@@ -1,7 +1,7 @@
 ﻿namespace MERRICK.Database.Entities;
 
 [Index(nameof(Name), nameof(EmailAddress), IsUnique = true)]
-public class User(string name, string emailAddress, string salt, string passwordSalt, string hashedPassword)
+public class User(string name, string emailAddress, string salt, string passwordSalt, string hashedPassword) : IdentityUser
 {
     [Key]
     public int ID { get; set; }
