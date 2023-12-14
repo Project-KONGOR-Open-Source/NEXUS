@@ -2,11 +2,11 @@
 
 public class MerrickContext : IdentityDbContext<User>
 {
-    public DbSet<Account> Accounts { get; set; }
+    public DbSet<Account> Accounts => Set<Account>();
 
-    public DbSet<Clan> Clans { get; set; }
+    public DbSet<Clan> Clans => Set<Clan>();
 
-    public DbSet<User> User { get; set; }
+    public new DbSet<User> Users => Set<User>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
