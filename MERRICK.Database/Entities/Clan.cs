@@ -1,16 +1,16 @@
 ﻿namespace MERRICK.Database.Entities;
 
 [Index(nameof(Name), nameof(Tag), IsUnique = true)]
-public class Clan(string name, string tag)
+public class Clan()
 {
     [Key]
-    public int ID { get; set; }
+    public Guid Id { get; set; }
 
     [StringLength(20)]
-    public required string Name { get; set; } = name;
+    public required string Name { get; set; } = null!;
 
     [StringLength(5)]
-    public required string Tag { get; set; } = tag;
+    public required string Tag { get; set; } = null!;
 
     public List<Account> Members { get; set; } = [];
 

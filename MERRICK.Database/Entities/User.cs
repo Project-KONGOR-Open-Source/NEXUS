@@ -1,21 +1,18 @@
 ﻿namespace MERRICK.Database.Entities;
 
 [Index(nameof(Name), nameof(EmailAddress), IsUnique = true)]
-public class User(string name, string emailAddress, string salt, string passwordSalt, string hashedPassword) : IdentityUser
+public class User() : IdentityUser
 {
-    [Key]
-    public int ID { get; set; }
-
     [StringLength(20)]
-    public required string Name { get; set; } = name;
+    public required string Name { get; set; } = null!;
 
-    public required string EmailAddress { get; set; } = emailAddress;
+    public required string EmailAddress { get; set; } = null!;
 
-    public required string Salt { get; set; } = salt;
+    public required string Salt { get; set; } = null!;
 
-    public required string PasswordSalt { get; set; } = passwordSalt;
+    public required string PasswordSalt { get; set; } = null!;
 
-    public required string HashedPassword { get; set; } = hashedPassword;
+    public required string HashedPassword { get; set; } = null!;
 
     public List<Account> Accounts { get; set; } = [];
 

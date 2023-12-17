@@ -1,15 +1,15 @@
 ﻿namespace MERRICK.Database.Entities;
 
 [Index(nameof(Name), IsUnique = true)]
-public class Account(string name, User user)
+public class Account()
 {
     [Key]
-    public int ID { get; set; }
+    public Guid Id { get; set; }
 
     [StringLength(20)]
-    public required string Name { get; set; } = name;
+    public required string Name { get; set; } = null!;
 
-    public required User User { get; set; } = user;
+    public required User User { get; set; } = null!;
 
     public AccountType AccountType { get; set; } = AccountType.Legacy;
 

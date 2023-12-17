@@ -1,19 +1,29 @@
-﻿WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+﻿namespace MERRICK.Database;
 
-builder.AddServiceDefaults();
-
-builder.Services.AddDbContext<MerrickContext>(options =>
+public class MERRICK
 {
-    options.UseSqlServer("MERRICK", connection => connection.MigrationsAssembly(typeof(Program).Assembly.GetName().Name));
-});
+    public static async Task Main(string[] args)
+    {
+        WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddOpenTelemetry().WithTracing(tracing => tracing.AddSource(DatabaseInitialiser.ActivitySourceName));
-builder.Services.AddSingleton<DatabaseInitialiser>();
-builder.Services.AddHostedService(provider => provider.GetRequiredService<DatabaseInitialiser>());
-builder.Services.AddHealthChecks().AddCheck<DatabaseHealthCheck>("DatabaseHealthCheck", null);
+        builder.AddServiceDefaults();
 
-WebApplication application = builder.Build();
+        string connectionString = builder.Configuration.GetConnectionString("MERRICK") ?? throw new NullReferenceException("MERRICK Connection String Is NULL");
 
-application.MapDefaultEndpoints();
+        builder.Services.AddDbContext<MerrickContext>(options =>
+        {
+            options.UseSqlServer(connectionString, connection => connection.MigrationsAssembly(typeof(MERRICK).Assembly.GetName().Name));
+        });
 
-await application.RunAsync();
+        builder.Services.AddOpenTelemetry().WithTracing(tracing => tracing.AddSource(DatabaseInitializer.ActivitySourceName));
+        builder.Services.AddSingleton<DatabaseInitializer>();
+        builder.Services.AddHostedService(provider => provider.GetRequiredService<DatabaseInitializer>());
+        builder.Services.AddHealthChecks().AddCheck<DatabaseHealthCheck>("DatabaseHealthCheck", null);
+
+        WebApplication application = builder.Build();
+
+        application.MapDefaultEndpoints();
+
+        await application.RunAsync();
+    }
+}

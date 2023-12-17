@@ -1,6 +1,6 @@
 ﻿namespace MERRICK.Database.Services;
 
-internal class DatabaseInitialiser(IServiceProvider serviceProvider, ILogger<DatabaseInitialiser> logger) : BackgroundService
+internal class DatabaseInitializer(IServiceProvider serviceProvider, ILogger<DatabaseInitializer> logger) : BackgroundService
 {
     public const string ActivitySourceName = "Migrations";
 
@@ -17,17 +17,17 @@ internal class DatabaseInitialiser(IServiceProvider serviceProvider, ILogger<Dat
 
     private async Task InitializeDatabaseAsync(MerrickContext context, CancellationToken cancellationToken)
     {
-        using Activity? activity = _activitySource.StartActivity("Initialising MERRICK Database", ActivityKind.Client);
+        using Activity? activity = _activitySource.StartActivity("Initializing MERRICK Database", ActivityKind.Client);
 
         Stopwatch stopwatch = Stopwatch.StartNew();
 
         IExecutionStrategy strategy = context.Database.CreateExecutionStrategy();
 
-        await strategy.ExecuteAsync(context.Database.MigrateAsync /* Not Supported By NativeAOT */, cancellationToken);
+        await strategy.ExecuteAsync(context.Database.MigrateAsync, cancellationToken);
 
         await SeedAsync(context, cancellationToken);
 
-        logger.LogInformation("Database Initialisation Completed After {ElapsedMilliseconds}ms", stopwatch.ElapsedMilliseconds);
+        logger.LogInformation("Database Initialization Completed After {ElapsedMilliseconds}ms", stopwatch.ElapsedMilliseconds);
     }
 
     private async Task SeedAsync(MerrickContext context, CancellationToken cancellationToken)
