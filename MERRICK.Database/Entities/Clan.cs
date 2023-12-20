@@ -1,7 +1,7 @@
 ﻿namespace MERRICK.Database.Entities;
 
 [Index(nameof(Name), nameof(Tag), IsUnique = true)]
-public class Clan()
+public class Clan
 {
     [Key]
     public Guid Id { get; set; }

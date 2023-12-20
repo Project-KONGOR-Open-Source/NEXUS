@@ -1,7 +1,7 @@
 ﻿namespace MERRICK.Database.Entities;
 
 [Index(nameof(Name), IsUnique = true)]
-public class Account() : IdentityUserLogin<Guid>
+public class Account : IdentityUserLogin<Guid>
 {
     [Key]
     public Guid Id { get; set; }
@@ -9,7 +9,7 @@ public class Account() : IdentityUserLogin<Guid>
     [StringLength(20)]
     public required string Name { get; set; } = null!;
 
-    public required User User { get; set; } = null!;
+    //public required User User { get; set; } = null!;
 
     public AccountType AccountType { get; set; } = AccountType.Legacy;
 
@@ -33,8 +33,8 @@ public class Account() : IdentityUserLogin<Guid>
 
     public List<string> SystemInformationCollection { get; set; } = [];
 
-    [NotMapped]
-    public bool IsMain => Name == User.Name;
+    //[NotMapped]
+    //public bool IsMain => Name == User.Name;
 
     [NotMapped]
     public string NameWithClanTag => Clan == null ? Name : $"[{Clan.Tag}]{Name}";

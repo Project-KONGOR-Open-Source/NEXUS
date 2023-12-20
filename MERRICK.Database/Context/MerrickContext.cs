@@ -1,6 +1,6 @@
 ﻿namespace MERRICK.Database.Context;
 
-public sealed class MerrickContext : IdentityDbContext<User>
+public sealed class MerrickContext : IdentityDbContext<User, Role, Guid, UserClaim, UserRole, Account, RoleClaim, UserToken>
 {
     public MerrickContext(DbContextOptions options) : base(options)
     {
@@ -8,14 +8,19 @@ public sealed class MerrickContext : IdentityDbContext<User>
     }
 
     public DbSet<Account> Accounts => Set<Account>();
-
     public DbSet<Clan> Clans => Set<Clan>();
-
+    public new DbSet<Role> Roles => Set<Role>();
+    public new DbSet<RoleClaim> RoleClaims => Set<RoleClaim>();
     public new DbSet<User> Users => Set<User>();
+    public new DbSet<UserClaim> UserClaims => Set<UserClaim>();
+    public new DbSet<UserRole> UserRoles => Set<UserRole>();
+    public new DbSet<UserToken> UserTokens => Set<UserToken>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
+
+        //builder.HasDefaultSchema("dbo");
 
         builder.Entity<Account>().ToTable("Accounts");
         builder.Entity<Role>().ToTable("Roles");
