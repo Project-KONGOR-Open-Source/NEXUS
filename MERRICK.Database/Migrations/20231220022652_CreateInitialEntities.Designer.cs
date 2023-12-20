@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MERRICK.Database.Migrations
 {
     [DbContext(typeof(MerrickContext))]
-    [Migration("20231220020924_CreateInitialEntities")]
+    [Migration("20231220022652_CreateInitialEntities")]
     partial class CreateInitialEntities
     {
         /// <inheritdoc />
@@ -74,7 +74,7 @@ namespace MERRICK.Database.Migrations
                     b.Property<DateTime>("TimestampLastActive")
                         .HasColumnType("datetime2");
 
-                    b.Property<Guid>("UserId")
+                    b.Property<Guid>("UserID")
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("ID");
@@ -84,9 +84,9 @@ namespace MERRICK.Database.Migrations
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("UserID");
 
-                    b.ToTable("Accounts", (string)null);
+                    b.ToTable("Accounts");
                 });
 
             modelBuilder.Entity("MERRICK.Database.Entities.Clan", b =>
@@ -161,7 +161,8 @@ namespace MERRICK.Database.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid>("RoleId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("RoleID");
 
                     b.HasKey("Id");
 
@@ -244,7 +245,8 @@ namespace MERRICK.Database.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("UserID");
 
                     b.HasKey("Id");
 
@@ -268,7 +270,8 @@ namespace MERRICK.Database.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("UserID");
 
                     b.HasKey("LoginProvider", "ProviderKey");
 
@@ -280,10 +283,12 @@ namespace MERRICK.Database.Migrations
             modelBuilder.Entity("MERRICK.Database.Entities.UserRole", b =>
                 {
                     b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("UserID");
 
                     b.Property<Guid>("RoleId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("RoleID");
 
                     b.Property<Guid>("ID")
                         .HasColumnType("uniqueidentifier");
@@ -298,7 +303,8 @@ namespace MERRICK.Database.Migrations
             modelBuilder.Entity("MERRICK.Database.Entities.UserToken", b =>
                 {
                     b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("UserID");
 
                     b.Property<string>("LoginProvider")
                         .HasColumnType("nvarchar(450)");
@@ -325,7 +331,7 @@ namespace MERRICK.Database.Migrations
 
                     b.HasOne("MERRICK.Database.Entities.User", "User")
                         .WithMany("Accounts")
-                        .HasForeignKey("UserId")
+                        .HasForeignKey("UserID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

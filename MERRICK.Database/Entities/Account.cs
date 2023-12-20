@@ -11,6 +11,8 @@ public class Account
 
     public required User User { get; set; } = null!;
 
+    public required Guid UserID { get; set; }
+
     public AccountType AccountType { get; set; } = AccountType.Legacy;
 
     public Clan? Clan { get; set; } = null;

@@ -22,7 +22,6 @@ public sealed class MerrickContext : IdentityDbContext<User, Role, Guid, UserCla
     {
         base.OnModelCreating(builder);
 
-        builder.Entity<Account>().ToTable("Accounts");
         builder.Entity<Role>().ToTable("Roles");
         builder.Entity<RoleClaim>().ToTable("RoleClaims");
         builder.Entity<User>().ToTable("Users");
@@ -48,7 +47,13 @@ public sealed class MerrickContext : IdentityDbContext<User, Role, Guid, UserCla
 
         builder.Entity<Role>().Property(role => role.Id).HasColumnName("ID");
         builder.Entity<RoleClaim>().Property(claim => claim.Id).HasColumnName("ID");
+        builder.Entity<RoleClaim>().Property(claim => claim.RoleId).HasColumnName("RoleID");
         builder.Entity<User>().Property(user => user.Id).HasColumnName("ID");
         builder.Entity<UserClaim>().Property(claim => claim.Id).HasColumnName("ID");
+        builder.Entity<UserClaim>().Property(claim => claim.UserId).HasColumnName("UserID");
+        builder.Entity<UserLogin>().Property(login => login.UserId).HasColumnName("UserID");
+        builder.Entity<UserRole>().Property(role => role.UserId).HasColumnName("UserID");
+        builder.Entity<UserRole>().Property(role => role.RoleId).HasColumnName("RoleID");
+        builder.Entity<UserToken>().Property(token => token.UserId).HasColumnName("UserID");
     }
 }
