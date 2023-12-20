@@ -45,11 +45,12 @@ public sealed class MerrickContext : IdentityDbContext<User, Role, Guid, UserCla
             .Ignore(user => user.LockoutEnabled)
             .Ignore(user => user.AccessFailedCount);
 
-        builder.Entity<Role>().Property(role => role.Id).HasColumnName("ID");
-        builder.Entity<RoleClaim>().Property(claim => claim.Id).HasColumnName("ID");
+        builder.Entity<Role>().Ignore(role => role.Id);
+        builder.Entity<RoleClaim>().Ignore(claim => claim.Id);
+        builder.Entity<User>().Ignore(user => user.Id);
+        builder.Entity<UserClaim>().Ignore(claim => claim.Id);
+
         builder.Entity<RoleClaim>().Property(claim => claim.RoleId).HasColumnName("RoleID");
-        builder.Entity<User>().Property(user => user.Id).HasColumnName("ID");
-        builder.Entity<UserClaim>().Property(claim => claim.Id).HasColumnName("ID");
         builder.Entity<UserClaim>().Property(claim => claim.UserId).HasColumnName("UserID");
         builder.Entity<UserLogin>().Property(login => login.UserId).HasColumnName("UserID");
         builder.Entity<UserRole>().Property(role => role.UserId).HasColumnName("UserID");
