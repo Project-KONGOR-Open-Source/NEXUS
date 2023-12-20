@@ -22,13 +22,9 @@ public sealed class MerrickContext : IdentityDbContext<User, Role, Guid, UserCla
     {
         base.OnModelCreating(builder);
 
-        builder.Entity<Role>().ToTable("Roles");
-        builder.Entity<RoleClaim>().ToTable("RoleClaims");
-        builder.Entity<User>().ToTable("Users");
-        builder.Entity<UserClaim>().ToTable("UserClaims");
-        builder.Entity<UserLogin>().ToTable("UserLogins");
-        builder.Entity<UserRole>().ToTable("UserRoles");
-        builder.Entity<UserToken>().ToTable("UserTokens");
+        builder.Entity<Role>().ToTable(nameof(Roles));
+        builder.Entity<User>().ToTable(nameof(Users));
+        builder.Entity<UserRole>().ToTable(nameof(UserRoles));
 
         builder.Entity<User>()
             .Ignore(user => user.UserName)
@@ -56,5 +52,10 @@ public sealed class MerrickContext : IdentityDbContext<User, Role, Guid, UserCla
         builder.Entity<UserRole>().Property(role => role.UserId).HasColumnName("UserID");
         builder.Entity<UserRole>().Property(role => role.RoleId).HasColumnName("RoleID");
         builder.Entity<UserToken>().Property(token => token.UserId).HasColumnName("UserID");
+
+        builder.Entity<RoleClaim>().ToTable(nameof(RoleClaims), table => table.ExcludeFromMigrations());
+        builder.Entity<UserClaim>().ToTable(nameof(UserClaims), table => table.ExcludeFromMigrations());
+        builder.Entity<UserLogin>().ToTable(nameof(UserLogins), table => table.ExcludeFromMigrations());
+        builder.Entity<UserToken>().ToTable(nameof(UserTokens), table => table.ExcludeFromMigrations());
     }
 }

@@ -165,7 +165,10 @@ namespace MERRICK.Database.Migrations
 
                     b.HasIndex("RoleId");
 
-                    b.ToTable("RoleClaims", (string)null);
+                    b.ToTable("RoleClaims", null, t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
                 });
 
             modelBuilder.Entity("MERRICK.Database.Entities.User", b =>
@@ -245,7 +248,10 @@ namespace MERRICK.Database.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("UserClaims", (string)null);
+                    b.ToTable("UserClaims", null, t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
                 });
 
             modelBuilder.Entity("MERRICK.Database.Entities.UserLogin", b =>
@@ -270,7 +276,10 @@ namespace MERRICK.Database.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("UserLogins", (string)null);
+                    b.ToTable("UserLogins", null, t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
                 });
 
             modelBuilder.Entity("MERRICK.Database.Entities.UserRole", b =>
@@ -316,7 +325,10 @@ namespace MERRICK.Database.Migrations
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.ToTable("UserTokens", (string)null);
+                    b.ToTable("UserTokens", null, t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
                 });
 
             modelBuilder.Entity("MERRICK.Database.Entities.Account", b =>

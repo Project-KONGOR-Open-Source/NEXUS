@@ -63,26 +63,6 @@ namespace MERRICK.Database.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "RoleClaims",
-                columns: table => new
-                {
-                    ID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    RoleID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    ClaimType = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    ClaimValue = table.Column<string>(type: "nvarchar(max)", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_RoleClaims", x => x.ID);
-                    table.ForeignKey(
-                        name: "FK_RoleClaims_Roles_RoleID",
-                        column: x => x.RoleID,
-                        principalTable: "Roles",
-                        principalColumn: "ID",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Accounts",
                 columns: table => new
                 {
@@ -118,47 +98,6 @@ namespace MERRICK.Database.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "UserClaims",
-                columns: table => new
-                {
-                    ID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    UserID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    ClaimType = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    ClaimValue = table.Column<string>(type: "nvarchar(max)", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_UserClaims", x => x.ID);
-                    table.ForeignKey(
-                        name: "FK_UserClaims_Users_UserID",
-                        column: x => x.UserID,
-                        principalTable: "Users",
-                        principalColumn: "ID",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "UserLogins",
-                columns: table => new
-                {
-                    LoginProvider = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    ProviderKey = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    ID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    ProviderDisplayName = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    UserID = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_UserLogins", x => new { x.LoginProvider, x.ProviderKey });
-                    table.ForeignKey(
-                        name: "FK_UserLogins_Users_UserID",
-                        column: x => x.UserID,
-                        principalTable: "Users",
-                        principalColumn: "ID",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "UserRoles",
                 columns: table => new
                 {
@@ -177,27 +116,6 @@ namespace MERRICK.Database.Migrations
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_UserRoles_Users_UserID",
-                        column: x => x.UserID,
-                        principalTable: "Users",
-                        principalColumn: "ID",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "UserTokens",
-                columns: table => new
-                {
-                    UserID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    LoginProvider = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    ID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Value = table.Column<string>(type: "nvarchar(max)", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_UserTokens", x => new { x.UserID, x.LoginProvider, x.Name });
-                    table.ForeignKey(
-                        name: "FK_UserTokens_Users_UserID",
                         column: x => x.UserID,
                         principalTable: "Users",
                         principalColumn: "ID",
@@ -227,11 +145,6 @@ namespace MERRICK.Database.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_RoleClaims_RoleID",
-                table: "RoleClaims",
-                column: "RoleID");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Roles_Name",
                 table: "Roles",
                 column: "Name",
@@ -246,16 +159,6 @@ namespace MERRICK.Database.Migrations
                 filter: "[NormalizedName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
-                name: "IX_UserClaims_UserID",
-                table: "UserClaims",
-                column: "UserID");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_UserLogins_UserID",
-                table: "UserLogins",
-                column: "UserID");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_UserRoles_RoleID",
                 table: "UserRoles",
                 column: "RoleID");
@@ -264,12 +167,6 @@ namespace MERRICK.Database.Migrations
                 name: "IX_Users_Name_EmailAddress",
                 table: "Users",
                 columns: new[] { "Name", "EmailAddress" },
-                unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_UserTokens_Name",
-                table: "UserTokens",
-                column: "Name",
                 unique: true);
         }
 
@@ -280,19 +177,7 @@ namespace MERRICK.Database.Migrations
                 name: "Accounts");
 
             migrationBuilder.DropTable(
-                name: "RoleClaims");
-
-            migrationBuilder.DropTable(
-                name: "UserClaims");
-
-            migrationBuilder.DropTable(
-                name: "UserLogins");
-
-            migrationBuilder.DropTable(
                 name: "UserRoles");
-
-            migrationBuilder.DropTable(
-                name: "UserTokens");
 
             migrationBuilder.DropTable(
                 name: "Clans");
