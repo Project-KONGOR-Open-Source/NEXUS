@@ -232,6 +232,13 @@ namespace MERRICK.Database.Migrations
                 column: "RoleID");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Roles_Name",
+                table: "Roles",
+                column: "Name",
+                unique: true,
+                filter: "[Name] IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
                 name: "RoleNameIndex",
                 table: "Roles",
                 column: "NormalizedName",
@@ -257,6 +264,12 @@ namespace MERRICK.Database.Migrations
                 name: "IX_Users_Name_EmailAddress",
                 table: "Users",
                 columns: new[] { "Name", "EmailAddress" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserTokens_Name",
+                table: "UserTokens",
+                column: "Name",
                 unique: true);
         }
 

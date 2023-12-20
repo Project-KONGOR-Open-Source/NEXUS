@@ -133,6 +133,10 @@ namespace MERRICK.Database.Migrations
 
                     b.HasKey("ID");
 
+                    b.HasIndex("Name")
+                        .IsUnique()
+                        .HasFilter("[Name] IS NOT NULL");
+
                     b.HasIndex("NormalizedName")
                         .IsUnique()
                         .HasDatabaseName("RoleNameIndex")
@@ -308,6 +312,9 @@ namespace MERRICK.Database.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("UserId", "LoginProvider", "Name");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
 
                     b.ToTable("UserTokens", (string)null);
                 });
