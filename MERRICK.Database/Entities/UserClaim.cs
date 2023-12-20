@@ -1,7 +1,3 @@
 ﻿namespace MERRICK.Database.Entities;
 
-public class UserClaim : IdentityUserClaim<Guid>
-{
-    [Key]
-    public Guid Id { get; set; }
-}
+public class UserClaim : IdentityUserClaim<Guid> { }

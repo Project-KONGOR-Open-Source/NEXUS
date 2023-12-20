@@ -3,9 +3,6 @@
 [Index(nameof(Name), nameof(EmailAddress), IsUnique = true)]
 public class User : IdentityUser<Guid>
 {
-    [Key]
-    public Guid Id { get; set; }
-
     [StringLength(20)]
     public required string Name { get; set; } = null!;
 

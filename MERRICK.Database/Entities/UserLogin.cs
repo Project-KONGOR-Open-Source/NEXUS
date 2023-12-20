@@ -1,6 +1,6 @@
 ﻿namespace MERRICK.Database.Entities;
 
-public class UserToken : IdentityUserToken<Guid>
+public class UserLogin : IdentityUserLogin<Guid>
 {
     [Key]
     public Guid ID { get; set; }
