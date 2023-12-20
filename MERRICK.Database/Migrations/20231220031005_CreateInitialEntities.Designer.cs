@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MERRICK.Database.Migrations
 {
     [DbContext(typeof(MerrickContext))]
-    [Migration("20231220030214_CreateInitialEntities")]
+    [Migration("20231220031005_CreateInitialEntities")]
     partial class CreateInitialEntities
     {
         /// <inheritdoc />
@@ -122,10 +122,6 @@ namespace MERRICK.Database.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("ConcurrencyStamp")
-                        .IsConcurrencyToken()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("Name")
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
@@ -198,9 +194,6 @@ namespace MERRICK.Database.Migrations
 
                     b.Property<string>("OwnedStoreItems")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("PasswordHash")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PasswordSalt")

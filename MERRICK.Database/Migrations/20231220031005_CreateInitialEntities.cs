@@ -31,8 +31,7 @@ namespace MERRICK.Database.Migrations
                 {
                     ID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
-                    NormalizedName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
-                    ConcurrencyStamp = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    NormalizedName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -54,8 +53,7 @@ namespace MERRICK.Database.Migrations
                     PlinkoTickets = table.Column<int>(type: "int", nullable: false),
                     TotalLevel = table.Column<int>(type: "int", nullable: false),
                     TotalExperience = table.Column<int>(type: "int", nullable: false),
-                    OwnedStoreItems = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    PasswordHash = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    OwnedStoreItems = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {

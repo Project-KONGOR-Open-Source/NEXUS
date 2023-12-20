@@ -39,7 +39,10 @@ public sealed class MerrickContext : IdentityDbContext<User, Role, Guid, UserCla
             .Ignore(user => user.TwoFactorEnabled)
             .Ignore(user => user.LockoutEnd)
             .Ignore(user => user.LockoutEnabled)
-            .Ignore(user => user.AccessFailedCount);
+            .Ignore(user => user.AccessFailedCount)
+            .Ignore(user => user.PasswordHash);
+
+        builder.Entity<Role>().Ignore(role => role.ConcurrencyStamp);
 
         builder.Entity<Role>().Ignore(role => role.Id);
         builder.Entity<RoleClaim>().Ignore(claim => claim.Id);
