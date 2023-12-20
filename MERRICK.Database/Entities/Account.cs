@@ -1,7 +1,7 @@
 ﻿namespace MERRICK.Database.Entities;
 
 [Index(nameof(Name), IsUnique = true)]
-public class Account()
+public class Account() : IdentityUserLogin<Guid>
 {
     [Key]
     public Guid Id { get; set; }

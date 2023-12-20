@@ -17,7 +17,13 @@ public sealed class MerrickContext : IdentityDbContext<User>
     {
         base.OnModelCreating(builder);
 
-        //builder.Entity<IdentityUser>().ToTable("Users");
+        builder.Entity<Account>().ToTable("Accounts");
+        builder.Entity<Role>().ToTable("Roles");
+        builder.Entity<RoleClaim>().ToTable("RoleClaims");
+        builder.Entity<User>().ToTable("Users");
+        builder.Entity<UserClaim>().ToTable("UserClaims");
+        builder.Entity<UserRole>().ToTable("UserRoles");
+        builder.Entity<UserToken>().ToTable("UserTokens");
 
         //builder.Entity<IdentityUser>()
         //    .Ignore(user => user.UserName)
@@ -33,7 +39,5 @@ public sealed class MerrickContext : IdentityDbContext<User>
         //    .Ignore(user => user.LockoutEnd)
         //    .Ignore(user => user.LockoutEnabled)
         //    .Ignore(user => user.AccessFailedCount);
-
-        // TODO: Create Custom Identity Tables
     }
 }
