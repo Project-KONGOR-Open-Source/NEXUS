@@ -8,7 +8,7 @@
             "environmentVariables": {
                 "ASPNETCORE_ENVIRONMENT": "Development",
                 "DOTNET_ENVIRONMENT": "Development",
-                "DOTNET_DASHBOARD_OTLP_ENDPOINT_URL": "http://localhost:55503;https://localhost:55504"
+                "DOTNET_DASHBOARD_OTLP_ENDPOINT_URL": "http://localhost:55500"
             },
             "dotnetRunMessages": true
         },
@@ -19,7 +19,7 @@
             "environmentVariables": {
                 "ASPNETCORE_ENVIRONMENT": "Production",
                 "DOTNET_ENVIRONMENT": "Production",
-                "DOTNET_DASHBOARD_OTLP_ENDPOINT_URL": "http://telemetry.kongor.online;https://telemetry.kongor.online"
+                "DOTNET_DASHBOARD_OTLP_ENDPOINT_URL": "http://telemetry.kongor.online"
             },
             "dotnetRunMessages": true
         }

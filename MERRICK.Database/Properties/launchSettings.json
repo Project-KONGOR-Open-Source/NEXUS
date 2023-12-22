@@ -4,7 +4,7 @@
         "MERRICK.Database Development": {
             "commandName": "Project",
             "launchBrowser": true,
-            "applicationUrl": "http://localhost:55505;https://localhost:55506",
+            "applicationUrl": "http://localhost:55503;https://localhost:55504",
             "launchUrl": "health",
             "environmentVariables": {
                 "ASPNETCORE_ENVIRONMENT": "Development",
