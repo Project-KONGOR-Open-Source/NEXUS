@@ -4,14 +4,12 @@
 public class Account
 {
     [Key]
-    public Guid ID { get; set; }
+    public Guid Id { get; set; }
 
-    [StringLength(20)]
+    [StringLength(15)]
     public required string Name { get; set; } = null!;
 
     public required User User { get; set; } = null!;
-
-    public required Guid UserID { get; set; }
 
     public AccountType AccountType { get; set; } = AccountType.Legacy;
 
@@ -27,11 +25,11 @@ public class Account
 
     public List<string> SelectedStoreItems { get; set; } = [];
 
-    public List<string> IPAddressCollection { get; set; } = [];
+    public List<string> IpAddressCollection { get; set; } = [];
 
-    public List<string> HardwareIDCollection { get; set; } = [];
+    public List<string> HardwareIdCollection { get; set; } = [];
 
-    public List<string> MACAddressCollection { get; set; } = [];
+    public List<string> MacAddressCollection { get; set; } = [];
 
     public List<string> SystemInformationCollection { get; set; } = [];
 

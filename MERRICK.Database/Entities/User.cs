@@ -3,19 +3,17 @@
 [Index(nameof(Name), nameof(EmailAddress), IsUnique = true)]
 public class User : IdentityUser<Guid>
 {
-    [Key]
-    public Guid ID { get; set; }
-
-    [StringLength(20)]
+    [MaxLength(15)]
     public required string Name { get; set; } = null!;
 
+    [MaxLength(30)]
     public required string EmailAddress { get; set; } = null!;
 
+    [StringLength(512)]
     public required string Salt { get; set; } = null!;
 
+    [StringLength(22)]
     public required string PasswordSalt { get; set; } = null!;
-
-    public required string HashedPassword { get; set; } = null!;
 
     public List<Account> Accounts { get; set; } = [];
 

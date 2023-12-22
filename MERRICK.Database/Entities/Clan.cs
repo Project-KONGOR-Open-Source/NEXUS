@@ -4,16 +4,15 @@
 public class Clan
 {
     [Key]
-    public Guid ID { get; set; }
+    public Guid Id { get; set; }
 
     [StringLength(20)]
     public required string Name { get; set; } = null!;
 
-    [StringLength(5)]
+    [StringLength(3)]
     public required string Tag { get; set; } = null!;
 
     public List<Account> Members { get; set; } = [];
 
-    [Required]
     public DateTime TimestampCreated { get; set; } = DateTime.UtcNow;
 }

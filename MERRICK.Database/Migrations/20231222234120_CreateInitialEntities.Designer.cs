@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MERRICK.Database.Migrations
 {
     [DbContext(typeof(MerrickContext))]
-    [Migration("20231222165135_CreateInitialEntities")]
+    [Migration("20231222234120_CreateInitialEntities")]
     partial class CreateInitialEntities
     {
         /// <inheritdoc />
@@ -27,7 +27,7 @@ namespace MERRICK.Database.Migrations
 
             modelBuilder.Entity("MERRICK.Database.Entities.Account", b =>
                 {
-                    b.Property<Guid>("ID")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
@@ -37,28 +37,28 @@ namespace MERRICK.Database.Migrations
                     b.Property<int>("AscensionLevel")
                         .HasColumnType("int");
 
-                    b.Property<Guid?>("ClanID")
+                    b.Property<Guid?>("ClanId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("ClanTier")
                         .HasColumnType("int");
 
-                    b.Property<string>("HardwareIDCollection")
+                    b.Property<string>("HardwareIdCollection")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("IPAddressCollection")
+                    b.Property<string>("IpAddressCollection")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("MACAddressCollection")
+                    b.Property<string>("MacAddressCollection")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
+                        .HasMaxLength(15)
+                        .HasColumnType("nvarchar(15)");
 
                     b.Property<string>("SelectedStoreItems")
                         .IsRequired()
@@ -74,24 +74,24 @@ namespace MERRICK.Database.Migrations
                     b.Property<DateTime>("TimestampLastActive")
                         .HasColumnType("datetime2");
 
-                    b.Property<Guid>("UserID")
+                    b.Property<Guid>("UserId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.HasKey("ID");
+                    b.HasKey("Id");
 
-                    b.HasIndex("ClanID");
+                    b.HasIndex("ClanId");
 
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.HasIndex("UserID");
+                    b.HasIndex("UserId");
 
                     b.ToTable("Accounts");
                 });
 
             modelBuilder.Entity("MERRICK.Database.Entities.Clan", b =>
                 {
-                    b.Property<Guid>("ID")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
@@ -102,13 +102,13 @@ namespace MERRICK.Database.Migrations
 
                     b.Property<string>("Tag")
                         .IsRequired()
-                        .HasMaxLength(5)
-                        .HasColumnType("nvarchar(5)");
+                        .HasMaxLength(3)
+                        .HasColumnType("nvarchar(3)");
 
                     b.Property<DateTime>("TimestampCreated")
                         .HasColumnType("datetime2");
 
-                    b.HasKey("ID");
+                    b.HasKey("Id");
 
                     b.HasIndex("Name", "Tag")
                         .IsUnique();
@@ -118,9 +118,13 @@ namespace MERRICK.Database.Migrations
 
             modelBuilder.Entity("MERRICK.Database.Entities.Role", b =>
                 {
-                    b.Property<Guid>("ID")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("ConcurrencyStamp")
+                        .IsConcurrencyToken()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
                         .HasMaxLength(256)
@@ -130,11 +134,7 @@ namespace MERRICK.Database.Migrations
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
 
-                    b.HasKey("ID");
-
-                    b.HasIndex("Name")
-                        .IsUnique()
-                        .HasFilter("[Name] IS NOT NULL");
+                    b.HasKey("Id");
 
                     b.HasIndex("NormalizedName")
                         .IsUnique()
@@ -146,9 +146,11 @@ namespace MERRICK.Database.Migrations
 
             modelBuilder.Entity("MERRICK.Database.Entities.RoleClaim", b =>
                 {
-                    b.Property<Guid>("ID")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("ClaimType")
                         .HasColumnType("nvarchar(max)");
@@ -157,54 +159,89 @@ namespace MERRICK.Database.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid>("RoleId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnName("RoleID");
+                        .HasColumnType("uniqueidentifier");
 
-                    b.HasKey("ID");
+                    b.HasKey("Id");
 
                     b.HasIndex("RoleId");
 
-                    b.ToTable("RoleClaims", null, t =>
-                        {
-                            t.ExcludeFromMigrations();
-                        });
+                    b.ToTable("RoleClaims", (string)null);
                 });
 
             modelBuilder.Entity("MERRICK.Database.Entities.User", b =>
                 {
-                    b.Property<Guid>("ID")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<int>("AccessFailedCount")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ConcurrencyStamp")
+                        .IsConcurrencyToken()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Email")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
                     b.Property<string>("EmailAddress")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<bool>("EmailConfirmed")
+                        .HasColumnType("bit");
 
                     b.Property<int>("GoldCoins")
                         .HasColumnType("int");
 
-                    b.Property<string>("HashedPassword")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<bool>("LockoutEnabled")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTimeOffset?>("LockoutEnd")
+                        .HasColumnType("datetimeoffset");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
+                        .HasMaxLength(15)
+                        .HasColumnType("nvarchar(15)");
+
+                    b.Property<string>("NormalizedEmail")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.Property<string>("NormalizedUserName")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
 
                     b.Property<string>("OwnedStoreItems")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("PasswordHash")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("PasswordSalt")
                         .IsRequired()
+                        .HasMaxLength(22)
+                        .HasColumnType("nvarchar(22)");
+
+                    b.Property<string>("PhoneNumber")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("PhoneNumberConfirmed")
+                        .HasColumnType("bit");
 
                     b.Property<int>("PlinkoTickets")
                         .HasColumnType("int");
 
                     b.Property<string>("Salt")
                         .IsRequired()
+                        .HasMaxLength(512)
+                        .HasColumnType("nvarchar(512)");
+
+                    b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("SilverCoins")
@@ -216,7 +253,22 @@ namespace MERRICK.Database.Migrations
                     b.Property<int>("TotalLevel")
                         .HasColumnType("int");
 
-                    b.HasKey("ID");
+                    b.Property<bool>("TwoFactorEnabled")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("UserName")
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NormalizedEmail")
+                        .HasDatabaseName("EmailIndex");
+
+                    b.HasIndex("NormalizedUserName")
+                        .IsUnique()
+                        .HasDatabaseName("UserNameIndex")
+                        .HasFilter("[NormalizedUserName] IS NOT NULL");
 
                     b.HasIndex("Name", "EmailAddress")
                         .IsUnique();
@@ -226,9 +278,11 @@ namespace MERRICK.Database.Migrations
 
             modelBuilder.Entity("MERRICK.Database.Entities.UserClaim", b =>
                 {
-                    b.Property<Guid>("ID")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("ClaimType")
                         .HasColumnType("nvarchar(max)");
@@ -237,17 +291,13 @@ namespace MERRICK.Database.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnName("UserID");
+                        .HasColumnType("uniqueidentifier");
 
-                    b.HasKey("ID");
+                    b.HasKey("Id");
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("UserClaims", null, t =>
-                        {
-                            t.ExcludeFromMigrations();
-                        });
+                    b.ToTable("UserClaims", (string)null);
                 });
 
             modelBuilder.Entity("MERRICK.Database.Entities.UserLogin", b =>
@@ -258,37 +308,25 @@ namespace MERRICK.Database.Migrations
                     b.Property<string>("ProviderKey")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<Guid>("ID")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<string>("ProviderDisplayName")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnName("UserID");
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("LoginProvider", "ProviderKey");
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("UserLogins", null, t =>
-                        {
-                            t.ExcludeFromMigrations();
-                        });
+                    b.ToTable("UserLogins", (string)null);
                 });
 
             modelBuilder.Entity("MERRICK.Database.Entities.UserRole", b =>
                 {
                     b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnName("UserID");
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("RoleId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnName("RoleID");
-
-                    b.Property<Guid>("ID")
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("UserId", "RoleId");
@@ -301,8 +339,7 @@ namespace MERRICK.Database.Migrations
             modelBuilder.Entity("MERRICK.Database.Entities.UserToken", b =>
                 {
                     b.Property<Guid>("UserId")
-                        .HasColumnType("uniqueidentifier")
-                        .HasColumnName("UserID");
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("LoginProvider")
                         .HasColumnType("nvarchar(450)");
@@ -310,32 +347,23 @@ namespace MERRICK.Database.Migrations
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<Guid>("ID")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<string>("Value")
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("UserId", "LoginProvider", "Name");
 
-                    b.HasIndex("Name")
-                        .IsUnique();
-
-                    b.ToTable("UserTokens", null, t =>
-                        {
-                            t.ExcludeFromMigrations();
-                        });
+                    b.ToTable("UserTokens", (string)null);
                 });
 
             modelBuilder.Entity("MERRICK.Database.Entities.Account", b =>
                 {
                     b.HasOne("MERRICK.Database.Entities.Clan", "Clan")
                         .WithMany("Members")
-                        .HasForeignKey("ClanID");
+                        .HasForeignKey("ClanId");
 
                     b.HasOne("MERRICK.Database.Entities.User", "User")
                         .WithMany("Accounts")
-                        .HasForeignKey("UserID")
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

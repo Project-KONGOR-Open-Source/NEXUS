@@ -34,73 +34,35 @@ public sealed class MerrickContext : IdentityDbContext<User, Role, Guid, UserCla
     private static void DefineRole(EntityTypeBuilder<Role> builder)
     {
         builder.ToTable(nameof(Roles));
-
-        builder.Ignore(role => role.ConcurrencyStamp);
-
-        builder.Ignore(role => role.Id);
     }
 
     private static void DefineRoleClaim(EntityTypeBuilder<RoleClaim> builder)
     {
-        builder.Ignore(roleClaim => roleClaim.Id);
-
-        builder.Property(roleClaim => roleClaim.RoleId).HasColumnName("RoleID");
-
-        builder.ToTable(nameof(RoleClaims), table => table.ExcludeFromMigrations());
+        builder.ToTable(nameof(RoleClaims));
     }
 
     private static void DefineUser(EntityTypeBuilder<User> builder)
     {
         builder.ToTable(nameof(Users));
-
-        builder
-            .Ignore(user => user.UserName)
-            .Ignore(user => user.NormalizedUserName)
-            .Ignore(user => user.Email)
-            .Ignore(user => user.NormalizedEmail)
-            .Ignore(user => user.EmailConfirmed)
-            .Ignore(user => user.SecurityStamp)
-            .Ignore(user => user.ConcurrencyStamp)
-            .Ignore(user => user.PhoneNumber)
-            .Ignore(user => user.PhoneNumberConfirmed)
-            .Ignore(user => user.TwoFactorEnabled)
-            .Ignore(user => user.LockoutEnd)
-            .Ignore(user => user.LockoutEnabled)
-            .Ignore(user => user.AccessFailedCount)
-            .Ignore(user => user.PasswordHash);
-
-        builder.Ignore(user => user.Id);
     }
 
     private static void DefineUserClaim(EntityTypeBuilder<UserClaim> builder)
     {
-        builder.Ignore(userClaim => userClaim.Id);
-
-        builder.Property(userClaim => userClaim.UserId).HasColumnName("UserID");
-
-        builder.ToTable(nameof(UserClaims), table => table.ExcludeFromMigrations());
+        builder.ToTable(nameof(UserClaims));
     }
 
     private static void DefineUserLogin(EntityTypeBuilder<UserLogin> builder)
     {
-        builder.Property(userLogin => userLogin.UserId).HasColumnName("UserID");
-
-        builder.ToTable(nameof(UserLogins), table => table.ExcludeFromMigrations());
+        builder.ToTable(nameof(UserLogins));
     }
 
     private static void DefineUserRole(EntityTypeBuilder<UserRole> builder)
     {
         builder.ToTable(nameof(UserRoles));
-
-        builder.Property(userRole => userRole.RoleId).HasColumnName("RoleID");
-
-        builder.Property(userRole => userRole.UserId).HasColumnName("UserID");
     }
 
     private static void DefineUserToken(EntityTypeBuilder<UserToken> builder)
     {
-        builder.Property(userToken => userToken.UserId).HasColumnName("UserID");
-
-        builder.ToTable(nameof(UserTokens), table => table.ExcludeFromMigrations());
+        builder.ToTable(nameof(UserTokens));
     }
 }
