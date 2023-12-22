@@ -22,11 +22,38 @@ public sealed class MerrickContext : IdentityDbContext<User, Role, Guid, UserCla
     {
         base.OnModelCreating(builder);
 
-        builder.Entity<Role>().ToTable(nameof(Roles));
-        builder.Entity<User>().ToTable(nameof(Users));
-        builder.Entity<UserRole>().ToTable(nameof(UserRoles));
+        DefineRole(builder.Entity<Role>());
+        DefineRoleClaim(builder.Entity<RoleClaim>());
+        DefineUser(builder.Entity<User>());
+        DefineUserClaim(builder.Entity<UserClaim>());
+        DefineUserLogin(builder.Entity<UserLogin>());
+        DefineUserRole(builder.Entity<UserRole>());
+        DefineUserToken(builder.Entity<UserToken>());
+    }
 
-        builder.Entity<User>()
+    private static void DefineRole(EntityTypeBuilder<Role> builder)
+    {
+        builder.ToTable(nameof(Roles));
+
+        builder.Ignore(role => role.ConcurrencyStamp);
+
+        builder.Ignore(role => role.Id);
+    }
+
+    private static void DefineRoleClaim(EntityTypeBuilder<RoleClaim> builder)
+    {
+        builder.Ignore(roleClaim => roleClaim.Id);
+
+        builder.Property(roleClaim => roleClaim.RoleId).HasColumnName("RoleID");
+
+        builder.ToTable(nameof(RoleClaims), table => table.ExcludeFromMigrations());
+    }
+
+    private static void DefineUser(EntityTypeBuilder<User> builder)
+    {
+        builder.ToTable(nameof(Users));
+
+        builder
             .Ignore(user => user.UserName)
             .Ignore(user => user.NormalizedUserName)
             .Ignore(user => user.Email)
@@ -42,23 +69,38 @@ public sealed class MerrickContext : IdentityDbContext<User, Role, Guid, UserCla
             .Ignore(user => user.AccessFailedCount)
             .Ignore(user => user.PasswordHash);
 
-        builder.Entity<Role>().Ignore(role => role.ConcurrencyStamp);
+        builder.Ignore(user => user.Id);
+    }
 
-        builder.Entity<Role>().Ignore(role => role.Id);
-        builder.Entity<RoleClaim>().Ignore(claim => claim.Id);
-        builder.Entity<User>().Ignore(user => user.Id);
-        builder.Entity<UserClaim>().Ignore(claim => claim.Id);
+    private static void DefineUserClaim(EntityTypeBuilder<UserClaim> builder)
+    {
+        builder.Ignore(userClaim => userClaim.Id);
 
-        builder.Entity<RoleClaim>().Property(claim => claim.RoleId).HasColumnName("RoleID");
-        builder.Entity<UserClaim>().Property(claim => claim.UserId).HasColumnName("UserID");
-        builder.Entity<UserLogin>().Property(login => login.UserId).HasColumnName("UserID");
-        builder.Entity<UserRole>().Property(role => role.UserId).HasColumnName("UserID");
-        builder.Entity<UserRole>().Property(role => role.RoleId).HasColumnName("RoleID");
-        builder.Entity<UserToken>().Property(token => token.UserId).HasColumnName("UserID");
+        builder.Property(userClaim => userClaim.UserId).HasColumnName("UserID");
 
-        builder.Entity<RoleClaim>().ToTable(nameof(RoleClaims), table => table.ExcludeFromMigrations());
-        builder.Entity<UserClaim>().ToTable(nameof(UserClaims), table => table.ExcludeFromMigrations());
-        builder.Entity<UserLogin>().ToTable(nameof(UserLogins), table => table.ExcludeFromMigrations());
-        builder.Entity<UserToken>().ToTable(nameof(UserTokens), table => table.ExcludeFromMigrations());
+        builder.ToTable(nameof(UserClaims), table => table.ExcludeFromMigrations());
+    }
+
+    private static void DefineUserLogin(EntityTypeBuilder<UserLogin> builder)
+    {
+        builder.Property(userLogin => userLogin.UserId).HasColumnName("UserID");
+
+        builder.ToTable(nameof(UserLogins), table => table.ExcludeFromMigrations());
+    }
+
+    private static void DefineUserRole(EntityTypeBuilder<UserRole> builder)
+    {
+        builder.ToTable(nameof(UserRoles));
+
+        builder.Property(userRole => userRole.RoleId).HasColumnName("RoleID");
+
+        builder.Property(userRole => userRole.UserId).HasColumnName("UserID");
+    }
+
+    private static void DefineUserToken(EntityTypeBuilder<UserToken> builder)
+    {
+        builder.Property(userToken => userToken.UserId).HasColumnName("UserID");
+
+        builder.ToTable(nameof(UserTokens), table => table.ExcludeFromMigrations());
     }
 }
