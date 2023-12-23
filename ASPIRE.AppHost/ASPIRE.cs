@@ -2,6 +2,7 @@ IDistributedApplicationBuilder builder = DistributedApplication.CreateBuilder(ar
 
 IResourceBuilder<ProjectResource> database = builder.AddProject<Projects.MERRICK_Database>("MERRICK Database");
 
-// TODO: look into splitting MERRICK into an entities project and a database manager project
+builder.AddProject<Projects.KONGOR_MasterServer>("KONGOR Master Server")
+    .WithReference(database);
 
 builder.Build().Run();
