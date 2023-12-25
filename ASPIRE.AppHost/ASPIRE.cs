@@ -6,9 +6,9 @@ internal class KONGOR
     {
         IDistributedApplicationBuilder builder = DistributedApplication.CreateBuilder(args);
 
-        IResourceBuilder<ProjectResource> database = builder.AddProject<Projects.MERRICK_Database_Manager>("MERRICK Database");
+        IResourceBuilder<ProjectResource> database = builder.AddProject<MERRICK_Database_Manager>("MERRICK Database");
 
-        builder.AddProject<Projects.KONGOR_MasterServer>("KONGOR Master Server")
+        builder.AddProject<KONGOR_MasterServer>("KONGOR Master Server")
             .WithReference(database);
 
         builder.Build().Run();
