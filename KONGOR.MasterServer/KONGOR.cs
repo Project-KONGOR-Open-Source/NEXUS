@@ -1,15 +1,8 @@
-﻿using MERRICK.Database.Context;
-using MERRICK.Database.Entities;
-
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.OpenApi.Models;
-
-namespace KONGOR.MasterServer;
+﻿namespace KONGOR.MasterServer;
 
 internal class KONGOR
 {
-    public static void Main(string[] args)
+    internal static void Main(string[] args)
     {
         // KongorContext.ServerStartEpochTime = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds();
 
@@ -120,7 +113,7 @@ internal class KONGOR
             };
         }*/);
 
-        var app = builder.Build();
+        WebApplication app = builder.Build();
 
         app.MapDefaultEndpoints();
 

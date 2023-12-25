@@ -34,7 +34,7 @@ NOTE: If no launch profile is specified, then the first profile in `launchSettin
 Create A Database Schema Migration
 
 1. install the Entity Framework Core CLI by executing `dotnet tool install --global dotnet-ef` or update it by executing `dotnet tool update --global dotnet-ef`
-2. in the context of the solution directory, execute `dotnet ef migrations add {MigrationName} --project MERRICK.Database`
+2. in the context of the solution directory, execute `dotnet ef migrations add {MigrationName} --project MERRICK.Database.Manager`
 
 <br/>
 
@@ -44,14 +44,14 @@ Update The Database
 # Development Database
 # In The Context Of The Solution Directory
 $ENV:ASPNETCORE_ENVIRONMENT = "Development"
-dotnet ef database update --project MERRICK.Database
+dotnet ef database update --project MERRICK.Database.Manager
 ```
 
 ```powershell
 # Production Database
 # In The Context Of The Solution Directory
 $ENV:ASPNETCORE_ENVIRONMENT = "Production"
-dotnet ef database update --project MERRICK.Database
+dotnet ef database update --project MERRICK.Database.Manager
 ```
 
 <br/>

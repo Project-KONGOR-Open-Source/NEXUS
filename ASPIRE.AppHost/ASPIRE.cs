@@ -1,8 +1,16 @@
-IDistributedApplicationBuilder builder = DistributedApplication.CreateBuilder(args);
+namespace ASPIRE.AppHost;
 
-IResourceBuilder<ProjectResource> database = builder.AddProject<Projects.MERRICK_Database>("MERRICK Database");
+internal class KONGOR
+{
+    internal static void Main(string[] args)
+    {
+        IDistributedApplicationBuilder builder = DistributedApplication.CreateBuilder(args);
 
-builder.AddProject<Projects.KONGOR_MasterServer>("KONGOR Master Server")
-    .WithReference(database);
+        IResourceBuilder<ProjectResource> database = builder.AddProject<Projects.MERRICK_Database_Manager>("MERRICK Database");
 
-builder.Build().Run();
+        builder.AddProject<Projects.KONGOR_MasterServer>("KONGOR Master Server")
+            .WithReference(database);
+
+        builder.Build().Run();
+    }
+}
