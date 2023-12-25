@@ -25,12 +25,12 @@ internal class DatabaseInitializer(IServiceProvider serviceProvider, ILogger<Dat
 
         await strategy.ExecuteAsync(context.Database.MigrateAsync, cancellationToken);
 
-        SeedAsync(context, cancellationToken);
+        await SeedAsync(context, cancellationToken);
 
         logger.LogInformation("Database Initialization Completed After {ElapsedMilliseconds}ms", stopwatch.ElapsedMilliseconds);
     }
 
-    private void SeedAsync(MerrickContext context, CancellationToken cancellationToken)
+    private async Task SeedAsync(MerrickContext context, CancellationToken cancellationToken)
     {
         logger.LogInformation("Seeding Database");
     }

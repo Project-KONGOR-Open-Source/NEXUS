@@ -2,5 +2,5 @@
 
 internal class DAWNBRINGER
 {
-    internal static void Main(string[] args) { Console.WriteLine("Hello, World!"); }
+    internal static void Main() { Console.WriteLine("Hello, World!"); }
 }

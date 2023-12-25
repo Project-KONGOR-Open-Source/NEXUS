@@ -2,5 +2,5 @@
 
 internal class TRANSMUTANSTEIN
 {
-    internal static void Main(string[] args) { Console.WriteLine("This will become a SignalR project!"); }
+    internal static void Main() { Console.WriteLine("This will become a SignalR project!"); }
 }
