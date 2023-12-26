@@ -10,10 +10,13 @@ public class User : IdentityUser<Guid>
     public required string EmailAddress { get; set; } = null!;
 
     [StringLength(512)]
-    public required string Salt { get; set; } = null!;
+    public required string SRPSalt { get; set; } = null!;
 
     [StringLength(22)]
-    public required string PasswordSalt { get; set; } = null!;
+    public required string SRPPasswordSalt { get; set; } = null!;
+
+    [StringLength(64)]
+    public required string SRPPasswordHash { get; set; } = null!;
 
     public List<Account> Accounts { get; set; } = [];
 

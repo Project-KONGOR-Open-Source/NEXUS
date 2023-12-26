@@ -26,12 +26,12 @@ public partial class ClientRequesterController : ControllerBase
         {
             "pre_auth"  => await HandlePreAuthenticationFunction(),
             "srpAuth"   => await HandleSRPAuthenticationFunction(),
-            null        => await HandleNullQueryStringFunctionParameter(),
+            null        => await HandleNullQueryStringFunction(),
             _           => throw new NotImplementedException($"Unsupported Client Requester Controller Query String Parameter: f={Request.Query["f"].Single()}")
         };
     }
 
-    private async Task<IActionResult> HandleNullQueryStringFunctionParameter()
+    private async Task<IActionResult> HandleNullQueryStringFunction()
     {
         return Request.Form["f"].SingleOrDefault() switch
         {
