@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MERRICK.Database.Manager.Migrations
 {
     [DbContext(typeof(MerrickContext))]
-    [Migration("20231225171453_CreateInitialEntities")]
+    [Migration("20231226005311_CreateInitialEntities")]
     partial class CreateInitialEntities
     {
         /// <inheritdoc />
@@ -222,11 +222,6 @@ namespace MERRICK.Database.Manager.Migrations
                     b.Property<string>("PasswordHash")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("PasswordSalt")
-                        .IsRequired()
-                        .HasMaxLength(22)
-                        .HasColumnType("nvarchar(22)");
-
                     b.Property<string>("PhoneNumber")
                         .HasColumnType("nvarchar(max)");
 
@@ -236,7 +231,17 @@ namespace MERRICK.Database.Manager.Migrations
                     b.Property<int>("PlinkoTickets")
                         .HasColumnType("int");
 
-                    b.Property<string>("Salt")
+                    b.Property<string>("SRPPasswordHash")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
+
+                    b.Property<string>("SRPPasswordSalt")
+                        .IsRequired()
+                        .HasMaxLength(22)
+                        .HasColumnType("nvarchar(22)");
+
+                    b.Property<string>("SRPSalt")
                         .IsRequired()
                         .HasMaxLength(512)
                         .HasColumnType("nvarchar(512)");

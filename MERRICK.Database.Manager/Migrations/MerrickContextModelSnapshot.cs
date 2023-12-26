@@ -219,11 +219,6 @@ namespace MERRICK.Database.Manager.Migrations
                     b.Property<string>("PasswordHash")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("PasswordSalt")
-                        .IsRequired()
-                        .HasMaxLength(22)
-                        .HasColumnType("nvarchar(22)");
-
                     b.Property<string>("PhoneNumber")
                         .HasColumnType("nvarchar(max)");
 
@@ -233,7 +228,17 @@ namespace MERRICK.Database.Manager.Migrations
                     b.Property<int>("PlinkoTickets")
                         .HasColumnType("int");
 
-                    b.Property<string>("Salt")
+                    b.Property<string>("SRPPasswordHash")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
+
+                    b.Property<string>("SRPPasswordSalt")
+                        .IsRequired()
+                        .HasMaxLength(22)
+                        .HasColumnType("nvarchar(22)");
+
+                    b.Property<string>("SRPSalt")
                         .IsRequired()
                         .HasMaxLength(512)
                         .HasColumnType("nvarchar(512)");
