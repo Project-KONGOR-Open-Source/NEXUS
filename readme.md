@@ -1,8 +1,14 @@
+<style>h1, h2 { border-bottom: 0; }</style>
+
 # ASPIRE
 
 ## The Full Suite Of Project KONGOR Services <br/> Architected As An Open-Source Cloud-Ready Distributed Application
 
-<br/>
+### If you would like to support the development of this project and buy me a coffee, please consider the following options: [GitHub Sponsors](https://github.com/sponsors/K-O-N-G-O-R), [PayPal](https://paypal.me/MissingLinkMedia). 💚
+
+<br/><hr/>
+
+<h2 align="center">Concise Instructions For Developers</h2>
 
 Non-Code Dependencies
 * SQL Server: https://www.microsoft.com/en-gb/sql-server/sql-server-downloads (preferably Developer Edition)
@@ -55,9 +61,10 @@ $ENV:ASPNETCORE_ENVIRONMENT = "Production"
 dotnet ef database update --project MERRICK.Database.Manager
 ```
 
-<br/>
+<br/><hr/>
 
-Comprehensive Instructions For Non-Developers
+<h2 align="center">Comprehensive Instructions For Non-Developers</h2>
+
 1. ??? (coming soon™)
 2. play HoN
 <br/>
