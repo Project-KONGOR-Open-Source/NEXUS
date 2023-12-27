@@ -5,7 +5,8 @@
 <br/>
 
 Non-Code Dependencies
-* SQL Server: https://www.microsoft.com/en-gb/sql-server/sql-server-downloads.
+* SQL Server: https://www.microsoft.com/en-gb/sql-server/sql-server-downloads (preferably Developer Edition)
+* Docker Desktop: https://www.docker.com/products/docker-desktop/
 
 <br/>
 
@@ -54,4 +55,9 @@ $ENV:ASPNETCORE_ENVIRONMENT = "Production"
 dotnet ef database update --project MERRICK.Database.Manager
 ```
 
+<br/>
+
+Comprehensive Instructions For Non-Developers
+1. ??? (coming soon™)
+2. play HoN
 <br/>
