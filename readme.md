@@ -1,24 +1,17 @@
-<h1 style="border-bottom: 0">
-    ASPIRE
-</h1>
-
-<h2 style="border-bottom: 0">
-    The Full Suite Of Project KONGOR Services
-    <br/>
-    Architected As An Open-Source Cloud-Ready Distributed Application
-</h2>
-
-<h3 style="border-bottom: 0">
-    If you would like to support the development of this project and buy me a coffee, please consider the following options: <a href="https://github.com/sponsors/K-O-N-G-O-R">GitHub Sponsors</a>, <a href="https://paypal.me/MissingLinkMedia">PayPal</a>. 💚
+<h3>
+    <p align="center">ASPIRE</p>
+    <p>The full suite of Project KONGOR services, architected as an open-source cloud-ready distributed application.</p>
+    <p>If you would like to support the development of this project and buy me a coffee, please consider one of the following options: <a href="https://github.com/sponsors/K-O-N-G-O-R">GitHub Sponsors</a>, <a href="https://paypal.me/MissingLinkMedia">PayPal</a>. 💚</p>
 </h3>
 
-<br/><hr/>
+<hr/>
 
-<h2 align="center">Concise Instructions For Developers</h2>
+<h3 align="center">Concise Instructions For Developers</h3>
 
-Non-Code Dependencies
-* SQL Server: https://www.microsoft.com/en-gb/sql-server/sql-server-downloads (preferably Developer Edition)
-* Docker Desktop: https://www.docker.com/products/docker-desktop/
+> [!NOTE]
+> Non-Code Dependencies
+> * SQL Server: https://www.microsoft.com/en-gb/sql-server/sql-server-downloads/ (preferably Developer Edition)
+> * Docker Desktop: https://www.docker.com/products/docker-desktop/ (preferably WSL 2, rather than Hyper-V)
 
 <br/>
 
@@ -67,9 +60,9 @@ $ENV:ASPNETCORE_ENVIRONMENT = "Production"
 dotnet ef database update --project MERRICK.Database.Manager
 ```
 
-<br/><hr/>
+<hr/>
 
-<h2 align="center">Comprehensive Instructions For Non-Developers</h2>
+<h3 align="center">Comprehensive Instructions For Non-Developers</h3>
 
 1. ??? (coming soon™)
 2. play HoN
