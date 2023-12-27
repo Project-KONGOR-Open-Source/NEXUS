@@ -6,14 +6,18 @@
 
 <hr/>
 
+<h3 align="center">Non-Code Dependencies</h3>
+
+* SQL Server (Developer Edition): https://www.microsoft.com/en-gb/sql-server/sql-server-downloads/
+* Docker (Personal Edition): https://www.docker.com/products/docker-desktop/ (Docker Desktop)
+
+> [!IMPORTANT]
+> The editions suggested in parentheses are for development purposes only.
+> Commercial usage will likely require paid tiers of these software products.
+
+<hr/>
+
 <h3 align="center">Concise Instructions For Developers</h3>
-
-> [!NOTE]
-> Non-Code Dependencies
-> * SQL Server (Developer Edition): https://www.microsoft.com/en-gb/sql-server/sql-server-downloads/
-> * Docker Desktop: https://www.docker.com/products/docker-desktop/ (preferably, using the WSL 2 engine)
-
-<br/>
 
 Run In Development
 
@@ -33,7 +37,9 @@ dotnet run --project ASPIRE.AppHost --launch-profile "Project KONGOR Production"
 
 <br/>
 
-NOTE: If no launch profile is specified, then the first profile in `launchSettings.json` will be used. Normally, this default profile is a development profile, which allows developers to run the project quickly by executing just `dotnet run` without specifying a launch profile.
+> [!NOTE]
+> If no launch profile is specified, then the first profile in `launchSettings.json` will be used.
+> Normally, this default profile is a development profile, which allows developers to run the project quickly by executing just `dotnet run` without specifying a launch profile.
 
 <br/>
 
@@ -66,4 +72,5 @@ dotnet ef database update --project MERRICK.Database.Manager
 
 1. ??? (coming soon™)
 2. play HoN
+
 <br/>
