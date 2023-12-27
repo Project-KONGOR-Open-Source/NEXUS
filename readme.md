@@ -1,10 +1,16 @@
-<style>h1, h2 { border-bottom: 0; }</style>
+<h1 style="border-bottom: 0">
+    ASPIRE
+</h1>
 
-# ASPIRE
+<h2 style="border-bottom: 0">
+    The Full Suite Of Project KONGOR Services
+    <br/>
+    Architected As An Open-Source Cloud-Ready Distributed Application
+</h2>
 
-## The Full Suite Of Project KONGOR Services <br/> Architected As An Open-Source Cloud-Ready Distributed Application
-
-### If you would like to support the development of this project and buy me a coffee, please consider the following options: [GitHub Sponsors](https://github.com/sponsors/K-O-N-G-O-R), [PayPal](https://paypal.me/MissingLinkMedia). 💚
+<h3 style="border-bottom: 0">
+    If you would like to support the development of this project and buy me a coffee, please consider the following options: <a href="https://github.com/sponsors/K-O-N-G-O-R">GitHub Sponsors</a>, <a href="https://paypal.me/MissingLinkMedia">PayPal</a>. 💚
+</h3>
 
 <br/><hr/>
 
