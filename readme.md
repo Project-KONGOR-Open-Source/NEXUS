@@ -10,8 +10,8 @@
 
 > [!NOTE]
 > Non-Code Dependencies
-> * SQL Server: https://www.microsoft.com/en-gb/sql-server/sql-server-downloads/ (preferably Developer Edition)
-> * Docker Desktop: https://www.docker.com/products/docker-desktop/ (preferably WSL 2, rather than Hyper-V)
+> * SQL Server (Developer Edition): https://www.microsoft.com/en-gb/sql-server/sql-server-downloads/
+> * Docker Desktop: https://www.docker.com/products/docker-desktop/ (preferably, using the WSL 2 engine)
 
 <br/>
 
