@@ -23,6 +23,9 @@ internal class KONGOR
             options.EnableSensitiveDataLogging(builder.Environment.IsDevelopment());
         });
 
+        // Add Memory Cache
+        builder.Services.AddMemoryCache();
+
         // Add MVC Controllers
         builder.Services.AddControllers();
 
@@ -86,6 +89,8 @@ internal class KONGOR
          *
          */
         //});
+
+        // builder.Services.AddAntiforgery(); ???
 
         // Build The Application
         WebApplication app = builder.Build();

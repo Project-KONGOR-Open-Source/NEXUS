@@ -3,7 +3,7 @@
 [ApiController]
 [Route("client_requester.php")]
 [Consumes("application/x-www-form-urlencoded")]
-public partial class ClientRequesterController : ControllerBase
+public partial class ClientRequesterController(MerrickContext databaseContext, ILogger<ClientRequesterController> logger, IMemoryCache cache) : ControllerBase
 {
     # region Client Requester Controller Description
     /*
@@ -18,6 +18,10 @@ public partial class ClientRequesterController : ControllerBase
         And instead the Client Requester controller needs to be handled using switch pattern matching, or equivalent, on these request data.
     */
     # endregion
+
+    private MerrickContext MerrickContext { get; } = databaseContext;
+    private ILogger Logger { get; } = logger;
+    private IMemoryCache Cache { get; } = cache;
 
     [HttpPost(Name = "Client Requester All-In-One")]
     public async Task<IActionResult> ClientRequester()
