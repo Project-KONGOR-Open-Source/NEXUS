@@ -1,4 +1,5 @@
-﻿global using KONGOR.MasterServer.RequestResponseModels.SRP;
+﻿global using KONGOR.MasterServer.Extensions;
+global using KONGOR.MasterServer.RequestResponseModels.SRP;
 
 global using MERRICK.Database.Models.Context;
 global using MERRICK.Database.Models.Entities;

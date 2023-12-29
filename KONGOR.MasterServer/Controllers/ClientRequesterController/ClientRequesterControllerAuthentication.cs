@@ -14,6 +14,11 @@ public partial class ClientRequesterController
         if (clientPublicEphemeral is null)
             return BadRequest(PhpSerialization.Serialize(new SRPAuthenticationFailureResponse(SRPAuthenticationFailureReason.BadRequest)));
 
+        string? systemInformation = Request.Form["SysInfo"];
+
+        if (systemInformation is null)
+            return BadRequest(PhpSerialization.Serialize(new SRPAuthenticationFailureResponse(SRPAuthenticationFailureReason.BadRequest)));
+
         Account? account = await MerrickContext.Accounts
             .Include(account => account.User)
             .Include(account => account.Clan)
@@ -33,12 +38,13 @@ public partial class ClientRequesterController
             Salt = user.SRPSalt,
             PasswordSalt = user.SRPPasswordSalt,
             PasswordHash = user.SRPPasswordHash,
-            ClientPublicEphemeral = clientPublicEphemeral
+            ClientPublicEphemeral = clientPublicEphemeral,
+            SystemInformation = systemInformation
         };
 
-        Cache.Set($@"SRP-SESSION[""{accountName}""]", data); // TODO: Create Cache Extension Methods
+        Cache.SetSRPAuthenticationSessionData(accountName, data);
 
-        return Ok(PhpSerialization.Serialize(GeneratePreAuthResponse(srpAuthSessionData)));
+        return Ok(PhpSerialization.Serialize(new SRPAuthenticationResponseStageOne(data)));
     }
 
     private async Task<IActionResult> HandleSRPAuthenticationFunction()
