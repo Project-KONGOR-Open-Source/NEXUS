@@ -2,15 +2,11 @@ namespace ZORGATH.WebPortal.API.Services.Email;
 
 // TODO: Implement Real Email Service
 
-internal class EmailService(IConfiguration configuration, ILogger logger) : IEmailService
+public class EmailService(IConfiguration configuration, ILogger<EmailService> logger) : IEmailService
 {
     private ILogger Logger { get; init; } = logger;
 
-    private string BaseURL { get; init; } = configuration.GetSection("environmentVariables").GetSection("ASPNETCORE_ENVIRONMENT").Value is "Development"
-        ? "https://localhost:55508"
-        : configuration.GetSection("environmentVariables").GetSection("ASPNETCORE_ENVIRONMENT").Value is "Production"
-            ? "https://portal.api.kongor.online"
-            : throw new ArgumentOutOfRangeException(@"Unknown ""ASPNETCORE_ENVIRONMENT"" Value");
+    private string BaseURL { get; init; } = ZORGATH.RunsInDevelopmentMode is true ? "https://localhost:55508" : "https://portal.api.kongor.online";
 
     public async Task<bool> SendEmailAddressRegistrationLink(string emailAddress, string token)
     {

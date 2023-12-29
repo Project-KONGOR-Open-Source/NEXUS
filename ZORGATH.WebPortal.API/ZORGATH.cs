@@ -2,10 +2,15 @@
 
 internal class ZORGATH
 {
+    internal static bool RunsInDevelopmentMode { get; set; }
+
     internal static void Main(string[] args)
     {
         // Create The Application Builder
         WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+
+        // Set Static RunsInDevelopmentMode Property
+        RunsInDevelopmentMode = builder.Environment.IsDevelopment();
 
         // Add Aspire Service Defaults
         builder.AddServiceDefaults();
@@ -88,6 +93,9 @@ internal class ZORGATH
         //});
 
         // builder.Services.AddAntiforgery(); ???
+
+        // Add Email Service
+        builder.Services.AddSingleton<IEmailService, EmailService>();
 
         // Build The Application
         WebApplication app = builder.Build();

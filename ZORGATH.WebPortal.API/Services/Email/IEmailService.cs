@@ -1,8 +1,8 @@
 ﻿namespace ZORGATH.WebPortal.API.Services.Email;
 
-internal interface IEmailService
+public interface IEmailService
 {
-    Task<bool> SendEmailAddressRegistrationLink(string emailAddress, string token);
+    public Task<bool> SendEmailAddressRegistrationLink(string emailAddress, string token);
 
-    Task<bool> SendEmailAddressRegistrationConfirmation(string emailAddress, string accountName);
+    public Task<bool> SendEmailAddressRegistrationConfirmation(string emailAddress, string accountName);
 }
