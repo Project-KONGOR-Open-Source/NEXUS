@@ -16,7 +16,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DAWNBRINGER.WebPortal.UI", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MERRICK.Database.Manager", "MERRICK.Database.Manager\MERRICK.Database.Manager.csproj", "{6D518B3D-B55C-493F-83AE-A75F79D15ED1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MERRICK.Database.Models", "MERRICK.Database.Models\MERRICK.Database.Models.csproj", "{4435D52D-D067-4660-81D5-C36298331C7A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MERRICK.Database.Models", "MERRICK.Database.Models\MERRICK.Database.Models.csproj", "{4435D52D-D067-4660-81D5-C36298331C7A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
