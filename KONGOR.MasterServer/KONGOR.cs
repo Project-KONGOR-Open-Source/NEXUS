@@ -101,7 +101,8 @@ internal class KONGOR
 
             app.UseSwaggerUI(options =>
             {
-                options.InjectStylesheet("/swagger/custom.css"); // https://github.com/Amoenus/SwaggerDark/releases
+                options.InjectStylesheet("/swagger/custom.css");
+                // https://github.com/Amoenus/SwaggerDark/releases
                 // https://blog.elijahlopez.ca/posts/aspnet-swagger-dark-theme/
                 // https://amoenus.dev/swagger-dark-theme
             });

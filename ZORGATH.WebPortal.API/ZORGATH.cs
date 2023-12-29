@@ -4,31 +4,122 @@ internal class ZORGATH
 {
     internal static void Main(string[] args)
     {
-        var builder = WebApplication.CreateBuilder(args);
+        // Create The Application Builder
+        WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
-        // Add services to the container.
+        // Add Aspire Service Defaults
+        builder.AddServiceDefaults();
 
+        // Add The Database Context
+        builder.Services.AddDbContext<MerrickContext>(options =>
+        {
+            // Set The Database Connection Options
+            options.UseSqlServer("MERRICK Database", connection => connection.MigrationsAssembly("MERRICK.Database.Manager"));
+
+            // Enable Comprehensive Database Query Logging
+            options.EnableSensitiveDataLogging(builder.Environment.IsDevelopment());
+        });
+
+        // Add Memory Cache
+        builder.Services.AddMemoryCache();
+
+        // Add MVC Controllers
         builder.Services.AddControllers();
-        // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-        builder.Services.AddEndpointsApiExplorer();
+
+        // Add Comprehensive Error Responses
+        if (builder.Environment.IsDevelopment())
+            builder.Services.AddProblemDetails();
+
+        // Add Swagger
         builder.Services.AddSwaggerGen();
 
-        var app = builder.Build();
+        //builder.Services.AddSwaggerGen(options =>
+        //{
+        //    options.SwaggerDoc("v1", new OpenApiInfo { Title = "Project KONGOR", Version = "v1" });
 
-        // Configure the HTTP request pipeline.
+        //    options.AddSecurityDefinition(JwtBearerDefaults.AuthenticationScheme, new OpenApiSecurityScheme
+        //    {
+        //        Description = @"Insert Your JWT In The Format ""Bearer {token}""",
+        //        Name = "Authorization",
+        //        In = ParameterLocation.Header,
+        //        Type = SecuritySchemeType.ApiKey,
+        //        Scheme = JwtBearerDefaults.AuthenticationScheme
+        //    });
+
+        //    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+        //    {
+        //        {
+        //            new OpenApiSecurityScheme
+        //            {
+        //                Reference = new OpenApiReference
+        //                {
+        //                    Type = ReferenceType.SecurityScheme,
+        //                    Id = JwtBearerDefaults.AuthenticationScheme
+        //                },
+        //                Scheme = "oauth2",
+        //                Name = JwtBearerDefaults.AuthenticationScheme,
+        //                In = ParameterLocation.Header
+        //            },
+        //            new List<string>()
+        //        }
+        //    });
+
+        /*
+         *
+         *    options.SwaggerDoc("v1", new OpenApiInfo
+           {
+               Version = "v1",
+               Title = "ToDo API",
+               Description = "An ASP.NET Core Web API for managing ToDo items",
+               TermsOfService = new Uri("https://example.com/terms"),
+               Contact = new OpenApiContact
+               {
+                   Name = "Example Contact",
+                   Url = new Uri("https://example.com/contact")
+               },
+               License = new OpenApiLicense
+               {
+                   Name = "Example License",
+                   Url = new Uri("https://example.com/license")
+               }
+           });
+         *
+         */
+        //});
+
+        // builder.Services.AddAntiforgery(); ???
+
+        // Build The Application
+        WebApplication app = builder.Build();
+
         if (app.Environment.IsDevelopment())
         {
             app.UseSwagger();
-            app.UseSwaggerUI();
+
+            app.UseSwaggerUI(options =>
+            {
+                options.InjectStylesheet("/swagger/custom.css");
+                // https://github.com/Amoenus/SwaggerDark/releases
+                // https://blog.elijahlopez.ca/posts/aspnet-swagger-dark-theme/
+                // https://amoenus.dev/swagger-dark-theme
+            });
         }
 
-        app.UseHttpsRedirection();
+        else
+        {
+            app.UseExceptionHandler();
+        }
 
-        app.UseAuthorization();
+        // Map Aspire Default Endpoints
+        app.MapDefaultEndpoints();
 
-
+        // Map MVC Controllers
         app.MapControllers();
 
+        // Automatically Redirect To HTTPS
+        app.UseHttpsRedirection();
+
+        // Run The Application
         app.Run();
     }
 }
