@@ -1,13 +1,12 @@
 ﻿namespace KONGOR.MasterServer.RequestResponseModels.SRP;
 
-[PhpClass]
-internal class SRPAuthenticationFailureResponse(SRPAuthenticationFailureReason reason, Account? account = null)
+public class SRPAuthenticationFailureResponse(SRPAuthenticationFailureReason reason, Account? account = null)
 {
     /// <summary>
     ///     A string of error output in the event of an authentication failure, e.g. "Invalid Nickname Or Password.".
     /// </summary>
     [PhpProperty("auth")]
-    internal string AuthenticationOutcome { get; set; } = reason switch
+    public string AuthenticationOutcome { get; set; } = reason switch
     {
         SRPAuthenticationFailureReason.AccountIsDisabled    => account is null ? "Account Is Disabled" : $@"Account ""{account.NameWithClanTag}"" Is Disabled",
         SRPAuthenticationFailureReason.AccountNotFound      => "Account Not Found",
@@ -22,10 +21,10 @@ internal class SRPAuthenticationFailureResponse(SRPAuthenticationFailureReason r
     ///     Since this is an error response, set to "false".
     /// </summary>
     [PhpProperty(0)]
-    internal bool Zero => false;
+    public bool Zero => false;
 }
 
-internal enum SRPAuthenticationFailureReason
+public enum SRPAuthenticationFailureReason
 {
     AccountIsDisabled,
     AccountNotFound,
