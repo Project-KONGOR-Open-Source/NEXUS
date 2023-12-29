@@ -13,6 +13,9 @@ public class EmailController(MerrickContext databaseContext, UserManager<User> u
     [HttpPost("Register", Name = "Register Email Address")]
     public async Task<IActionResult> RegisterEmailAddress(RegisterEmailAddressDTO payload)
     {
+        if (payload.EmailAddress.Equals(payload.ConfirmEmailAddress).Equals(false))
+            return BadRequest($@"Email Address ""{payload.ConfirmEmailAddress}"" Does Not Match ""{payload.EmailAddress}""");
+
         IActionResult result = SanitiseEmailAddress(payload.EmailAddress);
 
         if (result is not ContentResult contentResult) return result;
