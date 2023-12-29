@@ -22,6 +22,8 @@ public class EmailService(IConfiguration configuration, ILogger<EmailService> lo
 
         Console.WriteLine(body);
 
+        // TODO: Add "try/catch" Block And Return "false" On Failure
+
         await Task.Delay(250); return true;
     }
 
@@ -37,6 +39,8 @@ public class EmailService(IConfiguration configuration, ILogger<EmailService> lo
                       + Environment.NewLine + "The Project KONGOR Team";
 
         Console.WriteLine(body);
+
+        // TODO: Add "try/catch" Block And Return "false" On Failure
 
         await Task.Delay(250); return true;
     }

@@ -9,6 +9,7 @@ public sealed class MerrickContext : IdentityDbContext<User, Role, Guid, UserCla
 
     public DbSet<Account> Accounts => Set<Account>();
     public DbSet<Clan> Clans => Set<Clan>();
+    public DbSet<Token> Tokens => Set<Token>();
 
     public override DbSet<Role> Roles => Set<Role>();
     public override DbSet<RoleClaim> RoleClaims => Set<RoleClaim>();

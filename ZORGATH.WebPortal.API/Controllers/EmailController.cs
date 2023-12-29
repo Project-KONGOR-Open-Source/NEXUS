@@ -19,38 +19,38 @@ public class EmailController(MerrickContext databaseContext, UserManager<User> u
 
         string sanitisedEmailAddress = contentResult.Content ?? throw new NullReferenceException("Sanitised Email Address Is NULL");
 
-        Token? token = await MerrickContext.Tokens.SingleOrDefaultAsync(token => token.Purpose.Equals(TokenPurpose.EmailAddressVerification) && (token.EmailAddress.Equals(payload.EmailAddress) || token.SanitisedEmailAddress.Equals(sanitisedEmailAddress)));
+        Token? token = await MerrickContext.Tokens.SingleOrDefaultAsync(token => token.EmailAddress.Equals(sanitisedEmailAddress) && token.Purpose.Equals(TokenPurpose.EmailAddressVerification));
 
-        try
+        if (token is null)
         {
-            if (token is null)
+            token = new Token()
             {
-                token = new Token(payload.EmailAddress, sanitisedEmailAddress, TokenPurpose.EmailAddressVerification);
+                Purpose = TokenPurpose.EmailAddressVerification,
+                EmailAddress = sanitisedEmailAddress,
+                Data = Request.HttpContext.Connection.RemoteIpAddress is not null
+                    ? Request.HttpContext.Connection.RemoteIpAddress.ToString()
+                    : Request.HttpContext.Connection.LocalIpAddress is not null
+                        ? Request.HttpContext.Connection.LocalIpAddress.ToString()
+                        : string.Empty
+            };
 
-                await MerrickContext.Tokens.AddAsync(token);
+            await MerrickContext.Tokens.AddAsync(token);
+            await MerrickContext.SaveChangesAsync();
+
+            bool sent = await EmailService.SendEmailAddressRegistrationLink(payload.EmailAddress, token.Id.ToString());
+
+            if (sent.Equals(false))
+            {
+                MerrickContext.Tokens.Remove(token);
                 await MerrickContext.SaveChangesAsync();
 
-                bool sent = await EmailService.SendEmailAddressRegistrationLink(payload.EmailAddress, token.Value.ToString());
-
-                if (sent.Equals(false))
-                {
-                    MerrickContext.Tokens.Remove(token);
-                    await MerrickContext.SaveChangesAsync();
-
-                    return StatusCode(StatusCodes.Status503ServiceUnavailable, "Failed To Send Email");
-                }
+                return StatusCode(StatusCodes.Status503ServiceUnavailable, "Failed To Send Email Address Verification Email");
             }
-
-            else return BadRequest($@"A Registration Request For Email Address ""{payload.EmailAddress}"" Has Already Been Made; Check Your Email Inbox For A Registration Link");
         }
 
-        catch (Exception exception)
-        {
-            Logger.Error(exception, "EmailController.RegisterEmailAddress");
-            return StatusCode(StatusCodes.Status500InternalServerError, exception.Message);
-        }
+        else return BadRequest($@"A Registration Request For Email Address ""{payload.EmailAddress}"" Has Already Been Made (Check Your Email Inbox For A Registration Link)");
 
-        return Ok("Email Address Registration Token Successfully Issued");
+        return Ok($@"Email Address Registration Token Was Successfully Created, And An Email Was Sent To Address ""{payload.EmailAddress}""");
     }
 
     private static IActionResult SanitiseEmailAddress(string email)
