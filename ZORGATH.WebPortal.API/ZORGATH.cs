@@ -116,6 +116,9 @@ internal class ZORGATH
         // Map MVC Controllers
         app.MapControllers();
 
+        // Require Authentication To Access Non-Public Resources
+        app.UseAuthentication();
+
         // Automatically Redirect To HTTPS
         app.UseHttpsRedirection();
 
