@@ -1,5 +1,6 @@
 namespace ZORGATH.WebPortal.API.Services.Email;
 
+// TODO: Implement Secret Management Component
 // TODO: Implement Real Email Service
 
 public class EmailService(IConfiguration configuration, ILogger<EmailService> logger) : IEmailService

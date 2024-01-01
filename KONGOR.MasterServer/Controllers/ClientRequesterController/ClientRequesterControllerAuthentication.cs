@@ -49,6 +49,8 @@ public partial class ClientRequesterController
 
     private async Task<IActionResult> HandleSRPAuthenticationFunction()
     {
-        return Ok();
+        // TODO: Implement This
+
+        throw new NotImplementedException();
     }
 }

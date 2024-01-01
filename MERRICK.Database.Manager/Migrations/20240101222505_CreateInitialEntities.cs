@@ -61,6 +61,7 @@ namespace MERRICK.Database.Manager.Migrations
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(15)", maxLength: 15, nullable: false),
                     EmailAddress = table.Column<string>(type: "nvarchar(30)", maxLength: 30, nullable: false),
+                    SanitisedEmailAddress = table.Column<string>(type: "nvarchar(30)", maxLength: 30, nullable: false),
                     SRPSalt = table.Column<string>(type: "nvarchar(512)", maxLength: 512, nullable: false),
                     SRPPasswordSalt = table.Column<string>(type: "nvarchar(22)", maxLength: 22, nullable: false),
                     SRPPasswordHash = table.Column<string>(type: "nvarchar(64)", maxLength: 64, nullable: false),
@@ -286,9 +287,9 @@ namespace MERRICK.Database.Manager.Migrations
                 column: "NormalizedEmail");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Users_Name_EmailAddress",
+                name: "IX_Users_Name_SanitisedEmailAddress",
                 table: "Users",
-                columns: new[] { "Name", "EmailAddress" },
+                columns: new[] { "Name", "SanitisedEmailAddress" },
                 unique: true);
 
             migrationBuilder.CreateIndex(

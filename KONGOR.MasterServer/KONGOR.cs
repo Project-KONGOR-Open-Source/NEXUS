@@ -36,6 +36,8 @@ internal class KONGOR
         // Add Swagger
         builder.Services.AddSwaggerGen();
 
+        // TODO: Clean This Up
+
         //builder.Services.AddSwaggerGen(options =>
         //{
         //    options.SwaggerDoc("v1", new OpenApiInfo { Title = "Project KONGOR", Version = "v1" });

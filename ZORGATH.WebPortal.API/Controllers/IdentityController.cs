@@ -1,5 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore.Storage;
 
+using ZORGATH.WebPortal.API.Helpers;
+
 namespace ZORGATH.WebPortal.API.Controllers;
 
 [ApiController]
@@ -30,7 +32,20 @@ public class IdentityController(MerrickContext databaseContext, UserManager<User
                 return NotFound($@"Email Registration Token ""{payload.Token}"" Was Not Found");
             }
 
-            if (await MerrickContext.Users.Where(user => user.Email.Equals(token.EmailAddress) || user.Email.Equals(token.SanitisedEmailAddress)).AnyAsync())
+            IActionResult result = EmailAddressHelpers.SanitiseEmailAddress(token.EmailAddress);
+
+            if (result is not ContentResult contentResult) return result;
+
+            if (contentResult.Content is null)
+            {
+                Logger.LogError($@"[BUG] Sanitised Email Address ""{token.EmailAddress}"" Is NULL");
+
+                return UnprocessableEntity($@"Unable To Process Email Address ""{token.EmailAddress}""");
+            }
+
+            string sanitisedEmailAddress = contentResult.Content;
+
+            if (await MerrickContext.Users.Where(user => user.SanitisedEmailAddress.Equals(sanitisedEmailAddress)).AnyAsync())
             {
                 return Conflict($@"User With Email ""{token.EmailAddress}"" Already Exists");
             }
@@ -38,13 +53,6 @@ public class IdentityController(MerrickContext databaseContext, UserManager<User
             if (await MerrickContext.Accounts.Where(account => account.Name.Equals(payload.Name)).AnyAsync())
             {
                 return Conflict($@"Account With Name ""{payload.Name}"" Already Exists");
-            }
-
-            string[] disallowedUsernames = await System.IO.File.ReadAllLinesAsync(FlatListData.ReservedAccountNames);
-
-            if (disallowedUsernames.Contains(payload.Name, StringComparer.OrdinalIgnoreCase))
-            {
-                return Conflict($@"Account name ""{payload.Name}"" is reserved. If this account name belongs to you, please reach out to the Project KONGOR developers.");
             }
 
             AccountRegistrationData accountRegistrationData = SrpRegistrationHelpers.GenerateAccountRegistrationData(payload.Password);
@@ -64,11 +72,11 @@ public class IdentityController(MerrickContext databaseContext, UserManager<User
                 NormalizedUserName = payload.Name.ToUpper()
             };
 
-            IdentityResult result = await UserManager.CreateAsync(identity, payload.Password);
+            IdentityResult result2 = await UserManager.CreateAsync(identity, payload.Password);
 
-            if (result.Errors.Any())
+            if (result2.Errors.Any())
             {
-                return BadRequest(result.Errors);
+                return BadRequest(result2.Errors);
             }
 
             // Assign Default Role
