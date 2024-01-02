@@ -145,7 +145,7 @@ internal class ZORGATH
         //                Reference = new OpenApiReference
         //                {
         //                    Type = ReferenceType.SecurityScheme,
-        //                    Id = JwtBearerDefaults.AuthenticationScheme
+        //                    ID = JwtBearerDefaults.AuthenticationScheme
         //                },
         //                Scheme = "oauth2", // Is This Needed  ?
         //                Name = JwtBearerDefaults.AuthenticationScheme,

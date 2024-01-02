@@ -57,7 +57,7 @@ internal class KONGOR
         //                Reference = new OpenApiReference
         //                {
         //                    Type = ReferenceType.SecurityScheme,
-        //                    Id = JwtBearerDefaults.AuthenticationScheme
+        //                    ID = JwtBearerDefaults.AuthenticationScheme
         //                },
         //                Scheme = "oauth2",
         //                Name = JwtBearerDefaults.AuthenticationScheme,

@@ -35,7 +35,7 @@ public class EmailController(MerrickContext databaseContext, UserManager<User> u
             await MerrickContext.Tokens.AddAsync(token);
             await MerrickContext.SaveChangesAsync();
 
-            bool sent = await EmailService.SendEmailAddressRegistrationLink(payload.EmailAddress, token.Id.ToString());
+            bool sent = await EmailService.SendEmailAddressRegistrationLink(payload.EmailAddress, token.ID.ToString());
 
             if (sent.Equals(false))
             {

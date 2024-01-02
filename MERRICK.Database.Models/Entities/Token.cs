@@ -3,13 +3,15 @@
 public class Token
 {
     [Key]
-    public Guid Id { get; set; }
+    public Guid ID { get; set; }
 
     public required TokenPurpose Purpose { get; set; }
 
     public required string EmailAddress { get; set; }
 
     public DateTime TimestampCreated { get; set; } = DateTime.UtcNow;
+
+    public DateTime? TimestampConsumed { get; set; }
 
     public required string Data { get; set; }
 }

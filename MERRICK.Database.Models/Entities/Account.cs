@@ -4,7 +4,7 @@
 public class Account
 {
     [Key]
-    public Guid Id { get; set; }
+    public Guid ID { get; set; }
 
     [StringLength(15)]
     public required string Name { get; set; }
@@ -12,6 +12,8 @@ public class Account
     public required User User { get; set; }
 
     public AccountType AccountType { get; set; } = AccountType.Legacy;
+
+    public required bool IsMain { get; set; }
 
     public Clan? Clan { get; set; }
 
@@ -27,14 +29,11 @@ public class Account
 
     public List<string> IPAddressCollection { get; set; } = [];
 
-    public List<string> HardwareIdCollection { get; set; } = [];
+    public List<string> HardwareIDCollection { get; set; } = [];
 
     public List<string> MACAddressCollection { get; set; } = [];
 
     public List<string> SystemInformationCollection { get; set; } = [];
-
-    [NotMapped]
-    public bool IsMain => Name == User.Name;
 
     [NotMapped]
     public string NameWithClanTag => Clan == null ? Name : $"[{Clan.Tag}]{Name}";
