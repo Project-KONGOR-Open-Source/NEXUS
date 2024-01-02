@@ -28,13 +28,13 @@ public sealed class MerrickContext : DbContext
         (
             new Role
             {
-                ID = Guid.Parse($"00000000-0000-0000-0000-{Constants.UserRoles.Administrator.GetHashCode():X12}"),
+                ID = Guid.Parse($"00000000-0000-0000-0000-{Constants.UserRoles.Administrator.GetDeterministicHashCode():X12}"),
                 Name = Constants.UserRoles.Administrator
             },
 
             new Role
             {
-                ID = Guid.Parse($"00000000-0000-0000-0000-{Constants.UserRoles.User.GetHashCode():X12}"),
+                ID = Guid.Parse($"00000000-0000-0000-0000-{Constants.UserRoles.User.GetDeterministicHashCode():X12}"),
                 Name = Constants.UserRoles.User
             }
         );

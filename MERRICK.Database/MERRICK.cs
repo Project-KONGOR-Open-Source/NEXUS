@@ -23,7 +23,7 @@ internal class MERRICK
         builder.Services.AddOpenTelemetry().WithTracing(tracing => tracing.AddSource(DatabaseInitializer.ActivitySourceName));
         builder.Services.AddSingleton<DatabaseInitializer>();
         builder.Services.AddHostedService(provider => provider.GetRequiredService<DatabaseInitializer>());
-        builder.Services.AddHealthChecks().AddCheck<DatabaseHealthCheck>("DatabaseHealthCheck", null);
+        builder.Services.AddHealthChecks().AddCheck<DatabaseHealthCheck>("MERRICK Database Health Check", null);
 
         // Build The Application
         WebApplication application = builder.Build();

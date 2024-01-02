@@ -1,4 +1,6 @@
-﻿global using MERRICK.Database.Context;
+﻿global using ASPIRE.ServiceDefaults.Extensions.Cryptography;
+
+global using MERRICK.Database.Context;
 global using MERRICK.Database.Entities;
 global using MERRICK.Database.Enumerations;
 global using MERRICK.Database.Services;

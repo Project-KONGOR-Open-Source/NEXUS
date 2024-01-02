@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MERRICK.Database.Migrations
 {
     [DbContext(typeof(MerrickContext))]
-    [Migration("20240102221647_CreateInitialEntities")]
+    [Migration("20240102225948_CreateInitialEntities")]
     partial class CreateInitialEntities
     {
         /// <inheritdoc />
@@ -140,12 +140,12 @@ namespace MERRICK.Database.Migrations
                     b.HasData(
                         new
                         {
-                            ID = new Guid("00000000-0000-0000-0000-00004128011d"),
+                            ID = new Guid("00000000-0000-0000-0000-00009eaf9c10"),
                             Name = "Administrator"
                         },
                         new
                         {
-                            ID = new Guid("00000000-0000-0000-0000-0000e9cfab08"),
+                            ID = new Guid("00000000-0000-0000-0000-000091cf21a9"),
                             Name = "User"
                         });
                 });

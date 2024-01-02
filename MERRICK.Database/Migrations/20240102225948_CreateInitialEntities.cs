@@ -124,8 +124,8 @@ namespace MERRICK.Database.Migrations
                 columns: new[] { "ID", "Name" },
                 values: new object[,]
                 {
-                    { new Guid("00000000-0000-0000-0000-00004128011d"), "Administrator" },
-                    { new Guid("00000000-0000-0000-0000-0000e9cfab08"), "User" }
+                    { new Guid("00000000-0000-0000-0000-000091cf21a9"), "User" },
+                    { new Guid("00000000-0000-0000-0000-00009eaf9c10"), "Administrator" }
                 });
 
             migrationBuilder.CreateIndex(

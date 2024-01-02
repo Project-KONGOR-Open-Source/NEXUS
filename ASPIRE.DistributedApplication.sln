@@ -4,7 +4,7 @@ VisualStudioVersion = 17.8.0.0
 MinimumVisualStudioVersion = 17.8.0.0
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ASPIRE.AppHost", "ASPIRE.AppHost\ASPIRE.AppHost.csproj", "{6C001EF4-249D-4626-BC74-F8D960E3B183}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ASPIRE.ServiceDefaults", "ASPIRE.ServiceDefaults\ASPIRE.ServiceDefaults.csproj", "{CAC12A28-7CA5-4AE4-B8CF-CC7E482D5CAD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ASPIRE.SharedScope", "ASPIRE.SharedScope\ASPIRE.SharedScope.csproj", "{CAC12A28-7CA5-4AE4-B8CF-CC7E482D5CAD}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KONGOR.MasterServer", "KONGOR.MasterServer\KONGOR.MasterServer.csproj", "{970165A0-25EB-4363-A43B-0044BD3109E3}"
 EndProject

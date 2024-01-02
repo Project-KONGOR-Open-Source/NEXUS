@@ -137,12 +137,12 @@ namespace MERRICK.Database.Migrations
                     b.HasData(
                         new
                         {
-                            ID = new Guid("00000000-0000-0000-0000-00004128011d"),
+                            ID = new Guid("00000000-0000-0000-0000-00009eaf9c10"),
                             Name = "Administrator"
                         },
                         new
                         {
-                            ID = new Guid("00000000-0000-0000-0000-0000e9cfab08"),
+                            ID = new Guid("00000000-0000-0000-0000-000091cf21a9"),
                             Name = "User"
                         });
                 });

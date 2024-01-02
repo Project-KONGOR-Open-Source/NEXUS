@@ -92,4 +92,5 @@ public class SRPAuthenticationSessionData
     public string Verifier { get; init; }
 
     // TODO: Review "required" Usage ... Maybe Add Constructor And Patch Method
+    // TODO: Rework This Model
 }
