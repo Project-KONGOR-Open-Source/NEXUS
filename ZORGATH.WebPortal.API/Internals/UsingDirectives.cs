@@ -1,11 +1,13 @@
 ﻿global using MERRICK.Database.Models.Context;
 global using MERRICK.Database.Models.Entities;
 
+global using Microsoft.AspNetCore.Authentication.JwtBearer;
 global using Microsoft.AspNetCore.Authorization;
 global using Microsoft.AspNetCore.Identity;
 global using Microsoft.AspNetCore.Mvc;
 global using Microsoft.EntityFrameworkCore;
 global using Microsoft.EntityFrameworkCore.Storage;
+global using Microsoft.IdentityModel.Tokens;
 
 global using SecureRemotePassword;
 

@@ -12,8 +12,10 @@ public class UserController(MerrickContext databaseContext, UserManager<User> us
     private ILogger Logger { get; init; } = logger;
 
     // TODO: Map All Request/Response Data To Contracts
+    // TODO: [OutputCache] On Get Requests
 
     [HttpPost("Register", Name = "Register User And Main Account")]
+    [AllowAnonymous]
     public async Task<IActionResult> RegisterUserAndMainAccount([FromBody] RegisterUserAndMainAccountDTO payload)
     {
         if (payload.Password.Equals(payload.ConfirmPassword).Equals(false))
@@ -30,20 +32,20 @@ public class UserController(MerrickContext databaseContext, UserManager<User> us
                 return NotFound($@"Email Registration Token ""{payload.Token}"" Was Not Found");
             }
 
-            IActionResult result = EmailAddressHelpers.SanitiseEmailAddress(token.EmailAddress);
+            IActionResult result = EmailAddressHelpers.SanitizeEmailAddress(token.EmailAddress);
 
             if (result is not ContentResult contentResult) return result;
 
             if (contentResult.Content is null)
             {
-                Logger.LogError($@"[BUG] Sanitised Email Address ""{token.EmailAddress}"" Is NULL");
+                Logger.LogError($@"[BUG] Sanitized Email Address ""{token.EmailAddress}"" Is NULL");
 
                 return UnprocessableEntity($@"Unable To Process Email Address ""{token.EmailAddress}""");
             }
 
-            string sanitisedEmailAddress = contentResult.Content;
+            string sanitizedEmailAddress = contentResult.Content;
 
-            if (await MerrickContext.Users.Where(user => user.SanitisedEmailAddress.Equals(sanitisedEmailAddress)).AnyAsync())
+            if (await MerrickContext.Users.Where(user => user.SanitizedEmailAddress.Equals(sanitizedEmailAddress)).AnyAsync())
             {
                 return Conflict($@"User With Email ""{token.EmailAddress}"" Already Exists");
             }
@@ -59,7 +61,7 @@ public class UserController(MerrickContext databaseContext, UserManager<User> us
             {
                 Name = payload.Name,
                 EmailAddress = token.EmailAddress,
-                SanitisedEmailAddress = sanitisedEmailAddress,
+                SanitizedEmailAddress = sanitizedEmailAddress,
                 SRPSalt = SRPRegistrationHandlers.GeneratePasswordSalt(),
                 SRPPasswordSalt = salt,
                 SRPPasswordHash = SRPRegistrationHandlers.HashAccountPassword(payload.Password, salt),

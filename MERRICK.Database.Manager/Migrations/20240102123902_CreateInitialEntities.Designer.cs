@@ -271,7 +271,7 @@ namespace MERRICK.Database.Manager.Migrations
                         .HasMaxLength(512)
                         .HasColumnType("nvarchar(512)");
 
-                    b.Property<string>("SanitisedEmailAddress")
+                    b.Property<string>("SanitizedEmailAddress")
                         .IsRequired()
                         .HasMaxLength(30)
                         .HasColumnType("nvarchar(30)");
@@ -305,7 +305,7 @@ namespace MERRICK.Database.Manager.Migrations
                         .HasDatabaseName("UserNameIndex")
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
-                    b.HasIndex("Name", "SanitisedEmailAddress")
+                    b.HasIndex("Name", "SanitizedEmailAddress")
                         .IsUnique();
 
                     b.ToTable("Users", (string)null);

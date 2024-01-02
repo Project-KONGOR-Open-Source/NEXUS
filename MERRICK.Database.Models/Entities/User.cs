@@ -1,6 +1,6 @@
 ﻿namespace MERRICK.Database.Models.Entities;
 
-[Index(nameof(Name), nameof(SanitisedEmailAddress), IsUnique = true)]
+[Index(nameof(Name), nameof(SanitizedEmailAddress), IsUnique = true)]
 public class User : IdentityUser<Guid>
 {
     [MaxLength(15)]
@@ -10,7 +10,7 @@ public class User : IdentityUser<Guid>
     public required string EmailAddress { get; set; }
 
     [MaxLength(30)]
-    public required string SanitisedEmailAddress { get; set; }
+    public required string SanitizedEmailAddress { get; set; }
 
     [StringLength(512)]
     public required string SRPSalt { get; set; } // TODO: Maybe Just Rename This To PasswordSalt ?

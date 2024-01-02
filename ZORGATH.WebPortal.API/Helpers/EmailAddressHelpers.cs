@@ -2,7 +2,7 @@
 
 internal static class EmailAddressHelpers
 {
-    internal static IActionResult SanitiseEmailAddress(string email)
+    internal static IActionResult SanitizeEmailAddress(string email)
     {
         if (ZORGATH.RunsInDevelopmentMode is false)
         {

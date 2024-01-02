@@ -11,6 +11,7 @@ public class EmailController(MerrickContext databaseContext, UserManager<User> u
     private ILogger Logger { get; init; } = logger;
 
     [HttpPost("Register", Name = "Register Email Address")]
+    [AllowAnonymous]
     public async Task<IActionResult> RegisterEmailAddress(RegisterEmailAddressDTO payload)
     {
         if (payload.EmailAddress.Equals(payload.ConfirmEmailAddress).Equals(false))
