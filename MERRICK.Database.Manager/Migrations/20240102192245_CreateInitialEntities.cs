@@ -3,6 +3,8 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
+#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
+
 namespace MERRICK.Database.Manager.Migrations
 {
     /// <inheritdoc />
@@ -230,6 +232,15 @@ namespace MERRICK.Database.Manager.Migrations
                         principalTable: "Users",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.InsertData(
+                table: "Roles",
+                columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
+                values: new object[,]
+                {
+                    { new Guid("00000000-0000-0000-0000-000000000001"), "be7b4e6d-29d8-4c3b-bffb-6635418cd47d", "Administrator", "ADMINISTRATOR" },
+                    { new Guid("00000000-0000-0000-0000-000000000002"), "0b54499d-d84f-4196-9c99-e99e87f03792", "User", "USER" }
                 });
 
             migrationBuilder.CreateIndex(

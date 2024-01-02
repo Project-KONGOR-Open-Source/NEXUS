@@ -139,6 +139,22 @@ namespace MERRICK.Database.Manager.Migrations
                         .HasFilter("[NormalizedName] IS NOT NULL");
 
                     b.ToTable("Roles", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("00000000-0000-0000-0000-000000000001"),
+                            ConcurrencyStamp = "be7b4e6d-29d8-4c3b-bffb-6635418cd47d",
+                            Name = "Administrator",
+                            NormalizedName = "ADMINISTRATOR"
+                        },
+                        new
+                        {
+                            Id = new Guid("00000000-0000-0000-0000-000000000002"),
+                            ConcurrencyStamp = "0b54499d-d84f-4196-9c99-e99e87f03792",
+                            Name = "User",
+                            NormalizedName = "USER"
+                        });
                 });
 
             modelBuilder.Entity("MERRICK.Database.Models.Entities.RoleClaim", b =>

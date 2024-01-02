@@ -35,6 +35,25 @@ public sealed class MerrickContext : IdentityDbContext<User, Role, Guid, UserCla
     private static void DefineRole(EntityTypeBuilder<Role> builder)
     {
         builder.ToTable(nameof(Roles));
+
+        builder.HasData
+        (
+            new Role
+            {
+                Id = Guid.Parse("00000000-0000-0000-0000-000000000001"),
+                ConcurrencyStamp = Guid.NewGuid().ToString(),
+                Name = Constants.UserRoles.Administrator,
+                NormalizedName = Constants.UserRoles.Administrator.ToUpper()
+            },
+
+            new Role
+            {
+                Id = Guid.Parse("00000000-0000-0000-0000-000000000002"),
+                ConcurrencyStamp = Guid.NewGuid().ToString(),
+                Name = Constants.UserRoles.User,
+                NormalizedName = Constants.UserRoles.User.ToUpper()
+            }
+        );
     }
 
     private static void DefineRoleClaim(EntityTypeBuilder<RoleClaim> builder)

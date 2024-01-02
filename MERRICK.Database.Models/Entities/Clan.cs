@@ -4,7 +4,7 @@
 public class Clan
 {
     [Key]
-    public virtual Guid Id { get; set; }
+    public Guid Id { get; set; }
 
     [StringLength(20)]
     public required string Name { get; set; }
@@ -12,7 +12,7 @@ public class Clan
     [StringLength(3)]
     public required string Tag { get; set; }
 
-    public HashSet<Account> Members { get; set; } = [];
+    public List<Account> Members { get; set; } = [];
 
     public DateTime TimestampCreated { get; set; } = DateTime.UtcNow;
 }

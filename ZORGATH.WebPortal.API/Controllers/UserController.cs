@@ -21,95 +21,86 @@ public class UserController(MerrickContext databaseContext, UserManager<User> us
         if (payload.Password.Equals(payload.ConfirmPassword).Equals(false))
             return BadRequest($@"Password ""{payload.ConfirmPassword}"" Does Not Match ""{payload.Password}"" (These Values Are Only Visible To You)");
 
-        IDbContextTransaction transaction = await MerrickContext.Database.BeginTransactionAsync();
+        Token? token = await MerrickContext.Tokens.SingleOrDefaultAsync(token => token.Id.ToString().Equals(payload.Token) && token.Purpose.Equals(TokenPurpose.EmailAddressVerification));
 
-        try
+        if (token is null)
         {
-            Token? token = await MerrickContext.Tokens.SingleOrDefaultAsync(token => token.Id.ToString().Equals(payload.Token) && token.Purpose.Equals(TokenPurpose.EmailAddressVerification));
-
-            if (token is null)
-            {
-                return NotFound($@"Email Registration Token ""{payload.Token}"" Was Not Found");
-            }
-
-            IActionResult result = EmailAddressHelpers.SanitizeEmailAddress(token.EmailAddress);
-
-            if (result is not ContentResult contentResult) return result;
-
-            if (contentResult.Content is null)
-            {
-                Logger.LogError($@"[BUG] Sanitized Email Address ""{token.EmailAddress}"" Is NULL");
-
-                return UnprocessableEntity($@"Unable To Process Email Address ""{token.EmailAddress}""");
-            }
-
-            string sanitizedEmailAddress = contentResult.Content;
-
-            if (await MerrickContext.Users.Where(user => user.SanitizedEmailAddress.Equals(sanitizedEmailAddress)).AnyAsync())
-            {
-                return Conflict($@"User With Email ""{token.EmailAddress}"" Already Exists");
-            }
-
-            if (await MerrickContext.Accounts.Where(account => account.Name.Equals(payload.Name)).AnyAsync())
-            {
-                return Conflict($@"Account With Name ""{payload.Name}"" Already Exists");
-            }
-
-            string salt = SRPRegistrationHandlers.GeneratePasswordSRPSalt(); // TODO: Maybe Put This In The Constructor
-
-            User user = new()
-            {
-                Name = payload.Name,
-                EmailAddress = token.EmailAddress,
-                SanitizedEmailAddress = sanitizedEmailAddress,
-                SRPSalt = SRPRegistrationHandlers.GeneratePasswordSalt(),
-                SRPPasswordSalt = salt,
-                SRPPasswordHash = SRPRegistrationHandlers.HashAccountPassword(payload.Password, salt),
-            };
-
-            IdentityResult attempt = await UserManager.CreateAsync(user, payload.Password);
-
-            if (attempt.Errors.Any())
-            {
-                string errors = string.Join("; ", attempt.Errors.Select(error => error.Description));
-
-                Logger.LogError($@"[BUG] Unable To Create Identity For User Name ""{payload.Name}"": {errors}");
-
-                return UnprocessableEntity($@"Unable To Create Identity For User Name ""{payload.Name}""");
-            }
-
-            await UserManager.AddToRoleAsync(user, UserRoles.User);
-
-            DateTime now = DateTime.UtcNow;
-
-            Account account = new()
-            {
-                Name = payload.Name,
-                User = user
-            };
-
-            user.Accounts.Add(account);
-
-            MerrickContext.Tokens.Remove(token);
-
-            await MerrickContext.SaveChangesAsync();
-
-            await transaction.CommitAsync();
-
-            await EmailService.SendEmailAddressRegistrationConfirmation(user.EmailAddress, account.Name);
-
-            return CreatedAtAction(nameof(GetUser), new { id = user.Id },
-                new { Id = user.Id, Name = user.Name, EmailAddress = user.EmailAddress, Accounts = user.Accounts.Select(record => record.Id).ToList() });
+            return NotFound($@"Email Registration Token ""{payload.Token}"" Was Not Found");
         }
 
-        catch (Exception exception)
+        IActionResult result = EmailAddressHelpers.SanitizeEmailAddress(token.EmailAddress);
+
+        if (result is not ContentResult contentResult)
         {
-            Logger.LogError(exception, $@"Unable To Create User And Account For Name ""{payload.Name}""");
-
-            await transaction.RollbackAsync();
-
-            return StatusCode(StatusCodes.Status500InternalServerError, exception.Message);
+            return result;
         }
+
+        if (contentResult.Content is null)
+        {
+            Logger.LogError($@"[BUG] Sanitized Email Address ""{token.EmailAddress}"" Is NULL");
+
+            return UnprocessableEntity($@"Unable To Process Email Address ""{token.EmailAddress}""");
+        }
+
+        string sanitizedEmailAddress = contentResult.Content;
+
+        if (await MerrickContext.Users.Where(user => user.SanitizedEmailAddress.Equals(sanitizedEmailAddress)).AnyAsync())
+        {
+            return Conflict($@"User With Email ""{token.EmailAddress}"" Already Exists");
+        }
+
+        if (await MerrickContext.Accounts.Where(account => account.Name.Equals(payload.Name)).AnyAsync())
+        {
+            return Conflict($@"Account With Name ""{payload.Name}"" Already Exists");
+        }
+
+        string salt = SRPRegistrationHandlers.GeneratePasswordSRPSalt(); // TODO: Maybe Put This In The Constructor
+
+        User user = new()
+        {
+            Name = payload.Name,
+            EmailAddress = token.EmailAddress,
+            SanitizedEmailAddress = sanitizedEmailAddress,
+            SRPSalt = SRPRegistrationHandlers.GeneratePasswordSalt(),
+            SRPPasswordSalt = salt,
+            SRPPasswordHash = SRPRegistrationHandlers.HashAccountPassword(payload.Password, salt),
+
+            // TODO: Resolve This Duplication (Try Not Using Identity At All)
+
+            UserName = payload.Name
+        };
+
+        IdentityResult attempt = await UserManager.CreateAsync(user, payload.Password);
+
+        if (attempt.Errors.Any())
+        {
+            string errors = string.Join("; ", attempt.Errors.Select(error => error.Description));
+
+            Logger.LogError($@"[BUG] Unable To Create Identity For User Name ""{payload.Name}"": {errors}");
+
+            return UnprocessableEntity($@"Unable To Create Identity For User Name ""{payload.Name}""");
+        }
+
+        await UserManager.AddToRoleAsync(user, UserRoles.User);
+
+        DateTime now = DateTime.UtcNow;
+
+        Account account = new()
+        {
+            Name = payload.Name,
+            User = user
+        };
+
+        user.Accounts.Add(account);
+
+        MerrickContext.Tokens.Remove(token);
+
+        await MerrickContext.SaveChangesAsync();
+
+        await EmailService.SendEmailAddressRegistrationConfirmation(user.EmailAddress, account.Name);
+
+        return CreatedAtAction(nameof(GetUser), new { id = user.Id },
+            new { Id = user.Id, Name = user.Name, EmailAddress = user.EmailAddress, Accounts = user.Accounts.Select(record => record.Id).ToList() });
     }
 
     [HttpGet("{id}", Name = "Get User")]

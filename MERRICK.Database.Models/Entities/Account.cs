@@ -4,7 +4,7 @@
 public class Account
 {
     [Key]
-    public virtual Guid Id { get; set; }
+    public Guid Id { get; set; }
 
     [StringLength(15)]
     public required string Name { get; set; }
@@ -23,15 +23,15 @@ public class Account
 
     public DateTime TimestampLastActive { get; set; } = DateTime.UtcNow;
 
-    public HashSet<string> SelectedStoreItems { get; set; } = ["ai.Default Icon", "cc.white", "t.Standard"];
+    public List<string> SelectedStoreItems { get; set; } = ["ai.Default Icon", "cc.white", "t.Standard"];
 
-    public HashSet<string> IPAddressCollection { get; set; } = [];
+    public List<string> IPAddressCollection { get; set; } = [];
 
-    public HashSet<string> HardwareIdCollection { get; set; } = [];
+    public List<string> HardwareIdCollection { get; set; } = [];
 
-    public HashSet<string> MACAddressCollection { get; set; } = [];
+    public List<string> MACAddressCollection { get; set; } = [];
 
-    public HashSet<string> SystemInformationCollection { get; set; } = [];
+    public List<string> SystemInformationCollection { get; set; } = [];
 
     [NotMapped]
     public bool IsMain => Name == User.Name;

@@ -21,7 +21,7 @@ public class User : IdentityUser<Guid>
     [StringLength(64)]
     public required string SRPPasswordHash { get; set; } // TODO: Maybe Just Rename This To PasswordSRPHash ?
 
-    public HashSet<Account> Accounts { get; set; } = [];
+    public List<Account> Accounts { get; set; } = [];
 
     public int GoldCoins { get; set; } = 0;
 
@@ -33,5 +33,5 @@ public class User : IdentityUser<Guid>
 
     public int TotalExperience { get; set; } = 0;
 
-    public HashSet<string> OwnedStoreItems { get; set; } = ["ai.Default Icon", "cc.white", "t.Standard"];
+    public List<string> OwnedStoreItems { get; set; } = ["ai.Default Icon", "cc.white", "t.Standard"];
 }
