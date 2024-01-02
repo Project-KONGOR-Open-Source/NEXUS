@@ -1,4 +1,4 @@
-﻿namespace MERRICK.Database.Models.Context;
+﻿namespace MERRICK.Database.Context;
 
 public sealed class MerrickContext : DbContext
 {

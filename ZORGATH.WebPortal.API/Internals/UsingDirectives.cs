@@ -1,6 +1,6 @@
-﻿global using MERRICK.Database.Models.Constants;
-global using MERRICK.Database.Models.Context;
-global using MERRICK.Database.Models.Entities;
+﻿global using MERRICK.Database.Constants;
+global using MERRICK.Database.Context;
+global using MERRICK.Database.Entities;
 
 global using Microsoft.AspNetCore.Authentication.JwtBearer;
 global using Microsoft.AspNetCore.Authorization;

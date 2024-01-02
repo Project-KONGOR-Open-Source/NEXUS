@@ -18,7 +18,6 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\ASPIRE.ServiceDefaults\ASPIRE.ServiceDefaults.csproj" />
-		<ProjectReference Include="..\MERRICK.Database.Models\MERRICK.Database.Models.csproj" />
 	</ItemGroup>
 
 </Project>

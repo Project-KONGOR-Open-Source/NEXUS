@@ -1,9 +1,9 @@
 ﻿global using KONGOR.MasterServer.Extensions;
 global using KONGOR.MasterServer.RequestResponseModels.SRP;
 
-global using MERRICK.Database.Models.Context;
-global using MERRICK.Database.Models.Entities;
-global using MERRICK.Database.Models.Enumerations;
+global using MERRICK.Database.Context;
+global using MERRICK.Database.Entities;
+global using MERRICK.Database.Enumerations;
 
 global using Microsoft.AspNetCore.Mvc;
 global using Microsoft.EntityFrameworkCore;

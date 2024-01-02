@@ -1,4 +1,4 @@
-﻿namespace MERRICK.Database.Models.Entities;
+﻿namespace MERRICK.Database.Entities;
 
 public class Token
 {

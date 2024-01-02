@@ -14,9 +14,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ZORGATH.WebPortal.API", "ZO
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DAWNBRINGER.WebPortal.UI", "DAWNBRINGER.WebPortal.UI\DAWNBRINGER.WebPortal.UI.csproj", "{02A07C7E-2B96-47B1-B19A-208E01C69914}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MERRICK.Database.Manager", "MERRICK.Database.Manager\MERRICK.Database.Manager.csproj", "{6D518B3D-B55C-493F-83AE-A75F79D15ED1}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MERRICK.Database.Models", "MERRICK.Database.Models\MERRICK.Database.Models.csproj", "{4435D52D-D067-4660-81D5-C36298331C7A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MERRICK.Database", "MERRICK.Database\MERRICK.Database.csproj", "{6D518B3D-B55C-493F-83AE-A75F79D15ED1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -52,10 +50,6 @@ Global
 		{6D518B3D-B55C-493F-83AE-A75F79D15ED1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6D518B3D-B55C-493F-83AE-A75F79D15ED1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6D518B3D-B55C-493F-83AE-A75F79D15ED1}.Release|Any CPU.Build.0 = Release|Any CPU
-		{4435D52D-D067-4660-81D5-C36298331C7A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{4435D52D-D067-4660-81D5-C36298331C7A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{4435D52D-D067-4660-81D5-C36298331C7A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{4435D52D-D067-4660-81D5-C36298331C7A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

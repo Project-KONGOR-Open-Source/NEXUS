@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
 
-namespace MERRICK.Database.Manager.Migrations
+namespace MERRICK.Database.Migrations
 {
     /// <inheritdoc />
     public partial class CreateInitialEntities : Migration
@@ -124,8 +124,8 @@ namespace MERRICK.Database.Manager.Migrations
                 columns: new[] { "ID", "Name" },
                 values: new object[,]
                 {
-                    { new Guid("00000000-0000-0000-0000-000036dd4275"), "User" },
-                    { new Guid("00000000-0000-0000-0000-000065f3ae91"), "Administrator" }
+                    { new Guid("00000000-0000-0000-0000-00004128011d"), "Administrator" },
+                    { new Guid("00000000-0000-0000-0000-0000e9cfab08"), "User" }
                 });
 
             migrationBuilder.CreateIndex(

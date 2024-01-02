@@ -1,4 +1,4 @@
-﻿namespace MERRICK.Database.Manager.Services;
+﻿namespace MERRICK.Database.Services;
 
 internal class DatabaseInitializer(IServiceProvider serviceProvider, ILogger<DatabaseInitializer> logger) : BackgroundService
 {

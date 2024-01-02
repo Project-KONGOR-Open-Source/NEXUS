@@ -1,4 +1,4 @@
-﻿namespace MERRICK.Database.Models.Enumerations;
+﻿namespace MERRICK.Database.Enumerations;
 
 public enum AccountType
 {

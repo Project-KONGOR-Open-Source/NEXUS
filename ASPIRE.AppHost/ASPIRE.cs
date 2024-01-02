@@ -6,8 +6,7 @@ internal class KONGOR
     {
         IDistributedApplicationBuilder builder = DistributedApplication.CreateBuilder(args);
 
-        IResourceBuilder<ProjectResource> database = builder.AddProject<MERRICK_Database_Manager>("MERRICK Database");
-
+        IResourceBuilder<ProjectResource> database = builder.AddProject<MERRICK_Database>("MERRICK Database");
         IResourceBuilder<RedisContainerResource> cache = builder.AddRedisContainer("REDIS Cache");
 
         builder.AddProject<KONGOR_MasterServer>("KONGOR Master Server").WithReference(database);

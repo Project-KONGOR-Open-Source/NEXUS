@@ -1,4 +1,4 @@
-﻿namespace MERRICK.Database.Models.Constants;
+﻿namespace MERRICK.Database.Constants;
 
 public static class UserRoles
 {

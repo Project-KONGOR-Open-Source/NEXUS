@@ -45,12 +45,6 @@ internal class ZORGATH
         // Add Server-Sided Cache
         builder.Services.AddOutputCache(); // TODO: Use Redis
 
-        // Add Identity 
-        builder.Services.AddIdentityCore<User>()
-            .AddRoles<Role>()
-            .AddEntityFrameworkStores<MerrickContext>()
-            .AddDefaultTokenProviders();
-
         if (builder.Environment.IsDevelopment())
         {
             builder.Services.Configure<IdentityOptions>(options =>

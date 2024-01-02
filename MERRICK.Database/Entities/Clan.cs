@@ -1,4 +1,4 @@
-﻿namespace MERRICK.Database.Models.Entities;
+﻿namespace MERRICK.Database.Entities;
 
 [Index(nameof(Name), nameof(Tag), IsUnique = true)]
 public class Clan
