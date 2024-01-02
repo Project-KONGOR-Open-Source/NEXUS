@@ -90,4 +90,6 @@ public class SRPAuthenticationSessionData
     ///     Returns the verifier derived from the client's private key.
     /// </summary>
     public string Verifier { get; init; }
+
+    // TODO: Review "required" Usage ... Maybe Add Constructor And Patch Method
 }

@@ -4,13 +4,13 @@
 public class Clan
 {
     [Key]
-    public Guid Id { get; set; }
+    public virtual Guid Id { get; set; }
 
     [StringLength(20)]
-    public required string Name { get; set; } = null!;
+    public required string Name { get; set; }
 
     [StringLength(3)]
-    public required string Tag { get; set; } = null!;
+    public required string Tag { get; set; }
 
     public HashSet<Account> Members { get; set; } = [];
 

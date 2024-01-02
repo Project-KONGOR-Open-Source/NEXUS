@@ -4,16 +4,16 @@
 public class Account
 {
     [Key]
-    public Guid Id { get; set; }
+    public virtual Guid Id { get; set; }
 
     [StringLength(15)]
-    public required string Name { get; set; } = null!;
+    public required string Name { get; set; }
 
-    public required User User { get; set; } = null!;
+    public required User User { get; set; }
 
     public AccountType AccountType { get; set; } = AccountType.Legacy;
 
-    public Clan? Clan { get; set; } = null;
+    public Clan? Clan { get; set; }
 
     public ClanTier ClanTier { get; set; } = ClanTier.None;
 

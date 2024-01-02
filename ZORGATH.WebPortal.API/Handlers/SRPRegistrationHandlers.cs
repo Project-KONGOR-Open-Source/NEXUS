@@ -1,6 +1,6 @@
-﻿namespace ZORGATH.WebPortal.API.Helpers;
+﻿namespace ZORGATH.WebPortal.API.Handlers;
 
-internal static class SRPRegistrationHelpers
+internal static class SRPRegistrationHandlers
 {
     # region Secure Remote Password Magic Strings
 
@@ -46,5 +46,5 @@ internal static class SRPRegistrationHelpers
     ///     The value 22 is for the purpose of consistency with the original HoN salt length.
     /// </summary>
     internal static string GeneratePasswordSRPSalt()
-        => SrpInteger.RandomInteger(22/ 2 /* Divide By 2 Because There Are 2 Hexadecimal Digits Per Byte */).ToHex();
+        => SrpInteger.RandomInteger(22 / 2 /* Divide By 2 Because There Are 2 Hexadecimal Digits Per Byte */).ToHex();
 }

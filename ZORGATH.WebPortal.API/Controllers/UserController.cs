@@ -11,6 +11,8 @@ public class UserController(MerrickContext databaseContext, UserManager<User> us
     private IEmailService EmailService { get; init; } = emailService;
     private ILogger Logger { get; init; } = logger;
 
+    // TODO: Map All Request/Response Data To Contracts
+
     [HttpPost("Register", Name = "Register User And Main Account")]
     public async Task<IActionResult> RegisterUserAndMainAccount([FromBody] RegisterUserAndMainAccountDTO payload)
     {
@@ -51,16 +53,16 @@ public class UserController(MerrickContext databaseContext, UserManager<User> us
                 return Conflict($@"Account With Name ""{payload.Name}"" Already Exists");
             }
 
-            string salt = SRPRegistrationHelpers.GeneratePasswordSRPSalt(); // TODO: Maybe Put This In The Constructor
+            string salt = SRPRegistrationHandlers.GeneratePasswordSRPSalt(); // TODO: Maybe Put This In The Constructor
 
             User user = new()
             {
                 Name = payload.Name,
                 EmailAddress = token.EmailAddress,
                 SanitisedEmailAddress = sanitisedEmailAddress,
-                SRPSalt = SRPRegistrationHelpers.GeneratePasswordSalt(),
+                SRPSalt = SRPRegistrationHandlers.GeneratePasswordSalt(),
                 SRPPasswordSalt = salt,
-                SRPPasswordHash = SRPRegistrationHelpers.HashAccountPassword(payload.Password, salt),
+                SRPPasswordHash = SRPRegistrationHandlers.HashAccountPassword(payload.Password, salt),
             };
 
             IdentityResult attempt = await UserManager.CreateAsync(user, payload.Password);

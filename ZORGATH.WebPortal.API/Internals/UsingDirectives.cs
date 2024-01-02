@@ -14,6 +14,7 @@ global using System.Text;
 global using System.Text.RegularExpressions;
 
 global using ZORGATH.WebPortal.API.Constants;
-global using ZORGATH.WebPortal.API.DTOs;
+global using ZORGATH.WebPortal.API.Contracts;
+global using ZORGATH.WebPortal.API.Handlers;
 global using ZORGATH.WebPortal.API.Helpers;
 global using ZORGATH.WebPortal.API.Services.Email;
