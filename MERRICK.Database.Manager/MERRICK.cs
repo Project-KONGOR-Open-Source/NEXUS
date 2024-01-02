@@ -10,17 +10,12 @@ internal class MERRICK
         // Add Aspire Service Defaults
         builder.AddServiceDefaults();
 
-        // Get The Database Connection String
-        string connectionString = builder.Configuration.GetConnectionString("MERRICK") ?? throw new NullReferenceException("MERRICK Connection String Is NULL");
-
         // Add The Database Context
-        builder.Services.AddDbContext<MerrickContext>(options =>
+        builder.AddSqlServerDbContext<MerrickContext>("MERRICK", configureSettings: null, configureDbContextOptions: options =>
         {
-            // Set The Database Connection Options
-            options.UseSqlServer(connectionString, connection => connection.MigrationsAssembly(typeof(MERRICK).Assembly.GetName().Name));
-
-            // Enable Comprehensive Database Query Logging
+            options.EnableDetailedErrors(builder.Environment.IsDevelopment());
             options.EnableSensitiveDataLogging(builder.Environment.IsDevelopment());
+            options.EnableThreadSafetyChecks();
         });
 
         // TODO: Document The Services Below

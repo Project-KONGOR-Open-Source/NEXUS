@@ -14,13 +14,11 @@ internal class KONGOR
         builder.AddServiceDefaults();
 
         // Add The Database Context
-        builder.Services.AddDbContext<MerrickContext>(options =>
+        builder.AddSqlServerDbContext<MerrickContext>("MERRICK", configureSettings: null, configureDbContextOptions: options =>
         {
-            // Set The Database Connection Options
-            options.UseSqlServer("MERRICK Database", connection => connection.MigrationsAssembly("MERRICK.Database.Manager"));
-
-            // Enable Comprehensive Database Query Logging
+            options.EnableDetailedErrors(builder.Environment.IsDevelopment());
             options.EnableSensitiveDataLogging(builder.Environment.IsDevelopment());
+            options.EnableThreadSafetyChecks();
         });
 
         // Add Memory Cache

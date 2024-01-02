@@ -3,7 +3,7 @@
 [ApiController]
 [Route("[controller]")]
 [Consumes("application/json")]
-public class UserController(MerrickContext databaseContext, UserManager<User> userManager, IConfiguration configuration, IEmailService emailService, ILogger logger) : ControllerBase
+public class UserController(MerrickContext databaseContext, UserManager<User> userManager, IConfiguration configuration, IEmailService emailService, ILogger<UserController> logger) : ControllerBase
 {
     private MerrickContext MerrickContext { get; init; } = databaseContext;
     private UserManager<User> UserManager { get; init; } = userManager;
