@@ -4,7 +4,7 @@
         "ZORGATH.WebPortal.API Development": {
             "commandName": "Project",
             "launchBrowser": true,
-            "applicationUrl": "http://localhost:55507;https://localhost:55508",
+            "applicationUrl": "http://localhost:55509;https://localhost:55510",
             "launchUrl": "swagger",
             "environmentVariables": {
                 "ASPNETCORE_ENVIRONMENT": "Development",

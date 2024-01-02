@@ -12,7 +12,7 @@ public class Clan
     [StringLength(3)]
     public required string Tag { get; set; } = null!;
 
-    public List<Account> Members { get; set; } = [];
+    public HashSet<Account> Members { get; set; } = [];
 
     public DateTime TimestampCreated { get; set; } = DateTime.UtcNow;
 }

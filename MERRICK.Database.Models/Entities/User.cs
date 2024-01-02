@@ -13,15 +13,15 @@ public class User : IdentityUser<Guid>
     public required string SanitisedEmailAddress { get; set; } = null!;
 
     [StringLength(512)]
-    public required string SRPSalt { get; set; } = null!;
+    public required string SRPSalt { get; set; } = null!; // TODO: Maybe Just Rename This To PasswordSalt ?
 
     [StringLength(22)]
-    public required string SRPPasswordSalt { get; set; } = null!;
+    public required string SRPPasswordSalt { get; set; } = null!; // TODO: Maybe Just Rename This To PasswordSRPSalt ? Is This Even Needed ?
 
     [StringLength(64)]
-    public required string SRPPasswordHash { get; set; } = null!;
+    public required string SRPPasswordHash { get; set; } = null!; // TODO: Maybe Just Rename This To PasswordSRPHash ?
 
-    public List<Account> Accounts { get; set; } = [];
+    public HashSet<Account> Accounts { get; set; } = [];
 
     public int GoldCoins { get; set; } = 0;
 
@@ -33,5 +33,5 @@ public class User : IdentityUser<Guid>
 
     public int TotalExperience { get; set; } = 0;
 
-    public List<string> OwnedStoreItems { get; set; } = [];
+    public HashSet<string> OwnedStoreItems { get; set; } = ["ai.Default Icon", "cc.white", "t.Standard"];
 }

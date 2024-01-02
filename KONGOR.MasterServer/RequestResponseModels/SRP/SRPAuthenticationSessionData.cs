@@ -42,11 +42,6 @@ public class SRPAuthenticationSessionData
     # endregion
 
     /// <summary>
-    ///     The expected length of the salt (and also the length of "B", the ephemeral key of the server).
-    /// </summary>
-    public const int SaltLength = 256;
-
-    /// <summary>
     ///     A : the public ephemeral key sent by the client
     /// </summary>
     public required string ClientPublicEphemeral { get; init; }
