@@ -100,6 +100,15 @@ public class UserController(MerrickContext databaseContext, ILogger<UserControll
         if (result is not PasswordVerificationResult.Success)
             return Unauthorized("Invalid User Name And/Or Password");
 
+        if (new[] { UserRoles.Administrator, UserRoles.User }.Contains(user.Role.Name).Equals(false))
+        {
+            Logger.LogError($@"[BUG] Unknown User Role ""{user.Role.Name}""");
+
+            return UnprocessableEntity($@"Unknown User Role ""{user.Role.Name}""");
+        }
+
+        IEnumerable<Claim> userRoleClaims = user.Role.Name is UserRoles.Administrator ? UserRoleClaims.Administrator : UserRoleClaims.User;
+
         IEnumerable<Claim> openIDClaims = new List<Claim>
         {
             # region JWT Claims Documentation
@@ -109,33 +118,24 @@ public class UserController(MerrickContext databaseContext, ILogger<UserControll
             // RFC7519: https://www.rfc-editor.org/rfc/rfc7519.html#section-4
             # endregion
 
-            new(JwtRegisteredClaimNames.Sub, account.Name),
-            new(JwtRegisteredClaimNames.Iat, DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString()),
-            new(JwtRegisteredClaimNames.AuthTime, DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString()),
-            new(JwtRegisteredClaimNames.Nonce, Guid.NewGuid().ToString()),
-            new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-            new(JwtRegisteredClaimNames.Email, user.EmailAddress)
+            new(JwtRegisteredClaimNames.Sub, account.Name, ClaimValueTypes.String),
+            new(JwtRegisteredClaimNames.Iat, DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64),
+            new(JwtRegisteredClaimNames.AuthTime, DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64),
+            new(JwtRegisteredClaimNames.Nonce, Guid.NewGuid().ToString(), ClaimValueTypes.String),
+            new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString(), ClaimValueTypes.String),
+            new(JwtRegisteredClaimNames.Email, user.EmailAddress, ClaimValueTypes.Email)
         };
 
         IEnumerable<Claim> customClaims = new List<Claim>
         {
-            new("UserID", user.ID.ToString()),
-            new("AccountID", account.ID.ToString()),
-            new("ClanName", account.Clan?.Name ?? string.Empty),
-            new("ClanTag", account.Clan?.Tag ?? string.Empty),
-            new("MainAccount", account.IsMain.ToString())
+            new("user_id", user.ID.ToString(), ClaimValueTypes.String),
+            new("account_id", account.ID.ToString(), ClaimValueTypes.String),
+            new("clan_name", account.Clan?.Name ?? string.Empty, ClaimValueTypes.String),
+            new("clan_tag", account.Clan?.Tag ?? string.Empty, ClaimValueTypes.String),
+            new("is_main_account", account.IsMain.ToString(), ClaimValueTypes.Boolean)
         };
 
-        if (new[] {UserRoles.Administrator, UserRoles.User}.Contains(user.Role.Name).Equals(false))
-        {
-            Logger.LogError($@"[BUG] Unknown User Role ""{user.Role.Name}""");
-
-            return UnprocessableEntity($@"Unknown User Role ""{user.Role.Name}""");
-        }
-
-        IEnumerable<Claim> userRoleClaims = user.Role.Name is UserRoles.Administrator ? UserRoleClaims.Administrator : UserRoleClaims.User;
-
-        IEnumerable<Claim> allTokenClaims = Enumerable.Empty<Claim>().Union(openIDClaims).Union(customClaims).Union(userRoleClaims);
+        IEnumerable<Claim> allTokenClaims = Enumerable.Empty<Claim>().Union(userRoleClaims).Union(openIDClaims).Union(customClaims).OrderBy(claim => claim.Type);
 
         JwtSecurityToken token = new
         (
@@ -143,10 +143,14 @@ public class UserController(MerrickContext databaseContext, ILogger<UserControll
             audience: "TODO: Get The DAWNBRINGER.WebPortal.UI URL From Configuration Or Request Data",
             claims: allTokenClaims,
             expires: DateTime.UtcNow.AddHours(24), // TODO: Make Configurable
-            signingCredentials: new SigningCredentials(new SymmetricSecurityKey(Encoding.UTF8.GetBytes(/* Configuration["JWT:SigningKey"] // TODO: Implement Secrets Vault */"MY-SUPER-SECRET-KEY")), SecurityAlgorithms.HmacSha256)
+            signingCredentials: new SigningCredentials(new SymmetricSecurityKey(Encoding.UTF8.GetBytes( /* Configuration["JWT:SigningKey"] // TODO: Implement Secrets Vault */"MY-SUPER-DUPER-SECRET-SIGNING-KEY-1234567890-!?")), SecurityAlgorithms.HmacSha256)
         );
 
-        return Ok(new GetAuthenticationTokenDTO(user.ID, token));
+        const string schema = "bearer";
+
+        string jwt = new JwtSecurityTokenHandler().WriteToken(token);
+
+        return Ok(new GetAuthenticationTokenDTO(user.ID, schema, jwt));
     }
 
     [HttpGet("{id}", Name = "Get User")]

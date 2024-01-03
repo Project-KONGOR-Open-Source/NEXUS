@@ -2,6 +2,6 @@
 
 public static class UserRoleClaims
 {
-    public static readonly List<Claim> Administrator = [new Claim("UserRole", UserRoles.Administrator)];
-    public static readonly List<Claim> User = [new Claim("UserRole", UserRoles.User)];
+    public static readonly List<Claim> Administrator = [new Claim("user_role", UserRoles.Administrator, ClaimValueTypes.String)];
+    public static readonly List<Claim> User = [new Claim("user_role", UserRoles.User, ClaimValueTypes.String)];
 }
