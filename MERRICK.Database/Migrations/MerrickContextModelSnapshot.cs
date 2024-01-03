@@ -193,6 +193,11 @@ namespace MERRICK.Database.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("PBKDF2PasswordHash")
+                        .IsRequired()
+                        .HasMaxLength(84)
+                        .HasColumnType("nvarchar(84)");
+
                     b.Property<int>("PlinkoTickets")
                         .HasColumnType("int");
 

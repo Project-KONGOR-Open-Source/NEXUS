@@ -65,6 +65,7 @@ namespace MERRICK.Database.Migrations
                     SRPSalt = table.Column<string>(type: "nvarchar(512)", maxLength: 512, nullable: false),
                     SRPPasswordSalt = table.Column<string>(type: "nvarchar(22)", maxLength: 22, nullable: false),
                     SRPPasswordHash = table.Column<string>(type: "nvarchar(64)", maxLength: 64, nullable: false),
+                    PBKDF2PasswordHash = table.Column<string>(type: "nvarchar(84)", maxLength: 84, nullable: false),
                     GoldCoins = table.Column<int>(type: "int", nullable: false),
                     SilverCoins = table.Column<int>(type: "int", nullable: false),
                     PlinkoTickets = table.Column<int>(type: "int", nullable: false),

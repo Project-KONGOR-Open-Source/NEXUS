@@ -20,6 +20,9 @@ public class User
     [StringLength(64)]
     public required string SRPPasswordHash { get; set; } // TODO: Maybe Just Rename This To PasswordSRPHash ?
 
+    [StringLength(84)]
+    public string PBKDF2PasswordHash { get; set; } = null!;
+
     public List<Account> Accounts { get; set; } = [];
 
     public int GoldCoins { get; set; } = 0;

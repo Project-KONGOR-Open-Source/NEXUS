@@ -57,6 +57,8 @@ public class UserController(MerrickContext databaseContext, ILogger<UserControll
             SRPPasswordHash = SRPRegistrationHandlers.HashAccountPassword(payload.Password, salt)
         };
 
+        user.PBKDF2PasswordHash = new PasswordHasher<User>().HashPassword(user, payload.Password);
+
         await MerrickContext.Users.AddAsync(user);
 
         Account account = new()
@@ -76,6 +78,64 @@ public class UserController(MerrickContext databaseContext, ILogger<UserControll
 
         return CreatedAtAction(nameof(GetUser), new { id = user.ID },
             new GetBasicUserDTO(user.ID, user.EmailAddress, [new GetBasicAccountDTO(account.ID, account.Name)]));
+    }
+
+    [HttpPost("LogIn", Name = "Log In User")]
+    [AllowAnonymous]
+    // TODO: Add Responses
+    public async Task<IActionResult> LogInUser([FromBody] LogInUserDTO payload)
+    {
+        Account? account = await MerrickContext.Accounts
+            .Include(account => account.User)
+            .Include(account => account.Clan)
+            .SingleOrDefaultAsync(account => account.Name.Equals(payload.Name));
+
+        if (account is null)
+            return NotFound($@"Account ""{payload.Name}"" Was Not Found");
+
+        User user = account.User;
+
+        PasswordVerificationResult result = new PasswordHasher<User>().VerifyHashedPassword(user, user.PBKDF2PasswordHash, payload.Password);
+
+        if (result is not PasswordVerificationResult.Success)
+            return Unauthorized("Invalid User Name And/Or Password");
+
+        return Ok();
+
+        //bool passwordIsValid = await UserManager.CheckPasswordAsync(identity, payload.Password);
+
+        //if (passwordIsValid.Equals(false)) return Unauthorized(@"Invalid User Name And/Or Password");
+
+        //SymmetricSecurityKey signingKey = new(Encoding.UTF8.GetBytes(Configuration["JWT:SigningKey"]));
+        //SigningCredentials signingCredentials = new(signingKey, SecurityAlgorithms.HmacSha256);
+
+        //IEnumerable<string>? roles = await UserManager.GetRolesAsync(identity);
+
+        //if (roles.Count() == 0) return NotFound($@"Role for ""{payload.Name}"" Was Not Found");
+
+        //IEnumerable<Claim> roleClaims = roles.Select(role => new Claim(ClaimTypes.Role, role));
+        //IEnumerable<Claim>? userClaims = await UserManager.GetClaimsAsync(identity);
+
+        //IEnumerable<Claim> claims = new List<Claim>
+        //{
+        //    new(JwtRegisteredClaimNames.Sub, account.Name),
+        //    new("ClanName", account.Clan?.Name ?? string.Empty),
+        //    new("ClanTag", account.Clan?.Tag ?? string.Empty),
+        //    new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+        //    new(JwtRegisteredClaimNames.Email, identity.Email),
+        //    new("uid", identity.Id)
+        //}.Union(userClaims).Union(roleClaims);
+
+        //JwtSecurityToken token = new
+        //(
+        //    Configuration["JWT:Issuer"],
+        //    Configuration["JWT:Audience"],
+        //    claims,
+        //    expires: DateTime.UtcNow.AddHours(Convert.ToInt32(Configuration["JWT:DurationInHours"])),
+        //    signingCredentials: signingCredentials
+        //);
+
+        //return Ok(new Dictionary<string, object> { { "identifier", identity.Id }, { "token", new JwtSecurityTokenHandler().WriteToken(token) }, { "verified", identity.EmailConfirmed } });
     }
 
     [HttpGet("{id}", Name = "Get User")]
