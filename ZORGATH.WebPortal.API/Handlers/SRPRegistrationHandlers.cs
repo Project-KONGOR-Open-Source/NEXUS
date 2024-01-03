@@ -19,17 +19,17 @@ internal static class SRPRegistrationHandlers
     /// <summary>
     ///     Generates a 64-character long SHA256 hash of the account's password.
     /// </summary>
-    internal static string HashAccountPassword(string password, string salt)
+    internal static string HashPassword(string password, string salt)
     {
         string passwordHash = Convert.ToHexString(MD5.HashData(Encoding.UTF8.GetBytes(password))).ToLower();
 
         string magickedPasswordHash = passwordHash + salt + MagicStringOne;
 
-        string magickedPasswordHashMD5 = Convert.ToHexString(MD5.HashData(Encoding.UTF8.GetBytes(magickedPasswordHash))).ToLower();
+        string magickedPasswordHashHash = Convert.ToHexString(MD5.HashData(Encoding.UTF8.GetBytes(magickedPasswordHash))).ToLower();
 
-        string doubleMagickedPasswordHashMD5 = magickedPasswordHashMD5 + MagicStringTwo;
+        string magickedMagickedPasswordHashHash = magickedPasswordHashHash + MagicStringTwo;
 
-        return Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(doubleMagickedPasswordHashMD5))).ToLower();
+        return Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(magickedMagickedPasswordHashHash))).ToLower();
 
         // TODO: Remember Why ToLower() On All The Hashes?
     }
