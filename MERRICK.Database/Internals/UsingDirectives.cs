@@ -11,6 +11,7 @@ global using Microsoft.EntityFrameworkCore.Storage;
 global using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 global using System.Diagnostics;
+global using System.Security.Claims;
 
 global using System.ComponentModel.DataAnnotations;
 global using System.ComponentModel.DataAnnotations.Schema;

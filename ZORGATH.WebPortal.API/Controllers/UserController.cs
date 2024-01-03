@@ -39,8 +39,6 @@ public class UserController(MerrickContext databaseContext, ILogger<UserControll
             return Conflict($@"Account With Name ""{payload.Name}"" Already Exists");
         }
 
-        string salt = SRPRegistrationHandlers.GeneratePasswordSRPSalt();
-
         Role? role = await MerrickContext.Roles.SingleOrDefaultAsync(role => role.Name.Equals(UserRoles.User));
 
         if (role is null)
@@ -48,13 +46,15 @@ public class UserController(MerrickContext databaseContext, ILogger<UserControll
             return NotFound($@"User Role ""{UserRoles.User}"" Was Not Found");
         }
 
+        string salt = SRPRegistrationHandlers.GeneratePasswordSRPSalt();
+
         User user = new()
         {
             EmailAddress = sanitizedEmailAddress,
             Role = role,
             SRPSalt = SRPRegistrationHandlers.GeneratePasswordSalt(),
             SRPPasswordSalt = salt,
-            SRPPasswordHash = SRPRegistrationHandlers.HashAccountPassword(payload.Password, salt)
+            SRPPasswordHash = SRPRegistrationHandlers.HashPassword(payload.Password, salt)
         };
 
         user.PBKDF2PasswordHash = new PasswordHasher<User>().HashPassword(user, payload.Password);
@@ -86,7 +86,7 @@ public class UserController(MerrickContext databaseContext, ILogger<UserControll
     public async Task<IActionResult> LogInUser([FromBody] LogInUserDTO payload)
     {
         Account? account = await MerrickContext.Accounts
-            .Include(account => account.User)
+            .Include(account => account.User).ThenInclude(user => user.Role)
             .Include(account => account.Clan)
             .SingleOrDefaultAsync(account => account.Name.Equals(payload.Name));
 
@@ -100,42 +100,61 @@ public class UserController(MerrickContext databaseContext, ILogger<UserControll
         if (result is not PasswordVerificationResult.Success)
             return Unauthorized("Invalid User Name And/Or Password");
 
-        return Ok();
+        IEnumerable<Claim> openIDClaims = new List<Claim>
+        {
+            # region JWT Claims Documentation
+            // OpenID (This Implementation): https://openid.net/specs/openid-connect-core-1_0.html#IDToken
+            // auth0: https://auth0.com/docs/secure/tokens/json-web-tokens/json-web-token-claims
+            // Internet Assigned Numbers Authority: https://www.iana.org/assignments/jwt/jwt.xhtml
+            // RFC7519: https://www.rfc-editor.org/rfc/rfc7519.html#section-4
+            # endregion
 
-        //bool passwordIsValid = await UserManager.CheckPasswordAsync(identity, payload.Password);
+            new(JwtRegisteredClaimNames.Iss, "TODO: Get The Hosting URL From Configuration Or Request Data"),
+            new(JwtRegisteredClaimNames.Sub, account.Name),
+            new(JwtRegisteredClaimNames.Aud, $"{user.ID}:{account.ID}"),
+            new(JwtRegisteredClaimNames.Exp, Convert.ToInt64((DateTime.UtcNow.AddHours(24) - DateTime.MinValue).TotalSeconds).ToString()),
+            new(JwtRegisteredClaimNames.Iat, Convert.ToInt64((DateTime.UtcNow - DateTime.MinValue).TotalSeconds).ToString()),
+            new(JwtRegisteredClaimNames.AuthTime, Convert.ToInt64((DateTime.UtcNow - DateTime.MinValue).TotalSeconds).ToString()),
+            new(JwtRegisteredClaimNames.Nonce, Guid.NewGuid().ToString()),
+            new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+            new(JwtRegisteredClaimNames.Email, user.EmailAddress)
+        };
 
-        //if (passwordIsValid.Equals(false)) return Unauthorized(@"Invalid User Name And/Or Password");
+        IEnumerable<Claim> customClaims = new List<Claim>
+        {
+            new("UserID", user.ID.ToString()),
+            new("AccountID", account.ID.ToString()),
+            new("ClanName", account.Clan?.Name ?? string.Empty),
+            new("ClanTag", account.Clan?.Tag ?? string.Empty),
+            new("MainAccount", account.IsMain.ToString())
+        };
 
-        //SymmetricSecurityKey signingKey = new(Encoding.UTF8.GetBytes(Configuration["JWT:SigningKey"]));
-        //SigningCredentials signingCredentials = new(signingKey, SecurityAlgorithms.HmacSha256);
+        if (new[] {UserRoles.Administrator, UserRoles.User}.Contains(user.Role.Name).Equals(false))
+        {
+            Logger.LogError($@"[BUG] Unknown User Role ""{user.Role.Name}""");
 
-        //IEnumerable<string>? roles = await UserManager.GetRolesAsync(identity);
+            return UnprocessableEntity($@"Unknown User Role ""{user.Role.Name}""");
+        }
 
-        //if (roles.Count() == 0) return NotFound($@"Role for ""{payload.Name}"" Was Not Found");
+        IEnumerable<Claim> userRoleClaims = user.Role.Name is UserRoles.Administrator ? UserRoleClaims.Administrator : UserRoleClaims.User;
 
-        //IEnumerable<Claim> roleClaims = roles.Select(role => new Claim(ClaimTypes.Role, role));
-        //IEnumerable<Claim>? userClaims = await UserManager.GetClaimsAsync(identity);
+        IEnumerable<Claim> claim = Enumerable.Empty<Claim>().Union(openIDClaims).Union(customClaims).Union(userRoleClaims);
 
-        //IEnumerable<Claim> claims = new List<Claim>
-        //{
-        //    new(JwtRegisteredClaimNames.Sub, account.Name),
-        //    new("ClanName", account.Clan?.Name ?? string.Empty),
-        //    new("ClanTag", account.Clan?.Tag ?? string.Empty),
-        //    new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-        //    new(JwtRegisteredClaimNames.Email, identity.Email),
-        //    new("uid", identity.Id)
-        //}.Union(userClaims).Union(roleClaims);
+        // TODO: Implement Secrets Vault
 
-        //JwtSecurityToken token = new
-        //(
-        //    Configuration["JWT:Issuer"],
-        //    Configuration["JWT:Audience"],
-        //    claims,
-        //    expires: DateTime.UtcNow.AddHours(Convert.ToInt32(Configuration["JWT:DurationInHours"])),
-        //    signingCredentials: signingCredentials
-        //);
+        SymmetricSecurityKey signingKey = new(Encoding.UTF8.GetBytes(/*Configuration["JWT:SigningKey"]*/"MY-SUPER-SECRET-KEY"));
+        SigningCredentials signingCredentials = new(signingKey, SecurityAlgorithms.HmacSha256);
 
-        //return Ok(new Dictionary<string, object> { { "identifier", identity.Id }, { "token", new JwtSecurityTokenHandler().WriteToken(token) }, { "verified", identity.EmailConfirmed } });
+        JwtSecurityToken token = new
+        (
+            Configuration["JWT:Issuer"],
+            Configuration["JWT:Audience"],
+            claims,
+            expires: DateTime.UtcNow.AddHours(Convert.ToInt32(Configuration["JWT:DurationInHours"])),
+            signingCredentials: signingCredentials
+        );
+
+        return Ok(new Dictionary<string, object> { { "identifier", identity.Id }, { "token", new JwtSecurityTokenHandler().WriteToken(token) }, { "verified", identity.EmailConfirmed } });
     }
 
     [HttpGet("{id}", Name = "Get User")]
