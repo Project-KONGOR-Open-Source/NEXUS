@@ -3,10 +3,11 @@
 [ApiController]
 [Route("[controller]")]
 [Consumes("application/json")]
-public class UserController(MerrickContext databaseContext, ILogger<UserController> logger, IEmailService emailService) : ControllerBase
+public class UserController(MerrickContext databaseContext, ILogger<UserController> logger, IConfiguration configuration, IEmailService emailService) : ControllerBase
 {
     private MerrickContext MerrickContext { get; init; } = databaseContext;
     private ILogger Logger { get; init; } = logger;
+    private IConfiguration Configuration { get; init; } = configuration;
     private IEmailService EmailService { get; init; } = emailService;
 
     [HttpPost("Register", Name = "Register User And Main Account")]
@@ -137,13 +138,22 @@ public class UserController(MerrickContext databaseContext, ILogger<UserControll
 
         IEnumerable<Claim> allTokenClaims = Enumerable.Empty<Claim>().Union(userRoleClaims).Union(openIDClaims).Union(customClaims).OrderBy(claim => claim.Type);
 
+        string? tokenSigningKey = Configuration["JWT:SigningKey"]; // TODO: Put The Signing Key In A Secrets Vault
+
+        if (tokenSigningKey is null)
+        {
+            Logger.LogError("[BUG] JSON Web Token Signing Key Is NULL");
+
+            return StatusCode(StatusCodes.Status500InternalServerError, "Unable To Generate Authentication Token");
+        }
+
         JwtSecurityToken token = new
         (
-            issuer: "TODO: Get The ZORGATH.WebPortal.API URL From Configuration Or Request Data",
-            audience: "TODO: Get The DAWNBRINGER.WebPortal.UI URL From Configuration Or Request Data",
+            issuer: Configuration["JWT:Issuer"],
+            audience: Configuration["JWT:Audience"],
             claims: allTokenClaims,
-            expires: DateTime.UtcNow.AddHours(24), // TODO: Make Configurable
-            signingCredentials: new SigningCredentials(new SymmetricSecurityKey(Encoding.UTF8.GetBytes( /* Configuration["JWT:SigningKey"] // TODO: Implement Secrets Vault */"MY-SUPER-DUPER-SECRET-SIGNING-KEY-1234567890-!?")), SecurityAlgorithms.HmacSha256)
+            expires: DateTime.UtcNow.AddHours(Convert.ToInt32(Configuration["JWT:DurationInHours"])),
+            signingCredentials: new SigningCredentials(new SymmetricSecurityKey(Encoding.UTF8.GetBytes(tokenSigningKey)), SecurityAlgorithms.HmacSha256)
         );
 
         const string schema = "bearer";

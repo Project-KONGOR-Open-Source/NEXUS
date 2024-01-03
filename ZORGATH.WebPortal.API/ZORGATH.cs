@@ -45,44 +45,50 @@ internal class ZORGATH
         // Add Server-Sided Cache
         builder.Services.AddOutputCache(); // TODO: Use Redis
 
-        if (builder.Environment.IsDevelopment())
-        {
-            builder.Services.Configure<IdentityOptions>(options =>
-            {
-                options.User.RequireUniqueEmail = false;
-                options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_`";
+        //if (builder.Environment.IsDevelopment())
+        //{
+        //    builder.Services.Configure<IdentityOptions>(options =>
+        //    {
+        //        options.User.RequireUniqueEmail = false;
+        //        options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_`";
 
-                options.Password.RequiredLength = 0;
-                options.Password.RequiredUniqueChars = 0;
-                options.Password.RequireNonAlphanumeric = false;
-                options.Password.RequireLowercase = false;
-                options.Password.RequireUppercase = false;
-                options.Password.RequireDigit = false;
+        //        options.Password.RequiredLength = 0;
+        //        options.Password.RequiredUniqueChars = 0;
+        //        options.Password.RequireNonAlphanumeric = false;
+        //        options.Password.RequireLowercase = false;
+        //        options.Password.RequireUppercase = false;
+        //        options.Password.RequireDigit = false;
 
-                options.Lockout.MaxFailedAccessAttempts = 5;
-                options.Lockout.DefaultLockoutTimeSpan = TimeSpan.Zero;
-            });
-        }
+        //        options.Lockout.MaxFailedAccessAttempts = 5;
+        //        options.Lockout.DefaultLockoutTimeSpan = TimeSpan.Zero;
+        //    });
+        //}
 
-        else
-        {
-            builder.Services.Configure<IdentityOptions>(options =>
-            {
-                options.User.RequireUniqueEmail = true;
-                options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_`";
+        //else
+        //{
+        //    builder.Services.Configure<IdentityOptions>(options =>
+        //    {
+        //        options.User.RequireUniqueEmail = true;
+        //        options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_`";
 
-                options.Password.RequiredLength = 8;
-                options.Password.RequiredUniqueChars = 4;
-                options.Password.RequireNonAlphanumeric = true;
-                options.Password.RequireLowercase = true;
-                options.Password.RequireUppercase = true;
-                options.Password.RequireDigit = true;
+        //        options.Password.RequiredLength = 8;
+        //        options.Password.RequiredUniqueChars = 4;
+        //        options.Password.RequireNonAlphanumeric = true;
+        //        options.Password.RequireLowercase = true;
+        //        options.Password.RequireUppercase = true;
+        //        options.Password.RequireDigit = true;
 
-                options.Lockout.MaxFailedAccessAttempts = 3;
-                options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
-            });
-        }
+        //        options.Lockout.MaxFailedAccessAttempts = 3;
+        //        options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
+        //    });
+        //}
 
+        string? tokenSigningKey = builder.Configuration["JWT:SigningKey"]; // TODO: Put The Signing Key In A Secrets Vault
+
+        if (tokenSigningKey is null)
+            throw new NullReferenceException("JSON Web Token Signing Key Is NULL");
+
+        // Add And Configure Authentication
         builder.Services.AddAuthentication(options =>
         {
             options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -92,18 +98,19 @@ internal class ZORGATH
         {
             options.TokenValidationParameters = new TokenValidationParameters
             {
-                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:SigningKey"] ?? "TODO: Add Me")), // TODO: Put The Key In A Secrets File And Move That File To A Separate Repository
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(tokenSigningKey)),
                 ValidateIssuerSigningKey = true,
-                ValidIssuer = builder.Configuration["JWT:Issuer"] ?? "TODO: Add Me",
+                ValidIssuer = builder.Configuration["JWT:Issuer"],
                 ValidateIssuer = true,
-                ValidAudience = builder.Configuration["JWT:Audience"] ?? "TODO: Add Me",
+                ValidAudience = builder.Configuration["JWT:Audience"],
                 ValidateAudience = true,
                 ClockSkew = TimeSpan.Zero,
                 ValidateLifetime = true
             };
         });
 
-        builder.Services.AddAuthorization(); // TODO: Do I Need This?
+        // Add Authorization
+        builder.Services.AddAuthorization();
 
         // Add MVC Controllers
         builder.Services.AddControllers();
