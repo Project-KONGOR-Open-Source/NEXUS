@@ -1,135 +1,117 @@
-﻿//namespace ZORGATH.WebPortal.API.Controllers;
+﻿namespace ZORGATH.WebPortal.API.Controllers;
 
-//[ApiController]
-//[Route("[controller]")]
-//[Consumes("application/json")]
-//public class UserController(MerrickContext databaseContext, UserManager<User> userManager, IConfiguration configuration, IEmailService emailService, ILogger<UserController> logger) : ControllerBase
-//{
-//    private MerrickContext MerrickContext { get; init; } = databaseContext;
-//    private UserManager<User> UserManager { get; init; } = userManager;
-//    private IConfiguration Configuration { get; init; } = configuration;
-//    private IEmailService EmailService { get; init; } = emailService;
-//    private ILogger Logger { get; init; } = logger;
+[ApiController]
+[Route("[controller]")]
+[Consumes("application/json")]
+public class UserController(MerrickContext databaseContext, ILogger<UserController> logger, IEmailService emailService) : ControllerBase
+{
+    private MerrickContext MerrickContext { get; init; } = databaseContext;
+    private ILogger Logger { get; init; } = logger;
+    private IEmailService EmailService { get; init; } = emailService;
 
-//    // TODO: Map All Request/Response Data To Contracts
-//    // TODO: [OutputCache] On Get Requests
+    [HttpPost("Register", Name = "Register User And Main Account")]
+    [AllowAnonymous]
+    [ProducesResponseType(typeof(GetBasicUserDTO), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status409Conflict)]
+    public async Task<IActionResult> RegisterUserAndMainAccount([FromBody] RegisterUserAndMainAccountDTO payload)
+    {
+        if (payload.Password.Equals(payload.ConfirmPassword).Equals(false))
+            return BadRequest($@"Password ""{payload.ConfirmPassword}"" Does Not Match ""{payload.Password}"" (These Values Are Only Visible To You)");
 
-//    [HttpPost("Register", Name = "Register User And Main Account")]
-//    [AllowAnonymous]
-//    public async Task<IActionResult> RegisterUserAndMainAccount([FromBody] RegisterUserAndMainAccountDTO payload)
-//    {
-//        if (payload.Password.Equals(payload.ConfirmPassword).Equals(false))
-//            return BadRequest($@"Password ""{payload.ConfirmPassword}"" Does Not Match ""{payload.Password}"" (These Values Are Only Visible To You)");
+        Token? token = await MerrickContext.Tokens.SingleOrDefaultAsync(token => token.ID.ToString().Equals(payload.Token) && token.Purpose.Equals(TokenPurpose.EmailAddressVerification));
 
-//        Token? token = await MerrickContext.Tokens.SingleOrDefaultAsync(token => token.ID.ToString().Equals(payload.Token) && token.Purpose.Equals(TokenPurpose.EmailAddressVerification));
+        if (token is null)
+        {
+            return NotFound($@"Email Registration Token ""{payload.Token}"" Was Not Found");
+        }
 
-//        if (token is null)
-//        {
-//            return NotFound($@"Email Registration Token ""{payload.Token}"" Was Not Found");
-//        }
+        string sanitizedEmailAddress = token.Data;
 
-//        IActionResult result = EmailAddressHelpers.SanitizeEmailAddress(token.EmailAddress);
+        if (await MerrickContext.Users.AnyAsync(user => user.EmailAddress.Equals(sanitizedEmailAddress)))
+        {
+            return Conflict($@"User With Email ""{token.EmailAddress}"" Already Exists");
+        }
 
-//        if (result is not ContentResult contentResult)
-//        {
-//            return result;
-//        }
+        if (await MerrickContext.Accounts.AnyAsync(account => account.Name.Equals(payload.Name)))
+        {
+            return Conflict($@"Account With Name ""{payload.Name}"" Already Exists");
+        }
 
-//        if (contentResult.Content is null)
-//        {
-//            Logger.LogError($@"[BUG] Sanitized Email Address ""{token.EmailAddress}"" Is NULL");
+        string salt = SRPRegistrationHandlers.GeneratePasswordSRPSalt();
 
-//            return UnprocessableEntity($@"Unable To Process Email Address ""{token.EmailAddress}""");
-//        }
+        Role? role = await MerrickContext.Roles.SingleOrDefaultAsync(role => role.Name == UserRoles.User);
 
-//        string sanitizedEmailAddress = contentResult.Content;
+        if (role is null)
+        {
+            return NotFound($@"User Role ""{UserRoles.User}"" Was Not Found");
+        }
 
-//        if (await MerrickContext.Users.Where(user => user.SanitizedEmailAddress.Equals(sanitizedEmailAddress)).AnyAsync())
-//        {
-//            return Conflict($@"User With Email ""{token.EmailAddress}"" Already Exists");
-//        }
+        User user = new()
+        {
+            EmailAddress = sanitizedEmailAddress,
+            Role = role,
+            SRPSalt = SRPRegistrationHandlers.GeneratePasswordSalt(),
+            SRPPasswordSalt = salt,
+            SRPPasswordHash = SRPRegistrationHandlers.HashAccountPassword(payload.Password, salt)
+        };
 
-//        if (await MerrickContext.Accounts.Where(account => account.Name.Equals(payload.Name)).AnyAsync())
-//        {
-//            return Conflict($@"Account With Name ""{payload.Name}"" Already Exists");
-//        }
+        await MerrickContext.Users.AddAsync(user);
 
-//        string salt = SRPRegistrationHandlers.GeneratePasswordSRPSalt(); // TODO: Maybe Put This In The Constructor
+        Account account = new()
+        {
+            Name = payload.Name,
+            User = user,
+            IsMain = true
+        };
 
-//        User user = new()
-//        {
-//            Name = payload.Name,
-//            EmailAddress = token.EmailAddress,
-//            SanitizedEmailAddress = sanitizedEmailAddress,
-//            SRPSalt = SRPRegistrationHandlers.GeneratePasswordSalt(),
-//            SRPPasswordSalt = salt,
-//            SRPPasswordHash = SRPRegistrationHandlers.HashAccountPassword(payload.Password, salt),
+        user.Accounts.Add(account);
 
-//            // TODO: Resolve This Duplication (Try Not Using Identity At All)
+        token.TimestampConsumed = DateTime.UtcNow;
 
-//            UserName = payload.Name
-//        };
+        await MerrickContext.SaveChangesAsync();
 
-//        IdentityResult attempt = await UserManager.CreateAsync(user, payload.Password);
+        await EmailService.SendEmailAddressRegistrationConfirmation(user.EmailAddress, account.Name);
 
-//        if (attempt.Errors.Any())
-//        {
-//            string errors = string.Join("; ", attempt.Errors.Select(error => error.Description));
+        return CreatedAtAction(nameof(GetUser), new { id = user.ID },
+            new GetBasicUserDTO(user.ID, user.EmailAddress, [new GetBasicAccountDTO(account.ID, account.Name)]));
+    }
 
-//            Logger.LogError($@"[BUG] Unable To Create Identity For User Name ""{payload.Name}"": {errors}");
+    [HttpGet("{id}", Name = "Get User")]
+    [Authorize(Roles = UserRoles.AllRoles)]
+    [ProducesResponseType(typeof(GetBasicUserDTO), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetUser(Guid id)
+    {
+        User? user = await MerrickContext.Users
+            .Include(record => record.Accounts)
+            .ThenInclude(record => record.Clan)
+            .SingleOrDefaultAsync(record => record.ID.Equals(id));
 
-//            return UnprocessableEntity($@"Unable To Create Identity For User Name ""{payload.Name}""");
-//        }
+        if (user is null)
+            return NotFound($@"User With ID ""{id}"" Was Not Found");
 
-//        await UserManager.AddToRoleAsync(user, UserRoles.User);
+        // TODO: [OutputCache] On Get Requests
 
-//        DateTime now = DateTime.UtcNow;
+        if (User.IsInRole(UserRoles.Administrator))
+        {
+            return Ok(new GetBasicUserDTO(user.ID, user.EmailAddress,
+                user.Accounts.Select(account => new GetBasicAccountDTO(account.ID, account.NameWithClanTag)).ToList()));
+        }
 
-//        Account account = new()
-//        {
-//            Name = payload.Name,
-//            User = user
-//        };
+        if (User.IsInRole(UserRoles.User))
+        {
+            return Ok(new GetBasicUserDTO(user.ID,
+                user.EmailAddress.Select(character => char.IsLetterOrDigit(character) ? '*' : character).ToString() ?? new string('*', user.EmailAddress.Length),
+                user.Accounts.Select(account => new GetBasicAccountDTO(account.ID, account.NameWithClanTag)).ToList()));
+        }
 
-//        user.Accounts.Add(account);
+        // TODO: Get Role
 
-//        MerrickContext.Tokens.Remove(token);
+        Logger.LogError("[BUG] Unknown Requester Role");
 
-//        await MerrickContext.SaveChangesAsync();
-
-//        await EmailService.SendEmailAddressRegistrationConfirmation(user.EmailAddress, account.Name);
-
-//        return CreatedAtAction(nameof(GetUser), new { id = user.ID },
-//            new { Id = user.ID, Name = user.Name, EmailAddress = user.EmailAddress, Accounts = user.Accounts.Select(record => record.ID).ToList() });
-//    }
-
-//    [HttpGet("{id}", Name = "Get User")]
-//    [Authorize(Roles = UserRoles.AllRoles)]
-//    public async Task<IActionResult> GetUser(Guid id)
-//    {
-//        User? user = await UserManager.Users
-//            .Include(record => record.Accounts)
-//            .SingleOrDefaultAsync(record => record.ID.Equals(id));
-
-//        if (user is null) return NotFound($@"User With ID ""{id}"" Was Not Found");
-
-//        if (User.IsInRole(UserRoles.Administrator))
-//        {
-//            return Ok(new
-//            {
-//                Name = user.Name,
-//                EmailAddress = user.EmailAddress,
-//                Accounts = user.Accounts.Select(account => account.ID).ToList()
-//            });
-//        }
-
-//        else
-//        {
-//            return Ok(new
-//            {
-//                Name = user.Name,
-//                Accounts = user.Accounts.Select(account => account.ID).ToList()
-//            });
-//        }
-//    }
-//}
+        return BadRequest("Unknown Requester Role");
+    }
+}

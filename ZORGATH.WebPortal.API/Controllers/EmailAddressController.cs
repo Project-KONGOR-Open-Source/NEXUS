@@ -3,15 +3,18 @@
 [ApiController]
 [Route("[controller]")]
 [Consumes("application/json")]
-public class EmailController(MerrickContext databaseContext, UserManager<User> userManager, IEmailService emailService, ILogger<EmailController> logger) : ControllerBase
+public class EmailAddressController(MerrickContext databaseContext, ILogger<EmailAddressController> logger, IEmailService emailService) : ControllerBase
 {
     private MerrickContext MerrickContext { get; init; } = databaseContext;
-    private UserManager<User> UserManager { get; init; } = userManager;
-    private IEmailService EmailService { get; init; } = emailService;
     private ILogger Logger { get; init; } = logger;
+    private IEmailService EmailService { get; init; } = emailService;
 
     [HttpPost("Register", Name = "Register Email Address")]
     [AllowAnonymous]
+    [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status422UnprocessableEntity)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status503ServiceUnavailable)]
     public async Task<IActionResult> RegisterEmailAddress(RegisterEmailAddressDTO payload)
     {
         if (payload.EmailAddress.Equals(payload.ConfirmEmailAddress).Equals(false))
@@ -21,15 +24,27 @@ public class EmailController(MerrickContext databaseContext, UserManager<User> u
 
         if (token is null)
         {
+            IActionResult result = EmailAddressHelpers.SanitizeEmailAddress(payload.EmailAddress);
+
+            if (result is not ContentResult contentResult)
+            {
+                return result;
+            }
+
+            if (contentResult.Content is null)
+            {
+                Logger.LogError($@"[BUG] Sanitized Email Address ""{payload.EmailAddress}"" Is NULL");
+
+                return UnprocessableEntity($@"Unable To Process Email Address ""{payload.EmailAddress}""");
+            }
+
+            string sanitizedEmailAddress = contentResult.Content;
+
             token = new Token()
             {
                 Purpose = TokenPurpose.EmailAddressVerification,
                 EmailAddress = payload.EmailAddress,
-                Data = Request.HttpContext.Connection.RemoteIpAddress is not null
-                    ? Request.HttpContext.Connection.RemoteIpAddress.ToString()
-                    : Request.HttpContext.Connection.LocalIpAddress is not null
-                        ? Request.HttpContext.Connection.LocalIpAddress.ToString()
-                        : string.Empty
+                Data = sanitizedEmailAddress
             };
 
             await MerrickContext.Tokens.AddAsync(token);
