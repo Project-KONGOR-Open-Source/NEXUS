@@ -18,12 +18,17 @@ internal class MERRICK
             options.EnableThreadSafetyChecks();
         });
 
-        // TODO: Document The Services Below
-
+        // Add Open Telemetry
         builder.Services.AddOpenTelemetry().WithTracing(tracing => tracing.AddSource(DatabaseInitializer.ActivitySourceName));
+
+        // Add Singleton Service For Initializing The Database
         builder.Services.AddSingleton<DatabaseInitializer>();
+
+        // Set Database Initializer Service To Run In The Background
         builder.Services.AddHostedService(provider => provider.GetRequiredService<DatabaseInitializer>());
-        builder.Services.AddHealthChecks().AddCheck<DatabaseHealthCheck>("MERRICK Database Health Check", null);
+
+        // Add Database Health Check
+        builder.Services.AddHealthChecks().AddCheck<DatabaseHealthCheck>("MERRICK Database Health Check");
 
         // Build The Application
         WebApplication application = builder.Build();
