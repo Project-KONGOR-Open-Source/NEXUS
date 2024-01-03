@@ -109,12 +109,9 @@ public class UserController(MerrickContext databaseContext, ILogger<UserControll
             // RFC7519: https://www.rfc-editor.org/rfc/rfc7519.html#section-4
             # endregion
 
-            new(JwtRegisteredClaimNames.Iss, "TODO: Get The Hosting URL From Configuration Or Request Data"),
             new(JwtRegisteredClaimNames.Sub, account.Name),
-            new(JwtRegisteredClaimNames.Aud, $"{user.ID}:{account.ID}"),
-            new(JwtRegisteredClaimNames.Exp, Convert.ToInt64((DateTime.UtcNow.AddHours(24) - DateTime.MinValue).TotalSeconds).ToString()),
-            new(JwtRegisteredClaimNames.Iat, Convert.ToInt64((DateTime.UtcNow - DateTime.MinValue).TotalSeconds).ToString()),
-            new(JwtRegisteredClaimNames.AuthTime, Convert.ToInt64((DateTime.UtcNow - DateTime.MinValue).TotalSeconds).ToString()),
+            new(JwtRegisteredClaimNames.Iat, DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString()),
+            new(JwtRegisteredClaimNames.AuthTime, DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString()),
             new(JwtRegisteredClaimNames.Nonce, Guid.NewGuid().ToString()),
             new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             new(JwtRegisteredClaimNames.Email, user.EmailAddress)
@@ -138,23 +135,18 @@ public class UserController(MerrickContext databaseContext, ILogger<UserControll
 
         IEnumerable<Claim> userRoleClaims = user.Role.Name is UserRoles.Administrator ? UserRoleClaims.Administrator : UserRoleClaims.User;
 
-        IEnumerable<Claim> claim = Enumerable.Empty<Claim>().Union(openIDClaims).Union(customClaims).Union(userRoleClaims);
-
-        // TODO: Implement Secrets Vault
-
-        SymmetricSecurityKey signingKey = new(Encoding.UTF8.GetBytes(/*Configuration["JWT:SigningKey"]*/"MY-SUPER-SECRET-KEY"));
-        SigningCredentials signingCredentials = new(signingKey, SecurityAlgorithms.HmacSha256);
+        IEnumerable<Claim> allTokenClaims = Enumerable.Empty<Claim>().Union(openIDClaims).Union(customClaims).Union(userRoleClaims);
 
         JwtSecurityToken token = new
         (
-            Configuration["JWT:Issuer"],
-            Configuration["JWT:Audience"],
-            claims,
-            expires: DateTime.UtcNow.AddHours(Convert.ToInt32(Configuration["JWT:DurationInHours"])),
-            signingCredentials: signingCredentials
+            issuer: "TODO: Get The ZORGATH.WebPortal.API URL From Configuration Or Request Data",
+            audience: "TODO: Get The DAWNBRINGER.WebPortal.UI URL From Configuration Or Request Data",
+            claims: allTokenClaims,
+            expires: DateTime.UtcNow.AddHours(24), // TODO: Make Configurable
+            signingCredentials: new SigningCredentials(new SymmetricSecurityKey(Encoding.UTF8.GetBytes(/* Configuration["JWT:SigningKey"] // TODO: Implement Secrets Vault */"MY-SUPER-SECRET-KEY")), SecurityAlgorithms.HmacSha256)
         );
 
-        return Ok(new Dictionary<string, object> { { "identifier", identity.Id }, { "token", new JwtSecurityTokenHandler().WriteToken(token) }, { "verified", identity.EmailConfirmed } });
+        return Ok(new GetAuthenticationTokenDTO(user.ID, token));
     }
 
     [HttpGet("{id}", Name = "Get User")]
