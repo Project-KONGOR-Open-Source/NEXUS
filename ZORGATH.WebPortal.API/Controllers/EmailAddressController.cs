@@ -61,7 +61,12 @@ public class EmailAddressController(MerrickContext databaseContext, ILogger<Emai
             }
         }
 
-        else return BadRequest($@"A Registration Request For Email Address ""{payload.EmailAddress}"" Has Already Been Made (Check Your Email Inbox For A Registration Link)");
+        else
+        {
+            return token.TimestampConsumed is null
+                ? BadRequest($@"A Registration Request For Email Address ""{payload.EmailAddress}"" Has Already Been Made (Check Your Email Inbox For A Registration Link)")
+                : BadRequest($@"Email Address ""{payload.EmailAddress}"" Is Already Registered");
+        }
 
         return Ok($@"Email Address Registration Token Was Successfully Created, And An Email Was Sent To Address ""{payload.EmailAddress}""");
     }

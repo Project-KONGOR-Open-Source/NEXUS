@@ -41,7 +41,7 @@ public class UserController(MerrickContext databaseContext, ILogger<UserControll
 
         string salt = SRPRegistrationHandlers.GeneratePasswordSRPSalt();
 
-        Role? role = await MerrickContext.Roles.SingleOrDefaultAsync(role => role.Name == UserRoles.User);
+        Role? role = await MerrickContext.Roles.SingleOrDefaultAsync(role => role.Name.Equals(UserRoles.User));
 
         if (role is null)
         {

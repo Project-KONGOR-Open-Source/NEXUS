@@ -36,5 +36,5 @@ public class Account
     public List<string> SystemInformationCollection { get; set; } = [];
 
     [NotMapped]
-    public string NameWithClanTag => Clan == null ? Name : $"[{Clan.Tag}]{Name}";
+    public string NameWithClanTag => Equals(Clan, null) ? Name : $"[{Clan.Tag}]{Name}";
 }
