@@ -1,6 +1,6 @@
 namespace ASPIRE.AppHost;
 
-internal class KONGOR
+internal class ASPIRE
 {
     internal static void Main(string[] args)
     {
