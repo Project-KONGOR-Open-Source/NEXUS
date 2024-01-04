@@ -8,4 +8,4 @@ public record GetBasicUserDTO(Guid ID, string EmailAddress, List<GetBasicAccount
 
 public record GetBasicAccountDTO(Guid ID, string Name);
 
-public record GetAuthenticationTokenDTO(Guid UserID, string TokenSchema, string Token);
+public record GetAuthenticationTokenDTO(Guid UserID, string TokenType, string Token);

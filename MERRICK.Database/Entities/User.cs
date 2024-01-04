@@ -36,4 +36,7 @@ public class User
     public int TotalExperience { get; set; } = 0;
 
     public List<string> OwnedStoreItems { get; set; } = ["ai.Default Icon", "cc.white", "t.Standard"];
+
+    [NotMapped]
+    public bool IsAdministrator => Role.Name.Equals(UserRoles.Administrator);
 }

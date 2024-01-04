@@ -124,60 +124,52 @@ internal class ZORGATH
 
         // TODO: Clean This Up
 
-        //builder.Services.AddSwaggerGen(options =>
-        //{
-        //    options.SwaggerDoc("v1", new OpenApiInfo { Title = "Project KONGOR", Version = "v1" });
+        builder.Services.AddSwaggerGen(options =>
+        {
+            options.SwaggerDoc("v1", new OpenApiInfo
+            {
+                Title = "ZORGATH Web Portal API",
+                Version = "v1",
 
-        //    options.AddSecurityDefinition(JwtBearerDefaults.AuthenticationScheme, new OpenApiSecurityScheme
-        //    {
-        //        In = ParameterLocation.Header,
-        //        Description = "Insert A Valid JSON Web Token",
-        //        Name = "Authorization",
-        //        
-        //        Type = SecuritySchemeType.ApiKey, // (SecuritySchemeType.Http) ?
-        //        Scheme = JwtBearerDefaults.AuthenticationScheme // "Bearer" ?
-        //    });
+                License = new OpenApiLicense
+                {
+                    Name = "Project KONGOR Open-Source License",
+                    Url = new Uri("https://github.com/Project-KONGOR-Open-Source/ASPIRE/blob/main/license")
+                },
 
-        //    options.AddSecurityRequirement(new OpenApiSecurityRequirement
-        //    {
-        //        {
-        //            new OpenApiSecurityScheme
-        //            {
-        //                Reference = new OpenApiReference
-        //                {
-        //                    Type = ReferenceType.SecurityScheme,
-        //                    ID = JwtBearerDefaults.AuthenticationScheme
-        //                },
-        //                Scheme = "oauth2", // Is This Needed  ?
-        //                Name = JwtBearerDefaults.AuthenticationScheme,
-        //                In = ParameterLocation.Header
-        //            },
-        //            new List<string>()
-        //        }
-        //    });
+                Contact = new OpenApiContact
+                {
+                    Name = "[K]ONGOR",
+                    Url = new Uri("https://github.com/K-O-N-G-O-R"),
+                    Email = "project.kongor@proton.me"
+                }
+            });
 
-        /*
-         *
-         *    options.SwaggerDoc("v1", new OpenApiInfo
-           {
-               Version = "v1",
-               Title = "ToDo API",
-               Description = "An ASP.NET Core Web API for managing ToDo items",
-               TermsOfService = new Uri("https://example.com/terms"),
-               Contact = new OpenApiContact
-               {
-                   Name = "Example Contact",
-                   Url = new Uri("https://example.com/contact")
-               },
-               License = new OpenApiLicense
-               {
-                   Name = "Example License",
-                   Url = new Uri("https://example.com/license")
-               }
-           });
-         *
-         */
-        //});
+            options.AddSecurityDefinition(JwtBearerDefaults.AuthenticationScheme, new OpenApiSecurityScheme
+            {
+                In = ParameterLocation.Header,
+                Description = "Insert A Valid JSON Web Token",
+                Name = "Authorization",
+                Type = SecuritySchemeType.Http,
+                Scheme = JwtBearerDefaults.AuthenticationScheme,
+                BearerFormat = "JWT"
+            });
+
+            options.AddSecurityRequirement(new OpenApiSecurityRequirement
+            {
+                {
+                    new OpenApiSecurityScheme
+                    {
+                        Reference = new OpenApiReference
+                        {
+                            Type = ReferenceType.SecurityScheme,
+                            Id = JwtBearerDefaults.AuthenticationScheme
+                        }
+                    },
+                    Array.Empty<string>()
+                }
+            });
+        });
 
         // builder.Services.AddAntiforgery(); ???
 

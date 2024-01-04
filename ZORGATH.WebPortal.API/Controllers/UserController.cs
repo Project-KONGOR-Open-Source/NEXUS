@@ -131,9 +131,9 @@ public class UserController(MerrickContext databaseContext, ILogger<UserControll
         {
             new("user_id", user.ID.ToString(), ClaimValueTypes.String),
             new("account_id", account.ID.ToString(), ClaimValueTypes.String),
+            new("account_is_main", account.IsMain.ToString(), ClaimValueTypes.Boolean),
             new("clan_name", account.Clan?.Name ?? string.Empty, ClaimValueTypes.String),
-            new("clan_tag", account.Clan?.Tag ?? string.Empty, ClaimValueTypes.String),
-            new("is_main_account", account.IsMain.ToString(), ClaimValueTypes.Boolean)
+            new("clan_tag", account.Clan?.Tag ?? string.Empty, ClaimValueTypes.String)
         };
 
         IEnumerable<Claim> allTokenClaims = Enumerable.Empty<Claim>().Union(userRoleClaims).Union(openIDClaims).Union(customClaims).OrderBy(claim => claim.Type);
@@ -156,11 +156,9 @@ public class UserController(MerrickContext databaseContext, ILogger<UserControll
             signingCredentials: new SigningCredentials(new SymmetricSecurityKey(Encoding.UTF8.GetBytes(tokenSigningKey)), SecurityAlgorithms.HmacSha256)
         );
 
-        const string schema = "bearer";
-
         string jwt = new JwtSecurityTokenHandler().WriteToken(token);
 
-        return Ok(new GetAuthenticationTokenDTO(user.ID, schema, jwt));
+        return Ok(new GetAuthenticationTokenDTO(user.ID, "JWT", jwt));
     }
 
     [HttpGet("{id}", Name = "Get User")]
@@ -171,8 +169,8 @@ public class UserController(MerrickContext databaseContext, ILogger<UserControll
     public async Task<IActionResult> GetUser(Guid id)
     {
         User? user = await MerrickContext.Users
-            .Include(record => record.Accounts)
-            .ThenInclude(record => record.Clan)
+            .Include(record => record.Role)
+            .Include(record => record.Accounts).ThenInclude(record => record.Clan)
             .SingleOrDefaultAsync(record => record.ID.Equals(id));
 
         if (user is null)
@@ -180,23 +178,23 @@ public class UserController(MerrickContext databaseContext, ILogger<UserControll
 
         // TODO: [OutputCache] On Get Requests
 
-        if (User.IsInRole(UserRoles.Administrator))
+        string role = User.Claims.GetUserRole();
+
+        if (role.Equals(UserRoles.Administrator))
         {
             return Ok(new GetBasicUserDTO(user.ID, user.EmailAddress,
                 user.Accounts.Select(account => new GetBasicAccountDTO(account.ID, account.NameWithClanTag)).ToList()));
         }
 
-        if (User.IsInRole(UserRoles.User))
+        if (role.Equals(UserRoles.User))
         {
             return Ok(new GetBasicUserDTO(user.ID,
-                user.EmailAddress.Select(character => char.IsLetterOrDigit(character) ? '*' : character).ToString() ?? new string('*', user.EmailAddress.Length),
+                new string(user.EmailAddress.Select(character => char.IsLetterOrDigit(character) ? '*' : character).ToArray()),
                 user.Accounts.Select(account => new GetBasicAccountDTO(account.ID, account.NameWithClanTag)).ToList()));
         }
 
-        // TODO: Get Role
+        Logger.LogError($@"[BUG] Unknown User Role ""{role}""");
 
-        Logger.LogError("[BUG] Unknown Requester Role");
-
-        return BadRequest("Unknown Requester Role");
+        return BadRequest($@"Unknown User Role ""{role}""");
     }
 }
