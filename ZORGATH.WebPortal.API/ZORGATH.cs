@@ -110,7 +110,14 @@ internal class ZORGATH
         });
 
         // Add Authorization
-        builder.Services.AddAuthorization();
+        builder.Services.AddAuthorization(options =>
+        {
+            // TODO: Get Rid Of Magic String
+
+            options.AddPolicy(UserRoles.Administrator, policy => policy.RequireClaim("user_role", UserRoles.Administrator));
+            options.AddPolicy(UserRoles.User, policy => policy.RequireClaim("user_role", UserRoles.User));
+            options.AddPolicy(UserRoles.AllRoles, policy => policy.RequireClaim("user_role", UserRoles.AllRoles.Split(',')));
+        });
 
         // Add MVC Controllers
         builder.Services.AddControllers();

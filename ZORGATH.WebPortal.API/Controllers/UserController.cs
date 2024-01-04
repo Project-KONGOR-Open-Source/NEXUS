@@ -162,9 +162,11 @@ public class UserController(MerrickContext databaseContext, ILogger<UserControll
     }
 
     [HttpGet("{id}", Name = "Get User")]
-    [Authorize(Roles = UserRoles.AllRoles)]
+    [Authorize(UserRoles.AllRoles)]
     [ProducesResponseType(typeof(GetBasicUserDTO), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status403Forbidden)]
     [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetUser(Guid id)
     {
