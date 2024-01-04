@@ -4,7 +4,8 @@ public sealed class MerrickContext : DbContext
 {
     public MerrickContext(DbContextOptions options) : base(options)
     {
-        Database.SetCommandTimeout(60); // 1 Minute - Helps Prevent Migrations From Timing Out When Many Records Need To Update
+        if (Database.IsInMemory().Equals(false))
+            Database.SetCommandTimeout(60); // 1 Minute - Helps Prevent Migrations From Timing Out When Many Records Need To Update
     }
 
     public DbSet<Account> Accounts => Set<Account>();
