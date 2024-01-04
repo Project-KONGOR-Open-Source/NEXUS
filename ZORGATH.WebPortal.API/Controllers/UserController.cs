@@ -86,6 +86,36 @@ public class UserController(MerrickContext databaseContext, ILogger<UserControll
     // TODO: Add Responses
     public async Task<IActionResult> LogInUser([FromBody] LogInUserDTO payload)
     {
+        # region Code For Debugging User Claims
+
+        // This Code Block Can Be Triggered In A Development Environment By Logging In While Already Having A JWT
+
+        if (ZORGATH.RunsInDevelopmentMode && User.Claims.Any())
+        {
+            foreach (Claim claim in User.Claims.OrderBy(claim => claim.Type))
+                Logger.LogDebug($@"[DEBUG] Claim Type: ""{claim.Type}""; Claim Value: ""{claim.Value}""");
+
+            Logger.LogDebug($@"[DEBUG] AccountID: ""{User.Claims.GetAccountID()}""");
+            Logger.LogDebug($@"[DEBUG] AccountIsMain: ""{User.Claims.GetAccountIsMain()}""");
+            Logger.LogDebug($@"[DEBUG] AccountName: ""{User.Claims.GetAccountName()}""");
+            Logger.LogDebug($@"[DEBUG] Audience: ""{User.Claims.GetAudience()}""");
+            Logger.LogDebug($@"[DEBUG] AuthenticatedAtTime: ""{User.Claims.GetAuthenticatedAtTime()}""");
+            Logger.LogDebug($@"[DEBUG] ClanName: ""{User.Claims.GetClanName()}""");
+            Logger.LogDebug($@"[DEBUG] ClanTag: ""{User.Claims.GetClanTag()}""");
+            Logger.LogDebug($@"[DEBUG] ExpiresAtTime: ""{User.Claims.GetExpiresAtTime()}""");
+            Logger.LogDebug($@"[DEBUG] IssuedAtTime: ""{User.Claims.GetIssuedAtTime()}""");
+            Logger.LogDebug($@"[DEBUG] Issuer: ""{User.Claims.GetIssuer()}""");
+            Logger.LogDebug($@"[DEBUG] JWTIdentifier: ""{User.Claims.GetJWTIdentifier()}""");
+            Logger.LogDebug($@"[DEBUG] Nonce: ""{User.Claims.GetNonce()}""");
+            Logger.LogDebug($@"[DEBUG] UserID: ""{User.Claims.GetUserID()}""");
+            Logger.LogDebug($@"[DEBUG] UserEmailAddress: ""{User.Claims.GetUserEmailAddress()}""");
+            Logger.LogDebug($@"[DEBUG] UserRole: ""{User.Claims.GetUserRole()}""");
+        }
+
+        // TODO: Move This To Unit Tests Project
+
+        # endregion
+
         Account? account = await MerrickContext.Accounts
             .Include(account => account.User).ThenInclude(user => user.Role)
             .Include(account => account.Clan)
@@ -129,11 +159,11 @@ public class UserController(MerrickContext databaseContext, ILogger<UserControll
 
         IEnumerable<Claim> customClaims = new List<Claim>
         {
-            new("user_id", user.ID.ToString(), ClaimValueTypes.String),
-            new("account_id", account.ID.ToString(), ClaimValueTypes.String),
-            new("account_is_main", account.IsMain.ToString(), ClaimValueTypes.Boolean),
-            new("clan_name", account.Clan?.Name ?? string.Empty, ClaimValueTypes.String),
-            new("clan_tag", account.Clan?.Tag ?? string.Empty, ClaimValueTypes.String)
+            new(Claims.UserID, user.ID.ToString(), ClaimValueTypes.String),
+            new(Claims.AccountID, account.ID.ToString(), ClaimValueTypes.String),
+            new(Claims.AccountIsMain, account.IsMain.ToString(), ClaimValueTypes.Boolean),
+            new(Claims.ClanName, account.Clan?.Name ?? string.Empty, ClaimValueTypes.String),
+            new(Claims.ClanTag, account.Clan?.Tag ?? string.Empty, ClaimValueTypes.String)
         };
 
         IEnumerable<Claim> allTokenClaims = Enumerable.Empty<Claim>().Union(userRoleClaims).Union(openIDClaims).Union(customClaims).OrderBy(claim => claim.Type);

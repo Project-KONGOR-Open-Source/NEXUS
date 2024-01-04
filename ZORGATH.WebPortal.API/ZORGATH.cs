@@ -112,11 +112,9 @@ internal class ZORGATH
         // Add Authorization
         builder.Services.AddAuthorization(options =>
         {
-            // TODO: Get Rid Of Magic String
-
-            options.AddPolicy(UserRoles.Administrator, policy => policy.RequireClaim("user_role", UserRoles.Administrator));
-            options.AddPolicy(UserRoles.User, policy => policy.RequireClaim("user_role", UserRoles.User));
-            options.AddPolicy(UserRoles.AllRoles, policy => policy.RequireClaim("user_role", UserRoles.AllRoles.Split(',')));
+            options.AddPolicy(UserRoles.Administrator, policy => policy.RequireClaim(Claims.UserRole, UserRoles.Administrator));
+            options.AddPolicy(UserRoles.User, policy => policy.RequireClaim(Claims.UserRole, UserRoles.User));
+            options.AddPolicy(UserRoles.AllRoles, policy => policy.RequireClaim(Claims.UserRole, UserRoles.AllRoles.Split(',')));
         });
 
         // Add MVC Controllers

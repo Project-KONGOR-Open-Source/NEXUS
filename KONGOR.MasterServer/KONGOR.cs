@@ -2,6 +2,8 @@
 
 internal class KONGOR
 {
+    internal static bool RunsInDevelopmentMode { get; set; }
+
     internal static void Main(string[] args)
     {
         // Sets The Server Start Epoch Time (This Will Stop Working In 2038)
@@ -9,6 +11,9 @@ internal class KONGOR
 
         // Create The Application Builder
         WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+
+        // Set Static RunsInDevelopmentMode Property
+        RunsInDevelopmentMode = builder.Environment.IsDevelopment();
 
         // Add Aspire Service Defaults
         builder.AddServiceDefaults();
