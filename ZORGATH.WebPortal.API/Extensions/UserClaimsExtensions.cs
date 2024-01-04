@@ -9,7 +9,7 @@ public static class UserClaimsExtensions
         => bool.Parse(claims.Single(claim => claim.Type.Equals(Claims.AccountIsMain)).Value);
 
     public static string GetAccountName(this IEnumerable<Claim> claims)
-        => claims.Single(claim => claim.Type.Equals(Claims.NameIdentifier)).Value;
+        => claims.Single(claim => claim.Type.Equals(Claims.Subject) || claim.Type.Equals(Claims.NameIdentifier)).Value;
 
     public static string GetAudience(this IEnumerable<Claim> claims)
         => claims.Single(claim => claim.Type.Equals(Claims.Audience)).Value;
@@ -42,7 +42,7 @@ public static class UserClaimsExtensions
         => Guid.Parse(claims.Single(claim => claim.Type.Equals(Claims.UserID)).Value);
 
     public static string GetUserEmailAddress(this IEnumerable<Claim> claims)
-        => claims.Single(claim => claim.Type.Equals(Claims.EmailAddress)).Value;
+        => claims.Single(claim => claim.Type.Equals(Claims.Email) || claim.Type.Equals(Claims.EmailAddress)).Value;
 
     public static string GetUserRole(this IEnumerable<Claim> claims)
         => claims.Single(claim => claim.Type.Equals(Claims.UserRole)).Value;
