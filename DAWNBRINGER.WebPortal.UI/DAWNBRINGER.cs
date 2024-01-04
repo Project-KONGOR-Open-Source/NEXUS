@@ -1,6 +1,6 @@
 ﻿namespace DAWNBRINGER.WebPortal.UI;
 
-internal class DAWNBRINGER
+public class DAWNBRINGER
 {
-    internal static void Main() { Console.WriteLine("Hello, World!"); }
+    public static void Main() { Console.WriteLine("Hello, World!"); }
 }

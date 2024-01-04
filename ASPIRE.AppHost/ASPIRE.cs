@@ -1,8 +1,8 @@
 namespace ASPIRE.AppHost;
 
-internal class ASPIRE
+public class ASPIRE
 {
-    internal static void Main(string[] args)
+    public static void Main(string[] args)
     {
         IDistributedApplicationBuilder builder = DistributedApplication.CreateBuilder(args);
 

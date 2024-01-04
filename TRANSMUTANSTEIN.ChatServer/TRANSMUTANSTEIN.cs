@@ -1,6 +1,6 @@
 ﻿namespace TRANSMUTANSTEIN.ChatServer;
 
-internal class TRANSMUTANSTEIN
+public class TRANSMUTANSTEIN
 {
-    internal static void Main() { Console.WriteLine("This will become a SignalR project!"); }
+    public static void Main() { Console.WriteLine("This will become a SignalR project!"); }
 }

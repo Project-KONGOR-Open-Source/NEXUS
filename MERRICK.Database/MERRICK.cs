@@ -1,8 +1,8 @@
 ﻿namespace MERRICK.Database;
 
-internal class MERRICK
+public class MERRICK
 {
-    internal static async Task Main(string[] args)
+    public static async Task Main(string[] args)
     {
         // Create The Application Builder
         WebApplicationBuilder builder = WebApplication.CreateBuilder(args);

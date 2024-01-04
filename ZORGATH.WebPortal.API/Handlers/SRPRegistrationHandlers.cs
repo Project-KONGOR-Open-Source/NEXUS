@@ -1,6 +1,6 @@
 ﻿namespace ZORGATH.WebPortal.API.Handlers;
 
-internal static class SRPRegistrationHandlers
+public static class SRPRegistrationHandlers
 {
     # region Secure Remote Password Magic Strings
 
@@ -19,7 +19,7 @@ internal static class SRPRegistrationHandlers
     /// <summary>
     ///     Generates a 64-character long SHA256 hash of the account's password.
     /// </summary>
-    internal static string HashPassword(string password, string salt)
+    public static string HashPassword(string password, string salt)
     {
         string passwordHash = Convert.ToHexString(MD5.HashData(Encoding.UTF8.GetBytes(password))).ToLower();
 
@@ -38,13 +38,13 @@ internal static class SRPRegistrationHandlers
     ///     Generates a 512-character long password salt.
     ///     The value 512 is for the purpose of consistency with the length of "B", the ephemeral key of the server.
     /// </summary>
-    internal static string GeneratePasswordSalt()
+    public static string GeneratePasswordSalt()
         => SrpInteger.RandomInteger(512 / 2 /* Divide By 2 Because There Are 2 Hexadecimal Digits Per Byte */).ToHex();
 
     /// <summary>
     ///     Generates a 22-character long password SRP salt.
     ///     The value 22 is for the purpose of consistency with the original HoN salt length.
     /// </summary>
-    internal static string GeneratePasswordSRPSalt()
+    public static string GeneratePasswordSRPSalt()
         => SrpInteger.RandomInteger(22 / 2 /* Divide By 2 Because There Are 2 Hexadecimal Digits Per Byte */).ToHex();
 }

@@ -1,10 +1,10 @@
 ﻿namespace ZORGATH.WebPortal.API;
 
-internal class ZORGATH
+public class ZORGATH
 {
-    internal static bool RunsInDevelopmentMode { get; set; }
+    public static bool RunsInDevelopmentMode { get; set; }
 
-    internal static void Main(string[] args)
+    public static void Main(string[] args)
     {
         // Create The Application Builder
         WebApplicationBuilder builder = WebApplication.CreateBuilder(args);

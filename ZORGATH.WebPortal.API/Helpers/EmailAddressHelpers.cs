@@ -1,8 +1,8 @@
 ﻿namespace ZORGATH.WebPortal.API.Helpers;
 
-internal static class EmailAddressHelpers
+public static class EmailAddressHelpers
 {
-    internal static IActionResult SanitizeEmailAddress(string email)
+    public static IActionResult SanitizeEmailAddress(string email)
     {
         if (ZORGATH.RunsInDevelopmentMode is false)
         {

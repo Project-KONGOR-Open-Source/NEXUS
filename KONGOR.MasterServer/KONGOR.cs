@@ -1,10 +1,10 @@
 ﻿namespace KONGOR.MasterServer;
 
-internal class KONGOR
+public class KONGOR
 {
-    internal static bool RunsInDevelopmentMode { get; set; }
+    public static bool RunsInDevelopmentMode { get; set; }
 
-    internal static void Main(string[] args)
+    public static void Main(string[] args)
     {
         // Sets The Server Start Epoch Time (This Will Stop Working In 2038)
         // KongorContext.ServerStartEpochTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds();

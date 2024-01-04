@@ -1,6 +1,6 @@
 ﻿namespace MERRICK.Database.Services;
 
-internal class DatabaseHealthCheck(DatabaseInitializer initializer) : IHealthCheck
+public class DatabaseHealthCheck(DatabaseInitializer initializer) : IHealthCheck
 {
     public Task<HealthCheckResult> CheckHealthAsync(HealthCheckContext context, CancellationToken cancellationToken = default)
     {

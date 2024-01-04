@@ -1,8 +1,8 @@
 ﻿namespace MERRICK.Database.Services;
 
-internal class DatabaseInitializer(IServiceProvider serviceProvider, ILogger<DatabaseInitializer> logger) : BackgroundService
+public class DatabaseInitializer(IServiceProvider serviceProvider, ILogger<DatabaseInitializer> logger) : BackgroundService
 {
-    internal const string ActivitySourceName = "Migrations";
+    public const string ActivitySourceName = "Migrations";
 
     private readonly ActivitySource _activitySource = new(ActivitySourceName);
 
