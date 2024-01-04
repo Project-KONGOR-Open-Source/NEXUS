@@ -1,51 +1,16 @@
 namespace ASPIRE.Tests.ZORGATH.WebPortal.API;
 
-using ZORGATH = global::ZORGATH.WebPortal.API.ZORGATH;
-
 [TestFixture]
-public class UserControllerTests
+public sealed class UserControllerTests : BaseWebPortalAPITests
 {
-    private MerrickContext EphemeralMerrickContext { get; set; } = null!;
-    private WebApplicationFactory<ZORGATH> EphemeralZorgath { get; set; } = null!;
-    private HttpClient EphemeralZorgathClient { get; set; } = null!;
-
-    [OneTimeSetUp]
-    public void OneTimeSetUp()
-    {
-        EphemeralZorgath = new WebApplicationFactory<ZORGATH>();
-        EphemeralZorgathClient = EphemeralZorgath.CreateClient();
-    }
-
-    [SetUp]
-    public void SetUp()
-    {
-        EphemeralMerrickContext = InMemoryHelpers.GetInMemoryMerrickContext();
-    }
-
-    [TearDown]
-    public void TearDown()
-    {
-        EphemeralMerrickContext.Dispose();
-    }
-
-    [OneTimeTearDown]
-    public void OneTimeTearDown()
-    {
-        EphemeralZorgath.Dispose();
-        EphemeralZorgathClient.Dispose();
-    }
-
     [Test]
     [TestCase("project.kongor@proton.me", "KONGOR", "wh#b739&&2N0*$#9GIHz!p4kdys994r@")]
     public async Task RegisterUserAndMainAccountTest(string emailAddress, string name, string password)
     {
-        ILogger<EmailAddressController> emailAddressControllerLogger; ILogger<UserController> userControllerLogger; IConfiguration configuration; IEmailService emailService;
+        ILogger<UserController> userControllerLogger; IConfiguration configuration; IEmailService emailService;
 
         try
         {
-            emailAddressControllerLogger = EphemeralZorgath.Services.GetService(typeof(ILogger<EmailAddressController>)) as ILogger<EmailAddressController>
-                ?? throw new NullReferenceException("ILogger<EmailAddressController> Is NULL");
-
             userControllerLogger = EphemeralZorgath.Services.GetService(typeof(ILogger<UserController>)) as ILogger<UserController>
                 ?? throw new NullReferenceException("ILogger<UserController> Is NULL");
 
@@ -63,15 +28,14 @@ public class UserControllerTests
             throw new NullReferenceException("Required Service Is NULL", exception);
         }
 
-        EmailAddressController emailAddressController = new(EphemeralMerrickContext, emailAddressControllerLogger, emailService);
+        Token? registrationToken = await EphemeralMerrickContext.Tokens.SingleOrDefaultAsync(token => token.EmailAddress.Equals(emailAddress) && token.Purpose.Equals(TokenPurpose.EmailAddressVerification));
 
-        // TODO: Move Email Controller To Separate Tests File
+        if (registrationToken is null)
+        {
+            Assert.Fail("Registration Token Is NULL");
 
-        IActionResult responseRegisterEmailAddress = await emailAddressController.RegisterEmailAddress(new RegisterEmailAddressDTO(emailAddress, emailAddress));
-
-        Assert.That(responseRegisterEmailAddress is OkObjectResult, Is.True);
-
-        Token registrationToken = await EphemeralMerrickContext.Tokens.SingleAsync(token => token.EmailAddress.Equals(emailAddress));
+            throw new NullReferenceException("Registration Token Is NULL");
+        }
 
         UserController userController = new(EphemeralMerrickContext, userControllerLogger, configuration, emailService);
 
@@ -89,7 +53,11 @@ public class UserControllerTests
         string? authenticationTokenSigningKey = configuration["JWT:SigningKey"]; // TODO: Put The Signing Key In A Secrets Vault
 
         if (authenticationTokenSigningKey is null)
+        {
+            Assert.Fail("JSON Web Token Signing Key Is NULL");
+
             throw new NullReferenceException("JSON Web Token Signing Key Is NULL");
+        }
 
         TokenValidationParameters tokenValidationParameters = new()
         {
