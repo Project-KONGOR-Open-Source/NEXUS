@@ -43,7 +43,13 @@ public class ZORGATH
         });
 
         // Add Server-Sided Cache
-        builder.Services.AddOutputCache(); // TODO: Use Redis
+        builder.Services.AddOutputCache(options =>
+        {
+            options.AddPolicy(OutputCachePolicies.CacheForThirtySeconds, policy => policy.Cache().Expire(TimeSpan.FromSeconds(30)));
+            options.AddPolicy(OutputCachePolicies.CacheForFiveMinutes, policy => policy.Cache().Expire(TimeSpan.FromMinutes(5)));
+            options.AddPolicy(OutputCachePolicies.CacheForOneDay, policy => policy.Cache().Expire(TimeSpan.FromDays(1)));
+            options.AddPolicy(OutputCachePolicies.CacheForever, policy => policy.Cache().Expire(TimeSpan.FromDays(int.MaxValue)));
+        });
 
         //if (builder.Environment.IsDevelopment())
         //{
