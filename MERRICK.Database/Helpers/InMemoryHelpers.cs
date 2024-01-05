@@ -2,11 +2,11 @@
 
 public static class InMemoryHelpers
 {
-    public static MerrickContext GetInMemoryMerrickContext()
+    public static MerrickContext GetInMemoryMerrickContext(string? identifier = null)
     {
         DbContextOptionsBuilder<MerrickContext> builder = new();
 
-        builder.UseInMemoryDatabase(nameof(MERRICK));
+        builder.UseInMemoryDatabase(identifier ?? Guid.NewGuid().ToString());
 
         DbContextOptions<MerrickContext> options = builder.Options;
 
