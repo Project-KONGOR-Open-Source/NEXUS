@@ -4,4 +4,8 @@ namespace ASPIRE.Tests.ZORGATH.WebPortal.API;
 public sealed class UserControllerTests : BaseWebPortalAPITests
 {
     // TODO: Add Some Tests
+
+    [Test]
+    public void VerifyAuthenticationToken()
+        => Assert.That(string.IsNullOrWhiteSpace(EphemeralAuthenticationToken), Is.False);
 }
