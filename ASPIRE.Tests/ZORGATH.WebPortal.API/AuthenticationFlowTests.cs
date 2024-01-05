@@ -1,12 +1,18 @@
 ﻿namespace ASPIRE.Tests.ZORGATH.WebPortal.API;
 
-[TestFixture, Order(1) /* Run This Fixture Before Any Other One, In Order To Retrieve An Authentication Token */]
+// Run This Fixture Before Any Other One, In Order To Retrieve An Authentication Token
+// Other Methods Will Wait For An Authentication Token To Be Available
+
+[TestFixture, Order(1)]
 public sealed class AuthenticationFlowTests : WebPortalAPITestSetup
 {
     [SetUp]
-    public new void SetUp()
+    public override async Task SetUp()
     {
-        // Override The Default "EphemeralMerrickContext", And Create A Named Database Context For Sharing With "RegisterUserAndMainAccountTest()"
+        // This Method Overrides An Asynchronous Task, So It Needs To Do Some Asynchronous Work To Keep The Compiler Happy
+        await Task.Delay(TimeSpan.Zero);
+
+        // Override The Default "EphemeralMerrickContext", And Create A Named Database Context For Sharing Between The Methods Part Of The Authentication Flow
         EphemeralMerrickContext = InMemoryHelpers.GetInMemoryMerrickContext("Registration And Authentication");
     }
 
@@ -143,6 +149,9 @@ public sealed class AuthenticationFlowTests : WebPortalAPITestSetup
 
         // Set The Authentication Token For The Web Portal API Test Run; Other Tests Will Use This Token To Make Authenticated Requests
         WebPortalAPITestContext.EphemeralAuthenticationToken = authenticationToken;
+
+        // Signal Other Tests That An Authentication Token Is Available For Making Authenticated Requests
+        WebPortalAPITestContext.AuthenticationFlowHasExecuted = true;
 
         Assert.Multiple(() =>
         {

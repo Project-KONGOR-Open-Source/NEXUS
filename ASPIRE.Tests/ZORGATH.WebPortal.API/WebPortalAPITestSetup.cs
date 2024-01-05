@@ -16,8 +16,11 @@ public abstract class WebPortalAPITestSetup
     }
 
     [SetUp]
-    public void SetUp()
+    public virtual async Task SetUp()
     {
+        while (WebPortalAPITestContext.AuthenticationFlowHasExecuted.Equals(false))
+            await Task.Delay(250);
+
         EphemeralMerrickContext = InMemoryHelpers.GetInMemoryMerrickContext();
 
         if (string.IsNullOrWhiteSpace(WebPortalAPITestContext.EphemeralAuthenticationToken).Equals(false))
