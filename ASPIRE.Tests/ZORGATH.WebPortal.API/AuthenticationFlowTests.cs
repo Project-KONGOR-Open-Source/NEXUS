@@ -1,18 +1,13 @@
 ﻿namespace ASPIRE.Tests.ZORGATH.WebPortal.API;
 
-using ZORGATH = global::ZORGATH.WebPortal.API.ZORGATH;
-
-[SetUpFixture]
-public class AuthenticationFlowTests
+[TestFixture, Order(1) /* Run This Fixture Before Any Other One, In Order To Retrieve An Authentication Token */]
+public sealed class AuthenticationFlowTests : WebPortalAPITestSetup
 {
-    private WebApplicationFactory<ZORGATH> EphemeralZorgath { get; set; } = new();
-    private MerrickContext EphemeralMerrickContext => InMemoryHelpers.GetInMemoryMerrickContext("Registration And Authentication");
-
-    [OneTimeTearDown]
-    public void OneTimeTearDown()
+    [SetUp]
+    public new void SetUp()
     {
-        EphemeralMerrickContext.Dispose();
-        EphemeralZorgath.Dispose();
+        // Override The Default "EphemeralMerrickContext", And Create A Named Database Context For Sharing With "RegisterUserAndMainAccountTest()"
+        EphemeralMerrickContext = InMemoryHelpers.GetInMemoryMerrickContext("Registration And Authentication");
     }
 
     [Test, Order(1)]

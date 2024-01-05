@@ -2,13 +2,11 @@
 
 using ZORGATH = global::ZORGATH.WebPortal.API.ZORGATH;
 
-public abstract class BaseWebPortalAPITests
+public abstract class WebPortalAPITestSetup
 {
     protected WebApplicationFactory<ZORGATH> EphemeralZorgath { get; set; } = null!;
     protected MerrickContext EphemeralMerrickContext { get; set; } = null!;
     protected HttpClient EphemeralZorgathClient { get; set; } = null!;
-
-    protected static string EphemeralAuthenticationToken => WebPortalAPITestContext.EphemeralAuthenticationToken;
 
     [OneTimeSetUp]
     public void OneTimeSetUp()
@@ -22,7 +20,8 @@ public abstract class BaseWebPortalAPITests
     {
         EphemeralMerrickContext = InMemoryHelpers.GetInMemoryMerrickContext();
 
-        EphemeralZorgathClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(JwtBearerDefaults.AuthenticationScheme, EphemeralAuthenticationToken);
+        EphemeralZorgathClient.DefaultRequestHeaders.Authorization
+            = new AuthenticationHeaderValue(JwtBearerDefaults.AuthenticationScheme, WebPortalAPITestContext.EphemeralAuthenticationToken);
     }
 
     [TearDown]
