@@ -20,8 +20,9 @@ public abstract class WebPortalAPITestSetup
     {
         EphemeralMerrickContext = InMemoryHelpers.GetInMemoryMerrickContext();
 
-        EphemeralZorgathClient.DefaultRequestHeaders.Authorization
-            = new AuthenticationHeaderValue(JwtBearerDefaults.AuthenticationScheme, WebPortalAPITestContext.EphemeralAuthenticationToken);
+        if (string.IsNullOrWhiteSpace(WebPortalAPITestContext.EphemeralAuthenticationToken).Equals(false))
+            EphemeralZorgathClient.DefaultRequestHeaders.Authorization
+                = new AuthenticationHeaderValue(JwtBearerDefaults.AuthenticationScheme, WebPortalAPITestContext.EphemeralAuthenticationToken);
     }
 
     [TearDown]
