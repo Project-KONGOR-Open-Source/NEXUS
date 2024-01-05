@@ -83,7 +83,11 @@ public class UserController(MerrickContext databaseContext, ILogger<UserControll
 
     [HttpPost("LogIn", Name = "Log In User")]
     [AllowAnonymous]
-    // TODO: Add Responses
+    [ProducesResponseType(typeof(GetAuthenticationTokenDTO), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status422UnprocessableEntity)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> LogInUser([FromBody] LogInUserDTO payload)
     {
         Account? account = await MerrickContext.Accounts
