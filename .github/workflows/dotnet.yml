@@ -1,0 +1,55 @@
+name: "Unit/Integration Tests"
+
+on:
+  schedule:
+    - cron: "0 4 * * *"
+
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build-and-test:
+
+    runs-on: "ubuntu-latest"
+
+    steps:
+
+      # latest action versions can be inspected at https://github.com/actions
+
+    - name: "Check Out Branch"
+      uses: "actions/checkout@v4"
+
+    - name: "Install .NET 8"
+      uses: "actions/setup-dotnet@v4"
+      with:
+        dotnet-version: "8.x"
+
+    - name: "Print .NET Version"
+      run: "dotnet --version"
+
+    - name: "Update .NET Workloads"
+      run: "dotnet workload update"
+
+    - name: "Install Aspire Workload"
+      run: "dotnet workload install aspire"
+
+    - name: "List .NET Workloads"
+      run: "dotnet workload list"
+
+    - name: "Restore Dependencies"
+      run: "dotnet restore"
+
+    - name: "Build Solution"
+      run: "dotnet build --no-restore"
+
+    - name: "Run Tests"
+      run: "dotnet test --no-build --verbosity normal --logger trx --results-directory test-results"
+
+    - name: "Publish Test Results"
+      uses: "actions/upload-artifact@v4"
+      with:
+        name: "Published Test Results"
+        path: "test-results"
+        compression-level: "0"
+        if-no-files-found: "error"
+        retention-days: "28"
