@@ -1,5 +1,7 @@
 <p align="center">
-    <img alt="Unit/Integration Tests" src="https://github.com/Project-KONGOR-Open-Source/ASPIRE/actions/workflows/dotnet.yml/badge.svg">
+    <a href="https://github.com/Project-KONGOR-Open-Source/ASPIRE/actions/workflows/dotnet.yml">
+        <img alt="Unit/Integration Tests" src="https://github.com/Project-KONGOR-Open-Source/ASPIRE/actions/workflows/dotnet.yml/badge.svg">
+    </a>
     <img alt="Work Items" src="https://img.shields.io/github/issues/Project-KONGOR-Open-Source/ASPIRE?label=Work%20Items&color=limegreen">
     <img alt="Code Contributors" src="https://img.shields.io/github/contributors/Project-KONGOR-Open-Source/ASPIRE?label=Code%20Contributors&color=limegreen">
     <img alt="Total Commits" src="https://img.shields.io/github/commit-activity/t/Project-KONGOR-Open-Source/ASPIRE?label=Total%20Commits&color=limegreen">
