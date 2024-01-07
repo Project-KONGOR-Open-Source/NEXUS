@@ -205,7 +205,14 @@ public class ZORGATH
 
         else
         {
-            app.UseExceptionHandler();
+            app.UseExceptionHandler("/Error");
+        }
+
+        // Enforce HTTPS In Production
+        if (app.Environment.IsProduction())
+        {
+            app.UseHttpsRedirection();
+            app.UseHsts();
         }
 
         // User CORS

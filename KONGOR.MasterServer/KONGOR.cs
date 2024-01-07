@@ -115,7 +115,14 @@ public class KONGOR
 
         else
         {
-            app.UseExceptionHandler();
+            app.UseExceptionHandler("/Error");
+        }
+
+        // Enforce HTTPS In Production
+        if (app.Environment.IsProduction())
+        {
+            app.UseHttpsRedirection();
+            app.UseHsts();
         }
 
         // Map Aspire Default Endpoints
