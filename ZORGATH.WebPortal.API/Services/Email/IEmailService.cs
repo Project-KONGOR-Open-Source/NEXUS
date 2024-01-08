@@ -6,5 +6,5 @@ public interface IEmailService
 
     public Task<bool> SendEmailAddressRegistrationConfirmation(string emailAddress, string accountName);
 
-    // TODO: Define Email Service
+    // TODO: Define Email Service (Two Implementations: Real, Console)
 }

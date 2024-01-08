@@ -1,5 +1,7 @@
 ﻿namespace ASPIRE.Tests.ZORGATH.WebPortal.API;
 
+using ZORGATH = global::ZORGATH.WebPortal.API.ZORGATH;
+
 // Run This Fixture Before Any Other One, In Order To Retrieve An Authentication Token
 // Other Methods Will Wait For An Authentication Token To Be Available
 
@@ -11,6 +13,9 @@ public sealed class AuthenticationFlowTests : WebPortalAPITestSetup
     {
         // This Method Overrides An Asynchronous Task, So It Needs To Do Some Asynchronous Work To Keep The Compiler Happy
         await Task.Delay(TimeSpan.Zero);
+
+        EphemeralZorgath = new WebApplicationFactory<ZORGATH>();
+        EphemeralZorgathClient = EphemeralZorgath.CreateClient();
 
         // Override The Default "EphemeralMerrickContext", And Create A Named Database Context For Sharing Between The Methods Part Of The Authentication Flow
         EphemeralMerrickContext = InMemoryHelpers.GetInMemoryMerrickContext("Registration And Authentication");

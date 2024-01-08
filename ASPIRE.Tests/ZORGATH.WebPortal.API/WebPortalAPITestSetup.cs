@@ -9,11 +9,7 @@ public abstract class WebPortalAPITestSetup
     protected HttpClient EphemeralZorgathClient { get; set; } = null!;
 
     [OneTimeSetUp]
-    public void OneTimeSetUp()
-    {
-        EphemeralZorgath = new WebApplicationFactory<ZORGATH>();
-        EphemeralZorgathClient = EphemeralZorgath.CreateClient();
-    }
+    public static void OneTimeSetUp() { }
 
     [SetUp]
     public virtual async Task SetUp()
@@ -21,6 +17,8 @@ public abstract class WebPortalAPITestSetup
         while (WebPortalAPITestContext.AuthenticationFlowHasExecuted.Equals(false))
             await Task.Delay(250);
 
+        EphemeralZorgath = new WebApplicationFactory<ZORGATH>();
+        EphemeralZorgathClient = EphemeralZorgath.CreateClient();
         EphemeralMerrickContext = InMemoryHelpers.GetInMemoryMerrickContext();
 
         if (string.IsNullOrWhiteSpace(WebPortalAPITestContext.EphemeralAuthenticationToken).Equals(false))
@@ -29,15 +27,13 @@ public abstract class WebPortalAPITestSetup
     }
 
     [TearDown]
-    public void TearDown()
+    public virtual void TearDown()
     {
         EphemeralMerrickContext.Dispose();
+        EphemeralZorgath.Dispose();
+        EphemeralZorgathClient.Dispose();
     }
 
     [OneTimeTearDown]
-    public void OneTimeTearDown()
-    {
-        EphemeralZorgathClient.Dispose();
-        EphemeralZorgath.Dispose();
-    }
+    public static void OneTimeTearDown() { }
 }
