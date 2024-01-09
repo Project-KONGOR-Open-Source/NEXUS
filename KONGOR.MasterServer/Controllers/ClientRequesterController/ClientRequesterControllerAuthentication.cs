@@ -2,7 +2,7 @@
 
 public partial class ClientRequesterController
 {
-    private async Task<IActionResult> HandlePreAuthenticationFunction()
+    private async Task<IActionResult> HandlePreAuthentication()
     {
         string? accountName = Request.Form["login"];
 
@@ -28,7 +28,7 @@ public partial class ClientRequesterController
             return NotFound(PhpSerialization.Serialize(new SRPAuthenticationFailureResponse(SRPAuthenticationFailureReason.AccountNotFound)));
 
         if (account.AccountType is AccountType.Disabled)
-            return Unauthorized(PhpSerialization.Serialize(new SRPAuthenticationFailureResponse(SRPAuthenticationFailureReason.AccountIsDisabled, account)));
+            return Unauthorized(PhpSerialization.Serialize(new SRPAuthenticationFailureResponse(SRPAuthenticationFailureReason.AccountIsDisabled, account.NameWithClanTag)));
 
         User user = account.User;
 
@@ -47,10 +47,61 @@ public partial class ClientRequesterController
         return Ok(PhpSerialization.Serialize(new SRPAuthenticationResponseStageOne(data)));
     }
 
-    private async Task<IActionResult> HandleSRPAuthenticationFunction()
+    private async Task<IActionResult> HandleSRPAuthentication()
     {
+        string? accountName = Request.Form["login"];
+
+        if (accountName is null)
+            return NotFound(PhpSerialization.Serialize(new SRPAuthenticationFailureResponse(SRPAuthenticationFailureReason.AccountNotFound)));
+
+        string? proof = Request.Form["proof"];
+
+        if (proof is null)
+            return BadRequest(PhpSerialization.Serialize(new SRPAuthenticationFailureResponse(SRPAuthenticationFailureReason.MissingSRPProof)));
+
+        string? operatingSystemType = Request.Form["OSType"];
+
+        if (operatingSystemType is null)
+            return BadRequest(PhpSerialization.Serialize(new SRPAuthenticationFailureResponse(SRPAuthenticationFailureReason.MissingOperatingSystemType)));
+
+        string? majorVersion = Request.Form["MajorVersion"];
+
+        if (majorVersion is null)
+            return BadRequest(PhpSerialization.Serialize(new SRPAuthenticationFailureResponse(SRPAuthenticationFailureReason.MissingMajorVersion)));
+
+        string? minorVersion = Request.Form["MinorVersion"];
+
+        if (minorVersion is null)
+            return BadRequest(PhpSerialization.Serialize(new SRPAuthenticationFailureResponse(SRPAuthenticationFailureReason.MissingMinorVersion)));
+
+        string? microVersion = Request.Form["MicroVersion"];
+
+        if (microVersion is null)
+            return BadRequest(PhpSerialization.Serialize(new SRPAuthenticationFailureResponse(SRPAuthenticationFailureReason.MissingMicroVersion)));
+
+        SRPAuthenticationSessionData? data = Cache.GetSRPAuthenticationSessionData(accountName);
+
+        if (data is null)
+        {
+            Logger.LogError($@"[BUG] Unable To Retrieve SRP Authentication Session Data For Account Name ""{accountName}""");
+
+            return UnprocessableEntity(PhpSerialization.Serialize(new SRPAuthenticationFailureResponse(SRPAuthenticationFailureReason.MissingSRPData, accountName)));
+        }
+
+        Cache.RemoveSRPAuthenticationSessionData(accountName);
+
+
+
+
+
+
+
+
         // TODO: Implement This
 
         throw new NotImplementedException();
     }
+
+    private BadRequestObjectResult HandleAuthentication()
+        => BadRequest(PhpSerialization.Serialize(new SRPAuthenticationFailureResponse(SRPAuthenticationFailureReason.SRPAuthenticationDisabled)));
 }

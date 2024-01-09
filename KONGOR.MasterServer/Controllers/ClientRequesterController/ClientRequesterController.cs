@@ -28,14 +28,15 @@ public partial class ClientRequesterController(MerrickContext databaseContext, I
     {
         return Request.Query["f"].SingleOrDefault() switch
         {
-            "pre_auth"  => await HandlePreAuthenticationFunction(),
-            "srpAuth"   => await HandleSRPAuthenticationFunction(),
-            null        => await HandleNullQueryStringFunction(),
+            "auth"      => HandleAuthentication(),
+            "pre_auth"  => await HandlePreAuthentication(),
+            "srpAuth"   => await HandleSRPAuthentication(),
+            null        => await HandleNullQueryString(),
             _           => throw new NotImplementedException($"Unsupported Client Requester Controller Query String Parameter: f={Request.Query["f"].Single()}")
         };
     }
 
-    private async Task<IActionResult> HandleNullQueryStringFunction()
+    private async Task<IActionResult> HandleNullQueryString()
     {
         return Request.Form["f"].SingleOrDefault() switch
         {

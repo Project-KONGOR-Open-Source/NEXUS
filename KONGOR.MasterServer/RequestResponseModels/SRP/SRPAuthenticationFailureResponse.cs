@@ -1,6 +1,6 @@
 ﻿namespace KONGOR.MasterServer.RequestResponseModels.SRP;
 
-public class SRPAuthenticationFailureResponse(SRPAuthenticationFailureReason reason, Account? account = null)
+public class SRPAuthenticationFailureResponse(SRPAuthenticationFailureReason reason, string? accountName = null)
 {
     /// <summary>
     ///     A string of error output in the event of an authentication failure, e.g. "Invalid Nickname Or Password.".
@@ -8,12 +8,19 @@ public class SRPAuthenticationFailureResponse(SRPAuthenticationFailureReason rea
     [PhpProperty("auth")]
     public string AuthenticationOutcome { get; set; } = reason switch
     {
-        SRPAuthenticationFailureReason.AccountIsDisabled    => account is null ? "Account Is Disabled" : $@"Account ""{account.NameWithClanTag}"" Is Disabled",
-        SRPAuthenticationFailureReason.AccountNotFound      => "Account Not Found",
-        SRPAuthenticationFailureReason.BadRequest           => "Bad Authentication Request",
-        SRPAuthenticationFailureReason.IncorrectPassword    => "Incorrect Password",
-        SRPAuthenticationFailureReason.InvalidCookie        => "Invalid Cookie",
-        _                                                   => $@"Unsupported Authentication Failure Reason ""{nameof(reason)}""",
+        SRPAuthenticationFailureReason.AccountIsDisabled            => "Account" + (accountName is null ? " " : $@" ""{accountName}"" ") + "Is Disabled",
+        SRPAuthenticationFailureReason.AccountNotFound              => "Account Not Found",
+        SRPAuthenticationFailureReason.BadRequest                   => "Bad Authentication Request",
+        SRPAuthenticationFailureReason.IncorrectPassword            => "Incorrect Password",
+        SRPAuthenticationFailureReason.InvalidCookie                => "Invalid Cookie",
+        SRPAuthenticationFailureReason.MissingMajorVersion          => "Missing Major Version",
+        SRPAuthenticationFailureReason.MissingMinorVersion          => "Missing Minor Version",
+        SRPAuthenticationFailureReason.MissingMicroVersion          => "Missing Micro Version",
+        SRPAuthenticationFailureReason.MissingOperatingSystemType   => "Missing Operating System Type",
+        SRPAuthenticationFailureReason.MissingSRPProof              => "Missing SRP Proof",
+        SRPAuthenticationFailureReason.MissingSRPData               => "Unable To Retrieve SRP Authentication Session Data" + (accountName is null ? string.Empty : " " + $@"For Account Name ""{accountName}"""),
+        SRPAuthenticationFailureReason.SRPAuthenticationDisabled    => "SRP Authentication Is Disabled" + Environment.NewLine + "1) Open The Console (CTRL + F8)" + Environment.NewLine + @"2) Execute ""SetSave login_useSRP true""",
+        _                                                           => "Unsupported Authentication Failure Reason" + " " + $@"""{nameof(reason)}"""
     };
 
     /// <summary>
@@ -31,4 +38,11 @@ public enum SRPAuthenticationFailureReason
     BadRequest,
     IncorrectPassword,
     InvalidCookie,
+    MissingMajorVersion,
+    MissingMinorVersion,
+    MissingMicroVersion,
+    MissingOperatingSystemType,
+    MissingSRPProof,
+    MissingSRPData,
+    SRPAuthenticationDisabled
 }
