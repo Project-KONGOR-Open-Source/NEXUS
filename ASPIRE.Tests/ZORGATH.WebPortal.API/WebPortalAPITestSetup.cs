@@ -4,9 +4,9 @@ using ZORGATH = global::ZORGATH.WebPortal.API.ZORGATH;
 
 public abstract class WebPortalAPITestSetup
 {
-    protected WebApplicationFactory<ZORGATH> EphemeralZorgath { get; set; } = null!;
-    protected MerrickContext EphemeralMerrickContext { get; set; } = null!;
-    protected HttpClient EphemeralZorgathClient { get; set; } = null!;
+    protected WebApplicationFactory<ZORGATH> TransientZorgath { get; set; } = null!;
+    protected MerrickContext TransientMerrickContext { get; set; } = null!;
+    protected HttpClient TransientZorgathClient { get; set; } = null!;
 
     [OneTimeSetUp]
     public static void OneTimeSetUp() { }
@@ -17,21 +17,21 @@ public abstract class WebPortalAPITestSetup
         while (WebPortalAPITestContext.AuthenticationFlowHasExecuted.Equals(false))
             await Task.Delay(250);
 
-        EphemeralZorgath = new WebApplicationFactory<ZORGATH>();
-        EphemeralZorgathClient = EphemeralZorgath.CreateClient();
-        EphemeralMerrickContext = InMemoryHelpers.GetInMemoryMerrickContext();
+        TransientZorgath = new WebApplicationFactory<ZORGATH>();
+        TransientZorgathClient = TransientZorgath.CreateClient();
+        TransientMerrickContext = InMemoryHelpers.GetInMemoryMerrickContext();
 
-        if (string.IsNullOrWhiteSpace(WebPortalAPITestContext.EphemeralAuthenticationToken).Equals(false))
-            EphemeralZorgathClient.DefaultRequestHeaders.Authorization
-                = new AuthenticationHeaderValue(JwtBearerDefaults.AuthenticationScheme, WebPortalAPITestContext.EphemeralAuthenticationToken);
+        if (string.IsNullOrWhiteSpace(WebPortalAPITestContext.TransientAuthenticationToken).Equals(false))
+            TransientZorgathClient.DefaultRequestHeaders.Authorization
+                = new AuthenticationHeaderValue(JwtBearerDefaults.AuthenticationScheme, WebPortalAPITestContext.TransientAuthenticationToken);
     }
 
     [TearDown]
     public virtual void TearDown()
     {
-        EphemeralMerrickContext.Dispose();
-        EphemeralZorgath.Dispose();
-        EphemeralZorgathClient.Dispose();
+        TransientMerrickContext.Dispose();
+        TransientZorgath.Dispose();
+        TransientZorgathClient.Dispose();
     }
 
     [OneTimeTearDown]

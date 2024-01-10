@@ -7,5 +7,5 @@ public sealed class UserControllerTests : WebPortalAPITestSetup
 
     [Test]
     public void VerifyAuthenticationToken()
-        => Assert.That(string.IsNullOrWhiteSpace(EphemeralZorgathClient.DefaultRequestHeaders.Authorization?.ToString()), Is.False);
+        => Assert.That(string.IsNullOrWhiteSpace(TransientZorgathClient.DefaultRequestHeaders.Authorization?.ToString()), Is.False);
 }

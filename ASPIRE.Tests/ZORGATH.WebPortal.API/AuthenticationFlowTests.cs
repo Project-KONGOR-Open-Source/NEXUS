@@ -14,11 +14,11 @@ public sealed class AuthenticationFlowTests : WebPortalAPITestSetup
         // This Method Overrides An Asynchronous Task, So It Needs To Do Some Asynchronous Work To Keep The Compiler Happy
         await Task.Delay(TimeSpan.Zero);
 
-        EphemeralZorgath = new WebApplicationFactory<ZORGATH>();
-        EphemeralZorgathClient = EphemeralZorgath.CreateClient();
+        TransientZorgath = new WebApplicationFactory<ZORGATH>();
+        TransientZorgathClient = TransientZorgath.CreateClient();
 
-        // Override The Default "EphemeralMerrickContext", And Create A Named Database Context For Sharing Between The Methods Part Of The Authentication Flow
-        EphemeralMerrickContext = InMemoryHelpers.GetInMemoryMerrickContext("Registration And Authentication");
+        // Override The Default "TransientMerrickContext", And Create A Named Database Context For Sharing Between The Methods Part Of The Authentication Flow
+        TransientMerrickContext = InMemoryHelpers.GetInMemoryMerrickContext("Registration And Authentication");
     }
 
     [Test, Order(1)]
@@ -29,10 +29,10 @@ public sealed class AuthenticationFlowTests : WebPortalAPITestSetup
 
         try
         {
-            emailAddressControllerLogger = EphemeralZorgath.Services.GetService(typeof(ILogger<EmailAddressController>)) as ILogger<EmailAddressController>
+            emailAddressControllerLogger = TransientZorgath.Services.GetService(typeof(ILogger<EmailAddressController>)) as ILogger<EmailAddressController>
                 ?? throw new NullReferenceException("ILogger<EmailAddressController> Is NULL");
 
-            emailService = EphemeralZorgath.Services.GetService(typeof(IEmailService)) as IEmailService
+            emailService = TransientZorgath.Services.GetService(typeof(IEmailService)) as IEmailService
                 ?? throw new NullReferenceException("IEmailService Is NULL");
         }
 
@@ -43,13 +43,13 @@ public sealed class AuthenticationFlowTests : WebPortalAPITestSetup
             throw new NullReferenceException("Required Service Is NULL", exception);
         }
 
-        EmailAddressController emailAddressController = new(EphemeralMerrickContext, emailAddressControllerLogger, emailService);
+        EmailAddressController emailAddressController = new(TransientMerrickContext, emailAddressControllerLogger, emailService);
 
         IActionResult responseRegisterEmailAddress = await emailAddressController.RegisterEmailAddress(new RegisterEmailAddressDTO(emailAddress, emailAddress));
 
         Assert.That(responseRegisterEmailAddress is OkObjectResult, Is.True);
 
-        Token? token = await EphemeralMerrickContext.Tokens.SingleOrDefaultAsync(token => token.EmailAddress.Equals(emailAddress) && token.Purpose.Equals(TokenPurpose.EmailAddressVerification));
+        Token? token = await TransientMerrickContext.Tokens.SingleOrDefaultAsync(token => token.EmailAddress.Equals(emailAddress) && token.Purpose.Equals(TokenPurpose.EmailAddressVerification));
 
         Assert.That(token, Is.Not.Null);
     }
@@ -62,13 +62,13 @@ public sealed class AuthenticationFlowTests : WebPortalAPITestSetup
 
         try
         {
-            userControllerLogger = EphemeralZorgath.Services.GetService(typeof(ILogger<UserController>)) as ILogger<UserController>
+            userControllerLogger = TransientZorgath.Services.GetService(typeof(ILogger<UserController>)) as ILogger<UserController>
                 ?? throw new NullReferenceException("ILogger<UserController> Is NULL");
 
-            configuration = EphemeralZorgath.Services.GetService(typeof(IConfiguration)) as IConfiguration
+            configuration = TransientZorgath.Services.GetService(typeof(IConfiguration)) as IConfiguration
                 ?? throw new NullReferenceException("IConfiguration Is NULL");
 
-            emailService = EphemeralZorgath.Services.GetService(typeof(IEmailService)) as IEmailService
+            emailService = TransientZorgath.Services.GetService(typeof(IEmailService)) as IEmailService
                 ?? throw new NullReferenceException("IEmailService Is NULL");
         }
 
@@ -79,7 +79,7 @@ public sealed class AuthenticationFlowTests : WebPortalAPITestSetup
             throw new NullReferenceException("Required Service Is NULL", exception);
         }
 
-        Token? registrationToken = await EphemeralMerrickContext.Tokens.SingleOrDefaultAsync(token => token.EmailAddress.Equals(emailAddress) && token.Purpose.Equals(TokenPurpose.EmailAddressVerification));
+        Token? registrationToken = await TransientMerrickContext.Tokens.SingleOrDefaultAsync(token => token.EmailAddress.Equals(emailAddress) && token.Purpose.Equals(TokenPurpose.EmailAddressVerification));
 
         if (registrationToken is null)
         {
@@ -88,7 +88,7 @@ public sealed class AuthenticationFlowTests : WebPortalAPITestSetup
             throw new NullReferenceException("Registration Token Is NULL");
         }
 
-        UserController userController = new(EphemeralMerrickContext, userControllerLogger, configuration, emailService);
+        UserController userController = new(TransientMerrickContext, userControllerLogger, configuration, emailService);
 
         IActionResult responseRegisterUserAndMainAccount = await userController.RegisterUserAndMainAccount(new RegisterUserAndMainAccountDTO(registrationToken.ID.ToString(), name, password, password));
 
@@ -103,13 +103,13 @@ public sealed class AuthenticationFlowTests : WebPortalAPITestSetup
 
         try
         {
-            userControllerLogger = EphemeralZorgath.Services.GetService(typeof(ILogger<UserController>)) as ILogger<UserController>
+            userControllerLogger = TransientZorgath.Services.GetService(typeof(ILogger<UserController>)) as ILogger<UserController>
                 ?? throw new NullReferenceException("ILogger<UserController> Is NULL");
 
-            configuration = EphemeralZorgath.Services.GetService(typeof(IConfiguration)) as IConfiguration
+            configuration = TransientZorgath.Services.GetService(typeof(IConfiguration)) as IConfiguration
                 ?? throw new NullReferenceException("IConfiguration Is NULL");
 
-            emailService = EphemeralZorgath.Services.GetService(typeof(IEmailService)) as IEmailService
+            emailService = TransientZorgath.Services.GetService(typeof(IEmailService)) as IEmailService
                 ?? throw new NullReferenceException("IEmailService Is NULL");
         }
 
@@ -120,7 +120,7 @@ public sealed class AuthenticationFlowTests : WebPortalAPITestSetup
             throw new NullReferenceException("Required Service Is NULL", exception);
         }
 
-        UserController userController = new(EphemeralMerrickContext, userControllerLogger, configuration, emailService);
+        UserController userController = new(TransientMerrickContext, userControllerLogger, configuration, emailService);
 
         IActionResult responseLogInUser = await userController.LogInUser(new LogInUserDTO(name, password));
 
@@ -153,7 +153,7 @@ public sealed class AuthenticationFlowTests : WebPortalAPITestSetup
         new JwtSecurityTokenHandler().ValidateToken(authenticationToken, tokenValidationParameters, out SecurityToken validatedSecurityToken);
 
         // Set The Authentication Token For The Web Portal API Test Run; Other Tests Will Use This Token To Make Authenticated Requests
-        WebPortalAPITestContext.EphemeralAuthenticationToken = authenticationToken;
+        WebPortalAPITestContext.TransientAuthenticationToken = authenticationToken;
 
         // Signal Other Tests That An Authentication Token Is Available For Making Authenticated Requests
         WebPortalAPITestContext.AuthenticationFlowHasExecuted = true;
