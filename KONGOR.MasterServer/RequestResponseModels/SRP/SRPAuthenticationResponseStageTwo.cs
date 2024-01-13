@@ -1,3 +1,7 @@
+namespace KONGOR.MasterServer.RequestResponseModels.SRP;
+
+public class SRPAuthenticationResponseStageTwo
+{
 
 
     /// <summary>
@@ -20,7 +24,56 @@
     ///     This dictionary needs to contain a single entry with the key being the owner account's ID.
     /// </summary>
     [PhpProperty("banned_list")]
-    public required Dictionary<int, List<BannedAccounts>> BannedAccountsList { get; set; }
+    public required Dictionary<int, List<BannedAccount>> BannedAccountsList { get; set; }
+
+    /// <summary>
+    ///     The list of members of the account's clan.
+    ///     This dictionary needs to contain multiple entries, the key of each being the respective clan member account's ID.
+    /// </summary>
+    [PhpProperty("clan_roster")]
+    public required Dictionary<int, ClanMemberAccount> ClanRoster { get; set; }
+
+    /// <summary>
+    ///     The collection of owned store items.
+    ///     <code>
+    ///         Chat Name Colour       =>   "cc"
+    ///         Chat Symbol            =>   "cs"
+    ///         Account Icon           =>   "ai"
+    ///         Alternative Avatar     =>   "aa"
+    ///         Announcer Voice        =>   "av"
+    ///         Taunt                  =>   "t"
+    ///         Courier                =>   "c"
+    ///         Hero                   =>   "h"
+    ///         Early-Access Product   =>   "eap"
+    ///         Status                 =>   "s"
+    ///         Miscellaneous          =>   "m"
+    ///         Ward                   =>   "w"
+    ///         Enhancement            =>   "en"
+    ///         Coupon                 =>   "cp"
+    ///         Mastery                =>   "ma"
+    ///         Creep                  =>   "cr"
+    ///         Building               =>   "bu"
+    ///         Taunt Badge            =>   "tb"
+    ///         Teleportation Effect   =>   "te"
+    ///         Selection Circle       =>   "sc"
+    ///         Bundle                 =>   string.Empty
+    ///     </code>
+    /// </summary>
+    [PhpProperty("my_upgrades")]
+    public required List<string> OwnedStoreItems { get; set; }
+
+    /// <summary>
+    ///     The collection of selected store items.
+    /// </summary>
+    [PhpProperty("selected_upgrades")]
+    public required List<string> SelectedStoreItems { get; set; }
+
+    /// <summary>
+    ///     Metadata attached to each of the account's owned store items.
+    /// </summary>
+    [PhpProperty("my_upgrades_info")]
+    public required Dictionary<string, OneOf<StoreItemData, StoreItemDiscountCoupon>> OwnedStoreItemsData { get; set; }
+}
 
 
 
@@ -81,7 +134,7 @@ public class FriendAccount
     ///     0 = False; 1 = True
     /// </summary>
     [PhpProperty("new")]
-    public string? New { get; set; } = "0";
+    public string New { get; set; } = "0";
 }
 
 public class IgnoredAccount
@@ -119,4 +172,92 @@ public class BannedAccount
     /// </summary>
     [PhpProperty("reason")]
     public required string Reason { get; set; }
+}
+
+public class ClanMemberAccount
+{
+    /// <summary>
+    ///     The ID of the clan member account.
+    /// </summary>
+    [PhpProperty("account_id")]
+    public required string ID { get; set; }
+
+    /// <summary>
+    ///     The name of the clan member account.
+    /// </summary>
+    [PhpProperty("nickname")]
+    public required string Name { get; set; }
+
+    /// <summary>
+    ///     The ID of the clan.
+    /// </summary>
+    [PhpProperty("clan_id")]
+    public required string ClanID { get; set; }
+
+    /// <summary>
+    ///     The clan rank of the clan member account.
+    ///     <br/>
+    ///     None; Member; Officer; Leader
+    /// </summary>
+    [PhpProperty("rank")]
+    public required string Rank { get; set; }
+
+    /// <summary>
+    ///     Unknown.
+    /// </summary>
+    [PhpProperty("message")]
+    public string Message { get; set; } = string.Empty; // TODO: See Whether This Does Anything
+
+    /// <summary>
+    ///     The datetime that the account joined the clan, in the format "yyyy-MM-dd HH:mm:ss".
+    /// </summary>
+    [PhpProperty("join_date")]
+    public required string JoinDate { get; set; }
+
+    /// <summary>
+    ///     The account type of the friend.
+    ///     <br/>
+    ///     0 = None; 1 = Basic Account; 2 = Verified Account; 3 = Legacy Account
+    /// </summary>
+    [PhpProperty("standing")]
+    public string Standing { get; set; } = "3";
+}
+
+public class StoreItemData
+{
+    /// <summary>
+    ///     Unknown.
+    ///     Seems to be an empty string in all the network packet dumps.
+    /// </summary>
+    [PhpProperty("data")]
+    public string Data { get; set; } = string.Empty;
+
+    /// <summary>
+    ///     The availability start time (in UTC seconds) of a limited-time store item (e.g. early-access hero).
+    /// </summary>
+    [PhpProperty("start_time")]
+    public string AvailableFrom { get; set; } = DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString();
+
+    /// <summary>
+    ///     The availability end time (in UTC seconds) of a limited-time store item (e.g. early-access hero).
+    /// </summary>
+    [PhpProperty("end_time")]
+    public string AvailableUntil { get; set; } = DateTimeOffset.UtcNow.AddYears(1000).ToUnixTimeSeconds().ToString();
+
+    /// <summary>
+    ///     Unknown.
+    ///     If "score" is not set, then this property is not set either.
+    ///     But if "score" is set, then this property is set to "0".
+    /// </summary>
+    [PhpProperty("used")]
+    public int Used { get; set; } = 0;
+
+    /// <summary>
+    ///     Used for numeric counters and visual effects for specific hero avatars.
+    ///     This value represents the number of hero kills achieved with those respective avatars.
+    ///     <br/>
+    ///     We don't currently keep track of these scores, so setting this value to "0" on every login will cause the counter to be equal to the number of hero kills each game.
+    /// </summary>
+    [PhpProperty("score")]
+    public string Score { get; set; } = "0";
 }
