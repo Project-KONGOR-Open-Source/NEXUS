@@ -15,7 +15,7 @@ public class Account
 
     public required bool IsMain { get; set; }
 
-    public Clan? Clan { get; set; }
+    public Clan? Clan { get; set; } = default;
 
     public ClanTier ClanTier { get; set; } = ClanTier.None;
 
