@@ -21,7 +21,7 @@ public class User
     public required string SRPPasswordHash { get; set; } // TODO: Maybe Just Rename This To PasswordSRPHash ?
 
     [StringLength(84)]
-    public string PBKDF2PasswordHash { get; set; } = null!;
+    public string PBKDF2PasswordHash { get; set; } = null!; // TODO: Maybe Make This A Nullable Type
 
     public List<Account> Accounts { get; set; } = [];
 
