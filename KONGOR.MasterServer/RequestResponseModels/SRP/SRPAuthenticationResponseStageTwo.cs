@@ -1,4 +1,4 @@
-namespace KONGOR.MasterServer.RequestResponseModels.SRP;
+﻿namespace KONGOR.MasterServer.RequestResponseModels.SRP;
 
 public class SRPAuthenticationResponseStageTwo
 {
@@ -32,6 +32,12 @@ public class SRPAuthenticationResponseStageTwo
     /// </summary>
     [PhpProperty("clan_roster")]
     public required Dictionary<int, ClanMemberAccount> ClanRoster { get; set; }
+
+    /// <summary>
+    ///     The account's clan membership data if the account is part of a clan, or an error message if the account is not part of a clan.
+    /// </summary>
+    [PhpProperty("clan_member_info")]
+    public required OneOf<ClanMemberData, ClanMemberDataError> ClanMembershipData { get; set; }
 
     /// <summary>
     ///     The collection of owned store items.
@@ -206,7 +212,7 @@ public class ClanMemberAccount
     ///     Unknown.
     /// </summary>
     [PhpProperty("message")]
-    public string Message { get; set; } = string.Empty; // TODO: See Whether This Does Anything
+    public string Message { get; set; } = string.Empty;
 
     /// <summary>
     ///     The datetime that the account joined the clan, in the format "yyyy-MM-dd HH:mm:ss".
@@ -221,6 +227,104 @@ public class ClanMemberAccount
     /// </summary>
     [PhpProperty("standing")]
     public string Standing { get; set; } = "3";
+}
+
+public class ClanMemberData
+{
+    /// <summary>
+    ///     The ID of the clan.
+    /// </summary>
+    [PhpProperty("clan_id")]
+    public required string ClanID { get; set; }
+
+    /// <summary>
+    ///     The name of the clan.
+    /// </summary>
+    [PhpProperty("name")]
+    public required string ClanName { get; set; }
+
+    /// <summary>
+    ///     The tag of the clan.
+    /// </summary>
+    [PhpProperty("tag")]
+    public required string ClanTag { get; set; }
+
+    /// <summary>
+    ///     The ID of the account which owns the clan.
+    /// </summary>
+    [PhpProperty("creator")]
+    public required string ClanOwnerAccountID { get; set; }
+
+    /// <summary>
+    ///     The ID of the clan member account.
+    /// </summary>
+    [PhpProperty("account_id")]
+    public required string ID { get; set; }
+
+    /// <summary>
+    ///     The clan rank of the clan member account.
+    ///     <br/>
+    ///     None; Member; Officer; Leader
+    /// </summary>
+    [PhpProperty("rank")]
+    public required string Rank { get; set; }
+
+    /// <summary>
+    ///     Unknown.
+    /// </summary>
+    [PhpProperty("message")]
+    public string Message { get; set; } = "TODO: [MESSAGE] See Whether This Does Anything";
+
+    /// <summary>
+    ///     The datetime that the account joined the clan, in the format "yyyy-MM-dd HH:mm:ss".
+    /// </summary>
+    [PhpProperty("join_date")]
+    public required string JoinDate { get; set; }
+
+    /// <summary>
+    ///     Unknown.
+    /// </summary>
+    [PhpProperty("title")]
+    public string Title { get; set; } = "TODO: [TITLE] See Whether This Does Anything";
+
+    /// <summary>
+    ///     Whether the account is active in the clan or not.
+    ///     It is unknown what "active" means.
+    ///     <br/>
+    ///     0 = False; 1 = True
+    /// </summary>
+    [PhpProperty("active")]
+    public string Active { get; set; } = "1";
+
+    /// <summary>
+    ///     Unknown.
+    /// </summary>
+    [PhpProperty("logo")]
+    public string Logo { get; set; } = "TODO: [LOGO] See Whether This Does Anything";
+
+    /// <summary>
+    ///     Whether the clan has been flagged as idle (no active users) or not.
+    ///     <br/>
+    ///     0 = False; 1 = True
+    /// </summary>
+    [PhpProperty("idleWarn")]
+    public string ClanIsInactive { get; set; } = "0";
+
+    /// <summary>
+    ///     Unknown.
+    ///     Seems to be set to "0" in all the network packet dumps.
+    /// </summary>
+    [PhpProperty("activeIndex")]
+    public string ActiveIndex { get; set; } = "0";
+}
+
+public class ClanMemberDataError
+{
+    /// <summary>
+    ///     This replaces the account's clan member data when the account is not part of a clan.
+    /// </summary>
+    [PhpProperty("error")]
+    public string Error { get; set; } = "No Clan Member Found";
 }
 
 public class StoreItemData
