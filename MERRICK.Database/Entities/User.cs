@@ -25,6 +25,10 @@ public class User
 
     public List<Account> Accounts { get; set; } = [];
 
+    public DateTime TimestampCreated { get; set; } = DateTime.UtcNow;
+
+    public DateTime TimestampLastActive { get; set; } = DateTime.UtcNow;
+
     public int GoldCoins { get; set; } = 0;
 
     public int SilverCoins { get; set; } = 0;
