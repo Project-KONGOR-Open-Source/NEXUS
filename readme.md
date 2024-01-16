@@ -58,7 +58,7 @@ Create A Database Schema Migration
 
 <br/>
 
-Update The Database
+Update The Database Schema
 
 ```powershell
 # Development Database
@@ -73,6 +73,13 @@ dotnet ef database update --project MERRICK.Database
 $ENV:ASPNETCORE_ENVIRONMENT = "Production"
 dotnet ef database update --project MERRICK.Database
 ```
+
+<br/>
+
+> [!NOTE]
+> Updating the database schema manually is only required during development, when there is a potential for database schema migrations to fail.
+> If the migrations are stable, then manually updating the database can be skipped, as that happens automatically at runtime.
+> This also means that a database will be fully scaffolded at runtime if it does not already exist.
 
 <hr/>
 
