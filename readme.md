@@ -1,13 +1,13 @@
 <p align="center">
-    <a href="https://github.com/Project-KONGOR-Open-Source/ASPIRE/actions/workflows/dotnet.yml"><img alt="Unit/Integration Tests" src="https://github.com/Project-KONGOR-Open-Source/ASPIRE/actions/workflows/dotnet.yml/badge.svg"></a>
-    <img alt="Work Items" src="https://img.shields.io/github/issues/Project-KONGOR-Open-Source/ASPIRE?label=Work%20Items&color=limegreen">
-    <img alt="Code Contributors" src="https://img.shields.io/github/contributors/Project-KONGOR-Open-Source/ASPIRE?label=Code%20Contributors&color=limegreen">
-    <img alt="Total Commits" src="https://img.shields.io/github/commit-activity/t/Project-KONGOR-Open-Source/ASPIRE?label=Total%20Commits&color=limegreen">
+    <a href="https://github.com/Project-KONGOR-Open-Source/NEXUS/actions/workflows/dotnet.yml"><img alt="Unit/Integration Tests" src="https://github.com/Project-KONGOR-Open-Source/NEXUS/actions/workflows/dotnet.yml/badge.svg"></a>
+    <img alt="Work Items" src="https://img.shields.io/github/issues/Project-KONGOR-Open-Source/NEXUS?label=Work%20Items&color=limegreen">
+    <img alt="Code Contributors" src="https://img.shields.io/github/contributors/Project-KONGOR-Open-Source/NEXUS?label=Code%20Contributors&color=limegreen">
+    <img alt="Total Commits" src="https://img.shields.io/github/commit-activity/t/Project-KONGOR-Open-Source/NEXUS?label=Total%20Commits&color=limegreen">
     <img alt="GitHub Sponsors" src="https://img.shields.io/github/sponsors/K-O-N-G-O-R?label=GitHub%20Sponsors&color=limegreen">
 </p>
 
 <h3>
-    <p align="center">ASPIRE</p>
+    <p align="center">NEXUS</p>
     <p>The full suite of Project KONGOR services, architected as an open-source cloud-ready distributed application.</p>
     <p>If you would like to support the development of this project and buy me a coffee, please consider one of the following options: <a href="https://github.com/sponsors/K-O-N-G-O-R">GitHub Sponsors</a>, <a href="https://paypal.me/MissingLinkMedia">PayPal</a>. 💚</p>
 </h3>
