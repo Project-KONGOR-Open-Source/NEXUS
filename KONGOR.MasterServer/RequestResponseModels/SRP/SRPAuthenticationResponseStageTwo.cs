@@ -79,6 +79,27 @@ public class SRPAuthenticationResponseStageTwo
     /// </summary>
     [PhpProperty("my_upgrades_info")]
     public required Dictionary<string, OneOf<StoreItemData, StoreItemDiscountCoupon>> OwnedStoreItemsData { get; set; }
+
+    /// <summary>
+    ///     The list of heroes with a non-standard-ownership (free/early-access/etc.) model.
+    ///     The latest list of heroes sent by the legacy HoN master server before the services shut down is the list of free heroes: "Hero_Genesis,Hero_Dorin_Tal,Hero_Adeve".
+    ///     <br/>
+    ///     This property is obsolete.
+    /// </summary>
+    [PhpProperty("hero_list")]
+    public HeroList HeroList { get; set; } = new();
+
+    /// <summary>
+    ///     Used for the Tencent anti-DDoS protection component, which does network packet watermarking that gets verified by the game server proxy.
+    /// </summary>
+    [PhpProperty("sec_info")]
+    public SecurityInformation SecurityInformation { get; set; } = new();
+
+    /// <summary>
+    ///     A set of static values used to generate award-centric data and trigger award-centric events.
+    /// </summary>
+    [PhpProperty("awards_tooltip")]
+    public required AwardsTooltip AwardsTooltip { get; set; }
 }
 
 
@@ -364,4 +385,397 @@ public class StoreItemData
     /// </summary>
     [PhpProperty("score")]
     public string Score { get; set; } = "0";
+}
+
+public class HeroList
+{
+    /// <summary>
+    ///     The list of free heroes in the rotation, from when HoN became free-to-play.
+    ///     The assigned value is the latest list of heroes sent by the legacy HoN master server before the services shut down.
+    ///     <br/>
+    ///     This property is obsolete.
+    /// </summary>
+    [PhpProperty("free")]
+    public string FreeHeroes { get; set; } = "Hero_Genesis,Hero_Dorin_Tal,Hero_Adeve";
+}
+
+public class SecurityInformation
+{
+    /// <summary>
+    ///     Used for the Tencent anti-DDoS protection component, which does network packet watermarking that gets verified by the game server proxy.
+    /// </summary>
+    [PhpProperty("initial_vector")]
+    public string InitialVector { get; set; } = "73088db5e71cfb6d";
+
+    /// <summary>
+    ///     Unknown.
+    /// </summary>
+    [PhpProperty("hash_code")]
+    public string HashCode { get; set; } = "73088db5e71cfb6d43ae0bb4abf095dd43862200";
+
+    /// <summary>
+    ///     Unknown.
+    /// </summary>
+    [PhpProperty("key_version")]
+    public string KeyVersion { get; set; } = "3e2d";
+}
+
+public class AwardsTooltip
+{
+    /// <summary>
+    ///     Milestones award.
+    /// </summary>
+    [PhpProperty("milestones")]
+    public MilestonesAwardTooltip Milestones { get; set; } = new();
+
+    /// <summary>
+    ///     Leveling award.
+    /// </summary>
+    [PhpProperty("leveling")]
+    public LevelingAwardTooltip Leveling { get; set; } = new();
+
+    /// <summary>
+    ///     Bloodlust award.
+    /// </summary>
+    [PhpProperty("bloodlust")]
+    public BloodlustAwardTooltip Bloodlust { get; set; } = new();
+
+    /// <summary>
+    ///     Annihilation award.
+    /// </summary>
+    [PhpProperty("annihilation")]
+    public AnnihilationAwardTooltip Annihilation { get; set; } = new();
+
+    /// <summary>
+    ///     Immortal award.
+    /// </summary>
+    [PhpProperty("immortal")]
+    public ImmortalAwardTooltip Immortal { get; set; } = new();
+
+    /// <summary>
+    ///     Victory award.
+    /// </summary>
+    [PhpProperty("victory")]
+    public VictoryAwardTooltip Victory { get; set; } = new();
+
+    /// <summary>
+    ///     Loss award.
+    /// </summary>
+    [PhpProperty("loss")]
+    public LossAwardTooltip Loss { get; set; } = new();
+
+    /// <summary>
+    ///     Disconnect award.
+    /// </summary>
+    [PhpProperty("disco")]
+    public DisconnectAwardTooltip Disconnect { get; set; } = new();
+
+    /// <summary>
+    ///     Quick match award.
+    /// </summary>
+    [PhpProperty("quick")]
+    public QuickMatchAwardTooltip QuickMatch { get; set; } = new();
+
+    /// <summary>
+    ///     First blood award.
+    /// </summary>
+    [PhpProperty("first")]
+    public FirstBloodAwardTooltip FirstBlood { get; set; } = new();
+
+    /// <summary>
+    ///     Consecutive wins award.
+    /// </summary>
+    [PhpProperty("consec_win")]
+    public ConsecutiveWinAwardTooltip ConsecutiveWins { get; set; } = new();
+
+    /// <summary>
+    ///     Consecutive losses award.
+    /// </summary>
+    [PhpProperty("consec_loss")]
+    public ConsecutiveLossAwardTooltip ConsecutiveLosses { get; set; } = new();
+}
+
+public class MilestonesAwardTooltip
+{
+    /// <summary>
+    ///     Awarded for hero assists.
+    /// </summary>
+    [PhpProperty("heroassists")]
+    public MilestoneAwardTooltip HeroAssists { get; set; } = new()
+    {
+        AwardName = "heroassists",
+        Experience = "100",
+        GoblinCoins = "5",
+        Modulo = "250"
+    };
+
+    /// <summary>
+    ///     Awarded for hero kills.
+    /// </summary>
+    [PhpProperty("herokills")]
+    public MilestoneAwardTooltip HeroKills { get; set; } = new()
+    {
+        AwardName = "herokills",
+        Experience = "100",
+        GoblinCoins = "5",
+        Modulo = "250"
+    };
+
+    /// <summary>
+    ///     Awarded for killing heroes after taunting them.
+    /// </summary>
+    [PhpProperty("smackdown")]
+    public MilestoneAwardTooltip Smackdown { get; set; } = new()
+    {
+        AwardName = "smackdown",
+        Experience = "50",
+        GoblinCoins = "1",
+        Modulo = "10"
+    };
+
+    /// <summary>
+    ///     Awarded for placing wards.
+    /// </summary>
+    [PhpProperty("wards")]
+    public MilestoneAwardTooltip Wards { get; set; } = new()
+    {
+        AwardName = "wards",
+        Experience = "100",
+        GoblinCoins = "5",
+        Modulo = "50"
+    };
+
+    /// <summary>
+    ///     Awarded for winning matches.
+    /// </summary>
+    [PhpProperty("wins")]
+    public MilestoneAwardTooltip Wins { get; set; } = new()
+    {
+        AwardName = "wins",
+        Experience = "200",
+        GoblinCoins = "10",
+        Modulo = "50"
+    };
+}
+
+public class MilestoneAwardTooltip
+{
+    /// <summary>
+    ///     The name of the milestone.
+    /// </summary>
+    [PhpProperty("aname")]
+    public required string AwardName { get; set; }
+
+    /// <summary>
+    ///     The value of the milestone in experience.
+    /// </summary>
+    [PhpProperty("exp")]
+    public required string Experience { get; set; }
+
+    /// <summary>
+    ///     The value of the milestone in goblin coins.
+    /// </summary>
+    [PhpProperty("gc")]
+    public required string GoblinCoins { get; set; }
+
+    /// <summary>
+    ///     The modulus used to determine the frequency of reaching the milestone, e.g. "10" would mean that the milestone is reached every 10 ticks.
+    /// </summary>
+    [PhpProperty("modulo")]
+    public required string Modulo { get; set; }
+}
+
+public class LevelingAwardTooltip
+{
+    /// <summary>
+    ///     Awarded for reaching hero levels 2 to 5.
+    /// </summary>
+    [PhpProperty("2-5")]
+    public int TwoToFive { get; set; } = 6;
+
+    /// <summary>
+    ///     Awarded for reaching hero levels 6 to 10.
+    /// </summary>
+    [PhpProperty("6-10")]
+    public int SixToTen { get; set; } = 12;
+
+    /// <summary>
+    ///     Awarded for reaching hero levels 11 to 15.
+    /// </summary>
+    [PhpProperty("11-15")]
+    public int ElevenToFifteen { get; set; } = 16;
+}
+
+public class BloodlustAwardTooltip
+{
+    /// <summary>
+    ///     Experience reward.
+    /// </summary>
+    [PhpProperty("exp")]
+    public int Experience { get; set; } = 10;
+
+    /// <summary>
+    ///     Goblin coins reward.
+    /// </summary>
+    [PhpProperty("gc")]
+    public int GoblinCoins { get; set; } = 2;
+}
+
+public class AnnihilationAwardTooltip
+{
+    /// <summary>
+    ///     Experience reward.
+    /// </summary>
+    [PhpProperty("exp")]
+    public int Experience { get; set; } = 75;
+
+    /// <summary>
+    ///     Goblin coins reward.
+    /// </summary>
+    [PhpProperty("gc")]
+    public int GoblinCoins { get; set; } = 15;
+
+    /// <summary>
+    ///     Team experience reward.
+    /// </summary>
+    [PhpProperty("tm_exp")]
+    public int TeamExperience { get; set; } = 25;
+
+    /// <summary>
+    ///     Team goblin coins reward.
+    /// </summary>
+    [PhpProperty("tm_gc")]
+    public int TeamGoblinCoins { get; set; } = 5;
+}
+
+public class ImmortalAwardTooltip
+{
+    /// <summary>
+    ///     Experience reward.
+    /// </summary>
+    [PhpProperty("exp")]
+    public int Experience { get; set; } = 50;
+
+    /// <summary>
+    ///     Goblin coins reward.
+    /// </summary>
+    [PhpProperty("gc")]
+    public int GoblinCoins { get; set; } = 10;
+
+    /// <summary>
+    ///     Team experience reward.
+    /// </summary>
+    [PhpProperty("tm_exp")]
+    public int TeamExperience { get; set; } = 15;
+
+    /// <summary>
+    ///     Team goblin coins reward.
+    /// </summary>
+    [PhpProperty("tm_gc")]
+    public int TeamGoblinCoins { get; set; } = 3;
+}
+
+public class VictoryAwardTooltip
+{
+    /// <summary>
+    ///     Experience reward.
+    /// </summary>
+    [PhpProperty("exp")]
+    public int Experience { get; set; } = 30;
+
+    /// <summary>
+    ///     Goblin coins reward.
+    /// </summary>
+    [PhpProperty("gc")]
+    public int GoblinCoins { get; set; } = 6;
+}
+
+public class LossAwardTooltip
+{
+    /// <summary>
+    ///     Experience reward.
+    /// </summary>
+    [PhpProperty("exp")]
+    public int Experience { get; set; } = 10;
+
+    /// <summary>
+    ///     Goblin coins reward.
+    /// </summary>
+    [PhpProperty("gc")]
+    public int GoblinCoins { get; set; } = 2;
+}
+
+public class DisconnectAwardTooltip
+{
+    /// <summary>
+    ///     Experience reward.
+    /// </summary>
+    [PhpProperty("exp")]
+    public int Experience { get; set; } = 0;
+
+    /// <summary>
+    ///     Goblin coins reward.
+    /// </summary>
+    [PhpProperty("gc")]
+    public int GoblinCoins { get; set; } = 0;
+}
+
+public class QuickMatchAwardTooltip
+{
+    /// <summary>
+    ///     Experience reward.
+    /// </summary>
+    [PhpProperty("exp")]
+    public int Experience { get; set; } = 0;
+
+    /// <summary>
+    ///     Goblin coins reward.
+    /// </summary>
+    [PhpProperty("gc")]
+    public int GoblinCoins { get; set; } = 2;
+}
+
+public class FirstBloodAwardTooltip
+{
+    /// <summary>
+    ///     Experience reward.
+    /// </summary>
+    [PhpProperty("exp")]
+    public int Experience { get; set; } = 20;
+
+    /// <summary>
+    ///     Goblin coins reward.
+    /// </summary>
+    [PhpProperty("gc")]
+    public int GoblinCoins { get; set; } = 4;
+}
+
+public class ConsecutiveWinAwardTooltip
+{
+    /// <summary>
+    ///     Experience reward.
+    /// </summary>
+    [PhpProperty("exp")]
+    public int Experience { get; set; } = 0;
+
+    /// <summary>
+    ///     Goblin coins reward.
+    /// </summary>
+    [PhpProperty("gc")]
+    public string GoblinCoins { get; set; } = "2-6";
+}
+
+public class ConsecutiveLossAwardTooltip
+{
+    /// <summary>
+    ///     Experience reward.
+    /// </summary>
+    [PhpProperty("exp")]
+    public int Experience { get; set; } = 0;
+
+    /// <summary>
+    ///     Goblin coins reward.
+    /// </summary>
+    [PhpProperty("gc")]
+    public int GoblinCoins { get; set; } = 1;
 }
