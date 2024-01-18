@@ -13,7 +13,313 @@
 /// </summary>
 public class SRPAuthenticationResponseStageTwo
 {
+    /// <summary>
+    ///     M2 : the server's proof; the client should verify this value and use it to complete the SRP challenge exchange
+    /// </summary>
+    [PhpProperty("proof")]
+    public required string ServerProof { get; set; }
 
+    /// <summary>
+    ///     The ID of the main account associated with the account attempting to log in.
+    ///     This ID will be the same as the ID of the account attempting to log in, when logging in with a main account.
+    /// </summary>
+    [PhpProperty("super_id")]
+    public required string MainAccountID { get; set; }
+
+    /// <summary>
+    ///     The ID of the account attempting to log in.
+    /// </summary>
+    [PhpProperty("account_id")]
+    public required string ID { get; set; }
+
+    /// <summary>
+    ///     The Garena ID of the account attempting to log in.
+    ///     This property only applies to the Garena client.
+    /// </summary>
+    [PhpProperty("garena_id")]
+    public required string GarenaID { get; set; }
+
+    /// <summary>
+    ///     The name of the account attempting to log in.
+    /// </summary>
+    [PhpProperty("nickname")]
+    public required string Name { get; set; }
+
+    /// <summary>
+    ///     The email address of the user to which the account attempting to log in belongs.
+    /// </summary>
+    [PhpProperty("email")]
+    public required string Email { get; set; }
+
+    /// <summary>
+    ///     The type of the account.
+    ///     <br/>
+    ///     0 = Disabled; 1 = Demo; 2 = Server Host; 3 = Regular; 4 = Premium; 5 = Staff; 6 = Game Master; 7 = Tournament Moderator; 8 = Tournament Caster
+    /// </summary>
+    [PhpProperty("account_type")]
+    public required int AccountType { get; set; }
+
+    /// <summary>
+    ///     Unknown.
+    ///     <br/>
+    ///     0 = False; 1 = True
+    /// </summary>
+    [PhpProperty("trial")]
+    public string Trial { get; set; } = "0";
+
+    /// <summary>
+    ///     The ID of the currently active suspension on the account.
+    ///     If there is no currently active suspension on the account, then this value is "0".
+    /// </summary>
+    [PhpProperty("susp_id")]
+    public required string SuspensionID { get; set; }
+
+    /// <summary>
+    ///     Unknown.
+    ///     <br/>
+    ///     0 = False; 1 = True
+    /// </summary>
+    [PhpProperty("prepay_only")]
+    public string PrepayOnly { get; set; } = "0";
+
+    /// <summary>
+    ///     The type of the account.
+    ///     <br/>
+    ///     0 = None; 1 = Basic Account; 2 = Verified Account; 3 = Legacy Account
+    /// </summary>
+    [PhpProperty("standing")]
+    public string Standing { get; set; } = "3";
+
+    /// <summary>
+    ///     Whether to automatically download the backup of the game client configuration files from the cloud or not on login.
+    ///     <br/>
+    ///     0 = False; 1 = True
+    /// </summary>
+    [PhpProperty("use_cloud")]
+    public required string UseCloud { get; set; }
+
+    /// <summary>
+    ///     Whether the password has expired or not.
+    ///     <br/>
+    ///     NULL = Not Expired; 0 = Require Password Change; Any Non-Zero Positive Integer = Suggest Password Change
+    /// </summary>
+    [PhpProperty("pass_exp")]
+    public string? PasswordExpired { get; set; } = null;
+
+    /// <summary>
+    ///     Whether the referral system status of the friend is new or not.
+    ///     <br/>
+    ///     0 = False; 1 = True
+    /// </summary>
+    [PhpProperty("is_new")]
+    public int IsNew { get; set; } = 0;
+
+    /// <summary>
+    ///     The authentication cookie that will be used to authorize the account's session in all subsequent requests.
+    /// </summary>
+    [PhpProperty("cookie")]
+    public required string Cookie { get; set; }
+
+    /// <summary>
+    ///     The IP address of the game client which made the authentication request.
+    /// </summary>
+    [PhpProperty("ip")]
+    public required string IPAddress { get; set; }
+
+    /// <summary>
+    ///     Unknown.
+    /// </summary>
+    [PhpProperty("minimum_ranked_level")]
+    public string MinimumRankedLevel { get; set; } = "3";
+
+    /// <summary>
+    ///     A floating point representation of the percentage at which the account is marked as a leaver.
+    ///     The default value is ".05".
+    /// </summary>
+    [PhpProperty("leaverthreshold")]
+    public required string LeaverThreshold { get; set; }
+
+    /// <summary>
+    ///     Unknown.
+    /// </summary>
+    [PhpProperty("is_under_24")]
+    public bool IsUnder24 { get; set; } = false;
+
+    /// <summary>
+    ///     Whether the account attempting to log in has any sub-accounts or not.
+    /// </summary>
+    [PhpProperty("is_subaccount")]
+    public required bool HasSubAccounts { get; set; }
+
+    /// <summary>
+    ///     Whether the account attempting to log in is a sub-account or not.
+    /// </summary>
+    [PhpProperty("is_current_subaccount")]
+    public required bool IsSubAccount { get; set; }
+
+    /// <summary>
+    ///     Unknown.
+    /// </summary>
+    [PhpProperty("icb_url")]
+    public string ICBURL { get; set; } = string.Empty;
+
+    /// <summary>
+    ///     A hash of some of the account's authentication details.
+    /// </summary>
+    [PhpProperty("auth_hash")]
+    public required string AuthenticationHash { get; set; }
+
+    /// <summary>
+    ///     The server time (in UTC seconds).
+    /// </summary>
+    [PhpProperty("host_time")]
+    public string HostTime { get; set; } = DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString();
+
+    /// <summary>
+    ///     The IP address of the chat server.
+    /// </summary>
+    [PhpProperty("chat_url")]
+    public required string ChatServerIPAddress { get; set; }
+
+    /// <summary>
+    ///     The port of the chat server.
+    /// </summary>
+    [PhpProperty("chat_port")]
+    public required int ChatServerPort { get; set; }
+
+    /// <summary>
+    ///     Unknown.
+    /// </summary>
+    [PhpProperty("commenting_url")]
+    public string? CommentingURL { get; set; } = null;
+
+    /// <summary>
+    ///     Unknown.
+    /// </summary>
+    [PhpProperty("commenting_port")]
+    public int? CommentingPort { get; set; } = null;
+
+    /// <summary>
+    ///     The list of chat channels that the account automatically connects to.
+    /// </summary>
+    [PhpProperty("chatrooms")]
+    public required List<string> ChatChannels { get; set; }
+
+    /// <summary>
+    ///     All the accounts associated with the account attempting to log in, in registration order.
+    ///     Each inner-list is composed of two elements, the account name and the account ID.
+    /// </summary>
+    [PhpProperty("identities")]
+    public required List<List<string>> Accounts { get; set; }
+
+    /// <summary>
+    ///     Unknown.
+    /// </summary>
+    [PhpProperty("cafe_id")]
+    public string? CafeID { get; set; } = null;
+
+    /// <summary>
+    ///     Unknown.
+    /// </summary>
+    [PhpProperty("gca_regular")]
+    public string? GCARegular { get; set; } = null;
+
+    /// <summary>
+    ///     Unknown.
+    /// </summary>
+    [PhpProperty("gca_prime")]
+    public string? GCAPrime { get; set; } = null;
+
+    /// <summary>
+    ///     The amount of gold coins that the account owns.
+    /// </summary>
+    [PhpProperty("points")]
+    public required string GoldCoins { get; set; }
+
+    /// <summary>
+    ///     The amount of silver coins that the account owns.
+    /// </summary>
+    [PhpProperty("mmpoints")]
+    public required string SilverCoins { get; set; }
+
+    /// <summary>
+    ///     Unknown.
+    /// </summary>
+    [PhpProperty("season_level")]
+    public int SeasonLevel { get; set; } = 0;
+
+    /// <summary>
+    ///     Unknown.
+    ///     <br/>
+    ///     Potentially, the index of the custom icon in use.
+    ///     This value is set to "5" in the network packet dumps.
+    /// </summary>
+    [PhpProperty("slot_id")]
+    public string? SlotID { get; set; } = null;
+
+    /// <summary>
+    ///     Unknown.
+    /// </summary>
+    [PhpProperty("dice_tokens")]
+    public string DiceTokens { get; set; } = "1";
+
+    /// <summary>
+    ///     Unknown.
+    /// </summary>
+    [PhpProperty("game_tokens")]
+    public int GameTokens { get; set; } = 0;
+
+    /// <summary>
+    ///     Unknown.
+    ///     <br/>
+    ///     Potentially, the selected level of the upgradable creeps.
+    ///     This is also equipable from the owned items vault.
+    /// </summary>
+    [PhpProperty("creep_level")]
+    public int CreepLevel { get; set; } = 0;
+
+    /// <summary>
+    ///     The server time (in UTC seconds).
+    /// </summary>
+    [PhpProperty("timestamp")]
+    public long ServerTimestamp { get; set; } = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+
+    /// <summary>
+    ///     The current season.
+    ///     The last season before the services went offline was 12.
+    /// </summary>
+    [PhpProperty("campaign_current_season")]
+    public required string CurrentSeason { get; set; }
+
+    /// <summary>
+    ///     Unknown.
+    ///     <br/>
+    ///     Appears to be the MMR rank thresholds.
+    /// </summary>
+    [PhpProperty("mmr_rank")]
+    public string MMRRankThresholds { get; set; } = "1250,1275,1300,1330,1365,1400,1435,1470,1505,1540,1575,1610,1645,1685,1725,1765,1805,1850,1900,1950";
+
+    /// <summary>
+    ///     The time (in UTC seconds) at which the account is no longer muted.
+    /// </summary>
+    [PhpProperty("mute_expiration")]
+    public required int MuteExpiration { get; set; }
+
+    /// <summary>
+    ///     Unknown.
+    ///     <br/>
+    ///     Seems to be set to "5", for some reason.
+    /// </summary>
+    [PhpProperty("vested_threshold")]
+    public int VestedThreshold { get; set; } = 5;
+
+    /// <summary>
+    ///     Unknown.
+    ///     <br/>
+    ///     Seems to be set to TRUE on a successful response, or to FALSE if an error occurs.
+    /// </summary>
+    [PhpProperty(0)]
+    public bool Zero { get; set; } = true;
 
     /// <summary>
     ///     The account's list of friend accounts.
