@@ -19,4 +19,5 @@ global using System.Text;
 global using ZORGATH.WebPortal.API.Contracts;
 global using ZORGATH.WebPortal.API.Controllers;
 global using ZORGATH.WebPortal.API.Extensions;
+global using ZORGATH.WebPortal.API.Internals;
 global using ZORGATH.WebPortal.API.Services.Email;

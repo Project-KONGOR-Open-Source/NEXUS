@@ -1,10 +1,8 @@
 ﻿namespace ASPIRE.Tests.ZORGATH.WebPortal.API;
 
-using ZORGATH = global::ZORGATH.WebPortal.API.ZORGATH;
-
 public abstract class WebPortalAPITestSetup
 {
-    protected WebApplicationFactory<ZORGATH> TransientZorgath { get; set; } = null!;
+    protected WebApplicationFactory<IZorgathAssemblyMarker> TransientZorgath { get; set; } = null!;
     protected MerrickContext TransientMerrickContext { get; set; } = null!;
     protected HttpClient TransientZorgathClient { get; set; } = null!;
 
@@ -17,7 +15,7 @@ public abstract class WebPortalAPITestSetup
         while (WebPortalAPITestContext.AuthenticationFlowHasExecuted.Equals(false))
             await Task.Delay(250);
 
-        TransientZorgath = new WebApplicationFactory<ZORGATH>();
+        TransientZorgath = new WebApplicationFactory<IZorgathAssemblyMarker>();
         TransientZorgathClient = TransientZorgath.CreateClient();
         TransientMerrickContext = InMemoryHelpers.GetInMemoryMerrickContext();
 
