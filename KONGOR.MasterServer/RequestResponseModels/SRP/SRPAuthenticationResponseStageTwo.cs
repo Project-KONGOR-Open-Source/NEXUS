@@ -57,7 +57,7 @@ public class SRPAuthenticationResponseStageTwo
     ///     0 = Disabled; 1 = Demo; 2 = Server Host; 3 = Regular; 4 = Premium; 5 = Staff; 6 = Game Master; 7 = Tournament Moderator; 8 = Tournament Caster
     /// </summary>
     [PhpProperty("account_type")]
-    public required int AccountType { get; set; }
+    public required string AccountType { get; set; }
 
     /// <summary>
     ///     Unknown.
@@ -80,7 +80,7 @@ public class SRPAuthenticationResponseStageTwo
     ///     0 = False; 1 = True
     /// </summary>
     [PhpProperty("prepay_only")]
-    public string PrepayOnly { get; set; } = "0";
+    public string PrePayOnly { get; set; } = "0";
 
     /// <summary>
     ///     The type of the account.
@@ -161,7 +161,7 @@ public class SRPAuthenticationResponseStageTwo
     ///     Unknown.
     /// </summary>
     [PhpProperty("icb_url")]
-    public string ICBURL { get; set; } = string.Empty;
+    public string ICBURL { get; set; } = "http://s3.amazonaws.com/naeu-icb2";
 
     /// <summary>
     ///     A hash of some of the account's authentication details.
@@ -185,7 +185,7 @@ public class SRPAuthenticationResponseStageTwo
     ///     The port of the chat server.
     /// </summary>
     [PhpProperty("chat_port")]
-    public required int ChatServerPort { get; set; }
+    public required string ChatServerPort { get; set; }
 
     /// <summary>
     ///     Unknown.
@@ -240,7 +240,7 @@ public class SRPAuthenticationResponseStageTwo
     ///     The amount of silver coins that the account owns.
     /// </summary>
     [PhpProperty("mmpoints")]
-    public required string SilverCoins { get; set; }
+    public required int SilverCoins { get; set; }
 
     /// <summary>
     ///     Unknown.
@@ -249,13 +249,10 @@ public class SRPAuthenticationResponseStageTwo
     public int SeasonLevel { get; set; } = 0;
 
     /// <summary>
-    ///     Unknown.
-    ///     <br/>
-    ///     Potentially, the index of the custom icon in use.
-    ///     This value is set to "5" in the network packet dumps.
+    ///     The index of the custom icon equipped, or "0" if no custom icon is equipped.
     /// </summary>
     [PhpProperty("slot_id")]
-    public string? SlotID { get; set; } = null;
+    public required string SlotID { get; set; }
 
     /// <summary>
     ///     Unknown.
@@ -468,13 +465,13 @@ public class FriendAccount
     ///     Additionally, a friend does not need to be in a group.
     /// </summary>
     [PhpProperty("group")]
-    public string Group { get; set; } = string.Empty;
+    public required string Group { get; set; }
 
     /// <summary>
     ///     The clan tag of the friend.
     /// </summary>
     [PhpProperty("clan_tag")]
-    public string? ClanTag { get; set; } = default;
+    public required string ClanTag { get; set; }
 
     /// <summary>
     ///     Unknown.
@@ -647,10 +644,10 @@ public class ClanMemberData
     public required string JoinDate { get; set; }
 
     /// <summary>
-    ///     Unknown.
+    ///     The clan channel title.
     /// </summary>
     [PhpProperty("title")]
-    public string Title { get; set; } = "TODO: [TITLE] See Whether This Does Anything";
+    public required string Title { get; set; }
 
     /// <summary>
     ///     Whether the account is active in the clan or not.
@@ -947,7 +944,7 @@ public class LevelingAwardTooltip
     ///     Awarded for reaching hero levels 11 to 15.
     /// </summary>
     [PhpProperty("11-15")]
-    public int ElevenToFifteen { get; set; } = 16;
+    public int ElevenToFifteen { get; set; } = 18;
 }
 
 public class BloodlustAwardTooltip
