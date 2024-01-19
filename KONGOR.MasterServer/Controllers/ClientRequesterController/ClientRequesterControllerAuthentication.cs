@@ -7,17 +7,17 @@ public partial class ClientRequesterController
         string? accountName = Request.Form["login"];
 
         if (accountName is null)
-            return NotFound(PhpSerialization.Serialize(new SRPAuthenticationFailureResponse(SRPAuthenticationFailureReason.AccountNotFound)));
+            return NotFound(PhpSerialization.Serialize(new SRPAuthenticationFailureResponse(SRPAuthenticationFailureReason.MissingLoginIdentifier)));
 
         string? clientPublicEphemeral = Request.Form["A"];
 
         if (clientPublicEphemeral is null)
-            return BadRequest(PhpSerialization.Serialize(new SRPAuthenticationFailureResponse(SRPAuthenticationFailureReason.BadRequest)));
+            return BadRequest(PhpSerialization.Serialize(new SRPAuthenticationFailureResponse(SRPAuthenticationFailureReason.MissingClientPublicEphemeral)));
 
         string? systemInformation = Request.Form["SysInfo"];
 
         if (systemInformation is null)
-            return BadRequest(PhpSerialization.Serialize(new SRPAuthenticationFailureResponse(SRPAuthenticationFailureReason.BadRequest)));
+            return BadRequest(PhpSerialization.Serialize(new SRPAuthenticationFailureResponse(SRPAuthenticationFailureReason.MissingSystemInformation)));
 
         Account? account = await MerrickContext.Accounts
             .Include(account => account.User)
@@ -32,17 +32,17 @@ public partial class ClientRequesterController
 
         User user = account.User;
 
-        SRPAuthenticationSessionData data = new()
+        SRPAuthenticationSessionDataStageOne data = new()
         {
             LoginIdentifier = accountName,
             Salt = user.SRPSalt,
             PasswordSalt = user.SRPPasswordSalt,
             PasswordHash = user.SRPPasswordHash,
-            ClientPublicEphemeral = clientPublicEphemeral,
-            SystemInformation = systemInformation
+            ClientPublicEphemeral = clientPublicEphemeral
         };
 
         Cache.SetSRPAuthenticationSessionData(accountName, data);
+        Cache.SetSRPAuthenticationSystemInformation(accountName, systemInformation);
 
         return Ok(PhpSerialization.Serialize(new SRPAuthenticationResponseStageOne(data)));
     }
@@ -52,12 +52,12 @@ public partial class ClientRequesterController
         string? accountName = Request.Form["login"];
 
         if (accountName is null)
-            return NotFound(PhpSerialization.Serialize(new SRPAuthenticationFailureResponse(SRPAuthenticationFailureReason.AccountNotFound)));
+            return NotFound(PhpSerialization.Serialize(new SRPAuthenticationFailureResponse(SRPAuthenticationFailureReason.MissingLoginIdentifier)));
 
-        string? proof = Request.Form["proof"];
+        string? clientProof = Request.Form["proof"];
 
-        if (proof is null)
-            return BadRequest(PhpSerialization.Serialize(new SRPAuthenticationFailureResponse(SRPAuthenticationFailureReason.MissingSRPProof)));
+        if (clientProof is null)
+            return BadRequest(PhpSerialization.Serialize(new SRPAuthenticationFailureResponse(SRPAuthenticationFailureReason.MissingSRPClientProof)));
 
         string? operatingSystemType = Request.Form["OSType"];
 
@@ -79,27 +79,47 @@ public partial class ClientRequesterController
         if (microVersion is null)
             return BadRequest(PhpSerialization.Serialize(new SRPAuthenticationFailureResponse(SRPAuthenticationFailureReason.MissingMicroVersion)));
 
-        SRPAuthenticationSessionData? data = Cache.GetSRPAuthenticationSessionData(accountName);
+        SRPAuthenticationSessionDataStageOne? stageOneData = Cache.GetSRPAuthenticationSessionData(accountName);
 
-        if (data is null)
+        if (stageOneData is null)
         {
-            Logger.LogError($@"[BUG] Unable To Retrieve SRP Authentication Session Data For Account Name ""{accountName}""");
+            Logger.LogError($@"[BUG] Unable To Retrieve Cached SRP Authentication Session Data For Account Name ""{accountName}""");
 
-            return UnprocessableEntity(PhpSerialization.Serialize(new SRPAuthenticationFailureResponse(SRPAuthenticationFailureReason.MissingSRPData, accountName)));
+            return UnprocessableEntity(PhpSerialization.Serialize(new SRPAuthenticationFailureResponse(SRPAuthenticationFailureReason.MissingCachedSRPData)));
         }
 
         Cache.RemoveSRPAuthenticationSessionData(accountName);
 
+        string? systemInformation = Cache.GetSRPAuthenticationSystemInformation(accountName);
 
+        if (systemInformation is null)
+        {
+            Logger.LogError($@"[BUG] Unable To Retrieve Cached System Information For Account Name ""{accountName}""");
 
+            return UnprocessableEntity(PhpSerialization.Serialize(new SRPAuthenticationFailureResponse(SRPAuthenticationFailureReason.MissingSystemInformation)));
+        }
 
+        Cache.RemoveSRPAuthenticationSystemInformation(accountName);
 
+        SRPAuthenticationSessionDataStageTwo stageTwoData = new(stageOneData, clientProof);
 
+        string? serverProof = stageTwoData.ServerProof;
 
+        if (serverProof is null)
+            return Unauthorized(PhpSerialization.Serialize(new SRPAuthenticationFailureResponse(SRPAuthenticationFailureReason.IncorrectPassword)));
 
-        // TODO: Implement This
+        // TODO: ???
 
-        throw new NotImplementedException();
+        SRPHandlers.StageTwoResponseParameters parameters = new()
+        {
+            ServerProof = serverProof
+        };
+
+        SRPAuthenticationResponseStageTwo response = SRPHandlers.GenerateStageTwoResponse(parameters);
+
+        // TODO: ???
+
+        return Ok(PhpSerialization.Serialize(response));
     }
 
     private BadRequestObjectResult HandleAuthentication()

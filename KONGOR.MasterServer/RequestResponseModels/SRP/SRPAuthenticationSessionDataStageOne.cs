@@ -1,11 +1,11 @@
 ﻿namespace KONGOR.MasterServer.RequestResponseModels.SRP;
 
 /// <summary>
-///     Exposes the constants, properties, and methods required for Secure Remote Password protocol authentication.
+///     Exposes the constants, properties, and methods required for Secure Remote Password protocol authentication, stage one.
 /// </summary>
-public class SRPAuthenticationSessionData
+public class SRPAuthenticationSessionDataStageOne
 {
-    public SRPAuthenticationSessionData()
+    public SRPAuthenticationSessionDataStageOne()
     {
         SrpParameters parameters = SrpParameters.Create<SHA256>(SafePrimeNumber, MultiplicativeGroupGenerator);
 
@@ -77,20 +77,7 @@ public class SRPAuthenticationSessionData
     public required string PasswordHash { get; init; }
 
     /// <summary>
-    ///     M1 : the client's proof; the server should verify this value and use it to compute M2 (the server's proof)
-    /// </summary>
-    public string ClientProof { get; set; } = null!;
-
-    /// <summary>
-    ///     System information data sent by the client during pre-authentication.
-    /// </summary>
-    public required string SystemInformation { get; init; }
-
-    /// <summary>
     ///     Returns the verifier derived from the client's private key.
     /// </summary>
     public string Verifier { get; init; }
-
-    // TODO: Review "required" Usage ... Maybe Add Constructor And Patch Method
-    // TODO: Rework This Model
 }

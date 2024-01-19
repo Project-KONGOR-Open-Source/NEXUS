@@ -1,4 +1,5 @@
 ﻿global using KONGOR.MasterServer.Extensions;
+global using KONGOR.MasterServer.Handlers.SRP;
 global using KONGOR.MasterServer.RequestResponseModels.SRP;
 global using KONGOR.MasterServer.RequestResponseModels.Store;
 

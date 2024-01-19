@@ -1,26 +1,26 @@
 ﻿namespace KONGOR.MasterServer.RequestResponseModels.SRP;
 
-public class SRPAuthenticationResponseStageOne(SRPAuthenticationSessionData data)
+public class SRPAuthenticationResponseStageOne(SRPAuthenticationSessionDataStageOne stageOneData)
 {
     /// <summary>
     ///     The SRP salt, used by the client during authentication.
     ///     Not sent in the event of an invalid account name.
     /// </summary>
     [PhpProperty("salt")]
-    public string Salt { get; init; } = data.Salt;
+    public string Salt { get; init; } = stageOneData.Salt;
 
     /// <summary>
     ///     HoN's specific salt, used by the client in the password hashing algorithm.
     ///     Not sent in the event of an invalid account name.
     /// </summary>
     [PhpProperty("salt2")]
-    public string Salt2 { get; init; } = data.PasswordSalt;
+    public string Salt2 { get; init; } = stageOneData.PasswordSalt;
 
     /// <summary>
     ///     The ephemeral SRP value "B", created by the server and sent to the client for use during SRP authentication.
     /// </summary>
     [PhpProperty("B")]
-    public string B { get; init; } = data.ServerPublicEphemeral;
+    public string B { get; init; } = stageOneData.ServerPublicEphemeral;
 
     /// <summary>
     ///     Unknown property which seems to often be set to "5", for some reason.
