@@ -27,10 +27,14 @@ public partial class ClientRequesterController
         if (account is null)
             return NotFound(PhpSerialization.Serialize(new SRPAuthenticationFailureResponse(SRPAuthenticationFailureReason.AccountNotFound)));
 
-        if (account.AccountType is AccountType.Disabled)
+        if (account.Type is AccountType.Disabled)
             return Unauthorized(PhpSerialization.Serialize(new SRPAuthenticationFailureResponse(SRPAuthenticationFailureReason.AccountIsDisabled, account.NameWithClanTag)));
 
         User user = account.User;
+
+        string verifier = SRPAuthenticationSessionDataStageOne.ComputeVerifier(user.SRPSalt, accountName, user.SRPPasswordHash);
+
+        (string serverPrivateEphemeral, string serverPublicEphemeral) = SRPAuthenticationSessionDataStageOne.ComputeServerEphemeral(verifier);
 
         SRPAuthenticationSessionDataStageOne data = new()
         {
@@ -38,7 +42,10 @@ public partial class ClientRequesterController
             Salt = user.SRPSalt,
             PasswordSalt = user.SRPPasswordSalt,
             PasswordHash = user.SRPPasswordHash,
-            ClientPublicEphemeral = clientPublicEphemeral
+            ClientPublicEphemeral = clientPublicEphemeral,
+            Verifier = verifier,
+            ServerPrivateEphemeral = serverPrivateEphemeral,
+            ServerPublicEphemeral = serverPublicEphemeral
         };
 
         Cache.SetSRPAuthenticationSessionData(accountName, data);
@@ -108,7 +115,22 @@ public partial class ClientRequesterController
         if (serverProof is null)
             return Unauthorized(PhpSerialization.Serialize(new SRPAuthenticationFailureResponse(SRPAuthenticationFailureReason.IncorrectPassword)));
 
-        // TODO: ???
+        Account? account = await MerrickContext.Accounts
+            .Include(account => account.User)
+            .Include(account => account.Clan)
+            .SingleOrDefaultAsync(account => account.Name.Equals(accountName));
+
+        if (account is null)
+            return NotFound(PhpSerialization.Serialize(new SRPAuthenticationFailureResponse(SRPAuthenticationFailureReason.AccountNotFound)));
+
+        // TODO: Resolve Suspensions
+
+        if (account.Type is not AccountType.Staff)
+        {
+            // TODO: Get Client Information
+        }
+
+        // TODO: Resolve Chat Server Information
 
         SRPHandlers.StageTwoResponseParameters parameters = new()
         {
@@ -117,7 +139,11 @@ public partial class ClientRequesterController
 
         SRPAuthenticationResponseStageTwo response = SRPHandlers.GenerateStageTwoResponse(parameters);
 
-        // TODO: ???
+        // TODO: Set Cookie
+
+        account.TimestampLastActive = DateTime.UtcNow;
+
+        await MerrickContext.SaveChangesAsync();
 
         return Ok(PhpSerialization.Serialize(response));
     }
