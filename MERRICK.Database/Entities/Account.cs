@@ -11,7 +11,7 @@ public class Account
 
     public required User User { get; set; }
 
-    public AccountType AccountType { get; set; } = AccountType.Legacy;
+    public AccountType Type { get; set; } = AccountType.Legacy;
 
     public required bool IsMain { get; set; }
 

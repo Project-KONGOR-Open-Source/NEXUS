@@ -17,7 +17,7 @@ namespace MERRICK.Database.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.0")
+                .HasAnnotation("ProductVersion", "8.0.1")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -27,9 +27,6 @@ namespace MERRICK.Database.Migrations
                     b.Property<Guid>("ID")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("AccountType")
-                        .HasColumnType("int");
 
                     b.Property<int>("AscensionLevel")
                         .HasColumnType("int");
@@ -73,6 +70,9 @@ namespace MERRICK.Database.Migrations
 
                     b.Property<DateTime>("TimestampLastActive")
                         .HasColumnType("datetime2");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("int");
 
                     b.Property<Guid>("UserID")
                         .HasColumnType("uniqueidentifier");
@@ -221,6 +221,12 @@ namespace MERRICK.Database.Migrations
 
                     b.Property<int>("SilverCoins")
                         .HasColumnType("int");
+
+                    b.Property<DateTime>("TimestampCreated")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("TimestampLastActive")
+                        .HasColumnType("datetime2");
 
                     b.Property<int>("TotalExperience")
                         .HasColumnType("int");
