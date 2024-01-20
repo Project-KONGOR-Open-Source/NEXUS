@@ -32,14 +32,16 @@ public partial class ClientRequesterController
 
         User user = account.User;
 
-        string verifier = SRPAuthenticationSessionDataStageOne.ComputeVerifier(user.SRPSalt, accountName, user.SRPPasswordHash);
+        string authenticationSessionSalt = SRPAuthenticationSessionDataStageOne.GenerateSRPSessionSalt();
+
+        string verifier = SRPAuthenticationSessionDataStageOne.ComputeVerifier(authenticationSessionSalt, accountName, user.SRPPasswordHash);
 
         (string serverPrivateEphemeral, string serverPublicEphemeral) = SRPAuthenticationSessionDataStageOne.ComputeServerEphemeral(verifier);
 
         SRPAuthenticationSessionDataStageOne data = new()
         {
             LoginIdentifier = accountName,
-            Salt = user.SRPSalt,
+            SessionSalt = authenticationSessionSalt,
             PasswordSalt = user.SRPPasswordSalt,
             PasswordHash = user.SRPPasswordHash,
             ClientPublicEphemeral = clientPublicEphemeral,

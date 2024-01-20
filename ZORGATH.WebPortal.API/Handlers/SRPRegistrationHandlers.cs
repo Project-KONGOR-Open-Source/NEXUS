@@ -35,16 +35,10 @@ public static class SRPRegistrationHandlers
     }
 
     /// <summary>
-    ///     Generates a 512-character long password salt.
-    ///     The value 512 is for the purpose of consistency with the length of "B", the ephemeral key of the server.
+    ///     Generates a 22-character long SRP password salt.
+    ///     The value of "22" is for the purpose of consistency with the original HoN salt length.
+    ///     The value needs to be divided by 2, because there are 2 hexadecimal digits per byte.
     /// </summary>
-    public static string GeneratePasswordSalt()
-        => SrpInteger.RandomInteger(512 / 2 /* Divide By 2 Because There Are 2 Hexadecimal Digits Per Byte */).ToHex();
-
-    /// <summary>
-    ///     Generates a 22-character long password SRP salt.
-    ///     The value 22 is for the purpose of consistency with the original HoN salt length.
-    /// </summary>
-    public static string GeneratePasswordSRPSalt()
-        => SrpInteger.RandomInteger(22 / 2 /* Divide By 2 Because There Are 2 Hexadecimal Digits Per Byte */).ToHex();
+    public static string GenerateSRPPasswordSalt()
+        => SrpInteger.RandomInteger(22 / 2).ToHex(); // TODO: Change Length
 }

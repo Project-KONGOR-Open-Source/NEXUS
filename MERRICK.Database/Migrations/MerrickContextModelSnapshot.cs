@@ -214,11 +214,6 @@ namespace MERRICK.Database.Migrations
                         .HasMaxLength(22)
                         .HasColumnType("nvarchar(22)");
 
-                    b.Property<string>("SRPSalt")
-                        .IsRequired()
-                        .HasMaxLength(512)
-                        .HasColumnType("nvarchar(512)");
-
                     b.Property<int>("SilverCoins")
                         .HasColumnType("int");
 

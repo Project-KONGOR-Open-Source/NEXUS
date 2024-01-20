@@ -7,7 +7,7 @@ public class SRPAuthenticationResponseStageOne(SRPAuthenticationSessionDataStage
     ///     Not sent in the event of an invalid account name.
     /// </summary>
     [PhpProperty("salt")]
-    public string Salt { get; init; } = stageOneData.Salt;
+    public string Salt { get; init; } = stageOneData.SessionSalt;
 
     /// <summary>
     ///     HoN's specific salt, used by the client in the password hashing algorithm.

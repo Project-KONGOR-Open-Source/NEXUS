@@ -25,7 +25,7 @@ public class SRPAuthenticationSessionDataStageTwo
             (
                 stageOneData.ServerPrivateEphemeral,
                 stageOneData.ClientPublicEphemeral,
-                stageOneData.Salt,
+                stageOneData.SessionSalt,
                 stageOneData.LoginIdentifier,
                 stageOneData.Verifier,
                 clientProof

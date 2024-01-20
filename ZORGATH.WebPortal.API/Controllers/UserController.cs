@@ -47,13 +47,12 @@ public class UserController(MerrickContext databaseContext, ILogger<UserControll
             return NotFound($@"User Role ""{UserRoles.User}"" Was Not Found");
         }
 
-        string salt = SRPRegistrationHandlers.GeneratePasswordSRPSalt();
+        string salt = SRPRegistrationHandlers.GenerateSRPPasswordSalt();
 
         User user = new()
         {
             EmailAddress = sanitizedEmailAddress,
             Role = role,
-            SRPSalt = SRPRegistrationHandlers.GeneratePasswordSalt(),
             SRPPasswordSalt = salt,
             SRPPasswordHash = SRPRegistrationHandlers.HashPassword(payload.Password, salt)
         };

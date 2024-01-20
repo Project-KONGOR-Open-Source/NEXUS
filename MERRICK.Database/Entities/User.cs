@@ -11,14 +11,11 @@ public class User
 
     public required Role Role { get; set; }
 
-    [StringLength(512)]
-    public required string SRPSalt { get; set; } // TODO: Maybe Just Rename This To PasswordSalt ?
-
     [StringLength(22)]
-    public required string SRPPasswordSalt { get; set; } // TODO: Maybe Just Rename This To PasswordSRPSalt ? Is This Even Needed ?
+    public required string SRPPasswordSalt { get; set; }
 
     [StringLength(64)]
-    public required string SRPPasswordHash { get; set; } // TODO: Maybe Just Rename This To PasswordSRPHash ?
+    public required string SRPPasswordHash { get; set; }
 
     [StringLength(84)]
     public string PBKDF2PasswordHash { get; set; } = null!; // TODO: Maybe Make This A Nullable Type
