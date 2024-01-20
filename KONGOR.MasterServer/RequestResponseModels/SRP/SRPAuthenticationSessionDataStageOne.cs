@@ -94,7 +94,6 @@ public class SRPAuthenticationSessionDataStageOne
 
     /// <summary>
     ///     Generates a 512-character long SRP session salt.
-    ///     The value of "512" is for the purpose of consistency with the length of "B", the ephemeral key of the server.
     ///     The value needs to be divided by 2, because there are 2 hexadecimal digits per byte.
     /// </summary>
     public static string GenerateSRPSessionSalt()

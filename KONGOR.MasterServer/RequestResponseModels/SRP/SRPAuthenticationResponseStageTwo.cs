@@ -313,7 +313,7 @@ public class SRPAuthenticationResponseStageTwo
     /// <summary>
     ///     Unknown.
     ///     <br/>
-    ///     Seems to be set to TRUE on a successful response, or to FALSE if an error occurs.
+    ///     Seems to be set to "true" on a successful response, or to "false" if an error occurs.
     /// </summary>
     [PhpProperty(0)]
     public bool Zero { get; set; } = true;

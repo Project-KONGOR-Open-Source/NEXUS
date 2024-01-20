@@ -14,12 +14,10 @@ public static class SRPRegistrationHandlers
 
     # endregion
 
-    // TODO: Rename These Methods To Reflect Updated Column Names (Once They Get Updated)
-
     /// <summary>
     ///     Generates a 64-character long SHA256 hash of the account's password.
     /// </summary>
-    public static string HashPassword(string password, string salt)
+    public static string ComputeSRPPasswordHash(string password, string salt)
     {
         string passwordHash = Convert.ToHexString(MD5.HashData(Encoding.UTF8.GetBytes(password))).ToLower();
 
@@ -35,10 +33,9 @@ public static class SRPRegistrationHandlers
     }
 
     /// <summary>
-    ///     Generates a 22-character long SRP password salt.
-    ///     The value of "22" is for the purpose of consistency with the original HoN salt length.
+    ///     Generates a 64-character long SRP password salt.
     ///     The value needs to be divided by 2, because there are 2 hexadecimal digits per byte.
     /// </summary>
     public static string GenerateSRPPasswordSalt()
-        => SrpInteger.RandomInteger(22 / 2).ToHex(); // TODO: Change Length
+        => SrpInteger.RandomInteger(64 / 2).ToHex();
 }

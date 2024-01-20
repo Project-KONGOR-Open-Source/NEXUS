@@ -211,8 +211,8 @@ namespace MERRICK.Database.Migrations
 
                     b.Property<string>("SRPPasswordSalt")
                         .IsRequired()
-                        .HasMaxLength(22)
-                        .HasColumnType("nvarchar(22)");
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
 
                     b.Property<int>("SilverCoins")
                         .HasColumnType("int");

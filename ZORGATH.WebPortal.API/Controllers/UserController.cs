@@ -54,7 +54,7 @@ public class UserController(MerrickContext databaseContext, ILogger<UserControll
             EmailAddress = sanitizedEmailAddress,
             Role = role,
             SRPPasswordSalt = salt,
-            SRPPasswordHash = SRPRegistrationHandlers.HashPassword(payload.Password, salt)
+            SRPPasswordHash = SRPRegistrationHandlers.ComputeSRPPasswordHash(payload.Password, salt)
         };
 
         user.PBKDF2PasswordHash = new PasswordHasher<User>().HashPassword(user, payload.Password);

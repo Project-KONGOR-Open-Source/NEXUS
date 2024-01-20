@@ -11,7 +11,7 @@ public class User
 
     public required Role Role { get; set; }
 
-    [StringLength(22)]
+    [StringLength(64)]
     public required string SRPPasswordSalt { get; set; }
 
     [StringLength(64)]

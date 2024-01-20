@@ -62,7 +62,7 @@ namespace MERRICK.Database.Migrations
                     ID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     EmailAddress = table.Column<string>(type: "nvarchar(30)", maxLength: 30, nullable: false),
                     RoleID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    SRPPasswordSalt = table.Column<string>(type: "nvarchar(22)", maxLength: 22, nullable: false),
+                    SRPPasswordSalt = table.Column<string>(type: "nvarchar(64)", maxLength: 64, nullable: false),
                     SRPPasswordHash = table.Column<string>(type: "nvarchar(64)", maxLength: 64, nullable: false),
                     PBKDF2PasswordHash = table.Column<string>(type: "nvarchar(84)", maxLength: 84, nullable: false),
                     TimestampCreated = table.Column<DateTime>(type: "datetime2", nullable: false),

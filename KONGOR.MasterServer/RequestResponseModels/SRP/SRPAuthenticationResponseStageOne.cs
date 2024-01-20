@@ -3,7 +3,7 @@
 public class SRPAuthenticationResponseStageOne(SRPAuthenticationSessionDataStageOne stageOneData)
 {
     /// <summary>
-    ///     The SRP salt, used by the client during authentication.
+    ///     The SRP session salt, used by the client during authentication.
     ///     Not sent in the event of an invalid account name.
     /// </summary>
     [PhpProperty("salt")]

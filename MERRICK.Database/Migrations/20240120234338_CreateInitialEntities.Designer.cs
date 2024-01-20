@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MERRICK.Database.Migrations
 {
     [DbContext(typeof(MerrickContext))]
-    [Migration("20240120232228_CreateInitialEntities")]
+    [Migration("20240120234338_CreateInitialEntities")]
     partial class CreateInitialEntities
     {
         /// <inheritdoc />
@@ -214,8 +214,8 @@ namespace MERRICK.Database.Migrations
 
                     b.Property<string>("SRPPasswordSalt")
                         .IsRequired()
-                        .HasMaxLength(22)
-                        .HasColumnType("nvarchar(22)");
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
 
                     b.Property<int>("SilverCoins")
                         .HasColumnType("int");
