@@ -16,6 +16,7 @@ public static class SRPRegistrationHandlers
 
     /// <summary>
     ///     Generates a 64-character long SHA256 hash of the account's password.
+    ///     The uppercase hashes (C# default) in this method need to be lowercased, to match the lowercase hashes (C++ default) that the game client generates.
     /// </summary>
     public static string ComputeSRPPasswordHash(string password, string salt)
     {
@@ -28,8 +29,6 @@ public static class SRPRegistrationHandlers
         string magickedMagickedPasswordHashHash = magickedPasswordHashHash + MagicStringTwo;
 
         return Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(magickedMagickedPasswordHashHash))).ToLower();
-
-        // TODO: Remember Why ToLower() On All The Hashes?
     }
 
     /// <summary>
