@@ -11,11 +11,12 @@ public class SRPAuthenticationSessionDataStageTwo
 
         SrpParameters parameters = SrpParameters.Create<SHA256>(SRPAuthenticationSessionDataStageOne.SafePrimeNumber, SRPAuthenticationSessionDataStageOne.MultiplicativeGroupGenerator);
 
-        // NOTE: HoN SRP requires a padded `g` (`parameters.Generator`) value for its final `M` calculation. 
-        // The rfc5054 specification is unclear as to whether this 'should' be done or not. It is done in the Python SRP library (link below).
-        // https://github.com/cocagne/pysrp/blob/4dfb111fffd671b7d97d803309fda2904e3ca1c8/srp/_pysrp.py#L205-L208
-        // It's unclear if a similar change can (or should) merge this into the C# SRP library.
-        parameters.Generator = parameters.Pad(parameters.Generator); // TODO: Test This !!!
+        // HoN SRP requires a padded "g" (multiplicative group generator) value for its final "M2" (server proof) calculation. 
+        // The RFC5054 specification is unclear on whether this should be done or not.
+        // It is done by default in the Python "cocagne/pysrp" library which Anton Romanov used, but not in the C# "secure-remote-password/srp.net" library which this solution uses.
+        // cocagne/pysrp : https://github.com/cocagne/pysrp/blob/0414166e9dba63c2677414ace2673ccc24208d23/srp/_pysrp.py#L205-L208
+        // secure-remote-password/srp.net : https://github.com/secure-remote-password/srp.net/blob/176098e90501659990b12e8ac086018d47f23ccb/src/srp/SrpParameters.cs#L29
+        parameters.Generator = parameters.Pad(parameters.Generator);
 
         SrpServer server = new(parameters);
 
