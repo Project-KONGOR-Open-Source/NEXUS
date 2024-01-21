@@ -18,7 +18,7 @@ public class User
     public required string SRPPasswordHash { get; set; }
 
     [StringLength(84)]
-    public string PBKDF2PasswordHash { get; set; } = null!; // TODO: Maybe Make This A Nullable Type
+    public string PBKDF2PasswordHash { get; set; } = null!;
 
     public List<Account> Accounts { get; set; } = [];
 
