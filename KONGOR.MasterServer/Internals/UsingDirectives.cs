@@ -18,3 +18,4 @@ global using PhpSerializerNET;
 global using SecureRemotePassword;
 
 global using System.Security.Cryptography;
+global using System.Text.RegularExpressions;

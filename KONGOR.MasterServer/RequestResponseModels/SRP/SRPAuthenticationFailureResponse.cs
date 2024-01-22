@@ -8,21 +8,23 @@ public class SRPAuthenticationFailureResponse(SRPAuthenticationFailureReason rea
     [PhpProperty("auth")]
     public string AuthenticationOutcome { get; set; } = reason switch
     {
-        SRPAuthenticationFailureReason.AccountIsDisabled            => "Account" + (accountName is null ? " " : $@" ""{accountName}"" ") + "Is Disabled",
-        SRPAuthenticationFailureReason.AccountNotFound              => "Account Not Found",
-        SRPAuthenticationFailureReason.IncorrectPassword            => "Incorrect Password",
-        // SRPAuthenticationFailureReason.InvalidCookie                => "Invalid Cookie" + (accountName is null ? string.Empty : " " + $@"For Account Name ""{accountName}"""),
-        SRPAuthenticationFailureReason.MissingCachedSRPData         => "Missing Cached SRP Data",
-        SRPAuthenticationFailureReason.MissingClientPublicEphemeral => "Missing Client Public Ephemeral",
-        SRPAuthenticationFailureReason.MissingLoginIdentifier       => "Missing Login Identifier",
-        SRPAuthenticationFailureReason.MissingMajorVersion          => "Missing Major Version",
-        SRPAuthenticationFailureReason.MissingMinorVersion          => "Missing Minor Version",
-        SRPAuthenticationFailureReason.MissingMicroVersion          => "Missing Micro Version",
-        SRPAuthenticationFailureReason.MissingOperatingSystemType   => "Missing Operating System Type",
-        SRPAuthenticationFailureReason.MissingSRPClientProof        => "Missing SRP Client Proof",
-        SRPAuthenticationFailureReason.MissingSystemInformation     => "Missing System Information",
-        SRPAuthenticationFailureReason.SRPAuthenticationDisabled    => "SRP Authentication Is Disabled" + Environment.NewLine + "1) Open The Console (CTRL + F8)" + Environment.NewLine + @"2) Execute ""SetSave login_useSRP true""",
-        _                                                           => "Unsupported Authentication Failure Reason" + " " + $@"""{nameof(reason)}"""
+        SRPAuthenticationFailureReason.AccountIsDisabled                => "Account" + (accountName is null ? " " : $@" ""{accountName}"" ") + "Is Disabled",
+        SRPAuthenticationFailureReason.AccountNotFound                  => "Account Not Found",
+        SRPAuthenticationFailureReason.IncorrectPassword                => "Incorrect Password",
+        SRPAuthenticationFailureReason.IncorrectSystemInformationFormat => "Incorrect System Information Format",
+        // SRPAuthenticationFailureReason.InvalidCookie                    => "Invalid Cookie" + (accountName is null ? string.Empty : " " + $@"For Account Name ""{accountName}"""),
+        SRPAuthenticationFailureReason.MissingCachedSRPData             => "Missing Cached SRP Data",
+        SRPAuthenticationFailureReason.MissingClientPublicEphemeral     => "Missing Client Public Ephemeral",
+        SRPAuthenticationFailureReason.MissingLoginIdentifier           => "Missing Login Identifier",
+        SRPAuthenticationFailureReason.MissingMajorVersion              => "Missing Major Version",
+        SRPAuthenticationFailureReason.MissingMinorVersion              => "Missing Minor Version",
+        SRPAuthenticationFailureReason.MissingMicroVersion              => "Missing Micro Version",
+        SRPAuthenticationFailureReason.MissingOperatingSystemType       => "Missing Operating System Type",
+        SRPAuthenticationFailureReason.MissingSRPClientProof            => "Missing SRP Client Proof",
+        SRPAuthenticationFailureReason.MissingSystemInformation         => "Missing System Information",
+        SRPAuthenticationFailureReason.SRPAuthenticationDisabled        => "SRP Authentication Is Disabled" + Environment.NewLine + "1) Open The Console (CTRL + F8)" + Environment.NewLine + @"2) Execute ""SetSave login_useSRP true""",
+        SRPAuthenticationFailureReason.UnexpectedUserAgent              => "Unexpected User Agent",
+        _                                                               => "Unsupported Authentication Failure Reason" + " " + $@"""{nameof(reason)}"""
     };
 
     /// <summary>
@@ -38,6 +40,7 @@ public enum SRPAuthenticationFailureReason
     AccountIsDisabled,
     AccountNotFound,
     IncorrectPassword,
+    IncorrectSystemInformationFormat,
     InvalidCookie,
     MissingCachedSRPData,
     MissingClientPublicEphemeral,
@@ -48,5 +51,6 @@ public enum SRPAuthenticationFailureReason
     MissingOperatingSystemType,
     MissingSRPClientProof,
     MissingSystemInformation,
-    SRPAuthenticationDisabled
+    SRPAuthenticationDisabled,
+    UnexpectedUserAgent
 }

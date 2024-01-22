@@ -29,11 +29,11 @@ public class Account
 
     public List<string> IPAddressCollection { get; set; } = [];
 
-    public List<string> HardwareIDCollection { get; set; } = [];
-
     public List<string> MACAddressCollection { get; set; } = [];
 
     public List<string> SystemInformationCollection { get; set; } = [];
+
+    public List<string> SystemInformationHashCollection { get; set; } = [];
 
     [NotMapped]
     public string NameWithClanTag => Equals(Clan, null) ? Name : $"[{Clan.Tag}]{Name}";

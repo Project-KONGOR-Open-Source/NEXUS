@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MERRICK.Database.Migrations
 {
     [DbContext(typeof(MerrickContext))]
-    [Migration("20240120234338_CreateInitialEntities")]
+    [Migration("20240122004903_CreateInitialEntities")]
     partial class CreateInitialEntities
     {
         /// <inheritdoc />
@@ -40,10 +40,6 @@ namespace MERRICK.Database.Migrations
                     b.Property<int>("ClanTier")
                         .HasColumnType("int");
 
-                    b.Property<string>("HardwareIDCollection")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("IPAddressCollection")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -65,6 +61,10 @@ namespace MERRICK.Database.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("SystemInformationCollection")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("SystemInformationHashCollection")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 

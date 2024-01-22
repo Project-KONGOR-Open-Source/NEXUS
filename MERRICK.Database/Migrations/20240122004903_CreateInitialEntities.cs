@@ -101,9 +101,9 @@ namespace MERRICK.Database.Migrations
                     TimestampLastActive = table.Column<DateTime>(type: "datetime2", nullable: false),
                     SelectedStoreItems = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     IPAddressCollection = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    HardwareIDCollection = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     MACAddressCollection = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    SystemInformationCollection = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    SystemInformationCollection = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    SystemInformationHashCollection = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {

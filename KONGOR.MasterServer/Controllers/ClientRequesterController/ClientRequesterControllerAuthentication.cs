@@ -88,6 +88,11 @@ public partial class ClientRequesterController
         if (microVersion is null)
             return BadRequest(PhpSerialization.Serialize(new SRPAuthenticationFailureResponse(SRPAuthenticationFailureReason.MissingMicroVersion)));
 
+        string? systemInformationHashes = Request.Form["SysInfo"];
+
+        if (systemInformationHashes is null)
+            return BadRequest(PhpSerialization.Serialize(new SRPAuthenticationFailureResponse(SRPAuthenticationFailureReason.MissingSystemInformation)));
+
         SRPAuthenticationSessionDataStageOne? stageOneData = Cache.GetSRPAuthenticationSessionData(accountName);
 
         if (stageOneData is null)
@@ -125,12 +130,54 @@ public partial class ClientRequesterController
         if (account is null)
             return NotFound(PhpSerialization.Serialize(new SRPAuthenticationFailureResponse(SRPAuthenticationFailureReason.AccountNotFound)));
 
-        // TODO: Resolve Suspensions
-
         if (account.Type is not AccountType.Staff)
         {
-            // TODO: Get Client Information
+            string agent = Request.Headers.UserAgent.SingleOrDefault() ?? string.Empty;
+
+            if (UserAgentRegex().IsMatch(agent).Equals(false))
+            {
+                Logger.LogError($@"Account ""{account.NameWithClanTag}"" Has Made A Request To Log In Using Unexpected User Agent ""{agent}""");
+
+                return BadRequest(PhpSerialization.Serialize(new SRPAuthenticationFailureResponse(SRPAuthenticationFailureReason.UnexpectedUserAgent)));
+            }
+
+            string? remoteIPAddress = HttpContext.Connection.RemoteIpAddress?.MapToIPv4().ToString();
+
+            if (remoteIPAddress is not null && account.IPAddressCollection.Contains(remoteIPAddress).Equals(false))
+                account.IPAddressCollection.Add(remoteIPAddress);
+
+            string[] systemInformationDataPoints = [.. systemInformation.Split('|', StringSplitOptions.RemoveEmptyEntries)];
+
+            if (systemInformationDataPoints.Length is not 5 /* the expected count of data points */)
+            {
+                Logger.LogError($@"Account ""{account.NameWithClanTag}"" Has Made A Request To Log In Using Unexpected System Information ""{systemInformation}""");
+
+                return BadRequest(PhpSerialization.Serialize(new SRPAuthenticationFailureResponse(SRPAuthenticationFailureReason.IncorrectSystemInformationFormat)));
+            }
+
+            if (account.MACAddressCollection.Contains(systemInformationDataPoints.First()).Equals(false))
+                account.MACAddressCollection.Add(systemInformationDataPoints.First());
+
+            if (account.SystemInformationCollection.Contains(string.Join('|', systemInformationDataPoints.Skip(1))).Equals(false))
+                account.SystemInformationCollection.Add(string.Join('|', systemInformationDataPoints.Skip(1)));
+
+            // The set of system information hashes is most likely bugged.
+            // The intention probably was for each of the five data points to be hashed separately, but instead the entire system information is hashed five times.
+            // NOTE: The value of Request.Form["SysInfo"] for Linux and macOS clients is "not running on windows".
+            string? systemInformationHash = systemInformationHashes.Split('|', StringSplitOptions.RemoveEmptyEntries).Distinct().SingleOrDefault();
+
+            if (systemInformationHash is null)
+            {
+                Logger.LogError($@"Account ""{account.NameWithClanTag}"" Has Made A Request To Log In Using Unexpected System Information Hashes ""{systemInformationHashes}""");
+
+                return BadRequest(PhpSerialization.Serialize(new SRPAuthenticationFailureResponse(SRPAuthenticationFailureReason.IncorrectSystemInformationFormat)));
+            }
+
+            if (account.SystemInformationHashCollection.Contains(systemInformationHash).Equals(false))
+                account.SystemInformationHashCollection.Add(systemInformationHash);
         }
+
+        // TODO: Resolve Suspensions
 
         // TODO: Resolve Chat Server Information
 
@@ -152,4 +199,7 @@ public partial class ClientRequesterController
 
     private BadRequestObjectResult HandleAuthentication()
         => BadRequest(PhpSerialization.Serialize(new SRPAuthenticationFailureResponse(SRPAuthenticationFailureReason.SRPAuthenticationDisabled)));
+
+    [GeneratedRegex(@"(?>S2 Games)\/(?>Heroes of Newerth)\/(?<version>\d{1,2}.\d{1,2}.\d{1,2}.\d{1,2})\/(?<platform>[w|l|m]a[c|s])\/(?<architecture>x86_64|biarch|universal-64)")]
+    private static partial Regex UserAgentRegex();
 }

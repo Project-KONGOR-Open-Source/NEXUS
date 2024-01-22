@@ -37,10 +37,6 @@ namespace MERRICK.Database.Migrations
                     b.Property<int>("ClanTier")
                         .HasColumnType("int");
 
-                    b.Property<string>("HardwareIDCollection")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("IPAddressCollection")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -62,6 +58,10 @@ namespace MERRICK.Database.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("SystemInformationCollection")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("SystemInformationHashCollection")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
