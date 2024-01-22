@@ -141,7 +141,7 @@ public partial class ClientRequesterController
                 return BadRequest(PhpSerialization.Serialize(new SRPAuthenticationFailureResponse(SRPAuthenticationFailureReason.UnexpectedUserAgent)));
             }
 
-            string? remoteIPAddress = HttpContext.Connection.RemoteIpAddress?.MapToIPv4().ToString();
+            string? remoteIPAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
 
             if (remoteIPAddress is not null && account.IPAddressCollection.Contains(remoteIPAddress).Equals(false))
                 account.IPAddressCollection.Add(remoteIPAddress);
@@ -175,6 +175,8 @@ public partial class ClientRequesterController
 
             if (account.SystemInformationHashCollection.Contains(systemInformationHash).Equals(false))
                 account.SystemInformationHashCollection.Add(systemInformationHash);
+
+            await MerrickContext.SaveChangesAsync();
         }
 
         // TODO: Resolve Suspensions
@@ -200,6 +202,6 @@ public partial class ClientRequesterController
     private BadRequestObjectResult HandleAuthentication()
         => BadRequest(PhpSerialization.Serialize(new SRPAuthenticationFailureResponse(SRPAuthenticationFailureReason.SRPAuthenticationDisabled)));
 
-    [GeneratedRegex(@"(?>S2 Games)\/(?>Heroes of Newerth)\/(?<version>\d{1,2}.\d{1,2}.\d{1,2}.\d{1,2})\/(?<platform>[w|l|m]a[c|s])\/(?<architecture>x86_64|biarch|universal-64)")]
+    [GeneratedRegex(@"(?>S2 Games)\/(?>Heroes of Newerth)\/(?<version>\d{1,2}\.\d{1,2}\.\d{1,2}\.\d{1,2})\/(?<platform>[wlm]a[cs])\/(?<architecture>x86_64|biarch|universal-64)")]
     private static partial Regex UserAgentRegex();
 }
