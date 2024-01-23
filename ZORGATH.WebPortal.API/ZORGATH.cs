@@ -22,7 +22,12 @@ public class ZORGATH
         builder.AddSqlServerDbContext<MerrickContext>("MERRICK", configureSettings: null, configureDbContextOptions: options =>
         {
             options.EnableDetailedErrors(builder.Environment.IsDevelopment());
-            options.EnableSensitiveDataLogging(builder.Environment.IsDevelopment());
+
+            // Suppress Warning Regarding Enabled Sensitive Data Logging, Since It Is Only Enabled In The Development Environment
+            // https://github.com/dotnet/efcore/blob/main/src/EFCore/Properties/CoreStrings.resx (LogSensitiveDataLoggingEnabled)
+            options.EnableSensitiveDataLogging(builder.Environment.IsDevelopment())
+                .ConfigureWarnings(warnings => warnings.Log((Id: CoreEventId.SensitiveDataLoggingEnabledWarning, Level: LogLevel.Trace)));
+
             options.EnableThreadSafetyChecks();
         });
 
