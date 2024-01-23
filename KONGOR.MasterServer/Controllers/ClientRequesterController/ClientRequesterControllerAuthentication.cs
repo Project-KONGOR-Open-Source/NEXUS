@@ -181,9 +181,9 @@ public partial class ClientRequesterController
 
         // TODO: Resolve Suspensions
 
-        string chatServerProtocol = Configuration.ChatServerAddress.HTTPS.Protocol;
-        string chatServerHost = Configuration.ChatServerAddress.HTTPS.Host;
-        int chatServerPort = Configuration.ChatServerAddress.HTTPS.Port;
+        string chatServerProtocol = Configuration.Value.ChatServer.HTTPS.Protocol;
+        string chatServerHost = Configuration.Value.ChatServer.HTTPS.Host;
+        int chatServerPort = Configuration.Value.ChatServer.HTTPS.Port;
 
         SRPHandlers.StageTwoResponseParameters parameters = new()
         {

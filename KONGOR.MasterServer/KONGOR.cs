@@ -16,11 +16,7 @@ public class KONGOR
         RunsInDevelopmentMode = builder.Environment.IsDevelopment();
 
         // Map Functional Parameters Defined As Application Configuration
-        FunctionalParameters parameters = builder.Configuration.GetRequiredSection("FunctionalParameters").Get<FunctionalParameters>()
-            ?? throw new NullReferenceException("Functional Parameters Configuration Section Resolved To NULL");
-        builder.Services.AddSingleton(parameters);
-
-        // TODO: Look Into IOptions
+        builder.Services.Configure<RuntimeOptions>(builder.Configuration.GetRequiredSection(RuntimeOptions.ConfigurationSection));
 
         // Add Aspire Service Defaults
         builder.AddServiceDefaults();
