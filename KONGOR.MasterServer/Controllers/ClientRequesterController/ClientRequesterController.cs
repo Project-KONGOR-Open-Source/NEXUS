@@ -22,7 +22,7 @@ public partial class ClientRequesterController(MerrickContext databaseContext, I
     private MerrickContext MerrickContext { get; } = databaseContext;
     private ILogger Logger { get; } = logger;
     private IMemoryCache Cache { get; } = cache;
-    private IOptions<OperationalConfiguration> Configuration { get; } = configuration;
+    private OperationalConfiguration Configuration { get; } = configuration.Value;
 
     [HttpPost(Name = "Client Requester All-In-One")]
     public async Task<IActionResult> ClientRequester()

@@ -3,11 +3,12 @@ namespace ZORGATH.WebPortal.API.Services.Email;
 // TODO: Implement Secret Management Component
 // TODO: Implement Real Email Service
 
-public class EmailService(IConfiguration configuration, ILogger<EmailService> logger) : IEmailService
+public class EmailService(IOptions<OperationalConfiguration> configuration, ILogger<EmailService> logger) : IEmailService
 {
-    private ILogger Logger { get; init; } = logger;
+    private OperationalConfiguration Configuration { get; } = configuration.Value;
+    private ILogger Logger { get; } = logger;
 
-    private string BaseURL { get; init; } = ZORGATH.RunsInDevelopmentMode is true ? "https://localhost:55508" : "https://portal.api.kongor.online";
+    private string BaseURL { get; } = ZORGATH.RunsInDevelopmentMode is true ? "https://localhost:55508" : "https://portal.api.kongor.online";
 
     public async Task<bool> SendEmailAddressRegistrationLink(string emailAddress, string token)
     {

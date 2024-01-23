@@ -56,15 +56,15 @@ public sealed class AuthenticationFlowTests : WebPortalAPITestSetup
     [TestCase("project.kongor@proton.me", "KONGOR", "https://github.com/K-O-N-G-O-R")]
     public async Task RegisterUserAndMainAccount(string emailAddress, string name, string password)
     {
-        ILogger<UserController> userControllerLogger; IConfiguration configuration; IEmailService emailService;
+        ILogger<UserController> userControllerLogger; IOptions<OperationalConfiguration> configuration; IEmailService emailService;
 
         try
         {
             userControllerLogger = TransientZorgath.Services.GetService(typeof(ILogger<UserController>)) as ILogger<UserController>
                 ?? throw new NullReferenceException("ILogger<UserController> Is NULL");
 
-            configuration = TransientZorgath.Services.GetService(typeof(IConfiguration)) as IConfiguration
-                ?? throw new NullReferenceException("IConfiguration Is NULL");
+            configuration = TransientZorgath.Services.GetService(typeof(IOptions<OperationalConfiguration>)) as IOptions<OperationalConfiguration>
+                ?? throw new NullReferenceException("IOptions<OperationalConfiguration> Is NULL");
 
             emailService = TransientZorgath.Services.GetService(typeof(IEmailService)) as IEmailService
                 ?? throw new NullReferenceException("IEmailService Is NULL");
@@ -86,7 +86,7 @@ public sealed class AuthenticationFlowTests : WebPortalAPITestSetup
             throw new NullReferenceException("Registration Token Is NULL");
         }
 
-        UserController userController = new(TransientMerrickContext, userControllerLogger, configuration, emailService);
+        UserController userController = new(TransientMerrickContext, userControllerLogger, emailService, configuration);
 
         IActionResult responseRegisterUserAndMainAccount = await userController.RegisterUserAndMainAccount(new RegisterUserAndMainAccountDTO(registrationToken.ID.ToString(), name, password, password));
 
@@ -97,15 +97,15 @@ public sealed class AuthenticationFlowTests : WebPortalAPITestSetup
     [TestCase("project.kongor@proton.me", "KONGOR", "https://github.com/K-O-N-G-O-R")]
     public async Task LogInUser(string emailAddress, string name, string password)
     {
-        ILogger<UserController> userControllerLogger; IConfiguration configuration; IEmailService emailService;
+        ILogger<UserController> userControllerLogger; IOptions<OperationalConfiguration> configuration; IEmailService emailService;
 
         try
         {
             userControllerLogger = TransientZorgath.Services.GetService(typeof(ILogger<UserController>)) as ILogger<UserController>
                 ?? throw new NullReferenceException("ILogger<UserController> Is NULL");
 
-            configuration = TransientZorgath.Services.GetService(typeof(IConfiguration)) as IConfiguration
-                ?? throw new NullReferenceException("IConfiguration Is NULL");
+            configuration = TransientZorgath.Services.GetService(typeof(IOptions<OperationalConfiguration>)) as IOptions<OperationalConfiguration>
+                ?? throw new NullReferenceException("IOptions<OperationalConfiguration> Is NULL");
 
             emailService = TransientZorgath.Services.GetService(typeof(IEmailService)) as IEmailService
                 ?? throw new NullReferenceException("IEmailService Is NULL");
@@ -118,7 +118,7 @@ public sealed class AuthenticationFlowTests : WebPortalAPITestSetup
             throw new NullReferenceException("Required Service Is NULL", exception);
         }
 
-        UserController userController = new(TransientMerrickContext, userControllerLogger, configuration, emailService);
+        UserController userController = new(TransientMerrickContext, userControllerLogger, emailService, configuration);
 
         IActionResult responseLogInUser = await userController.LogInUser(new LogInUserDTO(name, password));
 
@@ -127,22 +127,13 @@ public sealed class AuthenticationFlowTests : WebPortalAPITestSetup
         string authenticationToken = ((responseLogInUser as OkObjectResult ?? throw new InvalidCastException("Unable To Cast Response"))
             .Value as GetAuthenticationTokenDTO ?? throw new NullReferenceException("Authentication Token DTO Is NULL")).Token;
 
-        string? authenticationTokenSigningKey = configuration["JWT:SigningKey"]; // TODO: Put The Signing Key In A Secrets Vault
-
-        if (authenticationTokenSigningKey is null)
-        {
-            Assert.Fail("JSON Web Token Signing Key Is NULL");
-
-            throw new NullReferenceException("JSON Web Token Signing Key Is NULL");
-        }
-
         TokenValidationParameters tokenValidationParameters = new()
         {
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(authenticationTokenSigningKey)),
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration.Value.JWT.SigningKey)), // TODO: Put The Signing Key In A Secrets Vault
             ValidateIssuerSigningKey = true,
-            ValidIssuer = configuration["JWT:Issuer"],
+            ValidIssuer = configuration.Value.JWT.Issuer,
             ValidateIssuer = true,
-            ValidAudience = configuration["JWT:Audience"],
+            ValidAudience = configuration.Value.JWT.Audience,
             ValidateAudience = true,
             ClockSkew = TimeSpan.Zero,
             ValidateLifetime = true

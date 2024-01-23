@@ -7,6 +7,7 @@ global using Microsoft.AspNetCore.Authorization;
 global using Microsoft.AspNetCore.Identity;
 global using Microsoft.AspNetCore.Mvc;
 global using Microsoft.EntityFrameworkCore;
+global using Microsoft.Extensions.Options;
 global using Microsoft.IdentityModel.Tokens;
 global using Microsoft.OpenApi.Models;
 
@@ -23,4 +24,5 @@ global using ZORGATH.WebPortal.API.Contracts;
 global using ZORGATH.WebPortal.API.Extensions;
 global using ZORGATH.WebPortal.API.Handlers;
 global using ZORGATH.WebPortal.API.Helpers;
+global using ZORGATH.WebPortal.API.Models.Configuration;
 global using ZORGATH.WebPortal.API.Services.Email;

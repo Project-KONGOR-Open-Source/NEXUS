@@ -12,6 +12,9 @@ public class ZORGATH
         // Set Static RunsInDevelopmentMode Property
         RunsInDevelopmentMode = builder.Environment.IsDevelopment();
 
+        // Map User-Defined Configuration Section
+        builder.Services.Configure<OperationalConfiguration>(builder.Configuration.GetRequiredSection(OperationalConfiguration.ConfigurationSection));
+
         // Add Aspire Service Defaults
         builder.AddServiceDefaults();
 
@@ -89,11 +92,6 @@ public class ZORGATH
         //    });
         //}
 
-        string? tokenSigningKey = builder.Configuration["JWT:SigningKey"]; // TODO: Put The Signing Key In A Secrets Vault
-
-        if (tokenSigningKey is null)
-            throw new NullReferenceException("JSON Web Token Signing Key Is NULL");
-
         // Add And Configure Authentication
         builder.Services.AddAuthentication(options =>
         {
@@ -102,13 +100,15 @@ public class ZORGATH
             options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
         }).AddJwtBearer(options =>
         {
+            OperationalConfiguration configuration = builder.Configuration.GetRequiredSection(OperationalConfiguration.ConfigurationSection).Get<OperationalConfiguration>() ?? throw new NullReferenceException("Operational Configuration Is NULL");
+
             options.TokenValidationParameters = new TokenValidationParameters
             {
-                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(tokenSigningKey)),
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration.JWT.SigningKey)), // TODO: Put The Signing Key In A Secrets Vault
                 ValidateIssuerSigningKey = true,
-                ValidIssuer = builder.Configuration["JWT:Issuer"],
+                ValidIssuer = configuration.JWT.Issuer,
                 ValidateIssuer = true,
-                ValidAudience = builder.Configuration["JWT:Audience"],
+                ValidAudience = configuration.JWT.Audience,
                 ValidateAudience = true,
                 ClockSkew = TimeSpan.Zero,
                 ValidateLifetime = true

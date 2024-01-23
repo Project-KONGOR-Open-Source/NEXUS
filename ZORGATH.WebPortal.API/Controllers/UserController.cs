@@ -3,12 +3,12 @@
 [ApiController]
 [Route("[controller]")]
 [Consumes("application/json")]
-public class UserController(MerrickContext databaseContext, ILogger<UserController> logger, IConfiguration configuration, IEmailService emailService) : ControllerBase
+public class UserController(MerrickContext databaseContext, ILogger<UserController> logger, IEmailService emailService, IOptions<OperationalConfiguration> configuration) : ControllerBase
 {
-    private MerrickContext MerrickContext { get; init; } = databaseContext;
-    private ILogger Logger { get; init; } = logger;
-    private IConfiguration Configuration { get; init; } = configuration;
-    private IEmailService EmailService { get; init; } = emailService;
+    private MerrickContext MerrickContext { get; } = databaseContext;
+    private ILogger Logger { get; } = logger;
+    private IEmailService EmailService { get; } = emailService;
+    private OperationalConfiguration Configuration { get; } = configuration.Value;
 
     [HttpPost("Register", Name = "Register User And Main Account")]
     [AllowAnonymous]
@@ -86,7 +86,6 @@ public class UserController(MerrickContext databaseContext, ILogger<UserControll
     [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(string), StatusCodes.Status422UnprocessableEntity)]
-    [ProducesResponseType(typeof(string), StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> LogInUser([FromBody] LogInUserDTO payload)
     {
         Account? account = await MerrickContext.Accounts
@@ -141,22 +140,13 @@ public class UserController(MerrickContext databaseContext, ILogger<UserControll
 
         IEnumerable<Claim> allTokenClaims = Enumerable.Empty<Claim>().Union(userRoleClaims).Union(openIDClaims).Union(customClaims).OrderBy(claim => claim.Type);
 
-        string? tokenSigningKey = Configuration["JWT:SigningKey"]; // TODO: Put The Signing Key In A Secrets Vault
-
-        if (tokenSigningKey is null)
-        {
-            Logger.LogError("[BUG] JSON Web Token Signing Key Is NULL");
-
-            return StatusCode(StatusCodes.Status500InternalServerError, "Unable To Generate Authentication Token");
-        }
-
         JwtSecurityToken token = new
         (
-            issuer: Configuration["JWT:Issuer"],
-            audience: Configuration["JWT:Audience"],
+            issuer: Configuration.JWT.Issuer,
+            audience: Configuration.JWT.Audience,
             claims: allTokenClaims,
-            expires: DateTime.UtcNow.AddHours(Convert.ToInt32(Configuration["JWT:DurationInHours"])),
-            signingCredentials: new SigningCredentials(new SymmetricSecurityKey(Encoding.UTF8.GetBytes(tokenSigningKey)), SecurityAlgorithms.HmacSha256)
+            expires: DateTime.UtcNow.AddHours(Configuration.JWT.DurationInHours),
+            signingCredentials: new SigningCredentials(new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration.JWT.SigningKey)), SecurityAlgorithms.HmacSha256) // TODO: Put The Signing Key In A Secrets Vault
         );
 
         string jwt = new JwtSecurityTokenHandler().WriteToken(token);

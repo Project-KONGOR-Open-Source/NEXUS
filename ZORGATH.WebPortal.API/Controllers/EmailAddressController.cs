@@ -5,9 +5,9 @@
 [Consumes("application/json")]
 public class EmailAddressController(MerrickContext databaseContext, ILogger<EmailAddressController> logger, IEmailService emailService) : ControllerBase
 {
-    private MerrickContext MerrickContext { get; init; } = databaseContext;
-    private ILogger Logger { get; init; } = logger;
-    private IEmailService EmailService { get; init; } = emailService;
+    private MerrickContext MerrickContext { get; } = databaseContext;
+    private ILogger Logger { get; } = logger;
+    private IEmailService EmailService { get; } = emailService;
 
     [HttpPost("Register", Name = "Register Email Address")]
     [AllowAnonymous]
