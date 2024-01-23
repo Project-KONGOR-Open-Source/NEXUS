@@ -16,7 +16,7 @@ public class KONGOR
         RunsInDevelopmentMode = builder.Environment.IsDevelopment();
 
         // Map Functional Parameters Defined As Application Configuration
-        builder.Services.Configure<RuntimeOptions>(builder.Configuration.GetRequiredSection(RuntimeOptions.ConfigurationSection));
+        builder.Services.Configure<OperationalConfiguration>(builder.Configuration.GetRequiredSection(OperationalConfiguration.ConfigurationSection));
 
         // Add Aspire Service Defaults
         builder.AddServiceDefaults();
