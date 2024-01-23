@@ -1,4 +1,4 @@
-﻿namespace KONGOR.MasterServer.RequestResponseModels.SRP;
+﻿namespace KONGOR.MasterServer.Models.RequestResponse.SRP;
 
 public class SRPAuthenticationFailureResponse(SRPAuthenticationFailureReason reason, string? accountName = null)
 {

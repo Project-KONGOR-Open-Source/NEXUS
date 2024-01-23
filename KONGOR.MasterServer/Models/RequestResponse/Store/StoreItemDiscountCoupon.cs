@@ -1,4 +1,4 @@
-﻿namespace KONGOR.MasterServer.RequestResponseModels.Store;
+﻿namespace KONGOR.MasterServer.Models.RequestResponse.Store;
 
 public class StoreItemDiscountCoupon
 {

@@ -3,7 +3,7 @@
 [ApiController]
 [Route("client_requester.php")]
 [Consumes("application/x-www-form-urlencoded")]
-public partial class ClientRequesterController(MerrickContext databaseContext, ILogger<ClientRequesterController> logger, IMemoryCache cache) : ControllerBase
+public partial class ClientRequesterController(MerrickContext databaseContext, ILogger<ClientRequesterController> logger, IMemoryCache cache, FunctionalParameters configuration) : ControllerBase
 {
     # region Client Requester Controller Description
     /*
@@ -22,6 +22,7 @@ public partial class ClientRequesterController(MerrickContext databaseContext, I
     private MerrickContext MerrickContext { get; } = databaseContext;
     private ILogger Logger { get; } = logger;
     private IMemoryCache Cache { get; } = cache;
+    private FunctionalParameters Configuration { get; } = configuration;
 
     [HttpPost(Name = "Client Requester All-In-One")]
     public async Task<IActionResult> ClientRequester()
