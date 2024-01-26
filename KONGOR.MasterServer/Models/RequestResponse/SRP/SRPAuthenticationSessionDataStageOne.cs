@@ -8,8 +8,8 @@ public class SRPAuthenticationSessionDataStageOne
     # region Secure Remote Password Protocol Secrets
 
     // Thank you, Anton Romanov (aka Theli), for making these values public: https://github.com/theli-ua/pyHoNBot/blob/cabde31b8601c1ca55dc10fcf663ec663ec0eb71/hon/masterserver.py#L23-L24.
-    // The safe prime number is also present in the k2_x64 DLL, between offsets 0xF2F8A0 and 0xF2FA9F.
-    // The multiplicative group generator was expected to be a small number in order to not generate sets unnecessarily, so it could have easily been brute-forced.
+    // The safe prime number is also present in the k2_x64 DLL of the Windows client, between offsets 0xF2F8A0 and 0xF2FA9F.
+    // The multiplicative group generator was always expected to be a small number in order to not generate sets unnecessarily, so it could have been brute-forced.
     // Having these values in the public domain, however, certainly helped to save a lot of time while writing the closed-source version of Project KONGOR.
 
     /// <summary>
