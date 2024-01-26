@@ -123,12 +123,21 @@ public partial class ClientRequesterController
             return Unauthorized(PhpSerialization.Serialize(new SRPAuthenticationFailureResponse(SRPAuthenticationFailureReason.IncorrectPassword)));
 
         Account? account = await MerrickContext.Accounts
-            .Include(account => account.User)
+            .Include(account => account.User).ThenInclude(user => user.Accounts)
             .Include(account => account.Clan)
             .SingleOrDefaultAsync(account => account.Name.Equals(accountName));
 
         if (account is null)
             return NotFound(PhpSerialization.Serialize(new SRPAuthenticationFailureResponse(SRPAuthenticationFailureReason.AccountNotFound)));
+
+        if (HttpContext.Connection.RemoteIpAddress is null)
+        {
+            Logger.LogError($@"[BUG] Remote IP Address For Account Name ""{accountName}"" Is NULL");
+
+            return UnprocessableEntity(PhpSerialization.Serialize(new SRPAuthenticationFailureResponse(SRPAuthenticationFailureReason.MissingIPAddress)));
+        }
+
+        string remoteIPAddress = HttpContext.Connection.RemoteIpAddress.MapToIPv4().ToString();
 
         if (account.Type is not AccountType.Staff)
         {
@@ -141,9 +150,7 @@ public partial class ClientRequesterController
                 return BadRequest(PhpSerialization.Serialize(new SRPAuthenticationFailureResponse(SRPAuthenticationFailureReason.UnexpectedUserAgent)));
             }
 
-            string? remoteIPAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
-
-            if (remoteIPAddress is not null && account.IPAddressCollection.Contains(remoteIPAddress).Equals(false))
+            if (account.IPAddressCollection.Contains(remoteIPAddress).Equals(false))
                 account.IPAddressCollection.Add(remoteIPAddress);
 
             string[] systemInformationDataPoints = [.. systemInformation.Split('|', StringSplitOptions.RemoveEmptyEntries)];
@@ -181,18 +188,15 @@ public partial class ClientRequesterController
 
         // TODO: Resolve Suspensions
 
-        string chatServerProtocol = Configuration.ChatServer.HTTPS.Protocol;
-        string chatServerHost = Configuration.ChatServer.HTTPS.Host;
-        int chatServerPort = Configuration.ChatServer.HTTPS.Port;
-
         SRPHandlers.StageTwoResponseParameters parameters = new()
         {
-            ServerProof = serverProof
+            Account = account,
+            ServerProof = serverProof,
+            ClientIPAddress = remoteIPAddress,
+            ChatServer = (Configuration.ChatServer.HTTPS.Protocol, Configuration.ChatServer.HTTPS.Host, Configuration.ChatServer.HTTPS.Port)
         };
 
         SRPAuthenticationResponseStageTwo response = SRPHandlers.GenerateStageTwoResponse(parameters);
-
-        // TODO: Set Cookie
 
         account.TimestampLastActive = DateTime.UtcNow;
 

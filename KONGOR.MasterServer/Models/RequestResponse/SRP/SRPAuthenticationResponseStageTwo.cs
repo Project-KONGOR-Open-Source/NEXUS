@@ -161,7 +161,7 @@ public class SRPAuthenticationResponseStageTwo
     ///     Unknown.
     /// </summary>
     [PhpProperty("icb_url")]
-    public string ICBURL { get; set; } = "http://s3.amazonaws.com/naeu-icb2";
+    public required string ICBURL { get; set; }
 
     /// <summary>
     ///     A hash of some of the account's authentication details.
