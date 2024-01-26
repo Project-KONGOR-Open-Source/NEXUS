@@ -19,6 +19,8 @@ public sealed class AuthenticationFlowTests : WebPortalAPITestSetup
         TransientMerrickContext = InMemoryHelpers.GetInMemoryMerrickContext("Registration And Authentication");
     }
 
+    // TODO: Use HttpClient
+
     [Test, Order(1)]
     [TestCase("project.kongor@proton.me")]
     public async Task RegisterEmailAddress(string emailAddress)

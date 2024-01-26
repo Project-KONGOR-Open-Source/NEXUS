@@ -9,6 +9,13 @@ public class ASPIRE
         builder.AddProject<MERRICK_Database>("MERRICK Database")
             .WithLaunchProfile(builder.Environment.IsProduction() ? "MERRICK.Database Production" : "MERRICK.Database Development");
 
+        // TODO: Add Chat Server Launch Profile
+
+        // builder.AddProject<TRANSMUTANSTEIN_ChatServer>("TRANSMUTANSTEIN Chat Server")
+        //     .WithLaunchProfile(builder.Environment.IsProduction() ? "TRANSMUTANSTEIN.ChatServer Production" : "TRANSMUTANSTEIN.ChatServer Development");
+
+        // TODO: Try To Set The Connection String Via Environment Variable
+
         builder.AddProject<KONGOR_MasterServer>("KONGOR Master Server")
             .WithLaunchProfile(builder.Environment.IsProduction() ? "KONGOR.MasterServer Production" : "KONGOR.MasterServer Development");
 
