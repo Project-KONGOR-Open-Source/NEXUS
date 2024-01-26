@@ -25,6 +25,8 @@ public class Account
 
     public DateTime TimestampLastActive { get; set; } = DateTime.UtcNow;
 
+    public List<string> AutoConnectChatChannels { get; set; } = [];
+
     public List<string> SelectedStoreItems { get; set; } = ["ai.Default Icon", "cc.white", "t.Standard"];
 
     public List<string> IPAddressCollection { get; set; } = [];
