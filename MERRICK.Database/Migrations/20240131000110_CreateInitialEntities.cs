@@ -99,6 +99,7 @@ namespace MERRICK.Database.Migrations
                     AscensionLevel = table.Column<int>(type: "int", nullable: false),
                     TimestampCreated = table.Column<DateTime>(type: "datetime2", nullable: false),
                     TimestampLastActive = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    AutoConnectChatChannels = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     SelectedStoreItems = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     IPAddressCollection = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     MACAddressCollection = table.Column<string>(type: "nvarchar(max)", nullable: false),

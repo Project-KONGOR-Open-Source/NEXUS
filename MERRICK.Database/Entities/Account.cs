@@ -27,6 +27,14 @@ public class Account
 
     public List<string> AutoConnectChatChannels { get; set; } = [];
 
+    // TODO: Add The Account Lists Below To The Database Schema
+
+    public List<Account> FriendAccounts { get; set; } = [];
+
+    public List<Account> IgnoredAccounts { get; set; } = [];
+
+    public List<Account> BannedAccounts { get; set; } = [];
+
     public List<string> SelectedStoreItems { get; set; } = ["ai.Default Icon", "cc.white", "t.Standard"];
 
     public List<string> IPAddressCollection { get; set; } = [];

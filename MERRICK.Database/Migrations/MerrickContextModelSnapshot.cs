@@ -31,6 +31,10 @@ namespace MERRICK.Database.Migrations
                     b.Property<int>("AscensionLevel")
                         .HasColumnType("int");
 
+                    b.Property<string>("AutoConnectChatChannels")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<Guid?>("ClanID")
                         .HasColumnType("uniqueidentifier");
 

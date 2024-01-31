@@ -33,9 +33,9 @@ public static class SRPHandlers
             SlotID = null,
             CurrentSeason = null,
             MuteExpiration = 0,
-            FriendAccountList = null,
-            IgnoredAccountsList = null,
-            BannedAccountsList = null,
+            FriendAccountList = SetFriendAccountList(parameters.Account),
+            IgnoredAccountsList = SetIgnoredAccountsList(parameters.Account),
+            BannedAccountsList = SetBannedAccountsList(parameters.Account),
             ClanRoster = null,
             ClanMembershipData = default,
             OwnedStoreItems = null,
@@ -129,4 +129,16 @@ public static class SRPHandlers
 
         return channels;
     }
+
+    private static Dictionary<Guid, Dictionary<Guid, FriendAccount>> SetFriendAccountList(Account account)
+        => new() { { account.ID, account.FriendAccounts.ToDictionary(friend => friend.ID,
+            friend => new FriendAccount { ID = friend.ID.ToString(), Name = friend.Name, Group = string.Empty /* TODO: Implement Friend Groups */, ClanTag = friend.Clan?.Tag ?? string.Empty } ) } };
+
+    private static Dictionary<Guid, List<IgnoredAccount>> SetIgnoredAccountsList(Account account)
+        => new() { { account.ID, account.IgnoredAccounts
+            .Select(ignored => new IgnoredAccount { ID = ignored.ID.ToString(), Name = ignored.Name }).ToList() } };
+
+    private static Dictionary<Guid, List<BannedAccount>> SetBannedAccountsList(Account account)
+        => new() { { account.ID, account.BannedAccounts
+            .Select(banned => new BannedAccount { ID = banned.ID.ToString(), Name = banned.Name, Reason = string.Empty /* TODO: Implement Ban Reason */ }).ToList() } };
 }

@@ -324,28 +324,28 @@ public class SRPAuthenticationResponseStageTwo
     ///     The inner-dictionary needs to contain multiple entries, the key of each being the respective friend account's ID.
     /// </summary>
     [PhpProperty("buddy_list")]
-    public required Dictionary<int, Dictionary<int, FriendAccount>> FriendAccountList { get; set; }
+    public required Dictionary<Guid, Dictionary<Guid, FriendAccount>> FriendAccountList { get; set; }
 
     /// <summary>
     ///     The account's list of ignored accounts.
     ///     This dictionary needs to contain a single entry with the key being the owner account's ID.
     /// </summary>
     [PhpProperty("ignored_list")]
-    public required Dictionary<int, List<IgnoredAccount>> IgnoredAccountsList { get; set; }
+    public required Dictionary<Guid, List<IgnoredAccount>> IgnoredAccountsList { get; set; }
 
     /// <summary>
     ///     The account's list of banned accounts.
     ///     This dictionary needs to contain a single entry with the key being the owner account's ID.
     /// </summary>
     [PhpProperty("banned_list")]
-    public required Dictionary<int, List<BannedAccount>> BannedAccountsList { get; set; }
+    public required Dictionary<Guid, List<BannedAccount>> BannedAccountsList { get; set; }
 
     /// <summary>
     ///     The list of members of the account's clan.
     ///     This dictionary needs to contain multiple entries, the key of each being the respective clan member account's ID.
     /// </summary>
     [PhpProperty("clan_roster")]
-    public required Dictionary<int, ClanMemberAccount> ClanRoster { get; set; }
+    public required Dictionary<Guid, ClanMemberAccount> ClanRoster { get; set; }
 
     /// <summary>
     ///     The account's clan membership data if the account is part of a clan, or an error message if the account is not part of a clan.

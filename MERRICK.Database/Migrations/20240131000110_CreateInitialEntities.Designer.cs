@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MERRICK.Database.Migrations
 {
     [DbContext(typeof(MerrickContext))]
-    [Migration("20240122004903_CreateInitialEntities")]
+    [Migration("20240131000110_CreateInitialEntities")]
     partial class CreateInitialEntities
     {
         /// <inheritdoc />
@@ -33,6 +33,10 @@ namespace MERRICK.Database.Migrations
 
                     b.Property<int>("AscensionLevel")
                         .HasColumnType("int");
+
+                    b.Property<string>("AutoConnectChatChannels")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid?>("ClanID")
                         .HasColumnType("uniqueidentifier");
