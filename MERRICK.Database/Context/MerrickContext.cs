@@ -9,7 +9,10 @@ public sealed class MerrickContext : DbContext
     }
 
     public DbSet<Account> Accounts => Set<Account>();
+    public DbSet<Banned> BannedAccounts => Set<Banned>();
     public DbSet<Clan> Clans => Set<Clan>();
+    public DbSet<Friend> FriendAccounts => Set<Friend>();
+    public DbSet<Ignored> IgnoredAccounts => Set<Ignored>();
     public DbSet<Role> Roles => Set<Role>();
     public DbSet<Token> Tokens => Set<Token>();
     public DbSet<User> Users => Set<User>();
@@ -23,8 +26,6 @@ public sealed class MerrickContext : DbContext
 
     private static void ConfigureRoles(EntityTypeBuilder<Role> builder)
     {
-        builder.ToTable(nameof(Roles));
-
         builder.HasData
         (
             new Role

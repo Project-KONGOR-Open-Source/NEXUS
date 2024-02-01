@@ -1,4 +1,4 @@
-﻿namespace MERRICK.Database.Entities;
+﻿namespace MERRICK.Database.Entities.Core;
 
 [Index(nameof(EmailAddress), IsUnique = true)]
 public class User

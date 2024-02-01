@@ -1,5 +1,5 @@
 ﻿global using MERRICK.Database.Context;
-global using MERRICK.Database.Entities;
+global using MERRICK.Database.Entities.Utility;
 global using MERRICK.Database.Helpers;
 
 global using Microsoft.AspNetCore.Authentication.JwtBearer;

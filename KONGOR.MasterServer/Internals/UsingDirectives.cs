@@ -5,7 +5,7 @@ global using KONGOR.MasterServer.Models.RequestResponse.SRP;
 global using KONGOR.MasterServer.Models.RequestResponse.Store;
 
 global using MERRICK.Database.Context;
-global using MERRICK.Database.Entities;
+global using MERRICK.Database.Entities.Core;
 global using MERRICK.Database.Enumerations;
 
 global using Microsoft.AspNetCore.Mvc;

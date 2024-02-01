@@ -22,7 +22,7 @@ namespace MERRICK.Database.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("MERRICK.Database.Entities.Account", b =>
+            modelBuilder.Entity("MERRICK.Database.Entities.Core.Account", b =>
                 {
                     b.Property<Guid>("ID")
                         .ValueGeneratedOnAdd()
@@ -93,7 +93,7 @@ namespace MERRICK.Database.Migrations
                     b.ToTable("Accounts");
                 });
 
-            modelBuilder.Entity("MERRICK.Database.Entities.Clan", b =>
+            modelBuilder.Entity("MERRICK.Database.Entities.Core.Clan", b =>
                 {
                     b.Property<Guid>("ID")
                         .ValueGeneratedOnAdd()
@@ -120,66 +120,7 @@ namespace MERRICK.Database.Migrations
                     b.ToTable("Clans");
                 });
 
-            modelBuilder.Entity("MERRICK.Database.Entities.Role", b =>
-                {
-                    b.Property<Guid>("ID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.HasKey("ID");
-
-                    b.HasIndex("Name")
-                        .IsUnique();
-
-                    b.ToTable("Roles", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            ID = new Guid("00000000-0000-0000-0000-0000f4a5e3d3"),
-                            Name = "ADMINISTRATOR"
-                        },
-                        new
-                        {
-                            ID = new Guid("00000000-0000-0000-0000-00002b88dfe2"),
-                            Name = "USER"
-                        });
-                });
-
-            modelBuilder.Entity("MERRICK.Database.Entities.Token", b =>
-                {
-                    b.Property<Guid>("ID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Data")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("EmailAddress")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("Purpose")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime?>("TimestampConsumed")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime>("TimestampCreated")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("ID");
-
-                    b.ToTable("Tokens");
-                });
-
-            modelBuilder.Entity("MERRICK.Database.Entities.User", b =>
+            modelBuilder.Entity("MERRICK.Database.Entities.Core.User", b =>
                 {
                     b.Property<Guid>("ID")
                         .ValueGeneratedOnAdd()
@@ -243,13 +184,128 @@ namespace MERRICK.Database.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("MERRICK.Database.Entities.Account", b =>
+            modelBuilder.Entity("MERRICK.Database.Entities.Relationship.Banned", b =>
                 {
-                    b.HasOne("MERRICK.Database.Entities.Clan", "Clan")
+                    b.Property<Guid>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("AccountID")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("AccountID");
+
+                    b.ToTable("BannedAccounts");
+                });
+
+            modelBuilder.Entity("MERRICK.Database.Entities.Relationship.Friend", b =>
+                {
+                    b.Property<Guid>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("AccountID")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Group")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("AccountID");
+
+                    b.ToTable("FriendAccounts");
+                });
+
+            modelBuilder.Entity("MERRICK.Database.Entities.Relationship.Ignored", b =>
+                {
+                    b.Property<Guid>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("AccountID")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("AccountID");
+
+                    b.ToTable("IgnoredAccounts");
+                });
+
+            modelBuilder.Entity("MERRICK.Database.Entities.Utility.Role", b =>
+                {
+                    b.Property<Guid>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.ToTable("Roles");
+
+                    b.HasData(
+                        new
+                        {
+                            ID = new Guid("00000000-0000-0000-0000-0000f4a5e3d3"),
+                            Name = "ADMINISTRATOR"
+                        },
+                        new
+                        {
+                            ID = new Guid("00000000-0000-0000-0000-00002b88dfe2"),
+                            Name = "USER"
+                        });
+                });
+
+            modelBuilder.Entity("MERRICK.Database.Entities.Utility.Token", b =>
+                {
+                    b.Property<Guid>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Data")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("EmailAddress")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Purpose")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("TimestampConsumed")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("TimestampCreated")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("ID");
+
+                    b.ToTable("Tokens");
+                });
+
+            modelBuilder.Entity("MERRICK.Database.Entities.Core.Account", b =>
+                {
+                    b.HasOne("MERRICK.Database.Entities.Core.Clan", "Clan")
                         .WithMany("Members")
                         .HasForeignKey("ClanID");
 
-                    b.HasOne("MERRICK.Database.Entities.User", "User")
+                    b.HasOne("MERRICK.Database.Entities.Core.User", "User")
                         .WithMany("Accounts")
                         .HasForeignKey("UserID")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -260,9 +316,9 @@ namespace MERRICK.Database.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("MERRICK.Database.Entities.User", b =>
+            modelBuilder.Entity("MERRICK.Database.Entities.Core.User", b =>
                 {
-                    b.HasOne("MERRICK.Database.Entities.Role", "Role")
+                    b.HasOne("MERRICK.Database.Entities.Utility.Role", "Role")
                         .WithMany()
                         .HasForeignKey("RoleID")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -271,12 +327,54 @@ namespace MERRICK.Database.Migrations
                     b.Navigation("Role");
                 });
 
-            modelBuilder.Entity("MERRICK.Database.Entities.Clan", b =>
+            modelBuilder.Entity("MERRICK.Database.Entities.Relationship.Banned", b =>
+                {
+                    b.HasOne("MERRICK.Database.Entities.Core.Account", "Account")
+                        .WithMany("BannedAccounts")
+                        .HasForeignKey("AccountID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Account");
+                });
+
+            modelBuilder.Entity("MERRICK.Database.Entities.Relationship.Friend", b =>
+                {
+                    b.HasOne("MERRICK.Database.Entities.Core.Account", "Account")
+                        .WithMany("FriendAccounts")
+                        .HasForeignKey("AccountID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Account");
+                });
+
+            modelBuilder.Entity("MERRICK.Database.Entities.Relationship.Ignored", b =>
+                {
+                    b.HasOne("MERRICK.Database.Entities.Core.Account", "Account")
+                        .WithMany("IgnoredAccounts")
+                        .HasForeignKey("AccountID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Account");
+                });
+
+            modelBuilder.Entity("MERRICK.Database.Entities.Core.Account", b =>
+                {
+                    b.Navigation("BannedAccounts");
+
+                    b.Navigation("FriendAccounts");
+
+                    b.Navigation("IgnoredAccounts");
+                });
+
+            modelBuilder.Entity("MERRICK.Database.Entities.Core.Clan", b =>
                 {
                     b.Navigation("Members");
                 });
 
-            modelBuilder.Entity("MERRICK.Database.Entities.User", b =>
+            modelBuilder.Entity("MERRICK.Database.Entities.Core.User", b =>
                 {
                     b.Navigation("Accounts");
                 });

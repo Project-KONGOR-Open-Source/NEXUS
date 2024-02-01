@@ -122,6 +122,62 @@ namespace MERRICK.Database.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "BannedAccounts",
+                columns: table => new
+                {
+                    ID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    AccountID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Reason = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_BannedAccounts", x => x.ID);
+                    table.ForeignKey(
+                        name: "FK_BannedAccounts_Accounts_AccountID",
+                        column: x => x.AccountID,
+                        principalTable: "Accounts",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "FriendAccounts",
+                columns: table => new
+                {
+                    ID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    AccountID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Group = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_FriendAccounts", x => x.ID);
+                    table.ForeignKey(
+                        name: "FK_FriendAccounts_Accounts_AccountID",
+                        column: x => x.AccountID,
+                        principalTable: "Accounts",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "IgnoredAccounts",
+                columns: table => new
+                {
+                    ID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    AccountID = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_IgnoredAccounts", x => x.ID);
+                    table.ForeignKey(
+                        name: "FK_IgnoredAccounts_Accounts_AccountID",
+                        column: x => x.AccountID,
+                        principalTable: "Accounts",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.InsertData(
                 table: "Roles",
                 columns: new[] { "ID", "Name" },
@@ -148,10 +204,25 @@ namespace MERRICK.Database.Migrations
                 column: "UserID");
 
             migrationBuilder.CreateIndex(
+                name: "IX_BannedAccounts_AccountID",
+                table: "BannedAccounts",
+                column: "AccountID");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Clans_Name_Tag",
                 table: "Clans",
                 columns: new[] { "Name", "Tag" },
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_FriendAccounts_AccountID",
+                table: "FriendAccounts",
+                column: "AccountID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_IgnoredAccounts_AccountID",
+                table: "IgnoredAccounts",
+                column: "AccountID");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Roles_Name",
@@ -175,10 +246,19 @@ namespace MERRICK.Database.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Accounts");
+                name: "BannedAccounts");
+
+            migrationBuilder.DropTable(
+                name: "FriendAccounts");
+
+            migrationBuilder.DropTable(
+                name: "IgnoredAccounts");
 
             migrationBuilder.DropTable(
                 name: "Tokens");
+
+            migrationBuilder.DropTable(
+                name: "Accounts");
 
             migrationBuilder.DropTable(
                 name: "Clans");

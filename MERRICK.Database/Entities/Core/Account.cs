@@ -1,4 +1,4 @@
-﻿namespace MERRICK.Database.Entities;
+﻿namespace MERRICK.Database.Entities.Core;
 
 [Index(nameof(Name), IsUnique = true)]
 public class Account
@@ -27,13 +27,11 @@ public class Account
 
     public List<string> AutoConnectChatChannels { get; set; } = [];
 
-    // TODO: Add The Account Lists Below To The Database Schema
+    public List<Friend> FriendAccounts { get; set; } = [];
 
-    public List<Account> FriendAccounts { get; set; } = [];
+    public List<Ignored> IgnoredAccounts { get; set; } = [];
 
-    public List<Account> IgnoredAccounts { get; set; } = [];
-
-    public List<Account> BannedAccounts { get; set; } = [];
+    public List<Banned> BannedAccounts { get; set; } = [];
 
     public List<string> SelectedStoreItems { get; set; } = ["ai.Default Icon", "cc.white", "t.Standard"];
 
