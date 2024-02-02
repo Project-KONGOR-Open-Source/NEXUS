@@ -27,11 +27,11 @@ public class Account
 
     public List<string> AutoConnectChatChannels { get; set; } = [];
 
-    public List<Account> FriendAccounts { get; set; } = [];
+    public List<FriendAccount> FriendAccounts { get; set; } = [];
 
-    public List<Account> IgnoredAccounts { get; set; } = [];
+    public List<IgnoredAccount> IgnoredAccounts { get; set; } = [];
 
-    public List<Account> BannedAccounts { get; set; } = [];
+    public List<BannedAccount> BannedAccounts { get; set; } = [];
 
     public List<string> SelectedStoreItems { get; set; } = ["ai.Default Icon", "cc.white", "t.Standard"];
 

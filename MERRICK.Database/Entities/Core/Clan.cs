@@ -16,3 +16,5 @@ public class Clan
 
     public DateTime TimestampCreated { get; set; } = DateTime.UtcNow;
 }
+
+// TODO: Get Clan Tier Parser
