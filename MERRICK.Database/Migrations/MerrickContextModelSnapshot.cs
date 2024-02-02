@@ -264,6 +264,9 @@ namespace MERRICK.Database.Migrations
                                 .ValueGeneratedOnAdd()
                                 .HasColumnType("int");
 
+                            b1.Property<Guid>("AccountIdentifier")
+                                .HasColumnType("uniqueidentifier");
+
                             b1.Property<string>("AccountName")
                                 .IsRequired()
                                 .HasMaxLength(15)
@@ -295,6 +298,9 @@ namespace MERRICK.Database.Migrations
                             b1.Property<int>("Id")
                                 .ValueGeneratedOnAdd()
                                 .HasColumnType("int");
+
+                            b1.Property<Guid>("AccountIdentifier")
+                                .HasColumnType("uniqueidentifier");
 
                             b1.Property<string>("AccountName")
                                 .IsRequired()
@@ -331,6 +337,9 @@ namespace MERRICK.Database.Migrations
                             b1.Property<int>("Id")
                                 .ValueGeneratedOnAdd()
                                 .HasColumnType("int");
+
+                            b1.Property<Guid>("AccountIdentifier")
+                                .HasColumnType("uniqueidentifier");
 
                             b1.Property<string>("AccountName")
                                 .IsRequired()
