@@ -132,13 +132,13 @@ public static class SRPHandlers
 
     private static Dictionary<Guid, Dictionary<Guid, FriendAccount>> SetFriendAccountList(Account account)
         => new() { { account.ID, account.FriendAccounts.ToDictionary(friend => friend.ID,
-            friend => new FriendAccount { ID = friend.ID.ToString(), Name = friend.Account.Name, Group = string.Empty /* TODO: Implement Friend Groups */, ClanTag = friend.Account.Clan?.Tag ?? string.Empty } ) } };
+            friend => new FriendAccount { ID = friend.ID.ToString(), Name = friend.Name, Group = string.Empty /* TODO: Implement Friend Groups */, ClanTag = friend.Clan?.Tag ?? string.Empty } ) } };
 
     private static Dictionary<Guid, List<IgnoredAccount>> SetIgnoredAccountsList(Account account)
         => new() { { account.ID, account.IgnoredAccounts
-            .Select(ignored => new IgnoredAccount { ID = ignored.ID.ToString(), Name = ignored.Account.Name }).ToList() } };
+            .Select(ignored => new IgnoredAccount { ID = ignored.ID.ToString(), Name = ignored.Name }).ToList() } };
 
     private static Dictionary<Guid, List<BannedAccount>> SetBannedAccountsList(Account account)
         => new() { { account.ID, account.BannedAccounts
-            .Select(banned => new BannedAccount { ID = banned.ID.ToString(), Name = banned.Account.Name, Reason = string.Empty /* TODO: Implement Ban Reason */ }).ToList() } };
+            .Select(banned => new BannedAccount { ID = banned.ID.ToString(), Name = banned.Name, Reason = string.Empty /* TODO: Implement Ban Reason */ }).ToList() } };
 }

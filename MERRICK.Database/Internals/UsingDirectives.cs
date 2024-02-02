@@ -3,7 +3,6 @@
 global using MERRICK.Database.Constants;
 global using MERRICK.Database.Context;
 global using MERRICK.Database.Entities.Core;
-global using MERRICK.Database.Entities.Relationship;
 global using MERRICK.Database.Entities.Utility;
 global using MERRICK.Database.Enumerations;
 global using MERRICK.Database.Services;

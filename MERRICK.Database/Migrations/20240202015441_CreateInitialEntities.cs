@@ -123,59 +123,72 @@ namespace MERRICK.Database.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "BannedAccounts",
+                name: "AccountBannedAccounts",
                 columns: table => new
                 {
-                    ID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     AccountID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Reason = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    BannedAccountID = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_BannedAccounts", x => x.ID);
+                    table.PrimaryKey("PK_AccountBannedAccounts", x => x.AccountID);
                     table.ForeignKey(
-                        name: "FK_BannedAccounts_Accounts_AccountID",
+                        name: "FK_AccountBannedAccounts_Accounts_AccountID",
                         column: x => x.AccountID,
                         principalTable: "Accounts",
                         principalColumn: "ID",
                         onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_AccountBannedAccounts_Accounts_BannedAccountID",
+                        column: x => x.BannedAccountID,
+                        principalTable: "Accounts",
+                        principalColumn: "ID");
                 });
 
             migrationBuilder.CreateTable(
-                name: "FriendAccounts",
+                name: "AccountFriendAccounts",
                 columns: table => new
                 {
-                    ID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     AccountID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Group = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    FriendAccountID = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_FriendAccounts", x => x.ID);
+                    table.PrimaryKey("PK_AccountFriendAccounts", x => x.AccountID);
                     table.ForeignKey(
-                        name: "FK_FriendAccounts_Accounts_AccountID",
+                        name: "FK_AccountFriendAccounts_Accounts_AccountID",
                         column: x => x.AccountID,
                         principalTable: "Accounts",
                         principalColumn: "ID",
                         onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_AccountFriendAccounts_Accounts_FriendAccountID",
+                        column: x => x.FriendAccountID,
+                        principalTable: "Accounts",
+                        principalColumn: "ID");
                 });
 
             migrationBuilder.CreateTable(
-                name: "IgnoredAccounts",
+                name: "AccountIgnoredAccounts",
                 columns: table => new
                 {
-                    ID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    AccountID = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                    AccountID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    IgnoredAccountID = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_IgnoredAccounts", x => x.ID);
+                    table.PrimaryKey("PK_AccountIgnoredAccounts", x => x.AccountID);
                     table.ForeignKey(
-                        name: "FK_IgnoredAccounts_Accounts_AccountID",
+                        name: "FK_AccountIgnoredAccounts_Accounts_AccountID",
                         column: x => x.AccountID,
                         principalTable: "Accounts",
                         principalColumn: "ID",
                         onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_AccountIgnoredAccounts_Accounts_IgnoredAccountID",
+                        column: x => x.IgnoredAccountID,
+                        principalTable: "Accounts",
+                        principalColumn: "ID");
                 });
 
             migrationBuilder.InsertData(
@@ -186,6 +199,39 @@ namespace MERRICK.Database.Migrations
                     { new Guid("00000000-0000-0000-0000-00002b88dfe2"), "USER" },
                     { new Guid("00000000-0000-0000-0000-0000f4a5e3d3"), "ADMINISTRATOR" }
                 });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AccountBannedAccounts_AccountID_BannedAccountID",
+                table: "AccountBannedAccounts",
+                columns: new[] { "AccountID", "BannedAccountID" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AccountBannedAccounts_BannedAccountID",
+                table: "AccountBannedAccounts",
+                column: "BannedAccountID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AccountFriendAccounts_AccountID_FriendAccountID",
+                table: "AccountFriendAccounts",
+                columns: new[] { "AccountID", "FriendAccountID" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AccountFriendAccounts_FriendAccountID",
+                table: "AccountFriendAccounts",
+                column: "FriendAccountID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AccountIgnoredAccounts_AccountID_IgnoredAccountID",
+                table: "AccountIgnoredAccounts",
+                columns: new[] { "AccountID", "IgnoredAccountID" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AccountIgnoredAccounts_IgnoredAccountID",
+                table: "AccountIgnoredAccounts",
+                column: "IgnoredAccountID");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Accounts_ClanID",
@@ -204,25 +250,10 @@ namespace MERRICK.Database.Migrations
                 column: "UserID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_BannedAccounts_AccountID",
-                table: "BannedAccounts",
-                column: "AccountID");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Clans_Name_Tag",
                 table: "Clans",
                 columns: new[] { "Name", "Tag" },
                 unique: true);
-
-            migrationBuilder.CreateIndex(
-                name: "IX_FriendAccounts_AccountID",
-                table: "FriendAccounts",
-                column: "AccountID");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_IgnoredAccounts_AccountID",
-                table: "IgnoredAccounts",
-                column: "AccountID");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Roles_Name",
@@ -246,13 +277,13 @@ namespace MERRICK.Database.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "BannedAccounts");
+                name: "AccountBannedAccounts");
 
             migrationBuilder.DropTable(
-                name: "FriendAccounts");
+                name: "AccountFriendAccounts");
 
             migrationBuilder.DropTable(
-                name: "IgnoredAccounts");
+                name: "AccountIgnoredAccounts");
 
             migrationBuilder.DropTable(
                 name: "Tokens");

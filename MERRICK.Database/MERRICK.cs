@@ -1,5 +1,8 @@
 ﻿namespace MERRICK.Database;
 
+/// <summary>
+///     My name is Merrick, and I manage the store ... the data store.
+/// </summary>
 public class MERRICK
 {
     public static async Task Main(string[] args)
