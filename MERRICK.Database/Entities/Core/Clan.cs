@@ -6,10 +6,10 @@ public class Clan
     [Key]
     public Guid ID { get; set; }
 
-    [StringLength(20)]
+    [MaxLength(20)]
     public required string Name { get; set; }
 
-    [StringLength(3)]
+    [MaxLength(4)]
     public required string Tag { get; set; }
 
     public List<Account> Members { get; set; } = [];

@@ -8,22 +8,11 @@ public sealed class MerrickContext : DbContext
             Database.SetCommandTimeout(60); // 1 Minute - Helps Prevent Migrations From Timing Out When Many Records Need To Update
     }
 
-    # region Core
     public DbSet<Account> Accounts => Set<Account>();
     public DbSet<Clan> Clans => Set<Clan>();
-    public DbSet<User> Users => Set<User>();
-    # endregion
-
-    # region Relational
-    public DbSet<BannedAccount> BannedAccounts => Set<BannedAccount>();
-    public DbSet<FriendAccount> FriendAccounts => Set<FriendAccount>();
-    public DbSet<IgnoredAccount> IgnoredAccounts => Set<IgnoredAccount>();
-    # endregion
-
-    # region Utility
     public DbSet<Role> Roles => Set<Role>();
     public DbSet<Token> Tokens => Set<Token>();
-    # endregion
+    public DbSet<User> Users => Set<User>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -35,9 +24,9 @@ public sealed class MerrickContext : DbContext
 
     private static void ConfigureAccounts(EntityTypeBuilder<Account> builder)
     {
-        builder.HasMany(account => account.FriendAccounts).WithOne(friend => friend.BelongsToAccount).OnDelete(DeleteBehavior.NoAction);
-        builder.HasMany(account => account.IgnoredAccounts).WithOne(ignored => ignored.BelongsToAccount).OnDelete(DeleteBehavior.NoAction);
-        builder.HasMany(account => account.BannedAccounts).WithOne(banned => banned.BelongsToAccount).OnDelete(DeleteBehavior.NoAction);
+        builder.OwnsMany(account => account.BannedAccounts, bannedAccounts => { bannedAccounts.ToJson(); });
+        builder.OwnsMany(account => account.FriendAccounts, friendAccounts => { friendAccounts.ToJson(); });
+        builder.OwnsMany(account => account.IgnoredAccounts, ignoredAccounts => { ignoredAccounts.ToJson(); });
     }
 
     private static void ConfigureRoles(EntityTypeBuilder<Role> builder)

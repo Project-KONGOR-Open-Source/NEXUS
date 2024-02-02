@@ -6,7 +6,7 @@ public class Account
     [Key]
     public Guid ID { get; set; }
 
-    [StringLength(15)]
+    [MaxLength(15)]
     public required string Name { get; set; }
 
     public required User User { get; set; }
@@ -27,11 +27,11 @@ public class Account
 
     public List<string> AutoConnectChatChannels { get; set; } = [];
 
-    public List<FriendAccount> FriendAccounts { get; set; } = [];
+    public List<Friend> FriendAccounts { get; set; } = [];
 
-    public List<IgnoredAccount> IgnoredAccounts { get; set; } = [];
+    public List<Ignored> IgnoredAccounts { get; set; } = [];
 
-    public List<BannedAccount> BannedAccounts { get; set; } = [];
+    public List<Banned> BannedAccounts { get; set; } = [];
 
     public List<string> SelectedStoreItems { get; set; } = ["ai.Default Icon", "cc.white", "t.Standard"];
 

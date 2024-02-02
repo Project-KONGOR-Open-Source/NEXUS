@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MERRICK.Database.Migrations
 {
     [DbContext(typeof(MerrickContext))]
-    [Migration("20240202025611_CreateInitialEntities")]
+    [Migration("20240202182309_CreateInitialEntities")]
     partial class CreateInitialEntities
     {
         /// <inheritdoc />
@@ -109,8 +109,8 @@ namespace MERRICK.Database.Migrations
 
                     b.Property<string>("Tag")
                         .IsRequired()
-                        .HasMaxLength(3)
-                        .HasColumnType("nvarchar(3)");
+                        .HasMaxLength(4)
+                        .HasColumnType("nvarchar(4)");
 
                     b.Property<DateTime>("TimestampCreated")
                         .HasColumnType("datetime2");
@@ -187,80 +187,6 @@ namespace MERRICK.Database.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("MERRICK.Database.Entities.Relational.BannedAccount", b =>
-                {
-                    b.Property<Guid>("ID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("BelongsToAccountID")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Reason")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid>("SelfAccountID")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("ID");
-
-                    b.HasIndex("BelongsToAccountID");
-
-                    b.HasIndex("SelfAccountID", "BelongsToAccountID")
-                        .IsUnique();
-
-                    b.ToTable("BannedAccounts");
-                });
-
-            modelBuilder.Entity("MERRICK.Database.Entities.Relational.FriendAccount", b =>
-                {
-                    b.Property<Guid>("ID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("BelongsToAccountID")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Group")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid>("SelfAccountID")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("ID");
-
-                    b.HasIndex("BelongsToAccountID");
-
-                    b.HasIndex("SelfAccountID", "BelongsToAccountID")
-                        .IsUnique();
-
-                    b.ToTable("FriendAccounts");
-                });
-
-            modelBuilder.Entity("MERRICK.Database.Entities.Relational.IgnoredAccount", b =>
-                {
-                    b.Property<Guid>("ID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("BelongsToAccountID")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("SelfAccountID")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.HasKey("ID");
-
-                    b.HasIndex("BelongsToAccountID");
-
-                    b.HasIndex("SelfAccountID", "BelongsToAccountID")
-                        .IsUnique();
-
-                    b.ToTable("IgnoredAccounts");
-                });
-
             modelBuilder.Entity("MERRICK.Database.Entities.Utility.Role", b =>
                 {
                     b.Property<Guid>("ID")
@@ -332,7 +258,108 @@ namespace MERRICK.Database.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.OwnsMany("MERRICK.Database.Entities.Relational.Banned", "BannedAccounts", b1 =>
+                        {
+                            b1.Property<Guid>("AccountID")
+                                .HasColumnType("uniqueidentifier");
+
+                            b1.Property<int>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("int");
+
+                            b1.Property<string>("AccountName")
+                                .IsRequired()
+                                .HasMaxLength(15)
+                                .HasColumnType("nvarchar(15)");
+
+                            b1.Property<string>("Reason")
+                                .IsRequired()
+                                .HasMaxLength(30)
+                                .HasColumnType("nvarchar(30)");
+
+                            b1.HasKey("AccountID", "Id");
+
+                            b1.HasIndex("AccountName")
+                                .IsUnique();
+
+                            b1.ToTable("Accounts");
+
+                            b1.ToJson("BannedAccounts");
+
+                            b1.WithOwner()
+                                .HasForeignKey("AccountID");
+                        });
+
+                    b.OwnsMany("MERRICK.Database.Entities.Relational.Friend", "FriendAccounts", b1 =>
+                        {
+                            b1.Property<Guid>("AccountID")
+                                .HasColumnType("uniqueidentifier");
+
+                            b1.Property<int>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("int");
+
+                            b1.Property<string>("AccountName")
+                                .IsRequired()
+                                .HasMaxLength(15)
+                                .HasColumnType("nvarchar(15)");
+
+                            b1.Property<string>("ClanTag")
+                                .HasMaxLength(4)
+                                .HasColumnType("nvarchar(4)");
+
+                            b1.Property<string>("Group")
+                                .IsRequired()
+                                .HasMaxLength(15)
+                                .HasColumnType("nvarchar(15)");
+
+                            b1.HasKey("AccountID", "Id");
+
+                            b1.HasIndex("AccountName")
+                                .IsUnique();
+
+                            b1.ToTable("Accounts");
+
+                            b1.ToJson("FriendAccounts");
+
+                            b1.WithOwner()
+                                .HasForeignKey("AccountID");
+                        });
+
+                    b.OwnsMany("MERRICK.Database.Entities.Relational.Ignored", "IgnoredAccounts", b1 =>
+                        {
+                            b1.Property<Guid>("AccountID")
+                                .HasColumnType("uniqueidentifier");
+
+                            b1.Property<int>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("int");
+
+                            b1.Property<string>("AccountName")
+                                .IsRequired()
+                                .HasMaxLength(15)
+                                .HasColumnType("nvarchar(15)");
+
+                            b1.HasKey("AccountID", "Id");
+
+                            b1.HasIndex("AccountName")
+                                .IsUnique();
+
+                            b1.ToTable("Accounts");
+
+                            b1.ToJson("IgnoredAccounts");
+
+                            b1.WithOwner()
+                                .HasForeignKey("AccountID");
+                        });
+
+                    b.Navigation("BannedAccounts");
+
                     b.Navigation("Clan");
+
+                    b.Navigation("FriendAccounts");
+
+                    b.Navigation("IgnoredAccounts");
 
                     b.Navigation("User");
                 });
@@ -346,72 +373,6 @@ namespace MERRICK.Database.Migrations
                         .IsRequired();
 
                     b.Navigation("Role");
-                });
-
-            modelBuilder.Entity("MERRICK.Database.Entities.Relational.BannedAccount", b =>
-                {
-                    b.HasOne("MERRICK.Database.Entities.Core.Account", "BelongsToAccount")
-                        .WithMany("BannedAccounts")
-                        .HasForeignKey("BelongsToAccountID")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("MERRICK.Database.Entities.Core.Account", "SelfAccount")
-                        .WithMany()
-                        .HasForeignKey("SelfAccountID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("BelongsToAccount");
-
-                    b.Navigation("SelfAccount");
-                });
-
-            modelBuilder.Entity("MERRICK.Database.Entities.Relational.FriendAccount", b =>
-                {
-                    b.HasOne("MERRICK.Database.Entities.Core.Account", "BelongsToAccount")
-                        .WithMany("FriendAccounts")
-                        .HasForeignKey("BelongsToAccountID")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("MERRICK.Database.Entities.Core.Account", "SelfAccount")
-                        .WithMany()
-                        .HasForeignKey("SelfAccountID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("BelongsToAccount");
-
-                    b.Navigation("SelfAccount");
-                });
-
-            modelBuilder.Entity("MERRICK.Database.Entities.Relational.IgnoredAccount", b =>
-                {
-                    b.HasOne("MERRICK.Database.Entities.Core.Account", "BelongsToAccount")
-                        .WithMany("IgnoredAccounts")
-                        .HasForeignKey("BelongsToAccountID")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("MERRICK.Database.Entities.Core.Account", "SelfAccount")
-                        .WithMany()
-                        .HasForeignKey("SelfAccountID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("BelongsToAccount");
-
-                    b.Navigation("SelfAccount");
-                });
-
-            modelBuilder.Entity("MERRICK.Database.Entities.Core.Account", b =>
-                {
-                    b.Navigation("BannedAccounts");
-
-                    b.Navigation("FriendAccounts");
-
-                    b.Navigation("IgnoredAccounts");
                 });
 
             modelBuilder.Entity("MERRICK.Database.Entities.Core.Clan", b =>

@@ -125,9 +125,9 @@ public partial class ClientRequesterController
         Account? account = await MerrickContext.Accounts
             .Include(account => account.User).ThenInclude(user => user.Accounts)
             .Include(account => account.Clan)
-            .Include(account => account.FriendAccounts).ThenInclude(friend => friend.SelfAccount).ThenInclude(account => account.Clan)
-            .Include(account => account.IgnoredAccounts).ThenInclude(ignored => ignored.SelfAccount)
-            .Include(account => account.BannedAccounts).ThenInclude(banned => banned.SelfAccount)
+            .Include(account => account.FriendAccounts)
+            .Include(account => account.IgnoredAccounts)
+            .Include(account => account.BannedAccounts)
             .SingleOrDefaultAsync(account => account.Name.Equals(accountName));
 
         if (account is null)
