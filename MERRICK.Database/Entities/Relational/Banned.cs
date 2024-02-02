@@ -3,7 +3,7 @@
 [Index(nameof(AccountName), IsUnique = true)]
 public class Banned
 {
-    public Guid AccountID { get; set; }
+    public required Guid AccountID { get; set; }
 
     [MaxLength(15)]
     public required string AccountName { get; set; }
