@@ -255,7 +255,7 @@ namespace MERRICK.Database.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.OwnsMany("MERRICK.Database.Entities.Relational.Banned", "BannedAccounts", b1 =>
+                    b.OwnsMany("MERRICK.Database.Entities.Relational.BannedPeer", "BannedPeers", b1 =>
                         {
                             b1.Property<Guid>("AccountID")
                                 .HasColumnType("uniqueidentifier");
@@ -264,33 +264,33 @@ namespace MERRICK.Database.Migrations
                                 .ValueGeneratedOnAdd()
                                 .HasColumnType("int");
 
-                            b1.Property<Guid>("AccountIdentifier")
-                                .HasColumnType("uniqueidentifier");
-
-                            b1.Property<string>("AccountName")
-                                .IsRequired()
-                                .HasMaxLength(15)
-                                .HasColumnType("nvarchar(15)");
-
-                            b1.Property<string>("Reason")
+                            b1.Property<string>("BanReason")
                                 .IsRequired()
                                 .HasMaxLength(30)
                                 .HasColumnType("nvarchar(30)");
 
+                            b1.Property<Guid>("Identifier")
+                                .HasColumnType("uniqueidentifier");
+
+                            b1.Property<string>("Name")
+                                .IsRequired()
+                                .HasMaxLength(15)
+                                .HasColumnType("nvarchar(15)");
+
                             b1.HasKey("AccountID", "Id");
 
-                            b1.HasIndex("AccountName")
+                            b1.HasIndex("Name")
                                 .IsUnique();
 
                             b1.ToTable("Accounts");
 
-                            b1.ToJson("BannedAccounts");
+                            b1.ToJson("BannedPeers");
 
                             b1.WithOwner()
                                 .HasForeignKey("AccountID");
                         });
 
-                    b.OwnsMany("MERRICK.Database.Entities.Relational.Friend", "FriendAccounts", b1 =>
+                    b.OwnsMany("MERRICK.Database.Entities.Relational.FriendedPeer", "FriendedPeers", b1 =>
                         {
                             b1.Property<Guid>("AccountID")
                                 .HasColumnType("uniqueidentifier");
@@ -298,38 +298,38 @@ namespace MERRICK.Database.Migrations
                             b1.Property<int>("Id")
                                 .ValueGeneratedOnAdd()
                                 .HasColumnType("int");
-
-                            b1.Property<Guid>("AccountIdentifier")
-                                .HasColumnType("uniqueidentifier");
-
-                            b1.Property<string>("AccountName")
-                                .IsRequired()
-                                .HasMaxLength(15)
-                                .HasColumnType("nvarchar(15)");
 
                             b1.Property<string>("ClanTag")
                                 .HasMaxLength(4)
                                 .HasColumnType("nvarchar(4)");
 
-                            b1.Property<string>("Group")
+                            b1.Property<string>("FriendGroup")
+                                .IsRequired()
+                                .HasMaxLength(15)
+                                .HasColumnType("nvarchar(15)");
+
+                            b1.Property<Guid>("Identifier")
+                                .HasColumnType("uniqueidentifier");
+
+                            b1.Property<string>("Name")
                                 .IsRequired()
                                 .HasMaxLength(15)
                                 .HasColumnType("nvarchar(15)");
 
                             b1.HasKey("AccountID", "Id");
 
-                            b1.HasIndex("AccountName")
+                            b1.HasIndex("Name")
                                 .IsUnique();
 
                             b1.ToTable("Accounts");
 
-                            b1.ToJson("FriendAccounts");
+                            b1.ToJson("FriendedPeers");
 
                             b1.WithOwner()
                                 .HasForeignKey("AccountID");
                         });
 
-                    b.OwnsMany("MERRICK.Database.Entities.Relational.Ignored", "IgnoredAccounts", b1 =>
+                    b.OwnsMany("MERRICK.Database.Entities.Relational.IgnoredPeer", "IgnoredPeers", b1 =>
                         {
                             b1.Property<Guid>("AccountID")
                                 .HasColumnType("uniqueidentifier");
@@ -338,34 +338,34 @@ namespace MERRICK.Database.Migrations
                                 .ValueGeneratedOnAdd()
                                 .HasColumnType("int");
 
-                            b1.Property<Guid>("AccountIdentifier")
+                            b1.Property<Guid>("Identifier")
                                 .HasColumnType("uniqueidentifier");
 
-                            b1.Property<string>("AccountName")
+                            b1.Property<string>("Name")
                                 .IsRequired()
                                 .HasMaxLength(15)
                                 .HasColumnType("nvarchar(15)");
 
                             b1.HasKey("AccountID", "Id");
 
-                            b1.HasIndex("AccountName")
+                            b1.HasIndex("Name")
                                 .IsUnique();
 
                             b1.ToTable("Accounts");
 
-                            b1.ToJson("IgnoredAccounts");
+                            b1.ToJson("IgnoredPeers");
 
                             b1.WithOwner()
                                 .HasForeignKey("AccountID");
                         });
 
-                    b.Navigation("BannedAccounts");
+                    b.Navigation("BannedPeers");
 
                     b.Navigation("Clan");
 
-                    b.Navigation("FriendAccounts");
+                    b.Navigation("FriendedPeers");
 
-                    b.Navigation("IgnoredAccounts");
+                    b.Navigation("IgnoredPeers");
 
                     b.Navigation("User");
                 });

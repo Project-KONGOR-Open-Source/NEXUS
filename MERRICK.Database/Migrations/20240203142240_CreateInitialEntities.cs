@@ -105,9 +105,9 @@ namespace MERRICK.Database.Migrations
                     MACAddressCollection = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     SystemInformationCollection = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     SystemInformationHashCollection = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    BannedAccounts = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    FriendAccounts = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    IgnoredAccounts = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    BannedPeers = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    FriendedPeers = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    IgnoredPeers = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {

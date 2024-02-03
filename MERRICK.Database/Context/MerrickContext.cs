@@ -24,9 +24,9 @@ public sealed class MerrickContext : DbContext
 
     private static void ConfigureAccounts(EntityTypeBuilder<Account> builder)
     {
-        builder.OwnsMany(account => account.BannedAccounts,  ownedNavigationBuilder => { ownedNavigationBuilder.ToJson(); });
-        builder.OwnsMany(account => account.FriendAccounts,  ownedNavigationBuilder => { ownedNavigationBuilder.ToJson(); });
-        builder.OwnsMany(account => account.IgnoredAccounts, ownedNavigationBuilder => { ownedNavigationBuilder.ToJson(); });
+        builder.OwnsMany(account => account.BannedPeers,   ownedNavigationBuilder => { ownedNavigationBuilder.ToJson(); });
+        builder.OwnsMany(account => account.FriendedPeers, ownedNavigationBuilder => { ownedNavigationBuilder.ToJson(); });
+        builder.OwnsMany(account => account.IgnoredPeers,  ownedNavigationBuilder => { ownedNavigationBuilder.ToJson(); });
     }
 
     private static void ConfigureRoles(EntityTypeBuilder<Role> builder)

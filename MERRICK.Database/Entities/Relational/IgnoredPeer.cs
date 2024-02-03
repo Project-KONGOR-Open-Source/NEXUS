@@ -1,0 +1,10 @@
+﻿namespace MERRICK.Database.Entities.Relational;
+
+[Index(nameof(Name), IsUnique = true)]
+public class IgnoredPeer
+{
+    public required Guid Identifier { get; set; }
+
+    [MaxLength(15)]
+    public required string Name { get; set; }
+}

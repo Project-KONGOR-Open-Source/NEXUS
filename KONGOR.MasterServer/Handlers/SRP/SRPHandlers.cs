@@ -131,14 +131,14 @@ public static class SRPHandlers
     }
 
     private static Dictionary<Guid, Dictionary<Guid, FriendAccount>> SetFriendAccountList(Account account)
-        => new() { { account.ID, account.FriendAccounts.ToDictionary(friend => friend.AccountIdentifier,
-            friend => new FriendAccount { ID = friend.AccountIdentifier.ToString(), Name = friend.AccountName, Group = friend.Group, ClanTag = friend.ClanTag ?? string.Empty } ) } };
+        => new() { { account.ID, account.FriendedPeers.ToDictionary(friend => friend.Identifier,
+            friend => new FriendAccount { ID = friend.Identifier.ToString(), Name = friend.Name, Group = friend.FriendGroup, ClanTag = friend.ClanTag ?? string.Empty } ) } };
 
     private static Dictionary<Guid, List<IgnoredAccount>> SetIgnoredAccountsList(Account account)
-        => new() { { account.ID, account.IgnoredAccounts
-            .Select(ignored => new IgnoredAccount { ID = ignored.AccountIdentifier.ToString(), Name = ignored.AccountName }).ToList() } };
+        => new() { { account.ID, account.IgnoredPeers
+            .Select(ignored => new IgnoredAccount { ID = ignored.Identifier.ToString(), Name = ignored.Name }).ToList() } };
 
     private static Dictionary<Guid, List<BannedAccount>> SetBannedAccountsList(Account account)
-        => new() { { account.ID, account.BannedAccounts
-            .Select(banned => new BannedAccount { ID = banned.AccountIdentifier.ToString(), Name = banned.AccountName, Reason = banned.Reason }).ToList() } };
+        => new() { { account.ID, account.BannedPeers
+            .Select(banned => new BannedAccount { ID = banned.Identifier.ToString(), Name = banned.Name, Reason = banned.BanReason }).ToList() } };
 }
