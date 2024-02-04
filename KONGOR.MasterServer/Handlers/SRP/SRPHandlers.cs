@@ -30,16 +30,16 @@ public static class SRPHandlers
             Accounts = parameters.Account.User.Accounts.OrderBy(account => account.TimestampCreated).Select(account => new List<string> { account.Name, account.ID.ToString() }).ToList(),
             GoldCoins = parameters.Account.User.GoldCoins.ToString(),
             SilverCoins = parameters.Account.User.SilverCoins,
-            SlotID = null,
-            CurrentSeason = null,
-            MuteExpiration = 0,
+            SlotID = SetCustomIconSlotID(parameters.Account),
+            CurrentSeason = "12", // TODO: Set Season
+            MuteExpiration = 0, // TODO: Implement Account Muting As Part Of The Karma System
             FriendAccountList = SetFriendAccountList(parameters.Account),
             IgnoredAccountsList = SetIgnoredAccountsList(parameters.Account),
             BannedAccountsList = SetBannedAccountsList(parameters.Account),
-            ClanRoster = null,
-            ClanMembershipData = default,
-            OwnedStoreItems = null,
-            SelectedStoreItems = null,
+            ClanRoster = SetClanRoster(parameters.ClanRoster),
+            ClanMembershipData = SetClanMembershipData(parameters.Account),
+            OwnedStoreItems = parameters.Account.User.OwnedStoreItems,
+            SelectedStoreItems = parameters.Account.SelectedStoreItems,
             OwnedStoreItemsData = null,
             AwardsTooltip = null,
             DataPoints = null,
@@ -53,6 +53,7 @@ public static class SRPHandlers
     public class StageTwoResponseParameters()
     {
         public required Account Account { get; set; }
+        public required List<Account> ClanRoster { get; set; }
         public required string ServerProof { get; set; }
         public required string ClientIPAddress { get; set; }
         public required (string Protocol, string Host, int Port) ChatServer { get; set; }
@@ -141,4 +142,24 @@ public static class SRPHandlers
     private static Dictionary<Guid, List<BannedAccount>> SetBannedAccountsList(Account account)
         => new() { { account.ID, account.BannedPeers
             .Select(banned => new BannedAccount { ID = banned.Identifier.ToString(), Name = banned.Name, Reason = banned.BanReason }).ToList() } };
+
+    private static string SetCustomIconSlotID(Account account)
+        => account.SelectedStoreItems.Any(item => item.StartsWith("ai.custom_icon"))
+            ? account.SelectedStoreItems.Single(item => item.StartsWith("ai.custom_icon")).Replace("ai.custom_icon:", string.Empty) : "0";
+
+    private static Dictionary<Guid, ClanMemberAccount> SetClanRoster(List<Account> members)
+        => members.Select(member => new KeyValuePair<Guid, ClanMemberAccount>(member.ID,
+                new ClanMemberAccount { ClanID = member.Clan?.ID.ToString() ?? string.Empty, ID = member.ID.ToString(),
+                    JoinDate = member.TimestampJoinedClan is not null ? member.TimestampJoinedClan.GetValueOrDefault().ToString("yyyy-MM-dd HH:mm:ss") : string.Empty,
+                    Name = member.Name, Rank = member.ClanTierName, Message = "TODO: Find Out What This Does", Standing = Convert.ToInt32(member.Type).ToString() }))
+            .ToDictionary();
+
+    private static OneOf<ClanMemberData, ClanMemberDataError> SetClanMembershipData(Account account)
+        => account.Clan is null ? new ClanMemberDataError() : new ClanMemberData
+        {
+            ClanID = account.Clan?.ID.ToString() ?? string.Empty, ID = account.ID.ToString(), ClanName = account.Clan?.Name ?? string.Empty,
+            ClanTag = account.Clan?.Tag ?? string.Empty, ClanOwnerAccountID = account.Clan?.Members.Single(member => member.ClanTier is ClanTier.Leader).ID.ToString() ?? string.Empty,
+            JoinDate = account.TimestampJoinedClan is not null ? account.TimestampJoinedClan.GetValueOrDefault().ToString("yyyy-MM-dd HH:mm:ss") : string.Empty,
+            Rank = account.ClanTierName, Message = "TODO: Find Out What This Does", Title = "TODO: Set The Clan Channel Title"
+        };
 }

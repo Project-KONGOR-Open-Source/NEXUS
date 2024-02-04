@@ -72,6 +72,9 @@ namespace MERRICK.Database.Migrations
                     b.Property<DateTime>("TimestampCreated")
                         .HasColumnType("datetime2");
 
+                    b.Property<DateTime?>("TimestampJoinedClan")
+                        .HasColumnType("datetime2");
+
                     b.Property<DateTime>("TimestampLastActive")
                         .HasColumnType("datetime2");
 

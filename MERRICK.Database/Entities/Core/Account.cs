@@ -15,9 +15,11 @@ public class Account
 
     public required bool IsMain { get; set; }
 
-    public Clan? Clan { get; set; } = default;
+    public Clan? Clan { get; set; } = null;
 
     public ClanTier ClanTier { get; set; } = ClanTier.None;
+
+    public DateTime? TimestampJoinedClan { get; set; } = null;
 
     public int AscensionLevel { get; set; } = 0;
 
@@ -45,4 +47,14 @@ public class Account
 
     [NotMapped]
     public string NameWithClanTag => Equals(Clan, null) ? Name : $"[{Clan.Tag}]{Name}";
+
+    [NotMapped]
+    public string ClanTierName => ClanTier switch
+    {
+        ClanTier.None       => "None",
+        ClanTier.Member     => "Member",
+        ClanTier.Officer    => "Officer",
+        ClanTier.Leader     => "Leader",
+        _                   => throw new ArgumentOutOfRangeException(@$"Unsupported Clan Tier ""{ClanTier}""")
+    };
 }

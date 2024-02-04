@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MERRICK.Database.Migrations
 {
     [DbContext(typeof(MerrickContext))]
-    [Migration("20240203142240_CreateInitialEntities")]
+    [Migration("20240204215550_CreateInitialEntities")]
     partial class CreateInitialEntities
     {
         /// <inheritdoc />
@@ -73,6 +73,9 @@ namespace MERRICK.Database.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("TimestampCreated")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("TimestampJoinedClan")
                         .HasColumnType("datetime2");
 
                     b.Property<DateTime>("TimestampLastActive")

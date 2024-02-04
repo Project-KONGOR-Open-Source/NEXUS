@@ -124,7 +124,7 @@ public partial class ClientRequesterController
 
         Account? account = await MerrickContext.Accounts
             .Include(account => account.User).ThenInclude(user => user.Accounts)
-            .Include(account => account.Clan)
+            .Include(account => account.Clan).ThenInclude(clan => clan.Members) // TODO: Fix This NULL Reference Exception
             .Include(account => account.BannedPeers)
             .Include(account => account.FriendedPeers)
             .Include(account => account.IgnoredPeers)
@@ -194,6 +194,7 @@ public partial class ClientRequesterController
         SRPHandlers.StageTwoResponseParameters parameters = new()
         {
             Account = account,
+            ClanRoster = account.Clan?.Members ?? [],
             ServerProof = serverProof,
             ClientIPAddress = remoteIPAddress,
             ChatServer = (Configuration.ChatServer.HTTPS.Protocol, Configuration.ChatServer.HTTPS.Host, Configuration.ChatServer.HTTPS.Port)

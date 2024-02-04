@@ -96,6 +96,7 @@ namespace MERRICK.Database.Migrations
                     IsMain = table.Column<bool>(type: "bit", nullable: false),
                     ClanID = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     ClanTier = table.Column<int>(type: "int", nullable: false),
+                    TimestampJoinedClan = table.Column<DateTime>(type: "datetime2", nullable: true),
                     AscensionLevel = table.Column<int>(type: "int", nullable: false),
                     TimestampCreated = table.Column<DateTime>(type: "datetime2", nullable: false),
                     TimestampLastActive = table.Column<DateTime>(type: "datetime2", nullable: false),
