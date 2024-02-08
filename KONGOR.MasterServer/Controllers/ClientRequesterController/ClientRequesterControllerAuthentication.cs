@@ -197,7 +197,7 @@ public partial class ClientRequesterController
             ClanRoster = account.Clan?.Members ?? [],
             ServerProof = serverProof,
             ClientIPAddress = remoteIPAddress,
-            ChatServer = (Configuration.ChatServer.HTTPS.Protocol, Configuration.ChatServer.HTTPS.Host, Configuration.ChatServer.HTTPS.Port)
+            ChatServer = (Configuration.ChatServer.HTTPS.Protocol, Configuration.ChatServer.HTTPS.Host, Configuration.ChatServer.HTTPS.Port) // TODO: The Chat Server Probably Doesn't Need HTTP/HTTPS
         };
 
         SRPAuthenticationResponseStageTwo response = SRPHandlers.GenerateStageTwoResponse(parameters);

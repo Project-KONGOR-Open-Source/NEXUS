@@ -252,7 +252,7 @@ public class SRPAuthenticationResponseStageTwo
     ///     The index of the custom icon equipped, or "0" if no custom icon is equipped.
     /// </summary>
     [PhpProperty("slot_id")]
-    public required string SlotID { get; set; }
+    public required string CustomIconSlotID { get; set; }
 
     /// <summary>
     ///     Unknown.
@@ -324,28 +324,28 @@ public class SRPAuthenticationResponseStageTwo
     ///     The inner-dictionary needs to contain multiple entries, the key of each being the respective friend account's ID.
     /// </summary>
     [PhpProperty("buddy_list")]
-    public required Dictionary<Guid, Dictionary<Guid, FriendAccount>> FriendAccountList { get; set; }
+    public required Dictionary<string, Dictionary<string, FriendAccount>> FriendAccountList { get; set; }
 
     /// <summary>
     ///     The account's list of ignored accounts.
     ///     This dictionary needs to contain a single entry with the key being the owner account's ID.
     /// </summary>
     [PhpProperty("ignored_list")]
-    public required Dictionary<Guid, List<IgnoredAccount>> IgnoredAccountsList { get; set; }
+    public required Dictionary<string, List<IgnoredAccount>> IgnoredAccountsList { get; set; }
 
     /// <summary>
     ///     The account's list of banned accounts.
     ///     This dictionary needs to contain a single entry with the key being the owner account's ID.
     /// </summary>
     [PhpProperty("banned_list")]
-    public required Dictionary<Guid, List<BannedAccount>> BannedAccountsList { get; set; }
+    public required Dictionary<string, List<BannedAccount>> BannedAccountsList { get; set; }
 
     /// <summary>
     ///     The list of members of the account's clan.
     ///     This dictionary needs to contain multiple entries, the key of each being the respective clan member account's ID.
     /// </summary>
     [PhpProperty("clan_roster")]
-    public required Dictionary<Guid, ClanMemberAccount> ClanRoster { get; set; }
+    public required Dictionary<string, ClanMemberAccount> ClanRoster { get; set; }
 
     /// <summary>
     ///     The account's clan membership data if the account is part of a clan, or an error message if the account is not part of a clan.
@@ -413,7 +413,7 @@ public class SRPAuthenticationResponseStageTwo
     ///     A set of static values used to generate award-centric data and trigger award-centric events.
     /// </summary>
     [PhpProperty("awards_tooltip")]
-    public required AwardsTooltip AwardsTooltip { get; set; }
+    public required AwardsTooltips AwardsTooltips { get; set; }
 
     /// <summary>
     ///     Account information, in the form of a list that contains a single object of string values.
@@ -761,7 +761,7 @@ public class SecurityInformation
     public string KeyVersion { get; set; } = "3e2d";
 }
 
-public class AwardsTooltip
+public class AwardsTooltips
 {
     /// <summary>
     ///     Milestones award.

@@ -14,8 +14,8 @@ public static class SRPHandlers
             GarenaID = parameters.Account.ID.ToString(),
             Name = parameters.Account.Name,
             Email = parameters.Account.User.EmailAddress,
-            AccountType = parameters.Account.Type.ToString(),
-            SuspensionID = string.Empty, // TODO: Implement Suspensions
+            AccountType = Convert.ToInt32(parameters.Account.Type).ToString(),
+            SuspensionID = "0", // TODO: Implement Suspensions
             UseCloud = "0", // TODO: Implement Cloud Backups
             Cookie = cookie,
             IPAddress = parameters.ClientIPAddress,
@@ -24,13 +24,13 @@ public static class SRPHandlers
             IsSubAccount = parameters.Account.IsMain.Equals(false),
             ICBURL = GetHTTPSApplicationURL(), // TODO: Fix This (The Port In The Environment Variable Is Different From The One In The Launch Profile)
             AuthenticationHash = ComputeChatServerCookieHash(parameters.Account.ID, parameters.ClientIPAddress, cookie),
-            ChatServerIPAddress = parameters.ChatServer.Protocol + "://" + parameters.ChatServer.Host,
+            ChatServerIPAddress = parameters.ChatServer.Host,
             ChatServerPort = parameters.ChatServer.Port.ToString(),
             ChatChannels = SetChatChannels(parameters.Account),
             Accounts = parameters.Account.User.Accounts.OrderBy(account => account.TimestampCreated).Select(account => new List<string> { account.Name, account.ID.ToString() }).ToList(),
             GoldCoins = parameters.Account.User.GoldCoins.ToString(),
             SilverCoins = parameters.Account.User.SilverCoins,
-            SlotID = SetCustomIconSlotID(parameters.Account),
+            CustomIconSlotID = SetCustomIconSlotID(parameters.Account),
             CurrentSeason = "12", // TODO: Set Season
             MuteExpiration = 0, // TODO: Implement Account Muting As Part Of The Karma System
             FriendAccountList = SetFriendAccountList(parameters.Account),
@@ -40,11 +40,11 @@ public static class SRPHandlers
             ClanMembershipData = SetClanMembershipData(parameters.Account),
             OwnedStoreItems = parameters.Account.User.OwnedStoreItems,
             SelectedStoreItems = parameters.Account.SelectedStoreItems,
-            OwnedStoreItemsData = null,
-            AwardsTooltip = null,
-            DataPoints = null,
-            CloudStorageInformation = null,
-            Notifications = null
+            OwnedStoreItemsData = SetOwnedStoreItemsData(parameters.Account),
+            AwardsTooltips = SetAwardsTooltips(),
+            DataPoints = SetDataPoints(),
+            CloudStorageInformation = SetCloudStorageInformation(parameters.Account),
+            Notifications = SetNotifications()
         };
 
         return response;
@@ -131,24 +131,20 @@ public static class SRPHandlers
         return channels;
     }
 
-    private static Dictionary<Guid, Dictionary<Guid, FriendAccount>> SetFriendAccountList(Account account)
-        => new() { { account.ID, account.FriendedPeers.ToDictionary(friend => friend.Identifier,
+    private static Dictionary<string, Dictionary<string, FriendAccount>> SetFriendAccountList(Account account)
+        => new() { { account.ID.ToString(), account.FriendedPeers.ToDictionary(friend => friend.Identifier.ToString(),
             friend => new FriendAccount { ID = friend.Identifier.ToString(), Name = friend.Name, Group = friend.FriendGroup, ClanTag = friend.ClanTag ?? string.Empty } ) } };
 
-    private static Dictionary<Guid, List<IgnoredAccount>> SetIgnoredAccountsList(Account account)
-        => new() { { account.ID, account.IgnoredPeers
+    private static Dictionary<string, List<IgnoredAccount>> SetIgnoredAccountsList(Account account)
+        => new() { { account.ID.ToString(), account.IgnoredPeers
             .Select(ignored => new IgnoredAccount { ID = ignored.Identifier.ToString(), Name = ignored.Name }).ToList() } };
 
-    private static Dictionary<Guid, List<BannedAccount>> SetBannedAccountsList(Account account)
-        => new() { { account.ID, account.BannedPeers
+    private static Dictionary<string, List<BannedAccount>> SetBannedAccountsList(Account account)
+        => new() { { account.ID.ToString(), account.BannedPeers
             .Select(banned => new BannedAccount { ID = banned.Identifier.ToString(), Name = banned.Name, Reason = banned.BanReason }).ToList() } };
 
-    private static string SetCustomIconSlotID(Account account)
-        => account.SelectedStoreItems.Any(item => item.StartsWith("ai.custom_icon"))
-            ? account.SelectedStoreItems.Single(item => item.StartsWith("ai.custom_icon")).Replace("ai.custom_icon:", string.Empty) : "0";
-
-    private static Dictionary<Guid, ClanMemberAccount> SetClanRoster(List<Account> members)
-        => members.Select(member => new KeyValuePair<Guid, ClanMemberAccount>(member.ID,
+    private static Dictionary<string, ClanMemberAccount> SetClanRoster(List<Account> members)
+        => members.Select(member => new KeyValuePair<string, ClanMemberAccount>(member.ID.ToString(),
                 new ClanMemberAccount { ClanID = member.Clan?.ID.ToString() ?? string.Empty, ID = member.ID.ToString(),
                     JoinDate = member.TimestampJoinedClan is not null ? member.TimestampJoinedClan.GetValueOrDefault().ToString("yyyy-MM-dd HH:mm:ss") : string.Empty,
                     Name = member.Name, Rank = member.ClanTierName, Message = "TODO: Find Out What This Does", Standing = Convert.ToInt32(member.Type).ToString() }))
@@ -162,4 +158,76 @@ public static class SRPHandlers
             JoinDate = account.TimestampJoinedClan is not null ? account.TimestampJoinedClan.GetValueOrDefault().ToString("yyyy-MM-dd HH:mm:ss") : string.Empty,
             Rank = account.ClanTierName, Message = "TODO: Find Out What This Does", Title = "TODO: Set The Clan Channel Title"
         };
+
+    private static string SetCustomIconSlotID(Account account)
+        => account.SelectedStoreItems.Any(item => item.StartsWith("ai.custom_icon"))
+            ? account.SelectedStoreItems.Single(item => item.StartsWith("ai.custom_icon")).Replace("ai.custom_icon:", string.Empty) : "0";
+
+    private static CloudStorageInformation SetCloudStorageInformation(Account account)
+        => new() { AccountID = account.ID.ToString(), UseCloud = "0", AutomaticCloudUpload = "0", BackupLastUpdatedTime = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") }; // TODO: Fix These Values
+
+    private static List<DataPoint> SetDataPoints()
+    {
+        List<DataPoint> dataPoints =
+        [
+            // TODO: Set These From Account Stats
+
+            new DataPoint
+            {
+                ID = "666",
+                Level = "1",
+                Disconnects = "0",
+                MatchesPlayed = "0",
+                BotMatchesWon = "0",
+                PSR = "1500.000",
+                PublicMatchesPlayed = "0",
+                PublicMatchesWon = "0",
+                PublicMatchesLost = "0",
+                PublicMatchDisconnects = "0",
+                MMR = "1500.000",
+                RankedMatchesPlayed = "0",
+                RankedMatchesWon = "0",
+                RankedMatchesLost = "0",
+                RankedMatchDisconnects = "0",
+                MidWarsMMR = "1500.000",
+                RankedMidWarsMatchesPlayed = "0",
+                RankedMidWarsMatchDisconnects = "0",
+                RiftWarsMMR = "1500.000",
+                RankedRiftWarsMatchesPlayed = "0",
+                RankedRiftWarsMatchDisconnects = "0",
+                CasualMMR = "1500.000",
+                CasualRankedMatchDisconnects = "0",
+                CasualRankedMatchesLost = "0",
+                CasualRankedMatchesPlayed = "0",
+                CasualRankedMatchesWon = "0",
+                SeasonalRankedMatchesPlayed = 0,
+                SeasonalRankedMatchDisconnects = 0,
+                CasualSeasonalRankedMatchesPlayed = 0,
+                CasualSeasonalRankedMatchDisconnects = 0,
+                Experience = "666"
+            }
+        ];
+
+        return dataPoints;
+    }
+
+    private static Dictionary<string, OneOf<StoreItemData, StoreItemDiscountCoupon>> SetOwnedStoreItemsData(Account account)
+    {
+        Dictionary<string, OneOf<StoreItemData, StoreItemDiscountCoupon>> items = account.User.OwnedStoreItems
+            .Where(item => item.StartsWith("ma.").Equals(false) && item.StartsWith("cp.").Equals(false))
+            .ToDictionary<string, string, OneOf<StoreItemData, StoreItemDiscountCoupon>>(upgrade => upgrade, upgrade => new StoreItemData());
+
+        // TODO: Add Mastery Boosts And Coupons
+
+        return items;
+    }
+
+    private static AwardsTooltips SetAwardsTooltips() => new();
+
+    private static List<Notification> SetNotifications()
+    {
+        // TODO: Implement This
+
+        return [];
+    }
 }
