@@ -272,7 +272,7 @@ namespace MERRICK.Database.Migrations
                                 .HasMaxLength(30)
                                 .HasColumnType("nvarchar(30)");
 
-                            b1.Property<Guid>("Identifier")
+                            b1.Property<Guid>("GUID")
                                 .HasColumnType("uniqueidentifier");
 
                             b1.Property<string>("Name")
@@ -311,7 +311,7 @@ namespace MERRICK.Database.Migrations
                                 .HasMaxLength(15)
                                 .HasColumnType("nvarchar(15)");
 
-                            b1.Property<Guid>("Identifier")
+                            b1.Property<Guid>("GUID")
                                 .HasColumnType("uniqueidentifier");
 
                             b1.Property<string>("Name")
@@ -341,7 +341,7 @@ namespace MERRICK.Database.Migrations
                                 .ValueGeneratedOnAdd()
                                 .HasColumnType("int");
 
-                            b1.Property<Guid>("Identifier")
+                            b1.Property<Guid>("GUID")
                                 .HasColumnType("uniqueidentifier");
 
                             b1.Property<string>("Name")

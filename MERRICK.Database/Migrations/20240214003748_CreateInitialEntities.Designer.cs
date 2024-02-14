@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MERRICK.Database.Migrations
 {
     [DbContext(typeof(MerrickContext))]
-    [Migration("20240204215550_CreateInitialEntities")]
+    [Migration("20240214003748_CreateInitialEntities")]
     partial class CreateInitialEntities
     {
         /// <inheritdoc />
@@ -275,7 +275,7 @@ namespace MERRICK.Database.Migrations
                                 .HasMaxLength(30)
                                 .HasColumnType("nvarchar(30)");
 
-                            b1.Property<Guid>("Identifier")
+                            b1.Property<Guid>("GUID")
                                 .HasColumnType("uniqueidentifier");
 
                             b1.Property<string>("Name")
@@ -314,7 +314,7 @@ namespace MERRICK.Database.Migrations
                                 .HasMaxLength(15)
                                 .HasColumnType("nvarchar(15)");
 
-                            b1.Property<Guid>("Identifier")
+                            b1.Property<Guid>("GUID")
                                 .HasColumnType("uniqueidentifier");
 
                             b1.Property<string>("Name")
@@ -344,7 +344,7 @@ namespace MERRICK.Database.Migrations
                                 .ValueGeneratedOnAdd()
                                 .HasColumnType("int");
 
-                            b1.Property<Guid>("Identifier")
+                            b1.Property<Guid>("GUID")
                                 .HasColumnType("uniqueidentifier");
 
                             b1.Property<string>("Name")
