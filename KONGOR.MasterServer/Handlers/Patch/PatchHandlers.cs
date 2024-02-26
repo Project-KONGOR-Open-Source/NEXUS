@@ -8,8 +8,6 @@ public static class PatchHandlers
     public static PatchDetails GetClientPatchDetails(string distribution, string version)
         => DistributionVersions.Single(details => details.DistributionIdentifier.Equals(distribution) && details.Version.Equals(version));
 
-    // TODO: Add Mac Client And Linux Server
-
     private static List<PatchDetails> DistributionVersions { get; set; } =
     [
         new PatchDetails()
@@ -35,8 +33,8 @@ public static class PatchHandlers
             DistributionIdentifier = "mac",
             Version = "4.10.1",
             FullVersion = "4.10.1.0",
-            ManifestArchiveSHA1Hash = "",
-            ManifestArchiveSizeInBytes = "",
+            ManifestArchiveSHA1Hash = "3933013",
+            ManifestArchiveSizeInBytes = "e60435582b3db03a198db65869786c0cafeda225",
             Latest = true
         },
         new PatchDetails()
@@ -53,8 +51,8 @@ public static class PatchHandlers
             DistributionIdentifier = "las-crIac6LASwoafrl8FrOa",
             Version = "4.10.1",
             FullVersion = "4.10.1.0",
-            ManifestArchiveSHA1Hash = "",
-            ManifestArchiveSizeInBytes = "",
+            ManifestArchiveSHA1Hash = "8ba887c3de95b0b0d33b461bdb4721f29ace952e",
+            ManifestArchiveSizeInBytes = "2705984",
             Latest = true
         },
     ];
