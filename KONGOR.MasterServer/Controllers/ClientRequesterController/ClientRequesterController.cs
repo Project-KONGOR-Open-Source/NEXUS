@@ -27,6 +27,8 @@ public partial class ClientRequesterController(MerrickContext databaseContext, I
     [HttpPost(Name = "Client Requester All-In-One")]
     public async Task<IActionResult> ClientRequester()
     {
+        // TODO: Check Cookie For Non-Auth Requests
+
         return Request.Query["f"].SingleOrDefault() switch
         {
             "auth"                          => HandleAuthentication(),

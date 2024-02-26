@@ -11,6 +11,8 @@ public class PatcherController(ILogger<PatcherController> logger, IOptions<Opera
     [HttpPost(Name = "Patcher")]
     public IActionResult LatestPatch([FromForm] LatestPatchRequestForm form)
     {
+        // TODO: Check Cookie
+
         (string, string)[] supported = [ ("wac", "x86_64"), ("lac", "x86-biarch"), ("mac", "universal-64") ];
 
         if (supported.Contains((form.OperatingSystem, form.Architecture)).Equals(false))
