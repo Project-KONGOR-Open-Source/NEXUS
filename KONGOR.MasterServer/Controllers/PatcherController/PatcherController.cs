@@ -11,23 +11,31 @@ public class PatcherController(ILogger<PatcherController> logger, IOptions<Opera
     [HttpPost(Name = "Patcher")]
     public IActionResult LatestPatch([FromForm] LatestPatchRequestForm form)
     {
-        string currentClientVersion = form.CurrentPatchVersion.Split('.').Length is 3 ? form.CurrentPatchVersion + ".0" : form.CurrentPatchVersion;
-        string latestClientVersion = "4.10.1"; // Unlike The Current Client's Version, The Revision Number Is Excluded From The Latest Client Version If It's Zero
+        (string, string)[] supported = [ ("wac", "x86_64"), ("lac", "x86-biarch"), ("mac", "universal-64") ];
+
+        if (supported.Contains((form.OperatingSystem, form.Architecture)).Equals(false))
+            return BadRequest($@"Unsupported Client: Operating System ""{form.OperatingSystem}"", Architecture ""{form.Architecture}""");
+
+        // The Current Client's Version Number Needs To Include The Revision Number Even If It Is Zero (e.g. "4.10.1.0" rather than just "4.10.1")
+        PatchDetails currentPatch = PatchHandlers.GetClientPatchDetails(form.OperatingSystem, form.CurrentPatchVersion);
+
+        // Unlike The Current Client's Version, The Revision Number Is Excluded From The Version Number Of The Latest Client If It Is Zero (e.g. "4.10.1.0" becomes just "4.10.1")
+        PatchDetails latestPatch = PatchHandlers.GetLatestClientPatchDetails(form.OperatingSystem);
 
         LatestPatchResponse response = new()
         {
-            PatchVersion = currentClientVersion,
-            CurrentPatchVersion = currentClientVersion,
-            CurrentManifestZipSHA1Hash = "33b5151fca1704aff892cf76e41f3986634d38bb",
-            CurrentManifestZipSizeInBytes = "3628533",
-            PatchDetails = new PatchDetails
+            PatchVersion = currentPatch.FullVersion,
+            CurrentPatchVersion = currentPatch.FullVersion,
+            CurrentManifestArchiveSHA1Hash = currentPatch.ManifestArchiveSHA1Hash,
+            CurrentManifestArchiveSizeInBytes = currentPatch.ManifestArchiveSizeInBytes,
+            PatchDetails = new PatchDetailsForResponse
             {
                 OperatingSystem = form.OperatingSystem,
                 Architecture = form.Architecture,
-                PatchVersion = latestClientVersion,
-                LatestPatchVersion = latestClientVersion,
-                LatestManifestZipSHA1Hash = "33b5151fca1704aff892cf76e41f3986634d38bb",
-                LatestManifestZipSizeInBytes = "3628533",
+                PatchVersion = latestPatch.Version,
+                LatestPatchVersion = latestPatch.Version,
+                LatestManifestArchiveSHA1Hash = latestPatch.ManifestArchiveSHA1Hash,
+                LatestManifestArchiveSizeInBytes = latestPatch.ManifestArchiveSizeInBytes,
                 PrimaryDownloadURL = Configuration.CDN.PrimaryPatchURL,
                 SecondaryDownloadURL = Configuration.CDN.SecondaryPatchURL
             }

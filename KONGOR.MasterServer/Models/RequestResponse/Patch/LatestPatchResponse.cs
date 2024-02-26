@@ -6,7 +6,7 @@ public class LatestPatchResponse
     ///     Details on the latest HoN client patch version.
     /// </summary>
     [PhpProperty(0)]
-    public required PatchDetails PatchDetails { get; set; }
+    public required PatchDetailsForResponse PatchDetails { get; set; }
 
     /// <summary>
     ///     The HoN client's current version.
@@ -27,16 +27,16 @@ public class LatestPatchResponse
     ///     The SHA-1 hash of the zipped manifest file of the client making the request.
     /// </summary>
     [PhpProperty("current_manifest_checksum")]
-    public required string CurrentManifestZipSHA1Hash { get; set; }
+    public required string CurrentManifestArchiveSHA1Hash { get; set; }
 
     /// <summary>
     ///     The size in bytes of the zipped manifest file of the client making the request.
     /// </summary>
     [PhpProperty("current_manifest_size")]
-    public required string CurrentManifestZipSizeInBytes { get; set; }
+    public required string CurrentManifestArchiveSizeInBytes { get; set; }
 }
 
-public class PatchDetails
+public class PatchDetailsForResponse
 {
     /// <summary>
     ///     The latest HoN client version available.
@@ -86,11 +86,11 @@ public class PatchDetails
     ///     The SHA-1 hash of the zipped manifest file of the latest HoN client version.
     /// </summary>
     [PhpProperty("latest_manifest_checksum")]
-    public required string LatestManifestZipSHA1Hash { get; set; }
+    public required string LatestManifestArchiveSHA1Hash { get; set; }
 
     /// <summary>
     ///     The size in bytes of the zipped manifest file of the latest HoN client version.
     /// </summary>
     [PhpProperty("latest_manifest_size")]
-    public required string LatestManifestZipSizeInBytes { get; set; }
+    public required string LatestManifestArchiveSizeInBytes { get; set; }
 }
