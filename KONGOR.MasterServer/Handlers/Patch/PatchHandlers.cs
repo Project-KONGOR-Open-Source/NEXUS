@@ -33,8 +33,8 @@ public static class PatchHandlers
             DistributionIdentifier = "mac",
             Version = "4.10.1",
             FullVersion = "4.10.1.0",
-            ManifestArchiveSHA1Hash = "3933013",
-            ManifestArchiveSizeInBytes = "e60435582b3db03a198db65869786c0cafeda225",
+            ManifestArchiveSHA1Hash = "3933009",
+            ManifestArchiveSizeInBytes = "ce18408b94a14a968736bb39213daac9a09e4026",
             Latest = true
         },
         new PatchDetails()
