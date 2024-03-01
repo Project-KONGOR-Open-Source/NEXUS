@@ -27,7 +27,12 @@ public partial class ClientRequesterController(MerrickContext databaseContext, I
     [HttpPost(Name = "Client Requester All-In-One")]
     public async Task<IActionResult> ClientRequester()
     {
-        // TODO: Check Cookie For Non-Auth Requests
+        if (Request.Query["f"].SingleOrDefault() is not "auth" or "pre_auth" or "srpAuth" && Cache.ValidateAccountSessionCookie(Request.Form["cookie"], out string? _).Equals(false))
+        {
+            Logger.LogWarning($@"IP Address ""{Request.HttpContext.Connection.RemoteIpAddress?.MapToIPv4().ToString() ?? "UNKNOWN"}"" Has Made A Client Controller Request With Forged Cookie ""{Request.Form["cookie"]}""");
+
+            return Unauthorized($@"Unrecognized Cookie ""{Request.Form["cookie"]}""");
+        }
 
         return Request.Query["f"].SingleOrDefault() switch
         {

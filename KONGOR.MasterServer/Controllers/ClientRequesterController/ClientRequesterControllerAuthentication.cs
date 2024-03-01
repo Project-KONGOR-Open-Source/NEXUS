@@ -202,11 +202,11 @@ public partial class ClientRequesterController
 
         SRPAuthenticationResponseStageTwo response = SRPHandlers.GenerateStageTwoResponse(parameters, out string cookie);
 
-        Cache.SetAccountSessionCookie(cookie, accountName);
-
         account.TimestampLastActive = DateTime.UtcNow;
 
         await MerrickContext.SaveChangesAsync();
+
+        Cache.SetAccountSessionCookie(cookie, accountName);
 
         return Ok(PhpSerialization.Serialize(response));
     }
