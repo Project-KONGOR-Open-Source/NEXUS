@@ -200,7 +200,9 @@ public partial class ClientRequesterController
             ChatServer = (Configuration.ChatServer.HTTPS.Protocol, Configuration.ChatServer.HTTPS.Host, Configuration.ChatServer.HTTPS.Port) // TODO: The Chat Server Probably Doesn't Need HTTP/HTTPS
         };
 
-        SRPAuthenticationResponseStageTwo response = SRPHandlers.GenerateStageTwoResponse(parameters);
+        SRPAuthenticationResponseStageTwo response = SRPHandlers.GenerateStageTwoResponse(parameters, out string cookie);
+
+        Cache.SetAccountSessionCookie(cookie, accountName);
 
         account.TimestampLastActive = DateTime.UtcNow;
 

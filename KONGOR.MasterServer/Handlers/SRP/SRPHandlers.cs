@@ -2,9 +2,9 @@
 
 public static class SRPHandlers
 {
-    public static SRPAuthenticationResponseStageTwo GenerateStageTwoResponse(StageTwoResponseParameters parameters)
+    public static SRPAuthenticationResponseStageTwo GenerateStageTwoResponse(StageTwoResponseParameters parameters, out string cookie)
     {
-        string cookie = Guid.NewGuid().ToString();
+        cookie = Guid.NewGuid().ToString();
 
         SRPAuthenticationResponseStageTwo response = new()
         {
