@@ -124,7 +124,7 @@ public partial class ClientRequesterController
 
         Account? account = await MerrickContext.Accounts
             .Include(account => account.User).ThenInclude(user => user.Accounts)
-            .Include(account => account.Clan).ThenInclude(clan => clan.Members) // TODO: Fix This NULL Reference Exception
+            .Include(account => account.Clan).ThenInclude(clan => clan!.Members)
             .Include(account => account.BannedPeers)
             .Include(account => account.FriendedPeers)
             .Include(account => account.IgnoredPeers)
