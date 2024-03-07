@@ -81,6 +81,39 @@ dotnet ef database update --project MERRICK.Database
 > If the migrations are stable, then manually updating the database can be skipped, as that happens automatically at runtime.
 > This also means that a database will be fully scaffolded at runtime if it does not already exist.
 
+<br/>
+
+Generate .NET Aspire Deployment Artefacts & Deploy To Azure/Kubernetes
+
+> [!NOTE]
+> Azure deployments require the [Azure Developer CLI](https://github.com/Azure/azure-dev), and Kubernetes deployments require [Aspir8](https://github.com/prom3theu5/aspirational-manifests).
+> The documentation of each tool should be inspected for more complex deployment configurations.
+
+```powershell
+# Azure
+winget install microsoft.azd
+
+# In The Context Of The ASPIRE.AppHost Project Directory
+azd init
+azd up
+```
+
+```powershell
+# Kubernetes
+dotnet tool install -g aspirate
+
+# In The Context Of The ASPIRE.AppHost Project Directory
+aspirate init
+aspirate generate
+aspirate apply
+```
+
+```powershell
+# Manifest
+# In The Context Of The Solution Directory
+dotnet run --project ASPIRE.AppHost\ASPIRE.AppHost.csproj -- --publisher manifest --output-path manifest.json
+```
+
 <hr/>
 
 <h3 align="center">Comprehensive Instructions For Non-Developers</h3>
