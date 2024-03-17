@@ -10,7 +10,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Aspire.Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.0-preview.3.24105.21" />
+		<PackageReference Include="Aspire.Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.0-preview.4.24156.9" />
 		<PackageReference Include="OneOf" Version="3.0.263" />
 		<PackageReference Include="PhpSerializerNET" Version="1.4.0" />
 		<PackageReference Include="srp" Version="1.0.7" />
