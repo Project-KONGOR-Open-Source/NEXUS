@@ -114,11 +114,36 @@ aspirate apply
 dotnet run --project ASPIRE.AppHost\ASPIRE.AppHost.csproj -- --publisher manifest --output-path manifest.json
 ```
 
+<br/>
+
+Install/Update .NET Aspire
+
+> [!NOTE]
+> The Aspire NuGet packages referenced by the respective projects need to be in-sync with the Aspire dotnet workload.
+
+```powershell
+# Install
+dotnet workload install aspire
+```
+
+```powershell
+# Update
+dotnet workload update
+```
+
+```powershell
+# Check The Installed Version
+dotnet workload list
+```
+
+> [!NOTE]
+> Mode in-depth information is available here: https://learn.microsoft.com/en-gb/dotnet/aspire/fundamentals/setup-tooling.
+
 <hr/>
 
 <h3 align="center">Comprehensive Instructions For Non-Developers</h3>
 
 1. ??? (coming soon™)
-2. play HoN
+2. Play HoN !
 
 <br/>
