@@ -27,12 +27,18 @@ public partial class ClientRequesterController(MerrickContext databaseContext, I
     [HttpPost(Name = "Client Requester All-In-One")]
     public async Task<IActionResult> ClientRequester()
     {
-        if (Request.Query["f"].SingleOrDefault() is not "auth" or "pre_auth" or "srpAuth" && Cache.ValidateAccountSessionCookie(Request.Form["cookie"].ToString() ?? "NULL", out string? _).Equals(false))
+        bool endpointRequiresCookieValidation = Request.Query["f"].SingleOrDefault() is not "auth" and not "pre_auth" and not "srpAuth";
+        bool accountSessionCookieIsValid = Cache.ValidateAccountSessionCookie(Request.Form["cookie"].ToString() ?? "NULL", out string? _);
+
+        if (endpointRequiresCookieValidation.Equals(true) && accountSessionCookieIsValid.Equals(false))
         {
             Logger.LogWarning($@"IP Address ""{Request.HttpContext.Connection.RemoteIpAddress?.MapToIPv4().ToString() ?? "UNKNOWN"}"" Has Made A Client Controller Request With Forged Cookie ""{Request.Form["cookie"]}""");
 
             return Unauthorized($@"Unrecognized Cookie ""{Request.Form["cookie"]}""");
         }
+
+        if (endpointRequiresCookieValidation.Equals(false) && accountSessionCookieIsValid.Equals(true))
+            Logger.LogError("[BUG] Endpoint Does Not Require Cookie Validation But A Valid Cookie Was Found");
 
         return Request.Query["f"].SingleOrDefault() switch
         {
