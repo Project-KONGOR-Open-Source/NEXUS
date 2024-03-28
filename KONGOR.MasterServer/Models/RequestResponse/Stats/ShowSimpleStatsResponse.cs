@@ -6,7 +6,7 @@ public class ShowSimpleStatsResponse
     ///     The name and clan tag of the account.
     /// </summary>
     [PhpProperty("nickname")]
-    public required string NameAndClanTag { get; set; }
+    public required string NameWithClanTag { get; set; }
 
     /// <summary>
     ///     The ID of the account.

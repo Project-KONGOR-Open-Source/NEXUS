@@ -9,8 +9,63 @@ public partial class ClientRequesterController
         if (accountName is null)
             return BadRequest(@"Missing Value For Form Parameter ""nickname""");
 
-        //Ok(@"a:24:{s:8:""nickname"";s:7:""[K]GOPO"";s:10:""account_id"";s:6:""195592"";s:5:""level"";s:3:""258"";s:9:""level_exp"";s:7:""3503475"";s:10:""avatar_num"";i:1280;s:8:""hero_num"";i:20;s:12:""total_played"";i:28320;s:13:""season_normal"";a:5:{s:4:""wins"";s:3:""180"";s:6:""losses"";s:3:""160"";s:10:""win_streak"";s:1:""2"";s:12:""is_placement"";i:0;s:13:""current_level"";s:2:""12"";}s:13:""season_casual"";a:5:{s:4:""wins"";s:1:""0"";s:6:""losses"";s:1:""0"";s:10:""win_streak"";s:1:""0"";s:12:""is_placement"";i:1;s:13:""current_level"";s:1:""0"";}s:9:""season_id"";i:12;s:7:""mvp_num"";s:5:""21874"";s:15:""award_top4_name"";a:4:{i:0;s:9:""awd_masst"";i:1;s:8:""awd_mhdd"";i:2;s:9:""awd_mbdmg"";i:3;s:8:""awd_lgks"";}s:14:""award_top4_num"";a:4:{i:0;s:5:""10287"";i:1;s:5:""16169"";i:2;s:5:""14119"";i:3;s:5:""12692"";}s:11:""dice_tokens"";s:1:""1"";s:12:""season_level"";i:0;s:7:""slot_id"";s:1:""5"";s:11:""my_upgrades"";a:3:{i:0;s:15:""m.allmodes.pass"";i:1;s:16:""h.AllHeroes.Hero"";i:2;s:13:""m.Super-Taunt"";}s:17:""selected_upgrades"";a:3:{i:0;s:9:""cs.legacy"";i:1;s:11:""cc.limesoda"";i:2;s:16:""ai.custom_icon:5"";}s:11:""game_tokens"";i:0;s:16:""my_upgrades_info"";a:0:{}s:11:""creep_level"";i:0;s:9:""timestamp"";i:1650396660;s:16:""vested_threshold"";i:5;i:0;b:1;}"),
+        Account? account = await MerrickContext.Accounts
+            .Include(account => account.User)
+            .Include(account => account.Clan)
+            .SingleOrDefaultAsync(account => account.Name.Equals(accountName));
 
-        return Ok();
+        if (account is null)
+            return NotFound($@"Account With Name ""{accountName}"" Was Not Found");
+
+        ShowSimpleStatsResponse response = new()
+        {
+            NameWithClanTag = account.NameWithClanTag,
+            ID = account.ID.ToString(),
+            Level = account.User.TotalLevel,
+            LevelExperience = account.User.TotalExperience,
+            NumberOfAvatarsOwned = account.User.OwnedStoreItems.Count(item => item.StartsWith("aa.")),
+            TotalMatchesPlayed = 5555, // TODO: Implement Matches Played
+            CurrentSeason = 12, // TODO: Set Season
+            SimpleSeasonStats = new SimpleSeasonStats() // TODO: Implement Stats
+            {
+                RankedMatchesWon = 1001 /* ranked */ + 1001 /* ranked casual */,
+                RankedMatchesLost = 1002 /* ranked */ + 1002 /* ranked casual */,
+                WinStreak = Math.Max(1003 /* ranked */, 1003 /* ranked casual */),
+                InPlacementPhase = 0, // TODO: Implement Placement Matches
+                LevelsGainedThisSeason = account.User.TotalLevel
+            },
+            SimpleCasualSeasonStats = new SimpleSeasonStats() // TODO: Implement Stats
+            {
+                RankedMatchesWon = 1001 /* ranked */ + 1001 /* ranked casual */,
+                RankedMatchesLost = 1002 /* ranked */ + 1002 /* ranked casual */,
+                WinStreak = Math.Max(1003 /* ranked */, 1003 /* ranked casual */),
+                InPlacementPhase = 0, // TODO: Implement Placement Matches
+                LevelsGainedThisSeason = account.User.TotalLevel
+            },
+            MVPAwardsCount = 1004,
+            Top4AwardNames = [ "awd_masst", "awd_mhdd", "awd_mbdmg", "awd_lgks" ], // TODO: Implement Awards
+            Top4AwardCounts = [ 1005, 1006, 1007, 1008 ], // TODO: Implement Awards
+            CustomIconSlotID = SetCustomIconSlotID(account),
+            OwnedStoreItems = account.User.OwnedStoreItems,
+            SelectedStoreItems = account.SelectedStoreItems,
+            OwnedStoreItemsData = SetOwnedStoreItemsData(account)
+        };
+
+        return Ok(PhpSerialization.Serialize(response));
+    }
+
+    private static string SetCustomIconSlotID(Account account)
+        => account.SelectedStoreItems.Any(item => item.StartsWith("ai.custom_icon"))
+            ? account.SelectedStoreItems.Single(item => item.StartsWith("ai.custom_icon")).Replace("ai.custom_icon:", string.Empty) : "0";
+
+    private static Dictionary<string, OneOf<StoreItemData, StoreItemDiscountCoupon>> SetOwnedStoreItemsData(Account account)
+    {
+        Dictionary<string, OneOf<StoreItemData, StoreItemDiscountCoupon>> items = account.User.OwnedStoreItems
+            .Where(item => item.StartsWith("ma.").Equals(false) && item.StartsWith("cp.").Equals(false))
+            .ToDictionary<string, string, OneOf<StoreItemData, StoreItemDiscountCoupon>>(upgrade => upgrade, upgrade => new StoreItemData());
+
+        // TODO: Add Mastery Boosts And Coupons
+
+        return items;
     }
 }
