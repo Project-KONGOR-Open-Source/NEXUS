@@ -89,6 +89,13 @@ public sealed class MerrickContext : DbContext
             Name = "Project KONGOR Open-Source",
             Tag = "PKOS"
         });
+
+        builder.HasData(new Clan()
+        {
+            ID = Guid.Parse("00000000-0000-0000-0000-000000000004"),
+            Name = "Project KONGOR Developers",
+            Tag = "DEV"
+        });
     }
 
     private static void ConfigureAccounts(EntityTypeBuilder<Account> builder)
@@ -106,7 +113,7 @@ public sealed class MerrickContext : DbContext
             UserID = Guid.Parse("00000000-0000-0000-0000-000000000001"),
             Type = AccountType.Staff,
             IsMain = true,
-            ClanID = Guid.Parse("00000000-0000-0000-0000-000000000001"),
+            ClanID = Guid.Parse("00000000-0000-0000-0000-000000000004"), // Project KONGOR Developers
             ClanTier = ClanTier.Leader,
             TimestampJoinedClan = DateTime.UtcNow,
             AscensionLevel = 666,
@@ -119,7 +126,7 @@ public sealed class MerrickContext : DbContext
             TimestampCreated = DateTime.UtcNow, TimestampLastActive = DateTime.UtcNow
         });
 
-        string[] subAccounts = ["GOPO", "Xen0byte", /* [K] */ "ONGOR"];
+        string[] subAccounts = [ "GOPO", "Xen0byte", /* [K] */ "ONGOR" ];
 
         builder.HasData(subAccounts.Select(subAccount => new
         {
@@ -128,8 +135,8 @@ public sealed class MerrickContext : DbContext
             UserID = Guid.Parse("00000000-0000-0000-0000-000000000001"),
             Type = AccountType.Staff,
             IsMain = false,
-            ClanID = Guid.Parse("00000000-0000-0000-0000-000000000001"),
-            ClanTier = ClanTier.Officer,
+            ClanID = Guid.Parse("00000000-0000-0000-0000-000000000001"), // KONGOR
+            ClanTier = subAccount is "ONGOR" ? ClanTier.Leader : ClanTier.Officer,
             TimestampJoinedClan = DateTime.UtcNow,
             AscensionLevel = 666,
             AutoConnectChatChannels = new List<string> { "KONGOR", "TERMINAL" },
