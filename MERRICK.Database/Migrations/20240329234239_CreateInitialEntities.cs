@@ -18,7 +18,7 @@ namespace MERRICK.Database.Migrations
                 columns: table => new
                 {
                     ID = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(30)", maxLength: 30, nullable: false),
                     Tag = table.Column<string>(type: "nvarchar(4)", maxLength: 4, nullable: false),
                     TimestampCreated = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
@@ -127,12 +127,38 @@ namespace MERRICK.Database.Migrations
                 });
 
             migrationBuilder.InsertData(
+                table: "Clans",
+                columns: new[] { "ID", "Name", "Tag", "TimestampCreated" },
+                values: new object[,]
+                {
+                    { new Guid("00000000-0000-0000-0000-000000000001"), "KONGOR", "K", new DateTime(2024, 3, 29, 23, 42, 39, 287, DateTimeKind.Utc).AddTicks(5316) },
+                    { new Guid("00000000-0000-0000-0000-000000000002"), "Project KONGOR", "PK", new DateTime(2024, 3, 29, 23, 42, 39, 287, DateTimeKind.Utc).AddTicks(5341) },
+                    { new Guid("00000000-0000-0000-0000-000000000003"), "Project KONGOR Open-Source", "PKOS", new DateTime(2024, 3, 29, 23, 42, 39, 287, DateTimeKind.Utc).AddTicks(5343) }
+                });
+
+            migrationBuilder.InsertData(
                 table: "Roles",
                 columns: new[] { "ID", "Name" },
                 values: new object[,]
                 {
                     { new Guid("00000000-0000-0000-0000-00002b88dfe2"), "USER" },
                     { new Guid("00000000-0000-0000-0000-0000f4a5e3d3"), "ADMINISTRATOR" }
+                });
+
+            migrationBuilder.InsertData(
+                table: "Users",
+                columns: new[] { "ID", "EmailAddress", "GoldCoins", "OwnedStoreItems", "PBKDF2PasswordHash", "PlinkoTickets", "RoleID", "SRPPasswordHash", "SRPPasswordSalt", "SilverCoins", "TimestampCreated", "TimestampLastActive", "TotalExperience", "TotalLevel" },
+                values: new object[] { new Guid("00000000-0000-0000-0000-000000000001"), "project.kongor@proton.me", 5555555, "[\"ai.custom_icon:1\",\"av.Flamboyant\",\"c.cat_courier\",\"cc.frostburnlogo\",\"cr.Punk Creep\",\"cs.frostburnlogo\",\"m.Super-Taunt\",\"sc.paragon_circle_upgrade\",\"t.Dumpster_Taunt\",\"te.Punk TP\",\"w.8bit_ward\"]", "AQAAAAIAAYagAAAAEMUkpLAr01NjkKRPaXCyTa17nlOdPKJucn5QYur+wQBTDKCpgsAcREenK+pGJPBCRw==", 5555555, new Guid("00000000-0000-0000-0000-0000f4a5e3d3"), "fe6f16b0ecb80f6b2bc95d68420fd13afef0c895172a81819870660208ac221a", "861c37ec6d049d92cc1c67d195b414f26b572a56358272af3e9c06fcd9bfa053", 555555555, new DateTime(2024, 3, 29, 23, 42, 39, 287, DateTimeKind.Utc).AddTicks(5294), new DateTime(2024, 3, 29, 23, 42, 39, 287, DateTimeKind.Utc).AddTicks(5296), 22211666, 666 });
+
+            migrationBuilder.InsertData(
+                table: "Accounts",
+                columns: new[] { "ID", "AscensionLevel", "AutoConnectChatChannels", "ClanID", "ClanTier", "IPAddressCollection", "IsMain", "MACAddressCollection", "Name", "SelectedStoreItems", "SystemInformationCollection", "SystemInformationHashCollection", "TimestampCreated", "TimestampJoinedClan", "TimestampLastActive", "Type", "UserID" },
+                values: new object[,]
+                {
+                    { new Guid("00000000-0000-0000-0000-000000000001"), 666, "[\"KONGOR\",\"TERMINAL\"]", new Guid("00000000-0000-0000-0000-000000000001"), 3, "[]", true, "[]", "KONGOR", "[\"ai.custom_icon:1\",\"av.Flamboyant\",\"c.cat_courier\",\"cc.frostburnlogo\",\"cr.Punk Creep\",\"cs.frostburnlogo\",\"m.Super-Taunt\",\"sc.paragon_circle_upgrade\",\"t.Dumpster_Taunt\",\"te.Punk TP\",\"w.8bit_ward\"]", "[]", "[]", new DateTime(2024, 3, 29, 23, 42, 39, 289, DateTimeKind.Utc).AddTicks(7763), new DateTime(2024, 3, 29, 23, 42, 39, 289, DateTimeKind.Utc).AddTicks(7757), new DateTime(2024, 3, 29, 23, 42, 39, 289, DateTimeKind.Utc).AddTicks(7763), 5, new Guid("00000000-0000-0000-0000-000000000001") },
+                    { new Guid("00000000-0000-0000-0000-000000000002"), 666, "[\"KONGOR\",\"TERMINAL\"]", new Guid("00000000-0000-0000-0000-000000000001"), 2, "[]", false, "[]", "GOPO", "[\"ai.custom_icon:1\",\"av.Flamboyant\",\"c.cat_courier\",\"cc.frostburnlogo\",\"cr.Punk Creep\",\"cs.frostburnlogo\",\"m.Super-Taunt\",\"sc.paragon_circle_upgrade\",\"t.Dumpster_Taunt\",\"te.Punk TP\",\"w.8bit_ward\"]", "[]", "[]", new DateTime(2024, 3, 29, 23, 42, 39, 289, DateTimeKind.Utc).AddTicks(7841), new DateTime(2024, 3, 29, 23, 42, 39, 289, DateTimeKind.Utc).AddTicks(7838), new DateTime(2024, 3, 29, 23, 42, 39, 289, DateTimeKind.Utc).AddTicks(7842), 5, new Guid("00000000-0000-0000-0000-000000000001") },
+                    { new Guid("00000000-0000-0000-0000-000000000003"), 666, "[\"KONGOR\",\"TERMINAL\"]", new Guid("00000000-0000-0000-0000-000000000001"), 2, "[]", false, "[]", "Xen0byte", "[\"ai.custom_icon:1\",\"av.Flamboyant\",\"c.cat_courier\",\"cc.frostburnlogo\",\"cr.Punk Creep\",\"cs.frostburnlogo\",\"m.Super-Taunt\",\"sc.paragon_circle_upgrade\",\"t.Dumpster_Taunt\",\"te.Punk TP\",\"w.8bit_ward\"]", "[]", "[]", new DateTime(2024, 3, 29, 23, 42, 39, 289, DateTimeKind.Utc).AddTicks(7848), new DateTime(2024, 3, 29, 23, 42, 39, 289, DateTimeKind.Utc).AddTicks(7846), new DateTime(2024, 3, 29, 23, 42, 39, 289, DateTimeKind.Utc).AddTicks(7848), 5, new Guid("00000000-0000-0000-0000-000000000001") },
+                    { new Guid("00000000-0000-0000-0000-000000000004"), 666, "[\"KONGOR\",\"TERMINAL\"]", new Guid("00000000-0000-0000-0000-000000000001"), 2, "[]", false, "[]", "ONGOR", "[\"ai.custom_icon:1\",\"av.Flamboyant\",\"c.cat_courier\",\"cc.frostburnlogo\",\"cr.Punk Creep\",\"cs.frostburnlogo\",\"m.Super-Taunt\",\"sc.paragon_circle_upgrade\",\"t.Dumpster_Taunt\",\"te.Punk TP\",\"w.8bit_ward\"]", "[]", "[]", new DateTime(2024, 3, 29, 23, 42, 39, 289, DateTimeKind.Utc).AddTicks(7853), new DateTime(2024, 3, 29, 23, 42, 39, 289, DateTimeKind.Utc).AddTicks(7851), new DateTime(2024, 3, 29, 23, 42, 39, 289, DateTimeKind.Utc).AddTicks(7853), 5, new Guid("00000000-0000-0000-0000-000000000001") }
                 });
 
             migrationBuilder.CreateIndex(
