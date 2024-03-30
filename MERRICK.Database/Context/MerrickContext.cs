@@ -100,43 +100,17 @@ public sealed class MerrickContext : DbContext
 
     private static void ConfigureAccounts(EntityTypeBuilder<Account> builder)
     {
-        builder.OwnsMany(account => account.BannedPeers, ownedNavigationBuilder => { ownedNavigationBuilder.ToJson(); });
-        builder.OwnsMany(account => account.FriendedPeers, ownedNavigationBuilder => { ownedNavigationBuilder.ToJson(); });
-        builder.OwnsMany(account => account.IgnoredPeers, ownedNavigationBuilder => { ownedNavigationBuilder.ToJson(); });
+        string[] accounts = ["KONGOR", /* [K] */ "ONGOR", "GOPO", "Xen0byte" ];
 
-        const string mainAccount = "KONGOR";
-
-        builder.HasData(new
+        builder.HasData(accounts.Select(account => new
         {
-            ID = Guid.Parse("00000000-0000-0000-0000-000000000001"),
-            Name = mainAccount,
+            ID = Guid.Parse($"00000000-0000-0000-0000-{(Array.IndexOf(accounts, account) + 1 /* 1-Based Indexing */ ):D12}"),
+            Name = account,
             UserID = Guid.Parse("00000000-0000-0000-0000-000000000001"),
             Type = AccountType.Staff,
-            IsMain = true,
-            ClanID = Guid.Parse("00000000-0000-0000-0000-000000000004"), // Project KONGOR Developers
-            ClanTier = ClanTier.Leader,
-            TimestampJoinedClan = DateTime.UtcNow,
-            AscensionLevel = 666,
-            AutoConnectChatChannels = new List<string> { "KONGOR", "TERMINAL" },
-            SelectedStoreItems = new List<string> { "ai.custom_icon:1", "av.Flamboyant", "c.cat_courier", "cc.frostburnlogo", "cr.Punk Creep", "cs.frostburnlogo", "m.Super-Taunt", "sc.paragon_circle_upgrade", "t.Dumpster_Taunt", "te.Punk TP", "w.8bit_ward" },
-
-            // The Following Properties Are Not Required, But Entity Framework Thinks They Are
-
-            IPAddressCollection = new List<string>(), MACAddressCollection = new List<string>(), SystemInformationCollection = new List<string>(), SystemInformationHashCollection = new List<string>(),
-            TimestampCreated = DateTime.UtcNow, TimestampLastActive = DateTime.UtcNow
-        });
-
-        string[] subAccounts = [ "GOPO", "Xen0byte", /* [K] */ "ONGOR" ];
-
-        builder.HasData(subAccounts.Select(subAccount => new
-        {
-            ID = Guid.Parse($"00000000-0000-0000-0000-{(Array.IndexOf(subAccounts, subAccount) + 1 /* Main Account */ + 1 /* 1-Based Indexing */ ):D12}"),
-            Name = subAccount,
-            UserID = Guid.Parse("00000000-0000-0000-0000-000000000001"),
-            Type = AccountType.Staff,
-            IsMain = false,
-            ClanID = Guid.Parse("00000000-0000-0000-0000-000000000001"), // KONGOR
-            ClanTier = subAccount is "ONGOR" ? ClanTier.Leader : ClanTier.Officer,
+            IsMain = account is "KONGOR",
+            ClanID = account is "KONGOR" ? Guid.Parse("00000000-0000-0000-0000-000000000004") /* Project KONGOR Developers */ : Guid.Parse("00000000-0000-0000-0000-000000000001") /* KONGOR */ ,
+            ClanTier = account is "KONGOR" or /* [K] */ "ONGOR" ? ClanTier.Leader : ClanTier.Officer,
             TimestampJoinedClan = DateTime.UtcNow,
             AscensionLevel = 666,
             AutoConnectChatChannels = new List<string> { "KONGOR", "TERMINAL" },
@@ -147,5 +121,9 @@ public sealed class MerrickContext : DbContext
             IPAddressCollection = new List<string>(), MACAddressCollection = new List<string>(), SystemInformationCollection = new List<string>(), SystemInformationHashCollection = new List<string>(),
             TimestampCreated = DateTime.UtcNow, TimestampLastActive = DateTime.UtcNow
         }));
+
+        builder.OwnsMany(account => account.BannedPeers, ownedNavigationBuilder => { ownedNavigationBuilder.ToJson(); });
+        builder.OwnsMany(account => account.FriendedPeers, ownedNavigationBuilder => { ownedNavigationBuilder.ToJson(); });
+        builder.OwnsMany(account => account.IgnoredPeers, ownedNavigationBuilder => { ownedNavigationBuilder.ToJson(); });
     }
 }
