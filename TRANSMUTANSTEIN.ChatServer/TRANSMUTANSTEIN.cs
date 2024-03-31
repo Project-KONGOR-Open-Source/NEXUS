@@ -1,5 +1,7 @@
 ﻿using System.Net;
 
+using Microsoft.AspNetCore.SignalR;
+
 using TRANSMUTANSTEIN.ChatServer.Hubs;
 using TRANSMUTANSTEIN.ChatServer.Services;
 
@@ -7,50 +9,40 @@ namespace TRANSMUTANSTEIN.ChatServer;
 
 public class TRANSMUTANSTEIN
 {
-    public static void Main(string[] args)
+    public static Task Main(string[] args)
     {
-        var builder = WebApplication.CreateBuilder(args);
+        var config = new ConfigurationBuilder()
+            .AddCommandLine(args)
+            .Build();
 
-        builder.Services.AddSignalR();
-        builder.Services.AddHostedService<TCPListenerService>();
+        var host = Host.CreateDefaultBuilder(args)
+            .ConfigureWebHost(webHostBuilder =>
+            {
+                webHostBuilder
+                    .UseConfiguration(config)
+                    .UseSetting(WebHostDefaults.PreventHostingStartupKey, "true")
+                    .ConfigureLogging((c, factory) =>
+                    {
+                        factory.AddConfiguration(c.Configuration.GetSection("Logging"));
+                        factory.AddConsole();
+                        factory.SetMinimumLevel(LogLevel.Debug);
+                    })
+                    .UseKestrel(options =>
+                    {
+                        // Default port
+                        // options.ListenAnyIP(11031);
 
-        var app = builder.Build();
+                        // Hub bound to TCP end point
+                        options.Listen(IPAddress.Any, 11031, builder =>
+                        {
+                            builder.UseHub<Chat>();
+                        });
+                    })
+                    .UseContentRoot(Directory.GetCurrentDirectory())
+                    .UseIISIntegration()
+                    .UseStartup<Startup>();
+            }).Build();
 
-        app.UseRouting();
-        app.MapHub<ChatHub>("0.0.0.0:11031");
-
-        app.Run();
-
-
-
-
-        //var config = new ConfigurationBuilder()
-        //    .AddCommandLine(args)
-        //    .Build();
-
-        //var host = new WebHostBuilder()
-        //    .UseConfiguration(config)
-        //    .UseSetting(WebHostDefaults.PreventHostingStartupKey, "true")
-        //    .ConfigureLogging(factory =>
-        //    {
-        //        factory.AddConsole();
-        //    })
-        //    .UseKestrel(options =>
-        //    {
-        //        // Default port
-        //        options.ListenLocalhost(5000);
-
-        //        // Hub bound to TCP end point
-        //        options.Listen(IPAddress.Any, 9001, builder =>
-        //        {
-        //            builder.UseHub<Chat>();
-        //        });
-        //    })
-        //    .UseContentRoot(Directory.GetCurrentDirectory())
-        //    .UseIISIntegration()
-        //    .UseStartup<Startup>()
-        //    .Build();
-
-        //host.Run();
+        return host.RunAsync();
     }
 }

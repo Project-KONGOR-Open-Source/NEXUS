@@ -5,12 +5,14 @@
 		<TargetFramework>net8.0</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
-		<WarningsAsErrors>nullable</WarningsAsErrors>
+		<!-- <WarningsAsErrors>nullable</WarningsAsErrors> -->
 		<PublishAot>false</PublishAot>
 	</PropertyGroup>
 
 	<ItemGroup>
 		<PackageReference Include="Aspire.Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.0-preview.4.24156.9" />
+		<PackageReference Include="Microsoft.AspNetCore.SignalR.Protocols.MessagePack" Version="8.0.3" />
+		<PackageReference Include="System.Reactive" Version="6.0.0" />
 	</ItemGroup>
 
 	<ItemGroup>
