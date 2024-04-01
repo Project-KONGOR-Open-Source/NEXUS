@@ -14,33 +14,70 @@ public class ChatSession(TCPServer server) : TCPSession(server)
 
     protected override void OnReceived(byte[] buffer, long offset, long size)
     {
-        string message = Encoding.UTF8.GetString(buffer, (int)offset, (int)size);
+        // TODO: Minimise Console Logging And Other I/O For Higher Throughput
 
-        Console.WriteLine(size is 2 ? $"Incoming Size: {buffer[0]}, {buffer[1]}" : $"Incoming: {message}");
-
-        const short connectionRequest = 0x0C00;
-        byte[] connectionRequestBytes = BitConverter.GetBytes(connectionRequest);
-
-        if (buffer.AsSpan()[..2].SequenceEqual(connectionRequestBytes.AsSpan()))
+        if (size < 2)
         {
-            const short connectionAccept = 0x1C00;
-            byte[] connectionAcceptBytes = BitConverter.GetBytes(connectionAccept);
+            // TODO: Log Bug
 
-            // All Packets End In A "0"
-
-            byte[] responseSize = [ 3, 0 ];
-            byte[] responseData = [ connectionAcceptBytes[0], connectionAcceptBytes[1], 0 ];
-
-            // Send The Size Of The Next Packet
-            SendAsync(responseSize);
-            Console.WriteLine($"Outgoing Size: {responseSize[0]}, {responseSize[1]}");
-
-            // Send The "Accept Connection" Packet
-            SendAsync(responseData);
-            Console.WriteLine(Encoding.UTF8.GetString(responseData, 0, responseData.Length));
+            throw new ArgumentException("Buffer Size Is Less Than 2 Bytes");
         }
 
-        // For strings, "\0" is the NULL character, which has the value 0 in the ASCII table and is used to determine the end of C-style strings (also known as the NULL Terminator).
+        if (size is 2)
+        {
+            Console.WriteLine($"Incoming Buffer Size: {buffer[0]}, {buffer[1]}");
+        }
+
+        if (size > 2)
+        {
+            string message = Encoding.UTF8.GetString(buffer, (int)offset, (int)size);
+
+            Console.WriteLine($"Incoming Buffer Text: {message}");
+
+            Type? commandType = GetCommandType([buffer[0], buffer[1]]);
+
+            if (commandType is null)
+            {
+                // TODO: Log Missing Command Handler
+            }
+
+            else
+            {
+                ICommandProcessor? commandTypeInstance = GetCommandTypeInstance(commandType);
+
+                if (commandTypeInstance is null)
+                {
+                    // TODO: Log Bug
+                }
+
+                else
+                {
+                    commandTypeInstance.Process(this);
+                }
+            }
+
+            // TODO: Cache Command-To-Type Mapping To Reduce Reflection Overhead
+
+            Type? GetCommandType(byte[] command)
+            {
+                Type[] types = typeof(TRANSMUTANSTEIN).Assembly.GetTypes();
+
+                Type? type = types
+                    .SingleOrDefault(type => type.GetCustomAttribute<ChatCommandAttribute>() is not null
+                        && (type.GetCustomAttribute<ChatCommandAttribute>()?.Command.SequenceEqual(command) ?? false));
+
+                return type;
+            }
+            
+            ICommandProcessor? GetCommandTypeInstance(Type type)
+            {
+                ConstructorInfo? constructor = type.GetConstructor(Type.EmptyTypes);
+
+                object? instance = constructor?.Invoke(new object[] { });
+
+                return instance as ICommandProcessor;
+            }
+        }
     }
 
     protected override void OnError(SocketError error)
