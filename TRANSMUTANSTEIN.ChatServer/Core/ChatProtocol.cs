@@ -5,6 +5,7 @@ public class ChatProtocol
     // TODO: Clean Up From https://github.com/shawwn/hon/blob/f1aa2dfb7d07c447e930aa36f571e547714f4a57/lib/k2public/chatserver_protocol.h
 
     public const ushort NET_CHAT_CL_CONNECT = 0x0C00;
+    public const ushort NET_CHAT_CL_TMM_CAMPAIGN_STATS = 0x0F07;
 
     /*
        // (C)2010 S2 Games

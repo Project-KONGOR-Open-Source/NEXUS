@@ -30,11 +30,13 @@ public class ChatSession(TCPServer server) : TCPSession(server)
 
         if (size > 2)
         {
+            ushort command = BitConverter.ToUInt16([buffer[0], buffer[1]]);
+
+            Console.WriteLine($"Incoming Command: {command:X4}");
+
             string message = Encoding.UTF8.GetString(buffer, (int)offset, (int)size);
 
             Console.WriteLine($"Incoming Buffer Text: {message}");
-
-            ushort command = BitConverter.ToUInt16([buffer[0], buffer[1]]);
 
             Type? commandType = GetCommandType(command);
 
