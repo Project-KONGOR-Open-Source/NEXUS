@@ -1,14 +1,10 @@
 ﻿namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors;
 
-[ChatCommand([0, 12])]
-public class Authentication : ICommandProcessor
+[ChatCommand(ChatProtocol.NET_CHAT_CL_CONNECT)]
+public class Handshake : ICommandProcessor
 {
     public void Process(TCPSession session)
     {
-        const short connectionRequest = 0x0C00;
-
-        // TODO: Do Something With The Request Command
-
         const short connectionAccept = 0x1C00;
         byte[] connectionAcceptBytes = BitConverter.GetBytes(connectionAccept);
 

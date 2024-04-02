@@ -34,7 +34,9 @@ public class ChatSession(TCPServer server) : TCPSession(server)
 
             Console.WriteLine($"Incoming Buffer Text: {message}");
 
-            Type? commandType = GetCommandType([buffer[0], buffer[1]]);
+            ushort command = BitConverter.ToUInt16([buffer[0], buffer[1]]);
+
+            Type? commandType = GetCommandType(command);
 
             if (commandType is null)
             {
@@ -58,13 +60,13 @@ public class ChatSession(TCPServer server) : TCPSession(server)
 
             // TODO: Cache Command-To-Type Mapping To Reduce Reflection Overhead
 
-            Type? GetCommandType(byte[] command)
+            Type? GetCommandType(ushort command)
             {
                 Type[] types = typeof(TRANSMUTANSTEIN).Assembly.GetTypes();
 
                 Type? type = types
                     .SingleOrDefault(type => type.GetCustomAttribute<ChatCommandAttribute>() is not null
-                        && (type.GetCustomAttribute<ChatCommandAttribute>()?.Command.SequenceEqual(command) ?? false));
+                        && (type.GetCustomAttribute<ChatCommandAttribute>()?.Command.Equals(command) ?? false));
 
                 return type;
             }
