@@ -21,7 +21,7 @@ public class UserController(MerrickContext databaseContext, ILogger<UserControll
         if (payload.Password.Equals(payload.ConfirmPassword).Equals(false))
             return BadRequest($@"Password ""{payload.ConfirmPassword}"" Does Not Match ""{payload.Password}"" (These Values Are Only Visible To You)");
 
-        Token? token = await MerrickContext.Tokens.SingleOrDefaultAsync(token => token.ID.ToString().Equals(payload.Token) && token.Purpose.Equals(TokenPurpose.EmailAddressVerification));
+        Token? token = await MerrickContext.Tokens.SingleOrDefaultAsync(token => token.Value.ToString().Equals(payload.Token) && token.Purpose.Equals(TokenPurpose.EmailAddressVerification));
 
         if (token is null)
         {
@@ -161,7 +161,7 @@ public class UserController(MerrickContext databaseContext, ILogger<UserControll
     [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(string), StatusCodes.Status403Forbidden)]
     [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> GetUser(Guid id)
+    public async Task<IActionResult> GetUser(int id)
     {
         User? user = await MerrickContext.Users
             .Include(record => record.Role)

@@ -82,7 +82,7 @@ public static class SRPHandlers
 
     # endregion
 
-    private static string ComputeChatServerCookieHash(Guid accountID, string remoteIPAddress, string cookie)
+    private static string ComputeChatServerCookieHash(int accountID, string remoteIPAddress, string cookie)
     {
         string chatServerCookie = accountID + remoteIPAddress + cookie + ChatServerAuthenticationSalt;
 
