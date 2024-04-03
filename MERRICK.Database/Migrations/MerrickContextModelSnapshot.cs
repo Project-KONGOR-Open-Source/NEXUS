@@ -112,9 +112,9 @@ namespace MERRICK.Database.Migrations
                             SelectedStoreItems = "[\"ai.custom_icon:1\",\"av.Flamboyant\",\"c.cat_courier\",\"cc.frostburnlogo\",\"cr.Punk Creep\",\"cs.frostburnlogo\",\"m.Super-Taunt\",\"sc.paragon_circle_upgrade\",\"t.Dumpster_Taunt\",\"te.Punk TP\",\"w.8bit_ward\"]",
                             SystemInformationCollection = "[]",
                             SystemInformationHashCollection = "[]",
-                            TimestampCreated = new DateTime(2024, 4, 3, 19, 15, 19, 318, DateTimeKind.Utc).AddTicks(4875),
-                            TimestampJoinedClan = new DateTime(2024, 4, 3, 19, 15, 19, 318, DateTimeKind.Utc).AddTicks(4870),
-                            TimestampLastActive = new DateTime(2024, 4, 3, 19, 15, 19, 318, DateTimeKind.Utc).AddTicks(4875),
+                            TimestampCreated = new DateTime(2024, 4, 3, 19, 36, 14, 466, DateTimeKind.Utc).AddTicks(8473),
+                            TimestampJoinedClan = new DateTime(2024, 4, 3, 19, 36, 14, 466, DateTimeKind.Utc).AddTicks(8467),
+                            TimestampLastActive = new DateTime(2024, 4, 3, 19, 36, 14, 466, DateTimeKind.Utc).AddTicks(8473),
                             Type = 5,
                             UserID = 1
                         },
@@ -132,9 +132,9 @@ namespace MERRICK.Database.Migrations
                             SelectedStoreItems = "[\"ai.custom_icon:1\",\"av.Flamboyant\",\"c.cat_courier\",\"cc.frostburnlogo\",\"cr.Punk Creep\",\"cs.frostburnlogo\",\"m.Super-Taunt\",\"sc.paragon_circle_upgrade\",\"t.Dumpster_Taunt\",\"te.Punk TP\",\"w.8bit_ward\"]",
                             SystemInformationCollection = "[]",
                             SystemInformationHashCollection = "[]",
-                            TimestampCreated = new DateTime(2024, 4, 3, 19, 15, 19, 318, DateTimeKind.Utc).AddTicks(4882),
-                            TimestampJoinedClan = new DateTime(2024, 4, 3, 19, 15, 19, 318, DateTimeKind.Utc).AddTicks(4879),
-                            TimestampLastActive = new DateTime(2024, 4, 3, 19, 15, 19, 318, DateTimeKind.Utc).AddTicks(4882),
+                            TimestampCreated = new DateTime(2024, 4, 3, 19, 36, 14, 466, DateTimeKind.Utc).AddTicks(8481),
+                            TimestampJoinedClan = new DateTime(2024, 4, 3, 19, 36, 14, 466, DateTimeKind.Utc).AddTicks(8479),
+                            TimestampLastActive = new DateTime(2024, 4, 3, 19, 36, 14, 466, DateTimeKind.Utc).AddTicks(8481),
                             Type = 5,
                             UserID = 1
                         },
@@ -152,9 +152,9 @@ namespace MERRICK.Database.Migrations
                             SelectedStoreItems = "[\"ai.custom_icon:1\",\"av.Flamboyant\",\"c.cat_courier\",\"cc.frostburnlogo\",\"cr.Punk Creep\",\"cs.frostburnlogo\",\"m.Super-Taunt\",\"sc.paragon_circle_upgrade\",\"t.Dumpster_Taunt\",\"te.Punk TP\",\"w.8bit_ward\"]",
                             SystemInformationCollection = "[]",
                             SystemInformationHashCollection = "[]",
-                            TimestampCreated = new DateTime(2024, 4, 3, 19, 15, 19, 318, DateTimeKind.Utc).AddTicks(4886),
-                            TimestampJoinedClan = new DateTime(2024, 4, 3, 19, 15, 19, 318, DateTimeKind.Utc).AddTicks(4883),
-                            TimestampLastActive = new DateTime(2024, 4, 3, 19, 15, 19, 318, DateTimeKind.Utc).AddTicks(4886),
+                            TimestampCreated = new DateTime(2024, 4, 3, 19, 36, 14, 466, DateTimeKind.Utc).AddTicks(8484),
+                            TimestampJoinedClan = new DateTime(2024, 4, 3, 19, 36, 14, 466, DateTimeKind.Utc).AddTicks(8482),
+                            TimestampLastActive = new DateTime(2024, 4, 3, 19, 36, 14, 466, DateTimeKind.Utc).AddTicks(8484),
                             Type = 5,
                             UserID = 1
                         },
@@ -172,9 +172,9 @@ namespace MERRICK.Database.Migrations
                             SelectedStoreItems = "[\"ai.custom_icon:1\",\"av.Flamboyant\",\"c.cat_courier\",\"cc.frostburnlogo\",\"cr.Punk Creep\",\"cs.frostburnlogo\",\"m.Super-Taunt\",\"sc.paragon_circle_upgrade\",\"t.Dumpster_Taunt\",\"te.Punk TP\",\"w.8bit_ward\"]",
                             SystemInformationCollection = "[]",
                             SystemInformationHashCollection = "[]",
-                            TimestampCreated = new DateTime(2024, 4, 3, 19, 15, 19, 318, DateTimeKind.Utc).AddTicks(4889),
-                            TimestampJoinedClan = new DateTime(2024, 4, 3, 19, 15, 19, 318, DateTimeKind.Utc).AddTicks(4887),
-                            TimestampLastActive = new DateTime(2024, 4, 3, 19, 15, 19, 318, DateTimeKind.Utc).AddTicks(4889),
+                            TimestampCreated = new DateTime(2024, 4, 3, 19, 36, 14, 466, DateTimeKind.Utc).AddTicks(8487),
+                            TimestampJoinedClan = new DateTime(2024, 4, 3, 19, 36, 14, 466, DateTimeKind.Utc).AddTicks(8485),
+                            TimestampLastActive = new DateTime(2024, 4, 3, 19, 36, 14, 466, DateTimeKind.Utc).AddTicks(8487),
                             Type = 5,
                             UserID = 1
                         });
@@ -214,28 +214,28 @@ namespace MERRICK.Database.Migrations
                             ID = 1,
                             Name = "KONGOR",
                             Tag = "K",
-                            TimestampCreated = new DateTime(2024, 4, 3, 19, 15, 19, 318, DateTimeKind.Utc).AddTicks(4831)
+                            TimestampCreated = new DateTime(2024, 4, 3, 19, 36, 14, 466, DateTimeKind.Utc).AddTicks(8423)
                         },
                         new
                         {
                             ID = 2,
                             Name = "Project KONGOR Developers",
                             Tag = ".NET",
-                            TimestampCreated = new DateTime(2024, 4, 3, 19, 15, 19, 318, DateTimeKind.Utc).AddTicks(4837)
+                            TimestampCreated = new DateTime(2024, 4, 3, 19, 36, 14, 466, DateTimeKind.Utc).AddTicks(8430)
                         },
                         new
                         {
                             ID = 3,
                             Name = "Project KONGOR",
                             Tag = "PK",
-                            TimestampCreated = new DateTime(2024, 4, 3, 19, 15, 19, 318, DateTimeKind.Utc).AddTicks(4839)
+                            TimestampCreated = new DateTime(2024, 4, 3, 19, 36, 14, 466, DateTimeKind.Utc).AddTicks(8432)
                         },
                         new
                         {
                             ID = 4,
                             Name = "Project KONGOR Open-Source",
                             Tag = "PKOS",
-                            TimestampCreated = new DateTime(2024, 4, 3, 19, 15, 19, 318, DateTimeKind.Utc).AddTicks(4841)
+                            TimestampCreated = new DateTime(2024, 4, 3, 19, 36, 14, 466, DateTimeKind.Utc).AddTicks(8434)
                         });
                 });
 
@@ -317,8 +317,8 @@ namespace MERRICK.Database.Migrations
                             SRPPasswordHash = "fe6f16b0ecb80f6b2bc95d68420fd13afef0c895172a81819870660208ac221a",
                             SRPPasswordSalt = "861c37ec6d049d92cc1c67d195b414f26b572a56358272af3e9c06fcd9bfa053",
                             SilverCoins = 555555555,
-                            TimestampCreated = new DateTime(2024, 4, 3, 19, 15, 19, 318, DateTimeKind.Utc).AddTicks(4807),
-                            TimestampLastActive = new DateTime(2024, 4, 3, 19, 15, 19, 318, DateTimeKind.Utc).AddTicks(4808),
+                            TimestampCreated = new DateTime(2024, 4, 3, 19, 36, 14, 466, DateTimeKind.Utc).AddTicks(8399),
+                            TimestampLastActive = new DateTime(2024, 4, 3, 19, 36, 14, 466, DateTimeKind.Utc).AddTicks(8401),
                             TotalExperience = 22211666,
                             TotalLevel = 666
                         });

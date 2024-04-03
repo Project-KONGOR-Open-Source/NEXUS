@@ -3,12 +3,10 @@
 [Index(nameof(Name), IsUnique = true)]
 public class IgnoredPeer
 {
-    [JsonPropertyName("ID")]
-    [JsonInclude]
+    [JsonInclude, JsonPropertyName("ID")]
     private int Identifier { get; set; }
 
-    [NotMapped]
-    [JsonIgnore]
+    [JsonIgnore, NotMapped]
     public required int ID
     {
         get => Identifier;
