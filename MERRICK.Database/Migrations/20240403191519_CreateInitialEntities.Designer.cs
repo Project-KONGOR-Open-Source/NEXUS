@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MERRICK.Database.Migrations
 {
     [DbContext(typeof(MerrickContext))]
-    [Migration("20240403183255_CreateInitialEntities")]
+    [Migration("20240403191519_CreateInitialEntities")]
     partial class CreateInitialEntities
     {
         /// <inheritdoc />
@@ -115,9 +115,9 @@ namespace MERRICK.Database.Migrations
                             SelectedStoreItems = "[\"ai.custom_icon:1\",\"av.Flamboyant\",\"c.cat_courier\",\"cc.frostburnlogo\",\"cr.Punk Creep\",\"cs.frostburnlogo\",\"m.Super-Taunt\",\"sc.paragon_circle_upgrade\",\"t.Dumpster_Taunt\",\"te.Punk TP\",\"w.8bit_ward\"]",
                             SystemInformationCollection = "[]",
                             SystemInformationHashCollection = "[]",
-                            TimestampCreated = new DateTime(2024, 4, 3, 18, 32, 55, 429, DateTimeKind.Utc).AddTicks(6546),
-                            TimestampJoinedClan = new DateTime(2024, 4, 3, 18, 32, 55, 429, DateTimeKind.Utc).AddTicks(6542),
-                            TimestampLastActive = new DateTime(2024, 4, 3, 18, 32, 55, 429, DateTimeKind.Utc).AddTicks(6546),
+                            TimestampCreated = new DateTime(2024, 4, 3, 19, 15, 19, 318, DateTimeKind.Utc).AddTicks(4875),
+                            TimestampJoinedClan = new DateTime(2024, 4, 3, 19, 15, 19, 318, DateTimeKind.Utc).AddTicks(4870),
+                            TimestampLastActive = new DateTime(2024, 4, 3, 19, 15, 19, 318, DateTimeKind.Utc).AddTicks(4875),
                             Type = 5,
                             UserID = 1
                         },
@@ -135,9 +135,9 @@ namespace MERRICK.Database.Migrations
                             SelectedStoreItems = "[\"ai.custom_icon:1\",\"av.Flamboyant\",\"c.cat_courier\",\"cc.frostburnlogo\",\"cr.Punk Creep\",\"cs.frostburnlogo\",\"m.Super-Taunt\",\"sc.paragon_circle_upgrade\",\"t.Dumpster_Taunt\",\"te.Punk TP\",\"w.8bit_ward\"]",
                             SystemInformationCollection = "[]",
                             SystemInformationHashCollection = "[]",
-                            TimestampCreated = new DateTime(2024, 4, 3, 18, 32, 55, 429, DateTimeKind.Utc).AddTicks(6558),
-                            TimestampJoinedClan = new DateTime(2024, 4, 3, 18, 32, 55, 429, DateTimeKind.Utc).AddTicks(6555),
-                            TimestampLastActive = new DateTime(2024, 4, 3, 18, 32, 55, 429, DateTimeKind.Utc).AddTicks(6558),
+                            TimestampCreated = new DateTime(2024, 4, 3, 19, 15, 19, 318, DateTimeKind.Utc).AddTicks(4882),
+                            TimestampJoinedClan = new DateTime(2024, 4, 3, 19, 15, 19, 318, DateTimeKind.Utc).AddTicks(4879),
+                            TimestampLastActive = new DateTime(2024, 4, 3, 19, 15, 19, 318, DateTimeKind.Utc).AddTicks(4882),
                             Type = 5,
                             UserID = 1
                         },
@@ -155,9 +155,9 @@ namespace MERRICK.Database.Migrations
                             SelectedStoreItems = "[\"ai.custom_icon:1\",\"av.Flamboyant\",\"c.cat_courier\",\"cc.frostburnlogo\",\"cr.Punk Creep\",\"cs.frostburnlogo\",\"m.Super-Taunt\",\"sc.paragon_circle_upgrade\",\"t.Dumpster_Taunt\",\"te.Punk TP\",\"w.8bit_ward\"]",
                             SystemInformationCollection = "[]",
                             SystemInformationHashCollection = "[]",
-                            TimestampCreated = new DateTime(2024, 4, 3, 18, 32, 55, 429, DateTimeKind.Utc).AddTicks(6561),
-                            TimestampJoinedClan = new DateTime(2024, 4, 3, 18, 32, 55, 429, DateTimeKind.Utc).AddTicks(6559),
-                            TimestampLastActive = new DateTime(2024, 4, 3, 18, 32, 55, 429, DateTimeKind.Utc).AddTicks(6561),
+                            TimestampCreated = new DateTime(2024, 4, 3, 19, 15, 19, 318, DateTimeKind.Utc).AddTicks(4886),
+                            TimestampJoinedClan = new DateTime(2024, 4, 3, 19, 15, 19, 318, DateTimeKind.Utc).AddTicks(4883),
+                            TimestampLastActive = new DateTime(2024, 4, 3, 19, 15, 19, 318, DateTimeKind.Utc).AddTicks(4886),
                             Type = 5,
                             UserID = 1
                         },
@@ -175,9 +175,9 @@ namespace MERRICK.Database.Migrations
                             SelectedStoreItems = "[\"ai.custom_icon:1\",\"av.Flamboyant\",\"c.cat_courier\",\"cc.frostburnlogo\",\"cr.Punk Creep\",\"cs.frostburnlogo\",\"m.Super-Taunt\",\"sc.paragon_circle_upgrade\",\"t.Dumpster_Taunt\",\"te.Punk TP\",\"w.8bit_ward\"]",
                             SystemInformationCollection = "[]",
                             SystemInformationHashCollection = "[]",
-                            TimestampCreated = new DateTime(2024, 4, 3, 18, 32, 55, 429, DateTimeKind.Utc).AddTicks(6564),
-                            TimestampJoinedClan = new DateTime(2024, 4, 3, 18, 32, 55, 429, DateTimeKind.Utc).AddTicks(6562),
-                            TimestampLastActive = new DateTime(2024, 4, 3, 18, 32, 55, 429, DateTimeKind.Utc).AddTicks(6564),
+                            TimestampCreated = new DateTime(2024, 4, 3, 19, 15, 19, 318, DateTimeKind.Utc).AddTicks(4889),
+                            TimestampJoinedClan = new DateTime(2024, 4, 3, 19, 15, 19, 318, DateTimeKind.Utc).AddTicks(4887),
+                            TimestampLastActive = new DateTime(2024, 4, 3, 19, 15, 19, 318, DateTimeKind.Utc).AddTicks(4889),
                             Type = 5,
                             UserID = 1
                         });
@@ -217,28 +217,28 @@ namespace MERRICK.Database.Migrations
                             ID = 1,
                             Name = "KONGOR",
                             Tag = "K",
-                            TimestampCreated = new DateTime(2024, 4, 3, 18, 32, 55, 429, DateTimeKind.Utc).AddTicks(6500)
+                            TimestampCreated = new DateTime(2024, 4, 3, 19, 15, 19, 318, DateTimeKind.Utc).AddTicks(4831)
                         },
                         new
                         {
                             ID = 2,
                             Name = "Project KONGOR Developers",
                             Tag = ".NET",
-                            TimestampCreated = new DateTime(2024, 4, 3, 18, 32, 55, 429, DateTimeKind.Utc).AddTicks(6505)
+                            TimestampCreated = new DateTime(2024, 4, 3, 19, 15, 19, 318, DateTimeKind.Utc).AddTicks(4837)
                         },
                         new
                         {
                             ID = 3,
                             Name = "Project KONGOR",
                             Tag = "PK",
-                            TimestampCreated = new DateTime(2024, 4, 3, 18, 32, 55, 429, DateTimeKind.Utc).AddTicks(6507)
+                            TimestampCreated = new DateTime(2024, 4, 3, 19, 15, 19, 318, DateTimeKind.Utc).AddTicks(4839)
                         },
                         new
                         {
                             ID = 4,
                             Name = "Project KONGOR Open-Source",
                             Tag = "PKOS",
-                            TimestampCreated = new DateTime(2024, 4, 3, 18, 32, 55, 429, DateTimeKind.Utc).AddTicks(6509)
+                            TimestampCreated = new DateTime(2024, 4, 3, 19, 15, 19, 318, DateTimeKind.Utc).AddTicks(4841)
                         });
                 });
 
@@ -320,8 +320,8 @@ namespace MERRICK.Database.Migrations
                             SRPPasswordHash = "fe6f16b0ecb80f6b2bc95d68420fd13afef0c895172a81819870660208ac221a",
                             SRPPasswordSalt = "861c37ec6d049d92cc1c67d195b414f26b572a56358272af3e9c06fcd9bfa053",
                             SilverCoins = 555555555,
-                            TimestampCreated = new DateTime(2024, 4, 3, 18, 32, 55, 429, DateTimeKind.Utc).AddTicks(6477),
-                            TimestampLastActive = new DateTime(2024, 4, 3, 18, 32, 55, 429, DateTimeKind.Utc).AddTicks(6479),
+                            TimestampCreated = new DateTime(2024, 4, 3, 19, 15, 19, 318, DateTimeKind.Utc).AddTicks(4807),
+                            TimestampLastActive = new DateTime(2024, 4, 3, 19, 15, 19, 318, DateTimeKind.Utc).AddTicks(4808),
                             TotalExperience = 22211666,
                             TotalLevel = 666
                         });
@@ -419,9 +419,6 @@ namespace MERRICK.Database.Migrations
                                 .HasMaxLength(30)
                                 .HasColumnType("nvarchar(30)");
 
-                            b1.Property<Guid>("GUID")
-                                .HasColumnType("uniqueidentifier");
-
                             b1.Property<string>("Name")
                                 .IsRequired()
                                 .HasMaxLength(15)
@@ -458,9 +455,6 @@ namespace MERRICK.Database.Migrations
                                 .HasMaxLength(15)
                                 .HasColumnType("nvarchar(15)");
 
-                            b1.Property<Guid>("GUID")
-                                .HasColumnType("uniqueidentifier");
-
                             b1.Property<string>("Name")
                                 .IsRequired()
                                 .HasMaxLength(15)
@@ -487,9 +481,6 @@ namespace MERRICK.Database.Migrations
                             b1.Property<int>("Id")
                                 .ValueGeneratedOnAdd()
                                 .HasColumnType("int");
-
-                            b1.Property<Guid>("GUID")
-                                .HasColumnType("uniqueidentifier");
 
                             b1.Property<string>("Name")
                                 .IsRequired()
