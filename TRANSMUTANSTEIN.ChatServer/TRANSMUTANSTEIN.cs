@@ -4,23 +4,12 @@ public class TRANSMUTANSTEIN
 {
     public static void Main(string[] args)
     {
-        IPAddress address = IPAddress.Any;
-        int port = 55508; // TODO: Get From Configuration
+        HostApplicationBuilder builder = Host.CreateApplicationBuilder(args);
 
-        Core.ChatServer server = new(address, port);
+        builder.Services.AddHostedService<ChatService>();
 
-        if (server.Start() is false)
-        {
-            // TODO: Log Critical Event
+        IHost host = builder.Build();
 
-            throw new ApplicationException("Chat Server Was Unable To Start");
-        }
-
-        Console.WriteLine($"Chat Server Listening On {server.Endpoint}");
-
-        while (server.IsStarted)
-        {
-            // keep listening
-        }
+        host.Start();
     }
 }

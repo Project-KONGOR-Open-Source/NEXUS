@@ -1,0 +1,27 @@
+{
+	"$schema": "http://json.schemastore.org/launchsettings.json",
+	"profiles": {
+		"TRANSMUTANSTEIN.ChatServer Development": {
+			"commandName": "Project",
+			"launchBrowser": true,
+			"applicationUrl": "http://localhost:55507;https://localhost:55508",
+			"launchUrl": "swagger",
+			"environmentVariables": {
+				"ASPNETCORE_ENVIRONMENT": "Development",
+				"DOTNET_ENVIRONMENT": "Development"
+			},
+			"dotnetRunMessages": true
+		},
+		"TRANSMUTANSTEIN.ChatServer Production": {
+			"commandName": "Project",
+			"launchBrowser": true,
+			"applicationUrl": "http://chat.kongor.online;https://chat.kongor.online",
+			"launchUrl": "swagger",
+			"environmentVariables": {
+				"ASPNETCORE_ENVIRONMENT": "Production",
+				"DOTNET_ENVIRONMENT": "Production"
+			},
+			"dotnetRunMessages": true
+		}
+	}
+}

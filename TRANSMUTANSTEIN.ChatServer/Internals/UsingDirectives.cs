@@ -6,3 +6,4 @@ global using System.Text;
 global using TRANSMUTANSTEIN.ChatServer.Attributes;
 global using TRANSMUTANSTEIN.ChatServer.Contracts;
 global using TRANSMUTANSTEIN.ChatServer.Core;
+global ﻿using TRANSMUTANSTEIN.ChatServer.Services;

@@ -11,7 +11,8 @@ public class ASPIRE
 
         // TODO: Set The Connection String Via Environment Variable (Or Use Some Other Way That Solves Duplication)
 
-        builder.AddProject<TRANSMUTANSTEIN_ChatServer>("chat-server");
+        builder.AddProject<TRANSMUTANSTEIN_ChatServer>("chat-server")
+            .WithLaunchProfile(builder.Environment.IsProduction() ? "TRANSMUTANSTEIN.ChatServer Production" : "TRANSMUTANSTEIN.ChatServer Development");
 
         builder.AddProject<KONGOR_MasterServer>("master-server")
             .WithLaunchProfile(builder.Environment.IsProduction() ? "KONGOR.MasterServer Production" : "KONGOR.MasterServer Development");
