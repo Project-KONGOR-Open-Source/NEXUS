@@ -5,7 +5,7 @@
 			"commandName": "Project",
 			"launchBrowser": true,
 			"applicationUrl": "http://localhost:55507;https://localhost:55508",
-			"launchUrl": "swagger",
+			"launchUrl": "health",
 			"environmentVariables": {
 				"ASPNETCORE_ENVIRONMENT": "Development",
 				"DOTNET_ENVIRONMENT": "Development"
@@ -16,7 +16,7 @@
 			"commandName": "Project",
 			"launchBrowser": true,
 			"applicationUrl": "http://chat.kongor.online;https://chat.kongor.online",
-			"launchUrl": "swagger",
+			"launchUrl": "health",
 			"environmentVariables": {
 				"ASPNETCORE_ENVIRONMENT": "Production",
 				"DOTNET_ENVIRONMENT": "Production"

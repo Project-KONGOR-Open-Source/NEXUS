@@ -1,13 +1,16 @@
 ﻿namespace TRANSMUTANSTEIN.ChatServer.Services;
 
-public class ChatService : IChatService
+public class ChatService : IHostedService, IDisposable
 {
-    private Core.ChatServer? ChatServer { get; set; }
+    public static Core.ChatServer? ChatServer { get; set; }
 
     public Task StartAsync(CancellationToken cancellationToken)
     {
         IPAddress address = IPAddress.Any;
-        int port = 55508; // TODO: Get From Configuration
+
+        // TODO: Get From Configuration
+        // TODO: Make Distinction Between Chat Service (55507, 55508) Ports And Chat Server Ports (5555x > 1: Client, 2: Manager, 3: Server)
+        int port = 55551;
 
         ChatServer = new Core.ChatServer(address, port);
 
@@ -19,11 +22,6 @@ public class ChatService : IChatService
         }
 
         Console.WriteLine($"Chat Server Listening On {ChatServer.Endpoint}");
-
-        while (ChatServer.IsStarted)
-        {
-            // keep listening
-        }
 
         return Task.CompletedTask;
     }
