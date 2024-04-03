@@ -3,10 +3,8 @@
 [ChatCommand(ChatProtocol.NET_CHAT_CL_TMM_CAMPAIGN_STATS)]
 public class SeasonStats : ICommandProcessor
 {
-    public void Process(TCPSession session)
+    public void Process(TCPSession session, ChatBuffer buffer)
     {
-        // For strings, "\0" is the NULL character, which has the value 0 in the ASCII table and is used to determine the end of C-style strings (also known as the NULL Terminator).
-
         /*
            m_fCampaignNormalTMR = phpResponse.GetFloat(_U8("normal_mmr"), 1250.0f);
            m_fCampaignCasualTMR = phpResponse.GetFloat(_U8("casual_mmr"), 1250.0f);

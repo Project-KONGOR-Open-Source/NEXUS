@@ -2,5 +2,5 @@
 
 public interface ICommandProcessor
 {
-    public void Process(TCPSession session);
+    public void Process(TCPSession session, ChatBuffer buffer);
 }

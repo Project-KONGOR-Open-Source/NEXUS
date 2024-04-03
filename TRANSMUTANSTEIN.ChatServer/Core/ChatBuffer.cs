@@ -1,130 +1,171 @@
 ﻿namespace TRANSMUTANSTEIN.ChatServer.Core;
 
-public class ChatBuffer // TODO: Inherit From TCPBuffer And Consolidate The Two Models
+public class ChatBuffer : TCPBuffer
 {
-    // Based on logging, ~99% of all messages are less than 112. 112 also has a nice property that
-    // it allocates exactly 128 bytes, when including byte[] object header.
-    private static readonly int INITIAL_CAPACITY = 112;
+    /// <summary>
+    ///     Initialize a new expandable chat buffer with zero capacity.
+    /// </summary>
+    public ChatBuffer() { }
 
-    // The rest of the messages are very long (e.g. ChatChannel connects), so when we grow, grow by a lot.
-    private static readonly int GROW_SIZE = 896;
+    /// <summary>
+    ///     Initialize a new expandable chat buffer with the given capacity.
+    /// </summary>
+    public ChatBuffer(long capacity) : base(capacity) { }
 
-    public byte[] Buffer = new byte[INITIAL_CAPACITY];
-    public int Size;
-    private Span<byte> Span => ((Span<byte>)Buffer).Slice(Size);
+    /// <summary>
+    ///     Initialize a new expandable chat buffer with the given data.
+    /// </summary>
+    public ChatBuffer(byte[] data) : base(data) { }
 
-    public void WriteInt8(byte value)
+    /// <summary>
+    ///     Read 2 bytes from the buffer, and return the result as a byte array.
+    /// </summary>
+    public byte[] ReadCommandBytes()
     {
-        if (Buffer.Length == Size)
-        {
-            Array.Resize(ref Buffer, Buffer.Length + GROW_SIZE);
-        }
-        Buffer[Size++] = value;
+        if (_offset is not 0)
+            throw new InvalidDataException($"Offset Is {_offset}, But 0 (Zero) Was Expected");
+
+        byte[] data = _data[..2];
+
+        Shift(2);
+
+        return data;
     }
 
-    public void WriteInt16(short value)
+    /// <summary>
+    ///     Append 1 byte to the buffer, and return the number of bytes appended.
+    /// </summary>
+    public long WriteInt8(byte value)
+        => Append(value);
+
+    /// <summary>
+    ///     Read 1 byte from the buffer, and return the result.
+    /// </summary>
+    public byte ReadInt8()
     {
-        if (!BitConverter.TryWriteBytes(Span, value))
-        {
-            Array.Resize(ref Buffer, Buffer.Length + GROW_SIZE);
-            BitConverter.TryWriteBytes(Span, value);
-        }
-        Size += 2;
+        if (_size - _offset < 1)
+            throw new InvalidDataException($"Unable To Read 1 Byte From Buffer With Size {_size} And Offset {_offset}");
+
+        byte data = _data[_offset];
+
+        Shift(1);
+
+        return data;
     }
 
-    public void WriteInt32(int value)
+    /// <summary>
+    ///     Append 2 bytes to the buffer, and return the number of bytes appended.
+    /// </summary>
+    public long WriteInt16(short value)
+        => Append(BitConverter.GetBytes(value));
+
+    /// <summary>
+    ///     Read 2 bytes from the buffer, and return the result as a short value.
+    /// </summary>
+    public short ReadInt16()
     {
-        if (!BitConverter.TryWriteBytes(Span, value))
-        {
-            Array.Resize(ref Buffer, Buffer.Length + GROW_SIZE);
-            BitConverter.TryWriteBytes(Span, value);
-        }
-        Size += 4;
+        if (_size - _offset < 2)
+            throw new InvalidDataException($"Unable To Read 2 Bytes From Buffer With Size {_size} And Offset {_offset}");
+
+        short data = BitConverter.ToInt16(_data, (int)_offset);
+
+        Shift(2);
+
+        return data;
     }
 
-    public void WriteInt64(long value)
+    /// <summary>
+    ///     Append 4 bytes to the buffer, and return the number of bytes appended.
+    /// </summary>
+    public long WriteInt32(int value)
+        => Append(BitConverter.GetBytes(value));
+
+    /// <summary>
+    ///     Read 4 bytes from the buffer, and return the result as an int value.
+    /// </summary>
+    public int ReadInt32()
     {
-        if (!BitConverter.TryWriteBytes(Span, value))
-        {
-            Array.Resize(ref Buffer, Buffer.Length + GROW_SIZE);
-            BitConverter.TryWriteBytes(Span, value);
-        }
-        Size += 8;
+        if (_size - _offset < 4)
+            throw new InvalidDataException($"Unable To Read 4 Bytes From Buffer With Size {_size} And Offset {_offset}");
+
+        int data = BitConverter.ToInt32(_data, (int)_offset);
+
+        Shift(4);
+
+        return data;
     }
 
-    public void WriteFloat32(float value)
+    /// <summary>
+    ///     Append 8 bytes to the buffer, and return the number of bytes appended.
+    /// </summary>
+    public long WriteInt64(long value)
+        => Append(BitConverter.GetBytes(value));
+
+    /// <summary>
+    ///     Read 8 bytes from the buffer, and return the result as a long value.
+    /// </summary>
+    public long ReadInt64()
     {
-        if (!BitConverter.TryWriteBytes(Span, value))
-        {
-            Array.Resize(ref Buffer, Buffer.Length + GROW_SIZE);
-            BitConverter.TryWriteBytes(Span, value);
-        }
-        Size += 4;
+        if (_size - _offset < 8)
+            throw new InvalidDataException($"Unable To Read 8 Bytes From Buffer With Size {_size} And Offset {_offset}");
+
+        long data = BitConverter.ToInt64(_data, (int)_offset);
+
+        Shift(8);
+
+        return data;
     }
 
-    public void WriteString(string value)
+    /// <summary>
+    ///     Append 4 bytes to the buffer, and return the number of bytes appended.
+    /// </summary>
+    public long WriteFloat32(float value)
+        => Append(BitConverter.GetBytes(value));
+
+    /// <summary>
+    ///     Read 4 bytes from the buffer, and return the result as a float value.
+    /// </summary>
+    public float ReadFloat32()
     {
-        byte[] data = Encoding.UTF8.GetBytes(value);
-        int finalWriteOffset = Size + data.Length + 1;
+        if (_size - _offset < 4)
+            throw new InvalidDataException($"Unable To Read 4 Bytes From Buffer With Size {_size} And Offset {_offset}");
 
-        if (Buffer.Length < finalWriteOffset)
-        {
-            Array.Resize(ref Buffer, Math.Max(Buffer.Length + GROW_SIZE, finalWriteOffset));
-        }
+        float data = BitConverter.ToSingle(_data, (int)_offset);
 
-        Array.Copy(data, 0, Buffer, Size, data.Length);
-        Buffer[finalWriteOffset - 1] = 0;
-        Size = finalWriteOffset;
+        Shift(4);
+
+        return data;
     }
 
-    /*
-       public static byte ReadByte(byte[] data, int offset, out int updatedOffset)
-       {
-           byte result = data[offset];
-           updatedOffset = offset + 1;
-           return result;
-       }
+    /// <summary>
+    ///     Append an arbitrary number of bytes to the buffer, and return the number of bytes appended.
+    ///     For C-style strings, "\0" is the NULL character (also known as the NULL Terminator), which has the value 0 in the ASCII table and is used to determine the end of C-style strings.
+    ///     UTF-8 is also compatible with NULL-terminated strings, meaning that no character will have a zero byte in it after being encoded.
+    /// </summary>
+    public long WriteString(string value)
+        => Append(Encoding.UTF8.GetBytes(value).Append<byte>(0).ToArray());
 
-       public static short ReadShort(byte[] data, int offset, out int updatedOffset)
-       {
-           short result = BitConverter.ToInt16(data, offset);
-           updatedOffset = offset + 2;
-           return result;
-       }
+    /// <summary>
+    ///     Reads an arbitrary number of bytes from the buffer, and return the result as a string value.
+    ///     For C-style strings, "\0" is the NULL character (also known as the NULL Terminator), which has the value 0 in the ASCII table and is used to determine the end of C-style strings.
+    ///     UTF-8 is also compatible with NULL-terminated strings, meaning that no character will have a zero byte in it after being encoded.
+    /// </summary>
+    public string ReadString()
+    {
+        long marker = _offset;
 
-       public static int ReadInt(byte[] data, int offset, out int updatedOffset)
-       {
-           int result = BitConverter.ToInt32(data, offset);
-           updatedOffset = offset + 4;
-           return result;
-       }
-       public static long ReadLong(byte[] data, int offset, out int updatedOffset)
-       {
-           long result = BitConverter.ToInt64(data, offset);
-           updatedOffset = offset + 8;
-           return result;
-       }
-       public static float ReadFloat(byte[] data, int offset, out int updatedOffset)
-       {
-           return BitConverter.Int32BitsToSingle(ReadInt(data, offset, out updatedOffset));
-       }
+        while (marker <= _size && _data[marker] is not 0)
+            marker++;
 
-       public static string ReadString(byte[] data, int offset, out int updatedOffset)
-       {
-           int end = offset;
-           while (true)
-           {
-               byte b = data[end];
-               if (b == 0)
-               {
-                   break;
-               }
-               ++end;
-           }
-           string result = Encoding.UTF8.GetString(data, offset, end - offset);
+        if (marker > _size)
+            throw new InvalidDataException($"Unable To Read A String Value From Buffer With Size {_size} And Offset {_offset}");
 
-           updatedOffset = end + 1; // skip \0
-           return result;
-       }
-     */
+        string data = Encoding.UTF8.GetString(_data, (int)_offset, (int)(marker - _offset));
+
+        marker++; // Move Marker To NULL Terminator Position
+
+        _offset = marker;
+
+        return data;
+    }
 }

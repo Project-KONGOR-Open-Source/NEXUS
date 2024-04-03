@@ -7,9 +7,9 @@ namespace TRANSMUTANSTEIN.ChatServer.Core;
 /// </summary>
 public class TCPBuffer
 {
-    private byte[] _data;
-    private long _size;
-    private long _offset;
+    protected byte[] _data;
+    protected long _size;
+    protected long _offset;
 
     /// <summary>
     /// Is the buffer empty?
@@ -38,15 +38,17 @@ public class TCPBuffer
     public byte this[long index] => _data[index];
 
     /// <summary>
-    /// Initialize a new expandable buffer with zero capacity
+    ///     Initialize a new expandable buffer with zero capacity.
     /// </summary>
     public TCPBuffer() { _data = new byte[0]; _size = 0; _offset = 0; }
+
     /// <summary>
-    /// Initialize a new expandable buffer with the given capacity
+    ///     Initialize a new expandable buffer with the given capacity.
     /// </summary>
     public TCPBuffer(long capacity) { _data = new byte[capacity]; _size = 0; _offset = 0; }
+
     /// <summary>
-    /// Initialize a new expandable buffer with the given data
+    ///     Initialize a new expandable buffer with the given data.
     /// </summary>
     public TCPBuffer(byte[] data) { _data = data; _size = data.Length; _offset = 0; }
 

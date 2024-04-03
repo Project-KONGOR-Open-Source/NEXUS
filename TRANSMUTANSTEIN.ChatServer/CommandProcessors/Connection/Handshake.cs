@@ -3,7 +3,7 @@
 [ChatCommand(ChatProtocol.NET_CHAT_CL_CONNECT)]
 public class Handshake : ICommandProcessor
 {
-    public void Process(TCPSession session)
+    public void Process(TCPSession session, ChatBuffer buffer)
     {
         /*
            [4] unsigned long - client's account ID
@@ -27,6 +27,16 @@ public class Handshake : ICommandProcessor
            - If the cookie is empty, fails silently.
            - Get OS version info via the Windows function GetVersionEx().
          */
+
+        var _01 = buffer.ReadCommandBytes();
+
+        // ID Is Wrong Because It's Supposed To Be A Long Value But It Is A GUID Instead
+        // TODO: Change IDs To Long
+        var _02 = buffer.ReadInt64();
+
+        var _03 = buffer.ReadString();
+        var _04 = buffer.ReadString();
+        var _05 = buffer.ReadString();
 
         const short connectionAccept = 0x1C00;
         byte[] connectionAcceptBytes = BitConverter.GetBytes(connectionAccept);

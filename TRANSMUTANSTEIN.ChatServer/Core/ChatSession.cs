@@ -56,7 +56,7 @@ public class ChatSession(TCPServer server) : TCPSession(server)
 
                 else
                 {
-                    commandTypeInstance.Process(this);
+                    commandTypeInstance.Process(this, new ChatBuffer(buffer));
                 }
             }
 
