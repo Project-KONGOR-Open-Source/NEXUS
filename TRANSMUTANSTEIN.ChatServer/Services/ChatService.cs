@@ -8,9 +8,8 @@ public class ChatService : IHostedService, IDisposable
     {
         IPAddress address = IPAddress.Any;
 
-        // TODO: Get From Configuration
         // TODO: Make Distinction Between Chat Service (55507, 55508) Ports And Chat Server Ports (5555x > 1: Client, 2: Manager, 3: Server)
-        int port = 55551;
+        int port = 55551; // TODO: Get From Configuration
 
         ChatServer = new Core.ChatServer(address, port);
 
