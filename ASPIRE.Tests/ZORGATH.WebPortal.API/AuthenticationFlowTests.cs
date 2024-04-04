@@ -22,7 +22,7 @@ public sealed class AuthenticationFlowTests : WebPortalAPITestSetup
     // TODO: Use HttpClient
 
     [Test, Order(1)]
-    [TestCase("project.kongor@proton.me")]
+    [TestCase("project@kongor.com")]
     public async Task RegisterEmailAddress(string emailAddress)
     {
         ILogger<EmailAddressController> emailAddressControllerLogger; IEmailService emailService;
@@ -55,7 +55,7 @@ public sealed class AuthenticationFlowTests : WebPortalAPITestSetup
     }
 
     [Test, Order(2)]
-    [TestCase("project.kongor@proton.me", "KONGOR", "https://github.com/K-O-N-G-O-R")]
+    [TestCase("project@kongor.com", "K-O-N-G-O-R", "https://github.com/K-O-N-G-O-R")]
     public async Task RegisterUserAndMainAccount(string emailAddress, string name, string password)
     {
         ILogger<UserController> userControllerLogger; IOptions<OperationalConfiguration> configuration; IEmailService emailService;
@@ -96,7 +96,7 @@ public sealed class AuthenticationFlowTests : WebPortalAPITestSetup
     }
 
     [Test, Order(3)]
-    [TestCase("project.kongor@proton.me", "KONGOR", "https://github.com/K-O-N-G-O-R")]
+    [TestCase("project@kongor.com", "K-O-N-G-O-R", "https://github.com/K-O-N-G-O-R")]
     public async Task LogInUser(string emailAddress, string name, string password)
     {
         ILogger<UserController> userControllerLogger; IOptions<OperationalConfiguration> configuration; IEmailService emailService;
