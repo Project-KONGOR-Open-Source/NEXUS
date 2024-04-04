@@ -4,7 +4,7 @@ public class TRANSMUTANSTEIN
 {
     public static bool RunsInDevelopmentMode { get; set; }
 
-    public static WebApplication? Application { get; set; }
+    public static IServiceProvider ServiceProvider { get; set; } = null!;
 
     public static void Main(string[] args)
     {
@@ -40,12 +40,15 @@ public class TRANSMUTANSTEIN
         builder.Services.AddHealthChecks().AddCheck<ChatServerHealthCheck>("TRANSMUTANSTEIN Chat Server Health Check");
 
         // Build The Application
-        Application = builder.Build();
+        WebApplication app = builder.Build();
 
         // Map Aspire Default Endpoints
-        Application.MapDefaultEndpoints();
+        app.MapDefaultEndpoints();
+
+        // Set A Global Service Provider
+        ServiceProvider = app.Services; // TODO: Find A Smarter Way To Provide Services (Figure Out Dependency Injection In This Project Setup)
 
         // Run The Application
-        Application.Run();
+        app.Run();
     }
 }

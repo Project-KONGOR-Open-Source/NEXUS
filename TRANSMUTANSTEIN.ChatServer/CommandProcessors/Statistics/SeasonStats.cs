@@ -1,10 +1,8 @@
 ﻿namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Statistics;
 
 [ChatCommand(ChatProtocol.NET_CHAT_CL_TMM_CAMPAIGN_STATS)]
-public class SeasonStats : ICommandProcessor
+public class SeasonStats : CommandProcessorsBase, ICommandProcessor
 {
-    public MerrickContext MerrickContext { get; set; }
-
     public async Task Process(TCPSession session, ChatBuffer buffer)
     {
         /*

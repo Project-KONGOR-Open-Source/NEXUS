@@ -1,10 +1,8 @@
 ﻿namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Connection;
 
 [ChatCommand(ChatProtocol.NET_CHAT_CL_CONNECT)]
-public class Handshake : ICommandProcessor
+public class Handshake : CommandProcessorsBase, ICommandProcessor
 {
-    public MerrickContext MerrickContext { get; set; } = TRANSMUTANSTEIN.Application?.Services.GetService<MerrickContext>() ?? throw new NullReferenceException("MERRICK Context Is NULL");
-
     public async Task Process(TCPSession session, ChatBuffer buffer)
     {
         byte[] _ = buffer.ReadCommandBytes();
@@ -29,6 +27,9 @@ public class Handshake : ICommandProcessor
         string clientLanguage = buffer.ReadString();
 
         // TODO: Run Checks
+
+        int debug = await MerrickContext.Users.CountAsync();
+        Logger.LogCritical("TEST");
 
         const short connectionAccept = 0x1C00;
         byte[] connectionAcceptBytes = BitConverter.GetBytes(connectionAccept);
