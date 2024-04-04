@@ -18,6 +18,17 @@ public class ChatBuffer : TCPBuffer
     public ChatBuffer(byte[] data) : base(data) { }
 
     /// <summary>
+    ///     Append 2 bytes to the buffer, and return the number of bytes appended.
+    /// </summary>
+    public long WriteCommandBytes(byte[] value)
+    {
+        if (value.Length is not 2)
+            throw new InvalidDataException($"Chat Command Is Expected To Be 2 Bytes In Length, But It Is {value.Length} Bytes");
+
+        return Append(value);
+    }
+
+    /// <summary>
     ///     Read 2 bytes from the buffer, and return the result as a byte array.
     /// </summary>
     public byte[] ReadCommandBytes()
@@ -165,6 +176,27 @@ public class ChatBuffer : TCPBuffer
         marker++; // Move Marker To NULL Terminator Position
 
         _offset = marker;
+
+        return data;
+    }
+
+    /// <summary>
+    ///     Append 1 byte to the buffer, and return the number of bytes appended.
+    /// </summary>
+    public long WriteNullTerminator()
+        => Append(Convert.ToByte(0x00));
+
+    /// <summary>
+    ///     Read 1 byte from the buffer, and return the result.
+    /// </summary>
+    public byte ReadNullTerminator()
+    {
+        if (_size - _offset is not 1)
+            throw new InvalidDataException($"The NULL Terminator Is Expected To Be The Last Character In The Packet Frame, But The Current Byte Offset Is At {_offset} Of {_size}");
+
+        byte data = _data[_offset];
+
+        Shift(1);
 
         return data;
     }

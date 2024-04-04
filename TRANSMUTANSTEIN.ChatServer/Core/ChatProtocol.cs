@@ -6,6 +6,7 @@ public class ChatProtocol
 
     public const ushort NET_CHAT_CL_CONNECT = 0x0C00;
     public const ushort NET_CHAT_CL_TMM_CAMPAIGN_STATS = 0x0F07;
+    public const ushort NET_CHAT_CL_ACCEPT = 0x1C00;
 
     /*
        // (C)2010 S2 Games

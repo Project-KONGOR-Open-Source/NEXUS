@@ -26,25 +26,15 @@ public class Handshake : CommandProcessorsBase, ICommandProcessor
         string clientRegion = buffer.ReadString();
         string clientLanguage = buffer.ReadString();
 
-        // TODO: Run Checks
+        // TODO: Check Cookie
+        // TODO: Check Authentication Hash
 
-        int debug = await MerrickContext.Users.CountAsync();
-        Logger.LogCritical("TEST");
+        ResponseCommand = BitConverter.GetBytes(ChatProtocol.NET_CHAT_CL_ACCEPT);
 
-        const short connectionAccept = 0x1C00;
-        byte[] connectionAcceptBytes = BitConverter.GetBytes(connectionAccept);
+        Response.WriteCommandBytes(ResponseCommand);
+        Response.WriteNullTerminator();
 
-        // All Packets End In A "0"
-
-        byte[] responseSize = [3, 0];
-        byte[] responseData = [connectionAcceptBytes[0], connectionAcceptBytes[1], 0];
-
-        // Send The Size Of The Next Packet
-        session.SendAsync(responseSize);
-        Console.WriteLine($"Outgoing Size: {responseSize[0]}, {responseSize[1]}");
-
-        // Send The "Accept Connection" Packet
-        session.SendAsync(responseData);
-        Console.WriteLine(Encoding.UTF8.GetString(responseData, 0, responseData.Length));
+        session.SendAsync(ResponseSize);
+        session.SendAsync(Response.Data);
     }
 }

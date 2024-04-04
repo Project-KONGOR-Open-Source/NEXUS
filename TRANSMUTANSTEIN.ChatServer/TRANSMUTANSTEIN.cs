@@ -46,7 +46,7 @@ public class TRANSMUTANSTEIN
         app.MapDefaultEndpoints();
 
         // Set A Global Service Provider
-        ServiceProvider = app.Services; // TODO: Find A Smarter Way To Provide Services (Figure Out Dependency Injection In This Project Setup)
+        ServiceProvider = app.Services; // TODO: Find A Smarter Way To Provide Services; Figure Out Dependency Injection In This Project Setup (Reflection-Based Routing)
 
         // Run The Application
         app.Run();
