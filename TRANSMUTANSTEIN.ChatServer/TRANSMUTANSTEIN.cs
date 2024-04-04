@@ -4,6 +4,8 @@ public class TRANSMUTANSTEIN
 {
     public static bool RunsInDevelopmentMode { get; set; }
 
+    public static WebApplication? Application { get; set; }
+
     public static void Main(string[] args)
     {
         // Create The Application Builder
@@ -31,16 +33,19 @@ public class TRANSMUTANSTEIN
         // Host The Chat Service
         builder.Services.AddHostedService<ChatService>();
 
+        // Register The Database Context Service
+        builder.Services.AddTransient<MerrickContext>();
+
         // Add Database Health Check
         builder.Services.AddHealthChecks().AddCheck<ChatServerHealthCheck>("TRANSMUTANSTEIN Chat Server Health Check");
 
         // Build The Application
-        WebApplication app = builder.Build();
+        Application = builder.Build();
 
         // Map Aspire Default Endpoints
-        app.MapDefaultEndpoints();
+        Application.MapDefaultEndpoints();
 
         // Run The Application
-        app.Run();
+        Application.Run();
     }
 }

@@ -3,7 +3,9 @@
 [ChatCommand(ChatProtocol.NET_CHAT_CL_CONNECT)]
 public class Handshake : ICommandProcessor
 {
-    public void Process(TCPSession session, ChatBuffer buffer)
+    public MerrickContext MerrickContext { get; set; } = TRANSMUTANSTEIN.Application?.Services.GetService<MerrickContext>() ?? throw new NullReferenceException("MERRICK Context Is NULL");
+
+    public async Task Process(TCPSession session, ChatBuffer buffer)
     {
         byte[] _ = buffer.ReadCommandBytes();
         int accountID = buffer.ReadInt32();

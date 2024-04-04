@@ -3,7 +3,9 @@
 [ChatCommand(ChatProtocol.NET_CHAT_CL_TMM_CAMPAIGN_STATS)]
 public class SeasonStats : ICommandProcessor
 {
-    public void Process(TCPSession session, ChatBuffer buffer)
+    public MerrickContext MerrickContext { get; set; }
+
+    public async Task Process(TCPSession session, ChatBuffer buffer)
     {
         /*
            m_fCampaignNormalTMR = phpResponse.GetFloat(_U8("normal_mmr"), 1250.0f);

@@ -2,5 +2,7 @@
 
 public interface ICommandProcessor
 {
-    public void Process(TCPSession session, ChatBuffer buffer);
+    public MerrickContext MerrickContext { get; set; }
+
+    public Task Process(TCPSession session, ChatBuffer buffer);
 }
