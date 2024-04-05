@@ -51,6 +51,7 @@ public class ChatSession(TCPServer server) : TCPSession(server)
 
                 if (commandTypeInstance is null)
                 {
+                    Console.WriteLine($"[BUG] Unknown Command: {command:X4}");
                     // TODO: Log Bug
                 }
 

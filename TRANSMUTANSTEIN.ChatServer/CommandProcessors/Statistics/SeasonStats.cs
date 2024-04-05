@@ -35,15 +35,43 @@ public class SeasonStats : CommandProcessorsBase, ICommandProcessor
            m_bCampaignEligible = phpResponse.GetBool(_U8("can_enter"), false);
            m_bExclusiveChannelEligible = phpResponse.GetBool(_U8("can_enter_exclusive_channel"), false);
            bool validSeason = phpResponse.GetBool(_U8("valid_season"), false);
-           
+
            m_bufferSend.Clear();
 
-           m_bufferSend << NET_CHAT_CL_TMM_CAMPAIGN_STATS << 
-           	m_fCampaignNormalTMR << m_uiCampaignNormalMedal << normalWins << normalLoss << normalWinStreak << m_iCampaignNormalMatches << normalPlacementNum << WStringToUTF8(normalPlacementWins) << byte('\0') <<
-           	m_fCampaignCasualTMR << m_uiCampaignCasualMedal << casualWins << casualLoss << casualWinStreak << m_iCampaignCasualMatches << casualPlacementNum << WStringToUTF8(casualPlacementWins) << byte('\0') <<
-           	(byte)m_bCampaignEligible << (byte)validSeason;
-           	
+           m_bufferSend << NET_CHAT_CL_TMM_CAMPAIGN_STATS <<
+            m_fCampaignNormalTMR << m_uiCampaignNormalMedal << normalWins << normalLoss << normalWinStreak << m_iCampaignNormalMatches << normalPlacementNum << WStringToUTF8(normalPlacementWins) << byte('\0') <<
+            m_fCampaignCasualTMR << m_uiCampaignCasualMedal << casualWins << casualLoss << casualWinStreak << m_iCampaignCasualMatches << casualPlacementNum << WStringToUTF8(casualPlacementWins) << byte('\0') <<
+            (byte)m_bCampaignEligible << (byte)validSeason;
+
            Send(m_bufferSend);
          */
+
+        ResponseCommand = BitConverter.GetBytes(ChatProtocol.NET_CHAT_CL_TMM_CAMPAIGN_STATS);
+
+        Response.WriteCommandBytes(ResponseCommand);
+        Response.WriteFloat32(1850.55f);
+        Response.WriteInt32(15);
+        Response.WriteInt32(6661);
+        Response.WriteInt32(123);
+        Response.WriteInt32(6662);
+        Response.WriteInt32(6663);
+        Response.WriteInt32(5);
+        Response.WriteString("11011");
+        // Response.WriteInt8(0);
+        Response.WriteFloat32(1950.55f);
+        Response.WriteInt32(10);
+        Response.WriteInt32(4441);
+        Response.WriteInt32(321);
+        Response.WriteInt32(4442);
+        Response.WriteInt32(4443);
+        Response.WriteInt32(6);
+        Response.WriteString("010101");
+        // Response.WriteInt8(0);
+        Response.WriteInt8(1);
+        Response.WriteInt8(1);
+        Response.WriteNullTerminator();
+
+        session.SendAsync(ResponseSize);
+        session.SendAsync(Response.Data);
     }
 }
