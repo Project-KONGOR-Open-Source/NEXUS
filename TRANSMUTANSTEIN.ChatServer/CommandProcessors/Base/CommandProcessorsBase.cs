@@ -1,6 +1,6 @@
 ﻿namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Base;
 
-public abstract class CommandProcessorsBase
+public abstract class CommandProcessorsBase<T>
 {
     protected byte[] ResponseCommand { get; set; } = new byte[2];
 
@@ -10,5 +10,5 @@ public abstract class CommandProcessorsBase
 
     protected MerrickContext MerrickContext { get; set; } = TRANSMUTANSTEIN.ServiceProvider.GetRequiredService<MerrickContext>();
 
-    protected ILogger Logger { get; set; } = TRANSMUTANSTEIN.ServiceProvider.GetRequiredService<ILogger<CommandProcessorsBase>>();
+    protected ILogger Logger { get; set; } = TRANSMUTANSTEIN.ServiceProvider.GetRequiredService<ILogger<T>>();
 }

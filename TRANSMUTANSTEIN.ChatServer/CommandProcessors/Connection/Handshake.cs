@@ -1,7 +1,7 @@
 ﻿namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Connection;
 
 [ChatCommand(ChatProtocol.NET_CHAT_CL_CONNECT)]
-public class Handshake : CommandProcessorsBase, ICommandProcessor
+public class Handshake : CommandProcessorsBase<Handshake>, ICommandProcessor
 {
     public async Task Process(TCPSession session, ChatBuffer buffer)
     {

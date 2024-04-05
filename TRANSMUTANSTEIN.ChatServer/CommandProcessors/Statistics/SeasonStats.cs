@@ -1,7 +1,7 @@
 ﻿namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Statistics;
 
 [ChatCommand(ChatProtocol.NET_CHAT_CL_TMM_CAMPAIGN_STATS)]
-public class SeasonStats : CommandProcessorsBase, ICommandProcessor
+public class SeasonStats : CommandProcessorsBase<SeasonStats>, ICommandProcessor
 {
     public async Task Process(TCPSession session, ChatBuffer buffer)
     {
