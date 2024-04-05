@@ -3,313 +3,299 @@
 public class ChatProtocol
 {
     // TODO: Clean Up From https://github.com/shawwn/hon/blob/f1aa2dfb7d07c447e930aa36f571e547714f4a57/lib/k2public/chatserver_protocol.h
+    // + symbol leak
 
-    public const ushort NET_CHAT_CL_CONNECT = 0x0C00;
-    public const ushort NET_CHAT_CL_TMM_CAMPAIGN_STATS = 0x0F07;
-    public const ushort NET_CHAT_CL_ACCEPT = 0x1C00;
+       public const uint CHAT_PROTOCOL_VERSION = 68;
 
-    /*
-       // (C)2010 S2 Games
-       // chatserver_protocol.h
-       //
-       //=============================================================================
-       #ifndef __CHATSERVER_PROTOCOL_H__
-       #define __CHATSERVER_PROTOCOL_H__
+       public const ushort CHAT_CMD_CHANNEL_MSG				= 0x03;				// Used when a user messages a channel
+       public const ushort CHAT_CMD_CHANGED_CHANNEL			= 0x04;				// Used when we change channels
+       public const ushort CHAT_CMD_JOINED_CHANNEL			= 0x05;				// Used when a new user joins our channel
+       public const ushort CHAT_CMD_LEFT_CHANNEL				= 0x06;				// Used when a user leaves our channel
+       public const ushort CHAT_CMD_DISCONNECTED				= 0x07;				// Used when we get disconnected
+       public const ushort CHAT_CMD_WHISPER					= 0x08;				// Used when one user whispers another
+       public const ushort CHAT_CMD_WHISPER_FAILED			= 0x09;				// Used when the whisper target could not be found
+       public const ushort CHAT_CMD_LAST_KNOWN_GAME_SERVER	= 0x0A;				// Return the last known game server for myself
+       public const ushort CHAT_CMD_INITIAL_STATUS			= 0x0B;				// Sent on connect to update buddy and clan connection status for new client
+       public const ushort CHAT_CMD_UPDATE_STATUS				= 0x0C;				// Sent on connect to update buddy and clan connection status for old clients
+       public const ushort CHAT_CMD_REQUEST_BUDDY_ADD			= 0x0D;				// Sent from client to chat server to request a buddy add
+       public const ushort CHAT_CMD_NOTIFY_BUDDY_REMOVE		= 0x0E;				// Sent from client to chat server to notify a buddy has been removed
+       public const ushort CHAT_CMD_JOINING_GAME				= 0x0F;				// Sent when a user starts joining a game
+       public const ushort CHAT_CMD_JOINED_GAME				= 0x10;				// Sent when a user finishes joining a game
+       public const ushort CHAT_CMD_LEFT_GAME					= 0x11;				// Sent when a user leaves a game
+       public const ushort EMPTY_0x12 = 0x12;
+       public const ushort CHAT_CMD_CLAN_WHISPER				= 0x13;				// Sent when whispering an entire clan
+       public const ushort CHAT_CMD_CLAN_WHISPER_FAILED		= 0x14;				// Sent when a whisper to a clan fails
+       public const ushort CHAT_CMD_CLAN_PROMOTE_NOTIFY		= 0x15;				// Sent with notification keys for the server to verify on clan promotion
+       public const ushort CHAT_CMD_CLAN_DEMOTE_NOTIFY		= 0x16;				// Sent with notification keys for the server to verify on clan demotion
+       public const ushort CHAT_CMD_CLAN_REMOVE_NOTIFY		= 0x17;				// Sent with notification keys for the server to verify on clan removal
+       public const ushort EMPTY_0x18			= 0x18;
+       public const ushort EMPTY_0x19		= 0x19;
+       public const ushort EMPTY_0x1A = 0x1A;
+       public const ushort CHAT_CMD_FLOODING					= 0x1B;				// Warning to user that their message wasn't sent due to flood control
+       public const ushort CHAT_CMD_IM						= 0x1C;				// Used when a user recieves/sends an IM through the CC panel
+       public const ushort CHAT_CMD_IM_FAILED					= 0x1D;				// Used when a user fails to send an IM
+       public const ushort CHAT_CMD_JOIN_CHANNEL				= 0x1E;				// Sent by user when joining a new channel
+       public const ushort CHAT_CMD_DYANMIC_PRODUCT_LIST		= 0x1F;				// Dynamic products that are updated in the chat server heartbeat then sent to the client when changed.
+       public const ushort CHAT_CMD_WHISPER_BUDDIES			= 0x20;				// Sending whisper to all buddies
+       public const ushort CHAT_CMD_MAX_CHANNELS				= 0x21;				// Error sent when user has joined max. # of channels
+       public const ushort CHAT_CMD_LEAVE_CHANNEL				= 0x22;				// Sent by user when leaving a channel
+       public const ushort CHAT_CMD_INVITE_USER_ID			= 0x23;				// Sent by game server to invite a user to a game by account ID
+       public const ushort CHAT_CMD_INVITE_USER_NAME			= 0x24;				// Sent by game server to invite a user to a game by account name
+       public const ushort CHAT_CMD_INVITED_TO_SERVER			= 0x25;				// Sent by chat server to notify a user of a pending server invite
+       public const ushort CHAT_CMD_INVITE_FAILED_USER		= 0x26;				// Notifies a user that their invite request failed because the target was not found
+       public const ushort CHAT_CMD_INVITE_FAILED_GAME		= 0x27;				// Notifies a user that their invite request failed because they are not in a game
+       public const ushort CHAT_CMD_INVITE_REJECTED			= 0x28;				// Indicates that a recieved invite was rejected
+       public const ushort EMPTY_0x29 = 0x29;
+       public const ushort CHAT_CMD_USER_INFO					= 0x2A;				// Returns information on a user
+       public const ushort CHAT_CMD_USER_INFO_NO_EXIST		= 0x2B;				// The requested user does not exist
+       public const ushort CHAT_CMD_USER_INFO_OFFLINE			= 0x2C;				// Returns information on an offline user
+       public const ushort CHAT_CMD_USER_INFO_ONLINE			= 0x2D;				// Returns information on an online user
+       public const ushort CHAT_CMD_USER_INFO_IN_GAME			= 0x2E;				// Returns information on a user in a game
+       public const ushort CHAT_CMD_CHANNEL_UPDATE			= 0x2F;				// Update channel information
+       public const ushort CHAT_CMD_CHANNEL_TOPIC				= 0x30;				// Set/get channel topic
+       public const ushort CHAT_CMD_CHANNEL_KICK				= 0x31;				// Kick user from channel
+       public const ushort CHAT_CMD_CHANNEL_BAN				= 0x32;				// Ban user from channel
+       public const ushort CHAT_CMD_CHANNEL_UNBAN				= 0x33;				// Unban user from channel
+       public const ushort CHAT_CMD_CHANNEL_IS_BANNED			= 0x34;				// User is banned from channel
+       public const ushort CHAT_CMD_CHANNEL_SILENCED			= 0x35;				// User is silenced in this channel
+       public const ushort CHAT_CMD_CHANNEL_SILENCE_LIFTED	= 0x36;				// User is no longer silenced in a channel
+       public const ushort CHAT_CMD_CHANNEL_SILENCE_PLACED	= 0x37;				// User is now silenced in a channel
+       public const ushort CHAT_CMD_CHANNEL_SILENCE_USER		= 0x38;				// Request to silence a user in a channel
+       public const ushort CHAT_CMD_MESSAGE_ALL				= 0x39;				// Administrator message to all users
+       public const ushort CHAT_CMD_CHANNEL_PROMOTE			= 0x3A;				// Request to promote a user in a channel
+       public const ushort CHAT_CMD_CHANNEL_DEMOTE			= 0x3B;				// Request to demote a user in a channel
+       public const ushort EMPTY_0x3C = 0x3C;
+       public const ushort EMPTY_0x3D = 0x3D;
+       public const ushort CHAT_CMD_CHANNEL_SET_AUTH			= 0x3E;				// User wants to enable authorization on a channel
+       public const ushort CHAT_CMD_CHANNEL_REMOVE_AUTH		= 0x3F;				// User wants to disable authorization on a channel
+       public const ushort CHAT_CMD_CHANNEL_ADD_AUTH_USER		= 0x40;				// User wants to add a user to the authorization list for a channel
+       public const ushort CHAT_CMD_CHANNEL_REMOVE_AUTH_USER	= 0x41;				// User wants to remove a user from the authorization list for a channel
+       public const ushort CHAT_CMD_CHANNEL_LIST_AUTH			= 0x42;				// User wants to get the authorization list for a channel
+       public const ushort CHAT_CMD_CHANNEL_SET_PASSWORD		= 0x43;				// User wants to set the password for a channel
+       public const ushort CHAT_CMD_CHANNEL_ADD_AUTH_FAIL		= 0x44;				// Failed to add the user to the channel authorization list
+       public const ushort CHAT_CMD_CHANNEL_REMOVE_AUTH_FAIL	= 0x45;				// Failed to remove the user from the channel authorization list
+       public const ushort CHAT_CMD_JOIN_CHANNEL_PASSWORD		= 0x46;				// Channel join with password
+       public const ushort CHAT_CMD_CLAN_ADD_MEMBER			= 0x47;				// Request to add a new clan member
+       public const ushort CHAT_CMD_CLAN_ADD_REJECTED			= 0x48;				// Request to add a member was rejected
+       public const ushort CHAT_CMD_CLAN_ADD_FAIL_ONLINE		= 0x49;				// Request to add a member failed, user was not online
+       public const ushort CHAT_CMD_CLAN_ADD_FAIL_CLAN		= 0x4A;				// Request to add a member failed, user is in a clan
+       public const ushort CHAT_CMD_CLAN_ADD_FAIL_INVITED		= 0x4B;				// Request to add a member failed, user has already been invited
+       public const ushort CHAT_CMD_CLAN_ADD_FAIL_PERMS		= 0x4C;				// Request to add a member failed, user does not have proper permissions
+       public const ushort CHAT_CMD_CLAN_ADD_FAIL_UNKNOWN		= 0x4D;				// Request to add a member failed
+       public const ushort CHAT_CMD_NEW_CLAN_MEMBER			= 0x4E;				// New user added to clan
+       public const ushort CHAT_CMD_CLAN_ADD_ACCEPTED			= 0x4F;				// Request to add a member was accepted
+       public const ushort CHAT_CMD_CLAN_RANK_CHANGE			= 0x50;				// Clan member's rank changed
+       public const ushort CHAT_CMD_CLAN_CREATE_REQUEST		= 0x51;				// Create clan request
+       public const ushort CHAT_CMD_CLAN_CREATE_ACCEPT		= 0x52;				// One of the founding members accepted the request
+       public const ushort CHAT_CMD_CLAN_CREATE_REJECT		= 0x53;				// One of the founding members rejected the request
+       public const ushort CHAT_CMD_CLAN_CREATE_COMPLETE		= 0x54;				// Clan creation completed successfully
+       public const ushort CHAT_CMD_CLAN_CREATE_FAIL_CLAN		= 0x55;				// Clan creation failed, one or more users are already in a clan
+       public const ushort CHAT_CMD_CLAN_CREATE_FAIL_INVITE	= 0x56;				// Clan creation failed, one or more users have an outstanding clan invitation
+       public const ushort CHAT_CMD_CLAN_CREATE_FAIL_FIND		= 0x57;				// Clan creation failed, one or more users could not be found
+       public const ushort CHAT_CMD_CLAN_CREATE_FAIL_DUPE		= 0x58;				// Clan creation failed, duplicate founding members
+       public const ushort CHAT_CMD_CLAN_CREATE_FAIL_PARAM	= 0x59;				// Clan creation failed, one or more parameters are invalid
+       public const ushort CHAT_CMD_NAME_CHANGE				= 0x5A;				// A user's name has changed
+       public const ushort CHAT_CMD_CLAN_CREATE_FAIL_NAME		= 0x5B;				// Clan creation failed, name invalid
+       public const ushort CHAT_CMD_CLAN_CREATE_FAIL_TAG		= 0x5C;				// Clan creation failed, tag invalid
+       public const ushort CHAT_CMD_CLAN_CREATE_FAIL_UNKNOWN	= 0x5D;             // Clan creation failed, unknown error
 
-       //=============================================================================
-       // Definitions
-       //=============================================================================
-       const uint CHAT_PROTOCOL_VERSION(68);
+       public const ushort CHAT_CMD_AUTO_MATCH_CONNECT		= 0x62;				// The match is ready and the client should connect
 
-       const ushort CHAT_CMD_CHANNEL_MSG				(0x03);				// Used when a user messages a channel
-       const ushort CHAT_CMD_CHANGED_CHANNEL			(0x04);				// Used when we change channels
-       const ushort CHAT_CMD_JOINED_CHANNEL			(0x05);				// Used when a new user joins our channel
-       const ushort CHAT_CMD_LEFT_CHANNEL				(0x06);				// Used when a user leaves our channel
-       const ushort CHAT_CMD_DISCONNECTED				(0x07);				// Used when we get disconnected
-       const ushort CHAT_CMD_WHISPER					(0x08);				// Used when one user whispers another
-       const ushort CHAT_CMD_WHISPER_FAILED			(0x09);				// Used when the whisper target could not be found
-       const ushort CHAT_CMD_LAST_KNOWN_GAME_SERVER	(0x0A);				// Return the last known game server for myself
-       const ushort CHAT_CMD_INITIAL_STATUS			(0x0B);				// Sent on connect to update buddy and clan connection status for new client
-       const ushort CHAT_CMD_UPDATE_STATUS				(0x0C);				// Sent on connect to update buddy and clan connection status for old clients
-       const ushort CHAT_CMD_REQUEST_BUDDY_ADD			(0x0D);				// Sent from client to chat server to request a buddy add
-       const ushort CHAT_CMD_NOTIFY_BUDDY_REMOVE		(0x0E);				// Sent from client to chat server to notify a buddy has been removed
-       const ushort CHAT_CMD_JOINING_GAME				(0x0F);				// Sent when a user starts joining a game
-       const ushort CHAT_CMD_JOINED_GAME				(0x10);				// Sent when a user finishes joining a game
-       const ushort CHAT_CMD_LEFT_GAME					(0x11);				// Sent when a user leaves a game
-       //const ushort EMPTY (0x12);
-       const ushort CHAT_CMD_CLAN_WHISPER				(0x13);				// Sent when whispering an entire clan
-       const ushort CHAT_CMD_CLAN_WHISPER_FAILED		(0x14);				// Sent when a whisper to a clan fails
-       const ushort CHAT_CMD_CLAN_PROMOTE_NOTIFY		(0x15);				// Sent with notification keys for the server to verify on clan promotion
-       const ushort CHAT_CMD_CLAN_DEMOTE_NOTIFY		(0x16);				// Sent with notification keys for the server to verify on clan demotion
-       const ushort CHAT_CMD_CLAN_REMOVE_NOTIFY		(0x17);				// Sent with notification keys for the server to verify on clan removal
-       //const ushort EMPTY			(0x18);
-       //const ushort EMPTY		(0x19);
-       //const ushort EMPTY (0x1A);
-       const ushort CHAT_CMD_FLOODING					(0x1B);				// Warning to user that their message wasn't sent due to flood control
-       const ushort CHAT_CMD_IM						(0x1C);				// Used when a user recieves/sends an IM through the CC panel
-       const ushort CHAT_CMD_IM_FAILED					(0x1D);				// Used when a user fails to send an IM
-       const ushort CHAT_CMD_JOIN_CHANNEL				(0x1E);				// Sent by user when joining a new channel
-       const ushort CHAT_CMD_DYANMIC_PRODUCT_LIST		(0x1F);				// Dynamic products that are updated in the chat server heartbeat then sent to the client when changed.
-       const ushort CHAT_CMD_WHISPER_BUDDIES			(0x20);				// Sending whisper to all buddies
-       const ushort CHAT_CMD_MAX_CHANNELS				(0x21);				// Error sent when user has joined max. # of channels
-       const ushort CHAT_CMD_LEAVE_CHANNEL				(0x22);				// Sent by user when leaving a channel
-       const ushort CHAT_CMD_INVITE_USER_ID			(0x23);				// Sent by game server to invite a user to a game by account ID
-       const ushort CHAT_CMD_INVITE_USER_NAME			(0x24);				// Sent by game server to invite a user to a game by account name
-       const ushort CHAT_CMD_INVITED_TO_SERVER			(0x25);				// Sent by chat server to notify a user of a pending server invite
-       const ushort CHAT_CMD_INVITE_FAILED_USER		(0x26);				// Notifies a user that their invite request failed because the target was not found
-       const ushort CHAT_CMD_INVITE_FAILED_GAME		(0x27);				// Notifies a user that their invite request failed because they are not in a game
-       const ushort CHAT_CMD_INVITE_REJECTED			(0x28);				// Indicates that a recieved invite was rejected
-       //const ushort EMPTY (0x29);
-       const ushort CHAT_CMD_USER_INFO					(0x2A);				// Returns information on a user
-       const ushort CHAT_CMD_USER_INFO_NO_EXIST		(0x2B);				// The requested user does not exist
-       const ushort CHAT_CMD_USER_INFO_OFFLINE			(0x2C);				// Returns information on an offline user
-       const ushort CHAT_CMD_USER_INFO_ONLINE			(0x2D);				// Returns information on an online user
-       const ushort CHAT_CMD_USER_INFO_IN_GAME			(0x2E);				// Returns information on a user in a game
-       const ushort CHAT_CMD_CHANNEL_UPDATE			(0x2F);				// Update channel information
-       const ushort CHAT_CMD_CHANNEL_TOPIC				(0x30);				// Set/get channel topic
-       const ushort CHAT_CMD_CHANNEL_KICK				(0x31);				// Kick user from channel
-       const ushort CHAT_CMD_CHANNEL_BAN				(0x32);				// Ban user from channel
-       const ushort CHAT_CMD_CHANNEL_UNBAN				(0x33);				// Unban user from channel
-       const ushort CHAT_CMD_CHANNEL_IS_BANNED			(0x34);				// User is banned from channel
-       const ushort CHAT_CMD_CHANNEL_SILENCED			(0x35);				// User is silenced in this channel
-       const ushort CHAT_CMD_CHANNEL_SILENCE_LIFTED	(0x36);				// User is no longer silenced in a channel
-       const ushort CHAT_CMD_CHANNEL_SILENCE_PLACED	(0x37);				// User is now silenced in a channel
-       const ushort CHAT_CMD_CHANNEL_SILENCE_USER		(0x38);				// Request to silence a user in a channel
-       const ushort CHAT_CMD_MESSAGE_ALL				(0x39);				// Administrator message to all users
-       const ushort CHAT_CMD_CHANNEL_PROMOTE			(0x3A);				// Request to promote a user in a channel
-       const ushort CHAT_CMD_CHANNEL_DEMOTE			(0x3B);				// Request to demote a user in a channel
-       //const ushort EMPTY(0x3C);
-       //const ushort EMPTY(0x3D);
-       const ushort CHAT_CMD_CHANNEL_SET_AUTH			(0x3E);				// User wants to enable authorization on a channel
-       const ushort CHAT_CMD_CHANNEL_REMOVE_AUTH		(0x3F);				// User wants to disable authorization on a channel
-       const ushort CHAT_CMD_CHANNEL_ADD_AUTH_USER		(0x40);				// User wants to add a user to the authorization list for a channel
-       const ushort CHAT_CMD_CHANNEL_REMOVE_AUTH_USER	(0x41);				// User wants to remove a user from the authorization list for a channel
-       const ushort CHAT_CMD_CHANNEL_LIST_AUTH			(0x42);				// User wants to get the authorization list for a channel
-       const ushort CHAT_CMD_CHANNEL_SET_PASSWORD		(0x43);				// User wants to set the password for a channel
-       const ushort CHAT_CMD_CHANNEL_ADD_AUTH_FAIL		(0x44);				// Failed to add the user to the channel authorization list
-       const ushort CHAT_CMD_CHANNEL_REMOVE_AUTH_FAIL	(0x45);				// Failed to remove the user from the channel authorization list
-       const ushort CHAT_CMD_JOIN_CHANNEL_PASSWORD		(0x46);				// Channel join with password
-       const ushort CHAT_CMD_CLAN_ADD_MEMBER			(0x47);				// Request to add a new clan member
-       const ushort CHAT_CMD_CLAN_ADD_REJECTED			(0x48);				// Request to add a member was rejected
-       const ushort CHAT_CMD_CLAN_ADD_FAIL_ONLINE		(0x49);				// Request to add a member failed, user was not online
-       const ushort CHAT_CMD_CLAN_ADD_FAIL_CLAN		(0x4A);				// Request to add a member failed, user is in a clan
-       const ushort CHAT_CMD_CLAN_ADD_FAIL_INVITED		(0x4B);				// Request to add a member failed, user has already been invited
-       const ushort CHAT_CMD_CLAN_ADD_FAIL_PERMS		(0x4C);				// Request to add a member failed, user does not have proper permissions
-       const ushort CHAT_CMD_CLAN_ADD_FAIL_UNKNOWN		(0x4D);				// Request to add a member failed
-       const ushort CHAT_CMD_NEW_CLAN_MEMBER			(0x4E);				// New user added to clan
-       const ushort CHAT_CMD_CLAN_ADD_ACCEPTED			(0x4F);				// Request to add a member was accepted
-       const ushort CHAT_CMD_CLAN_RANK_CHANGE			(0x50);				// Clan member's rank changed
-       const ushort CHAT_CMD_CLAN_CREATE_REQUEST		(0x51);				// Create clan request
-       const ushort CHAT_CMD_CLAN_CREATE_ACCEPT		(0x52);				// One of the founding members accepted the request
-       const ushort CHAT_CMD_CLAN_CREATE_REJECT		(0x53);				// One of the founding members rejected the request
-       const ushort CHAT_CMD_CLAN_CREATE_COMPLETE		(0x54);				// Clan creation completed successfully
-       const ushort CHAT_CMD_CLAN_CREATE_FAIL_CLAN		(0x55);				// Clan creation failed, one or more users are already in a clan
-       const ushort CHAT_CMD_CLAN_CREATE_FAIL_INVITE	(0x56);				// Clan creation failed, one or more users have an outstanding clan invitation
-       const ushort CHAT_CMD_CLAN_CREATE_FAIL_FIND		(0x57);				// Clan creation failed, one or more users could not be found
-       const ushort CHAT_CMD_CLAN_CREATE_FAIL_DUPE		(0x58);				// Clan creation failed, duplicate founding members
-       const ushort CHAT_CMD_CLAN_CREATE_FAIL_PARAM	(0x59);				// Clan creation failed, one or more parameters are invalid
-       const ushort CHAT_CMD_NAME_CHANGE				(0x5A);				// A user's name has changed
-       const ushort CHAT_CMD_CLAN_CREATE_FAIL_NAME		(0x5B);				// Clan creation failed, name invalid
-       const ushort CHAT_CMD_CLAN_CREATE_FAIL_TAG		(0x5C);				// Clan creation failed, tag invalid
-       const ushort CHAT_CMD_CLAN_CREATE_FAIL_UNKNOWN	(0x5D);				// Clan creation failed, unknown error
+       public const ushort CHAT_CMD_CHAT_ROLL					= 0x64;				// The user just rolled
+       public const ushort CHAT_CMD_CHAT_EMOTE				= 0x65;				// The user just emoted
+       public const ushort CHAT_CMD_SET_CHAT_MODE_TYPE		= 0x66;				// Sets the chat mode type
+       public const ushort CHAT_CMD_CHAT_MODE_AUTO_RESPONSE	= 0x67;				// Used for sending an auto response message
 
-       const ushort CHAT_CMD_AUTO_MATCH_CONNECT		(0x62);				// The match is ready and the client should connect
+       public const ushort CHAT_CMD_PLAYER_COUNT				= 0x68;				// Reports user counts to players periodically
+       public const ushort CHAT_CMD_SERVER_NOT_IDLE			= 0x69;				// Server was not idle
+       public const ushort CHAT_CMD_ACTIVE_STREAMS			= 0x6a;				// Active stream list
 
-       const ushort CHAT_CMD_CHAT_ROLL					(0x64);				// The user just rolled
-       const ushort CHAT_CMD_CHAT_EMOTE				(0x65);				// The user just emoted
-       const ushort CHAT_CMD_SET_CHAT_MODE_TYPE		(0x66);				// Sets the chat mode type
-       const ushort CHAT_CMD_CHAT_MODE_AUTO_RESPONSE	(0x67);				// Used for sending an auto response message
+       public const ushort CHAT_CMD_REQUEST_BUDDY_ADD_RESPONSE		= 0xb2;
+       public const ushort CHAT_CMD_REQUEST_BUDDY_APPROVE				= 0xb3;
+       public const ushort CHAT_CMD_REQUEST_BUDDY_APPROVE_RESPONSE	= 0xb4;
 
-       const ushort CHAT_CMD_PLAYER_COUNT				(0x68);				// Reports user counts to players periodically
-       const ushort CHAT_CMD_SERVER_NOT_IDLE			(0x69);				// Server was not idle
-       const ushort CHAT_CMD_ACTIVE_STREAMS			(0x6a);				// Active stream list
-
-       const ushort CHAT_CMD_REQUEST_BUDDY_ADD_RESPONSE		(0xb2);
-       const ushort CHAT_CMD_REQUEST_BUDDY_APPROVE				(0xb3);
-       const ushort CHAT_CMD_REQUEST_BUDDY_APPROVE_RESPONSE	(0xb4);
-
-       const ushort CHAT_CMD_REQUEST_GAME_INFO				(0xb5);
-       const ushort CHAT_CMD_LIST_DATA						(0xb6);
-       const ushort CHAT_CMD_JOIN_STREAM_CHANNEL			(0xb7);
-       const ushort CHAT_CMD_PLAYER_SPECTATE_REQUEST		(0xb8);
-       const ushort CHAT_CMD_TRACK_PLAYER_ACTION			(0xb9);
-       const ushort CHAT_CMD_STAFF_JOIN_MATCH_REQUEST		(0xba);
-       const ushort CHAT_CMD_STAFF_JOIN_MATCH_RESPONSE		(0xbb);
-       const ushort CHAT_CMD_EXCESSIVE_GAMEPLAY_MESSAGE	(0xbc);
-       const ushort CHAT_CMD_MAINTENANCE_MESSAGE			(0xbd);
-       const ushort CHAT_CMD_UPLOAD_REQUEST				(0xbe);
-       const ushort CHAT_CMD_UPLOAD_STATUS					(0xbf);
-       const ushort CHAT_CMD_OPTIONS						(0xc0);			// Send clients options controlled by the chat server
-       const ushort CHAT_CMD_LOGOUT						(0xc1);
-       const ushort CHAT_CMD_NEW_MESSAGES					(0xc2);			// The user has recieved new messages and should pull their message list
+       public const ushort CHAT_CMD_REQUEST_GAME_INFO				= 0xb5;
+       public const ushort CHAT_CMD_LIST_DATA						= 0xb6;
+       public const ushort CHAT_CMD_JOIN_STREAM_CHANNEL			= 0xb7;
+       public const ushort CHAT_CMD_PLAYER_SPECTATE_REQUEST		= 0xb8;
+       public const ushort CHAT_CMD_TRACK_PLAYER_ACTION			= 0xb9;
+       public const ushort CHAT_CMD_STAFF_JOIN_MATCH_REQUEST		= 0xba;
+       public const ushort CHAT_CMD_STAFF_JOIN_MATCH_RESPONSE		= 0xbb;
+       public const ushort CHAT_CMD_EXCESSIVE_GAMEPLAY_MESSAGE	= 0xbc;
+       public const ushort CHAT_CMD_MAINTENANCE_MESSAGE			= 0xbd;
+       public const ushort CHAT_CMD_UPLOAD_REQUEST				= 0xbe;
+       public const ushort CHAT_CMD_UPLOAD_STATUS					= 0xbf;
+       public const ushort CHAT_CMD_OPTIONS						= 0xc0;			// Send clients options controlled by the chat server
+       public const ushort CHAT_CMD_LOGOUT						= 0xc1;
+       public const ushort CHAT_CMD_NEW_MESSAGES					= 0xc2;			// The user has recieved new messages and should pull their message list
 
        //
        // General
        //
 
        // Bi-directional
-       const ushort NET_CHAT_PING						(0x2a00);
-       const ushort NET_CHAT_PONG						(0x2a01);
+       public const ushort NET_CHAT_PING						= 0x2a00;
+       public const ushort NET_CHAT_PONG						= 0x2a01;
 
        //
        // Client
        //
 
        // Client -> Chat Server
-       const ushort NET_CHAT_CL_CONNECT				(0x0c00);			// Client requesting connection
-       const ushort NET_CHAT_CL_GET_CHANNEL_LIST		(0x0c01);			// Client requests a list of channels
-       const ushort NET_CHAT_CL_CHANNEL_LIST_ACK		(0x0c02);			// HACK: until TCP connections are handled properly
-       const ushort NET_CHAT_CL_GET_CHANNEL_SUBLIST	(0x0c03);			// Client requests a sub-list of channels (for auto-complete)
-       const ushort NET_CHAT_CL_CHANNEL_SUBLIST_ACK	(0x0c04);			// HACK: until TCP connections are handled properly
-       const ushort NET_CHAT_CL_GET_USER_STATUS		(0x0c05);			// Client requesting status of a specific user
-       //const ushort EMPTY(0x0c06);
-       //const ushort EMPTY(0x0c07);
-       const ushort NET_CHAT_CL_ADMIN_KICK				(0x0c08);			// Admin request to disconnect target client from chat server
-       const ushort NET_CHAT_CL_REFRESH_UPGRADES		(0x0c09);			// Client is requesting an upgrade refresh for itself
-       const ushort NET_CHAT_CL_END_MATCH				(0x0c1b);			// Client is requesting to end match
-       const ushort NET_CHAT_CL_FORCE_GROUP_MATCHUP	(0x0c1c);			// Client is requesting to force a group into a match
-       const ushort NET_CHAT_CL_SET_MATCHMAKING_VERSION(0x0c1d);			// Client is requesting to change matchmaking version
-       const ushort NET_CHAT_CL_BLOCK_PHRASE			(0x0c1e);			// Client is requesting to block a phrase
-       const ushort NET_CHAT_CL_UNBLOCK_PHRASE			(0x0c1f);			// Client is requesting to unblock a phrase
+       public const ushort NET_CHAT_CL_CONNECT				= 0x0c00;			// Client requesting connection
+       public const ushort NET_CHAT_CL_GET_CHANNEL_LIST		= 0x0c01;			// Client requests a list of channels
+       public const ushort NET_CHAT_CL_CHANNEL_LIST_ACK		= 0x0c02;			// HACK: until TCP connections are handled properly
+       public const ushort NET_CHAT_CL_GET_CHANNEL_SUBLIST	= 0x0c03;			// Client requests a sub-list of channels (for auto-complete)
+       public const ushort NET_CHAT_CL_CHANNEL_SUBLIST_ACK	= 0x0c04;			// HACK: until TCP connections are handled properly
+       public const ushort NET_CHAT_CL_GET_USER_STATUS		= 0x0c05;			// Client requesting status of a specific user
+       public const ushort EMPTY_0x0C06 = 0x0C06;
+       public const ushort EMPTY_0x0C07 = 0x0C07;
+       public const ushort NET_CHAT_CL_ADMIN_KICK				= 0x0c08;			// Admin request to disconnect target client from chat server
+       public const ushort NET_CHAT_CL_REFRESH_UPGRADES		= 0x0c09;			// Client is requesting an upgrade refresh for itself
+       public const ushort NET_CHAT_CL_END_MATCH				= 0x0c1b;			// Client is requesting to end match
+       public const ushort NET_CHAT_CL_FORCE_GROUP_MATCHUP	= 0x0c1c;			// Client is requesting to force a group into a match
+       public const ushort NET_CHAT_CL_SET_MATCHMAKING_VERSION= 0x0c1d;			// Client is requesting to change matchmaking version
+       public const ushort NET_CHAT_CL_BLOCK_PHRASE			= 0x0c1e;			// Client is requesting to block a phrase
+       public const ushort NET_CHAT_CL_UNBLOCK_PHRASE			= 0x0c1f;			// Client is requesting to unblock a phrase
 
 
        //client lobby stuffs
-       const ushort NET_CHAT_CL_GAME_LOBBY_SELECT_HERO	(0x0c10);
-       const ushort NET_CHAT_CL_GAME_LOBBY_READY		(0x0c11);
-       const ushort NET_CHAT_CL_GAME_LOBBY_CREATE		(0x0c12);
-       const ushort NET_CHAT_CL_GAME_LOBBY_JOIN       	(0x0c13);			//player request to join the lobby
-       const ushort NET_CHAT_CL_GAME_LOBBY_INVITE		(0x0c14);
-       const ushort NET_CHAT_CL_GAME_LOBBY_REJECT_INVITE	(0x0c15);
-       const ushort NET_CHAT_CL_GAME_LOBBY_ACCEPT_INVITE	(0x0c16);
-       const ushort NET_CHAT_CL_GAME_LOBBY_KICK		(0x0c17);			//bidirectional, tell a client that he's kcked, or tell a server to kick someone
-       const ushort NET_CHAT_CL_GAME_LOBBY_CHANGE_SLOT	(0x0c18);
-       const ushort NET_CHAT_CL_GAME_LOBBY_REQUEST_LIST (0x0c19);
-       const ushort NET_CHAT_CL_GAME_LOBBY_RETURN		 (0x0c1a);
+       public const ushort NET_CHAT_CL_GAME_LOBBY_SELECT_HERO	= 0x0c10;
+       public const ushort NET_CHAT_CL_GAME_LOBBY_READY		= 0x0c11;
+       public const ushort NET_CHAT_CL_GAME_LOBBY_CREATE		= 0x0c12;
+       public const ushort NET_CHAT_CL_GAME_LOBBY_JOIN       	= 0x0c13;			//player request to join the lobby
+       public const ushort NET_CHAT_CL_GAME_LOBBY_INVITE		= 0x0c14;
+       public const ushort NET_CHAT_CL_GAME_LOBBY_REJECT_INVITE	= 0x0c15;
+       public const ushort NET_CHAT_CL_GAME_LOBBY_ACCEPT_INVITE	= 0x0c16;
+       public const ushort NET_CHAT_CL_GAME_LOBBY_KICK		= 0x0c17;			//bidirectional, tell a client that he's kcked, or tell a server to kick someone
+       public const ushort NET_CHAT_CL_GAME_LOBBY_CHANGE_SLOT	= 0x0c18;
+       public const ushort NET_CHAT_CL_GAME_LOBBY_REQUEST_LIST = 0x0c19;
+       public const ushort NET_CHAT_CL_GAME_LOBBY_RETURN		 = 0x0c1a;
 
 
        // Bi-directional stuff related to TMM
-       const ushort NET_CHAT_CL_TMM_GROUP_CREATE					(0x0c0a);		// Client is requesting a new group be created
-       const ushort NET_CHAT_CL_TMM_GROUP_JOIN						(0x0c0b);		// Client is joining a group
-       const ushort NET_CHAT_CL_TMM_GROUP_LEAVE					(0x0c0c);		// Client is leaving a group
-       const ushort NET_CHAT_CL_TMM_GROUP_INVITE					(0x0c0d);		// Client would like to invite someone to the group
-       const ushort NET_CHAT_CL_TMM_GROUP_INVITE_BROADCAST			(0x0c0e);		// Broadcast that a client would like to invite someone to the group
-       const ushort NET_CHAT_CL_TMM_GROUP_REJECT_INVITE			(0x0c0f);		// Client rejected invite
-       const ushort NET_CHAT_CL_CONNECT_TEST						(0x0c10);
-       const ushort NET_CHAT_CL_TMM_GROUP_KICK						(0x0d00);		// The leader requested to kick a group member
-       const ushort NET_CHAT_CL_TMM_GROUP_JOIN_QUEUE				(0x0d01);		// The group leader wants to join the queue for a match
-       const ushort NET_CHAT_CL_TMM_GROUP_LEAVE_QUEUE				(0x0d02);		// The group leader wants to leave the join match queue
-       const ushort NET_CHAT_CL_TMM_GROUP_UPDATE					(0x0d03);		// Updates that occur whenever something in the group is updated
-       const ushort NET_CHAT_CL_TMM_GROUP_PLAYER_LOADING_STATUS	(0x0d04);		// Send updates on loading status
-       const ushort NET_CHAT_CL_TMM_GROUP_PLAYER_READY_STATUS		(0x0d05);		// Send updates on whether or not the player is ready
-       const ushort NET_CHAT_CL_TMM_GROUP_QUEUE_UPDATE				(0x0d06);		// Send information on the queue times to the group
-       const ushort NET_CHAT_CL_TMM_POPULARITY_UPDATE				(0x0d07);		// Send information on the popularities to all the groups
-       const ushort NET_CHAT_CL_TMM_GAME_OPTION_UPDATE				(0x0d08);		// Send group option updates to players when the group leader changes them
-       const ushort NET_CHAT_CL_TMM_MATCH_FOUND_UPDATE				(0x0d09);		// Send team a match info update when a match is found
-       const ushort NET_CHAT_CL_TMM_SCHEDULED_MATCH_INFO			(0x0e01);		// Used to send scheduled match info to the clients
-       const ushort NET_CHAT_CL_TMM_SCHEDULED_MATCH_UPDATE			(0x0e02);		// Used to send specific scheduled match info to the clients
-       const ushort NET_CHAT_CL_TMM_SCHEDULED_MATCH_COMMAND		(0x0e03);		// Used to send commands from the client to the chat server
-       const ushort NET_CHAT_CL_TMM_SCHEDULED_MATCH_SERVER_INFO	(0x0e04);		// Send team a match info update when a match is found
-       const ushort NET_CHAT_CL_TMM_BOT_SPAWN_LOCAL_MATCH			(0x0e05);
-       const ushort NET_CHAT_CL_TMM_SWAP_GROUP_TYPE				(0x0e06);
-       const ushort NET_CHAT_CL_TMM_BOT_GROUP_UPDATE				(0x0e07);
-       const ushort NET_CHAT_CL_TMM_BOT_GROUP_BOTS					(0x0e08);
-       const ushort NET_CHAT_CL_TMM_BOT_NO_BOTS_SELECTED			(0x0e09);
-       const ushort NET_CHAT_CL_TMM_FAILED_TO_JOIN					(0x0e0a);		// Either TMM is disabled or they were not allowed to join due to being a leaver, being banned, or is not verified
-       const ushort NET_CHAT_CL_TMM_REGION_UNAVAILABLE				(0x0e0b);		// One of the regions the group leader selected is unavailable to one of the group members
-       const ushort NET_CHAT_CL_TMM_GROUP_REJOIN_QUEUE				(0x0e0c);		// Notify the group if they have been re-placed into the queue at their previous wait time
-       const ushort NET_CHAT_CL_TMM_GENERIC_RESPONSE				(0x0e0d);		// Used to send back generic responses back to the clients
-       const ushort NET_CHAT_CL_TMM_EVENTS_INFO					(0x0e0f);		// Used to send event info to the clients
-       const ushort NET_CHAT_CL_TMM_SCHEDULED_MATCH_LOBBY_INFO		(0x0f00);		// For relaying to tournament admins details about the length of time each team was in the lobby and readied up
-       const ushort NET_CHAT_CL_TMM_LEAVER_INFO					(0x0f01);		// If a player is unable to join due to being a leaver, send the client this data so the UI can display it to them
-       const ushort NET_CHAT_CL_TMM_REQUEST_READY_UP				(0x0f02);		// Group leader requests group members to ready up
-       const ushort NET_CHAT_CL_TMM_START_LOADING					(0x0f03);		// All group members are ready - load!
-       const ushort NET_CHAT_CL_TMM_PENDING_MATCH					(0x0f04);		// A match is waiting for your group
-       const ushort NET_CHAT_CL_TMM_ACCEPT_PENDING_MATCH			(0x0f05);		// A player has accepted the pending match
-       const ushort NET_CHAT_CL_TMM_FAILED_TO_ACCEPT_PENDING_MATCH	(0x0f06);		// A player in your group failed to accept the pending match
-       const ushort NET_CHAT_CL_TMM_CAMPAIGN_STATS					(0x0f07);		// Player's campaign stats
-       const ushort NET_CHAT_CL_TMM_CHANGE_GROUP_TYPE				(0x0f08);
-       const ushort NET_CHAT_CL_TMM_LEAVER_STRIKE_WARN				(0x0f09);		// Notify client that this user needs Leaver Strike popup warning
+       public const ushort NET_CHAT_CL_TMM_GROUP_CREATE					= 0x0c0a;		// Client is requesting a new group be created
+       public const ushort NET_CHAT_CL_TMM_GROUP_JOIN						= 0x0c0b;		// Client is joining a group
+       public const ushort NET_CHAT_CL_TMM_GROUP_LEAVE					= 0x0c0c;		// Client is leaving a group
+       public const ushort NET_CHAT_CL_TMM_GROUP_INVITE					= 0x0c0d;		// Client would like to invite someone to the group
+       public const ushort NET_CHAT_CL_TMM_GROUP_INVITE_BROADCAST			= 0x0c0e;		// Broadcast that a client would like to invite someone to the group
+       public const ushort NET_CHAT_CL_TMM_GROUP_REJECT_INVITE			= 0x0c0f;		// Client rejected invite
+       public const ushort NET_CHAT_CL_CONNECT_TEST						= 0x0c10;
+       public const ushort NET_CHAT_CL_TMM_GROUP_KICK						= 0x0d00;		// The leader requested to kick a group member
+       public const ushort NET_CHAT_CL_TMM_GROUP_JOIN_QUEUE				= 0x0d01;		// The group leader wants to join the queue for a match
+       public const ushort NET_CHAT_CL_TMM_GROUP_LEAVE_QUEUE				= 0x0d02;		// The group leader wants to leave the join match queue
+       public const ushort NET_CHAT_CL_TMM_GROUP_UPDATE					= 0x0d03;		// Updates that occur whenever something in the group is updated
+       public const ushort NET_CHAT_CL_TMM_GROUP_PLAYER_LOADING_STATUS	= 0x0d04;		// Send updates on loading status
+       public const ushort NET_CHAT_CL_TMM_GROUP_PLAYER_READY_STATUS		= 0x0d05;		// Send updates on whether or not the player is ready
+       public const ushort NET_CHAT_CL_TMM_GROUP_QUEUE_UPDATE				= 0x0d06;		// Send information on the queue times to the group
+       public const ushort NET_CHAT_CL_TMM_POPULARITY_UPDATE				= 0x0d07;		// Send information on the popularities to all the groups
+       public const ushort NET_CHAT_CL_TMM_GAME_OPTION_UPDATE				= 0x0d08;		// Send group option updates to players when the group leader changes them
+       public const ushort NET_CHAT_CL_TMM_MATCH_FOUND_UPDATE				= 0x0d09;		// Send team a match info update when a match is found
+       public const ushort NET_CHAT_CL_TMM_SCHEDULED_MATCH_INFO			= 0x0e01;		// Used to send scheduled match info to the clients
+       public const ushort NET_CHAT_CL_TMM_SCHEDULED_MATCH_UPDATE			= 0x0e02;		// Used to send specific scheduled match info to the clients
+       public const ushort NET_CHAT_CL_TMM_SCHEDULED_MATCH_COMMAND		= 0x0e03;		// Used to send commands from the client to the chat server
+       public const ushort NET_CHAT_CL_TMM_SCHEDULED_MATCH_SERVER_INFO	= 0x0e04;		// Send team a match info update when a match is found
+       public const ushort NET_CHAT_CL_TMM_BOT_SPAWN_LOCAL_MATCH			= 0x0e05;
+       public const ushort NET_CHAT_CL_TMM_SWAP_GROUP_TYPE				= 0x0e06;
+       public const ushort NET_CHAT_CL_TMM_BOT_GROUP_UPDATE				= 0x0e07;
+       public const ushort NET_CHAT_CL_TMM_BOT_GROUP_BOTS					= 0x0e08;
+       public const ushort NET_CHAT_CL_TMM_BOT_NO_BOTS_SELECTED			= 0x0e09;
+       public const ushort NET_CHAT_CL_TMM_FAILED_TO_JOIN					= 0x0e0a;		// Either TMM is disabled or they were not allowed to join due to being a leaver, being banned, or is not verified
+       public const ushort NET_CHAT_CL_TMM_REGION_UNAVAILABLE				= 0x0e0b;		// One of the regions the group leader selected is unavailable to one of the group members
+       public const ushort NET_CHAT_CL_TMM_GROUP_REJOIN_QUEUE				= 0x0e0c;		// Notify the group if they have been re-placed into the queue at their previous wait time
+       public const ushort NET_CHAT_CL_TMM_GENERIC_RESPONSE				= 0x0e0d;		// Used to send back generic responses back to the clients
+       public const ushort NET_CHAT_CL_TMM_EVENTS_INFO					= 0x0e0f;		// Used to send event info to the clients
+       public const ushort NET_CHAT_CL_TMM_SCHEDULED_MATCH_LOBBY_INFO		= 0x0f00;		// For relaying to tournament admins details about the length of time each team was in the lobby and readied up
+       public const ushort NET_CHAT_CL_TMM_LEAVER_INFO					= 0x0f01;		// If a player is unable to join due to being a leaver, send the client this data so the UI can display it to them
+       public const ushort NET_CHAT_CL_TMM_REQUEST_READY_UP				= 0x0f02;		// Group leader requests group members to ready up
+       public const ushort NET_CHAT_CL_TMM_START_LOADING					= 0x0f03;		// All group members are ready - load!
+       public const ushort NET_CHAT_CL_TMM_PENDING_MATCH					= 0x0f04;		// A match is waiting for your group
+       public const ushort NET_CHAT_CL_TMM_ACCEPT_PENDING_MATCH			= 0x0f05;		// A player has accepted the pending match
+       public const ushort NET_CHAT_CL_TMM_FAILED_TO_ACCEPT_PENDING_MATCH	= 0x0f06;		// A player in your group failed to accept the pending match
+       public const ushort NET_CHAT_CL_TMM_CAMPAIGN_STATS					= 0x0f07;		// Player's campaign stats
+       public const ushort NET_CHAT_CL_TMM_CHANGE_GROUP_TYPE				= 0x0f08;
+       public const ushort NET_CHAT_CL_TMM_LEAVER_STRIKE_WARN				= 0x0f09;		// Notify client that this user needs Leaver Strike popup warning
 
        // Chat Server -> Client
-       const ushort NET_CHAT_CL_ACCEPT						(0x1c00);			// Accept connection from client
-       const ushort NET_CHAT_CL_REJECT						(0x1c01);			// Refuse connection from client
-       const ushort NET_CHAT_CL_CHANNEL_INFO				(0x1c02);			// Basic information about a channel
-       const ushort NET_CHAT_CL_CHANNEL_LIST_SYN			(0x1c03);			// HACK: until TCP connections are handled properly
-       const ushort NET_CHAT_CL_CHANNEL_SUBLIST_START		(0x1c04);			// Start of a channel sub-list
-       const ushort NET_CHAT_CL_CHANNEL_INFO_SUB			(0x1c05);			// Basic information about a channel in a sublist
-       const ushort NET_CHAT_CL_CHANNEL_SUBLIST_SYN		(0x1c06);			// HACK: until TCP connections are handled properly
-       const ushort NET_CHAT_CL_CHANNEL_SUBLIST_END		(0x1c07);			// End of a channel sub-list
-       const ushort NET_CHAT_CL_USER_STATUS				(0x1c08);			// User status request reponse
-       const ushort NET_CHAT_CL_GAME_LOBBY_JOINED			(0x1c09);
-       const ushort NET_CHAT_CL_GAME_LOBBY_LEFT			(0x1c0a);
-       const ushort NET_CHAT_CL_GAME_LOBBY_UPDATE			(0x1c0b);
-       const ushort NET_CHAT_CL_GAME_LOBBY_PLAYER_JOINED	(0x1c0c);
-       const ushort NET_CHAT_CL_GAME_LOBBY_PLAYER_LEFT		(0x1c0d);
-       const ushort NET_CHAT_CL_GAME_LOBBY_PLAYER_UPDATE	(0x1c0e);
-       const ushort NET_CHAT_CL_GAME_LOBBY_LAUNCH_GAME		(0x1c0f);
-       const ushort NET_CHAT_CL_GAME_LOBBY_LIST			(0x1c10);
-       const ushort NET_CHAT_CL_GAME_LOBBY_FULL			(0x1c11);
-       const ushort NET_CHAT_CL_GAME_LOBBY_SPEC_READY		(0x1c12);			// Tell the spectator others are in hero picking mode
+       public const ushort NET_CHAT_CL_ACCEPT						= 0x1c00;			// Accept connection from client
+       public const ushort NET_CHAT_CL_REJECT						= 0x1c01;			// Refuse connection from client
+       public const ushort NET_CHAT_CL_CHANNEL_INFO				= 0x1c02;			// Basic information about a channel
+       public const ushort NET_CHAT_CL_CHANNEL_LIST_SYN			= 0x1c03;			// HACK: until TCP connections are handled properly
+       public const ushort NET_CHAT_CL_CHANNEL_SUBLIST_START		= 0x1c04;			// Start of a channel sub-list
+       public const ushort NET_CHAT_CL_CHANNEL_INFO_SUB			= 0x1c05;			// Basic information about a channel in a sublist
+       public const ushort NET_CHAT_CL_CHANNEL_SUBLIST_SYN		= 0x1c06;			// HACK: until TCP connections are handled properly
+       public const ushort NET_CHAT_CL_CHANNEL_SUBLIST_END		= 0x1c07;			// End of a channel sub-list
+       public const ushort NET_CHAT_CL_USER_STATUS				= 0x1c08;			// User status request reponse
+       public const ushort NET_CHAT_CL_GAME_LOBBY_JOINED			= 0x1c09;
+       public const ushort NET_CHAT_CL_GAME_LOBBY_LEFT			= 0x1c0a;
+       public const ushort NET_CHAT_CL_GAME_LOBBY_UPDATE			= 0x1c0b;
+       public const ushort NET_CHAT_CL_GAME_LOBBY_PLAYER_JOINED	= 0x1c0c;
+       public const ushort NET_CHAT_CL_GAME_LOBBY_PLAYER_LEFT		= 0x1c0d;
+       public const ushort NET_CHAT_CL_GAME_LOBBY_PLAYER_UPDATE	= 0x1c0e;
+       public const ushort NET_CHAT_CL_GAME_LOBBY_LAUNCH_GAME		= 0x1c0f;
+       public const ushort NET_CHAT_CL_GAME_LOBBY_LIST			= 0x1c10;
+       public const ushort NET_CHAT_CL_GAME_LOBBY_FULL			= 0x1c11;
+       public const ushort NET_CHAT_CL_GAME_LOBBY_SPEC_READY		= 0x1c12;			// Tell the spectator others are in hero picking mode
 
 
        // Game Server -> Chat Server
-       const ushort NET_CHAT_GS_CONNECT					(0x0500);			// Game server requesting connection
-       const ushort NET_CHAT_GS_DISCONNECT					(0x0501);			// Game server disconnecting
-       const ushort NET_CHAT_GS_STATUS						(0x0502);			// Game server's current status
-       const ushort NET_CHAT_GS_ANNOUNCE_MATCH				(0x0503);			// An arranged match is ready for clients
-       const ushort NET_CHAT_GS_ABANDON_MATCH				(0x0504);			// An arranged match failed to start
-       const ushort NET_CHAT_GS_MATCH_STARTED				(0x0505);			// An arranged match has started successfully (all clients in match and banning/picking phase starting)
-       const ushort NET_CHAT_GS_REMIND_PLAYER				(0x0506);			// An expected player has not yet connected to an arranged match
-       // const ushort EMPTY								(0x0507);
-       const ushort NET_CHAT_GS_NOT_IDLE					(0x0508);			// Server was not idle
-       const ushort NET_CHAT_GS_MATCH_ABORTED				(0x0509);			// An arranged match failed to start
-       const ushort NET_CHAT_GS_SAVE_DISCONNECT_REASON		(0x0510);			// For tracking reasons we are aborting matches due to disconnected players
-       const ushort NET_CHAT_GS_REPORT_MISSING_PLAYERS		(0x0511);			// For tracking potential problem players abusing the MM system and causing games fail to start
-       const ushort NET_CHAT_GS_MATCH_ID_RESULT			(0x0512);			// Game server letting the chat server know if we got a match ID
-       const ushort NET_CHAT_GS_CLIENT_AUTH_RESULT			(0x0513);			// Was this client able to auth with the master server?
-       const ushort NET_CHAT_GS_STAT_SUBMISSION_RESULT		(0x0514);			// What result did the server receive when attempting to submit stats?
-       const ushort NET_CHAT_GS_MATCH_ENDED				(0x0515);			// An arranged match has finished (stats have been submitted - or at least attempted to submit them)
-       const ushort NET_CHAT_GS_MATCH_ONGOING				(0x0516);			// A match is a few minutes in and the game server is just letting the chatserver know
-       const ushort NET_CHAT_GS_PLAYER_BENEFITS			(0x0517);			// Game server requests the benefits for a set of clients, chat server responds back with the benefits for each client
-       const ushort NET_CHAT_GS_REPORT_LEAVER				(0x0518);			// For tracking leaver players
+       public const ushort NET_CHAT_GS_CONNECT					= 0x0500;			// Game server requesting connection
+       public const ushort NET_CHAT_GS_DISCONNECT					= 0x0501;			// Game server disconnecting
+       public const ushort NET_CHAT_GS_STATUS						= 0x0502;			// Game server's current status
+       public const ushort NET_CHAT_GS_ANNOUNCE_MATCH				= 0x0503;			// An arranged match is ready for clients
+       public const ushort NET_CHAT_GS_ABANDON_MATCH				= 0x0504;			// An arranged match failed to start
+       public const ushort NET_CHAT_GS_MATCH_STARTED				= 0x0505;			// An arranged match has started successfully (all clients in match and banning/picking phase starting)
+       public const ushort NET_CHAT_GS_REMIND_PLAYER				= 0x0506;			// An expected player has not yet connected to an arranged match
+       public const ushort EMPTY_0x0507 = 0x0507;
+       public const ushort NET_CHAT_GS_NOT_IDLE					= 0x0508;			// Server was not idle
+       public const ushort NET_CHAT_GS_MATCH_ABORTED				= 0x0509;			// An arranged match failed to start
+       public const ushort NET_CHAT_GS_SAVE_DISCONNECT_REASON		= 0x0510;			// For tracking reasons we are aborting matches due to disconnected players
+       public const ushort NET_CHAT_GS_REPORT_MISSING_PLAYERS		= 0x0511;			// For tracking potential problem players abusing the MM system and causing games fail to start
+       public const ushort NET_CHAT_GS_MATCH_ID_RESULT			= 0x0512;			// Game server letting the chat server know if we got a match ID
+       public const ushort NET_CHAT_GS_CLIENT_AUTH_RESULT			= 0x0513;			// Was this client able to auth with the master server?
+       public const ushort NET_CHAT_GS_STAT_SUBMISSION_RESULT		= 0x0514;			// What result did the server receive when attempting to submit stats?
+       public const ushort NET_CHAT_GS_MATCH_ENDED				= 0x0515;			// An arranged match has finished (stats have been submitted - or at least attempted to submit them)
+       public const ushort NET_CHAT_GS_MATCH_ONGOING				= 0x0516;			// A match is a few minutes in and the game server is just letting the chatserver know
+       public const ushort NET_CHAT_GS_PLAYER_BENEFITS			= 0x0517;			// Game server requests the benefits for a set of clients, chat server responds back with the benefits for each client
+       public const ushort NET_CHAT_GS_REPORT_LEAVER				= 0x0518;			// For tracking leaver players
 
        // Chat Server -> Game Server
-       const ushort NET_CHAT_GS_ACCEPT					(0x1500);			// Accept connection from game server
-       const ushort NET_CHAT_GS_REJECT					(0x1501);			// Refuse connection from game server
-       const ushort NET_CHAT_GS_CREATE_MATCH			(0x1502);			// Game server has been selected to host an arranged match
-       const ushort NET_CHAT_GS_END_MATCH				(0x1503);			// Game server has been told to end a match
-       const ushort NET_CHAT_GS_REMOTE_COMMAND			(0x1504);			// Execute a console command on this server
-       const ushort NET_CHAT_GS_OPTIONS				(0x1505);			// Various options to control cvars
-       const ushort NET_CHAT_GS_DYNAMIC_PRODUCTS		(0x1506);			// NO COMMENT FOR YOU.
+       public const ushort NET_CHAT_GS_ACCEPT					= 0x1500;			// Accept connection from game server
+       public const ushort NET_CHAT_GS_REJECT					= 0x1501;			// Refuse connection from game server
+       public const ushort NET_CHAT_GS_CREATE_MATCH			= 0x1502;			// Game server has been selected to host an arranged match
+       public const ushort NET_CHAT_GS_END_MATCH				= 0x1503;			// Game server has been told to end a match
+       public const ushort NET_CHAT_GS_REMOTE_COMMAND			= 0x1504;			// Execute a console command on this server
+       public const ushort NET_CHAT_GS_OPTIONS				= 0x1505;			// Various options to control cvars
+       public const ushort NET_CHAT_GS_DYNAMIC_PRODUCTS		= 0x1506;			// NO COMMENT FOR YOU.
 
        // Server Manager -> Chat Server
-       const ushort NET_CHAT_SM_CONNECT				(0x1600);			// Server manager requesting connection
-       const ushort NET_CHAT_SM_DISCONNECT				(0x1601);			// Server manager disconnecting
-       const ushort NET_CHAT_SM_STATUS					(0x1602);			// Server manager's current status
-       const ushort NET_CHAT_SM_UPLOAD_UPDATE			(0x1603);			// Server manager's response to a NET_CHAT_SM_UPLOAD_REQUEST
+       public const ushort NET_CHAT_SM_CONNECT				= 0x1600;			// Server manager requesting connection
+       public const ushort NET_CHAT_SM_DISCONNECT				= 0x1601;			// Server manager disconnecting
+       public const ushort NET_CHAT_SM_STATUS					= 0x1602;			// Server manager's current status
+       public const ushort NET_CHAT_SM_UPLOAD_UPDATE			= 0x1603;			// Server manager's response to a NET_CHAT_SM_UPLOAD_REQUEST
 
        // Chat Server -> Server Manager
-       const ushort NET_CHAT_SM_ACCEPT					(0x1700);			// Accept connection from game server
-       const ushort NET_CHAT_SM_REJECT					(0x1701);			// Refuse connection from game server
-       const ushort NET_CHAT_SM_REMOTE_COMMAND			(0x1702);			// Execute a command on this server manager
-       const ushort NET_CHAT_SM_OPTIONS				(0x1703);			// Various options to control cvars
-       const ushort NET_CHAT_SM_UPLOAD_REQUEST			(0x1704);			// What replay or game log should the SM try to upload?
+       public const ushort NET_CHAT_SM_ACCEPT					= 0x1700;			// Accept connection from game server
+       public const ushort NET_CHAT_SM_REJECT					= 0x1701;			// Refuse connection from game server
+       public const ushort NET_CHAT_SM_REMOTE_COMMAND			= 0x1702;			// Execute a command on this server manager
+       public const ushort NET_CHAT_SM_OPTIONS				= 0x1703;			// Various options to control cvars
+       public const ushort NET_CHAT_SM_UPLOAD_REQUEST			= 0x1704;			// What replay or game log should the SM try to upload?
 
        // Web -> Chat Server
-       const ushort NET_CHAT_WEB_UPLOAD_REQUEST		(0x1800);			// A request from a website to upload a replay or game log
-       const ushort NET_CHAT_QUERY_LEAVER_STRIKE		(0x1801);			// A request from masterserver to chatserver to query account leaver strike info
+       public const ushort NET_CHAT_WEB_UPLOAD_REQUEST		= 0x1800;			// A request from a website to upload a replay or game log
+       public const ushort NET_CHAT_QUERY_LEAVER_STRIKE		= 0x1801;			// A request from masterserver to chatserver to query account leaver strike info
 
 
-       const ushort NET_CHAT_INVALID					(0xffff);
+       public const ushort NET_CHAT_INVALID					= 0xffff;
 
 
-       const byte CHAT_MESSAGE_MAX_LENGTH				(250);				// Max length of any channel chat message
-       const byte CHAT_CHANNEL_MAX_LENGTH				(35);				// Max length of channel names
-       const byte CHAT_CHANNEL_TOPIC_MAX_LENGTH		(140);				// Max length of channel topics
+       public const byte CHAT_MESSAGE_MAX_LENGTH				= 250;				// Max length of any channel chat message
+       public const byte CHAT_CHANNEL_MAX_LENGTH				= 35;				// Max length of channel names
+       public const byte CHAT_CHANNEL_TOPIC_MAX_LENGTH		= 140;              // Max length of channel topics
 
 
 
-       enum EChatRejectReason
+       public enum ChatRejectReason
        {
         ECR_UNKNOWN = 0,
         ECR_BAD_VERSION,
@@ -318,7 +304,7 @@ public class ChatProtocol
         ECR_ACCOUNT_SHARING_WARNING
        };
 
-       enum EGameLobbyState
+       public enum GameLobbyState
        {
         GLS_INVALID = -1,
 
@@ -335,7 +321,7 @@ public class ChatProtocol
        //
        // new Arranged Match Type need to be added at bottom
        // this will affect code in master server class_type.php
-       enum EArrangedMatchType
+       public enum ArrangedMatchType
        {
         AM_PUBLIC = 0,				    // Public games
         AM_MATCHMAKING = 1,				// Ranked Matchmaking games (normal and casual)
@@ -352,30 +338,27 @@ public class ChatProtocol
         NUM_ARRANGED_MATCH_TYPES
        };
 
-       static bool IsMatchmakingType(EArrangedMatchType eType)
+       public static bool IsMatchmakingType(ArrangedMatchType arrangedMatchType)
        {
-        switch (eType)
-        {
-        case AM_PUBLIC:
-        case AM_SCHEDULED_MATCH:
-        case AM_UNSCHEDULED_MATCH:
-            return false;
+         return arrangedMatchType switch
+         {
+             ArrangedMatchType.AM_PUBLIC => false,
+             ArrangedMatchType.AM_SCHEDULED_MATCH => false,
+             ArrangedMatchType.AM_UNSCHEDULED_MATCH => false,
 
-        case AM_MATCHMAKING:
-        case AM_MATCHMAKING_MIDWARS:
-        case AM_MATCHMAKING_RIFTWARS:
-        case AM_MATCHMAKING_BOTMATCH:
-        case AM_UNRANKED_MATCHMAKING:
-        case AM_MATCHMAKING_CUSTOM:
-        case AM_MATCHMAKING_CAMPAIGN:
-            return true;
+             ArrangedMatchType.AM_MATCHMAKING => true,
+             ArrangedMatchType.AM_MATCHMAKING_MIDWARS => true,
+             ArrangedMatchType.AM_MATCHMAKING_RIFTWARS => true,
+             ArrangedMatchType.AM_MATCHMAKING_BOTMATCH => true,
+             ArrangedMatchType.AM_UNRANKED_MATCHMAKING => true,
+             ArrangedMatchType.AM_MATCHMAKING_CUSTOM => true,
+             ArrangedMatchType.AM_MATCHMAKING_CAMPAIGN => true,
 
-        default:
-            return false;
-        }
-       }
+             _ => false
+         };
+    }
 
-       enum ETMMUpdateType
+       public enum TMMUpdateType
        {
         TMM_CREATE_GROUP = 0,
         TMM_FULL_GROUP_UPDATE,
@@ -399,7 +382,7 @@ public class ChatProtocol
         NUM_TMM_UPDATE_TYPES
        };
 
-       enum ELOBBYUpdateType
+       public enum LobbyUpdateType
        {
         LOBBY_CLIENT_ENTER = 0,	//tell the client who entered, if not bot
         LOBBY_CLIENT_ON_ENTER,	//tell other client that one client/bot entered
@@ -411,30 +394,29 @@ public class ChatProtocol
         LOBBY_UPDATE_TYPE_NUM
        };
 
-       const wchar_t* const g_sTMMUpdateTypes[] =
+       public static readonly string[] TMMUpdateTypes =
        {
-        L"TMM_CREATE_GROUP",				// TMM_CREATE_GROUP
-        L"TMM_FULL_GROUP_UPDATE",			// TMM_FULL_GROUP_UPDATE
-        L"TMM_PARTIAL_GROUP_UPDATE",		// TMM_PARTIAL_GROUP_UPDATE
-        L"TMM_PLAYER_JOINED_GROUP",			// TMM_PLAYER_JOINED_GROUP
-        L"TMM_PLAYER_LEFT_GROUP",			// TMM_PLAYER_LEFT_GROUP
-        L"TMM_PLAYER_KICKED_FROM_GROUP",	// TMM_PLAYER_KICKED_FROM_GROUP
-        L"TMM_GROUP_JOINED_QUEUE",			// TMM_GROUP_JOINED_QUEUE
-        L"TMM_GROUP_REJOINED_QUEUE",		// TMM_GROUP_REJOINED_QUEUE
-        L"TMM_GROUP_LEFT_QUEUE",			// TMM_GROUP_LEFT_QUEUE
-        L"TMM_INVITED_TO_GROUP",			// TMM_INVITED_TO_GROUP
-        L"TMM_PLAYER_REJECTED_GROUP_INVITE",	// TMM_PLAYER_REJECTED_GROUP_INVITE
-        L"TMM_GROUP_QUEUE_UPDATE",			// TMM_GROUP_QUEUE_UPDATE
-        L"TMM_GROUP_NO_MATCHES_FOUND",		// TMM_GROUP_NO_MATCHES_FOUND
-        L"TMM_GROUP_NO_SERVERS_FOUND",		// TMM_GROUP_NO_SERVERS_FOUND
-        L"TMM_POPULARITY_UPDATE",			// TMM_POPULARITY_UPDATE
-        L"TMM_FOUND_MATCH_UPDATE",			// TMM_FOUND_MATCH_UPDATE
-        L"TMM_GROUP_FOUND_SERVER",			// TMM_GROUP_FOUND_SERVER
-        L"TMM_MATCHMAKING_DISABLED",		// TMM_MATCHMAKING_DISABLED
+        "TMM_CREATE_GROUP",				// TMM_CREATE_GROUP
+        "TMM_FULL_GROUP_UPDATE",			// TMM_FULL_GROUP_UPDATE
+        "TMM_PARTIAL_GROUP_UPDATE",		// TMM_PARTIAL_GROUP_UPDATE
+        "TMM_PLAYER_JOINED_GROUP",			// TMM_PLAYER_JOINED_GROUP
+        "TMM_PLAYER_LEFT_GROUP",			// TMM_PLAYER_LEFT_GROUP
+        "TMM_PLAYER_KICKED_FROM_GROUP",	// TMM_PLAYER_KICKED_FROM_GROUP
+        "TMM_GROUP_JOINED_QUEUE",			// TMM_GROUP_JOINED_QUEUE
+        "TMM_GROUP_REJOINED_QUEUE",		// TMM_GROUP_REJOINED_QUEUE
+        "TMM_GROUP_LEFT_QUEUE",			// TMM_GROUP_LEFT_QUEUE
+        "TMM_INVITED_TO_GROUP",			// TMM_INVITED_TO_GROUP
+        "TMM_PLAYER_REJECTED_GROUP_INVITE",	// TMM_PLAYER_REJECTED_GROUP_INVITE
+        "TMM_GROUP_QUEUE_UPDATE",			// TMM_GROUP_QUEUE_UPDATE
+        "TMM_GROUP_NO_MATCHES_FOUND",		// TMM_GROUP_NO_MATCHES_FOUND
+        "TMM_GROUP_NO_SERVERS_FOUND",		// TMM_GROUP_NO_SERVERS_FOUND
+        "TMM_POPULARITY_UPDATE",			// TMM_POPULARITY_UPDATE
+        "TMM_FOUND_MATCH_UPDATE",			// TMM_FOUND_MATCH_UPDATE
+        "TMM_GROUP_FOUND_SERVER",			// TMM_GROUP_FOUND_SERVER
+        "TMM_MATCHMAKING_DISABLED",		// TMM_MATCHMAKING_DISABLED
        };
-       //assert_compile_time(STATIC_ARRAY_SIZE(g_sTMMUpdateTypes) == NUM_TMM_UPDATE_TYPES); // This currently doesn't exist on the chat server
 
-       enum ETMMFailedToJoinReason
+       public enum TMMFailedToJoinReason
        {
         TMMFTJR_LEAVER = 0,				// Group has a leaver
         TMMFTJR_DISABLED,				// Matchmaking is disabled
@@ -451,7 +433,7 @@ public class ChatProtocol
         TMMFTJR_CAMPAIGN_NOT_ELIGIBLE,
        };
 
-       enum EScheduledMatchUpdateType
+       public enum ScheduledMatchUpdateType
        {
         SM_UPDATE,
         SM_PLAYER_JOIN,
@@ -468,7 +450,7 @@ public class ChatProtocol
         NUM_SM_UPDATE_TYPES
        };
 
-       enum EServerStatus
+       public enum ServerStatus
        {
         SERVER_STATUS_SLEEPING = 0,
         SERVER_STATUS_IDLE,
@@ -480,7 +462,7 @@ public class ChatProtocol
         SERVER_STATUS_UNKNOWN
        };
 
-       enum EMatchAbortedReason
+       public enum MatchAbortedReason
        {
         MATCH_ABORTED_UNKNOWN = 0,
 
@@ -490,13 +472,13 @@ public class ChatProtocol
         MATCH_ABORT_NEVERENDING
        };
 
-       enum EMatchEndedReason
+       public enum MatchEndedReason
        {
         MATCH_ENDED_FINISHED,
         MATCH_ENDED_REMADE
        };
 
-       enum EChatModeType
+       public enum ChatModeType
        {
         CHAT_MODE_AVAILABLE,
         CHAT_MODE_AFK,
@@ -504,7 +486,7 @@ public class ChatProtocol
         CHAT_MODE_INVISIBLE,
        };
 
-       enum EAdminLevel
+       public enum AdminLevel
        {
         CHAT_CLIENT_ADMIN_NONE = 0,
         CHAT_CLIENT_ADMIN_OFFICER,
@@ -514,7 +496,7 @@ public class ChatProtocol
         CHAT_NUM_ADMIN_LEVELS,
        };
 
-       enum EMatchIDResult
+       public enum MatchIDResult
        {
         MIDR_FIRST = 0,
 
@@ -535,7 +517,7 @@ public class ChatProtocol
         NUM_MATCH_ID_RESULTS,
        };
 
-       enum EClientAuthResult
+       public enum ClientAuthResult
        {
         CAR_FIRST = 0,
 
@@ -555,7 +537,7 @@ public class ChatProtocol
         NUM_CLIENT_AUTH_RESULTS,
        };
 
-       enum EStatSubmissionResult
+       public enum StatSubmissionResult
        {
         SSR_FIRST = 0,
 
@@ -572,13 +554,13 @@ public class ChatProtocol
         NUM_STAT_SUBMISSION_RESULTS,
        };
 
-       enum EPlayerSpectateRequest
+       public enum PlayerSpectateRequest
        {
         PLAYER_SPECTATE_REQUEST = 0,
         PLAYER_SPECTATE_REQUEST_RESPONSE,
        };
 
-       enum EPlayerSpectateRequestResponses
+       public enum PlayerSpectateRequestResponses
        {
         PSRR_ALLOW,
         PSRR_DENY,
@@ -587,7 +569,7 @@ public class ChatProtocol
         PSSR_TOO_DEEP,
        };
 
-       enum EMatchmakingBroadcastTracking
+       public enum MatchmakingBroadcastTracking
        {
         MM_MATCH_FOUND,
         MM_SERVER_FOUND,
@@ -598,7 +580,7 @@ public class ChatProtocol
         NUM_MATCHMAKING_BROADCASTS
        };
 
-       enum EActionCampaigns
+       public enum ActionCampaigns
        {
         AC_DAILY_LOGINS = 0,
         AC_CLICKED_HON_STORE,
@@ -632,7 +614,7 @@ public class ChatProtocol
         NUM_ACTION_CAMPAIGNS
        };
 
-       enum EGenericResponses
+       public enum GenericResponses
        {
         GR_MAX_MATCH_FIDELITY_DIFFERENCE = 0,
         GR_SCHEDULED_MATCH_FULL,
@@ -640,7 +622,7 @@ public class ChatProtocol
         NUM_GENERIC_RESPONSES
        };
 
-       enum EOSType
+       public enum OSType
        {
         UNKNOWN_OS = 0,
         WINDOWS_OS,
@@ -650,7 +632,7 @@ public class ChatProtocol
         NUM_OS_TYPES
        };
 
-       enum EOSVersion
+       public enum OSVersion
        {
         EOSV_WINDOWS_XP_32,
         EOSV_WINDOWS_XP_64,
@@ -681,7 +663,7 @@ public class ChatProtocol
         NUM_OS_VERSIONS
        };
 
-       enum EExcessiveGamePlayType
+       public enum ExcessiveGamePlayType
        {
         EEGPT_NONE = 0,			// No message
         EEGPT_1_HOUR,			// You've played 1 hour
@@ -691,14 +673,14 @@ public class ChatProtocol
         EEGPT_GENERAL = 255		// A general message for excessive game play broadcasts (used only for Korea)
        };
 
-       enum EExcessiveGamePlayBenefit
+       public enum ExcessiveGamePlayBenefit
        {
         EEGPB_NORMAL = 0,		// Normal benefits
         EEGPB_HALF,				// Half benefits
         EEGPB_NONE,				// No benefits
        };
 
-       enum ECrashReportingClientState
+       public enum CrashReportingClientState
        {
         CRCS_NO_CRASH = 0,				// exited normally
         CRCS_IDLE,						// idle, before joining a game
@@ -715,7 +697,7 @@ public class ChatProtocol
         NUM_CRCS
        };
 
-       enum EChatClientStatus
+       public enum ChatClientStatus
        {
         CHAT_CLIENT_STATUS_DISCONNECTED = 0,
         CHAT_CLIENT_STATUS_CONNECTING,
@@ -727,21 +709,16 @@ public class ChatProtocol
         NUM_CHAT_CLIENT_STATUSES,
        };
 
-       struct SRosterInfo
+       public struct RosterInfo(uint accountID = 0, byte teamSlot = 0)
        {
-        uint				uiAccountID;
-        byte				yTeamSlot;
+           public uint AccountID { get; set; } = accountID;
 
-        SRosterInfo(uint _uiAccountID = 0, byte _yTeamSlot = 0) :
-        uiAccountID(_uiAccountID),
-        yTeamSlot(_yTeamSlot)
-        {
-        }
+           public byte TeamSlot { get; set; } = teamSlot;
        };
 
-       // Game client send it to chat server to be put in the correct queue
-       // Normal and casual need to stay at 1 and 2, unless we refactor some things
-       enum ETMMGameTypes
+    // Game client send it to chat server to be put in the correct queue
+    // Normal and casual need to stay at 1 and 2, unless we refactor some things
+    public enum TMMGameTypes
        {
         TMM_GAME_TYPE_NONE = -1,
 
@@ -759,7 +736,7 @@ public class ChatProtocol
         TMM_NUM_GAME_TYPES
        };
 
-       enum ETMMTypes
+    public enum TMMTypes
        {
         TMM_TYPE_SOLO = 1,
         TMM_TYPE_PVP = 2,
@@ -767,8 +744,8 @@ public class ChatProtocol
         TMM_TYPE_CAMPAIGN = 4
        };
 
-       // Make sure to update CMMCommon::GetMapFromMask if you change this
-       enum ETMMGameMaps
+    // Make sure to update CMMCommon::GetMapFromMask if you change this
+    public enum TMMGameMaps
        {
         TMM_GAME_MAP_NONE = -1,
 
@@ -788,10 +765,11 @@ public class ChatProtocol
 
         TMM_NUM_GAME_MAPS
        };
-       const uint MAX_TMM_GAME_MAPS_SELECTABLE(1);
 
-       // Make sure to update CMMCommon::GetGameModeFromMask if you change this
-       enum ETMMGameModes
+    public const uint MAX_TMM_GAME_MAPS_SELECTABLE = 1;
+
+    // Make sure to update CMMCommon::GetGameModeFromMask if you change this
+    public enum TMMGameModes
        {
         TMM_GAME_MODE_NONE = -1,
 
@@ -823,10 +801,11 @@ public class ChatProtocol
 
         TMM_NUM_GAME_MODES
        };
-       const uint MAX_TMM_GAME_MODES_SELECTABLE(6);
 
-       // Make sure to update CMMCommon::GetRegionFromMask if you change this
-       enum ETMMGameRegions
+    public const uint MAX_TMM_GAME_MODES_SELECTABLE = 6;
+
+    // Make sure to update CMMCommon::GetRegionFromMask if you change this
+    public enum TMMGameRegions
        {
         TMM_GAME_REGION_NONE = -1,
 
@@ -850,9 +829,10 @@ public class ChatProtocol
 
         NUM_TMM_GAME_REGIONS
        };
-       const uint MAX_TMM_GAME_REGIONS_SELECTABLE(6);
 
-       enum ETMMRankType
+    public const uint MAX_TMM_GAME_REGIONS_SELECTABLE = 6;
+
+       public enum TMMRankType
        {
         TMM_OPTION_UNRANKED = 0,
         TMM_OPTION_RANKED = 1,
@@ -860,64 +840,71 @@ public class ChatProtocol
         TMM_NUM_OPTION_RANK_TYPES
        };
 
-       struct STMMPopularities
+       public struct TMMPopularities
        {
-        byte		ayGameType[TMM_NUM_GAME_TYPES][TMM_NUM_GAME_MAPS][TMM_NUM_OPTION_RANK_TYPES];
-        byte		ayGameMap[TMM_NUM_GAME_MAPS][TMM_NUM_GAME_TYPES][TMM_NUM_OPTION_RANK_TYPES];
-        byte		ayGameMode[TMM_NUM_GAME_MODES][TMM_NUM_GAME_MAPS][TMM_NUM_GAME_TYPES][TMM_NUM_OPTION_RANK_TYPES];
-        byte		ayRegion[NUM_TMM_GAME_REGIONS][TMM_NUM_GAME_MAPS][TMM_NUM_GAME_TYPES][TMM_NUM_OPTION_RANK_TYPES];
+           public byte [/*TMM_NUM_GAME_TYPES*/]   [/*TMM_NUM_GAME_MAPS*/]  [/*TMM_NUM_OPTION_RANK_TYPES*/]                                 GameType { get; set; }
+           public byte [/*TMM_NUM_GAME_MAPS*/]    [/*TMM_NUM_GAME_TYPES*/] [/*TMM_NUM_OPTION_RANK_TYPES*/]                                 GameMap  { get; set; }
+           public byte [/*TMM_NUM_GAME_MODES*/]   [/*TMM_NUM_GAME_MAPS*/]  [/*TMM_NUM_GAME_TYPES*/]        [/*TMM_NUM_OPTION_RANK_TYPES*/] GameMode { get; set; }
+           public byte [/*NUM_TMM_GAME_REGIONS*/] [/*TMM_NUM_GAME_MAPS*/]  [/*TMM_NUM_GAME_TYPES*/]        [/*TMM_NUM_OPTION_RANK_TYPES*/] Region   { get; set; }
 
         void Clear()
         {
-            for (uint i(0); i < TMM_NUM_GAME_TYPES; ++i)
-                for (uint j(0); j < TMM_NUM_GAME_MAPS; ++j)
-                    for (uint k(0); k < TMM_NUM_OPTION_RANK_TYPES; ++k)
-                        ayGameType[i][j][k] = 0;
+            for (uint i = 0; i < Convert.ToInt32(TMMGameTypes.TMM_NUM_GAME_TYPES); ++i)
+                for (uint j = 0; j < Convert.ToInt32(TMMGameMaps.TMM_NUM_GAME_MAPS); ++j)
+                    for (uint k = 0; k < Convert.ToInt32(TMMRankType.TMM_NUM_OPTION_RANK_TYPES); ++k)
+                        GameType[i][j][k] = 0;
 
-            for (uint i(0); i < TMM_NUM_GAME_MAPS; ++i)
-                for (uint j(0); j < TMM_NUM_GAME_TYPES; ++j)
-                    for (uint k(0); k < TMM_NUM_OPTION_RANK_TYPES; ++k)
-                        ayGameMap[i][j][k] = 0;
+            for (uint i = 0; i < Convert.ToInt32(TMMGameMaps.TMM_NUM_GAME_MAPS); ++i)
+                for (uint j = 0; j < Convert.ToInt32(TMMGameTypes.TMM_NUM_GAME_TYPES); ++j)
+                    for (uint k = 0; k < Convert.ToInt32(TMMRankType.TMM_NUM_OPTION_RANK_TYPES); ++k)
+                        GameMap[i][j][k] = 0;
 
-            for (uint i(0); i < TMM_NUM_GAME_MODES; ++i)
-                for (uint j(0); j < TMM_NUM_GAME_MAPS; ++j)
-                    for (uint k(0); k < TMM_NUM_GAME_TYPES; ++k)
-                        for (uint l(0); l < TMM_NUM_OPTION_RANK_TYPES; ++l)
-                            ayGameMode[i][j][k][l] = 0;
+            for (uint i = 0; i < Convert.ToInt32(TMMGameModes.TMM_NUM_GAME_MODES); ++i)
+                for (uint j = 0; j < Convert.ToInt32(TMMGameMaps.TMM_NUM_GAME_MAPS); ++j)
+                    for (uint k = 0; k < Convert.ToInt32(TMMGameTypes.TMM_NUM_GAME_TYPES); ++k)
+                        for (uint l = 0; l < Convert.ToInt32(TMMRankType.TMM_NUM_OPTION_RANK_TYPES); ++l)
+                            GameMode[i][j][k][l] = 0;
 
-            for (uint i(0); i < NUM_TMM_GAME_REGIONS; ++i)
-                for (uint j(0); j < TMM_NUM_GAME_MAPS; ++j)
-                    for (uint k(0); k < TMM_NUM_GAME_TYPES; ++k)
-                        for (uint l(0); l < TMM_NUM_OPTION_RANK_TYPES; ++l)
-                            ayRegion[i][j][k][l] = 0;
+            for (uint i = 0; i < Convert.ToInt32(TMMGameRegions.NUM_TMM_GAME_REGIONS); ++i)
+                for (uint j = 0; j < Convert.ToInt32(TMMGameMaps.TMM_NUM_GAME_MAPS); ++j)
+                    for (uint k = 0; k < Convert.ToInt32(TMMGameTypes.TMM_NUM_GAME_TYPES); ++k)
+                        for (uint l = 0; l < Convert.ToInt32(TMMRankType.TMM_NUM_OPTION_RANK_TYPES); ++l)
+                            Region[i][j][k][l] = 0;
         }
        };
 
+    [Flags]
+       public enum ChatClientType
+       {
+       CHAT_CLIENT_IS_OFFICER = 1 << 0,
+       CHAT_CLIENT_IS_CLAN_LEADER = 1 << 1,
+       CHAT_CLIENT_IS_STAFF = 1 << 5,
+       CHAT_CLIENT_IS_PREMIUM = 1 << 6,
+       CHAT_CLIENT_IS_VERIFIED = 1 << 7
+        }
+
+    [Flags]
+    public enum ChatChannelType
+    {
+    CHAT_CHANNEL_FLAG_PERMANENT      = 1 << 0,
+    CHAT_CHANNEL_FLAG_SERVER         = 1 << 1, // Channel for post-match chat
+    CHAT_CHANNEL_FLAG_HIDDEN         = 1 << 2,
+    CHAT_CHANNEL_FLAG_RESERVED       = 1 << 3, // System created channels (e.g. general, clan, stream, etc.)
+    CHAT_CHANNEL_FLAG_GENERAL_USE       = 1 << 4, // e.g. HoN 1
+    CHAT_CHANNEL_FLAG_UNJOINABLE     = 1 << 5,
+    CHAT_CHANNEL_FLAG_AUTH_REQUIRED  = 1 << 6,
+    CHAT_CHANNEL_FLAG_CLAN           = 1 << 7,
+    // Flags beyond this point are untransmitted until the client gets updated!
+    CHAT_CHANNEL_FLAG_STREAM_USE = 1 << 8
+    }
 
 
-       const byte CHAT_CLIENT_IS_OFFICER		(BIT(0));
-       const byte CHAT_CLIENT_IS_CLAN_LEADER	(BIT(1));
-       const byte CHAT_CLIENT_IS_STAFF			(BIT(5));
-       const byte CHAT_CLIENT_IS_PREMIUM		(BIT(6));
-       const byte CHAT_CLIENT_IS_VERIFIED		(BIT(7));
-
-       const uint CHAT_CHANNEL_FLAG_PERMANENT		(BIT(0));
-       const uint CHAT_CHANNEL_FLAG_SERVER			(BIT(1)); // Channel for post-match chat
-       const uint CHAT_CHANNEL_FLAG_HIDDEN			(BIT(2));
-       const uint CHAT_CHANNEL_FLAG_RESERVED		(BIT(3)); // System created channels (e.g. general, clan, stream, etc.)
-       const uint CHAT_CHANNEL_FLAG_GENERAL_USE	(BIT(4)); // e.g. HoN 1
-       const uint CHAT_CHANNEL_FLAG_UNJOINABLE		(BIT(5));
-       const uint CHAT_CHANNEL_FLAG_AUTH_REQUIRED	(BIT(6));
-       const uint CHAT_CHANNEL_FLAG_CLAN			(BIT(7));
-       // Flags beyond this point are untransmitted until the client gets updated!
-       const uint CHAT_CHANNEL_FLAG_STREAM_USE		(BIT(8));
-
-       const uint MAX_USERS_PER_HON_CHANNEL(50);
-       const uint MAX_USERS_PER_CHANNEL(250);
-       const uint INVALID_CHAT_CHANNEL(-1);
+       public const uint MAX_USERS_PER_HON_CHANNEL = 50;
+       public const uint MAX_USERS_PER_CHANNEL = 250;
+       public const int INVALID_CHAT_CHANNEL = -1;
 
 
-       enum EUploadUpdateType
+       public enum UploadUpdateType
        {
         EUUT_NONE = -1,
         EUUT_GENERAL_FAILURE = 0,
@@ -930,10 +917,7 @@ public class ChatProtocol
         EUUT_FILE_UPLOAD_COMPLETE
        };
 
-       extern const char* const g_aCRCSStrings[NUM_CRCS];
-
-
-       enum EDisconnectReason
+       public enum DisconnectReason
        {
         DISCONNECT_INVALID = 0,
         DISCONNECT_AUTH_FAILED,
@@ -999,11 +983,7 @@ public class ChatProtocol
         // If you add to this list, be sure to update tables in public_strings.cpp
        };
 
-       extern const bool g_transmittedDisconnects[NUM_DISCONNECT_REASONS];
-
-       extern const char* const g_aDisconnectStrings[NUM_DISCONNECT_REASONS];
-
-       enum EQuestsAvailabilityType
+       public enum QuestsAvailabilityType
        {
         EQAT_INVALID = -1,
         EQAT_DISABLED_GENERAL,
@@ -1017,24 +997,23 @@ public class ChatProtocol
         NUM_QUEST_AVAILABILITY_TYPES
        };
 
-       // Server Status Flags
-       #define SSF_OFFICIAL				BIT(0)
-       #define SSF_OFFICIAL_WITH_STATS		BIT(1)
-       #define SSF_NOLEAVER				BIT(2)
-       #define SSF_VERIFIED_ONLY			BIT(3)
-       #define SSF_PRIVATE					BIT(4)
-       #define SSF_TIER_NOOBS_ALLOWED		BIT(5)
-       #define SSF_TIER_PRO				BIT(6)
-       #define SSF_ALL_HEROES				BIT(7)
-       #define SSF_CASUAL					BIT(8)
-       #define SSF_GATED					BIT(9)
-       #define SSF_FORCE_RANDOM			BIT(10)
-       #define SSF_AUTO_BALANCE			BIT(11)
-       #define SSF_ADV_OPTIONS				BIT(12)
-       #define SSF_DEV_HEROES				BIT(13)
-       #define SSF_HARDCORE				BIT(14)
-       //=============================================================================
-
-       #endif //__CHATSERVER_PROTOCOL_H__
-     */
+       [Flags]
+       public enum ServerType
+       {
+         SSF_OFFICIAL				= 1 << 0,
+         SSF_OFFICIAL_WITH_STATS		= 1 << 1,
+         SSF_NOLEAVER				= 1 << 2,
+         SSF_VERIFIED_ONLY			= 1 << 3,
+         SSF_PRIVATE					= 1 << 4,
+         SSF_TIER_NOOBS_ALLOWED		= 1 << 5,
+         SSF_TIER_PRO				= 1 << 6,
+         SSF_ALL_HEROES				= 1 << 7,
+         SSF_CASUAL					= 1 << 8,
+         SSF_GATED					= 1 << 9,
+         SSF_FORCE_RANDOM			= 1 << 10,
+         SSF_AUTO_BALANCE			= 1 << 11,
+         SSF_ADV_OPTIONS				= 1 << 12,
+         SSF_DEV_HEROES				= 1 << 13,
+         SSF_HARDCORE				= 1 << 14
+    }
 }
