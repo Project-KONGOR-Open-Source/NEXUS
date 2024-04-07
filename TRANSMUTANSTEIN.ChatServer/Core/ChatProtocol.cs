@@ -159,85 +159,85 @@ public static class ChatProtocol
 
     public static class GameLobby
     {
-        public const ushort NET_CHAT_CL_GAME_LOBBY_SELECT_HERO              = 0x0c10;
-        public const ushort NET_CHAT_CL_GAME_LOBBY_READY                    = 0x0c11;
-        public const ushort NET_CHAT_CL_GAME_LOBBY_CREATE                   = 0x0c12;
-        public const ushort NET_CHAT_CL_GAME_LOBBY_JOIN                     = 0x0c13; //player request to join the lobby
-        public const ushort NET_CHAT_CL_GAME_LOBBY_INVITE                   = 0x0c14;
-        public const ushort NET_CHAT_CL_GAME_LOBBY_REJECT_INVITE            = 0x0c15;
-        public const ushort NET_CHAT_CL_GAME_LOBBY_ACCEPT_INVITE            = 0x0c16;
-        public const ushort NET_CHAT_CL_GAME_LOBBY_KICK                     = 0x0c17; //bidirectional, tell a client that he's kcked, or tell a server to kick someone
-        public const ushort NET_CHAT_CL_GAME_LOBBY_CHANGE_SLOT              = 0x0c18;
-        public const ushort NET_CHAT_CL_GAME_LOBBY_REQUEST_LIST             = 0x0c19;
-        public const ushort NET_CHAT_CL_GAME_LOBBY_RETURN                   = 0x0c1a;
+        public const ushort NET_CHAT_CL_GAME_LOBBY_SELECT_HERO              = 0x0C10;
+        public const ushort NET_CHAT_CL_GAME_LOBBY_READY                    = 0x0C11;
+        public const ushort NET_CHAT_CL_GAME_LOBBY_CREATE                   = 0x0C12;
+        public const ushort NET_CHAT_CL_GAME_LOBBY_JOIN                     = 0x0C13; //player request to join the lobby
+        public const ushort NET_CHAT_CL_GAME_LOBBY_INVITE                   = 0x0C14;
+        public const ushort NET_CHAT_CL_GAME_LOBBY_REJECT_INVITE            = 0x0C15;
+        public const ushort NET_CHAT_CL_GAME_LOBBY_ACCEPT_INVITE            = 0x0C16;
+        public const ushort NET_CHAT_CL_GAME_LOBBY_KICK                     = 0x0C17; //bidirectional, tell a client that he's kcked, or tell a server to kick someone
+        public const ushort NET_CHAT_CL_GAME_LOBBY_CHANGE_SLOT              = 0x0C18;
+        public const ushort NET_CHAT_CL_GAME_LOBBY_REQUEST_LIST             = 0x0C19;
+        public const ushort NET_CHAT_CL_GAME_LOBBY_RETURN                   = 0x0C1A;
     }
 
     public static class Matchmaking
     {
-        public const ushort NET_CHAT_CL_TMM_GROUP_CREATE                    = 0x0c0a; // Client is requesting a new group be created
-        public const ushort NET_CHAT_CL_TMM_GROUP_JOIN                      = 0x0c0b; // Client is joining a group
-        public const ushort NET_CHAT_CL_TMM_GROUP_LEAVE                     = 0x0c0c; // Client is leaving a group
-        public const ushort NET_CHAT_CL_TMM_GROUP_INVITE                    = 0x0c0d; // Client would like to invite someone to the group
-        public const ushort NET_CHAT_CL_TMM_GROUP_INVITE_BROADCAST          = 0x0c0e; // Broadcast that a client would like to invite someone to the group
-        public const ushort NET_CHAT_CL_TMM_GROUP_REJECT_INVITE             = 0x0c0f; // Client rejected invite
-        public const ushort NET_CHAT_CL_CONNECT_TEST                        = 0x0c10;
-        public const ushort NET_CHAT_CL_TMM_GROUP_KICK                      = 0x0d00; // The leader requested to kick a group member
-        public const ushort NET_CHAT_CL_TMM_GROUP_JOIN_QUEUE                = 0x0d01; // The group leader wants to join the queue for a match
-        public const ushort NET_CHAT_CL_TMM_GROUP_LEAVE_QUEUE               = 0x0d02; // The group leader wants to leave the join match queue
-        public const ushort NET_CHAT_CL_TMM_GROUP_UPDATE                    = 0x0d03; // Updates that occur whenever something in the group is updated
-        public const ushort NET_CHAT_CL_TMM_GROUP_PLAYER_LOADING_STATUS     = 0x0d04; // Send updates on loading status
-        public const ushort NET_CHAT_CL_TMM_GROUP_PLAYER_READY_STATUS       = 0x0d05; // Send updates on whether or not the player is ready
-        public const ushort NET_CHAT_CL_TMM_GROUP_QUEUE_UPDATE              = 0x0d06; // Send information on the queue times to the group
-        public const ushort NET_CHAT_CL_TMM_POPULARITY_UPDATE               = 0x0d07; // Send information on the popularities to all the groups
-        public const ushort NET_CHAT_CL_TMM_GAME_OPTION_UPDATE              = 0x0d08; // Send group option updates to players when the group leader changes them
-        public const ushort NET_CHAT_CL_TMM_MATCH_FOUND_UPDATE              = 0x0d09; // Send team a match info update when a match is found
-        public const ushort NET_CHAT_CL_TMM_SCHEDULED_MATCH_INFO            = 0x0e01; // Used to send scheduled match info to the clients
-        public const ushort NET_CHAT_CL_TMM_SCHEDULED_MATCH_UPDATE          = 0x0e02; // Used to send specific scheduled match info to the clients
-        public const ushort NET_CHAT_CL_TMM_SCHEDULED_MATCH_COMMAND         = 0x0e03; // Used to send commands from the client to the chat server
-        public const ushort NET_CHAT_CL_TMM_SCHEDULED_MATCH_SERVER_INFO     = 0x0e04; // Send team a match info update when a match is found
-        public const ushort NET_CHAT_CL_TMM_BOT_SPAWN_LOCAL_MATCH           = 0x0e05;
-        public const ushort NET_CHAT_CL_TMM_SWAP_GROUP_TYPE                 = 0x0e06;
-        public const ushort NET_CHAT_CL_TMM_BOT_GROUP_UPDATE                = 0x0e07;
-        public const ushort NET_CHAT_CL_TMM_BOT_GROUP_BOTS                  = 0x0e08;
-        public const ushort NET_CHAT_CL_TMM_BOT_NO_BOTS_SELECTED            = 0x0e09;
-        public const ushort NET_CHAT_CL_TMM_FAILED_TO_JOIN                  = 0x0e0a; // Either TMM is disabled or they were not allowed to join due to being a leaver, being banned, or is not verified
-        public const ushort NET_CHAT_CL_TMM_REGION_UNAVAILABLE              = 0x0e0b; // One of the regions the group leader selected is unavailable to one of the group members
-        public const ushort NET_CHAT_CL_TMM_GROUP_REJOIN_QUEUE              = 0x0e0c; // Notify the group if they have been re-placed into the queue at their previous wait time
-        public const ushort NET_CHAT_CL_TMM_GENERIC_RESPONSE                = 0x0e0d; // Used to send back generic responses back to the clients
-        public const ushort NET_CHAT_CL_TMM_EVENTS_INFO                     = 0x0e0f; // Used to send event info to the clients
-        public const ushort NET_CHAT_CL_TMM_SCHEDULED_MATCH_LOBBY_INFO      = 0x0f00; // For relaying to tournament admins details about the length of time each team was in the lobby and readied up
-        public const ushort NET_CHAT_CL_TMM_LEAVER_INFO                     = 0x0f01; // If a player is unable to join due to being a leaver, send the client this data so the UI can display it to them
-        public const ushort NET_CHAT_CL_TMM_REQUEST_READY_UP                = 0x0f02; // Group leader requests group members to ready up
-        public const ushort NET_CHAT_CL_TMM_START_LOADING                   = 0x0f03; // All group members are ready - load!
-        public const ushort NET_CHAT_CL_TMM_PENDING_MATCH                   = 0x0f04; // A match is waiting for your group
-        public const ushort NET_CHAT_CL_TMM_ACCEPT_PENDING_MATCH            = 0x0f05; // A player has accepted the pending match
-        public const ushort NET_CHAT_CL_TMM_FAILED_TO_ACCEPT_PENDING_MATCH  = 0x0f06; // A player in your group failed to accept the pending match
-        public const ushort NET_CHAT_CL_TMM_CAMPAIGN_STATS                  = 0x0f07; // Player's campaign stats
-        public const ushort NET_CHAT_CL_TMM_CHANGE_GROUP_TYPE               = 0x0f08;
-        public const ushort NET_CHAT_CL_TMM_LEAVER_STRIKE_WARN              = 0x0f09; // Notify client that this user needs Leaver Strike popup warning
+        public const ushort NET_CHAT_CL_TMM_GROUP_CREATE                    = 0x0C0A; // Client is requesting a new group be created
+        public const ushort NET_CHAT_CL_TMM_GROUP_JOIN                      = 0x0C0B; // Client is joining a group
+        public const ushort NET_CHAT_CL_TMM_GROUP_LEAVE                     = 0x0C0C; // Client is leaving a group
+        public const ushort NET_CHAT_CL_TMM_GROUP_INVITE                    = 0x0C0D; // Client would like to invite someone to the group
+        public const ushort NET_CHAT_CL_TMM_GROUP_INVITE_BROADCAST          = 0x0C0E; // Broadcast that a client would like to invite someone to the group
+        public const ushort NET_CHAT_CL_TMM_GROUP_REJECT_INVITE             = 0x0C0F; // Client rejected invite
+        public const ushort NET_CHAT_CL_CONNECT_TEST                        = 0x0C10;
+        public const ushort NET_CHAT_CL_TMM_GROUP_KICK                      = 0x0D00; // The leader requested to kick a group member
+        public const ushort NET_CHAT_CL_TMM_GROUP_JOIN_QUEUE                = 0x0D01; // The group leader wants to join the queue for a match
+        public const ushort NET_CHAT_CL_TMM_GROUP_LEAVE_QUEUE               = 0x0D02; // The group leader wants to leave the join match queue
+        public const ushort NET_CHAT_CL_TMM_GROUP_UPDATE                    = 0x0D03; // Updates that occur whenever something in the group is updated
+        public const ushort NET_CHAT_CL_TMM_GROUP_PLAYER_LOADING_STATUS     = 0x0D04; // Send updates on loading status
+        public const ushort NET_CHAT_CL_TMM_GROUP_PLAYER_READY_STATUS       = 0x0D05; // Send updates on whether or not the player is ready
+        public const ushort NET_CHAT_CL_TMM_GROUP_QUEUE_UPDATE              = 0x0D06; // Send information on the queue times to the group
+        public const ushort NET_CHAT_CL_TMM_POPULARITY_UPDATE               = 0x0D07; // Send information on the popularities to all the groups
+        public const ushort NET_CHAT_CL_TMM_GAME_OPTION_UPDATE              = 0x0D08; // Send group option updates to players when the group leader changes them
+        public const ushort NET_CHAT_CL_TMM_MATCH_FOUND_UPDATE              = 0x0D09; // Send team a match info update when a match is found
+        public const ushort NET_CHAT_CL_TMM_SCHEDULED_MATCH_INFO            = 0x0E01; // Used to send scheduled match info to the clients
+        public const ushort NET_CHAT_CL_TMM_SCHEDULED_MATCH_UPDATE          = 0x0E02; // Used to send specific scheduled match info to the clients
+        public const ushort NET_CHAT_CL_TMM_SCHEDULED_MATCH_COMMAND         = 0x0E03; // Used to send commands from the client to the chat server
+        public const ushort NET_CHAT_CL_TMM_SCHEDULED_MATCH_SERVER_INFO     = 0x0E04; // Send team a match info update when a match is found
+        public const ushort NET_CHAT_CL_TMM_BOT_SPAWN_LOCAL_MATCH           = 0x0E05;
+        public const ushort NET_CHAT_CL_TMM_SWAP_GROUP_TYPE                 = 0x0E06;
+        public const ushort NET_CHAT_CL_TMM_BOT_GROUP_UPDATE                = 0x0E07;
+        public const ushort NET_CHAT_CL_TMM_BOT_GROUP_BOTS                  = 0x0E08;
+        public const ushort NET_CHAT_CL_TMM_BOT_NO_BOTS_SELECTED            = 0x0E09;
+        public const ushort NET_CHAT_CL_TMM_FAILED_TO_JOIN                  = 0x0E0A; // Either TMM is disabled or they were not allowed to join due to being a leaver, being banned, or is not verified
+        public const ushort NET_CHAT_CL_TMM_REGION_UNAVAILABLE              = 0x0E0B; // One of the regions the group leader selected is unavailable to one of the group members
+        public const ushort NET_CHAT_CL_TMM_GROUP_REJOIN_QUEUE              = 0x0E0C; // Notify the group if they have been re-placed into the queue at their previous wait time
+        public const ushort NET_CHAT_CL_TMM_GENERIC_RESPONSE                = 0x0E0D; // Used to send back generic responses back to the clients
+        public const ushort NET_CHAT_CL_TMM_EVENTS_INFO                     = 0x0E0F; // Used to send event info to the clients
+        public const ushort NET_CHAT_CL_TMM_SCHEDULED_MATCH_LOBBY_INFO      = 0x0F00; // For relaying to tournament admins details about the length of time each team was in the lobby and readied up
+        public const ushort NET_CHAT_CL_TMM_LEAVER_INFO                     = 0x0F01; // If a player is unable to join due to being a leaver, send the client this data so the UI can display it to them
+        public const ushort NET_CHAT_CL_TMM_REQUEST_READY_UP                = 0x0F02; // Group leader requests group members to ready up
+        public const ushort NET_CHAT_CL_TMM_START_LOADING                   = 0x0F03; // All group members are ready - load!
+        public const ushort NET_CHAT_CL_TMM_PENDING_MATCH                   = 0x0F04; // A match is waiting for your group
+        public const ushort NET_CHAT_CL_TMM_ACCEPT_PENDING_MATCH            = 0x0F05; // A player has accepted the pending match
+        public const ushort NET_CHAT_CL_TMM_FAILED_TO_ACCEPT_PENDING_MATCH  = 0x0F06; // A player in your group failed to accept the pending match
+        public const ushort NET_CHAT_CL_TMM_CAMPAIGN_STATS                  = 0x0F07; // Player's campaign stats
+        public const ushort NET_CHAT_CL_TMM_CHANGE_GROUP_TYPE               = 0x0F08;
+        public const ushort NET_CHAT_CL_TMM_LEAVER_STRIKE_WARN              = 0x0F09; // Notify client that this user needs Leaver Strike popup warning
     }
 
     public static class ChatServerToClient
     {
-        public const ushort NET_CHAT_CL_ACCEPT                              = 0x1c00; // Accept connection from client
-        public const ushort NET_CHAT_CL_REJECT                              = 0x1c01; // Refuse connection from client
-        public const ushort NET_CHAT_CL_CHANNEL_INFO                        = 0x1c02; // Basic information about a channel
-        public const ushort NET_CHAT_CL_CHANNEL_LIST_SYN                    = 0x1c03; // HACK: until TCP connections are handled properly
-        public const ushort NET_CHAT_CL_CHANNEL_SUBLIST_START               = 0x1c04; // Start of a channel sub-list
-        public const ushort NET_CHAT_CL_CHANNEL_INFO_SUB                    = 0x1c05; // Basic information about a channel in a sublist
-        public const ushort NET_CHAT_CL_CHANNEL_SUBLIST_SYN                 = 0x1c06; // HACK: until TCP connections are handled properly
-        public const ushort NET_CHAT_CL_CHANNEL_SUBLIST_END                 = 0x1c07; // End of a channel sub-list
-        public const ushort NET_CHAT_CL_USER_STATUS                         = 0x1c08; // User status request reponse
-        public const ushort NET_CHAT_CL_GAME_LOBBY_JOINED                   = 0x1c09;
-        public const ushort NET_CHAT_CL_GAME_LOBBY_LEFT                     = 0x1c0a;
-        public const ushort NET_CHAT_CL_GAME_LOBBY_UPDATE                   = 0x1c0b;
-        public const ushort NET_CHAT_CL_GAME_LOBBY_PLAYER_JOINED            = 0x1c0c;
-        public const ushort NET_CHAT_CL_GAME_LOBBY_PLAYER_LEFT              = 0x1c0d;
-        public const ushort NET_CHAT_CL_GAME_LOBBY_PLAYER_UPDATE            = 0x1c0e;
-        public const ushort NET_CHAT_CL_GAME_LOBBY_LAUNCH_GAME              = 0x1c0f;
-        public const ushort NET_CHAT_CL_GAME_LOBBY_LIST                     = 0x1c10;
-        public const ushort NET_CHAT_CL_GAME_LOBBY_FULL                     = 0x1c11;
-        public const ushort NET_CHAT_CL_GAME_LOBBY_SPEC_READY               = 0x1c12; // Tell the spectator others are in hero picking mode
+        public const ushort NET_CHAT_CL_ACCEPT                              = 0x1C00; // Accept connection from client
+        public const ushort NET_CHAT_CL_REJECT                              = 0x1C01; // Refuse connection from client
+        public const ushort NET_CHAT_CL_CHANNEL_INFO                        = 0x1C02; // Basic information about a channel
+        public const ushort NET_CHAT_CL_CHANNEL_LIST_SYN                    = 0x1C03; // HACK: until TCP connections are handled properly
+        public const ushort NET_CHAT_CL_CHANNEL_SUBLIST_START               = 0x1C04; // Start of a channel sub-list
+        public const ushort NET_CHAT_CL_CHANNEL_INFO_SUB                    = 0x1C05; // Basic information about a channel in a sublist
+        public const ushort NET_CHAT_CL_CHANNEL_SUBLIST_SYN                 = 0x1C06; // HACK: until TCP connections are handled properly
+        public const ushort NET_CHAT_CL_CHANNEL_SUBLIST_END                 = 0x1C07; // End of a channel sub-list
+        public const ushort NET_CHAT_CL_USER_STATUS                         = 0x1C08; // User status request reponse
+        public const ushort NET_CHAT_CL_GAME_LOBBY_JOINED                   = 0x1C09;
+        public const ushort NET_CHAT_CL_GAME_LOBBY_LEFT                     = 0x1C0A;
+        public const ushort NET_CHAT_CL_GAME_LOBBY_UPDATE                   = 0x1C0B;
+        public const ushort NET_CHAT_CL_GAME_LOBBY_PLAYER_JOINED            = 0x1C0C;
+        public const ushort NET_CHAT_CL_GAME_LOBBY_PLAYER_LEFT              = 0x1C0D;
+        public const ushort NET_CHAT_CL_GAME_LOBBY_PLAYER_UPDATE            = 0x1C0E;
+        public const ushort NET_CHAT_CL_GAME_LOBBY_LAUNCH_GAME              = 0x1C0F;
+        public const ushort NET_CHAT_CL_GAME_LOBBY_LIST                     = 0x1C10;
+        public const ushort NET_CHAT_CL_GAME_LOBBY_FULL                     = 0x1C11;
+        public const ushort NET_CHAT_CL_GAME_LOBBY_SPEC_READY               = 0x1C12; // Tell the spectator others are in hero picking mode
     }
 
     public static class GameServerToChatServer
@@ -297,18 +297,24 @@ public static class ChatProtocol
         public const ushort NET_CHAT_QUERY_LEAVER_STRIKE                    = 0x1801; // A request from masterserver to chatserver to query account leaver strike info
     }
 
-    public const ushort NET_CHAT_INVALID                                    = 0xffff;
-    public const int INVALID_CHAT_CHANNEL                                   = -1;
+    public const ushort NET_CHAT_INVALID                                    = 0xFFFF;
 
     public const byte CHAT_MESSAGE_MAX_LENGTH                               = 250; // Max length of any channel chat message
     public const byte CHAT_CHANNEL_MAX_LENGTH                               = 35; // Max length of channel names
     public const byte CHAT_CHANNEL_TOPIC_MAX_LENGTH                         = 140; // Max length of channel topics
+
+    public const int INVALID_CHAT_CHANNEL                                   = -1;
+
     public const uint MAX_USERS_PER_HON_CHANNEL                             = 50;
     public const uint MAX_USERS_PER_CHANNEL                                 = 250;
 
+    public const uint MAX_TMM_GAME_MAPS_SELECTABLE                          = 1;
+    public const uint MAX_TMM_GAME_MODES_SELECTABLE                         = 6;
+    public const uint MAX_TMM_GAME_REGIONS_SELECTABLE                       = 6;
+
     public enum ChatRejectReason
     {
-        ECR_UNKNOWN = 0,
+        ECR_UNKNOWN,
         ECR_BAD_VERSION,
         ECR_AUTH_FAILED,
         ECR_ACCOUNT_SHARING,
@@ -319,12 +325,12 @@ public static class ChatProtocol
     {
         GLS_INVALID = -1,
 
-        GLS_ADJUST_LOBBY = 0,
-        GLS_HERO_PICK = 1,
+        GLS_ADJUST_LOBBY,
+        GLS_HERO_PICK,
         GLS_LAUNCHING,
         GLS_IN_STATS,
 
-        NUM_GAME_LOBBY_STATES,
+        NUM_GAME_LOBBY_STATES
     };
 
     // chat server will sent it to game server when match starts
@@ -334,17 +340,17 @@ public static class ChatProtocol
     // this will affect code in master server class_type.php
     public enum ArrangedMatchType
     {
-        AM_PUBLIC = 0, // Public games
-        AM_MATCHMAKING = 1, // Ranked Matchmaking games (normal and casual)
-        AM_SCHEDULED_MATCH = 2, // Scheduled matches (tournament)
-        AM_UNSCHEDULED_MATCH = 3, // Unscheduled matches (league)
-        AM_MATCHMAKING_MIDWARS = 4, // Matchmaking games (midwars)
-        AM_MATCHMAKING_BOTMATCH = 5, // Matchmaking games (coop/bot)
-        AM_UNRANKED_MATCHMAKING = 6, // Unranked matchmaking games (normal and casual)
-        AM_MATCHMAKING_RIFTWARS = 7, // Matchmaking games (riftwars)
-        AM_PUBLIC_PRELOBBY = 8,
-        AM_MATCHMAKING_CUSTOM = 9, // Matchmaking games (custom maps)
-        AM_MATCHMAKING_CAMPAIGN = 10, // Matchmaking games (campaign, normal and casual)
+        AM_PUBLIC, // Public games
+        AM_MATCHMAKING, // Ranked Matchmaking games (normal and casual)
+        AM_SCHEDULED_MATCH, // Scheduled matches (tournament)
+        AM_UNSCHEDULED_MATCH, // Unscheduled matches (league)
+        AM_MATCHMAKING_MIDWARS, // Matchmaking games (midwars)
+        AM_MATCHMAKING_BOTMATCH, // Matchmaking games (coop/bot)
+        AM_UNRANKED_MATCHMAKING, // Unranked matchmaking games (normal and casual)
+        AM_MATCHMAKING_RIFTWARS, // Matchmaking games (riftwars)
+        AM_PUBLIC_PRELOBBY,
+        AM_MATCHMAKING_CUSTOM, // Matchmaking games (custom maps)
+        AM_MATCHMAKING_CAMPAIGN, // Matchmaking games (campaign, normal and casual)
 
         NUM_ARRANGED_MATCH_TYPES
     };
@@ -371,7 +377,7 @@ public static class ChatProtocol
 
     public enum TMMUpdateType
     {
-        TMM_CREATE_GROUP = 0,
+        TMM_CREATE_GROUP,
         TMM_FULL_GROUP_UPDATE,
         TMM_PARTIAL_GROUP_UPDATE,
         TMM_PLAYER_JOINED_GROUP,
@@ -395,7 +401,7 @@ public static class ChatProtocol
 
     public enum LobbyUpdateType
     {
-        LOBBY_CLIENT_ENTER = 0, //tell the client who entered, if not bot
+        LOBBY_CLIENT_ENTER, //tell the client who entered, if not bot
         LOBBY_CLIENT_ON_ENTER, //tell other client that one client/bot entered
         LOBBY_CLIENT_ON_LEAVE, //tell other client that one client/bot left
         LOBBY_CLIENT_ON_CHANGE, //tell other client that one client change slot
@@ -424,12 +430,12 @@ public static class ChatProtocol
         "TMM_POPULARITY_UPDATE", // TMM_POPULARITY_UPDATE
         "TMM_FOUND_MATCH_UPDATE", // TMM_FOUND_MATCH_UPDATE
         "TMM_GROUP_FOUND_SERVER", // TMM_GROUP_FOUND_SERVER
-        "TMM_MATCHMAKING_DISABLED", // TMM_MATCHMAKING_DISABLED
+        "TMM_MATCHMAKING_DISABLED" // TMM_MATCHMAKING_DISABLED
     };
 
     public enum TMMFailedToJoinReason
     {
-        TMMFTJR_LEAVER = 0, // Group has a leaver
+        TMMFTJR_LEAVER, // Group has a leaver
         TMMFTJR_DISABLED, // Matchmaking is disabled
         TMMFTJR_BUSY, // Matchmaking is full
         TMMFTJR_OPTION_UNAVAILABLE, // An option selected is currently unavailable
@@ -441,7 +447,7 @@ public static class ChatProtocol
         TMMFTJR_BANNED, // You're currently banned from matchmaking
         TMMFTJR_LOBBY_FULL,
         TMMFTJR_WRONG_PASSWORD,
-        TMMFTJR_CAMPAIGN_NOT_ELIGIBLE,
+        TMMFTJR_CAMPAIGN_NOT_ELIGIBLE
     };
 
     public enum ScheduledMatchUpdateType
@@ -463,7 +469,7 @@ public static class ChatProtocol
 
     public enum ServerStatus
     {
-        SERVER_STATUS_SLEEPING = 0,
+        SERVER_STATUS_SLEEPING,
         SERVER_STATUS_IDLE,
         SERVER_STATUS_LOADING,
         SERVER_STATUS_ACTIVE,
@@ -475,7 +481,7 @@ public static class ChatProtocol
 
     public enum MatchAbortedReason
     {
-        MATCH_ABORTED_UNKNOWN = 0,
+        MATCH_ABORTED_UNKNOWN,
 
         MATCH_ABORT_CONNECT_TIMEOUT,
         MATCH_ABORT_START_TIMEOUT,
@@ -494,22 +500,22 @@ public static class ChatProtocol
         CHAT_MODE_AVAILABLE,
         CHAT_MODE_AFK,
         CHAT_MODE_DND,
-        CHAT_MODE_INVISIBLE,
+        CHAT_MODE_INVISIBLE
     };
 
     public enum AdminLevel
     {
-        CHAT_CLIENT_ADMIN_NONE = 0,
+        CHAT_CLIENT_ADMIN_NONE,
         CHAT_CLIENT_ADMIN_OFFICER,
         CHAT_CLIENT_ADMIN_LEADER,
         CHAT_CLIENT_ADMIN_ADMINISTRATOR,
         CHAT_CLIENT_ADMIN_STAFF,
-        CHAT_NUM_ADMIN_LEVELS,
+        CHAT_NUM_ADMIN_LEVELS
     };
 
     public enum MatchIDResult
     {
-        MIDR_FIRST = 0,
+        MIDR_FIRST,
 
         MIDR_SUCCESS = MIDR_FIRST,
         MIDR_ERROR_SPAWN_REQUEST,
@@ -525,12 +531,12 @@ public static class ChatProtocol
 
         MIDR_FAILED,
 
-        NUM_MATCH_ID_RESULTS,
+        NUM_MATCH_ID_RESULTS
     };
 
     public enum ClientAuthResult
     {
-        CAR_FIRST = 0,
+        CAR_FIRST,
 
         CAR_SUCCESS = CAR_FIRST,
         CAR_ERROR_UNSUCCESSFUL,
@@ -545,12 +551,12 @@ public static class ChatProtocol
 
         CAR_FAILED,
 
-        NUM_CLIENT_AUTH_RESULTS,
+        NUM_CLIENT_AUTH_RESULTS
     };
 
     public enum StatSubmissionResult
     {
-        SSR_FIRST = 0,
+        SSR_FIRST,
 
         SSR_SUCCESS = SSR_FIRST,
         SSR_ERROR_UNSUCCESSFUL,
@@ -562,13 +568,13 @@ public static class ChatProtocol
 
         SSR_FAILED,
 
-        NUM_STAT_SUBMISSION_RESULTS,
+        NUM_STAT_SUBMISSION_RESULTS
     };
 
     public enum PlayerSpectateRequest
     {
-        PLAYER_SPECTATE_REQUEST = 0,
-        PLAYER_SPECTATE_REQUEST_RESPONSE,
+        PLAYER_SPECTATE_REQUEST,
+        PLAYER_SPECTATE_REQUEST_RESPONSE
     };
 
     public enum PlayerSpectateRequestResponses
@@ -577,7 +583,7 @@ public static class ChatProtocol
         PSRR_DENY,
         PSRR_FULL_PLAYER,
         PSRR_FULL_SERVER,
-        PSSR_TOO_DEEP,
+        PSSR_TOO_DEEP
     };
 
     public enum MatchmakingBroadcastTracking
@@ -593,7 +599,7 @@ public static class ChatProtocol
 
     public enum ActionCampaigns
     {
-        AC_DAILY_LOGINS = 0,
+        AC_DAILY_LOGINS,
         AC_CLICKED_HON_STORE,
         AC_CLICKED_BUY_COINS,
         AC_CLICKED_MOTD_ADS,
@@ -627,7 +633,7 @@ public static class ChatProtocol
 
     public enum GenericResponses
     {
-        GR_MAX_MATCH_FIDELITY_DIFFERENCE = 0,
+        GR_MAX_MATCH_FIDELITY_DIFFERENCE,
         GR_SCHEDULED_MATCH_FULL,
 
         NUM_GENERIC_RESPONSES
@@ -635,7 +641,7 @@ public static class ChatProtocol
 
     public enum OSType
     {
-        UNKNOWN_OS = 0,
+        UNKNOWN_OS,
         WINDOWS_OS,
         APPLE_OS,
         LINUX_OS,
@@ -676,7 +682,7 @@ public static class ChatProtocol
 
     public enum ExcessiveGamePlayType
     {
-        EEGPT_NONE = 0, // No message
+        EEGPT_NONE, // No message
         EEGPT_1_HOUR, // You've played 1 hour
         EEGPT_2_HOURS, // You've played 2 hours
         EEGPT_FATIGUE, // You've played too long and are now experiencing fatigue, your game benefits are now cut down to half.
@@ -686,14 +692,14 @@ public static class ChatProtocol
 
     public enum ExcessiveGamePlayBenefit
     {
-        EEGPB_NORMAL = 0, // Normal benefits
+        EEGPB_NORMAL, // Normal benefits
         EEGPB_HALF, // Half benefits
-        EEGPB_NONE, // No benefits
+        EEGPB_NONE // No benefits
     };
 
     public enum CrashReportingClientState
     {
-        CRCS_NO_CRASH = 0, // exited normally
+        CRCS_NO_CRASH, // exited normally
         CRCS_IDLE, // idle, before joining a game
         CRCS_CONNECTING, // connecting to a server
         CRCS_LOADING, // loading map resources
@@ -710,14 +716,14 @@ public static class ChatProtocol
 
     public enum ChatClientStatus
     {
-        CHAT_CLIENT_STATUS_DISCONNECTED = 0,
+        CHAT_CLIENT_STATUS_DISCONNECTED,
         CHAT_CLIENT_STATUS_CONNECTING,
         CHAT_CLIENT_STATUS_WAITING_FOR_AUTH,
         CHAT_CLIENT_STATUS_CONNECTED,
         CHAT_CLIENT_STATUS_JOINING_GAME,
         CHAT_CLIENT_STATUS_IN_GAME,
 
-        NUM_CHAT_CLIENT_STATUSES,
+        NUM_CHAT_CLIENT_STATUSES
     };
 
     public struct RosterInfo(uint accountID = 0, byte teamSlot = 0)
@@ -727,8 +733,6 @@ public static class ChatProtocol
         public byte TeamSlot { get; set; } = teamSlot;
     };
 
-    // Game client send it to chat server to be put in the correct queue
-    // Normal and casual need to stay at 1 and 2, unless we refactor some things
     public enum TMMGameTypes
     {
         TMM_GAME_TYPE_NONE = -1,
@@ -755,12 +759,11 @@ public static class ChatProtocol
         TMM_TYPE_CAMPAIGN = 4
     };
 
-    // Make sure to update CMMCommon::GetMapFromMask if you change this
     public enum TMMGameMaps
     {
         TMM_GAME_MAP_NONE = -1,
 
-        TMM_GAME_MAP_FORESTS_OF_CALDAVAR = 0,
+        TMM_GAME_MAP_FORESTS_OF_CALDAVAR,
         TMM_GAME_MAP_GRIMMS_CROSSING,
         TMM_GAME_MAP_MIDWARS,
         TMM_GAME_MAP_RIFTWARS,
@@ -777,14 +780,11 @@ public static class ChatProtocol
         TMM_NUM_GAME_MAPS
     };
 
-    public const uint MAX_TMM_GAME_MAPS_SELECTABLE = 1;
-
-    // Make sure to update CMMCommon::GetGameModeFromMask if you change this
     public enum TMMGameModes
     {
         TMM_GAME_MODE_NONE = -1,
 
-        TMM_GAME_MODE_ALL_PICK = 0,
+        TMM_GAME_MODE_ALL_PICK,
         TMM_GAME_MODE_ALL_PICK_GATED,
         TMM_GAME_MODE_ALL_PICK_DUPLICATE_HERO,
         TMM_GAME_MODE_SINGLE_DRAFT,
@@ -813,14 +813,11 @@ public static class ChatProtocol
         TMM_NUM_GAME_MODES
     };
 
-    public const uint MAX_TMM_GAME_MODES_SELECTABLE = 6;
-
-    // Make sure to update CMMCommon::GetRegionFromMask if you change this
     public enum TMMGameRegions
     {
         TMM_GAME_REGION_NONE = -1,
 
-        TMM_GAME_REGION_USE = 0,
+        TMM_GAME_REGION_USE,
         TMM_GAME_REGION_USW,
         TMM_GAME_REGION_EU,
         TMM_GAME_REGION_SG,
@@ -841,12 +838,10 @@ public static class ChatProtocol
         NUM_TMM_GAME_REGIONS
     };
 
-    public const uint MAX_TMM_GAME_REGIONS_SELECTABLE = 6;
-
     public enum TMMRankType
     {
-        TMM_OPTION_UNRANKED = 0,
-        TMM_OPTION_RANKED = 1,
+        TMM_OPTION_UNRANKED,
+        TMM_OPTION_RANKED,
 
         TMM_NUM_OPTION_RANK_TYPES
     };
@@ -887,33 +882,52 @@ public static class ChatProtocol
     [Flags]
     public enum ChatClientType
     {
-        CHAT_CLIENT_IS_OFFICER = 1 << 0,
-        CHAT_CLIENT_IS_CLAN_LEADER = 1 << 1,
-        CHAT_CLIENT_IS_STAFF = 1 << 5,
-        CHAT_CLIENT_IS_PREMIUM = 1 << 6,
-        CHAT_CLIENT_IS_VERIFIED = 1 << 7
+        CHAT_CLIENT_IS_OFFICER          = 1 << 0,
+        CHAT_CLIENT_IS_CLAN_LEADER      = 1 << 1,
+        CHAT_CLIENT_IS_STAFF            = 1 << 5,
+        CHAT_CLIENT_IS_PREMIUM          = 1 << 6,
+        CHAT_CLIENT_IS_VERIFIED         = 1 << 7
     }
 
     [Flags]
     public enum ChatChannelType
     {
-        CHAT_CHANNEL_FLAG_PERMANENT = 1 << 0,
-        CHAT_CHANNEL_FLAG_SERVER = 1 << 1, // Channel for post-match chat
-        CHAT_CHANNEL_FLAG_HIDDEN = 1 << 2,
-        CHAT_CHANNEL_FLAG_RESERVED = 1 << 3, // System created channels (e.g. general, clan, stream, etc.)
-        CHAT_CHANNEL_FLAG_GENERAL_USE = 1 << 4, // e.g. HoN 1
-        CHAT_CHANNEL_FLAG_UNJOINABLE = 1 << 5,
+        CHAT_CHANNEL_FLAG_PERMANENT     = 1 << 0,
+        CHAT_CHANNEL_FLAG_SERVER        = 1 << 1, // Channel for post-match chat
+        CHAT_CHANNEL_FLAG_HIDDEN        = 1 << 2,
+        CHAT_CHANNEL_FLAG_RESERVED      = 1 << 3, // System created channels (e.g. general, clan, stream, etc.)
+        CHAT_CHANNEL_FLAG_GENERAL_USE   = 1 << 4, // e.g. HoN 1
+        CHAT_CHANNEL_FLAG_UNJOINABLE    = 1 << 5,
         CHAT_CHANNEL_FLAG_AUTH_REQUIRED = 1 << 6,
-        CHAT_CHANNEL_FLAG_CLAN = 1 << 7,
+        CHAT_CHANNEL_FLAG_CLAN          = 1 << 7,
 
-        // Flags beyond this point are untransmitted until the client gets updated!
-        CHAT_CHANNEL_FLAG_STREAM_USE = 1 << 8
+        CHAT_CHANNEL_FLAG_STREAM_USE    = 1 << 8
     }
-    
+
+    [Flags]
+    public enum ServerType
+    {
+        SSF_OFFICIAL                    = 1 << 0,
+        SSF_OFFICIAL_WITH_STATS         = 1 << 1,
+        SSF_NOLEAVER                    = 1 << 2,
+        SSF_VERIFIED_ONLY               = 1 << 3,
+        SSF_PRIVATE                     = 1 << 4,
+        SSF_TIER_NOOBS_ALLOWED          = 1 << 5,
+        SSF_TIER_PRO                    = 1 << 6,
+        SSF_ALL_HEROES                  = 1 << 7,
+        SSF_CASUAL                      = 1 << 8,
+        SSF_GATED                       = 1 << 9,
+        SSF_FORCE_RANDOM                = 1 << 10,
+        SSF_AUTO_BALANCE                = 1 << 11,
+        SSF_ADV_OPTIONS                 = 1 << 12,
+        SSF_DEV_HEROES                  = 1 << 13,
+        SSF_HARDCORE                    = 1 << 14
+    }
+
     public enum UploadUpdateType
     {
         EUUT_NONE = -1,
-        EUUT_GENERAL_FAILURE = 0,
+        EUUT_GENERAL_FAILURE,
         EUUT_FILE_DOES_NOT_EXIST,
         EUUT_FILE_INVALID_HOST,
         EUUT_FILE_ALREADY_UPLOADED,
@@ -925,7 +939,7 @@ public static class ChatProtocol
 
     public enum DisconnectReason
     {
-        DISCONNECT_INVALID = 0,
+        DISCONNECT_INVALID,
         DISCONNECT_AUTH_FAILED,
         DISCONNECT_BANNED,
         DISCONNECT_BASIC,
@@ -986,8 +1000,6 @@ public static class ChatProtocol
         DISCONNECT_DISCONNECTED,
 
         NUM_DISCONNECT_REASONS
-
-        // If you add to this list, be sure to update tables in public_strings.cpp
     };
 
     public enum QuestsAvailabilityType
@@ -1003,24 +1015,4 @@ public static class ChatProtocol
 
         NUM_QUEST_AVAILABILITY_TYPES
     };
-
-    [Flags]
-    public enum ServerType
-    {
-        SSF_OFFICIAL = 1 << 0,
-        SSF_OFFICIAL_WITH_STATS = 1 << 1,
-        SSF_NOLEAVER = 1 << 2,
-        SSF_VERIFIED_ONLY = 1 << 3,
-        SSF_PRIVATE = 1 << 4,
-        SSF_TIER_NOOBS_ALLOWED = 1 << 5,
-        SSF_TIER_PRO = 1 << 6,
-        SSF_ALL_HEROES = 1 << 7,
-        SSF_CASUAL = 1 << 8,
-        SSF_GATED = 1 << 9,
-        SSF_FORCE_RANDOM = 1 << 10,
-        SSF_AUTO_BALANCE = 1 << 11,
-        SSF_ADV_OPTIONS = 1 << 12,
-        SSF_DEV_HEROES = 1 << 13,
-        SSF_HARDCORE = 1 << 14
-    }
 }
