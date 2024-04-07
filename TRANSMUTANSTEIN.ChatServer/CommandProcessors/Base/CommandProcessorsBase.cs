@@ -7,8 +7,4 @@ public abstract class CommandProcessorsBase<T>
     protected ChatBuffer Response { get; set; } = new();
 
     protected byte[] ResponseSize => BitConverter.GetBytes(Convert.ToInt16(Response.Data.Length));
-
-    protected MerrickContext MerrickContext { get; set; } = TRANSMUTANSTEIN.ServiceProvider.GetRequiredService<MerrickContext>();
-
-    protected ILogger Logger { get; set; } = TRANSMUTANSTEIN.ServiceProvider.GetRequiredService<ILogger<T>>();
 }

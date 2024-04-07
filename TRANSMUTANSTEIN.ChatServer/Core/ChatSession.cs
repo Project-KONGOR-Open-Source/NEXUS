@@ -47,17 +47,13 @@ public class ChatSession(TCPServer server) : TCPSession(server)
 
             else
             {
-                ICommandProcessor? commandTypeInstance = GetCommandTypeInstance(commandType);
-
-                if (commandTypeInstance is null)
-                {
-                    Console.WriteLine($"[BUG] Unknown Command: {command:X4}");
-                    // TODO: Log Bug
-                }
+                if (GetCommandTypeInstance(commandType) is { } commandTypeInstance)
+                    commandTypeInstance.Process(this, new ChatBuffer(buffer));
 
                 else
                 {
-                    commandTypeInstance.Process(this, new ChatBuffer(buffer));
+                    Console.WriteLine($"[BUG] Unknown Command: {command:X4}");
+                    // TODO: Log Bug
                 }
             }
 
@@ -76,9 +72,7 @@ public class ChatSession(TCPServer server) : TCPSession(server)
             
             ICommandProcessor? GetCommandTypeInstance(Type type)
             {
-                ConstructorInfo? constructor = type.GetConstructor(Type.EmptyTypes);
-
-                object? instance = constructor?.Invoke(new object[] { });
+                object instance = ActivatorUtilities.CreateInstance(TRANSMUTANSTEIN.ServiceProvider, type);
 
                 return instance as ICommandProcessor;
             }

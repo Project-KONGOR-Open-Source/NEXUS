@@ -1,8 +1,11 @@
 ﻿namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Connection;
 
 [ChatCommand(ChatProtocol.NET_CHAT_CL_CONNECT)]
-public class Handshake : CommandProcessorsBase<Handshake>, ICommandProcessor
+public class Handshake(MerrickContext merrick, ILogger<Handshake> logger) : CommandProcessorsBase<Handshake>, ICommandProcessor
 {
+    private MerrickContext MerrickContext { get; set; } = merrick;
+    private ILogger<Handshake> Logger { get; set; } = logger;
+
     public async Task Process(TCPSession session, ChatBuffer buffer)
     {
         byte[] _ = buffer.ReadCommandBytes();

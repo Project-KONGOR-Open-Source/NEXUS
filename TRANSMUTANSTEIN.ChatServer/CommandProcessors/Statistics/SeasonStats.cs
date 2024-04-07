@@ -1,10 +1,14 @@
 ﻿namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Statistics;
 
 [ChatCommand(ChatProtocol.NET_CHAT_CL_TMM_CAMPAIGN_STATS)]
-public class SeasonStats : CommandProcessorsBase<SeasonStats>, ICommandProcessor
+public class SeasonStats(MerrickContext merrick, ILogger<SeasonStats> logger) : CommandProcessorsBase<SeasonStats>, ICommandProcessor
 {
+    private MerrickContext MerrickContext { get; set; } = merrick;
+    private ILogger<SeasonStats> Logger { get; set; } = logger;
+
     public async Task Process(TCPSession session, ChatBuffer buffer)
     {
+
         /*
            m_fCampaignNormalTMR = phpResponse.GetFloat(_U8("normal_mmr"), 1250.0f);
            m_fCampaignCasualTMR = phpResponse.GetFloat(_U8("casual_mmr"), 1250.0f);
