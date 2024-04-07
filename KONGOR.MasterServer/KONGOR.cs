@@ -35,6 +35,9 @@ public class KONGOR
             options.EnableThreadSafetyChecks();
         });
 
+        // Add Garnet (Drop-In Replacement For Redis); The Connection String Maps To The "cache" Resource Defined In ASPIRE.AppHost
+        builder.AddRedis("cache", settings => settings.ConnectionString = Environment.GetEnvironmentVariable("ConnectionStrings__cache"));
+
         // Add Memory Cache
         builder.Services.AddMemoryCache();
 

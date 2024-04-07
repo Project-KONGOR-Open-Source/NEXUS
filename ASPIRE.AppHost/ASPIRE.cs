@@ -11,11 +11,17 @@ public class ASPIRE
 
         // TODO: Set The Connection String Via Environment Variable (Or Use Some Other Way That Solves Duplication)
 
-        builder.AddProject<TRANSMUTANSTEIN_ChatServer>("chat-server")
-            .WithLaunchProfile(builder.Environment.IsProduction() ? "TRANSMUTANSTEIN.ChatServer Production" : "TRANSMUTANSTEIN.ChatServer Development");
+        IResourceBuilder<RedisResource> cache = builder.AddRedis("cache", 55513).WithImage("ghcr.io/microsoft/garnet").WithImageTag("latest"); // https://github.com/microsoft/garnet
+
+        // TODO: Put The Cache Resource Port In The Configuration
 
         builder.AddProject<KONGOR_MasterServer>("master-server")
-            .WithLaunchProfile(builder.Environment.IsProduction() ? "KONGOR.MasterServer Production" : "KONGOR.MasterServer Development");
+            .WithLaunchProfile(builder.Environment.IsProduction() ? "KONGOR.MasterServer Production" : "KONGOR.MasterServer Development")
+            .WithReference(cache);
+
+        builder.AddProject<TRANSMUTANSTEIN_ChatServer>("chat-server")
+            .WithLaunchProfile(builder.Environment.IsProduction() ? "TRANSMUTANSTEIN.ChatServer Production" : "TRANSMUTANSTEIN.ChatServer Development")
+            .WithReference(cache);
 
         builder.AddProject<ZORGATH_WebPortal_API>("web-portal-api")
             .WithLaunchProfile(builder.Environment.IsProduction() ? "ZORGATH.WebPortal.API Production" : "ZORGATH.WebPortal.API Development");
