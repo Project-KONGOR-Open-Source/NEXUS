@@ -1,6 +1,6 @@
 ﻿namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Base;
 
-public abstract class CommandProcessorsBase<T>
+public abstract class CommandProcessorsBase
 {
     protected byte[] ResponseCommand { get; set; } = new byte[2];
 

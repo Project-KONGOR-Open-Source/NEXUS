@@ -1,7 +1,7 @@
 ﻿namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Statistics;
 
 [ChatCommand(ChatProtocol.NET_CHAT_CL_TMM_CAMPAIGN_STATS)]
-public class SeasonStats(MerrickContext merrick, ILogger<SeasonStats> logger) : CommandProcessorsBase<SeasonStats>, ICommandProcessor
+public class SeasonStats(MerrickContext merrick, ILogger<SeasonStats> logger) : CommandProcessorsBase, ICommandProcessor
 {
     private MerrickContext MerrickContext { get; set; } = merrick;
     private ILogger<SeasonStats> Logger { get; set; } = logger;
