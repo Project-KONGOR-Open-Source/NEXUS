@@ -2,8 +2,10 @@
 
 public class TRANSMUTANSTEIN
 {
-    public static bool RunsInDevelopmentMode { get; set; }
+    // TRUE If The Application Is Running In Development Mode Or False If Not
+    public static bool RunsInDevelopmentMode { get; set; } = true;
 
+    // The Service Provider As A Singleton Which Chat Sessions Can Share
     public static IServiceProvider ServiceProvider { get; set; } = null!;
 
     public static void Main(string[] args)

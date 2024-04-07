@@ -2,7 +2,8 @@
 
 public class KONGOR
 {
-    public static bool RunsInDevelopmentMode { get; set; }
+    // TRUE If The Application Is Running In Development Mode Or False If Not
+    public static bool RunsInDevelopmentMode { get; set; } = true;
 
     public static void Main(string[] args)
     {
