@@ -14,12 +14,21 @@ public class UserController(MerrickContext databaseContext, ILogger<UserControll
     [AllowAnonymous]
     [ProducesResponseType(typeof(GetBasicUserDTO), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(IEnumerable<string>), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(string), StatusCodes.Status409Conflict)]
     public async Task<IActionResult> RegisterUserAndMainAccount([FromBody] RegisterUserAndMainAccountDTO payload)
     {
         if (payload.Password.Equals(payload.ConfirmPassword).Equals(false))
             return BadRequest($@"Password ""{payload.ConfirmPassword}"" Does Not Match ""{payload.Password}"" (These Values Are Only Visible To You)");
+
+        if (ZORGATH.RunsInDevelopmentMode is false)
+        {
+            ValidationResult result = await new PasswordValidator().ValidateAsync(payload.Password);
+
+            if (result.IsValid is false)
+                return BadRequest(result.Errors.Select(error => error.ErrorMessage));
+        }
 
         Token? token = await MerrickContext.Tokens.SingleOrDefaultAsync(token => token.ID.ToString().Equals(payload.Token) && token.Purpose.Equals(TokenPurpose.EmailAddressVerification));
 

@@ -1,4 +1,7 @@
-﻿global using MERRICK.Database.Constants;
+﻿global using FluentValidation;
+global using FluentValidation.Results;
+
+global using MERRICK.Database.Constants;
 global using MERRICK.Database.Context;
 global using MERRICK.Database.Entities.Core;
 global using MERRICK.Database.Entities.Utility;
@@ -28,3 +31,4 @@ global using ZORGATH.WebPortal.API.Handlers;
 global using ZORGATH.WebPortal.API.Helpers;
 global using ZORGATH.WebPortal.API.Models.Configuration;
 global using ZORGATH.WebPortal.API.Services.Email;
+global using ZORGATH.WebPortal.API.Validators;
