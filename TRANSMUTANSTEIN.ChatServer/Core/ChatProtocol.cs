@@ -692,25 +692,25 @@ public static class ChatProtocol
 
     public enum ExcessiveGamePlayBenefit
     {
-        EEGPB_NORMAL, // Normal benefits
-        EEGPB_HALF, // Half benefits
-        EEGPB_NONE // No benefits
+        EEGPB_NORMAL,
+        EEGPB_HALF,
+        EEGPB_NONE
     };
 
     public enum CrashReportingClientState
     {
-        CRCS_NO_CRASH, // exited normally
-        CRCS_IDLE, // idle, before joining a game
-        CRCS_CONNECTING, // connecting to a server
-        CRCS_LOADING, // loading map resources
-        CRCS_LOBBY, // in game lobby
-        CRCS_LOADING_HEROES, // loading heroes
-        CRCS_IN_GAME, // in game
-        CRCS_DISCONNECTING_NEXT_FRAME, // client will disconnect next frame (one of the Disconnect commands called)
-        CRCS_DISCONNECTING, // disconnecting from server
-        CRCS_UNLOADING_RESOURCES, // unloading world, etc
-        CRCS_UNKNOWN, // crashed at unknown state
-        CRCS_UPDATING, // updating
+        CRCS_NO_CRASH,                  // The Client Has Exited Normally
+        CRCS_IDLE,                      // The Client Is Idle (Before Joining A Match)
+        CRCS_CONNECTING,                // The Client Is Connecting To A Server
+        CRCS_LOADING,                   // The Client Is Loading Map Resources
+        CRCS_LOBBY,                     // The Client Is In The Game Lobby
+        CRCS_LOADING_HEROES,            // The Client Is Loading Heroes
+        CRCS_IN_GAME,                   // The Client Is In-Game
+        CRCS_DISCONNECTING_NEXT_FRAME,  // The Client Will Disconnect Next Frame (One Of The "Disconnect" Commands Was Called)
+        CRCS_DISCONNECTING,             // The Client Is Disconnecting From The Server
+        CRCS_UNLOADING_RESOURCES,       // The Client Is Unloading Map Resources
+        CRCS_UNKNOWN,                   // The Client Has Crashed At An Unknown State
+        CRCS_UPDATING,                  // The Client Is Updating
         NUM_CRCS
     };
 
@@ -724,13 +724,6 @@ public static class ChatProtocol
         CHAT_CLIENT_STATUS_IN_GAME,
 
         NUM_CHAT_CLIENT_STATUSES
-    };
-
-    public struct RosterInfo(uint accountID = 0, byte teamSlot = 0)
-    {
-        public uint AccountID { get; set; } = accountID;
-
-        public byte TeamSlot { get; set; } = teamSlot;
     };
 
     public enum TMMGameTypes
@@ -846,84 +839,6 @@ public static class ChatProtocol
         TMM_NUM_OPTION_RANK_TYPES
     };
 
-    public struct TMMPopularities
-    {
-        public byte[ /*TMM_NUM_GAME_TYPES*/][ /*TMM_NUM_GAME_MAPS*/][ /*TMM_NUM_OPTION_RANK_TYPES*/] GameType { get; set; }
-        public byte[ /*TMM_NUM_GAME_MAPS*/][ /*TMM_NUM_GAME_TYPES*/][ /*TMM_NUM_OPTION_RANK_TYPES*/] GameMap { get; set; }
-        public byte[ /*TMM_NUM_GAME_MODES*/][ /*TMM_NUM_GAME_MAPS*/][ /*TMM_NUM_GAME_TYPES*/][ /*TMM_NUM_OPTION_RANK_TYPES*/] GameMode { get; set; }
-        public byte[ /*NUM_TMM_GAME_REGIONS*/][ /*TMM_NUM_GAME_MAPS*/][ /*TMM_NUM_GAME_TYPES*/][ /*TMM_NUM_OPTION_RANK_TYPES*/] Region { get; set; }
-
-        void Clear()
-        {
-            for (uint i = 0; i < Convert.ToInt32(TMMGameTypes.TMM_NUM_GAME_TYPES); ++i)
-                for (uint j = 0; j < Convert.ToInt32(TMMGameMaps.TMM_NUM_GAME_MAPS); ++j)
-                    for (uint k = 0; k < Convert.ToInt32(TMMRankType.TMM_NUM_OPTION_RANK_TYPES); ++k)
-                        GameType[i][j][k] = 0;
-
-            for (uint i = 0; i < Convert.ToInt32(TMMGameMaps.TMM_NUM_GAME_MAPS); ++i)
-                for (uint j = 0; j < Convert.ToInt32(TMMGameTypes.TMM_NUM_GAME_TYPES); ++j)
-                    for (uint k = 0; k < Convert.ToInt32(TMMRankType.TMM_NUM_OPTION_RANK_TYPES); ++k)
-                        GameMap[i][j][k] = 0;
-
-            for (uint i = 0; i < Convert.ToInt32(TMMGameModes.TMM_NUM_GAME_MODES); ++i)
-                for (uint j = 0; j < Convert.ToInt32(TMMGameMaps.TMM_NUM_GAME_MAPS); ++j)
-                    for (uint k = 0; k < Convert.ToInt32(TMMGameTypes.TMM_NUM_GAME_TYPES); ++k)
-                        for (uint l = 0; l < Convert.ToInt32(TMMRankType.TMM_NUM_OPTION_RANK_TYPES); ++l)
-                            GameMode[i][j][k][l] = 0;
-
-            for (uint i = 0; i < Convert.ToInt32(TMMGameRegions.NUM_TMM_GAME_REGIONS); ++i)
-                for (uint j = 0; j < Convert.ToInt32(TMMGameMaps.TMM_NUM_GAME_MAPS); ++j)
-                    for (uint k = 0; k < Convert.ToInt32(TMMGameTypes.TMM_NUM_GAME_TYPES); ++k)
-                        for (uint l = 0; l < Convert.ToInt32(TMMRankType.TMM_NUM_OPTION_RANK_TYPES); ++l)
-                            Region[i][j][k][l] = 0;
-        }
-    };
-
-    [Flags]
-    public enum ChatClientType
-    {
-        CHAT_CLIENT_IS_OFFICER          = 1 << 0,
-        CHAT_CLIENT_IS_CLAN_LEADER      = 1 << 1,
-        CHAT_CLIENT_IS_STAFF            = 1 << 5,
-        CHAT_CLIENT_IS_PREMIUM          = 1 << 6,
-        CHAT_CLIENT_IS_VERIFIED         = 1 << 7
-    }
-
-    [Flags]
-    public enum ChatChannelType
-    {
-        CHAT_CHANNEL_FLAG_PERMANENT     = 1 << 0,
-        CHAT_CHANNEL_FLAG_SERVER        = 1 << 1, // Channel for post-match chat
-        CHAT_CHANNEL_FLAG_HIDDEN        = 1 << 2,
-        CHAT_CHANNEL_FLAG_RESERVED      = 1 << 3, // System created channels (e.g. general, clan, stream, etc.)
-        CHAT_CHANNEL_FLAG_GENERAL_USE   = 1 << 4, // e.g. HoN 1
-        CHAT_CHANNEL_FLAG_UNJOINABLE    = 1 << 5,
-        CHAT_CHANNEL_FLAG_AUTH_REQUIRED = 1 << 6,
-        CHAT_CHANNEL_FLAG_CLAN          = 1 << 7,
-
-        CHAT_CHANNEL_FLAG_STREAM_USE    = 1 << 8
-    }
-
-    [Flags]
-    public enum ServerType
-    {
-        SSF_OFFICIAL                    = 1 << 0,
-        SSF_OFFICIAL_WITH_STATS         = 1 << 1,
-        SSF_NOLEAVER                    = 1 << 2,
-        SSF_VERIFIED_ONLY               = 1 << 3,
-        SSF_PRIVATE                     = 1 << 4,
-        SSF_TIER_NOOBS_ALLOWED          = 1 << 5,
-        SSF_TIER_PRO                    = 1 << 6,
-        SSF_ALL_HEROES                  = 1 << 7,
-        SSF_CASUAL                      = 1 << 8,
-        SSF_GATED                       = 1 << 9,
-        SSF_FORCE_RANDOM                = 1 << 10,
-        SSF_AUTO_BALANCE                = 1 << 11,
-        SSF_ADV_OPTIONS                 = 1 << 12,
-        SSF_DEV_HEROES                  = 1 << 13,
-        SSF_HARDCORE                    = 1 << 14
-    }
-
     public enum UploadUpdateType
     {
         EUUT_NONE = -1,
@@ -1014,5 +929,90 @@ public static class ChatProtocol
         EQAT_DISABLED_RESERVED_3,
 
         NUM_QUEST_AVAILABILITY_TYPES
+    };
+
+    [Flags]
+    public enum ChatClientType
+    {
+        CHAT_CLIENT_IS_OFFICER          = 1 << 0,
+        CHAT_CLIENT_IS_CLAN_LEADER      = 1 << 1,
+        CHAT_CLIENT_IS_STAFF            = 1 << 5,
+        CHAT_CLIENT_IS_PREMIUM          = 1 << 6,
+        CHAT_CLIENT_IS_VERIFIED         = 1 << 7
+    }
+
+    [Flags]
+    public enum ChatChannelType
+    {
+        CHAT_CHANNEL_FLAG_PERMANENT     = 1 << 0,
+        CHAT_CHANNEL_FLAG_SERVER        = 1 << 1, // The Channel For Post-Match Chat
+        CHAT_CHANNEL_FLAG_HIDDEN        = 1 << 2,
+        CHAT_CHANNEL_FLAG_RESERVED      = 1 << 3, // System-Created Channels (e.g. General, Clan, Stream, etc.)
+        CHAT_CHANNEL_FLAG_GENERAL_USE   = 1 << 4, // e.g. KONGOR 1, KONGOR 2, etc.
+        CHAT_CHANNEL_FLAG_UNJOINABLE    = 1 << 5,
+        CHAT_CHANNEL_FLAG_AUTH_REQUIRED = 1 << 6,
+        CHAT_CHANNEL_FLAG_CLAN          = 1 << 7,
+
+        CHAT_CHANNEL_FLAG_STREAM_USE    = 1 << 8
+    }
+
+    [Flags]
+    public enum ServerType
+    {
+        SSF_OFFICIAL                    = 1 << 0,
+        SSF_OFFICIAL_WITH_STATS         = 1 << 1,
+        SSF_NOLEAVER                    = 1 << 2,
+        SSF_VERIFIED_ONLY               = 1 << 3,
+        SSF_PRIVATE                     = 1 << 4,
+        SSF_TIER_NOOBS_ALLOWED          = 1 << 5,
+        SSF_TIER_PRO                    = 1 << 6,
+        SSF_ALL_HEROES                  = 1 << 7,
+        SSF_CASUAL                      = 1 << 8,
+        SSF_GATED                       = 1 << 9,
+        SSF_FORCE_RANDOM                = 1 << 10,
+        SSF_AUTO_BALANCE                = 1 << 11,
+        SSF_ADV_OPTIONS                 = 1 << 12,
+        SSF_DEV_HEROES                  = 1 << 13,
+        SSF_HARDCORE                    = 1 << 14
+    }
+
+    public struct TMMPopularities
+    {
+        public byte [ /* TMM_NUM_GAME_TYPES   */ ] [ /* TMM_NUM_GAME_MAPS  */ ] [ /* TMM_NUM_OPTION_RANK_TYPES */ ]                                     GameType { get; set; }
+        public byte [ /* TMM_NUM_GAME_MAPS    */ ] [ /* TMM_NUM_GAME_TYPES */ ] [ /* TMM_NUM_OPTION_RANK_TYPES */ ]                                     GameMap  { get; set; }
+        public byte [ /* TMM_NUM_GAME_MODES   */ ] [ /* TMM_NUM_GAME_MAPS  */ ] [ /* TMM_NUM_GAME_TYPES        */ ] [ /* TMM_NUM_OPTION_RANK_TYPES */ ] GameMode { get; set; }
+        public byte [ /* NUM_TMM_GAME_REGIONS */ ] [ /* TMM_NUM_GAME_MAPS  */ ] [ /* TMM_NUM_GAME_TYPES        */ ] [ /* TMM_NUM_OPTION_RANK_TYPES */ ] Region   { get; set; }
+
+        public void Clear()
+        {
+            for (uint i = 0; i < Convert.ToInt32(TMMGameTypes.TMM_NUM_GAME_TYPES); ++i)
+                for (uint j = 0; j < Convert.ToInt32(TMMGameMaps.TMM_NUM_GAME_MAPS); ++j)
+                    for (uint k = 0; k < Convert.ToInt32(TMMRankType.TMM_NUM_OPTION_RANK_TYPES); ++k)
+                        GameType[i][j][k] = 0;
+
+            for (uint i = 0; i < Convert.ToInt32(TMMGameMaps.TMM_NUM_GAME_MAPS); ++i)
+                for (uint j = 0; j < Convert.ToInt32(TMMGameTypes.TMM_NUM_GAME_TYPES); ++j)
+                    for (uint k = 0; k < Convert.ToInt32(TMMRankType.TMM_NUM_OPTION_RANK_TYPES); ++k)
+                        GameMap[i][j][k] = 0;
+
+            for (uint i = 0; i < Convert.ToInt32(TMMGameModes.TMM_NUM_GAME_MODES); ++i)
+                for (uint j = 0; j < Convert.ToInt32(TMMGameMaps.TMM_NUM_GAME_MAPS); ++j)
+                    for (uint k = 0; k < Convert.ToInt32(TMMGameTypes.TMM_NUM_GAME_TYPES); ++k)
+                        for (uint l = 0; l < Convert.ToInt32(TMMRankType.TMM_NUM_OPTION_RANK_TYPES); ++l)
+                            GameMode[i][j][k][l] = 0;
+
+            for (uint i = 0; i < Convert.ToInt32(TMMGameRegions.NUM_TMM_GAME_REGIONS); ++i)
+                for (uint j = 0; j < Convert.ToInt32(TMMGameMaps.TMM_NUM_GAME_MAPS); ++j)
+                    for (uint k = 0; k < Convert.ToInt32(TMMGameTypes.TMM_NUM_GAME_TYPES); ++k)
+                        for (uint l = 0; l < Convert.ToInt32(TMMRankType.TMM_NUM_OPTION_RANK_TYPES); ++l)
+                            Region[i][j][k][l] = 0;
+        }
+    };
+
+    public struct RosterInfo(uint accountID = 0, byte teamSlot = 0)
+    {
+        public uint AccountID { get; set; } = accountID;
+
+        public byte TeamSlot { get; set; } = teamSlot;
     };
 }
