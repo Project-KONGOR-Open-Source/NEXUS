@@ -1,6 +1,6 @@
 ﻿namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Statistics;
 
-[ChatCommand(ChatProtocol.NET_CHAT_CL_TMM_CAMPAIGN_STATS)]
+[ChatCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_CAMPAIGN_STATS)]
 public class SeasonStats(MerrickContext merrick, ILogger<SeasonStats> logger) : CommandProcessorsBase, ICommandProcessor
 {
     private MerrickContext MerrickContext { get; set; } = merrick;
@@ -50,7 +50,7 @@ public class SeasonStats(MerrickContext merrick, ILogger<SeasonStats> logger) : 
            Send(m_bufferSend);
          */
 
-        ResponseCommand = BitConverter.GetBytes(ChatProtocol.NET_CHAT_CL_TMM_CAMPAIGN_STATS);
+        ResponseCommand = BitConverter.GetBytes(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_CAMPAIGN_STATS);
 
         Response.WriteCommandBytes(ResponseCommand);
         Response.WriteFloat32(1850.55f);

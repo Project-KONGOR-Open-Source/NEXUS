@@ -1,6 +1,6 @@
 ﻿namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Connection;
 
-[ChatCommand(ChatProtocol.NET_CHAT_CL_CONNECT)]
+[ChatCommand(ChatProtocol.ClientToChatServer.NET_CHAT_CL_CONNECT)]
 public class Handshake(MerrickContext merrick, ILogger<Handshake> logger) : CommandProcessorsBase, ICommandProcessor
 {
     private MerrickContext MerrickContext { get; set; } = merrick;
@@ -32,7 +32,7 @@ public class Handshake(MerrickContext merrick, ILogger<Handshake> logger) : Comm
         // TODO: Check Cookie
         // TODO: Check Authentication Hash
 
-        ResponseCommand = BitConverter.GetBytes(ChatProtocol.NET_CHAT_CL_ACCEPT);
+        ResponseCommand = BitConverter.GetBytes(ChatProtocol.ChatServerToClient.NET_CHAT_CL_ACCEPT);
 
         Response.WriteCommandBytes(ResponseCommand);
         Response.WriteNullTerminator();
