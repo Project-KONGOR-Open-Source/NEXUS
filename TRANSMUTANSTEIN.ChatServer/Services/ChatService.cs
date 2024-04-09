@@ -1,7 +1,9 @@
 ﻿namespace TRANSMUTANSTEIN.ChatServer.Services;
 
-public class ChatService : IHostedService, IDisposable
+public class ChatService(IServiceProvider serviceProvider) : IHostedService, IDisposable
 {
+    private IServiceProvider ServiceProvider { get; set; } = serviceProvider;
+
     public static Core.ChatServer? ChatServer { get; set; }
 
     public Task StartAsync(CancellationToken cancellationToken)
@@ -11,7 +13,7 @@ public class ChatService : IHostedService, IDisposable
         // TODO: Make Distinction Between Chat Service (55507, 55508) Ports And Chat Server Ports (5555x > 1: Client, 2: Manager, 3: Server)
         int port = 55551; // TODO: Get From Configuration
 
-        ChatServer = new Core.ChatServer(address, port);
+        ChatServer = new Core.ChatServer(address, port, ServiceProvider);
 
         if (ChatServer.Start() is false)
         {

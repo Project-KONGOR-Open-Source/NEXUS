@@ -5,9 +5,6 @@ public class TRANSMUTANSTEIN
     // TRUE If The Application Is Running In Development Mode Or False If Not
     public static bool RunsInDevelopmentMode { get; set; } = true;
 
-    // The Service Provider As A Singleton Which Chat Sessions Can Share
-    public static IServiceProvider ServiceProvider { get; set; } = null!;
-
     public static void Main(string[] args)
     {
         // Create The Application Builder
@@ -49,9 +46,6 @@ public class TRANSMUTANSTEIN
 
         // Map Aspire Default Endpoints
         app.MapDefaultEndpoints();
-
-        // Set A Global Service Provider
-        ServiceProvider = app.Services; // TODO: Find A Smarter Way To Provide Services; Figure Out Dependency Injection In This Project Setup (Reflection-Based Routing)
 
         // Run The Application
         app.Run();

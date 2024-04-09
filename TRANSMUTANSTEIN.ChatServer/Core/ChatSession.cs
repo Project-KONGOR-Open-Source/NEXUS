@@ -1,7 +1,9 @@
 ﻿namespace TRANSMUTANSTEIN.ChatServer.Core;
 
-public class ChatSession(TCPServer server) : TCPSession(server)
+public class ChatSession(TCPServer server, IServiceProvider serviceProvider) : TCPSession(server)
 {
+    private IServiceProvider ServiceProvider { get; set; } = serviceProvider;
+
     protected override void OnConnected()
     {
         Console.WriteLine($"Chat Session ID {Id} Was Created");
@@ -72,7 +74,7 @@ public class ChatSession(TCPServer server) : TCPSession(server)
             
             ICommandProcessor? GetCommandTypeInstance(Type type)
             {
-                object instance = ActivatorUtilities.CreateInstance(TRANSMUTANSTEIN.ServiceProvider, type);
+                object instance = ActivatorUtilities.CreateInstance(ServiceProvider, type);
 
                 return instance as ICommandProcessor;
             }
