@@ -284,24 +284,24 @@ public static class ChatProtocol
 
     public static class ChatServerToServerManager
     {
-        public const ushort NET_CHAT_SM_ACCEPT                              = 0x1700; // Accept connection from game server
-        public const ushort NET_CHAT_SM_REJECT                              = 0x1701; // Refuse connection from game server
-        public const ushort NET_CHAT_SM_REMOTE_COMMAND                      = 0x1702; // Execute a command on this server manager
-        public const ushort NET_CHAT_SM_OPTIONS                             = 0x1703; // Various options to control cvars
-        public const ushort NET_CHAT_SM_UPLOAD_REQUEST                      = 0x1704; // What replay or game log should the SM try to upload?
+        public const ushort NET_CHAT_SM_ACCEPT                              = 0x1700;   // Accept A Match Server Connection
+        public const ushort NET_CHAT_SM_REJECT                              = 0x1701;   // Refuse A Match Server Connection
+        public const ushort NET_CHAT_SM_REMOTE_COMMAND                      = 0x1702;   // Execute A Command On The Server Manager
+        public const ushort NET_CHAT_SM_OPTIONS                             = 0x1703;   // Options To Set CVARs
+        public const ushort NET_CHAT_SM_UPLOAD_REQUEST                      = 0x1704;   // The Match Replay Or Match Log That The Server Manager Is Requested To Upload
     }
 
     public static class MasterServerToChatServer
     {
-        public const ushort NET_CHAT_WEB_UPLOAD_REQUEST                     = 0x1800; // A request from a website to upload a replay or game log
-        public const ushort NET_CHAT_QUERY_LEAVER_STRIKE                    = 0x1801; // A request from masterserver to chatserver to query account leaver strike info
+        public const ushort NET_CHAT_WEB_UPLOAD_REQUEST                     = 0x1800;   // The Web Portal Is Requesting The Upload Of A Match Replay Or Match Log
+        public const ushort NET_CHAT_QUERY_LEAVER_STRIKE                    = 0x1801;   // The Master Server Is Requesting Leaver Strike Information From The Chat Server
     }
 
     public const ushort NET_CHAT_INVALID                                    = 0xFFFF;
 
-    public const byte CHAT_MESSAGE_MAX_LENGTH                               = 250; // Max length of any channel chat message
-    public const byte CHAT_CHANNEL_MAX_LENGTH                               = 35; // Max length of channel names
-    public const byte CHAT_CHANNEL_TOPIC_MAX_LENGTH                         = 140; // Max length of channel topics
+    public const byte CHAT_MESSAGE_MAX_LENGTH                               = 250;      // The Maximum Length Of Messages Sent To The Channel
+    public const byte CHAT_CHANNEL_MAX_LENGTH                               = 35;       // The Maximum Length Of Channel Names
+    public const byte CHAT_CHANNEL_TOPIC_MAX_LENGTH                         = 140;      // The Maximum Length Of Channel Topics
 
     public const int INVALID_CHAT_CHANNEL                                   = -1;
 
@@ -333,24 +333,23 @@ public static class ChatProtocol
         NUM_GAME_LOBBY_STATES
     };
 
-    // chat server will sent it to game server when match starts
-    // game server then send it to master server.
-    //
-    // new Arranged Match Type need to be added at bottom
-    // this will affect code in master server class_type.php
+    /// <summary>
+    ///     The chat server will send this to the match server on match start.
+    ///     The game server will then send this to the master server for further processing.
+    /// </summary>
     public enum ArrangedMatchType
     {
-        AM_PUBLIC, // Public games
-        AM_MATCHMAKING, // Ranked Matchmaking games (normal and casual)
-        AM_SCHEDULED_MATCH, // Scheduled matches (tournament)
-        AM_UNSCHEDULED_MATCH, // Unscheduled matches (league)
-        AM_MATCHMAKING_MIDWARS, // Matchmaking games (midwars)
-        AM_MATCHMAKING_BOTMATCH, // Matchmaking games (coop/bot)
-        AM_UNRANKED_MATCHMAKING, // Unranked matchmaking games (normal and casual)
-        AM_MATCHMAKING_RIFTWARS, // Matchmaking games (riftwars)
+        AM_PUBLIC,                  // Public Match
+        AM_MATCHMAKING,             // Ranked Normal/Casual Matchmaking
+        AM_SCHEDULED_MATCH,         // Scheduled Tournament Match
+        AM_UNSCHEDULED_MATCH,       // Unscheduled League Match
+        AM_MATCHMAKING_MIDWARS,     // MidWars Matchmaking
+        AM_MATCHMAKING_BOTMATCH,    // Bot Co-Op Matchmaking
+        AM_UNRANKED_MATCHMAKING,    // Unranked Normal/Casual Matchmaking
+        AM_MATCHMAKING_RIFTWARS,    // RiftWars Matchmaking
         AM_PUBLIC_PRELOBBY,
-        AM_MATCHMAKING_CUSTOM, // Matchmaking games (custom maps)
-        AM_MATCHMAKING_CAMPAIGN, // Matchmaking games (campaign, normal and casual)
+        AM_MATCHMAKING_CUSTOM,      // Custom Map Matchmaking
+        AM_MATCHMAKING_CAMPAIGN,    // Ranked Season Normal/Casual Matchmaking
 
         NUM_ARRANGED_MATCH_TYPES
     };
@@ -359,19 +358,19 @@ public static class ChatProtocol
     {
         return arrangedMatchType switch
         {
-            ArrangedMatchType.AM_PUBLIC => false,
-            ArrangedMatchType.AM_SCHEDULED_MATCH => false,
-            ArrangedMatchType.AM_UNSCHEDULED_MATCH => false,
+            ArrangedMatchType.AM_PUBLIC                 => false,
+            ArrangedMatchType.AM_SCHEDULED_MATCH        => false,
+            ArrangedMatchType.AM_UNSCHEDULED_MATCH      => false,
 
-            ArrangedMatchType.AM_MATCHMAKING => true,
-            ArrangedMatchType.AM_MATCHMAKING_MIDWARS => true,
-            ArrangedMatchType.AM_MATCHMAKING_RIFTWARS => true,
-            ArrangedMatchType.AM_MATCHMAKING_BOTMATCH => true,
-            ArrangedMatchType.AM_UNRANKED_MATCHMAKING => true,
-            ArrangedMatchType.AM_MATCHMAKING_CUSTOM => true,
-            ArrangedMatchType.AM_MATCHMAKING_CAMPAIGN => true,
+            ArrangedMatchType.AM_MATCHMAKING            => true,
+            ArrangedMatchType.AM_MATCHMAKING_MIDWARS    => true,
+            ArrangedMatchType.AM_MATCHMAKING_RIFTWARS   => true,
+            ArrangedMatchType.AM_MATCHMAKING_BOTMATCH   => true,
+            ArrangedMatchType.AM_UNRANKED_MATCHMAKING   => true,
+            ArrangedMatchType.AM_MATCHMAKING_CUSTOM     => true,
+            ArrangedMatchType.AM_MATCHMAKING_CAMPAIGN   => true,
 
-            _ => false
+            _                                           => false
         };
     }
 
@@ -401,50 +400,50 @@ public static class ChatProtocol
 
     public enum LobbyUpdateType
     {
-        LOBBY_CLIENT_ENTER, //tell the client who entered, if not bot
-        LOBBY_CLIENT_ON_ENTER, //tell other client that one client/bot entered
-        LOBBY_CLIENT_ON_LEAVE, //tell other client that one client/bot left
-        LOBBY_CLIENT_ON_CHANGE, //tell other client that one client change slot
-        LOBBY_STATE_UPDATE, //tell all client for state update
-        LOBBY_INFO_UPDATE, //tell all client for info upate
+        LOBBY_CLIENT_ENTER,         // Message The Client That Another Non-Bot Player Has Joined
+        LOBBY_CLIENT_ON_ENTER,      // Message All Clients That A Human/Bot Player Has Joined
+        LOBBY_CLIENT_ON_LEAVE,      // Message All Clients That A Human/Bot Player Has Left
+        LOBBY_CLIENT_ON_CHANGE,     // Message All Clients That A Human/Bot Player Has Changed Slot
+        LOBBY_STATE_UPDATE,         // Message All Clients That A State Update Has Occured
+        LOBBY_INFO_UPDATE,          // Message All Clients That An Information Update Has Occured
 
         LOBBY_UPDATE_TYPE_NUM
     };
 
     public static readonly string[] TMMUpdateTypes =
     {
-        "TMM_CREATE_GROUP", // TMM_CREATE_GROUP
-        "TMM_FULL_GROUP_UPDATE", // TMM_FULL_GROUP_UPDATE
-        "TMM_PARTIAL_GROUP_UPDATE", // TMM_PARTIAL_GROUP_UPDATE
-        "TMM_PLAYER_JOINED_GROUP", // TMM_PLAYER_JOINED_GROUP
-        "TMM_PLAYER_LEFT_GROUP", // TMM_PLAYER_LEFT_GROUP
-        "TMM_PLAYER_KICKED_FROM_GROUP", // TMM_PLAYER_KICKED_FROM_GROUP
-        "TMM_GROUP_JOINED_QUEUE", // TMM_GROUP_JOINED_QUEUE
-        "TMM_GROUP_REJOINED_QUEUE", // TMM_GROUP_REJOINED_QUEUE
-        "TMM_GROUP_LEFT_QUEUE", // TMM_GROUP_LEFT_QUEUE
-        "TMM_INVITED_TO_GROUP", // TMM_INVITED_TO_GROUP
-        "TMM_PLAYER_REJECTED_GROUP_INVITE", // TMM_PLAYER_REJECTED_GROUP_INVITE
-        "TMM_GROUP_QUEUE_UPDATE", // TMM_GROUP_QUEUE_UPDATE
-        "TMM_GROUP_NO_MATCHES_FOUND", // TMM_GROUP_NO_MATCHES_FOUND
-        "TMM_GROUP_NO_SERVERS_FOUND", // TMM_GROUP_NO_SERVERS_FOUND
-        "TMM_POPULARITY_UPDATE", // TMM_POPULARITY_UPDATE
-        "TMM_FOUND_MATCH_UPDATE", // TMM_FOUND_MATCH_UPDATE
-        "TMM_GROUP_FOUND_SERVER", // TMM_GROUP_FOUND_SERVER
-        "TMM_MATCHMAKING_DISABLED" // TMM_MATCHMAKING_DISABLED
+        "TMM_CREATE_GROUP",
+        "TMM_FULL_GROUP_UPDATE",
+        "TMM_PARTIAL_GROUP_UPDATE",
+        "TMM_PLAYER_JOINED_GROUP",
+        "TMM_PLAYER_LEFT_GROUP",
+        "TMM_PLAYER_KICKED_FROM_GROUP",
+        "TMM_GROUP_JOINED_QUEUE",
+        "TMM_GROUP_REJOINED_QUEUE",
+        "TMM_GROUP_LEFT_QUEUE",
+        "TMM_INVITED_TO_GROUP",
+        "TMM_PLAYER_REJECTED_GROUP_INVITE",
+        "TMM_GROUP_QUEUE_UPDATE",
+        "TMM_GROUP_NO_MATCHES_FOUND",
+        "TMM_GROUP_NO_SERVERS_FOUND",
+        "TMM_POPULARITY_UPDATE",
+        "TMM_FOUND_MATCH_UPDATE",
+        "TMM_GROUP_FOUND_SERVER",
+        "TMM_MATCHMAKING_DISABLED"
     };
 
     public enum TMMFailedToJoinReason
     {
-        TMMFTJR_LEAVER, // Group has a leaver
-        TMMFTJR_DISABLED, // Matchmaking is disabled
-        TMMFTJR_BUSY, // Matchmaking is full
-        TMMFTJR_OPTION_UNAVAILABLE, // An option selected is currently unavailable
-        TMMFTJR_INVALID_VERSION, // Client's version is out of date
-        TMMFTJR_GROUP_FULL, // The group you're trying to join is full
-        TMMFTJR_BAD_STATS, // Unable to retrieve player's stats
-        TMMFTJR_ALREADY_QUEUED, // The group you're trying to join is in queue
-        TMMFTJR_TRIAL, // Trial accounts aren't allowed to play matchmaking (deprecated)
-        TMMFTJR_BANNED, // You're currently banned from matchmaking
+        TMMFTJR_LEAVER,             // A Player Has Left The Matchmaking Group
+        TMMFTJR_DISABLED,           // Matchmaking Is Disabled
+        TMMFTJR_BUSY,               // Matchmaking Is Unable To Accept Additional Players
+        TMMFTJR_OPTION_UNAVAILABLE, // A Selected Matchmaking Option Is Unavailable
+        TMMFTJR_INVALID_VERSION,    // The Game Client Version Does Not Match The Latest Version
+        TMMFTJR_GROUP_FULL,         // The Matchmaking Group Is Full
+        TMMFTJR_BAD_STATS,          // Unable To Retrieve Player Statistics
+        TMMFTJR_ALREADY_QUEUED,     // The Matchmaking Group Is Already In A Queue
+        TMMFTJR_TRIAL,              // Matchmaking Is Unavailable For Trial Accounts
+        TMMFTJR_BANNED,             // The Account Is Banned From Matchmaking
         TMMFTJR_LOBBY_FULL,
         TMMFTJR_WRONG_PASSWORD,
         TMMFTJR_CAMPAIGN_NOT_ELIGIBLE
@@ -682,12 +681,12 @@ public static class ChatProtocol
 
     public enum ExcessiveGamePlayType
     {
-        EEGPT_NONE, // No message
-        EEGPT_1_HOUR, // You've played 1 hour
-        EEGPT_2_HOURS, // You've played 2 hours
-        EEGPT_FATIGUE, // You've played too long and are now experiencing fatigue, your game benefits are now cut down to half.
-        EEGPT_UNHEALTHY, // You've played long enough to experience unhealthy side effects, you will no longer receive any game benefits.
-        EEGPT_GENERAL = 255 // A general message for excessive game play broadcasts (used only for Korea)
+        EEGPT_NONE,                     // No Broadcast For Excessively Long Player Sessions
+        EEGPT_1_HOUR,                   // The Player's Session Has Reached A Duration Of 1 Hour
+        EEGPT_2_HOURS,                  // The Player's Session Has Reached A Duration Of 2 Hours
+        EEGPT_FATIGUE,                  // The Player Has Been Online For An Extensive Amount Of Time, And Their Post-Match Rewards Are Halved
+        EEGPT_UNHEALTHY,                // The Player Has Been Online For Too Long, And They No Longer Receive Post-Match Rewards
+        EEGPT_GENERAL = 255             // A General Broadcast For Excessively Long Player Sessions
     };
 
     public enum ExcessiveGamePlayBenefit
