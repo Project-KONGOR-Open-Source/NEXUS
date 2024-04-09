@@ -127,9 +127,9 @@ public static class ChatProtocol
         public const ushort CHAT_CMD_MAINTENANCE_MESSAGE                    = 0xBD;
         public const ushort CHAT_CMD_UPLOAD_REQUEST                         = 0xBE;
         public const ushort CHAT_CMD_UPLOAD_STATUS                          = 0xBF;
-        public const ushort CHAT_CMD_OPTIONS                                = 0xC0; // Send clients options controlled by the chat server
+        public const ushort CHAT_CMD_OPTIONS                                = 0xC0;     // Send Clients Options Controlled By The Chat Server
         public const ushort CHAT_CMD_LOGOUT                                 = 0xC1;
-        public const ushort CHAT_CMD_NEW_MESSAGES                           = 0xC2; // The user has recieved new messages and should pull their message list
+        public const ushort CHAT_CMD_NEW_MESSAGES                           = 0xC2;     // The Player Has Unread Messages
     }
 
     public static class Bidirectional
@@ -140,21 +140,21 @@ public static class ChatProtocol
 
     public static class ClientToChatServer
     {
-        public const ushort NET_CHAT_CL_CONNECT                             = 0x0C00; // Client requesting connection
-        public const ushort NET_CHAT_CL_GET_CHANNEL_LIST                    = 0x0C01; // Client requests a list of channels
-        public const ushort NET_CHAT_CL_CHANNEL_LIST_ACK                    = 0x0C02; // HACK: until TCP connections are handled properly
-        public const ushort NET_CHAT_CL_GET_CHANNEL_SUBLIST                 = 0x0C03; // Client requests a sub-list of channels (for auto-complete)
-        public const ushort NET_CHAT_CL_CHANNEL_SUBLIST_ACK                 = 0x0C04; // HACK: until TCP connections are handled properly
-        public const ushort NET_CHAT_CL_GET_USER_STATUS                     = 0x0C05; // Client requesting status of a specific user
+        public const ushort NET_CHAT_CL_CONNECT                             = 0x0C00;   // A Game Client Is Requesting To Connect
+        public const ushort NET_CHAT_CL_GET_CHANNEL_LIST                    = 0x0C01;   // A Game Client Is Requesting A List Of Chat Channels
+        public const ushort NET_CHAT_CL_CHANNEL_LIST_ACK                    = 0x0C02;
+        public const ushort NET_CHAT_CL_GET_CHANNEL_SUBLIST                 = 0x0C03;   // A Game Client Is Requesting A Sub-List Of Chat Channels (For Auto-Complete)
+        public const ushort NET_CHAT_CL_CHANNEL_SUBLIST_ACK                 = 0x0C04;
+        public const ushort NET_CHAT_CL_GET_USER_STATUS                     = 0x0C05;   // A Game Client Is Requesting The Status Of A Player
         public const ushort EMPTY_0x0C06                                    = 0x0C06;
         public const ushort EMPTY_0x0C07                                    = 0x0C07;
-        public const ushort NET_CHAT_CL_ADMIN_KICK                          = 0x0C08; // Admin request to disconnect target client from chat server
-        public const ushort NET_CHAT_CL_REFRESH_UPGRADES                    = 0x0C09; // Client is requesting an upgrade refresh for itself
-        public const ushort NET_CHAT_CL_END_MATCH                           = 0x0C1B; // Client is requesting to end match
-        public const ushort NET_CHAT_CL_FORCE_GROUP_MATCHUP                 = 0x0C1C; // Client is requesting to force a group into a match
-        public const ushort NET_CHAT_CL_SET_MATCHMAKING_VERSION             = 0x0C1D; // Client is requesting to change matchmaking version
-        public const ushort NET_CHAT_CL_BLOCK_PHRASE                        = 0x0C1E; // Client is requesting to block a phrase
-        public const ushort NET_CHAT_CL_UNBLOCK_PHRASE                      = 0x0C1F; // Client is requesting to unblock a phrase
+        public const ushort NET_CHAT_CL_ADMIN_KICK                          = 0x0C08;   // A Request With Elevated Privileges To Disconnect A Target Client From The Chat Server
+        public const ushort NET_CHAT_CL_REFRESH_UPGRADES                    = 0x0C09;   // A Game Client Is Requesting An Upgrade Refresh For Itself
+        public const ushort NET_CHAT_CL_END_MATCH                           = 0x0C1B;   // A Game Client Is Requesting To End The Match
+        public const ushort NET_CHAT_CL_FORCE_GROUP_MATCHUP                 = 0x0C1C;   // A Game Client Is Requesting To Force A Group Into A Match
+        public const ushort NET_CHAT_CL_SET_MATCHMAKING_VERSION             = 0x0C1D;   // A Game Client Is Requesting To Change The Matchmaking Version
+        public const ushort NET_CHAT_CL_BLOCK_PHRASE                        = 0x0C1E;   // A Game Client Is Requesting To Block A Phrase
+        public const ushort NET_CHAT_CL_UNBLOCK_PHRASE                      = 0x0C1F;   // A Game Client Is Requesting to Unblock A Phrase
     }
 
     public static class GameLobby
@@ -162,11 +162,11 @@ public static class ChatProtocol
         public const ushort NET_CHAT_CL_GAME_LOBBY_SELECT_HERO              = 0x0C10;
         public const ushort NET_CHAT_CL_GAME_LOBBY_READY                    = 0x0C11;
         public const ushort NET_CHAT_CL_GAME_LOBBY_CREATE                   = 0x0C12;
-        public const ushort NET_CHAT_CL_GAME_LOBBY_JOIN                     = 0x0C13; //player request to join the lobby
+        public const ushort NET_CHAT_CL_GAME_LOBBY_JOIN                     = 0x0C13;   // A Player Is Requesting To Join The Match Lobby
         public const ushort NET_CHAT_CL_GAME_LOBBY_INVITE                   = 0x0C14;
         public const ushort NET_CHAT_CL_GAME_LOBBY_REJECT_INVITE            = 0x0C15;
         public const ushort NET_CHAT_CL_GAME_LOBBY_ACCEPT_INVITE            = 0x0C16;
-        public const ushort NET_CHAT_CL_GAME_LOBBY_KICK                     = 0x0C17; //bidirectional, tell a client that he's kcked, or tell a server to kick someone
+        public const ushort NET_CHAT_CL_GAME_LOBBY_KICK                     = 0x0C17;   // Message A Player That They Were Kicked From The Match, Or Message A Match Server To Kick A Player (Bi-Directional)
         public const ushort NET_CHAT_CL_GAME_LOBBY_CHANGE_SLOT              = 0x0C18;
         public const ushort NET_CHAT_CL_GAME_LOBBY_REQUEST_LIST             = 0x0C19;
         public const ushort NET_CHAT_CL_GAME_LOBBY_RETURN                   = 0x0C1A;
@@ -174,16 +174,16 @@ public static class ChatProtocol
 
     public static class Matchmaking
     {
-        public const ushort NET_CHAT_CL_TMM_GROUP_CREATE                    = 0x0C0A; // Client is requesting a new group be created
-        public const ushort NET_CHAT_CL_TMM_GROUP_JOIN                      = 0x0C0B; // Client is joining a group
-        public const ushort NET_CHAT_CL_TMM_GROUP_LEAVE                     = 0x0C0C; // Client is leaving a group
-        public const ushort NET_CHAT_CL_TMM_GROUP_INVITE                    = 0x0C0D; // Client would like to invite someone to the group
-        public const ushort NET_CHAT_CL_TMM_GROUP_INVITE_BROADCAST          = 0x0C0E; // Broadcast that a client would like to invite someone to the group
-        public const ushort NET_CHAT_CL_TMM_GROUP_REJECT_INVITE             = 0x0C0F; // Client rejected invite
+        public const ushort NET_CHAT_CL_TMM_GROUP_CREATE                    = 0x0C0A;   // A Player Is Requesting A New Group To Be Created
+        public const ushort NET_CHAT_CL_TMM_GROUP_JOIN                      = 0x0C0B;   // A Player Is Joining A Group
+        public const ushort NET_CHAT_CL_TMM_GROUP_LEAVE                     = 0x0C0C;   // A Player Is Leaving A Group
+        public const ushort NET_CHAT_CL_TMM_GROUP_INVITE                    = 0x0C0D;   // A Player Is Inviting Another Player To The Group
+        public const ushort NET_CHAT_CL_TMM_GROUP_INVITE_BROADCAST          = 0x0C0E;   // Broadcast To The Group That A Player Is Inviting Another Player To The Group
+        public const ushort NET_CHAT_CL_TMM_GROUP_REJECT_INVITE             = 0x0C0F;   // A Player Has Rejected A Group Invite
         public const ushort NET_CHAT_CL_CONNECT_TEST                        = 0x0C10;
-        public const ushort NET_CHAT_CL_TMM_GROUP_KICK                      = 0x0D00; // The leader requested to kick a group member
-        public const ushort NET_CHAT_CL_TMM_GROUP_JOIN_QUEUE                = 0x0D01; // The group leader wants to join the queue for a match
-        public const ushort NET_CHAT_CL_TMM_GROUP_LEAVE_QUEUE               = 0x0D02; // The group leader wants to leave the join match queue
+        public const ushort NET_CHAT_CL_TMM_GROUP_KICK                      = 0x0D00;   // The Group Leader Has Requested To Kick A Group Member
+        public const ushort NET_CHAT_CL_TMM_GROUP_JOIN_QUEUE                = 0x0D01;   // The Group Leader Has Requested To Join The Queue For A Match
+        public const ushort NET_CHAT_CL_TMM_GROUP_LEAVE_QUEUE               = 0x0D02;   // The Group Leader Has Requested To Leave The Queue For A Match
         public const ushort NET_CHAT_CL_TMM_GROUP_UPDATE                    = 0x0D03; // Updates that occur whenever something in the group is updated
         public const ushort NET_CHAT_CL_TMM_GROUP_PLAYER_LOADING_STATUS     = 0x0D04; // Send updates on loading status
         public const ushort NET_CHAT_CL_TMM_GROUP_PLAYER_READY_STATUS       = 0x0D05; // Send updates on whether or not the player is ready
@@ -219,15 +219,15 @@ public static class ChatProtocol
 
     public static class ChatServerToClient
     {
-        public const ushort NET_CHAT_CL_ACCEPT                              = 0x1C00; // Accept connection from client
-        public const ushort NET_CHAT_CL_REJECT                              = 0x1C01; // Refuse connection from client
-        public const ushort NET_CHAT_CL_CHANNEL_INFO                        = 0x1C02; // Basic information about a channel
-        public const ushort NET_CHAT_CL_CHANNEL_LIST_SYN                    = 0x1C03; // HACK: until TCP connections are handled properly
-        public const ushort NET_CHAT_CL_CHANNEL_SUBLIST_START               = 0x1C04; // Start of a channel sub-list
-        public const ushort NET_CHAT_CL_CHANNEL_INFO_SUB                    = 0x1C05; // Basic information about a channel in a sublist
-        public const ushort NET_CHAT_CL_CHANNEL_SUBLIST_SYN                 = 0x1C06; // HACK: until TCP connections are handled properly
-        public const ushort NET_CHAT_CL_CHANNEL_SUBLIST_END                 = 0x1C07; // End of a channel sub-list
-        public const ushort NET_CHAT_CL_USER_STATUS                         = 0x1C08; // User status request reponse
+        public const ushort NET_CHAT_CL_ACCEPT                              = 0x1C00;   // Accept A Game Client Connection
+        public const ushort NET_CHAT_CL_REJECT                              = 0x1C01;   // Refuse A Game Client Connection
+        public const ushort NET_CHAT_CL_CHANNEL_INFO                        = 0x1C02;   // Basic Chat Channel Information
+        public const ushort NET_CHAT_CL_CHANNEL_LIST_SYN                    = 0x1C03;
+        public const ushort NET_CHAT_CL_CHANNEL_SUBLIST_START               = 0x1C04;   // Start Of A Chat Channel Sub-List
+        public const ushort NET_CHAT_CL_CHANNEL_INFO_SUB                    = 0x1C05;   // Basic Information About A Chat Channel In A Sub-List
+        public const ushort NET_CHAT_CL_CHANNEL_SUBLIST_SYN                 = 0x1C06;
+        public const ushort NET_CHAT_CL_CHANNEL_SUBLIST_END                 = 0x1C07;   // End Of A Chat Channel Sub-List
+        public const ushort NET_CHAT_CL_USER_STATUS                         = 0x1C08;   // Response To NET_CHAT_CL_GET_USER_STATUS
         public const ushort NET_CHAT_CL_GAME_LOBBY_JOINED                   = 0x1C09;
         public const ushort NET_CHAT_CL_GAME_LOBBY_LEFT                     = 0x1C0A;
         public const ushort NET_CHAT_CL_GAME_LOBBY_UPDATE                   = 0x1C0B;
@@ -237,55 +237,55 @@ public static class ChatProtocol
         public const ushort NET_CHAT_CL_GAME_LOBBY_LAUNCH_GAME              = 0x1C0F;
         public const ushort NET_CHAT_CL_GAME_LOBBY_LIST                     = 0x1C10;
         public const ushort NET_CHAT_CL_GAME_LOBBY_FULL                     = 0x1C11;
-        public const ushort NET_CHAT_CL_GAME_LOBBY_SPEC_READY               = 0x1C12; // Tell the spectator others are in hero picking mode
+        public const ushort NET_CHAT_CL_GAME_LOBBY_SPEC_READY               = 0x1C12;   // Message A Match Spectator That Players Are In The Hero Banning/Picking Phase
     }
 
     public static class GameServerToChatServer
     {
-        public const ushort NET_CHAT_GS_CONNECT                             = 0x0500; // Game server requesting connection
-        public const ushort NET_CHAT_GS_DISCONNECT                          = 0x0501; // Game server disconnecting
-        public const ushort NET_CHAT_GS_STATUS                              = 0x0502; // Game server's current status
-        public const ushort NET_CHAT_GS_ANNOUNCE_MATCH                      = 0x0503; // An arranged match is ready for clients
-        public const ushort NET_CHAT_GS_ABANDON_MATCH                       = 0x0504; // An arranged match failed to start
-        public const ushort NET_CHAT_GS_MATCH_STARTED                       = 0x0505; // An arranged match has started successfully (all clients in match and banning/picking phase starting)
-        public const ushort NET_CHAT_GS_REMIND_PLAYER                       = 0x0506; // An expected player has not yet connected to an arranged match
+        public const ushort NET_CHAT_GS_CONNECT                             = 0x0500;   // A Match Server Is Requesting To Connect
+        public const ushort NET_CHAT_GS_DISCONNECT                          = 0x0501;   // A Match Server Is Disconnecting
+        public const ushort NET_CHAT_GS_STATUS                              = 0x0502;   // The Match Server's Status
+        public const ushort NET_CHAT_GS_ANNOUNCE_MATCH                      = 0x0503;   // Message Players That An Arranged Match Is Ready
+        public const ushort NET_CHAT_GS_ABANDON_MATCH                       = 0x0504;   // An Arranged Match Has Failed To Start
+        public const ushort NET_CHAT_GS_MATCH_STARTED                       = 0x0505;   // An Arranged Match Has Started Successfully (All Players Have Joined And The Banning/Picking Phase Is Starting)
+        public const ushort NET_CHAT_GS_REMIND_PLAYER                       = 0x0506;   // An Expected Player Has Not Yet Connected To An Arranged Match
         public const ushort EMPTY_0x0507                                    = 0x0507;
-        public const ushort NET_CHAT_GS_NOT_IDLE                            = 0x0508; // Server was not idle
-        public const ushort NET_CHAT_GS_MATCH_ABORTED                       = 0x0509; // An arranged match failed to start
-        public const ushort NET_CHAT_GS_SAVE_DISCONNECT_REASON              = 0x0510; // For tracking reasons we are aborting matches due to disconnected players
-        public const ushort NET_CHAT_GS_REPORT_MISSING_PLAYERS              = 0x0511; // For tracking potential problem players abusing the MM system and causing games fail to start
-        public const ushort NET_CHAT_GS_MATCH_ID_RESULT                     = 0x0512; // Game server letting the chat server know if we got a match ID
-        public const ushort NET_CHAT_GS_CLIENT_AUTH_RESULT                  = 0x0513; // Was this client able to auth with the master server?
-        public const ushort NET_CHAT_GS_STAT_SUBMISSION_RESULT              = 0x0514; // What result did the server receive when attempting to submit stats?
-        public const ushort NET_CHAT_GS_MATCH_ENDED                         = 0x0515; // An arranged match has finished (stats have been submitted - or at least attempted to submit them)
-        public const ushort NET_CHAT_GS_MATCH_ONGOING                       = 0x0516; // A match is a few minutes in and the game server is just letting the chatserver know
-        public const ushort NET_CHAT_GS_PLAYER_BENEFITS                     = 0x0517; // Game server requests the benefits for a set of clients, chat server responds back with the benefits for each client
-        public const ushort NET_CHAT_GS_REPORT_LEAVER                       = 0x0518; // For tracking leaver players
+        public const ushort NET_CHAT_GS_NOT_IDLE                            = 0x0508;   // Match Server Is Not Idle
+        public const ushort NET_CHAT_GS_MATCH_ABORTED                       = 0x0509;   // An Arranged Match Has Failed To Start
+        public const ushort NET_CHAT_GS_SAVE_DISCONNECT_REASON              = 0x0510;   // For Tracking Reasons, The Match Is Being Aborted Due To Disconnected Players
+        public const ushort NET_CHAT_GS_REPORT_MISSING_PLAYERS              = 0x0511;   // For Tracking Potentially Problematic Players Abusing Matchmaking And Causing Matches To Fail To Start
+        public const ushort NET_CHAT_GS_MATCH_ID_RESULT                     = 0x0512;   // The Match Server Is Announcing The Match ID To The Chat Server
+        public const ushort NET_CHAT_GS_CLIENT_AUTH_RESULT                  = 0x0513;   // The Outcome Of Authentication With The Master Server
+        public const ushort NET_CHAT_GS_STAT_SUBMISSION_RESULT              = 0x0514;   // The Outcome Of The Match Server Attempting To Submit Statistics
+        public const ushort NET_CHAT_GS_MATCH_ENDED                         = 0x0515;   // An Arranged Match Has Completed (Statistics Have Been Tentatively Submitted)
+        public const ushort NET_CHAT_GS_MATCH_ONGOING                       = 0x0516;   // The Match Server Is Announcing To The Chat Server That A Match Is In Progress
+        public const ushort NET_CHAT_GS_PLAYER_BENEFITS                     = 0x0517;   // The Match Server Is Requesting The Benefits For A Set Of Clients, And The Chat Server Responds Back With The Benefits For Each Client
+        public const ushort NET_CHAT_GS_REPORT_LEAVER                       = 0x0518;   // For Tracking Players With A "Leaver" Status
     }
 
     public static class ChatServerToGameServer
     {
-        public const ushort NET_CHAT_GS_ACCEPT                              = 0x1500; // Accept connection from game server
-        public const ushort NET_CHAT_GS_REJECT                              = 0x1501; // Refuse connection from game server
-        public const ushort NET_CHAT_GS_CREATE_MATCH                        = 0x1502; // Game server has been selected to host an arranged match
-        public const ushort NET_CHAT_GS_END_MATCH                           = 0x1503; // Game server has been told to end a match
-        public const ushort NET_CHAT_GS_REMOTE_COMMAND                      = 0x1504; // Execute a console command on this server
-        public const ushort NET_CHAT_GS_OPTIONS                             = 0x1505; // Various options to control cvars
-        public const ushort NET_CHAT_GS_DYNAMIC_PRODUCTS                    = 0x1506; // NO COMMENT FOR YOU.
+        public const ushort NET_CHAT_GS_ACCEPT                              = 0x1500;   // Accept A Match Server Connection
+        public const ushort NET_CHAT_GS_REJECT                              = 0x1501;   // Refuse A Match Server Connection
+        public const ushort NET_CHAT_GS_CREATE_MATCH                        = 0x1502;   // Request The Match Server To Host An Arranged Match
+        public const ushort NET_CHAT_GS_END_MATCH                           = 0x1503;   // Request The Match Server To End The Match
+        public const ushort NET_CHAT_GS_REMOTE_COMMAND                      = 0x1504;   // Execute A Command On The Match Server
+        public const ushort NET_CHAT_GS_OPTIONS                             = 0x1505;   // Options To Set CVARs
+        public const ushort NET_CHAT_GS_DYNAMIC_PRODUCTS                    = 0x1506;
     }
 
     public static class ServerManagerToChatServer
     {
-        public const ushort NET_CHAT_SM_CONNECT                             = 0x1600; // Server manager requesting connection
-        public const ushort NET_CHAT_SM_DISCONNECT                          = 0x1601; // Server manager disconnecting
-        public const ushort NET_CHAT_SM_STATUS                              = 0x1602; // Server manager's current status
-        public const ushort NET_CHAT_SM_UPLOAD_UPDATE                       = 0x1603; // Server manager's response to a NET_CHAT_SM_UPLOAD_REQUEST
+        public const ushort NET_CHAT_SM_CONNECT                             = 0x1600;   // The Server Manager Is Requesting To Connect
+        public const ushort NET_CHAT_SM_DISCONNECT                          = 0x1601;   // The Server Manager Is Disconnecting
+        public const ushort NET_CHAT_SM_STATUS                              = 0x1602;   // The Server Manager's Status
+        public const ushort NET_CHAT_SM_UPLOAD_UPDATE                       = 0x1603;   // The Server Manager's Response To NET_CHAT_SM_UPLOAD_REQUEST
     }
 
     public static class ChatServerToServerManager
     {
-        public const ushort NET_CHAT_SM_ACCEPT                              = 0x1700;   // Accept A Match Server Connection
-        public const ushort NET_CHAT_SM_REJECT                              = 0x1701;   // Refuse A Match Server Connection
+        public const ushort NET_CHAT_SM_ACCEPT                              = 0x1700;   // Accept A Server Manager Connection
+        public const ushort NET_CHAT_SM_REJECT                              = 0x1701;   // Refuse A Server Manager Connection
         public const ushort NET_CHAT_SM_REMOTE_COMMAND                      = 0x1702;   // Execute A Command On The Server Manager
         public const ushort NET_CHAT_SM_OPTIONS                             = 0x1703;   // Options To Set CVARs
         public const ushort NET_CHAT_SM_UPLOAD_REQUEST                      = 0x1704;   // The Match Replay Or Match Log That The Server Manager Is Requested To Upload
