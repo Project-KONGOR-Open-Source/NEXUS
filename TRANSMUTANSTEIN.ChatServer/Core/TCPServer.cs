@@ -1,4 +1,7 @@
-﻿using System.Collections.Concurrent;
+﻿// TODO: Clean This Up
+# nullable disable
+
+using System.Collections.Concurrent;
 using System.Diagnostics;
 
 namespace TRANSMUTANSTEIN.ChatServer.Core;

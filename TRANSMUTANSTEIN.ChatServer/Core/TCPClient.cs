@@ -1,4 +1,7 @@
-﻿namespace TRANSMUTANSTEIN.ChatServer.Core;
+﻿// TODO: Clean This Up
+# nullable disable
+
+namespace TRANSMUTANSTEIN.ChatServer.Core;
 
 /// <summary>
 /// TCP client is used to read/write data from/into the connected TCP server

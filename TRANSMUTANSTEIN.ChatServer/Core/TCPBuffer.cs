@@ -1,4 +1,7 @@
-﻿using System.Diagnostics;
+﻿// TODO: Clean This Up
+# nullable disable
+
+using System.Diagnostics;
 
 namespace TRANSMUTANSTEIN.ChatServer.Core;
 
