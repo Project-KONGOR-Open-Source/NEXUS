@@ -4,6 +4,8 @@ public class ChatSession(TCPServer server, IServiceProvider serviceProvider) : T
 {
     private IServiceProvider ServiceProvider { get; set; } = serviceProvider;
 
+    private static Dictionary<ushort, Type> CommandToTypeMap { get; set; } = [];
+
     protected override void OnConnected()
     {
         Console.WriteLine($"Chat Session ID {Id} Was Created");
@@ -59,15 +61,24 @@ public class ChatSession(TCPServer server, IServiceProvider serviceProvider) : T
                 }
             }
 
-            // TODO: Cache Command-To-Type Mapping To Reduce Reflection Overhead
-
             Type? GetCommandType(ushort command)
             {
+                if (CommandToTypeMap.TryGetValue(command, out Type? type))
+                    return type;
+
                 Type[] types = typeof(TRANSMUTANSTEIN).Assembly.GetTypes();
 
-                Type? type = types
+                type = types
                     .SingleOrDefault(type => type.GetCustomAttribute<ChatCommandAttribute>() is not null
                         && (type.GetCustomAttribute<ChatCommandAttribute>()?.Command.Equals(command) ?? false));
+
+                if (type is not null)
+                    CommandToTypeMap.Add(command, type);
+
+                else
+                {
+                    // TODO: Log Error (Unmapped Command)
+                }
 
                 return type;
             }
