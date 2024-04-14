@@ -417,8 +417,8 @@ public class TCPSession : IDisposable
     /// <returns>Received text</returns>
     public virtual string Receive(long size)
     {
-        var buffer = new byte[size];
-        var length = Receive(buffer);
+        byte[] buffer = new byte[size];
+        long length = Receive(buffer);
         return Encoding.UTF8.GetString(buffer, 0, (int)length);
     }
 

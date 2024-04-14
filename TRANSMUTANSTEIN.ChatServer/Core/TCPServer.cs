@@ -332,7 +332,7 @@ public class TCPServer : IDisposable
         if (e.SocketError == SocketError.Success)
         {
             // Create a new session to register
-            var session = CreateSession();
+            TCPSession session = CreateSession();
 
             // Register the session
             RegisterSession(session);
@@ -389,7 +389,7 @@ public class TCPServer : IDisposable
             return false;
 
         // Disconnect all sessions
-        foreach (var session in Sessions.Values)
+        foreach (TCPSession session in Sessions.Values)
             session.Disconnect();
 
         return true;
@@ -460,7 +460,7 @@ public class TCPServer : IDisposable
             return true;
 
         // Multicast data to all sessions
-        foreach (var session in Sessions.Values)
+        foreach (TCPSession session in Sessions.Values)
             session.SendAsync(buffer);
 
         return true;
