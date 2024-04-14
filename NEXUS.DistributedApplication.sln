@@ -2,8 +2,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.8.0.0
 MinimumVisualStudioVersion = 17.8.0.0
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ASPIRE.AppHost", "ASPIRE.AppHost\ASPIRE.AppHost.csproj", "{6C001EF4-249D-4626-BC74-F8D960E3B183}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ASPIRE.SharedScope", "ASPIRE.SharedScope\ASPIRE.SharedScope.csproj", "{CAC12A28-7CA5-4AE4-B8CF-CC7E482D5CAD}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KONGOR.MasterServer", "KONGOR.MasterServer\KONGOR.MasterServer.csproj", "{970165A0-25EB-4363-A43B-0044BD3109E3}"
@@ -18,16 +16,14 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MERRICK.Database", "MERRICK
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ASPIRE.Tests", "ASPIRE.Tests\ASPIRE.Tests.csproj", "{53C0E0C6-F134-4838-854A-5E374FC0C443}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ASPIRE.AppHost", "ASPIRE.AppHost\ASPIRE.AppHost.csproj", "{D63B2D57-DFE5-423B-9652-F4D0EAD17F46}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{6C001EF4-249D-4626-BC74-F8D960E3B183}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6C001EF4-249D-4626-BC74-F8D960E3B183}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{6C001EF4-249D-4626-BC74-F8D960E3B183}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{6C001EF4-249D-4626-BC74-F8D960E3B183}.Release|Any CPU.Build.0 = Release|Any CPU
 		{CAC12A28-7CA5-4AE4-B8CF-CC7E482D5CAD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{CAC12A28-7CA5-4AE4-B8CF-CC7E482D5CAD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CAC12A28-7CA5-4AE4-B8CF-CC7E482D5CAD}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -56,6 +52,21 @@ Global
 		{53C0E0C6-F134-4838-854A-5E374FC0C443}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{53C0E0C6-F134-4838-854A-5E374FC0C443}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{53C0E0C6-F134-4838-854A-5E374FC0C443}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D63B2D57-DFE5-423B-9652-F4D0EAD17F46}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D63B2D57-DFE5-423B-9652-F4D0EAD17F46}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D63B2D57-DFE5-423B-9652-F4D0EAD17F46}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D63B2D57-DFE5-423B-9652-F4D0EAD17F46}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {B4EC090C-CF57-470D-9EEE-5F1F7E46754D}
+	EndGlobalSection
+EndGlobal
+63B2D57-DFE5-423B-9652-F4D0EAD17F46}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D63B2D57-DFE5-423B-9652-F4D0EAD17F46}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D63B2D57-DFE5-423B-9652-F4D0EAD17F46}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
