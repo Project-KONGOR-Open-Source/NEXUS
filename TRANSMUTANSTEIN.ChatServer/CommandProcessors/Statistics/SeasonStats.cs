@@ -8,71 +8,206 @@ public class SeasonStats(MerrickContext merrick, ILogger<SeasonStats> logger) : 
 
     public async Task Process(TCPSession session, ChatBuffer buffer)
     {
-
-        /*
-           m_fCampaignNormalTMR = phpResponse.GetFloat(_U8("normal_mmr"), 1250.0f);
-           m_fCampaignCasualTMR = phpResponse.GetFloat(_U8("casual_mmr"), 1250.0f);
-           m_uiCampaignNormalMedal = phpResponse.GetInteger(_U8("normal_medal"), 0);
-           m_uiCampaignCasualMedal = phpResponse.GetInteger(_U8("casual_medal"), 0);
-
-           m_iCampaignNormalKills = phpResponse.GetInteger(_U8("normal_kills"), 0);
-           m_iCampaignCasualKills = phpResponse.GetInteger(_U8("casual_kills"), 0);
-           m_iCampaignNormalDeaths = phpResponse.GetInteger(_U8("normal_deaths"), 0);
-           m_iCampaignCasualDeaths = phpResponse.GetInteger(_U8("casual_deaths"), 0);
-
-           uint normalWins = phpResponse.GetInteger(_U8("normal_wins"), 0);
-           uint normalLoss = phpResponse.GetInteger(_U8("normal_loss"), 0);
-           uint normalWinStreak = phpResponse.GetInteger(_U8("normal_win_streak"), 0);
-           uint casualWins = phpResponse.GetInteger(_U8("casual_wins"), 0);
-           uint casualLoss = phpResponse.GetInteger(_U8("casual_loss"), 0);
-           uint casualWinStreak = phpResponse.GetInteger(_U8("casual_win_streak"), 0);
-
-           m_iCampaignNormalMatches = phpResponse.GetInteger(_U8("normal_rank"), -1);
-           m_iCampaignCasualMatches = phpResponse.GetInteger(_U8("casual_rank"), -1);
-
-           uint normalPlacementNum = phpResponse.GetInteger(_U8("normal_placement_num"), 0);
-           uint casualPlacementNum = phpResponse.GetInteger(_U8("casual_placement_num"), 0);
-
-           wstring normalPlacementWins = phpResponse.GetWString(_U8("normal_placement_wins"));
-           wstring casualPlacementWins = phpResponse.GetWString(_U8("casual_placement_wins"));
-
-           m_bCampaignEligible = phpResponse.GetBool(_U8("can_enter"), false);
-           m_bExclusiveChannelEligible = phpResponse.GetBool(_U8("can_enter_exclusive_channel"), false);
-           bool validSeason = phpResponse.GetBool(_U8("valid_season"), false);
-
-           m_bufferSend.Clear();
-
-           m_bufferSend << NET_CHAT_CL_TMM_CAMPAIGN_STATS <<
-            m_fCampaignNormalTMR << m_uiCampaignNormalMedal << normalWins << normalLoss << normalWinStreak << m_iCampaignNormalMatches << normalPlacementNum << WStringToUTF8(normalPlacementWins) << byte('\0') <<
-            m_fCampaignCasualTMR << m_uiCampaignCasualMedal << casualWins << casualLoss << casualWinStreak << m_iCampaignCasualMatches << casualPlacementNum << WStringToUTF8(casualPlacementWins) << byte('\0') <<
-            (byte)m_bCampaignEligible << (byte)validSeason;
-
-           Send(m_bufferSend);
-         */
-
         ResponseCommand = BitConverter.GetBytes(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_CAMPAIGN_STATS);
 
+        // TODO: Create Response Models
+
         Response.WriteCommandBytes(ResponseCommand);
-        Response.WriteFloat32(1850.55f);
-        Response.WriteInt32(15);
-        Response.WriteInt32(6661);
-        Response.WriteInt32(123);
-        Response.WriteInt32(6662);
-        Response.WriteInt32(6663);
-        Response.WriteInt32(5);
-        Response.WriteString("11011");
-        // Response.WriteInt8(0);
-        Response.WriteFloat32(1950.55f);
-        Response.WriteInt32(10);
-        Response.WriteInt32(4441);
-        Response.WriteInt32(321);
-        Response.WriteInt32(4442);
-        Response.WriteInt32(4443);
-        Response.WriteInt32(6);
-        Response.WriteString("010101");
-        // Response.WriteInt8(0);
-        Response.WriteInt8(1);
-        Response.WriteInt8(1);
+        Response.WriteFloat32(1850.55f);    // TMM Rating
+        Response.WriteInt32(15);            // TMM Rank
+        Response.WriteInt32(6661);          // TMM Wins
+        Response.WriteInt32(123);           // TMM Losses
+        Response.WriteInt32(6662);          // Ranked Win Streak
+        Response.WriteInt32(6663);          // Ranked Matches Played
+        Response.WriteInt32(5);             // Placement Matches Played
+        Response.WriteString("11011");      // Placement Status
+        Response.WriteFloat32(1950.55f);    // Casual TMM Rating
+        Response.WriteInt32(10);            // Casual TMM Rank
+        Response.WriteInt32(4441);          // Casual TMM Wins
+        Response.WriteInt32(321);           // Casual TMM Losses
+        Response.WriteInt32(4442);          // Casual Ranked Win Streak
+        Response.WriteInt32(4443);          // Casual Ranked Matches Played
+        Response.WriteInt32(6);             // Casual Placement Matches Played
+        Response.WriteString("010101");     // Casual Placement Status
+        Response.WriteInt8(1);              // Eligible For TMM
+        Response.WriteInt8(1);              // Season End
+        Response.WriteNullTerminator();
+
+        session.SendAsync(ResponseSize);
+        session.SendAsync(Response.Data);
+
+        // Also Respond With NET_CHAT_CL_TMM_POPULARITY_UPDATE Since The Client Will Not Explicitly Request It
+
+        Response = new ChatBuffer();
+
+        ResponseCommand = BitConverter.GetBytes(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_POPULARITY_UPDATE);
+
+        // TODO: Get All Maps And Compile List
+        List<string> maps = [ "caldavar", "midwars", "riftwars" ];
+
+        List<int> gameTypes =
+        [
+            Convert.ToInt32(ChatProtocol.TMMGameTypes.TMM_GAME_TYPE_CAMPAIGN_NORMAL),
+            Convert.ToInt32(ChatProtocol.TMMGameTypes.TMM_GAME_TYPE_MIDWARS),
+            Convert.ToInt32(ChatProtocol.TMMGameTypes.TMM_GAME_TYPE_RIFTWARS)
+        ];
+
+        // ALL_PICK: ap, ALL_PICK_GATED: apg, ALL_PICK_DUPLICATE_HEROES: apd, SINGLE_DRAFT: sd, BANNING_DRAFT: bd, BANNING_PICK: bp, ALL_RANDOM: ar, LOCK_PICK: lp, BLIND_BAN: bb, BLIND_BAN_GATED: bbg, BLIND_BAN_RAPID_FIRE: bbr, BOT_MATCH: bm, CAPTAINS_PICK: cm, BALANCED_RANDOM: br, KROS_MODE: km, RANDOM_DRAFT: rd, BANNING_DRAFT_RAPID_FIRE: bdr, COUNTER_PICK: cp, FORCE_PICK: fp, SOCCER_PICK: sp, SOLO_SAME: ss, SOLO_DIFF: sm, HERO_BAN: hb, MIDWARS_BETA: mwb, REBORN: rb
+        List<string> gameModes = [ "ap", "sd", "ar", "km", "hb", "rb" ];
+
+        // USE, USW, EU, SG, MY, PH, TH, ID, VN, RU, KR, AU, LAT, DX, CN, BR, TR
+        List<string> regions = [ "EU", "USE", "USW", "AU", "BR", "RU" ];
+
+        List<string> disabledGameModesByGameType = Enumerable.Empty<string>().ToList();
+        List<string> disabledGameModesByRankType = Enumerable.Empty<string>().ToList();
+
+        List<string> disabledGameModesByMap =
+        [
+            "caldavar->km", "caldavar->hb",
+            "midwars->ap", "midwars->sd", "midwars->rb",
+            "riftwars->sd", "riftwars->km", "riftwars->hb", "riftwars->rb",
+            "team_deathmatch->ap", "team_deathmatch->sd", "team_deathmatch->ar", "team_deathmatch->km", "team_deathmatch->hb", "team_deathmatch->rb"
+        ];
+
+        List<string> disabledRegions = Enumerable.Empty<string>().ToList();
+
+        // TODO: Use Geo-Location Over An Internet Connection (List Of Country Codes: https://www.iban.com/country-codes)
+        string clientCountryCode = string.Empty;
+
+        // TODO: Create Static Type For Maps/Modes/Regions
+        List<string> legendMaps = [ "caldavar-0", "midwars-2", "riftwars-3" ];
+        List<string> legendModes = [ "ap-0", "sd-3", "ar-6", "km-14", "hb-22", "rb-24" ];
+        List<string> legendRegions = [ "EU-2", "USE-0", "USW-1", "AU-11", "BR-15", "RU-9" ];
+
+        string legend = new StringBuilder()
+            .Append("maps:").Append(string.Concat(legendMaps.Select(map => map + '|')))
+            .Append("modes:").Append(string.Concat(legendModes.Select(mode => mode + '|')))
+            .Append("regions:").Append(string.Concat(legendRegions.Select(region => region + '|')))
+            .ToString();
+
+        Response.WriteCommandBytes(ResponseCommand);
+        Response.WriteInt8(1);                                                  // TMM Availability (0 If No Regions Are Enabled, Or 1 Otherwise)
+        Response.WriteString(string.Join('|', maps));                           // Available TMM Maps
+        Response.WriteString(string.Join('|', gameTypes));                      // Available TMM Game Types (Only Used By The Old UI; Needs To Match The List Of Available TMM Maps)
+        Response.WriteString(string.Join('|', gameModes));                      // Available TMM Game Modes
+        Response.WriteString(string.Join('|', regions));                        // Available TMM Regions
+        Response.WriteString(string.Join('|', disabledGameModesByGameType));    // Disabled Game Modes By Game Type
+        Response.WriteString(string.Join('|', disabledGameModesByRankType));    // Disabled Game Modes By Rank Type
+        Response.WriteString(string.Join('|', disabledGameModesByMap));         // Disabled Game Modes By Map
+        Response.WriteString(string.Join('|', disabledRegions));                // Disabled TMM Regions
+        Response.WriteString(clientCountryCode);                                // Client Country Code
+        Response.WriteString(legend);                                           // TMM Legend
+
+        ChatProtocol.TMMPopularity popularity = new();
+
+        // Popularity By Game Map
+        foreach (ChatProtocol.TMMGameMaps map in Enum.GetValues<ChatProtocol.TMMGameMaps>())
+        {
+            foreach (ChatProtocol.TMMGameTypes type in Enum.GetValues<ChatProtocol.TMMGameTypes>())
+            {
+                for (int iterator = 0; iterator < Convert.ToInt32(ChatProtocol.TMMRankType.TMM_NUM_OPTION_RANK_TYPES); iterator++)
+                {
+                    if
+                    (
+                        map is not ChatProtocol.TMMGameMaps.TMM_GAME_MAP_NONE &&
+                        Convert.ToInt32(map) < Convert.ToInt32(ChatProtocol.TMMGameMaps.TMM_NUM_GAME_MAPS) &&
+                        type is not ChatProtocol.TMMGameTypes.TMM_GAME_TYPE_NONE &&
+                        Convert.ToInt32(type) < Convert.ToInt32(ChatProtocol.TMMGameTypes.TMM_NUM_GAME_TYPES)
+                    )
+                    {
+                        Response.WriteInt8(popularity.GameMap[Convert.ToInt32(map)][Convert.ToInt32(type)][iterator]);
+                    }
+                        
+                    else Response.WriteInt8(0);
+                }
+            }
+        }
+
+        // Popularity By Game Type
+        foreach (ChatProtocol.TMMGameTypes type in Enum.GetValues<ChatProtocol.TMMGameTypes>())
+        {
+            foreach (ChatProtocol.TMMGameMaps map in Enum.GetValues<ChatProtocol.TMMGameMaps>())
+            {
+                for (int iterator = 0; iterator < Convert.ToInt32(ChatProtocol.TMMRankType.TMM_NUM_OPTION_RANK_TYPES); iterator++)
+                {
+                    if
+                    (
+                        type is not ChatProtocol.TMMGameTypes.TMM_GAME_TYPE_NONE &&
+                        Convert.ToInt32(type) < Convert.ToInt32(ChatProtocol.TMMGameTypes.TMM_NUM_GAME_TYPES) &&
+                        map is not ChatProtocol.TMMGameMaps.TMM_GAME_MAP_NONE &&
+                        Convert.ToInt32(map) < Convert.ToInt32(ChatProtocol.TMMGameMaps.TMM_NUM_GAME_MAPS)
+                    )
+                    {
+                        Response.WriteInt8(popularity.GameType[Convert.ToInt32(type)][Convert.ToInt32(map)][iterator]);
+                    }
+
+                    else Response.WriteInt8(0);
+                }
+            }
+        }
+
+        // Popularity By Game Mode
+        foreach (ChatProtocol.TMMGameModes mode in Enum.GetValues<ChatProtocol.TMMGameModes>())
+        {
+            foreach (ChatProtocol.TMMGameMaps map in Enum.GetValues<ChatProtocol.TMMGameMaps>())
+            {
+                foreach (ChatProtocol.TMMGameTypes type in Enum.GetValues<ChatProtocol.TMMGameTypes>())
+                {
+                    for (int iterator = 0; iterator < Convert.ToInt32(ChatProtocol.TMMRankType.TMM_NUM_OPTION_RANK_TYPES); iterator++)
+                    {
+                        if
+                        (
+                            mode is not ChatProtocol.TMMGameModes.TMM_GAME_MODE_NONE &&
+                            Convert.ToInt32(mode) < Convert.ToInt32(ChatProtocol.TMMGameModes.TMM_NUM_GAME_MODES) &&
+                            map is not ChatProtocol.TMMGameMaps.TMM_GAME_MAP_NONE &&
+                            Convert.ToInt32(map) < Convert.ToInt32(ChatProtocol.TMMGameMaps.TMM_NUM_GAME_MAPS) &&
+                            type is not ChatProtocol.TMMGameTypes.TMM_GAME_TYPE_NONE &&
+                            Convert.ToInt32(type) < Convert.ToInt32(ChatProtocol.TMMGameTypes.TMM_NUM_GAME_TYPES)
+                        )
+                        {
+                            Response.WriteInt8(popularity.GameMode[Convert.ToInt32(mode)][Convert.ToInt32(map)][Convert.ToInt32(type)][iterator]);
+                        }
+
+                        else Response.WriteInt8(0);
+                    }
+                }
+            }
+        }
+
+        // Popularity By Region
+        foreach (ChatProtocol.TMMGameRegions region in Enum.GetValues<ChatProtocol.TMMGameRegions>())
+        {
+            foreach (ChatProtocol.TMMGameMaps map in Enum.GetValues<ChatProtocol.TMMGameMaps>())
+            {
+                foreach (ChatProtocol.TMMGameTypes type in Enum.GetValues<ChatProtocol.TMMGameTypes>())
+                {
+                    for (int iterator = 0; iterator < Convert.ToInt32(ChatProtocol.TMMRankType.TMM_NUM_OPTION_RANK_TYPES); iterator++)
+                    {
+                        if
+                        (
+                            region is not ChatProtocol.TMMGameRegions.TMM_GAME_REGION_NONE &&
+                            Convert.ToInt32(region) < Convert.ToInt32(ChatProtocol.TMMGameRegions.NUM_TMM_GAME_REGIONS) &&
+                            map is not ChatProtocol.TMMGameMaps.TMM_GAME_MAP_NONE &&
+                            Convert.ToInt32(map) < Convert.ToInt32(ChatProtocol.TMMGameMaps.TMM_NUM_GAME_MAPS) &&
+                            type is not ChatProtocol.TMMGameTypes.TMM_GAME_TYPE_NONE &&
+                            Convert.ToInt32(type) < Convert.ToInt32(ChatProtocol.TMMGameTypes.TMM_NUM_GAME_TYPES)
+                        )
+
+                        {
+                            Response.WriteInt8(popularity.Region[Convert.ToInt32(region)][Convert.ToInt32(map)][Convert.ToInt32(type)][iterator]);
+                        }
+
+                        else Response.WriteInt8(0);
+                    }
+                }
+            }
+        }
+
+        // Custom Map Rotation End Time (As UNIX Epoch Time); Values In The Past = Disabled
+        int customMapRotationTime = Convert.ToInt32(DateTimeOffset.UnixEpoch.ToUnixTimeSeconds());
+
+        Response.WriteInt32(customMapRotationTime);
+
         Response.WriteNullTerminator();
 
         session.SendAsync(ResponseSize);

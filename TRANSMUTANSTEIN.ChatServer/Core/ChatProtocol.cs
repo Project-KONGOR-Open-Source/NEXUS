@@ -727,28 +727,29 @@ public static class ChatProtocol
 
     public enum TMMGameTypes
     {
-        TMM_GAME_TYPE_NONE = -1,
+        TMM_GAME_TYPE_NONE              = -1,
 
-        TMM_GAME_TYPE_NORMAL = 1,
-        TMM_GAME_TYPE_CASUAL = 2,
-        TMM_GAME_TYPE_MIDWARS = 3,
-        TMM_GAME_TYPE_RIFTWARS = 4,
-        TMM_GAME_TYPE_CUSTOM = 5,
-        TMM_GAME_TYPE_CAMPAIGN_NORMAL = 6,
-        TMM_GAME_TYPE_CAMPAIGN_CASUAL = 7,
-        TMM_GAME_TYPE_REBORN_NORMAL = 8,
-        TMM_GAME_TYPE_REBORN_CASUAL = 9,
-        TMM_GAME_TYPE_MIDWARS_REBORN = 10,
+        TMM_GAME_TYPE_PUBLIC            = 0, // Not In The Original Chat Server Protocol, But Defined In "matchmaking.lua"
+        TMM_GAME_TYPE_NORMAL            = 1,
+        TMM_GAME_TYPE_CASUAL            = 2,
+        TMM_GAME_TYPE_MIDWARS           = 3,
+        TMM_GAME_TYPE_RIFTWARS          = 4,
+        TMM_GAME_TYPE_CUSTOM            = 5,
+        TMM_GAME_TYPE_CAMPAIGN_NORMAL   = 6,
+        TMM_GAME_TYPE_CAMPAIGN_CASUAL   = 7,
+        TMM_GAME_TYPE_REBORN_NORMAL     = 8,
+        TMM_GAME_TYPE_REBORN_CASUAL     = 9,
+        TMM_GAME_TYPE_MIDWARS_REBORN    = 10,
 
         TMM_NUM_GAME_TYPES
     };
 
     public enum TMMTypes
     {
-        TMM_TYPE_SOLO = 1,
-        TMM_TYPE_PVP = 2,
-        TMM_TYPE_COOP = 3,
-        TMM_TYPE_CAMPAIGN = 4
+        TMM_TYPE_SOLO       = 1,
+        TMM_TYPE_PVP        = 2,
+        TMM_TYPE_COOP       = 3,
+        TMM_TYPE_CAMPAIGN   = 4
     };
 
     public enum TMMGameMaps
@@ -841,6 +842,7 @@ public static class ChatProtocol
     public enum UploadUpdateType
     {
         EUUT_NONE = -1,
+
         EUUT_GENERAL_FAILURE,
         EUUT_FILE_DOES_NOT_EXIST,
         EUUT_FILE_INVALID_HOST,
@@ -919,6 +921,7 @@ public static class ChatProtocol
     public enum QuestsAvailabilityType
     {
         EQAT_INVALID = -1,
+
         EQAT_DISABLED_GENERAL,
         EQAT_ENABLED,
         EQAT_DISABLED_TECHNICAL,
@@ -951,7 +954,6 @@ public static class ChatProtocol
         CHAT_CHANNEL_FLAG_UNJOINABLE    = 1 << 5,
         CHAT_CHANNEL_FLAG_AUTH_REQUIRED = 1 << 6,
         CHAT_CHANNEL_FLAG_CLAN          = 1 << 7,
-
         CHAT_CHANNEL_FLAG_STREAM_USE    = 1 << 8
     }
 
@@ -975,36 +977,332 @@ public static class ChatProtocol
         SSF_HARDCORE                    = 1 << 14
     }
 
-    public struct TMMPopularities
+    public struct TMMPopularity
     {
-        public byte [ /* TMM_NUM_GAME_TYPES   */ ] [ /* TMM_NUM_GAME_MAPS  */ ] [ /* TMM_NUM_OPTION_RANK_TYPES */ ]                                     GameType { get; set; }
-        public byte [ /* TMM_NUM_GAME_MAPS    */ ] [ /* TMM_NUM_GAME_TYPES */ ] [ /* TMM_NUM_OPTION_RANK_TYPES */ ]                                     GameMap  { get; set; }
-        public byte [ /* TMM_NUM_GAME_MODES   */ ] [ /* TMM_NUM_GAME_MAPS  */ ] [ /* TMM_NUM_GAME_TYPES        */ ] [ /* TMM_NUM_OPTION_RANK_TYPES */ ] GameMode { get; set; }
-        public byte [ /* NUM_TMM_GAME_REGIONS */ ] [ /* TMM_NUM_GAME_MAPS  */ ] [ /* TMM_NUM_GAME_TYPES        */ ] [ /* TMM_NUM_OPTION_RANK_TYPES */ ] Region   { get; set; }
+        public byte [ /* TMM_NUM_GAME_TYPES   */ ] [ /* TMM_NUM_GAME_MAPS  */ ] [ /* TMM_NUM_OPTION_RANK_TYPES */ ]                                     GameType { get; set; } = null!;
+        public byte [ /* TMM_NUM_GAME_MAPS    */ ] [ /* TMM_NUM_GAME_TYPES */ ] [ /* TMM_NUM_OPTION_RANK_TYPES */ ]                                     GameMap  { get; set; } = null!;
+        public byte [ /* TMM_NUM_GAME_MODES   */ ] [ /* TMM_NUM_GAME_MAPS  */ ] [ /* TMM_NUM_GAME_TYPES        */ ] [ /* TMM_NUM_OPTION_RANK_TYPES */ ] GameMode { get; set; } = null!;
+        public byte [ /* NUM_TMM_GAME_REGIONS */ ] [ /* TMM_NUM_GAME_MAPS  */ ] [ /* TMM_NUM_GAME_TYPES        */ ] [ /* TMM_NUM_OPTION_RANK_TYPES */ ] Region   { get; set; } = null!;
 
-        public void Clear()
+        public TMMPopularity()
+        {
+            Initialize();
+            Populate();
+        }
+
+        #region Set Popularities
+        /*
+
+           void CTeamFinder::UpdatePopularities()
+           {
+           	PROFILE("CTeamFinder::UpdatePopularities");
+           
+           	// Figure out the proper value to send to the client to display the popularity of the different choices they have
+           	// and clamp it between 0 and 10. 0 means 0 bars showing, 10 means all bars showing.	
+           
+           	// TODO: Convert these to loop only over potential matchmaking options, rather than all matchmaking options, see GetTMMInfoBuffer()
+           
+           	// Game Maps - Popularity based on game type + rank type
+           	float fHighestMapNameCount(0.0f);
+           	float afMapNameCount[TMM_NUM_GAME_MAPS][TMM_NUM_GAME_TYPES][TMM_NUM_OPTION_RANK_TYPES];
+           
+           	for (uint i(0); i < TMM_NUM_GAME_MAPS; ++i)
+           	{
+           		for (uint j(1); j < TMM_NUM_GAME_TYPES; ++j)
+           		{
+           			for (uint k(0); k < TMM_NUM_OPTION_RANK_TYPES; ++k)
+           			{
+           				ETMMGameMaps eGameMap(static_cast<ETMMGameMaps>(i));
+           				ETMMGameTypes eGameType(static_cast<ETMMGameTypes>(j));
+           				bool bRanked(k == TMM_OPTION_RANKED);
+           
+           				// Reset the main scaled map popularity array
+           				m_TMMPopularities.ayGameMap[i][j][k] = 0;
+           
+           				// Update the local map popularity array
+           				afMapNameCount[i][j][k] = GetRollingGroupCount(eGameType, eGameMap, TMM_GAME_MODE_NONE, TMM_GAME_REGION_NONE, bRanked) + ALMOST_ZERO;
+           
+           				// Determine highest map count
+           				if (afMapNameCount[i][j][k] > fHighestMapNameCount)
+           				{
+           					fHighestMapNameCount = afMapNameCount[i][j][k];
+           				}
+           			}
+           		}
+           	}
+           
+           	// Scale all scores 0 - 10 based on the highest score
+           	for (uint i(0); i < TMM_NUM_GAME_MAPS; ++i)
+           	{
+           		for (uint j(1); j < TMM_NUM_GAME_TYPES; ++j)
+           		{
+           			for (uint k(0); k < TMM_NUM_OPTION_RANK_TYPES; ++k)
+           			{
+           				m_TMMPopularities.ayGameMap[i][j][k] = CLAMP(INT_ROUND(((afMapNameCount[i][j][k] / (fHighestMapNameCount + ALMOST_ZERO)) * 100) / 10), 0, 10);
+           			}
+           		}
+           	}
+           
+           
+           	// Game Types - Popularity based on game map + rank type
+           	float fHighestGameTypeCount(0.0f);
+           	float afGameTypeCount[TMM_NUM_GAME_TYPES][TMM_NUM_GAME_MAPS][TMM_NUM_OPTION_RANK_TYPES];
+           
+           	for (uint i(1); i < TMM_NUM_GAME_TYPES; ++i)
+           	{
+           		for (uint j(0); j < TMM_NUM_GAME_MAPS; ++j)
+           		{
+           			for (uint k(0); k < TMM_NUM_OPTION_RANK_TYPES; ++k)
+           			{
+           				ETMMGameTypes eGameType(static_cast<ETMMGameTypes>(i));
+           				ETMMGameMaps eGameMap(static_cast<ETMMGameMaps>(j));
+           				bool bRanked(k == TMM_OPTION_RANKED);
+           
+           				// Reset the main scaled game type popularity array
+           				m_TMMPopularities.ayGameType[i][j][k] = 0;
+           
+           				// Update the local game type popularity array
+           				afGameTypeCount[i][j][k] = GetRollingGroupCount(eGameType, eGameMap, TMM_GAME_MODE_NONE, TMM_GAME_REGION_NONE, bRanked) + ALMOST_ZERO;
+           
+           				// Determine highest game type count
+           				if (afGameTypeCount[i][j][k] > fHighestGameTypeCount)
+           				{
+           					fHighestGameTypeCount = afGameTypeCount[i][j][k];
+           				}
+           			}
+           		}
+           	}
+           
+           	// Scale all scores 0 - 10 based on the highest score
+           	for (uint i(1); i < TMM_NUM_GAME_TYPES; ++i)
+           	{
+           		for (uint j(0); j < TMM_NUM_GAME_MAPS; ++j)
+           		{
+           			for (uint k(0); k < TMM_NUM_OPTION_RANK_TYPES; ++k)
+           			{
+           				m_TMMPopularities.ayGameType[i][j][k] = CLAMP(INT_ROUND(((afGameTypeCount[i][j][k] / (fHighestGameTypeCount + ALMOST_ZERO)) * 100) / 10), 0, 10);
+           			}
+           		}
+           	}
+           
+           
+           	// Game Mode - Popularity based on game map + game type + rank type
+           	float fHighestGameModeCount(0.0f);
+           	float afGameModeCount[TMM_NUM_GAME_MODES][TMM_NUM_GAME_MAPS][TMM_NUM_GAME_TYPES][TMM_NUM_OPTION_RANK_TYPES];
+           
+           	for (uint i(0); i < TMM_NUM_GAME_MODES; ++i)
+           	{
+           		for (uint j(0); j < TMM_NUM_GAME_MAPS; ++j)
+           		{
+           			for (uint k(1); k < TMM_NUM_GAME_TYPES; ++k)
+           			{
+           				for (uint l(0); l < TMM_NUM_OPTION_RANK_TYPES; ++l)
+           				{
+           					ETMMGameModes eGameMode(static_cast<ETMMGameModes>(i));
+           					ETMMGameMaps eGameMap(static_cast<ETMMGameMaps>(j));
+           					ETMMGameTypes eGameType(static_cast<ETMMGameTypes>(k));
+           					bool bRanked(l == TMM_OPTION_RANKED);
+           
+           					// Reset the main scaled game mode popularity array
+           					m_TMMPopularities.ayGameMode[i][j][k][l] = 0;
+           
+           					// Update the local game mode popularity array
+           					afGameModeCount[i][j][k][l] = GetRollingGroupCount(eGameType, eGameMap, eGameMode, TMM_GAME_REGION_NONE, bRanked) + ALMOST_ZERO;
+           
+           					if (afGameModeCount[i][j][k][l] > fHighestGameModeCount)
+           					{
+           						fHighestGameModeCount = afGameModeCount[i][j][k][l];
+           					}
+           				}
+           			}
+           		}
+           	}
+           
+           	// Scale all scores 0 - 10 based on the highest score
+           	for (uint i(0); i < TMM_NUM_GAME_MODES; ++i)
+           	{
+           		for (uint j(0); j < TMM_NUM_GAME_MAPS; ++j)
+           		{
+           			for (uint k(1); k < TMM_NUM_GAME_TYPES; ++k)
+           			{
+           				for (uint l(0); l < TMM_NUM_OPTION_RANK_TYPES; ++l)
+           				{
+           					m_TMMPopularities.ayGameMode[i][j][k][l] = CLAMP(INT_ROUND(((afGameModeCount[i][j][k][l] / (fHighestGameModeCount + ALMOST_ZERO)) * 100) / 10), 0, 10);
+           				}
+           			}
+           		}
+           	}
+           
+           
+           	// Region - Popularity based on game map + game type + rank type
+           	float fHighestRegionCount(0.0f);
+           	float afRegionCount[NUM_TMM_GAME_REGIONS][TMM_NUM_GAME_MAPS][TMM_NUM_GAME_TYPES][TMM_NUM_OPTION_RANK_TYPES];
+           
+           	for (uint i(0); i < NUM_TMM_GAME_REGIONS; ++i)
+           	{
+           		for (uint j(0); j < TMM_NUM_GAME_MAPS; ++j)
+           		{
+           			for (uint k(1); k < TMM_NUM_GAME_TYPES; ++k)
+           			{
+           				for (uint l(0); l < TMM_NUM_OPTION_RANK_TYPES; ++l)
+           				{
+           					ETMMGameRegions eRegion(static_cast<ETMMGameRegions>(i));
+           					ETMMGameMaps eGameMap(static_cast<ETMMGameMaps>(j));
+           					ETMMGameTypes eGameType(static_cast<ETMMGameTypes>(k));
+           					bool bRanked(l == TMM_OPTION_RANKED);
+           
+           					// Reset the main scaled game region popularity array
+           					m_TMMPopularities.ayRegion[i][j][k][l] = 0;
+           
+           					// Update the local game region popularity array
+           					afRegionCount[i][j][k][l] = GetRollingGroupCount(eGameType, eGameMap, TMM_GAME_MODE_NONE, eRegion, bRanked) + ALMOST_ZERO;
+           
+           					if (afRegionCount[i][j][k][l] > fHighestRegionCount)
+           					{
+           						fHighestRegionCount = afRegionCount[i][j][k][l];
+           					}
+           				}
+           			}
+           		}
+           	}
+           
+           	// Scale all scores 0 - 10 based on the highest score
+           	for (uint i(0); i < NUM_TMM_GAME_REGIONS; ++i)
+           	{
+           		for (uint j(0); j < TMM_NUM_GAME_MAPS; ++j)
+           		{
+           			for (uint k(1); k < TMM_NUM_GAME_TYPES; ++k)
+           			{
+           				for (uint l(0); l < TMM_NUM_OPTION_RANK_TYPES; ++l)
+           				{
+           					m_TMMPopularities.ayRegion[i][j][k][l] = CLAMP(INT_ROUND(((afRegionCount[i][j][k][l] / (fHighestRegionCount + ALMOST_ZERO)) * 100) / 10), 0, 10);
+           				}
+           			}
+           		}
+           	}
+           }
+
+        */
+        #endregion
+
+        /// <summary>
+        ///     Popularity values range between 0 and 10.
+        ///     0 means no bars display, while 10 means all bars display.
+        ///     This method sets all popularity values to 10.
+        /// </summary>
+        public void Populate() => Set(10);
+
+        /// <summary>
+        ///     Popularity values range between 0 and 10.
+        ///     0 means no bars display, while 10 means all bars display.
+        ///     This method sets all popularity values to 0.
+        /// </summary>
+        public void Clear() => Set(0);
+
+        private void Set(byte popularity)
         {
             for (uint i = 0; i < Convert.ToInt32(TMMGameTypes.TMM_NUM_GAME_TYPES); ++i)
                 for (uint j = 0; j < Convert.ToInt32(TMMGameMaps.TMM_NUM_GAME_MAPS); ++j)
                     for (uint k = 0; k < Convert.ToInt32(TMMRankType.TMM_NUM_OPTION_RANK_TYPES); ++k)
-                        GameType[i][j][k] = 0;
+                        GameType[i][j][k] = popularity;
 
             for (uint i = 0; i < Convert.ToInt32(TMMGameMaps.TMM_NUM_GAME_MAPS); ++i)
                 for (uint j = 0; j < Convert.ToInt32(TMMGameTypes.TMM_NUM_GAME_TYPES); ++j)
                     for (uint k = 0; k < Convert.ToInt32(TMMRankType.TMM_NUM_OPTION_RANK_TYPES); ++k)
-                        GameMap[i][j][k] = 0;
+                        GameMap[i][j][k] = popularity;
 
             for (uint i = 0; i < Convert.ToInt32(TMMGameModes.TMM_NUM_GAME_MODES); ++i)
                 for (uint j = 0; j < Convert.ToInt32(TMMGameMaps.TMM_NUM_GAME_MAPS); ++j)
                     for (uint k = 0; k < Convert.ToInt32(TMMGameTypes.TMM_NUM_GAME_TYPES); ++k)
                         for (uint l = 0; l < Convert.ToInt32(TMMRankType.TMM_NUM_OPTION_RANK_TYPES); ++l)
-                            GameMode[i][j][k][l] = 0;
+                            GameMode[i][j][k][l] = popularity;
 
             for (uint i = 0; i < Convert.ToInt32(TMMGameRegions.NUM_TMM_GAME_REGIONS); ++i)
                 for (uint j = 0; j < Convert.ToInt32(TMMGameMaps.TMM_NUM_GAME_MAPS); ++j)
                     for (uint k = 0; k < Convert.ToInt32(TMMGameTypes.TMM_NUM_GAME_TYPES); ++k)
                         for (uint l = 0; l < Convert.ToInt32(TMMRankType.TMM_NUM_OPTION_RANK_TYPES); ++l)
-                            Region[i][j][k][l] = 0;
+                            Region[i][j][k][l] = popularity;
+        }
+
+        private void Initialize()
+        {
+            GameType = new byte[Convert.ToInt32(TMMGameTypes.TMM_NUM_GAME_TYPES)][][];
+
+            for (int i = 0; i < Convert.ToInt32(TMMGameTypes.TMM_NUM_GAME_TYPES); i++)
+            {
+                GameType[i] = new byte[Convert.ToInt32(TMMGameMaps.TMM_NUM_GAME_MAPS)][];
+
+                for (int j = 0; j < Convert.ToInt32(TMMGameMaps.TMM_NUM_GAME_MAPS); j++)
+                {
+                    GameType[i][j] = new byte[Convert.ToInt32(TMMRankType.TMM_NUM_OPTION_RANK_TYPES)];
+
+                    for (int k = 0; k < Convert.ToInt32(TMMRankType.TMM_NUM_OPTION_RANK_TYPES); k++)
+                    {
+                        GameType[i][j][k] = new byte();
+                    }
+                }
+            }
+
+            GameMap = new byte[Convert.ToInt32(TMMGameMaps.TMM_NUM_GAME_MAPS)][][];
+
+            for (int i = 0; i < Convert.ToInt32(TMMGameMaps.TMM_NUM_GAME_MAPS); i++)
+            {
+                GameMap[i] = new byte[Convert.ToInt32(TMMGameTypes.TMM_NUM_GAME_TYPES)][];
+
+                for (int j = 0; j < Convert.ToInt32(TMMGameTypes.TMM_NUM_GAME_TYPES); j++)
+                {
+                    GameMap[i][j] = new byte[Convert.ToInt32(TMMRankType.TMM_NUM_OPTION_RANK_TYPES)];
+
+                    for (int k = 0; k < Convert.ToInt32(TMMRankType.TMM_NUM_OPTION_RANK_TYPES); k++)
+                    {
+                        GameMap[i][j][k] = new byte();
+                    }
+                }
+            }
+
+            GameMode = new byte[Convert.ToInt32(TMMGameModes.TMM_NUM_GAME_MODES)][][][];
+
+            for (int i = 0; i < Convert.ToInt32(TMMGameModes.TMM_NUM_GAME_MODES); i++)
+            {
+                GameMode[i] = new byte[Convert.ToInt32(TMMGameMaps.TMM_NUM_GAME_MAPS)][][];
+
+                for (int j = 0; j < Convert.ToInt32(TMMGameMaps.TMM_NUM_GAME_MAPS); j++)
+                {
+                    GameMode[i][j] = new byte[Convert.ToInt32(TMMGameTypes.TMM_NUM_GAME_TYPES)][];
+
+                    for (int k = 0; k < Convert.ToInt32(TMMGameTypes.TMM_NUM_GAME_TYPES); k++)
+                    {
+                        GameMode[i][j][k] = new byte[Convert.ToInt32(TMMRankType.TMM_NUM_OPTION_RANK_TYPES)];
+
+                        for (int l = 0; l < Convert.ToInt32(TMMRankType.TMM_NUM_OPTION_RANK_TYPES); l++)
+                        {
+                            GameMode[i][j][k][l] = new byte();
+                        }
+                    }
+                }
+            }
+
+            Region = new byte[Convert.ToInt32(TMMGameRegions.NUM_TMM_GAME_REGIONS)][][][];
+
+            for (int i = 0; i < Convert.ToInt32(TMMGameRegions.NUM_TMM_GAME_REGIONS); i++)
+            {
+                Region[i] = new byte[Convert.ToInt32(TMMGameMaps.TMM_NUM_GAME_MAPS)][][];
+
+                for (int j = 0; j < Convert.ToInt32(TMMGameMaps.TMM_NUM_GAME_MAPS); j++)
+                {
+                    Region[i][j] = new byte[Convert.ToInt32(TMMGameTypes.TMM_NUM_GAME_TYPES)][];
+
+                    for (int k = 0; k < Convert.ToInt32(TMMGameTypes.TMM_NUM_GAME_TYPES); k++)
+                    {
+                        Region[i][j][k] = new byte[Convert.ToInt32(TMMRankType.TMM_NUM_OPTION_RANK_TYPES)];
+
+                        for (int l = 0; l < Convert.ToInt32(TMMRankType.TMM_NUM_OPTION_RANK_TYPES); l++)
+                        {
+                            Region[i][j][k][l] = new byte();
+                        }
+                    }
+                }
+            }
         }
     };
 
