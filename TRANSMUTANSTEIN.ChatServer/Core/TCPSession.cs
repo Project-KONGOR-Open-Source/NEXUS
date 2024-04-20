@@ -804,7 +804,7 @@ public class TCPSession : IDisposable
             if (disposingManagedResources)
             {
                 // Dispose Managed Resources Here ...
-                DisconnectAsync();
+                Disconnect();
             }
 
             // Dispose Unmanaged Resources Here ...
