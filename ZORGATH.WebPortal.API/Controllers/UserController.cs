@@ -30,7 +30,7 @@ public class UserController(MerrickContext databaseContext, ILogger<UserControll
                 return BadRequest(result.Errors.Select(error => error.ErrorMessage));
         }
 
-        Token? token = await MerrickContext.Tokens.SingleOrDefaultAsync(token => token.ID.ToString().Equals(payload.Token) && token.Purpose.Equals(TokenPurpose.EmailAddressVerification));
+        Token? token = await MerrickContext.Tokens.SingleOrDefaultAsync(token => token.Value.ToString().Equals(payload.Token) && token.Purpose.Equals(TokenPurpose.EmailAddressVerification));
 
         if (token is null)
         {
