@@ -156,7 +156,7 @@ public class TCPServer : IDisposable
     /// </summary>
     public int OptionSendBufferSize { get; set; } = 8192;
 
-    #region Start/Stop server
+    # region Start/Stop server
 
     // Server acceptor
     private Socket _acceptorSocket;
@@ -307,9 +307,9 @@ public class TCPServer : IDisposable
         return Start();
     }
 
-    #endregion
+    # endregion
 
-    #region Accepting clients
+    # region Accepting clients
 
     /// <summary>
     /// Start accept a new client connection
@@ -360,9 +360,9 @@ public class TCPServer : IDisposable
         ProcessAccept(e);
     }
 
-    #endregion
+    # endregion
 
-    #region Session factory
+    # region Session factory
 
     /// <summary>
     /// Create TCP session factory method
@@ -370,9 +370,9 @@ public class TCPServer : IDisposable
     /// <returns>TCP session</returns>
     protected virtual TCPSession CreateSession() { return new TCPSession(this); }
 
-    #endregion
+    # endregion
 
-    #region Session management
+    # region Session management
 
     /// <summary>
     /// Server sessions
@@ -413,7 +413,7 @@ public class TCPServer : IDisposable
     internal void RegisterSession(TCPSession session)
     {
         // Register a new session
-        Sessions.TryAdd(session.Id, session);
+        Sessions.TryAdd(session.ID, session);
     }
 
     /// <summary>
@@ -426,9 +426,9 @@ public class TCPServer : IDisposable
         Sessions.TryRemove(id, out TCPSession _);
     }
 
-    #endregion
+    # endregion
 
-    #region Multicasting
+    # region Multicasting
 
     /// <summary>
     /// Multicast data to all connected sessions
@@ -480,9 +480,9 @@ public class TCPServer : IDisposable
     /// <returns>'true' if the text was successfully multicasted, 'false' if the text was not multicasted</returns>
     public virtual bool Multicast(ReadOnlySpan<char> text) => Multicast(Encoding.UTF8.GetBytes(text.ToArray()));
 
-    #endregion
+    # endregion
 
-    #region Server handlers
+    # region Server handlers
 
     /// <summary>
     /// Handle server starting notification
@@ -533,9 +533,9 @@ public class TCPServer : IDisposable
     internal void OnDisconnectingInternal(TCPSession session) { OnDisconnecting(session); }
     internal void OnDisconnectedInternal(TCPSession session) { OnDisconnected(session); }
 
-    #endregion
+    # endregion
 
-    #region Error handling
+    # region Error handling
 
     /// <summary>
     /// Send error notification
@@ -554,9 +554,9 @@ public class TCPServer : IDisposable
         OnError(error);
     }
 
-    #endregion
+    # endregion
 
-    #region IDisposable implementation
+    # region IDisposable implementation
 
     /// <summary>
     /// Disposed flag
@@ -606,5 +606,5 @@ public class TCPServer : IDisposable
         }
     }
 
-    #endregion
+    # endregion
 }
