@@ -32,12 +32,9 @@ public class Handshake(MerrickContext merrick, ILogger<Handshake> logger) : Comm
         // TODO: Check Cookie
         // TODO: Check Authentication Hash
 
-        ResponseCommand = BitConverter.GetBytes(ChatProtocol.ChatServerToClient.NET_CHAT_CL_ACCEPT);
+        Response.WriteCommand(ChatProtocol.ChatServerToClient.NET_CHAT_CL_ACCEPT);
+        Response.PrependBufferSize();
 
-        Response.WriteCommandBytes(ResponseCommand);
-        Response.WriteNullTerminator();
-
-        session.SendAsync(ResponseSize);
         session.SendAsync(Response.Data);
     }
 }
