@@ -8,12 +8,12 @@ public class ChatSession(TCPServer server, IServiceProvider serviceProvider) : T
 
     protected override void OnConnected()
     {
-        Console.WriteLine($"Chat Session ID {Id} Was Created");
+        Console.WriteLine($"Chat Session ID {ID} Was Created");
     }
 
     protected override void OnDisconnected()
     {
-        Console.WriteLine($"Chat Session ID {Id} Has Terminated");
+        Console.WriteLine($"Chat Session ID {ID} Has Terminated");
     }
 
     protected override void OnReceived(byte[] buffer, long offset, long size)
@@ -94,6 +94,6 @@ public class ChatSession(TCPServer server, IServiceProvider serviceProvider) : T
 
     protected override void OnError(SocketError error)
     {
-        Console.WriteLine($"Chat Session ID {Id} Caught A Socket Error With Code {error}");
+        Console.WriteLine($"Chat Session ID {ID} Caught A Socket Error With Code {error}");
     }
 }
