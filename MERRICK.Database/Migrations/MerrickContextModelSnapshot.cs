@@ -24,9 +24,11 @@ namespace MERRICK.Database.Migrations
 
             modelBuilder.Entity("MERRICK.Database.Entities.Core.Account", b =>
                 {
-                    b.Property<Guid>("ID")
+                    b.Property<int>("ID")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
 
                     b.Property<int>("AscensionLevel")
                         .HasColumnType("int");
@@ -35,8 +37,8 @@ namespace MERRICK.Database.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid?>("ClanID")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<int?>("ClanID")
+                        .HasColumnType("int");
 
                     b.Property<int>("ClanTier")
                         .HasColumnType("int");
@@ -81,8 +83,8 @@ namespace MERRICK.Database.Migrations
                     b.Property<int>("Type")
                         .HasColumnType("int");
 
-                    b.Property<Guid>("UserID")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<int>("UserID")
+                        .HasColumnType("int");
 
                     b.HasKey("ID");
 
@@ -98,10 +100,10 @@ namespace MERRICK.Database.Migrations
                     b.HasData(
                         new
                         {
-                            ID = new Guid("00000000-0000-0000-0000-000000000001"),
+                            ID = 1,
                             AscensionLevel = 666,
                             AutoConnectChatChannels = "[\"KONGOR\",\"TERMINAL\"]",
-                            ClanID = new Guid("00000000-0000-0000-0000-000000000004"),
+                            ClanID = 2,
                             ClanTier = 3,
                             IPAddressCollection = "[]",
                             IsMain = true,
@@ -110,18 +112,18 @@ namespace MERRICK.Database.Migrations
                             SelectedStoreItems = "[\"ai.custom_icon:1\",\"av.Flamboyant\",\"c.cat_courier\",\"cc.frostburnlogo\",\"cr.Punk Creep\",\"cs.frostburnlogo\",\"m.Super-Taunt\",\"sc.paragon_circle_upgrade\",\"t.Dumpster_Taunt\",\"te.Punk TP\",\"w.8bit_ward\"]",
                             SystemInformationCollection = "[]",
                             SystemInformationHashCollection = "[]",
-                            TimestampCreated = new DateTime(2024, 3, 30, 0, 22, 38, 336, DateTimeKind.Utc).AddTicks(7414),
-                            TimestampJoinedClan = new DateTime(2024, 3, 30, 0, 22, 38, 336, DateTimeKind.Utc).AddTicks(7409),
-                            TimestampLastActive = new DateTime(2024, 3, 30, 0, 22, 38, 336, DateTimeKind.Utc).AddTicks(7415),
+                            TimestampCreated = new DateTime(2024, 4, 3, 19, 36, 14, 466, DateTimeKind.Utc).AddTicks(8473),
+                            TimestampJoinedClan = new DateTime(2024, 4, 3, 19, 36, 14, 466, DateTimeKind.Utc).AddTicks(8467),
+                            TimestampLastActive = new DateTime(2024, 4, 3, 19, 36, 14, 466, DateTimeKind.Utc).AddTicks(8473),
                             Type = 5,
-                            UserID = new Guid("00000000-0000-0000-0000-000000000001")
+                            UserID = 1
                         },
                         new
                         {
-                            ID = new Guid("00000000-0000-0000-0000-000000000002"),
+                            ID = 2,
                             AscensionLevel = 666,
                             AutoConnectChatChannels = "[\"KONGOR\",\"TERMINAL\"]",
-                            ClanID = new Guid("00000000-0000-0000-0000-000000000001"),
+                            ClanID = 1,
                             ClanTier = 3,
                             IPAddressCollection = "[]",
                             IsMain = false,
@@ -130,18 +132,18 @@ namespace MERRICK.Database.Migrations
                             SelectedStoreItems = "[\"ai.custom_icon:1\",\"av.Flamboyant\",\"c.cat_courier\",\"cc.frostburnlogo\",\"cr.Punk Creep\",\"cs.frostburnlogo\",\"m.Super-Taunt\",\"sc.paragon_circle_upgrade\",\"t.Dumpster_Taunt\",\"te.Punk TP\",\"w.8bit_ward\"]",
                             SystemInformationCollection = "[]",
                             SystemInformationHashCollection = "[]",
-                            TimestampCreated = new DateTime(2024, 3, 30, 0, 22, 38, 336, DateTimeKind.Utc).AddTicks(7423),
-                            TimestampJoinedClan = new DateTime(2024, 3, 30, 0, 22, 38, 336, DateTimeKind.Utc).AddTicks(7421),
-                            TimestampLastActive = new DateTime(2024, 3, 30, 0, 22, 38, 336, DateTimeKind.Utc).AddTicks(7423),
+                            TimestampCreated = new DateTime(2024, 4, 3, 19, 36, 14, 466, DateTimeKind.Utc).AddTicks(8481),
+                            TimestampJoinedClan = new DateTime(2024, 4, 3, 19, 36, 14, 466, DateTimeKind.Utc).AddTicks(8479),
+                            TimestampLastActive = new DateTime(2024, 4, 3, 19, 36, 14, 466, DateTimeKind.Utc).AddTicks(8481),
                             Type = 5,
-                            UserID = new Guid("00000000-0000-0000-0000-000000000001")
+                            UserID = 1
                         },
                         new
                         {
-                            ID = new Guid("00000000-0000-0000-0000-000000000003"),
+                            ID = 3,
                             AscensionLevel = 666,
                             AutoConnectChatChannels = "[\"KONGOR\",\"TERMINAL\"]",
-                            ClanID = new Guid("00000000-0000-0000-0000-000000000001"),
+                            ClanID = 1,
                             ClanTier = 2,
                             IPAddressCollection = "[]",
                             IsMain = false,
@@ -150,18 +152,18 @@ namespace MERRICK.Database.Migrations
                             SelectedStoreItems = "[\"ai.custom_icon:1\",\"av.Flamboyant\",\"c.cat_courier\",\"cc.frostburnlogo\",\"cr.Punk Creep\",\"cs.frostburnlogo\",\"m.Super-Taunt\",\"sc.paragon_circle_upgrade\",\"t.Dumpster_Taunt\",\"te.Punk TP\",\"w.8bit_ward\"]",
                             SystemInformationCollection = "[]",
                             SystemInformationHashCollection = "[]",
-                            TimestampCreated = new DateTime(2024, 3, 30, 0, 22, 38, 336, DateTimeKind.Utc).AddTicks(7428),
-                            TimestampJoinedClan = new DateTime(2024, 3, 30, 0, 22, 38, 336, DateTimeKind.Utc).AddTicks(7426),
-                            TimestampLastActive = new DateTime(2024, 3, 30, 0, 22, 38, 336, DateTimeKind.Utc).AddTicks(7428),
+                            TimestampCreated = new DateTime(2024, 4, 3, 19, 36, 14, 466, DateTimeKind.Utc).AddTicks(8484),
+                            TimestampJoinedClan = new DateTime(2024, 4, 3, 19, 36, 14, 466, DateTimeKind.Utc).AddTicks(8482),
+                            TimestampLastActive = new DateTime(2024, 4, 3, 19, 36, 14, 466, DateTimeKind.Utc).AddTicks(8484),
                             Type = 5,
-                            UserID = new Guid("00000000-0000-0000-0000-000000000001")
+                            UserID = 1
                         },
                         new
                         {
-                            ID = new Guid("00000000-0000-0000-0000-000000000004"),
+                            ID = 4,
                             AscensionLevel = 666,
                             AutoConnectChatChannels = "[\"KONGOR\",\"TERMINAL\"]",
-                            ClanID = new Guid("00000000-0000-0000-0000-000000000001"),
+                            ClanID = 1,
                             ClanTier = 2,
                             IPAddressCollection = "[]",
                             IsMain = false,
@@ -170,19 +172,21 @@ namespace MERRICK.Database.Migrations
                             SelectedStoreItems = "[\"ai.custom_icon:1\",\"av.Flamboyant\",\"c.cat_courier\",\"cc.frostburnlogo\",\"cr.Punk Creep\",\"cs.frostburnlogo\",\"m.Super-Taunt\",\"sc.paragon_circle_upgrade\",\"t.Dumpster_Taunt\",\"te.Punk TP\",\"w.8bit_ward\"]",
                             SystemInformationCollection = "[]",
                             SystemInformationHashCollection = "[]",
-                            TimestampCreated = new DateTime(2024, 3, 30, 0, 22, 38, 336, DateTimeKind.Utc).AddTicks(7432),
-                            TimestampJoinedClan = new DateTime(2024, 3, 30, 0, 22, 38, 336, DateTimeKind.Utc).AddTicks(7431),
-                            TimestampLastActive = new DateTime(2024, 3, 30, 0, 22, 38, 336, DateTimeKind.Utc).AddTicks(7432),
+                            TimestampCreated = new DateTime(2024, 4, 3, 19, 36, 14, 466, DateTimeKind.Utc).AddTicks(8487),
+                            TimestampJoinedClan = new DateTime(2024, 4, 3, 19, 36, 14, 466, DateTimeKind.Utc).AddTicks(8485),
+                            TimestampLastActive = new DateTime(2024, 4, 3, 19, 36, 14, 466, DateTimeKind.Utc).AddTicks(8487),
                             Type = 5,
-                            UserID = new Guid("00000000-0000-0000-0000-000000000001")
+                            UserID = 1
                         });
                 });
 
             modelBuilder.Entity("MERRICK.Database.Entities.Core.Clan", b =>
                 {
-                    b.Property<Guid>("ID")
+                    b.Property<int>("ID")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -207,39 +211,41 @@ namespace MERRICK.Database.Migrations
                     b.HasData(
                         new
                         {
-                            ID = new Guid("00000000-0000-0000-0000-000000000001"),
+                            ID = 1,
                             Name = "KONGOR",
                             Tag = "K",
-                            TimestampCreated = new DateTime(2024, 3, 30, 0, 22, 38, 336, DateTimeKind.Utc).AddTicks(7337)
+                            TimestampCreated = new DateTime(2024, 4, 3, 19, 36, 14, 466, DateTimeKind.Utc).AddTicks(8423)
                         },
                         new
                         {
-                            ID = new Guid("00000000-0000-0000-0000-000000000002"),
+                            ID = 2,
+                            Name = "Project KONGOR Developers",
+                            Tag = ".NET",
+                            TimestampCreated = new DateTime(2024, 4, 3, 19, 36, 14, 466, DateTimeKind.Utc).AddTicks(8430)
+                        },
+                        new
+                        {
+                            ID = 3,
                             Name = "Project KONGOR",
                             Tag = "PK",
-                            TimestampCreated = new DateTime(2024, 3, 30, 0, 22, 38, 336, DateTimeKind.Utc).AddTicks(7342)
+                            TimestampCreated = new DateTime(2024, 4, 3, 19, 36, 14, 466, DateTimeKind.Utc).AddTicks(8432)
                         },
                         new
                         {
-                            ID = new Guid("00000000-0000-0000-0000-000000000003"),
+                            ID = 4,
                             Name = "Project KONGOR Open-Source",
                             Tag = "PKOS",
-                            TimestampCreated = new DateTime(2024, 3, 30, 0, 22, 38, 336, DateTimeKind.Utc).AddTicks(7371)
-                        },
-                        new
-                        {
-                            ID = new Guid("00000000-0000-0000-0000-000000000004"),
-                            Name = "Project KONGOR Developers",
-                            Tag = "DEV",
-                            TimestampCreated = new DateTime(2024, 3, 30, 0, 22, 38, 336, DateTimeKind.Utc).AddTicks(7373)
+                            TimestampCreated = new DateTime(2024, 4, 3, 19, 36, 14, 466, DateTimeKind.Utc).AddTicks(8434)
                         });
                 });
 
             modelBuilder.Entity("MERRICK.Database.Entities.Core.User", b =>
                 {
-                    b.Property<Guid>("ID")
+                    b.Property<int>("ID")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
 
                     b.Property<string>("EmailAddress")
                         .IsRequired()
@@ -261,8 +267,8 @@ namespace MERRICK.Database.Migrations
                     b.Property<int>("PlinkoTickets")
                         .HasColumnType("int");
 
-                    b.Property<Guid>("RoleID")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<int>("RoleID")
+                        .HasColumnType("int");
 
                     b.Property<string>("SRPPasswordHash")
                         .IsRequired()
@@ -301,18 +307,18 @@ namespace MERRICK.Database.Migrations
                     b.HasData(
                         new
                         {
-                            ID = new Guid("00000000-0000-0000-0000-000000000001"),
+                            ID = 1,
                             EmailAddress = "project.kongor@proton.me",
                             GoldCoins = 5555555,
                             OwnedStoreItems = "[\"ai.custom_icon:1\",\"av.Flamboyant\",\"c.cat_courier\",\"cc.frostburnlogo\",\"cr.Punk Creep\",\"cs.frostburnlogo\",\"m.Super-Taunt\",\"sc.paragon_circle_upgrade\",\"t.Dumpster_Taunt\",\"te.Punk TP\",\"w.8bit_ward\"]",
                             PBKDF2PasswordHash = "AQAAAAIAAYagAAAAEMUkpLAr01NjkKRPaXCyTa17nlOdPKJucn5QYur+wQBTDKCpgsAcREenK+pGJPBCRw==",
                             PlinkoTickets = 5555555,
-                            RoleID = new Guid("00000000-0000-0000-0000-0000f4a5e3d3"),
+                            RoleID = 1,
                             SRPPasswordHash = "fe6f16b0ecb80f6b2bc95d68420fd13afef0c895172a81819870660208ac221a",
                             SRPPasswordSalt = "861c37ec6d049d92cc1c67d195b414f26b572a56358272af3e9c06fcd9bfa053",
                             SilverCoins = 555555555,
-                            TimestampCreated = new DateTime(2024, 3, 30, 0, 22, 38, 336, DateTimeKind.Utc).AddTicks(7318),
-                            TimestampLastActive = new DateTime(2024, 3, 30, 0, 22, 38, 336, DateTimeKind.Utc).AddTicks(7319),
+                            TimestampCreated = new DateTime(2024, 4, 3, 19, 36, 14, 466, DateTimeKind.Utc).AddTicks(8399),
+                            TimestampLastActive = new DateTime(2024, 4, 3, 19, 36, 14, 466, DateTimeKind.Utc).AddTicks(8401),
                             TotalExperience = 22211666,
                             TotalLevel = 666
                         });
@@ -320,9 +326,11 @@ namespace MERRICK.Database.Migrations
 
             modelBuilder.Entity("MERRICK.Database.Entities.Utility.Role", b =>
                 {
-                    b.Property<Guid>("ID")
+                    b.Property<int>("ID")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -339,21 +347,23 @@ namespace MERRICK.Database.Migrations
                     b.HasData(
                         new
                         {
-                            ID = new Guid("00000000-0000-0000-0000-0000f4a5e3d3"),
+                            ID = 1,
                             Name = "ADMINISTRATOR"
                         },
                         new
                         {
-                            ID = new Guid("00000000-0000-0000-0000-00002b88dfe2"),
+                            ID = 2,
                             Name = "USER"
                         });
                 });
 
             modelBuilder.Entity("MERRICK.Database.Entities.Utility.Token", b =>
                 {
-                    b.Property<Guid>("ID")
+                    b.Property<int>("ID")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
 
                     b.Property<string>("Data")
                         .IsRequired()
@@ -371,6 +381,9 @@ namespace MERRICK.Database.Migrations
 
                     b.Property<DateTime>("TimestampCreated")
                         .HasColumnType("datetime2");
+
+                    b.Property<Guid>("Value")
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("ID");
 
@@ -391,8 +404,8 @@ namespace MERRICK.Database.Migrations
 
                     b.OwnsMany("MERRICK.Database.Entities.Relational.BannedPeer", "BannedPeers", b1 =>
                         {
-                            b1.Property<Guid>("AccountID")
-                                .HasColumnType("uniqueidentifier");
+                            b1.Property<int>("AccountID")
+                                .HasColumnType("int");
 
                             b1.Property<int>("Id")
                                 .ValueGeneratedOnAdd()
@@ -402,9 +415,6 @@ namespace MERRICK.Database.Migrations
                                 .IsRequired()
                                 .HasMaxLength(30)
                                 .HasColumnType("nvarchar(30)");
-
-                            b1.Property<Guid>("GUID")
-                                .HasColumnType("uniqueidentifier");
 
                             b1.Property<string>("Name")
                                 .IsRequired()
@@ -426,8 +436,8 @@ namespace MERRICK.Database.Migrations
 
                     b.OwnsMany("MERRICK.Database.Entities.Relational.FriendedPeer", "FriendedPeers", b1 =>
                         {
-                            b1.Property<Guid>("AccountID")
-                                .HasColumnType("uniqueidentifier");
+                            b1.Property<int>("AccountID")
+                                .HasColumnType("int");
 
                             b1.Property<int>("Id")
                                 .ValueGeneratedOnAdd()
@@ -441,9 +451,6 @@ namespace MERRICK.Database.Migrations
                                 .IsRequired()
                                 .HasMaxLength(15)
                                 .HasColumnType("nvarchar(15)");
-
-                            b1.Property<Guid>("GUID")
-                                .HasColumnType("uniqueidentifier");
 
                             b1.Property<string>("Name")
                                 .IsRequired()
@@ -465,15 +472,12 @@ namespace MERRICK.Database.Migrations
 
                     b.OwnsMany("MERRICK.Database.Entities.Relational.IgnoredPeer", "IgnoredPeers", b1 =>
                         {
-                            b1.Property<Guid>("AccountID")
-                                .HasColumnType("uniqueidentifier");
+                            b1.Property<int>("AccountID")
+                                .HasColumnType("int");
 
                             b1.Property<int>("Id")
                                 .ValueGeneratedOnAdd()
                                 .HasColumnType("int");
-
-                            b1.Property<Guid>("GUID")
-                                .HasColumnType("uniqueidentifier");
 
                             b1.Property<string>("Name")
                                 .IsRequired()

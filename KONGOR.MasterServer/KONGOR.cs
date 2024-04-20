@@ -2,7 +2,8 @@
 
 public class KONGOR
 {
-    public static bool RunsInDevelopmentMode { get; set; }
+    // TRUE If The Application Is Running In Development Mode Or False If Not
+    public static bool RunsInDevelopmentMode { get; set; } = true;
 
     public static void Main(string[] args)
     {
@@ -33,6 +34,9 @@ public class KONGOR
 
             options.EnableThreadSafetyChecks();
         });
+
+        // Add Garnet (Drop-In Replacement For Redis); The Connection String Maps To The "cache" Resource Defined In ASPIRE.AppHost
+        builder.AddRedisClient("cache", settings => settings.ConnectionString = Environment.GetEnvironmentVariable("ConnectionStrings__cache"));
 
         // Add Memory Cache
         builder.Services.AddMemoryCache();

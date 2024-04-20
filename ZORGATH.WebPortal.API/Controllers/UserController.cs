@@ -170,7 +170,7 @@ public class UserController(MerrickContext databaseContext, ILogger<UserControll
     [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(string), StatusCodes.Status403Forbidden)]
     [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> GetUser(Guid id)
+    public async Task<IActionResult> GetUser(int id)
     {
         User? user = await MerrickContext.Users
             .Include(record => record.Role)

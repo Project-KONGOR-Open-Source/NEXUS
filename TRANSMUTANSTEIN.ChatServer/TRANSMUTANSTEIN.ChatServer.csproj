@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
 	<PropertyGroup>
 		<OutputType>exe</OutputType>
@@ -11,6 +11,7 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\ASPIRE.SharedScope\ASPIRE.SharedScope.csproj" />
+		<ProjectReference Include="..\MERRICK.Database\MERRICK.Database.csproj" />
 	</ItemGroup>
 
 </Project>

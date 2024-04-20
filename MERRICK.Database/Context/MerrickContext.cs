@@ -30,13 +30,13 @@ public sealed class MerrickContext : DbContext
         (
             new Role
             {
-                ID = Guid.Parse($"00000000-0000-0000-0000-{UserRoles.Administrator.GetDeterministicHashCode():X12}"),
+                ID = 1,
                 Name = UserRoles.Administrator
             },
 
             new Role
             {
-                ID = Guid.Parse($"00000000-0000-0000-0000-{UserRoles.User.GetDeterministicHashCode():X12}"),
+                ID = 2,
                 Name = UserRoles.User
             }
         );
@@ -46,9 +46,9 @@ public sealed class MerrickContext : DbContext
     {
         builder.HasData(new
         {
-            ID = Guid.Parse("00000000-0000-0000-0000-000000000001"),
+            ID = 1,
             EmailAddress = "project.kongor@proton.me",
-            RoleID = Guid.Parse($"00000000-0000-0000-0000-{UserRoles.Administrator.GetDeterministicHashCode():X12}"),
+            RoleID = 1,
             SRPPasswordSalt = "861c37ec6d049d92cc1c67d195b414f26b572a56358272af3e9c06fcd9bfa053",
             SRPPasswordHash = "fe6f16b0ecb80f6b2bc95d68420fd13afef0c895172a81819870660208ac221a",
             PBKDF2PasswordHash = "AQAAAAIAAYagAAAAEMUkpLAr01NjkKRPaXCyTa17nlOdPKJucn5QYur+wQBTDKCpgsAcREenK+pGJPBCRw==",
@@ -71,30 +71,30 @@ public sealed class MerrickContext : DbContext
     {
         builder.HasData(new Clan()
         {
-            ID = Guid.Parse("00000000-0000-0000-0000-000000000001"),
+            ID = 1,
             Name = "KONGOR",
             Tag = "K"
         });
 
         builder.HasData(new Clan()
         {
-            ID = Guid.Parse("00000000-0000-0000-0000-000000000002"),
+            ID = 2,
+            Name = "Project KONGOR Developers",
+            Tag = ".NET"
+        });
+
+        builder.HasData(new Clan()
+        {
+            ID = 3,
             Name = "Project KONGOR",
             Tag = "PK"
         });
 
         builder.HasData(new Clan()
         {
-            ID = Guid.Parse("00000000-0000-0000-0000-000000000003"),
+            ID = 4,
             Name = "Project KONGOR Open-Source",
             Tag = "PKOS"
-        });
-
-        builder.HasData(new Clan()
-        {
-            ID = Guid.Parse("00000000-0000-0000-0000-000000000004"),
-            Name = "Project KONGOR Developers",
-            Tag = "DEV"
         });
     }
 
@@ -104,12 +104,12 @@ public sealed class MerrickContext : DbContext
 
         builder.HasData(accounts.Select(account => new
         {
-            ID = Guid.Parse($"00000000-0000-0000-0000-{(Array.IndexOf(accounts, account) + 1 /* 1-Based Indexing */ ):D12}"),
+            ID = Array.IndexOf(accounts, account) + 1 /* 1-Based Indexing */,
             Name = account,
-            UserID = Guid.Parse("00000000-0000-0000-0000-000000000001"),
+            UserID = 1,
             Type = AccountType.Staff,
             IsMain = account is "KONGOR",
-            ClanID = account is "KONGOR" ? Guid.Parse("00000000-0000-0000-0000-000000000004") /* Project KONGOR Developers */ : Guid.Parse("00000000-0000-0000-0000-000000000001") /* KONGOR */ ,
+            ClanID = account is "KONGOR" ? 2 /* Project KONGOR Developers */ : 1 /* KONGOR */ ,
             ClanTier = account is "KONGOR" or /* [K] */ "ONGOR" ? ClanTier.Leader : ClanTier.Officer,
             TimestampJoinedClan = DateTime.UtcNow,
             AscensionLevel = 666,

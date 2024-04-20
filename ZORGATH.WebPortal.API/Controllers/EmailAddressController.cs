@@ -44,13 +44,14 @@ public class EmailAddressController(MerrickContext databaseContext, ILogger<Emai
             {
                 Purpose = TokenPurpose.EmailAddressVerification,
                 EmailAddress = payload.EmailAddress,
+                Value = Guid.NewGuid(),
                 Data = sanitizedEmailAddress
             };
 
             await MerrickContext.Tokens.AddAsync(token);
             await MerrickContext.SaveChangesAsync();
 
-            bool sent = await EmailService.SendEmailAddressRegistrationLink(payload.EmailAddress, token.ID.ToString());
+            bool sent = await EmailService.SendEmailAddressRegistrationLink(payload.EmailAddress, token.Value.ToString());
 
             if (sent.Equals(false))
             {

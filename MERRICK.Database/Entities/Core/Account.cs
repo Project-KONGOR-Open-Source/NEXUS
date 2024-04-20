@@ -4,7 +4,7 @@
 public class Account
 {
     [Key]
-    public Guid ID { get; set; }
+    public int ID { get; set; }
 
     [MaxLength(15)]
     public required string Name { get; set; }

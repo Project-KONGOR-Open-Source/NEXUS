@@ -4,7 +4,7 @@
 public class Clan
 {
     [Key]
-    public Guid ID { get; set; }
+    public int ID { get; set; }
 
     [MaxLength(30)]
     public required string Name { get; set; }

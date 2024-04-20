@@ -3,7 +3,7 @@
 public class Token
 {
     [Key]
-    public Guid ID { get; set; }
+    public int ID { get; set; }
 
     public required TokenPurpose Purpose { get; set; }
 
@@ -12,6 +12,8 @@ public class Token
     public DateTime TimestampCreated { get; set; } = DateTime.UtcNow;
 
     public DateTime? TimestampConsumed { get; set; }
+
+    public required Guid Value { get; set; }
 
     public required string Data { get; set; }
 }

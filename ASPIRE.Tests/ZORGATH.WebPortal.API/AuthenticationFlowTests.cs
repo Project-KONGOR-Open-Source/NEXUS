@@ -90,7 +90,7 @@ public sealed class AuthenticationFlowTests : WebPortalAPITestSetup
 
         UserController userController = new(TransientMerrickContext, userControllerLogger, emailService, configuration);
 
-        IActionResult responseRegisterUserAndMainAccount = await userController.RegisterUserAndMainAccount(new RegisterUserAndMainAccountDTO(registrationToken.ID.ToString(), name, password, password));
+        IActionResult responseRegisterUserAndMainAccount = await userController.RegisterUserAndMainAccount(new RegisterUserAndMainAccountDTO(registrationToken.Value.ToString(), name, password, password));
 
         Assert.That(responseRegisterUserAndMainAccount is CreatedAtActionResult, Is.True);
     }

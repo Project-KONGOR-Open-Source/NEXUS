@@ -8,10 +8,10 @@ public class DatabaseHealthCheck(DatabaseInitializer initializer) : IHealthCheck
 
         return task switch
         {
-            { IsCompletedSuccessfully: true }   => Task.FromResult(HealthCheckResult.Healthy()),
-            { IsFaulted: true }                 => Task.FromResult(HealthCheckResult.Unhealthy(task.Exception.InnerException?.Message, task.Exception)),
-            { IsCanceled: true }                => Task.FromResult(HealthCheckResult.Unhealthy("Database Initialization Was Cancelled")),
-            _                                   => Task.FromResult(HealthCheckResult.Degraded("Database Initialization Is Still In Progress"))
+            { IsCompletedSuccessfully: true }   => Task.FromResult(HealthCheckResult.Healthy("[HEALTHY] Database Is Accepting Connections")),
+            { IsFaulted: true }                 => Task.FromResult(HealthCheckResult.Unhealthy($"[UNHEALTHY] {task.Exception.InnerException?.Message}", task.Exception)),
+            { IsCanceled: true }                => Task.FromResult(HealthCheckResult.Unhealthy("[UNHEALTHY] Database Initialization Was Cancelled")),
+            _                                   => Task.FromResult(HealthCheckResult.Unhealthy("[UNHEALTHY] Database Initialization Is In Progress"))
         };
     }
 }
