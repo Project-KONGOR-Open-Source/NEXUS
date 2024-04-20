@@ -1,9 +1,9 @@
 ﻿global using MERRICK.Database.Context;
 
-global using Microsoft.EntityFrameworkCore;
 global using Microsoft.EntityFrameworkCore.Diagnostics;
 global using Microsoft.Extensions.Diagnostics.HealthChecks;
 
+global using System.Diagnostics;
 global using System.Net;
 global using System.Net.Sockets;
 global using System.Reflection;

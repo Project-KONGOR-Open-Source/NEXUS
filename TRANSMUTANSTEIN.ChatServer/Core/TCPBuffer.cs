@@ -1,12 +1,7 @@
-﻿// TODO: Clean This Up
-# nullable disable
-
-using System.Diagnostics;
-
-namespace TRANSMUTANSTEIN.ChatServer.Core;
+﻿namespace TRANSMUTANSTEIN.ChatServer.Core;
 
 /// <summary>
-/// Dynamic byte buffer
+///     Dynamic Byte Buffer
 /// </summary>
 public class TCPBuffer
 {
@@ -15,50 +10,54 @@ public class TCPBuffer
     protected long _offset;
 
     /// <summary>
-    /// Is the buffer empty?
+    ///     Is The Buffer Empty?
     /// </summary>
     public bool IsEmpty => (_data == null) || (_size == 0);
+
     /// <summary>
-    /// Bytes memory buffer
+    ///     Bytes Memory Buffer
     /// </summary>
     public byte[] Data => _data;
+
     /// <summary>
-    /// Bytes memory buffer capacity
+    ///     Bytes Memory Buffer Capacity
     /// </summary>
     public long Capacity => _data.Length;
+
     /// <summary>
-    /// Bytes memory buffer size
+    ///     Bytes Memory Buffer Size
     /// </summary>
     public long Size => _size;
+
     /// <summary>
-    /// Bytes memory buffer offset
+    ///     Bytes Memory Buffer Offset
     /// </summary>
     public long Offset => _offset;
 
     /// <summary>
-    /// Buffer indexer operator
+    ///     Buffer Indexer Operator
     /// </summary>
     public byte this[long index] => _data[index];
 
     /// <summary>
-    ///     Initialize a new expandable buffer with zero capacity.
+    ///     Initialize A New Expandable Buffer With Zero Capacity
     /// </summary>
     public TCPBuffer() { _data = new byte[0]; _size = 0; _offset = 0; }
 
     /// <summary>
-    ///     Initialize a new expandable buffer with the given capacity.
+    ///     Initialize A New Expandable Buffer With The Given Capacity
     /// </summary>
     public TCPBuffer(long capacity) { _data = new byte[capacity]; _size = 0; _offset = 0; }
 
     /// <summary>
-    ///     Initialize a new expandable buffer with the given data.
+    ///     Initialize A New Expandable Buffer With The Given Data
     /// </summary>
     public TCPBuffer(byte[] data) { _data = data; _size = data.Length; _offset = 0; }
 
-    #region Memory buffer methods
+    # region Memory Buffer Methods
 
     /// <summary>
-    /// Get a span of bytes from the current buffer
+    ///     Get A Span Of Bytes From The Current Buffer
     /// </summary>
     public Span<byte> AsSpan()
     {
@@ -66,7 +65,7 @@ public class TCPBuffer
     }
 
     /// <summary>
-    /// Get a string from the current buffer
+    ///     Get A String From The Current Buffer
     /// </summary>
     public override string ToString()
     {
@@ -74,7 +73,7 @@ public class TCPBuffer
     }
 
     /// <summary>
-    /// Clear the current buffer and its offset
+    ///     Clear The Current Buffer And Its Offset
     /// </summary>
     public void Clear()
     {
@@ -83,7 +82,7 @@ public class TCPBuffer
     }
 
     /// <summary>
-    /// Extract the string from buffer of the given offset and size
+    ///     Extract The String From Buffer Of The Given Offset And Size
     /// </summary>
     public string ExtractString(long offset, long size)
     {
@@ -95,7 +94,7 @@ public class TCPBuffer
     }
 
     /// <summary>
-    /// Remove the buffer of the given offset and size
+    ///     Remove The Buffer Of The Given Offset And Size
     /// </summary>
     public void Remove(long offset, long size)
     {
@@ -116,7 +115,7 @@ public class TCPBuffer
     }
 
     /// <summary>
-    /// Reserve the buffer of the given capacity
+    ///     Reserve The Buffer Of The Given Capacity
     /// </summary>
     public void Reserve(long capacity)
     {
@@ -133,7 +132,7 @@ public class TCPBuffer
     }
 
     /// <summary>
-    /// Resize the current buffer
+    ///     Resize The Current Buffer
     /// </summary>
     public void Resize(long size)
     {
@@ -144,23 +143,24 @@ public class TCPBuffer
     }
 
     /// <summary>
-    /// Shift the current buffer offset
+    ///     Shift The Current Buffer Offset
     /// </summary>
     public void Shift(long offset) { _offset += offset; }
+
     /// <summary>
-    /// Unshift the current buffer offset
+    ///     Unshift The Current Buffer Offset
     /// </summary>
     public void Unshift(long offset) { _offset -= offset; }
 
-    #endregion
+    # endregion
 
-    #region Buffer I/O methods
+    # region Buffer I/O Methods
 
     /// <summary>
-    /// Append the single byte
+    ///     Append The Single Byte
     /// </summary>
-    /// <param name="value">Byte value to append</param>
-    /// <returns>Count of append bytes</returns>
+    /// <param name="value">Byte Value To Append</param>
+    /// <returns>Count Of Append Bytes</returns>
     public long Append(byte value)
     {
         Reserve(_size + 1);
@@ -170,10 +170,10 @@ public class TCPBuffer
     }
 
     /// <summary>
-    /// Append the given buffer
+    ///     Append The Given Buffer
     /// </summary>
-    /// <param name="buffer">Buffer to append</param>
-    /// <returns>Count of append bytes</returns>
+    /// <param name="buffer">Buffer To Append</param>
+    /// <returns>Count Of Append Bytes</returns>
     public long Append(byte[] buffer)
     {
         Reserve(_size + buffer.Length);
@@ -183,12 +183,12 @@ public class TCPBuffer
     }
 
     /// <summary>
-    /// Append the given buffer fragment
+    ///     Append The Given Buffer Fragment
     /// </summary>
-    /// <param name="buffer">Buffer to append</param>
-    /// <param name="offset">Buffer offset</param>
-    /// <param name="size">Buffer size</param>
-    /// <returns>Count of append bytes</returns>
+    /// <param name="buffer">Buffer To Append</param>
+    /// <param name="offset">Buffer Offset</param>
+    /// <param name="size">Buffer Size</param>
+    /// <returns>Count Of Append Bytes</returns>
     public long Append(byte[] buffer, long offset, long size)
     {
         Reserve(_size + size);
@@ -198,10 +198,10 @@ public class TCPBuffer
     }
 
     /// <summary>
-    /// Append the given span of bytes
+    ///     Append The Given Span Of Bytes
     /// </summary>
-    /// <param name="buffer">Buffer to append as a span of bytes</param>
-    /// <returns>Count of append bytes</returns>
+    /// <param name="buffer">Buffer To Append As A Span Of Bytes</param>
+    /// <returns>Count Of Append Bytes</returns>
     public long Append(ReadOnlySpan<byte> buffer)
     {
         Reserve(_size + buffer.Length);
@@ -211,17 +211,17 @@ public class TCPBuffer
     }
 
     /// <summary>
-    /// Append the given buffer
+    ///     Append The Given Buffer
     /// </summary>
-    /// <param name="buffer">Buffer to append</param>
-    /// <returns>Count of append bytes</returns>
+    /// <param name="buffer">Buffer To Append</param>
+    /// <returns>Count Of Append Bytes</returns>
     public long Append(TCPBuffer buffer) => Append(buffer.AsSpan());
 
     /// <summary>
-    /// Append the given text in UTF-8 encoding
+    ///     Append The Given Text In UTF-8 Encoding
     /// </summary>
-    /// <param name="text">Text to append</param>
-    /// <returns>Count of append bytes</returns>
+    /// <param name="text">Text To Append</param>
+    /// <returns>Count Of Append Bytes</returns>
     public long Append(string text)
     {
         int length = Encoding.UTF8.GetMaxByteCount(text.Length);
@@ -232,10 +232,10 @@ public class TCPBuffer
     }
 
     /// <summary>
-    /// Append the given text in UTF-8 encoding
+    ///     Append The Given Text In Utf-8 Encoding
     /// </summary>
-    /// <param name="text">Text to append as a span of characters</param>
-    /// <returns>Count of append bytes</returns>
+    /// <param name="text">Text To Append As A Span Of Characters</param>
+    /// <returns>Count Of Append Bytes</returns>
     public long Append(ReadOnlySpan<char> text)
     {
         int length = Encoding.UTF8.GetMaxByteCount(text.Length);
@@ -245,5 +245,5 @@ public class TCPBuffer
         return result;
     }
 
-    #endregion
+    # endregion
 }
