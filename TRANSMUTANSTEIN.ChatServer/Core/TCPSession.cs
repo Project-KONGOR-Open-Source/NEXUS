@@ -101,12 +101,12 @@ public class TCPSession : IDisposable
         // Apply the option: keep alive
         if (Server.OptionKeepAlive)
             Socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.KeepAlive, true);
-        if (Server.OptionTcpKeepAliveTime >= 0)
-            Socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveTime, Server.OptionTcpKeepAliveTime);
-        if (Server.OptionTcpKeepAliveInterval >= 0)
-            Socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveInterval, Server.OptionTcpKeepAliveInterval);
-        if (Server.OptionTcpKeepAliveRetryCount >= 0)
-            Socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveRetryCount, Server.OptionTcpKeepAliveRetryCount);
+        if (Server.OptionTCPKeepAliveTime >= 0)
+            Socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveTime, Server.OptionTCPKeepAliveTime);
+        if (Server.OptionTCPKeepAliveInterval >= 0)
+            Socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveInterval, Server.OptionTCPKeepAliveInterval);
+        if (Server.OptionTCPKeepAliveRetryCount >= 0)
+            Socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveRetryCount, Server.OptionTCPKeepAliveRetryCount);
         // Apply the option: no delay
         if (Server.OptionNoDelay)
             Socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, true);
