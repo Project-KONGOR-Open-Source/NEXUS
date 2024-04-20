@@ -1,244 +1,264 @@
-﻿// TODO: Clean This Up
+﻿namespace TRANSMUTANSTEIN.ChatServer.Core;
+
 # nullable disable
 
-using System.Collections.Concurrent;
-using System.Diagnostics;
-
-namespace TRANSMUTANSTEIN.ChatServer.Core;
-
 /// <summary>
-/// TCP server is used to connect, disconnect and manage TCP sessions
+///     TCP Server Is Used To Connect, Disconnect And Manage TCP Sessions
 /// </summary>
-/// <remarks>Thread-safe</remarks>
+/// <remarks>Thread-Safe</remarks>
 public class TCPServer : IDisposable
 {
     /// <summary>
-    /// Initialize TCP server with a given IP address and port number
+    ///     Initialize TCP Server With A Given IP Address And Port Number
     /// </summary>
-    /// <param name="address">IP address</param>
-    /// <param name="port">Port number</param>
+    /// <param name="address">IP Address</param>
+    /// <param name="port">Port Number</param>
     public TCPServer(IPAddress address, int port) : this(new IPEndPoint(address, port)) { }
+
     /// <summary>
-    /// Initialize TCP server with a given IP address and port number
+    ///     Initialize TCP Server With A Given IP Address And Port Number
     /// </summary>
-    /// <param name="address">IP address</param>
-    /// <param name="port">Port number</param>
+    /// <param name="address">IP Address</param>
+    /// <param name="port">Port Number</param>
     public TCPServer(string address, int port) : this(new IPEndPoint(IPAddress.Parse(address), port)) { }
+
     /// <summary>
-    /// Initialize TCP server with a given DNS endpoint
+    ///     Initialize TCP Server With A Given DNS Endpoint
     /// </summary>
-    /// <param name="endpoint">DNS endpoint</param>
+    /// <param name="endpoint">DNS Endpoint</param>
     public TCPServer(DnsEndPoint endpoint) : this(endpoint as EndPoint, endpoint.Host, endpoint.Port) { }
+
     /// <summary>
-    /// Initialize TCP server with a given IP endpoint
+    ///     Initialize TCP Server With A Given IP Endpoint
     /// </summary>
-    /// <param name="endpoint">IP endpoint</param>
+    /// <param name="endpoint">IP Endpoint</param>
     public TCPServer(IPEndPoint endpoint) : this(endpoint as EndPoint, endpoint.Address.ToString(), endpoint.Port) { }
+
     /// <summary>
-    /// Initialize TCP server with a given endpoint, address and port
+    ///     Initialize TCP Server With A Given Endpoint, Address And Port
     /// </summary>
     /// <param name="endpoint">Endpoint</param>
-    /// <param name="address">Server address</param>
-    /// <param name="port">Server port</param>
+    /// <param name="address">Server Address</param>
+    /// <param name="port">Server Port</param>
     private TCPServer(EndPoint endpoint, string address, int port)
     {
-        Id = Guid.NewGuid();
+        ID = Guid.NewGuid();
         Address = address;
         Port = port;
         Endpoint = endpoint;
     }
 
     /// <summary>
-    /// Server Id
+    ///     Server ID
     /// </summary>
-    public Guid Id { get; }
+    public Guid ID { get; }
 
     /// <summary>
-    /// TCP server address
+    ///     TCP Server Address
     /// </summary>
     public string Address { get; }
+
     /// <summary>
-    /// TCP server port
+    ///     TCP Server Port
     /// </summary>
     public int Port { get; }
+
     /// <summary>
-    /// Endpoint
+    ///     Endpoint
     /// </summary>
     public EndPoint Endpoint { get; private set; }
 
     /// <summary>
-    /// Number of sessions connected to the server
+    ///     Number Of Sessions Connected To The Server
     /// </summary>
     public long ConnectedSessions { get { return Sessions.Count; } }
+
     /// <summary>
-    /// Number of bytes pending sent by the server
+    ///     Number Of Bytes Pending Sent By The Server
     /// </summary>
     public long BytesPending { get { return _bytesPending; } }
+
     /// <summary>
-    /// Number of bytes sent by the server
+    ///     Number Of Bytes Sent By The Server
     /// </summary>
     public long BytesSent { get { return _bytesSent; } }
+
     /// <summary>
-    /// Number of bytes received by the server
+    ///     Number Of Bytes Received By The Server
     /// </summary>
     public long BytesReceived { get { return _bytesReceived; } }
 
     /// <summary>
-    /// Option: acceptor backlog size
+    ///     Option: Acceptor Backlog Size
     /// </summary>
     /// <remarks>
-    /// This option will set the listening socket's backlog size
+    ///     This Option Will Set The Listening Socket's Backlog Size
     /// </remarks>
     public int OptionAcceptorBacklog { get; set; } = 1024;
+
     /// <summary>
-    /// Option: dual mode socket
+    ///     Option: Dual Mode Socket
     /// </summary>
     /// <remarks>
-    /// Specifies whether the Socket is a dual-mode socket used for both IPv4 and IPv6.
-    /// Will work only if socket is bound on IPv6 address.
+    ///     Specifies Whether The Socket Is A Dual-Mode Socket Used For Both IPv4 And IPv6
+    ///     <br/>
+    ///     Will Work Only If Socket Is Bound On IPv6 Address
     /// </remarks>
     public bool OptionDualMode { get; set; }
+
     /// <summary>
-    /// Option: keep alive
+    ///     Option: Keep Alive
     /// </summary>
     /// <remarks>
-    /// This option will setup SO_KEEPALIVE if the OS support this feature
+    ///     This Option Will Setup SO_KEEPALIVE If The Operating System Supports This Feature
     /// </remarks>
     public bool OptionKeepAlive { get; set; }
+
     /// <summary>
-    /// Option: TCP keep alive time
+    ///     Option: TCP Keep Alive Time
     /// </summary>
     /// <remarks>
-    /// The number of seconds a TCP connection will remain alive/idle before keepalive probes are sent to the remote
+    ///     The Number Of Seconds A TCP Connection Will Remain Alive/Idle Before KeepAlive Probes Are Sent To The Remote
     /// </remarks>
     public int OptionTCPKeepAliveTime { get; set; } = -1;
+
     /// <summary>
-    /// Option: TCP keep alive interval
+    ///     Option: TCP Keep Alive Interval
     /// </summary>
     /// <remarks>
-    /// The number of seconds a TCP connection will wait for a keepalive response before sending another keepalive probe
+    ///     The Number Of Seconds A TCP Connection Will Wait For A KeepAlive Response Before Sending Another KeepAlive Probe
     /// </remarks>
     public int OptionTCPKeepAliveInterval { get; set; } = -1;
+
     /// <summary>
-    /// Option: TCP keep alive retry count
+    ///     Option: TCP Keep Alive Retry Count
     /// </summary>
     /// <remarks>
-    /// The number of TCP keep alive probes that will be sent before the connection is terminated
+    ///     The Number Of TCP Keep Alive Probes That Will Be Sent Before The Connection Is Terminated
     /// </remarks>
     public int OptionTCPKeepAliveRetryCount { get; set; } = -1;
+
     /// <summary>
-    /// Option: no delay
+    ///     Option: No Delay
     /// </summary>
     /// <remarks>
-    /// This option will enable/disable Nagle's algorithm for TCP protocol
+    ///     This Option Will Enable/Disable Nagle's Algorithm For TCP Protocol
     /// </remarks>
     public bool OptionNoDelay { get; set; }
+
     /// <summary>
-    /// Option: reuse address
+    ///     Option: Reuse Address
     /// </summary>
     /// <remarks>
-    /// This option will enable/disable SO_REUSEADDR if the OS support this feature
+    ///     This Option Will Enable/Disable SO_REUSEADDR If The Operating System Supports This Feature
     /// </remarks>
     public bool OptionReuseAddress { get; set; }
+
     /// <summary>
-    /// Option: enables a socket to be bound for exclusive access
+    ///     Option: Enables A Socket To Be Bound For Exclusive Access
     /// </summary>
     /// <remarks>
-    /// This option will enable/disable SO_EXCLUSIVEADDRUSE if the OS support this feature
+    ///     This Option Will Enable/Disable SO_EXCLUSIVEADDRUSE If The Operating System Supports This Feature
     /// </remarks>
     public bool OptionExclusiveAddressUse { get; set; }
+
     /// <summary>
-    /// Option: receive buffer size
+    ///     Option: Receive Buffer Size
     /// </summary>
     public int OptionReceiveBufferSize { get; set; } = 8192;
+
     /// <summary>
-    /// Option: send buffer size
+    ///     Option: Send Buffer Size
     /// </summary>
     public int OptionSendBufferSize { get; set; } = 8192;
 
-    # region Start/Stop server
+    # region Start/Stop Server
 
-    // Server acceptor
+    // Server Acceptor
     private Socket _acceptorSocket;
     private SocketAsyncEventArgs _acceptorEventArg;
 
-    // Server statistic
+    // Server Statistic
     internal long _bytesPending;
     internal long _bytesSent;
     internal long _bytesReceived;
 
     /// <summary>
-    /// Is the server started?
+    ///     Is The Server Started?
     /// </summary>
     public bool IsStarted { get; private set; }
+
     /// <summary>
-    /// Is the server accepting new clients?
+    ///     Is The Server Accepting New Clients?
     /// </summary>
     public bool IsAccepting { get; private set; }
 
     /// <summary>
-    /// Create a new socket object
+    ///     Create A New Socket Object
     /// </summary>
     /// <remarks>
-    /// Method may be override if you need to prepare some specific socket object in your implementation.
+    ///     Method May Be Override If You Need To Prepare Some Specific Socket Object In Your Implementation
     /// </remarks>
-    /// <returns>Socket object</returns>
+    /// <returns>Socket Object</returns>
     protected virtual Socket CreateSocket()
     {
         return new Socket(Endpoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
     }
 
     /// <summary>
-    /// Start the server
+    ///     Start The Server
     /// </summary>
-    /// <returns>'true' if the server was successfully started, 'false' if the server failed to start</returns>
+    /// <returns>TRUE If The Server Was Successfully Started, Or FALSE If The Server Failed To Start</returns>
     public virtual bool Start()
     {
-        Debug.Assert(!IsStarted, "TCP server is already started!");
+        Debug.Assert(!IsStarted, "TCP Server Is Already Started");
         if (IsStarted)
             return false;
 
-        // Setup acceptor event arg
+        // Setup Acceptor Event Arg
         _acceptorEventArg = new SocketAsyncEventArgs();
         _acceptorEventArg.Completed += OnAsyncCompleted;
 
-        // Create a new acceptor socket
+        // Create A New Acceptor Socket
         _acceptorSocket = CreateSocket();
 
-        // Update the acceptor socket disposed flag
+        // Update The Acceptor Socket Disposed Flag
         IsSocketDisposed = false;
 
-        // Apply the option: reuse address
+        // Apply The Option: Reuse Address
         _acceptorSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, OptionReuseAddress);
-        // Apply the option: exclusive address use
+
+        // Apply The Option: Exclusive Address Use
         _acceptorSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ExclusiveAddressUse, OptionExclusiveAddressUse);
-        // Apply the option: dual mode (this option must be applied before listening)
+
+        // Apply The Option: Dual Mode (This Option Must Be Applied Before Listening)
         if (_acceptorSocket.AddressFamily == AddressFamily.InterNetworkV6)
             _acceptorSocket.DualMode = OptionDualMode;
 
-        // Bind the acceptor socket to the endpoint
+        // Bind The Acceptor Socket To The Endpoint
         _acceptorSocket.Bind(Endpoint);
-        // Refresh the endpoint property based on the actual endpoint created
+
+        // Refresh The Endpoint Property Based On The Actual Endpoint Created
         Endpoint = _acceptorSocket.LocalEndPoint;
 
-        // Call the server starting handler
+        // Call The Server Starting Handler
         OnStarting();
 
-        // Start listen to the acceptor socket with the given accepting backlog size
+        // Start Listen To The Acceptor Socket With The Given Accepting Backlog Size
         _acceptorSocket.Listen(OptionAcceptorBacklog);
 
-        // Reset statistic
+        // Reset Statistic
         _bytesPending = 0;
         _bytesSent = 0;
         _bytesReceived = 0;
 
-        // Update the started flag
+        // Update The Started Flag
         IsStarted = true;
 
-        // Call the server started handler
+        // Call The Server Started Handler
         OnStarted();
 
-        // Perform the first server accept
+        // Perform The First Server Accept
         IsAccepting = true;
         StartAccept(_acceptorEventArg);
 
@@ -246,56 +266,58 @@ public class TCPServer : IDisposable
     }
 
     /// <summary>
-    /// Stop the server
+    ///     Stop The Server
     /// </summary>
-    /// <returns>'true' if the server was successfully stopped, 'false' if the server is already stopped</returns>
+    /// <returns>TRUE If The Server Was Successfully Stopped, Or FALSE If The Server Is Already Stopped</returns>
     public virtual bool Stop()
     {
-        Debug.Assert(IsStarted, "TCP server is not started!");
+        Debug.Assert(IsStarted, "TCP Server Is Not Started");
+
         if (!IsStarted)
             return false;
 
-        // Stop accepting new clients
+        // Stop Accepting New Clients
         IsAccepting = false;
 
-        // Reset acceptor event arg
+        // Reset Acceptor Event Arg
         _acceptorEventArg.Completed -= OnAsyncCompleted;
 
-        // Call the server stopping handler
+        // Call The Server Stopping Handler
         OnStopping();
 
         try
         {
-            // Close the acceptor socket
+            // Close The Acceptor Socket
             _acceptorSocket.Close();
 
-            // Dispose the acceptor socket
+            // Dispose The Acceptor Socket
             _acceptorSocket.Dispose();
 
-            // Dispose event arguments
+            // Dispose Event Arguments
             _acceptorEventArg.Dispose();
 
-            // Update the acceptor socket disposed flag
+            // Update The Acceptor Socket Disposed Flag
             IsSocketDisposed = true;
         }
+
         catch (ObjectDisposedException) { }
 
-        // Disconnect all sessions
+        // Disconnect All Sessions
         DisconnectAll();
 
-        // Update the started flag
+        // Update The Started Flag
         IsStarted = false;
 
-        // Call the server stopped handler
+        // Call The Server Stopped Handler
         OnStopped();
 
         return true;
     }
 
     /// <summary>
-    /// Restart the server
+    ///     Restart The Server
     /// </summary>
-    /// <returns>'true' if the server was successfully restarted, 'false' if the server failed to restart</returns>
+    /// <returns>TRUE If The Server Was Successfully Restarted, Or FALSE If The Server Failed To Restart</returns>
     public virtual bool Restart()
     {
         if (!Stop())
@@ -309,48 +331,47 @@ public class TCPServer : IDisposable
 
     # endregion
 
-    # region Accepting clients
+    # region Accepting Clients
 
     /// <summary>
-    /// Start accept a new client connection
+    ///     Start Accept A New Client Connection
     /// </summary>
     private void StartAccept(SocketAsyncEventArgs e)
     {
-        // Socket must be cleared since the context object is being reused
+        // Socket Must Be Cleared Since The Context Object Is Being Reused
         e.AcceptSocket = null;
 
-        // Async accept a new client connection
+        // Async Accept A New Client Connection
         if (!_acceptorSocket.AcceptAsync(e))
             ProcessAccept(e);
     }
 
     /// <summary>
-    /// Process accepted client connection
+    ///     Process Accepted Client Connection
     /// </summary>
     private void ProcessAccept(SocketAsyncEventArgs e)
     {
         if (e.SocketError == SocketError.Success)
         {
-            // Create a new session to register
+            // Create A New Session To Register
             TCPSession session = CreateSession();
 
-            // Register the session
+            // Register The Session
             RegisterSession(session);
 
-            // Connect new session
+            // Connect New Session
             session.Connect(e.AcceptSocket);
         }
-        else
-            SendError(e.SocketError);
 
-        // Accept the next client connection
+        else SendError(e.SocketError);
+
+        // Accept The Next Client Connection
         if (IsAccepting)
             StartAccept(e);
     }
 
     /// <summary>
-    /// This method is the callback method associated with Socket.AcceptAsync()
-    /// operations and is invoked when an accept operation is complete
+    /// This Method Is The Callback Method Associated With The Socket.AcceptAsync() Operations And Is Invoked When An Accept Operation Is Complete
     /// </summary>
     private void OnAsyncCompleted(object sender, SocketAsyncEventArgs e)
     {
@@ -362,33 +383,33 @@ public class TCPServer : IDisposable
 
     # endregion
 
-    # region Session factory
+    # region Session Factory
 
     /// <summary>
-    /// Create TCP session factory method
+    ///     Create TCP Session Factory Method
     /// </summary>
-    /// <returns>TCP session</returns>
+    /// <returns>TCP Session</returns>
     protected virtual TCPSession CreateSession() { return new TCPSession(this); }
 
     # endregion
 
-    # region Session management
+    # region Session Management
 
     /// <summary>
-    /// Server sessions
+    ///     Server Sessions
     /// </summary>
     protected readonly ConcurrentDictionary<Guid, TCPSession> Sessions = new ConcurrentDictionary<Guid, TCPSession>();
 
     /// <summary>
-    /// Disconnect all connected sessions
+    ///     Disconnect All Connected Sessions
     /// </summary>
-    /// <returns>'true' if all sessions were successfully disconnected, 'false' if the server is not started</returns>
+    /// <returns>TRUE If All Sessions Were Successfully Disconnected, Or FALSE If The Server Is Not Started</returns>
     public virtual bool DisconnectAll()
     {
         if (!IsStarted)
             return false;
 
-        // Disconnect all sessions
+        // Disconnect All Sessions
         foreach (TCPSession session in Sessions.Values)
             session.Disconnect();
 
@@ -396,33 +417,33 @@ public class TCPServer : IDisposable
     }
 
     /// <summary>
-    /// Find a session with a given Id
+    ///     Find A Session With A Given ID
     /// </summary>
-    /// <param name="id">Session Id</param>
-    /// <returns>Session with a given Id or null if the session it not connected</returns>
+    /// <param name="id">Session ID</param>
+    /// <returns>Session With A Given ID, Or NULL If The Session It Not Connected</returns>
     public TCPSession FindSession(Guid id)
     {
-        // Try to find the required session
+        // Try To Find The Required Session
         return Sessions.TryGetValue(id, out TCPSession result) ? result : null;
     }
 
     /// <summary>
-    /// Register a new session
+    ///     Register A New Session
     /// </summary>
-    /// <param name="session">Session to register</param>
+    /// <param name="session">Session To Register</param>
     internal void RegisterSession(TCPSession session)
     {
-        // Register a new session
+        // Register A New Session
         Sessions.TryAdd(session.ID, session);
     }
 
     /// <summary>
-    /// Unregister session by Id
+    ///     Unregister Session By ID
     /// </summary>
-    /// <param name="id">Session Id</param>
+    /// <param name="id">Session ID</param>
     internal void UnregisterSession(Guid id)
     {
-        // Unregister session by Id
+        // Unregister Session By ID
         Sessions.TryRemove(id, out TCPSession _);
     }
 
@@ -431,26 +452,26 @@ public class TCPServer : IDisposable
     # region Multicasting
 
     /// <summary>
-    /// Multicast data to all connected sessions
+    ///     Multicast Data To All Connected Sessions
     /// </summary>
-    /// <param name="buffer">Buffer to multicast</param>
-    /// <returns>'true' if the data was successfully multicasted, 'false' if the data was not multicasted</returns>
+    /// <param name="buffer">Buffer To Multicast</param>
+    /// <returns>TRUE If The Data Was Successfully Multicasted, Or FALSE If The Data Was Not Multicasted</returns>
     public virtual bool Multicast(byte[] buffer) => Multicast(buffer.AsSpan());
 
     /// <summary>
-    /// Multicast data to all connected clients
+    ///     Multicast Data To All Connected Clients
     /// </summary>
-    /// <param name="buffer">Buffer to multicast</param>
-    /// <param name="offset">Buffer offset</param>
-    /// <param name="size">Buffer size</param>
-    /// <returns>'true' if the data was successfully multicasted, 'false' if the data was not multicasted</returns>
+    /// <param name="buffer">Buffer To Multicast</param>
+    /// <param name="offset">Buffer Offset</param>
+    /// <param name="size">Buffer Size</param>
+    /// <returns>TRUE If The Data Was Successfully Multicasted, Or FALSE If The Data Was Not Multicasted</returns>
     public virtual bool Multicast(byte[] buffer, long offset, long size) => Multicast(buffer.AsSpan((int)offset, (int)size));
 
     /// <summary>
-    /// Multicast data to all connected clients
+    ///     Multicast Data To All Connected Clients
     /// </summary>
-    /// <param name="buffer">Buffer to send as a span of bytes</param>
-    /// <returns>'true' if the data was successfully multicasted, 'false' if the data was not multicasted</returns>
+    /// <param name="buffer">Buffer To Send As A Span Of Bytes</param>
+    /// <returns>TRUE If The Data Was Successfully Multicasted, Or FALSE If The Data Was Not Multicasted</returns>
     public virtual bool Multicast(ReadOnlySpan<byte> buffer)
     {
         if (!IsStarted)
@@ -459,7 +480,7 @@ public class TCPServer : IDisposable
         if (buffer.IsEmpty)
             return true;
 
-        // Multicast data to all sessions
+        // Multicast Data To All Sessions
         foreach (TCPSession session in Sessions.Values)
             session.SendAsync(buffer);
 
@@ -467,65 +488,71 @@ public class TCPServer : IDisposable
     }
 
     /// <summary>
-    /// Multicast text to all connected clients
+    ///     Multicast Text To All Connected Clients
     /// </summary>
-    /// <param name="text">Text string to multicast</param>
-    /// <returns>'true' if the text was successfully multicasted, 'false' if the text was not multicasted</returns>
+    /// <param name="text">Text String To Multicast</param>
+    /// <returns>TRUE If The Text Was Successfully Multicasted, Or FALSE If The Text Was Not Multicasted</returns>
     public virtual bool Multicast(string text) => Multicast(Encoding.UTF8.GetBytes(text));
 
     /// <summary>
-    /// Multicast text to all connected clients
+    ///     Multicast Text To All Connected Clients
     /// </summary>
-    /// <param name="text">Text to multicast as a span of characters</param>
-    /// <returns>'true' if the text was successfully multicasted, 'false' if the text was not multicasted</returns>
+    /// <param name="text">Text To Multicast As A Span Of Characters</param>
+    /// <returns>TRUE If The Text Was Successfully Multicasted, Or FALSE If The Text Was Not Multicasted</returns>
     public virtual bool Multicast(ReadOnlySpan<char> text) => Multicast(Encoding.UTF8.GetBytes(text.ToArray()));
 
     # endregion
 
-    # region Server handlers
+    # region Server Handlers
 
     /// <summary>
-    /// Handle server starting notification
+    ///     Handle Server Starting Notification
     /// </summary>
     protected virtual void OnStarting() { }
+
     /// <summary>
-    /// Handle server started notification
+    ///     Handle Server Started Notification
     /// </summary>
     protected virtual void OnStarted() { }
+
     /// <summary>
-    /// Handle server stopping notification
+    ///     Handle Server Stopping Notification
     /// </summary>
     protected virtual void OnStopping() { }
+
     /// <summary>
-    /// Handle server stopped notification
+    ///     Handle Server Stopped Notification
     /// </summary>
     protected virtual void OnStopped() { }
 
     /// <summary>
-    /// Handle session connecting notification
+    ///     Handle Session Connecting Notification
     /// </summary>
-    /// <param name="session">Connecting session</param>
+    /// <param name="session">Connecting Session</param>
     protected virtual void OnConnecting(TCPSession session) { }
+
     /// <summary>
-    /// Handle session connected notification
+    ///     Handle Session Connected Notification
     /// </summary>
-    /// <param name="session">Connected session</param>
+    /// <param name="session">Connected Session</param>
     protected virtual void OnConnected(TCPSession session) { }
+
     /// <summary>
-    /// Handle session disconnecting notification
+    ///     Handle Session Disconnecting Notification
     /// </summary>
-    /// <param name="session">Disconnecting session</param>
+    /// <param name="session">Disconnecting Session</param>
     protected virtual void OnDisconnecting(TCPSession session) { }
+
     /// <summary>
-    /// Handle session disconnected notification
+    ///     Handle Session Disconnected Notification
     /// </summary>
-    /// <param name="session">Disconnected session</param>
+    /// <param name="session">Disconnected Session</param>
     protected virtual void OnDisconnected(TCPSession session) { }
 
     /// <summary>
-    /// Handle error notification
+    ///     Handle Error Notification
     /// </summary>
-    /// <param name="error">Socket error code</param>
+    /// <param name="error">Socket Error Code</param>
     protected virtual void OnError(SocketError error) { }
 
     internal void OnConnectingInternal(TCPSession session) { OnConnecting(session); }
@@ -538,12 +565,12 @@ public class TCPServer : IDisposable
     # region Error handling
 
     /// <summary>
-    /// Send error notification
+    ///     Send Error Notification
     /// </summary>
-    /// <param name="error">Socket error code</param>
+    /// <param name="error">Socket Error Code</param>
     private void SendError(SocketError error)
     {
-        // Skip disconnect errors
+        // Skip Disconnect Errors
         if ((error == SocketError.ConnectionAborted) ||
             (error == SocketError.ConnectionRefused) ||
             (error == SocketError.ConnectionReset) ||
@@ -556,19 +583,19 @@ public class TCPServer : IDisposable
 
     # endregion
 
-    # region IDisposable implementation
+    # region IDisposable Implementation
 
     /// <summary>
-    /// Disposed flag
+    ///     Disposed Flag
     /// </summary>
     public bool IsDisposed { get; private set; }
 
     /// <summary>
-    /// Acceptor socket disposed flag
+    ///     Acceptor Socket Disposed Flag
     /// </summary>
     public bool IsSocketDisposed { get; private set; } = true;
 
-    // Implement IDisposable.
+    // Implement IDisposable
     public void Dispose()
     {
         Dispose(true);
@@ -577,31 +604,23 @@ public class TCPServer : IDisposable
 
     protected virtual void Dispose(bool disposingManagedResources)
     {
-        // The idea here is that Dispose(Boolean) knows whether it is
-        // being called to do explicit cleanup (the Boolean is true)
-        // versus being called due to a garbage collection (the Boolean
-        // is false). This distinction is useful because, when being
-        // disposed explicitly, the Dispose(Boolean) method can safely
-        // execute code using reference type fields that refer to other
-        // objects knowing for sure that these other objects have not been
-        // finalized or disposed of yet. When the Boolean is false,
-        // the Dispose(Boolean) method should not execute code that
-        // refer to reference type fields because those objects may
-        // have already been finalized."
+        // The idea here is that Dispose(Boolean) knows whether it is being called to do explicit clean-up (the Boolean is true) versus being called due to a garbage collection event (the Boolean is false).
+        // This distinction is useful because, when being disposed explicitly, the Dispose(Boolean) method can safely execute code using reference type fields that refer to other objects knowing for sure that these other objects have not been finalized or disposed of yet.
+        // When the Boolean is false, the Dispose(Boolean) method should not execute code that refers to reference type fields, because those objects may have already been finalized.
 
         if (!IsDisposed)
         {
             if (disposingManagedResources)
             {
-                // Dispose managed resources here...
+                // Dispose Managed Resources Here ...
                 Stop();
             }
 
-            // Dispose unmanaged resources here...
+            // Dispose Unmanaged Resources Here ...
 
-            // Set large fields to null here...
+            // Set Large Fields To NULL Here ...
 
-            // Mark as disposed.
+            // Mark As Disposed
             IsDisposed = true;
         }
     }
