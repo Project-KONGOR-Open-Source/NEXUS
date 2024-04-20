@@ -86,9 +86,10 @@ public class TCPBuffer
     /// </summary>
     public string ExtractString(long offset, long size)
     {
-        Debug.Assert(((offset + size) <= Size), "Invalid offset & size!");
+        Debug.Assert(((offset + size) <= Size), "Invalid Offset And Size");
+
         if ((offset + size) > Size)
-            throw new ArgumentException("Invalid offset & size!", nameof(offset));
+            throw new ArgumentException("Invalid Offset And Size", nameof(offset));
 
         return Encoding.UTF8.GetString(_data, (int)offset, (int)size);
     }
@@ -98,17 +99,21 @@ public class TCPBuffer
     /// </summary>
     public void Remove(long offset, long size)
     {
-        Debug.Assert(((offset + size) <= Size), "Invalid offset & size!");
+        Debug.Assert(((offset + size) <= Size), "Invalid Offset And Size");
+
         if ((offset + size) > Size)
-            throw new ArgumentException("Invalid offset & size!", nameof(offset));
+            throw new ArgumentException("Invalid Offset And Size", nameof(offset));
 
         Array.Copy(_data, offset + size, _data, offset, _size - size - offset);
         _size -= size;
+
         if (_offset >= (offset + size))
             _offset -= size;
+
         else if (_offset >= offset)
         {
             _offset -= _offset - offset;
+
             if (_offset > Size)
                 _offset = Size;
         }
@@ -119,9 +124,10 @@ public class TCPBuffer
     /// </summary>
     public void Reserve(long capacity)
     {
-        Debug.Assert((capacity >= 0), "Invalid reserve capacity!");
+        Debug.Assert((capacity >= 0), "Invalid Reserve Capacity");
+
         if (capacity < 0)
-            throw new ArgumentException("Invalid reserve capacity!", nameof(capacity));
+            throw new ArgumentException("Invalid Reserve Capacity", nameof(capacity));
 
         if (capacity > Capacity)
         {
@@ -138,6 +144,7 @@ public class TCPBuffer
     {
         Reserve(size);
         _size = size;
+
         if (_offset > _size)
             _offset = _size;
     }
@@ -164,8 +171,10 @@ public class TCPBuffer
     public long Append(byte value)
     {
         Reserve(_size + 1);
+
         _data[_size] = value;
         _size += 1;
+
         return 1;
     }
 
@@ -177,8 +186,10 @@ public class TCPBuffer
     public long Append(byte[] buffer)
     {
         Reserve(_size + buffer.Length);
+
         Array.Copy(buffer, 0, _data, _size, buffer.Length);
         _size += buffer.Length;
+
         return buffer.Length;
     }
 
@@ -192,8 +203,10 @@ public class TCPBuffer
     public long Append(byte[] buffer, long offset, long size)
     {
         Reserve(_size + size);
+
         Array.Copy(buffer, offset, _data, _size, size);
         _size += size;
+
         return size;
     }
 
@@ -205,8 +218,10 @@ public class TCPBuffer
     public long Append(ReadOnlySpan<byte> buffer)
     {
         Reserve(_size + buffer.Length);
+
         buffer.CopyTo(new Span<byte>(_data, (int)_size, buffer.Length));
         _size += buffer.Length;
+
         return buffer.Length;
     }
 
@@ -225,9 +240,12 @@ public class TCPBuffer
     public long Append(string text)
     {
         int length = Encoding.UTF8.GetMaxByteCount(text.Length);
+
         Reserve(_size + length);
+
         long result = Encoding.UTF8.GetBytes(text, 0, text.Length, _data, (int)_size);
         _size += result;
+
         return result;
     }
 
@@ -239,9 +257,12 @@ public class TCPBuffer
     public long Append(ReadOnlySpan<char> text)
     {
         int length = Encoding.UTF8.GetMaxByteCount(text.Length);
+
         Reserve(_size + length);
+
         long result = Encoding.UTF8.GetBytes(text, new Span<byte>(_data, (int)_size, length));
         _size += result;
+
         return result;
     }
 
