@@ -3,6 +3,7 @@ global using KONGOR.MasterServer.Handlers.Patch;
 global using KONGOR.MasterServer.Handlers.SRP;
 global using KONGOR.MasterServer.Models.Configuration;
 global using KONGOR.MasterServer.Models.RequestResponse.Patch;
+global using KONGOR.MasterServer.Models.RequestResponse.Server;
 global using KONGOR.MasterServer.Models.RequestResponse.SRP;
 global using KONGOR.MasterServer.Models.RequestResponse.Stats;
 global using KONGOR.MasterServer.Models.RequestResponse.Store;
