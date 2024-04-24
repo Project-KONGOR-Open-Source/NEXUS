@@ -10,7 +10,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\ASPIRE.SharedScope\ASPIRE.ServiceDefaults.csproj" />
+		<ProjectReference Include="..\ASPIRE.ServiceDefaults\ASPIRE.ServiceDefaults.csproj" />
 		<ProjectReference Include="..\MERRICK.Database\MERRICK.Database.csproj" />
 	</ItemGroup>
 

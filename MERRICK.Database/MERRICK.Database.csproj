@@ -18,7 +18,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\ASPIRE.SharedScope\ASPIRE.ServiceDefaults.csproj" />
+		<ProjectReference Include="..\ASPIRE.ServiceDefaults\ASPIRE.ServiceDefaults.csproj" />
 	</ItemGroup>
 
 </Project>
