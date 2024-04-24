@@ -166,4 +166,12 @@ public partial class ServerRequesterController
 
         return Ok(PhpSerialization.Serialize(response));
     }
+
+    private async Task<IActionResult> HandleSetOnline()
+    {
+        // It Is Unclear What This Does; Requests To This Endpoint Are Made Even While The Game Server Is Idle
+        // TODO: Maybe Use This To Link The Server To The Server Manager? (Or Maybe Just Do That On Server New Session)
+
+        return Ok();
+    }
 }

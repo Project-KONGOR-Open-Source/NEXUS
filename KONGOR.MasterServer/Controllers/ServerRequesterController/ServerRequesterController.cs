@@ -28,6 +28,7 @@ public partial class ServerRequesterController(MerrickContext databaseContext, I
 
             // server
             "new_session"   => await HandleNewSession(),
+            "set_online"    => await HandleSetOnline(),
 
             _               => throw new NotImplementedException($"Unsupported Server Requester Controller Query String Parameter: f={Request.Query["f"].Single()}")
         };
