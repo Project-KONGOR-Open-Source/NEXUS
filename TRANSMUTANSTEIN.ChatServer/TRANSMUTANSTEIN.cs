@@ -30,7 +30,7 @@ public class TRANSMUTANSTEIN
         });
 
         // Add Garnet (Drop-In Replacement For Redis); The Connection String Maps To The "cache" Resource Defined In ASPIRE.AppHost
-        builder.AddRedisDistributedCache("cache", settings => settings.ConnectionString = Environment.GetEnvironmentVariable("ConnectionStrings__cache"));
+        builder.AddRedisClient("cache", settings => settings.ConnectionString = Environment.GetEnvironmentVariable("ConnectionStrings__cache"));
 
         // Host The Chat Service
         builder.Services.AddHostedService<ChatService>();

@@ -40,8 +40,8 @@ public partial class ServerRequesterController
 
         // TODO: Create Extension Methods For Distributed Cache
 
-        byte[] serializedManager = JsonSerializer.SerializeToUtf8Bytes(manager);
-        // await DistributedCache.SetAsync($@"SERVER-MANAGER:[""{accountName}""]", serializedManager); // TODO: Fix Distributed Cache
+        string serializedManager = JsonSerializer.Serialize(manager);
+        await Cache.StringSetAsync($@"SERVER-MANAGER:[""{accountName}""]", serializedManager);
 
         // ChatServerConfiguration? chatServerConfig = Configuration.GetSection("ChatServerConfiguration").Get<ChatServerConfiguration>();
         // if (KongorContext.RuntimeEnvironment is "Development") chatServerConfig.Address = AddressHelpers.ResolveChatServerAddress(Request.HttpContext.Connection.RemoteIpAddress);
@@ -140,8 +140,8 @@ public partial class ServerRequesterController
 
         // TODO: Create Extension Methods For Distributed Cache
 
-        byte[] serializedServer = JsonSerializer.SerializeToUtf8Bytes(server);
-        // await DistributedCache.SetAsync($@"SERVER:[""{serverIdentifier}""]", serializedServer); // TODO: Fix Distributed Cache
+        string serializedServer = JsonSerializer.Serialize(server);
+        await Cache.StringSetAsync($@"SERVER:[""{serverIdentifier}""]", serializedServer);
 
         // TODO: Implement Verifier In Description (If The Server Is A COMPEL Server, It Will Have A Verifier In The Description)
 

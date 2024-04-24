@@ -3,11 +3,11 @@
 [ApiController]
 [Route("server_requester.php")]
 [Consumes("application/x-www-form-urlencoded")]
-public partial class ServerRequesterController(MerrickContext databaseContext, ILogger<ServerRequesterController> logger, IDistributedCache cache) : ControllerBase
+public partial class ServerRequesterController(MerrickContext databaseContext, ILogger<ServerRequesterController> logger, IConnectionMultiplexer multiplexer) : ControllerBase
 {
     private MerrickContext MerrickContext { get; } = databaseContext;
     private ILogger Logger { get; } = logger;
-    private IDistributedCache DistributedCache { get; } = cache;
+    private IDatabase Cache { get; } = multiplexer.GetDatabase();
 
     [HttpPost(Name = "Server Requester All-In-One")]
     public async Task<IActionResult> ServerRequester()

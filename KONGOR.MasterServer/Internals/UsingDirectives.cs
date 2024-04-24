@@ -17,7 +17,6 @@ global using MERRICK.Database.Enumerations;
 global using Microsoft.AspNetCore.Mvc;
 global using Microsoft.EntityFrameworkCore;
 global using Microsoft.EntityFrameworkCore.Diagnostics;
-global using Microsoft.Extensions.Caching.Distributed;
 global using Microsoft.Extensions.Caching.Memory;
 global using Microsoft.Extensions.Options;
 
@@ -26,6 +25,8 @@ global using OneOf;
 global using PhpSerializerNET;
 
 global using SecureRemotePassword;
+
+global using StackExchange.Redis;
 
 global using System.Security.Cryptography;
 global using System.Text;

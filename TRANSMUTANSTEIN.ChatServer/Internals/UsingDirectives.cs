@@ -3,6 +3,8 @@
 global using Microsoft.EntityFrameworkCore.Diagnostics;
 global using Microsoft.Extensions.Diagnostics.HealthChecks;
 
+global using StackExchange.Redis;
+
 global using System.Collections.Concurrent;
 global using System.Diagnostics;
 global using System.Net;
