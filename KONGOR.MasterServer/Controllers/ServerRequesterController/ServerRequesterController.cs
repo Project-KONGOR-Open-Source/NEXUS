@@ -3,10 +3,11 @@
 [ApiController]
 [Route("server_requester.php")]
 [Consumes("application/x-www-form-urlencoded")]
-public partial class ServerRequesterController(ILogger<ServerRequesterController> logger, IMemoryCache cache) : ControllerBase
+public partial class ServerRequesterController(MerrickContext databaseContext, ILogger<ServerRequesterController> logger, IDistributedCache cache) : ControllerBase
 {
+    private MerrickContext MerrickContext { get; } = databaseContext;
     private ILogger Logger { get; } = logger;
-    private IMemoryCache Cache { get; } = cache;
+    private IDistributedCache DistributedCache { get; } = cache;
 
     [HttpPost(Name = "Server Requester All-In-One")]
     public async Task<IActionResult> ServerRequester([FromForm] Dictionary<string, string> /* ServerRequestForm */ form)
@@ -20,6 +21,12 @@ public partial class ServerRequesterController(ILogger<ServerRequesterController
         //    return Unauthorized($@"Unrecognized Cookie ""{form.Cookie}""");
         //}
 
-        return Ok();
+        return Request.Query["f"].SingleOrDefault() switch
+        {
+            // session
+            "new_session"   => await HandleNewSession(),
+
+            _               => throw new NotImplementedException($"Unsupported Server Requester Controller Query String Parameter: f={Request.Query["f"].Single()}")
+        };
     }
 }

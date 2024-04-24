@@ -17,10 +17,12 @@ public static class SRPRegistrationHandlers
     /// <summary>
     ///     Generates a 64-character long SHA256 hash of the account's password.
     ///     The uppercase hashes (C# default) in this method need to be lowercased, to match the lowercase hashes (C++ default) that the game client generates.
+    ///     <br/>
+    ///     The expectation is that the password is not hashed for SRP registration, but is hashed for SRP authentication.
     /// </summary>
-    public static string ComputeSRPPasswordHash(string password, string salt)
+    public static string ComputeSRPPasswordHash(string password, string salt, bool passwordIsHashed = false)
     {
-        string passwordHash = Convert.ToHexString(MD5.HashData(Encoding.UTF8.GetBytes(password))).ToLower();
+        string passwordHash = passwordIsHashed ? password : Convert.ToHexString(MD5.HashData(Encoding.UTF8.GetBytes(password))).ToLower();
 
         string magickedPasswordHash = passwordHash + salt + MagicStringOne;
 

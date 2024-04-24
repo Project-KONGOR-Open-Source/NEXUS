@@ -1,4 +1,4 @@
-﻿namespace KONGOR.MasterServer.Models.RequestResponse.Server;
+﻿namespace KONGOR.MasterServer.Models.RequestResponse.ServerManagement;
 
 public class ServerForCreateListResponse : ServerListResponse
 {

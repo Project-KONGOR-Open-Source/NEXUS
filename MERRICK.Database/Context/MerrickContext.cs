@@ -100,14 +100,14 @@ public sealed class MerrickContext : DbContext
 
     private static void ConfigureAccounts(EntityTypeBuilder<Account> builder)
     {
-        string[] accounts = ["KONGOR", /* [K] */ "ONGOR", "GOPO", "Xen0byte" ];
+        string[] accounts = [ "KONGOR", /* [K] */ "ONGOR", "GOPO", "Xen0byte", "HOST" ];
 
         builder.HasData(accounts.Select(account => new
         {
             ID = Array.IndexOf(accounts, account) + 1 /* 1-Based Indexing */,
             Name = account,
             UserID = 1,
-            Type = AccountType.Staff,
+            Type = account is "HOST" ? AccountType.ServerHost : AccountType.Staff,
             IsMain = account is "KONGOR",
             ClanID = account is "KONGOR" ? 2 /* Project KONGOR Developers */ : 1 /* KONGOR */ ,
             ClanTier = account is "KONGOR" or /* [K] */ "ONGOR" ? ClanTier.Leader : ClanTier.Officer,

@@ -133,6 +133,9 @@ public partial class ClientRequesterController
         if (account is null)
             return NotFound(PhpSerialization.Serialize(new SRPAuthenticationFailureResponse(SRPAuthenticationFailureReason.AccountNotFound)));
 
+        if (account.Type is AccountType.ServerHost)
+            return Unauthorized(PhpSerialization.Serialize(new SRPAuthenticationFailureResponse(SRPAuthenticationFailureReason.IsServerHostingAccount)));
+
         if (HttpContext.Connection.RemoteIpAddress is null)
         {
             Logger.LogError($@"[BUG] Remote IP Address For Account Name ""{accountName}"" Is NULL");
@@ -191,7 +194,7 @@ public partial class ClientRequesterController
 
         // TODO: Resolve Suspensions
 
-        SRPHandlers.StageTwoResponseParameters parameters = new()
+        SRPAuthenticationHandlers.StageTwoResponseParameters parameters = new()
         {
             Account = account,
             ClanRoster = account.Clan?.Members ?? [],
@@ -200,7 +203,7 @@ public partial class ClientRequesterController
             ChatServer = (Configuration.ChatServer.HTTPS.Protocol, Configuration.ChatServer.HTTPS.Host, Configuration.ChatServer.HTTPS.Port) // TODO: The Chat Server Probably Doesn't Need HTTP/HTTPS
         };
 
-        SRPAuthenticationResponseStageTwo response = SRPHandlers.GenerateStageTwoResponse(parameters, out string cookie);
+        SRPAuthenticationResponseStageTwo response = SRPAuthenticationHandlers.GenerateStageTwoResponse(parameters, out string cookie);
 
         account.TimestampLastActive = DateTime.UtcNow;
 

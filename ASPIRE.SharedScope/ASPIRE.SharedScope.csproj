@@ -15,7 +15,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="Aspire.Microsoft.EntityFrameworkCore.SqlServer" Version="8.0.0-preview.5.24201.12" />
-		<PackageReference Include="Aspire.StackExchange.Redis" Version="8.0.0-preview.5.24201.12" />
+		<PackageReference Include="Aspire.StackExchange.Redis.DistributedCaching" Version="8.0.0-preview.5.24201.12" />
 	</ItemGroup>
 
 	<ItemGroup>
