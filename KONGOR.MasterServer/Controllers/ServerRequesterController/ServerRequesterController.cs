@@ -10,7 +10,7 @@ public partial class ServerRequesterController(MerrickContext databaseContext, I
     private IDistributedCache DistributedCache { get; } = cache;
 
     [HttpPost(Name = "Server Requester All-In-One")]
-    public async Task<IActionResult> ServerRequester([FromForm] Dictionary<string, string> /* ServerRequestForm */ form)
+    public async Task<IActionResult> ServerRequester()
     {
         // TODO: Implement Server Requester Controller
 
@@ -23,7 +23,10 @@ public partial class ServerRequesterController(MerrickContext databaseContext, I
 
         return Request.Query["f"].SingleOrDefault() switch
         {
-            // session
+            // server manager
+            "replay_auth"   => await HandleReplayAuthentication(),
+
+            // server
             "new_session"   => await HandleNewSession(),
 
             _               => throw new NotImplementedException($"Unsupported Server Requester Controller Query String Parameter: f={Request.Query["f"].Single()}")

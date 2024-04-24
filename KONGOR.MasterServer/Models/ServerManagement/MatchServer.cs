@@ -1,8 +1,8 @@
-﻿namespace KONGOR.MasterServer.Models.RequestResponse.ServerManagement;
+﻿namespace KONGOR.MasterServer.Models.ServerManagement;
 
-public class Server
+public class MatchServer
 {
-    public required Account Host { get; set; }
+    public required int HostID { get; set; }
 
     public required uint ID { get; set; }
 
@@ -20,5 +20,5 @@ public class Server
 
     public Guid Cookie { get; set; } = Guid.NewGuid();
 
-    public DateTime TimestampCreated { get; set; } = DateTime.UtcNow;
+    public DateTime TimestampRegistered { get; set; } = DateTime.UtcNow;
 }

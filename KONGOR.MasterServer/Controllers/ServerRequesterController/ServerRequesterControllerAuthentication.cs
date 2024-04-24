@@ -4,6 +4,71 @@ namespace KONGOR.MasterServer.Controllers.ServerRequesterController;
 
 public partial class ServerRequesterController
 {
+    private async Task<IActionResult> HandleReplayAuthentication()
+    {
+        string? accountName = Request.Form["login"];
+
+        if (accountName is null)
+            return BadRequest(@"Missing Value For Form Parameter ""login""");
+
+        accountName = accountName.TrimEnd(':'); // The Semicolon Is Used To Separate The Account Name From The Server Instance, So We Need To Remove It Because It Is Not Needed For The Server Manager
+
+        string? accountPasswordHash = Request.Form["pass"];
+
+        if (accountPasswordHash is null)
+            return BadRequest(@"Missing Value For Form Parameter ""pass""");
+
+        Account? account = await MerrickContext.Accounts
+            .Include(account => account.User)
+            .SingleOrDefaultAsync(account => account.Name.Equals(accountName));
+
+        if (account is null)
+            return NotFound($@"Account ""{accountName}"" Was Not Found");
+
+        if (account.Type is not AccountType.ServerHost)
+            return Unauthorized($@"Account ""{accountName}"" Is Not A Server Host");
+
+        string srpPasswordHash = SRPAuthenticationHandlers.ComputeSRPPasswordHash(accountPasswordHash, account.User.SRPPasswordSalt);
+
+        if (srpPasswordHash.Equals(account.User.SRPPasswordHash) is false)
+            return Unauthorized("Incorrect Password");
+
+        MatchServerManager manager = new()
+        {
+            HostID = account.ID,
+            ID = accountName.GetDeterministicHashCode(),
+            IPAddress = Request.HttpContext.Connection.RemoteIpAddress?.MapToIPv4().ToString() ?? "0.0.0.0"
+        };
+
+        // TODO: Create Extension Methods For Distributed Cache
+
+        byte[] serializedManager = JsonSerializer.SerializeToUtf8Bytes(manager);
+        // await DistributedCache.SetAsync($@"SERVER-MANAGER:[""{accountName}""]", serializedManager); // TODO: Fix Distributed Cache
+
+        // ChatServerConfiguration? chatServerConfig = Configuration.GetSection("ChatServerConfiguration").Get<ChatServerConfiguration>();
+        // if (KongorContext.RuntimeEnvironment is "Development") chatServerConfig.Address = AddressHelpers.ResolveChatServerAddress(Request.HttpContext.Connection.RemoteIpAddress);
+        // TODO: Resolve Chat Server Address/Port
+        string chatAddress = "0.0.0.0";
+        int chatPort = 55551;
+
+        Dictionary<string, object> response = new()
+        {
+            ["server_id"] = manager.ID,
+            ["official"] = 1, // If Not Official, It Is Considered To Be Un-Authorized
+            ["session"] = manager.Cookie,
+            ["chat_address"] = chatAddress,
+            ["chat_port"] = chatPort,
+        };
+
+        // TODO: Investigate How These Are Used (+ Resolve CDN Host)
+        response["cdn_upload_host"] = "kongor.online";
+        response["cdn_upload_target"] = "upload";
+
+        Logger.LogInformation($@"Server Manager ID ""{manager.ID}"" Was Registered At ""{manager.IPAddress}"" With Cookie ""{manager.Cookie}""");
+
+        return Ok(PhpSerialization.Serialize(response));
+    }
+
     private async Task<IActionResult> HandleNewSession()
     {
         string serverIdentifier = Request.Form["login"].ToString();
@@ -16,7 +81,6 @@ public partial class ServerRequesterController
 
         string? accountPasswordHash = Request.Form["pass"];
 
-        // TODO: This Is Not Needed, Since We Can Check Auth Anyway (The Host Can Use Anything As The Password And It Will Still Work)
         if (accountPasswordHash is null) 
             return BadRequest(@"Missing Value For Form Parameter ""pass""");
 
@@ -64,9 +128,9 @@ public partial class ServerRequesterController
 
         // TODO: Verify Whether The Server Version Matches The Client Version (Or Disallow Servers To Be Started If They Are Not On The Latest Version)
 
-        Server server = new()
+        MatchServer server = new()
         {
-            Host = account,
+            HostID = account.ID,
             ID = serverIdentifier.GetDeterministicHashCode(),
             Name = serverName,
             Instance = int.Parse(serverInstance),
@@ -79,14 +143,14 @@ public partial class ServerRequesterController
         // TODO: Create Extension Methods For Distributed Cache
 
         byte[] serializedServer = JsonSerializer.SerializeToUtf8Bytes(server);
-        await DistributedCache.SetAsync($@"SERVER:[""{serverIdentifier}""]", serializedServer);
+        // await DistributedCache.SetAsync($@"SERVER:[""{serverIdentifier}""]", serializedServer); // TODO: Fix Distributed Cache
 
         // TODO: Implement Verifier In Description (If The Server Is A COMPEL Server, It Will Have A Verifier In The Description)
 
         // ChatServerConfiguration? chatServerConfig = Configuration.GetSection("ChatServerConfiguration").Get<ChatServerConfiguration>();
         // if (KongorContext.RuntimeEnvironment is "Development") chatServerConfig.Address = AddressHelpers.ResolveChatServerAddress(Request.HttpContext.Connection.RemoteIpAddress);
         // TODO: Resolve Chat Server Address/Port
-        string chatAddress = "127.0.0.1";
+        string chatAddress = "0.0.0.0";
         int chatPort = 55551;
 
         Dictionary<string, object> response = new()
@@ -98,7 +162,7 @@ public partial class ServerRequesterController
             ["leaverthreshold"] = 0.05
         };
 
-        Logger.LogInformation($@"New Server ""{server.IPAddress}:{server.Port}"" Was Created With Cookie ""{server.Cookie}""");
+        Logger.LogInformation($@"Server ID ""{server.ID}"" Was Registered At ""{server.IPAddress}:{server.Port}"" With Cookie ""{server.Cookie}""");
 
         return Ok(PhpSerialization.Serialize(response));
     }
