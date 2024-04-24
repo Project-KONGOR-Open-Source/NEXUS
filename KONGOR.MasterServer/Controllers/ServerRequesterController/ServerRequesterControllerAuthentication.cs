@@ -36,7 +36,7 @@ public partial class ServerRequesterController
         MatchServerManager manager = new()
         {
             HostID = account.ID,
-            ID = accountName.GetDeterministicHashCode(),
+            ID = accountName.GetDeterministicInt32Hash(),
             IPAddress = Request.HttpContext.Connection.RemoteIpAddress?.MapToIPv4().ToString() ?? "0.0.0.0"
         };
 
@@ -48,7 +48,7 @@ public partial class ServerRequesterController
         // ChatServerConfiguration? chatServerConfig = Configuration.GetSection("ChatServerConfiguration").Get<ChatServerConfiguration>();
         // if (KongorContext.RuntimeEnvironment is "Development") chatServerConfig.Address = AddressHelpers.ResolveChatServerAddress(Request.HttpContext.Connection.RemoteIpAddress);
         // TODO: Resolve Chat Server Address/Port
-        string chatAddress = "0.0.0.0";
+        string chatAddress = "127.0.0.1";
         int chatPort = 55551;
 
         Dictionary<string, object> response = new()
@@ -131,7 +131,7 @@ public partial class ServerRequesterController
         MatchServer server = new()
         {
             HostID = account.ID,
-            ID = serverIdentifier.GetDeterministicHashCode(),
+            ID = serverIdentifier.GetDeterministicInt32Hash(),
             Name = serverName,
             Instance = int.Parse(serverInstance),
             IPAddress = serverIPAddress,
@@ -150,7 +150,7 @@ public partial class ServerRequesterController
         // ChatServerConfiguration? chatServerConfig = Configuration.GetSection("ChatServerConfiguration").Get<ChatServerConfiguration>();
         // if (KongorContext.RuntimeEnvironment is "Development") chatServerConfig.Address = AddressHelpers.ResolveChatServerAddress(Request.HttpContext.Connection.RemoteIpAddress);
         // TODO: Resolve Chat Server Address/Port
-        string chatAddress = "0.0.0.0";
+        string chatAddress = "127.0.0.1";
         int chatPort = 55551;
 
         Dictionary<string, object> response = new()
