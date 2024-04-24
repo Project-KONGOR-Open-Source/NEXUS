@@ -10,7 +10,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\ASPIRE.SharedScope\ASPIRE.SharedScope.csproj" />
+		<ProjectReference Include="..\ASPIRE.SharedScope\ASPIRE.ServiceDefaults.csproj" />
 	</ItemGroup>
 
 </Project>

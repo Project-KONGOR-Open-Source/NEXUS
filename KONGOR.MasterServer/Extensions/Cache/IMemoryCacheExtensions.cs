@@ -1,4 +1,4 @@
-﻿namespace KONGOR.MasterServer.Extensions;
+﻿namespace KONGOR.MasterServer.Extensions.Cache;
 
 public static class IMemoryCacheExtensions
 {

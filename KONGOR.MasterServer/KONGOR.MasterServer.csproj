@@ -17,7 +17,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="..\ASPIRE.SharedScope\ASPIRE.SharedScope.csproj" />
+		<ProjectReference Include="..\ASPIRE.SharedScope\ASPIRE.ServiceDefaults.csproj" />
 		<ProjectReference Include="..\MERRICK.Database\MERRICK.Database.csproj" />
 	</ItemGroup>
 

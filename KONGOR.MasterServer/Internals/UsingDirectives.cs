@@ -1,4 +1,5 @@
-﻿global using KONGOR.MasterServer.Extensions;
+﻿global using KONGOR.MasterServer.Extensions.Cache;
+global using KONGOR.MasterServer.Extensions.Cryptography;
 global using KONGOR.MasterServer.Handlers.Patch;
 global using KONGOR.MasterServer.Handlers.SRP;
 global using KONGOR.MasterServer.Models.Configuration;

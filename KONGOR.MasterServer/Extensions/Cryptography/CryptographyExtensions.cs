@@ -1,4 +1,4 @@
-﻿namespace ASPIRE.ServiceDefaults.Extensions.Cryptography;
+﻿namespace KONGOR.MasterServer.Extensions.Cryptography;
 
 public static class CryptographyExtensions
 {

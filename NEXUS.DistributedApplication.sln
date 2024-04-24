@@ -1,11 +1,10 @@
-﻿
-Microsoft Visual Studio Solution File, Format Version 12.00
+﻿Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.10.34804.81
 MinimumVisualStudioVersion = 17.10.34804.81
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ASPIRE.AppHost", "ASPIRE.AppHost\ASPIRE.AppHost.csproj", "{F2069850-D51F-4605-9933-3E0E25E16373}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ASPIRE.SharedScope", "ASPIRE.SharedScope\ASPIRE.SharedScope.csproj", "{6B1B7727-5D5B-413D-84F8-63D485A7E601}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ASPIRE.ServiceDefaults", "ASPIRE.ServiceDefaults\ASPIRE.ServiceDefaults.csproj", "{6B1B7727-5D5B-413D-84F8-63D485A7E601}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ASPIRE.Tests", "ASPIRE.Tests\ASPIRE.Tests.csproj", "{C68FA3CE-881D-4286-A8A6-EAE4C3904FC6}"
 EndProject

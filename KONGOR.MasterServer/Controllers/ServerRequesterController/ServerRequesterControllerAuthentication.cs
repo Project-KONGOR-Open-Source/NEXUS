@@ -1,6 +1,4 @@
-﻿using ASPIRE.ServiceDefaults.Extensions.Cryptography; // TODO: Remove Non-Aspire References To This Project From All Projects
-
-namespace KONGOR.MasterServer.Controllers.ServerRequesterController;
+﻿namespace KONGOR.MasterServer.Controllers.ServerRequesterController;
 
 public partial class ServerRequesterController
 {
