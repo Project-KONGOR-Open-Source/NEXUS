@@ -10,6 +10,10 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+		<PackageReference Include="Aspire.StackExchange.Redis.DistributedCaching" Version="8.0.0-preview.6.24214.1" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<ProjectReference Include="..\ASPIRE.ServiceDefaults\ASPIRE.ServiceDefaults.csproj" />
 		<ProjectReference Include="..\MERRICK.Database\MERRICK.Database.csproj" />
 	</ItemGroup>
