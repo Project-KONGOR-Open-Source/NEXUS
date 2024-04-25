@@ -6,9 +6,8 @@ public class ASPIRE
     {
         IDistributedApplicationBuilder builder = DistributedApplication.CreateBuilder(args);
 
-        IResourceBuilder<RedisResource> distributedCache = builder.AddRedis("cache", 55513).WithImage("ghcr.io/microsoft/garnet").WithImageTag("latest"); // https://github.com/microsoft/garnet
-
-        // TODO: Put The Cache Resource Port In The Configuration
+        IResourceBuilder<IResourceWithConnectionString> distributedCache = builder.AddRedis("distributed-cache")
+            .WithImageRegistry("ghcr.io/microsoft").WithImage("garnet").WithImageTag("latest"); // https://github.com/microsoft/garnet
 
         IResourceBuilder<IResourceWithConnectionString> databaseConnectionString = builder.AddConnectionString("MERRICK");
 
@@ -17,11 +16,11 @@ public class ASPIRE
 
         builder.AddProject<KONGOR_MasterServer>("master-server", builder.Environment.IsProduction() ? "KONGOR.MasterServer Production" : "KONGOR.MasterServer Development")
             .WithReference(databaseConnectionString)
-            .WithReference(distributedCache);
+            .WithReference(distributedCache, connectionName: "GARNET");
 
         builder.AddProject<TRANSMUTANSTEIN_ChatServer>("chat-server", builder.Environment.IsProduction() ? "TRANSMUTANSTEIN.ChatServer Production" : "TRANSMUTANSTEIN.ChatServer Development")
             .WithReference(databaseConnectionString)
-            .WithReference(distributedCache);
+            .WithReference(distributedCache, connectionName: "GARNET");
 
         builder.AddProject<ZORGATH_WebPortal_API>("web-portal-api", builder.Environment.IsProduction() ? "ZORGATH.WebPortal.API Production" : "ZORGATH.WebPortal.API Development")
             .WithReference(databaseConnectionString);
