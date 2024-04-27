@@ -114,6 +114,8 @@ public class KONGOR
 
         if (app.Environment.IsDevelopment())
         {
+            app.UseDeveloperExceptionPage();
+
             app.UseSwagger();
 
             app.UseSwaggerUI(options =>
@@ -128,13 +130,6 @@ public class KONGOR
         else
         {
             app.UseExceptionHandler("/Error");
-        }
-
-        // Enforce HTTPS In Production
-        if (app.Environment.IsProduction())
-        {
-            app.UseHttpsRedirection();
-            app.UseHsts();
         }
 
         // Map Aspire Default Endpoints

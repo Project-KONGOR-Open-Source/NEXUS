@@ -4,12 +4,12 @@
         "ASPIRE.AppHost Development": {
             "commandName": "Project",
             "launchBrowser": true,
-            "applicationUrl": "https://localhost:55500",
+            "applicationUrl": "https://localhost:55550",
             "environmentVariables": {
                 "ASPNETCORE_ENVIRONMENT": "Development",
                 "DOTNET_ENVIRONMENT": "Development",
-                "DOTNET_DASHBOARD_OTLP_ENDPOINT_URL": "https://localhost:55501",
-                "DOTNET_RESOURCE_SERVICE_ENDPOINT_URL": "https://localhost:55502"
+                "DOTNET_DASHBOARD_OTLP_ENDPOINT_URL": "https://localhost:55551",
+                "DOTNET_RESOURCE_SERVICE_ENDPOINT_URL": "https://localhost:55552"
             },
             "dotnetRunMessages": true
         },

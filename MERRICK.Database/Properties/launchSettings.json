@@ -4,7 +4,7 @@
         "MERRICK.Database Development": {
             "commandName": "Project",
             "launchBrowser": true,
-            "applicationUrl": "http://localhost:55503;https://localhost:55504",
+            "applicationUrl": "https://localhost:55553",
             "launchUrl": "health",
             "environmentVariables": {
                 "ASPNETCORE_ENVIRONMENT": "Development",
@@ -15,7 +15,7 @@
         "MERRICK.Database Production": {
             "commandName": "Project",
             "launchBrowser": true,
-            "applicationUrl": "http://database.kongor.online;https://database.kongor.online",
+            "applicationUrl": "https://database.kongor.online",
             "launchUrl": "health",
             "environmentVariables": {
                 "ASPNETCORE_ENVIRONMENT": "Production",

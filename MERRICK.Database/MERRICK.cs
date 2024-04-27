@@ -41,6 +41,12 @@ public class MERRICK
         // Build The Application
         WebApplication application = builder.Build();
 
+        // Automatically Redirect To HTTPS
+        application.UseHttpsRedirection();
+
+        // Enforce HTTPS
+        application.UseHsts();
+
         // Map Aspire Default Endpoints
         application.MapDefaultEndpoints();
 

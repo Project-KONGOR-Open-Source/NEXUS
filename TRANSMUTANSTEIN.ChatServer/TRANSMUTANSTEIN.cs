@@ -44,6 +44,12 @@ public class TRANSMUTANSTEIN
         // Build The Application
         WebApplication app = builder.Build();
 
+        // Automatically Redirect To HTTPS
+        app.UseHttpsRedirection();
+
+        // Enforce HTTPS
+        app.UseHsts();
+
         // Map Aspire Default Endpoints
         app.MapDefaultEndpoints();
 

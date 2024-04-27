@@ -40,8 +40,8 @@ public class ZORGATH
 
         // Set CORS Origins
         string[] corsOrigins = builder.Environment.IsDevelopment()
-            ? ["http://localhost:55500",            "http://localhost:55501",       "https://localhost:55502",      "http://localhost:55503",           "https://localhost:55504",          "http://localhost:55505",       "https://localhost:55506",      "http://localhost:55507",       "https://localhost:55508",      "http://localhost:55509",           "https://localhost:55510",          "http://localhost:55511",           "https://localhost:55512"]
-            : ["http://telemetry.kongor.online",    "http://aspire.kongor.online",  "https://aspire.kongor.online", "http://database.kongor.online",    "https://database.kongor.online",   "http://master.kongor.online",  "https://master.kongor.online", "http://chat.kongor.online",    "https://chat.kongor.online",   "http://portal.api.kongor.online",  "https://portal.api.kongor.online", "http://portal.ui.kongor.online",   "https://portal.ui.kongor.online"];
+            ? [ "https://localhost:55550",      "https://localhost:55551",          "https://localhost:55552",          "https://localhost:55553",          "https://localhost:55554",      "http://localhost:55555",   "https://localhost:55556",          "https://localhost:55557"         ]
+            : [ "https://aspire.kongor.online", "https://telemetry.kongor.online",  "https://resources.kongor.online",  "https://database.kongor.online",   "https://chat.kongor.online",   "http://api.kongor.online", "https://portal.api.kongor.online", "https://portal.ui.kongor.online" ];
 
         // Add CORS
         builder.Services.AddCors(options =>
@@ -198,6 +198,8 @@ public class ZORGATH
 
         if (app.Environment.IsDevelopment())
         {
+            app.UseDeveloperExceptionPage();
+
             app.UseSwagger();
 
             app.UseSwaggerUI(options =>
@@ -214,18 +216,17 @@ public class ZORGATH
             app.UseExceptionHandler("/Error");
         }
 
-        // Enforce HTTPS In Production
-        if (app.Environment.IsProduction())
-        {
-            app.UseHttpsRedirection();
-            app.UseHsts();
-        }
-
         // User CORS
         app.UseCors(corsPolicyName);
 
         // Use Server-Sided Cache
         app.UseOutputCache();
+
+        // Automatically Redirect To HTTPS
+        app.UseHttpsRedirection();
+
+        // Enforce HTTPS
+        app.UseHsts();
 
         // Map Aspire Default Endpoints
         app.MapDefaultEndpoints();
@@ -238,9 +239,6 @@ public class ZORGATH
 
         // Require Authentication To Access Role-Specific Resources
         app.UseAuthorization();
-
-        // Automatically Redirect To HTTPS
-        app.UseHttpsRedirection();
 
         // Run The Application
         app.Run();

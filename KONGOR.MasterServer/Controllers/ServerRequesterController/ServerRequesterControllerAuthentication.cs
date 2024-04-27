@@ -47,7 +47,7 @@ public partial class ServerRequesterController
         // if (KongorContext.RuntimeEnvironment is "Development") chatServerConfig.Address = AddressHelpers.ResolveChatServerAddress(Request.HttpContext.Connection.RemoteIpAddress);
         // TODO: Resolve Chat Server Address/Port
         string chatAddress = "127.0.0.1";
-        int chatPort = 55551;
+        int chatPort = 5555;
 
         Dictionary<string, object> response = new()
         {
@@ -149,7 +149,7 @@ public partial class ServerRequesterController
         // if (KongorContext.RuntimeEnvironment is "Development") chatServerConfig.Address = AddressHelpers.ResolveChatServerAddress(Request.HttpContext.Connection.RemoteIpAddress);
         // TODO: Resolve Chat Server Address/Port
         string chatAddress = "127.0.0.1";
-        int chatPort = 55551;
+        int chatPort = 5555;
 
         Dictionary<string, object> response = new()
         {
