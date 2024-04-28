@@ -41,7 +41,7 @@ public partial class ServerRequesterController
         // TODO: Create Extension Methods For Distributed Cache
 
         string serializedManager = JsonSerializer.Serialize(manager);
-        await Cache.StringSetAsync($@"SERVER-MANAGER:[""{accountName}""]", serializedManager);
+        await DistributedCache.HashSetAsync("SERVER-MANAGERS", [new HashEntry(accountName, serializedManager)]);
 
         string chatHost = Environment.GetEnvironmentVariable("CHAT_SERVER_HOST") ?? throw new NullReferenceException("Chat Server Host Is NULL");
         int chatPort = int.Parse(Environment.GetEnvironmentVariable("CHAT_SERVER_PORT") ?? throw new NullReferenceException("Chat Server Port Is NULL"));
@@ -138,7 +138,7 @@ public partial class ServerRequesterController
         // TODO: Create Extension Methods For Distributed Cache
 
         string serializedServer = JsonSerializer.Serialize(server);
-        await Cache.StringSetAsync($@"SERVER:[""{serverIdentifier}""]", serializedServer);
+        await DistributedCache.HashSetAsync("SERVERS", [new HashEntry(serverIdentifier, serializedServer)]);
 
         // TODO: Implement Verifier In Description (If The Server Is A COMPEL Server, It Will Have A Verifier In The Description)
 
@@ -163,6 +163,7 @@ public partial class ServerRequesterController
     {
         // It Is Unclear What This Does; Requests To This Endpoint Are Made Even While The Game Server Is Idle
         // TODO: Maybe Use This To Link The Server To The Server Manager? (Or Maybe Just Do That On Server New Session)
+        // TODO: Or Maybe Make The Servers And Managers Expire From The Cache After A Certain Amount Of Time, And Use This Call To Refresh The Expiration Time
 
         return Ok();
     }

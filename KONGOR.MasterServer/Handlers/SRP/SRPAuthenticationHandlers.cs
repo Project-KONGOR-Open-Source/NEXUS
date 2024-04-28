@@ -50,7 +50,7 @@ public static class SRPAuthenticationHandlers
         return response;
     }
 
-    #region Secure Remote Password Magic Strings
+    # region Secure Remote Password Magic Strings
 
     // Thank you, Anton Romanov (aka Theli), for making these values public: https://github.com/theli-ua/pyHoNBot/blob/cabde31b8601c1ca55dc10fcf663ec663ec0eb71/hon/masterserver.py#L37.
     // The first magic string is also present in the k2_x64 DLL of the Windows client, between offsets 0xF2F4D0 and 0xF2F4D0.
@@ -109,6 +109,9 @@ public static class SRPAuthenticationHandlers
 
         return chatServerCookieHash;
     }
+
+    public static string ComputeMatchServerChatAuthenticationHash(string key, string cookie)
+        => Convert.ToHexString(SHA1.HashData(Encoding.UTF8.GetBytes(key + cookie + ChatServerAuthenticationSalt))).ToLower();
 
     private static List<string> SetChatChannels(Account account)
     {

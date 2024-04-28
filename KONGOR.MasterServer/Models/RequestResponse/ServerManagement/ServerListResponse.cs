@@ -1,19 +1,11 @@
 ﻿namespace KONGOR.MasterServer.Models.RequestResponse.ServerManagement;
 
-public class ServerForCreateListResponse : ServerListResponse
+public class ServerForCreateListResponse(List<MatchServer> servers, string? region, string cookie) : ServerListResponse(cookie)
 {
-    public ServerForCreateListResponse(/* List<Server> servers, */ string? region)
-    {
-        // TODO: Retrieve Servers From Distributed Cache
-
-        //Servers = new Dictionary<int, ServerForCreate>();
-
-        //if (servers.Any() is false) return;
-
         //foreach (Server server in servers.Where(entry => entry.ServerStatus.Equals(ChatServerProtocol.ServerStatus.Idle)))
         //    Servers.Add(server.ServerId, new ServerForCreate(server.ServerId.ToString(), server.Address, server.Port.ToString(), server.Location));
 
-        // TODO: Filter Server List By Region (+ Add Support For NEWERTH Region)
+       // TODO: Filter Server List By Region(+Add Support For NEWERTH Region)
 
         /*
 
@@ -56,16 +48,16 @@ public class ServerForCreateListResponse : ServerListResponse
                }
 
          */
-    }
 
     [PhpProperty("server_list")]
-    public Dictionary<int, ServerForCreate> Servers { get; set; } = [];
+    public Dictionary<int, ServerForCreate> Servers { get; set; } = servers.Any() is false? []
+        : servers.ToDictionary(server => server.ID, server => new ServerForCreate(server.ID.ToString(), server.IPAddress, server.Port.ToString(), server.Location));
+
+    // TODO: Filter Out Server-For-Join List
 }
 
-public class ServerForJoinListResponse : ServerListResponse
+public class ServerForJoinListResponse(List<MatchServer> servers, string cookie) : ServerListResponse(cookie)
 {
-    public ServerForJoinListResponse(/* List<Server> servers */)
-    {
         // TODO: Retrieve Servers From Distributed Cache
 
         //Servers = new Dictionary<int, ServerForJoin>();
@@ -97,21 +89,29 @@ public class ServerForJoinListResponse : ServerListResponse
             };
 
          */
-    }
 
     [PhpProperty("server_list")]
-    public Dictionary<int, ServerForJoin> Servers { get; set; } = [];
+    public Dictionary<int, ServerForJoin> Servers { get; set; } = servers.Any() is false ? []
+        : servers.ToDictionary(server => server.ID, server => new ServerForJoin(server.ID.ToString(), server.IPAddress, server.Port.ToString(), server.Location));
+
+    // TODO: Filter Out Server-For-Create List
 }
 
 public abstract class ServerListResponse
 {
-    // TODO: Handle Account Key And Account Key Hash
+    protected ServerListResponse(string cookie)
+    {
+        string key = Guid.NewGuid().ToString();
+
+        AccountKey = key;
+        AccountKeyHash = SRPAuthenticationHandlers.ComputeMatchServerChatAuthenticationHash(key, cookie);
+    }
 
     [PhpProperty("acc_key")]
-    public required string AccountKey { get; set; }
+    public string AccountKey { get; set; }
 
     [PhpProperty("acc_key_hash")]
-    public required string AccountKeyHash { get; set; }
+    public string AccountKeyHash { get; set; }
 
     [PhpProperty("vested_threshold")]
     public int VestedThreshold { get; set; } = 5;
