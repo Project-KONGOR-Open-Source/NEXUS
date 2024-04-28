@@ -10,7 +10,7 @@ public static class ChatProtocol
     public static class Command
     {
         public const ushort CHAT_CMD_CHANNEL_MSG                            = 0x03;     // Used When A User Messages A Channel
-        public const ushort CHAT_CMD_CHANGED_CHANNEL                        = 0x04;     // Used When A Channel Change Has Occured
+        public const ushort CHAT_CMD_CHANGED_CHANNEL                        = 0x04;     // Used When A Channel Change Has Occurred
         public const ushort CHAT_CMD_JOINED_CHANNEL                         = 0x05;     // Used When A New User Joins Our Channel
         public const ushort CHAT_CMD_LEFT_CHANNEL                           = 0x06;     // Used When A User Leaves Our Channel
         public const ushort CHAT_CMD_DISCONNECTED                           = 0x07;     // Used When We Get Disconnected
