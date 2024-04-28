@@ -35,7 +35,9 @@ public partial class ServerRequesterController
         {
             HostID = account.ID,
             ID = accountName.GetDeterministicInt32Hash(),
-            IPAddress = Request.HttpContext.Connection.RemoteIpAddress?.MapToIPv4().ToString() ?? throw new NullReferenceException("Remote IP Address Is NULL")
+
+            IPAddress = (Request.HttpContext.Connection.RemoteIpAddress?.Equals(IPAddress.IPv6Loopback) ?? false ? IPAddress.Loopback : Request.HttpContext.Connection.RemoteIpAddress)?
+                .MapToIPv4().ToString() ?? throw new NullReferenceException("Remote IP Address Is NULL") // Use The Server Manager's IPv4 Address (And Fix The Loopback Address Mapping)
         };
 
         // TODO: Create Extension Methods For Distributed Cache

@@ -28,6 +28,7 @@ global using SecureRemotePassword;
 
 global using StackExchange.Redis;
 
+global using System.Net;
 global using System.Security.Cryptography;
 global using System.Text;
 global using System.Text.Json;
