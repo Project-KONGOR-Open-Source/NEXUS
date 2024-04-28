@@ -194,7 +194,7 @@ public partial class ClientRequesterController
 
         // TODO: Resolve Suspensions
 
-        string chatAddress = Environment.GetEnvironmentVariable("CHAT_SERVER_ADDRESS") ?? throw new NullReferenceException("Chat Server Address Is NULL");
+        string chatHost = Environment.GetEnvironmentVariable("CHAT_SERVER_HOST") ?? throw new NullReferenceException("Chat Server Host Is NULL");
         int chatPort = int.Parse(Environment.GetEnvironmentVariable("CHAT_SERVER_PORT") ?? throw new NullReferenceException("Chat Server Port Is NULL"));
 
         SRPAuthenticationHandlers.StageTwoResponseParameters parameters = new()
@@ -203,7 +203,7 @@ public partial class ClientRequesterController
             ClanRoster = account.Clan?.Members ?? [],
             ServerProof = serverProof,
             ClientIPAddress = remoteIPAddress,
-            ChatServer = (chatAddress, chatPort)
+            ChatServer = (chatHost, chatPort)
         };
 
         SRPAuthenticationResponseStageTwo response = SRPAuthenticationHandlers.GenerateStageTwoResponse(parameters, out string cookie);

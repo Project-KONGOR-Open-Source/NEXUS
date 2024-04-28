@@ -43,7 +43,7 @@ public partial class ServerRequesterController
         string serializedManager = JsonSerializer.Serialize(manager);
         await Cache.StringSetAsync($@"SERVER-MANAGER:[""{accountName}""]", serializedManager);
 
-        string chatAddress = Environment.GetEnvironmentVariable("CHAT_SERVER_ADDRESS") ?? throw new NullReferenceException("Chat Server Address Is NULL");
+        string chatHost = Environment.GetEnvironmentVariable("CHAT_SERVER_HOST") ?? throw new NullReferenceException("Chat Server Host Is NULL");
         int chatPort = int.Parse(Environment.GetEnvironmentVariable("CHAT_SERVER_PORT") ?? throw new NullReferenceException("Chat Server Port Is NULL"));
 
         Dictionary<string, object> response = new()
@@ -51,7 +51,7 @@ public partial class ServerRequesterController
             ["server_id"] = manager.ID,
             ["official"] = 1, // If Not Official, It Is Considered To Be Un-Authorized
             ["session"] = manager.Cookie,
-            ["chat_address"] = chatAddress,
+            ["chat_address"] = chatHost,
             ["chat_port"] = chatPort,
         };
 
@@ -142,14 +142,14 @@ public partial class ServerRequesterController
 
         // TODO: Implement Verifier In Description (If The Server Is A COMPEL Server, It Will Have A Verifier In The Description)
 
-        string chatAddress = Environment.GetEnvironmentVariable("CHAT_SERVER_ADDRESS") ?? throw new NullReferenceException("Chat Server Address Is NULL");
+        string chatHost = Environment.GetEnvironmentVariable("CHAT_SERVER_HOST") ?? throw new NullReferenceException("Chat Server Host Is NULL");
         int chatPort = int.Parse(Environment.GetEnvironmentVariable("CHAT_SERVER_PORT") ?? throw new NullReferenceException("Chat Server Port Is NULL"));
 
         Dictionary<string, object> response = new()
         {
             ["session"] = server.Cookie,
             ["server_id"] = server.ID,
-            ["chat_address"] = chatAddress,
+            ["chat_address"] = chatHost,
             ["chat_port"] = chatPort,
             ["leaverthreshold"] = 0.05
         };
