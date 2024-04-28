@@ -10,8 +10,7 @@ public class ChatService(IServiceProvider serviceProvider) : IHostedService, IDi
     {
         IPAddress address = IPAddress.Any;
 
-        // TODO: Make Distinction Between Chat Service (55507, 55508) Ports And Chat Server Ports (5555x > 1: Client, 2: Manager, 3: Server)
-        int port = 5555; // TODO: Get From Configuration
+        int port = int.Parse(Environment.GetEnvironmentVariable("CHAT_SERVER_PORT") ?? throw new NullReferenceException("Chat Server Port Is NULL"));
 
         ChatServer = new Core.ChatServer(address, port, ServiceProvider);
 

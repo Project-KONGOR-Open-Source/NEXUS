@@ -22,9 +22,9 @@ public static class SRPAuthenticationHandlers
             LeaverThreshold = ".05", // TODO: Set Per Partition Of Games Played (e.g. under 50 games = 20%, between 50 and 100 games = 10%, over 100 games = 5%)
             HasSubAccounts = parameters.Account.User.Accounts.Any(account => account.IsMain.Equals(false)),
             IsSubAccount = parameters.Account.IsMain.Equals(false),
-            ICBURL = GetHTTPSApplicationURL(), // TODO: Fix This (The Port In The Environment Variable Is Different From The One In The Launch Profile)
+            ICBURL = Environment.GetEnvironmentVariable("APPLICATION_URL") ?? throw new NullReferenceException("Application URL Is NULL"),
             AuthenticationHash = ComputeChatServerCookieHash(parameters.Account.ID, parameters.ClientIPAddress, cookie),
-            ChatServerIPAddress = parameters.ChatServer.Host,
+            ChatServerIPAddress = parameters.ChatServer.Address,
             ChatServerPort = parameters.ChatServer.Port.ToString(),
             ChatChannels = SetChatChannels(parameters.Account),
             Accounts = parameters.Account.User.Accounts.OrderBy(account => account.TimestampCreated).Select(account => new List<string> { account.Name, account.ID.ToString() }).ToList(),
@@ -87,20 +87,7 @@ public static class SRPAuthenticationHandlers
         public required List<Account> ClanRoster { get; set; }
         public required string ServerProof { get; set; }
         public required string ClientIPAddress { get; set; }
-        public required (string Protocol, string Host, int Port) ChatServer { get; set; }
-    }
-
-    private static string GetHTTPSApplicationURL()
-    {
-        string urlCollection = Environment.GetEnvironmentVariable("ASPNETCORE_URLS") ?? throw new NullReferenceException(@"""ASPNETCORE_URLS"" Environment Variable Is NULL");
-
-        // This Works On The Assumption That Each Set Of URLs Has One HTTP Address And One HTTPS Address, Exactly In This Order
-        string https = urlCollection.Split(";").Last();
-
-        // This Works On The Assumption That URLs In Development Are Always "localhost" And A Port Number, While URLs In Production Are Always A Public Sub-Domain With No Explicitly-Defined Port Number
-        string mutated = https.Replace("localhost", "127.0.0.1");
-
-        return mutated;
+        public required (string Address, int Port) ChatServer { get; set; }
     }
 
     # region Chat Server Authentication Secret

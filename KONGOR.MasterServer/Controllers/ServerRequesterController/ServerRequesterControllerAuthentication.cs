@@ -35,7 +35,7 @@ public partial class ServerRequesterController
         {
             HostID = account.ID,
             ID = accountName.GetDeterministicInt32Hash(),
-            IPAddress = Request.HttpContext.Connection.RemoteIpAddress?.MapToIPv4().ToString() ?? "0.0.0.0"
+            IPAddress = Request.HttpContext.Connection.RemoteIpAddress?.MapToIPv4().ToString() ?? throw new NullReferenceException("Remote IP Address Is NULL")
         };
 
         // TODO: Create Extension Methods For Distributed Cache
@@ -43,11 +43,8 @@ public partial class ServerRequesterController
         string serializedManager = JsonSerializer.Serialize(manager);
         await Cache.StringSetAsync($@"SERVER-MANAGER:[""{accountName}""]", serializedManager);
 
-        // ChatServerConfiguration? chatServerConfig = Configuration.GetSection("ChatServerConfiguration").Get<ChatServerConfiguration>();
-        // if (KongorContext.RuntimeEnvironment is "Development") chatServerConfig.Address = AddressHelpers.ResolveChatServerAddress(Request.HttpContext.Connection.RemoteIpAddress);
-        // TODO: Resolve Chat Server Address/Port
-        string chatAddress = "127.0.0.1";
-        int chatPort = 5555;
+        string chatAddress = Environment.GetEnvironmentVariable("CHAT_SERVER_ADDRESS") ?? throw new NullReferenceException("Chat Server Address Is NULL");
+        int chatPort = int.Parse(Environment.GetEnvironmentVariable("CHAT_SERVER_PORT") ?? throw new NullReferenceException("Chat Server Port Is NULL"));
 
         Dictionary<string, object> response = new()
         {
@@ -58,7 +55,7 @@ public partial class ServerRequesterController
             ["chat_port"] = chatPort,
         };
 
-        // TODO: Investigate How These Are Used (+ Resolve CDN Host)
+        // TODO: Investigate How These Are Used (+ Resolve CDN Host, + Reconcile With CDN Patch Addresses)
         response["cdn_upload_host"] = "kongor.online";
         response["cdn_upload_target"] = "upload";
 
@@ -145,11 +142,8 @@ public partial class ServerRequesterController
 
         // TODO: Implement Verifier In Description (If The Server Is A COMPEL Server, It Will Have A Verifier In The Description)
 
-        // ChatServerConfiguration? chatServerConfig = Configuration.GetSection("ChatServerConfiguration").Get<ChatServerConfiguration>();
-        // if (KongorContext.RuntimeEnvironment is "Development") chatServerConfig.Address = AddressHelpers.ResolveChatServerAddress(Request.HttpContext.Connection.RemoteIpAddress);
-        // TODO: Resolve Chat Server Address/Port
-        string chatAddress = "127.0.0.1";
-        int chatPort = 5555;
+        string chatAddress = Environment.GetEnvironmentVariable("CHAT_SERVER_ADDRESS") ?? throw new NullReferenceException("Chat Server Address Is NULL");
+        int chatPort = int.Parse(Environment.GetEnvironmentVariable("CHAT_SERVER_PORT") ?? throw new NullReferenceException("Chat Server Port Is NULL"));
 
         Dictionary<string, object> response = new()
         {

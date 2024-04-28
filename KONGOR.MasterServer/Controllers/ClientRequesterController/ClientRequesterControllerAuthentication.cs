@@ -194,13 +194,16 @@ public partial class ClientRequesterController
 
         // TODO: Resolve Suspensions
 
+        string chatAddress = Environment.GetEnvironmentVariable("CHAT_SERVER_ADDRESS") ?? throw new NullReferenceException("Chat Server Address Is NULL");
+        int chatPort = int.Parse(Environment.GetEnvironmentVariable("CHAT_SERVER_PORT") ?? throw new NullReferenceException("Chat Server Port Is NULL"));
+
         SRPAuthenticationHandlers.StageTwoResponseParameters parameters = new()
         {
             Account = account,
             ClanRoster = account.Clan?.Members ?? [],
             ServerProof = serverProof,
             ClientIPAddress = remoteIPAddress,
-            ChatServer = (Configuration.ChatServer.HTTPS.Protocol, Configuration.ChatServer.HTTPS.Host, Configuration.ChatServer.HTTPS.Port) // TODO: The Chat Server Probably Doesn't Need HTTP/HTTPS
+            ChatServer = (chatAddress, chatPort)
         };
 
         SRPAuthenticationResponseStageTwo response = SRPAuthenticationHandlers.GenerateStageTwoResponse(parameters, out string cookie);
