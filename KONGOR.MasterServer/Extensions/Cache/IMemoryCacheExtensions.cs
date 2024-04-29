@@ -28,18 +28,18 @@ public static class IMemoryCacheExtensions
     // Additionally, Cached Values Cannot Be Retrieved Without Their Respective Key, So Iterating Just The Values Is Not Possible Without Complex Reflection
     private static string ConstructAccountSessionCookieKey(string cookie) => $@"ACCOUNT-SESSION-COOKIE:[""{cookie}""]";
 
-    public static void SetAccountSessionCookie(this IMemoryCache cache, string cookie, string accountName)
+    public static void SetAccountNameForSessionCookie(this IMemoryCache cache, string cookie, string accountName)
         => cache.Set(ConstructAccountSessionCookieKey(cookie), accountName, new TimeSpan(24, 0, 0));
 
-    public static string? GetAccountSessionCookie(this IMemoryCache cache, string cookie)
+    public static string? GetAccountNameForSessionCookie(this IMemoryCache cache, string cookie)
         => cache.Get<string>(ConstructAccountSessionCookieKey(cookie));
 
-    public static void RemoveAccountSessionCookie(this IMemoryCache cache, string cookie)
+    public static void RemoveAccountNameForSessionCookie(this IMemoryCache cache, string cookie)
         => cache.Remove(ConstructAccountSessionCookieKey(cookie));
 
     public static bool ValidateAccountSessionCookie(this IMemoryCache cache, string cookie, out string? accountName)
     {
-        accountName = cache.GetAccountSessionCookie(cookie);
+        accountName = cache.GetAccountNameForSessionCookie(cookie);
 
         return accountName is not null;
     }

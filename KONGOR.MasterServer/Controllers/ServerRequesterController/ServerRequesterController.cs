@@ -3,10 +3,11 @@
 [ApiController]
 [Route("server_requester.php")]
 [Consumes("application/x-www-form-urlencoded")]
-public partial class ServerRequesterController(MerrickContext databaseContext, IConnectionMultiplexer multiplexer, ILogger<ServerRequesterController> logger) : ControllerBase
+public partial class ServerRequesterController(MerrickContext databaseContext, IConnectionMultiplexer multiplexer, IMemoryCache cache, ILogger<ServerRequesterController> logger) : ControllerBase
 {
     private MerrickContext MerrickContext { get; } = databaseContext;
     private IDatabase DistributedCache { get; } = multiplexer.GetDatabase();
+    private IMemoryCache Cache { get; } = cache;
     private ILogger Logger { get; } = logger;
 
     [HttpPost(Name = "Server Requester All-In-One")]
@@ -27,6 +28,8 @@ public partial class ServerRequesterController(MerrickContext databaseContext, I
             "replay_auth"   => await HandleReplayAuthentication(),
 
             // server
+            "accept_key"    => await HandleAcceptKey(),
+            "c_conn"        => await HandleConnectClient(),
             "new_session"   => await HandleNewSession(),
             "set_online"    => await HandleSetOnline(),
 

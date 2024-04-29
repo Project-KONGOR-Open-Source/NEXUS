@@ -11,7 +11,7 @@ public partial class ClientRequesterController
 
         string? gameType = Request.Form.ContainsKey("gametype") ? Request.Form["gametype"].ToString() : null;
 
-        List<MatchServer> servers = (await DistributedCache.HashGetAllAsync("SERVERS"))
+        List<MatchServer> servers = (await DistributedCache.HashGetAllAsync("MATCH-SERVERS"))
             .Where(entry => entry.Value.ToString() is not null)
             .Select(entry => JsonSerializer.Deserialize<MatchServer>(entry.Value.ToString()) ?? throw new NullReferenceException("Deserialized Match Server Is NULL")).ToList();
 

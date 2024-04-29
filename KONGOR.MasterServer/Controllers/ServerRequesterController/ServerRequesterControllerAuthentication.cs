@@ -31,19 +31,25 @@ public partial class ServerRequesterController
         if (srpPasswordHash.Equals(account.User.SRPPasswordHash) is false)
             return Unauthorized("Incorrect Password");
 
+        if (Request.HttpContext.Connection.RemoteIpAddress is null)
+        {
+            Logger.LogError($@"[BUG] Remote IP Address For Server Manager With Host Account Name ""{accountName}"" Is NULL");
+
+            return BadRequest("Unable To Resolve Remote IP Address");
+        }
+
         MatchServerManager manager = new()
         {
             HostID = account.ID,
             ID = accountName.GetDeterministicInt32Hash(),
 
-            IPAddress = (Request.HttpContext.Connection.RemoteIpAddress?.Equals(IPAddress.IPv6Loopback) ?? false ? IPAddress.Loopback : Request.HttpContext.Connection.RemoteIpAddress)?
-                .MapToIPv4().ToString() ?? throw new NullReferenceException("Remote IP Address Is NULL") // Use The Server Manager's IPv4 Address (And Fix The Loopback Address Mapping)
+            IPAddress = Request.HttpContext.Connection.RemoteIpAddress.MapToIPv4().ToString()
         };
 
         // TODO: Create Extension Methods For Distributed Cache
 
         string serializedManager = JsonSerializer.Serialize(manager);
-        await DistributedCache.HashSetAsync("SERVER-MANAGERS", [new HashEntry(accountName, serializedManager)]);
+        await DistributedCache.HashSetAsync("MATCH-SERVER-MANAGERS", [new HashEntry(accountName, serializedManager)]);
 
         string chatHost = Environment.GetEnvironmentVariable("CHAT_SERVER_HOST") ?? throw new NullReferenceException("Chat Server Host Is NULL");
         int chatPort = int.Parse(Environment.GetEnvironmentVariable("CHAT_SERVER_PORT") ?? throw new NullReferenceException("Chat Server Port Is NULL"));
@@ -140,7 +146,7 @@ public partial class ServerRequesterController
         // TODO: Create Extension Methods For Distributed Cache
 
         string serializedServer = JsonSerializer.Serialize(server);
-        await DistributedCache.HashSetAsync("SERVERS", [new HashEntry(serverIdentifier, serializedServer)]);
+        await DistributedCache.HashSetAsync("MATCH-SERVERS", [new HashEntry(serverIdentifier, serializedServer)]);
 
         // TODO: Implement Verifier In Description (If The Server Is A COMPEL Server, It Will Have A Verifier In The Description)
 
@@ -157,6 +163,187 @@ public partial class ServerRequesterController
         };
 
         Logger.LogInformation($@"Server ID ""{server.ID}"" Was Registered At ""{server.IPAddress}:{server.Port}"" With Cookie ""{server.Cookie}""");
+
+        return Ok(PhpSerialization.Serialize(response));
+    }
+
+    private async Task<IActionResult> HandleConnectClient()
+    {
+        string? session = Request.Form["session"];
+
+        if (session is null)
+            return BadRequest(@"Missing Value For Form Parameter ""session""");
+
+        string? cookie = Request.Form["cookie"];
+
+        if (cookie is null)
+            return BadRequest(@"Missing Value For Form Parameter ""cookie""");
+
+        string? ip = Request.Form["ip"];
+
+        if (ip is null)
+            return BadRequest(@"Missing Value For Form Parameter ""ip""");
+
+        string? casual = Request.Form["cas"];
+
+        if (casual is null)
+            return BadRequest(@"Missing Value For Form Parameter ""cas""");
+
+        // This value is the ChatProtocol.ArrangedMatchType value plus 1. This enum seems to be 1-indexed on the client-side.
+        // Example 1: a value of 1 means AM_PUBLIC, which is ChatProtocol.ArrangedMatchType value 0.
+        // Example 2: a value of 2 means AM_MATCHMAKING, which is ChatProtocol.ArrangedMatchType value 1.
+        string? arrangedMatchType = Request.Form["new"];
+
+        if (arrangedMatchType is null)
+            return BadRequest(@"Missing Value For Form Parameter ""new""");
+
+        string? accountNameForSessionCookie = Cache.GetAccountNameForSessionCookie(cookie);
+
+        if (accountNameForSessionCookie is null)
+            return Unauthorized("No Valid Client Session Cookie Could Be Found");
+
+        Account? account = await MerrickContext.Accounts
+            .Include(account => account.User).ThenInclude(user => user.Accounts)
+            .Include(account => account.Clan)
+            .SingleOrDefaultAsync(account => account.Name.Equals(accountNameForSessionCookie));
+
+        if (account is null)
+        {
+            Logger.LogError($@"[BUG] No Account Could Be Found For Account Name ""{accountNameForSessionCookie}"" With Session Cookie ""{cookie}""");
+
+            return BadRequest($@"Account With Name ""{accountNameForSessionCookie}"" Could Not Be Found");
+        }
+
+        Dictionary<string, object> response = new()
+        {
+            { "cookie", cookie },
+            { "account_id", account.ID },
+            { "nickname", account.Name },
+            { "super_id", account.User.Accounts.Single(record => record.IsMain).ID },
+            { "account_type", account.Type },
+            { "level", account.User.TotalLevel }
+        };
+
+        if (account.Clan is not null)
+        {
+            response.Add("clan_id", account.Clan.ID);
+            response.Add("tag", account.Clan.Tag);
+        }
+
+        /*
+            public static List<Info> InfoForAccount(AccountDetails accountDetails, float tournamentRatingForActiveTeam)
+           {
+               Info info = new()
+               {
+                   AccountId = accountDetails.AccountId.ToString(),
+                   Standing = "3",
+                   Level = "1",
+                   LevelExp = "0",
+                   // AllTimeTotalDisconnects: appears to be ignored
+                   // PossibleDisconnects: appears to be ignored
+                   // AllTimeGamesPlayed: appears to be ignored
+                   // NumBotGamesWon: appears to be ignored
+                   PSR = accountDetails.PublicRating,
+                   // PublicGameWins = publicStats.Wins,
+                   // PublicGameLosses = publicStats.Losses,
+                   PublicGamesPlayed = accountDetails.PublicGamesPlayed,
+                   PublicGameDisconnects = accountDetails.PublicTimesDisconnected,
+                   // NormalRankedGamesMMR: unused in KONGOR
+                   // NormalRankedGameWins: unused in KONGOR
+                   // NormalRankedGameLosses: unused in KONGOR
+                   // NormalRankedGamesPlayed: unused in KONGOR
+                   // NormalRankedGameDisconnects: unused in KONGOR
+                   // CasualModeMMR: unused in KONGOR
+                   // CasualModeWins: unused in KONGOR
+                   // CasualModeLosses: unused in KONGOR
+                   // CasualModeGamesPlayed: unused in KONGOR
+                   // CasualModeDisconnects: unused in KONGOR
+                   MidWarsMMR = accountDetails.MidWarsRating,
+                   MidWarsGamesPlayed = accountDetails.MidWarsGamesPlayed,
+                   MidWarsTimesDisconnected = accountDetails.MidWarsTimesDisconnected,
+
+                   // Number of Tournament matches played. Note: rift wars is used as a piggy-back.
+                   RiftWarsGamesPlayed = accountDetails.TournamentGamesPlayed,
+                   RiftWarsDisconnects = accountDetails.TournamentTimesDisconnected,
+                   RiftWarsRating = tournamentRatingForActiveTeam,
+
+                   IsNew = 0,
+                   ChampionsOfNewerthNormalMMR = accountDetails.CoNNormalRating,
+                   ChampionsOfNewerthNormalRank = accountDetails.CoNNormalRank,
+                   ChampionsOfNewerthGamesPlayed = accountDetails.CoNNormalGamesPlayed,
+                   ChampionsOfNewerthGameDisconnects = accountDetails.CoNNormalTimesDisconnected,
+
+                   ChampionsOfNewerthCasualMMR = accountDetails.CoNCasualRating,
+                   ChampionsOfNewerthCasualRank = accountDetails.CoNCasualRank,
+                   ChampionsOfNewerthCasualGamesPlayed = accountDetails.CoNCasualGamesPlayed,
+                   ChampionsOfNewerthCasualGameDisconnects = accountDetails.CoNCasualTimesDisconnected,
+
+                   // Additional Public Games info requested by server_requester.php?f=c_conn
+                   // Unclear if used or not.
+                   // PublicHeroKills = account.PlayerSeasonStatsPublic.HeroKills,
+                   // PublicHeroAssists = account.PlayerSeasonStatsPublic.HeroAssists,
+                   // PublicDeaths = account.PlayerSeasonStatsPublic.Deaths,
+                   // PublicWardsPlaced = account.PlayerSeasonStatsPublic.Wards,
+                   // PublicGoldEarned = account.PlayerSeasonStatsPublic.Gold,
+                   // PublicExpEarned = account.PlayerSeasonStatsPublic.Exp,
+                   // PublicSecondsPlayed = account.PlayerSeasonStatsPublic.Secs,
+                   // PublicTimeEarningExp = account.PlayerSeasonStatsPublic.TimeEarningExp,
+
+                   // Additional TMM info requested by server_requester.php?f=c_conn
+
+                   // Additional unknown fields requested by server_requester.php?f=c_conn
+                   // Unclear if used or not.
+                   rnk_amm_solo_conf = 0,
+                   rnk_amm_team_conf = 0,
+               };
+
+               return new List<Info>() { info };
+           }
+         */
+
+        response.Add("infos", ""); // TODO: Set These Stats
+        response.Add("game_cookie", "16cb3211-5253-45a8-bcb9-10d037ec9303"); // Must Exist, But The Value Doesn't Really Matter; TODO: Generate And Store This Cookie Per Match?
+        response.Add("my_upgrades", account.User.OwnedStoreItems);
+        response.Add("selected_upgrades", account.SelectedStoreItems);
+
+        return Ok(PhpSerialization.Serialize(response));
+    }
+
+    private async Task<IActionResult> HandleAcceptKey()
+    {
+        string? session = Request.Form["session"];
+
+        if (session is null)
+            return BadRequest(@"Missing Value For Form Parameter ""session""");
+
+        string? accountKey = Request.Form["acc_key"];
+
+        if (accountKey is null)
+            return BadRequest(@"Missing Value For Form Parameter ""acc_key""");
+
+        //GameServer? server = MerrickContext.GameServers.SingleOrDefault(server => server.Cookie.Equals(formData["session"]));
+        //if (server is null) return Unauthorized();
+
+        //if (KongorContext.InvalidateGameHostingPermissionToken(formData["acc_key"]).Equals(false))
+        //    return Unauthorized($@"NOT AUTHORISED: Invalid Account Key ""{formData["acc_key"]}""");
+
+        /*
+        Dictionary<string, object> response = new()
+        {
+            { "server_id", server.GameServerId },
+            { "official", server.Official ? 1 : 0 } // 0 = Unofficial; 1 = Official With Stats; 2 = Official Without Stats;
+        };
+        */
+
+        // TODO: Fix This Mess !!! (Maybe Just Use The Cookie As The Account Key?)
+
+        Dictionary<string, object> response = new()
+        {
+            { "server_id", 666 },
+            { "official", 1 } // 0 = Unofficial; 1 = Official With Stats; 2 = Official Without Stats;
+        };
+
+        // TODO: Fully Inspect Response Model
 
         return Ok(PhpSerialization.Serialize(response));
     }

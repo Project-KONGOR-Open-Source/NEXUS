@@ -136,14 +136,14 @@ public partial class ClientRequesterController
         if (account.Type is AccountType.ServerHost)
             return Unauthorized(PhpSerialization.Serialize(new SRPAuthenticationFailureResponse(SRPAuthenticationFailureReason.IsServerHostingAccount)));
 
-        if (HttpContext.Connection.RemoteIpAddress is null)
+        if (Request.HttpContext.Connection.RemoteIpAddress is null)
         {
             Logger.LogError($@"[BUG] Remote IP Address For Account Name ""{accountName}"" Is NULL");
 
             return UnprocessableEntity(PhpSerialization.Serialize(new SRPAuthenticationFailureResponse(SRPAuthenticationFailureReason.MissingIPAddress)));
         }
 
-        string remoteIPAddress = HttpContext.Connection.RemoteIpAddress.MapToIPv4().ToString();
+        string remoteIPAddress = Request.HttpContext.Connection.RemoteIpAddress.MapToIPv4().ToString();
 
         if (account.Type is not AccountType.Staff)
         {
@@ -212,7 +212,7 @@ public partial class ClientRequesterController
 
         await MerrickContext.SaveChangesAsync();
 
-        Cache.SetAccountSessionCookie(cookie, accountName);
+        Cache.SetAccountNameForSessionCookie(cookie, accountName);
 
         return Ok(PhpSerialization.Serialize(response));
     }

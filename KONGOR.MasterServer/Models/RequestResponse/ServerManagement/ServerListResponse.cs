@@ -2,9 +2,6 @@
 
 public class ServerForCreateListResponse(List<MatchServer> servers, string? region, string cookie) : ServerListResponse(cookie)
 {
-        //foreach (Server server in servers.Where(entry => entry.ServerStatus.Equals(ChatServerProtocol.ServerStatus.Idle)))
-        //    Servers.Add(server.ServerId, new ServerForCreate(server.ServerId.ToString(), server.Address, server.Port.ToString(), server.Location));
-
        // TODO: Filter Server List By Region(+Add Support For NEWERTH Region)
 
         /*
@@ -51,50 +48,16 @@ public class ServerForCreateListResponse(List<MatchServer> servers, string? regi
 
     [PhpProperty("server_list")]
     public Dictionary<int, ServerForCreate> Servers { get; set; } = servers.Any() is false? []
-        : servers.ToDictionary(server => server.ID, server => new ServerForCreate(server.ID.ToString(), server.IPAddress, server.Port.ToString(), server.Location));
-
-    // TODO: Filter Out Server-For-Join List
+        : servers.Where(server => server.Status is ServerStatus.SERVER_STATUS_IDLE)
+            .ToDictionary(server => server.ID, server => new ServerForCreate(server.ID.ToString(), server.IPAddress, server.Port.ToString(), server.Location));
 }
 
 public class ServerForJoinListResponse(List<MatchServer> servers, string cookie) : ServerListResponse(cookie)
 {
-        // TODO: Retrieve Servers From Distributed Cache
-
-        //Servers = new Dictionary<int, ServerForJoin>();
-
-        //if (servers.Any() is false) return;
-
-        //foreach (Server server in servers.Where(entry => entry.ServerStatus.Equals(ChatServerProtocol.ServerStatus.Active)))
-        //    Servers.Add(server.ServerId, new ServerForJoin(server.ServerId.ToString(), server.Address, server.Port.ToString(), server.Location));
-
-        // TODO: Filter Server List By Game Phase
-
-        /*
-
-            return GamePhase switch
-            {
-                0   => "Ready to host",
-                1   => "Lobby",
-                2   => "Banning",
-                3   => "Hero Select",
-                4   => GetMatchDuration(MatchDuration),
-                5   => GetMatchDuration(MatchDuration),
-                6   => GetMatchDuration(MatchDuration),
-                7   => "Finished",
-                8   => "Blind Banning",
-                9   => "Locking",
-                10  => "Lock Picking",
-                11  => "Shuffle Picking",
-                _   => "0:00:00"
-            };
-
-         */
-
     [PhpProperty("server_list")]
     public Dictionary<int, ServerForJoin> Servers { get; set; } = servers.Any() is false ? []
-        : servers.ToDictionary(server => server.ID, server => new ServerForJoin(server.ID.ToString(), server.IPAddress, server.Port.ToString(), server.Location));
-
-    // TODO: Filter Out Server-For-Create List
+        : servers.Where(server => server.Status is ServerStatus.SERVER_STATUS_ACTIVE)
+            .ToDictionary(server => server.ID, server => new ServerForJoin(server.ID.ToString(), server.IPAddress, server.Port.ToString(), server.Location));
 }
 
 public abstract class ServerListResponse
