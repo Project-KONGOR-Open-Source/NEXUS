@@ -132,15 +132,51 @@ namespace MERRICK.Database.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "HeroGuides",
+                columns: table => new
+                {
+                    ID = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
+                    HeroName = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    HeroIdentifier = table.Column<string>(type: "nvarchar(25)", maxLength: 25, nullable: false),
+                    Intro = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
+                    Content = table.Column<string>(type: "nvarchar(1500)", maxLength: 1500, nullable: false),
+                    StartingItems = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: false),
+                    EarlyGameItems = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: false),
+                    CoreItems = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: false),
+                    LuxuryItems = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: false),
+                    AbilityQueue = table.Column<string>(type: "nvarchar(750)", maxLength: 750, nullable: false),
+                    AuthorID = table.Column<int>(type: "int", nullable: false),
+                    Rating = table.Column<float>(type: "real", nullable: false),
+                    UpVotes = table.Column<int>(type: "int", nullable: false),
+                    DownVotes = table.Column<int>(type: "int", nullable: false),
+                    Public = table.Column<bool>(type: "bit", nullable: false),
+                    Featured = table.Column<bool>(type: "bit", nullable: false),
+                    TimestampCreated = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    TimestampLastUpdated = table.Column<DateTime>(type: "datetime2", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_HeroGuides", x => x.ID);
+                    table.ForeignKey(
+                        name: "FK_HeroGuides_Accounts_AuthorID",
+                        column: x => x.AuthorID,
+                        principalTable: "Accounts",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.InsertData(
                 table: "Clans",
                 columns: new[] { "ID", "Name", "Tag", "TimestampCreated" },
                 values: new object[,]
                 {
-                    { 1, "KONGOR", "K", new DateTime(2024, 4, 25, 19, 53, 8, 933, DateTimeKind.Utc).AddTicks(5560) },
-                    { 2, "Project KONGOR Developers", ".NET", new DateTime(2024, 4, 25, 19, 53, 8, 933, DateTimeKind.Utc).AddTicks(5565) },
-                    { 3, "Project KONGOR", "PK", new DateTime(2024, 4, 25, 19, 53, 8, 933, DateTimeKind.Utc).AddTicks(5568) },
-                    { 4, "Project KONGOR Open-Source", "PKOS", new DateTime(2024, 4, 25, 19, 53, 8, 933, DateTimeKind.Utc).AddTicks(5570) }
+                    { 1, "KONGOR", "K", new DateTime(2024, 5, 5, 22, 57, 32, 87, DateTimeKind.Utc).AddTicks(7454) },
+                    { 2, "Project KONGOR Developers", ".NET", new DateTime(2024, 5, 5, 22, 57, 32, 87, DateTimeKind.Utc).AddTicks(7458) },
+                    { 3, "Project KONGOR", "PK", new DateTime(2024, 5, 5, 22, 57, 32, 87, DateTimeKind.Utc).AddTicks(7461) },
+                    { 4, "Project KONGOR Open-Source", "PKOS", new DateTime(2024, 5, 5, 22, 57, 32, 87, DateTimeKind.Utc).AddTicks(7462) }
                 });
 
             migrationBuilder.InsertData(
@@ -155,18 +191,18 @@ namespace MERRICK.Database.Migrations
             migrationBuilder.InsertData(
                 table: "Users",
                 columns: new[] { "ID", "EmailAddress", "GoldCoins", "OwnedStoreItems", "PBKDF2PasswordHash", "PlinkoTickets", "RoleID", "SRPPasswordHash", "SRPPasswordSalt", "SilverCoins", "TimestampCreated", "TimestampLastActive", "TotalExperience", "TotalLevel" },
-                values: new object[] { 1, "project.kongor@proton.me", 5555555, "[\"ai.custom_icon:1\",\"av.Flamboyant\",\"c.cat_courier\",\"cc.frostburnlogo\",\"cr.Punk Creep\",\"cs.frostburnlogo\",\"m.Super-Taunt\",\"sc.paragon_circle_upgrade\",\"t.Dumpster_Taunt\",\"te.Punk TP\",\"w.8bit_ward\"]", "AQAAAAIAAYagAAAAEMUkpLAr01NjkKRPaXCyTa17nlOdPKJucn5QYur+wQBTDKCpgsAcREenK+pGJPBCRw==", 5555555, 1, "fe6f16b0ecb80f6b2bc95d68420fd13afef0c895172a81819870660208ac221a", "861c37ec6d049d92cc1c67d195b414f26b572a56358272af3e9c06fcd9bfa053", 555555555, new DateTime(2024, 4, 25, 19, 53, 8, 933, DateTimeKind.Utc).AddTicks(5539), new DateTime(2024, 4, 25, 19, 53, 8, 933, DateTimeKind.Utc).AddTicks(5541), 22211666, 666 });
+                values: new object[] { 1, "project.kongor@proton.me", 5555555, "[\"ai.custom_icon:1\",\"av.Flamboyant\",\"c.cat_courier\",\"cc.frostburnlogo\",\"cr.Punk Creep\",\"cs.frostburnlogo\",\"m.Super-Taunt\",\"sc.paragon_circle_upgrade\",\"t.Dumpster_Taunt\",\"te.Punk TP\",\"w.8bit_ward\"]", "AQAAAAIAAYagAAAAEMUkpLAr01NjkKRPaXCyTa17nlOdPKJucn5QYur+wQBTDKCpgsAcREenK+pGJPBCRw==", 5555555, 1, "fe6f16b0ecb80f6b2bc95d68420fd13afef0c895172a81819870660208ac221a", "861c37ec6d049d92cc1c67d195b414f26b572a56358272af3e9c06fcd9bfa053", 555555555, new DateTime(2024, 5, 5, 22, 57, 32, 87, DateTimeKind.Utc).AddTicks(7412), new DateTime(2024, 5, 5, 22, 57, 32, 87, DateTimeKind.Utc).AddTicks(7417), 22211666, 666 });
 
             migrationBuilder.InsertData(
                 table: "Accounts",
                 columns: new[] { "ID", "AscensionLevel", "AutoConnectChatChannels", "ClanID", "ClanTier", "IPAddressCollection", "IsMain", "MACAddressCollection", "Name", "SelectedStoreItems", "SystemInformationCollection", "SystemInformationHashCollection", "TimestampCreated", "TimestampJoinedClan", "TimestampLastActive", "Type", "UserID" },
                 values: new object[,]
                 {
-                    { 1, 666, "[\"KONGOR\",\"TERMINAL\"]", 2, 3, "[]", true, "[]", "KONGOR", "[\"ai.custom_icon:1\",\"av.Flamboyant\",\"c.cat_courier\",\"cc.frostburnlogo\",\"cr.Punk Creep\",\"cs.frostburnlogo\",\"m.Super-Taunt\",\"sc.paragon_circle_upgrade\",\"t.Dumpster_Taunt\",\"te.Punk TP\",\"w.8bit_ward\"]", "[]", "[]", new DateTime(2024, 4, 25, 19, 53, 8, 933, DateTimeKind.Utc).AddTicks(5606), new DateTime(2024, 4, 25, 19, 53, 8, 933, DateTimeKind.Utc).AddTicks(5601), new DateTime(2024, 4, 25, 19, 53, 8, 933, DateTimeKind.Utc).AddTicks(5606), 5, 1 },
-                    { 2, 666, "[\"KONGOR\",\"TERMINAL\"]", 1, 3, "[]", false, "[]", "ONGOR", "[\"ai.custom_icon:1\",\"av.Flamboyant\",\"c.cat_courier\",\"cc.frostburnlogo\",\"cr.Punk Creep\",\"cs.frostburnlogo\",\"m.Super-Taunt\",\"sc.paragon_circle_upgrade\",\"t.Dumpster_Taunt\",\"te.Punk TP\",\"w.8bit_ward\"]", "[]", "[]", new DateTime(2024, 4, 25, 19, 53, 8, 933, DateTimeKind.Utc).AddTicks(5613), new DateTime(2024, 4, 25, 19, 53, 8, 933, DateTimeKind.Utc).AddTicks(5610), new DateTime(2024, 4, 25, 19, 53, 8, 933, DateTimeKind.Utc).AddTicks(5613), 5, 1 },
-                    { 3, 666, "[\"KONGOR\",\"TERMINAL\"]", 1, 2, "[]", false, "[]", "GOPO", "[\"ai.custom_icon:1\",\"av.Flamboyant\",\"c.cat_courier\",\"cc.frostburnlogo\",\"cr.Punk Creep\",\"cs.frostburnlogo\",\"m.Super-Taunt\",\"sc.paragon_circle_upgrade\",\"t.Dumpster_Taunt\",\"te.Punk TP\",\"w.8bit_ward\"]", "[]", "[]", new DateTime(2024, 4, 25, 19, 53, 8, 933, DateTimeKind.Utc).AddTicks(5617), new DateTime(2024, 4, 25, 19, 53, 8, 933, DateTimeKind.Utc).AddTicks(5615), new DateTime(2024, 4, 25, 19, 53, 8, 933, DateTimeKind.Utc).AddTicks(5617), 5, 1 },
-                    { 4, 666, "[\"KONGOR\",\"TERMINAL\"]", 1, 2, "[]", false, "[]", "Xen0byte", "[\"ai.custom_icon:1\",\"av.Flamboyant\",\"c.cat_courier\",\"cc.frostburnlogo\",\"cr.Punk Creep\",\"cs.frostburnlogo\",\"m.Super-Taunt\",\"sc.paragon_circle_upgrade\",\"t.Dumpster_Taunt\",\"te.Punk TP\",\"w.8bit_ward\"]", "[]", "[]", new DateTime(2024, 4, 25, 19, 53, 8, 933, DateTimeKind.Utc).AddTicks(5620), new DateTime(2024, 4, 25, 19, 53, 8, 933, DateTimeKind.Utc).AddTicks(5618), new DateTime(2024, 4, 25, 19, 53, 8, 933, DateTimeKind.Utc).AddTicks(5620), 5, 1 },
-                    { 5, 666, "[\"KONGOR\",\"TERMINAL\"]", 1, 2, "[]", false, "[]", "HOST", "[\"ai.custom_icon:1\",\"av.Flamboyant\",\"c.cat_courier\",\"cc.frostburnlogo\",\"cr.Punk Creep\",\"cs.frostburnlogo\",\"m.Super-Taunt\",\"sc.paragon_circle_upgrade\",\"t.Dumpster_Taunt\",\"te.Punk TP\",\"w.8bit_ward\"]", "[]", "[]", new DateTime(2024, 4, 25, 19, 53, 8, 933, DateTimeKind.Utc).AddTicks(5643), new DateTime(2024, 4, 25, 19, 53, 8, 933, DateTimeKind.Utc).AddTicks(5621), new DateTime(2024, 4, 25, 19, 53, 8, 933, DateTimeKind.Utc).AddTicks(5643), 2, 1 }
+                    { 1, 666, "[\"KONGOR\",\"TERMINAL\"]", 2, 3, "[]", true, "[]", "KONGOR", "[\"ai.custom_icon:1\",\"av.Flamboyant\",\"c.cat_courier\",\"cc.frostburnlogo\",\"cr.Punk Creep\",\"cs.frostburnlogo\",\"m.Super-Taunt\",\"sc.paragon_circle_upgrade\",\"t.Dumpster_Taunt\",\"te.Punk TP\",\"w.8bit_ward\"]", "[]", "[]", new DateTime(2024, 5, 5, 22, 57, 32, 87, DateTimeKind.Utc).AddTicks(7500), new DateTime(2024, 5, 5, 22, 57, 32, 87, DateTimeKind.Utc).AddTicks(7496), new DateTime(2024, 5, 5, 22, 57, 32, 87, DateTimeKind.Utc).AddTicks(7500), 5, 1 },
+                    { 2, 666, "[\"KONGOR\",\"TERMINAL\"]", 1, 3, "[]", false, "[]", "ONGOR", "[\"ai.custom_icon:1\",\"av.Flamboyant\",\"c.cat_courier\",\"cc.frostburnlogo\",\"cr.Punk Creep\",\"cs.frostburnlogo\",\"m.Super-Taunt\",\"sc.paragon_circle_upgrade\",\"t.Dumpster_Taunt\",\"te.Punk TP\",\"w.8bit_ward\"]", "[]", "[]", new DateTime(2024, 5, 5, 22, 57, 32, 87, DateTimeKind.Utc).AddTicks(7506), new DateTime(2024, 5, 5, 22, 57, 32, 87, DateTimeKind.Utc).AddTicks(7504), new DateTime(2024, 5, 5, 22, 57, 32, 87, DateTimeKind.Utc).AddTicks(7506), 5, 1 },
+                    { 3, 666, "[\"KONGOR\",\"TERMINAL\"]", 1, 2, "[]", false, "[]", "GOPO", "[\"ai.custom_icon:1\",\"av.Flamboyant\",\"c.cat_courier\",\"cc.frostburnlogo\",\"cr.Punk Creep\",\"cs.frostburnlogo\",\"m.Super-Taunt\",\"sc.paragon_circle_upgrade\",\"t.Dumpster_Taunt\",\"te.Punk TP\",\"w.8bit_ward\"]", "[]", "[]", new DateTime(2024, 5, 5, 22, 57, 32, 87, DateTimeKind.Utc).AddTicks(7509), new DateTime(2024, 5, 5, 22, 57, 32, 87, DateTimeKind.Utc).AddTicks(7508), new DateTime(2024, 5, 5, 22, 57, 32, 87, DateTimeKind.Utc).AddTicks(7510), 5, 1 },
+                    { 4, 666, "[\"KONGOR\",\"TERMINAL\"]", 1, 2, "[]", false, "[]", "Xen0byte", "[\"ai.custom_icon:1\",\"av.Flamboyant\",\"c.cat_courier\",\"cc.frostburnlogo\",\"cr.Punk Creep\",\"cs.frostburnlogo\",\"m.Super-Taunt\",\"sc.paragon_circle_upgrade\",\"t.Dumpster_Taunt\",\"te.Punk TP\",\"w.8bit_ward\"]", "[]", "[]", new DateTime(2024, 5, 5, 22, 57, 32, 87, DateTimeKind.Utc).AddTicks(7512), new DateTime(2024, 5, 5, 22, 57, 32, 87, DateTimeKind.Utc).AddTicks(7511), new DateTime(2024, 5, 5, 22, 57, 32, 87, DateTimeKind.Utc).AddTicks(7512), 5, 1 },
+                    { 5, 666, "[\"KONGOR\",\"TERMINAL\"]", 1, 2, "[]", false, "[]", "HOST", "[\"ai.custom_icon:1\",\"av.Flamboyant\",\"c.cat_courier\",\"cc.frostburnlogo\",\"cr.Punk Creep\",\"cs.frostburnlogo\",\"m.Super-Taunt\",\"sc.paragon_circle_upgrade\",\"t.Dumpster_Taunt\",\"te.Punk TP\",\"w.8bit_ward\"]", "[]", "[]", new DateTime(2024, 5, 5, 22, 57, 32, 87, DateTimeKind.Utc).AddTicks(7515), new DateTime(2024, 5, 5, 22, 57, 32, 87, DateTimeKind.Utc).AddTicks(7514), new DateTime(2024, 5, 5, 22, 57, 32, 87, DateTimeKind.Utc).AddTicks(7515), 2, 1 }
                 });
 
             migrationBuilder.CreateIndex(
@@ -192,6 +228,11 @@ namespace MERRICK.Database.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_HeroGuides_AuthorID",
+                table: "HeroGuides",
+                column: "AuthorID");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Roles_Name",
                 table: "Roles",
                 column: "Name",
@@ -213,10 +254,13 @@ namespace MERRICK.Database.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Accounts");
+                name: "HeroGuides");
 
             migrationBuilder.DropTable(
                 name: "Tokens");
+
+            migrationBuilder.DropTable(
+                name: "Accounts");
 
             migrationBuilder.DropTable(
                 name: "Clans");

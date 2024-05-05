@@ -10,6 +10,7 @@ public sealed class MerrickContext : DbContext
 
     public DbSet<Account> Accounts => Set<Account>();
     public DbSet<Clan> Clans => Set<Clan>();
+    public DbSet<HeroGuide> HeroGuides => Set<HeroGuide>();
     public DbSet<Role> Roles => Set<Role>();
     public DbSet<Token> Tokens => Set<Token>();
     public DbSet<User> Users => Set<User>();

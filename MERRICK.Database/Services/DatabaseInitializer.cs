@@ -17,7 +17,9 @@ public class DatabaseInitializer(IServiceProvider serviceProvider, ILogger<Datab
 
     private async Task InitializeDatabaseAsync(MerrickContext context, CancellationToken cancellationToken)
     {
-        using Activity? activity = _activitySource.StartActivity("Initializing MERRICK Database", ActivityKind.Client);
+        const string activityName = "Initializing MERRICK Database";
+
+        using Activity? activity = _activitySource.StartActivity(activityName, ActivityKind.Client);
 
         Stopwatch stopwatch = Stopwatch.StartNew();
 
@@ -33,5 +35,7 @@ public class DatabaseInitializer(IServiceProvider serviceProvider, ILogger<Datab
     private async Task SeedAsync(MerrickContext context, CancellationToken cancellationToken)
     {
         logger.LogInformation("Seeding Database");
+
+        await SeedDataHandlers.SeedHeroGuides(context, cancellationToken, logger);
     }
 }
