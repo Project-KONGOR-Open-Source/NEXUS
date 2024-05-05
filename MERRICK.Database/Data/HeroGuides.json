@@ -1,6 +1,6 @@
 [
     {
-        "guideId": 1,
+        "guideID": 1,
         "name": "WhatYouGot\\'s Accursed Guide",
         "heroName": "Accursed",
         "heroIdentifier": "Hero_Accursed",
@@ -73,7 +73,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -83,7 +83,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 2,
+        "guideID": 2,
         "name": "WhatYouGot\\'s Adrenaline Guide",
         "heroName": "Adrenaline",
         "heroIdentifier": "Hero_Adrenaline",
@@ -156,7 +156,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -166,7 +166,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 3,
+        "guideID": 3,
         "name": "WhatYouGot\\'s Aluna Guide",
         "heroName": "Aluna",
         "heroIdentifier": "Hero_Aluna",
@@ -239,7 +239,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -249,7 +249,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 4,
+        "guideID": 4,
         "name": "WhatYouGot\\'s Andromeda Guide",
         "heroName": "Andromeda",
         "heroIdentifier": "Hero_Andromeda",
@@ -322,7 +322,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -332,7 +332,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 5,
+        "guideID": 5,
         "name": "WhatYouGot\\'s Apex Guide",
         "heroName": "Apex",
         "heroIdentifier": "Hero_Apex",
@@ -405,7 +405,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -415,7 +415,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 6,
+        "guideID": 6,
         "name": "WhatYouGot\\'s Arachna Guide",
         "heroName": "Arachna",
         "heroIdentifier": "Hero_Arachna",
@@ -488,7 +488,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -498,7 +498,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 7,
+        "guideID": 7,
         "name": "WhatYouGot\\'s Armadon Guide",
         "heroName": "Armadon",
         "heroIdentifier": "Hero_Armadon",
@@ -571,7 +571,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -581,7 +581,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 8,
+        "guideID": 8,
         "name": "WhatYouGot\\'s Artesia Guide",
         "heroName": "Artesia",
         "heroIdentifier": "Hero_Artesia",
@@ -654,7 +654,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -664,7 +664,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 9,
+        "guideID": 9,
         "name": "WhatYouGot\\'s Artillery Guide",
         "heroName": "Artillery",
         "heroIdentifier": "Hero_Artillery",
@@ -737,7 +737,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -747,7 +747,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 10,
+        "guideID": 10,
         "name": "WhatYouGot\\'s Wretched Hag Guide",
         "heroName": "Wretched Hag",
         "heroIdentifier": "Hero_BabaYaga",
@@ -820,7 +820,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -830,7 +830,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 11,
+        "guideID": 11,
         "name": "WhatYouGot\\'s Behemoth Guide",
         "heroName": "Behemoth",
         "heroIdentifier": "Hero_Behemoth",
@@ -903,7 +903,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -913,7 +913,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 12,
+        "guideID": 12,
         "name": "WhatYouGot\\'s Balphagore Guide",
         "heroName": "Balphagore",
         "heroIdentifier": "Hero_Bephelgor",
@@ -986,7 +986,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -996,7 +996,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 13,
+        "guideID": 13,
         "name": "WhatYouGot\\'s Berzerker Guide",
         "heroName": "Berzerker",
         "heroIdentifier": "Hero_Berzerker",
@@ -1069,7 +1069,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -1079,7 +1079,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 14,
+        "guideID": 14,
         "name": "WhatYouGot\\'s Blitz Guide",
         "heroName": "Blitz",
         "heroIdentifier": "Hero_Blitz",
@@ -1152,7 +1152,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -1162,7 +1162,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 15,
+        "guideID": 15,
         "name": "WhatYouGot\\'s Bombardier Guide",
         "heroName": "Bombardier",
         "heroIdentifier": "Hero_Bombardier",
@@ -1235,7 +1235,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -1245,7 +1245,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 16,
+        "guideID": 16,
         "name": "WhatYouGot\\'s Bubbles Guide",
         "heroName": "Bubbles",
         "heroIdentifier": "Hero_Bubbles",
@@ -1318,7 +1318,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -1328,7 +1328,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 17,
+        "guideID": 17,
         "name": "WhatYouGot\\'s Bushwack Guide",
         "heroName": "Bushwack",
         "heroIdentifier": "Hero_Bushwack",
@@ -1401,7 +1401,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -1411,7 +1411,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 18,
+        "guideID": 18,
         "name": "WhatYouGot\\'s Calamity Guide",
         "heroName": "Calamity",
         "heroIdentifier": "Hero_Calamity",
@@ -1484,7 +1484,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -1494,7 +1494,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 19,
+        "guideID": 19,
         "name": "WhatYouGot\\'s Qi Guide",
         "heroName": "Qi",
         "heroIdentifier": "Hero_Chi",
@@ -1567,7 +1567,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -1577,7 +1577,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 20,
+        "guideID": 20,
         "name": "WhatYouGot\\'s The Chipper Guide",
         "heroName": "The Chipper",
         "heroIdentifier": "Hero_Chipper",
@@ -1650,7 +1650,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -1660,7 +1660,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 21,
+        "guideID": 21,
         "name": "WhatYouGot\\'s Chronos Guide",
         "heroName": "Chronos",
         "heroIdentifier": "Hero_Chronos",
@@ -1733,7 +1733,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -1743,7 +1743,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 22,
+        "guideID": 22,
         "name": "WhatYouGot\\'s Circe Guide",
         "heroName": "Circe",
         "heroIdentifier": "Hero_Circe",
@@ -1816,7 +1816,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -1826,7 +1826,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 23,
+        "guideID": 23,
         "name": "WhatYouGot\\'s Corrupted Disciple Guide",
         "heroName": "Corrupted Disciple",
         "heroIdentifier": "Hero_CorruptedDisciple",
@@ -1899,7 +1899,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -1909,7 +1909,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 24,
+        "guideID": 24,
         "name": "WhatYouGot\\'s Cthulhuphant Guide",
         "heroName": "Cthulhuphant",
         "heroIdentifier": "Hero_Cthulhuphant",
@@ -1982,7 +1982,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -1992,7 +1992,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 25,
+        "guideID": 25,
         "name": "WhatYouGot\\'s Dampeer Guide",
         "heroName": "Dampeer",
         "heroIdentifier": "Hero_Dampeer",
@@ -2065,7 +2065,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -2075,7 +2075,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 26,
+        "guideID": 26,
         "name": "WhatYouGot\\'s Deadlift Guide",
         "heroName": "Deadlift",
         "heroIdentifier": "Hero_Deadlift",
@@ -2148,7 +2148,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -2158,7 +2158,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 27,
+        "guideID": 27,
         "name": "WhatYouGot\\'s Deadwood Guide",
         "heroName": "Deadwood",
         "heroIdentifier": "Hero_Deadwood",
@@ -2231,7 +2231,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -2241,7 +2241,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 28,
+        "guideID": 28,
         "name": "WhatYouGot\\'s Defiler Guide",
         "heroName": "Defiler",
         "heroIdentifier": "Hero_Defiler",
@@ -2314,7 +2314,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -2324,7 +2324,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 29,
+        "guideID": 29,
         "name": "WhatYouGot\\'s Devourer Guide",
         "heroName": "Devourer",
         "heroIdentifier": "Hero_Devourer",
@@ -2397,7 +2397,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -2407,7 +2407,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 30,
+        "guideID": 30,
         "name": "WhatYouGot\\'s Plague Rider Guide",
         "heroName": "Plague Rider",
         "heroIdentifier": "Hero_DiseasedRider",
@@ -2480,7 +2480,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -2490,7 +2490,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 31,
+        "guideID": 31,
         "name": "WhatYouGot\\'s Doctor Repulsor Guide",
         "heroName": "Doctor Repulsor",
         "heroIdentifier": "Hero_DoctorRepulsor",
@@ -2563,7 +2563,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -2573,7 +2573,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 32,
+        "guideID": 32,
         "name": "WhatYouGot\\'s Lord Salforis Guide",
         "heroName": "Lord Salforis",
         "heroIdentifier": "Hero_Dreadknight",
@@ -2646,7 +2646,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -2656,7 +2656,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 33,
+        "guideID": 33,
         "name": "WhatYouGot\\'s Drunken Master Guide",
         "heroName": "Drunken Master",
         "heroIdentifier": "Hero_DrunkenMaster",
@@ -2729,7 +2729,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -2739,7 +2739,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 34,
+        "guideID": 34,
         "name": "WhatYouGot\\'s Blacksmith Guide",
         "heroName": "Blacksmith",
         "heroIdentifier": "Hero_DwarfMagi",
@@ -2812,7 +2812,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -2822,7 +2822,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 35,
+        "guideID": 35,
         "name": "WhatYouGot\\'s Slither Guide",
         "heroName": "Slither",
         "heroIdentifier": "Hero_Ebulus",
@@ -2895,7 +2895,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -2905,7 +2905,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 36,
+        "guideID": 36,
         "name": "WhatYouGot\\'s Electrician Guide",
         "heroName": "Electrician",
         "heroIdentifier": "Hero_Electrician",
@@ -2978,7 +2978,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -2988,7 +2988,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 37,
+        "guideID": 37,
         "name": "WhatYouGot\\'s Ellonia Guide",
         "heroName": "Ellonia",
         "heroIdentifier": "Hero_Ellonia",
@@ -3061,7 +3061,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -3071,7 +3071,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 38,
+        "guideID": 38,
         "name": "WhatYouGot\\'s Emerald Warden Guide",
         "heroName": "Emerald Warden",
         "heroIdentifier": "Hero_EmeraldWarden",
@@ -3144,7 +3144,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -3154,7 +3154,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 39,
+        "guideID": 39,
         "name": "WhatYouGot\\'s Empath Guide",
         "heroName": "Empath",
         "heroIdentifier": "Hero_Empath",
@@ -3227,7 +3227,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -3237,7 +3237,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 40,
+        "guideID": 40,
         "name": "WhatYouGot\\'s Engineer Guide",
         "heroName": "Engineer",
         "heroIdentifier": "Hero_Engineer",
@@ -3310,7 +3310,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -3320,7 +3320,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 41,
+        "guideID": 41,
         "name": "WhatYouGot\\'s Fayde Guide",
         "heroName": "Fayde",
         "heroIdentifier": "Hero_Fade",
@@ -3393,7 +3393,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -3403,7 +3403,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 42,
+        "guideID": 42,
         "name": "WhatYouGot\\'s Nymphora Guide",
         "heroName": "Nymphora",
         "heroIdentifier": "Hero_Fairy",
@@ -3476,7 +3476,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -3486,7 +3486,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 43,
+        "guideID": 43,
         "name": "WhatYouGot\\'s Draconis Guide",
         "heroName": "Draconis",
         "heroIdentifier": "Hero_FlameDragon",
@@ -3559,7 +3559,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -3569,7 +3569,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 44,
+        "guideID": 44,
         "name": "WhatYouGot\\'s Flint Beastwood Guide",
         "heroName": "Flint Beastwood",
         "heroIdentifier": "Hero_FlintBeastwood",
@@ -3642,7 +3642,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -3652,7 +3652,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 45,
+        "guideID": 45,
         "name": "WhatYouGot\\'s Flux Guide",
         "heroName": "Flux",
         "heroIdentifier": "Hero_Flux",
@@ -3725,7 +3725,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -3735,7 +3735,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 46,
+        "guideID": 46,
         "name": "WhatYouGot\\'s Forsaken Archer Guide",
         "heroName": "Forsaken Archer",
         "heroIdentifier": "Hero_ForsakenArcher",
@@ -3808,7 +3808,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -3818,7 +3818,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 47,
+        "guideID": 47,
         "name": "WhatYouGot\\'s Glacius Guide",
         "heroName": "Glacius",
         "heroIdentifier": "Hero_Frosty",
@@ -3891,7 +3891,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -3901,7 +3901,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 48,
+        "guideID": 48,
         "name": "WhatYouGot\\'s Gauntlet Guide",
         "heroName": "Gauntlet",
         "heroIdentifier": "Hero_Gauntlet",
@@ -3974,7 +3974,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -3984,7 +3984,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 49,
+        "guideID": 49,
         "name": "WhatYouGot\\'s Gemini Guide",
         "heroName": "Gemini",
         "heroIdentifier": "Hero_Gemini",
@@ -4057,7 +4057,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -4067,7 +4067,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 50,
+        "guideID": 50,
         "name": "WhatYouGot\\'s Geomancer Guide",
         "heroName": "Geomancer",
         "heroIdentifier": "Hero_Geomancer",
@@ -4140,7 +4140,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -4150,7 +4150,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 51,
+        "guideID": 51,
         "name": "WhatYouGot\\'s The Gladiator Guide",
         "heroName": "The Gladiator",
         "heroIdentifier": "Hero_Gladiator",
@@ -4223,7 +4223,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -4233,7 +4233,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 52,
+        "guideID": 52,
         "name": "WhatYouGot\\'s Goldenveil Guide",
         "heroName": "Goldenveil",
         "heroIdentifier": "Hero_Goldenveil",
@@ -4306,7 +4306,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -4316,7 +4316,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 53,
+        "guideID": 53,
         "name": "WhatYouGot\\'s Grinex Guide",
         "heroName": "Grinex",
         "heroIdentifier": "Hero_Grinex",
@@ -4389,7 +4389,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -4399,7 +4399,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 54,
+        "guideID": 54,
         "name": "WhatYouGot\\'s Gunblade Guide",
         "heroName": "Gunblade",
         "heroIdentifier": "Hero_Gunblade",
@@ -4472,7 +4472,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -4482,7 +4482,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 55,
+        "guideID": 55,
         "name": "WhatYouGot\\'s Hammerstorm Guide",
         "heroName": "Hammerstorm",
         "heroIdentifier": "Hero_Hammerstorm",
@@ -4555,7 +4555,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -4565,7 +4565,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 56,
+        "guideID": 56,
         "name": "WhatYouGot\\'s Night Hound Guide",
         "heroName": "Night Hound",
         "heroIdentifier": "Hero_Hantumon",
@@ -4638,7 +4638,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -4648,7 +4648,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 57,
+        "guideID": 57,
         "name": "WhatYouGot\\'s Soul Reaper Guide",
         "heroName": "Soul Reaper",
         "heroIdentifier": "Hero_HellDemon",
@@ -4721,7 +4721,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -4731,7 +4731,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 58,
+        "guideID": 58,
         "name": "WhatYouGot\\'s Hellbringer Guide",
         "heroName": "Hellbringer",
         "heroIdentifier": "Hero_Hellbringer",
@@ -4804,7 +4804,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -4814,7 +4814,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 59,
+        "guideID": 59,
         "name": "WhatYouGot\\'s Swiftblade Guide",
         "heroName": "Swiftblade",
         "heroIdentifier": "Hero_Hiro",
@@ -4887,7 +4887,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -4897,7 +4897,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 60,
+        "guideID": 60,
         "name": "WhatYouGot\\'s Blood Hunter Guide",
         "heroName": "Blood Hunter",
         "heroIdentifier": "Hero_Hunter",
@@ -4970,7 +4970,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -4980,7 +4980,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 61,
+        "guideID": 61,
         "name": "WhatYouGot\\'s Myrmidon Guide",
         "heroName": "Myrmidon",
         "heroIdentifier": "Hero_Hydromancer",
@@ -5053,7 +5053,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -5063,7 +5063,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 62,
+        "guideID": 62,
         "name": "WhatYouGot\\'s Ichor Guide",
         "heroName": "Ichor",
         "heroIdentifier": "Hero_Ichor",
@@ -5136,7 +5136,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -5146,7 +5146,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 63,
+        "guideID": 63,
         "name": "WhatYouGot\\'s Magebane Guide",
         "heroName": "Magebane",
         "heroIdentifier": "Hero_Javaras",
@@ -5219,7 +5219,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -5229,7 +5229,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 64,
+        "guideID": 64,
         "name": "WhatYouGot\\'s Jeraziah Guide",
         "heroName": "Jeraziah",
         "heroIdentifier": "Hero_Jereziah",
@@ -5302,7 +5302,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -5312,7 +5312,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 65,
+        "guideID": 65,
         "name": "WhatYouGot\\'s Kane Guide",
         "heroName": "Kane",
         "heroIdentifier": "Hero_Kane",
@@ -5385,7 +5385,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -5395,7 +5395,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 66,
+        "guideID": 66,
         "name": "WhatYouGot\\'s Kinesis Guide",
         "heroName": "Kinesis",
         "heroIdentifier": "Hero_Kenisis",
@@ -5468,7 +5468,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -5478,7 +5478,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 67,
+        "guideID": 67,
         "name": "WhatYouGot\\'s King Klout Guide",
         "heroName": "King Klout",
         "heroIdentifier": "Hero_KingKlout",
@@ -5551,7 +5551,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -5561,7 +5561,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 68,
+        "guideID": 68,
         "name": "WhatYouGot\\'s Klanx Guide",
         "heroName": "Klanx",
         "heroIdentifier": "Hero_Klanx",
@@ -5634,7 +5634,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -5644,7 +5644,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 69,
+        "guideID": 69,
         "name": "WhatYouGot\\'s Kraken Guide",
         "heroName": "Kraken",
         "heroIdentifier": "Hero_Kraken",
@@ -5717,7 +5717,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -5727,7 +5727,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 70,
+        "guideID": 70,
         "name": "WhatYouGot\\'s Moon Queen Guide",
         "heroName": "Moon Queen",
         "heroIdentifier": "Hero_Krixi",
@@ -5800,7 +5800,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -5810,7 +5810,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 71,
+        "guideID": 71,
         "name": "WhatYouGot\\'s Thunderbringer Guide",
         "heroName": "Thunderbringer",
         "heroIdentifier": "Hero_Kunas",
@@ -5883,7 +5883,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -5893,7 +5893,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 72,
+        "guideID": 72,
         "name": "WhatYouGot\\'s Legionnaire Guide",
         "heroName": "Legionnaire",
         "heroIdentifier": "Hero_Legionnaire",
@@ -5966,7 +5966,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -5976,7 +5976,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 73,
+        "guideID": 73,
         "name": "WhatYouGot\\'s Lodestone Guide",
         "heroName": "Lodestone",
         "heroIdentifier": "Hero_Lodestone",
@@ -6049,7 +6049,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -6059,7 +6059,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 74,
+        "guideID": 74,
         "name": "WhatYouGot\\'s Magmus Guide",
         "heroName": "Magmus",
         "heroIdentifier": "Hero_Magmar",
@@ -6132,7 +6132,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -6142,7 +6142,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 75,
+        "guideID": 75,
         "name": "WhatYouGot\\'s Maliken Guide",
         "heroName": "Maliken",
         "heroIdentifier": "Hero_Maliken",
@@ -6215,7 +6215,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -6225,7 +6225,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 76,
+        "guideID": 76,
         "name": "WhatYouGot\\'s Martyr Guide",
         "heroName": "Martyr",
         "heroIdentifier": "Hero_Martyr",
@@ -6298,7 +6298,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -6308,7 +6308,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 77,
+        "guideID": 77,
         "name": "WhatYouGot\\'s Master Of Arms Guide",
         "heroName": "Master Of Arms",
         "heroIdentifier": "Hero_MasterOfArms",
@@ -6381,7 +6381,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -6391,7 +6391,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 78,
+        "guideID": 78,
         "name": "WhatYouGot\\'s Midas Guide",
         "heroName": "Midas",
         "heroIdentifier": "Hero_Midas",
@@ -6464,7 +6464,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -6474,7 +6474,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 79,
+        "guideID": 79,
         "name": "WhatYouGot\\'s Xemplar Guide",
         "heroName": "Xemplar",
         "heroIdentifier": "Hero_Mimix",
@@ -6547,7 +6547,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -6557,7 +6557,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 80,
+        "guideID": 80,
         "name": "WhatYouGot\\'s Moira Guide",
         "heroName": "Moira",
         "heroIdentifier": "Hero_Moira",
@@ -6630,7 +6630,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -6640,7 +6640,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 81,
+        "guideID": 81,
         "name": "WhatYouGot\\'s Monarch Guide",
         "heroName": "Monarch",
         "heroIdentifier": "Hero_Monarch",
@@ -6713,7 +6713,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -6723,7 +6723,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 82,
+        "guideID": 82,
         "name": "WhatYouGot\\'s Monkey King Guide",
         "heroName": "Monkey King",
         "heroIdentifier": "Hero_MonkeyKing",
@@ -6796,7 +6796,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -6806,7 +6806,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 83,
+        "guideID": 83,
         "name": "WhatYouGot\\'s Moraxus Guide",
         "heroName": "Moraxus",
         "heroIdentifier": "Hero_Moraxus",
@@ -6879,7 +6879,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -6889,7 +6889,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 84,
+        "guideID": 84,
         "name": "WhatYouGot\\'s Pharaoh Guide",
         "heroName": "Pharaoh",
         "heroIdentifier": "Hero_Mumra",
@@ -6962,7 +6962,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -6972,7 +6972,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 85,
+        "guideID": 85,
         "name": "WhatYouGot\\'s Nitro Guide",
         "heroName": "Nitro",
         "heroIdentifier": "Hero_Nitro",
@@ -7045,7 +7045,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -7055,7 +7055,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 86,
+        "guideID": 86,
         "name": "WhatYouGot\\'s Nomad Guide",
         "heroName": "Nomad",
         "heroIdentifier": "Hero_Nomad",
@@ -7128,7 +7128,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -7138,7 +7138,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 87,
+        "guideID": 87,
         "name": "WhatYouGot\\'s Oogie Guide",
         "heroName": "Oogie",
         "heroIdentifier": "Hero_Oogie",
@@ -7211,7 +7211,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -7221,7 +7221,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 88,
+        "guideID": 88,
         "name": "WhatYouGot\\'s Ophelia Guide",
         "heroName": "Ophelia",
         "heroIdentifier": "Hero_Ophelia",
@@ -7294,7 +7294,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -7304,7 +7304,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 89,
+        "guideID": 89,
         "name": "WhatYouGot\\'s Pandamonium Guide",
         "heroName": "Pandamonium",
         "heroIdentifier": "Hero_Panda",
@@ -7377,7 +7377,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -7387,7 +7387,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 90,
+        "guideID": 90,
         "name": "WhatYouGot\\'s Parallax Guide",
         "heroName": "Parallax",
         "heroIdentifier": "Hero_Parallax",
@@ -7460,7 +7460,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -7470,7 +7470,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 91,
+        "guideID": 91,
         "name": "WhatYouGot\\'s Parasite Guide",
         "heroName": "Parasite",
         "heroIdentifier": "Hero_Parasite",
@@ -7543,7 +7543,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -7553,7 +7553,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 92,
+        "guideID": 92,
         "name": "WhatYouGot\\'s Pearl Guide",
         "heroName": "Pearl",
         "heroIdentifier": "Hero_Pearl",
@@ -7626,7 +7626,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -7636,7 +7636,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 93,
+        "guideID": 93,
         "name": "WhatYouGot\\'s Pestilence Guide",
         "heroName": "Pestilence",
         "heroIdentifier": "Hero_Pestilence",
@@ -7709,7 +7709,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -7719,7 +7719,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 94,
+        "guideID": 94,
         "name": "WhatYouGot\\'s Bramble Guide",
         "heroName": "Bramble",
         "heroIdentifier": "Hero_Plant",
@@ -7792,7 +7792,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -7802,7 +7802,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 95,
+        "guideID": 95,
         "name": "WhatYouGot\\'s Pollywog Priest Guide",
         "heroName": "Pollywog Priest",
         "heroIdentifier": "Hero_PollywogPriest",
@@ -7875,7 +7875,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -7885,7 +7885,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 96,
+        "guideID": 96,
         "name": "WhatYouGot\\'s Predator Guide",
         "heroName": "Predator",
         "heroIdentifier": "Hero_Predator",
@@ -7958,7 +7958,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -7968,7 +7968,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 97,
+        "guideID": 97,
         "name": "WhatYouGot\\'s Prisoner 945 Guide",
         "heroName": "Prisoner 945",
         "heroIdentifier": "Hero_Prisoner",
@@ -8041,7 +8041,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -8051,7 +8051,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 98,
+        "guideID": 98,
         "name": "WhatYouGot\\'s Prophet Guide",
         "heroName": "Prophet",
         "heroIdentifier": "Hero_Prophet",
@@ -8124,7 +8124,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -8134,7 +8134,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 99,
+        "guideID": 99,
         "name": "WhatYouGot\\'s Puppet Master Guide",
         "heroName": "Puppet Master",
         "heroIdentifier": "Hero_PuppetMaster",
@@ -8207,7 +8207,7 @@
             "Ability_PuppetMaster1",
             "Ability_PuppetMaster1"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -8217,7 +8217,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 100,
+        "guideID": 100,
         "name": "WhatYouGot\\'s Pyromancer Guide",
         "heroName": "Pyromancer",
         "heroIdentifier": "Hero_Pyromancer",
@@ -8290,7 +8290,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -8300,7 +8300,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 101,
+        "guideID": 101,
         "name": "WhatYouGot\\'s Amun-Ra Guide",
         "heroName": "Amun-Ra",
         "heroIdentifier": "Hero_Ra",
@@ -8373,7 +8373,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -8383,7 +8383,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 102,
+        "guideID": 102,
         "name": "WhatYouGot\\'s Rally Guide",
         "heroName": "Rally",
         "heroIdentifier": "Hero_Rally",
@@ -8456,7 +8456,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -8466,7 +8466,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 103,
+        "guideID": 103,
         "name": "WhatYouGot\\'s Rampage Guide",
         "heroName": "Rampage",
         "heroIdentifier": "Hero_Rampage",
@@ -8539,7 +8539,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -8549,7 +8549,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 104,
+        "guideID": 104,
         "name": "WhatYouGot\\'s Ravenor Guide",
         "heroName": "Ravenor",
         "heroIdentifier": "Hero_Ravenor",
@@ -8622,7 +8622,7 @@
             "Ability_Ravenor1",
             "Ability_Ravenor1"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -8632,7 +8632,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 105,
+        "guideID": 105,
         "name": "WhatYouGot\\'s Revenant Guide",
         "heroName": "Revenant",
         "heroIdentifier": "Hero_Revenant",
@@ -8705,7 +8705,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -8715,7 +8715,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 106,
+        "guideID": 106,
         "name": "WhatYouGot\\'s Rhapsody Guide",
         "heroName": "Rhapsody",
         "heroIdentifier": "Hero_Rhapsody",
@@ -8788,7 +8788,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -8798,7 +8798,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 107,
+        "guideID": 107,
         "name": "WhatYouGot\\'s Riftwalker Guide",
         "heroName": "Riftwalker",
         "heroIdentifier": "Hero_Riftmage",
@@ -8871,7 +8871,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -8881,7 +8881,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 108,
+        "guideID": 108,
         "name": "WhatYouGot\\'s Riptide Guide",
         "heroName": "Riptide",
         "heroIdentifier": "Hero_Riptide",
@@ -8954,7 +8954,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -8964,7 +8964,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 109,
+        "guideID": 109,
         "name": "WhatYouGot\\'s Pebbles Guide",
         "heroName": "Pebbles",
         "heroIdentifier": "Hero_Rocky",
@@ -9037,7 +9037,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -9047,7 +9047,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 110,
+        "guideID": 110,
         "name": "WhatYouGot\\'s Salomon Guide",
         "heroName": "Salomon",
         "heroIdentifier": "Hero_Salomon",
@@ -9120,7 +9120,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -9130,7 +9130,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 111,
+        "guideID": 111,
         "name": "WhatYouGot\\'s Sand Wraith Guide",
         "heroName": "Sand Wraith",
         "heroIdentifier": "Hero_SandWraith",
@@ -9203,7 +9203,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -9213,7 +9213,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 112,
+        "guideID": 112,
         "name": "WhatYouGot\\'s Sapphire Guide",
         "heroName": "Sapphire",
         "heroIdentifier": "Hero_Sapphire",
@@ -9286,7 +9286,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -9296,7 +9296,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 113,
+        "guideID": 113,
         "name": "WhatYouGot\\'s The Madman Guide",
         "heroName": "The Madman",
         "heroIdentifier": "Hero_Scar",
@@ -9369,7 +9369,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -9379,7 +9379,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 114,
+        "guideID": 114,
         "name": "WhatYouGot\\'s Scout Guide",
         "heroName": "Scout",
         "heroIdentifier": "Hero_Scout",
@@ -9452,7 +9452,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -9462,7 +9462,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 115,
+        "guideID": 115,
         "name": "WhatYouGot\\'s Shadowblade Guide",
         "heroName": "Shadowblade",
         "heroIdentifier": "Hero_ShadowBlade",
@@ -9535,7 +9535,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -9545,7 +9545,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 116,
+        "guideID": 116,
         "name": "WhatYouGot\\'s Demented Shaman Guide",
         "heroName": "Demented Shaman",
         "heroIdentifier": "Hero_Shaman",
@@ -9618,7 +9618,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -9628,7 +9628,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 117,
+        "guideID": 117,
         "name": "WhatYouGot\\'s Shellshock Guide",
         "heroName": "Shellshock",
         "heroIdentifier": "Hero_Shellshock",
@@ -9701,7 +9701,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -9711,7 +9711,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 118,
+        "guideID": 118,
         "name": "WhatYouGot\\'s Silhouette Guide",
         "heroName": "Silhouette",
         "heroIdentifier": "Hero_Silhouette",
@@ -9784,7 +9784,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -9794,7 +9794,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 119,
+        "guideID": 119,
         "name": "WhatYouGot\\'s Sir Benzington Guide",
         "heroName": "Sir Benzington",
         "heroIdentifier": "Hero_SirBenzington",
@@ -9867,7 +9867,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -9877,7 +9877,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 120,
+        "guideID": 120,
         "name": "WhatYouGot\\'s Skrap Guide",
         "heroName": "Skrap",
         "heroIdentifier": "Hero_Skrap",
@@ -9950,7 +9950,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -9960,7 +9960,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 121,
+        "guideID": 121,
         "name": "WhatYouGot\\'s Solstice Guide",
         "heroName": "Solstice",
         "heroIdentifier": "Hero_Solstice",
@@ -10033,7 +10033,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -10043,7 +10043,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 122,
+        "guideID": 122,
         "name": "WhatYouGot\\'s Soulstealer Guide",
         "heroName": "Soulstealer",
         "heroIdentifier": "Hero_Soulstealer",
@@ -10116,7 +10116,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -10126,7 +10126,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 123,
+        "guideID": 123,
         "name": "WhatYouGot\\'s Succubus Guide",
         "heroName": "Succubus",
         "heroIdentifier": "Hero_Succubis",
@@ -10199,7 +10199,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -10209,7 +10209,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 124,
+        "guideID": 124,
         "name": "WhatYouGot\\'s Gravekeeper Guide",
         "heroName": "Gravekeeper",
         "heroIdentifier": "Hero_Taint",
@@ -10282,7 +10282,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -10292,7 +10292,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 125,
+        "guideID": 125,
         "name": "WhatYouGot\\'s Tarot Guide",
         "heroName": "Tarot",
         "heroIdentifier": "Hero_Tarot",
@@ -10365,7 +10365,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -10375,7 +10375,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 126,
+        "guideID": 126,
         "name": "WhatYouGot\\'s Tempest Guide",
         "heroName": "Tempest",
         "heroIdentifier": "Hero_Tempest",
@@ -10448,7 +10448,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -10458,7 +10458,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 127,
+        "guideID": 127,
         "name": "WhatYouGot\\'s Keeper Of The Forest Guide",
         "heroName": "Keeper Of The Forest",
         "heroIdentifier": "Hero_Treant",
@@ -10531,7 +10531,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -10541,7 +10541,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 128,
+        "guideID": 128,
         "name": "WhatYouGot\\'s Tremble Guide",
         "heroName": "Tremble",
         "heroIdentifier": "Hero_Tremble",
@@ -10614,7 +10614,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -10624,7 +10624,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 129,
+        "guideID": 129,
         "name": "WhatYouGot\\'s Tundra Guide",
         "heroName": "Tundra",
         "heroIdentifier": "Hero_Tundra",
@@ -10697,7 +10697,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -10707,7 +10707,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 130,
+        "guideID": 130,
         "name": "WhatYouGot\\'s Valkyrie Guide",
         "heroName": "Valkyrie",
         "heroIdentifier": "Hero_Valkyrie",
@@ -10780,7 +10780,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -10790,7 +10790,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 131,
+        "guideID": 131,
         "name": "WhatYouGot\\'s The Dark Lady Guide",
         "heroName": "The Dark Lady",
         "heroIdentifier": "Hero_Vanya",
@@ -10863,7 +10863,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -10873,7 +10873,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 132,
+        "guideID": 132,
         "name": "WhatYouGot\\'s Vindicator Guide",
         "heroName": "Vindicator",
         "heroIdentifier": "Hero_Vindicator",
@@ -10946,7 +10946,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -10956,7 +10956,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 133,
+        "guideID": 133,
         "name": "WhatYouGot\\'s Voodoo Jester Guide",
         "heroName": "Voodoo Jester",
         "heroIdentifier": "Hero_Voodoo",
@@ -11029,7 +11029,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -11039,7 +11039,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 134,
+        "guideID": 134,
         "name": "WhatYouGot\\'s Warchief Guide",
         "heroName": "Warchief",
         "heroIdentifier": "Hero_Warchief",
@@ -11112,7 +11112,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -11122,7 +11122,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 135,
+        "guideID": 135,
         "name": "WhatYouGot\\'s Witch Slayer Guide",
         "heroName": "Witch Slayer",
         "heroIdentifier": "Hero_WitchSlayer",
@@ -11195,7 +11195,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -11205,7 +11205,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 136,
+        "guideID": 136,
         "name": "WhatYouGot\\'s War Beast Guide",
         "heroName": "War Beast",
         "heroIdentifier": "Hero_WolfMan",
@@ -11278,7 +11278,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -11288,7 +11288,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 137,
+        "guideID": 137,
         "name": "WhatYouGot\\'s Torturer Guide",
         "heroName": "Torturer",
         "heroIdentifier": "Hero_Xalynx",
@@ -11361,7 +11361,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -11371,7 +11371,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 138,
+        "guideID": 138,
         "name": "WhatYouGot\\'s Wildsoul Guide",
         "heroName": "Wildsoul",
         "heroIdentifier": "Hero_Yogi",
@@ -11444,7 +11444,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -11454,7 +11454,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 139,
+        "guideID": 139,
         "name": "WhatYouGot\\'s Zephyr Guide",
         "heroName": "Zephyr",
         "heroIdentifier": "Hero_Zephyr",
@@ -11527,7 +11527,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -11537,7 +11537,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 140,
+        "guideID": 140,
         "name": "Accursed Guide",
         "heroName": "Accursed",
         "heroIdentifier": "Hero_Accursed",
@@ -11610,7 +11610,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -11620,7 +11620,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 141,
+        "guideID": 141,
         "name": "Adrenaline Guide",
         "heroName": "Adrenaline",
         "heroIdentifier": "Hero_Adrenaline",
@@ -11693,7 +11693,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -11703,7 +11703,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 142,
+        "guideID": 142,
         "name": "Aluna Guide",
         "heroName": "Aluna",
         "heroIdentifier": "Hero_Aluna",
@@ -11776,7 +11776,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -11786,7 +11786,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 143,
+        "guideID": 143,
         "name": "Andromeda Guide",
         "heroName": "Andromeda",
         "heroIdentifier": "Hero_Andromeda",
@@ -11859,7 +11859,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -11869,7 +11869,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 144,
+        "guideID": 144,
         "name": "Apex Guide",
         "heroName": "Apex",
         "heroIdentifier": "Hero_Apex",
@@ -11942,7 +11942,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -11952,7 +11952,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 145,
+        "guideID": 145,
         "name": "Arachna Guide",
         "heroName": "Arachna",
         "heroIdentifier": "Hero_Arachna",
@@ -12025,7 +12025,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -12035,7 +12035,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 146,
+        "guideID": 146,
         "name": "Armadon Guide",
         "heroName": "Armadon",
         "heroIdentifier": "Hero_Armadon",
@@ -12108,7 +12108,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -12118,7 +12118,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 147,
+        "guideID": 147,
         "name": "Artesia Guide",
         "heroName": "Artesia",
         "heroIdentifier": "Hero_Artesia",
@@ -12191,7 +12191,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -12201,7 +12201,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 148,
+        "guideID": 148,
         "name": "Artillery Guide",
         "heroName": "Artillery",
         "heroIdentifier": "Hero_Artillery",
@@ -12274,7 +12274,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -12284,7 +12284,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 149,
+        "guideID": 149,
         "name": "Wretched Hag Guide",
         "heroName": "Wretched Hag",
         "heroIdentifier": "Hero_BabaYaga",
@@ -12357,7 +12357,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -12367,7 +12367,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 150,
+        "guideID": 150,
         "name": "Behemoth Guide",
         "heroName": "Behemoth",
         "heroIdentifier": "Hero_Behemoth",
@@ -12440,7 +12440,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -12450,7 +12450,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 151,
+        "guideID": 151,
         "name": "Balphagore Guide",
         "heroName": "Balphagore",
         "heroIdentifier": "Hero_Bephelgor",
@@ -12523,7 +12523,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -12533,7 +12533,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 152,
+        "guideID": 152,
         "name": "Berzerker Guide",
         "heroName": "Berzerker",
         "heroIdentifier": "Hero_Berzerker",
@@ -12606,7 +12606,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -12616,7 +12616,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 153,
+        "guideID": 153,
         "name": "Blitz Guide",
         "heroName": "Blitz",
         "heroIdentifier": "Hero_Blitz",
@@ -12689,7 +12689,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -12699,7 +12699,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 154,
+        "guideID": 154,
         "name": "Bombardier Guide",
         "heroName": "Bombardier",
         "heroIdentifier": "Hero_Bombardier",
@@ -12772,7 +12772,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -12782,7 +12782,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 155,
+        "guideID": 155,
         "name": "Bubbles Guide",
         "heroName": "Bubbles",
         "heroIdentifier": "Hero_Bubbles",
@@ -12855,7 +12855,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -12865,7 +12865,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 156,
+        "guideID": 156,
         "name": "Bushwack Guide",
         "heroName": "Bushwack",
         "heroIdentifier": "Hero_Bushwack",
@@ -12938,7 +12938,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -12948,7 +12948,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 157,
+        "guideID": 157,
         "name": "Calamity Guide",
         "heroName": "Calamity",
         "heroIdentifier": "Hero_Calamity",
@@ -13021,7 +13021,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -13031,7 +13031,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 158,
+        "guideID": 158,
         "name": "Qi Guide",
         "heroName": "Qi",
         "heroIdentifier": "Hero_Chi",
@@ -13104,7 +13104,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -13114,7 +13114,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 159,
+        "guideID": 159,
         "name": "The Chipper Guide",
         "heroName": "The Chipper",
         "heroIdentifier": "Hero_Chipper",
@@ -13187,7 +13187,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -13197,7 +13197,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 160,
+        "guideID": 160,
         "name": "Chronos Guide",
         "heroName": "Chronos",
         "heroIdentifier": "Hero_Chronos",
@@ -13270,7 +13270,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -13280,7 +13280,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 161,
+        "guideID": 161,
         "name": "Circe Guide",
         "heroName": "Circe",
         "heroIdentifier": "Hero_Circe",
@@ -13353,7 +13353,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -13363,7 +13363,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 162,
+        "guideID": 162,
         "name": "Corrupted Disciple Guide",
         "heroName": "Corrupted Disciple",
         "heroIdentifier": "Hero_CorruptedDisciple",
@@ -13436,7 +13436,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -13446,7 +13446,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 163,
+        "guideID": 163,
         "name": "Cthulhuphant Guide",
         "heroName": "Cthulhuphant",
         "heroIdentifier": "Hero_Cthulhuphant",
@@ -13519,7 +13519,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -13529,7 +13529,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 164,
+        "guideID": 164,
         "name": "Dampeer Guide",
         "heroName": "Dampeer",
         "heroIdentifier": "Hero_Dampeer",
@@ -13602,7 +13602,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -13612,7 +13612,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 165,
+        "guideID": 165,
         "name": "Deadlift Guide",
         "heroName": "Deadlift",
         "heroIdentifier": "Hero_Deadlift",
@@ -13685,7 +13685,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -13695,7 +13695,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 166,
+        "guideID": 166,
         "name": "Deadwood Guide",
         "heroName": "Deadwood",
         "heroIdentifier": "Hero_Deadwood",
@@ -13768,7 +13768,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -13778,7 +13778,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 167,
+        "guideID": 167,
         "name": "Defiler Guide",
         "heroName": "Defiler",
         "heroIdentifier": "Hero_Defiler",
@@ -13851,7 +13851,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -13861,7 +13861,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 168,
+        "guideID": 168,
         "name": "Devourer Guide",
         "heroName": "Devourer",
         "heroIdentifier": "Hero_Devourer",
@@ -13934,7 +13934,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -13944,7 +13944,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 169,
+        "guideID": 169,
         "name": "Plague Rider Guide",
         "heroName": "Plague Rider",
         "heroIdentifier": "Hero_DiseasedRider",
@@ -14017,7 +14017,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -14027,7 +14027,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 170,
+        "guideID": 170,
         "name": "Doctor Repulsor Guide",
         "heroName": "Doctor Repulsor",
         "heroIdentifier": "Hero_DoctorRepulsor",
@@ -14100,7 +14100,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -14110,7 +14110,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 171,
+        "guideID": 171,
         "name": "Lord Salforis Guide",
         "heroName": "Lord Salforis",
         "heroIdentifier": "Hero_Dreadknight",
@@ -14183,7 +14183,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -14193,7 +14193,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 172,
+        "guideID": 172,
         "name": "Drunken Master Guide",
         "heroName": "Drunken Master",
         "heroIdentifier": "Hero_DrunkenMaster",
@@ -14266,7 +14266,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -14276,7 +14276,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 173,
+        "guideID": 173,
         "name": "Blacksmith Guide",
         "heroName": "Blacksmith",
         "heroIdentifier": "Hero_DwarfMagi",
@@ -14349,7 +14349,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -14359,7 +14359,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 174,
+        "guideID": 174,
         "name": "Slither Guide",
         "heroName": "Slither",
         "heroIdentifier": "Hero_Ebulus",
@@ -14432,7 +14432,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -14442,7 +14442,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 175,
+        "guideID": 175,
         "name": "Electrician Guide",
         "heroName": "Electrician",
         "heroIdentifier": "Hero_Electrician",
@@ -14515,7 +14515,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -14525,7 +14525,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 176,
+        "guideID": 176,
         "name": "Ellonia Guide",
         "heroName": "Ellonia",
         "heroIdentifier": "Hero_Ellonia",
@@ -14598,7 +14598,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -14608,7 +14608,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 177,
+        "guideID": 177,
         "name": "Emerald Warden Guide",
         "heroName": "Emerald Warden",
         "heroIdentifier": "Hero_EmeraldWarden",
@@ -14681,7 +14681,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -14691,7 +14691,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 178,
+        "guideID": 178,
         "name": "Empath Guide",
         "heroName": "Empath",
         "heroIdentifier": "Hero_Empath",
@@ -14764,7 +14764,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -14774,7 +14774,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 179,
+        "guideID": 179,
         "name": "Engineer Guide",
         "heroName": "Engineer",
         "heroIdentifier": "Hero_Engineer",
@@ -14847,7 +14847,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -14857,7 +14857,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 180,
+        "guideID": 180,
         "name": "Fayde Guide",
         "heroName": "Fayde",
         "heroIdentifier": "Hero_Fade",
@@ -14930,7 +14930,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -14940,7 +14940,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 181,
+        "guideID": 181,
         "name": "Nymphora Guide",
         "heroName": "Nymphora",
         "heroIdentifier": "Hero_Fairy",
@@ -15013,7 +15013,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -15023,7 +15023,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 182,
+        "guideID": 182,
         "name": "Draconis Guide",
         "heroName": "Draconis",
         "heroIdentifier": "Hero_FlameDragon",
@@ -15096,7 +15096,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -15106,7 +15106,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 183,
+        "guideID": 183,
         "name": "Flint Beastwood Guide",
         "heroName": "Flint Beastwood",
         "heroIdentifier": "Hero_FlintBeastwood",
@@ -15179,7 +15179,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -15189,7 +15189,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 184,
+        "guideID": 184,
         "name": "Flux Guide",
         "heroName": "Flux",
         "heroIdentifier": "Hero_Flux",
@@ -15262,7 +15262,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -15272,7 +15272,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 185,
+        "guideID": 185,
         "name": "Forsaken Archer Guide",
         "heroName": "Forsaken Archer",
         "heroIdentifier": "Hero_ForsakenArcher",
@@ -15345,7 +15345,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -15355,7 +15355,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 186,
+        "guideID": 186,
         "name": "Glacius Guide",
         "heroName": "Glacius",
         "heroIdentifier": "Hero_Frosty",
@@ -15428,7 +15428,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -15438,7 +15438,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 187,
+        "guideID": 187,
         "name": "Gauntlet Guide",
         "heroName": "Gauntlet",
         "heroIdentifier": "Hero_Gauntlet",
@@ -15511,7 +15511,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -15521,7 +15521,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 188,
+        "guideID": 188,
         "name": "Gemini Guide",
         "heroName": "Gemini",
         "heroIdentifier": "Hero_Gemini",
@@ -15594,7 +15594,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -15604,7 +15604,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 189,
+        "guideID": 189,
         "name": "Geomancer Guide",
         "heroName": "Geomancer",
         "heroIdentifier": "Hero_Geomancer",
@@ -15677,7 +15677,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -15687,7 +15687,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 190,
+        "guideID": 190,
         "name": "The Gladiator Guide",
         "heroName": "The Gladiator",
         "heroIdentifier": "Hero_Gladiator",
@@ -15760,7 +15760,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -15770,7 +15770,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 191,
+        "guideID": 191,
         "name": "Goldenveil Guide",
         "heroName": "Goldenveil",
         "heroIdentifier": "Hero_Goldenveil",
@@ -15843,7 +15843,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -15853,7 +15853,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 192,
+        "guideID": 192,
         "name": "Grinex Guide",
         "heroName": "Grinex",
         "heroIdentifier": "Hero_Grinex",
@@ -15926,7 +15926,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -15936,7 +15936,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 193,
+        "guideID": 193,
         "name": "Gunblade Guide",
         "heroName": "Gunblade",
         "heroIdentifier": "Hero_Gunblade",
@@ -16009,7 +16009,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -16019,7 +16019,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 194,
+        "guideID": 194,
         "name": "Hammerstorm Guide",
         "heroName": "Hammerstorm",
         "heroIdentifier": "Hero_Hammerstorm",
@@ -16092,7 +16092,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -16102,7 +16102,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 195,
+        "guideID": 195,
         "name": "Night Hound Guide",
         "heroName": "Night Hound",
         "heroIdentifier": "Hero_Hantumon",
@@ -16175,7 +16175,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -16185,7 +16185,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 196,
+        "guideID": 196,
         "name": "Soul Reaper Guide",
         "heroName": "Soul Reaper",
         "heroIdentifier": "Hero_HellDemon",
@@ -16258,7 +16258,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -16268,7 +16268,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 197,
+        "guideID": 197,
         "name": "Hellbringer Guide",
         "heroName": "Hellbringer",
         "heroIdentifier": "Hero_Hellbringer",
@@ -16341,7 +16341,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -16351,7 +16351,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 198,
+        "guideID": 198,
         "name": "Swiftblade Guide",
         "heroName": "Swiftblade",
         "heroIdentifier": "Hero_Hiro",
@@ -16424,7 +16424,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -16434,7 +16434,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 199,
+        "guideID": 199,
         "name": "Blood Hunter Guide",
         "heroName": "Blood Hunter",
         "heroIdentifier": "Hero_Hunter",
@@ -16507,7 +16507,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -16517,7 +16517,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 200,
+        "guideID": 200,
         "name": "Myrmidon Guide",
         "heroName": "Myrmidon",
         "heroIdentifier": "Hero_Hydromancer",
@@ -16590,7 +16590,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -16600,7 +16600,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 201,
+        "guideID": 201,
         "name": "Ichor Guide",
         "heroName": "Ichor",
         "heroIdentifier": "Hero_Ichor",
@@ -16673,7 +16673,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -16683,7 +16683,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 202,
+        "guideID": 202,
         "name": "Magebane Guide",
         "heroName": "Magebane",
         "heroIdentifier": "Hero_Javaras",
@@ -16756,7 +16756,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -16766,7 +16766,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 203,
+        "guideID": 203,
         "name": "Jeraziah Guide",
         "heroName": "Jeraziah",
         "heroIdentifier": "Hero_Jereziah",
@@ -16839,7 +16839,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -16849,7 +16849,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 204,
+        "guideID": 204,
         "name": "Kane Guide",
         "heroName": "Kane",
         "heroIdentifier": "Hero_Kane",
@@ -16922,7 +16922,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -16932,7 +16932,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 205,
+        "guideID": 205,
         "name": "Kinesis Guide",
         "heroName": "Kinesis",
         "heroIdentifier": "Hero_Kenisis",
@@ -17005,7 +17005,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -17015,7 +17015,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 206,
+        "guideID": 206,
         "name": "King Klout Guide",
         "heroName": "King Klout",
         "heroIdentifier": "Hero_KingKlout",
@@ -17088,7 +17088,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -17098,7 +17098,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 207,
+        "guideID": 207,
         "name": "Klanx Guide",
         "heroName": "Klanx",
         "heroIdentifier": "Hero_Klanx",
@@ -17171,7 +17171,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -17181,7 +17181,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 208,
+        "guideID": 208,
         "name": "Kraken Guide",
         "heroName": "Kraken",
         "heroIdentifier": "Hero_Kraken",
@@ -17254,7 +17254,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -17264,7 +17264,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 209,
+        "guideID": 209,
         "name": "Moon Queen Guide",
         "heroName": "Moon Queen",
         "heroIdentifier": "Hero_Krixi",
@@ -17337,7 +17337,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -17347,7 +17347,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 210,
+        "guideID": 210,
         "name": "Thunderbringer Guide",
         "heroName": "Thunderbringer",
         "heroIdentifier": "Hero_Kunas",
@@ -17420,7 +17420,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -17430,7 +17430,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 211,
+        "guideID": 211,
         "name": "Legionnaire Guide",
         "heroName": "Legionnaire",
         "heroIdentifier": "Hero_Legionnaire",
@@ -17503,7 +17503,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -17513,7 +17513,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 212,
+        "guideID": 212,
         "name": "Lodestone Guide",
         "heroName": "Lodestone",
         "heroIdentifier": "Hero_Lodestone",
@@ -17586,7 +17586,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -17596,7 +17596,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 213,
+        "guideID": 213,
         "name": "Magmus Guide",
         "heroName": "Magmus",
         "heroIdentifier": "Hero_Magmar",
@@ -17669,7 +17669,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -17679,7 +17679,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 214,
+        "guideID": 214,
         "name": "Maliken Guide",
         "heroName": "Maliken",
         "heroIdentifier": "Hero_Maliken",
@@ -17752,7 +17752,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -17762,7 +17762,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 215,
+        "guideID": 215,
         "name": "Martyr Guide",
         "heroName": "Martyr",
         "heroIdentifier": "Hero_Martyr",
@@ -17835,7 +17835,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -17845,7 +17845,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 216,
+        "guideID": 216,
         "name": "Master Of Arms Guide",
         "heroName": "Master Of Arms",
         "heroIdentifier": "Hero_MasterOfArms",
@@ -17918,7 +17918,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -17928,7 +17928,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 217,
+        "guideID": 217,
         "name": "Midas Guide",
         "heroName": "Midas",
         "heroIdentifier": "Hero_Midas",
@@ -18001,7 +18001,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -18011,7 +18011,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 218,
+        "guideID": 218,
         "name": "Xemplar Guide",
         "heroName": "Xemplar",
         "heroIdentifier": "Hero_Mimix",
@@ -18084,7 +18084,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -18094,7 +18094,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 219,
+        "guideID": 219,
         "name": "Moira Guide",
         "heroName": "Moira",
         "heroIdentifier": "Hero_Moira",
@@ -18167,7 +18167,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -18177,7 +18177,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 220,
+        "guideID": 220,
         "name": "Monarch Guide",
         "heroName": "Monarch",
         "heroIdentifier": "Hero_Monarch",
@@ -18250,7 +18250,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -18260,7 +18260,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 221,
+        "guideID": 221,
         "name": "Monkey King Guide",
         "heroName": "Monkey King",
         "heroIdentifier": "Hero_MonkeyKing",
@@ -18333,7 +18333,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -18343,7 +18343,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 222,
+        "guideID": 222,
         "name": "Moraxus Guide",
         "heroName": "Moraxus",
         "heroIdentifier": "Hero_Moraxus",
@@ -18416,7 +18416,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -18426,7 +18426,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 223,
+        "guideID": 223,
         "name": "Pharaoh Guide",
         "heroName": "Pharaoh",
         "heroIdentifier": "Hero_Mumra",
@@ -18499,7 +18499,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -18509,7 +18509,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 224,
+        "guideID": 224,
         "name": "Nitro Guide",
         "heroName": "Nitro",
         "heroIdentifier": "Hero_Nitro",
@@ -18582,7 +18582,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -18592,7 +18592,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 225,
+        "guideID": 225,
         "name": "Nomad Guide",
         "heroName": "Nomad",
         "heroIdentifier": "Hero_Nomad",
@@ -18665,7 +18665,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -18675,7 +18675,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 226,
+        "guideID": 226,
         "name": "Oogie Guide",
         "heroName": "Oogie",
         "heroIdentifier": "Hero_Oogie",
@@ -18748,7 +18748,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -18758,7 +18758,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 227,
+        "guideID": 227,
         "name": "Ophelia Guide",
         "heroName": "Ophelia",
         "heroIdentifier": "Hero_Ophelia",
@@ -18831,7 +18831,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -18841,7 +18841,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 228,
+        "guideID": 228,
         "name": "Pandamonium Guide",
         "heroName": "Pandamonium",
         "heroIdentifier": "Hero_Panda",
@@ -18914,7 +18914,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -18924,7 +18924,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 229,
+        "guideID": 229,
         "name": "Parallax Guide",
         "heroName": "Parallax",
         "heroIdentifier": "Hero_Parallax",
@@ -18997,7 +18997,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -19007,7 +19007,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 230,
+        "guideID": 230,
         "name": "Parasite Guide",
         "heroName": "Parasite",
         "heroIdentifier": "Hero_Parasite",
@@ -19080,7 +19080,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -19090,7 +19090,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 231,
+        "guideID": 231,
         "name": "Pearl Guide",
         "heroName": "Pearl",
         "heroIdentifier": "Hero_Pearl",
@@ -19163,7 +19163,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -19173,7 +19173,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 232,
+        "guideID": 232,
         "name": "Pestilence Guide",
         "heroName": "Pestilence",
         "heroIdentifier": "Hero_Pestilence",
@@ -19246,7 +19246,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -19256,7 +19256,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 233,
+        "guideID": 233,
         "name": "Bramble Guide",
         "heroName": "Bramble",
         "heroIdentifier": "Hero_Plant",
@@ -19329,7 +19329,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -19339,7 +19339,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 234,
+        "guideID": 234,
         "name": "Pollywog Priest Guide",
         "heroName": "Pollywog Priest",
         "heroIdentifier": "Hero_PollywogPriest",
@@ -19412,7 +19412,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -19422,7 +19422,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 235,
+        "guideID": 235,
         "name": "Predator Guide",
         "heroName": "Predator",
         "heroIdentifier": "Hero_Predator",
@@ -19495,7 +19495,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -19505,7 +19505,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 236,
+        "guideID": 236,
         "name": "Prisoner 945 Guide",
         "heroName": "Prisoner 945",
         "heroIdentifier": "Hero_Prisoner",
@@ -19578,7 +19578,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -19588,7 +19588,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 237,
+        "guideID": 237,
         "name": "Prophet Guide",
         "heroName": "Prophet",
         "heroIdentifier": "Hero_Prophet",
@@ -19661,7 +19661,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -19671,7 +19671,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 238,
+        "guideID": 238,
         "name": "Puppet Master Guide",
         "heroName": "Puppet Master",
         "heroIdentifier": "Hero_PuppetMaster",
@@ -19744,7 +19744,7 @@
             "Ability_PuppetMaster1",
             "Ability_PuppetMaster1"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -19754,7 +19754,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 239,
+        "guideID": 239,
         "name": "Pyromancer Guide",
         "heroName": "Pyromancer",
         "heroIdentifier": "Hero_Pyromancer",
@@ -19827,7 +19827,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -19837,7 +19837,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 240,
+        "guideID": 240,
         "name": "Amun-Ra Guide",
         "heroName": "Amun-Ra",
         "heroIdentifier": "Hero_Ra",
@@ -19910,7 +19910,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -19920,7 +19920,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 241,
+        "guideID": 241,
         "name": "Rally Guide",
         "heroName": "Rally",
         "heroIdentifier": "Hero_Rally",
@@ -19993,7 +19993,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -20003,7 +20003,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 242,
+        "guideID": 242,
         "name": "Rampage Guide",
         "heroName": "Rampage",
         "heroIdentifier": "Hero_Rampage",
@@ -20076,7 +20076,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -20086,7 +20086,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 243,
+        "guideID": 243,
         "name": "Ravenor Guide",
         "heroName": "Ravenor",
         "heroIdentifier": "Hero_Ravenor",
@@ -20159,7 +20159,7 @@
             "Ability_Ravenor1",
             "Ability_Ravenor1"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -20169,7 +20169,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 244,
+        "guideID": 244,
         "name": "Revenant Guide",
         "heroName": "Revenant",
         "heroIdentifier": "Hero_Revenant",
@@ -20242,7 +20242,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -20252,7 +20252,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 245,
+        "guideID": 245,
         "name": "Rhapsody Guide",
         "heroName": "Rhapsody",
         "heroIdentifier": "Hero_Rhapsody",
@@ -20325,7 +20325,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -20335,7 +20335,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 246,
+        "guideID": 246,
         "name": "Riftwalker Guide",
         "heroName": "Riftwalker",
         "heroIdentifier": "Hero_Riftmage",
@@ -20408,7 +20408,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -20418,7 +20418,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 247,
+        "guideID": 247,
         "name": "Riptide Guide",
         "heroName": "Riptide",
         "heroIdentifier": "Hero_Riptide",
@@ -20491,7 +20491,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -20501,7 +20501,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 248,
+        "guideID": 248,
         "name": "Pebbles Guide",
         "heroName": "Pebbles",
         "heroIdentifier": "Hero_Rocky",
@@ -20574,7 +20574,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -20584,7 +20584,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 249,
+        "guideID": 249,
         "name": "Salomon Guide",
         "heroName": "Salomon",
         "heroIdentifier": "Hero_Salomon",
@@ -20657,7 +20657,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -20667,7 +20667,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 250,
+        "guideID": 250,
         "name": "Sand Wraith Guide",
         "heroName": "Sand Wraith",
         "heroIdentifier": "Hero_SandWraith",
@@ -20740,7 +20740,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -20750,7 +20750,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 251,
+        "guideID": 251,
         "name": "Sapphire Guide",
         "heroName": "Sapphire",
         "heroIdentifier": "Hero_Sapphire",
@@ -20823,7 +20823,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -20833,7 +20833,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 252,
+        "guideID": 252,
         "name": "The Madman Guide",
         "heroName": "The Madman",
         "heroIdentifier": "Hero_Scar",
@@ -20906,7 +20906,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -20916,7 +20916,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 253,
+        "guideID": 253,
         "name": "Scout Guide",
         "heroName": "Scout",
         "heroIdentifier": "Hero_Scout",
@@ -20989,7 +20989,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -20999,7 +20999,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 254,
+        "guideID": 254,
         "name": "Shadowblade Guide",
         "heroName": "Shadowblade",
         "heroIdentifier": "Hero_ShadowBlade",
@@ -21072,7 +21072,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -21082,7 +21082,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 255,
+        "guideID": 255,
         "name": "Demented Shaman Guide",
         "heroName": "Demented Shaman",
         "heroIdentifier": "Hero_Shaman",
@@ -21155,7 +21155,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -21165,7 +21165,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 256,
+        "guideID": 256,
         "name": "Shellshock Guide",
         "heroName": "Shellshock",
         "heroIdentifier": "Hero_Shellshock",
@@ -21238,7 +21238,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -21248,7 +21248,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 257,
+        "guideID": 257,
         "name": "Silhouette Guide",
         "heroName": "Silhouette",
         "heroIdentifier": "Hero_Silhouette",
@@ -21321,7 +21321,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -21331,7 +21331,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 258,
+        "guideID": 258,
         "name": "Sir Benzington Guide",
         "heroName": "Sir Benzington",
         "heroIdentifier": "Hero_SirBenzington",
@@ -21404,7 +21404,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -21414,7 +21414,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 259,
+        "guideID": 259,
         "name": "Skrap Guide",
         "heroName": "Skrap",
         "heroIdentifier": "Hero_Skrap",
@@ -21487,7 +21487,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -21497,7 +21497,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 260,
+        "guideID": 260,
         "name": "Solstice Guide",
         "heroName": "Solstice",
         "heroIdentifier": "Hero_Solstice",
@@ -21570,7 +21570,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -21580,7 +21580,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 261,
+        "guideID": 261,
         "name": "Soulstealer Guide",
         "heroName": "Soulstealer",
         "heroIdentifier": "Hero_Soulstealer",
@@ -21653,7 +21653,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -21663,7 +21663,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 262,
+        "guideID": 262,
         "name": "Succubus Guide",
         "heroName": "Succubus",
         "heroIdentifier": "Hero_Succubis",
@@ -21736,7 +21736,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -21746,7 +21746,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 263,
+        "guideID": 263,
         "name": "Gravekeeper Guide",
         "heroName": "Gravekeeper",
         "heroIdentifier": "Hero_Taint",
@@ -21819,7 +21819,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -21829,7 +21829,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 264,
+        "guideID": 264,
         "name": "Tarot Guide",
         "heroName": "Tarot",
         "heroIdentifier": "Hero_Tarot",
@@ -21902,7 +21902,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -21912,7 +21912,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 265,
+        "guideID": 265,
         "name": "Tempest Guide",
         "heroName": "Tempest",
         "heroIdentifier": "Hero_Tempest",
@@ -21985,7 +21985,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -21995,7 +21995,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 266,
+        "guideID": 266,
         "name": "Keeper Of The Forest Guide",
         "heroName": "Keeper Of The Forest",
         "heroIdentifier": "Hero_Treant",
@@ -22068,7 +22068,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -22078,7 +22078,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 267,
+        "guideID": 267,
         "name": "Tremble Guide",
         "heroName": "Tremble",
         "heroIdentifier": "Hero_Tremble",
@@ -22151,7 +22151,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -22161,7 +22161,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 268,
+        "guideID": 268,
         "name": "Tundra Guide",
         "heroName": "Tundra",
         "heroIdentifier": "Hero_Tundra",
@@ -22234,7 +22234,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -22244,7 +22244,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 269,
+        "guideID": 269,
         "name": "Valkyrie Guide",
         "heroName": "Valkyrie",
         "heroIdentifier": "Hero_Valkyrie",
@@ -22317,7 +22317,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -22327,7 +22327,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 270,
+        "guideID": 270,
         "name": "The Dark Lady Guide",
         "heroName": "The Dark Lady",
         "heroIdentifier": "Hero_Vanya",
@@ -22400,7 +22400,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -22410,7 +22410,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 271,
+        "guideID": 271,
         "name": "Vindicator Guide",
         "heroName": "Vindicator",
         "heroIdentifier": "Hero_Vindicator",
@@ -22483,7 +22483,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -22493,7 +22493,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 272,
+        "guideID": 272,
         "name": "Voodoo Jester Guide",
         "heroName": "Voodoo Jester",
         "heroIdentifier": "Hero_Voodoo",
@@ -22566,7 +22566,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -22576,7 +22576,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 273,
+        "guideID": 273,
         "name": "Warchief Guide",
         "heroName": "Warchief",
         "heroIdentifier": "Hero_Warchief",
@@ -22649,7 +22649,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -22659,7 +22659,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 274,
+        "guideID": 274,
         "name": "Witch Slayer Guide",
         "heroName": "Witch Slayer",
         "heroIdentifier": "Hero_WitchSlayer",
@@ -22732,7 +22732,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -22742,7 +22742,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 275,
+        "guideID": 275,
         "name": "War Beast Guide",
         "heroName": "War Beast",
         "heroIdentifier": "Hero_WolfMan",
@@ -22815,7 +22815,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -22825,7 +22825,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 276,
+        "guideID": 276,
         "name": "Torturer Guide",
         "heroName": "Torturer",
         "heroIdentifier": "Hero_Xalynx",
@@ -22898,7 +22898,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -22908,7 +22908,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 277,
+        "guideID": 277,
         "name": "Wildsoul Guide",
         "heroName": "Wildsoul",
         "heroIdentifier": "Hero_Yogi",
@@ -22981,7 +22981,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,
@@ -22991,7 +22991,7 @@
         "timestampLastUpdated": null
     },
     {
-        "guideId": 278,
+        "guideID": 278,
         "name": "Zephyr Guide",
         "heroName": "Zephyr",
         "heroIdentifier": "Hero_Zephyr",
@@ -23064,7 +23064,7 @@
             "Ability_AttributeBoost",
             "Ability_AttributeBoost"
         ],
-        "authorId": 1,
+        "authorID": 1,
         "rating": 1,
         "upVotes": 1,
         "downVotes": 0,

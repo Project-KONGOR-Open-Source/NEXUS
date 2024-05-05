@@ -15,5 +15,6 @@ global using Microsoft.Extensions.Diagnostics.HealthChecks;
 global using System.ComponentModel.DataAnnotations;
 global using System.ComponentModel.DataAnnotations.Schema;
 global using System.Diagnostics;
+global using System.Reflection;
 global using System.Security.Claims;
 global using System.Text.Json.Serialization;
