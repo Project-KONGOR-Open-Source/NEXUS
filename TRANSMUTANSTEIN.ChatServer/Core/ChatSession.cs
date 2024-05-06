@@ -21,12 +21,15 @@ public class ChatSession(TCPServer server, IServiceProvider serviceProvider) : T
     {
         ushort command = BitConverter.ToUInt16([buffer[0], buffer[1]]);
 
-        string message = Encoding.UTF8.GetString(buffer, (int)offset, (int)size);
-
         Type? commandType = GetCommandType(command);
 
         if (commandType is null)
-            Logger.LogError($@"Missing Command Type For Command: ""{command:X4}""");
+        {
+            string output = new StringBuilder($@"Missing Command Type For Command: ""{command:X4}""")
+                .Append(Environment.NewLine).Append($"Message UTF8 Text: {Encoding.UTF8.GetString(buffer, (int)offset, (int)size - (int)offset)}").ToString();
+
+            Logger.LogError(output);
+        }
 
         else
         {
@@ -49,8 +52,6 @@ public class ChatSession(TCPServer server, IServiceProvider serviceProvider) : T
 
             if (type is not null)
                 CommandToTypeMap.Add(command, type);
-
-            else Logger.LogError($@"Unsupported Command: ""{command:X4}""");
 
             return type;
         }
