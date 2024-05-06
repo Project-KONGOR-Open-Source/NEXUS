@@ -2,7 +2,7 @@
 
 public partial class ClientRequesterController
 {
-    private async Task<IActionResult> HandleServerList()
+    private async Task<IActionResult> GetServerList()
     {
         string? cookie = Request.Form["cookie"].ToString();
 

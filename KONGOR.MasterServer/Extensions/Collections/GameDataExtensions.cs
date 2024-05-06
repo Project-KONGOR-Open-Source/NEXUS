@@ -1,4 +1,4 @@
-﻿namespace MERRICK.Database.Extensions;
+﻿namespace KONGOR.MasterServer.Extensions.Collections;
 
 // TODO: Move To Shared Project To Remove Duplication
 

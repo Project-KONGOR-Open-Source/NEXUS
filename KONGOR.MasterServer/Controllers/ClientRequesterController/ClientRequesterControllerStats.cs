@@ -2,7 +2,7 @@
 
 public partial class ClientRequesterController
 {
-    private async Task<IActionResult> HandleSimpleStats()
+    private async Task<IActionResult> GetSimpleStats()
     {
         string? accountName = Request.Form["nickname"];
 
