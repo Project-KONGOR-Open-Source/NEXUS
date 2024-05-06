@@ -20,8 +20,6 @@ public sealed class MerrickContext : DbContext
         base.OnModelCreating(builder);
 
         ConfigureRoles(builder.Entity<Role>());
-        ConfigureUsers(builder.Entity<User>());
-        ConfigureClans(builder.Entity<Clan>());
         ConfigureAccounts(builder.Entity<Account>());
     }
 
@@ -43,86 +41,8 @@ public sealed class MerrickContext : DbContext
         );
     }
 
-    private static void ConfigureUsers(EntityTypeBuilder<User> builder)
-    {
-        builder.HasData(new
-        {
-            ID = 1,
-            EmailAddress = "project.kongor@proton.me",
-            RoleID = 1,
-            SRPPasswordSalt = "861c37ec6d049d92cc1c67d195b414f26b572a56358272af3e9c06fcd9bfa053",
-            SRPPasswordHash = "fe6f16b0ecb80f6b2bc95d68420fd13afef0c895172a81819870660208ac221a",
-            PBKDF2PasswordHash = "AQAAAAIAAYagAAAAEMUkpLAr01NjkKRPaXCyTa17nlOdPKJucn5QYur+wQBTDKCpgsAcREenK+pGJPBCRw==",
-            GoldCoins = 5_555_555,
-            SilverCoins = 555_555_555,
-            PlinkoTickets = 5_555_555,
-            TotalLevel = 666,
-            TotalExperience = 222_11_666,
-            OwnedStoreItems = new List<string> { "ai.custom_icon:1", "av.Flamboyant", "c.cat_courier", "cc.frostburnlogo", "cr.Punk Creep", "cs.frostburnlogo", "m.Super-Taunt", "sc.paragon_circle_upgrade", "t.Dumpster_Taunt", "te.Punk TP", "w.8bit_ward" },
-
-            // TODO: Add All Upgrades (Including Missing Ones From PK Version Control); Maybe Scrape The Resources Again
-
-            // The Following Properties Are Not Required, But Entity Framework Thinks They Are
-
-            TimestampCreated = DateTime.UtcNow, TimestampLastActive = DateTime.UtcNow
-        });
-    }
-
-    private static void ConfigureClans(EntityTypeBuilder<Clan> builder)
-    {
-        builder.HasData(new Clan()
-        {
-            ID = 1,
-            Name = "KONGOR",
-            Tag = "K"
-        });
-
-        builder.HasData(new Clan()
-        {
-            ID = 2,
-            Name = "Project KONGOR Developers",
-            Tag = ".NET"
-        });
-
-        builder.HasData(new Clan()
-        {
-            ID = 3,
-            Name = "Project KONGOR",
-            Tag = "PK"
-        });
-
-        builder.HasData(new Clan()
-        {
-            ID = 4,
-            Name = "Project KONGOR Open-Source",
-            Tag = "PKOS"
-        });
-    }
-
     private static void ConfigureAccounts(EntityTypeBuilder<Account> builder)
     {
-        string[] accounts = [ "KONGOR", /* [K] */ "ONGOR", "GOPO", "Xen0byte", "HOST" ];
-
-        builder.HasData(accounts.Select(account => new
-        {
-            ID = Array.IndexOf(accounts, account) + 1 /* 1-Based Indexing */,
-            Name = account,
-            UserID = 1,
-            Type = account is "HOST" ? AccountType.ServerHost : AccountType.Staff,
-            IsMain = account is "KONGOR",
-            ClanID = account is "KONGOR" ? 2 /* Project KONGOR Developers */ : 1 /* KONGOR */ ,
-            ClanTier = account is "KONGOR" or /* [K] */ "ONGOR" ? ClanTier.Leader : ClanTier.Officer,
-            TimestampJoinedClan = DateTime.UtcNow,
-            AscensionLevel = 666,
-            AutoConnectChatChannels = new List<string> { "KONGOR", "TERMINAL" },
-            SelectedStoreItems = new List<string> { "ai.custom_icon:1", "av.Flamboyant", "c.cat_courier", "cc.frostburnlogo", "cr.Punk Creep", "cs.frostburnlogo", "m.Super-Taunt", "sc.paragon_circle_upgrade", "t.Dumpster_Taunt", "te.Punk TP", "w.8bit_ward" },
-
-            // The Following Properties Are Not Required, But Entity Framework Thinks They Are
-
-            IPAddressCollection = new List<string>(), MACAddressCollection = new List<string>(), SystemInformationCollection = new List<string>(), SystemInformationHashCollection = new List<string>(),
-            TimestampCreated = DateTime.UtcNow, TimestampLastActive = DateTime.UtcNow
-        }));
-
         builder.OwnsMany(account => account.BannedPeers, ownedNavigationBuilder => { ownedNavigationBuilder.ToJson(); });
         builder.OwnsMany(account => account.FriendedPeers, ownedNavigationBuilder => { ownedNavigationBuilder.ToJson(); });
         builder.OwnsMany(account => account.IgnoredPeers, ownedNavigationBuilder => { ownedNavigationBuilder.ToJson(); });

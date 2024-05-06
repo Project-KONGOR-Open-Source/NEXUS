@@ -169,40 +169,12 @@ namespace MERRICK.Database.Migrations
                 });
 
             migrationBuilder.InsertData(
-                table: "Clans",
-                columns: new[] { "ID", "Name", "Tag", "TimestampCreated" },
-                values: new object[,]
-                {
-                    { 1, "KONGOR", "K", new DateTime(2024, 5, 5, 22, 57, 32, 87, DateTimeKind.Utc).AddTicks(7454) },
-                    { 2, "Project KONGOR Developers", ".NET", new DateTime(2024, 5, 5, 22, 57, 32, 87, DateTimeKind.Utc).AddTicks(7458) },
-                    { 3, "Project KONGOR", "PK", new DateTime(2024, 5, 5, 22, 57, 32, 87, DateTimeKind.Utc).AddTicks(7461) },
-                    { 4, "Project KONGOR Open-Source", "PKOS", new DateTime(2024, 5, 5, 22, 57, 32, 87, DateTimeKind.Utc).AddTicks(7462) }
-                });
-
-            migrationBuilder.InsertData(
                 table: "Roles",
                 columns: new[] { "ID", "Name" },
                 values: new object[,]
                 {
                     { 1, "ADMINISTRATOR" },
                     { 2, "USER" }
-                });
-
-            migrationBuilder.InsertData(
-                table: "Users",
-                columns: new[] { "ID", "EmailAddress", "GoldCoins", "OwnedStoreItems", "PBKDF2PasswordHash", "PlinkoTickets", "RoleID", "SRPPasswordHash", "SRPPasswordSalt", "SilverCoins", "TimestampCreated", "TimestampLastActive", "TotalExperience", "TotalLevel" },
-                values: new object[] { 1, "project.kongor@proton.me", 5555555, "[\"ai.custom_icon:1\",\"av.Flamboyant\",\"c.cat_courier\",\"cc.frostburnlogo\",\"cr.Punk Creep\",\"cs.frostburnlogo\",\"m.Super-Taunt\",\"sc.paragon_circle_upgrade\",\"t.Dumpster_Taunt\",\"te.Punk TP\",\"w.8bit_ward\"]", "AQAAAAIAAYagAAAAEMUkpLAr01NjkKRPaXCyTa17nlOdPKJucn5QYur+wQBTDKCpgsAcREenK+pGJPBCRw==", 5555555, 1, "fe6f16b0ecb80f6b2bc95d68420fd13afef0c895172a81819870660208ac221a", "861c37ec6d049d92cc1c67d195b414f26b572a56358272af3e9c06fcd9bfa053", 555555555, new DateTime(2024, 5, 5, 22, 57, 32, 87, DateTimeKind.Utc).AddTicks(7412), new DateTime(2024, 5, 5, 22, 57, 32, 87, DateTimeKind.Utc).AddTicks(7417), 22211666, 666 });
-
-            migrationBuilder.InsertData(
-                table: "Accounts",
-                columns: new[] { "ID", "AscensionLevel", "AutoConnectChatChannels", "ClanID", "ClanTier", "IPAddressCollection", "IsMain", "MACAddressCollection", "Name", "SelectedStoreItems", "SystemInformationCollection", "SystemInformationHashCollection", "TimestampCreated", "TimestampJoinedClan", "TimestampLastActive", "Type", "UserID" },
-                values: new object[,]
-                {
-                    { 1, 666, "[\"KONGOR\",\"TERMINAL\"]", 2, 3, "[]", true, "[]", "KONGOR", "[\"ai.custom_icon:1\",\"av.Flamboyant\",\"c.cat_courier\",\"cc.frostburnlogo\",\"cr.Punk Creep\",\"cs.frostburnlogo\",\"m.Super-Taunt\",\"sc.paragon_circle_upgrade\",\"t.Dumpster_Taunt\",\"te.Punk TP\",\"w.8bit_ward\"]", "[]", "[]", new DateTime(2024, 5, 5, 22, 57, 32, 87, DateTimeKind.Utc).AddTicks(7500), new DateTime(2024, 5, 5, 22, 57, 32, 87, DateTimeKind.Utc).AddTicks(7496), new DateTime(2024, 5, 5, 22, 57, 32, 87, DateTimeKind.Utc).AddTicks(7500), 5, 1 },
-                    { 2, 666, "[\"KONGOR\",\"TERMINAL\"]", 1, 3, "[]", false, "[]", "ONGOR", "[\"ai.custom_icon:1\",\"av.Flamboyant\",\"c.cat_courier\",\"cc.frostburnlogo\",\"cr.Punk Creep\",\"cs.frostburnlogo\",\"m.Super-Taunt\",\"sc.paragon_circle_upgrade\",\"t.Dumpster_Taunt\",\"te.Punk TP\",\"w.8bit_ward\"]", "[]", "[]", new DateTime(2024, 5, 5, 22, 57, 32, 87, DateTimeKind.Utc).AddTicks(7506), new DateTime(2024, 5, 5, 22, 57, 32, 87, DateTimeKind.Utc).AddTicks(7504), new DateTime(2024, 5, 5, 22, 57, 32, 87, DateTimeKind.Utc).AddTicks(7506), 5, 1 },
-                    { 3, 666, "[\"KONGOR\",\"TERMINAL\"]", 1, 2, "[]", false, "[]", "GOPO", "[\"ai.custom_icon:1\",\"av.Flamboyant\",\"c.cat_courier\",\"cc.frostburnlogo\",\"cr.Punk Creep\",\"cs.frostburnlogo\",\"m.Super-Taunt\",\"sc.paragon_circle_upgrade\",\"t.Dumpster_Taunt\",\"te.Punk TP\",\"w.8bit_ward\"]", "[]", "[]", new DateTime(2024, 5, 5, 22, 57, 32, 87, DateTimeKind.Utc).AddTicks(7509), new DateTime(2024, 5, 5, 22, 57, 32, 87, DateTimeKind.Utc).AddTicks(7508), new DateTime(2024, 5, 5, 22, 57, 32, 87, DateTimeKind.Utc).AddTicks(7510), 5, 1 },
-                    { 4, 666, "[\"KONGOR\",\"TERMINAL\"]", 1, 2, "[]", false, "[]", "Xen0byte", "[\"ai.custom_icon:1\",\"av.Flamboyant\",\"c.cat_courier\",\"cc.frostburnlogo\",\"cr.Punk Creep\",\"cs.frostburnlogo\",\"m.Super-Taunt\",\"sc.paragon_circle_upgrade\",\"t.Dumpster_Taunt\",\"te.Punk TP\",\"w.8bit_ward\"]", "[]", "[]", new DateTime(2024, 5, 5, 22, 57, 32, 87, DateTimeKind.Utc).AddTicks(7512), new DateTime(2024, 5, 5, 22, 57, 32, 87, DateTimeKind.Utc).AddTicks(7511), new DateTime(2024, 5, 5, 22, 57, 32, 87, DateTimeKind.Utc).AddTicks(7512), 5, 1 },
-                    { 5, 666, "[\"KONGOR\",\"TERMINAL\"]", 1, 2, "[]", false, "[]", "HOST", "[\"ai.custom_icon:1\",\"av.Flamboyant\",\"c.cat_courier\",\"cc.frostburnlogo\",\"cr.Punk Creep\",\"cs.frostburnlogo\",\"m.Super-Taunt\",\"sc.paragon_circle_upgrade\",\"t.Dumpster_Taunt\",\"te.Punk TP\",\"w.8bit_ward\"]", "[]", "[]", new DateTime(2024, 5, 5, 22, 57, 32, 87, DateTimeKind.Utc).AddTicks(7515), new DateTime(2024, 5, 5, 22, 57, 32, 87, DateTimeKind.Utc).AddTicks(7514), new DateTime(2024, 5, 5, 22, 57, 32, 87, DateTimeKind.Utc).AddTicks(7515), 2, 1 }
                 });
 
             migrationBuilder.CreateIndex(

@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MERRICK.Database.Migrations
 {
     [DbContext(typeof(MerrickContext))]
-    [Migration("20240505225732_CreateInitialEntities")]
+    [Migration("20240506190956_CreateInitialEntities")]
     partial class CreateInitialEntities
     {
         /// <inheritdoc />
@@ -99,108 +99,6 @@ namespace MERRICK.Database.Migrations
                     b.HasIndex("UserID");
 
                     b.ToTable("Accounts");
-
-                    b.HasData(
-                        new
-                        {
-                            ID = 1,
-                            AscensionLevel = 666,
-                            AutoConnectChatChannels = "[\"KONGOR\",\"TERMINAL\"]",
-                            ClanID = 2,
-                            ClanTier = 3,
-                            IPAddressCollection = "[]",
-                            IsMain = true,
-                            MACAddressCollection = "[]",
-                            Name = "KONGOR",
-                            SelectedStoreItems = "[\"ai.custom_icon:1\",\"av.Flamboyant\",\"c.cat_courier\",\"cc.frostburnlogo\",\"cr.Punk Creep\",\"cs.frostburnlogo\",\"m.Super-Taunt\",\"sc.paragon_circle_upgrade\",\"t.Dumpster_Taunt\",\"te.Punk TP\",\"w.8bit_ward\"]",
-                            SystemInformationCollection = "[]",
-                            SystemInformationHashCollection = "[]",
-                            TimestampCreated = new DateTime(2024, 5, 5, 22, 57, 32, 87, DateTimeKind.Utc).AddTicks(7500),
-                            TimestampJoinedClan = new DateTime(2024, 5, 5, 22, 57, 32, 87, DateTimeKind.Utc).AddTicks(7496),
-                            TimestampLastActive = new DateTime(2024, 5, 5, 22, 57, 32, 87, DateTimeKind.Utc).AddTicks(7500),
-                            Type = 5,
-                            UserID = 1
-                        },
-                        new
-                        {
-                            ID = 2,
-                            AscensionLevel = 666,
-                            AutoConnectChatChannels = "[\"KONGOR\",\"TERMINAL\"]",
-                            ClanID = 1,
-                            ClanTier = 3,
-                            IPAddressCollection = "[]",
-                            IsMain = false,
-                            MACAddressCollection = "[]",
-                            Name = "ONGOR",
-                            SelectedStoreItems = "[\"ai.custom_icon:1\",\"av.Flamboyant\",\"c.cat_courier\",\"cc.frostburnlogo\",\"cr.Punk Creep\",\"cs.frostburnlogo\",\"m.Super-Taunt\",\"sc.paragon_circle_upgrade\",\"t.Dumpster_Taunt\",\"te.Punk TP\",\"w.8bit_ward\"]",
-                            SystemInformationCollection = "[]",
-                            SystemInformationHashCollection = "[]",
-                            TimestampCreated = new DateTime(2024, 5, 5, 22, 57, 32, 87, DateTimeKind.Utc).AddTicks(7506),
-                            TimestampJoinedClan = new DateTime(2024, 5, 5, 22, 57, 32, 87, DateTimeKind.Utc).AddTicks(7504),
-                            TimestampLastActive = new DateTime(2024, 5, 5, 22, 57, 32, 87, DateTimeKind.Utc).AddTicks(7506),
-                            Type = 5,
-                            UserID = 1
-                        },
-                        new
-                        {
-                            ID = 3,
-                            AscensionLevel = 666,
-                            AutoConnectChatChannels = "[\"KONGOR\",\"TERMINAL\"]",
-                            ClanID = 1,
-                            ClanTier = 2,
-                            IPAddressCollection = "[]",
-                            IsMain = false,
-                            MACAddressCollection = "[]",
-                            Name = "GOPO",
-                            SelectedStoreItems = "[\"ai.custom_icon:1\",\"av.Flamboyant\",\"c.cat_courier\",\"cc.frostburnlogo\",\"cr.Punk Creep\",\"cs.frostburnlogo\",\"m.Super-Taunt\",\"sc.paragon_circle_upgrade\",\"t.Dumpster_Taunt\",\"te.Punk TP\",\"w.8bit_ward\"]",
-                            SystemInformationCollection = "[]",
-                            SystemInformationHashCollection = "[]",
-                            TimestampCreated = new DateTime(2024, 5, 5, 22, 57, 32, 87, DateTimeKind.Utc).AddTicks(7509),
-                            TimestampJoinedClan = new DateTime(2024, 5, 5, 22, 57, 32, 87, DateTimeKind.Utc).AddTicks(7508),
-                            TimestampLastActive = new DateTime(2024, 5, 5, 22, 57, 32, 87, DateTimeKind.Utc).AddTicks(7510),
-                            Type = 5,
-                            UserID = 1
-                        },
-                        new
-                        {
-                            ID = 4,
-                            AscensionLevel = 666,
-                            AutoConnectChatChannels = "[\"KONGOR\",\"TERMINAL\"]",
-                            ClanID = 1,
-                            ClanTier = 2,
-                            IPAddressCollection = "[]",
-                            IsMain = false,
-                            MACAddressCollection = "[]",
-                            Name = "Xen0byte",
-                            SelectedStoreItems = "[\"ai.custom_icon:1\",\"av.Flamboyant\",\"c.cat_courier\",\"cc.frostburnlogo\",\"cr.Punk Creep\",\"cs.frostburnlogo\",\"m.Super-Taunt\",\"sc.paragon_circle_upgrade\",\"t.Dumpster_Taunt\",\"te.Punk TP\",\"w.8bit_ward\"]",
-                            SystemInformationCollection = "[]",
-                            SystemInformationHashCollection = "[]",
-                            TimestampCreated = new DateTime(2024, 5, 5, 22, 57, 32, 87, DateTimeKind.Utc).AddTicks(7512),
-                            TimestampJoinedClan = new DateTime(2024, 5, 5, 22, 57, 32, 87, DateTimeKind.Utc).AddTicks(7511),
-                            TimestampLastActive = new DateTime(2024, 5, 5, 22, 57, 32, 87, DateTimeKind.Utc).AddTicks(7512),
-                            Type = 5,
-                            UserID = 1
-                        },
-                        new
-                        {
-                            ID = 5,
-                            AscensionLevel = 666,
-                            AutoConnectChatChannels = "[\"KONGOR\",\"TERMINAL\"]",
-                            ClanID = 1,
-                            ClanTier = 2,
-                            IPAddressCollection = "[]",
-                            IsMain = false,
-                            MACAddressCollection = "[]",
-                            Name = "HOST",
-                            SelectedStoreItems = "[\"ai.custom_icon:1\",\"av.Flamboyant\",\"c.cat_courier\",\"cc.frostburnlogo\",\"cr.Punk Creep\",\"cs.frostburnlogo\",\"m.Super-Taunt\",\"sc.paragon_circle_upgrade\",\"t.Dumpster_Taunt\",\"te.Punk TP\",\"w.8bit_ward\"]",
-                            SystemInformationCollection = "[]",
-                            SystemInformationHashCollection = "[]",
-                            TimestampCreated = new DateTime(2024, 5, 5, 22, 57, 32, 87, DateTimeKind.Utc).AddTicks(7515),
-                            TimestampJoinedClan = new DateTime(2024, 5, 5, 22, 57, 32, 87, DateTimeKind.Utc).AddTicks(7514),
-                            TimestampLastActive = new DateTime(2024, 5, 5, 22, 57, 32, 87, DateTimeKind.Utc).AddTicks(7515),
-                            Type = 2,
-                            UserID = 1
-                        });
                 });
 
             modelBuilder.Entity("MERRICK.Database.Entities.Core.Clan", b =>
@@ -230,36 +128,6 @@ namespace MERRICK.Database.Migrations
                         .IsUnique();
 
                     b.ToTable("Clans");
-
-                    b.HasData(
-                        new
-                        {
-                            ID = 1,
-                            Name = "KONGOR",
-                            Tag = "K",
-                            TimestampCreated = new DateTime(2024, 5, 5, 22, 57, 32, 87, DateTimeKind.Utc).AddTicks(7454)
-                        },
-                        new
-                        {
-                            ID = 2,
-                            Name = "Project KONGOR Developers",
-                            Tag = ".NET",
-                            TimestampCreated = new DateTime(2024, 5, 5, 22, 57, 32, 87, DateTimeKind.Utc).AddTicks(7458)
-                        },
-                        new
-                        {
-                            ID = 3,
-                            Name = "Project KONGOR",
-                            Tag = "PK",
-                            TimestampCreated = new DateTime(2024, 5, 5, 22, 57, 32, 87, DateTimeKind.Utc).AddTicks(7461)
-                        },
-                        new
-                        {
-                            ID = 4,
-                            Name = "Project KONGOR Open-Source",
-                            Tag = "PKOS",
-                            TimestampCreated = new DateTime(2024, 5, 5, 22, 57, 32, 87, DateTimeKind.Utc).AddTicks(7462)
-                        });
                 });
 
             modelBuilder.Entity("MERRICK.Database.Entities.Core.User", b =>
@@ -326,25 +194,6 @@ namespace MERRICK.Database.Migrations
                     b.HasIndex("RoleID");
 
                     b.ToTable("Users");
-
-                    b.HasData(
-                        new
-                        {
-                            ID = 1,
-                            EmailAddress = "project.kongor@proton.me",
-                            GoldCoins = 5555555,
-                            OwnedStoreItems = "[\"ai.custom_icon:1\",\"av.Flamboyant\",\"c.cat_courier\",\"cc.frostburnlogo\",\"cr.Punk Creep\",\"cs.frostburnlogo\",\"m.Super-Taunt\",\"sc.paragon_circle_upgrade\",\"t.Dumpster_Taunt\",\"te.Punk TP\",\"w.8bit_ward\"]",
-                            PBKDF2PasswordHash = "AQAAAAIAAYagAAAAEMUkpLAr01NjkKRPaXCyTa17nlOdPKJucn5QYur+wQBTDKCpgsAcREenK+pGJPBCRw==",
-                            PlinkoTickets = 5555555,
-                            RoleID = 1,
-                            SRPPasswordHash = "fe6f16b0ecb80f6b2bc95d68420fd13afef0c895172a81819870660208ac221a",
-                            SRPPasswordSalt = "861c37ec6d049d92cc1c67d195b414f26b572a56358272af3e9c06fcd9bfa053",
-                            SilverCoins = 555555555,
-                            TimestampCreated = new DateTime(2024, 5, 5, 22, 57, 32, 87, DateTimeKind.Utc).AddTicks(7412),
-                            TimestampLastActive = new DateTime(2024, 5, 5, 22, 57, 32, 87, DateTimeKind.Utc).AddTicks(7417),
-                            TotalExperience = 22211666,
-                            TotalLevel = 666
-                        });
                 });
 
             modelBuilder.Entity("MERRICK.Database.Entities.Game.HeroGuide", b =>
