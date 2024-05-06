@@ -39,6 +39,7 @@ public class DatabaseInitializer(IServiceProvider serviceProvider, ILogger<Datab
         await SeedDataHandlers.SeedUsers(context, cancellationToken, logger);
         await SeedDataHandlers.SeedClans(context, cancellationToken, logger);
         await SeedDataHandlers.SeedAccounts(context, cancellationToken, logger);
+        await SeedDataHandlers.SeedFriendedPeers(context, cancellationToken, logger);
         await SeedDataHandlers.SeedHeroGuides(context, cancellationToken, logger);
     }
 }

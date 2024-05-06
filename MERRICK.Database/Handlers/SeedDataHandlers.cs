@@ -114,6 +114,28 @@ public static class SeedDataHandlers
         await context.SaveChangesAsync(cancellationToken);
     }
 
+    public static async Task SeedFriendedPeers(MerrickContext context, CancellationToken cancellationToken, ILogger logger)
+    {
+        if (await context.Accounts.NoneAsync(cancellationToken) || await context.Clans.NoneAsync(cancellationToken)) return;
+
+        Account systemAccount = await context.Accounts.FirstAsync(cancellationToken);
+        Account hostAccount = await context.Accounts.SingleAsync(account => account.Type == AccountType.ServerHost, cancellationToken: cancellationToken);
+
+        List<Account> subAccounts = await context.Accounts.Include(account => account.User).Include(account => account.Clan)
+            .Where(account => account.IsMain.Equals(false)).ToListAsync(cancellationToken: cancellationToken);
+
+        foreach (Account subAccount in subAccounts.Except([hostAccount]))
+        {
+            subAccount.FriendedPeers = subAccounts.Except([hostAccount, subAccount]).Union([systemAccount]).Select(account => new FriendedPeer
+            {
+                Identifier = account.ID,
+                Name = account.Name,
+                ClanTag = account.Clan?.Tag,
+                FriendGroup = "ALIAS"
+            }).ToList();
+        }
+    }
+
     public static async Task SeedHeroGuides(MerrickContext context, CancellationToken cancellationToken, ILogger logger)
     {
         if (await context.HeroGuides.AnyAsync(cancellationToken) || await context.Accounts.NoneAsync(cancellationToken)) return;

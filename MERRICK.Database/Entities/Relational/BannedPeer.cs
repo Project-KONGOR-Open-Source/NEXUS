@@ -3,15 +3,7 @@
 [Index(nameof(Name), IsUnique = true)]
 public class BannedPeer
 {
-    [JsonInclude, JsonPropertyName("ID")]
-    private int Identifier { get; set; }
-
-    [JsonIgnore, NotMapped]
-    public required int ID
-    {
-        get => Identifier;
-        set => Identifier = value;
-    }
+    public required int Identifier { get; set; }
 
     // Currently Unable To Easily Name The "ID" Property "ID" Due To A Conflict With A JSON Property Name: https://github.com/dotnet/efcore/issues/29380
     // Having A JSON-Mapped Property Called "ID" In An Entity Which Maps To JSON Causes An Entity Framework Exception At Runtime
