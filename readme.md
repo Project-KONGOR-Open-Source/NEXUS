@@ -144,7 +144,7 @@ dotnet workload list
 Debug HTTP Traffic With Fiddler
 
 1. launch Project KONGOR in development mode, by using the `ASPIRE.AppHost Development` profile
-2. start HoN with the following command line parameters: `-masterserver 127.0.0.1:8888 -webserver 127.0.0.1:8888 -messageserver 127.0.0.1:8888`
+2. start the HoN client with the following command line parameters: `-masterserver 127.0.0.1:8888 -webserver 127.0.0.1:8888 -messageserver 127.0.0.1:8888`; to proxy the the HoN server through Fiddler, set the master server to `127.0.0.1:8888` in the COMPEL configuration file
 3. in Fiddler, in the bottom-left corner, make sure that the application type filter is set to `All Processes`
 4. in Fiddler, click in the bottom-left corner to disable traffic capturing, which removes the noise from implicitly captured traffic; anything explicitly sent to the Fiddler proxy with default port 8888 will still be captured
 5. in Fiddler, go to `Rules > Customize Rules`, then `Go > to OnBeforeRequest`, and add `oSession.url = oSession.url.Replace("127.0.0.1:8888", "127.0.0.1:55555");` to forward traffic to the Project KONGOR development server once it's been captured
