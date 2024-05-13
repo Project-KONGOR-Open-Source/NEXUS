@@ -1,0 +1,16 @@
+<!-- MSBuild properties defined in a "Directory.Build.props" file apply to all projects and are set early in the build process. -->
+<!-- In comparison, properties defined in a "Directory.Build.targets" file also apply to all projects but are set late in the build process. -->
+<!-- MSBuild Properties: https://learn.microsoft.com/en-gb/visualstudio/msbuild/msbuild-properties -->
+<!-- MSBuild Targets: https://learn.microsoft.com/en-gb/visualstudio/msbuild/msbuild-targets -->
+<!-- Customising MSBuild: https://learn.microsoft.com/en-gb/visualstudio/msbuild/customize-your-build#choose-between-adding-properties-to-a-props-or-targets-file -->
+
+<Project>
+
+	<PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<WarningsAsErrors>nullable</WarningsAsErrors>
+	</PropertyGroup>
+
+</Project>
