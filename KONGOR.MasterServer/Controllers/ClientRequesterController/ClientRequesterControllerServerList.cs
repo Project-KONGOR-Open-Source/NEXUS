@@ -4,7 +4,7 @@ public partial class ClientRequesterController
 {
     private async Task<IActionResult> GetServerList()
     {
-        string? cookie = Request.Form["cookie"].ToString();
+        string? cookie = Request.Form["cookie"];
 
         if (cookie is null)
             return BadRequest(@"Missing Value For Form Parameter ""cookie""");
