@@ -350,9 +350,67 @@ public partial class ServerRequesterController
 
     private async Task<IActionResult> HandleSetOnline()
     {
-        // It Is Unclear What This Does; Requests To This Endpoint Are Made Even While The Game Server Is Idle
+        string? session = Request.Form["session"];
+
+        if (session is null)
+            return BadRequest(@"Missing Value For Form Parameter ""session""");
+
+        string? connectionsCount = Request.Form["num_conn"];
+
+        if (connectionsCount is null)
+            return BadRequest(@"Missing Value For Form Parameter ""num_conn""");
+
+        string? gameTime = Request.Form["cgt"];
+
+        if (gameTime is null)
+            return BadRequest(@"Missing Value For Form Parameter ""cgt""");
+
+        string? map = Request.Form["map"];
+
+        if (map is null)
+            return BadRequest(@"Missing Value For Form Parameter ""map""");
+
+        string? isPrivate = Request.Form["private"];
+
+        if (isPrivate is null)
+            return BadRequest(@"Missing Value For Form Parameter ""private""");
+
+        string? isVIP = Request.Form["vip"];
+
+        if (isVIP is null)
+            return BadRequest(@"Missing Value For Form Parameter ""vip""");
+
+        string? connectionState = Request.Form["c_state"];
+
+        if (connectionState is null)
+            return BadRequest(@"Missing Value For Form Parameter ""c_state""");
+
+        string? previousConnectionState = Request.Form["prev_c_state"];
+
+        if (previousConnectionState is null)
+            return BadRequest(@"Missing Value For Form Parameter ""prev_c_state""");
+
         // TODO: Maybe Use This To Link The Server To The Server Manager? (Or Maybe Just Do That On Server New Session)
-        // TODO: Or Maybe Make The Servers And Managers Expire From The Cache After A Certain Amount Of Time, And Use This Call To Refresh The Expiration Time
+
+        // TODO: Maybe Make The Servers And Managers Expire From The Cache After A Certain Amount Of Time, And Use This Call To Refresh The Expiration Time
+
+        (string serverIdentifier, MatchServer server) = (await DistributedCache.HashGetAllAsync("MATCH-SERVERS"))
+            .Select(entry => (entry.Name.ToString(), JsonSerializer.Deserialize<MatchServer>(entry.Value.ToString()) ?? throw new NullReferenceException("Deserialized Match Server Is NULL")))
+            .SingleOrDefault(tuple => tuple.Item2.Cookie.Equals(session));
+
+        if (server is null)
+        {
+            Logger.LogError($@"[BUG] Match Server With Session Cookie ""{session}"" Is NULL");
+
+            return BadRequest("Unable To Find Match Server");
+        }
+
+        server.Status = Enum.Parse<ServerStatus>(connectionState);
+
+        // TODO: Put All The Other Data In The Server Model
+
+        string serializedServer = JsonSerializer.Serialize(server);
+        await DistributedCache.HashSetAsync("MATCH-SERVERS", [new HashEntry(serverIdentifier, serializedServer)]);
 
         return Ok();
     }
