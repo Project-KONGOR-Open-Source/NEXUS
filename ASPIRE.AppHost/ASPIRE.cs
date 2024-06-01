@@ -10,6 +10,7 @@ public class ASPIRE
         int chatServerPort = builder.Configuration.GetRequiredSection("ChatServer").GetValue<int?>("Port") ?? throw new NullReferenceException("Chat Server Port Is NULL");
 
         IResourceBuilder<IResourceWithConnectionString> distributedCache = builder.AddRedis("distributed-cache")
+            .WithImageTag("latest")
             .WithRedisCommander() // https://joeferner.github.io/redis-commander/
             .WithDataVolume();
 
