@@ -19,7 +19,7 @@ public partial class StatsRequesterController(MerrickContext databaseContext, IC
     // NOTE #2: Another Quick Way To Test The Stats Submission System Is To Replay A Fiddler/Requestly/etc. Request Or Make A Postman/Insomnia/etc. Request With The Required Form Data
 
     [HttpPost(Name = "Stats Requester All-In-One")]
-    public async Task<IActionResult> StatsRequester()
+    public async Task<IActionResult> StatsRequester([FromForm] StatsForSubmissionRequestForm form)
     {
         // TODO: Implement Stats Requester Controller Cookie Validation
 
@@ -29,36 +29,6 @@ public partial class StatsRequesterController(MerrickContext databaseContext, IC
 
         //    return Unauthorized($@"Unrecognized Cookie ""{form.Cookie}""");
         //}
-
-        string? serializedMatchStats = Request.Form["match_stats"];
-
-        if (serializedMatchStats is null)
-            return BadRequest(@"Missing Value For Form Parameter ""match_stats""");
-
-        // TODO: Do Something With Match Stats
-
-        string? serializedTeamStats = Request.Form["team_stats"];
-
-        if (serializedTeamStats is null)
-            return BadRequest(@"Missing Value For Form Parameter ""team_stats""");
-
-        // TODO: Do Something With Team Stats
-
-        string? serializedPlayerStats = Request.Form["player_stats"];
-
-        if (serializedPlayerStats is null)
-            return BadRequest(@"Missing Value For Form Parameter ""player_stats""");
-
-        // TODO: Do Something With Player Stats
-
-        string? serializedInventory = Request.Form["inventory"];
-
-        if (serializedInventory is null)
-            return BadRequest(@"Missing Value For Form Parameter ""inventory""");
-
-        Dictionary<int, Dictionary<string, string>>? inventory = JsonSerializer.Deserialize<Dictionary<int, Dictionary<string, string>>>(serializedInventory);
-
-        // TODO: Do Something With Inventory
 
         return Request.Query["f"].SingleOrDefault() switch
         {
