@@ -13,7 +13,7 @@ public partial class ServerRequesterController(MerrickContext databaseContext, I
     [HttpPost(Name = "Server Requester All-In-One")]
     public async Task<IActionResult> ServerRequester()
     {
-        // TODO: Implement Server Requester Controller
+        // TODO: Implement Server Requester Controller Cookie Validation
 
         //if (Cache.ValidateAccountSessionCookie(form.Cookie, out string? _).Equals(false))
         //{
