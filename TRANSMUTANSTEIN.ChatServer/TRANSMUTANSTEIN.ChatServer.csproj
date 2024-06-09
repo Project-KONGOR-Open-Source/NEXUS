@@ -6,7 +6,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Aspire.StackExchange.Redis.DistributedCaching" Version="8.0.0-preview.6.24214.1" />
+		<PackageReference Include="Aspire.StackExchange.Redis.DistributedCaching" Version="8.0.1" />
 	</ItemGroup>
 
 	<ItemGroup>
