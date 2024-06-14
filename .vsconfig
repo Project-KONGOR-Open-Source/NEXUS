@@ -1,0 +1,6 @@
+{
+    "version": "1.0",
+    "extensions": [
+        "https://marketplace.visualstudio.com/items?itemName=SharpDevelopTeam.ILSpy",
+    ]
+}
