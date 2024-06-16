@@ -14,6 +14,20 @@
 
 <hr/>
 
+<h3 align="center">Terms And Conditions</h3>
+
+> [!CAUTION]
+> In addition to the clauses in the license attached to this code base, the Terms And Conditions below also apply.
+> If the Terms And Conditions specified below conflict with any clauses in the license attached to this code base, the Terms And Conditions specified below take precedence.
+> The purpose of these Terms And Conditions which complement the license is to allow any and every individual to host their own services for fun or for experimentation, while at the same time preventing large entities with many resources from converting any parts of this code base into a heartless business opportunity.
+> `Project KONGOR always was and forever will be completely free.`
+
+- no parts of this code base shall be used for any financial gain of any kind, including but not limited to direct financial gain, or indirect financial gain via any intermediary systems, mechanisms, platforms, processes, currencies, etc. of any kind
+- usage of any parts of this code base for purposes beyond private or personal is strictly forbidden without the author's explicit consent in writing; this consent may be revoked by the author at any time, for any reason, and without any prior notice
+- any entities using any parts of this code base for purposes beyond private or personal shall grant the author unrestricted access to databases, deployment servers, hosting servers, and any and all other infrastructure resources used for operational purposes
+
+<hr/>
+
 <h3 align="center">Non-Code Dependencies</h3>
 
 * SQL Server (Developer Edition): https://www.microsoft.com/en-gb/sql-server/sql-server-downloads/
@@ -92,10 +106,13 @@ Generate .NET Aspire Deployment Artefacts & Deploy To Azure/Kubernetes
 ```powershell
 # Azure
 winget install microsoft.azd
+# or
+winget update microsoft.azd
 
 # In The Context Of The ASPIRE.AppHost Project Directory
 azd init
 azd up
+# TODO: Maybe Reference next-steps.md After Doing azd init ?
 ```
 
 ```powershell
