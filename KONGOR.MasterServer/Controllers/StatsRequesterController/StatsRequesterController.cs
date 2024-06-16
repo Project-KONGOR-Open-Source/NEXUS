@@ -10,6 +10,14 @@ public partial class StatsRequesterController(MerrickContext databaseContext, IC
     private IMemoryCache Cache { get; } = cache;
     private ILogger Logger { get; } = logger;
 
+    /// <summary>
+    ///     <para>
+    ///         The stats resubmission key is the SHA1 hash of the match ID prepended to this salt.
+    ///     </para>
+    ///     <code>
+    ///         StatsResubmissionKey = SHA1.HashData(Encoding.UTF8.GetBytes(matchID + MatchStatsSubmissionSalt));
+    ///     </code>
+    /// </summary>
     private string MatchStatsSubmissionSalt => "s8c7xaduxAbRanaspUf3kadRachecrac9efeyupr8suwrewecrUphayeweqUmana";
 
     // For Debugging Purposes, The "GiveGold" And "GiveExp" Commands (Case-Insensitive) Can Be Used From The Server Console To Complete Matches Quickly And Send Stats
@@ -20,21 +28,9 @@ public partial class StatsRequesterController(MerrickContext databaseContext, IC
 
     [HttpPost(Name = "Submit Stats")]
     public async Task<IActionResult> SubmitStats([FromForm] StatsForSubmissionRequestForm form)
-    {
-        await CookieIsValid();
-
-        return await HandleStatsSubmission(form);
-    }
+        => await HandleStatsSubmission(form);
 
     [HttpPost(Name = "Resubmit Stats")]
     public async Task<IActionResult> ResubmitStats([FromForm] StatsForResubmissionRequestForm form)
-    {
-        await CookieIsValid();
-
-        return await HandleStatsResubmission(form);
-    }
-
-    [HttpPost(Name = "Stats Requester Controller Catch-All")]
-    public IActionResult StatsRequesterControllerCatchAll()
-        => throw new NotImplementedException($"Unsupported Stats Requester Controller Form Parameter: f={Request.Form["f"].Single()}");
+        => await HandleStatsResubmission(form);
 }
