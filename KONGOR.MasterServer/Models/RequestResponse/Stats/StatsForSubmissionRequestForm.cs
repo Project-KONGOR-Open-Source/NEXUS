@@ -1,6 +1,42 @@
 ﻿namespace KONGOR.MasterServer.Models.RequestResponse.Stats;
 
-public class StatsForSubmissionRequestForm
+// TODO: Inspect Stats Data For Matchmaking
+
+/*
+    AmmSoloRating($player_match_stats['amm_solo_rating'])
+    AmmSoloCount($player_match_stats['amm_solo_count'])
+    AmmTeamRating($player_match_stats['amm_team_rating'])
+    AmmTeamCount($player_match_stats['amm_team_count'])
+ */
+
+public class StatsForSubmissionRequestForm : StatsForSubmissionRequestFormBase
+{
+    [FromForm(Name = "f")]
+    public string Function { get; init; } = "submit_stats";
+
+    [FromForm(Name = "session")]
+    public required string Session { get; set; }
+}
+
+public class StatsForResubmissionRequestForm : StatsForSubmissionRequestFormBase
+{
+    [FromForm(Name = "f")]
+    public string Function { get; init; } = "resubmit_stats";
+
+    [FromForm(Name = "login")]
+    public required string HostAccountName { get; set; }
+
+    [FromForm(Name = "pass")]
+    public required string HostAccountPasswordHash { get; set; }
+
+    [FromForm(Name = "resubmission_key")]
+    public required string StatsResubmissionKey { get; set; }
+
+    [FromForm(Name = "server_id")]
+    public required long ServerID { get; set; }
+}
+
+public abstract class StatsForSubmissionRequestFormBase
 {
     [FromForm(Name = "match_stats")]
     public required MatchStats MatchStats { get; set; }
@@ -110,93 +146,240 @@ public class MatchStats
 
 public class IndividualPlayerStats
 {
-    public string? nickname { get; set; }
-    public string? clan_tag { get; set; }
-    public int clan_id { get; set; }
-    public int team { get; set; }
-    public int position { get; set; }
-    public int group_num { get; set; }
-    public int benefit { get; set; }
-    public long hero_id { get; set; }
-    public int wins { get; set; }
-    public int losses { get; set; }
-    public int discos { get; set; }
-    public int concedes { get; set; }
-    public int kicked { get; set; }
-    public int social_bonus { get; set; }
-    public int used_token { get; set; }
-    public double pub_skill { get; set; }
-    public int pub_count { get; set; }
-    public double amm_team_rating { get; set; }
-    public int amm_team_count { get; set; }
-    public int concedevotes { get; set; }
-    public int herokills { get; set; }
-    public int herodmg { get; set; }
-    public int herokillsgold { get; set; }
-    public int heroassists { get; set; }
-    public int heroexp { get; set; }
-    public int deaths { get; set; }
-    public int buybacks { get; set; }
-    public int goldlost2death { get; set; }
-    public int secs_dead { get; set; }
-    public int teamcreepkills { get; set; }
-    public int teamcreepdmg { get; set; }
-    public int teamcreepgold { get; set; }
-    public int teamcreepexp { get; set; }
-    public int neutralcreepkills { get; set; }
-    public int neutralcreepdmg { get; set; }
-    public int neutralcreepgold { get; set; }
-    public int neutralcreepexp { get; set; }
-    public int bdmg { get; set; }
-    public int razed { get; set; }
-    public int bdmgexp { get; set; }
-    public int bgold { get; set; }
-    public int denies { get; set; }
-    public int exp_denied { get; set; }
-    public int gold { get; set; }
-    public int gold_spent { get; set; }
-    public int exp { get; set; }
-    public int actions { get; set; }
-    public int secs { get; set; }
-    public int level { get; set; }
-    public int consumables { get; set; }
-    public int wards { get; set; }
-    public int bloodlust { get; set; }
-    public int doublekill { get; set; }
-    public int triplekill { get; set; }
-    public int quadkill { get; set; }
-    public int annihilation { get; set; }
-    public int ks3 { get; set; }
-    public int ks4 { get; set; }
-    public int ks5 { get; set; }
-    public int ks6 { get; set; }
-    public int ks7 { get; set; }
-    public int ks8 { get; set; }
-    public int ks9 { get; set; }
-    public int ks10 { get; set; }
-    public int ks15 { get; set; }
-    public int smackdown { get; set; }
-    public int humiliation { get; set; }
-    public int nemesis { get; set; }
-    public int retribution { get; set; }
-    public int score { get; set; }
-    public double gameplaystat0 { get; set; }
-    public double gameplaystat1 { get; set; }
-    public double gameplaystat2 { get; set; }
-    public double gameplaystat3 { get; set; }
-    public double gameplaystat4 { get; set; }
-    public double gameplaystat5 { get; set; }
-    public double gameplaystat6 { get; set; }
-    public double gameplaystat7 { get; set; }
-    public double gameplaystat8 { get; set; }
-    public double gameplaystat9 { get; set; }
-    public int time_earning_exp { get; set; }
+    [FromForm(Name = "nickname")]
+    public required string AccountName { get; set; }
 
-    // Extra fields that we populate manually.
-    public int match_id { get; set; }
-    public int? account_id { get; set; }
-    public string? map { get; set; }
-    public string? cli_name { get; set; }
-    public string? mdt { get; set; } // DEPRECATED -> TODO: convert this to a [NotMapped] string generated from "datetime"
-    public DateTime datetime { get; set; }
+    [FromForm(Name = "clan_tag")]
+    public required string ClanTag { get; set; }
+
+    [FromForm(Name = "clan_id")]
+    public required int ClanID { get; set; }
+
+    [FromForm(Name = "team")]
+    public required int Team { get; set; }
+
+    [FromForm(Name = "position")]
+    public required int LobbyPosition { get; set; }
+
+    [FromForm(Name = "group_num")]
+    public required int GroupNumber { get; set; }
+
+    [FromForm(Name = "benefit")]
+    public required int Benefit { get; set; }
+
+    [FromForm(Name = "hero_id")]
+    public required long HeroID { get; set; }
+
+    [FromForm(Name = "wins")]
+    public required int Win { get; set; }
+
+    [FromForm(Name = "losses")]
+    public required int Loss { get; set; }
+
+    [FromForm(Name = "discos")]
+    public required int Disconnected { get; set; }
+
+    [FromForm(Name = "concedes")]
+    public required int Conceded { get; set; }
+
+    [FromForm(Name = "kicked")]
+    public required int Kicked { get; set; }
+
+    [FromForm(Name = "social_bonus")]
+    public required int SocialBonus { get; set; }
+
+    [FromForm(Name = "used_token")]
+    public required int UsedToken { get; set; }
+
+    [FromForm(Name = "pub_skill")]
+    public required double PublicSkillRatingChange { get; set; }
+
+    [FromForm(Name = "pub_count")]
+    public required int PublicMatch { get; set; }
+
+    [FromForm(Name = "concedevotes")]
+    public required int ConcedeVotes { get; set; }
+
+    [FromForm(Name = "herokills")]
+    public required int HeroKills { get; set; }
+
+    [FromForm(Name = "herodmg")]
+    public required int HeroDamage { get; set; }
+
+    [FromForm(Name = "herokillsgold")]
+    public required int GoldFromHeroKills { get; set; }
+
+    [FromForm(Name = "heroassists")]
+    public required int HeroAssists { get; set; }
+
+    [FromForm(Name = "heroexp")]
+    public required int HeroExperience { get; set; }
+
+    [FromForm(Name = "deaths")]
+    public required int HeroDeaths { get; set; }
+
+    [FromForm(Name = "buybacks")]
+    public required int Buybacks { get; set; }
+
+    [FromForm(Name = "goldlost2death")]
+    public required int GoldLostToDeath { get; set; }
+
+    [FromForm(Name = "secs_dead")]
+    public required int SecondsDead { get; set; }
+
+    [FromForm(Name = "teamcreepkills")]
+    public required int TeamCreepKills { get; set; }
+
+    [FromForm(Name = "teamcreepdmg")]
+    public required int TeamCreepDamage { get; set; }
+
+    [FromForm(Name = "teamcreepgold")]
+    public required int TeamCreepGold { get; set; }
+
+    [FromForm(Name = "teamcreepexp")]
+    public required int TeamCreepExperience { get; set; }
+
+    [FromForm(Name = "neutralcreepkills")]
+    public required int NeutralCreepKills { get; set; }
+
+    [FromForm(Name = "neutralcreepdmg")]
+    public required int NeutralCreepDamage { get; set; }
+
+    [FromForm(Name = "neutralcreepgold")]
+    public required int NeutralCreepGold { get; set; }
+
+    [FromForm(Name = "neutralcreepexp")]
+    public required int NeutralCreepExperience { get; set; }
+
+    [FromForm(Name = "bdmg")]
+    public required int BuildingDamage { get; set; }
+
+    [FromForm(Name = "razed")]
+    public required int BuildingsRazed { get; set; }
+
+    [FromForm(Name = "bdmgexp")]
+    public required int ExperienceFromBuildings { get; set; }
+
+    [FromForm(Name = "bgold")]
+    public required int GoldFromBuildings { get; set; }
+
+    [FromForm(Name = "denies")]
+    public required int Denies { get; set; }
+
+    [FromForm(Name = "exp_denied")]
+    public required int ExperienceDenied { get; set; }
+
+    [FromForm(Name = "gold")]
+    public required int Gold { get; set; }
+
+    [FromForm(Name = "gold_spent")]
+    public required int GoldSpent { get; set; }
+
+    [FromForm(Name = "exp")]
+    public required int Experience { get; set; }
+
+    [FromForm(Name = "actions")]
+    public required int Actions { get; set; }
+
+    [FromForm(Name = "secs")]
+    public required int SecondsPlayed { get; set; }
+
+    [FromForm(Name = "level")]
+    public required int HeroLevel { get; set; }
+
+    [FromForm(Name = "consumables")]
+    public required int ConsumablesUsed { get; set; }
+
+    [FromForm(Name = "wards")]
+    public required int WardsPlaced { get; set; }
+
+    [FromForm(Name = "bloodlust")]
+    public required int Bloodlust { get; set; }
+
+    [FromForm(Name = "doublekill")]
+    public required int DoubleKill { get; set; }
+
+    [FromForm(Name = "triplekill")]
+    public required int TripleKill { get; set; }
+
+    [FromForm(Name = "quadkill")]
+    public required int QuadKill { get; set; }
+
+    [FromForm(Name = "annihilation")]
+    public required int Annihilation { get; set; }
+
+    [FromForm(Name = "ks3")]
+    public required int KillStreak3 { get; set; }
+
+    [FromForm(Name = "ks4")]
+    public required int KillStreak4 { get; set; }
+
+    [FromForm(Name = "ks5")]
+    public required int KillStreak5 { get; set; }
+
+    [FromForm(Name = "ks6")]
+    public required int KillStreak6 { get; set; }
+
+    [FromForm(Name = "ks7")]
+    public required int KillStreak7 { get; set; }
+
+    [FromForm(Name = "ks8")]
+    public required int KillStreak8 { get; set; }
+
+    [FromForm(Name = "ks9")]
+    public required int KillStreak9 { get; set; }
+
+    [FromForm(Name = "ks10")]
+    public required int KillStreak10 { get; set; }
+
+    [FromForm(Name = "ks15")]
+    public required int KillStreak15 { get; set; }
+
+    [FromForm(Name = "smackdown")]
+    public required int Smackdown { get; set; }
+
+    [FromForm(Name = "humiliation")]
+    public required int Humiliation { get; set; }
+
+    [FromForm(Name = "nemesis")]
+    public required int Nemesis { get; set; }
+
+    [FromForm(Name = "retribution")]
+    public required int Retribution { get; set; }
+
+    [FromForm(Name = "score")]
+    public required int Score { get; set; }
+
+    [FromForm(Name = "gameplaystat0")]
+    public required double GameplayStat0 { get; set; }
+
+    [FromForm(Name = "gameplaystat1")]
+    public required double GameplayStat1 { get; set; }
+
+    [FromForm(Name = "gameplaystat2")]
+    public required double GameplayStat2 { get; set; }
+
+    [FromForm(Name = "gameplaystat3")]
+    public required double GameplayStat3 { get; set; }
+
+    [FromForm(Name = "gameplaystat4")]
+    public required double GameplayStat4 { get; set; }
+
+    [FromForm(Name = "gameplaystat5")]
+    public required double GameplayStat5 { get; set; }
+
+    [FromForm(Name = "gameplaystat6")]
+    public required double GameplayStat6 { get; set; }
+
+    [FromForm(Name = "gameplaystat7")]
+    public required double GameplayStat7 { get; set; }
+
+    [FromForm(Name = "gameplaystat8")]
+    public required double GameplayStat8 { get; set; }
+
+    [FromForm(Name = "gameplaystat9")]
+    public required double GameplayStat9 { get; set; }
+
+    [FromForm(Name = "time_earning_exp")]
+    public required int TimeEarningExperience { get; set; }
 }
