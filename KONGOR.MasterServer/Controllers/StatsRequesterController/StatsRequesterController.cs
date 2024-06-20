@@ -26,11 +26,15 @@ public partial class StatsRequesterController(MerrickContext databaseContext, IC
     // NOTE #1: 1v1 Matches Are A Good Way To Test The Stats Submission System, As They Are The Quickest To Complete
     // NOTE #2: Another Quick Way To Test The Stats Submission System Is To Replay A Fiddler/Requestly/etc. Request Or Make A Postman/Insomnia/etc. Request With The Required Form Data
 
-    [HttpPost(Name = "Submit Stats")]
-    public async Task<IActionResult> SubmitStats([FromForm] StatsForSubmissionRequestForm form)
-        => await HandleStatsSubmission(form);
+    [HttpPost(Name = "Stats Requester All-In-One")]
+    public async Task<IActionResult> StatsRequester([FromForm] StatsForSubmissionRequestForm form)
+    {
+        return Request.Form["f"].SingleOrDefault() switch
+        {
+            "submit_stats"      => await HandleStatsSubmission(form),
+            "resubmit_stats"    => await HandleStatsResubmission(form),
 
-    [HttpPost(Name = "Resubmit Stats")]
-    public async Task<IActionResult> ResubmitStats([FromForm] StatsForResubmissionRequestForm form)
-        => await HandleStatsResubmission(form);
+            _                   => throw new NotImplementedException($"Unsupported Stats Requester Controller Form Parameter: f={Request.Form["f"].Single()}")
+        };
+    }
 }

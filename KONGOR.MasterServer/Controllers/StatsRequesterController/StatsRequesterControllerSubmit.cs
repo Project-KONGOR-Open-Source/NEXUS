@@ -23,7 +23,7 @@ public partial class StatsRequesterController
         return Ok();
     }
 
-    private async Task<IActionResult> HandleStatsResubmission(StatsForResubmissionRequestForm form)
+    private async Task<IActionResult> HandleStatsResubmission(StatsForSubmissionRequestForm form)
     {
         // TODO: Add Password Validation
         // TODO: Add Stats Resubmission Key Validation
