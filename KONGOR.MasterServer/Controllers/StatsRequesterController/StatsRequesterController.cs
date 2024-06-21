@@ -17,8 +17,11 @@ public partial class StatsRequesterController(MerrickContext databaseContext, IC
     ///     <code>
     ///         StatsResubmissionKey = SHA1.HashData(Encoding.UTF8.GetBytes(matchID + MatchStatsSubmissionSalt));
     ///     </code>
+    ///     <para>
+    ///         This key can be found at offset 0x00F03A10 in k2_x64.dll of the WAS distribution.
+    ///     </para>
     /// </summary>
-    private string MatchStatsSubmissionSalt => "s8c7xaduxAbRanaspUf3kadRachecrac9efeyupr8suwrewecrUphayeweqUmana";
+    private static string MatchStatsSubmissionSalt => "s8c7xaduxAbRanaspUf3kadRachecrac9efeyupr8suwrewecrUphayeweqUmana";
 
     // For Debugging Purposes, The "GiveGold" And "GiveExp" Commands (Case-Insensitive) Can Be Used From The Server Console To Complete Matches Quickly And Send Stats
     // e.g. #1: "givegold 0 65535" To Give 65535 Gold To Player Index 0 (The First Player), Or "givegold KONGOR 65535" To Give 65535 Gold To Player With Name "KONGOR"
