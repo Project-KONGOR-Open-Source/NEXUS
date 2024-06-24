@@ -11,6 +11,8 @@ public sealed class MerrickContext : DbContext
     public DbSet<Account> Accounts => Set<Account>();
     public DbSet<Clan> Clans => Set<Clan>();
     public DbSet<HeroGuide> HeroGuides => Set<HeroGuide>();
+    public DbSet<MatchStatistics> MatchStatistics => Set<MatchStatistics>();
+    public DbSet<PlayerStatistics> PlayerStatistics => Set<PlayerStatistics>();
     public DbSet<Role> Roles => Set<Role>();
     public DbSet<Token> Tokens => Set<Token>();
     public DbSet<User> Users => Set<User>();
@@ -21,6 +23,7 @@ public sealed class MerrickContext : DbContext
 
         ConfigureRoles(builder.Entity<Role>());
         ConfigureAccounts(builder.Entity<Account>());
+        ConfigurePlayerStatistics(builder.Entity<PlayerStatistics>());
     }
 
     private static void ConfigureRoles(EntityTypeBuilder<Role> builder)
@@ -46,5 +49,10 @@ public sealed class MerrickContext : DbContext
         builder.OwnsMany(account => account.BannedPeers, ownedNavigationBuilder => { ownedNavigationBuilder.ToJson(); });
         builder.OwnsMany(account => account.FriendedPeers, ownedNavigationBuilder => { ownedNavigationBuilder.ToJson(); });
         builder.OwnsMany(account => account.IgnoredPeers, ownedNavigationBuilder => { ownedNavigationBuilder.ToJson(); });
+    }
+
+    private static void ConfigurePlayerStatistics(EntityTypeBuilder<PlayerStatistics> builder)
+    {
+        builder.OwnsOne(statistics => statistics.Inventory, ownedNavigationBuilder => { ownedNavigationBuilder.ToJson(); });
     }
 }

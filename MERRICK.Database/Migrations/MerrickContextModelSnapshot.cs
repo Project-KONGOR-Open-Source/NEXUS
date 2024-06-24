@@ -282,6 +282,399 @@ namespace MERRICK.Database.Migrations
                     b.ToTable("HeroGuides");
                 });
 
+            modelBuilder.Entity("MERRICK.Database.Entities.Statistics.MatchStatistics", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
+
+                    b.Property<int>("AveragePSR")
+                        .HasColumnType("int");
+
+                    b.Property<int>("AveragePSRTeamOne")
+                        .HasColumnType("int");
+
+                    b.Property<int>("AveragePSRTeamTwo")
+                        .HasColumnType("int");
+
+                    b.Property<int>("AwardHighestCreepScore")
+                        .HasColumnType("int");
+
+                    b.Property<int>("AwardLargestKillStreak")
+                        .HasColumnType("int");
+
+                    b.Property<int>("AwardLeastDeaths")
+                        .HasColumnType("int");
+
+                    b.Property<int>("AwardMostAnnihilations")
+                        .HasColumnType("int");
+
+                    b.Property<int>("AwardMostAssists")
+                        .HasColumnType("int");
+
+                    b.Property<int>("AwardMostBuildingDamage")
+                        .HasColumnType("int");
+
+                    b.Property<int>("AwardMostHeroDamageDealt")
+                        .HasColumnType("int");
+
+                    b.Property<int>("AwardMostKills")
+                        .HasColumnType("int");
+
+                    b.Property<int>("AwardMostQuadKills")
+                        .HasColumnType("int");
+
+                    b.Property<int>("AwardMostSmackdowns")
+                        .HasColumnType("int");
+
+                    b.Property<int>("AwardMostWardsKilled")
+                        .HasColumnType("int");
+
+                    b.Property<string>("BannedHeroes")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("ConnectionState")
+                        .HasColumnType("int");
+
+                    b.Property<string>("FileName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("FileSize")
+                        .HasColumnType("int");
+
+                    b.Property<string>("GameMode")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("HostAccountName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Map")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("MapVersion")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("MatchID")
+                        .HasColumnType("int");
+
+                    b.Property<int>("NumberOfRounds")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PlayerScoreGoal")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ReleaseStage")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("ScoreTeam1")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ScoreTeam2")
+                        .HasColumnType("int");
+
+                    b.Property<long>("ServerID")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("SubmissionDebug")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("TeamScoreGoal")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TimePlayed")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Version")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("MatchID")
+                        .IsUnique();
+
+                    b.ToTable("MatchStatistics");
+                });
+
+            modelBuilder.Entity("MERRICK.Database.Entities.Statistics.PlayerStatistics", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
+
+                    b.Property<int>("AccountID")
+                        .HasColumnType("int");
+
+                    b.Property<string>("AccountName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Actions")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Annihilation")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Benefit")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Bloodlust")
+                        .HasColumnType("int");
+
+                    b.Property<int>("BuildingDamage")
+                        .HasColumnType("int");
+
+                    b.Property<int>("BuildingsRazed")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Buybacks")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ClanTag")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("ConcedeVotes")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Conceded")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ConsumablesUsed")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Denies")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Disconnected")
+                        .HasColumnType("int");
+
+                    b.Property<int>("DoubleKill")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Experience")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ExperienceDenied")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ExperienceFromBuildings")
+                        .HasColumnType("int");
+
+                    b.Property<double>("GameplayStat0")
+                        .HasColumnType("float");
+
+                    b.Property<double>("GameplayStat1")
+                        .HasColumnType("float");
+
+                    b.Property<double>("GameplayStat2")
+                        .HasColumnType("float");
+
+                    b.Property<double>("GameplayStat3")
+                        .HasColumnType("float");
+
+                    b.Property<double>("GameplayStat4")
+                        .HasColumnType("float");
+
+                    b.Property<double>("GameplayStat5")
+                        .HasColumnType("float");
+
+                    b.Property<double>("GameplayStat6")
+                        .HasColumnType("float");
+
+                    b.Property<double>("GameplayStat7")
+                        .HasColumnType("float");
+
+                    b.Property<double>("GameplayStat8")
+                        .HasColumnType("float");
+
+                    b.Property<double>("GameplayStat9")
+                        .HasColumnType("float");
+
+                    b.Property<int>("Gold")
+                        .HasColumnType("int");
+
+                    b.Property<int>("GoldFromBuildings")
+                        .HasColumnType("int");
+
+                    b.Property<int>("GoldFromHeroKills")
+                        .HasColumnType("int");
+
+                    b.Property<int>("GoldLostToDeath")
+                        .HasColumnType("int");
+
+                    b.Property<int>("GoldSpent")
+                        .HasColumnType("int");
+
+                    b.Property<int>("GroupNumber")
+                        .HasColumnType("int");
+
+                    b.Property<int>("HeroAssists")
+                        .HasColumnType("int");
+
+                    b.Property<int>("HeroDamage")
+                        .HasColumnType("int");
+
+                    b.Property<int>("HeroDeaths")
+                        .HasColumnType("int");
+
+                    b.Property<int>("HeroExperience")
+                        .HasColumnType("int");
+
+                    b.Property<long>("HeroID")
+                        .HasColumnType("bigint");
+
+                    b.Property<int>("HeroKills")
+                        .HasColumnType("int");
+
+                    b.Property<int>("HeroLevel")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Humiliation")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Kicked")
+                        .HasColumnType("int");
+
+                    b.Property<int>("KillStreak10")
+                        .HasColumnType("int");
+
+                    b.Property<int>("KillStreak15")
+                        .HasColumnType("int");
+
+                    b.Property<int>("KillStreak3")
+                        .HasColumnType("int");
+
+                    b.Property<int>("KillStreak4")
+                        .HasColumnType("int");
+
+                    b.Property<int>("KillStreak5")
+                        .HasColumnType("int");
+
+                    b.Property<int>("KillStreak6")
+                        .HasColumnType("int");
+
+                    b.Property<int>("KillStreak7")
+                        .HasColumnType("int");
+
+                    b.Property<int>("KillStreak8")
+                        .HasColumnType("int");
+
+                    b.Property<int>("KillStreak9")
+                        .HasColumnType("int");
+
+                    b.Property<int>("LobbyPosition")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Loss")
+                        .HasColumnType("int");
+
+                    b.Property<int>("MatchID")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Nemesis")
+                        .HasColumnType("int");
+
+                    b.Property<int>("NeutralCreepDamage")
+                        .HasColumnType("int");
+
+                    b.Property<int>("NeutralCreepExperience")
+                        .HasColumnType("int");
+
+                    b.Property<int>("NeutralCreepGold")
+                        .HasColumnType("int");
+
+                    b.Property<int>("NeutralCreepKills")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PublicMatch")
+                        .HasColumnType("int");
+
+                    b.Property<double>("PublicSkillRatingChange")
+                        .HasColumnType("float");
+
+                    b.Property<int>("QuadKill")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Retribution")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Score")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SecondsDead")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SecondsPlayed")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Smackdown")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SocialBonus")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SoloRankedMatch")
+                        .HasColumnType("int");
+
+                    b.Property<double>("SoloRankedSkillRatingChange")
+                        .HasColumnType("float");
+
+                    b.Property<int>("Team")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TeamCreepDamage")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TeamCreepExperience")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TeamCreepGold")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TeamCreepKills")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TeamRankedMatch")
+                        .HasColumnType("int");
+
+                    b.Property<double>("TeamRankedSkillRatingChange")
+                        .HasColumnType("float");
+
+                    b.Property<int>("TimeEarningExperience")
+                        .HasColumnType("int");
+
+                    b.Property<int>("TripleKill")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UsedToken")
+                        .HasColumnType("int");
+
+                    b.Property<int>("WardsPlaced")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Win")
+                        .HasColumnType("int");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("MatchID", "AccountID")
+                        .IsUnique();
+
+                    b.ToTable("PlayerStatistics");
+                });
+
             modelBuilder.Entity("MERRICK.Database.Entities.Utility.Role", b =>
                 {
                     b.Property<int>("ID")
@@ -374,6 +767,9 @@ namespace MERRICK.Database.Migrations
                                 .HasMaxLength(30)
                                 .HasColumnType("nvarchar(30)");
 
+                            b1.Property<int>("Identifier")
+                                .HasColumnType("int");
+
                             b1.Property<string>("Name")
                                 .IsRequired()
                                 .HasMaxLength(15)
@@ -410,6 +806,9 @@ namespace MERRICK.Database.Migrations
                                 .HasMaxLength(15)
                                 .HasColumnType("nvarchar(15)");
 
+                            b1.Property<int>("Identifier")
+                                .HasColumnType("int");
+
                             b1.Property<string>("Name")
                                 .IsRequired()
                                 .HasMaxLength(15)
@@ -435,6 +834,9 @@ namespace MERRICK.Database.Migrations
 
                             b1.Property<int>("Id")
                                 .ValueGeneratedOnAdd()
+                                .HasColumnType("int");
+
+                            b1.Property<int>("Identifier")
                                 .HasColumnType("int");
 
                             b1.Property<string>("Name")
@@ -486,6 +888,27 @@ namespace MERRICK.Database.Migrations
                         .IsRequired();
 
                     b.Navigation("Author");
+                });
+
+            modelBuilder.Entity("MERRICK.Database.Entities.Statistics.PlayerStatistics", b =>
+                {
+                    b.OwnsOne("System.Collections.Generic.Dictionary<int, string>", "Inventory", b1 =>
+                        {
+                            b1.Property<int>("PlayerStatisticsID")
+                                .HasColumnType("int");
+
+                            b1.HasKey("PlayerStatisticsID");
+
+                            b1.ToTable("PlayerStatistics");
+
+                            b1.ToJson("Inventory");
+
+                            b1.WithOwner()
+                                .HasForeignKey("PlayerStatisticsID");
+                        });
+
+                    b.Navigation("Inventory")
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("MERRICK.Database.Entities.Core.Clan", b =>

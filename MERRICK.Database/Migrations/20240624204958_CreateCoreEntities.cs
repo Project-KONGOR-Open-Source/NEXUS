@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace MERRICK.Database.Migrations
 {
     /// <inheritdoc />
-    public partial class CreateInitialEntities : Migration
+    public partial class CreateCoreEntities : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -26,6 +26,148 @@ namespace MERRICK.Database.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Clans", x => x.ID);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "MatchStatistics",
+                columns: table => new
+                {
+                    ID = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    ServerID = table.Column<long>(type: "bigint", nullable: false),
+                    HostAccountName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    MatchID = table.Column<int>(type: "int", nullable: false),
+                    Map = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    MapVersion = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    TimePlayed = table.Column<int>(type: "int", nullable: false),
+                    FileSize = table.Column<int>(type: "int", nullable: false),
+                    FileName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ConnectionState = table.Column<int>(type: "int", nullable: false),
+                    Version = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    AveragePSR = table.Column<int>(type: "int", nullable: false),
+                    AveragePSRTeamOne = table.Column<int>(type: "int", nullable: false),
+                    AveragePSRTeamTwo = table.Column<int>(type: "int", nullable: false),
+                    GameMode = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ScoreTeam1 = table.Column<int>(type: "int", nullable: false),
+                    ScoreTeam2 = table.Column<int>(type: "int", nullable: false),
+                    TeamScoreGoal = table.Column<int>(type: "int", nullable: false),
+                    PlayerScoreGoal = table.Column<int>(type: "int", nullable: false),
+                    NumberOfRounds = table.Column<int>(type: "int", nullable: false),
+                    ReleaseStage = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    BannedHeroes = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    AwardMostAnnihilations = table.Column<int>(type: "int", nullable: false),
+                    AwardMostQuadKills = table.Column<int>(type: "int", nullable: false),
+                    AwardLargestKillStreak = table.Column<int>(type: "int", nullable: false),
+                    AwardMostSmackdowns = table.Column<int>(type: "int", nullable: false),
+                    AwardMostKills = table.Column<int>(type: "int", nullable: false),
+                    AwardMostAssists = table.Column<int>(type: "int", nullable: false),
+                    AwardLeastDeaths = table.Column<int>(type: "int", nullable: false),
+                    AwardMostBuildingDamage = table.Column<int>(type: "int", nullable: false),
+                    AwardMostWardsKilled = table.Column<int>(type: "int", nullable: false),
+                    AwardMostHeroDamageDealt = table.Column<int>(type: "int", nullable: false),
+                    AwardHighestCreepScore = table.Column<int>(type: "int", nullable: false),
+                    SubmissionDebug = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_MatchStatistics", x => x.ID);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "PlayerStatistics",
+                columns: table => new
+                {
+                    ID = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    MatchID = table.Column<int>(type: "int", nullable: false),
+                    AccountID = table.Column<int>(type: "int", nullable: false),
+                    AccountName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ClanTag = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Team = table.Column<int>(type: "int", nullable: false),
+                    LobbyPosition = table.Column<int>(type: "int", nullable: false),
+                    GroupNumber = table.Column<int>(type: "int", nullable: false),
+                    Benefit = table.Column<int>(type: "int", nullable: false),
+                    HeroID = table.Column<long>(type: "bigint", nullable: false),
+                    Win = table.Column<int>(type: "int", nullable: false),
+                    Loss = table.Column<int>(type: "int", nullable: false),
+                    Disconnected = table.Column<int>(type: "int", nullable: false),
+                    Conceded = table.Column<int>(type: "int", nullable: false),
+                    Kicked = table.Column<int>(type: "int", nullable: false),
+                    PublicMatch = table.Column<int>(type: "int", nullable: false),
+                    PublicSkillRatingChange = table.Column<double>(type: "float", nullable: false),
+                    SoloRankedMatch = table.Column<int>(type: "int", nullable: false),
+                    SoloRankedSkillRatingChange = table.Column<double>(type: "float", nullable: false),
+                    TeamRankedMatch = table.Column<int>(type: "int", nullable: false),
+                    TeamRankedSkillRatingChange = table.Column<double>(type: "float", nullable: false),
+                    SocialBonus = table.Column<int>(type: "int", nullable: false),
+                    UsedToken = table.Column<int>(type: "int", nullable: false),
+                    ConcedeVotes = table.Column<int>(type: "int", nullable: false),
+                    HeroKills = table.Column<int>(type: "int", nullable: false),
+                    HeroDamage = table.Column<int>(type: "int", nullable: false),
+                    GoldFromHeroKills = table.Column<int>(type: "int", nullable: false),
+                    HeroAssists = table.Column<int>(type: "int", nullable: false),
+                    HeroExperience = table.Column<int>(type: "int", nullable: false),
+                    HeroDeaths = table.Column<int>(type: "int", nullable: false),
+                    Buybacks = table.Column<int>(type: "int", nullable: false),
+                    GoldLostToDeath = table.Column<int>(type: "int", nullable: false),
+                    SecondsDead = table.Column<int>(type: "int", nullable: false),
+                    TeamCreepKills = table.Column<int>(type: "int", nullable: false),
+                    TeamCreepDamage = table.Column<int>(type: "int", nullable: false),
+                    TeamCreepGold = table.Column<int>(type: "int", nullable: false),
+                    TeamCreepExperience = table.Column<int>(type: "int", nullable: false),
+                    NeutralCreepKills = table.Column<int>(type: "int", nullable: false),
+                    NeutralCreepDamage = table.Column<int>(type: "int", nullable: false),
+                    NeutralCreepGold = table.Column<int>(type: "int", nullable: false),
+                    NeutralCreepExperience = table.Column<int>(type: "int", nullable: false),
+                    BuildingDamage = table.Column<int>(type: "int", nullable: false),
+                    BuildingsRazed = table.Column<int>(type: "int", nullable: false),
+                    ExperienceFromBuildings = table.Column<int>(type: "int", nullable: false),
+                    GoldFromBuildings = table.Column<int>(type: "int", nullable: false),
+                    Denies = table.Column<int>(type: "int", nullable: false),
+                    ExperienceDenied = table.Column<int>(type: "int", nullable: false),
+                    Gold = table.Column<int>(type: "int", nullable: false),
+                    GoldSpent = table.Column<int>(type: "int", nullable: false),
+                    Experience = table.Column<int>(type: "int", nullable: false),
+                    Actions = table.Column<int>(type: "int", nullable: false),
+                    SecondsPlayed = table.Column<int>(type: "int", nullable: false),
+                    HeroLevel = table.Column<int>(type: "int", nullable: false),
+                    ConsumablesUsed = table.Column<int>(type: "int", nullable: false),
+                    WardsPlaced = table.Column<int>(type: "int", nullable: false),
+                    Bloodlust = table.Column<int>(type: "int", nullable: false),
+                    DoubleKill = table.Column<int>(type: "int", nullable: false),
+                    TripleKill = table.Column<int>(type: "int", nullable: false),
+                    QuadKill = table.Column<int>(type: "int", nullable: false),
+                    Annihilation = table.Column<int>(type: "int", nullable: false),
+                    KillStreak3 = table.Column<int>(type: "int", nullable: false),
+                    KillStreak4 = table.Column<int>(type: "int", nullable: false),
+                    KillStreak5 = table.Column<int>(type: "int", nullable: false),
+                    KillStreak6 = table.Column<int>(type: "int", nullable: false),
+                    KillStreak7 = table.Column<int>(type: "int", nullable: false),
+                    KillStreak8 = table.Column<int>(type: "int", nullable: false),
+                    KillStreak9 = table.Column<int>(type: "int", nullable: false),
+                    KillStreak10 = table.Column<int>(type: "int", nullable: false),
+                    KillStreak15 = table.Column<int>(type: "int", nullable: false),
+                    Smackdown = table.Column<int>(type: "int", nullable: false),
+                    Humiliation = table.Column<int>(type: "int", nullable: false),
+                    Nemesis = table.Column<int>(type: "int", nullable: false),
+                    Retribution = table.Column<int>(type: "int", nullable: false),
+                    Score = table.Column<int>(type: "int", nullable: false),
+                    GameplayStat0 = table.Column<double>(type: "float", nullable: false),
+                    GameplayStat1 = table.Column<double>(type: "float", nullable: false),
+                    GameplayStat2 = table.Column<double>(type: "float", nullable: false),
+                    GameplayStat3 = table.Column<double>(type: "float", nullable: false),
+                    GameplayStat4 = table.Column<double>(type: "float", nullable: false),
+                    GameplayStat5 = table.Column<double>(type: "float", nullable: false),
+                    GameplayStat6 = table.Column<double>(type: "float", nullable: false),
+                    GameplayStat7 = table.Column<double>(type: "float", nullable: false),
+                    GameplayStat8 = table.Column<double>(type: "float", nullable: false),
+                    GameplayStat9 = table.Column<double>(type: "float", nullable: false),
+                    TimeEarningExperience = table.Column<int>(type: "int", nullable: false),
+                    Inventory = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PlayerStatistics", x => x.ID);
                 });
 
             migrationBuilder.CreateTable(
@@ -205,6 +347,18 @@ namespace MERRICK.Database.Migrations
                 column: "AuthorID");
 
             migrationBuilder.CreateIndex(
+                name: "IX_MatchStatistics_MatchID",
+                table: "MatchStatistics",
+                column: "MatchID",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PlayerStatistics_MatchID_AccountID",
+                table: "PlayerStatistics",
+                columns: new[] { "MatchID", "AccountID" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Roles_Name",
                 table: "Roles",
                 column: "Name",
@@ -227,6 +381,12 @@ namespace MERRICK.Database.Migrations
         {
             migrationBuilder.DropTable(
                 name: "HeroGuides");
+
+            migrationBuilder.DropTable(
+                name: "MatchStatistics");
+
+            migrationBuilder.DropTable(
+                name: "PlayerStatistics");
 
             migrationBuilder.DropTable(
                 name: "Tokens");
