@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MERRICK.Database.Migrations
 {
     [DbContext(typeof(MerrickContext))]
-    [Migration("20240624204958_CreateCoreEntities")]
+    [Migration("20240624211225_CreateCoreEntities")]
     partial class CreateCoreEntities
     {
         /// <inheritdoc />
@@ -355,7 +355,8 @@ namespace MERRICK.Database.Migrations
 
                     b.Property<string>("HostAccountName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(15)
+                        .HasColumnType("nvarchar(15)");
 
                     b.Property<string>("Map")
                         .IsRequired()
@@ -363,7 +364,8 @@ namespace MERRICK.Database.Migrations
 
                     b.Property<string>("MapVersion")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(15)
+                        .HasColumnType("nvarchar(15)");
 
                     b.Property<int>("MatchID")
                         .HasColumnType("int");
@@ -422,7 +424,8 @@ namespace MERRICK.Database.Migrations
 
                     b.Property<string>("AccountName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(15)
+                        .HasColumnType("nvarchar(15)");
 
                     b.Property<int>("Actions")
                         .HasColumnType("int");
@@ -446,7 +449,8 @@ namespace MERRICK.Database.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("ClanTag")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(4)
+                        .HasColumnType("nvarchar(4)");
 
                     b.Property<int>("ConcedeVotes")
                         .HasColumnType("int");

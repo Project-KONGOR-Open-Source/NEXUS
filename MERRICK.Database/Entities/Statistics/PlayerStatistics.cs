@@ -10,8 +10,10 @@ public class PlayerStatistics
 
     public required int AccountID { get; set; }
 
+    [MaxLength(15)]
     public required string AccountName { get; set; }
 
+    [MaxLength(4)]
     public string? ClanTag { get; set; }
 
     public required int Team { get; set; }

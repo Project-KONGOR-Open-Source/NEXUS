@@ -8,12 +8,14 @@ public class MatchStatistics
 
     public required long ServerID { get; set; }
 
+    [MaxLength(15)]
     public required string HostAccountName { get; set; }
 
     public required int MatchID { get; set; }
 
     public required string Map { get; set; }
 
+    [MaxLength(15)]
     public required string MapVersion { get; set; }
 
     public required int TimePlayed { get; set; }
