@@ -88,6 +88,7 @@ namespace MERRICK.Database.Migrations
                     GroupNumber = table.Column<int>(type: "int", nullable: false),
                     Benefit = table.Column<int>(type: "int", nullable: false),
                     HeroID = table.Column<long>(type: "bigint", nullable: false),
+                    Inventory = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Win = table.Column<int>(type: "int", nullable: false),
                     Loss = table.Column<int>(type: "int", nullable: false),
                     Disconnected = table.Column<int>(type: "int", nullable: false),
@@ -162,8 +163,7 @@ namespace MERRICK.Database.Migrations
                     GameplayStat7 = table.Column<double>(type: "float", nullable: false),
                     GameplayStat8 = table.Column<double>(type: "float", nullable: false),
                     GameplayStat9 = table.Column<double>(type: "float", nullable: false),
-                    TimeEarningExperience = table.Column<int>(type: "int", nullable: false),
-                    Inventory = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    TimeEarningExperience = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {

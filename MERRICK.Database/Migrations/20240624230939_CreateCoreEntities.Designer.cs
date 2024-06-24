@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MERRICK.Database.Migrations
 {
     [DbContext(typeof(MerrickContext))]
-    [Migration("20240624211225_CreateCoreEntities")]
+    [Migration("20240624230939_CreateCoreEntities")]
     partial class CreateCoreEntities
     {
         /// <inheritdoc />
@@ -551,6 +551,10 @@ namespace MERRICK.Database.Migrations
                     b.Property<int>("Humiliation")
                         .HasColumnType("int");
 
+                    b.Property<string>("Inventory")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("Kicked")
                         .HasColumnType("int");
 
@@ -895,27 +899,6 @@ namespace MERRICK.Database.Migrations
                         .IsRequired();
 
                     b.Navigation("Author");
-                });
-
-            modelBuilder.Entity("MERRICK.Database.Entities.Statistics.PlayerStatistics", b =>
-                {
-                    b.OwnsOne("System.Collections.Generic.Dictionary<int, string>", "Inventory", b1 =>
-                        {
-                            b1.Property<int>("PlayerStatisticsID")
-                                .HasColumnType("int");
-
-                            b1.HasKey("PlayerStatisticsID");
-
-                            b1.ToTable("PlayerStatistics");
-
-                            b1.ToJson("Inventory");
-
-                            b1.WithOwner()
-                                .HasForeignKey("PlayerStatisticsID");
-                        });
-
-                    b.Navigation("Inventory")
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("MERRICK.Database.Entities.Core.Clan", b =>

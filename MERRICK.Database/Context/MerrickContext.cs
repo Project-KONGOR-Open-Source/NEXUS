@@ -53,6 +53,10 @@ public sealed class MerrickContext : DbContext
 
     private static void ConfigurePlayerStatistics(EntityTypeBuilder<PlayerStatistics> builder)
     {
-        builder.OwnsOne(statistics => statistics.Inventory, ownedNavigationBuilder => { ownedNavigationBuilder.ToJson(); });
+        builder.Property(statistics => statistics.Inventory).HasConversion
+        (
+            value => JsonSerializer.Serialize(value, new JsonSerializerOptions()),
+            value => JsonSerializer.Deserialize<Dictionary<int, string>>(value, new JsonSerializerOptions()) ?? new Dictionary<int, string>()
+        );
     }
 }
