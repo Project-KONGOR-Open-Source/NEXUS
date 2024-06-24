@@ -56,7 +56,7 @@ public sealed class MerrickContext : DbContext
         builder.Property(statistics => statistics.Inventory).HasConversion
         (
             value => JsonSerializer.Serialize(value, new JsonSerializerOptions()),
-            value => JsonSerializer.Deserialize<Dictionary<int, string>>(value, new JsonSerializerOptions()) ?? new Dictionary<int, string>()
+            value => JsonSerializer.Deserialize<List<string>>(value, new JsonSerializerOptions()) ?? new List<string>()
         );
     }
 }

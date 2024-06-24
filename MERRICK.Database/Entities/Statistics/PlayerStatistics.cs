@@ -26,7 +26,7 @@ public class PlayerStatistics
 
     public required long HeroID { get; set; }
 
-    public required Dictionary<int, string> Inventory { get; set; }
+    public required List<string> Inventory { get; set; }
 
     public required int Win { get; set; }
 

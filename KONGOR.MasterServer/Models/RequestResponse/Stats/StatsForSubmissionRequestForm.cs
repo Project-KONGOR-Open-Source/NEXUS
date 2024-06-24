@@ -462,7 +462,7 @@ public static class StatsForSubmissionRequestFormExtensions
             GroupNumber = player.GroupNumber,
             Benefit = player.Benefit,
             HeroID = player.HeroID,
-            Inventory = form.PlayerInventory[playerIndex],
+            Inventory = form.PlayerInventory[playerIndex].Values.ToList(),
             Win = player.Win,
             Loss = player.Loss,
             Disconnected = player.Disconnected,
