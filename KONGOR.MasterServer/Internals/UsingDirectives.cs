@@ -15,6 +15,7 @@ global using KONGOR.MasterServer.Models.ServerManagement;
 global using MERRICK.Database.Context;
 global using MERRICK.Database.Entities.Core;
 global using MERRICK.Database.Entities.Game;
+global using MERRICK.Database.Entities.Statistics;
 global using MERRICK.Database.Enumerations;
 
 global using Microsoft.AspNetCore.Mvc;

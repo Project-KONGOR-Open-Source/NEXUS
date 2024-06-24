@@ -9,6 +9,30 @@ public partial class StatsRequesterController
 
         // TODO: Validate Session
 
+        MatchStatistics matchStatistics = form.ToMatchStatisticsEntity();
+
+        List<PlayerStatistics> playerStatistics = [];
+
+        foreach (int playerIndex in form.PlayerInventory.Keys)
+        {
+            string accountName = form.PlayerStats[playerIndex].Values.Single().AccountName;
+
+            Account? account = await MerrickContext.Accounts.SingleOrDefaultAsync(account => account.Name.Equals(accountName));
+
+            if (account is null)
+            {
+                Logger.LogError($@"[BUG] Unable To Retrieve Account For Account Name ""{accountName}""");
+
+                return NotFound($@"Unable To Retrieve Account For Account Name ""{accountName}""");
+            }
+
+            playerStatistics.Add(form.ToPlayerStatisticsEntity(playerIndex, account.ID));
+        }
+
+        await MerrickContext.MatchStatistics.AddAsync(matchStatistics);
+        await MerrickContext.PlayerStatistics.AddRangeAsync(playerStatistics);
+        await MerrickContext.SaveChangesAsync();
+
         return Ok();
     }
 
@@ -35,6 +59,30 @@ public partial class StatsRequesterController
             return BadRequest(@"Missing Value For Form Parameter ""server_id""");
 
         // TODO: Do Something With Server ID
+
+        MatchStatistics matchStatistics = form.ToMatchStatisticsEntity();
+
+        List<PlayerStatistics> playerStatistics = [];
+
+        foreach (int playerIndex in form.PlayerInventory.Keys)
+        {
+            string accountName = form.PlayerStats[playerIndex].Values.Single().AccountName;
+
+            Account? account = await MerrickContext.Accounts.SingleOrDefaultAsync(account => account.Name.Equals(accountName));
+
+            if (account is null)
+            {
+                Logger.LogError($@"[BUG] Unable To Retrieve Account For Account Name ""{accountName}""");
+
+                return NotFound($@"Unable To Retrieve Account For Account Name ""{accountName}""");
+            }
+
+            playerStatistics.Add(form.ToPlayerStatisticsEntity(playerIndex, account.ID));
+        }
+
+        await MerrickContext.MatchStatistics.AddAsync(matchStatistics);
+        await MerrickContext.PlayerStatistics.AddRangeAsync(playerStatistics);
+        await MerrickContext.SaveChangesAsync();
 
         return Ok();
     }

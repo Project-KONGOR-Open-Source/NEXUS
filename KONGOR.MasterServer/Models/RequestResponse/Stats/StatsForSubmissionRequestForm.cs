@@ -1,6 +1,7 @@
 ﻿namespace KONGOR.MasterServer.Models.RequestResponse.Stats;
 
 // TODO: Inspect Stats Data For All Other Supported Game Modes (Ranked, Casual Ranked, MidWars, RiftWars) To Determine If They Have Any Unique Properties (The Models Below Are From Public Matches)
+// TODO: The Following May Be Needed: AverageMMR, AverageMMRTeamOne, AverageMMRTeamTwo
 
 // Properties Common To Both "submit_stats" And "resubmit_stats" Requests
 public partial class StatsForSubmissionRequestForm
@@ -400,4 +401,145 @@ public partial class IndividualPlayerStats
 
     [FromForm(Name = "amm_team_count")]
     public int TeamRankedMatch { get; set; }
+}
+
+public static class StatsForSubmissionRequestFormExtensions
+{
+    public static MatchStatistics ToMatchStatisticsEntity(this StatsForSubmissionRequestForm form)
+    {
+        MatchStatistics statistics = new()
+        {
+            ServerID = form.ServerID ?? throw new NullReferenceException("Server ID Is NULL"),
+            HostAccountName = form.HostAccountName ?? throw new NullReferenceException("Host Account Name Is NULL"),
+            MatchID = form.MatchStats.MatchID,
+            Map = form.MatchStats.Map,
+            MapVersion = form.MatchStats.MapVersion,
+            TimePlayed = form.MatchStats.TimePlayed,
+            FileSize = form.MatchStats.FileSize,
+            FileName = form.MatchStats.FileName,
+            ConnectionState = form.MatchStats.ConnectionState,
+            Version = form.MatchStats.Version,
+            AveragePSR = form.MatchStats.AveragePSR,
+            AveragePSRTeamOne = form.MatchStats.AveragePSRTeamOne,
+            AveragePSRTeamTwo = form.MatchStats.AveragePSRTeamTwo,
+            GameMode = form.MatchStats.GameMode,
+            ScoreTeam1 = form.TeamStats.First().Value.Single().Value,
+            ScoreTeam2 = form.TeamStats.Last().Value.Single().Value,
+            TeamScoreGoal = form.MatchStats.TeamScoreGoal,
+            PlayerScoreGoal = form.MatchStats.PlayerScoreGoal,
+            NumberOfRounds = form.MatchStats.NumberOfRounds,
+            ReleaseStage = form.MatchStats.ReleaseStage,
+            BannedHeroes = form.MatchStats.BannedHeroes,
+            AwardMostAnnihilations = form.MatchStats.AwardMostAnnihilations,
+            AwardMostQuadKills = form.MatchStats.AwardMostQuadKills,
+            AwardLargestKillStreak = form.MatchStats.AwardLargestKillStreak,
+            AwardMostSmackdowns = form.MatchStats.AwardMostSmackdowns,
+            AwardMostKills = form.MatchStats.AwardMostKills,
+            AwardMostAssists = form.MatchStats.AwardMostAssists,
+            AwardLeastDeaths = form.MatchStats.AwardLeastDeaths,
+            AwardMostBuildingDamage = form.MatchStats.AwardMostBuildingDamage,
+            AwardMostWardsKilled = form.MatchStats.AwardMostWardsKilled,
+            AwardMostHeroDamageDealt = form.MatchStats.AwardMostHeroDamageDealt,
+            AwardHighestCreepScore = form.MatchStats.AwardHighestCreepScore,
+            SubmissionDebug = form.MatchStats.SubmissionDebug
+        };
+
+        return statistics;
+    }
+
+    public static PlayerStatistics ToPlayerStatisticsEntity(this StatsForSubmissionRequestForm form, int playerIndex, int accountID)
+    {
+        string hero = form.PlayerStats[playerIndex].Keys.Single();
+        IndividualPlayerStats player = form.PlayerStats[playerIndex][hero];
+
+        PlayerStatistics statistics = new()
+        {
+            MatchID = form.MatchStats.MatchID,
+            AccountID = accountID,
+            AccountName = player.AccountName,
+            Team = player.Team,
+            LobbyPosition = player.LobbyPosition,
+            GroupNumber = player.GroupNumber,
+            Benefit = player.Benefit,
+            HeroID = player.HeroID,
+            Inventory = form.PlayerInventory[playerIndex],
+            Win = player.Win,
+            Loss = player.Loss,
+            Disconnected = player.Disconnected,
+            Conceded = player.Conceded,
+            Kicked = player.Kicked,
+            PublicMatch = player.PublicMatch,
+            PublicSkillRatingChange = player.PublicSkillRatingChange,
+            SoloRankedMatch = player.SoloRankedMatch,
+            SoloRankedSkillRatingChange = player.SoloRankedSkillRatingChange,
+            TeamRankedMatch = player.TeamRankedMatch,
+            TeamRankedSkillRatingChange = player.TeamRankedSkillRatingChange,
+            SocialBonus = player.SocialBonus,
+            UsedToken = player.UsedToken,
+            ConcedeVotes = player.ConcedeVotes,
+            HeroKills = player.HeroKills,
+            HeroDamage = player.HeroDamage,
+            GoldFromHeroKills = player.GoldFromHeroKills,
+            HeroAssists = player.HeroAssists,
+            HeroExperience = player.HeroExperience,
+            HeroDeaths = player.HeroDeaths,
+            Buybacks = player.Buybacks,
+            GoldLostToDeath = player.GoldLostToDeath,
+            SecondsDead = player.SecondsDead,
+            TeamCreepKills = player.TeamCreepKills,
+            TeamCreepDamage = player.TeamCreepDamage,
+            TeamCreepGold = player.TeamCreepGold,
+            TeamCreepExperience = player.TeamCreepExperience,
+            NeutralCreepKills = player.NeutralCreepKills,
+            NeutralCreepDamage = player.NeutralCreepDamage,
+            NeutralCreepGold = player.NeutralCreepGold,
+            NeutralCreepExperience = player.NeutralCreepExperience,
+            BuildingDamage = player.BuildingDamage,
+            BuildingsRazed = player.BuildingsRazed,
+            ExperienceFromBuildings = player.ExperienceFromBuildings,
+            GoldFromBuildings = player.GoldFromBuildings,
+            Denies = player.Denies,
+            ExperienceDenied = player.ExperienceDenied,
+            Gold = player.Gold,
+            GoldSpent = player.GoldSpent,
+            Experience = player.Experience,
+            Actions = player.Actions,
+            SecondsPlayed = player.SecondsPlayed,
+            HeroLevel = player.HeroLevel,
+            ConsumablesUsed = player.ConsumablesUsed,
+            WardsPlaced = player.WardsPlaced,
+            Bloodlust = player.Bloodlust,
+            DoubleKill = player.DoubleKill,
+            TripleKill = player.TripleKill,
+            QuadKill = player.QuadKill,
+            Annihilation = player.Annihilation,
+            KillStreak3 = player.KillStreak3,
+            KillStreak4 = player.KillStreak4,
+            KillStreak5 = player.KillStreak5,
+            KillStreak6 = player.KillStreak6,
+            KillStreak7 = player.KillStreak7,
+            KillStreak8 = player.KillStreak8,
+            KillStreak9 = player.KillStreak9,
+            KillStreak10 = player.KillStreak10,
+            KillStreak15 = player.KillStreak15,
+            Smackdown = player.Smackdown,
+            Humiliation = player.Humiliation,
+            Nemesis = player.Nemesis,
+            Retribution = player.Retribution,
+            Score = player.Score,
+            GameplayStat0 = player.GameplayStat0,
+            GameplayStat1 = player.GameplayStat1,
+            GameplayStat2 = player.GameplayStat2,
+            GameplayStat3 = player.GameplayStat3,
+            GameplayStat4 = player.GameplayStat4,
+            GameplayStat5 = player.GameplayStat5,
+            GameplayStat6 = player.GameplayStat6,
+            GameplayStat7 = player.GameplayStat7,
+            GameplayStat8 = player.GameplayStat8,
+            GameplayStat9 = player.GameplayStat9,
+            TimeEarningExperience = player.TimeEarningExperience
+        };
+
+        return statistics;
+    }
 }
