@@ -56,7 +56,9 @@ public sealed class MerrickContext : DbContext
         builder.Property(statistics => statistics.Inventory).HasConversion
         (
             value => JsonSerializer.Serialize(value, new JsonSerializerOptions()),
-            value => JsonSerializer.Deserialize<List<string>>(value, new JsonSerializerOptions()) ?? new List<string>()
+            value => JsonSerializer.Deserialize<List<string>>(value, new JsonSerializerOptions()) ?? new List<string>(),
+            new ValueComparer<List<string>>((first, second) => (first ?? new List<string>()).SequenceEqual(second ?? new List<string>()),
+                collection => collection.Aggregate(0, (accumulatedHashCode, value) => HashCode.Combine(accumulatedHashCode, value.GetHashCode())), collection => collection.ToList())
         );
     }
 }
