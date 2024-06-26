@@ -27,6 +27,9 @@ public static class SeedDataHandlers
         };
 
         await context.Users.AddAsync(user, cancellationToken);
+
+        // TODO: Seed Guest Users
+
         await context.SaveChangesAsync(cancellationToken);
     }
 
@@ -69,7 +72,7 @@ public static class SeedDataHandlers
 
         await context.AddAsync(systemAccount, cancellationToken);
 
-        string[] subAccountNames = [ /* [K] */ "ONGOR", "GOPO", "Xen0byte" ];
+        string[] subAccountNames = [ /* [K] */ "ONGOR", "GOPO", "Xen0byte", "Gwynplaine" ];
 
         foreach (string subAccountName in subAccountNames)
         {
@@ -90,7 +93,7 @@ public static class SeedDataHandlers
             await context.AddAsync(subAccount, cancellationToken);
         }
 
-        string[] hostAccountNames = [ "HOST" ];
+        string[] hostAccountNames = [ "HOST", "SERVER" ];
 
         foreach (string hostAccountName in hostAccountNames)
         {
