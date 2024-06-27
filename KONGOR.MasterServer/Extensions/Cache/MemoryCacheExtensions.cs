@@ -1,6 +1,6 @@
 ﻿namespace KONGOR.MasterServer.Extensions.Cache;
 
-public static class IMemoryCacheExtensions
+public static class MemoryCacheExtensions
 {
     private static string ConstructSRPAuthenticationSessionDataKey(string accountName) => $@"SRP-SESSION-DATA:[""{accountName}""]";
 

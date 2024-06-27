@@ -11,8 +11,7 @@ public partial class ClientRequesterController
 
         string? gameType = Request.Form.ContainsKey("gametype") ? Request.Form["gametype"].ToString() : null;
 
-        List<MatchServer> servers = (await DistributedCache.HashGetAllAsync("MATCH-SERVERS"))
-            .Select(entry => JsonSerializer.Deserialize<MatchServer>(entry.Value.ToString())).OfType<MatchServer>().ToList();
+        List<MatchServer> servers = await DistributedCache.GetMatchServers();
 
         switch (gameType)
         {
