@@ -405,12 +405,22 @@ public partial class IndividualPlayerStats
 
 public static class StatsForSubmissionRequestFormExtensions
 {
-    public static MatchStatistics ToMatchStatisticsEntity(this StatsForSubmissionRequestForm form)
+    public static MatchStatistics ToMatchStatisticsEntity(this StatsForSubmissionRequestForm form, long? matchServerID = null, string? hostAccountName = null)
     {
         MatchStatistics statistics = new()
         {
-            ServerID = form.ServerID ?? throw new NullReferenceException("Server ID Is NULL"),
-            HostAccountName = form.HostAccountName ?? throw new NullReferenceException("Host Account Name Is NULL"),
+            ServerID = form.ServerID ?? (matchServerID ?? throw new NullReferenceException("Server ID Is NULL")),
+
+            // A Stats Resubmission Request Form Contains The Match Server ID While A Stats Submission Request Form Does Not
+            // We Always Want To Persist The Match Server ID To The Database
+            // So We Use The Match Server ID From The Form, If It Exists, Otherwise We Use The Match Server ID Passed As An Argument
+
+            HostAccountName = form.HostAccountName ?? (hostAccountName ?? throw new NullReferenceException("Host Account Name Is NULL")),
+
+            // A Stats Resubmission Request Form Contains The Host Account Name While A Stats Submission Request Form Does Not
+            // We Always Want To Persist The Host Account Name To The Database
+            // So We Use The Host Account Name From The Form, If It Exists, Otherwise We Use The Host Account Name Passed As An Argument
+
             MatchID = form.MatchStats.MatchID,
             Map = form.MatchStats.Map,
             MapVersion = form.MatchStats.MapVersion,

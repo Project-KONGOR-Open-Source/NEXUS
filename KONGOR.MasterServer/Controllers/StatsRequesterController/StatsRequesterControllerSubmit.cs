@@ -12,7 +12,7 @@ public partial class StatsRequesterController
         if (matchServer is null)
             return Unauthorized($@"No Match Server Could Be Found For Session Cookie ""{form.Session}""");
 
-        MatchStatistics matchStatistics = form.ToMatchStatisticsEntity();
+        MatchStatistics matchStatistics = form.ToMatchStatisticsEntity(matchServer.ID, matchServer.HostAccountName);
 
         List<PlayerStatistics> playerStatistics = [];
 
@@ -71,11 +71,7 @@ public partial class StatsRequesterController
         {
             string accountName = form.PlayerStats[playerIndex].Values.Single().AccountName;
 
-            // TODO: Figure Out If The Account Name Should Include The Clan Tag, And Get Rid Of This Horrible Query
-            // Actually, This Is Certainly A Bug Because The Clan Tag Is Sent As NULL In The Form Data But Is Part Of The Account Name
-
-            Account? account = MerrickContext.Accounts.Include(account => account.Clan)
-                .Where(account => accountName.Contains(account.Name)).AsEnumerable().SingleOrDefault(account => account.NameWithClanTag.Equals(accountName));
+            Account? account = await MerrickContext.Accounts.SingleOrDefaultAsync(account => account.Name.Equals(accountName));
 
             if (account is null)
             {
