@@ -390,13 +390,16 @@ public partial class ServerRequesterController
 
         // TODO: Maybe Make The Servers And Managers Expire From The Cache After A Certain Amount Of Time, And Use This Call To Refresh The Expiration Time
 
-        (string hostAccountName, MatchServer matchServer) = await DistributedCache.GetMatchServerBySessionCookie(session);
+        MatchServer? matchServer = await DistributedCache.GetMatchServerBySessionCookie(session);
+
+        if (matchServer is null)
+            return Unauthorized($@"No Match Server Could Be Found For Session Cookie ""{session}""");
 
         matchServer.Status = Enum.Parse<ServerStatus>(connectionState);
 
         // TODO: Put All The Other Data In The Server Model
 
-        await DistributedCache.SetMatchServer(hostAccountName, matchServer);
+        await DistributedCache.SetMatchServer(matchServer.HostAccountName, matchServer);
 
         return Ok();
     }

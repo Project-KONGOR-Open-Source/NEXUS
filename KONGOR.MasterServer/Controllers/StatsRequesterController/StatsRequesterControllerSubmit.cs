@@ -7,7 +7,10 @@ public partial class StatsRequesterController
         if (form.Session is null)
             return BadRequest(@"Missing Value For Form Parameter ""session""");
 
-        // TODO: Validate Session
+        MatchServer? matchServer = await DistributedCache.GetMatchServerBySessionCookie(form.Session);
+
+        if (matchServer is null)
+            return Unauthorized($@"No Match Server Could Be Found For Session Cookie ""{form.Session}""");
 
         MatchStatistics matchStatistics = form.ToMatchStatisticsEntity();
 
@@ -58,7 +61,7 @@ public partial class StatsRequesterController
         if (form.ServerID is null)
             return BadRequest(@"Missing Value For Form Parameter ""server_id""");
 
-        // TODO: Do Something With Server ID
+        // TODO: Validate Server By ID (Maybe? Server May No Longer Exist At Stats Resubmission Time)
 
         MatchStatistics matchStatistics = form.ToMatchStatisticsEntity();
 

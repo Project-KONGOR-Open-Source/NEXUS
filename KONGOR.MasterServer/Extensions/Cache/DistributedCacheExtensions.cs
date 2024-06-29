@@ -36,35 +36,34 @@ public static class DistributedCacheExtensions
         return matchServers;
     }
 
-    public static async Task<(string HostAccountName, MatchServer MatchServer)> GetMatchServerBySessionCookie(this IDatabase distributedCache, string sessionCookie)
+    public static async Task<MatchServer?> GetMatchServerBySessionCookie(this IDatabase distributedCache, string sessionCookie)
     {
-        (string hostAccountName, MatchServer matchServer) = (await distributedCache.HashGetAllAsync("MATCH-SERVERS"))
-            .Select(entry => (entry.Name.ToString().Split(':').First(), JsonSerializer.Deserialize<MatchServer>(entry.Value.ToString())
-                ?? throw new NullReferenceException("Deserialized Match Server Is NULL")))
-            .SingleOrDefault(tuple => tuple.Item2.Cookie.Equals(sessionCookie));
+        HashEntry[] serializedMatchServers = await distributedCache.HashGetAllAsync(MatchServersKey);
 
-        return (hostAccountName, matchServer);
+        List<MatchServer> matchServers = serializedMatchServers.Select(entry => JsonSerializer.Deserialize<MatchServer>(entry.Value.ToString()))
+            .OfType<MatchServer>().ToList();
+
+        MatchServer? matchServer = matchServers.SingleOrDefault(server => server.Cookie.Equals(sessionCookie));
+
+        return matchServer;
     }
 
-    public static async Task<(MatchServerManager MatchServerManager, List<MatchServer> MatchServers)> GetMatchServerManagerAndMatchServersByAccountName(this IDatabase distributedCache, string hostAccountName)
+    public static async Task<(MatchServerManager? MatchServerManager, List<MatchServer> MatchServers)> GetMatchServerManagerAndMatchServersByAccountName(this IDatabase distributedCache, string hostAccountName)
     {
-        MatchServerManager matchServerManager = await distributedCache.GetMatchServerManagerByAccountName(hostAccountName);
+        MatchServerManager? matchServerManager = await distributedCache.GetMatchServerManagerByAccountName(hostAccountName);
         List<MatchServer> matchServers = await distributedCache.GetMatchServersByAccountName(hostAccountName);
 
         return (matchServerManager, matchServers);
     }
 
-    public static async Task<MatchServerManager> GetMatchServerManagerByAccountName(this IDatabase distributedCache, string hostAccountName)
+    public static async Task<MatchServerManager?> GetMatchServerManagerByAccountName(this IDatabase distributedCache, string hostAccountName)
     {
         string? serializedMatchServerManager = await distributedCache.HashGetAsync(MatchServerManagersKey, hostAccountName);
 
-        if (serializedMatchServerManager is null)
-            throw new NullReferenceException($@"Serialized Match Server Manager For Host Account Name ""{hostAccountName}"" Is NULL");
+        if (serializedMatchServerManager is null) return null;
 
-        MatchServerManager? matchServerManager = JsonSerializer.Deserialize<MatchServerManager>(serializedMatchServerManager);
-
-        if (matchServerManager is null)
-            throw new NullReferenceException($@"Deserialized Match Server Manager For Host Account Name ""{hostAccountName}"" Is NULL");
+        MatchServerManager matchServerManager = JsonSerializer.Deserialize<MatchServerManager>(serializedMatchServerManager)
+            ?? throw new NullReferenceException($@"Unable To Deserialize Match Server Manager With Key ""{hostAccountName}""");
 
         return matchServerManager;
     }
@@ -79,16 +78,18 @@ public static class DistributedCacheExtensions
         {
             string serializedMatchServer = entry.Value.ToString();
 
-            MatchServer? matchServer = JsonSerializer.Deserialize<MatchServer>(serializedMatchServer);
-
-            if (matchServer is null)
-                throw new NullReferenceException($@"Deserialized Match Server With Key ""{entry.Name}"" Is NULL");
+            MatchServer matchServer = JsonSerializer.Deserialize<MatchServer>(serializedMatchServer)
+                ?? throw new NullReferenceException($@"Unable To Deserialize Match Server With Key ""{entry.Name}""");
 
             matchServers.Add(matchServer);
         }
 
         return matchServers;
     }
+
+    // TODO: Get Server By ID
+
+    // TODO: Add Extension Methods To Remove Match Server Manager And Match Servers By Account Name
 
     // TODO: Add Extension Method To Remove Match Server Manager By Account Name If No Match Servers Are Associated With The Host Account Name
 }
