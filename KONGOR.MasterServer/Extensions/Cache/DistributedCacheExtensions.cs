@@ -30,10 +30,10 @@ public static class DistributedCacheExtensions
 
     public static async Task<List<MatchServer>> GetMatchServers(this IDatabase distributedCache)
     {
-        List<MatchServer> servers = (await distributedCache.HashGetAllAsync(MatchServersKey))
+        List<MatchServer> matchServers = (await distributedCache.HashGetAllAsync(MatchServersKey))
             .Select(entry => JsonSerializer.Deserialize<MatchServer>(entry.Value.ToString())).OfType<MatchServer>().ToList();
 
-        return servers;
+        return matchServers;
     }
 
     public static async Task<(string HostAccountName, MatchServer MatchServer)> GetMatchServerBySessionCookie(this IDatabase distributedCache, string sessionCookie)
@@ -46,5 +46,49 @@ public static class DistributedCacheExtensions
         return (hostAccountName, matchServer);
     }
 
-    // TODO: GetMatchServerManagerAndMatchServersByAccountName -> (MatchServerManager, List<MatchServer>)
+    public static async Task<(MatchServerManager MatchServerManager, List<MatchServer> MatchServers)> GetMatchServerManagerAndMatchServersByAccountName(this IDatabase distributedCache, string hostAccountName)
+    {
+        MatchServerManager matchServerManager = await distributedCache.GetMatchServerManagerByAccountName(hostAccountName);
+        List<MatchServer> matchServers = await distributedCache.GetMatchServersByAccountName(hostAccountName);
+
+        return (matchServerManager, matchServers);
+    }
+
+    public static async Task<MatchServerManager> GetMatchServerManagerByAccountName(this IDatabase distributedCache, string hostAccountName)
+    {
+        string? serializedMatchServerManager = await distributedCache.HashGetAsync(MatchServerManagersKey, hostAccountName);
+
+        if (serializedMatchServerManager is null)
+            throw new NullReferenceException($@"Serialized Match Server Manager For Host Account Name ""{hostAccountName}"" Is NULL");
+
+        MatchServerManager? matchServerManager = JsonSerializer.Deserialize<MatchServerManager>(serializedMatchServerManager);
+
+        if (matchServerManager is null)
+            throw new NullReferenceException($@"Deserialized Match Server Manager For Host Account Name ""{hostAccountName}"" Is NULL");
+
+        return matchServerManager;
+    }
+
+    public static async Task<List<MatchServer>> GetMatchServersByAccountName(this IDatabase distributedCache, string hostAccountName)
+    {
+        List<MatchServer> matchServers = [];
+
+        IAsyncEnumerable<HashEntry> scanResult = distributedCache.HashScanAsync(MatchServersKey, pattern: $"{hostAccountName}:*", pageSize: int.MaxValue);
+
+        await foreach (HashEntry entry in scanResult)
+        {
+            string serializedMatchServer = entry.Value.ToString();
+
+            MatchServer? matchServer = JsonSerializer.Deserialize<MatchServer>(serializedMatchServer);
+
+            if (matchServer is null)
+                throw new NullReferenceException($@"Deserialized Match Server With Key ""{entry.Name}"" Is NULL");
+
+            matchServers.Add(matchServer);
+        }
+
+        return matchServers;
+    }
+
+    // TODO: Add Extension Method To Remove Match Server Manager By Account Name If No Match Servers Are Associated With The Host Account Name
 }
