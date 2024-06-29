@@ -40,7 +40,8 @@ public partial class ServerRequesterController
 
         MatchServerManager matchServerManager = new()
         {
-            HostID = account.ID,
+            HostAccountID = account.ID,
+            HostAccountName = account.Name,
             ID = hostAccountName.GetDeterministicInt32Hash(),
 
             IPAddress = Request.HttpContext.Connection.RemoteIpAddress.MapToIPv4().ToString()
@@ -130,7 +131,8 @@ public partial class ServerRequesterController
 
         MatchServer matchServer = new()
         {
-            HostID = account.ID,
+            HostAccountID = account.ID,
+            HostAccountName = account.Name,
             ID = serverIdentifier.GetDeterministicInt32Hash(),
             Name = serverName,
             Instance = int.Parse(serverInstance),

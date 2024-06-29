@@ -2,7 +2,9 @@
 
 public class MatchServerManager
 {
-    public required int HostID { get; set; }
+    public required int HostAccountID { get; set; }
+
+    public required string HostAccountName { get; set; }
 
     public required int ID { get; set; }
 
