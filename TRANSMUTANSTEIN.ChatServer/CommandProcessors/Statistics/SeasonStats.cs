@@ -21,6 +21,8 @@ public class SeasonStats(MerrickContext merrick, ILogger<SeasonStats> logger) : 
     {
         Response.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_CAMPAIGN_STATS);
 
+        // TODO: Send Actual Season Statistics
+
         Response.WriteFloat32(1850.55f);    // TMM Rating
         Response.WriteInt32(15);            // TMM Rank
         Response.WriteInt32(6661);          // TMM Wins
