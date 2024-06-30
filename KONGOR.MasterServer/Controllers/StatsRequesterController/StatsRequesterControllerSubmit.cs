@@ -12,29 +12,44 @@ public partial class StatsRequesterController
         if (matchServer is null)
             return Unauthorized($@"No Match Server Could Be Found For Session Cookie ""{form.Session}""");
 
-        MatchStatistics matchStatistics = form.ToMatchStatisticsEntity(matchServer.ID, matchServer.HostAccountName);
+        MatchStatistics? existingMatchStatistics = await MerrickContext.MatchStatistics.SingleOrDefaultAsync(stats => stats.MatchID == form.MatchStats.MatchID);
 
-        List<PlayerStatistics> playerStatistics = [];
+        if (existingMatchStatistics is null)
+        {
+            MatchStatistics matchStatistics = form.ToMatchStatisticsEntity(matchServer.ID, matchServer.HostAccountName);
+
+            await MerrickContext.MatchStatistics.AddAsync(matchStatistics);
+        }
+
+        else Logger.LogError($"[BUG] Match Statistics For Match ID {form.MatchStats.MatchID} Have Already Been Submitted");
 
         foreach (int playerIndex in form.PlayerInventory.Keys)
         {
             // The Match Server Sends The Account Name With The Clan Tag Combined Into A Single String Value So We Need To Separate Them
             string accountName = Account.SeparateClanTagFromAccountName(form.PlayerStats[playerIndex].Values.Single().AccountName).AccountName;
 
-            Account? account = await MerrickContext.Accounts.Include(account => account.Clan).SingleOrDefaultAsync(account => account.Name.Equals(accountName));
+            PlayerStatistics? existingPlayerStatistics = await MerrickContext.PlayerStatistics
+                .SingleOrDefaultAsync(stats => stats.MatchID == form.MatchStats.MatchID && stats.AccountName == accountName);
 
-            if (account is null)
+            if (existingPlayerStatistics is null)
             {
-                Logger.LogError($@"[BUG] Unable To Retrieve Account For Account Name ""{accountName}""");
+                Account? account = await MerrickContext.Accounts.Include(account => account.Clan).SingleOrDefaultAsync(account => account.Name.Equals(accountName));
 
-                return NotFound($@"Unable To Retrieve Account For Account Name ""{accountName}""");
+                if (account is null)
+                {
+                    Logger.LogError($@"[BUG] Unable To Retrieve Account For Account Name ""{accountName}""");
+
+                    return NotFound($@"Unable To Retrieve Account For Account Name ""{accountName}""");
+                }
+
+                PlayerStatistics playerStatistics = form.ToPlayerStatisticsEntity(playerIndex, account.ID, account.Name, account.Clan?.ID, account.Clan?.Tag);
+
+                await MerrickContext.PlayerStatistics.AddAsync(playerStatistics);
             }
 
-            playerStatistics.Add(form.ToPlayerStatisticsEntity(playerIndex, account.ID, account.Name, account.Clan?.ID, account.Clan?.Tag));
+            else Logger.LogError($@"[BUG] Player Statistics For Account Name ""{accountName}"" In Match ID {form.MatchStats.MatchID} Have Already Been Submitted");
         }
 
-        await MerrickContext.MatchStatistics.AddAsync(matchStatistics);
-        await MerrickContext.PlayerStatistics.AddRangeAsync(playerStatistics);
         await MerrickContext.SaveChangesAsync();
 
         return Ok();
@@ -64,29 +79,44 @@ public partial class StatsRequesterController
 
         // TODO: Validate Server By ID (Maybe? Server May No Longer Exist At Stats Resubmission Time)
 
-        MatchStatistics matchStatistics = form.ToMatchStatisticsEntity();
+        MatchStatistics? existingMatchStatistics = await MerrickContext.MatchStatistics.SingleOrDefaultAsync(stats => stats.MatchID == form.MatchStats.MatchID);
 
-        List<PlayerStatistics> playerStatistics = [];
+        if (existingMatchStatistics is null)
+        {
+            MatchStatistics matchStatistics = form.ToMatchStatisticsEntity();
+
+            await MerrickContext.MatchStatistics.AddAsync(matchStatistics);
+        }
+
+        else Logger.LogError($"[BUG] Match Statistics For Match ID {form.MatchStats.MatchID} Have Already Been Submitted");
 
         foreach (int playerIndex in form.PlayerInventory.Keys)
         {
             // The Match Server Sends The Account Name With The Clan Tag Combined Into A Single String Value So We Need To Separate Them
             string accountName = Account.SeparateClanTagFromAccountName(form.PlayerStats[playerIndex].Values.Single().AccountName).AccountName;
 
-            Account? account = await MerrickContext.Accounts.Include(account => account.Clan).SingleOrDefaultAsync(account => account.Name.Equals(accountName));
+            PlayerStatistics? existingPlayerStatistics = await MerrickContext.PlayerStatistics
+                .SingleOrDefaultAsync(stats => stats.MatchID == form.MatchStats.MatchID && stats.AccountName == accountName);
 
-            if (account is null)
+            if (existingPlayerStatistics is null)
             {
-                Logger.LogError($@"[BUG] Unable To Retrieve Account For Account Name ""{accountName}""");
+                Account? account = await MerrickContext.Accounts.Include(account => account.Clan).SingleOrDefaultAsync(account => account.Name.Equals(accountName));
 
-                return NotFound($@"Unable To Retrieve Account For Account Name ""{accountName}""");
+                if (account is null)
+                {
+                    Logger.LogError($@"[BUG] Unable To Retrieve Account For Account Name ""{accountName}""");
+
+                    return NotFound($@"Unable To Retrieve Account For Account Name ""{accountName}""");
+                }
+
+                PlayerStatistics playerStatistics = form.ToPlayerStatisticsEntity(playerIndex, account.ID, account.Name, account.Clan?.ID, account.Clan?.Tag);
+
+                await MerrickContext.PlayerStatistics.AddAsync(playerStatistics);
             }
 
-            playerStatistics.Add(form.ToPlayerStatisticsEntity(playerIndex, account.ID, account.Name, account.Clan?.ID, account.Clan?.Tag));
+            else Logger.LogError($@"[BUG] Player Statistics For Account Name ""{accountName}"" In Match ID {form.MatchStats.MatchID} Have Already Been Submitted");
         }
 
-        await MerrickContext.MatchStatistics.AddAsync(matchStatistics);
-        await MerrickContext.PlayerStatistics.AddRangeAsync(playerStatistics);
         await MerrickContext.SaveChangesAsync();
 
         return Ok();
