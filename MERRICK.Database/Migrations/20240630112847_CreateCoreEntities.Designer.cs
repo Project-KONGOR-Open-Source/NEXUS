@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MERRICK.Database.Migrations
 {
     [DbContext(typeof(MerrickContext))]
-    [Migration("20240624235959_CreateCoreEntities")]
+    [Migration("20240630112847_CreateCoreEntities")]
     partial class CreateCoreEntities
     {
         /// <inheritdoc />
@@ -446,6 +446,9 @@ namespace MERRICK.Database.Migrations
                         .HasColumnType("int");
 
                     b.Property<int>("Buybacks")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("ClanID")
                         .HasColumnType("int");
 
                     b.Property<string>("ClanTag")

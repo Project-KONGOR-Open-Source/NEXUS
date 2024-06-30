@@ -57,4 +57,20 @@ public class Account
         ClanTier.Leader     => "Leader",
         _                   => throw new ArgumentOutOfRangeException(@$"Unsupported Clan Tier ""{ClanTier}""")
     };
+
+    public static (string ClanTag, string AccountName) SeparateClanTagFromAccountName(string accountNameWithClanTag)
+    {
+        // If no '[' and ']' characters are found, then the account is not part of a clan and has no clan tag.
+        if (accountNameWithClanTag.Contains('[').Equals(false) && accountNameWithClanTag.Contains(']').Equals(false))
+            return (string.Empty, accountNameWithClanTag);
+
+        // If '[' is not the first character, then the account name contains the '[' and ']' characters, but the account is not part of a clan and has no clan tag.
+        if (accountNameWithClanTag.StartsWith('[').Equals(false))
+            return (string.Empty, accountNameWithClanTag);
+
+        // Remove the leading '[' character and split at the first occurence of the ']' character. The resulting account name may contain the '[' and ']' characters.
+        string[] segments = accountNameWithClanTag.TrimStart('[').Split(']', count: 2);
+
+        return (segments.First(), segments.Last());
+    }
 }

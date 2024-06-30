@@ -34,6 +34,9 @@ public class MatchStatistics
 
     public required int AveragePSRTeamTwo { get; set; }
 
+    // TODO: MMR And Casual MMR May Need To Also Be Added Here
+    // TODO: PSR And (Casual) MMR Should Default To The Data Type Default Value If Not Provided
+
     public required string GameMode { get; set; }
 
     public required int ScoreTeam1 { get; set; }

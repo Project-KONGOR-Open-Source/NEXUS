@@ -445,6 +445,9 @@ namespace MERRICK.Database.Migrations
                     b.Property<int>("Buybacks")
                         .HasColumnType("int");
 
+                    b.Property<int?>("ClanID")
+                        .HasColumnType("int");
+
                     b.Property<string>("ClanTag")
                         .HasMaxLength(4)
                         .HasColumnType("nvarchar(4)");

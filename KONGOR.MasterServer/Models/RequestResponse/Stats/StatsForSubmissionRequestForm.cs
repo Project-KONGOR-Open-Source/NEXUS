@@ -1,7 +1,7 @@
 ﻿namespace KONGOR.MasterServer.Models.RequestResponse.Stats;
 
 // TODO: Inspect Stats Data For All Other Supported Game Modes (Ranked, Casual Ranked, MidWars, RiftWars) To Determine If They Have Any Unique Properties (The Models Below Are From Public Matches)
-// TODO: The Following May Be Needed: AverageMMR, AverageMMRTeamOne, AverageMMRTeamTwo
+// TODO: The Following May Be Needed: AverageMMR, AverageMMRTeamOne, AverageMMRTeamTwo, etc.
 
 // Properties Common To Both "submit_stats" And "resubmit_stats" Requests
 public partial class StatsForSubmissionRequestForm
@@ -82,6 +82,8 @@ public class MatchStats
 
     [FromForm(Name = "avgpsr_team2")]
     public required int AveragePSRTeamTwo { get; set; }
+
+    // TODO: MMR And Casual MMR May Need To Also Be Added Here
 
     [FromForm(Name = "gamemode")]
     public required string GameMode { get; set; }
@@ -457,7 +459,7 @@ public static class StatsForSubmissionRequestFormExtensions
         return statistics;
     }
 
-    public static PlayerStatistics ToPlayerStatisticsEntity(this StatsForSubmissionRequestForm form, int playerIndex, int accountID)
+    public static PlayerStatistics ToPlayerStatisticsEntity(this StatsForSubmissionRequestForm form, int playerIndex, int accountID, string accountName, int? clanID, string? clanTag)
     {
         string hero = form.PlayerStats[playerIndex].Keys.Single();
         IndividualPlayerStats player = form.PlayerStats[playerIndex][hero];
@@ -466,7 +468,9 @@ public static class StatsForSubmissionRequestFormExtensions
         {
             MatchID = form.MatchStats.MatchID,
             AccountID = accountID,
-            AccountName = player.AccountName,
+            AccountName = accountName,
+            ClanID = clanID,
+            ClanTag = clanTag,
             Team = player.Team,
             LobbyPosition = player.LobbyPosition,
             GroupNumber = player.GroupNumber,

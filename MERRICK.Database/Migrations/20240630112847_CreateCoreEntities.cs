@@ -82,6 +82,7 @@ namespace MERRICK.Database.Migrations
                     MatchID = table.Column<int>(type: "int", nullable: false),
                     AccountID = table.Column<int>(type: "int", nullable: false),
                     AccountName = table.Column<string>(type: "nvarchar(15)", maxLength: 15, nullable: false),
+                    ClanID = table.Column<int>(type: "int", nullable: true),
                     ClanTag = table.Column<string>(type: "nvarchar(4)", maxLength: 4, nullable: true),
                     Team = table.Column<int>(type: "int", nullable: false),
                     LobbyPosition = table.Column<int>(type: "int", nullable: false),
