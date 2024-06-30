@@ -81,12 +81,19 @@ public partial class StatsRequesterController
         if (form.StatsResubmissionKey is null)
             return BadRequest(@"Missing Value For Form Parameter ""resubmission_key""");
 
-        // TODO: Do Something With Stats Resubmission Key
+        string computedStatsResubmissionKey = Convert.ToHexString(SHA1.HashData(Encoding.UTF8.GetBytes(form.MatchStats.MatchID + MatchStatsSubmissionSalt))).ToLower();
+        string expectedStatsResubmissionKey = form.StatsResubmissionKey;
+
+        if (computedStatsResubmissionKey.Equals(expectedStatsResubmissionKey) is false)
+            return Unauthorized("Invalid Match Statistics Resubmission Key");
 
         if (form.ServerID is null)
             return BadRequest(@"Missing Value For Form Parameter ""server_id""");
 
-        // TODO: Validate Server By ID (Maybe? Server May No Longer Exist At Stats Resubmission Time)
+        MatchServer? matchServer = (await DistributedCache.GetMatchServersByAccountName(hostAccount.Name)).SingleOrDefault(server => server.ID == form.ServerID);
+
+        if (matchServer is null)
+            Logger.LogInformation($@"Match Server ID {form.ServerID} Hosted By ""{hostAccount.Name}"" Is No Longer Online While Match Statistics For Match ID {form.MatchStats.MatchID} Are Being Resubmitted");
 
         MatchStatistics? existingMatchStatistics = await MerrickContext.MatchStatistics.SingleOrDefaultAsync(stats => stats.MatchID == form.MatchStats.MatchID);
 
