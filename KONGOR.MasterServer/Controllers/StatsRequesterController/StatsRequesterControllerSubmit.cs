@@ -89,4 +89,28 @@ public partial class StatsRequesterController
 
         return Ok();
     }
+
+    // TODO: Use This To Populate Clan Tag And ID
+
+    /// <summary>
+    ///     Takes a fully qualified account identifier (an optional clan tag enclosed in brackets and a mandatory account name) and returns a tuple composed of a clan tag, if one exists, and an account name.
+    /// </summary>
+    public static (string ClanTag, string AccountName) SeparateClanTagFromAccountName(string fullyQualifiedAccountIdentifier)
+    {
+        if (fullyQualifiedAccountIdentifier.Contains('[').Equals(false) && fullyQualifiedAccountIdentifier.Contains(']').Equals(false))
+        {
+            // If no '[' and ']' characters are found in the fully qualified account identifier, then it is safe to assume that the account is not part of a clan and has no clan tag.
+            return (string.Empty, fullyQualifiedAccountIdentifier);
+        }
+
+        // Create a pattern that looks for a clan tag (excluding the enclosing brackets) and an account name.
+        // For the sake of simplicity and maintenance, the regular expression assumes that both the clan tag and the account name can be any character.
+        Regex pattern = new(@"^\[(?<tag>.+)\](?<account>.+)$");
+
+        // A match should always be found, because if the account is not in a clan then this method returns before any regular expression matching happens.
+        Match match = pattern.Match(fullyQualifiedAccountIdentifier);
+
+        // There are now two match groups, a "tag" and an "account". The former is the clan tag (excluding the enclosing brackets), while the latter is the account name.
+        return (match.Groups["tag"].Value, match.Groups["account"].Value);
+    }
 }
