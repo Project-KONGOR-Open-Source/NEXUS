@@ -64,10 +64,19 @@ public partial class StatsRequesterController
         // Which The Match Server Launcher Uses To Separate The Host Account Name From The Match Server Instance ID
         form.HostAccountName = form.HostAccountName.TrimEnd(':');
 
+        Account? hostAccount = await MerrickContext.Accounts.Include(account => account.User).SingleOrDefaultAsync(account => account.Name.Equals(form.HostAccountName));
+
+        if (hostAccount is null)
+            return NotFound($@"Unable To Retrieve Account For Host Account Name ""{hostAccount}""");
+
         if (form.HostAccountPasswordHash is null)
             return BadRequest(@"Missing Value For Form Parameter ""pass""");
 
-        // TODO: Validate Host Account Password
+        string computedSRPPasswordHash = SRPAuthenticationHandlers.ComputeSRPPasswordHash(form.HostAccountPasswordHash, hostAccount.User.SRPPasswordSalt, passwordIsHashed: true);
+        string expectedSRPPasswordHash = hostAccount.User.SRPPasswordHash;
+
+        if (computedSRPPasswordHash.Equals(expectedSRPPasswordHash) is false)
+            return Unauthorized("Invalid Host Account Password");
 
         if (form.StatsResubmissionKey is null)
             return BadRequest(@"Missing Value For Form Parameter ""resubmission_key""");
