@@ -141,12 +141,12 @@ public static class SeedDataHandlers
         {
             Account guestAccount = new()
             {
-                Name = iterator is 0 ? "GUEST" : $"GUEST-{iterator:D2}",
+                Name = iterator is 0 ? "MODERATOR" : $"GUEST-{iterator:D2}",
                 User = userGuest,
-                Type = AccountType.Trial,
+                Type = iterator is 0 ? AccountType.MatchModerator : AccountType.Trial,
                 IsMain = iterator is 0,
                 Clan = clanGuest,
-                ClanTier = ClanTier.Member,
+                ClanTier = iterator is 0 ? ClanTier.Leader : ClanTier.Member,
                 TimestampJoinedClan = DateTime.UtcNow,
                 AscensionLevel = 0,
                 AutoConnectChatChannels = [ "GUESTS" ],
