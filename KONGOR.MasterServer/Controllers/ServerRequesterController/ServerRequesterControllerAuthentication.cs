@@ -62,7 +62,7 @@ public partial class ServerRequesterController
         };
 
         // TODO: Investigate How These Are Used (+ Resolve CDN Host, + Reconcile With CDN Patch Addresses)
-        response["cdn_upload_host"] = "kongor.online";
+        response["cdn_upload_host"] = "kongor.net";
         response["cdn_upload_target"] = "upload";
 
         Logger.LogInformation($@"Server Manager ID ""{matchServerManager.ID}"" Was Registered At ""{matchServerManager.IPAddress}"" With Cookie ""{matchServerManager.Cookie}""");

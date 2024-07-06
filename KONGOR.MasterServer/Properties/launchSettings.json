@@ -16,10 +16,10 @@
         "KONGOR.MasterServer Production": {
             "commandName": "Project",
             "launchBrowser": true,
-            "applicationUrl": "http://api.kongor.online",
+            "applicationUrl": "http://api.kongor.net",
             "launchUrl": "swagger",
             "environmentVariables": {
-                "APPLICATION_URL": "http://api.kongor.online",
+                "APPLICATION_URL": "http://api.kongor.net",
                 "ASPNETCORE_ENVIRONMENT": "Production",
                 "DOTNET_ENVIRONMENT": "Production"
             },

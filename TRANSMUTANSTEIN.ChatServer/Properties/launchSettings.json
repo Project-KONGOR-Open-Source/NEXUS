@@ -16,10 +16,10 @@
 		"TRANSMUTANSTEIN.ChatServer Production": {
 			"commandName": "Project",
 			"launchBrowser": true,
-			"applicationUrl": "https://chat.kongor.online",
+			"applicationUrl": "https://chat.kongor.net",
 			"launchUrl": "health",
 			"environmentVariables": {
-				"APPLICATION_URL": "https://chat.kongor.online",
+				"APPLICATION_URL": "https://chat.kongor.net",
 				"ASPNETCORE_ENVIRONMENT": "Production",
 				"DOTNET_ENVIRONMENT": "Production"
 			},

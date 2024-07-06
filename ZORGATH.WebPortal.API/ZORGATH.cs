@@ -40,8 +40,8 @@ public class ZORGATH
 
         // Set CORS Origins
         string[] corsOrigins = builder.Environment.IsDevelopment()
-            ? [ "https://localhost:55550",      "https://localhost:55551",          "https://localhost:55552",          "https://localhost:55553",          "https://localhost:55554",      "http://localhost:55555",   "https://localhost:55556",          "https://localhost:55557"         ]
-            : [ "https://aspire.kongor.online", "https://telemetry.kongor.online",  "https://resources.kongor.online",  "https://database.kongor.online",   "https://chat.kongor.online",   "http://api.kongor.online", "https://portal.api.kongor.online", "https://portal.ui.kongor.online" ];
+            ? [ "https://localhost:55550",   "https://localhost:55551",      "https://localhost:55552",      "https://localhost:55553",     "https://localhost:55554", "http://localhost:55555", "https://localhost:55556",       "https://localhost:55557"      ]
+            : [ "https://aspire.kongor.net", "https://telemetry.kongor.net", "https://resources.kongor.net", "https://database.kongor.net", "https://chat.kongor.net", "http://api.kongor.net",  "https://portal.api.kongor.net", "https://portal.ui.kongor.net" ];
 
         // Add CORS
         builder.Services.AddCors(options =>
