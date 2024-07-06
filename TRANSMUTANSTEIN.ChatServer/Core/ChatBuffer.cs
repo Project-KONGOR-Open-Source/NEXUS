@@ -71,6 +71,25 @@ public class ChatBuffer : TCPBuffer
     }
 
     /// <summary>
+    ///     Append 1 byte with a value of either 0 or 1 to the buffer, and return the number of bytes appended.
+    /// </summary>
+    public long WriteBool(bool value)
+        => WriteInt8(BitConverter.GetBytes(value).Single());
+
+    /// <summary>
+    ///     Reads 1 byte from the buffer, and return the result as a boolean value if it can be parsed to one.
+    /// </summary>
+    public bool ReadBool()
+    {
+        byte data = ReadInt8();
+
+        if (data is not 0 and not 1)
+            throw new InvalidDataException($"Unable To Read A Boolean Value From Buffer Byte Value {data}");
+
+        return data is 1;
+    }
+
+    /// <summary>
     ///     Append 2 bytes to the buffer, and return the number of bytes appended.
     /// </summary>
     public long WriteInt16(short value)
