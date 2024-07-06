@@ -412,7 +412,7 @@ public static class ChatProtocol
     };
 
     public static readonly string[] TMMUpdateTypes =
-    {
+    [
         "TMM_CREATE_GROUP",
         "TMM_FULL_GROUP_UPDATE",
         "TMM_PARTIAL_GROUP_UPDATE",
@@ -431,7 +431,7 @@ public static class ChatProtocol
         "TMM_FOUND_MATCH_UPDATE",
         "TMM_GROUP_FOUND_SERVER",
         "TMM_MATCHMAKING_DISABLED"
-    };
+    ];
 
     public enum TMMFailedToJoinReason
     {
