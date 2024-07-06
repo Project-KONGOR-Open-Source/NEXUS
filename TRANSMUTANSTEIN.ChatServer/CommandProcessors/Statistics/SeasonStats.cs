@@ -36,5 +36,9 @@ public class SeasonStats(MerrickContext merrick, ILogger<SeasonStats> logger) : 
         Response.PrependBufferSize();
 
         session.SendAsync(Response.Data);
+
+        Response = new ChatBuffer(); // Also Respond With NET_CHAT_CL_TMM_POPULARITY_UPDATE Since The Client Will Not Explicitly Request It
+
+        await PopularityUpdate.SendMatchmakingPopularity(session, buffer, Response);
     }
 }

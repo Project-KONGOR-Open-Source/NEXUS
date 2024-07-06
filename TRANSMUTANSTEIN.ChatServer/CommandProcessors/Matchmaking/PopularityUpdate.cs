@@ -7,6 +7,9 @@ public class PopularityUpdate(MerrickContext merrick, ILogger<PopularityUpdate> 
     private ILogger<PopularityUpdate> Logger { get; set; } = logger;
 
     public async Task Process(TCPSession session, ChatBuffer buffer)
+        => await SendMatchmakingPopularity(session, buffer, Response);
+
+    public static async Task SendMatchmakingPopularity(TCPSession session, ChatBuffer buffer, ChatBuffer response)
     {
         // TODO: Get All Maps And Compile List
         List<string> maps = ["caldavar", "midwars", "riftwars"];
@@ -51,19 +54,19 @@ public class PopularityUpdate(MerrickContext merrick, ILogger<PopularityUpdate> 
             .Append("regions:").Append(string.Concat(legendRegions.Select(region => region + '|')))
             .ToString();
 
-        Response.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_POPULARITY_UPDATE);
+        response.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_POPULARITY_UPDATE);
 
-        Response.WriteInt8(1);                                                  // TMM Availability (0 If No Regions Are Enabled, Or 1 Otherwise)
-        Response.WriteString(string.Join('|', maps));                           // Available TMM Maps
-        Response.WriteString(string.Join('|', gameTypes));                      // Available TMM Game Types (Only Used By The Old UI; Needs To Match The List Of Available TMM Maps)
-        Response.WriteString(string.Join('|', gameModes));                      // Available TMM Game Modes
-        Response.WriteString(string.Join('|', regions));                        // Available TMM Regions
-        Response.WriteString(string.Join('|', disabledGameModesByGameType));    // Disabled Game Modes By Game Type
-        Response.WriteString(string.Join('|', disabledGameModesByRankType));    // Disabled Game Modes By Rank Type
-        Response.WriteString(string.Join('|', disabledGameModesByMap));         // Disabled Game Modes By Map
-        Response.WriteString(string.Join('|', disabledRegions));                // Disabled TMM Regions
-        Response.WriteString(clientCountryCode);                                // Client Country Code
-        Response.WriteString(legend);                                           // TMM Legend
+        response.WriteInt8(1);                                                  // TMM Availability (0 If No Regions Are Enabled, Or 1 Otherwise)
+        response.WriteString(string.Join('|', maps));                           // Available TMM Maps
+        response.WriteString(string.Join('|', gameTypes));                      // Available TMM Game Types (Only Used By The Old UI; Needs To Match The List Of Available TMM Maps)
+        response.WriteString(string.Join('|', gameModes));                      // Available TMM Game Modes
+        response.WriteString(string.Join('|', regions));                        // Available TMM Regions
+        response.WriteString(string.Join('|', disabledGameModesByGameType));    // Disabled Game Modes By Game Type
+        response.WriteString(string.Join('|', disabledGameModesByRankType));    // Disabled Game Modes By Rank Type
+        response.WriteString(string.Join('|', disabledGameModesByMap));         // Disabled Game Modes By Map
+        response.WriteString(string.Join('|', disabledRegions));                // Disabled TMM Regions
+        response.WriteString(clientCountryCode);                                // Client Country Code
+        response.WriteString(legend);                                           // TMM Legend
 
         List<int> rankTypes =
         [
@@ -75,35 +78,35 @@ public class PopularityUpdate(MerrickContext merrick, ILogger<PopularityUpdate> 
         foreach (string _1 in maps)
             foreach (int _2 in gameTypes)
                 foreach (int _3 in rankTypes)
-                    Response.WriteInt8(10);
+                    response.WriteInt8(10);
 
         // Popularity By Game Type, Ranges From 0 (Lowest) To 10 (Highest)
         foreach (int _1 in gameTypes)
             foreach (string _2 in maps)
                 foreach (int _3 in rankTypes)
-                    Response.WriteInt8(10);
+                    response.WriteInt8(10);
 
         // Popularity By Game Mode, Ranges From 0 (Lowest) To 10 (Highest)
         foreach (string _1 in legendModes)
             foreach (string _2 in maps)
                 foreach (int _3 in gameTypes)
                     foreach (int _4 in rankTypes)
-                        Response.WriteInt8(10);
+                        response.WriteInt8(10);
 
         // Popularity By Region, Ranges From 0 (Lowest) To 10 (Highest)
         foreach (string _1 in legendRegions)
             foreach (string _2 in maps)
                 foreach (int _3 in gameTypes)
                     foreach (int _4 in rankTypes)
-                        Response.WriteInt8(10);
+                        response.WriteInt8(10);
 
         // Custom Map Rotation End Time (As UNIX Epoch Time); Values In The Past = Disabled
         int customMapRotationTime = Convert.ToInt32(DateTimeOffset.UnixEpoch.ToUnixTimeSeconds());
 
-        Response.WriteInt32(customMapRotationTime);
+        response.WriteInt32(customMapRotationTime);
 
-        Response.PrependBufferSize();
+        response.PrependBufferSize();
 
-        session.SendAsync(Response.Data);
+        session.SendAsync(response.Data);
     }
 }
