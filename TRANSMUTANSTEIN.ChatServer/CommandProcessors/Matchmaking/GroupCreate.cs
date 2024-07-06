@@ -10,8 +10,8 @@ public class GroupCreate(MerrickContext merrick, ILogger<GroupCreate> logger) : 
     {
         byte[] _ = buffer.ReadCommandBytes();
         string clientVersion = buffer.ReadString();
-        ChatProtocol.TMMTypes groupType = (ChatProtocol.TMMTypes) buffer.ReadInt8();
-        ChatProtocol.TMMGameTypes gameType = (ChatProtocol.TMMGameTypes) buffer.ReadInt8(); // TODO: Rename These Enums To Be In The Singular Form
+        ChatProtocol.TMMType groupType = (ChatProtocol.TMMType) buffer.ReadInt8();
+        ChatProtocol.TMMGameType gameType = (ChatProtocol.TMMGameType) buffer.ReadInt8();
         string mapName = buffer.ReadString();
         string[] gameModes = buffer.ReadString().Split('|', StringSplitOptions.RemoveEmptyEntries);
         string[] gameRegions = buffer.ReadString().Split('|', StringSplitOptions.RemoveEmptyEntries);

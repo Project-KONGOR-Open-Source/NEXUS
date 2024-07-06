@@ -13,9 +13,9 @@ public class PopularityUpdate(MerrickContext merrick, ILogger<PopularityUpdate> 
 
         List<int> gameTypes =
         [
-            Convert.ToInt32(ChatProtocol.TMMGameTypes.TMM_GAME_TYPE_CAMPAIGN_NORMAL),
-            Convert.ToInt32(ChatProtocol.TMMGameTypes.TMM_GAME_TYPE_MIDWARS),
-            Convert.ToInt32(ChatProtocol.TMMGameTypes.TMM_GAME_TYPE_RIFTWARS)
+            Convert.ToInt32(ChatProtocol.TMMGameType.TMM_GAME_TYPE_CAMPAIGN_NORMAL),
+            Convert.ToInt32(ChatProtocol.TMMGameType.TMM_GAME_TYPE_MIDWARS),
+            Convert.ToInt32(ChatProtocol.TMMGameType.TMM_GAME_TYPE_RIFTWARS)
         ];
 
         // ALL_PICK: ap, ALL_PICK_GATED: apg, ALL_PICK_DUPLICATE_HEROES: apd, SINGLE_DRAFT: sd, BANNING_DRAFT: bd, BANNING_PICK: bp, ALL_RANDOM: ar, LOCK_PICK: lp, BLIND_BAN: bb, BLIND_BAN_GATED: bbg, BLIND_BAN_RAPID_FIRE: bbr, BOT_MATCH: bm, CAPTAINS_PICK: cm, BALANCED_RANDOM: br, KROS_MODE: km, RANDOM_DRAFT: rd, BANNING_DRAFT_RAPID_FIRE: bdr, COUNTER_PICK: cp, FORCE_PICK: fp, SOCCER_PICK: sp, SOLO_SAME: ss, SOLO_DIFF: sm, HERO_BAN: hb, MIDWARS_BETA: mwb, REBORN: rb

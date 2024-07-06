@@ -577,7 +577,7 @@ public static class ChatProtocol
         PLAYER_SPECTATE_REQUEST_RESPONSE
     };
 
-    public enum PlayerSpectateRequestResponses
+    public enum PlayerSpectateRequestResponse
     {
         PSRR_ALLOW,
         PSRR_DENY,
@@ -597,7 +597,7 @@ public static class ChatProtocol
         NUM_MATCHMAKING_BROADCASTS
     };
 
-    public enum ActionCampaigns
+    public enum ActionCampaign
     {
         AC_DAILY_LOGINS,
         AC_CLICKED_HON_STORE,
@@ -631,7 +631,7 @@ public static class ChatProtocol
         NUM_ACTION_CAMPAIGNS
     };
 
-    public enum GenericResponses
+    public enum GenericResponse
     {
         GR_MAX_MATCH_FIDELITY_DIFFERENCE,
         GR_SCHEDULED_MATCH_FULL,
@@ -726,7 +726,7 @@ public static class ChatProtocol
         NUM_CHAT_CLIENT_STATUSES
     };
 
-    public enum TMMGameTypes
+    public enum TMMGameType
     {
         TMM_GAME_TYPE_NONE              = -1,
 
@@ -745,7 +745,7 @@ public static class ChatProtocol
         TMM_NUM_GAME_TYPES
     };
 
-    public enum TMMTypes
+    public enum TMMType
     {
         TMM_TYPE_SOLO       = 1,
         TMM_TYPE_PVP        = 2,
@@ -753,7 +753,7 @@ public static class ChatProtocol
         TMM_TYPE_CAMPAIGN   = 4
     };
 
-    public enum TMMGameMaps
+    public enum TMMGameMap
     {
         TMM_GAME_MAP_NONE = -1,
 
@@ -774,7 +774,7 @@ public static class ChatProtocol
         TMM_NUM_GAME_MAPS
     };
 
-    public enum TMMGameModes
+    public enum TMMGameMode
     {
         TMM_GAME_MODE_NONE = -1,
 
@@ -807,7 +807,7 @@ public static class ChatProtocol
         TMM_NUM_GAME_MODES
     };
 
-    public enum TMMGameRegions
+    public enum TMMGameRegion
     {
         TMM_GAME_REGION_NONE = -1,
 
