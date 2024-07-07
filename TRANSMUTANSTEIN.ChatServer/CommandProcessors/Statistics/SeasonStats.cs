@@ -8,6 +8,8 @@ public class SeasonStats(MerrickContext merrick, ILogger<SeasonStats> logger) : 
 
     public async Task Process(TCPSession session, ChatBuffer buffer)
     {
+        byte[] _ = buffer.ReadCommandBytes();
+
         // TODO: Create Response Models
 
         Response.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_CAMPAIGN_STATS);
