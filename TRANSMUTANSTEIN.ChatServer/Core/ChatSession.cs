@@ -5,7 +5,7 @@ public class ChatSession(TCPServer server, IServiceProvider serviceProvider) : T
     private IServiceProvider ServiceProvider { get; set; } = serviceProvider;
     private ILogger Logger { get; } = serviceProvider.GetRequiredService<ILogger<ChatSession>>();
 
-    private static Dictionary<ushort, Type> CommandToTypeMap { get; set; } = [];
+    private static ConcurrentDictionary<ushort, Type> CommandToTypeMap { get; set; } = [];
 
     protected override void OnConnected()
     {
@@ -21,13 +21,7 @@ public class ChatSession(TCPServer server, IServiceProvider serviceProvider) : T
 
     protected override void OnReceived(byte[] buffer, long offset, long size)
     {
-        var debug1 = buffer;
-        var debug2 = this.BytesPending;
-        var debug3 = this.BytesReceived;
-        var debug4 = this.BytesSent;
-
-
-        byte[] frame = buffer[..(int)BytesReceived];
+        byte[] frame = buffer[(int)offset..(int)size];
 
         if (size < 2)
             throw new Exception("Invalid Frame Size (command etc.)");
@@ -90,12 +84,12 @@ public class ChatSession(TCPServer server, IServiceProvider serviceProvider) : T
 
             Type[] types = typeof(TRANSMUTANSTEIN).Assembly.GetTypes();
 
-            type = types
-                .SingleOrDefault(type => type.GetCustomAttribute<ChatCommandAttribute>() is not null
-                                         && (type.GetCustomAttribute<ChatCommandAttribute>()?.Command.Equals(command) ?? false));
+            type = types.SingleOrDefault(type => type.GetCustomAttribute<ChatCommandAttribute>() is not null
+                && (type.GetCustomAttribute<ChatCommandAttribute>()?.Command.Equals(command) ?? false));
 
             if (type is not null)
-                CommandToTypeMap.Add(command, type);
+                if (CommandToTypeMap.TryAdd(command, type) is false)
+                    Logger.LogError($@"[BUG] Could Not Add Command To Type Mapping For Command ""{command:X4}"" And Type ""{type.Name}""");
 
             return type;
         }
@@ -116,12 +110,21 @@ public class ChatSession(TCPServer server, IServiceProvider serviceProvider) : T
 
         while (offset < buffer.Length)
         {
-            ushort frameSize = BitConverter.ToUInt16([buffer[offset], buffer[offset + 1]]);
-            byte[] frame = buffer[(offset + 2)..(offset + 2 + frameSize)];
+            try
+            {
+                ushort frameSize = BitConverter.ToUInt16([buffer[offset], buffer[offset + 1]]);
+                byte[] frame = buffer[(offset + 2)..(offset + 2 + frameSize)];
 
-            frames.Add(frame);
+                frames.Add(frame);
 
-            offset += 2 + frameSize;
+                offset += 2 + frameSize;
+            }
+
+            catch (Exception exception)
+            {
+                Logger.LogError(exception, $"Failed To Get Frame From Buffer With Remaining Bytes {string.Join(':', buffer[offset..buffer.Length])}");
+                break;
+            }
         }
 
         return frames;
