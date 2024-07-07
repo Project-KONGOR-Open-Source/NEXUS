@@ -9,7 +9,6 @@ public static class ChatProtocol
 
     public static class Command
     {
-     // public const byte MM_COMMAND_GROUP_INIT                             = 0x0002;   // It Is Not Clear If This Is Actually "MM_COMMAND_GROUP_INIT" Or What "(0x02)" Actually Does
         public const ushort CHAT_CMD_CHANNEL_MSG                            = 0x0003;   // Used When A User Messages A Channel
         public const ushort CHAT_CMD_CHANGED_CHANNEL                        = 0x0004;   // Used When A Channel Change Has Occurred
         public const ushort CHAT_CMD_JOINED_CHANNEL                         = 0x0005;   // Used When A New User Joins Our Channel
