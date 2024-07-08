@@ -210,13 +210,11 @@ public class ChatBuffer : TCPBuffer
     /// </summary>
     public long PrependBufferSize()
     {
-        const long bytes = 2;
+        byte[] size = BitConverter.GetBytes(Convert.ToInt16(_size));
 
-        Reserve(_size + bytes);
+        _data = size.Concat(_data).ToArray();
+        _size = _size + size.Length;
 
-        _data = BitConverter.GetBytes(Convert.ToInt16(_size)).Concat(_data).ToArray();
-        _size = _size + bytes;
-
-        return bytes;
+        return size.Length;
     }
 }
