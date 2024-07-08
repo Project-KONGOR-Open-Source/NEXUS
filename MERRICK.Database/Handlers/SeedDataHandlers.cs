@@ -157,11 +157,19 @@ public static class SeedDataHandlers
         }
 
         await context.SaveChangesAsync(cancellationToken);
+
+        // Also Include Friended/Ignored/Banned Peer Seeding To Reduce The Application Startup Duration
+
+        await SeedFriendedPeers(context, cancellationToken, logger);
+        await SeedIgnoredPeers(context, cancellationToken, logger);
+        await SeedBannedPeers(context, cancellationToken, logger);
     }
 
-    public static async Task SeedFriendedPeers(MerrickContext context, CancellationToken cancellationToken, ILogger logger)
+    private static async Task SeedFriendedPeers(MerrickContext context, CancellationToken cancellationToken, ILogger logger)
     {
         if (await context.Accounts.NoneAsync(cancellationToken) || await context.Clans.NoneAsync(cancellationToken)) return;
+
+        if ((await context.Users.Include(user => user.Accounts).FirstAsync(cancellationToken)).Accounts.Any(account => account.FriendedPeers.Count > 0)) return;
 
         Account systemAccount = await context.Accounts.Include(account => account.User).FirstAsync(cancellationToken);
 
@@ -196,9 +204,11 @@ public static class SeedDataHandlers
         await context.SaveChangesAsync(cancellationToken);
     }
 
-    public static async Task SeedIgnoredPeers(MerrickContext context, CancellationToken cancellationToken, ILogger logger)
+    private static async Task SeedIgnoredPeers(MerrickContext context, CancellationToken cancellationToken, ILogger logger)
     {
         if (await context.Accounts.NoneAsync(cancellationToken)) return;
+
+        if ((await context.Users.Include(user => user.Accounts).FirstAsync(cancellationToken)).Accounts.Any(account => account.IgnoredPeers.Count > 0)) return;
 
         Account systemAccount = await context.Accounts.FirstAsync(cancellationToken);
 
@@ -217,9 +227,11 @@ public static class SeedDataHandlers
         await context.SaveChangesAsync(cancellationToken);
     }
 
-    public static async Task SeedBannedPeers(MerrickContext context, CancellationToken cancellationToken, ILogger logger)
+    private static async Task SeedBannedPeers(MerrickContext context, CancellationToken cancellationToken, ILogger logger)
     {
         if (await context.Accounts.NoneAsync(cancellationToken)) return;
+
+        if ((await context.Users.Include(user => user.Accounts).FirstAsync(cancellationToken)).Accounts.Any(account => account.BannedPeers.Count > 0)) return;
 
         Account systemAccount = await context.Accounts.FirstAsync(cancellationToken);
 
