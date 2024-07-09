@@ -7,7 +7,11 @@ public class PopularityUpdate(MerrickContext merrick, ILogger<PopularityUpdate> 
     private ILogger<PopularityUpdate> Logger { get; set; } = logger;
 
     public async Task Process(TCPSession session, ChatBuffer buffer)
-        => await SendMatchmakingPopularity(session, buffer, Response);
+    {
+        PopularityUpdateRequestData requestData = new(buffer);
+
+        await SendMatchmakingPopularity(session, buffer, Response);
+    }
 
     public static async Task SendMatchmakingPopularity(TCPSession session, ChatBuffer buffer, ChatBuffer response)
     {
@@ -109,4 +113,9 @@ public class PopularityUpdate(MerrickContext merrick, ILogger<PopularityUpdate> 
 
         session.SendAsync(response.Data);
     }
+}
+
+public class PopularityUpdateRequestData(ChatBuffer buffer)
+{
+    public byte[] CommandBytes = buffer.ReadCommandBytes();
 }

@@ -8,10 +8,7 @@ public class ServerManagerHandshake(MerrickContext merrick, ILogger<ServerManage
 
     public async Task Process(TCPSession session, ChatBuffer buffer)
     {
-        byte[] _ = buffer.ReadCommandBytes();
-        int serverManagerID = buffer.ReadInt32();
-        string sessionCookie = buffer.ReadString();
-        int chatProtocolVersion = buffer.ReadInt32();
+        ServerManagerHandshakeRequestData requestData = new(buffer);
 
         // TODO: Check Cookie
 
@@ -54,4 +51,12 @@ public class ServerManagerHandshake(MerrickContext merrick, ILogger<ServerManage
 
         session.SendAsync(Response.Data);
     }
+}
+
+public class ServerManagerHandshakeRequestData(ChatBuffer buffer)
+{
+    public byte[] CommandBytes = buffer.ReadCommandBytes();
+    public int ServerManagerID = buffer.ReadInt32();
+    public string SessionCookie = buffer.ReadString();
+    public int ChatProtocolVersion = buffer.ReadInt32();
 }

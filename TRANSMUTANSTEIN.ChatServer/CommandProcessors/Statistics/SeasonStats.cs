@@ -8,9 +8,7 @@ public class SeasonStats(MerrickContext merrick, ILogger<SeasonStats> logger) : 
 
     public async Task Process(TCPSession session, ChatBuffer buffer)
     {
-        byte[] _ = buffer.ReadCommandBytes();
-
-        // TODO: Create Response Models
+        SeasonStatsRequestData requestData = new(buffer);
 
         Response.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_CAMPAIGN_STATS);
 
@@ -43,4 +41,9 @@ public class SeasonStats(MerrickContext merrick, ILogger<SeasonStats> logger) : 
 
         await PopularityUpdate.SendMatchmakingPopularity(session, buffer, Response);
     }
+}
+
+public class SeasonStatsRequestData(ChatBuffer buffer)
+{
+    public byte[] CommandBytes = buffer.ReadCommandBytes();
 }

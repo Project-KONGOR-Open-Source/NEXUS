@@ -8,28 +8,10 @@ public class ClientHandshake(MerrickContext merrick, ILogger<ClientHandshake> lo
 
     public async Task Process(TCPSession session, ChatBuffer buffer)
     {
-        byte[] _ = buffer.ReadCommandBytes();
-        int accountID = buffer.ReadInt32();
-        string sessionCookie = buffer.ReadString();
-        string remoteIP = buffer.ReadString();
-        string sessionAuthenticationHash = buffer.ReadString();
-        int chatProtocolVersion = buffer.ReadInt32();
-        byte operatingSystemIdentifier = buffer.ReadInt8();
-        byte operatingSystemVersionMajor = buffer.ReadInt8();
-        byte operatingSystemVersionMinor = buffer.ReadInt8();
-        byte operatingSystemVersionPatch = buffer.ReadInt8();
-        string operatingSystemBuildCode = buffer.ReadString();
-        string operatingSystemArchitecture = buffer.ReadString();
-        byte clientVersionMajor = buffer.ReadInt8();
-        byte clientVersionMinor = buffer.ReadInt8();
-        byte clientVersionPatch = buffer.ReadInt8();
-        byte clientVersionRevision = buffer.ReadInt8();
-        byte lastKnownClientState = buffer.ReadInt8();
-        byte clientChatModeState = buffer.ReadInt8();
-        string clientRegion = buffer.ReadString();
-        string clientLanguage = buffer.ReadString();
+        ClientHandshakeRequestData requestData = new(buffer);
 
         // TODO: Check Cookie
+
         // TODO: Check Authentication Hash
 
         Response.WriteCommand(ChatProtocol.ChatServerToClient.NET_CHAT_CL_ACCEPT);
@@ -37,4 +19,28 @@ public class ClientHandshake(MerrickContext merrick, ILogger<ClientHandshake> lo
 
         session.SendAsync(Response.Data);
     }
+}
+
+public class ClientHandshakeRequestData(ChatBuffer buffer)
+{
+    public byte[] CommandBytes = buffer.ReadCommandBytes();
+    public int AccountID = buffer.ReadInt32();
+    public string SessionCookie = buffer.ReadString();
+    public string RemoteIP = buffer.ReadString();
+    public string SessionAuthenticationHash = buffer.ReadString();
+    public int ChatProtocolVersion = buffer.ReadInt32();
+    public byte OperatingSystemIdentifier = buffer.ReadInt8();
+    public byte OperatingSystemVersionMajor = buffer.ReadInt8();
+    public byte OperatingSystemVersionMinor = buffer.ReadInt8();
+    public byte OperatingSystemVersionPatch = buffer.ReadInt8();
+    public string OperatingSystemBuildCode = buffer.ReadString();
+    public string OperatingSystemArchitecture = buffer.ReadString();
+    public byte ClientVersionMajor = buffer.ReadInt8();
+    public byte ClientVersionMinor = buffer.ReadInt8();
+    public byte ClientVersionPatch = buffer.ReadInt8();
+    public byte ClientVersionRevision = buffer.ReadInt8();
+    public byte LastKnownClientState = buffer.ReadInt8();
+    public byte ClientChatModeState = buffer.ReadInt8();
+    public string ClientRegion = buffer.ReadString();
+    public string ClientLanguage = buffer.ReadString();
 }

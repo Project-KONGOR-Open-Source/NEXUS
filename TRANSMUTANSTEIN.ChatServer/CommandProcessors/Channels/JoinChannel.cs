@@ -8,11 +8,16 @@ public class JoinChannel(MerrickContext merrick, ILogger<JoinChannel> logger) : 
 
     public async Task Process(TCPSession session, ChatBuffer buffer)
     {
-        byte[] _ = buffer.ReadCommandBytes();
-        string channel = buffer.ReadString();
+        JoinChannelRequestData requestData = new(buffer);
 
         // TODO: Handle Max Channels
 
         // TODO: Handle Channel Passwords And Permissions
     }
+}
+
+public class JoinChannelRequestData(ChatBuffer buffer)
+{
+    public byte[] CommandBytes = buffer.ReadCommandBytes();
+    public string Channel = buffer.ReadString();
 }
