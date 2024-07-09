@@ -29,13 +29,17 @@ public class ChatSession(TCPServer server, IServiceProvider serviceProvider) : T
         byte[] received = buffer[(int)offset..(int)size];
 
         // If The Data Size Is Less Than 2 Bytes, Then It Is Not A Valid Data Segment
-        if (size < 2) throw new InvalidDataException("Received Data Size Is Less Than 2 Bytes");
+        if (size < 2) Logger.LogError("Received Data Size Is Less Than 2 Bytes");
 
         // If The Data Size Is 2 Bytes, Then It Is The Expected Data Size For The Next Data Segment To Be Sent
         else if (size == 2 && ExpectedDataSize == null)
         {
             if (received.Length != 2)
-                throw new InvalidDataException("Received Data Size Is Not 2 Bytes");
+            {
+                Logger.LogError($"[BUG] Received Data Size Is Expected To Be 2 Bytes, But It Is {received.Length}");
+
+                return;
+            }
 
             ExpectedDataSize = received;
         }
@@ -58,7 +62,7 @@ public class ChatSession(TCPServer server, IServiceProvider serviceProvider) : T
         }
 
         // If The Received Data Does Not Match Any Of The Previous Conditions, Then It Is Not Valid Data
-        else throw new InvalidDataException($"[BUG] Unable To Process Bytes {string.Join(':', received)}");
+        else Logger.LogError($"[BUG] Unable To Process Bytes {string.Join(':', received)}");
     }
 
     private void ProcessDataSegment(byte[] segment)
