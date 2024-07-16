@@ -1,5 +1,10 @@
-﻿global using MERRICK.Database.Context;
+﻿global using ASPIRE.Common.Extensions.Cryptography;
 
+global using MERRICK.Database.Context;
+global using MERRICK.Database.Entities.Core;
+global using MERRICK.Database.Enumerations;
+
+global using Microsoft.EntityFrameworkCore;
 global using Microsoft.EntityFrameworkCore.Diagnostics;
 global using Microsoft.Extensions.Diagnostics.HealthChecks;
 
@@ -14,7 +19,10 @@ global using System.Text;
 
 global using TRANSMUTANSTEIN.ChatServer.Attributes;
 global using TRANSMUTANSTEIN.ChatServer.CommandProcessors.Base;
+global using TRANSMUTANSTEIN.ChatServer.CommandProcessors.Connection;
 global using TRANSMUTANSTEIN.ChatServer.CommandProcessors.Matchmaking;
+global using TRANSMUTANSTEIN.ChatServer.Communication;
 global using TRANSMUTANSTEIN.ChatServer.Contracts;
 global using TRANSMUTANSTEIN.ChatServer.Core;
+global using TRANSMUTANSTEIN.ChatServer.Internals;
 global ﻿using TRANSMUTANSTEIN.ChatServer.Services;

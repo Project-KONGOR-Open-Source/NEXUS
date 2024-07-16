@@ -6,7 +6,7 @@ public class GroupCreate(MerrickContext merrick, ILogger<GroupCreate> logger) : 
     private MerrickContext MerrickContext { get; set; } = merrick;
     private ILogger<GroupCreate> Logger { get; set; } = logger;
 
-    public async Task Process(TCPSession session, ChatBuffer buffer)
+    public async Task Process(ChatSession session, ChatBuffer buffer)
     {
         GroupCreateRequestData requestData = new(buffer);
 

@@ -117,37 +117,31 @@ public static class SRPAuthenticationHandlers
     {
         List<string> channels = account.AutoConnectChatChannels;
 
-        // "KONGOR" is a special channel name that maps to "KONGOR 1", then to "KONGOR 2" if "KONGOR 1" is full, then to "KONGOR 3" if "KONGOR 2" is full, and so on.
-        const string generalChannel = "KONGOR"; // TODO: Implement Channel Load Balancing
-
-        const string vipChannel = "VIP";
-        const string streamersChannel = "Streamers";
-        const string serverHostsChannel = "Server Hosts";
-        const string gameMastersChannel = "Game Masters";
-
-        // "TERMINAL" is a special channel from which chat server commands can be executed.
-        const string staffChannel = "TERMINAL"; // TODO: Implement TERMINAL Command Palette
-
         if (account.Type is not AccountType.ServerHost)
-            channels = channels.Prepend(generalChannel).ToList();
-
-        if (account.Type is AccountType.VIP or AccountType.Staff)
-            channels.Add(vipChannel);
-
-        if (account.Type is AccountType.Streamer or AccountType.Staff)
-            channels.Add(streamersChannel);
-
-        if (account.Type is AccountType.ServerHost or AccountType.Staff)
-            channels.Add(serverHostsChannel);
-
-        if (account.Type is AccountType.GameMaster or AccountType.Staff)
-            channels.Add(gameMastersChannel);
+            channels = channels.Prepend(ChatChannels.GeneralChannel).ToList();
 
         if (account.Clan is not null)
             channels.Add($"Clan {account.Clan.Name}");
 
+        if (account.Type is AccountType.GameMaster or AccountType.Staff)
+            channels.Add(ChatChannels.GameMastersChannel);
+
+        if (account.Type is AccountType.Trial or AccountType.Staff)
+            channels.Add(ChatChannels.GuestsChannel);
+
+        if (account.Type is AccountType.ServerHost or AccountType.Staff)
+            channels.Add(ChatChannels.ServerHostsChannel);
+
+        if (account.Type is AccountType.Streamer or AccountType.Staff)
+            channels.Add(ChatChannels.StreamersChannel);
+
+        if (account.Type is AccountType.VIP or AccountType.Staff)
+            channels.Add(ChatChannels.VIPChannel);
+
         if (account.Type is AccountType.Staff)
-            channels.Add(staffChannel);
+            channels.Add(ChatChannels.StaffChannel);
+
+        channels = channels.Distinct().Order().ToList();
 
         return channels;
     }

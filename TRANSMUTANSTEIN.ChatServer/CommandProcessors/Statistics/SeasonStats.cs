@@ -6,7 +6,7 @@ public class SeasonStats(MerrickContext merrick, ILogger<SeasonStats> logger) : 
     private MerrickContext MerrickContext { get; set; } = merrick;
     private ILogger<SeasonStats> Logger { get; set; } = logger;
 
-    public async Task Process(TCPSession session, ChatBuffer buffer)
+    public async Task Process(ChatSession session, ChatBuffer buffer)
     {
         SeasonStatsRequestData requestData = new(buffer);
 

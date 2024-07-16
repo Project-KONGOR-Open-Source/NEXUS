@@ -1,4 +1,6 @@
-﻿global using MERRICK.Database.Constants;
+﻿global using ASPIRE.Common.Communication;
+
+global using MERRICK.Database.Constants;
 global using MERRICK.Database.Context;
 global using MERRICK.Database.Data;
 global using MERRICK.Database.Entities.Core;

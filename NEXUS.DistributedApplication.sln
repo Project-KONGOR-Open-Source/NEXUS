@@ -1,30 +1,28 @@
-﻿Microsoft Visual Studio Solution File, Format Version 12.00
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.10.34804.81
 MinimumVisualStudioVersion = 17.10.34804.81
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ASPIRE.AppHost", "ASPIRE.AppHost\ASPIRE.AppHost.csproj", "{F2069850-D51F-4605-9933-3E0E25E16373}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ASPIRE.AppHost", "ASPIRE.AppHost\ASPIRE.AppHost.csproj", "{F2069850-D51F-4605-9933-3E0E25E16373}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ASPIRE.ServiceDefaults", "ASPIRE.ServiceDefaults\ASPIRE.ServiceDefaults.csproj", "{6B1B7727-5D5B-413D-84F8-63D485A7E601}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ASPIRE.Common", "ASPIRE.Common\ASPIRE.Common.csproj", "{6B1B7727-5D5B-413D-84F8-63D485A7E601}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ASPIRE.Tests", "ASPIRE.Tests\ASPIRE.Tests.csproj", "{C68FA3CE-881D-4286-A8A6-EAE4C3904FC6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ASPIRE.Tests", "ASPIRE.Tests\ASPIRE.Tests.csproj", "{C68FA3CE-881D-4286-A8A6-EAE4C3904FC6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DAWNBRINGER.WebPortal.UI", "DAWNBRINGER.WebPortal.UI\DAWNBRINGER.WebPortal.UI.csproj", "{3DDDA44C-4D94-4E1F-AE21-6F2192EBA6BA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DAWNBRINGER.WebPortal.UI", "DAWNBRINGER.WebPortal.UI\DAWNBRINGER.WebPortal.UI.csproj", "{3DDDA44C-4D94-4E1F-AE21-6F2192EBA6BA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KONGOR.MasterServer", "KONGOR.MasterServer\KONGOR.MasterServer.csproj", "{2DFDC3D6-C1AD-4661-9E47-17836CBD413D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "KONGOR.MasterServer", "KONGOR.MasterServer\KONGOR.MasterServer.csproj", "{2DFDC3D6-C1AD-4661-9E47-17836CBD413D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MERRICK.Database", "MERRICK.Database\MERRICK.Database.csproj", "{5DDB8067-389F-4294-BDCA-ED5CC3D8C7AB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MERRICK.Database", "MERRICK.Database\MERRICK.Database.csproj", "{5DDB8067-389F-4294-BDCA-ED5CC3D8C7AB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TRANSMUTANSTEIN.ChatServer", "TRANSMUTANSTEIN.ChatServer\TRANSMUTANSTEIN.ChatServer.csproj", "{47C9A530-2BA0-414C-BCAE-AEA8F7F528C1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TRANSMUTANSTEIN.ChatServer", "TRANSMUTANSTEIN.ChatServer\TRANSMUTANSTEIN.ChatServer.csproj", "{47C9A530-2BA0-414C-BCAE-AEA8F7F528C1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZORGATH.WebPortal.API", "ZORGATH.WebPortal.API\ZORGATH.WebPortal.API.csproj", "{592E3A57-2908-4760-9B7B-2D13EF6142D3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ZORGATH.WebPortal.API", "ZORGATH.WebPortal.API\ZORGATH.WebPortal.API.csproj", "{592E3A57-2908-4760-9B7B-2D13EF6142D3}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
-	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{F2069850-D51F-4605-9933-3E0E25E16373}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -59,5 +57,8 @@ Global
 		{592E3A57-2908-4760-9B7B-2D13EF6142D3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{592E3A57-2908-4760-9B7B-2D13EF6142D3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{592E3A57-2908-4760-9B7B-2D13EF6142D3}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
 	EndGlobalSection
 EndGlobal

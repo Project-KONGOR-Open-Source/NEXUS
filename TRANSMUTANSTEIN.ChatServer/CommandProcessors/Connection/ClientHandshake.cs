@@ -6,13 +6,28 @@ public class ClientHandshake(MerrickContext merrick, ILogger<ClientHandshake> lo
     private MerrickContext MerrickContext { get; set; } = merrick;
     private ILogger<ClientHandshake> Logger { get; set; } = logger;
 
-    public async Task Process(TCPSession session, ChatBuffer buffer)
+    public async Task Process(ChatSession session, ChatBuffer buffer)
     {
         ClientHandshakeRequestData requestData = new(buffer);
+
+        Account? account = await MerrickContext.Accounts.Include(account => account.Clan).SingleOrDefaultAsync(account => account.ID == requestData.AccountID);
+
+        if (account is null)
+        {
+            Logger.LogError($@"[BUG] Account With ID ""{requestData.AccountID}"" Could Not Be Found");
+
+            return;
+        }
 
         // TODO: Check Cookie
 
         // TODO: Check Authentication Hash
+
+        // Embed The Client Information In The Chat Session
+        session.ClientInformation = new ClientInformation(requestData, account);
+
+        // Add The Chat Session To The Chat Sessions Collection
+        Context.ChatSessions.AddOrUpdate(account.Name, session, (key, existing) => session);
 
         Response.WriteCommand(ChatProtocol.ChatServerToClient.NET_CHAT_CL_ACCEPT);
         Response.PrependBufferSize();
@@ -43,4 +58,28 @@ public class ClientHandshakeRequestData(ChatBuffer buffer)
     public byte ClientChatModeState = buffer.ReadInt8();
     public string ClientRegion = buffer.ReadString();
     public string ClientLanguage = buffer.ReadString();
+}
+
+public class ClientInformation(ClientHandshakeRequestData data, Account account)
+{
+    public Account Account = account;
+
+    public string SessionCookie = data.SessionCookie;
+    public string RemoteIP = data.RemoteIP;
+    public string SessionAuthenticationHash = data.SessionAuthenticationHash;
+    public int ChatProtocolVersion = data.ChatProtocolVersion;
+    public byte OperatingSystemIdentifier = data.OperatingSystemIdentifier;
+    public byte OperatingSystemVersionMajor = data.OperatingSystemVersionMajor;
+    public byte OperatingSystemVersionMinor = data.OperatingSystemVersionMinor;
+    public byte OperatingSystemVersionPatch = data.OperatingSystemVersionPatch;
+    public string OperatingSystemBuildCode = data.OperatingSystemBuildCode;
+    public string OperatingSystemArchitecture = data.OperatingSystemArchitecture;
+    public byte ClientVersionMajor = data.ClientVersionMajor;
+    public byte ClientVersionMinor = data.ClientVersionMinor;
+    public byte ClientVersionPatch = data.ClientVersionPatch;
+    public byte ClientVersionRevision = data.ClientVersionRevision;
+    public byte LastKnownClientState = data.LastKnownClientState;
+    public byte ClientChatModeState = data.ClientChatModeState;
+    public string ClientRegion = data.ClientRegion;
+    public string ClientLanguage = data.ClientLanguage;
 }

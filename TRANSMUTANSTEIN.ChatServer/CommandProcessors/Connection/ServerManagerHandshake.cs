@@ -6,7 +6,7 @@ public class ServerManagerHandshake(MerrickContext merrick, ILogger<ServerManage
     private MerrickContext MerrickContext { get; set; } = merrick;
     private ILogger<ServerManagerHandshake> Logger { get; set; } = logger;
 
-    public async Task Process(TCPSession session, ChatBuffer buffer)
+    public async Task Process(ChatSession session, ChatBuffer buffer)
     {
         ServerManagerHandshakeRequestData requestData = new(buffer);
 
@@ -41,12 +41,14 @@ public class ServerManagerHandshake(MerrickContext merrick, ILogger<ServerManage
         Response = new ChatBuffer(); // Also Respond With NET_CHAT_SM_OPTIONS Since The Server Manager Will Not Explicitly Request It
 
         Response.WriteCommand(ChatProtocol.ChatServerToServerManager.NET_CHAT_SM_OPTIONS);
+
         Response.WriteInt8(Convert.ToByte(true));   // Submit Stats Enabled
         Response.WriteInt8(Convert.ToByte(true));   // Upload Replays Enabled
         Response.WriteInt8(Convert.ToByte(false));  // Upload To FTP On Demand Enabled
         Response.WriteInt8(Convert.ToByte(true));   // Upload To HTTP On Demand Enabled
         Response.WriteInt8(Convert.ToByte(true));   // Resubmit Stats Enabled
         Response.WriteInt32(1);                     // Stats Resubmit Match ID Cut-Off // TODO: Investigate What This Is
+
         Response.PrependBufferSize();
 
         session.SendAsync(Response.Data);

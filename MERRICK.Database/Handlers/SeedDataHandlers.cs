@@ -86,7 +86,7 @@ public static class SeedDataHandlers
             ClanTier = ClanTier.None,
             TimestampJoinedClan = null,
             AscensionLevel = 666,
-            AutoConnectChatChannels = [ "KONGOR", "TERMINAL", "HOSTS", "GUESTS" ],
+            AutoConnectChatChannels = ChatChannels.AllDefaultChannels.ToList(),
             SelectedStoreItems = [ "ai.custom_icon:1", "av.Flamboyant", "c.cat_courier", "cc.frostburnlogo", "cr.Punk Creep", "cs.frostburnlogo", "m.Super-Taunt", "sc.paragon_circle_upgrade", "t.Dumpster_Taunt", "te.Punk TP", "w.8bit_ward" ]
         };
 
@@ -106,7 +106,7 @@ public static class SeedDataHandlers
                 ClanTier = subAccountName is /* [K] */ "ONGOR" ? ClanTier.Leader : ClanTier.Officer,
                 TimestampJoinedClan = DateTime.UtcNow,
                 AscensionLevel = 666,
-                AutoConnectChatChannels = [ "KONGOR", "TERMINAL", "HOSTS", "GUESTS" ],
+                AutoConnectChatChannels = ChatChannels.AllDefaultChannels.Append($"Clan {clan.Name}").ToList(),
                 SelectedStoreItems = [ "ai.custom_icon:1", "av.Flamboyant", "c.cat_courier", "cc.frostburnlogo", "cr.Punk Creep", "cs.frostburnlogo", "m.Super-Taunt", "sc.paragon_circle_upgrade", "t.Dumpster_Taunt", "te.Punk TP", "w.8bit_ward" ]
             };
 
@@ -127,7 +127,7 @@ public static class SeedDataHandlers
                 ClanTier = ClanTier.None,
                 TimestampJoinedClan = null,
                 AscensionLevel = 666,
-                AutoConnectChatChannels = [ "HOSTS" ], // TODO: Implement Commands To Query Hosts From This Channel As Administrator
+                AutoConnectChatChannels = [ ChatChannels.ServerHostsChannel ],
                 SelectedStoreItems = [ "ai.custom_icon:1", "av.Flamboyant", "c.cat_courier", "cc.frostburnlogo", "cr.Punk Creep", "cs.frostburnlogo", "m.Super-Taunt", "sc.paragon_circle_upgrade", "t.Dumpster_Taunt", "te.Punk TP", "w.8bit_ward" ]
             };
 
@@ -149,7 +149,7 @@ public static class SeedDataHandlers
                 ClanTier = iterator is 0 ? ClanTier.Leader : ClanTier.Member,
                 TimestampJoinedClan = DateTime.UtcNow,
                 AscensionLevel = 0,
-                AutoConnectChatChannels = [ "GUESTS" ],
+                AutoConnectChatChannels = [ ChatChannels.GuestsChannel, $"Clan {clan.Name}" ],
                 SelectedStoreItems = [ "ai.custom_icon:1", "av.Flamboyant", "c.cat_courier", "cc.frostburnlogo", "cr.Punk Creep", "cs.frostburnlogo", "m.Super-Taunt", "sc.paragon_circle_upgrade", "t.Dumpster_Taunt", "te.Punk TP", "w.8bit_ward" ]
             };
 

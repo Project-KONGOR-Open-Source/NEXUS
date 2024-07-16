@@ -2,6 +2,8 @@
 
 public class ChatSession(TCPServer server, IServiceProvider serviceProvider) : TCPSession(server)
 {
+    public ClientInformation ClientInformation { get; set; } = null!; // TODO: If This Is NULL Or Equivalent, Don't Process Data Other Than Client Handshake
+
     private IServiceProvider ServiceProvider { get; set; } = serviceProvider;
 
     private ILogger Logger { get; } = serviceProvider.GetRequiredService<ILogger<ChatSession>>();
