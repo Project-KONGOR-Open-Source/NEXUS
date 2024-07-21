@@ -106,7 +106,7 @@ public class ChatSession(TCPServer server, IServiceProvider serviceProvider) : T
             && (type.GetCustomAttribute<ChatCommandAttribute>()?.Command.Equals(command) ?? false));
 
         if (type is not null)
-            if (CommandToTypeMap.TryAdd(command, type) is false)
+            if (CommandToTypeMap.TryAdd(command, type) is false && CommandToTypeMap.ContainsKey(command) is false)
                 Logger.LogError($@"[BUG] Could Not Add Command To Type Mapping For Command ""{command:X4}"" And Type ""{type.Name}""");
 
         return type;
