@@ -2,26 +2,34 @@
 
 public class MatchmakingService(IServiceProvider serviceProvider) : IHostedService, IDisposable
 {
-    private IServiceProvider ServiceProvider { get; set; } = serviceProvider;
+    private ILogger Logger { get; } = serviceProvider.GetRequiredService<ILogger<MatchmakingService>>();
+
+    public static ConcurrentDictionary<int, MatchmakingGroup> SoloPlayerGroups { get; set; } = [];
+    public static ConcurrentDictionary<int, MatchmakingGroup> TwoPlayerGroups { get; set; } = [];
+    public static ConcurrentDictionary<int, MatchmakingGroup> ThreePlayerGroups { get; set; } = [];
+    public static ConcurrentDictionary<int, MatchmakingGroup> FourPlayerGroups { get; set; } = [];
+    public static ConcurrentDictionary<int, MatchmakingGroup> FivePlayerGroups { get; set; } = [];
 
     public Task StartAsync(CancellationToken cancellationToken)
     {
-        // TODO: Do Something On Start
+        Logger.LogInformation("Matchmaking Service Has Started");
 
         return Task.CompletedTask;
     }
 
     public Task StopAsync(CancellationToken cancellationToken)
     {
-        // TODO: Do Something On Stop
+        Logger.LogInformation("Matchmaking Service Has Stopped");
 
         return Task.CompletedTask;
     }
 
     public void Dispose()
     {
-        // TODO: Do Something On Dispose
-
-        return;
+        SoloPlayerGroups.Clear();
+        TwoPlayerGroups.Clear();
+        ThreePlayerGroups.Clear();
+        FourPlayerGroups.Clear();
+        FivePlayerGroups.Clear();
     }
 }

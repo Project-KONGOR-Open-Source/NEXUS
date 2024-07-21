@@ -2,7 +2,7 @@
 
 public class ChatService(IServiceProvider serviceProvider) : IHostedService, IDisposable
 {
-    private IServiceProvider ServiceProvider { get; set; } = serviceProvider;
+    private ILogger Logger { get; } = serviceProvider.GetRequiredService<ILogger<ChatService>>();
 
     public static Core.ChatServer? ChatServer { get; set; }
 
@@ -12,7 +12,7 @@ public class ChatService(IServiceProvider serviceProvider) : IHostedService, IDi
 
         int port = int.Parse(Environment.GetEnvironmentVariable("CHAT_SERVER_PORT") ?? throw new NullReferenceException("Chat Server Port Is NULL"));
 
-        ChatServer = new Core.ChatServer(address, port, ServiceProvider);
+        ChatServer = new Core.ChatServer(address, port, serviceProvider);
 
         if (ChatServer.Start() is false)
         {
@@ -21,7 +21,7 @@ public class ChatService(IServiceProvider serviceProvider) : IHostedService, IDi
             return Task.FromException(new ApplicationException("Chat Server Was Unable To Start"));
         }
 
-        Console.WriteLine($"Chat Server Listening On {ChatServer.Endpoint}");
+        Logger.LogInformation($"Chat Server Listening On {ChatServer.Endpoint}");
 
         return Task.CompletedTask;
     }
@@ -48,7 +48,7 @@ public class ChatService(IServiceProvider serviceProvider) : IHostedService, IDi
             return Task.FromException(new ApplicationException("Chat Server Is Not Running"));
         }
 
-        Console.WriteLine("Chat Server Has Stopped");
+        Logger.LogInformation("Chat Server Has Stopped");
 
         return Task.CompletedTask;
     }

@@ -12,7 +12,12 @@ public class GroupCreate(MerrickContext merrick, ILogger<GroupCreate> logger) : 
 
         // TODO: Perform Checks And Respond With ChatProtocol.TMMFailedToJoinReason If Needed
 
-        // TODO: Add Group To Matchmaking Queue
+        if (Context.MatchmakingGroupChatChannels.ContainsKey(session.ClientInformation.Account.ID) is false)
+            MatchmakingService.SoloPlayerGroups.TryAdd(session.ClientInformation.Account.ID, new MatchmakingGroup(new MatchmakingGroupMember { Rating = 1650.00f, IsLeader = true, IsReady = true }));
+
+        // TODO: Set Actual Rating & Game Details
+
+        // TODO: Add Some Flag For Queue State, For Groups Created In Advance
     }
 }
 
