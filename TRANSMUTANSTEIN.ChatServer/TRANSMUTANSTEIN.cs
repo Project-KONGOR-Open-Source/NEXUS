@@ -35,10 +35,13 @@ public class TRANSMUTANSTEIN
         // Host The Chat Service
         builder.Services.AddHostedService<ChatService>();
 
+        // Host The Matchmaking Service
+        builder.Services.AddHostedService<MatchmakingService>();
+
         // Register The Database Context Service
         builder.Services.AddTransient<MerrickContext>();
 
-        // Add Database Health Check
+        // Add Chat Server Health Check
         builder.Services.AddHealthChecks().AddCheck<ChatServerHealthCheck>("TRANSMUTANSTEIN Chat Server Health Check");
 
         // Build The Application

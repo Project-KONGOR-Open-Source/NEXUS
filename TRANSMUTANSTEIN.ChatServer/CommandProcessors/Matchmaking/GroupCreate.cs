@@ -11,6 +11,8 @@ public class GroupCreate(MerrickContext merrick, ILogger<GroupCreate> logger) : 
         GroupCreateRequestData requestData = new(buffer);
 
         // TODO: Perform Checks And Respond With ChatProtocol.TMMFailedToJoinReason If Needed
+
+        // TODO: Add Group To Matchmaking Queue
     }
 }
 
