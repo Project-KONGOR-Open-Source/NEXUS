@@ -1,4 +1,6 @@
-﻿namespace TRANSMUTANSTEIN.ChatServer.Core;
+﻿using System.Collections.Generic;
+
+namespace TRANSMUTANSTEIN.ChatServer.Core;
 
 public class ChatSession(TCPServer server, IServiceProvider serviceProvider) : TCPSession(server)
 {
@@ -8,6 +10,8 @@ public class ChatSession(TCPServer server, IServiceProvider serviceProvider) : T
 
     private ILogger Logger { get; } = serviceProvider.GetRequiredService<ILogger<ChatSession>>();
 
+    public static readonly ConcurrentDictionary<Guid, ChatSession> ActiveSessions = new();
+
     private static ConcurrentDictionary<ushort, Type> CommandToTypeMap { get; set; } = [];
 
     private byte[] RemainingPreviouslyReceivedData { get; set; } = [];
@@ -15,6 +19,7 @@ public class ChatSession(TCPServer server, IServiceProvider serviceProvider) : T
     protected override void OnConnected()
     {
         Logger.LogInformation($"Chat Session ID {ID} Was Created");
+        ActiveSessions.TryAdd(ID, this);
     }
 
     protected override void OnError(SocketError error)
@@ -25,6 +30,7 @@ public class ChatSession(TCPServer server, IServiceProvider serviceProvider) : T
     protected override void OnDisconnected()
     {
         Logger.LogInformation($"Chat Session ID {ID} Has Terminated");
+        ActiveSessions.TryRemove(ID, out _);
     }
 
     protected override void OnReceived(byte[] buffer, long offset, long size)
