@@ -1,12 +1,15 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-	<PropertyGroup>
-		<OutputType>exe</OutputType>
-		<PublishAot>true</PublishAot>
-	</PropertyGroup>
+    <PropertyGroup>
+        <OutputType>exe</OutputType>
+        <TargetFramework>net9.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <WarningsAsErrors>nullable</WarningsAsErrors>
+    </PropertyGroup>
 
-	<ItemGroup>
-		<ProjectReference Include="..\ASPIRE.Common\ASPIRE.Common.csproj" />
-	</ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\ASPIRE.Common\ASPIRE.Common.csproj" />
+    </ItemGroup>
 
 </Project>

@@ -1,20 +1,23 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
-	<PropertyGroup>
-		<OutputType>exe</OutputType>
-		<PublishAot>false</PublishAot>
-	</PropertyGroup>
+    <PropertyGroup>
+        <OutputType>exe</OutputType>
+        <TargetFramework>net9.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <WarningsAsErrors>nullable</WarningsAsErrors>
+    </PropertyGroup>
 
-	<ItemGroup>
-		<PackageReference Include="FluentValidation" Version="11.9.2" />
-		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.8" />
-		<PackageReference Include="srp" Version="1.0.7" />
-		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.7.3" />
-	</ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="FluentValidation" Version="11.9.2" />
+        <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.8" />
+        <PackageReference Include="srp" Version="1.0.7" />
+        <PackageReference Include="Swashbuckle.AspNetCore" Version="6.7.3" />
+    </ItemGroup>
 
-	<ItemGroup>
-		<ProjectReference Include="..\ASPIRE.Common\ASPIRE.Common.csproj" />
-		<ProjectReference Include="..\MERRICK.Database\MERRICK.Database.csproj" />
-	</ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\ASPIRE.Common\ASPIRE.Common.csproj" />
+        <ProjectReference Include="..\MERRICK.Database\MERRICK.Database.csproj" />
+    </ItemGroup>
 
 </Project>
