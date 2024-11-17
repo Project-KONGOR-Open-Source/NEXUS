@@ -1,21 +1,27 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-	<PropertyGroup>
-		<OutputType>exe</OutputType>
-		<IsAspireHost>true</IsAspireHost>
-	</PropertyGroup>
+    <Sdk Name="Aspire.AppHost.Sdk" Version="9.0.0" />
 
-	<ItemGroup>
-		<PackageReference Include="Aspire.Hosting.AppHost" Version="8.2.0" />
-		<PackageReference Include="Aspire.Hosting.Redis" Version="8.2.0" />
-	</ItemGroup>
+    <PropertyGroup>
+        <OutputType>exe</OutputType>
+        <TargetFramework>net9.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <WarningsAsErrors>nullable</WarningsAsErrors>
+        <IsAspireHost>true</IsAspireHost>
+    </PropertyGroup>
 
-	<ItemGroup>
-		<ProjectReference Include="..\DAWNBRINGER.WebPortal.UI\DAWNBRINGER.WebPortal.UI.csproj" />
-		<ProjectReference Include="..\KONGOR.MasterServer\KONGOR.MasterServer.csproj" />
-		<ProjectReference Include="..\MERRICK.Database\MERRICK.Database.csproj" />
-		<ProjectReference Include="..\TRANSMUTANSTEIN.ChatServer\TRANSMUTANSTEIN.ChatServer.csproj" />
-		<ProjectReference Include="..\ZORGATH.WebPortal.API\ZORGATH.WebPortal.API.csproj" />
-	</ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="Aspire.Hosting.AppHost" Version="9.0.0" />
+        <PackageReference Include="Aspire.Hosting.Redis" Version="8.2.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\DAWNBRINGER.WebPortal.UI\DAWNBRINGER.WebPortal.UI.csproj" />
+        <ProjectReference Include="..\KONGOR.MasterServer\KONGOR.MasterServer.csproj" />
+        <ProjectReference Include="..\MERRICK.Database\MERRICK.Database.csproj" />
+        <ProjectReference Include="..\TRANSMUTANSTEIN.ChatServer\TRANSMUTANSTEIN.ChatServer.csproj" />
+        <ProjectReference Include="..\ZORGATH.WebPortal.API\ZORGATH.WebPortal.API.csproj" />
+    </ItemGroup>
 
 </Project>
