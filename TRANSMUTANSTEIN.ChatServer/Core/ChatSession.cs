@@ -88,6 +88,9 @@ public class ChatSession(TCPServer server, IServiceProvider serviceProvider) : T
 
         else
         {
+            if (TRANSMUTANSTEIN.RunsInDevelopmentMode)
+                Logger.LogDebug($"Processing Command 0x{command:X4}");
+
             if (GetCommandTypeInstance(commandType) is { } commandTypeInstance)
                 commandTypeInstance.Process(this, new ChatBuffer(segment));
 

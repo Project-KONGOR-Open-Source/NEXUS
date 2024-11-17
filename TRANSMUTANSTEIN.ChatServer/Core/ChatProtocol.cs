@@ -174,7 +174,7 @@ public static class ChatProtocol
 
     public static class Matchmaking
     {
-        public const ushort NET_CHAT_CL_TMM_GROUP_CREATE                    = 0x0C0A;   // A Player Is Requesting A New Group To Be Created (This Event Is Triggered By Clicking The "START GAME" Button On The "PLAY NOW" Screen)
+        public const ushort NET_CHAT_CL_TMM_GROUP_CREATE                    = 0x0C0A;   // A Player Is Requesting A New Group To Be Created (This Event Is Triggered By Clicking The "START GAME" Button On The "PLAY NOW" Screen Or By Inviting A New Player)
         public const ushort NET_CHAT_CL_TMM_GROUP_JOIN                      = 0x0C0B;   // A Player Is Joining A Group
         public const ushort NET_CHAT_CL_TMM_GROUP_LEAVE                     = 0x0C0C;   // A Player Is Leaving A Group
         public const ushort NET_CHAT_CL_TMM_GROUP_INVITE                    = 0x0C0D;   // A Player Is Inviting Another Player To The Group
