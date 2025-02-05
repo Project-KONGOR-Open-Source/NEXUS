@@ -11,9 +11,9 @@
     <ItemGroup>
         <PackageReference Include="Aspire.StackExchange.Redis.DistributedCaching" Version="9.0.0" />
         <PackageReference Include="OneOf" Version="3.0.271" />
-        <PackageReference Include="PhpSerializerNET" Version="2.0.0" />
+        <PackageReference Include="PhpSerializerNET" Version="2.0.1" />
         <PackageReference Include="srp" Version="1.0.7" />
-        <PackageReference Include="Swashbuckle.AspNetCore" Version="7.0.0" />
+        <PackageReference Include="Swashbuckle.AspNetCore" Version="7.2.0" />
     </ItemGroup>
 
     <ItemGroup>
