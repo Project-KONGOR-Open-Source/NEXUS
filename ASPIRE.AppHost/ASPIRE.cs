@@ -11,8 +11,8 @@ public class ASPIRE
 
         IResourceBuilder<IResourceWithConnectionString> distributedCache = builder.AddRedis("distributed-cache")
             .WithImageTag("latest")
-            .WithRedisCommander() // https://joeferner.github.io/redis-commander/
-            .WithDataVolume();
+            .WithRedisInsight(containerName: "distributed-cache-insight") // https://github.com/RedisInsight/RedisInsight/releases/tag/2.58.0
+            .WithLifetime(ContainerLifetime.Persistent);
 
         IResourceBuilder<IResourceWithConnectionString> databaseConnectionString = builder.AddConnectionString("MERRICK");
 
@@ -21,12 +21,12 @@ public class ASPIRE
 
         builder.AddProject<KONGOR_MasterServer>("master-server", builder.Environment.IsProduction() ? "KONGOR.MasterServer Production" : "KONGOR.MasterServer Development")
             .WithReference(databaseConnectionString)
-            .WithReference(distributedCache, connectionName: "DISTRIBUTED-CACHE")
+            .WithReference(distributedCache, connectionName: "DISTRIBUTED-CACHE").WaitFor(distributedCache)
             .WithEnvironment("CHAT_SERVER_HOST", chatServerHost).WithEnvironment("CHAT_SERVER_PORT", chatServerPort.ToString());
 
         builder.AddProject<TRANSMUTANSTEIN_ChatServer>("chat-server", builder.Environment.IsProduction() ? "TRANSMUTANSTEIN.ChatServer Production" : "TRANSMUTANSTEIN.ChatServer Development")
             .WithReference(databaseConnectionString)
-            .WithReference(distributedCache, connectionName: "DISTRIBUTED-CACHE")
+            .WithReference(distributedCache, connectionName: "DISTRIBUTED-CACHE").WaitFor(distributedCache)
             .WithEnvironment("CHAT_SERVER_HOST", chatServerHost).WithEnvironment("CHAT_SERVER_PORT", chatServerPort.ToString());
 
         builder.AddProject<ZORGATH_WebPortal_API>("web-portal-api", builder.Environment.IsProduction() ? "ZORGATH.WebPortal.API Production" : "ZORGATH.WebPortal.API Development")
