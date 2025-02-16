@@ -1,6 +1,9 @@
 name: "Unit/Integration Tests"
 
 on:
+
+  workflow_dispatch: # enable manual trigger
+
   schedule:
     - cron: "0 4 * * *"
 
@@ -8,13 +11,12 @@ on:
     branches: [ "main" ]
 
 jobs:
+
   build-and-test:
 
     runs-on: "ubuntu-latest"
 
-    steps:
-
-      # latest action versions can be inspected at https://github.com/actions
+    steps: # latest action versions can be inspected at https://github.com/actions
 
     - name: "Check Out Branch"
       uses: "actions/checkout@v4"
