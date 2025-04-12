@@ -9,7 +9,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Aspire.StackExchange.Redis.DistributedCaching" Version="9.0.0" />
+        <PackageReference Include="Aspire.StackExchange.Redis.DistributedCaching" Version="9.2.0" />
     </ItemGroup>
 
     <ItemGroup>
