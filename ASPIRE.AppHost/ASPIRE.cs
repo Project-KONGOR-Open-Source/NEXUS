@@ -11,7 +11,7 @@ public class ASPIRE
 
         IResourceBuilder<IResourceWithConnectionString> distributedCache = builder.AddRedis("distributed-cache")
             .WithImageTag("latest")
-            .WithRedisInsight(containerName: "distributed-cache-insight") // https://github.com/RedisInsight/RedisInsight/releases/tag/2.58.0
+            .WithRedisInsight(containerName: "distributed-cache-insight") // https://github.com/RedisInsight/RedisInsight/releases/latest
             .WithLifetime(ContainerLifetime.Persistent);
 
         IResourceBuilder<IResourceWithConnectionString> databaseConnectionString = builder.AddConnectionString("MERRICK");
