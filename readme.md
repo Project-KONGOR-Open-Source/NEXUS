@@ -65,10 +65,11 @@ dotnet run --project ASPIRE.AppHost --launch-profile "Project KONGOR Production"
 
 <br/>
 
-Create A Database Schema Migration
+Create A Database Schema Migration And Update The Database
 
 1. install the Entity Framework Core CLI by executing `dotnet tool install --global dotnet-ef` or update it by executing `dotnet tool update --global dotnet-ef`
 2. in the context of the solution directory, execute `dotnet ef migrations add {MigrationName} --project MERRICK.Database`
+3. in the context of the solution directory, execute `dotnet ef database update --project MERRICK.Database`
 
 <br/>
 
