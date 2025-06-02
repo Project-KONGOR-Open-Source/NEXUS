@@ -117,6 +117,44 @@ Install/Update .NET Aspire
 
 <br/>
 
+Deploy To Azure
+
+1. install or update the Azure Developer CLI
+
+    ```powershell
+    # powershell install
+    winget install microsoft.azd
+    ```
+
+    ```bash
+    # bash install
+    curl -fsSL https://aka.ms/install-azd.sh | bash
+    ```
+
+    ```powershell
+    # powershell update
+    winget upgrade microsoft.azd
+    ```
+
+    ```bash
+    # bash update
+    curl -fsSL https://aka.ms/install-azd.sh | bash
+    ```
+
+2. in the context of the solution, execute `azd init` and follow the instructions
+    a. application initialization type: `use code in the current directory`
+    b. unique environment name: `nexus`
+
+3. preview the IaC (infrastructure as code) definition, by executing `azd `azd infra synth``
+    - if `azd infra synth` is not enabled, execute `azd config set alpha.infraSynth on`
+
+4. execute `azd up` to provision the required resources and deploy the distributed application
+
+> [!NOTE]
+> Mode in-depth information is available here: https://learn.microsoft.com/en-gb/azure/developer/azure-developer-cli/reference.
+
+<br/>
+
 Debug HTTP Traffic With Fiddler
 
 1. launch Project KONGOR in development mode, by using the `ASPIRE.AppHost Development` profile
