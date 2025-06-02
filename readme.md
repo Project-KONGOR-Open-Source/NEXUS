@@ -39,7 +39,7 @@
 
 <hr/>
 
-<h3 align="center">Concise Instructions For Developers</h3>
+<h3 align="center">Comprehensive Instructions For Developers</h3>
 
 Run In Development
 
@@ -98,61 +98,19 @@ dotnet ef database update --project MERRICK.Database
 
 <br/>
 
-Generate .NET Aspire Deployment Artefacts & Deploy To Azure/Kubernetes
-
-> [!NOTE]
-> Azure deployments require the [Azure Developer CLI](https://github.com/Azure/azure-dev), and Kubernetes deployments require [Aspir8](https://github.com/prom3theu5/aspirational-manifests).
-> The documentation of each tool should be inspected for more complex deployment configurations.
-
-```powershell
-# Azure
-winget install microsoft.azd
-# or
-winget update microsoft.azd
-
-# In The Context Of The ASPIRE.AppHost Project Directory
-azd init
-azd up
-# TODO: Maybe Reference next-steps.md After Doing azd init ?
-```
-
-```powershell
-# Kubernetes
-dotnet tool install -g aspirate
-
-# In The Context Of The ASPIRE.AppHost Project Directory
-aspirate init
-aspirate generate
-aspirate apply
-```
-
-```powershell
-# Manifest
-# In The Context Of The Solution Directory
-dotnet run --project ASPIRE.AppHost\ASPIRE.AppHost.csproj -- --publisher manifest --output-path manifest.json
-```
-
-<br/>
-
 Install/Update .NET Aspire
 
 > [!NOTE]
-> The Aspire NuGet packages referenced by the respective projects need to be in-sync with the Aspire dotnet workload.
+> The Aspire NuGet packages referenced by the respective projects need to be in-sync with each other and with the Aspire SDK.
 
-```powershell
-# Install
-dotnet workload install aspire
-```
-
-```powershell
-# Update
-dotnet workload update
-```
-
-```powershell
-# Check The Installed Version
-dotnet workload list
-```
+1. update the Aspire NuGet packages to the latest version
+2. manually (for now) update the Aspire SDK in the application host project file
+3. (optional, but good practice) ensure that the service defaults are on the latest version of the template
+    a. make sure that the Aspire project templates are installed, by executing `dotnet new list aspire`
+        - if the Aspire templates are not installed, execute `dotnet new install Aspire.ProjectTemplates`
+    b. execute `dotnet new update` to update all the project templates
+    c. create a temporary service defaults project by executing `dotnet new aspire-servicedefaults`
+    d. copy the content of the generated extensions class over the already existing extensions class, and delete the temporary project
 
 > [!NOTE]
 > Mode in-depth information is available here: https://learn.microsoft.com/en-gb/dotnet/aspire/fundamentals/setup-tooling.
@@ -169,9 +127,16 @@ Debug HTTP Traffic With Fiddler
 
 <hr/>
 
-<h3 align="center">Comprehensive Instructions For Non-Developers</h3>
+<h3 align="center">Concise Instructions For Non-Developers</h3>
 
 1. ??? (coming soon™)
 2. Play HoN !
+
+<hr/>
+
+<h3 align="center">TODOs</h3>
+
+- [ ] add instructions for publishing to Azure, Kubernetes, etc.
+- [ ] support one-click start-up for non-technical users
 
 <br/>
