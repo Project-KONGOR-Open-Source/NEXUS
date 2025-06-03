@@ -10,8 +10,9 @@ public class ASPIRE
         int chatServerPort = builder.Configuration.GetRequiredSection("ChatServer").GetValue<int?>("Port") ?? throw new NullReferenceException("Chat Server Port Is NULL");
 
         IResourceBuilder<IResourceWithConnectionString> distributedCache = builder.AddRedis("distributed-cache")
-            .WithImageTag("latest")
-            .WithRedisInsight(containerName: "distributed-cache-insight") // https://github.com/RedisInsight/RedisInsight/releases/latest
+            .WithImageTag("latest") // https://github.com/redis/redis/releases/latest
+            .WithRedisInsight(container => container.WithLifetime(ContainerLifetime.Persistent).WithEnvironment("RI_ACCEPT_TERMS_AND_CONDITIONS", "true"), // TODO: Confirm This Works From v2.7.2
+                containerName: "distributed-cache-insight") // https://github.com/RedisInsight/RedisInsight/releases/latest
             .WithLifetime(ContainerLifetime.Persistent);
 
         IResourceBuilder<IResourceWithConnectionString> databaseConnectionString = builder.AddConnectionString("MERRICK");
