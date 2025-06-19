@@ -33,13 +33,15 @@ public class TRANSMUTANSTEIN
         builder.AddRedisClient("DISTRIBUTED-CACHE");
 
         // Host The Chat Service
-        builder.Services.AddHostedService<ChatService>();
-
-        // Host The Matchmaking Service
+        builder.Services.AddHostedService<ChatService>();        // Host The Matchmaking Service
         builder.Services.AddHostedService<MatchmakingService>();
 
         // Register The Database Context Service
         builder.Services.AddTransient<MerrickContext>();
+
+        // Register additional services
+        builder.Services.AddScoped<MatchService>();
+        builder.Services.AddScoped<GameServerAllocationService>();
 
         // Add Chat Server Health Check
         builder.Services.AddHealthChecks().AddCheck<ChatServerHealthCheck>("TRANSMUTANSTEIN Chat Server Health Check");

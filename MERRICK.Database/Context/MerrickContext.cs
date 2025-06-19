@@ -6,11 +6,11 @@ public sealed class MerrickContext : DbContext
     {
         if (Database.IsInMemory().Equals(false))
             Database.SetCommandTimeout(60); // 1 Minute - Helps Prevent Migrations From Timing Out When Many Records Need To Update
-    }
-
-    public DbSet<Account> Accounts => Set<Account>();
+    }    public DbSet<Account> Accounts => Set<Account>();
     public DbSet<Clan> Clans => Set<Clan>();
     public DbSet<HeroGuide> HeroGuides => Set<HeroGuide>();
+    public DbSet<Match> Matches => Set<Match>();
+    public DbSet<MatchParticipant> MatchParticipants => Set<MatchParticipant>();
     public DbSet<MatchStatistics> MatchStatistics => Set<MatchStatistics>();
     public DbSet<PlayerStatistics> PlayerStatistics => Set<PlayerStatistics>();
     public DbSet<Role> Roles => Set<Role>();
@@ -19,11 +19,11 @@ public sealed class MerrickContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
-        base.OnModelCreating(builder);
-
-        ConfigureRoles(builder.Entity<Role>());
+        base.OnModelCreating(builder);        ConfigureRoles(builder.Entity<Role>());
         ConfigureAccounts(builder.Entity<Account>());
         ConfigurePlayerStatistics(builder.Entity<PlayerStatistics>());
+        ConfigureMatches(builder.Entity<Match>());
+        ConfigureMatchParticipants(builder.Entity<MatchParticipant>());
     }
 
     private static void ConfigureRoles(EntityTypeBuilder<Role> builder)
@@ -49,9 +49,7 @@ public sealed class MerrickContext : DbContext
         builder.OwnsMany(account => account.BannedPeers, ownedNavigationBuilder => { ownedNavigationBuilder.ToJson(); });
         builder.OwnsMany(account => account.FriendedPeers, ownedNavigationBuilder => { ownedNavigationBuilder.ToJson(); });
         builder.OwnsMany(account => account.IgnoredPeers, ownedNavigationBuilder => { ownedNavigationBuilder.ToJson(); });
-    }
-
-    private static void ConfigurePlayerStatistics(EntityTypeBuilder<PlayerStatistics> builder)
+    }    private static void ConfigurePlayerStatistics(EntityTypeBuilder<PlayerStatistics> builder)
     {
         builder.Property(statistics => statistics.Inventory).HasConversion
         (
@@ -60,5 +58,18 @@ public sealed class MerrickContext : DbContext
             new ValueComparer<List<string>>((first, second) => (first ?? new List<string>()).SequenceEqual(second ?? new List<string>()),
                 collection => collection.Aggregate(0, (accumulatedHashCode, value) => HashCode.Combine(accumulatedHashCode, value.GetHashCode())), collection => collection.ToList())
         );
+    }
+
+    private static void ConfigureMatches(EntityTypeBuilder<Match> builder)
+    {
+        builder.HasMany(m => m.Participants)
+               .WithOne(p => p.Match)
+               .HasForeignKey(p => p.MatchID);
+    }
+
+    private static void ConfigureMatchParticipants(EntityTypeBuilder<MatchParticipant> builder)
+    {
+        builder.HasIndex(p => new { p.MatchID, p.AccountID })
+               .IsUnique();
     }
 }

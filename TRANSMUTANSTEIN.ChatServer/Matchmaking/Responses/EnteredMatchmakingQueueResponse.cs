@@ -2,5 +2,11 @@ namespace TRANSMUTANSTEIN.ChatServer.Matchmaking.Responses;
 
 public record EnteredMatchmakingQueueResponse : IMatchmakingResponse
 {
-    // This response notifies players that the group has entered the queue
+    public byte[] Serialize()
+    {
+        ChatBuffer buffer = new();
+        buffer.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_JOIN_QUEUE);
+        buffer.PrependBufferSize();
+        return buffer.Data;
+    }
 }

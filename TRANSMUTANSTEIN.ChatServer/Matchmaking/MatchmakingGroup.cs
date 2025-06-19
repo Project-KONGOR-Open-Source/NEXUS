@@ -65,15 +65,17 @@ public class MatchmakingGroup
         _botDifficulty = botDifficulty;
         _randomizeBots = randomizeBots;
         _maxGroupSize = maxGroupSize;
-    }
-
-    public int GroupId => _groupId;
+    }    public int GroupId => _groupId;
     public GroupState State => _state;
     public IReadOnlyList<Participant> Participants => _participants.ToList().AsReadOnly();
     public int ParticipantCount => _participants.Length;
     public bool IsFull => _participants.Length >= _maxGroupSize;
     public Participant? Leader => _participants.Length > 0 ? _participants[0] : null;
     public ChatChannel? ChatChannel => _chatChannel;
+    public ChatProtocol.TMMGameType GameType => _gameType;
+    public string Regions => _regions;
+    public bool Ranked => _ranked;
+    public DateTime QueueJoinTime { get; private set; } = DateTime.UtcNow;
       public float AverageRating => _participants.Length > 0 ? _participants.Average(p => 1500f) : 0f;
     public float RatingDisparity => _participants.Length > 0 ? 
         _participants.Max(p => 1500f) - 
@@ -316,12 +318,12 @@ public class MatchmakingGroup
         BroadcastToParticipants(response, participants);
     }    private void BroadcastToParticipants<T>(T response, Participant[] participants) where T : IMatchmakingResponse
     {
+        byte[] responseData = response.Serialize();
         foreach (Participant participant in participants)
         {
             if (Context.ChatSessions.TryGetValue(participant.ClientInformation.Account.Name, out var session))
             {
-                // TODO: Serialize response to ChatBuffer and send
-                // For now, skip sending until we implement proper serialization
+                session.SendAsync(responseData);
             }
         }
     }
@@ -350,12 +352,10 @@ public class MatchmakingGroup
                 GroupParticipants: CreateGroupParticipants(participants),
                 FriendshipStatus: new byte[participants.Length],
                 IsLoadingResources: _state == GroupState.LoadingResources
-            );
-
-            if (Context.ChatSessions.TryGetValue(participant.ClientInformation.Account.Name, out var session))
+            );            if (Context.ChatSessions.TryGetValue(participant.ClientInformation.Account.Name, out var session))
             {
-                // TODO: Serialize response to ChatBuffer and send
-                // For now, skip sending until we implement proper serialization
+                byte[] responseData = matchmakingGroupUpdateResponse.Serialize();
+                session.SendAsync(responseData);
             }
         }
     }
@@ -391,9 +391,7 @@ public class MatchmakingGroup
         }
 
         return groupParticipants;
-    }
-
-    private static string GetMapName(ChatProtocol.TMMGameType gameType)
+    }    private static string GetMapName(ChatProtocol.TMMGameType gameType)
     {
         return gameType switch
         {
@@ -405,5 +403,11 @@ public class MatchmakingGroup
             ChatProtocol.TMMGameType.TMM_GAME_TYPE_CASUAL => "caldavar_old",
             _ => $"unknown#{gameType}"
         };
+    }    public void StartLoadingResources()
+    {
+        _state = GroupState.LoadingResources;
+        
+        // Notify all participants about the state change
+        BroadcastUpdate(GroupUpdateType.Partial, _participants);
     }
 }
