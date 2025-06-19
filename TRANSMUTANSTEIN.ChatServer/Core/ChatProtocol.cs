@@ -37,7 +37,7 @@ public static class ChatProtocol
         public const ushort CHAT_CMD_IM                                     = 0x001C;   // Used When A User Receives/Sends An Instant Message Through The CC Panel
         public const ushort CHAT_CMD_IM_FAILED                              = 0x001D;   // Used When A User Fails To Send An Instant Message
         public const ushort CHAT_CMD_JOIN_CHANNEL                           = 0x001E;   // Sent By User When Joining A New Channel
-        public const ushort CHAT_CMD_DYANMIC_PRODUCT_LIST                   = 0x001F;   // Dynamic Products That Are Updated In The Chat Server Heartbeat Then Sent To The Client When Changed
+        public const ushort CHAT_CMD_DYNAMIC_PRODUCT_LIST                   = 0x001F;   // Dynamic Products That Are Updated In The Chat Server Heartbeat Then Sent To The Client When Changed
         public const ushort CHAT_CMD_WHISPER_BUDDIES                        = 0x0020;   // Send Whisper To All Buddies
         public const ushort CHAT_CMD_MAX_CHANNELS                           = 0x0021;   // Error Sent When User Has Joined The Maximum Number Of Channels
         public const ushort CHAT_CMD_LEAVE_CHANNEL                          = 0x0022;   // Sent By User When Leaving A Channel
