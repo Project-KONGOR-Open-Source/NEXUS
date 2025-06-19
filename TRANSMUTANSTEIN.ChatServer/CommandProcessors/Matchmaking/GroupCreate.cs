@@ -10,128 +10,77 @@ public class GroupCreate(MerrickContext merrick, ILogger<GroupCreate> logger) : 
     {
         GroupCreateRequestData requestData = new(buffer);
 
-        // TODO: Perform Checks And Respond With ChatProtocol.TMMFailedToJoinReason If Needed
+        // Check if player is already in a group
+        if (Context.MatchmakingGroupChatChannels.ContainsKey(session.ClientInformation.Account.ID))
+        {
+            Logger.LogWarning($"Account {session.ClientInformation.Account.ID} ({session.ClientInformation.Account.Name}) attempted to create a group while already in one");
+              // Send failure response
+            Response.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_FAILED_TO_JOIN);
+            Response.WriteInt8((byte)ChatProtocol.TMMFailedToJoinReason.TMMFTJR_GROUP_FULL);
+            Response.PrependBufferSize();
+            
+            session.SendAsync(Response.Data);
+            return;
+        }
 
-        if (Context.MatchmakingGroupChatChannels.ContainsKey(session.ClientInformation.Account.ID) is false)
-            MatchmakingService.SoloPlayerGroups.TryAdd(session.ClientInformation.Account.ID, new MatchmakingGroup(new MatchmakingGroupMember { Rating = 1650.00f, IsLeader = true, IsReady = true }));
+        // TODO: Add additional validation (e.g., banned players, maintenance mode, etc.)
 
-        // TODO: Set Actual Rating & Game Details
+        try
+        {
+            // Create the matchmaking group
+            MatchmakingGroup group = new(
+                requestData.GroupType,
+                requestData.GameType,
+                string.Join("|", requestData.GameModes),
+                string.Join("|", requestData.GameRegions),
+                requestData.Ranked,
+                requestData.MatchFidelity,
+                requestData.BotDifficulty,
+                requestData.RandomizeBots
+            );
 
-        // TODO: Add Some Flag For Queue State, For Groups Created In Advance
+            // Add the group to the appropriate collection based on size
+            var groupDict = GetGroupDictionary(requestData.GroupType);
+            groupDict.TryAdd(session.ClientInformation.Account.ID, group);
 
-        /*
+            // Add the player to the group
+            if (!group.AddParticipant(session, out var failureReason))
+            {
+                // Remove the group if we couldn't add the participant
+                groupDict.TryRemove(session.ClientInformation.Account.ID, out _);
+                
+                Logger.LogWarning($"Failed to add account {session.ClientInformation.Account.ID} to their own group: {failureReason}");
+                  // Send failure response
+                Response.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_FAILED_TO_JOIN);
+                Response.WriteInt8((byte)failureReason);
+                Response.PrependBufferSize();
+                
+                session.SendAsync(Response.Data);
+                return;
+            }
 
-        MatchmakingGroupUpdateResponse matchmakingGroupUpdateResponse = new MatchmakingGroupUpdateResponse(
-            updateType: Convert.ToByte(updateType),
-            accountId: removedOrKickedAccountId,
-            groupSize: Convert.ToByte(participantsListCopy.Count),
-            averageTMR: Convert.ToInt16(1500),
-            leaderAccountId: Participants[0].AccountId,
-            unknown1: 1, // 1 for ranked, 4 midwars, 5 bot, 7 riftwars? Possibly wrong.
-            gameType: GameType,
-            mapName: GetMapName(GameType),
-            gameModes: GameModes,
-            regions: Regions,
-            ranked: Ranked,
-            matchFidelity: MatchFidelity,
-            botDifficulty: BotDifficulty,
-            randomizeBots: RandomizeBots,
-            unknown2: "",
-            playerInvitationResponses: "", // seems important.
-            teamSize: 5, // max number of players?
-            groupType: GroupType,
-            groupParticipants: CreateGroupParticipants(),
-            friendshipStatus: friendshipStatus
-        );
-
-           private List<MatchmakingGroupUpdateResponse.GroupParticipant> CreateGroupParticipants()
-           {
-               List<MatchmakingGroupUpdateResponse.GroupParticipant> groupParticipants = new();
-               for (int i = 0; i < Participants.Count; ++i)
-               {
-                   groupParticipants.Add(CreateGroupParticipant(i, Participants[i]));
-               }
-               return groupParticipants;
-           }
-
-           private MatchmakingGroupUpdateResponse.GroupParticipant CreateGroupParticipant(int slot, Participant participant)
-           {
-               bool isReady;
-               if (participant == Participants[0])
-               {
-                   // Leader is Ready when they advance the state.
-                   isReady = State != GroupState.WaitingToStart;
-               }
-               else
-               {
-                   // Non-Leaders are always ready.
-                   isReady = true;
-               }
-               return new MatchmakingGroupUpdateResponse.GroupParticipant(
-                   AccountId: participant.AccountId,
-                   Name: participant.Name,
-                   Slot: Convert.ToByte(slot),
-                   NormalRankLevel: 1500,
-                   CasualRankLevel: 1500,
-                   NormalRanking: 5,
-                   CasualRanking: 5,
-                   EligibleForCampaign: 1,
-                   Rating: 1500,
-                   LoadingPercent: participant.LoadingStatus,
-                   ReadyStatus: Convert.ToByte(isReady),
-                   InGame: 0,
-                   Verified: 1,
-                   ChatNameColor: participant.ChatNameColor, // not sure if this works.
-                   AccountIcon: participant.AccountIcon,
-                   Country: "US", // ??
-                   GameModeAccessBool: 1,
-                   GameModeAccessString: GameModes // game modes that user can access?
-               );
-           }
-
-           if (participantCount == 0)
-           {
-               // First connected Account become the Leader.
-               BroadcastUpdate(MatchmakingGroup.GroupUpdateType.GroupCreated);
-           }
-           else
-           {
-               // Create a chat channel for the group if there are more than one Participants.
-               if (ChatChannel == null)
-               {
-                   string channelName = "Group #" + GroupId;
-                   ChatChannel? chatChannel = KongorContext.ChatChannels.ChatChannelByName(channelName);
-                   ChatServerProtocol.ChatChannelFlags channelFlags = ChatServerProtocol.ChatChannelFlags.CannotBeJoined;
-                   if (chatChannel != null)
-                   {
-                       chatChannel.RemoveEveryone();
-                       chatChannel.Flags = channelFlags;
-                   }
-                   else
-                   {
-                       chatChannel = new ChatChannel(channelName, "TMM Group Chat", channelFlags);
-                       KongorContext.ChatChannels.Add(chatChannel);
-                   }
-
-                   ChatChannel = chatChannel;
-                   chatChannel.AddAccountIds(Participants.Select(participant => participant.AccountId));
-               }
-               else
-               {
-                   // ChatChannel already exists, join it.
-                   ChatChannel.AddAccount(account, KongorContext.ConnectedClients[account.AccountId]);
-               }
-
-               BroadcastUpdate(MatchmakingGroup.GroupUpdateType.Full);
-           }
-
-           if (State == GroupState.LoadingResources)
-           {
-               // Update LoadingProgress progress.
-               BroadcastUpdate(GroupUpdateType.Partial);
-           }
-
-        */
+            Logger.LogInformation($"Created matchmaking group for account {session.ClientInformation.Account.ID} ({session.ClientInformation.Account.Name})");
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, $"Failed to create matchmaking group for account {session.ClientInformation.Account.ID}");
+              // Send failure response
+            Response.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_FAILED_TO_JOIN);
+            Response.WriteInt8((byte)ChatProtocol.TMMFailedToJoinReason.TMMFTJR_DISABLED);
+            Response.PrependBufferSize();
+            
+            session.SendAsync(Response.Data);
+        }
+    }    private static ConcurrentDictionary<int, MatchmakingGroup> GetGroupDictionary(ChatProtocol.TMMType groupType)
+    {
+        return groupType switch
+        {
+            ChatProtocol.TMMType.TMM_TYPE_SOLO => MatchmakingService.SoloPlayerGroups,
+            ChatProtocol.TMMType.TMM_TYPE_PVP => MatchmakingService.TwoPlayerGroups,
+            ChatProtocol.TMMType.TMM_TYPE_COOP => MatchmakingService.ThreePlayerGroups,
+            ChatProtocol.TMMType.TMM_TYPE_CAMPAIGN => MatchmakingService.FourPlayerGroups,
+            _ => MatchmakingService.SoloPlayerGroups
+        };
     }
 }
 

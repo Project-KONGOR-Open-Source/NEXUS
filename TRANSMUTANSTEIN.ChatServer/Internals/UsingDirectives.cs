@@ -26,4 +26,5 @@ global using TRANSMUTANSTEIN.ChatServer.Contracts;
 global using TRANSMUTANSTEIN.ChatServer.Core;
 global using TRANSMUTANSTEIN.ChatServer.Internals;
 global using TRANSMUTANSTEIN.ChatServer.Matchmaking;
+global using TRANSMUTANSTEIN.ChatServer.Matchmaking.Responses;
 global ﻿using TRANSMUTANSTEIN.ChatServer.Services;
