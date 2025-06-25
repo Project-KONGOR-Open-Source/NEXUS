@@ -17,7 +17,7 @@ namespace MERRICK.Database.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.4")
+                .HasAnnotation("ProductVersion", "9.0.6")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -33,7 +33,7 @@ namespace MERRICK.Database.Migrations
                     b.Property<int>("AscensionLevel")
                         .HasColumnType("int");
 
-                    b.Property<string>("AutoConnectChatChannels")
+                    b.PrimitiveCollection<string>("AutoConnectChatChannels")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -43,14 +43,14 @@ namespace MERRICK.Database.Migrations
                     b.Property<int>("ClanTier")
                         .HasColumnType("int");
 
-                    b.Property<string>("IPAddressCollection")
+                    b.PrimitiveCollection<string>("IPAddressCollection")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("IsMain")
                         .HasColumnType("bit");
 
-                    b.Property<string>("MACAddressCollection")
+                    b.PrimitiveCollection<string>("MACAddressCollection")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -59,15 +59,15 @@ namespace MERRICK.Database.Migrations
                         .HasMaxLength(15)
                         .HasColumnType("nvarchar(15)");
 
-                    b.Property<string>("SelectedStoreItems")
+                    b.PrimitiveCollection<string>("SelectedStoreItems")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("SystemInformationCollection")
+                    b.PrimitiveCollection<string>("SystemInformationCollection")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("SystemInformationHashCollection")
+                    b.PrimitiveCollection<string>("SystemInformationHashCollection")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -143,7 +143,7 @@ namespace MERRICK.Database.Migrations
                     b.Property<int>("GoldCoins")
                         .HasColumnType("int");
 
-                    b.Property<string>("OwnedStoreItems")
+                    b.PrimitiveCollection<string>("OwnedStoreItems")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -769,7 +769,7 @@ namespace MERRICK.Database.Migrations
                             b1.Property<int>("AccountID")
                                 .HasColumnType("int");
 
-                            b1.Property<int>("Id")
+                            b1.Property<int>("__synthesizedOrdinal")
                                 .ValueGeneratedOnAdd()
                                 .HasColumnType("int");
 
@@ -786,7 +786,7 @@ namespace MERRICK.Database.Migrations
                                 .HasMaxLength(15)
                                 .HasColumnType("nvarchar(15)");
 
-                            b1.HasKey("AccountID", "Id");
+                            b1.HasKey("AccountID", "__synthesizedOrdinal");
 
                             b1.HasIndex("Name")
                                 .IsUnique();
@@ -804,7 +804,7 @@ namespace MERRICK.Database.Migrations
                             b1.Property<int>("AccountID")
                                 .HasColumnType("int");
 
-                            b1.Property<int>("Id")
+                            b1.Property<int>("__synthesizedOrdinal")
                                 .ValueGeneratedOnAdd()
                                 .HasColumnType("int");
 
@@ -825,7 +825,7 @@ namespace MERRICK.Database.Migrations
                                 .HasMaxLength(15)
                                 .HasColumnType("nvarchar(15)");
 
-                            b1.HasKey("AccountID", "Id");
+                            b1.HasKey("AccountID", "__synthesizedOrdinal");
 
                             b1.HasIndex("Name")
                                 .IsUnique();
@@ -843,7 +843,7 @@ namespace MERRICK.Database.Migrations
                             b1.Property<int>("AccountID")
                                 .HasColumnType("int");
 
-                            b1.Property<int>("Id")
+                            b1.Property<int>("__synthesizedOrdinal")
                                 .ValueGeneratedOnAdd()
                                 .HasColumnType("int");
 
@@ -855,7 +855,7 @@ namespace MERRICK.Database.Migrations
                                 .HasMaxLength(15)
                                 .HasColumnType("nvarchar(15)");
 
-                            b1.HasKey("AccountID", "Id");
+                            b1.HasKey("AccountID", "__synthesizedOrdinal");
 
                             b1.HasIndex("Name")
                                 .IsUnique();
