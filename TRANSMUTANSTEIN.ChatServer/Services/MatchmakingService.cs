@@ -10,6 +10,10 @@ public class MatchmakingService(IServiceProvider serviceProvider) : IHostedServi
     public static ConcurrentDictionary<int, MatchmakingGroup> FourPlayerGroups { get; set; } = [];
     public static ConcurrentDictionary<int, MatchmakingGroup> FivePlayerGroups { get; set; } = [];
 
+    public static ConcurrentDictionary<int, MatchmakingGroup> Groups =>
+        new(new[] { SoloPlayerGroups, TwoPlayerGroups, ThreePlayerGroups, FourPlayerGroups, FivePlayerGroups }
+            .SelectMany(dictionary => dictionary).ToDictionary(entry => entry.Key, entry => entry.Value));
+
     public Task StartAsync(CancellationToken cancellationToken)
     {
         Logger.LogInformation("Matchmaking Service Has Started");
