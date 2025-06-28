@@ -10,15 +10,13 @@ public class GroupCreate(MerrickContext merrick, ILogger<GroupCreate> logger) : 
     {
         GroupCreateRequestData requestData = new (buffer);
 
-        // TODO: Perform Checks And Respond With ChatProtocol.TMMFailedToJoinReason If Needed
-
         if (Context.MatchmakingGroupChatChannels.ContainsKey(session.ClientInformation.Account.ID) is false)
         {
             MatchmakingGroupMember member = new ()
             {
                 ID = session.ClientInformation.Account.ID,
                 Name = session.ClientInformation.Account.NameWithClanTag,
-                Slot = 1, // TODO: Is This Zero-Indexed Or One-Indexed?
+                Slot = 1,
                 IsLeader = true,
                 IsReady = false,
                 IsInGame = false,
@@ -70,11 +68,11 @@ public class GroupCreate(MerrickContext merrick, ILogger<GroupCreate> logger) : 
         Response.WriteBool(requestData.MatchFidelity);                                      // Match Fidelity
         Response.WriteInt8(requestData.BotDifficulty);                                      // Bot Difficulty
         Response.WriteBool(requestData.RandomizeBots);                                      // Randomize Bots
-        Response.WriteString(string.Empty);                                                 // Country Restrictions (e.g. "AB->USE|XY->USW" means only country "AB" can access region "USE" and only country "XY" can access region "USW")
+        Response.WriteString(string.Empty);                                                 // Country Restrictions (e.g. "AB->USE|XY->USW" Means Only Country "AB" Can Access Region "USE" And Only Country "XY" Can Access Region "USW")
         Response.WriteString("TODO: Find Out What Player Invitation Responses Do");         // Player Invitation Responses
         // TODO: Dynamically Set Team Size From The Request Data
-        Response.WriteInt8(5);                                                              // Team Size (e.g. 5 for Forests Of Caldavar, 3 for Grimm's Crossing)
-        Response.WriteInt8(Convert.ToByte(requestData.GroupType));                          // Group Type (e.g. 2 for multiplayer group, 3 for bot match group)
+        Response.WriteInt8(5);                                                              // Team Size (e.g. 5 For Forests Of Caldavar, 3 For Grimm's Crossing)
+        Response.WriteInt8(Convert.ToByte(requestData.GroupType));                          // Group Type
 
         MatchmakingGroup group = MatchmakingService.Groups.Single(group => group.Key == session.ClientInformation.Account.ID).Value;
 
@@ -108,7 +106,6 @@ public class GroupCreate(MerrickContext merrick, ILogger<GroupCreate> logger) : 
         {
             foreach (MatchmakingGroupMember member in group.Members)
             {
-                // TODO: Determine If The Member Is A Friend Of The Leader
                 Response.WriteBool(false);                                                  // Is Friend
             }
         }
