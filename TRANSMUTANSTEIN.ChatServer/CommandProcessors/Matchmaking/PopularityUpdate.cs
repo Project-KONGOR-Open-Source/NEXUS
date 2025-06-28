@@ -8,7 +8,7 @@ public class PopularityUpdate(MerrickContext merrick, ILogger<PopularityUpdate> 
 
     public async Task Process(ChatSession session, ChatBuffer buffer)
     {
-        PopularityUpdateRequestData requestData = new(buffer);
+        PopularityUpdateRequestData requestData = new (buffer);
 
         await SendMatchmakingPopularity(session, buffer, Response);
     }

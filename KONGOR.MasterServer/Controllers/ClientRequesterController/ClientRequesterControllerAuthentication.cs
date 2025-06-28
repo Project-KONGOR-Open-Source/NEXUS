@@ -38,7 +38,7 @@ public partial class ClientRequesterController
 
         (string serverPrivateEphemeral, string serverPublicEphemeral) = SRPAuthenticationSessionDataStageOne.ComputeServerEphemeral(verifier);
 
-        SRPAuthenticationSessionDataStageOne data = new()
+        SRPAuthenticationSessionDataStageOne data = new ()
         {
             LoginIdentifier = accountName,
             SessionSalt = authenticationSessionSalt,
@@ -115,7 +115,7 @@ public partial class ClientRequesterController
 
         Cache.RemoveSRPAuthenticationSystemInformation(accountName);
 
-        SRPAuthenticationSessionDataStageTwo stageTwoData = new(stageOneData, clientProof);
+        SRPAuthenticationSessionDataStageTwo stageTwoData = new (stageOneData, clientProof);
 
         string? serverProof = stageTwoData.ServerProof;
 
@@ -197,7 +197,7 @@ public partial class ClientRequesterController
         string chatHost = Environment.GetEnvironmentVariable("CHAT_SERVER_HOST") ?? throw new NullReferenceException("Chat Server Host Is NULL");
         int chatPort = int.Parse(Environment.GetEnvironmentVariable("CHAT_SERVER_PORT") ?? throw new NullReferenceException("Chat Server Port Is NULL"));
 
-        SRPAuthenticationHandlers.StageTwoResponseParameters parameters = new()
+        SRPAuthenticationHandlers.StageTwoResponseParameters parameters = new ()
         {
             Account = account,
             ClanRoster = account.Clan?.Members ?? [],

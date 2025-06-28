@@ -30,7 +30,7 @@ public class PatcherController(ILogger<PatcherController> logger, IMemoryCache c
         // Unlike The Current Client's Version, The Revision Number Is Excluded From The Version Number Of The Latest Client If It Is Zero (e.g. "4.10.1.0" becomes just "4.10.1")
         PatchDetails latestPatch = PatchHandlers.GetLatestClientPatchDetails(form.OperatingSystem);
 
-        LatestPatchResponse response = new()
+        LatestPatchResponse response = new ()
         {
             PatchVersion = currentPatch.FullVersion,
             CurrentPatchVersion = currentPatch.FullVersion,

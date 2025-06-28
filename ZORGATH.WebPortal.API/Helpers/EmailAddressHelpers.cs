@@ -18,7 +18,7 @@ public static class EmailAddressHelpers
                 .Concat(new[] { "icloud", "me", "mac" }) // iCloud Mail
                 .ToArray();
 
-            Regex pattern = new(@"^(?<local>[a-zA-Z0-9_\-.]+)@(?<domain>[a-zA-Z]+)\.(?<tld>[a-zA-Z]{1,3}|co.uk)$");
+            Regex pattern = new (@"^(?<local>[a-zA-Z0-9_\-.]+)@(?<domain>[a-zA-Z]+)\.(?<tld>[a-zA-Z]{1,3}|co.uk)$");
 
             Match match = pattern.Match(email);
 

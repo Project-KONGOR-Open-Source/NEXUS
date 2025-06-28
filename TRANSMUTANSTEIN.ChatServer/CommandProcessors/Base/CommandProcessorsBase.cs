@@ -2,5 +2,5 @@
 
 public abstract class CommandProcessorsBase
 {
-    protected ChatBuffer Response { get; set; } = new();
+    protected ChatBuffer Response { get; set; } = new ();
 }

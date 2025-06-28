@@ -38,7 +38,7 @@ public partial class ServerRequesterController
             return BadRequest("Unable To Resolve Remote IP Address");
         }
 
-        MatchServerManager matchServerManager = new()
+        MatchServerManager matchServerManager = new ()
         {
             HostAccountID = account.ID,
             HostAccountName = account.Name,
@@ -52,7 +52,7 @@ public partial class ServerRequesterController
         string chatHost = Environment.GetEnvironmentVariable("CHAT_SERVER_HOST") ?? throw new NullReferenceException("Chat Server Host Is NULL");
         int chatPort = int.Parse(Environment.GetEnvironmentVariable("CHAT_SERVER_PORT") ?? throw new NullReferenceException("Chat Server Port Is NULL"));
 
-        Dictionary<string, object> response = new()
+        Dictionary<string, object> response = new ()
         {
             ["server_id"] = matchServerManager.ID,
             ["official"] = 1, // If Not Official, It Is Considered To Be Un-Authorized
@@ -129,7 +129,7 @@ public partial class ServerRequesterController
 
         // TODO: Verify Whether The Server Version Matches The Client Version (Or Disallow Servers To Be Started If They Are Not On The Latest Version)
 
-        MatchServer matchServer = new()
+        MatchServer matchServer = new ()
         {
             HostAccountID = account.ID,
             HostAccountName = account.Name,
@@ -149,7 +149,7 @@ public partial class ServerRequesterController
         string chatHost = Environment.GetEnvironmentVariable("CHAT_SERVER_HOST") ?? throw new NullReferenceException("Chat Server Host Is NULL");
         int chatPort = int.Parse(Environment.GetEnvironmentVariable("CHAT_SERVER_PORT") ?? throw new NullReferenceException("Chat Server Port Is NULL"));
 
-        Dictionary<string, object> response = new()
+        Dictionary<string, object> response = new ()
         {
             ["session"] = matchServer.Cookie,
             ["server_id"] = matchServer.ID,
@@ -210,7 +210,7 @@ public partial class ServerRequesterController
             return BadRequest($@"Account With Name ""{accountNameForSessionCookie}"" Could Not Be Found");
         }
 
-        Dictionary<string, object> response = new()
+        Dictionary<string, object> response = new ()
         {
             { "cookie", cookie },
             { "account_id", account.ID },
@@ -229,7 +229,7 @@ public partial class ServerRequesterController
         /*
             public static List<Info> InfoForAccount(AccountDetails accountDetails, float tournamentRatingForActiveTeam)
            {
-               Info info = new()
+               Info info = new ()
                {
                    AccountId = accountDetails.AccountId.ToString(),
                    Standing = "3",
@@ -324,7 +324,7 @@ public partial class ServerRequesterController
         //    return Unauthorized($@"NOT AUTHORISED: Invalid Account Key ""{formData["acc_key"]}""");
 
         /*
-        Dictionary<string, object> response = new()
+        Dictionary<string, object> response = new ()
         {
             { "server_id", server.GameServerId },
             { "official", server.Official ? 1 : 0 } // 0 = Unofficial; 1 = Official With Stats; 2 = Official Without Stats;
@@ -333,7 +333,7 @@ public partial class ServerRequesterController
 
         // TODO: Fix This Mess !!! (Maybe Just Use The Cookie As The Account Key?)
 
-        Dictionary<string, object> response = new()
+        Dictionary<string, object> response = new ()
         {
             { "server_id", 666 },
             { "official", 1 } // 0 = Unofficial; 1 = Official With Stats; 2 = Official Without Stats;

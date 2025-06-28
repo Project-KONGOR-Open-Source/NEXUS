@@ -8,20 +8,26 @@ public class GroupCreate(MerrickContext merrick, ILogger<GroupCreate> logger) : 
 
     public async Task Process(ChatSession session, ChatBuffer buffer)
     {
-        GroupCreateRequestData requestData = new(buffer);
+        GroupCreateRequestData requestData = new (buffer);
 
         // TODO: Perform Checks And Respond With ChatProtocol.TMMFailedToJoinReason If Needed
 
         if (Context.MatchmakingGroupChatChannels.ContainsKey(session.ClientInformation.Account.ID) is false)
         {
-            MatchmakingGroupMember member = new()
+            MatchmakingGroupMember member = new ()
             {
                 ID = session.ClientInformation.Account.ID,
                 Name = session.ClientInformation.Account.NameWithClanTag,
                 Slot = 1, // TODO: Is This Zero-Indexed Or One-Indexed?
                 IsLeader = true,
                 IsReady = false,
-                LoadingPercent = 0
+                IsInGame = false,
+                IsEligibleForMatchmaking = true,
+                LoadingPercent = 0,
+                ChatNameColor = session.ClientInformation.Account.ChatNameColor,
+                AccountIcon = session.ClientInformation.Account.Icon,
+                GameModeAccess = string.Join('|', requestData.GameModes.Select(mode => "true")),
+                IsFriend = false // TODO: Determine If The Group Member Is A Friend And If Self Should Be Considered A Friend
             };
 
             if (MatchmakingService.SoloPlayerGroups.TryAdd(session.ClientInformation.Account.ID, new MatchmakingGroup(member)) is false)
@@ -62,9 +68,9 @@ public class GroupCreate(MerrickContext merrick, ILogger<GroupCreate> logger) : 
 
         MatchmakingGroup group = MatchmakingService.Groups.Single(group => group.Key == session.ClientInformation.Account.ID).Value;
 
-        if (updateType is not ChatProtocol.TMMUpdateType.TMM_PARTIAL_GROUP_UPDATE)
+        foreach (MatchmakingGroupMember member in group.Members)
         {
-            foreach (MatchmakingGroupMember member in group.Members)
+            if (updateType is not ChatProtocol.TMMUpdateType.TMM_PARTIAL_GROUP_UPDATE)
             {
                 Response.WriteInt32(member.ID);                                             // Account ID
                 Response.WriteString(member.Name);                                          // Account Name
@@ -77,77 +83,33 @@ public class GroupCreate(MerrickContext merrick, ILogger<GroupCreate> logger) : 
                 Response.WriteInt32(1500);                                                  // Normal Ranking
                 // TODO: Use Real Casual Ranking
                 Response.WriteInt32(1500);                                                  // Casual Ranking
+
+                // TODO: The Rank Level Is Probably Not Needed, And The Ranking Should Be Determined By The Game Type
+                // TODO: It Also Looks Like This Value Needs To Be An Int16, Not Int32
+
+                /*
+                    if (update type != TMM_PARTIAL_GROUP_UPDATE)
+                        [4] unsigned long - client's account ID
+                        [X] string - client's name
+                        [1] unsigned char - client's team slot
+                        [2] unsigned short - client's MMR (USHORT_MAX if unranked or MidWars)
+                 */
+            }
+
+            Response.WriteInt8(member.LoadingPercent);                                      // Loading Percent (0 to 100)
+            Response.WriteBool(member.IsReady);                                             // Ready Status
+            Response.WriteBool(member.IsInGame);                                            // In-Game Status
+
+            if (updateType is not ChatProtocol.TMMUpdateType.TMM_PARTIAL_GROUP_UPDATE)
+            {
+                Response.WriteBool(member.IsEligibleForMatchmaking);                        // Eligible For Matchmaking
             }
         }
 
 
+
+
         /*
-
-
-    private readonly List<GroupParticipant> GroupParticipants;
-    private readonly byte[] FriendshipStatus;
-
-
-
-
-        0x0D03 - NET_CHAT_CL_TMM_GROUP_UPDATE - Gives the client updated information on their matchmaking group.
-Format:
-	[1] ETMMUpdateType - update type. Valid types:
-		TMM_CREATE_GROUP: The group has been created.
-		TMM_FULL_GROUP_UPDATE: Full group update.
-		TMM_PARTIAL_GROUP_UPDATE: Partial group update.
-		TMM_PLAYER_JOINED_GROUP: A player has joined the group.
-		TMM_PLAYER_LEFT_GROUP: A player has left the group.
-		TMM_PLAYER_KICKED_FROM_GROUP: A player was kicked from the group.
-	[4] unsigned long - account ID (if update is for a specific client, this is the client's account ID)
-	[1] unsigned char - number of clients in group
-	[2] unsigned short - average MMR of clients in group
-	[4] unsigned long - group leader's account ID
-	[1] EArrangedMatchType - arranged match type
-	[1] ETMMGameTypes - game type
-	[X] string - map name. Valid names:
-		"caldavar"
-		"grimmscrossing"
-		"midwars"
-	[X] string - game modes, delimited by | (e.g "ap|sd"). Case sensitive. Valid modes:
-		"ap" - All Pick
-		"apg" - All Pick Core Pool
-		"sd" - Single Draft
-		"bd" - Banning Draft
-		"bp" - Banning Pick
-		"ar" - All Random
-		"lp" - Lock Pick
-		"bb" - Blind Ban (Midwars mode)
-		"bbg" - Blind Ban Core Pool
-		"bm" - Bot Match
-		"cm" - Captain's Pick
-		"br" - Balanced Random
-	[X] string - server regions, delimited by | (e.g. "VN|DX"). Case sensitive. Valid regions:
-		"USE" - US East
-		"USW" - US West
-		"EU" - Europe
-		"SG" - Singapore
-		"MY" - Malaysia
-		"PH" - Philippines
-		"TH" - Thailand
-		"ID" - Indonesia
-		"VN" - Vietnam
-		"RU" - Russia
-		"KR" - Korea
-		"AU" - Australia
-		"LAT" - Latin America
-		"DX" - China DX region
-		"LT" - China LT region
-	[1] bool - ranked
-	[1] bool - match fidelity
-	[1] unsigned char - bot difficulty
-	[1] bool - randomize bots
-	[X] string - country restrictions (e.g. "AB->USE|XY->USW" means only country "AB" can access region "USE" and only country "XY" can access region "USW")
-	[X] string - player response string (TODO: this has information on player invites)
-	[1] unsigned char - matchmaking team size (e.g. 5 for Forests of Caldavar, 3 for Grimm's Crossing)
-	[1] unsigned char - group type. Valid types:
-		2: multiplayer group
-		3: bot match group
 	for each client in the group
 		if (update type != TMM_PARTIAL_GROUP_UPDATE)
 			[4] unsigned long - client's account ID
@@ -196,7 +158,7 @@ Notes:
 
            private List<MatchmakingGroupUpdateResponse.GroupParticipant> CreateGroupParticipants()
            {
-               List<MatchmakingGroupUpdateResponse.GroupParticipant> groupParticipants = new();
+               List<MatchmakingGroupUpdateResponse.GroupParticipant> groupParticipants = new ();
                for (int i = 0; i < Participants.Count; ++i)
                {
                    groupParticipants.Add(CreateGroupParticipant(i, Participants[i]));
@@ -406,7 +368,7 @@ public class MatchmakingGroupUpdateResponse : ProtocolResponse
 
     public override CommandBuffer Encode()
     {
-        CommandBuffer buffer = new();
+        CommandBuffer buffer = new ();
         buffer.WriteInt16(ChatServerProtocol.MatchmakingTwoWay.GroupUpdate);
         buffer.WriteInt8(UpdateType);
         buffer.WriteInt32(AccountId);

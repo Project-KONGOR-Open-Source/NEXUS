@@ -8,7 +8,7 @@ public class SeasonStats(MerrickContext merrick, ILogger<SeasonStats> logger) : 
 
     public async Task Process(ChatSession session, ChatBuffer buffer)
     {
-        SeasonStatsRequestData requestData = new(buffer);
+        SeasonStatsRequestData requestData = new (buffer);
 
         Response.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_CAMPAIGN_STATS);
 

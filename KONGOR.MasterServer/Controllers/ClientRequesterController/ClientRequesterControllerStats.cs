@@ -17,7 +17,7 @@ public partial class ClientRequesterController
         if (account is null)
             return NotFound($@"Account With Name ""{accountName}"" Was Not Found");
 
-        ShowSimpleStatsResponse response = new()
+        ShowSimpleStatsResponse response = new ()
         {
             NameWithClanTag = account.NameWithClanTag,
             ID = account.ID.ToString(),

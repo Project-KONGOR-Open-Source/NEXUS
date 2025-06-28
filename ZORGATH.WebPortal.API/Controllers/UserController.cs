@@ -58,7 +58,7 @@ public class UserController(MerrickContext databaseContext, ILogger<UserControll
 
         string salt = SRPRegistrationHandlers.GenerateSRPPasswordSalt();
 
-        User user = new()
+        User user = new ()
         {
             EmailAddress = sanitizedEmailAddress,
             Role = role,
@@ -70,7 +70,7 @@ public class UserController(MerrickContext databaseContext, ILogger<UserControll
 
         await MerrickContext.Users.AddAsync(user);
 
-        Account account = new()
+        Account account = new ()
         {
             Name = payload.Name,
             User = user,
@@ -130,21 +130,21 @@ public class UserController(MerrickContext databaseContext, ILogger<UserControll
             // RFC7519: https://www.rfc-editor.org/rfc/rfc7519.html#section-4
             # endregion
 
-            new(JwtRegisteredClaimNames.Sub, account.Name, ClaimValueTypes.String),
-            new(JwtRegisteredClaimNames.Iat, DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64),
-            new(JwtRegisteredClaimNames.AuthTime, DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64),
-            new(JwtRegisteredClaimNames.Nonce, Guid.NewGuid().ToString(), ClaimValueTypes.String),
-            new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString(), ClaimValueTypes.String),
-            new(JwtRegisteredClaimNames.Email, user.EmailAddress, ClaimValueTypes.Email)
+            new (JwtRegisteredClaimNames.Sub, account.Name, ClaimValueTypes.String),
+            new (JwtRegisteredClaimNames.Iat, DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64),
+            new (JwtRegisteredClaimNames.AuthTime, DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64),
+            new (JwtRegisteredClaimNames.Nonce, Guid.NewGuid().ToString(), ClaimValueTypes.String),
+            new (JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString(), ClaimValueTypes.String),
+            new (JwtRegisteredClaimNames.Email, user.EmailAddress, ClaimValueTypes.Email)
         };
 
         IEnumerable<Claim> customClaims = new List<Claim>
         {
-            new(Claims.UserID, user.ID.ToString(), ClaimValueTypes.String),
-            new(Claims.AccountID, account.ID.ToString(), ClaimValueTypes.String),
-            new(Claims.AccountIsMain, account.IsMain.ToString(), ClaimValueTypes.Boolean),
-            new(Claims.ClanName, account.Clan?.Name ?? string.Empty, ClaimValueTypes.String),
-            new(Claims.ClanTag, account.Clan?.Tag ?? string.Empty, ClaimValueTypes.String)
+            new (Claims.UserID, user.ID.ToString(), ClaimValueTypes.String),
+            new (Claims.AccountID, account.ID.ToString(), ClaimValueTypes.String),
+            new (Claims.AccountIsMain, account.IsMain.ToString(), ClaimValueTypes.Boolean),
+            new (Claims.ClanName, account.Clan?.Name ?? string.Empty, ClaimValueTypes.String),
+            new (Claims.ClanTag, account.Clan?.Tag ?? string.Empty, ClaimValueTypes.String)
         };
 
         IEnumerable<Claim> allTokenClaims = Enumerable.Empty<Claim>().Union(userRoleClaims).Union(openIDClaims).Union(customClaims).OrderBy(claim => claim.Type);

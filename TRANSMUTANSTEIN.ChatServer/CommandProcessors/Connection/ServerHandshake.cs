@@ -8,7 +8,7 @@ public class ServerHandshake(MerrickContext merrick, ILogger<ServerHandshake> lo
 
     public async Task Process(ChatSession session, ChatBuffer buffer)
     {
-        ServerHandshakeRequestData requestData = new(buffer);
+        ServerHandshakeRequestData requestData = new (buffer);
 
         // TODO: Check Cookie
 

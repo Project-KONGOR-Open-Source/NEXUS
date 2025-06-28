@@ -8,7 +8,7 @@ public class TrackPlayerAction(MerrickContext merrick, ILogger<TrackPlayerAction
 
     public async Task Process(ChatSession session, ChatBuffer buffer)
     {
-        TrackPlayerActionRequestData requestData = new(buffer);
+        TrackPlayerActionRequestData requestData = new (buffer);
 
         // TODO: Do Something With This Data
 

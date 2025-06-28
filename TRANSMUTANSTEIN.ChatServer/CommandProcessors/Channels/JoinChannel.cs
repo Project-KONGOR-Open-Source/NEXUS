@@ -8,7 +8,7 @@ public class JoinChannel(MerrickContext merrick, ILogger<JoinChannel> logger) : 
 
     public async Task Process(ChatSession session, ChatBuffer buffer)
     {
-        JoinChannelRequestData requestData = new(buffer);
+        JoinChannelRequestData requestData = new (buffer);
 
         // TODO: Handle Max Channels
         // If the channel has MAX_USERS_PER_CHANNEL or more in it, fails silently.
@@ -70,7 +70,7 @@ public class JoinChannel(MerrickContext merrick, ILogger<JoinChannel> logger) : 
         ChatChannelMember newMember = channel.Members.Values.Single(member => member.Account.ID == session.ClientInformation.Account.ID);
         IEnumerable<ChatChannelMember> existingMembers = channel.Members.Values.Where(member => member.Account.ID != session.ClientInformation.Account.ID);
 
-        ChatBuffer broadcast = new();
+        ChatBuffer broadcast = new ();
 
         broadcast.WriteCommand(ChatProtocol.Command.CHAT_CMD_JOINED_CHANNEL);
 

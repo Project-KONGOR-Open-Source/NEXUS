@@ -18,7 +18,7 @@ public class SRPAuthenticationSessionDataStageTwo
         // secure-remote-password/srp.net : https://github.com/secure-remote-password/srp.net/blob/176098e90501659990b12e8ac086018d47f23ccb/src/srp/SrpParameters.cs#L29
         parameters.Generator = parameters.Pad(parameters.Generator);
 
-        SrpServer server = new(parameters);
+        SrpServer server = new (parameters);
 
         try
         {

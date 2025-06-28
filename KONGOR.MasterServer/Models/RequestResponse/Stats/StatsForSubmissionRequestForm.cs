@@ -409,7 +409,7 @@ public static class StatsForSubmissionRequestFormExtensions
 {
     public static MatchStatistics ToMatchStatisticsEntity(this StatsForSubmissionRequestForm form, long? matchServerID = null, string? hostAccountName = null)
     {
-        MatchStatistics statistics = new()
+        MatchStatistics statistics = new ()
         {
             ServerID = form.ServerID ?? (matchServerID ?? throw new NullReferenceException("Server ID Is NULL")),
 
@@ -464,7 +464,7 @@ public static class StatsForSubmissionRequestFormExtensions
         string hero = form.PlayerStats[playerIndex].Keys.Single();
         IndividualPlayerStats player = form.PlayerStats[playerIndex][hero];
 
-        PlayerStatistics statistics = new()
+        PlayerStatistics statistics = new ()
         {
             MatchID = form.MatchStats.MatchID,
             AccountID = accountID,

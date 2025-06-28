@@ -401,13 +401,13 @@ public class SRPAuthenticationResponseStageTwo
     ///     This property is obsolete.
     /// </summary>
     [PhpProperty("hero_list")]
-    public HeroList HeroList { get; set; } = new();
+    public HeroList HeroList { get; set; } = new ();
 
     /// <summary>
     ///     Used for the Tencent anti-DDoS protection component, which does network packet watermarking that gets verified by the game server proxy.
     /// </summary>
     [PhpProperty("sec_info")]
-    public SecurityInformation SecurityInformation { get; set; } = new();
+    public SecurityInformation SecurityInformation { get; set; } = new ();
 
     /// <summary>
     ///     A set of static values used to generate award-centric data and trigger award-centric events.
@@ -428,7 +428,7 @@ public class SRPAuthenticationResponseStageTwo
     ///     The object which is the value of this element has the values of all its properties set to "0".
     /// </summary>
     [PhpProperty("quest_system")]
-    public Dictionary<string, QuestSystem> QuestSystem { get; set; } = new() { { "error", new QuestSystem() } };
+    public Dictionary<string, QuestSystem> QuestSystem { get; set; } = new () { { "error", new QuestSystem() } };
 
     /// <summary>
     ///     The cloud storage settings of the account.
@@ -767,73 +767,73 @@ public class AwardsTooltips
     ///     Milestones award.
     /// </summary>
     [PhpProperty("milestones")]
-    public MilestonesAwardTooltip Milestones { get; set; } = new();
+    public MilestonesAwardTooltip Milestones { get; set; } = new ();
 
     /// <summary>
     ///     Leveling award.
     /// </summary>
     [PhpProperty("leveling")]
-    public LevelingAwardTooltip Leveling { get; set; } = new();
+    public LevelingAwardTooltip Leveling { get; set; } = new ();
 
     /// <summary>
     ///     Bloodlust award.
     /// </summary>
     [PhpProperty("bloodlust")]
-    public BloodlustAwardTooltip Bloodlust { get; set; } = new();
+    public BloodlustAwardTooltip Bloodlust { get; set; } = new ();
 
     /// <summary>
     ///     Annihilation award.
     /// </summary>
     [PhpProperty("annihilation")]
-    public AnnihilationAwardTooltip Annihilation { get; set; } = new();
+    public AnnihilationAwardTooltip Annihilation { get; set; } = new ();
 
     /// <summary>
     ///     Immortal award.
     /// </summary>
     [PhpProperty("immortal")]
-    public ImmortalAwardTooltip Immortal { get; set; } = new();
+    public ImmortalAwardTooltip Immortal { get; set; } = new ();
 
     /// <summary>
     ///     Victory award.
     /// </summary>
     [PhpProperty("victory")]
-    public VictoryAwardTooltip Victory { get; set; } = new();
+    public VictoryAwardTooltip Victory { get; set; } = new ();
 
     /// <summary>
     ///     Loss award.
     /// </summary>
     [PhpProperty("loss")]
-    public LossAwardTooltip Loss { get; set; } = new();
+    public LossAwardTooltip Loss { get; set; } = new ();
 
     /// <summary>
     ///     Disconnect award.
     /// </summary>
     [PhpProperty("disco")]
-    public DisconnectAwardTooltip Disconnect { get; set; } = new();
+    public DisconnectAwardTooltip Disconnect { get; set; } = new ();
 
     /// <summary>
     ///     Quick match award.
     /// </summary>
     [PhpProperty("quick")]
-    public QuickMatchAwardTooltip QuickMatch { get; set; } = new();
+    public QuickMatchAwardTooltip QuickMatch { get; set; } = new ();
 
     /// <summary>
     ///     First blood award.
     /// </summary>
     [PhpProperty("first")]
-    public FirstBloodAwardTooltip FirstBlood { get; set; } = new();
+    public FirstBloodAwardTooltip FirstBlood { get; set; } = new ();
 
     /// <summary>
     ///     Consecutive wins award.
     /// </summary>
     [PhpProperty("consec_win")]
-    public ConsecutiveWinAwardTooltip ConsecutiveWins { get; set; } = new();
+    public ConsecutiveWinAwardTooltip ConsecutiveWins { get; set; } = new ();
 
     /// <summary>
     ///     Consecutive losses award.
     /// </summary>
     [PhpProperty("consec_loss")]
-    public ConsecutiveLossAwardTooltip ConsecutiveLosses { get; set; } = new();
+    public ConsecutiveLossAwardTooltip ConsecutiveLosses { get; set; } = new ();
 }
 
 public class MilestonesAwardTooltip
@@ -842,7 +842,7 @@ public class MilestonesAwardTooltip
     ///     Awarded for hero assists.
     /// </summary>
     [PhpProperty("heroassists")]
-    public MilestoneAwardTooltip HeroAssists { get; set; } = new()
+    public MilestoneAwardTooltip HeroAssists { get; set; } = new ()
     {
         AwardName = "heroassists",
         Experience = "100",
@@ -854,7 +854,7 @@ public class MilestonesAwardTooltip
     ///     Awarded for hero kills.
     /// </summary>
     [PhpProperty("herokills")]
-    public MilestoneAwardTooltip HeroKills { get; set; } = new()
+    public MilestoneAwardTooltip HeroKills { get; set; } = new ()
     {
         AwardName = "herokills",
         Experience = "100",
@@ -866,7 +866,7 @@ public class MilestonesAwardTooltip
     ///     Awarded for killing heroes after taunting them.
     /// </summary>
     [PhpProperty("smackdown")]
-    public MilestoneAwardTooltip Smackdown { get; set; } = new()
+    public MilestoneAwardTooltip Smackdown { get; set; } = new ()
     {
         AwardName = "smackdown",
         Experience = "50",
@@ -878,7 +878,7 @@ public class MilestonesAwardTooltip
     ///     Awarded for placing wards.
     /// </summary>
     [PhpProperty("wards")]
-    public MilestoneAwardTooltip Wards { get; set; } = new()
+    public MilestoneAwardTooltip Wards { get; set; } = new ()
     {
         AwardName = "wards",
         Experience = "100",
@@ -890,7 +890,7 @@ public class MilestonesAwardTooltip
     ///     Awarded for winning matches.
     /// </summary>
     [PhpProperty("wins")]
-    public MilestoneAwardTooltip Wins { get; set; } = new()
+    public MilestoneAwardTooltip Wins { get; set; } = new ()
     {
         AwardName = "wins",
         Experience = "200",

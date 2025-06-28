@@ -71,7 +71,7 @@ public class SRPAuthenticationSessionDataStageOne
     {
         SrpParameters parameters = SrpParameters.Create<SHA256>(SafePrimeNumber, MultiplicativeGroupGenerator);
 
-        SrpClient client = new(parameters);
+        SrpClient client = new (parameters);
 
         string privateClientKey = client.DerivePrivateKey(salt, loginIdentifier, passwordHash);
 
@@ -85,7 +85,7 @@ public class SRPAuthenticationSessionDataStageOne
     {
         SrpParameters parameters = SrpParameters.Create<SHA256>(SafePrimeNumber, MultiplicativeGroupGenerator);
 
-        SrpServer server = new(parameters);
+        SrpServer server = new (parameters);
 
         SrpEphemeral ephemeral = server.GenerateEphemeral(verifier);
 

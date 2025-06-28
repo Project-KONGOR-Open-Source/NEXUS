@@ -8,7 +8,7 @@ public static class SeedDataHandlers
 
         Role roleAdministrator = await context.Roles.SingleAsync(role => role.Name.Equals(UserRoles.Administrator), cancellationToken: cancellationToken);
 
-        User userAdministrator = new()
+        User userAdministrator = new ()
         {
             EmailAddress = "project.kongor@proton.me",
             Role = roleAdministrator,
@@ -30,7 +30,7 @@ public static class SeedDataHandlers
 
         Role roleGuest = await context.Roles.SingleAsync(role => role.Name.Equals(UserRoles.User), cancellationToken: cancellationToken);
 
-        User userGuest = new()
+        User userGuest = new ()
         {
             EmailAddress = "guest@project.kongor",
             Role = roleGuest,
@@ -76,7 +76,7 @@ public static class SeedDataHandlers
         User user = await context.Users.FirstAsync(cancellationToken);
         Clan clan = await context.Clans.FirstAsync(cancellationToken);
 
-        Account systemAccount = new()
+        Account systemAccount = new ()
         {
             Name = "KONGOR",
             User = user,
@@ -96,7 +96,7 @@ public static class SeedDataHandlers
 
         foreach (string subAccountName in subAccountNames)
         {
-            Account subAccount = new()
+            Account subAccount = new ()
             {
                 Name = subAccountName,
                 User = user,
@@ -117,7 +117,7 @@ public static class SeedDataHandlers
 
         foreach (string hostAccountName in hostAccountNames)
         {
-            Account hostAccount = new()
+            Account hostAccount = new ()
             {
                 Name = hostAccountName,
                 User = user,
@@ -139,7 +139,7 @@ public static class SeedDataHandlers
 
         for (int iterator = 0; iterator < 50 + 1; iterator++)
         {
-            Account guestAccount = new()
+            Account guestAccount = new ()
             {
                 Name = iterator is 0 ? "MODERATOR" : $"GUEST-{iterator:D2}",
                 User = userGuest,

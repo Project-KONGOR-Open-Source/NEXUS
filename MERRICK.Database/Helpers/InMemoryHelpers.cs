@@ -4,13 +4,13 @@ public static class InMemoryHelpers
 {
     public static MerrickContext GetInMemoryMerrickContext(string? identifier = null)
     {
-        DbContextOptionsBuilder<MerrickContext> builder = new();
+        DbContextOptionsBuilder<MerrickContext> builder = new ();
 
         builder.UseInMemoryDatabase(identifier ?? Guid.NewGuid().ToString());
 
         DbContextOptions<MerrickContext> options = builder.Options;
 
-        MerrickContext context = new(options);
+        MerrickContext context = new (options);
 
         context.Database.EnsureCreated();
 

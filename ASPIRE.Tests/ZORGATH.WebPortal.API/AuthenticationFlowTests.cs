@@ -43,7 +43,7 @@ public sealed class AuthenticationFlowTests : WebPortalAPITestSetup
             throw new NullReferenceException("Required Service Is NULL", exception);
         }
 
-        EmailAddressController emailAddressController = new(TransientMerrickContext, emailAddressControllerLogger, emailService);
+        EmailAddressController emailAddressController = new (TransientMerrickContext, emailAddressControllerLogger, emailService);
 
         IActionResult responseRegisterEmailAddress = await emailAddressController.RegisterEmailAddress(new RegisterEmailAddressDTO(emailAddress, emailAddress));
 
@@ -88,7 +88,7 @@ public sealed class AuthenticationFlowTests : WebPortalAPITestSetup
             throw new NullReferenceException("Registration Token Is NULL");
         }
 
-        UserController userController = new(TransientMerrickContext, userControllerLogger, emailService, configuration);
+        UserController userController = new (TransientMerrickContext, userControllerLogger, emailService, configuration);
 
         IActionResult responseRegisterUserAndMainAccount = await userController.RegisterUserAndMainAccount(new RegisterUserAndMainAccountDTO(registrationToken.Value.ToString(), name, password, password));
 
@@ -120,7 +120,7 @@ public sealed class AuthenticationFlowTests : WebPortalAPITestSetup
             throw new NullReferenceException("Required Service Is NULL", exception);
         }
 
-        UserController userController = new(TransientMerrickContext, userControllerLogger, emailService, configuration);
+        UserController userController = new (TransientMerrickContext, userControllerLogger, emailService, configuration);
 
         IActionResult responseLogInUser = await userController.LogInUser(new LogInUserDTO(name, password));
 
@@ -129,7 +129,7 @@ public sealed class AuthenticationFlowTests : WebPortalAPITestSetup
         string authenticationToken = ((responseLogInUser as OkObjectResult ?? throw new InvalidCastException("Unable To Cast Response"))
             .Value as GetAuthenticationTokenDTO ?? throw new NullReferenceException("Authentication Token DTO Is NULL")).Token;
 
-        TokenValidationParameters tokenValidationParameters = new()
+        TokenValidationParameters tokenValidationParameters = new ()
         {
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration.Value.JWT.SigningKey)), // TODO: Put The Signing Key In A Secrets Vault
             ValidateIssuerSigningKey = true,

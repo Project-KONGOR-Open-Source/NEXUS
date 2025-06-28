@@ -4,7 +4,7 @@ public class DatabaseInitializer(IServiceProvider serviceProvider, ILogger<Datab
 {
     public const string ActivitySourceName = "Migrations";
 
-    private readonly ActivitySource _activitySource = new(ActivitySourceName);
+    private readonly ActivitySource _activitySource = new (ActivitySourceName);
 
     protected override async Task ExecuteAsync(CancellationToken cancellationToken)
     {

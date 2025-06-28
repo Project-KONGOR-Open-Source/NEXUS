@@ -8,7 +8,7 @@ public class ClientHandshake(MerrickContext merrick, ILogger<ClientHandshake> lo
 
     public async Task Process(ChatSession session, ChatBuffer buffer)
     {
-        ClientHandshakeRequestData requestData = new(buffer);
+        ClientHandshakeRequestData requestData = new (buffer);
 
         Account? account = await MerrickContext.Accounts.Include(account => account.Clan).SingleOrDefaultAsync(account => account.ID == requestData.AccountID);
 

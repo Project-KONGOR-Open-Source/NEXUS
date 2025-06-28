@@ -6,7 +6,7 @@ public static class SRPAuthenticationHandlers
     {
         cookie = Guid.NewGuid().ToString();
 
-        SRPAuthenticationResponseStageTwo response = new()
+        SRPAuthenticationResponseStageTwo response = new ()
         {
             ServerProof = parameters.ServerProof,
             MainAccountID = parameters.Account.User.Accounts.Single(account => account.IsMain).ID.ToString(),
@@ -147,15 +147,15 @@ public static class SRPAuthenticationHandlers
     }
 
     private static Dictionary<string, Dictionary<string, FriendAccount>> SetFriendAccountList(Account account)
-        => new() { { account.ID.ToString(), account.FriendedPeers.ToDictionary(friend => friend.Identifier.ToString(),
+        => new () { { account.ID.ToString(), account.FriendedPeers.ToDictionary(friend => friend.Identifier.ToString(),
             friend => new FriendAccount { ID = friend.Identifier.ToString(), Name = friend.Name, Group = friend.FriendGroup, ClanTag = friend.ClanTag ?? string.Empty } ) } };
 
     private static Dictionary<string, List<IgnoredAccount>> SetIgnoredAccountsList(Account account)
-        => new() { { account.ID.ToString(), account.IgnoredPeers
+        => new () { { account.ID.ToString(), account.IgnoredPeers
             .Select(ignored => new IgnoredAccount { ID = ignored.Identifier.ToString(), Name = ignored.Name }).ToList() } };
 
     private static Dictionary<string, List<BannedAccount>> SetBannedAccountsList(Account account)
-        => new() { { account.ID.ToString(), account.BannedPeers
+        => new () { { account.ID.ToString(), account.BannedPeers
             .Select(banned => new BannedAccount { ID = banned.Identifier.ToString(), Name = banned.Name, Reason = banned.BanReason }).ToList() } };
 
     private static Dictionary<string, ClanMemberAccount> SetClanRoster(List<Account> members)
@@ -179,7 +179,7 @@ public static class SRPAuthenticationHandlers
             ? account.SelectedStoreItems.Single(item => item.StartsWith("ai.custom_icon")).Replace("ai.custom_icon:", string.Empty) : "0";
 
     private static CloudStorageInformation SetCloudStorageInformation(Account account)
-        => new() { AccountID = account.ID.ToString(), UseCloud = "0", AutomaticCloudUpload = "0", BackupLastUpdatedTime = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") }; // TODO: Fix These Values
+        => new () { AccountID = account.ID.ToString(), UseCloud = "0", AutomaticCloudUpload = "0", BackupLastUpdatedTime = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") }; // TODO: Fix These Values
 
     private static List<DataPoint> SetDataPoints()
     {
@@ -237,7 +237,7 @@ public static class SRPAuthenticationHandlers
         return items;
     }
 
-    private static AwardsTooltips SetAwardsTooltips() => new();
+    private static AwardsTooltips SetAwardsTooltips() => new ();
 
     private static List<Notification> SetNotifications()
     {

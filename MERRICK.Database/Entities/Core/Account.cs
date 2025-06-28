@@ -73,4 +73,8 @@ public class Account
 
         return (segments.First(), segments.Last());
     }
+
+    public string Icon => SelectedStoreItems.SingleOrDefault(item => item.StartsWith("ai.")) ?? "ai.Default Icon";
+
+    public string ChatNameColor => SelectedStoreItems.SingleOrDefault(item => item.StartsWith("cc.")) ?? "cc.white";
 }
