@@ -509,6 +509,7 @@ public static class ChatProtocol
         CHAT_CLIENT_ADMIN_LEADER,
         CHAT_CLIENT_ADMIN_ADMINISTRATOR,
         CHAT_CLIENT_ADMIN_STAFF,
+
         CHAT_NUM_ADMIN_LEVELS
     };
 
