@@ -29,15 +29,26 @@ public class GroupCreate(MerrickContext merrick, ILogger<GroupCreate> logger) : 
                 GameModeAccess = string.Join('|', requestData.GameModes.Select(mode => "true"))
             };
 
-            if (MatchmakingService.Groups.TryAdd(session.ClientInformation.Account.ID, new MatchmakingGroup(member)) is false)
+            if (MatchmakingService.Groups.ContainsKey(session.ClientInformation.Account.ID) is false)
             {
-                Logger.LogError(@"Failed To Create Matchmaking Group For Account ID ""{session.ClientInformation.Account.ID}""", session.ClientInformation.Account.ID);
+                if (MatchmakingService.Groups.TryAdd(session.ClientInformation.Account.ID, new MatchmakingGroup(member)) is false)
+                {
+                    Logger.LogError(@"Failed To Create Matchmaking Group For Account ID ""{session.ClientInformation.Account.ID}""", session.ClientInformation.Account.ID);
 
-                return; // TODO: Respond With ChatProtocol.TMMFailedToJoinReason Or Similar (e.g. TMMFailedToCreate, If It Exists)
+                    return; // TODO: Respond With ChatProtocol.TMMFailedToJoinReason Or Similar (e.g. TMMFailedToCreate, If It Exists)
+                }
+            }
+
+            else
+            {
+                if (MatchmakingService.Groups.TryUpdate(session.ClientInformation.Account.ID, new MatchmakingGroup(member), MatchmakingService.Groups[session.ClientInformation.Account.ID]) is false)
+                {
+                    Logger.LogError(@"Failed To Update Matchmaking Group For Account ID ""{session.ClientInformation.Account.ID}""", session.ClientInformation.Account.ID);
+
+                    return; // TODO: Respond With ChatProtocol.TMMFailedToJoinReason Or Similar (e.g. TMMFailedToCreate, If It Exists)
+                }
             }
         }
-
-        // TODO: Add Some Flag For Queue State, For Groups Created In Advance
 
         Response.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_UPDATE);
 
@@ -101,6 +112,11 @@ public class GroupCreate(MerrickContext merrick, ILogger<GroupCreate> logger) : 
                 Response.WriteBool(false);                                                  // Is Friend
             }
         }
+
+        Response.PrependBufferSize();
+
+        // Create A New Matchmaking Group With The Initiator As The Group Leader
+        session.SendAsync(Response.Data);
     }
 }
 
