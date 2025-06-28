@@ -13,9 +13,24 @@ public class GroupCreate(MerrickContext merrick, ILogger<GroupCreate> logger) : 
         // TODO: Perform Checks And Respond With ChatProtocol.TMMFailedToJoinReason If Needed
 
         if (Context.MatchmakingGroupChatChannels.ContainsKey(session.ClientInformation.Account.ID) is false)
-            MatchmakingService.SoloPlayerGroups.TryAdd(session.ClientInformation.Account.ID, new MatchmakingGroup(new MatchmakingGroupMember { Rating = 1650.00f, IsLeader = true, IsReady = true }));
+        {
+            MatchmakingGroupMember member = new()
+            {
+                ID = session.ClientInformation.Account.ID,
+                Name = session.ClientInformation.Account.NameWithClanTag,
+                Slot = 1, // TODO: Is This Zero-Indexed Or One-Indexed?
+                IsLeader = true,
+                IsReady = false,
+                LoadingPercent = 0
+            };
 
-        // TODO: Set Actual Rating & Game Details
+            if (MatchmakingService.SoloPlayerGroups.TryAdd(session.ClientInformation.Account.ID, new MatchmakingGroup(member)) is false)
+            {
+                Logger.LogError(@"Failed To Create Matchmaking Group For Account ID ""{session.ClientInformation.Account.ID}""", session.ClientInformation.Account.ID);
+
+                return; // TODO: Respond With ChatProtocol.TMMFailedToJoinReason Or Similar (e.g. TMMFailedToCreate, If It Exists)
+            }
+        }
 
         // TODO: Add Some Flag For Queue State, For Groups Created In Advance
 
@@ -23,7 +38,7 @@ public class GroupCreate(MerrickContext merrick, ILogger<GroupCreate> logger) : 
 
         ChatProtocol.TMMUpdateType updateType = ChatProtocol.TMMUpdateType.TMM_CREATE_GROUP;
 
-        Response.WriteInt8(Convert.ToByte(updateType));    // Group Update Type
+        Response.WriteInt8(Convert.ToByte(updateType));                                     // Group Update Type
         Response.WriteInt32(session.ClientInformation.Account.ID);                          // Account ID
         Response.WriteInt8(1);                                                              // Group Size
         // TODO: Calculate Average TMR 
@@ -51,13 +66,17 @@ public class GroupCreate(MerrickContext merrick, ILogger<GroupCreate> logger) : 
         {
             foreach (MatchmakingGroupMember member in group.Members)
             {
-                Response.WriteInt32(member.a);                               // Client's Account ID
-                Response.WriteString(member.Account.NameWithClanTag);                 // Client's Name
-                Response.WriteInt8(Convert.ToByte(participant.Slot));                       // Client's Team Slot
-                Response.WriteInt32(1500);                                                  // Client's Normal Rank Level
-                Response.WriteInt32(1500);                                                  // Client's Casual Rank Level
-                Response.WriteInt32(5);                                                     // Client's Normal Ranking
-                Response.WriteInt32(5);                                                     // Client's Casual Ranking
+                Response.WriteInt32(member.ID);                                             // Account ID
+                Response.WriteString(member.Name);                                          // Account Name
+                Response.WriteInt8(member.Slot);                                            // Group Slot
+                // TODO: Use Real Normal Rank (Badge) Level
+                Response.WriteInt32(5);                                                     // Normal Rank Level
+                // TODO: Use Real Casual Rank (Badge) Level
+                Response.WriteInt32(5);                                                     // Casual Rank Level
+                // TODO: Use Real Normal Ranking
+                Response.WriteInt32(1500);                                                  // Normal Ranking
+                // TODO: Use Real Casual Ranking
+                Response.WriteInt32(1500);                                                  // Casual Ranking
             }
         }
 

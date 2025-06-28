@@ -12,7 +12,7 @@ public class TrackPlayerAction(MerrickContext merrick, ILogger<TrackPlayerAction
 
         // TODO: Do Something With This Data
 
-        Logger.LogError($@"Unhandled User Action: ""{requestData.Action}""");
+        Logger.LogError(@"Unhandled User Action: ""{requestData.Action}""", requestData.Action);
     }
 }
 

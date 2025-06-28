@@ -68,7 +68,7 @@ public class Account
         if (accountNameWithClanTag.StartsWith('[').Equals(false))
             return (string.Empty, accountNameWithClanTag);
 
-        // Remove the leading '[' character and split at the first occurence of the ']' character. The resulting account name may contain the '[' and ']' characters.
+        // Remove the leading '[' character and split at the first occurrence of the ']' character. The resulting account name may contain the '[' and ']' characters.
         string[] segments = accountNameWithClanTag.TrimStart('[').Split(']', count: 2);
 
         return (segments.First(), segments.Last());
