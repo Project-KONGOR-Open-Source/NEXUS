@@ -33,6 +33,4 @@ public class MatchmakingGroupMember
     ///     The Group Member's Game Mode Access, Delimited By "|" (e.g. "true|true|false")
     /// </summary>
     public required string GameModeAccess { get; set; }
-
-    public required bool IsFriend { get; set; }
 }

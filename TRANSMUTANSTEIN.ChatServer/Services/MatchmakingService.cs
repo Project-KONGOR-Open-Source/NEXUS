@@ -4,15 +4,22 @@ public class MatchmakingService(IServiceProvider serviceProvider) : IHostedServi
 {
     private ILogger Logger { get; } = serviceProvider.GetRequiredService<ILogger<MatchmakingService>>();
 
-    public static ConcurrentDictionary<int, MatchmakingGroup> SoloPlayerGroups { get; set; } = [];
-    public static ConcurrentDictionary<int, MatchmakingGroup> TwoPlayerGroups { get; set; } = [];
-    public static ConcurrentDictionary<int, MatchmakingGroup> ThreePlayerGroups { get; set; } = [];
-    public static ConcurrentDictionary<int, MatchmakingGroup> FourPlayerGroups { get; set; } = [];
-    public static ConcurrentDictionary<int, MatchmakingGroup> FivePlayerGroups { get; set; } = [];
+    public static ConcurrentDictionary<int, MatchmakingGroup> Groups { get; set; } = [];
 
-    public static ConcurrentDictionary<int, MatchmakingGroup> Groups =>
-        new (new[] { SoloPlayerGroups, TwoPlayerGroups, ThreePlayerGroups, FourPlayerGroups, FivePlayerGroups }
-            .SelectMany(dictionary => dictionary).ToDictionary(entry => entry.Key, entry => entry.Value));
+    public static ConcurrentDictionary<int, MatchmakingGroup> SoloPlayerGroups
+        => new (Groups.Where(group => group.Value.Members.Count == 1));
+
+    public static ConcurrentDictionary<int, MatchmakingGroup> TwoPlayerGroups
+        => new (Groups.Where(group => group.Value.Members.Count == 2));
+
+    public static ConcurrentDictionary<int, MatchmakingGroup> ThreePlayerGroups
+        => new (Groups.Where(group => group.Value.Members.Count == 3));
+
+    public static ConcurrentDictionary<int, MatchmakingGroup> FourPlayerGroups
+        => new (Groups.Where(group => group.Value.Members.Count == 4));
+
+    public static ConcurrentDictionary<int, MatchmakingGroup> FivePlayerGroups
+        => new (Groups.Where(group => group.Value.Members.Count == 5));
 
     public Task StartAsync(CancellationToken cancellationToken)
     {
@@ -30,10 +37,8 @@ public class MatchmakingService(IServiceProvider serviceProvider) : IHostedServi
 
     public void Dispose()
     {
-        SoloPlayerGroups.Clear();
-        TwoPlayerGroups.Clear();
-        ThreePlayerGroups.Clear();
-        FourPlayerGroups.Clear();
-        FivePlayerGroups.Clear();
+        Groups.Clear();
+
+        GC.SuppressFinalize(this);
     }
 }
