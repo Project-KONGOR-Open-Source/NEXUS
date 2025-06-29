@@ -6,6 +6,9 @@ indent_size = 4
 tab_width = 4
 end_of_line = native
 
+# Language
+spelling_languages = en-gb
+
 # Microsoft .NET Properties
 csharp_indent_braces = false
 csharp_indent_switch_labels = true
