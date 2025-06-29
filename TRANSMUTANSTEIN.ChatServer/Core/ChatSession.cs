@@ -78,7 +78,7 @@ public class ChatSession(TCPServer server, IServiceProvider serviceProvider) : T
 
         if (commandType is null)
         {
-            string output = new StringBuilder($@"Missing Type Mapping For Command: ""{command:X4}""")
+            string output = new StringBuilder($@"Missing Type Mapping For Command: ""0x{command:X4}""")
                 .Append(Environment.NewLine).Append($"Message UTF8 Bytes: {string.Join(':', segment)}")
                 .Append(Environment.NewLine).Append($"Message UTF8 Text: {Encoding.UTF8.GetString(segment)}")
                 .ToString();
@@ -89,12 +89,22 @@ public class ChatSession(TCPServer server, IServiceProvider serviceProvider) : T
         else
         {
             if (TRANSMUTANSTEIN.RunsInDevelopmentMode)
-                Logger.LogDebug($"Processing Command 0x{command:X4}");
+                Logger.LogDebug(@"Processing Command: ""0x{Command}""", command.ToString("X4"));
 
             if (GetCommandTypeInstance(commandType) is { } commandTypeInstance)
-                commandTypeInstance.Process(this, new ChatBuffer(segment));
+            {
+                try
+                {
+                    commandTypeInstance.Process(this, new ChatBuffer(segment));
+                }
 
-            else Logger.LogError($@"[BUG] Could Not Create Command Type Instance For Command: ""{command:X4}""");
+                catch (Exception exception)
+                {
+                    Logger.LogError(exception, @"[BUG] Error Processing Command: ""0x{Command}""", command.ToString("X4"));
+                }
+            }
+
+            else Logger.LogError(@"[BUG] Could Not Create Command Type Instance For Command: ""0x{Command}""", command.ToString("X4"));
         }
     }
 
@@ -110,7 +120,7 @@ public class ChatSession(TCPServer server, IServiceProvider serviceProvider) : T
 
         if (type is not null)
             if (CommandToTypeMap.TryAdd(command, type) is false && CommandToTypeMap.ContainsKey(command) is false)
-                Logger.LogError($@"[BUG] Could Not Add Command To Type Mapping For Command ""{command:X4}"" And Type ""{type.Name}""");
+                Logger.LogError(@"[BUG] Could Not Add Command-To-Type Mapping For Command ""0x{Command}"" And Type ""{TypeName}""", command.ToString("X4"), type.Name);
 
         return type;
     }
