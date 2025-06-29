@@ -18,7 +18,7 @@ public class GroupInvite(MerrickContext merrick, ILogger<GroupInvite> logger) : 
         invite.WriteInt32(session.ClientInformation.Account.ID);                                        // Invite Issuer ID
         invite.WriteInt8(Convert.ToByte(ChatProtocol.ChatClientStatus.CHAT_CLIENT_STATUS_CONNECTED));   // Invite Issuer Status
         invite.WriteInt8(session.ClientInformation.Account.GetChatClientFlags());                       // Invite Issuer Chat Flags
-        invite.WriteString(session.ClientInformation.Account.ChatNameColor);                            // Invite Issuer Chat Name Color
+        invite.WriteString(session.ClientInformation.Account.ChatNameColour);                           // Invite Issuer Chat Name Colour
         invite.WriteString(session.ClientInformation.Account.Icon);                                     // Invite Issuer Icon
         // TODO: Get Actual Map Name From Group Information, Rather Than Hardcoding It
         /*

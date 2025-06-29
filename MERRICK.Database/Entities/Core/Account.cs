@@ -76,5 +76,5 @@ public class Account
 
     public string Icon => SelectedStoreItems.SingleOrDefault(item => item.StartsWith("ai.")) ?? "ai.Default Icon";
 
-    public string ChatNameColor => SelectedStoreItems.SingleOrDefault(item => item.StartsWith("cc.")) ?? "cc.white";
+    public string ChatNameColour => SelectedStoreItems.SingleOrDefault(item => item.StartsWith("cc.")) ?? "cc.white";
 }

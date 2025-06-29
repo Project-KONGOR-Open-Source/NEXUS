@@ -18,7 +18,7 @@ public class MatchmakingGroupMember
 
     public required byte LoadingPercent { get; set; }
 
-    public required string ChatNameColor { get; set; }
+    public required string ChatNameColour { get; set; }
 
     public required string AccountIcon { get; set; }
 

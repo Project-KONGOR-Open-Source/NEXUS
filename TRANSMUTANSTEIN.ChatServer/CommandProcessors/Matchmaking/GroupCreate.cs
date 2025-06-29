@@ -22,7 +22,7 @@ public class GroupCreate(MerrickContext merrick, ILogger<GroupCreate> logger) : 
                 IsInGame = false,
                 IsEligibleForMatchmaking = true,
                 LoadingPercent = 0,
-                ChatNameColor = session.ClientInformation.Account.ChatNameColor,
+                ChatNameColour = session.ClientInformation.Account.ChatNameColour,
                 AccountIcon = session.ClientInformation.Account.Icon,
                 GameModeAccess = string.Join('|', requestData.GameModes.Select(mode => "true"))
             };
@@ -94,7 +94,7 @@ public class GroupCreate(MerrickContext merrick, ILogger<GroupCreate> logger) : 
             if (updateType is not ChatProtocol.TMMUpdateType.TMM_PARTIAL_GROUP_UPDATE)
             {
                 Response.WriteBool(member.IsEligibleForMatchmaking);                        // Eligible For Matchmaking
-                Response.WriteString(member.ChatNameColor);                                 // Chat Name Color
+                Response.WriteString(member.ChatNameColour);                                // Chat Name Colour
                 Response.WriteString(member.AccountIcon);                                   // Account Icon
                 Response.WriteString(member.Country);                                       // Country
                 Response.WriteBool(member.HasGameModeAccess);                               // Game Mode Access Bool
