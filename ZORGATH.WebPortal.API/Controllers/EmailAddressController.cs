@@ -33,7 +33,7 @@ public class EmailAddressController(MerrickContext databaseContext, ILogger<Emai
 
             if (contentResult.Content is null)
             {
-                Logger.LogError($@"[BUG] Sanitized Email Address ""{payload.EmailAddress}"" Is NULL");
+                Logger.LogError(@"[BUG] Sanitized Email Address ""{Payload.EmailAddress}"" Is NULL", payload.EmailAddress);
 
                 return UnprocessableEntity($@"Unable To Process Email Address ""{payload.EmailAddress}""");
             }

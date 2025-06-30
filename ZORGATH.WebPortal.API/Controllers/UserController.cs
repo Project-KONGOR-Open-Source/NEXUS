@@ -114,9 +114,9 @@ public class UserController(MerrickContext databaseContext, ILogger<UserControll
 
         if (new[] { UserRoles.Administrator, UserRoles.User }.Contains(user.Role.Name).Equals(false))
         {
-            Logger.LogError($@"[BUG] Unknown User Role ""{user.Role.Name}""");
+            Logger.LogError(@"[BUG] Unknown User Role ""{User.Role.Name}""", user.Role.Name);
 
-            return UnprocessableEntity($@"Unknown User Role ""{user.Role.Name}""");
+            return UnprocessableEntity(@"Unknown User Role ""{User.Role.Name}""", user.Role.Name);
         }
 
         IEnumerable<Claim> userRoleClaims = user.Role.Name is UserRoles.Administrator ? UserRoleClaims.Administrator : UserRoleClaims.User;
@@ -197,7 +197,7 @@ public class UserController(MerrickContext databaseContext, ILogger<UserControll
                 user.Accounts.Select(account => new GetBasicAccountDTO(account.ID, account.NameWithClanTag)).ToList()));
         }
 
-        Logger.LogError($@"[BUG] Unknown User Role ""{role}""");
+        Logger.LogError(@"[BUG] Unknown User Role ""{User.Role}""", role);
 
         return BadRequest($@"Unknown User Role ""{role}""");
     }

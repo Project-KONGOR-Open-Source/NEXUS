@@ -31,7 +31,7 @@ public class GroupCreate(MerrickContext merrick, ILogger<GroupCreate> logger) : 
             {
                 if (MatchmakingService.Groups.TryAdd(session.ClientInformation.Account.ID, new MatchmakingGroup(member)) is false)
                 {
-                    Logger.LogError(@"Failed To Create Matchmaking Group For Account ID ""{session.ClientInformation.Account.ID}""", session.ClientInformation.Account.ID);
+                    Logger.LogError(@"Failed To Create Matchmaking Group For Account ID ""{Session.ClientInformation.Account.ID}""", session.ClientInformation.Account.ID);
 
                     return; // TODO: Respond With ChatProtocol.TMMFailedToJoinReason Or Similar (e.g. TMMFailedToCreate, If It Exists)
                 }
@@ -41,7 +41,7 @@ public class GroupCreate(MerrickContext merrick, ILogger<GroupCreate> logger) : 
             {
                 if (MatchmakingService.Groups.TryUpdate(session.ClientInformation.Account.ID, new MatchmakingGroup(member), MatchmakingService.Groups[session.ClientInformation.Account.ID]) is false)
                 {
-                    Logger.LogError(@"Failed To Update Matchmaking Group For Account ID ""{session.ClientInformation.Account.ID}""", session.ClientInformation.Account.ID);
+                    Logger.LogError(@"Failed To Update Matchmaking Group For Account ID ""{Session.ClientInformation.Account.ID}""", session.ClientInformation.Account.ID);
 
                     return; // TODO: Respond With ChatProtocol.TMMFailedToJoinReason Or Similar (e.g. TMMFailedToCreate, If It Exists)
                 }

@@ -14,7 +14,7 @@ public class ClientHandshake(MerrickContext merrick, ILogger<ClientHandshake> lo
 
         if (account is null)
         {
-            Logger.LogError($@"[BUG] Account With ID ""{requestData.AccountID}"" Could Not Be Found");
+            Logger.LogError(@"[BUG] Account With ID ""{RequestData.AccountID}"" Could Not Be Found", requestData.AccountID);
 
             return;
         }

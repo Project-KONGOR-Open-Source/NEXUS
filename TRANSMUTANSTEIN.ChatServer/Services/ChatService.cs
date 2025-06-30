@@ -21,7 +21,7 @@ public class ChatService(IServiceProvider serviceProvider) : IHostedService, IDi
             return Task.FromException(new ApplicationException("Chat Server Was Unable To Start"));
         }
 
-        Logger.LogInformation($"Chat Server Listening On {ChatServer.Endpoint}");
+        Logger.LogInformation("Chat Server Listening On {ChatServer.Endpoint}", ChatServer.Endpoint);
 
         return Task.CompletedTask;
     }

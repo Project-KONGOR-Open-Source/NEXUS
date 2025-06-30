@@ -14,17 +14,17 @@ public class ChatSession(TCPServer server, IServiceProvider serviceProvider) : T
 
     protected override void OnConnected()
     {
-        Logger.LogInformation($"Chat Session ID {ID} Was Created");
+        Logger.LogInformation("Chat Session ID {SessionID} Was Created", ID);
     }
 
     protected override void OnError(SocketError error)
     {
-        Logger.LogInformation($"Chat Session ID {ID} Caught A Socket Error With Code {error}");
+        Logger.LogInformation("Chat Session ID {SessionID} Caught A Socket Error With Code {SocketErrorCode}", ID, error);
     }
 
     protected override void OnDisconnected()
     {
-        Logger.LogInformation($"Chat Session ID {ID} Has Terminated");
+        Logger.LogInformation("Chat Session ID {SessionID} Has Terminated", ID);
     }
 
     protected override void OnReceived(byte[] buffer, long offset, long size)
