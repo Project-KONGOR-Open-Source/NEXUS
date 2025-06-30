@@ -1,10 +1,10 @@
 ﻿namespace TRANSMUTANSTEIN.ChatServer.Matchmaking;
 
-public class MatchmakingGroupMember
+public class MatchmakingGroupMember(ChatSession session)
 {
-    public required int ID { get; set; }
+    public Account Account = session.ClientInformation.Account;
 
-    public required string Name { get; set; }
+    public ChatSession Session = session;
 
     public required byte Slot { get; set; }
 
@@ -17,10 +17,6 @@ public class MatchmakingGroupMember
     public required bool IsEligibleForMatchmaking { get; set; }
 
     public required byte LoadingPercent { get; set; }
-
-    public required string ChatNameColour { get; set; }
-
-    public required string AccountIcon { get; set; }
 
     public string Country { get; set; } = "NEWERTH";
 

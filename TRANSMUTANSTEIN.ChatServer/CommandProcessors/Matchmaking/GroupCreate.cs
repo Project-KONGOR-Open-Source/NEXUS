@@ -12,18 +12,14 @@ public class GroupCreate(MerrickContext merrick, ILogger<GroupCreate> logger) : 
 
         if (Context.MatchmakingGroupChatChannels.ContainsKey(session.ClientInformation.Account.ID) is false)
         {
-            MatchmakingGroupMember member = new ()
+            MatchmakingGroupMember member = new (session)
             {
-                ID = session.ClientInformation.Account.ID,
-                Name = session.ClientInformation.Account.NameWithClanTag,
                 Slot = 1,
                 IsLeader = true,
                 IsReady = false,
                 IsInGame = false,
                 IsEligibleForMatchmaking = true,
                 LoadingPercent = 0,
-                ChatNameColour = session.ClientInformation.Account.ChatNameColour,
-                AccountIcon = session.ClientInformation.Account.Icon,
                 GameModeAccess = string.Join('|', requestData.GameModes.Select(mode => "true"))
             };
 
@@ -80,8 +76,8 @@ public class GroupCreate(MerrickContext merrick, ILogger<GroupCreate> logger) : 
         {
             if (updateType is not ChatProtocol.TMMUpdateType.TMM_PARTIAL_GROUP_UPDATE)
             {
-                Response.WriteInt32(member.ID);                                             // Account ID
-                Response.WriteString(member.Name);                                          // Account Name
+                Response.WriteInt32(member.Account.ID);                                     // Account ID
+                Response.WriteString(member.Account.Name);                                  // Account Name
                 Response.WriteInt8(member.Slot);                                            // Group Slot
                 // TODO: Determine Rating From Game Type
                 Response.WriteInt16(1500);                                                  // Normal Rank Level
@@ -94,8 +90,8 @@ public class GroupCreate(MerrickContext merrick, ILogger<GroupCreate> logger) : 
             if (updateType is not ChatProtocol.TMMUpdateType.TMM_PARTIAL_GROUP_UPDATE)
             {
                 Response.WriteBool(member.IsEligibleForMatchmaking);                        // Eligible For Matchmaking
-                Response.WriteString(member.ChatNameColour);                                // Chat Name Colour
-                Response.WriteString(member.AccountIcon);                                   // Account Icon
+                Response.WriteString(member.Account.ChatNameColour);                        // Chat Name Colour
+                Response.WriteString(member.Account.Icon);                                  // Account Icon
                 Response.WriteString(member.Country);                                       // Country
                 Response.WriteBool(member.HasGameModeAccess);                               // Game Mode Access Bool
                 Response.WriteString(member.GameModeAccess);                                // Game Mode Access String

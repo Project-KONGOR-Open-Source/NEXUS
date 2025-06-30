@@ -116,7 +116,7 @@ public class UserController(MerrickContext databaseContext, ILogger<UserControll
         {
             Logger.LogError(@"[BUG] Unknown User Role ""{User.Role.Name}""", user.Role.Name);
 
-            return UnprocessableEntity(@"Unknown User Role ""{User.Role.Name}""", user.Role.Name);
+            return UnprocessableEntity($@"Unknown User Role ""{user.Role.Name}""");
         }
 
         IEnumerable<Claim> userRoleClaims = user.Role.Name is UserRoles.Administrator ? UserRoleClaims.Administrator : UserRoleClaims.User;

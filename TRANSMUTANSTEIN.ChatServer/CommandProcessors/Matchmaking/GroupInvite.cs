@@ -10,7 +10,7 @@ public class GroupInvite(MerrickContext merrick, ILogger<GroupInvite> logger) : 
     {
         GroupInviteRequestData requestData = new (buffer);
 
-        ChatBuffer invite = new();
+        ChatBuffer invite = new ();
 
         invite.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_INVITE);
 
@@ -48,9 +48,37 @@ public class GroupInvite(MerrickContext merrick, ILogger<GroupInvite> logger) : 
 
         invite.PrependBufferSize();
 
-        // TODO: Send Invite
+        ChatSession? inviteReceiverSession = Context.ChatSessions
+            .Values.SingleOrDefault(session => session.ClientInformation.Account.Name.Equals(requestData.InviteReceiverName));
 
-        // TODO: Broadcast Invite To All Group Members
+        if (inviteReceiverSession is not null)
+        {
+            inviteReceiverSession.SendAsync(Response.Data);
+
+            MatchmakingGroup? group = MatchmakingService.Groups.Values
+                .SingleOrDefault(group => group.Members.Select(member => member.Account.ID).Contains(session.ClientInformation.Account.ID));
+
+            if (group is not null)
+            {
+                ChatBuffer inviteBroadcast = new ();
+
+                inviteBroadcast.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_INVITE_BROADCAST);
+
+                Account inviteReceiver = MerrickContext.Accounts.Include(account => account.Clan)
+                    .Single(account => account.Name.Equals(requestData.InviteReceiverName));
+
+                inviteBroadcast.WriteString(inviteReceiver.NameWithClanTag);                            // Invite Receiver Name
+                inviteBroadcast.WriteString(session.ClientInformation.Account.NameWithClanTag);         // Invite Issuer Name
+
+                inviteBroadcast.PrependBufferSize();
+
+                Parallel.ForEach(group.Members, (member) => { member.Session.SendAsync(inviteBroadcast.Data); });
+            }
+
+            else Logger.LogWarning(@"Group Not Found For Invite Issuer ID ""{Session.ClientInformation.Account.ID}""", session.ClientInformation.Account.ID);
+        }
+
+        else Logger.LogWarning(@"Invite Receiver Session Not Found For Account Name ""{RequestData.InviteReceiverName}""", requestData.InviteReceiverName);
     }
 }
 
@@ -58,29 +86,4 @@ public class GroupInviteRequestData(ChatBuffer buffer)
 {
     public byte[] CommandBytes = buffer.ReadCommandBytes();
     public string InviteReceiverName = buffer.ReadString();
-    //public string InviterName = buffer.ReadString();
-    //public int InviterID = buffer.ReadInt32();
-    //public ChatProtocol.ChatClientStatus InviterStatus = (ChatProtocol.ChatClientStatus) buffer.ReadInt8();
-
-    /*
-        public byte GetAccountFlags(Account account)
-        {
-            byte Flags = 0x0;
-
-            if (account.AccountType == AccountType.Staff)
-            {
-                Flags |= (byte)ChatServerProtocol.ChatClientFlags.IsStaff;
-            }
-            if (account.ClanTier == Clan.Tier.Officer)
-            {
-                Flags |= (byte)ChatServerProtocol.ChatClientFlags.IsOfficer;
-            }
-            if (account.ClanTier == Clan.Tier.Leader)
-            {
-                Flags |= (byte)ChatServerProtocol.ChatClientFlags.IsClanLeader;
-            }
-
-            return Flags;
-        }
-     */
 }
