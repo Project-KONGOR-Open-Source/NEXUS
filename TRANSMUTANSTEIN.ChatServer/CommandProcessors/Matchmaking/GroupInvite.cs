@@ -53,7 +53,7 @@ public class GroupInvite(MerrickContext merrick, ILogger<GroupInvite> logger) : 
 
         if (inviteReceiverSession is not null)
         {
-            inviteReceiverSession.SendAsync(Response.Data);
+            inviteReceiverSession.SendAsync(invite.Data);
 
             MatchmakingGroup? group = MatchmakingService.Groups.Values
                 .SingleOrDefault(group => group.Members.Select(member => member.Account.ID).Contains(session.ClientInformation.Account.ID));
