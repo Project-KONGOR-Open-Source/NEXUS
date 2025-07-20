@@ -16,6 +16,7 @@ public class MERRICK
         // Add The Database Context
         builder.AddSqlServerDbContext<MerrickContext>("MERRICK", configureSettings: null, configureDbContextOptions: options =>
         {
+            // Enable Detailed Error Messages In Development Environment
             options.EnableDetailedErrors(builder.Environment.IsDevelopment());
 
             // Suppress Warning Regarding Enabled Sensitive Data Logging, Since It Is Only Enabled In The Development Environment
@@ -23,16 +24,17 @@ public class MERRICK
             options.EnableSensitiveDataLogging(builder.Environment.IsDevelopment())
                 .ConfigureWarnings(warnings => warnings.Log((Id: CoreEventId.SensitiveDataLoggingEnabledWarning, Level: LogLevel.Trace)));
 
+            // Enable Thread Safety Checks For Entity Framework
             options.EnableThreadSafetyChecks();
         });
 
-        // Add Open Telemetry
+        // Add Database Initializer Telemetry
         builder.Services.AddOpenTelemetry().WithTracing(tracing => tracing.AddSource(DatabaseInitializer.ActivitySourceName));
 
-        // Add Singleton Service For Initializing The Database
+        // Register Database Initializer As Singleton Service For Dependency Injection
         builder.Services.AddSingleton<DatabaseInitializer>();
 
-        // Set Database Initializer Service To Run In The Background
+        // Register Database Initializer As Hosted Service For Background Execution At Application Startup
         builder.Services.AddHostedService(provider => provider.GetRequiredService<DatabaseInitializer>());
 
         // Add Database Health Check
@@ -41,13 +43,41 @@ public class MERRICK
         // Build The Application
         WebApplication application = builder.Build();
 
-        // Automatically Redirect To HTTPS
+        // Configure Development-Specific Middleware
+        if (application.Environment.IsDevelopment())
+        {
+            // Show Detailed Error Pages In Development
+            application.UseDeveloperExceptionPage();
+        }
+
+        else
+        {
+            // Use Global Exception Handler In Production
+            application.UseExceptionHandler("/error");
+        }
+
+        // Automatically Redirect HTTP Requests To HTTPS
         application.UseHttpsRedirection();
 
-        // Enforce HTTPS
+        // Enforce HTTPS With Strict Transport Security
         application.UseHsts();
 
-        // Map Aspire Default Endpoints
+        // Add Basic Security Headers Middleware
+        application.Use(async (context, next) =>
+        {
+            // Prevent MIME Type Sniffing
+            context.Response.Headers.Append("X-Content-Type-Options", "nosniff");
+            
+            // Prevent Page From Being Displayed In Frames
+            context.Response.Headers.Append("X-Frame-Options", "DENY");
+            
+            // Enable XSS Protection
+            context.Response.Headers.Append("X-XSS-Protection", "1; mode=block");
+            
+            await next();
+        });
+
+        // Map Aspire Default Health Check Endpoints
         application.MapDefaultEndpoints();
 
         // Run The Application

@@ -8,8 +8,10 @@ global using MERRICK.Database.Entities.Utility;
 
 global using Microsoft.AspNetCore.Authentication.JwtBearer;
 global using Microsoft.AspNetCore.Authorization;
+global using Microsoft.AspNetCore.HttpLogging;
 global using Microsoft.AspNetCore.Identity;
 global using Microsoft.AspNetCore.Mvc;
+global using Microsoft.AspNetCore.RateLimiting;
 global using Microsoft.EntityFrameworkCore;
 global using Microsoft.EntityFrameworkCore.Diagnostics;
 global using Microsoft.Extensions.FileProviders;
@@ -24,6 +26,7 @@ global using System.Security.Claims;
 global using System.Security.Cryptography;
 global using System.Text;
 global using System.Text.RegularExpressions;
+global using System.Threading.RateLimiting;
 
 global using ZORGATH.WebPortal.API.Constants;
 global using ZORGATH.WebPortal.API.Contracts;

@@ -28,6 +28,7 @@ public class KONGOR
         // Add The Database Context
         builder.AddSqlServerDbContext<MerrickContext>("MERRICK", configureSettings: null, configureDbContextOptions: options =>
         {
+            // Enable Detailed Error Messages In Development Environment
             options.EnableDetailedErrors(builder.Environment.IsDevelopment());
 
             // Suppress Warning Regarding Enabled Sensitive Data Logging, Since It Is Only Enabled In The Development Environment
@@ -35,25 +36,60 @@ public class KONGOR
             options.EnableSensitiveDataLogging(builder.Environment.IsDevelopment())
                 .ConfigureWarnings(warnings => warnings.Log((Id: CoreEventId.SensitiveDataLoggingEnabledWarning, Level: LogLevel.Trace)));
 
+            // Enable Thread Safety Checks For Entity Framework
             options.EnableThreadSafetyChecks();
         });
 
-        // The Connection String Maps To The "distributed-cache" Resource Defined In ASPIRE.AppHost
+        // Add Distributed Cache; The Connection String Maps To The "distributed-cache" Resource Defined In ASPIRE.AppHost
         builder.AddRedisClient("DISTRIBUTED-CACHE");
 
-        // Add Memory Cache
+        // Add Memory Cache Service
         builder.Services.AddMemoryCache();
 
-        // Add MVC Controllers
+        // Add Rate Limiting Service To Protect Against Abuse And DoS Attacks
+        builder.Services.AddRateLimiter(options =>
+        {
+            // Relaxed Limits For General API Endpoints
+            options.AddFixedWindowLimiter(policyName: RateLimiterPolicies.Relaxed, policy =>
+            {
+                policy.PermitLimit = 100;
+                policy.Window = TimeSpan.FromMinutes(1);
+                policy.QueueLimit = 10;
+                policy.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+            });
+
+            // Strict Limits For Authentication And Other Sensitive Endpoints
+            options.AddFixedWindowLimiter(policyName: RateLimiterPolicies.Strict, policy =>
+            {
+                policy.PermitLimit = 5;
+                policy.Window = TimeSpan.FromMinutes(1);
+                policy.QueueLimit = 0;
+                policy.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+            });
+        });
+
+        // Add HTTP Request/Response Logging For Debugging In Development
+        if (builder.Environment.IsDevelopment())
+        {
+            builder.Services.AddHttpLogging(options =>
+            {
+                options.LoggingFields = HttpLoggingFields.RequestPropertiesAndHeaders | HttpLoggingFields.ResponsePropertiesAndHeaders;
+                options.RequestBodyLogLimit = 4096; // 4KB Request Body Limit
+                options.ResponseBodyLogLimit = 4096; // 4KB Response Body Limit
+            });
+        }
+
+        // Add MVC Controllers Support
         builder.Services.AddControllers();
 
-        // Add Comprehensive Error Responses
+        // Add Comprehensive Error Response Detail In Development Environment
         if (builder.Environment.IsDevelopment())
             builder.Services.AddProblemDetails();
 
-        // Add Swagger
+        // Add Swagger/OpenAPI Documentation Generation
         builder.Services.AddSwaggerGen(options =>
         {
+            // Configure API Documentation Metadata
             options.SwaggerDoc("v1", new OpenApiInfo
             {
                 Title = "KONGOR Master Server API",
@@ -77,18 +113,26 @@ public class KONGOR
         // Build The Application
         WebApplication app = builder.Build();
 
+        // Configure Development-Specific Middleware
         if (app.Environment.IsDevelopment())
         {
+            // Show Detailed Error Pages In Development
             app.UseDeveloperExceptionPage();
 
+            // Enable HTTP Request/Response Logging
+            app.UseHttpLogging();
+
+            // Enable Swagger API Documentation
             app.UseSwagger();
 
+            // Configure Swagger UI With Custom Styling
             app.UseSwaggerUI(options =>
             {
                 options.InjectStylesheet("swagger.css");
                 options.DocumentTitle = "KONGOR Master Server API";
             });
 
+            // Serve Static Files For Swagger CSS
             app.UseStaticFiles(new StaticFileOptions
             {
                 FileProvider = new PhysicalFileProvider(Path.Combine(builder.Environment.ContentRootPath, "Resources", "CSS")),
@@ -98,14 +142,45 @@ public class KONGOR
 
         else
         {
+            // Use Global Exception Handler In Production
             app.UseExceptionHandler("/error");
         }
 
-        // Map Aspire Default Endpoints
+        // Enable Rate Limiting (Before Other Processing)
+        app.UseRateLimiter();
+
+        // Automatically Redirect HTTP Requests To HTTPS
+        app.UseHttpsRedirection();
+
+        // Enforce HTTPS With Strict Transport Security
+        app.UseHsts();
+
+        // Add Security Headers Middleware
+        app.Use(async (context, next) =>
+        {
+            // Prevent MIME Type Sniffing
+            context.Response.Headers.Append("X-Content-Type-Options", "nosniff");
+            
+            // Prevent Page From Being Displayed In Frames
+            context.Response.Headers.Append("X-Frame-Options", "DENY");
+            
+            // Enable XSS Protection
+            context.Response.Headers.Append("X-XSS-Protection", "1; mode=block");
+            
+            // Control Referrer Information
+            context.Response.Headers.Append("Referrer-Policy", "strict-origin-when-cross-origin");
+            
+            // Content Security Policy For API
+            context.Response.Headers.Append("Content-Security-Policy", "default-src 'none'; frame-ancestors 'none';");
+            
+            await next();
+        });
+
+        // Map Aspire Default Health Check Endpoints
         app.MapDefaultEndpoints();
 
-        // Map MVC Controllers
-        app.MapControllers();
+        // Map MVC Controllers With Rate Limiting
+        app.MapControllers().RequireRateLimiting(RateLimiterPolicies.Relaxed);
 
         // Run The Application
         app.Run();

@@ -2,5 +2,10 @@
 
 public class DAWNBRINGER
 {
-    public static void Main() { Console.WriteLine("Hello, World!"); }
+    // Entry Point For The Web Portal UI Application
+    public static void Main() 
+    { 
+        // TODO: Implement Full Web Portal UI Application
+        Console.WriteLine("Hello, World!"); 
+    }
 }

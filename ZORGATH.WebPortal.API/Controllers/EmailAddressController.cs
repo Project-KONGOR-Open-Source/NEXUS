@@ -3,6 +3,7 @@
 [ApiController]
 [Route("[controller]")]
 [Consumes("application/json")]
+[EnableRateLimiting(RateLimiterPolicies.Strict)]
 public class EmailAddressController(MerrickContext databaseContext, ILogger<EmailAddressController> logger, IEmailService emailService) : ControllerBase
 {
     private MerrickContext MerrickContext { get; } = databaseContext;

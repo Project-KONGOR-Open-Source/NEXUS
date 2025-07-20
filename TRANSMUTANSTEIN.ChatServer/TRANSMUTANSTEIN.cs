@@ -19,6 +19,7 @@ public class TRANSMUTANSTEIN
         // Add The Database Context
         builder.AddSqlServerDbContext<MerrickContext>("MERRICK", configureSettings: null, configureDbContextOptions: options =>
         {
+            // Enable Detailed Error Messages In Development Environment
             options.EnableDetailedErrors(builder.Environment.IsDevelopment());
 
             // Suppress Warning Regarding Enabled Sensitive Data Logging, Since It Is Only Enabled In The Development Environment
@@ -26,19 +27,20 @@ public class TRANSMUTANSTEIN
             options.EnableSensitiveDataLogging(builder.Environment.IsDevelopment())
                 .ConfigureWarnings(warnings => warnings.Log((Id: CoreEventId.SensitiveDataLoggingEnabledWarning, Level: LogLevel.Trace)));
 
+            // Enable Thread Safety Checks For Entity Framework
             options.EnableThreadSafetyChecks();
         });
 
-        // The Connection String Maps To The "distributed-cache" Resource Defined In ASPIRE.AppHost
+        // Add Distributed Cache; The Connection String Maps To The "distributed-cache" Resource Defined In ASPIRE.AppHost
         builder.AddRedisClient("DISTRIBUTED-CACHE");
 
-        // Host The Chat Service
+        // Register Chat Service As Background Hosted Service
         builder.Services.AddHostedService<ChatService>();
 
-        // Host The Matchmaking Service
+        // Register Matchmaking Service As Background Hosted Service
         builder.Services.AddHostedService<MatchmakingService>();
 
-        // Register The Database Context Service
+        // Register Database Context Service
         builder.Services.AddTransient<MerrickContext>();
 
         // Add Chat Server Health Check
@@ -47,13 +49,41 @@ public class TRANSMUTANSTEIN
         // Build The Application
         WebApplication app = builder.Build();
 
-        // Automatically Redirect To HTTPS
+        // Configure Development-Specific Middleware
+        if (app.Environment.IsDevelopment())
+        {
+            // Show Detailed Error Pages In Development
+            app.UseDeveloperExceptionPage();
+        }
+
+        else
+        {
+            // Use Global Exception Handler In Production
+            app.UseExceptionHandler("/error");
+        }
+
+        // Automatically Redirect HTTP Requests To HTTPS
         app.UseHttpsRedirection();
 
-        // Enforce HTTPS
+        // Enforce HTTPS With Strict Transport Security
         app.UseHsts();
 
-        // Map Aspire Default Endpoints
+        // Add Basic Security Headers Middleware
+        app.Use(async (context, next) =>
+        {
+            // Prevent MIME Type Sniffing
+            context.Response.Headers.Append("X-Content-Type-Options", "nosniff");
+            
+            // Prevent Page From Being Displayed In Frames
+            context.Response.Headers.Append("X-Frame-Options", "DENY");
+            
+            // Enable XSS Protection
+            context.Response.Headers.Append("X-XSS-Protection", "1; mode=block");
+            
+            await next();
+        });
+
+        // Map Aspire Default Health Check Endpoints
         app.MapDefaultEndpoints();
 
         // Run The Application

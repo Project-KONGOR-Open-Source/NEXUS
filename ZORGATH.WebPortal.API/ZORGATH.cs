@@ -22,6 +22,7 @@ public class ZORGATH
         // Add The Database Context
         builder.AddSqlServerDbContext<MerrickContext>("MERRICK", configureSettings: null, configureDbContextOptions: options =>
         {
+            // Enable Detailed Error Messages In Development Environment
             options.EnableDetailedErrors(builder.Environment.IsDevelopment());
 
             // Suppress Warning Regarding Enabled Sensitive Data Logging, Since It Is Only Enabled In The Development Environment
@@ -29,11 +30,45 @@ public class ZORGATH
             options.EnableSensitiveDataLogging(builder.Environment.IsDevelopment())
                 .ConfigureWarnings(warnings => warnings.Log((Id: CoreEventId.SensitiveDataLoggingEnabledWarning, Level: LogLevel.Trace)));
 
+            // Enable Thread Safety Checks For Entity Framework
             options.EnableThreadSafetyChecks();
         });
 
-        // Add Memory Cache
+        // Add Memory Cache Service
         builder.Services.AddMemoryCache();
+
+        // Add Rate Limiting Service To Protect Against Abuse And DoS Attacks
+        builder.Services.AddRateLimiter(options =>
+        {
+            // Relaxed Limits For General API Endpoints
+            options.AddFixedWindowLimiter(policyName: RateLimiterPolicies.Relaxed, policy =>
+            {
+                policy.PermitLimit = 100;
+                policy.Window = TimeSpan.FromMinutes(1);
+                policy.QueueLimit = 10;
+                policy.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+            });
+            
+            // Strict Limits For Authentication And Other Sensitive Endpoints
+            options.AddFixedWindowLimiter(policyName: RateLimiterPolicies.Strict, policy =>
+            {
+                policy.PermitLimit = 5;
+                policy.Window = TimeSpan.FromMinutes(1);
+                policy.QueueLimit = 0;
+                policy.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
+            });
+        });
+
+        // Add HTTP Request/Response Logging For Debugging In Development
+        if (builder.Environment.IsDevelopment())
+        {
+            builder.Services.AddHttpLogging(options =>
+            {
+                options.LoggingFields = HttpLoggingFields.RequestPropertiesAndHeaders | HttpLoggingFields.ResponsePropertiesAndHeaders;
+                options.RequestBodyLogLimit = 4096; // 4KB Request Body Limit
+                options.ResponseBodyLogLimit = 4096; // 4KB Response Body Limit
+            });
+        }
 
         // Set CORS Policy Name
         const string corsPolicyName = "Allow-All";
@@ -43,7 +78,7 @@ public class ZORGATH
             ? [ "https://localhost:55550",   "https://localhost:55551",      "https://localhost:55552",      "https://localhost:55553",     "https://localhost:55554", "http://localhost:55555", "https://localhost:55556",       "https://localhost:55557"      ]
             : [ "https://aspire.kongor.net", "https://telemetry.kongor.net", "https://resources.kongor.net", "https://database.kongor.net", "https://chat.kongor.net", "http://api.kongor.net",  "https://portal.api.kongor.net", "https://portal.ui.kongor.net" ];
 
-        // Add CORS
+        // Add CORS Policy To Allow Cross-Origin Requests
         builder.Services.AddCors(options =>
         {
             options.AddPolicy(corsPolicyName,
@@ -51,7 +86,7 @@ public class ZORGATH
                     .AllowAnyHeader().AllowAnyMethod().AllowCredentials());
         });
 
-        // Add Server-Sided Cache
+        // Add Server-Side Output Caching
         builder.Services.AddOutputCache(options =>
         {
             options.AddPolicy(OutputCachePolicies.CacheForThirtySeconds, policy => policy.Cache().Expire(TimeSpan.FromSeconds(30)));
@@ -60,6 +95,7 @@ public class ZORGATH
             options.AddPolicy(OutputCachePolicies.CacheForOneWeek, policy => policy.Cache().Expire(TimeSpan.FromDays(7)));
         });
 
+        // TODO: Implement Username And Password Validation Policies
         //if (builder.Environment.IsDevelopment())
         //{
         //    builder.Services.Configure<IdentityOptions>(options =>
@@ -98,47 +134,51 @@ public class ZORGATH
         //    });
         //}
 
-        // Add And Configure Authentication
-        builder.Services.AddAuthentication(options =>
-        {
-            options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-            options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-        }).AddJwtBearer(options =>
-        {
-            OperationalConfiguration configuration = builder.Configuration.GetRequiredSection(OperationalConfiguration.ConfigurationSection).Get<OperationalConfiguration>() ?? throw new NullReferenceException("Operational Configuration Is NULL");
-
-            options.TokenValidationParameters = new TokenValidationParameters
+        // Add JWT Bearer Authentication Configuration
+        builder.Services
+            .AddAuthentication(options =>
             {
-                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration.JWT.SigningKey)), // TODO: Put The Signing Key In A Secrets Vault
-                ValidateIssuerSigningKey = true,
-                ValidIssuer = configuration.JWT.Issuer,
-                ValidateIssuer = true,
-                ValidAudience = configuration.JWT.Audience,
-                ValidateAudience = true,
-                ClockSkew = TimeSpan.Zero,
-                ValidateLifetime = true
-            };
-        });
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(options =>
+            {
+                // Get Operational Configuration For JWT Settings
+                OperationalConfiguration configuration = builder.Configuration.GetRequiredSection(OperationalConfiguration.ConfigurationSection)
+                    .Get<OperationalConfiguration>() ?? throw new NullReferenceException("Operational Configuration Is NULL");
 
-        // Add Authorization
-        builder.Services.AddAuthorization(options =>
-        {
-            options.AddPolicy(UserRoles.Administrator, policy => policy.RequireClaim(Claims.UserRole, UserRoles.Administrator));
-            options.AddPolicy(UserRoles.User, policy => policy.RequireClaim(Claims.UserRole, UserRoles.User));
-            options.AddPolicy(UserRoles.AllRoles, policy => policy.RequireClaim(Claims.UserRole, UserRoles.AllRoles.Split(',')));
-        });
+                // Configure JWT Validation Parameters
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration.JWT.SigningKey)), // TODO: Put The Signing Key In A Secrets Vault
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = configuration.JWT.Issuer,
+                    ValidateIssuer = true,
+                    ValidAudience = configuration.JWT.Audience,
+                    ValidateAudience = true,
+                    ClockSkew = TimeSpan.Zero,
+                    ValidateLifetime = true
+                };
+            });
 
-        // Add MVC Controllers
+        // Add Authorization Policies For Role-Based Access Control
+        builder.Services.AddAuthorizationBuilder()
+            .AddPolicy(UserRoles.Administrator, policy => policy.RequireClaim(Claims.UserRole, UserRoles.Administrator))
+            .AddPolicy(UserRoles.User, policy => policy.RequireClaim(Claims.UserRole, UserRoles.User))
+            .AddPolicy(UserRoles.AllRoles, policy => policy.RequireClaim(Claims.UserRole, UserRoles.AllRoles.Split(',')));
+
+        // Enable MVC Controllers
         builder.Services.AddControllers();
 
-        // Add Comprehensive Error Responses
+        // Add Comprehensive Error Response Detail In Development Environment
         if (builder.Environment.IsDevelopment())
             builder.Services.AddProblemDetails();
 
-        // Add Swagger
+        // Add Swagger/OpenAPI Documentation Generation
         builder.Services.AddSwaggerGen(options =>
         {
+            // Configure API Documentation Metadata
             options.SwaggerDoc("v1", new OpenApiInfo
             {
                 Title = "ZORGATH Web Portal API",
@@ -158,6 +198,7 @@ public class ZORGATH
                 }
             });
 
+            // Add JWT Bearer Authentication To Swagger UI
             options.AddSecurityDefinition(JwtBearerDefaults.AuthenticationScheme, new OpenApiSecurityScheme
             {
                 Description = "Insert A Valid JSON Web Token",
@@ -168,6 +209,7 @@ public class ZORGATH
                 BearerFormat = "JWT"
             });
 
+            // Configure Security Requirements For All Endpoints
             options.AddSecurityRequirement(new OpenApiSecurityRequirement
             {
                 {
@@ -191,18 +233,26 @@ public class ZORGATH
         // Build The Application
         WebApplication app = builder.Build();
 
+        // Configure Development-Specific Middleware
         if (app.Environment.IsDevelopment())
         {
+            // Show Detailed Error Pages In Development
             app.UseDeveloperExceptionPage();
 
+            // Enable HTTP Request/Response Logging
+            app.UseHttpLogging();
+
+            // Enable Swagger API Documentation
             app.UseSwagger();
 
+            // Configure Swagger UI With Custom Styling
             app.UseSwaggerUI(options =>
             {
                 options.InjectStylesheet("swagger.css");
                 options.DocumentTitle = "ZORGATH Web Portal API";
             });
 
+            // Serve Static Files For Swagger CSS
             app.UseStaticFiles(new StaticFileOptions
             {
                 FileProvider = new PhysicalFileProvider(Path.Combine(builder.Environment.ContentRootPath, "Resources", "CSS")),
@@ -212,32 +262,57 @@ public class ZORGATH
 
         else
         {
+            // Use Global Exception Handler In Production
             app.UseExceptionHandler("/error");
         }
 
-        // User CORS
+        // Enable CORS Policy
         app.UseCors(corsPolicyName);
 
-        // Use Server-Sided Cache
+        // Enable Output Caching
         app.UseOutputCache();
 
-        // Automatically Redirect To HTTPS
+        // Enable Rate Limiting (Before Authentication)
+        app.UseRateLimiter();
+
+        // Automatically Redirect HTTP Requests To HTTPS
         app.UseHttpsRedirection();
 
-        // Enforce HTTPS
+        // Enforce HTTPS With Strict Transport Security
         app.UseHsts();
+
+        // Add Security Headers Middleware
+        app.Use(async (context, next) =>
+        {
+            // Prevent MIME Type Sniffing
+            context.Response.Headers.Append("X-Content-Type-Options", "nosniff");
+            
+            // Prevent Page From Being Displayed In Frames
+            context.Response.Headers.Append("X-Frame-Options", "DENY");
+            
+            // Enable XSS Protection
+            context.Response.Headers.Append("X-XSS-Protection", "1; mode=block");
+            
+            // Control Referrer Information
+            context.Response.Headers.Append("Referrer-Policy", "strict-origin-when-cross-origin");
+            
+            // Content Security Policy For API
+            context.Response.Headers.Append("Content-Security-Policy", "default-src 'none'; frame-ancestors 'none';");
+            
+            await next();
+        });
 
         // Require Authentication To Access Non-Public Resources
         app.UseAuthentication();
 
-        // Require Authentication To Access Role-Specific Resources
+        // Require Authorization To Access Role-Specific Resources
         app.UseAuthorization();
 
-        // Map Aspire Default Endpoints
+        // Map Aspire Default Health Check Endpoints
         app.MapDefaultEndpoints();
 
-        // Map MVC Controllers
-        app.MapControllers();
+        // Map MVC Controllers With Rate Limiting
+        app.MapControllers().RequireRateLimiting(RateLimiterPolicies.Relaxed);
 
         // Run The Application
         app.Run();
