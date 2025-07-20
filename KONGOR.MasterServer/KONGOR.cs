@@ -48,8 +48,8 @@ public class KONGOR
         if (builder.Environment.IsDevelopment())
             builder.Services.AddProblemDetails();
 
-        // Add Swagger
-        builder.Services.AddSwaggerGen();
+        // Add OpenAPI
+        builder.Services.AddOpenApi(documentName: "master-server");
 
         // TODO: Clean This Up
 
@@ -116,20 +116,17 @@ public class KONGOR
         {
             app.UseDeveloperExceptionPage();
 
-            app.UseSwagger();
+            app.MapOpenApi();
 
-            app.UseSwaggerUI(options =>
+            app.MapScalarApiReference(options =>
             {
-                options.InjectStylesheet("/swagger/custom.css");
-                // https://github.com/Amoenus/SwaggerDark/releases
-                // https://blog.elijahlopez.ca/posts/aspnet-swagger-dark-theme/
-                // https://amoenus.dev/swagger-dark-theme
+                options.AddDocument(documentName: "v1", title: "???", routePattern: "openapi/master-server.json");
             });
         }
 
         else
         {
-            app.UseExceptionHandler("/Error");
+            app.UseExceptionHandler("/error");
         }
 
         // Map Aspire Default Endpoints

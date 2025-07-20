@@ -5,7 +5,7 @@
             "commandName": "Project",
             "launchBrowser": true,
             "applicationUrl": "https://localhost:55556",
-            "launchUrl": "swagger",
+            "launchUrl": "scalar",
             "environmentVariables": {
                 "APPLICATION_URL": "https://localhost:55556",
                 "ASPNETCORE_ENVIRONMENT": "Development",
@@ -17,7 +17,7 @@
             "commandName": "Project",
             "launchBrowser": true,
             "applicationUrl": "https://portal.api.kongor.net",
-            "launchUrl": "swagger",
+            "launchUrl": "scalar",
             "environmentVariables": {
                 "APPLICATION_URL": "https://portal.api.kongor.net",
                 "ASPNETCORE_ENVIRONMENT": "Production",

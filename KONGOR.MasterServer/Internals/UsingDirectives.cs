@@ -30,6 +30,8 @@ global using OneOf;
 
 global using PhpSerializerNET;
 
+global using Scalar.AspNetCore;
+
 global using SecureRemotePassword;
 
 global using StackExchange.Redis;

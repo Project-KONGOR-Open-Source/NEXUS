@@ -14,7 +14,8 @@ global using Microsoft.EntityFrameworkCore;
 global using Microsoft.EntityFrameworkCore.Diagnostics;
 global using Microsoft.Extensions.Options;
 global using Microsoft.IdentityModel.Tokens;
-global using Microsoft.OpenApi.Models;
+
+global using Scalar.AspNetCore;
 
 global using SecureRemotePassword;
 
