@@ -85,6 +85,7 @@ public class KONGOR
             app.UseSwaggerUI(options =>
             {
                 options.InjectStylesheet("swagger.css");
+                options.DocumentTitle = "KONGOR Master Server API";
             });
 
             app.UseStaticFiles(new StaticFileOptions

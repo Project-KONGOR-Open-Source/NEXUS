@@ -202,6 +202,7 @@ public class ZORGATH
             app.UseSwaggerUI(options =>
             {
                 options.InjectStylesheet("swagger.css");
+                options.DocumentTitle = "ZORGATH Web Portal API";
             });
 
             app.UseStaticFiles(new StaticFileOptions
