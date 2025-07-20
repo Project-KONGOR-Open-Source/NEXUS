@@ -137,7 +137,7 @@ public class ZORGATH
             builder.Services.AddProblemDetails();
 
         // Add OpenAPI
-        builder.Services.AddOpenApi(documentName: "web-portal-api");
+        builder.Services.AddOpenApi();
 
         // TODO: Clean This Up
 
@@ -202,10 +202,7 @@ public class ZORGATH
 
             app.MapOpenApi();
 
-            app.MapScalarApiReference(options =>
-            {
-                options.AddDocument(documentName: "v1", title: "???", routePattern: "openapi/web-portal-api.json");
-            });
+            app.MapScalarApiReference();
         }
 
         else

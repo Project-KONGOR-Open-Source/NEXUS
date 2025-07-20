@@ -49,7 +49,7 @@ public class KONGOR
             builder.Services.AddProblemDetails();
 
         // Add OpenAPI
-        builder.Services.AddOpenApi(documentName: "master-server");
+        builder.Services.AddOpenApi();
 
         // TODO: Clean This Up
 
@@ -118,10 +118,7 @@ public class KONGOR
 
             app.MapOpenApi();
 
-            app.MapScalarApiReference(options =>
-            {
-                options.AddDocument(documentName: "v1", title: "???", routePattern: "openapi/master-server.json");
-            });
+            app.MapScalarApiReference();
         }
 
         else
