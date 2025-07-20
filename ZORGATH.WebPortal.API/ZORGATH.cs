@@ -1,4 +1,6 @@
-﻿namespace ZORGATH.WebPortal.API;
+﻿using Simple.SwaggerThemeToggler;
+
+namespace ZORGATH.WebPortal.API;
 
 public class ZORGATH
 {
@@ -196,16 +198,10 @@ public class ZORGATH
         if (app.Environment.IsDevelopment())
         {
             app.UseDeveloperExceptionPage();
-
+            app.UseStaticFiles();
             app.UseSwagger();
-
-            app.UseSwaggerUI(options =>
-            {
-                options.InjectStylesheet("/swagger/custom.css");
-                // https://github.com/Amoenus/SwaggerDark/releases
-                // https://blog.elijahlopez.ca/posts/aspnet-swagger-dark-theme/
-                // https://amoenus.dev/swagger-dark-theme
-            });
+            app.UseSwaggerThemeToggler();
+            app.UseSwaggerUI(options => options.AddSwaggerThemeToggler());
         }
 
         else
