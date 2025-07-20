@@ -1,6 +1,4 @@
-﻿using Simple.SwaggerThemeToggler;
-
-namespace ZORGATH.WebPortal.API;
+﻿namespace ZORGATH.WebPortal.API;
 
 public class ZORGATH
 {
@@ -198,10 +196,19 @@ public class ZORGATH
         if (app.Environment.IsDevelopment())
         {
             app.UseDeveloperExceptionPage();
-            app.UseStaticFiles();
+
             app.UseSwagger();
-            app.UseSwaggerThemeToggler();
-            app.UseSwaggerUI(options => options.AddSwaggerThemeToggler());
+
+            app.UseSwaggerUI(options =>
+            {
+                options.InjectStylesheet("swagger.css");
+            });
+
+            app.UseStaticFiles(new StaticFileOptions
+            {
+                FileProvider = new PhysicalFileProvider(Path.Combine(builder.Environment.ContentRootPath, "Resources", "CSS")),
+                RequestPath = "/swagger"
+            });
         }
 
         else
