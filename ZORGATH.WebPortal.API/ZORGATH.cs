@@ -137,10 +137,6 @@ public class ZORGATH
             builder.Services.AddProblemDetails();
 
         // Add Swagger
-        builder.Services.AddSwaggerGen();
-
-        // TODO: Clean This Up
-
         builder.Services.AddSwaggerGen(options =>
         {
             options.SwaggerDoc("v1", new OpenApiInfo
@@ -164,11 +160,11 @@ public class ZORGATH
 
             options.AddSecurityDefinition(JwtBearerDefaults.AuthenticationScheme, new OpenApiSecurityScheme
             {
-                In = ParameterLocation.Header,
                 Description = "Insert A Valid JSON Web Token",
                 Name = "Authorization",
                 Type = SecuritySchemeType.Http,
                 Scheme = JwtBearerDefaults.AuthenticationScheme,
+                In = ParameterLocation.Header,
                 BearerFormat = "JWT"
             });
 
@@ -183,7 +179,8 @@ public class ZORGATH
                             Id = JwtBearerDefaults.AuthenticationScheme
                         }
                     },
-                    Array.Empty<string>()
+
+                    Array.Empty<string>() // No Scopes Required, Just A Valid JWT
                 }
             });
         });
