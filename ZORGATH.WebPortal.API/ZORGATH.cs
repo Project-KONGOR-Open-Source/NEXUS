@@ -3,7 +3,7 @@
 public class ZORGATH
 {
     // TRUE If The Application Is Running In Development Mode Or FALSE If Not
-    public static bool RunsInDevelopmentMode { get; set; } = true;
+    public static bool RunsInDevelopmentMode { get; private set; } = true;
 
     public static void Main(string[] args)
     {
@@ -184,8 +184,6 @@ public class ZORGATH
                 }
             });
         });
-
-        // builder.Services.AddAntiforgery(); ???
 
         // Add Email Service
         builder.Services.AddSingleton<IEmailService, EmailService>();

@@ -2,16 +2,19 @@
 
 public class KONGOR
 {
+    // The Count Of Seconds Since The UNIX Epoch (Epochalypse = 19.01.2038 @ 03:14:07 UTC)
+    public static long ServerStartEpochTime { get; private set; } = default;
+
     // TRUE If The Application Is Running In Development Mode Or FALSE If Not
-    public static bool RunsInDevelopmentMode { get; set; } = true;
+    public static bool RunsInDevelopmentMode { get; private set; } = true;
 
     public static void Main(string[] args)
     {
-        // Sets The Server Start Epoch Time (This Will Stop Working In 2038)
-        // KongorContext.ServerStartEpochTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-
         // Create The Application Builder
         WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+
+        // Set Static ServerStartEpochTime Property
+        ServerStartEpochTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
 
         // Set Static RunsInDevelopmentMode Property
         RunsInDevelopmentMode = builder.Environment.IsDevelopment();
@@ -70,8 +73,6 @@ public class KONGOR
                 }
             });
         });
-
-        // builder.Services.AddAntiforgery(); ???
 
         // Build The Application
         WebApplication app = builder.Build();
