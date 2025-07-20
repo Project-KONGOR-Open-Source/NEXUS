@@ -136,57 +136,57 @@ public class ZORGATH
         if (builder.Environment.IsDevelopment())
             builder.Services.AddProblemDetails();
 
-        // Add OpenAPI
-        builder.Services.AddOpenApi();
+        // Add Swagger
+        builder.Services.AddSwaggerGen();
 
         // TODO: Clean This Up
 
-        //builder.Services.AddSwaggerGen(options =>
-        //{
-        //    options.SwaggerDoc("v1", new OpenApiInfo
-        //    {
-        //        Title = "ZORGATH Web Portal API",
-        //        Version = "v1",
+        builder.Services.AddSwaggerGen(options =>
+        {
+            options.SwaggerDoc("v1", new OpenApiInfo
+            {
+                Title = "ZORGATH Web Portal API",
+                Version = "v1",
 
-        //        License = new OpenApiLicense
-        //        {
-        //            Name = "Project KONGOR Open-Source License",
-        //            Url = new Uri("https://github.com/Project-KONGOR-Open-Source/ASPIRE/blob/main/license")
-        //        },
+                License = new OpenApiLicense
+                {
+                    Name = "Project KONGOR Open-Source License",
+                    Url = new Uri("https://github.com/Project-KONGOR-Open-Source/ASPIRE/blob/main/license")
+                },
 
-        //        Contact = new OpenApiContact
-        //        {
-        //            Name = "[K]ONGOR",
-        //            Url = new Uri("https://github.com/K-O-N-G-O-R"),
-        //            Email = "project.kongor@proton.me"
-        //        }
-        //    });
+                Contact = new OpenApiContact
+                {
+                    Name = "[K]ONGOR",
+                    Url = new Uri("https://github.com/K-O-N-G-O-R"),
+                    Email = "project.kongor@proton.me"
+                }
+            });
 
-        //    options.AddSecurityDefinition(JwtBearerDefaults.AuthenticationScheme, new OpenApiSecurityScheme
-        //    {
-        //        In = ParameterLocation.Header,
-        //        Description = "Insert A Valid JSON Web Token",
-        //        Name = "Authorization",
-        //        Type = SecuritySchemeType.Http,
-        //        Scheme = JwtBearerDefaults.AuthenticationScheme,
-        //        BearerFormat = "JWT"
-        //    });
+            options.AddSecurityDefinition(JwtBearerDefaults.AuthenticationScheme, new OpenApiSecurityScheme
+            {
+                In = ParameterLocation.Header,
+                Description = "Insert A Valid JSON Web Token",
+                Name = "Authorization",
+                Type = SecuritySchemeType.Http,
+                Scheme = JwtBearerDefaults.AuthenticationScheme,
+                BearerFormat = "JWT"
+            });
 
-        //    options.AddSecurityRequirement(new OpenApiSecurityRequirement
-        //    {
-        //        {
-        //            new OpenApiSecurityScheme
-        //            {
-        //                Reference = new OpenApiReference
-        //                {
-        //                    Type = ReferenceType.SecurityScheme,
-        //                    Id = JwtBearerDefaults.AuthenticationScheme
-        //                }
-        //            },
-        //            Array.Empty<string>()
-        //        }
-        //    });
-        //});
+            options.AddSecurityRequirement(new OpenApiSecurityRequirement
+            {
+                {
+                    new OpenApiSecurityScheme
+                    {
+                        Reference = new OpenApiReference
+                        {
+                            Type = ReferenceType.SecurityScheme,
+                            Id = JwtBearerDefaults.AuthenticationScheme
+                        }
+                    },
+                    Array.Empty<string>()
+                }
+            });
+        });
 
         // builder.Services.AddAntiforgery(); ???
 
@@ -200,9 +200,15 @@ public class ZORGATH
         {
             app.UseDeveloperExceptionPage();
 
-            app.MapOpenApi();
+            app.UseSwagger();
 
-            app.MapScalarApiReference();
+            app.UseSwaggerUI(options =>
+            {
+                options.InjectStylesheet("/swagger/custom.css");
+                // https://github.com/Amoenus/SwaggerDark/releases
+                // https://blog.elijahlopez.ca/posts/aspnet-swagger-dark-theme/
+                // https://amoenus.dev/swagger-dark-theme
+            });
         }
 
         else
