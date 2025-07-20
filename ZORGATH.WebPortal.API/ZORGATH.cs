@@ -225,17 +225,17 @@ public class ZORGATH
         // Enforce HTTPS
         app.UseHsts();
 
-        // Map Aspire Default Endpoints
-        app.MapDefaultEndpoints();
-
-        // Map MVC Controllers
-        app.MapControllers();
-
         // Require Authentication To Access Non-Public Resources
         app.UseAuthentication();
 
         // Require Authentication To Access Role-Specific Resources
         app.UseAuthorization();
+
+        // Map Aspire Default Endpoints
+        app.MapDefaultEndpoints();
+
+        // Map MVC Controllers
+        app.MapControllers();
 
         // Run The Application
         app.Run();
