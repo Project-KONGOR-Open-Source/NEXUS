@@ -50,19 +50,21 @@ public class KONGOR
         builder.Services.AddRateLimiter(options =>
         {
             // Relaxed Limits For General API Endpoints
-            options.AddFixedWindowLimiter(policyName: RateLimiterPolicies.Relaxed, policy =>
+            options.AddSlidingWindowLimiter(policyName: RateLimiterPolicies.Relaxed, policy =>
             {
                 policy.PermitLimit = 100;
                 policy.Window = TimeSpan.FromMinutes(1);
+                policy.SegmentsPerWindow = 6; // 10 Seconds Per Sliding Window Segment
                 policy.QueueLimit = 10;
                 policy.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
             });
 
             // Strict Limits For Authentication And Other Sensitive Endpoints
-            options.AddFixedWindowLimiter(policyName: RateLimiterPolicies.Strict, policy =>
+            options.AddSlidingWindowLimiter(policyName: RateLimiterPolicies.Strict, policy =>
             {
                 policy.PermitLimit = 5;
                 policy.Window = TimeSpan.FromMinutes(1);
+                policy.SegmentsPerWindow = 6; // 10 Seconds Per Sliding Window Segment
                 policy.QueueLimit = 0;
                 policy.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
             });
