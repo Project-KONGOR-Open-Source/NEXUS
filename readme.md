@@ -39,7 +39,25 @@
 
 <hr/>
 
+<h3 align="center">Optional Tools</h3>
+
+* Entity Framework Core Tools: https://www.nuget.org/packages/dotnet-ef/
+* Aspire CLI: https://www.nuget.org/packages/Aspire.CLI/
+
+> [!IMPORTANT]
+> While these tools are not required, most or all guides and code snippets will prefer using them over other methods.
+
+These tools are defined as dependencies in the `.config/dotnet-tools.json` file. In order to restore them, execute `dotnet tool restore` in the context of the solution directory.
+
+To update the tools locally, execute `dotnet tool update --local {name}` for each tool, where `{name}` is the tool name.
+
+Optionally, but recommended on development machines, also install these tools globally with `dotnet tool install --global {name}` and keep them updated with `dotnet tool update --global {name}`, where `{name}` is the tool name.
+
+<hr/>
+
 <h3 align="center">Comprehensive Instructions For Developers</h3>
+
+TODO: Update These Commands With Aspire CLI Versions
 
 Run In Development
 
@@ -104,13 +122,13 @@ Install/Update .NET Aspire
 > The Aspire NuGet packages referenced by the respective projects need to be in-sync with each other and with the Aspire SDK.
 
 1. update the Aspire NuGet packages to the latest version
-2. manually (for now) update the Aspire SDK in the application host project file
-3. (optional, but good practice) ensure that the service defaults are on the latest version of the template
-    a. make sure that the Aspire project templates are installed, by executing `dotnet new list aspire`
-        - if the Aspire templates are not installed, execute `dotnet new install Aspire.ProjectTemplates`
-    b. execute `dotnet new update` to update all the project templates
-    c. create a temporary service defaults project by executing `dotnet new aspire-servicedefaults`
-    d. copy the content of the generated extensions class over the already existing extensions class, and delete the temporary project
+2. manually (for now), update the Aspire SDK in the application host project file
+3. optionally (but good practice), ensure that the service defaults are on the latest version of the project template
+    1. make sure that the latest Aspire project templates are installed by executing `dotnet new install Aspire.ProjectTemplates@X.Y.Z --force`, where `X.Y.Z` is the required Aspire version, which would ideally be the latest released version
+    2. optionally, update all project templates by executing `dotnet new update`
+    3. make sure that the Aspire project templates are correctly installed, by executing `dotnet new list aspire --type project`
+    4. create a temporary service defaults project by executing `dotnet new aspire-servicedefaults`
+    5. copy the content of the generated extensions class over the already existing extensions class, and then delete the temporary project
 
 > [!NOTE]
 > Mode in-depth information is available here: https://learn.microsoft.com/en-gb/dotnet/aspire/fundamentals/setup-tooling.
