@@ -33,6 +33,10 @@
 #   DRY_RUN=1                     print qm commands without executing them
 #   BALLOON_ENABLE=1              enable memory ballooning (omit --balloon 0)
 #   NO_MEMORY_HOTPLUG=1           remove memory from hotplug features (avoids 1024MB alignment requirement)
+#   VGA_MODEL=<std|qxl|virtio>    override default graphical adapter (std). 'qxl' recommended for SPICE clipboard; 'virtio' for modern guests
+#   ENABLE_SPICE=1                shorthand to force VGA_MODEL=qxl (unless HEADLESS) for better clipboard integration via SPICE client
+# notes:
+#   - for file copy use SSH/SCP or add a virtio-fs share manually; this script focuses on enabling rich clipboard via VGA choice
 # exit behavior: set -euo pipefail + ERR trap abort on first error.
 
 # trap and print generic error then exit
@@ -548,6 +552,31 @@ if [ "$VM_EXISTS" -eq 1 ]; then
         --cores "$ALLOCATED_VM_CPU_CORES" --sockets 1 --cpu host --numa 1 $CPUSET_OPTION \
         --memory "$ALLOCATED_VM_MEMORY_MB" $BALLOON_PARAMETER
 
+    # derive desired VGA model for update if environment requests it (HEADLESS wins over others)
+    DESIRED_VGA=""
+    
+    if [ -z "${HEADLESS:-}" ]; then
+        if [ -n "${ENABLE_SPICE:-}" ] && [ -z "${VGA_MODEL:-}" ]; then
+            VGA_MODEL="qxl"
+        fi
+        if [ -n "${VGA_MODEL:-}" ]; then
+            case "$VGA_MODEL" in
+                std|qxl|virtio|vmware) DESIRED_VGA="$VGA_MODEL" ;;
+                *) echo "WARNING: Unsupported VGA_MODEL '$VGA_MODEL' (use std|qxl|virtio|vmware). Falling back to std."; DESIRED_VGA="std" ;;
+            esac
+        else
+            DESIRED_VGA="std"
+        fi
+    fi
+
+    if [ -n "$DESIRED_VGA" ]; then
+        CURRENT_VGA=$(qm config "$VIRTUAL_MACHINE_ID" 2>/dev/null | awk -F': ' '/^vga:/ {print $2}') || CURRENT_VGA=""
+        if ! echo "$CURRENT_VGA" | grep -qi "$DESIRED_VGA"; then
+            echo "INFO: Updating VGA To $DESIRED_VGA"
+            $QM_EXEC_PREFIX qm set "$VIRTUAL_MACHINE_ID" --vga "$DESIRED_VGA" >/dev/null 2>&1 || true
+        fi
+    fi
+
     # if an ISO path is provided during update, (re)attach it and ensure boot order prefers CDROM first
     if [ -n "$ISO_FILE_PATH" ] && [ -f "$ISO_FILE_PATH" ]; then
         echo "INFO: Attaching ISO And Setting Boot Order (CDROM First) For Reinstallation / Rescue"
@@ -591,10 +620,17 @@ else
     if [ "$INSTALLATION_MODE" = "CLOUD_IMAGE" ]; then
         # base create without primary disk (will import cloud image)
 
-        # provide graphical console unless HEADLESS=1
-        VGA_FLAG="--vga std"
+        # resolve VGA flag (honor HEADLESS, ENABLE_SPICE, VGA_MODEL)
         if [ -n "${HEADLESS:-}" ]; then
             VGA_FLAG="--vga serial0"
+        else
+            if [ -n "${ENABLE_SPICE:-}" ] && [ -z "${VGA_MODEL:-}" ]; then
+                VGA_MODEL="qxl"
+            fi
+            case "${VGA_MODEL:-std}" in
+                std|qxl|virtio|vmware) VGA_FLAG="--vga ${VGA_MODEL:-std}" ;;
+                *) echo "WARNING: Unsupported VGA_MODEL '${VGA_MODEL}' - falling back to std"; VGA_FLAG="--vga std" ;;
+            esac
         fi
 
         $QM_EXEC_PREFIX qm create "$VIRTUAL_MACHINE_ID" \
@@ -658,11 +694,20 @@ else
         fi
     else
         # ISO installation path (standard interactive OS installer)
-        # If HEADLESS=1 is exported we keep serial-only VGA; otherwise provide a standard graphical adapter so installers like AnduinOS appear.
-        VGA_FLAG="--vga std"
+
+        # if HEADLESS=1 is exported we keep serial-only VGA; otherwise provide a standard graphical adapter so GUI installers appear
         if [ -n "${HEADLESS:-}" ]; then
             VGA_FLAG="--vga serial0"
+        else
+            if [ -n "${ENABLE_SPICE:-}" ] && [ -z "${VGA_MODEL:-}" ]; then
+                VGA_MODEL="qxl"
+            fi
+            case "${VGA_MODEL:-std}" in
+                std|qxl|virtio|vmware) VGA_FLAG="--vga ${VGA_MODEL:-std}" ;;
+                *) echo "WARNING: Unsupported VGA_MODEL '${VGA_MODEL}' - falling back to std"; VGA_FLAG="--vga std" ;;
+            esac
         fi
+
         $QM_EXEC_PREFIX qm create "$VIRTUAL_MACHINE_ID" \
             --name "$VIRTUAL_MACHINE_NAME" \
             --machine q35 \
@@ -682,6 +727,7 @@ else
             ${HUGE_PAGES_OPTION} \
             --onboot 0 \
             --protection 0
+
         # add RNG device unless disabled
         if [ -z "${DISABLE_RNG:-}" ]; then
             $QM_EXEC_PREFIX qm set "$VIRTUAL_MACHINE_ID" --rng0 source=/dev/urandom >/dev/null 2>&1 || true
