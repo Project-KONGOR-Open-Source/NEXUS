@@ -547,6 +547,32 @@ if [ "$VM_EXISTS" -eq 1 ]; then
     $QM_EXEC_PREFIX qm set "$VIRTUAL_MACHINE_ID" \
         --cores "$ALLOCATED_VM_CPU_CORES" --sockets 1 --cpu host --numa 1 $CPUSET_OPTION \
         --memory "$ALLOCATED_VM_MEMORY_MB" $BALLOON_PARAMETER
+
+    # if an ISO path is provided during update, (re)attach it and ensure boot order prefers CDROM first
+    if [ -n "$ISO_FILE_PATH" ] && [ -f "$ISO_FILE_PATH" ]; then
+        echo "INFO: Attaching ISO And Setting Boot Order (CDROM First) For Reinstallation / Rescue"
+
+        $QM_EXEC_PREFIX qm set "$VIRTUAL_MACHINE_ID" --ide2 "${STORAGE_NAME}:iso/$(basename \"$ISO_FILE_PATH\")" 2>/dev/null || true
+
+        # fallback: direct path reference if storage:iso form fails (user may have passed absolute path on dir storage)
+        if ! qm config "$VIRTUAL_MACHINE_ID" 2>/dev/null | grep -q '^ide2:'; then
+            $QM_EXEC_PREFIX qm set "$VIRTUAL_MACHINE_ID" --cdrom "$ISO_FILE_PATH" || true
+        fi
+
+        # set boot order with ide2 first if present
+        if qm config "$VIRTUAL_MACHINE_ID" 2>/dev/null | grep -q '^ide2:'; then
+            $QM_EXEC_PREFIX qm set "$VIRTUAL_MACHINE_ID" --boot order=ide2;scsi0 || true
+        fi
+
+        # ensure a graphical VGA is present unless HEADLESS=1
+        if [ -z "${HEADLESS:-}" ]; then
+            CURRENT_VGA=$(qm config "$VIRTUAL_MACHINE_ID" 2>/dev/null | awk -F': ' '/^vga:/ {print $2}')
+            if echo "$CURRENT_VGA" | grep -qi 'serial0'; then
+                echo "INFO: Switching From Serial-Only VGA To 'std' For Installer UI"
+                $QM_EXEC_PREFIX qm set "$VIRTUAL_MACHINE_ID" --vga std || true
+            fi
+        fi
+    fi
 else
     echo "Virtual Machine $VIRTUAL_MACHINE_ID Does Not Exist - Creating High-Performance Virtual Machine..."
     echo "  CPU Cores (Host/Allocated/Reserved): ${TOTAL_HOST_CPU_CORES}/${ALLOCATED_VM_CPU_CORES}/${RESERVED_HOST_CPU_CORES}"
@@ -564,6 +590,13 @@ else
 
     if [ "$INSTALLATION_MODE" = "CLOUD_IMAGE" ]; then
         # base create without primary disk (will import cloud image)
+
+        # provide graphical console unless HEADLESS=1
+        VGA_FLAG="--vga std"
+        if [ -n "${HEADLESS:-}" ]; then
+            VGA_FLAG="--vga serial0"
+        fi
+
         $QM_EXEC_PREFIX qm create "$VIRTUAL_MACHINE_ID" \
             --name "$VIRTUAL_MACHINE_NAME" \
             --machine q35 \
@@ -572,7 +605,7 @@ else
             --cores "$ALLOCATED_VM_CPU_CORES" --sockets 1 --cpu host --numa 1 $CPUSET_OPTION \
             --memory "$ALLOCATED_VM_MEMORY_MB" $BALLOON_PARAMETER \
             --hotplug ${HOTPLUG_FEATURES} \
-            --serial0 socket --vga serial0 \
+            --serial0 socket $VGA_FLAG \
             --agent enabled=1,fstrim_cloned_disks=1 \
             --ostype l26 \
             ${HUGE_PAGES_OPTION} \
@@ -624,6 +657,12 @@ else
             fi
         fi
     else
+        # ISO installation path (standard interactive OS installer)
+        # If HEADLESS=1 is exported we keep serial-only VGA; otherwise provide a standard graphical adapter so installers like AnduinOS appear.
+        VGA_FLAG="--vga std"
+        if [ -n "${HEADLESS:-}" ]; then
+            VGA_FLAG="--vga serial0"
+        fi
         $QM_EXEC_PREFIX qm create "$VIRTUAL_MACHINE_ID" \
             --name "$VIRTUAL_MACHINE_NAME" \
             --machine q35 \
@@ -635,8 +674,8 @@ else
             --scsi0 "$PRIMARY_DISK_SCSI0_PARAMETER" \
             --net0 "$NETWORK_DEVICE0_PARAMETER" \
             --hotplug ${HOTPLUG_FEATURES} \
-            --boot order=scsi0 \
-            --serial0 socket --vga serial0 \
+            --boot order=${ISO_FILE_PATH:+ide2;}scsi0 \
+            --serial0 socket $VGA_FLAG \
             ${ISO_FILE_PATH:+--cdrom "$ISO_FILE_PATH"} \
             --agent enabled=1,fstrim_cloned_disks=1 \
             --ostype l26 \
