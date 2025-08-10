@@ -7,105 +7,145 @@ public class GroupPlayerLoadingStatus(ILogger<GroupPlayerLoadingStatus> logger) 
 
     public async Task Process(ChatSession session, ChatBuffer buffer)
     {
-        // Decode minimal request (loadingStatus byte)
+        // Decode request (single byte loadingStatus)
         byte[] commandBytes = buffer.ReadCommandBytes();
         byte loadingStatus = buffer.ReadInt8();
+        int accountId = session.ClientInformation.Account.ID;
 
-        // TODO: Persist loading status in group object when group model exists.
-        // Single-player placeholder logic: when reaches 100 we simulate queue join -> match found -> lobby.
+        // TODO: Reconnect flow (if player should reconnect to match/lobby, skip processing)
 
-        // Always echo a partial group update reflecting loading percent.
-        Response.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_UPDATE);
-        Response.WriteInt8(Convert.ToByte(ChatProtocol.TMMUpdateType.TMM_PARTIAL_GROUP_UPDATE));
-        Response.WriteInt32(session.ClientInformation.Account.ID); // Account changing status
-        Response.WriteInt8(1);    // Group size
-        Response.WriteInt16(1500);// Avg rating placeholder
-        Response.WriteInt32(session.ClientInformation.Account.ID); // Leader
-        Response.WriteInt8(Convert.ToByte(ChatProtocol.ArrangedMatchType.AM_MATCHMAKING));
-        Response.WriteInt8(Convert.ToByte(ChatProtocol.TMMGameType.TMM_GAME_TYPE_NORMAL));
-        Response.WriteString("caldavar");
-        Response.WriteString("ap|ar|sd");
-        Response.WriteString("EU|USE|USW");
-        Response.WriteBool(true);  // Ranked
-        Response.WriteBool(true);  // Match Fidelity
-        Response.WriteInt8(1);     // Bot Difficulty
-        Response.WriteBool(false); // Randomize Bots
-        Response.WriteString(string.Empty); // Country Restrictions
-        Response.WriteString(string.Empty); // Invite Responses
-        Response.WriteInt8(5); // Team size
-        Response.WriteInt8(Convert.ToByte(ChatProtocol.TMMType.TMM_TYPE_CAMPAIGN)); // Group Type
-
-        // Member block
-        Response.WriteInt32(session.ClientInformation.Account.ID);
-        Response.WriteString(session.ClientInformation.Account.Name);
-        Response.WriteInt8(1);                // Slot
-        Response.WriteInt16(1500);            // Rating
-        Response.WriteInt8(loadingStatus);    // Loading Percent
-        Response.WriteBool(false);            // Ready (unchanged here)
-        Response.WriteBool(false);            // In game
-        Response.WriteBool(true);             // Eligible
-        Response.WriteString(session.ClientInformation.Account.ChatNameColour);
-        Response.WriteString(session.ClientInformation.Account.Icon);
-        Response.WriteString("NEWERTH");      // Country placeholder
-        Response.WriteBool(true);             // Has game mode access
-        Response.WriteString("true|true|true");
-
-        Response.WriteBool(false); // Friend flag placeholder
-
-        Response.PrependBufferSize();
-        session.SendAsync(Response.Data);
-
-        if (loadingStatus == 100)
+        var group = MatchmakingService.FindGroupForAccount(accountId);
+        if (group == null)
         {
-            // Simulate: group joins queue (0x0D01), then immediately finds a match (0x0D09), and enters game lobby (0x1C09).
-            await SendBare(session, ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_JOIN_QUEUE); // 0x0D01
-            await SendBare(session, ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_MATCH_FOUND_UPDATE); // 0x0D09
-            await SendBare(session, ChatProtocol.ChatServerToClient.NET_CHAT_CL_GAME_LOBBY_JOINED); // 0x1C09
+            Logger.LogWarning("LoadingStatus: No group for account {AccountId}", accountId);
+            // TODO: Failure response (generic / NET_CHAT_CL_TMM_GENERIC_RESPONSE)
+            return;
+        }
+        var member = group.Members.FirstOrDefault(m => m.Account.ID == accountId);
+        if (member == null)
+        {
+            Logger.LogWarning("LoadingStatus: Member not in group for account {AccountId}", accountId);
+            return;
+        }
+
+        // Persist loading percent (0-100)
+        member.LoadingPercent = loadingStatus; // TODO: clamp + validate monotonic increase
+
+        // Broadcast partial update reflecting single member change (legacy KONGOR builds a partial group update)
+        BroadcastPartial(group, actorAccountId: accountId);
+
+        // When ALL members reach 100% and group was in LoadingResources -> move to queue
+        if (group.AllMembersLoaded && group.State == MatchmakingGroupState.LoadingResources)
+        {
+            group.State = MatchmakingGroupState.InQueue;
+            // Broadcast GROUP_JOINED_QUEUE (update type 6)
+            BroadcastGroupUpdateWithType(group, ChatProtocol.TMMUpdateType.TMM_GROUP_JOINED_QUEUE);
+            // TODO: Start queue timers / periodic TMM_GROUP_QUEUE_UPDATE packets (update type 11)
+            // TODO: Defer match found simulation to a separate service / scheduler instead of immediate progression here.
         }
     }
 
-    private async Task SendBare(ChatSession session, ushort command)
+    private void BroadcastPartial(MatchmakingGroup group, int actorAccountId)
     {
         Response.Clear();
-        Response.WriteCommand(command);
+        Response.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_UPDATE);
+        Response.WriteInt8(Convert.ToByte(ChatProtocol.TMMUpdateType.TMM_PARTIAL_GROUP_UPDATE));
+        Response.WriteInt32(actorAccountId);
+        Response.WriteInt8(Convert.ToByte(group.Members.Count));
+        Response.WriteInt16(1500); // TODO: average rating
+        Response.WriteInt32(group.Leader.Account.ID);
+        Response.WriteInt8(Convert.ToByte(ChatProtocol.ArrangedMatchType.AM_MATCHMAKING)); // TODO derive from config
+        Response.WriteInt8(Convert.ToByte(group.GameType));
+        Response.WriteString(group.MapName);
+        Response.WriteString(group.GameModes);
+        Response.WriteString(group.Regions);
+        Response.WriteBool(group.Ranked);
+        Response.WriteBool(group.MatchFidelity);
+        Response.WriteInt8(group.BotDifficulty);
+        Response.WriteBool(group.RandomizeBots);
+        Response.WriteString(string.Empty); // Country restrictions TODO
+        Response.WriteString(string.Empty); // Invitation responses TODO
+        Response.WriteInt8(group.TeamSize);
+        Response.WriteInt8(Convert.ToByte(group.GroupType));
+        foreach (var m in group.Members)
+        {
+            Response.WriteInt32(m.Account.ID);
+            Response.WriteString(m.Account.Name);
+            Response.WriteInt8(m.Slot);
+            Response.WriteInt16(1500); // TODO per-player rating
+            Response.WriteInt8(m.LoadingPercent);
+            Response.WriteBool(m.IsReady);
+            Response.WriteBool(m.IsInGame);
+            Response.WriteBool(m.IsEligibleForMatchmaking);
+            Response.WriteString(m.Account.ChatNameColour);
+            Response.WriteString(m.Account.Icon);
+            Response.WriteString(m.Country);
+            Response.WriteBool(m.HasGameModeAccess);
+            Response.WriteString(m.GameModeAccess);
+        }
+        foreach (var _ in group.Members)
+            Response.WriteBool(false); // TODO friend flags
         Response.PrependBufferSize();
-        session.SendAsync(Response.Data);
+        group.Broadcast(Response.Clone());
+    }
+
+    private void BroadcastGroupUpdateWithType(MatchmakingGroup group, ChatProtocol.TMMUpdateType type)
+    {
+        Response.Clear();
+        Response.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_UPDATE);
+        Response.WriteInt8(Convert.ToByte(type));
+        Response.WriteInt32(group.Leader.Account.ID); // actor = leader placeholder
+        Response.WriteInt8(Convert.ToByte(group.Members.Count));
+        Response.WriteInt16(1500); // TODO avg rating
+        Response.WriteInt32(group.Leader.Account.ID);
+        Response.WriteInt8(Convert.ToByte(ChatProtocol.ArrangedMatchType.AM_MATCHMAKING));
+        Response.WriteInt8(Convert.ToByte(group.GameType));
+        Response.WriteString(group.MapName);
+        Response.WriteString(group.GameModes);
+        Response.WriteString(group.Regions);
+        Response.WriteBool(group.Ranked);
+        Response.WriteBool(group.MatchFidelity);
+        Response.WriteInt8(group.BotDifficulty);
+        Response.WriteBool(group.RandomizeBots);
+        Response.WriteString(string.Empty);
+        Response.WriteString(string.Empty);
+        Response.WriteInt8(group.TeamSize);
+        Response.WriteInt8(Convert.ToByte(group.GroupType));
+        foreach (var m in group.Members)
+        {
+            Response.WriteInt32(m.Account.ID);
+            Response.WriteString(m.Account.Name);
+            Response.WriteInt8(m.Slot);
+            Response.WriteInt16(1500);
+            Response.WriteInt8(m.LoadingPercent);
+            Response.WriteBool(m.IsReady);
+            Response.WriteBool(m.IsInGame);
+            Response.WriteBool(m.IsEligibleForMatchmaking);
+            Response.WriteString(m.Account.ChatNameColour);
+            Response.WriteString(m.Account.Icon);
+            Response.WriteString(m.Country);
+            Response.WriteBool(m.HasGameModeAccess);
+            Response.WriteString(m.GameModeAccess);
+        }
+        foreach (var _ in group.Members)
+            Response.WriteBool(false);
+        Response.PrependBufferSize();
+        group.Broadcast(Response.Clone());
     }
 }
 
 /*
-Minimal Placeholder Flow Extension (0x0D04 -> Lobby)
-
-Purpose:
-Provide a skeletal pathway from player loading status updates to a simulated game lobby entry without implementing real matchmaking / queue logic.
-
-Decoded Request:
-- Bytes: [ size-prefixed command ][ loadingStatus ]
-
-Behavior Implemented:
-1. Echo partial group update (0x0D03 semantics) including updated loading percent for a single-member group.
-2. When loadingStatus == 100:
-   a. Send bare GroupJoinQueue (0x0D01) as if the group transitioned into the matchmaking queue.
-   b. Send bare MatchFoundUpdate (0x0D09) instantly (skipping timing, queue logic, region / MMR matching).
-   c. Send bare GAME_LOBBY_JOINED (0x1C09) to emulate successful transition into a lobby.
-
-Skipped / Deferred (TODO):
-- Accumulating multi-member loading status and only proceeding when all reach 100.
-- Maintaining a real MatchmakingGroup state machine (WaitingToStart -> LoadingResources -> InQueue -> MatchFound ...).
-- Sending StartLoading (0x0F03) or PendingMatch (0x0F04) intermediate steps.
-- Emitting proper MatchFoundUpdate payload (currently empty frame only).
-- Constructing valid Game Lobby payload (0x1C09 currently sent with no body; real clients may expect lobby metadata and slots).
-- Queue rejoin (0x0E0C) vs fresh join differentiation.
-- Queue time updates (0x0D06) and popularity updates (0x0D07).
-
-Future Incremental Steps:
-1. Introduce in-memory group store with per-member LoadingPercent and Ready flag.
-2. Add Ready handler (already placeholder) to set group state and emit StartLoading (0x0F03) before first 0x0D04.
-3. Replace immediate jump with:
-   - After all 100%: send GroupJoinQueue (0x0D01) then a delayed MatchFoundUpdate (0x0D09).
-4. Implement minimal payload structures for 0x0D09 and 0x1C09 following KONGOR formats.
-5. Add PendingMatch (0x0F04) / AcceptPendingMatch (0x0F05) cycle.
-6. Populate lobby roster using real group membership.
-
-This file documents each placeholder so future work can fill in real matchmaking logic without guessing current shortcuts.
+GroupPlayerLoadingStatus (0x0D04) parity-focused implementation:
+- Decodes loadingStatus byte and updates member.LoadingPercent.
+- Sends TMM_PARTIAL_GROUP_UPDATE reflecting all members (mirrors legacy partial update after each change).
+- When all members reach 100% while in LoadingResources -> transitions to InQueue and emits TMM_GROUP_JOINED_QUEUE (update type 6).
+Removed earlier immediate simulation of match found / pending match / lobby to better match original request responsibilities (those belong to later matchmaking pipeline components).
+Placeholders / TODOs:
+- Failure responses when group not found or invalid state.
+- Validate monotonic loading progression and reject regressions.
+- Queue time update scheduling (TMM_GROUP_QUEUE_UPDATE) & popularity metrics.
+- Separation of actor account vs leader for partial updates (legacy may echo actor id).
+- Ratings, placement flags, ping info retrieval (currently static 1500).
+- Distinguish REJOINED_QUEUE vs JOINED_QUEUE if resuming after disconnect.
+- Integration with a future MatchFinder to trigger 0x0D09 (match found) asynchronously.
 */
