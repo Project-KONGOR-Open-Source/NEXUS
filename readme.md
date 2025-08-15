@@ -28,19 +28,24 @@
 
 <hr/>
 
-<h3 align="center">Non-Code Dependencies</h3>
+<h3 align="center">Required Tools</h3>
 
-* SQL Server (Developer Edition): https://www.microsoft.com/en-gb/sql-server/sql-server-downloads/
-* Docker (Personal Edition): https://www.docker.com/products/docker-desktop/ (Docker Desktop)
+* .NET: https://dotnet.microsoft.com/
 
-> [!IMPORTANT]
-> The editions suggested in parentheses are for development purposes only.
-> Commercial usage will likely require paid tiers of these software products.
+  the version needs to match the one used by the code base
+
+* Docker: https://www.docker.com/
+
+  install in one of the following ways:
+  - manually, using the Docker Desktop installer: https://www.docker.com/products/docker-desktop/
+  - with `winget` on Windows: `winget install --id=Docker.DockerDesktop --exact`
+  - with online installation script, for Linux: `curl -fsSL https://get.docker.com | sh`
 
 <hr/>
 
 <h3 align="center">Optional Tools</h3>
 
+* PowerShell Core: https://learn.microsoft.com/en-gb/powershell/
 * Entity Framework Core Tools: https://www.nuget.org/packages/dotnet-ef/
 * Aspire CLI: https://www.nuget.org/packages/Aspire.CLI/
 
