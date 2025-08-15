@@ -36,7 +36,7 @@ jobs:
       run: "dotnet build NEXUS.DistributedApplication.slnx --no-restore"
 
     - name: "Run Tests"
-      run: "dotnet test NEXUS.DistributedApplication.slnx --no-build --verbosity normal --logger trx --results-directory test-results"
+      run: "dotnet test NEXUS.DistributedApplication.slnx --no-build --settings .runsettings --verbosity normal --logger trx --results-directory test-results"
 
     - name: "Publish Test Results"
       uses: "actions/upload-artifact@v4"
