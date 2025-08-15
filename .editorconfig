@@ -1,5 +1,8 @@
 #### dotnet new editorconfig ####
 
+# Generate New With Current .NET Version Defaults
+# dotnet new editorconfig --name FullEditorConfig --force
+
 # Top-Most EditorConfig File
 root = true
 
