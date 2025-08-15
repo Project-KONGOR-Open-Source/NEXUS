@@ -1,0 +1,29 @@
+<!--
+    Directory.Build.targets
+
+    Purpose: define targets (build steps or actions)
+    Imported: late in the build process, after the project file is evaluated
+    Use Case: add or override build steps like copying files, running tools, or customizing the build pipeline
+
+    MSBuild Targets: https://learn.microsoft.com/en-gb/visualstudio/msbuild/msbuild-targets
+    Customising MSBuild: https://learn.microsoft.com/en-gb/visualstudio/msbuild/customize-your-build#choose-between-adding-properties-to-a-props-or-targets-file
+
+    example:
+
+        <Project>
+            <Target Name="AfterBuild">
+                <Message Text="Build Completed For $(ProjectName)" Importance="high" />
+            </Target>
+        </Project>
+-->
+
+<Project>
+
+    <ItemGroup>
+        <PackageReference Update="Microsoft.CodeAnalysis.BannedApiAnalyzers" Version="4.14.0">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+    </ItemGroup>
+
+</Project>

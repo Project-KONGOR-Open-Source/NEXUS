@@ -1,8 +1,21 @@
-<!-- MSBuild properties defined in a "Directory.Build.props" file apply to all projects and are set early in the build process. -->
-<!-- In comparison, properties defined in a "Directory.Build.targets" file also apply to all projects but are set late in the build process. -->
-<!-- MSBuild Properties: https://learn.microsoft.com/en-gb/visualstudio/msbuild/msbuild-properties -->
-<!-- MSBuild Targets: https://learn.microsoft.com/en-gb/visualstudio/msbuild/msbuild-targets -->
-<!-- Customising MSBuild: https://learn.microsoft.com/en-gb/visualstudio/msbuild/customize-your-build#choose-between-adding-properties-to-a-props-or-targets-file -->
+<!--
+    Directory.Build.props
+
+    Purpose: define properties (like configuration settings, paths, version numbers, etc.)
+    Imported: early in the build process, before the project file is evaluated
+    Use Case: set values that might be used or overridden in the project file
+
+    MSBuild Properties: https://learn.microsoft.com/en-gb/visualstudio/msbuild/msbuild-properties
+    Customising MSBuild: https://learn.microsoft.com/en-gb/visualstudio/msbuild/customize-your-build#choose-between-adding-properties-to-a-props-or-targets-file
+
+    example:
+
+        <Project>
+            <PropertyGroup>
+                <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+            </PropertyGroup>
+        </Project>
+-->
 
 <Project>
 
@@ -12,5 +25,9 @@
         <Nullable>enable</Nullable>
         <WarningsAsErrors>nullable</WarningsAsErrors>
     </PropertyGroup>
+
+    <ItemGroup>
+        <AdditionalFiles Include="$(MSBuildThisFileDirectory)BannedSymbols.txt"/>
+    </ItemGroup>
 
 </Project>

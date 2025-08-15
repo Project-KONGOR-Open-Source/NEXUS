@@ -1,0 +1,2 @@
+﻿M:System.Threading.Thread.Sleep(System.Int32); Do not block the thread. Use 'Task.Delay(...)' for non-blocking delays.
+M:System.Threading.Thread.Sleep(System.TimeSpan); Do not block the thread. Use 'Task.Delay(...)' for non-blocking delays.
