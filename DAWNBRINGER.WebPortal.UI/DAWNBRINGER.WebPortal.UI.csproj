@@ -5,7 +5,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\ASPIRE.Common\ASPIRE.Common.csproj" />
+        <ProjectReference Include="../ASPIRE.Common/ASPIRE.Common.csproj" />
     </ItemGroup>
 
 </Project>

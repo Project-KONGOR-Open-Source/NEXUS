@@ -17,15 +17,15 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\DAWNBRINGER.WebPortal.UI\DAWNBRINGER.WebPortal.UI.csproj" />
-        <ProjectReference Include="..\KONGOR.MasterServer\KONGOR.MasterServer.csproj" />
-        <ProjectReference Include="..\MERRICK.Database\MERRICK.Database.csproj" />
-        <ProjectReference Include="..\TRANSMUTANSTEIN.ChatServer\TRANSMUTANSTEIN.ChatServer.csproj" />
-        <ProjectReference Include="..\ZORGATH.WebPortal.API\ZORGATH.WebPortal.API.csproj" />
+        <ProjectReference Include="../DAWNBRINGER.WebPortal.UI/DAWNBRINGER.WebPortal.UI.csproj" />
+        <ProjectReference Include="../KONGOR.MasterServer/KONGOR.MasterServer.csproj" />
+        <ProjectReference Include="../MERRICK.Database/MERRICK.Database.csproj" />
+        <ProjectReference Include="../TRANSMUTANSTEIN.ChatServer/TRANSMUTANSTEIN.ChatServer.csproj" />
+        <ProjectReference Include="../ZORGATH.WebPortal.API/ZORGATH.WebPortal.API.csproj" />
     </ItemGroup>
 
     <ItemGroup>
-        <None Include="..\.runsettings">
+        <None Include="../.runsettings">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>
     </ItemGroup>

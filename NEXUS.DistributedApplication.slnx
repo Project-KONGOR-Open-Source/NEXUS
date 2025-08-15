@@ -1,10 +1,10 @@
 <Solution>
-    <Project Path="ASPIRE.AppHost\ASPIRE.AppHost.csproj" />
-    <Project Path="ASPIRE.Common\ASPIRE.Common.csproj" />
-    <Project Path="ASPIRE.Tests\ASPIRE.Tests.csproj" />
-    <Project Path="DAWNBRINGER.WebPortal.UI\DAWNBRINGER.WebPortal.UI.csproj" />
-    <Project Path="KONGOR.MasterServer\KONGOR.MasterServer.csproj" />
-    <Project Path="MERRICK.Database\MERRICK.Database.csproj" />
-    <Project Path="TRANSMUTANSTEIN.ChatServer\TRANSMUTANSTEIN.ChatServer.csproj" />
-    <Project Path="ZORGATH.WebPortal.API\ZORGATH.WebPortal.API.csproj" />
+    <Project Path="ASPIRE.AppHost/ASPIRE.AppHost.csproj" />
+    <Project Path="ASPIRE.Common/ASPIRE.Common.csproj" />
+    <Project Path="ASPIRE.Tests/ASPIRE.Tests.csproj" />
+    <Project Path="DAWNBRINGER.WebPortal.UI/DAWNBRINGER.WebPortal.UI.csproj" />
+    <Project Path="KONGOR.MasterServer/KONGOR.MasterServer.csproj" />
+    <Project Path="MERRICK.Database/MERRICK.Database.csproj" />
+    <Project Path="TRANSMUTANSTEIN.ChatServer/TRANSMUTANSTEIN.ChatServer.csproj" />
+    <Project Path="ZORGATH.WebPortal.API/ZORGATH.WebPortal.API.csproj" />
 </Solution>

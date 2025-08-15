@@ -3,7 +3,7 @@
     "profiles": {
         "ASPIRE.Tests": {
             "commandName": "Project",
-            "commandLineArgs": "--settings .\\.runsettings",
+            "commandLineArgs": "--settings ./.runsettings",
             "environmentVariables": {
                 "ASPNETCORE_ENVIRONMENT": "Development",
                 "DOTNET_ENVIRONMENT": "Development"
