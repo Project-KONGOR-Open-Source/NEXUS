@@ -3,14 +3,14 @@
     "isRoot": true,
     "tools": {
         "dotnet-ef": {
-            "version": "9.0.7",
+            "version": "9.0.8",
             "commands": [
                 "dotnet-ef"
             ],
             "rollForward": false
         },
         "aspire.cli": {
-            "version": "9.4.0",
+            "version": "9.4.1",
             "commands": [
                 "aspire"
             ],
