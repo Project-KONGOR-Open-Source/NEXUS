@@ -23,14 +23,19 @@ public class ASPIRE
             .WithRedisInsight(distributedCacheDashboard) // Add Redis Insight Dashboard
             .WithLifetime(ContainerLifetime.Persistent); // Persist Cached Data Between Distributed Application Restarts But Not Between Resource Container Restarts
 
-        // Resolve Database Password From IConfiguration In Order Of Priority: 1) User Secrets, 2) Environment Variables
-        string? resolvedDatabasePassword = new ConfigurationBuilder().AddEnvironmentVariables().AddUserSecrets<ASPIRE>(optional: true).Build() is IConfigurationRoot configuration
-            ? string.IsNullOrWhiteSpace(configuration["Parameters:database-password"]) ? configuration["DATABASE_PASSWORD"] : configuration["Parameters:database-password"] : null;
+        // Get Configuration From Environment Variables And User Secrets
+        IConfiguration configuration = new ConfigurationBuilder().AddEnvironmentVariables().AddUserSecrets<ASPIRE>(optional: true).Build();
+
+        // Set Database Password Parameter Name And Environment Variable Name
+        const string databasePasswordParameterName = "database-password"; const string databasePasswordEnvironmentVariableName = "DATABASE_PASSWORD";
+
+        // Attempt To Resolve Database Password From Configuration In Order Of Priority: 1) User Secrets, 2) Environment Variables
+        string? resolvedDatabasePassword = configuration[$"Parameters:{databasePasswordParameterName}"] ?? configuration[databasePasswordEnvironmentVariableName];
 
         // Populate Database Password If Available In User Secrets Or Environment Variables
         IResourceBuilder<ParameterResource> databasePassword = resolvedDatabasePassword is not null
-            ? builder.AddParameter("database-password", resolvedDatabasePassword, secret: true)
-            : builder.AddParameter("database-password", secret: true);
+            ? builder.AddParameter(databasePasswordParameterName, resolvedDatabasePassword, secret: true)
+            : builder.AddParameter(databasePasswordParameterName, secret: true);
 
         // Configure Database Name Based On Environment
         string databaseName = builder.Environment.IsProduction() ? "production" : "development";
