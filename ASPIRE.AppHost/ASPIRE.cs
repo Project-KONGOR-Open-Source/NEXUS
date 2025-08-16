@@ -12,7 +12,7 @@ public class ASPIRE
         int chatServerPort = builder.Configuration.GetRequiredSection("ChatServer").GetValue<int?>("Port") ?? throw new NullReferenceException("Chat Server Port Is NULL");
 
         // Add Redis Insight Dashboard Resource For Redis Distributed Cache
-        Action<IResourceBuilder<RedisInsightResource>> distributedCacheDashboard = builder => builder.WithContainerName("distributed-cache-insight")
+        Action<IResourceBuilder<RedisInsightResource>> distributedCacheDashboard = builder => builder
             .WithImageTag("latest") // Latest Redis Insight Image: https://github.com/RedisInsight/RedisInsight/releases/latest
             .WithLifetime(ContainerLifetime.Persistent) // Persist Cached Data Between Distributed Application Restarts But Not Between Resource Container Restarts
             .WithEnvironment("RI_ACCEPT_TERMS_AND_CONDITIONS", "true"); // TODO: Confirm This Works From v2.7.2
@@ -20,7 +20,7 @@ public class ASPIRE
         // Add Redis Distributed Cache Resource
         IResourceBuilder<IResourceWithConnectionString> distributedCache = builder.AddRedis("distributed-cache")
             .WithImageTag("latest") // Latest Redis Image: https://github.com/redis/redis/releases/latest
-            .WithRedisInsight(distributedCacheDashboard) // Add Redis Insight Dashboard
+            .WithRedisInsight(distributedCacheDashboard, containerName: "distributed-cache-insight") // Add Redis Insight Dashboard
             .WithLifetime(ContainerLifetime.Persistent); // Persist Cached Data Between Distributed Application Restarts But Not Between Resource Container Restarts
 
         // Get Configuration From Environment Variables And User Secrets
