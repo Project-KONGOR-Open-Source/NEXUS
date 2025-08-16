@@ -23,10 +23,14 @@ public class ASPIRE
             .WithRedisInsight(distributedCacheDashboard) // Add Redis Insight Dashboard
             .WithLifetime(ContainerLifetime.Persistent); // Persist Cached Data Between Distributed Application Restarts But Not Between Resource Container Restarts
 
-        // TODO: Populate Database Password
+        // Resolve Database Password From IConfiguration In Order Of Priority: 1) User Secrets, 2) Environment Variables
+        string? resolvedDatabasePassword = new ConfigurationBuilder().AddEnvironmentVariables().AddUserSecrets<ASPIRE>(optional: true).Build() is IConfigurationRoot configuration
+            ? string.IsNullOrWhiteSpace(configuration["Parameters:database-password"]) ? configuration["DATABASE_PASSWORD"] : configuration["Parameters:database-password"] : null;
 
-        // Add Database Password Parameter (Secret)
-        IResourceBuilder<ParameterResource> databasePassword = builder.AddParameter("database-password", secret: true);
+        // Populate Database Password If Available In User Secrets Or Environment Variables
+        IResourceBuilder<ParameterResource> databasePassword = resolvedDatabasePassword is not null
+            ? builder.AddParameter("database-password", resolvedDatabasePassword, secret: true)
+            : builder.AddParameter("database-password", secret: true);
 
         // Configure Database Name Based On Environment
         string databaseName = builder.Environment.IsProduction() ? "production" : "development";
