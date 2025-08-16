@@ -40,12 +40,17 @@ public class ASPIRE
         // Configure Database Name Based On Environment
         string databaseName = builder.Environment.IsProduction() ? "production" : "development";
 
+        // Using The Default SQL Server Port Allows The Database To Be Accessible With Just The Host Name/Address And No Port Number (e.g. 127.0.0.1)
+        // If The SQL Server Resource Does Not Define A Port, Then It Will Be Randomly Assigned One, And The Connection Address Format Will Be {HOST},{PORT} (e.g. 127.0.0.1,51433)
+        // While Aspire's Service Orchestration Is Not Running, The Port To Connect Directly To The Running SQL Server Container Can Be Found In Docker (e.g. "docker container list")
+        const int databasePort = 1433;
+
         // Configure SQL Server Data Directory
         string userHomeDirectory = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
         string databaseDirectory = Path.Combine(userHomeDirectory, "SQL", "MERRICK", databaseName);
 
         // Add SQL Server Container With Persistent Data In The Current User's Directory (Cross-Platform)
-        IResourceBuilder<SqlServerServerResource> databaseServer = builder.AddSqlServer("database-server", password: databasePassword)
+        IResourceBuilder<SqlServerServerResource> databaseServer = builder.AddSqlServer("database-server", password: databasePassword, port: databasePort)
             .WithImageTag("latest") // SQL Server Image Tags: https://mcr.microsoft.com/en-gb/artifact/mar/mssql/server/tags
             .WithLifetime(ContainerLifetime.Persistent).WithDataBindMount(source: databaseDirectory) // Persist SQL Server Data Both Between Distributed Application Restarts And Resource Container Restarts
             .WithEnvironment("ACCEPT_EULA", "Y").WithEnvironment("MSSQL_PID", "Developer"); // SQL Server Image Information: https://mcr.microsoft.com/en-gb/artifact/mar/mssql/server/about
