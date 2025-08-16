@@ -62,14 +62,27 @@ Optionally, but recommended on development machines, also install these tools gl
 
 <h3 align="center">Comprehensive Instructions For Developers</h3>
 
-TODO: Update These Commands With Aspire CLI Versions
-
-Run In Development
+Run In Development ...
 
 ```powershell
 # In The Context Of The Solution Directory
-dotnet run --project ASPIRE.AppHost --launch-profile "Project KONGOR Development"
+dotnet run --project ASPIRE.AppHost --launch-profile "ASPIRE.AppHost Development"
 ```
+
+... Or Using The Aspire CLI
+
+```powershell
+# Quick Start With Automatic Application Host Detection
+aspire run
+```
+
+```powershell
+# ... And With Debug Logging And Attached Debugger
+aspire run --debug --wait-for-debugger
+```
+
+> [!NOTE]
+> There is currently no way to pass a launch profile to the `aspire run` command, so it will always use the first profile defined in `launchSettings.json`.
 
 <br/>
 
@@ -77,7 +90,7 @@ Run In Production
 
 ```powershell
 # In The Context Of The Solution Directory
-dotnet run --project ASPIRE.AppHost --launch-profile "Project KONGOR Production"
+dotnet run --project ASPIRE.AppHost --launch-profile "ASPIRE.AppHost Production"
 ```
 
 <br/>
@@ -88,11 +101,14 @@ dotnet run --project ASPIRE.AppHost --launch-profile "Project KONGOR Production"
 
 <br/>
 
-Create A Database Schema Migration And Update The Database
+Create A Database Schema Migration
 
-1. install the Entity Framework Core CLI by executing `dotnet tool install --global dotnet-ef` or update it by executing `dotnet tool update --global dotnet-ef`
-2. in the context of the solution directory, execute `dotnet ef migrations add {MigrationName} --project MERRICK.Database`
-3. in the context of the solution directory, execute `dotnet ef database update --project MERRICK.Database`
+1. restore the Entity Framework Core CLI and the Aspire CLI by executing `dotnet tool restore`
+2. in the context of the solution directory, execute `aspire exec --resource database -- dotnet ef migrations add {NAME}`
+
+> [!NOTE]
+> Because the code-first database project is an Aspire resource, it needs the Aspire application host to be running when managing migrations and updating the database, so that Entity Framework Core can gain awareness of resources generated dynamically at run time, such as the connection string. Therefore, it is not possible to run `dotnet ef` commands directly against such a project, because on its own it doesn't have awareness of how to connect to the database server, since this information is passed downstream by the application host at run time.
+> More information on resource-aware CLI commands is available here: https://learn.microsoft.com/en-gb/dotnet/aspire/cli-reference/aspire-exec.
 
 <br/>
 
@@ -102,22 +118,18 @@ Update The Database Schema
 # Development Database
 # In The Context Of The Solution Directory
 $ENV:ASPNETCORE_ENVIRONMENT = "Development"
-dotnet ef database update --project MERRICK.Database
+aspire exec --resource database -- dotnet ef database update
 ```
 
 ```powershell
 # Production Database
 # In The Context Of The Solution Directory
 $ENV:ASPNETCORE_ENVIRONMENT = "Production"
-dotnet ef database update --project MERRICK.Database
+aspire exec --resource database -- dotnet ef database update
 ```
 
-<br/>
-
 > [!NOTE]
-> Updating the database schema manually is only required during development, when there is a potential for database schema migrations to fail.
-> If the migrations are stable, then manually updating the database can be skipped, as that happens automatically at runtime.
-> This also means that a database will be fully scaffolded at runtime if it does not already exist.
+> While updating the database happens automatically at run time, through code, it is still recommended to update databases manually from the command line, due to the significantly better debugging experience.
 
 <br/>
 
