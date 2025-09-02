@@ -132,8 +132,14 @@ public class GroupPlayerLoadingStatus(ILogger<GroupPlayerLoadingStatus> logger) 
             bool allLoaded = group.Members.All(m => m.LoadingPercent >= 100);
             if (allLoaded)
             {
-                // Once all 100%, simulate queue join then match found then lobby for all members
+                // Mirror KONGOR minimal flow when all are loaded:
+                // 1) Join queue (or rejoin)
                 await BroadcastBare(group, ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_JOIN_QUEUE);
+
+                // 2) Optional queue update (avg time); we’ll omit payload and keep it minimal for now
+                //    In KONGOR this is MatchmakingGroupQueueUpdateResponse(updateType: 11)
+
+                // 3) For a thin placeholder, jump to match found and lobby join
                 await BroadcastBare(group, ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_MATCH_FOUND_UPDATE);
                 await BroadcastBare(group, ChatProtocol.ChatServerToClient.NET_CHAT_CL_GAME_LOBBY_JOINED);
             }

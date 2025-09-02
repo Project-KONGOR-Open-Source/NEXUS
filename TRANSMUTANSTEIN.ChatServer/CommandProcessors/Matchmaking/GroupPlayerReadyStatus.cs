@@ -91,12 +91,18 @@ public class GroupPlayerReadyStatus(ILogger<GroupPlayerReadyStatus> logger) : Co
             return;
         }
 
-        // Update readiness: leader explicit, others implicit ready
+        // Update readiness according to KONGOR UX:
+        // - Ignore non-leader toggles (everyone except leader is implicitly ready)
+        // - Only leader's ready (non-zero) triggers loading for all
         MatchmakingGroupMember caller = group.Members.Single(m => m.Account.ID == session.ClientInformation.Account.ID);
-        caller.IsReady = readyStatus != 0;
+        if (!caller.IsLeader)
+        {
+            // Non-leaders are implicitly ready; do not emit any updates here
+            return;
+        }
 
-        bool isLeader = caller.IsLeader;
-        if (isLeader && caller.IsReady)
+        bool leaderReady = readyStatus != 0;
+        if (leaderReady)
         {
             // Implicitly ready all other members and broadcast StartLoading to all
             foreach (var member in group.Members)
