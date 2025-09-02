@@ -7,69 +7,145 @@ public class GroupPlayerLoadingStatus(ILogger<GroupPlayerLoadingStatus> logger) 
 
     public async Task Process(ChatSession session, ChatBuffer buffer)
     {
+        /*
+            // This handles new groups being created, and players getting kicked/leaving/joining from the groups because once the group 
+            // changes another update would need to be sent anyways.  It is designed to be stateless so any update will always provide 
+            // all the information required so we can avoid synchronization complications
+            ETMMUpdateType eUpdateType(static_cast<ETMMUpdateType>(pkt.ReadByte()));
+            uint uiAccountID(pkt.ReadInt());
+            byte yGroupSize(pkt.ReadByte());
+            ushort unAverageTMR(pkt.ReadShort());
+            uint uiGroupLeaderAccountID(pkt.ReadInt());
+            EArrangedMatchType eArrangedMatchType(static_cast<EArrangedMatchType>(pkt.ReadByte()));
+            byte yGameType(pkt.ReadByte());
+            tstring sMapName(pkt.ReadTString());
+            tstring sGameModes(pkt.ReadTString());
+            tstring sRegions(pkt.ReadTString());
+            bool bRanked(pkt.ReadByte() != 0);
+            uint uiMatchFidelity(pkt.ReadByte());
+            byte yBotDifficulty(pkt.ReadByte());
+            bool bRandomizeBots(pkt.ReadByte() != 0);
+            tstring sRestrictedRegions(pkt.ReadTString());
+            tstring sPlayerInvitationResponses(pkt.ReadTString());
+            byte yTeamSize(pkt.ReadByte());
+            byte yTMMType(pkt.ReadByte());
+
+            if (pkt.HasFaults() || yGroupSize > MAX_GROUP_SIZE)
+                return;
+
+            if (cc_printTMMUpdates)
+            {
+                Console << L"Received TMM update " << g_sTMMUpdateTypes[eUpdateType] << newl;
+            }
+
+            // We need to store these out permanently so we can check for restricted regions
+            m_yGroupSize = yGroupSize;
+
+            m_yArrangedMatchType = eArrangedMatchType;
+            m_yGameType = yGameType;
+            m_sTMMMapName = sMapName;
+            cc_TMMMatchFidelity = uiMatchFidelity;
+            m_sRestrictedRegions = sRestrictedRegions;
+
+            bool bHandleFullUpdate(eUpdateType == TMM_CREATE_GROUP || eUpdateType == TMM_FULL_GROUP_UPDATE || eUpdateType == TMM_PLAYER_JOINED_GROUP || eUpdateType == TMM_PLAYER_LEFT_GROUP || eUpdateType == TMM_PLAYER_KICKED_FROM_GROUP);
+
+            ... More Code In c_chatmanager.cpp
+        */
+
         // Decode minimal request (loadingStatus byte)
         byte[] commandBytes = buffer.ReadCommandBytes();
         byte loadingStatus = buffer.ReadInt8();
 
-        // TODO: Persist loading status in group object when group model exists.
-        // Single-player placeholder logic: when reaches 100 we simulate queue join -> match found -> lobby.
+        // Update in-memory group member loading if group exists
+        MatchmakingGroup? group = MatchmakingService.Groups.Values
+            .SingleOrDefault(g => g.Members.Any(m => m.Account.ID == session.ClientInformation.Account.ID));
 
-        // Always echo a partial group update reflecting loading percent.
-        Response.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_UPDATE);
-        Response.WriteInt8(Convert.ToByte(ChatProtocol.TMMUpdateType.TMM_PARTIAL_GROUP_UPDATE));
-        Response.WriteInt32(session.ClientInformation.Account.ID); // Account changing status
-        Response.WriteInt8(1);    // Group size
-        Response.WriteInt16(1500);// Avg rating placeholder
-        Response.WriteInt32(session.ClientInformation.Account.ID); // Leader
-        Response.WriteInt8(Convert.ToByte(ChatProtocol.ArrangedMatchType.AM_MATCHMAKING));
-        Response.WriteInt8(Convert.ToByte(ChatProtocol.TMMGameType.TMM_GAME_TYPE_NORMAL));
-        Response.WriteString("caldavar");
-        Response.WriteString("ap|ar|sd");
-        Response.WriteString("EU|USE|USW");
-        Response.WriteBool(true);  // Ranked
-        Response.WriteBool(true);  // Match Fidelity
-        Response.WriteInt8(1);     // Bot Difficulty
-        Response.WriteBool(false); // Randomize Bots
-        Response.WriteString(string.Empty); // Country Restrictions
-        Response.WriteString(string.Empty); // Invite Responses
-        Response.WriteInt8(5); // Team size
-        Response.WriteInt8(Convert.ToByte(ChatProtocol.TMMType.TMM_TYPE_CAMPAIGN)); // Group Type
-
-        // Member block
-        Response.WriteInt32(session.ClientInformation.Account.ID);
-        Response.WriteString(session.ClientInformation.Account.Name);
-        Response.WriteInt8(1);                // Slot
-        Response.WriteInt16(1500);            // Rating
-        Response.WriteInt8(loadingStatus);    // Loading Percent
-        Response.WriteBool(false);            // Ready (unchanged here)
-        Response.WriteBool(false);            // In game
-        Response.WriteBool(true);             // Eligible
-        Response.WriteString(session.ClientInformation.Account.ChatNameColour);
-        Response.WriteString(session.ClientInformation.Account.Icon);
-        Response.WriteString("NEWERTH");      // Country placeholder
-        Response.WriteBool(true);             // Has game mode access
-        Response.WriteString("true|true|true");
-
-        Response.WriteBool(false); // Friend flag placeholder
-
-        Response.PrependBufferSize();
-        session.SendAsync(Response.Data);
-
-        if (loadingStatus == 100)
+        if (group is not null)
         {
-            // Simulate: group joins queue (0x0D01), then immediately finds a match (0x0D09), and enters game lobby (0x1C09).
-            await SendBare(session, ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_JOIN_QUEUE); // 0x0D01
-            await SendBare(session, ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_MATCH_FOUND_UPDATE); // 0x0D09
-            await SendBare(session, ChatProtocol.ChatServerToClient.NET_CHAT_CL_GAME_LOBBY_JOINED); // 0x1C09
+            MatchmakingGroupMember member = group.Members.Single(m => m.Account.ID == session.ClientInformation.Account.ID);
+            member.LoadingPercent = loadingStatus;
+        }
+
+        // Broadcast a partial group update reflecting current per-member loading
+        ChatBuffer update = new();
+        update.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_UPDATE);
+        update.WriteInt8(Convert.ToByte(ChatProtocol.TMMUpdateType.TMM_PARTIAL_GROUP_UPDATE));
+        update.WriteInt32(session.ClientInformation.Account.ID); // Actor
+
+        if (group is null)
+        {
+            // Solo fallback
+            update.WriteInt8(1);
+            update.WriteInt16(1500);
+            update.WriteInt32(session.ClientInformation.Account.ID);
+            update.WriteInt8(Convert.ToByte(ChatProtocol.ArrangedMatchType.AM_MATCHMAKING));
+            update.WriteInt8(Convert.ToByte(ChatProtocol.TMMGameType.TMM_GAME_TYPE_NORMAL));
+            update.WriteString("caldavar");
+            update.WriteString("ap|ar|sd");
+            update.WriteString("EU|USE|USW");
+            update.WriteBool(true);
+            update.WriteInt8(1);
+            update.WriteInt8(1);
+            update.WriteBool(false);
+            update.WriteString(string.Empty);
+            update.WriteString(string.Empty);
+            update.WriteInt8(5);
+            update.WriteInt8(Convert.ToByte(ChatProtocol.TMMType.TMM_TYPE_CAMPAIGN));
+            update.WriteInt8(loadingStatus);
+            update.WriteInt8(0);
+            update.WriteBool(false);
+            update.PrependBufferSize();
+            session.SendAsync(update.Data);
+        }
+        else
+        {
+            update.WriteInt8(Convert.ToByte(group.Members.Count));
+            update.WriteInt16(1500);
+            update.WriteInt32(group.Leader.Account.ID);
+            update.WriteInt8(Convert.ToByte(ChatProtocol.ArrangedMatchType.AM_MATCHMAKING));
+            update.WriteInt8(Convert.ToByte(ChatProtocol.TMMGameType.TMM_GAME_TYPE_NORMAL));
+            update.WriteString("caldavar");
+            update.WriteString("ap|ar|sd");
+            update.WriteString("EU|USE|USW");
+            update.WriteBool(true);
+            update.WriteInt8(1);
+            update.WriteInt8(1);
+            update.WriteBool(false);
+            update.WriteString(string.Empty);
+            update.WriteString(string.Empty);
+            update.WriteInt8(5);
+            update.WriteInt8(Convert.ToByte(ChatProtocol.TMMType.TMM_TYPE_CAMPAIGN));
+
+            foreach (var m in group.Members)
+            {
+                update.WriteInt8(m.LoadingPercent);
+                update.WriteInt8(Convert.ToByte(m.IsReady));
+                update.WriteBool(m.IsInGame);
+            }
+
+            update.PrependBufferSize();
+            Parallel.ForEach(group.Members, m => m.Session.SendAsync(update.Data));
+        }
+
+        if (group is not null)
+        {
+            bool allLoaded = group.Members.All(m => m.LoadingPercent >= 100);
+            if (allLoaded)
+            {
+                // Once all 100%, simulate queue join then match found then lobby for all members
+                await BroadcastBare(group, ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_JOIN_QUEUE);
+                await BroadcastBare(group, ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_MATCH_FOUND_UPDATE);
+                await BroadcastBare(group, ChatProtocol.ChatServerToClient.NET_CHAT_CL_GAME_LOBBY_JOINED);
+            }
         }
     }
 
-    private async Task SendBare(ChatSession session, ushort command)
+    private async Task BroadcastBare(MatchmakingGroup group, ushort command)
     {
-        Response.Clear();
-        Response.WriteCommand(command);
-        Response.PrependBufferSize();
-        session.SendAsync(Response.Data);
+        ChatBuffer buf = new();
+        buf.WriteCommand(command);
+        buf.PrependBufferSize();
+        Parallel.ForEach(group.Members, m => m.Session.SendAsync(buf.Data));
     }
 }
 
