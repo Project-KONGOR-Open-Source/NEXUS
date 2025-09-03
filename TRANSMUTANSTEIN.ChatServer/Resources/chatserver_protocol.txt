@@ -1,0 +1,1532 @@
+BASIC INFO
+------------------------------------------------------------------------------------------------------
+Unless specified, all numeric values are in little endian format. Unless specified, all strings are in UTF8 format and NULL-terminated.
+
+When mentioned, flood protection means it increments the client's request counter. The counter decays at a rate of one every 3.5 seconds. If a client's request counter is more than 5, the request fails silently.
+
+Any client to server packets that include a client name should be stripped of its clan tag.
+
+The chat server basic format is
+	[2] unsigned short - packet length, not including these 2 bytes
+	[2] unsigned short - command
+	[X] command data
+
+	
+SERVER TO CLIENT
+------------------------------------------------------------------------------------------------------
+0x0003 - CHAT_CMD_CHANNEL_MSG - Tells the client a message was sent in a chat channel.
+Format:
+	[4] unsigned long - account ID of sender
+	[4] unsigned long - channel ID
+	[X] string - message
+------------------------------------------------------------------------------------------------------
+0x0004 - CHAT_CMD_CHANGED_CHANNEL - Tells the client they have successfully joined a chat channel.
+Format:
+	[X] string - channel name
+	[4] unsigned long - channel ID
+	[1] unsigned char - channel flags (refer to CHAT_CHANNEL_FLAG_*)
+	[X] string - channel topic
+	[4] unsigned long - number of channel admins
+		[4] unsigned long - admin account ID
+		[1] EAdminLevel - admin level
+	[4] unsigned long - number of clients in the channel
+		[X] string - client name
+		[4] unsigned long - client account ID
+		[1] EChatClientStatus - client status
+		[1] unsigned char - client flags (refer to CHAT_CLIENT_* flags)
+		[X] string - client chat symbol
+		[X] string - client chat name color
+		[X] string - client chat icon name
+------------------------------------------------------------------------------------------------------	
+0x0005 - CHAT_CMD_JOINED_CHANNEL - Tells a client another client has joined a chat channel. This is NOT sent to the client that's joining.
+Format:
+	[4] unsigned long - channel ID
+	[X] string - new client's name
+	[4] unsigned long - new client's account ID
+	[1] EChatClientStatus - new client's status
+	[1] unsigned char - new client's flags (refer to CHAT_CLIENT_* flags)
+	[X] string - new client's chat symbol
+	[X] string - new client's chat name color
+	[X] string - new client's chat icon name
+------------------------------------------------------------------------------------------------------
+0x0006 - CHAT_CMD_LEFT_CHANNEL - Tells a client that a client has left a chat channel. This is sent to the client that's leaving.
+Format:
+	[4] unsigned long - account ID of client that's leaving
+	[4] unsigend long - channel ID
+------------------------------------------------------------------------------------------------------
+0x0007 - CHAT_CMD_DISCONNECTED - Tells a client they have been disconnected from the chat server.
+Format:
+	no data
+------------------------------------------------------------------------------------------------------
+0x0008 - CHAT_CMD_WHISPER (bidirectional) - Tells a client they received a whisper from another client.
+Format:
+	[X] string - sender's name
+	[X] string - message
+------------------------------------------------------------------------------------------------------
+0x0009 - CHAT_CMD_WHISPER_FAILED - Tells a client their whisper failed because their target does not exist or is not online.
+Format:
+	[X] string - target's name
+	[X] string - message
+------------------------------------------------------------------------------------------------------
+0x000A - CHAT_CMD_LAST_KNOWN_GAME_SERVER (bidirectional) - Response for a client's CHAT_CMD_LAST_KNOWN_GAME_SERVER
+Format:
+	[X] string - server address
+	[2] unsigned short - server port
+	
+Notes:
+- If we have no information, server address will be blank.
+------------------------------------------------------------------------------------------------------
+0x000B - CHAT_CMD_INITIAL_STATUS - Tells a client the status of all of their clan members and buddies.
+Format:
+	[4] unsigned long - number of clients
+		[4] unsigned long - client's account ID
+		[1] EChatClientStatus - client's status
+		[1] unsigned char - client's flags (refer to CHAT_CLIENT_* flags)
+		[X] string - client's chat name color
+		[X] string - client's account icon
+		if (status > CHAT_CLIENT_STATUS_CONNECTED)
+			[X] string - server address this client is connected to, in the form of "X.X.X.X:X"
+		if (status == CHAT_CLIENT_STATUS_IN_GAME)
+			[X] string - game name this client is connected to
+			[4] unsigned long - match ID this client is in	
+------------------------------------------------------------------------------------------------------
+0x000C - CHAT_CMD_UPDATE_STATUS - Gives a client a status update for another client.
+Format:
+	[4] unsigned long - client's account ID
+	[1] EChatClientStatus - client's status
+	[1] unsigned char - client's flags (refer to CHAT_CLIENT_* flags)
+	[4] unsigned long - client's clan ID
+	[X] string - client's clan name
+	[X] string - client's chat symbol
+	[X] string - client's chat name color
+	[X] string - client's account icon
+	if (status > CHAT_CLIENT_STATUS_CONNECTED)
+		[X] string - server address this client is connected to, in the form of "X.X.X.X:X"
+	if (status == CHAT_CLIENT_STATUS_IN_GAME)
+		[X] string - game name this client is connected to
+		[4] unsigned long - match ID this client is in
+		[1] bool - has extended server info
+		if (has extended server info)
+			[1] EArrangedMatchType - arranged match type
+			[X] string - client's name
+			[X] string - server's region
+			[X] string - server's game mode
+			[1] unsigned char - server's team size
+			[X] string - server's map name
+			[1] unsigned char - server's tier (deprecated)
+			[1] unsigned char - server's official status (0 = unofficial (deprecated), 1 = official w/ stats, 2 = official w/o stats)
+			[1] bool - server's "no leavers" flag
+			[1] bool - server's "private" flag
+			[1] bool - server's "all heroes" flag
+			[1] bool - server's "casual mode" flag
+			[1] bool - server's "all random" flags (deprecated)
+			[1] bool - server's "auto balanced" flag
+			[1] bool - server's "advanced options" flag
+			[2] unsigned short - server's minimum PSR allowed
+			[2] unsigned short - server's maximum PSR allowed
+			[1] bool - server's "dev heroes" flag
+			[1] bool - server's "hardcore" flag
+			[1] bool - server's "verified only" flag
+			[1] bool - server's "gated" flag
+------------------------------------------------------------------------------------------------------
+0x0014 - CHAT_CMD_CLAN_WHISPER_FAILED - Tell a client their clan whisper failed because they're not in a clan.
+Format:
+	no data
+------------------------------------------------------------------------------------------------------
+0x001B - CHAT_CMD_FLOODING (deprecated) - Tell a client their action failed because they've triggered flood protection.
+Format:
+	no data
+------------------------------------------------------------------------------------------------------
+0x001C - CHAT_CMD_IM (bidirectional) - Tell a client they've sent or received an IM.
+Format:
+	[1] unsigned char - status byte to indicate what data follows
+	if (status byte == 0) - sent to receiver
+		[X] string - sender's name
+		[X] string - message
+	else if (status byte == 1) - sent to receiver
+		[X] string - sender's name
+		[4] unsigned long - sender's account ID
+		[1] EChatClientStatus - sender's account status
+		[1] unsigned char - sender's client flags (refer to CHAT_CLIENT_* flags)
+		[X] string - sender's chat name color
+		[X] string - sender's account icon
+		[X] string - message
+	else if (status byte == 2) - sent to sender. This happens on the first IM sent from the sender to the receiver.
+		[X] string - receiver's name
+		[4] unsigned long - receiver's account ID
+		[1] EChatClientStatus - receiver's account status
+		[1] unsigned char - receiver's client flags (refer to CHAT_CLIENT_* flags)
+		[X] string - receiver's chat name color
+		[X] string - receiver's account icon
+		[X] string - message
+------------------------------------------------------------------------------------------------------
+0x001D - CHAT_CMD_IM_FAILED - Tell a client their IM failed to send - due to the receiver not existing/being online, or the receiver being in invisible mode.
+Format:
+	[X] string - receiver's name
+------------------------------------------------------------------------------------------------------
+0x0020 - CHAT_CMD_WHISPER_BUDDIES (bidirectional) - Tell a client they've received a buddy message from a buddy.
+Format:
+	[X] string - sender's name
+	[X] string - message
+------------------------------------------------------------------------------------------------------
+0x0021 - CHAT_CMD_MAX_CHANNELS - Tell a client they cannot join the channel, as they're already at the max.
+Format:
+	no data
+------------------------------------------------------------------------------------------------------
+0x0025 - CHAT_CMD_INVITED_TO_SERVER - Tells a client they've been invited to a game.
+Format:
+	[X] string - inviter's name
+	[4] unsigned long - inviter's account ID
+	[1] EChatClientStatus - inviter's account status
+	[1] unsigned char - inviter's client flags (refer to CHAT_CLIENT_* flags)
+	[X] string - inviter's chat name color
+	[X] string - inviter's account icon
+	if (status > CHAT_CLIENT_STATUS_CONNECTED)
+		[X] string - server address the inviter is connected to, in the form of "X.X.X.X:X"
+	if (status == CHAT_CLIENT_STATUS_IN_GAME)
+		[X] string - game name the inviter is connected to
+		[4] unsigned long - match ID the inviter is in
+		[1] bool - has extended server info
+		if (has extended server info)
+			[1] EArrangedMatchType - arranged match type
+			[X] string - inviter's name
+			[X] string - server's region
+			[X] string - server's game mode
+			[1] unsigned char - server's team size
+			[X] string - server's map name
+			[1] unsigned char - server's tier (deprecated)
+			[1] unsigned char - server's official status (0 = unofficial (deprecated), 1 = official w/ stats, 2 = official w/o stats)
+			[1] bool - server's "no leavers" flag
+			[1] bool - server's "private" flag
+			[1] bool - server's "all heroes" flag
+			[1] bool - server's "casual mode" flag
+			[1] bool - server's "all random" flags (deprecated)
+			[1] bool - server's "auto balanced" flag
+			[1] bool - server's "advanced options" flag
+			[2] unsigned short - server's minimum PSR allowed
+			[2] unsigned short - server's maximum PSR allowed
+			[1] bool - server's "dev heroes" flag
+			[1] bool - server's "hardcore" flag
+			[1] bool - server's "verified only" flag
+			[1] bool - server's "gated" flag	
+------------------------------------------------------------------------------------------------------
+0x0026 - CHAT_CMD_INVITE_FAILED_USER - Tells a client their invite request failed because the target was invalid.
+Format:
+	no data
+------------------------------------------------------------------------------------------------------
+0x0027 - CHAT_CMD_INVITE_FAILED_GAME - Tells a client their invite request failed because they're not in a game.
+Format:
+	no data
+------------------------------------------------------------------------------------------------------
+0x0028 - CHAT_CMD_INVITE_REJECTED (bidirectional) - Tells a client their game invite was rejected.
+Format:
+	[X] string - invitee's name
+	[4] unsigned long - invitee's account ID
+	
+Notes:
+- This is not sent if the invitee has DND on.
+------------------------------------------------------------------------------------------------------
+0x002B - CHAT_CMD_USER_INFO_NO_EXIST - User info request failed because the target does not exist or is invisible.
+Format:
+	[X] string - target's name
+------------------------------------------------------------------------------------------------------
+0x002C - CHAT_CMD_USER_INFO_OFFLINE (deprecated) - No longer sent.
+------------------------------------------------------------------------------------------------------
+0x002D - CHAT_CMD_USER_INFO_ONLINE - Requested user info for an online client.
+Format:
+	[X] string - target's name
+	[4] unsigned long - number of chat channels
+		[X] string - chat channel name
+------------------------------------------------------------------------------------------------------
+0x002E - CHAT_CMD_USER_INFO_IN_GAME - Requested user info for a client in a game.
+Format:
+	[X] string - target's name
+	[X] string - target's game name
+	[X] string - target's game's phase, with the following possible values:
+		"Lobby"
+		"Banning"
+		"Hero Select"
+		"Pre Match"
+		"Finished"
+		"Blind Banning"
+		"Locking"
+		"Lock Picking"
+		Game time, in the format of H:MM:SS
+------------------------------------------------------------------------------------------------------
+0x002F - CHAT_CMD_CHANNEL_UPDATE - A chat channel the user is in has updated info.
+Format:
+	[4] unsigned long - channel ID
+	[X] string - channel name
+	[1] unsigned char - channel flags (refer to CHAT_CHANNEL_FLAG_*)
+	[X] string - channel topic
+	[4] unsigned long - number of channel admins
+		[4] unsigned long - admin account ID
+		[1] EAdminLevel - admin level
+		
+Notes:
+- Once created, a channel's name will not change.
+------------------------------------------------------------------------------------------------------
+0x0030 - CHAT_CMD_CHANNEL_TOPIC (bidirectional) - A chat channel had its topic changed.
+Format:
+	[4] unsigned long - channel ID
+	[X] string - channel topic
+------------------------------------------------------------------------------------------------------
+0x0031 - CHAT_CMD_CHANNEL_KICK (bidirectional) - A client has been kicked from a chat channel.
+Format:
+	[4] unsigned long - channel ID
+	[4] unsigned long - kicking client's account ID
+	[4] unsigned long - kicked client's account ID
+	
+Notes:
+- The client that was kicked also receives this packet.
+------------------------------------------------------------------------------------------------------
+0x0032 - CHAT_CMD_CHANNEL_BAN (bidirectional) - A client has been banned from a chat channel.
+Format:
+	[4] unsigned long - channel ID
+	[4] unsigned long - banning client's account ID
+	[X] string - banned client's name
+	
+Notes:
+- When this is sent, the banned client has also been removed from the channel.
+------------------------------------------------------------------------------------------------------
+0x0033 - CHAT_CMD_CHANNEL_UNBAN (bidirectional) - A client has been unbanned from a chat channel.
+Format:
+	[4] unsigned long - channel ID
+	[4] unsigned long - unbanning client's account ID
+	[X] string - unbanned client's name
+------------------------------------------------------------------------------------------------------
+0x0034 - CHAT_CMD_CHANNEL_IS_BANNED - You were unable to join the chat channel because you're banned from it.
+Format:
+	[X] string - channel name
+------------------------------------------------------------------------------------------------------
+0x0035 - CHAT_CMD_CHANNEL_SILENCED - You were unable to send a message to the chat channel because you're silenced on it.
+Format:
+	[4] unsigned long - channel ID
+------------------------------------------------------------------------------------------------------
+0x0036 - CHAT_CMD_CHANNEL_SILENCE_LIFTED - You are no longer silenced in a chat channel.
+Format:
+	[X] string - channel name
+------------------------------------------------------------------------------------------------------
+0x0037 - CHAT_CMD_CHANNEL_SILENCE_PLACED - A client has been silenced in a chat channel.
+Format:
+	[X] string - channel name
+	[X] string - silencing client's name
+	[X] string - silenced client's name
+	[4] unsigned long - duration of silence in milliseconds
+	
+Notes:
+- This only gets sent if the client that was silenced is in the channel.
+------------------------------------------------------------------------------------------------------
+0x0039 - CHAT_CMD_MESSAGE_ALL - Administrator message to all users.
+Format:
+	[X] string - sender's name (can also be "HoNTour Message" or "Server Message")
+	[X] string - message
+------------------------------------------------------------------------------------------------------	
+0x003A - CHAT_CMD_CHANNEL_PROMOTE (bidirectional) - A client has increased the admin level of another client in a chat channel.
+Format:
+	[4] unsigned long - channel ID
+	[4] unsigned long - target's account ID
+	[4] unsigned long - client that caused the increase's account ID
+	
+Notes:
+- This increases the target's admin level by 1 (e.g. from CHAT_CLIENT_ADMIN_NONE to CHAT_CLIENT_ADMIN_OFFICER).
+------------------------------------------------------------------------------------------------------
+0x003E - CHAT_CMD_CHANNEL_SET_AUTH (bidirectional) - Auth has been enabled on a chat channel.
+Format:
+	[4] usngined long - channel ID
+	
+Notes:
+- When auth is enabled, a channel can only be joined by channel admins or users who have been authed.
+------------------------------------------------------------------------------------------------------
+0x003F - CHAT_CMD_CHANNEL_REMOVE_AUTH (bidirectional) - Auth has been disabled on a chat channel
+Format:
+	[4] unsigned long - channel ID
+	
+Notes:
+- When auth is enabled, a channel can only be joined by channel admins or users who have been authed.
+------------------------------------------------------------------------------------------------------
+0x0040 - CHAT_CMD_CHANNEL_ADD_AUTH_USER (bidirectional) - A client has been authed for a chat channel.
+Format:
+	[4] unsigned long - channel ID
+	[X] string - client's name
+------------------------------------------------------------------------------------------------------	
+0x0041 - CHAT_CMD_CHANNEL_REMOVE_AUTH_USER (bidirectional) - A client has been deauthed for a chat channel.
+Format:
+	[4] unsigned long - channel ID
+	[X] string - client's name
+------------------------------------------------------------------------------------------------------
+0x0042 - CHAT_CMD_CHANNEL_LIST_AUTH (bidirectional) - List of authed users for a channel.
+Format:
+	[4] unsigned long - channel ID
+	[4] unsigned long - number of authed clients
+		[X] string - authed client's name
+------------------------------------------------------------------------------------------------------
+0x0043 - CHAT_CMD_CHANNEL_SET_PASSWORD (bidirectional) - The password for a channel has changed.
+Format:
+	[4] unsigned long - channel ID
+	[X] string - client's name that changed the password
+	
+Notes:
+- This is sent to all users in the channel when the password changes.
+------------------------------------------------------------------------------------------------------
+0x0044 - CHAT_CMD_CHANNEL_ADD_AUTH_FAIL - Request to add an authed user to a chat channel failed.
+Format:
+	[4] unsigned long - channel ID
+	[X] string - client's name that was failed to add
+------------------------------------------------------------------------------------------------------
+0x0045 - CHAT_CMD_CHANNEL_REMOVE_AUTH_FAIL - Request to remove an authed user from a chat channel failed.
+Format:
+	[4] unsigned long - channel ID
+	[X] string - client's name that was failed to remove
+------------------------------------------------------------------------------------------------------
+0x0046 - CHAT_CMD_JOIN_CHANNEL_PASSWORD (bidirectional) - You attempted to join a passworded channel but did not provide a password.
+Format:
+	[X] string - channel name
+------------------------------------------------------------------------------------------------------
+TODO: Clan functionality
+------------------------------------------------------------------------------------------------------
+0x0062 - CHAT_CMD_AUTO_MATCH_CONNECT - Tells a client know they should join an arranged match.
+Format:
+	[1] EArrangedMatchType - arranged match type
+	[4] unsigned long - matchup ID
+	[X] string - server address
+	[2] unsigned short - server port
+	[4] unsigned long - connection reminder/duplication workaround
+		If this is 0xFFFFFFFF, this is a connection reminder.
+		Otherwise, this is random and can be safely ignored. This is a workaround for routers dropping duplicate packets intended for multiple recipients on the same network.
+------------------------------------------------------------------------------------------------------
+0x0064 - CHAT_CMD_CHAT_ROLL (bidirectional) - TODO: The implementation of this is bad and I want to change this.
+------------------------------------------------------------------------------------------------------ 
+0x0065 - CHAT_CMD_CHAT_EMOTE (bidirectional) - A client sent an emote message on a chat channel.
+Format:
+	[4] unsigned long - client's account ID
+	[4] unsigned long - channel ID
+	[X] string - message
+	
+Notes:
+- This is analogous to the /me IRC command.
+------------------------------------------------------------------------------------------------------
+0x0066 - CHAT_CMD_SET_CHAT_MODE_TYPE (bidirectional) - A client set their chat mode type.
+Format:
+	[1] EChatModeType - chat mode type
+	[X] string - reason
+	
+Notes:
+- This is only sent to the client that set their type.
+------------------------------------------------------------------------------------------------------
+0x0067 - CHAT_CMD_CHAT_MODE_AUTO_RESPONSE - The target that you sent a message to had AFK or DND on.
+Format:
+	[1] EChatModeType - chat mode type (either CHAT_MODE_AFK or CHAT_MODE_DND)
+	[X] string - target's name
+	[X] string - reason
+------------------------------------------------------------------------------------------------------
+0x0068 - CHAT_CMD_PLAYER_COUNT - Concurrent User Counts
+Format:
+	[4] unsigned long - total number of clients connected to all chat servers (not just this one)
+	[X] string - regional CCU breakdown, formatted as "region1name:region1ccu|region2name:region2ccu|"
+		This is blank when sent to non-staff accounts.
+------------------------------------------------------------------------------------------------------
+0x0069 - CHAT_CMD_SERVER_NOT_IDLE - The server that the arranged match found for you was not idle.
+Format:
+	[1] EArrangedMatchType - arranged match type
+	[4] unsigned long - matchup ID
+	[X] string - server address
+	[2] unsigned short - server port
+------------------------------------------------------------------------------------------------------
+0x006A - CHAT_CMD_ACTIVE_STREAMS - List of active Twitch.tv streamers
+Format:
+	[X] string - list, in the form of "streamname1,streamname2"
+------------------------------------------------------------------------------------------------------
+0x00B2 - CHAT_CMD_REQUEST_BUDDY_ADD_RESPONSE - Let the client know if their buddy add request was successful.
+Format:
+	[1] unsigned char - response type
+		0: general failure
+		1: successful (sent to client requesting adding)
+		2: successful (sent to client that the request wants to add)
+		3: failure (already buddies)
+		4: failure (request ignored)
+		5: failure (requester at buddy limit)
+	if (response type >= 3 and response type <= 5)
+		[X] string - buddy's name
+	else
+		[4] unsigned long - buddy's account ID
+	if (response type == 0)
+		[X] string - buddy's name
+	if (response type == 1 or response type == 2)
+		[X] string - buddy's name
+		[4] unsigned long - buddy's account ID
+		[1] EChatClientStatus - buddy's status
+		[1] unsigned char - buddy's flags (refer to CHAT_CLIENT_* flags)
+		[4] unsigned long - buddy's clan ID
+		[X] string - buddy's clan name
+		[X] string - buddy's chat symbol
+		[X] string - buddy's name color
+		[X] string - buddy's account icon
+		
+Notes:
+- This does not mean the clients are now buddies. This means the target now can accept or decline the request.
+------------------------------------------------------------------------------------------------------
+0x00B4 - CHAT_CMD_REQUEST_BUDDY_APPROVE_RESPONSE - Let the client know if their buddy approval request was successful.
+Format:
+	[1] unsigned char - response type
+		0: general failure
+		1: successful (sent to client approving)
+		2: successful (sent to client that was approved)
+		3: failure (approver at buddy limit)
+	if (response type == 0 or response type == 3)
+		[4] unsigned long - buddy's account ID
+		[X] string - buddy's name
+	if (response type == 1 or response type == 2)
+		[4] unsigned long - buddy's account ID
+		[4] unsigned long - your account ID
+		[X] string - buddy's name
+
+Notes:
+- If successful, the clients are now buddies.
+------------------------------------------------------------------------------------------------------
+0x00B5 - CHAT_CMD_REQUEST_GAME_INFO (bidirectional) - Give a client's requested game info.
+Format:
+	[X] string - client's name
+	[X] string - game name
+	[X] string - map name
+	[1] bool - casual mode
+	[1] bool - hardcore mode (deprecated)
+	[1] bool - gated mode
+	[X] string - mode name
+	[X] string - game phase, with the following possible values:
+		"Lobby"
+		"Banning"
+		"Hero Select"
+		"Pre Match"
+		"Finished"
+		"Blind Banning"
+		"Locking"
+		"Lock Picking"
+		Game time, in the format of H:MM:SS
+	[X] string - Legion team info (TODO)
+	[X] string - Hellbourne team info (TODO)
+	[X] string - player 0 info (TODO)
+	[X] string - player 1 info (TODO)
+	[X] string - player 2 info (TODO)
+	[X] string - player 3 info (TODO)
+	[X] string - player 4 info (TODO)
+	[X] string - player 5 info (TODO)
+	[X] string - player 6 info (TODO)
+	[X] string - player 7 info (TODO)
+	[X] string - player 8 info (TODO)
+	[X] string - player 9 info (TODO)
+------------------------------------------------------------------------------------------------------
+0x00B8 - CHAT_CMD_PLAYER_SPECTATE_REQUEST (bidirectional) - TODO
+------------------------------------------------------------------------------------------------------
+0x00BB - CHAT_CMD_STAFF_JOIN_MATCH_RESPONSE - TODO
+------------------------------------------------------------------------------------------------------
+0x00BC - CHAT_CMD_EXCESSIVE_GAMEPLAY_MESSAGE - Tell the client they've been playing Heroes of Newerth for an excessive amount of time.
+Format:
+	[1] EExcessiveGamePlayType - excessive status
+	[1] EExcessiveGamePlayBenefit - amount of benefits player receives
+	
+Notes:
+- Sent with EEGPT_NONE upon login. Otherwise, only sent when AAS notifies the chat server.
+------------------------------------------------------------------------------------------------------
+0x2A00 - NET_CHAT_PING - Request a client send a Pong back to the chat server (keep-alive check).
+Format:
+	no data
+	
+Notes:
+- If the chat server hasn't received data from the client in 60 seconds, it sends NET_CHAT_PING.
+------------------------------------------------------------------------------------------------------
+0x1C00 - NET_CHAT_CL_ACCEPT - Accept a client connection.
+Format:
+	no data
+	
+Notes:
+- Sent in response to a successful NET_CHAT_CL_CONNECT.
+------------------------------------------------------------------------------------------------------
+0x1C01 - NET_CHAT_CL_REJECT - Refuse a client connection.
+Format:
+	[1] unsigned char - rejection reason (see CHAT_CLIENT_REJECT_*)
+	
+Notes:
+- This is no longer sent. Unsuccessful client ocnnection attempts are not responded to.
+------------------------------------------------------------------------------------------------------
+0x1C08 - NET_CHAT_CL_USER_STATUS - Status information for a client
+Format:
+	[X] string - client's name
+	[1] EChatClientStatus - client's status
+	
+Notes:
+- Sent in response to NET_CHAT_CL_GET_USER_STATUS
+------------------------------------------------------------------------------------------------------
+0x0C0D - NET_CHAT_CL_TMM_GROUP_INVITE (bidirectional) - Tells a client they've been invited to join a matchmaking group.
+Format:
+	[X] string - inviting client's name
+	[4] unsigned long - inviting client's account ID
+	[1] EChatClientStatus - inviting client's status
+	[1] unsigned char - inviting client's flags (refer to CHAT_CLIENT_* flags)
+	[X] string - inviting client's name color
+	[X] string - inviting client's account icon
+	[X] string - map name. Valid names:
+		"caldavar"
+		"grimmscrossing"
+		"midwars"
+	[1] ETMMGameTypes - game type
+	[X] string - game modes, delimited by | (e.g "ap|sd"). Case sensitive. Valid modes:
+		"ap" - All Pick
+		"apg" - All Pick Core Pool
+		"sd" - Single Draft
+		"bd" - Banning Draft
+		"bp" - Banning Pick
+		"ar" - All Random
+		"lp" - Lock Pick
+		"bb" - Blind Ban (Midwars mode)
+		"bbg" - Blind Ban Core Pool
+		"bm" - Bot Match
+		"cm" - Captain's Pick
+		"br" - Balanced Random
+	[X] string - server regions, delimited by | (e.g. "VN|DX"). Case sensitive. Valid regions:
+		"USE" - US East
+		"USW" - US West
+		"EU" - Europe
+		"SG" - Singapore
+		"MY" - Malaysia
+		"PH" - Philippines
+		"TH" - Thailand
+		"ID" - Indonesia
+		"VN" - Vietnam
+		"RU" - Russia
+		"KR" - Korea
+		"AU" - Australia
+		"LAT" - Latin America
+		"DX" - China DX region
+		"LT" - China LT region
+------------------------------------------------------------------------------------------------------
+0x0C0E - NET_CHAT_CL_TMM_GROUP_INVITE_BROADCAST - Tells group members that a group member has invited another client to join their matchmaking group.
+Format:
+	[X] string - client's name that was invited
+	[X] string - group member's name that sent the invite
+------------------------------------------------------------------------------------------------------
+0x0C0F - NET_CHAT_CL_TMM_GROUP_REJECT_INVITE (bidirectional) - Tells group members that a client has rejected an invite to join their matchmaking group.
+Format:
+	[X] string - client's name that rejected the invite
+	[X] string - group member's name that sent the invite
+------------------------------------------------------------------------------------------------------
+0x0D01 - NET_CHAT_CL_TMM_GROUP_JOIN_QUEUE (bidirectional) - Tells the client their group has joined the matchmaking queue.
+Format:
+	no data
+------------------------------------------------------------------------------------------------------
+0x0D02 - NET_CHAT_CL_TMM_GROUP_LEAVE_QUEUE (bidirectional) - Tells the client their group has left the matchmaking queue.
+Format:
+	no data
+------------------------------------------------------------------------------------------------------
+0x0D03 - NET_CHAT_CL_TMM_GROUP_UPDATE - Gives the client updated information on their matchmaking group.
+Format:
+	[1] ETMMUpdateType - update type. Valid types:
+		TMM_CREATE_GROUP: The group has been created.
+		TMM_FULL_GROUP_UPDATE: Full group update.
+		TMM_PARTIAL_GROUP_UPDATE: Partial group update.
+		TMM_PLAYER_JOINED_GROUP: A player has joined the group.
+		TMM_PLAYER_LEFT_GROUP: A player has left the group.
+		TMM_PLAYER_KICKED_FROM_GROUP: A player was kicked from the group.
+	[4] unsigned long - account ID (if update is for a specific client, this is the client's account ID)
+	[1] unsigned char - number of clients in group
+	[2] unsigned short - average MMR of clients in group
+	[4] unsigned long - group leader's account ID
+	[1] EArrangedMatchType - arranged match type
+	[1] ETMMGameTypes - game type
+	[X] string - map name. Valid names:
+		"caldavar"
+		"grimmscrossing"
+		"midwars"
+	[X] string - game modes, delimited by | (e.g "ap|sd"). Case sensitive. Valid modes:
+		"ap" - All Pick
+		"apg" - All Pick Core Pool
+		"sd" - Single Draft
+		"bd" - Banning Draft
+		"bp" - Banning Pick
+		"ar" - All Random
+		"lp" - Lock Pick
+		"bb" - Blind Ban (Midwars mode)
+		"bbg" - Blind Ban Core Pool
+		"bm" - Bot Match
+		"cm" - Captain's Pick
+		"br" - Balanced Random
+	[X] string - server regions, delimited by | (e.g. "VN|DX"). Case sensitive. Valid regions:
+		"USE" - US East
+		"USW" - US West
+		"EU" - Europe
+		"SG" - Singapore
+		"MY" - Malaysia
+		"PH" - Philippines
+		"TH" - Thailand
+		"ID" - Indonesia
+		"VN" - Vietnam
+		"RU" - Russia
+		"KR" - Korea
+		"AU" - Australia
+		"LAT" - Latin America
+		"DX" - China DX region
+		"LT" - China LT region
+	[1] bool - ranked
+	[1] bool - match fidelity
+	[1] unsigned char - bot difficulty
+	[1] bool - randomize bots
+	[X] string - country restrictions (e.g. "AB->USE|XY->USW" means only country "AB" can access region "USE" and only country "XY" can access region "USW")
+	[X] string - player response string (TODO: this has information on player invites)
+	[1] unsigned char - matchmaking team size (e.g. 5 for Forests of Caldavar, 3 for Grimm's Crossing)
+	[1] unsigned char - group type. Valid types:
+		2: multiplayer group
+		3: bot match group
+	for each client in the group
+		if (update type != TMM_PARTIAL_GROUP_UPDATE)
+			[4] unsigned long - client's account ID
+			[X] string - client's name
+			[1] unsigned char - client's team slot
+			[2] unsigned short - client's MMR (USHORT_MAX if unranked or Midwars)
+		[1] unsigned char - loading percent (0 to 100)
+		[1] bool - ready
+		[1] bool - in game
+		if (update type != TMM_PARTIAL_GROUP_UPDATE)
+			[1] bool - eligible for ranked matchmaking
+			[X] string - client's chat name color
+			[X] string - client's account icon
+			[X] string - client's country
+			[1] bool - client has access to all of the group's game modes
+			[X] string - client's game mode access, delimited by "|" (e.g. "true|true|false")
+	if (update type != TMM_PARTIAL_GROUP_UPDATE)
+		for each client in the group
+			[1] bool - client is a buddy
+			
+Notes:
+- This packet is sent whenever group information changes.
+------------------------------------------------------------------------------------------------------
+0x0D06 - NET_CHAT_CL_TMM_GROUP_QUEUE_UPDATE - Tells a client about group updates while in queue.
+Format:
+	[1] ETMMUpdateType - update type. Valid types:
+		TMM_GROUP_FOUND_SERVER: Match is being started
+		TMM_GROUP_NO_MATCHES_FOUND: Group has been queued for too long and was unable to be matched
+		TMM_MATCHMAKING_DISABLED: Matchmaking has been disabled
+		TMM_GROUP_QUEUE_UPDATE: Average queue time has been updated
+	if (update type == TMM_GROUP_QUEUE_UPDATE)
+		[4] unsigned long - average queue time in seconds (0 means no data available)
+------------------------------------------------------------------------------------------------------
+0x0D09 - NET_CHAT_CL_TMM_MATCH_FOUND_UPDATE - A match has been found.
+	[X] string - map name. Valid names:
+		"caldavar"
+		"grimmscrossing"
+		"midwars"
+	[4] unsigned long - team size
+	[1] ETMMGameTypes - game type
+	[X] string - game mode. Valid modes:
+		"ap" - All Pick
+		"apg" - All Pick Core Pool
+		"sd" - Single Draft
+		"bd" - Banning Draft
+		"bp" - Banning Pick
+		"ar" - All Random
+		"lp" - Lock Pick
+		"bb" - Blind Ban (Midwars mode)
+		"bbg" - Blind Ban Core Pool
+		"bm" - Bot Match
+		"cm" - Captain's Pick
+		"br" - Balanced Random
+	[X] string - server region. Valid regions:
+		"USE" - US East
+		"USW" - US West
+		"EU" - Europe
+		"SG" - Singapore
+		"MY" - Malaysia
+		"PH" - Philippines
+		"TH" - Thailand
+		"ID" - Indonesia
+		"VN" - Vietnam
+		"RU" - Russia
+		"KR" - Korea
+		"AU" - Australia
+		"LAT" - Latin America
+		"DX" - China DX region
+		"LT" - China LT region
+	[X] string - extra info (debug data)
+------------------------------------------------------------------------------------------------------
+0x0E05 - NET_CHAT_CL_TMM_BOT_SPAWN_LOCAL_MATCH - TODO
+------------------------------------------------------------------------------------------------------
+0x0E07 - NET_CHAT_CL_TMM_BOT_GROUP_UPDATE (bidirectional) - Sent in response to a client's NET_CHAT_CL_TMM_BOT_GROUP_UPDATE
+Format:
+	[1] unsigned char - team (1 to 2)
+	[1] unsigned char - slot (0 to 4)
+	[X] string - bot name
+------------------------------------------------------------------------------------------------------
+0x0E08 - NET_CHAT_CL_TMM_BOT_GROUP_BOTS - Gives the client the current bots set
+Format:
+	[X] string - ally bot 0
+	[X] string - ally bot 1
+	[X] string - ally bot 2
+	[X] string - ally bot 3
+	[X] string - ally bot 4
+	[X] string - enemy bot 0
+	[X] string - enemy bot 1
+	[X] string - enemy bot 2
+	[X] string - enemy bot 3
+	[X] string - enemy bot 4
+	
+Notes:
+- Sent to a client when they join a group.
+------------------------------------------------------------------------------------------------------
+0x0E09 - NET_CHAT_CL_TMM_BOT_NO_BOTS_SELECTED - Your group attempted to join the queue with no enemy bots selected and randomize bots is off.
+Format:
+	no data
+------------------------------------------------------------------------------------------------------
+0x0E0A - NET_CHAT_CL_TMM_FAILED_TO_JOIN - Failed to create or join a matchmaking group.
+Format:
+	[1] ETMMFailedToJoinReason - failure reason
+	if (failure reason == TMMFTJR_BANNED)
+		[4] unsigned long - time banned from matchmaking, in seconds
+------------------------------------------------------------------------------------------------------
+0x0E0B - NET_CHAT_CL_TMM_REGION_UNAVAILABLE - Your group attempted to queue in regions that are restricted.
+Format:
+	[X] string - restricted regions, comma delimited (e.g. "EU,VN")
+------------------------------------------------------------------------------------------------------
+0x0E0D - NET_CHAT_CL_TMM_GENERIC_RESPONSE - Used for a few things
+Format:
+	[1] EGenericResponses - response type
+		GR_MAX_MATCH_FIDELITY_DIFFERENCE: Group attempted to change match fidelity, but MMR differences are too wide so it failed
+------------------------------------------------------------------------------------------------------
+0x0F01 - NET_CHAT_CL_TMM_LEAVER_INFO - 
+Format:
+	[4] unsigned long - number of matches played
+	[4] unsigned long - number of match disconnects
+	
+Notes:
+- Sent to a client when they fail to create or join a matchmaking group because they're a leaver.
+------------------------------------------------------------------------------------------------------
+0x0F02 - NET_CHAT_CL_TMM_REQUEST_READY_UP - The group leader has requested you ready.
+Format:
+	no data
+------------------------------------------------------------------------------------------------------
+0x0F03 - NET_CHAT_CL_TMM_START_LOADING - Tells the client to begin pre-loading the map.
+Format:
+	no data
+	
+Notes:
+- For the Garena China launcher, no loading is necessary. When this packet is received, the client should respond with NET_CHAT_CL_TMM_GROUP_PLAYER_LOADING_STATUS of 100.
+------------------------------------------------------------------------------------------------------
+0x1c09 - NET_CHAT_CL_GAME_LOBBY_JOINED - Tells the client they've joined a game lobby.
+Format:
+	[X] string - map name. Valid options:
+		"caldavar"
+		"grimmscrossing"
+		"midwars"
+	[1] unsigned char - team size
+	[1] ETMMGameTypes - game type
+	[X] string - mode name. Valid options:
+		"ap" - All Pick
+		"apg" - All Pick Core Pool
+		"sd" - Single Draft
+		"bd" - Banning Draft
+		"bp" - Banning Pick
+		"ar" - All Random
+		"lp" - Lock Pick
+		"bb" - Blind Ban (Midwars mode)
+		"bbg" - Blind Ban Core Pool
+		"bm" - Bot Match
+		"cm" - Captain's Pick
+		"br" - Balanced Random
+	[X] string - server region. Valid options:
+		"USE" - US East
+		"USW" - US West
+		"EU" - Europe
+		"SG" - Singapore
+		"MY" - Malaysia
+		"PH" - Philippines
+		"TH" - Thailand
+		"ID" - Indonesia
+		"VN" - Vietnam
+		"RU" - Russia
+		"KR" - Korea
+		"AU" - Australia
+		"LAT" - Latin America
+		"DX" - China DX region
+		"LT" - China LT region
+	[1] EGameLobbyState - lobby state
+	[1] unsigned char - client's team (0 is Legion, 1 is Hellbourne)
+	[1] unsigned char - team slot (0 through 4)
+------------------------------------------------------------------------------------------------------
+0x1c0a - NET_CHAT_CL_GAME_LOBBY_LEFT - Tells the client they've left a game lobby.
+Format:
+	no data
+------------------------------------------------------------------------------------------------------
+0x1c0b - NET_CHAT_CL_GAME_LOBBY_UPDATE - Updated game lobby information.
+Format:
+	[1] EGameLobbyState - lobby state
+------------------------------------------------------------------------------------------------------
+0x1c0c - NET_CHAT_CL_GAME_LOBBY_PLAYER_JOINED - Tells the client a player joined the game lobby.
+Format:
+	[1] unsigned char - team (0 is Legion, 1 is Hellbourne)
+	[1] unsigned char - team slot (0 through 4)
+	[1] bool - bot
+	if (bot)
+		[X] string - bot definition name
+	else
+		[X] string - player's name
+		[4] unsigned long - player's account ID
+		[1] EChatClientStatus - player's status
+		[1] unsigned char - player's client flags
+		[4] unsigned long - player's clan ID
+		[X] string - player's clan name
+		[X] string - player's chat symbol
+		[X] string - player's chat name color
+		[X] string - player's account icon
+		
+Notes:
+- You can find the bot definitions in game\bots\*.bot.
+------------------------------------------------------------------------------------------------------
+0x1c0d - NET_CHAT_CL_GAME_LOBBY_PLAYER_LEFT - Tells the client a player left the game lobby.
+Format:
+	[X] string - player's name
+------------------------------------------------------------------------------------------------------
+0x1c0e - NET_CHAT_CL_GAME_LOBBY_PLAYER_UPDATE - Updated player information in a game lobby.
+Format:
+	[X] string - player's name
+	[1] unsigned char - team (0 is legion, 1 is Hellbourne)
+	[1] unsigned char team slot (0 through 4)
+	[X] string - hero name
+	[X] string - alt. avatar name
+	[1] bool - potential picked
+	[1] unsigned char - ready
+------------------------------------------------------------------------------------------------------
+0x1c0f - NET_CHAT_CL_GAME_LOBBY_LAUNCH_GAME - Tells the client that the lobby is done and to launch HoN and connect
+Format:
+	[X] string - server IP
+	[2] unsigned short - server port
+	- [1] unsigned char - number of players
+	For each player
+		- [1] unsigned char - player's slot
+		- [X] string - player's hero
+		- [X] string - player's avatar
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+CLIENT TO SERVER
+------------------------------------------------------------------------------------------------------
+0x0003 - CHAT_CMD_CHANNEL_MSG (bidirectional) - Attempt to send a message to a chat channel.
+Format:
+	[X] string - message
+	[4] unsigned long - channel ID
+	
+Notes:
+- Flood protection.
+- Fails silently if the client is not in that channel.
+- If the client is silenced on that channel, fails and the chat server will send CHAT_CMD_CHANNEL_SILENCED back.
+- Fails silently if the client is muted (suspension type) and they're not talking in their own clan's channel.
+- Message is truncated to CHAT_MESSAGE_MAX_LENGTH length (not including null terminator).
+------------------------------------------------------------------------------------------------------
+0x0008 - CHAT_CMD_WHISPER (bidrectional) - Attempt to send a whisper to another client.
+Format:
+	[X] string - client's name we're sending a whisper to.
+	[X] string - message
+	
+Notes:
+- Flood protection.
+- If the target is offline or in invisible mode, fails and the chat server will send CHAT_CMD_WHISPER_FAILED back.
+- If the target has AFK or DND on, fails and the chat server will send CHAT_CMD_CHAT_MODE_AUTO_RESPONSE back.
+- Fails silently if the client is muted (suspension type) and the target is not a buddy or clan member.
+- Message is truncated to CHAT_MESSAGE_MAX_LENGTH length (not including null terminator).
+------------------------------------------------------------------------------------------------------	
+0x000A - CHAT_CMD_LAST_KNOWN_GAME_SERVER (bidirectional) - Request the last known game server that I've been on
+Format:
+	no data
+	
+Notes:
+- The response from this should be used to query the game server to see if a reconnect is available.
+------------------------------------------------------------------------------------------------------	
+0x000D - CHAT_CMD_REQUEST_BUDDY_ADD - Attempt to add a client as a buddy.
+Format:
+	[X] string - client's name
+	
+Notes:
+- Flood protection.
+- This will send the request to the master server to add the buddy.
+------------------------------------------------------------------------------------------------------
+0x000E - CHAT_CMD_NOTIFY_BUDDY_REMOVE - Tell the chat server we removed a buddy.
+Format:
+	[4] unsigned long - former buddy's account ID
+	[4] unsigned long - unused
+	[4] unsigned long - unused
+	
+Notes:
+- Currently has no effect, as we don't want to tell players they've been removed as a buddy.
+------------------------------------------------------------------------------------------------------
+0x000F - CHAT_CMD_JOINING_GAME - Tell the chat server we're joining a game.
+Format:
+	[X] string - server's address and port, in the form of "X.X.X.X:X"
+	
+Notes:
+- This will also remove the client from all general channels (e.g. HoN 5)
+------------------------------------------------------------------------------------------------------
+0x0010 - CHAT_CMD_JOINED_GAME - Tell the chat server we've finished joining a game.
+Format:
+	[X] string - game name
+	[4] unsigned long - match ID
+	[1] bool - should we join the game's chat channel?
+	
+Notes:
+- This will remove the client from any previous game chat channels, even if we're not joining the new game's chat channel.
+------------------------------------------------------------------------------------------------------
+0x0011 - CHAT_CMD_LEFT_GAME - Tell the chat server we've left a game.
+Format:
+	no data
+
+Notes:
+- If the client is not in invisible mode, we will add the client to their default channel.
+------------------------------------------------------------------------------------------------------
+0x0013 - CHAT_CMD_CLAN_WHISPER (bidirectional) - Attempt to send a whisper to our clan.
+Format:
+	[X] string - message
+	
+Notes:
+- Flood protection.
+- If the client is not in a clan, fails and chat server will send CHAT_CMD_CLAN_WHISPER_FAILED back.
+- The client sending this message will also receive the message.
+------------------------------------------------------------------------------------------------------
+0x0015 - CHAT_CMD_CLAN_PROMOTE_NOTIFY - Tell the chat server we promoted a clan member to an Officer.
+Format:
+	[4] unsigned long - account ID of clan member
+	
+Notes:
+- Fails silently if the client is not the clan leader or if the target is not in the clan.
+- Chat server will send CHAT_CMD_CLAN_RANK_CHANGE to all clan members.
+------------------------------------------------------------------------------------------------------
+0x0016 - CHAT_CMD_CLAN_DEMOTE_NOTIFY - Tell the chat server we demoted a clan member from an Officer to a Member.
+Format:
+	[4] unsigned long - account ID of clan member
+	
+Notes:
+- Fails silently if the client is not the clan leader or if the target is not in the clan.
+- Chat server will send CHAT_CMD_CLAN_RANK_CHANGE to all clan members.
+------------------------------------------------------------------------------------------------------
+0x0017 - CHAT_CMD_CLAN_REMOVE_NOTIFY - Tell the chat server we removed a player from our clan.
+Format:
+	[4] unsigned long - account ID of clan member
+	
+Notes:
+- Fails silently if the target is not the sender (to remove yourself from a clan), or the clan leader, or the target is not in the clan.
+- Chat server will send CHAT_CMD_CLAN_RANK_CHANGE to all clan members.
+- Chat server will send CHAT_CMD_NAME_CHANGE to all clan members.
+------------------------------------------------------------------------------------------------------
+0x001C - CHAT_CMD_IM (bidirectional) - Attempt to send an IM to another client.
+Format:
+	[X] string - client's name we're sending an IM to
+	[X] string - message
+	[1] bool - should the target client get information about the sender? False if we've sent them an IM before and we know their information, true if not
+	
+Notes:
+- Flood protection.
+- If the target is offline or invisible, fails and the chat server will send CHAT_CMD_IM_FAILED back.
+- Fails silently if the client is muted and the target is not a buddy or clan member.
+- Message is truncated to CHAT_MESSAGE_MAX_LENGTH length (not including null terminator).
+------------------------------------------------------------------------------------------------------
+0x001E - CHAT_CMD_JOIN_CHANNEL - Attempt to join a chat channel.
+Format:
+	[X] string - channel name
+
+Notes:
+- If the client is in 8 or more channels, fails and the chat server will send CHAT_CMD_MAX_CHANNELS back.
+- If the channel is passworded and the client is not an admin of the channel, fails and the chat server will send CHAT_CMD_JOIN_CHANNEL_PASSWORD back.
+- If the channel has MAX_USERS_PER_CHANNEL or more in it, fails silently.
+------------------------------------------------------------------------------------------------------
+0x0020 - CHAT_CMD_WHISPER_BUDDIES (bidirectional) - Attempt to send a message to our buddies.
+Format:
+	[X] string - message
+	
+Notes:
+- Flood protection.
+- Whispers will not be sent to clients with DND on.
+------------------------------------------------------------------------------------------------------
+0x0022 - CHAT_CMD_LEAVE_CHANNEL - Attempt to leave a chat channel.
+Format:
+	[X] string - channel name
+------------------------------------------------------------------------------------------------------
+0x0023 - CHAT_CMD_INVITE_USER_ID - Invite another client to join your current game.
+Format:
+	[4] unsigned long - target's account ID
+	
+Notes:
+- If the target does not exist, is the sender, or isn't online yet, fails and the chat server sends CHAT_CMD_INVITE_FAILED_USER back.
+- If the sender is not in a game (status < CHAT_CLIENT_STATUS_JOINING_GAME), fails and the chat server sends CHAT_CMD_INVITE_FAILED_GAME back.
+- If the target has DND on, fails silently.
+------------------------------------------------------------------------------------------------------
+0x0024 - CHAT_CMD_INVITE_USER_NAME - Invite another client to join your current game.
+Format:
+	[X] string - target's name
+	
+Notes:
+- If the target does not exist, is the sender, or isn't online yet, fails and the chat server sends CHAT_CMD_INVITE_FAILED_USER back.
+- If the sender is not in a game (status < CHAT_CLIENT_STATUS_JOINING_GAME), fails and the chat server sends CHAT_CMD_INVITE_FAILED_GAME back.
+- If the target has DND on, fails silently.
+------------------------------------------------------------------------------------------------------
+0x0028 - CHAT_CMD_INVITE_REJECTED (bidirectional) - Tell the chat server we rejected a game invite.
+Format:
+	[4] unsigned long - inviter's account ID
+
+Notes:
+- If the inviter does not have DND on, the chat server will send CHAT_CMD_INVITE_REJECTED to the inviter.
+------------------------------------------------------------------------------------------------------
+0x002A - CHAT_CMD_USER_INFO - Request info on a client.
+Format:
+	[X] string - client's name
+
+Notes:
+- Flood protection.
+------------------------------------------------------------------------------------------------------
+0x0030 - CHAT_CMD_CHANNEL_TOPIC (bidirectional) - Attempt to change a chat channel's topic.
+Format:
+	[4] unsigned long - channel ID
+	[X] string - topic
+	
+Notes:
+- If the client is not at least CHAT_CLIENT_ADMIN_OFFICER admin level, fails silently.
+- If the client is muted and the channel is not their clan's channel, fails silently.
+- Chat server will send CHAT_CMD_CHANNEL_TOPIC to all clients in the channel, including the requester.
+------------------------------------------------------------------------------------------------------
+0x0031 - CHAT_CMD_CHANNEL_KICK (bidirectional) - Attempt to kick a client from a chat channel.
+Format:
+	[4] unsigned long - channel ID
+	[4] unsigned long - target's account ID
+	
+Notes:
+- If the requester's admin level is less than or equal to the target's, fails silently.
+- If the target is not in the channel, fails silently.
+- Chat server will send CHAT_CMD_CHANNEL_KICK to all clients in the channel, including the requester.
+------------------------------------------------------------------------------------------------------
+0x0032 - CHAT_CMD_CHANNEL_BAN (bidirectional) Attempt to ban a client from a chat channel.
+Format:
+	[4] unsigned long - channel ID
+	[X] string - target's name
+	
+Notes:
+- If the requester's channel admin level is less than or equal to the target's, fails silently.
+- If the target is already banned from the channel, fails silently.
+- The target is removed from the channel.
+- The chat server will send a CHAT_CMD_CHANNEL_BAN to all players in the channel.
+- If the target does not have DND on, the chat server will also send CHAT_CMD_CHANNEL_BAN to the target.
+------------------------------------------------------------------------------------------------------
+0x0033 - CHAT_CMD_CHANNEL_UNBAN (bidirectional) - Attempt to unban a client from a chat channel.
+Format:
+	[4] unsigned long - channel ID
+	[X] string - target's name
+	
+Notes:
+- If the requester's admin level is not at least CHAT_CLIENT_ADMIN_OFFICER, fails silently.
+- If the target is not banned from the channel, fails silently.
+- The chat server will send a CHAT_CMD_CHANNEL_UNBAN to all players in the channel.
+- If the target does not have DND on, the chat server will also send CHAT_CMD_CHANNEL_UNBAN to the target.
+------------------------------------------------------------------------------------------------------
+0x0038 - CHAT_CMD_CHANNEL_SILENCE_USER - Attempt to silence a client on a chat channel.
+Format:
+	[4] unsigned long - channel ID
+	[X] string - client's name to silence
+	[4] unsigned long - silence duration
+	
+Notes:
+- If the requester's channel admin level is less than or equal to the target's, fails silently.
+------------------------------------------------------------------------------------------------------
+0x0039 - CHAT_CMD_MESSAGE_ALL (bidirectional) - Send a message to a subset of users.
+Format:
+	[1] unsigned char - message type
+		0: Normal broadcast - resulting message is sent to all
+		1: Scheduled match broadcast - resulting message is sent to clients in scheduled matches
+	[4] unsigned long - scheduled match event ID (ignored for type 0). If -1, sent to players in every scheduled match.
+	[X] string - message
+
+Notes:
+- If the client does not have the CHAT_CLIENT_IS_STAFF flag, fails silently.
+------------------------------------------------------------------------------------------------------
+0x003A - CHAT_CMD_CHANNEL_PROMOTE (bidirectional) - Attempt to increase a client's admin level in a chat channel.
+Format:
+	[4] unsigned long - channel ID
+	[4] unsigned long - target's account ID
+	
+Notes:
+- If the client's admin level is not greater than the target's admin level + 1, fails silently.
+- This increases the target's admin level by 1.
+------------------------------------------------------------------------------------------------------
+0x003B - CHAT_CMD_CHANNEL_DEMOTE (bidirectional) - Attempt to decrease a client's admin level in a chat channel.
+Format:
+	[4] unsigned long - channel ID
+	[4] unsigned long - target's account ID
+	
+Notes:
+- If the requester's or target's admin level is CHAT_CLIENT_ADMIN_NONE, fails silently.
+- If the requester's admin level is less than or equal to the target's admin level, fails silently.
+- This decreases the target's admin level by 1.
+------------------------------------------------------------------------------------------------------
+0x003E - CHAT_CMD_CHANNEL_SET_AUTH (bidirectional) - Attempt to enable auth on a chat channel.
+Format:
+	[4] unsigned long - channel ID
+	
+Notes:
+- If the requester's admin level is not at least CHAT_CLIENT_ADMIN_LEADER, fails silently.
+- When auth is enabled, a channel can only be joined by channel admins or users who have been authed.
+------------------------------------------------------------------------------------------------------
+0x003F - CHAT_CMD_CHANNEL_REMOVE_AUTH (bidirectional) - Attempt to disable auth on a chat channel.
+Format:
+	[4] unsigned long - channel ID
+	
+Notes:
+- If the requester's admin level is not at least CHAT_CLIENT_ADMIN_LEADER, fails silently.
+- When auth is enabled, a channel can only be joined by channel admins or users who have been authed.
+------------------------------------------------------------------------------------------------------
+0x0040 - CHAT_CMD_CHANNEL_ADD_AUTH_USER (bidirectional) - Attempt to authorize a user for a chat channel.
+Format:
+	[4] unsigned long - channel ID
+	[X] string - target's name
+
+Notes:
+- If the requester's admin level is not at least CHAT_CLIENT_ADMIN_LEADER, fails silently.
+- If the target is already authed, chat server sends CHAT_CMD_CHANNEL_ADD_AUTH_FAIL back.
+------------------------------------------------------------------------------------------------------
+0x0041 - CHAT_CMD_CHANNEL_REMOVE_AUTH_USER (bidirectional) - Attempt to deauthorize a user for a chat channel.
+Format:
+	[4] unsigned long - channel ID
+	[X] string - target's name
+
+Notes:
+- If the requester's admin level is not at least CHAT_CLIENT_ADMIN_LEADER, fails silently.
+- If the target is not authed, chat server sends CHAT_CMD_CHANNEL_REMOVE_AUTH_FAIL back.
+------------------------------------------------------------------------------------------------------
+0x0042 - CHAT_CMD_CHANNEL_LIST_AUTH (bidirectional) - Request the auth list for a channel.
+Format:
+	[4] unsigned long - channel ID
+	
+Notes:
+- If the requester's admin level is not at least CHAT_CLIENT_ADMIN_LEADER, fails silently.
+------------------------------------------------------------------------------------------------------
+0x0043 - CHAT_CMD_CHANNEL_SET_PASSWORD (bidirectional) - Request to change the password on a channel.
+Format:
+	[4] unsigned long - channel ID
+	[X] string - password
+	
+Notes:
+- If the requester's admin level is not at least CHAT_CLIENT_ADMIN_LEADER, fails silently.
+------------------------------------------------------------------------------------------------------
+0x0046 - CHAT_CMD_JOIN_CHANNEL_PASSWORD (bidirectional) - Attempt to join a passworded channel
+Format:
+	[X] string - channel name
+	[X] string - password
+	
+Notes:
+- If the client is banned from the channel, fails and chat server sends CHAT_CMD_CHANNEL_IS_BANNED back.
+- If the channel has a password and the password provided by the client doesn't match (case insensitive), fails silently.
+------------------------------------------------------------------------------------------------------
+TODO: Clan functionality
+------------------------------------------------------------------------------------------------------
+0x0064 - CHAT_CMD_CHAT_ROLL (bidirectional) - TODO
+------------------------------------------------------------------------------------------------------
+0x0065 - CHAT_CMD_CHAT_EMOTE (bidirectional) - Send an emote message on a channel.
+Format:
+	[X] string - emote message
+	[4] unsigned long - channel ID
+	
+Notes:
+- Flood protection.
+- Analogous to the /me command on IRC.
+------------------------------------------------------------------------------------------------------
+0x0066 - CHAT_CMD_SET_CHAT_MODE_TYPE (bidirectional) - Change my chat mode type.
+Format:
+	[1] EChatModeType - chat mode type
+	[X] string - reason (e.g. "eating dinner")
+	
+Notes:
+- Flood protection.
+------------------------------------------------------------------------------------------------------
+0x00B3 - CHAT_CMD_REQUEST_BUDDY_APPROVE - Request to approve a requested buddy add.
+Format:
+	[X] string - buddy's name
+
+Notes:
+- Flood protection.
+------------------------------------------------------------------------------------------------------
+0x00B5 - CHAT_CMD_REQUEST_GAME_INFO (bidirectional) - Request info for a client's game that's in progress.
+Format:
+	[X] string - client's name
+	
+Notes:
+- If the target is not a buddy or clan member, or the client requesting this is not a staff account, fails silently.
+------------------------------------------------------------------------------------------------------
+0x00B7 - CHAT_CMD_JOIN_STREAM_CHANNEL - Request to join the chat channel for a Twitch.tv stream.
+Format:
+	[X] string - Twitch.tv stream name
+
+Notes:
+- If the target is already in a stream chat channel or in 8 or more channels, fails and chat server sends CHAT_CMD_MAX_CHANNELS back.
+- If the channel has MAX_USERS_PER_CHANNEL or more in it, fails silently.
+------------------------------------------------------------------------------------------------------
+0x00B8 - CHAT_CMD_PLAYER_SPECTATE_REQUEST (bidirectional) - TODO
+------------------------------------------------------------------------------------------------------
+0x00B9 - CHAT_CMD_TRACK_PLAYER_ACTION - Track a player action for action campaigns
+Format:
+	[1] EActionCampaigns - campaign type
+------------------------------------------------------------------------------------------------------
+0x00Ba - CHAT_CMD_STAFF_JOIN_MATCH_REQUEST - TODO
+------------------------------------------------------------------------------------------------------
+0x2A01 - NET_CHAT_PONG - Tell the chat server we're still connected.
+Format:
+	no data
+	
+Notes:
+- Should be sent in response to NET_CHAT_PING.
+------------------------------------------------------------------------------------------------------
+0x0C00 - NET_CHAT_CL_CONNECT - Connect to the chat server.
+Format:
+	[4] unsigned long - client's account ID
+	[X] string - client's cookie
+	[X] string - client's external IP
+	[X] string - client's auth hash
+	[4] unsigned long - CHAT_PROTOCOL_VERSION
+	[1] EOSType - client's operating system
+	[1] unsigned char - client's operating system's major version
+	[1] unsigned char - client's operating system's minor version
+	[1] unsigned char - client's operating system's micro version
+	[X] string - client's operating system build code (TODO: this is a static string)
+	[4] unsigned long - client's version (e.g. 3.1.0.2 would be 0x02000103)
+	[1] ECrashReportingClientState - client's last known state - sending CRCS_NO_CRASH is fine.
+	[1] EChatModeType - client's chat mode type
+	[X] string - client's region ("cn")
+	[X] string - client's language ("en" or "cn")
+
+Notes:
+- If the protocol does not match the chat server's, fails silently.
+- If the auth hash is incorrect, fails silently.
+- If the cookie is empty, fails silently.
+- Get OS version info via the Windows function GetVersionEx().
+------------------------------------------------------------------------------------------------------
+0x0C05 - NET_CHAT_CL_GET_USER_STATUS - Request the status of a client
+Format:
+	[X] string - client's name
+	
+Notes:
+- The chat server responds with NET_CHAT_CL_USER_STATUS.
+------------------------------------------------------------------------------------------------------
+0x0C08 - NET_CHAT_CL_ADMIN_KICK - Kick/ban a client from the chat server
+Format:
+	[X] string - client's name or account ID
+	[4] unsigned long - amount of seconds to ban this client
+
+Notes:
+- Bans do not persist between restarts of the chat server.
+- Attempts to lookup by name first. If no client exists by that name, converts the string to an account ID and attempts to look up by that.
+- If the client does not exist, fails silently.
+- If the requester is not a staff account, fails silently.
+- If the client exists, he is removed from the chat server. If the ban time is greater than 0, both the IP and account ID will be banned for that many seconds.
+------------------------------------------------------------------------------------------------------
+0x0C09 - NET_CHAT_CL_REFRESH_UPGRADES - Refresh products and upgrades the client owns.
+Format:
+	no data
+	
+Notes:
+- Flood protection.
+- This should be called any time a client's product ownership changes (e.g. purchases a new product)
+------------------------------------------------------------------------------------------------------
+0x0C0A - NET_CHAT_CL_TMM_GROUP_CREATE - Attempt to create a matchmaking group
+Format:
+	[X] string - Heroes of Newerth client version (e.g. "3.1.0.2")
+	[1] unsigned char - TMM type. Valid types:
+		1: solo group
+		2: multiple player group
+		3: bot match
+	[1] ETMMGameTypes - game type
+	[X] string - map name. Valid names:
+		"caldavar"
+		"grimmscrossing"
+		"midwars"
+	[X] string - game modes, delimited by | (e.g "ap|sd"). Case sensitive. Valid modes:
+		"ap" - All Pick
+		"apg" - All Pick Core Pool
+		"sd" - Single Draft
+		"bd" - Banning Draft
+		"bp" - Banning Pick
+		"ar" - All Random
+		"lp" - Lock Pick
+		"bb" - Blind Ban (Midwars mode)
+		"bbg" - Blind Ban Core Pool
+		"bm" - Bot Match
+		"cm" - Captain's Pick
+		"br" - Balanced Random
+	[X] string - server regions, delimited by | (e.g. "VN|DX"). Case sensitive. Valid regions:
+		"USE" - US East
+		"USW" - US West
+		"EU" - Europe
+		"SG" - Singapore
+		"MY" - Malaysia
+		"PH" - Philippines
+		"TH" - Thailand
+		"ID" - Indonesia
+		"VN" - Vietnam
+		"RU" - Russia
+		"KR" - Korea
+		"AU" - Australia
+		"LAT" - Latin America
+		"DX" - China DX region
+		"LT" - China LT region
+	[1] bool - ranked
+	[1] bool - match fidelity (true for higher quality matches and longer matchmaking time)
+	[1] unsigned char - bot difficulty (1 = easy, 2 = medium, 3 = hard) (only used in bot matches, but always sent)
+	[1] bool - randomize enemy bots (only used in bot matches, but always sent)
+
+Notes:
+- Flood protection.
+- If the request fails, chat server sends NET_CHAT_CL_TMM_FAILED_TO_JOIN back.
+- The leader of the group is the client who creates the group.
+------------------------------------------------------------------------------------------------------
+0x0C0B - NET_CHAT_CL_TMM_GROUP_JOIN - Attempt to join another client's matchmaking group.
+Format:
+	[X] string - Heroes of Newerth client version (e.g. "3.1.0.2")
+	[X] string - client's name
+
+Note:
+- Flood protection.
+- If the target is not in a group, or the requesting client has not been invited to that group, fails silently.
+- The target client does not have to be the group leader. It can be any member in the group.
+- If the request fails, chat server sends NET_CHAT_CL_TMM_FAILED_TO_JOIN back.
+------------------------------------------------------------------------------------------------------
+0x0C0C - NET_CHAT_CL_TMM_GROUP_LEAVE - Leave your current matchmaking group.
+Format:
+	no data
+------------------------------------------------------------------------------------------------------
+0x0C0D - NET_CHAT_CL_TMM_GROUP_INVITE (bidirectional) - Attempt to invite another client to join your matchmaking group.
+Format:
+	[X] string - client's nickname that you want to invite
+
+Notes:
+- Flood protection.
+- If the target has DND on, fails silently.
+- If successful, chat server sends NET_CHAT_CL_TMM_GROUP_INVITE to the target client.
+------------------------------------------------------------------------------------------------------
+0x0C0F - NET_CHAT_CL_TMM_GROUP_REJECT_INVITE (bidirectional) - Reject a matchmaking group invite.
+Format:
+	[X] string - client's name that sent the invite
+------------------------------------------------------------------------------------------------------
+0x0D00 - NET_CHAT_CL_TMM_GROUP_KICK - Attempt to kick a group member from the matchmaking group.
+Format:
+	[1] unsigned char - team slot of the group member you want to kick
+	
+Notes:
+- If you are not the group leader, fails silently.
+- If you attempt to kick yourself, fails silently.
+------------------------------------------------------------------------------------------------------
+0x0D01 - NET_CHAT_CL_TMM_GROUP_JOIN_QUEUE (bidirectional) - Attempt to have your group join the matchmaking queue.
+Format:
+	no data
+	
+Notes:
+- If the requesting client is not in a matchmaking group or is not the leader of the group, fails silently.
+------------------------------------------------------------------------------------------------------
+0x0D02 - NET_CHAT_CL_TMM_GROUP_LEAVE_QUEUE (bidirectional) - Attempt to have your group leave the matchmaking queue.
+Format:
+	no data
+	
+Notes:
+- Any group member can call this to leave the queue, not just the group leader.
+------------------------------------------------------------------------------------------------------
+0x0D04 - NET_CHAT_CL_TMM_GROUP_PLAYER_LOADING_STATUS - Tell the chat server how much we've preloaded.
+Format:
+	[1] unsigned char - loading percent, from 0 to 100
+
+Notes:
+- Once all clients in a group are ready and send a loading status of 100, the group will be added to the matchmaking queue.
+------------------------------------------------------------------------------------------------------
+0x0D05 - NET_CHAT_CL_TMM_GROUP_PLAYER_READY_STATUS - Attempt to change our ready status.
+Format:
+	[1] bool - ready status
+	
+Notes:
+- If the group leader attempts to ready and one or more group members have not yet readied, chat server sends NET_CHAT_CL_TMM_REQUEST_READY_UP to all group members.
+- If the group is set to queue for ranked matchmaking and the requesting client is not eligible, fails silently.
+- If the requesting client does not have access to the group's current game modes, fails silently.
+- If all clients in the group are ready, chat server sends NET_CHAT_CL_TMM_START_LOADING to all group members.
+------------------------------------------------------------------------------------------------------
+0x0D08 - NET_CHAT_CL_TMM_GAME_OPTION_UPDATE - Attempt to change group options.
+Format:
+	[1] ETMMGameTypes - game type
+	[X] string - map name. Valid names:
+		"caldavar"
+		"grimmscrossing"
+		"midwars"
+	[X] string - game modes, delimited by | (e.g "ap|sd"). Case sensitive. Valid modes:
+		"ap" - All Pick
+		"apg" - All Pick Core Pool
+		"sd" - Single Draft
+		"bd" - Banning Draft
+		"bp" - Banning Pick
+		"ar" - All Random
+		"lp" - Lock Pick
+		"bb" - Blind Ban (Midwars mode)
+		"bbg" - Blind Ban Core Pool
+		"bm" - Bot Match
+		"cm" - Captain's Pick
+		"br" - Balanced Random
+	[X] string - server regions, delimited by | (e.g. "VN|DX"). Case sensitive. Valid regions:
+		"USE" - US East
+		"USW" - US West
+		"EU" - Europe
+		"SG" - Singapore
+		"MY" - Malaysia
+		"PH" - Philippines
+		"TH" - Thailand
+		"ID" - Indonesia
+		"VN" - Vietnam
+		"RU" - Russia
+		"KR" - Korea
+		"AU" - Australia
+		"LAT" - Latin America
+		"DX" - China DX region
+		"LT" - China LT region
+	[1] bool - ranked
+	[1] bool - match fidelity (true for higher quality matches and longer matchmaking time)
+	[1] unsigned char - bot difficulty (1 = easy, 2 = medium, 3 = hard) (only used in bot matches, but always sent)
+	[1] bool - randomize enemy bots (only used in bot matches, but always sent)
+
+Notes:
+- If the requesting client is not in a group or is not the leader of the group, fails silently.
+------------------------------------------------------------------------------------------------------
+0x0c10 - NET_CHAT_CL_GAME_LOBBY_SELECT_HERO - Select a hero and/or avatar.
+Format:
+	[X] string - hero's name
+	[X] string - avatar's name (if blank, default avatar)
+	[1] bool - potential pick?
+------------------------------------------------------------------------------------------------------
+0x0c11 - NET_CHAT_CL_GAME_LOBBY_READY - Ready up
+Format:
+	no data
+	
+Notes:
+- Once a player has readied, he can no longer change his hero.
+------------------------------------------------------------------------------------------------------
+0x0E06 - NET_CHAT_CL_TMM_SWAP_GROUP_TYPE - Swap from a PvP to bot group or bot to PvP group
+Format:
+	no data
+	
+Notes:
+- Bot group type is 3, PvP group type is 2
+------------------------------------------------------------------------------------------------------
+0x0E07 - NET_CHAT_CL_TMM_BOT_GROUP_UPDATE (bidirectional) - Assign a bot to a slot
+Format:
+	[1] unsigned char - team (1 or 2)
+	[1] unsigned char - slot (0 to 4)
+	[X] string - bot name
+	
+Notes:
+- If the requesting client is not in a group or is not the leader of the group, fails silently.
+------------------------------------------------------------------------------------------------------
