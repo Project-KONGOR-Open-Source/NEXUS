@@ -4,6 +4,7 @@
 public class JoinChannel(MerrickContext merrick, ILogger<JoinChannel> logger) : CommandProcessorsBase, ICommandProcessor
 {
     private MerrickContext MerrickContext { get; set; } = merrick;
+
     private ILogger<JoinChannel> Logger { get; set; } = logger;
 
     public async Task Process(ChatSession session, ChatBuffer buffer)

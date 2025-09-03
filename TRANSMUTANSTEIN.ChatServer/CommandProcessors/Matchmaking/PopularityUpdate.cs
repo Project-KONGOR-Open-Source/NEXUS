@@ -4,6 +4,7 @@
 public class PopularityUpdate(MerrickContext merrick, ILogger<PopularityUpdate> logger) : CommandProcessorsBase, ICommandProcessor
 {
     private MerrickContext MerrickContext { get; set; } = merrick;
+
     private ILogger<PopularityUpdate> Logger { get; set; } = logger;
 
     public async Task Process(ChatSession session, ChatBuffer buffer)

@@ -4,6 +4,7 @@
 public class GroupInvite(MerrickContext merrick, ILogger<GroupInvite> logger) : CommandProcessorsBase, ICommandProcessor
 {
     private MerrickContext MerrickContext { get; set; } = merrick;
+
     private ILogger<GroupInvite> Logger { get; set; } = logger;
 
     public async Task Process(ChatSession session, ChatBuffer buffer)

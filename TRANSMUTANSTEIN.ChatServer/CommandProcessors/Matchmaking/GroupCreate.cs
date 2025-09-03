@@ -4,6 +4,7 @@
 public class GroupCreate(MerrickContext merrick, ILogger<GroupCreate> logger) : CommandProcessorsBase, ICommandProcessor
 {
     private MerrickContext MerrickContext { get; set; } = merrick;
+
     private ILogger<GroupCreate> Logger { get; set; } = logger;
 
     public async Task Process(ChatSession session, ChatBuffer buffer)
@@ -72,22 +73,71 @@ public class GroupCreate(MerrickContext merrick, ILogger<GroupCreate> logger) : 
 
         MatchmakingGroup group = MatchmakingService.Groups.Single(group => group.Key == session.ClientInformation.Account.ID).Value;
 
+        bool fullGroupUpdate = updateType switch
+        {
+            ChatProtocol.TMMUpdateType.TMM_CREATE_GROUP             => true,
+            ChatProtocol.TMMUpdateType.TMM_FULL_GROUP_UPDATE        => true,
+            ChatProtocol.TMMUpdateType.TMM_PLAYER_JOINED_GROUP      => true,
+            ChatProtocol.TMMUpdateType.TMM_PLAYER_LEFT_GROUP        => true,
+            ChatProtocol.TMMUpdateType.TMM_PLAYER_KICKED_FROM_GROUP => true,
+            _                                                       => false
+        };
+
         foreach (MatchmakingGroupMember member in group.Members)
         {
-            if (updateType is not ChatProtocol.TMMUpdateType.TMM_PARTIAL_GROUP_UPDATE)
+            if (fullGroupUpdate)
             {
                 Response.WriteInt32(member.Account.ID);                                     // Account ID
                 Response.WriteString(member.Account.Name);                                  // Account Name
                 Response.WriteInt8(member.Slot);                                            // Group Slot
-                // TODO: Determine Rating From Game Type
-                Response.WriteInt16(1500);                                                  // Normal Rank Level
+                // TODO: Get Real Rank Level And Rating
+                /* TODO: Establish Rank (Medal) Level From Rating And Add To The Database
+                    enum ECampaignLevel
+                    {
+	                    CAMPAIGN_LEVEL_NONE = 0,
+
+	                    CAMPAIGN_LEVEL_BRONZE_5,
+	                    CAMPAIGN_LEVEL_BRONZE_4,
+	                    CAMPAIGN_LEVEL_BRONZE_3,
+	                    CAMPAIGN_LEVEL_BRONZE_2,
+	                    CAMPAIGN_LEVEL_BRONZE_1,
+
+	                    CAMPAIGN_LEVEL_SILVER_5,
+	                    CAMPAIGN_LEVEL_SILVER_4,
+	                    CAMPAIGN_LEVEL_SILVER_3,
+	                    CAMPAIGN_LEVEL_SILVER_2,
+	                    CAMPAIGN_LEVEL_SILVER_1,
+	
+	                    CAMPAIGN_LEVEL_GOLD_4,
+	                    CAMPAIGN_LEVEL_GOLD_3,
+	                    CAMPAIGN_LEVEL_GOLD_2,
+	                    CAMPAIGN_LEVEL_GOLD_1,
+	
+	                    CAMPAIGN_LEVEL_DIAMOND_3,
+	                    CAMPAIGN_LEVEL_DIAMOND_2,
+	                    CAMPAIGN_LEVEL_DIAMOND_1,
+	
+	                    CAMPAIGN_LEVEL_LEGENDARY2,
+	                    CAMPAIGN_LEVEL_LEGENDARY1,
+
+	                    CAMPAIGN_LEVEL_IMMORTAL
+                    };
+                */
+                Response.WriteInt32(20);                                                      // Normal Rank Level (Also Known As Normal Campaign Level Or Medal)
+                Response.WriteInt32(20);                                                      // Casual Rank Level (Also Known As Casual Campaign Level Or Medal)
+                // TODO: Figure Out What These Ranks Are (Potentially Actual Global Ranking Index In Order Of Rating Descending, e.g. Highest Rating Is Rank 1)
+                Response.WriteInt32(123);                                                     // Normal Rank
+                Response.WriteInt32(321);                                                     // Casual Rank
+                Response.WriteBool(true);                                                     // Eligible For Campaign
+                // TODO: Can Be Set To -1 To Hide The Rating From Other Players For Unranked Game Modes
+                Response.WriteInt16(1850);                                                    // Rating
             }
 
             Response.WriteInt8(member.LoadingPercent);                                      // Loading Percent (0 to 100)
             Response.WriteBool(member.IsReady);                                             // Ready Status
             Response.WriteBool(member.IsInGame);                                            // In-Game Status
 
-            if (updateType is not ChatProtocol.TMMUpdateType.TMM_PARTIAL_GROUP_UPDATE)
+            if (fullGroupUpdate)
             {
                 Response.WriteBool(member.IsEligibleForMatchmaking);                        // Eligible For Matchmaking
                 Response.WriteString(member.Account.ChatNameColour);                        // Chat Name Colour
@@ -98,15 +148,18 @@ public class GroupCreate(MerrickContext merrick, ILogger<GroupCreate> logger) : 
             }
         }
 
-        if (updateType is not ChatProtocol.TMMUpdateType.TMM_PARTIAL_GROUP_UPDATE)
+        if (fullGroupUpdate)
         {
             foreach (MatchmakingGroupMember member in group.Members)
             {
+                // TODO: Determine Friendship Status
                 Response.WriteBool(false);                                                  // Is Friend
             }
         }
 
         Response.PrependBufferSize();
+
+        // TODO: Create Tentative Group, And Only Create Actual Group When Another Player Joins
 
         // Create A New Matchmaking Group With The Initiator As The Group Leader
         session.SendAsync(Response.Data);

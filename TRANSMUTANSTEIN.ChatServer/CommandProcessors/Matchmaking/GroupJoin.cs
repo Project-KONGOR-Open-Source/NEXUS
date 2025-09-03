@@ -1,65 +1,182 @@
 namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Matchmaking;
 
 [ChatCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_JOIN)]
-public class GroupJoin(ILogger<GroupJoin> logger) : CommandProcessorsBase, ICommandProcessor
+public class GroupJoin(MerrickContext merrick, ILogger<GroupJoin> logger) : CommandProcessorsBase, ICommandProcessor
 {
+    private MerrickContext MerrickContext { get; set; } = merrick;
+
     private ILogger<GroupJoin> Logger { get; } = logger;
 
     public async Task Process(ChatSession session, ChatBuffer buffer)
     {
-        GroupJoinRequestData requestData = new(buffer);
+        GroupJoinRequestData requestData = new (buffer);
 
-        // Minimal placeholder implementation: accept join without validation and send a basic group update.
-        // TODO: Replace hard-coded placeholder data with real group lookup, invite validation, ban checks, etc.
+        MatchmakingGroup group = MatchmakingService.Groups.Single(group => group.Value.Members.Select(member => member.Account.Name).Contains(requestData.InviteIssuerName)).Value;
+
+        MatchmakingGroupMember newMatchmakingGroupMember = new (session)
+        {
+            Slot = Convert.ToByte(group.Members.Count + 1),
+            IsLeader = false,
+            IsReady = false,
+            IsInGame = false,
+            IsEligibleForMatchmaking = true,
+            LoadingPercent = 0,
+            HasGameModeAccess = true,
+            GameModeAccess = group.Leader.GameModeAccess
+        };
+
+        if (group.Members.Any(member => member.Account.ID == session.ClientInformation.Account.ID) is false)
+        {
+            group.Members.Add(newMatchmakingGroupMember);
+        }
+
+        else
+        {
+            Logger.LogWarning("Player {Session.ClientInformation.Account.Name} Tried To Join A Matchmaking Group They Are Already In", session.ClientInformation.Account.Name);
+
+            return;
+        }
 
         Response.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_UPDATE);
 
-        ChatProtocol.TMMUpdateType updateType = ChatProtocol.TMMUpdateType.TMM_PLAYER_JOINED_GROUP; // Placeholder update type
-        Response.WriteInt8(Convert.ToByte(updateType));                  // Group Update Type
-        Response.WriteInt32(session.ClientInformation.Account.ID);       // Account ID (placeholder: joining player)
-        Response.WriteInt8(1);                                           // Group Size (placeholder: solo group after join)
-        Response.WriteInt16(1500);                                       // Average Group Rating (placeholder)
-        Response.WriteInt32(session.ClientInformation.Account.ID);       // Leader Account ID (placeholder: self as leader)
-        Response.WriteInt8(Convert.ToByte(ChatProtocol.ArrangedMatchType.AM_MATCHMAKING)); // Arranged Match Type (placeholder)
-        Response.WriteInt8(Convert.ToByte(ChatProtocol.TMMGameType.TMM_GAME_TYPE_NORMAL)); // Game Type (placeholder)
-        Response.WriteString("caldavar");                                // Map Name (placeholder)
-        Response.WriteString("ap|ar|sd");                                // Game Modes (placeholder)
-        Response.WriteString("EU|USE|USW");                              // Regions (placeholder)
-        Response.WriteBool(true);                                        // Ranked (placeholder)
-        Response.WriteBool(true);                                        // Match Fidelity (placeholder)
-        Response.WriteInt8(1);                                           // Bot Difficulty (placeholder)
-        Response.WriteBool(false);                                       // Randomize Bots (placeholder)
-        Response.WriteString(string.Empty);                              // Country Restrictions (placeholder)
-        Response.WriteString(string.Empty);                              // Player Invitation Responses (placeholder)
-        Response.WriteInt8(5);                                           // Team Size (placeholder)
-        Response.WriteInt8(Convert.ToByte(ChatProtocol.TMMType.TMM_TYPE_CAMPAIGN)); // Group Type (placeholder)
+        ChatProtocol.TMMUpdateType updateType = ChatProtocol.TMMUpdateType.TMM_PLAYER_JOINED_GROUP;
 
-        // Placeholder single member data (joining player)
-        Response.WriteInt32(session.ClientInformation.Account.ID);       // Member Account ID
-        Response.WriteString(session.ClientInformation.Account.Name);    // Member Account Name
-        Response.WriteInt8(1);                                           // Member Slot (placeholder)
-        Response.WriteInt16(1500);                                       // Member Rating (placeholder)
-        Response.WriteInt8(0);                                           // Loading Percent (placeholder)
-        Response.WriteBool(false);                                       // Ready Status (placeholder)
-        Response.WriteBool(false);                                       // In-Game Status (placeholder)
-        Response.WriteBool(true);                                        // Eligible For Matchmaking (placeholder)
-        Response.WriteString(session.ClientInformation.Account.ChatNameColour); // Chat Name Colour
-        Response.WriteString(session.ClientInformation.Account.Icon);    // Account Icon
-        Response.WriteString("NEWERTH");                                 // Country (placeholder)
-        Response.WriteBool(true);                                        // Has Game Mode Access (placeholder)
-        Response.WriteString("true|true|true");                          // Game Mode Access (placeholder)
+        Response.WriteInt8(Convert.ToByte(updateType));                                     // Group Update Type
+        Response.WriteInt32(session.ClientInformation.Account.ID);                          // Account ID
+        Response.WriteInt8(Convert.ToByte(group.Members.Count));                            // Group Size
+        // TODO: Calculate Average Group Rating
+        Response.WriteInt16(1500);                                                          // Average Group Rating
+        Response.WriteInt32(group.Leader.Account.ID);                                       // Leader Account ID
+        // TODO: Dynamically Set Arranged Match Type From The Request Data
+        Response.WriteInt8(Convert.ToByte(ChatProtocol.ArrangedMatchType.AM_MATCHMAKING));  // Arranged Match Type
 
-        // Friend flags for each member (only one member)
-        Response.WriteBool(false);                                       // Is Friend (placeholder)
+        /*
+        Response.WriteInt8(Convert.ToByte(requestData.GameType));                           // Game Type
+        Response.WriteString(requestData.MapName);                                          // Map Name
+        Response.WriteString(string.Join('|', requestData.GameModes));                      // Game Modes
+        Response.WriteString(string.Join('|', requestData.GameRegions));                    // Regions
+        Response.WriteBool(requestData.Ranked);                                             // Ranked
+        Response.WriteBool(requestData.MatchFidelity);                                      // Match Fidelity
+        Response.WriteInt8(requestData.BotDifficulty);                                      // Bot Difficulty
+        Response.WriteBool(requestData.RandomizeBots);                                      // Randomize Bots
+        Response.WriteString(string.Empty);                                                 // Country Restrictions (e.g. "AB->USE|XY->USW" Means Only Country "AB" Can Access Region "USE" And Only Country "XY" Can Access Region "USW")
+        Response.WriteString("TODO: Find Out What Player Invitation Responses Do");         // Player Invitation Responses
+        // TODO: Dynamically Set Team Size From The Request Data
+        Response.WriteInt8(5);                                                              // Team Size (e.g. 5 For Forests Of Caldavar, 3 For Grimm's Crossing)
+        Response.WriteInt8(Convert.ToByte(requestData.GroupType));                          // Group Type
+        */
+
+        # region TODO: Replace These Placeholder Values With Actual Request Data (Uncomment Above And Populate Data)
+        Response.WriteInt8(Convert.ToByte(ChatProtocol.TMMGameType.TMM_GAME_TYPE_NORMAL));  // Game Type (placeholder)
+        Response.WriteString("caldavar");                                                   // Map Name (placeholder)
+        Response.WriteString("ap|ar|sd");                                                   // Game Modes (placeholder)
+        Response.WriteString("EU|USE|USW");                                                 // Regions (placeholder)
+        Response.WriteBool(true);                                                           // Ranked (placeholder)
+        Response.WriteBool(true);                                                           // Match Fidelity (placeholder)
+        Response.WriteInt8(1);                                                              // Bot Difficulty (placeholder)
+        Response.WriteBool(false);                                                          // Randomize Bots (placeholder)
+        Response.WriteString(string.Empty);                                                 // Country Restrictions (placeholder)
+        Response.WriteString(string.Empty);                                                 // Player Invitation Responses (placeholder)
+        Response.WriteInt8(5);                                                              // Team Size (placeholder)
+        Response.WriteInt8(Convert.ToByte(ChatProtocol.TMMType.TMM_TYPE_CAMPAIGN));         // Group Type (placeholder)
+        # endregion
+
+        bool fullGroupUpdate = updateType switch
+        {
+            ChatProtocol.TMMUpdateType.TMM_CREATE_GROUP => true,
+            ChatProtocol.TMMUpdateType.TMM_FULL_GROUP_UPDATE => true,
+            ChatProtocol.TMMUpdateType.TMM_PLAYER_JOINED_GROUP => true,
+            ChatProtocol.TMMUpdateType.TMM_PLAYER_LEFT_GROUP => true,
+            ChatProtocol.TMMUpdateType.TMM_PLAYER_KICKED_FROM_GROUP => true,
+            _ => false
+        };
+
+        foreach (MatchmakingGroupMember member in group.Members)
+        {
+            if (fullGroupUpdate)
+            {
+                Response.WriteInt32(member.Account.ID);                                     // Account ID
+                Response.WriteString(member.Account.Name);                                  // Account Name
+                Response.WriteInt8(member.Slot);                                            // Group Slot
+                // TODO: Get Real Rank Level And Rating
+                /* TODO: Establish Rank (Medal) Level From Rating And Add To The Database
+                    enum ECampaignLevel
+                    {
+	                    CAMPAIGN_LEVEL_NONE = 0,
+
+	                    CAMPAIGN_LEVEL_BRONZE_5,
+	                    CAMPAIGN_LEVEL_BRONZE_4,
+	                    CAMPAIGN_LEVEL_BRONZE_3,
+	                    CAMPAIGN_LEVEL_BRONZE_2,
+	                    CAMPAIGN_LEVEL_BRONZE_1,
+
+	                    CAMPAIGN_LEVEL_SILVER_5,
+	                    CAMPAIGN_LEVEL_SILVER_4,
+	                    CAMPAIGN_LEVEL_SILVER_3,
+	                    CAMPAIGN_LEVEL_SILVER_2,
+	                    CAMPAIGN_LEVEL_SILVER_1,
+	
+	                    CAMPAIGN_LEVEL_GOLD_4,
+	                    CAMPAIGN_LEVEL_GOLD_3,
+	                    CAMPAIGN_LEVEL_GOLD_2,
+	                    CAMPAIGN_LEVEL_GOLD_1,
+	
+	                    CAMPAIGN_LEVEL_DIAMOND_3,
+	                    CAMPAIGN_LEVEL_DIAMOND_2,
+	                    CAMPAIGN_LEVEL_DIAMOND_1,
+	
+	                    CAMPAIGN_LEVEL_LEGENDARY2,
+	                    CAMPAIGN_LEVEL_LEGENDARY1,
+
+	                    CAMPAIGN_LEVEL_IMMORTAL
+                    };
+                */
+                Response.WriteInt32(20);                                                      // Normal Rank Level (Also Known As Normal Campaign Level Or Medal)
+                Response.WriteInt32(20);                                                      // Casual Rank Level (Also Known As Casual Campaign Level Or Medal)
+                // TODO: Figure Out What These Ranks Are (Potentially Actual Global Ranking Index In Order Of Rating Descending, e.g. Highest Rating Is Rank 1)
+                Response.WriteInt32(123);                                                     // Normal Rank
+                Response.WriteInt32(321);                                                     // Casual Rank
+                Response.WriteBool(true);                                                     // Eligible For Campaign
+                // TODO: Can Be Set To -1 To Hide The Rating From Other Players For Unranked Game Modes
+                Response.WriteInt16(1850);                                                    // Rating
+            }
+
+            Response.WriteInt8(member.LoadingPercent);                                      // Loading Percent (0 to 100)
+            Response.WriteBool(member.IsReady);                                             // Ready Status
+            Response.WriteBool(member.IsInGame);                                            // In-Game Status
+
+            if (fullGroupUpdate)
+            {
+                Response.WriteBool(member.IsEligibleForMatchmaking);                        // Eligible For Matchmaking
+                Response.WriteString(member.Account.ChatNameColour);                        // Chat Name Colour
+                Response.WriteString(member.Account.Icon);                                  // Account Icon
+                Response.WriteString(member.Country);                                       // Country
+                Response.WriteBool(member.HasGameModeAccess);                               // Game Mode Access Bool
+                Response.WriteString(member.GameModeAccess);                                // Game Mode Access String
+            }
+        }
+
+        if (fullGroupUpdate)
+        {
+            foreach (MatchmakingGroupMember member in group.Members)
+            {
+                // TODO: Determine Friendship Status
+                Response.WriteBool(false);                                                  // Is Friend
+            }
+        }
 
         Response.PrependBufferSize();
-        session.SendAsync(Response.Data);
+
+        // TODO: Create Tentative Group, And Only Create Actual Group When Another Player Joins
+
+        // Broadcast To All Current Group Members That A New Player Has Joined
+        Parallel.ForEach(group.Members, member => member.Session.SendAsync(Response.Data));
     }
 }
 
 public class GroupJoinRequestData(ChatBuffer buffer)
 {
     public byte[] CommandBytes = buffer.ReadCommandBytes();
-    public string ClientVersion = buffer.ReadString();           // Placeholder: Version string read but unused
-    public string InitiatorAccountName = buffer.ReadString();    // Placeholder: Intended group leader name read but unused
+    public string ClientVersion = buffer.ReadString();
+    public string InviteIssuerName = buffer.ReadString();
 }

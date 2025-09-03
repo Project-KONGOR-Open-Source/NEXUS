@@ -4,6 +4,7 @@
 public class ServerManagerHandshake(MerrickContext merrick, ILogger<ServerManagerHandshake> logger) : CommandProcessorsBase, ICommandProcessor
 {
     private MerrickContext MerrickContext { get; set; } = merrick;
+
     private ILogger<ServerManagerHandshake> Logger { get; set; } = logger;
 
     public async Task Process(ChatSession session, ChatBuffer buffer)

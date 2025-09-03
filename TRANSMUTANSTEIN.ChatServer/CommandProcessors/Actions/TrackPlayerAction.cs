@@ -4,6 +4,7 @@
 public class TrackPlayerAction(MerrickContext merrick, ILogger<TrackPlayerAction> logger) : CommandProcessorsBase, ICommandProcessor
 {
     private MerrickContext MerrickContext { get; set; } = merrick;
+
     private ILogger<TrackPlayerAction> Logger { get; set; } = logger;
 
     public async Task Process(ChatSession session, ChatBuffer buffer)
