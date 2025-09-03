@@ -124,10 +124,10 @@ public class GroupCreate(MerrickContext merrick, ILogger<GroupCreate> logger) : 
                     };
                 */
                 Response.WriteInt32(20);                                                      // Normal Rank Level (Also Known As Normal Campaign Level Or Medal)
-                Response.WriteInt32(20);                                                      // Casual Rank Level (Also Known As Casual Campaign Level Or Medal)
+                Response.WriteInt32(15);                                                      // Casual Rank Level (Also Known As Casual Campaign Level Or Medal)
                 // TODO: Figure Out What These Ranks Are (Potentially Actual Global Ranking Index In Order Of Rating Descending, e.g. Highest Rating Is Rank 1)
-                Response.WriteInt32(123);                                                     // Normal Rank
-                Response.WriteInt32(321);                                                     // Casual Rank
+                Response.WriteInt32(20);                                                      // Normal Rank
+                Response.WriteInt32(15);                                                      // Casual Rank
                 Response.WriteBool(true);                                                     // Eligible For Campaign
                 // TODO: Can Be Set To -1 To Hide The Rating From Other Players For Unranked Game Modes
                 Response.WriteInt16(1850);                                                    // Rating
