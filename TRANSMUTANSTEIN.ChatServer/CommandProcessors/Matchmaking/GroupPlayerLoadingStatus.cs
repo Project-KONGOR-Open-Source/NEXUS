@@ -50,6 +50,46 @@ public class GroupPlayerLoadingStatus(ILogger<GroupPlayerLoadingStatus> logger) 
         ... More Code In c_chatmanager.cpp
     */
 
+    /*
+        public void UpdateParticipantLoadingStatus(Account account, byte loadingStatus)
+        {
+            bool everyoneLoaded = true;
+            foreach (Participant participant in Participants)
+            {
+                if (participant.AccountId == account.AccountId)
+                {
+                    participant.LoadingStatus = loadingStatus;
+                }
+                if (participant.LoadingStatus != 100)
+                {
+                    everyoneLoaded = false;
+                }
+            }
+
+            if (everyoneLoaded && State == GroupState.LoadingResources)
+            {
+                // Register the Group with the GameFinder.
+                if (!AddToGameFinderQueue(timestampWhenJoinedQueue: Stopwatch.GetTimestamp()))
+                {
+                    // Failed to join the queue, go back to WaitingToStart state.
+                    State = GroupState.WaitingToStart;
+                    BroadcastUpdate(GroupUpdateType.Partial);
+                    return;
+                }
+
+                // If we want to broadcast expected time in queue, we can:
+                Broadcast(new MatchmakingGroupQueueUpdateResponse(
+                    updateType: 11,
+                    averageTimeInQueueInSeconds: 42
+                ));
+
+                // Don't trigger Timer again, for now. But before we do so, send an update.
+                BroadcastUpdate(GroupUpdateType.Partial);
+                Timer.Change(Timeout.Infinite, Timeout.Infinite);
+            }
+        }
+    */
+
     public async Task Process(ChatSession session, ChatBuffer buffer)
     {
         GroupPlayerLoadingStatusRequestData requestData = new (buffer);
@@ -66,7 +106,7 @@ public class GroupPlayerLoadingStatus(ILogger<GroupPlayerLoadingStatus> logger) 
 
         // Broadcast a partial group update reflecting current per-member loading
         ChatBuffer update = new ();
-        update.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_UPDATE);
+        update.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_UPDATE); // TODO: Make This DRY To Eliminate The Duplication
         update.WriteInt8(Convert.ToByte(ChatProtocol.TMMUpdateType.TMM_PARTIAL_GROUP_UPDATE));
         update.WriteInt32(session.ClientInformation.Account.ID); // Actor
 
@@ -160,6 +200,8 @@ public class GroupPlayerLoadingStatusRequestData(ChatBuffer buffer)
 }
 
 /*
+When all members reach 100%, broadcast 0x0D01, then 0x0D09, then 0x1C09 to all.
+
 Minimal Placeholder Flow Extension (0x0D04 -> Lobby)
 
 Purpose:
