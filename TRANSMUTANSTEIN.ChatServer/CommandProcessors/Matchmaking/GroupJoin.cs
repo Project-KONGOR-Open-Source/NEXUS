@@ -38,7 +38,7 @@ public class GroupJoin(MerrickContext merrick, ILogger<GroupJoin> logger) : Comm
             return;
         }
 
-        Response.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_UPDATE);
+        Response.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_UPDATE); // TODO: Make This DRY To Eliminate The Duplication
 
         ChatProtocol.TMMUpdateType updateType = ChatProtocol.TMMUpdateType.TMM_PLAYER_JOINED_GROUP;
 
