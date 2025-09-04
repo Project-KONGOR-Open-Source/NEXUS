@@ -12,35 +12,26 @@ public class GroupPlayerReadyStatus(ILogger<GroupPlayerReadyStatus> logger) : Co
         MatchmakingGroup group = MatchmakingService.GetMatchmakingGroup(session.ClientInformation.Account.ID)
             ?? throw new NullReferenceException($@"No Matchmaking Group Found For Invite Issuer ID ""{session.ClientInformation.Account.ID}""");
 
+        group.Information.GameType = requestData.GameType;
+
         MatchmakingGroupMember groupMember = group.Members.Single(member => member.Account.ID == session.ClientInformation.Account.ID);
 
         if (groupMember.IsLeader is false)
             return; // Non-Leader Group Members Are Implicitly Ready (By Means Of Joining The Group In A Ready State) And Do Not Need To Emit Readiness Status Updates
 
-        bool ready = requestData.ReadyStatus is not 0;
-
-        if (ready)
+        if (groupMember.IsReady is false)
         {
-            foreach (MatchmakingGroupMember member in group.Members.Where(member => member.IsLeader is false))
+            foreach (MatchmakingGroupMember member in group.Members)
             {
                 if (member.IsReady is false)
                 {
-                    member.IsReady = true;
+                    if (member.IsLeader is false)
+                        Logger.LogError(@"[BUG] Non-Leader Group Member ""{Member.Account.Name}"" With ID ""{Member.Account.ID}"" Was Not Ready", member.Account.Name, member.Account.ID);
 
-                    Logger.LogError(@"[BUG] Non-Leader Group Member ""{Member.Account.Name}"" With ID ""{Member.Account.ID}"" Was Not Ready", member.Account.Name, member.Account.ID);
+                    member.IsReady = true;
                 }
             }
 
-            ChatBuffer load = new ();
-
-            load.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_START_LOADING);
-            load.PrependBufferSize();
-
-            Parallel.ForEach(group.Members, member => member.Session.SendAsync(load.Data));
-        }
-
-        else
-        {
             ChatBuffer update = new ();
 
             update.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_UPDATE); // TODO: Make This DRY To Eliminate The Duplication
@@ -49,13 +40,13 @@ public class GroupPlayerReadyStatus(ILogger<GroupPlayerReadyStatus> logger) : Co
 
             update.WriteInt8(Convert.ToByte(updateType));                                     // Group Update Type
             update.WriteInt32(session.ClientInformation.Account.ID);                          // Account ID
-            update.WriteInt8(1);                                                              // Group Size
+            update.WriteInt8(Convert.ToByte(group.Members.Count));                            // Group Size
             // TODO: Calculate Average Group Rating
             update.WriteInt16(1500);                                                          // Average Group Rating
-            update.WriteInt32(session.ClientInformation.Account.ID);                          // Leader Account ID
+            update.WriteInt32(group.Leader.Account.ID);                                       // Leader Account ID
             // TODO: Dynamically Set Arranged Match Type From The Request Data
             update.WriteInt8(Convert.ToByte(ChatProtocol.ArrangedMatchType.AM_MATCHMAKING));  // Arranged Match Type
-            update.WriteInt8(Convert.ToByte(requestData.GameType));                           // Game Type
+            update.WriteInt8(Convert.ToByte(group.Information.GameType));                     // Game Type
             update.WriteString(group.Information.MapName);                                    // Map Name
             update.WriteString(string.Join('|', group.Information.GameModes));                // Game Modes
             update.WriteString(string.Join('|', group.Information.GameRegions));              // Game Regions
@@ -155,8 +146,17 @@ public class GroupPlayerReadyStatus(ILogger<GroupPlayerReadyStatus> logger) : Co
 
             update.PrependBufferSize();
 
-            // Send Final Group Update Before Starting To Queue For A Match
             Parallel.ForEach(group.Members, member => member.Session.SendAsync(update.Data));
+        }
+
+        if (group.Members.All(member => member.IsReady))
+        {
+            ChatBuffer load = new ();
+
+            load.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_START_LOADING);
+            load.PrependBufferSize();
+
+            Parallel.ForEach(group.Members, member => member.Session.SendAsync(load.Data));
         }
     }
 }

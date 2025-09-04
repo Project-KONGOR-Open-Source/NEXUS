@@ -50,7 +50,6 @@ public class GroupJoin(MerrickContext merrick, ILogger<GroupJoin> logger) : Comm
         Response.WriteInt32(group.Leader.Account.ID);                                       // Leader Account ID
         // TODO: Dynamically Set Arranged Match Type From The Request Data
         Response.WriteInt8(Convert.ToByte(ChatProtocol.ArrangedMatchType.AM_MATCHMAKING));  // Arranged Match Type
-
         Response.WriteInt8(Convert.ToByte(group.Information.GameType));                     // Game Type
         Response.WriteString(group.Information.MapName);                                    // Map Name
         Response.WriteString(string.Join('|', group.Information.GameModes));                // Game Modes
