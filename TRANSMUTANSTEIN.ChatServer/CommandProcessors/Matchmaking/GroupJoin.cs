@@ -18,7 +18,7 @@ public class GroupJoin(MerrickContext merrick, ILogger<GroupJoin> logger) : Comm
         {
             Slot = Convert.ToByte(group.Members.Count + 1),
             IsLeader = false,
-            IsReady = false,
+            IsReady = true,
             IsInGame = false,
             IsEligibleForMatchmaking = true,
             LoadingPercent = 0,
