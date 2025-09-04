@@ -11,7 +11,8 @@ public class GroupJoin(MerrickContext merrick, ILogger<GroupJoin> logger) : Comm
     {
         GroupJoinRequestData requestData = new (buffer);
 
-        MatchmakingGroup group = MatchmakingService.Groups.Single(group => group.Value.Members.Select(member => member.Account.Name).Contains(requestData.InviteIssuerName)).Value;
+        MatchmakingGroup group = MatchmakingService.GetMatchmakingGroup(requestData.InviteIssuerName)
+            ?? throw new NullReferenceException($@"No Matchmaking Group Found For Invite Issuer Name ""{requestData.InviteIssuerName}""");
 
         MatchmakingGroupMember newMatchmakingGroupMember = new (session)
         {
@@ -50,45 +51,28 @@ public class GroupJoin(MerrickContext merrick, ILogger<GroupJoin> logger) : Comm
         // TODO: Dynamically Set Arranged Match Type From The Request Data
         Response.WriteInt8(Convert.ToByte(ChatProtocol.ArrangedMatchType.AM_MATCHMAKING));  // Arranged Match Type
 
-        /*
-        Response.WriteInt8(Convert.ToByte(requestData.GameType));                           // Game Type
-        Response.WriteString(requestData.MapName);                                          // Map Name
-        Response.WriteString(string.Join('|', requestData.GameModes));                      // Game Modes
-        Response.WriteString(string.Join('|', requestData.GameRegions));                    // Regions
-        Response.WriteBool(requestData.Ranked);                                             // Ranked
-        Response.WriteBool(requestData.MatchFidelity);                                      // Match Fidelity
-        Response.WriteInt8(requestData.BotDifficulty);                                      // Bot Difficulty
-        Response.WriteBool(requestData.RandomizeBots);                                      // Randomize Bots
+        Response.WriteInt8(Convert.ToByte(group.Information.GameType));                     // Game Type
+        Response.WriteString(group.Information.MapName);                                    // Map Name
+        Response.WriteString(string.Join('|', group.Information.GameModes));                // Game Modes
+        Response.WriteString(string.Join('|', group.Information.GameRegions));              // Game Regions
+        Response.WriteBool(group.Information.Ranked);                                       // Ranked
+        Response.WriteInt8(group.Information.MatchFidelity);                                // Match Fidelity
+        Response.WriteInt8(group.Information.BotDifficulty);                                // Bot Difficulty
+        Response.WriteBool(group.Information.RandomizeBots);                                // Randomize Bots
         Response.WriteString(string.Empty);                                                 // Country Restrictions (e.g. "AB->USE|XY->USW" Means Only Country "AB" Can Access Region "USE" And Only Country "XY" Can Access Region "USW")
         Response.WriteString("TODO: Find Out What Player Invitation Responses Do");         // Player Invitation Responses
         // TODO: Dynamically Set Team Size From The Request Data
         Response.WriteInt8(5);                                                              // Team Size (e.g. 5 For Forests Of Caldavar, 3 For Grimm's Crossing)
-        Response.WriteInt8(Convert.ToByte(requestData.GroupType));                          // Group Type
-        */
-
-        # region TODO: Replace These Placeholder Values With Actual Request Data (Uncomment Above And Populate Data)
-        Response.WriteInt8(Convert.ToByte(ChatProtocol.TMMGameType.TMM_GAME_TYPE_NORMAL));  // Game Type (placeholder)
-        Response.WriteString("caldavar");                                                   // Map Name (placeholder)
-        Response.WriteString("ap|ar|sd");                                                   // Game Modes (placeholder)
-        Response.WriteString("EU|USE|USW");                                                 // Regions (placeholder)
-        Response.WriteBool(true);                                                           // Ranked (placeholder)
-        Response.WriteBool(true);                                                           // Match Fidelity (placeholder)
-        Response.WriteInt8(1);                                                              // Bot Difficulty (placeholder)
-        Response.WriteBool(false);                                                          // Randomize Bots (placeholder)
-        Response.WriteString(string.Empty);                                                 // Country Restrictions (placeholder)
-        Response.WriteString(string.Empty);                                                 // Player Invitation Responses (placeholder)
-        Response.WriteInt8(5);                                                              // Team Size (placeholder)
-        Response.WriteInt8(Convert.ToByte(ChatProtocol.TMMType.TMM_TYPE_CAMPAIGN));         // Group Type (placeholder)
-        # endregion
+        Response.WriteInt8(Convert.ToByte(group.Information.GroupType));                    // Group Type
 
         bool fullGroupUpdate = updateType switch
         {
-            ChatProtocol.TMMUpdateType.TMM_CREATE_GROUP => true,
-            ChatProtocol.TMMUpdateType.TMM_FULL_GROUP_UPDATE => true,
-            ChatProtocol.TMMUpdateType.TMM_PLAYER_JOINED_GROUP => true,
-            ChatProtocol.TMMUpdateType.TMM_PLAYER_LEFT_GROUP => true,
+            ChatProtocol.TMMUpdateType.TMM_CREATE_GROUP             => true,
+            ChatProtocol.TMMUpdateType.TMM_FULL_GROUP_UPDATE        => true,
+            ChatProtocol.TMMUpdateType.TMM_PLAYER_JOINED_GROUP      => true,
+            ChatProtocol.TMMUpdateType.TMM_PLAYER_LEFT_GROUP        => true,
             ChatProtocol.TMMUpdateType.TMM_PLAYER_KICKED_FROM_GROUP => true,
-            _ => false
+            _                                                       => false
         };
 
         foreach (MatchmakingGroupMember member in group.Members)

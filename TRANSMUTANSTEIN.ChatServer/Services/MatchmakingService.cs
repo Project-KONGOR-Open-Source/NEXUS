@@ -6,6 +6,15 @@ public class MatchmakingService(IServiceProvider serviceProvider) : IHostedServi
 
     public static ConcurrentDictionary<int, MatchmakingGroup> Groups { get; set; } = [];
 
+    public static MatchmakingGroup? GetMatchmakingGroup(OneOf<int, string> memberIdentifier)
+        => memberIdentifier.Match(id => GetMatchmakingGroupByMemberID(id), name => GetMatchmakingGroupByMemberName(name));
+
+    public static MatchmakingGroup? GetMatchmakingGroupByMemberID(int memberID)
+        => Groups.Values.SingleOrDefault(group => group.Members.Any(member => member.Account.ID == memberID));
+
+    public static MatchmakingGroup? GetMatchmakingGroupByMemberName(string memberName)
+        => Groups.Values.SingleOrDefault(group => group.Members.Any(member => member.Account.Name.Equals(memberName)));
+
     public static ConcurrentDictionary<int, MatchmakingGroup> SoloPlayerGroups
         => new (Groups.Where(group => group.Value.Members.Count == 1));
 

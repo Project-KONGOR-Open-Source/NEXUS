@@ -8,6 +8,8 @@ global using Microsoft.EntityFrameworkCore;
 global using Microsoft.EntityFrameworkCore.Diagnostics;
 global using Microsoft.Extensions.Diagnostics.HealthChecks;
 
+global using OneOf;
+
 global using StackExchange.Redis;
 
 global using System.Collections.Concurrent;

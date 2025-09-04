@@ -24,23 +24,41 @@ public class GroupCreate(MerrickContext merrick, ILogger<GroupCreate> logger) : 
                 GameModeAccess = string.Join('|', requestData.GameModes.Select(mode => "true"))
             };
 
+            MatchmakingGroupInformation information = new ()
+            {
+                ClientVersion = requestData.ClientVersion,
+                GroupType = requestData.GroupType,
+                GameType = requestData.GameType,
+                MapName = requestData.MapName,
+                GameModes = requestData.GameModes,
+                GameRegions = requestData.GameRegions,
+                Ranked = requestData.Ranked,
+                MatchFidelity = requestData.MatchFidelity,
+                BotDifficulty = requestData.BotDifficulty,
+                RandomizeBots = requestData.RandomizeBots
+            };
+
             if (MatchmakingService.Groups.ContainsKey(session.ClientInformation.Account.ID) is false)
             {
-                if (MatchmakingService.Groups.TryAdd(session.ClientInformation.Account.ID, new MatchmakingGroup(member)) is false)
+                if (MatchmakingService.Groups.TryAdd(session.ClientInformation.Account.ID, new MatchmakingGroup(member) { Information = information }) is false)
                 {
                     Logger.LogError(@"Failed To Create Matchmaking Group For Account ID ""{Session.ClientInformation.Account.ID}""", session.ClientInformation.Account.ID);
 
-                    return; // TODO: Respond With ChatProtocol.TMMFailedToJoinReason Or Similar (e.g. TMMFailedToCreate, If It Exists)
+                    // TODO: Respond With ChatProtocol.TMMFailedToJoinReason Or Similar (e.g. TMMFailedToCreate, If It Exists) Or Maybe Just Throw An Exception
+
+                    return;
                 }
             }
 
             else
             {
-                if (MatchmakingService.Groups.TryUpdate(session.ClientInformation.Account.ID, new MatchmakingGroup(member), MatchmakingService.Groups[session.ClientInformation.Account.ID]) is false)
+                if (MatchmakingService.Groups.TryUpdate(session.ClientInformation.Account.ID, new MatchmakingGroup(member) { Information = information }, MatchmakingService.Groups[session.ClientInformation.Account.ID]) is false)
                 {
                     Logger.LogError(@"Failed To Update Matchmaking Group For Account ID ""{Session.ClientInformation.Account.ID}""", session.ClientInformation.Account.ID);
 
-                    return; // TODO: Respond With ChatProtocol.TMMFailedToJoinReason Or Similar (e.g. TMMFailedToCreate, If It Exists)
+                    // TODO: Respond With ChatProtocol.TMMFailedToJoinReason Or Similar (e.g. TMMFailedToCreate, If It Exists) Or Maybe Just Throw An Exception
+
+                    return;
                 }
             }
         }
@@ -60,9 +78,9 @@ public class GroupCreate(MerrickContext merrick, ILogger<GroupCreate> logger) : 
         Response.WriteInt8(Convert.ToByte(requestData.GameType));                           // Game Type
         Response.WriteString(requestData.MapName);                                          // Map Name
         Response.WriteString(string.Join('|', requestData.GameModes));                      // Game Modes
-        Response.WriteString(string.Join('|', requestData.GameRegions));                    // Regions
+        Response.WriteString(string.Join('|', requestData.GameRegions));                    // Game Regions
         Response.WriteBool(requestData.Ranked);                                             // Ranked
-        Response.WriteBool(requestData.MatchFidelity);                                      // Match Fidelity
+        Response.WriteInt8(requestData.MatchFidelity);                                      // Match Fidelity
         Response.WriteInt8(requestData.BotDifficulty);                                      // Bot Difficulty
         Response.WriteBool(requestData.RandomizeBots);                                      // Randomize Bots
         Response.WriteString(string.Empty);                                                 // Country Restrictions (e.g. "AB->USE|XY->USW" Means Only Country "AB" Can Access Region "USE" And Only Country "XY" Can Access Region "USW")
@@ -71,7 +89,7 @@ public class GroupCreate(MerrickContext merrick, ILogger<GroupCreate> logger) : 
         Response.WriteInt8(5);                                                              // Team Size (e.g. 5 For Forests Of Caldavar, 3 For Grimm's Crossing)
         Response.WriteInt8(Convert.ToByte(requestData.GroupType));                          // Group Type
 
-        MatchmakingGroup group = MatchmakingService.Groups.Single(group => group.Key == session.ClientInformation.Account.ID).Value;
+        MatchmakingGroup group = MatchmakingService.Groups[session.ClientInformation.Account.ID];
 
         bool fullGroupUpdate = updateType switch
         {
@@ -177,8 +195,9 @@ public class GroupCreateRequestData(ChatBuffer buffer)
     public string[] GameRegions = buffer.ReadString().Split('|', StringSplitOptions.RemoveEmptyEntries);
     public bool Ranked = buffer.ReadBool();
 
-    // If TRUE, Skill Disparity Will Be Lower But The Matchmaking Queue Time Will Be Longer
-    public bool MatchFidelity = buffer.ReadBool();
+    // 0: Skill Disparity Will Be Higher But The Matchmaking Queue Time Will Be Shorter
+    // 1: Skill Disparity Will Be Lower But The Matchmaking Queue Time Will Be Longer
+    public byte MatchFidelity = buffer.ReadInt8();
 
     // 1: Easy, 2: Medium, 3: Hard
     // Only Used For Bot Matches, But Sent With Every Request To Create A Group
