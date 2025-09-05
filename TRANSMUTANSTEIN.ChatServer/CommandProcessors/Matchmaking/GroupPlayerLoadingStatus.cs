@@ -5,98 +5,123 @@ public class GroupPlayerLoadingStatus(ILogger<GroupPlayerLoadingStatus> logger) 
 {
     private ILogger<GroupPlayerLoadingStatus> Logger { get; } = logger;
 
-    /*
-        // This handles new groups being created, and players getting kicked/leaving/joining from the groups because once the group 
-        // changes another update would need to be sent anyways.  It is designed to be stateless so any update will always provide 
-        // all the information required so we can avoid synchronization complications
-        ETMMUpdateType eUpdateType(static_cast<ETMMUpdateType>(pkt.ReadByte()));
-        uint uiAccountID(pkt.ReadInt());
-        byte yGroupSize(pkt.ReadByte());
-        ushort unAverageTMR(pkt.ReadShort());
-        uint uiGroupLeaderAccountID(pkt.ReadInt());
-        EArrangedMatchType eArrangedMatchType(static_cast<EArrangedMatchType>(pkt.ReadByte()));
-        byte yGameType(pkt.ReadByte());
-        tstring sMapName(pkt.ReadTString());
-        tstring sGameModes(pkt.ReadTString());
-        tstring sRegions(pkt.ReadTString());
-        bool bRanked(pkt.ReadByte() != 0);
-        uint uiMatchFidelity(pkt.ReadByte());
-        byte yBotDifficulty(pkt.ReadByte());
-        bool bRandomizeBots(pkt.ReadByte() != 0);
-        tstring sRestrictedRegions(pkt.ReadTString());
-        tstring sPlayerInvitationResponses(pkt.ReadTString());
-        byte yTeamSize(pkt.ReadByte());
-        byte yTMMType(pkt.ReadByte());
-
-        if (pkt.HasFaults() || yGroupSize > MAX_GROUP_SIZE)
-            return;
-
-        if (cc_printTMMUpdates)
-        {
-            Console << L"Received TMM update " << g_sTMMUpdateTypes[eUpdateType] << newl;
-        }
-
-        // We need to store these out permanently so we can check for restricted regions
-        m_yGroupSize = yGroupSize;
-
-        m_yArrangedMatchType = eArrangedMatchType;
-        m_yGameType = yGameType;
-        m_sTMMMapName = sMapName;
-        cc_TMMMatchFidelity = uiMatchFidelity;
-        m_sRestrictedRegions = sRestrictedRegions;
-
-        bool bHandleFullUpdate(eUpdateType == TMM_CREATE_GROUP || eUpdateType == TMM_FULL_GROUP_UPDATE || eUpdateType == TMM_PLAYER_JOINED_GROUP || eUpdateType == TMM_PLAYER_LEFT_GROUP || eUpdateType == TMM_PLAYER_KICKED_FROM_GROUP);
-
-        ... More Code In c_chatmanager.cpp
-    */
-
-    /*
-        public void UpdateParticipantLoadingStatus(Account account, byte loadingStatus)
-        {
-            bool everyoneLoaded = true;
-            foreach (Participant participant in Participants)
-            {
-                if (participant.AccountId == account.AccountId)
-                {
-                    participant.LoadingStatus = loadingStatus;
-                }
-                if (participant.LoadingStatus != 100)
-                {
-                    everyoneLoaded = false;
-                }
-            }
-
-            if (everyoneLoaded && State == GroupState.LoadingResources)
-            {
-                // Register the Group with the GameFinder.
-                if (!AddToGameFinderQueue(timestampWhenJoinedQueue: Stopwatch.GetTimestamp()))
-                {
-                    // Failed to join the queue, go back to WaitingToStart state.
-                    State = GroupState.WaitingToStart;
-                    BroadcastUpdate(GroupUpdateType.Partial);
-                    return;
-                }
-
-                // If we want to broadcast expected time in queue, we can:
-                Broadcast(new MatchmakingGroupQueueUpdateResponse(
-                    updateType: 11,
-                    averageTimeInQueueInSeconds: 42
-                ));
-
-                // Don't trigger Timer again, for now. But before we do so, send an update.
-                BroadcastUpdate(GroupUpdateType.Partial);
-                Timer.Change(Timeout.Infinite, Timeout.Infinite);
-            }
-        }
-    */
-
     public async Task Process(ChatSession session, ChatBuffer buffer)
     {
         GroupPlayerLoadingStatusRequestData requestData = new (buffer);
 
-        // Update in-memory group member loading if group exists
-        MatchmakingGroup? group = MatchmakingService.Groups.Values
-            .SingleOrDefault(g => g.Members.Any(m => m.Account.ID == session.ClientInformation.Account.ID));
+        MatchmakingGroup group = MatchmakingService.GetMatchmakingGroup(session.ClientInformation.Account.ID)
+            ?? throw new NullReferenceException($@"No Matchmaking Group Found For Invite Issuer ID ""{session.ClientInformation.Account.ID}""");
+
+        MatchmakingGroupMember groupMember = group.Members.Single(member => member.Account.ID == session.ClientInformation.Account.ID);
+
+        groupMember.LoadingPercent = requestData.LoadingPercent;
+
+        bool loaded = group.Members.All(member => member.LoadingPercent is 100);
+
+        /*
+            // Register the Group with the GameFinder.
+            if (!AddToGameFinderQueue(timestampWhenJoinedQueue: Stopwatch.GetTimestamp()))
+            {
+                // Failed to join the queue, go back to WaitingToStart state.
+                State = GroupState.WaitingToStart;
+                BroadcastUpdate(GroupUpdateType.Partial);
+                return;
+            }
+
+            // If we want to broadcast expected time in queue, we can:
+            Broadcast(new MatchmakingGroupQueueUpdateResponse(
+                updateType: 11,
+                averageTimeInQueueInSeconds: 42
+            ));
+
+            // Don't trigger Timer again, for now. But before we do so, send an update.
+            BroadcastUpdate(GroupUpdateType.Partial);
+            Timer.Change(Timeout.Infinite, Timeout.Infinite);
+
+            ---------------------------------------------------------------------------------------------------------
+
+            internal bool AddToGameFinderQueue(long timestampWhenJoinedQueue)
+            {
+                Dictionary<int, int>? pingInformation;
+                if (Regions == "AUTO" || Regions == "AUTO|")
+                {
+                    // If the region is auto, obtain ping information for the group.
+                    pingInformation = CombinePingInformation(PlayersInfo.Select(info => info.PingInformation).ToList());
+                    if (pingInformation.Count == 0)
+                    {
+                        // No ping information is available.
+                        KongorContext.ConnectedClients[Participants[0].AccountId].SendResponse(
+                            new ErrorMessageResponse("Not all players have reported server pings. Please toggle AUTO region on/off and try again.")
+                        );
+                        return false;
+                    }
+                }
+                else
+                {
+                    pingInformation = null;
+                }
+
+                if (Participants.Count != PlayersInfo.Count())
+                {
+                    KongorContext.ConnectedClients[Participants[0].AccountId].SendResponse(
+                        new ErrorMessageResponse("Internal error: couldn't obtain MMR of all players.")
+                    );
+                    return false;
+                }
+
+                ProtocolResponse response;
+                ConnectedClient leader = KongorContext.ConnectedClients[Participants[0].AccountId];
+                if (leader.TimestampWhenTimePreviouslySpentInQueueExpire > timestampWhenJoinedQueue)
+                {
+                    long timePreviouslySpentInQueue = leader.TimePreviouslySpentInQueue;
+                    timestampWhenJoinedQueue -= timePreviouslySpentInQueue;
+                    response = new MatchmakingGroupRejoinQueueResponse(Convert.ToInt32(timePreviouslySpentInQueue / Stopwatch.Frequency));
+            
+                }
+                else
+                {
+                    response = new MatchmakingGroupJoinQueueResponse();
+                }
+        
+                // Create an immutable snapshot of our MatchmakingGroup.
+                TMMGroup = ToTMMGroup(timestampWhenJoinedQueue, pingInformation);
+                if (TMMGroup == null) return false;
+
+                Broadcast(response);
+
+                // Register it with the GameFinder.
+                GameFinder.AddToQueue(TMMGroup);
+
+                // We are now in the queue.
+                State = GroupState.InQueue;
+
+                return true;
+            }
+         */
+
+        if (loaded)
+        {
+            ChatBuffer load = new();
+
+            load.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_QUEUE_UPDATE);
+            load.WriteInt8(Convert.ToByte(ChatProtocol.TMMUpdateType.TMM_GROUP_QUEUE_UPDATE));
+            // TODO: Get Actual Average Time In Queue (In Seconds)
+            load.WriteInt32(666);
+
+            load.PrependBufferSize();
+
+            Parallel.ForEach(group.Members, member => member.Session.SendAsync(load.Data));
+        }
+
+
+
+
+
+
+
+
+
+
 
         if (group is not null)
         {
@@ -198,42 +223,3 @@ public class GroupPlayerLoadingStatusRequestData(ChatBuffer buffer)
     public byte[] CommandBytes = buffer.ReadCommandBytes();
     public byte LoadingPercent = buffer.ReadInt8();
 }
-
-/*
-When all members reach 100%, broadcast 0x0D01, then 0x0D09, then 0x1C09 to all.
-
-Minimal Placeholder Flow Extension (0x0D04 -> Lobby)
-
-Purpose:
-Provide a skeletal pathway from player loading status updates to a simulated game lobby entry without implementing real matchmaking / queue logic.
-
-Decoded Request:
-- Bytes: [ size-prefixed command ][ loadingStatus ]
-
-Behavior Implemented:
-1. Echo partial group update (0x0D03 semantics) including updated loading percent for a single-member group.
-2. When loadingStatus == 100:
-   a. Send bare GroupJoinQueue (0x0D01) as if the group transitioned into the matchmaking queue.
-   b. Send bare MatchFoundUpdate (0x0D09) instantly (skipping timing, queue logic, region / MMR matching).
-   c. Send bare GAME_LOBBY_JOINED (0x1C09) to emulate successful transition into a lobby.
-
-Skipped / Deferred (TODO):
-- Accumulating multi-member loading status and only proceeding when all reach 100.
-- Maintaining a real MatchmakingGroup state machine (WaitingToStart -> LoadingResources -> InQueue -> MatchFound ...).
-- Sending StartLoading (0x0F03) or PendingMatch (0x0F04) intermediate steps.
-- Emitting proper MatchFoundUpdate payload (currently empty frame only).
-- Constructing valid Game Lobby payload (0x1C09 currently sent with no body; real clients may expect lobby metadata and slots).
-- Queue rejoin (0x0E0C) vs fresh join differentiation.
-- Queue time updates (0x0D06) and popularity updates (0x0D07).
-
-Future Incremental Steps:
-1. Introduce in-memory group store with per-member LoadingPercent and Ready flag.
-2. Add Ready handler (already placeholder) to set group state and emit StartLoading (0x0F03) before first 0x0D04.
-3. Replace immediate jump with:
-   - After all 100%: send GroupJoinQueue (0x0D01) then a delayed MatchFoundUpdate (0x0D09).
-4. Implement minimal payload structures for 0x0D09 and 0x1C09 following KONGOR formats.
-5. Add PendingMatch (0x0F04) / AcceptPendingMatch (0x0F05) cycle.
-6. Populate lobby roster using real group membership.
-
-This file documents each placeholder so future work can fill in real matchmaking logic without guessing current shortcuts.
-*/
