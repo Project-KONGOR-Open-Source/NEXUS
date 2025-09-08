@@ -66,6 +66,8 @@ public class GroupCreate(MerrickContext merrick, ILogger<GroupCreate> logger) : 
         MatchmakingGroup group = MatchmakingService.Groups[session.ClientInformation.Account.ID];
 
         group.MulticastUpdate(session.ClientInformation.Account.ID, ChatProtocol.TMMUpdateType.TMM_CREATE_GROUP);
+
+        // TODO: Create Chat Channel For The Group
     }
 }
 
