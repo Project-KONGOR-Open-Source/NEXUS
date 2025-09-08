@@ -55,5 +55,6 @@ public class GroupInvite(MerrickContext merrick, ILogger<GroupInvite> logger) : 
 public class GroupInviteRequestData(ChatBuffer buffer)
 {
     public byte[] CommandBytes = buffer.ReadCommandBytes();
+
     public string InviteReceiverName = buffer.ReadString();
 }

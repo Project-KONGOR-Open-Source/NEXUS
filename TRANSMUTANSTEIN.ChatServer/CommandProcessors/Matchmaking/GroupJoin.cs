@@ -46,6 +46,8 @@ public class GroupJoin(MerrickContext merrick, ILogger<GroupJoin> logger) : Comm
 public class GroupJoinRequestData(ChatBuffer buffer)
 {
     public byte[] CommandBytes = buffer.ReadCommandBytes();
+
     public string ClientVersion = buffer.ReadString();
+
     public string InviteIssuerName = buffer.ReadString();
 }

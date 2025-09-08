@@ -59,7 +59,10 @@ public class ServerManagerHandshake(MerrickContext merrick, ILogger<ServerManage
 public class ServerManagerHandshakeRequestData(ChatBuffer buffer)
 {
     public byte[] CommandBytes = buffer.ReadCommandBytes();
+
     public int ServerManagerID = buffer.ReadInt32();
+
     public string SessionCookie = buffer.ReadString();
+
     public int ChatProtocolVersion = buffer.ReadInt32();
 }

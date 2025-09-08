@@ -47,5 +47,6 @@ public class GroupPlayerLoadingStatus(ILogger<GroupPlayerLoadingStatus> logger) 
 public class GroupPlayerLoadingStatusRequestData(ChatBuffer buffer)
 {
     public byte[] CommandBytes = buffer.ReadCommandBytes();
+
     public byte LoadingPercent = buffer.ReadInt8();
 }

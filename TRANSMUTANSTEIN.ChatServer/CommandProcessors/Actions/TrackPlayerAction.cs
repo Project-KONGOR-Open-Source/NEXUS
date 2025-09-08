@@ -20,5 +20,6 @@ public class TrackPlayerAction(MerrickContext merrick, ILogger<TrackPlayerAction
 public class TrackPlayerActionRequestData(ChatBuffer buffer)
 {
     public byte[] CommandBytes = buffer.ReadCommandBytes();
+
     public ChatProtocol.ActionCampaign Action = (ChatProtocol.ActionCampaign)buffer.ReadInt8();
 }

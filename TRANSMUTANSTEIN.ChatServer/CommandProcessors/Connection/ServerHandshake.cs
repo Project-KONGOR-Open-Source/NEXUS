@@ -53,7 +53,10 @@ public class ServerHandshake(MerrickContext merrick, ILogger<ServerHandshake> lo
 public class ServerHandshakeRequestData(ChatBuffer buffer)
 {
     public byte[] CommandBytes = buffer.ReadCommandBytes();
+
     public int ServerID = buffer.ReadInt32();
+
     public string SessionCookie = buffer.ReadString();
+
     public int ChatProtocolVersion = buffer.ReadInt32();
 }

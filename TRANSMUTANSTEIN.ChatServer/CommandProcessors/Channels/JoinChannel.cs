@@ -95,5 +95,6 @@ public class JoinChannel(MerrickContext merrick, ILogger<JoinChannel> logger) : 
 public class JoinChannelRequestData(ChatBuffer buffer)
 {
     public byte[] CommandBytes = buffer.ReadCommandBytes();
+
     public string Channel = buffer.ReadString();
 }

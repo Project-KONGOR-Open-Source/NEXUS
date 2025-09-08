@@ -50,6 +50,8 @@ public class GroupPlayerReadyStatus(ILogger<GroupPlayerReadyStatus> logger) : Co
 public class GroupPlayerReadyStatusRequestData(ChatBuffer buffer)
 {
     public byte[] CommandBytes = buffer.ReadCommandBytes();
+
     public byte ReadyStatus = buffer.ReadInt8();
+
     public ChatProtocol.TMMGameType GameType = (ChatProtocol.TMMGameType) buffer.ReadInt8();
 }
