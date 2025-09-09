@@ -14,6 +14,8 @@ public class GroupJoin(MerrickContext merrick, ILogger<GroupJoin> logger) : Comm
         MatchmakingGroup group = MatchmakingService.GetMatchmakingGroup(requestData.InviteIssuerName)
             ?? throw new NullReferenceException($@"No Matchmaking Group Found For Invite Issuer Name ""{requestData.InviteIssuerName}""");
 
+        // TODO: If The Group Is Full (Members Count Is Equal To Max Map Players Count), Reject The Join Request With An Appropriate Error
+
         MatchmakingGroupMember newMatchmakingGroupMember = new (session)
         {
             Slot = Convert.ToByte(group.Members.Count + 1),
