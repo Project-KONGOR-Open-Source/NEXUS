@@ -28,6 +28,8 @@ public class GroupPlayerLoadingStatus(ILogger<GroupPlayerLoadingStatus> logger) 
 
             Parallel.ForEach(group.Members, member => member.Session.SendAsync(queue.Data));
 
+            group.QueueStartTime = DateTimeOffset.UtcNow;
+
             ChatBuffer load = new ();
 
             load.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_QUEUE_UPDATE);

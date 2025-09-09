@@ -16,6 +16,10 @@ public class MatchmakingGroup(MatchmakingGroupMember leader)
 
     public int FullTeamDifference => Information.TeamSize - Members.Count;
 
+    public DateTimeOffset? QueueStartTime { get; set; } = null;
+
+    public TimeSpan QueueDuration => QueueStartTime is not null ? DateTimeOffset.UtcNow - QueueStartTime.Value : TimeSpan.Zero;
+
     public void MulticastUpdate(int emitterAccountID, ChatProtocol.TMMUpdateType updateType)
     {
         ChatBuffer update = new ();

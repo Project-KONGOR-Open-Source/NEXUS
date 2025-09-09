@@ -34,8 +34,7 @@ public class MatchmakingService(IServiceProvider serviceProvider) : IHostedServi
     {
         Logger.LogInformation("Matchmaking Service Has Started");
 
-        while (cancellationToken.IsCancellationRequested is false)
-            await MakeMatches();
+        await RunMatchBroker(cancellationToken);
     }
 
     public async Task StopAsync(CancellationToken cancellationToken)
@@ -52,8 +51,32 @@ public class MatchmakingService(IServiceProvider serviceProvider) : IHostedServi
         GC.SuppressFinalize(this);
     }
 
-    private async Task MakeMatches()
+    private async Task RunMatchBroker(CancellationToken cancellationToken)
     {
-         await Task.CompletedTask;
+        while (cancellationToken.IsCancellationRequested is false)
+        {
+            // TODO: Implement Match Broker Logic Here
+
+            # region Match Broker Logic Placeholder
+            if (Groups.Count == 2 && Groups.Values.First().QueueDuration != TimeSpan.Zero && Groups.Values.Last().QueueDuration != TimeSpan.Zero)
+            {
+                List<MatchmakingGroup> team_1 = [Groups.Values.First()];
+                List<MatchmakingGroup> team_2 = [Groups.Values.Last()];
+
+                Parallel.ForEach([..team_1, ..team_2], group => group.QueueStartTime = null);
+
+                ChatBuffer match = new ();
+
+                match.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_QUEUE_UPDATE);
+                match.WriteInt8(Convert.ToByte(ChatProtocol.TMMUpdateType.TMM_GROUP_FOUND_SERVER)); // The Horn !!!
+
+                match.PrependBufferSize();
+
+                Parallel.ForEach([..team_1, ..team_2], group => Parallel.ForEach(group.Members, member => member.Session.SendAsync(match.Data)));
+            }
+            # endregion
+        }
+
+        await Task.CompletedTask;
     }
 }
