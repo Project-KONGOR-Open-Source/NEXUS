@@ -1,0 +1,494 @@
+﻿namespace KONGOR.TCPListener;
+
+public class ChatChannel
+{
+    private static int ResponseSizeThatMarksChannelFull = 15000; // 16384 is the absolute maximum.
+    private static int NextChannelId = 0;
+
+    public class ChannelUser
+    {
+        public readonly string DisplayedName;
+        public readonly int AccountId;
+        public ChatServerProtocol.ChatClientStatus ChatClientStatus { get; set; }
+        public readonly ChatServerProtocol.ChatAdminLevel ChatAdminLevel;
+        public readonly byte Flags;
+        public string ChatSymbol { get; set; }
+        public string ChatNameColour { get; set; }
+        public string AccountIcon { get; set; }
+        public readonly int AscensionLevel;
+
+        public ChannelUser(
+            string displayedName,
+            int accountId,
+            ChatServerProtocol.ChatClientStatus chatClientStatus,
+            ChatServerProtocol.ChatAdminLevel chatAdminLevel,
+            byte flags,
+            string chatSymbol,
+            string chatNameColour,
+            string accountIcon,
+            int ascensionLevel)
+        {
+            DisplayedName = displayedName;
+            AccountId = accountId;
+            ChatClientStatus = chatClientStatus;
+            ChatAdminLevel = chatAdminLevel;
+            Flags = flags;
+            ChatSymbol = chatSymbol;
+            ChatNameColour = chatNameColour;
+            AccountIcon = accountIcon;
+            AscensionLevel = ascensionLevel;
+        }
+    }
+
+    public ChatChannel(string name) : this(name, $"Welcome To The {name} Channel!", ChatServerProtocol.ChatChannelFlags.Permanent)
+    {
+    }
+
+    public ChatChannel(string name, string topic, ChatServerProtocol.ChatChannelFlags flags)
+    {
+        Identifier = ++NextChannelId;
+        Name = name;
+        Topic = topic;
+        Flags = flags;
+    }
+
+    public int Identifier { get; }
+    public string Name { get; }
+    public string Topic { get; set; }
+    public ChatServerProtocol.ChatChannelFlags Flags { get; set; }
+    public List<ChannelUser> ChannelUsers { get; } = new();
+    public bool ChannelIsFull = false;
+
+    public void NotifyAccountUpgradesChanged(int accountId, string chatSymbol, string chatNameColour, string accountIcon)
+    {
+        ChannelUser? channelUser = ChannelUsers.SingleOrDefault(user => user.AccountId == accountId);
+        if (channelUser == null) return;
+
+        channelUser.ChatSymbol = chatSymbol;
+        channelUser.ChatNameColour = chatNameColour;
+        channelUser.AccountIcon = accountIcon;
+
+        NotifyEveryone(CreateChangedChannelResponse());
+    }
+
+    public void SetTopic(int accountId, string desiredTopic)
+    {
+        ChannelUser? channelUser = ChannelUsers.SingleOrDefault(user => user.AccountId == accountId);
+        // See if the account has necessary permissions.
+        if (channelUser != null && channelUser.ChatAdminLevel != ChatServerProtocol.ChatAdminLevel.None)
+        {
+            // Allowed.
+            SetTopicByAdmin(desiredTopic);
+        }
+    }
+
+    public void SetTopicByAdmin(string desiredTopic)
+    {
+        if (Topic == desiredTopic)
+        {
+            return;
+        }
+
+        Topic = desiredTopic;
+
+        NotifyEveryone(
+            new ChannelTopicResponse(
+                channelId: Identifier,
+                topic: desiredTopic
+            )
+        );
+    }
+
+    public void AddAccountIds(IEnumerable<int> accountIds)
+    {
+        List<ConnectedClient> clients = new();
+        foreach (int accountId in accountIds)
+        {
+            if (KongorContext.ConnectedClients.TryGetValue(accountId, out ConnectedClient? client))
+            {
+                if (client.Account == null) continue;
+
+                clients.Add(client);
+            }
+        }
+
+        AddClientsWithNonNullSession(clients);
+    }
+
+    public void AddClientsWithNonNullSession(List<ConnectedClient> clients)
+    {
+        List<JoinedChannelBroadcast> joinedChannelBroadcasts = new();
+        int oldUsersCount = ChannelUsers.Count;
+        foreach (ConnectedClient client in clients)
+        {
+            Account account = client.Account;
+            if (ChannelUsers.Any(user => user.AccountId == account.AccountId))
+            {
+                // Already in the channel.
+                continue;
+            }
+
+            ChannelUser newUser = ConvertAccountToChannelUser(account, ChatServerProtocol.ChatAdminLevel.None);
+            AddChannelUser(newUser, client);
+            joinedChannelBroadcasts.Add(CreateJoinedChannelBroadcast(newUser));
+        }
+
+        // Make a copy of the List to avoid modification of the list while iterating in case SendResponse() causes a disconnect.
+        List<ChannelUser> oldUsers = ChannelUsers.GetRange(0, oldUsersCount);
+        List<ChannelUser> newUsers = ChannelUsers.GetRange(oldUsersCount, ChannelUsers.Count - oldUsersCount);
+
+        // Notify OLD channel users that we have new guests.
+        foreach (ChannelUser oldUser in oldUsers)
+        {
+            ConnectedClient client = KongorContext.ConnectedClients[oldUser.AccountId];
+            foreach (JoinedChannelBroadcast? joinedChannelBroadcast in joinedChannelBroadcasts)
+            {
+                client.SendResponse(joinedChannelBroadcast);
+            }
+        }
+
+        // Notify NEW channel users that they have now successfully joined the chat:
+        ChangedChannelResponse changedChannelResponse = CreateChangedChannelResponse();
+        foreach (ChannelUser newUser in newUsers)
+        {
+            ConnectedClient client = KongorContext.ConnectedClients[newUser.AccountId];
+            client.SendResponse(changedChannelResponse);
+        }
+    }
+
+    public bool AddAccount(Account account, ConnectedClient client)
+    {
+        if (ChannelIsFull)
+        {
+            // Cannot accept any more users without risking packet size overflow.
+            return false;
+        }
+
+        if (ChannelUsers.Any(user => user.AccountId == account.AccountId))
+        {
+            // Already in the channel.
+            return false;
+        }
+
+        // Notify old users about the new account before adding it the the list
+        // to avoid sending to ourselves.
+        ChatServerProtocol.ChatAdminLevel adminLevel;
+        if (account.AccountType == AccountType.Staff)
+        {
+            adminLevel = ChatServerProtocol.ChatAdminLevel.Staff;
+        }
+        else
+        {
+            adminLevel = ChatServerProtocol.ChatAdminLevel.None;
+        }
+
+        ChannelUser newUser = ConvertAccountToChannelUser(account, adminLevel);
+        JoinedChannelBroadcast joinedChannelBroadcast = CreateJoinedChannelBroadcast(newUser);
+        NotifyEveryone(joinedChannelBroadcast);
+
+        AddChannelUser(newUser, client);
+
+        client.SendResponse(CreateChangedChannelResponse());
+        return true;
+    }
+
+    public void RemoveAccount(ConnectedClient connectedClient, int accountId, bool removeFromClientChatChannels)
+    {
+        if (ChannelUsers.RemoveAll(user => user.AccountId == accountId) == 0)
+        {
+            // Unknown account. Is this an error?
+            return;
+        }
+
+        // No longer full since we freed up some space.
+        ChannelIsFull = false;
+
+        if (removeFromClientChatChannels)
+        {
+            // Remove the ChatChannel from the list of the channels that this Account has joined.
+            connectedClient.ChatChannels.Remove(this);
+        }
+
+        if (ChannelUsers.Count == 0 && !Flags.HasFlag(ChatServerProtocol.ChatChannelFlags.Clan))
+        {
+            // Channel became empty. Dispose of it.
+            KongorContext.ChatChannels.Remove(this);
+            return;
+        }
+
+        NotifyEveryone(
+            new LeftChannelResponse(
+                accountId: accountId,
+                channelId: Identifier
+            )
+        );
+    }
+
+    public void RemoveEveryone()
+    {
+        foreach (ChannelUser channelUser in ChannelUsers)
+        {
+            // Let each of the accounts know that they left channel.
+            LeftChannelResponse leftChannelResponse = new(
+                accountId: channelUser.AccountId,
+                channelId: Identifier
+            );
+
+            ConnectedClient connectedClient = KongorContext.ConnectedClients[channelUser.AccountId]!;
+            connectedClient.ChatChannels.Remove(this);
+
+            connectedClient.SendResponse(leftChannelResponse);
+        }
+        ChannelUsers.Clear();
+    }
+
+    public void UpdateExistingUserStatus(int accountId, ChatServerProtocol.ChatClientStatus chatClientStatus, HashSet<int> clientAccountIdsToUpdate)
+    {
+        ChannelUser? channelUser = ChannelUsers.SingleOrDefault(user => user.AccountId == accountId);
+        if (channelUser == null)
+        {
+            Console.WriteLine("User was not found in the channel.");
+            return;
+        }
+
+        channelUser.ChatClientStatus = chatClientStatus;
+        foreach (ChatChannel.ChannelUser user in ChannelUsers)
+        {
+            clientAccountIdsToUpdate.Add(user.AccountId);
+        }
+    }
+
+    public void SendMessage(int senderAccountId, string? senderName, string message)
+    {
+        if (!KongorContext.ConnectedClients.TryGetValue(senderAccountId, out var connectedClient))
+            return;
+
+        if (connectedClient.Account.AccountType == AccountType.Staff && Name == "DEBUG")
+        {
+            if (message.StartsWith("!maintenance "))
+            {
+                byte type = 0;
+                try
+                {
+                    type = byte.Parse(message[13..]);
+                }
+                catch
+                {
+                }
+                if (type != 1 && type != 2)
+                {
+                    connectedClient.SendResponse(new WhisperResponse("Merrick", @"Only the following maintenance template IDs are currently supported: ""1"", ""2""."));
+                }
+                else
+                {
+                    MaintenanceMessageResponse broadcast = new(type);
+                    foreach (ConnectedClient client in KongorContext.ConnectedClients.Values)
+                    {
+                        client.SendResponse(broadcast);
+                    }
+                }
+                return;
+            }
+            else if (message.StartsWith("!broadcast as "))
+            {
+                string overriddenSenderName = message.Split(" ")[2];
+                MessageAllResponse broadcast = new(overriddenSenderName, string.Concat(message.Skip("!broadcast as ".Length + $"{overriddenSenderName} ".Length)));
+                foreach (ConnectedClient client in KongorContext.ConnectedClients.Values)
+                {
+                    client.SendResponse(broadcast);
+                }
+                return;
+            }
+            else if (message.StartsWith("!broadcast "))
+            {
+                // TODO: pass proper name / message.
+                MessageAllResponse broadcast = new(senderName, message[11..]);
+                foreach (ConnectedClient client in KongorContext.ConnectedClients.Values)
+                {
+                    client.SendResponse(broadcast);
+                }
+                return;
+            }
+            else if (message.StartsWith("!remake "))
+            {
+                if (int.TryParse(message[8..], out var matchId)) {
+                    var server = KongorContext.ConnectedServers.SingleOrDefault(s => s.LastHostedMatchId == matchId);
+                    if (server != null)
+                    {
+                        var response = new ChatServer.Server.RemoteCommandResponse(server.SessionCookie, "remake");
+                        server.SendResponse(response);
+                        connectedClient.SendResponse(new WhisperResponse("Merrick", $@"Game With Match ID ""{matchId}"" And Server Session Cookie ""{server.SessionCookie}"" Was Remade"));
+                        return;  
+                    }
+                }
+                connectedClient.SendResponse(new WhisperResponse("Merrick", $@"Failed To Get Server/Match For Match ID ""{matchId}"""));
+                return;
+
+            }
+
+            else if (message.StartsWith("!blacklist"))
+            {
+                if (message == "!blacklist")
+                {
+                    connectedClient.SendResponse(new WhisperResponse("Merrick", "Blacklisted Game Servers: " + GameFinder.BlacklistedManagerNames));
+                    return;
+                }
+
+                if (message.StartsWith("!blacklist add "))
+                {
+                    GameFinder.AddToBlacklist(message.Substring(15));
+                    connectedClient.SendResponse(new WhisperResponse("Merrick", "Blacklisted Game Servers: " + GameFinder.BlacklistedManagerNames));
+                    return;
+                }
+
+                if (message.StartsWith("!blacklist remove "))
+                {
+                    GameFinder.RemoveFromBlacklist(message.Substring(18));
+                    connectedClient.SendResponse(new WhisperResponse("Merrick", "Blacklisted Game Servers: " + GameFinder.BlacklistedManagerNames));
+                    return;
+                }
+            }
+
+            else if (message.StartsWith("!logout"))
+            {
+                var name = message.Substring(8);
+                ConnectedClient logoutClient = null;
+                foreach (var client in KongorContext.ConnectedClients)
+                {
+                    if (client.Value.Account?.Name == name)
+                    {
+                        logoutClient = client.Value;
+                        break;
+                    }
+                }
+                if(logoutClient != null)
+                {
+                    logoutClient.SendResponse(new ChatLogoutResponse());
+                    connectedClient.SendResponse(new WhisperResponse("Merrick", "Logout player: " + name));
+                    return;
+                }
+                connectedClient.SendResponse(new WhisperResponse("Merrick", "Failed to find player: " + name));
+                return;
+            }
+
+            else if (message.StartsWith("!options"))
+            {
+                string[] nameAndOptions = message.Split(new char[] { ' ' }, 3);
+                string name = nameAndOptions[1];
+                string options = nameAndOptions[2];
+
+                ConnectedClient optionsClient = null;
+                foreach (var client in KongorContext.ConnectedClients)
+                {
+                    if (client.Value.Account?.Name == name)
+                    {
+                        optionsClient = client.Value;
+                        break;
+                    }
+                }
+                if (optionsClient != null)
+                {
+                    optionsClient.SendResponse(new OptionsResponse(
+                    uploadToFTPEnabled: false,
+                    uploadToHTTPEnabled: true,
+                    somethingRelatedToQuests1Enabled: false,
+                    somethingRelatedToQuests2Enabled: false,
+                    unknown: false,
+                    messagesEnabled: true,
+                    dynamicCommands: options
+                    ));
+
+                    connectedClient.SendResponse(new WhisperResponse("Merrick", "Options sent to player: " + name));
+                    return;
+                }
+                connectedClient.SendResponse(new WhisperResponse("Merrick", "Failed to find player: " + name));
+                return;
+            }
+            
+        }
+
+        ChannelMessageBroadcast channelMessageBroadcast = new(
+            accountId: senderAccountId,
+            channelId: Identifier,
+            message: message
+        );
+        if (!ChannelUsers.Any(user => user.AccountId == senderAccountId))
+        {
+            return;
+        }
+        foreach (ChannelUser channelUser in ChannelUsers.ToList())
+        {
+            if (channelUser.AccountId == senderAccountId || channelUser.AccountId == 0) continue;
+
+            ConnectedClient client = KongorContext.ConnectedClients[channelUser.AccountId];
+            client.SendResponse(channelMessageBroadcast);
+        }
+    }
+
+    private ChangedChannelResponse CreateChangedChannelResponse()
+    {
+        ChangedChannelResponse response = new(
+            channelName: Name,
+            channelId: Identifier,
+            chatChannelFlags: Convert.ToByte(Flags),
+            channelTopic: Topic,
+            channelUsers: ChannelUsers
+        );
+
+        ChannelIsFull = response.CommandBuffer.Size > ResponseSizeThatMarksChannelFull;
+        return response;
+    }
+
+    private JoinedChannelBroadcast CreateJoinedChannelBroadcast(ChatChannel.ChannelUser channelUser)
+    {
+        return new(
+            channelId: Identifier,
+            displayedName: channelUser.DisplayedName,
+            accountId: channelUser.AccountId,
+            chatClientStatus: channelUser.ChatClientStatus,
+            chatAdminLevel: channelUser.ChatAdminLevel,
+            chatSymbol: channelUser.ChatSymbol,
+            chatNameColour: channelUser.ChatNameColour,
+            accountIcon: channelUser.AccountIcon,
+            ascensionLevel: channelUser.AscensionLevel
+        );
+    }
+
+    private ChannelUser ConvertAccountToChannelUser(Account account, ChatServerProtocol.ChatAdminLevel chatAdminLevel)
+    {
+        int accountId = account.AccountId;
+        ChatServerProtocol.ChatClientStatus chatClientStatus = ChatServerProtocol.ChatClientStatus.Connected;
+        return new ChannelUser(
+            account.NameWithClanTag,
+            accountId,
+            chatClientStatus,
+            chatAdminLevel,
+            account.Flags,
+            account.SelectedChatSymbolCode,
+            account.SelectedChatNameColourCode,
+            account.SelectedAccountIconCode,
+            account.AscensionLevel);
+    }
+
+    private void NotifyEveryone(ProtocolResponse response)
+    {
+        foreach (int accountId in ChannelUsers.Select(user => user.AccountId).ToList())
+        {
+            // Note: this is a temporary measure to allow pseudo-bots with AccountId == 0.
+            // They do not have an associated ConnectedClient.
+            if (accountId == 0) continue;
+
+            if (KongorContext.ConnectedClients.TryGetValue(accountId, out var client))
+            {
+                client.SendResponse(response);
+            }
+        }
+    }
+
+    // Centralized method for adding ChatChannelUser that updates the list of channels stored in ConnectedClient.
+    private void AddChannelUser(ChannelUser chatChannelUser, ConnectedClient connectedClient)
+    {
+        ChannelUsers.Add(chatChannelUser);
+        connectedClient.ChatChannels.Add(this);
+    }
+}
