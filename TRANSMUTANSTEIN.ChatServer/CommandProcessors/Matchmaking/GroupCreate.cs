@@ -11,33 +11,33 @@ public class GroupCreate(MerrickContext merrick, ILogger<GroupCreate> logger) : 
     {
         GroupCreateRequestData requestData = new (buffer);
 
+        MatchmakingGroupMember member = new (session)
+        {
+            Slot = 1,
+            IsLeader = true,
+            IsReady = false,
+            IsInGame = false,
+            IsEligibleForMatchmaking = true,
+            LoadingPercent = 0,
+            GameModeAccess = string.Join('|', requestData.GameModes.Select(mode => "true"))
+        };
+
+        MatchmakingGroupInformation information = new ()
+        {
+            ClientVersion = requestData.ClientVersion,
+            GroupType = requestData.GroupType,
+            GameType = requestData.GameType,
+            MapName = requestData.MapName,
+            GameModes = requestData.GameModes,
+            GameRegions = requestData.GameRegions,
+            Ranked = requestData.Ranked,
+            MatchFidelity = requestData.MatchFidelity,
+            BotDifficulty = requestData.BotDifficulty,
+            RandomizeBots = requestData.RandomizeBots
+        };
+
         if (MatchmakingService.Groups.ContainsKey(session.ClientInformation.Account.ID) is false)
         {
-            MatchmakingGroupMember member = new (session)
-            {
-                Slot = 1,
-                IsLeader = true,
-                IsReady = false,
-                IsInGame = false,
-                IsEligibleForMatchmaking = true,
-                LoadingPercent = 0,
-                GameModeAccess = string.Join('|', requestData.GameModes.Select(mode => "true"))
-            };
-
-            MatchmakingGroupInformation information = new ()
-            {
-                ClientVersion = requestData.ClientVersion,
-                GroupType = requestData.GroupType,
-                GameType = requestData.GameType,
-                MapName = requestData.MapName,
-                GameModes = requestData.GameModes,
-                GameRegions = requestData.GameRegions,
-                Ranked = requestData.Ranked,
-                MatchFidelity = requestData.MatchFidelity,
-                BotDifficulty = requestData.BotDifficulty,
-                RandomizeBots = requestData.RandomizeBots
-            };
-
             if (MatchmakingService.Groups.TryAdd(session.ClientInformation.Account.ID, new MatchmakingGroup(member) { Information = information }) is false)
             {
                 Logger.LogError(@"Failed To Create Matchmaking Group For Account ID ""{Session.ClientInformation.Account.ID}""", session.ClientInformation.Account.ID);
