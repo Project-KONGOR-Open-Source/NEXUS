@@ -30,18 +30,19 @@ public class MatchmakingService(IServiceProvider serviceProvider) : IHostedServi
     public static ConcurrentDictionary<int, MatchmakingGroup> FivePlayerGroups
         => new (Groups.Where(group => group.Value.Members.Count == 5));
 
-    public Task StartAsync(CancellationToken cancellationToken)
+    public async Task StartAsync(CancellationToken cancellationToken)
     {
         Logger.LogInformation("Matchmaking Service Has Started");
 
-        return Task.CompletedTask;
+        while (cancellationToken.IsCancellationRequested is false)
+            await MakeMatches();
     }
 
-    public Task StopAsync(CancellationToken cancellationToken)
+    public async Task StopAsync(CancellationToken cancellationToken)
     {
         Logger.LogInformation("Matchmaking Service Has Stopped");
 
-        return Task.CompletedTask;
+        await Task.CompletedTask;
     }
 
     public void Dispose()
@@ -49,5 +50,10 @@ public class MatchmakingService(IServiceProvider serviceProvider) : IHostedServi
         Groups.Clear();
 
         GC.SuppressFinalize(this);
+    }
+
+    private async Task MakeMatches()
+    {
+         await Task.CompletedTask;
     }
 }
