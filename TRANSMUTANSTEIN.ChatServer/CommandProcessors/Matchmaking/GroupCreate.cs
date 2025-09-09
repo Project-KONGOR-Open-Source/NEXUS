@@ -11,7 +11,7 @@ public class GroupCreate(MerrickContext merrick, ILogger<GroupCreate> logger) : 
     {
         GroupCreateRequestData requestData = new (buffer);
 
-        if (Context.MatchmakingGroupChatChannels.ContainsKey(session.ClientInformation.Account.ID) is false)
+        if (MatchmakingService.Groups.ContainsKey(session.ClientInformation.Account.ID) is false)
         {
             MatchmakingGroupMember member = new (session)
             {
@@ -38,28 +38,25 @@ public class GroupCreate(MerrickContext merrick, ILogger<GroupCreate> logger) : 
                 RandomizeBots = requestData.RandomizeBots
             };
 
-            if (MatchmakingService.Groups.ContainsKey(session.ClientInformation.Account.ID) is false)
+            if (MatchmakingService.Groups.TryAdd(session.ClientInformation.Account.ID, new MatchmakingGroup(member) { Information = information }) is false)
             {
-                if (MatchmakingService.Groups.TryAdd(session.ClientInformation.Account.ID, new MatchmakingGroup(member) { Information = information }) is false)
-                {
-                    Logger.LogError(@"Failed To Create Matchmaking Group For Account ID ""{Session.ClientInformation.Account.ID}""", session.ClientInformation.Account.ID);
+                Logger.LogError(@"Failed To Create Matchmaking Group For Account ID ""{Session.ClientInformation.Account.ID}""", session.ClientInformation.Account.ID);
 
-                    // TODO: Respond With ChatProtocol.TMMFailedToJoinReason Or Similar (e.g. TMMFailedToCreate, If It Exists) Or Maybe Just Throw An Exception
+                // TODO: Respond With ChatProtocol.TMMFailedToJoinReason Or Similar (e.g. TMMFailedToCreate, If It Exists) Or Maybe Just Throw An Exception
 
-                    return;
-                }
+                return;
             }
+        }
 
-            else
+        else
+        {
+            if (MatchmakingService.Groups.TryUpdate(session.ClientInformation.Account.ID, new MatchmakingGroup(member) { Information = information }, MatchmakingService.Groups[session.ClientInformation.Account.ID]) is false)
             {
-                if (MatchmakingService.Groups.TryUpdate(session.ClientInformation.Account.ID, new MatchmakingGroup(member) { Information = information }, MatchmakingService.Groups[session.ClientInformation.Account.ID]) is false)
-                {
-                    Logger.LogError(@"Failed To Update Matchmaking Group For Account ID ""{Session.ClientInformation.Account.ID}""", session.ClientInformation.Account.ID);
+                Logger.LogError(@"Failed To Update Matchmaking Group For Account ID ""{Session.ClientInformation.Account.ID}""", session.ClientInformation.Account.ID);
 
-                    // TODO: Respond With ChatProtocol.TMMFailedToJoinReason Or Similar (e.g. TMMFailedToCreate, If It Exists) Or Maybe Just Throw An Exception
+                // TODO: Respond With ChatProtocol.TMMFailedToJoinReason Or Similar (e.g. TMMFailedToCreate, If It Exists) Or Maybe Just Throw An Exception
 
-                    return;
-                }
+                return;
             }
         }
 

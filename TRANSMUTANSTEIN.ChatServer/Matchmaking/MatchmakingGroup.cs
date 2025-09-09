@@ -8,6 +8,8 @@ public class MatchmakingGroup(MatchmakingGroupMember leader)
 
     public required MatchmakingGroupInformation Information { get; set; }
 
+    // public required ChatChannel ChatChannel { get; set; }
+
     // public float AverageRating => Members.Average(member => member.Rating);
 
     // public float RatingDisparity => Members.Max(member => member.Rating) - Members.Min(member => member.Rating);
