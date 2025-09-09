@@ -14,7 +14,7 @@ public static class UserClaimsExtensions
     public static string GetAudience(this IEnumerable<Claim> claims)
         => claims.Single(claim => claim.Type.Equals(Claims.Audience)).Value;
 
-    public static DateTime GetAuthenticatedAtTime(this IEnumerable<Claim> claims)
+    public static DateTimeOffset GetAuthenticatedAtTime(this IEnumerable<Claim> claims)
         => EpochTimeToUTCTime(Convert.ToInt64(claims.Single(claim => claim.Type.Equals(Claims.AuthenticatedAtTime)).Value));
 
     public static string GetClanName(this IEnumerable<Claim> claims)
@@ -23,10 +23,10 @@ public static class UserClaimsExtensions
     public static string GetClanTag(this IEnumerable<Claim> claims)
         => claims.Single(claim => claim.Type.Equals(Claims.ClanTag)).Value;
 
-    public static DateTime GetExpiresAtTime(this IEnumerable<Claim> claims)
+    public static DateTimeOffset GetExpiresAtTime(this IEnumerable<Claim> claims)
         => EpochTimeToUTCTime(Convert.ToInt64(claims.Single(claim => claim.Type.Equals(Claims.ExpiresAtTime)).Value));
 
-    public static DateTime GetIssuedAtTime(this IEnumerable<Claim> claims)
+    public static DateTimeOffset GetIssuedAtTime(this IEnumerable<Claim> claims)
         => EpochTimeToUTCTime(Convert.ToInt64(claims.Single(claim => claim.Type.Equals(Claims.IssuedAtTime)).Value));
 
     public static string GetIssuer(this IEnumerable<Claim> claims)
@@ -47,6 +47,6 @@ public static class UserClaimsExtensions
     public static string GetUserRole(this IEnumerable<Claim> claims)
         => claims.Single(claim => claim.Type.Equals(Claims.UserRole)).Value;
 
-    private static DateTime EpochTimeToUTCTime(long epochSeconds)
-        => DateTimeOffset.FromUnixTimeSeconds(epochSeconds).DateTime;
+    private static DateTimeOffset EpochTimeToUTCTime(long epochSeconds)
+        => DateTimeOffset.FromUnixTimeSeconds(epochSeconds);
 }

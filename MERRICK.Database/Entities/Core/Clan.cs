@@ -14,5 +14,5 @@ public class Clan
 
     public List<Account> Members { get; set; } = [];
 
-    public DateTime TimestampCreated { get; set; } = DateTime.UtcNow;
+    public DateTimeOffset TimestampCreated { get; set; } = DateTimeOffset.UtcNow;
 }

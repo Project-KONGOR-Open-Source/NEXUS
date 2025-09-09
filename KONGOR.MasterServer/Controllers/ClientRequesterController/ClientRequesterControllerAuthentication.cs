@@ -208,7 +208,7 @@ public partial class ClientRequesterController
 
         SRPAuthenticationResponseStageTwo response = SRPAuthenticationHandlers.GenerateStageTwoResponse(parameters, out string cookie);
 
-        account.TimestampLastActive = DateTime.UtcNow;
+        account.TimestampLastActive = DateTimeOffset.UtcNow;
 
         await MerrickContext.SaveChangesAsync();
 

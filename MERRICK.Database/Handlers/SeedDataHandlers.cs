@@ -104,7 +104,7 @@ public static class SeedDataHandlers
                 IsMain = false,
                 Clan = clan,
                 ClanTier = subAccountName is /* [K] */ "ONGOR" ? ClanTier.Leader : ClanTier.Officer,
-                TimestampJoinedClan = DateTime.UtcNow,
+                TimestampJoinedClan = DateTimeOffset.UtcNow,
                 AscensionLevel = 666,
                 AutoConnectChatChannels = ChatChannels.AllDefaultChannels.Append($"Clan {clan.Name}").ToList(),
                 SelectedStoreItems = [ "ai.custom_icon:1", "av.Flamboyant", "c.cat_courier", "cc.frostburnlogo", "cr.Punk Creep", "cs.frostburnlogo", "m.Super-Taunt", "sc.paragon_circle_upgrade", "t.Dumpster_Taunt", "te.Punk TP", "w.8bit_ward" ]
@@ -147,7 +147,7 @@ public static class SeedDataHandlers
                 IsMain = iterator is 0,
                 Clan = clanGuest,
                 ClanTier = iterator is 0 ? ClanTier.Leader : ClanTier.Member,
-                TimestampJoinedClan = DateTime.UtcNow,
+                TimestampJoinedClan = DateTimeOffset.UtcNow,
                 AscensionLevel = 0,
                 AutoConnectChatChannels = [ ChatChannels.GuestsChannel, $"Clan {clan.Name}" ],
                 SelectedStoreItems = [ "ai.custom_icon:1", "av.Flamboyant", "c.cat_courier", "cc.frostburnlogo", "cr.Punk Creep", "cs.frostburnlogo", "m.Super-Taunt", "sc.paragon_circle_upgrade", "t.Dumpster_Taunt", "te.Punk TP", "w.8bit_ward" ]
@@ -280,7 +280,7 @@ public static class SeedDataHandlers
             DownVotes = guide.DownVotes,
             Public = guide.Public,
             Featured = guide.Featured,
-            TimestampCreated = DateTime.UtcNow
+            TimestampCreated = DateTimeOffset.UtcNow
         });
 
         await context.HeroGuides.AddRangeAsync(guides, cancellationToken);

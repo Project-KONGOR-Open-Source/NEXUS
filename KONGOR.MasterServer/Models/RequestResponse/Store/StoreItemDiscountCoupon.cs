@@ -34,7 +34,7 @@ public class StoreItemDiscountCoupon
     //public double DiscountSilver => 0.75;
 
     //[PhpProperty("end_time")]
-    //public string DiscountExpirationDate => DateTime.UtcNow.AddYears(1000).ToString("dd MMMM yyyy", CultureInfo.InvariantCulture);
+    //public string DiscountExpirationDate => DateTimeOffset.UtcNow.AddYears(1000).ToString("dd MMMM yyyy", CultureInfo.InvariantCulture);
 
     //private string GetApplicableProducts()
     //{

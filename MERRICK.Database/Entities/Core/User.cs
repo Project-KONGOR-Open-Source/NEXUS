@@ -22,9 +22,9 @@ public class User
 
     public List<Account> Accounts { get; set; } = [];
 
-    public DateTime TimestampCreated { get; set; } = DateTime.UtcNow;
+    public DateTimeOffset TimestampCreated { get; set; } = DateTimeOffset.UtcNow;
 
-    public DateTime TimestampLastActive { get; set; } = DateTime.UtcNow;
+    public DateTimeOffset TimestampLastActive { get; set; } = DateTimeOffset.UtcNow;
 
     public int GoldCoins { get; set; } = 0;
 

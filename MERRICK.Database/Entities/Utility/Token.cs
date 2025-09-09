@@ -9,9 +9,9 @@ public class Token
 
     public required string EmailAddress { get; set; }
 
-    public DateTime TimestampCreated { get; set; } = DateTime.UtcNow;
+    public DateTimeOffset TimestampCreated { get; set; } = DateTimeOffset.UtcNow;
 
-    public DateTime? TimestampConsumed { get; set; }
+    public DateTimeOffset? TimestampConsumed { get; set; }
 
     public required Guid Value { get; set; }
 

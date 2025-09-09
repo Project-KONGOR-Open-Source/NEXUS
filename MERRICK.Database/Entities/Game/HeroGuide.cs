@@ -47,7 +47,7 @@ public class HeroGuide
 
     public required bool Featured { get; set; }
 
-    public DateTime TimestampCreated { get; set; } = DateTime.UtcNow;
+    public DateTimeOffset TimestampCreated { get; set; } = DateTimeOffset.UtcNow;
 
-    public DateTime? TimestampLastUpdated { get; set; }
+    public DateTimeOffset? TimestampLastUpdated { get; set; }
 }

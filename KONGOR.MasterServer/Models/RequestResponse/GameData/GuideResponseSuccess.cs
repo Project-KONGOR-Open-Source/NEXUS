@@ -9,7 +9,7 @@ public class GuideResponseSuccess(HeroGuide guide, int hostTime)
     public int Success => 1;
 
     [PhpProperty("datetime")]
-    public DateTime TimestampCreated { get; set; } = guide.TimestampCreated;
+    public DateTimeOffset TimestampCreated { get; set; } = guide.TimestampCreated;
 
     [PhpProperty("author_name")]
     public string AuthorName { get; set; } = guide.Author.Name;

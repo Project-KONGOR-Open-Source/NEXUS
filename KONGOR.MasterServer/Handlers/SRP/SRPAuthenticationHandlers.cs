@@ -179,7 +179,7 @@ public static class SRPAuthenticationHandlers
             ? account.SelectedStoreItems.Single(item => item.StartsWith("ai.custom_icon")).Replace("ai.custom_icon:", string.Empty) : "0";
 
     private static CloudStorageInformation SetCloudStorageInformation(Account account)
-        => new () { AccountID = account.ID.ToString(), UseCloud = "0", AutomaticCloudUpload = "0", BackupLastUpdatedTime = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") }; // TODO: Fix These Values
+        => new () { AccountID = account.ID.ToString(), UseCloud = "0", AutomaticCloudUpload = "0", BackupLastUpdatedTime = DateTimeOffset.UtcNow.ToString("yyyy-MM-dd HH:mm:ss") }; // TODO: Fix These Values
 
     private static List<DataPoint> SetDataPoints()
     {

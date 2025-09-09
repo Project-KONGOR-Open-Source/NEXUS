@@ -80,7 +80,7 @@ public class UserController(MerrickContext databaseContext, ILogger<UserControll
 
         user.Accounts.Add(account);
 
-        token.TimestampConsumed = DateTime.UtcNow;
+        token.TimestampConsumed = DateTimeOffset.UtcNow;
 
         await MerrickContext.SaveChangesAsync();
 
@@ -155,7 +155,7 @@ public class UserController(MerrickContext databaseContext, ILogger<UserControll
             issuer: Configuration.JWT.Issuer,
             audience: Configuration.JWT.Audience,
             claims: allTokenClaims,
-            expires: DateTime.UtcNow.AddHours(Configuration.JWT.DurationInHours),
+            expires: DateTimeOffset.UtcNow.AddHours(Configuration.JWT.DurationInHours).DateTime,
             signingCredentials: new SigningCredentials(new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration.JWT.SigningKey)), SecurityAlgorithms.HmacSha256) // TODO: Put The Signing Key In A Secrets Vault
         );
 

@@ -12,5 +12,5 @@ public class MatchServerManager
 
     public string Cookie { get; set; } = Guid.NewGuid().ToString();
 
-    public DateTime TimestampRegistered { get; set; } = DateTime.UtcNow;
+    public DateTimeOffset TimestampRegistered { get; set; } = DateTimeOffset.UtcNow;
 }

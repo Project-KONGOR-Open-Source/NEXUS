@@ -17,7 +17,7 @@ namespace MERRICK.Database.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.6")
+                .HasAnnotation("ProductVersion", "9.0.8")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -71,14 +71,14 @@ namespace MERRICK.Database.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("TimestampCreated")
-                        .HasColumnType("datetime2");
+                    b.Property<DateTimeOffset>("TimestampCreated")
+                        .HasColumnType("datetimeoffset");
 
-                    b.Property<DateTime?>("TimestampJoinedClan")
-                        .HasColumnType("datetime2");
+                    b.Property<DateTimeOffset?>("TimestampJoinedClan")
+                        .HasColumnType("datetimeoffset");
 
-                    b.Property<DateTime>("TimestampLastActive")
-                        .HasColumnType("datetime2");
+                    b.Property<DateTimeOffset>("TimestampLastActive")
+                        .HasColumnType("datetimeoffset");
 
                     b.Property<int>("Type")
                         .HasColumnType("int");
@@ -116,8 +116,8 @@ namespace MERRICK.Database.Migrations
                         .HasMaxLength(4)
                         .HasColumnType("nvarchar(4)");
 
-                    b.Property<DateTime>("TimestampCreated")
-                        .HasColumnType("datetime2");
+                    b.Property<DateTimeOffset>("TimestampCreated")
+                        .HasColumnType("datetimeoffset");
 
                     b.HasKey("ID");
 
@@ -171,11 +171,11 @@ namespace MERRICK.Database.Migrations
                     b.Property<int>("SilverCoins")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("TimestampCreated")
-                        .HasColumnType("datetime2");
+                    b.Property<DateTimeOffset>("TimestampCreated")
+                        .HasColumnType("datetimeoffset");
 
-                    b.Property<DateTime>("TimestampLastActive")
-                        .HasColumnType("datetime2");
+                    b.Property<DateTimeOffset>("TimestampLastActive")
+                        .HasColumnType("datetimeoffset");
 
                     b.Property<int>("TotalExperience")
                         .HasColumnType("int");
@@ -266,11 +266,11 @@ namespace MERRICK.Database.Migrations
                         .HasMaxLength(150)
                         .HasColumnType("nvarchar(150)");
 
-                    b.Property<DateTime>("TimestampCreated")
-                        .HasColumnType("datetime2");
+                    b.Property<DateTimeOffset>("TimestampCreated")
+                        .HasColumnType("datetimeoffset");
 
-                    b.Property<DateTime?>("TimestampLastUpdated")
-                        .HasColumnType("datetime2");
+                    b.Property<DateTimeOffset?>("TimestampLastUpdated")
+                        .HasColumnType("datetimeoffset");
 
                     b.Property<int>("UpVotes")
                         .HasColumnType("int");
@@ -738,11 +738,11 @@ namespace MERRICK.Database.Migrations
                     b.Property<int>("Purpose")
                         .HasColumnType("int");
 
-                    b.Property<DateTime?>("TimestampConsumed")
-                        .HasColumnType("datetime2");
+                    b.Property<DateTimeOffset?>("TimestampConsumed")
+                        .HasColumnType("datetimeoffset");
 
-                    b.Property<DateTime>("TimestampCreated")
-                        .HasColumnType("datetime2");
+                    b.Property<DateTimeOffset>("TimestampCreated")
+                        .HasColumnType("datetimeoffset");
 
                     b.Property<Guid>("Value")
                         .HasColumnType("uniqueidentifier");

@@ -21,7 +21,7 @@ namespace MERRICK.Database.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Name = table.Column<string>(type: "nvarchar(30)", maxLength: 30, nullable: false),
                     Tag = table.Column<string>(type: "nvarchar(4)", maxLength: 4, nullable: false),
-                    TimestampCreated = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    TimestampCreated = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -192,8 +192,8 @@ namespace MERRICK.Database.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Purpose = table.Column<int>(type: "int", nullable: false),
                     EmailAddress = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    TimestampCreated = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    TimestampConsumed = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    TimestampCreated = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    TimestampConsumed = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
                     Value = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Data = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
@@ -213,8 +213,8 @@ namespace MERRICK.Database.Migrations
                     SRPPasswordSalt = table.Column<string>(type: "nvarchar(64)", maxLength: 64, nullable: false),
                     SRPPasswordHash = table.Column<string>(type: "nvarchar(64)", maxLength: 64, nullable: false),
                     PBKDF2PasswordHash = table.Column<string>(type: "nvarchar(84)", maxLength: 84, nullable: false),
-                    TimestampCreated = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    TimestampLastActive = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    TimestampCreated = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    TimestampLastActive = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     GoldCoins = table.Column<int>(type: "int", nullable: false),
                     SilverCoins = table.Column<int>(type: "int", nullable: false),
                     PlinkoTickets = table.Column<int>(type: "int", nullable: false),
@@ -245,10 +245,10 @@ namespace MERRICK.Database.Migrations
                     IsMain = table.Column<bool>(type: "bit", nullable: false),
                     ClanID = table.Column<int>(type: "int", nullable: true),
                     ClanTier = table.Column<int>(type: "int", nullable: false),
-                    TimestampJoinedClan = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    TimestampJoinedClan = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
                     AscensionLevel = table.Column<int>(type: "int", nullable: false),
-                    TimestampCreated = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    TimestampLastActive = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    TimestampCreated = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    TimestampLastActive = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     AutoConnectChatChannels = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     SelectedStoreItems = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     IPAddressCollection = table.Column<string>(type: "nvarchar(max)", nullable: false),
@@ -297,8 +297,8 @@ namespace MERRICK.Database.Migrations
                     DownVotes = table.Column<int>(type: "int", nullable: false),
                     Public = table.Column<bool>(type: "bit", nullable: false),
                     Featured = table.Column<bool>(type: "bit", nullable: false),
-                    TimestampCreated = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    TimestampLastUpdated = table.Column<DateTime>(type: "datetime2", nullable: true)
+                    TimestampCreated = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    TimestampLastUpdated = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true)
                 },
                 constraints: table =>
                 {
