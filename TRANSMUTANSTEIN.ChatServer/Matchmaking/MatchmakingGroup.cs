@@ -10,9 +10,11 @@ public class MatchmakingGroup(MatchmakingGroupMember leader)
 
     // public required ChatChannel ChatChannel { get; set; }
 
-    // public float AverageRating => Members.Average(member => member.Rating);
+    public float AverageRating => 1500; // TODO: Members.Average(member => member.Rating);
 
-    // public float RatingDisparity => Members.Max(member => member.Rating) - Members.Min(member => member.Rating);
+    public float RatingDisparity => 100; // TODO: Members.Max(member => member.Rating) - Members.Min(member => member.Rating);
+
+    public int FullTeamDifference => Information.TeamSize - Members.Count;
 
     public void MulticastUpdate(int emitterAccountID, ChatProtocol.TMMUpdateType updateType)
     {
@@ -39,8 +41,7 @@ public class MatchmakingGroup(MatchmakingGroupMember leader)
         update.WriteString(string.Empty);                                                // Country Restrictions (e.g. "AB->USE|XY->USW" Means Only Country "AB" Can Access Region "USE" And Only Country "XY" Can Access Region "USW")
         // TODO: Find Out What Player Invitation Responses Do
         update.WriteString("What Is This ??? (Player Invitation Responses)");            // Player Invitation Responses
-        // TODO: Dynamically Set Team Size From The Request Data
-        update.WriteInt8(5);                                                             // Team Size (e.g. 5 For Forests Of Caldavar, 3 For Grimm's Crossing)
+        update.WriteInt8(Information.TeamSize);                                          // Team Size (e.g. 5 For Forests Of Caldavar, 3 For Grimm's Crossing)
         update.WriteInt8(Convert.ToByte(Information.GroupType));                         // Group Type
 
         bool fullGroupUpdate = updateType switch
