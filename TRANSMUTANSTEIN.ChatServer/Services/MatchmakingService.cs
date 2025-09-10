@@ -75,51 +75,6 @@ public class MatchmakingService(IServiceProvider serviceProvider) : IHostedServi
                 found.PrependBufferSize();
 
                 Parallel.ForEach([..team_1, ..team_2], group => Parallel.ForEach(group.Members, member => member.Session.SendAsync(found.Data)));
-
-                ChatBuffer match = new ();
-
-                // TODO: Replace This Mickey Mouse Shit With Actual Matchmaking Logic
-                MatchmakingGroupInformation information = team_1.First().Information;
-
-                match.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_MATCH_FOUND_UPDATE);
-                match.WriteString(information.MapName);
-                match.WriteInt8(information.TeamSize);
-                match.WriteInt8(Convert.ToByte(information.GameType));
-                match.WriteString(string.Join('|', information.GameModes));
-                match.WriteString(string.Join('|', information.GameRegions));
-                match.WriteString("Additional Arbitrary Data"); // For Debugging Purposes
-
-                match.PrependBufferSize();
-
-                Parallel.ForEach([.. team_1, .. team_2], group => Parallel.ForEach(group.Members, member => member.Session.SendAsync(match.Data)));
-
-                // TODO: The Packets Below Don't Work, Remove This Commented Code
-
-                // ChatBuffer lobby_1 = new ();
-                // lobby_1.WriteCommand(ChatProtocol.ChatServerToClient.NET_CHAT_CL_GAME_LOBBY_JOINED);
-                // lobby_1.WriteString(information.MapName);
-                // lobby_1.WriteInt8(1);
-                // lobby_1.WriteInt8(Convert.ToByte(information.GameType));
-                // lobby_1.WriteString("ap");
-                // lobby_1.WriteString("EU");
-                // lobby_1.WriteInt8(Convert.ToByte(ChatProtocol.GameLobbyState.GLS_HERO_PICK));
-                // lobby_1.WriteInt8(0);
-                // lobby_1.WriteInt8(1); // Slot
-                // lobby_1.PrependBufferSize();
-                // team_1.First().Members.First().Session.SendAsync(lobby_1.Data);
-                
-                // ChatBuffer lobby_2 = new();
-                // lobby_2.WriteCommand(ChatProtocol.ChatServerToClient.NET_CHAT_CL_GAME_LOBBY_JOINED);
-                // lobby_2.WriteString(information.MapName);
-                // lobby_2.WriteInt8(1);
-                // lobby_2.WriteInt8(Convert.ToByte(information.GameType));
-                // lobby_2.WriteString("ap");
-                // lobby_2.WriteString("EU");
-                // lobby_2.WriteInt8(Convert.ToByte(ChatProtocol.GameLobbyState.GLS_HERO_PICK));
-                // lobby_2.WriteInt8(1);
-                // lobby_2.WriteInt8(3); // Slot
-                // lobby_2.PrependBufferSize();
-                // team_2.First().Members.First().Session.SendAsync(lobby_2.Data);
             }
             # endregion
         }
