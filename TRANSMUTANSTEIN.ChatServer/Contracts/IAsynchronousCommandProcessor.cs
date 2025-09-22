@@ -1,6 +1,6 @@
 ﻿namespace TRANSMUTANSTEIN.ChatServer.Contracts;
 
-public interface ICommandProcessor
+public interface IAsynchronousCommandProcessor
 {
     public Task Process(ChatSession session, ChatBuffer buffer);
 }

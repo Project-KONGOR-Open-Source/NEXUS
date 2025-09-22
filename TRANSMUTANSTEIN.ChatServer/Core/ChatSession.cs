@@ -95,7 +95,10 @@ public class ChatSession(TCPServer server, IServiceProvider serviceProvider) : T
             {
                 try
                 {
-                    commandTypeInstance.Process(this, new ChatBuffer(segment));
+                    ChatBuffer buffer = new (segment);
+
+                    commandTypeInstance.Switch
+                        (synchronous => synchronous.Process(this, buffer), async asynchronous => await asynchronous.Process(this, buffer));
                 }
 
                 catch (Exception exception)
@@ -125,10 +128,18 @@ public class ChatSession(TCPServer server, IServiceProvider serviceProvider) : T
         return type;
     }
 
-    private ICommandProcessor? GetCommandTypeInstance(Type type)
+    private OneOf<ISynchronousCommandProcessor, IAsynchronousCommandProcessor>? GetCommandTypeInstance(Type type)
     {
         object instance = ActivatorUtilities.CreateInstance(ServiceProvider, type);
 
-        return instance as ICommandProcessor;
+        if (instance is ISynchronousCommandProcessor synchronous)
+            return OneOf<ISynchronousCommandProcessor, IAsynchronousCommandProcessor>.FromT0(synchronous);
+
+        if (instance is IAsynchronousCommandProcessor asynchronous)
+            return OneOf<ISynchronousCommandProcessor, IAsynchronousCommandProcessor>.FromT1(asynchronous);
+
+        Logger.LogError(@"[BUG] Command Type ""{TypeName}"" Does Not Implement A Supported Processor Interface", type.Name);
+
+        return null;
     }
 }
