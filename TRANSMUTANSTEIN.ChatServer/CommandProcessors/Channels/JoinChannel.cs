@@ -1,7 +1,7 @@
 ﻿namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Channels;
 
 [ChatCommand(ChatProtocol.Command.CHAT_CMD_JOIN_CHANNEL)]
-public class JoinChannel(MerrickContext merrick, ILogger<JoinChannel> logger) : ISynchronousCommandProcessor
+public class JoinChannel : ISynchronousCommandProcessor
 {
     public void Process(ChatSession session, ChatBuffer buffer)
     {

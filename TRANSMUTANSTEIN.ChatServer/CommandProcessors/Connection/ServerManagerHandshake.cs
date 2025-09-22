@@ -1,13 +1,9 @@
 ﻿namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Connection;
 
 [ChatCommand(ChatProtocol.ServerManagerToChatServer.NET_CHAT_SM_CONNECT)]
-public class ServerManagerHandshake(MerrickContext merrick, ILogger<ServerManagerHandshake> logger) : CommandProcessorsBase, ICommandProcessor
+public class ServerManagerHandshake : ISynchronousCommandProcessor
 {
-    private MerrickContext MerrickContext { get; set; } = merrick;
-
-    private ILogger<ServerManagerHandshake> Logger { get; set; } = logger;
-
-    public async Task Process(ChatSession session, ChatBuffer buffer)
+    public void Process(ChatSession session, ChatBuffer buffer)
     {
         ServerManagerHandshakeRequestData requestData = new (buffer);
 
@@ -34,25 +30,29 @@ public class ServerManagerHandshake(MerrickContext merrick, ILogger<ServerManage
             }
          */
 
-        Response.WriteCommand(ChatProtocol.ChatServerToServerManager.NET_CHAT_SM_ACCEPT);
-        Response.PrependBufferSize();
+        ChatBuffer response = new ();
 
-        session.SendAsync(Response.Data);
+        response.WriteCommand(ChatProtocol.ChatServerToServerManager.NET_CHAT_SM_ACCEPT);
+        response.PrependBufferSize();
 
-        Response = new ChatBuffer(); // Also Respond With NET_CHAT_SM_OPTIONS Since The Server Manager Will Not Explicitly Request It
+        session.SendAsync(response.Data);
 
-        Response.WriteCommand(ChatProtocol.ChatServerToServerManager.NET_CHAT_SM_OPTIONS);
+        // TODO: Don't Reuse Chat Buffer Instance
 
-        Response.WriteInt8(Convert.ToByte(true));   // Submit Stats Enabled
-        Response.WriteInt8(Convert.ToByte(true));   // Upload Replays Enabled
-        Response.WriteInt8(Convert.ToByte(false));  // Upload To FTP On Demand Enabled
-        Response.WriteInt8(Convert.ToByte(true));   // Upload To HTTP On Demand Enabled
-        Response.WriteInt8(Convert.ToByte(true));   // Resubmit Stats Enabled
-        Response.WriteInt32(1);                     // Stats Resubmit Match ID Cut-Off // TODO: Investigate What This Is
+        response = new ChatBuffer(); // Also Respond With NET_CHAT_SM_OPTIONS Since The Server Manager Will Not Explicitly Request It
 
-        Response.PrependBufferSize();
+        response.WriteCommand(ChatProtocol.ChatServerToServerManager.NET_CHAT_SM_OPTIONS);
 
-        session.SendAsync(Response.Data);
+        response.WriteInt8(Convert.ToByte(true));   // Submit Stats Enabled
+        response.WriteInt8(Convert.ToByte(true));   // Upload Replays Enabled
+        response.WriteInt8(Convert.ToByte(false));  // Upload To FTP On Demand Enabled
+        response.WriteInt8(Convert.ToByte(true));   // Upload To HTTP On Demand Enabled
+        response.WriteInt8(Convert.ToByte(true));   // Resubmit Stats Enabled
+        response.WriteInt32(1);                     // Stats Resubmit Match ID Cut-Off // TODO: Investigate What This Is
+
+        response.PrependBufferSize();
+
+        session.SendAsync(response.Data);
     }
 }
 

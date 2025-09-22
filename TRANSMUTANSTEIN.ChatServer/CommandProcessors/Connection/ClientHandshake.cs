@@ -1,21 +1,17 @@
 ﻿namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Connection;
 
 [ChatCommand(ChatProtocol.ClientToChatServer.NET_CHAT_CL_CONNECT)]
-public class ClientHandshake(MerrickContext merrick, ILogger<ClientHandshake> logger) : CommandProcessorsBase, ICommandProcessor
+public class ClientHandshake(MerrickContext merrick, ILogger<ClientHandshake> logger) : ICommandProcessor
 {
-    private MerrickContext MerrickContext { get; set; } = merrick;
-
-    private ILogger<ClientHandshake> Logger { get; set; } = logger;
-
     public async Task Process(ChatSession session, ChatBuffer buffer)
     {
         ClientHandshakeRequestData requestData = new (buffer);
 
-        Account? account = await MerrickContext.Accounts.Include(account => account.Clan).SingleOrDefaultAsync(account => account.ID == requestData.AccountID);
+        Account? account = await merrick.Accounts.Include(account => account.Clan).SingleOrDefaultAsync(account => account.ID == requestData.AccountID);
 
         if (account is null)
         {
-            Logger.LogError(@"[BUG] Account With ID ""{RequestData.AccountID}"" Could Not Be Found", requestData.AccountID);
+            logger.LogError(@"[BUG] Account With ID ""{RequestData.AccountID}"" Could Not Be Found", requestData.AccountID);
 
             return;
         }
@@ -30,10 +26,12 @@ public class ClientHandshake(MerrickContext merrick, ILogger<ClientHandshake> lo
         // Add The Chat Session To The Chat Sessions Collection
         Context.ChatSessions.AddOrUpdate(account.Name, session, (key, existing) => session);
 
-        Response.WriteCommand(ChatProtocol.ChatServerToClient.NET_CHAT_CL_ACCEPT);
-        Response.PrependBufferSize();
+        ChatBuffer response = new ();
 
-        session.SendAsync(Response.Data);
+        response.WriteCommand(ChatProtocol.ChatServerToClient.NET_CHAT_CL_ACCEPT);
+        response.PrependBufferSize();
+
+        session.SendAsync(response.Data);
     }
 }
 

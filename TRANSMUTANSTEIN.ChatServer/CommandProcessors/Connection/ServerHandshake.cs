@@ -1,13 +1,9 @@
 ﻿namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Connection;
 
 [ChatCommand(ChatProtocol.GameServerToChatServer.NET_CHAT_GS_CONNECT)]
-public class ServerHandshake(MerrickContext merrick, ILogger<ServerHandshake> logger) : CommandProcessorsBase, ICommandProcessor
+public class ServerHandshake : ISynchronousCommandProcessor
 {
-    private MerrickContext MerrickContext { get; set; } = merrick;
-
-    private ILogger<ServerHandshake> Logger { get; set; } = logger;
-
-    public async Task Process(ChatSession session, ChatBuffer buffer)
+    public void Process(ChatSession session, ChatBuffer buffer)
     {
         ServerHandshakeRequestData requestData = new (buffer);
 
@@ -43,10 +39,12 @@ public class ServerHandshake(MerrickContext merrick, ILogger<ServerHandshake> lo
             }
          */
 
-        Response.WriteCommand(ChatProtocol.ChatServerToGameServer.NET_CHAT_GS_ACCEPT);
-        Response.PrependBufferSize();
+        ChatBuffer response = new ();
 
-        session.SendAsync(Response.Data);
+        response.WriteCommand(ChatProtocol.ChatServerToGameServer.NET_CHAT_GS_ACCEPT);
+        response.PrependBufferSize();
+
+        session.SendAsync(response.Data);
     }
 }
 

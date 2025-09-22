@@ -1,11 +1,9 @@
 ﻿namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Matchmaking;
 
 [ChatCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_PLAYER_READY_STATUS)]
-public class GroupPlayerReadyStatus(ILogger<GroupPlayerReadyStatus> logger) : CommandProcessorsBase, ICommandProcessor
+public class GroupPlayerReadyStatus(ILogger<GroupPlayerReadyStatus> logger) : ISynchronousCommandProcessor
 {
-    private ILogger<GroupPlayerReadyStatus> Logger { get; } = logger;
-
-    public async Task Process(ChatSession session, ChatBuffer buffer)
+    public void Process(ChatSession session, ChatBuffer buffer)
     {
         GroupPlayerReadyStatusRequestData requestData = new (buffer);
 
@@ -26,7 +24,7 @@ public class GroupPlayerReadyStatus(ILogger<GroupPlayerReadyStatus> logger) : Co
                 if (member.IsReady is false)
                 {
                     if (member.IsLeader is false)
-                        Logger.LogError(@"[BUG] Non-Leader Group Member ""{Member.Account.Name}"" With ID ""{Member.Account.ID}"" Was Not Ready", member.Account.Name, member.Account.ID);
+                        logger.LogError(@"[BUG] Non-Leader Group Member ""{Member.Account.Name}"" With ID ""{Member.Account.ID}"" Was Not Ready", member.Account.Name, member.Account.ID);
 
                     member.IsReady = true;
                 }

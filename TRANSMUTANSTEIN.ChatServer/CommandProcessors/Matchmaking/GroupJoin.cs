@@ -1,13 +1,9 @@
 namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Matchmaking;
 
 [ChatCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_JOIN)]
-public class GroupJoin(MerrickContext merrick, ILogger<GroupJoin> logger) : CommandProcessorsBase, ICommandProcessor
+public class GroupJoin(ILogger<GroupJoin> logger) : ISynchronousCommandProcessor
 {
-    private MerrickContext MerrickContext { get; set; } = merrick;
-
-    private ILogger<GroupJoin> Logger { get; } = logger;
-
-    public async Task Process(ChatSession session, ChatBuffer buffer)
+    public void Process(ChatSession session, ChatBuffer buffer)
     {
         GroupJoinRequestData requestData = new (buffer);
 
@@ -35,7 +31,7 @@ public class GroupJoin(MerrickContext merrick, ILogger<GroupJoin> logger) : Comm
 
         else
         {
-            Logger.LogWarning("Player {Session.ClientInformation.Account.Name} Tried To Join A Matchmaking Group They Are Already In", session.ClientInformation.Account.Name);
+            logger.LogWarning("Player {Session.ClientInformation.Account.Name} Tried To Join A Matchmaking Group They Are Already In", session.ClientInformation.Account.Name);
 
             return;
         }

@@ -1,13 +1,9 @@
 ﻿namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Matchmaking;
 
 [ChatCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_INVITE)]
-public class GroupInvite(MerrickContext merrick, ILogger<GroupInvite> logger) : CommandProcessorsBase, ICommandProcessor
+public class GroupInvite(MerrickContext merrick) : ISynchronousCommandProcessor
 {
-    private MerrickContext MerrickContext { get; set; } = merrick;
-
-    private ILogger<GroupInvite> Logger { get; set; } = logger;
-
-    public async Task Process(ChatSession session, ChatBuffer buffer)
+    public void Process(ChatSession session, ChatBuffer buffer)
     {
         GroupInviteRequestData requestData = new (buffer);
 
@@ -40,7 +36,7 @@ public class GroupInvite(MerrickContext merrick, ILogger<GroupInvite> logger) : 
 
         inviteBroadcast.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_INVITE_BROADCAST);
 
-        Account inviteReceiver = MerrickContext.Accounts.Include(account => account.Clan)
+        Account inviteReceiver = merrick.Accounts.Include(account => account.Clan)
             .Single(account => account.Name.Equals(requestData.InviteReceiverName));
 
         inviteBroadcast.WriteString(inviteReceiver.NameWithClanTag);                                    // Invite Receiver Name

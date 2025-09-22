@@ -1,20 +1,16 @@
 ﻿namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Matchmaking;
 
 [ChatCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_POPULARITY_UPDATE)]
-public class PopularityUpdate(MerrickContext merrick, ILogger<PopularityUpdate> logger) : CommandProcessorsBase, ICommandProcessor
+public class PopularityUpdate : ISynchronousCommandProcessor
 {
-    private MerrickContext MerrickContext { get; set; } = merrick;
-
-    private ILogger<PopularityUpdate> Logger { get; set; } = logger;
-
-    public async Task Process(ChatSession session, ChatBuffer buffer)
+    public void Process(ChatSession session, ChatBuffer buffer)
     {
         PopularityUpdateRequestData requestData = new (buffer);
 
-        await SendMatchmakingPopularity(session, buffer, Response);
+        SendMatchmakingPopularity(session);
     }
 
-    public static async Task SendMatchmakingPopularity(TCPSession session, ChatBuffer buffer, ChatBuffer response)
+    public static void SendMatchmakingPopularity(ChatSession session)
     {
         // TODO: Get All Maps And Compile List
         List<string> maps = ["caldavar", "midwars", "riftwars"];
@@ -58,6 +54,8 @@ public class PopularityUpdate(MerrickContext merrick, ILogger<PopularityUpdate> 
             .Append("modes:").Append(string.Concat(legendModes.Select(mode => mode + '|')))
             .Append("regions:").Append(string.Concat(legendRegions.Select(region => region + '|')))
             .ToString();
+
+        ChatBuffer response = new ();
 
         response.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_POPULARITY_UPDATE);
 
