@@ -20,7 +20,7 @@ global using System.Reflection;
 global using System.Text;
 
 global using TRANSMUTANSTEIN.ChatServer.Attributes;
-global using TRANSMUTANSTEIN.ChatServer.CommandProcessors.Base;
+global using TRANSMUTANSTEIN.ChatServer.CommandProcessors.Channels;
 global using TRANSMUTANSTEIN.ChatServer.CommandProcessors.Connection;
 global using TRANSMUTANSTEIN.ChatServer.CommandProcessors.Matchmaking;
 global using TRANSMUTANSTEIN.ChatServer.Communication;
@@ -29,4 +29,4 @@ global using TRANSMUTANSTEIN.ChatServer.Core;
 global using TRANSMUTANSTEIN.ChatServer.Extensions;
 global using TRANSMUTANSTEIN.ChatServer.Internals;
 global using TRANSMUTANSTEIN.ChatServer.Matchmaking;
-global ﻿using TRANSMUTANSTEIN.ChatServer.Services;
+global using TRANSMUTANSTEIN.ChatServer.Services;
