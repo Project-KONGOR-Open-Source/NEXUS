@@ -9,6 +9,8 @@ public class TrackPlayerAction(ILogger<TrackPlayerAction> logger) : ISynchronous
 
         // TODO: Do Something With This Data
 
+        // TODO: Look Into Updating The Online Players Count And Matchmaking Details Using Custom Action OBTAIN_DETAILED_ONLINE_STATUS (Or Equivalent)
+
         logger.LogError(@"Unhandled User Action: ""{RequestData.Action}""", requestData.Action);
     }
 }
@@ -17,5 +19,5 @@ public class TrackPlayerActionRequestData(ChatBuffer buffer)
 {
     public byte[] CommandBytes = buffer.ReadCommandBytes();
 
-    public ChatProtocol.ActionCampaign Action = (ChatProtocol.ActionCampaign)buffer.ReadInt8();
+    public ChatProtocol.ActionCampaign Action = (ChatProtocol.ActionCampaign) buffer.ReadInt8();
 }

@@ -7,18 +7,46 @@ public class ClientHandshake(MerrickContext merrick, ILogger<ClientHandshake> lo
     {
         ClientHandshakeRequestData requestData = new (buffer);
 
-        Account? account = await merrick.Accounts.Include(account => account.Clan).SingleOrDefaultAsync(account => account.ID == requestData.AccountID);
+        Account? account = await merrick.Accounts
+            .Include(account => account.FriendedPeers)
+            .Include(account => account.Clan).ThenInclude(clan => clan!.Members)
+            .SingleOrDefaultAsync(account => account.ID == requestData.AccountID);
+
+        // TODO: Check Session Cookie And/Or Session Authentication Hash
 
         if (account is null)
         {
             logger.LogError(@"[BUG] Account With ID ""{RequestData.AccountID}"" Could Not Be Found", requestData.AccountID);
 
+            ChatBuffer failure = new ();
+
+            failure.WriteCommand(ChatProtocol.ChatServerToClient.NET_CHAT_CL_REJECT);
+            failure.WriteInt8(Convert.ToByte(ChatProtocol.ChatRejectReason.ECR_AUTH_FAILED));
+            failure.PrependBufferSize();
+
+            session.SendAsync(failure.Data);
+
+            session.Terminate();
+
             return;
         }
 
-        // TODO: Check Cookie
+        // TODO: Check For Account Sharing And Concurrent Sub-Account Connections
 
-        // TODO: Check Authentication Hash
+        if ($"{requestData.ClientVersionMajor}.{requestData.ClientVersionMinor}.{requestData.ClientVersionPatch}.{requestData.ClientVersionRevision}" is not "4.10.1.0")
+        {
+            ChatBuffer failure = new ();
+
+            failure.WriteCommand(ChatProtocol.ChatServerToClient.NET_CHAT_CL_REJECT);
+            failure.WriteInt8(Convert.ToByte(ChatProtocol.ChatRejectReason.ECR_BAD_VERSION));
+            failure.PrependBufferSize();
+
+            session.SendAsync(failure.Data);
+
+            session.Terminate();
+
+            return;
+        }
 
         // Embed The Client Information In The Chat Session
         session.ClientInformation = new ClientInformation(requestData, account);
@@ -32,6 +60,9 @@ public class ClientHandshake(MerrickContext merrick, ILogger<ClientHandshake> lo
         response.PrependBufferSize();
 
         session.SendAsync(response.Data);
+
+        // Notify Self, Clan Members, And Friends That This Client Is Now Connected
+        session.UpdateConnectionStatus(ChatProtocol.ChatClientStatus.CHAT_CLIENT_STATUS_CONNECTED);
     }
 }
 
@@ -69,9 +100,9 @@ public class ClientHandshakeRequestData(ChatBuffer buffer)
 
     public byte ClientVersionRevision = buffer.ReadInt8();
 
-    public byte LastKnownClientState = buffer.ReadInt8();
+    public ChatProtocol.ChatClientStatus LastKnownClientState = (ChatProtocol.ChatClientStatus) buffer.ReadInt8();
 
-    public byte ClientChatModeState = buffer.ReadInt8();
+    public ChatProtocol.ChatModeType ClientChatModeState = (ChatProtocol.ChatModeType) buffer.ReadInt8();
 
     public string ClientRegion = buffer.ReadString();
 
@@ -110,9 +141,9 @@ public class ClientInformation(ClientHandshakeRequestData data, Account account)
 
     public byte ClientVersionRevision = data.ClientVersionRevision;
 
-    public byte LastKnownClientState = data.LastKnownClientState;
+    public ChatProtocol.ChatClientStatus LastKnownClientState = data.LastKnownClientState;
 
-    public byte ClientChatModeState = data.ClientChatModeState;
+    public ChatProtocol.ChatModeType ClientChatModeState = data.ClientChatModeState;
 
     public string ClientRegion = data.ClientRegion;
 

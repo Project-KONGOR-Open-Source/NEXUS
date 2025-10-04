@@ -38,7 +38,86 @@ public class ChatSession(TCPServer server, IServiceProvider serviceProvider) : T
         Parallel.ForEach(segments, ProcessDataSegment);
     }
 
-    private List<byte[]> ExtractDataSegments(byte[] buffer, out byte[] remaining)
+    public void Terminate()
+    {
+        UpdateConnectionStatus(ChatProtocol.ChatClientStatus.CHAT_CLIENT_STATUS_DISCONNECTED);
+
+        // TODO: Disconnect From Chat Channels
+
+        if (Context.ChatSessions.TryRemove(ClientInformation.Account.Name, out ChatSession? _) is false)
+            Logger.LogError(@"Failed To Remove Chat Session For Account Name ""{ClientInformation.Account.Name}""", ClientInformation.Account.Name);
+
+        Disconnect();
+    }
+
+    public void UpdateConnectionStatus(ChatProtocol.ChatClientStatus status)
+    {
+        if (ClientInformation.LastKnownClientState == status) return; else ClientInformation.LastKnownClientState = status;
+
+        if (ClientInformation.ClientChatModeState is not ChatProtocol.ChatModeType.CHAT_MODE_INVISIBLE)
+        {
+            List<int> clanMemberIDs = [.. ClientInformation.Account.Clan?.Members.Select(clanMember => clanMember.ID) ?? []];
+            List<int> friendIDs = [.. ClientInformation.Account.FriendedPeers.Select(friend => friend.Identifier)];
+
+            List<ChatSession> onlinePeers = Context.ChatSessions
+                .Where(chatSession => friendIDs.Any(friendID => friendID == chatSession.Value.ClientInformation?.Account.ID) || clanMemberIDs.Any(clanMemberID => clanMemberID == chatSession.Value.ClientInformation?.Account.ID))
+                .Select(chatSession => chatSession.Value).Distinct().ToList();
+
+            throw new NotImplementedException("ChatProtocol.Command.CHAT_CMD_UPDATE_STATUS / ChatServerProtocol.GameClientToChatServer.UpdateStatus"); // TODO: Implement Response
+
+            Parallel.ForEach(onlinePeers, session =>
+            {
+                ChatBuffer update = new ();
+
+                update.WriteCommand(ChatProtocol.Command.CHAT_CMD_UPDATE_STATUS);
+
+                /*
+                    [4] unsigned long - client's account ID
+                    [1] EChatClientStatus - client's status
+                    [1] unsigned char - client's flags (refer to CHAT_CLIENT_* flags)
+                    [4] unsigned long - client's clan ID
+                    [X] string - client's clan name
+                    [X] string - client's chat symbol
+                    [X] string - client's chat name color
+                    [X] string - client's account icon
+                    if (status > CHAT_CLIENT_STATUS_CONNECTED)
+                        [X] string - server address this client is connected to, in the form of "X.X.X.X:X"
+                    if (status == CHAT_CLIENT_STATUS_IN_GAME)
+                        [X] string - game name this client is connected to
+                        [4] unsigned long - match ID this client is in
+                        [1] bool - has extended server info
+                        if (has extended server info)
+                            [1] EArrangedMatchType - arranged match type
+                            [X] string - client's name
+                            [X] string - server's region
+                            [X] string - server's game mode
+                            [1] unsigned char - server's team size
+                            [X] string - server's map name
+                            [1] unsigned char - server's tier (deprecated)
+                            [1] unsigned char - server's official status (0 = unofficial (deprecated), 1 = official w/ stats, 2 = official w/o stats)
+                            [1] bool - server's "no leavers" flag
+                            [1] bool - server's "private" flag
+                            [1] bool - server's "all heroes" flag
+                            [1] bool - server's "casual mode" flag
+                            [1] bool - server's "all random" flags (deprecated)
+                            [1] bool - server's "auto balanced" flag
+                            [1] bool - server's "advanced options" flag
+                            [2] unsigned short - server's minimum PSR allowed
+                            [2] unsigned short - server's maximum PSR allowed
+                            [1] bool - server's "dev heroes" flag
+                            [1] bool - server's "hardcore" flag
+                            [1] bool - server's "verified only" flag
+                            [1] bool - server's "gated" flag
+                */
+
+                update.PrependBufferSize();
+
+                session.SendAsync(update.Data);
+            });
+        }
+    }
+
+    private static List<byte[]> ExtractDataSegments(byte[] buffer, out byte[] remaining)
     {
         remaining = [];
 
