@@ -63,6 +63,10 @@ public class ClientHandshake(MerrickContext merrick, ILogger<ClientHandshake> lo
 
         // Notify Self, Clan Members, And Friends That This Client Is Now Connected
         session.UpdateConnectionStatus(ChatProtocol.ChatClientStatus.CHAT_CLIENT_STATUS_CONNECTED);
+
+        // TODO: Update Chat Channel Members
+
+        // TODO: Send Initial Update
     }
 }
 

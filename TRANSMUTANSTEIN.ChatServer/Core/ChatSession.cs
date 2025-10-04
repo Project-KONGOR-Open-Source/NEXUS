@@ -108,6 +108,49 @@ public class ChatSession(TCPServer server, IServiceProvider serviceProvider) : T
                             [1] bool - server's "hardcore" flag
                             [1] bool - server's "verified only" flag
                             [1] bool - server's "gated" flag
+
+                    public override CommandBuffer Encode()
+                    {
+                        CommandBuffer response = new();
+                        response.WriteInt16(ChatServerProtocol.GameClientToChatServer.UpdateStatus);
+                        response.WriteInt32(AccountId);
+                        response.WriteInt8(Convert.ToByte(ChatClientStatus));
+                        response.WriteInt8(Flags);
+
+                        if (Clan == null)
+                        {
+                            response.WriteInt32(0);
+                            response.WriteString("");
+                        }
+                        else
+                        {
+                            response.WriteInt32(Clan.ClanId);
+                            response.WriteString(Clan.Name);
+                        }
+
+                        response.WriteString(SelectedChatSymbolCode);
+                        response.WriteString(SelectedChatNameColourCode);
+                        response.WriteString(SelectedAccountIconCode);
+
+                        switch (ChatClientStatus)
+                        {
+                            case ChatServerProtocol.ChatClientStatus.JoiningGame:
+                                response.WriteString(ServerAddress);
+                                break;
+                            case ChatServerProtocol.ChatClientStatus.InGame:
+                                response.WriteString(ServerAddress);
+                                response.WriteString(GameName);
+                                response.WriteInt32(MatchId);
+
+                                // 0 - done, 1 - more data about the match to follow.
+                                response.WriteInt8(0);
+                                break;
+                        }
+
+                        response.WriteInt32(AscensionLevel);
+
+                        return response;
+                    }
                 */
 
                 update.PrependBufferSize();
