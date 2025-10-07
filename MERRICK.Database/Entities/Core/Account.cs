@@ -75,6 +75,11 @@ public class Account
     }
 
     public string Icon => SelectedStoreItems.SingleOrDefault(item => item.StartsWith("ai.")) ?? "ai.Default Icon";
+    public string IconNoPrefixCode => Icon.Replace("ai.", string.Empty);
 
-    public string ChatNameColour => SelectedStoreItems.SingleOrDefault(item => item.StartsWith("cc.")) ?? "cc.white";
+    public string ChatSymbol => SelectedStoreItems.SingleOrDefault(item => item.StartsWith("cs.")) ?? string.Empty;
+    public string ChatSymbolNoPrefixCode => ChatSymbol.Replace("cs.", string.Empty);
+
+    public string NameColour => SelectedStoreItems.SingleOrDefault(item => item.StartsWith("cc.")) ?? "cc.white";
+    public string NameColourNoPrefixCode => NameColour.Replace("cc.", string.Empty);
 }

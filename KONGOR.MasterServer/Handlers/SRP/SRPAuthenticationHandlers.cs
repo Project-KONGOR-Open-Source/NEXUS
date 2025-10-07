@@ -121,7 +121,7 @@ public static class SRPAuthenticationHandlers
             channels = channels.Prepend(ChatChannels.GeneralChannel).ToList();
 
         if (account.Clan is not null)
-            channels.Add($"Clan {account.Clan.Name}");
+            channels.Add(account.Clan.GetChatChannelName());
 
         if (account.Type is AccountType.GameMaster or AccountType.Staff)
             channels.Add(ChatChannels.GameMastersChannel);

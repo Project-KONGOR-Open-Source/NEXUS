@@ -11,6 +11,7 @@
 
     <ItemGroup>
         <ProjectReference Include="../ASPIRE.Common/ASPIRE.Common.csproj" />
+        <ProjectReference Include="../KONGOR.MasterServer/KONGOR.MasterServer.csproj" /> <!-- TODO: Move Models To A Shared Project And Remove Inter-Project Dependencies -->
         <ProjectReference Include="../MERRICK.Database/MERRICK.Database.csproj" />
     </ItemGroup>
 

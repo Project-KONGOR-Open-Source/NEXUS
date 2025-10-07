@@ -15,4 +15,6 @@ public class Clan
     public List<Account> Members { get; set; } = [];
 
     public DateTimeOffset TimestampCreated { get; set; } = DateTimeOffset.UtcNow;
+
+    public string GetChatChannelName() => $"Clan {Name}";
 }

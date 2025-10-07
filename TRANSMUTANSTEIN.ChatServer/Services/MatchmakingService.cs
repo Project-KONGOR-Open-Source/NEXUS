@@ -63,7 +63,7 @@ public class MatchmakingService(IServiceProvider serviceProvider) : IHostedServi
                 List<MatchmakingGroup> team_1 = [Groups.Values.First()];
                 List<MatchmakingGroup> team_2 = [Groups.Values.Last()];
 
-                Parallel.ForEach([..team_1, ..team_2], group => group.QueueStartTime = null);
+                Parallel.ForEach([.. team_1, .. team_2], group => group.QueueStartTime = null);
 
                 ChatBuffer found = new ();
 
@@ -74,7 +74,7 @@ public class MatchmakingService(IServiceProvider serviceProvider) : IHostedServi
 
                 found.PrependBufferSize();
 
-                Parallel.ForEach([..team_1, ..team_2], group => Parallel.ForEach(group.Members, member => member.Session.SendAsync(found.Data)));
+                Parallel.ForEach([.. team_1, .. team_2], group => Parallel.ForEach(group.Members, member => member.Session.SendAsync(found.Data)));
             }
             # endregion
         }

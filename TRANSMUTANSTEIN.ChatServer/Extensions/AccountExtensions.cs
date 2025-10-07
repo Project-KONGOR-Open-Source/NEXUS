@@ -21,6 +21,8 @@ public static class AccountExtensions
             flags |= Convert.ToByte(ChatProtocol.ChatClientType.CHAT_CLIENT_IS_OFFICER);
         }
 
+        // TODO: Do Something With ChatProtocol.ChatClientType.CHAT_CLIENT_IS_PREMIUM And ChatProtocol.ChatClientType.CHAT_CLIENT_IS_VERIFIED
+
         return flags;
     }
 }

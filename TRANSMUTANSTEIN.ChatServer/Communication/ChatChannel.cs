@@ -6,19 +6,22 @@ public class ChatChannel
 
     public required string Name { get; set; }
 
-    public string Topic => $"Welcome To The {Name} Channel!";
+    public string Topic => $"Welcome To The {Name} Channel !";
 
     public required ChatProtocol.ChatChannelType Flags { get; set; }
 
-    public ConcurrentDictionary<string, ChatChannelMember> Administrators { get; set; } = [];
-
     public ConcurrentDictionary<string, ChatChannelMember> Members { get; set; } = [];
 
-    public List<ChatChannelMember> MembersAndAdministrators => [.. Members.Values, .. Administrators.Values];
+    public bool IsFull => Members.Count > ChatProtocol.MAX_USERS_PER_CHANNEL;
+
+    /// <summary>
+    ///     Hidden Constructor Which Enforces <see cref="GetOrCreate"/> As The Primary Mechanism For Creating Chat Channels
+    /// </summary>
+    private ChatChannel() { }
 
     public static ChatChannel GetOrCreate(JoinChannelRequestData requestData, ChatSession session)
     {
-        bool isClanChannel = session.ClientInformation.Account.Clan is not null && requestData.Channel == $"Clan {session.ClientInformation.Account.Clan.Name}";
+        bool isClanChannel = session.ClientInformation.Account.Clan is not null && requestData.Channel == session.ClientInformation.Account.Clan.GetChatChannelName();
 
         ChatProtocol.ChatChannelType chatChannelType = isClanChannel
             ? ChatProtocol.ChatChannelType.CHAT_CHANNEL_FLAG_RESERVED | ChatProtocol.ChatChannelType.CHAT_CHANNEL_FLAG_CLAN
@@ -31,13 +34,19 @@ public class ChatChannel
 
     public ChatChannel Join(ChatSession session)
     {
-        ChatChannelMember newMember = new (session);
+        // TODO: Reject Join Request If Client Is Already In The Channel
 
-        if (newMember.AdministratorLevel is ChatProtocol.AdminLevel.CHAT_CLIENT_ADMIN_NONE)
-            Members.TryAdd(session.ClientInformation.Account.Name, newMember);
+        // TODO: Reject Join Request If The Channel Is A Clan Channel And The Client Is Not In The Clan
 
-        if (newMember.AdministratorLevel is not ChatProtocol.AdminLevel.CHAT_CLIENT_ADMIN_NONE)
-            Administrators.TryAdd(session.ClientInformation.Account.Name, newMember);
+        // TODO: Reject Join Request If The Channel Has The CHAT_CHANNEL_FLAG_UNJOINABLE Flag
+
+        // TODO: Reject Join Request As Non-Administrator If Channel Is Full
+
+        // TODO: Reject Join Request If Response Buffer Would Overlow With A Data Size Greater Than 16384 Bytes (16 Kilobytes)
+
+        ChatChannelMember newMember = new (session, this);
+
+        Members.TryAdd(session.ClientInformation.Account.Name, newMember);
 
         ChatBuffer response = new ();
 
@@ -48,9 +57,11 @@ public class ChatChannel
         response.WriteInt8(Convert.ToByte(Flags));                                // Channel Flags
         response.WriteString(Topic);                                              // Channel Topic
 
-        response.WriteInt32(Administrators.Count);                                // Count Of Channel Administrators
+        List<ChatChannelMember> administrators = [.. Members.Values.Where(member => member.IsAdministrator)];
 
-        foreach (ChatChannelMember administrator in Administrators.Values)
+        response.WriteInt32(administrators.Count);                                // Count Of Channel Administrators
+
+        foreach (ChatChannelMember administrator in administrators)
         {
             response.WriteInt32(administrator.Account.ID);                        // Administrator Account ID
             response.WriteInt8(Convert.ToByte(administrator.AdministratorLevel)); // Channel Administrator Level
@@ -64,9 +75,9 @@ public class ChatChannel
             response.WriteInt32(member.Account.ID);                               // Member Account ID
             response.WriteInt8(Convert.ToByte(member.ConnectionStatus));          // Connection Status
             response.WriteInt8(Convert.ToByte(member.AdministratorLevel));        // Channel Administrator Level
-            response.WriteString(member.ChatSymbol);                              // Chat Symbol
-            response.WriteString(member.NameColour);                              // Name Colour
-            response.WriteString(member.AccountIcon);                             // Account Icon
+            response.WriteString(member.Account.ChatSymbolNoPrefixCode);          // Chat Symbol
+            response.WriteString(member.Account.NameColourNoPrefixCode);          // Name Colour
+            response.WriteString(member.Account.IconNoPrefixCode);                // Account Icon
             response.WriteInt32(member.Account.AscensionLevel);                   // Ascension Level
         }
 
@@ -80,9 +91,9 @@ public class ChatChannel
 
     public ChatChannel BroadcastJoin(ChatSession session)
     {
-        ChatChannelMember newMember = MembersAndAdministrators.Single(member => member.Account.ID == session.ClientInformation.Account.ID);
+        ChatChannelMember newMember = Members.Values.Single(member => member.Account.ID == session.ClientInformation.Account.ID);
 
-        List<ChatChannelMember> existingMembers = [..MembersAndAdministrators.Where(member => member.Account.ID != session.ClientInformation.Account.ID)];
+        List<ChatChannelMember> existingMembers = [.. Members.Values.Where(member => member.Account.ID != session.ClientInformation.Account.ID)];
 
         ChatBuffer broadcast = new ();
 
@@ -93,9 +104,9 @@ public class ChatChannel
         broadcast.WriteInt32(newMember.Account.ID);                        // Member Account ID
         broadcast.WriteInt8(Convert.ToByte(newMember.ConnectionStatus));   // Connection Status
         broadcast.WriteInt8(Convert.ToByte(newMember.AdministratorLevel)); // Channel Administrator Level
-        broadcast.WriteString(newMember.ChatSymbol);                       // Chat Symbol
-        broadcast.WriteString(newMember.NameColour);                       // Name Colour
-        broadcast.WriteString(newMember.AccountIcon);                      // Account Icon
+        broadcast.WriteString(newMember.Account.ChatSymbolNoPrefixCode);   // Chat Symbol
+        broadcast.WriteString(newMember.Account.NameColourNoPrefixCode);   // Name Colour
+        broadcast.WriteString(newMember.Account.IconNoPrefixCode);         // Account Icon
         broadcast.WriteInt32(newMember.Account.AscensionLevel);            // Ascension Level
 
         broadcast.PrependBufferSize();

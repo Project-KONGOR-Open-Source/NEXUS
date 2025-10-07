@@ -116,7 +116,7 @@ public class MatchmakingGroup(MatchmakingGroupMember leader)
             if (fullGroupUpdate)
             {
                 update.WriteBool(member.IsEligibleForMatchmaking);                       // Eligible For Matchmaking
-                update.WriteString(member.Account.ChatNameColour);                       // Chat Name Colour
+                update.WriteString(member.Account.NameColour);                           // Chat Name Colour
                 update.WriteString(member.Account.Icon);                                 // Account Icon
                 update.WriteString(member.Country);                                      // Country
                 update.WriteBool(member.HasGameModeAccess);                              // Game Mode Access Bool

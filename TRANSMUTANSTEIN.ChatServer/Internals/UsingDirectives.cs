@@ -1,5 +1,7 @@
 ﻿global using ASPIRE.Common.Extensions.Cryptography;
 
+global using KONGOR.MasterServer.Models.ServerManagement; // TODO: Move Models To A Shared Project And Remove Inter-Project Dependencies
+
 global using MERRICK.Database.Context;
 global using MERRICK.Database.Entities.Core;
 global using MERRICK.Database.Enumerations;

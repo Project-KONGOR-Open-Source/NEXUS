@@ -86,7 +86,7 @@ public static class SeedDataHandlers
             ClanTier = ClanTier.None,
             TimestampJoinedClan = null,
             AscensionLevel = 666,
-            AutoConnectChatChannels = ChatChannels.AllDefaultChannels.ToList(),
+            AutoConnectChatChannels = [.. ChatChannels.AllDefaultChannels],
             SelectedStoreItems = [ "ai.custom_icon:1", "av.Flamboyant", "c.cat_courier", "cc.frostburnlogo", "cr.Punk Creep", "cs.frostburnlogo", "m.Super-Taunt", "sc.paragon_circle_upgrade", "t.Dumpster_Taunt", "te.Punk TP", "w.8bit_ward" ]
         };
 
@@ -106,7 +106,7 @@ public static class SeedDataHandlers
                 ClanTier = subAccountName is /* [K] */ "ONGOR" ? ClanTier.Leader : ClanTier.Officer,
                 TimestampJoinedClan = DateTimeOffset.UtcNow,
                 AscensionLevel = 666,
-                AutoConnectChatChannels = ChatChannels.AllDefaultChannels.Append($"Clan {clan.Name}").ToList(),
+                AutoConnectChatChannels = [.. ChatChannels.AllDefaultChannels, clan.GetChatChannelName()],
                 SelectedStoreItems = [ "ai.custom_icon:1", "av.Flamboyant", "c.cat_courier", "cc.frostburnlogo", "cr.Punk Creep", "cs.frostburnlogo", "m.Super-Taunt", "sc.paragon_circle_upgrade", "t.Dumpster_Taunt", "te.Punk TP", "w.8bit_ward" ]
             };
 
@@ -149,7 +149,7 @@ public static class SeedDataHandlers
                 ClanTier = iterator is 0 ? ClanTier.Leader : ClanTier.Member,
                 TimestampJoinedClan = DateTimeOffset.UtcNow,
                 AscensionLevel = 0,
-                AutoConnectChatChannels = [ ChatChannels.GuestsChannel, $"Clan {clan.Name}" ],
+                AutoConnectChatChannels = [ ChatChannels.GuestsChannel, clan.GetChatChannelName() ],
                 SelectedStoreItems = [ "ai.custom_icon:1", "av.Flamboyant", "c.cat_courier", "cc.frostburnlogo", "cr.Punk Creep", "cs.frostburnlogo", "m.Super-Taunt", "sc.paragon_circle_upgrade", "t.Dumpster_Taunt", "te.Punk TP", "w.8bit_ward" ]
             };
 

@@ -12,7 +12,7 @@ public class ClientHandshake(MerrickContext merrick, ILogger<ClientHandshake> lo
             .Include(account => account.Clan).ThenInclude(clan => clan!.Members)
             .SingleOrDefaultAsync(account => account.ID == requestData.AccountID);
 
-        // TODO: Check Session Cookie And/Or Session Authentication Hash
+        // TODO: Check Session Cookie And/Or Session Authentication Hash And Fail With ECR_AUTH_FAILED
 
         if (account is null)
         {
@@ -21,7 +21,7 @@ public class ClientHandshake(MerrickContext merrick, ILogger<ClientHandshake> lo
             ChatBuffer failure = new ();
 
             failure.WriteCommand(ChatProtocol.ChatServerToClient.NET_CHAT_CL_REJECT);
-            failure.WriteInt8(Convert.ToByte(ChatProtocol.ChatRejectReason.ECR_AUTH_FAILED));
+            failure.WriteInt8(Convert.ToByte(ChatProtocol.ChatRejectReason.ECR_UNKNOWN));
             failure.PrependBufferSize();
 
             session.SendAsync(failure.Data);

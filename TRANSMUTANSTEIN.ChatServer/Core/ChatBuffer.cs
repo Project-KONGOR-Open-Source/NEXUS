@@ -42,7 +42,7 @@ public class ChatBuffer : TCPBuffer
         if (_offset is not 0)
             throw new InvalidDataException($"Offset Is {_offset}, But 0 (Zero) Was Expected");
 
-        byte[] data = _data[..2];
+        byte[] data = _data[.. 2];
 
         Shift(2);
 

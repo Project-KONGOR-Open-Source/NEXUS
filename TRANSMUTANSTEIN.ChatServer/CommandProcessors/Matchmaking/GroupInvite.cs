@@ -18,7 +18,7 @@ public class GroupInvite(MerrickContext merrick) : ISynchronousCommandProcessor
         invite.WriteInt32(session.ClientInformation.Account.ID);                                        // Invite Issuer ID
         invite.WriteInt8(Convert.ToByte(ChatProtocol.ChatClientStatus.CHAT_CLIENT_STATUS_CONNECTED));   // Invite Issuer Status
         invite.WriteInt8(session.ClientInformation.Account.GetChatClientFlags());                       // Invite Issuer Chat Flags
-        invite.WriteString(session.ClientInformation.Account.ChatNameColour);                           // Invite Issuer Chat Name Colour
+        invite.WriteString(session.ClientInformation.Account.NameColour);                               // Invite Issuer Chat Name Colour
         invite.WriteString(session.ClientInformation.Account.Icon);                                     // Invite Issuer Icon
         invite.WriteString(group.Information.MapName);                                                  // Map Name
         invite.WriteInt8(Convert.ToByte(group.Information.GameType));                                   // Game Type
