@@ -12,7 +12,7 @@ public class ChatChannel
 
     public ConcurrentDictionary<string, ChatChannelMember> Members { get; set; } = [];
 
-    public bool IsFull => Members.Count > ChatProtocol.MAX_USERS_PER_CHANNEL;
+    public bool IsFull => (Members.Count < ChatProtocol.MAX_USERS_PER_CHANNEL) is false;
 
     /// <summary>
     ///     Hidden Constructor Which Enforces <see cref="GetOrCreate"/> As The Primary Mechanism For Creating Chat Channels
@@ -115,5 +115,34 @@ public class ChatChannel
         Parallel.ForEach(existingMembers, (existingMember) => existingMember.Session.SendAsync(broadcast.Data));
 
         return this;
+    }
+
+    public void Leave(ChatSession session)
+    {
+        Members.TryRemove(session.ClientInformation.Account.Name, out ChatChannelMember? member);
+
+        if (member is not null)
+        {
+            // If There Are No Remaining Members And The Channel Is Not Permanent, Remove It Entirely
+            if (Members.IsEmpty && (Flags & ChatProtocol.ChatChannelType.CHAT_CHANNEL_FLAG_PERMANENT) == 0)
+                Context.ChatChannels.TryRemove(Name, out _);
+
+            else if (Members.IsEmpty is false)
+            {
+                List<ChatChannelMember> remainingMembers = [.. Members.Values];
+
+                ChatBuffer broadcast = new ();
+
+                broadcast.WriteCommand(ChatProtocol.Command.CHAT_CMD_LEFT_CHANNEL);
+
+                broadcast.WriteInt32(member.Account.ID); // Member Account ID
+                broadcast.WriteInt32(ID);                // Channel ID
+
+                broadcast.PrependBufferSize();
+
+                // Announce To The Remaining Channel Members That A Client Has Left The Channel
+                Parallel.ForEach(remainingMembers, (remainingMember) => remainingMember.Session.SendAsync(broadcast.Data));
+            }
+        }
     }
 }

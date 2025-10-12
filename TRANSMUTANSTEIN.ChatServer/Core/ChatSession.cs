@@ -40,14 +40,18 @@ public class ChatSession(TCPServer server, IServiceProvider serviceProvider) : T
 
     public void Terminate()
     {
+        List<ChatChannel> channels = [.. Context.ChatChannels.Values.Where(channel => channel.Members.ContainsKey(ClientInformation.Account.Name))];
+
+        Parallel.ForEach(channels, channel => channel.Leave(this));
+
         UpdateConnectionStatus(ChatProtocol.ChatClientStatus.CHAT_CLIENT_STATUS_DISCONNECTED);
 
-        // TODO: Disconnect From Chat Channels
+        Disconnect();
 
         if (Context.ChatSessions.TryRemove(ClientInformation.Account.Name, out ChatSession? _) is false)
             Logger.LogError(@"Failed To Remove Chat Session For Account Name ""{ClientInformation.Account.Name}""", ClientInformation.Account.Name);
 
-        Disconnect();
+        // TODO: Send Disconnect Notification To Friends And Clan Members
     }
 
     public void UpdateConnectionStatus(ChatProtocol.ChatClientStatus status, MatchServer? matchServer = null)
