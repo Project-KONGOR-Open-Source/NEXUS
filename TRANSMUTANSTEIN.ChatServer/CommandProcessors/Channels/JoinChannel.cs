@@ -8,7 +8,7 @@ public class JoinChannel : ISynchronousCommandProcessor
         JoinChannelRequestData requestData = new (buffer);
 
         ChatChannel
-            .GetOrCreate(requestData.ChannelName, session)
+            .GetOrCreate(session, requestData.ChannelName)
             .Join(session)
             .BroadcastJoin(session);
     }

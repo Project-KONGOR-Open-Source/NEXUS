@@ -14,12 +14,14 @@ public class ChatChannel
 
     public bool IsFull => (Members.Count < ChatProtocol.MAX_USERS_PER_CHANNEL) is false;
 
+    public bool IsPermanent => Flags.HasFlag(ChatProtocol.ChatChannelType.CHAT_CHANNEL_FLAG_PERMANENT);
+
     /// <summary>
     ///     Hidden Constructor Which Enforces <see cref="GetOrCreate"/> As The Primary Mechanism For Creating Chat Channels
     /// </summary>
     private ChatChannel() { }
 
-    public static ChatChannel GetOrCreate(string channelName, ChatSession session)
+    public static ChatChannel GetOrCreate(ChatSession session, string channelName)
     {
         bool isClanChannel = session.ClientInformation.Account.Clan is not null && channelName == session.ClientInformation.Account.Clan.GetChatChannelName();
 
@@ -32,7 +34,7 @@ public class ChatChannel
         return channel;
     }
 
-    public static ChatChannel Get(OneOf<string, int> channelIdentifier, ChatSession session)
+    public static ChatChannel Get(ChatSession session, OneOf<string, int> channelIdentifier)
     {
         ChatChannel channel = channelIdentifier.Match
         (
@@ -134,50 +136,67 @@ public class ChatChannel
 
     public void Leave(ChatSession session)
     {
-        ChatBuffer broadcast = new ();
-
-        broadcast.WriteCommand(ChatProtocol.Command.CHAT_CMD_LEFT_CHANNEL);
-
-        broadcast.WriteInt32(session.ClientInformation.Account.ID); // Member Account ID
-        broadcast.WriteInt32(ID);                                   // Channel ID
-
-        broadcast.PrependBufferSize();
-
-        // Announce To The Channel Members (Including To Self) That A Client Has Left The Channel
-        Parallel.ForEach(Members.Values, (member) => member.Session.SendAsync(broadcast.Data));
-
-        if (Members.TryRemove(session.ClientInformation.Account.Name, out _) is false)
+        if (Members.TryRemove(session.ClientInformation.Account.Name, out ChatChannelMember? member) is false)
             session.Logger.LogError(@"[BUG] Failed To Remove Account ""{AccountName}"" From Channel ""{ChannelName}""", session.ClientInformation.Account.Name, Name);
 
-        // If There Are No Remaining Members And The Channel Is Not Permanent, Remove It Entirely
-        if (Members.IsEmpty && (Flags & ChatProtocol.ChatChannelType.CHAT_CHANNEL_FLAG_PERMANENT) == 0)
-            Context.ChatChannels.TryRemove(Name, out _);
+        if (member is not null)
+        {
+            // If There Are No Remaining Members And The Channel Is Not Permanent, Dispose Of It
+            if (Members.IsEmpty is true && IsPermanent is false)
+            {
+                if (Context.ChatChannels.TryRemove(Name, out ChatChannel? channel) is false)
+                    session.Logger.LogError(@"[BUG] Failed To Remove Channel ""{ChannelName}"" From Global Channel List", Name);
+
+                if (channel is null)
+                    session.Logger.LogError(@"[BUG] Chat Channel Instance For Channel ""{ChannelName}"" Is NULL", Name);
+            }
+
+            else if (Members.IsEmpty is false)
+            {
+                ChatBuffer broadcast = new ();
+
+                broadcast.WriteCommand(ChatProtocol.Command.CHAT_CMD_LEFT_CHANNEL);
+
+                broadcast.WriteInt32(member.Account.ID); // Member Account ID
+                broadcast.WriteInt32(ID);                // Channel ID
+
+                broadcast.PrependBufferSize();
+
+                // Announce To The Channel Members (Including The Leaving Member) That A Client Has Left The Channel
+                Parallel.ForEach([member, .. Members.Values], (members) => members.Session.SendAsync(broadcast.Data));
+            }
+        }
+
+        else session.Logger.LogError(@"[BUG] Chat Channel Member Instance For Account ""{AccountName}"" In Channel ""{ChannelName}"" Is NULL", session.ClientInformation.Account.Name, Name);
     }
 
-    public void Kick(int kickerID, int kickedID)
+    public void Kick(ChatSession requesterSession, int targetAccountID)
     {
-        // TODO: Implement Route And Use Complex Object Parameter
+        ChatChannelMember requester = Members.Values.Single(member => member.Account.ID == requesterSession.ClientInformation.Account.ID);
+        ChatChannelMember target = Members.Values.Single(member => member.Account.ID == targetAccountID);
 
-        ChatBuffer broadcast = new ();
+        if (requester.AdministratorLevel > target.AdministratorLevel)
+        {
+            ChatBuffer broadcast = new ();
 
-        broadcast.WriteCommand(ChatProtocol.Command.CHAT_CMD_CHANNEL_KICK);
+            broadcast.WriteCommand(ChatProtocol.Command.CHAT_CMD_CHANNEL_KICK);
 
-        broadcast.WriteInt32(ID);       // Channel ID
-        broadcast.WriteInt32(kickerID); // Kicker Account ID
-        broadcast.WriteInt32(kickedID); // Kicked Account ID
+            broadcast.WriteInt32(ID);                                            // Channel ID
+            broadcast.WriteInt32(requesterSession.ClientInformation.Account.ID); // Kicker Account ID
+            broadcast.WriteInt32(targetAccountID);                               // Kicked Account ID
 
-        broadcast.PrependBufferSize();
+            broadcast.PrependBufferSize();
 
-        // Announce To The Channel Members (Including To Self) That A Client Was Kicked From The Channel
-        Parallel.ForEach(Members.Values, (member) => member.Session.SendAsync(broadcast.Data));
+            // Announce To The Channel Members That A Client Will Be Kicked From The Channel
+            // If The Requester's Administrator Level Is Less Than Or Equal To The Target's, This Operation Fails Silently
+            Parallel.ForEach(Members.Values, (member) => member.Session.SendAsync(broadcast.Data));
 
-        ChatSession kickedSession = Context.ChatSessions.Values.Single(session => session.ClientInformation.Account.ID == kickerID);
+            ChatSession targetSession = Context.ChatSessions.Values.Single(session => session.ClientInformation.Account.ID == targetAccountID);
 
-        if (Members.TryRemove(kickedSession.ClientInformation.Account.Name, out _) is false)
-            kickedSession.Logger.LogError(@"[BUG] Failed To Remove Account ""{AccountName}"" From Channel ""{ChannelName}""", kickedSession.ClientInformation.Account.Name, Name);
+            // Remove The Target Member From The Channel
+            Leave(targetSession);
+        }
 
-        // If There Are No Remaining Members And The Channel Is Not Permanent, Remove It Entirely
-        if (Members.IsEmpty && (Flags & ChatProtocol.ChatChannelType.CHAT_CHANNEL_FLAG_PERMANENT) == 0)
-            Context.ChatChannels.TryRemove(Name, out _);
+        // TODO: Notify The Requester That Their Attempt To Kick The Target Failed Due To Insufficient Permissions
     }
 }

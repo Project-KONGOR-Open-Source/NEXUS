@@ -8,8 +8,8 @@ public class KickFromChannel : ISynchronousCommandProcessor
         KickFromChannelRequestData requestData = new (buffer);
 
         ChatChannel
-            .Get(requestData.ChannelID, session)
-            .Kick(session.ClientInformation.Account.ID, requestData.KickedAccountID);
+            .Get(session, requestData.ChannelID)
+            .Kick(session, requestData.TargetAccountID);
     }
 }
 
@@ -19,5 +19,5 @@ public class KickFromChannelRequestData(ChatBuffer buffer)
 
     public int ChannelID = buffer.ReadInt32();
 
-    public int KickedAccountID = buffer.ReadInt32();
+    public int TargetAccountID = buffer.ReadInt32();
 }
