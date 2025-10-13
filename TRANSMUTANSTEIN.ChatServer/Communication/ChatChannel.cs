@@ -19,15 +19,29 @@ public class ChatChannel
     /// </summary>
     private ChatChannel() { }
 
-    public static ChatChannel GetOrCreate(JoinChannelRequestData requestData, ChatSession session)
+    public static ChatChannel GetOrCreate(string channelName, ChatSession session)
     {
-        bool isClanChannel = session.ClientInformation.Account.Clan is not null && requestData.Channel == session.ClientInformation.Account.Clan.GetChatChannelName();
+        bool isClanChannel = session.ClientInformation.Account.Clan is not null && channelName == session.ClientInformation.Account.Clan.GetChatChannelName();
 
         ChatProtocol.ChatChannelType chatChannelType = isClanChannel
             ? ChatProtocol.ChatChannelType.CHAT_CHANNEL_FLAG_RESERVED | ChatProtocol.ChatChannelType.CHAT_CHANNEL_FLAG_CLAN
             : ChatProtocol.ChatChannelType.CHAT_CHANNEL_FLAG_RESERVED | ChatProtocol.ChatChannelType.CHAT_CHANNEL_FLAG_PERMANENT;
 
-        ChatChannel channel = Context.ChatChannels.GetOrAdd(requestData.Channel, new ChatChannel { Name = requestData.Channel, Flags = chatChannelType });
+        ChatChannel channel = Context.ChatChannels.GetOrAdd(channelName, new ChatChannel { Name = channelName, Flags = chatChannelType });
+
+        return channel;
+    }
+
+    public static ChatChannel Get(OneOf<string, int> channelIdentifier, ChatSession session)
+    {
+        ChatChannel channel = channelIdentifier.Match
+        (
+            channelName => Context.ChatChannels.Values
+                .Single(channel => channel.Name == channelName && channel.Members.ContainsKey(session.ClientInformation.Account.Name)),
+
+            channelID => Context.ChatChannels.Values
+                .Single(channel => channel.ID == channelID && channel.Members.ContainsKey(session.ClientInformation.Account.Name))
+        );
 
         return channel;
     }
@@ -46,7 +60,8 @@ public class ChatChannel
 
         ChatChannelMember newMember = new (session, this);
 
-        Members.TryAdd(session.ClientInformation.Account.Name, newMember);
+        if (Members.TryAdd(session.ClientInformation.Account.Name, newMember) is false)
+            session.Logger.LogError(@"[BUG] Failed To Add Account ""{AccountName}"" To Channel ""{ChannelName}""", session.ClientInformation.Account.Name, Name);
 
         ChatBuffer response = new ();
 
@@ -119,30 +134,50 @@ public class ChatChannel
 
     public void Leave(ChatSession session)
     {
-        Members.TryRemove(session.ClientInformation.Account.Name, out ChatChannelMember? member);
+        ChatBuffer broadcast = new ();
 
-        if (member is not null)
-        {
-            // If There Are No Remaining Members And The Channel Is Not Permanent, Remove It Entirely
-            if (Members.IsEmpty && (Flags & ChatProtocol.ChatChannelType.CHAT_CHANNEL_FLAG_PERMANENT) == 0)
-                Context.ChatChannels.TryRemove(Name, out _);
+        broadcast.WriteCommand(ChatProtocol.Command.CHAT_CMD_LEFT_CHANNEL);
 
-            else if (Members.IsEmpty is false)
-            {
-                List<ChatChannelMember> remainingMembers = [.. Members.Values];
+        broadcast.WriteInt32(session.ClientInformation.Account.ID); // Member Account ID
+        broadcast.WriteInt32(ID);                                   // Channel ID
 
-                ChatBuffer broadcast = new ();
+        broadcast.PrependBufferSize();
 
-                broadcast.WriteCommand(ChatProtocol.Command.CHAT_CMD_LEFT_CHANNEL);
+        // Announce To The Channel Members (Including To Self) That A Client Has Left The Channel
+        Parallel.ForEach(Members.Values, (member) => member.Session.SendAsync(broadcast.Data));
 
-                broadcast.WriteInt32(member.Account.ID); // Member Account ID
-                broadcast.WriteInt32(ID);                // Channel ID
+        if (Members.TryRemove(session.ClientInformation.Account.Name, out _) is false)
+            session.Logger.LogError(@"[BUG] Failed To Remove Account ""{AccountName}"" From Channel ""{ChannelName}""", session.ClientInformation.Account.Name, Name);
 
-                broadcast.PrependBufferSize();
+        // If There Are No Remaining Members And The Channel Is Not Permanent, Remove It Entirely
+        if (Members.IsEmpty && (Flags & ChatProtocol.ChatChannelType.CHAT_CHANNEL_FLAG_PERMANENT) == 0)
+            Context.ChatChannels.TryRemove(Name, out _);
+    }
 
-                // Announce To The Remaining Channel Members That A Client Has Left The Channel
-                Parallel.ForEach(remainingMembers, (remainingMember) => remainingMember.Session.SendAsync(broadcast.Data));
-            }
-        }
+    public void Kick(int kickerID, int kickedID)
+    {
+        // TODO: Implement Route And Use Complex Object Parameter
+
+        ChatBuffer broadcast = new ();
+
+        broadcast.WriteCommand(ChatProtocol.Command.CHAT_CMD_CHANNEL_KICK);
+
+        broadcast.WriteInt32(ID);       // Channel ID
+        broadcast.WriteInt32(kickerID); // Kicker Account ID
+        broadcast.WriteInt32(kickedID); // Kicked Account ID
+
+        broadcast.PrependBufferSize();
+
+        // Announce To The Channel Members (Including To Self) That A Client Was Kicked From The Channel
+        Parallel.ForEach(Members.Values, (member) => member.Session.SendAsync(broadcast.Data));
+
+        ChatSession kickedSession = Context.ChatSessions.Values.Single(session => session.ClientInformation.Account.ID == kickerID);
+
+        if (Members.TryRemove(kickedSession.ClientInformation.Account.Name, out _) is false)
+            kickedSession.Logger.LogError(@"[BUG] Failed To Remove Account ""{AccountName}"" From Channel ""{ChannelName}""", kickedSession.ClientInformation.Account.Name, Name);
+
+        // If There Are No Remaining Members And The Channel Is Not Permanent, Remove It Entirely
+        if (Members.IsEmpty && (Flags & ChatProtocol.ChatChannelType.CHAT_CHANNEL_FLAG_PERMANENT) == 0)
+            Context.ChatChannels.TryRemove(Name, out _);
     }
 }

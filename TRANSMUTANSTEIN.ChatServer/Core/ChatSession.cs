@@ -40,9 +40,11 @@ public class ChatSession(TCPServer server, IServiceProvider serviceProvider) : T
 
     public void Terminate()
     {
+        // TODO: Reconsider This Logic, Because The Channels Don't Get Removed Without A Client Action ... Or Find A Way To Remove Channels Just From The Server Side
+
         List<ChatChannel> channels = [.. Context.ChatChannels.Values.Where(channel => channel.Members.ContainsKey(ClientInformation.Account.Name))];
 
-        Parallel.ForEach(channels, channel => channel.Leave(this));
+        Parallel.ForEach(channels, channel => channel.Kick(ClientInformation.Account.ID, ClientInformation.Account.ID));
 
         UpdateConnectionStatus(ChatProtocol.ChatClientStatus.CHAT_CLIENT_STATUS_DISCONNECTED);
 
