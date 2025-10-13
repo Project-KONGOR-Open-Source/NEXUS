@@ -7,28 +7,28 @@ public class GroupInvite(MerrickContext merrick) : ISynchronousCommandProcessor
     {
         GroupInviteRequestData requestData = new (buffer);
 
-        MatchmakingGroup group = MatchmakingService.GetMatchmakingGroup(session.ClientInformation.Account.ID)
-            ?? throw new NullReferenceException($@"No Matchmaking Group Found For Invite Issuer ID ""{session.ClientInformation.Account.ID}""");
+        MatchmakingGroup group = MatchmakingService.GetMatchmakingGroup(session.Account.ID)
+            ?? throw new NullReferenceException($@"No Matchmaking Group Found For Invite Issuer ID ""{session.Account.ID}""");
 
         ChatBuffer invite = new ();
 
         invite.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_INVITE);
 
-        invite.WriteString(session.ClientInformation.Account.Name);                                     // Invite Issuer Name
-        invite.WriteInt32(session.ClientInformation.Account.ID);                                        // Invite Issuer ID
-        invite.WriteInt8(Convert.ToByte(ChatProtocol.ChatClientStatus.CHAT_CLIENT_STATUS_CONNECTED));   // Invite Issuer Status
-        invite.WriteInt8(session.ClientInformation.Account.GetChatClientFlags());                       // Invite Issuer Chat Flags
-        invite.WriteString(session.ClientInformation.Account.NameColour);                               // Invite Issuer Chat Name Colour
-        invite.WriteString(session.ClientInformation.Account.Icon);                                     // Invite Issuer Icon
-        invite.WriteString(group.Information.MapName);                                                  // Map Name
-        invite.WriteInt8(Convert.ToByte(group.Information.GameType));                                   // Game Type
-        invite.WriteString(string.Join('|', group.Information.GameModes));                              // Game Modes
-        invite.WriteString(string.Join('|', group.Information.GameRegions));                            // Game Regions
+        invite.WriteString(session.Account.Name);                                                     // Invite Issuer Name
+        invite.WriteInt32(session.Account.ID);                                                        // Invite Issuer ID
+        invite.WriteInt8(Convert.ToByte(ChatProtocol.ChatClientStatus.CHAT_CLIENT_STATUS_CONNECTED)); // Invite Issuer Status
+        invite.WriteInt8(session.Account.GetChatClientFlags());                                       // Invite Issuer Chat Flags
+        invite.WriteString(session.Account.NameColour);                                               // Invite Issuer Chat Name Colour
+        invite.WriteString(session.Account.Icon);                                                     // Invite Issuer Icon
+        invite.WriteString(group.Information.MapName);                                                // Map Name
+        invite.WriteInt8(Convert.ToByte(group.Information.GameType));                                 // Game Type
+        invite.WriteString(string.Join('|', group.Information.GameModes));                            // Game Modes
+        invite.WriteString(string.Join('|', group.Information.GameRegions));                          // Game Regions
 
         invite.PrependBufferSize();
 
         ChatSession inviteReceiverSession = Context.ChatSessions
-            .Values.Single(session => session.ClientInformation.Account.Name.Equals(requestData.InviteReceiverName));
+            .Values.Single(session => session.Account.Name.Equals(requestData.InviteReceiverName));
 
         inviteReceiverSession.SendAsync(invite.Data);
 
@@ -39,8 +39,8 @@ public class GroupInvite(MerrickContext merrick) : ISynchronousCommandProcessor
         Account inviteReceiver = merrick.Accounts.Include(account => account.Clan)
             .Single(account => account.Name.Equals(requestData.InviteReceiverName));
 
-        inviteBroadcast.WriteString(inviteReceiver.NameWithClanTag);                                    // Invite Receiver Name
-        inviteBroadcast.WriteString(session.ClientInformation.Account.NameWithClanTag);                 // Invite Issuer Name
+        inviteBroadcast.WriteString(inviteReceiver.NameWithClanTag);                                  // Invite Receiver Name
+        inviteBroadcast.WriteString(session.Account.NameWithClanTag);                                 // Invite Issuer Name
 
         inviteBroadcast.PrependBufferSize();
 

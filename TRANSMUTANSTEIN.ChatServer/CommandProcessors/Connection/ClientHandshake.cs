@@ -49,7 +49,10 @@ public class ClientHandshake(MerrickContext merrick, ILogger<ClientHandshake> lo
         }
 
         // Embed The Client Information In The Chat Session
-        session.ClientInformation = new ClientInformation(requestData, account);
+        session.Metadata = new ChatSessionMetadata(requestData);
+
+        // Link The Account To The Chat Session
+        session.Account = account;
 
         // Add The Chat Session To The Chat Sessions Collection
         Context.ChatSessions.AddOrUpdate(account.Name, session, (key, existing) => session);
@@ -111,45 +114,4 @@ public class ClientHandshakeRequestData(ChatBuffer buffer)
     public string ClientRegion = buffer.ReadString();
 
     public string ClientLanguage = buffer.ReadString();
-}
-
-public class ClientInformation(ClientHandshakeRequestData data, Account account)
-{
-    public Account Account = account;
-
-    public string SessionCookie = data.SessionCookie;
-
-    public string RemoteIP = data.RemoteIP;
-
-    public string SessionAuthenticationHash = data.SessionAuthenticationHash;
-
-    public int ChatProtocolVersion = data.ChatProtocolVersion;
-
-    public byte OperatingSystemIdentifier = data.OperatingSystemIdentifier;
-
-    public byte OperatingSystemVersionMajor = data.OperatingSystemVersionMajor;
-
-    public byte OperatingSystemVersionMinor = data.OperatingSystemVersionMinor;
-
-    public byte OperatingSystemVersionPatch = data.OperatingSystemVersionPatch;
-
-    public string OperatingSystemBuildCode = data.OperatingSystemBuildCode;
-
-    public string OperatingSystemArchitecture = data.OperatingSystemArchitecture;
-
-    public byte ClientVersionMajor = data.ClientVersionMajor;
-
-    public byte ClientVersionMinor = data.ClientVersionMinor;
-
-    public byte ClientVersionPatch = data.ClientVersionPatch;
-
-    public byte ClientVersionRevision = data.ClientVersionRevision;
-
-    public ChatProtocol.ChatClientStatus LastKnownClientState = data.LastKnownClientState;
-
-    public ChatProtocol.ChatModeType ClientChatModeState = data.ClientChatModeState;
-
-    public string ClientRegion = data.ClientRegion;
-
-    public string ClientLanguage = data.ClientLanguage;
 }

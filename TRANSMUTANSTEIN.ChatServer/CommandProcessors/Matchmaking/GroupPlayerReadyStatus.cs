@@ -7,12 +7,12 @@ public class GroupPlayerReadyStatus(ILogger<GroupPlayerReadyStatus> logger) : IS
     {
         GroupPlayerReadyStatusRequestData requestData = new (buffer);
 
-        MatchmakingGroup group = MatchmakingService.GetMatchmakingGroup(session.ClientInformation.Account.ID)
-            ?? throw new NullReferenceException($@"No Matchmaking Group Found For Invite Issuer ID ""{session.ClientInformation.Account.ID}""");
+        MatchmakingGroup group = MatchmakingService.GetMatchmakingGroup(session.Account.ID)
+            ?? throw new NullReferenceException($@"No Matchmaking Group Found For Invite Issuer ID ""{session.Account.ID}""");
 
         group.Information.GameType = requestData.GameType;
 
-        MatchmakingGroupMember groupMember = group.Members.Single(member => member.Account.ID == session.ClientInformation.Account.ID);
+        MatchmakingGroupMember groupMember = group.Members.Single(member => member.Account.ID == session.Account.ID);
 
         if (groupMember.IsLeader is false)
             return; // Non-Leader Group Members Are Implicitly Ready (By Means Of Joining The Group In A Ready State) And Do Not Need To Emit Readiness Status Updates
@@ -30,7 +30,7 @@ public class GroupPlayerReadyStatus(ILogger<GroupPlayerReadyStatus> logger) : IS
                 }
             }
 
-            group.MulticastUpdate(session.ClientInformation.Account.ID, ChatProtocol.TMMUpdateType.TMM_PARTIAL_GROUP_UPDATE);
+            group.MulticastUpdate(session.Account.ID, ChatProtocol.TMMUpdateType.TMM_PARTIAL_GROUP_UPDATE);
         }
 
         if (group.Members.All(member => member.IsReady))

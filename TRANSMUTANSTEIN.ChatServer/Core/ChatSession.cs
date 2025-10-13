@@ -2,7 +2,15 @@
 
 public class ChatSession(TCPServer server, IServiceProvider serviceProvider) : TCPSession(server)
 {
-    public ClientInformation ClientInformation { get; set; } = null!; // TODO: If This Is NULL Or Equivalent, Don't Process Data Other Than Client Handshake
+    /// <summary>
+    ///     Gets Set After A Successful Client Handshake, And Contains Metadata About The Client Connected To This Chat Session
+    /// </summary>
+    public ChatSessionMetadata Metadata { get; set; } = null!;
+
+    /// <summary>
+    ///     Gets Set After A Successful Client Handshake, And Contains The Account Information Of The Client Connected To This Chat Session
+    /// </summary>
+    public Account Account { get; set; } = null!;
 
     private IServiceProvider ServiceProvider { get; set; } = serviceProvider;
 
@@ -50,23 +58,23 @@ public class ChatSession(TCPServer server, IServiceProvider serviceProvider) : T
 
         Disconnect();
 
-        if (Context.ChatSessions.TryRemove(ClientInformation.Account.Name, out ChatSession? _) is false)
-            Logger.LogError(@"Failed To Remove Chat Session For Account Name ""{ClientInformation.Account.Name}""", ClientInformation.Account.Name);
+        if (Context.ChatSessions.TryRemove(Account.Name, out ChatSession? _) is false)
+            Logger.LogError(@"Failed To Remove Chat Session For Account Name ""{ClientInformation.Account.Name}""", Account.Name);
 
         // TODO: Send Disconnect Notification To Friends And Clan Members
     }
 
     public void UpdateConnectionStatus(ChatProtocol.ChatClientStatus status, MatchServer? matchServer = null)
     {
-        if (ClientInformation.LastKnownClientState == status) return; else ClientInformation.LastKnownClientState = status;
+        if (Metadata.LastKnownClientState == status) return; else Metadata.LastKnownClientState = status;
 
-        if (ClientInformation.ClientChatModeState is not ChatProtocol.ChatModeType.CHAT_MODE_INVISIBLE)
+        if (Metadata.ClientChatModeState is not ChatProtocol.ChatModeType.CHAT_MODE_INVISIBLE)
         {
-            List<int> clanMemberIDs = [.. ClientInformation.Account.Clan?.Members.Select(clanMember => clanMember.ID) ?? []];
-            List<int> friendIDs = [.. ClientInformation.Account.FriendedPeers.Select(friend => friend.Identifier)];
+            List<int> clanMemberIDs = [.. Account.Clan?.Members.Select(clanMember => clanMember.ID) ?? []];
+            List<int> friendIDs = [.. Account.FriendedPeers.Select(friend => friend.Identifier)];
 
             List<ChatSession> onlinePeers = Context.ChatSessions
-                .Where(chatSession => friendIDs.Any(friendID => friendID == chatSession.Value.ClientInformation?.Account.ID) || clanMemberIDs.Any(clanMemberID => clanMemberID == chatSession.Value.ClientInformation?.Account.ID))
+                .Where(chatSession => friendIDs.Any(friendID => friendID == chatSession.Value.Account.ID) || clanMemberIDs.Any(clanMemberID => clanMemberID == chatSession.Value.Account.ID))
                 .Select(chatSession => chatSession.Value).Distinct().ToList();
 
             Parallel.ForEach(onlinePeers, session =>
@@ -75,35 +83,35 @@ public class ChatSession(TCPServer server, IServiceProvider serviceProvider) : T
 
                 update.WriteCommand(ChatProtocol.Command.CHAT_CMD_UPDATE_STATUS);
 
-                update.WriteInt32(ClientInformation.Account.ID);                          // Client's Account ID
-                update.WriteInt8(Convert.ToByte(status));                                 // Client's Status
-                update.WriteInt8(ClientInformation.Account.GetChatClientFlags());         // Client's Flags (Chat Client Type)
-                update.WriteInt32(ClientInformation.Account.Clan?.ID ?? 0);               // Client's Clan ID
-                update.WriteString(ClientInformation.Account.Clan?.Name ?? string.Empty); // Client's Clan Name
-                update.WriteString(ClientInformation.Account.ChatSymbolNoPrefixCode);     // Chat Symbol
-                update.WriteString(ClientInformation.Account.NameColourNoPrefixCode);     // Name Colour
-                update.WriteString(ClientInformation.Account.IconNoPrefixCode);           // Account Icon
+                update.WriteInt32(Account.ID);                          // Client's Account ID
+                update.WriteInt8(Convert.ToByte(status));               // Client's Status
+                update.WriteInt8(Account.GetChatClientFlags());         // Client's Flags (Chat Client Type)
+                update.WriteInt32(Account.Clan?.ID ?? 0);               // Client's Clan ID
+                update.WriteString(Account.Clan?.Name ?? string.Empty); // Client's Clan Name
+                update.WriteString(Account.ChatSymbolNoPrefixCode);     // Chat Symbol
+                update.WriteString(Account.NameColourNoPrefixCode);     // Name Colour
+                update.WriteString(Account.IconNoPrefixCode);           // Account Icon
 
                 if (status is ChatProtocol.ChatClientStatus.CHAT_CLIENT_STATUS_JOINING_GAME || status is ChatProtocol.ChatClientStatus.CHAT_CLIENT_STATUS_IN_GAME)
                 {
                     if (matchServer is null)
                     {
-                        Logger.LogError(@"[BUG] A Connection Status Update Was Requested For Account Name ""{ClientInformation.Account.Name}"" While Connected To A Match Server, But The Match Server Is NULL", ClientInformation.Account.Name);
+                        Logger.LogError(@"[BUG] A Connection Status Update Was Requested For Account Name ""{ClientInformation.Account.Name}"" While Connected To A Match Server, But The Match Server Is NULL", Account.Name);
 
                         return;
                     }
 
-                    update.WriteString($"{matchServer.IPAddress}:{matchServer.Port}");    // Server Address This Client Is Connected To, In The Form Of "X.X.X.X:P"
+                    update.WriteString($"{matchServer.IPAddress}:{matchServer.Port}"); // Server Address This Client Is Connected To, In The Form Of "X.X.X.X:P"
 
                     if (status is ChatProtocol.ChatClientStatus.CHAT_CLIENT_STATUS_IN_GAME)
                     {
                         // TODO: Populate With Real Match Name
-                        update.WriteString(string.Empty);                                 // Match Name
+                        update.WriteString(string.Empty);                              // Match Name
 
                         // TODO: Populate With Real Match ID
-                        update.WriteInt32(default(int));                                  // Match ID
+                        update.WriteInt32(default(int));                               // Match ID
 
-                        update.WriteBool(false);                                          // Has Extended Server Info
+                        update.WriteBool(false);                                       // Has Extended Server Info
 
                         // TODO: Set Extended Server Info To True And Populate The Following Fields
 
@@ -133,7 +141,7 @@ public class ChatSession(TCPServer server, IServiceProvider serviceProvider) : T
                     }
                 }
 
-                update.WriteInt32(ClientInformation.Account.AscensionLevel);              // Client's Ascension Level
+                update.WriteInt32(Account.AscensionLevel);                             // Client's Ascension Level
 
                 update.PrependBufferSize();
 

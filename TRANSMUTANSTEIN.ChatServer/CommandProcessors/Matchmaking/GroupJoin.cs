@@ -24,20 +24,20 @@ public class GroupJoin(ILogger<GroupJoin> logger) : ISynchronousCommandProcessor
             GameModeAccess = group.Leader.GameModeAccess
         };
 
-        if (group.Members.Any(member => member.Account.ID == session.ClientInformation.Account.ID) is false)
+        if (group.Members.Any(member => member.Account.ID == session.Account.ID) is false)
         {
             group.Members.Add(newMatchmakingGroupMember);
         }
 
         else
         {
-            logger.LogWarning("Player {Session.ClientInformation.Account.Name} Tried To Join A Matchmaking Group They Are Already In", session.ClientInformation.Account.Name);
+            logger.LogWarning("Player {Session.ClientInformation.Account.Name} Tried To Join A Matchmaking Group They Are Already In", session.Account.Name);
 
             return;
         }
 
         // TODO: Create Tentative Group, And Only Create Actual Group When Another Player Joins, Or Create Group As Is But Disband On Invite Refusal/Timeout
-        group.MulticastUpdate(session.ClientInformation.Account.ID, ChatProtocol.TMMUpdateType.TMM_PLAYER_JOINED_GROUP);
+        group.MulticastUpdate(session.Account.ID, ChatProtocol.TMMUpdateType.TMM_PLAYER_JOINED_GROUP);
     }
 }
 

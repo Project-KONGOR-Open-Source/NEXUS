@@ -23,7 +23,7 @@ public class ChatChannel
 
     public static ChatChannel GetOrCreate(ChatSession session, string channelName)
     {
-        bool isClanChannel = session.ClientInformation.Account.Clan is not null && channelName == session.ClientInformation.Account.Clan.GetChatChannelName();
+        bool isClanChannel = session.Account.Clan is not null && channelName == session.Account.Clan.GetChatChannelName();
 
         ChatProtocol.ChatChannelType chatChannelType = isClanChannel
             ? ChatProtocol.ChatChannelType.CHAT_CHANNEL_FLAG_RESERVED | ChatProtocol.ChatChannelType.CHAT_CHANNEL_FLAG_CLAN
@@ -39,10 +39,10 @@ public class ChatChannel
         ChatChannel channel = channelIdentifier.Match
         (
             channelName => Context.ChatChannels.Values
-                .Single(channel => channel.Name == channelName && channel.Members.ContainsKey(session.ClientInformation.Account.Name)),
+                .Single(channel => channel.Name == channelName && channel.Members.ContainsKey(session.Account.Name)),
 
             channelID => Context.ChatChannels.Values
-                .Single(channel => channel.ID == channelID && channel.Members.ContainsKey(session.ClientInformation.Account.Name))
+                .Single(channel => channel.ID == channelID && channel.Members.ContainsKey(session.Account.Name))
         );
 
         return channel;
@@ -62,8 +62,8 @@ public class ChatChannel
 
         ChatChannelMember newMember = new (session, this);
 
-        if (Members.TryAdd(session.ClientInformation.Account.Name, newMember) is false)
-            session.Logger.LogError(@"[BUG] Failed To Add Account ""{AccountName}"" To Channel ""{ChannelName}""", session.ClientInformation.Account.Name, Name);
+        if (Members.TryAdd(session.Account.Name, newMember) is false)
+            session.Logger.LogError(@"[BUG] Failed To Add Account ""{AccountName}"" To Channel ""{ChannelName}""", session.Account.Name, Name);
 
         ChatBuffer response = new ();
 
@@ -108,9 +108,9 @@ public class ChatChannel
 
     public ChatChannel BroadcastJoin(ChatSession session)
     {
-        ChatChannelMember newMember = Members.Values.Single(member => member.Account.ID == session.ClientInformation.Account.ID);
+        ChatChannelMember newMember = Members.Values.Single(member => member.Account.ID == session.Account.ID);
 
-        List<ChatChannelMember> existingMembers = [.. Members.Values.Where(member => member.Account.ID != session.ClientInformation.Account.ID)];
+        List<ChatChannelMember> existingMembers = [.. Members.Values.Where(member => member.Account.ID != session.Account.ID)];
 
         ChatBuffer broadcast = new ();
 
@@ -136,8 +136,8 @@ public class ChatChannel
 
     public void Leave(ChatSession session)
     {
-        if (Members.TryRemove(session.ClientInformation.Account.Name, out ChatChannelMember? member) is false)
-            session.Logger.LogError(@"[BUG] Failed To Remove Account ""{AccountName}"" From Channel ""{ChannelName}""", session.ClientInformation.Account.Name, Name);
+        if (Members.TryRemove(session.Account.Name, out ChatChannelMember? member) is false)
+            session.Logger.LogError(@"[BUG] Failed To Remove Account ""{AccountName}"" From Channel ""{ChannelName}""", session.Account.Name, Name);
 
         if (member is not null)
         {
@@ -167,12 +167,12 @@ public class ChatChannel
             }
         }
 
-        else session.Logger.LogError(@"[BUG] Chat Channel Member Instance For Account ""{AccountName}"" In Channel ""{ChannelName}"" Is NULL", session.ClientInformation.Account.Name, Name);
+        else session.Logger.LogError(@"[BUG] Chat Channel Member Instance For Account ""{AccountName}"" In Channel ""{ChannelName}"" Is NULL", session.Account.Name, Name);
     }
 
     public void Kick(ChatSession requesterSession, int targetAccountID)
     {
-        ChatChannelMember requester = Members.Values.Single(member => member.Account.ID == requesterSession.ClientInformation.Account.ID);
+        ChatChannelMember requester = Members.Values.Single(member => member.Account.ID == requesterSession.Account.ID);
         ChatChannelMember target = Members.Values.Single(member => member.Account.ID == targetAccountID);
 
         if (requester.AdministratorLevel > target.AdministratorLevel)
@@ -181,9 +181,9 @@ public class ChatChannel
 
             broadcast.WriteCommand(ChatProtocol.Command.CHAT_CMD_CHANNEL_KICK);
 
-            broadcast.WriteInt32(ID);                                            // Channel ID
-            broadcast.WriteInt32(requesterSession.ClientInformation.Account.ID); // Kicker Account ID
-            broadcast.WriteInt32(targetAccountID);                               // Kicked Account ID
+            broadcast.WriteInt32(ID);                          // Channel ID
+            broadcast.WriteInt32(requesterSession.Account.ID); // Kicker Account ID
+            broadcast.WriteInt32(targetAccountID);             // Kicked Account ID
 
             broadcast.PrependBufferSize();
 
@@ -191,7 +191,7 @@ public class ChatChannel
             // If The Requester's Administrator Level Is Less Than Or Equal To The Target's, This Operation Fails Silently
             Parallel.ForEach(Members.Values, (member) => member.Session.SendAsync(broadcast.Data));
 
-            ChatSession targetSession = Context.ChatSessions.Values.Single(session => session.ClientInformation.Account.ID == targetAccountID);
+            ChatSession targetSession = Context.ChatSessions.Values.Single(session => session.Account.ID == targetAccountID);
 
             // Remove The Target Member From The Channel
             Leave(targetSession);

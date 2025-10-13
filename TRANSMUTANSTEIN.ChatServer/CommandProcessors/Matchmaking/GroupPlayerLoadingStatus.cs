@@ -7,10 +7,10 @@ public class GroupPlayerLoadingStatus : ISynchronousCommandProcessor
     {
         GroupPlayerLoadingStatusRequestData requestData = new (buffer);
 
-        MatchmakingGroup group = MatchmakingService.GetMatchmakingGroup(session.ClientInformation.Account.ID)
-            ?? throw new NullReferenceException($@"No Matchmaking Group Found For Invite Issuer ID ""{session.ClientInformation.Account.ID}""");
+        MatchmakingGroup group = MatchmakingService.GetMatchmakingGroup(session.Account.ID)
+            ?? throw new NullReferenceException($@"No Matchmaking Group Found For Invite Issuer ID ""{session.Account.ID}""");
 
-        MatchmakingGroupMember groupMember = group.Members.Single(member => member.Account.ID == session.ClientInformation.Account.ID);
+        MatchmakingGroupMember groupMember = group.Members.Single(member => member.Account.ID == session.Account.ID);
 
         groupMember.LoadingPercent = requestData.LoadingPercent;
 
@@ -40,7 +40,7 @@ public class GroupPlayerLoadingStatus : ISynchronousCommandProcessor
             Parallel.ForEach(group.Members, member => member.Session.SendAsync(load.Data));
         }
 
-        group.MulticastUpdate(session.ClientInformation.Account.ID, ChatProtocol.TMMUpdateType.TMM_PARTIAL_GROUP_UPDATE);
+        group.MulticastUpdate(session.Account.ID, ChatProtocol.TMMUpdateType.TMM_PARTIAL_GROUP_UPDATE);
     }
 }
 

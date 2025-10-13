@@ -2,7 +2,7 @@
 
 public class MatchmakingGroupMember(ChatSession session)
 {
-    public Account Account = session.ClientInformation.Account;
+    public Account Account = session.Account;
 
     public ChatSession Session = session;
 

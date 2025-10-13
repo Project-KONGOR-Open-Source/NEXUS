@@ -32,11 +32,11 @@ public class GroupCreate(ILogger<GroupCreate> logger) : ISynchronousCommandProce
             RandomizeBots = requestData.RandomizeBots
         };
 
-        if (MatchmakingService.Groups.ContainsKey(session.ClientInformation.Account.ID) is false)
+        if (MatchmakingService.Groups.ContainsKey(session.Account.ID) is false)
         {
-            if (MatchmakingService.Groups.TryAdd(session.ClientInformation.Account.ID, new MatchmakingGroup(member) { Information = information }) is false)
+            if (MatchmakingService.Groups.TryAdd(session.Account.ID, new MatchmakingGroup(member) { Information = information }) is false)
             {
-                logger.LogError(@"Failed To Create Matchmaking Group For Account ID ""{Session.ClientInformation.Account.ID}""", session.ClientInformation.Account.ID);
+                logger.LogError(@"Failed To Create Matchmaking Group For Account ID ""{Session.ClientInformation.Account.ID}""", session.Account.ID);
 
                 // TODO: Respond With ChatProtocol.TMMFailedToJoinReason Or Similar (e.g. TMMFailedToCreate, If It Exists) Or Maybe Just Throw An Exception
 
@@ -46,9 +46,9 @@ public class GroupCreate(ILogger<GroupCreate> logger) : ISynchronousCommandProce
 
         else
         {
-            if (MatchmakingService.Groups.TryUpdate(session.ClientInformation.Account.ID, new MatchmakingGroup(member) { Information = information }, MatchmakingService.Groups[session.ClientInformation.Account.ID]) is false)
+            if (MatchmakingService.Groups.TryUpdate(session.Account.ID, new MatchmakingGroup(member) { Information = information }, MatchmakingService.Groups[session.Account.ID]) is false)
             {
-                logger.LogError(@"Failed To Update Matchmaking Group For Account ID ""{Session.ClientInformation.Account.ID}""", session.ClientInformation.Account.ID);
+                logger.LogError(@"Failed To Update Matchmaking Group For Account ID ""{Session.ClientInformation.Account.ID}""", session.Account.ID);
 
                 // TODO: Respond With ChatProtocol.TMMFailedToJoinReason Or Similar (e.g. TMMFailedToCreate, If It Exists) Or Maybe Just Throw An Exception
 
@@ -56,9 +56,9 @@ public class GroupCreate(ILogger<GroupCreate> logger) : ISynchronousCommandProce
             }
         }
 
-        MatchmakingGroup group = MatchmakingService.Groups[session.ClientInformation.Account.ID];
+        MatchmakingGroup group = MatchmakingService.Groups[session.Account.ID];
 
-        group.MulticastUpdate(session.ClientInformation.Account.ID, ChatProtocol.TMMUpdateType.TMM_CREATE_GROUP);
+        group.MulticastUpdate(session.Account.ID, ChatProtocol.TMMUpdateType.TMM_CREATE_GROUP);
 
         // TODO: Create Chat Channel For The Group
     }

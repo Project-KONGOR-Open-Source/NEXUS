@@ -6,9 +6,9 @@ public class ChatChannelMember(ChatSession session, ChatChannel chatChannel)
 
     public ChatChannel ChatChannel = chatChannel;
 
-    public Account Account => Session.ClientInformation.Account;
+    public Account Account => Session.Account;
 
-    public ChatProtocol.ChatClientStatus ConnectionStatus => Session.ClientInformation.LastKnownClientState;
+    public ChatProtocol.ChatClientStatus ConnectionStatus => Session.Metadata.LastKnownClientState;
 
     public ChatProtocol.AdminLevel AdministratorLevel => GetAdministratorLevel();
 
