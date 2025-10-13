@@ -12,9 +12,7 @@ public class ChatSession(TCPServer server, IServiceProvider serviceProvider) : T
     /// </summary>
     public Account Account { get; set; } = null!;
 
-    private IServiceProvider ServiceProvider { get; set; } = serviceProvider;
-
-    private ILogger Logger { get; } = serviceProvider.GetRequiredService<ILogger<ChatSession>>();
+    public ILogger Logger { get; } = serviceProvider.GetRequiredService<ILogger<ChatSession>>();
 
     private static ConcurrentDictionary<ushort, Type> CommandToTypeMap { get; set; } = [];
 
@@ -242,7 +240,7 @@ public class ChatSession(TCPServer server, IServiceProvider serviceProvider) : T
 
     private OneOf<ISynchronousCommandProcessor, IAsynchronousCommandProcessor>? GetCommandTypeInstance(Type type)
     {
-        object instance = ActivatorUtilities.CreateInstance(ServiceProvider, type);
+        object instance = ActivatorUtilities.CreateInstance(serviceProvider, type);
 
         if (instance is ISynchronousCommandProcessor synchronous)
             return OneOf<ISynchronousCommandProcessor, IAsynchronousCommandProcessor>.FromT0(synchronous);
