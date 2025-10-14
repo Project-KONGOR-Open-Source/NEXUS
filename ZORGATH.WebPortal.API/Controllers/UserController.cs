@@ -113,7 +113,7 @@ public class UserController(MerrickContext databaseContext, ILogger<UserControll
         if (result is not PasswordVerificationResult.Success)
             return Unauthorized("Invalid User Name And/Or Password");
 
-        if (new[] { UserRoles.Administrator, UserRoles.User }.Contains(user.Role.Name).Equals(false))
+        if (new [] { UserRoles.Administrator, UserRoles.User }.Contains(user.Role.Name).Equals(false))
         {
             Logger.LogError(@"[BUG] Unknown User Role ""{User.Role.Name}""", user.Role.Name);
 

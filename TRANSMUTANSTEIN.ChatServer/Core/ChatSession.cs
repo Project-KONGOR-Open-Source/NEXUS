@@ -44,22 +44,81 @@ public class ChatSession(TCPServer server, IServiceProvider serviceProvider) : T
         Parallel.ForEach(segments, ProcessDataSegment);
     }
 
-    public void Terminate()
+    public ChatSession Accept(ChatSessionMetadata metadata, Account account)
     {
-        // TODO: Reconsider This Logic, Because The Channels Don't Get Removed Without A Client Action ... Or Find A Way To Remove Channels Just From The Server Side
+        // Embed The Client Information In The Chat Session
+        Metadata = metadata;
 
-        List<ChatChannel> channels = [.. Context.ChatChannels.Values.Where(channel => channel.Members.ContainsKey(ClientInformation.Account.Name))];
+        // Link The Account To The Chat Session
+        Account = account;
 
-        Parallel.ForEach(channels, channel => channel.Kick(ClientInformation.Account.ID, ClientInformation.Account.ID));
+        // Add The Chat Session To The Chat Sessions Collection
+        Context.ChatSessions.AddOrUpdate(account.Name, this, (key, existing) => this);
 
+        ChatBuffer accept = new ();
+
+        accept.WriteCommand(ChatProtocol.ChatServerToClient.NET_CHAT_CL_ACCEPT);
+        accept.PrependBufferSize();
+
+        SendAsync(accept.Data);
+
+        // Notify Self, Clan Members, And Friends That This Client Is Now Connected
+        UpdateConnectionStatus(ChatProtocol.ChatClientStatus.CHAT_CLIENT_STATUS_CONNECTED);
+
+        // TODO: Update Chat Channel Members
+
+        // TODO: Send Initial Update
+
+        return this;
+    }
+
+    public ChatSession Reject(ChatProtocol.ChatRejectReason reason)
+    {
+        ChatBuffer reject = new ();
+
+        reject.WriteCommand(ChatProtocol.ChatServerToClient.NET_CHAT_CL_REJECT);
+        reject.WriteInt8(Convert.ToByte(reason));
+        reject.PrependBufferSize();
+
+        SendAsync(reject.Data);
+
+        return this;
+    }
+
+    public void LogOut()
+    {
         UpdateConnectionStatus(ChatProtocol.ChatClientStatus.CHAT_CLIENT_STATUS_DISCONNECTED);
 
-        Disconnect();
+        ChatBuffer eject = new ();
 
+        eject.WriteCommand(ChatProtocol.Command.CHAT_CMD_LOGOUT);
+        eject.WriteInt8(1);
+        eject.PrependBufferSize();
+
+        SendAsync(eject.Data);
+
+        // TODO: Send Notification With Logout Reson To Client
+
+        // TODO: Send Logout Notification To Friends And Clan Members
+    }
+
+    public void Terminate()
+    {
+        // Get All Chat Channels The Client Is A Member Of
+        List<ChatChannel> channels = [.. Context.ChatChannels.Values.Where(channel => channel.Members.ContainsKey(Account.Name))];
+
+        // Remove The Client From All Chat Channels They Are A Member Of
+        Parallel.ForEach(channels, channel => channel.Leave(this));
+
+        // Log The Client Out And Disconnect The Chat Session
+        LogOut(); Disconnect();
+
+        // Remove The Chat Session From The Chat Sessions Collection
         if (Context.ChatSessions.TryRemove(Account.Name, out ChatSession? _) is false)
             Logger.LogError(@"Failed To Remove Chat Session For Account Name ""{ClientInformation.Account.Name}""", Account.Name);
 
-        // TODO: Send Disconnect Notification To Friends And Clan Members
+        // Dispose Of The Chat Session
+        Dispose();
     }
 
     public void UpdateConnectionStatus(ChatProtocol.ChatClientStatus status, MatchServer? matchServer = null)

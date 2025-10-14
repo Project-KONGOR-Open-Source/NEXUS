@@ -18,15 +18,9 @@ public class ClientHandshake(MerrickContext merrick, ILogger<ClientHandshake> lo
         {
             logger.LogError(@"[BUG] Account With ID ""{RequestData.AccountID}"" Could Not Be Found", requestData.AccountID);
 
-            ChatBuffer failure = new ();
-
-            failure.WriteCommand(ChatProtocol.ChatServerToClient.NET_CHAT_CL_REJECT);
-            failure.WriteInt8(Convert.ToByte(ChatProtocol.ChatRejectReason.ECR_UNKNOWN));
-            failure.PrependBufferSize();
-
-            session.SendAsync(failure.Data);
-
-            session.Terminate();
+            session
+                .Reject(ChatProtocol.ChatRejectReason.ECR_UNKNOWN)
+                .Terminate();
 
             return;
         }
@@ -35,41 +29,14 @@ public class ClientHandshake(MerrickContext merrick, ILogger<ClientHandshake> lo
 
         if ($"{requestData.ClientVersionMajor}.{requestData.ClientVersionMinor}.{requestData.ClientVersionPatch}.{requestData.ClientVersionRevision}" is not "4.10.1.0")
         {
-            ChatBuffer failure = new ();
-
-            failure.WriteCommand(ChatProtocol.ChatServerToClient.NET_CHAT_CL_REJECT);
-            failure.WriteInt8(Convert.ToByte(ChatProtocol.ChatRejectReason.ECR_BAD_VERSION));
-            failure.PrependBufferSize();
-
-            session.SendAsync(failure.Data);
-
-            session.Terminate();
+            session
+                .Reject(ChatProtocol.ChatRejectReason.ECR_BAD_VERSION)
+                .Terminate();
 
             return;
         }
 
-        // Embed The Client Information In The Chat Session
-        session.Metadata = new ChatSessionMetadata(requestData);
-
-        // Link The Account To The Chat Session
-        session.Account = account;
-
-        // Add The Chat Session To The Chat Sessions Collection
-        Context.ChatSessions.AddOrUpdate(account.Name, session, (key, existing) => session);
-
-        ChatBuffer response = new ();
-
-        response.WriteCommand(ChatProtocol.ChatServerToClient.NET_CHAT_CL_ACCEPT);
-        response.PrependBufferSize();
-
-        session.SendAsync(response.Data);
-
-        // Notify Self, Clan Members, And Friends That This Client Is Now Connected
-        session.UpdateConnectionStatus(ChatProtocol.ChatClientStatus.CHAT_CLIENT_STATUS_CONNECTED);
-
-        // TODO: Update Chat Channel Members
-
-        // TODO: Send Initial Update
+        session.Accept(new ChatSessionMetadata(requestData), account);
     }
 }
 

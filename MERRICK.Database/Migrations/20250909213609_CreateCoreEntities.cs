@@ -313,7 +313,7 @@ namespace MERRICK.Database.Migrations
 
             migrationBuilder.InsertData(
                 table: "Roles",
-                columns: new[] { "ID", "Name" },
+                columns: new [] { "ID", "Name" },
                 values: new object[,]
                 {
                     { 1, "ADMINISTRATOR" },
@@ -339,7 +339,7 @@ namespace MERRICK.Database.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_Clans_Name_Tag",
                 table: "Clans",
-                columns: new[] { "Name", "Tag" },
+                columns: new [] { "Name", "Tag" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
@@ -356,7 +356,7 @@ namespace MERRICK.Database.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_PlayerStatistics_MatchID_AccountID",
                 table: "PlayerStatistics",
-                columns: new[] { "MatchID", "AccountID" },
+                columns: new [] { "MatchID", "AccountID" },
                 unique: true);
 
             migrationBuilder.CreateIndex(

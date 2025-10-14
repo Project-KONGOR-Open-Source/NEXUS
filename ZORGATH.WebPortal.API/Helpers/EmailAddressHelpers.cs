@@ -10,12 +10,12 @@ public static class EmailAddressHelpers
                 return new BadRequestObjectResult(@"Alias Creating Character ""+"" Is Not Allowed");
 
             string[] allowedEmailProviders = Enumerable.Empty<string>()
-                .Concat(new[] { "outlook", "hotmail", "live", "msn" }) // Microsoft Outlook
-                .Concat(new[] { "protonmail", "proton" }) // Proton Mail
-                .Concat(new[] { "gmail", "googlemail" }) // Google Mail
-                .Concat(new[] { "yahoo", "rocketmail", "ymail" }) // Yahoo Mail
-                .Concat(new[] { "aol", "yandex", "gmx", "mail" }) // AOL Mail, Yandex Mail, GMX Mail, mail.com
-                .Concat(new[] { "icloud", "me", "mac" }) // iCloud Mail
+                .Concat(new [] { "outlook", "hotmail", "live", "msn" }) // Microsoft Outlook
+                .Concat(new [] { "protonmail", "proton" }) // Proton Mail
+                .Concat(new [] { "gmail", "googlemail" }) // Google Mail
+                .Concat(new [] { "yahoo", "rocketmail", "ymail" }) // Yahoo Mail
+                .Concat(new [] { "aol", "yandex", "gmx", "mail" }) // AOL Mail, Yandex Mail, GMX Mail, mail.com
+                .Concat(new [] { "icloud", "me", "mac" }) // iCloud Mail
                 .ToArray();
 
             Regex pattern = new (@"^(?<local>[a-zA-Z0-9_\-.]+)@(?<domain>[a-zA-Z]+)\.(?<tld>[a-zA-Z]{1,3}|co.uk)$");
