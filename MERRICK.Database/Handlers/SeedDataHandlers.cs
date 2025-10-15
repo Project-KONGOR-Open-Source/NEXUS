@@ -183,7 +183,7 @@ public static class SeedDataHandlers
         {
             subAccount.FriendedPeers = subAccounts.Except([subAccount]).Union([systemAccount]).Select(account => new FriendedPeer
             {
-                Identifier = account.ID,
+                ID = account.ID,
                 Name = account.Name,
                 ClanTag = account.Clan?.Tag,
                 FriendGroup = "PERSONAS"
@@ -194,7 +194,7 @@ public static class SeedDataHandlers
         {
             hostAccount.FriendedPeers = hostAccounts.Except([hostAccount]).Select(account => new FriendedPeer
             {
-                Identifier = account.ID,
+                ID = account.ID,
                 Name = account.Name,
                 ClanTag = account.Clan?.Tag,
                 FriendGroup = "CLUSTERS"
@@ -219,7 +219,7 @@ public static class SeedDataHandlers
         {
             systemAccount.IgnoredPeers.Add(new IgnoredPeer
             {
-                Identifier = guestAccount.ID,
+                ID = guestAccount.ID,
                 Name = guestAccount.Name
             });
         }
@@ -242,7 +242,7 @@ public static class SeedDataHandlers
         {
             systemAccount.BannedPeers.Add(new BannedPeer
             {
-                Identifier = guestAccount.ID,
+                ID = guestAccount.ID,
                 Name = guestAccount.Name,
                 BanReason = "Non-Main Guest Account"
             });

@@ -101,7 +101,7 @@ public partial class ChatSession(TCPServer server, IServiceProvider serviceProvi
         if (Metadata.ClientChatModeState is not ChatProtocol.ChatModeType.CHAT_MODE_INVISIBLE)
         {
             List<int> clanMemberIDs = [.. Account.Clan?.Members.Select(clanMember => clanMember.ID) ?? []];
-            List<int> friendIDs = [.. Account.FriendedPeers.Select(friend => friend.Identifier)];
+            List<int> friendIDs = [.. Account.FriendedPeers.Select(friend => friend.ID)];
 
             List<ChatSession> onlinePeers = Context.ChatSessions.Values
                 .Where(chatSession => friendIDs.Any(friendID => friendID == chatSession.Account.ID) || clanMemberIDs.Any(clanMemberID => clanMemberID == chatSession.Account.ID))
@@ -203,7 +203,7 @@ public partial class ChatSession(TCPServer server, IServiceProvider serviceProvi
     private void ReceiveFriendAndClanMemberConnectionStatus(MatchServer? matchServer = null)
     {
         List<int> clanMemberIDs = [.. Account.Clan?.Members.Select(clanMember => clanMember.ID) ?? []];
-        List<int> friendIDs = [.. Account.FriendedPeers.Select(friend => friend.Identifier)];
+        List<int> friendIDs = [.. Account.FriendedPeers.Select(friend => friend.ID)];
 
         List<ChatSession> onlinePeers = Context.ChatSessions.Values
             .Where(chatSession => friendIDs.Any(friendID => friendID == chatSession.Account.ID) || clanMemberIDs.Any(clanMemberID => clanMemberID == chatSession.Account.ID))

@@ -17,7 +17,7 @@ namespace MERRICK.Database.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.8")
+                .HasAnnotation("ProductVersion", "9.0.10")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -778,7 +778,7 @@ namespace MERRICK.Database.Migrations
                                 .HasMaxLength(30)
                                 .HasColumnType("nvarchar(30)");
 
-                            b1.Property<int>("Identifier")
+                            b1.Property<int>("ID")
                                 .HasColumnType("int");
 
                             b1.Property<string>("Name")
@@ -817,7 +817,7 @@ namespace MERRICK.Database.Migrations
                                 .HasMaxLength(15)
                                 .HasColumnType("nvarchar(15)");
 
-                            b1.Property<int>("Identifier")
+                            b1.Property<int>("ID")
                                 .HasColumnType("int");
 
                             b1.Property<string>("Name")
@@ -847,7 +847,7 @@ namespace MERRICK.Database.Migrations
                                 .ValueGeneratedOnAdd()
                                 .HasColumnType("int");
 
-                            b1.Property<int>("Identifier")
+                            b1.Property<int>("ID")
                                 .HasColumnType("int");
 
                             b1.Property<string>("Name")
