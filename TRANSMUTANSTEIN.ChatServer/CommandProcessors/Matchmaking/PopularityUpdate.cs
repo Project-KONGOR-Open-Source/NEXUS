@@ -59,17 +59,17 @@ public class PopularityUpdate : ISynchronousCommandProcessor
 
         response.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_POPULARITY_UPDATE);
 
-        response.WriteInt8(1);                                                  // TMM Availability (0 If No Regions Are Enabled, Or 1 Otherwise)
-        response.WriteString(string.Join('|', maps));                           // Available TMM Maps
-        response.WriteString(string.Join('|', gameTypes));                      // Available TMM Game Types (Only Used By The Old UI; Needs To Match The List Of Available TMM Maps)
-        response.WriteString(string.Join('|', gameModes));                      // Available TMM Game Modes
-        response.WriteString(string.Join('|', regions));                        // Available TMM Regions
-        response.WriteString(string.Join('|', disabledGameModesByGameType));    // Disabled Game Modes By Game Type
-        response.WriteString(string.Join('|', disabledGameModesByRankType));    // Disabled Game Modes By Rank Type
-        response.WriteString(string.Join('|', disabledGameModesByMap));         // Disabled Game Modes By Map
-        response.WriteString(string.Join('|', disabledRegions));                // Disabled TMM Regions
-        response.WriteString(clientCountryCode);                                // Client Country Code
-        response.WriteString(legend);                                           // TMM Legend
+        response.WriteInt8(1);                                               // TMM Availability (0 If No Regions Are Enabled, Or 1 Otherwise)
+        response.WriteString(string.Join('|', maps));                        // Available TMM Maps
+        response.WriteString(string.Join('|', gameTypes));                   // Available TMM Game Types (Only Used By The Old UI; Needs To Match The List Of Available TMM Maps)
+        response.WriteString(string.Join('|', gameModes));                   // Available TMM Game Modes
+        response.WriteString(string.Join('|', regions));                     // Available TMM Regions
+        response.WriteString(string.Join('|', disabledGameModesByGameType)); // Disabled Game Modes By Game Type
+        response.WriteString(string.Join('|', disabledGameModesByRankType)); // Disabled Game Modes By Rank Type
+        response.WriteString(string.Join('|', disabledGameModesByMap));      // Disabled Game Modes By Map
+        response.WriteString(string.Join('|', disabledRegions));             // Disabled TMM Regions
+        response.WriteString(clientCountryCode);                             // Client Country Code
+        response.WriteString(legend);                                        // TMM Legend
 
         List<int> rankTypes =
         [
@@ -108,9 +108,7 @@ public class PopularityUpdate : ISynchronousCommandProcessor
 
         response.WriteInt32(customMapRotationTime);
 
-        response.PrependBufferSize();
-
-        session.SendAsync(response.Data);
+        session.Send(response);
     }
 }
 

@@ -68,13 +68,11 @@ public class MatchmakingService(IServiceProvider serviceProvider) : IHostedServi
                 ChatBuffer found = new ();
 
                 found.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_QUEUE_UPDATE);
-                found.WriteInt8(Convert.ToByte(ChatProtocol.TMMUpdateType.TMM_GROUP_FOUND_SERVER)); // The Horn !!!
+                found.WriteInt8(Convert.ToByte(ChatProtocol.TMMUpdateType.TMM_GROUP_FOUND_SERVER)); // Sound The Horn !!!
 
                 // TODO: This Packet Can Be Sent With TMM_GROUP_QUEUE_UPDATE And A 4-Byte Integer To Update The Average Time In Queue (In Seconds)
 
-                found.PrependBufferSize();
-
-                Parallel.ForEach([.. team_1, .. team_2], group => Parallel.ForEach(group.Members, member => member.Session.SendAsync(found.Data)));
+                Parallel.ForEach([.. team_1, .. team_2], group => Parallel.ForEach(group.Members, member => member.Session.Send(found)));
             }
             # endregion
         }

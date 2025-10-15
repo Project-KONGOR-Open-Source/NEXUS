@@ -65,6 +65,7 @@ public class MatchmakingGroup(MatchmakingGroupMember leader)
                 update.WriteInt32(member.Account.ID);                                    // Account ID
                 update.WriteString(member.Account.Name);                                 // Account Name
                 update.WriteInt8(member.Slot);                                           // Group Slot
+
                 // TODO: Get Real Rank Level And Rating
                 /* TODO: Establish Rank (Medal) Level From Rating And Add To The Database
                     enum ECampaignLevel
@@ -98,6 +99,7 @@ public class MatchmakingGroup(MatchmakingGroupMember leader)
                         CAMPAIGN_LEVEL_IMMORTAL
                     };
                 */
+
                 update.WriteInt32(20);                                                   // Normal Rank Level (Also Known As Normal Campaign Level Or Medal)
                 update.WriteInt32(15);                                                   // Casual Rank Level (Also Known As Casual Campaign Level Or Medal)
                 // TODO: Figure Out What These Ranks Are (Potentially Actual Global Ranking Index In Order Of Rating Descending, e.g. Highest Rating Is Rank 1)
@@ -133,8 +135,6 @@ public class MatchmakingGroup(MatchmakingGroupMember leader)
             }
         }
 
-        update.PrependBufferSize();
-
-        Parallel.ForEach(Members, member => member.Session.SendAsync(update.Data));
+        Parallel.ForEach(Members, member => member.Session.Send(update));
     }
 }

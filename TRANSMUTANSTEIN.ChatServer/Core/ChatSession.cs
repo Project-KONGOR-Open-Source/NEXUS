@@ -58,9 +58,8 @@ public class ChatSession(TCPServer server, IServiceProvider serviceProvider) : T
         ChatBuffer accept = new ();
 
         accept.WriteCommand(ChatProtocol.ChatServerToClient.NET_CHAT_CL_ACCEPT);
-        accept.PrependBufferSize();
 
-        SendAsync(accept.Data);
+        Send(accept);
 
         // Notify Self, Clan Members, And Friends That This Client Is Now Connected
         BroadcastConnectionStatusUpdate(ChatProtocol.ChatClientStatus.CHAT_CLIENT_STATUS_CONNECTED);
@@ -76,11 +75,9 @@ public class ChatSession(TCPServer server, IServiceProvider serviceProvider) : T
         ChatBuffer reject = new ();
 
         reject.WriteCommand(ChatProtocol.ChatServerToClient.NET_CHAT_CL_REJECT);
-
         reject.WriteInt8(Convert.ToByte(reason)); // Rejection Reason
-        reject.PrependBufferSize();
 
-        SendAsync(reject.Data);
+        Send(reject);
 
         return this;
     }
@@ -89,14 +86,12 @@ public class ChatSession(TCPServer server, IServiceProvider serviceProvider) : T
     {
         BroadcastConnectionStatusUpdate(ChatProtocol.ChatClientStatus.CHAT_CLIENT_STATUS_DISCONNECTED);
 
-        ChatBuffer eject = new ();
+        ChatBuffer logout = new ();
 
-        eject.WriteCommand(ChatProtocol.Command.CHAT_CMD_LOGOUT);
+        logout.WriteCommand(ChatProtocol.Command.CHAT_CMD_LOGOUT);
+        logout.WriteBool(true); // Whether Or Not To Log Out Staff Accounts
 
-        eject.WriteBool(true); // Whether Or Not To Log Out Staff Accounts
-        eject.PrependBufferSize();
-
-        SendAsync(eject.Data);
+        Send(logout);
 
         // TODO: Send Notification With Logout Reson To Client
 
@@ -142,7 +137,6 @@ public class ChatSession(TCPServer server, IServiceProvider serviceProvider) : T
             ChatBuffer update = new ();
 
             update.WriteCommand(ChatProtocol.Command.CHAT_CMD_UPDATE_STATUS);
-
             update.WriteInt32(Account.ID);                          // Client's Account ID
             update.WriteInt8(Convert.ToByte(status));               // Client's Status
             update.WriteInt8(Account.GetChatClientFlags());         // Client's Flags (Chat Client Type)
@@ -167,10 +161,8 @@ public class ChatSession(TCPServer server, IServiceProvider serviceProvider) : T
                 {
                     // TODO: Populate With Real Match Name
                     update.WriteString(string.Empty);               // Match Name
-
                     // TODO: Populate With Real Match ID
                     update.WriteInt32(default(int));                // Match ID
-
                     update.WriteBool(false);                        // Has Extended Server Info
 
                     // TODO: Set Extended Server Info To TRUE And Populate The Following Fields
@@ -227,9 +219,7 @@ public class ChatSession(TCPServer server, IServiceProvider serviceProvider) : T
 
             update.WriteInt32(Account.AscensionLevel);              // Client's Ascension Level
 
-            update.PrependBufferSize();
-
-            Parallel.ForEach(onlinePeers, session => session.SendAsync(update.Data));
+            Parallel.ForEach(onlinePeers, session => session.Send(update));
         }
     }
 
@@ -250,18 +240,17 @@ public class ChatSession(TCPServer server, IServiceProvider serviceProvider) : T
         ChatBuffer update = new ();
 
         update.WriteCommand(ChatProtocol.Command.CHAT_CMD_INITIAL_STATUS);
-
-        update.WriteInt32(onlinePeers.Count);                                      // Number Of Online Peers
+        update.WriteInt32(onlinePeers.Count);                           // Number Of Online Peers
 
         Parallel.ForEach(onlinePeers, session =>
         {
             ChatProtocol.ChatClientStatus status = session.Metadata.LastKnownClientState;
 
-            update.WriteInt32(session.Account.ID);                                 // Client's Account ID
-            update.WriteInt8(Convert.ToByte(status));                              // Client's Status
-            update.WriteInt8(session.Account.GetChatClientFlags());                // Client's Flags (Chat Client Type)
-            update.WriteString(session.Account.NameColourNoPrefixCode);            // Name Colour
-            update.WriteString(session.Account.IconNoPrefixCode);                  // Account Icon
+            update.WriteInt32(session.Account.ID);                      // Client's Account ID
+            update.WriteInt8(Convert.ToByte(status));                   // Client's Status
+            update.WriteInt8(session.Account.GetChatClientFlags());     // Client's Flags (Chat Client Type)
+            update.WriteString(session.Account.NameColourNoPrefixCode); // Name Colour
+            update.WriteString(session.Account.IconNoPrefixCode);       // Account Icon
 
             if (status is ChatProtocol.ChatClientStatus.CHAT_CLIENT_STATUS_JOINING_GAME || status is ChatProtocol.ChatClientStatus.CHAT_CLIENT_STATUS_IN_GAME)
             {
@@ -277,25 +266,21 @@ public class ChatSession(TCPServer server, IServiceProvider serviceProvider) : T
                 if (status is ChatProtocol.ChatClientStatus.CHAT_CLIENT_STATUS_IN_GAME)
                 {
                     // TODO: Populate With Real Match Name
-                    update.WriteString(string.Empty);                              // Match Name
-
+                    update.WriteString(string.Empty);                   // Match Name
                     // TODO: Populate With Real Match ID
-                    update.WriteInt32(default(int));                               // Match ID
+                    update.WriteInt32(default(int));                    // Match ID
                 }
             }
 
-            update.WriteInt32(Account.AscensionLevel);                             // Client's Ascension Level
-            update.PrependBufferSize();
+            update.WriteInt32(Account.AscensionLevel);                  // Client's Ascension Level
 
-            session.SendAsync(update.Data);
+            session.Send(update);
         });
     }
 
     public ChatSession SendOptionsAndRemoteCommands()
     {
         ChatBuffer options = new ();
-
-        options.WriteCommand(ChatProtocol.Command.CHAT_CMD_OPTIONS);
 
         string[] commands =
         [
@@ -309,6 +294,7 @@ public class ChatSession(TCPServer server, IServiceProvider serviceProvider) : T
             // "startgame practice GameName map:caldavar allheroes:true devheroes:true mode:botmatch nostats:true"
         ];
 
+        options.WriteCommand(ChatProtocol.Command.CHAT_CMD_OPTIONS);
         options.WriteBool(false);                        // Upload To FTP On Demand (e.g. replays)
         options.WriteBool(true);                         // Upload To HTTP On Demand (e.g. replays)
         options.WriteBool(true);                         // Quests Are Enabled
@@ -316,9 +302,8 @@ public class ChatSession(TCPServer server, IServiceProvider serviceProvider) : T
         options.WriteBool(false);                        // Override Connect Resend Time
         options.WriteBool(true);                         // Enable Messages
         options.WriteString(string.Join('|', commands)); // Dynamic List Of Console Commands For The Client To Execute
-        options.PrependBufferSize();
 
-        SendAsync(options.Data);
+        Send(options);
 
         return this;
     }
@@ -426,5 +411,12 @@ public class ChatSession(TCPServer server, IServiceProvider serviceProvider) : T
         Logger.LogError(@"[BUG] Command Type ""{TypeName}"" Does Not Implement A Supported Processor Interface", type.Name);
 
         return null;
+    }
+
+    public bool Send(ChatBuffer buffer)
+    {
+        buffer.PrependBufferSize();
+
+        return SendAsync(buffer.Data);
     }
 }

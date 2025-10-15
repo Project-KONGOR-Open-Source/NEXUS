@@ -13,7 +13,6 @@ public class GroupInvite(MerrickContext merrick) : ISynchronousCommandProcessor
         ChatBuffer invite = new ();
 
         invite.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_INVITE);
-
         invite.WriteString(session.Account.Name);                                                     // Invite Issuer Name
         invite.WriteInt32(session.Account.ID);                                                        // Invite Issuer ID
         invite.WriteInt8(Convert.ToByte(ChatProtocol.ChatClientStatus.CHAT_CLIENT_STATUS_CONNECTED)); // Invite Issuer Status
@@ -25,26 +24,22 @@ public class GroupInvite(MerrickContext merrick) : ISynchronousCommandProcessor
         invite.WriteString(string.Join('|', group.Information.GameModes));                            // Game Modes
         invite.WriteString(string.Join('|', group.Information.GameRegions));                          // Game Regions
 
-        invite.PrependBufferSize();
 
         ChatSession inviteReceiverSession = Context.ChatSessions
             .Values.Single(session => session.Account.Name.Equals(requestData.InviteReceiverName));
 
-        inviteReceiverSession.SendAsync(invite.Data);
+        inviteReceiverSession.Send(invite);
 
-        ChatBuffer inviteBroadcast = new ();
-
-        inviteBroadcast.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_INVITE_BROADCAST);
+        ChatBuffer broadcast = new ();
 
         Account inviteReceiver = merrick.Accounts.Include(account => account.Clan)
             .Single(account => account.Name.Equals(requestData.InviteReceiverName));
 
-        inviteBroadcast.WriteString(inviteReceiver.NameWithClanTag);                                  // Invite Receiver Name
-        inviteBroadcast.WriteString(session.Account.NameWithClanTag);                                 // Invite Issuer Name
+        broadcast.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_INVITE_BROADCAST);
+        broadcast.WriteString(inviteReceiver.NameWithClanTag);  // Invite Receiver Name
+        broadcast.WriteString(session.Account.NameWithClanTag); // Invite Issuer Name
 
-        inviteBroadcast.PrependBufferSize();
-
-        Parallel.ForEach(group.Members, (member) => member.Session.SendAsync(inviteBroadcast.Data));
+        Parallel.ForEach(group.Members, (member) => member.Session.Send(broadcast));
     }
 }
 

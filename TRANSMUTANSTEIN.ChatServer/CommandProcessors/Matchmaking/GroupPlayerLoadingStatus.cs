@@ -22,9 +22,7 @@ public class GroupPlayerLoadingStatus : ISynchronousCommandProcessor
 
             queue.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_JOIN_QUEUE);
 
-            queue.PrependBufferSize();
-
-            Parallel.ForEach(group.Members, member => member.Session.SendAsync(queue.Data));
+            Parallel.ForEach(group.Members, member => member.Session.Send(queue));
 
             group.QueueStartTime = DateTimeOffset.UtcNow;
 
@@ -35,9 +33,7 @@ public class GroupPlayerLoadingStatus : ISynchronousCommandProcessor
             // TODO: Get Actual Average Time In Queue (In Seconds)
             load.WriteInt32(83);
 
-            load.PrependBufferSize();
-
-            Parallel.ForEach(group.Members, member => member.Session.SendAsync(load.Data));
+            Parallel.ForEach(group.Members, member => member.Session.Send(load));
         }
 
         group.MulticastUpdate(session.Account.ID, ChatProtocol.TMMUpdateType.TMM_PARTIAL_GROUP_UPDATE);

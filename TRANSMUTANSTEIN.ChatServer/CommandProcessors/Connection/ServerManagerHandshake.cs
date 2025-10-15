@@ -33,26 +33,23 @@ public class ServerManagerHandshake : ISynchronousCommandProcessor
         ChatBuffer response = new ();
 
         response.WriteCommand(ChatProtocol.ChatServerToServerManager.NET_CHAT_SM_ACCEPT);
-        response.PrependBufferSize();
 
-        session.SendAsync(response.Data);
+        session.Send(response);
 
         // TODO: Don't Reuse Chat Buffer Instance
 
         response = new ChatBuffer(); // Also Respond With NET_CHAT_SM_OPTIONS Since The Server Manager Will Not Explicitly Request It
 
         response.WriteCommand(ChatProtocol.ChatServerToServerManager.NET_CHAT_SM_OPTIONS);
+        response.WriteInt8(Convert.ToByte(true));  // Submit Stats Enabled
+        response.WriteInt8(Convert.ToByte(true));  // Upload Replays Enabled
+        response.WriteInt8(Convert.ToByte(false)); // Upload To FTP On Demand Enabled
+        response.WriteInt8(Convert.ToByte(true));  // Upload To HTTP On Demand Enabled
+        response.WriteInt8(Convert.ToByte(true));  // Resubmit Stats Enabled
+        // TODO: Investigate What This (Stats Resubmit Match ID Cut-Off) Is
+        response.WriteInt32(1);                    // Stats Resubmit Match ID Cut-Off
 
-        response.WriteInt8(Convert.ToByte(true));   // Submit Stats Enabled
-        response.WriteInt8(Convert.ToByte(true));   // Upload Replays Enabled
-        response.WriteInt8(Convert.ToByte(false));  // Upload To FTP On Demand Enabled
-        response.WriteInt8(Convert.ToByte(true));   // Upload To HTTP On Demand Enabled
-        response.WriteInt8(Convert.ToByte(true));   // Resubmit Stats Enabled
-        response.WriteInt32(1);                     // Stats Resubmit Match ID Cut-Off // TODO: Investigate What This Is
-
-        response.PrependBufferSize();
-
-        session.SendAsync(response.Data);
+        session.Send(response);
     }
 }
 

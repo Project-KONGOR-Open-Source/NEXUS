@@ -68,7 +68,6 @@ public class ChatChannel
         ChatBuffer response = new ();
 
         response.WriteCommand(ChatProtocol.Command.CHAT_CMD_CHANGED_CHANNEL);
-
         response.WriteString(Name);                                               // Channel Name
         response.WriteInt32(ID);                                                  // Channel ID
         response.WriteInt8(Convert.ToByte(Flags));                                // Channel Flags
@@ -98,10 +97,8 @@ public class ChatChannel
             response.WriteInt32(member.Account.AscensionLevel);                   // Ascension Level
         }
 
-        response.PrependBufferSize();
-
         // Announce To The Requesting Client That They Have Joined The Channel
-        session.SendAsync(response.Data);
+        session.Send(response);
 
         return this;
     }
@@ -115,7 +112,6 @@ public class ChatChannel
         ChatBuffer broadcast = new ();
 
         broadcast.WriteCommand(ChatProtocol.Command.CHAT_CMD_JOINED_CHANNEL);
-
         broadcast.WriteInt32(ID);                                          // Channel ID
         broadcast.WriteString(newMember.Account.NameWithClanTag);          // Member Account Name
         broadcast.WriteInt32(newMember.Account.ID);                        // Member Account ID
@@ -126,10 +122,8 @@ public class ChatChannel
         broadcast.WriteString(newMember.Account.IconNoPrefixCode);         // Account Icon
         broadcast.WriteInt32(newMember.Account.AscensionLevel);            // Ascension Level
 
-        broadcast.PrependBufferSize();
-
         // Announce To The Existing Channel Members That A New Client Has Joined The Channel
-        Parallel.ForEach(existingMembers, (existingMember) => existingMember.Session.SendAsync(broadcast.Data));
+        Parallel.ForEach(existingMembers, (existingMember) => existingMember.Session.Send(broadcast));
 
         return this;
     }
@@ -156,14 +150,11 @@ public class ChatChannel
                 ChatBuffer broadcast = new ();
 
                 broadcast.WriteCommand(ChatProtocol.Command.CHAT_CMD_LEFT_CHANNEL);
-
                 broadcast.WriteInt32(member.Account.ID); // Member Account ID
                 broadcast.WriteInt32(ID);                // Channel ID
 
-                broadcast.PrependBufferSize();
-
                 // Announce To The Channel Members (Including The Leaving Member) That A Client Has Left The Channel
-                Parallel.ForEach([member, .. Members.Values], (members) => members.Session.SendAsync(broadcast.Data));
+                Parallel.ForEach([member, .. Members.Values], (members) => members.Session.Send(broadcast));
             }
         }
 
@@ -180,16 +171,13 @@ public class ChatChannel
             ChatBuffer broadcast = new ();
 
             broadcast.WriteCommand(ChatProtocol.Command.CHAT_CMD_CHANNEL_KICK);
-
             broadcast.WriteInt32(ID);                          // Channel ID
             broadcast.WriteInt32(requesterSession.Account.ID); // Kicker Account ID
             broadcast.WriteInt32(targetAccountID);             // Kicked Account ID
 
-            broadcast.PrependBufferSize();
-
             // Announce To The Channel Members That A Client Will Be Kicked From The Channel
             // If The Requester's Administrator Level Is Less Than Or Equal To The Target's, This Operation Fails Silently
-            Parallel.ForEach(Members.Values, (member) => member.Session.SendAsync(broadcast.Data));
+            Parallel.ForEach(Members.Values, (member) => member.Session.Send(broadcast));
 
             ChatSession targetSession = Context.ChatSessions.Values.Single(session => session.Account.ID == targetAccountID);
 

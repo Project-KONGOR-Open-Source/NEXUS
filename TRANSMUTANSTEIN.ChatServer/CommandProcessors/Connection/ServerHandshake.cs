@@ -42,9 +42,8 @@ public class ServerHandshake : ISynchronousCommandProcessor
         ChatBuffer response = new ();
 
         response.WriteCommand(ChatProtocol.ChatServerToGameServer.NET_CHAT_GS_ACCEPT);
-        response.PrependBufferSize();
 
-        session.SendAsync(response.Data);
+        session.Send(response);
     }
 }
 

@@ -38,9 +38,8 @@ public class GroupPlayerReadyStatus(ILogger<GroupPlayerReadyStatus> logger) : IS
             ChatBuffer load = new ();
 
             load.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_START_LOADING);
-            load.PrependBufferSize();
 
-            Parallel.ForEach(group.Members, member => member.Session.SendAsync(load.Data));
+            Parallel.ForEach(group.Members, member => member.Session.Send(load));
         }
     }
 }
