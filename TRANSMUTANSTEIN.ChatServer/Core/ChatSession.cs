@@ -63,11 +63,10 @@ public class ChatSession(TCPServer server, IServiceProvider serviceProvider) : T
         SendAsync(accept.Data);
 
         // Notify Self, Clan Members, And Friends That This Client Is Now Connected
-        UpdateConnectionStatus(ChatProtocol.ChatClientStatus.CHAT_CLIENT_STATUS_CONNECTED);
+        BroadcastConnectionStatusUpdate(ChatProtocol.ChatClientStatus.CHAT_CLIENT_STATUS_CONNECTED);
 
-        // TODO: Update Chat Channel Members
-
-        // TODO: Send Initial Update
+        // Get The Connection Status Of All Friends And Clan Members That Are Currently Online (Excluding Invisible Clients)
+        ReceiveFriendAndClanMemberConnectionStatus();
 
         return this;
     }
@@ -87,7 +86,7 @@ public class ChatSession(TCPServer server, IServiceProvider serviceProvider) : T
 
     public void LogOut()
     {
-        UpdateConnectionStatus(ChatProtocol.ChatClientStatus.CHAT_CLIENT_STATUS_DISCONNECTED);
+        BroadcastConnectionStatusUpdate(ChatProtocol.ChatClientStatus.CHAT_CLIENT_STATUS_DISCONNECTED);
 
         ChatBuffer eject = new ();
 
@@ -121,7 +120,11 @@ public class ChatSession(TCPServer server, IServiceProvider serviceProvider) : T
         Dispose();
     }
 
-    public void UpdateConnectionStatus(ChatProtocol.ChatClientStatus status, MatchServer? matchServer = null)
+    /// <summary>
+    ///     Sends the client's connection status to all friends and clan members that are currently online.
+    ///     Also sends the client's connection status to the client itself, so they can see their own status.
+    /// </summary>
+    private void BroadcastConnectionStatusUpdate(ChatProtocol.ChatClientStatus status, MatchServer? matchServer = null)
     {
         if (Metadata.LastKnownClientState == status) return; else Metadata.LastKnownClientState = status;
 
@@ -130,81 +133,161 @@ public class ChatSession(TCPServer server, IServiceProvider serviceProvider) : T
             List<int> clanMemberIDs = [.. Account.Clan?.Members.Select(clanMember => clanMember.ID) ?? []];
             List<int> friendIDs = [.. Account.FriendedPeers.Select(friend => friend.Identifier)];
 
-            List<ChatSession> onlinePeers = Context.ChatSessions
-                .Where(chatSession => friendIDs.Any(friendID => friendID == chatSession.Value.Account.ID) || clanMemberIDs.Any(clanMemberID => clanMemberID == chatSession.Value.Account.ID))
-                .Select(chatSession => chatSession.Value).Distinct().ToList();
+            List<ChatSession> onlinePeers = Context.ChatSessions.Values
+                .Where(chatSession => friendIDs.Any(friendID => friendID == chatSession.Account.ID) || clanMemberIDs.Any(clanMemberID => clanMemberID == chatSession.Account.ID))
+                .Select(chatSession => chatSession).Distinct().ToList(); // Get All Online Friends And Clan Members
 
-            Parallel.ForEach(onlinePeers, session =>
+            ChatBuffer update = new ();
+
+            update.WriteCommand(ChatProtocol.Command.CHAT_CMD_UPDATE_STATUS);
+
+            update.WriteInt32(Account.ID);                          // Client's Account ID
+            update.WriteInt8(Convert.ToByte(status));               // Client's Status
+            update.WriteInt8(Account.GetChatClientFlags());         // Client's Flags (Chat Client Type)
+            update.WriteInt32(Account.Clan?.ID ?? 0);               // Client's Clan ID
+            update.WriteString(Account.Clan?.Name ?? string.Empty); // Client's Clan Name
+            update.WriteString(Account.ChatSymbolNoPrefixCode);     // Chat Symbol
+            update.WriteString(Account.NameColourNoPrefixCode);     // Name Colour
+            update.WriteString(Account.IconNoPrefixCode);           // Account Icon
+
+            if (status is ChatProtocol.ChatClientStatus.CHAT_CLIENT_STATUS_JOINING_GAME || status is ChatProtocol.ChatClientStatus.CHAT_CLIENT_STATUS_IN_GAME)
             {
-                ChatBuffer update = new ();
-
-                update.WriteCommand(ChatProtocol.Command.CHAT_CMD_UPDATE_STATUS);
-
-                update.WriteInt32(Account.ID);                          // Client's Account ID
-                update.WriteInt8(Convert.ToByte(status));               // Client's Status
-                update.WriteInt8(Account.GetChatClientFlags());         // Client's Flags (Chat Client Type)
-                update.WriteInt32(Account.Clan?.ID ?? 0);               // Client's Clan ID
-                update.WriteString(Account.Clan?.Name ?? string.Empty); // Client's Clan Name
-                update.WriteString(Account.ChatSymbolNoPrefixCode);     // Chat Symbol
-                update.WriteString(Account.NameColourNoPrefixCode);     // Name Colour
-                update.WriteString(Account.IconNoPrefixCode);           // Account Icon
-
-                if (status is ChatProtocol.ChatClientStatus.CHAT_CLIENT_STATUS_JOINING_GAME || status is ChatProtocol.ChatClientStatus.CHAT_CLIENT_STATUS_IN_GAME)
+                if (matchServer is null)
                 {
-                    if (matchServer is null)
-                    {
-                        Logger.LogError(@"[BUG] A Connection Status Update Was Requested For Account Name ""{ClientInformation.Account.Name}"" While Connected To A Match Server, But The Match Server Is NULL", Account.Name);
+                    Logger.LogError(@"[BUG] A Connection Status Update Was Requested For Account Name ""{ClientInformation.Account.Name}"" While Connected To A Match Server, But The Match Server Is NULL", Account.Name);
 
-                        return;
-                    }
-
-                    update.WriteString($"{matchServer.IPAddress}:{matchServer.Port}"); // Server Address This Client Is Connected To, In The Form Of "X.X.X.X:P"
-
-                    if (status is ChatProtocol.ChatClientStatus.CHAT_CLIENT_STATUS_IN_GAME)
-                    {
-                        // TODO: Populate With Real Match Name
-                        update.WriteString(string.Empty);                              // Match Name
-
-                        // TODO: Populate With Real Match ID
-                        update.WriteInt32(default(int));                               // Match ID
-
-                        update.WriteBool(false);                                       // Has Extended Server Info
-
-                        // TODO: Set Extended Server Info To True And Populate The Following Fields
-
-                        /*
-                            [1] EArrangedMatchType - arranged match type
-                            [X] string - client's name
-                            [X] string - server's region
-                            [X] string - server's game mode
-                            [1] unsigned char - server's team size
-                            [X] string - server's map name
-                            [1] unsigned char - server's tier (deprecated)
-                            [1] unsigned char - server's official status (0 = unofficial (deprecated), 1 = official with stats, 2 = official without stats)
-                            [1] bool - server's "no leavers" flag
-                            [1] bool - server's "private" flag
-                            [1] bool - server's "all heroes" flag
-                            [1] bool - server's "casual mode" flag
-                            [1] bool - server's "all random" flags (deprecated)
-                            [1] bool - server's "auto balanced" flag
-                            [1] bool - server's "advanced options" flag
-                            [2] unsigned short - server's minimum PSR allowed
-                            [2] unsigned short - server's maximum PSR allowed
-                            [1] bool - server's "dev heroes" flag
-                            [1] bool - server's "hardcore" flag
-                            [1] bool - server's "verified only" flag
-                            [1] bool - server's "gated" flag
-                        */
-                    }
+                    return;
                 }
 
-                update.WriteInt32(Account.AscensionLevel);                             // Client's Ascension Level
+                update.WriteString($"{matchServer.IPAddress}:{matchServer.Port}"); // Server Address This Client Is Connected To, In The Form Of "X.X.X.X:P"
 
-                update.PrependBufferSize();
+                if (status is ChatProtocol.ChatClientStatus.CHAT_CLIENT_STATUS_IN_GAME)
+                {
+                    // TODO: Populate With Real Match Name
+                    update.WriteString(string.Empty);               // Match Name
 
-                session.SendAsync(update.Data);
-            });
+                    // TODO: Populate With Real Match ID
+                    update.WriteInt32(default(int));                // Match ID
+
+                    update.WriteBool(false);                        // Has Extended Server Info
+
+                    // TODO: Set Extended Server Info To TRUE And Populate The Following Fields
+
+                    /*
+                        [1] EArrangedMatchType - arranged match type
+                        [X] string - client's name
+                        [X] string - server's region
+                        [X] string - server's game mode
+                        [1] unsigned char - server's team size
+                        [X] string - server's map name
+                        [1] unsigned char - server's tier (deprecated)
+                        [1] unsigned char - server's official status (0 = unofficial (deprecated), 1 = official with stats, 2 = official without stats)
+                        [1] bool - server's "no leavers" flag
+                        [1] bool - server's "private" flag
+                        [1] bool - server's "all heroes" flag
+                        [1] bool - server's "casual mode" flag
+                        [1] bool - server's "all random" flags (deprecated)
+                        [1] bool - server's "auto balanced" flag
+                        [1] bool - server's "advanced options" flag
+                        [2] unsigned short - server's minimum PSR allowed
+                        [2] unsigned short - server's maximum PSR allowed
+                        [1] bool - server's "dev heroes" flag
+                        [1] bool - server's "hardcore" flag
+                        [1] bool - server's "verified only" flag
+                        [1] bool - server's "gated" flag
+
+                        or ...
+
+                        << pJoinedServer->GetArrangedMatchType()                         // Arranged Match Type (0 = Public, 1 = Matchmaking, 2 = Scheduled match, 3 = Unscheduled match, 4 = Matchmaking midwars)
+                        << GetNameUTF8() << byte('\0')                                   // Player Name
+                        << WStringToUTF8(pJoinedServer->GetLocation()) << byte('\0')     // Region
+                        << WStringToUTF8(pJoinedServer->GetGameModeName()) << byte('\0') // Game Mode Name (banningdraft)
+                        << pJoinedServer->GetTeamSize()                                  // Team Size
+                        << WStringToUTF8(pJoinedServer->GetMapName()) << byte('\0')      // Map Name (caldavar)
+                        << pJoinedServer->GetTier()                                      // Tier - Noobs Only (0), Noobs Allowed (1), Pro (2)
+                        << pJoinedServer->GetOfficial()                                  // 0 - Unofficial, 1 - Official w/ stats, 2 - Official w/o stats
+                        << pJoinedServer->GetNoLeaver()                                  // No Leavers (1), Leavers (0)
+                        << pJoinedServer->GetPrivate()                                   // Private (1), Not Private (0)
+                        << pJoinedServer->GetAllHeroes()                                 // All Heroes (1), Not All Heroes (0)
+                        << pJoinedServer->GetCasualMode()                                // Casual Mode (1), Not Casual Mode (0)
+                        << pJoinedServer->GetForceRandom()                               // Force Random (1), Not Force Random (0) -- (NOTE: Deprecated)
+                        << pJoinedServer->GetAutoBalanced()                              // Auto Balanced (1), Non Auto Balanced (0)
+                        << pJoinedServer->GetAdvancedOptions()                           // Advanced Options	(1), No Advanced Options (0)
+                        << pJoinedServer->GetMinPSR()                                    // Min PSR
+                        << pJoinedServer->GetMaxPSR()                                    // Max PSR
+                        << pJoinedServer->GetDevHeroes()                                 // Dev Heroes (1), Non Dev Heroes (0)
+                        << pJoinedServer->GetHardcore()                                  // Hardcore (1), Non Hardcore (0)
+                        << pJoinedServer->GetVerifiedOnly()                              // Verified Only (1), Everyone (0)
+                        << pJoinedServer->GetGated()                                     // Gated (1), Non Gated (0)
+                    */
+                }
+            }
+
+            update.WriteInt32(Account.AscensionLevel);              // Client's Ascension Level
+
+            update.PrependBufferSize();
+
+            Parallel.ForEach(onlinePeers, session => session.SendAsync(update.Data));
         }
+    }
+
+    /// <summary>
+    ///     Receive the connection status of all friends and clan members that are currently online.
+    ///     Does not include invisible clients.
+    /// </summary>
+    private void ReceiveFriendAndClanMemberConnectionStatus(MatchServer? matchServer = null)
+    {
+        List<int> clanMemberIDs = [.. Account.Clan?.Members.Select(clanMember => clanMember.ID) ?? []];
+        List<int> friendIDs = [.. Account.FriendedPeers.Select(friend => friend.Identifier)];
+
+        List<ChatSession> onlinePeers = Context.ChatSessions.Values
+            .Where(chatSession => friendIDs.Any(friendID => friendID == chatSession.Account.ID) || clanMemberIDs.Any(clanMemberID => clanMemberID == chatSession.Account.ID))
+            .Where(chatSession => chatSession.Metadata.ClientChatModeState is not ChatProtocol.ChatModeType.CHAT_MODE_INVISIBLE)
+            .Select(chatSession => chatSession).Distinct().ToList(); // Get All Online Friends And Clan Members That Are Not Invisible
+
+        ChatBuffer update = new ();
+
+        update.WriteCommand(ChatProtocol.Command.CHAT_CMD_INITIAL_STATUS);
+
+        update.WriteInt32(onlinePeers.Count);                                      // Number Of Online Peers
+
+        Parallel.ForEach(onlinePeers, session =>
+        {
+            ChatProtocol.ChatClientStatus status = session.Metadata.LastKnownClientState;
+
+            update.WriteInt32(session.Account.ID);                                 // Client's Account ID
+            update.WriteInt8(Convert.ToByte(status));                              // Client's Status
+            update.WriteInt8(session.Account.GetChatClientFlags());                // Client's Flags (Chat Client Type)
+            update.WriteString(session.Account.NameColourNoPrefixCode);            // Name Colour
+            update.WriteString(session.Account.IconNoPrefixCode);                  // Account Icon
+
+            if (status is ChatProtocol.ChatClientStatus.CHAT_CLIENT_STATUS_JOINING_GAME || status is ChatProtocol.ChatClientStatus.CHAT_CLIENT_STATUS_IN_GAME)
+            {
+                if (matchServer is null)
+                {
+                    Logger.LogError(@"[BUG] A Connection Status Update Was Requested For Account Name ""{ClientInformation.Account.Name}"" While Connected To A Match Server, But The Match Server Is NULL", Account.Name);
+
+                    return;
+                }
+
+                update.WriteString($"{matchServer.IPAddress}:{matchServer.Port}"); // Server Address This Client Is Connected To, In The Form Of "X.X.X.X:P"
+
+                if (status is ChatProtocol.ChatClientStatus.CHAT_CLIENT_STATUS_IN_GAME)
+                {
+                    // TODO: Populate With Real Match Name
+                    update.WriteString(string.Empty);                              // Match Name
+
+                    // TODO: Populate With Real Match ID
+                    update.WriteInt32(default(int));                               // Match ID
+                }
+            }
+
+            update.WriteInt32(Account.AscensionLevel);                             // Client's Ascension Level
+
+            update.PrependBufferSize();
+
+            session.SendAsync(update.Data);
+        });
     }
 
     private static List<byte[]> ExtractDataSegments(byte[] buffer, out byte[] remaining)
