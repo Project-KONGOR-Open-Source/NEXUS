@@ -304,6 +304,9 @@ public class ChatSession(TCPServer server, IServiceProvider serviceProvider) : T
             "http_printDebugInfo true",
             "php_printDebugInfo true",
             "sys_dumpOnFatal true"
+
+            // Adding The Following Command Will Log The Client Directly Into A No-Stats Practice Match With Bots
+            // "startgame practice GameName map:caldavar allheroes:true devheroes:true mode:botmatch nostats:true"
         ];
 
         options.WriteBool(false);                        // Upload To FTP On Demand (e.g. replays)
