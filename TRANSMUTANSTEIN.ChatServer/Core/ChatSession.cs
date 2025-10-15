@@ -1,6 +1,6 @@
 ﻿namespace TRANSMUTANSTEIN.ChatServer.Core;
 
-public class ChatSession(TCPServer server, IServiceProvider serviceProvider) : TCPSession(server)
+public partial class ChatSession(TCPServer server, IServiceProvider serviceProvider) : TCPSession(server)
 {
     /// <summary>
     ///     Gets Set After A Successful Client Handshake, And Contains Metadata About The Client Connected To This Chat Session
@@ -12,37 +12,10 @@ public class ChatSession(TCPServer server, IServiceProvider serviceProvider) : T
     /// </summary>
     public Account Account { get; set; } = null!;
 
+    /// <summary>
+    ///     A Publicly Accessible Logger Instance Which Can Be Invoked By Higher-Order Types
+    /// </summary>
     public ILogger Logger { get; } = serviceProvider.GetRequiredService<ILogger<ChatSession>>();
-
-    private static ConcurrentDictionary<ushort, Type> CommandToTypeMap { get; set; } = [];
-
-    private byte[] RemainingPreviouslyReceivedData { get; set; } = [];
-
-    protected override void OnConnected()
-    {
-        Logger.LogInformation("Chat Session ID {SessionID} Was Created", ID);
-    }
-
-    protected override void OnError(SocketError error)
-    {
-        Logger.LogInformation("Chat Session ID {SessionID} Caught A Socket Error With Code {SocketErrorCode}", ID, error);
-    }
-
-    protected override void OnDisconnected()
-    {
-        Logger.LogInformation("Chat Session ID {SessionID} Has Terminated", ID);
-    }
-
-    protected override void OnReceived(byte[] buffer, long offset, long size)
-    {
-        byte[] received = RemainingPreviouslyReceivedData.Concat(buffer[(int)offset..(int)size]).ToArray();
-
-        List<byte[]> segments = ExtractDataSegments(received, out byte[] remaining);
-
-        RemainingPreviouslyReceivedData = remaining;
-
-        Parallel.ForEach(segments, ProcessDataSegment);
-    }
 
     public ChatSession Accept(ChatSessionMetadata metadata, Account account)
     {
@@ -306,6 +279,39 @@ public class ChatSession(TCPServer server, IServiceProvider serviceProvider) : T
         Send(options);
 
         return this;
+    }
+}
+
+public partial class ChatSession
+{
+    private static ConcurrentDictionary<ushort, Type> CommandToTypeMap { get; set; } = [];
+
+    private byte[] RemainingPreviouslyReceivedData { get; set; } = [];
+
+    protected override void OnConnected()
+    {
+        Logger.LogInformation("Chat Session ID {SessionID} Was Created", ID);
+    }
+
+    protected override void OnError(SocketError error)
+    {
+        Logger.LogInformation("Chat Session ID {SessionID} Caught A Socket Error With Code {SocketErrorCode}", ID, error);
+    }
+
+    protected override void OnDisconnected()
+    {
+        Logger.LogInformation("Chat Session ID {SessionID} Has Terminated", ID);
+    }
+
+    protected override void OnReceived(byte[] buffer, long offset, long size)
+    {
+        byte[] received = RemainingPreviouslyReceivedData.Concat(buffer[(int) offset..(int) size]).ToArray();
+
+        List<byte[]> segments = ExtractDataSegments(received, out byte[] remaining);
+
+        RemainingPreviouslyReceivedData = remaining;
+
+        Parallel.ForEach(segments, ProcessDataSegment);
     }
 
     private static List<byte[]> ExtractDataSegments(byte[] buffer, out byte[] remaining)
