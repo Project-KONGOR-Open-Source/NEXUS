@@ -76,7 +76,8 @@ public class ChatSession(TCPServer server, IServiceProvider serviceProvider) : T
         ChatBuffer reject = new ();
 
         reject.WriteCommand(ChatProtocol.ChatServerToClient.NET_CHAT_CL_REJECT);
-        reject.WriteInt8(Convert.ToByte(reason));
+
+        reject.WriteInt8(Convert.ToByte(reason)); // Rejection Reason
         reject.PrependBufferSize();
 
         SendAsync(reject.Data);
@@ -91,7 +92,8 @@ public class ChatSession(TCPServer server, IServiceProvider serviceProvider) : T
         ChatBuffer eject = new ();
 
         eject.WriteCommand(ChatProtocol.Command.CHAT_CMD_LOGOUT);
-        eject.WriteInt8(1);
+
+        eject.WriteBool(true); // Whether Or Not To Log Out Staff Accounts
         eject.PrependBufferSize();
 
         SendAsync(eject.Data);
@@ -283,11 +285,39 @@ public class ChatSession(TCPServer server, IServiceProvider serviceProvider) : T
             }
 
             update.WriteInt32(Account.AscensionLevel);                             // Client's Ascension Level
-
             update.PrependBufferSize();
 
             session.SendAsync(update.Data);
         });
+    }
+
+    public ChatSession SendOptionsAndRemoteCommands()
+    {
+        ChatBuffer options = new ();
+
+        options.WriteCommand(ChatProtocol.Command.CHAT_CMD_OPTIONS);
+
+        string[] commands =
+        [
+            "cg_24hourClock true",
+            "con_showNet true",
+            "http_printDebugInfo true",
+            "php_printDebugInfo true",
+            "sys_dumpOnFatal true"
+        ];
+
+        options.WriteBool(false);                        // Upload To FTP On Demand (e.g. replays)
+        options.WriteBool(true);                         // Upload To HTTP On Demand (e.g. replays)
+        options.WriteBool(true);                         // Quests Are Enabled
+        options.WriteBool(true);                         // Quest Ladder Is Enabled
+        options.WriteBool(false);                        // Override Connect Resend Time
+        options.WriteBool(true);                         // Enable Messages
+        options.WriteString(string.Join('|', commands)); // Dynamic List Of Console Commands For The Client To Execute
+        options.PrependBufferSize();
+
+        SendAsync(options.Data);
+
+        return this;
     }
 
     private static List<byte[]> ExtractDataSegments(byte[] buffer, out byte[] remaining)

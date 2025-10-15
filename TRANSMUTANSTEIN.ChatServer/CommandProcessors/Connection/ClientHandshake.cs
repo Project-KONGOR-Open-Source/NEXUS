@@ -36,7 +36,9 @@ public class ClientHandshake(MerrickContext merrick, ILogger<ClientHandshake> lo
             return;
         }
 
-        session.Accept(new ChatSessionMetadata(requestData), account);
+        session
+            .Accept(new ChatSessionMetadata(requestData), account)
+            .SendOptionsAndRemoteCommands();
     }
 }
 
