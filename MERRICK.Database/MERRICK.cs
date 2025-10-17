@@ -56,24 +56,29 @@ public class MERRICK
             application.UseExceptionHandler("/error");
         }
 
-        // Automatically Redirect HTTP Requests To HTTPS
-        application.UseHttpsRedirection();
-
         // Enforce HTTPS With Strict Transport Security
         application.UseHsts();
 
-        // Add Basic Security Headers Middleware
+        // Automatically Redirect HTTP Requests To HTTPS
+        application.UseHttpsRedirection();
+
+        // Add Security Headers Middleware
         application.Use(async (context, next) =>
         {
+            IHeaderDictionary headers = context.Response.Headers;
+
             // Prevent MIME Type Sniffing
-            context.Response.Headers.Append("X-Content-Type-Options", "nosniff");
-            
-            // Prevent Page From Being Displayed In Frames
-            context.Response.Headers.Append("X-Frame-Options", "DENY");
-            
-            // Enable XSS Protection
-            context.Response.Headers.Append("X-XSS-Protection", "1; mode=block");
-            
+            headers["X-Content-Type-Options"] = "nosniff";
+
+            // Control Referrer Information
+            headers["Referrer-Policy"] = "strict-origin-when-cross-origin";
+
+            // Apply Restrictive CSP Only To API Endpoints
+            if (context.Request.Path.StartsWithSegments("/api", StringComparison.OrdinalIgnoreCase))
+            {
+                headers["Content-Security-Policy"] = "default-src 'none'; frame-ancestors 'none';";
+            }
+
             await next();
         });
 

@@ -233,29 +233,29 @@ public class ZORGATH
         builder.Services.AddSingleton<IEmailService, EmailService>();
 
         // Build The Application
-        WebApplication app = builder.Build();
+        WebApplication application = builder.Build();
 
         // Configure Development-Specific Middleware
-        if (app.Environment.IsDevelopment())
+        if (application.Environment.IsDevelopment())
         {
             // Show Detailed Error Pages In Development
-            app.UseDeveloperExceptionPage();
+            application.UseDeveloperExceptionPage();
 
             // Enable HTTP Request/Response Logging
-            app.UseHttpLogging();
+            application.UseHttpLogging();
 
             // Enable Swagger API Documentation
-            app.UseSwagger();
+            application.UseSwagger();
 
             // Configure Swagger UI With Custom Styling
-            app.UseSwaggerUI(options =>
+            application.UseSwaggerUI(options =>
             {
                 options.InjectStylesheet("swagger.css");
                 options.DocumentTitle = "ZORGATH Web Portal API";
             });
 
             // Serve Static Files For Swagger CSS
-            app.UseStaticFiles(new StaticFileOptions
+            application.UseStaticFiles(new StaticFileOptions
             {
                 FileProvider = new PhysicalFileProvider(Path.Combine(builder.Environment.ContentRootPath, "Resources", "CSS")),
                 RequestPath = "/swagger"
@@ -265,58 +265,57 @@ public class ZORGATH
         else
         {
             // Use Global Exception Handler In Production
-            app.UseExceptionHandler("/error");
+            application.UseExceptionHandler("/error");
         }
 
-        // Enable CORS Policy
-        app.UseCors(corsPolicyName);
-
-        // Enable Output Caching
-        app.UseOutputCache();
-
-        // Enable Rate Limiting (Before Authentication)
-        app.UseRateLimiter();
-
-        // Automatically Redirect HTTP Requests To HTTPS
-        app.UseHttpsRedirection();
+        // Enable Rate Limiting (Before Other Processing)
+        application.UseRateLimiter();
 
         // Enforce HTTPS With Strict Transport Security
-        app.UseHsts();
+        application.UseHsts();
+
+        // Automatically Redirect HTTP Requests To HTTPS
+        application.UseHttpsRedirection();
+
+        // Enable CORS Policy
+        application.UseCors(corsPolicyName);
+
+        // Enable Output Caching
+        application.UseOutputCache();
 
         // Add Security Headers Middleware
-        app.Use(async (context, next) =>
+        application.Use(async (context, next) =>
         {
+            IHeaderDictionary headers = context.Response.Headers;
+
             // Prevent MIME Type Sniffing
-            context.Response.Headers.Append("X-Content-Type-Options", "nosniff");
-            
-            // Prevent Page From Being Displayed In Frames
-            context.Response.Headers.Append("X-Frame-Options", "DENY");
-            
-            // Enable XSS Protection
-            context.Response.Headers.Append("X-XSS-Protection", "1; mode=block");
-            
+            headers["X-Content-Type-Options"] = "nosniff";
+
             // Control Referrer Information
-            context.Response.Headers.Append("Referrer-Policy", "strict-origin-when-cross-origin");
-            
-            // Content Security Policy For API
-            context.Response.Headers.Append("Content-Security-Policy", "default-src 'none'; frame-ancestors 'none';");
-            
+            headers["Referrer-Policy"] = "strict-origin-when-cross-origin";
+
+            // Apply Restrictive CSP Only To API Endpoints
+            if (context.Request.Path.StartsWithSegments("/api", StringComparison.OrdinalIgnoreCase))
+            {
+                headers["Content-Security-Policy"] = "default-src 'none'; frame-ancestors 'none';";
+            }
+
             await next();
         });
 
         // Require Authentication To Access Non-Public Resources
-        app.UseAuthentication();
+        application.UseAuthentication();
 
         // Require Authorization To Access Role-Specific Resources
-        app.UseAuthorization();
+        application.UseAuthorization();
 
         // Map Aspire Default Health Check Endpoints
-        app.MapDefaultEndpoints();
+        application.MapDefaultEndpoints();
 
         // Map MVC Controllers With Rate Limiting
-        app.MapControllers().RequireRateLimiting(RateLimiterPolicies.Relaxed);
+        application.MapControllers().RequireRateLimiting(RateLimiterPolicies.Relaxed);
 
         // Run The Application
-        app.Run();
+        application.Run();
     }
 }

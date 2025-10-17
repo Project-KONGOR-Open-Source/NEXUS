@@ -47,46 +47,51 @@ public class TRANSMUTANSTEIN
         builder.Services.AddHealthChecks().AddCheck<ChatServerHealthCheck>("TRANSMUTANSTEIN Chat Server Health Check");
 
         // Build The Application
-        WebApplication app = builder.Build();
+        WebApplication application = builder.Build();
 
         // Configure Development-Specific Middleware
-        if (app.Environment.IsDevelopment())
+        if (application.Environment.IsDevelopment())
         {
             // Show Detailed Error Pages In Development
-            app.UseDeveloperExceptionPage();
+            application.UseDeveloperExceptionPage();
         }
 
         else
         {
             // Use Global Exception Handler In Production
-            app.UseExceptionHandler("/error");
+            application.UseExceptionHandler("/error");
         }
 
-        // Automatically Redirect HTTP Requests To HTTPS
-        app.UseHttpsRedirection();
-
         // Enforce HTTPS With Strict Transport Security
-        app.UseHsts();
+        application.UseHsts();
 
-        // Add Basic Security Headers Middleware
-        app.Use(async (context, next) =>
+        // Automatically Redirect HTTP Requests To HTTPS
+        application.UseHttpsRedirection();
+
+        // Add Security Headers Middleware
+        application.Use(async (context, next) =>
         {
+            IHeaderDictionary headers = context.Response.Headers;
+
             // Prevent MIME Type Sniffing
-            context.Response.Headers.Append("X-Content-Type-Options", "nosniff");
-            
-            // Prevent Page From Being Displayed In Frames
-            context.Response.Headers.Append("X-Frame-Options", "DENY");
-            
-            // Enable XSS Protection
-            context.Response.Headers.Append("X-XSS-Protection", "1; mode=block");
-            
+            headers["X-Content-Type-Options"] = "nosniff";
+
+            // Control Referrer Information
+            headers["Referrer-Policy"] = "strict-origin-when-cross-origin";
+
+            // Apply Restrictive CSP Only To API Endpoints
+            if (context.Request.Path.StartsWithSegments("/api", StringComparison.OrdinalIgnoreCase))
+            {
+                headers["Content-Security-Policy"] = "default-src 'none'; frame-ancestors 'none';";
+            }
+
             await next();
         });
 
         // Map Aspire Default Health Check Endpoints
-        app.MapDefaultEndpoints();
+        application.MapDefaultEndpoints();
 
         // Run The Application
-        app.Run();
+        application.Run();
     }
 }
