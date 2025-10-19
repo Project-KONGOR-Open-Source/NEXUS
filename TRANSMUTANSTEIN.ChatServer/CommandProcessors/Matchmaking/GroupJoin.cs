@@ -31,7 +31,7 @@ public class GroupJoin(ILogger<GroupJoin> logger) : ISynchronousCommandProcessor
 
         else
         {
-            logger.LogWarning("Player {Session.ClientInformation.Account.Name} Tried To Join A Matchmaking Group They Are Already In", session.Account.Name);
+            logger.LogWarning("Player {Session.Account.Name} Tried To Join A Matchmaking Group They Are Already In", session.Account.Name);
 
             return;
         }
