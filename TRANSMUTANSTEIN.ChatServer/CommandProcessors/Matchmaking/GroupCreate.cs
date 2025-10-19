@@ -1,66 +1,14 @@
 ﻿namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Matchmaking;
 
 [ChatCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_CREATE)]
-public class GroupCreate(ILogger<GroupCreate> logger) : ISynchronousCommandProcessor
+public class GroupCreate : ISynchronousCommandProcessor
 {
     public void Process(ChatSession session, ChatBuffer buffer)
     {
         GroupCreateRequestData requestData = new (buffer);
 
-        MatchmakingGroupMember member = new (session)
-        {
-            Slot = 1,
-            IsLeader = true,
-            IsReady = false,
-            IsInGame = false,
-            IsEligibleForMatchmaking = true,
-            LoadingPercent = 0,
-            GameModeAccess = string.Join('|', requestData.GameModes.Select(mode => "true"))
-        };
-
-        MatchmakingGroupInformation information = new ()
-        {
-            ClientVersion = requestData.ClientVersion,
-            GroupType = requestData.GroupType,
-            GameType = requestData.GameType,
-            MapName = requestData.MapName,
-            GameModes = requestData.GameModes,
-            GameRegions = requestData.GameRegions,
-            Ranked = requestData.Ranked,
-            MatchFidelity = requestData.MatchFidelity,
-            BotDifficulty = requestData.BotDifficulty,
-            RandomizeBots = requestData.RandomizeBots
-        };
-
-        if (MatchmakingService.Groups.ContainsKey(session.Account.ID) is false)
-        {
-            if (MatchmakingService.Groups.TryAdd(session.Account.ID, new MatchmakingGroup(member) { Information = information }) is false)
-            {
-                logger.LogError(@"Failed To Create Matchmaking Group For Account ID ""{Session.ClientInformation.Account.ID}""", session.Account.ID);
-
-                // TODO: Respond With ChatProtocol.TMMFailedToJoinReason Or Similar (e.g. TMMFailedToCreate, If It Exists) Or Maybe Just Throw An Exception
-
-                return;
-            }
-        }
-
-        else
-        {
-            if (MatchmakingService.Groups.TryUpdate(session.Account.ID, new MatchmakingGroup(member) { Information = information }, MatchmakingService.Groups[session.Account.ID]) is false)
-            {
-                logger.LogError(@"Failed To Update Matchmaking Group For Account ID ""{Session.ClientInformation.Account.ID}""", session.Account.ID);
-
-                // TODO: Respond With ChatProtocol.TMMFailedToJoinReason Or Similar (e.g. TMMFailedToCreate, If It Exists) Or Maybe Just Throw An Exception
-
-                return;
-            }
-        }
-
-        MatchmakingGroup group = MatchmakingService.Groups[session.Account.ID];
-
-        group.MulticastUpdate(session.Account.ID, ChatProtocol.TMMUpdateType.TMM_CREATE_GROUP);
-
-        // TODO: Create Chat Channel For The Group
+        MatchmakingGroup
+            .Create(session, requestData);
     }
 }
 

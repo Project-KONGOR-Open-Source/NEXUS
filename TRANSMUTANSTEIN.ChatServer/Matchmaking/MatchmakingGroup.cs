@@ -1,10 +1,10 @@
 ﻿namespace TRANSMUTANSTEIN.ChatServer.Matchmaking;
 
-public class MatchmakingGroup(MatchmakingGroupMember leader)
+public class MatchmakingGroup
 {
     public MatchmakingGroupMember Leader => Members.Single(member => member.IsLeader);
 
-    public List<MatchmakingGroupMember> Members { get; set; } = [ leader ];
+    public required List<MatchmakingGroupMember> Members { get; set; }
 
     public required MatchmakingGroupInformation Information { get; set; }
 
@@ -20,7 +20,62 @@ public class MatchmakingGroup(MatchmakingGroupMember leader)
 
     public TimeSpan QueueDuration => QueueStartTime is not null ? DateTimeOffset.UtcNow - QueueStartTime.Value : TimeSpan.Zero;
 
-    public void MulticastUpdate(int emitterAccountID, ChatProtocol.TMMUpdateType updateType)
+    /// <summary>
+    ///     Hidden Constructor Which Enforces <see cref="Create"/> As The Primary Mechanism For Creating Matchmaking Groups
+    /// </summary>
+    private MatchmakingGroup() { }
+
+    public static MatchmakingGroup Create(ChatSession session, GroupCreateRequestData data)
+    {
+        MatchmakingGroupMember member = new (session)
+        {
+            Slot = 1, // The Group Leader Is Always In Slot 1
+            IsLeader = true,
+            IsReady = false,
+            IsInGame = false,
+            IsEligibleForMatchmaking = true,
+            LoadingPercent = 0,
+            GameModeAccess = string.Join('|', data.GameModes.Select(mode => "true"))
+        };
+
+        MatchmakingGroupInformation information = new ()
+        {
+            ClientVersion = data.ClientVersion,
+            GroupType = data.GroupType,
+            GameType = data.GameType,
+            MapName = data.MapName,
+            GameModes = data.GameModes,
+            GameRegions = data.GameRegions,
+            Ranked = data.Ranked,
+            MatchFidelity = data.MatchFidelity,
+            BotDifficulty = data.BotDifficulty,
+            RandomizeBots = data.RandomizeBots
+        };
+
+        // TODO: Create Chat Channel For The Group
+
+        MatchmakingGroup group = new () { Members = [member], Information = information };
+
+        if (MatchmakingService.Groups.ContainsKey(session.Account.ID) is false)
+        {
+            // TODO: Check If The Account Is Already In A Matchmaking Group And Handle Accordingly
+
+            if (MatchmakingService.Groups.TryAdd(session.Account.ID, group) is false)
+                throw new InvalidOperationException($@"Failed To Create Matchmaking Group For Account ID ""{session.Account.ID}""");
+        }
+
+        else
+        {
+            if (MatchmakingService.Groups.TryUpdate(session.Account.ID, group, MatchmakingService.Groups[session.Account.ID]) is false)
+                throw new InvalidOperationException($@"Failed To Update Matchmaking Group For Account ID ""{session.Account.ID}""");
+        }
+
+        group.MulticastUpdate(session.Account.ID, ChatProtocol.TMMUpdateType.TMM_CREATE_GROUP);
+
+        return group;
+    }
+
+    private void MulticastUpdate(int emitterAccountID, ChatProtocol.TMMUpdateType updateType)
     {
         ChatBuffer update = new ();
 
