@@ -100,10 +100,13 @@ public class ChatChannel
         // Announce To The Requesting Client That They Have Joined The Channel
         session.Send(response);
 
+        // Announce To The Existing Channel Members That A New Client Has Joined The Channel
+        BroadcastJoin(session);
+
         return this;
     }
 
-    public ChatChannel BroadcastJoin(ChatSession session)
+    private void BroadcastJoin(ChatSession session)
     {
         ChatChannelMember newMember = Members.Values.Single(member => member.Account.ID == session.Account.ID);
 

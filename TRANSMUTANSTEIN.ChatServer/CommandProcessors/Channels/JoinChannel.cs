@@ -9,8 +9,7 @@ public class JoinChannel : ISynchronousCommandProcessor
 
         ChatChannel
             .GetOrCreate(session, requestData.ChannelName)
-            .Join(session)
-            .BroadcastJoin(session);
+            .Join(session);
     }
 }
 
