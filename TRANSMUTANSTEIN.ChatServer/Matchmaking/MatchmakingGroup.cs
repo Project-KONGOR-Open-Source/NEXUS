@@ -91,6 +91,41 @@ public class MatchmakingGroup
         return group;
     }
 
+    public MatchmakingGroup Invite(ChatSession session, MerrickContext merrick, string receiverAccountName)
+    {
+        ChatBuffer invite = new ();
+
+        invite.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_INVITE);
+        invite.WriteString(session.Account.Name);                                                     // Invite Issuer Name
+        invite.WriteInt32(session.Account.ID);                                                        // Invite Issuer ID
+        invite.WriteInt8(Convert.ToByte(ChatProtocol.ChatClientStatus.CHAT_CLIENT_STATUS_CONNECTED)); // Invite Issuer Status
+        invite.WriteInt8(session.Account.GetChatClientFlags());                                       // Invite Issuer Chat Flags
+        invite.WriteString(session.Account.NameColour);                                               // Invite Issuer Chat Name Colour
+        invite.WriteString(session.Account.Icon);                                                     // Invite Issuer Icon
+        invite.WriteString(Information.MapName);                                                      // Map Name
+        invite.WriteInt8(Convert.ToByte(Information.GameType));                                       // Game Type
+        invite.WriteString(string.Join('|', Information.GameModes));                                  // Game Modes
+        invite.WriteString(string.Join('|', Information.GameRegions));                                // Game Regions
+
+        ChatSession inviteReceiverSession = Context.ChatSessions
+            .Values.Single(session => session.Account.Name.Equals(receiverAccountName));
+
+        inviteReceiverSession.Send(invite);
+
+        ChatBuffer broadcast = new ();
+
+        Account inviteReceiver = merrick.Accounts.Include(account => account.Clan)
+            .Single(account => account.Name.Equals(receiverAccountName));
+
+        broadcast.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_INVITE_BROADCAST);
+        broadcast.WriteString(inviteReceiver.NameWithClanTag);  // Invite Receiver Name
+        broadcast.WriteString(session.Account.NameWithClanTag); // Invite Issuer Name
+
+        Parallel.ForEach(Members, (member) => member.Session.Send(broadcast));
+
+        return this;
+    }
+
     public MatchmakingGroup Join(ChatSession session)
     {
         // TODO: If The Group Is Full (Members Count Is Equal To Max Map Players Count), Reject The Join Request With An Appropriate Error
@@ -127,6 +162,39 @@ public class MatchmakingGroup
         MulticastUpdate(session.Account.ID, ChatProtocol.TMMUpdateType.TMM_PLAYER_JOINED_GROUP);
 
         // TODO: Create "TMM Group Chat" Chat Channel Or Join Already-Existing One For The Group; Must Have CannotBeJoined Flag Set
+
+        return this;
+    }
+
+    public MatchmakingGroup SendLoadingStatusUpdate(ChatSession session, byte loadingPercent)
+    {
+        MatchmakingGroupMember groupMember = Members.Single(member => member.Account.ID == session.Account.ID);
+
+        groupMember.LoadingPercent = loadingPercent;
+
+        bool loaded = Members.All(member => member.LoadingPercent is 100);
+
+        if (loaded)
+        {
+            ChatBuffer queue = new ();
+
+            queue.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_JOIN_QUEUE);
+
+            Parallel.ForEach(Members, member => member.Session.Send(queue));
+
+            QueueStartTime = DateTimeOffset.UtcNow;
+
+            ChatBuffer load = new ();
+
+            load.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_QUEUE_UPDATE);
+            load.WriteInt8(Convert.ToByte(ChatProtocol.TMMUpdateType.TMM_GROUP_QUEUE_UPDATE));
+            // TODO: Get Actual Average Time In Queue (In Seconds)
+            load.WriteInt32(83);
+
+            Parallel.ForEach(Members, member => member.Session.Send(load));
+        }
+
+        MulticastUpdate(session.Account.ID, ChatProtocol.TMMUpdateType.TMM_PARTIAL_GROUP_UPDATE);
 
         return this;
     }
@@ -247,40 +315,5 @@ public class MatchmakingGroup
         }
 
         Parallel.ForEach(Members, member => member.Session.Send(update));
-    }
-
-    public MatchmakingGroup Invite(ChatSession session, MerrickContext merrick, string receiverAccountName)
-    {
-        ChatBuffer invite = new ();
-
-        invite.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_INVITE);
-        invite.WriteString(session.Account.Name);                                                     // Invite Issuer Name
-        invite.WriteInt32(session.Account.ID);                                                        // Invite Issuer ID
-        invite.WriteInt8(Convert.ToByte(ChatProtocol.ChatClientStatus.CHAT_CLIENT_STATUS_CONNECTED)); // Invite Issuer Status
-        invite.WriteInt8(session.Account.GetChatClientFlags());                                       // Invite Issuer Chat Flags
-        invite.WriteString(session.Account.NameColour);                                               // Invite Issuer Chat Name Colour
-        invite.WriteString(session.Account.Icon);                                                     // Invite Issuer Icon
-        invite.WriteString(Information.MapName);                                                      // Map Name
-        invite.WriteInt8(Convert.ToByte(Information.GameType));                                       // Game Type
-        invite.WriteString(string.Join('|', Information.GameModes));                                  // Game Modes
-        invite.WriteString(string.Join('|', Information.GameRegions));                                // Game Regions
-
-        ChatSession inviteReceiverSession = Context.ChatSessions
-            .Values.Single(session => session.Account.Name.Equals(receiverAccountName));
-
-        inviteReceiverSession.Send(invite);
-
-        ChatBuffer broadcast = new ();
-
-        Account inviteReceiver = merrick.Accounts.Include(account => account.Clan)
-            .Single(account => account.Name.Equals(receiverAccountName));
-
-        broadcast.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_INVITE_BROADCAST);
-        broadcast.WriteString(inviteReceiver.NameWithClanTag);  // Invite Receiver Name
-        broadcast.WriteString(session.Account.NameWithClanTag); // Invite Issuer Name
-
-        Parallel.ForEach(Members, (member) => member.Session.Send(broadcast));
-
-        return this;
     }
 }
