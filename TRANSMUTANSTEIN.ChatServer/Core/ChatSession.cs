@@ -12,11 +12,6 @@ public partial class ChatSession(TCPServer server, IServiceProvider serviceProvi
     /// </summary>
     public Account Account { get; set; } = null!;
 
-    /// <summary>
-    ///     A Publicly Accessible Logger Instance Which Can Be Invoked By Higher-Order Types
-    /// </summary>
-    public ILogger Logger { get; } = serviceProvider.GetRequiredService<ILogger<ChatSession>>();
-
     public ChatSession Accept(ChatSessionMetadata metadata, Account account)
     {
         // Embed The Client Information In The Chat Session
@@ -84,7 +79,7 @@ public partial class ChatSession(TCPServer server, IServiceProvider serviceProvi
 
         // Remove The Chat Session From The Chat Sessions Collection
         if (Context.ChatSessions.TryRemove(Account.Name, out ChatSession? _) is false)
-            Logger.LogError(@"Failed To Remove Chat Session For Account Name ""{ClientInformation.Account.Name}""", Account.Name);
+            Log.Error(@"Failed To Remove Chat Session For Account Name ""{ClientInformation.Account.Name}""", Account.Name);
 
         // Dispose Of The Chat Session
         Dispose();
@@ -123,7 +118,7 @@ public partial class ChatSession(TCPServer server, IServiceProvider serviceProvi
             {
                 if (matchServer is null)
                 {
-                    Logger.LogError(@"[BUG] A Connection Status Update Was Requested For Account Name ""{ClientInformation.Account.Name}"" While Connected To A Match Server, But The Match Server Is NULL", Account.Name);
+                    Log.Error(@"[BUG] A Connection Status Update Was Requested For Account Name ""{ClientInformation.Account.Name}"" While Connected To A Match Server, But The Match Server Is NULL", Account.Name);
 
                     return;
                 }
@@ -229,7 +224,7 @@ public partial class ChatSession(TCPServer server, IServiceProvider serviceProvi
             {
                 if (matchServer is null)
                 {
-                    Logger.LogError(@"[BUG] A Connection Status Update Was Requested For Account Name ""{ClientInformation.Account.Name}"" While Connected To A Match Server, But The Match Server Is NULL", Account.Name);
+                    Log.Error(@"[BUG] A Connection Status Update Was Requested For Account Name ""{ClientInformation.Account.Name}"" While Connected To A Match Server, But The Match Server Is NULL", Account.Name);
 
                     return;
                 }
@@ -290,17 +285,17 @@ public partial class ChatSession
 
     protected override void OnConnected()
     {
-        Logger.LogInformation("Chat Session ID {SessionID} Was Created", ID);
+        Log.Information("Chat Session ID {SessionID} Was Created", ID);
     }
 
     protected override void OnError(SocketError error)
     {
-        Logger.LogInformation("Chat Session ID {SessionID} Caught A Socket Error With Code {SocketErrorCode}", ID, error);
+        Log.Information("Chat Session ID {SessionID} Caught A Socket Error With Code {SocketErrorCode}", ID, error);
     }
 
     protected override void OnDisconnected()
     {
-        Logger.LogInformation("Chat Session ID {SessionID} Has Terminated", ID);
+        Log.Information("Chat Session ID {SessionID} Has Terminated", ID);
     }
 
     protected override void OnReceived(byte[] buffer, long offset, long size)
@@ -359,13 +354,13 @@ public partial class ChatSession
                 .Append(Environment.NewLine).Append($"Message UTF8 Text: {Encoding.UTF8.GetString(segment)}")
                 .ToString();
 
-            Logger.LogError(output);
+            Log.Error(output);
         }
 
         else
         {
             if (TRANSMUTANSTEIN.RunsInDevelopmentMode)
-                Logger.LogDebug(@"Processing Command: ""0x{Command}""", command.ToString("X4"));
+                Log.Debug(@"Processing Command: ""0x{Command}""", command.ToString("X4"));
 
             if (GetCommandTypeInstance(commandType) is { } commandTypeInstance)
             {
@@ -379,11 +374,11 @@ public partial class ChatSession
 
                 catch (Exception exception)
                 {
-                    Logger.LogError(exception, @"[BUG] Error Processing Command: ""0x{Command}""", command.ToString("X4"));
+                    Log.Error(exception, @"[BUG] Error Processing Command: ""0x{Command}""", command.ToString("X4"));
                 }
             }
 
-            else Logger.LogError(@"[BUG] Could Not Create Command Type Instance For Command: ""0x{Command}""", command.ToString("X4"));
+            else Log.Error(@"[BUG] Could Not Create Command Type Instance For Command: ""0x{Command}""", command.ToString("X4"));
         }
     }
 
@@ -399,7 +394,7 @@ public partial class ChatSession
 
         if (type is not null)
             if (CommandToTypeMap.TryAdd(command, type) is false && CommandToTypeMap.ContainsKey(command) is false)
-                Logger.LogError(@"[BUG] Could Not Add Command-To-Type Mapping For Command ""0x{Command}"" And Type ""{TypeName}""", command.ToString("X4"), type.Name);
+                Log.Error(@"[BUG] Could Not Add Command-To-Type Mapping For Command ""0x{Command}"" And Type ""{TypeName}""", command.ToString("X4"), type.Name);
 
         return type;
     }
@@ -414,7 +409,7 @@ public partial class ChatSession
         if (instance is IAsynchronousCommandProcessor asynchronous)
             return OneOf<ISynchronousCommandProcessor, IAsynchronousCommandProcessor>.FromT1(asynchronous);
 
-        Logger.LogError(@"[BUG] Command Type ""{TypeName}"" Does Not Implement A Supported Processor Interface", type.Name);
+        Log.Error(@"[BUG] Command Type ""{TypeName}"" Does Not Implement A Supported Processor Interface", type.Name);
 
         return null;
     }

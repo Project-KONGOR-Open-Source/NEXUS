@@ -1,7 +1,7 @@
 ﻿namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Actions;
 
 [ChatCommand(ChatProtocol.Command.CHAT_CMD_TRACK_PLAYER_ACTION)]
-public class TrackPlayerAction(ILogger<TrackPlayerAction> logger) : ISynchronousCommandProcessor
+public class TrackPlayerAction : ISynchronousCommandProcessor
 {
     public void Process(ChatSession session, ChatBuffer buffer)
     {
@@ -11,7 +11,7 @@ public class TrackPlayerAction(ILogger<TrackPlayerAction> logger) : ISynchronous
 
         // TODO: Look Into Updating The Online Players Count And Matchmaking Details Using Custom Action OBTAIN_DETAILED_ONLINE_STATUS (Or Equivalent)
 
-        logger.LogError(@"Unhandled User Action: ""{RequestData.Action}""", requestData.Action);
+        Log.Error(@"Unhandled User Action: ""{RequestData.Action}""", requestData.Action);
     }
 }
 

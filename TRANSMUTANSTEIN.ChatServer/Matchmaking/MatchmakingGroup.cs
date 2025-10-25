@@ -216,8 +216,7 @@ public class MatchmakingGroup
                 {
                     if (member.IsLeader is false)
                     {
-                        if (session.Logger.IsEnabled(LogLevel.Error))
-                            session.Logger.LogError(@"[BUG] Non-Leader Group Member ""{Member.Account.Name}"" With ID ""{Member.Account.ID}"" Was Not Ready", member.Account.Name, member.Account.ID);
+                        Log.Error(@"[BUG] Non-Leader Group Member ""{Member.Account.Name}"" With ID ""{Member.Account.ID}"" Was Not Ready", member.Account.Name, member.Account.ID);
 
                         member.IsReady = true;
                     }

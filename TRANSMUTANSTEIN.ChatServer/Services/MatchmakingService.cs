@@ -1,9 +1,7 @@
 ﻿namespace TRANSMUTANSTEIN.ChatServer.Services;
 
-public class MatchmakingService(IServiceProvider serviceProvider) : IHostedService, IDisposable
+public class MatchmakingService : IHostedService, IDisposable
 {
-    private ILogger Logger { get; } = serviceProvider.GetRequiredService<ILogger<MatchmakingService>>();
-
     public static ConcurrentDictionary<int, MatchmakingGroup> Groups { get; set; } = [];
 
     public static MatchmakingGroup? GetMatchmakingGroup(OneOf<int, string> memberIdentifier)
@@ -32,14 +30,14 @@ public class MatchmakingService(IServiceProvider serviceProvider) : IHostedServi
 
     public async Task StartAsync(CancellationToken cancellationToken)
     {
-        Logger.LogInformation("Matchmaking Service Has Started");
+        Log.Information("Matchmaking Service Has Started");
 
         await RunMatchBroker(cancellationToken);
     }
 
     public async Task StopAsync(CancellationToken cancellationToken)
     {
-        Logger.LogInformation("Matchmaking Service Has Stopped");
+        Log.Information("Matchmaking Service Has Stopped");
 
         await Task.CompletedTask;
     }

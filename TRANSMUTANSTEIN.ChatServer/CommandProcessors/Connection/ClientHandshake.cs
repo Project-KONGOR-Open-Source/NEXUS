@@ -1,7 +1,7 @@
 ﻿namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Connection;
 
 [ChatCommand(ChatProtocol.ClientToChatServer.NET_CHAT_CL_CONNECT)]
-public class ClientHandshake(MerrickContext merrick, ILogger<ClientHandshake> logger) : IAsynchronousCommandProcessor
+public class ClientHandshake(MerrickContext merrick) : IAsynchronousCommandProcessor
 {
     public async Task Process(ChatSession session, ChatBuffer buffer)
     {
@@ -16,7 +16,7 @@ public class ClientHandshake(MerrickContext merrick, ILogger<ClientHandshake> lo
 
         if (account is null)
         {
-            logger.LogError(@"[BUG] Account With ID ""{RequestData.AccountID}"" Could Not Be Found", requestData.AccountID);
+            Log.Error(@"[BUG] Account With ID ""{RequestData.AccountID}"" Could Not Be Found", requestData.AccountID);
 
             session
                 .Reject(ChatProtocol.ChatRejectReason.ECR_UNKNOWN)

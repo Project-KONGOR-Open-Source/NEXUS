@@ -32,3 +32,4 @@ global using TRANSMUTANSTEIN.ChatServer.Extensions;
 global using TRANSMUTANSTEIN.ChatServer.Internals;
 global using TRANSMUTANSTEIN.ChatServer.Matchmaking;
 global using TRANSMUTANSTEIN.ChatServer.Services;
+global using TRANSMUTANSTEIN.ChatServer.Utilities;

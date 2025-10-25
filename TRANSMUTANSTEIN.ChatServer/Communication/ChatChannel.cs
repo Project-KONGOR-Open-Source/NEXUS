@@ -63,7 +63,7 @@ public class ChatChannel
         ChatChannelMember newMember = new (session, this);
 
         if (Members.TryAdd(session.Account.Name, newMember) is false)
-            session.Logger.LogError(@"[BUG] Failed To Add Account ""{AccountName}"" To Channel ""{ChannelName}""", session.Account.Name, Name);
+            Log.Error(@"[BUG] Failed To Add Account ""{AccountName}"" To Channel ""{ChannelName}""", session.Account.Name, Name);
 
         ChatBuffer response = new ();
 
@@ -132,7 +132,7 @@ public class ChatChannel
     public void Leave(ChatSession session)
     {
         if (Members.TryRemove(session.Account.Name, out ChatChannelMember? member) is false)
-            session.Logger.LogError(@"[BUG] Failed To Remove Account ""{AccountName}"" From Channel ""{ChannelName}""", session.Account.Name, Name);
+            Log.Error(@"[BUG] Failed To Remove Account ""{AccountName}"" From Channel ""{ChannelName}""", session.Account.Name, Name);
 
         if (member is not null)
         {
@@ -140,10 +140,10 @@ public class ChatChannel
             if (Members.IsEmpty is true && IsPermanent is false)
             {
                 if (Context.ChatChannels.TryRemove(Name, out ChatChannel? channel) is false)
-                    session.Logger.LogError(@"[BUG] Failed To Remove Channel ""{ChannelName}"" From Global Channel List", Name);
+                    Log.Error(@"[BUG] Failed To Remove Channel ""{ChannelName}"" From Global Channel List", Name);
 
                 if (channel is null)
-                    session.Logger.LogError(@"[BUG] Chat Channel Instance For Channel ""{ChannelName}"" Is NULL", Name);
+                    Log.Error(@"[BUG] Chat Channel Instance For Channel ""{ChannelName}"" Is NULL", Name);
             }
 
             else if (Members.IsEmpty is false)
@@ -159,7 +159,7 @@ public class ChatChannel
             }
         }
 
-        else session.Logger.LogError(@"[BUG] Chat Channel Member Instance For Account ""{AccountName}"" In Channel ""{ChannelName}"" Is NULL", session.Account.Name, Name);
+        else Log.Error(@"[BUG] Chat Channel Member Instance For Account ""{AccountName}"" In Channel ""{ChannelName}"" Is NULL", session.Account.Name, Name);
     }
 
     public void Kick(ChatSession requesterSession, int targetAccountID)
