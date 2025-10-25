@@ -25,6 +25,22 @@ public class MatchmakingGroup
     /// </summary>
     private MatchmakingGroup() { }
 
+    public static MatchmakingGroup GetByMemberAccountID(int accountID)
+    {
+        MatchmakingGroup group = MatchmakingService.GetMatchmakingGroup(accountID)
+            ?? throw new NullReferenceException($@"No Matchmaking Group Found For Account ID ""{accountID}""");
+
+        return group;
+    }
+
+    public static MatchmakingGroup GetByMemberAccountName(int accountName)
+    {
+        MatchmakingGroup group = MatchmakingService.GetMatchmakingGroup(accountName)
+            ?? throw new NullReferenceException($@"No Matchmaking Group Found For Account Name ""{accountName}""");
+
+        return group;
+    }
+
     public static MatchmakingGroup Create(ChatSession session, GroupCreateRequestData data)
     {
         MatchmakingGroupMember member = new (session)
@@ -191,5 +207,40 @@ public class MatchmakingGroup
         }
 
         Parallel.ForEach(Members, member => member.Session.Send(update));
+    }
+
+    public MatchmakingGroup Invite(ChatSession session, MerrickContext merrick, string receiverAccountName)
+    {
+        ChatBuffer invite = new ();
+
+        invite.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_INVITE);
+        invite.WriteString(session.Account.Name);                                                     // Invite Issuer Name
+        invite.WriteInt32(session.Account.ID);                                                        // Invite Issuer ID
+        invite.WriteInt8(Convert.ToByte(ChatProtocol.ChatClientStatus.CHAT_CLIENT_STATUS_CONNECTED)); // Invite Issuer Status
+        invite.WriteInt8(session.Account.GetChatClientFlags());                                       // Invite Issuer Chat Flags
+        invite.WriteString(session.Account.NameColour);                                               // Invite Issuer Chat Name Colour
+        invite.WriteString(session.Account.Icon);                                                     // Invite Issuer Icon
+        invite.WriteString(Information.MapName);                                                      // Map Name
+        invite.WriteInt8(Convert.ToByte(Information.GameType));                                       // Game Type
+        invite.WriteString(string.Join('|', Information.GameModes));                                  // Game Modes
+        invite.WriteString(string.Join('|', Information.GameRegions));                                // Game Regions
+
+        ChatSession inviteReceiverSession = Context.ChatSessions
+            .Values.Single(session => session.Account.Name.Equals(receiverAccountName));
+
+        inviteReceiverSession.Send(invite);
+
+        ChatBuffer broadcast = new ();
+
+        Account inviteReceiver = merrick.Accounts.Include(account => account.Clan)
+            .Single(account => account.Name.Equals(receiverAccountName));
+
+        broadcast.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_INVITE_BROADCAST);
+        broadcast.WriteString(inviteReceiver.NameWithClanTag);  // Invite Receiver Name
+        broadcast.WriteString(session.Account.NameWithClanTag); // Invite Issuer Name
+
+        Parallel.ForEach(Members, (member) => member.Session.Send(broadcast));
+
+        return this;
     }
 }
