@@ -33,7 +33,7 @@ public class MatchmakingGroup
         return group;
     }
 
-    public static MatchmakingGroup GetByMemberAccountName(int accountName)
+    public static MatchmakingGroup GetByMemberAccountName(string accountName)
     {
         MatchmakingGroup group = MatchmakingService.GetMatchmakingGroup(accountName)
             ?? throw new NullReferenceException($@"No Matchmaking Group Found For Account Name ""{accountName}""");
@@ -89,6 +89,46 @@ public class MatchmakingGroup
         group.MulticastUpdate(session.Account.ID, ChatProtocol.TMMUpdateType.TMM_CREATE_GROUP);
 
         return group;
+    }
+
+    public MatchmakingGroup Join(ChatSession session)
+    {
+        // TODO: If The Group Is Full (Members Count Is Equal To Max Map Players Count), Reject The Join Request With An Appropriate Error
+
+        // TODO: If The Group Is Already In Queue For A Match, Reject The Join Request With An Appropriate Error
+
+        MatchmakingGroupMember newMatchmakingGroupMember = new (session)
+        {
+            Slot = Convert.ToByte(Members.Count + 1),
+            IsLeader = false,
+            IsReady = true,
+            IsInGame = false,
+            IsEligibleForMatchmaking = true,
+            LoadingPercent = 0,
+            HasGameModeAccess = true,
+            GameModeAccess = Leader.GameModeAccess
+        };
+
+        if (Members.Any(member => member.Account.ID == session.Account.ID) is false)
+        {
+            // TODO: Remove From Previous Group, If Any
+
+            Members.Add(newMatchmakingGroupMember);
+        }
+
+        else
+        {
+            // TODO: Send Failure Response
+
+            throw new InvalidOperationException($@"Player ""{session.Account.Name}"" Tried To Join A Matchmaking Group They Are Already In");
+        }
+
+        // TODO: Create Tentative Group, And Only Create Actual Group When Another Player Joins, Or Create Group As Is But Disband On Invite Refusal/Timeout
+        MulticastUpdate(session.Account.ID, ChatProtocol.TMMUpdateType.TMM_PLAYER_JOINED_GROUP);
+
+        // TODO: Create "TMM Group Chat" Chat Channel Or Join Already-Existing One For The Group; Must Have CannotBeJoined Flag Set
+
+        return this;
     }
 
     private void MulticastUpdate(int emitterAccountID, ChatProtocol.TMMUpdateType updateType)

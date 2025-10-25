@@ -127,8 +127,6 @@ public class ChatChannel
 
         // Announce To The Existing Channel Members That A New Client Has Joined The Channel
         Parallel.ForEach(existingMembers, (existingMember) => existingMember.Session.Send(broadcast));
-
-        return this;
     }
 
     public void Leave(ChatSession session)
