@@ -199,6 +199,46 @@ public class MatchmakingGroup
         return this;
     }
 
+    public MatchmakingGroup SendPlayerReadinessStatusUpdate(ChatSession session, ChatProtocol.TMMGameType matchType)
+    {
+        Information.GameType = matchType;
+
+        MatchmakingGroupMember groupMember = Members.Single(member => member.Account.ID == session.Account.ID);
+
+        if (groupMember.IsLeader is false)
+            return this; // Non-Leader Group Members Are Implicitly Ready (By Means Of Joining The Group In A Ready State) And Do Not Need To Emit Readiness Status Updates
+
+        if (groupMember.IsReady is false)
+        {
+            foreach (MatchmakingGroupMember member in Members)
+            {
+                if (member.IsReady is false)
+                {
+                    if (member.IsLeader is false)
+                    {
+                        if (session.Logger.IsEnabled(LogLevel.Error))
+                            session.Logger.LogError(@"[BUG] Non-Leader Group Member ""{Member.Account.Name}"" With ID ""{Member.Account.ID}"" Was Not Ready", member.Account.Name, member.Account.ID);
+
+                        member.IsReady = true;
+                    }
+                }
+            }
+
+            MulticastUpdate(session.Account.ID, ChatProtocol.TMMUpdateType.TMM_PARTIAL_GROUP_UPDATE);
+        }
+
+        if (Members.All(member => member.IsReady))
+        {
+            ChatBuffer load = new ();
+
+            load.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_START_LOADING);
+
+            Parallel.ForEach(Members, member => member.Session.Send(load));
+        }
+
+        return this;
+    }
+
     private void MulticastUpdate(int emitterAccountID, ChatProtocol.TMMUpdateType updateType)
     {
         ChatBuffer update = new ();

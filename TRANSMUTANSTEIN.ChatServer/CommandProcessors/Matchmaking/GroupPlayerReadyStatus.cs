@@ -1,46 +1,15 @@
 ﻿namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Matchmaking;
 
 [ChatCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_PLAYER_READY_STATUS)]
-public class GroupPlayerReadyStatus(ILogger<GroupPlayerReadyStatus> logger) : ISynchronousCommandProcessor
+public class GroupPlayerReadyStatus : ISynchronousCommandProcessor
 {
     public void Process(ChatSession session, ChatBuffer buffer)
     {
         GroupPlayerReadyStatusRequestData requestData = new (buffer);
 
-        MatchmakingGroup group = MatchmakingService.GetMatchmakingGroup(session.Account.ID)
-            ?? throw new NullReferenceException($@"No Matchmaking Group Found For Invite Issuer ID ""{session.Account.ID}""");
-
-        group.Information.GameType = requestData.GameType;
-
-        MatchmakingGroupMember groupMember = group.Members.Single(member => member.Account.ID == session.Account.ID);
-
-        if (groupMember.IsLeader is false)
-            return; // Non-Leader Group Members Are Implicitly Ready (By Means Of Joining The Group In A Ready State) And Do Not Need To Emit Readiness Status Updates
-
-        if (groupMember.IsReady is false)
-        {
-            foreach (MatchmakingGroupMember member in group.Members)
-            {
-                if (member.IsReady is false)
-                {
-                    if (member.IsLeader is false)
-                        logger.LogError(@"[BUG] Non-Leader Group Member ""{Member.Account.Name}"" With ID ""{Member.Account.ID}"" Was Not Ready", member.Account.Name, member.Account.ID);
-
-                    member.IsReady = true;
-                }
-            }
-
-            group.MulticastUpdate(session.Account.ID, ChatProtocol.TMMUpdateType.TMM_PARTIAL_GROUP_UPDATE);
-        }
-
-        if (group.Members.All(member => member.IsReady))
-        {
-            ChatBuffer load = new ();
-
-            load.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_START_LOADING);
-
-            Parallel.ForEach(group.Members, member => member.Session.Send(load));
-        }
+        MatchmakingGroup
+            .GetByMemberAccountID(session.Account.ID)
+            .SendPlayerReadinessStatusUpdate(session, requestData.GameType);
     }
 }
 
