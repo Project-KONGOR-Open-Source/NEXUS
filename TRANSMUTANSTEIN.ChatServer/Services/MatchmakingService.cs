@@ -61,16 +61,21 @@ public class MatchmakingService : IHostedService, IDisposable
                 List<MatchmakingGroup> team_1 = [Groups.Values.First()];
                 List<MatchmakingGroup> team_2 = [Groups.Values.Last()];
 
-                Parallel.ForEach([.. team_1, .. team_2], group => group.QueueStartTime = null);
+                List<MatchmakingGroup> groups = [.. team_1, .. team_2];
 
-                ChatBuffer found = new ();
+                foreach (MatchmakingGroup group in groups)
+                    group.QueueStartTime = null;
+
+                ChatBuffer found = new();
 
                 found.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_QUEUE_UPDATE);
                 found.WriteInt8(Convert.ToByte(ChatProtocol.TMMUpdateType.TMM_GROUP_FOUND_SERVER)); // Sound The Horn !!!
 
                 // TODO: This Packet Can Be Sent With TMM_GROUP_QUEUE_UPDATE And A 4-Byte Integer To Update The Average Time In Queue (In Seconds)
 
-                Parallel.ForEach([.. team_1, .. team_2], group => Parallel.ForEach(group.Members, member => member.Session.Send(found)));
+                foreach (MatchmakingGroup group in groups)
+                    foreach (MatchmakingGroupMember member in group.Members)
+                        member.Session.Send(found);
             }
             # endregion
         }

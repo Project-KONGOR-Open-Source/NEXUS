@@ -126,7 +126,8 @@ public class ChatChannel
         broadcast.WriteInt32(newMember.Account.AscensionLevel);            // Ascension Level
 
         // Announce To The Existing Channel Members That A New Client Has Joined The Channel
-        Parallel.ForEach(existingMembers, (existingMember) => existingMember.Session.Send(broadcast));
+        foreach (ChatChannelMember existingMember in existingMembers)
+            existingMember.Session.Send(broadcast);
     }
 
     public void Leave(ChatSession session)
@@ -154,8 +155,11 @@ public class ChatChannel
                 broadcast.WriteInt32(member.Account.ID); // Member Account ID
                 broadcast.WriteInt32(ID);                // Channel ID
 
+                List<ChatChannelMember> channelMembers = [member, .. Members.Values];
+
                 // Announce To The Channel Members (Including The Leaving Member) That A Client Has Left The Channel
-                Parallel.ForEach([member, .. Members.Values], (members) => members.Session.Send(broadcast));
+                foreach (ChatChannelMember channelMember in channelMembers)
+                    channelMember.Session.Send(broadcast);
             }
         }
 
@@ -178,7 +182,8 @@ public class ChatChannel
 
             // Announce To The Channel Members That A Client Will Be Kicked From The Channel
             // If The Requester's Administrator Level Is Less Than Or Equal To The Target's, This Operation Fails Silently
-            Parallel.ForEach(Members.Values, (member) => member.Session.Send(broadcast));
+            foreach (ChatChannelMember member in Members.Values)
+                member.Session.Send(broadcast);
 
             ChatSession targetSession = Context.ChatSessions.Values.Single(session => session.Account.ID == targetAccountID);
 

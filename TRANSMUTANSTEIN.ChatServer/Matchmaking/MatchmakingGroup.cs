@@ -121,7 +121,8 @@ public class MatchmakingGroup
         broadcast.WriteString(inviteReceiver.NameWithClanTag);  // Invite Receiver Name
         broadcast.WriteString(session.Account.NameWithClanTag); // Invite Issuer Name
 
-        Parallel.ForEach(Members, (member) => member.Session.Send(broadcast));
+        foreach (MatchmakingGroupMember member in Members)
+            member.Session.Send(broadcast);
 
         return this;
     }
@@ -180,7 +181,8 @@ public class MatchmakingGroup
 
             queue.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_JOIN_QUEUE);
 
-            Parallel.ForEach(Members, member => member.Session.Send(queue));
+            foreach (MatchmakingGroupMember member in Members)
+                member.Session.Send(queue);
 
             QueueStartTime = DateTimeOffset.UtcNow;
 
@@ -191,7 +193,8 @@ public class MatchmakingGroup
             // TODO: Get Actual Average Time In Queue (In Seconds)
             load.WriteInt32(83);
 
-            Parallel.ForEach(Members, member => member.Session.Send(load));
+            foreach (MatchmakingGroupMember member in Members)
+                member.Session.Send(load);
         }
 
         MulticastUpdate(session.Account.ID, ChatProtocol.TMMUpdateType.TMM_PARTIAL_GROUP_UPDATE);
@@ -232,7 +235,8 @@ public class MatchmakingGroup
 
             load.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_START_LOADING);
 
-            Parallel.ForEach(Members, member => member.Session.Send(load));
+            foreach (MatchmakingGroupMember member in Members)
+                member.Session.Send(load);
         }
 
         return this;
@@ -353,6 +357,7 @@ public class MatchmakingGroup
             }
         }
 
-        Parallel.ForEach(Members, member => member.Session.Send(update));
+        foreach (MatchmakingGroupMember member in Members)
+            member.Session.Send(update);
     }
 }

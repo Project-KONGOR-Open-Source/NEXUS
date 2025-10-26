@@ -72,7 +72,8 @@ public partial class ChatSession(TCPServer server, IServiceProvider serviceProvi
         List<ChatChannel> channels = [.. Context.ChatChannels.Values.Where(channel => channel.Members.ContainsKey(Account.Name))];
 
         // Remove The Client From All Chat Channels They Are A Member Of
-        Parallel.ForEach(channels, channel => channel.Leave(this));
+        foreach (ChatChannel channel in channels)
+            channel.Leave(this);
 
         // Log The Client Out And Disconnect The Chat Session
         LogOut(); Disconnect();
@@ -98,7 +99,7 @@ public partial class ChatSession(TCPServer server, IServiceProvider serviceProvi
             List<int> clanMemberIDs = [.. Account.Clan?.Members.Select(clanMember => clanMember.ID) ?? []];
             List<int> friendIDs = [.. Account.FriendedPeers.Select(friend => friend.ID)];
 
-            List<ChatSession> onlinePeers = Context.ChatSessions.Values
+            List<ChatSession> onlinePeerSessions = Context.ChatSessions.Values
                 .Where(chatSession => friendIDs.Any(friendID => friendID == chatSession.Account.ID) || clanMemberIDs.Any(clanMemberID => clanMemberID == chatSession.Account.ID))
                 .Select(chatSession => chatSession).Distinct().ToList(); // Get All Online Friends And Clan Members
 
@@ -187,7 +188,8 @@ public partial class ChatSession(TCPServer server, IServiceProvider serviceProvi
 
             update.WriteInt32(Account.AscensionLevel);              // Client's Ascension Level
 
-            Parallel.ForEach(onlinePeers, session => session.Send(update));
+            foreach (ChatSession onlinePeerSession in onlinePeerSessions)
+                onlinePeerSession.Send(update);
         }
     }
 
@@ -200,7 +202,7 @@ public partial class ChatSession(TCPServer server, IServiceProvider serviceProvi
         List<int> clanMemberIDs = [.. Account.Clan?.Members.Select(clanMember => clanMember.ID) ?? []];
         List<int> friendIDs = [.. Account.FriendedPeers.Select(friend => friend.ID)];
 
-        List<ChatSession> onlinePeers = Context.ChatSessions.Values
+        List<ChatSession> onlinePeerSessions = Context.ChatSessions.Values
             .Where(chatSession => friendIDs.Any(friendID => friendID == chatSession.Account.ID) || clanMemberIDs.Any(clanMemberID => clanMemberID == chatSession.Account.ID))
             .Where(chatSession => chatSession.Metadata.ClientChatModeState is not ChatProtocol.ChatModeType.CHAT_MODE_INVISIBLE)
             .Select(chatSession => chatSession).Distinct().ToList(); // Get All Online Friends And Clan Members That Are Not Invisible
@@ -208,17 +210,17 @@ public partial class ChatSession(TCPServer server, IServiceProvider serviceProvi
         ChatBuffer update = new ();
 
         update.WriteCommand(ChatProtocol.Command.CHAT_CMD_INITIAL_STATUS);
-        update.WriteInt32(onlinePeers.Count);                           // Number Of Online Peers
+        update.WriteInt32(onlinePeerSessions.Count);                               // Number Of Online Peers
 
-        Parallel.ForEach(onlinePeers, session =>
+        foreach (ChatSession onlinePeerSession in onlinePeerSessions)
         {
-            ChatProtocol.ChatClientStatus status = session.Metadata.LastKnownClientState;
+            ChatProtocol.ChatClientStatus status = onlinePeerSession.Metadata.LastKnownClientState;
 
-            update.WriteInt32(session.Account.ID);                      // Client's Account ID
-            update.WriteInt8(Convert.ToByte(status));                   // Client's Status
-            update.WriteInt8(session.Account.GetChatClientFlags());     // Client's Flags (Chat Client Type)
-            update.WriteString(session.Account.NameColourNoPrefixCode); // Name Colour
-            update.WriteString(session.Account.IconNoPrefixCode);       // Account Icon
+            update.WriteInt32(onlinePeerSession.Account.ID);                       // Client's Account ID
+            update.WriteInt8(Convert.ToByte(status));                              // Client's Status
+            update.WriteInt8(onlinePeerSession.Account.GetChatClientFlags());      // Client's Flags (Chat Client Type)
+            update.WriteString(onlinePeerSession.Account.NameColourNoPrefixCode);  // Name Colour
+            update.WriteString(onlinePeerSession.Account.IconNoPrefixCode);        // Account Icon
 
             if (status is ChatProtocol.ChatClientStatus.CHAT_CLIENT_STATUS_JOINING_GAME || status is ChatProtocol.ChatClientStatus.CHAT_CLIENT_STATUS_IN_GAME)
             {
@@ -226,7 +228,7 @@ public partial class ChatSession(TCPServer server, IServiceProvider serviceProvi
                 {
                     Log.Error(@"[BUG] A Connection Status Update Was Requested For Account Name ""{ClientInformation.Account.Name}"" While Connected To A Match Server, But The Match Server Is NULL", Account.Name);
 
-                    return;
+                    continue;
                 }
 
                 update.WriteString($"{matchServer.IPAddress}:{matchServer.Port}"); // Server Address This Client Is Connected To, In The Form Of "X.X.X.X:P"
@@ -234,16 +236,16 @@ public partial class ChatSession(TCPServer server, IServiceProvider serviceProvi
                 if (status is ChatProtocol.ChatClientStatus.CHAT_CLIENT_STATUS_IN_GAME)
                 {
                     // TODO: Populate With Real Match Name
-                    update.WriteString(string.Empty);                   // Match Name
+                    update.WriteString(string.Empty);                              // Match Name
                     // TODO: Populate With Real Match ID
-                    update.WriteInt32(default(int));                    // Match ID
+                    update.WriteInt32(default(int));                               // Match ID
                 }
             }
 
-            update.WriteInt32(Account.AscensionLevel);                  // Client's Ascension Level
+            update.WriteInt32(Account.AscensionLevel);                             // Client's Ascension Level
 
-            session.Send(update);
-        });
+            onlinePeerSession.Send(update);
+        };
     }
 
     public ChatSession SendOptionsAndRemoteCommands()
@@ -306,7 +308,8 @@ public partial class ChatSession
 
         RemainingPreviouslyReceivedData = remaining;
 
-        Parallel.ForEach(segments, ProcessDataSegment);
+        foreach (byte[] segment in segments)
+            ProcessDataSegment(segment);
     }
 
     private static List<byte[]> ExtractDataSegments(byte[] buffer, out byte[] remaining)
@@ -414,10 +417,19 @@ public partial class ChatSession
         return null;
     }
 
+    /// <summary>
+    ///     Send Buffer Data With Non-Destructive Size Prefixing Which Does Not Mutate The Original Buffer
+    /// </summary>
     public bool Send(ChatBuffer buffer)
     {
-        buffer.PrependBufferSize();
+        short messageLength = Convert.ToInt16(buffer.Size);
 
-        return SendAsync(buffer.Data);
+        byte[] messageLengthBytes = BitConverter.GetBytes(messageLength);
+        byte[] messageBytes = new byte[messageLengthBytes.Length + messageLength];
+
+        Array.Copy(messageLengthBytes, 0, messageBytes, 0, messageLengthBytes.Length);
+        Array.Copy(buffer.Data, 0, messageBytes, messageLengthBytes.Length, messageLength);
+
+        return SendAsync(messageBytes);
     }
 }
