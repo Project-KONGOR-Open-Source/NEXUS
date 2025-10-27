@@ -8,8 +8,9 @@ public class ASPIRE
         IDistributedApplicationBuilder builder = DistributedApplication.CreateBuilder(args);
 
         // Get Chat Server Configuration
-        string chatServerHost = builder.Configuration.GetRequiredSection("ChatServer").GetValue<string?>("Host") ?? throw new NullReferenceException("Chat Server Host Is NULL");
-        int chatServerPort = builder.Configuration.GetRequiredSection("ChatServer").GetValue<int?>("Port") ?? throw new NullReferenceException("Chat Server Port Is NULL");
+        IConfigurationSection chatServerConfiguration = builder.Configuration.GetRequiredSection("ChatServer");
+        string chatServerHost = chatServerConfiguration.GetValue<string?>("Host") ?? throw new NullReferenceException("Chat Server Host Is NULL");
+        int chatServerPort = chatServerConfiguration.GetValue<int?>("Port") ?? throw new NullReferenceException("Chat Server Port Is NULL");
 
         // Add Redis Insight Dashboard Resource For Redis Distributed Cache
         Action<IResourceBuilder<RedisInsightResource>> distributedCacheDashboard = builder => builder
