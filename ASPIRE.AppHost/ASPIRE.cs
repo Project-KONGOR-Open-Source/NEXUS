@@ -7,32 +7,49 @@ public class ASPIRE
         // Create Distributed Application Builder
         IDistributedApplicationBuilder builder = DistributedApplication.CreateBuilder(args);
 
+        // Get Configuration From Environment Variables And User Secrets
+        IConfiguration configuration = new ConfigurationBuilder().AddEnvironmentVariables().AddUserSecrets<ASPIRE>(optional: true).Build();
+
         // Get Chat Server Configuration
         IConfigurationSection chatServerConfiguration = builder.Configuration.GetRequiredSection("ChatServer");
         string chatServerHost = chatServerConfiguration.GetValue<string?>("Host") ?? throw new NullReferenceException("Chat Server Host Is NULL");
         int chatServerPort = chatServerConfiguration.GetValue<int?>("Port") ?? throw new NullReferenceException("Chat Server Port Is NULL");
 
-        // Add Redis Insight Dashboard Resource For Redis Distributed Cache
+        // Set Distributed Cache Password Parameter Name And Environment Variable Name
+        const string distributedCachePasswordParameterName = "distributed-cache-password";
+        const string distributedCachePasswordEnvironmentVariableName = "DISTRIBUTED_CACHE_PASSWORD";
+
+        // Attempt To Resolve Distributed Cache Password From Configuration In Order Of Priority: 1) User Secrets, 2) Environment Variables
+        string? resolvedDistributedCachePassword = configuration[$"Parameters:{distributedCachePasswordParameterName}"] ?? configuration[distributedCachePasswordEnvironmentVariableName];
+
+        // Populate Distributed Cache Password If Available In User Secrets Or Environment Variables
+        IResourceBuilder<ParameterResource> distributedCachePassword = resolvedDistributedCachePassword is not null
+            ? builder.AddParameter(distributedCachePasswordParameterName, resolvedDistributedCachePassword, secret: true)
+            : builder.AddParameter(distributedCachePasswordParameterName, secret: true);
+
+        // Add Distributed Cache Resource
+        IResourceBuilder<RedisResource> distributedCache = builder.AddRedis("distributed-cache", password: distributedCachePassword)
+            .WithImageTag("latest") // Latest Redis Image: https://github.com/redis/redis/releases/latest
+            .WithLifetime(ContainerLifetime.Persistent); // Persist Cached Data Between Distributed Application Restarts But Not Between Resource Container Restarts
+
+        // Create Resource Relationship After Parent Resource Is Defined
+        distributedCachePassword
+            .WithDescription("Distributed Cache Password") // Add Description To Parameter Resource
+            .WithParentRelationship(distributedCache); // Set Distributed Cache As Parent Resource
+
+        // Create Distributed Cache Dashboard Resource
         Action<IResourceBuilder<RedisInsightResource>> distributedCacheDashboard = builder => builder
             .WithImageTag("latest") // Latest Redis Insight Image: https://github.com/RedisInsight/RedisInsight/releases/latest
             .WithLifetime(ContainerLifetime.Persistent) // Persist Cached Data Between Distributed Application Restarts But Not Between Resource Container Restarts
-            .WithEnvironment("RI_ACCEPT_TERMS_AND_CONDITIONS", "true"); // TODO: Confirm This Works From v2.7.2
+            .WithEnvironment("RI_ACCEPT_TERMS_AND_CONDITIONS", "true") // Automatically Accept Terms And Conditions: https://redis.io/docs/latest/operate/redisinsight/configuration/
+            .WithParentRelationship(distributedCache); // Set Distributed Cache As Parent Resource
 
-        // Add Redis Distributed Cache Resource
-        IResourceBuilder<IResourceWithConnectionString> distributedCache = builder.AddRedis("distributed-cache")
-            .WithImageTag("latest") // Latest Redis Image: https://github.com/redis/redis/releases/latest
-            .WithRedisInsight(distributedCacheDashboard, containerName: "distributed-cache-insight") // Add Redis Insight Dashboard
-            .WithLifetime(ContainerLifetime.Persistent); // Persist Cached Data Between Distributed Application Restarts But Not Between Resource Container Restarts
-
-        // TODO: Add Redis Password (And Maybe Redis Insight Password Too, If Supported)
-
-        // TODO: Make Redis Insight A Child Resource Of The Redis Resource
-
-        // Get Configuration From Environment Variables And User Secrets
-        IConfiguration configuration = new ConfigurationBuilder().AddEnvironmentVariables().AddUserSecrets<ASPIRE>(optional: true).Build();
+        // Add Distributed Cache Dashboard Resource
+        distributedCache.WithRedisInsight(distributedCacheDashboard, containerName: "distributed-cache-dashboard");
 
         // Set Database Password Parameter Name And Environment Variable Name
-        const string databasePasswordParameterName = "database-password"; const string databasePasswordEnvironmentVariableName = "DATABASE_PASSWORD";
+        const string databasePasswordParameterName = "database-password";
+        const string databasePasswordEnvironmentVariableName = "DATABASE_PASSWORD";
 
         // Attempt To Resolve Database Password From Configuration In Order Of Priority: 1) User Secrets, 2) Environment Variables
         string? resolvedDatabasePassword = configuration[$"Parameters:{databasePasswordParameterName}"] ?? configuration[databasePasswordEnvironmentVariableName];
@@ -62,27 +79,28 @@ public class ASPIRE
 
         // Create Resource Relationship After Parent Resource Is Defined
         databasePassword
-            .WithParentRelationship(databaseServer); // Set Database As Parent Resource
+            .WithDescription("Database Password") // Add Description To Parameter Resource
+            .WithParentRelationship(databaseServer); // Set Database Server As Parent Resource
 
         // Add SQL Server Database Resource
         IResourceBuilder<SqlServerDatabaseResource> database = databaseServer.AddDatabase("database", databaseName)
-            .WithParentRelationship(databaseServer); // Set Database As Parent Resource
+            .WithParentRelationship(databaseServer); // Set Database Server As Parent Resource
 
         // Add Database Project
         builder.AddProject<MERRICK>("database-context", builder.Environment.IsProduction() ? "MERRICK.DatabaseContext Production" : "MERRICK.DatabaseContext Development")
             .WithReference(database, connectionName: "MERRICK").WaitFor(database) // Connect To SQL Server Database And Wait For It To Start
-            .WithParentRelationship(databaseServer); // Set Database As Parent Resource
+            .WithParentRelationship(databaseServer); // Set Database Server As Parent Resource
 
         // Add Master Server Project
         builder.AddProject<KONGOR>("master-server", builder.Environment.IsProduction() ? "KONGOR.MasterServer Production" : "KONGOR.MasterServer Development")
             .WithReference(database, connectionName: "MERRICK").WaitFor(database) // Connect To SQL Server Database And Wait For It To Start
-            .WithReference(distributedCache, connectionName: "DISTRIBUTED-CACHE").WaitFor(distributedCache) // Connect To Redis And Wait For It To Start
+            .WithReference(distributedCache, connectionName: "DISTRIBUTED-CACHE").WaitFor(distributedCache) // Connect To Distributed Cache And Wait For It To Start
             .WithEnvironment("CHAT_SERVER_HOST", chatServerHost).WithEnvironment("CHAT_SERVER_PORT", chatServerPort.ToString()); // Pass Chat Server Configuration
 
         // Add Chat Server Project
         builder.AddProject<TRANSMUTANSTEIN>("chat-server", builder.Environment.IsProduction() ? "TRANSMUTANSTEIN.ChatServer Production" : "TRANSMUTANSTEIN.ChatServer Development")
             .WithReference(database, connectionName: "MERRICK").WaitFor(database) // Connect To SQL Server Database And Wait For It To Start
-            .WithReference(distributedCache, connectionName: "DISTRIBUTED-CACHE").WaitFor(distributedCache) // Connect To Redis And Wait For It To Start
+            .WithReference(distributedCache, connectionName: "DISTRIBUTED-CACHE").WaitFor(distributedCache) // Connect To Distributed Cache And Wait For It To Start
             .WithEnvironment("CHAT_SERVER_HOST", chatServerHost).WithEnvironment("CHAT_SERVER_PORT", chatServerPort.ToString()); // Pass Chat Server Configuration
 
         // Add Web Portal API Project
