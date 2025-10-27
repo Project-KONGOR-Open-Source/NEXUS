@@ -1,0 +1,29 @@
+{
+    "$schema": "http://json.schemastore.org/launchsettings.json",
+    "profiles": {
+        "MERRICK.DatabaseContext Development": {
+            "commandName": "Project",
+            "launchBrowser": true,
+            "applicationUrl": "https://localhost:55553",
+            "launchUrl": "health",
+            "environmentVariables": {
+                "APPLICATION_URL": "https://localhost:55553",
+                "ASPNETCORE_ENVIRONMENT": "Development",
+                "DOTNET_ENVIRONMENT": "Development"
+            },
+            "dotnetRunMessages": true
+        },
+        "MERRICK.DatabaseContext Production": {
+            "commandName": "Project",
+            "launchBrowser": true,
+            "applicationUrl": "https://database.kongor.net",
+            "launchUrl": "health",
+            "environmentVariables": {
+                "APPLICATION_URL": "https://database.kongor.net",
+                "ASPNETCORE_ENVIRONMENT": "Production",
+                "DOTNET_ENVIRONMENT": "Production"
+            },
+            "dotnetRunMessages": true
+        }
+    }
+}

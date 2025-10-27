@@ -2,9 +2,9 @@
 
 global using KONGOR.MasterServer.Models.ServerManagement; // TODO: Move Models To A Shared Project And Remove Inter-Project Dependencies
 
-global using MERRICK.Database.Context;
-global using MERRICK.Database.Entities.Core;
-global using MERRICK.Database.Enumerations;
+global using MERRICK.DatabaseContext.Entities.Core;
+global using MERRICK.DatabaseContext.Enumerations;
+global using MERRICK.DatabaseContext.Persistence;
 
 global using Microsoft.EntityFrameworkCore;
 global using Microsoft.EntityFrameworkCore.Diagnostics;

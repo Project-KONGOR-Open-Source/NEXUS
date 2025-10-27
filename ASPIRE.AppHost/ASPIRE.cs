@@ -56,12 +56,18 @@ public class ASPIRE
             .WithLifetime(ContainerLifetime.Persistent).WithDataBindMount(source: databaseDirectory) // Persist SQL Server Data Both Between Distributed Application Restarts And Resource Container Restarts
             .WithEnvironment("ACCEPT_EULA", "Y").WithEnvironment("MSSQL_PID", "Developer"); // SQL Server Image Information: https://mcr.microsoft.com/en-gb/artifact/mar/mssql/server/about
 
+        // Create Resource Relationship After Parent Resource Is Defined
+        databasePassword
+            .WithParentRelationship(databaseServer); // Set Database As Parent Resource
+
         // Add SQL Server Database Resource
-        IResourceBuilder<SqlServerDatabaseResource> database = databaseServer.AddDatabase(databaseName);
+        IResourceBuilder<SqlServerDatabaseResource> database = databaseServer.AddDatabase(databaseName)
+            .WithParentRelationship(databaseServer); // Set Database As Parent Resource
 
         // Add Database Project
-        builder.AddProject<MERRICK>("database", builder.Environment.IsProduction() ? "MERRICK.Database Production" : "MERRICK.Database Development")
-            .WithReference(database, connectionName: "MERRICK").WaitFor(database); // Connect To SQL Server Database And Wait For It To Start
+        builder.AddProject<MERRICK>("database-context", builder.Environment.IsProduction() ? "MERRICK.DatabaseContext Production" : "MERRICK.DatabaseContext Development")
+            .WithReference(database, connectionName: "MERRICK").WaitFor(database) // Connect To SQL Server Database And Wait For It To Start
+            .WithParentRelationship(databaseServer); // Set Database As Parent Resource
 
         // Add Master Server Project
         builder.AddProject<KONGOR>("master-server", builder.Environment.IsProduction() ? "KONGOR.MasterServer Production" : "KONGOR.MasterServer Development")

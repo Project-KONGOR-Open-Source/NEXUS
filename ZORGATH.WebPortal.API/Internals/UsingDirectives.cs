@@ -1,10 +1,10 @@
 ﻿global using FluentValidation;
 global using FluentValidation.Results;
 
-global using MERRICK.Database.Constants;
-global using MERRICK.Database.Context;
-global using MERRICK.Database.Entities.Core;
-global using MERRICK.Database.Entities.Utility;
+global using MERRICK.DatabaseContext.Constants;
+global using MERRICK.DatabaseContext.Entities.Core;
+global using MERRICK.DatabaseContext.Entities.Utility;
+global using MERRICK.DatabaseContext.Persistence;
 
 global using Microsoft.AspNetCore.Authentication.JwtBearer;
 global using Microsoft.AspNetCore.Authorization;

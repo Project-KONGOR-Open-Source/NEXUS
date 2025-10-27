@@ -24,7 +24,7 @@
     <ItemGroup>
         <ProjectReference Include="../DAWNBRINGER.WebPortal.UI/DAWNBRINGER.WebPortal.UI.csproj" AspireProjectMetadataTypeName="DAWNBRINGER" />
         <ProjectReference Include="../KONGOR.MasterServer/KONGOR.MasterServer.csproj" AspireProjectMetadataTypeName="KONGOR" />
-        <ProjectReference Include="../MERRICK.Database/MERRICK.Database.csproj" AspireProjectMetadataTypeName="MERRICK" />
+        <ProjectReference Include="../MERRICK.DatabaseContext/MERRICK.DatabaseContext.csproj" AspireProjectMetadataTypeName="MERRICK" />
         <ProjectReference Include="../TRANSMUTANSTEIN.ChatServer/TRANSMUTANSTEIN.ChatServer.csproj" AspireProjectMetadataTypeName="TRANSMUTANSTEIN" />
         <ProjectReference Include="../ZORGATH.WebPortal.API/ZORGATH.WebPortal.API.csproj" AspireProjectMetadataTypeName="ZORGATH" />
     </ItemGroup>

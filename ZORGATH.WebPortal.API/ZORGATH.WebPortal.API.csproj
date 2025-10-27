@@ -13,7 +13,7 @@
 
     <ItemGroup>
         <ProjectReference Include="../ASPIRE.Common/ASPIRE.Common.csproj" />
-        <ProjectReference Include="../MERRICK.Database/MERRICK.Database.csproj" />
+        <ProjectReference Include="../MERRICK.DatabaseContext/MERRICK.DatabaseContext.csproj" />
     </ItemGroup>
 
 </Project>

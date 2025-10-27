@@ -4,7 +4,7 @@
     <Project Path="ASPIRE.Tests/ASPIRE.Tests.csproj" />
     <Project Path="DAWNBRINGER.WebPortal.UI/DAWNBRINGER.WebPortal.UI.csproj" />
     <Project Path="KONGOR.MasterServer/KONGOR.MasterServer.csproj" />
-    <Project Path="MERRICK.Database/MERRICK.Database.csproj" />
+    <Project Path="MERRICK.DatabaseContext/MERRICK.DatabaseContext.csproj" />
     <Project Path="TRANSMUTANSTEIN.ChatServer/TRANSMUTANSTEIN.ChatServer.csproj" />
     <Project Path="ZORGATH.WebPortal.API/ZORGATH.WebPortal.API.csproj" />
 </Solution>

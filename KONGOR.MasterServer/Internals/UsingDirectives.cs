@@ -16,11 +16,11 @@ global using KONGOR.MasterServer.Models.RequestResponse.Stats;
 global using KONGOR.MasterServer.Models.RequestResponse.Store;
 global using KONGOR.MasterServer.Models.ServerManagement;
 
-global using MERRICK.Database.Context;
-global using MERRICK.Database.Entities.Core;
-global using MERRICK.Database.Entities.Game;
-global using MERRICK.Database.Entities.Statistics;
-global using MERRICK.Database.Enumerations;
+global using MERRICK.DatabaseContext.Entities.Core;
+global using MERRICK.DatabaseContext.Entities.Game;
+global using MERRICK.DatabaseContext.Entities.Statistics;
+global using MERRICK.DatabaseContext.Enumerations;
+global using MERRICK.DatabaseContext.Persistence;
 
 global using Microsoft.AspNetCore.HttpLogging;
 global using Microsoft.AspNetCore.Mvc;
