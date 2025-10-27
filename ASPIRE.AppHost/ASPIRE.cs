@@ -30,7 +30,7 @@ public class ASPIRE
         // Add Distributed Cache Resource
         IResourceBuilder<RedisResource> distributedCache = builder.AddRedis("distributed-cache", password: distributedCachePassword)
             .WithImageTag("latest") // Latest Redis Image: https://github.com/redis/redis/releases/latest
-            .WithLifetime(ContainerLifetime.Persistent); // Persist Cached Data Between Distributed Application Restarts But Not Between Resource Container Restarts
+            .WithLifetime(ContainerLifetime.Persistent).WithDataVolume("distributed-cache-data"); // Persist Cached Data Between Distributed Application Restarts But Not Between Resource Container Restarts
 
         // Create Resource Relationship After Parent Resource Is Defined
         distributedCachePassword
@@ -40,7 +40,7 @@ public class ASPIRE
         // Create Distributed Cache Dashboard Resource
         Action<IResourceBuilder<RedisInsightResource>> distributedCacheDashboard = builder => builder
             .WithImageTag("latest") // Latest Redis Insight Image: https://github.com/RedisInsight/RedisInsight/releases/latest
-            .WithLifetime(ContainerLifetime.Persistent) // Persist Cached Data Between Distributed Application Restarts But Not Between Resource Container Restarts
+            .WithLifetime(ContainerLifetime.Persistent).WithDataVolume("distributed-cache-dashboard-data") // Persist Cached Data Between Distributed Application Restarts But Not Between Resource Container Restarts
             .WithEnvironment("RI_ACCEPT_TERMS_AND_CONDITIONS", "true") // Automatically Accept Terms And Conditions: https://redis.io/docs/latest/operate/redisinsight/configuration/
             .WithParentRelationship(distributedCache); // Set Distributed Cache As Parent Resource
 
