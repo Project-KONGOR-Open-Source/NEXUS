@@ -24,6 +24,10 @@ public class ASPIRE
             .WithRedisInsight(distributedCacheDashboard, containerName: "distributed-cache-insight") // Add Redis Insight Dashboard
             .WithLifetime(ContainerLifetime.Persistent); // Persist Cached Data Between Distributed Application Restarts But Not Between Resource Container Restarts
 
+        // TODO: Add Redis Password (And Maybe Redis Insight Password Too, If Supported)
+
+        // TODO: Make Redis Insight A Child Resource Of The Redis Resource
+
         // Get Configuration From Environment Variables And User Secrets
         IConfiguration configuration = new ConfigurationBuilder().AddEnvironmentVariables().AddUserSecrets<ASPIRE>(optional: true).Build();
 
@@ -61,7 +65,7 @@ public class ASPIRE
             .WithParentRelationship(databaseServer); // Set Database As Parent Resource
 
         // Add SQL Server Database Resource
-        IResourceBuilder<SqlServerDatabaseResource> database = databaseServer.AddDatabase(databaseName)
+        IResourceBuilder<SqlServerDatabaseResource> database = databaseServer.AddDatabase("database", databaseName)
             .WithParentRelationship(databaseServer); // Set Database As Parent Resource
 
         // Add Database Project
