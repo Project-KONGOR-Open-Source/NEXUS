@@ -208,8 +208,9 @@ public class MatchmakingGroup
 
         MatchmakingGroupMember groupMember = Members.Single(member => member.Account.ID == session.Account.ID);
 
+        // Non-Leader Group Members Are Implicitly Ready (By Means Of Joining The Group In A Ready State) And Do Not Need To Emit Readiness Status Updates
         if (groupMember.IsLeader is false)
-            return this; // Non-Leader Group Members Are Implicitly Ready (By Means Of Joining The Group In A Ready State) And Do Not Need To Emit Readiness Status Updates
+            return this;
 
         if (groupMember.IsReady is false)
         {
@@ -220,6 +221,7 @@ public class MatchmakingGroup
                     if (member.IsLeader is false)
                         Log.Error(@"[BUG] Non-Leader Group Member ""{Member.Account.Name}"" With ID ""{Member.Account.ID}"" Was Not Ready", member.Account.Name, member.Account.ID);
 
+                    // All Matchmaking Group Members Need To Be Ready For The Queue To Start
                     member.IsReady = true;
                 }
             }
