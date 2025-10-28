@@ -8,12 +8,10 @@ using Infrastructure;
 public sealed class UserRegistrationTests
 {
     [Test]
-    public async Task RegisterUserAndMainAccount_WithValidData_ReturnsCreatedAndCreatesUserAndAccount()
+    [Arguments("test@kongor.com", "TestPlayer", "SecurePassword123!")]
+    [Arguments("user@kongor.net", "GameUser", "MyP@ssw0rd!")]
+    public async Task RegisterUserAndMainAccount_WithValidData_ReturnsCreatedAndCreatesUserAndAccount(string emailAddress, string accountName, string password)
     {
-        const string emailAddress = "new.user@kongor.net";
-        const string accountName = "NewUser";
-        const string password = "SecurePassword123!";
-
         await using ServiceProvider services = new ();
         AuthenticationFactory authenticationFactory = services.CreateAuthenticationFactory();
 
@@ -62,13 +60,10 @@ public sealed class UserRegistrationTests
     }
 
     [Test]
-    public async Task RegisterUserAndMainAccount_WithMismatchedPasswords_ReturnsBadRequest()
+    [Arguments("mismatch@kongor.com", "MismatchUser", "Password123!", "DifferentPass123!")]
+    [Arguments("test@kongor.net", "TestUser", "MyP@ss!", "WrongP@ss!")]
+    public async Task RegisterUserAndMainAccount_WithMismatchedPasswords_ReturnsBadRequest(string emailAddress, string accountName, string password, string confirmPassword)
     {
-        const string emailAddress = "new.user@kongor.net";
-        const string accountName = "NewUser";
-        const string password = "SecurePassword123!";
-        const string confirmPassword = "DifferentPassword123!";
-
         await using ServiceProvider services = new ();
 
         ILogger<EmailAddressController> emailLogger = services.Factory.Services.GetRequiredService<ILogger<EmailAddressController>>();
@@ -95,10 +90,10 @@ public sealed class UserRegistrationTests
     }
 
     [Test]
-    public async Task RegisterUserAndMainAccount_WithInvalidToken_ReturnsNotFound()
+    [Arguments("InvalidUser", "SecurePassword123!")]
+    [Arguments("TestPlayer", "MyP@ssw0rd!")]
+    public async Task RegisterUserAndMainAccount_WithInvalidToken_ReturnsNotFound(string accountName, string password)
     {
-        const string accountName = "NewUser";
-        const string password = "SecurePassword123!";
         string invalidToken = Guid.NewGuid().ToString();
 
         await using ServiceProvider services = new ();
@@ -116,13 +111,10 @@ public sealed class UserRegistrationTests
     }
 
     [Test]
-    public async Task RegisterUserAndMainAccount_WithDuplicateAccountName_ReturnsConflict()
+    [Arguments("user1@kongor.com", "user2@kongor.com", "DuplicateName", "SecurePassword123!")]
+    [Arguments("first@kongor.net", "second@kongor.net", "SameName", "MyP@ssw0rd!")]
+    public async Task RegisterUserAndMainAccount_WithDuplicateAccountName_ReturnsConflict(string emailAddressOne, string emailAddressTwo, string accountName, string password)
     {
-        const string emailAddressOne = "new.user.one@kongor.net";
-        const string emailAddressTwo = "new.user.two@kongor.net";
-        const string accountName = "NewUser";
-        const string password = "SecurePassword123!";
-
         await using ServiceProvider services = new ();
 
         AuthenticationFactory authenticationFactory = services.CreateAuthenticationFactory();

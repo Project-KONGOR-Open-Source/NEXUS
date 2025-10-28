@@ -8,10 +8,10 @@ using Infrastructure;
 public sealed class EmailAddressRegistrationTests
 {
     [Test]
-    public async Task RegisterEmailAddress_WithValidEmailAddress_ReturnsOkAndCreatesToken()
+    [Arguments("test@kongor.com")]
+    [Arguments("user@kongor.net")]
+    public async Task RegisterEmailAddress_WithValidEmailAddress_ReturnsOkAndCreatesToken(string emailAddress)
     {
-        const string emailAddress = "new.user@kongor.net";
-
         await using ServiceProvider services = new ();
 
         ILogger<EmailAddressController> logger = services.Factory.Services.GetRequiredService<ILogger<EmailAddressController>>();
@@ -33,11 +33,10 @@ public sealed class EmailAddressRegistrationTests
     }
 
     [Test]
-    public async Task RegisterEmailAddress_WithMismatchedConfirmation_ReturnsBadRequest()
+    [Arguments("test@kongor.com", "different@kongor.com")]
+    [Arguments("user@kongor.net", "typo@kongor.net")]
+    public async Task RegisterEmailAddress_WithMismatchedConfirmation_ReturnsBadRequest(string emailAddress, string confirmEmailAddress)
     {
-        const string emailAddress = "new.user@kongor.net";
-        const string confirmEmailAddress = "different@kongor.com";
-
         await using ServiceProvider services = new ();
 
         ILogger<EmailAddressController> logger = services.Factory.Services.GetRequiredService<ILogger<EmailAddressController>>();
@@ -51,10 +50,10 @@ public sealed class EmailAddressRegistrationTests
     }
 
     [Test]
-    public async Task RegisterEmailAddress_WhenAlreadyRegistered_ReturnsBadRequest()
+    [Arguments("duplicate@kongor.com")]
+    [Arguments("existing@kongor.net")]
+    public async Task RegisterEmailAddress_WhenAlreadyRegistered_ReturnsBadRequest(string emailAddress)
     {
-        const string emailAddress = "new.user@kongor.net";
-
         await using ServiceProvider services = new ();
 
         ILogger<EmailAddressController> logger = services.Factory.Services.GetRequiredService<ILogger<EmailAddressController>>();

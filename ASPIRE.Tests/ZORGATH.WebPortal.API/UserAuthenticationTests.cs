@@ -8,12 +8,10 @@ using Infrastructure;
 public sealed class UserAuthenticationTests
 {
     [Test]
-    public async Task LogInUser_WithValidCredentials_ReturnsOkWithValidJWT()
+    [Arguments("login@kongor.com", "LoginPlayer", "SecurePassword123!")]
+    [Arguments("auth@kongor.net", "AuthUser", "MyP@ssw0rd!")]
+    public async Task LogInUser_WithValidCredentials_ReturnsOkWithValidJWT(string emailAddress, string accountName, string password)
     {
-        const string emailAddress = "new.user@kongor.net";
-        const string accountName = "NewUser";
-        const string password = "SecurePassword123!";
-
         await using ServiceProvider services = new();
         
         AuthenticationFactory authenticationFactory = services.CreateAuthenticationFactory();
@@ -51,11 +49,10 @@ public sealed class UserAuthenticationTests
     }
 
     [Test]
-    public async Task LogInUser_WithInvalidAccountName_ReturnsNotFound()
+    [Arguments("NonExistentPlayer", "SomePassword123!")]
+    [Arguments("InvalidUser", "AnotherPass123!")]
+    public async Task LogInUser_WithInvalidAccountName_ReturnsNotFound(string accountName, string password)
     {
-        const string accountName = "NewUser";
-        const string password = "SecurePassword123!";
-
         await using ServiceProvider services = new ();
 
         ILogger<UserController> userLogger = services.Factory.Services.GetRequiredService<ILogger<UserController>>();
@@ -70,13 +67,10 @@ public sealed class UserAuthenticationTests
     }
 
     [Test]
-    public async Task LogInUser_WithInvalidPassword_ReturnsUnauthorized()
+    [Arguments("wrongpass@kongor.com", "WrongPassUser", "CorrectPassword123!", "WrongPassword123!")]
+    [Arguments("badauth@kongor.net", "BadAuthUser", "RightP@ss!", "WrongP@ss!")]
+    public async Task LogInUser_WithInvalidPassword_ReturnsUnauthorized(string emailAddress, string accountName, string correctPassword, string wrongPassword)
     {
-        const string emailAddress = "new.user@kongor.net";
-        const string accountName = "NewUser";
-        const string correctPassword = "CorrectPassword123!";
-        const string wrongPassword = "WrongPassword123!";
-
         await using ServiceProvider services = new();
         
         AuthenticationFactory authenticationFactory = services.CreateAuthenticationFactory();
@@ -95,12 +89,10 @@ public sealed class UserAuthenticationTests
     }
 
     [Test]
-    public async Task LogInUser_JWTContainsAllRequiredClaims()
+    [Arguments("claims@kongor.com", "ClaimsUser", "SecurePassword123!")]
+    [Arguments("jwt@kongor.net", "JWTUser", "MyP@ssw0rd!")]
+    public async Task LogInUser_JWTContainsAllRequiredClaims(string emailAddress, string accountName, string password)
     {
-        const string emailAddress = "new.user@kongor.net";
-        const string accountName = "NewUser";
-        const string password = "SecurePassword123!";
-
         await using ServiceProvider services = new();
         
         AuthenticationFactory authenticationFactory = services.CreateAuthenticationFactory();
@@ -123,12 +115,10 @@ public sealed class UserAuthenticationTests
     }
 
     [Test]
-    public async Task CompleteAuthenticationFlow_RegisterEmailThenUserThenLogin_Succeeds()
+    [Arguments("fullflow@kongor.com", "FlowUser", "SecurePassword123!")]
+    [Arguments("complete@kongor.net", "CompleteUser", "MyP@ssw0rd!")]
+    public async Task CompleteAuthenticationFlow_RegisterEmailThenUserThenLogin_Succeeds(string emailAddress, string accountName, string password)
     {
-        const string emailAddress = "new.user@kongor.net";
-        const string accountName = "NewUser";
-        const string password = "SecurePassword123!";
-
         await using ServiceProvider services = new();
         
         AuthenticationFactory authenticationFactory = services.CreateAuthenticationFactory();
