@@ -1,4 +1,5 @@
-﻿global using MERRICK.DatabaseContext.Entities.Utility;
+﻿global using MERRICK.DatabaseContext.Entities.Core;
+global using MERRICK.DatabaseContext.Entities.Utility;
 global using MERRICK.DatabaseContext.Helpers;
 global using MERRICK.DatabaseContext.Persistence;
 
@@ -7,10 +8,14 @@ global using Microsoft.AspNetCore.Identity;
 global using Microsoft.AspNetCore.Mvc;
 global using Microsoft.AspNetCore.Mvc.Testing;
 global using Microsoft.EntityFrameworkCore;
+global using Microsoft.Extensions.Caching.Memory;
 global using Microsoft.Extensions.DependencyInjection;
 global using Microsoft.Extensions.Logging;
 global using Microsoft.Extensions.Options;
 global using Microsoft.IdentityModel.Tokens;
+
+global using Aspire.Hosting;
+global using Aspire.Hosting.Testing;
 
 global using TUnit.Assertions;
 global using TUnit.Assertions.Extensions;
@@ -27,3 +32,5 @@ global using ZORGATH.WebPortal.API.Handlers;
 global using ZORGATH.WebPortal.API.Internals;
 global using ZORGATH.WebPortal.API.Models.Configuration;
 global using ZORGATH.WebPortal.API.Services.Email;
+
+global using ASPIRE.Tests.ZORGATH.WebPortal.API.Infrastructure;

@@ -3,13 +3,13 @@ namespace ASPIRE.Tests.ZORGATH.WebPortal.API.Infrastructure;
 /// <summary>
 ///     Provides Test Dependencies For ZORGATH Web Portal API Tests
 /// </summary>
-public sealed class ServiceProvider : IDisposable, IAsyncDisposable
+public sealed class JWTAuthenticationServiceProvider : IDisposable, IAsyncDisposable
 {
     private readonly WebApplicationFactory<ZORGATHAssemblyMarker> _factory;
     private readonly MerrickContext _merrickContext;
     private readonly HttpClient _httpClient;
 
-    public ServiceProvider(string? databaseIdentifier = null)
+    public JWTAuthenticationServiceProvider(string? databaseIdentifier = null)
     {
         _factory = new WebApplicationFactory<ZORGATHAssemblyMarker>();
         _merrickContext = InMemoryHelpers.GetInMemoryMerrickContext(databaseIdentifier);
@@ -20,7 +20,7 @@ public sealed class ServiceProvider : IDisposable, IAsyncDisposable
     public MerrickContext MerrickContext => _merrickContext;
     public HttpClient HttpClient => _httpClient;
 
-    public AuthenticationFactory CreateAuthenticationFactory()
+    public JWTAuthenticationService CreateJWTAuthenticationService()
         => new (_merrickContext, _factory);
 
     public void SetAuthenticationToken(string token)

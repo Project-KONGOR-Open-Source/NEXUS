@@ -1,6 +1,4 @@
-namespace ASPIRE.Tests.ZORGATH.WebPortal.API;
-
-using Infrastructure;
+namespace ASPIRE.Tests.Zorgath.WebPortal.API.Tests;
 
 /// <summary>
 ///     Tests For Email Address Registration Functionality
@@ -12,7 +10,7 @@ public sealed class EmailAddressRegistrationTests
     [Arguments("user@kongor.net")]
     public async Task RegisterEmailAddress_WithValidEmailAddress_ReturnsOkAndCreatesToken(string emailAddress)
     {
-        await using ServiceProvider services = new ();
+        await using JWTAuthenticationServiceProvider services = new ();
 
         ILogger<EmailAddressController> logger = services.Factory.Services.GetRequiredService<ILogger<EmailAddressController>>();
         IEmailService emailService = services.Factory.Services.GetRequiredService<IEmailService>();
@@ -41,7 +39,7 @@ public sealed class EmailAddressRegistrationTests
     [Arguments("user@kongor.net", "typo@kongor.net")]
     public async Task RegisterEmailAddress_WithMismatchedConfirmation_ReturnsBadRequest(string emailAddress, string confirmEmailAddress)
     {
-        await using ServiceProvider services = new ();
+        await using JWTAuthenticationServiceProvider services = new ();
 
         ILogger<EmailAddressController> logger = services.Factory.Services.GetRequiredService<ILogger<EmailAddressController>>();
         IEmailService emailService = services.Factory.Services.GetRequiredService<IEmailService>();
@@ -58,7 +56,7 @@ public sealed class EmailAddressRegistrationTests
     [Arguments("existing@kongor.net")]
     public async Task RegisterEmailAddress_WhenAlreadyRegistered_ReturnsBadRequest(string emailAddress)
     {
-        await using ServiceProvider services = new ();
+        await using JWTAuthenticationServiceProvider services = new ();
 
         ILogger<EmailAddressController> logger = services.Factory.Services.GetRequiredService<ILogger<EmailAddressController>>();
         IEmailService emailService = services.Factory.Services.GetRequiredService<IEmailService>();

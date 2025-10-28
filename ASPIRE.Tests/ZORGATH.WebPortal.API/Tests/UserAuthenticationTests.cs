@@ -1,6 +1,4 @@
-namespace ASPIRE.Tests.ZORGATH.WebPortal.API;
-
-using Infrastructure;
+namespace ASPIRE.Tests.Zorgath.WebPortal.API.Tests;
 
 /// <summary>
 ///     Tests For User Authentication Functionality
@@ -12,11 +10,11 @@ public sealed class UserAuthenticationTests
     [Arguments("auth@kongor.net", "AuthUser", "MyP@ssw0rd!")]
     public async Task LogInUser_WithValidCredentials_ReturnsOkWithValidJWT(string emailAddress, string accountName, string password)
     {
-        await using ServiceProvider services = new();
+        await using JWTAuthenticationServiceProvider services = new();
         
-        AuthenticationFactory authenticationFactory = services.CreateAuthenticationFactory();
+        JWTAuthenticationService jwtAuthenticationService = services.CreateJWTAuthenticationService();
 
-        AuthenticationResult authenticationResult = await authenticationFactory.CreateAuthenticatedUser(emailAddress, accountName, password);
+        AuthenticationResult authenticationResult = await jwtAuthenticationService.CreateAuthenticatedUser(emailAddress, accountName, password);
 
         IOptions<OperationalConfiguration> configuration = services.Factory.Services.GetRequiredService<IOptions<OperationalConfiguration>>();
 
@@ -53,7 +51,7 @@ public sealed class UserAuthenticationTests
     [Arguments("InvalidUser", "AnotherPass123!")]
     public async Task LogInUser_WithInvalidAccountName_ReturnsNotFound(string accountName, string password)
     {
-        await using ServiceProvider services = new ();
+        await using JWTAuthenticationServiceProvider services = new ();
 
         ILogger<UserController> userLogger = services.Factory.Services.GetRequiredService<ILogger<UserController>>();
         IOptions<OperationalConfiguration> configuration = services.Factory.Services.GetRequiredService<IOptions<OperationalConfiguration>>();
@@ -71,11 +69,11 @@ public sealed class UserAuthenticationTests
     [Arguments("badauth@kongor.net", "BadAuthUser", "RightP@ss!", "WrongP@ss!")]
     public async Task LogInUser_WithInvalidPassword_ReturnsUnauthorized(string emailAddress, string accountName, string correctPassword, string wrongPassword)
     {
-        await using ServiceProvider services = new();
+        await using JWTAuthenticationServiceProvider services = new();
         
-        AuthenticationFactory authenticationFactory = services.CreateAuthenticationFactory();
+        JWTAuthenticationService jwtAuthenticationService = services.CreateJWTAuthenticationService();
 
-        await authenticationFactory.CreateAuthenticatedUser(emailAddress, accountName, correctPassword);
+        await jwtAuthenticationService.CreateAuthenticatedUser(emailAddress, accountName, correctPassword);
 
         ILogger<UserController> userLogger = services.Factory.Services.GetRequiredService<ILogger<UserController>>();
         IOptions<OperationalConfiguration> configuration = services.Factory.Services.GetRequiredService<IOptions<OperationalConfiguration>>();
@@ -93,11 +91,11 @@ public sealed class UserAuthenticationTests
     [Arguments("jwt@kongor.net", "JWTUser", "MyP@ssw0rd!")]
     public async Task LogInUser_JWTContainsAllRequiredClaims(string emailAddress, string accountName, string password)
     {
-        await using ServiceProvider services = new();
+        await using JWTAuthenticationServiceProvider services = new();
         
-        AuthenticationFactory authenticationFactory = services.CreateAuthenticationFactory();
+        JWTAuthenticationService jwtAuthenticationService = services.CreateJWTAuthenticationService();
 
-        AuthenticationResult authenticationResult = await authenticationFactory.CreateAuthenticatedUser(emailAddress, accountName, password);
+        AuthenticationResult authenticationResult = await jwtAuthenticationService.CreateAuthenticatedUser(emailAddress, accountName, password);
 
         JwtSecurityTokenHandler tokenHandler = new ();
         JwtSecurityToken jwtToken = tokenHandler.ReadJwtToken(authenticationResult.AuthenticationToken);
@@ -119,11 +117,11 @@ public sealed class UserAuthenticationTests
     [Arguments("complete@kongor.net", "CompleteUser", "MyP@ssw0rd!")]
     public async Task CompleteAuthenticationFlow_RegisterEmailThenUserThenLogin_Succeeds(string emailAddress, string accountName, string password)
     {
-        await using ServiceProvider services = new();
+        await using JWTAuthenticationServiceProvider services = new();
         
-        AuthenticationFactory authenticationFactory = services.CreateAuthenticationFactory();
+        JWTAuthenticationService jwtAuthenticationService = services.CreateJWTAuthenticationService();
 
-        AuthenticationResult result = await authenticationFactory.CreateAuthenticatedUser(emailAddress, accountName, password);
+        AuthenticationResult result = await jwtAuthenticationService.CreateAuthenticatedUser(emailAddress, accountName, password);
 
         await Assert.That(result.UserID).IsGreaterThan(0);
         await Assert.That(result.AccountName).IsEqualTo(accountName);

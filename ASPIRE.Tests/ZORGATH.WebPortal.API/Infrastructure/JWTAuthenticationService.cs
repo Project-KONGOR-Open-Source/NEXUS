@@ -3,12 +3,12 @@ namespace ASPIRE.Tests.ZORGATH.WebPortal.API.Infrastructure;
 /// <summary>
 ///     Helper Class For Creating Authentication State In Tests
 /// </summary>
-public sealed class AuthenticationFactory
+public sealed class JWTAuthenticationService
 {
     private readonly MerrickContext _merrickContext;
     private readonly WebApplicationFactory<ZORGATHAssemblyMarker> _factory;
 
-    public AuthenticationFactory(MerrickContext merrickContext, WebApplicationFactory<ZORGATHAssemblyMarker> factory)
+    public JWTAuthenticationService(MerrickContext merrickContext, WebApplicationFactory<ZORGATHAssemblyMarker> factory)
     {
         _merrickContext = merrickContext;
         _factory = factory;

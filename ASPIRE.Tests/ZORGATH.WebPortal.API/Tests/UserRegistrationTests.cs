@@ -1,6 +1,4 @@
-namespace ASPIRE.Tests.ZORGATH.WebPortal.API;
-
-using Infrastructure;
+namespace ASPIRE.Tests.Zorgath.WebPortal.API.Tests;
 
 /// <summary>
 ///     Tests For User Registration Functionality
@@ -12,8 +10,8 @@ public sealed class UserRegistrationTests
     [Arguments("user@kongor.net", "GameUser", "MyP@ssw0rd!")]
     public async Task RegisterUserAndMainAccount_WithValidData_ReturnsCreatedAndCreatesUserAndAccount(string emailAddress, string accountName, string password)
     {
-        await using ServiceProvider services = new ();
-        AuthenticationFactory authenticationFactory = services.CreateAuthenticationFactory();
+        await using JWTAuthenticationServiceProvider services = new ();
+        JWTAuthenticationService jwtAuthenticationService = services.CreateJWTAuthenticationService();
 
         ILogger<EmailAddressController> emailLogger = services.Factory.Services.GetRequiredService<ILogger<EmailAddressController>>();
         IEmailService emailService = services.Factory.Services.GetRequiredService<IEmailService>();
@@ -75,7 +73,7 @@ public sealed class UserRegistrationTests
     [Arguments("test@kongor.net", "TestUser", "MyP@ss!", "WrongP@ss!")]
     public async Task RegisterUserAndMainAccount_WithMismatchedPasswords_ReturnsBadRequest(string emailAddress, string accountName, string password, string confirmPassword)
     {
-        await using ServiceProvider services = new ();
+        await using JWTAuthenticationServiceProvider services = new ();
 
         ILogger<EmailAddressController> emailLogger = services.Factory.Services.GetRequiredService<ILogger<EmailAddressController>>();
         IEmailService emailService = services.Factory.Services.GetRequiredService<IEmailService>();
@@ -107,7 +105,7 @@ public sealed class UserRegistrationTests
     {
         string invalidToken = Guid.NewGuid().ToString();
 
-        await using ServiceProvider services = new ();
+        await using JWTAuthenticationServiceProvider services = new ();
 
         ILogger<UserController> userLogger = services.Factory.Services.GetRequiredService<ILogger<UserController>>();
         IOptions<OperationalConfiguration> configuration = services.Factory.Services.GetRequiredService<IOptions<OperationalConfiguration>>();
@@ -126,10 +124,10 @@ public sealed class UserRegistrationTests
     [Arguments("first@kongor.net", "second@kongor.net", "SameName", "MyP@ssw0rd!")]
     public async Task RegisterUserAndMainAccount_WithDuplicateAccountName_ReturnsConflict(string emailAddressOne, string emailAddressTwo, string accountName, string password)
     {
-        await using ServiceProvider services = new ();
+        await using JWTAuthenticationServiceProvider services = new ();
 
-        AuthenticationFactory authenticationFactory = services.CreateAuthenticationFactory();
-        await authenticationFactory.CreateAuthenticatedUser(emailAddressOne, accountName, password);
+        JWTAuthenticationService jwtAuthenticationService = services.CreateJWTAuthenticationService();
+        await jwtAuthenticationService.CreateAuthenticatedUser(emailAddressOne, accountName, password);
 
         ILogger<EmailAddressController> emailLogger = services.Factory.Services.GetRequiredService<ILogger<EmailAddressController>>();
         IEmailService emailService = services.Factory.Services.GetRequiredService<IEmailService>();
