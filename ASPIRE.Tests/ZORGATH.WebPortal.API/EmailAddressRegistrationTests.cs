@@ -27,7 +27,11 @@ public sealed class EmailAddressRegistrationTests
             token.EmailAddress.Equals(emailAddress) && token.Purpose.Equals(TokenPurpose.EmailAddressVerification));
 
         await Assert.That(token).IsNotNull();
-        await Assert.That(token!.EmailAddress).IsEqualTo(emailAddress);
+
+        if (token is null)
+            throw new NullReferenceException("Token Is NULL");
+
+        await Assert.That(token.EmailAddress).IsEqualTo(emailAddress);
         await Assert.That(token.Purpose).IsEqualTo(TokenPurpose.EmailAddressVerification);
         await Assert.That(token.TimestampConsumed).IsNull();
     }

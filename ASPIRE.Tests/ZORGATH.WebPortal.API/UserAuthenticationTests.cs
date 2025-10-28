@@ -136,7 +136,11 @@ public sealed class UserAuthenticationTests
             .SingleOrDefaultAsync(user => user.ID.Equals(result.UserID));
 
         await Assert.That(user).IsNotNull();
-        await Assert.That(user!.EmailAddress).IsEqualTo(emailAddress);
+
+        if (user is null)
+            throw new NullReferenceException("User Is NULL");
+
+        await Assert.That(user.EmailAddress).IsEqualTo(emailAddress);
         await Assert.That(user.Accounts).HasCount().GreaterThanOrEqualTo(1);
         await Assert.That(user.Accounts.Any(account => account.Name.Equals(accountName))).IsTrue();
         await Assert.That(user.Role.Name).IsEqualTo(MERRICK.DatabaseContext.Constants.UserRoles.User);

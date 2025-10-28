@@ -25,7 +25,7 @@ public sealed class UserRegistrationTests
             token.EmailAddress.Equals(emailAddress) && token.Purpose.Equals(TokenPurpose.EmailAddressVerification));
 
         if (registrationToken is null)
-            throw new InvalidOperationException("Registration Token Not Created");
+            throw new NullReferenceException("Registration Token Is NULL");
 
         ILogger<UserController> userLogger = services.Factory.Services.GetRequiredService<ILogger<UserController>>();
         IOptions<OperationalConfiguration> configuration = services.Factory.Services.GetRequiredService<IOptions<OperationalConfiguration>>();
@@ -41,7 +41,11 @@ public sealed class UserRegistrationTests
         GetBasicUserDTO? userDTO = createdResult.Value as GetBasicUserDTO;
 
         await Assert.That(userDTO).IsNotNull();
-        await Assert.That(userDTO!.EmailAddress).IsEqualTo(emailAddress);
+
+        if (userDTO is null)
+            throw new NullReferenceException("User DTO Is NULL");
+
+        await Assert.That(userDTO.EmailAddress).IsEqualTo(emailAddress);
         await Assert.That(userDTO.Accounts).HasCount().EqualTo(1);
         await Assert.That(userDTO.Accounts.First().Name).IsEqualTo(accountName);
 
@@ -50,13 +54,20 @@ public sealed class UserRegistrationTests
             .SingleOrDefaultAsync(user => user.EmailAddress.Equals(emailAddress));
 
         await Assert.That(user).IsNotNull();
-        await Assert.That(user!.Accounts).HasCount().EqualTo(1);
+
+        if (user is null)
+            throw new NullReferenceException("User Is NULL");
+
+        await Assert.That(user.Accounts).HasCount().EqualTo(1);
         await Assert.That(user.Accounts.First().Name).IsEqualTo(accountName);
         await Assert.That(user.Accounts.First().IsMain).IsTrue();
 
         Token? consumedToken = await services.MerrickContext.Tokens.FindAsync(registrationToken.ID);
 
-        await Assert.That(consumedToken!.TimestampConsumed).IsNotNull();
+        if (consumedToken is null)
+            throw new NullReferenceException("Consumed Token Is NULL");
+
+        await Assert.That(consumedToken.TimestampConsumed).IsNotNull();
     }
 
     [Test]
@@ -76,7 +87,7 @@ public sealed class UserRegistrationTests
             token.EmailAddress.Equals(emailAddress) && token.Purpose.Equals(TokenPurpose.EmailAddressVerification));
 
         if (registrationToken is null)
-            throw new InvalidOperationException("Registration Token Not Created");
+            throw new NullReferenceException("Registration Token Is NULL");
 
         ILogger<UserController> userLogger = services.Factory.Services.GetRequiredService<ILogger<UserController>>();
         IOptions<OperationalConfiguration> configuration = services.Factory.Services.GetRequiredService<IOptions<OperationalConfiguration>>();
@@ -130,7 +141,7 @@ public sealed class UserRegistrationTests
             token.EmailAddress.Equals(emailAddressTwo) && token.Purpose.Equals(TokenPurpose.EmailAddressVerification));
 
         if (registrationToken is null)
-            throw new InvalidOperationException("Registration Token Not Created");
+            throw new NullReferenceException("Registration Token Is NULL");
 
         ILogger<UserController> userLogger = services.Factory.Services.GetRequiredService<ILogger<UserController>>();
         IOptions<OperationalConfiguration> configuration = services.Factory.Services.GetRequiredService<IOptions<OperationalConfiguration>>();
