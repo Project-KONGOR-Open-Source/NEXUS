@@ -23,11 +23,6 @@ public sealed class JWTAuthenticationServiceProvider : IDisposable, IAsyncDispos
     public JWTAuthenticationService CreateJWTAuthenticationService()
         => new (_merrickContext, _factory);
 
-    public void SetAuthenticationToken(string token)
-    {
-        _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(JwtBearerDefaults.AuthenticationScheme, token);
-    }
-
     public void Dispose()
     {
         _httpClient?.Dispose();

@@ -3,29 +3,18 @@ namespace ASPIRE.Tests.ZORGATH.WebPortal.API.Infrastructure;
 /// <summary>
 ///     Helper Class For Creating Authentication State In Tests
 /// </summary>
-public sealed class JWTAuthenticationService
+public sealed class JWTAuthenticationService(MerrickContext merrickContext, WebApplicationFactory<ZORGATHAssemblyMarker> factory)
 {
-    private readonly MerrickContext _merrickContext;
-    private readonly WebApplicationFactory<ZORGATHAssemblyMarker> _factory;
-
-    public JWTAuthenticationService(MerrickContext merrickContext, WebApplicationFactory<ZORGATHAssemblyMarker> factory)
-    {
-        _merrickContext = merrickContext;
-        _factory = factory;
-    }
+    private readonly MerrickContext _merrickContext = merrickContext;
+    private readonly WebApplicationFactory<ZORGATHAssemblyMarker> _factory = factory;
 
     /// <summary>
     ///     Creates A Complete Authentication Flow: Email Registration, User Registration, And Login
     /// </summary>
     public async Task<AuthenticationResult> CreateAuthenticatedUser(string emailAddress, string accountName, string password)
     {
-        // Step 1: Register Email Address
         Token registrationToken = await RegisterEmailAddress(emailAddress);
-
-        // Step 2: Register User And Main Account
         int userID = await RegisterUserAndMainAccount(registrationToken.Value.ToString(), accountName, password);
-
-        // Step 3: Log In User And Get Authentication Token
         string authenticationToken = await LogInUser(accountName, password);
 
         return new AuthenticationResult(userID, accountName, emailAddress, authenticationToken);

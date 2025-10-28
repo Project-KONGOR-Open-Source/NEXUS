@@ -44,3 +44,5 @@
  - never use the null-forgiving operator (!) to suppress null handling; then only times where this is acceptable are the following:
    - when using Include or ThenInclude in Entity Framework queries to reference navigation properties that are known to be not null according to the data model, but are reference types or marked as nullable in the code
    - when assigning "null!" to a nullable variable, field, or property is unavoidable without making the code overly-complex, and it is absolutely certain that the value will not be null at runtime
+
+ - when creating asynchronous methods, never use the "Async" suffix in the method name unless there is also a synchronous version of the same method in the same scope

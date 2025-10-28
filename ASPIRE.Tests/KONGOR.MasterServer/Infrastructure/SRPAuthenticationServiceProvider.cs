@@ -5,39 +5,44 @@ namespace ASPIRE.Tests.KONGOR.MasterServer.Infrastructure;
 /// </summary>
 public sealed class SRPAuthenticationServiceProvider : IAsyncDisposable
 {
-    private readonly IDistributedApplicationTestingBuilder _appHost;
+    private readonly IDistributedApplicationTestingBuilder? _appHost;
     private readonly DistributedApplication? _app;
     private readonly MerrickContext _merrickContext;
     private readonly HttpClient? _httpClient;
     private readonly bool _isFullyInitialized;
 
-    public SRPAuthenticationServiceProvider(string? databaseIdentifier = null, bool spinUpAppHost = false)
+    private SRPAuthenticationServiceProvider(MerrickContext merrickContext, IDistributedApplicationTestingBuilder? appHost, DistributedApplication? app, HttpClient? httpClient, bool isFullyInitialized)
     {
-        _merrickContext = InMemoryHelpers.GetInMemoryMerrickContext(databaseIdentifier);
+        _merrickContext = merrickContext;
+        _appHost = appHost;
+        _app = app;
+        _httpClient = httpClient;
+        _isFullyInitialized = isFullyInitialized;
+    }
+
+    public static async Task<SRPAuthenticationServiceProvider> CreateAsync(string? databaseIdentifier = null, bool spinUpAppHost = false)
+    {
+        MerrickContext merrickContext = InMemoryHelpers.GetInMemoryMerrickContext(databaseIdentifier);
 
         if (spinUpAppHost)
         {
-            // Spin Up Aspire AppHost For Integration Tests
-            _appHost = DistributedApplicationTestingBuilder.CreateAsync<Projects.ASPIRE_AppHost>().GetAwaiter().GetResult();
+            IDistributedApplicationTestingBuilder appHost = await DistributedApplicationTestingBuilder.CreateAsync<Projects.ASPIRE_AppHost>();
 
-            _appHost.Services.ConfigureHttpClientDefaults(clientBuilder =>
+            appHost.Services.ConfigureHttpClientDefaults(clientBuilder =>
             {
                 clientBuilder.AddStandardResilienceHandler();
             });
 
-            _app = _appHost.BuildAsync().GetAwaiter().GetResult();
+            DistributedApplication app = await appHost.BuildAsync();
+            await app.StartAsync();
 
-            _app.StartAsync().GetAwaiter().GetResult();
+            HttpClient httpClient = app.CreateHttpClient("master-server");
 
-            _httpClient = _app.CreateHttpClient("kongor-masterserver");
-            _isFullyInitialized = true;
+            return new SRPAuthenticationServiceProvider(merrickContext, appHost, app, httpClient, isFullyInitialized: true);
         }
         else
         {
-            _appHost = null!;
-            _app = null;
-            _httpClient = null;
-            _isFullyInitialized = false;
+            return new SRPAuthenticationServiceProvider(merrickContext, appHost: null, app: null, httpClient: null, isFullyInitialized: false);
         }
     }
 

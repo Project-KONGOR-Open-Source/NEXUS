@@ -14,12 +14,12 @@ public sealed class SRPAuthenticationTests
     {
         string databaseIdentifier = Guid.NewGuid().ToString();
 
-        await using SRPAuthenticationServiceProvider services = new (databaseIdentifier, spinUpAppHost: false);
+        await using SRPAuthenticationServiceProvider services = await SRPAuthenticationServiceProvider.CreateAsync(databaseIdentifier, spinUpAppHost: false);
 
         IMemoryCache cache = new MemoryCache(new MemoryCacheOptions());
-        SRPAuthenticationService srpHelper = new (services.MerrickContext, cache);
+        SRPAuthenticationService srpAuthenticationService = new (services.MerrickContext, cache);
 
-        (Account account, string returnedPassword) = await srpHelper.CreateAccountWithSRPCredentialsAsync(emailAddress, accountName, password);
+        (Account account, string returnedPassword) = await srpAuthenticationService.CreateAccountWithSRPCredentials(emailAddress, accountName, password);
 
         await Assert.That(account).IsNotNull();
         await Assert.That(account.Name).IsEqualTo(accountName);
@@ -30,7 +30,6 @@ public sealed class SRPAuthenticationTests
         await Assert.That(account.IsMain).IsTrue();
         await Assert.That(returnedPassword).IsEqualTo(password);
 
-        // Verify Account Exists In Database
         Account? dbAccount = await services.MerrickContext.Accounts
             .Include(acc => acc.User)
             .SingleOrDefaultAsync(acc => acc.Name.Equals(accountName));
@@ -52,13 +51,13 @@ public sealed class SRPAuthenticationTests
     {
         string databaseIdentifier = Guid.NewGuid().ToString();
 
-        await using SRPAuthenticationServiceProvider services = new (databaseIdentifier, spinUpAppHost: false);
+        await using SRPAuthenticationServiceProvider services = await SRPAuthenticationServiceProvider.CreateAsync(databaseIdentifier, spinUpAppHost: false);
 
         IMemoryCache cache = new MemoryCache(new MemoryCacheOptions());
-        SRPAuthenticationService srpHelper = new (services.MerrickContext, cache);
+        SRPAuthenticationService srpAuthenticationService = new (services.MerrickContext, cache);
 
-        (Account account1, string _) = await srpHelper.CreateAccountWithSRPCredentialsAsync(emailAddress, accountName, password);
-        (Account account2, string _) = await srpHelper.CreateAccountWithSRPCredentialsAsync($"other_{emailAddress}", $"Other{accountName}", password);
+        (Account account1, string _) = await srpAuthenticationService.CreateAccountWithSRPCredentials(emailAddress, accountName, password);
+        (Account account2, string _) = await srpAuthenticationService.CreateAccountWithSRPCredentials($"other_{emailAddress}", $"Other{accountName}", password);
 
         await Assert.That(account1.User.SRPPasswordSalt).IsNotEqualTo(account2.User.SRPPasswordSalt);
     }
@@ -70,12 +69,12 @@ public sealed class SRPAuthenticationTests
     {
         string databaseIdentifier = Guid.NewGuid().ToString();
 
-        await using SRPAuthenticationServiceProvider services = new (databaseIdentifier, spinUpAppHost: false);
+        await using SRPAuthenticationServiceProvider services = await SRPAuthenticationServiceProvider.CreateAsync(databaseIdentifier, spinUpAppHost: false);
 
         IMemoryCache cache = new MemoryCache(new MemoryCacheOptions());
-        SRPAuthenticationService srpHelper = new (services.MerrickContext, cache);
+        SRPAuthenticationService srpAuthenticationService = new (services.MerrickContext, cache);
 
-        (Account account, string _) = await srpHelper.CreateAccountWithSRPCredentialsAsync(emailAddress, accountName, password);
+        (Account account, string _) = await srpAuthenticationService.CreateAccountWithSRPCredentials(emailAddress, accountName, password);
 
         string salt = account.User.SRPPasswordSalt;
         string expectedHash = SRPRegistrationHandlers.ComputeSRPPasswordHash(password, salt);
@@ -90,12 +89,12 @@ public sealed class SRPAuthenticationTests
     {
         string databaseIdentifier = Guid.NewGuid().ToString();
 
-        await using SRPAuthenticationServiceProvider services = new (databaseIdentifier, spinUpAppHost: false);
+        await using SRPAuthenticationServiceProvider services = await SRPAuthenticationServiceProvider.CreateAsync(databaseIdentifier, spinUpAppHost: false);
 
         IMemoryCache cache = new MemoryCache(new MemoryCacheOptions());
-        SRPAuthenticationService srpHelper = new (services.MerrickContext, cache);
+        SRPAuthenticationService srpAuthenticationService = new (services.MerrickContext, cache);
 
-        (Account account, string _) = await srpHelper.CreateAccountWithSRPCredentialsAsync(emailAddress, accountName, password);
+        (Account account, string _) = await srpAuthenticationService.CreateAccountWithSRPCredentials(emailAddress, accountName, password);
 
         Account? dbAccount = await services.MerrickContext.Accounts
             .Include(acc => acc.User)
@@ -118,12 +117,12 @@ public sealed class SRPAuthenticationTests
     {
         string databaseIdentifier = Guid.NewGuid().ToString();
 
-        await using SRPAuthenticationServiceProvider services = new (databaseIdentifier, spinUpAppHost: false);
+        await using SRPAuthenticationServiceProvider services = await SRPAuthenticationServiceProvider.CreateAsync(databaseIdentifier, spinUpAppHost: false);
 
         IMemoryCache cache = new MemoryCache(new MemoryCacheOptions());
-        SRPAuthenticationService srpHelper = new (services.MerrickContext, cache);
+        SRPAuthenticationService srpAuthenticationService = new (services.MerrickContext, cache);
 
-        (Account account, string _) = await srpHelper.CreateAccountWithSRPCredentialsAsync(emailAddress, accountName, password);
+        (Account account, string _) = await srpAuthenticationService.CreateAccountWithSRPCredentials(emailAddress, accountName, password);
 
         await Assert.That(account.User.SRPPasswordHash).IsNotEmpty();
         await Assert.That(account.User.PBKDF2PasswordHash).IsNotEmpty();
