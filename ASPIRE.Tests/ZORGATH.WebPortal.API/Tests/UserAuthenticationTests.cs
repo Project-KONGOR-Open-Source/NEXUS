@@ -41,7 +41,7 @@ public sealed class UserAuthenticationTests
         await Assert.That(jwtToken.Issuer).IsEqualTo(configuration.Value.JWT.Issuer);
         await Assert.That(jwtToken.Audiences.First()).IsEqualTo(configuration.Value.JWT.Audience);
 
-        string userIDClaim = jwtToken.Claims.Single(claim => claim.Type.Equals(MERRICK.DatabaseContext.Constants.Claims.UserID)).Value;
+        string userIDClaim = jwtToken.Claims.Single(claim => claim.Type.Equals(Claims.UserID)).Value;
 
         await Assert.That(userIDClaim).IsEqualTo(authenticationResult.UserID.ToString());
     }
@@ -107,9 +107,9 @@ public sealed class UserAuthenticationTests
         await Assert.That(jwtToken.Claims.Any(claim => claim.Type.Equals(JwtRegisteredClaimNames.Jti))).IsTrue();
         await Assert.That(jwtToken.Claims.Any(claim => claim.Type.Equals(JwtRegisteredClaimNames.Nonce))).IsTrue();
 
-        await Assert.That(jwtToken.Claims.Any(claim => claim.Type.Equals(MERRICK.DatabaseContext.Constants.Claims.UserID))).IsTrue();
-        await Assert.That(jwtToken.Claims.Any(claim => claim.Type.Equals(MERRICK.DatabaseContext.Constants.Claims.AccountID))).IsTrue();
-        await Assert.That(jwtToken.Claims.Any(claim => claim.Type.Equals(MERRICK.DatabaseContext.Constants.Claims.AccountIsMain))).IsTrue();
+        await Assert.That(jwtToken.Claims.Any(claim => claim.Type.Equals(Claims.UserID))).IsTrue();
+        await Assert.That(jwtToken.Claims.Any(claim => claim.Type.Equals(Claims.AccountID))).IsTrue();
+        await Assert.That(jwtToken.Claims.Any(claim => claim.Type.Equals(Claims.AccountIsMain))).IsTrue();
     }
 
     [Test]
@@ -128,7 +128,7 @@ public sealed class UserAuthenticationTests
         await Assert.That(result.EmailAddress).IsEqualTo(emailAddress);
         await Assert.That(result.AuthenticationToken).IsNotEmpty();
 
-        MERRICK.DatabaseContext.Entities.Core.User? user = await services.MerrickContext.Users
+        User? user = await services.MerrickContext.Users
             .Include(user => user.Accounts)
             .Include(user => user.Role)
             .SingleOrDefaultAsync(user => user.ID.Equals(result.UserID));
@@ -141,6 +141,6 @@ public sealed class UserAuthenticationTests
         await Assert.That(user.EmailAddress).IsEqualTo(emailAddress);
         await Assert.That(user.Accounts).HasCount().GreaterThanOrEqualTo(1);
         await Assert.That(user.Accounts.Any(account => account.Name.Equals(accountName))).IsTrue();
-        await Assert.That(user.Role.Name).IsEqualTo(MERRICK.DatabaseContext.Constants.UserRoles.User);
+        await Assert.That(user.Role.Name).IsEqualTo(UserRoles.User);
     }
 }

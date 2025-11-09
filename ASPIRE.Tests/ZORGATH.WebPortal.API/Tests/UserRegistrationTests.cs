@@ -47,7 +47,7 @@ public sealed class UserRegistrationTests
         await Assert.That(userDTO.Accounts).HasCount().EqualTo(1);
         await Assert.That(userDTO.Accounts.First().Name).IsEqualTo(accountName);
 
-        MERRICK.DatabaseContext.Entities.Core.User? user = await services.MerrickContext.Users
+        User? user = await services.MerrickContext.Users
             .Include(user => user.Accounts)
             .SingleOrDefaultAsync(user => user.EmailAddress.Equals(emailAddress));
 

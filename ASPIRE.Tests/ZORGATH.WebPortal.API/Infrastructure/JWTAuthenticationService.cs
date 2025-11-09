@@ -5,9 +5,6 @@ namespace ASPIRE.Tests.ZORGATH.WebPortal.API.Infrastructure;
 /// </summary>
 public sealed class JWTAuthenticationService(MerrickContext merrickContext, WebApplicationFactory<ZORGATHAssemblyMarker> factory)
 {
-    private readonly MerrickContext _merrickContext = merrickContext;
-    private readonly WebApplicationFactory<ZORGATHAssemblyMarker> _factory = factory;
-
     /// <summary>
     ///     Creates A Complete Authentication Flow: Email Registration, User Registration, And Login
     /// </summary>
@@ -22,17 +19,17 @@ public sealed class JWTAuthenticationService(MerrickContext merrickContext, WebA
 
     private async Task<Token> RegisterEmailAddress(string emailAddress)
     {
-        ILogger<EmailAddressController> logger = _factory.Services.GetRequiredService<ILogger<EmailAddressController>>();
-        IEmailService emailService = _factory.Services.GetRequiredService<IEmailService>();
+        ILogger<EmailAddressController> logger = factory.Services.GetRequiredService<ILogger<EmailAddressController>>();
+        IEmailService emailService = factory.Services.GetRequiredService<IEmailService>();
 
-        EmailAddressController controller = new (_merrickContext, logger, emailService);
+        EmailAddressController controller = new (merrickContext, logger, emailService);
 
         IActionResult response = await controller.RegisterEmailAddress(new RegisterEmailAddressDTO(emailAddress, emailAddress));
 
         if (response is not OkObjectResult)
             throw new InvalidOperationException($"Failed To Register Email Address: {emailAddress}");
 
-        Token? token = await _merrickContext.Tokens.SingleOrDefaultAsync(token =>
+        Token? token = await merrickContext.Tokens.SingleOrDefaultAsync(token =>
             token.EmailAddress.Equals(emailAddress) && token.Purpose.Equals(TokenPurpose.EmailAddressVerification));
 
         return token ?? throw new InvalidOperationException($"Registration Token Not Found For Email: {emailAddress}");
@@ -40,11 +37,11 @@ public sealed class JWTAuthenticationService(MerrickContext merrickContext, WebA
 
     private async Task<int> RegisterUserAndMainAccount(string tokenValue, string accountName, string password)
     {
-        ILogger<UserController> logger = _factory.Services.GetRequiredService<ILogger<UserController>>();
-        IOptions<OperationalConfiguration> configuration = _factory.Services.GetRequiredService<IOptions<OperationalConfiguration>>();
-        IEmailService emailService = _factory.Services.GetRequiredService<IEmailService>();
+        ILogger<UserController> logger = factory.Services.GetRequiredService<ILogger<UserController>>();
+        IOptions<OperationalConfiguration> configuration = factory.Services.GetRequiredService<IOptions<OperationalConfiguration>>();
+        IEmailService emailService = factory.Services.GetRequiredService<IEmailService>();
 
-        UserController controller = new (_merrickContext, logger, emailService, configuration);
+        UserController controller = new (merrickContext, logger, emailService, configuration);
 
         IActionResult response = await controller.RegisterUserAndMainAccount(
             new RegisterUserAndMainAccountDTO(tokenValue, accountName, password, password));
@@ -59,11 +56,11 @@ public sealed class JWTAuthenticationService(MerrickContext merrickContext, WebA
 
     private async Task<string> LogInUser(string accountName, string password)
     {
-        ILogger<UserController> logger = _factory.Services.GetRequiredService<ILogger<UserController>>();
-        IOptions<OperationalConfiguration> configuration = _factory.Services.GetRequiredService<IOptions<OperationalConfiguration>>();
-        IEmailService emailService = _factory.Services.GetRequiredService<IEmailService>();
+        ILogger<UserController> logger = factory.Services.GetRequiredService<ILogger<UserController>>();
+        IOptions<OperationalConfiguration> configuration = factory.Services.GetRequiredService<IOptions<OperationalConfiguration>>();
+        IEmailService emailService = factory.Services.GetRequiredService<IEmailService>();
 
-        UserController controller = new (_merrickContext, logger, emailService, configuration);
+        UserController controller = new (merrickContext, logger, emailService, configuration);
 
         IActionResult response = await controller.LogInUser(new LogInUserDTO(accountName, password));
 
