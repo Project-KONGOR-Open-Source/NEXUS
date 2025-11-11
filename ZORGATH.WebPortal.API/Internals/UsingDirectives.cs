@@ -1,4 +1,6 @@
-﻿global using FluentValidation;
+﻿global using ASPIRE.Common.ServiceDefaults;
+
+global using FluentValidation;
 global using FluentValidation.Results;
 
 global using MERRICK.DatabaseContext.Constants;

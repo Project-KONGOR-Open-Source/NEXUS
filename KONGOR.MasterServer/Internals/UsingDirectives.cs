@@ -1,6 +1,7 @@
 ﻿global using ASPIRE.Common.Communication;
 global using ASPIRE.Common.Constants;
 global using ASPIRE.Common.Extensions.Cryptography;
+global using ASPIRE.Common.ServiceDefaults;
 
 global using KONGOR.MasterServer.Constants;
 global using KONGOR.MasterServer.Extensions.Cache;

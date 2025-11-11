@@ -1,4 +1,5 @@
 ﻿global using ASPIRE.Common.Communication;
+global using ASPIRE.Common.ServiceDefaults;
 
 global using MERRICK.DatabaseContext.Constants;
 global using MERRICK.DatabaseContext.Data;
