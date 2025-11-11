@@ -1,12 +1,10 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-
-    <Sdk Name="Aspire.AppHost.Sdk" Version="9.5.2" />
+﻿<Project Sdk="Aspire.AppHost.Sdk/13.0.0">
 
     <!--
-        Make Sure To Always:
-            1) Update The "Aspire.AppHost.Sdk" SDK When The "Aspire.Hosting.AppHost" NuGet Package Is Updated
-            2) Update The Local .NET Tools And, Optionally But Recommended, Also The Global .NET Tools
-            3) Optionally, Update The Aspire Templates With "dotnet new install Aspire.ProjectTemplates"
+        When There Is An Update To The "Aspire.Hosting.AppHost" NuGet Package:
+            1) Update The "Aspire.AppHost.Sdk" SDK Which Includes The "Aspire.Hosting.AppHost" NuGet Package
+            2) Update The Local .NET Tools And, Optionally But Recommended, Also Update The Global .NET Tools
+            3) Update The Aspire Templates With "dotnet new install Aspire.ProjectTemplates" And Check For Service Defaults Updates
     -->
 
     <PropertyGroup>
@@ -16,7 +14,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Aspire.Hosting.AppHost" Version="13.0.0" />
         <PackageReference Include="Aspire.Hosting.Redis" Version="13.0.0" />
         <PackageReference Include="Aspire.Hosting.SqlServer" Version="13.0.0" />
     </ItemGroup>
