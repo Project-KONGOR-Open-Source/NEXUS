@@ -104,7 +104,7 @@ dotnet run --project ASPIRE.AppHost --launch-profile "ASPIRE.AppHost Production"
 Create A Database Schema Migration
 
 1. restore the Entity Framework Core CLI and the Aspire CLI by executing `dotnet tool restore`
-2. in the context of the solution directory, execute `aspire exec --resource database -- dotnet ef migrations add {NAME}`
+2. in the context of the solution directory, execute `aspire exec --resource database-context -- dotnet ef migrations add {NAME}`
 
 > [!NOTE]
 > Because the code-first database project is an Aspire resource, it needs the Aspire application host to be running when managing migrations and updating the database, so that Entity Framework Core can gain awareness of resources generated dynamically at run time, such as the connection string. Therefore, it is not possible to run `dotnet ef` commands directly against such a project, because on its own it doesn't have awareness of how to connect to the database server, since this information is passed downstream by the application host at run time.
@@ -118,14 +118,14 @@ Update The Database Schema
 # Development Database
 # In The Context Of The Solution Directory
 $ENV:ASPNETCORE_ENVIRONMENT = "Development"
-aspire exec --resource database -- dotnet ef database update
+aspire exec --resource database-context -- dotnet ef database update
 ```
 
 ```powershell
 # Production Database
 # In The Context Of The Solution Directory
 $ENV:ASPNETCORE_ENVIRONMENT = "Production"
-aspire exec --resource database -- dotnet ef database update
+aspire exec --resource database-context -- dotnet ef database update
 ```
 
 > [!NOTE]
