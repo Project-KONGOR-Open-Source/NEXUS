@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MERRICK.DatabaseContext.Migrations
 {
     [DbContext(typeof(MerrickContext))]
-    [Migration("20251015222846_CreateCoreEntities")]
+    [Migration("20251111193356_CreateCoreEntities")]
     partial class CreateCoreEntities
     {
         /// <inheritdoc />
@@ -20,7 +20,7 @@ namespace MERRICK.DatabaseContext.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.10")
+                .HasAnnotation("ProductVersion", "10.0.0")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -769,25 +769,20 @@ namespace MERRICK.DatabaseContext.Migrations
 
                     b.OwnsMany("MERRICK.DatabaseContext.Entities.Relational.BannedPeer", "BannedPeers", b1 =>
                         {
-                            b1.Property<int>("AccountID")
-                                .HasColumnType("int");
+                            b1.Property<int>("AccountID");
 
                             b1.Property<int>("__synthesizedOrdinal")
-                                .ValueGeneratedOnAdd()
-                                .HasColumnType("int");
+                                .ValueGeneratedOnAddOrUpdate();
 
                             b1.Property<string>("BanReason")
                                 .IsRequired()
-                                .HasMaxLength(30)
-                                .HasColumnType("nvarchar(30)");
+                                .HasMaxLength(30);
 
-                            b1.Property<int>("ID")
-                                .HasColumnType("int");
+                            b1.Property<int>("ID");
 
                             b1.Property<string>("Name")
                                 .IsRequired()
-                                .HasMaxLength(15)
-                                .HasColumnType("nvarchar(15)");
+                                .HasMaxLength(15);
 
                             b1.HasKey("AccountID", "__synthesizedOrdinal");
 
@@ -804,29 +799,23 @@ namespace MERRICK.DatabaseContext.Migrations
 
                     b.OwnsMany("MERRICK.DatabaseContext.Entities.Relational.FriendedPeer", "FriendedPeers", b1 =>
                         {
-                            b1.Property<int>("AccountID")
-                                .HasColumnType("int");
+                            b1.Property<int>("AccountID");
 
                             b1.Property<int>("__synthesizedOrdinal")
-                                .ValueGeneratedOnAdd()
-                                .HasColumnType("int");
+                                .ValueGeneratedOnAddOrUpdate();
 
                             b1.Property<string>("ClanTag")
-                                .HasMaxLength(4)
-                                .HasColumnType("nvarchar(4)");
+                                .HasMaxLength(4);
 
                             b1.Property<string>("FriendGroup")
                                 .IsRequired()
-                                .HasMaxLength(15)
-                                .HasColumnType("nvarchar(15)");
+                                .HasMaxLength(15);
 
-                            b1.Property<int>("ID")
-                                .HasColumnType("int");
+                            b1.Property<int>("ID");
 
                             b1.Property<string>("Name")
                                 .IsRequired()
-                                .HasMaxLength(15)
-                                .HasColumnType("nvarchar(15)");
+                                .HasMaxLength(15);
 
                             b1.HasKey("AccountID", "__synthesizedOrdinal");
 
@@ -843,20 +832,16 @@ namespace MERRICK.DatabaseContext.Migrations
 
                     b.OwnsMany("MERRICK.DatabaseContext.Entities.Relational.IgnoredPeer", "IgnoredPeers", b1 =>
                         {
-                            b1.Property<int>("AccountID")
-                                .HasColumnType("int");
+                            b1.Property<int>("AccountID");
 
                             b1.Property<int>("__synthesizedOrdinal")
-                                .ValueGeneratedOnAdd()
-                                .HasColumnType("int");
+                                .ValueGeneratedOnAddOrUpdate();
 
-                            b1.Property<int>("ID")
-                                .HasColumnType("int");
+                            b1.Property<int>("ID");
 
                             b1.Property<string>("Name")
                                 .IsRequired()
-                                .HasMaxLength(15)
-                                .HasColumnType("nvarchar(15)");
+                                .HasMaxLength(15);
 
                             b1.HasKey("AccountID", "__synthesizedOrdinal");
 
