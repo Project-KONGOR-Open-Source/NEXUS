@@ -30,7 +30,7 @@ global using Microsoft.EntityFrameworkCore.Diagnostics;
 global using Microsoft.Extensions.Caching.Memory;
 global using Microsoft.Extensions.FileProviders;
 global using Microsoft.Extensions.Options;
-global using Microsoft.OpenApi.Models;
+global using Microsoft.OpenApi;
 
 global using OneOf;
 

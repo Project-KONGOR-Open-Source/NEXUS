@@ -212,20 +212,18 @@ public class ZORGATH
             });
 
             // Configure Security Requirements For All Endpoints
-            options.AddSecurityRequirement(new OpenApiSecurityRequirement
+            options.AddSecurityRequirement(document =>
             {
-                {
-                    new OpenApiSecurityScheme
-                    {
-                        Reference = new OpenApiReference
-                        {
-                            Type = ReferenceType.SecurityScheme,
-                            Id = JwtBearerDefaults.AuthenticationScheme
-                        }
-                    },
+                OpenApiSecuritySchemeReference schemeReference = new (JwtBearerDefaults.AuthenticationScheme, document);
 
-                    Array.Empty<string>() // No Scopes Required, Just A Valid JWT
-                }
+                List<string> requiredScopes = []; // No Scopes Required, Just A Valid JWT
+
+                OpenApiSecurityRequirement securityRequirement = new ()
+                {
+                    { schemeReference, requiredScopes }
+                };
+
+                return securityRequirement;
             });
         });
 
