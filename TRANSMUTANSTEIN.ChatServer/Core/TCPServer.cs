@@ -42,7 +42,7 @@ public class TCPServer : IDisposable
     /// <param name="port">Server Port</param>
     private TCPServer(EndPoint endpoint, string address, int port)
     {
-        ID = Guid.NewGuid();
+        ID = Guid.CreateVersion7();
         Address = address;
         Port = port;
         Endpoint = endpoint;

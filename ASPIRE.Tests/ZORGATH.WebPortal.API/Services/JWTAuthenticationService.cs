@@ -3,7 +3,7 @@ namespace ASPIRE.Tests.ZORGATH.WebPortal.API.Services;
 /// <summary>
 ///     Helper Class For Creating Authentication State In Tests
 /// </summary>
-public sealed class JWTAuthenticationService(WebApplicationFactory<ZORGATHAssemblyMarker> webApplicationFactory, MerrickContext merrickContext)
+public sealed class JWTAuthenticationService(WebApplicationFactory<ZORGATHAssemblyMarker> webApplicationFactory)
 {
     /// <summary>
     ///     Creates A Complete Authentication Flow: Email Registration, User Registration, And Login
@@ -22,6 +22,8 @@ public sealed class JWTAuthenticationService(WebApplicationFactory<ZORGATHAssemb
     {
         ILogger<EmailAddressController> logger = webApplicationFactory.Services.GetRequiredService<ILogger<EmailAddressController>>();
         IEmailService emailService = webApplicationFactory.Services.GetRequiredService<IEmailService>();
+
+        MerrickContext merrickContext = webApplicationFactory.Services.GetRequiredService<MerrickContext>();
 
         EmailAddressController controller = new (merrickContext, logger, emailService);
 
@@ -42,6 +44,8 @@ public sealed class JWTAuthenticationService(WebApplicationFactory<ZORGATHAssemb
         IOptions<OperationalConfiguration> configuration = webApplicationFactory.Services.GetRequiredService<IOptions<OperationalConfiguration>>();
         IEmailService emailService = webApplicationFactory.Services.GetRequiredService<IEmailService>();
 
+        MerrickContext merrickContext = webApplicationFactory.Services.GetRequiredService<MerrickContext>();
+
         UserController controller = new (merrickContext, logger, emailService, configuration);
 
         IActionResult response = await controller.RegisterUserAndMainAccount(
@@ -60,6 +64,8 @@ public sealed class JWTAuthenticationService(WebApplicationFactory<ZORGATHAssemb
         ILogger<UserController> logger = webApplicationFactory.Services.GetRequiredService<ILogger<UserController>>();
         IOptions<OperationalConfiguration> configuration = webApplicationFactory.Services.GetRequiredService<IOptions<OperationalConfiguration>>();
         IEmailService emailService = webApplicationFactory.Services.GetRequiredService<IEmailService>();
+
+        MerrickContext merrickContext = webApplicationFactory.Services.GetRequiredService<MerrickContext>();
 
         UserController controller = new (merrickContext, logger, emailService, configuration);
 

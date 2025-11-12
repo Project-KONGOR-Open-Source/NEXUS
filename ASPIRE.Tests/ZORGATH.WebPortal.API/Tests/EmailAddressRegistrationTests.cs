@@ -10,18 +10,20 @@ public sealed class EmailAddressRegistrationTests
     [Arguments("user@kongor.net")]
     public async Task RegisterEmailAddress_WithValidEmailAddress_ReturnsOkAndCreatesToken(string emailAddress)
     {
-        ZORGATHServiceProvider serviceProvider = new ();
+        WebApplicationFactory<ZORGATHAssemblyMarker> webApplicationFactory = await ZORGATHServiceProvider.CreateOrchestratedInstance();
 
-        ILogger<EmailAddressController> logger = serviceProvider.WebApplicationFactory.Services.GetRequiredService<ILogger<EmailAddressController>>();
-        IEmailService emailService = serviceProvider.WebApplicationFactory.Services.GetRequiredService<IEmailService>();
+        ILogger<EmailAddressController> logger = webApplicationFactory.Services.GetRequiredService<ILogger<EmailAddressController>>();
+        IEmailService emailService = webApplicationFactory.Services.GetRequiredService<IEmailService>();
 
-        EmailAddressController controller = new (serviceProvider.DatabaseContext, logger, emailService);
+        MerrickContext databaseContext = webApplicationFactory.Services.GetRequiredService<MerrickContext>();
+
+        EmailAddressController controller = new (databaseContext, logger, emailService);
 
         IActionResult response = await controller.RegisterEmailAddress(new RegisterEmailAddressDTO(emailAddress, emailAddress));
 
         await Assert.That(response).IsTypeOf<OkObjectResult>();
 
-        Token? token = await serviceProvider.DatabaseContext.Tokens.SingleOrDefaultAsync(token =>
+        Token? token = await databaseContext.Tokens.SingleOrDefaultAsync(token =>
             token.EmailAddress.Equals(emailAddress) && token.Purpose.Equals(TokenPurpose.EmailAddressVerification));
 
         await Assert.That(token).IsNotNull();
@@ -39,12 +41,14 @@ public sealed class EmailAddressRegistrationTests
     [Arguments("user@kongor.net", "typo@kongor.net")]
     public async Task RegisterEmailAddress_WithMismatchedConfirmation_ReturnsBadRequest(string emailAddress, string confirmEmailAddress)
     {
-        ZORGATHServiceProvider serviceProvider = new ();
+        WebApplicationFactory<ZORGATHAssemblyMarker> webApplicationFactory = await ZORGATHServiceProvider.CreateOrchestratedInstance();
 
-        ILogger<EmailAddressController> logger = serviceProvider.WebApplicationFactory.Services.GetRequiredService<ILogger<EmailAddressController>>();
-        IEmailService emailService = serviceProvider.WebApplicationFactory.Services.GetRequiredService<IEmailService>();
+        ILogger<EmailAddressController> logger = webApplicationFactory.Services.GetRequiredService<ILogger<EmailAddressController>>();
+        IEmailService emailService = webApplicationFactory.Services.GetRequiredService<IEmailService>();
 
-        EmailAddressController controller = new (serviceProvider.DatabaseContext, logger, emailService);
+        MerrickContext databaseContext = webApplicationFactory.Services.GetRequiredService<MerrickContext>();
+
+        EmailAddressController controller = new (databaseContext, logger, emailService);
 
         IActionResult response = await controller.RegisterEmailAddress(new RegisterEmailAddressDTO(emailAddress, confirmEmailAddress));
 
@@ -56,12 +60,14 @@ public sealed class EmailAddressRegistrationTests
     [Arguments("existing@kongor.net")]
     public async Task RegisterEmailAddress_WhenAlreadyRegistered_ReturnsBadRequest(string emailAddress)
     {
-        ZORGATHServiceProvider serviceProvider = new ();
+        WebApplicationFactory<ZORGATHAssemblyMarker> webApplicationFactory = await ZORGATHServiceProvider.CreateOrchestratedInstance();
 
-        ILogger<EmailAddressController> logger = serviceProvider.WebApplicationFactory.Services.GetRequiredService<ILogger<EmailAddressController>>();
-        IEmailService emailService = serviceProvider.WebApplicationFactory.Services.GetRequiredService<IEmailService>();
+        ILogger<EmailAddressController> logger = webApplicationFactory.Services.GetRequiredService<ILogger<EmailAddressController>>();
+        IEmailService emailService = webApplicationFactory.Services.GetRequiredService<IEmailService>();
 
-        EmailAddressController controller = new (serviceProvider.DatabaseContext, logger, emailService);
+        MerrickContext databaseContext = webApplicationFactory.Services.GetRequiredService<MerrickContext>();
+
+        EmailAddressController controller = new (databaseContext, logger, emailService);
 
         await controller.RegisterEmailAddress(new RegisterEmailAddressDTO(emailAddress, emailAddress));
 

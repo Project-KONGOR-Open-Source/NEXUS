@@ -3,13 +3,15 @@ namespace ASPIRE.Tests.KONGOR.MasterServer.Services;
 /// <summary>
 ///     Helper Class For Building And Executing SRP Authentication Flows In Tests
 /// </summary>
-public sealed class SRPAuthenticationService(MerrickContext merrickContext)
+public sealed class SRPAuthenticationService(WebApplicationFactory<KONGORAssemblyMarker> webApplicationFactory)
 {
     /// <summary>
     ///     Creates An Account With SRP Credentials For Testing
     /// </summary>
     public async Task<(Account Account, string Password)> CreateAccountWithSRPCredentials(string emailAddress, string accountName, string password)
     {
+        MerrickContext merrickContext = webApplicationFactory.Services.GetRequiredService<MerrickContext>();
+
         Role? role = await merrickContext.Roles.SingleOrDefaultAsync(role => role.Name.Equals(UserRoles.User));
 
         if (role is null)

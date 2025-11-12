@@ -22,7 +22,7 @@ public class MatchServer
 
     public ServerStatus Status { get; set; } = ServerStatus.SERVER_STATUS_IDLE;
 
-    public string Cookie { get; set; } = Guid.NewGuid().ToString();
+    public string Cookie { get; set; } = Guid.CreateVersion7().ToString();
 
     public DateTimeOffset TimestampRegistered { get; set; } = DateTimeOffset.UtcNow;
 }

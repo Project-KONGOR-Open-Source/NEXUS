@@ -3,96 +3,80 @@
 /// <summary>
 ///     Provides Test Dependencies For ZORGATH Web Portal Tests
 /// </summary>
-public sealed class ZORGATHServiceProvider : IAsyncDisposable
+public static class ZORGATHServiceProvider
 {
-    private readonly MerrickContext merrickContext;
-    private readonly DistributedApplication? distributedApplication;
-    private readonly WebApplicationFactory<ZORGATHAssemblyMarker> webApplicationFactory;
-    private readonly bool isOrchestrated;
-
-    public ZORGATHServiceProvider()
+    /// <summary>
+    ///     Creates An Instance Of The ZORGATH Web Portal
+    /// </summary>
+    public static WebApplicationFactory<ZORGATHAssemblyMarker> CreateInstance(string? identifier = null)
     {
-        merrickContext = InMemoryHelpers.GetInMemoryMerrickContext(Guid.CreateVersion7().ToString());
+        WebApplicationFactory<ZORGATHAssemblyMarker> webApplicationFactory = new WebApplicationFactory<ZORGATHAssemblyMarker>().WithWebHostBuilder(builder =>
+        {
+            builder.UseSetting("ASPIRE:Orchestrated", "false");
 
-        webApplicationFactory = new WebApplicationFactory<ZORGATHAssemblyMarker>()
-            .WithWebHostBuilder(builder =>
+            builder.ConfigureServices(services =>
             {
-                builder.UseSetting("ASPIRE:Orchestrated", "false");
-                builder.ConfigureServices(services =>
-                {
-                    ServiceDescriptor? existing = services.FirstOrDefault(d => d.ServiceType == typeof(DbContextOptions<MerrickContext>));
-                    if (existing is not null)
-                        services.Remove(existing);
+                List<ServiceDescriptor> databaseContextDescriptors = [.. services.Where(descriptor => descriptor.ServiceType == typeof(DbContextOptions<MerrickContext>))];
 
-                    services.AddDbContext<MerrickContext>(options => options.UseInMemoryDatabase("Test-" + Guid.CreateVersion7().ToString()));
+                if (databaseContextDescriptors.Any())
+                    foreach (ServiceDescriptor databaseContextDescriptor in databaseContextDescriptors)
+                        services.Remove(databaseContextDescriptor);
 
-                    ServiceDescriptor? distributedCacheDescriptor = services.FirstOrDefault(d => d.ServiceType == typeof(IDistributedCache));
-                    if (distributedCacheDescriptor is not null)
+                services.AddDbContext<MerrickContext>(options => options.UseInMemoryDatabase(identifier ?? Guid.CreateVersion7().ToString()));
+
+                List<ServiceDescriptor> distributedCacheDescriptors = [.. services.Where(descriptor => descriptor.ServiceType == typeof(IDistributedCache))];
+
+                if (distributedCacheDescriptors.Any())
+                    foreach (ServiceDescriptor distributedCacheDescriptor in distributedCacheDescriptors)
                         services.Remove(distributedCacheDescriptor);
 
-                    services.AddDistributedMemoryCache();
-                });
+                services.AddDistributedMemoryCache();
             });
-
-        isOrchestrated = false;
-    }
-
-    private ZORGATHServiceProvider(MerrickContext context, DistributedApplication application, WebApplicationFactory<ZORGATHAssemblyMarker> factory)
-    {
-        merrickContext = context;
-        distributedApplication = application;
-        webApplicationFactory = factory;
-        isOrchestrated = true;
-    }
-
-    public MerrickContext DatabaseContext => merrickContext;
-    public WebApplicationFactory<ZORGATHAssemblyMarker> WebApplicationFactory => webApplicationFactory;
-    public bool IsOrchestrated => isOrchestrated;
-
-    /// <summary>
-    ///     Creates an orchestrated instance using the Aspire service graph without replacing external resources.
-    /// </summary>
-    public static async Task<ZORGATHServiceProvider> CreateOrchestratedAsync()
-    {
-        IDistributedApplicationTestingBuilder appHostBuilder = await DistributedApplicationTestingBuilder.CreateAsync<ASPIRE.AppHost.ASPIRE>();
-
-        appHostBuilder.Services.ConfigureHttpClientDefaults(clientBuilder =>
-        {
-            clientBuilder.AddStandardResilienceHandler();
         });
 
-        DistributedApplication distributedApplication = await appHostBuilder.BuildAsync();
-        await distributedApplication.StartAsync();
-
-        MerrickContext context = InMemoryHelpers.GetInMemoryMerrickContext(Guid.CreateVersion7().ToString());
-
-        WebApplicationFactory<ZORGATHAssemblyMarker> factory = new WebApplicationFactory<ZORGATHAssemblyMarker>()
-            .WithWebHostBuilder(builder =>
-            {
-                builder.UseSetting("ASPIRE:Orchestrated", "true");
-                builder.ConfigureServices(services =>
-                {
-                    ServiceDescriptor? existing = services.FirstOrDefault(d => d.ServiceType == typeof(DbContextOptions<MerrickContext>));
-                    if (existing is not null)
-                        services.Remove(existing);
-
-                    services.AddDbContext<MerrickContext>(options => options.UseInMemoryDatabase("Test-" + Guid.CreateVersion7().ToString()));
-
-                    ServiceDescriptor? distributedCacheDescriptor = services.FirstOrDefault(d => d.ServiceType == typeof(IDistributedCache));
-                    if (distributedCacheDescriptor is not null)
-                        services.Remove(distributedCacheDescriptor);
-
-                    services.AddDistributedMemoryCache();
-                });
-            });
-
-        return new ZORGATHServiceProvider(context, distributedApplication, factory);
+        return webApplicationFactory;
     }
 
-    public async ValueTask DisposeAsync()
+    /// <summary>
+    ///     Creates An Orchestrated Instance Of The ZORGATH Web Portal
+    /// </summary>
+    public static async Task<WebApplicationFactory<ZORGATHAssemblyMarker>> CreateOrchestratedInstance(string? identifier = null)
     {
-        await merrickContext.DisposeAsync();
-        if (distributedApplication is not null)
-            await distributedApplication.DisposeAsync();
+        IDistributedApplicationTestingBuilder applicationTestingBuilder = await DistributedApplicationTestingBuilder.CreateAsync<AppHost.ASPIRE>();
+
+        applicationTestingBuilder.Services.ConfigureHttpClientDefaults(httpClientBuilder =>
+        {
+            httpClientBuilder.AddStandardResilienceHandler();
+        });
+
+        DistributedApplication distributedApplication = await applicationTestingBuilder.BuildAsync();
+
+        await distributedApplication.StartAsync();
+
+        WebApplicationFactory<ZORGATHAssemblyMarker> webApplicationFactory = new WebApplicationFactory<ZORGATHAssemblyMarker>().WithWebHostBuilder(builder =>
+        {
+            builder.UseSetting("ASPIRE:Orchestrated", "true");
+
+            builder.ConfigureServices(services =>
+            {
+                List<ServiceDescriptor> databaseContextDescriptors = [.. services.Where(descriptor => descriptor.ServiceType == typeof(DbContextOptions<MerrickContext>))];
+
+                if (databaseContextDescriptors.Any())
+                    foreach (ServiceDescriptor databaseContextDescriptor in databaseContextDescriptors)
+                        services.Remove(databaseContextDescriptor);
+
+                services.AddDbContext<MerrickContext>(options => options.UseInMemoryDatabase(identifier ?? Guid.CreateVersion7().ToString()));
+
+                List<ServiceDescriptor> distributedCacheDescriptors = [.. services.Where(descriptor => descriptor.ServiceType == typeof(IDistributedCache))];
+
+                if (distributedCacheDescriptors.Any())
+                    foreach (ServiceDescriptor distributedCacheDescriptor in distributedCacheDescriptors)
+                        services.Remove(distributedCacheDescriptor);
+
+                services.AddDistributedMemoryCache();
+            });
+        });
+
+        return webApplicationFactory;
     }
 }
