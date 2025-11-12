@@ -10,11 +10,9 @@ public sealed class SRPAuthenticationTests
     [Arguments("srpuser2@kongor.net", "SRPPlayer2", "MyP@ssw0rd!")]
     public async Task CreateAccountWithSRPCredentials_WithValidData_CreatesAccountWithValidSRPFields(string emailAddress, string accountName, string password)
     {
-        string databaseIdentifier = Guid.CreateVersion7().ToString();
+        WebApplicationFactory<KONGORAssemblyMarker> webApplicationFactory = await KONGORServiceProvider.CreateOrchestratedInstance();
 
-        await using KONGORServiceProvider services = await KONGORServiceProvider.CreateAsync(databaseIdentifier, spinUpAppHost: false);
-
-        SRPAuthenticationService srpAuthenticationService = new (services.MerrickContext);
+        SRPAuthenticationService srpAuthenticationService = new (webApplicationFactory);
 
         (Account account, string returnedPassword) = await srpAuthenticationService.CreateAccountWithSRPCredentials(emailAddress, accountName, password);
 
@@ -27,7 +25,9 @@ public sealed class SRPAuthenticationTests
         await Assert.That(account.IsMain).IsTrue();
         await Assert.That(returnedPassword).IsEqualTo(password);
 
-        Account? dbAccount = await services.MerrickContext.Accounts
+        MerrickContext databaseContext = webApplicationFactory.Services.GetRequiredService<MerrickContext>();
+
+        Account? dbAccount = await databaseContext.Accounts
             .Include(acc => acc.User)
             .SingleOrDefaultAsync(acc => acc.Name.Equals(accountName));
 
@@ -46,11 +46,9 @@ public sealed class SRPAuthenticationTests
     [Arguments("salt2@kongor.net", "SaltPlayer2", "MyP@ssw0rd!")]
     public async Task CreateAccountWithSRPCredentials_GeneratesUniqueSaltsForDifferentAccounts(string emailAddress, string accountName, string password)
     {
-        string databaseIdentifier = Guid.CreateVersion7().ToString();
+        WebApplicationFactory<KONGORAssemblyMarker> webApplicationFactory = await KONGORServiceProvider.CreateOrchestratedInstance();
 
-        await using KONGORServiceProvider services = await KONGORServiceProvider.CreateAsync(databaseIdentifier, spinUpAppHost: false);
-
-        SRPAuthenticationService srpAuthenticationService = new (services.MerrickContext);
+        SRPAuthenticationService srpAuthenticationService = new (webApplicationFactory);
 
         (Account account1, string _) = await srpAuthenticationService.CreateAccountWithSRPCredentials(emailAddress, accountName, password);
         (Account account2, string _) = await srpAuthenticationService.CreateAccountWithSRPCredentials($"other_{emailAddress}", $"Other{accountName}", password);
@@ -63,11 +61,9 @@ public sealed class SRPAuthenticationTests
     [Arguments("hash2@kongor.net", "HashPlayer2", "MyP@ssw0rd!")]
     public async Task CreateAccountWithSRPCredentials_HashesAreDeterministicForSamePasswordAndSalt(string emailAddress, string accountName, string password)
     {
-        string databaseIdentifier = Guid.CreateVersion7().ToString();
+        WebApplicationFactory<KONGORAssemblyMarker> webApplicationFactory = await KONGORServiceProvider.CreateOrchestratedInstance();
 
-        await using KONGORServiceProvider services = await KONGORServiceProvider.CreateAsync(databaseIdentifier, spinUpAppHost: false);
-
-        SRPAuthenticationService srpAuthenticationService = new (services.MerrickContext);
+        SRPAuthenticationService srpAuthenticationService = new (webApplicationFactory);
 
         (Account account, string _) = await srpAuthenticationService.CreateAccountWithSRPCredentials(emailAddress, accountName, password);
 
@@ -82,15 +78,15 @@ public sealed class SRPAuthenticationTests
     [Arguments("role2@kongor.net", "RolePlayer2", "MyP@ssw0rd!")]
     public async Task CreateAccountWithSRPCredentials_AssignsUserRoleCorrectly(string emailAddress, string accountName, string password)
     {
-        string databaseIdentifier = Guid.CreateVersion7().ToString();
+        WebApplicationFactory<KONGORAssemblyMarker> webApplicationFactory = await KONGORServiceProvider.CreateOrchestratedInstance();
 
-        await using KONGORServiceProvider services = await KONGORServiceProvider.CreateAsync(databaseIdentifier, spinUpAppHost: false);
-
-        SRPAuthenticationService srpAuthenticationService = new (services.MerrickContext);
+        SRPAuthenticationService srpAuthenticationService = new (webApplicationFactory);
 
         (Account account, string _) = await srpAuthenticationService.CreateAccountWithSRPCredentials(emailAddress, accountName, password);
 
-        Account? dbAccount = await services.MerrickContext.Accounts
+        MerrickContext databaseContext = webApplicationFactory.Services.GetRequiredService<MerrickContext>();
+
+        Account? dbAccount = await databaseContext.Accounts
             .Include(acc => acc.User)
             .ThenInclude(user => user.Role)
             .SingleOrDefaultAsync(acc => acc.Name.Equals(accountName));
@@ -109,11 +105,9 @@ public sealed class SRPAuthenticationTests
     [Arguments("pbkdf2@kongor.net", "PBKDF2Player2", "MyP@ssw0rd!")]
     public async Task CreateAccountWithSRPCredentials_GeneratesBothSRPAndPBKDF2Hashes(string emailAddress, string accountName, string password)
     {
-        string databaseIdentifier = Guid.CreateVersion7().ToString();
+        WebApplicationFactory<KONGORAssemblyMarker> webApplicationFactory = await KONGORServiceProvider.CreateOrchestratedInstance();
 
-        await using KONGORServiceProvider services = await KONGORServiceProvider.CreateAsync(databaseIdentifier, spinUpAppHost: false);
-
-        SRPAuthenticationService srpAuthenticationService = new (services.MerrickContext);
+        SRPAuthenticationService srpAuthenticationService = new (webApplicationFactory);
 
         (Account account, string _) = await srpAuthenticationService.CreateAccountWithSRPCredentials(emailAddress, accountName, password);
 
