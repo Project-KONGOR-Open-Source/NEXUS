@@ -14,7 +14,7 @@ public sealed class UserAuthenticationTests
 
         JWTAuthenticationService jwtAuthenticationService = new(serviceProvider.WebApplicationFactory, serviceProvider.DatabaseContext);
 
-        AuthenticationResult authenticationResult = await jwtAuthenticationService.CreateAuthenticatedUser(emailAddress, accountName, password);
+        JWTAuthenticationData authenticationResult = await jwtAuthenticationService.CreateAuthenticatedUser(emailAddress, accountName, password);
 
         IOptions<OperationalConfiguration> configuration = serviceProvider.WebApplicationFactory.Services.GetRequiredService<IOptions<OperationalConfiguration>>();
 
@@ -95,7 +95,7 @@ public sealed class UserAuthenticationTests
 
         JWTAuthenticationService jwtAuthenticationService = new(serviceProvider.WebApplicationFactory, serviceProvider.DatabaseContext);
 
-        AuthenticationResult authenticationResult = await jwtAuthenticationService.CreateAuthenticatedUser(emailAddress, accountName, password);
+        JWTAuthenticationData authenticationResult = await jwtAuthenticationService.CreateAuthenticatedUser(emailAddress, accountName, password);
 
         JwtSecurityTokenHandler tokenHandler = new ();
         JwtSecurityToken jwtToken = tokenHandler.ReadJwtToken(authenticationResult.AuthenticationToken);
@@ -121,7 +121,7 @@ public sealed class UserAuthenticationTests
 
         JWTAuthenticationService jwtAuthenticationService = new(serviceProvider.WebApplicationFactory, serviceProvider.DatabaseContext);
 
-        AuthenticationResult result = await jwtAuthenticationService.CreateAuthenticatedUser(emailAddress, accountName, password);
+        JWTAuthenticationData result = await jwtAuthenticationService.CreateAuthenticatedUser(emailAddress, accountName, password);
 
         await Assert.That(result.UserID).IsGreaterThan(0);
         await Assert.That(result.AccountName).IsEqualTo(accountName);

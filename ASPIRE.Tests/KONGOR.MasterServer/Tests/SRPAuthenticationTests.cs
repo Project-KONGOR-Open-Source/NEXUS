@@ -1,7 +1,5 @@
 namespace ASPIRE.Tests.KONGOR.MasterServer.Tests;
 
-using Infrastructure;
-
 /// <summary>
 ///     Tests For SRP Authentication Functionality In KONGOR Master Server
 /// </summary>
@@ -14,7 +12,7 @@ public sealed class SRPAuthenticationTests
     {
         string databaseIdentifier = Guid.NewGuid().ToString();
 
-        await using SRPAuthenticationServiceProvider services = await SRPAuthenticationServiceProvider.CreateAsync(databaseIdentifier, spinUpAppHost: false);
+        await using KONGORServiceProvider services = await KONGORServiceProvider.CreateAsync(databaseIdentifier, spinUpAppHost: false);
 
         SRPAuthenticationService srpAuthenticationService = new (services.MerrickContext);
 
@@ -50,7 +48,7 @@ public sealed class SRPAuthenticationTests
     {
         string databaseIdentifier = Guid.NewGuid().ToString();
 
-        await using SRPAuthenticationServiceProvider services = await SRPAuthenticationServiceProvider.CreateAsync(databaseIdentifier, spinUpAppHost: false);
+        await using KONGORServiceProvider services = await KONGORServiceProvider.CreateAsync(databaseIdentifier, spinUpAppHost: false);
 
         SRPAuthenticationService srpAuthenticationService = new (services.MerrickContext);
 
@@ -67,7 +65,7 @@ public sealed class SRPAuthenticationTests
     {
         string databaseIdentifier = Guid.NewGuid().ToString();
 
-        await using SRPAuthenticationServiceProvider services = await SRPAuthenticationServiceProvider.CreateAsync(databaseIdentifier, spinUpAppHost: false);
+        await using KONGORServiceProvider services = await KONGORServiceProvider.CreateAsync(databaseIdentifier, spinUpAppHost: false);
 
         SRPAuthenticationService srpAuthenticationService = new (services.MerrickContext);
 
@@ -86,7 +84,7 @@ public sealed class SRPAuthenticationTests
     {
         string databaseIdentifier = Guid.NewGuid().ToString();
 
-        await using SRPAuthenticationServiceProvider services = await SRPAuthenticationServiceProvider.CreateAsync(databaseIdentifier, spinUpAppHost: false);
+        await using KONGORServiceProvider services = await KONGORServiceProvider.CreateAsync(databaseIdentifier, spinUpAppHost: false);
 
         SRPAuthenticationService srpAuthenticationService = new (services.MerrickContext);
 
@@ -113,7 +111,7 @@ public sealed class SRPAuthenticationTests
     {
         string databaseIdentifier = Guid.NewGuid().ToString();
 
-        await using SRPAuthenticationServiceProvider services = await SRPAuthenticationServiceProvider.CreateAsync(databaseIdentifier, spinUpAppHost: false);
+        await using KONGORServiceProvider services = await KONGORServiceProvider.CreateAsync(databaseIdentifier, spinUpAppHost: false);
 
         SRPAuthenticationService srpAuthenticationService = new (services.MerrickContext);
 

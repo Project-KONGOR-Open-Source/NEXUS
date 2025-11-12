@@ -1,4 +1,4 @@
-namespace ASPIRE.Tests.KONGOR.MasterServer.Infrastructure;
+namespace ASPIRE.Tests.KONGOR.MasterServer.Services;
 
 /// <summary>
 ///     Helper Class For Building And Executing SRP Authentication Flows In Tests

@@ -8,14 +8,14 @@ public sealed class JWTAuthenticationService(WebApplicationFactory<ZORGATHAssemb
     /// <summary>
     ///     Creates A Complete Authentication Flow: Email Registration, User Registration, And Login
     /// </summary>
-    public async Task<AuthenticationResult> CreateAuthenticatedUser(string emailAddress, string accountName, string password)
+    public async Task<JWTAuthenticationData> CreateAuthenticatedUser(string emailAddress, string accountName, string password)
     {
         Token registrationToken = await RegisterEmailAddress(emailAddress);
 
         int userID = await RegisterUserAndMainAccount(registrationToken.Value.ToString(), accountName, password);
         string authenticationToken = await LogInUser(accountName, password);
 
-        return new AuthenticationResult(userID, accountName, emailAddress, authenticationToken);
+        return new JWTAuthenticationData(userID, accountName, emailAddress, authenticationToken);
     }
 
     private async Task<Token> RegisterEmailAddress(string emailAddress)
@@ -73,8 +73,3 @@ public sealed class JWTAuthenticationService(WebApplicationFactory<ZORGATHAssemb
         return tokenDTO?.Token ?? throw new InvalidOperationException("Authentication Token Not Found In Login Response");
     }
 }
-
-/// <summary>
-///     Result Of A Complete Authentication Flow
-/// </summary>
-public sealed record AuthenticationResult(int UserID, string AccountName, string EmailAddress, string AuthenticationToken);
