@@ -1,4 +1,6 @@
-﻿global using MERRICK.DatabaseContext.Constants;
+﻿global using KONGOR.MasterServer.Internals;
+
+global using MERRICK.DatabaseContext.Constants;
 global using MERRICK.DatabaseContext.Entities.Core;
 global using MERRICK.DatabaseContext.Entities.Utility;
 global using MERRICK.DatabaseContext.Helpers;
@@ -8,6 +10,7 @@ global using Microsoft.AspNetCore.Identity;
 global using Microsoft.AspNetCore.Mvc;
 global using Microsoft.AspNetCore.Mvc.Testing;
 global using Microsoft.EntityFrameworkCore;
+global using Microsoft.Extensions.Caching.Distributed;
 global using Microsoft.Extensions.DependencyInjection;
 global using Microsoft.Extensions.Logging;
 global using Microsoft.Extensions.Options;
