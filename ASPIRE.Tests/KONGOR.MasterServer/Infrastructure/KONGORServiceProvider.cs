@@ -6,11 +6,6 @@ namespace ASPIRE.Tests.KONGOR.MasterServer.Infrastructure;
 public static class KONGORServiceProvider
 {
     /// <summary>
-    ///     Creates An Instance Of The KONGOR Master Server
-    /// </summary>
-    public static WebApplicationFactory<KONGORAssemblyMarker> CreateInstance() => new ();
-
-    /// <summary>
     ///     Creates An Orchestrated Instance Of The KONGOR Master Server
     /// </summary>
     public static async Task<WebApplicationFactory<KONGORAssemblyMarker>> CreateOrchestratedInstance(string? identifier = null)

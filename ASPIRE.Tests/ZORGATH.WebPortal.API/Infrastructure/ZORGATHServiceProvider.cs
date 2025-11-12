@@ -6,11 +6,6 @@
 public static class ZORGATHServiceProvider
 {
     /// <summary>
-    ///     Creates An Instance Of The ZORGATH Web Portal API
-    /// </summary>
-    public static WebApplicationFactory<ZORGATHAssemblyMarker> CreateInstance() => new ();
-
-    /// <summary>
     ///     Creates An Orchestrated Instance Of The ZORGATH Web Portal API
     /// </summary>
     public static async Task<WebApplicationFactory<ZORGATHAssemblyMarker>> CreateOrchestratedInstance(string? identifier = null)
