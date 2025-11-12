@@ -8,30 +8,7 @@ public static class KONGORServiceProvider
     /// <summary>
     ///     Creates An Instance Of The KONGOR Master Server
     /// </summary>
-    public static WebApplicationFactory<KONGORAssemblyMarker> CreateInstance(string? identifier = null)
-    {
-        WebApplicationFactory<KONGORAssemblyMarker> webApplicationFactory = new WebApplicationFactory<KONGORAssemblyMarker>().WithWebHostBuilder(builder =>
-        {
-            builder.ConfigureServices(services =>
-            {
-                List<ServiceDescriptor> databaseContextDescriptors = [.. services.Where(descriptor => descriptor.ServiceType == typeof(DbContextOptions<MerrickContext>))];
-
-                foreach (ServiceDescriptor databaseContextDescriptor in databaseContextDescriptors)
-                    services.Remove(databaseContextDescriptor);
-
-                services.AddDbContext<MerrickContext>(options => options.UseInMemoryDatabase(identifier ?? Guid.CreateVersion7().ToString()));
-
-                List<ServiceDescriptor> distributedCacheDescriptors = [.. services.Where(descriptor => descriptor.ServiceType == typeof(IDistributedCache))];
-
-                foreach (ServiceDescriptor distributedCacheDescriptor in distributedCacheDescriptors)
-                    services.Remove(distributedCacheDescriptor);
-
-                services.AddDistributedMemoryCache();
-            });
-        });
-
-        return webApplicationFactory;
-    }
+    public static WebApplicationFactory<KONGORAssemblyMarker> CreateInstance() => new ();
 
     /// <summary>
     ///     Creates An Orchestrated Instance Of The KONGOR Master Server
