@@ -10,25 +10,27 @@ public sealed class UserRegistrationTests
     [Arguments("user@kongor.net", "GameUser", "MyP@ssw0rd!")]
     public async Task RegisterUserAndMainAccount_WithValidData_ReturnsCreatedAndCreatesUserAndAccount(string emailAddress, string accountName, string password)
     {
-        await using JWTAuthenticationServiceProvider services = new ();
-        JWTAuthenticationService jwtAuthenticationService = services.CreateJWTAuthenticationService();
+        ZORGATHServiceProvider serviceProvider = new ();
 
-        ILogger<EmailAddressController> emailLogger = services.Factory.Services.GetRequiredService<ILogger<EmailAddressController>>();
-        IEmailService emailService = services.Factory.Services.GetRequiredService<IEmailService>();
+        JWTAuthenticationService jwtAuthenticationService = new (serviceProvider.WebApplicationFactory, serviceProvider.DatabaseContext);
 
-        EmailAddressController emailController = new (services.MerrickContext, emailLogger, emailService);
+        ILogger<EmailAddressController> emailLogger = serviceProvider.WebApplicationFactory.Services.GetRequiredService<ILogger<EmailAddressController>>();
+        IEmailService emailService = serviceProvider.WebApplicationFactory.Services.GetRequiredService<IEmailService>();
+
+        EmailAddressController emailController = new (serviceProvider.DatabaseContext, emailLogger, emailService);
+
         await emailController.RegisterEmailAddress(new RegisterEmailAddressDTO(emailAddress, emailAddress));
 
-        Token? registrationToken = await services.MerrickContext.Tokens.SingleOrDefaultAsync(token =>
+        Token? registrationToken = await serviceProvider.DatabaseContext.Tokens.SingleOrDefaultAsync(token =>
             token.EmailAddress.Equals(emailAddress) && token.Purpose.Equals(TokenPurpose.EmailAddressVerification));
 
         if (registrationToken is null)
             throw new NullReferenceException("Registration Token Is NULL");
 
-        ILogger<UserController> userLogger = services.Factory.Services.GetRequiredService<ILogger<UserController>>();
-        IOptions<OperationalConfiguration> configuration = services.Factory.Services.GetRequiredService<IOptions<OperationalConfiguration>>();
+        ILogger<UserController> userLogger = serviceProvider.WebApplicationFactory.Services.GetRequiredService<ILogger<UserController>>();
+        IOptions<OperationalConfiguration> configuration = serviceProvider.WebApplicationFactory.Services.GetRequiredService<IOptions<OperationalConfiguration>>();
 
-        UserController userController = new (services.MerrickContext, userLogger, emailService, configuration);
+        UserController userController = new (serviceProvider.DatabaseContext, userLogger, emailService, configuration);
 
         IActionResult response = await userController.RegisterUserAndMainAccount(
             new RegisterUserAndMainAccountDTO(registrationToken.Value.ToString(), accountName, password, password));
@@ -47,7 +49,7 @@ public sealed class UserRegistrationTests
         await Assert.That(userDTO.Accounts).HasCount().EqualTo(1);
         await Assert.That(userDTO.Accounts.First().Name).IsEqualTo(accountName);
 
-        User? user = await services.MerrickContext.Users
+        User? user = await serviceProvider.DatabaseContext.Users
             .Include(user => user.Accounts)
             .SingleOrDefaultAsync(user => user.EmailAddress.Equals(emailAddress));
 
@@ -60,7 +62,7 @@ public sealed class UserRegistrationTests
         await Assert.That(user.Accounts.First().Name).IsEqualTo(accountName);
         await Assert.That(user.Accounts.First().IsMain).IsTrue();
 
-        Token? consumedToken = await services.MerrickContext.Tokens.FindAsync(registrationToken.ID);
+        Token? consumedToken = await serviceProvider.DatabaseContext.Tokens.FindAsync(registrationToken.ID);
 
         if (consumedToken is null)
             throw new NullReferenceException("Consumed Token Is NULL");
@@ -73,24 +75,25 @@ public sealed class UserRegistrationTests
     [Arguments("test@kongor.net", "TestUser", "MyP@ss!", "WrongP@ss!")]
     public async Task RegisterUserAndMainAccount_WithMismatchedPasswords_ReturnsBadRequest(string emailAddress, string accountName, string password, string confirmPassword)
     {
-        await using JWTAuthenticationServiceProvider services = new ();
+        ZORGATHServiceProvider serviceProvider = new ();
 
-        ILogger<EmailAddressController> emailLogger = services.Factory.Services.GetRequiredService<ILogger<EmailAddressController>>();
-        IEmailService emailService = services.Factory.Services.GetRequiredService<IEmailService>();
+        ILogger<EmailAddressController> emailLogger = serviceProvider.WebApplicationFactory.Services.GetRequiredService<ILogger<EmailAddressController>>();
+        IEmailService emailService = serviceProvider.WebApplicationFactory.Services.GetRequiredService<IEmailService>();
 
-        EmailAddressController emailController = new (services.MerrickContext, emailLogger, emailService);
+        EmailAddressController emailController = new (serviceProvider.DatabaseContext, emailLogger, emailService);
+
         await emailController.RegisterEmailAddress(new RegisterEmailAddressDTO(emailAddress, emailAddress));
 
-        Token? registrationToken = await services.MerrickContext.Tokens.SingleOrDefaultAsync(token =>
+        Token? registrationToken = await serviceProvider.DatabaseContext.Tokens.SingleOrDefaultAsync(token =>
             token.EmailAddress.Equals(emailAddress) && token.Purpose.Equals(TokenPurpose.EmailAddressVerification));
 
         if (registrationToken is null)
             throw new NullReferenceException("Registration Token Is NULL");
 
-        ILogger<UserController> userLogger = services.Factory.Services.GetRequiredService<ILogger<UserController>>();
-        IOptions<OperationalConfiguration> configuration = services.Factory.Services.GetRequiredService<IOptions<OperationalConfiguration>>();
+        ILogger<UserController> userLogger = serviceProvider.WebApplicationFactory.Services.GetRequiredService<ILogger<UserController>>();
+        IOptions<OperationalConfiguration> configuration = serviceProvider.WebApplicationFactory.Services.GetRequiredService<IOptions<OperationalConfiguration>>();
 
-        UserController userController = new (services.MerrickContext, userLogger, emailService, configuration);
+        UserController userController = new (serviceProvider.DatabaseContext, userLogger, emailService, configuration);
 
         IActionResult response = await userController.RegisterUserAndMainAccount(
             new RegisterUserAndMainAccountDTO(registrationToken.Value.ToString(), accountName, password, confirmPassword));
@@ -105,13 +108,13 @@ public sealed class UserRegistrationTests
     {
         string invalidToken = Guid.NewGuid().ToString();
 
-        await using JWTAuthenticationServiceProvider services = new ();
+        ZORGATHServiceProvider serviceProvider = new ();
 
-        ILogger<UserController> userLogger = services.Factory.Services.GetRequiredService<ILogger<UserController>>();
-        IOptions<OperationalConfiguration> configuration = services.Factory.Services.GetRequiredService<IOptions<OperationalConfiguration>>();
-        IEmailService emailService = services.Factory.Services.GetRequiredService<IEmailService>();
+        ILogger<UserController> userLogger = serviceProvider.WebApplicationFactory.Services.GetRequiredService<ILogger<UserController>>();
+        IOptions<OperationalConfiguration> configuration = serviceProvider.WebApplicationFactory.Services.GetRequiredService<IOptions<OperationalConfiguration>>();
+        IEmailService emailService = serviceProvider.WebApplicationFactory.Services.GetRequiredService<IEmailService>();
 
-        UserController userController = new (services.MerrickContext, userLogger, emailService, configuration);
+        UserController userController = new (serviceProvider.DatabaseContext, userLogger, emailService, configuration);
 
         IActionResult response = await userController.RegisterUserAndMainAccount(
             new RegisterUserAndMainAccountDTO(invalidToken, accountName, password, password));
@@ -124,27 +127,29 @@ public sealed class UserRegistrationTests
     [Arguments("first@kongor.net", "second@kongor.net", "SameName", "MyP@ssw0rd!")]
     public async Task RegisterUserAndMainAccount_WithDuplicateAccountName_ReturnsConflict(string emailAddressOne, string emailAddressTwo, string accountName, string password)
     {
-        await using JWTAuthenticationServiceProvider services = new ();
+        ZORGATHServiceProvider serviceProvider = new ();
 
-        JWTAuthenticationService jwtAuthenticationService = services.CreateJWTAuthenticationService();
+        JWTAuthenticationService jwtAuthenticationService = new(serviceProvider.WebApplicationFactory, serviceProvider.DatabaseContext);
+
         await jwtAuthenticationService.CreateAuthenticatedUser(emailAddressOne, accountName, password);
 
-        ILogger<EmailAddressController> emailLogger = services.Factory.Services.GetRequiredService<ILogger<EmailAddressController>>();
-        IEmailService emailService = services.Factory.Services.GetRequiredService<IEmailService>();
+        ILogger<EmailAddressController> emailLogger = serviceProvider.WebApplicationFactory.Services.GetRequiredService<ILogger<EmailAddressController>>();
+        IEmailService emailService = serviceProvider.WebApplicationFactory.Services.GetRequiredService<IEmailService>();
 
-        EmailAddressController emailController = new (services.MerrickContext, emailLogger, emailService);
+        EmailAddressController emailController = new (serviceProvider.DatabaseContext, emailLogger, emailService);
+
         await emailController.RegisterEmailAddress(new RegisterEmailAddressDTO(emailAddressTwo, emailAddressTwo));
 
-        Token? registrationToken = await services.MerrickContext.Tokens.SingleOrDefaultAsync(token =>
+        Token? registrationToken = await serviceProvider.DatabaseContext.Tokens.SingleOrDefaultAsync(token =>
             token.EmailAddress.Equals(emailAddressTwo) && token.Purpose.Equals(TokenPurpose.EmailAddressVerification));
 
         if (registrationToken is null)
             throw new NullReferenceException("Registration Token Is NULL");
 
-        ILogger<UserController> userLogger = services.Factory.Services.GetRequiredService<ILogger<UserController>>();
-        IOptions<OperationalConfiguration> configuration = services.Factory.Services.GetRequiredService<IOptions<OperationalConfiguration>>();
+        ILogger<UserController> userLogger = serviceProvider.WebApplicationFactory.Services.GetRequiredService<ILogger<UserController>>();
+        IOptions<OperationalConfiguration> configuration = serviceProvider.WebApplicationFactory.Services.GetRequiredService<IOptions<OperationalConfiguration>>();
 
-        UserController userController = new (services.MerrickContext, userLogger, emailService, configuration);
+        UserController userController = new (serviceProvider.DatabaseContext, userLogger, emailService, configuration);
 
         IActionResult response = await userController.RegisterUserAndMainAccount(
             new RegisterUserAndMainAccountDTO(registrationToken.Value.ToString(), accountName, password, password));

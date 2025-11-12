@@ -33,3 +33,4 @@ global using ZORGATH.WebPortal.API.Models.Configuration;
 global using ZORGATH.WebPortal.API.Services.Email;
 
 global using ASPIRE.Tests.ZORGATH.WebPortal.API.Infrastructure;
+global using ASPIRE.Tests.ZORGATH.WebPortal.API.Services;

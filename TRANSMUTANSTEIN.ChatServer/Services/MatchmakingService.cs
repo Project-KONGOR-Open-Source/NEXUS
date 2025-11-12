@@ -66,7 +66,7 @@ public class MatchmakingService : IHostedService, IDisposable
                 foreach (MatchmakingGroup group in groups)
                     group.QueueStartTime = null;
 
-                ChatBuffer found = new();
+                ChatBuffer found = new ();
 
                 found.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_QUEUE_UPDATE);
                 found.WriteInt8(Convert.ToByte(ChatProtocol.TMMUpdateType.TMM_GROUP_FOUND_SERVER)); // Sound The Horn !!!

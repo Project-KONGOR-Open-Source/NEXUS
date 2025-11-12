@@ -1,9 +1,9 @@
-namespace ASPIRE.Tests.ZORGATH.WebPortal.API.Infrastructure;
+namespace ASPIRE.Tests.ZORGATH.WebPortal.API.Services;
 
 /// <summary>
 ///     Helper Class For Creating Authentication State In Tests
 /// </summary>
-public sealed class JWTAuthenticationService(MerrickContext merrickContext, WebApplicationFactory<ZORGATHAssemblyMarker> factory)
+public sealed class JWTAuthenticationService(WebApplicationFactory<ZORGATHAssemblyMarker> webApplicationFactory, MerrickContext merrickContext)
 {
     /// <summary>
     ///     Creates A Complete Authentication Flow: Email Registration, User Registration, And Login
@@ -11,6 +11,7 @@ public sealed class JWTAuthenticationService(MerrickContext merrickContext, WebA
     public async Task<AuthenticationResult> CreateAuthenticatedUser(string emailAddress, string accountName, string password)
     {
         Token registrationToken = await RegisterEmailAddress(emailAddress);
+
         int userID = await RegisterUserAndMainAccount(registrationToken.Value.ToString(), accountName, password);
         string authenticationToken = await LogInUser(accountName, password);
 
@@ -19,8 +20,8 @@ public sealed class JWTAuthenticationService(MerrickContext merrickContext, WebA
 
     private async Task<Token> RegisterEmailAddress(string emailAddress)
     {
-        ILogger<EmailAddressController> logger = factory.Services.GetRequiredService<ILogger<EmailAddressController>>();
-        IEmailService emailService = factory.Services.GetRequiredService<IEmailService>();
+        ILogger<EmailAddressController> logger = webApplicationFactory.Services.GetRequiredService<ILogger<EmailAddressController>>();
+        IEmailService emailService = webApplicationFactory.Services.GetRequiredService<IEmailService>();
 
         EmailAddressController controller = new (merrickContext, logger, emailService);
 
@@ -37,9 +38,9 @@ public sealed class JWTAuthenticationService(MerrickContext merrickContext, WebA
 
     private async Task<int> RegisterUserAndMainAccount(string tokenValue, string accountName, string password)
     {
-        ILogger<UserController> logger = factory.Services.GetRequiredService<ILogger<UserController>>();
-        IOptions<OperationalConfiguration> configuration = factory.Services.GetRequiredService<IOptions<OperationalConfiguration>>();
-        IEmailService emailService = factory.Services.GetRequiredService<IEmailService>();
+        ILogger<UserController> logger = webApplicationFactory.Services.GetRequiredService<ILogger<UserController>>();
+        IOptions<OperationalConfiguration> configuration = webApplicationFactory.Services.GetRequiredService<IOptions<OperationalConfiguration>>();
+        IEmailService emailService = webApplicationFactory.Services.GetRequiredService<IEmailService>();
 
         UserController controller = new (merrickContext, logger, emailService, configuration);
 
@@ -56,9 +57,9 @@ public sealed class JWTAuthenticationService(MerrickContext merrickContext, WebA
 
     private async Task<string> LogInUser(string accountName, string password)
     {
-        ILogger<UserController> logger = factory.Services.GetRequiredService<ILogger<UserController>>();
-        IOptions<OperationalConfiguration> configuration = factory.Services.GetRequiredService<IOptions<OperationalConfiguration>>();
-        IEmailService emailService = factory.Services.GetRequiredService<IEmailService>();
+        ILogger<UserController> logger = webApplicationFactory.Services.GetRequiredService<ILogger<UserController>>();
+        IOptions<OperationalConfiguration> configuration = webApplicationFactory.Services.GetRequiredService<IOptions<OperationalConfiguration>>();
+        IEmailService emailService = webApplicationFactory.Services.GetRequiredService<IEmailService>();
 
         UserController controller = new (merrickContext, logger, emailService, configuration);
 
