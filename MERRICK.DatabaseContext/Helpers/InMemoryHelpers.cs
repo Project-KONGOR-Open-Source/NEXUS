@@ -6,7 +6,7 @@ public static class InMemoryHelpers
     {
         DbContextOptionsBuilder<MerrickContext> builder = new ();
 
-        builder.UseInMemoryDatabase(identifier ?? Guid.NewGuid().ToString());
+        builder.UseInMemoryDatabase(identifier ?? Guid.CreateVersion7().ToString());
 
         DbContextOptions<MerrickContext> options = builder.Options;
 

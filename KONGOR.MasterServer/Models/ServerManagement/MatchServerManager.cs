@@ -10,7 +10,7 @@ public class MatchServerManager
 
     public required string IPAddress { get; set; }
 
-    public string Cookie { get; set; } = Guid.NewGuid().ToString();
+    public string Cookie { get; set; } = Guid.CreateVersion7().ToString();
 
     public DateTimeOffset TimestampRegistered { get; set; } = DateTimeOffset.UtcNow;
 }

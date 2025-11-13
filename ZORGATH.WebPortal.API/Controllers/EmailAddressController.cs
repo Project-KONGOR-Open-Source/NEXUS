@@ -45,7 +45,7 @@ public class EmailAddressController(MerrickContext databaseContext, ILogger<Emai
             {
                 Purpose = TokenPurpose.EmailAddressVerification,
                 EmailAddress = payload.EmailAddress,
-                Value = Guid.NewGuid(),
+                Value = Guid.CreateVersion7(),
                 Data = sanitizedEmailAddress
             };
 

@@ -14,7 +14,7 @@ public class TCPSession : IDisposable
     /// <param name="server">TCP Server</param>
     public TCPSession(TCPServer server)
     {
-        ID = Guid.NewGuid();
+        ID = Guid.CreateVersion7();
         Server = server;
         OptionReceiveBufferSize = server.OptionReceiveBufferSize;
         OptionSendBufferSize = server.OptionSendBufferSize;

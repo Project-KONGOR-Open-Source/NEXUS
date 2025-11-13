@@ -134,8 +134,8 @@ public class UserController(MerrickContext databaseContext, ILogger<UserControll
             new (JwtRegisteredClaimNames.Sub, account.Name, ClaimValueTypes.String),
             new (JwtRegisteredClaimNames.Iat, DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64),
             new (JwtRegisteredClaimNames.AuthTime, DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64),
-            new (JwtRegisteredClaimNames.Nonce, Guid.NewGuid().ToString(), ClaimValueTypes.String),
-            new (JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString(), ClaimValueTypes.String),
+            new (JwtRegisteredClaimNames.Nonce, Guid.CreateVersion7().ToString(), ClaimValueTypes.String),
+            new (JwtRegisteredClaimNames.Jti, Guid.CreateVersion7().ToString(), ClaimValueTypes.String),
             new (JwtRegisteredClaimNames.Email, user.EmailAddress, ClaimValueTypes.Email)
         };
 

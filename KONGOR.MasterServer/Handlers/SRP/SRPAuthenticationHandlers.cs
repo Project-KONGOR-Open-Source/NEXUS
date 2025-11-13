@@ -4,7 +4,7 @@ public static class SRPAuthenticationHandlers
 {
     public static SRPAuthenticationResponseStageTwo GenerateStageTwoResponse(StageTwoResponseParameters parameters, out string cookie)
     {
-        cookie = Guid.NewGuid().ToString();
+        cookie = Guid.CreateVersion7().ToString();
 
         SRPAuthenticationResponseStageTwo response = new ()
         {

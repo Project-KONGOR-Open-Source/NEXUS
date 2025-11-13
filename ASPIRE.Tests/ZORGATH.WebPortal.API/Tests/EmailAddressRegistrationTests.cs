@@ -8,30 +8,32 @@ public sealed class EmailAddressRegistrationTests
     [Test]
     [Arguments("test@kongor.com")]
     [Arguments("user@kongor.net")]
-    public async Task RegisterEmailAddress_WithValidEmailAddress_ReturnsOkAndCreatesToken(string emailAddress)
+    public async Task RegisterEmailAddress_WithValidEmailAddress_ReturnsOKAndCreatesToken(string emailAddress)
     {
-        await using JWTAuthenticationServiceProvider services = new ();
+        await using WebApplicationFactory<ZORGATHAssemblyMarker> webApplicationFactory = ZORGATHServiceProvider.CreateOrchestratedInstance();
 
-        ILogger<EmailAddressController> logger = services.Factory.Services.GetRequiredService<ILogger<EmailAddressController>>();
-        IEmailService emailService = services.Factory.Services.GetRequiredService<IEmailService>();
+        ILogger<EmailAddressController> logger = webApplicationFactory.Services.GetRequiredService<ILogger<EmailAddressController>>();
+        IEmailService emailService = webApplicationFactory.Services.GetRequiredService<IEmailService>();
 
-        EmailAddressController controller = new (services.MerrickContext, logger, emailService);
+        MerrickContext databaseContext = webApplicationFactory.Services.GetRequiredService<MerrickContext>();
+
+        EmailAddressController controller = new (databaseContext, logger, emailService);
 
         IActionResult response = await controller.RegisterEmailAddress(new RegisterEmailAddressDTO(emailAddress, emailAddress));
 
         await Assert.That(response).IsTypeOf<OkObjectResult>();
 
-        Token? token = await services.MerrickContext.Tokens.SingleOrDefaultAsync(token =>
+        Token? token = await databaseContext.Tokens.SingleOrDefaultAsync(token =>
             token.EmailAddress.Equals(emailAddress) && token.Purpose.Equals(TokenPurpose.EmailAddressVerification));
 
         await Assert.That(token).IsNotNull();
 
-        if (token is null)
-            throw new NullReferenceException("Token Is NULL");
-
-        await Assert.That(token.EmailAddress).IsEqualTo(emailAddress);
-        await Assert.That(token.Purpose).IsEqualTo(TokenPurpose.EmailAddressVerification);
-        await Assert.That(token.TimestampConsumed).IsNull();
+        using (Assert.Multiple())
+        {
+            await Assert.That(token.EmailAddress).IsEqualTo(emailAddress);
+            await Assert.That(token.Purpose).IsEqualTo(TokenPurpose.EmailAddressVerification);
+            await Assert.That(token.TimestampConsumed).IsNull();
+        }
     }
 
     [Test]
@@ -39,12 +41,14 @@ public sealed class EmailAddressRegistrationTests
     [Arguments("user@kongor.net", "typo@kongor.net")]
     public async Task RegisterEmailAddress_WithMismatchedConfirmation_ReturnsBadRequest(string emailAddress, string confirmEmailAddress)
     {
-        await using JWTAuthenticationServiceProvider services = new ();
+        await using WebApplicationFactory<ZORGATHAssemblyMarker> webApplicationFactory = ZORGATHServiceProvider.CreateOrchestratedInstance();
 
-        ILogger<EmailAddressController> logger = services.Factory.Services.GetRequiredService<ILogger<EmailAddressController>>();
-        IEmailService emailService = services.Factory.Services.GetRequiredService<IEmailService>();
+        ILogger<EmailAddressController> logger = webApplicationFactory.Services.GetRequiredService<ILogger<EmailAddressController>>();
+        IEmailService emailService = webApplicationFactory.Services.GetRequiredService<IEmailService>();
 
-        EmailAddressController controller = new (services.MerrickContext, logger, emailService);
+        MerrickContext databaseContext = webApplicationFactory.Services.GetRequiredService<MerrickContext>();
+
+        EmailAddressController controller = new (databaseContext, logger, emailService);
 
         IActionResult response = await controller.RegisterEmailAddress(new RegisterEmailAddressDTO(emailAddress, confirmEmailAddress));
 
@@ -56,12 +60,14 @@ public sealed class EmailAddressRegistrationTests
     [Arguments("existing@kongor.net")]
     public async Task RegisterEmailAddress_WhenAlreadyRegistered_ReturnsBadRequest(string emailAddress)
     {
-        await using JWTAuthenticationServiceProvider services = new ();
+        await using WebApplicationFactory<ZORGATHAssemblyMarker> webApplicationFactory = ZORGATHServiceProvider.CreateOrchestratedInstance();
 
-        ILogger<EmailAddressController> logger = services.Factory.Services.GetRequiredService<ILogger<EmailAddressController>>();
-        IEmailService emailService = services.Factory.Services.GetRequiredService<IEmailService>();
+        ILogger<EmailAddressController> logger = webApplicationFactory.Services.GetRequiredService<ILogger<EmailAddressController>>();
+        IEmailService emailService = webApplicationFactory.Services.GetRequiredService<IEmailService>();
 
-        EmailAddressController controller = new (services.MerrickContext, logger, emailService);
+        MerrickContext databaseContext = webApplicationFactory.Services.GetRequiredService<MerrickContext>();
+
+        EmailAddressController controller = new (databaseContext, logger, emailService);
 
         await controller.RegisterEmailAddress(new RegisterEmailAddressDTO(emailAddress, emailAddress));
 

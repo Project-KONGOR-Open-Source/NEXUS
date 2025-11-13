@@ -64,7 +64,7 @@ public abstract class ServerListResponse
 {
     protected ServerListResponse(string cookie)
     {
-        string key = Guid.NewGuid().ToString();
+        string key = Guid.CreateVersion7().ToString();
 
         AccountKey = key;
         AccountKeyHash = SRPAuthenticationHandlers.ComputeMatchServerChatAuthenticationHash(key, cookie);
