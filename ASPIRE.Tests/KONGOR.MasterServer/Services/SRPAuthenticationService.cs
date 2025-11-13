@@ -12,7 +12,6 @@ public sealed class SRPAuthenticationService(WebApplicationFactory<KONGORAssembl
     {
         MerrickContext merrickContext = webApplicationFactory.Services.GetRequiredService<MerrickContext>();
 
-        // Role Is Already Seeded By EnsureCreated() In The Service Provider
         Role role = await merrickContext.Roles.SingleAsync(role => role.Name.Equals(UserRoles.User));
 
         string salt = SRPRegistrationHandlers.GenerateSRPPasswordSalt();

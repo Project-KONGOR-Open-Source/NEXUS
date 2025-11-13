@@ -8,7 +8,7 @@ public sealed class EmailAddressRegistrationTests
     [Test]
     [Arguments("test@kongor.com")]
     [Arguments("user@kongor.net")]
-    public async Task RegisterEmailAddress_WithValidEmailAddress_ReturnsOkAndCreatesToken(string emailAddress)
+    public async Task RegisterEmailAddress_WithValidEmailAddress_ReturnsOKAndCreatesToken(string emailAddress)
     {
         await using WebApplicationFactory<ZORGATHAssemblyMarker> webApplicationFactory = ZORGATHServiceProvider.CreateOrchestratedInstance();
 
@@ -28,9 +28,12 @@ public sealed class EmailAddressRegistrationTests
 
         await Assert.That(token).IsNotNull();
 
-        await Assert.That(token.EmailAddress).IsEqualTo(emailAddress);
-        await Assert.That(token.Purpose).IsEqualTo(TokenPurpose.EmailAddressVerification);
-        await Assert.That(token.TimestampConsumed).IsNull();
+        using (Assert.Multiple())
+        {
+            await Assert.That(token.EmailAddress).IsEqualTo(emailAddress);
+            await Assert.That(token.Purpose).IsEqualTo(TokenPurpose.EmailAddressVerification);
+            await Assert.That(token.TimestampConsumed).IsNull();
+        }
     }
 
     [Test]

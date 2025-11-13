@@ -8,7 +8,7 @@ public sealed class UserAuthenticationTests
     [Test]
     [Arguments("login@kongor.com", "LoginPlayer", "SecurePassword123!")]
     [Arguments("auth@kongor.net", "AuthUser", "MyP@ssw0rd!")]
-    public async Task LogInUser_WithValidCredentials_ReturnsOkWithValidJWT(string emailAddress, string accountName, string password)
+    public async Task LogInUser_WithValidCredentials_ReturnsOKWithValidJWT(string emailAddress, string accountName, string password)
     {
         await using WebApplicationFactory<ZORGATHAssemblyMarker> webApplicationFactory = ZORGATHServiceProvider.CreateOrchestratedInstance();
 
@@ -168,7 +168,6 @@ public sealed class UserAuthenticationTests
 
         JWTAuthenticationService jwtAuthenticationService = new (webApplicationFactory);
 
-        // Register Account With Original Case
         await jwtAuthenticationService.CreateAuthenticatedUser(emailAddress, accountName, password);
 
         ILogger<UserController> userLogger = webApplicationFactory.Services.GetRequiredService<ILogger<UserController>>();
@@ -179,13 +178,13 @@ public sealed class UserAuthenticationTests
 
         UserController userController = new (databaseContext, userLogger, emailService, configuration);
 
-        // Try To Login With Different Case
         string differentCaseAccountName = accountName.ToLowerInvariant();
+
         IActionResult response = await userController.LogInUser(new LogInUserDTO(differentCaseAccountName, password));
 
-        // Document Current Case Sensitivity Behavior For Login
-        bool isOkOrNotFound = response is OkObjectResult or NotFoundObjectResult;
-        await Assert.That(isOkOrNotFound).IsTrue();
+        bool isOKOrNotFound = response is OkObjectResult or NotFoundObjectResult;
+
+        await Assert.That(isOKOrNotFound).IsTrue();
     }
 
     [Test]

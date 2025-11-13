@@ -14,12 +14,12 @@ public sealed class UserRegistrationTests
 
         MerrickContext databaseContext = webApplicationFactory.Services.GetRequiredService<MerrickContext>();
 
-        JWTAuthenticationService jwtAuthenticationService = new (webApplicationFactory);
+        JWTAuthenticationService jwtAuthenticationService = new(webApplicationFactory);
 
         ILogger<EmailAddressController> emailLogger = webApplicationFactory.Services.GetRequiredService<ILogger<EmailAddressController>>();
         IEmailService emailService = webApplicationFactory.Services.GetRequiredService<IEmailService>();
 
-        EmailAddressController emailController = new (databaseContext, emailLogger, emailService);
+        EmailAddressController emailController = new(databaseContext, emailLogger, emailService);
 
         await emailController.RegisterEmailAddress(new RegisterEmailAddressDTO(emailAddress, emailAddress));
 
@@ -31,14 +31,14 @@ public sealed class UserRegistrationTests
         ILogger<UserController> userLogger = webApplicationFactory.Services.GetRequiredService<ILogger<UserController>>();
         IOptions<OperationalConfiguration> configuration = webApplicationFactory.Services.GetRequiredService<IOptions<OperationalConfiguration>>();
 
-        UserController userController = new (databaseContext, userLogger, emailService, configuration);
+        UserController userController = new(databaseContext, userLogger, emailService, configuration);
 
         IActionResult response = await userController.RegisterUserAndMainAccount(
             new RegisterUserAndMainAccountDTO(registrationToken.Value.ToString(), accountName, password, password));
 
         await Assert.That(response).IsTypeOf<CreatedAtActionResult>();
 
-        CreatedAtActionResult createdResult = (CreatedAtActionResult)response;
+        CreatedAtActionResult createdResult = (CreatedAtActionResult) response;
         GetBasicUserDTO? userDTO = createdResult.Value as GetBasicUserDTO;
 
         await Assert.That(userDTO).IsNotNull();
@@ -65,8 +65,11 @@ public sealed class UserRegistrationTests
 
         Token? consumedToken = await databaseContext.Tokens.FindAsync(registrationToken.ID);
 
-        await Assert.That(consumedToken).IsNotNull();
-        await Assert.That(consumedToken.TimestampConsumed).IsNotNull();
+        using (Assert.Multiple())
+        {
+            await Assert.That(consumedToken).IsNotNull();
+            await Assert.That(consumedToken.TimestampConsumed).IsNotNull();
+        }
     }
 
     [Test]
@@ -169,6 +172,7 @@ public sealed class UserRegistrationTests
 
         ILogger<EmailAddressController> emailLogger = webApplicationFactory.Services.GetRequiredService<ILogger<EmailAddressController>>();
         IEmailService emailService = webApplicationFactory.Services.GetRequiredService<IEmailService>();
+
         MerrickContext databaseContext = webApplicationFactory.Services.GetRequiredService<MerrickContext>();
 
         EmailAddressController emailController = new (databaseContext, emailLogger, emailService);
@@ -193,20 +197,19 @@ public sealed class UserRegistrationTests
 
         await Assert.That(firstResponse).IsTypeOf<CreatedAtActionResult>();
 
-        // Verify Token Is Marked As Consumed
+        // Token Should Be Marked As Consumed
         Token? consumedToken = await databaseContext.Tokens.FindAsync(registrationToken.ID);
 
         await Assert.That(consumedToken).IsNotNull();
 
         await Assert.That(consumedToken.TimestampConsumed).IsNotNull();
 
-        // Second Registration With Same Token Should Fail
         // May Return UnauthorizedObjectResult (Invalid Token) Or ConflictObjectResult (If Email Already Registered)
         IActionResult secondResponse = await userController.RegisterUserAndMainAccount(
             new RegisterUserAndMainAccountDTO(tokenValue, $"{accountName}2", password, password));
 
-        // Document Actual Behavior: Returns Error (Unauthorized Or Conflict)
         bool isUnauthorizedOrConflict = secondResponse is UnauthorizedObjectResult or ConflictObjectResult;
+
         await Assert.That(isUnauthorizedOrConflict).IsTrue();
     }
 
@@ -222,14 +225,16 @@ public sealed class UserRegistrationTests
         // Register First Account With Original Case
         await jwtAuthenticationService.CreateAuthenticatedUser(emailAddress, accountName, password);
 
-        // Try To Register Second Account With Different Case - Should Succeed If Case-Insensitive Or Fail If Case-Sensitive
         ILogger<EmailAddressController> emailLogger = webApplicationFactory.Services.GetRequiredService<ILogger<EmailAddressController>>();
         IEmailService emailService = webApplicationFactory.Services.GetRequiredService<IEmailService>();
+
         MerrickContext databaseContext = webApplicationFactory.Services.GetRequiredService<MerrickContext>();
 
         string secondEmail = $"second{emailAddress}";
+
         EmailAddressController emailController = new (databaseContext, emailLogger, emailService);
 
+        // Try To Register Second Account With Different Case (Should Succeed If Case-Insensitive Or Fail If Case-Sensitive)
         await emailController.RegisterEmailAddress(new RegisterEmailAddressDTO(secondEmail, secondEmail));
 
         Token? registrationToken = await databaseContext.Tokens.SingleOrDefaultAsync(token =>
@@ -242,13 +247,14 @@ public sealed class UserRegistrationTests
 
         UserController userController = new (databaseContext, userLogger, emailService, configuration);
 
-        // Try With Different Case
         string differentCaseAccountName = accountName.ToLowerInvariant();
+
+        // May Return ConflictObjectResult (If Case-Sensitive) Or CreatedAtActionResult (If Case-Insensitive)
         IActionResult response = await userController.RegisterUserAndMainAccount(
             new RegisterUserAndMainAccountDTO(registrationToken.Value.ToString(), differentCaseAccountName, password, password));
 
-        // Document Current Case Sensitivity Behavior
         bool isConflictOrCreated = response is ConflictObjectResult or CreatedAtActionResult;
+
         await Assert.That(isConflictOrCreated).IsTrue();
     }
 }

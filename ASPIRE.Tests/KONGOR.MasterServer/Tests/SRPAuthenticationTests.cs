@@ -31,17 +31,17 @@ public sealed class SRPAuthenticationTests
 
         MerrickContext databaseContext = webApplicationFactory.Services.GetRequiredService<MerrickContext>();
 
-        Account? dbAccount = await databaseContext.Accounts
-            .Include(acc => acc.User)
-            .SingleOrDefaultAsync(acc => acc.Name.Equals(accountName));
+        Account? databaseAccount = await databaseContext.Accounts
+            .Include(accountRecord => accountRecord.User)
+            .SingleOrDefaultAsync(accountRecord => accountRecord.Name.Equals(accountName));
 
-        await Assert.That(dbAccount).IsNotNull();
+        await Assert.That(databaseAccount).IsNotNull();
 
         using (Assert.Multiple())
         {
-            await Assert.That(dbAccount.User.EmailAddress).IsEqualTo(emailAddress);
-            await Assert.That(dbAccount.User.SRPPasswordSalt).IsEqualTo(account.User.SRPPasswordSalt);
-            await Assert.That(dbAccount.User.SRPPasswordHash).IsEqualTo(account.User.SRPPasswordHash);
+            await Assert.That(databaseAccount.User.EmailAddress).IsEqualTo(emailAddress);
+            await Assert.That(databaseAccount.User.SRPPasswordSalt).IsEqualTo(account.User.SRPPasswordSalt);
+            await Assert.That(databaseAccount.User.SRPPasswordHash).IsEqualTo(account.User.SRPPasswordHash);
         }
     }
 
@@ -90,15 +90,18 @@ public sealed class SRPAuthenticationTests
 
         MerrickContext databaseContext = webApplicationFactory.Services.GetRequiredService<MerrickContext>();
 
-        Account? dbAccount = await databaseContext.Accounts
-            .Include(acc => acc.User)
+        Account? databaseAccount = await databaseContext.Accounts
+            .Include(accountRecord => accountRecord.User)
             .ThenInclude(user => user.Role)
-            .SingleOrDefaultAsync(acc => acc.Name.Equals(accountName));
+            .SingleOrDefaultAsync(accountRecord => accountRecord.Name.Equals(accountName));
 
-        await Assert.That(dbAccount).IsNotNull();
+        await Assert.That(databaseAccount).IsNotNull();
 
-        await Assert.That(dbAccount.User.Role).IsNotNull();
-        await Assert.That(dbAccount.User.Role.Name).IsEqualTo(UserRoles.User);
+        using (Assert.Multiple())
+        {
+            await Assert.That(databaseAccount.User.Role).IsNotNull();
+            await Assert.That(databaseAccount.User.Role.Name).IsEqualTo(UserRoles.User);
+        }
     }
 
     [Test]
