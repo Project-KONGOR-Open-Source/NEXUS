@@ -10,20 +10,24 @@ public sealed class SRPAuthenticationTests
     [Arguments("srpuser2@kongor.net", "SRPPlayer2", "MyP@ssw0rd!")]
     public async Task CreateAccountWithSRPCredentials_WithValidData_CreatesAccountWithValidSRPFields(string emailAddress, string accountName, string password)
     {
-        WebApplicationFactory<KONGORAssemblyMarker> webApplicationFactory = KONGORServiceProvider.CreateOrchestratedInstance();
+        await using WebApplicationFactory<KONGORAssemblyMarker> webApplicationFactory = KONGORServiceProvider.CreateOrchestratedInstance();
 
         SRPAuthenticationService srpAuthenticationService = new (webApplicationFactory);
 
         (Account account, string returnedPassword) = await srpAuthenticationService.CreateAccountWithSRPCredentials(emailAddress, accountName, password);
 
         await Assert.That(account).IsNotNull();
-        await Assert.That(account.Name).IsEqualTo(accountName);
-        await Assert.That(account.User.EmailAddress).IsEqualTo(emailAddress);
-        await Assert.That(account.User.SRPPasswordSalt).IsNotEmpty();
-        await Assert.That(account.User.SRPPasswordHash).IsNotEmpty();
-        await Assert.That(account.User.PBKDF2PasswordHash).IsNotEmpty();
-        await Assert.That(account.IsMain).IsTrue();
-        await Assert.That(returnedPassword).IsEqualTo(password);
+
+        using (Assert.Multiple())
+        {
+            await Assert.That(account.Name).IsEqualTo(accountName);
+            await Assert.That(account.User.EmailAddress).IsEqualTo(emailAddress);
+            await Assert.That(account.User.SRPPasswordSalt).IsNotEmpty();
+            await Assert.That(account.User.SRPPasswordHash).IsNotEmpty();
+            await Assert.That(account.User.PBKDF2PasswordHash).IsNotEmpty();
+            await Assert.That(account.IsMain).IsTrue();
+            await Assert.That(returnedPassword).IsEqualTo(password);
+        }
 
         MerrickContext databaseContext = webApplicationFactory.Services.GetRequiredService<MerrickContext>();
 
@@ -33,12 +37,12 @@ public sealed class SRPAuthenticationTests
 
         await Assert.That(dbAccount).IsNotNull();
 
-        if (dbAccount is null)
-            throw new NullReferenceException("Database Account Is NULL");
-
-        await Assert.That(dbAccount.User.EmailAddress).IsEqualTo(emailAddress);
-        await Assert.That(dbAccount.User.SRPPasswordSalt).IsEqualTo(account.User.SRPPasswordSalt);
-        await Assert.That(dbAccount.User.SRPPasswordHash).IsEqualTo(account.User.SRPPasswordHash);
+        using (Assert.Multiple())
+        {
+            await Assert.That(dbAccount.User.EmailAddress).IsEqualTo(emailAddress);
+            await Assert.That(dbAccount.User.SRPPasswordSalt).IsEqualTo(account.User.SRPPasswordSalt);
+            await Assert.That(dbAccount.User.SRPPasswordHash).IsEqualTo(account.User.SRPPasswordHash);
+        }
     }
 
     [Test]
@@ -46,7 +50,7 @@ public sealed class SRPAuthenticationTests
     [Arguments("salt2@kongor.net", "SaltPlayer2", "MyP@ssw0rd!")]
     public async Task CreateAccountWithSRPCredentials_GeneratesUniqueSaltsForDifferentAccounts(string emailAddress, string accountName, string password)
     {
-        WebApplicationFactory<KONGORAssemblyMarker> webApplicationFactory = KONGORServiceProvider.CreateOrchestratedInstance();
+        await using WebApplicationFactory<KONGORAssemblyMarker> webApplicationFactory = KONGORServiceProvider.CreateOrchestratedInstance();
 
         SRPAuthenticationService srpAuthenticationService = new (webApplicationFactory);
 
@@ -61,7 +65,7 @@ public sealed class SRPAuthenticationTests
     [Arguments("hash2@kongor.net", "HashPlayer2", "MyP@ssw0rd!")]
     public async Task CreateAccountWithSRPCredentials_HashesAreDeterministicForSamePasswordAndSalt(string emailAddress, string accountName, string password)
     {
-        WebApplicationFactory<KONGORAssemblyMarker> webApplicationFactory = KONGORServiceProvider.CreateOrchestratedInstance();
+        await using WebApplicationFactory<KONGORAssemblyMarker> webApplicationFactory = KONGORServiceProvider.CreateOrchestratedInstance();
 
         SRPAuthenticationService srpAuthenticationService = new (webApplicationFactory);
 
@@ -78,7 +82,7 @@ public sealed class SRPAuthenticationTests
     [Arguments("role2@kongor.net", "RolePlayer2", "MyP@ssw0rd!")]
     public async Task CreateAccountWithSRPCredentials_AssignsUserRoleCorrectly(string emailAddress, string accountName, string password)
     {
-        WebApplicationFactory<KONGORAssemblyMarker> webApplicationFactory = KONGORServiceProvider.CreateOrchestratedInstance();
+        await using WebApplicationFactory<KONGORAssemblyMarker> webApplicationFactory = KONGORServiceProvider.CreateOrchestratedInstance();
 
         SRPAuthenticationService srpAuthenticationService = new (webApplicationFactory);
 
@@ -93,9 +97,6 @@ public sealed class SRPAuthenticationTests
 
         await Assert.That(dbAccount).IsNotNull();
 
-        if (dbAccount is null)
-            throw new NullReferenceException("Database Account Is NULL");
-
         await Assert.That(dbAccount.User.Role).IsNotNull();
         await Assert.That(dbAccount.User.Role.Name).IsEqualTo(UserRoles.User);
     }
@@ -105,15 +106,18 @@ public sealed class SRPAuthenticationTests
     [Arguments("pbkdf2@kongor.net", "PBKDF2Player2", "MyP@ssw0rd!")]
     public async Task CreateAccountWithSRPCredentials_GeneratesBothSRPAndPBKDF2Hashes(string emailAddress, string accountName, string password)
     {
-        WebApplicationFactory<KONGORAssemblyMarker> webApplicationFactory = KONGORServiceProvider.CreateOrchestratedInstance();
+        await using WebApplicationFactory<KONGORAssemblyMarker> webApplicationFactory = KONGORServiceProvider.CreateOrchestratedInstance();
 
         SRPAuthenticationService srpAuthenticationService = new (webApplicationFactory);
 
         (Account account, string _) = await srpAuthenticationService.CreateAccountWithSRPCredentials(emailAddress, accountName, password);
 
-        await Assert.That(account.User.SRPPasswordHash).IsNotEmpty();
-        await Assert.That(account.User.PBKDF2PasswordHash).IsNotEmpty();
-        await Assert.That(account.User.SRPPasswordHash).IsNotEqualTo(account.User.PBKDF2PasswordHash);
+        using (Assert.Multiple())
+        {
+            await Assert.That(account.User.SRPPasswordHash).IsNotEmpty();
+            await Assert.That(account.User.PBKDF2PasswordHash).IsNotEmpty();
+            await Assert.That(account.User.SRPPasswordHash).IsNotEqualTo(account.User.PBKDF2PasswordHash);
+        }
 
         PasswordHasher<User> passwordHasher = new ();
         PasswordVerificationResult verificationResult = passwordHasher.VerifyHashedPassword(account.User, account.User.PBKDF2PasswordHash, password);

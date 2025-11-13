@@ -10,7 +10,7 @@ public sealed class EmailAddressRegistrationTests
     [Arguments("user@kongor.net")]
     public async Task RegisterEmailAddress_WithValidEmailAddress_ReturnsOkAndCreatesToken(string emailAddress)
     {
-        WebApplicationFactory<ZORGATHAssemblyMarker> webApplicationFactory = ZORGATHServiceProvider.CreateOrchestratedInstance();
+        await using WebApplicationFactory<ZORGATHAssemblyMarker> webApplicationFactory = ZORGATHServiceProvider.CreateOrchestratedInstance();
 
         ILogger<EmailAddressController> logger = webApplicationFactory.Services.GetRequiredService<ILogger<EmailAddressController>>();
         IEmailService emailService = webApplicationFactory.Services.GetRequiredService<IEmailService>();
@@ -28,9 +28,6 @@ public sealed class EmailAddressRegistrationTests
 
         await Assert.That(token).IsNotNull();
 
-        if (token is null)
-            throw new NullReferenceException("Token Is NULL");
-
         await Assert.That(token.EmailAddress).IsEqualTo(emailAddress);
         await Assert.That(token.Purpose).IsEqualTo(TokenPurpose.EmailAddressVerification);
         await Assert.That(token.TimestampConsumed).IsNull();
@@ -41,7 +38,7 @@ public sealed class EmailAddressRegistrationTests
     [Arguments("user@kongor.net", "typo@kongor.net")]
     public async Task RegisterEmailAddress_WithMismatchedConfirmation_ReturnsBadRequest(string emailAddress, string confirmEmailAddress)
     {
-        WebApplicationFactory<ZORGATHAssemblyMarker> webApplicationFactory = ZORGATHServiceProvider.CreateOrchestratedInstance();
+        await using WebApplicationFactory<ZORGATHAssemblyMarker> webApplicationFactory = ZORGATHServiceProvider.CreateOrchestratedInstance();
 
         ILogger<EmailAddressController> logger = webApplicationFactory.Services.GetRequiredService<ILogger<EmailAddressController>>();
         IEmailService emailService = webApplicationFactory.Services.GetRequiredService<IEmailService>();
@@ -60,7 +57,7 @@ public sealed class EmailAddressRegistrationTests
     [Arguments("existing@kongor.net")]
     public async Task RegisterEmailAddress_WhenAlreadyRegistered_ReturnsBadRequest(string emailAddress)
     {
-        WebApplicationFactory<ZORGATHAssemblyMarker> webApplicationFactory = ZORGATHServiceProvider.CreateOrchestratedInstance();
+        await using WebApplicationFactory<ZORGATHAssemblyMarker> webApplicationFactory = ZORGATHServiceProvider.CreateOrchestratedInstance();
 
         ILogger<EmailAddressController> logger = webApplicationFactory.Services.GetRequiredService<ILogger<EmailAddressController>>();
         IEmailService emailService = webApplicationFactory.Services.GetRequiredService<IEmailService>();

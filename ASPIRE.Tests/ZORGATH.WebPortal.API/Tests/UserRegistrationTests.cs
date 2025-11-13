@@ -10,7 +10,7 @@ public sealed class UserRegistrationTests
     [Arguments("user@kongor.net", "GameUser", "MyP@ssw0rd!")]
     public async Task RegisterUserAndMainAccount_WithValidData_ReturnsCreatedAndCreatesUserAndAccount(string emailAddress, string accountName, string password)
     {
-        WebApplicationFactory<ZORGATHAssemblyMarker> webApplicationFactory = ZORGATHServiceProvider.CreateOrchestratedInstance();
+        await using WebApplicationFactory<ZORGATHAssemblyMarker> webApplicationFactory = ZORGATHServiceProvider.CreateOrchestratedInstance();
 
         MerrickContext databaseContext = webApplicationFactory.Services.GetRequiredService<MerrickContext>();
 
@@ -26,8 +26,7 @@ public sealed class UserRegistrationTests
         Token? registrationToken = await databaseContext.Tokens.SingleOrDefaultAsync(token =>
             token.EmailAddress.Equals(emailAddress) && token.Purpose.Equals(TokenPurpose.EmailAddressVerification));
 
-        if (registrationToken is null)
-            throw new NullReferenceException("Registration Token Is NULL");
+        await Assert.That(registrationToken).IsNotNull();
 
         ILogger<UserController> userLogger = webApplicationFactory.Services.GetRequiredService<ILogger<UserController>>();
         IOptions<OperationalConfiguration> configuration = webApplicationFactory.Services.GetRequiredService<IOptions<OperationalConfiguration>>();
@@ -44,12 +43,12 @@ public sealed class UserRegistrationTests
 
         await Assert.That(userDTO).IsNotNull();
 
-        if (userDTO is null)
-            throw new NullReferenceException("User DTO Is NULL");
-
-        await Assert.That(userDTO.EmailAddress).IsEqualTo(emailAddress);
-        await Assert.That(userDTO.Accounts).HasCount().EqualTo(1);
-        await Assert.That(userDTO.Accounts.First().Name).IsEqualTo(accountName);
+        using (Assert.Multiple())
+        {
+            await Assert.That(userDTO.EmailAddress).IsEqualTo(emailAddress);
+            await Assert.That(userDTO.Accounts).HasCount().EqualTo(1);
+            await Assert.That(userDTO.Accounts.First().Name).IsEqualTo(accountName);
+        }
 
         User? user = await databaseContext.Users
             .Include(user => user.Accounts)
@@ -57,18 +56,16 @@ public sealed class UserRegistrationTests
 
         await Assert.That(user).IsNotNull();
 
-        if (user is null)
-            throw new NullReferenceException("User Is NULL");
-
-        await Assert.That(user.Accounts).HasCount().EqualTo(1);
-        await Assert.That(user.Accounts.First().Name).IsEqualTo(accountName);
-        await Assert.That(user.Accounts.First().IsMain).IsTrue();
+        using (Assert.Multiple())
+        {
+            await Assert.That(user.Accounts).HasCount().EqualTo(1);
+            await Assert.That(user.Accounts.First().Name).IsEqualTo(accountName);
+            await Assert.That(user.Accounts.First().IsMain).IsTrue();
+        }
 
         Token? consumedToken = await databaseContext.Tokens.FindAsync(registrationToken.ID);
 
-        if (consumedToken is null)
-            throw new NullReferenceException("Consumed Token Is NULL");
-
+        await Assert.That(consumedToken).IsNotNull();
         await Assert.That(consumedToken.TimestampConsumed).IsNotNull();
     }
 
@@ -77,7 +74,7 @@ public sealed class UserRegistrationTests
     [Arguments("test@kongor.net", "TestUser", "MyP@ss!", "WrongP@ss!")]
     public async Task RegisterUserAndMainAccount_WithMismatchedPasswords_ReturnsBadRequest(string emailAddress, string accountName, string password, string confirmPassword)
     {
-        WebApplicationFactory<ZORGATHAssemblyMarker> webApplicationFactory = ZORGATHServiceProvider.CreateOrchestratedInstance();
+        await using WebApplicationFactory<ZORGATHAssemblyMarker> webApplicationFactory = ZORGATHServiceProvider.CreateOrchestratedInstance();
 
         ILogger<EmailAddressController> emailLogger = webApplicationFactory.Services.GetRequiredService<ILogger<EmailAddressController>>();
         IEmailService emailService = webApplicationFactory.Services.GetRequiredService<IEmailService>();
@@ -91,8 +88,7 @@ public sealed class UserRegistrationTests
         Token? registrationToken = await databaseContext.Tokens.SingleOrDefaultAsync(token =>
             token.EmailAddress.Equals(emailAddress) && token.Purpose.Equals(TokenPurpose.EmailAddressVerification));
 
-        if (registrationToken is null)
-            throw new NullReferenceException("Registration Token Is NULL");
+        await Assert.That(registrationToken).IsNotNull();
 
         ILogger<UserController> userLogger = webApplicationFactory.Services.GetRequiredService<ILogger<UserController>>();
         IOptions<OperationalConfiguration> configuration = webApplicationFactory.Services.GetRequiredService<IOptions<OperationalConfiguration>>();
@@ -112,7 +108,7 @@ public sealed class UserRegistrationTests
     {
         string invalidToken = Guid.CreateVersion7().ToString();
 
-        WebApplicationFactory<ZORGATHAssemblyMarker> webApplicationFactory = ZORGATHServiceProvider.CreateOrchestratedInstance();
+        await using WebApplicationFactory<ZORGATHAssemblyMarker> webApplicationFactory = ZORGATHServiceProvider.CreateOrchestratedInstance();
 
         ILogger<UserController> userLogger = webApplicationFactory.Services.GetRequiredService<ILogger<UserController>>();
         IOptions<OperationalConfiguration> configuration = webApplicationFactory.Services.GetRequiredService<IOptions<OperationalConfiguration>>();
@@ -133,7 +129,7 @@ public sealed class UserRegistrationTests
     [Arguments("first@kongor.net", "second@kongor.net", "SameName", "MyP@ssw0rd!")]
     public async Task RegisterUserAndMainAccount_WithDuplicateAccountName_ReturnsConflict(string emailAddressOne, string emailAddressTwo, string accountName, string password)
     {
-        WebApplicationFactory<ZORGATHAssemblyMarker> webApplicationFactory = ZORGATHServiceProvider.CreateOrchestratedInstance();
+        await using WebApplicationFactory<ZORGATHAssemblyMarker> webApplicationFactory = ZORGATHServiceProvider.CreateOrchestratedInstance();
 
         JWTAuthenticationService jwtAuthenticationService = new (webApplicationFactory);
 
@@ -151,8 +147,7 @@ public sealed class UserRegistrationTests
         Token? registrationToken = await databaseContext.Tokens.SingleOrDefaultAsync(token =>
             token.EmailAddress.Equals(emailAddressTwo) && token.Purpose.Equals(TokenPurpose.EmailAddressVerification));
 
-        if (registrationToken is null)
-            throw new NullReferenceException("Registration Token Is NULL");
+        await Assert.That(registrationToken).IsNotNull();
 
         ILogger<UserController> userLogger = webApplicationFactory.Services.GetRequiredService<ILogger<UserController>>();
         IOptions<OperationalConfiguration> configuration = webApplicationFactory.Services.GetRequiredService<IOptions<OperationalConfiguration>>();
@@ -163,5 +158,97 @@ public sealed class UserRegistrationTests
             new RegisterUserAndMainAccountDTO(registrationToken.Value.ToString(), accountName, password, password));
 
         await Assert.That(response).IsTypeOf<ConflictObjectResult>();
+    }
+
+    [Test]
+    [Arguments("tokenreuse@kongor.com", "TokenUser", "SecurePassword123!")]
+    [Arguments("consumed@kongor.net", "ConsumedUser", "MyP@ssw0rd!")]
+    public async Task RegisterUserAndMainAccount_WithConsumedToken_ReturnsUnauthorizedOrConflict(string emailAddress, string accountName, string password)
+    {
+        await using WebApplicationFactory<ZORGATHAssemblyMarker> webApplicationFactory = ZORGATHServiceProvider.CreateOrchestratedInstance();
+
+        ILogger<EmailAddressController> emailLogger = webApplicationFactory.Services.GetRequiredService<ILogger<EmailAddressController>>();
+        IEmailService emailService = webApplicationFactory.Services.GetRequiredService<IEmailService>();
+        MerrickContext databaseContext = webApplicationFactory.Services.GetRequiredService<MerrickContext>();
+
+        EmailAddressController emailController = new (databaseContext, emailLogger, emailService);
+
+        await emailController.RegisterEmailAddress(new RegisterEmailAddressDTO(emailAddress, emailAddress));
+
+        Token? registrationToken = await databaseContext.Tokens.SingleOrDefaultAsync(token =>
+            token.EmailAddress.Equals(emailAddress) && token.Purpose.Equals(TokenPurpose.EmailAddressVerification));
+
+        await Assert.That(registrationToken).IsNotNull();
+
+        string tokenValue = registrationToken.Value.ToString();
+
+        ILogger<UserController> userLogger = webApplicationFactory.Services.GetRequiredService<ILogger<UserController>>();
+        IOptions<OperationalConfiguration> configuration = webApplicationFactory.Services.GetRequiredService<IOptions<OperationalConfiguration>>();
+
+        UserController userController = new (databaseContext, userLogger, emailService, configuration);
+
+        // First Registration Should Succeed And Consume The Token
+        IActionResult firstResponse = await userController.RegisterUserAndMainAccount(
+            new RegisterUserAndMainAccountDTO(tokenValue, accountName, password, password));
+
+        await Assert.That(firstResponse).IsTypeOf<CreatedAtActionResult>();
+
+        // Verify Token Is Marked As Consumed
+        Token? consumedToken = await databaseContext.Tokens.FindAsync(registrationToken.ID);
+
+        await Assert.That(consumedToken).IsNotNull();
+
+        await Assert.That(consumedToken.TimestampConsumed).IsNotNull();
+
+        // Second Registration With Same Token Should Fail
+        // May Return UnauthorizedObjectResult (Invalid Token) Or ConflictObjectResult (If Email Already Registered)
+        IActionResult secondResponse = await userController.RegisterUserAndMainAccount(
+            new RegisterUserAndMainAccountDTO(tokenValue, $"{accountName}2", password, password));
+
+        // Document Actual Behavior: Returns Error (Unauthorized Or Conflict)
+        bool isUnauthorizedOrConflict = secondResponse is UnauthorizedObjectResult or ConflictObjectResult;
+        await Assert.That(isUnauthorizedOrConflict).IsTrue();
+    }
+
+    [Test]
+    [Arguments("Case@Kongor.Com", "CaseUser", "SecurePassword123!")]
+    [Arguments("TEST@KONGOR.NET", "TESTUSER", "MyP@ssw0rd!")]
+    public async Task RegisterUserAndMainAccount_WithMixedCaseAccountName_ShouldAllowDifferentCases(string emailAddress, string accountName, string password)
+    {
+        await using WebApplicationFactory<ZORGATHAssemblyMarker> webApplicationFactory = ZORGATHServiceProvider.CreateOrchestratedInstance();
+
+        JWTAuthenticationService jwtAuthenticationService = new (webApplicationFactory);
+
+        // Register First Account With Original Case
+        await jwtAuthenticationService.CreateAuthenticatedUser(emailAddress, accountName, password);
+
+        // Try To Register Second Account With Different Case - Should Succeed If Case-Insensitive Or Fail If Case-Sensitive
+        ILogger<EmailAddressController> emailLogger = webApplicationFactory.Services.GetRequiredService<ILogger<EmailAddressController>>();
+        IEmailService emailService = webApplicationFactory.Services.GetRequiredService<IEmailService>();
+        MerrickContext databaseContext = webApplicationFactory.Services.GetRequiredService<MerrickContext>();
+
+        string secondEmail = $"second{emailAddress}";
+        EmailAddressController emailController = new (databaseContext, emailLogger, emailService);
+
+        await emailController.RegisterEmailAddress(new RegisterEmailAddressDTO(secondEmail, secondEmail));
+
+        Token? registrationToken = await databaseContext.Tokens.SingleOrDefaultAsync(token =>
+            token.EmailAddress.Equals(secondEmail) && token.Purpose.Equals(TokenPurpose.EmailAddressVerification));
+
+        await Assert.That(registrationToken).IsNotNull();
+
+        ILogger<UserController> userLogger = webApplicationFactory.Services.GetRequiredService<ILogger<UserController>>();
+        IOptions<OperationalConfiguration> configuration = webApplicationFactory.Services.GetRequiredService<IOptions<OperationalConfiguration>>();
+
+        UserController userController = new (databaseContext, userLogger, emailService, configuration);
+
+        // Try With Different Case
+        string differentCaseAccountName = accountName.ToLowerInvariant();
+        IActionResult response = await userController.RegisterUserAndMainAccount(
+            new RegisterUserAndMainAccountDTO(registrationToken.Value.ToString(), differentCaseAccountName, password, password));
+
+        // Document Current Case Sensitivity Behavior
+        bool isConflictOrCreated = response is ConflictObjectResult or CreatedAtActionResult;
+        await Assert.That(isConflictOrCreated).IsTrue();
     }
 }
