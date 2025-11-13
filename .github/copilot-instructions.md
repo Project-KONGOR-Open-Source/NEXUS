@@ -6,6 +6,10 @@
    - RIGHT: UserID, GetGUID, HTMLParser, userGUID, accountID, httpStatusCode
    - WRONG: UserId, GetGuid, HtmlParser, userGuid, accountId, hTTPStatusCode
 
+ - always use full variable names for delegates and lambda parameters; never use abbreviations or single-letter names like "x", "y", "z", etc.
+   - RIGHT: numbers.Select(number => number * number);
+   - WRONG: numbers.Select(x => x * x);
+
  - always keep vertical whitespace usage consistent; if there is any already-existing code in the proximity, inspect it and use the same vertical whitespace usage conventions
 
  - always keep syntax and formatting styles consistent with those of already-existing code; if there is any already-existing code in the proximity, inspect it and use the same syntax and formatting styles
@@ -46,3 +50,26 @@
    - when assigning "null!" to a nullable variable, field, or property is unavoidable without making the code overly-complex, and it is absolutely certain that the value will not be null at runtime
 
  - when creating asynchronous methods, never use the "Async" suffix in the method name unless there is also a synchronous version of the same method in the same scope
+
+### Code Generation
+
+ - always ensure that the generated code is syntactically correct and adheres to best practices for the target programming language
+   - if necessary and possible, check relevant online sources or documentation to verify compliance with the latest standards
+
+ - always ensure that the generated code is efficient and optimized for performance, avoiding unnecessary computations or memory usage, unless readability and maintainability are significantly compromised
+   - if necessary and possible, check relevant online sources or documentation to verify compliance with the latest performance optimization techniques
+
+ - always ensure that the generated code is secure, following best practices to prevent vulnerabilities such as injection attacks, data leaks, and unauthorized access
+   - if necessary and possible, check relevant online sources or documentation to verify compliance with the latest security standards
+
+ - always keep the generated code consistent with the existing codebase in terms of style, conventions, and architecture
+   - if necessary and possible, inspect the existing codebase to identify relevant patterns and practices to follow
+
+ - always keep generated code targeted towards the objective, avoiding unnecessary features or complexity that do not directly contribute to the specified goal
+   - if necessary and possible, review the prompt to ensure alignment with the specified objectives and confirm with the user if there is any ambiguity
+   - when in doubt, present the available options to the user in a clear manner and let them decide on the best approach
+
+ - prefer simplicity and clarity over complexity and unnecessary features
+   - avoid over-engineering or adding features that are not explicitly requested or required
+   - keep the code as straightforward and easy to understand as possible while still meeting the specified requirements
+   - keep the code minimalistic and to the point, avoiding unnecessary abstractions, layers, or components that do not add significant value to the overall design or functionality
