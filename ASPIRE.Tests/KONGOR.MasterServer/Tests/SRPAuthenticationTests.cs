@@ -10,7 +10,7 @@ public sealed class SRPAuthenticationTests
     [Arguments("srpuser2@kongor.net", "SRPPlayer2", "MyP@ssw0rd!")]
     public async Task CreateAccountWithSRPCredentials_WithValidData_CreatesAccountWithValidSRPFields(string emailAddress, string accountName, string password)
     {
-        WebApplicationFactory<KONGORAssemblyMarker> webApplicationFactory = await KONGORServiceProvider.CreateOrchestratedInstance();
+        WebApplicationFactory<KONGORAssemblyMarker> webApplicationFactory = KONGORServiceProvider.CreateOrchestratedInstance();
 
         SRPAuthenticationService srpAuthenticationService = new (webApplicationFactory);
 
@@ -46,7 +46,7 @@ public sealed class SRPAuthenticationTests
     [Arguments("salt2@kongor.net", "SaltPlayer2", "MyP@ssw0rd!")]
     public async Task CreateAccountWithSRPCredentials_GeneratesUniqueSaltsForDifferentAccounts(string emailAddress, string accountName, string password)
     {
-        WebApplicationFactory<KONGORAssemblyMarker> webApplicationFactory = await KONGORServiceProvider.CreateOrchestratedInstance();
+        WebApplicationFactory<KONGORAssemblyMarker> webApplicationFactory = KONGORServiceProvider.CreateOrchestratedInstance();
 
         SRPAuthenticationService srpAuthenticationService = new (webApplicationFactory);
 
@@ -61,7 +61,7 @@ public sealed class SRPAuthenticationTests
     [Arguments("hash2@kongor.net", "HashPlayer2", "MyP@ssw0rd!")]
     public async Task CreateAccountWithSRPCredentials_HashesAreDeterministicForSamePasswordAndSalt(string emailAddress, string accountName, string password)
     {
-        WebApplicationFactory<KONGORAssemblyMarker> webApplicationFactory = await KONGORServiceProvider.CreateOrchestratedInstance();
+        WebApplicationFactory<KONGORAssemblyMarker> webApplicationFactory = KONGORServiceProvider.CreateOrchestratedInstance();
 
         SRPAuthenticationService srpAuthenticationService = new (webApplicationFactory);
 
@@ -78,7 +78,7 @@ public sealed class SRPAuthenticationTests
     [Arguments("role2@kongor.net", "RolePlayer2", "MyP@ssw0rd!")]
     public async Task CreateAccountWithSRPCredentials_AssignsUserRoleCorrectly(string emailAddress, string accountName, string password)
     {
-        WebApplicationFactory<KONGORAssemblyMarker> webApplicationFactory = await KONGORServiceProvider.CreateOrchestratedInstance();
+        WebApplicationFactory<KONGORAssemblyMarker> webApplicationFactory = KONGORServiceProvider.CreateOrchestratedInstance();
 
         SRPAuthenticationService srpAuthenticationService = new (webApplicationFactory);
 
@@ -105,7 +105,7 @@ public sealed class SRPAuthenticationTests
     [Arguments("pbkdf2@kongor.net", "PBKDF2Player2", "MyP@ssw0rd!")]
     public async Task CreateAccountWithSRPCredentials_GeneratesBothSRPAndPBKDF2Hashes(string emailAddress, string accountName, string password)
     {
-        WebApplicationFactory<KONGORAssemblyMarker> webApplicationFactory = await KONGORServiceProvider.CreateOrchestratedInstance();
+        WebApplicationFactory<KONGORAssemblyMarker> webApplicationFactory = KONGORServiceProvider.CreateOrchestratedInstance();
 
         SRPAuthenticationService srpAuthenticationService = new (webApplicationFactory);
 

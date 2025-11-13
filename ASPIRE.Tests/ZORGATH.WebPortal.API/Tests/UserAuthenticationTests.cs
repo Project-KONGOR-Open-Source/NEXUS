@@ -10,7 +10,7 @@ public sealed class UserAuthenticationTests
     [Arguments("auth@kongor.net", "AuthUser", "MyP@ssw0rd!")]
     public async Task LogInUser_WithValidCredentials_ReturnsOkWithValidJWT(string emailAddress, string accountName, string password)
     {
-        WebApplicationFactory<ZORGATHAssemblyMarker> webApplicationFactory = await ZORGATHServiceProvider.CreateOrchestratedInstance();
+        WebApplicationFactory<ZORGATHAssemblyMarker> webApplicationFactory = ZORGATHServiceProvider.CreateOrchestratedInstance();
 
         JWTAuthenticationService jwtAuthenticationService = new (webApplicationFactory);
 
@@ -51,7 +51,7 @@ public sealed class UserAuthenticationTests
     [Arguments("InvalidUser", "AnotherPass123!")]
     public async Task LogInUser_WithInvalidAccountName_ReturnsNotFound(string accountName, string password)
     {
-        WebApplicationFactory<ZORGATHAssemblyMarker> webApplicationFactory = await ZORGATHServiceProvider.CreateOrchestratedInstance();
+        WebApplicationFactory<ZORGATHAssemblyMarker> webApplicationFactory = ZORGATHServiceProvider.CreateOrchestratedInstance();
 
         ILogger<UserController> userLogger = webApplicationFactory.Services.GetRequiredService<ILogger<UserController>>();
         IOptions<OperationalConfiguration> configuration = webApplicationFactory.Services.GetRequiredService<IOptions<OperationalConfiguration>>();
@@ -71,7 +71,7 @@ public sealed class UserAuthenticationTests
     [Arguments("badauth@kongor.net", "BadAuthUser", "RightP@ss!", "WrongP@ss!")]
     public async Task LogInUser_WithInvalidPassword_ReturnsUnauthorized(string emailAddress, string accountName, string correctPassword, string wrongPassword)
     {
-        WebApplicationFactory<ZORGATHAssemblyMarker> webApplicationFactory = await ZORGATHServiceProvider.CreateOrchestratedInstance();
+        WebApplicationFactory<ZORGATHAssemblyMarker> webApplicationFactory = ZORGATHServiceProvider.CreateOrchestratedInstance();
 
         JWTAuthenticationService jwtAuthenticationService = new (webApplicationFactory);
 
@@ -95,7 +95,7 @@ public sealed class UserAuthenticationTests
     [Arguments("jwt@kongor.net", "JWTUser", "MyP@ssw0rd!")]
     public async Task LogInUser_JWTContainsAllRequiredClaims(string emailAddress, string accountName, string password)
     {
-        WebApplicationFactory<ZORGATHAssemblyMarker> webApplicationFactory = await ZORGATHServiceProvider.CreateOrchestratedInstance();
+        WebApplicationFactory<ZORGATHAssemblyMarker> webApplicationFactory = ZORGATHServiceProvider.CreateOrchestratedInstance();
 
         JWTAuthenticationService jwtAuthenticationService = new (webApplicationFactory);
 
@@ -121,7 +121,7 @@ public sealed class UserAuthenticationTests
     [Arguments("complete@kongor.net", "CompleteUser", "MyP@ssw0rd!")]
     public async Task CompleteAuthenticationFlow_RegisterEmailThenUserThenLogin_Succeeds(string emailAddress, string accountName, string password)
     {
-        WebApplicationFactory<ZORGATHAssemblyMarker> webApplicationFactory = await ZORGATHServiceProvider.CreateOrchestratedInstance();
+        WebApplicationFactory<ZORGATHAssemblyMarker> webApplicationFactory = ZORGATHServiceProvider.CreateOrchestratedInstance();
 
         JWTAuthenticationService jwtAuthenticationService = new (webApplicationFactory);
 

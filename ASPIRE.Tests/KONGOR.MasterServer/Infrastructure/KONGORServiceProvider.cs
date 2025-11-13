@@ -6,40 +6,27 @@ namespace ASPIRE.Tests.KONGOR.MasterServer.Infrastructure;
 public static class KONGORServiceProvider
 {
     /// <summary>
-    ///     Creates An Orchestrated Instance Of The KONGOR Master Server
+    ///     Creates An Instance Of The KONGOR Master Server With In-Memory Dependencies
     /// </summary>
-    public static async Task<WebApplicationFactory<KONGORAssemblyMarker>> CreateOrchestratedInstance(string? identifier = null)
+    public static WebApplicationFactory<KONGORAssemblyMarker> CreateOrchestratedInstance(string? identifier = null)
     {
-        IDistributedApplicationTestingBuilder applicationTestingBuilder = await DistributedApplicationTestingBuilder.CreateAsync<AppHost.ASPIRE>();
+        string databaseName = identifier ?? Guid.CreateVersion7().ToString();
 
-        applicationTestingBuilder.Services.ConfigureHttpClientDefaults(httpClientBuilder =>
+        // Replace Database Context With In-Memory Database
+        WebApplicationFactory<KONGORAssemblyMarker> webApplicationFactory = new WebApplicationFactory<KONGORAssemblyMarker>().WithWebHostBuilder(builder => builder.ConfigureServices(services =>
         {
-            httpClientBuilder.AddStandardResilienceHandler();
-        });
+            Func<ServiceDescriptor, bool> serviceDescriptorPredicate = descriptor =>
+                descriptor.ServiceType.FullName?.Contains(nameof(MerrickContext)) is true || descriptor.ImplementationType?.FullName?.Contains(nameof(MerrickContext)) is true;
 
-        DistributedApplication distributedApplication = await applicationTestingBuilder.BuildAsync();
+            foreach (ServiceDescriptor? descriptor in services.Where(serviceDescriptorPredicate).ToList())
+                services.Remove(descriptor);
 
-        await distributedApplication.StartAsync();
+            services.AddDbContext<MerrickContext>(options => options.UseInMemoryDatabase(databaseName).EnableServiceProviderCaching(false),
+                ServiceLifetime.Singleton, ServiceLifetime.Singleton);
+        }));
 
-        WebApplicationFactory<KONGORAssemblyMarker> webApplicationFactory = new WebApplicationFactory<KONGORAssemblyMarker>().WithWebHostBuilder(builder =>
-        {
-            builder.ConfigureServices(services =>
-            {
-                List<ServiceDescriptor> databaseContextDescriptors = [.. services.Where(descriptor => descriptor.ServiceType == typeof(DbContextOptions<MerrickContext>))];
-
-                foreach (ServiceDescriptor databaseContextDescriptor in databaseContextDescriptors)
-                    services.Remove(databaseContextDescriptor);
-
-                services.AddDbContext<MerrickContext>(options => options.UseInMemoryDatabase(identifier ?? Guid.CreateVersion7().ToString()));
-
-                List<ServiceDescriptor> distributedCacheDescriptors = [.. services.Where(descriptor => descriptor.ServiceType == typeof(IDistributedCache))];
-
-                foreach (ServiceDescriptor distributedCacheDescriptor in distributedCacheDescriptors)
-                    services.Remove(distributedCacheDescriptor);
-
-                services.AddDistributedMemoryCache();
-            });
-        });
+        // Ensure That OnModelCreating From MerrickContext Has Been Called
+        webApplicationFactory.Services.GetRequiredService<MerrickContext>().Database.EnsureCreated();
 
         return webApplicationFactory;
     }
