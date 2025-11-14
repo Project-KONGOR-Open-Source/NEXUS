@@ -12,7 +12,7 @@ public class PatcherController(ILogger<PatcherController> logger, IDatabase dist
     [HttpPost(Name = "Patcher")]
     public async Task<IActionResult> LatestPatch([FromForm] LatestPatchRequestForm form)
     {
-        if (await DistributedCache.ValidateAccountSessionCookie(form.Cookie).ContinueWith(task => task.Result.IsValid.Equals(false)))
+        if ((await DistributedCache.ValidateAccountSessionCookie(form.Cookie)).IsValid.Equals(false))
         {
             Logger.LogWarning($@"IP Address ""{Request.HttpContext.Connection.RemoteIpAddress?.MapToIPv4().ToString() ?? "UNKNOWN"}"" Has Made A Patcher Controller Request With Forged Cookie ""{form.Cookie}""");
 

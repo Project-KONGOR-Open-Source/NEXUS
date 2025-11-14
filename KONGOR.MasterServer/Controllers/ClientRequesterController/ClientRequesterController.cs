@@ -28,7 +28,7 @@ public partial class ClientRequesterController(MerrickContext databaseContext, I
     public async Task<IActionResult> ClientRequester()
     {
         bool endpointRequiresCookieValidation = Request.Query["f"].SingleOrDefault() is not "auth" and not "pre_auth" and not "srpAuth";
-        bool accountSessionCookieIsValid = await DistributedCache.ValidateAccountSessionCookie(Request.Form["cookie"].ToString() ?? "NULL").ContinueWith(task => task.Result.IsValid);
+        bool accountSessionCookieIsValid = (await DistributedCache.ValidateAccountSessionCookie(Request.Form["cookie"].ToString() ?? "NULL")).IsValid;
 
         if (endpointRequiresCookieValidation.Equals(true) && accountSessionCookieIsValid.Equals(false))
         {
