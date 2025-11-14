@@ -3,7 +3,7 @@
 [ApiController]
 [Route("client_requester.php")]
 [Consumes("application/x-www-form-urlencoded")]
-public partial class ClientRequesterController(MerrickContext databaseContext, IConnectionMultiplexer multiplexer, IMemoryCache cache, ILogger<ClientRequesterController> logger, IOptions<OperationalConfiguration> configuration) : ControllerBase
+public partial class ClientRequesterController(MerrickContext databaseContext, IDatabase distributedCache, ILogger<ClientRequesterController> logger, IOptions<OperationalConfiguration> configuration) : ControllerBase
 {
     # region Client Requester Controller Description
     /*
@@ -20,8 +20,7 @@ public partial class ClientRequesterController(MerrickContext databaseContext, I
     # endregion
 
     private MerrickContext MerrickContext { get; } = databaseContext;
-    private IDatabase DistributedCache { get; } = multiplexer.GetDatabase();
-    private IMemoryCache Cache { get; } = cache;
+    private IDatabase DistributedCache { get; } = distributedCache;
     private ILogger Logger { get; } = logger;
     private OperationalConfiguration Configuration { get; } = configuration.Value;
 
@@ -29,7 +28,7 @@ public partial class ClientRequesterController(MerrickContext databaseContext, I
     public async Task<IActionResult> ClientRequester()
     {
         bool endpointRequiresCookieValidation = Request.Query["f"].SingleOrDefault() is not "auth" and not "pre_auth" and not "srpAuth";
-        bool accountSessionCookieIsValid = Cache.ValidateAccountSessionCookie(Request.Form["cookie"].ToString() ?? "NULL", out string? _);
+        bool accountSessionCookieIsValid = await DistributedCache.ValidateAccountSessionCookie(Request.Form["cookie"].ToString() ?? "NULL").ContinueWith(task => task.Result.IsValid);
 
         if (endpointRequiresCookieValidation.Equals(true) && accountSessionCookieIsValid.Equals(false))
         {

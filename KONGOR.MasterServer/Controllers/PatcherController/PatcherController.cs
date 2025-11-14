@@ -3,16 +3,16 @@
 [ApiController]
 [Route("patcher/patcher.php")]
 [Consumes("application/x-www-form-urlencoded")]
-public class PatcherController(ILogger<PatcherController> logger, IMemoryCache cache, IOptions<OperationalConfiguration> configuration) : ControllerBase
+public class PatcherController(ILogger<PatcherController> logger, IDatabase distributedCache, IOptions<OperationalConfiguration> configuration) : ControllerBase
 {
     private ILogger Logger { get; } = logger;
-    private IMemoryCache Cache { get; } = cache;
+    private IDatabase DistributedCache { get; } = distributedCache;
     private OperationalConfiguration Configuration { get; } = configuration.Value;
 
     [HttpPost(Name = "Patcher")]
-    public IActionResult LatestPatch([FromForm] LatestPatchRequestForm form)
+    public async Task<IActionResult> LatestPatch([FromForm] LatestPatchRequestForm form)
     {
-        if (Cache.ValidateAccountSessionCookie(form.Cookie, out string? _).Equals(false))
+        if (await DistributedCache.ValidateAccountSessionCookie(form.Cookie).ContinueWith(task => task.Result.IsValid.Equals(false)))
         {
             Logger.LogWarning($@"IP Address ""{Request.HttpContext.Connection.RemoteIpAddress?.MapToIPv4().ToString() ?? "UNKNOWN"}"" Has Made A Patcher Controller Request With Forged Cookie ""{form.Cookie}""");
 

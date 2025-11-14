@@ -100,7 +100,7 @@ public static class SRPAuthenticationHandlers
 
     # endregion
 
-    private static string ComputeChatServerCookieHash(int accountID, string remoteIPAddress, string cookie)
+    public static string ComputeChatServerCookieHash(int accountID, string remoteIPAddress, string cookie)
     {
         string chatServerCookie = accountID + remoteIPAddress + cookie + ChatServerAuthenticationSalt;
 
