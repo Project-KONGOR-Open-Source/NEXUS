@@ -12,6 +12,32 @@ The chat server uses a hybrid storage approach:
 
 **Thread Safety**: All in-memory collections use `ConcurrentDictionary<TKey, TValue>` or `ConcurrentBag<T>` for safe multi-threaded access.
 
+## Storage Strategy
+
+NEXUS uses three persistence layers based on data lifetime requirements:
+
+1. **Database (SQL Server via MERRICK.DatabaseContext)**: Permanent persistence
+   - PlayerStatistics: Match statistics and ratings persist indefinitely
+   - FriendedPeer: Friend relationships persist across all restarts
+   - Clan, ClanMember: Clan data must be permanent
+   - Use when: Data must survive application restarts AND service failures
+
+2. **Redis Cache (via Aspire)**: Service-restart-safe temporary data
+   - GameServer registry: Must persist while game servers online, even if chat service restarts
+   - Potentially: Queue state if we want matchmaking to survive chat server restarts
+   - Use when: Data should survive service restarts but not indefinite
+
+3. **In-Memory (ConcurrentDictionary)**: Disposable session data
+   - ChatChannel: Recreated as players join channels
+   - MatchmakingGroup: Recreated as players form groups
+   - ChatSession: Active connections only
+   - Use when: Data is session-based and acceptable to lose on service restart
+
+**Rule of Thumb**:
+- Permanent data → Database
+- Service-restart-safe → Redis
+- Disposable/session-based → In-Memory
+
 ---
 
 ## In-Memory Entities (Transient State)
@@ -358,8 +384,8 @@ public class PlayerStatistics
     public int RiftwarsWins { get; set; } = 0;
     public int RiftwarsLosses { get; set; } = 0;
 
-    // Public (may be unranked - clarify with user)
-    public float? PublicRating { get; set; }  // Nullable if unranked
+    // Public (PSR - Public Skill Rating, works like MMR)
+    public float PublicRating { get; set; } = 1500.0f;  // PSR (Public Skill Rating)
     public int PublicWins { get; set; } = 0;
     public int PublicLosses { get; set; } = 0;
 
@@ -387,13 +413,13 @@ public class PlayerStatistics
 
 ---
 
-### FriendedPeer (or Buddy - check NEXUS terminology)
+### FriendedPeer
 
 Stores persistent friend relationships between players.
 
 **Entity Configuration**:
 ```csharp
-[Table("FriendedPeers")]  // Or "Buddies" if existing NEXUS term
+[Table("FriendedPeers")]
 public class FriendedPeer
 {
     [Key]

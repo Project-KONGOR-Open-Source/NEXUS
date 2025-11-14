@@ -1,84 +1,92 @@
-# Implementation Plan: [FEATURE]
+# Implementation Plan: Chat Server Implementation
 
-**Branch**: `[###-feature-name]` | **Date**: [DATE] | **Spec**: [link]
-**Input**: Feature specification from `/specs/[###-feature-name]/spec.md`
+**Branch**: `spec-kit` | **Date**: 2025-01-13 | **Spec**: [spec.md](./spec.md)
+**Input**: Feature specification from `/specs/spec-kit/spec.md`
 
 **Note**: This template is filled in by the `/speckit.plan` command. See `.specify/templates/commands/plan.md` for the execution workflow.
 
 ## Summary
 
-[Extract from feature spec: primary requirement + technical approach from research]
+Implement the TRANSMUTANSTEIN chat server with full TCP protocol support for player communication, matchmaking, and game coordination. The server maintains protocol compatibility with HoN (absolute truth) and KONGOR (production reference) while using modern .NET 10 patterns. Architecture uses triple TCP listeners (client, game server, manager ports) with in-memory state management for channels and groups, and Entity Framework persistence for player statistics and friend relationships. Implementation follows phased approach: (1) chat channels, (2) matchmaking groups, (3) queue/match lobby/game start, (4) player communication.
 
 ## Technical Context
 
-<!--
-  ACTION REQUIRED: Replace the content in this section with the technical details
-  for the project. The structure here is presented in advisory capacity to guide
-  the iteration process.
--->
-
-**Language/Version**: [e.g., Python 3.11, Swift 5.9, Rust 1.75 or NEEDS CLARIFICATION]  
-**Primary Dependencies**: [e.g., FastAPI, UIKit, LLVM or NEEDS CLARIFICATION]  
-**Storage**: [if applicable, e.g., PostgreSQL, CoreData, files or N/A]  
-**Testing**: [e.g., pytest, XCTest, cargo test or NEEDS CLARIFICATION]  
-**Target Platform**: [e.g., Linux server, iOS 15+, WASM or NEEDS CLARIFICATION]
-**Project Type**: [single/web/mobile - determines source structure]  
-**Performance Goals**: [domain-specific, e.g., 1000 req/s, 10k lines/sec, 60 fps or NEEDS CLARIFICATION]  
-**Constraints**: [domain-specific, e.g., <200ms p95, <100MB memory, offline-capable or NEEDS CLARIFICATION]  
-**Scale/Scope**: [domain-specific, e.g., 10k users, 1M LOC, 50 screens or NEEDS CLARIFICATION]
+**Language/Version**: C# with .NET 10
+**Primary Dependencies**: .NET Aspire, Entity Framework Core, System.Net.Sockets, System.Diagnostics.Metrics
+**Storage**: SQL Server via MERRICK.DatabaseContext (EF Core), In-memory ConcurrentDictionary for transient state, Redis caching via Aspire
+**Testing**: xUnit in ASPIRE.Tests, NBomber for load testing, SimulatedChatClient for protocol integration tests
+**Target Platform**: Cross-platform (Windows/Linux) with Docker support, deployed via Aspire orchestration
+**Project Type**: Distributed service (TCP server with multiple listener ports)
+**Performance Goals**: 10,000+ concurrent connections, 1000+ messages/second throughput, P95 message latency < 100ms
+**Constraints**: Protocol version 68 compatibility (HoN/KONGOR), 16KB channel buffer limit, 60-second keep-alive interval, immediate disconnect cleanup
+**Scale/Scope**: 5 game types, 200+ protocol commands (phased implementation), 4 in-memory entity types, 2-3 persistent database entities
 
 ## Constitution Check
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
 ### Principle I: Legacy Parity and Source of Truth
-- [ ] Feature maintains protocol compatibility with HoN/KONGOR
-- [ ] Legacy behavior documented and referenced (if applicable)
-- [ ] HoN source code consulted for absolute truth (if protocol-related)
-- [ ] KONGOR implementation reviewed for production patterns (if applicable)
-- [ ] Enhancement rationale documented (if changing legacy behavior)
+- [x] Feature maintains protocol compatibility with HoN/KONGOR
+- [x] Legacy behavior documented and referenced (if applicable)
+- [x] HoN source code consulted for absolute truth (if protocol-related)
+- [x] KONGOR implementation reviewed for production patterns (if applicable)
+- [x] Enhancement rationale documented (if changing legacy behavior)
+
+**Evidence**: research.md documents HoN c_client.h (742 lines), c_channel.h as absolute truth. KONGOR Connection.cs, ChatServer.cs analysed for production patterns. Protocol version 68 compatibility maintained. Modern .NET patterns used for implementation while preserving protocol structures.
 
 ### Principle II: Service Architecture
-- [ ] Service boundaries clearly defined
-- [ ] Service registered in ASPIRE.AppHost (if new service)
-- [ ] Uses MERRICK.DatabaseContext for data persistence (if data required)
-- [ ] Follows Aspire patterns for observability and configuration
-- [ ] Independent deployability considered in design
+- [x] Service boundaries clearly defined
+- [x] Service registered in ASPIRE.AppHost (if new service)
+- [x] Uses MERRICK.DatabaseContext for data persistence (if data required)
+- [x] Follows Aspire patterns for observability and configuration
+- [x] Independent deployability considered in design
+
+**Evidence**: TRANSMUTANSTEIN.ChatServer is distinct service. Will register in ASPIRE.AppHost. data-model.md defines PlayerStatistics and FriendedPeer entities using MERRICK.DatabaseContext. Triple TCP listener architecture supports independent deployment. Aspire health checks and metrics planned.
 
 ### Principle III: Chat Server Priority
-- [ ] Chat Server priority acknowledged (if not chat-related, mark N/A)
-- [ ] Event flows documented (if chat-related)
-- [ ] Protocol validated against HoN and KONGOR (if chat-related)
-- [ ] Real-time performance considered (if chat-related)
-- [ ] Logging strategy defined for debugging (if chat-related)
+- [x] Chat Server priority acknowledged (if not chat-related, mark N/A)
+- [x] Event flows documented (if chat-related)
+- [x] Protocol validated against HoN and KONGOR (if chat-related)
+- [x] Real-time performance considered (if chat-related)
+- [x] Logging strategy defined for debugging (if chat-related)
+
+**Evidence**: This IS the chat server (highest priority). research.md documents command categorization and flows. Protocol validated against HoN chatserver_protocol.h and KONGOR implementations. Performance targets: 10k connections, <100ms P95 latency. quickstart.md defines logging strategy with .NET metrics.
 
 ### Principle IV: Code Style and Formatting
-- [ ] Will follow C# conventions from copilot-instructions.md
-- [ ] No "var" usage planned
-- [ ] Proper acronym casing (UserID, userGUID, HTTPParser)
-- [ ] Full lambda parameter names planned
-- [ ] XML summaries planned for public APIs
+- [x] Will follow C# conventions from copilot-instructions.md
+- [x] No "var" usage planned
+- [x] Proper acronym casing (UserID, userGUID, HTTPParser)
+- [x] Full lambda parameter names planned
+- [x] XML summaries planned for public APIs
+
+**Evidence**: quickstart.md examples use explicit types (no var), proper casing (AccountID, GroupID), full lambda parameter names. data-model.md entity definitions follow conventions. Public APIs will have XML summaries per constitution.
 
 ### Principle V: Security and Correctness
-- [ ] OWASP Top 10 vulnerabilities considered
-- [ ] Input validation strategy defined
-- [ ] Authentication/authorization requirements identified
-- [ ] Data protection requirements identified
-- [ ] Performance optimization strategy balanced with readability
+- [x] OWASP Top 10 vulnerabilities considered
+- [x] Input validation strategy defined
+- [x] Authentication/authorization requirements identified
+- [x] Data protection requirements identified
+- [x] Performance optimization strategy balanced with readability
+
+**Evidence**: spec.md FR-011 to FR-015 define buffer limits (16KB), flood prevention, rate limiting. FR-006 to FR-009 define authentication/authorization. quickstart.md shows input validation patterns. Performance via ConcurrentDictionary and async patterns, not premature optimization.
 
 ### Principle VI: Simplicity and Maintainability
-- [ ] Simplest solution that meets requirements selected
-- [ ] Complexity justified (if introducing new patterns)
-- [ ] YAGNI principle applied
-- [ ] No over-engineering in design
-- [ ] Clear rationale for architectural choices
+- [x] Simplest solution that meets requirements selected
+- [x] Complexity justified (if introducing new patterns)
+- [x] YAGNI principle applied
+- [x] No over-engineering in design
+- [x] Clear rationale for architectural choices
+
+**Evidence**: In-memory state (not over-engineered persistence). Triple listener is simplest for three port types. Existing TCPServer base class reused. No unnecessary abstractions. research.md documents rationale for all major decisions.
 
 ### Principle VII: Testing and Validation
-- [ ] Integration test strategy defined (protocol, database, chat flows)
-- [ ] Legacy parity validation approach documented
-- [ ] Performance testing planned (for real-time components)
-- [ ] Test location identified (ASPIRE.Tests)
-- [ ] Success criteria measurable
+- [x] Integration test strategy defined (protocol, database, chat flows)
+- [x] Legacy parity validation approach documented
+- [x] Performance testing planned (for real-time components)
+- [x] Test location identified (ASPIRE.Tests)
+- [x] Success criteria measurable
+
+**Evidence**: quickstart.md defines SimulatedChatClient for protocol testing, 10k connection load tests, P95 latency measurement. research.md section 8 details performance testing harness. Success criteria in spec.md SC-001 to SC-013 are measurable. Tests in ASPIRE.Tests per constitution.
 
 ## Project Structure
 
@@ -95,51 +103,90 @@ specs/[###-feature]/
 ```
 
 ### Source Code (repository root)
-<!--
-  ACTION REQUIRED: Replace the placeholder tree below with the concrete layout
-  for this feature. Delete unused options and expand the chosen structure with
-  real paths (e.g., apps/admin, packages/something). The delivered plan must
-  not include Option labels.
--->
 
 ```text
-# [REMOVE IF UNUSED] Option 1: Single project (DEFAULT)
-src/
-├── models/
-├── services/
-├── cli/
-└── lib/
-
-tests/
-├── contract/
-├── integration/
-└── unit/
-
-# [REMOVE IF UNUSED] Option 2: Web application (when "frontend" + "backend" detected)
-backend/
-├── src/
-│   ├── models/
-│   ├── services/
-│   └── api/
-└── tests/
-
-frontend/
-├── src/
-│   ├── components/
-│   ├── pages/
-│   └── services/
-└── tests/
-
-# [REMOVE IF UNUSED] Option 3: Mobile + API (when "iOS/Android" detected)
-api/
-└── [same as backend above]
-
-ios/ or android/
-└── [platform-specific structure: feature modules, UI flows, platform tests]
+NEXUS/
+├── TRANSMUTANSTEIN.ChatServer/
+│   ├── Core/
+│   │   ├── ChatServer.cs              # Main server with triple TCP listeners
+│   │   ├── ChatSession.cs             # Client connection handler
+│   │   ├── GameServerSession.cs       # Game server connection handler
+│   │   ├── ManagerSession.cs          # Manager connection handler
+│   │   ├── ChatProtocol.cs            # Command codes (protocol v68)
+│   │   ├── ChatBuffer.cs              # Binary message serialization
+│   │   └── CommandProcessorRegistry.cs # Command routing
+│   ├── CommandProcessors/
+│   │   ├── Channels/
+│   │   │   ├── JoinChannelProcessor.cs
+│   │   │   ├── LeaveChannelProcessor.cs
+│   │   │   ├── ChannelMessageProcessor.cs
+│   │   │   ├── KickFromChannelProcessor.cs
+│   │   │   └── SilenceUserProcessor.cs
+│   │   ├── Groups/
+│   │   │   ├── GroupCreateProcessor.cs
+│   │   │   ├── GroupInviteProcessor.cs
+│   │   │   ├── GroupJoinProcessor.cs
+│   │   │   ├── GroupLeaveProcessor.cs
+│   │   │   └── PlayerReadyStatusProcessor.cs
+│   │   ├── Matchmaking/
+│   │   │   ├── GroupJoinQueueProcessor.cs
+│   │   │   ├── GroupLeaveQueueProcessor.cs
+│   │   │   ├── MatchFoundProcessor.cs
+│   │   │   ├── MatchAcceptProcessor.cs
+│   │   │   └── MatchStartProcessor.cs
+│   │   ├── Communication/
+│   │   │   ├── WhisperProcessor.cs
+│   │   │   ├── AddBuddyProcessor.cs
+│   │   │   └── RemoveBuddyProcessor.cs
+│   │   └── Server/
+│   │       ├── ServerHandshakeProcessor.cs
+│   │       ├── ServerStatusProcessor.cs
+│   │       ├── MatchCompleteProcessor.cs
+│   │       └── AllocateServerProcessor.cs
+│   ├── InMemory/
+│   │   ├── ChatChannel.cs             # In-memory channel state
+│   │   ├── ChatChannelMember.cs       # Channel membership
+│   │   ├── MatchmakingGroup.cs        # In-memory group state
+│   │   ├── MatchmakingGroupMember.cs  # Group membership
+│   │   ├── MatchLobby.cs              # Match lobby (Phase 3)
+│   │   └── MatchLobbyPlayer.cs        # Lobby player (Phase 3)
+│   ├── Services/
+│   │   ├── MatchmakingBroker.cs       # Matchmaking algorithm (Phase 3)
+│   │   └── KeepAliveService.cs        # 60-second keep-alive timer
+│   └── Program.cs                      # Aspire orchestration entry
+│
+├── MERRICK.DatabaseContext/
+│   ├── Entities/
+│   │   ├── PlayerStatistics.cs        # NEW: 5 game type ratings
+│   │   ├── FriendedPeer.cs            # NEW: Friend relationships
+│   │   └── ClanMember.cs              # Check if exists, add if needed
+│   └── Migrations/
+│       ├── AddPlayerStatistics.cs     # EF Core migration
+│       └── AddFriendedPeer.cs         # EF Core migration
+│
+├── ASPIRE.Tests/
+│   ├── ChatServer/
+│   │   ├── Integration/
+│   │   │   ├── ChannelTests.cs        # Phase 1 tests
+│   │   │   ├── GroupTests.cs          # Phase 2 tests
+│   │   │   ├── MatchmakingTests.cs    # Phase 3 tests
+│   │   │   └── CommunicationTests.cs  # Phase 4 tests
+│   │   ├── Performance/
+│   │   │   ├── ConcurrentConnectionsTest.cs
+│   │   │   ├── MessageLatencyTest.cs
+│   │   │   └── SimulatedChatClient.cs # Test helper
+│   │   └── Unit/
+│   │       ├── ChatBufferTests.cs
+│   │       ├── ChatChannelTests.cs
+│   │       └── MatchmakingGroupTests.cs
+│   └── TestHelpers/
+│       └── SimulatedChatClient.cs     # Protocol test client
+│
+└── ASPIRE.AppHost/
+    └── Program.cs                      # Register TRANSMUTANSTEIN.ChatServer
 ```
 
-**Structure Decision**: [Document the selected structure and reference the real
-directories captured above]
+**Structure Decision**: NEXUS uses distributed service architecture with .NET Aspire orchestration. TRANSMUTANSTEIN.ChatServer is a dedicated TCP service with clear separation of concerns: Core (server infrastructure), CommandProcessors (protocol handlers organized by phase), InMemory (transient state), Services (business logic). Database entities added to MERRICK.DatabaseContext. Tests organized by type (integration, performance, unit) in ASPIRE.Tests.
 
 ## Complexity Tracking
 

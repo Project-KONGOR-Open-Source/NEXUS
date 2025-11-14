@@ -706,23 +706,51 @@ public async Task Test_10k_Concurrent_Connections()
 
 ## 10. Open Questions & Action Items
 
-### Critical Action Items
+### ✅ RESOLVED (2025-01-14)
 
-1. **Public Game Type Rating**:
-   - ❓ Does Public game type track separate rating?
-   - ❓ Or is Public unranked/casual without rating changes?
-   - **Impact**: Affects PlayerStatistics entity definition
+1. **Public Game Type Rating**: ✅ RESOLVED
+   - **Decision**: Public game type tracks PSR (Public Skill Rating) - separate rating container that works like MMR
+   - **Implementation**: PublicRating field in PlayerStatistics (non-nullable, default 1500.0f)
+   - **Impact**: FR-037 updated, data-model.md updated
 
-2. **NEXUS Friend Terminology**:
-   - ❓ Does NEXUS codebase already define "FriendedPeer", "Buddy", or other term?
-   - ❓ What existing entities relate to friend relationships?
-   - **Impact**: Entity naming consistency with NEXUS conventions
-   - **Action**: Search MERRICK.DatabaseContext for existing friend/buddy entities
+2. **NEXUS Friend Terminology**: ✅ RESOLVED
+   - **Decision**: Use "FriendedPeer" consistently (not "Buddy")
+   - **Rationale**: More descriptive, shows bidirectional relationship, follows NEXUS naming conventions
+   - **Impact**: spec.md updated, data-model.md updated, tasks.md updated
 
-3. **PopularityUpdate.cs Update**:
+3. **Pipeline Pattern (FR-013)**: ✅ RESOLVED
+   - **Decision**: Use modern ASP.NET Core DI pattern (NOT BeforeProcess/AfterProcess)
+   - **Rationale**: Legacy pattern is anti-pattern with modern DI, dependencies injected via constructor
+   - **Impact**: FR-013 reworded to "use dependency injection for database context"
+
+4. **Recursive Depth Tracking (FR-012)**: ✅ RESOLVED
+   - **Decision**: Use async/await patterns (NOT recursive depth counter)
+   - **Rationale**: Modern async/await handles this, legacy concern no longer applicable
+   - **Impact**: FR-012 reworded, keep FR-015 buffer limit (16KB) for safety
+
+5. **Group Leader Transfer (FR-032)**: ✅ RESOLVED
+   - **Decision**: Automatic transfer when leader leaves (index-based)
+   - **Implementation**: When leader removed, shift all indices down by 1, member at index 0 becomes new leader
+   - **Impact**: FR-032 clarified, task T075a added
+
+6. **Storage Strategy**: ✅ RESOLVED
+   - **Database**: Permanent data (PlayerStatistics, FriendedPeer, Clan, ClanMember)
+   - **Redis**: Service-restart-safe (GameServer registry, potentially queue state)
+   - **In-Memory**: Disposable (ChatChannel, MatchmakingGroup, ChatSession)
+   - **Rule**: Permanent → DB, Service-restart-safe → Redis, Disposable → In-Memory
+   - **Impact**: data-model.md updated with storage strategy, task T027a added for Redis
+
+7. **PopularityUpdate.cs Update**: ✅ RESOLVED
    - Current: Campaign Normal, Midwars, Riftwars
    - Needed: Add Campaign Casual and Public
-   - **Action**: Update PopularityUpdate.cs game types list
+   - **Action**: Update PopularityUpdate.cs game types list during implementation
+
+### Deferred to Post-MVP
+
+1. **Match History Tracking (FR-058)**: DEFERRED POST-MVP
+2. **Win/Loss Streak Tracking (FR-059)**: DEFERRED POST-MVP
+3. **Season Statistics Resets (FR-060)**: DEFERRED POST-MVP
+4. **Leaver Strike Tracking (FR-062)**: DEFERRED POST-MVP
 
 ### Deferred Decisions (Implementation Phase)
 

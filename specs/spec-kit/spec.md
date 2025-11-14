@@ -132,11 +132,11 @@ The matchmaking system must pair compatible groups, consider MMR ratings across 
 
 - **Connection drops**: When a player's connection drops unexpectedly, the system immediately cleans up all state (removes from channels, disbands groups if leader, removes from queue, marks offline). Game client handles reconnection and re-establishes fresh state. This prevents "ghost users" appearing online when actually disconnected.
 - **Rapid reconnection attempts**: System must handle connection spam with rate limiting to prevent denial-of-service attacks
-- **Channel buffer overflow**: When channel buffer limits are exceeded (16KB limit), system must reject additional messages or oldest messages until buffer space available
-- **Chat flooding and spam**: System prevents flooding through configurable message rate limits per user and per channel
+- **Channel buffer overflow**: When a protocol message would cause the channel buffer to exceed 16KB limit, the system rejects the entire message with an error response. Sender must retry after buffer clears. Partial message transmission is forbidden to maintain protocol integrity and prevent client connection corruption
+- **Chat flooding and spam**: System prevents flooding through message rate limits (default: 5 messages per 2 seconds per user, configurable per deployment). Exceeded limit results in temporary message rejection with cooldown period
 - **Game server unavailability**: When game servers become unavailable during matchmaking, queued groups must be notified and matches cannot be formed until servers return
 - **Authentication session expiration**: Expired sessions must be detected during handshake and connection rejected with appropriate error
-- **Channel limit exceeded**: When a player attempts to join more channels than the allowed limit, system rejects join request with error message
+- **Channel limit exceeded**: When a player attempts to join more than 8 channels (HoN protocol limit), system sends CHAT_CMD_MAX_CHANNELS (0x0021) error response to client
 - **Clan membership changes**: When a player leaves a clan mid-session, they are immediately removed from clan-specific channels
 - **Queue wait time thresholds**: When matchmaking queue wait times exceed acceptable thresholds, system may relax rating requirements or notify players
 - **Time zone differences**: For scheduled tournaments, all times stored and compared in UTC to eliminate time zone ambiguity
@@ -154,6 +154,13 @@ The matchmaking system must pair compatible groups, consider MMR ratings across 
 - Q: Should specification use British English or defer language conversion? → A: Defer to implementation phase (code, comments, user-facing strings use British English)
 - Q: Should all 200+ protocol commands be implemented initially or phased? → A: Phased implementation prioritising: chat channels, matchmaking groups, matchmaking/queue/match start, player communication
 - Q: Which game types/rating categories should be supported (not all 9 from KONGOR)? → A: 5 game types: Campaign Normal, Campaign Casual, Midwars, Riftwars, Public (Campaign = internal name for TMM)
+
+### Session 2025-01-14
+
+- Q: How should we approach the existing custom TCP server infrastructure? → A: Document existing TCP patterns now, add low-priority task (post-MVP) to evaluate migration to System.Net.Sockets async patterns or Kestrel-based TCP server for improved maintainability
+- Q: When the buffer approaches 16KB limit, how should protocol messages be handled? → A: Reject message entirely (return error, sender must retry later when buffer clears). Protocol messages have specific structures and sending incomplete payloads would corrupt the connection
+- Q: What should the default message rate limit be for flood prevention? → A: 5 messages per 2 seconds per user (configurable via deployment settings)
+- Q: What is the maximum number of channels a player can join simultaneously? → A: 8 channels maximum (per HoN legacy protocol documentation)
 
 ## Requirements *(mandatory)*
 
@@ -178,10 +185,10 @@ The matchmaking system must pair compatible groups, consider MMR ratings across 
 #### Buffer and Message Processing
 
 - **FR-011**: System MUST implement buffer management with dual read/write offset system and automatic capacity expansion
-- **FR-012**: System MUST implement recursive depth tracking with maximum depth of 20 levels to prevent stack overflow
-- **FR-013**: System MUST process messages in pipeline pattern: BeforeProcess (database setup) → Process (core logic) → AfterProcess (database cleanup)
+- **FR-012**: System MUST use async/await patterns for message processing to prevent blocking and ensure scalability
+- **FR-013**: System MUST use dependency injection for database context and service dependencies in command processors
 - **FR-014**: System MUST support message serialization/deserialization for: int8, int16, int32, int64, float, double, string, boolean types
-- **FR-015**: System MUST enforce 16KB buffer limit per channel to prevent buffer overflow attacks
+- **FR-015**: System MUST enforce 16KB buffer limit per channel to prevent buffer overflow attacks. When a protocol message would exceed the buffer limit, the system MUST reject the message entirely and return an error to the sender. Partial message transmission is forbidden as it would corrupt the protocol stream and potentially crash client connections
 
 #### Channel Management
 
@@ -190,6 +197,7 @@ The matchmaking system must pair compatible groups, consider MMR ratings across 
 - **FR-018**: System MUST broadcast channel events (join, leave, message) to all channel members in real-time
 - **FR-019**: System MUST support channel moderation: kick users, silence users (with expiration), ban users from channels
 - **FR-020**: System MUST reject duplicate channel join attempts from the same player
+- **FR-020a**: System MUST enforce maximum channel limit of 8 channels per player. When a player attempts to join a 9th channel, system MUST send CHAT_CMD_MAX_CHANNELS error response
 - **FR-021**: System MUST validate clan channel membership before allowing join operations
 - **FR-022**: System MUST support authorized user lists for restricted channels
 
@@ -207,7 +215,7 @@ The matchmaking system must pair compatible groups, consider MMR ratings across 
 - **FR-029**: System MUST support group invitation system with accept/decline responses
 - **FR-030**: System MUST track group member ready status (ready, not ready) per player
 - **FR-031**: System MUST track group member loading status during match initialization
-- **FR-032**: System MUST support group leader transfer functionality
+- **FR-032**: System MUST automatically transfer group leadership when leader leaves or is removed. Leadership transfers to member at index 0 (after leader removal, all indices shift down by 1)
 - **FR-033**: System MUST allow group members to leave groups voluntarily
 - **FR-034**: System MUST disband groups when the last member leaves
 - **FR-035**: System MUST support group queue operations: join queue, leave queue, queue status updates
@@ -215,7 +223,7 @@ The matchmaking system must pair compatible groups, consider MMR ratings across 
 #### Matchmaking Broker
 
 - **FR-036**: System MUST implement matchmaking broker service evaluating group compatibility for match creation
-- **FR-037**: System MUST support 5 game types with associated ratings per player: Campaign Normal (ranked TMM), Campaign Casual (casual TMM), Midwars, Riftwars, and Public. Note: "Campaign" is the internal name for Team Matchmaking (TMM)
+- **FR-037**: System MUST support 5 game types with associated ratings per player: Campaign Normal (ranked TMM with MMR), Campaign Casual (casual TMM with MMR), Midwars (MMR), Riftwars (MMR), and Public (PSR - Public Skill Rating). Note: "Campaign" is the internal name for Team Matchmaking (TMM). PSR works like MMR but uses separate rating container
 - **FR-038**: System MUST calculate match compatibility based on average group MMR with configurable rating disparity thresholds
 - **FR-039**: System MUST filter matchmaking by game mode preferences: All Pick, Draft, Random, Banning Draft
 - **FR-040**: System MUST filter matchmaking by game map preferences: Caldavar, Midwars, Riftwars, Prophets
@@ -245,14 +253,14 @@ The matchmaking system must pair compatible groups, consider MMR ratings across 
 - **FR-055**: System MUST update player statistics after match completion: wins, losses, kills, deaths, assists
 - **FR-056**: System MUST calculate rating changes based on match outcome and opponent ratings
 - **FR-057**: System MUST maintain separate statistics per game type (Campaign Normal, Campaign Casual, Midwars, Riftwars, Public)
-- **FR-058**: System MUST track match history per player with configurable history depth
-- **FR-059**: System MUST track recent win/loss streaks for rating volatility adjustments
-- **FR-060**: System MUST support season statistics resets at configured intervals
+- **FR-058**: [DEFERRED POST-MVP] System SHOULD track match history per player with configurable history depth
+- **FR-059**: [DEFERRED POST-MVP] System SHOULD track recent win/loss streaks for rating volatility adjustments
+- **FR-060**: [DEFERRED POST-MVP] System SHOULD support season statistics resets at configured intervals
 
 #### Moderation and Anti-Abuse
 
-- **FR-061**: System MUST implement chat flood prevention with configurable message rate limits
-- **FR-062**: System MUST track leaver strikes per player for abandonment penalties
+- **FR-061**: System MUST implement chat flood prevention with configurable message rate limits (default: 5 messages per 2 seconds per user, overridable via configuration)
+- **FR-062**: [DEFERRED POST-MVP] System SHOULD track leaver strikes per player for abandonment penalties
 - **FR-063**: System MUST enforce account bans during authentication. Suspension system deferred - skip suspension checks in initial implementation
 - **FR-064**: System MUST support silence durations with automatic expiration
 - **FR-065**: System MUST log all moderation actions (kicks, bans, silences) with administrator attribution
@@ -269,6 +277,11 @@ The matchmaking system must pair compatible groups, consider MMR ratings across 
 
 **Entity Relationship Patterns**: All database entities follow MERRICK.DatabaseContext conventions using Entity Framework Core navigation properties for related data access. Relationships are defined bidirectionally where appropriate to enable efficient querying and maintain referential integrity.
 
+**Storage Classification**:
+- **Database Entities (Permanent)**: PlayerStatistics, FriendedPeer, Clan, ClanMember - Persist indefinitely in MERRICK.DatabaseContext
+- **Redis Entities (Service-Restart-Safe)**: GameServer - Persist across service restarts but temporary
+- **In-Memory Entities (Disposable)**: ChatSession, ChatChannel, ChatChannelMember, MatchmakingGroup, MatchmakingGroupMember - Cleared on service shutdown
+
 - **ChatSession**: Represents a connected client with authentication state, account information, chat mode, channels, and matchmaking group membership. Navigation properties link to Account, ChatChannels (collection), and MatchmakingGroup.
 - **ChatChannel**: Represents a chat channel with members, admin levels, topic, password, flags (permanent, hidden, clan-specific), and moderation state. Navigation properties link to ChatChannelMembers (collection) and Clan (if clan-specific).
 - **ChatChannelMember**: Represents a player's membership in a channel with admin level and silence status. Navigation properties link to Account and ChatChannel.
@@ -276,7 +289,7 @@ The matchmaking system must pair compatible groups, consider MMR ratings across 
 - **MatchmakingGroupMember**: Represents a player in a matchmaking group with team slot assignment and status flags. Navigation properties link to Account and MatchmakingGroup.
 - **GameServer**: Represents a connected game server with availability status, capacity, current match count, and region. May link to current Match entities (collection) if match tracking is in database.
 - **PlayerStatistics**: Represents player ratings and match history across 5 game types (Campaign Normal, Campaign Casual, Midwars, Riftwars, Public) with separate rating values per type. Navigation property links to Account. May link to MatchHistory (collection) for detailed match records.
-- **Buddy**: Represents a friend relationship between two players with online status tracking. Navigation properties link to both Account entities (requester and target) using appropriate foreign keys.
+- **FriendedPeer**: Represents a friend relationship between two players with online status tracking. Navigation properties link to both Account entities (requester and target) using appropriate foreign keys.
 - **Clan**: Represents a clan organization with members, ranks, and associated channels. Navigation properties link to ClanMembers (collection), ClanLeader (Account), and ClanChannels (collection).
 - **ClanMember**: Represents a player's membership in a clan with role and join date. Navigation properties link to Account and Clan.
 
@@ -289,7 +302,7 @@ The matchmaking system must pair compatible groups, consider MMR ratings across 
 - **SC-003**: System supports at least 10,000 concurrent connected players
 - **SC-004**: Matchmaking broker creates balanced matches (rating disparity < 300 MMR) within 3 minutes for 90% of groups
 - **SC-005**: Game server allocation completes within 5 seconds of match formation
-- **SC-006**: Chat flood prevention blocks spam attempts while allowing legitimate rapid communication (configurable threshold)
+- **SC-006**: Chat flood prevention blocks spam attempts while allowing legitimate rapid communication (default: 5 messages per 2 seconds, configurable)
 - **SC-007**: System maintains protocol compatibility with HoN game clients version 4.10.1.0+
 - **SC-008**: Connection keep-alive mechanism prevents premature disconnections (< 1% false disconnect rate)
 - **SC-009**: Protocol commands implemented in phased approach prioritising core functionality: (1) chat channels, (2) matchmaking groups, (3) matchmaking/queue/match start, (4) player communication. Additional commands implemented as needed
@@ -341,7 +354,7 @@ The matchmaking system must pair compatible groups, consider MMR ratings across 
 - Extensive integration testing required to validate parity with legacy systems
 - Chat Server is marked as HIGHEST PRIORITY in NEXUS constitution
 - **Architecture Pattern**: The existing TRANSMUTANSTEIN.ChatServer command processor framework is modelled after ASP.NET Core but adapted for TCP (attribute-based routing with ChatCommandAttribute, ISynchronousCommandProcessor, IAsynchronousCommandProcessor). New implementations should follow this established pattern. Minor improvements are welcome if they offer clear superiority while maintaining the ASP.NET Core-inspired philosophy
-- **TCP Infrastructure**: TRANSMUTANSTEIN.ChatServer already contains custom TCP server infrastructure (TCPServer base class, TCPSession, ChatSession, etc.). Implementation should build on this existing foundation. While it could potentially be simplified with more standard approaches, this is not a priority - maintain consistency with existing patterns
+- **TCP Infrastructure**: TRANSMUTANSTEIN.ChatServer already contains custom TCP server infrastructure (TCPServer base class, TCPSession, ChatSession, etc.). MVP implementation should build on this existing foundation to minimize risk and leverage proven patterns. A low-priority post-MVP task should evaluate potential migration to modern .NET async Socket patterns or Kestrel-based TCP server for improved long-term maintainability and ecosystem integration
 - **Terminology**: Prefer NEXUS terminology over KONGOR when conflicts arise. Use established NEXUS codebase terms rather than renaming to match legacy implementations
 - **Language**: British English should be used in code comments, documentation, and user-facing strings during implementation
 - **Feature Scope**: KONGOR contains some features not desired in NEXUS (e.g., hardware fingerprinting). When encountering KONGOR-specific features, verify before implementing. Suspension system deferred - stub/skip suspension checks initially
