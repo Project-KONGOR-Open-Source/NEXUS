@@ -51,6 +51,8 @@
 
  - when creating asynchronous methods, never use the "Async" suffix in the method name unless there is also a synchronous version of the same method in the same scope
 
+ - always keep any and all code and comments in British English, and never use American English
+
 ### Code Generation
 
  - always ensure that the generated code is syntactically correct and adheres to best practices for the target programming language
