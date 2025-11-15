@@ -53,9 +53,9 @@ public class ClientHandshake(MerrickContext merrick, IDatabase distributedCacheS
         }
 
         // Ensure Authentication Hash (AccountID + RemoteIP + Cookie + Salt) Matches Expected Value
-        string expectedAuthHash = SRPAuthenticationHandlers.ComputeChatServerCookieHash(requestData.AccountID, requestData.RemoteIP, requestData.SessionCookie);
+        string expectedSessionAuthenticationHash = SRPAuthenticationHandlers.ComputeChatServerCookieHash(requestData.AccountID, requestData.RemoteIP, requestData.SessionCookie);
 
-        if (requestData.SessionAuthenticationHash.Equals(expectedAuthHash, StringComparison.OrdinalIgnoreCase).Equals(false))
+        if (requestData.SessionAuthenticationHash.Equals(expectedSessionAuthenticationHash, StringComparison.OrdinalIgnoreCase).Equals(false))
         {
             Log.Warning(@"Authentication Failed For Account ""{Account.Name}"": Invalid Authentication Hash", account.Name);
 
