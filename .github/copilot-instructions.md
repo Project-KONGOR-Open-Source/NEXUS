@@ -10,6 +10,8 @@
    - RIGHT: numbers.Select(number => number * number);
    - WRONG: numbers.Select(x => x * x);
 
+ - always use four spaces for indentation, and always terminate files with a newline character
+
  - always keep vertical whitespace usage consistent; if there is any already-existing code in the proximity, inspect it and use the same vertical whitespace usage conventions
 
  - always keep syntax and formatting styles consistent with those of already-existing code; if there is any already-existing code in the proximity, inspect it and use the same syntax and formatting styles

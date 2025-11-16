@@ -96,10 +96,12 @@ NEXUS uses distributed service architecture:
 
 **Independent Test**: Launch SimulatedChatClient, connect to port 11031, send authentication, verify session confirmation received and keep-alive packets sent every 60 seconds.
 
-### Tests for User Story 1
+### Tests for User Story 1 (DEFERRED)
 
-- [ ] T032 [P] [US1] Create SimulatedChatClient.cs in ASPIRE.Tests/TestHelpers/SimulatedChatClient.cs (ConnectAsync, SendAuthenticateAsync, ReceiveAsync methods)
-- [ ] T033 [US1] Integration test for authentication flow in ASPIRE.Tests/ChatServer/Integration/AuthenticationTests.cs (valid credentials, invalid credentials, concurrent connections, keep-alive)
+**Tests deferred until more chat server functionality is implemented**
+
+- [ ] T032 [P] [US1] Create SimulatedChatClient.cs in ASPIRE.Tests/TestHelpers/SimulatedChatClient.cs (ConnectAsync, SendAuthenticateAsync, ReceiveAsync methods) - 🔄 DEFERRED until more chat server code available
+- [ ] T033 [US1] Integration test for authentication flow in ASPIRE.Tests/ChatServer/Integration/AuthenticationTests.cs (valid credentials, invalid credentials, concurrent connections, keep-alive) - 🔄 DEFERRED until more chat server code available
 
 ### Implementation for User Story 1
 
@@ -122,11 +124,13 @@ NEXUS uses distributed service architecture:
 
 **Independent Test**: Two SimulatedChatClients connect and authenticate, both join "General" channel, one sends message, verify other receives broadcast. Admin client kicks member, verify removal.
 
-### Tests for User Story 2
+### Tests for User Story 2 (DEFERRED)
 
-- [ ] T042 [P] [US2] Integration test for channel join/leave in ASPIRE.Tests/ChatServer/Integration/ChannelTests.cs (join public channel, leave channel, member list updates)
-- [ ] T043 [P] [US2] Integration test for channel messaging in ASPIRE.Tests/ChatServer/Integration/ChannelTests.cs (send message, broadcast to all members, exclude sender)
-- [ ] T044 [P] [US2] Integration test for channel moderation in ASPIRE.Tests/ChatServer/Integration/ChannelTests.cs (kick user, silence user with expiration)
+**Tests deferred until application code is implemented**
+
+- [ ] T042 [P] [US2] Integration test for channel join/leave in ASPIRE.Tests/ChatServer/Integration/ChannelTests.cs (join public channel, leave channel, member list updates) - 🔄 DEFERRED until application code complete
+- [ ] T043 [P] [US2] Integration test for channel messaging in ASPIRE.Tests/ChatServer/Integration/ChannelTests.cs (send message, broadcast to all members, exclude sender) - 🔄 DEFERRED until application code complete
+- [ ] T044 [P] [US2] Integration test for channel moderation in ASPIRE.Tests/ChatServer/Integration/ChannelTests.cs (kick user, silence user with expiration) - 🔄 DEFERRED until application code complete
 
 ### Implementation for User Story 2
 
@@ -156,12 +160,14 @@ NEXUS uses distributed service architecture:
 
 **Independent Test**: Three SimulatedChatClients form a group (leader creates, invites two members), all mark ready, group joins queue, verify queue status updates broadcast to all members.
 
-### Tests for User Story 3
+### Tests for User Story 3 (DEFERRED)
 
-- [ ] T060 [P] [US3] Integration test for group creation in ASPIRE.Tests/ChatServer/Integration/GroupTests.cs (create group, leader assigned)
-- [ ] T061 [P] [US3] Integration test for group invitations in ASPIRE.Tests/ChatServer/Integration/GroupTests.cs (invite player, accept, decline, join group)
-- [ ] T062 [P] [US3] Integration test for ready status in ASPIRE.Tests/ChatServer/Integration/GroupTests.cs (mark ready, all members see status update)
-- [ ] T063 [P] [US3] Integration test for queue join/leave in ASPIRE.Tests/ChatServer/Integration/GroupTests.cs (join queue, leave queue, leader cancels)
+**Tests deferred until application code is implemented**
+
+- [ ] T060 [P] [US3] Integration test for group creation in ASPIRE.Tests/ChatServer/Integration/GroupTests.cs (create group, leader assigned) - 🔄 DEFERRED until application code complete
+- [ ] T061 [P] [US3] Integration test for group invitations in ASPIRE.Tests/ChatServer/Integration/GroupTests.cs (invite player, accept, decline, join group) - 🔄 DEFERRED until application code complete
+- [ ] T062 [P] [US3] Integration test for ready status in ASPIRE.Tests/ChatServer/Integration/GroupTests.cs (mark ready, all members see status update) - 🔄 DEFERRED until application code complete
+- [ ] T063 [P] [US3] Integration test for queue join/leave in ASPIRE.Tests/ChatServer/Integration/GroupTests.cs (join queue, leave queue, leader cancels) - 🔄 DEFERRED until application code complete
 
 ### Implementation for User Story 3
 
@@ -194,11 +200,13 @@ NEXUS uses distributed service architecture:
 
 **Independent Test**: Two SimulatedChatClients add each other as buddies, verify persistent in database. One sends whisper, other receives. One disconnects, verify offline notification sent to buddy.
 
-### Tests for User Story 4
+### Tests for User Story 4 (DEFERRED)
 
-- [ ] T081 [P] [US4] Integration test for whisper messaging in ASPIRE.Tests/ChatServer/Integration/CommunicationTests.cs (send whisper, receive whisper, whisper failed when offline)
-- [ ] T082 [P] [US4] Integration test for buddy system in ASPIRE.Tests/ChatServer/Integration/CommunicationTests.cs (add buddy, remove buddy, online notification, offline notification)
-- [ ] T083 [P] [US4] Integration test for ChatMode respect in ASPIRE.Tests/ChatServer/Integration/CommunicationTests.cs (DND blocks whispers, AFK marks away)
+**Tests deferred until application code is implemented**
+
+- [ ] T081 [P] [US4] Integration test for whisper messaging in ASPIRE.Tests/ChatServer/Integration/CommunicationTests.cs (send whisper, receive whisper, whisper failed when offline) - 🔄 DEFERRED until application code complete
+- [ ] T082 [P] [US4] Integration test for buddy system in ASPIRE.Tests/ChatServer/Integration/CommunicationTests.cs (add buddy, remove buddy, online notification, offline notification) - 🔄 DEFERRED until application code complete
+- [ ] T083 [P] [US4] Integration test for ChatMode respect in ASPIRE.Tests/ChatServer/Integration/CommunicationTests.cs (DND blocks whispers, AFK marks away) - 🔄 DEFERRED until application code complete
 
 ### Implementation for User Story 4
 
@@ -224,11 +232,13 @@ NEXUS uses distributed service architecture:
 
 **Independent Test**: SimulatedChatClient with ClanID connects, verify auto-joined clan channel. Leader promotes member to officer, verify admin privileges granted in channel.
 
-### Tests for User Story 5
+### Tests for User Story 5 (DEFERRED)
 
-- [ ] T095 [P] [US5] Integration test for clan channel auto-join in ASPIRE.Tests/ChatServer/Integration/ClanTests.cs (clan member connects, auto-joined clan channel)
-- [ ] T096 [P] [US5] Integration test for clan messaging in ASPIRE.Tests/ChatServer/Integration/ClanTests.cs (clan member sends message, all online clan members receive)
-- [ ] T097 [P] [US5] Integration test for clan rank management in ASPIRE.Tests/ChatServer/Integration/ClanTests.cs (leader promotes to officer, officer gains admin privileges)
+**Tests deferred until application code is implemented**
+
+- [ ] T095 [P] [US5] Integration test for clan channel auto-join in ASPIRE.Tests/ChatServer/Integration/ClanTests.cs (clan member connects, auto-joined clan channel) - 🔄 DEFERRED until application code complete
+- [ ] T096 [P] [US5] Integration test for clan messaging in ASPIRE.Tests/ChatServer/Integration/ClanTests.cs (clan member sends message, all online clan members receive) - 🔄 DEFERRED until application code complete
+- [ ] T097 [P] [US5] Integration test for clan rank management in ASPIRE.Tests/ChatServer/Integration/ClanTests.cs (leader promotes to officer, officer gains admin privileges) - 🔄 DEFERRED until application code complete
 
 ### Implementation for User Story 5
 
@@ -249,11 +259,13 @@ NEXUS uses distributed service architecture:
 
 **Independent Test**: SimulatedGameServerClient connects to port 11033, authenticates, reports server available, submits match results with player statistics, verify PlayerStatistics updated in database.
 
-### Tests for User Story 6
+### Tests for User Story 6 (DEFERRED)
 
-- [ ] T104 [P] [US6] Integration test for game server handshake in ASPIRE.Tests/ChatServer/Integration/GameServerTests.cs (server connects to port 11033, authenticates, registers availability)
-- [ ] T105 [P] [US6] Integration test for match status updates in ASPIRE.Tests/ChatServer/Integration/GameServerTests.cs (server reports match in progress, completed, aborted)
-- [ ] T106 [P] [US6] Integration test for match results submission in ASPIRE.Tests/ChatServer/Integration/GameServerTests.cs (server submits results, PlayerStatistics updated)
+**Tests deferred until application code is implemented**
+
+- [ ] T104 [P] [US6] Integration test for game server handshake in ASPIRE.Tests/ChatServer/Integration/GameServerTests.cs (server connects to port 11033, authenticates, registers availability) - 🔄 DEFERRED until application code complete
+- [ ] T105 [P] [US6] Integration test for match status updates in ASPIRE.Tests/ChatServer/Integration/GameServerTests.cs (server reports match in progress, completed, aborted) - 🔄 DEFERRED until application code complete
+- [ ] T106 [P] [US6] Integration test for match results submission in ASPIRE.Tests/ChatServer/Integration/GameServerTests.cs (server submits results, PlayerStatistics updated) - 🔄 DEFERRED until application code complete
 
 ### Implementation for User Story 6
 
@@ -278,11 +290,13 @@ NEXUS uses distributed service architecture:
 
 **Independent Test**: Two groups (2 SimulatedChatClients each) join queue with compatible ratings and preferences, verify matchmaking broker pairs them, allocates server, creates lobby, sends match start when all loaded.
 
-### Tests for User Story 7
+### Tests for User Story 7 (DEFERRED)
 
-- [ ] T117 [P] [US7] Integration test for matchmaking algorithm in ASPIRE.Tests/ChatServer/Integration/MatchmakingTests.cs (two compatible groups paired within rating threshold)
-- [ ] T118 [P] [US7] Integration test for server allocation in ASPIRE.Tests/ChatServer/Integration/MatchmakingTests.cs (match created, server allocated from RegisteredGameServers)
-- [ ] T119 [P] [US7] Integration test for match lobby flow in ASPIRE.Tests/ChatServer/Integration/MatchmakingTests.cs (lobby created, players accept, loading status tracked, match start)
+**Tests deferred until application code is implemented**
+
+- [ ] T117 [P] [US7] Integration test for matchmaking algorithm in ASPIRE.Tests/ChatServer/Integration/MatchmakingTests.cs (two compatible groups paired within rating threshold) - 🔄 DEFERRED until application code complete
+- [ ] T118 [P] [US7] Integration test for server allocation in ASPIRE.Tests/ChatServer/Integration/MatchmakingTests.cs (match created, server allocated from RegisteredGameServers) - 🔄 DEFERRED until application code complete
+- [ ] T119 [P] [US7] Integration test for match lobby flow in ASPIRE.Tests/ChatServer/Integration/MatchmakingTests.cs (lobby created, players accept, loading status tracked, match start) - 🔄 DEFERRED until application code complete
 
 ### Implementation for User Story 7
 
