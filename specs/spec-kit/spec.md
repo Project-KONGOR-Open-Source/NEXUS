@@ -161,6 +161,7 @@ The matchmaking system must pair compatible groups, consider MMR ratings across 
 - Q: When the buffer approaches 16KB limit, how should protocol messages be handled? → A: Reject message entirely (return error, sender must retry later when buffer clears). Protocol messages have specific structures and sending incomplete payloads would corrupt the connection
 - Q: What should the default message rate limit be for flood prevention? → A: 5 messages per 2 seconds per user (configurable via deployment settings)
 - Q: What is the maximum number of channels a player can join simultaneously? → A: 8 channels maximum (per HoN legacy protocol documentation)
+- Q: Does the protocol support manual leadership transfer commands (player voluntarily promotes another member to leader), or only automatic transfer on leader disconnect/leave? → A: [NEEDS RESEARCH - check HoN/KONGOR for NET_CHAT_CL_TMM_GROUP_PROMOTE_LEADER or similar command]
 
 ## Requirements *(mandatory)*
 
@@ -188,7 +189,7 @@ The matchmaking system must pair compatible groups, consider MMR ratings across 
 - **FR-012**: System MUST use async/await patterns for message processing to prevent blocking and ensure scalability
 - **FR-013**: System MUST use dependency injection for database context and service dependencies in command processors
 - **FR-014**: System MUST support message serialization/deserialization for: int8, int16, int32, int64, float, double, string, boolean types
-- **FR-015**: System MUST enforce 16KB buffer limit per channel to prevent buffer overflow attacks. When a protocol message would exceed the buffer limit, the system MUST reject the message entirely and return an error to the sender. Partial message transmission is forbidden as it would corrupt the protocol stream and potentially crash client connections
+- **FR-015**: System MUST enforce 16KB buffer limit per channel to prevent buffer overflow attacks. When a protocol message would exceed the buffer limit, the system MUST reject the message entirely and return NET_CHAT_CL_CHANNEL_BUFFER_FULL error response (or appropriate protocol-defined error code) to the sender. Partial message transmission is forbidden as it would corrupt the protocol stream and potentially crash client connections
 
 #### Channel Management
 
@@ -211,7 +212,7 @@ The matchmaking system must pair compatible groups, consider MMR ratings across 
 
 #### Matchmaking Group Management
 
-- **FR-028**: System MUST support group creation with designated group leader
+- **FR-028**: System MUST support group creation with designated group leader (maximum 5 members per team as per team size variations in FR-043)
 - **FR-029**: System MUST support group invitation system with accept/decline responses
 - **FR-030**: System MUST track group member ready status (ready, not ready) per player
 - **FR-031**: System MUST track group member loading status during match initialization

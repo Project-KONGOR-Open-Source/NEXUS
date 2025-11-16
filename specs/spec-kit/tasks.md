@@ -74,9 +74,9 @@ NEXUS uses distributed service architecture:
 ### Chat Server Main Class
 
 - [x] T024 Implement ChatServer.cs in TRANSMUTANSTEIN.ChatServer/Core/ChatServer.cs with three TCPServer instances (clientListener, serverListener, managerListener) managing ports 11031, 11032, 11033 - ✅ Core/ChatServer.cs exists (single listener, multi-port may be handled differently)
-- [x] T025 Add ConcurrentDictionary<string, ChatChannel> ActiveChannels to ChatServer.cs for in-memory channel management - ✅ Complete in Internals/Context.cs as static Context.ChatChannels
+- [x] T025 Add ConcurrentDictionary<string, ChatChannel> ActiveChannels for in-memory channel management - ✅ Complete in Internals/Context.cs as static Context.ChatChannels
 - [x] T026 Add ConcurrentDictionary<int, MatchmakingGroup> ActiveGroups to ChatServer.cs for in-memory group management - ✅ MatchmakingService.Groups handles this
-- [x] T027 Add ConcurrentDictionary<int, ChatSession> ActiveSessions to ChatServer.cs keyed by AccountID - ✅ Complete in Internals/Context.cs as Context.ChatSessions (keyed by AccountName)
+- [x] T027 Add ConcurrentDictionary<int, ChatSession> ActiveSessions keyed by AccountID - ✅ Complete in Internals/Context.cs as Context.ChatSessions (keyed by AccountName)
 - [ ] T027a Add Redis cache integration for GameServer registry in ChatServer.cs (ConcurrentDictionary<int, GameServerSession> with Redis backing for service-restart safety) - 🔄 DEFERRED until matchmaking queue functional
 - [ ] T028 Implement ConnectionHealthService.cs in TRANSMUTANSTEIN.ChatServer/Services/ConnectionHealthService.cs with dual purpose: (1) Ping/pong at regular intervals to keep connection alive, (2) Graceful disconnect after 1 initial + 5 retries (6 calls over 30s) with no response - removes from channels/groups/etc. - 🔄 DEFERRED until client cleanup logic complete
 
@@ -144,11 +144,14 @@ NEXUS uses distributed service architecture:
 - [ ] T052 [US2] Add ChatChannel.RemoveMember() in ChatChannel.cs (ConcurrentDictionary.TryRemove, broadcast leave event, cleanup empty non-permanent channels)
 - [ ] T053 [US2] Add ChatChannel.BroadcastMessage() in ChatChannel.cs (iterate Members, send to each ChatSession, exclude sender if specified)
 - [ ] T054 [US2] Add clan channel validation in JoinChannelProcessor (check ClanMember table via MERRICK.DatabaseContext if channel has ClanID)
-- [ ] T055 [US2] Add duplicate join prevention in JoinChannelProcessor (check if AccountID already in channel.Members)
+- [ ] T055 [US2] Add duplicate join check in JoinChannelProcessor per FR-020 (reject if AccountID already in channel.Members)
+- [ ] T055a [US2] Add channel limit enforcement in JoinChannelProcessor (count player's current channels via ChatSession.CurrentChannels, reject join with NET_CHAT_CL_MAX_CHANNELS (0x0021) error if attempting to join 9th channel per FR-020a)
 - [ ] T056 [US2] Add password validation in JoinChannelProcessor (compare provided password with channel.Password if set)
 - [ ] T057 [US2] Add admin permission checks in KickFromChannelProcessor and SilenceUserProcessor (verify caller has AdminLevel != None)
 - [ ] T058 [US2] Add silence expiration check in ChannelMessageProcessor (if member.SilencedUntil > DateTime.UtcNow, reject message)
 - [ ] T059 [US2] Add 16KB buffer limit enforcement in ChannelMessageProcessor per FR-015
+- [ ] T059a [US2] Implement FloodPreventionService.cs in TRANSMUTANSTEIN.ChatServer/Services/FloodPreventionService.cs with configurable rate limits (CheckMessageAllowed method tracking per-user message timestamps, default: 5 messages per 2 seconds per user)
+- [ ] T059b [US2] Integrate FloodPreventionService in ChannelMessageProcessor (inject via DI, call CheckMessageAllowed before broadcasting, reject with NET_CHAT_CL_MESSAGE_REJECTED if rate exceeded)
 
 **Checkpoint**: At this point, players can use public and clan chat channels with moderation. User Story 2 is fully functional and testable independently.
 
@@ -459,18 +462,18 @@ With multiple developers after Foundational phase:
 
 ## Task Statistics
 
-- **Total Tasks**: 153 (151 original + T027a + T075a)
+- **Total Tasks**: 156 (151 original + T027a + T055a + T059a + T059b + T075a)
 - **Setup Phase**: 4 tasks
 - **Foundational Phase**: 28 tasks (BLOCKS all user stories) - includes Redis cache integration
 - **User Story 1**: 10 tasks (MVP)
-- **User Story 2**: 18 tasks
+- **User Story 2**: 21 tasks
 - **User Story 3**: 22 tasks - includes automatic leader transfer (FR-032)
 - **User Story 4**: 14 tasks
 - **User Story 5**: 9 tasks
 - **User Story 6**: 13 tasks
 - **User Story 7**: 22 tasks
 - **Polish Phase**: 13 tasks
-- **Parallel Tasks**: 89 marked [P] (58% can run in parallel within constraints)
+- **Parallel Tasks**: 89 marked [P] (57% can run in parallel within constraints)
 - **MVP Scope**: Phases 1, 2, 3 (42 tasks) delivers authenticated connection handling
 
 **Deferred to Post-MVP** (not included in tasks):
