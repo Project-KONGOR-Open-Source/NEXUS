@@ -58,20 +58,24 @@ public class ChatChannel
 
     public ChatChannel Join(ChatSession session, string? providedPassword = null)
     {
-        if (session.CurrentChannels.Count > ChatProtocol.MAX_CHANNELS_PER_CLIENT)
-            Log.Error(@"[BUG] Account ""{AccountName}"" Has Exceeded The Maximum Number Of Channels ({MaxChannels})", session.Account.Name, ChatProtocol.MAX_CHANNELS_PER_CLIENT);
-
-        // Reject Join Request If Client Has Reached Maximum Number Of Channels
-        // Staff Accounts Are Exempt From This Limit, For Moderation And Administration Purposes
-        if (session.Account.Type != AccountType.Staff && session.CurrentChannels.Count == ChatProtocol.MAX_CHANNELS_PER_CLIENT)
+        // Staff Accounts Are Exempt From Channel Limit Restrictions, For Moderation And Administration Purposes
+        if (session.Account.Type is not AccountType.Staff)
         {
-            ChatBuffer error = new ();
+            // Log A Bug-Type Error If The Client Has Exceeded The Maximum Number Of Channels
+            if (session.CurrentChannels.Count > ChatProtocol.MAX_CHANNELS_PER_CLIENT)
+                Log.Error(@"[BUG] Account ""{AccountName}"" Has Exceeded The Maximum Number Of Channels ({MaxChannels})", session.Account.Name, ChatProtocol.MAX_CHANNELS_PER_CLIENT);
 
-            error.WriteCommand(ChatProtocol.Command.CHAT_CMD_MAX_CHANNELS);
+            // Reject Join Request If Client Has Reached Maximum Number Of Channels
+            if (session.CurrentChannels.Count == ChatProtocol.MAX_CHANNELS_PER_CLIENT)
+            {
+                ChatBuffer error = new();
 
-            session.Send(error);
+                error.WriteCommand(ChatProtocol.Command.CHAT_CMD_MAX_CHANNELS);
 
-            return this;
+                session.Send(error);
+
+                return this;
+            }
         }
 
         // Reject Join Request If Client Is Already In The Channel
