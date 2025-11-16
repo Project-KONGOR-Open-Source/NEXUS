@@ -50,9 +50,42 @@ public class ChatChannel
 
     public ChatChannel Join(ChatSession session)
     {
-        // TODO: Reject Join Request If Client Is Already In The Channel
+        if (session.CurrentChannels.Count > ChatProtocol.MAX_CHANNELS_PER_CLIENT)
+            Log.Error(@"[BUG] Account ""{AccountName}"" Has Exceeded The Maximum Number Of Channels ({MaxChannels})", session.Account.Name, ChatProtocol.MAX_CHANNELS_PER_CLIENT);
 
-        // TODO: Reject Join Request If The Channel Is A Clan Channel And The Client Is Not In The Clan
+        // Reject Join Request If Client Has Reached Maximum Number Of Channels
+        // Staff Accounts Are Exempt From This Limit For Moderation Purposes
+        if (session.Account.Type != AccountType.Staff && session.CurrentChannels.Count == ChatProtocol.MAX_CHANNELS_PER_CLIENT)
+        {
+            ChatBuffer error = new ();
+
+            error.WriteCommand(ChatProtocol.Command.CHAT_CMD_MAX_CHANNELS);
+
+            session.Send(error);
+
+            return this;
+        }
+
+        // Reject Join Request If Client Is Already In The Channel
+        if (Members.ContainsKey(session.Account.Name))
+        {
+            // Legacy Behavior: No Error Message Sent To Client (Silent Rejection)
+            // TODO: Send Error Response To Client Indicating They Cannot Join This Clan Channel
+
+            return this;
+        }
+
+        // Reject Join Request If The Channel Is A Clan Channel And The Client Is Not In The Clan
+        if (Flags.HasFlag(ChatProtocol.ChatChannelType.CHAT_CHANNEL_FLAG_CLAN))
+        {
+            if (session.Account.Clan is null || Name != session.Account.Clan.GetChatChannelName())
+            {
+                // Legacy Behavior: No Error Message Sent To Client (Silent Rejection)
+                // TODO: Send Error Response To Client Indicating They Cannot Join This Clan Channel
+
+                return this;
+            }
+        }
 
         // TODO: Reject Join Request If The Channel Has The CHAT_CHANNEL_FLAG_UNJOINABLE Flag
 
@@ -103,6 +136,9 @@ public class ChatChannel
         // Announce To The Existing Channel Members That A New Client Has Joined The Channel
         BroadcastJoin(session);
 
+        // Track This Channel In The Client's Current Channels List
+        session.CurrentChannels.Add(ID);
+
         return this;
     }
 
@@ -137,6 +173,9 @@ public class ChatChannel
 
         if (member is not null)
         {
+            // Remove This Channel From The Client's Current Channels List
+            session.CurrentChannels.Remove(ID);
+
             // If There Are No Remaining Members And The Channel Is Not Permanent, Dispose Of It
             if (Members.IsEmpty is true && IsPermanent is false)
             {

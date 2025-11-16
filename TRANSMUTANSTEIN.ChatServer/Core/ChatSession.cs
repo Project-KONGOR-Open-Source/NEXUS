@@ -12,6 +12,12 @@ public partial class ChatSession(TCPServer server, IServiceProvider serviceProvi
     /// </summary>
     public Account Account { get; set; } = null!;
 
+    /// <summary>
+    ///     Tracks the channel IDs that this client is currently a member of.
+    ///     The maximum number of channels cannot exceed the value of <see cref="ChatProtocol.MAX_CHANNELS_PER_CLIENT"/>.
+    /// </summary>
+    public HashSet<int> CurrentChannels { get; set; } = [];
+
     public ChatSession Accept(ChatSessionMetadata metadata, Account account)
     {
         // Embed The Client Information In The Chat Session

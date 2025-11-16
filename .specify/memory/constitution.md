@@ -1,14 +1,19 @@
 <!--
 Sync Impact Report:
-Version: 1.0.0 → 1.1.0
-Rationale: Enhanced Principle IV to mandate pre-edit check of copilot-instructions.md (MINOR bump for expanded guidance)
+Version: 1.1.0 → 1.2.0
+Rationale: Enhanced Principle I to mandate legacy code verification for protocol tasks (MINOR bump for new mandatory requirement)
 
 Changes:
-- ENHANCED: Principle IV - Added MANDATORY PRE-EDIT CHECK requirement
-  - Agents MUST read .github/agents/copilot-instructions.md before ANY code edits
-  - File takes precedence as authoritative source (handles frequent updates)
-  - Never rely on cached/memorized conventions
-  - Principle now explicitly states the file wins in conflicts
+- ENHANCED: Principle I - Added MANDATORY LEGACY VERIFICATION requirement
+  - Agents MUST search LEGACY/HoN and LEGACY/KONGOR before implementing protocol tasks
+  - MUST document legacy behavior including error handling and edge cases
+  - MUST implement matching behavior unless compelling reason exists
+  - Task completion notes MUST include references to verified legacy code locations
+  - Verification MUST be performed BEFORE task completion, not after
+
+Previous Version (1.1.0):
+- Enhanced Principle IV with mandatory pre-edit check of copilot-instructions.md
+- Added requirement to never rely on cached/memorized conventions
 
 Previous Version (1.0.0):
 - Initial constitution with 7 core principles
@@ -17,11 +22,11 @@ Previous Version (1.0.0):
 - Governance framework established
 
 Templates requiring updates:
-⚠️ plan-template.md - May benefit from explicit copilot-instructions.md check in Constitution Check section
+⚠️ tasks.md - Task descriptions may benefit from explicit legacy verification checkpoints
 ✅ Other templates - No changes required
 
 Follow-up TODOs:
-- Consider adding copilot-instructions.md check to plan template constitution verification
+- Consider adding legacy verification checklist to protocol implementation tasks
 -->
 
 # NEXUS Constitution
@@ -32,6 +37,12 @@ Follow-up TODOs:
 
 The NEXUS project is a modernization of the KONGOR codebase, which itself replaces the original HoN (Heroes of Newerth) backend services. This principle establishes our hierarchy of truth and approach to legacy code:
 
+**MANDATORY LEGACY VERIFICATION:** Before implementing ANY protocol-related task (authentication, channels, matchmaking, friends, clans, game server coordination, etc.), agents and developers MUST:
+1. Search LEGACY/HoN and LEGACY/KONGOR directories for equivalent functionality
+2. Document the legacy behavior, including error handling and edge cases
+3. Implement matching behavior unless there is a compelling modernization reason
+4. Document any intentional deviations with clear rationale
+
 **Rules:**
 - HoN source code (C:\Users\SADS-810\Source\NEXUS\LEGACY\HoN) is the ABSOLUTE source of truth for protocol behavior, message formats, and game mechanics
 - KONGOR source code (C:\Users\SADS-810\Source\NEXUS\LEGACY\KONGOR) is the PRACTICAL reference, having run in production successfully for years
@@ -39,8 +50,10 @@ The NEXUS project is a modernization of the KONGOR codebase, which itself replac
 - All client-server protocol implementations MUST maintain backward compatibility with existing game clients and servers
 - Enhancements to responses are permitted only when they improve functionality without breaking existing behavior
 - When behavior is undocumented, it MUST be extrapolated from both KONGOR implementation and HoN source code
+- Legacy verification MUST be performed BEFORE completing the task, not after
+- Task completion notes MUST include references to verified legacy code locations
 
-**Rationale:** The project's success depends on maintaining protocol compatibility while modernizing the codebase. HoN represents the original design intent, while KONGOR represents proven production reliability.
+**Rationale:** The project's success depends on maintaining protocol compatibility while modernizing the codebase. HoN represents the original design intent, while KONGOR represents proven production reliability. Without systematic verification against legacy implementations, we risk introducing incompatibilities that break existing clients.
 
 ### II. Service Architecture
 
@@ -214,4 +227,4 @@ Quality MUST be verified through appropriate testing:
 - Ratification Date: The date this constitution was first adopted (today)
 - Last Amended Date: The date of most recent substantive changes (today for initial creation)
 
-**Version**: 1.1.0 | **Ratified**: 2025-01-13 | **Last Amended**: 2025-01-16
+**Version**: 1.2.0 | **Ratified**: 2025-01-13 | **Last Amended**: 2025-11-16

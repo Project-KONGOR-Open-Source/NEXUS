@@ -4,13 +4,13 @@ Auto-generated from all feature plans. Last updated: 2025-01-16
 
 ## ⚠️ MANDATORY: Before Making ANY Code Edits
 
-**Constitutional Requirement (Principle IV - v1.1.0):**
+**Constitutional Requirement (Principle IV - v1.2.0):**
 - **ALWAYS** read `.github/agents/copilot-instructions.md` before making ANY code modifications
 - This file is the authoritative source of truth for code style
 - The file updates frequently - NEVER rely on cached/memorized versions
 - These principles take precedence over all other guidance
 
-See `.specify/memory/constitution.md` (v1.1.0) for full constitutional principles.
+See `.specify/memory/constitution.md` (v1.2.0) for full constitutional principles.
 
 ## Active Technologies
 - C# with .NET 10 + .NET Aspire, Entity Framework Core, System.Net.Sockets, System.Diagnostics.Metrics (spec-kit)
@@ -154,6 +154,14 @@ EXUS\LEGACY\KONGOR): Practical production reference
 - Research undocumented flows thoroughly
 
 ## Recent Changes
+
+### 2025-11-16
+- **Constitution v1.2.0**: Added MANDATORY LEGACY VERIFICATION requirement to Principle I
+  - All protocol-related tasks MUST verify against HoN and KONGOR before completion
+  - Task completion notes MUST include references to verified legacy code locations
+- **Task T054**: Completed clan channel validation in ChatChannel.Join() with legacy-verified silent rejection behavior
+- **Codebase Cleanup**: Removed 13 empty source files and 9 empty directories
+- **Class Renaming**: SilenceUser → SilenceChannelMember, ChannelMessage → SendChannelMessage
 
 ### 2025-01-16
 - **Constitution v1.1.0**: Added MANDATORY pre-edit check requirement for copilot-instructions.md

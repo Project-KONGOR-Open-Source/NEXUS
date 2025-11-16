@@ -307,6 +307,7 @@ public static class ChatProtocol
 
     public const uint MAX_USERS_PER_HON_CHANNEL                            = 50;
     public const uint MAX_USERS_PER_CHANNEL                                = 250;
+    public const uint MAX_CHANNELS_PER_CLIENT                              = 8;
 
     public const uint MAX_TMM_GAME_MAPS_SELECTABLE                         = 1;
     public const uint MAX_TMM_GAME_MODES_SELECTABLE                        = 6;
