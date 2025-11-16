@@ -14,12 +14,12 @@ public sealed class UserRegistrationTests
 
         MerrickContext databaseContext = webApplicationFactory.Services.GetRequiredService<MerrickContext>();
 
-        JWTAuthenticationService jwtAuthenticationService = new(webApplicationFactory);
+        JWTAuthenticationService jwtAuthenticationService = new (webApplicationFactory);
 
         ILogger<EmailAddressController> emailLogger = webApplicationFactory.Services.GetRequiredService<ILogger<EmailAddressController>>();
         IEmailService emailService = webApplicationFactory.Services.GetRequiredService<IEmailService>();
 
-        EmailAddressController emailController = new(databaseContext, emailLogger, emailService);
+        EmailAddressController emailController = new (databaseContext, emailLogger, emailService);
 
         await emailController.RegisterEmailAddress(new RegisterEmailAddressDTO(emailAddress, emailAddress));
 
@@ -31,7 +31,7 @@ public sealed class UserRegistrationTests
         ILogger<UserController> userLogger = webApplicationFactory.Services.GetRequiredService<ILogger<UserController>>();
         IOptions<OperationalConfiguration> configuration = webApplicationFactory.Services.GetRequiredService<IOptions<OperationalConfiguration>>();
 
-        UserController userController = new(databaseContext, userLogger, emailService, configuration);
+        UserController userController = new (databaseContext, userLogger, emailService, configuration);
 
         IActionResult response = await userController.RegisterUserAndMainAccount(
             new RegisterUserAndMainAccountDTO(registrationToken.Value.ToString(), accountName, password, password));
