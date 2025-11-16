@@ -3,12 +3,16 @@
 public partial class ChatSession(TCPServer server, IServiceProvider serviceProvider) : TCPSession(server)
 {
     /// <summary>
-    ///     Gets Set After A Successful Client Handshake, And Contains Metadata About The Client Connected To This Chat Session
+    ///     Gets set after a successful client handshake following the <see cref="Accept"/> method.
+    ///     Contains metadata about the client connected to this chat session.
+    ///     This property is NULL before authentication, but is guaranteed non-NULL after <see cref="Accept"/> is called.
     /// </summary>
     public ChatSessionMetadata Metadata { get; set; } = null!;
 
     /// <summary>
-    ///     Gets Set After A Successful Client Handshake, And Contains The Account Information Of The Client Connected To This Chat Session
+    ///     Gets set after a successful client handshake following the <see cref="Accept"/> method.
+    ///     Contains the account information of the client connected to this chat session.
+    ///     This property is NULL before authentication, but is guaranteed non-NULL after <see cref="Accept"/> is called.
     /// </summary>
     public Account Account { get; set; } = null!;
 

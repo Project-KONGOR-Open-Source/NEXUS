@@ -12,9 +12,17 @@ public class ChatChannel
 
     public ConcurrentDictionary<string, ChatChannelMember> Members { get; set; } = [];
 
+    /// <summary>
+    ///     Channel password for access control.
+    ///     This value is NULL if no password is set.
+    /// </summary>
+    public string? Password { get; set; } = null;
+
     public bool IsFull => (Members.Count < ChatProtocol.MAX_USERS_PER_CHANNEL) is false;
 
     public bool IsPermanent => Flags.HasFlag(ChatProtocol.ChatChannelType.CHAT_CHANNEL_FLAG_PERMANENT);
+
+    public bool HasPassword() => string.IsNullOrEmpty(Password) is false;
 
     /// <summary>
     ///     Hidden Constructor Which Enforces <see cref="GetOrCreate"/> As The Primary Mechanism For Creating Chat Channels
@@ -48,13 +56,13 @@ public class ChatChannel
         return channel;
     }
 
-    public ChatChannel Join(ChatSession session)
+    public ChatChannel Join(ChatSession session, string? providedPassword = null)
     {
         if (session.CurrentChannels.Count > ChatProtocol.MAX_CHANNELS_PER_CLIENT)
             Log.Error(@"[BUG] Account ""{AccountName}"" Has Exceeded The Maximum Number Of Channels ({MaxChannels})", session.Account.Name, ChatProtocol.MAX_CHANNELS_PER_CLIENT);
 
         // Reject Join Request If Client Has Reached Maximum Number Of Channels
-        // Staff Accounts Are Exempt From This Limit For Moderation Purposes
+        // Staff Accounts Are Exempt From This Limit, For Moderation And Administration Purposes
         if (session.Account.Type != AccountType.Staff && session.CurrentChannels.Count == ChatProtocol.MAX_CHANNELS_PER_CLIENT)
         {
             ChatBuffer error = new ();
@@ -94,6 +102,35 @@ public class ChatChannel
         // TODO: Reject Join Request If Response Buffer Would Overlow With A Data Size Greater Than 16384 Bytes (16 Kilobytes)
 
         ChatChannelMember newMember = new (session, this);
+
+        // Check For Password Protection On The Channel
+        // Staff Accounts And Channel Administrators Bypass Password Checks
+        if (HasPassword())
+        {
+            if (newMember.IsAdministrator is false)
+            {
+                // If No Password Was Provided, Send Password Prompt To Client
+                if (string.IsNullOrEmpty(providedPassword))
+                {
+                    ChatBuffer prompt = new ();
+
+                    prompt.WriteCommand(ChatProtocol.Command.CHAT_CMD_JOIN_CHANNEL_PASSWORD);
+                    prompt.WriteString(Name); // Channel Name Only (Does Not Reveal Password)
+
+                    session.Send(prompt);
+
+                    return this;
+                }
+
+                // If Wrong Password Was Provided, Reject Join Request
+                if (Password is not null && Password.Equals(providedPassword, StringComparison.Ordinal) is false)
+                {
+                    // TODO: Send Error Response To Client Indicating Incorrect Password (Requires Direct User Messaging Implementation)
+
+                    return this;
+                }
+            }
+        }
 
         if (Members.TryAdd(session.Account.Name, newMember) is false)
             Log.Error(@"[BUG] Failed To Add Account ""{AccountName}"" To Channel ""{ChannelName}""", session.Account.Name, Name);
@@ -210,7 +247,7 @@ public class ChatChannel
         ChatChannelMember requester = Members.Values.Single(member => member.Account.ID == requesterSession.Account.ID);
         ChatChannelMember target = Members.Values.Single(member => member.Account.ID == targetAccountID);
 
-        if (requester.AdministratorLevel > target.AdministratorLevel)
+        if (requester.HasHigherAdministratorLevelThan(target))
         {
             ChatBuffer broadcast = new ();
 
@@ -258,7 +295,7 @@ public class ChatChannel
         ChatChannelMember target = Members.Values.Single(member => member.Account.ID == targetAccountID);
 
         // Requester Must Have Higher Administrator Level Than Target (Strict Inequality)
-        if (requester.AdministratorLevel <= target.AdministratorLevel)
+        if (requester.HasHigherAdministratorLevelThan(target) is false)
         {
             // TODO: Notify Requester That They Don't Have Permission
 
@@ -295,5 +332,43 @@ public class ChatChannel
         {
             recipient.Session.Send(message);
         }
+    }
+
+    /// <summary>
+    ///     Sets the channel password. Requires CHAT_CLIENT_ADMIN_LEADER privileges or higher.
+    ///     User must be a member of the channel to set the password.
+    ///     Broadcasts password change notification to all channel members.
+    /// </summary>
+    /// <param name="session">The session attempting to set the password.</param>
+    /// <param name="password">The new password. Empty string clears the password.</param>
+    public void SetPassword(ChatSession session, string password)
+    {
+        // User Must Be A Member Of The Channel To Set Password
+        if (Members.TryGetValue(session.Account.Name, out ChatChannelMember? member) is false)
+        {
+            // TODO: Send Error Response To Client Indicating Not A Member (Requires Direct User Messaging Implementation)
+
+            return;
+        }
+
+        // Check If Member Has Elevated Privileges, Which Are Required To Set Channel Password
+        if (member.HasElevatedPrivileges() is false)
+        {
+            // TODO: Send Error Response To Client Indicating Insufficient Permissions (Requires Direct User Messaging Implementation)
+
+            return;
+        }
+
+        // Set The Password (Empty String Clears Password)
+        Password = string.IsNullOrEmpty(password) ? null : password;
+
+        ChatBuffer broadcast = new ();
+
+        broadcast.WriteCommand(ChatProtocol.Command.CHAT_CMD_CHANNEL_SET_PASSWORD);
+        broadcast.WriteInt32(ID);                               // Channel ID
+        broadcast.WriteString(session.Account.NameWithClanTag); // Password Setter's Name
+
+        // Broadcast Password Change To All Channel Members
+        BroadcastMessage(broadcast);
     }
 }
