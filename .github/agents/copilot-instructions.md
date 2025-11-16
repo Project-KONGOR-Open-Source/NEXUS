@@ -55,6 +55,10 @@
 
  - always keep any and all code and comments in British English, and never use American English
 
+ - always use full words for symbols, never use abbreviations
+   - RIGHT: configuration, administrator, implementation
+   - WRONG: config, admin, impl
+
 ### Code Generation
 
  - always ensure that the generated code is syntactically correct and adheres to best practices for the target programming language

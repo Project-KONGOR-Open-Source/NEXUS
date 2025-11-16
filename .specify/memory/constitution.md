@@ -1,29 +1,27 @@
 <!--
 Sync Impact Report:
-Version: 0.0.0 → 1.0.0
-Rationale: Initial constitution creation for NEXUS project (MAJOR bump for first version)
+Version: 1.0.0 → 1.1.0
+Rationale: Enhanced Principle IV to mandate pre-edit check of copilot-instructions.md (MINOR bump for expanded guidance)
 
 Changes:
-- NEW: Principle I - Legacy Parity and Source of Truth (HoN/KONGOR hierarchy)
-- NEW: Principle II - Service Architecture (Aspire-based distributed system)
-- NEW: Principle III - Chat Server Priority (highest priority work)
-- NEW: Principle IV - Code Style and Formatting (from copilot-instructions.md)
-- NEW: Principle V - Security and Correctness (OWASP, best practices)
-- NEW: Principle VI - Simplicity and Maintainability (YAGNI, avoid over-engineering)
-- NEW: Principle VII - Testing and Validation (integration tests, legacy parity)
-- NEW: Section on Legacy Code Treatment (reference approach)
-- NEW: Section on Development Standards (tech stack, workflow, docs)
-- NEW: Governance framework established (amendments, compliance, versioning)
+- ENHANCED: Principle IV - Added MANDATORY PRE-EDIT CHECK requirement
+  - Agents MUST read .github/agents/copilot-instructions.md before ANY code edits
+  - File takes precedence as authoritative source (handles frequent updates)
+  - Never rely on cached/memorized conventions
+  - Principle now explicitly states the file wins in conflicts
+
+Previous Version (1.0.0):
+- Initial constitution with 7 core principles
+- Legacy parity, service architecture, chat priority
+- Code style, security, simplicity, testing
+- Governance framework established
 
 Templates requiring updates:
-✅ plan-template.md - Updated Constitution Check with all 7 principles as checklist gates
-✅ spec-template.md - No structural changes required, aligns with requirements principle
-✅ tasks-template.md - No structural changes required, aligns with testing principle
-✅ agent-file-template.md - Fully populated with NEXUS-specific project information
-✅ checklist-template.md - No changes required, template remains generic
+⚠️ plan-template.md - May benefit from explicit copilot-instructions.md check in Constitution Check section
+✅ Other templates - No changes required
 
 Follow-up TODOs:
-- None - all placeholders filled with concrete values
+- Consider adding copilot-instructions.md check to plan template constitution verification
 -->
 
 # NEXUS Constitution
@@ -77,20 +75,26 @@ The Chat Server implementation is the current highest priority and requires spec
 
 ### IV. Code Style and Formatting (NON-NEGOTIABLE)
 
-All code MUST adhere to the established C# conventions defined in copilot-instructions.md:
+**MANDATORY PRE-EDIT CHECK:** Before making ANY code edits, agents and developers MUST read and apply the principles from `.github/agents/copilot-instructions.md`. This file is the authoritative source of truth for code style and MUST be consulted before every editing session.
 
 **Rules:**
-- NEVER use "var" - always use explicit type names
-- Acronyms and initialisms: uppercase in PascalCase, conditional in camelCase (UserID, userGUID, HTTPParser, accountID)
-- Full variable names for delegates and lambda parameters - NO single letters (number => not x =>)
-- Consistent vertical whitespace with existing code
-- Aligned lambda operators in switch expressions
-- Comments only when adding value - use StartCase for comments, sentence case for XML summaries
-- Symbol names in double quotes or `<see cref="..."/>` tags without parameters
-- Null-forgiving operator (!) only for EF navigation properties or truly unavoidable cases
-- "Async" suffix only when synchronous version exists
+- `.github/agents/copilot-instructions.md` MUST be checked before ANY code modifications
+- ALL principles in that file take precedence over default behaviors or memorized conventions
+- The file updates frequently - NEVER rely on cached/memorized versions
+- If conflicting guidance exists between this constitution and copilot-instructions.md, the copilot-instructions.md file wins for code style matters
+- Key conventions (as of last constitution update, but ALWAYS verify in source file):
+  - NEVER use "var" - always use explicit type names
+  - Acronyms and initialisms: uppercase in PascalCase, conditional in camelCase (UserID, userGUID, HTTPParser, accountID)
+  - Full variable names for delegates and lambda parameters - NO single letters (number => not x =>)
+  - Consistent vertical whitespace with existing code
+  - Aligned lambda operators in switch expressions
+  - Comments only when adding value - use StartCase for comments, sentence case for XML summaries
+  - Symbol names in double quotes or `<see cref="..."/>` tags without parameters
+  - Null-forgiving operator (!) only for EF navigation properties or truly unavoidable cases
+  - "Async" suffix only when synchronous version exists
+  - British English spelling throughout
 
-**Rationale:** Consistent code style improves readability, maintainability, and team collaboration. These conventions are already established and must be maintained throughout the modernization.
+**Rationale:** The copilot-instructions.md file contains frequently-updated coding standards that must be consistently applied. By mandating a fresh read before each editing session, we ensure compliance with the latest conventions and prevent style drift.
 
 ### V. Security and Correctness
 
@@ -210,4 +214,4 @@ Quality MUST be verified through appropriate testing:
 - Ratification Date: The date this constitution was first adopted (today)
 - Last Amended Date: The date of most recent substantive changes (today for initial creation)
 
-**Version**: 1.0.0 | **Ratified**: 2025-01-13 | **Last Amended**: 2025-01-13
+**Version**: 1.1.0 | **Ratified**: 2025-01-13 | **Last Amended**: 2025-01-16
