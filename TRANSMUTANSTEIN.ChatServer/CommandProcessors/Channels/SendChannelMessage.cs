@@ -1,11 +1,11 @@
 namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Channels;
 
 [ChatCommand(ChatProtocol.Command.CHAT_CMD_CHANNEL_MSG)]
-public class ChannelMessage : ISynchronousCommandProcessor
+public class SendChannelMessage : ISynchronousCommandProcessor
 {
     public void Process(ChatSession session, ChatBuffer buffer)
     {
-        ChannelMessageRequestData requestData = new (buffer);
+        SendChannelMessageRequestData requestData = new (buffer);
 
         ChatChannel channel = ChatChannel.Get(session, requestData.ChannelID);
 
@@ -34,7 +34,7 @@ public class ChannelMessage : ISynchronousCommandProcessor
     }
 }
 
-public class ChannelMessageRequestData(ChatBuffer buffer)
+public class SendChannelMessageRequestData(ChatBuffer buffer)
 {
     public byte[] CommandBytes = buffer.ReadCommandBytes();
 

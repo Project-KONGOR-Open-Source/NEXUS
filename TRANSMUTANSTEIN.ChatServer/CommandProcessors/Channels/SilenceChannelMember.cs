@@ -1,11 +1,11 @@
 namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Channels;
 
 [ChatCommand(ChatProtocol.Command.CHAT_CMD_CHANNEL_SILENCE_USER)]
-public class SilenceUser : ISynchronousCommandProcessor
+public class SilenceChannelMember : ISynchronousCommandProcessor
 {
     public void Process(ChatSession session, ChatBuffer buffer)
     {
-        SilenceUserRequestData requestData = new (buffer);
+        SilenceChannelMemberRequestData requestData = new (buffer);
 
         ChatChannel channel = ChatChannel.Get(session, requestData.ChannelID);
 
@@ -24,7 +24,7 @@ public class SilenceUser : ISynchronousCommandProcessor
     }
 }
 
-public class SilenceUserRequestData(ChatBuffer buffer)
+public class SilenceChannelMemberRequestData(ChatBuffer buffer)
 {
     public byte[] CommandBytes = buffer.ReadCommandBytes();
 
