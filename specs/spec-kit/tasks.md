@@ -134,15 +134,15 @@ NEXUS uses distributed service architecture:
 
 ### Implementation for User Story 2
 
-- [ ] T045 [P] [US2] Implement JoinChannelProcessor.cs in TRANSMUTANSTEIN.ChatServer/CommandProcessors/Channels/JoinChannelProcessor.cs with [ChatCommand(NET_CHAT_CL_JOIN_CHANNEL)]
-- [ ] T046 [P] [US2] Implement LeaveChannelProcessor.cs in TRANSMUTANSTEIN.ChatServer/CommandProcessors/Channels/LeaveChannelProcessor.cs with [ChatCommand(NET_CHAT_CL_LEAVE_CHANNEL)]
-- [ ] T047 [P] [US2] Implement ChannelMessageProcessor.cs in TRANSMUTANSTEIN.ChatServer/CommandProcessors/Channels/ChannelMessageProcessor.cs with [ChatCommand(NET_CHAT_CL_CHANNEL_MESSAGE)]
-- [ ] T048 [P] [US2] Implement KickFromChannelProcessor.cs in TRANSMUTANSTEIN.ChatServer/CommandProcessors/Channels/KickFromChannelProcessor.cs with [ChatCommand(NET_CHAT_CL_KICK_FROM_CHANNEL)]
-- [ ] T049 [P] [US2] Implement SilenceUserProcessor.cs in TRANSMUTANSTEIN.ChatServer/CommandProcessors/Channels/SilenceUserProcessor.cs with [ChatCommand(NET_CHAT_CL_SILENCE_USER)]
-- [ ] T050 [US2] Add ChatChannel.GetOrCreate() in ChatServer.cs (ActiveChannels.GetOrAdd with channel name key)
-- [ ] T051 [US2] Add ChatChannel.AddMember() in ChatChannel.cs (ConcurrentDictionary.TryAdd, broadcast join event)
-- [ ] T052 [US2] Add ChatChannel.RemoveMember() in ChatChannel.cs (ConcurrentDictionary.TryRemove, broadcast leave event, cleanup empty non-permanent channels)
-- [ ] T053 [US2] Add ChatChannel.BroadcastMessage() in ChatChannel.cs (iterate Members, send to each ChatSession, exclude sender if specified)
+- [x] T045 [P] [US2] Implement JoinChannelProcessor.cs in TRANSMUTANSTEIN.ChatServer/CommandProcessors/Channels/JoinChannelProcessor.cs with [ChatCommand(NET_CHAT_CL_JOIN_CHANNEL)] - ✅ Complete as JoinChannel.cs
+- [x] T046 [P] [US2] Implement LeaveChannelProcessor.cs in TRANSMUTANSTEIN.ChatServer/CommandProcessors/Channels/LeaveChannelProcessor.cs with [ChatCommand(NET_CHAT_CL_LEAVE_CHANNEL)] - ✅ Complete as LeaveChannel.cs
+- [x] T047 [P] [US2] Implement ChannelMessageProcessor.cs in TRANSMUTANSTEIN.ChatServer/CommandProcessors/Channels/ChannelMessageProcessor.cs with [ChatCommand(NET_CHAT_CL_CHANNEL_MESSAGE)] - ✅ Complete as ChannelMessage.cs, verified against HoN protocol (lines 17-22, 923-930 in Chatserver Protocol.txt)
+- [x] T048 [P] [US2] Implement KickFromChannelProcessor.cs in TRANSMUTANSTEIN.ChatServer/CommandProcessors/Channels/KickFromChannelProcessor.cs with [ChatCommand(NET_CHAT_CL_KICK_FROM_CHANNEL)] - ✅ Complete as KickFromChannel.cs
+- [x] T049 [P] [US2] Implement SilenceUserProcessor.cs in TRANSMUTANSTEIN.ChatServer/CommandProcessors/Channels/SilenceUserProcessor.cs with [ChatCommand(NET_CHAT_CL_SILENCE_USER)] - ✅ Complete as SilenceUser.cs, verified against HoN protocol (lines 1136-1144 in Chatserver Protocol.txt), includes Silenced tracking in ChatChannel with IsSilenced() and Silence() methods
+- [x] T050 [US2] Add ChatChannel.GetOrCreate() in ChatServer.cs (ActiveChannels.GetOrAdd with channel name key) - ✅ Complete as static method in ChatChannel.cs (line 24-35)
+- [x] T051 [US2] Add ChatChannel.AddMember() in ChatChannel.cs (ConcurrentDictionary.TryAdd, broadcast join event) - ✅ Complete as Join() method (line 51-107)
+- [x] T052 [US2] Add ChatChannel.RemoveMember() in ChatChannel.cs (ConcurrentDictionary.TryRemove, broadcast leave event, cleanup empty non-permanent channels) - ✅ Complete as Leave() method (line 133-167)
+- [x] T053 [US2] Add ChatChannel.BroadcastMessage() in ChatChannel.cs (iterate Members, send to each ChatSession, exclude sender if specified) - ✅ Complete as BroadcastMessage() method (line 202-212), verified against HoN source
 - [ ] T054 [US2] Add clan channel validation in JoinChannelProcessor (check ClanMember table via MERRICK.DatabaseContext if channel has ClanID)
 - [ ] T055 [US2] Add duplicate join check in JoinChannelProcessor per FR-020 (reject if AccountID already in channel.Members)
 - [ ] T055a [US2] Add channel limit enforcement in JoinChannelProcessor (count player's current channels via ChatSession.CurrentChannels, reject join with NET_CHAT_CL_MAX_CHANNELS (0x0021) error if attempting to join 9th channel per FR-020a)
@@ -344,6 +344,7 @@ NEXUS uses distributed service architecture:
 - [ ] T149 [P] Add comprehensive logging in all command processors (log command received, processing, completion, errors at appropriate levels)
 - [ ] T150 [P] Test graceful shutdown in ChatServer (connection draining, notify all sessions, cleanup resources)
 - [ ] T151 Run quickstart.md validation (verify developer can follow guide to run chat server)
+- [ ] T151a [P] Research and implement enriched channel flags in ChatChannel.cs per HoN protocol (GENERAL_USE for "HoN 1" style channels, SERVER for post-match channels, HIDDEN for unlisted channels, UNJOINABLE for system-only channels, AUTH_REQUIRED for authorization lists, STREAM_USE for stream channels with 12hr cleanup) - See HON_REVERSE_ENGINEERING_GUIDE.md for flag analysis
 
 ---
 
@@ -462,7 +463,7 @@ With multiple developers after Foundational phase:
 
 ## Task Statistics
 
-- **Total Tasks**: 156 (151 original + T027a + T055a + T059a + T059b + T075a)
+- **Total Tasks**: 157 (151 original + T027a + T055a + T059a + T059b + T075a + T151a)
 - **Setup Phase**: 4 tasks
 - **Foundational Phase**: 28 tasks (BLOCKS all user stories) - includes Redis cache integration
 - **User Story 1**: 10 tasks (MVP)
@@ -472,7 +473,7 @@ With multiple developers after Foundational phase:
 - **User Story 5**: 9 tasks
 - **User Story 6**: 13 tasks
 - **User Story 7**: 22 tasks
-- **Polish Phase**: 13 tasks
+- **Polish Phase**: 14 tasks - includes channel flag enrichment (T151a)
 - **Parallel Tasks**: 89 marked [P] (57% can run in parallel within constraints)
 - **MVP Scope**: Phases 1, 2, 3 (42 tasks) delivers authenticated connection handling
 

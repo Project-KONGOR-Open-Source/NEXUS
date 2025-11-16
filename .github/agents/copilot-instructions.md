@@ -59,6 +59,8 @@
    - RIGHT: configuration, administrator, implementation
    - WRONG: config, admin, impl
 
+ - in comments, use "TRUE", "FALSE", and "NULL" when referring to the boolean and null literals, to clearly distinguish them from their natural-language meanings
+
 ### Code Generation
 
  - always ensure that the generated code is syntactically correct and adheres to best practices for the target programming language

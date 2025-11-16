@@ -193,4 +193,68 @@ public class ChatChannel
 
         // TODO: Notify The Requester That Their Attempt To Kick The Target Failed Due To Insufficient Permissions
     }
+
+    /// <summary>
+    ///     Check if a member is currently silenced in this channel.
+    /// </summary>
+    /// <param name="session">The session to check.</param>
+    /// <returns>TRUE if the member is silenced, FALSE otherwise.</returns>
+    public bool IsSilenced(ChatSession session)
+    {
+        ChatChannelMember? member = Members.Values
+            .SingleOrDefault(channelMember => channelMember.Account.ID == session.Account.ID);
+
+        return member?.IsSilenced() ?? false;
+    }
+
+    /// <summary>
+    ///     Silence a member in this channel.
+    /// </summary>
+    /// <param name="requesterSession">The session requesting the silence (must have higher administrator level).</param>
+    /// <param name="targetAccountID">The account ID of the member to silence.</param>
+    /// <param name="durationMilliseconds">The duration of the silence in milliseconds.</param>
+    public void Silence(ChatSession requesterSession, int targetAccountID, int durationMilliseconds)
+    {
+        ChatChannelMember requester = Members.Values.Single(member => member.Account.ID == requesterSession.Account.ID);
+        ChatChannelMember target = Members.Values.Single(member => member.Account.ID == targetAccountID);
+
+        // Requester Must Have Higher Administrator Level Than Target (Strict Inequality)
+        if (requester.AdministratorLevel <= target.AdministratorLevel)
+        {
+            // TODO: Notify Requester That They Don't Have Permission
+
+            return;
+        }
+
+        // Set Silence Expiration On Target Member
+        target.SilencedUntil = DateTime.UtcNow.AddMilliseconds(durationMilliseconds);
+
+        // Broadcast Silence Notification To All Channel Members
+        ChatBuffer broadcast = new ();
+
+        broadcast.WriteCommand(ChatProtocol.Command.CHAT_CMD_CHANNEL_SILENCE_PLACED);
+        broadcast.WriteString(Name);                              // Channel Name
+        broadcast.WriteString(requester.Account.NameWithClanTag); // Requester Name
+        broadcast.WriteString(target.Account.NameWithClanTag);    // Target Name
+        broadcast.WriteInt32(durationMilliseconds);               // Duration In Milliseconds
+
+        BroadcastMessage(broadcast);
+    }
+
+    /// <summary>
+    ///     Broadcast a message to all members of the channel, optionally excluding the sender.
+    /// </summary>
+    /// <param name="message">The message buffer to broadcast.</param>
+    /// <param name="excludeAccountID">Optional account ID to exclude from the broadcast (typically the sender).</param>
+    public void BroadcastMessage(ChatBuffer message, int? excludeAccountID = null)
+    {
+        List<ChatChannelMember> recipients = excludeAccountID.HasValue
+            ? [.. Members.Values.Where(member => member.Account.ID != excludeAccountID.Value)]
+            : [.. Members.Values];
+
+        foreach (ChatChannelMember recipient in recipients)
+        {
+            recipient.Session.Send(message);
+        }
+    }
 }

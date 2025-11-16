@@ -14,6 +14,8 @@ public class ChatChannelMember(ChatSession session, ChatChannel chatChannel)
 
     public bool IsAdministrator => GetAdministratorStatus();
 
+    public DateTime? SilencedUntil { get; set; } = null;
+
     private bool GetAdministratorStatus()
     {
         return AdministratorLevel switch
@@ -45,5 +47,28 @@ public class ChatChannelMember(ChatSession session, ChatChannel chatChannel)
         }
 
         return ChatProtocol.AdminLevel.CHAT_CLIENT_ADMIN_NONE;
+    }
+
+    /// <summary>
+    ///     Check if this member is currently silenced in the channel.
+    /// </summary>
+    /// <returns>TRUE if the member is silenced, FALSE otherwise.</returns>
+    public bool IsSilenced()
+    {
+        if (SilencedUntil.HasValue)
+        {
+            // Check If Silence Has Expired
+            if (DateTime.UtcNow > SilencedUntil.Value)
+            {
+                // Silence Has Expired, Clear The Property
+                SilencedUntil = null;
+
+                return false;
+            }
+
+            return true;
+        }
+
+        return false;
     }
 }
