@@ -339,10 +339,15 @@ public class ChatChannel
     }
 
     /// <summary>
-    ///     Sets the channel password. Requires CHAT_CLIENT_ADMIN_LEADER privileges or higher.
+    ///     Sets the channel password. Requires elevated privileges.
     ///     User must be a member of the channel to set the password.
     ///     Broadcasts password change notification to all channel members.
     /// </summary>
+    /// <remarks>
+    ///     The password can be changed by typing the following chat channel slash command: <c>/password {password}</c>
+    ///     <br/>
+    ///     To remove the password, use an empty string: <c>/password</c>
+    /// </remarks>
     /// <param name="session">The session attempting to set the password.</param>
     /// <param name="password">The new password. Empty string clears the password.</param>
     public void SetPassword(ChatSession session, string password)
