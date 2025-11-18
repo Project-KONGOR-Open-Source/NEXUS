@@ -55,6 +55,12 @@ public class ChatChannelMember(ChatSession session, ChatChannel chatChannel)
     /// <returns>TRUE if the member is silenced, FALSE otherwise.</returns>
     public bool IsSilenced()
     {
+        // Staff Members Are Immune To Being Silenced
+        if (AdministratorLevel is ChatProtocol.AdminLevel.CHAT_CLIENT_ADMIN_STAFF)
+        {
+            return false;
+        }
+
         if (SilencedUntil.HasValue)
         {
             // Check If Silence Has Expired

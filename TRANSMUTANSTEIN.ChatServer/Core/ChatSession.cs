@@ -428,10 +428,18 @@ public partial class ChatSession
     }
 
     /// <summary>
-    ///     Send Buffer Data With Non-Destructive Size Prefixing Which Does Not Mutate The Original Buffer
+    ///     Send buffer data with non-destructive size prefixing, which does not mutate the original buffer.
+    ///     Enforces 16KB (16384 bytes) maximum packet size, as to not exceed the chat protocol's limitations.
     /// </summary>
     public bool Send(ChatBuffer buffer)
     {
+        if (buffer.Size > ChatProtocol.MAX_PACKET_SIZE)
+        {
+            Log.Error(@"Packet Of {PacketSize} Bytes Exceeds Maximum Allowed Size Of {MaximumPacketSize} Bytes", buffer.Size, ChatProtocol.MAX_PACKET_SIZE);
+
+            return false;
+        }
+
         short messageLength = Convert.ToInt16(buffer.Size);
 
         byte[] messageLengthBytes = BitConverter.GetBytes(messageLength);

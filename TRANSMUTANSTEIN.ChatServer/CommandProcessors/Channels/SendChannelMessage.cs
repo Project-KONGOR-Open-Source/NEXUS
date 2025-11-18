@@ -22,13 +22,24 @@ public class SendChannelMessage : ISynchronousCommandProcessor
             return;
         }
 
+        string messageContent = requestData.Message;
+
+        // Enforce Message Content Length Limit
+        // Staff Accounts Are Exempt From Message Length Restrictions, For Moderation And Administration Purposes
+        if (session.Account.Type is not AccountType.Staff && messageContent.Length > ChatProtocol.CHAT_MESSAGE_MAX_LENGTH)
+        {
+            messageContent = messageContent[.. ChatProtocol.CHAT_MESSAGE_MAX_LENGTH];
+
+            // TODO: Notify The Sender That Their Message Was Truncated
+        }
+
         // Broadcast The Message To All Channel Members
         ChatBuffer broadcast = new ();
 
         broadcast.WriteCommand(ChatProtocol.Command.CHAT_CMD_CHANNEL_MSG);
         broadcast.WriteInt32(session.Account.ID);    // Sender Account ID
         broadcast.WriteInt32(requestData.ChannelID); // Channel ID
-        broadcast.WriteString(requestData.Message);  // Message Content
+        broadcast.WriteString(messageContent);       // Message Content (Potentially Truncated)
 
         channel.BroadcastMessage(broadcast);
     }
