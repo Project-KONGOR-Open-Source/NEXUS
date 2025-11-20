@@ -1,4 +1,4 @@
-namespace ASPIRE.Tests.Zorgath.WebPortal.API.Tests;
+namespace ASPIRE.Tests.ZORGATH.WebPortal.API.Tests;
 
 /// <summary>
 ///     Tests For Email Address Registration Functionality

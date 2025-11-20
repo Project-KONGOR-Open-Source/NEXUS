@@ -1,4 +1,4 @@
-namespace ASPIRE.Tests.Zorgath.WebPortal.API.Tests;
+namespace ASPIRE.Tests.ZORGATH.WebPortal.API.Tests;
 
 /// <summary>
 ///     Tests For User Authentication Functionality
@@ -31,10 +31,11 @@ public sealed class UserAuthenticationTests
         };
 
         JwtSecurityTokenHandler tokenHandler = new ();
-        
+
         tokenHandler.ValidateToken(authenticationResult.AuthenticationToken, tokenValidationParameters, out SecurityToken validatedToken);
 
-        JwtSecurityToken jwtToken = (JwtSecurityToken)validatedToken;
+        if (validatedToken is not JwtSecurityToken jwtToken)
+            throw new InvalidOperationException($"Expected Token To Be A JWT Security Token, But Was {validatedToken.GetType().Name}");
 
         using (Assert.Multiple())
         {

@@ -302,7 +302,7 @@ public class AutoImplementMissingMembersGenerator : IIncrementalGenerator
         {
             return methodOne.Parameters.Length == methodTwo.Parameters.Length &&
                 methodOne.Parameters.Zip(methodTwo.Parameters, (parameterOne, parameterTwo) =>
-                    SymbolEqualityComparer.Default.Equals(parameterOne.Type, parameterTwo.Type)).All(match => match);
+                    SymbolEqualityComparer.Default.Equals(parameterOne.Type, parameterTwo.Type)).All(parametersMatch => parametersMatch);
         }
 
         if (memberOne is IPropertySymbol propertyOne && memberTwo is IPropertySymbol propertyTwo)
