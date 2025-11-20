@@ -160,15 +160,15 @@ public sealed class UserAuthenticationTests
     }
 
     [Test]
-    [Arguments("caselogin@kongor.com", "CaseLoginUser", "SecurePassword123!")]
-    [Arguments("UPPERCASELOGIN@kongor.net", "UPPERCASEUSER", "MyP@ssw0rd!")]
-    public async Task LogInUser_WithDifferentCaseAccountName_DocumentsCaseSensitivityBehavior(string emailAddress, string accountName, string password)
+    [Arguments("caselogin@kongor.com", "CaseLoginUser", "CaseLoginUser", "SecurePassword123!")]
+    [Arguments("UPPERCASELOGIN@kongor.net", "UPPERCASEUSER", "UPPERCASEUSER", "MyP@ssw0rd!")]
+    public async Task LogInUser_WithExactCaseAccountName_ReturnsOK(string emailAddress, string registeredAccountName, string loginAccountName, string password)
     {
         await using WebApplicationFactory<ZORGATHAssemblyMarker> webApplicationFactory = ZORGATHServiceProvider.CreateOrchestratedInstance();
 
         JWTAuthenticationService jwtAuthenticationService = new (webApplicationFactory);
 
-        await jwtAuthenticationService.CreateAuthenticatedUser(emailAddress, accountName, password);
+        await jwtAuthenticationService.CreateAuthenticatedUser(emailAddress, registeredAccountName, password);
 
         ILogger<UserController> userLogger = webApplicationFactory.Services.GetRequiredService<ILogger<UserController>>();
         IOptions<OperationalConfiguration> configuration = webApplicationFactory.Services.GetRequiredService<IOptions<OperationalConfiguration>>();
@@ -178,13 +178,33 @@ public sealed class UserAuthenticationTests
 
         UserController userController = new (databaseContext, userLogger, emailService, configuration);
 
-        string differentCaseAccountName = accountName.ToLowerInvariant();
+        IActionResult response = await userController.LogInUser(new LogInUserDTO(loginAccountName, password));
 
-        IActionResult response = await userController.LogInUser(new LogInUserDTO(differentCaseAccountName, password));
+        await Assert.That(response).IsTypeOf<OkObjectResult>();
+    }
 
-        bool isOKOrNotFound = response is OkObjectResult or NotFoundObjectResult;
+    [Test]
+    [Arguments("caselogin@kongor.com", "CaseLoginUser", "caseloginuser", "SecurePassword123!")]
+    [Arguments("UPPERCASELOGIN@kongor.net", "UPPERCASEUSER", "uppercaseuser", "MyP@ssw0rd!")]
+    public async Task LogInUser_WithDifferentCaseAccountName_ReturnsNotFound(string emailAddress, string registeredAccountName, string loginAccountName, string password)
+    {
+        await using WebApplicationFactory<ZORGATHAssemblyMarker> webApplicationFactory = ZORGATHServiceProvider.CreateOrchestratedInstance();
 
-        await Assert.That(isOKOrNotFound).IsTrue();
+        JWTAuthenticationService jwtAuthenticationService = new (webApplicationFactory);
+
+        await jwtAuthenticationService.CreateAuthenticatedUser(emailAddress, registeredAccountName, password);
+
+        ILogger<UserController> userLogger = webApplicationFactory.Services.GetRequiredService<ILogger<UserController>>();
+        IOptions<OperationalConfiguration> configuration = webApplicationFactory.Services.GetRequiredService<IOptions<OperationalConfiguration>>();
+        IEmailService emailService = webApplicationFactory.Services.GetRequiredService<IEmailService>();
+
+        MerrickContext databaseContext = webApplicationFactory.Services.GetRequiredService<MerrickContext>();
+
+        UserController userController = new (databaseContext, userLogger, emailService, configuration);
+
+        IActionResult response = await userController.LogInUser(new LogInUserDTO(loginAccountName, password));
+
+        await Assert.That(response).IsTypeOf<NotFoundObjectResult>();
     }
 
     [Test]
