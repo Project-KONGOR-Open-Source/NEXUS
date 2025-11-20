@@ -33,9 +33,8 @@ public static class ZORGATHServiceProvider
             foreach (ServiceDescriptor? descriptor in services.Where(distributedCachePredicate).ToList())
                 services.Remove(descriptor);
 
-            // Register In-Memory Test Doubles For Distributed Cache
+            // Register In-Process Distributed Cache Database
             services.AddSingleton<IDatabase, InProcess.InProcessDistributedCacheStore>();
-            services.AddSingleton<IConnectionMultiplexer>(serviceProvider => new InProcess.InProcessConnectionMultiplexer(serviceProvider.GetRequiredService<IDatabase>()));
         }));
 
         // Ensure That OnModelCreating From MerrickContext Has Been Called

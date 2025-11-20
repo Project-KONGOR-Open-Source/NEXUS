@@ -117,8 +117,14 @@ public class KONGOR
         // Build The Application
         WebApplication application = builder.Build();
 
+        IConnectionMultiplexer? connectionMultiplexer = application.Services.GetService<IConnectionMultiplexer>();
+
         // Purge All Session Cookies From Cache At Startup To Prevent Stale Authentication Data
-        await application.Services.GetRequiredService<IConnectionMultiplexer>().PurgeSessionCookies();
+        // Only Run If IConnectionMultiplexer Is Registered (Skipped In Tests That Use In-Memory Test Doubles)
+        if (connectionMultiplexer is not null)
+        {
+            await connectionMultiplexer.PurgeSessionCookies();
+        }
 
         // Configure Development-Specific Middleware
         if (application.Environment.IsDevelopment())
