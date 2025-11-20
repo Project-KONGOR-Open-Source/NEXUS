@@ -68,7 +68,7 @@ public class ChatChannel
             // Reject Join Request If Client Has Reached Maximum Number Of Channels
             if (session.CurrentChannels.Count == ChatProtocol.MAX_CHANNELS_PER_CLIENT)
             {
-                ChatBuffer error = new();
+                ChatBuffer error = new ();
 
                 error.WriteCommand(ChatProtocol.Command.CHAT_CMD_MAX_CHANNELS);
 
