@@ -38,6 +38,11 @@ public class UserController(MerrickContext databaseContext, ILogger<UserControll
             return NotFound($@"Email Registration Token ""{payload.Token}"" Was Not Found");
         }
 
+        if (token.TimestampConsumed is not null)
+        {
+            return Conflict($@"Email Registration Token ""{payload.Token}"" Has Already Been Consumed");
+        }
+
         string sanitizedEmailAddress = token.Data;
 
         if (await MerrickContext.Users.AnyAsync(user => user.EmailAddress.Equals(sanitizedEmailAddress)))

@@ -193,7 +193,7 @@ public partial class ServerRequesterController
         if (arrangedMatchType is null)
             return BadRequest(@"Missing Value For Form Parameter ""new""");
 
-        string? accountNameForSessionCookie = Cache.GetAccountNameForSessionCookie(cookie);
+        string? accountNameForSessionCookie = await DistributedCache.GetAccountNameForSessionCookie(cookie);
 
         if (accountNameForSessionCookie is null)
             return Unauthorized("No Valid Client Session Cookie Could Be Found");

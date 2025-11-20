@@ -8,7 +8,7 @@ public class KONGOR
     // TRUE If The Application Is Running In Development Mode Or FALSE If Not
     public static bool RunsInDevelopmentMode { get; private set; } = true;
 
-    public static void Main(string[] args)
+    public static async Task Main(string[] args)
     {
         // Create The Application Builder
         WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
@@ -40,8 +40,11 @@ public class KONGOR
             options.EnableThreadSafetyChecks();
         });
 
-        // Add Distributed Cache; The Connection String Maps To The "distributed-cache" Resource Defined In ASPIRE.AppHost
+        // Add Distributed Cache; The Connection String Maps To The "distributed-cache" Resource Defined In ASPIRE.ApplicationHost
         builder.AddRedisClient("DISTRIBUTED-CACHE");
+
+        // Register IDatabase From IConnectionMultiplexer
+        builder.Services.AddSingleton<IDatabase>(serviceProvider => serviceProvider.GetRequiredService<IConnectionMultiplexer>().GetDatabase());
 
         // Add Memory Cache Service
         builder.Services.AddMemoryCache();
@@ -113,6 +116,14 @@ public class KONGOR
 
         // Build The Application
         WebApplication application = builder.Build();
+
+        if (application.Services.GetService<IConnectionMultiplexer>() is IConnectionMultiplexer connectionMultiplexer)
+        {
+            // Purge All Session Cookies From Cache At Startup To Prevent Stale Authentication Data
+            // Only Run If IConnectionMultiplexer Is Registered (Skipped In Tests That Use In-Process Test Doubles)
+
+            await connectionMultiplexer.PurgeSessionCookies();
+        }
 
         // Configure Development-Specific Middleware
         if (application.Environment.IsDevelopment())

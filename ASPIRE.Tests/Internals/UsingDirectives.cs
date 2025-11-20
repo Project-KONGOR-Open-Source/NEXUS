@@ -23,8 +23,12 @@ global using TUnit.Assertions;
 global using TUnit.Assertions.Extensions;
 global using TUnit.Core;
 
+global using StackExchange.Redis;
+
+global using System.Collections.Concurrent;
 global using System.IdentityModel.Tokens.Jwt;
 global using System.Text;
+global using System.Text.RegularExpressions;
 
 global using ZORGATH.WebPortal.API.Contracts;
 global using ZORGATH.WebPortal.API.Controllers;
@@ -33,6 +37,8 @@ global using ZORGATH.WebPortal.API.Handlers;
 global using ZORGATH.WebPortal.API.Internals;
 global using ZORGATH.WebPortal.API.Models.Configuration;
 global using ZORGATH.WebPortal.API.Services.Email;
+
+global using ASPIRE.SourceGenerator.Attributes;
 
 global using ASPIRE.Tests.KONGOR.MasterServer.Infrastructure;
 global using ASPIRE.Tests.KONGOR.MasterServer.Services;

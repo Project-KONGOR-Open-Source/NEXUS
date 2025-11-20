@@ -1,6 +1,6 @@
 ﻿namespace KONGOR.MasterServer.Extensions.Cache;
 
-public static class DistributedCacheExtensions
+public static partial class DistributedCacheExtensions
 {
     private const string MatchServerManagersKey = "MATCH-SERVER-MANAGERS";
 
@@ -9,10 +9,11 @@ public static class DistributedCacheExtensions
     ///     This command overwrites the values of specified fields that exist in the hash.
     ///     If key doesn't exist, a new key holding a hash is created.
     /// </summary>
-    public static async Task SetMatchServerManager(this IDatabase distributedCache, string hostAccountName, MatchServerManager matchServerManager)
+    public static async Task SetMatchServerManager(this IDatabase distributedCacheStore, string hostAccountName, MatchServerManager matchServerManager)
     {
         string serializedMatchServerManager = JsonSerializer.Serialize(matchServerManager);
-        await distributedCache.HashSetAsync(MatchServerManagersKey, [new HashEntry(hostAccountName, serializedMatchServerManager)]);
+
+        await distributedCacheStore.HashSetAsync(MatchServerManagersKey, [new HashEntry(hostAccountName, serializedMatchServerManager)]);
     }
 
     private const string MatchServersKey = "MATCH-SERVERS";
@@ -22,23 +23,24 @@ public static class DistributedCacheExtensions
     ///     This command overwrites the values of specified fields that exist in the hash.
     ///     If key doesn't exist, a new key holding a hash is created.
     /// </summary>
-    public static async Task SetMatchServer(this IDatabase distributedCache, string hostAccountName, MatchServer matchServer)
+    public static async Task SetMatchServer(this IDatabase distributedCacheStore, string hostAccountName, MatchServer matchServer)
     {
         string serializedMatchServer = JsonSerializer.Serialize(matchServer);
-        await distributedCache.HashSetAsync(MatchServersKey, [new HashEntry($"{hostAccountName}:{matchServer.Instance}", serializedMatchServer)]);
+
+        await distributedCacheStore.HashSetAsync(MatchServersKey, [new HashEntry($"{hostAccountName}:{matchServer.Instance}", serializedMatchServer)]);
     }
 
-    public static async Task<List<MatchServer>> GetMatchServers(this IDatabase distributedCache)
+    public static async Task<List<MatchServer>> GetMatchServers(this IDatabase distributedCacheStore)
     {
-        List<MatchServer> matchServers = (await distributedCache.HashGetAllAsync(MatchServersKey))
+        List<MatchServer> matchServers = (await distributedCacheStore.HashGetAllAsync(MatchServersKey))
             .Select(entry => JsonSerializer.Deserialize<MatchServer>(entry.Value.ToString())).OfType<MatchServer>().ToList();
 
         return matchServers;
     }
 
-    public static async Task<MatchServer?> GetMatchServerBySessionCookie(this IDatabase distributedCache, string sessionCookie)
+    public static async Task<MatchServer?> GetMatchServerBySessionCookie(this IDatabase distributedCacheStore, string sessionCookie)
     {
-        HashEntry[] serializedMatchServers = await distributedCache.HashGetAllAsync(MatchServersKey);
+        HashEntry[] serializedMatchServers = await distributedCacheStore.HashGetAllAsync(MatchServersKey);
 
         List<MatchServer> matchServers = serializedMatchServers.Select(entry => JsonSerializer.Deserialize<MatchServer>(entry.Value.ToString()))
             .OfType<MatchServer>().ToList();
@@ -48,17 +50,17 @@ public static class DistributedCacheExtensions
         return matchServer;
     }
 
-    public static async Task<(MatchServerManager? MatchServerManager, List<MatchServer> MatchServers)> GetMatchServerManagerAndMatchServersByAccountName(this IDatabase distributedCache, string hostAccountName)
+    public static async Task<(MatchServerManager? MatchServerManager, List<MatchServer> MatchServers)> GetMatchServerManagerAndMatchServersByAccountName(this IDatabase distributedCacheStore, string hostAccountName)
     {
-        MatchServerManager? matchServerManager = await distributedCache.GetMatchServerManagerByAccountName(hostAccountName);
-        List<MatchServer> matchServers = await distributedCache.GetMatchServersByAccountName(hostAccountName);
+        MatchServerManager? matchServerManager = await distributedCacheStore.GetMatchServerManagerByAccountName(hostAccountName);
+        List<MatchServer> matchServers = await distributedCacheStore.GetMatchServersByAccountName(hostAccountName);
 
         return (matchServerManager, matchServers);
     }
 
-    public static async Task<MatchServerManager?> GetMatchServerManagerByAccountName(this IDatabase distributedCache, string hostAccountName)
+    public static async Task<MatchServerManager?> GetMatchServerManagerByAccountName(this IDatabase distributedCacheStore, string hostAccountName)
     {
-        string? serializedMatchServerManager = await distributedCache.HashGetAsync(MatchServerManagersKey, hostAccountName);
+        string? serializedMatchServerManager = await distributedCacheStore.HashGetAsync(MatchServerManagersKey, hostAccountName);
 
         if (serializedMatchServerManager is null) return null;
 
@@ -68,11 +70,11 @@ public static class DistributedCacheExtensions
         return matchServerManager;
     }
 
-    public static async Task<List<MatchServer>> GetMatchServersByAccountName(this IDatabase distributedCache, string hostAccountName)
+    public static async Task<List<MatchServer>> GetMatchServersByAccountName(this IDatabase distributedCacheStore, string hostAccountName)
     {
         List<MatchServer> matchServers = [];
 
-        IAsyncEnumerable<HashEntry> scanResult = distributedCache.HashScanAsync(MatchServersKey, pattern: $"{hostAccountName}:*", pageSize: int.MaxValue);
+        IAsyncEnumerable<HashEntry> scanResult = distributedCacheStore.HashScanAsync(MatchServersKey, pattern: $"{hostAccountName}:*", pageSize: int.MaxValue);
 
         await foreach (HashEntry entry in scanResult)
         {

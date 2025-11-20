@@ -5,7 +5,7 @@ public static class ChatProtocol
     // Thank you, Shawn Presser, for making these values public: https://github.com/shawwn/hon/blob/f1aa2dfb7d07c447e930aa36f571e547714f4a57/lib/k2public/chatserver_protocol.h.
     // The symbols added since the chat server protocol version linked above were extracted from the PDB files made public at http://cdn.hon.team/wac/x86_64/4.9.1.3/symbols.zip in February 2021.
 
-    public const uint CHAT_PROTOCOL_VERSION = 68;
+    public const uint CHAT_PROTOCOL_VERSION = 69;
 
     public static class Command
     {
@@ -307,6 +307,8 @@ public static class ChatProtocol
 
     public const uint MAX_USERS_PER_HON_CHANNEL                            = 50;
     public const uint MAX_USERS_PER_CHANNEL                                = 250;
+    public const uint MAX_CHANNELS_PER_CLIENT                              = 8;
+    public const uint MAX_PACKET_SIZE                                      = 16384;  // 16KB - Maximum Size For Entire Chat Protocol Packet
 
     public const uint MAX_TMM_GAME_MAPS_SELECTABLE                         = 1;
     public const uint MAX_TMM_GAME_MODES_SELECTABLE                        = 6;

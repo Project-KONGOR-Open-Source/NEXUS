@@ -3,14 +3,24 @@
 public partial class ChatSession(TCPServer server, IServiceProvider serviceProvider) : TCPSession(server)
 {
     /// <summary>
-    ///     Gets Set After A Successful Client Handshake, And Contains Metadata About The Client Connected To This Chat Session
+    ///     Gets set after a successful client handshake following the <see cref="Accept"/> method.
+    ///     Contains metadata about the client connected to this chat session.
+    ///     This property is NULL before authentication, but is guaranteed non-NULL after <see cref="Accept"/> is called.
     /// </summary>
     public ChatSessionMetadata Metadata { get; set; } = null!;
 
     /// <summary>
-    ///     Gets Set After A Successful Client Handshake, And Contains The Account Information Of The Client Connected To This Chat Session
+    ///     Gets set after a successful client handshake following the <see cref="Accept"/> method.
+    ///     Contains the account information of the client connected to this chat session.
+    ///     This property is NULL before authentication, but is guaranteed non-NULL after <see cref="Accept"/> is called.
     /// </summary>
     public Account Account { get; set; } = null!;
+
+    /// <summary>
+    ///     Tracks the channel IDs that this client is currently a member of.
+    ///     The maximum number of channels cannot exceed the value of <see cref="ChatProtocol.MAX_CHANNELS_PER_CLIENT"/>.
+    /// </summary>
+    public HashSet<int> CurrentChannels { get; set; } = [];
 
     public ChatSession Accept(ChatSessionMetadata metadata, Account account)
     {
@@ -418,10 +428,18 @@ public partial class ChatSession
     }
 
     /// <summary>
-    ///     Send Buffer Data With Non-Destructive Size Prefixing Which Does Not Mutate The Original Buffer
+    ///     Send buffer data with non-destructive size prefixing, which does not mutate the original buffer.
+    ///     Enforces 16KB (16384 bytes) maximum packet size, as to not exceed the chat protocol's limitations.
     /// </summary>
     public bool Send(ChatBuffer buffer)
     {
+        if (buffer.Size > ChatProtocol.MAX_PACKET_SIZE)
+        {
+            Log.Error(@"Packet Of {PacketSize} Bytes Exceeds Maximum Allowed Size Of {MaximumPacketSize} Bytes", buffer.Size, ChatProtocol.MAX_PACKET_SIZE);
+
+            return false;
+        }
+
         short messageLength = Convert.ToInt16(buffer.Size);
 
         byte[] messageLengthBytes = BitConverter.GetBytes(messageLength);

@@ -31,8 +31,11 @@ public class TRANSMUTANSTEIN
             options.EnableThreadSafetyChecks();
         });
 
-        // Add Distributed Cache; The Connection String Maps To The "distributed-cache" Resource Defined In ASPIRE.AppHost
+        // Add Distributed Cache; The Connection String Maps To The "distributed-cache" Resource Defined In ASPIRE.ApplicationHost
         builder.AddRedisClient("DISTRIBUTED-CACHE");
+
+        // Register IDatabase From IConnectionMultiplexer
+        builder.Services.AddSingleton<IDatabase>(serviceProvider => serviceProvider.GetRequiredService<IConnectionMultiplexer>().GetDatabase());
 
         // Register Chat Service As Background Hosted Service
         builder.Services.AddHostedService<ChatService>();

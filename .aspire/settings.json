@@ -1,5 +1,5 @@
 {
-    "appHostPath": "../ASPIRE.AppHost/ASPIRE.AppHost.csproj",
+    "applicationHostPath": "../ASPIRE.ApplicationHost/ASPIRE.ApplicationHost.csproj",
     "features": {
         "execCommandEnabled": "true"
     }

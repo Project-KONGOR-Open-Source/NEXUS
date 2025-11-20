@@ -3,11 +3,10 @@
 [ApiController]
 [Route("stats_requester.php")]
 [Consumes("application/x-www-form-urlencoded")]
-public partial class StatsRequesterController(MerrickContext databaseContext, IConnectionMultiplexer multiplexer, IMemoryCache cache, ILogger<StatsRequesterController> logger) : ControllerBase
+public partial class StatsRequesterController(MerrickContext databaseContext, IDatabase distributedCache, ILogger<StatsRequesterController> logger) : ControllerBase
 {
     private MerrickContext MerrickContext { get; } = databaseContext;
-    private IDatabase DistributedCache { get; } = multiplexer.GetDatabase();
-    private IMemoryCache Cache { get; } = cache;
+    private IDatabase DistributedCache { get; } = distributedCache;
     private ILogger Logger { get; } = logger;
 
     /// <summary>

@@ -1,7 +1,10 @@
 ﻿global using ASPIRE.Common.Extensions.Cryptography;
 global using ASPIRE.Common.ServiceDefaults;
 
-global using KONGOR.MasterServer.Models.ServerManagement; // TODO: Move Models To A Shared Project And Remove Inter-Project Dependencies
+          // TODO: Move These To A Shared Project And Remove Inter-Project Dependencies
+global using KONGOR.MasterServer.Extensions.Cache;
+global using KONGOR.MasterServer.Models.ServerManagement;
+global using KONGOR.MasterServer.Handlers.SRP;
 
 global using MERRICK.DatabaseContext.Entities.Core;
 global using MERRICK.DatabaseContext.Enumerations;
@@ -29,7 +32,7 @@ global using TRANSMUTANSTEIN.ChatServer.CommandProcessors.Matchmaking;
 global using TRANSMUTANSTEIN.ChatServer.Communication;
 global using TRANSMUTANSTEIN.ChatServer.Contracts;
 global using TRANSMUTANSTEIN.ChatServer.Core;
-global using TRANSMUTANSTEIN.ChatServer.Extensions;
+global using TRANSMUTANSTEIN.ChatServer.Extensions.Protocol;
 global using TRANSMUTANSTEIN.ChatServer.Internals;
 global using TRANSMUTANSTEIN.ChatServer.Matchmaking;
 global using TRANSMUTANSTEIN.ChatServer.Services;

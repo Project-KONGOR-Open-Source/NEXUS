@@ -14,12 +14,16 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="../ASPIRE.AppHost/ASPIRE.AppHost.csproj" />
+        <ProjectReference Include="../ASPIRE.ApplicationHost/ASPIRE.ApplicationHost.csproj" />
         <ProjectReference Include="../DAWNBRINGER.WebPortal.UI/DAWNBRINGER.WebPortal.UI.csproj" />
         <ProjectReference Include="../KONGOR.MasterServer/KONGOR.MasterServer.csproj" />
         <ProjectReference Include="../MERRICK.DatabaseContext/MERRICK.DatabaseContext.csproj" />
         <ProjectReference Include="../TRANSMUTANSTEIN.ChatServer/TRANSMUTANSTEIN.ChatServer.csproj" />
         <ProjectReference Include="../ZORGATH.WebPortal.API/ZORGATH.WebPortal.API.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="../ASPIRE.SourceGenerator/ASPIRE.SourceGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="true" />
     </ItemGroup>
 
 </Project>

@@ -50,8 +50,8 @@ public partial class ClientRequesterController
             ServerPublicEphemeral = serverPublicEphemeral
         };
 
-        Cache.SetSRPAuthenticationSessionData(accountName, data);
-        Cache.SetSRPAuthenticationSystemInformation(accountName, systemInformation);
+        await DistributedCache.SetSRPAuthenticationSessionData(accountName, data);
+        await DistributedCache.SetSRPAuthenticationSystemInformation(accountName, systemInformation);
 
         return Ok(PhpSerialization.Serialize(new SRPAuthenticationResponseStageOne(data)));
     }
@@ -93,7 +93,7 @@ public partial class ClientRequesterController
         if (systemInformationHashes is null)
             return BadRequest(PhpSerialization.Serialize(new SRPAuthenticationFailureResponse(SRPAuthenticationFailureReason.MissingSystemInformation)));
 
-        SRPAuthenticationSessionDataStageOne? stageOneData = Cache.GetSRPAuthenticationSessionData(accountName);
+        SRPAuthenticationSessionDataStageOne? stageOneData = await DistributedCache.GetSRPAuthenticationSessionData(accountName);
 
         if (stageOneData is null)
         {
@@ -102,9 +102,9 @@ public partial class ClientRequesterController
             return UnprocessableEntity(PhpSerialization.Serialize(new SRPAuthenticationFailureResponse(SRPAuthenticationFailureReason.MissingCachedSRPData)));
         }
 
-        Cache.RemoveSRPAuthenticationSessionData(accountName);
+        await DistributedCache.RemoveSRPAuthenticationSessionData(accountName);
 
-        string? systemInformation = Cache.GetSRPAuthenticationSystemInformation(accountName);
+        string? systemInformation = await DistributedCache.GetSRPAuthenticationSystemInformation(accountName);
 
         if (systemInformation is null)
         {
@@ -113,7 +113,7 @@ public partial class ClientRequesterController
             return UnprocessableEntity(PhpSerialization.Serialize(new SRPAuthenticationFailureResponse(SRPAuthenticationFailureReason.MissingSystemInformation)));
         }
 
-        Cache.RemoveSRPAuthenticationSystemInformation(accountName);
+        await DistributedCache.RemoveSRPAuthenticationSystemInformation(accountName);
 
         SRPAuthenticationSessionDataStageTwo stageTwoData = new (stageOneData, clientProof);
 
@@ -212,7 +212,7 @@ public partial class ClientRequesterController
 
         await MerrickContext.SaveChangesAsync();
 
-        Cache.SetAccountNameForSessionCookie(cookie, accountName);
+        await DistributedCache.SetAccountNameForSessionCookie(cookie, accountName);
 
         return Ok(PhpSerialization.Serialize(response));
     }
