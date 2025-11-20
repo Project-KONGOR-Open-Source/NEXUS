@@ -65,7 +65,7 @@ public class AutoImplementMissingMembersGenerator : IIncrementalGenerator
     /// </summary>
     /// <remarks>
     ///     <code>
-    ///         1. Gathers all interface members (excluding generic methods and infrastructure properties such as <c>Database</c> / <c>Multiplexer</c>).
+    ///         1. Gathers all interface members (methods and properties).
     ///         2. Filters out members already implemented (including explicit interface implementations).
     ///         3. If at least one member is missing and the class is not declared <c>partial</c>, reports diagnostic NX0001 and aborts generation.
     ///         4. Otherwise generates a source file named <c>{ClassName}.g.cs</c> with a partial class implementing the missing members by throwing <see cref="System.NotImplementedException"/>.
@@ -167,23 +167,78 @@ public class AutoImplementMissingMembersGenerator : IIncrementalGenerator
             .Where(member => member.IsImplicitlyDeclared is false) // Exclude Implicit Compiler Members
             .ToImmutableHashSet(SymbolEqualityComparer.Default); // Materialise Immutable Set For Fast Lookup
 
-        ImmutableArray<ISymbol> allInterfaceMembers = classSymbol.AllInterfaces // Enumerate All Implemented Interfaces
-            .SelectMany(interfaceSymbol => interfaceSymbol.GetMembers()) // Flatten Interface Member Collections
-            .Where(member => member.Kind == SymbolKind.Method || member.Kind == SymbolKind.Property) // Keep Methods And Properties
-            .Where(member => IsGenericMethod(member) is false) // Skip Generic Methods
-            .ToImmutableArray(); // Materialise Immutable Array
+        Dictionary<string, ISymbol> uniqueInterfaceMembers = [];
 
-        return allInterfaceMembers // Begin Filtering For Unimplemented Members
-            .Where(interfaceMember => IsImplemented(interfaceMember, implementedMembers, classSymbol) is false) // Exclude Already Implemented Members
-            .ToImmutableArray(); // Materialise Unimplemented Members Into Immutable Array
-    }
+        // Deduplicate Interface Members By Name And Signature
+        foreach (INamedTypeSymbol interfaceSymbol in classSymbol.AllInterfaces)
+        {
+            foreach (ISymbol member in interfaceSymbol.GetMembers())
+            {
+                if (member.Kind != SymbolKind.Method && member.Kind != SymbolKind.Property)
+                {
+                    continue;
+                }
 
-    /// <summary>
-    ///     Checks if a member is a generic method.
-    /// </summary>
-    private static bool IsGenericMethod(ISymbol member)
-    {
-        return member is IMethodSymbol method && method.IsGenericMethod;
+                // Skip Property Accessor Methods As They Are Generated With The Property
+                if (member is IMethodSymbol accessorMethod && (accessorMethod.MethodKind == MethodKind.PropertyGet || accessorMethod.MethodKind == MethodKind.PropertySet))
+                {
+                    continue;
+                }
+
+                // Create Unique Key From Member Name And Signature
+                string memberKey = member.Name + "|" + member.Kind.ToString();
+
+                if (member is IMethodSymbol methodSymbol)
+                {
+                    memberKey += "|" + string.Join(",", methodSymbol.Parameters.Select(parameter => parameter.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)));
+
+                    if (methodSymbol.IsGenericMethod)
+                    {
+                        memberKey += "|" + methodSymbol.Arity.ToString();
+                    }
+                }
+
+                else if (member is IPropertySymbol propertySymbol)
+                {
+                    memberKey += "|" + propertySymbol.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat);
+                }
+
+                if (uniqueInterfaceMembers.ContainsKey(memberKey) is false)
+                {
+                    uniqueInterfaceMembers[memberKey] = member;
+                }
+            }
+        }
+
+        ImmutableArray<ISymbol> allInterfaceMembers = uniqueInterfaceMembers.Values.ToImmutableArray();
+
+        IEnumerable<ISymbol> unimplemented = allInterfaceMembers // Begin Filtering For Unimplemented Members
+            .Where(interfaceMember => IsImplemented(interfaceMember, implementedMembers, classSymbol) is false); // Exclude Already Implemented Members
+
+        List<ISymbol> finalUniqueMembers = [];
+
+        // Additional Deduplication Using Signature Matching
+        foreach (ISymbol member in unimplemented)
+        {
+            bool isDuplicate = false;
+
+            foreach (ISymbol existingMember in finalUniqueMembers)
+            {
+                if (existingMember.Name == member.Name && SignaturesMatch(existingMember, member))
+                {
+                    isDuplicate = true;
+
+                    break;
+                }
+            }
+
+            if (isDuplicate is false)
+            {
+                finalUniqueMembers.Add(member);
+            }
+        }
+
+        return finalUniqueMembers.ToImmutableArray(); // Materialise Unimplemented Members Into Immutable Array
     }
 
     /// <summary>
@@ -270,7 +325,17 @@ public class AutoImplementMissingMembersGenerator : IIncrementalGenerator
         string parameters = string.Join(", ", method.Parameters.Select(parameter =>
             $"{parameter.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)} {parameter.Name}"));
 
-        builder.AppendLine($"    public {returnType} {method.Name}({parameters})");
+        string typeParameters = "";
+
+        // Handle Generic Type Parameters
+        if (method.IsGenericMethod)
+        {
+            string typeParameterList = string.Join(", ", method.TypeParameters.Select(typeParameter => typeParameter.Name));
+
+            typeParameters = $"<{typeParameterList}>";
+        }
+
+        builder.AppendLine($"    public {returnType} {method.Name}{typeParameters}({parameters})");
         builder.AppendLine("    {");
         builder.AppendLine($"        throw new System.NotImplementedException(@\"Method \"\"{method.Name}\"\" Is Not Implemented In Test Double\");");
         builder.AppendLine("    }");

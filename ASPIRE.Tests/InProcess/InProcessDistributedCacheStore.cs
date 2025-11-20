@@ -13,14 +13,6 @@ public partial class InProcessDistributedCacheStore : IDatabase
 {
     private ConcurrentDictionary<string, string> StoreItems { get; set; } = new ();
 
-    // IDatabase Properties
-
-    public int Database => 0;
-
-    public IConnectionMultiplexer Multiplexer => throw new NotImplementedException("Multiplexer Not Available In Test Double");
-
-    public T Wait<T>(Task<T> task) => task.GetAwaiter().GetResult();
-
     // String Operations
 
     public Task<bool> StringSetAsync(RedisKey key, RedisValue value, TimeSpan? expiry = null, When when = When.Always, CommandFlags flags = CommandFlags.None)
