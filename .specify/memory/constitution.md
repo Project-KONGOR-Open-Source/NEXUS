@@ -67,7 +67,7 @@ NEXUS is a distributed cloud-ready application built on .NET Aspire, consisting 
   - **Web Portal API** (ZORGATH.WebPortal.API): Web services for portal functionality
   - **Web Portal UI** (DAWNBRINGER.WebPortal.UI): Frontend interface
 - Services MUST use the database context (MERRICK.DatabaseContext) for data persistence
-- All services MUST be registered in the Aspire AppHost (ASPIRE.AppHost)
+- All services MUST be registered in the Aspire ApplicationHost (ASPIRE.ApplicationHost)
 - Services MUST follow the Aspire architecture patterns for observability, health checks, and configuration
 
 **Rationale:** The distributed architecture enables independent scaling, deployment, and maintenance of each component while ensuring the system can handle production workloads.
@@ -184,7 +184,7 @@ Quality MUST be verified through appropriate testing:
 - **Tools**: PowerShell Core, EF Core CLI, Aspire CLI (as per README.md)
 
 **Workflow Requirements:**
-- Development via Aspire AppHost launch profiles (Development/Production)
+- Development via Aspire ApplicationHost launch profiles (Development/Production)
 - Database migrations managed through `aspire exec --resource database-context`
 - All services MUST be testable independently and as part of the distributed application
 - Configuration MUST follow Aspire patterns for environment-specific settings

@@ -1,5 +1,5 @@
 <Solution>
-    <Project Path="ASPIRE.AppHost/ASPIRE.AppHost.csproj" />
+    <Project Path="ASPIRE.ApplicationHost/ASPIRE.ApplicationHost.csproj" />
     <Project Path="ASPIRE.Common/ASPIRE.Common.csproj" />
     <Project Path="ASPIRE.SourceGenerator/ASPIRE.SourceGenerator.csproj" />
     <Project Path="ASPIRE.Tests/ASPIRE.Tests.csproj" />

@@ -19,7 +19,7 @@ NEXUS uses distributed service architecture:
 - **Chat Server**: `TRANSMUTANSTEIN.ChatServer/`
 - **Database Context**: `MERRICK.DatabaseContext/`
 - **Tests**: `ASPIRE.Tests/ChatServer/`
-- **Aspire Host**: `ASPIRE.AppHost/`
+- **Aspire Host**: `ASPIRE.ApplicationHost/`
 
 ---
 
@@ -82,7 +82,7 @@ NEXUS uses distributed service architecture:
 
 ### Aspire Registration
 
-- [x] T029 Register TRANSMUTANSTEIN.ChatServer in ASPIRE.AppHost/Program.cs with Aspire orchestration, configure ports (11031, 11032, 11033) via environment variables - ✅ Complete in ASPIRE.cs lines 100-104 with database & distributed cache references
+- [x] T029 Register TRANSMUTANSTEIN.ChatServer in ASPIRE.ApplicationHost/Program.cs with Aspire orchestration, configure ports (11031, 11032, 11033) via environment variables - ✅ Complete in ASPIRE.cs lines 100-104 with database & distributed cache references
 - [ ] T030 Configure health checks for ChatServer in TRANSMUTANSTEIN.ChatServer/Program.cs (TCP listener availability) - 🔄 DEFERRED until client cleanup logic complete
 - [x] T031 [P] Configure logging levels in TRANSMUTANSTEIN.ChatServer/appsettings.Development.json (Debug level for TRANSMUTANSTEIN namespace) - ✅ Complete (Default: Debug)
 

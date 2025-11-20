@@ -40,7 +40,7 @@
 
 ### Principle II: Service Architecture
 - [ ] Service boundaries clearly defined
-- [ ] Service registered in ASPIRE.AppHost (if new service)
+- [ ] Service registered in ASPIRE.ApplicationHost (if new service)
 - [ ] Uses MERRICK.DatabaseContext for data persistence (if data required)
 - [ ] Follows Aspire patterns for observability and configuration
 - [ ] Independent deployability considered in design

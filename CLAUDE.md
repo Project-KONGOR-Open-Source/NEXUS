@@ -22,7 +22,7 @@ See `.specify/memory/constitution.md` (v1.2.0) for full constitutional principle
 - Entity Framework Core for data persistence
 
 **Primary Services:**
-- **ASPIRE.AppHost**: Application host for orchestration
+- **ASPIRE.ApplicationHost**: Application host for orchestration
 - **KONGOR.MasterServer**: REST API for game client/server communication
 - **TRANSMUTANSTEIN.ChatServer**: TCP server for real-time chat (HIGHEST PRIORITY)
 - **ZORGATH.WebPortal.API**: Web portal backend API
@@ -39,7 +39,7 @@ See `.specify/memory/constitution.md` (v1.2.0) for full constitutional principle
 
 ```text
 NEXUS/
-├── ASPIRE.AppHost/              # Aspire orchestration host
+├── ASPIRE.ApplicationHost/              # Aspire orchestration host
 ├── ASPIRE.Common/               # Shared common utilities
 ├── ASPIRE.Tests/                # Test project (xUnit)
 ├── KONGOR.MasterServer/         # Master Server (REST API)
@@ -57,9 +57,9 @@ NEXUS/
 **Development:**
 ```powershell
 # Run in development mode
-dotnet run --project ASPIRE.AppHost --launch-profile "ASPIRE.AppHost Development"
+dotnet run --project ASPIRE.ApplicationHost --launch-profile "ASPIRE.ApplicationHost Development"
 
-# Or using Aspire CLI (auto-detects AppHost)
+# Or using Aspire CLI (auto-detects ApplicationHost)
 aspire run
 
 # With debugging
@@ -123,7 +123,7 @@ dotnet tool update --all --local
 
 **Architecture Conventions:**
 - Services use MERRICK.DatabaseContext for persistence
-- All services registered in ASPIRE.AppHost
+- All services registered in ASPIRE.ApplicationHost
 - Follow Aspire patterns for configuration and observability
 - Protocol implementations maintain HoN/KONGOR compatibility
 

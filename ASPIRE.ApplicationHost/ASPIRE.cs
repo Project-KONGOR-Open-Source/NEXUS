@@ -1,4 +1,4 @@
-namespace ASPIRE.AppHost;
+namespace ASPIRE.ApplicationHost;
 
 public class ASPIRE
 {

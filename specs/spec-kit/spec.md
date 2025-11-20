@@ -328,7 +328,7 @@ The matchmaking system must pair compatible groups, consider MMR ratings across 
 ## Dependencies
 
 1. **MERRICK.DatabaseContext**: Database schema and Entity Framework context for persistent data
-2. **ASPIRE.AppHost**: Aspire orchestration for service registration, configuration, and lifecycle management
+2. **ASPIRE.ApplicationHost**: Aspire orchestration for service registration, configuration, and lifecycle management
 3. **ASPIRE.Common**: Shared utilities and common infrastructure components
 4. **Redis**: Caching layer for session state and temporary matchmaking data
 5. **SQL Server**: Primary database for accounts, clans, statistics, and persistent chat state

@@ -36,12 +36,12 @@ Implement the TRANSMUTANSTEIN chat server with full TCP protocol support for pla
 
 ### Principle II: Service Architecture
 - [x] Service boundaries clearly defined
-- [x] Service registered in ASPIRE.AppHost (if new service)
+- [x] Service registered in ASPIRE.ApplicationHost (if new service)
 - [x] Uses MERRICK.DatabaseContext for data persistence (if data required)
 - [x] Follows Aspire patterns for observability and configuration
 - [x] Independent deployability considered in design
 
-**Evidence**: TRANSMUTANSTEIN.ChatServer is distinct service. Will register in ASPIRE.AppHost. data-model.md defines PlayerStatistics and FriendedPeer entities using MERRICK.DatabaseContext. Triple TCP listener architecture supports independent deployment. Aspire health checks and metrics planned.
+**Evidence**: TRANSMUTANSTEIN.ChatServer is distinct service. Will register in ASPIRE.ApplicationHost. data-model.md defines PlayerStatistics and FriendedPeer entities using MERRICK.DatabaseContext. Triple TCP listener architecture supports independent deployment. Aspire health checks and metrics planned.
 
 ### Principle III: Chat Server Priority
 - [x] Chat Server priority acknowledged (if not chat-related, mark N/A)
@@ -182,7 +182,7 @@ NEXUS/
 │   └── TestHelpers/
 │       └── SimulatedChatClient.cs     # Protocol test client
 │
-└── ASPIRE.AppHost/
+└── ASPIRE.ApplicationHost/
     └── Program.cs                      # Register TRANSMUTANSTEIN.ChatServer
 ```
 
