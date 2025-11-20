@@ -22,4 +22,8 @@
         <ProjectReference Include="../ZORGATH.WebPortal.API/ZORGATH.WebPortal.API.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+        <ProjectReference Include="../ASPIRE.SourceGenerator/ASPIRE.SourceGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="true" />
+    </ItemGroup>
+
 </Project>

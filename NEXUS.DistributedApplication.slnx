@@ -1,10 +1,10 @@
 <Solution>
     <Project Path="ASPIRE.AppHost/ASPIRE.AppHost.csproj" />
     <Project Path="ASPIRE.Common/ASPIRE.Common.csproj" />
+    <Project Path="ASPIRE.SourceGenerator/ASPIRE.SourceGenerator.csproj" />
     <Project Path="ASPIRE.Tests/ASPIRE.Tests.csproj" />
     <Project Path="DAWNBRINGER.WebPortal.UI/DAWNBRINGER.WebPortal.UI.csproj" />
     <Project Path="KONGOR.MasterServer/KONGOR.MasterServer.csproj" />
-    <Project Path="LEGACY/LEGACY.csproj" Id="0f08fa7a-8204-44a9-a502-cccb330067db" />
     <Project Path="MERRICK.DatabaseContext/MERRICK.DatabaseContext.csproj" />
     <Project Path="TRANSMUTANSTEIN.ChatServer/TRANSMUTANSTEIN.ChatServer.csproj" />
     <Project Path="ZORGATH.WebPortal.API/ZORGATH.WebPortal.API.csproj" />
