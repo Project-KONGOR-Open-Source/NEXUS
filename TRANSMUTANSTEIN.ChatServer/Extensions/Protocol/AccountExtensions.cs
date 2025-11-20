@@ -1,4 +1,4 @@
-﻿namespace TRANSMUTANSTEIN.ChatServer.Extensions;
+﻿namespace TRANSMUTANSTEIN.ChatServer.Extensions.Protocol;
 
 public static class AccountExtensions
 {
