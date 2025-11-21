@@ -86,3 +86,6 @@
 
  - always prefer global using directives, and add or move them to a "Internals/UsingDirectives.cs" file in the project root
    - keep using directives in lexicographic order ascending, grouped by assembly
+   - use global using directive syntax rather than the "global::" alias qualifier
+     - RIGHT: global using Aspire.Hosting;
+     - WRONG: using global::Aspire.Hosting;
