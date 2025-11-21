@@ -1,178 +1,85 @@
-# NEXUS Development Guidelines
+### Syntax And Formatting
 
-Auto-generated from all feature plans. Last updated: 2025-01-16
+ - never use "var", always use explicit type names
 
-## ⚠️ MANDATORY: Before Making ANY Code Edits
+ - always use uppercase for acronyms and initialisms in PascalCase, but only use uppercase for acronyms and initialisms in camelCase if it is not at the start of a symbol name
+   - RIGHT: UserID, GetGUID, HTMLParser, userGUID, accountID, httpStatusCode
+   - WRONG: UserId, GetGuid, HtmlParser, userGuid, accountId, hTTPStatusCode
 
-**Constitutional Requirement (Principle IV - v1.2.0):**
-- **ALWAYS** read `.github/agents/copilot-instructions.md` before making ANY code modifications
-- This file is the authoritative source of truth for code style
-- The file updates frequently - NEVER rely on cached/memorized versions
-- These principles take precedence over all other guidance
+ - always use full variable names for delegates and lambda parameters; never use abbreviations or single-letter names like "x", "y", "z", etc.
+   - RIGHT: numbers.Select(number => number * number);
+   - WRONG: numbers.Select(x => x * x);
 
-See `.specify/memory/constitution.md` (v1.2.0) for full constitutional principles.
+ - always use four spaces for indentation, and always terminate files with a newline character
 
-## Active Technologies
-- C# with .NET 10 + .NET Aspire, Entity Framework Core, System.Net.Sockets, System.Diagnostics.Metrics (spec-kit)
-- SQL Server via MERRICK.DatabaseContext (EF Core), In-memory ConcurrentDictionary for transient state, Redis caching via Aspire (spec-kit)
+ - always keep vertical whitespace usage consistent; if there is any already-existing code in the proximity, inspect it and use the same vertical whitespace usage conventions
 
-**Language/Framework:**
-- C# with .NET 10 (or version specified in solution)
-- .NET Aspire for distributed application orchestration
-- Entity Framework Core for data persistence
+ - always keep syntax and formatting styles consistent with those of already-existing code; if there is any already-existing code in the proximity, inspect it and use the same syntax and formatting styles
 
-**Primary Services:**
-- **ASPIRE.ApplicationHost**: Application host for orchestration
-- **KONGOR.MasterServer**: REST API for game client/server communication
-- **TRANSMUTANSTEIN.ChatServer**: TCP server for real-time chat (HIGHEST PRIORITY)
-- **ZORGATH.WebPortal.API**: Web portal backend API
-- **DAWNBRINGER.WebPortal.UI**: Web portal frontend
-- **MERRICK.DatabaseContext**: Database context for EF Core
+ - always align lambda operators for switch expressions, as in the following example:
+    ```
+    return UserType switch
+    {
+        UserType.Staff  => "internal",
+        UserType.Client => "external",
+        _               => throw new ArgumentOutOfRangeException(@$"Unsupported User Type ""{UserType}""")
+    };
+    ```
 
-**Testing:**
-- xUnit in ASPIRE.Tests project
+ - don't add comments for obvious code; only add comments when they add value by explaining why something is done a certain way or providing context that isn't immediately clear from the code itself
 
-**Platform:**
-- Cross-platform (Windows/Linux) with Docker support
+ - when adding code comments use StartCase, but not if that would change the letter case for acronyms, initialisms, symbol names, etc.
+   - COMMENT: // This Is A Sample Comment Explaining The Purpose Of The "request" Variable In The HTTP Handler
 
-## Project Structure
+ - when adding summaries for code elements (like classes, methods, properties, etc.) use sentence case with correct indentation and punctuation, including a punctuation mark at the end of each sentence
+   - SUMMARY LINE #1: /// <summary>
+   - SUMMARY LINE #2: ///     This method retrieves user information based on the provided user ID.
+   - SUMMARY LINE #3: ///     It does do by using the "request" variable from the HTTP handler.
+   - SUMMARY LINE #4: /// </summary>
 
-```text
-NEXUS/
-├── ASPIRE.ApplicationHost/              # Aspire orchestration host
-├── ASPIRE.Common/               # Shared common utilities
-├── ASPIRE.Tests/                # Test project (xUnit)
-├── KONGOR.MasterServer/         # Master Server (REST API)
-├── TRANSMUTANSTEIN.ChatServer/  # Chat Server (TCP) - PRIORITY
-├── ZORGATH.WebPortal.API/       # Web Portal API
-├── DAWNBRINGER.WebPortal.UI/    # Web Portal UI
-├── MERRICK.DatabaseContext/     # Database context (EF Core)
-└── LEGACY/                      # Legacy reference code
-    ├── HoN/                     # Original HoN source (ABSOLUTE TRUTH)
-    └── KONGOR/                  # Production KONGOR code (PRACTICAL REFERENCE)
-```
+ - always enclose references to symbol names, branch names, etc. in double quotation marks unless it is possible to use a <see cref="..."/> tag instead
+   - COMMENT: The "GetUserData" Method Is Responsible For Fetching User Information
+   - SUMMARY LINE #1: /// <summary>
+   - SUMMARY LINE #2: ///     The <see cref="GetUserData"/> method is responsible for fetching user information.
+   - SUMMARY LINE #3: /// </summary>
 
-## Commands
+ - when using a <see cref="..."/> tag to refer to a method or another code construct which takes parameters, do not include the parameters
+   - RIGHT: <see cref="CalculateTotal"/>
+   - WRONG: <see cref="CalculateTotal(int, int)"/>
 
-**Development:**
-```powershell
-# Run in development mode
-dotnet run --project ASPIRE.ApplicationHost --launch-profile "ASPIRE.ApplicationHost Development"
+ - never use the null-forgiving operator (!) to suppress null handling; then only times where this is acceptable are the following:
+   - when using Include or ThenInclude in Entity Framework queries to reference navigation properties that are known to be not null according to the data model, but are reference types or marked as nullable in the code
+   - when assigning "null!" to a nullable variable, field, or property is unavoidable without making the code overly-complex, and it is absolutely certain that the value will not be null at runtime
 
-# Or using Aspire CLI (auto-detects ApplicationHost)
-aspire run
+ - when creating asynchronous methods, never use the "Async" suffix in the method name unless there is also a synchronous version of the same method in the same scope
 
-# With debugging
-aspire run --debug --wait-for-debugger
-```
+ - always keep any and all code and comments in British English, and never use American English
 
-**Database Migrations:**
-```powershell
-# Create migration (requires Aspire host running)
-aspire exec --resource database-context -- dotnet ef migrations add {NAME}
+ - always use full words for symbols, never use abbreviations
+   - RIGHT: configuration, administrator, implementation
+   - WRONG: config, admin, impl
 
-# Update development database
-$ENV:ASPNETCORE_ENVIRONMENT = "Development"
-aspire exec --resource database-context -- dotnet ef database update
+ - in comments, use "TRUE", "FALSE", and "NULL" when referring to the boolean and null literals, to clearly distinguish them from their natural-language meanings
 
-# Update production database
-$ENV:ASPNETCORE_ENVIRONMENT = "Production"
-aspire exec --resource database-context -- dotnet ef database update
-```
+### Code Generation
 
-**Testing:**
-```powershell
-# Run all tests
-dotnet test
+ - always ensure that the generated code is syntactically correct and adheres to best practices for the target programming language
+   - if necessary and possible, check relevant online sources or documentation to verify compliance with the latest standards
 
-# Run specific test project
-dotnet test ASPIRE.Tests
-```
+ - always ensure that the generated code is efficient and optimized for performance, avoiding unnecessary computations or memory usage, unless readability and maintainability are significantly compromised
+   - if necessary and possible, check relevant online sources or documentation to verify compliance with the latest performance optimization techniques
 
-**Tools Management:**
-```powershell
-# Restore .NET tools (EF Core CLI, Aspire CLI, etc.)
-dotnet tool restore
+ - always ensure that the generated code is secure, following best practices to prevent vulnerabilities such as injection attacks, data leaks, and unauthorized access
+   - if necessary and possible, check relevant online sources or documentation to verify compliance with the latest security standards
 
-# Update all local tools
-dotnet tool update --all --local
-```
+ - always keep the generated code consistent with the existing codebase in terms of style, conventions, and architecture
+   - if necessary and possible, inspect the existing codebase to identify relevant patterns and practices to follow
 
-## Code Style
+ - always keep generated code targeted towards the objective, avoiding unnecessary features or complexity that do not directly contribute to the specified goal
+   - if necessary and possible, review the prompt to ensure alignment with the specified objectives and confirm with the user if there is any ambiguity
+   - when in doubt, present the available options to the user in a clear manner and let them decide on the best approach
 
-**⚠️ CRITICAL: Always consult `.github/agents/copilot-instructions.md` for the latest rules**
-
-**C# Conventions Summary (verify against source file before editing):**
-
-- **NEVER use "var"** - always use explicit type names
-- **Acronyms/Initialisms**:
-  - PascalCase: Always uppercase (UserID, GetGUID, HTMLParser)
-  - camelCase: Uppercase only if not at start (userGUID, accountID, httpStatusCode)
-- **Lambda parameters**: Full variable names, never single letters
-  - ✅ `numbers.Select(number => number * number)`
-  - ❌ `numbers.Select(x => x * x)`
-- **Switch expressions**: Align lambda operators
-- **Comments**: StartCase for comments (Every Word Capitalised), sentence case for XML summaries
-- **Symbol names**: Always use full words, NEVER abbreviations
-  - ✅ configuration, administrator, implementation
-  - ❌ config, admin, impl
-- **Symbol references**: Use `<see cref="MethodName"/>` (no parameters in tag)
-- **Null-forgiving operator (!)**: Only for EF navigation properties or truly unavoidable cases
-- **"Async" suffix**: Only when synchronous version exists
-- **Language**: British English throughout (colour, behaviour, serialise)
-
-**Architecture Conventions:**
-- Services use MERRICK.DatabaseContext for persistence
-- All services registered in ASPIRE.ApplicationHost
-- Follow Aspire patterns for configuration and observability
-- Protocol implementations maintain HoN/KONGOR compatibility
-
-## Legacy Code Reference
-
-**Hierarchy of Truth:**
-1. **HoN** (C:\Users\SADS-810\Source
-EXUS\LEGACY\HoN): Absolute source of truth for protocols
-2. **KONGOR** (C:\Users\SADS-810\Source
-EXUS\LEGACY\KONGOR): Practical production reference
-
-**When consulting legacy code:**
-- Document behavior and intent, not just implementation
-- Identify technical debt or issues in legacy approach
-- Consider modern .NET patterns for implementation
-- Honor protocol structures, modernize implementation
-- Keep traceability between legacy and NEXUS components
-
-## Chat Server Priority
-
-**HIGHEST PRIORITY**: TRANSMUTANSTEIN.ChatServer implementation
-
-**Requirements:**
-- Document event flows as discovered
-- Validate protocol against both HoN and KONGOR
-- Test real-time performance
-- Log all protocol interactions for debugging
-- Research undocumented flows thoroughly
-
-## Recent Changes
-
-### 2025-11-16
-- **Constitution v1.2.0**: Added MANDATORY LEGACY VERIFICATION requirement to Principle I
-  - All protocol-related tasks MUST verify against HoN and KONGOR before completion
-  - Task completion notes MUST include references to verified legacy code locations
-- **Task T054**: Completed clan channel validation in ChatChannel.Join() with legacy-verified silent rejection behavior
-- **Codebase Cleanup**: Removed 13 empty source files and 9 empty directories
-- **Class Renaming**: SilenceUser → SilenceChannelMember, ChannelMessage → SendChannelMessage
-
-### 2025-01-16
-- **Constitution v1.1.0**: Added MANDATORY pre-edit check requirement for copilot-instructions.md
-- **copilot-instructions.md**: Added "full words for symbols" rule (no abbreviations like admin, config, impl)
-- **Code Style**: Updated all session code to comply with StartCase comments and full word requirements
-- **Tasks T045-T049**: Completed channel command processors (JoinChannel, LeaveChannel, ChannelMessage, KickFromChannel, SilenceUser)
-- **ChatChannel**: Added silence tracking with IsSilenced() and Silence() methods
-
-### 2025-01-13
-- spec-kit: Added C# with .NET 10 + .NET Aspire, Entity Framework Core, System.Net.Sockets, System.Diagnostics.Metrics
-- Constitution v1.0.0: Initial ratification with 7 core principles
-
-<!-- MANUAL ADDITIONS START -->
-<!-- MANUAL ADDITIONS END -->
+ - prefer simplicity and clarity over complexity and unnecessary features
+   - avoid over-engineering or adding features that are not explicitly requested or required
+   - keep the code as straightforward and easy to understand as possible while still meeting the specified requirements
+   - keep the code minimalistic and to the point, avoiding unnecessary abstractions, layers, or components that do not add significant value to the overall design or functionality

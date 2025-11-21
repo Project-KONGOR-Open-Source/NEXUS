@@ -88,10 +88,10 @@ The Chat Server implementation is the current highest priority and requires spec
 
 ### IV. Code Style and Formatting (NON-NEGOTIABLE)
 
-**MANDATORY PRE-EDIT CHECK:** Before making ANY code edits, agents and developers MUST read and apply the principles from `.github/agents/copilot-instructions.md`. This file is the authoritative source of truth for code style and MUST be consulted before every editing session.
+**MANDATORY PRE-EDIT CHECK:** Before making ANY code edits, agents and developers MUST read and apply the principles from `.github/copilot-instructions.md`. This file is the authoritative source of truth for code style and MUST be consulted before every editing session.
 
 **Rules:**
-- `.github/agents/copilot-instructions.md` MUST be checked before ANY code modifications
+- `.github/copilot-instructions.md` MUST be checked before ANY code modifications
 - ALL principles in that file take precedence over default behaviors or memorized conventions
 - The file updates frequently - NEVER rely on cached/memorized versions
 - If conflicting guidance exists between this constitution and copilot-instructions.md, the copilot-instructions.md file wins for code style matters
