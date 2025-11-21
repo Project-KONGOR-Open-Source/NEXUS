@@ -83,3 +83,6 @@
    - avoid over-engineering or adding features that are not explicitly requested or required
    - keep the code as straightforward and easy to understand as possible while still meeting the specified requirements
    - keep the code minimalistic and to the point, avoiding unnecessary abstractions, layers, or components that do not add significant value to the overall design or functionality
+
+ - always prefer global using directives, and add or move them to a "Internals/UsingDirectives.cs" file in the project root
+   - keep using directives in lexicographic order ascending, grouped by assembly
