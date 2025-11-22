@@ -310,6 +310,9 @@ public static class ChatProtocol
     public const uint MAX_CHANNELS_PER_CLIENT                              = 8;
     public const uint MAX_PACKET_SIZE                                      = 16384;  // 16KB - Maximum Size For Entire Chat Protocol Packet
 
+    public const int FLOOD_THRESHOLD                                       = 5;      // Maximum Number Of Requests Before Flood Protection Activates
+    public const double FLOOD_DECAY_INTERVAL_SECONDS                       = 3.5;    // Request Counter Decays By 1 Every 3.5 Seconds
+
     public const uint MAX_TMM_GAME_MAPS_SELECTABLE                         = 1;
     public const uint MAX_TMM_GAME_MODES_SELECTABLE                        = 6;
     public const uint MAX_TMM_GAME_REGIONS_SELECTABLE                      = 6;

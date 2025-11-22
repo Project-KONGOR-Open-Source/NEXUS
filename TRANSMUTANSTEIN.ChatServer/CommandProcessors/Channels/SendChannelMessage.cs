@@ -1,13 +1,19 @@
 namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Channels;
 
 [ChatCommand(ChatProtocol.Command.CHAT_CMD_CHANNEL_MSG)]
-public class SendChannelMessage : ISynchronousCommandProcessor
+public class SendChannelMessage(FloodPreventionService floodPreventionService) : ISynchronousCommandProcessor
 {
     public void Process(ChatSession session, ChatBuffer buffer)
     {
         SendChannelMessageRequestData requestData = new (buffer);
 
         ChatChannel channel = ChatChannel.Get(session, requestData.ChannelID);
+
+        // Check Flood Prevention (Service Handles Both Check And Response)
+        if (floodPreventionService.CheckAndHandleFloodPrevention(session) is false)
+        {
+            return;
+        }
 
         // Check If The Sender Is Silenced In This Channel
         if (channel.IsSilenced(session))
