@@ -22,6 +22,13 @@ public partial class InProcessDistributedCacheStore : IDatabase
         return Task.FromResult(true);
     }
 
+    public Task<bool> StringSetAsync(RedisKey key, RedisValue value, TimeSpan? expiry, bool keepTtl, When when = When.Always, CommandFlags flags = CommandFlags.None)
+    {
+        StoreItems[key.ToString()] = value.ToString();
+
+        return Task.FromResult(true);
+    }
+
     public Task<RedisValue> StringGetAsync(RedisKey key, CommandFlags flags = CommandFlags.None)
     {
         bool found = StoreItems.TryGetValue(key.ToString(), out string? value);
