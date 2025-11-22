@@ -114,7 +114,7 @@ public class FloodPreventionService(ILogger<FloodPreventionService> logger) : IH
                     decayedAccounts++;
                 }
 
-                // Remove Accounts With Zero Request Count And No Recent Activity (Prevent Memory Leaks)
+                // Remove Accounts With Zero Request Count And No Recent Activity, To Prevent Memory Leaks
                 if (floodState.RequestCount == 0 && (DateTime.UtcNow - floodState.LastRequestTime).TotalSeconds > ChatProtocol.FLOOD_GARBAGE_COLLECTION_SECONDS)
                 {
                     AccountFloodStates.TryRemove(entry.Key, out _);

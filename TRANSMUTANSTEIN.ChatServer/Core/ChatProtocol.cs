@@ -312,6 +312,7 @@ public static class ChatProtocol
 
     public const int FLOOD_THRESHOLD                                       = 5;      // Maximum Number Of Requests Before Flood Protection Activates
     public const double FLOOD_DECAY_INTERVAL_SECONDS                       = 3.5;    // Request Counter Decays By 1 Every 3.5 Seconds
+    public const int FLOOD_GARBAGE_COLLECTION_SECONDS                      = 300;    // The Threshold In Seconds Before Tracked Clients Are Released From Memory
 
     public const uint MAX_TMM_GAME_MAPS_SELECTABLE                         = 1;
     public const uint MAX_TMM_GAME_MODES_SELECTABLE                        = 6;
