@@ -85,6 +85,9 @@ public partial class ChatSession(TCPServer server, IServiceProvider serviceProvi
         foreach (ChatChannel channel in channels)
             channel.Leave(this);
 
+        // Remove From Matchmaking Group If In One
+        MatchmakingService.GetMatchmakingGroup(Account.ID)?.RemoveMember(Account.ID);
+
         // Log The Client Out And Disconnect The Chat Session
         LogOut(); Disconnect();
 

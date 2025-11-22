@@ -2,6 +2,8 @@
 
 public class MatchmakingGroup
 {
+    public Guid GUID { get; } = Guid.CreateVersion7();
+
     public MatchmakingGroupMember Leader => Members.Single(member => member.IsLeader);
 
     public required List<MatchmakingGroupMember> Members { get; set; }
@@ -242,7 +244,7 @@ public class MatchmakingGroup
         return this;
     }
 
-    private void MulticastUpdate(int emitterAccountID, ChatProtocol.TMMUpdateType updateType)
+    public void MulticastUpdate(int emitterAccountID, ChatProtocol.TMMUpdateType updateType)
     {
         ChatBuffer update = new ();
 
@@ -359,5 +361,95 @@ public class MatchmakingGroup
 
         foreach (MatchmakingGroupMember member in Members)
             member.Session.Send(update);
+    }
+
+    /// <summary>
+    ///     Removes a member from the matchmaking group.
+    ///     If the leader leaves and other members remain, leadership transfers to the member with the lowest slot index.
+    ///     If the leader leaves and no other members remain, or if the last member leaves, the group is disbanded.
+    /// </summary>
+    public void RemoveMember(int accountID, bool kick = false)
+    {
+        MatchmakingGroupMember? memberToRemove = Members.SingleOrDefault(member => member.Account.ID == accountID);
+
+        if (memberToRemove is null)
+            return;
+
+        bool memberToRemoveIsLeader = memberToRemove.IsLeader;
+
+        // Broadcast Removal To All Members Before Removing
+        ChatProtocol.TMMUpdateType updateType = kick
+            ? ChatProtocol.TMMUpdateType.TMM_PLAYER_KICKED_FROM_GROUP
+            : ChatProtocol.TMMUpdateType.TMM_PLAYER_LEFT_GROUP;
+
+        // Send Partial Group Update Indicating Member Removal
+        MulticastUpdate(accountID, updateType);
+
+        // Remove Member From Group
+        Members.Remove(memberToRemove);
+
+        // If Group Is Now Empty, Disband It
+        if (Members.Count is 0)
+        {
+            DisbandGroup(accountID);
+
+            return;
+        }
+
+        // Reassign Slots And Transfer Leadership
+        ReassignSlots();
+
+        // Reset All Members To Default Readiness State: Leader = Not Ready, Others = Ready
+        // Non-Leader Members Should Always Be Ready So That Group Readiness Is Determined Solely By The Leader
+        foreach (MatchmakingGroupMember member in Members)
+            member.IsReady = member.IsLeader is false;
+
+        // TODO: Remove From Queue If Queued
+
+        // TODO: Leave Group Chat Channel
+
+        // Send Full Group Update To Remaining Members
+        MulticastUpdate(accountID, ChatProtocol.TMMUpdateType.TMM_FULL_GROUP_UPDATE);
+    }
+
+    /// <summary>
+    ///     Removes the specified member from the group and records the action as a kick.
+    /// </summary>
+    public void KickMember(int accountID) => RemoveMember(accountID, kick: true);
+
+    /// <summary>
+    ///     Reassigns team slots to all group members sequentially based on current member order.
+    ///     Leader always receives slot 1, and subsequent members receive slots 2, 3, 4, and 5.
+    /// </summary>
+    private void ReassignSlots()
+    {
+        if (Members.Count == 0)
+        {
+            Log.Error(@"[BUG] Attempted To Reassign Slots In Empty Matchmaking Group GUID ""{Group.GUID}""", GUID);
+
+            return;
+        }
+
+        Members = [.. Members.OrderBy(member => member.Slot)];
+
+        foreach (MatchmakingGroupMember member in Members)
+            member.Slot = Convert.ToByte(Members.IndexOf(member) + 1);
+
+        Members.Single(member => member.Slot is 1).IsLeader = true;
+    }
+
+    /// <summary>
+    ///     Disbands the matchmaking group by removing it from the matchmaking service registry.
+    ///     Called when the last member leaves or when the leader leaves with no other members.
+    /// </summary>
+    private void DisbandGroup(int accountID)
+    {
+        // Remove Group From Matchmaking Service Registry
+        if (MatchmakingService.Groups.TryRemove(accountID, out MatchmakingGroup? group) is false)
+            Log.Error(@"Failed To Disband Matchmaking Group GUID ""{Group.GUID}"" For Account ID ""{Member.Account.ID}""", group?.GUID ?? Guid.Empty, accountID);
+
+        // TODO: Remove From Queue If Queued
+
+        // TODO: Remove All Members From Group Chat Channel
     }
 }

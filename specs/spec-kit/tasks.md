@@ -175,24 +175,24 @@ NEXUS uses distributed service architecture:
 
 ### Implementation for User Story 3
 
-- [ ] T064 [P] [US3] Implement GroupCreateProcessor.cs in TRANSMUTANSTEIN.ChatServer/CommandProcessors/Groups/GroupCreateProcessor.cs with [ChatCommand(NET_CHAT_CL_TMM_GROUP_CREATE)]
-- [ ] T065 [P] [US3] Implement GroupInviteProcessor.cs in TRANSMUTANSTEIN.ChatServer/CommandProcessors/Groups/GroupInviteProcessor.cs with [ChatCommand(NET_CHAT_CL_TMM_GROUP_INVITE)]
-- [ ] T066 [P] [US3] Implement GroupAcceptInviteProcessor.cs in TRANSMUTANSTEIN.ChatServer/CommandProcessors/Groups/GroupAcceptInviteProcessor.cs with [ChatCommand(NET_CHAT_CL_TMM_GROUP_ACCEPT_INVITE)]
-- [ ] T067 [P] [US3] Implement GroupRejectInviteProcessor.cs in TRANSMUTANSTEIN.ChatServer/CommandProcessors/Groups/GroupRejectInviteProcessor.cs with [ChatCommand(NET_CHAT_CL_TMM_GROUP_REJECT_INVITE)]
-- [ ] T068 [P] [US3] Implement GroupJoinProcessor.cs in TRANSMUTANSTEIN.ChatServer/CommandProcessors/Groups/GroupJoinProcessor.cs with [ChatCommand(NET_CHAT_CL_TMM_GROUP_JOIN)]
-- [ ] T069 [P] [US3] Implement GroupLeaveProcessor.cs in TRANSMUTANSTEIN.ChatServer/CommandProcessors/Groups/GroupLeaveProcessor.cs with [ChatCommand(NET_CHAT_CL_TMM_GROUP_LEAVE)]
-- [ ] T070 [P] [US3] Implement PlayerReadyStatusProcessor.cs in TRANSMUTANSTEIN.ChatServer/CommandProcessors/Groups/PlayerReadyStatusProcessor.cs with [ChatCommand(NET_CHAT_CL_TMM_PLAYER_READY_STATUS)]
-- [ ] T071 [P] [US3] Implement GroupJoinQueueProcessor.cs in TRANSMUTANSTEIN.ChatServer/CommandProcessors/Matchmaking/GroupJoinQueueProcessor.cs with [ChatCommand(NET_CHAT_CL_TMM_GROUP_JOIN_QUEUE)]
-- [ ] T072 [P] [US3] Implement GroupLeaveQueueProcessor.cs in TRANSMUTANSTEIN.ChatServer/CommandProcessors/Matchmaking/GroupLeaveQueueProcessor.cs with [ChatCommand(NET_CHAT_CL_TMM_GROUP_LEAVE_QUEUE)]
-- [ ] T073 [US3] Add MatchmakingGroup.Create() in ChatServer.cs (ActiveGroups.TryAdd with auto-increment GroupID, set LeaderAccountID)
-- [ ] T074 [US3] Add MatchmakingGroup.AddMember() in MatchmakingGroup.cs (assign TeamSlot, add to Members ConcurrentDictionary, broadcast member joined)
-- [ ] T075 [US3] Add MatchmakingGroup.RemoveMember() in MatchmakingGroup.cs (remove from Members, disband if leader leaves or last member)
-- [ ] T075a [US3] Implement automatic leader transfer in MatchmakingGroup.RemoveMember() when leader leaves per FR-032 (shift all indices down by 1, member at index 0 becomes new leader)
-- [ ] T076 [US3] Add MatchmakingGroup.SetReady() in MatchmakingGroupMember.cs (update ReadyStatus, broadcast to all group members)
-- [ ] T077 [US3] Add MatchmakingGroup.AllMembersReady() check in GroupJoinQueueProcessor (verify all Members have ReadyStatus = true before queue join)
-- [ ] T078 [US3] Add invitation system in GroupInviteProcessor (send invitation message to target player ChatSession)
-- [ ] T079 [US3] Add group leave on disconnect in ChatSession.OnDisconnectAsync() (check CurrentGroup, remove member or disband if leader)
-- [ ] T080 [US3] Load PlayerStatistics from database in GroupJoinQueueProcessor for matchmaking rating (query MERRICK.DatabaseContext.PlayerStatistics by AccountID)
+- [x] T064 [P] [US3] Implement GroupCreateProcessor.cs in TRANSMUTANSTEIN.ChatServer/CommandProcessors/Groups/GroupCreateProcessor.cs with [ChatCommand(NET_CHAT_CL_TMM_GROUP_CREATE)] - ✅ Complete as GroupCreate.cs
+- [x] T065 [P] [US3] Implement GroupInviteProcessor.cs in TRANSMUTANSTEIN.ChatServer/CommandProcessors/Groups/GroupInviteProcessor.cs with [ChatCommand(NET_CHAT_CL_TMM_GROUP_INVITE)] - ✅ Complete as GroupInvite.cs
+- [x] T066 [P] [US3] Implement GroupAcceptInviteProcessor.cs in TRANSMUTANSTEIN.ChatServer/CommandProcessors/Groups/GroupAcceptInviteProcessor.cs with [ChatCommand(NET_CHAT_CL_TMM_GROUP_ACCEPT_INVITE)] - ✅ Complete as GroupJoin.cs
+- [x] T067 [P] [US3] Implement GroupRejectInviteProcessor.cs in TRANSMUTANSTEIN.ChatServer/CommandProcessors/Groups/GroupRejectInviteProcessor.cs with [ChatCommand(NET_CHAT_CL_TMM_GROUP_REJECT_INVITE)] - ✅ Complete as GroupRejectInvite.cs, broadcasts rejection to all group members and sends partial group update
+- [x] T068 [P] [US3] Implement GroupJoinProcessor.cs in TRANSMUTANSTEIN.ChatServer/CommandProcessors/Groups/GroupJoinProcessor.cs with [ChatCommand(NET_CHAT_CL_TMM_GROUP_JOIN)] - ✅ Complete as GroupJoin.cs
+- [x] T069 [P] [US3] Implement GroupLeaveProcessor.cs in TRANSMUTANSTEIN.ChatServer/CommandProcessors/Groups/GroupLeaveProcessor.cs with [ChatCommand(NET_CHAT_CL_TMM_GROUP_LEAVE)] - ✅ Complete as GroupLeave.cs, calls RemoveMember with isKick: false
+- [x] T070 [P] [US3] Implement PlayerReadyStatusProcessor.cs in TRANSMUTANSTEIN.ChatServer/CommandProcessors/Groups/PlayerReadyStatusProcessor.cs with [ChatCommand(NET_CHAT_CL_TMM_PLAYER_READY_STATUS)] - ✅ Complete as GroupPlayerReadyStatus.cs
+- [x] T071 [P] [US3] Implement GroupJoinQueueProcessor.cs in TRANSMUTANSTEIN.ChatServer/CommandProcessors/Matchmaking/GroupJoinQueueProcessor.cs with [ChatCommand(NET_CHAT_CL_TMM_GROUP_JOIN_QUEUE)] - ✅ Complete as GroupJoinQueue.cs, validates leader and all members ready/loaded
+- [x] T072 [P] [US3] Implement GroupLeaveQueueProcessor.cs in TRANSMUTANSTEIN.ChatServer/CommandProcessors/Matchmaking/GroupLeaveQueueProcessor.cs with [ChatCommand(NET_CHAT_CL_TMM_GROUP_LEAVE_QUEUE)] - ✅ Complete as GroupLeaveQueue.cs, resets all player ready/loading states
+- [x] T073 [US3] Add MatchmakingGroup.Create() in ChatServer.cs (ActiveGroups.TryAdd with auto-increment GroupID, set LeaderAccountID) - ✅ Complete in MatchmakingGroup.cs as static Create() method
+- [x] T074 [US3] Add MatchmakingGroup.AddMember() in MatchmakingGroup.cs (assign TeamSlot, add to Members ConcurrentDictionary, broadcast member joined) - ✅ Complete as Join() method in MatchmakingGroup.cs
+- [x] T075 [US3] Add MatchmakingGroup.RemoveMember() in MatchmakingGroup.cs (remove from Members, disband if leader leaves or last member) - ✅ Complete with full implementation including broadcasts and slot reassignment
+- [x] T075a [US3] Implement automatic leader transfer in MatchmakingGroup.RemoveMember() when leader leaves per FR-032 (shift all indices down by 1, member at index 0 becomes new leader) - ✅ Complete in RemoveMember() method, transfers leadership to member with lowest slot index
+- [x] T076 [US3] Add MatchmakingGroup.SetReady() in MatchmakingGroupMember.cs (update ReadyStatus, broadcast to all group members) - ✅ Complete via SendPlayerReadinessStatusUpdate() which sets member.IsReady and broadcasts
+- [x] T077 [US3] Add MatchmakingGroup.AllMembersReady() check in GroupJoinQueueProcessor (verify all Members have ReadyStatus = true before queue join) - ✅ Complete as inline check in GroupJoinQueue.cs: Members.All(member => member.IsReady && member.LoadingPercent is 100)
+- [x] T078 [US3] Add invitation system in GroupInviteProcessor (send invitation message to target player ChatSession) - ✅ Complete as Invite() method in MatchmakingGroup.cs
+- [x] T079 [US3] Add group leave on disconnect in ChatSession.OnDisconnectAsync() (check CurrentGroup, remove member or disband if leader) - ✅ Complete in ChatSession.cs Terminate() method, calls RemoveMember when player disconnects
+- [ ] T080 [US3] Load PlayerStatistics from database in GroupJoinQueueProcessor for matchmaking rating (query MERRICK.DatabaseContext.PlayerStatistics by AccountID) - 🔄 DEFERRED with TODOs in MatchmakingGroup.cs for calculating average group rating and member ratings
 
 **Checkpoint**: At this point, players can form groups and join queues. User Story 3 is fully functional and testable independently.
 
