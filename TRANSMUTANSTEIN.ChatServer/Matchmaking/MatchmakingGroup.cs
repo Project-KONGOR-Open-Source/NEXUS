@@ -175,28 +175,12 @@ public class MatchmakingGroup
 
         groupMember.LoadingPercent = loadingPercent;
 
-        bool loaded = Members.All(member => member.LoadingPercent is 100);
+        // Check If All Members Have Reached 100% Loading
+        bool allMembersAreFullyLoaded = Members.All(member => member.LoadingPercent is 100);
 
-        if (loaded)
+        if (allMembersAreFullyLoaded)
         {
-            ChatBuffer queue = new ();
-
-            queue.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_JOIN_QUEUE);
-
-            foreach (MatchmakingGroupMember member in Members)
-                member.Session.Send(queue);
-
-            QueueStartTime = DateTimeOffset.UtcNow;
-
-            ChatBuffer load = new ();
-
-            load.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_QUEUE_UPDATE);
-            load.WriteInt8(Convert.ToByte(ChatProtocol.TMMUpdateType.TMM_GROUP_QUEUE_UPDATE));
-            // TODO: Get Actual Average Time In Queue (In Seconds)
-            load.WriteInt32(83);
-
-            foreach (MatchmakingGroupMember member in Members)
-                member.Session.Send(load);
+            JoinQueue();
         }
 
         MulticastUpdate(session.Account.ID, ChatProtocol.TMMUpdateType.TMM_PARTIAL_GROUP_UPDATE);
@@ -242,6 +226,56 @@ public class MatchmakingGroup
         }
 
         return this;
+    }
+
+    /// <summary>
+    ///     Attempts to join the matchmaking queue.
+    ///     Validates that all members are ready and fully loaded (100%) before joining.
+    /// </summary>
+    public void JoinQueue()
+    {
+        // Prevent Double-Queuing: Check If Already In Queue
+        if (QueueStartTime is not null)
+        {
+            Log.Error(@"[BUG] Matchmaking Group GUID ""{Group.GUID}"" Tried To Join Queue While Already Queued", GUID);
+
+            return;
+        }
+
+        // Validate That All Members Are Ready And Loaded Before Joining Queue
+        bool allMembersReadyAndLoaded = Members.All(member => member.IsReady && member.LoadingPercent is 100);
+
+        if (allMembersReadyAndLoaded is false)
+        {
+            return;
+        }
+
+        // TODO: Validate Regional Restrictions (Turkey Region Requires GarenaID)
+        // TODO: Validate Game Mode Restrictions (Lock Pick Only For 5-Person Groups)
+        // TODO: Validate Disabled Game Modes
+        // TODO: Update Group Statistics And Cache Information
+
+        // Set Group As Queued
+        QueueStartTime = DateTimeOffset.UtcNow;
+
+        // Broadcast Queue Join To All Group Members
+        ChatBuffer joinQueueBroadcast = new ();
+
+        joinQueueBroadcast.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_JOIN_QUEUE);
+
+        foreach (MatchmakingGroupMember member in Members)
+            member.Session.Send(joinQueueBroadcast);
+
+        // Broadcast Queue Update With Average Queue Time
+        ChatBuffer queueUpdateBroadcast = new ();
+
+        queueUpdateBroadcast.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_QUEUE_UPDATE);
+        queueUpdateBroadcast.WriteInt8(Convert.ToByte(ChatProtocol.TMMUpdateType.TMM_GROUP_QUEUE_UPDATE));
+        // TODO: Calculate Real Average Queue Time In Seconds
+        queueUpdateBroadcast.WriteInt32(83);
+
+        foreach (MatchmakingGroupMember member in Members)
+            member.Session.Send(queueUpdateBroadcast);
     }
 
     public void MulticastUpdate(int emitterAccountID, ChatProtocol.TMMUpdateType updateType)
