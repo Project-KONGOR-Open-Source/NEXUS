@@ -159,7 +159,7 @@ public sealed class SRPAuthenticationTests
     {
         await using WebApplicationFactory<KONGORAssemblyMarker> webApplicationFactory = KONGORServiceProvider.CreateOrchestratedInstance();
 
-        SRPAuthenticationService srpAuthenticationService = new(webApplicationFactory);
+        SRPAuthenticationService srpAuthenticationService = new (webApplicationFactory);
 
         SRPAuthenticationData result = await srpAuthenticationService.AuthenticateWithSRP(emailAddress, accountName, password);
 

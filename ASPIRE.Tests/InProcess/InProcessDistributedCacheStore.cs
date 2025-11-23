@@ -113,7 +113,7 @@ public partial class InProcessDistributedCacheStore : IDatabase
 
         string regexPattern = "^" + Regex.Escape(patternString).Replace(@"\*", ".*") + "$";
 
-        Regex regex = new(regexPattern);
+        Regex regex = new (regexPattern);
 
         List<HashEntry> matchingEntries = [];
 
