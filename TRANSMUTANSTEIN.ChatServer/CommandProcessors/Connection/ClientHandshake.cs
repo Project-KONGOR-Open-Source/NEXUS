@@ -95,10 +95,11 @@ public class ClientHandshake(MerrickContext merrick, IDatabase distributedCacheS
             return;
         }
 
-        // Accept Connection And Send Options
+        // Accept Connection, Send Options, And Broadcast Connection To Friends And Clan Members
         session
             .Accept(new ChatSessionMetadata(requestData), account)
-            .SendOptionsAndRemoteCommands();
+            .SendOptionsAndRemoteCommands()
+            .BroadcastConnection();
     }
 }
 

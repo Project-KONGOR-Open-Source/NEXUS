@@ -17,10 +17,10 @@ public static class ChatProtocol
         public const ushort CHAT_CMD_WHISPER                               = 0x0008; // Used When One User Whispers Another
         public const ushort CHAT_CMD_WHISPER_FAILED                        = 0x0009; // Used When The Whisper Target Could Not Be Found
         public const ushort CHAT_CMD_LAST_KNOWN_GAME_SERVER                = 0x000A; // Return The Last Known Game Server
-        public const ushort CHAT_CMD_INITIAL_STATUS                        = 0x000B; // Sent On Connect To Update Buddy And Clan Connection Status For New Client
-        public const ushort CHAT_CMD_UPDATE_STATUS                         = 0x000C; // Sent On Connect To Update Buddy And Clan Connection Status For Old Clients
-        public const ushort CHAT_CMD_REQUEST_BUDDY_ADD                     = 0x000D; // Sent From Client To Chat Server To Request A Buddy Add
-        public const ushort CHAT_CMD_NOTIFY_BUDDY_REMOVE                   = 0x000E; // Sent From Client To Chat Server To Notify A Buddy Has Been Removed
+        public const ushort CHAT_CMD_INITIAL_STATUS                        = 0x000B; // Sent On Connect To Update Friend And Clan Connection Status For New Client
+        public const ushort CHAT_CMD_UPDATE_STATUS                         = 0x000C; // Sent On Connect To Update Friend And Clan Connection Status For Old Clients
+        public const ushort CHAT_CMD_REQUEST_BUDDY_ADD                     = 0x000D; // Sent From Client To Chat Server To Request A Friend Add
+        public const ushort CHAT_CMD_NOTIFY_BUDDY_REMOVE                   = 0x000E; // Sent From Client To Chat Server To Notify A Friend Has Been Removed
         public const ushort CHAT_CMD_JOINING_GAME                          = 0x000F; // Sent When A User Starts Joining A Game
         public const ushort CHAT_CMD_JOINED_GAME                           = 0x0010; // Sent When A User Finishes Joining A Game
         public const ushort CHAT_CMD_LEFT_GAME                             = 0x0011; // Sent When A User Leaves A Game

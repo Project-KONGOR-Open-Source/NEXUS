@@ -7,6 +7,7 @@ global using KONGOR.MasterServer.Models.ServerManagement;
 global using KONGOR.MasterServer.Handlers.SRP;
 
 global using MERRICK.DatabaseContext.Entities.Core;
+global using MERRICK.DatabaseContext.Entities.Relational;
 global using MERRICK.DatabaseContext.Enumerations;
 global using MERRICK.DatabaseContext.Persistence;
 
