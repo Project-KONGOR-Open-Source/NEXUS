@@ -1,4 +1,4 @@
-﻿namespace TRANSMUTANSTEIN.ChatServer.Core;
+﻿namespace TRANSMUTANSTEIN.ChatServer.Domain.Core;
 
 public class ChatServer(IPAddress address, int port, IServiceProvider serviceProvider) : TCPServer(address, port)
 {

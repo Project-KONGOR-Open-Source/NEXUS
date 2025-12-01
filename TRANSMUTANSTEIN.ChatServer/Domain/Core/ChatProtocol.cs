@@ -1,4 +1,4 @@
-﻿namespace TRANSMUTANSTEIN.ChatServer.Core;
+﻿namespace TRANSMUTANSTEIN.ChatServer.Domain.Core;
 
 public static class ChatProtocol
 {

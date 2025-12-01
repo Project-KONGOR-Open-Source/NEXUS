@@ -2,7 +2,7 @@
 
 public class ChatService(IServiceProvider serviceProvider) : IHostedService, IDisposable
 {
-    public static Core.ChatServer? ChatServer { get; set; }
+    public static Domain.Core.ChatServer? ChatServer { get; set; }
 
     public Task StartAsync(CancellationToken cancellationToken)
     {
@@ -12,7 +12,7 @@ public class ChatService(IServiceProvider serviceProvider) : IHostedService, IDi
 
         int port = int.Parse(Environment.GetEnvironmentVariable("CHAT_SERVER_PORT") ?? throw new NullReferenceException("Chat Server Port Is NULL"));
 
-        ChatServer = new Core.ChatServer(address, port, serviceProvider);
+        ChatServer = new Domain.Core.ChatServer(address, port, serviceProvider);
 
         if (ChatServer.Start() is false)
         {
