@@ -8,7 +8,8 @@ public class SendWhisper : ISynchronousCommandProcessor
         WhisperRequestData requestData = new (buffer);
 
         Whisper
-            .Send(session, requestData.TargetName, requestData.Message);
+            .Create(requestData.Message)
+            .Send(session, requestData.TargetName);
     }
 }
 
