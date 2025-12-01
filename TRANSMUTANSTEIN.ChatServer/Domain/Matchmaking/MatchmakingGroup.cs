@@ -1,4 +1,4 @@
-﻿namespace TRANSMUTANSTEIN.ChatServer.Matchmaking;
+﻿namespace TRANSMUTANSTEIN.ChatServer.Domain.Matchmaking;
 
 public class MatchmakingGroup
 {
