@@ -215,13 +215,14 @@ NEXUS uses distributed service architecture:
 ### Implementation for User Story 4
 
 - [ ] T084 [P] [US4] Implement WhisperProcessor.cs in TRANSMUTANSTEIN.ChatServer/CommandProcessors/Communication/WhisperProcessor.cs with [ChatCommand(NET_CHAT_CL_WHISPER)]
-- [ ] T085 [P] [US4] Implement AddBuddyProcessor.cs in TRANSMUTANSTEIN.ChatServer/CommandProcessors/Communication/AddBuddyProcessor.cs with [ChatCommand(NET_CHAT_CL_ADD_BUDDY)]
-- [ ] T086 [P] [US4] Implement RemoveBuddyProcessor.cs in TRANSMUTANSTEIN.ChatServer/CommandProcessors/Communication/RemoveBuddyProcessor.cs with [ChatCommand(NET_CHAT_CL_REMOVE_BUDDY)]
+- [x] T085 [P] [US4] Implement AddBuddyProcessor.cs in TRANSMUTANSTEIN.ChatServer/CommandProcessors/Communication/AddBuddyProcessor.cs with [ChatCommand(NET_CHAT_CL_ADD_BUDDY)] - ✅ Implemented as AddFriend.cs in Social/ with KONGOR-style request/approve flow using Redis TTL (60s), detects mutual requests for instant friendship
+- [x] T085a [P] [US4] Implement ApproveBuddyProcessor.cs for CHAT_CMD_REQUEST_BUDDY_APPROVE - ✅ Implemented as ApproveFriend.cs in Social/, creates bidirectional friendship, removes Redis entry, sends approval packets to both users
+- [x] T086 [P] [US4] Implement RemoveBuddyProcessor.cs in TRANSMUTANSTEIN.ChatServer/CommandProcessors/Communication/RemoveBuddyProcessor.cs with [ChatCommand(NET_CHAT_CL_REMOVE_BUDDY)] - ✅ Implemented as RemoveFriend.cs in Social/ with DSL-style fluent API
 - [ ] T087 [US4] Add whisper delivery in WhisperProcessor (find target in ChatServer.ActiveSessions, send NET_CHAT_CL_WHISPER_RECEIVED)
 - [ ] T088 [US4] Add whisper failed notification in WhisperProcessor (if target offline or unavailable, send NET_CHAT_CL_WHISPER_FAILED)
 - [ ] T089 [US4] Add ChatMode validation in WhisperProcessor (block whispers if target.ChatMode == DND, mark as away if AFK)
-- [ ] T090 [US4] Add FriendedPeer persistence in AddBuddyProcessor (insert into MERRICK.DatabaseContext.FriendedPeers with Status = Pending)
-- [ ] T091 [US4] Add FriendedPeer removal in RemoveBuddyProcessor (delete from MERRICK.DatabaseContext.FriendedPeers)
+- [x] T090 [US4] Add FriendedPeer persistence in AddBuddyProcessor (insert into MERRICK.DatabaseContext.FriendedPeers with Status = Pending) - ✅ Implemented in Friend.Add() with Redis pending request storage (60s TTL), bidirectional database persistence in Friend.Approve()
+- [x] T091 [US4] Add FriendedPeer removal in RemoveBuddyProcessor (delete from MERRICK.DatabaseContext.FriendedPeers) - ✅ Implemented in Friend.Remove() with one-directional removal
 - [ ] T092 [US4] Load buddy list on connect in AuthenticateProcessor (query FriendedPeers where RequesterAccountID or TargetAccountID = session.AccountID, cache in ChatSession)
 - [ ] T093 [US4] Send buddy online notifications in AuthenticateProcessor (after authentication, notify all friends with NET_CHAT_CL_BUDDY_ONLINE)
 - [ ] T094 [US4] Send buddy offline notifications in ChatSession.OnDisconnectAsync() (notify all friends with NET_CHAT_CL_BUDDY_OFFLINE)

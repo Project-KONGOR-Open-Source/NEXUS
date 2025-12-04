@@ -940,6 +940,16 @@ public static class ChatProtocol
         NUM_QUEST_AVAILABILITY_TYPES
     };
 
+    public enum FriendAddStatus
+    {
+        GENERIC_FAILURE      = 0,
+        SUCCESS_REQUESTER    = 1,
+        SUCCESS_REQUESTEE    = 2,
+        DUPLICATE_RECORD     = 3, // Custom Failure Reason 1/3
+        BANNED_OR_IGNORED    = 4, // Custom Failure Reason 2/3
+        FRIEND_LIMIT_REACHED = 5  // Custom Failure Reason 3/3
+    }
+
     [Flags]
     public enum ChatClientType
     {

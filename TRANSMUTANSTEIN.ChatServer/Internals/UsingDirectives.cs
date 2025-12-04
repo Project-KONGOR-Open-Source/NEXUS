@@ -35,6 +35,7 @@ global using TRANSMUTANSTEIN.ChatServer.Core;
 global using TRANSMUTANSTEIN.ChatServer.Domain.Communication;
 global using TRANSMUTANSTEIN.ChatServer.Domain.Core;
 global using TRANSMUTANSTEIN.ChatServer.Domain.Matchmaking;
+global using TRANSMUTANSTEIN.ChatServer.Domain.Social;
 global using TRANSMUTANSTEIN.ChatServer.Extensions.Protocol;
 global using TRANSMUTANSTEIN.ChatServer.Internals;
 global using TRANSMUTANSTEIN.ChatServer.Services;
