@@ -6,21 +6,36 @@ public static partial class DistributedCacheExtensions
 
     /// <summary>
     ///     Stores a pending friend request in the distributed cache store.
+    ///     The value of this entry is the requester's and target's notification IDs as a tuple.
     /// </summary>
-    public static async Task SetFriendRequest(this IDatabase distributedCacheStore, int requesterID, int targetID, int notificationID)
+    public static async Task SetFriendRequest(this IDatabase distributedCacheStore, int requesterID, int targetID, int requesterNotificationID, int targetNotificationID)
     {
-        await distributedCacheStore.StringSetAsync(ConstructFriendRequestKey(requesterID, targetID), notificationID, TimeSpan.FromSeconds(60));
+        string notificationIDsPair = $"{requesterNotificationID}:{targetNotificationID}";
+
+        await distributedCacheStore.StringSetAsync(ConstructFriendRequestKey(requesterID, targetID), notificationIDsPair, TimeSpan.FromHours(24));
     }
 
     /// <summary>
     ///     Retrieves a pending friend request from the distributed cache store.
-    ///     Returns NULL if request doesn't exist or has expired.
+    ///     Returns a tuple containing the requester's and target's notification IDs, or NULL if the request doesn't exist or has expired.
     /// </summary>
-    public static async Task<int?> GetFriendRequest(this IDatabase distributedCacheStore, int requesterID, int targetID)
+    public static async Task<(int RequesterNotificationID, int TargetNotificationID)?> GetFriendRequest(this IDatabase distributedCacheStore, int requesterID, int targetID)
     {
         RedisValue cachedValue = await distributedCacheStore.StringGetAsync(ConstructFriendRequestKey(requesterID, targetID));
 
-        return cachedValue.IsNullOrEmpty ? null : int.TryParse(cachedValue.ToString(), out int notificationID) ? notificationID : null;
+        if (cachedValue.IsNullOrEmpty)
+        {
+            return null;
+        }
+
+        string[] parts = cachedValue.ToString().Split(':');
+
+        if (parts.Length is not 2 || int.TryParse(parts.First(), out int requesterNotificationID) is false || int.TryParse(parts.Last(), out int targetNotificationID) is false)
+        {
+            return null;
+        }
+
+        return (requesterNotificationID, targetNotificationID);
     }
 
     /// <summary>

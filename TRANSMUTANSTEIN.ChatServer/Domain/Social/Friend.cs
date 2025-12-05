@@ -29,7 +29,7 @@ public class Friend
         // Target Account Not Found
         if (targetAccount is null)
         {
-            SendFriendAddFailure(session, ChatProtocol.FriendAddStatus.GENERIC_FAILURE);
+            SendFriendAddFailure(session, ChatProtocol.FriendAddStatus.GENERIC_FAILURE, targetAccount);
 
             return this;
         }
@@ -45,7 +45,7 @@ public class Friend
 
         if (isIgnored)
         {
-            SendFriendAddFailure(session, ChatProtocol.FriendAddStatus.BANNED_OR_IGNORED);
+            SendFriendAddFailure(session, ChatProtocol.FriendAddStatus.BANNED_OR_IGNORED, targetAccount);
 
             return this;
         }
@@ -55,7 +55,7 @@ public class Friend
 
         if (isBanned)
         {
-            SendFriendAddFailure(session, ChatProtocol.FriendAddStatus.BANNED_OR_IGNORED);
+            SendFriendAddFailure(session, ChatProtocol.FriendAddStatus.BANNED_OR_IGNORED, targetAccount);
 
             return this;
         }
@@ -66,7 +66,7 @@ public class Friend
 
         if (alreadyFriends)
         {
-            SendFriendAddFailure(session, ChatProtocol.FriendAddStatus.DUPLICATE_RECORD);
+            SendFriendAddFailure(session, ChatProtocol.FriendAddStatus.DUPLICATE_RECORD, targetAccount);
 
             return this;
         }
@@ -74,7 +74,7 @@ public class Friend
         // Check If Requester Has Reached Friend Limit
         if (requesterAccount.FriendedPeers.Count >= ChatProtocol.FRIEND_LIMIT)
         {
-            SendFriendAddFailure(session, ChatProtocol.FriendAddStatus.FRIEND_LIMIT_REACHED);
+            SendFriendAddFailure(session, ChatProtocol.FriendAddStatus.FRIEND_LIMIT_REACHED, targetAccount);
 
             return this;
         }
@@ -84,46 +84,50 @@ public class Friend
 
         if (existingPendingRequest)
         {
-            SendFriendAddFailure(session, ChatProtocol.FriendAddStatus.DUPLICATE_RECORD);
+            SendFriendAddFailure(session, ChatProtocol.FriendAddStatus.DUPLICATE_RECORD, targetAccount);
 
             return this;
         }
 
         // Check Whether The Target Account Has Already Sent A Friend Request To The Requester
-        int? pendingFriendRequestNotificationID = await distributedCacheStore.GetFriendRequest(targetAccount.ID, requesterAccount.ID);
+        (int RequesterNotificationID, int TargetNotificationID)? mutualRequest = await distributedCacheStore.GetFriendRequest(targetAccount.ID, requesterAccount.ID);
 
-        if (pendingFriendRequestNotificationID is not null)
+        if (mutualRequest is not null)
         {
             // Request Is Mutual: Both Accounts Become Friends Immediately
             await CreateMutualFriendship(requesterAccount, targetAccount, merrick, distributedCacheStore);
 
-            // Send Approval Response To Requester (Their Request Was Approved)
-            SendFriendRequestApproval(session, targetAccount, ChatProtocol.FriendApproveStatus.SUCCESS_REQUESTER);
+            // Send Approval Success Notification To Requester
+            // NOTE: Current Requester Was Target Of Original Request, So They Receive Target Notification ID
+            SendFriendRequestApproval(session, targetAccount, ChatProtocol.FriendApproveStatus.SUCCESS_REQUESTER, mutualRequest.Value.TargetNotificationID);
 
             ChatSession? targetSession = Context.ChatSessions.Values
                 .SingleOrDefault(chatSession => chatSession.Account.Name.Equals(targetAccount.Name, StringComparison.OrdinalIgnoreCase));
 
-            // Send Approval Response To Target, If Online (They Are Approving The Requester)
+            // Send Approval Success Notification To Target, If Online
+            // NOTE: Current Target Was Requester Of Original Request, So They Receive Requester Notification ID
             if (targetSession is not null)
-                SendFriendRequestApproval(targetSession, requesterAccount, ChatProtocol.FriendApproveStatus.SUCCESS_APPROVER);
+                SendFriendRequestApproval(targetSession, requesterAccount, ChatProtocol.FriendApproveStatus.SUCCESS_APPROVER, mutualRequest.Value.RequesterNotificationID);
 
             return this;
         }
 
-        int notificationID = GenerateNotificationID();
+        // Request Is Not Mutual: Generate Both Notification IDs
+        int requesterNotificationID = GenerateNotificationID();
+        int targetNotificationID = GenerateNotificationID();
 
-        // Request Is Not Mutual: Store Pending Request In Cache Store
-        await distributedCacheStore.SetFriendRequest(requesterAccount.ID, targetAccount.ID, notificationID);
+        // Store Pending Friend Request In Distributed Cache Store
+        await distributedCacheStore.SetFriendRequest(requesterAccount.ID, targetAccount.ID, requesterNotificationID, targetNotificationID);
 
         // Send Success Response To Requester (Friend Request Created Successfully)
-        SendFriendAddSuccess(session, targetAccount);
+        SendFriendAddSuccess(session, targetAccount, requesterNotificationID);
 
         ChatSession? targetOnlineSession = Context.ChatSessions.Values
             .SingleOrDefault(chatSession => chatSession.Account.Name.Equals(targetAccount.Name, StringComparison.OrdinalIgnoreCase));
 
         // Send Friend Request Notification To Target, If Online
         if (targetOnlineSession is not null && targetOnlineSession.Metadata.ClientChatModeState is not ChatProtocol.ChatModeType.CHAT_MODE_DND)
-            SendFriendRequest(targetOnlineSession, requesterAccount, notificationID);
+            SendFriendRequest(targetOnlineSession, requesterAccount, targetNotificationID);
 
         return this;
     }
@@ -152,11 +156,13 @@ public class Friend
         }
 
         // Check Whether Pending Friend Request Exists Or Not
-        int? pendingFriendRequestNotificationID = await distributedCacheStore.GetFriendRequest(requesterAccount.ID, approverAccount.ID);
+        (int RequesterNotificationID, int TargetNotificationID)? pendingRequest = await distributedCacheStore.GetFriendRequest(requesterAccount.ID, approverAccount.ID);
 
-        if (pendingFriendRequestNotificationID is null)
+        if (pendingRequest is null)
         {
-            // No Pending Request Found
+            // No Pending Request Found (May Have Expired Or Never Existed)
+            SendFriendApproveFailure(session, requesterAccount.ID, requesterAccount.NameWithClanTag);
+
             return this;
         }
 
@@ -164,14 +170,14 @@ public class Friend
         await CreateMutualFriendship(requesterAccount, approverAccount, merrick, distributedCacheStore);
 
         // Send Approval Request To Approver
-        SendFriendRequestApproval(session, requesterAccount, ChatProtocol.FriendApproveStatus.SUCCESS_APPROVER);
+        SendFriendRequestApproval(session, requesterAccount, ChatProtocol.FriendApproveStatus.SUCCESS_APPROVER, pendingRequest.Value.TargetNotificationID);
 
         ChatSession? requesterSession = Context.ChatSessions.Values
             .SingleOrDefault(chatSession => chatSession.Account.Name.Equals(requesterAccount.Name, StringComparison.OrdinalIgnoreCase));
 
         // Send Approval Response To Requester, If Online
         if (requesterSession is not null)
-            SendFriendRequestApproval(requesterSession, approverAccount, ChatProtocol.FriendApproveStatus.SUCCESS_REQUESTER);
+            SendFriendRequestApproval(requesterSession, approverAccount, ChatProtocol.FriendApproveStatus.SUCCESS_REQUESTER, pendingRequest.Value.RequesterNotificationID);
 
         return this;
     }
@@ -253,32 +259,30 @@ public class Friend
     /// <summary>
     ///     Sends friend approval response.
     /// </summary>
-    private static void SendFriendRequestApproval(ChatSession session, Account friendAccount, ChatProtocol.FriendApproveStatus status)
+    private static void SendFriendRequestApproval(ChatSession session, Account friendAccount, ChatProtocol.FriendApproveStatus status, int notificationID)
     {
         ChatBuffer response = new ();
 
         response.WriteCommand(ChatProtocol.Command.CHAT_CMD_REQUEST_BUDDY_APPROVE_RESPONSE);
         response.WriteInt8(Convert.ToByte(status));          // Friend Approval Status
         response.WriteInt32(friendAccount.ID);               // Friend's Account ID
-        response.WriteInt32(session.Account.ID);             // Receiver's Own Account ID
+        response.WriteInt32(notificationID);                 // Notification ID For Tracking The Friend Request
         response.WriteString(friendAccount.NameWithClanTag); // Friend's Display Name With Clan Tag
 
         session.Send(response);
     }
 
     /// <summary>
-    ///     Sends successful friend add response to the requester with complete friend details.
-    ///     This is sent when a friend is immediately added (mutual request scenario).
+    ///     Sends friend add success response to the requester.
+    ///     This indicates that the friend request was created successfully, not that the friendship has been established.
     /// </summary>
-    private static void SendFriendAddSuccess(ChatSession session, Account friendAccount)
+    private static void SendFriendAddSuccess(ChatSession session, Account friendAccount, int notificationID)
     {
-        int notificationID = GenerateNotificationID();
-
         ChatBuffer response = new ();
 
         response.WriteCommand(ChatProtocol.Command.CHAT_CMD_REQUEST_BUDDY_ADD_RESPONSE);
         response.WriteInt8(Convert.ToByte(ChatProtocol.FriendAddStatus.SUCCESS_REQUESTER));             // Success Indicator For The Client Who Initiated The Friend Request
-        response.WriteInt32(notificationID);                                                            // The ID Of The Friend Addition Success Notification
+        response.WriteInt32(notificationID);                                                            // Requester's Notification ID For This Friend Request
         response.WriteString(friendAccount.NameWithClanTag);                                            // Friend's Display Name With Clan Tag
         response.WriteInt32(friendAccount.ID);                                                          // Friend's Account ID
         response.WriteInt8(Convert.ToByte(ChatProtocol.ChatClientStatus.CHAT_CLIENT_STATUS_CONNECTED)); // Friend's Current Connection Status
@@ -296,16 +300,30 @@ public class Friend
     /// <summary>
     ///     Sends friend add failure response with the specific failure reason.
     /// </summary>
-    private void SendFriendAddFailure(ChatSession session, ChatProtocol.FriendAddStatus reason)
+    private void SendFriendAddFailure(ChatSession session, ChatProtocol.FriendAddStatus reason, Account? targetAccount)
     {
-        int notificationID = GenerateNotificationID();
-
         ChatBuffer response = new ();
 
         response.WriteCommand(ChatProtocol.Command.CHAT_CMD_REQUEST_BUDDY_ADD_RESPONSE);
-        response.WriteInt8(Convert.ToByte(reason)); // Friend Addition Failure Reason
-        response.WriteInt32(notificationID);        // The ID Of The Friend Addition Failure Notification
-        response.WriteString(AccountName);          // Target Account Name That Was Attempted To Be Added (For Client Error Message Display)
+        response.WriteInt8(Convert.ToByte(reason));                          // Friend Addition Failure Reason
+        response.WriteInt32(0);                                              // Notification ID (Zero Indicates Failure)
+        response.WriteString(targetAccount?.NameWithClanTag ?? AccountName); // Target Display Name With Clan Tag (Or Plain Name If Account Not Found)
+
+        session.Send(response);
+    }
+
+    /// <summary>
+    ///     Sends friend approve failure response when the pending request cannot be found or has expired.
+    /// </summary>
+    private static void SendFriendApproveFailure(ChatSession session, int requesterAccountID, string requesterAccountName)
+    {
+        ChatBuffer response = new ();
+
+        response.WriteCommand(ChatProtocol.Command.CHAT_CMD_REQUEST_BUDDY_APPROVE_RESPONSE);
+        response.WriteInt8(Convert.ToByte(ChatProtocol.FriendApproveStatus.GENERIC_FAILURE)); // Friend Approval Failure (Generic Error)
+        response.WriteInt32(requesterAccountID);                                              // Requester's Account ID
+        response.WriteInt32(0);                                                               // Notification ID (Zero Indicates Failure)
+        response.WriteString(requesterAccountName);                                           // Requester's Display Name With Clan Tag
 
         session.Send(response);
     }
