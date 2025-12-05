@@ -119,7 +119,7 @@ public partial class ChatSession(TCPServer server, IServiceProvider serviceProvi
             connect.WriteString(Account.NameWithClanTag);                                                  // Client's Account Name
             connect.WriteInt32(Account.ID);                                                                // Client's Account ID
             connect.WriteInt8(Convert.ToByte(ChatProtocol.ChatClientStatus.CHAT_CLIENT_STATUS_CONNECTED)); // Chat Client Status
-            connect.WriteInt8(Convert.ToByte(Account.Type));                                               // Administrator Level
+            connect.WriteInt8(Account.GetChatClientFlags());                                               // Client's Flags (Chat Client Type)
             connect.WriteInt32(Account.Clan?.ID ?? 0);                                                     // Client's Clan ID
             connect.WriteString(Account.Clan?.Name ?? string.Empty);                                       // Client's Clan Name
             connect.WriteString(Account.ChatSymbolNoPrefixCode);                                           // Account's Chat Symbol
@@ -148,7 +148,7 @@ public partial class ChatSession(TCPServer server, IServiceProvider serviceProvi
             disconnect.WriteString(Account.NameWithClanTag);                                                     // Client's Account Name
             disconnect.WriteInt32(Account.ID);                                                                   // Client's Account ID
             disconnect.WriteInt8(Convert.ToByte(ChatProtocol.ChatClientStatus.CHAT_CLIENT_STATUS_DISCONNECTED)); // Chat Client Status
-            disconnect.WriteInt8(Convert.ToByte(Account.Type));                                                  // Administrator Level
+            disconnect.WriteInt8(Account.GetChatClientFlags());                                                  // Client's Flags (Chat Client Type)
             disconnect.WriteInt32(Account.Clan?.ID ?? 0);                                                        // Client's Clan ID
             disconnect.WriteString(Account.Clan?.Name ?? string.Empty);                                          // Client's Clan Name
             disconnect.WriteString(Account.ChatSymbolNoPrefixCode);                                              // Account's Chat Symbol

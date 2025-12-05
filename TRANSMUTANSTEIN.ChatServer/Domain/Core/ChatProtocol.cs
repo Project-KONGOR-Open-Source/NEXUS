@@ -310,6 +310,8 @@ public static class ChatProtocol
     public const uint MAX_CHANNELS_PER_CLIENT                              = 8;
     public const uint MAX_PACKET_SIZE                                      = 16384;  // 16KB - Maximum Size For Entire Chat Protocol Packet
 
+    public const uint FRIEND_LIMIT                                         = 250;    // Maximum Number Of Friends Per Account
+
     public const int FLOOD_THRESHOLD                                       = 5;      // Maximum Number Of Requests Before Flood Protection Activates
     public const double FLOOD_DECAY_INTERVAL_SECONDS                       = 3.5;    // Request Counter Decays By 1 Every 3.5 Seconds
     public const int FLOOD_GARBAGE_COLLECTION_SECONDS                      = 300;    // The Threshold In Seconds Before Tracked Clients Are Released From Memory
@@ -942,12 +944,20 @@ public static class ChatProtocol
 
     public enum FriendAddStatus
     {
-        GENERIC_FAILURE      = 0,
-        SUCCESS_REQUESTER    = 1,
-        SUCCESS_REQUESTEE    = 2,
-        DUPLICATE_RECORD     = 3, // Custom Failure Reason 1/3
-        BANNED_OR_IGNORED    = 4, // Custom Failure Reason 2/3
-        FRIEND_LIMIT_REACHED = 5  // Custom Failure Reason 3/3
+        GENERIC_FAILURE      = 0, // Sent When Friend Request Failed Due To An Unspecified Error
+        SUCCESS_REQUESTER    = 1, // Sent To The Client Who Initiated The Friend Request
+        SUCCESS_REQUESTEE    = 2, // Sent To The Client Who Received The Friend Request Notification
+        DUPLICATE_RECORD     = 3, // Sent When Accounts Are Already Friends Or A Pending Request Already Exists
+        BANNED_OR_IGNORED    = 4, // Sent When The Requester Is On The Target's Ignore Or Ban List
+        FRIEND_LIMIT_REACHED = 5  // Sent When The Requester Has Reached The Maximum Friend Limit (250 Friends)
+    }
+
+    public enum FriendApproveStatus
+    {
+        GENERIC_FAILURE      = 0, // Sent When Friend Approval Failed Due To An Unspecified Error
+        SUCCESS_APPROVER     = 1, // Sent To The Client Who Is Approving The Friend Request
+        SUCCESS_REQUESTER    = 2, // Sent To The Client Whose Friend Request Was Approved
+        FRIEND_LIMIT_REACHED = 3  // Approver Has Reached Their Friend Limit
     }
 
     [Flags]
