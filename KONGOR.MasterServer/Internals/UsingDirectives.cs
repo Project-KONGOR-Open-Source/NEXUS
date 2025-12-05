@@ -19,6 +19,7 @@ global using KONGOR.MasterServer.Models.ServerManagement;
 
 global using MERRICK.DatabaseContext.Entities.Core;
 global using MERRICK.DatabaseContext.Entities.Game;
+global using MERRICK.DatabaseContext.Entities.Relational;
 global using MERRICK.DatabaseContext.Entities.Statistics;
 global using MERRICK.DatabaseContext.Enumerations;
 global using MERRICK.DatabaseContext.Persistence;

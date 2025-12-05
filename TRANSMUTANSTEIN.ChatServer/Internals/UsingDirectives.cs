@@ -7,6 +7,7 @@ global using KONGOR.MasterServer.Models.ServerManagement;
 global using KONGOR.MasterServer.Handlers.SRP;
 
 global using MERRICK.DatabaseContext.Entities.Core;
+global using MERRICK.DatabaseContext.Entities.Relational;
 global using MERRICK.DatabaseContext.Enumerations;
 global using MERRICK.DatabaseContext.Persistence;
 
@@ -29,11 +30,13 @@ global using TRANSMUTANSTEIN.ChatServer.Attributes;
 global using TRANSMUTANSTEIN.ChatServer.CommandProcessors.Channels;
 global using TRANSMUTANSTEIN.ChatServer.CommandProcessors.Connection;
 global using TRANSMUTANSTEIN.ChatServer.CommandProcessors.Matchmaking;
-global using TRANSMUTANSTEIN.ChatServer.Communication;
 global using TRANSMUTANSTEIN.ChatServer.Contracts;
 global using TRANSMUTANSTEIN.ChatServer.Core;
+global using TRANSMUTANSTEIN.ChatServer.Domain.Communication;
+global using TRANSMUTANSTEIN.ChatServer.Domain.Core;
+global using TRANSMUTANSTEIN.ChatServer.Domain.Matchmaking;
+global using TRANSMUTANSTEIN.ChatServer.Domain.Social;
 global using TRANSMUTANSTEIN.ChatServer.Extensions.Protocol;
 global using TRANSMUTANSTEIN.ChatServer.Internals;
-global using TRANSMUTANSTEIN.ChatServer.Matchmaking;
 global using TRANSMUTANSTEIN.ChatServer.Services;
 global using TRANSMUTANSTEIN.ChatServer.Utilities;

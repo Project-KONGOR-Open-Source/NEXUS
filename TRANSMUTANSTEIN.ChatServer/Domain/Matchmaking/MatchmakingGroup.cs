@@ -1,7 +1,9 @@
-﻿namespace TRANSMUTANSTEIN.ChatServer.Matchmaking;
+﻿namespace TRANSMUTANSTEIN.ChatServer.Domain.Matchmaking;
 
 public class MatchmakingGroup
 {
+    public Guid GUID { get; } = Guid.CreateVersion7();
+
     public MatchmakingGroupMember Leader => Members.Single(member => member.IsLeader);
 
     public required List<MatchmakingGroupMember> Members { get; set; }
@@ -100,8 +102,8 @@ public class MatchmakingGroup
         invite.WriteInt32(session.Account.ID);                                                        // Invite Issuer ID
         invite.WriteInt8(Convert.ToByte(ChatProtocol.ChatClientStatus.CHAT_CLIENT_STATUS_CONNECTED)); // Invite Issuer Status
         invite.WriteInt8(session.Account.GetChatClientFlags());                                       // Invite Issuer Chat Flags
-        invite.WriteString(session.Account.NameColour);                                               // Invite Issuer Chat Name Colour
-        invite.WriteString(session.Account.Icon);                                                     // Invite Issuer Icon
+        invite.WriteString(session.Account.NameColourNoPrefixCode);                                   // Invite Issuer Chat Name Colour
+        invite.WriteString(session.Account.IconNoPrefixCode);                                         // Invite Issuer Icon
         invite.WriteString(Information.MapName);                                                      // Map Name
         invite.WriteInt8(Convert.ToByte(Information.GameType));                                       // Game Type
         invite.WriteString(string.Join('|', Information.GameModes));                                  // Game Modes
@@ -173,28 +175,12 @@ public class MatchmakingGroup
 
         groupMember.LoadingPercent = loadingPercent;
 
-        bool loaded = Members.All(member => member.LoadingPercent is 100);
+        // Check If All Members Have Reached 100% Loading
+        bool allMembersAreFullyLoaded = Members.All(member => member.LoadingPercent is 100);
 
-        if (loaded)
+        if (allMembersAreFullyLoaded)
         {
-            ChatBuffer queue = new ();
-
-            queue.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_JOIN_QUEUE);
-
-            foreach (MatchmakingGroupMember member in Members)
-                member.Session.Send(queue);
-
-            QueueStartTime = DateTimeOffset.UtcNow;
-
-            ChatBuffer load = new ();
-
-            load.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_QUEUE_UPDATE);
-            load.WriteInt8(Convert.ToByte(ChatProtocol.TMMUpdateType.TMM_GROUP_QUEUE_UPDATE));
-            // TODO: Get Actual Average Time In Queue (In Seconds)
-            load.WriteInt32(83);
-
-            foreach (MatchmakingGroupMember member in Members)
-                member.Session.Send(load);
+            JoinQueue();
         }
 
         MulticastUpdate(session.Account.ID, ChatProtocol.TMMUpdateType.TMM_PARTIAL_GROUP_UPDATE);
@@ -242,7 +228,57 @@ public class MatchmakingGroup
         return this;
     }
 
-    private void MulticastUpdate(int emitterAccountID, ChatProtocol.TMMUpdateType updateType)
+    /// <summary>
+    ///     Attempts to join the matchmaking queue.
+    ///     Validates that all members are ready and fully loaded (100%) before joining.
+    /// </summary>
+    public void JoinQueue()
+    {
+        // Prevent Double-Queuing: Check If Already In Queue
+        if (QueueStartTime is not null)
+        {
+            Log.Error(@"[BUG] Matchmaking Group GUID ""{Group.GUID}"" Tried To Join Queue While Already Queued", GUID);
+
+            return;
+        }
+
+        // Validate That All Members Are Ready And Loaded Before Joining Queue
+        bool allMembersReadyAndLoaded = Members.All(member => member.IsReady && member.LoadingPercent is 100);
+
+        if (allMembersReadyAndLoaded is false)
+        {
+            return;
+        }
+
+        // TODO: Validate Regional Restrictions (Turkey Region Requires GarenaID)
+        // TODO: Validate Game Mode Restrictions (Lock Pick Only For 5-Person Groups)
+        // TODO: Validate Disabled Game Modes
+        // TODO: Update Group Statistics And Cache Information
+
+        // Set Group As Queued
+        QueueStartTime = DateTimeOffset.UtcNow;
+
+        // Broadcast Queue Join To All Group Members
+        ChatBuffer joinQueueBroadcast = new ();
+
+        joinQueueBroadcast.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_JOIN_QUEUE);
+
+        foreach (MatchmakingGroupMember member in Members)
+            member.Session.Send(joinQueueBroadcast);
+
+        // Broadcast Queue Update With Average Queue Time
+        ChatBuffer queueUpdateBroadcast = new ();
+
+        queueUpdateBroadcast.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_QUEUE_UPDATE);
+        queueUpdateBroadcast.WriteInt8(Convert.ToByte(ChatProtocol.TMMUpdateType.TMM_GROUP_QUEUE_UPDATE));
+        // TODO: Calculate Real Average Queue Time In Seconds
+        queueUpdateBroadcast.WriteInt32(83);
+
+        foreach (MatchmakingGroupMember member in Members)
+            member.Session.Send(queueUpdateBroadcast);
+    }
+
+    public void MulticastUpdate(int emitterAccountID, ChatProtocol.TMMUpdateType updateType)
     {
         ChatBuffer update = new ();
 
@@ -340,8 +376,8 @@ public class MatchmakingGroup
             if (fullGroupUpdate)
             {
                 update.WriteBool(member.IsEligibleForMatchmaking);                       // Eligible For Matchmaking
-                update.WriteString(member.Account.NameColour);                           // Chat Name Colour
-                update.WriteString(member.Account.Icon);                                 // Account Icon
+                update.WriteString(member.Account.NameColourNoPrefixCode);               // Chat Name Colour
+                update.WriteString(member.Account.IconNoPrefixCode);                     // Account Icon
                 update.WriteString(member.Country);                                      // Country
                 update.WriteBool(member.HasGameModeAccess);                              // Game Mode Access Bool
                 update.WriteString(member.GameModeAccess);                               // Game Mode Access String
@@ -359,5 +395,95 @@ public class MatchmakingGroup
 
         foreach (MatchmakingGroupMember member in Members)
             member.Session.Send(update);
+    }
+
+    /// <summary>
+    ///     Removes a member from the matchmaking group.
+    ///     If the leader leaves and other members remain, leadership transfers to the member with the lowest slot index.
+    ///     If the leader leaves and no other members remain, or if the last member leaves, the group is disbanded.
+    /// </summary>
+    public void RemoveMember(int accountID, bool kick = false)
+    {
+        MatchmakingGroupMember? memberToRemove = Members.SingleOrDefault(member => member.Account.ID == accountID);
+
+        if (memberToRemove is null)
+            return;
+
+        bool memberToRemoveIsLeader = memberToRemove.IsLeader;
+
+        // Broadcast Removal To All Members Before Removing
+        ChatProtocol.TMMUpdateType updateType = kick
+            ? ChatProtocol.TMMUpdateType.TMM_PLAYER_KICKED_FROM_GROUP
+            : ChatProtocol.TMMUpdateType.TMM_PLAYER_LEFT_GROUP;
+
+        // Send Partial Group Update Indicating Member Removal
+        MulticastUpdate(accountID, updateType);
+
+        // Remove Member From Group
+        Members.Remove(memberToRemove);
+
+        // If Group Is Now Empty, Disband It
+        if (Members.Count is 0)
+        {
+            DisbandGroup(accountID);
+
+            return;
+        }
+
+        // Reassign Slots And Transfer Leadership
+        ReassignSlots();
+
+        // Reset All Members To Default Readiness State: Leader = Not Ready, Others = Ready
+        // Non-Leader Members Should Always Be Ready So That Group Readiness Is Determined Solely By The Leader
+        foreach (MatchmakingGroupMember member in Members)
+            member.IsReady = member.IsLeader is false;
+
+        // TODO: Remove From Queue If Queued
+
+        // TODO: Leave Group Chat Channel
+
+        // Send Full Group Update To Remaining Members
+        MulticastUpdate(accountID, ChatProtocol.TMMUpdateType.TMM_FULL_GROUP_UPDATE);
+    }
+
+    /// <summary>
+    ///     Removes the specified member from the group and records the action as a kick.
+    /// </summary>
+    public void KickMember(int accountID) => RemoveMember(accountID, kick: true);
+
+    /// <summary>
+    ///     Reassigns team slots to all group members sequentially based on current member order.
+    ///     Leader always receives slot 1, and subsequent members receive slots 2, 3, 4, and 5.
+    /// </summary>
+    private void ReassignSlots()
+    {
+        if (Members.Count == 0)
+        {
+            Log.Error(@"[BUG] Attempted To Reassign Slots In Empty Matchmaking Group GUID ""{Group.GUID}""", GUID);
+
+            return;
+        }
+
+        Members = [.. Members.OrderBy(member => member.Slot)];
+
+        foreach (MatchmakingGroupMember member in Members)
+            member.Slot = Convert.ToByte(Members.IndexOf(member) + 1);
+
+        Members.Single(member => member.Slot is 1).IsLeader = true;
+    }
+
+    /// <summary>
+    ///     Disbands the matchmaking group by removing it from the matchmaking service registry.
+    ///     Called when the last member leaves or when the leader leaves with no other members.
+    /// </summary>
+    private void DisbandGroup(int accountID)
+    {
+        // Remove Group From Matchmaking Service Registry
+        if (MatchmakingService.Groups.TryRemove(accountID, out MatchmakingGroup? group) is false)
+            Log.Error(@"Failed To Disband Matchmaking Group GUID ""{Group.GUID}"" For Account ID ""{Member.Account.ID}""", group?.GUID ?? Guid.Empty, accountID);
+
+        // TODO: Remove From Queue If Queued
+
+        // TODO: Remove All Members From Group Chat Channel
     }
 }

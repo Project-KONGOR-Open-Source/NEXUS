@@ -58,6 +58,9 @@ public partial class ClientRequesterController(MerrickContext databaseContext, I
             // servers
             "server_list"                   => await GetServerList(),
 
+            // friends
+            "remove_buddy2"                 => await RemoveFriend(),
+
             null                            => await HandleNullQueryString(),
             _                               => throw new NotImplementedException($"Unsupported Client Requester Controller Query String Parameter: f={Request.Query["f"].Single()}")
         };

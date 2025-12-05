@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MERRICK.DatabaseContext.Migrations
 {
     [DbContext(typeof(MerrickContext))]
-    [Migration("20251111193356_CreateCoreEntities")]
+    [Migration("20251204004912_CreateCoreEntities")]
     partial class CreateCoreEntities
     {
         /// <inheritdoc />

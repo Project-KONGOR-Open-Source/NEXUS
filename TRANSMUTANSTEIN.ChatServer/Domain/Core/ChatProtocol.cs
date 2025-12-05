@@ -1,4 +1,4 @@
-﻿namespace TRANSMUTANSTEIN.ChatServer.Core;
+﻿namespace TRANSMUTANSTEIN.ChatServer.Domain.Core;
 
 public static class ChatProtocol
 {
@@ -17,10 +17,10 @@ public static class ChatProtocol
         public const ushort CHAT_CMD_WHISPER                               = 0x0008; // Used When One User Whispers Another
         public const ushort CHAT_CMD_WHISPER_FAILED                        = 0x0009; // Used When The Whisper Target Could Not Be Found
         public const ushort CHAT_CMD_LAST_KNOWN_GAME_SERVER                = 0x000A; // Return The Last Known Game Server
-        public const ushort CHAT_CMD_INITIAL_STATUS                        = 0x000B; // Sent On Connect To Update Buddy And Clan Connection Status For New Client
-        public const ushort CHAT_CMD_UPDATE_STATUS                         = 0x000C; // Sent On Connect To Update Buddy And Clan Connection Status For Old Clients
-        public const ushort CHAT_CMD_REQUEST_BUDDY_ADD                     = 0x000D; // Sent From Client To Chat Server To Request A Buddy Add
-        public const ushort CHAT_CMD_NOTIFY_BUDDY_REMOVE                   = 0x000E; // Sent From Client To Chat Server To Notify A Buddy Has Been Removed
+        public const ushort CHAT_CMD_INITIAL_STATUS                        = 0x000B; // Sent On Connect To Update Friend And Clan Connection Status For New Client
+        public const ushort CHAT_CMD_UPDATE_STATUS                         = 0x000C; // Sent On Connect To Update Friend And Clan Connection Status For Old Clients
+        public const ushort CHAT_CMD_REQUEST_BUDDY_ADD                     = 0x000D; // Sent From Client To Chat Server To Request A Friend Add
+        public const ushort CHAT_CMD_NOTIFY_BUDDY_REMOVE                   = 0x000E; // Sent From Client To Chat Server To Notify A Friend Has Been Removed
         public const ushort CHAT_CMD_JOINING_GAME                          = 0x000F; // Sent When A User Starts Joining A Game
         public const ushort CHAT_CMD_JOINED_GAME                           = 0x0010; // Sent When A User Finishes Joining A Game
         public const ushort CHAT_CMD_LEFT_GAME                             = 0x0011; // Sent When A User Leaves A Game
@@ -309,6 +309,12 @@ public static class ChatProtocol
     public const uint MAX_USERS_PER_CHANNEL                                = 250;
     public const uint MAX_CHANNELS_PER_CLIENT                              = 8;
     public const uint MAX_PACKET_SIZE                                      = 16384;  // 16KB - Maximum Size For Entire Chat Protocol Packet
+
+    public const uint FRIEND_LIMIT                                         = 250;    // Maximum Number Of Friends Per Account
+
+    public const int FLOOD_THRESHOLD                                       = 5;      // Maximum Number Of Requests Before Flood Protection Activates
+    public const double FLOOD_DECAY_INTERVAL_SECONDS                       = 3.5;    // Request Counter Decays By 1 Every 3.5 Seconds
+    public const int FLOOD_GARBAGE_COLLECTION_SECONDS                      = 300;    // The Threshold In Seconds Before Tracked Clients Are Released From Memory
 
     public const uint MAX_TMM_GAME_MAPS_SELECTABLE                         = 1;
     public const uint MAX_TMM_GAME_MODES_SELECTABLE                        = 6;
@@ -935,6 +941,24 @@ public static class ChatProtocol
 
         NUM_QUEST_AVAILABILITY_TYPES
     };
+
+    public enum FriendAddStatus
+    {
+        GENERIC_FAILURE      = 0, // Sent When Friend Request Failed Due To An Unspecified Error
+        SUCCESS_REQUESTER    = 1, // Sent To The Client Who Initiated The Friend Request
+        SUCCESS_REQUESTEE    = 2, // Sent To The Client Who Received The Friend Request Notification
+        DUPLICATE_RECORD     = 3, // Sent When Accounts Are Already Friends Or A Pending Request Already Exists
+        BANNED_OR_IGNORED    = 4, // Sent When The Requester Is On The Target's Ignore Or Ban List
+        FRIEND_LIMIT_REACHED = 5  // Sent When The Requester Has Reached The Maximum Friend Limit (250 Friends)
+    }
+
+    public enum FriendApproveStatus
+    {
+        GENERIC_FAILURE      = 0, // Sent When Friend Approval Failed Due To An Unspecified Error
+        SUCCESS_APPROVER     = 1, // Sent To The Client Who Is Approving The Friend Request
+        SUCCESS_REQUESTER    = 2, // Sent To The Client Whose Friend Request Was Approved
+        FRIEND_LIMIT_REACHED = 3  // Approver Has Reached Their Friend Limit
+    }
 
     [Flags]
     public enum ChatClientType

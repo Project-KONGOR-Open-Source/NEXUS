@@ -8,7 +8,7 @@ public static partial class DistributedCacheExtensions
     {
         string serializedData = JsonSerializer.Serialize(data);
 
-        await distributedCacheStore.StringSetAsync(ConstructSRPAuthenticationSessionDataKey(accountName), serializedData, new TimeSpan(0, 0, 30));
+        await distributedCacheStore.StringSetAsync(ConstructSRPAuthenticationSessionDataKey(accountName), serializedData, TimeSpan.FromSeconds(30));
     }
 
     public static async Task<SRPAuthenticationSessionDataStageOne?> GetSRPAuthenticationSessionData(this IDatabase distributedCacheStore, string accountName)
@@ -24,7 +24,7 @@ public static partial class DistributedCacheExtensions
     private static string ConstructSRPAuthenticationSystemInformationKey(string accountName) => $@"SYSTEM-INFORMATION:[""{accountName}""]";
 
     public static async Task SetSRPAuthenticationSystemInformation(this IDatabase distributedCacheStore, string accountName, string systemInformation)
-        => await distributedCacheStore.StringSetAsync(ConstructSRPAuthenticationSystemInformationKey(accountName), systemInformation, new TimeSpan(0, 0, 30));
+        => await distributedCacheStore.StringSetAsync(ConstructSRPAuthenticationSystemInformationKey(accountName), systemInformation, TimeSpan.FromSeconds(30));
 
     public static async Task<string?> GetSRPAuthenticationSystemInformation(this IDatabase distributedCacheStore, string accountName)
     {
@@ -41,7 +41,7 @@ public static partial class DistributedCacheExtensions
     private static string ConstructAccountSessionCookieKey(string cookie) => $@"ACCOUNT-SESSION-COOKIE:[""{cookie}""]";
 
     public static async Task SetAccountNameForSessionCookie(this IDatabase distributedCacheStore, string cookie, string accountName)
-        => await distributedCacheStore.StringSetAsync(ConstructAccountSessionCookieKey(cookie), accountName, new TimeSpan(24, 0, 0));
+        => await distributedCacheStore.StringSetAsync(ConstructAccountSessionCookieKey(cookie), accountName, TimeSpan.FromHours(24));
 
     public static async Task<string?> GetAccountNameForSessionCookie(this IDatabase distributedCacheStore, string cookie)
     {

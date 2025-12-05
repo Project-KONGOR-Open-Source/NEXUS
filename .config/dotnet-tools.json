@@ -10,7 +10,7 @@
             "rollForward": false
         },
         "aspire.cli": {
-            "version": "13.0.0",
+            "version": "13.0.2",
             "commands": [
                 "aspire"
             ],

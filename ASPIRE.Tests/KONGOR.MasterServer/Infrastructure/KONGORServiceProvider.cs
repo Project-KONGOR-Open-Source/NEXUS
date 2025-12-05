@@ -12,6 +12,11 @@ public static class KONGORServiceProvider
     {
         string databaseName = identifier ?? Guid.CreateVersion7().ToString();
 
+        // Set Required Environment Variables
+        Environment.SetEnvironmentVariable("CHAT_SERVER_HOST", "127.0.0.1");
+        Environment.SetEnvironmentVariable("CHAT_SERVER_PORT", "11031");
+        Environment.SetEnvironmentVariable("APPLICATION_URL", "http://localhost/");
+
         // Replace Database Context And Distributed Cache With In-Memory Implementations
         WebApplicationFactory<KONGORAssemblyMarker> webApplicationFactory = new WebApplicationFactory<KONGORAssemblyMarker>().WithWebHostBuilder(builder => builder.ConfigureServices(services =>
         {
@@ -35,11 +40,35 @@ public static class KONGORServiceProvider
 
             // Register In-Process Distributed Cache Database
             services.AddSingleton<IDatabase, InProcess.InProcessDistributedCacheStore>();
+
+            // Add Middleware To Set Fake Remote IP Address
+            services.AddSingleton<IStartupFilter>(new RemoteIPAddressStartupFilter());
         }));
 
         // Ensure That OnModelCreating From MerrickContext Has Been Called
         webApplicationFactory.Services.GetRequiredService<MerrickContext>().Database.EnsureCreated();
 
         return webApplicationFactory;
+    }
+}
+
+/// <summary>
+///     Startup Filter To Set Fake Remote IP Address
+/// </summary>
+file class RemoteIPAddressStartupFilter : IStartupFilter
+{
+    public Action<IApplicationBuilder> Configure(Action<IApplicationBuilder> next)
+    {
+        return app =>
+        {
+            app.Use(next => async context =>
+            {
+                context.Connection.RemoteIpAddress = System.Net.IPAddress.Loopback;
+
+                await next(context);
+            });
+
+            next(app);
+        };
     }
 }

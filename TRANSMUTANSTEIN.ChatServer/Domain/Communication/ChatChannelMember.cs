@@ -1,4 +1,4 @@
-﻿namespace TRANSMUTANSTEIN.ChatServer.Communication;
+﻿namespace TRANSMUTANSTEIN.ChatServer.Domain.Communication;
 
 public class ChatChannelMember(ChatSession session, ChatChannel chatChannel)
 {
