@@ -1,5 +1,5 @@
 <p align="center">
-    <a href="https://github.com/Project-KONGOR-Open-Source/NEXUS/actions/workflows/dotnet.yml"><img alt="Unit/Integration Tests" src="https://github.com/Project-KONGOR-Open-Source/NEXUS/actions/workflows/dotnet.yml/badge.svg"></a>
+    <a href="https://github.com/Project-KONGOR-Open-Source/NEXUS/actions/workflows/run-unit-tests.yml"><img alt="Unit/Integration Tests" src="https://github.com/Project-KONGOR-Open-Source/NEXUS/actions/workflows/run-unit-tests.yml/badge.svg"></a>
     <img alt="Work Items" src="https://img.shields.io/github/issues/Project-KONGOR-Open-Source/NEXUS?label=Work%20Items&color=limegreen">
     <img alt="Code Contributors" src="https://img.shields.io/github/contributors/Project-KONGOR-Open-Source/NEXUS?label=Code%20Contributors&color=limegreen">
     <img alt="Total Commits" src="https://img.shields.io/github/commit-activity/t/Project-KONGOR-Open-Source/NEXUS?label=Total%20Commits&color=limegreen">
