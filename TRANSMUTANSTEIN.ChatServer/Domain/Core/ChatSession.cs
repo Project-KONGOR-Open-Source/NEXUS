@@ -123,8 +123,8 @@ public partial class ChatSession(TCPServer server, IServiceProvider serviceProvi
             connect.WriteInt32(Account.Clan?.ID ?? 0);                                                     // Client's Clan ID
             connect.WriteString(Account.Clan?.Name ?? string.Empty);                                       // Client's Clan Name
             connect.WriteString(Account.ChatSymbolNoPrefixCode);                                           // Account's Chat Symbol
-            connect.WriteString(Account.NameColour);                                                       // Account's Name Colour
-            connect.WriteString(Account.Icon);                                                             // Account's Icon
+            connect.WriteString(Account.NameColourNoPrefixCode);                                           // Account's Name Colour
+            connect.WriteString(Account.IconNoPrefixCode);                                                 // Account's Icon
 
             // Send The Connection Notification To The Online Peer
             onlinePeerSession.Send(connect);
@@ -152,8 +152,8 @@ public partial class ChatSession(TCPServer server, IServiceProvider serviceProvi
             disconnect.WriteInt32(Account.Clan?.ID ?? 0);                                                        // Client's Clan ID
             disconnect.WriteString(Account.Clan?.Name ?? string.Empty);                                          // Client's Clan Name
             disconnect.WriteString(Account.ChatSymbolNoPrefixCode);                                              // Account's Chat Symbol
-            disconnect.WriteString(Account.NameColour);                                                          // Account's Name Colour
-            disconnect.WriteString(Account.Icon);                                                                // Account's Icon
+            disconnect.WriteString(Account.NameColourNoPrefixCode);                                              // Account's Name Colour
+            disconnect.WriteString(Account.IconNoPrefixCode);                                                    // Account's Icon
 
             // Send The Disconnection Notification To The Online Peer
             onlinePeerSession.Send(disconnect);

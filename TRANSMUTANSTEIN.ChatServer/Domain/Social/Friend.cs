@@ -243,8 +243,8 @@ public class Friend
         notification.WriteInt32(requesterAccount.Clan?.ID ?? 0);                                            // Requester's Clan ID (Zero If Not In A Clan)
         notification.WriteString(requesterAccount.Clan?.Name ?? string.Empty);                              // Requester's Clan Full Name (Empty String If Not In A Clan)
         notification.WriteString(requesterAccount.ChatSymbolNoPrefixCode);                                  // Requester's Chat Symbol
-        notification.WriteString(requesterAccount.NameColour);                                              // Requester's Name Colour
-        notification.WriteString(requesterAccount.Icon);                                                    // Requester's Account Icon
+        notification.WriteString(requesterAccount.NameColourNoPrefixCode);                                  // Requester's Name Colour
+        notification.WriteString(requesterAccount.IconNoPrefixCode);                                        // Requester's Account Icon
         notification.WriteInt32(requesterAccount.AscensionLevel);                                           // Requester's Ascension Level
 
         targetSession.Send(notification);
@@ -286,8 +286,8 @@ public class Friend
         response.WriteInt32(friendAccount.Clan?.ID ?? 0);                                               // Friend's Clan ID (Zero If Not In A Clan)
         response.WriteString(friendAccount.Clan?.Name ?? string.Empty);                                 // Friend's Clan Name (Empty String If Not In A Clan)
         response.WriteString(friendAccount.ChatSymbolNoPrefixCode);                                     // Friend's Chat Symbol
-        response.WriteString(friendAccount.NameColour);                                                 // Friend's Name Colour
-        response.WriteString(friendAccount.Icon);                                                       // Friend's Account Icon
+        response.WriteString(friendAccount.NameColourNoPrefixCode);                                     // Friend's Name Colour
+        response.WriteString(friendAccount.IconNoPrefixCode);                                           // Friend's Account Icon
         response.WriteInt32(friendAccount.AscensionLevel);                                              // Friend's Ascension Level
 
         session.Send(response);

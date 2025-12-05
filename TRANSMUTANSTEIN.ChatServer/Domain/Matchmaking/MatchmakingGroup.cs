@@ -102,8 +102,8 @@ public class MatchmakingGroup
         invite.WriteInt32(session.Account.ID);                                                        // Invite Issuer ID
         invite.WriteInt8(Convert.ToByte(ChatProtocol.ChatClientStatus.CHAT_CLIENT_STATUS_CONNECTED)); // Invite Issuer Status
         invite.WriteInt8(session.Account.GetChatClientFlags());                                       // Invite Issuer Chat Flags
-        invite.WriteString(session.Account.NameColour);                                               // Invite Issuer Chat Name Colour
-        invite.WriteString(session.Account.Icon);                                                     // Invite Issuer Icon
+        invite.WriteString(session.Account.NameColourNoPrefixCode);                                   // Invite Issuer Chat Name Colour
+        invite.WriteString(session.Account.IconNoPrefixCode);                                         // Invite Issuer Icon
         invite.WriteString(Information.MapName);                                                      // Map Name
         invite.WriteInt8(Convert.ToByte(Information.GameType));                                       // Game Type
         invite.WriteString(string.Join('|', Information.GameModes));                                  // Game Modes
@@ -376,8 +376,8 @@ public class MatchmakingGroup
             if (fullGroupUpdate)
             {
                 update.WriteBool(member.IsEligibleForMatchmaking);                       // Eligible For Matchmaking
-                update.WriteString(member.Account.NameColour);                           // Chat Name Colour
-                update.WriteString(member.Account.Icon);                                 // Account Icon
+                update.WriteString(member.Account.NameColourNoPrefixCode);               // Chat Name Colour
+                update.WriteString(member.Account.IconNoPrefixCode);                     // Account Icon
                 update.WriteString(member.Country);                                      // Country
                 update.WriteBool(member.HasGameModeAccess);                              // Game Mode Access Bool
                 update.WriteString(member.GameModeAccess);                               // Game Mode Access String
