@@ -257,23 +257,95 @@ NEXUS uses distributed service architecture:
 - [ ] T097 [P] [US7] Create MatchLobby.cs in TRANSMUTANSTEIN.ChatServer/InMemory/MatchLobby.cs with ConcurrentDictionary<int, MatchLobbyPlayer> Players, Team1GroupID, Team2GroupID, GameServerIP, MatchToken
 - [ ] T098 [P] [US7] Create MatchLobbyPlayer.cs in TRANSMUTANSTEIN.ChatServer/InMemory/MatchLobbyPlayer.cs with AccountID, Team, TeamSlot, LoadingStatus
 - [ ] T099 [US7] Implement MatchmakingBroker.cs in TRANSMUTANSTEIN.ChatServer/Services/MatchmakingBroker.cs (EvaluateQueue method, FindCompatibleGroups, CreateMatchLobby)
-- [ ] T100 [US7] Add PLACEHOLDER matchmaking algorithm in MatchmakingBroker.FindCompatibleGroups (select groups with equal team sizes, configurable players per team, defer full rating-based matching)
-- [ ] T101 [US7] Add game mode compatibility check in MatchmakingBroker.FindCompatibleGroups (filter by TMMGameMode preferences)
-- [ ] T102 [US7] Add region matching in MatchmakingBroker.FindCompatibleGroups (prefer same TMMRegion)
-- [ ] T103 [US7] Add team size matching in MatchmakingBroker (1v1, 2v2, 3v3, 4v4, 5v5 based on group member counts)
-- [ ] T104 [US7] Implement MatchFoundProcessor.cs in TRANSMUTANSTEIN.ChatServer/CommandProcessors/Matchmaking/MatchFoundProcessor.cs with [ChatCommand(NET_CHAT_CL_TMM_MATCH_FOUND)]
-- [ ] T105 [US7] Implement MatchAcceptProcessor.cs in TRANSMUTANSTEIN.ChatServer/CommandProcessors/Matchmaking/MatchAcceptProcessor.cs with [ChatCommand(NET_CHAT_CL_TMM_MATCH_ACCEPT)]
-- [ ] T106 [US7] Implement MatchDeclineProcessor.cs in TRANSMUTANSTEIN.ChatServer/CommandProcessors/Matchmaking/MatchDeclineProcessor.cs with [ChatCommand(NET_CHAT_CL_TMM_MATCH_DECLINE)]
-- [ ] T107 [US7] Implement MatchLobbyUpdateProcessor.cs in TRANSMUTANSTEIN.ChatServer/CommandProcessors/Matchmaking/MatchLobbyUpdateProcessor.cs with [ChatCommand(NET_CHAT_CL_TMM_MATCH_LOBBY_UPDATE)]
-- [ ] T108 [US7] Implement PlayerLoadingStatusProcessor.cs in TRANSMUTANSTEIN.ChatServer/CommandProcessors/Matchmaking/PlayerLoadingStatusProcessor.cs with [ChatCommand(NET_CHAT_CL_TMM_PLAYER_LOADING_STATUS)]
-- [ ] T109 [US7] Implement MatchStartProcessor.cs in TRANSMUTANSTEIN.ChatServer/CommandProcessors/Matchmaking/MatchStartProcessor.cs with [ChatCommand(NET_CHAT_CL_TMM_MATCH_START)]
-- [ ] T110 [US7] Add server allocation in MatchmakingBroker.CreateMatchLobby (select available server from RegisteredGameServers, send allocation request via manager port)
-- [ ] T111 [US7] Add match lobby creation in MatchmakingBroker (create MatchLobby, populate from both groups, send NET_CHAT_CL_TMM_MATCH_FOUND to all players)
-- [ ] T112 [US7] Track player loading status in MatchLobbyPlayer (update LoadingStatus when NET_CHAT_CL_TMM_PLAYER_LOADING_STATUS received)
-- [ ] T113 [US7] Check all players loaded in MatchStartProcessor (MatchLobby.AllPlayersLoaded(), send NET_CHAT_CL_TMM_MATCH_START with server connection info)
-- [ ] T114 [US7] Start MatchmakingBroker background service in ChatServer.StartAsync() (periodic queue evaluation every 5 seconds)
+- [ ] T100 [US7] Implement MatchmakingBrokerConfig.cs with tunable parameters: GroupAlpha (default 0.03 for premade advantage), BaseTolerance (50 MMR), LinearGrowthPerMinute (25 MMR), Accel (15), AccelStartMinutes (3.0), MaxTeamCandidates (1000), MaxPairingAttempts (5000) in TRANSMUTANSTEIN.ChatServer/Services/MatchmakingBrokerConfig.cs
+- [ ] T101 [US7] Implement team rating calculation in MatchmakingBroker: effective player rating = base rating * (1 + GroupAlpha * (groupSize - 1)), team rating = average of 5 effective player ratings (gives premade groups +3% per additional member bonus)
+- [ ] T102 [US7] Implement tolerance growth function: tolerance(t_min) = BaseTolerance + LinearGrowth * t_min + Accel * max(0, t_min - AccelStart)^1.4 (starts strict at ±50 MMR, expands +25 MMR/min, accelerates after 3 min wait)
+- [ ] T103 [US7] Implement GenerateTeamCandidates method using backtracking to enumerate all group combinations summing to exactly 5 players (capped by MaxTeamCandidates), sort pool by QueueEnteredUtc oldest first for fairness
+- [ ] T104 [US7] Implement TryFindMatch method: sort candidates by TeamRating, brute-force pairing with disjoint groups check, region intersection check, rating diff <= AllowedDiff(teamA, teamB) where allowed diff averages both teams' tolerances
+- [ ] T105 [US7] Add game mode compatibility check in MatchmakingBroker.FindCompatibleGroups (filter by TMMGameMode preferences)
+- [ ] T106 [US7] Add region matching in MatchmakingBroker: groups have multiple allowed regions (leader picks), match only if region intersection non-empty, choose first common region for match
+- [ ] T107 [US7] Add team size matching in MatchmakingBroker (1v1, 2v2, 3v3, 4v4, 5v5 based on group member counts)
+- [ ] T108 [US7] Implement GreedyFallback method as safety valve for long waits: pick oldest group as anchor, build teamA greedily, construct teamB to balance rating, skip if no region intersection (less fair but faster)
+- [ ] T109 [P] [US7] Implement MatchFoundProcessor.cs in TRANSMUTANSTEIN.ChatServer/CommandProcessors/Matchmaking/MatchFoundProcessor.cs with [ChatCommand(NET_CHAT_CL_TMM_MATCH_FOUND)]
+- [ ] T110 [P] [US7] Implement MatchAcceptProcessor.cs in TRANSMUTANSTEIN.ChatServer/CommandProcessors/Matchmaking/MatchAcceptProcessor.cs with [ChatCommand(NET_CHAT_CL_TMM_MATCH_ACCEPT)]
+- [ ] T111 [P] [US7] Implement MatchDeclineProcessor.cs in TRANSMUTANSTEIN.ChatServer/CommandProcessors/Matchmaking/MatchDeclineProcessor.cs with [ChatCommand(NET_CHAT_CL_TMM_MATCH_DECLINE)]
+- [ ] T112 [P] [US7] Implement MatchLobbyUpdateProcessor.cs in TRANSMUTANSTEIN.ChatServer/CommandProcessors/Matchmaking/MatchLobbyUpdateProcessor.cs with [ChatCommand(NET_CHAT_CL_TMM_MATCH_LOBBY_UPDATE)]
+- [ ] T113 [P] [US7] Implement PlayerLoadingStatusProcessor.cs in TRANSMUTANSTEIN.ChatServer/CommandProcessors/Matchmaking/PlayerLoadingStatusProcessor.cs with [ChatCommand(NET_CHAT_CL_TMM_PLAYER_LOADING_STATUS)]
+- [ ] T114 [P] [US7] Implement MatchStartProcessor.cs in TRANSMUTANSTEIN.ChatServer/CommandProcessors/Matchmaking/MatchStartProcessor.cs with [ChatCommand(NET_CHAT_CL_TMM_MATCH_START)]
+- [ ] T115 [US7] Add server allocation in MatchmakingBroker.CreateMatchLobby (select available server from RegisteredGameServers, send allocation request via manager port)
+- [ ] T116 [US7] Add match lobby creation in MatchmakingBroker (create MatchLobby, populate from both groups, send NET_CHAT_CL_TMM_MATCH_FOUND to all players)
+- [ ] T117 [US7] Track player loading status in MatchLobbyPlayer (update LoadingStatus when NET_CHAT_CL_TMM_PLAYER_LOADING_STATUS received)
+- [ ] T118 [US7] Check all players loaded in MatchStartProcessor (MatchLobby.AllPlayersLoaded(), send NET_CHAT_CL_TMM_MATCH_START with server connection info)
+- [ ] T119 [US7] Start MatchmakingBroker background service in ChatServer.StartAsync() (periodic queue evaluation every 5 seconds)
 
-**Checkpoint**: At this point, full matchmaking pipeline works end-to-end with placeholder algorithm. User Story 7 is fully functional and testable independently.
+**⚠️ Algorithm Design & Implementation Approach**:
+
+**IMPORTANT**: Before implementing, conduct thorough analysis of the matchmaking problem and evaluate multiple algorithm approaches. The specifications below represent ONE possible solution but are NOT prescriptive. Consider alternative designs, compare trade-offs, and select the approach that best fits NEXUS requirements.
+
+**Requirements Summary** (from feature specification):
+- **5v5 matches**: Pair up 5 players against 5 other players
+- **Group integrity**: Groups of 1-5 players must stay together (atomic)
+- **Team composition**: Any combination summing to 5 players is valid (e.g., 3+2, 1+1+1+1+1, 4+1, etc.)
+- **Team rating**: Average of player ratings, weighted for group size (premade groups should have advantage)
+- **Tolerance growth**: Rating match tolerance increases with wait time (start fair, decrease fairness for speed over time)
+- **Rating scale**: 1500 default MMR, 2500 maximum, 1200 considered low
+- **Region matching**: Players can select multiple regions, group leader picks for the group
+- **Queue size**: Unknown population, algorithm should scale
+
+**One Suggested Approach** (evaluate alternatives):
+
+**Group Advantage Formula**:
+```
+groupMultiplier(size) = 1 + GROUP_ALPHA * (size - 1)
+effectivePlayerRating = baseRating * groupMultiplier(groupSize)
+teamRating = average of 5 effectivePlayerRatings
+```
+Suggested GROUP_ALPHA = 0.03 (gives 3% per member, so 5-player premade = +12% rating)
+
+**Tolerance Growth Formula**:
+```
+tolerance(t_min) = BASE_TOL + LINEAR_GROWTH * t_min + ACCEL * max(0, t_min - ACCEL_START)^1.4
+```
+Suggested defaults: BASE_TOL=50 MMR, LINEAR_GROWTH=25 MMR/min, ACCEL=15, ACCEL_START=3 min
+
+**Team Candidate Generation**:
+- Backtracking algorithm to enumerate group combinations summing to exactly 5 players
+- Sort pool by queue time (oldest first for fairness)
+- Cap candidates to prevent combinatorial explosion (e.g., MaxTeamCandidates=1000)
+
+**Match Pairing Strategy**:
+- Sort candidates by team rating
+- Brute-force pairing with checks: disjoint groups, region intersection, rating difference ≤ tolerance
+- Cap pairing attempts for performance (e.g., MaxPairingAttempts=5000)
+- Use average of both teams' tolerances for allowed difference
+
+**Fallback Mechanism**:
+- Greedy algorithm for long waits: pick oldest group as anchor, build balanced teams
+- Prioritize getting players into matches over perfect fairness after extended wait times
+
+**Alternative Approaches to Consider**:
+1. **Pre-bucketing by rating bands**: Group players into rating buckets (e.g., 100 MMR ranges) before candidate generation
+2. **Greedy-first with backtracking fallback**: Try greedy algorithm first, use expensive backtracking only when greedy fails
+3. **Weighted scoring system**: Instead of hard tolerance checks, use a scoring function to rank match quality
+4. **Dynamic adjustment**: Adjust group advantage multiplier based on historical match outcomes
+5. **Parallel processing**: If queue is large, parallelize candidate generation and pairing checks
+6. **Machine learning**: Consider ML-based matchmaking for population patterns and optimal wait times
+
+**Performance Considerations**:
+- Team combination enumeration is O(2^n) worst case but bounded by caps
+- For large queues (hundreds/thousands), pre-bucketing by rating and region is recommended
+- Monitor CPU usage and adjust MaxTeamCandidates/MaxPairingAttempts accordingly
+
+**Tuning Parameters to Implement** (MatchmakingBrokerConfig.cs):
+- GroupAlpha: Premade group advantage (suggested 0.02-0.06, default 0.03)
+- BaseTolerance: Initial MMR tolerance (suggested 30-100, default 50)
+- LinearGrowthPerMinute: MMR tolerance increase per minute (suggested 15-40, default 25)
+- Accel: Acceleration factor after wait threshold (suggested 10-30, default 15)
+- AccelStartMinutes: When to start accelerating tolerance (suggested 2-4, default 3.0)
+- MaxTeamCandidates: Cap on candidate enumeration (suggested 500-2000, default 1000)
+- MaxPairingAttempts: Cap on pairing checks (suggested 3000-10000, default 5000)
+
+**Checkpoint**: At this point, full matchmaking pipeline works end-to-end with detailed rating-based algorithm. User Story 7 is fully functional and testable independently.
 
 ---
 
@@ -287,24 +359,24 @@ NEXUS uses distributed service architecture:
 
 **Tests deferred until application code is implemented**
 
-- [ ] T115 [P] [US4] Integration test for whisper messaging in ASPIRE.Tests/ChatServer/Integration/CommunicationTests.cs (send whisper, receive whisper, whisper failed when offline) - 🔄 DEFERRED until application code complete
-- [ ] T116 [P] [US4] Integration test for buddy system in ASPIRE.Tests/ChatServer/Integration/CommunicationTests.cs (add buddy, remove buddy, online notification, offline notification) - 🔄 DEFERRED until application code complete
-- [ ] T117 [P] [US4] Integration test for ChatMode respect in ASPIRE.Tests/ChatServer/Integration/CommunicationTests.cs (DND blocks whispers, AFK marks away) - 🔄 DEFERRED until application code complete
+- [ ] T120 [P] [US4] Integration test for whisper messaging in ASPIRE.Tests/ChatServer/Integration/CommunicationTests.cs (send whisper, receive whisper, whisper failed when offline) - 🔄 DEFERRED until application code complete
+- [ ] T121 [P] [US4] Integration test for buddy system in ASPIRE.Tests/ChatServer/Integration/CommunicationTests.cs (add buddy, remove buddy, online notification, offline notification) - 🔄 DEFERRED until application code complete
+- [ ] T122 [P] [US4] Integration test for ChatMode respect in ASPIRE.Tests/ChatServer/Integration/CommunicationTests.cs (DND blocks whispers, AFK marks away) - 🔄 DEFERRED until application code complete
 
 ### Implementation for User Story 4
 
-- [ ] T118 [P] [US4] Implement WhisperProcessor.cs in TRANSMUTANSTEIN.ChatServer/CommandProcessors/Communication/WhisperProcessor.cs with [ChatCommand(NET_CHAT_CL_WHISPER)]
-- [x] T119 [P] [US4] Implement AddBuddyProcessor.cs in TRANSMUTANSTEIN.ChatServer/CommandProcessors/Communication/AddBuddyProcessor.cs with [ChatCommand(NET_CHAT_CL_ADD_BUDDY)] - ✅ Implemented as AddFriend.cs in Social/ with KONGOR-style request/approve flow using Redis TTL (60s), detects mutual requests for instant friendship
-- [x] T119a [P] [US4] Implement ApproveBuddyProcessor.cs for CHAT_CMD_REQUEST_BUDDY_APPROVE - ✅ Implemented as ApproveFriend.cs in Social/, creates bidirectional friendship, removes Redis entry, sends approval packets to both users
-- [x] T120 [P] [US4] Implement RemoveBuddyProcessor.cs in TRANSMUTANSTEIN.ChatServer/CommandProcessors/Communication/RemoveBuddyProcessor.cs with [ChatCommand(NET_CHAT_CL_REMOVE_BUDDY)] - ✅ Implemented as RemoveFriend.cs in Social/ with DSL-style fluent API
-- [ ] T121 [US4] Add whisper delivery in WhisperProcessor (find target in ChatServer.ActiveSessions, send NET_CHAT_CL_WHISPER_RECEIVED)
-- [ ] T122 [US4] Add whisper failed notification in WhisperProcessor (if target offline or unavailable, send NET_CHAT_CL_WHISPER_FAILED)
-- [ ] T123 [US4] Add ChatMode validation in WhisperProcessor (block whispers if target.ChatMode == DND, mark as away if AFK)
-- [x] T124 [US4] Add FriendedPeer persistence in AddBuddyProcessor (insert into MERRICK.DatabaseContext.FriendedPeers with Status = Pending) - ✅ Implemented in Friend.Add() with Redis pending request storage (60s TTL), bidirectional database persistence in Friend.Approve()
-- [x] T125 [US4] Add FriendedPeer removal in RemoveBuddyProcessor (delete from MERRICK.DatabaseContext.FriendedPeers) - ✅ Implemented in Friend.Remove() with one-directional removal
-- [ ] T126 [US4] Load buddy list on connect in AuthenticateProcessor (query FriendedPeers where RequesterAccountID or TargetAccountID = session.AccountID, cache in ChatSession)
-- [ ] T127 [US4] Send buddy online notifications in AuthenticateProcessor (after authentication, notify all friends with NET_CHAT_CL_BUDDY_ONLINE)
-- [ ] T128 [US4] Send buddy offline notifications in ChatSession.OnDisconnectAsync() (notify all friends with NET_CHAT_CL_BUDDY_OFFLINE)
+- [ ] T123 [P] [US4] Implement WhisperProcessor.cs in TRANSMUTANSTEIN.ChatServer/CommandProcessors/Communication/WhisperProcessor.cs with [ChatCommand(NET_CHAT_CL_WHISPER)]
+- [x] T124 [P] [US4] Implement AddBuddyProcessor.cs in TRANSMUTANSTEIN.ChatServer/CommandProcessors/Communication/AddBuddyProcessor.cs with [ChatCommand(NET_CHAT_CL_ADD_BUDDY)] - ✅ Implemented as AddFriend.cs in Social/ with KONGOR-style request/approve flow using Redis TTL (60s), detects mutual requests for instant friendship
+- [x] T124a [P] [US4] Implement ApproveBuddyProcessor.cs for CHAT_CMD_REQUEST_BUDDY_APPROVE - ✅ Implemented as ApproveFriend.cs in Social/, creates bidirectional friendship, removes Redis entry, sends approval packets to both users
+- [x] T125 [P] [US4] Implement RemoveBuddyProcessor.cs in TRANSMUTANSTEIN.ChatServer/CommandProcessors/Communication/RemoveBuddyProcessor.cs with [ChatCommand(NET_CHAT_CL_REMOVE_BUDDY)] - ✅ Implemented as RemoveFriend.cs in Social/ with DSL-style fluent API
+- [ ] T126 [US4] Add whisper delivery in WhisperProcessor (find target in ChatServer.ActiveSessions, send NET_CHAT_CL_WHISPER_RECEIVED)
+- [ ] T127 [US4] Add whisper failed notification in WhisperProcessor (if target offline or unavailable, send NET_CHAT_CL_WHISPER_FAILED)
+- [ ] T128 [US4] Add ChatMode validation in WhisperProcessor (block whispers if target.ChatMode == DND, mark as away if AFK)
+- [x] T129 [US4] Add FriendedPeer persistence in AddBuddyProcessor (insert into MERRICK.DatabaseContext.FriendedPeers with Status = Pending) - ✅ Implemented in Friend.Add() with Redis pending request storage (60s TTL), bidirectional database persistence in Friend.Approve()
+- [x] T130 [US4] Add FriendedPeer removal in RemoveBuddyProcessor (delete from MERRICK.DatabaseContext.FriendedPeers) - ✅ Implemented in Friend.Remove() with one-directional removal
+- [ ] T131 [US4] Load buddy list on connect in AuthenticateProcessor (query FriendedPeers where RequesterAccountID or TargetAccountID = session.AccountID, cache in ChatSession)
+- [ ] T132 [US4] Send buddy online notifications in AuthenticateProcessor (after authentication, notify all friends with NET_CHAT_CL_BUDDY_ONLINE)
+- [ ] T133 [US4] Send buddy offline notifications in ChatSession.OnDisconnectAsync() (notify all friends with NET_CHAT_CL_BUDDY_OFFLINE)
 
 **Checkpoint**: At this point, players have private messaging and friend system working. User Story 4 is fully functional and testable independently.
 
@@ -320,18 +392,18 @@ NEXUS uses distributed service architecture:
 
 **Tests deferred until application code is implemented**
 
-- [ ] T129 [P] [US5] Integration test for clan channel auto-join in ASPIRE.Tests/ChatServer/Integration/ClanTests.cs (clan member connects, auto-joined clan channel) - 🔄 DEFERRED until application code complete
-- [ ] T130 [P] [US5] Integration test for clan messaging in ASPIRE.Tests/ChatServer/Integration/ClanTests.cs (clan member sends message, all online clan members receive) - 🔄 DEFERRED until application code complete
-- [ ] T131 [P] [US5] Integration test for clan rank management in ASPIRE.Tests/ChatServer/Integration/ClanTests.cs (leader promotes to officer, officer gains admin privileges) - 🔄 DEFERRED until application code complete
+- [ ] T134 [P] [US5] Integration test for clan channel auto-join in ASPIRE.Tests/ChatServer/Integration/ClanTests.cs (clan member connects, auto-joined clan channel) - 🔄 DEFERRED until application code complete
+- [ ] T135 [P] [US5] Integration test for clan messaging in ASPIRE.Tests/ChatServer/Integration/ClanTests.cs (clan member sends message, all online clan members receive) - 🔄 DEFERRED until application code complete
+- [ ] T136 [P] [US5] Integration test for clan rank management in ASPIRE.Tests/ChatServer/Integration/ClanTests.cs (leader promotes to officer, officer gains admin privileges) - 🔄 DEFERRED until application code complete
 
 ### Implementation for User Story 5
 
-- [ ] T132 [US5] Add clan channel auto-join in AuthenticateProcessor (after authentication, if player has ClanID, join clan channel automatically)
-- [ ] T133 [US5] Create clan channel if not exists in ChatServer.GetOrCreateChannel() (check for clan-specific naming convention, set ChannelFlags.Clan, set ClanID)
-- [ ] T134 [US5] Add ClanMember role check in clan channel operations (query MERRICK.DatabaseContext.ClanMembers, map ClanRole to AdminLevel)
-- [ ] T135 [US5] Implement PromoteClanMemberProcessor.cs in TRANSMUTANSTEIN.ChatServer/CommandProcessors/Clans/PromoteClanMemberProcessor.cs with [ChatCommand(NET_CHAT_CL_CLAN_PROMOTE_MEMBER)] (if implementing promotion via chat server)
-- [ ] T136 [US5] Add clan roster online status in clan channel (when members view roster, show online/offline via ActiveSessions lookup)
-- [ ] T137 [US5] Remove from clan channel on disconnect in ChatSession.OnDisconnectAsync() (if clan channel exists in CurrentChannels)
+- [ ] T137 [US5] Add clan channel auto-join in AuthenticateProcessor (after authentication, if player has ClanID, join clan channel automatically)
+- [ ] T138 [US5] Create clan channel if not exists in ChatServer.GetOrCreateChannel() (check for clan-specific naming convention, set ChannelFlags.Clan, set ClanID)
+- [ ] T139 [US5] Add ClanMember role check in clan channel operations (query MERRICK.DatabaseContext.ClanMembers, map ClanRole to AdminLevel)
+- [ ] T140 [US5] Implement PromoteClanMemberProcessor.cs in TRANSMUTANSTEIN.ChatServer/CommandProcessors/Clans/PromoteClanMemberProcessor.cs with [ChatCommand(NET_CHAT_CL_CLAN_PROMOTE_MEMBER)] (if implementing promotion via chat server)
+- [ ] T141 [US5] Add clan roster online status in clan channel (when members view roster, show online/offline via ActiveSessions lookup)
+- [ ] T142 [US5] Remove from clan channel on disconnect in ChatSession.OnDisconnectAsync() (if clan channel exists in CurrentChannels)
 
 **Checkpoint**: At this point, clan features are working. User Story 5 is fully functional and testable independently.
 
@@ -341,20 +413,20 @@ NEXUS uses distributed service architecture:
 
 **Purpose**: Performance testing, error handling, logging, and production readiness improvements across all user stories
 
-- [ ] T138 [P] Implement SimulatedChatClient.SimulateConcurrentLoad() in ASPIRE.Tests/TestHelpers/SimulatedChatClient.cs for load testing
-- [ ] T139 [P] Create performance test for 10k concurrent connections in ASPIRE.Tests/ChatServer/Performance/ConcurrentConnectionsTest.cs
-- [ ] T140 [P] Create performance test for message latency (P95 < 100ms) in ASPIRE.Tests/ChatServer/Performance/MessageLatencyTest.cs
-- [ ] T141 [P] Add .NET metrics instrumentation in ChatServer.cs (System.Diagnostics.Metrics, track command duration histogram per command type)
-- [ ] T142 [P] Add comprehensive error handling in all command processors (try-catch, log exceptions, send error responses to clients)
-- [ ] T143 [P] Add input validation in all command processors (string length limits, null checks, range checks per FR-011 to FR-015)
-- [ ] T144 [P] Add rate limiting for flood prevention in ChannelMessageProcessor (configurable messages per second per user)
-- [ ] T145 [P] Configure Aspire dashboard metrics in TRANSMUTANSTEIN.ChatServer/Program.cs (expose metrics endpoint)
-- [ ] T146 [P] Add XML documentation summaries to all public APIs (ChatServer, ChatSession, command processors)
-- [ ] T147 [P] Validate all code follows C# conventions (no var, explicit types, full lambda names, proper acronym casing)
-- [ ] T148 [P] Add comprehensive logging in all command processors (log command received, processing, completion, errors at appropriate levels)
-- [ ] T149 [P] Test graceful shutdown in ChatServer (connection draining, notify all sessions, cleanup resources)
-- [ ] T150 Run quickstart.md validation (verify developer can follow guide to run chat server)
-- [ ] T151 [P] Research and implement enriched channel flags in ChatChannel.cs per HoN protocol (GENERAL_USE for "HoN 1" style channels, SERVER for post-match channels, HIDDEN for unlisted channels, UNJOINABLE for system-only channels, AUTH_REQUIRED for authorization lists, STREAM_USE for stream channels with 12hr cleanup) - See HON_REVERSE_ENGINEERING_GUIDE.md for flag analysis
+- [ ] T143 [P] Implement SimulatedChatClient.SimulateConcurrentLoad() in ASPIRE.Tests/TestHelpers/SimulatedChatClient.cs for load testing
+- [ ] T144 [P] Create performance test for 10k concurrent connections in ASPIRE.Tests/ChatServer/Performance/ConcurrentConnectionsTest.cs
+- [ ] T145 [P] Create performance test for message latency (P95 < 100ms) in ASPIRE.Tests/ChatServer/Performance/MessageLatencyTest.cs
+- [ ] T146 [P] Add .NET metrics instrumentation in ChatServer.cs (System.Diagnostics.Metrics, track command duration histogram per command type)
+- [ ] T147 [P] Add comprehensive error handling in all command processors (try-catch, log exceptions, send error responses to clients)
+- [ ] T148 [P] Add input validation in all command processors (string length limits, null checks, range checks per FR-011 to FR-015)
+- [ ] T149 [P] Add rate limiting for flood prevention in ChannelMessageProcessor (configurable messages per second per user)
+- [ ] T150 [P] Configure Aspire dashboard metrics in TRANSMUTANSTEIN.ChatServer/Program.cs (expose metrics endpoint)
+- [ ] T151 [P] Add XML documentation summaries to all public APIs (ChatServer, ChatSession, command processors)
+- [ ] T152 [P] Validate all code follows C# conventions (no var, explicit types, full lambda names, proper acronym casing)
+- [ ] T153 [P] Add comprehensive logging in all command processors (log command received, processing, completion, errors at appropriate levels)
+- [ ] T154 [P] Test graceful shutdown in ChatServer (connection draining, notify all sessions, cleanup resources)
+- [ ] T155 Run quickstart.md validation (verify developer can follow guide to run chat server)
+- [ ] T156 [P] Research and implement enriched channel flags in ChatChannel.cs per HoN protocol (GENERAL_USE for "HoN 1" style channels, SERVER for post-match channels, HIDDEN for unlisted channels, UNJOINABLE for system-only channels, AUTH_REQUIRED for authorization lists, STREAM_USE for stream channels with 12hr cleanup) - See HON_REVERSE_ENGINEERING_GUIDE.md for flag analysis
 
 ---
 
@@ -415,7 +487,7 @@ Foundational (Phase 2)
   - **Parallel with Priority**: US2 (Channels) and US4 (Whispers) can run in parallel with matchmaking track
   - US5 (Clans) waits for US2 completion
 - **Within Each Story**: Command processors marked [P] can run in parallel (different files)
-- **Polish Phase**: T138-T151 nearly all [P] can run in parallel
+- **Polish Phase**: T143-T156 nearly all [P] can run in parallel
 
 ---
 
@@ -448,7 +520,7 @@ Task: "Implement SilenceUserProcessor.cs in TRANSMUTANSTEIN.ChatServer/CommandPr
 3. Complete Phase 3: User Story 1 - Authentication (T032-T041)
 4. Complete Phase 5: User Story 3 - Groups (T060-T080)
 5. Complete Phase 6: User Story 6 - Game Server Coordination (T081-T093) 🎯 **Server handshakes & stats recording**
-6. Complete Phase 7: User Story 7 - Matchmaking Broker (T094-T114) 🎯 **Matchmaking algorithm, lobby, match start**
+6. Complete Phase 7: User Story 7 - Matchmaking Broker (T094-T119) 🎯 **Matchmaking algorithm, lobby, match start**
 7. **STOP and VALIDATE**: Test full matchmaking flow end-to-end (group → queue → match → play → stats)
 8. Deploy/demo matchmaking capability
 
@@ -479,14 +551,14 @@ With multiple developers after Foundational phase:
 3. After US1:
    - **Developer A (Critical Path)**: US3 (Groups) - T060-T080
    - **Developer B (Parallel)**: US2 (Channels) - T042-T059
-   - **Developer C (Parallel)**: US4 (Whispers) - T115-T128
+   - **Developer C (Parallel)**: US4 (Whispers) - T120-T133
 4. After US3:
    - **Developer A (Critical Path)**: US6 (Game Server) - T081-T093 🎯
 5. After US6:
-   - **Developer A (Critical Path)**: US7 (Matchmaking) - T094-T114 🎯
+   - **Developer A (Critical Path)**: US7 (Matchmaking) - T094-T119 🎯
 6. After US2:
-   - **Developer B**: US5 (Clans) - T129-T137
-7. All developers collaborate on Phase 10 (Polish) - T138-T151
+   - **Developer B**: US5 (Clans) - T134-T142
+7. All developers collaborate on Phase 10 (Polish) - T143-T156
 
 **Result**: Matchmaking working as fast as possible while other features developed in parallel
 
@@ -494,19 +566,19 @@ With multiple developers after Foundational phase:
 
 ## Task Statistics
 
-- **Total Tasks**: 151 (T001-T151, includes T027a, T055a, T056b, T059a, T059b, T075a, T085a, T119a)
+- **Total Tasks**: 156 (T001-T156, includes T027a, T055a, T056b, T059a, T059b, T075a, T085a, T124a)
 - **Setup Phase**: 4 tasks (T001-T004)
 - **Foundational Phase**: 28 tasks (T005-T031) - BLOCKS all user stories, includes Redis cache integration
 - **User Story 1 (Authentication, Phase 3)**: 10 tasks (T032-T041)
 - **User Story 2 (Channels, Phase 4)**: 18 tasks (T042-T059b)
 - **User Story 3 (Groups, Phase 5)**: 21 tasks (T060-T080) - includes automatic leader transfer
 - **User Story 6 (Game Server, Phase 6)** 🎯: 13 tasks (T081-T093) - **MATCHMAKING CRITICAL**
-- **User Story 7 (Matchmaking, Phase 7)** 🎯: 21 tasks (T094-T114) - **MATCHMAKING CRITICAL**
-- **User Story 4 (Whispers/Buddies, Phase 8)**: 14 tasks (T115-T128, includes T119a, T120)
-- **User Story 5 (Clans, Phase 9)**: 9 tasks (T129-T137)
-- **Polish Phase**: 14 tasks (T138-T151) - includes channel flag enrichment
-- **Parallel Tasks**: 89 marked [P] (59% can run in parallel within constraints)
-- **Matchmaking MVP Scope**: Phases 1-3, 5-7 (97 tasks total) delivers full matchmaking capability with server handshakes, placeholder algorithm, and stats recording
+- **User Story 7 (Matchmaking, Phase 7)** 🎯: 26 tasks (T094-T119) - **MATCHMAKING CRITICAL** - includes detailed algorithm implementation from temp.txt
+- **User Story 4 (Whispers/Buddies, Phase 8)**: 14 tasks (T120-T133, includes T124a)
+- **User Story 5 (Clans, Phase 9)**: 9 tasks (T134-T142)
+- **Polish Phase**: 14 tasks (T143-T156) - includes channel flag enrichment
+- **Parallel Tasks**: 94 marked [P] (60% can run in parallel within constraints)
+- **Matchmaking MVP Scope**: Phases 1-3, 5-7 (102 tasks total) delivers full matchmaking capability with server handshakes, detailed rating-based algorithm, and stats recording
 
 **Deferred to Post-MVP** (not included in tasks):
 - FR-058: Match history tracking with configurable depth
