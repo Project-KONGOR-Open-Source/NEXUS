@@ -33,7 +33,7 @@ public partial class ServerRequesterController
 
         if (Request.HttpContext.Connection.RemoteIpAddress is null)
         {
-            Logger.LogError($@"[BUG] Remote IP Address For Server Manager With Host Account Name ""{hostAccountName}"" Is NULL");
+            Logger.LogError(@"[BUG] Remote IP Address For Server Manager With Host Account Name ""{HostAccountName}"" Is NULL", hostAccountName);
 
             return BadRequest("Unable To Resolve Remote IP Address");
         }
@@ -65,7 +65,8 @@ public partial class ServerRequesterController
         response["cdn_upload_host"] = "kongor.net";
         response["cdn_upload_target"] = "upload";
 
-        Logger.LogInformation($@"Server Manager ID ""{matchServerManager.ID}"" Was Registered At ""{matchServerManager.IPAddress}"" With Cookie ""{matchServerManager.Cookie}""");
+        Logger.LogInformation(@"Server Manager ID ""{MatchServerManagerID}"" Was Registered At ""{MatchServerManagerIPAddress}"" With Cookie ""{MatchServerManagerCookie}""",
+            matchServerManager.ID, matchServerManager.IPAddress, matchServerManager.Cookie);
 
         return Ok(PhpSerialization.Serialize(response));
     }
@@ -158,7 +159,8 @@ public partial class ServerRequesterController
             ["leaverthreshold"] = 0.05
         };
 
-        Logger.LogInformation($@"Server ID ""{matchServer.ID}"" Was Registered At ""{matchServer.IPAddress}:{matchServer.Port}"" With Cookie ""{matchServer.Cookie}""");
+        Logger.LogInformation(@"Server ID ""{MatchServerID}"" Was Registered At ""{MatchServerIPAddress}"":""{MatchServerPort}"" With Cookie ""{MatchServerCookie}""",
+            matchServer.ID, matchServer.IPAddress, matchServer.Port, matchServer.Cookie);
 
         return Ok(PhpSerialization.Serialize(response));
     }
@@ -205,7 +207,7 @@ public partial class ServerRequesterController
 
         if (account is null)
         {
-            Logger.LogError($@"[BUG] No Account Could Be Found For Account Name ""{accountNameForSessionCookie}"" With Session Cookie ""{cookie}""");
+            Logger.LogError(@"[BUG] No Account Could Be Found For Account Name ""{AccountName}"" With Session Cookie ""{Cookie}""", accountNameForSessionCookie, cookie);
 
             return BadRequest($@"Account With Name ""{accountNameForSessionCookie}"" Could Not Be Found");
         }
@@ -402,5 +404,17 @@ public partial class ServerRequesterController
         await DistributedCache.SetMatchServer(matchServer.HostAccountName, matchServer);
 
         return Ok();
+    }
+
+    private async Task<IActionResult> HandleAuthentication()
+    {
+        string? accountName = Request.Form["login"];
+
+        if (accountName is not null)
+            Logger.LogWarning(@"Account ""{AccountName}"" Is Attempting To Use HTTP Server Authentication", accountName);
+
+        string response = PhpSerialization.Serialize(new SRPAuthenticationFailureResponse(SRPAuthenticationFailureReason.SRPAuthenticationDisabled));
+
+        return BadRequest(response);
     }
 }

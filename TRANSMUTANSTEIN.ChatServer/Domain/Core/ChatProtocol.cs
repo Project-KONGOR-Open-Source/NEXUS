@@ -5,7 +5,11 @@ public static class ChatProtocol
     // Thank you, Shawn Presser, for making these values public: https://github.com/shawwn/hon/blob/f1aa2dfb7d07c447e930aa36f571e547714f4a57/lib/k2public/chatserver_protocol.h.
     // The symbols added since the chat server protocol version linked above were extracted from the PDB files made public at http://cdn.hon.team/wac/x86_64/4.9.1.3/symbols.zip in February 2021.
 
-    public const uint CHAT_PROTOCOL_VERSION = 69;
+    // The Version Which Official Game Clients, Match Servers, And Server Managers Expect
+    public const uint CHAT_PROTOCOL_EXTERNAL_VERSION = 68;
+
+    // The Version Used Internally For Keeping Track Of Custom Changes To The Chat Server
+    public const uint CHAT_PROTOCOL_INTERNAL_VERSION = 69;
 
     public static class Command
     {

@@ -4,11 +4,12 @@
 [Route("[controller]")]
 [Consumes("application/json")]
 [EnableRateLimiting(RateLimiterPolicies.Strict)]
-public class EmailAddressController(MerrickContext databaseContext, ILogger<EmailAddressController> logger, IEmailService emailService) : ControllerBase
+public class EmailAddressController(MerrickContext databaseContext, ILogger<EmailAddressController> logger, IEmailService emailService, IWebHostEnvironment hostEnvironment) : ControllerBase
 {
     private MerrickContext MerrickContext { get; } = databaseContext;
     private ILogger Logger { get; } = logger;
     private IEmailService EmailService { get; } = emailService;
+    private IWebHostEnvironment HostEnvironment { get; } = hostEnvironment;
 
     [HttpPost("Register", Name = "Register Email Address")]
     [AllowAnonymous]
@@ -25,7 +26,7 @@ public class EmailAddressController(MerrickContext databaseContext, ILogger<Emai
 
         if (token is null)
         {
-            IActionResult result = EmailAddressHelpers.SanitizeEmailAddress(payload.EmailAddress);
+            IActionResult result = EmailAddressHelpers.SanitizeEmailAddress(payload.EmailAddress, HostEnvironment);
 
             if (result is not ContentResult contentResult)
             {

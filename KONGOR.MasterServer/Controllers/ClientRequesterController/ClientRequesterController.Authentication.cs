@@ -217,8 +217,17 @@ public partial class ClientRequesterController
         return Ok(PhpSerialization.Serialize(response));
     }
 
-    private BadRequestObjectResult HandleAuthentication()
-        => BadRequest(PhpSerialization.Serialize(new SRPAuthenticationFailureResponse(SRPAuthenticationFailureReason.SRPAuthenticationDisabled)));
+    private async Task<IActionResult> HandleAuthentication()
+    {
+        string? accountName = Request.Form["login"];
+
+        if (accountName is not null)
+            Logger.LogWarning(@"Account ""{AccountName}"" Is Attempting To Use HTTP Client Authentication", accountName);
+
+        string response = PhpSerialization.Serialize(new SRPAuthenticationFailureResponse(SRPAuthenticationFailureReason.SRPAuthenticationDisabled));
+
+        return BadRequest(response);
+    }
 
     [GeneratedRegex(@"(?>S2 Games)\/(?>Heroes [oO]f Newerth)\/(?<version>\d{1,2}\.\d{1,2}\.\d{1,2}\.\d{1,2})\/(?<platform>[wlm]a[cs])\/(?<architecture>x86_64|x86-biarch|universal-64)")]
     private static partial Regex UserAgentRegex();

@@ -22,6 +22,14 @@ public partial class ChatSession(TCPServer server, IServiceProvider serviceProvi
     /// </summary>
     public HashSet<int> CurrentChannels { get; set; } = [];
 
+    /// <summary>
+    ///     Gets the current hosting environment information for the web application.
+    /// </summary>
+    /// <remarks>
+    ///     Use this property to access environment-specific settings, such as the application name, the content root path, or the environment name.
+    /// </remarks>
+    public IWebHostEnvironment HostEnvironment { get; init; } = serviceProvider.GetRequiredService<IWebHostEnvironment>();
+
     public ChatSession Accept(ChatSessionMetadata metadata, Account account)
     {
         // Embed The Client Information In The Chat Session
@@ -471,7 +479,7 @@ public partial class ChatSession
 
         else
         {
-            if (TRANSMUTANSTEIN.RunsInDevelopmentMode)
+            if (HostEnvironment.IsDevelopment())
                 Log.Debug(@"Processing Command: ""0x{Command}""", command.ToString("X4"));
 
             if (GetCommandTypeInstance(commandType) is { } commandTypeInstance)

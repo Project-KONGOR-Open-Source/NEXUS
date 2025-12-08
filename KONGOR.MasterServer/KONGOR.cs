@@ -5,9 +5,6 @@ public class KONGOR
     // The Count Of Seconds Since The UNIX Epoch (Epochalypse = 19.01.2038 @ 03:14:07 UTC)
     public static long ServerStartEpochTime { get; private set; } = default;
 
-    // TRUE If The Application Is Running In Development Mode Or FALSE If Not
-    public static bool RunsInDevelopmentMode { get; private set; } = true;
-
     public static async Task Main(string[] args)
     {
         // Create The Application Builder
@@ -15,9 +12,6 @@ public class KONGOR
 
         // Set Static ServerStartEpochTime Property
         ServerStartEpochTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-
-        // Set Static RunsInDevelopmentMode Property
-        RunsInDevelopmentMode = builder.Environment.IsDevelopment();
 
         // Map User-Defined Configuration Section
         builder.Services.Configure<OperationalConfiguration>(builder.Configuration.GetRequiredSection(OperationalConfiguration.ConfigurationSection));

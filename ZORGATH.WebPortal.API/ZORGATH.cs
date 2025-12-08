@@ -2,16 +2,10 @@
 
 public class ZORGATH
 {
-    // TRUE If The Application Is Running In Development Mode Or FALSE If Not
-    public static bool RunsInDevelopmentMode { get; private set; } = true;
-
     public static void Main(string[] args)
     {
         // Create The Application Builder
         WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
-
-        // Set Static RunsInDevelopmentMode Property
-        RunsInDevelopmentMode = builder.Environment.IsDevelopment();
 
         // Map User-Defined Configuration Section
         builder.Services.Configure<OperationalConfiguration>(builder.Configuration.GetRequiredSection(OperationalConfiguration.ConfigurationSection));

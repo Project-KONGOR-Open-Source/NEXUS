@@ -4,12 +4,13 @@
 [Route("[controller]")]
 [Consumes("application/json")]
 [EnableRateLimiting(RateLimiterPolicies.Strict)]
-public class UserController(MerrickContext databaseContext, ILogger<UserController> logger, IEmailService emailService, IOptions<OperationalConfiguration> configuration) : ControllerBase
+public class UserController(MerrickContext databaseContext, ILogger<UserController> logger, IEmailService emailService, IOptions<OperationalConfiguration> configuration, IWebHostEnvironment hostEnvironment) : ControllerBase
 {
     private MerrickContext MerrickContext { get; } = databaseContext;
     private ILogger Logger { get; } = logger;
     private IEmailService EmailService { get; } = emailService;
     private OperationalConfiguration Configuration { get; } = configuration.Value;
+    private IWebHostEnvironment HostEnvironment { get; } = hostEnvironment;
 
     [HttpPost("Register", Name = "Register User And Main Account")]
     [AllowAnonymous]
@@ -23,7 +24,7 @@ public class UserController(MerrickContext databaseContext, ILogger<UserControll
         if (payload.Password.Equals(payload.ConfirmPassword).Equals(false))
             return BadRequest($@"Password ""{payload.ConfirmPassword}"" Does Not Match ""{payload.Password}"" (These Values Are Only Visible To You)");
 
-        if (ZORGATH.RunsInDevelopmentMode is false)
+        if (HostEnvironment.IsDevelopment() is false)
         {
             ValidationResult result = await new PasswordValidator().ValidateAsync(payload.Password);
 

@@ -223,12 +223,12 @@ NEXUS uses distributed service architecture:
 
 ### Implementation for User Story 6
 
-- [ ] T084 [P] [US6] Implement ServerHandshakeProcessor.cs in TRANSMUTANSTEIN.ChatServer/CommandProcessors/Server/ServerHandshakeProcessor.cs with [ChatCommand(NET_CHAT_SV_SERVER_HANDSHAKE)]
+- [x] T084 [P] [US6] Implement ServerHandshakeProcessor.cs in TRANSMUTANSTEIN.ChatServer/CommandProcessors/Server/ServerHandshakeProcessor.cs with [ChatCommand(NET_CHAT_SV_SERVER_HANDSHAKE)] - ✅ Implemented as ServerHandshake.cs in Connection/, protocol version validation complete, cookie validation TODOs documented for T088/T089
 - [ ] T085 [P] [US6] Implement ServerStatusProcessor.cs in TRANSMUTANSTEIN.ChatServer/CommandProcessors/Server/ServerStatusProcessor.cs with [ChatCommand(NET_CHAT_SV_SERVER_STATUS)]
 - [ ] T086 [P] [US6] Implement MatchStatusProcessor.cs in TRANSMUTANSTEIN.ChatServer/CommandProcessors/Server/MatchStatusProcessor.cs with [ChatCommand(NET_CHAT_SV_MATCH_STATUS)]
 - [ ] T087 [P] [US6] Implement MatchCompleteProcessor.cs in TRANSMUTANSTEIN.ChatServer/CommandProcessors/Server/MatchCompleteProcessor.cs with [ChatCommand(NET_CHAT_SV_MATCH_COMPLETE)]
 - [ ] T088 [US6] Add GameServerSession tracking in ChatServer.RegisteredGameServers ConcurrentDictionary (keyed by ServerID)
-- [ ] T089 [US6] Add game server authentication in ServerHandshakeProcessor (validate server credentials, add to RegisteredGameServers)
+- [x] T089 [US6] Add game server authentication in ServerHandshakeProcessor (validate server credentials, add to RegisteredGameServers) - ✅ Implemented account permissions validation in both ServerHandshake.cs and ServerManagerHandshake.cs using AccountType.ServerHost check via MerrickContext.Accounts lookup
 - [ ] T090 [US6] Add server availability tracking in ServerStatusProcessor (update GameServerSession availability status)
 - [ ] T091 [US6] Update player availability in MatchStatusProcessor (when match starts, mark players as InGame in ChatSession)
 - [ ] T092 [US6] Update PlayerStatistics in MatchCompleteProcessor (query MERRICK.DatabaseContext.PlayerStatistics, update wins/losses/rating for appropriate GameType)
