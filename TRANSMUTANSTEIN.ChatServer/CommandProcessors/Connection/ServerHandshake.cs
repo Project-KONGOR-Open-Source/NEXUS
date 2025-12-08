@@ -1,49 +1,135 @@
 ﻿namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Connection;
 
 [ChatCommand(ChatProtocol.GameServerToChatServer.NET_CHAT_GS_CONNECT)]
-public class ServerHandshake : ISynchronousCommandProcessor
+public class ServerHandshake(IDatabase distributedCacheStore, MerrickContext databaseContext) : IAsynchronousCommandProcessor
 {
-    public void Process(ChatSession session, ChatBuffer buffer)
+    public async Task Process(ChatSession session, ChatBuffer buffer)
     {
         ServerHandshakeRequestData requestData = new (buffer);
 
-        // TODO: Check Cookie
+        // Validate Protocol Version
+        if (requestData.ChatProtocolVersion != ChatProtocol.CHAT_PROTOCOL_EXTERNAL_VERSION)
+        {
+            Log.Warning(@"Match Server ID ""{ServerID}"" Chat Protocol Version Mismatch (Expected: ""{ExpectedVersion}"", Received: ""{ReceivedVersion}"")",
+                requestData.ServerID, ChatProtocol.CHAT_PROTOCOL_EXTERNAL_VERSION, requestData.ChatProtocolVersion);
 
-        // TODO: Run Other Checks
+            ChatBuffer rejectResponse = new ();
 
-        /*
-            // Must update session cookie first so that if we call Disconnect(), remote command would execute properly.
-            Subject.SessionCookie = SessionCookie;
+            rejectResponse.WriteCommand(ChatProtocol.ChatServerToGameServer.NET_CHAT_GS_REJECT);
+            rejectResponse.WriteString($@"Chat Protocol Version Mismatch: Expected ""{ChatProtocol.CHAT_PROTOCOL_EXTERNAL_VERSION}"", Received ""{requestData.ChatProtocolVersion}""");
 
-            if (Server is null)
-            {
-                Console.WriteLine("Rejected server chat connection because could not validate the cookie {0}", SessionCookie);
+            session.Send(rejectResponse);
+            session.Terminate();
 
-                // Close the server so that it re-obtains a new cookie.
-                Subject.SendResponse(new RemoteCommandResponse(SessionCookie, "quit"));
-                Subject.Disconnect("Failed to resolve a server with provided Id and SessionCookie.");
-                return;
-            }
+            return;
+        }
 
-            if (ServerAccountType != AccountType.RankedMatchHost && ServerAccountType != AccountType.UnrankedMatchHost)
-            {
-                Console.WriteLine("Rejected server chat connection because account doens't have the hosting permissions for cookie {0}", SessionCookie);
-                Subject.Disconnect("The provided account is not allowed to host games, please contact support if you believe this is wrong.");
-                return;
-            }
+        MatchServer? server = await distributedCacheStore.GetMatchServerBySessionCookie(requestData.SessionCookie);
 
-            ConnectedServer? previousInstance = KongorContext.ConnectedServers.SingleOrDefault(s => s.Address == Server.Address && s.Port == Server.Port);
-            if (previousInstance != null)
-            {
-                previousInstance.Disconnect("A new game server instance with an identical address and port has replaced this instance.");
-            }
-         */
+        // Validate Server Cookie Against Distributed Cache
+        if (server is null)
+        {
+            Log.Warning(@"Match Server ID ""{ServerID}"" Cookie ""{Cookie}"" Is Invalid", requestData.ServerID, requestData.SessionCookie);
 
-        ChatBuffer response = new ();
+            ChatBuffer rejectResponse = new ();
 
-        response.WriteCommand(ChatProtocol.ChatServerToGameServer.NET_CHAT_GS_ACCEPT);
+            rejectResponse.WriteCommand(ChatProtocol.ChatServerToGameServer.NET_CHAT_GS_REJECT);
+            rejectResponse.WriteString("The Session Cookie Provided For Chat Server Authentication Is Invalid");
 
-        session.Send(response);
+            session.Send(rejectResponse);
+            session.Terminate();
+
+            return;
+        }
+
+        // Validate Server ID Match
+        if (server.ID != requestData.ServerID)
+        {
+            Log.Warning(@"Match Server ID ""{ServerID}"" Does Not Match The Server ID With Session Cookie ""{Cookie}""",requestData.ServerID, requestData.SessionCookie);
+
+            ChatBuffer rejectResponse = new ();
+
+            rejectResponse.WriteCommand(ChatProtocol.ChatServerToGameServer.NET_CHAT_GS_REJECT);
+            rejectResponse.WriteString($@"Match Server ID Mismatch: Received ""{server.ID}""");
+
+            session.Send(rejectResponse);
+            session.Terminate();
+
+            return;
+        }
+
+        Account? hostAccount = await databaseContext.Accounts.FindAsync(server.HostAccountID);
+
+        // Validate Host Account Against Database
+        if (hostAccount is null)
+        {
+            Log.Warning(@"Could Not Find Host Account ID ""{HostAccountID}"" For Match Server ID ""{ServerID}"")", server.HostAccountID, requestData.ServerID);
+
+            ChatBuffer rejectResponse = new ();
+
+            rejectResponse.WriteCommand(ChatProtocol.ChatServerToGameServer.NET_CHAT_GS_REJECT);
+            rejectResponse.WriteString("Match Server Host Account Not Found");
+
+            session.Send(rejectResponse);
+            session.Terminate();
+
+            return;
+        }
+
+        // Validate Match Hosting Permissions
+        if (hostAccount.Type != AccountType.ServerHost)
+        {
+            Log.Warning(@"Host Account ID ""{HostAccountID}"" For Match Server ID ""{ServerID}"" Does Not Have Match Hosting Permissions", requestData.ServerID, server.HostAccountID);
+
+            ChatBuffer rejectResponse = new ();
+
+            rejectResponse.WriteCommand(ChatProtocol.ChatServerToGameServer.NET_CHAT_GS_REJECT);
+            rejectResponse.WriteString("The Match Server Host Account Does Not Have Match Hosting Permissions");
+
+            session.Send(rejectResponse);
+            session.Terminate();
+
+            return;
+        }
+
+        // Validate Host Account ID Match
+        if (hostAccount.ID != server.HostAccountID)
+        {
+            Log.Warning(@"Match Server Host Account ID ""{ReceivedHostAccountID}"" Does Not Match The Host Account ID ""{ExpectedHostAccountID}"" For Match Server ID ""{ServerID}""",
+                server.HostAccountID, hostAccount.ID, requestData.ServerID);
+
+            ChatBuffer rejectResponse = new ();
+
+            rejectResponse.WriteCommand(ChatProtocol.ChatServerToGameServer.NET_CHAT_GS_REJECT);
+            rejectResponse.WriteString($@"Match Server Host Account ID Mismatch: Received ""{server.HostAccountID}""");
+
+            session.Send(rejectResponse);
+            session.Terminate();
+
+            return;
+        }
+
+        // Check For Duplicate Match Server Instances
+        if (Context.MatchServers.TryGetValue(requestData.ServerID, out ChatSession? existingSession))
+        {
+            Log.Information(@"Disconnecting Duplicate Match Server Instance With ID ""{ServerID}"" And Address ""{Address}:{Port}"")", requestData.ServerID, server.IPAddress, server.Port);
+
+            existingSession.Terminate();
+
+            Context.MatchServers.TryRemove(requestData.ServerID, out _);
+        }
+
+        // Register Match Server
+        Context.MatchServers[requestData.ServerID] = session;
+
+        Log.Information(@"Match Server Connection Accepted - Server ID: ""{ServerID}"", Host Account: ""{HostAccountName}"", Address: ""{Address}:{Port}"", Location: ""{Location}""",
+            requestData.ServerID, server.HostAccountName, server.IPAddress, server.Port, server.Location);
+
+        ChatBuffer acceptResponse = new ();
+
+        acceptResponse.WriteCommand(ChatProtocol.ChatServerToGameServer.NET_CHAT_GS_ACCEPT);
+
+        session.Send(acceptResponse);
     }
 }
 

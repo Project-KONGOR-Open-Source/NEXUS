@@ -223,12 +223,14 @@ NEXUS uses distributed service architecture:
 
 ### Implementation for User Story 6
 
-- [x] T084 [P] [US6] Implement ServerHandshakeProcessor.cs in TRANSMUTANSTEIN.ChatServer/CommandProcessors/Server/ServerHandshakeProcessor.cs with [ChatCommand(NET_CHAT_SV_SERVER_HANDSHAKE)] - ✅ Implemented as ServerHandshake.cs in Connection/, protocol version validation complete, cookie validation TODOs documented for T088/T089
+- [x] T084 [P] [US6] Implement ServerHandshakeProcessor.cs in TRANSMUTANSTEIN.ChatServer/CommandProcessors/Server/ServerHandshakeProcessor.cs with [ChatCommand(NET_CHAT_SV_SERVER_HANDSHAKE)] - ✅ Implemented as ServerHandshake.cs in Connection/, protocol version validation complete, session termination in all rejection paths, cookie validation TODOs documented for T088/T089
 - [ ] T085 [P] [US6] Implement ServerStatusProcessor.cs in TRANSMUTANSTEIN.ChatServer/CommandProcessors/Server/ServerStatusProcessor.cs with [ChatCommand(NET_CHAT_SV_SERVER_STATUS)]
 - [ ] T086 [P] [US6] Implement MatchStatusProcessor.cs in TRANSMUTANSTEIN.ChatServer/CommandProcessors/Server/MatchStatusProcessor.cs with [ChatCommand(NET_CHAT_SV_MATCH_STATUS)]
 - [ ] T087 [P] [US6] Implement MatchCompleteProcessor.cs in TRANSMUTANSTEIN.ChatServer/CommandProcessors/Server/MatchCompleteProcessor.cs with [ChatCommand(NET_CHAT_SV_MATCH_COMPLETE)]
 - [ ] T088 [US6] Add GameServerSession tracking in ChatServer.RegisteredGameServers ConcurrentDictionary (keyed by ServerID)
-- [x] T089 [US6] Add game server authentication in ServerHandshakeProcessor (validate server credentials, add to RegisteredGameServers) - ✅ Implemented account permissions validation in both ServerHandshake.cs and ServerManagerHandshake.cs using AccountType.ServerHost check via MerrickContext.Accounts lookup
+- [x] T089 [US6] Add game server authentication in ServerHandshakeProcessor (validate server credentials, add to RegisteredGameServers) - ✅ Implemented account permissions validation in both ServerHandshake.cs and ServerManagerHandshake.cs using AccountType.ServerHost check via MerrickContext.Accounts lookup. All rejection paths properly terminate sessions (protocol mismatch, invalid cookie, invalid permissions)
+- [x] T089a [P] [US6] Implement ServerDisconnect.cs in TRANSMUTANSTEIN.ChatServer/CommandProcessors/Connection/ServerDisconnect.cs with [ChatCommand(NET_CHAT_GS_DISCONNECT)] - ✅ Complete with session termination, disconnect acknowledgement via NET_CHAT_GS_REMOTE_COMMAND, and TODO comments for Phase 7 matchmaking integration (pending match cleanup, idle pool removal). Verified against HON c_gameserver.cpp and KONGOR ConnectedServer.cs patterns
+- [x] T089b [P] [US6] Implement ServerManagerDisconnect.cs in TRANSMUTANSTEIN.ChatServer/CommandProcessors/Connection/ServerManagerDisconnect.cs with [ChatCommand(NET_CHAT_SM_DISCONNECT)] - ✅ Complete with session termination, disconnect acknowledgement via NET_CHAT_SM_REMOTE_COMMAND. Verified against HON c_servermanager.cpp and KONGOR ConnectedManager.cs patterns
 - [ ] T090 [US6] Add server availability tracking in ServerStatusProcessor (update GameServerSession availability status)
 - [ ] T091 [US6] Update player availability in MatchStatusProcessor (when match starts, mark players as InGame in ChatSession)
 - [ ] T092 [US6] Update PlayerStatistics in MatchCompleteProcessor (query MERRICK.DatabaseContext.PlayerStatistics, update wins/losses/rating for appropriate GameType)
@@ -566,19 +568,19 @@ With multiple developers after Foundational phase:
 
 ## Task Statistics
 
-- **Total Tasks**: 156 (T001-T156, includes T027a, T055a, T056b, T059a, T059b, T075a, T085a, T124a)
+- **Total Tasks**: 158 (T001-T156, includes T027a, T055a, T056b, T059a, T059b, T075a, T089a, T089b, T124a)
 - **Setup Phase**: 4 tasks (T001-T004)
 - **Foundational Phase**: 28 tasks (T005-T031) - BLOCKS all user stories, includes Redis cache integration
 - **User Story 1 (Authentication, Phase 3)**: 10 tasks (T032-T041)
 - **User Story 2 (Channels, Phase 4)**: 18 tasks (T042-T059b)
 - **User Story 3 (Groups, Phase 5)**: 21 tasks (T060-T080) - includes automatic leader transfer
-- **User Story 6 (Game Server, Phase 6)** 🎯: 13 tasks (T081-T093) - **MATCHMAKING CRITICAL**
+- **User Story 6 (Game Server, Phase 6)** 🎯: 15 tasks (T081-T093, includes T089a, T089b) - **MATCHMAKING CRITICAL** - includes server/manager disconnect with HON-verified patterns
 - **User Story 7 (Matchmaking, Phase 7)** 🎯: 26 tasks (T094-T119) - **MATCHMAKING CRITICAL** - includes detailed algorithm implementation from temp.txt
 - **User Story 4 (Whispers/Buddies, Phase 8)**: 14 tasks (T120-T133, includes T124a)
 - **User Story 5 (Clans, Phase 9)**: 9 tasks (T134-T142)
 - **Polish Phase**: 14 tasks (T143-T156) - includes channel flag enrichment
-- **Parallel Tasks**: 94 marked [P] (60% can run in parallel within constraints)
-- **Matchmaking MVP Scope**: Phases 1-3, 5-7 (102 tasks total) delivers full matchmaking capability with server handshakes, detailed rating-based algorithm, and stats recording
+- **Parallel Tasks**: 96 marked [P] (61% can run in parallel within constraints)
+- **Matchmaking MVP Scope**: Phases 1-3, 5-7 (104 tasks total) delivers full matchmaking capability with server handshakes, disconnect handling, detailed rating-based algorithm, and stats recording
 
 **Deferred to Post-MVP** (not included in tasks):
 - FR-058: Match history tracking with configurable depth
