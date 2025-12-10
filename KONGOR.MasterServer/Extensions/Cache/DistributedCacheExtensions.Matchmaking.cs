@@ -2,6 +2,10 @@
 
 public static partial class DistributedCacheExtensions
 {
+    // TODO: Make Match Servers And Match Server Managers Individual Keys Instead Of Hash Entries And Have Expiration Policies That Renew On Status Update
+
+    // TODO: Implement Cleanup Routine To Remove Stale Match Servers And Match Servers Managers (Managers With No Servers Should Also Be Considered Stale)
+
     private const string MatchServerManagersKey = "MATCH-SERVER-MANAGERS";
 
     /// <summary>
