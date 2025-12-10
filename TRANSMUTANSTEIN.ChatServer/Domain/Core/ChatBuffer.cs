@@ -217,4 +217,10 @@ public class ChatBuffer : TCPBuffer
 
         return size.Length;
     }
+
+    /// <summary>
+    ///     Check if there is any remaining data to read in the buffer.
+    /// </summary>
+    public bool HasRemainingData()
+        => _offset < _size;
 }
