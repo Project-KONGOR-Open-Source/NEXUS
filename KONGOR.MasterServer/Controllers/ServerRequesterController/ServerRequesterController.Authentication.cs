@@ -43,7 +43,7 @@ public partial class ServerRequesterController
             HostAccountID = account.ID,
             HostAccountName = account.Name,
             ID = hostAccountName.GetDeterministicInt32Hash(),
-
+            MatchServers = [],
             IPAddress = Request.HttpContext.Connection.RemoteIpAddress.MapToIPv4().ToString()
         };
 
@@ -99,11 +99,9 @@ public partial class ServerRequesterController
         string? serverDescription = Request.Form["desc"];
 
         if (serverDescription is null)
-            serverDescription = string.Empty;
-            // TODO: Make COMPEL Send The Server Description
-            // return BadRequest(@"Missing Value For Form Parameter ""desc""");
+            return BadRequest(@"Missing Value For Form Parameter ""desc""");
 
-            string? serverLocation = Request.Form["location"];
+        string? serverLocation = Request.Form["location"];
 
         if (serverLocation is null)
             return BadRequest(@"Missing Value For Form Parameter ""location""");
@@ -130,12 +128,15 @@ public partial class ServerRequesterController
 
         // TODO: Verify Whether The Server Version Matches The Client Version (Or Disallow Servers To Be Started If They Are Not On The Latest Version)
 
+        List<MatchServerManager> matchServerManagers = await DistributedCache.GetMatchServerManagersByAccountName(hostAccountName);
+
         MatchServer matchServer = new ()
         {
             HostAccountID = account.ID,
             HostAccountName = account.Name,
             ID = serverIdentifier.GetDeterministicInt32Hash(),
             Name = serverName,
+            MatchServerManager = matchServerManagers.SingleOrDefault(),
             Instance = int.Parse(serverInstance),
             IPAddress = serverIPAddress,
             Port = int.Parse(serverPort),

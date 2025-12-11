@@ -31,7 +31,7 @@ global using TRANSMUTANSTEIN.ChatServer.CommandProcessors.Channels;
 global using TRANSMUTANSTEIN.ChatServer.CommandProcessors.Connection;
 global using TRANSMUTANSTEIN.ChatServer.CommandProcessors.Matchmaking;
 global using TRANSMUTANSTEIN.ChatServer.Contracts;
-global using TRANSMUTANSTEIN.ChatServer.Core;
+global using TRANSMUTANSTEIN.ChatServer.Domain.Core;
 global using TRANSMUTANSTEIN.ChatServer.Domain.Communication;
 global using TRANSMUTANSTEIN.ChatServer.Domain.Core;
 global using TRANSMUTANSTEIN.ChatServer.Domain.Matchmaking;

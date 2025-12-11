@@ -1,6 +1,6 @@
 ﻿namespace TRANSMUTANSTEIN.ChatServer.Contracts;
 
-public interface ISynchronousCommandProcessor
+public interface ISynchronousCommandProcessor<TSession> where TSession : ChatSession
 {
-    public void Process(ChatSession session, ChatBuffer buffer);
+    void Process(TSession session, ChatBuffer buffer);
 }

@@ -1,9 +1,9 @@
 ﻿namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Connection;
 
 [ChatCommand(ChatProtocol.ClientToChatServer.NET_CHAT_CL_CONNECT)]
-public class ClientHandshake(MerrickContext merrick, IDatabase distributedCacheStore) : IAsynchronousCommandProcessor
+public class ClientHandshake(MerrickContext merrick, IDatabase distributedCacheStore) : IAsynchronousCommandProcessor<ClientChatSession>
 {
-    public async Task Process(ChatSession session, ChatBuffer buffer)
+    public async Task Process(ClientChatSession session, ChatBuffer buffer)
     {
         ClientHandshakeRequestData requestData = new (buffer);
 
@@ -71,7 +71,7 @@ public class ClientHandshake(MerrickContext merrick, IDatabase distributedCacheS
         // Check For Concurrent Connections: Disconnect Any Other Existing Sessions For This Account Or For Any Sub-Account Of The Same User
         foreach (int subAccountID in subAccountIDs)
         {
-            ChatSession? existingSessionMatch = Context.ChatSessions.Values
+            ClientChatSession? existingSessionMatch = Context.ClientChatSessions.Values
                 .SingleOrDefault(existingSession => existingSession.Account?.ID == subAccountID);
 
             if (existingSessionMatch is not null)
@@ -97,7 +97,7 @@ public class ClientHandshake(MerrickContext merrick, IDatabase distributedCacheS
 
         // Accept Connection, Send Options, And Broadcast Connection To Friends And Clan Members
         session
-            .Accept(new ChatSessionMetadata(requestData), account)
+            .Accept(requestData.ToMetadata(), account)
             .SendOptionsAndRemoteCommands()
             .BroadcastConnection();
     }
@@ -144,4 +144,29 @@ public class ClientHandshakeRequestData(ChatBuffer buffer)
     public string ClientRegion = buffer.ReadString();
 
     public string ClientLanguage = buffer.ReadString();
+
+    public ClientChatSessionMetadata ToMetadata()
+    {
+        return new ClientChatSessionMetadata
+        {
+            RemoteIP = RemoteIP,
+            SessionCookie = SessionCookie,
+            SessionAuthenticationHash = SessionAuthenticationHash,
+            ChatProtocolVersion = ChatProtocolVersion,
+            OperatingSystemIdentifier = OperatingSystemIdentifier,
+            OperatingSystemVersionMajor = OperatingSystemVersionMajor,
+            OperatingSystemVersionMinor = OperatingSystemVersionMinor,
+            OperatingSystemVersionPatch = OperatingSystemVersionPatch,
+            OperatingSystemBuildCode = OperatingSystemBuildCode,
+            OperatingSystemArchitecture = OperatingSystemArchitecture,
+            ClientVersionMajor = ClientVersionMajor,
+            ClientVersionMinor = ClientVersionMinor,
+            ClientVersionPatch = ClientVersionPatch,
+            ClientVersionRevision = ClientVersionRevision,
+            LastKnownClientState = LastKnownClientState,
+            ClientChatModeState = ClientChatModeState,
+            ClientRegion = ClientRegion,
+            ClientLanguage = ClientLanguage
+        };
+    }
 }

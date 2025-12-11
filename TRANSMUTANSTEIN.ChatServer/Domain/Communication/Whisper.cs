@@ -12,9 +12,9 @@ public class Whisper
     public static Whisper Create(string message)
         => new () { Message = message };
 
-    public Whisper Send(ChatSession senderSession, string recipientName)
+    public Whisper Send(ClientChatSession senderSession, string recipientName)
     {
-        ChatSession recipientSession = Context.ChatSessions.Values
+        ClientChatSession recipientSession = Context.ClientChatSessions.Values
             .Single(chatSession => chatSession.Account.Name.Equals(recipientName, StringComparison.OrdinalIgnoreCase));
 
         // Check Recipient's Chat Mode
@@ -52,7 +52,7 @@ public class Whisper
         }
     }
 
-    private Whisper SendWhisperSuccess(string senderName, ChatSession recipientSession)
+    private Whisper SendWhisperSuccess(string senderName, ClientChatSession recipientSession)
     {
         ChatBuffer whisperSuccess = new ();
 
@@ -66,7 +66,7 @@ public class Whisper
     }
 
 
-    private Whisper SendWhisperFailure(ChatSession senderSession, string recipientName)
+    private Whisper SendWhisperFailure(ClientChatSession senderSession, string recipientName)
     {
         ChatBuffer whisperFailed = new ();
 
@@ -79,7 +79,7 @@ public class Whisper
         return this;
     }
 
-    private Whisper SendAutomaticResponse(ChatSession senderSession, ChatSession recipientSession, string messageAutomaticResponse)
+    private Whisper SendAutomaticResponse(ClientChatSession senderSession, ClientChatSession recipientSession, string messageAutomaticResponse)
     {
         ChatBuffer automaticResponse = new ();
 

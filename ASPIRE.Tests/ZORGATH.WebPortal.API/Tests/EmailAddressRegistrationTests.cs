@@ -14,10 +14,11 @@ public sealed class EmailAddressRegistrationTests
 
         ILogger<EmailAddressController> logger = webApplicationFactory.Services.GetRequiredService<ILogger<EmailAddressController>>();
         IEmailService emailService = webApplicationFactory.Services.GetRequiredService<IEmailService>();
+        IWebHostEnvironment hostEnvironment = webApplicationFactory.Services.GetRequiredService<IWebHostEnvironment>();
 
         MerrickContext databaseContext = webApplicationFactory.Services.GetRequiredService<MerrickContext>();
 
-        EmailAddressController controller = new (databaseContext, logger, emailService);
+        EmailAddressController controller = new (databaseContext, logger, emailService, hostEnvironment);
 
         IActionResult response = await controller.RegisterEmailAddress(new RegisterEmailAddressDTO(emailAddress, emailAddress));
 
@@ -45,10 +46,11 @@ public sealed class EmailAddressRegistrationTests
 
         ILogger<EmailAddressController> logger = webApplicationFactory.Services.GetRequiredService<ILogger<EmailAddressController>>();
         IEmailService emailService = webApplicationFactory.Services.GetRequiredService<IEmailService>();
+        IWebHostEnvironment hostEnvironment = webApplicationFactory.Services.GetRequiredService<IWebHostEnvironment>();
 
         MerrickContext databaseContext = webApplicationFactory.Services.GetRequiredService<MerrickContext>();
 
-        EmailAddressController controller = new (databaseContext, logger, emailService);
+        EmailAddressController controller = new (databaseContext, logger, emailService, hostEnvironment);
 
         IActionResult response = await controller.RegisterEmailAddress(new RegisterEmailAddressDTO(emailAddress, confirmEmailAddress));
 
@@ -64,10 +66,11 @@ public sealed class EmailAddressRegistrationTests
 
         ILogger<EmailAddressController> logger = webApplicationFactory.Services.GetRequiredService<ILogger<EmailAddressController>>();
         IEmailService emailService = webApplicationFactory.Services.GetRequiredService<IEmailService>();
+        IWebHostEnvironment hostEnvironment = webApplicationFactory.Services.GetRequiredService<IWebHostEnvironment>();
 
         MerrickContext databaseContext = webApplicationFactory.Services.GetRequiredService<MerrickContext>();
 
-        EmailAddressController controller = new (databaseContext, logger, emailService);
+        EmailAddressController controller = new (databaseContext, logger, emailService, hostEnvironment);
 
         await controller.RegisterEmailAddress(new RegisterEmailAddressDTO(emailAddress, emailAddress));
 

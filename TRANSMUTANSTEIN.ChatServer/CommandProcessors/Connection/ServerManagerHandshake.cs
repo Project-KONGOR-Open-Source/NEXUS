@@ -1,9 +1,9 @@
 ﻿namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Connection;
 
 [ChatCommand(ChatProtocol.ServerManagerToChatServer.NET_CHAT_SM_CONNECT)]
-public class ServerManagerHandshake(IDatabase distributedCacheStore, MerrickContext databaseContext) : IAsynchronousCommandProcessor
+public class ServerManagerHandshake(IDatabase distributedCacheStore, MerrickContext databaseContext) : IAsynchronousCommandProcessor<MatchServerManagerChatSession>
 {
-    public async Task Process(ChatSession session, ChatBuffer buffer)
+    public async Task Process(MatchServerManagerChatSession session, ChatBuffer buffer)
     {
         ServerManagerHandshakeRequestData requestData = new (buffer);
 
@@ -19,7 +19,7 @@ public class ServerManagerHandshake(IDatabase distributedCacheStore, MerrickCont
             rejectResponse.WriteString($@"Chat Protocol Version Mismatch: Expected ""{ChatProtocol.CHAT_PROTOCOL_EXTERNAL_VERSION}"", Received ""{requestData.ChatProtocolVersion}""");
 
             session.Send(rejectResponse);
-            session.Terminate();
+            await session.Terminate(distributedCacheStore);
 
             return;
         }
@@ -37,7 +37,7 @@ public class ServerManagerHandshake(IDatabase distributedCacheStore, MerrickCont
             rejectResponse.WriteString("The Session Cookie Provided For Chat Server Manager Authentication Is Invalid");
 
             session.Send(rejectResponse);
-            session.Terminate();
+            await session.Terminate(distributedCacheStore);
 
             return;
         }
@@ -53,7 +53,7 @@ public class ServerManagerHandshake(IDatabase distributedCacheStore, MerrickCont
             rejectResponse.WriteString($@"Match Server Manager ID Mismatch: Received ""{manager.ID}""");
 
             session.Send(rejectResponse);
-            session.Terminate();
+            await session.Terminate(distributedCacheStore);
 
             return;
         }
@@ -71,10 +71,16 @@ public class ServerManagerHandshake(IDatabase distributedCacheStore, MerrickCont
             rejectResponse.WriteString("Match Server Manager Host Account Not Found");
 
             session.Send(rejectResponse);
-            session.Terminate();
+            await session.Terminate(distributedCacheStore);
 
             return;
         }
+
+        // Set Host Account On Match Server Manager Session
+        session.Account = hostAccount;
+
+        // Set Match Server Manager Metadata On Session
+        session.Metadata = requestData.ToMetadata();
 
         // Validate Match Hosting Permissions
         if (hostAccount.Type != AccountType.ServerHost)
@@ -87,7 +93,7 @@ public class ServerManagerHandshake(IDatabase distributedCacheStore, MerrickCont
             rejectResponse.WriteString("The Match Server Manager Host Account Does Not Have Match Hosting Permissions");
 
             session.Send(rejectResponse);
-            session.Terminate();
+            await session.Terminate(distributedCacheStore);
 
             return;
         }
@@ -104,23 +110,23 @@ public class ServerManagerHandshake(IDatabase distributedCacheStore, MerrickCont
             rejectResponse.WriteString($@"Match Server Manager Host Account ID Mismatch: Received ""{manager.HostAccountID}""");
 
             session.Send(rejectResponse);
-            session.Terminate();
+            await session.Terminate(distributedCacheStore);
 
             return;
         }
 
         // Check For Duplicate Match Server Manager Instances
-        if (Context.MatchServerManagers.TryGetValue(requestData.ServerManagerID, out ChatSession? existingSession))
+        if (Context.MatchServerManagerChatSessions.TryGetValue(requestData.ServerManagerID, out MatchServerManagerChatSession? existingSession))
         {
             Log.Information(@"Disconnecting Duplicate Match Server Manager Instance With ID ""{ServerID}"" And Address ""{Address}"")", requestData.ServerManagerID, manager.IPAddress);
 
-            existingSession.Terminate();
+            await existingSession.Terminate(distributedCacheStore);
 
-            Context.MatchServerManagers.TryRemove(requestData.ServerManagerID, out _);
+            Context.MatchServerManagerChatSessions.TryRemove(requestData.ServerManagerID, out _);
         }
 
         // Register Match Server Manager
-        Context.MatchServerManagers[requestData.ServerManagerID] = session;
+        Context.MatchServerManagerChatSessions[requestData.ServerManagerID] = session;
 
         Log.Information(@"Match Server Manager Connection Accepted - Manager ID: ""{ManagerID}"", Host Account: ""{HostAccountName}"", Address: ""{Address}""",
             requestData.ServerManagerID, manager.HostAccountName, manager.IPAddress);
@@ -160,4 +166,14 @@ public class ServerManagerHandshakeRequestData(ChatBuffer buffer)
     public string SessionCookie = buffer.ReadString();
 
     public int ChatProtocolVersion = buffer.ReadInt32();
+
+    public MatchServerManagerChatSessionMetadata ToMetadata()
+    {
+        return new MatchServerManagerChatSessionMetadata()
+        {
+            ServerManagerID = ServerManagerID,
+            SessionCookie = SessionCookie,
+            ChatProtocolVersion = ChatProtocolVersion
+        };
+    }
 }
