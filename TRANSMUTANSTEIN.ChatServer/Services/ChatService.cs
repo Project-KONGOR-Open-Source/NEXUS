@@ -10,18 +10,18 @@ public class ChatService(IServiceProvider serviceProvider) : IHostedService, IDi
 
         IPAddress address = IPAddress.Any;
 
-        int port = int.Parse(Environment.GetEnvironmentVariable("CHAT_SERVER_PORT") ?? throw new NullReferenceException("Chat Server Port Is NULL"));
+        int clientConnectionsPort = int.Parse(Environment.GetEnvironmentVariable("TCP_SERVER_PORT_CLIENT")
+            ?? throw new NullReferenceException("TCP Server Port For Client Connections Is NULL"));
 
-        ChatServer = new Domain.Core.ChatServer(address, port, serviceProvider);
+        int matchServerConnectionsPort = int.Parse(Environment.GetEnvironmentVariable("TCP_SERVER_PORT_MATCH_SERVER")
+            ?? throw new NullReferenceException("TCP Server Port For Match Server Connections Is NULL"));
 
-        if (ChatServer.Start() is false)
-        {
-            // TODO: Log Critical Event
+        int matchServerManagerConnectionsPort = int.Parse(Environment.GetEnvironmentVariable("TCP_SERVER_PORT_MATCH_SERVER_MANAGER")
+            ?? throw new NullReferenceException("TCP Server Port For Match Server Manager Connections Is NULL"));
 
-            return Task.FromException(new ApplicationException("Chat Server Was Unable To Start"));
-        }
+        ChatServer = new Domain.Core.ChatServer(serviceProvider, address, clientConnectionsPort, matchServerConnectionsPort, matchServerManagerConnectionsPort);
 
-        Log.Information("Chat Server Listening On {ChatServer.Endpoint}", ChatServer.Endpoint);
+        ChatServer.Start();
 
         return Task.CompletedTask;
     }

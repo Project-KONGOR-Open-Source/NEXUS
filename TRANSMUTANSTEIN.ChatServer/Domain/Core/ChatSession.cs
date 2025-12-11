@@ -1,4 +1,4 @@
-﻿namespace TRANSMUTANSTEIN.ChatServer.Domain.Core;
+namespace TRANSMUTANSTEIN.ChatServer.Domain.Core;
 
 public class ChatSession(TCPServer server, IServiceProvider serviceProvider) : TCPSession(server)
 {
@@ -11,15 +11,6 @@ public class ChatSession(TCPServer server, IServiceProvider serviceProvider) : T
     public IWebHostEnvironment HostEnvironment { get; init; } = serviceProvider.GetRequiredService<IWebHostEnvironment>();
 
     private static ConcurrentDictionary<ushort, Type> CommandToCommandTypeMap { get; set; } = [];
-
-    private static ConcurrentDictionary<Type, Type> CommandTypeToSessionTypeMap { get; set; } = [];
-
-    /// <summary>
-    ///     Gets or sets the polymorphic session instance created after a successful handshake.
-    ///     This property is NULL for base sessions before handshake, and references the derived session instance (ClientChatSession, MatchServerChatSession, or MatchServerManagerChatSession) after handshake.
-    ///     Commands are dispatched to the polymorphic session instead of the base session, when available.
-    /// </summary>
-    public ChatSession? Polymorph { get; set; }
 
     private byte[] RemainingPreviouslyReceivedData { get; set; } = [];
 
@@ -36,39 +27,6 @@ public class ChatSession(TCPServer server, IServiceProvider serviceProvider) : T
     protected override void OnDisconnected()
     {
         Log.Information("Chat Session ID {SessionID} Has Terminated", ID);
-
-        if (Polymorph is not null)
-        {
-            IDatabase distributedCacheStore = serviceProvider.GetRequiredService<IDatabase>();
-
-            switch (Polymorph)
-            {
-                case ClientChatSession clientSession:
-                if (clientSession.Account is not null)
-                {
-                    Context.ClientChatSessions.TryRemove(clientSession.Account.Name, out _);
-                }
-                break;
-
-                case MatchServerChatSession matchServerSession:
-                if (matchServerSession.Metadata is not null)
-                {
-                    Context.MatchServerChatSessions.TryRemove(matchServerSession.Metadata.ServerID, out _);
-
-                    _ = distributedCacheStore.RemoveMatchServerByID(matchServerSession.Metadata.ServerID);
-                }
-                break;
-
-                case MatchServerManagerChatSession matchServerManagerSession:
-                if (matchServerManagerSession.Metadata is not null)
-                {
-                    Context.MatchServerManagerChatSessions.TryRemove(matchServerManagerSession.Metadata.ServerManagerID, out _);
-
-                    _ = distributedCacheStore.RemoveMatchServerManagerByID(matchServerManagerSession.Metadata.ServerManagerID);
-                }
-                break;
-            }
-        }
     }
 
     protected override void OnReceived(byte[] buffer, long offset, long size)
@@ -79,7 +37,8 @@ public class ChatSession(TCPServer server, IServiceProvider serviceProvider) : T
 
         RemainingPreviouslyReceivedData = remaining;
 
-        foreach (byte[] segment in segments) _ = ProcessDataSegment(segment);
+        foreach (byte[] segment in segments)
+            ProcessDataSegment(segment);
     }
 
     private static List<byte[]> ExtractDataSegments(byte[] buffer, out byte[] remaining)
@@ -114,143 +73,117 @@ public class ChatSession(TCPServer server, IServiceProvider serviceProvider) : T
         return segments;
     }
 
-    private async Task ProcessDataSegment(byte[] segment)
+    private void ProcessDataSegment(byte[] segment)
     {
-        try
+        ushort command = BitConverter.ToUInt16([segment[0], segment[1]]);
+
+        Type? commandType = GetCommandType(command);
+
+        if (commandType is null)
         {
-            ushort command = BitConverter.ToUInt16([segment[0], segment[1]]);
+            string output = new StringBuilder($@"Missing Type Mapping For Command: ""0x{command:X4}""")
+                .Append(Environment.NewLine).Append($"Message UTF8 Bytes: {string.Join(':', segment)}")
+                .Append(Environment.NewLine).Append($"Message UTF8 Text: {Encoding.UTF8.GetString(segment)}")
+                .ToString();
 
-            Type? commandType = GetCommandType(command);
-
-            if (commandType is null)
-            {
-                string output = new StringBuilder($@"Missing Type Mapping For Command: ""0x{command:X4}""")
-                    .Append(Environment.NewLine).Append($"Message UTF8 Bytes: {string.Join(':', segment)}")
-                    .Append(Environment.NewLine).Append($"Message UTF8 Text: {Encoding.UTF8.GetString(segment)}")
-                    .ToString();
-
-                Log.Error(output);
-            }
-
-            else
-            {
-                if (HostEnvironment.IsDevelopment())
-                    Log.Debug(@"Processing Command: ""0x{Command}""", command.ToString("X4"));
-
-                object? commandTypeInstance = ActivatorUtilities.CreateInstance(serviceProvider, commandType);
-
-                if (commandTypeInstance is null)
-                    Log.Error(@"[BUG] Could Not Create Command Type Instance For Command: ""0x{Command}""", command.ToString("X4"));
-
-                else
-                {
-                    const string processMethodName = "Process";
-
-                    MethodInfo? processMethod = commandType.GetMethod(processMethodName);
-
-                    if (processMethod is null)
-                        Log.Error(@"[BUG] Command Type ""{TypeName}"" Does Not Have A ""{ProcessMethodName}"" Method", commandType.Name, processMethodName);
-
-                    else
-                    {
-                        Type[] parameterTypes = [.. processMethod.GetParameters().Select(parameter => parameter.ParameterType)];
-
-                        if (parameterTypes.Length is not 2)
-                            Log.Error(@"[BUG] The ""{processMethodName}"" Method For Command Type ""{TypeName}"" Does Not Have Exactly Two Parameters (ChatSession, ChatBuffer)",
-                                processMethodName, commandType.Name);
-
-                        else
-                        {
-                            Type sessionParameterType = parameterTypes.First();
-
-                            ChatSession sessionToUse = this;
-
-                            if (CommandTypeToSessionTypeMap.TryGetValue(commandType, out Type? requiredSessionType))
-                            {
-                                if (requiredSessionType != typeof(ChatSession))
-                                {
-                                    if (Polymorph is null || Polymorph.GetType() != requiredSessionType)
-                                    {
-                                        Polymorph = (ChatSession) Activator.CreateInstance(requiredSessionType, Server, serviceProvider)!;
-
-                                        Log.Debug(@"Created Polymorphic Session ""{SessionType}"" For Command ""{CommandType}""", requiredSessionType.Name, commandType.Name);
-                                    }
-
-                                    sessionToUse = Polymorph;
-                                }
-                            }
-
-                            Type actualSessionType = sessionToUse.GetType();
-
-                            if (sessionParameterType.IsAssignableFrom(actualSessionType) is false)
-                                Log.Error(@"[BUG] Command Type ""{TypeName}"" Requires Session Type ""{RequiredSessionType}"" But Got ""{ActualSessionType}""",
-                                    commandType.Name, sessionParameterType.Name, actualSessionType.Name);
-
-                            else
-                            {
-                                ChatBuffer buffer = new (segment);
-
-                                object? result = processMethod.Invoke(commandTypeInstance, [sessionToUse, buffer]);
-
-                                if (result is Task task) await task;
-                            }
-                        }
-                    }
-                }
-            }
+            Log.Error(output);
         }
 
-        catch (Exception exception)
+        else
         {
-            Log.Error(exception, @"[BUG] Error Processing Command From Segment");
+            if (HostEnvironment.IsDevelopment())
+                Log.Debug(@"Processing Command: ""0x{Command}""", command.ToString("X4"));
+
+            if (GetCommandTypeInstance(commandType) is { } commandTypeInstance)
+            {
+                try
+                {
+                    ChatBuffer buffer = new (segment);
+
+                    commandTypeInstance.Switch
+                    (
+                        synchronousInstance =>
+                        {
+                            Type instanceType = synchronousInstance.GetType();
+
+                            Type? interfaceType = instanceType.GetInterfaces()
+                                .SingleOrDefault(interfaceType => interfaceType.IsGenericType && interfaceType.GetGenericTypeDefinition() == typeof(ISynchronousCommandProcessor<>));
+
+                            if (interfaceType is not null)
+                            {
+                                MethodInfo? processMethod = interfaceType.GetMethod("Process");
+
+                                processMethod?.Invoke(synchronousInstance, [this, buffer]);
+                            }
+                        },
+
+                        async asynchronousInstance =>
+                        {
+                            Type instanceType = asynchronousInstance.GetType();
+
+                            Type? interfaceType = instanceType.GetInterfaces()
+                                .SingleOrDefault(interfaceType => interfaceType.IsGenericType && interfaceType.GetGenericTypeDefinition() == typeof(IAsynchronousCommandProcessor<>));
+
+                            if (interfaceType is not null)
+                            {
+                                MethodInfo? processMethod = interfaceType.GetMethod("Process");
+
+                                if (processMethod is not null)
+                                {
+                                    Task? task = processMethod.Invoke(asynchronousInstance, [this, buffer]) as Task;
+
+                                    if (task is not null) await task;
+                                }
+                            }
+                        }
+                    );
+                }
+
+                catch (Exception exception)
+                {
+                    Log.Error(exception, @"[BUG] Error Processing Command: ""0x{Command}""", command.ToString("X4"));
+                }
+            }
+
+            else Log.Error(@"[BUG] Could Not Create Command Type Instance For Command: ""0x{Command}""", command.ToString("X4"));
         }
     }
 
     private Type? GetCommandType(ushort command)
     {
-        if (CommandToCommandTypeMap.TryGetValue(command, out Type? type))
-            return type;
+        if (CommandToCommandTypeMap.TryGetValue(command, out Type? type)) return type;
 
         Type[] types = typeof(TRANSMUTANSTEIN).Assembly.GetTypes();
 
-        type = types.SingleOrDefault(type => type.GetCustomAttribute<ChatCommandAttribute>() is not null
-            && (type.GetCustomAttribute<ChatCommandAttribute>()?.Command.Equals(command) ?? false));
+        type = types
+            .SingleOrDefault(type => type.GetCustomAttribute<ChatCommandAttribute>() is not null && (type.GetCustomAttribute<ChatCommandAttribute>()?.Command.Equals(command) ?? false));
 
         if (type is not null)
-        {
             if (CommandToCommandTypeMap.TryAdd(command, type) is false && CommandToCommandTypeMap.ContainsKey(command) is false)
                 Log.Error(@"[BUG] Could Not Add Command-To-Type Mapping For Command ""0x{Command}"" And Type ""{TypeName}""", command.ToString("X4"), type.Name);
-
-            MapCommandTypeToSessionType(type);
-        }
 
         return type;
     }
 
-    /// <summary>
-    ///     Extracts the session type parameter from a command processor's generic interface and populates the command type to session type mapping.
-    ///     This method inspects the command processor's implemented interfaces to find IAsynchronousCommandProcessor or ISynchronousCommandProcessor.
-    ///     It then extracts the generic type parameter which represents the required session type for that command.
-    /// </summary>
-    /// <param name="commandType">The command processor type to analyse.</param>
-    private static void MapCommandTypeToSessionType(Type commandType)
+    private OneOf<object, object>? GetCommandTypeInstance(Type type)
     {
-        if (CommandTypeToSessionTypeMap.ContainsKey(commandType)) return;
+        object instance = ActivatorUtilities.CreateInstance(serviceProvider, type);
 
-        Type? commandProcessorInterface = commandType.GetInterfaces()
-            .FirstOrDefault(interfaceType =>
-                interfaceType.IsGenericType &&
-                    (interfaceType.GetGenericTypeDefinition() == typeof(IAsynchronousCommandProcessor<>) ||
-                        interfaceType.GetGenericTypeDefinition() == typeof(ISynchronousCommandProcessor<>)));
+        Type? syncInterface = type.GetInterfaces()
+            .SingleOrDefault(interfaceType => interfaceType.IsGenericType && interfaceType.GetGenericTypeDefinition() == typeof(ISynchronousCommandProcessor<>));
 
-        if (commandProcessorInterface is not null)
-        {
-            Type sessionType = commandProcessorInterface.GetGenericArguments().Single();
+        if (syncInterface is not null)
+            return OneOf<object, object>.FromT0(instance);
 
-            CommandTypeToSessionTypeMap.TryAdd(commandType, sessionType);
+        Type? asyncInterface = type.GetInterfaces()
+            .SingleOrDefault(interfaceType => interfaceType.IsGenericType && interfaceType.GetGenericTypeDefinition() == typeof(IAsynchronousCommandProcessor<>));
 
-            Log.Debug(@"Mapped Command Type ""{CommandType}"" To Session Type ""{SessionType}""", commandType.Name, sessionType.Name);
-        }
+        if (asyncInterface is not null)
+            return OneOf<object, object>.FromT1(instance);
+
+        Log.Error(@"[BUG] Command Type ""{TypeName}"" Does Not Implement A Supported Processor Interface", type.Name);
+
+        return null;
     }
 
     /// <summary>

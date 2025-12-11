@@ -3,7 +3,6 @@ namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Connection;
 /// <summary>
 ///     Handles ping requests from clients, match servers, and match server managers.
 ///     Responds with a pong message to keep the connection alive.
-///     Uses a polymorphic chat session type to support multiple higher-level session types.
 /// </summary>
 [ChatCommand(ChatProtocol.Bidirectional.NET_CHAT_PING)]
 public class Ping : ISynchronousCommandProcessor<ChatSession>
