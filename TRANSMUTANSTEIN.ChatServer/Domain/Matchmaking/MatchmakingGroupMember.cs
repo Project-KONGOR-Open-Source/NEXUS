@@ -1,10 +1,10 @@
 ﻿namespace TRANSMUTANSTEIN.ChatServer.Domain.Matchmaking;
 
-public class MatchmakingGroupMember(ChatSession session)
+public class MatchmakingGroupMember(ClientChatSession session)
 {
     public Account Account = session.Account;
 
-    public ChatSession Session = session;
+    public ClientChatSession Session = session;
 
     public required byte Slot { get; set; }
 

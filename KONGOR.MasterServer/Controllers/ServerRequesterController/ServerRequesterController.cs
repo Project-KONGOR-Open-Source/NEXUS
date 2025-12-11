@@ -18,13 +18,13 @@ public partial class ServerRequesterController(MerrickContext databaseContext, I
         return Request.Query["f"].SingleOrDefault() switch
         {
             // server manager
-            "replay_auth"   => await HandleReplayAuthentication(),
+            "replay_auth"   => await HandleServerManagerAuthentication(),
 
             // server
             "accept_key"    => await HandleAcceptKey(),
             "auth"          => await HandleAuthentication(),
             "c_conn"        => await HandleConnectClient(),
-            "new_session"   => await HandleNewSession(),
+            "new_session"   => await HandleServerAuthentication(),
             "set_online"    => await HandleSetOnline(),
 
             // fallback

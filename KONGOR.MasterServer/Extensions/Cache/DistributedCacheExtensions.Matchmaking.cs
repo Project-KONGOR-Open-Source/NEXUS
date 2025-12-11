@@ -20,6 +20,80 @@ public static partial class DistributedCacheExtensions
         await distributedCacheStore.HashSetAsync(MatchServerManagersKey, [new HashEntry(hostAccountName, serializedMatchServerManager)]);
     }
 
+    public static async Task<List<MatchServerManager>> GetMatchServerManagers(this IDatabase distributedCacheStore)
+    {
+        HashEntry[] serializedMatchServerManagers = await distributedCacheStore.HashGetAllAsync(MatchServerManagersKey);
+
+        List<MatchServerManager> matchServerManagers = [.. serializedMatchServerManagers
+            .Select(entry => JsonSerializer.Deserialize<MatchServerManager>(entry.Value.ToString())).OfType<MatchServerManager>()];
+
+        return matchServerManagers;
+    }
+
+    public static async Task<MatchServerManager?> GetMatchServerManagerBySessionCookie(this IDatabase distributedCacheStore, string sessionCookie)
+    {
+        HashEntry[] serializedMatchServerManagers = await distributedCacheStore.HashGetAllAsync(MatchServerManagersKey);
+
+        List<MatchServerManager> matchServerManagers = [.. serializedMatchServerManagers
+            .Select(entry => JsonSerializer.Deserialize<MatchServerManager>(entry.Value.ToString())).OfType<MatchServerManager>()];
+
+        MatchServerManager? matchServerManager = matchServerManagers.SingleOrDefault(manager => manager.Cookie.Equals(sessionCookie));
+
+        return matchServerManager;
+    }
+
+    public static async Task<List<MatchServerManager>> GetMatchServerManagersByAccountName(this IDatabase distributedCacheStore, string hostAccountName)
+    {
+        List<MatchServerManager> matchServerManagers = [];
+
+        IAsyncEnumerable<HashEntry> scanResult = distributedCacheStore.HashScanAsync(MatchServerManagersKey, pattern: hostAccountName, pageSize: int.MaxValue);
+
+        await foreach (HashEntry entry in scanResult)
+        {
+            string serializedMatchServerManager = entry.Value.ToString();
+
+            MatchServerManager matchServerManager = JsonSerializer.Deserialize<MatchServerManager>(serializedMatchServerManager)
+                ?? throw new NullReferenceException($@"Unable To Deserialize Match Server Manager With Key ""{entry.Name}""");
+
+            matchServerManagers.Add(matchServerManager);
+        }
+
+        return matchServerManagers;
+    }
+
+    public static async Task<MatchServerManager?> GetMatchServerManagerByID(this IDatabase distributedCacheStore, int serverManagerID)
+    {
+        HashEntry[] serializedMatchServerManagers = await distributedCacheStore.HashGetAllAsync(MatchServerManagersKey);
+
+        List<MatchServerManager> matchServerManagers = [.. serializedMatchServerManagers
+            .Select(entry => JsonSerializer.Deserialize<MatchServerManager>(entry.Value.ToString())).OfType<MatchServerManager>()];
+
+        MatchServerManager? matchServerManager = matchServerManagers.SingleOrDefault(manager => manager.ID == serverManagerID);
+
+        return matchServerManager;
+    }
+
+    public static async Task RemoveMatchServerManagerByID(this IDatabase distributedCacheStore, int serverManagerID)
+    {
+        MatchServerManager? matchServerManager = await distributedCacheStore.GetMatchServerManagerByID(serverManagerID);
+
+        if (matchServerManager is not null)
+        {
+            string hostAccountName = matchServerManager.HostAccountName;
+
+            await distributedCacheStore.HashDeleteAsync(MatchServerManagersKey, hostAccountName);
+
+            foreach (MatchServer server in matchServerManager.MatchServers)
+            {
+                server.MatchServerManager = null;
+
+                await distributedCacheStore.RemoveMatchServerByID(server.ID);
+            }
+
+            matchServerManager.MatchServers.Clear();
+        }
+    }
+
     private const string MatchServersKey = "MATCH-SERVERS";
 
     /// <summary>
@@ -56,38 +130,6 @@ public static partial class DistributedCacheExtensions
         return matchServer;
     }
 
-    public static async Task<MatchServerManager?> GetMatchServerManagerBySessionCookie(this IDatabase distributedCacheStore, string sessionCookie)
-    {
-        HashEntry[] serializedMatchServerManagers = await distributedCacheStore.HashGetAllAsync(MatchServerManagersKey);
-
-        List<MatchServerManager> matchServerManagers = [.. serializedMatchServerManagers
-            .Select(entry => JsonSerializer.Deserialize<MatchServerManager>(entry.Value.ToString())).OfType<MatchServerManager>()];
-
-        MatchServerManager? matchServerManager = matchServerManagers.SingleOrDefault(manager => manager.Cookie.Equals(sessionCookie));
-
-        return matchServerManager;
-    }
-
-    public static async Task<(MatchServerManager? MatchServerManager, List<MatchServer> MatchServers)> GetMatchServerManagerAndMatchServersByAccountName(this IDatabase distributedCacheStore, string hostAccountName)
-    {
-        MatchServerManager? matchServerManager = await distributedCacheStore.GetMatchServerManagerByAccountName(hostAccountName);
-        List<MatchServer> matchServers = await distributedCacheStore.GetMatchServersByAccountName(hostAccountName);
-
-        return (matchServerManager, matchServers);
-    }
-
-    public static async Task<MatchServerManager?> GetMatchServerManagerByAccountName(this IDatabase distributedCacheStore, string hostAccountName)
-    {
-        string? serializedMatchServerManager = await distributedCacheStore.HashGetAsync(MatchServerManagersKey, hostAccountName);
-
-        if (serializedMatchServerManager is null) return null;
-
-        MatchServerManager matchServerManager = JsonSerializer.Deserialize<MatchServerManager>(serializedMatchServerManager)
-            ?? throw new NullReferenceException($@"Unable To Deserialize Match Server Manager With Key ""{hostAccountName}""");
-
-        return matchServerManager;
-    }
-
     public static async Task<List<MatchServer>> GetMatchServersByAccountName(this IDatabase distributedCacheStore, string hostAccountName)
     {
         List<MatchServer> matchServers = [];
@@ -119,45 +161,22 @@ public static partial class DistributedCacheExtensions
         return matchServer;
     }
 
-    public static async Task<bool> RemoveMatchServer(this IDatabase distributedCacheStore, string hostAccountName, int instance)
+    public static async Task RemoveMatchServerByID(this IDatabase distributedCacheStore, int serverID)
     {
-        bool removed = await distributedCacheStore.HashDeleteAsync(MatchServersKey, $"{hostAccountName}:{instance}");
+        MatchServer? matchServer = await distributedCacheStore.GetMatchServerByID(serverID);
 
-        List<MatchServer> matchServers = await distributedCacheStore.GetMatchServersByAccountName(hostAccountName);
-
-        if (matchServers.Any() is false)
-            await distributedCacheStore.RemoveMatchServerManager(hostAccountName);
-
-        return removed;
-    }
-
-    public static async Task<int> RemoveMatchServersByAccountName(this IDatabase distributedCacheStore, string hostAccountName)
-    {
-        List<MatchServer> matchServers = await distributedCacheStore.GetMatchServersByAccountName(hostAccountName);
-
-        if (matchServers.Any())
+        if (matchServer is not null)
         {
-            RedisValue[] keys = [.. matchServers.Select(server => (RedisValue) $"{hostAccountName}:{server.Instance}")];
+            string hashField = $"{matchServer.HostAccountName}:{matchServer.Instance}";
 
-            long removedCount = await distributedCacheStore.HashDeleteAsync(MatchServersKey, keys);
+            await distributedCacheStore.HashDeleteAsync(MatchServersKey, hashField);
 
-            await distributedCacheStore.RemoveMatchServerManager(hostAccountName);
+            matchServer.MatchServerManager?.MatchServers.Remove(matchServer);
 
-            return Convert.ToInt32(removedCount);
+            if (matchServer.MatchServerManager?.MatchServers.Any() is false)
+                await distributedCacheStore.RemoveMatchServerManagerByID(matchServer.MatchServerManager.ID);
+
+            matchServer.MatchServerManager = null;
         }
-
-        else
-        {
-            await distributedCacheStore.RemoveMatchServerManager(hostAccountName);
-
-            return 0;
-        }
-    }
-
-    public static async Task<bool> RemoveMatchServerManager(this IDatabase distributedCacheStore, string hostAccountName)
-    {
-        bool removed = await distributedCacheStore.HashDeleteAsync(MatchServerManagersKey, hostAccountName);
-
-        return removed;
     }
 }

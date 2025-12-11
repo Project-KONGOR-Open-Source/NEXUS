@@ -1,9 +1,9 @@
 ﻿namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Matchmaking;
 
 [ChatCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_PLAYER_READY_STATUS)]
-public class GroupPlayerReadyStatus : ISynchronousCommandProcessor
+public class GroupPlayerReadyStatus : ISynchronousCommandProcessor<ClientChatSession>
 {
-    public void Process(ChatSession session, ChatBuffer buffer)
+    public void Process(ClientChatSession session, ChatBuffer buffer)
     {
         GroupPlayerReadyStatusRequestData requestData = new (buffer);
 
