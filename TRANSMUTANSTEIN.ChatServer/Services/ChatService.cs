@@ -10,14 +10,14 @@ public class ChatService(IServiceProvider serviceProvider) : IHostedService, IDi
 
         IPAddress address = IPAddress.Any;
 
-        int clientConnectionsPort = int.Parse(Environment.GetEnvironmentVariable("TCP_SERVER_PORT_CLIENT")
-            ?? throw new NullReferenceException("TCP Server Port For Client Connections Is NULL"));
+        int clientConnectionsPort = int.Parse(Environment.GetEnvironmentVariable("CHAT_SERVER_PORT_CLIENT")
+            ?? throw new NullReferenceException("Chat Server Port For Client Connections Is NULL"));
 
-        int matchServerConnectionsPort = int.Parse(Environment.GetEnvironmentVariable("TCP_SERVER_PORT_MATCH_SERVER")
-            ?? throw new NullReferenceException("TCP Server Port For Match Server Connections Is NULL"));
+        int matchServerConnectionsPort = int.Parse(Environment.GetEnvironmentVariable("CHAT_SERVER_PORT_MATCH_SERVER")
+            ?? throw new NullReferenceException("Chat Server Port For Match Server Connections Is NULL"));
 
-        int matchServerManagerConnectionsPort = int.Parse(Environment.GetEnvironmentVariable("TCP_SERVER_PORT_MATCH_SERVER_MANAGER")
-            ?? throw new NullReferenceException("TCP Server Port For Match Server Manager Connections Is NULL"));
+        int matchServerManagerConnectionsPort = int.Parse(Environment.GetEnvironmentVariable("CHAT_SERVER_PORT_MATCH_SERVER_MANAGER")
+            ?? throw new NullReferenceException("Chat Server Port For Match Server Manager Connections Is NULL"));
 
         ChatServer = new Domain.Core.ChatServer(serviceProvider, address, clientConnectionsPort, matchServerConnectionsPort, matchServerManagerConnectionsPort);
 

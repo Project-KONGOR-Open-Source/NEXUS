@@ -50,7 +50,7 @@ public partial class ServerRequesterController
         await DistributedCache.SetMatchServerManager(hostAccountName, matchServerManager);
 
         string chatHost = Environment.GetEnvironmentVariable("CHAT_SERVER_HOST") ?? throw new NullReferenceException("Chat Server Host Is NULL");
-        int chatPort = int.Parse(Environment.GetEnvironmentVariable("CHAT_SERVER_PORT") ?? throw new NullReferenceException("Chat Server Port Is NULL"));
+        int chatPort = int.Parse(Environment.GetEnvironmentVariable("CHAT_SERVER_PORT_CLIENT") ?? throw new NullReferenceException("Chat Server Port Is NULL"));
 
         Dictionary<string, object> response = new ()
         {
@@ -149,7 +149,7 @@ public partial class ServerRequesterController
         // TODO: Implement Verifier In Description (If The Server Is A COMPEL Server, It Will Have A Verifier In The Description)
 
         string chatHost = Environment.GetEnvironmentVariable("CHAT_SERVER_HOST") ?? throw new NullReferenceException("Chat Server Host Is NULL");
-        int chatPort = int.Parse(Environment.GetEnvironmentVariable("CHAT_SERVER_PORT") ?? throw new NullReferenceException("Chat Server Port Is NULL"));
+        int chatPort = int.Parse(Environment.GetEnvironmentVariable("CHAT_SERVER_PORT_CLIENT") ?? throw new NullReferenceException("Chat Server Port Is NULL"));
 
         Dictionary<string, object> response = new ()
         {
