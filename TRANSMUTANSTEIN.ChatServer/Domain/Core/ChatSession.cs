@@ -10,7 +10,16 @@ public class ChatSession(TCPServer server, IServiceProvider serviceProvider) : T
     /// </remarks>
     public IWebHostEnvironment HostEnvironment { get; init; } = serviceProvider.GetRequiredService<IWebHostEnvironment>();
 
-    private static ConcurrentDictionary<ushort, Type> CommandToTypeMap { get; set; } = [];
+    private static ConcurrentDictionary<ushort, Type> CommandToCommandTypeMap { get; set; } = [];
+
+    private static ConcurrentDictionary<Type, Type> CommandTypeToSessionTypeMap { get; set; } = [];
+
+    /// <summary>
+    ///     Gets or sets the polymorphic session instance created after a successful handshake.
+    ///     This property is NULL for base sessions before handshake, and references the derived session instance (ClientChatSession, MatchServerChatSession, or MatchServerManagerChatSession) after handshake.
+    ///     Commands are dispatched to the polymorphic session instead of the base session, when available.
+    /// </summary>
+    public ChatSession? Polymorph { get; set; }
 
     private byte[] RemainingPreviouslyReceivedData { get; set; } = [];
 
@@ -27,6 +36,39 @@ public class ChatSession(TCPServer server, IServiceProvider serviceProvider) : T
     protected override void OnDisconnected()
     {
         Log.Information("Chat Session ID {SessionID} Has Terminated", ID);
+
+        if (Polymorph is not null)
+        {
+            IDatabase distributedCacheStore = serviceProvider.GetRequiredService<IDatabase>();
+
+            switch (Polymorph)
+            {
+                case ClientChatSession clientSession:
+                if (clientSession.Account is not null)
+                {
+                    Context.ClientChatSessions.TryRemove(clientSession.Account.Name, out _);
+                }
+                break;
+
+                case MatchServerChatSession matchServerSession:
+                if (matchServerSession.Metadata is not null)
+                {
+                    Context.MatchServerChatSessions.TryRemove(matchServerSession.Metadata.ServerID, out _);
+
+                    _ = distributedCacheStore.RemoveMatchServerByID(matchServerSession.Metadata.ServerID);
+                }
+                break;
+
+                case MatchServerManagerChatSession matchServerManagerSession:
+                if (matchServerManagerSession.Metadata is not null)
+                {
+                    Context.MatchServerManagerChatSessions.TryRemove(matchServerManagerSession.Metadata.ServerManagerID, out _);
+
+                    _ = distributedCacheStore.RemoveMatchServerManagerByID(matchServerManagerSession.Metadata.ServerManagerID);
+                }
+                break;
+            }
+        }
     }
 
     protected override void OnReceived(byte[] buffer, long offset, long size)
@@ -121,17 +163,35 @@ public class ChatSession(TCPServer server, IServiceProvider serviceProvider) : T
                         {
                             Type sessionParameterType = parameterTypes.First();
 
-                            if (sessionParameterType.IsAssignableFrom(GetType()) is false)
+                            ChatSession sessionToUse = this;
+
+                            if (CommandTypeToSessionTypeMap.TryGetValue(commandType, out Type? requiredSessionType))
+                            {
+                                if (requiredSessionType != typeof(ChatSession))
+                                {
+                                    if (Polymorph is null || Polymorph.GetType() != requiredSessionType)
+                                    {
+                                        Polymorph = (ChatSession) Activator.CreateInstance(requiredSessionType, Server, serviceProvider)!;
+
+                                        Log.Debug(@"Created Polymorphic Session ""{SessionType}"" For Command ""{CommandType}""", requiredSessionType.Name, commandType.Name);
+                                    }
+
+                                    sessionToUse = Polymorph;
+                                }
+                            }
+
+                            Type actualSessionType = sessionToUse.GetType();
+
+                            if (sessionParameterType.IsAssignableFrom(actualSessionType) is false)
                                 Log.Error(@"[BUG] Command Type ""{TypeName}"" Requires Session Type ""{RequiredSessionType}"" But Got ""{ActualSessionType}""",
-                                    commandType.Name, sessionParameterType.Name, GetType().Name);
+                                    commandType.Name, sessionParameterType.Name, actualSessionType.Name);
 
                             else
                             {
                                 ChatBuffer buffer = new (segment);
 
-                                object? result = processMethod.Invoke(commandTypeInstance, [this, buffer]);
+                                object? result = processMethod.Invoke(commandTypeInstance, [sessionToUse, buffer]);
 
-                                // If The Result Is A Task, Await It
                                 if (result is Task task) await task;
                             }
                         }
@@ -148,7 +208,7 @@ public class ChatSession(TCPServer server, IServiceProvider serviceProvider) : T
 
     private Type? GetCommandType(ushort command)
     {
-        if (CommandToTypeMap.TryGetValue(command, out Type? type))
+        if (CommandToCommandTypeMap.TryGetValue(command, out Type? type))
             return type;
 
         Type[] types = typeof(TRANSMUTANSTEIN).Assembly.GetTypes();
@@ -157,10 +217,40 @@ public class ChatSession(TCPServer server, IServiceProvider serviceProvider) : T
             && (type.GetCustomAttribute<ChatCommandAttribute>()?.Command.Equals(command) ?? false));
 
         if (type is not null)
-            if (CommandToTypeMap.TryAdd(command, type) is false && CommandToTypeMap.ContainsKey(command) is false)
+        {
+            if (CommandToCommandTypeMap.TryAdd(command, type) is false && CommandToCommandTypeMap.ContainsKey(command) is false)
                 Log.Error(@"[BUG] Could Not Add Command-To-Type Mapping For Command ""0x{Command}"" And Type ""{TypeName}""", command.ToString("X4"), type.Name);
 
+            MapCommandTypeToSessionType(type);
+        }
+
         return type;
+    }
+
+    /// <summary>
+    ///     Extracts the session type parameter from a command processor's generic interface and populates the command type to session type mapping.
+    ///     This method inspects the command processor's implemented interfaces to find IAsynchronousCommandProcessor or ISynchronousCommandProcessor.
+    ///     It then extracts the generic type parameter which represents the required session type for that command.
+    /// </summary>
+    /// <param name="commandType">The command processor type to analyse.</param>
+    private static void MapCommandTypeToSessionType(Type commandType)
+    {
+        if (CommandTypeToSessionTypeMap.ContainsKey(commandType)) return;
+
+        Type? commandProcessorInterface = commandType.GetInterfaces()
+            .FirstOrDefault(interfaceType =>
+                interfaceType.IsGenericType &&
+                    (interfaceType.GetGenericTypeDefinition() == typeof(IAsynchronousCommandProcessor<>) ||
+                        interfaceType.GetGenericTypeDefinition() == typeof(ISynchronousCommandProcessor<>)));
+
+        if (commandProcessorInterface is not null)
+        {
+            Type sessionType = commandProcessorInterface.GetGenericArguments().Single();
+
+            CommandTypeToSessionTypeMap.TryAdd(commandType, sessionType);
+
+            Log.Debug(@"Mapped Command Type ""{CommandType}"" To Session Type ""{SessionType}""", commandType.Name, sessionType.Name);
+        }
     }
 
     /// <summary>
