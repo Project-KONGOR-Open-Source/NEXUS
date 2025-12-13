@@ -21,8 +21,6 @@ public class ServerStatus : ISynchronousCommandProcessor<MatchServerChatSession>
         // TODO: If Status Is IDLE, Mark Server As Available For Match Allocation
         // TODO: If Status Is ACTIVE, Update Match Information And Player Availability States
         // TODO: If Status Is CRASHED Or KILLED, Remove Server From Pool And Handle Match Cleanup
-
-        // TODO: Update Server Load Metrics For Load Balancing Decisions
     }
 }
 
