@@ -28,9 +28,15 @@ public class GroupRejectInvite : ISynchronousCommandProcessor<ClientChatSession>
     }
 }
 
-public class GroupRejectInviteRequestData(ChatBuffer buffer)
+file class GroupRejectInviteRequestData
 {
-    public byte[] CommandBytes = buffer.ReadCommandBytes();
+    public byte[] CommandBytes { get; init; }
 
-    public string InviterName = buffer.ReadString();
+    public string InviterName { get; init; }
+
+    public GroupRejectInviteRequestData(ChatBuffer buffer)
+    {
+        CommandBytes = buffer.ReadCommandBytes();
+        InviterName = buffer.ReadString();
+    }
 }

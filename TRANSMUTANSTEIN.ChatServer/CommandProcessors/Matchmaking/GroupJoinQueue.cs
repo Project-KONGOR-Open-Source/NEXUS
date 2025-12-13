@@ -34,7 +34,12 @@ public class GroupJoinQueue : ISynchronousCommandProcessor<ClientChatSession>
     }
 }
 
-public class GroupJoinQueueRequestData(ChatBuffer buffer)
+file class GroupJoinQueueRequestData
 {
-    public byte[] CommandBytes = buffer.ReadCommandBytes();
+    public byte[] CommandBytes { get; init; }
+
+    public GroupJoinQueueRequestData(ChatBuffer buffer)
+    {
+        CommandBytes = buffer.ReadCommandBytes();
+    }
 }

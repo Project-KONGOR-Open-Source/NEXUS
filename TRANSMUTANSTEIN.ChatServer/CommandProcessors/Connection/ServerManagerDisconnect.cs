@@ -12,7 +12,12 @@ public class ServerManagerDisconnect(IDatabase distributedCacheStore) : IAsynchr
     }
 }
 
-public class ServerManagerDisconnectRequestData(ChatBuffer buffer)
+file class ServerManagerDisconnectRequestData
 {
-    public byte[] CommandBytes = buffer.ReadCommandBytes();
+    public byte[] CommandBytes { get; init; }
+
+    public ServerManagerDisconnectRequestData(ChatBuffer buffer)
+    {
+        CommandBytes = buffer.ReadCommandBytes();
+    }
 }

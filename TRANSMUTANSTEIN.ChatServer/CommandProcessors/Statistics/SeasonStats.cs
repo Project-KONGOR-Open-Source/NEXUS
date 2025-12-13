@@ -38,7 +38,12 @@ public class SeasonStats : ISynchronousCommandProcessor<ClientChatSession>
     }
 }
 
-public class SeasonStatsRequestData(ChatBuffer buffer)
+file class SeasonStatsRequestData
 {
-    public byte[] CommandBytes = buffer.ReadCommandBytes();
+    public byte[] CommandBytes { get; init; }
+
+    public SeasonStatsRequestData(ChatBuffer buffer)
+    {
+        CommandBytes = buffer.ReadCommandBytes();
+    }
 }

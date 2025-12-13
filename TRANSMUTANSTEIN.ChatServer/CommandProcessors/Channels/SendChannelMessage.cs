@@ -51,11 +51,18 @@ public class SendChannelMessage(FloodPreventionService floodPreventionService) :
     }
 }
 
-public class SendChannelMessageRequestData(ChatBuffer buffer)
+file class SendChannelMessageRequestData
 {
-    public byte[] CommandBytes = buffer.ReadCommandBytes();
+    public byte[] CommandBytes { get; init; }
 
-    public string Message = buffer.ReadString();
+    public string Message { get; init; }
 
-    public int ChannelID = buffer.ReadInt32();
+    public int ChannelID { get; init; }
+
+    public SendChannelMessageRequestData(ChatBuffer buffer)
+    {
+        CommandBytes = buffer.ReadCommandBytes();
+        Message = buffer.ReadString();
+        ChannelID = buffer.ReadInt32();
+    }
 }

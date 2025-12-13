@@ -20,23 +20,36 @@ public class ServerManagerStatus : ISynchronousCommandProcessor<MatchServerManag
     }
 }
 
-public class ServerManagerStatusData(ChatBuffer buffer)
+file class ServerManagerStatusData
 {
-    public byte[] CommandBytes = buffer.ReadCommandBytes();
+    public byte[] CommandBytes { get; init; }
 
-    public int ServerManagerID = buffer.ReadInt32();
+    public int ServerManagerID { get; init; }
 
-    public string ServerLogin = buffer.ReadString();
+    public string ServerLogin { get; init; }
 
-    public string Location = buffer.ReadString();
+    public string Location { get; init; }
 
-    public string Name = buffer.ReadString();
+    public string Name { get; init; }
 
-    public string Version = buffer.ReadString();
+    public string Version { get; init; }
 
-    public string Address = buffer.ReadString();
+    public string Address { get; init; }
 
-    public short Port = buffer.ReadInt16();
+    public short Port { get; init; }
 
-    public bool ShuttingDown = buffer.ReadInt8() is not 0;
+    public bool ShuttingDown { get; init; }
+
+    public ServerManagerStatusData(ChatBuffer buffer)
+    {
+        CommandBytes = buffer.ReadCommandBytes();
+        ServerManagerID = buffer.ReadInt32();
+        ServerLogin = buffer.ReadString();
+        Location = buffer.ReadString();
+        Name = buffer.ReadString();
+        Version = buffer.ReadString();
+        Address = buffer.ReadString();
+        Port = buffer.ReadInt16();
+        ShuttingDown = buffer.ReadInt8() is not 0;
+    }
 }

@@ -24,13 +24,21 @@ public class SilenceChannelMember : ISynchronousCommandProcessor<ClientChatSessi
     }
 }
 
-public class SilenceChannelMemberRequestData(ChatBuffer buffer)
+file class SilenceChannelMemberRequestData
 {
-    public byte[] CommandBytes = buffer.ReadCommandBytes();
+    public byte[] CommandBytes { get; init; }
 
-    public int ChannelID = buffer.ReadInt32();
+    public int ChannelID { get; init; }
 
-    public string TargetName = buffer.ReadString();
+    public string TargetName { get; init; }
 
-    public int DurationMilliseconds = buffer.ReadInt32();
+    public int DurationMilliseconds { get; init; }
+
+    public SilenceChannelMemberRequestData(ChatBuffer buffer)
+    {
+        CommandBytes = buffer.ReadCommandBytes();
+        ChannelID = buffer.ReadInt32();
+        TargetName = buffer.ReadString();
+        DurationMilliseconds = buffer.ReadInt32();
+    }
 }

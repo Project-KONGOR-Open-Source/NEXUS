@@ -17,9 +17,15 @@ public class ApproveFriend(MerrickContext merrick, IDatabase distributedCacheSto
     }
 }
 
-public class ApproveFriendRequestData(ChatBuffer buffer)
+file class ApproveFriendRequestData
 {
-    public byte[] CommandBytes = buffer.ReadCommandBytes();
+    public byte[] CommandBytes { get; init; }
 
-    public string FriendNickname = buffer.ReadString();
+    public string FriendNickname { get; init; }
+
+    public ApproveFriendRequestData(ChatBuffer buffer)
+    {
+        CommandBytes = buffer.ReadCommandBytes();
+        FriendNickname = buffer.ReadString();
+    }
 }

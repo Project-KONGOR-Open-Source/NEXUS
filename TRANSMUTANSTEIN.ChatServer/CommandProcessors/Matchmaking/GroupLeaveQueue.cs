@@ -40,7 +40,12 @@ public class GroupLeaveQueue : ISynchronousCommandProcessor<ClientChatSession>
     }
 }
 
-public class GroupLeaveQueueRequestData(ChatBuffer buffer)
+file class GroupLeaveQueueRequestData
 {
-    public byte[] CommandBytes = buffer.ReadCommandBytes();
+    public byte[] CommandBytes { get; init; }
+
+    public GroupLeaveQueueRequestData(ChatBuffer buffer)
+    {
+        CommandBytes = buffer.ReadCommandBytes();
+    }
 }

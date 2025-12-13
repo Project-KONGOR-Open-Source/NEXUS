@@ -13,11 +13,18 @@ public class GroupJoin : ISynchronousCommandProcessor<ClientChatSession>
     }
 }
 
-public class GroupJoinRequestData(ChatBuffer buffer)
+file class GroupJoinRequestData
 {
-    public byte[] CommandBytes = buffer.ReadCommandBytes();
+    public byte[] CommandBytes { get; init; }
 
-    public string ClientVersion = buffer.ReadString();
+    public string ClientVersion { get; init; }
 
-    public string InviteIssuerName = buffer.ReadString();
+    public string InviteIssuerName { get; init; }
+
+    public GroupJoinRequestData(ChatBuffer buffer)
+    {
+        CommandBytes = buffer.ReadCommandBytes();
+        ClientVersion = buffer.ReadString();
+        InviteIssuerName = buffer.ReadString();
+    }
 }

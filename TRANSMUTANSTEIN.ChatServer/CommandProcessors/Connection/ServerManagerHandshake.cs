@@ -157,15 +157,23 @@ public class ServerManagerHandshake(IDatabase distributedCacheStore, MerrickCont
     }
 }
 
-public class ServerManagerHandshakeRequestData(ChatBuffer buffer)
+file class ServerManagerHandshakeRequestData
 {
-    public byte[] CommandBytes = buffer.ReadCommandBytes();
+    public byte[] CommandBytes { get; init; }
 
-    public int ServerManagerID = buffer.ReadInt32();
+    public int ServerManagerID { get; init; }
 
-    public string SessionCookie = buffer.ReadString();
+    public string SessionCookie { get; init; }
 
-    public int ChatProtocolVersion = buffer.ReadInt32();
+    public int ChatProtocolVersion { get; init; }
+
+    public ServerManagerHandshakeRequestData(ChatBuffer buffer)
+    {
+        CommandBytes = buffer.ReadCommandBytes();
+        ServerManagerID = buffer.ReadInt32();
+        SessionCookie = buffer.ReadString();
+        ChatProtocolVersion = buffer.ReadInt32();
+    }
 
     public MatchServerManagerChatSessionMetadata ToMetadata()
     {

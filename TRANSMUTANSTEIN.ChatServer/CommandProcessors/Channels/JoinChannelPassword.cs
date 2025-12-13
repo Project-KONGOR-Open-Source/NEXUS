@@ -13,11 +13,18 @@ public class JoinPasswordProtectedChannel : ISynchronousCommandProcessor<ClientC
     }
 }
 
-public class JoinPasswordProtectedChannelRequestData(ChatBuffer buffer)
+file class JoinPasswordProtectedChannelRequestData
 {
-    public byte[] CommandBytes = buffer.ReadCommandBytes();
+    public byte[] CommandBytes { get; init; }
 
-    public string ChannelName = buffer.ReadString();
+    public string ChannelName { get; init; }
 
-    public string Password = buffer.ReadString();
+    public string Password { get; init; }
+
+    public JoinPasswordProtectedChannelRequestData(ChatBuffer buffer)
+    {
+        CommandBytes = buffer.ReadCommandBytes();
+        ChannelName = buffer.ReadString();
+        Password = buffer.ReadString();
+    }
 }
