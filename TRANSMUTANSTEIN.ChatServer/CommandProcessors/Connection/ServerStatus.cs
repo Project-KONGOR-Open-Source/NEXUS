@@ -157,7 +157,6 @@ file class ServerStatusData
         Status = (ChatProtocol.ServerStatus) buffer.ReadInt8();
         ArrangedMatchType = buffer.ReadInt8();
         Flags = (ChatProtocol.ServerType) buffer.ReadInt16();
-        DecodeServerFlags();
         MapName = buffer.ReadString();
         GameName = buffer.ReadString();
         GameMode = buffer.ReadString();
@@ -185,67 +184,33 @@ file class ServerStatusData
         DriveFreeSpace = buffer.ReadInt64();
         DriveTotalSpace = buffer.ReadInt64();
         ServerVersion = buffer.ReadString();
+        ClientCount = buffer.ReadInt32();
+        LoadAverage = buffer.ReadFloat32();
+        HostName = buffer.ReadString();
 
         ClientNetworkStatistics = [];
 
-        if (buffer.HasRemainingData())
+        for (int clientIndex = 0; clientIndex < ClientCount; clientIndex++)
         {
-            ClientCount = buffer.ReadInt32();
-            LoadAverage = buffer.ReadFloat32();
-            HostName = buffer.ReadString();
-
-            if (ClientCount < 0 || ClientCount > 1000)
+            ClientNetworkStatistics.Add(new ClientNetworkStatistics
             {
-                ClientCount = 0;
-            }
-
-            else
-            {
-                for (int clientIndex = 0; clientIndex < ClientCount; clientIndex++)
-                {
-                    long bytesNeededMinimum = 4 + 1 + 6 + (8 * 8);
-
-                    if (buffer.Size - buffer.Offset < bytesNeededMinimum)
-                    {
-                        break;
-                    }
-
-                    try
-                    {
-                        ClientNetworkStatistics.Add(new ClientNetworkStatistics
-                        {
-                            AccountID = buffer.ReadInt32(),
-                            Address = buffer.ReadString(),
-                            PingMinimum = buffer.ReadInt16(),
-                            PingAverage = buffer.ReadInt16(),
-                            PingMaximum = buffer.ReadInt16(),
-                            ReliablePacketsSent = buffer.ReadInt64(),
-                            ReliablePacketsAcknowledged = buffer.ReadInt64(),
-                            ReliablePacketsPeerSent = buffer.ReadInt64(),
-                            ReliablePacketsPeerAcknowledged = buffer.ReadInt64(),
-                            UnreliablePacketsSent = buffer.ReadInt64(),
-                            UnreliablePacketsPeerReceived = buffer.ReadInt64(),
-                            UnreliablePacketsPeerSent = buffer.ReadInt64(),
-                            UnreliablePacketsReceived = buffer.ReadInt64()
-                        });
-                    }
-
-                    catch (Exception exception)
-                    {
-                        Log.Error(exception, @"Error Reading Client {Index} Stats", clientIndex);
-
-                        break;
-                    }
-                }
-            }
+                AccountID = buffer.ReadInt32(),
+                Address = buffer.ReadString(),
+                PingMinimum = buffer.ReadInt16(),
+                PingAverage = buffer.ReadInt16(),
+                PingMaximum = buffer.ReadInt16(),
+                ReliablePacketsSent = buffer.ReadInt64(),
+                ReliablePacketsAcknowledged = buffer.ReadInt64(),
+                ReliablePacketsPeerSent = buffer.ReadInt64(),
+                ReliablePacketsPeerAcknowledged = buffer.ReadInt64(),
+                UnreliablePacketsSent = buffer.ReadInt64(),
+                UnreliablePacketsPeerReceived = buffer.ReadInt64(),
+                UnreliablePacketsPeerSent = buffer.ReadInt64(),
+                UnreliablePacketsReceived = buffer.ReadInt64()
+            });
         }
 
-        else
-        {
-            ClientCount = 0;
-            LoadAverage = 0.0f;
-            HostName = string.Empty;
-        }
+        DecodeServerFlags();
     }
 
     /// <summary>
