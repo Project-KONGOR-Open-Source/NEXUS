@@ -59,10 +59,7 @@ file class ServerStatusData
 
     public bool VerifiedOnly { get; private set; }
 
-    /// <summary>
-    ///     
-    /// </summary>
-    public bool ServerAccess { get; private set; }                  // Private Server
+    public bool PrivateServer { get; private set; }
 
     /// <summary>
     ///     0 = Noobs Only, 1 = Noobs Allowed, 2 = Professionals Only
@@ -265,7 +262,7 @@ file class ServerStatusData
 
         NoLeavers = Flags.HasFlag(ChatProtocol.ServerType.SSF_NOLEAVER);
         VerifiedOnly = Flags.HasFlag(ChatProtocol.ServerType.SSF_VERIFIED_ONLY);
-        ServerAccess = Flags.HasFlag(ChatProtocol.ServerType.SSF_PRIVATE);
+        PrivateServer = Flags.HasFlag(ChatProtocol.ServerType.SSF_PRIVATE);
         AllHeroes = Flags.HasFlag(ChatProtocol.ServerType.SSF_ALL_HEROES);
         CasualMode = Flags.HasFlag(ChatProtocol.ServerType.SSF_CASUAL);
         Gated = Flags.HasFlag(ChatProtocol.ServerType.SSF_GATED);
