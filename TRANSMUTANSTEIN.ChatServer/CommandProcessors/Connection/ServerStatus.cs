@@ -218,9 +218,9 @@ file class ServerStatusData
     {
         Official = Flags switch
         {
-            _ when Flags.HasFlag(ChatProtocol.ServerType.SSF_OFFICIAL_WITH_STATS) => 2,  // Official With Stats
-            _ when Flags.HasFlag(ChatProtocol.ServerType.SSF_OFFICIAL)            => 1,  // Official Without Stats
-            _                                                                     => 0   // Unofficial
+            _ when Flags.HasFlag(ChatProtocol.ServerType.SSF_OFFICIAL_WITH_STATS) => 2, // Official With Stats
+            _ when Flags.HasFlag(ChatProtocol.ServerType.SSF_OFFICIAL)            => 1, // Official Without Stats
+            _                                                                     => 0  // Unofficial
         };
 
         NoLeavers = Flags.HasFlag(ChatProtocol.ServerType.SSF_NOLEAVER);
@@ -237,9 +237,9 @@ file class ServerStatusData
 
         Tier = Flags switch
         {
-            _ when Flags.HasFlag(ChatProtocol.ServerType.SSF_TIER_PRO)           => 2,  // Professionals Only
-            _ when Flags.HasFlag(ChatProtocol.ServerType.SSF_TIER_NOOBS_ALLOWED) => 1,  // Noobs Allowed
-            _                                                                    => 0   // Noobs Only
+            _ when Flags.HasFlag(ChatProtocol.ServerType.SSF_TIER_PRO)           => 2, // Professionals Only
+            _ when Flags.HasFlag(ChatProtocol.ServerType.SSF_TIER_NOOBS_ALLOWED) => 1, // Noobs Allowed
+            _                                                                    => 0  // Noobs Only
         };
     }
 }
