@@ -41,7 +41,7 @@ public partial class ServerRequesterController
         int matchMode = int.TryParse(Request.Form["match_mode"], out int parsedMatchMode) ? parsedMatchMode
             : throw new ArgumentOutOfRangeException("match_mode", Request.Form["match_mode"].ToString(), @"Value Of Form Parameter ""match_mode"" Is Invalid");
 
-        MatchStartData matchStartData = new()
+        MatchStartData matchStartData = new ()
         {
             ServerID = matchServer.ID,
             Map = map,
@@ -56,7 +56,7 @@ public partial class ServerRequesterController
 
         await DistributedCache.SetMatchStartData(matchStartData);
 
-        Dictionary<string, object> response = new()
+        Dictionary<string, object> response = new ()
         {
             ["match_id"] = matchStartData.MatchID
         };
