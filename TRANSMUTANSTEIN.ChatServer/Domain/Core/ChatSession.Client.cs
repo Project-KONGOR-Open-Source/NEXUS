@@ -48,6 +48,36 @@ public class ClientChatSession(TCPServer server, IServiceProvider serviceProvide
         return this;
     }
 
+    public async Task<ClientChatSession> JoinMatch(IDatabase distributedCacheStore, string serverAddress)
+    {
+        List<string> serverAddressParts = [.. serverAddress.Split(':')];
+
+        if (serverAddressParts.Count is not 2)
+        {
+            Log.Error(@"[BUG] Invalid Match Server Address ""{MatchServerAddress}""", serverAddress);
+
+            return this;
+        }
+
+        string serverIPAddress = serverAddressParts.First();
+        int serverPort = Convert.ToInt32(serverAddressParts.Last());
+
+        MatchServer? server = await distributedCacheStore.GetMatchServerByIPAddressAndPort(serverIPAddress, serverPort);
+
+        if (server is null)
+        {
+            Log.Error(@"[BUG] Client Account ID ""{AccountID}"" Attempted To Join Match On Unknown Server ""{ServerAddress}""", Account.ID, serverAddress);
+
+            return this;
+        }
+
+        Metadata.LastKnownClientState = ChatProtocol.ChatClientStatus.CHAT_CLIENT_STATUS_JOINING_GAME;
+
+        BroadcastConnectionStatusUpdate(ChatProtocol.ChatClientStatus.CHAT_CLIENT_STATUS_JOINING_GAME, server);
+
+        return this;
+    }
+
     public ClientChatSession Reject(ChatProtocol.ChatRejectReason reason)
     {
         ChatBuffer reject = new ();
