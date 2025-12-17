@@ -179,4 +179,36 @@ public static partial class DistributedCacheExtensions
             matchServer.MatchServerManager = null;
         }
     }
+
+    private static string ConstructMatchStartDataKey(long matchID) => $@"MATCH-START-DATA:[""{matchID}""]";
+
+    /// <summary>
+    ///     Stores match start data in the cache.
+    ///     This data will be used to populate match statistics when the match ends.
+    /// </summary>
+    public static async Task SetMatchStartData(this IDatabase distributedCacheStore, MatchStartData matchStartData)
+    {
+        string serializedMatchStartData = JsonSerializer.Serialize(matchStartData);
+
+        // Store For A Duration Of Time Longer Than Any Match Is Expected To Last
+        await distributedCacheStore.StringSetAsync(ConstructMatchStartDataKey(matchStartData.MatchID), serializedMatchStartData, TimeSpan.FromHours(6));
+    }
+
+    /// <summary>
+    ///     Retrieves match start data from the cache by match ID.
+    ///     Returns NULL if no match start data is found for the given match ID.
+    /// </summary>
+    public static async Task<MatchStartData?> GetMatchStartData(this IDatabase distributedCacheStore, long matchID)
+    {
+        RedisValue cachedValue = await distributedCacheStore.StringGetAsync(ConstructMatchStartDataKey(matchID));
+
+        return cachedValue.IsNullOrEmpty ? null : JsonSerializer.Deserialize<MatchStartData>(cachedValue.ToString());
+    }
+
+    /// <summary>
+    ///     Removes match start data from the cache.
+    ///     This should be called after full match statistics have been created.
+    /// </summary>
+    public static async Task RemoveMatchStartData(this IDatabase distributedCacheStore, long matchID)
+        => await distributedCacheStore.KeyDeleteAsync(ConstructMatchStartDataKey(matchID));
 }
