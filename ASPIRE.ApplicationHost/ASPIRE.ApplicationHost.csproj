@@ -1,4 +1,4 @@
-﻿<Project Sdk="Aspire.AppHost.Sdk/13.0.2">
+﻿<Project Sdk="Aspire.AppHost.Sdk/13.1.0">
 
     <!--
         When There Is An Update To The "Aspire.Hosting.AppHost" NuGet Package:
@@ -14,8 +14,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Aspire.Hosting.Redis" Version="13.0.2" />
-        <PackageReference Include="Aspire.Hosting.SqlServer" Version="13.0.2" />
+        <PackageReference Include="Aspire.Hosting.Redis" Version="13.1.0" />
+        <PackageReference Include="Aspire.Hosting.SqlServer" Version="13.1.0" />
     </ItemGroup>
 
     <ItemGroup>
