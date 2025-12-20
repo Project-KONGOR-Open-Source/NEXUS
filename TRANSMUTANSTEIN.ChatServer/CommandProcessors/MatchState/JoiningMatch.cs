@@ -14,7 +14,7 @@ public class JoiningMatch(IDatabase distributedCacheStore) : IAsynchronousComman
         // INFO: If Valid, Send AutoMatchConnectBroadcast With Server Details And Return Early
 
         await session
-            .JoinMatch(distributedCacheStore, requestData.ServerAddress);
+            .PrepareToJoinMatch(distributedCacheStore, requestData.ServerAddress);
     }
 }
 
