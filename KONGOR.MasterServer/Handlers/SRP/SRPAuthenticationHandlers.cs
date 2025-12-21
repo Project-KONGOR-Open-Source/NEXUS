@@ -126,7 +126,7 @@ public static class SRPAuthenticationHandlers
         if (account.Type is AccountType.GameMaster or AccountType.Staff)
             channels.Add(ChatChannels.GameMastersChannel);
 
-        if (account.Type is AccountType.Trial or AccountType.Staff)
+        if (account.Type is AccountType.Guest or AccountType.Staff)
             channels.Add(ChatChannels.GuestsChannel);
 
         if (account.Type is AccountType.ServerHost or AccountType.Staff)

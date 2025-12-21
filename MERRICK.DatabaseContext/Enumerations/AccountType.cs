@@ -14,6 +14,7 @@ public enum AccountType
     MatchCaster         = 8,    // can spectate matches
 
     // custom types
+    Guest               = 100,  // built-in accounts used for quick play
     Streamer            = 101,  // has top priority in the matchmaking queue
     VIP                 = 102   // has top priority in the matchmaking queue
 }

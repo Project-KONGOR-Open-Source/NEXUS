@@ -143,7 +143,7 @@ public static class SeedDataHandlers
             {
                 Name = iterator is 0 ? "MODERATOR" : $"GUEST-{iterator:D2}",
                 User = userGuest,
-                Type = iterator is 0 ? AccountType.MatchModerator : AccountType.Trial,
+                Type = iterator is 0 ? AccountType.MatchModerator : AccountType.Guest,
                 IsMain = iterator is 0,
                 Clan = clanGuest,
                 ClanTier = iterator is 0 ? ClanTier.Leader : ClanTier.Member,
@@ -213,7 +213,7 @@ public static class SeedDataHandlers
         Account systemAccount = await context.Accounts.FirstAsync(cancellationToken);
 
         List<Account> guestAccounts = await context.Accounts.Include(account => account.User)
-            .Where(account => account.IsMain.Equals(false)).Where(account => account.Type == AccountType.Trial).ToListAsync(cancellationToken: cancellationToken);
+            .Where(account => account.IsMain.Equals(false)).Where(account => account.Type == AccountType.Guest).ToListAsync(cancellationToken: cancellationToken);
 
         foreach (Account guestAccount in guestAccounts)
         {
@@ -236,7 +236,7 @@ public static class SeedDataHandlers
         Account systemAccount = await context.Accounts.FirstAsync(cancellationToken);
 
         List<Account> guestAccounts = await context.Accounts.Include(account => account.User)
-            .Where(account => account.IsMain.Equals(false)).Where(account => account.Type == AccountType.Trial).ToListAsync(cancellationToken: cancellationToken);
+            .Where(account => account.IsMain.Equals(false)).Where(account => account.Type == AccountType.Guest).ToListAsync(cancellationToken: cancellationToken);
 
         foreach (Account guestAccount in guestAccounts)
         {
