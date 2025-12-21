@@ -96,7 +96,7 @@ public class ClientChatSession(TCPServer server, IServiceProvider serviceProvide
 
         MatchData = matchData;
 
-        MatchServer? server = await distributedCacheStore.GetMatchServerByID(matchID);
+        MatchServer? server = await distributedCacheStore.GetMatchServerByID(matchData.ServerID);
 
         if (server is null)
         {
