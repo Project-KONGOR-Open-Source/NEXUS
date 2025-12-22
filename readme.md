@@ -263,13 +263,14 @@ NEXUS implements a tiered account system to ensure matchmaking quality. Account 
 
 | Account Type | ID | Condition | Queue Eligibility |
 | :--- | :--- | :--- | :--- |
-| **Trial** | `1` | Default / Unverified | <span style="color:red">restricted</span> |
-| **Normal** | `3` | **Verified Email** on Discord | ✅ **Public Matches** |
-| **Legacy** | `4` | **MFA Enabled** on Discord | ✅ **Public & Ranked Matches** |
+| **Disabled** | `0` | Default / Unverified | <span style="color:red">restricted</span> |
+| **Normal** | `3` | **Verified Email**   | ✅ **Public Matches** |
+| **Legacy** | `4` | **MFA Enabled**      | ✅ **Public & Ranked Matches** |
 
 > [!NOTE]
-> Existing Legacy/Staff/VIP accounts are not downgraded. New accounts start as Trial and upgrade automatically upon verification.
+> Existing Legacy/Staff/VIP accounts are not downgraded. New accounts start as Disabled and upgrade automatically upon verification.
 > Link your Discord account to upgrade your eligibility!
+
 
 <hr/>
 

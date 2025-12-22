@@ -32,6 +32,18 @@
                     <div class="card-body p-5 bg-light">
                         
                         <div class="row g-4 mb-5">
+                            @if (!User.IsEmailVerified)
+                            {
+                                <div class="col-12">
+                                    <div class="alert alert-danger shadow-sm d-flex align-items-center" role="alert">
+                                        <i class="bi bi-exclamation-triangle-fill fs-4 me-3"></i>
+                                        <div>
+                                            <strong>Account Disabled</strong>
+                                            <div class="small">Your account is currently disabled. Please verify your email via Discord to unlock access to the game.</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
                             <div class="col-12">
                                 <h4 class="text-muted text-uppercase fw-bold text-center mb-4">Wallet</h4>
                             </div>

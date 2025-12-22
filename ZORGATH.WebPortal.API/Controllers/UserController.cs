@@ -189,7 +189,7 @@ public class UserController(MerrickContext databaseContext, ILogger<UserControll
 
         // 5. Create Account
         // Determine Account Type based on verification status
-        AccountType accountType = AccountType.Trial; // Default restricted
+        AccountType accountType = AccountType.Disabled; // Default disabled until verified
         if (mfaEnabled) 
             accountType = AccountType.Legacy; // Ranked eligible
         else if (emailVerified) 

@@ -89,15 +89,16 @@ public class AuthController(
             if (user.DiscordProfile.MfaEnabled != newMfa) { user.DiscordProfile.MfaEnabled = newMfa; hasChanges = true; }
 
             // Sync Account Type logic
-            AccountType targetType = AccountType.Trial;
+            AccountType targetType = AccountType.Disabled;
             if (newMfa) targetType = AccountType.Legacy;
             else if (newVerified) targetType = AccountType.Normal;
 
-            // Update all accounts for this user (or just Main? Assuming all for now to be safe/consistent)
+            // Update all accounts for this user
             foreach (var account in user.Accounts)
             {
-                // Only upgrade/downgrade if it matches one of our auto-managed types to avoid overwriting Staff/VIP
-                if (account.Type == AccountType.Trial || account.Type == AccountType.Normal || account.Type == AccountType.Legacy)
+                // Only upgrade/downgrade if it matches one of our auto-managed types (or Trial if any exist)
+                // Using Disabled ensures unverified users cannot play
+                if (account.Type == AccountType.Disabled || account.Type == AccountType.Trial || account.Type == AccountType.Normal || account.Type == AccountType.Legacy)
                 {
                     if (account.Type != targetType)
                     {
