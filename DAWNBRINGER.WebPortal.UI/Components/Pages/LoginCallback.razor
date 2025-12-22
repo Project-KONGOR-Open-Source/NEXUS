@@ -1,55 +1,29 @@
 @page "/login-callback"
-@using System.Net.Http.Headers
-@inject HttpClient Http
+@using global::DAWNBRINGER.WebPortal.UI.Services
 @inject NavigationManager Navigation
+@inject AuthService BuildAuth
+@inject ILogger<LoginCallback> logger
+@rendermode InteractiveServer
 
-<PageTitle>Login Successful</PageTitle>
+<PageTitle>Login Processing</PageTitle>
 
-<h1>Login Successful!</h1>
-
-<p>You have been successfully authenticated.</p>
-
-<div class="alert alert-success">
-    <strong>Success!</strong> Your account is ready.
-    <br/>
-    You can now log in through the <strong>Game Client</strong> using your username and password.
-</div>
-
-@if (User != null)
-{
-    <div class="card mt-4" style="max-width: 500px;">
-        <div class="card-header">
-            Account Overview
-        </div>
-        @if (!string.IsNullOrEmpty(User.ProfilePictureUrl))
+<div class="d-flex justify-content-center align-items-center mt-5">
+    <div class="text-center">
+        @if (!string.IsNullOrEmpty(ErrorMessage))
         {
-            <div class="card-body text-center">
-                <img src="@User.ProfilePictureUrl" alt="Avatar" class="rounded-circle" style="width: 100px; height: 100px;" />
+            <div class="alert alert-danger">
+                <strong>Error:</strong> @ErrorMessage
             </div>
+            <a href="/" class="btn btn-primary mt-3">Go Home</a>
         }
-        <ul class="list-group list-group-flush">
-            <li class="list-group-item"><strong>Username:</strong> @User.Accounts.FirstOrDefault()?.Name</li>
-            <li class="list-group-item"><strong>Email:</strong> @User.EmailAddress</li>
-            <li class="list-group-item"><strong>Gold Coins:</strong> @User.GoldCoins</li>
-            <li class="list-group-item"><strong>Silver Coins:</strong> @User.SilverCoins</li>
-            <li class="list-group-item"><strong>Total Level:</strong> @User.TotalLevel</li>
-            <li class="list-group-item"><strong>Plinko Tickets:</strong> @User.PlinkoTickets</li>
-        </ul>
+        else
+        {
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Logging in...</span>
+            </div>
+            <p class="mt-3 text-muted">Authenticating...</p>
+        }
     </div>
-}
-else if (IsLoading)
-{
-    <p><em>Loading user details...</em></p>
-}
-else
-{
-    <div class="alert alert-warning">
-        Could not load user details.
-    </div>
-}
-
-<div class="mt-4">
-    <a href="/" class="btn btn-primary">Go Home</a>
 </div>
 
 @code {
@@ -59,33 +33,36 @@ else
     [SupplyParameterFromQuery(Name = "userid")]
     public int? UserID { get; set; }
 
-    private global::DAWNBRINGER.WebPortal.UI.DTOs.GetBasicUserDTO? User;
-    private bool IsLoading = true;
-
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (string.IsNullOrEmpty(Token) || UserID == null)
+        if (firstRender)
         {
-            IsLoading = false;
-            return;
-        }
-
-        try
-        {
-            // Set the Bearer token
-            Http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", Token);
-
-            // Fetch user details
-            User = await Http.GetFromJsonAsync<global::DAWNBRINGER.WebPortal.UI.DTOs.GetBasicUserDTO>($"User/{UserID}");
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error fetching user: {ex.Message}");
-        }
-        finally
-        {
-            IsLoading = false;
+            Console.WriteLine($"[LoginCallback] OnAfterRenderAsync called. Token: {Token?.Substring(0, 10)}..., UserID: {UserID}");
+            try
+            {
+                if (!string.IsNullOrEmpty(Token) && UserID.HasValue)
+                {
+                    Console.WriteLine("[LoginCallback] Saving session...");
+                    await BuildAuth.SaveSessionAsync(Token, UserID.Value);
+                    Console.WriteLine("[LoginCallback] Session saved. Navigating to profile...");
+                    Navigation.NavigateTo("/profile");
+                }
+                else
+                {
+                    Console.WriteLine("[LoginCallback] Missing Token or UserID. redirecting home.");
+                    Navigation.NavigateTo("/");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[LoginCallback] Error: {ex}");
+                ErrorMessage = ex.Message + " | Stack: " + ex.StackTrace;
+                logger.LogError(ex, "Login failed");
+                StateHasChanged();
+            }
         }
     }
+
+    private string? ErrorMessage;
 }
 

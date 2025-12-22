@@ -1,4 +1,5 @@
 ﻿using DAWNBRINGER.WebPortal.UI.Components;
+using ASPIRE.Common.ServiceDefaults;
 
 namespace DAWNBRINGER.WebPortal.UI;
 
@@ -10,6 +11,7 @@ public class DAWNBRINGER
         var builder = WebApplication.CreateBuilder(args);
 
         // Add services to the container.
+        builder.AddServiceDefaults();
         builder.Services.AddRazorComponents()
             .AddInteractiveServerComponents();
 
@@ -23,6 +25,8 @@ public class DAWNBRINGER
         {
             BaseAddress = new Uri("https://localhost:55556") 
         });
+
+        builder.Services.AddScoped<global::DAWNBRINGER.WebPortal.UI.Services.AuthService>();
 
         var app = builder.Build();
 
@@ -41,6 +45,8 @@ public class DAWNBRINGER
 
         app.MapRazorComponents<App>()
             .AddInteractiveServerRenderMode();
+
+        app.MapDefaultEndpoints();
 
         app.Run();
     }
