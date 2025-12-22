@@ -19,21 +19,29 @@ public class RemoveFriend : ISynchronousCommandProcessor<ClientChatSession>
     }
 }
 
-public class RemoveFriendNotificationData(ChatBuffer buffer)
+file class RemoveFriendNotificationData
 {
-    public byte[] CommandBytes = buffer.ReadCommandBytes();
+    public byte[] CommandBytes { get; init; }
 
-    public int RemovedFriendAccountID = buffer.ReadInt32();
+    public int RemovedFriendAccountID { get; init; }
 
     /// <summary>
     ///     The ID of the notification for removing another player from the client's friend list.
     ///     Used for managing notifications while the client is offline; to be received on next login.
     /// </summary>
-    public int RequesterNotificationID = buffer.ReadInt32();
+    public int RequesterNotificationID { get; init; }
 
     /// <summary>
     ///     The ID of the notification for being removed from another player's friend list.
     ///     Used for managing notifications while the client is offline; to be received on next login.
     /// </summary>
-    public int RemovedFriendNotificationID = buffer.ReadInt32();
+    public int RemovedFriendNotificationID { get; init; }
+
+    public RemoveFriendNotificationData(ChatBuffer buffer)
+    {
+        CommandBytes = buffer.ReadCommandBytes();
+        RemovedFriendAccountID = buffer.ReadInt32();
+        RequesterNotificationID = buffer.ReadInt32();
+        RemovedFriendNotificationID = buffer.ReadInt32();
+    }
 }

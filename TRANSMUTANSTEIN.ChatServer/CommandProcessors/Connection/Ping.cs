@@ -19,7 +19,12 @@ public class Ping : ISynchronousCommandProcessor<ChatSession>
     }
 }
 
-public class PingRequestData(ChatBuffer buffer)
+file class PingRequestData
 {
-    public byte[] CommandBytes = buffer.ReadCommandBytes();
+    public byte[] CommandBytes { get; init; }
+
+    public PingRequestData(ChatBuffer buffer)
+    {
+        CommandBytes = buffer.ReadCommandBytes();
+    }
 }

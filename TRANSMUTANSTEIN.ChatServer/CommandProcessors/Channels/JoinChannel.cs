@@ -13,9 +13,15 @@ public class JoinChannel : ISynchronousCommandProcessor<ClientChatSession>
     }
 }
 
-public class JoinChannelRequestData(ChatBuffer buffer)
+file class JoinChannelRequestData
 {
-    public byte[] CommandBytes = buffer.ReadCommandBytes();
+    public byte[] CommandBytes { get; init; }
 
-    public string ChannelName = buffer.ReadString();
+    public string ChannelName { get; init; }
+
+    public JoinChannelRequestData(ChatBuffer buffer)
+    {
+        CommandBytes = buffer.ReadCommandBytes();
+        ChannelName = buffer.ReadString();
+    }
 }

@@ -13,7 +13,12 @@ public class GroupLeave : ISynchronousCommandProcessor<ClientChatSession>
     }
 }
 
-public class GroupLeaveRequestData(ChatBuffer buffer)
+file class GroupLeaveRequestData
 {
-    public byte[] CommandBytes = buffer.ReadCommandBytes();
+    public byte[] CommandBytes { get; init; }
+
+    public GroupLeaveRequestData(ChatBuffer buffer)
+    {
+        CommandBytes = buffer.ReadCommandBytes();
+    }
 }

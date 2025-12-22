@@ -13,11 +13,18 @@ public class KickFromChannel : ISynchronousCommandProcessor<ClientChatSession>
     }
 }
 
-public class KickFromChannelRequestData(ChatBuffer buffer)
+file class KickFromChannelRequestData
 {
-    public byte[] CommandBytes = buffer.ReadCommandBytes();
+    public byte[] CommandBytes { get; init; }
 
-    public int ChannelID = buffer.ReadInt32();
+    public int ChannelID { get; init; }
 
-    public int TargetAccountID = buffer.ReadInt32();
+    public int TargetAccountID { get; init; }
+
+    public KickFromChannelRequestData(ChatBuffer buffer)
+    {
+        CommandBytes = buffer.ReadCommandBytes();
+        ChannelID = buffer.ReadInt32();
+        TargetAccountID = buffer.ReadInt32();
+    }
 }

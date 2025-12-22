@@ -112,7 +112,12 @@ public class PopularityUpdate : ISynchronousCommandProcessor<ClientChatSession>
     }
 }
 
-public class PopularityUpdateRequestData(ChatBuffer buffer)
+file class PopularityUpdateRequestData
 {
-    public byte[] CommandBytes = buffer.ReadCommandBytes();
+    public byte[] CommandBytes { get; init; }
+
+    public PopularityUpdateRequestData(ChatBuffer buffer)
+    {
+        CommandBytes = buffer.ReadCommandBytes();
+    }
 }

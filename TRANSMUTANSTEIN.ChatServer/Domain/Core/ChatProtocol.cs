@@ -819,6 +819,91 @@ public static class ChatProtocol
         TMM_NUM_GAME_MODES
     };
 
+    public enum PublicGameMode
+    {
+        GAME_MODE_NORMAL,
+        GAME_MODE_RANDOM_DRAFT,
+        GAME_MODE_SINGLE_DRAFT,
+        GAME_MODE_DEATHMATCH,
+        GAME_MODE_BANNING_DRAFT,
+        GAME_MODE_CAPTAINS_DRAFT,
+        GAME_MODE_CAPTAINS_MODE,
+        GAME_MODE_BANNING_PICK,
+        GAME_MODE_ALL_RANDOM,
+        GAME_MODE_LOCKPICK,
+        GAME_MODE_BLIND_BAN,
+        GAME_MODE_BOT_MATCH,
+        GAME_MODE_KROS_MODE,
+        GAME_MODE_FORCEPICK,
+        GAME_MODE_SOCCERPICK,
+        GAME_MODE_SOLO_SAME_HERO,
+        GAME_MODE_SOLO_DIFF_HERO,
+        GAME_MODE_COUNTER_PICK,
+        GAME_MODE_MIDWARS_BETA,
+        GAME_MODE_HEROBAN,
+        GAME_MODE_REBORN,
+
+        NUM_GAME_MODES
+    };
+
+    public static string? GetPublicGameModeName(PublicGameMode publicGameMode)
+    {
+        return publicGameMode switch
+        {
+            PublicGameMode.GAME_MODE_NORMAL          => "normal",
+            PublicGameMode.GAME_MODE_RANDOM_DRAFT    => "randomdraft",
+            PublicGameMode.GAME_MODE_SINGLE_DRAFT    => "singledraft",
+            PublicGameMode.GAME_MODE_DEATHMATCH      => "deathmatch",
+            PublicGameMode.GAME_MODE_BANNING_DRAFT   => "banningdraft",
+            PublicGameMode.GAME_MODE_CAPTAINS_DRAFT  => "captainsdraft",
+            PublicGameMode.GAME_MODE_CAPTAINS_MODE   => "captainsmode",
+            PublicGameMode.GAME_MODE_BANNING_PICK    => "banningpick",
+            PublicGameMode.GAME_MODE_ALL_RANDOM      => "allrandom",
+            PublicGameMode.GAME_MODE_LOCKPICK        => "lockpick",
+            PublicGameMode.GAME_MODE_BLIND_BAN       => "blindban",
+            PublicGameMode.GAME_MODE_BOT_MATCH       => "botmatch",
+            PublicGameMode.GAME_MODE_KROS_MODE       => "krosmode",
+            PublicGameMode.GAME_MODE_FORCEPICK       => "forcepick",
+            PublicGameMode.GAME_MODE_SOCCERPICK      => "soccerpick",
+            PublicGameMode.GAME_MODE_SOLO_SAME_HERO  => "solosamehero",
+            PublicGameMode.GAME_MODE_SOLO_DIFF_HERO  => "solodiffhero",
+            PublicGameMode.GAME_MODE_COUNTER_PICK    => "counterpick",
+            PublicGameMode.GAME_MODE_MIDWARS_BETA    => "midwarsbeta",
+            PublicGameMode.GAME_MODE_HEROBAN         => "heroban",
+            PublicGameMode.GAME_MODE_REBORN          => "reborn",
+            _                                        => null
+        };
+    }
+
+    public static string? GetPublicGameModeString(PublicGameMode publicGameMode)
+    {
+        return publicGameMode switch
+        {
+            PublicGameMode.GAME_MODE_NORMAL          => "Mode_Normal",
+            PublicGameMode.GAME_MODE_RANDOM_DRAFT    => "Mode_RandomDraft",
+            PublicGameMode.GAME_MODE_SINGLE_DRAFT    => "Mode_SingleDraft",
+            PublicGameMode.GAME_MODE_DEATHMATCH      => "Mode_Deathmatch",
+            PublicGameMode.GAME_MODE_BANNING_DRAFT   => "Mode_BanningDraft",
+            PublicGameMode.GAME_MODE_CAPTAINS_DRAFT  => "Mode_CaptainsDraft",
+            PublicGameMode.GAME_MODE_CAPTAINS_MODE   => "Mode_CaptainsMode",
+            PublicGameMode.GAME_MODE_BANNING_PICK    => "Mode_BanningPick",
+            PublicGameMode.GAME_MODE_ALL_RANDOM      => "Mode_AllRandom",
+            PublicGameMode.GAME_MODE_LOCKPICK        => "Mode_LockPick",
+            PublicGameMode.GAME_MODE_BLIND_BAN       => "Mode_BlindBan",
+            PublicGameMode.GAME_MODE_BOT_MATCH       => "Mode_BotMatch",
+            PublicGameMode.GAME_MODE_KROS_MODE       => "Mode_KrosMode",
+            PublicGameMode.GAME_MODE_FORCEPICK       => "Mode_ForcePick",
+            PublicGameMode.GAME_MODE_SOCCERPICK      => "Mode_SoccerPick",
+            PublicGameMode.GAME_MODE_SOLO_SAME_HERO  => "Mode_SoloSameHero",
+            PublicGameMode.GAME_MODE_SOLO_DIFF_HERO  => "Mode_SoloDiffHero",
+            PublicGameMode.GAME_MODE_COUNTER_PICK    => "Mode_CounterPick",
+            PublicGameMode.GAME_MODE_MIDWARS_BETA    => "Mode_MidwarsBeta",
+            PublicGameMode.GAME_MODE_HEROBAN         => "Mode_HeroBan",
+            PublicGameMode.GAME_MODE_REBORN          => "Mode_Reborn",
+            _                                        => null
+        };
+    }
+
     public enum TMMGameRegion
     {
         TMM_GAME_REGION_NONE = -1,

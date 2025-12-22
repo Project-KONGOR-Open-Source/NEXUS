@@ -103,47 +103,71 @@ public class ClientHandshake(MerrickContext merrick, IDatabase distributedCacheS
     }
 }
 
-public class ClientHandshakeRequestData(ChatBuffer buffer)
+file class ClientHandshakeRequestData
 {
-    public byte[] CommandBytes = buffer.ReadCommandBytes();
+    public byte[] CommandBytes { get; init; }
 
-    public int AccountID = buffer.ReadInt32();
+    public int AccountID { get; init; }
 
-    public string SessionCookie = buffer.ReadString();
+    public string SessionCookie { get; init; }
 
-    public string RemoteIP = buffer.ReadString();
+    public string RemoteIP { get; init; }
 
-    public string SessionAuthenticationHash = buffer.ReadString();
+    public string SessionAuthenticationHash { get; init; }
 
-    public int ChatProtocolVersion = buffer.ReadInt32();
+    public int ChatProtocolVersion { get; init; }
 
-    public byte OperatingSystemIdentifier = buffer.ReadInt8();
+    public byte OperatingSystemIdentifier { get; init; }
 
-    public byte OperatingSystemVersionMajor = buffer.ReadInt8();
+    public byte OperatingSystemVersionMajor { get; init; }
 
-    public byte OperatingSystemVersionMinor = buffer.ReadInt8();
+    public byte OperatingSystemVersionMinor { get; init; }
 
-    public byte OperatingSystemVersionPatch = buffer.ReadInt8();
+    public byte OperatingSystemVersionPatch { get; init; }
 
-    public string OperatingSystemBuildCode = buffer.ReadString();
+    public string OperatingSystemBuildCode { get; init; }
 
-    public string OperatingSystemArchitecture = buffer.ReadString();
+    public string OperatingSystemArchitecture { get; init; }
 
-    public byte ClientVersionMajor = buffer.ReadInt8();
+    public byte ClientVersionMajor { get; init; }
 
-    public byte ClientVersionMinor = buffer.ReadInt8();
+    public byte ClientVersionMinor { get; init; }
 
-    public byte ClientVersionPatch = buffer.ReadInt8();
+    public byte ClientVersionPatch { get; init; }
 
-    public byte ClientVersionRevision = buffer.ReadInt8();
+    public byte ClientVersionRevision { get; init; }
 
-    public ChatProtocol.ChatClientStatus LastKnownClientState = (ChatProtocol.ChatClientStatus) buffer.ReadInt8();
+    public ChatProtocol.ChatClientStatus LastKnownClientState { get; init; }
 
-    public ChatProtocol.ChatModeType ClientChatModeState = (ChatProtocol.ChatModeType) buffer.ReadInt8();
+    public ChatProtocol.ChatModeType ClientChatModeState { get; init; }
 
-    public string ClientRegion = buffer.ReadString();
+    public string ClientRegion { get; init; }
 
-    public string ClientLanguage = buffer.ReadString();
+    public string ClientLanguage { get; init; }
+
+    public ClientHandshakeRequestData(ChatBuffer buffer)
+    {
+        CommandBytes = buffer.ReadCommandBytes();
+        AccountID = buffer.ReadInt32();
+        SessionCookie = buffer.ReadString();
+        RemoteIP = buffer.ReadString();
+        SessionAuthenticationHash = buffer.ReadString();
+        ChatProtocolVersion = buffer.ReadInt32();
+        OperatingSystemIdentifier = buffer.ReadInt8();
+        OperatingSystemVersionMajor = buffer.ReadInt8();
+        OperatingSystemVersionMinor = buffer.ReadInt8();
+        OperatingSystemVersionPatch = buffer.ReadInt8();
+        OperatingSystemBuildCode = buffer.ReadString();
+        OperatingSystemArchitecture = buffer.ReadString();
+        ClientVersionMajor = buffer.ReadInt8();
+        ClientVersionMinor = buffer.ReadInt8();
+        ClientVersionPatch = buffer.ReadInt8();
+        ClientVersionRevision = buffer.ReadInt8();
+        LastKnownClientState = (ChatProtocol.ChatClientStatus) buffer.ReadInt8();
+        ClientChatModeState = (ChatProtocol.ChatModeType) buffer.ReadInt8();
+        ClientRegion = buffer.ReadString();
+        ClientLanguage = buffer.ReadString();
+    }
 
     public ClientChatSessionMetadata ToMetadata()
     {

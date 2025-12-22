@@ -17,6 +17,11 @@ public class ClientChatSession(TCPServer server, IServiceProvider serviceProvide
     public Account Account { get; set; } = null!;
 
     /// <summary>
+    ///     Gets or sets the data associated with the start of a match.
+    /// </summary>
+    public MatchStartData? MatchData { get; set; }
+
+    /// <summary>
     ///     Tracks the channel IDs that this client is currently a member of.
     ///     The maximum number of channels cannot exceed the value of <see cref="ChatProtocol.MAX_CHANNELS_PER_CLIENT"/>.
     /// </summary>
@@ -44,6 +49,65 @@ public class ClientChatSession(TCPServer server, IServiceProvider serviceProvide
 
         // Get The Connection Status Of All Friends And Clan Members That Are Currently Online (Excluding Invisible Clients)
         ReceiveFriendAndClanMemberConnectionStatus();
+
+        return this;
+    }
+
+    public async Task<ClientChatSession> PrepareToJoinMatch(IDatabase distributedCacheStore, string serverAddress)
+    {
+        List<string> serverAddressParts = [.. serverAddress.Split(':')];
+
+        if (serverAddressParts.Count is not 2)
+        {
+            Log.Error(@"[BUG] Invalid Match Server Address ""{MatchServerAddress}""", serverAddress);
+
+            return this;
+        }
+
+        string serverIPAddress = serverAddressParts.First();
+        int serverPort = Convert.ToInt32(serverAddressParts.Last());
+
+        MatchServer? server = await distributedCacheStore.GetMatchServerByIPAddressAndPort(serverIPAddress, serverPort);
+
+        if (server is null)
+        {
+            Log.Error(@"[BUG] Client Account ID ""{AccountID}"" Attempted To Join Match On Unknown Server ""{ServerAddress}""", Account.ID, serverAddress);
+
+            return this;
+        }
+
+        Metadata.LastKnownClientState = ChatProtocol.ChatClientStatus.CHAT_CLIENT_STATUS_JOINING_GAME;
+
+        BroadcastConnectionStatusUpdate(ChatProtocol.ChatClientStatus.CHAT_CLIENT_STATUS_JOINING_GAME, server);
+
+        return this;
+    }
+
+    public async Task<ClientChatSession> JoinMatch(IDatabase distributedCacheStore, int matchID)
+    {
+        MatchStartData? matchData = await distributedCacheStore.GetMatchStartData(matchID);
+
+        if (matchData is null)
+        {
+            Log.Error(@"[BUG] Match ID {MatchID} Not Found In Cache For Session {SessionID}", matchID, ID);
+
+            return this;
+        }
+
+        MatchData = matchData;
+
+        MatchServer? server = await distributedCacheStore.GetMatchServerByID(matchData.ServerID);
+
+        if (server is null)
+        {
+            Log.Error(@"[BUG] Client Account ID ""{AccountID}"" Attempted To Join Match On Unknown Server", Account.ID);
+
+            return this;
+        }
+
+        Metadata.LastKnownClientState = ChatProtocol.ChatClientStatus.CHAT_CLIENT_STATUS_IN_GAME;
+
+        BroadcastConnectionStatusUpdate(ChatProtocol.ChatClientStatus.CHAT_CLIENT_STATUS_IN_GAME, server);
 
         return this;
     }

@@ -13,11 +13,18 @@ public class GroupPlayerReadyStatus : ISynchronousCommandProcessor<ClientChatSes
     }
 }
 
-public class GroupPlayerReadyStatusRequestData(ChatBuffer buffer)
+file class GroupPlayerReadyStatusRequestData
 {
-    public byte[] CommandBytes = buffer.ReadCommandBytes();
+    public byte[] CommandBytes { get; init; }
 
-    public byte ReadyStatus = buffer.ReadInt8();
+    public byte ReadyStatus { get; init; }
 
-    public ChatProtocol.TMMGameType GameType = (ChatProtocol.TMMGameType) buffer.ReadInt8();
+    public ChatProtocol.TMMGameType GameType { get; init; }
+
+    public GroupPlayerReadyStatusRequestData(ChatBuffer buffer)
+    {
+        CommandBytes = buffer.ReadCommandBytes();
+        ReadyStatus = buffer.ReadInt8();
+        GameType = (ChatProtocol.TMMGameType) buffer.ReadInt8();
+    }
 }

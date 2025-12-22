@@ -30,6 +30,18 @@ public static partial class DistributedCacheExtensions
         return matchServerManagers;
     }
 
+    public static async Task<MatchServerManager?> GetMatchServerManagerByIPAddress(this IDatabase distributedCacheStore, string ipAddress)
+    {
+        HashEntry[] serializedMatchServerManagers = await distributedCacheStore.HashGetAllAsync(MatchServerManagersKey);
+
+        List<MatchServerManager> matchServerManagers = [.. serializedMatchServerManagers
+            .Select(entry => JsonSerializer.Deserialize<MatchServerManager>(entry.Value.ToString())).OfType<MatchServerManager>()];
+
+        MatchServerManager? matchServerManager = matchServerManagers.SingleOrDefault(manager => manager.IPAddress.Equals(ipAddress));
+
+        return matchServerManager;
+    }
+
     public static async Task<MatchServerManager?> GetMatchServerManagerBySessionCookie(this IDatabase distributedCacheStore, string sessionCookie)
     {
         HashEntry[] serializedMatchServerManagers = await distributedCacheStore.HashGetAllAsync(MatchServerManagersKey);
@@ -118,6 +130,18 @@ public static partial class DistributedCacheExtensions
         return matchServers;
     }
 
+    public static async Task<MatchServer?> GetMatchServerByIPAddressAndPort(this IDatabase distributedCacheStore, string ipAddress, int port)
+    {
+        HashEntry[] serializedMatchServers = await distributedCacheStore.HashGetAllAsync(MatchServersKey);
+
+        List<MatchServer> matchServers = [.. serializedMatchServers
+            .Select(entry => JsonSerializer.Deserialize<MatchServer>(entry.Value.ToString())).OfType<MatchServer>()];
+
+        MatchServer? matchServer = matchServers.SingleOrDefault(server => server.IPAddress.Equals(ipAddress) && server.Port == port);
+
+        return matchServer;
+    }
+
     public static async Task<MatchServer?> GetMatchServerBySessionCookie(this IDatabase distributedCacheStore, string sessionCookie)
     {
         HashEntry[] serializedMatchServers = await distributedCacheStore.HashGetAllAsync(MatchServersKey);
@@ -179,4 +203,36 @@ public static partial class DistributedCacheExtensions
             matchServer.MatchServerManager = null;
         }
     }
+
+    private static string ConstructMatchStartDataKey(long matchID) => $@"MATCH-START-DATA:[""{matchID}""]";
+
+    /// <summary>
+    ///     Stores match start data in the cache.
+    ///     This data will be used to populate match statistics when the match ends.
+    /// </summary>
+    public static async Task SetMatchStartData(this IDatabase distributedCacheStore, MatchStartData matchStartData)
+    {
+        string serializedMatchStartData = JsonSerializer.Serialize(matchStartData);
+
+        // Store For A Duration Of Time Longer Than Any Match Is Expected To Last
+        await distributedCacheStore.StringSetAsync(ConstructMatchStartDataKey(matchStartData.MatchID), serializedMatchStartData, TimeSpan.FromHours(6));
+    }
+
+    /// <summary>
+    ///     Retrieves match start data from the cache by match ID.
+    ///     Returns NULL if no match start data is found for the given match ID.
+    /// </summary>
+    public static async Task<MatchStartData?> GetMatchStartData(this IDatabase distributedCacheStore, long matchID)
+    {
+        RedisValue cachedValue = await distributedCacheStore.StringGetAsync(ConstructMatchStartDataKey(matchID));
+
+        return cachedValue.IsNullOrEmpty ? null : JsonSerializer.Deserialize<MatchStartData>(cachedValue.ToString());
+    }
+
+    /// <summary>
+    ///     Removes match start data from the cache.
+    ///     This should be called after full match statistics have been created.
+    /// </summary>
+    public static async Task RemoveMatchStartData(this IDatabase distributedCacheStore, long matchID)
+        => await distributedCacheStore.KeyDeleteAsync(ConstructMatchStartDataKey(matchID));
 }

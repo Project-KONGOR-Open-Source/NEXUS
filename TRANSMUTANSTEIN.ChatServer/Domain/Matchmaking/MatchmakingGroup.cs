@@ -43,7 +43,7 @@ public class MatchmakingGroup
         return group;
     }
 
-    public static MatchmakingGroup Create(ClientChatSession session, GroupCreateRequestData data)
+    internal static MatchmakingGroup Create(ClientChatSession session, MatchmakingGroupInformation information)
     {
         MatchmakingGroupMember member = new (session)
         {
@@ -53,21 +53,7 @@ public class MatchmakingGroup
             IsInGame = false,
             IsEligibleForMatchmaking = true,
             LoadingPercent = 0,
-            GameModeAccess = string.Join('|', data.GameModes.Select(mode => "true"))
-        };
-
-        MatchmakingGroupInformation information = new ()
-        {
-            ClientVersion = data.ClientVersion,
-            GroupType = data.GroupType,
-            GameType = data.GameType,
-            MapName = data.MapName,
-            GameModes = data.GameModes,
-            GameRegions = data.GameRegions,
-            Ranked = data.Ranked,
-            MatchFidelity = data.MatchFidelity,
-            BotDifficulty = data.BotDifficulty,
-            RandomizeBots = data.RandomizeBots
+            GameModeAccess = string.Join('|', information.GameModes.Select(mode => "true"))
         };
 
         // TODO: Create Chat Channel For The Group

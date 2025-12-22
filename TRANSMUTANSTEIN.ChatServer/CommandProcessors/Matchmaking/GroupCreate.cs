@@ -8,34 +8,34 @@ public class GroupCreate : ISynchronousCommandProcessor<ClientChatSession>
         GroupCreateRequestData requestData = new (buffer);
 
         MatchmakingGroup
-            .Create(session, requestData);
+            .Create(session, requestData.ToGroupInformation());
     }
 }
 
-public class GroupCreateRequestData(ChatBuffer buffer)
+file class GroupCreateRequestData
 {
-    public byte[] CommandBytes = buffer.ReadCommandBytes();
+    public byte[] CommandBytes { get; init; }
 
-    public string ClientVersion = buffer.ReadString();
+    public string ClientVersion { get; init; }
 
-    public ChatProtocol.TMMType GroupType = (ChatProtocol.TMMType) buffer.ReadInt8();
+    public ChatProtocol.TMMType GroupType { get; init; }
 
-    public ChatProtocol.TMMGameType GameType = (ChatProtocol.TMMGameType) buffer.ReadInt8();
+    public ChatProtocol.TMMGameType GameType { get; init; }
 
-    public string MapName = buffer.ReadString();
+    public string MapName { get; init; }
 
-    public string[] GameModes = buffer.ReadString().Split('|', StringSplitOptions.RemoveEmptyEntries);
+    public string[] GameModes { get; init; }
 
-    public string[] GameRegions = buffer.ReadString().Split('|', StringSplitOptions.RemoveEmptyEntries);
+    public string[] GameRegions { get; init; }
 
-    public bool Ranked = buffer.ReadBool();
+    public bool Ranked { get; init; }
 
     /// <summary>
     ///     0: Skill Disparity Will Be Higher But The Matchmaking Queue Time Will Be Shorter
     ///     <br/>
     ///     1: Skill Disparity Will Be Lower But The Matchmaking Queue Time Will Be Longer
     /// </summary>
-    public byte MatchFidelity = buffer.ReadInt8();
+    public byte MatchFidelity { get; init; }
 
     /// <summary>
     ///     1: Easy, 2: Medium, 3: Hard
@@ -43,10 +43,43 @@ public class GroupCreateRequestData(ChatBuffer buffer)
     /// <remarks>
     ///     Only Used For Bot Matches, But Sent With Every Request To Create A Group
     /// </remarks>
-    public byte BotDifficulty = buffer.ReadInt8();
+    public byte BotDifficulty { get; init; }
 
     /// <remarks>
     ///     Only Used For Bot Matches, But Sent With Every Request To Create A Group
     /// </remarks>
-    public bool RandomizeBots = buffer.ReadBool();
+    public bool RandomizeBots { get; init; }
+
+    public GroupCreateRequestData(ChatBuffer buffer)
+    {
+        CommandBytes = buffer.ReadCommandBytes();
+        ClientVersion = buffer.ReadString();
+        GroupType = (ChatProtocol.TMMType) buffer.ReadInt8();
+        GameType = (ChatProtocol.TMMGameType) buffer.ReadInt8();
+        MapName = buffer.ReadString();
+        GameModes = buffer.ReadString().Split('|', StringSplitOptions.RemoveEmptyEntries);
+        GameRegions = buffer.ReadString().Split('|', StringSplitOptions.RemoveEmptyEntries);
+        Ranked = buffer.ReadBool();
+        MatchFidelity = buffer.ReadInt8();
+        BotDifficulty = buffer.ReadInt8();
+        RandomizeBots = buffer.ReadBool();
+    }
+
+    public MatchmakingGroupInformation ToGroupInformation()
+    {
+        return new MatchmakingGroupInformation()
+        {
+
+            ClientVersion = ClientVersion,
+            GroupType = GroupType,
+            GameType = GameType,
+            MapName = MapName,
+            GameModes = GameModes,
+            GameRegions = GameRegions,
+            Ranked = Ranked,
+            MatchFidelity = MatchFidelity,
+            BotDifficulty = BotDifficulty,
+            RandomizeBots = RandomizeBots
+        };
+    }
 }

@@ -13,9 +13,15 @@ public class LeaveChannel : ISynchronousCommandProcessor<ClientChatSession>
     }
 }
 
-public class LeaveChannelRequestData(ChatBuffer buffer)
+file class LeaveChannelRequestData
 {
-    public byte[] CommandBytes = buffer.ReadCommandBytes();
+    public byte[] CommandBytes { get; init; }
 
-    public string ChannelName = buffer.ReadString();
+    public string ChannelName { get; init; }
+
+    public LeaveChannelRequestData(ChatBuffer buffer)
+    {
+        CommandBytes = buffer.ReadCommandBytes();
+        ChannelName = buffer.ReadString();
+    }
 }

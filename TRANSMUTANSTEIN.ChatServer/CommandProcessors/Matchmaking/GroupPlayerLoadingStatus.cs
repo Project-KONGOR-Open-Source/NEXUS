@@ -18,9 +18,15 @@ public class GroupPlayerLoadingStatus : ISynchronousCommandProcessor<ClientChatS
     }
 }
 
-public class GroupPlayerLoadingStatusRequestData(ChatBuffer buffer)
+file class GroupPlayerLoadingStatusRequestData
 {
-    public byte[] CommandBytes = buffer.ReadCommandBytes();
+    public byte[] CommandBytes { get; init; }
 
-    public byte LoadingPercent = buffer.ReadInt8();
+    public byte LoadingPercent { get; init; }
+
+    public GroupPlayerLoadingStatusRequestData(ChatBuffer buffer)
+    {
+        CommandBytes = buffer.ReadCommandBytes();
+        LoadingPercent = buffer.ReadInt8();
+    }
 }

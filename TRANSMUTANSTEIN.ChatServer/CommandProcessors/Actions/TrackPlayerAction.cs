@@ -15,9 +15,15 @@ public class TrackPlayerAction : ISynchronousCommandProcessor<ClientChatSession>
     }
 }
 
-public class TrackPlayerActionRequestData(ChatBuffer buffer)
+file class TrackPlayerActionRequestData
 {
-    public byte[] CommandBytes = buffer.ReadCommandBytes();
+    public byte[] CommandBytes { get; init; }
 
-    public ChatProtocol.ActionCampaign Action = (ChatProtocol.ActionCampaign) buffer.ReadInt8();
+    public ChatProtocol.ActionCampaign Action { get; init; }
+
+    public TrackPlayerActionRequestData(ChatBuffer buffer)
+    {
+        CommandBytes = buffer.ReadCommandBytes();
+        Action = (ChatProtocol.ActionCampaign) buffer.ReadInt8();
+    }
 }

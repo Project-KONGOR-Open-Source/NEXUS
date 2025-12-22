@@ -18,9 +18,15 @@ public class AddFriend(MerrickContext merrick, IDatabase distributedCacheStore) 
     }
 }
 
-public class AddFriendRequestData(ChatBuffer buffer)
+file class AddFriendRequestData
 {
-    public byte[] CommandBytes = buffer.ReadCommandBytes();
+    public byte[] CommandBytes { get; init; }
 
-    public string FriendNickname = buffer.ReadString();
+    public string FriendNickname { get; init; }
+
+    public AddFriendRequestData(ChatBuffer buffer)
+    {
+        CommandBytes = buffer.ReadCommandBytes();
+        FriendNickname = buffer.ReadString();
+    }
 }
