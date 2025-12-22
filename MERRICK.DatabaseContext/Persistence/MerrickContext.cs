@@ -16,6 +16,7 @@ public sealed class MerrickContext : DbContext
     public DbSet<Role> Roles => Set<Role>();
     public DbSet<Token> Tokens => Set<Token>();
     public DbSet<User> Users => Set<User>();
+    public DbSet<UserDiscordProfile> UserDiscordProfiles => Set<UserDiscordProfile>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

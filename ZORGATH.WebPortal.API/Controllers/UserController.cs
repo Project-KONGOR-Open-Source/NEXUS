@@ -1,5 +1,7 @@
 namespace ZORGATH.WebPortal.API.Controllers;
 
+using MERRICK.DatabaseContext.Enumerations;
+
 [ApiController]
 [Route("[controller]")]
 [Consumes("application/json")]
@@ -102,6 +104,8 @@ public class UserController(MerrickContext databaseContext, ILogger<UserControll
                 user.PlinkoTickets,
                 user.TotalLevel,
                 user.TotalExperience,
+                false,
+                false,
                 [new GetBasicAccountDTO(account.ID, account.Name)]
             ));
     }
@@ -147,12 +151,14 @@ public class UserController(MerrickContext databaseContext, ILogger<UserControll
         string username = jwtToken.Claims.FirstOrDefault(x => x.Type == "username")?.Value ?? "";
         string avatar = jwtToken.Claims.FirstOrDefault(x => x.Type == "avatar")?.Value ?? "";
         string banner = jwtToken.Claims.FirstOrDefault(x => x.Type == "banner")?.Value ?? "";
+        bool emailVerified = bool.TryParse(jwtToken.Claims.FirstOrDefault(x => x.Type == "verified")?.Value, out var v) && v;
+        bool mfaEnabled = bool.TryParse(jwtToken.Claims.FirstOrDefault(x => x.Type == "mfa_enabled")?.Value, out var m) && m;
 
         // 3. User Existence Check
         if (await MerrickContext.Users.AnyAsync(user => user.EmailAddress.Equals(email)))
             return Conflict($@"User With Email ""{email}"" Already Exists");
         
-        if (await MerrickContext.Users.AnyAsync(user => user.DiscordID == discordId))
+        if (await MerrickContext.UserDiscordProfiles.AnyAsync(profile => profile.DiscordID == discordId))
             return Conflict($@"User With Discord ID ""{discordId}"" Already Exists");
 
         if (await MerrickContext.Accounts.AnyAsync(account => account.Name.Equals(payload.Name)))
@@ -166,10 +172,15 @@ public class UserController(MerrickContext databaseContext, ILogger<UserControll
         User user = new()
         {
             EmailAddress = email,
-            DiscordID = discordId,
-            DiscordUsername = username,
-            DiscordAvatar = avatar,
-            DiscordBanner = banner,
+            DiscordProfile = new MERRICK.DatabaseContext.Entities.Core.UserDiscordProfile
+            {
+                DiscordID = discordId,
+                Username = username,
+                Avatar = avatar,
+                Banner = banner,
+                EmailVerified = emailVerified, 
+                MfaEnabled = mfaEnabled
+            },
             Role = role,
             SRPPasswordSalt = salt,
             SRPPasswordHash = SRPRegistrationHandlers.ComputeSRPPasswordHash(payload.Password, salt)
@@ -177,10 +188,18 @@ public class UserController(MerrickContext databaseContext, ILogger<UserControll
         user.PBKDF2PasswordHash = new PasswordHasher<User>().HashPassword(user, payload.Password);
 
         // 5. Create Account
+        // Determine Account Type based on verification status
+        AccountType accountType = AccountType.Trial; // Default restricted
+        if (mfaEnabled) 
+            accountType = AccountType.Legacy; // Ranked eligible
+        else if (emailVerified) 
+            accountType = AccountType.Normal; // Public eligible
+
         Account account = new()
         {
             Name = payload.Name,
             User = user,
+            Type = accountType,
             IsMain = true
         };
         user.Accounts.Add(account);
@@ -278,6 +297,7 @@ public class UserController(MerrickContext databaseContext, ILogger<UserControll
     {
         User? user = await MerrickContext.Users
             .Include(record => record.Role)
+            .Include(record => record.DiscordProfile)
             .Include(record => record.Accounts).ThenInclude(record => record.Clan)
             .SingleOrDefaultAsync(record => record.ID.Equals(id));
 
@@ -293,14 +313,16 @@ public class UserController(MerrickContext databaseContext, ILogger<UserControll
             return Ok(new GetBasicUserDTO(
                 user.ID, 
                 user.EmailAddress,
-                !string.IsNullOrEmpty(user.DiscordID) && !string.IsNullOrEmpty(user.DiscordAvatar) 
-                    ? $"https://cdn.discordapp.com/avatars/{user.DiscordID}/{user.DiscordAvatar}.png" 
+                user.DiscordProfile != null && !string.IsNullOrEmpty(user.DiscordProfile.Avatar) 
+                    ? $"https://cdn.discordapp.com/avatars/{user.DiscordProfile.DiscordID}/{user.DiscordProfile.Avatar}.png" 
                     : null,
                 user.GoldCoins,
                 user.SilverCoins,
                 user.PlinkoTickets,
                 user.TotalLevel,
                 user.TotalExperience,
+                user.DiscordProfile?.EmailVerified ?? false,
+                user.DiscordProfile?.MfaEnabled ?? false,
                 user.Accounts.Select(account => new GetBasicAccountDTO(account.ID, account.NameWithClanTag)).ToList()));
         }
 
@@ -309,14 +331,16 @@ public class UserController(MerrickContext databaseContext, ILogger<UserControll
             return Ok(new GetBasicUserDTO(
                 user.ID,
                 new string(user.EmailAddress.Select(character => char.IsLetterOrDigit(character) ? '*' : character).ToArray()),
-                !string.IsNullOrEmpty(user.DiscordID) && !string.IsNullOrEmpty(user.DiscordAvatar) 
-                    ? $"https://cdn.discordapp.com/avatars/{user.DiscordID}/{user.DiscordAvatar}.png" 
+                user.DiscordProfile != null && !string.IsNullOrEmpty(user.DiscordProfile.Avatar) 
+                    ? $"https://cdn.discordapp.com/avatars/{user.DiscordProfile.DiscordID}/{user.DiscordProfile.Avatar}.png" 
                     : null,
                 user.GoldCoins,
                 user.SilverCoins,
                 user.PlinkoTickets,
                 user.TotalLevel,
                 user.TotalExperience,
+                user.DiscordProfile?.EmailVerified ?? false,
+                user.DiscordProfile?.MfaEnabled ?? false,
                 user.Accounts.Select(account => new GetBasicAccountDTO(account.ID, account.NameWithClanTag)).ToList()));
         }
 

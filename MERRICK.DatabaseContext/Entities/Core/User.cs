@@ -1,7 +1,7 @@
 ﻿namespace MERRICK.DatabaseContext.Entities.Core;
 
 [Index(nameof(EmailAddress), IsUnique = true)]
-[Index(nameof(DiscordID), IsUnique = true)]
+
 public class User
 {
     [Key]
@@ -11,16 +11,7 @@ public class User
     public required string EmailAddress { get; set; }
 
     [MaxLength(30)]
-    public string? DiscordID { get; set; }
-
-    [MaxLength(32)]
-    public string? DiscordUsername { get; set; }
-
-    [MaxLength(100)]
-    public string? DiscordAvatar { get; set; }
-
-    [MaxLength(100)]
-    public string? DiscordBanner { get; set; }
+    public UserDiscordProfile? DiscordProfile { get; set; }
 
     public required Role Role { get; set; }
 

@@ -15,6 +15,8 @@ public record GetBasicUserDTO(
     int PlinkoTickets,
     int TotalLevel,
     int TotalExperience,
+    bool IsEmailVerified,
+    bool IsMfaEnabled,
     List<GetBasicAccountDTO> Accounts
 );
 

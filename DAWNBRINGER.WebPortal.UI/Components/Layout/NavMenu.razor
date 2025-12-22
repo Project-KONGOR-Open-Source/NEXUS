@@ -1,3 +1,7 @@
+@inject AuthService BuildAuth
+@implements IDisposable
+@rendermode InteractiveServer
+
 <div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
         <a class="navbar-brand" href="">NEXUS</a>
@@ -11,15 +15,65 @@
                 <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
             </NavLink>
         </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="login">
-                <span class="bi bi-person-plus-fill-nav-menu" aria-hidden="true"></span> Login
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="profile">
-                <span class="bi bi-person-badge-fill-nav-menu" aria-hidden="true"></span> Profile
-            </NavLink>
-        </div>
+        
+        @if (!IsLoggedIn)
+        {
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="login">
+                    <span class="bi bi-person-plus-fill-nav-menu" aria-hidden="true"></span> Login
+                </NavLink>
+            </div>
+        }
+        
+        @if (IsLoggedIn)
+        {
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="profile">
+                    <span class="bi bi-person-badge-fill-nav-menu" aria-hidden="true"></span> Profile
+                </NavLink>
+            </div>
+        }
     </nav>
 </div>
+
+
+
+@code {
+    private bool IsLoggedIn = false;
+
+    protected override void OnInitialized()
+    {
+        BuildAuth.OnChange += StateChanged;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await CheckLoginStatus();
+        }
+    }
+
+    private async void StateChanged()
+    {
+        await CheckLoginStatus();
+        StateHasChanged();
+    }
+
+    private async Task CheckLoginStatus()
+    {
+        var session = await BuildAuth.LoadSessionAsync();
+        bool newState = !string.IsNullOrEmpty(session.Token);
+        
+        if (IsLoggedIn != newState)
+        {
+            IsLoggedIn = newState;
+            StateHasChanged();
+        }
+    }
+
+    public void Dispose()
+    {
+        BuildAuth.OnChange -= StateChanged;
+    }
+}

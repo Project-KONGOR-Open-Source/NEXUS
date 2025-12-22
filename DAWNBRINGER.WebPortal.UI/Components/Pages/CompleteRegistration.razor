@@ -4,54 +4,74 @@
 
 <PageTitle>Complete Registration</PageTitle>
 
-<h1>Complete Registration</h1>
+<PageTitle>Complete Registration</PageTitle>
 
-<p>Choose your username and password to complete your account creation.</p>
+<div class="d-flex align-items-center justify-content-center min-vh-100 bg-dark text-white">
+    <div class="card bg-secondary text-white shadow-lg" style="max-width: 500px; width: 100%;">
+        <div class="card-body p-5">
+            <h2 class="text-center mb-4 fw-bold">Finish Setting Up</h2>
+            <p class="text-center text-light mb-4">Choose your username and password to create your account.</p>
 
-<EditForm Model="@Model" OnValidSubmit="HandleValidSubmit" FormName="CompleteRegistrationForm">
-    <DataAnnotationsValidator />
-    <ValidationSummary />
+            <EditForm Model="@Model" OnValidSubmit="HandleValidSubmit" FormName="CompleteRegistrationForm">
+                <DataAnnotationsValidator />
+                
+                @if (!string.IsNullOrEmpty(Message))
+                {
+                    <div class="alert @(IsSuccess ? "alert-success" : "alert-danger") mb-3">
+                        @Message
+                    </div>
+                }
+                
+                <div class="mb-3">
+                    <label class="form-label text-uppercase small fw-bold text-muted">Registration Token</label>
+                    <InputText class="form-control bg-dark text-white border-0" @bind-Value="Model.RegistrationToken" readonly disabled />
+                </div>
 
-    <div class="mb-3">
-        <label class="form-label">Registration Token</label>
-        <InputText class="form-control" @bind-Value="Model.RegistrationToken" readonly disabled />
+                <div class="mb-3">
+                    <label for="name" class="form-label fw-bold">Hero Name (Username)</label>
+                    <InputText id="name" class="form-control form-control-lg" @bind-Value="Model.Name" placeholder="Enter your display name" />
+                    <ValidationMessage For="@(() => Model.Name)" class="text-danger small mt-1" />
+                    <small class="text-light opacity-75">This will be your in-game display name.</small>
+                </div>
+
+                <div class="mb-3">
+                    <label for="password" class="form-label fw-bold">Password</label>
+                    <InputText id="password" type="password" class="form-control form-control-lg" @bind-Value="Model.Password" placeholder="••••••••" />
+                    <ValidationMessage For="@(() => Model.Password)" class="text-danger small mt-1" />
+                </div>
+
+                <div class="mb-4">
+                    <label for="confirmPassword" class="form-label fw-bold">Confirm Password</label>
+                    <InputText id="confirmPassword" type="password" class="form-control form-control-lg" @bind-Value="Model.ConfirmPassword" placeholder="••••••••" />
+                    <ValidationMessage For="@(() => Model.ConfirmPassword)" class="text-danger small mt-1" />
+                </div>
+
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-primary btn-lg fw-bold" disabled="@IsSubmitting">
+                        @if (IsSubmitting)
+                        {
+                            <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                            <span>Creating Account...</span>
+                        }
+                        else
+                        {
+                            <span>Create Account</span>
+                        }
+                    </button>
+                </div>
+            </EditForm>
+        </div>
     </div>
-
-    <div class="mb-3">
-        <label for="name" class="form-label">Username</label>
-        <InputText id="name" class="form-control" @bind-Value="Model.Name" />
-        <ValidationMessage For="@(() => Model.Name)" />
-        <small class="text-muted">This will be your in-game display name.</small>
-    </div>
-
-    <div class="mb-3">
-        <label for="password" class="form-label">Password</label>
-        <InputText id="password" type="password" class="form-control" @bind-Value="Model.Password" />
-        <ValidationMessage For="@(() => Model.Password)" />
-    </div>
-
-    <div class="mb-3">
-        <label for="confirmPassword" class="form-label">Confirm Password</label>
-        <InputText id="confirmPassword" type="password" class="form-control" @bind-Value="Model.ConfirmPassword" />
-        <ValidationMessage For="@(() => Model.ConfirmPassword)" />
-    </div>
-
-    <button type="submit" class="btn btn-primary" disabled="@IsSubmitting">Create Account</button>
-</EditForm>
-
-@if (!string.IsNullOrEmpty(Message))
-{
-    <div class="alert @(IsSuccess ? "alert-success" : "alert-danger") mt-3">
-        @Message
-    </div>
-}
+</div>
 
 @code {
     [Parameter]
     public string Token { get; set; } = string.Empty;
 
     [SupplyParameterFromForm]
+#pragma warning disable BL0008
     private RegisterUserWithDiscordDTO Model { get; set; } = new();
+#pragma warning restore BL0008
 
     private string? Message;
     private bool IsSuccess;
@@ -93,6 +113,10 @@
                 IsSuccess = false;
                 Message = $"Error: {content}";
             }
+        }
+        catch (NavigationException)
+        {
+            throw;
         }
         catch (Exception ex)
         {

@@ -20,4 +20,8 @@ public class DiscordUserResponse
     public string? Avatar { get; set; }
     [JsonPropertyName("banner")]
     public string? Banner { get; set; }
+    [JsonPropertyName("verified")]
+    public bool? Verified { get; set; }
+    [JsonPropertyName("mfa_enabled")]
+    public bool? MfaEnabled { get; set; }
 }

@@ -257,6 +257,22 @@ To enable Discord authentication in development, you must configure **credential
 
 <hr/>
 
+<h3 align="center">User Accounts & Matchmaking Eligibility</h3>
+
+NEXUS implements a tiered account system to ensure matchmaking quality. Account types are automatically assigned based on Discord verification status during registration and login.
+
+| Account Type | ID | Condition | Queue Eligibility |
+| :--- | :--- | :--- | :--- |
+| **Trial** | `1` | Default / Unverified | <span style="color:red">restricted</span> |
+| **Normal** | `3` | **Verified Email** on Discord | ✅ **Public Matches** |
+| **Legacy** | `4` | **MFA Enabled** on Discord | ✅ **Public & Ranked Matches** |
+
+> [!NOTE]
+> Existing Legacy/Staff/VIP accounts are not downgraded. New accounts start as Trial and upgrade automatically upon verification.
+> Link your Discord account to upgrade your eligibility!
+
+<hr/>
+
 <h3 align="center">Concise Instructions For Non-Developers</h3>
 
 1. ??? (coming soon™)

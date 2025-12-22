@@ -11,10 +11,13 @@ public class AuthService
         _js = js;
     }
 
+    public event Action? OnChange;
+
     public async Task SaveSessionAsync(string token, int userId)
     {
         await _js.InvokeVoidAsync("auth.save", "authToken", token);
         await _js.InvokeVoidAsync("auth.save", "authUserId", userId.ToString());
+        NotifyStateChanged();
     }
 
     public async Task<(string? Token, int? UserId)> LoadSessionAsync()
@@ -35,5 +38,8 @@ public class AuthService
     {
         await _js.InvokeVoidAsync("auth.remove", "authToken");
         await _js.InvokeVoidAsync("auth.remove", "authUserId");
+        NotifyStateChanged();
     }
+
+    private void NotifyStateChanged() => OnChange?.Invoke();
 }

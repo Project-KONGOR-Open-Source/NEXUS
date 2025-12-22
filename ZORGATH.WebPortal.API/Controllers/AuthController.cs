@@ -1,5 +1,6 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using MERRICK.DatabaseContext.Enumerations;
 using System.Text;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -56,16 +57,55 @@ public class AuthController(
         // Check DB
         var user = await MerrickContext.Users
             .Include(u => u.Role)
+            .Include(u => u.DiscordProfile) // Include Discord Profile
             .Include(u => u.Accounts).ThenInclude(a => a.Clan)
-            .SingleOrDefaultAsync(u => u.DiscordID == userData.Id);
+            .SingleOrDefaultAsync(u => u.DiscordProfile != null && u.DiscordProfile.DiscordID == userData.Id);
 
         if (user != null)
         {
             // Sync Profile Data
             bool hasChanges = false;
-            if (user.DiscordUsername != userData.Username) { user.DiscordUsername = userData.Username; hasChanges = true; }
-            if (user.DiscordAvatar != userData.Avatar) { user.DiscordAvatar = userData.Avatar; hasChanges = true; }
-            if (user.DiscordBanner != userData.Banner) { user.DiscordBanner = userData.Banner; hasChanges = true; }
+            
+            // Ensure DiscordProfile exists (sanity check, though query handles nulls gracefully usually)
+            if (user.DiscordProfile == null)
+            {
+                user.DiscordProfile = new MERRICK.DatabaseContext.Entities.Core.UserDiscordProfile 
+                { 
+                    DiscordID = userData.Id, 
+                    Username = userData.Username 
+                };
+                hasChanges = true;
+            }
+
+            if (user.DiscordProfile.Username != userData.Username) { user.DiscordProfile.Username = userData.Username; hasChanges = true; }
+            if (user.DiscordProfile.Avatar != userData.Avatar) { user.DiscordProfile.Avatar = userData.Avatar; hasChanges = true; }
+            if (user.DiscordProfile.Banner != userData.Banner) { user.DiscordProfile.Banner = userData.Banner; hasChanges = true; }
+            
+            // Map nullable booleans to bool, defaulting to false if null
+            bool newVerified = userData.Verified ?? false;
+            if (user.DiscordProfile.EmailVerified != newVerified) { user.DiscordProfile.EmailVerified = newVerified; hasChanges = true; }
+            
+            bool newMfa = userData.MfaEnabled ?? false;
+            if (user.DiscordProfile.MfaEnabled != newMfa) { user.DiscordProfile.MfaEnabled = newMfa; hasChanges = true; }
+
+            // Sync Account Type logic
+            AccountType targetType = AccountType.Trial;
+            if (newMfa) targetType = AccountType.Legacy;
+            else if (newVerified) targetType = AccountType.Normal;
+
+            // Update all accounts for this user (or just Main? Assuming all for now to be safe/consistent)
+            foreach (var account in user.Accounts)
+            {
+                // Only upgrade/downgrade if it matches one of our auto-managed types to avoid overwriting Staff/VIP
+                if (account.Type == AccountType.Trial || account.Type == AccountType.Normal || account.Type == AccountType.Legacy)
+                {
+                    if (account.Type != targetType)
+                    {
+                        account.Type = targetType;
+                        hasChanges = true;
+                    }
+                }
+            }
 
             if (hasChanges)
             {
@@ -129,7 +169,9 @@ public class AuthController(
             new ("email", discordUser.Email ?? ""),
             new ("username", discordUser.Username),
             new ("avatar", discordUser.Avatar ?? ""),
-            new ("banner", discordUser.Banner ?? "")
+            new ("banner", discordUser.Banner ?? ""),
+            new ("verified", (discordUser.Verified ?? false).ToString()),
+            new ("mfa_enabled", (discordUser.MfaEnabled ?? false).ToString())
         };
 
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration.JWT.SigningKey));
