@@ -204,7 +204,7 @@ public static partial class DistributedCacheExtensions
         }
     }
 
-    private static string ConstructMatchStartDataKey(long matchID) => $@"MATCH-START-DATA:[""{matchID}""]";
+    private static string ConstructMatchStartDataKey(int matchID) => $@"MATCH-START-DATA:[""{matchID}""]";
 
     /// <summary>
     ///     Stores match start data in the cache.
@@ -222,7 +222,7 @@ public static partial class DistributedCacheExtensions
     ///     Retrieves match start data from the cache by match ID.
     ///     Returns NULL if no match start data is found for the given match ID.
     /// </summary>
-    public static async Task<MatchStartData?> GetMatchStartData(this IDatabase distributedCacheStore, long matchID)
+    public static async Task<MatchStartData?> GetMatchStartData(this IDatabase distributedCacheStore, int matchID)
     {
         RedisValue cachedValue = await distributedCacheStore.StringGetAsync(ConstructMatchStartDataKey(matchID));
 
@@ -230,9 +230,38 @@ public static partial class DistributedCacheExtensions
     }
 
     /// <summary>
+    ///     Retrieves the match start data associated with the specified match server ID from the distributed cache.
+    /// </summary>
+    public static async Task<MatchStartData?> GetMatchStartDataByMatchServerID(this IDatabase distributedCacheStore, int serverID)
+    {
+        EndPoint endPoint = distributedCacheStore.Multiplexer.GetEndPoints().Single();
+
+        IServer server = distributedCacheStore.Multiplexer.GetServer(endPoint);
+
+        List<MatchStartData> matches = [];
+
+        foreach (RedisKey key in server.Keys(pattern: "MATCH-START-DATA:*"))
+        {
+            RedisValue cachedValue = await distributedCacheStore.StringGetAsync(key);
+
+            if (cachedValue.IsNullOrEmpty is false)
+            {
+                MatchStartData? matchStartData = JsonSerializer.Deserialize<MatchStartData>(cachedValue.ToString());
+
+                if (matchStartData is not null && matchStartData.ServerID == serverID)
+                {
+                    matches.Add(matchStartData);
+                }
+            }
+        }
+
+        return matches.SingleOrDefault();
+    }
+
+    /// <summary>
     ///     Removes match start data from the cache.
     ///     This should be called after full match statistics have been created.
     /// </summary>
-    public static async Task RemoveMatchStartData(this IDatabase distributedCacheStore, long matchID)
+    public static async Task RemoveMatchStartData(this IDatabase distributedCacheStore, int matchID)
         => await distributedCacheStore.KeyDeleteAsync(ConstructMatchStartDataKey(matchID));
 }
