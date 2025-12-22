@@ -8,71 +8,81 @@
 
 <PageTitle>My Profile</PageTitle>
 
-<div class="d-flex justify-content-center align-items-center mt-5">
-    @if (IsLoading)
-    {
-        <div class="spinner-border text-primary" role="status">
-            <span class="visually-hidden">Loading...</span>
-        </div>
-    }
-    else if (User != null)
-    {
-        <div class="card shadow-lg" style="width: 100%; max-width: 500px; border-radius: 15px; overflow: hidden;">
-            <div class="card-header bg-primary text-white text-center py-4" style="background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);">
-                @if (!string.IsNullOrEmpty(User.ProfilePictureUrl))
-                {
-                    <img src="@User.ProfilePictureUrl" alt="Avatar" class="rounded-circle border border-3 border-white shadow-sm mb-3" style="width: 120px; height: 120px; object-fit: cover;" />
-                }
-                <h3 class="mb-0 fw-bold">@User.Accounts.FirstOrDefault()?.Name</h3>
-                <small class="text-white-50">@User.EmailAddress</small>
-            </div>
-            <div class="card-body p-4 bg-light">
-                <h5 class="card-title text-muted text-uppercase fs-6 mb-3 fw-bold">Wallet</h5>
-                <div class="row g-3">
-                    <div class="col-6">
-                        <div class="p-3 bg-white rounded shadow-sm border text-center">
-                            <i class="bi bi-coin text-warning fs-4 d-block mb-1"></i>
-                            <span class="d-block text-muted small">Gold</span>
-                            <span class="fw-bold fs-5">@User.GoldCoins</span>
-                        </div>
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-10 col-lg-8">
+            @if (IsLoading)
+            {
+                <div class="text-center">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
                     </div>
-                    <div class="col-6">
-                        <div class="p-3 bg-white rounded shadow-sm border text-center">
-                            <i class="bi bi-currency-exchange text-secondary fs-4 d-block mb-1"></i>
-                            <span class="d-block text-muted small">Silver</span>
-                            <span class="fw-bold fs-5">@User.SilverCoins</span>
+                </div>
+            }
+            else if (User != null)
+            {
+                <div class="card shadow-lg border-0 rounded-3 overflow-hidden">
+                    <div class="card-header bg-primary text-white text-center py-5" style="background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);">
+                        @if (!string.IsNullOrEmpty(User.ProfilePictureUrl))
+                        {
+                            <img src="@User.ProfilePictureUrl" alt="Avatar" class="rounded-circle border border-4 border-white shadow mb-3" style="width: 150px; height: 150px; object-fit: cover;" />
+                        }
+                        <h2 class="mb-0 fw-bold display-6">@User.Accounts.FirstOrDefault()?.Name</h2>
+                    </div>
+                    <div class="card-body p-5 bg-light">
+                        
+                        <div class="row g-4 mb-5">
+                            <div class="col-12">
+                                <h4 class="text-muted text-uppercase fw-bold text-center mb-4">Wallet</h4>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="p-4 bg-white rounded-3 shadow-sm border text-center h-100 d-flex flex-column justify-content-center">
+                                    <i class="bi bi-coin text-warning display-4 d-block mb-2"></i>
+                                    <span class="d-block text-muted text-uppercase small fw-bold">Gold</span>
+                                    <span class="fw-bold display-6 text-dark">@User.GoldCoins</span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="p-4 bg-white rounded-3 shadow-sm border text-center h-100 d-flex flex-column justify-content-center">
+                                    <i class="bi bi-currency-exchange text-secondary display-4 d-block mb-2"></i>
+                                    <span class="d-block text-muted text-uppercase small fw-bold">Silver</span>
+                                    <span class="fw-bold display-6 text-dark">@User.SilverCoins</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-5">
+                             <h4 class="text-muted text-uppercase fw-bold text-center mb-4">Stats</h4>
+                            <div class="list-group shadow-sm rounded-3">
+                                <div class="list-group-item p-4 d-flex justify-content-between align-items-center">
+                                    <span class="fs-5"><i class="bi bi-star-fill text-primary me-3"></i> Total Level</span>
+                                    <span class="badge bg-primary rounded-pill fs-5 px-3 py-2">@User.TotalLevel</span>
+                                </div>
+                                <div class="list-group-item p-4 d-flex justify-content-between align-items-center">
+                                    <span class="fs-5"><i class="bi bi-ticket-perforated-fill text-danger me-3"></i> Plinko Tickets</span>
+                                    <span class="badge bg-danger rounded-pill fs-5 px-3 py-2">@User.PlinkoTickets</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-center gap-4 align-items-center">
+                            <button class="btn btn-outline-danger btn-lg px-5 py-3 fw-bold rounded-pill" @onclick="SignOut">
+                                <i class="bi bi-box-arrow-right me-2"></i> Sign Out
+                            </button>
+                            <a href="/" class="btn btn-link text-muted text-decoration-none">Back to Home</a>
                         </div>
                     </div>
                 </div>
-
-                <h5 class="card-title text-muted text-uppercase fs-6 mt-4 mb-3 fw-bold">Stats</h5>
-                <ul class="list-group list-group-flush rounded shadow-sm">
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        <span><i class="bi bi-star-fill text-primary me-2"></i> Total Level</span>
-                        <span class="badge bg-primary rounded-pill">@User.TotalLevel</span>
-                    </li>
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        <span><i class="bi bi-ticket-perforated-fill text-danger me-2"></i> Plinko Tickets</span>
-                        <span class="badge bg-danger rounded-pill">@User.PlinkoTickets</span>
-                    </li>
-                </ul>
-
-                <div class="d-grid gap-2 mt-5">
-                    <button class="btn btn-outline-danger btn-lg" @onclick="SignOut">
-                        <i class="bi bi-box-arrow-right me-2"></i> Sign Out
-                    </button>
-                    <a href="/" class="btn btn-link text-muted">Back to Home</a>
+            }
+            else
+            {
+                <div class="text-center alert alert-warning p-5 shadow-sm rounded-3">
+                    <h3 class="text-muted mb-4">You are not logged in.</h3>
+                    <a href="login" class="btn btn-primary btn-lg px-5 rounded-pill">Log In</a>
                 </div>
-            </div>
+            }
         </div>
-    }
-    else
-    {
-         <div class="text-center">
-            <h3 class="text-muted">You are not logged in.</h3>
-            <a href="login" class="btn btn-primary mt-3">Log In</a>
-        </div>
-    }
+    </div>
 </div>
 
 @code {
