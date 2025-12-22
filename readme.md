@@ -224,6 +224,12 @@ net stop winnat
 # Reserve TCP Server Ports
 netsh int ipv4 add excludedportrange protocol=tcp startport=11031 numberofports=3 store=persistent
 
+# Reserve Match Server Ports
+netsh int ipv4 add excludedportrange protocol=tcp startport=11235 numberofports=5 store=persistent
+
+# Reserve Voice Port
+netsh int ipv4 add excludedportrange protocol=tcp startport=11435 numberofports=1 store=persistent
+
 # Reserve HTTP Services Ports
 netsh int ipv4 add excludedportrange protocol=tcp startport=55550 numberofports=8 store=persistent
 
