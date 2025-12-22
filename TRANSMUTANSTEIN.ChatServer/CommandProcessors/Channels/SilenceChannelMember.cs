@@ -1,16 +1,16 @@
 namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Channels;
 
 [ChatCommand(ChatProtocol.Command.CHAT_CMD_CHANNEL_SILENCE_USER)]
-public class SilenceChannelMember : ISynchronousCommandProcessor
+public class SilenceChannelMember : ISynchronousCommandProcessor<ClientChatSession>
 {
-    public void Process(ChatSession session, ChatBuffer buffer)
+    public void Process(ClientChatSession session, ChatBuffer buffer)
     {
         SilenceChannelMemberRequestData requestData = new (buffer);
 
         ChatChannel channel = ChatChannel.Get(session, requestData.ChannelID);
 
         // Find The Target Account ID By Name
-        ChatSession? targetSession = Context.ChatSessions.Values
+        ClientChatSession? targetSession = Context.ClientChatSessions.Values
             .SingleOrDefault(chatSession => chatSession.Account.Name.Equals(requestData.TargetName, StringComparison.OrdinalIgnoreCase));
 
         if (targetSession is null)
@@ -24,13 +24,21 @@ public class SilenceChannelMember : ISynchronousCommandProcessor
     }
 }
 
-public class SilenceChannelMemberRequestData(ChatBuffer buffer)
+file class SilenceChannelMemberRequestData
 {
-    public byte[] CommandBytes = buffer.ReadCommandBytes();
+    public byte[] CommandBytes { get; init; }
 
-    public int ChannelID = buffer.ReadInt32();
+    public int ChannelID { get; init; }
 
-    public string TargetName = buffer.ReadString();
+    public string TargetName { get; init; }
 
-    public int DurationMilliseconds = buffer.ReadInt32();
+    public int DurationMilliseconds { get; init; }
+
+    public SilenceChannelMemberRequestData(ChatBuffer buffer)
+    {
+        CommandBytes = buffer.ReadCommandBytes();
+        ChannelID = buffer.ReadInt32();
+        TargetName = buffer.ReadString();
+        DurationMilliseconds = buffer.ReadInt32();
+    }
 }

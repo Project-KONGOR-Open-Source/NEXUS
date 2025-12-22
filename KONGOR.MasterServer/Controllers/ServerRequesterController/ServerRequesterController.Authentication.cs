@@ -2,7 +2,7 @@
 
 public partial class ServerRequesterController
 {
-    private async Task<IActionResult> HandleReplayAuthentication()
+    private async Task<IActionResult> HandleServerManagerAuthentication()
     {
         string? hostAccountName = Request.Form["login"];
 
@@ -33,7 +33,7 @@ public partial class ServerRequesterController
 
         if (Request.HttpContext.Connection.RemoteIpAddress is null)
         {
-            Logger.LogError($@"[BUG] Remote IP Address For Server Manager With Host Account Name ""{hostAccountName}"" Is NULL");
+            Logger.LogError(@"[BUG] Remote IP Address For Server Manager With Host Account Name ""{HostAccountName}"" Is NULL", hostAccountName);
 
             return BadRequest("Unable To Resolve Remote IP Address");
         }
@@ -43,34 +43,38 @@ public partial class ServerRequesterController
             HostAccountID = account.ID,
             HostAccountName = account.Name,
             ID = hostAccountName.GetDeterministicInt32Hash(),
-
+            MatchServers = [],
             IPAddress = Request.HttpContext.Connection.RemoteIpAddress.MapToIPv4().ToString()
         };
 
         await DistributedCache.SetMatchServerManager(hostAccountName, matchServerManager);
 
-        string chatHost = Environment.GetEnvironmentVariable("CHAT_SERVER_HOST") ?? throw new NullReferenceException("Chat Server Host Is NULL");
-        int chatPort = int.Parse(Environment.GetEnvironmentVariable("CHAT_SERVER_PORT") ?? throw new NullReferenceException("Chat Server Port Is NULL"));
+        string chatServerHost = Environment.GetEnvironmentVariable("CHAT_SERVER_HOST")
+            ?? throw new NullReferenceException("Chat Server Host Is NULL");
+
+        int chatServerMatchServerManagerConnectionsPort = int.Parse(Environment.GetEnvironmentVariable("CHAT_SERVER_PORT_MATCH_SERVER_MANAGER")
+            ?? throw new NullReferenceException("Chat Server Match Server Manager Connections Port Is NULL"));
 
         Dictionary<string, object> response = new ()
         {
             ["server_id"] = matchServerManager.ID,
             ["official"] = 1, // If Not Official, It Is Considered To Be Un-Authorized
             ["session"] = matchServerManager.Cookie,
-            ["chat_address"] = chatHost,
-            ["chat_port"] = chatPort,
+            ["chat_address"] = chatServerHost,
+            ["chat_port"] = chatServerMatchServerManagerConnectionsPort,
         };
 
         // TODO: Investigate How These Are Used (+ Resolve CDN Host, + Reconcile With CDN Patch Addresses)
         response["cdn_upload_host"] = "kongor.net";
         response["cdn_upload_target"] = "upload";
 
-        Logger.LogInformation($@"Server Manager ID ""{matchServerManager.ID}"" Was Registered At ""{matchServerManager.IPAddress}"" With Cookie ""{matchServerManager.Cookie}""");
+        Logger.LogInformation(@"Server Manager ID ""{MatchServerManagerID}"" Was Registered At ""{MatchServerManagerIPAddress}"" With Cookie ""{MatchServerManagerCookie}""",
+            matchServerManager.ID, matchServerManager.IPAddress, matchServerManager.Cookie);
 
         return Ok(PhpSerialization.Serialize(response));
     }
 
-    private async Task<IActionResult> HandleNewSession()
+    private async Task<IActionResult> HandleServerAuthentication()
     {
         string serverIdentifier = Request.Form["login"].ToString();
 
@@ -98,11 +102,9 @@ public partial class ServerRequesterController
         string? serverDescription = Request.Form["desc"];
 
         if (serverDescription is null)
-            serverDescription = string.Empty;
-            // TODO: Make COMPEL Send The Server Description
-            // return BadRequest(@"Missing Value For Form Parameter ""desc""");
+            return BadRequest(@"Missing Value For Form Parameter ""desc""");
 
-            string? serverLocation = Request.Form["location"];
+        string? serverLocation = Request.Form["location"];
 
         if (serverLocation is null)
             return BadRequest(@"Missing Value For Form Parameter ""location""");
@@ -129,12 +131,15 @@ public partial class ServerRequesterController
 
         // TODO: Verify Whether The Server Version Matches The Client Version (Or Disallow Servers To Be Started If They Are Not On The Latest Version)
 
+        List<MatchServerManager> matchServerManagers = await DistributedCache.GetMatchServerManagersByAccountName(hostAccountName);
+
         MatchServer matchServer = new ()
         {
             HostAccountID = account.ID,
             HostAccountName = account.Name,
             ID = serverIdentifier.GetDeterministicInt32Hash(),
             Name = serverName,
+            MatchServerManager = matchServerManagers.SingleOrDefault(),
             Instance = int.Parse(serverInstance),
             IPAddress = serverIPAddress,
             Port = int.Parse(serverPort),
@@ -146,19 +151,23 @@ public partial class ServerRequesterController
 
         // TODO: Implement Verifier In Description (If The Server Is A COMPEL Server, It Will Have A Verifier In The Description)
 
-        string chatHost = Environment.GetEnvironmentVariable("CHAT_SERVER_HOST") ?? throw new NullReferenceException("Chat Server Host Is NULL");
-        int chatPort = int.Parse(Environment.GetEnvironmentVariable("CHAT_SERVER_PORT") ?? throw new NullReferenceException("Chat Server Port Is NULL"));
+        string chatServerHost = Environment.GetEnvironmentVariable("CHAT_SERVER_HOST")
+            ?? throw new NullReferenceException("Chat Server Host Is NULL");
+
+        int chatServerMatchServerConnectionsPort = int.Parse(Environment.GetEnvironmentVariable("CHAT_SERVER_PORT_MATCH_SERVER")
+            ?? throw new NullReferenceException("Chat Server Match Server Connections Port Is NULL"));
 
         Dictionary<string, object> response = new ()
         {
             ["session"] = matchServer.Cookie,
             ["server_id"] = matchServer.ID,
-            ["chat_address"] = chatHost,
-            ["chat_port"] = chatPort,
+            ["chat_address"] = chatServerHost,
+            ["chat_port"] = chatServerMatchServerConnectionsPort,
             ["leaverthreshold"] = 0.05
         };
 
-        Logger.LogInformation($@"Server ID ""{matchServer.ID}"" Was Registered At ""{matchServer.IPAddress}:{matchServer.Port}"" With Cookie ""{matchServer.Cookie}""");
+        Logger.LogInformation(@"Server ID ""{MatchServerID}"" Was Registered At ""{MatchServerIPAddress}"":""{MatchServerPort}"" With Cookie ""{MatchServerCookie}""",
+            matchServer.ID, matchServer.IPAddress, matchServer.Port, matchServer.Cookie);
 
         return Ok(PhpSerialization.Serialize(response));
     }
@@ -205,7 +214,7 @@ public partial class ServerRequesterController
 
         if (account is null)
         {
-            Logger.LogError($@"[BUG] No Account Could Be Found For Account Name ""{accountNameForSessionCookie}"" With Session Cookie ""{cookie}""");
+            Logger.LogError(@"[BUG] No Account Could Be Found For Account Name ""{AccountName}"" With Session Cookie ""{Cookie}""", accountNameForSessionCookie, cookie);
 
             return BadRequest($@"Account With Name ""{accountNameForSessionCookie}"" Could Not Be Found");
         }
@@ -402,5 +411,17 @@ public partial class ServerRequesterController
         await DistributedCache.SetMatchServer(matchServer.HostAccountName, matchServer);
 
         return Ok();
+    }
+
+    private async Task<IActionResult> HandleAuthentication()
+    {
+        string? accountName = Request.Form["login"];
+
+        if (accountName is not null)
+            Logger.LogWarning(@"Account ""{AccountName}"" Is Attempting To Use HTTP Server Authentication", accountName);
+
+        string response = PhpSerialization.Serialize(new SRPAuthenticationFailureResponse(SRPAuthenticationFailureReason.SRPAuthenticationDisabled));
+
+        return BadRequest(response);
     }
 }

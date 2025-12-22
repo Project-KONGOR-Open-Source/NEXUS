@@ -3,7 +3,7 @@
 [ApiController]
 [Route("client_requester.php")]
 [Consumes("application/x-www-form-urlencoded")]
-public partial class ClientRequesterController(MerrickContext databaseContext, IDatabase distributedCache, ILogger<ClientRequesterController> logger, IOptions<OperationalConfiguration> configuration) : ControllerBase
+public partial class ClientRequesterController(MerrickContext databaseContext, IDatabase distributedCache, ILogger<ClientRequesterController> logger) : ControllerBase
 {
     # region Client Requester Controller Description
     /*
@@ -22,7 +22,6 @@ public partial class ClientRequesterController(MerrickContext databaseContext, I
     private MerrickContext MerrickContext { get; } = databaseContext;
     private IDatabase DistributedCache { get; } = distributedCache;
     private ILogger Logger { get; } = logger;
-    private OperationalConfiguration Configuration { get; } = configuration.Value;
 
     [HttpPost(Name = "Client Requester All-In-One")]
     public async Task<IActionResult> ClientRequester()
@@ -32,7 +31,7 @@ public partial class ClientRequesterController(MerrickContext databaseContext, I
 
         if (endpointRequiresCookieValidation.Equals(true) && accountSessionCookieIsValid.Equals(false))
         {
-            Logger.LogWarning($@"IP Address ""{Request.HttpContext.Connection.RemoteIpAddress?.MapToIPv4().ToString() ?? "UNKNOWN"}"" Has Made A Client Controller Request With Forged Cookie ""{Request.Form["cookie"]}""");
+            Logger.LogWarning($@"IP Address ""{Request.HttpContext.Connection.RemoteIpAddress?.MapToIPv4().ToString() ?? "UNKNOWN"}"" Has Made A Client Request With Forged Cookie ""{Request.Form["cookie"]}""");
 
             return Unauthorized($@"Unrecognized Cookie ""{Request.Form["cookie"]}""");
         }
@@ -40,10 +39,15 @@ public partial class ClientRequesterController(MerrickContext databaseContext, I
         if (endpointRequiresCookieValidation.Equals(false) && accountSessionCookieIsValid.Equals(true))
             Logger.LogError("[BUG] Endpoint Does Not Require Cookie Validation But A Valid Cookie Was Found");
 
+        return await HandleClientRequest();
+    }
+
+    private async Task<IActionResult> HandleClientRequest()
+    {
         return Request.Query["f"].SingleOrDefault() switch
         {
             // authentication
-            "auth"                          => HandleAuthentication(),
+            "auth"                          => await HandleAuthentication(),
             "pre_auth"                      => await HandlePreAuthentication(),
             "srpAuth"                       => await HandleSRPAuthentication(),
 
@@ -61,12 +65,15 @@ public partial class ClientRequesterController(MerrickContext databaseContext, I
             // friends
             "remove_buddy2"                 => await RemoveFriend(),
 
-            null                            => await HandleNullQueryString(),
+            // fallback
+            null                            => await HandleClientRequestWithNoQueryString(),
+
+            // default
             _                               => throw new NotImplementedException($"Unsupported Client Requester Controller Query String Parameter: f={Request.Query["f"].Single()}")
         };
     }
 
-    private async Task<IActionResult> HandleNullQueryString()
+    private async Task<IActionResult> HandleClientRequestWithNoQueryString()
     {
         return Request.Form["f"].SingleOrDefault() switch
         {
@@ -77,6 +84,7 @@ public partial class ClientRequesterController(MerrickContext databaseContext, I
             "get_guide_list_filtered"       => await GetGuideList(),
             "get_guide"                     => await GetGuide(),
 
+            // default
             _                               => throw new NotImplementedException($"Unsupported Client Requester Controller Form Parameter: f={Request.Form["f"].Single()}")
         };
     }

@@ -1,16 +1,16 @@
 ﻿namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Matchmaking;
 
 [ChatCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_POPULARITY_UPDATE)]
-public class PopularityUpdate : ISynchronousCommandProcessor
+public class PopularityUpdate : ISynchronousCommandProcessor<ClientChatSession>
 {
-    public void Process(ChatSession session, ChatBuffer buffer)
+    public void Process(ClientChatSession session, ChatBuffer buffer)
     {
         PopularityUpdateRequestData requestData = new (buffer);
 
         SendMatchmakingPopularity(session);
     }
 
-    public static void SendMatchmakingPopularity(ChatSession session)
+    public static void SendMatchmakingPopularity(ClientChatSession session)
     {
         // TODO: Get All Maps And Compile List
         List<string> maps = ["caldavar", "midwars", "riftwars"];
@@ -112,7 +112,12 @@ public class PopularityUpdate : ISynchronousCommandProcessor
     }
 }
 
-public class PopularityUpdateRequestData(ChatBuffer buffer)
+file class PopularityUpdateRequestData
 {
-    public byte[] CommandBytes = buffer.ReadCommandBytes();
+    public byte[] CommandBytes { get; init; }
+
+    public PopularityUpdateRequestData(ChatBuffer buffer)
+    {
+        CommandBytes = buffer.ReadCommandBytes();
+    }
 }

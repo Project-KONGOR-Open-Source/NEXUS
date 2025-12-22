@@ -1,11 +1,15 @@
 ﻿namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Connection;
 
 [ChatCommand(ChatProtocol.ClientToChatServer.NET_CHAT_CL_CONNECT)]
-public class ClientHandshake(MerrickContext merrick, IDatabase distributedCacheStore) : IAsynchronousCommandProcessor
+public class ClientHandshake(MerrickContext merrick, IDatabase distributedCacheStore) : IAsynchronousCommandProcessor<ClientChatSession>
 {
-    public async Task Process(ChatSession session, ChatBuffer buffer)
+    public async Task Process(ClientChatSession session, ChatBuffer buffer)
     {
         ClientHandshakeRequestData requestData = new (buffer);
+
+        // Set Client Metadata On Session
+        // This Needs To Be Set At The First Opportunity So That Any Subsequent Code Logic Can Have Access To The Client's Metadata
+        session.Metadata = requestData.ToMetadata();
 
         string? cachedAccountName = await distributedCacheStore.GetAccountNameForSessionCookie(requestData.SessionCookie);
 
@@ -71,7 +75,7 @@ public class ClientHandshake(MerrickContext merrick, IDatabase distributedCacheS
         // Check For Concurrent Connections: Disconnect Any Other Existing Sessions For This Account Or For Any Sub-Account Of The Same User
         foreach (int subAccountID in subAccountIDs)
         {
-            ChatSession? existingSessionMatch = Context.ChatSessions.Values
+            ClientChatSession? existingSessionMatch = Context.ClientChatSessions.Values
                 .SingleOrDefault(existingSession => existingSession.Account?.ID == subAccountID);
 
             if (existingSessionMatch is not null)
@@ -97,51 +101,100 @@ public class ClientHandshake(MerrickContext merrick, IDatabase distributedCacheS
 
         // Accept Connection, Send Options, And Broadcast Connection To Friends And Clan Members
         session
-            .Accept(new ChatSessionMetadata(requestData), account)
+            .Accept(account)
             .SendOptionsAndRemoteCommands()
             .BroadcastConnection();
     }
 }
 
-public class ClientHandshakeRequestData(ChatBuffer buffer)
+file class ClientHandshakeRequestData
 {
-    public byte[] CommandBytes = buffer.ReadCommandBytes();
+    public byte[] CommandBytes { get; init; }
 
-    public int AccountID = buffer.ReadInt32();
+    public int AccountID { get; init; }
 
-    public string SessionCookie = buffer.ReadString();
+    public string SessionCookie { get; init; }
 
-    public string RemoteIP = buffer.ReadString();
+    public string RemoteIP { get; init; }
 
-    public string SessionAuthenticationHash = buffer.ReadString();
+    public string SessionAuthenticationHash { get; init; }
 
-    public int ChatProtocolVersion = buffer.ReadInt32();
+    public int ChatProtocolVersion { get; init; }
 
-    public byte OperatingSystemIdentifier = buffer.ReadInt8();
+    public byte OperatingSystemIdentifier { get; init; }
 
-    public byte OperatingSystemVersionMajor = buffer.ReadInt8();
+    public byte OperatingSystemVersionMajor { get; init; }
 
-    public byte OperatingSystemVersionMinor = buffer.ReadInt8();
+    public byte OperatingSystemVersionMinor { get; init; }
 
-    public byte OperatingSystemVersionPatch = buffer.ReadInt8();
+    public byte OperatingSystemVersionPatch { get; init; }
 
-    public string OperatingSystemBuildCode = buffer.ReadString();
+    public string OperatingSystemBuildCode { get; init; }
 
-    public string OperatingSystemArchitecture = buffer.ReadString();
+    public string OperatingSystemArchitecture { get; init; }
 
-    public byte ClientVersionMajor = buffer.ReadInt8();
+    public byte ClientVersionMajor { get; init; }
 
-    public byte ClientVersionMinor = buffer.ReadInt8();
+    public byte ClientVersionMinor { get; init; }
 
-    public byte ClientVersionPatch = buffer.ReadInt8();
+    public byte ClientVersionPatch { get; init; }
 
-    public byte ClientVersionRevision = buffer.ReadInt8();
+    public byte ClientVersionRevision { get; init; }
 
-    public ChatProtocol.ChatClientStatus LastKnownClientState = (ChatProtocol.ChatClientStatus) buffer.ReadInt8();
+    public ChatProtocol.ChatClientStatus LastKnownClientState { get; init; }
 
-    public ChatProtocol.ChatModeType ClientChatModeState = (ChatProtocol.ChatModeType) buffer.ReadInt8();
+    public ChatProtocol.ChatModeType ClientChatModeState { get; init; }
 
-    public string ClientRegion = buffer.ReadString();
+    public string ClientRegion { get; init; }
 
-    public string ClientLanguage = buffer.ReadString();
+    public string ClientLanguage { get; init; }
+
+    public ClientHandshakeRequestData(ChatBuffer buffer)
+    {
+        CommandBytes = buffer.ReadCommandBytes();
+        AccountID = buffer.ReadInt32();
+        SessionCookie = buffer.ReadString();
+        RemoteIP = buffer.ReadString();
+        SessionAuthenticationHash = buffer.ReadString();
+        ChatProtocolVersion = buffer.ReadInt32();
+        OperatingSystemIdentifier = buffer.ReadInt8();
+        OperatingSystemVersionMajor = buffer.ReadInt8();
+        OperatingSystemVersionMinor = buffer.ReadInt8();
+        OperatingSystemVersionPatch = buffer.ReadInt8();
+        OperatingSystemBuildCode = buffer.ReadString();
+        OperatingSystemArchitecture = buffer.ReadString();
+        ClientVersionMajor = buffer.ReadInt8();
+        ClientVersionMinor = buffer.ReadInt8();
+        ClientVersionPatch = buffer.ReadInt8();
+        ClientVersionRevision = buffer.ReadInt8();
+        LastKnownClientState = (ChatProtocol.ChatClientStatus) buffer.ReadInt8();
+        ClientChatModeState = (ChatProtocol.ChatModeType) buffer.ReadInt8();
+        ClientRegion = buffer.ReadString();
+        ClientLanguage = buffer.ReadString();
+    }
+
+    public ClientChatSessionMetadata ToMetadata()
+    {
+        return new ClientChatSessionMetadata
+        {
+            RemoteIP = RemoteIP,
+            SessionCookie = SessionCookie,
+            SessionAuthenticationHash = SessionAuthenticationHash,
+            ChatProtocolVersion = ChatProtocolVersion,
+            OperatingSystemIdentifier = OperatingSystemIdentifier,
+            OperatingSystemVersionMajor = OperatingSystemVersionMajor,
+            OperatingSystemVersionMinor = OperatingSystemVersionMinor,
+            OperatingSystemVersionPatch = OperatingSystemVersionPatch,
+            OperatingSystemBuildCode = OperatingSystemBuildCode,
+            OperatingSystemArchitecture = OperatingSystemArchitecture,
+            ClientVersionMajor = ClientVersionMajor,
+            ClientVersionMinor = ClientVersionMinor,
+            ClientVersionPatch = ClientVersionPatch,
+            ClientVersionRevision = ClientVersionRevision,
+            LastKnownClientState = LastKnownClientState,
+            ClientChatModeState = ClientChatModeState,
+            ClientRegion = ClientRegion,
+            ClientLanguage = ClientLanguage
+        };
+    }
 }

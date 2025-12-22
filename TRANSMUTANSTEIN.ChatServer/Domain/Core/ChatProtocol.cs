@@ -5,7 +5,11 @@ public static class ChatProtocol
     // Thank you, Shawn Presser, for making these values public: https://github.com/shawwn/hon/blob/f1aa2dfb7d07c447e930aa36f571e547714f4a57/lib/k2public/chatserver_protocol.h.
     // The symbols added since the chat server protocol version linked above were extracted from the PDB files made public at http://cdn.hon.team/wac/x86_64/4.9.1.3/symbols.zip in February 2021.
 
-    public const uint CHAT_PROTOCOL_VERSION = 69;
+    // The Version Which Official Game Clients, Match Servers, And Server Managers Expect
+    public const uint CHAT_PROTOCOL_EXTERNAL_VERSION = 68;
+
+    // The Version Used Internally For Keeping Track Of Custom Changes To The Chat Server
+    public const uint CHAT_PROTOCOL_INTERNAL_VERSION = 69;
 
     public static class Command
     {
@@ -255,7 +259,7 @@ public static class ChatProtocol
         public const ushort NET_CHAT_GS_SAVE_DISCONNECT_REASON             = 0x0510; // For Tracking Reasons, The Match Is Being Aborted Due To Disconnected Players
         public const ushort NET_CHAT_GS_REPORT_MISSING_PLAYERS             = 0x0511; // For Tracking Potentially Problematic Players Abusing Matchmaking And Causing Matches To Fail To Start
         public const ushort NET_CHAT_GS_MATCH_ID_RESULT                    = 0x0512; // The Match Server Is Announcing The Match ID To The Chat Server
-        public const ushort NET_CHAT_GS_CLIENT_AUTH_RESULT                 = 0x0513; // The Outcome Of Authentication With The Master Server
+        public const ushort NET_CHAT_GS_CLIENT_AUTH_RESULT                 = 0x0513; // The Outcome Of A Game Client's Authentication With The Master Server, As Verified By The Match Server
         public const ushort NET_CHAT_GS_STAT_SUBMISSION_RESULT             = 0x0514; // The Outcome Of The Match Server Attempting To Submit Statistics
         public const ushort NET_CHAT_GS_MATCH_ENDED                        = 0x0515; // An Arranged Match Has Completed (Statistics Have Been Tentatively Submitted)
         public const ushort NET_CHAT_GS_MATCH_ONGOING                      = 0x0516; // The Match Server Is Announcing To The Chat Server That A Match Is In Progress
@@ -542,7 +546,7 @@ public static class ChatProtocol
         NUM_MATCH_ID_RESULTS
     };
 
-    public enum ClientAuthResult
+    public enum ClientAuthenticationResult
     {
         CAR_FIRST,
 
@@ -814,6 +818,91 @@ public static class ChatProtocol
 
         TMM_NUM_GAME_MODES
     };
+
+    public enum PublicGameMode
+    {
+        GAME_MODE_NORMAL,
+        GAME_MODE_RANDOM_DRAFT,
+        GAME_MODE_SINGLE_DRAFT,
+        GAME_MODE_DEATHMATCH,
+        GAME_MODE_BANNING_DRAFT,
+        GAME_MODE_CAPTAINS_DRAFT,
+        GAME_MODE_CAPTAINS_MODE,
+        GAME_MODE_BANNING_PICK,
+        GAME_MODE_ALL_RANDOM,
+        GAME_MODE_LOCKPICK,
+        GAME_MODE_BLIND_BAN,
+        GAME_MODE_BOT_MATCH,
+        GAME_MODE_KROS_MODE,
+        GAME_MODE_FORCEPICK,
+        GAME_MODE_SOCCERPICK,
+        GAME_MODE_SOLO_SAME_HERO,
+        GAME_MODE_SOLO_DIFF_HERO,
+        GAME_MODE_COUNTER_PICK,
+        GAME_MODE_MIDWARS_BETA,
+        GAME_MODE_HEROBAN,
+        GAME_MODE_REBORN,
+
+        NUM_GAME_MODES
+    };
+
+    public static string? GetPublicGameModeName(PublicGameMode publicGameMode)
+    {
+        return publicGameMode switch
+        {
+            PublicGameMode.GAME_MODE_NORMAL          => "normal",
+            PublicGameMode.GAME_MODE_RANDOM_DRAFT    => "randomdraft",
+            PublicGameMode.GAME_MODE_SINGLE_DRAFT    => "singledraft",
+            PublicGameMode.GAME_MODE_DEATHMATCH      => "deathmatch",
+            PublicGameMode.GAME_MODE_BANNING_DRAFT   => "banningdraft",
+            PublicGameMode.GAME_MODE_CAPTAINS_DRAFT  => "captainsdraft",
+            PublicGameMode.GAME_MODE_CAPTAINS_MODE   => "captainsmode",
+            PublicGameMode.GAME_MODE_BANNING_PICK    => "banningpick",
+            PublicGameMode.GAME_MODE_ALL_RANDOM      => "allrandom",
+            PublicGameMode.GAME_MODE_LOCKPICK        => "lockpick",
+            PublicGameMode.GAME_MODE_BLIND_BAN       => "blindban",
+            PublicGameMode.GAME_MODE_BOT_MATCH       => "botmatch",
+            PublicGameMode.GAME_MODE_KROS_MODE       => "krosmode",
+            PublicGameMode.GAME_MODE_FORCEPICK       => "forcepick",
+            PublicGameMode.GAME_MODE_SOCCERPICK      => "soccerpick",
+            PublicGameMode.GAME_MODE_SOLO_SAME_HERO  => "solosamehero",
+            PublicGameMode.GAME_MODE_SOLO_DIFF_HERO  => "solodiffhero",
+            PublicGameMode.GAME_MODE_COUNTER_PICK    => "counterpick",
+            PublicGameMode.GAME_MODE_MIDWARS_BETA    => "midwarsbeta",
+            PublicGameMode.GAME_MODE_HEROBAN         => "heroban",
+            PublicGameMode.GAME_MODE_REBORN          => "reborn",
+            _                                        => null
+        };
+    }
+
+    public static string? GetPublicGameModeString(PublicGameMode publicGameMode)
+    {
+        return publicGameMode switch
+        {
+            PublicGameMode.GAME_MODE_NORMAL          => "Mode_Normal",
+            PublicGameMode.GAME_MODE_RANDOM_DRAFT    => "Mode_RandomDraft",
+            PublicGameMode.GAME_MODE_SINGLE_DRAFT    => "Mode_SingleDraft",
+            PublicGameMode.GAME_MODE_DEATHMATCH      => "Mode_Deathmatch",
+            PublicGameMode.GAME_MODE_BANNING_DRAFT   => "Mode_BanningDraft",
+            PublicGameMode.GAME_MODE_CAPTAINS_DRAFT  => "Mode_CaptainsDraft",
+            PublicGameMode.GAME_MODE_CAPTAINS_MODE   => "Mode_CaptainsMode",
+            PublicGameMode.GAME_MODE_BANNING_PICK    => "Mode_BanningPick",
+            PublicGameMode.GAME_MODE_ALL_RANDOM      => "Mode_AllRandom",
+            PublicGameMode.GAME_MODE_LOCKPICK        => "Mode_LockPick",
+            PublicGameMode.GAME_MODE_BLIND_BAN       => "Mode_BlindBan",
+            PublicGameMode.GAME_MODE_BOT_MATCH       => "Mode_BotMatch",
+            PublicGameMode.GAME_MODE_KROS_MODE       => "Mode_KrosMode",
+            PublicGameMode.GAME_MODE_FORCEPICK       => "Mode_ForcePick",
+            PublicGameMode.GAME_MODE_SOCCERPICK      => "Mode_SoccerPick",
+            PublicGameMode.GAME_MODE_SOLO_SAME_HERO  => "Mode_SoloSameHero",
+            PublicGameMode.GAME_MODE_SOLO_DIFF_HERO  => "Mode_SoloDiffHero",
+            PublicGameMode.GAME_MODE_COUNTER_PICK    => "Mode_CounterPick",
+            PublicGameMode.GAME_MODE_MIDWARS_BETA    => "Mode_MidwarsBeta",
+            PublicGameMode.GAME_MODE_HEROBAN         => "Mode_HeroBan",
+            PublicGameMode.GAME_MODE_REBORN          => "Mode_Reborn",
+            _                                        => null
+        };
+    }
 
     public enum TMMGameRegion
     {

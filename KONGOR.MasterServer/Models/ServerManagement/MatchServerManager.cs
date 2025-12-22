@@ -8,6 +8,8 @@ public class MatchServerManager
 
     public required int ID { get; set; }
 
+    public required List<MatchServer> MatchServers { get; set; }
+
     public required string IPAddress { get; set; }
 
     public string Cookie { get; set; } = Guid.CreateVersion7().ToString();

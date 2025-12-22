@@ -29,7 +29,7 @@ public class ChatChannel
     /// </summary>
     private ChatChannel() { }
 
-    public static ChatChannel GetOrCreate(ChatSession session, string channelName)
+    public static ChatChannel GetOrCreate(ClientChatSession session, string channelName)
     {
         bool isClanChannel = session.Account.Clan is not null && channelName == session.Account.Clan.GetChatChannelName();
 
@@ -42,7 +42,7 @@ public class ChatChannel
         return channel;
     }
 
-    public static ChatChannel Get(ChatSession session, OneOf<string, int> channelIdentifier)
+    public static ChatChannel Get(ClientChatSession session, OneOf<string, int> channelIdentifier)
     {
         ChatChannel channel = channelIdentifier.Match
         (
@@ -56,7 +56,7 @@ public class ChatChannel
         return channel;
     }
 
-    public ChatChannel Join(ChatSession session, string? providedPassword = null)
+    public ChatChannel Join(ClientChatSession session, string? providedPassword = null)
     {
         // Staff Accounts Are Exempt From Channel Limit Restrictions, For Moderation And Administration Purposes
         if (session.Account.Type is not AccountType.Staff)
@@ -183,7 +183,7 @@ public class ChatChannel
         return this;
     }
 
-    private void BroadcastJoin(ChatSession session)
+    private void BroadcastJoin(ClientChatSession session)
     {
         ChatChannelMember newMember = Members.Values.Single(member => member.Account.ID == session.Account.ID);
 
@@ -207,7 +207,7 @@ public class ChatChannel
             existingMember.Session.Send(broadcast);
     }
 
-    public void Leave(ChatSession session)
+    public void Leave(ClientChatSession session)
     {
         if (Members.TryRemove(session.Account.Name, out ChatChannelMember? member) is false)
             Log.Error(@"[BUG] Failed To Remove Account ""{AccountName}"" From Channel ""{ChannelName}""", session.Account.Name, Name);
@@ -246,7 +246,7 @@ public class ChatChannel
         else Log.Error(@"[BUG] Chat Channel Member Instance For Account ""{AccountName}"" In Channel ""{ChannelName}"" Is NULL", session.Account.Name, Name);
     }
 
-    public void Kick(ChatSession requesterSession, int targetAccountID)
+    public void Kick(ClientChatSession requesterSession, int targetAccountID)
     {
         ChatChannelMember requester = Members.Values.Single(member => member.Account.ID == requesterSession.Account.ID);
         ChatChannelMember target = Members.Values.Single(member => member.Account.ID == targetAccountID);
@@ -265,7 +265,7 @@ public class ChatChannel
             foreach (ChatChannelMember member in Members.Values)
                 member.Session.Send(broadcast);
 
-            ChatSession targetSession = Context.ChatSessions.Values.Single(session => session.Account.ID == targetAccountID);
+            ClientChatSession targetSession = Context.ClientChatSessions.Values.Single(session => session.Account.ID == targetAccountID);
 
             // Remove The Target Member From The Channel
             Leave(targetSession);
@@ -279,7 +279,7 @@ public class ChatChannel
     /// </summary>
     /// <param name="session">The session to check.</param>
     /// <returns>TRUE if the member is silenced, FALSE otherwise.</returns>
-    public bool IsSilenced(ChatSession session)
+    public bool IsSilenced(ClientChatSession session)
     {
         ChatChannelMember? member = Members.Values
             .SingleOrDefault(channelMember => channelMember.Account.ID == session.Account.ID);
@@ -293,7 +293,7 @@ public class ChatChannel
     /// <param name="requesterSession">The session requesting the silence (must have higher administrator level).</param>
     /// <param name="targetAccountID">The account ID of the member to silence.</param>
     /// <param name="durationMilliseconds">The duration of the silence in milliseconds.</param>
-    public void Silence(ChatSession requesterSession, int targetAccountID, int durationMilliseconds)
+    public void Silence(ClientChatSession requesterSession, int targetAccountID, int durationMilliseconds)
     {
         ChatChannelMember requester = Members.Values.Single(member => member.Account.ID == requesterSession.Account.ID);
         ChatChannelMember target = Members.Values.Single(member => member.Account.ID == targetAccountID);
@@ -350,7 +350,7 @@ public class ChatChannel
     /// </remarks>
     /// <param name="session">The session attempting to set the password.</param>
     /// <param name="password">The new password. Empty string clears the password.</param>
-    public void SetPassword(ChatSession session, string password)
+    public void SetPassword(ClientChatSession session, string password)
     {
         // User Must Be A Member Of The Channel To Set Password
         if (Members.TryGetValue(session.Account.Name, out ChatChannelMember? member) is false)

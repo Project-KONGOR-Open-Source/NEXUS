@@ -1,9 +1,9 @@
 namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Matchmaking;
 
 [ChatCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_JOIN)]
-public class GroupJoin : ISynchronousCommandProcessor
+public class GroupJoin : ISynchronousCommandProcessor<ClientChatSession>
 {
-    public void Process(ChatSession session, ChatBuffer buffer)
+    public void Process(ClientChatSession session, ChatBuffer buffer)
     {
         GroupJoinRequestData requestData = new (buffer);
 
@@ -13,11 +13,18 @@ public class GroupJoin : ISynchronousCommandProcessor
     }
 }
 
-public class GroupJoinRequestData(ChatBuffer buffer)
+file class GroupJoinRequestData
 {
-    public byte[] CommandBytes = buffer.ReadCommandBytes();
+    public byte[] CommandBytes { get; init; }
 
-    public string ClientVersion = buffer.ReadString();
+    public string ClientVersion { get; init; }
 
-    public string InviteIssuerName = buffer.ReadString();
+    public string InviteIssuerName { get; init; }
+
+    public GroupJoinRequestData(ChatBuffer buffer)
+    {
+        CommandBytes = buffer.ReadCommandBytes();
+        ClientVersion = buffer.ReadString();
+        InviteIssuerName = buffer.ReadString();
+    }
 }

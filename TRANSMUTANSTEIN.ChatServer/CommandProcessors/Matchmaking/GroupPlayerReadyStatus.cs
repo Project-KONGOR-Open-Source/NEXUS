@@ -1,9 +1,9 @@
 ﻿namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Matchmaking;
 
 [ChatCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_PLAYER_READY_STATUS)]
-public class GroupPlayerReadyStatus : ISynchronousCommandProcessor
+public class GroupPlayerReadyStatus : ISynchronousCommandProcessor<ClientChatSession>
 {
-    public void Process(ChatSession session, ChatBuffer buffer)
+    public void Process(ClientChatSession session, ChatBuffer buffer)
     {
         GroupPlayerReadyStatusRequestData requestData = new (buffer);
 
@@ -13,11 +13,18 @@ public class GroupPlayerReadyStatus : ISynchronousCommandProcessor
     }
 }
 
-public class GroupPlayerReadyStatusRequestData(ChatBuffer buffer)
+file class GroupPlayerReadyStatusRequestData
 {
-    public byte[] CommandBytes = buffer.ReadCommandBytes();
+    public byte[] CommandBytes { get; init; }
 
-    public byte ReadyStatus = buffer.ReadInt8();
+    public byte ReadyStatus { get; init; }
 
-    public ChatProtocol.TMMGameType GameType = (ChatProtocol.TMMGameType) buffer.ReadInt8();
+    public ChatProtocol.TMMGameType GameType { get; init; }
+
+    public GroupPlayerReadyStatusRequestData(ChatBuffer buffer)
+    {
+        CommandBytes = buffer.ReadCommandBytes();
+        ReadyStatus = buffer.ReadInt8();
+        GameType = (ChatProtocol.TMMGameType) buffer.ReadInt8();
+    }
 }

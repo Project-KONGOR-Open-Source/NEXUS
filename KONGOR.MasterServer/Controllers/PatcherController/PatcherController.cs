@@ -14,7 +14,7 @@ public class PatcherController(ILogger<PatcherController> logger, IDatabase dist
     {
         if ((await DistributedCache.ValidateAccountSessionCookie(form.Cookie)).IsValid.Equals(false))
         {
-            Logger.LogWarning($@"IP Address ""{Request.HttpContext.Connection.RemoteIpAddress?.MapToIPv4().ToString() ?? "UNKNOWN"}"" Has Made A Patcher Controller Request With Forged Cookie ""{form.Cookie}""");
+            Logger.LogWarning($@"IP Address ""{Request.HttpContext.Connection.RemoteIpAddress?.MapToIPv4().ToString() ?? "UNKNOWN"}"" Has Requested Patch Information With Forged Cookie ""{form.Cookie}""");
 
             return Unauthorized($@"Unrecognized Cookie ""{form.Cookie}""");
         }

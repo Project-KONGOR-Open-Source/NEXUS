@@ -43,7 +43,7 @@ public class MatchmakingGroup
         return group;
     }
 
-    public static MatchmakingGroup Create(ChatSession session, GroupCreateRequestData data)
+    internal static MatchmakingGroup Create(ClientChatSession session, MatchmakingGroupInformation information)
     {
         MatchmakingGroupMember member = new (session)
         {
@@ -53,21 +53,7 @@ public class MatchmakingGroup
             IsInGame = false,
             IsEligibleForMatchmaking = true,
             LoadingPercent = 0,
-            GameModeAccess = string.Join('|', data.GameModes.Select(mode => "true"))
-        };
-
-        MatchmakingGroupInformation information = new ()
-        {
-            ClientVersion = data.ClientVersion,
-            GroupType = data.GroupType,
-            GameType = data.GameType,
-            MapName = data.MapName,
-            GameModes = data.GameModes,
-            GameRegions = data.GameRegions,
-            Ranked = data.Ranked,
-            MatchFidelity = data.MatchFidelity,
-            BotDifficulty = data.BotDifficulty,
-            RandomizeBots = data.RandomizeBots
+            GameModeAccess = string.Join('|', information.GameModes.Select(mode => "true"))
         };
 
         // TODO: Create Chat Channel For The Group
@@ -93,7 +79,7 @@ public class MatchmakingGroup
         return group;
     }
 
-    public MatchmakingGroup Invite(ChatSession session, MerrickContext merrick, string receiverAccountName)
+    public MatchmakingGroup Invite(ClientChatSession session, MerrickContext merrick, string receiverAccountName)
     {
         ChatBuffer invite = new ();
 
@@ -109,7 +95,7 @@ public class MatchmakingGroup
         invite.WriteString(string.Join('|', Information.GameModes));                                  // Game Modes
         invite.WriteString(string.Join('|', Information.GameRegions));                                // Game Regions
 
-        ChatSession inviteReceiverSession = Context.ChatSessions
+        ClientChatSession inviteReceiverSession = Context.ClientChatSessions
             .Values.Single(session => session.Account.Name.Equals(receiverAccountName));
 
         inviteReceiverSession.Send(invite);
@@ -129,7 +115,7 @@ public class MatchmakingGroup
         return this;
     }
 
-    public MatchmakingGroup Join(ChatSession session)
+    public MatchmakingGroup Join(ClientChatSession session)
     {
         // TODO: If The Group Is Full (Members Count Is Equal To Max Map Players Count), Reject The Join Request With An Appropriate Error
 
@@ -169,7 +155,7 @@ public class MatchmakingGroup
         return this;
     }
 
-    public MatchmakingGroup SendLoadingStatusUpdate(ChatSession session, byte loadingPercent)
+    public MatchmakingGroup SendLoadingStatusUpdate(ClientChatSession session, byte loadingPercent)
     {
         MatchmakingGroupMember groupMember = Members.Single(member => member.Account.ID == session.Account.ID);
 
@@ -188,7 +174,7 @@ public class MatchmakingGroup
         return this;
     }
 
-    public MatchmakingGroup SendPlayerReadinessStatusUpdate(ChatSession session, ChatProtocol.TMMGameType matchType)
+    public MatchmakingGroup SendPlayerReadinessStatusUpdate(ClientChatSession session, ChatProtocol.TMMGameType matchType)
     {
         Information.GameType = matchType;
 

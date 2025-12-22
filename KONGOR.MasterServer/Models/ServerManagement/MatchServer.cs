@@ -10,6 +10,8 @@ public class MatchServer
 
     public required string Name { get; set; }
 
+    public required MatchServerManager? MatchServerManager { get; set; }
+
     public required int Instance { get; set; }
 
     public required string IPAddress { get; set; }

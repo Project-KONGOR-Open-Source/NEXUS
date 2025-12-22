@@ -213,6 +213,30 @@ Debug HTTP Traffic With Fiddler
 4. in Fiddler, click in the bottom-left corner to disable traffic capturing, which removes the noise from implicitly captured traffic; anything explicitly sent to the Fiddler proxy with default port 8888 will still be captured
 5. in Fiddler, go to `Rules > Customize Rules`, then `Go > to OnBeforeRequest`, and add `oSession.url = oSession.url.Replace("127.0.0.1:8888", "127.0.0.1:55555");` and `oSession.url = oSession.url.Replace("0.0.0.0:8888", "127.0.0.1:55555");` to forward traffic to the Project KONGOR development server once it's been captured
 
+<br/>
+
+Troubleshoot Port Conflicts On Windows
+
+```powershell
+# Stop Windows NAT To Clear Dynamic Exclusions
+net stop winnat
+
+# Reserve TCP Server Ports
+netsh int ipv4 add excludedportrange protocol=tcp startport=11031 numberofports=3 store=persistent
+
+# Reserve Match Server Ports
+netsh int ipv4 add excludedportrange protocol=tcp startport=11235 numberofports=5 store=persistent
+
+# Reserve Voice Port
+netsh int ipv4 add excludedportrange protocol=tcp startport=11435 numberofports=1 store=persistent
+
+# Reserve HTTP Services Ports
+netsh int ipv4 add excludedportrange protocol=tcp startport=55550 numberofports=8 store=persistent
+
+# Start Windows NAT
+net start winnat
+```
+
 <hr/>
 
 <h3 align="center">Concise Instructions For Non-Developers</h3>

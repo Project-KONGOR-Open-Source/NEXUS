@@ -17,7 +17,7 @@ public class FloodPreventionService(ILogger<FloodPreventionService> logger) : IH
     ///     If the request count exceeds <see cref="ChatProtocol.FLOOD_THRESHOLD"/>, sends a warning to the client via <see cref="ChatProtocol.Command.CHAT_CMD_FLOODING"/> and returns FALSE.
     ///     Otherwise, increments the request counter and returns TRUE.
     /// </summary>
-    public bool CheckAndHandleFloodPrevention(ChatSession session)
+    public bool CheckAndHandleFloodPrevention(ClientChatSession session)
     {
         // Staff Accounts Are Exempt From Flood Prevention For Moderation And Administration Purposes
         if (session.Account.Type is AccountType.Staff)

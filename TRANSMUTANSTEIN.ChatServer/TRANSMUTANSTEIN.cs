@@ -2,16 +2,10 @@
 
 public class TRANSMUTANSTEIN
 {
-    // TRUE If The Application Is Running In Development Mode Or FALSE If Not
-    public static bool RunsInDevelopmentMode { get; set; } = true;
-
     public static void Main(string[] args)
     {
         // Create The Application Builder
         WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
-
-        // Set Static RunsInDevelopmentMode Property
-        RunsInDevelopmentMode = builder.Environment.IsDevelopment();
 
         // Add Aspire Service Defaults
         builder.AddServiceDefaults();

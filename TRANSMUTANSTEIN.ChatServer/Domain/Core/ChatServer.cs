@@ -1,13 +1,62 @@
-﻿namespace TRANSMUTANSTEIN.ChatServer.Domain.Core;
+namespace TRANSMUTANSTEIN.ChatServer.Domain.Core;
 
-public class ChatServer(IPAddress address, int port, IServiceProvider serviceProvider) : TCPServer(address, port)
+/// <summary>
+///     Manages three separate TCP servers for handling different types of connections.
+///     ClientChatServer for game clients.
+///     MatchServerChatServer for match servers.
+///     MatchServerManagerChatServer for match server managers.
+/// </summary>
+public class ChatServer(IServiceProvider serviceProvider, IPAddress address, int clientPort, int matchServerPort, int matchServerManagerPort)
 {
-    private IServiceProvider ServiceProvider { get; set; } = serviceProvider;
+    private ClientChatServer ClientServer { get; init; } = new ClientChatServer(serviceProvider, address, clientPort);
+    private MatchServerChatServer MatchServer { get; init; } = new MatchServerChatServer(serviceProvider, address, matchServerPort);
+    private MatchServerManagerChatServer MatchServerManagerServer { get; init; } = new MatchServerManagerChatServer(serviceProvider, address, matchServerManagerPort);
 
-    protected override TCPSession CreateSession() => new ChatSession(this, ServiceProvider);
+    public bool IsStarted => ClientServer.IsStarted && MatchServer.IsStarted && MatchServerManagerServer.IsStarted;
+    public bool IsAccepting => ClientServer.IsAccepting && MatchServer.IsAccepting && MatchServerManagerServer.IsAccepting;
+    public bool IsDisposed => ClientServer.IsDisposed && MatchServer.IsDisposed && MatchServerManagerServer.IsDisposed;
 
-    protected override void OnError(SocketError error)
+    public void Start()
     {
-        Log.Error($"Chat Server Caught A Socket Error With Code {error}");
+        ClientServer.Start();
+        MatchServer.Start();
+        MatchServerManagerServer.Start();
+
+        Log.Information("The Chat Server Has Started");
+    }
+
+    public void Stop()
+    {
+        ClientServer.Stop();
+        MatchServer.Stop();
+        MatchServerManagerServer.Stop();
+
+        Log.Information("The Chat Server Has Stopped");
+    }
+
+    public void Restart()
+    {
+        Stop();
+        Start();
+
+        Log.Information("The Chat Server Has Restarted");
+    }
+
+    public void DisconnectAll()
+    {
+        ClientServer.DisconnectAll();
+        MatchServer.DisconnectAll();
+        MatchServerManagerServer.DisconnectAll();
+
+        Log.Information("All Chat Server Sessions Have Been Disconnected");
+    }
+
+    public void Dispose()
+    {
+        ClientServer.Dispose();
+        MatchServer.Dispose();
+        MatchServerManagerServer.Dispose();
+
+        Log.Information("The Chat Server Has Been Disposed");
     }
 }

@@ -60,10 +60,11 @@ public sealed class UserAuthenticationTests
         ILogger<UserController> userLogger = webApplicationFactory.Services.GetRequiredService<ILogger<UserController>>();
         IOptions<OperationalConfiguration> configuration = webApplicationFactory.Services.GetRequiredService<IOptions<OperationalConfiguration>>();
         IEmailService emailService = webApplicationFactory.Services.GetRequiredService<IEmailService>();
+        IWebHostEnvironment hostEnvironment = webApplicationFactory.Services.GetRequiredService<IWebHostEnvironment>();
 
         MerrickContext databaseContext = webApplicationFactory.Services.GetRequiredService<MerrickContext>();
 
-        UserController userController = new (databaseContext, userLogger, emailService, configuration);
+        UserController userController = new (databaseContext, userLogger, emailService, configuration, hostEnvironment);
 
         IActionResult response = await userController.LogInUser(new LogInUserDTO(accountName, password));
 
@@ -84,10 +85,11 @@ public sealed class UserAuthenticationTests
         ILogger<UserController> userLogger = webApplicationFactory.Services.GetRequiredService<ILogger<UserController>>();
         IOptions<OperationalConfiguration> configuration = webApplicationFactory.Services.GetRequiredService<IOptions<OperationalConfiguration>>();
         IEmailService emailService = webApplicationFactory.Services.GetRequiredService<IEmailService>();
+        IWebHostEnvironment hostEnvironment = webApplicationFactory.Services.GetRequiredService<IWebHostEnvironment>();
 
         MerrickContext databaseContext = webApplicationFactory.Services.GetRequiredService<MerrickContext>();
 
-        UserController userController = new (databaseContext, userLogger, emailService, configuration);
+        UserController userController = new (databaseContext, userLogger, emailService, configuration, hostEnvironment);
 
         IActionResult response = await userController.LogInUser(new LogInUserDTO(accountName, wrongPassword));
 
@@ -174,10 +176,11 @@ public sealed class UserAuthenticationTests
         ILogger<UserController> userLogger = webApplicationFactory.Services.GetRequiredService<ILogger<UserController>>();
         IOptions<OperationalConfiguration> configuration = webApplicationFactory.Services.GetRequiredService<IOptions<OperationalConfiguration>>();
         IEmailService emailService = webApplicationFactory.Services.GetRequiredService<IEmailService>();
+        IWebHostEnvironment hostEnvironment = webApplicationFactory.Services.GetRequiredService<IWebHostEnvironment>();
 
         MerrickContext databaseContext = webApplicationFactory.Services.GetRequiredService<MerrickContext>();
 
-        UserController userController = new (databaseContext, userLogger, emailService, configuration);
+        UserController userController = new (databaseContext, userLogger, emailService, configuration, hostEnvironment);
 
         IActionResult response = await userController.LogInUser(new LogInUserDTO(loginAccountName, password));
 
@@ -198,10 +201,11 @@ public sealed class UserAuthenticationTests
         ILogger<UserController> userLogger = webApplicationFactory.Services.GetRequiredService<ILogger<UserController>>();
         IOptions<OperationalConfiguration> configuration = webApplicationFactory.Services.GetRequiredService<IOptions<OperationalConfiguration>>();
         IEmailService emailService = webApplicationFactory.Services.GetRequiredService<IEmailService>();
+        IWebHostEnvironment hostEnvironment = webApplicationFactory.Services.GetRequiredService<IWebHostEnvironment>();
 
         MerrickContext databaseContext = webApplicationFactory.Services.GetRequiredService<MerrickContext>();
 
-        UserController userController = new (databaseContext, userLogger, emailService, configuration);
+        UserController userController = new (databaseContext, userLogger, emailService, configuration, hostEnvironment);
 
         IActionResult response = await userController.LogInUser(new LogInUserDTO(loginAccountName, password));
 

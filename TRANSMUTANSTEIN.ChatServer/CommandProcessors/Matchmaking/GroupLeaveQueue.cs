@@ -1,9 +1,9 @@
 namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Matchmaking;
 
 [ChatCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_LEAVE_QUEUE)]
-public class GroupLeaveQueue : ISynchronousCommandProcessor
+public class GroupLeaveQueue : ISynchronousCommandProcessor<ClientChatSession>
 {
-    public void Process(ChatSession session, ChatBuffer buffer)
+    public void Process(ClientChatSession session, ChatBuffer buffer)
     {
         GroupLeaveQueueRequestData requestData = new (buffer);
 
@@ -40,7 +40,12 @@ public class GroupLeaveQueue : ISynchronousCommandProcessor
     }
 }
 
-public class GroupLeaveQueueRequestData(ChatBuffer buffer)
+file class GroupLeaveQueueRequestData
 {
-    public byte[] CommandBytes = buffer.ReadCommandBytes();
+    public byte[] CommandBytes { get; init; }
+
+    public GroupLeaveQueueRequestData(ChatBuffer buffer)
+    {
+        CommandBytes = buffer.ReadCommandBytes();
+    }
 }

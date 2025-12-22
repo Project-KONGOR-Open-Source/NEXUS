@@ -1,9 +1,9 @@
 ﻿namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Actions;
 
 [ChatCommand(ChatProtocol.Command.CHAT_CMD_TRACK_PLAYER_ACTION)]
-public class TrackPlayerAction : ISynchronousCommandProcessor
+public class TrackPlayerAction : ISynchronousCommandProcessor<ClientChatSession>
 {
-    public void Process(ChatSession session, ChatBuffer buffer)
+    public void Process(ClientChatSession session, ChatBuffer buffer)
     {
         TrackPlayerActionRequestData requestData = new (buffer);
 
@@ -15,9 +15,15 @@ public class TrackPlayerAction : ISynchronousCommandProcessor
     }
 }
 
-public class TrackPlayerActionRequestData(ChatBuffer buffer)
+file class TrackPlayerActionRequestData
 {
-    public byte[] CommandBytes = buffer.ReadCommandBytes();
+    public byte[] CommandBytes { get; init; }
 
-    public ChatProtocol.ActionCampaign Action = (ChatProtocol.ActionCampaign) buffer.ReadInt8();
+    public ChatProtocol.ActionCampaign Action { get; init; }
+
+    public TrackPlayerActionRequestData(ChatBuffer buffer)
+    {
+        CommandBytes = buffer.ReadCommandBytes();
+        Action = (ChatProtocol.ActionCampaign) buffer.ReadInt8();
+    }
 }

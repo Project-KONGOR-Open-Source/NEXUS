@@ -1,9 +1,9 @@
 namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Matchmaking;
 
 [ChatCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_REJECT_INVITE)]
-public class GroupRejectInvite : ISynchronousCommandProcessor
+public class GroupRejectInvite : ISynchronousCommandProcessor<ClientChatSession>
 {
-    public void Process(ChatSession session, ChatBuffer buffer)
+    public void Process(ClientChatSession session, ChatBuffer buffer)
     {
         GroupRejectInviteRequestData requestData = new (buffer);
 
@@ -28,9 +28,15 @@ public class GroupRejectInvite : ISynchronousCommandProcessor
     }
 }
 
-public class GroupRejectInviteRequestData(ChatBuffer buffer)
+file class GroupRejectInviteRequestData
 {
-    public byte[] CommandBytes = buffer.ReadCommandBytes();
+    public byte[] CommandBytes { get; init; }
 
-    public string InviterName = buffer.ReadString();
+    public string InviterName { get; init; }
+
+    public GroupRejectInviteRequestData(ChatBuffer buffer)
+    {
+        CommandBytes = buffer.ReadCommandBytes();
+        InviterName = buffer.ReadString();
+    }
 }

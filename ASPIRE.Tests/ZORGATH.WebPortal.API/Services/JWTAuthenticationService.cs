@@ -22,10 +22,11 @@ public sealed class JWTAuthenticationService(WebApplicationFactory<ZORGATHAssemb
     {
         ILogger<EmailAddressController> logger = webApplicationFactory.Services.GetRequiredService<ILogger<EmailAddressController>>();
         IEmailService emailService = webApplicationFactory.Services.GetRequiredService<IEmailService>();
+        IWebHostEnvironment hostEnvironment = webApplicationFactory.Services.GetRequiredService<IWebHostEnvironment>();
 
         MerrickContext merrickContext = webApplicationFactory.Services.GetRequiredService<MerrickContext>();
 
-        EmailAddressController controller = new (merrickContext, logger, emailService);
+        EmailAddressController controller = new (merrickContext, logger, emailService, hostEnvironment);
 
         IActionResult response = await controller.RegisterEmailAddress(new RegisterEmailAddressDTO(emailAddress, emailAddress));
 
@@ -43,10 +44,11 @@ public sealed class JWTAuthenticationService(WebApplicationFactory<ZORGATHAssemb
         ILogger<UserController> logger = webApplicationFactory.Services.GetRequiredService<ILogger<UserController>>();
         IOptions<OperationalConfiguration> configuration = webApplicationFactory.Services.GetRequiredService<IOptions<OperationalConfiguration>>();
         IEmailService emailService = webApplicationFactory.Services.GetRequiredService<IEmailService>();
+        IWebHostEnvironment hostEnvironment = webApplicationFactory.Services.GetRequiredService<IWebHostEnvironment>();
 
         MerrickContext merrickContext = webApplicationFactory.Services.GetRequiredService<MerrickContext>();
 
-        UserController controller = new (merrickContext, logger, emailService, configuration);
+        UserController controller = new (merrickContext, logger, emailService, configuration, hostEnvironment);
 
         IActionResult response = await controller.RegisterUserAndMainAccount(
             new RegisterUserAndMainAccountDTO(tokenValue, accountName, password, password));
@@ -64,10 +66,11 @@ public sealed class JWTAuthenticationService(WebApplicationFactory<ZORGATHAssemb
         ILogger<UserController> logger = webApplicationFactory.Services.GetRequiredService<ILogger<UserController>>();
         IOptions<OperationalConfiguration> configuration = webApplicationFactory.Services.GetRequiredService<IOptions<OperationalConfiguration>>();
         IEmailService emailService = webApplicationFactory.Services.GetRequiredService<IEmailService>();
+        IWebHostEnvironment hostEnvironment = webApplicationFactory.Services.GetRequiredService<IWebHostEnvironment>();
 
         MerrickContext merrickContext = webApplicationFactory.Services.GetRequiredService<MerrickContext>();
 
-        UserController controller = new (merrickContext, logger, emailService, configuration);
+        UserController controller = new (merrickContext, logger, emailService, configuration, hostEnvironment);
 
         IActionResult response = await controller.LogInUser(new LogInUserDTO(accountName, password));
 
