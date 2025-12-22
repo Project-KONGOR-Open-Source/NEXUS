@@ -259,7 +259,7 @@ public static class ChatProtocol
         public const ushort NET_CHAT_GS_SAVE_DISCONNECT_REASON             = 0x0510; // For Tracking Reasons, The Match Is Being Aborted Due To Disconnected Players
         public const ushort NET_CHAT_GS_REPORT_MISSING_PLAYERS             = 0x0511; // For Tracking Potentially Problematic Players Abusing Matchmaking And Causing Matches To Fail To Start
         public const ushort NET_CHAT_GS_MATCH_ID_RESULT                    = 0x0512; // The Match Server Is Announcing The Match ID To The Chat Server
-        public const ushort NET_CHAT_GS_CLIENT_AUTH_RESULT                 = 0x0513; // The Outcome Of Authentication With The Master Server
+        public const ushort NET_CHAT_GS_CLIENT_AUTH_RESULT                 = 0x0513; // The Outcome Of A Game Client's Authentication With The Master Server, As Verified By The Match Server
         public const ushort NET_CHAT_GS_STAT_SUBMISSION_RESULT             = 0x0514; // The Outcome Of The Match Server Attempting To Submit Statistics
         public const ushort NET_CHAT_GS_MATCH_ENDED                        = 0x0515; // An Arranged Match Has Completed (Statistics Have Been Tentatively Submitted)
         public const ushort NET_CHAT_GS_MATCH_ONGOING                      = 0x0516; // The Match Server Is Announcing To The Chat Server That A Match Is In Progress
@@ -546,7 +546,7 @@ public static class ChatProtocol
         NUM_MATCH_ID_RESULTS
     };
 
-    public enum ClientAuthResult
+    public enum ClientAuthenticationResult
     {
         CAR_FIRST,
 
