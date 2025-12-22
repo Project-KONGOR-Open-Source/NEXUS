@@ -5,9 +5,10 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-// Actually, using Newtonsoft or System.Text.Json for Discord response parsing inside controller for brevity.
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using ZORGATH.WebPortal.API.Services;
+using ZORGATH.WebPortal.API.Models;
 
 namespace ZORGATH.WebPortal.API.Controllers;
 
@@ -17,28 +18,21 @@ public class AuthController(
     MerrickContext databaseContext,
     IOptions<OperationalConfiguration> configuration,
     ILogger<AuthController> logger,
-    IHttpClientFactory httpClientFactory,
+    IDiscordService discordService,
     IWebHostEnvironment hostEnvironment) : ControllerBase
 {
     private MerrickContext MerrickContext { get; } = databaseContext;
     private OperationalConfiguration Configuration { get; } = configuration.Value;
     private ILogger Logger { get; } = logger;
-    private HttpClient HttpClient { get; } = httpClientFactory.CreateClient();
+    private IDiscordService DiscordService { get; } = discordService;
     private IWebHostEnvironment HostEnvironment { get; } = hostEnvironment;
 
     private string FrontendBaseUrl => HostEnvironment.IsDevelopment() ? "https://localhost:55510" : "https://portal.ui.kongor.net";
-    private string ApiBaseUrl => HostEnvironment.IsDevelopment() ? "https://localhost:55556" : "https://portal.api.kongor.net";
 
     [HttpGet("Discord/Login")]
     public IActionResult KeycloakLogin()
     {
-        string clientId = Configuration.Discord.ClientID;
-        string redirectUri = $"{ApiBaseUrl}/Auth/Discord/Callback";
-        string state = Guid.NewGuid().ToString(); // Should be stored/verified for security, skipping for simplicity now.
-        
-        string url = $"https://discord.com/oauth2/authorize?client_id={clientId}&redirect_uri={Uri.EscapeDataString(redirectUri)}&response_type=code&scope=identify%20email&state={state}";
-        
-        return Redirect(url);
+        return Redirect(DiscordService.GetLoginUrl());
     }
 
     [HttpGet("Discord/Callback")]
@@ -47,39 +41,17 @@ public class AuthController(
         if (string.IsNullOrEmpty(code))
             return BadRequest("Authorization Code Missing");
 
-        // Exchange Code for Token
-        var tokenRequest = new FormUrlEncodedContent(new[]
-        {
-            new KeyValuePair<string, string>("client_id", Configuration.Discord.ClientID),
-            new KeyValuePair<string, string>("client_secret", Configuration.Discord.ClientSecret),
-            new KeyValuePair<string, string>("grant_type", "authorization_code"),
-            new KeyValuePair<string, string>("code", code),
-            new KeyValuePair<string, string>("redirect_uri", $"{ApiBaseUrl}/Auth/Discord/Callback")
-        });
-
-        var tokenResponse = await HttpClient.PostAsync("https://discord.com/api/oauth2/token", tokenRequest);
-        if (!tokenResponse.IsSuccessStatusCode)
-            return Unauthorized("Failed to exchange code for token from Discord.");
-
-        var tokenContent = await tokenResponse.Content.ReadAsStringAsync();
-        var tokenData = JsonSerializer.Deserialize<DiscordTokenResponse>(tokenContent);
+        // Exchange Code for Token (State validation happens inside ExchangeCodeForTokenAsync)
+        var tokenData = await DiscordService.ExchangeCodeForTokenAsync(code, state);
         
         if (tokenData is null || string.IsNullOrEmpty(tokenData.AccessToken))
-             return Unauthorized("Invalid Token Response from Discord.");
+             return Unauthorized("Failed to exchange code for token or invalid state.");
 
         // Get User Info
-        var request = new HttpRequestMessage(HttpMethod.Get, "https://discord.com/api/users/@me");
-        request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", tokenData.AccessToken);
-        
-        var userResponse = await HttpClient.SendAsync(request);
-        if (!userResponse.IsSuccessStatusCode)
-             return Unauthorized("Failed to get user info from Discord.");
-
-        var userContent = await userResponse.Content.ReadAsStringAsync();
-        var userData = JsonSerializer.Deserialize<DiscordUserResponse>(userContent);
+        var userData = await DiscordService.GetUserInfoAsync(tokenData.AccessToken);
 
         if (userData is null || string.IsNullOrEmpty(userData.Id))
-            return Unauthorized("Invalid User Info Response from Discord.");
+            return Unauthorized("Failed to get user info from Discord.");
 
         // Check DB
         var user = await MerrickContext.Users
@@ -93,7 +65,6 @@ public class AuthController(
             bool hasChanges = false;
             if (user.DiscordUsername != userData.Username) { user.DiscordUsername = userData.Username; hasChanges = true; }
             if (user.DiscordAvatar != userData.Avatar) { user.DiscordAvatar = userData.Avatar; hasChanges = true; }
-            // Assuming Banner is added to DiscordUserResponse in previous steps, if not I need to make sure DTO has it.
             if (user.DiscordBanner != userData.Banner) { user.DiscordBanner = userData.Banner; hasChanges = true; }
 
             if (hasChanges)
@@ -175,22 +146,4 @@ public class AuthController(
     }
 }
 
-public class DiscordTokenResponse
-{
-    [JsonPropertyName("access_token")]
-    public string AccessToken { get; set; } = "";
-}
 
-public class DiscordUserResponse
-{
-    [JsonPropertyName("id")]
-    public string Id { get; set; } = "";
-    [JsonPropertyName("username")]
-    public string Username { get; set; } = "";
-    [JsonPropertyName("email")]
-    public string? Email { get; set; }
-    [JsonPropertyName("avatar")]
-    public string? Avatar { get; set; }
-    [JsonPropertyName("banner")]
-    public string? Banner { get; set; }
-}

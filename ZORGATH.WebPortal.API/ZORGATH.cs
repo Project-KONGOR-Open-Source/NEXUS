@@ -1,5 +1,7 @@
 ﻿namespace ZORGATH.WebPortal.API;
 
+using global::ZORGATH.WebPortal.API.Services;
+
 public class ZORGATH
 {
     public static void Main(string[] args)
@@ -30,6 +32,12 @@ public class ZORGATH
 
         // Add Memory Cache Service
         builder.Services.AddMemoryCache();
+
+        // Add Distributed Cache (Redis)
+        builder.AddRedisDistributedCache("distributed-cache");
+
+        // Add Domain Services
+        builder.Services.AddScoped<IDiscordService, DiscordService>();
 
         // Add Rate Limiting Service To Protect Against Abuse And DoS Attacks
         builder.Services.AddRateLimiter(options =>
