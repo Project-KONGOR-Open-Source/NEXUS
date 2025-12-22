@@ -2,9 +2,21 @@
 
 public record RegisterUserAndMainAccountDTO(string Token, string Name, string Password, string ConfirmPassword);
 
+public record RegisterUserWithDiscordDTO(string RegistrationToken, string Name, string Password, string ConfirmPassword);
+
 public record LogInUserDTO(string Name, string Password);
 
-public record GetBasicUserDTO(int ID, string EmailAddress, List<GetBasicAccountDTO> Accounts);
+public record GetBasicUserDTO(
+    int ID, 
+    string EmailAddress,
+    string? ProfilePictureUrl,
+    int GoldCoins,
+    int SilverCoins,
+    int PlinkoTickets,
+    int TotalLevel,
+    int TotalExperience,
+    List<GetBasicAccountDTO> Accounts
+);
 
 public record GetBasicAccountDTO(int ID, string Name);
 

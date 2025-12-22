@@ -66,12 +66,15 @@ public class ZORGATH
             });
         }
 
+        // Add HTTP Client Factory
+        builder.Services.AddHttpClient();
+
         // Set CORS Policy Name
         const string corsPolicyName = "Allow-All";
 
         // Set CORS Origins
         string[] corsOrigins = builder.Environment.IsDevelopment()
-            ? [ "https://localhost:55550",   "https://localhost:55551",      "https://localhost:55552",      "https://localhost:55553",     "https://localhost:55554", "http://localhost:55555", "https://localhost:55556",       "https://localhost:55557"      ]
+            ? [ "https://localhost:55550",   "https://localhost:55551",      "https://localhost:55552",      "https://localhost:55553",     "https://localhost:55554", "http://localhost:55555", "https://localhost:55556",       "https://localhost:55557", "https://localhost:55510", "http://localhost:55511" ]
             : [ "https://aspire.kongor.net", "https://telemetry.kongor.net", "https://resources.kongor.net", "https://database.kongor.net", "https://chat.kongor.net", "http://api.kongor.net",  "https://portal.api.kongor.net", "https://portal.ui.kongor.net" ];
 
         // Add CORS Policy To Allow Cross-Origin Requests

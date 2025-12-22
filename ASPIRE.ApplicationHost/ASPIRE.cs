@@ -115,6 +115,10 @@ public class ASPIRE
         builder.AddProject<ZORGATH>("web-portal-api", builder.Environment.IsProduction() ? "ZORGATH.WebPortal.API Production" : "ZORGATH.WebPortal.API Development")
             .WithReference(database, connectionName: "MERRICK").WaitFor(database); // Connect To SQL Server Database And Wait For It To Start
 
+        // Add Web Portal UI Project
+        builder.AddProject<DAWNBRINGER>("web-portal-ui", builder.Environment.IsProduction() ? "DAWNBRINGER.WebPortal.UI" : "DAWNBRINGER.WebPortal.UI");
+
+
         // Start Orchestrating Distributed Application
         builder.Build().Run();
     }

@@ -1,4 +1,4 @@
-﻿namespace ZORGATH.WebPortal.API.Controllers;
+namespace ZORGATH.WebPortal.API.Controllers;
 
 [ApiController]
 [Route("[controller]")]
@@ -93,7 +93,104 @@ public class UserController(MerrickContext databaseContext, ILogger<UserControll
         await EmailService.SendEmailAddressRegistrationConfirmation(user.EmailAddress, account.Name);
 
         return CreatedAtAction(nameof(GetUser), new { id = user.ID },
-            new GetBasicUserDTO(user.ID, user.EmailAddress, [new GetBasicAccountDTO(account.ID, account.Name)]));
+            new GetBasicUserDTO(
+                user.ID, 
+                user.EmailAddress, 
+                null,
+                user.GoldCoins,
+                user.SilverCoins,
+                user.PlinkoTickets,
+                user.TotalLevel,
+                user.TotalExperience,
+                [new GetBasicAccountDTO(account.ID, account.Name)]
+            ));
+    }
+
+    [HttpPost("RegisterWithDiscord", Name = "Register User And Main Account With Discord")]
+    [AllowAnonymous]
+    [ProducesResponseType(typeof(GetAuthenticationTokenDTO), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status409Conflict)]
+    public async Task<IActionResult> RegisterUserAndMainAccountWithDiscord([FromBody] RegisterUserWithDiscordDTO payload)
+    {
+        // 1. Validate Password Match
+        if (payload.Password.Equals(payload.ConfirmPassword).Equals(false))
+            return BadRequest($@"Password ""{payload.ConfirmPassword}"" Does Not Match ""{payload.Password}""");
+
+        // 2. Validate Registration Token
+        var tokenHandler = new JwtSecurityTokenHandler();
+        if (!tokenHandler.CanReadToken(payload.RegistrationToken))
+            return BadRequest("Invalid Registration Token");
+
+        SecurityToken validatedToken;
+        try
+        {
+            var principal = tokenHandler.ValidateToken(payload.RegistrationToken, new TokenValidationParameters
+            {
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration.JWT.SigningKey)),
+                ValidateIssuer = true,
+                ValidIssuer = Configuration.JWT.Issuer,
+                ValidateAudience = true,
+                ValidAudience = Configuration.JWT.Audience,
+                ValidateLifetime = true
+            }, out validatedToken);
+        }
+        catch (Exception ex)
+        {
+            return BadRequest($"Token Validation Failed: {ex.Message}");
+        }
+
+        var jwtToken = (JwtSecurityToken)validatedToken;
+        string discordId = jwtToken.Claims.First(x => x.Type == "discord_id").Value;
+        string email = jwtToken.Claims.First(x => x.Type == "email").Value;
+        string username = jwtToken.Claims.FirstOrDefault(x => x.Type == "username")?.Value ?? "";
+        string avatar = jwtToken.Claims.FirstOrDefault(x => x.Type == "avatar")?.Value ?? "";
+        string banner = jwtToken.Claims.FirstOrDefault(x => x.Type == "banner")?.Value ?? "";
+
+        // 3. User Existence Check
+        if (await MerrickContext.Users.AnyAsync(user => user.EmailAddress.Equals(email)))
+            return Conflict($@"User With Email ""{email}"" Already Exists");
+        
+        if (await MerrickContext.Users.AnyAsync(user => user.DiscordID == discordId))
+            return Conflict($@"User With Discord ID ""{discordId}"" Already Exists");
+
+        if (await MerrickContext.Accounts.AnyAsync(account => account.Name.Equals(payload.Name)))
+             return Conflict($@"Account With Name ""{payload.Name}"" Already Exists");
+
+        // 4. Create User
+        Role? role = await MerrickContext.Roles.SingleOrDefaultAsync(role => role.Name.Equals(UserRoles.User));
+        if (role is null) return NotFound($@"User Role ""{UserRoles.User}"" Was Not Found");
+
+        string salt = SRPRegistrationHandlers.GenerateSRPPasswordSalt();
+        User user = new()
+        {
+            EmailAddress = email,
+            DiscordID = discordId,
+            DiscordUsername = username,
+            DiscordAvatar = avatar,
+            DiscordBanner = banner,
+            Role = role,
+            SRPPasswordSalt = salt,
+            SRPPasswordHash = SRPRegistrationHandlers.ComputeSRPPasswordHash(payload.Password, salt)
+        };
+        user.PBKDF2PasswordHash = new PasswordHasher<User>().HashPassword(user, payload.Password);
+
+        // 5. Create Account
+        Account account = new()
+        {
+            Name = payload.Name,
+            User = user,
+            IsMain = true
+        };
+        user.Accounts.Add(account);
+
+        await MerrickContext.Users.AddAsync(user);
+        await MerrickContext.SaveChangesAsync();
+
+        // 6. Generate Login Token (Using AuthController logic usually, duplicating minimal here or reusing helper if existed)
+        // TODO: Refactor JWT generation to shared service
+        return await LogInUser(new LogInUserDTO(payload.Name, payload.Password)); // Reuse LogIn logic to return token!
     }
 
     [HttpPost("LogIn", Name = "Log In User")]
@@ -193,14 +290,33 @@ public class UserController(MerrickContext databaseContext, ILogger<UserControll
 
         if (role.Equals(UserRoles.Administrator))
         {
-            return Ok(new GetBasicUserDTO(user.ID, user.EmailAddress,
+            return Ok(new GetBasicUserDTO(
+                user.ID, 
+                user.EmailAddress,
+                !string.IsNullOrEmpty(user.DiscordID) && !string.IsNullOrEmpty(user.DiscordAvatar) 
+                    ? $"https://cdn.discordapp.com/avatars/{user.DiscordID}/{user.DiscordAvatar}.png" 
+                    : null,
+                user.GoldCoins,
+                user.SilverCoins,
+                user.PlinkoTickets,
+                user.TotalLevel,
+                user.TotalExperience,
                 user.Accounts.Select(account => new GetBasicAccountDTO(account.ID, account.NameWithClanTag)).ToList()));
         }
 
         if (role.Equals(UserRoles.User))
         {
-            return Ok(new GetBasicUserDTO(user.ID,
+            return Ok(new GetBasicUserDTO(
+                user.ID,
                 new string(user.EmailAddress.Select(character => char.IsLetterOrDigit(character) ? '*' : character).ToArray()),
+                !string.IsNullOrEmpty(user.DiscordID) && !string.IsNullOrEmpty(user.DiscordAvatar) 
+                    ? $"https://cdn.discordapp.com/avatars/{user.DiscordID}/{user.DiscordAvatar}.png" 
+                    : null,
+                user.GoldCoins,
+                user.SilverCoins,
+                user.PlinkoTickets,
+                user.TotalLevel,
+                user.TotalExperience,
                 user.Accounts.Select(account => new GetBasicAccountDTO(account.ID, account.NameWithClanTag)).ToList()));
         }
 

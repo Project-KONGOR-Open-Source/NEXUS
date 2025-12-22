@@ -1,0 +1,91 @@
+@page "/login-callback"
+@using System.Net.Http.Headers
+@inject HttpClient Http
+@inject NavigationManager Navigation
+
+<PageTitle>Login Successful</PageTitle>
+
+<h1>Login Successful!</h1>
+
+<p>You have been successfully authenticated.</p>
+
+<div class="alert alert-success">
+    <strong>Success!</strong> Your account is ready.
+    <br/>
+    You can now log in through the <strong>Game Client</strong> using your username and password.
+</div>
+
+@if (User != null)
+{
+    <div class="card mt-4" style="max-width: 500px;">
+        <div class="card-header">
+            Account Overview
+        </div>
+        @if (!string.IsNullOrEmpty(User.ProfilePictureUrl))
+        {
+            <div class="card-body text-center">
+                <img src="@User.ProfilePictureUrl" alt="Avatar" class="rounded-circle" style="width: 100px; height: 100px;" />
+            </div>
+        }
+        <ul class="list-group list-group-flush">
+            <li class="list-group-item"><strong>Username:</strong> @User.Accounts.FirstOrDefault()?.Name</li>
+            <li class="list-group-item"><strong>Email:</strong> @User.EmailAddress</li>
+            <li class="list-group-item"><strong>Gold Coins:</strong> @User.GoldCoins</li>
+            <li class="list-group-item"><strong>Silver Coins:</strong> @User.SilverCoins</li>
+            <li class="list-group-item"><strong>Total Level:</strong> @User.TotalLevel</li>
+            <li class="list-group-item"><strong>Plinko Tickets:</strong> @User.PlinkoTickets</li>
+        </ul>
+    </div>
+}
+else if (IsLoading)
+{
+    <p><em>Loading user details...</em></p>
+}
+else
+{
+    <div class="alert alert-warning">
+        Could not load user details.
+    </div>
+}
+
+<div class="mt-4">
+    <a href="/" class="btn btn-primary">Go Home</a>
+</div>
+
+@code {
+    [SupplyParameterFromQuery]
+    public string? Token { get; set; }
+
+    [SupplyParameterFromQuery(Name = "userid")]
+    public int? UserID { get; set; }
+
+    private global::DAWNBRINGER.WebPortal.UI.DTOs.GetBasicUserDTO? User;
+    private bool IsLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (string.IsNullOrEmpty(Token) || UserID == null)
+        {
+            IsLoading = false;
+            return;
+        }
+
+        try
+        {
+            // Set the Bearer token
+            Http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", Token);
+
+            // Fetch user details
+            User = await Http.GetFromJsonAsync<global::DAWNBRINGER.WebPortal.UI.DTOs.GetBasicUserDTO>($"User/{UserID}");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error fetching user: {ex.Message}");
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+}
+

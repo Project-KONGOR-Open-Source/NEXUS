@@ -1,11 +1,10 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
     <PropertyGroup>
-        <OutputType>exe</OutputType>
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="../ASPIRE.Common/ASPIRE.Common.csproj" />
+        <ProjectReference Include="..\ASPIRE.Common\ASPIRE.Common.csproj" />
     </ItemGroup>
 
 </Project>

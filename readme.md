@@ -215,6 +215,29 @@ Debug HTTP Traffic With Fiddler
 
 <hr/>
 
+<h3 align="center">Discord Authentication Configuration</h3>
+
+To enable Discord authentication in development, you must configure **credentials** and the **callback URL**:
+
+1.  **Credentials**: Update `NEXUS/ZORGATH.WebPortal.API/appsettings.Development.json`:
+    ```json
+    "Discord": {
+        "ClientID": "YOUR_CLIENT_ID",
+        "ClientSecret": "YOUR_CLIENT_SECRET"
+    }
+    ```
+
+2.  **Redirect URI**: In the Discord Developer Portal, add this Redirect URI:
+    ```
+    https://localhost:55556/Auth/Discord/Callback
+    ```
+
+3.  **Scopes**: Ensure the following scopes are selected:
+    *   `identify`
+    *   `email`
+
+<hr/>
+
 <h3 align="center">Concise Instructions For Non-Developers</h3>
 
 1. ??? (coming soon™)
