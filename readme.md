@@ -237,12 +237,13 @@ net start winnat
 
 To enable Discord authentication in development, you must configure **credentials** and the **callback URL**:
 
-1.  **Credentials**: Update `NEXUS/ZORGATH.WebPortal.API/appsettings.Development.json`:
-    ```json
-    "Discord": {
-        "ClientID": "YOUR_CLIENT_ID",
-        "ClientSecret": "YOUR_CLIENT_SECRET"
-    }
+1.  **Credentials**: Configure Aspire User Secrets for the `ASPIRE.ApplicationHost` project.
+    It is easy to do this through the dashboard or you can 
+    Run the following commands in the `NEXUS/ASPIRE.ApplicationHost` directory:
+    ```powershell
+    dotnet user-secrets init
+    dotnet user-secrets set "Parameters:discord-client-id" "YOUR_CLIENT_ID"
+    dotnet user-secrets set "Parameters:discord-client-secret" "YOUR_CLIENT_SECRET"
     ```
 
 2.  **Redirect URI**: In the Discord Developer Portal, add this Redirect URI:

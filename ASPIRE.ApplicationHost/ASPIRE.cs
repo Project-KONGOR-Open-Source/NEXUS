@@ -111,10 +111,16 @@ public class ASPIRE
             .WithEnvironment("CHAT_SERVER_PORT_MATCH_SERVER", chatServerMatchServerConnectionsPort.ToString())
             .WithEnvironment("CHAT_SERVER_PORT_MATCH_SERVER_MANAGER", chatServerMatchServerManagerConnectionsPort.ToString());
 
+        // Add Discord Credentials Parameters
+        IResourceBuilder<ParameterResource> discordClientId = builder.AddParameter("discord-client-id");
+        IResourceBuilder<ParameterResource> discordClientSecret = builder.AddParameter("discord-client-secret", secret: true);
+
         // Add Web Portal API Project
         builder.AddProject<ZORGATH>("web-portal-api", builder.Environment.IsProduction() ? "ZORGATH.WebPortal.API Production" : "ZORGATH.WebPortal.API Development")
             .WithReference(database, connectionName: "MERRICK").WaitFor(database) // Connect To SQL Server Database And Wait For It To Start
-            .WithReference(distributedCache, connectionName: "distributed-cache").WaitFor(distributedCache); // Connect To Distributed Cache And Wait For It To Start
+            .WithReference(distributedCache, connectionName: "distributed-cache").WaitFor(distributedCache) // Connect To Distributed Cache And Wait For It To Start
+            .WithEnvironment("Operational__Discord__ClientID", discordClientId)
+            .WithEnvironment("Operational__Discord__ClientSecret", discordClientSecret);
 
         // Add Web Portal UI Project
         builder.AddProject<DAWNBRINGER>("web-portal-ui", builder.Environment.IsProduction() ? "DAWNBRINGER.WebPortal.UI" : "DAWNBRINGER.WebPortal.UI");
