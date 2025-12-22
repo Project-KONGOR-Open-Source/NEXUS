@@ -7,6 +7,10 @@ public class ClientHandshake(MerrickContext merrick, IDatabase distributedCacheS
     {
         ClientHandshakeRequestData requestData = new (buffer);
 
+        // Set Client Metadata On Session
+        // This Needs To Be Set At The First Opportunity So That Any Subsequent Code Logic Can Have Access To The Client's Metadata
+        session.Metadata = requestData.ToMetadata();
+
         string? cachedAccountName = await distributedCacheStore.GetAccountNameForSessionCookie(requestData.SessionCookie);
 
         // Ensure Session Cookie Exists In Cache
@@ -97,7 +101,7 @@ public class ClientHandshake(MerrickContext merrick, IDatabase distributedCacheS
 
         // Accept Connection, Send Options, And Broadcast Connection To Friends And Clan Members
         session
-            .Accept(requestData.ToMetadata(), account)
+            .Accept(account)
             .SendOptionsAndRemoteCommands()
             .BroadcastConnection();
     }

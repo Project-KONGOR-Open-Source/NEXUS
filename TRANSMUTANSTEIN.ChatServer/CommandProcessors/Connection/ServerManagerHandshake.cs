@@ -7,6 +7,10 @@ public class ServerManagerHandshake(IDatabase distributedCacheStore, MerrickCont
     {
         ServerManagerHandshakeRequestData requestData = new (buffer);
 
+        // Set Match Server Manager Metadata On Session
+        // This Needs To Be Set At The First Opportunity So That Any Subsequent Code Logic Can Have Access To The Match Server Manager's Metadata
+        session.Metadata = requestData.ToMetadata();
+
         // Validate Protocol Version
         if (requestData.ChatProtocolVersion != ChatProtocol.CHAT_PROTOCOL_EXTERNAL_VERSION)
         {
@@ -78,9 +82,6 @@ public class ServerManagerHandshake(IDatabase distributedCacheStore, MerrickCont
 
         // Set Host Account On Match Server Manager Session
         session.Account = hostAccount;
-
-        // Set Match Server Manager Metadata On Session
-        session.Metadata = requestData.ToMetadata();
 
         // Validate Match Hosting Permissions
         if (hostAccount.Type != AccountType.ServerHost)

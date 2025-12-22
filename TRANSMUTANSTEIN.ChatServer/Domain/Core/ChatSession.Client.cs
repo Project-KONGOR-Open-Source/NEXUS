@@ -27,11 +27,8 @@ public class ClientChatSession(TCPServer server, IServiceProvider serviceProvide
     /// </summary>
     public HashSet<int> CurrentChannels { get; set; } = [];
 
-    public ClientChatSession Accept(ClientChatSessionMetadata metadata, Account account)
+    public ClientChatSession Accept(Account account)
     {
-        // Embed The Client Information In The Chat Session
-        Metadata = metadata;
-
         // Link The Account To The Chat Session
         Account = account;
 
