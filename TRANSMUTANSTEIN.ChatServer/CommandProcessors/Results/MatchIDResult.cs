@@ -1,7 +1,7 @@
-namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Matchmaking;
+namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Results;
 
 [ChatCommand(ChatProtocol.GameServerToChatServer.NET_CHAT_GS_MATCH_ID_RESULT)]
-public class AnnounceMatchID(IDatabase distributedCacheStore) : IAsynchronousCommandProcessor<MatchServerChatSession>
+public class MatchIDResult(IDatabase distributedCacheStore) : IAsynchronousCommandProcessor<MatchServerChatSession>
 {
     public async Task Process(MatchServerChatSession session, ChatBuffer buffer)
     {
