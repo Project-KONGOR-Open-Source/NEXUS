@@ -91,12 +91,12 @@ public class ChatSession(TCPServer server, IServiceProvider serviceProvider) : T
 
         else
         {
-            if (HostEnvironment.IsDevelopment())
-                Log.Debug(@"Processing Command: ""0x{Command}""", command.ToString("X4"));
-
-            if (GetCommandTypeInstance(commandType) is { } commandTypeInstance)
+            try
             {
-                try
+                if (HostEnvironment.IsDevelopment())
+                    Log.Debug(@"Processing Command: ""0x{Command}""", command.ToString("X4"));
+
+                if (GetCommandTypeInstance(commandType) is { } commandTypeInstance)
                 {
                     ChatBuffer buffer = new (segment);
 
@@ -138,14 +138,15 @@ public class ChatSession(TCPServer server, IServiceProvider serviceProvider) : T
                         }
                     );
                 }
-
-                catch (Exception exception)
+                else
                 {
-                    Log.Error(exception, @"[BUG] Error Processing Command: ""0x{Command}""", command.ToString("X4"));
+                    Log.Error(@"[BUG] Could Not Create Command Type Instance For Command: ""0x{Command}""", command.ToString("X4"));
                 }
             }
-
-            else Log.Error(@"[BUG] Could Not Create Command Type Instance For Command: ""0x{Command}""", command.ToString("X4"));
+            catch (Exception exception)
+            {
+                Log.Error(exception, @"[BUG] Error Processing Command: ""0x{Command}""", command.ToString("X4"));
+            }
         }
     }
 

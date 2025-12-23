@@ -6,116 +6,124 @@ public class TRANSMUTANSTEIN
 {
     public static void Main(string[] args)
     {
-        // Create The Application Builder
-        WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
-
-        // Map User-Defined Configuration Section
-        builder.Services.Configure<OperationalConfiguration>(builder.Configuration.GetRequiredSection(OperationalConfiguration.ConfigurationSection));
-
-        // Add Aspire Service Defaults
-        builder.AddServiceDefaults();
-
-        // Retrieve Operational Configuration
-        OperationalConfiguration configuration = builder.Configuration.GetRequiredSection(OperationalConfiguration.ConfigurationSection)
-            .Get<OperationalConfiguration>() ?? throw new NullReferenceException("Operational Configuration Is NULL");
-
-        // Set CORS Policy Name
-        const string corsPolicyName = "Allow-All";
-
-        // Add CORS Policy To Allow Cross-Origin Requests
-        builder.Services.AddCors(options =>
+        try
         {
-            options.AddPolicy(corsPolicyName,
-                policyBuilder => policyBuilder.WithOrigins(configuration.Service.CorsOrigins)
-                    .AllowAnyHeader().AllowAnyMethod().AllowCredentials());
-        });
+            // Create The Application Builder
+            WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
-        // Add The Database Context
-        builder.AddSqlServerDbContext<MerrickContext>("MERRICK", configureSettings: null, configureDbContextOptions: options =>
-        {
-            // Enable Detailed Error Messages In Development Environment
-            options.EnableDetailedErrors(builder.Environment.IsDevelopment());
+            // Map User-Defined Configuration Section
+            builder.Services.Configure<OperationalConfiguration>(builder.Configuration.GetRequiredSection(OperationalConfiguration.ConfigurationSection));
 
-            // Suppress Warning Regarding Enabled Sensitive Data Logging, Since It Is Only Enabled In The Development Environment
-            // https://github.com/dotnet/efcore/blob/main/src/EFCore/Properties/CoreStrings.resx (LogSensitiveDataLoggingEnabled)
-            options.EnableSensitiveDataLogging(builder.Environment.IsDevelopment())
-                .ConfigureWarnings(warnings => warnings.Log((Id: CoreEventId.SensitiveDataLoggingEnabledWarning, Level: LogLevel.Trace)));
+            // Add Aspire Service Defaults
+            builder.AddServiceDefaults();
 
-            // Enable Thread Safety Checks For Entity Framework
-            options.EnableThreadSafetyChecks();
-        });
+            // Retrieve Operational Configuration
+            OperationalConfiguration configuration = builder.Configuration.GetRequiredSection(OperationalConfiguration.ConfigurationSection)
+                .Get<OperationalConfiguration>() ?? throw new NullReferenceException("Operational Configuration Is NULL");
 
-        // Add Distributed Cache; The Connection String Maps To The "distributed-cache" Resource Defined In ASPIRE.ApplicationHost
-        builder.AddRedisClient("DISTRIBUTED-CACHE");
+            // Set CORS Policy Name
+            const string corsPolicyName = "Allow-All";
 
-        // Register IDatabase From IConnectionMultiplexer
-        builder.Services.AddSingleton<IDatabase>(serviceProvider => serviceProvider.GetRequiredService<IConnectionMultiplexer>().GetDatabase());
-
-        // Register Chat Service As Background Hosted Service
-        builder.Services.AddHostedService<ChatService>();
-
-        // Register Matchmaking Service As Background Hosted Service
-        builder.Services.AddHostedService<MatchmakingService>();
-
-        // Register Flood Prevention Service As Background Hosted Service With Support For Dependency Injection
-        builder.Services.AddSingleton<FloodPreventionService>();
-        builder.Services.AddHostedService(serviceProvider => serviceProvider.GetRequiredService<FloodPreventionService>());
-
-        // Register Database Context Service
-        builder.Services.AddTransient<MerrickContext>();
-
-        // Add Chat Server Health Check
-        builder.Services.AddHealthChecks().AddCheck<ChatServerHealthCheck>("TRANSMUTANSTEIN Chat Server Health Check");
-
-        // Build The Application
-        WebApplication application = builder.Build();
-
-        // Configure Development-Specific Middleware
-        if (application.Environment.IsDevelopment())
-        {
-            // Show Detailed Error Pages In Development
-            application.UseDeveloperExceptionPage();
-        }
-
-        else
-        {
-            // Use Global Exception Handler In Production
-            application.UseExceptionHandler("/error");
-        }
-
-        // Enforce HTTPS With Strict Transport Security
-        application.UseHsts();
-
-        // Automatically Redirect HTTP Requests To HTTPS
-        application.UseHttpsRedirection();
-
-        // Enable CORS Policy
-        application.UseCors(corsPolicyName);
-
-        // Add Security Headers Middleware
-        application.Use(async (context, next) =>
-        {
-            IHeaderDictionary headers = context.Response.Headers;
-
-            // Prevent MIME Type Sniffing
-            headers["X-Content-Type-Options"] = "nosniff";
-
-            // Control Referrer Information
-            headers["Referrer-Policy"] = "strict-origin-when-cross-origin";
-
-            // Apply Restrictive CSP Only To API Endpoints
-            if (context.Request.Path.StartsWithSegments("/api", StringComparison.OrdinalIgnoreCase))
+            // Add CORS Policy To Allow Cross-Origin Requests
+            builder.Services.AddCors(options =>
             {
-                headers["Content-Security-Policy"] = "default-src 'none'; frame-ancestors 'none';";
+                options.AddPolicy(corsPolicyName,
+                    policyBuilder => policyBuilder.WithOrigins(configuration.Service.CorsOrigins)
+                        .AllowAnyHeader().AllowAnyMethod().AllowCredentials());
+            });
+
+            // Add The Database Context
+            builder.AddSqlServerDbContext<MerrickContext>("MERRICK", configureSettings: null, configureDbContextOptions: options =>
+            {
+                // Enable Detailed Error Messages In Development Environment
+                options.EnableDetailedErrors(builder.Environment.IsDevelopment());
+
+                // Suppress Warning Regarding Enabled Sensitive Data Logging, Since It Is Only Enabled In The Development Environment
+                // https://github.com/dotnet/efcore/blob/main/src/EFCore/Properties/CoreStrings.resx (LogSensitiveDataLoggingEnabled)
+                options.EnableSensitiveDataLogging(builder.Environment.IsDevelopment())
+                    .ConfigureWarnings(warnings => warnings.Log((Id: CoreEventId.SensitiveDataLoggingEnabledWarning, Level: LogLevel.Trace)));
+
+                // Enable Thread Safety Checks For Entity Framework
+                options.EnableThreadSafetyChecks();
+            });
+
+            // Add Distributed Cache; The Connection String Maps To The "distributed-cache" Resource Defined In ASPIRE.ApplicationHost
+            builder.AddRedisClient("DISTRIBUTED-CACHE");
+
+            // Register IDatabase From IConnectionMultiplexer
+            builder.Services.AddSingleton<IDatabase>(serviceProvider => serviceProvider.GetRequiredService<IConnectionMultiplexer>().GetDatabase());
+
+            // Register Chat Service As Background Hosted Service
+            builder.Services.AddHostedService<ChatService>();
+
+            // Register Matchmaking Service As Background Hosted Service
+            builder.Services.AddHostedService<MatchmakingService>();
+
+            // Register Flood Prevention Service As Background Hosted Service With Support For Dependency Injection
+            builder.Services.AddSingleton<FloodPreventionService>();
+            builder.Services.AddHostedService(serviceProvider => serviceProvider.GetRequiredService<FloodPreventionService>());
+
+            // Register Database Context Service
+            builder.Services.AddTransient<MerrickContext>();
+
+            // Add Chat Server Health Check
+            builder.Services.AddHealthChecks().AddCheck<ChatServerHealthCheck>("TRANSMUTANSTEIN Chat Server Health Check");
+
+            // Build The Application
+            WebApplication application = builder.Build();
+
+            // Configure Development-Specific Middleware
+            if (application.Environment.IsDevelopment())
+            {
+                // Show Detailed Error Pages In Development
+                application.UseDeveloperExceptionPage();
             }
 
-            await next();
-        });
+            else
+            {
+                // Use Global Exception Handler In Production
+                application.UseExceptionHandler("/error");
+            }
 
-        // Map Aspire Default Health Check Endpoints
-        application.MapDefaultEndpoints();
+            // Enforce HTTPS With Strict Transport Security
+            application.UseHsts();
 
-        // Run The Application
-        application.Run();
+            // Automatically Redirect HTTP Requests To HTTPS
+            application.UseHttpsRedirection();
+
+            // Enable CORS Policy
+            application.UseCors(corsPolicyName);
+
+            // Add Security Headers Middleware
+            application.Use(async (context, next) =>
+            {
+                IHeaderDictionary headers = context.Response.Headers;
+
+                // Prevent MIME Type Sniffing
+                headers["X-Content-Type-Options"] = "nosniff";
+
+                // Control Referrer Information
+                headers["Referrer-Policy"] = "strict-origin-when-cross-origin";
+
+                // Apply Restrictive CSP Only To API Endpoints
+                if (context.Request.Path.StartsWithSegments("/api", StringComparison.OrdinalIgnoreCase))
+                {
+                    headers["Content-Security-Policy"] = "default-src 'none'; frame-ancestors 'none';";
+                }
+
+                await next();
+            });
+
+            // Map Aspire Default Health Check Endpoints
+            application.MapDefaultEndpoints();
+
+            // Run The Application
+            application.Run();
+        }
+        catch (Exception ex)
+        {
+            File.WriteAllText("crash.txt", ex.ToString());
+            throw;
+        }
     }
 }

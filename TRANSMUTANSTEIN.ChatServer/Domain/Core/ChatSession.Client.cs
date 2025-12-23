@@ -89,7 +89,8 @@ public class ClientChatSession(TCPServer server, IServiceProvider serviceProvide
 
         if (matchData is null)
         {
-            Log.Error(@"[BUG] Match ID {MatchID} Not Found In Cache For Session {SessionID}", matchID, ID);
+            if (matchID is not -1)
+                Log.Error(@"[BUG] Match ID {MatchID} Not Found In Cache For Session {SessionID}", matchID, ID);
 
             return this;
         }
@@ -110,6 +111,15 @@ public class ClientChatSession(TCPServer server, IServiceProvider serviceProvide
         BroadcastConnectionStatusUpdate(ChatProtocol.ChatClientStatus.CHAT_CLIENT_STATUS_IN_GAME, server);
 
         return this;
+    }
+
+    public void LeaveMatch()
+    {
+        MatchData = null;
+
+        Metadata.LastKnownClientState = ChatProtocol.ChatClientStatus.CHAT_CLIENT_STATUS_CONNECTED;
+
+        BroadcastConnectionStatusUpdate(ChatProtocol.ChatClientStatus.CHAT_CLIENT_STATUS_CONNECTED);
     }
 
     public ClientChatSession Reject(ChatProtocol.ChatRejectReason reason)

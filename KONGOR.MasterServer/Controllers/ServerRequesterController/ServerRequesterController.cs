@@ -21,6 +21,7 @@ public partial class ServerRequesterController(MerrickContext databaseContext, I
             "replay_auth"   => await HandleServerManagerAuthentication(),
 
             // server
+            "aids2cookie"   => await HandleAidsToCookie(),
             "accept_key"    => await HandleAcceptKey(),
             "auth"          => await HandleAuthentication(),
             "c_conn"        => await HandleConnectClient(),

@@ -424,4 +424,11 @@ public partial class ServerRequesterController
 
         return BadRequest(response);
     }
+    private async Task<IActionResult> HandleAidsToCookie()
+    {
+        // TODO: Implement Logic To Retrieve Cookies For Account IDs
+        // For now, return an empty array to prevent crashing.
+        Dictionary<string, object> response = new();
+        return Ok(PhpSerialization.Serialize(response));
+    }
 }

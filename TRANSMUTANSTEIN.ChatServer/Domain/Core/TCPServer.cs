@@ -351,19 +351,27 @@ public class TCPServer : IDisposable
     /// </summary>
     private void ProcessAccept(SocketAsyncEventArgs e)
     {
-        if (e.SocketError == SocketError.Success)
+        try
         {
-            // Create A New Session To Register
-            TCPSession session = CreateSession();
+            if (e.SocketError == SocketError.Success)
+            {
+                // Create A New Session To Register
+                TCPSession session = CreateSession();
 
-            // Register The Session
-            RegisterSession(session);
+                // Register The Session
+                RegisterSession(session);
 
-            // Connect New Session
-            session.Connect(e.AcceptSocket);
+                // Connect New Session
+                session.Connect(e.AcceptSocket);
+            }
+
+            else SendError(e.SocketError);
         }
 
-        else SendError(e.SocketError);
+        catch (Exception)
+        {
+            SendError(SocketError.TypeNotFound);
+        }
 
         // Accept The Next Client Connection
         if (IsAccepting)

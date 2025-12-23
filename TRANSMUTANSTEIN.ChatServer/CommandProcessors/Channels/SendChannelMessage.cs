@@ -9,6 +9,8 @@ public class SendChannelMessage(FloodPreventionService floodPreventionService) :
 
         ChatChannel channel = ChatChannel.Get(session, requestData.ChannelID);
 
+        Log.Debug(@"Received Channel Message In Channel ID ""{ChannelID}"" From Account ID ""{AccountID}"": ""{Message}""", requestData.ChannelID, session.Account.ID, requestData.Message);
+
         // Check Flood Prevention (Service Handles Both Check And Response)
         if (floodPreventionService.CheckAndHandleFloodPrevention(session) is false)
         {
