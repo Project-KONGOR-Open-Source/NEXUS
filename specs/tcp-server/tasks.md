@@ -1,6 +1,6 @@
 # Tasks: Chat Server Implementation
 
-**Input**: Design documents from `/specs/spec-kit/`
+**Input**: Design documents from `/specs/tcp-server/`
 **Prerequisites**: plan.md, spec.md, research.md, data-model.md, contracts/, quickstart.md
 
 **🎯 PRIORITY FOCUS**: Tasks are **REPRIORITIZED** to get players into matches via matchmaking as quickly as possible:

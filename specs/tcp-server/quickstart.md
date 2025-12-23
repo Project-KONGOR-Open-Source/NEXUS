@@ -58,7 +58,7 @@ NEXUS/
 │   │   └── (Uses MERRICK.DatabaseContext from shared project)
 │   └── Program.cs                 # Aspire orchestration entry point
 ├── specs/
-│   └── spec-kit/
+│   └── tcp-server/
 │       ├── spec.md                # Feature specification
 │       ├── plan.md                # Implementation plan
 │       ├── research.md            # Protocol research
@@ -75,8 +75,8 @@ NEXUS/
 # Navigate to repo
 cd C:\Users\SADS-810\Source\NEXUS
 
-# Ensure you're on spec-kit branch
-git checkout spec-kit
+# Ensure you're on tcp-server branch
+git checkout tcp-server
 
 # Restore dependencies
 dotnet restore
@@ -685,17 +685,17 @@ private void LogMessage(byte[] message, string direction)
 
 ## Additional Resources
 
-- **Spec**: `specs/spec-kit/spec.md`
-- **Plan**: `specs/spec-kit/plan.md`
-- **Research**: `specs/spec-kit/research.md`
-- **Data Model**: `specs/spec-kit/data-model.md`
-- **Contracts**: `specs/spec-kit/contracts/`
+- **Spec**: `specs/tcp-server/spec.md`
+- **Plan**: `specs/tcp-server/plan.md`
+- **Research**: `specs/tcp-server/research.md`
+- **Data Model**: `specs/tcp-server/data-model.md`
+- **Contracts**: `specs/tcp-server/contracts/`
 - **HoN Source**: `C:\HoN\` (absolute source of truth)
 - **KONGOR Source**: `C:\KONGOR\` (practical reference)
 
 ## Getting Help
 
-- Review protocol contracts in `specs/spec-kit/contracts/`
+- Review protocol contracts in `specs/tcp-server/contracts/`
 - Check HoN source code for reference implementations
 - Consult KONGOR codebase for practical patterns
 - Ask team members for clarification
