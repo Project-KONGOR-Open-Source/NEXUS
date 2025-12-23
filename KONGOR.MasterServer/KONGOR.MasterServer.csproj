@@ -14,6 +14,7 @@
 
     <ItemGroup>
         <ProjectReference Include="../ASPIRE.Common/ASPIRE.Common.csproj" />
+        <ProjectReference Include="../KINESIS/KINESIS.csproj" />
         <ProjectReference Include="../MERRICK.DatabaseContext/MERRICK.DatabaseContext.csproj" />
     </ItemGroup>
 

@@ -1,0 +1,49 @@
+{
+  "Caldavar": {
+    "Regions": [
+      "EU",
+      "USE",
+      "USW",
+      "AU",
+      "BR",
+      "RU",
+      "TH",
+      "SEA",
+      "AUTO"
+    ],
+    "Modes": [
+      "rb"
+    ],
+    "Match": {
+      "ExcellentTeamDisparity": 50,
+      "StrictMaximumTeamDisparity": 285,
+      "RelaxedMaximumTeamDisparity": 450,
+      "MaximumPlayerRatingDifference": 190,
+      "TeamSize": 5
+    }
+  },
+  "MidWars": {
+    "Regions": [
+      "EU",
+      "USE",
+      "USW",
+      "AU",
+      "BR",
+      "RU",
+      "TH",
+      "SEA",
+      "AUTO"
+    ],
+    "Modes": [
+      "hb",
+      "sd"
+    ],
+    "Match": {
+      "ExcellentTeamDisparity": 50,
+      "StrictMaximumTeamDisparity": 285,
+      "RelaxedMaximumTeamDisparity": 450,
+      "MaximumPlayerRatingDifference": 190,
+      "TeamSize": 5
+    }
+  }
+}

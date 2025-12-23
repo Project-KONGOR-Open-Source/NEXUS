@@ -1,5 +1,7 @@
 namespace TRANSMUTANSTEIN.ChatServer.Domain.Core;
 
+using KINESIS;
+
 public class ChatSession(TCPServer server, IServiceProvider serviceProvider) : TCPSession(server)
 {
     /// <summary>
@@ -207,6 +209,30 @@ public class ChatSession(TCPServer server, IServiceProvider serviceProvider) : T
 
         Array.Copy(messageLengthBytes, 0, messageBytes, 0, messageLengthBytes.Length);
         Array.Copy(buffer.Data, 0, messageBytes, messageLengthBytes.Length, messageLength);
+
+        return SendAsync(messageBytes);
+    }
+
+    public bool Send(ProtocolResponse response)
+    {
+        return Send(response.CommandBuffer);
+    }
+
+    public bool Send(CommandBuffer buffer)
+    {
+        if (buffer.Size > ChatProtocol.MAX_PACKET_SIZE)
+        {
+            Log.Error(@"Packet Of {PacketSize} Bytes Exceeds Maximum Allowed Size Of {MaximumPacketSize} Bytes", buffer.Size, ChatProtocol.MAX_PACKET_SIZE);
+            return false;
+        }
+
+        short messageLength = (short)buffer.Size;
+
+        byte[] messageLengthBytes = BitConverter.GetBytes(messageLength);
+        byte[] messageBytes = new byte[messageLengthBytes.Length + messageLength];
+
+        Array.Copy(messageLengthBytes, 0, messageBytes, 0, messageLengthBytes.Length);
+        Array.Copy(buffer.Buffer, 0, messageBytes, messageLengthBytes.Length, messageLength);
 
         return SendAsync(messageBytes);
     }

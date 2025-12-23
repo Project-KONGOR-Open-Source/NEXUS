@@ -1,37 +1,55 @@
 ﻿namespace TRANSMUTANSTEIN.ChatServer.Domain.Communication;
 
+using KINESIS.Client;
+using Context = global::TRANSMUTANSTEIN.ChatServer.Internals.Context;
+using global::TRANSMUTANSTEIN.ChatServer.Domain.Core;
+using global::TRANSMUTANSTEIN.ChatServer.Utilities;
+
 public class Whisper
 {
-    public required string Message { get; init; }
+    private readonly string _message;
 
-    /// <summary>
-    ///     Hidden Constructor Which Enforces <see cref="Create"/> As The Primary Mechanism For Creating Whispers
-    /// </summary>
-    private Whisper() { }
+    private Whisper(string message)
+    {
+        _message = message;
+    }
 
     public static Whisper Create(string message)
-        => new () { Message = message };
+    {
+        return new Whisper(message);
+    }
 
     public Whisper Send(ClientChatSession senderSession, string recipientName)
     {
-        ClientChatSession recipientSession = Context.ClientChatSessions.Values
-            .Single(chatSession => chatSession.Account.Name.Equals(recipientName, StringComparison.OrdinalIgnoreCase));
+        // Debugging: Log the lookup attempt
+        Log.Error("DEBUG: Whisper Sender={Sender} Recipient={Recipient}", senderSession.Account.Name, recipientName);
+        
+        // Log all available names in the dictionary to see what we are comparing against
+        string availableUsers = string.Join(", ", Context.ClientChatSessions.Keys);
+        Log.Error("DEBUG: Available Users in Context.ClientChatSessions: {Users}", availableUsers);
+
+        // Try to find the recipient session (Case insensitive lookup)
+        ClientChatSession? recipientSession = Context.ClientChatSessions.FirstOrDefault(x => x.Key.Equals(recipientName, StringComparison.OrdinalIgnoreCase)).Value;
+        
+        if (recipientSession == null)
+        {
+            Log.Error("DEBUG: Whisper Recipient not found. Sent 'Offline' response.");
+            return SendWhisperFailure(senderSession);
+        }
 
         // Check Recipient's Chat Mode
         switch (recipientSession.Metadata.ClientChatModeState)
         {
             // DND: Block Whisper And Send Auto-Response
             case ChatProtocol.ChatModeType.CHAT_MODE_DND:
-                SendWhisperFailure(senderSession, recipientName)
+                SendWhisperFailure(senderSession)
                     .SendAutomaticResponse(senderSession, recipientSession, "Do Not Disturb");
 
                 return this;
 
             // Invisible: Treat As Offline
             case ChatProtocol.ChatModeType.CHAT_MODE_INVISIBLE:
-                SendWhisperFailure(senderSession, recipientName);
-
-                return this;
+                return SendWhisperFailure(senderSession);
 
             // AFK: Deliver Message But Send Auto-Response
             case ChatProtocol.ChatModeType.CHAT_MODE_AFK:
@@ -42,9 +60,7 @@ public class Whisper
 
             // Available: Normal Delivery
             case ChatProtocol.ChatModeType.CHAT_MODE_AVAILABLE:
-                SendWhisperSuccess(senderSession.Account.Name, recipientSession);
-
-                return this;
+                return SendWhisperSuccess(senderSession.Account.Name, recipientSession);
 
             default:
                 throw new ArgumentOutOfRangeException(nameof(recipientSession.Metadata.ClientChatModeState), recipientSession.Metadata.ClientChatModeState,
@@ -54,41 +70,25 @@ public class Whisper
 
     private Whisper SendWhisperSuccess(string senderName, ClientChatSession recipientSession)
     {
-        ChatBuffer whisperSuccess = new ();
-
-        whisperSuccess.WriteCommand(ChatProtocol.Command.CHAT_CMD_WHISPER);
-        whisperSuccess.WriteString(senderName); // Sender Name
-        whisperSuccess.WriteString(Message);    // Message Content
-
-        recipientSession.Send(whisperSuccess);
+        recipientSession.Send(new WhisperResponse(senderName, _message));
 
         return this;
     }
 
 
-    private Whisper SendWhisperFailure(ClientChatSession senderSession, string recipientName)
+    private Whisper SendWhisperFailure(ClientChatSession senderSession)
     {
-        ChatBuffer whisperFailed = new ();
-
-        whisperFailed.WriteCommand(ChatProtocol.Command.CHAT_CMD_WHISPER_FAILED);
-        whisperFailed.WriteString(recipientName); // Recipient's Account Name
-        whisperFailed.WriteString(Message);       // Message Content
-
-        senderSession.Send(whisperFailed);
+        senderSession.Send(new WhisperFailedResponse());
 
         return this;
     }
 
     private Whisper SendAutomaticResponse(ClientChatSession senderSession, ClientChatSession recipientSession, string messageAutomaticResponse)
     {
-        ChatBuffer automaticResponse = new ();
-
-        automaticResponse.WriteCommand(ChatProtocol.Command.CHAT_CMD_CHAT_MODE_AUTO_RESPONSE);
-        automaticResponse.WriteInt8(Convert.ToByte(recipientSession.Metadata.ClientChatModeState)); // Recipient's Chat Mode Type
-        automaticResponse.WriteString(recipientSession.Account.Name);                               // Recipient's Account Name
-        automaticResponse.WriteString(messageAutomaticResponse);                                    // Message Content
-
-        senderSession.Send(automaticResponse);
+        senderSession.Send(new ChatModeAutoResponse(
+            (ChatMode)recipientSession.Metadata.ClientChatModeState,
+            recipientSession.Account.Name,
+            messageAutomaticResponse));
 
         return this;
     }

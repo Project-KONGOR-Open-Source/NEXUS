@@ -4,6 +4,7 @@
     <Project Path="ASPIRE.SourceGenerator/ASPIRE.SourceGenerator.csproj" />
     <Project Path="ASPIRE.Tests/ASPIRE.Tests.csproj" />
     <Project Path="DAWNBRINGER.WebPortal.UI/DAWNBRINGER.WebPortal.UI.csproj" />
+    <Project Path="KINESIS/KINESIS.csproj" />
     <Project Path="KONGOR.MasterServer/KONGOR.MasterServer.csproj" />
     <Project Path="MERRICK.DatabaseContext/MERRICK.DatabaseContext.csproj" />
     <Project Path="TRANSMUTANSTEIN.ChatServer/TRANSMUTANSTEIN.ChatServer.csproj" />
