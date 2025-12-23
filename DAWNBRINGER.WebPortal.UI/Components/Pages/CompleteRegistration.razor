@@ -18,7 +18,7 @@
                 @if (!string.IsNullOrEmpty(Message))
                 {
                     <div class="alert @(IsSuccess ? "alert-success" : "alert-danger") mb-3">
-                        @Message
+                         @((MarkupString)Message)
                     </div>
                 }
                 
@@ -111,7 +111,27 @@
             {
                 var content = await response.Content.ReadAsStringAsync();
                 IsSuccess = false;
-                Message = $"Error: {content}";
+
+                try 
+                {
+                    // Try to parse as array of strings (validation errors)
+                    var errors = await response.Content.ReadFromJsonAsync<string[]>();
+                    if (errors != null && errors.Length > 0)
+                    {
+                        // Start HTML list
+                        Message = "<ul>" + string.Join("", errors.Select(e => $"<li>{e}</li>")) + "</ul>"; 
+                    }
+                    else 
+                    {
+                         // Fallback to raw content if not an array or empty
+                         Message = !string.IsNullOrWhiteSpace(content) ? content : "Registration failed.";
+                    }
+                }
+                catch
+                {
+                    // Fallback if parsing fails (e.g. simple string error)
+                    Message = !string.IsNullOrWhiteSpace(content) ? content : "Registration failed.";
+                }
             }
         }
         catch (NavigationException)

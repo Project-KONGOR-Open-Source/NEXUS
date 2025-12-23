@@ -1,6 +1,8 @@
 ﻿namespace ZORGATH.WebPortal.API;
 
 using global::ZORGATH.WebPortal.API.Services;
+using global::ZORGATH.WebPortal.API.Validators;
+using Microsoft.AspNetCore.Identity;
 
 public class ZORGATH
 {
@@ -105,44 +107,45 @@ public class ZORGATH
             options.AddPolicy(OutputCachePolicies.CacheForOneWeek, policy => policy.Cache().Expire(TimeSpan.FromDays(7)));
         });
 
-        // TODO: Implement Username And Password Validation Policies
-        //if (builder.Environment.IsDevelopment())
-        //{
-        //    builder.Services.Configure<IdentityOptions>(options =>
-        //    {
-        //        options.User.RequireUniqueEmail = false;
-        //        options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_`";
+        // IMPLEMENTED: Username And Password Validation Policies
+        if (builder.Environment.IsDevelopment())
+        {
+            builder.Services.Configure<IdentityOptions>(options =>
+            {
+                options.User.RequireUniqueEmail = false;
+                options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_`";
 
-        //        options.Password.RequiredLength = 0;
-        //        options.Password.RequiredUniqueChars = 0;
-        //        options.Password.RequireNonAlphanumeric = false;
-        //        options.Password.RequireLowercase = false;
-        //        options.Password.RequireUppercase = false;
-        //        options.Password.RequireDigit = false;
+                options.Password.RequiredLength = 6;
+                options.Password.RequiredUniqueChars = 0;
+                options.Password.RequireNonAlphanumeric = false;
+                options.Password.RequireLowercase = false;
+                options.Password.RequireUppercase = false;
+                options.Password.RequireDigit = false;
 
-        //        options.Lockout.MaxFailedAccessAttempts = 5;
-        //        options.Lockout.DefaultLockoutTimeSpan = TimeSpan.Zero;
-        //    });
-        //}
+                options.Lockout.MaxFailedAccessAttempts = 5;
+                options.Lockout.DefaultLockoutTimeSpan = TimeSpan.Zero;
+            });
+        }
+        else
+        {
+            builder.Services.Configure<IdentityOptions>(options =>
+            {
+                options.User.RequireUniqueEmail = true;
+                options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_`";
 
-        //else
-        //{
-        //    builder.Services.Configure<IdentityOptions>(options =>
-        //    {
-        //        options.User.RequireUniqueEmail = true;
-        //        options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_`";
+                options.Password.RequiredLength = 8;
+                options.Password.RequiredUniqueChars = 4;
+                options.Password.RequireNonAlphanumeric = true;
+                options.Password.RequireLowercase = true;
+                options.Password.RequireUppercase = true;
+                options.Password.RequireDigit = true;
 
-        //        options.Password.RequiredLength = 8;
-        //        options.Password.RequiredUniqueChars = 4;
-        //        options.Password.RequireNonAlphanumeric = true;
-        //        options.Password.RequireLowercase = true;
-        //        options.Password.RequireUppercase = true;
-        //        options.Password.RequireDigit = true;
+                options.Lockout.MaxFailedAccessAttempts = 3;
+                options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
+            });
+        }
 
-        //        options.Lockout.MaxFailedAccessAttempts = 3;
-        //        options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
-        //    });
-        //}
+
 
         // Add JWT Bearer Authentication Configuration
         builder.Services
@@ -240,6 +243,9 @@ public class ZORGATH
 
         // Add Email Service
         builder.Services.AddSingleton<IEmailService, EmailService>();
+
+        // Add Password Validator
+        builder.Services.AddScoped<PasswordValidator>();
 
         // Build The Application
         WebApplication application = builder.Build();

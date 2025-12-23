@@ -1,5 +1,7 @@
 namespace ASPIRE.Tests.ZORGATH.WebPortal.API.Services;
 
+using global::ZORGATH.WebPortal.API.Validators;
+
 /// <summary>
 ///     Helper Class For Creating Authentication State In Tests
 /// </summary>
@@ -47,8 +49,9 @@ public sealed class JWTAuthenticationService(WebApplicationFactory<ZORGATHAssemb
         IWebHostEnvironment hostEnvironment = webApplicationFactory.Services.GetRequiredService<IWebHostEnvironment>();
 
         MerrickContext merrickContext = webApplicationFactory.Services.GetRequiredService<MerrickContext>();
+        PasswordValidator passwordValidator = webApplicationFactory.Services.GetRequiredService<PasswordValidator>();
 
-        UserController controller = new (merrickContext, logger, emailService, configuration, hostEnvironment);
+        UserController controller = new (merrickContext, logger, emailService, configuration, hostEnvironment, passwordValidator);
 
         IActionResult response = await controller.RegisterUserAndMainAccount(
             new RegisterUserAndMainAccountDTO(tokenValue, accountName, password, password));
@@ -69,8 +72,9 @@ public sealed class JWTAuthenticationService(WebApplicationFactory<ZORGATHAssemb
         IWebHostEnvironment hostEnvironment = webApplicationFactory.Services.GetRequiredService<IWebHostEnvironment>();
 
         MerrickContext merrickContext = webApplicationFactory.Services.GetRequiredService<MerrickContext>();
+        PasswordValidator passwordValidator = webApplicationFactory.Services.GetRequiredService<PasswordValidator>();
 
-        UserController controller = new (merrickContext, logger, emailService, configuration, hostEnvironment);
+        UserController controller = new (merrickContext, logger, emailService, configuration, hostEnvironment, passwordValidator);
 
         IActionResult response = await controller.LogInUser(new LogInUserDTO(accountName, password));
 

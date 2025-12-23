@@ -1,18 +1,20 @@
 namespace ZORGATH.WebPortal.API.Controllers;
 
 using MERRICK.DatabaseContext.Enumerations;
+using global::ZORGATH.WebPortal.API.Validators;
 
 [ApiController]
 [Route("[controller]")]
 [Consumes("application/json")]
 [EnableRateLimiting(RateLimiterPolicies.Strict)]
-public class UserController(MerrickContext databaseContext, ILogger<UserController> logger, IEmailService emailService, IOptions<OperationalConfiguration> configuration, IWebHostEnvironment hostEnvironment) : ControllerBase
+    public class UserController(MerrickContext databaseContext, ILogger<UserController> logger, IEmailService emailService, IOptions<OperationalConfiguration> configuration, IWebHostEnvironment hostEnvironment, PasswordValidator passwordValidator) : ControllerBase
 {
     private MerrickContext MerrickContext { get; } = databaseContext;
     private ILogger Logger { get; } = logger;
     private IEmailService EmailService { get; } = emailService;
     private OperationalConfiguration Configuration { get; } = configuration.Value;
     private IWebHostEnvironment HostEnvironment { get; } = hostEnvironment;
+    private PasswordValidator PasswordValidator { get; } = passwordValidator;
 
     [HttpPost("Register", Name = "Register User And Main Account")]
     [AllowAnonymous]
@@ -26,13 +28,10 @@ public class UserController(MerrickContext databaseContext, ILogger<UserControll
         if (payload.Password.Equals(payload.ConfirmPassword).Equals(false))
             return BadRequest($@"Password ""{payload.ConfirmPassword}"" Does Not Match ""{payload.Password}"" (These Values Are Only Visible To You)");
 
-        if (HostEnvironment.IsDevelopment() is false)
-        {
-            ValidationResult result = await new PasswordValidator().ValidateAsync(payload.Password);
+        ValidationResult result = await PasswordValidator.ValidateAsync(payload.Password);
 
-            if (result.IsValid is false)
-                return BadRequest(result.Errors.Select(error => error.ErrorMessage));
-        }
+        if (result.IsValid is false)
+            return BadRequest(result.Errors.Select(error => error.ErrorMessage));
 
         Token? token = await MerrickContext.Tokens.SingleOrDefaultAsync(token => token.Value.ToString().Equals(payload.Token) && token.Purpose.Equals(TokenPurpose.EmailAddressVerification));
 
@@ -120,6 +119,13 @@ public class UserController(MerrickContext databaseContext, ILogger<UserControll
         // 1. Validate Password Match
         if (payload.Password.Equals(payload.ConfirmPassword).Equals(false))
             return BadRequest($@"Password ""{payload.ConfirmPassword}"" Does Not Match ""{payload.Password}""");
+
+        // 1b. Validate Password Complexity
+        ValidationResult passwordValidationResult = await PasswordValidator.ValidateAsync(payload.Password);
+        if (!passwordValidationResult.IsValid)
+        {
+             return BadRequest(passwordValidationResult.Errors.Select(error => error.ErrorMessage));
+        }
 
         // 2. Validate Registration Token
         var tokenHandler = new JwtSecurityTokenHandler();

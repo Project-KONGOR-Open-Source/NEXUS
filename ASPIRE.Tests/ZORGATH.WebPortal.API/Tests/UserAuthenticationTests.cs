@@ -1,5 +1,7 @@
 namespace ASPIRE.Tests.ZORGATH.WebPortal.API.Tests;
 
+using global::ZORGATH.WebPortal.API.Validators;
+
 /// <summary>
 ///     Tests For User Authentication Functionality
 /// </summary>
@@ -63,8 +65,9 @@ public sealed class UserAuthenticationTests
         IWebHostEnvironment hostEnvironment = webApplicationFactory.Services.GetRequiredService<IWebHostEnvironment>();
 
         MerrickContext databaseContext = webApplicationFactory.Services.GetRequiredService<MerrickContext>();
+        PasswordValidator passwordValidator = webApplicationFactory.Services.GetRequiredService<PasswordValidator>();
 
-        UserController userController = new (databaseContext, userLogger, emailService, configuration, hostEnvironment);
+        UserController userController = new (databaseContext, userLogger, emailService, configuration, hostEnvironment, passwordValidator);
 
         IActionResult response = await userController.LogInUser(new LogInUserDTO(accountName, password));
 
@@ -88,8 +91,9 @@ public sealed class UserAuthenticationTests
         IWebHostEnvironment hostEnvironment = webApplicationFactory.Services.GetRequiredService<IWebHostEnvironment>();
 
         MerrickContext databaseContext = webApplicationFactory.Services.GetRequiredService<MerrickContext>();
+        PasswordValidator passwordValidator = webApplicationFactory.Services.GetRequiredService<PasswordValidator>();
 
-        UserController userController = new (databaseContext, userLogger, emailService, configuration, hostEnvironment);
+        UserController userController = new (databaseContext, userLogger, emailService, configuration, hostEnvironment, passwordValidator);
 
         IActionResult response = await userController.LogInUser(new LogInUserDTO(accountName, wrongPassword));
 
@@ -179,8 +183,9 @@ public sealed class UserAuthenticationTests
         IWebHostEnvironment hostEnvironment = webApplicationFactory.Services.GetRequiredService<IWebHostEnvironment>();
 
         MerrickContext databaseContext = webApplicationFactory.Services.GetRequiredService<MerrickContext>();
+        PasswordValidator passwordValidator = webApplicationFactory.Services.GetRequiredService<PasswordValidator>();
 
-        UserController userController = new (databaseContext, userLogger, emailService, configuration, hostEnvironment);
+        UserController userController = new (databaseContext, userLogger, emailService, configuration, hostEnvironment, passwordValidator);
 
         IActionResult response = await userController.LogInUser(new LogInUserDTO(loginAccountName, password));
 
@@ -204,8 +209,9 @@ public sealed class UserAuthenticationTests
         IWebHostEnvironment hostEnvironment = webApplicationFactory.Services.GetRequiredService<IWebHostEnvironment>();
 
         MerrickContext databaseContext = webApplicationFactory.Services.GetRequiredService<MerrickContext>();
+        PasswordValidator passwordValidator = webApplicationFactory.Services.GetRequiredService<PasswordValidator>();
 
-        UserController userController = new (databaseContext, userLogger, emailService, configuration, hostEnvironment);
+        UserController userController = new (databaseContext, userLogger, emailService, configuration, hostEnvironment, passwordValidator);
 
         IActionResult response = await userController.LogInUser(new LogInUserDTO(loginAccountName, password));
 

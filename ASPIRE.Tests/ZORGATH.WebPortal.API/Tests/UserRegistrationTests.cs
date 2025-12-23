@@ -1,5 +1,7 @@
 namespace ASPIRE.Tests.ZORGATH.WebPortal.API.Tests;
 
+using global::ZORGATH.WebPortal.API.Validators;
+
 /// <summary>
 ///     Tests For User Registration Functionality
 /// </summary>
@@ -32,8 +34,9 @@ public sealed class UserRegistrationTests
         ILogger<UserController> userLogger = webApplicationFactory.Services.GetRequiredService<ILogger<UserController>>();
         IOptions<OperationalConfiguration> configuration = webApplicationFactory.Services.GetRequiredService<IOptions<OperationalConfiguration>>();
         IWebHostEnvironment userHostEnvironment = webApplicationFactory.Services.GetRequiredService<IWebHostEnvironment>();
+        PasswordValidator passwordValidator = webApplicationFactory.Services.GetRequiredService<PasswordValidator>();
 
-        UserController userController = new (databaseContext, userLogger, emailService, configuration, userHostEnvironment);
+        UserController userController = new (databaseContext, userLogger, emailService, configuration, userHostEnvironment, passwordValidator);
 
         IActionResult response = await userController.RegisterUserAndMainAccount(
             new RegisterUserAndMainAccountDTO(registrationToken.Value.ToString(), accountName, password, password));
@@ -99,8 +102,9 @@ public sealed class UserRegistrationTests
         ILogger<UserController> userLogger = webApplicationFactory.Services.GetRequiredService<ILogger<UserController>>();
         IOptions<OperationalConfiguration> configuration = webApplicationFactory.Services.GetRequiredService<IOptions<OperationalConfiguration>>();
         IWebHostEnvironment userHostEnvironment = webApplicationFactory.Services.GetRequiredService<IWebHostEnvironment>();
+        PasswordValidator passwordValidator = webApplicationFactory.Services.GetRequiredService<PasswordValidator>();
 
-        UserController userController = new (databaseContext, userLogger, emailService, configuration, userHostEnvironment);
+        UserController userController = new (databaseContext, userLogger, emailService, configuration, userHostEnvironment, passwordValidator);
 
         IActionResult response = await userController.RegisterUserAndMainAccount(
             new RegisterUserAndMainAccountDTO(registrationToken.Value.ToString(), accountName, password, confirmPassword));
@@ -123,8 +127,9 @@ public sealed class UserRegistrationTests
         IWebHostEnvironment secondHostEnvironment = webApplicationFactory.Services.GetRequiredService<IWebHostEnvironment>();
 
         MerrickContext databaseContext = webApplicationFactory.Services.GetRequiredService<MerrickContext>();
+        PasswordValidator passwordValidator = webApplicationFactory.Services.GetRequiredService<PasswordValidator>();
 
-        UserController userController = new (databaseContext, userLogger, emailService, configuration, secondHostEnvironment);
+        UserController userController = new (databaseContext, userLogger, emailService, configuration, secondHostEnvironment, passwordValidator);
 
         IActionResult response = await userController.RegisterUserAndMainAccount(
             new RegisterUserAndMainAccountDTO(invalidToken, accountName, password, password));
@@ -161,8 +166,9 @@ public sealed class UserRegistrationTests
         ILogger<UserController> userLogger = webApplicationFactory.Services.GetRequiredService<ILogger<UserController>>();
         IOptions<OperationalConfiguration> configuration = webApplicationFactory.Services.GetRequiredService<IOptions<OperationalConfiguration>>();
         IWebHostEnvironment userHostEnvironment = webApplicationFactory.Services.GetRequiredService<IWebHostEnvironment>();
+        PasswordValidator passwordValidator = webApplicationFactory.Services.GetRequiredService<PasswordValidator>();
 
-        UserController userController = new (databaseContext, userLogger, emailService, configuration, userHostEnvironment);
+        UserController userController = new (databaseContext, userLogger, emailService, configuration, userHostEnvironment, passwordValidator);
 
         IActionResult response = await userController.RegisterUserAndMainAccount(
             new RegisterUserAndMainAccountDTO(registrationToken.Value.ToString(), accountName, password, password));
@@ -197,8 +203,9 @@ public sealed class UserRegistrationTests
         ILogger<UserController> userLogger = webApplicationFactory.Services.GetRequiredService<ILogger<UserController>>();
         IOptions<OperationalConfiguration> configuration = webApplicationFactory.Services.GetRequiredService<IOptions<OperationalConfiguration>>();
         IWebHostEnvironment userHostEnvironment = webApplicationFactory.Services.GetRequiredService<IWebHostEnvironment>();
+        PasswordValidator passwordValidator = webApplicationFactory.Services.GetRequiredService<PasswordValidator>();
 
-        UserController userController = new (databaseContext, userLogger, emailService, configuration, userHostEnvironment);
+        UserController userController = new (databaseContext, userLogger, emailService, configuration, userHostEnvironment, passwordValidator);
 
         // First Registration Should Succeed And Consume The Token
         IActionResult firstResponse = await userController.RegisterUserAndMainAccount(
@@ -251,8 +258,9 @@ public sealed class UserRegistrationTests
         ILogger<UserController> userLogger = webApplicationFactory.Services.GetRequiredService<ILogger<UserController>>();
         IOptions<OperationalConfiguration> configuration = webApplicationFactory.Services.GetRequiredService<IOptions<OperationalConfiguration>>();
         IWebHostEnvironment userHostEnvironment = webApplicationFactory.Services.GetRequiredService<IWebHostEnvironment>();
+        PasswordValidator passwordValidator = webApplicationFactory.Services.GetRequiredService<PasswordValidator>();
 
-        UserController userController = new (databaseContext, userLogger, emailService, configuration, userHostEnvironment);
+        UserController userController = new (databaseContext, userLogger, emailService, configuration, userHostEnvironment, passwordValidator);
 
         // Second Registration Attempt With Duplicate Account Name Should Return Conflict
         IActionResult response = await userController.RegisterUserAndMainAccount(
@@ -292,8 +300,9 @@ public sealed class UserRegistrationTests
         ILogger<UserController> userLogger = webApplicationFactory.Services.GetRequiredService<ILogger<UserController>>();
         IOptions<OperationalConfiguration> configuration = webApplicationFactory.Services.GetRequiredService<IOptions<OperationalConfiguration>>();
         IWebHostEnvironment userHostEnvironment = webApplicationFactory.Services.GetRequiredService<IWebHostEnvironment>();
+        PasswordValidator passwordValidator = webApplicationFactory.Services.GetRequiredService<PasswordValidator>();
 
-        UserController userController = new (databaseContext, userLogger, emailService, configuration, userHostEnvironment);
+        UserController userController = new (databaseContext, userLogger, emailService, configuration, userHostEnvironment, passwordValidator);
 
         // Second Registration Attempt With Duplicate Account Name Should Return Conflict
         IActionResult response = await userController.RegisterUserAndMainAccount(
