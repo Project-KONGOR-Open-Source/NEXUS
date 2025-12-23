@@ -5,22 +5,53 @@ namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Connection;
 ///     Match servers periodically send their status to inform the chat server about their current state.
 /// </summary>
 [ChatCommand(ChatProtocol.GameServerToChatServer.NET_CHAT_GS_STATUS)]
-public class ServerStatus : ISynchronousCommandProcessor<MatchServerChatSession>
+public class ServerStatus(IDatabase distributedCacheStore) : IAsynchronousCommandProcessor<MatchServerChatSession>
 {
-    public void Process(MatchServerChatSession session, ChatBuffer buffer)
+    public async Task Process(MatchServerChatSession session, ChatBuffer buffer)
     {
         ServerStatusData statusData = new (buffer);
 
         Log.Debug(@"Received Status Update From Server ID ""{ServerID}"" - Name: ""{Name}"", Address: ""{Address}:{Port}"", Location: ""{Location}"", Status: {Status}",
             statusData.ServerID, statusData.Name, statusData.Address, statusData.Port, statusData.Location, statusData.Status);
 
-        // TODO: Update Any Relevant Match Server Data
+        MatchServer? matchServer = await distributedCacheStore.GetMatchServerByID(session.Metadata.ServerID);
 
-        // TODO: Update Server In Distributed Cache
+        if (matchServer is null)
+        {
+             Log.Warning(@"Received Status Update From Unknown Match Server ID ""{ServerID}""", session.Metadata.ServerID);
+             return;
+        }
 
-        // TODO: If Status Is IDLE, Mark Server As Available For Match Allocation
-        // TODO: If Status Is ACTIVE, Update Match Information And Player Availability States
-        // TODO: If Status Is CRASHED Or KILLED, Remove Server From Pool And Handle Match Cleanup
+        // Map Chat Protocol Status To Internal Server Status
+        matchServer.Status = statusData.Status switch
+        {
+            ChatProtocol.ServerStatus.SERVER_STATUS_SLEEPING => KONGOR.MasterServer.Models.ServerManagement.ServerStatus.SERVER_STATUS_SLEEPING,
+            ChatProtocol.ServerStatus.SERVER_STATUS_IDLE => KONGOR.MasterServer.Models.ServerManagement.ServerStatus.SERVER_STATUS_IDLE,
+            ChatProtocol.ServerStatus.SERVER_STATUS_LOADING => KONGOR.MasterServer.Models.ServerManagement.ServerStatus.SERVER_STATUS_LOADING,
+            ChatProtocol.ServerStatus.SERVER_STATUS_ACTIVE => KONGOR.MasterServer.Models.ServerManagement.ServerStatus.SERVER_STATUS_ACTIVE,
+            ChatProtocol.ServerStatus.SERVER_STATUS_CRASHED => KONGOR.MasterServer.Models.ServerManagement.ServerStatus.SERVER_STATUS_CRASHED,
+            ChatProtocol.ServerStatus.SERVER_STATUS_KILLED => KONGOR.MasterServer.Models.ServerManagement.ServerStatus.SERVER_STATUS_KILLED,
+            _ => KONGOR.MasterServer.Models.ServerManagement.ServerStatus.SERVER_STATUS_UNKNOWN
+        };
+
+        matchServer.IPAddress = statusData.Address;
+        matchServer.Port = statusData.Port;
+        matchServer.Location = statusData.Location;
+        matchServer.Name = statusData.Name;
+
+        // Handle Terminal States
+        if (matchServer.Status is KONGOR.MasterServer.Models.ServerManagement.ServerStatus.SERVER_STATUS_CRASHED or KONGOR.MasterServer.Models.ServerManagement.ServerStatus.SERVER_STATUS_KILLED)
+        {
+            Log.Information(@"Removing Crashed/Killed Match Server ID ""{ServerID}"" From Cache", matchServer.ID);
+            await distributedCacheStore.RemoveMatchServerByID(matchServer.ID);
+            await session.Terminate(distributedCacheStore); 
+            return;
+        }
+
+        // Update Server In Cache
+        await distributedCacheStore.SetMatchServer(matchServer.HostAccountName, matchServer);
+
+        Log.Debug(@"Updated Match Server ID ""{ServerID}"" Status To ""{Status}""", matchServer.ID, matchServer.Status);
     }
 }
 
