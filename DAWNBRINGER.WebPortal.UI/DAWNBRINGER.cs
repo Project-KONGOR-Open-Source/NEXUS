@@ -15,15 +15,9 @@ public class DAWNBRINGER
         builder.Services.AddRazorComponents()
             .AddInteractiveServerComponents();
 
-        // Register HttpClient to talk to ZORGATH API
-        // In development, we might use the Aspire service discovery name or localhost if not using Aspire for this part yet.
-        // The implementation plan says to listen on 55510.
-        // For outgoing requests to ZORGATH:
-        // Based on ZORGATH launch settings, it is on https://localhost:55556
-        
         builder.Services.AddScoped(sp => new HttpClient
         {
-            BaseAddress = new Uri("https://localhost:55556") 
+            BaseAddress = new Uri(builder.Configuration["ApiConfiguration:ZorgathApiUrl"] ?? throw new InvalidOperationException("Zorgath Api Url Is Missing From Configuration")) 
         });
 
         builder.Services.AddScoped<global::DAWNBRINGER.WebPortal.UI.Services.AuthService>();

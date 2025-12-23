@@ -9,7 +9,7 @@ public class EmailService(IOptions<OperationalConfiguration> configuration, ILog
     private ILogger Logger { get; } = logger;
     private IWebHostEnvironment HostEnvironment { get; } = hostEnvironment;
 
-    private string BaseURL => HostEnvironment.IsDevelopment() ? "https://localhost:55510" : "https://portal.api.kongor.net";
+    private string BaseURL => Configuration.Service.PublicUrl;
 
     public async Task<bool> SendEmailAddressRegistrationLink(string emailAddress, string token)
     {

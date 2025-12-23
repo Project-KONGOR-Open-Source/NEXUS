@@ -18,7 +18,7 @@ public class DiscordService(
     private IDistributedCache Cache { get; } = cache;
     private IWebHostEnvironment HostEnvironment { get; } = hostEnvironment;
 
-    private string ApiBaseUrl => HostEnvironment.IsDevelopment() ? "https://localhost:55556" : "https://portal.api.kongor.net";
+    private string ApiBaseUrl => Configuration.Service.PublicUrl;
 
     public string GetLoginUrl()
     {

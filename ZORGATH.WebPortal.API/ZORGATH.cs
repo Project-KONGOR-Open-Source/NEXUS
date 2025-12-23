@@ -81,9 +81,12 @@ public class ZORGATH
         const string corsPolicyName = "Allow-All";
 
         // Set CORS Origins
-        string[] corsOrigins = builder.Environment.IsDevelopment()
-            ? [ "https://localhost:55550",   "https://localhost:55551",      "https://localhost:55552",      "https://localhost:55553",     "https://localhost:55554", "http://localhost:55555", "https://localhost:55556",       "https://localhost:55557", "https://localhost:55510", "http://localhost:55511" ]
-            : [ "https://aspire.kongor.net", "https://telemetry.kongor.net", "https://resources.kongor.net", "https://database.kongor.net", "https://chat.kongor.net", "http://api.kongor.net",  "https://portal.api.kongor.net", "https://portal.ui.kongor.net" ];
+        // Retrieve Operational Configuration
+        OperationalConfiguration configuration = builder.Configuration.GetRequiredSection(OperationalConfiguration.ConfigurationSection)
+            .Get<OperationalConfiguration>() ?? throw new NullReferenceException("Operational Configuration Is NULL");
+
+        // Set CORS Origins
+        string[] corsOrigins = configuration.Service.CorsOrigins;
 
         // Add CORS Policy To Allow Cross-Origin Requests
         builder.Services.AddCors(options =>
@@ -152,8 +155,11 @@ public class ZORGATH
             .AddJwtBearer(options =>
             {
                 // Get Operational Configuration For JWT Settings
-                OperationalConfiguration configuration = builder.Configuration.GetRequiredSection(OperationalConfiguration.ConfigurationSection)
-                    .Get<OperationalConfiguration>() ?? throw new NullReferenceException("Operational Configuration Is NULL");
+                // Get Operational Configuration For JWT Settings
+                // OperationalConfiguration configuration = builder.Configuration.GetRequiredSection(OperationalConfiguration.ConfigurationSection)
+                //    .Get<OperationalConfiguration>() ?? throw new NullReferenceException("Operational Configuration Is NULL");
+                
+                // Note: 'configuration' variable is already in scope from earlier retrieval
 
                 // Configure JWT Validation Parameters
                 options.TokenValidationParameters = new TokenValidationParameters

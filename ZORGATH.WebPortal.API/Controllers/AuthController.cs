@@ -28,7 +28,7 @@ public class AuthController(
     private IDiscordService DiscordService { get; } = discordService;
     private IWebHostEnvironment HostEnvironment { get; } = hostEnvironment;
 
-    private string FrontendBaseUrl => HostEnvironment.IsDevelopment() ? "https://localhost:55510" : "https://portal.ui.kongor.net";
+    private string FrontendBaseUrl => Configuration.Service.FrontendUrl;
 
     [HttpGet("Discord/Login")]
     public IActionResult KeycloakLogin()

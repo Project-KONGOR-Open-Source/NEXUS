@@ -1,5 +1,7 @@
 ﻿namespace TRANSMUTANSTEIN.ChatServer;
 
+using Models.Configuration;
+
 public class TRANSMUTANSTEIN
 {
     public static void Main(string[] args)
@@ -7,8 +9,26 @@ public class TRANSMUTANSTEIN
         // Create The Application Builder
         WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
+        // Map User-Defined Configuration Section
+        builder.Services.Configure<OperationalConfiguration>(builder.Configuration.GetRequiredSection(OperationalConfiguration.ConfigurationSection));
+
         // Add Aspire Service Defaults
         builder.AddServiceDefaults();
+
+        // Retrieve Operational Configuration
+        OperationalConfiguration configuration = builder.Configuration.GetRequiredSection(OperationalConfiguration.ConfigurationSection)
+            .Get<OperationalConfiguration>() ?? throw new NullReferenceException("Operational Configuration Is NULL");
+
+        // Set CORS Policy Name
+        const string corsPolicyName = "Allow-All";
+
+        // Add CORS Policy To Allow Cross-Origin Requests
+        builder.Services.AddCors(options =>
+        {
+            options.AddPolicy(corsPolicyName,
+                policyBuilder => policyBuilder.WithOrigins(configuration.Service.CorsOrigins)
+                    .AllowAnyHeader().AllowAnyMethod().AllowCredentials());
+        });
 
         // Add The Database Context
         builder.AddSqlServerDbContext<MerrickContext>("MERRICK", configureSettings: null, configureDbContextOptions: options =>
@@ -68,6 +88,9 @@ public class TRANSMUTANSTEIN
 
         // Automatically Redirect HTTP Requests To HTTPS
         application.UseHttpsRedirection();
+
+        // Enable CORS Policy
+        application.UseCors(corsPolicyName);
 
         // Add Security Headers Middleware
         application.Use(async (context, next) =>

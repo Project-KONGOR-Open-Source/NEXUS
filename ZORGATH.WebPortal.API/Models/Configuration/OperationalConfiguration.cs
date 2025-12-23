@@ -5,6 +5,7 @@ public class OperationalConfiguration
     public const string ConfigurationSection = "Operational";
     public required OperationalConfigurationJWT JWT { get; set; }
     public required OperationalConfigurationDiscord Discord { get; set; }
+    public required OperationalConfigurationService Service { get; set; }
 }
 
 public class OperationalConfigurationJWT
@@ -19,4 +20,11 @@ public class OperationalConfigurationDiscord
 {
     public required string ClientID { get; set; }
     public required string ClientSecret { get; set; }
+}
+
+public class OperationalConfigurationService
+{
+    public required string PublicUrl { get; set; }
+    public required string FrontendUrl { get; set; }
+    public required string[] CorsOrigins { get; set; }
 }
