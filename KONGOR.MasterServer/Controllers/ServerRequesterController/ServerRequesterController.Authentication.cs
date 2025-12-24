@@ -64,8 +64,8 @@ public partial class ServerRequesterController
             ["chat_port"] = chatServerMatchServerManagerConnectionsPort,
         };
 
-        // TODO: Investigate How These Are Used (+ Resolve CDN Host, + Reconcile With CDN Patch Addresses)
-        response["cdn_upload_host"] = "kongor.net";
+        // TODO: Investigate How These Are Used
+        response["cdn_upload_host"] = Configuration.CDN.Host;
         response["cdn_upload_target"] = "upload";
 
         Logger.LogInformation(@"Server Manager ID ""{MatchServerManagerID}"" Was Registered At ""{MatchServerManagerIPAddress}"" With Cookie ""{MatchServerManagerCookie}""",
