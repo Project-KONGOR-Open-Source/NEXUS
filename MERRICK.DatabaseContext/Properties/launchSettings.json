@@ -4,10 +4,10 @@
         "MERRICK.DatabaseContext Development": {
             "commandName": "Project",
             "launchBrowser": true,
-            "applicationUrl": "https://localhost:55553",
+            "applicationUrl": "https://0.0.0.0:55553",
             "launchUrl": "health",
             "environmentVariables": {
-                "APPLICATION_URL": "https://localhost:55553",
+                "APPLICATION_URL": "https://0.0.0.0:55553",
                 "ASPNETCORE_ENVIRONMENT": "Development",
                 "DOTNET_ENVIRONMENT": "Development"
             },
