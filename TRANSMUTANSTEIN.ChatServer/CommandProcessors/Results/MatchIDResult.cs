@@ -5,9 +5,9 @@ public class MatchIDResult(IDatabase distributedCacheStore) : IAsynchronousComma
 {
     public async Task Process(MatchServerChatSession session, ChatBuffer buffer)
     {
-        MatchIDResultData resultData = new (buffer);
+        MatchIDResultRequestData requestData = new (buffer);
 
-        if (resultData.Result is not ChatProtocol.MatchIDResult.MIDR_SUCCESS)
+        if (requestData.Result is not ChatProtocol.MatchIDResult.MIDR_SUCCESS)
         {
             MatchStartData? data = await distributedCacheStore.GetMatchStartDataByMatchServerID(session.Metadata.ServerID);
 
@@ -20,13 +20,13 @@ public class MatchIDResult(IDatabase distributedCacheStore) : IAsynchronousComma
             else
             {
                 Log.Error(@"Publishing Match ID ""{MatchID}"" Has Failed In {RequestTime}ms With Result ""{Result}""",
-                    data.MatchID, resultData.RequestTimeMilliseconds, resultData.Result);
+                    data.MatchID, requestData.RequestTimeMilliseconds, requestData.Result);
             }
         }
     }
 }
 
-file class MatchIDResultData
+file class MatchIDResultRequestData
 {
     public byte[] CommandBytes { get; init; }
 
@@ -34,7 +34,7 @@ file class MatchIDResultData
 
     public int RequestTimeMilliseconds { get; init; }
 
-    public MatchIDResultData(ChatBuffer buffer)
+    public MatchIDResultRequestData(ChatBuffer buffer)
     {
         CommandBytes = buffer.ReadCommandBytes();
         Result = (ChatProtocol.MatchIDResult) buffer.ReadInt8();

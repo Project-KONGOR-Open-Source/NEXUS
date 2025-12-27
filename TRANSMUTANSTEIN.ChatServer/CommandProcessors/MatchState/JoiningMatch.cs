@@ -5,7 +5,7 @@ public class JoiningMatch(IDatabase distributedCacheStore) : IAsynchronousComman
 {
     public async Task Process(ClientChatSession session, ChatBuffer buffer)
     {
-        JoiningGameData requestData = new (buffer);
+        JoiningMatchRequestData requestData = new (buffer);
 
         // TODO: Attempt To Reconnect Client To Their Last Unfinished Game
         // INFO: Check If Client Has A Valid LastPlayedMatchID In Session Or Database
@@ -18,13 +18,13 @@ public class JoiningMatch(IDatabase distributedCacheStore) : IAsynchronousComman
     }
 }
 
-file class JoiningGameData
+file class JoiningMatchRequestData
 {
     public byte[] CommandBytes { get; init; }
 
     public string ServerAddress { get; init; }
 
-    public JoiningGameData(ChatBuffer buffer)
+    public JoiningMatchRequestData(ChatBuffer buffer)
     {
         CommandBytes = buffer.ReadCommandBytes();
         ServerAddress = buffer.ReadString();

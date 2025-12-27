@@ -5,7 +5,7 @@ public class SendWhisper : ISynchronousCommandProcessor<ClientChatSession>
 {
     public void Process(ClientChatSession session, ChatBuffer buffer)
     {
-        WhisperRequestData requestData = new (buffer);
+        SendWhisperRequestData requestData = new (buffer);
 
         Whisper
             .Create(requestData.Message)
@@ -13,7 +13,7 @@ public class SendWhisper : ISynchronousCommandProcessor<ClientChatSession>
     }
 }
 
-file class WhisperRequestData
+file class SendWhisperRequestData
 {
     public byte[] CommandBytes { get; init; }
 
@@ -21,7 +21,7 @@ file class WhisperRequestData
 
     public string Message { get; init; }
 
-    public WhisperRequestData(ChatBuffer buffer)
+    public SendWhisperRequestData(ChatBuffer buffer)
     {
         CommandBytes = buffer.ReadCommandBytes();
         TargetName = buffer.ReadString();

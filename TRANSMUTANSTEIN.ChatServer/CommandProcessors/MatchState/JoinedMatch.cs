@@ -5,14 +5,14 @@ public class JoinedMatch(IDatabase distributedCacheStore) : IAsynchronousCommand
 {
     public async Task Process(ClientChatSession session, ChatBuffer buffer)
     {
-        JoinedGameData requestData = new (buffer);
+        JoinedMatchRequestData requestData = new (buffer);
 
         await session
             .JoinMatch(distributedCacheStore, requestData.MatchID);
     }
 }
 
-file class JoinedGameData
+file class JoinedMatchRequestData
 {
     public byte[] CommandBytes { get; init; }
 
@@ -22,7 +22,7 @@ file class JoinedGameData
 
     public bool JoinMatchChannel { get; init; }
 
-    public JoinedGameData(ChatBuffer buffer)
+    public JoinedMatchRequestData(ChatBuffer buffer)
     {
         CommandBytes = buffer.ReadCommandBytes();
         MatchName = buffer.ReadString();
