@@ -27,6 +27,7 @@ public partial class ServerRequesterController(MerrickContext databaseContext, I
             "c_conn"        => await HandleConnectClient(),
             "new_session"   => await HandleServerAuthentication(),
             "set_online"    => await HandleSetOnline(),
+            "shutdown"      => await HandleShutdown(),
             "start_game"    => await HandleMatchStart(),
 
             // fallback

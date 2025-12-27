@@ -16,8 +16,7 @@ public class MatchServerChatSession(TCPServer server, IServiceProvider servicePr
 
     public async Task Terminate(IDatabase distributedCacheStore)
     {
-        // Remove Match Server From The Distributed Cache
-        await distributedCacheStore.RemoveMatchServerByID(Metadata.ServerID);
+        await Remove(distributedCacheStore);
 
         // Remove The Match Server Chat Session
         if (Context.MatchServerChatSessions.TryRemove(Metadata.ServerID, out MatchServerChatSession? existingSession))
@@ -44,8 +43,6 @@ public class MatchServerChatSession(TCPServer server, IServiceProvider servicePr
                 return;
             }
 
-            // TODO: Discard Any Pending Match Expected To Be Hosted By This Server
-
             ChatBuffer acknowledgementResponse = new ();
 
             acknowledgementResponse.WriteCommand(ChatProtocol.ChatServerToGameServer.NET_CHAT_GS_REMOTE_COMMAND);
@@ -65,5 +62,11 @@ public class MatchServerChatSession(TCPServer server, IServiceProvider servicePr
         Disconnect(); Dispose();
 
         Log.Information(@"Match Server ID ""{ServerID}"" Has Disconnected Gracefully", Metadata.ServerID);
+    }
+
+    private async Task Remove(IDatabase distributedCacheStore)
+    {
+        // Remove Match Server From The Distributed Cache
+        await distributedCacheStore.RemoveMatchServerByID(Metadata.ServerID);
     }
 }
