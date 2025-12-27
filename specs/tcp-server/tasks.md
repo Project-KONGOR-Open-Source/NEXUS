@@ -3,18 +3,42 @@
 **Input**: Design documents from `/specs/tcp-server/`
 **Prerequisites**: plan.md, spec.md, research.md, data-model.md, contracts/, quickstart.md
 
-**🎯 PRIORITY FOCUS**: Tasks are **REPRIORITIZED** to get players into matches via matchmaking as quickly as possible:
-- **Phase 6 (US6)**: Server handshake & server manager handshake (game server coordination)
-- **Phase 7 (US7)**: Matchmaking algorithm (placeholder initially - equal team sizes), team creation, lobby, match start, stats recording
-- **Phases 2-3**: Authentication (foundational requirement)
-- **Phase 5 (US3)**: Group formation (required for matchmaking)
-- **Phases 4, 8-9**: Channels, messaging, and clans (lower priority, can be implemented in parallel)
+**🎯 CURRENT PRIORITY FOCUS**: Tasks are **REPRIORITIZED** to complete the end-of-match flow and server management:
+
+## **TOP PRIORITY WORK ITEMS (Do These Next):**
+
+1. **Database Schema Organization** (Phase 6 - US6):
+   - T085a-e: Create `CORE` and `STAT` schemas, move tables from `dbo`
+   - Configure EF Core with `HasDefaultSchema("CORE")`
+   - Clear domain boundaries: operational data in `CORE`, statistics in `STAT`
+   - **Do this FIRST** - foundation for all statistics work
+
+2. **End-of-Match Stats Recording** (Phase 6 - US6):
+   - T086-T087: Match status and completion processors (TCP)
+   - T092-T093: PlayerStatistics updates with MMR/PSR rating calculations
+   - Enhance StatsRequesterController with MMR/PSR updates
+
+3. **Server Management Refactoring**:
+   - Move distributed cache cleanup from ChatServer TCP events to ServerRequesterController HTTP endpoint
+   - Create new ServerRequesterController endpoint for graceful server shutdown (f=shutdown)
+   - Refactor ChatSession.MatchServer.Terminate() to only handle TCP connection cleanup
+   - Refactor ChatSession.MatchServerManager.Terminate() to only handle TCP connection cleanup
+
+4. **Match Server Lifecycle** (Phase 6 - US6):
+   - T088-T091: Server availability tracking and player status updates
+   - Server allocation for matchmaking
+
+**Previous Priority (Partially Complete)**:
+- ✅ Phase 1-2: Setup and Foundational (complete)
+- ✅ Phase 3 (US1): Authentication (mostly complete)
+- ✅ Phase 4 (US2): Channels (mostly complete)
+- ✅ Phase 5 (US3): Groups (mostly complete)
+- ⚠️ Phase 6 (US6): Server coordination (handshakes done, **stats recording NOT done**)
+- ⏸ Phase 7 (US7): Matchmaking algorithm (deferred until end-of-match flow complete)
 
 **Tests**: Integration and performance tests are planned per quickstart.md and will be implemented alongside each user story.
 
 **Organization**: Tasks are grouped by user story to enable independent implementation and testing of each story.
-
-**Critical Path for Matchmaking**: Setup → Foundational → Authentication (US1) → Groups (US3) → Game Server (US6) → Matchmaking (US7)
 
 ## Format: `[ID] [P?] [Story] Description`
 
@@ -233,12 +257,55 @@ NEXUS uses distributed service architecture:
 - [x] T089b [P] [US6] Implement ServerManagerDisconnect.cs in TRANSMUTANSTEIN.ChatServer/CommandProcessors/Connection/ServerManagerDisconnect.cs with [ChatCommand(NET_CHAT_SM_DISCONNECT)] - ✅ Complete with session termination, disconnect acknowledgement via NET_CHAT_SM_REMOTE_COMMAND. Verified against HON c_servermanager.cpp and KONGOR ConnectedManager.cs patterns. FIXED: Buffer reading issue resolved by finding ServerManagerID from Context.MatchServerManagers dictionary instead of reading from buffer payload
 - [x] T089c [P] [US6] Implement ServerManagerStatus.cs in TRANSMUTANSTEIN.ChatServer/CommandProcessors/Connection/ServerManagerStatus.cs with [ChatCommand(NET_CHAT_SM_STATUS)] - ✅ Implemented to handle server manager status updates (ServerManagerID, login, location, name, version, address, port, shutting down flag), logs updates, includes TODOs for state management and graceful shutdown handling
 - [x] T089d [P] [US6] Implement Ping.cs in TRANSMUTANSTEIN.ChatServer/CommandProcessors/Connection/Ping.cs with [ChatCommand(NET_CHAT_PING)] - ✅ Implemented bidirectional ping/pong handler for keep-alive functionality, responds with NET_CHAT_PONG, works for clients, game servers, and server managers
-- [ ] T090 [US6] Add server availability tracking in ServerStatusProcessor (update GameServerSession availability status)
-- [ ] T091 [US6] Update player availability in MatchStatusProcessor (when match starts, mark players as InGame in ChatSession)
-- [ ] T092 [US6] Update PlayerStatistics in MatchCompleteProcessor (query MERRICK.DatabaseContext.PlayerStatistics, update wins/losses/rating for appropriate GameType)
-- [ ] T093 [US6] Add rating calculation in MatchCompleteProcessor (Elo-like algorithm with K-factor, separate per game type)
 
-**Checkpoint**: At this point, game servers can coordinate with chat server and update statistics. User Story 6 is fully functional and testable independently.
+### 🎯 TOP PRIORITY: Database Schema Organization (CORE + STAT)
+
+**Architecture Decision**: Organize database into explicit domain schemas for clarity, security, and maintainability:
+- **`CORE` schema**: Core operational data (Accounts, Users, Clans, Roles, Tokens, HeroGuides)
+- **`STAT` schema**: Statistics and match history data (MatchStatistics, PlayerStatistics)
+
+**Benefits**:
+- **Explicit Architecture**: Clear domain boundaries replacing implicit `dbo` default
+- **Separation of Concerns**: Operational vs. analytics data isolated
+- **Security**: Granular permissions (e.g., analytics team gets read-only `STAT`, no access to `CORE`)
+- **Performance**: Independent optimization strategies per domain
+- **Maintenance**: Domain-specific backup/archiving strategies (e.g., archive old `STAT` data, never touch `CORE`)
+
+#### Phase 1: Create CORE Schema and Move Operational Tables
+
+- [x] T085a [US6] **[PRIORITY]** Create CORE and STAT schema migration in MERRICK.DatabaseContext using `dotnet ef migrations add CreateCoreAndStatSchemas`: In Up() method execute `CREATE SCHEMA CORE` and `CREATE SCHEMA STAT`, then move core tables with `ALTER SCHEMA CORE TRANSFER dbo.Accounts`, `ALTER SCHEMA CORE TRANSFER dbo.Users`, `ALTER SCHEMA CORE TRANSFER dbo.Clans`, `ALTER SCHEMA CORE TRANSFER dbo.Roles`, `ALTER SCHEMA CORE TRANSFER dbo.Tokens`, `ALTER SCHEMA CORE TRANSFER dbo.HeroGuides`, and statistics tables with `ALTER SCHEMA STAT TRANSFER dbo.MatchStatistics`, `ALTER SCHEMA STAT TRANSFER dbo.PlayerStatistics` - ✅ Complete with EF Core RenameTable + EnsureSchema (20251227163322_CreateCoreAndStatSchemasWithCorrectedCosmetics)
+- [x] T085b [US6] **[PRIORITY]** Update MerrickContext.OnModelCreating() in MERRICK.DatabaseContext/Persistence/MerrickContext.cs to configure schema defaults: Add `modelBuilder.HasDefaultSchema("CORE")` at line 23 (after base.OnModelCreating), then explicitly configure statistics: `builder.Entity<MatchStatistics>().ToTable("MatchStatistics", "STAT")` and `builder.Entity<PlayerStatistics>().ToTable("PlayerStatistics", "STAT")` after line 26 (all other tables inherit CORE schema default) - ✅ Complete (lines 24-29)
+- [x] T085c [US6] **[PRIORITY]** Add ConfigureMatchStatistics() method in MerrickContext.cs: Create `private static void ConfigureMatchStatistics(EntityTypeBuilder<MatchStatistics> builder)` with comment explaining schema organization (CORE vs STAT domains), call from OnModelCreating after ConfigurePlayerStatistics, mirror pattern used for other Configure methods - ✅ Not needed (schema configured via ToTable, no additional configuration required)
+- [x] T085d [US6] **[PRIORITY]** Test schema migration: Run `dotnet ef database update` in development, verify schema creation with `SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME IN ('CORE', 'STAT')`, verify table migration with `SELECT TABLE_SCHEMA, TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA IN ('CORE', 'STAT') ORDER BY TABLE_SCHEMA, TABLE_NAME`, confirm EF queries work correctly with schema-qualified names - ✅ Migration created and validated
+- [x] T085e [US6] **[PRIORITY]** Update Down() method in migration to reverse schema changes: Move all tables back to dbo (`ALTER SCHEMA dbo TRANSFER CORE.Accounts`, etc.), then `DROP SCHEMA CORE` and `DROP SCHEMA STAT`, ensuring clean rollback capability for development safety - ✅ Complete (Down() method lines 271-309)
+
+### 🎯 TOP PRIORITY: End-of-Match Stats Recording & MMR/PSR Updates
+
+- [x] T086 [P] [US6] **[PRIORITY]** Implement MatchStatusProcessor.cs in TRANSMUTANSTEIN.ChatServer/CommandProcessors/Server/MatchStatusProcessor.cs with [ChatCommand(NET_CHAT_SV_MATCH_STATUS)] for tracking match progress (in progress, paused, resumed) - ✅ Complete as MatchStatus.cs in MatchState/ directory with NET_CHAT_GS_MATCH_ONGOING command
+- [x] T087 [P] [US6] **[PRIORITY]** Implement MatchCompleteProcessor.cs in TRANSMUTANSTEIN.ChatServer/CommandProcessors/Server/MatchCompleteProcessor.cs with [ChatCommand(NET_CHAT_SV_MATCH_COMPLETE)] for receiving match completion event from game server - ✅ Complete as MatchComplete.cs in MatchState/ directory with NET_CHAT_GS_MATCH_ENDED command
+- [ ] T092 [US6] **[PRIORITY]** Update PlayerStatistics in match completion flow - Query MERRICK.DatabaseContext.PlayerStatistics by AccountID (now in STAT.PlayerStatistics schema), update wins/losses counters for appropriate GameType
+- [ ] T092a [US6] **[PRIORITY]** Enhance StatsRequesterController.HandleStatsSubmission() in KONGOR.MasterServer/Controllers/StatsRequesterController/StatsRequesterController.Submit.cs to call RatingCalculationService after PlayerStatistics entity creation (line 45-47) to calculate and update MMR/PSR ratings before SaveChangesAsync (queries now reference STAT.PlayerStatistics and STAT.MatchStatistics schemas)
+- [x] T093 [US6] **[PRIORITY]** Implement RatingCalculationService.cs in KONGOR.MasterServer/Services/RatingCalculationService.cs with Elo rating algorithm: CalculateNewRating(float currentRating, float opponentAverageRating, bool won, int kFactor = 32), Formula: NewRating = OldRating + K * (ActualScore - ExpectedScore), ExpectedScore = 1 / (1 + 10^((OpponentRating - PlayerRating) / 400)), separate calculations per game type (CampaignNormalRating MMR, CampaignCasualRating MMR, MidwarsRating MMR, RiftwarsRating MMR, PublicRating PSR), K-factor configurable via appsettings (default 32) - ✅ Complete with Elo algorithm and team rating calculations, K-factor configurable via appsettings (default 32)
+- [ ] T093a [US6] **[PRIORITY]** Update PlayerStatistics entity rating fields in StatsRequesterController after rating calculation: update CampaignNormalRating/CampaignCasualRating/MidwarsRating/RiftwarsRating/PublicRating based on GameType, increment wins/losses counter, update LastUpdated timestamp, call SaveChangesAsync()
+
+### 🎯 TOP PRIORITY: Server Management Refactoring (Separation of Concerns)
+
+**Context**: ChatSession.Terminate() currently handles both TCP connection cleanup AND distributed cache removal. This violates separation of concerns. Move distributed cache logic to HTTP endpoints, keep TCP events focused on connection management only.
+
+- [ ] T089e [US6] **[PRIORITY]** Create ServerRequesterController.Shutdown.cs in KONGOR.MasterServer/Controllers/ServerRequesterController/ServerRequesterController.Shutdown.cs with graceful match server shutdown endpoint (route: server_requester.php?f=shutdown, params: session/server_id, logic: DistributedCache.RemoveMatchServerByID, cleanup pending matches, validate session cookie)
+- [ ] T089f [US6] **[PRIORITY]** Add server manager shutdown endpoint in ServerRequesterController.Shutdown.cs (route: server_requester.php?f=shutdown_manager, params: session/manager_id, logic: DistributedCache.RemoveMatchServerManagerByID, cleanup orphaned servers, validate session cookie)
+- [ ] T089g [US6] **[PRIORITY]** Refactor ChatSession.MatchServer.Terminate() in TRANSMUTANSTEIN.ChatServer/Domain/Core/ChatSession.MatchServer.cs: REMOVE line 20 `await distributedCacheStore.RemoveMatchServerByID`, REMOVE distributedCacheStore parameter, keep only TCP connection management (send ack, remove from Context, disconnect/dispose), add comment explaining HTTP endpoint handles distributed cache
+- [ ] T089h [US6] **[PRIORITY]** Refactor ChatSession.MatchServerManager.Terminate() in TRANSMUTANSTEIN.ChatServer/Domain/Core/ChatSession.MatchServerManager.cs: REMOVE line 20 `await distributedCacheStore.RemoveMatchServerManagerByID`, REMOVE distributedCacheStore parameter, keep only TCP connection management, add comment explaining HTTP endpoint handles distributed cache
+- [ ] T089i [US6] **[PRIORITY]** Update ServerDisconnect.cs and ServerManagerDisconnect.cs processors: check if server still in distributed cache after disconnect command, if yes log "Ungraceful shutdown" warning and call HTTP endpoint synchronously as fallback, if no proceed normally (already removed by HTTP), call refactored Terminate() without distributed cache parameter
+- [ ] T089j [US6] **[PRIORITY]** Document new graceful shutdown flow in comments and quickstart.md: proper sequence (1. HTTP POST to shutdown endpoint, 2. HTTP removes from cache, 3. TCP disconnect, 4. TCP cleanup only), ungraceful fallback (TCP disconnect triggers warning and fallback cleanup)
+
+### Lower Priority: Server Tracking and Availability
+
+- [ ] T088 [US6] Add GameServerSession tracking in ChatServer.RegisteredGameServers ConcurrentDictionary (keyed by ServerID) for quick lookup of available servers during matchmaking
+- [ ] T090 [US6] Add server availability tracking in ServerStatusProcessor (update GameServerSession availability status based on server load, mark as available/busy/full)
+- [ ] T091 [US6] Update player availability in MatchStatusProcessor (when match starts, mark players as InGame in ChatSession, when match ends mark as Available)
+
+**Checkpoint**: At this point, end-of-match stats recording with MMR/PSR updates is complete, server management follows proper separation of concerns (HTTP for distributed cache, TCP for connections only), and the full match lifecycle is functional. User Story 6 is fully functional and testable independently.
 
 ---
 
@@ -260,7 +327,7 @@ NEXUS uses distributed service architecture:
 
 - [ ] T097 [P] [US7] Create MatchLobby.cs in TRANSMUTANSTEIN.ChatServer/InMemory/MatchLobby.cs with ConcurrentDictionary<int, MatchLobbyPlayer> Players, Team1GroupID, Team2GroupID, GameServerIP, MatchToken
 - [ ] T098 [P] [US7] Create MatchLobbyPlayer.cs in TRANSMUTANSTEIN.ChatServer/InMemory/MatchLobbyPlayer.cs with AccountID, Team, TeamSlot, LoadingStatus
-- [ ] T099 [US7] Implement MatchmakingBroker.cs in TRANSMUTANSTEIN.ChatServer/Services/MatchmakingBroker.cs (EvaluateQueue method, FindCompatibleGroups, CreateMatchLobby)
+- [~] T099 [US7] Implement MatchmakingBroker.cs in TRANSMUTANSTEIN.ChatServer/Services/MatchmakingBroker.cs (EvaluateQueue method, FindCompatibleGroups, CreateMatchLobby) - ⚠️ BASIC PLACEHOLDER EXISTS in MatchmakingService.cs (pairs 2 groups when both in queue), but sophisticated rating-based algorithm from T100-T108 NOT YET IMPLEMENTED
 - [ ] T100 [US7] Implement MatchmakingBrokerConfig.cs with tunable parameters: GroupAlpha (default 0.03 for premade advantage), BaseTolerance (50 MMR), LinearGrowthPerMinute (25 MMR), Accel (15), AccelStartMinutes (3.0), MaxTeamCandidates (1000), MaxPairingAttempts (5000) in TRANSMUTANSTEIN.ChatServer/Services/MatchmakingBrokerConfig.cs
 - [ ] T101 [US7] Implement team rating calculation in MatchmakingBroker: effective player rating = base rating * (1 + GroupAlpha * (groupSize - 1)), team rating = average of 5 effective player ratings (gives premade groups +3% per additional member bonus)
 - [ ] T102 [US7] Implement tolerance growth function: tolerance(t_min) = BaseTolerance + LinearGrowth * t_min + Accel * max(0, t_min - AccelStart)^1.4 (starts strict at ±50 MMR, expands +25 MMR/min, accelerates after 3 min wait)
@@ -276,6 +343,8 @@ NEXUS uses distributed service architecture:
 - [ ] T112 [P] [US7] Implement MatchLobbyUpdateProcessor.cs in TRANSMUTANSTEIN.ChatServer/CommandProcessors/Matchmaking/MatchLobbyUpdateProcessor.cs with [ChatCommand(NET_CHAT_CL_TMM_MATCH_LOBBY_UPDATE)]
 - [ ] T113 [P] [US7] Implement PlayerLoadingStatusProcessor.cs in TRANSMUTANSTEIN.ChatServer/CommandProcessors/Matchmaking/PlayerLoadingStatusProcessor.cs with [ChatCommand(NET_CHAT_CL_TMM_PLAYER_LOADING_STATUS)]
 - [ ] T114 [P] [US7] Implement MatchStartProcessor.cs in TRANSMUTANSTEIN.ChatServer/CommandProcessors/Matchmaking/MatchStartProcessor.cs with [ChatCommand(NET_CHAT_CL_TMM_MATCH_START)]
+- [x] T114a [P] [US7] Implement JoiningMatch.cs in TRANSMUTANSTEIN.ChatServer/CommandProcessors/MatchState/JoiningMatch.cs with [ChatCommand(CHAT_CMD_JOINING_GAME)] - ✅ Complete, handles player entering match loading state
+- [x] T114b [P] [US7] Implement JoinedMatch.cs in TRANSMUTANSTEIN.ChatServer/CommandProcessors/MatchState/JoinedMatch.cs with [ChatCommand(CHAT_CMD_JOINED_GAME)] - ✅ Complete with distributed cache integration, handles player fully loaded into match
 - [ ] T115 [US7] Add server allocation in MatchmakingBroker.CreateMatchLobby (select available server from RegisteredGameServers, send allocation request via manager port)
 - [ ] T116 [US7] Add match lobby creation in MatchmakingBroker (create MatchLobby, populate from both groups, send NET_CHAT_CL_TMM_MATCH_FOUND to all players)
 - [ ] T117 [US7] Track player loading status in MatchLobbyPlayer (update LoadingStatus when NET_CHAT_CL_TMM_PLAYER_LOADING_STATUS received)
@@ -369,7 +438,7 @@ Suggested defaults: BASE_TOL=50 MMR, LINEAR_GROWTH=25 MMR/min, ACCEL=15, ACCEL_S
 
 ### Implementation for User Story 4
 
-- [ ] T123 [P] [US4] Implement WhisperProcessor.cs in TRANSMUTANSTEIN.ChatServer/CommandProcessors/Communication/WhisperProcessor.cs with [ChatCommand(NET_CHAT_CL_WHISPER)]
+- [x] T123 [P] [US4] Implement WhisperProcessor.cs in TRANSMUTANSTEIN.ChatServer/CommandProcessors/Communication/WhisperProcessor.cs with [ChatCommand(NET_CHAT_CL_WHISPER)] - ✅ Implemented as SendWhisper.cs with basic whisper delivery using Whisper.Create().Send() pattern
 - [x] T124 [P] [US4] Implement AddBuddyProcessor.cs in TRANSMUTANSTEIN.ChatServer/CommandProcessors/Communication/AddBuddyProcessor.cs with [ChatCommand(NET_CHAT_CL_ADD_BUDDY)] - ✅ Implemented as AddFriend.cs in Social/ with KONGOR-style request/approve flow using Redis TTL (60s), detects mutual requests for instant friendship
 - [x] T124a [P] [US4] Implement ApproveBuddyProcessor.cs for CHAT_CMD_REQUEST_BUDDY_APPROVE - ✅ Implemented as ApproveFriend.cs in Social/, creates bidirectional friendship, removes Redis entry, sends approval packets to both users
 - [x] T125 [P] [US4] Implement RemoveBuddyProcessor.cs in TRANSMUTANSTEIN.ChatServer/CommandProcessors/Communication/RemoveBuddyProcessor.cs with [ChatCommand(NET_CHAT_CL_REMOVE_BUDDY)] - ✅ Implemented as RemoveFriend.cs in Social/ with DSL-style fluent API
@@ -570,19 +639,21 @@ With multiple developers after Foundational phase:
 
 ## Task Statistics
 
-- **Total Tasks**: 158 (T001-T156, includes T027a, T055a, T056b, T059a, T059b, T075a, T089a, T089b, T124a)
-- **Setup Phase**: 4 tasks (T001-T004)
-- **Foundational Phase**: 28 tasks (T005-T031) - BLOCKS all user stories, includes Redis cache integration
-- **User Story 1 (Authentication, Phase 3)**: 10 tasks (T032-T041)
-- **User Story 2 (Channels, Phase 4)**: 18 tasks (T042-T059b)
-- **User Story 3 (Groups, Phase 5)**: 21 tasks (T060-T080) - includes automatic leader transfer
-- **User Story 6 (Game Server, Phase 6)** 🎯: 15 tasks (T081-T093, includes T089a, T089b) - **MATCHMAKING CRITICAL** - includes server/manager disconnect with HON-verified patterns
-- **User Story 7 (Matchmaking, Phase 7)** 🎯: 26 tasks (T094-T119) - **MATCHMAKING CRITICAL** - includes detailed algorithm implementation from temp.txt
-- **User Story 4 (Whispers/Buddies, Phase 8)**: 14 tasks (T120-T133, includes T124a)
-- **User Story 5 (Clans, Phase 9)**: 9 tasks (T134-T142)
-- **Polish Phase**: 14 tasks (T143-T156) - includes channel flag enrichment
-- **Parallel Tasks**: 96 marked [P] (61% can run in parallel within constraints)
-- **Matchmaking MVP Scope**: Phases 1-3, 5-7 (104 tasks total) delivers full matchmaking capability with server handshakes, disconnect handling, detailed rating-based algorithm, and stats recording
+- **Total Tasks**: 174 (T001-T156, includes T027a, T055a, T056b, T059a, T059b, T075a, T085a-e, T089a-j, T092a, T093a, T114a-b, T124a)
+- **Setup Phase**: 4 tasks (T001-T004) - ✅ COMPLETE
+- **Foundational Phase**: 28 tasks (T005-T031) - ✅ MOSTLY COMPLETE (some deferred)
+- **User Story 1 (Authentication, Phase 3)**: 10 tasks (T032-T041) - ✅ MOSTLY COMPLETE
+- **User Story 2 (Channels, Phase 4)**: 18 tasks (T042-T059b) - ✅ MOSTLY COMPLETE (tests deferred)
+- **User Story 3 (Groups, Phase 5)**: 21 tasks (T060-T080) - ✅ MOSTLY COMPLETE (T080 deferred)
+- **User Story 6 (Game Server, Phase 6)** 🎯: 28 tasks (T081-T093a, includes T085a-e, T089a-j, T092a, T093a) - ⚠️ PARTIALLY COMPLETE (handshakes done, **PRIORITY WORK: T085a-e database schema organization, T086-T087 end-of-match processors, T092-T093a stats/MMR/PSR, T089e-j server management refactoring**) - **MATCHMAKING CRITICAL**
+- **User Story 7 (Matchmaking, Phase 7)** 🎯: 28 tasks (T094-T119, includes T114a-b) - ⏸ DEFERRED (basic placeholder exists, sophisticated algorithm deferred until end-of-match flow complete) - **MATCHMAKING CRITICAL**
+- **User Story 4 (Whispers/Buddies, Phase 8)**: 14 tasks (T120-T133, includes T124a) - ⚠️ PARTIALLY COMPLETE (T123-T125, T129-T130 done, buddy notifications NOT done)
+- **User Story 5 (Clans, Phase 9)**: 9 tasks (T134-T142) - ❌ NOT STARTED
+- **Polish Phase**: 14 tasks (T143-T156) - ❌ NOT STARTED
+- **Parallel Tasks**: 100 marked [P] (58% can run in parallel within constraints)
+- **Current Priority**: Database schema organization (T085a-e), end-of-match stats recording (T086-T087, T092-T093a), server management refactoring (T089e-j) - 15 tasks
+- **Matchmaking MVP Scope**: Phases 1-3, 5-6 (103 tasks total) delivers authentication, groups, and complete end-of-match lifecycle with organized database schemas and stats/MMR/PSR updates
+- **Current Completion**: ~75 of 174 tasks complete (~43%), **NEXT: Database schema organization (T085a-e) FIRST, then complete Phase 6 priority tasks (end-of-match + server management) before resuming matchmaking algorithm**
 
 **Deferred to Post-MVP** (not included in tasks):
 - FR-058: Match history tracking with configurable depth
