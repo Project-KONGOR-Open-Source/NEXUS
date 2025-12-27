@@ -8,6 +8,12 @@ public sealed class MerrickContext : DbContext
             Database.SetCommandTimeout(60); // 1 Minute - Helps Prevent Migrations From Timing Out When Many Records Need To Update
     }
 
+    private const string DefaultSchema = "PKOS";
+    private const string CoreSchema = "CORE";
+    private const string AuthenticationSchema = "AUTH";
+    private const string StatisticsSchema = "STAT";
+    private const string MiscellaneousSchema = "MISC";
+
     public DbSet<Account> Accounts => Set<Account>();
     public DbSet<Clan> Clans => Set<Clan>();
     public DbSet<HeroGuide> HeroGuides => Set<HeroGuide>();
@@ -21,9 +27,25 @@ public sealed class MerrickContext : DbContext
     {
         base.OnModelCreating(builder);
 
+        ConfigureSchemas(builder);
+
         ConfigureRoles(builder.Entity<Role>());
         ConfigureAccounts(builder.Entity<Account>());
         ConfigurePlayerStatistics(builder.Entity<PlayerStatistics>());
+    }
+
+    private static void ConfigureSchemas(ModelBuilder builder)
+    {
+        builder.HasDefaultSchema(DefaultSchema);
+
+        builder.Entity<Account>().ToTable("Accounts", CoreSchema);
+        builder.Entity<Clan>().ToTable("Clans", CoreSchema);
+        builder.Entity<HeroGuide>().ToTable("HeroGuides", MiscellaneousSchema);
+        builder.Entity<MatchStatistics>().ToTable("MatchStatistics", StatisticsSchema);
+        builder.Entity<PlayerStatistics>().ToTable("PlayerStatistics", StatisticsSchema);
+        builder.Entity<Role>().ToTable("Roles", AuthenticationSchema);
+        builder.Entity<Token>().ToTable("Tokens", AuthenticationSchema);
+        builder.Entity<User>().ToTable("Users", CoreSchema);
     }
 
     private static void ConfigureRoles(EntityTypeBuilder<Role> builder)

@@ -8,13 +8,26 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace MERRICK.DatabaseContext.Migrations
 {
     /// <inheritdoc />
-    public partial class CreateCoreEntities : Migration
+    public partial class CreatePrimordialEntities : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.EnsureSchema(
+                name: "CORE");
+
+            migrationBuilder.EnsureSchema(
+                name: "MISC");
+
+            migrationBuilder.EnsureSchema(
+                name: "STAT");
+
+            migrationBuilder.EnsureSchema(
+                name: "AUTH");
+
             migrationBuilder.CreateTable(
                 name: "Clans",
+                schema: "CORE",
                 columns: table => new
                 {
                     ID = table.Column<int>(type: "int", nullable: false)
@@ -30,6 +43,7 @@ namespace MERRICK.DatabaseContext.Migrations
 
             migrationBuilder.CreateTable(
                 name: "MatchStatistics",
+                schema: "STAT",
                 columns: table => new
                 {
                     ID = table.Column<int>(type: "int", nullable: false)
@@ -75,6 +89,7 @@ namespace MERRICK.DatabaseContext.Migrations
 
             migrationBuilder.CreateTable(
                 name: "PlayerStatistics",
+                schema: "STAT",
                 columns: table => new
                 {
                     ID = table.Column<int>(type: "int", nullable: false)
@@ -173,6 +188,7 @@ namespace MERRICK.DatabaseContext.Migrations
 
             migrationBuilder.CreateTable(
                 name: "Roles",
+                schema: "AUTH",
                 columns: table => new
                 {
                     ID = table.Column<int>(type: "int", nullable: false)
@@ -186,6 +202,7 @@ namespace MERRICK.DatabaseContext.Migrations
 
             migrationBuilder.CreateTable(
                 name: "Tokens",
+                schema: "AUTH",
                 columns: table => new
                 {
                     ID = table.Column<int>(type: "int", nullable: false)
@@ -204,6 +221,7 @@ namespace MERRICK.DatabaseContext.Migrations
 
             migrationBuilder.CreateTable(
                 name: "Users",
+                schema: "CORE",
                 columns: table => new
                 {
                     ID = table.Column<int>(type: "int", nullable: false)
@@ -228,6 +246,7 @@ namespace MERRICK.DatabaseContext.Migrations
                     table.ForeignKey(
                         name: "FK_Users_Roles_RoleID",
                         column: x => x.RoleID,
+                        principalSchema: "AUTH",
                         principalTable: "Roles",
                         principalColumn: "ID",
                         onDelete: ReferentialAction.Cascade);
@@ -235,6 +254,7 @@ namespace MERRICK.DatabaseContext.Migrations
 
             migrationBuilder.CreateTable(
                 name: "Accounts",
+                schema: "CORE",
                 columns: table => new
                 {
                     ID = table.Column<int>(type: "int", nullable: false)
@@ -265,11 +285,13 @@ namespace MERRICK.DatabaseContext.Migrations
                     table.ForeignKey(
                         name: "FK_Accounts_Clans_ClanID",
                         column: x => x.ClanID,
+                        principalSchema: "CORE",
                         principalTable: "Clans",
                         principalColumn: "ID");
                     table.ForeignKey(
                         name: "FK_Accounts_Users_UserID",
                         column: x => x.UserID,
+                        principalSchema: "CORE",
                         principalTable: "Users",
                         principalColumn: "ID",
                         onDelete: ReferentialAction.Cascade);
@@ -277,6 +299,7 @@ namespace MERRICK.DatabaseContext.Migrations
 
             migrationBuilder.CreateTable(
                 name: "HeroGuides",
+                schema: "MISC",
                 columns: table => new
                 {
                     ID = table.Column<int>(type: "int", nullable: false)
@@ -306,12 +329,14 @@ namespace MERRICK.DatabaseContext.Migrations
                     table.ForeignKey(
                         name: "FK_HeroGuides_Accounts_AuthorID",
                         column: x => x.AuthorID,
+                        principalSchema: "CORE",
                         principalTable: "Accounts",
                         principalColumn: "ID",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.InsertData(
+                schema: "AUTH",
                 table: "Roles",
                 columns: new[] { "ID", "Name" },
                 values: new object[,]
@@ -322,57 +347,67 @@ namespace MERRICK.DatabaseContext.Migrations
 
             migrationBuilder.CreateIndex(
                 name: "IX_Accounts_ClanID",
+                schema: "CORE",
                 table: "Accounts",
                 column: "ClanID");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Accounts_Name",
+                schema: "CORE",
                 table: "Accounts",
                 column: "Name",
                 unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Accounts_UserID",
+                schema: "CORE",
                 table: "Accounts",
                 column: "UserID");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Clans_Name_Tag",
+                schema: "CORE",
                 table: "Clans",
                 columns: new[] { "Name", "Tag" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_HeroGuides_AuthorID",
+                schema: "MISC",
                 table: "HeroGuides",
                 column: "AuthorID");
 
             migrationBuilder.CreateIndex(
                 name: "IX_MatchStatistics_MatchID",
+                schema: "STAT",
                 table: "MatchStatistics",
                 column: "MatchID",
                 unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_PlayerStatistics_MatchID_AccountID",
+                schema: "STAT",
                 table: "PlayerStatistics",
                 columns: new[] { "MatchID", "AccountID" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Roles_Name",
+                schema: "AUTH",
                 table: "Roles",
                 column: "Name",
                 unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Users_EmailAddress",
+                schema: "CORE",
                 table: "Users",
                 column: "EmailAddress",
                 unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Users_RoleID",
+                schema: "CORE",
                 table: "Users",
                 column: "RoleID");
         }
@@ -381,28 +416,36 @@ namespace MERRICK.DatabaseContext.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "HeroGuides");
+                name: "HeroGuides",
+                schema: "MISC");
 
             migrationBuilder.DropTable(
-                name: "MatchStatistics");
+                name: "MatchStatistics",
+                schema: "STAT");
 
             migrationBuilder.DropTable(
-                name: "PlayerStatistics");
+                name: "PlayerStatistics",
+                schema: "STAT");
 
             migrationBuilder.DropTable(
-                name: "Tokens");
+                name: "Tokens",
+                schema: "AUTH");
 
             migrationBuilder.DropTable(
-                name: "Accounts");
+                name: "Accounts",
+                schema: "CORE");
 
             migrationBuilder.DropTable(
-                name: "Clans");
+                name: "Clans",
+                schema: "CORE");
 
             migrationBuilder.DropTable(
-                name: "Users");
+                name: "Users",
+                schema: "CORE");
 
             migrationBuilder.DropTable(
-                name: "Roles");
+                name: "Roles",
+                schema: "AUTH");
         }
     }
 }
