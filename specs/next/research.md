@@ -775,5 +775,5 @@ public async Task Test_10k_Concurrent_Connections()
 - Protocol analysis comprehensive
 - Performance testing approach defined
 
-**Branch**: tcp-server
+**Branch**: next
 **Next Command**: Generate Phase 1 artifacts (data-model.md, contracts/, quickstart.md)

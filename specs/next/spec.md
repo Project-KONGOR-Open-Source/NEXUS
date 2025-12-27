@@ -1,6 +1,6 @@
 # Feature Specification: Chat Server Implementation
 
-**Feature Branch**: `tcp-server`
+**Feature Branch**: `next`
 **Created**: 2025-01-13
 **Status**: Draft
 **Input**: Implement TRANSMUTANSTEIN Chat Server with full protocol support, maintaining parity with HoN/KONGOR legacy implementations

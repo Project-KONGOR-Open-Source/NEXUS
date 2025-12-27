@@ -1,7 +1,7 @@
 # Implementation Plan: Chat Server Implementation
 
-**Branch**: `tcp-server` | **Date**: 2025-01-13 | **Spec**: [spec.md](./spec.md)
-**Input**: Feature specification from `/specs/tcp-server/spec.md`
+**Branch**: `next` | **Date**: 2025-01-13 | **Spec**: [spec.md](./spec.md)
+**Input**: Feature specification from `/specs/next/spec.md`
 
 **Note**: This template is filled in by the `/speckit.plan` command. See `.specify/templates/commands/plan.md` for the execution workflow.
 

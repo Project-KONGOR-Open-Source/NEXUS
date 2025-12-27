@@ -1,6 +1,6 @@
 # Tasks: Chat Server Implementation
 
-**Input**: Design documents from `/specs/tcp-server/`
+**Input**: Design documents from `/specs/next/`
 **Prerequisites**: plan.md, spec.md, research.md, data-model.md, contracts/, quickstart.md
 
 **🎯 CURRENT PRIORITY FOCUS**: Tasks are **REPRIORITIZED** to complete the end-of-match flow and server management:
