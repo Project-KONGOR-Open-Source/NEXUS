@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MERRICK.DatabaseContext.Migrations
 {
     [DbContext(typeof(MerrickContext))]
-    [Migration("20251227173520_CreatePrimordialEntities")]
+    [Migration("20251227185014_CreatePrimordialEntities")]
     partial class CreatePrimordialEntities
     {
         /// <inheritdoc />
@@ -20,7 +20,7 @@ namespace MERRICK.DatabaseContext.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasDefaultSchema("PKOS")
+                .HasDefaultSchema("data")
                 .HasAnnotation("ProductVersion", "10.0.1")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
@@ -99,7 +99,7 @@ namespace MERRICK.DatabaseContext.Migrations
 
                     b.HasIndex("UserID");
 
-                    b.ToTable("Accounts", "CORE");
+                    b.ToTable("Accounts", "core");
                 });
 
             modelBuilder.Entity("MERRICK.DatabaseContext.Entities.Core.Clan", b =>
@@ -128,7 +128,7 @@ namespace MERRICK.DatabaseContext.Migrations
                     b.HasIndex("Name", "Tag")
                         .IsUnique();
 
-                    b.ToTable("Clans", "CORE");
+                    b.ToTable("Clans", "core");
                 });
 
             modelBuilder.Entity("MERRICK.DatabaseContext.Entities.Core.User", b =>
@@ -194,7 +194,7 @@ namespace MERRICK.DatabaseContext.Migrations
 
                     b.HasIndex("RoleID");
 
-                    b.ToTable("Users", "CORE");
+                    b.ToTable("Users", "core");
                 });
 
             modelBuilder.Entity("MERRICK.DatabaseContext.Entities.Game.HeroGuide", b =>
@@ -283,7 +283,7 @@ namespace MERRICK.DatabaseContext.Migrations
 
                     b.HasIndex("AuthorID");
 
-                    b.ToTable("HeroGuides", "MISC");
+                    b.ToTable("HeroGuides", "misc");
                 });
 
             modelBuilder.Entity("MERRICK.DatabaseContext.Entities.Statistics.MatchStatistics", b =>
@@ -409,7 +409,7 @@ namespace MERRICK.DatabaseContext.Migrations
                     b.HasIndex("MatchID")
                         .IsUnique();
 
-                    b.ToTable("MatchStatistics", "STAT");
+                    b.ToTable("MatchStatistics", "stat");
                 });
 
             modelBuilder.Entity("MERRICK.DatabaseContext.Entities.Statistics.PlayerStatistics", b =>
@@ -687,7 +687,7 @@ namespace MERRICK.DatabaseContext.Migrations
                     b.HasIndex("MatchID", "AccountID")
                         .IsUnique();
 
-                    b.ToTable("PlayerStatistics", "STAT");
+                    b.ToTable("PlayerStatistics", "stat");
                 });
 
             modelBuilder.Entity("MERRICK.DatabaseContext.Entities.Utility.Role", b =>
@@ -708,7 +708,7 @@ namespace MERRICK.DatabaseContext.Migrations
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.ToTable("Roles", "AUTH");
+                    b.ToTable("Roles", "auth");
 
                     b.HasData(
                         new
@@ -753,7 +753,7 @@ namespace MERRICK.DatabaseContext.Migrations
 
                     b.HasKey("ID");
 
-                    b.ToTable("Tokens", "AUTH");
+                    b.ToTable("Tokens", "auth");
                 });
 
             modelBuilder.Entity("MERRICK.DatabaseContext.Entities.Core.Account", b =>
@@ -790,7 +790,7 @@ namespace MERRICK.DatabaseContext.Migrations
                             b1.HasIndex("Name")
                                 .IsUnique();
 
-                            b1.ToTable("Accounts", "CORE");
+                            b1.ToTable("Accounts", "core");
 
                             b1.ToJson("BannedPeers");
 
@@ -823,7 +823,7 @@ namespace MERRICK.DatabaseContext.Migrations
                             b1.HasIndex("Name")
                                 .IsUnique();
 
-                            b1.ToTable("Accounts", "CORE");
+                            b1.ToTable("Accounts", "core");
 
                             b1.ToJson("FriendedPeers");
 
@@ -849,7 +849,7 @@ namespace MERRICK.DatabaseContext.Migrations
                             b1.HasIndex("Name")
                                 .IsUnique();
 
-                            b1.ToTable("Accounts", "CORE");
+                            b1.ToTable("Accounts", "core");
 
                             b1.ToJson("IgnoredPeers");
 

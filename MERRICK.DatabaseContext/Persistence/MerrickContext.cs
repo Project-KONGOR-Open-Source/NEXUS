@@ -8,11 +8,12 @@ public sealed class MerrickContext : DbContext
             Database.SetCommandTimeout(60); // 1 Minute - Helps Prevent Migrations From Timing Out When Many Records Need To Update
     }
 
-    private const string DefaultSchema = "PKOS";
-    private const string CoreSchema = "CORE";
-    private const string AuthenticationSchema = "AUTH";
-    private const string StatisticsSchema = "STAT";
-    private const string MiscellaneousSchema = "MISC";
+    public const string MetadataSchema = "meta";
+    public const string DefaultSchema = "data";
+    public const string CoreSchema = "core";
+    public const string AuthenticationSchema = "auth";
+    public const string StatisticsSchema = "stat";
+    public const string MiscellaneousSchema = "misc";
 
     public DbSet<Account> Accounts => Set<Account>();
     public DbSet<Clan> Clans => Set<Clan>();
