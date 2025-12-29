@@ -48,7 +48,7 @@ namespace MERRICK.DatabaseContext.Migrations
                 {
                     ID = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    ServerID = table.Column<long>(type: "bigint", nullable: false),
+                    ServerID = table.Column<int>(type: "int", nullable: false),
                     HostAccountName = table.Column<string>(type: "nvarchar(15)", maxLength: 15, nullable: false),
                     MatchID = table.Column<int>(type: "int", nullable: false),
                     Map = table.Column<string>(type: "nvarchar(max)", nullable: false),
@@ -68,7 +68,7 @@ namespace MERRICK.DatabaseContext.Migrations
                     PlayerScoreGoal = table.Column<int>(type: "int", nullable: false),
                     NumberOfRounds = table.Column<int>(type: "int", nullable: false),
                     ReleaseStage = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    BannedHeroes = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    BannedHeroes = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     AwardMostAnnihilations = table.Column<int>(type: "int", nullable: false),
                     AwardMostQuadKills = table.Column<int>(type: "int", nullable: false),
                     AwardLargestKillStreak = table.Column<int>(type: "int", nullable: false),
@@ -79,8 +79,7 @@ namespace MERRICK.DatabaseContext.Migrations
                     AwardMostBuildingDamage = table.Column<int>(type: "int", nullable: false),
                     AwardMostWardsKilled = table.Column<int>(type: "int", nullable: false),
                     AwardMostHeroDamageDealt = table.Column<int>(type: "int", nullable: false),
-                    AwardHighestCreepScore = table.Column<int>(type: "int", nullable: false),
-                    SubmissionDebug = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    AwardHighestCreepScore = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -103,7 +102,7 @@ namespace MERRICK.DatabaseContext.Migrations
                     LobbyPosition = table.Column<int>(type: "int", nullable: false),
                     GroupNumber = table.Column<int>(type: "int", nullable: false),
                     Benefit = table.Column<int>(type: "int", nullable: false),
-                    HeroID = table.Column<long>(type: "bigint", nullable: false),
+                    ProductID = table.Column<long>(type: "bigint", nullable: false),
                     Inventory = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Win = table.Column<int>(type: "int", nullable: false),
                     Loss = table.Column<int>(type: "int", nullable: false),

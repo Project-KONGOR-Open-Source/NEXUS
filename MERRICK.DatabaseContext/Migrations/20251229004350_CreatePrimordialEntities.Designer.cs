@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MERRICK.DatabaseContext.Migrations
 {
     [DbContext(typeof(MerrickContext))]
-    [Migration("20251227185014_CreatePrimordialEntities")]
+    [Migration("20251229004350_CreatePrimordialEntities")]
     partial class CreatePrimordialEntities
     {
         /// <inheritdoc />
@@ -337,7 +337,6 @@ namespace MERRICK.DatabaseContext.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("BannedHeroes")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("ConnectionState")
@@ -387,12 +386,8 @@ namespace MERRICK.DatabaseContext.Migrations
                     b.Property<int>("ScoreTeam2")
                         .HasColumnType("int");
 
-                    b.Property<long>("ServerID")
-                        .HasColumnType("bigint");
-
-                    b.Property<string>("SubmissionDebug")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("ServerID")
+                        .HasColumnType("int");
 
                     b.Property<int>("TeamScoreGoal")
                         .HasColumnType("int");
@@ -543,9 +538,6 @@ namespace MERRICK.DatabaseContext.Migrations
                     b.Property<int>("HeroExperience")
                         .HasColumnType("int");
 
-                    b.Property<long>("HeroID")
-                        .HasColumnType("bigint");
-
                     b.Property<int>("HeroKills")
                         .HasColumnType("int");
 
@@ -612,6 +604,9 @@ namespace MERRICK.DatabaseContext.Migrations
 
                     b.Property<int>("NeutralCreepKills")
                         .HasColumnType("int");
+
+                    b.Property<long>("ProductID")
+                        .HasColumnType("bigint");
 
                     b.Property<int>("PublicMatch")
                         .HasColumnType("int");

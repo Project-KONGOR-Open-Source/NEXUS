@@ -6,7 +6,7 @@ public class MatchStatistics
     [Key]
     public int ID { get; set; }
 
-    public required long ServerID { get; set; }
+    public required int ServerID { get; set; }
 
     [MaxLength(15)]
     public required string HostAccountName { get; set; }
@@ -51,7 +51,7 @@ public class MatchStatistics
 
     public required string ReleaseStage { get; set; }
 
-    public required string BannedHeroes { get; set; }
+    public required string? BannedHeroes { get; set; }
 
     public required int AwardMostAnnihilations { get; set; }
 
@@ -74,6 +74,4 @@ public class MatchStatistics
     public required int AwardMostHeroDamageDealt { get; set; }
 
     public required int AwardHighestCreepScore { get; set; }
-
-    public required string SubmissionDebug { get; set; }
 }

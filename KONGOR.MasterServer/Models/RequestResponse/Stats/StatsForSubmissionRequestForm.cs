@@ -1,6 +1,5 @@
 ﻿namespace KONGOR.MasterServer.Models.RequestResponse.Stats;
 
-// TODO: Inspect Stats Data For All Other Supported Game Modes (Ranked, Casual Ranked, MidWars, RiftWars) To Determine If They Have Any Unique Properties (The Models Below Are From Public Matches)
 // TODO: The Following May Be Needed: AverageMMR, AverageMMRTeamOne, AverageMMRTeamTwo, etc.
 
 // Properties Common To Both "submit_stats" And "resubmit_stats" Requests
@@ -42,13 +41,13 @@ public partial class StatsForSubmissionRequestForm
     public string? StatsResubmissionKey { get; set; }
 
     [FromForm(Name = "server_id")]
-    public long? ServerID { get; set; }
+    public int? ServerID { get; set; }
 }
 
 public class MatchStats
 {
     [FromForm(Name = "server_id")]
-    public required long ServerID { get; set; }
+    public required int ServerID { get; set; }
 
     [FromForm(Name = "match_id")]
     public required int MatchID { get; set; }
@@ -101,7 +100,7 @@ public class MatchStats
     public required string ReleaseStage { get; set; }
 
     [FromForm(Name = "banned_heroes")]
-    public required string BannedHeroes { get; set; }
+    public string? BannedHeroes { get; set; }
 
     [FromForm(Name = "awd_mann")]
     public required int AwardMostAnnihilations { get; set; }
@@ -165,7 +164,7 @@ public partial class IndividualPlayerStats
     public required int Benefit { get; set; }
 
     [FromForm(Name = "hero_id")]
-    public required long HeroID { get; set; }
+    public required uint ProductID { get; set; }
 
     [FromForm(Name = "wins")]
     public required int Win { get; set; }
@@ -407,21 +406,15 @@ public partial class IndividualPlayerStats
 
 public static class StatsForSubmissionRequestFormExtensions
 {
-    public static MatchStatistics ToMatchStatisticsEntity(this StatsForSubmissionRequestForm form, long? matchServerID = null, string? hostAccountName = null)
+    public static MatchStatistics ToMatchStatistics(this StatsForSubmissionRequestForm form, int? matchServerID = null, string? hostAccountName = null)
     {
         MatchStatistics statistics = new ()
         {
+            // A Stats Re-Submission Request Form Contains The Match Server ID While A Stats Submission Request Form Does Not
             ServerID = form.ServerID ?? (matchServerID ?? throw new NullReferenceException("Server ID Is NULL")),
 
-            // A Stats Resubmission Request Form Contains The Match Server ID While A Stats Submission Request Form Does Not
-            // We Always Want To Persist The Match Server ID To The Database
-            // So We Use The Match Server ID From The Form, If It Exists, Otherwise We Use The Match Server ID Passed As An Argument
-
+            // A Stats Re-Submission Request Form Contains The Host Account Name While A Stats Submission Request Form Does Not
             HostAccountName = form.HostAccountName ?? (hostAccountName ?? throw new NullReferenceException("Host Account Name Is NULL")),
-
-            // A Stats Resubmission Request Form Contains The Host Account Name While A Stats Submission Request Form Does Not
-            // We Always Want To Persist The Host Account Name To The Database
-            // So We Use The Host Account Name From The Form, If It Exists, Otherwise We Use The Host Account Name Passed As An Argument
 
             MatchID = form.MatchStats.MatchID,
             Map = form.MatchStats.Map,
@@ -452,16 +445,16 @@ public static class StatsForSubmissionRequestFormExtensions
             AwardMostBuildingDamage = form.MatchStats.AwardMostBuildingDamage,
             AwardMostWardsKilled = form.MatchStats.AwardMostWardsKilled,
             AwardMostHeroDamageDealt = form.MatchStats.AwardMostHeroDamageDealt,
-            AwardHighestCreepScore = form.MatchStats.AwardHighestCreepScore,
-            SubmissionDebug = form.MatchStats.SubmissionDebug
+            AwardHighestCreepScore = form.MatchStats.AwardHighestCreepScore
         };
 
         return statistics;
     }
 
-    public static PlayerStatistics ToPlayerStatisticsEntity(this StatsForSubmissionRequestForm form, int playerIndex, int accountID, string accountName, int? clanID, string? clanTag)
+    public static PlayerStatistics ToPlayerStatistics(this StatsForSubmissionRequestForm form, int playerIndex, int accountID, string accountName, int? clanID, string? clanTag)
     {
         string hero = form.PlayerStats[playerIndex].Keys.Single();
+
         IndividualPlayerStats player = form.PlayerStats[playerIndex][hero];
 
         PlayerStatistics statistics = new ()
@@ -475,7 +468,7 @@ public static class StatsForSubmissionRequestFormExtensions
             LobbyPosition = player.LobbyPosition,
             GroupNumber = player.GroupNumber,
             Benefit = player.Benefit,
-            HeroID = player.HeroID,
+            ProductID = player.ProductID == uint.MaxValue ? uint.MinValue : player.ProductID,
             Inventory = form.PlayerInventory[playerIndex].Values.ToList(),
             Win = player.Win,
             Loss = player.Loss,

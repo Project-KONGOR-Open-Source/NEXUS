@@ -16,7 +16,7 @@ public partial class StatsRequesterController
 
         if (existingMatchStatistics is null)
         {
-            MatchStatistics matchStatistics = form.ToMatchStatisticsEntity(matchServer.ID, matchServer.HostAccountName);
+            MatchStatistics matchStatistics = form.ToMatchStatistics(matchServer.ID, matchServer.HostAccountName);
 
             await MerrickContext.MatchStatistics.AddAsync(matchStatistics);
         }
@@ -42,7 +42,7 @@ public partial class StatsRequesterController
                     return NotFound($@"Unable To Retrieve Account For Account Name ""{accountName}""");
                 }
 
-                PlayerStatistics playerStatistics = form.ToPlayerStatisticsEntity(playerIndex, account.ID, account.Name, account.Clan?.ID, account.Clan?.Tag);
+                PlayerStatistics playerStatistics = form.ToPlayerStatistics(playerIndex, account.ID, account.Name, account.Clan?.ID, account.Clan?.Tag);
 
                 await MerrickContext.PlayerStatistics.AddAsync(playerStatistics);
             }
@@ -99,7 +99,7 @@ public partial class StatsRequesterController
 
         if (existingMatchStatistics is null)
         {
-            MatchStatistics matchStatistics = form.ToMatchStatisticsEntity();
+            MatchStatistics matchStatistics = form.ToMatchStatistics();
 
             await MerrickContext.MatchStatistics.AddAsync(matchStatistics);
         }
@@ -125,7 +125,7 @@ public partial class StatsRequesterController
                     return NotFound($@"Unable To Retrieve Account For Account Name ""{accountName}""");
                 }
 
-                PlayerStatistics playerStatistics = form.ToPlayerStatisticsEntity(playerIndex, account.ID, account.Name, account.Clan?.ID, account.Clan?.Tag);
+                PlayerStatistics playerStatistics = form.ToPlayerStatistics(playerIndex, account.ID, account.Name, account.Clan?.ID, account.Clan?.Tag);
 
                 await MerrickContext.PlayerStatistics.AddAsync(playerStatistics);
             }

@@ -26,7 +26,7 @@ public class PlayerStatistics
 
     public required int Benefit { get; set; }
 
-    public required long HeroID { get; set; }
+    public required uint ProductID { get; set; }
 
     public required List<string> Inventory { get; set; }
 
