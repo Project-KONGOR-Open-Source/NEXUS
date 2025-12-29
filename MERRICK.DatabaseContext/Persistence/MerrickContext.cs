@@ -33,6 +33,7 @@ public sealed class MerrickContext : DbContext
         ConfigureRoles(builder.Entity<Role>());
         ConfigureAccounts(builder.Entity<Account>());
         ConfigurePlayerStatistics(builder.Entity<PlayerStatistics>());
+        ConfigureMatchStatistics(builder.Entity<MatchStatistics>());
     }
 
     private static void ConfigureSchemas(ModelBuilder builder)
@@ -83,5 +84,13 @@ public sealed class MerrickContext : DbContext
             new ValueComparer<List<string>>((first, second) => (first ?? new List<string>()).SequenceEqual(second ?? new List<string>()),
                 collection => collection.Aggregate(0, (accumulatedHashCode, value) => HashCode.Combine(accumulatedHashCode, value.GetHashCode())), collection => collection.ToList())
         );
+
+        builder.OwnsMany(statistics => statistics.ItemHistory, ownedNavigationBuilder => ownedNavigationBuilder.ToJson());
+        builder.OwnsMany(statistics => statistics.AbilityHistory, ownedNavigationBuilder => ownedNavigationBuilder.ToJson());
+    }
+
+    private static void ConfigureMatchStatistics(EntityTypeBuilder<MatchStatistics> builder)
+    {
+        builder.OwnsMany(statistics => statistics.FragHistory, ownedNavigationBuilder => ownedNavigationBuilder.ToJson());
     }
 }

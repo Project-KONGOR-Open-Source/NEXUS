@@ -77,4 +77,17 @@ public class MatchStatistics
     public required int AwardMostHeroDamageDealt { get; set; }
 
     public required int AwardHighestCreepScore { get; set; }
+
+    public List<FragEvent>? FragHistory { get; set; }
+}
+
+public class FragEvent
+{
+    public required int FraggerID { get; set; }
+
+    public required int FraggedID { get; set; }
+
+    public required int Seconds { get; set; }
+
+    public List<int>? Assists { get; set; }
 }

@@ -46,41 +46,25 @@ public partial class StatsForSubmissionRequestForm
 public partial class StatsForSubmissionRequestForm
 {
     /// <summary>
-    ///     Courier product usage tracking.
-    ///     Submitted when courier products are used in the match.
-    ///     Format: courier[product_name] = product_id
-    /// </summary>
-    [FromForm(Name = "courier")]
-    public Dictionary<string, int>? CourierProductIDs { get; set; }
-
-    /// <summary>
     ///     Item purchase, sell, and drop history.
     ///     Only submitted if server CVAR "svr_submitMatchStatItems" is enabled.
     /// </summary>
     [FromForm(Name = "items")]
-    public List<ItemPurchaseHistory>? ItemHistory { get; set; }
+    public List<ItemEvent>? ItemHistory { get; set; }
 
     /// <summary>
     ///     Ability upgrade timeline for each player.
     ///     Only submitted if server CVAR "svr_submitMatchStatAbilities" is enabled.
     /// </summary>
     [FromForm(Name = "abilities")]
-    public Dictionary<int, List<AbilityUpgradeHistory>>? AbilityUpgrades { get; set; }
+    public Dictionary<int, List<AbilityEvent>>? AbilityHistory { get; set; }
 
     /// <summary>
     ///     Kill/Death event details with assists.
     ///     Only submitted if server CVAR "svr_submitMatchStatFrags" is enabled.
     /// </summary>
     [FromForm(Name = "frags")]
-    public List<FragHistory>? FragHistory { get; set; }
-
-    /// <summary>
-    ///     Player feedback/comments about the match.
-    ///     Submitted when players provide post-match comments.
-    ///     Format: comments[account_id] = comment_text
-    /// </summary>
-    [FromForm(Name = "comments")]
-    public Dictionary<int, string>? PlayerComments { get; set; }
+    public List<FragEvent>? FragHistory { get; set; }
 }
 
 public class MatchStats
@@ -529,7 +513,10 @@ public static class StatsForSubmissionRequestFormExtensions
             AwardMostBuildingDamage = form.MatchStats.AwardMostBuildingDamage,
             AwardMostWardsKilled = form.MatchStats.AwardMostWardsKilled,
             AwardMostHeroDamageDealt = form.MatchStats.AwardMostHeroDamageDealt,
-            AwardHighestCreepScore = form.MatchStats.AwardHighestCreepScore
+            AwardHighestCreepScore = form.MatchStats.AwardHighestCreepScore,
+
+            FragHistory = form.FragHistory?.Select(frag => new MERRICK.DatabaseContext.Entities.Statistics.FragEvent
+                { FraggerID = frag.FraggerID, FraggedID = frag.FraggedID, Seconds = frag.Seconds, Assists = frag.Assists }).ToList()
         };
 
         return statistics;
@@ -640,20 +627,27 @@ public static class StatsForSubmissionRequestFormExtensions
             GameplayStat7 = player.GameplayStat7,
             GameplayStat8 = player.GameplayStat8,
             GameplayStat9 = player.GameplayStat9,
-            TimeEarningExperience = player.TimeEarningExperience
+            TimeEarningExperience = player.TimeEarningExperience,
+
+            ItemHistory = form.ItemHistory?.Where(item => item.AccountID == accountID).Select(item => new MERRICK.DatabaseContext.Entities.Statistics.ItemEvent
+                { ItemName = item.ItemName, Seconds = item.Seconds, Action = item.Action }).ToList(),
+
+            AbilityHistory = form.AbilityHistory is not null && form.AbilityHistory.TryGetValue(accountID, out List<AbilityEvent>? abilities)
+                ? [.. abilities.Select(ability => new MERRICK.DatabaseContext.Entities.Statistics.AbilityEvent { HeroName = ability.HeroName, AbilityName = ability.AbilityName, Seconds = ability.Seconds, Slot = ability.Slot })]
+                : null
         };
 
         return statistics;
     }
 }
 
-public class ItemPurchaseHistory
+public class ItemEvent
 {
     [FromForm(Name = "account_id")]
     public required int AccountID { get; set; }
 
     [FromForm(Name = "cli_name")]
-    public required string ClientName { get; set; }
+    public required string ItemName { get; set; }
 
     [FromForm(Name = "secs")]
     public required int Seconds { get; set; }
@@ -662,13 +656,13 @@ public class ItemPurchaseHistory
     public required string Action { get; set; }
 }
 
-public class AbilityUpgradeHistory
+public class AbilityEvent
 {
     [FromForm(Name = "hero_cli_name")]
-    public required string HeroClientName { get; set; }
+    public required string HeroName { get; set; }
 
     [FromForm(Name = "ability_cli_name")]
-    public required string AbilityClientName { get; set; }
+    public required string AbilityName { get; set; }
 
     [FromForm(Name = "secs")]
     public required int Seconds { get; set; }
@@ -677,13 +671,13 @@ public class AbilityUpgradeHistory
     public required int Slot { get; set; }
 }
 
-public class FragHistory
+public class FragEvent
 {
     [FromForm(Name = "account_id")]
-    public required int AccountID { get; set; }
+    public required int FraggerID { get; set; }
 
     [FromForm(Name = "victim_id")]
-    public required int VictimID { get; set; }
+    public required int FraggedID { get; set; }
 
     [FromForm(Name = "secs")]
     public required int Seconds { get; set; }

@@ -203,4 +203,28 @@ public class PlayerStatistics
     public required double GameplayStat9 { get; set; }
 
     public required int TimeEarningExperience { get; set; }
+
+    public List<ItemEvent>? ItemHistory { get; set; }
+
+    public List<AbilityEvent>? AbilityHistory { get; set; }
+}
+
+public class ItemEvent
+{
+    public required string ItemName { get; set; }
+
+    public required int Seconds { get; set; }
+
+    public required string Action { get; set; }
+}
+
+public class AbilityEvent
+{
+    public required string HeroName { get; set; }
+
+    public required string AbilityName { get; set; }
+
+    public required int Seconds { get; set; }
+
+    public required int Slot { get; set; }
 }
