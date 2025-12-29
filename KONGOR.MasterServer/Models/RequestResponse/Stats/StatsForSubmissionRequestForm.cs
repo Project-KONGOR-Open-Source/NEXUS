@@ -1,7 +1,5 @@
 ﻿namespace KONGOR.MasterServer.Models.RequestResponse.Stats;
 
-// TODO: The Following May Be Needed: AverageMMR, AverageMMRTeamOne, AverageMMRTeamTwo, etc.
-
 // Properties Common To Both "submit_stats" And "resubmit_stats" Requests
 public partial class StatsForSubmissionRequestForm
 {
@@ -44,6 +42,47 @@ public partial class StatsForSubmissionRequestForm
     public int? ServerID { get; set; }
 }
 
+// Conditional Properties
+public partial class StatsForSubmissionRequestForm
+{
+    /// <summary>
+    ///     Courier product usage tracking.
+    ///     Submitted when courier products are used in the match.
+    ///     Format: courier[product_name] = product_id
+    /// </summary>
+    [FromForm(Name = "courier")]
+    public Dictionary<string, int>? CourierProductIDs { get; set; }
+
+    /// <summary>
+    ///     Item purchase, sell, and drop history.
+    ///     Only submitted if server CVAR "svr_submitMatchStatItems" is enabled.
+    /// </summary>
+    [FromForm(Name = "items")]
+    public List<ItemPurchaseHistory>? ItemHistory { get; set; }
+
+    /// <summary>
+    ///     Ability upgrade timeline for each player.
+    ///     Only submitted if server CVAR "svr_submitMatchStatAbilities" is enabled.
+    /// </summary>
+    [FromForm(Name = "abilities")]
+    public Dictionary<int, List<AbilityUpgradeHistory>>? AbilityUpgrades { get; set; }
+
+    /// <summary>
+    ///     Kill/Death event details with assists.
+    ///     Only submitted if server CVAR "svr_submitMatchStatFrags" is enabled.
+    /// </summary>
+    [FromForm(Name = "frags")]
+    public List<FragHistory>? FragHistory { get; set; }
+
+    /// <summary>
+    ///     Player feedback/comments about the match.
+    ///     Submitted when players provide post-match comments.
+    ///     Format: comments[account_id] = comment_text
+    /// </summary>
+    [FromForm(Name = "comments")]
+    public Dictionary<int, string>? PlayerComments { get; set; }
+}
+
 public class MatchStats
 {
     [FromForm(Name = "server_id")]
@@ -82,8 +121,6 @@ public class MatchStats
     [FromForm(Name = "avgpsr_team2")]
     public required int AveragePSRTeamTwo { get; set; }
 
-    // TODO: MMR And Casual MMR May Need To Also Be Added Here
-
     [FromForm(Name = "gamemode")]
     public required string GameMode { get; set; }
 
@@ -101,6 +138,15 @@ public class MatchStats
 
     [FromForm(Name = "banned_heroes")]
     public string? BannedHeroes { get; set; }
+
+    [FromForm(Name = "event_id")]
+    public int? ScheduledEventID { get; set; }
+
+    [FromForm(Name = "matchup_id")]
+    public int? ScheduledMatchID { get; set; }
+
+    [FromForm(Name = "mvp")]
+    public int? MVPAccountID { get; set; }
 
     [FromForm(Name = "awd_mann")]
     public required int AwardMostAnnihilations { get; set; }
@@ -164,7 +210,49 @@ public partial class IndividualPlayerStats
     public required int Benefit { get; set; }
 
     [FromForm(Name = "hero_id")]
-    public required uint ProductID { get; set; }
+    public required uint HeroProductID { get; set; }
+
+    [FromForm(Name = "alt_avatar_name")]
+    public string? AlternativeAvatarName { get; set; }
+
+    [FromForm(Name = "alt_avatar_pid")]
+    public uint? AlternativeAvatarProductID { get; set; }
+
+    [FromForm(Name = "ward_name")]
+    public string? WardProductName { get; set; }
+
+    [FromForm(Name = "ward_pid")]
+    public uint? WardProductID { get; set; }
+
+    [FromForm(Name = "taunt_name")]
+    public string? TauntProductName { get; set; }
+
+    [FromForm(Name = "taunt_pid")]
+    public uint? TauntProductID { get; set; }
+
+    [FromForm(Name = "announcer_name")]
+    public string? AnnouncerProductName { get; set; }
+
+    [FromForm(Name = "announcer_pid")]
+    public uint? AnnouncerProductID { get; set; }
+
+    [FromForm(Name = "courier_name")]
+    public string? CourierProductName { get; set; }
+
+    [FromForm(Name = "courier_pid")]
+    public uint? CourierProductID { get; set; }
+
+    [FromForm(Name = "account_icon_name")]
+    public string? AccountIconProductName { get; set; }
+
+    [FromForm(Name = "account_icon_pid")]
+    public uint? AccountIconProductID { get; set; }
+
+    [FromForm(Name = "chat_color_name")]
+    public string? ChatColourProductName { get; set; }
+
+    [FromForm(Name = "chat_color_pid")]
+    public uint? ChatColourProductID { get; set; }
 
     [FromForm(Name = "wins")]
     public required int Win { get; set; }
@@ -278,13 +366,13 @@ public partial class IndividualPlayerStats
     public required int HeroLevel { get; set; }
 
     [FromForm(Name = "consumables")]
-    public required int ConsumablesUsed { get; set; }
+    public required int ConsumablesPurchased { get; set; }
 
     [FromForm(Name = "wards")]
     public required int WardsPlaced { get; set; }
 
     [FromForm(Name = "bloodlust")]
-    public required int Bloodlust { get; set; }
+    public required int FirstBlood { get; set; }
 
     [FromForm(Name = "doublekill")]
     public required int DoubleKill { get; set; }
@@ -384,24 +472,17 @@ public partial class IndividualPlayerStats
     public int PublicMatch { get; set; }
 }
 
-// Properties Specific To Ranked (Arranged Matchmaking) Solo Matches
-public partial class IndividualPlayerStats
-{
-    [FromForm(Name = "amm_solo_rating")]
-    public double SoloRankedSkillRatingChange { get; set; }
-
-    [FromForm(Name = "amm_solo_count")]
-    public int SoloRankedMatch { get; set; }
-}
-
-// Properties Specific To Ranked (Arranged Matchmaking) Team Matches
+// Properties Specific To Ranked (Arranged Matchmaking) Matches
 public partial class IndividualPlayerStats
 {
     [FromForm(Name = "amm_team_rating")]
-    public double TeamRankedSkillRatingChange { get; set; }
+    public double RankedSkillRatingChange { get; set; }
 
     [FromForm(Name = "amm_team_count")]
-    public int TeamRankedMatch { get; set; }
+    public int RankedMatch { get; set; }
+
+    [FromForm(Name = "achievement_data")]
+    public string? AchievementData { get; set; }
 }
 
 public static class StatsForSubmissionRequestFormExtensions
@@ -435,6 +516,9 @@ public static class StatsForSubmissionRequestFormExtensions
             NumberOfRounds = form.MatchStats.NumberOfRounds,
             ReleaseStage = form.MatchStats.ReleaseStage,
             BannedHeroes = form.MatchStats.BannedHeroes,
+            ScheduledEventID = form.MatchStats.ScheduledEventID,
+            ScheduledMatchID = form.MatchStats.ScheduledMatchID,
+            MVPAccountID = form.MatchStats.MVPAccountID,
             AwardMostAnnihilations = form.MatchStats.AwardMostAnnihilations,
             AwardMostQuadKills = form.MatchStats.AwardMostQuadKills,
             AwardLargestKillStreak = form.MatchStats.AwardLargestKillStreak,
@@ -468,7 +552,21 @@ public static class StatsForSubmissionRequestFormExtensions
             LobbyPosition = player.LobbyPosition,
             GroupNumber = player.GroupNumber,
             Benefit = player.Benefit,
-            ProductID = player.ProductID == uint.MaxValue ? uint.MinValue : player.ProductID,
+            HeroProductID = player.HeroProductID == uint.MaxValue ? uint.MinValue : player.HeroProductID,
+            AlternativeAvatarName = player.AlternativeAvatarName,
+            AlternativeAvatarProductID = player.AlternativeAvatarProductID == uint.MaxValue ? null : player.AlternativeAvatarProductID,
+            WardProductName = player.WardProductName,
+            WardProductID = player.WardProductID == uint.MaxValue ? null : player.WardProductID,
+            TauntProductName = player.TauntProductName,
+            TauntProductID = player.TauntProductID == uint.MaxValue ? null : player.TauntProductID,
+            AnnouncerProductName = player.AnnouncerProductName,
+            AnnouncerProductID = player.AnnouncerProductID == uint.MaxValue ? null : player.AnnouncerProductID,
+            CourierProductName = player.CourierProductName,
+            CourierProductID = player.CourierProductID == uint.MaxValue ? null : player.CourierProductID,
+            AccountIconProductName = player.AccountIconProductName,
+            AccountIconProductID = player.AccountIconProductID == uint.MaxValue ? null : player.AccountIconProductID,
+            ChatColourProductName = player.ChatColourProductName,
+            ChatColourProductID = player.ChatColourProductID == uint.MaxValue ? null : player.ChatColourProductID,
             Inventory = form.PlayerInventory[playerIndex].Values.ToList(),
             Win = player.Win,
             Loss = player.Loss,
@@ -477,10 +575,8 @@ public static class StatsForSubmissionRequestFormExtensions
             Kicked = player.Kicked,
             PublicMatch = player.PublicMatch,
             PublicSkillRatingChange = player.PublicSkillRatingChange,
-            SoloRankedMatch = player.SoloRankedMatch,
-            SoloRankedSkillRatingChange = player.SoloRankedSkillRatingChange,
-            TeamRankedMatch = player.TeamRankedMatch,
-            TeamRankedSkillRatingChange = player.TeamRankedSkillRatingChange,
+            RankedMatch = player.RankedMatch,
+            RankedSkillRatingChange = player.RankedSkillRatingChange,
             SocialBonus = player.SocialBonus,
             UsedToken = player.UsedToken,
             ConcedeVotes = player.ConcedeVotes,
@@ -513,9 +609,9 @@ public static class StatsForSubmissionRequestFormExtensions
             Actions = player.Actions,
             SecondsPlayed = player.SecondsPlayed,
             HeroLevel = player.HeroLevel,
-            ConsumablesUsed = player.ConsumablesUsed,
+            ConsumablesPurchased = player.ConsumablesPurchased,
             WardsPlaced = player.WardsPlaced,
-            Bloodlust = player.Bloodlust,
+            FirstBlood = player.FirstBlood,
             DoubleKill = player.DoubleKill,
             TripleKill = player.TripleKill,
             QuadKill = player.QuadKill,
@@ -549,4 +645,49 @@ public static class StatsForSubmissionRequestFormExtensions
 
         return statistics;
     }
+}
+
+public class ItemPurchaseHistory
+{
+    [FromForm(Name = "account_id")]
+    public required int AccountID { get; set; }
+
+    [FromForm(Name = "cli_name")]
+    public required string ClientName { get; set; }
+
+    [FromForm(Name = "secs")]
+    public required int Seconds { get; set; }
+
+    [FromForm(Name = "action")]
+    public required string Action { get; set; }
+}
+
+public class AbilityUpgradeHistory
+{
+    [FromForm(Name = "hero_cli_name")]
+    public required string HeroClientName { get; set; }
+
+    [FromForm(Name = "ability_cli_name")]
+    public required string AbilityClientName { get; set; }
+
+    [FromForm(Name = "secs")]
+    public required int Seconds { get; set; }
+
+    [FromForm(Name = "slot")]
+    public required int Slot { get; set; }
+}
+
+public class FragHistory
+{
+    [FromForm(Name = "account_id")]
+    public required int AccountID { get; set; }
+
+    [FromForm(Name = "victim_id")]
+    public required int VictimID { get; set; }
+
+    [FromForm(Name = "secs")]
+    public required int Seconds { get; set; }
+
+    [FromForm(Name = "assists")]
+    public List<int>? Assists { get; set; }
 }
