@@ -16,7 +16,7 @@
         "KONGOR.MasterServer Production": {
             "commandName": "Project",
             "launchBrowser": true,
-            "applicationUrl": "http://api.kongor.net",
+            "applicationUrl": "http://0.0.0.0:5555",
             "launchUrl": "swagger",
             "environmentVariables": {
                 "APPLICATION_URL": "http://api.kongor.net",
