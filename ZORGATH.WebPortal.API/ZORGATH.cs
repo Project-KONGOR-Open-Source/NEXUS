@@ -64,8 +64,7 @@ public class ZORGATH
             builder.Services.AddHttpLogging(options =>
             {
                 options.LoggingFields = HttpLoggingFields.RequestPropertiesAndHeaders | HttpLoggingFields.ResponsePropertiesAndHeaders;
-                options.RequestBodyLogLimit = 4096; // 4KB Request Body Limit
-                options.ResponseBodyLogLimit = 4096; // 4KB Response Body Limit
+                options.RequestBodyLogLimit = 4096; /* 4KB Request Body Limit */ options.ResponseBodyLogLimit = 4096; /* 4KB Response Body Limit */
             });
         }
 
@@ -238,23 +237,6 @@ public class ZORGATH
 
             // Enable HTTP Request/Response Logging
             application.UseHttpLogging();
-
-            // Enable Swagger API Documentation
-            application.UseSwagger();
-
-            // Configure Swagger UI With Custom Styling
-            application.UseSwaggerUI(options =>
-            {
-                options.InjectStylesheet("swagger.css");
-                options.DocumentTitle = "ZORGATH Web Portal API";
-            });
-
-            // Serve Static Files For Swagger CSS
-            application.UseStaticFiles(new StaticFileOptions
-            {
-                FileProvider = new PhysicalFileProvider(Path.Combine(builder.Environment.ContentRootPath, "Resources", "CSS")),
-                RequestPath = "/swagger"
-            });
         }
 
         else
@@ -262,6 +244,23 @@ public class ZORGATH
             // Use Global Exception Handler In Production
             application.UseExceptionHandler("/error");
         }
+
+        // Enable Swagger API Documentation
+        application.UseSwagger();
+
+        // Configure Swagger UI With Custom Styling
+        application.UseSwaggerUI(options =>
+        {
+            options.InjectStylesheet("swagger.css");
+            options.DocumentTitle = "ZORGATH Web Portal API";
+        });
+
+        // Serve Static Files For Swagger CSS
+        application.UseStaticFiles(new StaticFileOptions
+        {
+            FileProvider = new PhysicalFileProvider(Path.Combine(builder.Environment.ContentRootPath, "Resources", "CSS")),
+            RequestPath = "/swagger"
+        });
 
         // Enable Rate Limiting (Before Other Processing)
         application.UseRateLimiter();

@@ -130,23 +130,6 @@ public class KONGOR
 
             // Enable HTTP Request/Response Logging
             application.UseHttpLogging();
-
-            // Enable Swagger API Documentation
-            application.UseSwagger();
-
-            // Configure Swagger UI With Custom Styling
-            application.UseSwaggerUI(options =>
-            {
-                options.InjectStylesheet("swagger.css");
-                options.DocumentTitle = "KONGOR Master Server API";
-            });
-
-            // Serve Static Files For Swagger CSS
-            application.UseStaticFiles(new StaticFileOptions
-            {
-                FileProvider = new PhysicalFileProvider(Path.Combine(builder.Environment.ContentRootPath, "Resources", "CSS")),
-                RequestPath = "/swagger"
-            });
         }
 
         else
@@ -154,6 +137,23 @@ public class KONGOR
             // Use Global Exception Handler In Production
             application.UseExceptionHandler("/error");
         }
+
+        // Enable Swagger API Documentation
+        application.UseSwagger();
+
+        // Configure Swagger UI With Custom Styling
+        application.UseSwaggerUI(options =>
+        {
+            options.InjectStylesheet("swagger.css");
+            options.DocumentTitle = "KONGOR Master Server API";
+        });
+
+        // Serve Static Files For Swagger CSS
+        application.UseStaticFiles(new StaticFileOptions
+        {
+            FileProvider = new PhysicalFileProvider(Path.Combine(builder.Environment.ContentRootPath, "Resources", "CSS")),
+            RequestPath = "/swagger"
+        });
 
         // Enable Rate Limiting (Before Other Processing)
         application.UseRateLimiter();
