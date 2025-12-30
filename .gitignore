@@ -430,3 +430,6 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+
+# macOS Desktop Services Store Cache
+.DS_Store
