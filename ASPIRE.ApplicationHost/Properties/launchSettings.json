@@ -4,24 +4,24 @@
         "ASPIRE.ApplicationHost Development": {
             "commandName": "Project",
             "launchBrowser": true,
-            "applicationUrl": "https://0.0.0.0:55550",
+            "applicationUrl": "https://localhost:5550",
             "environmentVariables": {
                 "ASPNETCORE_ENVIRONMENT": "Development",
                 "DOTNET_ENVIRONMENT": "Development",
-                "DOTNET_DASHBOARD_OTLP_ENDPOINT_URL": "https://localhost:55551",
-                "DOTNET_RESOURCE_SERVICE_ENDPOINT_URL": "https://localhost:55552"
+                "DOTNET_DASHBOARD_OTLP_ENDPOINT_URL": "https://localhost:5551",
+                "DOTNET_RESOURCE_SERVICE_ENDPOINT_URL": "https://localhost:5552"
             },
             "dotnetRunMessages": true
         },
         "ASPIRE.ApplicationHost Production": {
             "commandName": "Project",
             "launchBrowser": true,
-            "applicationUrl": "https://dashboard.kongor.net",
+            "applicationUrl": "https://localhost:5550",
             "environmentVariables": {
                 "ASPNETCORE_ENVIRONMENT": "Production",
                 "DOTNET_ENVIRONMENT": "Production",
-                "DOTNET_DASHBOARD_OTLP_ENDPOINT_URL": "https://localhost:55551",
-                "DOTNET_RESOURCE_SERVICE_ENDPOINT_URL": "https://localhost:55552"
+                "DOTNET_DASHBOARD_OTLP_ENDPOINT_URL": "https://localhost:5551",
+                "DOTNET_RESOURCE_SERVICE_ENDPOINT_URL": "https://localhost:5552"
             },
             "dotnetRunMessages": true
         }
