@@ -1,6 +1,6 @@
 ﻿namespace TRANSMUTANSTEIN.ChatServer.Services;
 
-public class MatchmakingService : IHostedService, IDisposable
+public class MatchmakingService : BackgroundService, IDisposable
 {
     public static ConcurrentDictionary<int, MatchmakingGroup> Groups { get; set; } = [];
 
@@ -28,23 +28,29 @@ public class MatchmakingService : IHostedService, IDisposable
     public static ConcurrentDictionary<int, MatchmakingGroup> FivePlayerGroups
         => new (Groups.Where(group => group.Value.Members.Count == 5));
 
-    public async Task StartAsync(CancellationToken cancellationToken)
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
+        Log.Information("Matchmaking Service Is Starting");
+
+        await RunMatchBroker(stoppingToken);
+
         Log.Information("Matchmaking Service Has Started");
-
-        await RunMatchBroker(cancellationToken);
     }
 
-    public async Task StopAsync(CancellationToken cancellationToken)
+    public override async Task StopAsync(CancellationToken cancellationToken)
     {
-        Log.Information("Matchmaking Service Has Stopped");
+        Log.Information("Matchmaking Service Is Stopping");
 
-        await Task.CompletedTask;
+        await base.StopAsync(cancellationToken);
+
+        Log.Information("Matchmaking Service Has Stopped");
     }
 
-    public void Dispose()
+    public override void Dispose()
     {
         Groups.Clear();
+
+        base.Dispose();
 
         GC.SuppressFinalize(this);
     }
