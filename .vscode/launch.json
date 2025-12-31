@@ -14,7 +14,11 @@
                 "ASPNETCORE_ENVIRONMENT": "Development",
                 "DOTNET_ENVIRONMENT": "Development"
             },
-            "console": "internalConsole"
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "enableStepFiltering": false,
+            "suppressJITOptimizations": true,
+            "requireExactSource": false
         }
     ]
 }
