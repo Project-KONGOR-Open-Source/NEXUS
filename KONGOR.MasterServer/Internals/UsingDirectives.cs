@@ -25,6 +25,7 @@ global using MERRICK.DatabaseContext.Enumerations;
 global using MERRICK.DatabaseContext.Persistence;
 
 global using Microsoft.AspNetCore.HttpLogging;
+global using Microsoft.AspNetCore.HttpOverrides;
 global using Microsoft.AspNetCore.Mvc;
 global using Microsoft.AspNetCore.RateLimiting;
 global using Microsoft.EntityFrameworkCore;
@@ -44,6 +45,7 @@ global using StackExchange.Redis;
 
 global using System.Linq.Expressions;
 global using System.Net;
+global using System.Net.Sockets;
 global using System.Security.Cryptography;
 global using System.Text;
 global using System.Text.Json;
