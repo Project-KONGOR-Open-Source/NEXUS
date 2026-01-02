@@ -480,13 +480,60 @@ public static class ChatProtocol
 
     public enum ServerStatus
     {
+        /// <summary>
+        ///     Server is hibernating/dormant with no activity.
+        ///     The server process exists, but Host.IsSleeping() returns TRUE.
+        ///     Used for slave servers in a server manager pool waiting to be assigned work.
+        ///     Expected state for non-CowMaster servers when idle in the pool.
+        /// </summary>
         SERVER_STATUS_SLEEPING,
+
+        /// <summary>
+        ///     Server is running and ready but has no active match.
+        ///     World is either not loaded, or loaded but has zero connected clients.
+        ///     Server is listening and can accept connections.
+        ///     Expected state for "CowMaster" (Copy-on-Write master) servers.
+        ///     Can transition to ACTIVE when clients connect.
+        /// </summary>
         SERVER_STATUS_IDLE,
+
+        /// <summary>
+        ///     Server is currently loading a lobby/world.
+        ///     Set when m_bGameLoading is TRUE.
+        ///     Transitional state between IDLE and ACTIVE.
+        /// </summary>
         SERVER_STATUS_LOADING,
+
+        /// <summary>
+        ///     Server has an active match session running.
+        ///     Either the world is loaded with connected clients, or clients are in the lobby.
+        ///     Match may or may not have started (m_bMatchStarted distinguishes between "lobby" and "active" in HTTP responses).
+        ///     Normal operational state during gameplay.
+        /// </summary>
         SERVER_STATUS_ACTIVE,
+
+        /// <summary>
+        ///     Server process terminated unexpectedly or became unresponsive.
+        ///     Set when process is no longer running but was not intentionally killed.
+        ///     Set when server fails to respond within timeout period.
+        ///     Triggers respawn logic if man_respawnServers is enabled.
+        ///     Server manager attempts cleanup and possible restart.
+        /// </summary>
         SERVER_STATUS_CRASHED,
+
+        /// <summary>
+        ///     Server was intentionally terminated by the server manager.
+        ///     Set when manager sends NETCMD_MANAGER_SHUTDOWN_SLAVE.
+        ///     Differentiated from CRASHED to prevent unwanted respawns.
+        ///     Final state when shutting down servers during updates or manual termination.
+        /// </summary>
         SERVER_STATUS_KILLED,
 
+        /// <summary>
+        ///     Initial state when server is first spawned but hasn't reported status yet.
+        ///     Used when server status cannot be determined.
+        ///     Transitional state during server initialization before first status update.
+        /// </summary>
         SERVER_STATUS_UNKNOWN
     };
 
