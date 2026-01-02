@@ -15,13 +15,17 @@ public partial class ClientRequesterController
 
         switch (gameType)
         {
-            case "10":
-                return Ok(PhpSerialization.Serialize(new ServerForJoinListResponse(servers, cookie)));
+            case "10": // List Of Match Servers On Which Matches Can Be Joined
+                ServerForJoinListResponse serversForJoin = new (servers, cookie);
 
-            case "90":
+                return Ok(PhpSerialization.Serialize(serversForJoin));
+
+            case "90": // List Of Match Servers On Which Matches Can Be Created
                 string? region = Request.Form.ContainsKey("region") ? Request.Form["region"].ToString() : null;
 
-                return Ok(PhpSerialization.Serialize(new ServerForCreateListResponse(servers, region, cookie)));
+                ServerForCreateListResponse serversForCreate = new (servers, region, cookie);
+
+                return Ok(PhpSerialization.Serialize(serversForCreate));
 
             default:
                 Logger.LogError($@"[BUG] Unknown Server List Game Type ""{gameType ?? "NULL"}""");

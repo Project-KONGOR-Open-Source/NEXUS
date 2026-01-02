@@ -95,14 +95,19 @@ public static partial class DistributedCacheExtensions
 
             await distributedCacheStore.HashDeleteAsync(MatchServerManagersKey, hostAccountName);
 
-            foreach (MatchServer server in matchServerManager.MatchServers)
+            foreach (int matchServerID in matchServerManager.MatchServerIDs)
             {
-                server.MatchServerManager = null;
+                MatchServer? matchServer = await distributedCacheStore.GetMatchServerByID(matchServerID);
 
-                await distributedCacheStore.RemoveMatchServerByID(server.ID);
+                if (matchServer is not null)
+                {
+                    matchServer.MatchServerManagerID = null;
+
+                    await distributedCacheStore.RemoveMatchServerByID(matchServer.ID);
+                }
             }
 
-            matchServerManager.MatchServers.Clear();
+            matchServerManager.MatchServerIDs.Clear();
         }
     }
 
@@ -195,12 +200,17 @@ public static partial class DistributedCacheExtensions
 
             await distributedCacheStore.HashDeleteAsync(MatchServersKey, hashField);
 
-            matchServer.MatchServerManager?.MatchServers.Remove(matchServer);
+            MatchServerManager? matchServerManager = await distributedCacheStore.GetMatchServerManagerByID(matchServer.MatchServerManagerID ?? default);
 
-            if (matchServer.MatchServerManager?.MatchServers.Any() is false)
-                await distributedCacheStore.RemoveMatchServerManagerByID(matchServer.MatchServerManager.ID);
+            if (matchServerManager is not null)
+            {
+                matchServerManager.MatchServerIDs.Remove(matchServer.ID);
 
-            matchServer.MatchServerManager = null;
+                if (matchServerManager.MatchServerIDs.Any() is false)
+                    await distributedCacheStore.RemoveMatchServerManagerByID(matchServerManager.ID);
+            }
+
+            matchServer.MatchServerManagerID = null;
         }
     }
 

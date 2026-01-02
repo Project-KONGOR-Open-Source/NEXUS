@@ -43,7 +43,7 @@ public partial class ServerRequesterController
             HostAccountID = account.ID,
             HostAccountName = account.Name,
             ID = hostAccountName.GetDeterministicInt32Hash(),
-            MatchServers = [],
+            MatchServerIDs = [],
             IPAddress = Request.HttpContext.Connection.RemoteIpAddress.MapToIPv4().ToString()
         };
 
@@ -131,7 +131,7 @@ public partial class ServerRequesterController
 
         // TODO: Verify Whether The Server Version Matches The Client Version (Or Disallow Servers To Be Started If They Are Not On The Latest Version)
 
-        List<MatchServerManager> matchServerManagers = await DistributedCache.GetMatchServerManagersByAccountName(hostAccountName);
+        MatchServerManager? matchServerManager = (await DistributedCache.GetMatchServerManagersByAccountName(hostAccountName)).SingleOrDefault();
 
         MatchServer matchServer = new ()
         {
@@ -139,7 +139,7 @@ public partial class ServerRequesterController
             HostAccountName = account.Name,
             ID = serverIdentifier.GetDeterministicInt32Hash(),
             Name = serverName,
-            MatchServerManager = matchServerManagers.SingleOrDefault(),
+            MatchServerManagerID = matchServerManager?.ID,
             Instance = int.Parse(serverInstance),
             IPAddress = serverIPAddress,
             Port = int.Parse(serverPort),
@@ -149,7 +149,15 @@ public partial class ServerRequesterController
 
         await DistributedCache.SetMatchServer(hostAccountName, matchServer);
 
+        if (matchServerManager is not null)
+        {
+            matchServerManager.MatchServerIDs.Add(matchServer.ID);
+
+            await DistributedCache.SetMatchServerManager(hostAccountName, matchServerManager);
+        }
+
         // TODO: Implement Verifier In Description (If The Server Is A COMPEL Server, It Will Have A Verifier In The Description)
+        // INFO: The Server Manager Doesn't Send Descriptions, So Use Name Instead Since We Can Override Them Anyway Via Remote Command (svr_name) On TCP Handshake
 
         string chatServerHost = Environment.GetEnvironmentVariable("CHAT_SERVER_HOST")
             ?? throw new NullReferenceException("Chat Server Host Is NULL");

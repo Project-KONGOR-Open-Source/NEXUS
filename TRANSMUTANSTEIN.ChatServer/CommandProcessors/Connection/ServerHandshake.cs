@@ -138,13 +138,16 @@ public class ServerHandshake(IDatabase distributedCacheStore, MerrickContext dat
 
         session.Send(acceptResponse);
 
-        ChatBuffer remoteCommand = new();
+        string uniqueServerName = Random.Shared.Next().ToString("X8"); // TODO: Use The Original Name As Identifier, To Verify Server Binaries Checksum
+
+        ChatBuffer remoteCommand = new ();
 
         string[] commands =
         [
             "svr_submitMatchStatItems true",
             "svr_submitMatchStatAbilities true",
             "svr_submitMatchStatFrags true",
+            $"svr_name {uniqueServerName}",
             "echo Project KONGOR Remote Configuration Was Injected Successfully"
         ];
 
@@ -154,6 +157,11 @@ public class ServerHandshake(IDatabase distributedCacheStore, MerrickContext dat
 
         // Inject The Match Server With Remote Configuration
         session.Send(remoteCommand);
+
+        server.Name = uniqueServerName;
+
+        // Update The Match Server Name In The Distributed Cache
+        await distributedCacheStore.SetMatchServer(server.HostAccountName, server);
     }
 }
 
