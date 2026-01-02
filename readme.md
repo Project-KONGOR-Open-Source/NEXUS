@@ -218,23 +218,32 @@ Debug HTTP Traffic With Fiddler
 Troubleshoot Port Conflicts On Windows
 
 ```powershell
+# Verify Port Reservations
+netsh int ipv4 show excludedportrange protocol=tcp
+
 # Stop Windows NAT To Clear Dynamic Exclusions
 net stop winnat
 
+# Reserve HTTP Services Ports
+netsh int ipv4 delete excludedportrange protocol=tcp startport=5550 numberofports=8 store=persistent
+netsh int ipv4 add excludedportrange protocol=tcp startport=5550 numberofports=8 store=persistent
+
 # Reserve TCP Server Ports
+netsh int ipv4 delete excludedportrange protocol=tcp startport=11031 numberofports=3 store=persistent
 netsh int ipv4 add excludedportrange protocol=tcp startport=11031 numberofports=3 store=persistent
 
 # Reserve Match Server Ports
+netsh int ipv4 delete excludedportrange protocol=tcp startport=11235 numberofports=5 store=persistent
 netsh int ipv4 add excludedportrange protocol=tcp startport=11235 numberofports=5 store=persistent
 
 # Reserve Match Server Voice Ports
+netsh int ipv4 delete excludedportrange protocol=tcp startport=11435 numberofports=5 store=persistent
 netsh int ipv4 add excludedportrange protocol=tcp startport=11435 numberofports=5 store=persistent
-
-# Reserve HTTP Services Ports
-netsh int ipv4 add excludedportrange protocol=tcp startport=5550 numberofports=8 store=persistent
 
 # Start Windows NAT
 net start winnat
+
+# NOTE: on deletion, make sure to delete the actual range reserved otherwise the delete operation will fail
 ```
 
 <hr/>
