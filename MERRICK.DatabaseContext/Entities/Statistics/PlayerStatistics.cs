@@ -213,9 +213,9 @@ public class ItemEvent
 {
     public required string ItemName { get; set; }
 
-    public required int Seconds { get; set; }
+    public required int GameTimeSeconds { get; set; }
 
-    public required string Action { get; set; }
+    public required byte EventType { get; set; }
 }
 
 public class AbilityEvent
@@ -224,7 +224,7 @@ public class AbilityEvent
 
     public required string AbilityName { get; set; }
 
-    public required int Seconds { get; set; }
+    public required int GameTimeSeconds { get; set; }
 
-    public required int Slot { get; set; }
+    public required byte SlotIndex { get; set; }
 }

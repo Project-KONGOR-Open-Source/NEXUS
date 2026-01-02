@@ -6,6 +6,8 @@ public class MatchStatistics
     [Key]
     public int ID { get; set; }
 
+    public DateTimeOffset TimestampRecorded { get; set; } = DateTimeOffset.UtcNow;
+
     public required int ServerID { get; set; }
 
     [MaxLength(15)]
@@ -83,11 +85,11 @@ public class MatchStatistics
 
 public class FragEvent
 {
-    public required int FraggerID { get; set; }
+    public required int SourceID { get; set; }
 
-    public required int FraggedID { get; set; }
+    public required int TargetID { get; set; }
 
-    public required int Seconds { get; set; }
+    public required int GameTimeSeconds { get; set; }
 
-    public List<int>? Assists { get; set; }
+    public required List<int>? SupporterIDs { get; set; }
 }

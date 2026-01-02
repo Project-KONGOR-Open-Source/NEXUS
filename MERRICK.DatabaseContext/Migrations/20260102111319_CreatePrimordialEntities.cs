@@ -48,6 +48,7 @@ namespace MERRICK.DatabaseContext.Migrations
                 {
                     ID = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
+                    TimestampRecorded = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
                     ServerID = table.Column<int>(type: "int", nullable: false),
                     HostAccountName = table.Column<string>(type: "nvarchar(15)", maxLength: 15, nullable: false),
                     MatchID = table.Column<int>(type: "int", nullable: false),

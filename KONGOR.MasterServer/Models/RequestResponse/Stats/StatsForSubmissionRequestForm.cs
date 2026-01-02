@@ -516,7 +516,7 @@ public static class StatsForSubmissionRequestFormExtensions
             AwardHighestCreepScore = form.MatchStats.AwardHighestCreepScore,
 
             FragHistory = form.FragHistory?.Select(frag => new MERRICK.DatabaseContext.Entities.Statistics.FragEvent
-                { FraggerID = frag.FraggerID, FraggedID = frag.FraggedID, Seconds = frag.Seconds, Assists = frag.Assists }).ToList()
+                { SourceID = frag.SourceID, TargetID = frag.TargetID, GameTimeSeconds = frag.GameTimeSeconds, SupporterIDs = frag.SupporterIDs }).ToList()
         };
 
         return statistics;
@@ -630,10 +630,10 @@ public static class StatsForSubmissionRequestFormExtensions
             TimeEarningExperience = player.TimeEarningExperience,
 
             ItemHistory = form.ItemHistory?.Where(item => item.AccountID == accountID).Select(item => new MERRICK.DatabaseContext.Entities.Statistics.ItemEvent
-                { ItemName = item.ItemName, Seconds = item.Seconds, Action = item.Action }).ToList(),
+                { ItemName = item.ItemName, GameTimeSeconds = item.GameTimeSeconds, EventType = item.EventType }).ToList(),
 
             AbilityHistory = form.AbilityHistory is not null && form.AbilityHistory.TryGetValue(accountID, out List<AbilityEvent>? abilities)
-                ? [.. abilities.Select(ability => new MERRICK.DatabaseContext.Entities.Statistics.AbilityEvent { HeroName = ability.HeroName, AbilityName = ability.AbilityName, Seconds = ability.Seconds, Slot = ability.Slot })]
+                ? [.. abilities.Select(ability => new MERRICK.DatabaseContext.Entities.Statistics.AbilityEvent { HeroName = ability.HeroName, AbilityName = ability.AbilityName, GameTimeSeconds = ability.GameTimeSeconds, SlotIndex = ability.SlotIndex })]
                 : null
         };
 
@@ -650,10 +650,10 @@ public class ItemEvent
     public required string ItemName { get; set; }
 
     [FromForm(Name = "secs")]
-    public required int Seconds { get; set; }
+    public required int GameTimeSeconds { get; set; }
 
     [FromForm(Name = "action")]
-    public required string Action { get; set; }
+    public required byte EventType { get; set; }
 }
 
 public class AbilityEvent
@@ -665,23 +665,23 @@ public class AbilityEvent
     public required string AbilityName { get; set; }
 
     [FromForm(Name = "secs")]
-    public required int Seconds { get; set; }
+    public required int GameTimeSeconds { get; set; }
 
     [FromForm(Name = "slot")]
-    public required int Slot { get; set; }
+    public required byte SlotIndex { get; set; }
 }
 
 public class FragEvent
 {
-    [FromForm(Name = "account_id")]
-    public required int FraggerID { get; set; }
+    [FromForm(Name = "killer_id")]
+    public required int SourceID { get; set; }
 
-    [FromForm(Name = "victim_id")]
-    public required int FraggedID { get; set; }
+    [FromForm(Name = "target_id")]
+    public required int TargetID { get; set; }
 
     [FromForm(Name = "secs")]
-    public required int Seconds { get; set; }
+    public required int GameTimeSeconds { get; set; }
 
-    [FromForm(Name = "assists")]
-    public List<int>? Assists { get; set; }
+    [FromForm(Name = "assisters")]
+    public required List<int>? SupporterIDs { get; set; }
 }

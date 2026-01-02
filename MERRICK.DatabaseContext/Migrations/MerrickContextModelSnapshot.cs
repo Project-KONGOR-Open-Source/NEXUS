@@ -401,6 +401,9 @@ namespace MERRICK.DatabaseContext.Migrations
                     b.Property<int>("TimePlayed")
                         .HasColumnType("int");
 
+                    b.Property<DateTimeOffset>("TimestampRecorded")
+                        .HasColumnType("datetimeoffset");
+
                     b.Property<string>("Version")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -936,13 +939,13 @@ namespace MERRICK.DatabaseContext.Migrations
                             b1.Property<int>("__synthesizedOrdinal")
                                 .ValueGeneratedOnAddOrUpdate();
 
-                            b1.PrimitiveCollection<string>("Assists");
+                            b1.Property<int>("GameTimeSeconds");
 
-                            b1.Property<int>("FraggedID");
+                            b1.Property<int>("SourceID");
 
-                            b1.Property<int>("FraggerID");
+                            b1.PrimitiveCollection<string>("SupporterIDs");
 
-                            b1.Property<int>("Seconds");
+                            b1.Property<int>("TargetID");
 
                             b1.HasKey("MatchStatisticsID", "__synthesizedOrdinal");
 
@@ -969,12 +972,12 @@ namespace MERRICK.DatabaseContext.Migrations
                             b1.Property<string>("AbilityName")
                                 .IsRequired();
 
+                            b1.Property<int>("GameTimeSeconds");
+
                             b1.Property<string>("HeroName")
                                 .IsRequired();
 
-                            b1.Property<int>("Seconds");
-
-                            b1.Property<int>("Slot");
+                            b1.Property<byte>("SlotIndex");
 
                             b1.HasKey("PlayerStatisticsID", "__synthesizedOrdinal");
 
@@ -993,13 +996,12 @@ namespace MERRICK.DatabaseContext.Migrations
                             b1.Property<int>("__synthesizedOrdinal")
                                 .ValueGeneratedOnAddOrUpdate();
 
-                            b1.Property<string>("Action")
-                                .IsRequired();
+                            b1.Property<byte>("EventType");
+
+                            b1.Property<int>("GameTimeSeconds");
 
                             b1.Property<string>("ItemName")
                                 .IsRequired();
-
-                            b1.Property<int>("Seconds");
 
                             b1.HasKey("PlayerStatisticsID", "__synthesizedOrdinal");
 
