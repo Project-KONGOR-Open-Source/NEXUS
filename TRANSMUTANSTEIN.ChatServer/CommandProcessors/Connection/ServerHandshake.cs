@@ -137,6 +137,23 @@ public class ServerHandshake(IDatabase distributedCacheStore, MerrickContext dat
         acceptResponse.WriteCommand(ChatProtocol.ChatServerToGameServer.NET_CHAT_GS_ACCEPT);
 
         session.Send(acceptResponse);
+
+        ChatBuffer remoteCommand = new();
+
+        string[] commands =
+        [
+            "svr_submitMatchStatItems true",
+            "svr_submitMatchStatAbilities true",
+            "svr_submitMatchStatFrags true",
+            "echo Project KONGOR Remote Configuration Was Injected Successfully"
+        ];
+
+        remoteCommand.WriteCommand(ChatProtocol.ChatServerToGameServer.NET_CHAT_GS_REMOTE_COMMAND);
+        remoteCommand.WriteString(requestData.SessionCookie);
+        remoteCommand.WriteString(string.Join(";", commands));
+
+        // Inject The Match Server With Remote Configuration
+        session.Send(remoteCommand);
     }
 }
 
