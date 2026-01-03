@@ -101,6 +101,15 @@ public class MatchStatsResponse
     public long ServerTimestamp { get; set; } = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
 
     /// <summary>
+    ///     Used for the quest system, which has been disabled.
+    ///     <br/>
+    ///     While the quest system is disabled, this dictionary contains a single element with a key of "error".
+    ///     The object which is the value of this element has the values of all its properties set to "0".
+    /// </summary>
+    [PhpProperty("quest_system")]
+    public Dictionary<string, QuestSystem> QuestSystem { get; set; } = new () { { "error", new QuestSystem() } };
+
+    /// <summary>
     ///     The minimum number of matches a free-to-play (trial) account must complete to become verified.
     ///     A verified account is considered to have full account privileges, and is no longer considered a restricted account.
     /// </summary>

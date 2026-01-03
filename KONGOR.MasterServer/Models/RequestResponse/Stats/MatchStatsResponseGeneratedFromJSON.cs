@@ -5,21 +5,9 @@ public class Rootobject
     public Match_Summ[] match_summ { get; set; }
     public Match_Player_Stats[] match_player_stats { get; set; }
     public Inventory[] inventory { get; set; }
-    public Quest_System quest_system { get; set; }
     public Con_Reward con_reward { get; set; }
     public Match_Mastery match_mastery { get; set; }
     public Season_System season_system { get; set; }
-}
-
-public class Quest_System
-{
-    public Error error { get; set; }
-}
-
-public class Error
-{
-    public int quest_status { get; set; }
-    public int leaderboard_status { get; set; }
 }
 
 public class Con_Reward
