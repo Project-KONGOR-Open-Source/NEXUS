@@ -1,0 +1,77 @@
+{
+    "SignupRewards": {
+        "GoldCoins": 2500,
+        "SilverCoins": 25000,
+        "PlinkoTickets": 250
+    },
+    "EventRewards": {
+        "PostSignupBonus": {
+            "GoldCoins": 100,
+            "SilverCoins": 1000,
+            "PlinkoTickets": 10,
+            "MatchesCount": 25
+        }
+    },
+    "MatchRewards": {
+        "Solo": {
+            "Win": {
+                "GoldCoins": 20,
+                "SilverCoins": 200,
+                "PlinkoTickets": 10
+            },
+            "Loss": {
+                "GoldCoins": 10,
+                "SilverCoins": 100,
+                "PlinkoTickets": 5
+            }
+        },
+        "TwoPersonGroup": {
+            "Win": {
+                "GoldCoins": 24,
+                "SilverCoins": 240,
+                "PlinkoTickets": 14
+            },
+            "Loss": {
+                "GoldCoins": 12,
+                "SilverCoins": 120,
+                "PlinkoTickets": 7
+            }
+        },
+        "ThreePersonGroup": {
+            "Win": {
+                "GoldCoins": 30,
+                "SilverCoins": 300,
+                "PlinkoTickets": 16
+            },
+            "Loss": {
+                "GoldCoins": 15,
+                "SilverCoins": 150,
+                "PlinkoTickets": 8
+            }
+        },
+        "FourPersonGroup": {
+            "Win": {
+                "GoldCoins": 36,
+                "SilverCoins": 360,
+                "PlinkoTickets": 18
+            },
+            "Loss": {
+                "GoldCoins": 18,
+                "SilverCoins": 180,
+                "PlinkoTickets": 9
+            }
+        },
+        "FivePersonGroup": {
+            "Win": {
+                "GoldCoins": 40,
+                "SilverCoins": 400,
+                "PlinkoTickets": 20
+            },
+            "Loss": {
+                "GoldCoins": 20,
+                "SilverCoins": 200,
+                "PlinkoTickets": 10
+            }
+        }
+    }
+}
