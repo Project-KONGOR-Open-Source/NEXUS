@@ -5,20 +5,8 @@ public class Rootobject
     public Match_Summ[] match_summ { get; set; }
     public Match_Player_Stats[] match_player_stats { get; set; }
     public Inventory[] inventory { get; set; }
-    public Con_Reward con_reward { get; set; }
     public Match_Mastery match_mastery { get; set; }
     public Season_System season_system { get; set; }
-}
-
-public class Con_Reward
-{
-    public int old_lvl { get; set; }
-    public int curr_lvl { get; set; }
-    public int next_lvl { get; set; }
-    public int require_rank { get; set; }
-    public int need_more_play { get; set; }
-    public string percentage_before { get; set; }
-    public string percentage { get; set; }
 }
 
 public class Match_Mastery
