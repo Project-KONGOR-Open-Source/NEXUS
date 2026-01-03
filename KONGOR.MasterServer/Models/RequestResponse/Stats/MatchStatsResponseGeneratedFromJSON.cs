@@ -1,0 +1,1262 @@
+﻿namespace KONGOR.MasterServer.Models.RequestResponse.Stats;
+
+public class Rootobject
+{
+    public Match_Summ[] match_summ { get; set; }
+    public Match_Player_Stats[] match_player_stats { get; set; }
+    public Inventory[] inventory { get; set; }
+    public Quest_System quest_system { get; set; }
+    public Con_Reward con_reward { get; set; }
+    public Match_Mastery match_mastery { get; set; }
+    public Season_System season_system { get; set; }
+}
+
+public class Quest_System
+{
+    public Error error { get; set; }
+}
+
+public class Error
+{
+    public int quest_status { get; set; }
+    public int leaderboard_status { get; set; }
+}
+
+public class Con_Reward
+{
+    public int old_lvl { get; set; }
+    public int curr_lvl { get; set; }
+    public int next_lvl { get; set; }
+    public int require_rank { get; set; }
+    public int need_more_play { get; set; }
+    public string percentage_before { get; set; }
+    public string percentage { get; set; }
+}
+
+public class Match_Mastery
+{
+    public string cli_name { get; set; }
+    public int mastery_exp_original { get; set; }
+    public int mastery_exp_match { get; set; }
+    public int mastery_exp_bonus { get; set; }
+    public int mastery_exp_boost { get; set; }
+    public int mastery_exp_super_boost { get; set; }
+    public int mastery_exp_heroes_count { get; set; }
+    public int mastery_exp_heroes_addon { get; set; }
+    public int mastery_exp_to_boost { get; set; }
+    public int mastery_exp_event { get; set; }
+    public bool mastery_canboost { get; set; }
+    public bool mastery_super_canboost { get; set; }
+    public int mastery_boost_product_id { get; set; }
+    public int mastery_super_boost_product_id { get; set; }
+    public int mastery_boostnum { get; set; }
+    public int mastery_super_boostnum { get; set; }
+}
+
+public class Season_System
+{
+    public int drop_diamonds { get; set; }
+    public int cur_diamonds { get; set; }
+    public object[] box_price { get; set; }
+}
+
+public class Match_Summ
+{
+    public string match_id { get; set; }
+    public string server_id { get; set; }
+    public string map { get; set; }
+    public string map_version { get; set; }
+    public string time_played { get; set; }
+    public string file_host { get; set; }
+    public string file_size { get; set; }
+    public string file_name { get; set; }
+    public string c_state { get; set; }
+    public string version { get; set; }
+    public string avgpsr { get; set; }
+    public string date { get; set; }
+    public string time { get; set; }
+    public string mname { get; set; }
+    public string _class { get; set; }
+    public string _private { get; set; }
+    public string nm { get; set; }
+    public string sd { get; set; }
+    public string rd { get; set; }
+    public string dm { get; set; }
+    public string bd { get; set; }
+    public string bp { get; set; }
+    public string ar { get; set; }
+    public string cd { get; set; }
+    public string cm { get; set; }
+    public string lp { get; set; }
+    public string bb { get; set; }
+    public string bm { get; set; }
+    public string km { get; set; }
+    public string league { get; set; }
+    public string max_players { get; set; }
+    public string tier { get; set; }
+    public string no_repick { get; set; }
+    public string no_agi { get; set; }
+    public string drp_itm { get; set; }
+    public string no_timer { get; set; }
+    public string rev_hs { get; set; }
+    public string no_swap { get; set; }
+    public string no_int { get; set; }
+    public string alt_pick { get; set; }
+    public string veto { get; set; }
+    public string shuf { get; set; }
+    public string no_str { get; set; }
+    public string no_pups { get; set; }
+    public string dup_h { get; set; }
+    public string ap { get; set; }
+    public string br { get; set; }
+    public string em { get; set; }
+    public string cas { get; set; }
+    public string rs { get; set; }
+    public string nl { get; set; }
+    public string officl { get; set; }
+    public string no_stats { get; set; }
+    public string ab { get; set; }
+    public string hardcore { get; set; }
+    public string dev_heroes { get; set; }
+    public string verified_only { get; set; }
+    public string gated { get; set; }
+    public string rapidfire { get; set; }
+    public int timestamp { get; set; }
+    public string url { get; set; }
+    public string size { get; set; }
+    public string name { get; set; }
+    public string dir { get; set; }
+    public string s3_url { get; set; }
+    public string winning_team { get; set; }
+    public string gamemode { get; set; }
+    public string mvp { get; set; }
+    public string awd_mann { get; set; }
+    public string awd_mqk { get; set; }
+    public string awd_lgks { get; set; }
+    public string awd_msd { get; set; }
+    public string awd_mkill { get; set; }
+    public string awd_masst { get; set; }
+    public string awd_ledth { get; set; }
+    public string awd_mbdmg { get; set; }
+    public string awd_mwk { get; set; }
+    public string awd_mhdd { get; set; }
+    public string awd_hcs { get; set; }
+}
+
+public class Match_Player_Stats
+{
+    public _1178390 _1178390 { get; set; }
+    public _3333353 _3333353 { get; set; }
+    public _4484879 _4484879 { get; set; }
+    public _7729781 _7729781 { get; set; }
+    public _7748889 _7748889 { get; set; }
+    public _8559430 _8559430 { get; set; }
+    public _8755682 _8755682 { get; set; }
+    public _8967936 _8967936 { get; set; }
+    public _9479746 _9479746 { get; set; }
+    public _9495947 _9495947 { get; set; }
+}
+
+public class _1178390
+{
+    public string match_id { get; set; }
+    public string account_id { get; set; }
+    public string clan_id { get; set; }
+    public string hero_id { get; set; }
+    public string position { get; set; }
+    public string team { get; set; }
+    public string level { get; set; }
+    public string wins { get; set; }
+    public string losses { get; set; }
+    public string concedes { get; set; }
+    public string concedevotes { get; set; }
+    public string buybacks { get; set; }
+    public string discos { get; set; }
+    public string kicked { get; set; }
+    public string pub_skill { get; set; }
+    public string pub_count { get; set; }
+    public string amm_solo_rating { get; set; }
+    public string amm_solo_count { get; set; }
+    public string amm_team_rating { get; set; }
+    public string amm_team_count { get; set; }
+    public string avg_score { get; set; }
+    public string herokills { get; set; }
+    public string herodmg { get; set; }
+    public string heroexp { get; set; }
+    public string herokillsgold { get; set; }
+    public string heroassists { get; set; }
+    public string deaths { get; set; }
+    public string goldlost2death { get; set; }
+    public string secs_dead { get; set; }
+    public string teamcreepkills { get; set; }
+    public string teamcreepdmg { get; set; }
+    public string teamcreepexp { get; set; }
+    public string teamcreepgold { get; set; }
+    public string neutralcreepkills { get; set; }
+    public string neutralcreepdmg { get; set; }
+    public string neutralcreepexp { get; set; }
+    public string neutralcreepgold { get; set; }
+    public string bdmg { get; set; }
+    public string bdmgexp { get; set; }
+    public string razed { get; set; }
+    public string bgold { get; set; }
+    public string denies { get; set; }
+    public string exp_denied { get; set; }
+    public string gold { get; set; }
+    public string gold_spent { get; set; }
+    public string exp { get; set; }
+    public string actions { get; set; }
+    public string secs { get; set; }
+    public string consumables { get; set; }
+    public string wards { get; set; }
+    public string time_earning_exp { get; set; }
+    public string bloodlust { get; set; }
+    public string doublekill { get; set; }
+    public string triplekill { get; set; }
+    public string quadkill { get; set; }
+    public string annihilation { get; set; }
+    public string ks3 { get; set; }
+    public string ks4 { get; set; }
+    public string ks5 { get; set; }
+    public string ks6 { get; set; }
+    public string ks7 { get; set; }
+    public string ks8 { get; set; }
+    public string ks9 { get; set; }
+    public string ks10 { get; set; }
+    public string ks15 { get; set; }
+    public string smackdown { get; set; }
+    public string humiliation { get; set; }
+    public string nemesis { get; set; }
+    public string retribution { get; set; }
+    public string used_token { get; set; }
+    public string cli_name { get; set; }
+    public string tag { get; set; }
+    public string nickname { get; set; }
+    public string alt_avatar_name { get; set; }
+    public Campaign_Info campaign_info { get; set; }
+}
+
+public class Campaign_Info
+{
+    public string match_id { get; set; }
+    public string account_id { get; set; }
+    public string is_casual { get; set; }
+    public string mmr_before { get; set; }
+    public string mmr_after { get; set; }
+    public string medal_before { get; set; }
+    public string medal_after { get; set; }
+    public string season { get; set; }
+    public int placement_matches { get; set; }
+    public string placement_wins { get; set; }
+}
+
+public class _3333353
+{
+    public string match_id { get; set; }
+    public string account_id { get; set; }
+    public string clan_id { get; set; }
+    public string hero_id { get; set; }
+    public string position { get; set; }
+    public string team { get; set; }
+    public string level { get; set; }
+    public string wins { get; set; }
+    public string losses { get; set; }
+    public string concedes { get; set; }
+    public string concedevotes { get; set; }
+    public string buybacks { get; set; }
+    public string discos { get; set; }
+    public string kicked { get; set; }
+    public string pub_skill { get; set; }
+    public string pub_count { get; set; }
+    public string amm_solo_rating { get; set; }
+    public string amm_solo_count { get; set; }
+    public string amm_team_rating { get; set; }
+    public string amm_team_count { get; set; }
+    public string avg_score { get; set; }
+    public string herokills { get; set; }
+    public string herodmg { get; set; }
+    public string heroexp { get; set; }
+    public string herokillsgold { get; set; }
+    public string heroassists { get; set; }
+    public string deaths { get; set; }
+    public string goldlost2death { get; set; }
+    public string secs_dead { get; set; }
+    public string teamcreepkills { get; set; }
+    public string teamcreepdmg { get; set; }
+    public string teamcreepexp { get; set; }
+    public string teamcreepgold { get; set; }
+    public string neutralcreepkills { get; set; }
+    public string neutralcreepdmg { get; set; }
+    public string neutralcreepexp { get; set; }
+    public string neutralcreepgold { get; set; }
+    public string bdmg { get; set; }
+    public string bdmgexp { get; set; }
+    public string razed { get; set; }
+    public string bgold { get; set; }
+    public string denies { get; set; }
+    public string exp_denied { get; set; }
+    public string gold { get; set; }
+    public string gold_spent { get; set; }
+    public string exp { get; set; }
+    public string actions { get; set; }
+    public string secs { get; set; }
+    public string consumables { get; set; }
+    public string wards { get; set; }
+    public string time_earning_exp { get; set; }
+    public string bloodlust { get; set; }
+    public string doublekill { get; set; }
+    public string triplekill { get; set; }
+    public string quadkill { get; set; }
+    public string annihilation { get; set; }
+    public string ks3 { get; set; }
+    public string ks4 { get; set; }
+    public string ks5 { get; set; }
+    public string ks6 { get; set; }
+    public string ks7 { get; set; }
+    public string ks8 { get; set; }
+    public string ks9 { get; set; }
+    public string ks10 { get; set; }
+    public string ks15 { get; set; }
+    public string smackdown { get; set; }
+    public string humiliation { get; set; }
+    public string nemesis { get; set; }
+    public string retribution { get; set; }
+    public string used_token { get; set; }
+    public string cli_name { get; set; }
+    public string tag { get; set; }
+    public string nickname { get; set; }
+    public string alt_avatar_name { get; set; }
+    public Campaign_Info1 campaign_info { get; set; }
+}
+
+public class Campaign_Info1
+{
+    public string match_id { get; set; }
+    public string account_id { get; set; }
+    public string is_casual { get; set; }
+    public string mmr_before { get; set; }
+    public string mmr_after { get; set; }
+    public string medal_before { get; set; }
+    public string medal_after { get; set; }
+    public string season { get; set; }
+    public int placement_matches { get; set; }
+    public string placement_wins { get; set; }
+}
+
+public class _4484879
+{
+    public string match_id { get; set; }
+    public string account_id { get; set; }
+    public string clan_id { get; set; }
+    public string hero_id { get; set; }
+    public string position { get; set; }
+    public string team { get; set; }
+    public string level { get; set; }
+    public string wins { get; set; }
+    public string losses { get; set; }
+    public string concedes { get; set; }
+    public string concedevotes { get; set; }
+    public string buybacks { get; set; }
+    public string discos { get; set; }
+    public string kicked { get; set; }
+    public string pub_skill { get; set; }
+    public string pub_count { get; set; }
+    public string amm_solo_rating { get; set; }
+    public string amm_solo_count { get; set; }
+    public string amm_team_rating { get; set; }
+    public string amm_team_count { get; set; }
+    public string avg_score { get; set; }
+    public string herokills { get; set; }
+    public string herodmg { get; set; }
+    public string heroexp { get; set; }
+    public string herokillsgold { get; set; }
+    public string heroassists { get; set; }
+    public string deaths { get; set; }
+    public string goldlost2death { get; set; }
+    public string secs_dead { get; set; }
+    public string teamcreepkills { get; set; }
+    public string teamcreepdmg { get; set; }
+    public string teamcreepexp { get; set; }
+    public string teamcreepgold { get; set; }
+    public string neutralcreepkills { get; set; }
+    public string neutralcreepdmg { get; set; }
+    public string neutralcreepexp { get; set; }
+    public string neutralcreepgold { get; set; }
+    public string bdmg { get; set; }
+    public string bdmgexp { get; set; }
+    public string razed { get; set; }
+    public string bgold { get; set; }
+    public string denies { get; set; }
+    public string exp_denied { get; set; }
+    public string gold { get; set; }
+    public string gold_spent { get; set; }
+    public string exp { get; set; }
+    public string actions { get; set; }
+    public string secs { get; set; }
+    public string consumables { get; set; }
+    public string wards { get; set; }
+    public string time_earning_exp { get; set; }
+    public string bloodlust { get; set; }
+    public string doublekill { get; set; }
+    public string triplekill { get; set; }
+    public string quadkill { get; set; }
+    public string annihilation { get; set; }
+    public string ks3 { get; set; }
+    public string ks4 { get; set; }
+    public string ks5 { get; set; }
+    public string ks6 { get; set; }
+    public string ks7 { get; set; }
+    public string ks8 { get; set; }
+    public string ks9 { get; set; }
+    public string ks10 { get; set; }
+    public string ks15 { get; set; }
+    public string smackdown { get; set; }
+    public string humiliation { get; set; }
+    public string nemesis { get; set; }
+    public string retribution { get; set; }
+    public string used_token { get; set; }
+    public string cli_name { get; set; }
+    public string tag { get; set; }
+    public string nickname { get; set; }
+    public string alt_avatar_name { get; set; }
+    public Campaign_Info2 campaign_info { get; set; }
+}
+
+public class Campaign_Info2
+{
+    public string match_id { get; set; }
+    public string account_id { get; set; }
+    public string is_casual { get; set; }
+    public string mmr_before { get; set; }
+    public string mmr_after { get; set; }
+    public string medal_before { get; set; }
+    public string medal_after { get; set; }
+    public string season { get; set; }
+    public int placement_matches { get; set; }
+    public string placement_wins { get; set; }
+}
+
+public class _7729781
+{
+    public string match_id { get; set; }
+    public string account_id { get; set; }
+    public string clan_id { get; set; }
+    public string hero_id { get; set; }
+    public string position { get; set; }
+    public string team { get; set; }
+    public string level { get; set; }
+    public string wins { get; set; }
+    public string losses { get; set; }
+    public string concedes { get; set; }
+    public string concedevotes { get; set; }
+    public string buybacks { get; set; }
+    public string discos { get; set; }
+    public string kicked { get; set; }
+    public string pub_skill { get; set; }
+    public string pub_count { get; set; }
+    public string amm_solo_rating { get; set; }
+    public string amm_solo_count { get; set; }
+    public string amm_team_rating { get; set; }
+    public string amm_team_count { get; set; }
+    public string avg_score { get; set; }
+    public string herokills { get; set; }
+    public string herodmg { get; set; }
+    public string heroexp { get; set; }
+    public string herokillsgold { get; set; }
+    public string heroassists { get; set; }
+    public string deaths { get; set; }
+    public string goldlost2death { get; set; }
+    public string secs_dead { get; set; }
+    public string teamcreepkills { get; set; }
+    public string teamcreepdmg { get; set; }
+    public string teamcreepexp { get; set; }
+    public string teamcreepgold { get; set; }
+    public string neutralcreepkills { get; set; }
+    public string neutralcreepdmg { get; set; }
+    public string neutralcreepexp { get; set; }
+    public string neutralcreepgold { get; set; }
+    public string bdmg { get; set; }
+    public string bdmgexp { get; set; }
+    public string razed { get; set; }
+    public string bgold { get; set; }
+    public string denies { get; set; }
+    public string exp_denied { get; set; }
+    public string gold { get; set; }
+    public string gold_spent { get; set; }
+    public string exp { get; set; }
+    public string actions { get; set; }
+    public string secs { get; set; }
+    public string consumables { get; set; }
+    public string wards { get; set; }
+    public string time_earning_exp { get; set; }
+    public string bloodlust { get; set; }
+    public string doublekill { get; set; }
+    public string triplekill { get; set; }
+    public string quadkill { get; set; }
+    public string annihilation { get; set; }
+    public string ks3 { get; set; }
+    public string ks4 { get; set; }
+    public string ks5 { get; set; }
+    public string ks6 { get; set; }
+    public string ks7 { get; set; }
+    public string ks8 { get; set; }
+    public string ks9 { get; set; }
+    public string ks10 { get; set; }
+    public string ks15 { get; set; }
+    public string smackdown { get; set; }
+    public string humiliation { get; set; }
+    public string nemesis { get; set; }
+    public string retribution { get; set; }
+    public string used_token { get; set; }
+    public string cli_name { get; set; }
+    public string tag { get; set; }
+    public string nickname { get; set; }
+    public string alt_avatar_name { get; set; }
+    public Campaign_Info3 campaign_info { get; set; }
+}
+
+public class Campaign_Info3
+{
+    public string match_id { get; set; }
+    public string account_id { get; set; }
+    public string is_casual { get; set; }
+    public string mmr_before { get; set; }
+    public string mmr_after { get; set; }
+    public string medal_before { get; set; }
+    public string medal_after { get; set; }
+    public string season { get; set; }
+    public int placement_matches { get; set; }
+    public string placement_wins { get; set; }
+}
+
+public class _7748889
+{
+    public string match_id { get; set; }
+    public string account_id { get; set; }
+    public string clan_id { get; set; }
+    public string hero_id { get; set; }
+    public string position { get; set; }
+    public string team { get; set; }
+    public string level { get; set; }
+    public string wins { get; set; }
+    public string losses { get; set; }
+    public string concedes { get; set; }
+    public string concedevotes { get; set; }
+    public string buybacks { get; set; }
+    public string discos { get; set; }
+    public string kicked { get; set; }
+    public string pub_skill { get; set; }
+    public string pub_count { get; set; }
+    public string amm_solo_rating { get; set; }
+    public string amm_solo_count { get; set; }
+    public string amm_team_rating { get; set; }
+    public string amm_team_count { get; set; }
+    public string avg_score { get; set; }
+    public string herokills { get; set; }
+    public string herodmg { get; set; }
+    public string heroexp { get; set; }
+    public string herokillsgold { get; set; }
+    public string heroassists { get; set; }
+    public string deaths { get; set; }
+    public string goldlost2death { get; set; }
+    public string secs_dead { get; set; }
+    public string teamcreepkills { get; set; }
+    public string teamcreepdmg { get; set; }
+    public string teamcreepexp { get; set; }
+    public string teamcreepgold { get; set; }
+    public string neutralcreepkills { get; set; }
+    public string neutralcreepdmg { get; set; }
+    public string neutralcreepexp { get; set; }
+    public string neutralcreepgold { get; set; }
+    public string bdmg { get; set; }
+    public string bdmgexp { get; set; }
+    public string razed { get; set; }
+    public string bgold { get; set; }
+    public string denies { get; set; }
+    public string exp_denied { get; set; }
+    public string gold { get; set; }
+    public string gold_spent { get; set; }
+    public string exp { get; set; }
+    public string actions { get; set; }
+    public string secs { get; set; }
+    public string consumables { get; set; }
+    public string wards { get; set; }
+    public string time_earning_exp { get; set; }
+    public string bloodlust { get; set; }
+    public string doublekill { get; set; }
+    public string triplekill { get; set; }
+    public string quadkill { get; set; }
+    public string annihilation { get; set; }
+    public string ks3 { get; set; }
+    public string ks4 { get; set; }
+    public string ks5 { get; set; }
+    public string ks6 { get; set; }
+    public string ks7 { get; set; }
+    public string ks8 { get; set; }
+    public string ks9 { get; set; }
+    public string ks10 { get; set; }
+    public string ks15 { get; set; }
+    public string smackdown { get; set; }
+    public string humiliation { get; set; }
+    public string nemesis { get; set; }
+    public string retribution { get; set; }
+    public string used_token { get; set; }
+    public string cli_name { get; set; }
+    public string tag { get; set; }
+    public string nickname { get; set; }
+    public string alt_avatar_name { get; set; }
+    public Campaign_Info4 campaign_info { get; set; }
+}
+
+public class Campaign_Info4
+{
+    public string match_id { get; set; }
+    public string account_id { get; set; }
+    public string is_casual { get; set; }
+    public string mmr_before { get; set; }
+    public string mmr_after { get; set; }
+    public string medal_before { get; set; }
+    public string medal_after { get; set; }
+    public string season { get; set; }
+    public int placement_matches { get; set; }
+    public string placement_wins { get; set; }
+}
+
+public class _8559430
+{
+    public string match_id { get; set; }
+    public string account_id { get; set; }
+    public string clan_id { get; set; }
+    public string hero_id { get; set; }
+    public string position { get; set; }
+    public string team { get; set; }
+    public string level { get; set; }
+    public string wins { get; set; }
+    public string losses { get; set; }
+    public string concedes { get; set; }
+    public string concedevotes { get; set; }
+    public string buybacks { get; set; }
+    public string discos { get; set; }
+    public string kicked { get; set; }
+    public string pub_skill { get; set; }
+    public string pub_count { get; set; }
+    public string amm_solo_rating { get; set; }
+    public string amm_solo_count { get; set; }
+    public string amm_team_rating { get; set; }
+    public string amm_team_count { get; set; }
+    public string avg_score { get; set; }
+    public string herokills { get; set; }
+    public string herodmg { get; set; }
+    public string heroexp { get; set; }
+    public string herokillsgold { get; set; }
+    public string heroassists { get; set; }
+    public string deaths { get; set; }
+    public string goldlost2death { get; set; }
+    public string secs_dead { get; set; }
+    public string teamcreepkills { get; set; }
+    public string teamcreepdmg { get; set; }
+    public string teamcreepexp { get; set; }
+    public string teamcreepgold { get; set; }
+    public string neutralcreepkills { get; set; }
+    public string neutralcreepdmg { get; set; }
+    public string neutralcreepexp { get; set; }
+    public string neutralcreepgold { get; set; }
+    public string bdmg { get; set; }
+    public string bdmgexp { get; set; }
+    public string razed { get; set; }
+    public string bgold { get; set; }
+    public string denies { get; set; }
+    public string exp_denied { get; set; }
+    public string gold { get; set; }
+    public string gold_spent { get; set; }
+    public string exp { get; set; }
+    public string actions { get; set; }
+    public string secs { get; set; }
+    public string consumables { get; set; }
+    public string wards { get; set; }
+    public string time_earning_exp { get; set; }
+    public string bloodlust { get; set; }
+    public string doublekill { get; set; }
+    public string triplekill { get; set; }
+    public string quadkill { get; set; }
+    public string annihilation { get; set; }
+    public string ks3 { get; set; }
+    public string ks4 { get; set; }
+    public string ks5 { get; set; }
+    public string ks6 { get; set; }
+    public string ks7 { get; set; }
+    public string ks8 { get; set; }
+    public string ks9 { get; set; }
+    public string ks10 { get; set; }
+    public string ks15 { get; set; }
+    public string smackdown { get; set; }
+    public string humiliation { get; set; }
+    public string nemesis { get; set; }
+    public string retribution { get; set; }
+    public string used_token { get; set; }
+    public string cli_name { get; set; }
+    public string tag { get; set; }
+    public string nickname { get; set; }
+    public string alt_avatar_name { get; set; }
+    public string perf_amm_team_rating { get; set; }
+    public string perf_amm_team_rating_delta { get; set; }
+    public string perf_victory_exp { get; set; }
+    public string perf_victory_gc { get; set; }
+    public string perf_first_exp { get; set; }
+    public string perf_first_gc { get; set; }
+    public string perf_quick_exp { get; set; }
+    public string perf_quick_gc { get; set; }
+    public string perf_consec_played { get; set; }
+    public string perf_consec_exp { get; set; }
+    public string perf_consec_gc { get; set; }
+    public string perf_annihilation_exp { get; set; }
+    public string perf_annihilation_gc { get; set; }
+    public string perf_bloodlust_exp { get; set; }
+    public string perf_bloodlust_gc { get; set; }
+    public string perf_ks15_exp { get; set; }
+    public string perf_ks15_gc { get; set; }
+    public string perf_social_bonus_gc { get; set; }
+    public string perf_wins { get; set; }
+    public string perf_wins_delta { get; set; }
+    public string perf_wins_gc { get; set; }
+    public string perf_herokills { get; set; }
+    public string perf_herokills_delta { get; set; }
+    public string perf_herokills_gc { get; set; }
+    public string perf_heroassists { get; set; }
+    public string perf_heroassists_delta { get; set; }
+    public string perf_heroassists_gc { get; set; }
+    public string perf_wards { get; set; }
+    public string perf_wards_delta { get; set; }
+    public string perf_wards_gc { get; set; }
+    public string perf_smackdown { get; set; }
+    public string perf_smackdown_delta { get; set; }
+    public string perf_smackdown_gc { get; set; }
+    public string perf_level { get; set; }
+    public string perf_level_exp { get; set; }
+    public string perf_level_delta { get; set; }
+    public string perf_level_gc { get; set; }
+    public string perf_legacy_gc { get; set; }
+    public string perf_multiplier_mmpoints { get; set; }
+    public string perf_multiplier_exp { get; set; }
+    public Campaign_Info5 campaign_info { get; set; }
+}
+
+public class Campaign_Info5
+{
+    public string match_id { get; set; }
+    public string account_id { get; set; }
+    public string is_casual { get; set; }
+    public string mmr_before { get; set; }
+    public string mmr_after { get; set; }
+    public string medal_before { get; set; }
+    public string medal_after { get; set; }
+    public string season { get; set; }
+    public int placement_matches { get; set; }
+    public string placement_wins { get; set; }
+}
+
+public class _8755682
+{
+    public string match_id { get; set; }
+    public string account_id { get; set; }
+    public string clan_id { get; set; }
+    public string hero_id { get; set; }
+    public string position { get; set; }
+    public string team { get; set; }
+    public string level { get; set; }
+    public string wins { get; set; }
+    public string losses { get; set; }
+    public string concedes { get; set; }
+    public string concedevotes { get; set; }
+    public string buybacks { get; set; }
+    public string discos { get; set; }
+    public string kicked { get; set; }
+    public string pub_skill { get; set; }
+    public string pub_count { get; set; }
+    public string amm_solo_rating { get; set; }
+    public string amm_solo_count { get; set; }
+    public string amm_team_rating { get; set; }
+    public string amm_team_count { get; set; }
+    public string avg_score { get; set; }
+    public string herokills { get; set; }
+    public string herodmg { get; set; }
+    public string heroexp { get; set; }
+    public string herokillsgold { get; set; }
+    public string heroassists { get; set; }
+    public string deaths { get; set; }
+    public string goldlost2death { get; set; }
+    public string secs_dead { get; set; }
+    public string teamcreepkills { get; set; }
+    public string teamcreepdmg { get; set; }
+    public string teamcreepexp { get; set; }
+    public string teamcreepgold { get; set; }
+    public string neutralcreepkills { get; set; }
+    public string neutralcreepdmg { get; set; }
+    public string neutralcreepexp { get; set; }
+    public string neutralcreepgold { get; set; }
+    public string bdmg { get; set; }
+    public string bdmgexp { get; set; }
+    public string razed { get; set; }
+    public string bgold { get; set; }
+    public string denies { get; set; }
+    public string exp_denied { get; set; }
+    public string gold { get; set; }
+    public string gold_spent { get; set; }
+    public string exp { get; set; }
+    public string actions { get; set; }
+    public string secs { get; set; }
+    public string consumables { get; set; }
+    public string wards { get; set; }
+    public string time_earning_exp { get; set; }
+    public string bloodlust { get; set; }
+    public string doublekill { get; set; }
+    public string triplekill { get; set; }
+    public string quadkill { get; set; }
+    public string annihilation { get; set; }
+    public string ks3 { get; set; }
+    public string ks4 { get; set; }
+    public string ks5 { get; set; }
+    public string ks6 { get; set; }
+    public string ks7 { get; set; }
+    public string ks8 { get; set; }
+    public string ks9 { get; set; }
+    public string ks10 { get; set; }
+    public string ks15 { get; set; }
+    public string smackdown { get; set; }
+    public string humiliation { get; set; }
+    public string nemesis { get; set; }
+    public string retribution { get; set; }
+    public string used_token { get; set; }
+    public string cli_name { get; set; }
+    public string tag { get; set; }
+    public string nickname { get; set; }
+    public string alt_avatar_name { get; set; }
+    public Campaign_Info6 campaign_info { get; set; }
+}
+
+public class Campaign_Info6
+{
+    public string match_id { get; set; }
+    public string account_id { get; set; }
+    public string is_casual { get; set; }
+    public string mmr_before { get; set; }
+    public string mmr_after { get; set; }
+    public string medal_before { get; set; }
+    public string medal_after { get; set; }
+    public string season { get; set; }
+    public int placement_matches { get; set; }
+    public string placement_wins { get; set; }
+}
+
+public class _8967936
+{
+    public string match_id { get; set; }
+    public string account_id { get; set; }
+    public string clan_id { get; set; }
+    public string hero_id { get; set; }
+    public string position { get; set; }
+    public string team { get; set; }
+    public string level { get; set; }
+    public string wins { get; set; }
+    public string losses { get; set; }
+    public string concedes { get; set; }
+    public string concedevotes { get; set; }
+    public string buybacks { get; set; }
+    public string discos { get; set; }
+    public string kicked { get; set; }
+    public string pub_skill { get; set; }
+    public string pub_count { get; set; }
+    public string amm_solo_rating { get; set; }
+    public string amm_solo_count { get; set; }
+    public string amm_team_rating { get; set; }
+    public string amm_team_count { get; set; }
+    public string avg_score { get; set; }
+    public string herokills { get; set; }
+    public string herodmg { get; set; }
+    public string heroexp { get; set; }
+    public string herokillsgold { get; set; }
+    public string heroassists { get; set; }
+    public string deaths { get; set; }
+    public string goldlost2death { get; set; }
+    public string secs_dead { get; set; }
+    public string teamcreepkills { get; set; }
+    public string teamcreepdmg { get; set; }
+    public string teamcreepexp { get; set; }
+    public string teamcreepgold { get; set; }
+    public string neutralcreepkills { get; set; }
+    public string neutralcreepdmg { get; set; }
+    public string neutralcreepexp { get; set; }
+    public string neutralcreepgold { get; set; }
+    public string bdmg { get; set; }
+    public string bdmgexp { get; set; }
+    public string razed { get; set; }
+    public string bgold { get; set; }
+    public string denies { get; set; }
+    public string exp_denied { get; set; }
+    public string gold { get; set; }
+    public string gold_spent { get; set; }
+    public string exp { get; set; }
+    public string actions { get; set; }
+    public string secs { get; set; }
+    public string consumables { get; set; }
+    public string wards { get; set; }
+    public string time_earning_exp { get; set; }
+    public string bloodlust { get; set; }
+    public string doublekill { get; set; }
+    public string triplekill { get; set; }
+    public string quadkill { get; set; }
+    public string annihilation { get; set; }
+    public string ks3 { get; set; }
+    public string ks4 { get; set; }
+    public string ks5 { get; set; }
+    public string ks6 { get; set; }
+    public string ks7 { get; set; }
+    public string ks8 { get; set; }
+    public string ks9 { get; set; }
+    public string ks10 { get; set; }
+    public string ks15 { get; set; }
+    public string smackdown { get; set; }
+    public string humiliation { get; set; }
+    public string nemesis { get; set; }
+    public string retribution { get; set; }
+    public string used_token { get; set; }
+    public string cli_name { get; set; }
+    public string tag { get; set; }
+    public string nickname { get; set; }
+    public string alt_avatar_name { get; set; }
+    public Campaign_Info7 campaign_info { get; set; }
+}
+
+public class Campaign_Info7
+{
+    public string match_id { get; set; }
+    public string account_id { get; set; }
+    public string is_casual { get; set; }
+    public string mmr_before { get; set; }
+    public string mmr_after { get; set; }
+    public string medal_before { get; set; }
+    public string medal_after { get; set; }
+    public string season { get; set; }
+    public int placement_matches { get; set; }
+    public string placement_wins { get; set; }
+}
+
+public class _9479746
+{
+    public string match_id { get; set; }
+    public string account_id { get; set; }
+    public string clan_id { get; set; }
+    public string hero_id { get; set; }
+    public string position { get; set; }
+    public string team { get; set; }
+    public string level { get; set; }
+    public string wins { get; set; }
+    public string losses { get; set; }
+    public string concedes { get; set; }
+    public string concedevotes { get; set; }
+    public string buybacks { get; set; }
+    public string discos { get; set; }
+    public string kicked { get; set; }
+    public string pub_skill { get; set; }
+    public string pub_count { get; set; }
+    public string amm_solo_rating { get; set; }
+    public string amm_solo_count { get; set; }
+    public string amm_team_rating { get; set; }
+    public string amm_team_count { get; set; }
+    public string avg_score { get; set; }
+    public string herokills { get; set; }
+    public string herodmg { get; set; }
+    public string heroexp { get; set; }
+    public string herokillsgold { get; set; }
+    public string heroassists { get; set; }
+    public string deaths { get; set; }
+    public string goldlost2death { get; set; }
+    public string secs_dead { get; set; }
+    public string teamcreepkills { get; set; }
+    public string teamcreepdmg { get; set; }
+    public string teamcreepexp { get; set; }
+    public string teamcreepgold { get; set; }
+    public string neutralcreepkills { get; set; }
+    public string neutralcreepdmg { get; set; }
+    public string neutralcreepexp { get; set; }
+    public string neutralcreepgold { get; set; }
+    public string bdmg { get; set; }
+    public string bdmgexp { get; set; }
+    public string razed { get; set; }
+    public string bgold { get; set; }
+    public string denies { get; set; }
+    public string exp_denied { get; set; }
+    public string gold { get; set; }
+    public string gold_spent { get; set; }
+    public string exp { get; set; }
+    public string actions { get; set; }
+    public string secs { get; set; }
+    public string consumables { get; set; }
+    public string wards { get; set; }
+    public string time_earning_exp { get; set; }
+    public string bloodlust { get; set; }
+    public string doublekill { get; set; }
+    public string triplekill { get; set; }
+    public string quadkill { get; set; }
+    public string annihilation { get; set; }
+    public string ks3 { get; set; }
+    public string ks4 { get; set; }
+    public string ks5 { get; set; }
+    public string ks6 { get; set; }
+    public string ks7 { get; set; }
+    public string ks8 { get; set; }
+    public string ks9 { get; set; }
+    public string ks10 { get; set; }
+    public string ks15 { get; set; }
+    public string smackdown { get; set; }
+    public string humiliation { get; set; }
+    public string nemesis { get; set; }
+    public string retribution { get; set; }
+    public string used_token { get; set; }
+    public string cli_name { get; set; }
+    public string tag { get; set; }
+    public string nickname { get; set; }
+    public string alt_avatar_name { get; set; }
+    public Campaign_Info8 campaign_info { get; set; }
+}
+
+public class Campaign_Info8
+{
+    public string match_id { get; set; }
+    public string account_id { get; set; }
+    public string is_casual { get; set; }
+    public string mmr_before { get; set; }
+    public string mmr_after { get; set; }
+    public string medal_before { get; set; }
+    public string medal_after { get; set; }
+    public string season { get; set; }
+    public int placement_matches { get; set; }
+    public string placement_wins { get; set; }
+}
+
+public class _9495947
+{
+    public string match_id { get; set; }
+    public string account_id { get; set; }
+    public string clan_id { get; set; }
+    public string hero_id { get; set; }
+    public string position { get; set; }
+    public string team { get; set; }
+    public string level { get; set; }
+    public string wins { get; set; }
+    public string losses { get; set; }
+    public string concedes { get; set; }
+    public string concedevotes { get; set; }
+    public string buybacks { get; set; }
+    public string discos { get; set; }
+    public string kicked { get; set; }
+    public string pub_skill { get; set; }
+    public string pub_count { get; set; }
+    public string amm_solo_rating { get; set; }
+    public string amm_solo_count { get; set; }
+    public string amm_team_rating { get; set; }
+    public string amm_team_count { get; set; }
+    public string avg_score { get; set; }
+    public string herokills { get; set; }
+    public string herodmg { get; set; }
+    public string heroexp { get; set; }
+    public string herokillsgold { get; set; }
+    public string heroassists { get; set; }
+    public string deaths { get; set; }
+    public string goldlost2death { get; set; }
+    public string secs_dead { get; set; }
+    public string teamcreepkills { get; set; }
+    public string teamcreepdmg { get; set; }
+    public string teamcreepexp { get; set; }
+    public string teamcreepgold { get; set; }
+    public string neutralcreepkills { get; set; }
+    public string neutralcreepdmg { get; set; }
+    public string neutralcreepexp { get; set; }
+    public string neutralcreepgold { get; set; }
+    public string bdmg { get; set; }
+    public string bdmgexp { get; set; }
+    public string razed { get; set; }
+    public string bgold { get; set; }
+    public string denies { get; set; }
+    public string exp_denied { get; set; }
+    public string gold { get; set; }
+    public string gold_spent { get; set; }
+    public string exp { get; set; }
+    public string actions { get; set; }
+    public string secs { get; set; }
+    public string consumables { get; set; }
+    public string wards { get; set; }
+    public string time_earning_exp { get; set; }
+    public string bloodlust { get; set; }
+    public string doublekill { get; set; }
+    public string triplekill { get; set; }
+    public string quadkill { get; set; }
+    public string annihilation { get; set; }
+    public string ks3 { get; set; }
+    public string ks4 { get; set; }
+    public string ks5 { get; set; }
+    public string ks6 { get; set; }
+    public string ks7 { get; set; }
+    public string ks8 { get; set; }
+    public string ks9 { get; set; }
+    public string ks10 { get; set; }
+    public string ks15 { get; set; }
+    public string smackdown { get; set; }
+    public string humiliation { get; set; }
+    public string nemesis { get; set; }
+    public string retribution { get; set; }
+    public string used_token { get; set; }
+    public string cli_name { get; set; }
+    public string tag { get; set; }
+    public string nickname { get; set; }
+    public string alt_avatar_name { get; set; }
+    public Campaign_Info9 campaign_info { get; set; }
+}
+
+public class Campaign_Info9
+{
+    public string match_id { get; set; }
+    public string account_id { get; set; }
+    public string is_casual { get; set; }
+    public string mmr_before { get; set; }
+    public string mmr_after { get; set; }
+    public string medal_before { get; set; }
+    public string medal_after { get; set; }
+    public string season { get; set; }
+    public int placement_matches { get; set; }
+    public string placement_wins { get; set; }
+}
+
+public class Inventory
+{
+    public _11783901 _1178390 { get; set; }
+    public _33333531 _3333353 { get; set; }
+    public _44848791 _4484879 { get; set; }
+    public _77297811 _7729781 { get; set; }
+    public _77488891 _7748889 { get; set; }
+    public _85594301 _8559430 { get; set; }
+    public _87556821 _8755682 { get; set; }
+    public _89679361 _8967936 { get; set; }
+    public _94797461 _9479746 { get; set; }
+    public _94959471 _9495947 { get; set; }
+}
+
+public class _11783901
+{
+    public string account_id { get; set; }
+    public string match_id { get; set; }
+    public string slot_1 { get; set; }
+    public string slot_2 { get; set; }
+    public string slot_3 { get; set; }
+    public string slot_4 { get; set; }
+    public string slot_5 { get; set; }
+    public string slot_6 { get; set; }
+}
+
+public class _33333531
+{
+    public string account_id { get; set; }
+    public string match_id { get; set; }
+    public string slot_1 { get; set; }
+    public string slot_2 { get; set; }
+    public string slot_3 { get; set; }
+    public string slot_4 { get; set; }
+    public string slot_5 { get; set; }
+    public string slot_6 { get; set; }
+}
+
+public class _44848791
+{
+    public string account_id { get; set; }
+    public string match_id { get; set; }
+    public string slot_1 { get; set; }
+    public string slot_2 { get; set; }
+    public object slot_3 { get; set; }
+    public string slot_4 { get; set; }
+    public string slot_5 { get; set; }
+    public string slot_6 { get; set; }
+}
+
+public class _77297811
+{
+    public string account_id { get; set; }
+    public string match_id { get; set; }
+    public string slot_1 { get; set; }
+    public string slot_2 { get; set; }
+    public string slot_3 { get; set; }
+    public string slot_4 { get; set; }
+    public string slot_5 { get; set; }
+    public string slot_6 { get; set; }
+}
+
+public class _77488891
+{
+    public string account_id { get; set; }
+    public string match_id { get; set; }
+    public string slot_1 { get; set; }
+    public string slot_2 { get; set; }
+    public string slot_3 { get; set; }
+    public string slot_4 { get; set; }
+    public string slot_5 { get; set; }
+    public object slot_6 { get; set; }
+}
+
+public class _85594301
+{
+    public string account_id { get; set; }
+    public string match_id { get; set; }
+    public string slot_1 { get; set; }
+    public string slot_2 { get; set; }
+    public string slot_3 { get; set; }
+    public string slot_4 { get; set; }
+    public string slot_5 { get; set; }
+    public string slot_6 { get; set; }
+}
+
+public class _87556821
+{
+    public string account_id { get; set; }
+    public string match_id { get; set; }
+    public string slot_1 { get; set; }
+    public string slot_2 { get; set; }
+    public string slot_3 { get; set; }
+    public string slot_4 { get; set; }
+    public string slot_5 { get; set; }
+    public string slot_6 { get; set; }
+}
+
+public class _89679361
+{
+    public string account_id { get; set; }
+    public string match_id { get; set; }
+    public string slot_1 { get; set; }
+    public string slot_2 { get; set; }
+    public string slot_3 { get; set; }
+    public string slot_4 { get; set; }
+    public object slot_5 { get; set; }
+    public string slot_6 { get; set; }
+}
+
+public class _94797461
+{
+    public string account_id { get; set; }
+    public string match_id { get; set; }
+    public string slot_1 { get; set; }
+    public string slot_2 { get; set; }
+    public string slot_3 { get; set; }
+    public string slot_4 { get; set; }
+    public string slot_5 { get; set; }
+    public string slot_6 { get; set; }
+}
+
+public class _94959471
+{
+    public string account_id { get; set; }
+    public string match_id { get; set; }
+    public string slot_1 { get; set; }
+    public string slot_2 { get; set; }
+    public string slot_3 { get; set; }
+    public string slot_4 { get; set; }
+    public string slot_5 { get; set; }
+    public string slot_6 { get; set; }
+}

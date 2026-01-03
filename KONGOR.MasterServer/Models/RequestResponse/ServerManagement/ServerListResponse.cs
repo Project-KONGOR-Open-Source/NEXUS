@@ -77,10 +77,10 @@ public abstract class ServerListResponse
     public string AccountKeyHash { get; set; }
 
     [PhpProperty("vested_threshold")]
-    public int VestedThreshold { get; set; } = 5;
+    public int VestedThreshold => 5;
 
     [PhpProperty(0)]
-    public bool Zero { get; set; } = true;
+    public bool Zero => true;
 }
 
 public class ServerForCreate(string id, string ip, string port, string location) : ServerForResponse(id, ip, port, location)

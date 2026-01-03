@@ -54,6 +54,13 @@ public partial class ClientRequesterController
         return Ok(PhpSerialization.Serialize(response));
     }
 
+    private async Task<IActionResult> HandleMatchStats()
+    {
+
+
+        return Unauthorized();
+    }
+
     private static string SetCustomIconSlotID(Account account)
         => account.SelectedStoreItems.Any(item => item.StartsWith("ai.custom_icon"))
             ? account.SelectedStoreItems.Single(item => item.StartsWith("ai.custom_icon")).Replace("ai.custom_icon:", string.Empty) : "0";

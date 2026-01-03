@@ -29,8 +29,9 @@ public class SRPAuthenticationFailureResponse(SRPAuthenticationFailureReason rea
     };
 
     /// <summary>
-    ///     Unknown property which seems to be set to "true" on a successful response or "false" if an error occurs.
-    ///     Since this is an error response, set to "false".
+    ///     Unknown.
+    ///     <br/>
+    ///     Seems to be set to "true" on a successful response, or to "false" if an error occurs.
     /// </summary>
     [PhpProperty(0)]
     public bool Zero => false;

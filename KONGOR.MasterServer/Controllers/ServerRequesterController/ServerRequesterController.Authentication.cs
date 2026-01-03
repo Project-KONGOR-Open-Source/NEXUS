@@ -314,6 +314,8 @@ public partial class ServerRequesterController
            }
          */
 
+        // TODO: Create Proper Response Model
+
         response.Add("infos", ""); // TODO: Set These Stats
         response.Add("game_cookie", "16cb3211-5253-45a8-bcb9-10d037ec9303"); // Must Exist, But The Value Doesn't Really Matter; TODO: Generate And Store This Cookie Per Match?
         response.Add("my_upgrades", account.User.OwnedStoreItems);

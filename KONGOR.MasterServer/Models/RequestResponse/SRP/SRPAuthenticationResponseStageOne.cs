@@ -23,7 +23,8 @@ public class SRPAuthenticationResponseStageOne(SRPAuthenticationSessionDataStage
     public string B { get; init; } = stageOneData.ServerPublicEphemeral;
 
     /// <summary>
-    ///     Unknown property which seems to often be set to "5", for some reason.
+    ///     The minimum number of matches a free-to-play (trial) account must complete to become verified.
+    ///     A verified account is considered to have full account privileges, and is no longer considered a restricted account.
     /// </summary>
     [PhpProperty("vested_threshold")]
     public int VestedThreshold => 5;
