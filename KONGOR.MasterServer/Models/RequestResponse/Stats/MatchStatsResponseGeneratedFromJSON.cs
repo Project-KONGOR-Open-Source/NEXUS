@@ -2,7 +2,6 @@
 
 public class Rootobject
 {
-    public Match_Summ[] match_summ { get; set; }
     public Match_Player_Stats[] match_player_stats { get; set; }
     public Match_Mastery match_mastery { get; set; }
 }
@@ -25,89 +24,6 @@ public class Match_Mastery
     public int mastery_super_boost_product_id { get; set; }
     public int mastery_boostnum { get; set; }
     public int mastery_super_boostnum { get; set; }
-}
-
-public class Match_Summ
-{
-    public string match_id { get; set; }
-    public string server_id { get; set; }
-    public string map { get; set; }
-    public string map_version { get; set; }
-    public string time_played { get; set; }
-    public string file_host { get; set; }
-    public string file_size { get; set; }
-    public string file_name { get; set; }
-    public string c_state { get; set; }
-    public string version { get; set; }
-    public string avgpsr { get; set; }
-    public string date { get; set; }
-    public string time { get; set; }
-    public string mname { get; set; }
-    public string _class { get; set; }
-    public string _private { get; set; }
-    public string nm { get; set; }
-    public string sd { get; set; }
-    public string rd { get; set; }
-    public string dm { get; set; }
-    public string bd { get; set; }
-    public string bp { get; set; }
-    public string ar { get; set; }
-    public string cd { get; set; }
-    public string cm { get; set; }
-    public string lp { get; set; }
-    public string bb { get; set; }
-    public string bm { get; set; }
-    public string km { get; set; }
-    public string league { get; set; }
-    public string max_players { get; set; }
-    public string tier { get; set; }
-    public string no_repick { get; set; }
-    public string no_agi { get; set; }
-    public string drp_itm { get; set; }
-    public string no_timer { get; set; }
-    public string rev_hs { get; set; }
-    public string no_swap { get; set; }
-    public string no_int { get; set; }
-    public string alt_pick { get; set; }
-    public string veto { get; set; }
-    public string shuf { get; set; }
-    public string no_str { get; set; }
-    public string no_pups { get; set; }
-    public string dup_h { get; set; }
-    public string ap { get; set; }
-    public string br { get; set; }
-    public string em { get; set; }
-    public string cas { get; set; }
-    public string rs { get; set; }
-    public string nl { get; set; }
-    public string officl { get; set; }
-    public string no_stats { get; set; }
-    public string ab { get; set; }
-    public string hardcore { get; set; }
-    public string dev_heroes { get; set; }
-    public string verified_only { get; set; }
-    public string gated { get; set; }
-    public string rapidfire { get; set; }
-    public int timestamp { get; set; }
-    public string url { get; set; }
-    public string size { get; set; }
-    public string name { get; set; }
-    public string dir { get; set; }
-    public string s3_url { get; set; }
-    public string winning_team { get; set; }
-    public string gamemode { get; set; }
-    public string mvp { get; set; }
-    public string awd_mann { get; set; }
-    public string awd_mqk { get; set; }
-    public string awd_lgks { get; set; }
-    public string awd_msd { get; set; }
-    public string awd_mkill { get; set; }
-    public string awd_masst { get; set; }
-    public string awd_ledth { get; set; }
-    public string awd_mbdmg { get; set; }
-    public string awd_mwk { get; set; }
-    public string awd_mhdd { get; set; }
-    public string awd_hcs { get; set; }
 }
 
 public class Match_Player_Stats
