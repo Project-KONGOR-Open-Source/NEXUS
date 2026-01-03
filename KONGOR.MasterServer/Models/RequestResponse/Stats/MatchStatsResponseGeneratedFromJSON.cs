@@ -41,13 +41,6 @@ public class Match_Mastery
     public int mastery_super_boostnum { get; set; }
 }
 
-public class Season_System
-{
-    public int drop_diamonds { get; set; }
-    public int cur_diamonds { get; set; }
-    public object[] box_price { get; set; }
-}
-
 public class Match_Summ
 {
     public string match_id { get; set; }

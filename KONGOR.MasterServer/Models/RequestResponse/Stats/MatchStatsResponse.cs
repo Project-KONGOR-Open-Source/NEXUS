@@ -110,6 +110,14 @@ public class MatchStatsResponse
     public Dictionary<string, QuestSystem> QuestSystem { get; set; } = new () { { "error", new QuestSystem() } };
 
     /// <summary>
+    ///     Unused.
+    ///     <br/>
+    ///     Statistics related to the "Event Codex" (otherwise known as "Ascension") seasonal system.
+    /// </summary>
+    [PhpProperty("season_system")]
+    public SeasonSystem SeasonSystem { get; set; } = new ();
+
+    /// <summary>
     ///     The minimum number of matches a free-to-play (trial) account must complete to become verified.
     ///     A verified account is considered to have full account privileges, and is no longer considered a restricted account.
     /// </summary>
@@ -123,4 +131,26 @@ public class MatchStatsResponse
     /// </summary>
     [PhpProperty(0)]
     public bool Zero => true;
+}
+
+public class SeasonSystem
+{
+    /// <summary>
+    ///     Number of diamonds earned/dropped from the match.
+    ///     Calculated based on drop probability.
+    /// </summary>
+    [PhpProperty("drop_diamonds")]
+    public int DropDiamonds { get; set; } = 0;
+
+    /// <summary>
+    ///     Current total diamonds the account has accumulated this season.
+    /// </summary>
+    [PhpProperty("cur_diamonds")]
+    public int TotalDiamonds { get; set; } = 0;
+
+    /// <summary>
+    ///     Season shop loot box prices and information.
+    /// </summary>
+    [PhpProperty("box_price")]
+    public Dictionary<int, int> BoxPrice { get; set; } = [];
 }
