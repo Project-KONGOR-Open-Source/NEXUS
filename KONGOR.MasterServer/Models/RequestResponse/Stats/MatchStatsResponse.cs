@@ -15,6 +15,12 @@ public class MatchStatsResponse
     public required int SilverCoins { get; set; }
 
     /// <summary>
+    ///     A dictionary of player inventories for the match, keyed by the player's account ID.
+    /// </summary>
+    [PhpProperty("inventory")]
+    public required Dictionary<int, Inventory> Inventory { get; set; }
+
+    /// <summary>
     ///     Tokens for the Kros Dice random ability draft that players can use while dead or in spawn in a Kros Mode match.
     ///     Only works in matches which have the "GAME_OPTION_SHUFFLE_ABILITIES" flag enabled, such as Rift Wars.
     /// </summary>
@@ -137,6 +143,57 @@ public class MatchStatsResponse
     /// </summary>
     [PhpProperty(0)]
     public bool Zero => true;
+}
+
+public class Inventory
+{
+    /// <summary>
+    ///     The player's account ID.
+    /// </summary>
+    [PhpProperty("account_id")]
+    public required int AccountID { get; set; }
+
+    /// <summary>
+    ///     The unique identifier for the match.
+    /// </summary>
+    [PhpProperty("match_id")]
+    public required int MatchID { get; set; }
+
+    /// <summary>
+    ///     Item in slot 1 (Top Left).
+    /// </summary>
+    [PhpProperty("slot_1")]
+    public required string Slot1 { get; set; }
+
+    /// <summary>
+    ///     Item in slot 2 (Top Center).
+    /// </summary>
+    [PhpProperty("slot_2")]
+    public required string Slot2 { get; set; }
+
+    /// <summary>
+    ///     Item in slot 3 (Top Right).
+    /// </summary>
+    [PhpProperty("slot_3")]
+    public required string Slot3 { get; set; }
+
+    /// <summary>
+    ///     Item in slot 4 (Bottom Left).
+    /// </summary>
+    [PhpProperty("slot_4")]
+    public required string Slot4 { get; set; }
+
+    /// <summary>
+    ///     Item in slot 5 (Bottom Center).
+    /// </summary>
+    [PhpProperty("slot_5")]
+    public required string Slot5 { get; set; }
+
+    /// <summary>
+    ///     Item in slot 6 (Bottom Right).
+    /// </summary>
+    [PhpProperty("slot_6")]
+    public required string Slot6 { get; set; }
 }
 
 public class SeasonSystem
