@@ -28,6 +28,11 @@ public class MatchStatsResponse
     public required Dictionary<int, Inventory> Inventories { get; set; }
 
     /// <summary>
+    ///     Mastery details for the hero played in the match.
+    /// </summary>
+    public required MatchMastery MatchMastery { get; set; }
+
+    /// <summary>
     ///     Tokens for the Kros Dice random ability draft that players can use while dead or in spawn in a Kros Mode match.
     ///     Only works in matches which have the "GAME_OPTION_SHUFFLE_ABILITIES" flag enabled, such as Rift Wars.
     /// </summary>
@@ -664,6 +669,132 @@ public class MatchSummary
     /// </summary>
     [PhpProperty("awd_hcs")]
     public required string AwardHighestCreepScore { get; set; }
+}
+
+public class MatchMastery(string heroIdentifier, int currentMasteryExperience, int matchMasteryExperience, int bonusExperience)
+{
+    // TODO: Set Missing Properties Once Database Entities Are Available
+
+    //public class MatchMastery(MasteryRewards rewards)
+    //{
+    //    MasteryExperienceBoostProductCount = rewards.MasteryBoostsOwned;
+    //    MasteryExperienceSuperBoostProductCount = rewards.MasterySuperBoostsOwned;
+    //    MasteryExperienceHeroesCount = rewards.MasteryMaxLevelHeroesCount;
+    //}
+
+    /// <summary>
+    ///     The identifier of the hero, in the format Hero_{Snake_Case_Name}.
+    /// </summary>
+    [PhpProperty("cli_name")]
+    public required string HeroIdentifier { get; init; } = heroIdentifier;
+
+    /// <summary>
+    ///     The hero's original mastery experience before the match.
+    ///     This is the current mastery level progress persisted to the database.
+    /// </summary>
+    [PhpProperty("mastery_exp_original")]
+    public required int CurrentMasteryExperience { get; init; } = currentMasteryExperience;
+
+    /// <summary>
+    ///     The base mastery experience earned during the match.
+    ///     Calculated from match duration, map, match type, and win/loss status.
+    ///     Does not include bonuses or boosts.
+    /// </summary>
+    [PhpProperty("mastery_exp_match")]
+    public required int MatchMasteryExperience { get; init; } = matchMasteryExperience;
+
+    /// <summary>
+    ///     Additional mastery experience bonus from map-specific multipliers.
+    ///     Applied as a percentage multiplier to the base experience.
+    /// </summary>
+    [PhpProperty("mastery_exp_bonus")]
+    public required int MasteryExperienceBonus { get; init; } = 0;
+
+    /// <summary>
+    ///     The additional mastery experience gained from applying a regular mastery boost consumable.
+    ///     Set to zero initially when match results are calculated.
+    ///     Only populated with a non-zero value after the player applies a mastery boost product.
+    /// </summary>
+    [PhpProperty("mastery_exp_boost")]
+    public required int MasteryExperienceBoost { get; init; } = 0;
+
+    /// <summary>
+    ///     The additional mastery experience gained from applying a super mastery boost consumable.
+    ///     Set to zero initially when match results are calculated.
+    ///     Only populated with a non-zero value after the player applies a super mastery boost product.
+    /// </summary>
+    [PhpProperty("mastery_exp_super_boost")]
+    public required int MasteryExperienceSuperBoost { get; init; } = 0;
+
+    /// <summary>
+    ///     The number of heroes the account has reached maximum mastery level with.
+    ///     Used to calculate the "max_heroes_addon" bonus multiplier.
+    /// </summary>
+    [PhpProperty("mastery_exp_heroes_count")]
+    public required int MasteryExperienceMaximumLevelHeroesCount { get; init; }
+
+    /// <summary>
+    ///     Bonus mastery experience awarded based on the number of max-level heroes owned.
+    ///     Maps to "mastery_maxlevel_addon" in "match_stats_v2.lua".
+    /// </summary>
+    [PhpProperty("mastery_exp_heroes_addon")]
+    public required int MasteryExperienceHeroesBonus { get; init; } = bonusExperience;
+
+    /// <summary>
+    ///     The potential experience that can be gained by using a regular mastery boost.
+    ///     Displayed when hovering over the mastery boost button in the UI.
+    /// </summary>
+    [PhpProperty("mastery_exp_to_boost")]
+    public required int MasteryExperienceToBoost { get; init; } = (matchMasteryExperience + bonusExperience) * 2;
+
+    /// <summary>
+    ///     Special event bonus mastery experience granted during promotional periods.
+    ///     Typically zero unless an admin-configured mastery experience event is active.
+    /// </summary>
+    [PhpProperty("mastery_exp_event")]
+    public required int MasteryExperienceEventBonus { get; init; } = 0;
+
+    /// <summary>
+    ///     Setting this value to FALSE disables using or purchasing regular mastery boosts.
+    ///     Some use cases for FALSE would be: 1) the hero has reached the maximum mastery level, 2) a mastery experience boost has already been used, 3) the map/mode combination is not eligible for accumulating mastery experience.
+    /// </summary>
+    [PhpProperty("mastery_canboost")]
+    public required bool MasteryExperienceCanBoost { get; set; } = true;
+
+    /// <summary>
+    ///     Setting this value to FALSE disables using or purchasing super mastery boosts.
+    ///     Some use cases for FALSE would be: 1) the hero has reached the maximum mastery level, 2) a mastery experience boost has already been used, 3) the map/mode combination is not eligible for accumulating mastery experience.
+    /// </summary>
+    [PhpProperty("mastery_super_canboost")]
+    public required bool MasteryExperienceCanSuperBoost { get; set; } = true;
+
+    /// <summary>
+    ///     The product ID for regular mastery boost purchases (typically 3609 for "m.Mastery Boost").
+    ///     Used when the player clicks to purchase a mastery boost from the match rewards screen.
+    /// </summary>
+    [PhpProperty("mastery_boost_product_id")]
+    public required int MasteryExperienceBoostProductIdentifier { get; init; } = 3609; // m.Mastery Boost
+
+    /// <summary>
+    ///     The product ID for super mastery boost purchases (typically 4605 for "m.Super boost").
+    ///     Referenced but not directly purchasable from the standard match rewards UI.
+    /// </summary>
+    [PhpProperty("mastery_super_boost_product_id")]
+    public required int MasteryExperienceSuperBoostProductIdentifier { get; init; } = 4605; // m.Super boost
+
+    /// <summary>
+    ///     The number of regular mastery boost products the player currently owns.
+    ///     Retrieved from the account's owned upgrades/products list.
+    /// </summary>
+    [PhpProperty("mastery_boostnum")]
+    public required int MasteryExperienceBoostProductCount { get; init; }
+
+    /// <summary>
+    ///     The number of super mastery boost products the player currently owns.
+    ///     Retrieved from the account's owned upgrades/products list.
+    /// </summary>
+    [PhpProperty("mastery_super_boostnum")]
+    public required int MasteryExperienceSuperBoostProductCount { get; init; }
 }
 
 public class Inventory

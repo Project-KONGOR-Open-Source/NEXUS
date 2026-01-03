@@ -3,6 +3,9 @@ global using ASPIRE.Common.Constants;
 global using ASPIRE.Common.Extensions.Cryptography;
 global using ASPIRE.Common.ServiceDefaults;
 
+global using KONGOR.MasterServer.Configuration.Economy;
+global using KONGOR.MasterServer.Configuration.Mastery;
+global using KONGOR.MasterServer.Configuration.Matchmaking;
 global using KONGOR.MasterServer.Constants;
 global using KONGOR.MasterServer.Extensions.Cache;
 global using KONGOR.MasterServer.Extensions.Collections;
@@ -46,6 +49,7 @@ global using StackExchange.Redis;
 global using System.Linq.Expressions;
 global using System.Net;
 global using System.Net.Sockets;
+global using System.Reflection;
 global using System.Security.Cryptography;
 global using System.Text;
 global using System.Text.Json;

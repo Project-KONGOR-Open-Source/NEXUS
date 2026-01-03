@@ -3,27 +3,6 @@
 public class Rootobject
 {
     public Match_Player_Stats[] match_player_stats { get; set; }
-    public Match_Mastery match_mastery { get; set; }
-}
-
-public class Match_Mastery
-{
-    public string cli_name { get; set; }
-    public int mastery_exp_original { get; set; }
-    public int mastery_exp_match { get; set; }
-    public int mastery_exp_bonus { get; set; }
-    public int mastery_exp_boost { get; set; }
-    public int mastery_exp_super_boost { get; set; }
-    public int mastery_exp_heroes_count { get; set; }
-    public int mastery_exp_heroes_addon { get; set; }
-    public int mastery_exp_to_boost { get; set; }
-    public int mastery_exp_event { get; set; }
-    public bool mastery_canboost { get; set; }
-    public bool mastery_super_canboost { get; set; }
-    public int mastery_boost_product_id { get; set; }
-    public int mastery_super_boost_product_id { get; set; }
-    public int mastery_boostnum { get; set; }
-    public int mastery_super_boostnum { get; set; }
 }
 
 public class Match_Player_Stats
