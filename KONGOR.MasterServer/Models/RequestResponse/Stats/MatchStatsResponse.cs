@@ -22,10 +22,16 @@ public class MatchStatsResponse
     public required List<MatchSummary> MatchSummary { get; set; }
 
     /// <summary>
+    ///     A dictionary of player statistics for the match, keyed by the player's account ID.
+    /// </summary>
+    [PhpProperty("match_player_stats")]
+    public required Dictionary<int, PlayerStatistics> PlayerStatistics { get; set; }
+
+    /// <summary>
     ///     A dictionary of player inventories for the match, keyed by the player's account ID.
     /// </summary>
     [PhpProperty("inventory")]
-    public required Dictionary<int, Inventory> Inventories { get; set; }
+    public required Dictionary<int, PlayerInventory> PlayerInventories { get; set; }
 
     /// <summary>
     ///     Mastery details for the hero played in the match.
@@ -797,7 +803,112 @@ public class MatchMastery(string heroIdentifier, int currentMasteryExperience, i
     public required int MasteryExperienceSuperBoostProductCount { get; init; }
 }
 
-public class Inventory
+public class PlayerStatistics
+{
+    public string match_id { get; set; }
+    public string account_id { get; set; }
+    public string clan_id { get; set; }
+    public string hero_id { get; set; }
+    public string position { get; set; }
+    public string team { get; set; }
+    public string level { get; set; }
+    public string wins { get; set; }
+    public string losses { get; set; }
+    public string concedes { get; set; }
+    public string concedevotes { get; set; }
+    public string buybacks { get; set; }
+    public string discos { get; set; }
+    public string kicked { get; set; }
+    public string pub_skill { get; set; }
+    public string pub_count { get; set; }
+    public string amm_solo_rating { get; set; }
+    public string amm_solo_count { get; set; }
+    public string amm_team_rating { get; set; }
+    public string amm_team_count { get; set; }
+    public string avg_score { get; set; }
+    public string herokills { get; set; }
+    public string herodmg { get; set; }
+    public string heroexp { get; set; }
+    public string herokillsgold { get; set; }
+    public string heroassists { get; set; }
+    public string deaths { get; set; }
+    public string goldlost2death { get; set; }
+    public string secs_dead { get; set; }
+    public string teamcreepkills { get; set; }
+    public string teamcreepdmg { get; set; }
+    public string teamcreepexp { get; set; }
+    public string teamcreepgold { get; set; }
+    public string neutralcreepkills { get; set; }
+    public string neutralcreepdmg { get; set; }
+    public string neutralcreepexp { get; set; }
+    public string neutralcreepgold { get; set; }
+    public string bdmg { get; set; }
+    public string bdmgexp { get; set; }
+    public string razed { get; set; }
+    public string bgold { get; set; }
+    public string denies { get; set; }
+    public string exp_denied { get; set; }
+    public string gold { get; set; }
+    public string gold_spent { get; set; }
+    public string exp { get; set; }
+    public string actions { get; set; }
+    public string secs { get; set; }
+    public string consumables { get; set; }
+    public string wards { get; set; }
+    public string time_earning_exp { get; set; }
+    public string bloodlust { get; set; }
+    public string doublekill { get; set; }
+    public string triplekill { get; set; }
+    public string quadkill { get; set; }
+    public string annihilation { get; set; }
+    public string ks3 { get; set; }
+    public string ks4 { get; set; }
+    public string ks5 { get; set; }
+    public string ks6 { get; set; }
+    public string ks7 { get; set; }
+    public string ks8 { get; set; }
+    public string ks9 { get; set; }
+    public string ks10 { get; set; }
+    public string ks15 { get; set; }
+    public string smackdown { get; set; }
+    public string humiliation { get; set; }
+    public string nemesis { get; set; }
+    public string retribution { get; set; }
+    public string used_token { get; set; }
+    public string cli_name { get; set; }
+    public string tag { get; set; }
+    public string nickname { get; set; }
+    public string alt_avatar_name { get; set; }
+
+    [PhpProperty("campaign_info")]
+    public required SeasonProgress SeasonProgress { get; set; }
+}
+
+public class SeasonProgress
+{
+    /// <summary>
+    ///     The player's account ID.
+    /// </summary>
+    [PhpProperty("account_id")]
+    public required int AccountID { get; set; }
+
+    /// <summary>
+    ///     The unique identifier for the match.
+    /// </summary>
+    [PhpProperty("match_id")]
+    public required int MatchID { get; set; }
+
+    public string is_casual { get; set; }
+    public string mmr_before { get; set; }
+    public string mmr_after { get; set; }
+    public string medal_before { get; set; }
+    public string medal_after { get; set; }
+    public string season { get; set; }
+    public int placement_matches { get; set; }
+    public string placement_wins { get; set; }
+}
+
+public class PlayerInventory
 {
     /// <summary>
     ///     The player's account ID.
