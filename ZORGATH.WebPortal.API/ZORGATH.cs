@@ -1,4 +1,5 @@
-﻿namespace ZORGATH.WebPortal.API;
+﻿
+namespace ZORGATH.WebPortal.API;
 
 public class ZORGATH
 {
@@ -288,11 +289,14 @@ public class ZORGATH
         // Enable Rate Limiting (Before Other Processing)
         application.UseRateLimiter();
 
-        // Enforce HTTPS With Strict Transport Security
-        application.UseHsts();
+        if (!application.Environment.IsDevelopment())
+        {
+            // Enforce HTTPS With Strict Transport Security
+            application.UseHsts();
 
-        // Automatically Redirect HTTP Requests To HTTPS
-        application.UseHttpsRedirection();
+            // Automatically Redirect HTTP Requests To HTTPS
+            application.UseHttpsRedirection();
+        }
 
         // Enable CORS Policy
         application.UseCors(corsPolicyName);

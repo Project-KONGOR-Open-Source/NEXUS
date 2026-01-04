@@ -1,5 +1,7 @@
 ﻿namespace ZORGATH.WebPortal.API.Controllers;
 
+using ASPIRE.Common.DTOs;
+
 [ApiController]
 [Route("[controller]")]
 [Consumes("application/json")]
@@ -91,6 +93,60 @@ public class UserController(MerrickContext databaseContext, ILogger<UserControll
         await MerrickContext.SaveChangesAsync();
 
         await EmailService.SendEmailAddressRegistrationConfirmation(user.EmailAddress, account.Name);
+
+        return CreatedAtAction(nameof(GetUser), new { id = user.ID },
+            new GetBasicUserDTO(user.ID, user.EmailAddress, [new GetBasicAccountDTO(account.ID, account.Name)]));
+    }
+
+    [HttpPost("RegisterFromDiscord", Name = "Register User From Discord")]
+    [AllowAnonymous]
+    [ProducesResponseType(typeof(GetBasicUserDTO), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status409Conflict)]
+    public async Task<IActionResult> RegisterUserFromDiscord([FromBody] RegisterDiscordUserDTO payload)
+    {
+        if (await MerrickContext.Users.AnyAsync(user => user.EmailAddress.Equals(payload.Email)))
+        {
+            return Conflict($@"User With Email ""{payload.Email}"" Already Exists");
+        }
+
+        if (await MerrickContext.Accounts.AnyAsync(account => account.Name.Equals(payload.Name)))
+        {
+            return Conflict($@"Account With Name ""{payload.Name}"" Already Exists");
+        }
+
+        Role? role = await MerrickContext.Roles.SingleOrDefaultAsync(role => role.Name.Equals(UserRoles.User));
+
+        if (role is null)
+        {
+            return NotFound($@"User Role ""{UserRoles.User}"" Was Not Found");
+        }
+
+        string salt = SRPRegistrationHandlers.GenerateSRPPasswordSalt();
+
+        User user = new()
+        {
+            EmailAddress = payload.Email,
+            Role = role,
+            SRPPasswordSalt = salt,
+            SRPPasswordHash = SRPRegistrationHandlers.ComputeSRPPasswordHash(payload.Password, salt)
+        };
+
+        // Initialize required PBKDF2 hash, though we use SRP primarily
+        user.PBKDF2PasswordHash = new PasswordHasher<User>().HashPassword(user, payload.Password);
+
+        await MerrickContext.Users.AddAsync(user);
+
+        Account account = new()
+        {
+            Name = payload.Name,
+            User = user,
+            IsMain = true
+        };
+
+        user.Accounts.Add(account);
+
+        await MerrickContext.SaveChangesAsync();
 
         return CreatedAtAction(nameof(GetUser), new { id = user.ID },
             new GetBasicUserDTO(user.ID, user.EmailAddress, [new GetBasicAccountDTO(account.ID, account.Name)]));

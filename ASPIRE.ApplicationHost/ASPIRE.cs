@@ -44,7 +44,7 @@ public class ASPIRE
             .WithParentRelationship(distributedCache); // Set Distributed Cache As Parent Resource
 
         // Create Distributed Cache Dashboard Resource
-        Action<IResourceBuilder<RedisInsightResource>> distributedCacheDashboard = builder => builder
+        Action<IResourceBuilder<RedisInsightResource>> distributedCacheDashboard = dashboard => dashboard
             .WithImageTag("latest") // Latest Redis Insight Image: https://github.com/RedisInsight/RedisInsight/releases/latest
             .WithLifetime(ContainerLifetime.Persistent).WithDataVolume("distributed-cache-dashboard-data") // Persist Cached Data Between Distributed Application Restarts But Not Between Resource Container Restarts
             .WithEnvironment("RI_ACCEPT_TERMS_AND_CONDITIONS", "true") // Automatically Accept Terms And Conditions: https://redis.io/docs/latest/operate/redisinsight/configuration/
@@ -115,8 +115,14 @@ public class ASPIRE
             .WithEnvironment("INFRASTRUCTURE_GATEWAY", gateway);
 
         // Add Web Portal API Project
-        builder.AddProject<ZORGATH>("web-portal-api", builder.Environment.IsProduction() ? "ZORGATH.WebPortal.API Production" : "ZORGATH.WebPortal.API Development")
+        IResourceBuilder<ProjectResource> webPortalApi = builder.AddProject<ZORGATH>("web-portal-api", builder.Environment.IsProduction() ? "ZORGATH.WebPortal.API Production" : "ZORGATH.WebPortal.API Development")
             .WithReference(database, connectionName: "MERRICK").WaitFor(database) // Connect To SQL Server Database And Wait For It To Start
+            .WithEnvironment("INFRASTRUCTURE_GATEWAY", gateway);
+
+        // Add Web Portal UI Project
+        builder.AddProject<DawnBringerUI>("web-portal-ui", builder.Environment.IsProduction() ? "DAWNBRINGER.WebPortal.UI Production" : "DAWNBRINGER.WebPortal.UI Development")
+            .WithReference(database, connectionName: "MERRICK").WaitFor(database) // Connect To SQL Server Database And Wait For It To Start
+            .WithReference(webPortalApi.GetEndpoint("http")).WaitFor(webPortalApi) // Connect To Web Portal API
             .WithEnvironment("INFRASTRUCTURE_GATEWAY", gateway);
 
         // Start Orchestrating Distributed Application
