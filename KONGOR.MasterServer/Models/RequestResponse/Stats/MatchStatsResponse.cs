@@ -25,13 +25,13 @@ public class MatchStatsResponse
     ///     A dictionary of player statistics for the match, keyed by the player's account ID.
     /// </summary>
     [PhpProperty("match_player_stats")]
-    public required Dictionary<int, PlayerStatistics> PlayerStatistics { get; set; }
+    public required Dictionary<int, MatchPlayerStatistics> MatchPlayerStatistics { get; set; }
 
     /// <summary>
     ///     A dictionary of player inventories for the match, keyed by the player's account ID.
     /// </summary>
     [PhpProperty("inventory")]
-    public required Dictionary<int, PlayerInventory> PlayerInventories { get; set; }
+    public required Dictionary<int, MatchPlayerInventory> MatchPlayerInventories { get; set; }
 
     /// <summary>
     ///     Mastery details for the hero played in the match.
@@ -803,7 +803,7 @@ public class MatchMastery(string heroIdentifier, int currentMasteryExperience, i
     public required int MasteryExperienceSuperBoostProductCount { get; init; }
 }
 
-public class PlayerStatistics
+public class MatchPlayerStatistics
 {
     /// <summary>
     ///     The unique identifier for the match.
@@ -1337,7 +1337,7 @@ public class SeasonProgress
     public string? Ranking { get; set; }
 }
 
-public class PlayerInventory
+public class MatchPlayerInventory
 {
     /// <summary>
     ///     The player's account ID.
