@@ -26,7 +26,7 @@ public class PlayerStatistics
 
     public required int Benefit { get; set; }
 
-    public required uint HeroProductID { get; set; }
+    public required uint? HeroProductID { get => field is 0 ? null : field; set => field = value is 0 ? null : value; }
 
     public string? AlternativeAvatarName { get; set; }
 
@@ -154,19 +154,19 @@ public class PlayerStatistics
 
     public required int Annihilation { get; set; }
 
-    public required int KillStreak3 { get; set; }
+    public required int KillStreak03 { get; set; }
 
-    public required int KillStreak4 { get; set; }
+    public required int KillStreak04 { get; set; }
 
-    public required int KillStreak5 { get; set; }
+    public required int KillStreak05 { get; set; }
 
-    public required int KillStreak6 { get; set; }
+    public required int KillStreak06 { get; set; }
 
-    public required int KillStreak7 { get; set; }
+    public required int KillStreak07 { get; set; }
 
-    public required int KillStreak8 { get; set; }
+    public required int KillStreak08 { get; set; }
 
-    public required int KillStreak9 { get; set; }
+    public required int KillStreak09 { get; set; }
 
     public required int KillStreak10 { get; set; }
 

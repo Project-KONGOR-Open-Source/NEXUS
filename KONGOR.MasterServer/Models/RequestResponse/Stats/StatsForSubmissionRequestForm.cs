@@ -371,25 +371,25 @@ public partial class IndividualPlayerStats
     public required int Annihilation { get; set; }
 
     [FromForm(Name = "ks3")]
-    public required int KillStreak3 { get; set; }
+    public required int KillStreak03 { get; set; }
 
     [FromForm(Name = "ks4")]
-    public required int KillStreak4 { get; set; }
+    public required int KillStreak04 { get; set; }
 
     [FromForm(Name = "ks5")]
-    public required int KillStreak5 { get; set; }
+    public required int KillStreak05 { get; set; }
 
     [FromForm(Name = "ks6")]
-    public required int KillStreak6 { get; set; }
+    public required int KillStreak06 { get; set; }
 
     [FromForm(Name = "ks7")]
-    public required int KillStreak7 { get; set; }
+    public required int KillStreak07 { get; set; }
 
     [FromForm(Name = "ks8")]
-    public required int KillStreak8 { get; set; }
+    public required int KillStreak08 { get; set; }
 
     [FromForm(Name = "ks9")]
-    public required int KillStreak9 { get; set; }
+    public required int KillStreak09 { get; set; }
 
     [FromForm(Name = "ks10")]
     public required int KillStreak10 { get; set; }
@@ -603,13 +603,13 @@ public static class StatsForSubmissionRequestFormExtensions
             TripleKill = player.TripleKill,
             QuadKill = player.QuadKill,
             Annihilation = player.Annihilation,
-            KillStreak3 = player.KillStreak3,
-            KillStreak4 = player.KillStreak4,
-            KillStreak5 = player.KillStreak5,
-            KillStreak6 = player.KillStreak6,
-            KillStreak7 = player.KillStreak7,
-            KillStreak8 = player.KillStreak8,
-            KillStreak9 = player.KillStreak9,
+            KillStreak03 = player.KillStreak03,
+            KillStreak04 = player.KillStreak04,
+            KillStreak05 = player.KillStreak05,
+            KillStreak06 = player.KillStreak06,
+            KillStreak07 = player.KillStreak07,
+            KillStreak08 = player.KillStreak08,
+            KillStreak09 = player.KillStreak09,
             KillStreak10 = player.KillStreak10,
             KillStreak15 = player.KillStreak15,
             Smackdown = player.Smackdown,

@@ -58,27 +58,27 @@ public class MatchStatistics
 
     public int? MVPAccountID { get; set; }
 
-    public required int AwardMostAnnihilations { get; set; }
+    public required int? AwardMostAnnihilations { get => field is -1 ? null : field; set => field = value is -1 ? null : value; }
 
-    public required int AwardMostQuadKills { get; set; }
+    public required int? AwardMostQuadKills { get => field is -1 ? null : field; set => field = value is -1 ? null : value; }
 
-    public required int AwardLargestKillStreak { get; set; }
+    public required int? AwardLargestKillStreak { get => field is -1 ? null : field; set => field = value is -1 ? null : value; }
 
-    public required int AwardMostSmackdowns { get; set; }
+    public required int? AwardMostSmackdowns { get => field is -1 ? null : field; set => field = value is -1 ? null : value; }
 
-    public required int AwardMostKills { get; set; }
+    public required int? AwardMostKills { get => field is -1 ? null : field; set => field = value is -1 ? null : value; }
 
-    public required int AwardMostAssists { get; set; }
+    public required int? AwardMostAssists { get => field is -1 ? null : field; set => field = value is -1 ? null : value; }
 
-    public required int AwardLeastDeaths { get; set; }
+    public required int? AwardLeastDeaths { get => field is -1 ? null : field; set => field = value is -1 ? null : value; }
 
-    public required int AwardMostBuildingDamage { get; set; }
+    public required int? AwardMostBuildingDamage { get => field is -1 ? null : field; set => field = value is -1 ? null : value; }
 
-    public required int AwardMostWardsKilled { get; set; }
+    public required int? AwardMostWardsKilled { get => field is -1 ? null : field; set => field = value is -1 ? null : value; }
 
-    public required int AwardMostHeroDamageDealt { get; set; }
+    public required int? AwardMostHeroDamageDealt { get => field is -1 ? null : field; set => field = value is -1 ? null : value; }
 
-    public required int AwardHighestCreepScore { get; set; }
+    public required int? AwardHighestCreepScore { get => field is -1 ? null : field; set => field = value is -1 ? null : value; }
 
     public List<FragEvent>? FragHistory { get; set; }
 }
