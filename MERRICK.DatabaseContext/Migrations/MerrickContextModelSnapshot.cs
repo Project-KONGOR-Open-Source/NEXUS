@@ -300,37 +300,37 @@ namespace MERRICK.DatabaseContext.Migrations
                     b.Property<int>("AveragePSRTeamTwo")
                         .HasColumnType("int");
 
-                    b.Property<int>("AwardHighestCreepScore")
+                    b.Property<int?>("AwardHighestCreepScore")
                         .HasColumnType("int");
 
-                    b.Property<int>("AwardLargestKillStreak")
+                    b.Property<int?>("AwardLargestKillStreak")
                         .HasColumnType("int");
 
-                    b.Property<int>("AwardLeastDeaths")
+                    b.Property<int?>("AwardLeastDeaths")
                         .HasColumnType("int");
 
-                    b.Property<int>("AwardMostAnnihilations")
+                    b.Property<int?>("AwardMostAnnihilations")
                         .HasColumnType("int");
 
-                    b.Property<int>("AwardMostAssists")
+                    b.Property<int?>("AwardMostAssists")
                         .HasColumnType("int");
 
-                    b.Property<int>("AwardMostBuildingDamage")
+                    b.Property<int?>("AwardMostBuildingDamage")
                         .HasColumnType("int");
 
-                    b.Property<int>("AwardMostHeroDamageDealt")
+                    b.Property<int?>("AwardMostHeroDamageDealt")
                         .HasColumnType("int");
 
-                    b.Property<int>("AwardMostKills")
+                    b.Property<int?>("AwardMostKills")
                         .HasColumnType("int");
 
-                    b.Property<int>("AwardMostQuadKills")
+                    b.Property<int?>("AwardMostQuadKills")
                         .HasColumnType("int");
 
-                    b.Property<int>("AwardMostSmackdowns")
+                    b.Property<int?>("AwardMostSmackdowns")
                         .HasColumnType("int");
 
-                    b.Property<int>("AwardMostWardsKilled")
+                    b.Property<int?>("AwardMostWardsKilled")
                         .HasColumnType("int");
 
                     b.Property<string>("BannedHeroes")
@@ -583,7 +583,7 @@ namespace MERRICK.DatabaseContext.Migrations
                     b.Property<int>("HeroLevel")
                         .HasColumnType("int");
 
-                    b.Property<long>("HeroProductID")
+                    b.Property<long?>("HeroProductID")
                         .HasColumnType("bigint");
 
                     b.Property<int>("Humiliation")
@@ -596,31 +596,31 @@ namespace MERRICK.DatabaseContext.Migrations
                     b.Property<int>("Kicked")
                         .HasColumnType("int");
 
+                    b.Property<int>("KillStreak03")
+                        .HasColumnType("int");
+
+                    b.Property<int>("KillStreak04")
+                        .HasColumnType("int");
+
+                    b.Property<int>("KillStreak05")
+                        .HasColumnType("int");
+
+                    b.Property<int>("KillStreak06")
+                        .HasColumnType("int");
+
+                    b.Property<int>("KillStreak07")
+                        .HasColumnType("int");
+
+                    b.Property<int>("KillStreak08")
+                        .HasColumnType("int");
+
+                    b.Property<int>("KillStreak09")
+                        .HasColumnType("int");
+
                     b.Property<int>("KillStreak10")
                         .HasColumnType("int");
 
                     b.Property<int>("KillStreak15")
-                        .HasColumnType("int");
-
-                    b.Property<int>("KillStreak3")
-                        .HasColumnType("int");
-
-                    b.Property<int>("KillStreak4")
-                        .HasColumnType("int");
-
-                    b.Property<int>("KillStreak5")
-                        .HasColumnType("int");
-
-                    b.Property<int>("KillStreak6")
-                        .HasColumnType("int");
-
-                    b.Property<int>("KillStreak7")
-                        .HasColumnType("int");
-
-                    b.Property<int>("KillStreak8")
-                        .HasColumnType("int");
-
-                    b.Property<int>("KillStreak9")
                         .HasColumnType("int");
 
                     b.Property<int>("LobbyPosition")

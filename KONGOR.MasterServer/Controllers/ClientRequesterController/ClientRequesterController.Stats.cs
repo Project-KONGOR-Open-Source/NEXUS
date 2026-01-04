@@ -56,7 +56,36 @@ public partial class ClientRequesterController
 
     private async Task<IActionResult> HandleMatchStats()
     {
+        string? cookie = Request.Form["cookie"];
 
+        if (cookie is null)
+            return BadRequest(@"Missing Value For Form Parameter ""cookie""");
+
+        string? matchID = Request.Form["match_id"];
+
+        if (matchID is null)
+            return BadRequest(@"Missing Value For Form Parameter ""match_id""");
+
+        MatchStatistics? matchStatistics = await MerrickContext.MatchStatistics.SingleOrDefaultAsync(matchStatistics => matchStatistics.ID == int.Parse(matchID));
+
+        if (matchStatistics is null)
+            return new NotFoundObjectResult("Match Stats Not Found");
+
+        List<PlayerStatistics> playerStatistics = await MerrickContext.PlayerStatistics.Where(playerStatistics => playerStatistics.MatchID == matchStatistics.ID).ToListAsync();
+
+        string? accountName = await DistributedCache.GetAccountNameForSessionCookie(cookie);
+
+        if (accountName is null)
+            return new NotFoundObjectResult("Session Not Found");
+
+        Account? account = await MerrickContext.Accounts.SingleOrDefaultAsync(account => account.Name.Equals(accountName));
+
+        if (account is null)
+            return new NotFoundObjectResult("Account Not Found");
+
+        MatchSummary matchSummary = new (matchStatistics, playerStatistics);
+
+        throw new NotImplementedException(); // TODO: Implement Match Stats Response
 
         return Unauthorized();
     }

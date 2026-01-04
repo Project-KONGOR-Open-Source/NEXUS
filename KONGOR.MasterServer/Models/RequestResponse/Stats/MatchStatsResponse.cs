@@ -1,4 +1,4 @@
-﻿namespace KONGOR.MasterServer.Models.RequestResponse.Stats;
+namespace KONGOR.MasterServer.Models.RequestResponse.Stats;
 
 public class MatchStatsResponse
 {
@@ -163,91 +163,91 @@ public class MatchStatsResponse
     public bool Zero => true;
 }
 
-public class MatchSummary
+public class MatchSummary(MatchStatistics matchStatistics, List<PlayerStatistics> playerStatistics)
 {
     /// <summary>
     ///     The unique identifier for the match.
     /// </summary>
     [PhpProperty("match_id")]
-    public required int MatchID { get; set; }
+    public int MatchID { get; init; } = matchStatistics.ID;
 
     /// <summary>
     ///     The server ID where the match was hosted.
     /// </summary>
     [PhpProperty("server_id")]
-    public required int ServerID { get; set; }
+    public int ServerID { get; init; } = matchStatistics.ServerID;
 
     /// <summary>
     ///     The map on which the match was played (e.g. "caldavar", "midwars", "grimms_crossing").
     /// </summary>
     [PhpProperty("map")]
-    public required string Map { get; set; }
+    public string Map { get; init; } = matchStatistics.Map;
 
     /// <summary>
     ///     The version of the map used in the match.
     /// </summary>
     [PhpProperty("map_version")]
-    public required string MapVersion { get; set; }
+    public string MapVersion { get; init; } = matchStatistics.MapVersion;
 
     /// <summary>
     ///     The duration of the match in seconds.
     /// </summary>
     [PhpProperty("time_played")]
-    public required int TimePlayed { get; set; }
+    public int TimePlayed { get; init; } = matchStatistics.TimePlayed;
 
     /// <summary>
     ///     The host where the match replay file is stored.
     /// </summary>
     [PhpProperty("file_host")]
-    public string? FileHost { get; set; }
+    public string FileHost { get; init; }
 
     /// <summary>
     ///     The size of the match replay file in bytes.
     /// </summary>
     [PhpProperty("file_size")]
-    public int? FileSize { get; set; }
+    public int FileSize { get; init; } = matchStatistics.FileSize;
 
     /// <summary>
     ///     The filename of the match replay file.
     /// </summary>
     [PhpProperty("file_name")]
-    public string? FileName { get; set; }
+    public string FileName { get; init; } = matchStatistics.FileName;
 
     /// <summary>
     ///     The connection state or match state code.
     /// </summary>
     [PhpProperty("c_state")]
-    public int? ConnectionState { get; set; }
+    public int ConnectionState { get; init; } = matchStatistics.ConnectionState;
 
     /// <summary>
     ///     The game client version used for the match.
     /// </summary>
     [PhpProperty("version")]
-    public required string Version { get; set; }
+    public string Version { get; init; } = matchStatistics.Version;
 
     /// <summary>
     ///     The average Player Skill Rating (PSR) of all players in the match.
     /// </summary>
     [PhpProperty("avgpsr")]
-    public required int AveragePSR { get; set; }
+    public int AveragePSR { get; init; } = matchStatistics.AveragePSR;
 
     /// <summary>
     ///     The match date, originally formatted as "M/D/YYYY" (e.g. "3/15/2024").
     /// </summary>
     [PhpProperty("date")]
-    public required string Date { get; set; }
+    public string Date { get; init; } = DateTimeOffset.UtcNow.ToString("dd/MM/yyyy");
 
     /// <summary>
     ///     The match time, originally formatted in 12-hour format with AM/PM (e.g. "2:30:45 PM").
     /// </summary>
     [PhpProperty("time")]
-    public required string Time { get; set; }
+    public string Time { get; init; } = DateTimeOffset.UtcNow.ToString("HH:mm:ss");
 
     /// <summary>
     ///     The match name or custom server name.
     /// </summary>
     [PhpProperty("mname")]
-    public string? MatchName { get; set; }
+    public string MatchName { get; init; }
 
     /// <summary>
     ///     The match class/type (e.g. public match, tournament match, custom match).
@@ -259,85 +259,85 @@ public class MatchSummary
     ///     </code>
     /// </summary>
     [PhpProperty("class")]
-    public required int Class { get; set; }
+    public int Class { get; init; }
 
     /// <summary>
     ///     Whether the match was private (1) or public (0).
     /// </summary>
     [PhpProperty("private")]
-    public required int Private { get; set; }
+    public int Private { get; init; } = IsPrivateMatch(playerStatistics);
 
     /// <summary>
     ///     Normal Mode flag (1 = enabled, 0 = disabled).
     /// </summary>
     [PhpProperty("nm")]
-    public required int NormalMode { get; set; }
+    public int NormalMode { get; init; }
 
     /// <summary>
     ///     Single Draft Mode flag (1 = enabled, 0 = disabled).
     /// </summary>
     [PhpProperty("sd")]
-    public required int SingleDraft { get; set; }
+    public int SingleDraft { get; init; }
 
     /// <summary>
     ///     Random Draft Mode flag (1 = enabled, 0 = disabled).
     /// </summary>
     [PhpProperty("rd")]
-    public required int RandomDraft { get; set; }
+    public int RandomDraft { get; init; }
 
     /// <summary>
     ///     Death Match Mode flag (1 = enabled, 0 = disabled).
     /// </summary>
     [PhpProperty("dm")]
-    public required int DeathMatch { get; set; }
+    public int DeathMatch { get; init; }
 
     /// <summary>
     ///     Banning Draft Mode flag (1 = enabled, 0 = disabled).
     /// </summary>
     [PhpProperty("bd")]
-    public required int BanningDraft { get; set; }
+    public int BanningDraft { get; init; }
 
     /// <summary>
     ///     Banning Pick Mode flag (1 = enabled, 0 = disabled).
     /// </summary>
     [PhpProperty("bp")]
-    public required int BanningPick { get; set; }
+    public int BanningPick { get; init; }
 
     /// <summary>
     ///     All Random Mode flag (1 = enabled, 0 = disabled).
     /// </summary>
     [PhpProperty("ar")]
-    public required int AllRandom { get; set; }
+    public int AllRandom { get; init; }
 
     /// <summary>
     ///     Captains Draft Mode flag (1 = enabled, 0 = disabled).
     /// </summary>
     [PhpProperty("cd")]
-    public required int CaptainsDraft { get; set; }
+    public int CaptainsDraft { get; init; }
 
     /// <summary>
     ///     Captains Mode flag (1 = enabled, 0 = disabled).
     /// </summary>
     [PhpProperty("cm")]
-    public required int CaptainsMode { get; set; }
+    public int CaptainsMode { get; init; }
 
     /// <summary>
     ///     Lock Pick Mode flag (1 = enabled, 0 = disabled).
     /// </summary>
     [PhpProperty("lp")]
-    public required int LockPick { get; set; }
+    public int LockPick { get; init; }
 
     /// <summary>
     ///     Blind Ban Mode flag (1 = enabled, 0 = disabled).
     /// </summary>
     [PhpProperty("bb")]
-    public required int BlindBan { get; set; }
+    public int BlindBan { get; init; }
 
     /// <summary>
     ///     Balanced Mode flag (1 = enabled, 0 = disabled).
     /// </summary>
     [PhpProperty("bm")]
-    public required int BalancedMode { get; set; }
+    public int BalancedMode { get; init; }
 
     /// <summary>
     ///     Kros Mode or special game mode indicator.
@@ -351,19 +351,19 @@ public class MatchSummary
     ///     </code>
     /// </summary>
     [PhpProperty("km")]
-    public required int KrosMode { get; set; }
+    public int KrosMode { get; init; }
 
     /// <summary>
     ///     Whether the match was a league/ranked match (1) or casual (0).
     /// </summary>
     [PhpProperty("league")]
-    public required int League { get; set; }
+    public int League { get; init; }
 
     /// <summary>
     ///     The maximum number of players allowed in the match (typically 2, 4, 6, 8, or 10).
     /// </summary>
     [PhpProperty("max_players")]
-    public required int MaxPlayers { get; set; }
+    public int MaxPlayers { get; init; }
 
     /// <summary>
     ///     Deprecated skill-based server filter that was used for matchmaking.
@@ -375,213 +375,213 @@ public class MatchSummary
     ///     This feature is no longer active and the field has no functional purpose.
     /// </summary>
     [PhpProperty("tier")]
-    public required int Tier { get; set; }
+    public int Tier { get; init; }
 
     /// <summary>
     ///     No Repick option flag (1 = repicking disabled, 0 = repicking allowed).
     /// </summary>
     [PhpProperty("no_repick")]
-    public required int NoRepick { get; set; }
+    public int NoRepick { get; init; }
 
     /// <summary>
     ///     No Agility Heroes option flag (1 = agility heroes banned, 0 = allowed).
     /// </summary>
     [PhpProperty("no_agi")]
-    public required int NoAgility { get; set; }
+    public int NoAgility { get; init; }
 
     /// <summary>
     ///     Drop Items On Death option flag (1 = enabled, 0 = disabled).
     /// </summary>
     [PhpProperty("drp_itm")]
-    public required int DropItems { get; set; }
+    public int DropItems { get; init; }
 
     /// <summary>
     ///     No Respawn Timer option flag (1 = picking timer disabled, 0 = timer enabled).
     /// </summary>
     [PhpProperty("no_timer")]
-    public required int NoRespawnTimer { get; set; }
+    public int NoRespawnTimer { get; init; }
 
     /// <summary>
     ///     Reverse Hero Selection option flag (1 = enabled, 0 = disabled).
     /// </summary>
     [PhpProperty("rev_hs")]
-    public required int ReverseHeroSelection { get; set; }
+    public int ReverseHeroSelection { get; init; }
 
     /// <summary>
     ///     No Swap option flag (1 = hero swapping disabled, 0 = swapping allowed).
     /// </summary>
     [PhpProperty("no_swap")]
-    public required int NoSwap { get; set; }
+    public int NoSwap { get; init; }
 
     /// <summary>
     ///     No Intelligence Heroes option flag (1 = intelligence heroes banned, 0 = allowed).
     /// </summary>
     [PhpProperty("no_int")]
-    public required int NoIntelligence { get; set; }
+    public int NoIntelligence { get; init; }
 
     /// <summary>
     ///     Alternate Picking option flag (1 = enabled, 0 = disabled).
     /// </summary>
     [PhpProperty("alt_pick")]
-    public required int AlternatePicking { get; set; }
+    public int AlternatePicking { get; init; }
 
     /// <summary>
     ///     Ban Phase option flag (1 = ban phase enabled, 0 = disabled).
     /// </summary>
     [PhpProperty("veto")]
-    public required int BanPhase { get; set; }
+    public int BanPhase { get; init; }
 
     /// <summary>
     ///     Shuffle Abilities option flag (1 = abilities shuffled/randomised, 0 = normal abilities).
     ///     Used in Rift Wars and other Kros Mode variants.
     /// </summary>
     [PhpProperty("shuf")]
-    public required int ShuffleAbilities { get; set; }
+    public int ShuffleAbilities { get; init; }
 
     /// <summary>
     ///     No Strength Heroes option flag (1 = strength heroes banned, 0 = allowed).
     /// </summary>
     [PhpProperty("no_str")]
-    public required int NoStrength { get; set; }
+    public int NoStrength { get; init; }
 
     /// <summary>
     ///     No Power-Ups option flag (1 = power-ups/runes disabled, 0 = enabled).
     /// </summary>
     [PhpProperty("no_pups")]
-    public required int NoPowerUps { get; set; }
+    public int NoPowerUps { get; init; }
 
     /// <summary>
     ///     Duplicate Heroes option flag (1 = duplicate heroes allowed, 0 = each hero unique).
     /// </summary>
     [PhpProperty("dup_h")]
-    public required int DuplicateHeroes { get; set; }
+    public int DuplicateHeroes { get; init; }
 
     /// <summary>
     ///     All Pick Mode option flag (1 = enabled, 0 = disabled).
     /// </summary>
     [PhpProperty("ap")]
-    public required int AllPick { get; set; }
+    public int AllPick { get; init; }
 
     /// <summary>
     ///     Balanced Random Mode option flag (1 = enabled, 0 = disabled).
     /// </summary>
     [PhpProperty("br")]
-    public required int BalancedRandom { get; set; }
+    public int BalancedRandom { get; init; }
 
     /// <summary>
     ///     Easy Mode option flag (1 = easy mode enabled, 0 = normal difficulty).
     /// </summary>
     [PhpProperty("em")]
-    public required int EasyMode { get; set; }
+    public int EasyMode { get; init; }
 
     /// <summary>
     ///     Casual Mode option flag (1 = casual mode enabled, 0 = normal mode).
     /// </summary>
     [PhpProperty("cas")]
-    public required int CasualMode { get; set; }
+    public int CasualMode { get; init; }
 
     /// <summary>
     ///     Reverse Selection option flag (1 = enabled, 0 = disabled).
     /// </summary>
     [PhpProperty("rs")]
-    public required int ReverseSelection { get; set; }
+    public int ReverseSelection { get; init; }
 
     /// <summary>
     ///     No Leaver option flag (1 = no leaver penalty applied, 0 = leaver penalties enabled).
     /// </summary>
     [PhpProperty("nl")]
-    public required int NoLeaver { get; set; }
+    public int NoLeaver { get; init; }
 
     /// <summary>
     ///     Official Match flag (1 = official tournament match, 0 = unofficial).
     /// </summary>
     [PhpProperty("officl")]
-    public required int Official { get; set; }
+    public int Official { get; init; }
 
     /// <summary>
     ///     No Statistics option flag (1 = match stats not recorded, 0 = stats recorded).
     /// </summary>
     [PhpProperty("no_stats")]
-    public required int NoStatistics { get; set; }
+    public int NoStatistics { get; init; }
 
     /// <summary>
     ///     Auto Balance option flag (1 = teams automatically balanced, 0 = manual teams).
     /// </summary>
     [PhpProperty("ab")]
-    public required int AutoBalance { get; set; }
+    public int AutoBalance { get; init; }
 
     /// <summary>
     ///     Hardcore Mode option flag (1 = hardcore difficulty enabled, 0 = normal).
     /// </summary>
     [PhpProperty("hardcore")]
-    public required int Hardcore { get; set; }
+    public int Hardcore { get; init; }
 
     /// <summary>
     ///     Development Heroes option flag (1 = development/unreleased heroes allowed, 0 = only released heroes).
     /// </summary>
     [PhpProperty("dev_heroes")]
-    public required int DevelopmentHeroes { get; set; }
+    public int DevelopmentHeroes { get; init; }
 
     /// <summary>
     ///     Verified Only option flag (1 = only verified accounts allowed, 0 = all accounts allowed).
     /// </summary>
     [PhpProperty("verified_only")]
-    public required int VerifiedOnly { get; set; }
+    public int VerifiedOnly { get; init; }
 
     /// <summary>
     ///     Gated option flag (1 = gated/restricted match, 0 = open match).
     /// </summary>
     [PhpProperty("gated")]
-    public required int Gated { get; set; }
+    public int Gated { get; init; }
 
     /// <summary>
     ///     Rapid Fire Mode option flag (1 = rapid fire mode enabled, 0 = normal ability cooldowns).
     /// </summary>
     [PhpProperty("rapidfire")]
-    public int RapidFire { get; set; }
+    public int RapidFire { get; init; }
 
     /// <summary>
     ///     The UNIX timestamp (in seconds) when the match started.
     /// </summary>
     [PhpProperty("timestamp")]
-    public required int Timestamp { get; set; }
+    public int Timestamp { get; init; } = Convert.ToInt32(Math.Max(matchStatistics.TimestampRecorded.ToUnixTimeSeconds(), Convert.ToInt64(Int32.MaxValue)));
 
     /// <summary>
     ///     The URL for the match replay file.
     /// </summary>
     [PhpProperty("url")]
-    public required string URL { get; set; }
+    public string URL { get; init; }
 
     /// <summary>
     ///     The size of the match replay file (human-readable format or bytes as string).
     /// </summary>
     [PhpProperty("size")]
-    public required string Size { get; set; }
+    public string Size { get; init; }
 
     /// <summary>
     ///     The name or title of the replay file.
     /// </summary>
     [PhpProperty("name")]
-    public required string Name { get; set; }
+    public string Name { get; init; }
 
     /// <summary>
     ///     The directory path where the replay file is stored.
     /// </summary>
     [PhpProperty("dir")]
-    public required string Directory { get; set; }
+    public string Directory { get; init; }
 
     /// <summary>
     ///     The S3 download URL for the match replay file.
     /// </summary>
     [PhpProperty("s3_url")]
-    public required string S3URL { get; set; }
+    public string S3URL { get; init; }
 
     /// <summary>
     ///     The winning team ("1" for Legion, "2" for Hellbourne).
     ///     Determined by analysing player statistics from the match.
     /// </summary>
     [PhpProperty("winning_team")]
-    public required string WinningTeam { get; set; }
+    public string WinningTeam { get; init; } = GetWinningTeam(playerStatistics).ToString();
 
     /// <summary>
     ///     The game mode code derived from match options.
@@ -602,79 +602,125 @@ public class MatchSummary
     ///     </code>
     /// </summary>
     [PhpProperty("gamemode")]
-    public required string GameMode { get; set; }
+    public string GameMode { get; init; } = matchStatistics.GameMode;
 
     /// <summary>
     ///     The account ID of the Most Valuable Player (MVP) in the match.
     /// </summary>
     [PhpProperty("mvp")]
-    public required string MVP { get; set; }
+    public string MVP { get; init; } = (matchStatistics.MVPAccountID ?? -1).ToString();
 
     /// <summary>
-    ///     The account ID of the player who earned the "Most Annihilations" award.
+    ///     The account ID of the player who earned the "Most Annihilations" award, or "-1" if no player earned this award.
     /// </summary>
     [PhpProperty("awd_mann")]
-    public required string AwardMostAnnihilations { get; set; }
+    public string AwardMostAnnihilations { get; init; } = (matchStatistics.AwardMostAnnihilations ?? -1).ToString();
 
     /// <summary>
-    ///     The account ID of the player who earned the "Most Quad Kills" award.
+    ///     The account ID of the player who earned the "Most Quad Kills" award, or "-1" if no player earned this award.
     /// </summary>
     [PhpProperty("awd_mqk")]
-    public required string AwardMostQuadKills { get; set; }
+    public string AwardMostQuadKills { get; init; } = (matchStatistics.AwardMostQuadKills ?? -1).ToString();
 
     /// <summary>
-    ///     The account ID of the player who earned the "Longest Killing Spree" award.
+    ///     The account ID of the player who earned the "Longest Killing Spree" award, or "-1" if no player earned this award.
     /// </summary>
     [PhpProperty("awd_lgks")]
-    public required string AwardLongestKillingSpree { get; set; }
+    public string AwardLongestKillingSpree { get; init; } = GetLongestKillingSpreeAwardRecipientID(playerStatistics).ToString();
 
     /// <summary>
-    ///     The account ID of the player who earned the "Most Smackdowns" award.
+    ///     The account ID of the player who earned the "Most Smackdowns" award, or "-1" if no player earned this award.
     /// </summary>
     [PhpProperty("awd_msd")]
-    public required string AwardMostSmackdowns { get; set; }
+    public string AwardMostSmackdowns { get; init; } = (matchStatistics.AwardMostSmackdowns ?? -1).ToString();
 
     /// <summary>
-    ///     The account ID of the player who earned the "Most Kills" award.
+    ///     The account ID of the player who earned the "Most Kills" award, or "-1" if no player earned this award.
     /// </summary>
     [PhpProperty("awd_mkill")]
-    public required string AwardMostKills { get; set; }
+    public string AwardMostKills { get; init; } = (matchStatistics.AwardMostKills ?? -1).ToString();
 
     /// <summary>
-    ///     The account ID of the player who earned the "Most Assists" award.
+    ///     The account ID of the player who earned the "Most Assists" award, or "-1" if no player earned this award.
     /// </summary>
     [PhpProperty("awd_masst")]
-    public required string AwardMostAssists { get; set; }
+    public string AwardMostAssists { get; init; } = (matchStatistics.AwardMostAssists ?? -1).ToString();
 
     /// <summary>
-    ///     The account ID of the player who earned the "Least Deaths" award.
+    ///     The account ID of the player who earned the "Least Deaths" award, or "-1" if no player earned this award.
     /// </summary>
     [PhpProperty("awd_ledth")]
-    public required string AwardLeastDeaths { get; set; }
+    public string AwardLeastDeaths { get; init; } = (matchStatistics.AwardLeastDeaths ?? -1).ToString();
 
     /// <summary>
-    ///     The account ID of the player who earned the "Most Building Damage" award.
+    ///     The account ID of the player who earned the "Most Building Damage" award, or "-1" if no player earned this award.
     /// </summary>
     [PhpProperty("awd_mbdmg")]
-    public required string AwardMostBuildingDamage { get; set; }
+    public string AwardMostBuildingDamage { get; init; } = (matchStatistics.AwardMostBuildingDamage ?? -1).ToString();
 
     /// <summary>
-    ///     The account ID of the player who earned the "Most Wards" award.
+    ///     The account ID of the player who earned the "Most Wards" award, or "-1" if no player earned this award.
     /// </summary>
     [PhpProperty("awd_mwk")]
-    public required string AwardMostWards { get; set; }
+    public string AwardMostWards { get; init; } = GetMostWardsAwardRecipientID(playerStatistics).ToString();
 
     /// <summary>
-    ///     The account ID of the player who earned the "Most Hero Damage Dealt" award.
+    ///     The account ID of the player who earned the "Most Hero Damage Dealt" award, or "-1" if no player earned this award.
     /// </summary>
     [PhpProperty("awd_mhdd")]
-    public required string AwardMostHeroDamageDealt { get; set; }
+    public string AwardMostHeroDamageDealt { get; init; } = (matchStatistics.AwardMostHeroDamageDealt ?? -1).ToString();
 
     /// <summary>
-    ///     The account ID of the player who earned the "Highest Creep Score" award.
+    ///     The account ID of the player who earned the "Highest Creep Score" award, or "-1" if no player earned this award.
     /// </summary>
     [PhpProperty("awd_hcs")]
-    public required string AwardHighestCreepScore { get; set; }
+    public string AwardHighestCreepScore { get; init; } = (matchStatistics.AwardHighestCreepScore ?? -1).ToString();
+
+    private static int GetMostWardsAwardRecipientID(List<PlayerStatistics> playerStatistics)
+    {
+        if (playerStatistics.Where(player => player.WardsPlaced > 0).Any())
+            return playerStatistics.OrderByDescending(player => player.WardsPlaced).ThenByDescending(player => player.Experience).First().ID;
+
+        return -1;
+    }
+
+    private static int GetLongestKillingSpreeAwardRecipientID(List<PlayerStatistics> playerStatistics)
+    {
+        if (playerStatistics.Where(player => player.KillStreak15 > 0).Any())
+            return playerStatistics.OrderByDescending(player => player.KillStreak15).ThenByDescending(player => player.Experience).First().ID;
+
+        if (playerStatistics.Where(player => player.KillStreak10 > 0).Any())
+            return playerStatistics.OrderByDescending(player => player.KillStreak10).ThenByDescending(player => player.Experience).First().ID;
+
+        if (playerStatistics.Where(player => player.KillStreak09 > 0).Any())
+            return playerStatistics.OrderByDescending(player => player.KillStreak05).ThenByDescending(player => player.Experience).First().ID;
+
+        if (playerStatistics.Where(player => player.KillStreak08 > 0).Any())
+            return playerStatistics.OrderByDescending(player => player.KillStreak05).ThenByDescending(player => player.Experience).First().ID;
+
+        if (playerStatistics.Where(player => player.KillStreak07 > 0).Any())
+            return playerStatistics.OrderByDescending(player => player.KillStreak05).ThenByDescending(player => player.Experience).First().ID;
+
+        if (playerStatistics.Where(player => player.KillStreak06 > 0).Any())
+            return playerStatistics.OrderByDescending(player => player.KillStreak05).ThenByDescending(player => player.Experience).First().ID;
+
+        if (playerStatistics.Where(player => player.KillStreak05 > 0).Any())
+            return playerStatistics.OrderByDescending(player => player.KillStreak05).ThenByDescending(player => player.Experience).First().ID;
+
+        if (playerStatistics.Where(player => player.KillStreak04 > 0).Any())
+            return playerStatistics.OrderByDescending(player => player.KillStreak05).ThenByDescending(player => player.Experience).First().ID;
+
+        if (playerStatistics.Where(player => player.KillStreak03 > 0).Any())
+            return playerStatistics.OrderByDescending(player => player.KillStreak05).ThenByDescending(player => player.Experience).First().ID;
+
+        return -1;
+    }
+
+    private static int GetWinningTeam(List<PlayerStatistics> playerStatistics)
+        => playerStatistics.Where(player => player.Loss is 0 && player.Win is 1).DistinctBy(player => player.Team).Single().Team;
+
+    private static int IsPrivateMatch(List<PlayerStatistics> playerStatistics)
+        => playerStatistics.DistinctBy(player => player.PublicMatch).Single().PublicMatch is 0 ? 1 : 0;
 }
 
 public class MatchMastery(string heroIdentifier, int currentMasteryExperience, int matchMasteryExperience, int bonusExperience)
