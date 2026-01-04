@@ -114,7 +114,7 @@ public class KONGOR
         // Configure Forwarded Headers For Reverse Proxy Support
         builder.Services.Configure<ForwardedHeadersOptions>(options =>
         {
-            string proxy = Environment.GetEnvironmentVariable("INFRASTRUCTURE_GATEWAY") ?? throw new NullReferenceException("Infrastructure Gateway Is NULL");
+            string proxy = builder.Configuration.GetValue<string>("INFRASTRUCTURE_GATEWAY") ?? "localhost";
 
             options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedHost;
 

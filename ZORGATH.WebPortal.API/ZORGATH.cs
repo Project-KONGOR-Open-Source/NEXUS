@@ -46,7 +46,7 @@ public class ZORGATH
                 policy.QueueLimit = 10;
                 policy.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
             });
-            
+
             // Strict Limits For Authentication And Other Sensitive Endpoints
             options.AddSlidingWindowLimiter(policyName: RateLimiterPolicies.Strict, policy =>
             {
@@ -73,8 +73,8 @@ public class ZORGATH
 
         // Set CORS Origins
         string[] corsOrigins = builder.Environment.IsDevelopment()
-            ? [ "https://localhost:5553",      "https://localhost:5554",  "http://localhost:5555", "https://localhost:5556",        "https://localhost:5557"      ]
-            : [ "https://database.kongor.net", "https://chat.kongor.net", "http://api.kongor.net", "https://portal.api.kongor.net", "https://portal.ui.kongor.net" ];
+            ? ["https://localhost:5553", "https://localhost:5554", "http://localhost:5555", "https://localhost:5556", "https://localhost:5557"]
+            : ["https://database.kongor.net", "https://chat.kongor.net", "http://api.kongor.net", "https://portal.api.kongor.net", "https://portal.ui.kongor.net"];
 
         // Add CORS Policy To Allow Cross-Origin Requests
         builder.Services.AddCors(options =>
@@ -210,11 +210,11 @@ public class ZORGATH
             // Configure Security Requirements For All Endpoints
             options.AddSecurityRequirement(document =>
             {
-                OpenApiSecuritySchemeReference schemeReference = new (JwtBearerDefaults.AuthenticationScheme, document);
+                OpenApiSecuritySchemeReference schemeReference = new(JwtBearerDefaults.AuthenticationScheme, document);
 
                 List<string> requiredScopes = []; // No Scopes Required, Just A Valid JWT
 
-                OpenApiSecurityRequirement securityRequirement = new ()
+                OpenApiSecurityRequirement securityRequirement = new()
                 {
                     { schemeReference, requiredScopes }
                 };
@@ -229,7 +229,7 @@ public class ZORGATH
         // Configure Forwarded Headers For Reverse Proxy Support
         builder.Services.Configure<ForwardedHeadersOptions>(options =>
         {
-            string proxy = Environment.GetEnvironmentVariable("INFRASTRUCTURE_GATEWAY") ?? throw new NullReferenceException("Infrastructure Gateway Is NULL");
+            string proxy = builder.Configuration.GetValue<string>("INFRASTRUCTURE_GATEWAY") ?? "localhost";
 
             options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedHost;
 
