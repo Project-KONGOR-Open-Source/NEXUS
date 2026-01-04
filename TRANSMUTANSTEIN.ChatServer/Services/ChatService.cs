@@ -10,14 +10,16 @@ public class ChatService(IServiceProvider serviceProvider) : IHostedService, IDi
 
         IPAddress address = IPAddress.Any;
 
-        int clientConnectionsPort = int.Parse(Environment.GetEnvironmentVariable("CHAT_SERVER_PORT_CLIENT")
-            ?? throw new NullReferenceException("Chat Server Port For Client Connections Is NULL"));
+        IConfiguration configuration = serviceProvider.GetRequiredService<IConfiguration>();
 
-        int matchServerConnectionsPort = int.Parse(Environment.GetEnvironmentVariable("CHAT_SERVER_PORT_MATCH_SERVER")
-            ?? throw new NullReferenceException("Chat Server Port For Match Server Connections Is NULL"));
+        int clientConnectionsPort = configuration.GetValue<int>("CHAT_SERVER_PORT_CLIENT");
+        if (clientConnectionsPort == 0) throw new InvalidOperationException("Chat Server Port For Client Connections Is Not Configured");
 
-        int matchServerManagerConnectionsPort = int.Parse(Environment.GetEnvironmentVariable("CHAT_SERVER_PORT_MATCH_SERVER_MANAGER")
-            ?? throw new NullReferenceException("Chat Server Port For Match Server Manager Connections Is NULL"));
+        int matchServerConnectionsPort = configuration.GetValue<int>("CHAT_SERVER_PORT_MATCH_SERVER");
+        if (matchServerConnectionsPort == 0) throw new InvalidOperationException("Chat Server Port For Match Server Connections Is Not Configured");
+
+        int matchServerManagerConnectionsPort = configuration.GetValue<int>("CHAT_SERVER_PORT_MATCH_SERVER_MANAGER");
+        if (matchServerManagerConnectionsPort == 0) throw new InvalidOperationException("Chat Server Port For Match Server Manager Connections Is Not Configured");
 
         ChatServer = new Domain.Core.ChatServer(serviceProvider, address, clientConnectionsPort, matchServerConnectionsPort, matchServerManagerConnectionsPort);
 
