@@ -33,7 +33,7 @@ public class TCPSession : IDisposable
     /// <summary>
     ///     Socket
     /// </summary>
-    public Socket Socket { get; private set; }
+    public Socket Socket { get; private set; } = null!;
 
     /// <summary>
     ///     Number Of Bytes Pending Sent By The Session
@@ -229,15 +229,15 @@ public class TCPSession : IDisposable
 
     // Receive Buffer
     private bool _receiving;
-    private TCPBuffer _receiveBuffer;
-    private SocketAsyncEventArgs _receiveEventArg;
+    private TCPBuffer _receiveBuffer = null!;
+    private SocketAsyncEventArgs _receiveEventArg = null!;
 
     // Send Buffer
     private readonly object _sendLock = new object();
     private bool _sending;
-    private TCPBuffer _sendBufferMain;
-    private TCPBuffer _sendBufferFlush;
-    private SocketAsyncEventArgs _sendEventArg;
+    private TCPBuffer _sendBufferMain = null!;
+    private TCPBuffer _sendBufferFlush = null!;
+    private SocketAsyncEventArgs _sendEventArg = null!;
     private long _sendBufferFlushOffset;
 
     /// <summary>
@@ -254,7 +254,7 @@ public class TCPSession : IDisposable
     /// <param name="offset">Buffer Offset</param>
     /// <param name="size">Buffer Size</param>
     /// <returns>Size Of Sent Data</returns>
-    public virtual long Send(byte[] buffer, long offset, long size) => Send(buffer.AsSpan((int)offset, (int)size));
+    public virtual long Send(byte[] buffer, long offset, long size) => Send(buffer.AsSpan((int) offset, (int) size));
 
     /// <summary>
     ///     Send Data To The Client (Synchronous)
@@ -320,7 +320,7 @@ public class TCPSession : IDisposable
     /// <param name="offset">Buffer Offset</param>
     /// <param name="size">Buffer Size</param>
     /// <returns>TRUE If The Data Was Successfully Sent, Or FALSE If The Session Is Not Connected</returns>
-    public virtual bool SendAsync(byte[] buffer, long offset, long size) => SendAsync(buffer.AsSpan((int)offset, (int)size));
+    public virtual bool SendAsync(byte[] buffer, long offset, long size) => SendAsync(buffer.AsSpan((int) offset, (int) size));
 
     /// <summary>
     ///     Send Data To The Client (Asynchronous)
@@ -401,7 +401,7 @@ public class TCPSession : IDisposable
             return 0;
 
         // Receive Data From The Client
-        long received = Socket.Receive(buffer, (int)offset, (int)size, SocketFlags.None, out SocketError ec);
+        long received = Socket.Receive(buffer, (int) offset, (int) size, SocketFlags.None, out SocketError ec);
 
         if (received > 0)
         {
@@ -433,7 +433,7 @@ public class TCPSession : IDisposable
         byte[] buffer = new byte[size];
         long length = Receive(buffer);
 
-        return Encoding.UTF8.GetString(buffer, 0, (int)length);
+        return Encoding.UTF8.GetString(buffer, 0, (int) length);
     }
 
     /// <summary>
@@ -466,7 +466,7 @@ public class TCPSession : IDisposable
             {
                 // Async Receive With The Receive Handler
                 _receiving = true;
-                _receiveEventArg.SetBuffer(_receiveBuffer.Data, 0, (int)_receiveBuffer.Capacity);
+                _receiveEventArg.SetBuffer(_receiveBuffer.Data, 0, (int) _receiveBuffer.Capacity);
 
                 if (!Socket.ReceiveAsync(_receiveEventArg))
                     process = ProcessReceive(_receiveEventArg);
@@ -528,7 +528,7 @@ public class TCPSession : IDisposable
             try
             {
                 // Async Write With The Write Handler
-                _sendEventArg.SetBuffer(_sendBufferFlush.Data, (int)_sendBufferFlushOffset, (int)(_sendBufferFlush.Size - _sendBufferFlushOffset));
+                _sendEventArg.SetBuffer(_sendBufferFlush.Data, (int) _sendBufferFlushOffset, (int) (_sendBufferFlush.Size - _sendBufferFlushOffset));
 
                 if (!Socket.SendAsync(_sendEventArg))
                     process = ProcessSend(_sendEventArg);
@@ -556,14 +556,16 @@ public class TCPSession : IDisposable
         }
     }
 
-    # endregion
+    #endregion
 
-    # region IO Processing
+    #region IO Processing
 
     /// <summary>
     ///     This Method Is Called Whenever A Receive Or Send Operation Is Completed On A Socket
     /// </summary>
-    private void OnAsyncCompleted(object sender, SocketAsyncEventArgs e)
+#nullable enable
+    private void OnAsyncCompleted(object? sender, SocketAsyncEventArgs e)
+#nullable disable
     {
         if (IsSocketDisposed)
             return;

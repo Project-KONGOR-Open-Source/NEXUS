@@ -175,8 +175,10 @@ public class TCPServer : IDisposable
     # region Start/Stop Server
 
     // Server Acceptor
-    private Socket _acceptorSocket;
-    private SocketAsyncEventArgs _acceptorEventArg;
+#nullable enable
+    private Socket? _acceptorSocket;
+    private SocketAsyncEventArgs? _acceptorEventArg;
+#nullable disable
 
     // Server Statistic
     internal long _bytesPending;
@@ -360,7 +362,8 @@ public class TCPServer : IDisposable
             RegisterSession(session);
 
             // Connect New Session
-            session.Connect(e.AcceptSocket);
+            if (e.AcceptSocket != null)
+                session.Connect(e.AcceptSocket);
         }
 
         else SendError(e.SocketError);
@@ -373,7 +376,9 @@ public class TCPServer : IDisposable
     /// <summary>
     /// This Method Is The Callback Method Associated With The Socket.AcceptAsync() Operations And Is Invoked When An Accept Operation Is Complete
     /// </summary>
-    private void OnAsyncCompleted(object sender, SocketAsyncEventArgs e)
+#nullable enable
+    private void OnAsyncCompleted(object? sender, SocketAsyncEventArgs e)
+#nullable disable
     {
         if (IsSocketDisposed)
             return;
@@ -465,7 +470,7 @@ public class TCPServer : IDisposable
     /// <param name="offset">Buffer Offset</param>
     /// <param name="size">Buffer Size</param>
     /// <returns>TRUE If The Data Was Successfully Multicasted, Or FALSE If The Data Was Not Multicasted</returns>
-    public virtual bool Multicast(byte[] buffer, long offset, long size) => Multicast(buffer.AsSpan((int)offset, (int)size));
+    public virtual bool Multicast(byte[] buffer, long offset, long size) => Multicast(buffer.AsSpan((int) offset, (int) size));
 
     /// <summary>
     ///     Multicast Data To All Connected Clients
