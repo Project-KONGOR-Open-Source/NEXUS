@@ -26,13 +26,13 @@ public class TCPServer : IDisposable
     ///     Initialize TCP Server With A Given DNS Endpoint
     /// </summary>
     /// <param name="endpoint">DNS Endpoint</param>
-    public TCPServer(DnsEndPoint endpoint) : this(endpoint as EndPoint, endpoint.Host, endpoint.Port) { }
+    public TCPServer(DnsEndPoint endpoint) : this(endpoint, endpoint.Host, endpoint.Port) { }
 
     /// <summary>
     ///     Initialize TCP Server With A Given IP Endpoint
     /// </summary>
     /// <param name="endpoint">IP Endpoint</param>
-    public TCPServer(IPEndPoint endpoint) : this(endpoint as EndPoint, endpoint.Address.ToString(), endpoint.Port) { }
+    public TCPServer(IPEndPoint endpoint) : this(endpoint, endpoint.Address.ToString(), endpoint.Port) { }
 
     /// <summary>
     ///     Initialize TCP Server With A Given Endpoint, Address And Port
@@ -228,7 +228,7 @@ public class TCPServer : IDisposable
         IsSocketDisposed = false;
 
         // Apply The Option: Reuse Address
-        _acceptorSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, OptionReuseAddress);
+        _acceptorSocket!.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, OptionReuseAddress);
 
         // Apply The Option: Exclusive Address Use
         _acceptorSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ExclusiveAddressUse, OptionExclusiveAddressUse);
@@ -241,7 +241,7 @@ public class TCPServer : IDisposable
         _acceptorSocket.Bind(Endpoint);
 
         // Refresh The Endpoint Property Based On The Actual Endpoint Created
-        Endpoint = _acceptorSocket.LocalEndPoint;
+        Endpoint = _acceptorSocket.LocalEndPoint!;
 
         // Call The Server Starting Handler
         OnStarting();
@@ -282,7 +282,7 @@ public class TCPServer : IDisposable
         IsAccepting = false;
 
         // Reset Acceptor Event Arg
-        _acceptorEventArg.Completed -= OnAsyncCompleted;
+        _acceptorEventArg!.Completed -= OnAsyncCompleted;
 
         // Call The Server Stopping Handler
         OnStopping();
@@ -290,7 +290,7 @@ public class TCPServer : IDisposable
         try
         {
             // Close The Acceptor Socket
-            _acceptorSocket.Close();
+            _acceptorSocket!.Close();
 
             // Dispose The Acceptor Socket
             _acceptorSocket.Dispose();
@@ -344,7 +344,7 @@ public class TCPServer : IDisposable
         e.AcceptSocket = null;
 
         // Async Accept A New Client Connection
-        if (!_acceptorSocket.AcceptAsync(e))
+        if (!_acceptorSocket!.AcceptAsync(e))
             ProcessAccept(e);
     }
 
@@ -425,7 +425,7 @@ public class TCPServer : IDisposable
     ///     Find A Session With A Given ID
     /// </summary>
     /// <param name="id">Session ID</param>
-    /// <returns>Session With A Given ID, Or NULL If The Session It Not Connected</returns>
+    /// <returns>Session With A Given ID, Or NULL If The Session Is Not Connected</returns>
     public TCPSession FindSession(Guid id)
     {
         // Try To Find The Required Session

@@ -63,7 +63,7 @@ public class TCPSession : IDisposable
     /// <summary>
     ///     Option: Receive Buffer Size
     /// </summary>
-    public int OptionReceiveBufferSize { get; set; } = 8192;
+    public int OptionReceiveBufferSize { get; set; }
 
     /// <summary>
     ///     Option: Send Buffer Limit
@@ -73,7 +73,7 @@ public class TCPSession : IDisposable
     /// <summary>
     ///     Option: Send Buffer Size
     /// </summary>
-    public int OptionSendBufferSize { get; set; } = 8192;
+    public int OptionSendBufferSize { get; set; }
 
     # region Connect/Disconnect Session
 

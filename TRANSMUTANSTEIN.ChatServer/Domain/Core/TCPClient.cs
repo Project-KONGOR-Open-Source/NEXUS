@@ -13,6 +13,13 @@ public class TCPClient : IDisposable
     /// </summary>
     /// <param name="address">IP Address</param>
     /// <param name="port">Port Number</param>
+    /// <param name="socket">Socket</param>
+    /// <param name="connectEventArg">Connect Event Argument</param>
+    /// <param name="receiveBuffer">Receive Buffer</param>
+    /// <param name="receiveEventArg">Receive Event Argument</param>
+    /// <param name="sendBufferMain">Send Buffer Main</param>
+    /// <param name="sendBufferFlush">Send Buffer Flush</param>
+    /// <param name="sendEventArg">Send Event Argument</param>
     public TCPClient(IPAddress address, int port, Socket socket, SocketAsyncEventArgs connectEventArg, TCPBuffer receiveBuffer, SocketAsyncEventArgs receiveEventArg, TCPBuffer sendBufferMain, TCPBuffer sendBufferFlush, SocketAsyncEventArgs sendEventArg) : this(new IPEndPoint(address, port), socket, connectEventArg, receiveBuffer, receiveEventArg, sendBufferMain, sendBufferFlush, sendEventArg) { }
 
     /// <summary>
@@ -20,19 +27,40 @@ public class TCPClient : IDisposable
     /// </summary>
     /// <param name="address">IP Address</param>
     /// <param name="port">Port Number</param>
+    /// <param name="socket">Socket</param>
+    /// <param name="connectEventArg">Connect Event Argument</param>
+    /// <param name="receiveBuffer">Receive Buffer</param>
+    /// <param name="receiveEventArg">Receive Event Argument</param>
+    /// <param name="sendBufferMain">Send Buffer Main</param>
+    /// <param name="sendBufferFlush">Send Buffer Flush</param>
+    /// <param name="sendEventArg">Send Event Argument</param>
     public TCPClient(string address, int port, Socket socket, SocketAsyncEventArgs connectEventArg, TCPBuffer receiveBuffer, SocketAsyncEventArgs receiveEventArg, TCPBuffer sendBufferMain, TCPBuffer sendBufferFlush, SocketAsyncEventArgs sendEventArg) : this(new IPEndPoint(IPAddress.Parse(address), port), socket, connectEventArg, receiveBuffer, receiveEventArg, sendBufferMain, sendBufferFlush, sendEventArg) { }
 
     /// <summary>
     ///     Initialize TCP Client With A Given DNS Endpoint
     /// </summary>
     /// <param name="endpoint">DNS Endpoint</param>
-    public TCPClient(DnsEndPoint endpoint, Socket socket, SocketAsyncEventArgs connectEventArg, TCPBuffer receiveBuffer, SocketAsyncEventArgs receiveEventArg, TCPBuffer sendBufferMain, TCPBuffer sendBufferFlush, SocketAsyncEventArgs sendEventArg) : this(endpoint as EndPoint, endpoint.Host, endpoint.Port, socket, connectEventArg, receiveBuffer, receiveEventArg, sendBufferMain, sendBufferFlush, sendEventArg) { }
+    /// <param name="socket">Socket</param>
+    /// <param name="connectEventArg">Connect Event Argument</param>
+    /// <param name="receiveBuffer">Receive Buffer</param>
+    /// <param name="receiveEventArg">Receive Event Argument</param>
+    /// <param name="sendBufferMain">Send Buffer Main</param>
+    /// <param name="sendBufferFlush">Send Buffer Flush</param>
+    /// <param name="sendEventArg">Send Event Argument</param>
+    public TCPClient(DnsEndPoint endpoint, Socket socket, SocketAsyncEventArgs connectEventArg, TCPBuffer receiveBuffer, SocketAsyncEventArgs receiveEventArg, TCPBuffer sendBufferMain, TCPBuffer sendBufferFlush, SocketAsyncEventArgs sendEventArg) : this(endpoint, endpoint.Host, endpoint.Port, socket, connectEventArg, receiveBuffer, receiveEventArg, sendBufferMain, sendBufferFlush, sendEventArg) { }
 
     /// <summary>
     ///     Initialize TCP Client With A Given IP Endpoint
     /// </summary>
     /// <param name="endpoint">IP Endpoint</param>
-    public TCPClient(IPEndPoint endpoint, Socket socket, SocketAsyncEventArgs connectEventArg, TCPBuffer receiveBuffer, SocketAsyncEventArgs receiveEventArg, TCPBuffer sendBufferMain, TCPBuffer sendBufferFlush, SocketAsyncEventArgs sendEventArg) : this(endpoint as EndPoint, endpoint.Address.ToString(), endpoint.Port, socket, connectEventArg, receiveBuffer, receiveEventArg, sendBufferMain, sendBufferFlush, sendEventArg) { }
+    /// <param name="socket">Socket</param>
+    /// <param name="connectEventArg">Connect Event Argument</param>
+    /// <param name="receiveBuffer">Receive Buffer</param>
+    /// <param name="receiveEventArg">Receive Event Argument</param>
+    /// <param name="sendBufferMain">Send Buffer Main</param>
+    /// <param name="sendBufferFlush">Send Buffer Flush</param>
+    /// <param name="sendEventArg">Send Event Argument</param>
+    public TCPClient(IPEndPoint endpoint, Socket socket, SocketAsyncEventArgs connectEventArg, TCPBuffer receiveBuffer, SocketAsyncEventArgs receiveEventArg, TCPBuffer sendBufferMain, TCPBuffer sendBufferFlush, SocketAsyncEventArgs sendEventArg) : this(endpoint, endpoint.Address.ToString(), endpoint.Port, socket, connectEventArg, receiveBuffer, receiveEventArg, sendBufferMain, sendBufferFlush, sendEventArg) { }
 
     /// <summary>
     ///     Initialize TCP Client With A Given Endpoint, Address And Port
@@ -40,6 +68,13 @@ public class TCPClient : IDisposable
     /// <param name="endpoint">Endpoint</param>
     /// <param name="address">Server Address</param>
     /// <param name="port">Server Port</param>
+    /// <param name="socket">Socket</param>
+    /// <param name="connectEventArg">Connect Event Argument</param>
+    /// <param name="receiveBuffer">Receive Buffer</param>
+    /// <param name="receiveEventArg">Receive Event Argument</param>
+    /// <param name="sendBufferMain">Send Buffer Main</param>
+    /// <param name="sendBufferFlush">Send Buffer Flush</param>
+    /// <param name="sendEventArg">Send Event Argument</param>
     private TCPClient(EndPoint endpoint, string address, int port, Socket socket, SocketAsyncEventArgs connectEventArg, TCPBuffer receiveBuffer, SocketAsyncEventArgs receiveEventArg, TCPBuffer sendBufferMain, TCPBuffer sendBufferFlush, SocketAsyncEventArgs sendEventArg)
     {
         ID = Guid.CreateVersion7();
