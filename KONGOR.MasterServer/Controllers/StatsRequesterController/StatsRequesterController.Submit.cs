@@ -1,5 +1,7 @@
 ﻿namespace KONGOR.MasterServer.Controllers.StatsRequesterController;
 
+using PlayerEntity = MERRICK.DatabaseContext.Entities.Statistics.PlayerStatistics;
+
 public partial class StatsRequesterController
 {
     private async Task<IActionResult> HandleStatsSubmission(StatsForSubmissionRequestForm form)
@@ -28,7 +30,7 @@ public partial class StatsRequesterController
             // The Match Server Sends The Account Name With The Clan Tag Combined Into A Single String Value So We Need To Separate Them
             string accountName = Account.SeparateClanTagFromAccountName(form.PlayerStats[playerIndex].Values.Single().AccountName).AccountName;
 
-            PlayerStatistics? existingPlayerStatistics = await MerrickContext.PlayerStatistics
+            PlayerEntity? existingPlayerStatistics = await MerrickContext.PlayerStatistics
                 .SingleOrDefaultAsync(stats => stats.MatchID == form.MatchStats.MatchID && stats.AccountName == accountName);
 
             if (existingPlayerStatistics is null)
@@ -42,7 +44,7 @@ public partial class StatsRequesterController
                     return NotFound($@"Unable To Retrieve Account For Account Name ""{accountName}""");
                 }
 
-                PlayerStatistics playerStatistics = form.ToPlayerStatistics(playerIndex, account.ID, account.Name, account.Clan?.ID, account.Clan?.Tag);
+                PlayerEntity playerStatistics = form.ToPlayerStatistics(playerIndex, account.ID, account.Name, account.Clan?.ID, account.Clan?.Tag);
 
                 await MerrickContext.PlayerStatistics.AddAsync(playerStatistics);
             }
@@ -111,7 +113,7 @@ public partial class StatsRequesterController
             // The Match Server Sends The Account Name With The Clan Tag Combined Into A Single String Value So We Need To Separate Them
             string accountName = Account.SeparateClanTagFromAccountName(form.PlayerStats[playerIndex].Values.Single().AccountName).AccountName;
 
-            PlayerStatistics? existingPlayerStatistics = await MerrickContext.PlayerStatistics
+            PlayerEntity? existingPlayerStatistics = await MerrickContext.PlayerStatistics
                 .SingleOrDefaultAsync(stats => stats.MatchID == form.MatchStats.MatchID && stats.AccountName == accountName);
 
             if (existingPlayerStatistics is null)
@@ -125,7 +127,7 @@ public partial class StatsRequesterController
                     return NotFound($@"Unable To Retrieve Account For Account Name ""{accountName}""");
                 }
 
-                PlayerStatistics playerStatistics = form.ToPlayerStatistics(playerIndex, account.ID, account.Name, account.Clan?.ID, account.Clan?.Tag);
+                PlayerEntity playerStatistics = form.ToPlayerStatistics(playerIndex, account.ID, account.Name, account.Clan?.ID, account.Clan?.Tag);
 
                 await MerrickContext.PlayerStatistics.AddAsync(playerStatistics);
             }

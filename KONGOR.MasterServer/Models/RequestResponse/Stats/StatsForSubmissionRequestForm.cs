@@ -1,5 +1,7 @@
 ﻿namespace KONGOR.MasterServer.Models.RequestResponse.Stats;
 
+using PlayerEntity = MERRICK.DatabaseContext.Entities.Statistics.PlayerStatistics;
+
 // Properties Common To Both "submit_stats" And "resubmit_stats" Requests
 public partial class StatsForSubmissionRequestForm
 {
@@ -473,7 +475,7 @@ public static class StatsForSubmissionRequestFormExtensions
 {
     public static MatchStatistics ToMatchStatistics(this StatsForSubmissionRequestForm form, int? matchServerID = null, string? hostAccountName = null)
     {
-        MatchStatistics statistics = new ()
+        MatchStatistics statistics = new()
         {
             // A Stats Re-Submission Request Form Contains The Match Server ID While A Stats Submission Request Form Does Not
             ServerID = form.ServerID ?? (matchServerID ?? throw new NullReferenceException("Server ID Is NULL")),
@@ -516,19 +518,19 @@ public static class StatsForSubmissionRequestFormExtensions
             AwardHighestCreepScore = form.MatchStats.AwardHighestCreepScore,
 
             FragHistory = form.FragHistory?.Select(frag => new MERRICK.DatabaseContext.Entities.Statistics.FragEvent
-                { SourceID = frag.SourceID, TargetID = frag.TargetID, GameTimeSeconds = frag.GameTimeSeconds, SupporterIDs = frag.SupporterIDs }).ToList()
+            { SourceID = frag.SourceID, TargetID = frag.TargetID, GameTimeSeconds = frag.GameTimeSeconds, SupporterIDs = frag.SupporterIDs }).ToList()
         };
 
         return statistics;
     }
 
-    public static PlayerStatistics ToPlayerStatistics(this StatsForSubmissionRequestForm form, int playerIndex, int accountID, string accountName, int? clanID, string? clanTag)
+    public static PlayerEntity ToPlayerStatistics(this StatsForSubmissionRequestForm form, int playerIndex, int accountID, string accountName, int? clanID, string? clanTag)
     {
         string hero = form.PlayerStats[playerIndex].Keys.Single();
 
         IndividualPlayerStats player = form.PlayerStats[playerIndex][hero];
 
-        PlayerStatistics statistics = new ()
+        PlayerEntity statistics = new()
         {
             MatchID = form.MatchStats.MatchID,
             AccountID = accountID,
@@ -630,7 +632,7 @@ public static class StatsForSubmissionRequestFormExtensions
             TimeEarningExperience = player.TimeEarningExperience,
 
             ItemHistory = form.ItemHistory?.Where(item => item.AccountID == accountID).Select(item => new MERRICK.DatabaseContext.Entities.Statistics.ItemEvent
-                { ItemName = item.ItemName, GameTimeSeconds = item.GameTimeSeconds, EventType = item.EventType }).ToList(),
+            { ItemName = item.ItemName, GameTimeSeconds = item.GameTimeSeconds, EventType = item.EventType }).ToList(),
 
             AbilityHistory = form.AbilityHistory is not null && form.AbilityHistory.TryGetValue(accountID, out List<AbilityEvent>? abilities)
                 ? [.. abilities.Select(ability => new MERRICK.DatabaseContext.Entities.Statistics.AbilityEvent { HeroName = ability.HeroName, AbilityName = ability.AbilityName, GameTimeSeconds = ability.GameTimeSeconds, SlotIndex = ability.SlotIndex })]
