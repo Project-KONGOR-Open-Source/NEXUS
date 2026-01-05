@@ -199,7 +199,7 @@ public class MatchSummary(MatchStatistics matchStatistics, List<PlayerStatistics
     ///     The host where the match replay file is stored.
     /// </summary>
     [PhpProperty("file_host")]
-    public string FileHost { get; init; }
+    public string FileHost { get; init; } = string.Empty;
 
     /// <summary>
     ///     The size of the match replay file in bytes.
@@ -247,7 +247,7 @@ public class MatchSummary(MatchStatistics matchStatistics, List<PlayerStatistics
     ///     The match name or custom server name.
     /// </summary>
     [PhpProperty("mname")]
-    public string MatchName { get; init; }
+    public string MatchName { get; init; } = matchStatistics.HostAccountName + "'s Game";
 
     /// <summary>
     ///     The match class/type (e.g. public match, tournament match, custom match).
@@ -550,31 +550,31 @@ public class MatchSummary(MatchStatistics matchStatistics, List<PlayerStatistics
     ///     The URL for the match replay file.
     /// </summary>
     [PhpProperty("url")]
-    public string URL { get; init; }
+    public string URL { get; init; } = string.Empty;
 
     /// <summary>
     ///     The size of the match replay file (human-readable format or bytes as string).
     /// </summary>
     [PhpProperty("size")]
-    public string Size { get; init; }
+    public string Size { get; init; } = matchStatistics.FileSize.ToString();
 
     /// <summary>
     ///     The name or title of the replay file.
     /// </summary>
     [PhpProperty("name")]
-    public string Name { get; init; }
+    public string Name { get; init; } = matchStatistics.FileName;
 
     /// <summary>
     ///     The directory path where the replay file is stored.
     /// </summary>
     [PhpProperty("dir")]
-    public string Directory { get; init; }
+    public string Directory { get; init; } = "/";
 
     /// <summary>
     ///     The S3 download URL for the match replay file.
     /// </summary>
     [PhpProperty("s3_url")]
-    public string S3URL { get; init; }
+    public string S3URL { get; init; } = string.Empty;
 
     /// <summary>
     ///     The winning team ("1" for Legion, "2" for Hellbourne).
