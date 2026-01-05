@@ -25,13 +25,13 @@ public class MatchStatsResponse
     ///     A dictionary of player statistics for the match, keyed by the player's account ID.
     /// </summary>
     [PhpProperty("match_player_stats")]
-    public required Dictionary<int, PlayerStatistics> PlayerStatistics { get; set; }
+    public required Dictionary<int, MatchPlayerStatistics> MatchPlayerStatistics { get; set; }
 
     /// <summary>
     ///     A dictionary of player inventories for the match, keyed by the player's account ID.
     /// </summary>
     [PhpProperty("inventory")]
-    public required Dictionary<int, PlayerInventory> PlayerInventories { get; set; }
+    public required Dictionary<int, MatchPlayerInventory> MatchPlayerInventories { get; set; }
 
     /// <summary>
     ///     Mastery details for the hero played in the match.
@@ -131,7 +131,7 @@ public class MatchStatsResponse
     ///     The object which is the value of this element has the values of all its properties set to "0".
     /// </summary>
     [PhpProperty("quest_system")]
-    public Dictionary<string, QuestSystem> QuestSystem { get; set; } = new () { { "error", new QuestSystem() } };
+    public Dictionary<string, QuestSystem> QuestSystem { get; set; } = new() { { "error", new QuestSystem() } };
 
     /// <summary>
     ///     Unused.
@@ -139,13 +139,13 @@ public class MatchStatsResponse
     ///     Statistics related to the "Event Codex" (otherwise known as "Ascension") seasonal system.
     /// </summary>
     [PhpProperty("season_system")]
-    public SeasonSystem SeasonSystem { get; set; } = new ();
+    public SeasonSystem SeasonSystem { get; set; } = new();
 
     /// <summary>
     ///     Statistics related to the Champions Of Newerth seasonal campaign.
     /// </summary>
     [PhpProperty("con_reward")]
-    public required CampaignReward CampaignReward { get; set; } = new ();
+    public required CampaignReward CampaignReward { get; set; } = new();
 
     /// <summary>
     ///     The minimum number of matches a free-to-play (trial) account must complete to become verified.
@@ -803,7 +803,7 @@ public class MatchMastery(string heroIdentifier, int currentMasteryExperience, i
     public required int MasteryExperienceSuperBoostProductCount { get; init; }
 }
 
-public class PlayerStatistics
+public class MatchPlayerStatistics
 {
     /// <summary>
     ///     The unique identifier for the match.
@@ -1337,7 +1337,7 @@ public class SeasonProgress
     public string? Ranking { get; set; }
 }
 
-public class PlayerInventory
+public class MatchPlayerInventory
 {
     /// <summary>
     ///     The player's account ID.
