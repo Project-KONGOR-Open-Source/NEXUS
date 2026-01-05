@@ -14,12 +14,18 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <None Update="appsettings.json">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+    </ItemGroup>
+
+    <ItemGroup>
         <PackageReference Include="Aspire.Hosting.Redis" Version="13.1.0" />
         <PackageReference Include="Aspire.Hosting.SqlServer" Version="13.1.0" />
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="../DAWNBRINGER.WebPortal.UI/DAWNBRINGER.WebPortal.UI.csproj" AspireProjectMetadataTypeName="DAWNBRINGER" />
+        <ProjectReference Include="../DAWNBRINGER.WebPortal.UI/DAWNBRINGER.WebPortal.UI.csproj" AspireProjectMetadataTypeName="DawnBringerUI" />
         <ProjectReference Include="../KONGOR.MasterServer/KONGOR.MasterServer.csproj" AspireProjectMetadataTypeName="KONGOR" />
         <ProjectReference Include="../MERRICK.DatabaseContext/MERRICK.DatabaseContext.csproj" AspireProjectMetadataTypeName="MERRICK" />
         <ProjectReference Include="../TRANSMUTANSTEIN.ChatServer/TRANSMUTANSTEIN.ChatServer.csproj" AspireProjectMetadataTypeName="TRANSMUTANSTEIN" />

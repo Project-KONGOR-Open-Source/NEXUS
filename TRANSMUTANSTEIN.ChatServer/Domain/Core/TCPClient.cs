@@ -13,26 +13,54 @@ public class TCPClient : IDisposable
     /// </summary>
     /// <param name="address">IP Address</param>
     /// <param name="port">Port Number</param>
-    public TCPClient(IPAddress address, int port) : this(new IPEndPoint(address, port)) { }
+    /// <param name="socket">Socket</param>
+    /// <param name="connectEventArg">Connect Event Argument</param>
+    /// <param name="receiveBuffer">Receive Buffer</param>
+    /// <param name="receiveEventArg">Receive Event Argument</param>
+    /// <param name="sendBufferMain">Send Buffer Main</param>
+    /// <param name="sendBufferFlush">Send Buffer Flush</param>
+    /// <param name="sendEventArg">Send Event Argument</param>
+    public TCPClient(IPAddress address, int port, Socket socket, SocketAsyncEventArgs connectEventArg, TCPBuffer receiveBuffer, SocketAsyncEventArgs receiveEventArg, TCPBuffer sendBufferMain, TCPBuffer sendBufferFlush, SocketAsyncEventArgs sendEventArg) : this(new IPEndPoint(address, port), socket, connectEventArg, receiveBuffer, receiveEventArg, sendBufferMain, sendBufferFlush, sendEventArg) { }
 
     /// <summary>
     ///     Initialize TCP Client With A Given Server IP Address And Port Number
     /// </summary>
     /// <param name="address">IP Address</param>
     /// <param name="port">Port Number</param>
-    public TCPClient(string address, int port) : this(new IPEndPoint(IPAddress.Parse(address), port)) { }
+    /// <param name="socket">Socket</param>
+    /// <param name="connectEventArg">Connect Event Argument</param>
+    /// <param name="receiveBuffer">Receive Buffer</param>
+    /// <param name="receiveEventArg">Receive Event Argument</param>
+    /// <param name="sendBufferMain">Send Buffer Main</param>
+    /// <param name="sendBufferFlush">Send Buffer Flush</param>
+    /// <param name="sendEventArg">Send Event Argument</param>
+    public TCPClient(string address, int port, Socket socket, SocketAsyncEventArgs connectEventArg, TCPBuffer receiveBuffer, SocketAsyncEventArgs receiveEventArg, TCPBuffer sendBufferMain, TCPBuffer sendBufferFlush, SocketAsyncEventArgs sendEventArg) : this(new IPEndPoint(IPAddress.Parse(address), port), socket, connectEventArg, receiveBuffer, receiveEventArg, sendBufferMain, sendBufferFlush, sendEventArg) { }
 
     /// <summary>
     ///     Initialize TCP Client With A Given DNS Endpoint
     /// </summary>
     /// <param name="endpoint">DNS Endpoint</param>
-    public TCPClient(DnsEndPoint endpoint) : this(endpoint as EndPoint, endpoint.Host, endpoint.Port) { }
+    /// <param name="socket">Socket</param>
+    /// <param name="connectEventArg">Connect Event Argument</param>
+    /// <param name="receiveBuffer">Receive Buffer</param>
+    /// <param name="receiveEventArg">Receive Event Argument</param>
+    /// <param name="sendBufferMain">Send Buffer Main</param>
+    /// <param name="sendBufferFlush">Send Buffer Flush</param>
+    /// <param name="sendEventArg">Send Event Argument</param>
+    public TCPClient(DnsEndPoint endpoint, Socket socket, SocketAsyncEventArgs connectEventArg, TCPBuffer receiveBuffer, SocketAsyncEventArgs receiveEventArg, TCPBuffer sendBufferMain, TCPBuffer sendBufferFlush, SocketAsyncEventArgs sendEventArg) : this(endpoint, endpoint.Host, endpoint.Port, socket, connectEventArg, receiveBuffer, receiveEventArg, sendBufferMain, sendBufferFlush, sendEventArg) { }
 
     /// <summary>
     ///     Initialize TCP Client With A Given IP Endpoint
     /// </summary>
     /// <param name="endpoint">IP Endpoint</param>
-    public TCPClient(IPEndPoint endpoint) : this(endpoint as EndPoint, endpoint.Address.ToString(), endpoint.Port) { }
+    /// <param name="socket">Socket</param>
+    /// <param name="connectEventArg">Connect Event Argument</param>
+    /// <param name="receiveBuffer">Receive Buffer</param>
+    /// <param name="receiveEventArg">Receive Event Argument</param>
+    /// <param name="sendBufferMain">Send Buffer Main</param>
+    /// <param name="sendBufferFlush">Send Buffer Flush</param>
+    /// <param name="sendEventArg">Send Event Argument</param>
+    public TCPClient(IPEndPoint endpoint, Socket socket, SocketAsyncEventArgs connectEventArg, TCPBuffer receiveBuffer, SocketAsyncEventArgs receiveEventArg, TCPBuffer sendBufferMain, TCPBuffer sendBufferFlush, SocketAsyncEventArgs sendEventArg) : this(endpoint, endpoint.Address.ToString(), endpoint.Port, socket, connectEventArg, receiveBuffer, receiveEventArg, sendBufferMain, sendBufferFlush, sendEventArg) { }
 
     /// <summary>
     ///     Initialize TCP Client With A Given Endpoint, Address And Port
@@ -40,11 +68,25 @@ public class TCPClient : IDisposable
     /// <param name="endpoint">Endpoint</param>
     /// <param name="address">Server Address</param>
     /// <param name="port">Server Port</param>
-    private TCPClient(EndPoint endpoint, string address, int port)
+    /// <param name="socket">Socket</param>
+    /// <param name="connectEventArg">Connect Event Argument</param>
+    /// <param name="receiveBuffer">Receive Buffer</param>
+    /// <param name="receiveEventArg">Receive Event Argument</param>
+    /// <param name="sendBufferMain">Send Buffer Main</param>
+    /// <param name="sendBufferFlush">Send Buffer Flush</param>
+    /// <param name="sendEventArg">Send Event Argument</param>
+    private TCPClient(EndPoint endpoint, string address, int port, Socket socket, SocketAsyncEventArgs connectEventArg, TCPBuffer receiveBuffer, SocketAsyncEventArgs receiveEventArg, TCPBuffer sendBufferMain, TCPBuffer sendBufferFlush, SocketAsyncEventArgs sendEventArg)
     {
         ID = Guid.CreateVersion7();
         Address = address;
         Port = port;
+        Socket = socket;
+        _connectEventArg = connectEventArg;
+        _receiveBuffer = receiveBuffer;
+        _receiveEventArg = receiveEventArg;
+        _sendBufferMain = sendBufferMain;
+        _sendBufferFlush = sendBufferFlush;
+        _sendEventArg = sendEventArg;
         Endpoint = endpoint;
     }
 
@@ -477,7 +519,7 @@ public class TCPClient : IDisposable
     /// <param name="offset">Buffer Offset</param>
     /// <param name="size">Buffer Size</param>
     /// <returns>Size Of Sent Data</returns>
-    public virtual long Send(byte[] buffer, long offset, long size) => Send(buffer.AsSpan((int)offset, (int)size));
+    public virtual long Send(byte[] buffer, long offset, long size) => Send(buffer.AsSpan((int) offset, (int) size));
 
     /// <summary>
     ///     Send Data To The Server (Synchronous)
@@ -541,7 +583,7 @@ public class TCPClient : IDisposable
     /// <param name="offset">Buffer Offset</param>
     /// <param name="size">Buffer Size</param>
     /// <returns>TRUE If The Data Was Successfully Sent, Or FALSE If The Client Is Not Connected</returns>
-    public virtual bool SendAsync(byte[] buffer, long offset, long size) => SendAsync(buffer.AsSpan((int)offset, (int)size));
+    public virtual bool SendAsync(byte[] buffer, long offset, long size) => SendAsync(buffer.AsSpan((int) offset, (int) size));
 
     /// <summary>
     ///     Send Data To The Server (Asynchronous)
@@ -621,7 +663,7 @@ public class TCPClient : IDisposable
             return 0;
 
         // Receive Data From The Server
-        long received = Socket.Receive(buffer, (int)offset, (int)size, SocketFlags.None, out SocketError ec);
+        long received = Socket.Receive(buffer, (int) offset, (int) size, SocketFlags.None, out SocketError ec);
         if (received > 0)
         {
             // Update Statistic
@@ -651,7 +693,7 @@ public class TCPClient : IDisposable
         byte[] buffer = new byte[size];
         long length = Receive(buffer);
 
-        return Encoding.UTF8.GetString(buffer, 0, (int)length);
+        return Encoding.UTF8.GetString(buffer, 0, (int) length);
     }
 
     /// <summary>
@@ -684,7 +726,7 @@ public class TCPClient : IDisposable
             {
                 // Async Receive With The Receive Handler
                 _receiving = true;
-                _receiveEventArg.SetBuffer(_receiveBuffer.Data, 0, (int)_receiveBuffer.Capacity);
+                _receiveEventArg.SetBuffer(_receiveBuffer.Data, 0, (int) _receiveBuffer.Capacity);
 
                 if (!Socket.ReceiveAsync(_receiveEventArg))
                     process = ProcessReceive(_receiveEventArg);
@@ -746,7 +788,7 @@ public class TCPClient : IDisposable
             try
             {
                 // Async Write With The Write Handler
-                _sendEventArg.SetBuffer(_sendBufferFlush.Data, (int)_sendBufferFlushOffset, (int)(_sendBufferFlush.Size - _sendBufferFlushOffset));
+                _sendEventArg.SetBuffer(_sendBufferFlush.Data, (int) _sendBufferFlushOffset, (int) (_sendBufferFlush.Size - _sendBufferFlushOffset));
 
                 if (!Socket.SendAsync(_sendEventArg))
                     process = ProcessSend(_sendEventArg);
@@ -774,14 +816,16 @@ public class TCPClient : IDisposable
         }
     }
 
-    # endregion
+    #endregion
 
-    # region IO Processing
+    #region IO Processing
 
     /// <summary>
     ///     This Method Is Called Whenever A Receive Or Send Operation Is Completed On A Socket
     /// </summary>
-    private void OnAsyncCompleted(object sender, SocketAsyncEventArgs e)
+#nullable enable
+    private void OnAsyncCompleted(object? sender, SocketAsyncEventArgs e)
+#nullable disable
     {
         if (IsSocketDisposed)
             return;

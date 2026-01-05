@@ -131,7 +131,7 @@ public class MatchStatsResponse
     ///     The object which is the value of this element has the values of all its properties set to "0".
     /// </summary>
     [PhpProperty("quest_system")]
-    public Dictionary<string, QuestSystem> QuestSystem { get; set; } = new () { { "error", new QuestSystem() } };
+    public Dictionary<string, QuestSystem> QuestSystem { get; set; } = new() { { "error", new QuestSystem() } };
 
     /// <summary>
     ///     Unused.
@@ -139,13 +139,13 @@ public class MatchStatsResponse
     ///     Statistics related to the "Event Codex" (otherwise known as "Ascension") seasonal system.
     /// </summary>
     [PhpProperty("season_system")]
-    public SeasonSystem SeasonSystem { get; set; } = new ();
+    public SeasonSystem SeasonSystem { get; set; } = new();
 
     /// <summary>
     ///     Statistics related to the Champions Of Newerth seasonal campaign.
     /// </summary>
     [PhpProperty("con_reward")]
-    public required CampaignReward CampaignReward { get; set; } = new ();
+    public required CampaignReward CampaignReward { get; set; } = new();
 
     /// <summary>
     ///     The minimum number of matches a free-to-play (trial) account must complete to become verified.

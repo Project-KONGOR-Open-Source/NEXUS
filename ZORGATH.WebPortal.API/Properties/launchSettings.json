@@ -4,10 +4,10 @@
         "ZORGATH.WebPortal.API Development": {
             "commandName": "Project",
             "launchBrowser": true,
-            "applicationUrl": "https://0.0.0.0:5556",
+            "applicationUrl": "https://localhost:5201;http://localhost:5200",
             "launchUrl": "swagger",
             "environmentVariables": {
-                "APPLICATION_URL": "https://0.0.0.0:5556",
+                "APPLICATION_URL": "https://localhost:5201",
                 "ASPNETCORE_ENVIRONMENT": "Development",
                 "DOTNET_ENVIRONMENT": "Development"
             },
@@ -16,7 +16,7 @@
         "ZORGATH.WebPortal.API Production": {
             "commandName": "Project",
             "launchBrowser": true,
-            "applicationUrl": "https://0.0.0.0:5556",
+            "applicationUrl": "https://0.0.0.0:5201;http://0.0.0.0:5200",
             "launchUrl": "swagger",
             "environmentVariables": {
                 "APPLICATION_URL": "https://portal.api.kongor.net",

@@ -12,7 +12,7 @@ public sealed class SRPAuthenticationTests
     {
         await using WebApplicationFactory<KONGORAssemblyMarker> webApplicationFactory = KONGORServiceProvider.CreateOrchestratedInstance();
 
-        SRPAuthenticationService srpAuthenticationService = new (webApplicationFactory);
+        SRPAuthenticationService srpAuthenticationService = new(webApplicationFactory);
 
         (Account account, string returnedPassword) = await srpAuthenticationService.CreateAccountWithSRPCredentials(emailAddress, accountName, password);
 
@@ -52,12 +52,12 @@ public sealed class SRPAuthenticationTests
     {
         await using WebApplicationFactory<KONGORAssemblyMarker> webApplicationFactory = KONGORServiceProvider.CreateOrchestratedInstance();
 
-        SRPAuthenticationService srpAuthenticationService = new (webApplicationFactory);
+        SRPAuthenticationService srpAuthenticationService = new(webApplicationFactory);
 
         (Account account1, string _) = await srpAuthenticationService.CreateAccountWithSRPCredentials(emailAddress, accountName, password);
         (Account account2, string _) = await srpAuthenticationService.CreateAccountWithSRPCredentials($"other_{emailAddress}", $"Other{accountName}", password);
 
-        await Assert.That(account1.User.SRPPasswordSalt).IsNotEqualTo(account2.User.SRPPasswordSalt);
+        await Assert.That<string?>(account1.User.SRPPasswordSalt).IsNotEqualTo(account2.User.SRPPasswordSalt);
     }
 
     [Test]
@@ -67,7 +67,7 @@ public sealed class SRPAuthenticationTests
     {
         await using WebApplicationFactory<KONGORAssemblyMarker> webApplicationFactory = KONGORServiceProvider.CreateOrchestratedInstance();
 
-        SRPAuthenticationService srpAuthenticationService = new (webApplicationFactory);
+        SRPAuthenticationService srpAuthenticationService = new(webApplicationFactory);
 
         (Account account, string _) = await srpAuthenticationService.CreateAccountWithSRPCredentials(emailAddress, accountName, password);
 
@@ -84,9 +84,9 @@ public sealed class SRPAuthenticationTests
     {
         await using WebApplicationFactory<KONGORAssemblyMarker> webApplicationFactory = KONGORServiceProvider.CreateOrchestratedInstance();
 
-        SRPAuthenticationService srpAuthenticationService = new (webApplicationFactory);
+        SRPAuthenticationService srpAuthenticationService = new(webApplicationFactory);
 
-        (Account account, string _) = await srpAuthenticationService.CreateAccountWithSRPCredentials(emailAddress, accountName, password);
+        _ = await srpAuthenticationService.CreateAccountWithSRPCredentials(emailAddress, accountName, password);
 
         MerrickContext databaseContext = webApplicationFactory.Services.GetRequiredService<MerrickContext>();
 
@@ -111,7 +111,7 @@ public sealed class SRPAuthenticationTests
     {
         await using WebApplicationFactory<KONGORAssemblyMarker> webApplicationFactory = KONGORServiceProvider.CreateOrchestratedInstance();
 
-        SRPAuthenticationService srpAuthenticationService = new (webApplicationFactory);
+        SRPAuthenticationService srpAuthenticationService = new(webApplicationFactory);
 
         (Account account, string _) = await srpAuthenticationService.CreateAccountWithSRPCredentials(emailAddress, accountName, password);
 
@@ -119,10 +119,10 @@ public sealed class SRPAuthenticationTests
         {
             await Assert.That(account.User.SRPPasswordHash).IsNotEmpty();
             await Assert.That(account.User.PBKDF2PasswordHash).IsNotEmpty();
-            await Assert.That(account.User.SRPPasswordHash).IsNotEqualTo(account.User.PBKDF2PasswordHash);
+            await Assert.That<string?>(account.User.SRPPasswordHash).IsNotEqualTo(account.User.PBKDF2PasswordHash);
         }
 
-        PasswordHasher<User> passwordHasher = new ();
+        PasswordHasher<User> passwordHasher = new();
 
         PasswordVerificationResult verificationResult = passwordHasher.VerifyHashedPassword(account.User, account.User.PBKDF2PasswordHash, password);
 
@@ -136,7 +136,7 @@ public sealed class SRPAuthenticationTests
     {
         await using WebApplicationFactory<KONGORAssemblyMarker> webApplicationFactory = KONGORServiceProvider.CreateOrchestratedInstance();
 
-        SRPAuthenticationService srpAuthenticationService = new (webApplicationFactory);
+        SRPAuthenticationService srpAuthenticationService = new(webApplicationFactory);
 
         SRPAuthenticationData result = await srpAuthenticationService.AuthenticateWithSRP(emailAddress, accountName, password);
 
@@ -159,7 +159,7 @@ public sealed class SRPAuthenticationTests
     {
         await using WebApplicationFactory<KONGORAssemblyMarker> webApplicationFactory = KONGORServiceProvider.CreateOrchestratedInstance();
 
-        SRPAuthenticationService srpAuthenticationService = new (webApplicationFactory);
+        SRPAuthenticationService srpAuthenticationService = new(webApplicationFactory);
 
         SRPAuthenticationData result = await srpAuthenticationService.AuthenticateWithSRP(emailAddress, accountName, password);
 
@@ -194,17 +194,17 @@ public sealed class SRPAuthenticationTests
     {
         await using WebApplicationFactory<KONGORAssemblyMarker> webApplicationFactory = KONGORServiceProvider.CreateOrchestratedInstance();
 
-        SRPAuthenticationService srpAuthenticationService = new (webApplicationFactory);
+        SRPAuthenticationService srpAuthenticationService = new(webApplicationFactory);
 
         (Account account, string _) = await srpAuthenticationService.CreateAccountWithSRPCredentials(emailAddress, accountName, password);
 
         SrpParameters parameters = SrpParameters.Create<System.Security.Cryptography.SHA256>
             (SRPAuthenticationSessionDataStageOne.SafePrimeNumber, SRPAuthenticationSessionDataStageOne.MultiplicativeGroupGenerator);
 
-        SrpClient client = new (parameters);
+        SrpClient client = new(parameters);
         SrpEphemeral clientEphemeral = client.GenerateEphemeral();
 
-        (bool success, string? sessionSalt, string? passwordSalt, string? serverPublicEphemeral, string? errorMessage)
+        (bool success, string? sessionSalt, string? passwordSalt, string? serverPublicEphemeral, string? _)
             = await srpAuthenticationService.PerformPreAuthentication(accountName, clientEphemeral.Public);
 
         using (Assert.Multiple())
@@ -223,15 +223,15 @@ public sealed class SRPAuthenticationTests
     {
         await using WebApplicationFactory<KONGORAssemblyMarker> webApplicationFactory = KONGORServiceProvider.CreateOrchestratedInstance();
 
-        SRPAuthenticationService srpAuthenticationService = new (webApplicationFactory);
+        SRPAuthenticationService srpAuthenticationService = new(webApplicationFactory);
 
         SrpParameters parameters = SrpParameters.Create<System.Security.Cryptography.SHA256>
             (SRPAuthenticationSessionDataStageOne.SafePrimeNumber, SRPAuthenticationSessionDataStageOne.MultiplicativeGroupGenerator);
 
-        SrpClient client = new (parameters);
+        SrpClient client = new(parameters);
         SrpEphemeral clientEphemeral = client.GenerateEphemeral();
 
-        (bool success, string? sessionSalt, string? passwordSalt, string? serverPublicEphemeral, string? errorMessage)
+        (bool success, string? _, string? _, string? _, string? errorMessage)
             = await srpAuthenticationService.PerformPreAuthentication(accountName, clientEphemeral.Public);
 
         using (Assert.Multiple())
@@ -248,7 +248,7 @@ public sealed class SRPAuthenticationTests
     {
         await using WebApplicationFactory<KONGORAssemblyMarker> webApplicationFactory = KONGORServiceProvider.CreateOrchestratedInstance();
 
-        SRPAuthenticationService srpAuthenticationService = new (webApplicationFactory);
+        SRPAuthenticationService srpAuthenticationService = new(webApplicationFactory);
 
         SRPAuthenticationData result = await srpAuthenticationService.AuthenticateWithSRP(emailAddress, accountName, password);
 
@@ -272,7 +272,7 @@ public sealed class SRPAuthenticationTests
     {
         await using WebApplicationFactory<KONGORAssemblyMarker> webApplicationFactory = KONGORServiceProvider.CreateOrchestratedInstance();
 
-        SRPAuthenticationService srpAuthenticationService = new (webApplicationFactory);
+        SRPAuthenticationService srpAuthenticationService = new(webApplicationFactory);
 
         SRPAuthenticationData result1 = await srpAuthenticationService.AuthenticateWithSRP(emailAddress, accountName, password);
         SRPAuthenticationData result2 = await srpAuthenticationService.AuthenticateWithSRP($"other_{emailAddress}", $"Other{accountName}", password);
@@ -281,7 +281,7 @@ public sealed class SRPAuthenticationTests
         {
             await Assert.That(result1.Success).IsTrue();
             await Assert.That(result2.Success).IsTrue();
-            await Assert.That(result1.Cookie).IsNotEqualTo(result2.Cookie);
+            await Assert.That<string?>(result1.Cookie).IsNotEqualTo(result2.Cookie);
         }
     }
 
@@ -291,7 +291,7 @@ public sealed class SRPAuthenticationTests
     {
         await using WebApplicationFactory<KONGORAssemblyMarker> webApplicationFactory = KONGORServiceProvider.CreateOrchestratedInstance();
 
-        SRPAuthenticationService srpAuthenticationService = new (webApplicationFactory);
+        SRPAuthenticationService srpAuthenticationService = new(webApplicationFactory);
 
         (Account account, string _) = await srpAuthenticationService.CreateAccountWithSRPCredentials(emailAddress, accountName, password);
 
@@ -317,7 +317,7 @@ public sealed class SRPAuthenticationTests
     {
         await using WebApplicationFactory<KONGORAssemblyMarker> webApplicationFactory = KONGORServiceProvider.CreateOrchestratedInstance();
 
-        SRPAuthenticationService srpAuthenticationService = new (webApplicationFactory);
+        SRPAuthenticationService srpAuthenticationService = new(webApplicationFactory);
 
         (Account account, string _) = await srpAuthenticationService.CreateAccountWithSRPCredentials(emailAddress, accountName, correctPassword);
 
@@ -336,7 +336,7 @@ public sealed class SRPAuthenticationTests
     {
         await using WebApplicationFactory<KONGORAssemblyMarker> webApplicationFactory = KONGORServiceProvider.CreateOrchestratedInstance();
 
-        SRPAuthenticationService srpAuthenticationService = new (webApplicationFactory);
+        SRPAuthenticationService srpAuthenticationService = new(webApplicationFactory);
 
         (Account account, string _) = await srpAuthenticationService.CreateAccountWithSRPCredentials(emailAddress, accountName, password);
 
@@ -347,7 +347,7 @@ public sealed class SRPAuthenticationTests
         {
             await Assert.That(result1.Success).IsTrue();
             await Assert.That(result2.Success).IsTrue();
-            await Assert.That(result1.Cookie).IsNotEqualTo(result2.Cookie);
+            await Assert.That<string?>(result1.Cookie).IsNotEqualTo(result2.Cookie);
         }
     }
 
@@ -357,7 +357,7 @@ public sealed class SRPAuthenticationTests
     {
         await using WebApplicationFactory<KONGORAssemblyMarker> webApplicationFactory = KONGORServiceProvider.CreateOrchestratedInstance();
 
-        SRPAuthenticationService srpAuthenticationService = new (webApplicationFactory);
+        SRPAuthenticationService srpAuthenticationService = new(webApplicationFactory);
 
         (Account account, string _) = await srpAuthenticationService.CreateAccountWithSRPCredentials(emailAddress, accountName, password);
 
@@ -378,9 +378,9 @@ public sealed class SRPAuthenticationTests
     {
         await using WebApplicationFactory<KONGORAssemblyMarker> webApplicationFactory = KONGORServiceProvider.CreateOrchestratedInstance();
 
-        SRPAuthenticationService srpAuthenticationService = new (webApplicationFactory);
+        SRPAuthenticationService srpAuthenticationService = new(webApplicationFactory);
 
-        (Account account, string _) = await srpAuthenticationService.CreateAccountWithSRPCredentials(emailAddress, accountName, password);
+        _ = await srpAuthenticationService.CreateAccountWithSRPCredentials(emailAddress, accountName, password);
 
         HttpClient httpClient = webApplicationFactory.CreateClient();
 
@@ -391,10 +391,10 @@ public sealed class SRPAuthenticationTests
 
         parameters.Generator = parameters.Pad(parameters.Generator);
 
-        SrpClient client = new (parameters);
+        SrpClient client = new(parameters);
         SrpEphemeral clientEphemeral = client.GenerateEphemeral();
 
-        (bool preAuthSuccess, string? sessionSalt, string? passwordSalt, string? serverPublicEphemeral, string? preAuthError)
+        (bool preAuthSuccess, string? sessionSalt, string? passwordSalt, string? serverPublicEphemeral, string? _)
             = await srpAuthenticationService.PerformPreAuthentication(accountName, clientEphemeral.Public);
 
         await Assert.That(preAuthSuccess).IsTrue();
@@ -411,7 +411,7 @@ public sealed class SRPAuthenticationTests
             ? clientSession.Proof[..^1] + "X"
             : "TamperedProof123";
 
-        Dictionary<string, string> authFormData = new ()
+        Dictionary<string, string> authFormData = new()
         {
             { "login", accountName },
             { "proof", tamperedProof },
@@ -422,7 +422,7 @@ public sealed class SRPAuthenticationTests
             { "SysInfo", "testhash|testhash|testhash|testhash|testhash" }
         };
 
-        FormUrlEncodedContent authContent = new (authFormData);
+        FormUrlEncodedContent authContent = new(authFormData);
         HttpResponseMessage authResponse = await httpClient.PostAsync("client_requester.php?f=srpAuth", authContent);
 
         await Assert.That(authResponse.IsSuccessStatusCode).IsFalse();
@@ -434,9 +434,9 @@ public sealed class SRPAuthenticationTests
     {
         await using WebApplicationFactory<KONGORAssemblyMarker> webApplicationFactory = KONGORServiceProvider.CreateOrchestratedInstance();
 
-        SRPAuthenticationService srpAuthenticationService = new (webApplicationFactory);
+        SRPAuthenticationService srpAuthenticationService = new(webApplicationFactory);
 
-        (Account account, string _) = await srpAuthenticationService.CreateAccountWithSRPCredentials(emailAddress, accountName, password);
+        _ = await srpAuthenticationService.CreateAccountWithSRPCredentials(emailAddress, accountName, password);
 
         HttpClient httpClient = webApplicationFactory.CreateClient();
 
@@ -447,10 +447,10 @@ public sealed class SRPAuthenticationTests
 
         parameters.Generator = parameters.Pad(parameters.Generator);
 
-        SrpClient client = new (parameters);
+        SrpClient client = new(parameters);
         SrpEphemeral clientEphemeral = client.GenerateEphemeral();
 
-        (bool preAuthSuccess, string? sessionSalt, string? passwordSalt, string? serverPublicEphemeral, string? preAuthError)
+        (bool preAuthSuccess, string? sessionSalt, string? passwordSalt, string? serverPublicEphemeral, string? _)
             = await srpAuthenticationService.PerformPreAuthentication(accountName, clientEphemeral.Public);
 
         await Assert.That(preAuthSuccess).IsTrue();
@@ -463,7 +463,7 @@ public sealed class SRPAuthenticationTests
 
         SrpSession clientSession = client.DeriveSession(clientEphemeral.Secret, serverPublicEphemeral, sessionSalt, accountName, privateClientKey);
 
-        Dictionary<string, string> authFormData = new ()
+        Dictionary<string, string> authFormData = new()
         {
             { "login", accountName },
             { "proof", clientSession.Proof },
@@ -474,7 +474,7 @@ public sealed class SRPAuthenticationTests
             { "SysInfo", "testhash|testhash|testhash|testhash|testhash" }
         };
 
-        FormUrlEncodedContent authContent = new (authFormData);
+        FormUrlEncodedContent authContent = new(authFormData);
         HttpResponseMessage authResponse = await httpClient.PostAsync("client_requester.php?f=srpAuth", authContent);
 
         string authResponseBody = await authResponse.Content.ReadAsStringAsync();

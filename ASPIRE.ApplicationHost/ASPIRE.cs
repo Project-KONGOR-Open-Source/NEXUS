@@ -44,7 +44,7 @@ public class ASPIRE
             .WithParentRelationship(distributedCache); // Set Distributed Cache As Parent Resource
 
         // Create Distributed Cache Dashboard Resource
-        Action<IResourceBuilder<RedisInsightResource>> distributedCacheDashboard = builder => builder
+        Action<IResourceBuilder<RedisInsightResource>> distributedCacheDashboard = dashboard => dashboard
             .WithImageTag("latest") // Latest Redis Insight Image: https://github.com/RedisInsight/RedisInsight/releases/latest
             .WithLifetime(ContainerLifetime.Persistent).WithDataVolume("distributed-cache-dashboard-data") // Persist Cached Data Between Distributed Application Restarts But Not Between Resource Container Restarts
             .WithEnvironment("RI_ACCEPT_TERMS_AND_CONDITIONS", "true") // Automatically Accept Terms And Conditions: https://redis.io/docs/latest/operate/redisinsight/configuration/
@@ -73,14 +73,10 @@ public class ASPIRE
         // While Aspire's Service Orchestration Is Not Running, The Port To Connect Directly To The Running SQL Server Container Can Be Found In Docker (e.g. "docker container list")
         const int databasePort = 1433;
 
-        // Configure SQL Server Data Directory
-        string userHomeDirectory = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-        string databaseDirectory = Path.Combine(userHomeDirectory, "SQL", "MERRICK", databaseName);
-
-        // Add SQL Server Container With Persistent Data In The Current User's Directory (Cross-Platform)
+        // Add SQL Server Container With Persistent Data In A Docker Named Volume (Avoids Windows Host I/O Issues)
         IResourceBuilder<SqlServerServerResource> databaseServer = builder.AddSqlServer("database-server", password: databasePassword, port: databasePort)
             .WithImageTag("2022-latest") // SQL Server Image Tags: https://mcr.microsoft.com/en-gb/artifact/mar/mssql/server/tags
-            .WithLifetime(ContainerLifetime.Persistent).WithDataBindMount(source: databaseDirectory) // Persist SQL Server Data Both Between Distributed Application Restarts And Resource Container Restarts
+            .WithLifetime(ContainerLifetime.Persistent).WithDataVolume("merrick-data-" + databaseName) // Persist SQL Server Data In A Docker Volume Managed By The Daemon
             .WithEnvironment("ACCEPT_EULA", "Y").WithEnvironment("MSSQL_PID", "Developer"); // SQL Server Image Information: https://mcr.microsoft.com/en-gb/artifact/mar/mssql/server/about
 
         // Create Resource Relationship After Parent Resource Is Defined
@@ -119,8 +115,14 @@ public class ASPIRE
             .WithEnvironment("INFRASTRUCTURE_GATEWAY", gateway);
 
         // Add Web Portal API Project
-        builder.AddProject<ZORGATH>("web-portal-api", builder.Environment.IsProduction() ? "ZORGATH.WebPortal.API Production" : "ZORGATH.WebPortal.API Development")
+        IResourceBuilder<ProjectResource> webPortalApi = builder.AddProject<ZORGATH>("web-portal-api", builder.Environment.IsProduction() ? "ZORGATH.WebPortal.API Production" : "ZORGATH.WebPortal.API Development")
             .WithReference(database, connectionName: "MERRICK").WaitFor(database) // Connect To SQL Server Database And Wait For It To Start
+            .WithEnvironment("INFRASTRUCTURE_GATEWAY", gateway);
+
+        // Add Web Portal UI Project
+        builder.AddProject<DawnBringerUI>("web-portal-ui", builder.Environment.IsProduction() ? "DAWNBRINGER.WebPortal.UI Production" : "DAWNBRINGER.WebPortal.UI Development")
+            .WithReference(database, connectionName: "MERRICK").WaitFor(database) // Connect To SQL Server Database And Wait For It To Start
+            .WithReference(webPortalApi.GetEndpoint("http")).WaitFor(webPortalApi) // Connect To Web Portal API
             .WithEnvironment("INFRASTRUCTURE_GATEWAY", gateway);
 
         // Start Orchestrating Distributed Application

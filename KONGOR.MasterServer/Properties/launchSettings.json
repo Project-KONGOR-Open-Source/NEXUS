@@ -4,10 +4,10 @@
         "KONGOR.MasterServer Development": {
             "commandName": "Project",
             "launchBrowser": true,
-            "applicationUrl": "http://0.0.0.0:5555",
-            "launchUrl": "swagger",
+            "applicationUrl": "http://0.0.0.0:55555",
+            "launchUrl": "http://localhost:55555/swagger",
             "environmentVariables": {
-                "APPLICATION_URL": "http://0.0.0.0:5555",
+                "APPLICATION_URL": "http://0.0.0.0:55555",
                 "ASPNETCORE_ENVIRONMENT": "Development",
                 "DOTNET_ENVIRONMENT": "Development"
             },
@@ -16,7 +16,7 @@
         "KONGOR.MasterServer Production": {
             "commandName": "Project",
             "launchBrowser": true,
-            "applicationUrl": "http://0.0.0.0:5555",
+            "applicationUrl": "http://0.0.0.0:55555",
             "launchUrl": "swagger",
             "environmentVariables": {
                 "APPLICATION_URL": "http://api.kongor.net",

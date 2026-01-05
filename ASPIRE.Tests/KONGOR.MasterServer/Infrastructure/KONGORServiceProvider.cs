@@ -18,12 +18,15 @@ public static class KONGORServiceProvider
         Environment.SetEnvironmentVariable("CHAT_SERVER_PORT_MATCH_SERVER", "11032");
         Environment.SetEnvironmentVariable("CHAT_SERVER_PORT_MATCH_SERVER_MANAGER", "11033");
         Environment.SetEnvironmentVariable("APPLICATION_URL", "http://0.0.0.0/");
+        Environment.SetEnvironmentVariable("INFRASTRUCTURE_GATEWAY", "localhost");
 
         // Replace Database Context And Distributed Cache With In-Memory Implementations
-        WebApplicationFactory<KONGORAssemblyMarker> webApplicationFactory = new WebApplicationFactory<KONGORAssemblyMarker>().WithWebHostBuilder(builder => builder.ConfigureServices(services =>
+        WebApplicationFactory<KONGORAssemblyMarker> webApplicationFactory = new WebApplicationFactory<KONGORAssemblyMarker>().WithWebHostBuilder(builder =>
+            builder.UseSetting("INFRASTRUCTURE_GATEWAY", "localhost")
+                   .ConfigureServices(services =>
         {
             Func<ServiceDescriptor, bool> databaseContextPredicate = descriptor =>
-                descriptor.ServiceType.FullName?.Contains(nameof(MerrickContext)) is true || descriptor.ImplementationType?.FullName?.Contains(nameof(MerrickContext)) is true;
+                    descriptor.ServiceType.FullName?.Contains(nameof(MerrickContext)) is true || descriptor.ImplementationType?.FullName?.Contains(nameof(MerrickContext)) is true;
 
             // Remove MerrickContext Registration
             foreach (ServiceDescriptor? descriptor in services.Where(databaseContextPredicate).ToList())
@@ -31,10 +34,10 @@ public static class KONGORServiceProvider
 
             // Register In-Memory MerrickContext
             services.AddDbContext<MerrickContext>(options => options.UseInMemoryDatabase(databaseName).EnableServiceProviderCaching(false),
-                ServiceLifetime.Singleton, ServiceLifetime.Singleton);
+                    ServiceLifetime.Singleton, ServiceLifetime.Singleton);
 
             Func<ServiceDescriptor, bool> distributedCachePredicate = descriptor =>
-                descriptor.ServiceType == typeof(IConnectionMultiplexer) || descriptor.ServiceType == typeof(IDatabase);
+                    descriptor.ServiceType == typeof(IConnectionMultiplexer) || descriptor.ServiceType == typeof(IDatabase);
 
             // Remove IConnectionMultiplexer And IDatabase Registrations
             foreach (ServiceDescriptor? descriptor in services.Where(distributedCachePredicate).ToList())

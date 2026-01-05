@@ -12,11 +12,16 @@ public static class ZORGATHServiceProvider
     {
         string databaseName = identifier ?? Guid.CreateVersion7().ToString();
 
+        // Set Required Environment Variables
+        Environment.SetEnvironmentVariable("INFRASTRUCTURE_GATEWAY", "localhost");
+
         // Replace Database Context And Distributed Cache With In-Memory Implementations
-        WebApplicationFactory<ZORGATHAssemblyMarker> webApplicationFactory = new WebApplicationFactory<ZORGATHAssemblyMarker>().WithWebHostBuilder(builder => builder.ConfigureServices(services =>
+        WebApplicationFactory<ZORGATHAssemblyMarker> webApplicationFactory = new WebApplicationFactory<ZORGATHAssemblyMarker>().WithWebHostBuilder(builder =>
+            builder.UseSetting("INFRASTRUCTURE_GATEWAY", "localhost")
+                   .ConfigureServices(services =>
         {
             Func<ServiceDescriptor, bool> databaseContextPredicate = descriptor =>
-                descriptor.ServiceType.FullName?.Contains(nameof(MerrickContext)) is true || descriptor.ImplementationType?.FullName?.Contains(nameof(MerrickContext)) is true;
+                    descriptor.ServiceType.FullName?.Contains(nameof(MerrickContext)) is true || descriptor.ImplementationType?.FullName?.Contains(nameof(MerrickContext)) is true;
 
             // Remove MerrickContext Registration
             foreach (ServiceDescriptor? descriptor in services.Where(databaseContextPredicate).ToList())
@@ -24,10 +29,10 @@ public static class ZORGATHServiceProvider
 
             // Register In-Memory MerrickContext
             services.AddDbContext<MerrickContext>(options => options.UseInMemoryDatabase(databaseName).EnableServiceProviderCaching(false),
-                ServiceLifetime.Singleton, ServiceLifetime.Singleton);
+                    ServiceLifetime.Singleton, ServiceLifetime.Singleton);
 
             Func<ServiceDescriptor, bool> distributedCachePredicate = descriptor =>
-                descriptor.ServiceType == typeof(IConnectionMultiplexer) || descriptor.ServiceType == typeof(IDatabase);
+                    descriptor.ServiceType == typeof(IConnectionMultiplexer) || descriptor.ServiceType == typeof(IDatabase);
 
             // Remove IConnectionMultiplexer And IDatabase Registrations
             foreach (ServiceDescriptor? descriptor in services.Where(distributedCachePredicate).ToList())

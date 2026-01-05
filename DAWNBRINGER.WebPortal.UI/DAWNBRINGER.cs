@@ -1,11 +1,6 @@
-﻿namespace DAWNBRINGER.WebPortal.UI;
+namespace DAWNBRINGER.WebPortal.UI;
 
-public class DAWNBRINGER
+public class DawnBringerService
 {
-    // Entry Point For The Web Portal UI Application
-    public static void Main() 
-    { 
-        // TODO: Implement Full Web Portal UI Application
-        Console.WriteLine("Hello, World!"); 
-    }
+    // Marker class for Aspire Service Discovery
 }

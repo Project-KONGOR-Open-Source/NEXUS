@@ -26,13 +26,13 @@ public class TCPServer : IDisposable
     ///     Initialize TCP Server With A Given DNS Endpoint
     /// </summary>
     /// <param name="endpoint">DNS Endpoint</param>
-    public TCPServer(DnsEndPoint endpoint) : this(endpoint as EndPoint, endpoint.Host, endpoint.Port) { }
+    public TCPServer(DnsEndPoint endpoint) : this(endpoint, endpoint.Host, endpoint.Port) { }
 
     /// <summary>
     ///     Initialize TCP Server With A Given IP Endpoint
     /// </summary>
     /// <param name="endpoint">IP Endpoint</param>
-    public TCPServer(IPEndPoint endpoint) : this(endpoint as EndPoint, endpoint.Address.ToString(), endpoint.Port) { }
+    public TCPServer(IPEndPoint endpoint) : this(endpoint, endpoint.Address.ToString(), endpoint.Port) { }
 
     /// <summary>
     ///     Initialize TCP Server With A Given Endpoint, Address And Port
@@ -175,8 +175,10 @@ public class TCPServer : IDisposable
     # region Start/Stop Server
 
     // Server Acceptor
-    private Socket _acceptorSocket;
-    private SocketAsyncEventArgs _acceptorEventArg;
+#nullable enable
+    private Socket? _acceptorSocket;
+    private SocketAsyncEventArgs? _acceptorEventArg;
+#nullable disable
 
     // Server Statistic
     internal long _bytesPending;
@@ -226,7 +228,7 @@ public class TCPServer : IDisposable
         IsSocketDisposed = false;
 
         // Apply The Option: Reuse Address
-        _acceptorSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, OptionReuseAddress);
+        _acceptorSocket!.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, OptionReuseAddress);
 
         // Apply The Option: Exclusive Address Use
         _acceptorSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ExclusiveAddressUse, OptionExclusiveAddressUse);
@@ -239,7 +241,7 @@ public class TCPServer : IDisposable
         _acceptorSocket.Bind(Endpoint);
 
         // Refresh The Endpoint Property Based On The Actual Endpoint Created
-        Endpoint = _acceptorSocket.LocalEndPoint;
+        Endpoint = _acceptorSocket.LocalEndPoint!;
 
         // Call The Server Starting Handler
         OnStarting();
@@ -280,7 +282,7 @@ public class TCPServer : IDisposable
         IsAccepting = false;
 
         // Reset Acceptor Event Arg
-        _acceptorEventArg.Completed -= OnAsyncCompleted;
+        _acceptorEventArg!.Completed -= OnAsyncCompleted;
 
         // Call The Server Stopping Handler
         OnStopping();
@@ -288,7 +290,7 @@ public class TCPServer : IDisposable
         try
         {
             // Close The Acceptor Socket
-            _acceptorSocket.Close();
+            _acceptorSocket!.Close();
 
             // Dispose The Acceptor Socket
             _acceptorSocket.Dispose();
@@ -342,7 +344,7 @@ public class TCPServer : IDisposable
         e.AcceptSocket = null;
 
         // Async Accept A New Client Connection
-        if (!_acceptorSocket.AcceptAsync(e))
+        if (!_acceptorSocket!.AcceptAsync(e))
             ProcessAccept(e);
     }
 
@@ -360,7 +362,8 @@ public class TCPServer : IDisposable
             RegisterSession(session);
 
             // Connect New Session
-            session.Connect(e.AcceptSocket);
+            if (e.AcceptSocket != null)
+                session.Connect(e.AcceptSocket);
         }
 
         else SendError(e.SocketError);
@@ -373,7 +376,9 @@ public class TCPServer : IDisposable
     /// <summary>
     /// This Method Is The Callback Method Associated With The Socket.AcceptAsync() Operations And Is Invoked When An Accept Operation Is Complete
     /// </summary>
-    private void OnAsyncCompleted(object sender, SocketAsyncEventArgs e)
+#nullable enable
+    private void OnAsyncCompleted(object? sender, SocketAsyncEventArgs e)
+#nullable disable
     {
         if (IsSocketDisposed)
             return;
@@ -420,7 +425,7 @@ public class TCPServer : IDisposable
     ///     Find A Session With A Given ID
     /// </summary>
     /// <param name="id">Session ID</param>
-    /// <returns>Session With A Given ID, Or NULL If The Session It Not Connected</returns>
+    /// <returns>Session With A Given ID, Or NULL If The Session Is Not Connected</returns>
     public TCPSession FindSession(Guid id)
     {
         // Try To Find The Required Session
@@ -465,7 +470,7 @@ public class TCPServer : IDisposable
     /// <param name="offset">Buffer Offset</param>
     /// <param name="size">Buffer Size</param>
     /// <returns>TRUE If The Data Was Successfully Multicasted, Or FALSE If The Data Was Not Multicasted</returns>
-    public virtual bool Multicast(byte[] buffer, long offset, long size) => Multicast(buffer.AsSpan((int)offset, (int)size));
+    public virtual bool Multicast(byte[] buffer, long offset, long size) => Multicast(buffer.AsSpan((int) offset, (int) size));
 
     /// <summary>
     ///     Multicast Data To All Connected Clients

@@ -1,0 +1,55 @@
+@{
+    ViewData["Title"] = "Home";
+}
+
+<div class="text-center animate-fade-in-up">
+    <h1 class="text-6xl font-extrabold mb-6 tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 drop-shadow-2xl">
+        PROJECT KONGOR
+    </h1>
+
+
+    @if (User?.Identity?.IsAuthenticated == true)
+    {
+        <div class="glass-panel p-8 rounded-2xl max-w-lg mx-auto transform transition-all hover:scale-105 duration-500">
+            <h2 class="text-2xl font-bold mb-4 text-white">Welcome, @User.Identity.Name</h2>
+            <p class="text-slate-300 mb-6">System Status: <span class="text-green-400 font-mono">ONLINE</span></p>
+            <div class="grid grid-cols-2 gap-4">
+                <button class="bg-slate-700/50 hover:bg-slate-600 p-4 rounded-xl border border-slate-600 transition-colors">
+                    <span class="block text-2xl mb-1">📊</span>
+                    <span class="text-sm font-semibold">Stats</span>
+                </button>
+                <button class="bg-slate-700/50 hover:bg-slate-600 p-4 rounded-xl border border-slate-600 transition-colors">
+                    <span class="block text-2xl mb-1">⚔️</span>
+                    <span class="text-sm font-semibold">Matches</span>
+                </button>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="flex gap-4 justify-center">
+            <a asp-controller="Account" asp-action="Signup" class="px-8 py-3 rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold text-lg hover:opacity-90 transition-all shadow-lg shadow-purple-900/40">
+                Get Started
+            </a>
+            <a asp-controller="Account" asp-action="Login" class="px-8 py-3 rounded-xl bg-slate-800 text-white font-bold text-lg border border-slate-700 hover:bg-slate-700 transition-all">
+                Login
+            </a>
+        </div>
+    }
+</div>
+
+<style>
+    @@keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    .animate-fade-in-up {
+        animation: fadeInUp 0.8s ease-out forwards;
+    }
+</style>
