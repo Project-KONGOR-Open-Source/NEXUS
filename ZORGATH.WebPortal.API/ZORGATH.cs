@@ -74,7 +74,7 @@ public class ZORGATH
 
         // Set CORS Origins
         string[] corsOrigins = builder.Environment.IsDevelopment()
-            ? ["https://localhost:5553", "https://localhost:5554", "http://localhost:5555", "https://localhost:5556", "https://localhost:5557"]
+            ? ["https://localhost:5553", "https://localhost:5554", "http://localhost:5555", "http://localhost:55555", "https://localhost:5556", "https://localhost:5557"]
             : ["https://database.kongor.net", "https://chat.kongor.net", "http://api.kongor.net", "https://portal.api.kongor.net", "https://portal.ui.kongor.net"];
 
         // Add CORS Policy To Allow Cross-Origin Requests
