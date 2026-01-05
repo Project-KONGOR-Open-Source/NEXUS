@@ -10,7 +10,7 @@ public class MatchServer
 
     public required string Name { get; set; }
 
-    public required int? MatchServerManagerID { get; set; }
+    public int? MatchServerManagerID { get; set; }
 
     public required int Instance { get; set; }
 
