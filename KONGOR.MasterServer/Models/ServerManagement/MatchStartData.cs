@@ -17,6 +17,8 @@ public class MatchStartData
 
     public required int ServerID { get; set; }
 
+    public required string ServerName { get; set; }
+
     public required string HostAccountName { get; set; }
 
     public required string Map { get; set; }

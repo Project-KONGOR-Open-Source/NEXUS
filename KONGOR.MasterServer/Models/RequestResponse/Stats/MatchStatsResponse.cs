@@ -12,7 +12,7 @@ public class MatchStatsResponse
     ///     The amount of silver coins that the account owns.
     /// </summary>
     [PhpProperty("mmpoints")]
-    public required int SilverCoins { get; set; }
+    public required string SilverCoins { get; set; }
 
     /// <summary>
     ///     A collection containing the summary of the match.
@@ -175,7 +175,13 @@ public class MatchSummary(MatchStatistics matchStatistics, List<PlayerStatistics
     ///     The server ID where the match was hosted.
     /// </summary>
     [PhpProperty("server_id")]
-    public string ServerID { get; init; } = matchStatistics.ServerID.ToString();
+    public int ServerID { get; init; } = matchStatistics.ServerID;
+
+    /// <summary>
+    ///     The server name where the match was hosted.
+    /// </summary>
+    [PhpProperty("name")]
+    public string ServerName { get; init; } = matchStartData.ServerName;
 
     /// <summary>
     ///     The map on which the match was played (e.g. "caldavar", "midwars", "grimms_crossing").
@@ -197,15 +203,16 @@ public class MatchSummary(MatchStatistics matchStatistics, List<PlayerStatistics
 
     /// <summary>
     ///     The host where the match replay file is stored.
+    ///     This is typically "localhost" in development environments, or "kongor.net" in production environments.
     /// </summary>
     [PhpProperty("file_host")]
-    public string FileHost { get; init; } = string.Empty;
+    public string FileHost { get; init; } = Environment.GetEnvironmentVariable("INFRASTRUCTURE_GATEWAY") ?? throw new NullReferenceException("Infrastructure Gateway Is NULL");
 
     /// <summary>
     ///     The size of the match replay file in bytes.
     /// </summary>
     [PhpProperty("file_size")]
-    public string FileSize { get; init; } = matchStatistics.FileSize.ToString();
+    public int FileSize { get; init; } = Math.Min(0, matchStatistics.FileSize);
 
     /// <summary>
     ///     The filename of the match replay file.
@@ -250,16 +257,23 @@ public class MatchSummary(MatchStatistics matchStatistics, List<PlayerStatistics
     public string MatchName { get; init; } = matchStartData.MatchName;
 
     /// <summary>
-    ///     The match class/type (e.g. public match, tournament match, custom match).
+    ///     The arranged match type that categorises how the match was created.
     ///     <code>
-    ///         0 -> Public Match
-    ///         1 -> Tournament Match
-    ///         2 -> Custom Match
-    ///         3 -> Campaign Match
+    ///         00 -> Public Match
+    ///         01 -> Ranked Normal/Casual Matchmaking
+    ///         02 -> Scheduled Tournament Match
+    ///         03 -> Unscheduled League Match
+    ///         04 -> MidWars Matchmaking
+    ///         05 -> Bot Co-Op Matchmaking
+    ///         06 -> Unranked Normal/Casual Matchmaking
+    ///         07 -> RiftWars Matchmaking
+    ///         08 -> Public Pre-Lobby
+    ///         09 -> Custom Map Matchmaking
+    ///         10 -> Ranked Season Normal/Casual Matchmaking
     ///     </code>
     /// </summary>
     [PhpProperty("class")]
-    public string Class { get; init; } = "0";
+    public int Class { get; init; } = (int) matchStartData.MatchType;
 
     /// <summary>
     ///     Whether the match was private (1) or public (0).
@@ -369,7 +383,7 @@ public class MatchSummary(MatchStatistics matchStatistics, List<PlayerStatistics
     ///     <code>
     ///         0 -> Noobs Only
     ///         1 -> Noobs Allowed
-    ///         2 -> Pro
+    ///         2 -> Professionals
     ///     </code>
     ///     This feature is no longer active and the field has no functional purpose.
     /// </summary>
@@ -548,31 +562,25 @@ public class MatchSummary(MatchStatistics matchStatistics, List<PlayerStatistics
     ///     The URL for the match replay file.
     /// </summary>
     [PhpProperty("url")]
-    public string URL { get; init; } = string.Empty;
+    public string URL => $"http://{FileHost}/replays/{ServerID}/M{MatchID}.honreplay";
 
     /// <summary>
     ///     The size of the match replay file (human-readable format or bytes as string).
     /// </summary>
     [PhpProperty("size")]
-    public string Size { get; init; } = matchStatistics.FileSize.ToString();
-
-    /// <summary>
-    ///     The name or title of the replay file.
-    /// </summary>
-    [PhpProperty("name")]
-    public string Name { get; init; } = matchStatistics.FileName;
+    public int Size { get; init; } = Math.Min(0, matchStatistics.FileSize);
 
     /// <summary>
     ///     The directory path where the replay file is stored.
     /// </summary>
     [PhpProperty("dir")]
-    public string Directory { get; init; } = "/";
+    public string Directory => $"/replays/{ServerID}";
 
     /// <summary>
     ///     The S3 download URL for the match replay file.
     /// </summary>
     [PhpProperty("s3_url")]
-    public string S3URL { get; init; } = string.Empty;
+    public string S3URL => $"http://{FileHost}/replays/{ServerID}/M{MatchID}.honreplay";
 
     /// <summary>
     ///     The winning team ("1" for Legion, "2" for Hellbourne).

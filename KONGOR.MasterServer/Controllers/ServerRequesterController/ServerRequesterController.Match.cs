@@ -55,6 +55,7 @@ public partial class ServerRequesterController
         MatchStartData matchStartData = new ()
         {
             ServerID = matchServer.ID,
+            ServerName = matchServer.Name,
             Map = map,
             Version = version,
             MatchName = matchName,
