@@ -92,7 +92,18 @@ public partial class ClientRequesterController
         {
             GoldCoins = account.User.GoldCoins.ToString(),
             SilverCoins = account.User.SilverCoins,
-            MatchSummary = [new MatchSummary(matchStatistics, playerStatistics)],
+            MatchSummary = [new MatchSummary(matchStatistics, playerStatistics, new MatchStartData
+            {
+                MatchName = matchStatistics.HostAccountName + "'s Game",
+                ServerID = matchStatistics.ServerID,
+                HostAccountName = matchStatistics.HostAccountName,
+                Map = matchStatistics.Map,
+                Version = matchStatistics.Version,
+                IsCasual = false, // Defaulting to false as we don't have this in MatchStatistics explicitly yet
+                MatchType = 0, // Default
+                MatchMode = matchStatistics.GameMode,
+                Options = MatchOptions.None // We don't have options persisted in MatchStatistics yet
+            })],
             MatchPlayerStatistics = playerStatistics.ToDictionary(stats => stats.AccountID, stats => new MatchPlayerStatistics
             {
                 MatchID = stats.MatchID,

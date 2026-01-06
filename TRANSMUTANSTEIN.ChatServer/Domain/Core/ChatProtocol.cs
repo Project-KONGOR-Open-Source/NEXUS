@@ -893,6 +893,35 @@ public static class ChatProtocol
         NUM_GAME_MODES
     };
 
+    public static string? GetPublicGameModeCode(PublicGameMode publicGameMode)
+    {
+        return publicGameMode switch
+        {
+            PublicGameMode.GAME_MODE_NORMAL          => "nm",
+            PublicGameMode.GAME_MODE_RANDOM_DRAFT    => "rd",
+            PublicGameMode.GAME_MODE_SINGLE_DRAFT    => "sd",
+            PublicGameMode.GAME_MODE_DEATHMATCH      => "dm",
+            PublicGameMode.GAME_MODE_BANNING_DRAFT   => "bd",
+            PublicGameMode.GAME_MODE_CAPTAINS_DRAFT  => "cd",
+            PublicGameMode.GAME_MODE_CAPTAINS_MODE   => "cm",
+            PublicGameMode.GAME_MODE_BANNING_PICK    => "bp",
+            PublicGameMode.GAME_MODE_ALL_RANDOM      => "ar",
+            PublicGameMode.GAME_MODE_LOCKPICK        => "lp",
+            PublicGameMode.GAME_MODE_BLIND_BAN       => "bb",
+            PublicGameMode.GAME_MODE_BOT_MATCH       => "bm",
+            PublicGameMode.GAME_MODE_KROS_MODE       => "km",
+            PublicGameMode.GAME_MODE_FORCEPICK       => "fp",
+            PublicGameMode.GAME_MODE_SOCCERPICK      => "sp",
+            PublicGameMode.GAME_MODE_SOLO_SAME_HERO  => "ss",
+            PublicGameMode.GAME_MODE_SOLO_DIFF_HERO  => "sm",
+            PublicGameMode.GAME_MODE_COUNTER_PICK    => "cp",
+            PublicGameMode.GAME_MODE_MIDWARS_BETA    => "mwb",
+            PublicGameMode.GAME_MODE_HEROBAN         => "hb",
+            PublicGameMode.GAME_MODE_REBORN          => "rb",
+            _                                        => null
+        };
+    }
+
     public static string? GetPublicGameModeName(PublicGameMode publicGameMode)
     {
         return publicGameMode switch
