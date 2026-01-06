@@ -151,211 +151,37 @@ public partial class ClientRequesterController
             return Ok(PhpSerialization.Serialize(false));
         }
 
-        List<PlayerStatistics> playerStatistics = await MerrickContext.PlayerStatistics.Where(playerStatistics => playerStatistics.MatchID == matchStatistics.MatchID).ToListAsync();
+        List<PlayerStatistics> allPlayerStatistics = await MerrickContext.PlayerStatistics.Where(playerStatistics => playerStatistics.MatchID == matchStatistics.ID).ToListAsync();
 
         string? accountName = HttpContext.Items["SessionAccountName"] as string
                               ?? await DistributedCache.GetAccountNameForSessionCookie(cookie);
 
-        Account? account = null;
+        if (accountName is null)
+            return new NotFoundObjectResult("Session Not Found");
 
-        if (accountName is not null)
-        {
-            account = await MerrickContext.Accounts.Include(account => account.User).FirstOrDefaultAsync(account => account.Name.Equals(accountName));
-        }
+        Account? account = await MerrickContext.Accounts.SingleOrDefaultAsync(account => account.Name.Equals(accountName));
 
-        if (account is null && accountName is not null)
-        {
-            Logger.LogWarning("Match Stats Request: Session Name {AccountName} Found But Account Not In DB. Treating As Anonymous.", accountName);
-        }
+        if (account is null)
+            return new NotFoundObjectResult("Account Not Found");
 
-        // Calculate winning team (1=Legion, 2=Hellbourne)
-        string winningTeam = "0";
-        PlayerStatistics? firstWinner = playerStatistics.FirstOrDefault(p => p.Win == 1);
-        if (firstWinner != null)
-        {
-            winningTeam = firstWinner.Team.ToString();
-        }
+        MatchStartData? matchStartData = await DistributedCache.GetMatchStartData(matchStatistics.ID);
 
-        MatchSummary matchSummary = new(matchStatistics, playerStatistics, new MatchStartData
+        if (matchStartData is null)
+            return new NotFoundObjectResult("Match Start Data Not Found");
+
+        MatchSummary matchSummary = new(matchStatistics, allPlayerStatistics, matchStartData);
+
+        PlayerStatistics playerStatistics = allPlayerStatistics.Single(statistics => statistics.AccountID == account.ID);
+
+        MatchStatsResponse response = new()
         {
-            MatchName = matchStatistics.HostAccountName + "'s Game",
-            ServerID = matchStatistics.ServerID,
-            ServerName = matchStatistics.HostAccountName + "'s Server", // Since we don't have the server name in MatchStatistics, we default to "User's Server"
-            HostAccountName = matchStatistics.HostAccountName,
-            Map = matchStatistics.Map,
-            Version = matchStatistics.Version,
-            IsCasual = false,
-            MatchType = 0,
-            MatchMode = matchStatistics.GameMode,
-            Options = MatchOptions.None
-        })
-        {
-            WinningTeam = winningTeam
+            GoldCoins = account.User.GoldCoins.ToString(),
+            SilverCoins = account.User.SilverCoins.ToString(),
+            MatchSummary = [matchSummary],
+            MatchPlayerStatistics = new(account, playerStatistics)
         };
 
-        // Construct match_player_stats dictionary
-        List<MatchPlayerStatistics> mappedPlayerStats = playerStatistics.Select(stats => new MatchPlayerStatistics
-        {
-            MatchID = stats.MatchID,
-            AccountID = stats.AccountID,
-            AccountName = stats.AccountName,
-            ClanID = stats.ClanID?.ToString() ?? "0",
-            HeroID = stats.HeroProductID?.ToString() ?? "0",
-            Position = stats.LobbyPosition.ToString(),
-            Team = stats.Team.ToString(),
-            Level = stats.HeroLevel.ToString(),
-            Wins = stats.Win.ToString(),
-            Losses = stats.Loss.ToString(),
-            Concedes = stats.Conceded.ToString(),
-            ConcedeVotes = stats.ConcedeVotes.ToString(),
-            Buybacks = stats.Buybacks.ToString(),
-            Disconnections = stats.Disconnected.ToString(),
-            Kicked = stats.Kicked.ToString(),
-            PublicSkill = "1500", // TODO: Store snapshot of PSR
-            PublicCount = stats.PublicMatch.ToString(),
-            AMMSoloRating = "1500", // TODO: Store snapshot of MMR
-            AMMSoloCount = stats.RankedMatch.ToString(),
-            AMMTeamRating = "1500", // TODO: Store snapshot of Team MMR
-            AMMTeamCount = "0",
-            AverageScore = stats.Score.ToString(),
-            HeroKills = stats.HeroKills.ToString(),
-            HeroDamage = stats.HeroDamage.ToString(),
-            HeroExperience = stats.HeroExperience.ToString(),
-            HeroKillsGold = stats.GoldFromHeroKills.ToString(),
-            HeroAssists = stats.HeroAssists.ToString(),
-            Deaths = stats.HeroDeaths.ToString(),
-            GoldLostToDeath = stats.GoldLostToDeath.ToString(),
-            SecondsDead = stats.SecondsDead.ToString(),
-            TeamCreepKills = stats.TeamCreepKills.ToString(),
-            TeamCreepDamage = stats.TeamCreepDamage.ToString(),
-            TeamCreepExperience = stats.TeamCreepExperience.ToString(),
-            TeamCreepGold = stats.TeamCreepGold.ToString(),
-            NeutralCreepKills = stats.NeutralCreepKills.ToString(),
-            NeutralCreepDamage = stats.NeutralCreepDamage.ToString(),
-            NeutralCreepExperience = stats.NeutralCreepExperience.ToString(),
-            NeutralCreepGold = stats.NeutralCreepGold.ToString(),
-            BuildingDamage = stats.BuildingDamage.ToString(),
-            BuildingExperience = stats.ExperienceFromBuildings.ToString(),
-            BuildingsRazed = stats.BuildingsRazed.ToString(),
-            BuildingGold = stats.GoldFromBuildings.ToString(),
-            Denies = stats.Denies.ToString(),
-            ExperienceDenied = stats.ExperienceDenied.ToString(),
-            Gold = stats.Gold.ToString(),
-            GoldSpent = stats.GoldSpent.ToString(),
-            Experience = stats.Experience.ToString(),
-            Actions = stats.Actions.ToString(),
-            Seconds = stats.SecondsPlayed.ToString(),
-            Consumables = stats.ConsumablesPurchased.ToString(),
-            Wards = stats.WardsPlaced.ToString(),
-            TimeEarningExperience = stats.TimeEarningExperience.ToString(),
-            FirstBlood = stats.FirstBlood.ToString(),
-            DoubleKill = stats.DoubleKill.ToString(),
-            TripleKill = stats.TripleKill.ToString(),
-            QuadKill = stats.QuadKill.ToString(),
-            Annihilation = stats.Annihilation.ToString(),
-            KillStreak3 = stats.KillStreak03.ToString(),
-            KillStreak4 = stats.KillStreak04.ToString(),
-            KillStreak5 = stats.KillStreak05.ToString(),
-            KillStreak6 = stats.KillStreak06.ToString(),
-            KillStreak7 = stats.KillStreak07.ToString(),
-            KillStreak8 = stats.KillStreak08.ToString(),
-            KillStreak9 = stats.KillStreak09.ToString(),
-            KillStreak10 = stats.KillStreak10.ToString(),
-            KillStreak15 = stats.KillStreak15.ToString(),
-            Smackdown = stats.Smackdown.ToString(),
-            Humiliation = stats.Humiliation.ToString(),
-            Nemesis = stats.Nemesis.ToString(),
-            Retribution = stats.Retribution.ToString(),
-            UsedToken = stats.UsedToken.ToString(),
-            HeroIdentifier = stats.HeroProductID?.ToString() ?? "0",
-            ClanTag = stats.ClanTag ?? string.Empty,
-            AlternativeAvatarName = stats.AlternativeAvatarName ?? string.Empty,
-            SeasonProgress = new SeasonProgress
-            {
-                AccountID = stats.AccountID,
-                MatchID = stats.MatchID,
-                IsCasual = "0",
-                MMRBefore = "1500.00",
-                MMRAfter = "1500.00",
-                MedalBefore = "11",
-                MedalAfter = "11",
-                Season = "12",
-                PlacementMatches = 0,
-                PlacementWins = "0"
-            }
-        }).ToList();
-
-        // Match Mastery
-        PlayerStatistics? requesterStats = null;
-        if (account is not null)
-        {
-            requesterStats = playerStatistics.FirstOrDefault(stats => stats.AccountID == account.ID);
-        }
-        MatchMastery? matchMastery = null;
-
-        if (requesterStats != null)
-        {
-            matchMastery = new MatchMastery((requesterStats?.HeroProductID.ToString() ?? "Hero_Legionnaire"), 0, 0, 0)
-            {
-                HeroIdentifier = (requesterStats?.HeroProductID.ToString() ?? "Hero_Legionnaire"),
-                CurrentMasteryExperience = 0,
-                MatchMasteryExperience = 0,
-                MasteryExperienceBonus = 0,
-                MasteryExperienceHeroesBonus = 0,
-                MasteryExperienceBoost = 0,
-                MasteryExperienceSuperBoost = 0,
-                MasteryExperienceMaximumLevelHeroesCount = 0,
-                MasteryExperienceToBoost = 0,
-                MasteryExperienceEventBonus = 0,
-                MasteryExperienceCanBoost = false,
-                MasteryExperienceCanSuperBoost = false,
-                MasteryExperienceBoostProductIdentifier = 3609,
-                MasteryExperienceSuperBoostProductIdentifier = 4605,
-                MasteryExperienceBoostProductCount = 0,
-                MasteryExperienceSuperBoostProductCount = 0
-            };
-        }
-
-        // Inventory
-        Dictionary<int, Dictionary<string, string>> inventoryDict = new();
-        foreach (PlayerStatistics stat in playerStatistics)
-        {
-            if (stat.Inventory != null)
-            {
-                Dictionary<string, string> slots = new Dictionary<string, string>();
-                for (int i = 0; i < stat.Inventory.Count && i < 6; i++)
-                {
-                    slots[$"slot_{i + 1}"] = stat.Inventory[i];
-                }
-                inventoryDict[stat.AccountID] = slots;
-            }
-        }
-
-        Dictionary<string, object> response = new();
-
-        // Ordered Response for Game Client
-        if (account is not null)
-        {
-            response["selected_upgrades"] = account.SelectedStoreItems.ToArray();
-        }
-        else
-        {
-            Logger.LogInformation("Returning Anonymous Match Stats (No Selected Upgrades)");
-            response["selected_upgrades"] = Array.Empty<string>();
-        }
-        response["match_summ"] = new Dictionary<int, object> { { matchID, matchSummary } };
-        response["match_player_stats"] = new Dictionary<int, object> { { matchID, mappedPlayerStats } };
-
-        if (matchMastery != null)
-            response["match_mastery"] = matchMastery;
-
-        response["inventory"] = new Dictionary<int, object> { { matchID, inventoryDict } };
-        response["vested_threshold"] = 5;
-        response["0"] = true;
-
-        Logger.LogInformation("Successfully Retrieved Match Stats For Match ID {MatchID} Requested By {AccountName}", matchID, accountName);
-
-        return Ok(PhpSerialization.Serialize(response));
+        throw new NotImplementedException(); // TODO: Implement Match Stats Response
     }
 
     private static string SetCustomIconSlotID(Account account)

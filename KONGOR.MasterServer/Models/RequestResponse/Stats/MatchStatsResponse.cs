@@ -871,31 +871,31 @@ public class MatchMastery(string heroIdentifier, int currentMasteryExperience, i
     public required int MasteryExperienceSuperBoostProductCount { get; init; }
 }
 
-public class MatchPlayerStatistics
+public class MatchPlayerStatistics(Account account, PlayerStatistics playerStatistics)
 {
     /// <summary>
     ///     The unique identifier for the match.
     /// </summary>
     [PhpProperty("match_id")]
-    public required int MatchID { get; set; }
+    public int MatchID { get; init; } = playerStatistics.MatchID;
 
     /// <summary>
     ///     The player's account ID.
     /// </summary>
     [PhpProperty("account_id")]
-    public required int AccountID { get; set; }
+    public int AccountID { get; init; } = playerStatistics.AccountID;
 
     /// <summary>
     ///     The account name (nickname) of the player.
     /// </summary>
     [PhpProperty("nickname")]
-    public required string AccountName { get; set; }
+    public string AccountName { get; init; } = playerStatistics.AccountName;
 
     /// <summary>
     ///     The clan ID of the player's clan, or "0" if the player is not in a clan.
     /// </summary>
     [PhpProperty("clan_id")]
-    public required string ClanID { get; set; }
+    public string ClanID { get; init; } = (playerStatistics.ClanID ?? 0).ToString();
 
     /// <summary>
     ///     The unique identifier of the hero played in the match.
@@ -913,7 +913,7 @@ public class MatchPlayerStatistics
     ///     The team the player was on ("1" for Legion, "2" for Hellbourne).
     /// </summary>
     [PhpProperty("team")]
-    public required string Team { get; set; }
+    public string Team { get; init; } = playerStatistics.Team.ToString();
 
     /// <summary>
     ///     The final hero level reached by the player in the match (1-25).
