@@ -435,6 +435,7 @@ public partial class ServerRequesterController
             }
 
             matchStartData.ConnectedPlayersCount = int.Parse(connectionsCount);
+            matchStartData.Map = map;
         }
 
         if (newMatch is not null)
@@ -453,8 +454,36 @@ public partial class ServerRequesterController
                 return Ok();
             }
 
-            matchStartData.MaximumPlayersCount = int.Parse(Request.Form["max_players"].ToString() ?? throw new ArgumentException(@"Invalid Value For Form Parameter ""max_players"""));
-            matchStartData.League = int.Parse(Request.Form["league"].ToString() ?? throw new ArgumentException(@"Invalid Value For Form Parameter ""league"""));
+            matchStartData.ConnectedPlayersCount = int.Parse(connectionsCount);
+            matchStartData.Map = map;
+
+            string? maximumPlayersCount = Request.Form["max_players"];
+
+            if (maximumPlayersCount is null)
+                return BadRequest(@"Invalid Value For Form Parameter ""max_players""");
+
+            matchStartData.MaximumPlayersCount = int.Parse(maximumPlayersCount);
+
+            string? league = Request.Form["league"];
+
+            if (league is null)
+                return BadRequest(@"Invalid Value For Form Parameter ""league""");
+
+            matchStartData.League = int.Parse(league);
+
+            string? matchMode = Request.Form["mode"];
+
+            if (matchMode is null)
+                return BadRequest(@"Invalid Value For Form Parameter ""mode""");
+
+            matchStartData.MatchMode = matchMode;
+
+            string? matchName = Request.Form["mname"];
+
+            if (matchName is null)
+                return BadRequest(@"Invalid Value For Form Parameter ""mname""");
+
+            matchStartData.MatchName = matchName;
 
             MatchOptions options = MatchOptions.None;
 
