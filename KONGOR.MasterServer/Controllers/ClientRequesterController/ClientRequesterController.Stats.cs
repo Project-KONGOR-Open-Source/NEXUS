@@ -71,7 +71,7 @@ public partial class ClientRequesterController
         if (matchStatistics is null)
             return new NotFoundObjectResult("Match Stats Not Found");
 
-        List<PlayerStatistics> playerStatistics = await MerrickContext.PlayerStatistics.Where(playerStatistics => playerStatistics.MatchID == matchStatistics.ID).ToListAsync();
+        List<PlayerStatistics> allPlayerStatistics = await MerrickContext.PlayerStatistics.Where(playerStatistics => playerStatistics.MatchID == matchStatistics.ID).ToListAsync();
 
         string? accountName = await DistributedCache.GetAccountNameForSessionCookie(cookie);
 
@@ -83,11 +83,24 @@ public partial class ClientRequesterController
         if (account is null)
             return new NotFoundObjectResult("Account Not Found");
 
-        MatchSummary matchSummary = new (matchStatistics, playerStatistics);
+        MatchStartData? matchStartData = await DistributedCache.GetMatchStartData(matchStatistics.ID);
+
+        if (matchStartData is null)
+            return new NotFoundObjectResult("Match Start Data Not Found");
+
+        MatchSummary matchSummary = new (matchStatistics, allPlayerStatistics, matchStartData);
+
+        PlayerStatistics playerStatistics = allPlayerStatistics.Single(statistics => statistics.AccountID == account.ID);
+
+        MatchStatsResponse response = new ()
+        {
+            GoldCoins = account.User.GoldCoins.ToString(),
+            SilverCoins = account.User.SilverCoins.ToString(),
+            MatchSummary = [ matchSummary ],
+            MatchPlayerStatistics = new (account, playerStatistics)
+        };
 
         throw new NotImplementedException(); // TODO: Implement Match Stats Response
-
-        return Unauthorized();
     }
 
     private static string SetCustomIconSlotID(Account account)
