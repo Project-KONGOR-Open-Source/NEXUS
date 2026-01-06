@@ -46,7 +46,7 @@ public class ZORGATH
                 policy.QueueLimit = 10;
                 policy.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
             });
-            
+
             // Strict Limits For Authentication And Other Sensitive Endpoints
             options.AddSlidingWindowLimiter(policyName: RateLimiterPolicies.Strict, policy =>
             {
