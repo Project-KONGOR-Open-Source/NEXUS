@@ -268,6 +268,15 @@ public static partial class DistributedCacheExtensions
         return matches.SingleOrDefault();
     }
 
+    public static async Task<MatchStartData?> GetMatchStartDataByMatchServerSessionCookie(this IDatabase distributedCacheStore, string sessionCookie)
+    {
+        MatchServer? matchServer = await distributedCacheStore.GetMatchServerBySessionCookie(sessionCookie);
+
+        if (matchServer is null) return null;
+
+        return await distributedCacheStore.GetMatchStartDataByMatchServerID(matchServer.ID);
+    }
+
     /// <summary>
     ///     Removes match start data from the cache.
     ///     This should be called after full match statistics have been created.

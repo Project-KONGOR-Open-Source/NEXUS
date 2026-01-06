@@ -420,6 +420,83 @@ public partial class ServerRequesterController
 
         await DistributedCache.SetMatchServer(matchServer.HostAccountName, matchServer);
 
+        // The "new" Parameter Being Present Indicates This Is A Match Initialisation Heartbeat
+        string? newMatch = Request.Form["new"];
+
+        if (newMatch is null)
+        {
+            MatchStartData? matchStartData = await DistributedCache.GetMatchStartDataByMatchServerSessionCookie(session);
+
+            if (matchStartData is null)
+            {
+                Logger.LogError(@"[BUG] Received Match Initialisation Heartbeat For Session ""{Session}"", But No MatchStartData Found In Cache", session);
+
+                return Ok();
+            }
+
+            matchStartData.ConnectedPlayersCount = int.Parse(connectionsCount);
+        }
+
+        if (newMatch is not null)
+        {
+            string? matchID = Request.Form["match_id"];
+
+            if (matchID is null)
+                return BadRequest(@"Invalid Value For Form Parameter ""match_id""");
+
+            MatchStartData? matchStartData = await DistributedCache.GetMatchStartData(int.Parse(matchID));
+
+            if (matchStartData is null)
+            {
+                Logger.LogError(@"[BUG] Received Match Initialisation Heartbeat For Match ID ""{MatchID}"", But No MatchStartData Found In Cache", matchID);
+
+                return Ok();
+            }
+
+            matchStartData.MaximumPlayersCount = int.Parse(Request.Form["max_players"].ToString() ?? throw new ArgumentException(@"Invalid Value For Form Parameter ""max_players"""));
+            matchStartData.League = int.Parse(Request.Form["league"].ToString() ?? throw new ArgumentException(@"Invalid Value For Form Parameter ""league"""));
+
+            MatchOptions options = MatchOptions.None;
+
+            if (Request.Form.ContainsKey("option[ap]"))                 options |= MatchOptions.AllPick;
+            if (Request.Form.ContainsKey("option[ar]"))                 options |= MatchOptions.AllRandom;
+            if (Request.Form.ContainsKey("option[alt_pick]"))           options |= MatchOptions.AlternateHeroPicking;
+            if (Request.Form.ContainsKey("option[ab]"))                 options |= MatchOptions.AutoBalanced;
+            if (Request.Form.ContainsKey("option[br]"))                 options |= MatchOptions.BalancedRandom;
+            if (Request.Form.ContainsKey("option[veto]"))               options |= MatchOptions.BanPhase;
+            if (Request.Form.ContainsKey("option[rapidfire]"))          options |= MatchOptions.BlitzMode;
+            if (Request.Form.ContainsKey("option[cas]"))                options |= MatchOptions.CasualMode;
+            if (Request.Form.ContainsKey("option[dev_heroes]"))         options |= MatchOptions.DevelopmentHeroes;
+            if (Request.Form.ContainsKey("option[drp_itm]"))            options |= MatchOptions.DropItems;
+            if (Request.Form.ContainsKey("option[dup_h]"))              options |= MatchOptions.DuplicateHeroes;
+            if (Request.Form.ContainsKey("option[em]"))                 options |= MatchOptions.EasyMode;
+            if (Request.Form.ContainsKey("option[gated]"))              options |= MatchOptions.Gated;
+            if (Request.Form.ContainsKey("option[hardcore]"))           options |= MatchOptions.Hardcore;
+            if (Request.Form.ContainsKey("option[no_agi]"))             options |= MatchOptions.NoAgilityHeroes;
+            if (Request.Form.ContainsKey("option[no_repick]"))          options |= MatchOptions.NoHeroRepick;
+            if (Request.Form.ContainsKey("option[no_swap]"))            options |= MatchOptions.NoHeroSwap;
+            if (Request.Form.ContainsKey("option[no_int]"))             options |= MatchOptions.NoIntelligenceHeroes;
+            if (Request.Form.ContainsKey("option[nl]"))                 options |= MatchOptions.NoLeavers;
+            if (Request.Form.ContainsKey("option[no_pups]"))            options |= MatchOptions.NoPowerUps;
+            if (Request.Form.ContainsKey("option[no_timer]"))           options |= MatchOptions.NoRespawnTimer;
+            if (Request.Form.ContainsKey("option[no_stats]"))           options |= MatchOptions.NoStatistics;
+            if (Request.Form.ContainsKey("option[no_str]"))             options |= MatchOptions.NoStrengthHeroes;
+            if (Request.Form.ContainsKey("option[officl]"))             options |= MatchOptions.Official;
+            if (Request.Form.ContainsKey("option[rev_hs]"))             options |= MatchOptions.ReverseHeroSelection;
+            if (Request.Form.ContainsKey("option[rs]"))                 options |= MatchOptions.ReverseSelection;
+            if (Request.Form.ContainsKey("option[shuffleabilities]"))   options |= MatchOptions.ShuffleAbilities;
+            if (Request.Form.ContainsKey("option[shuf]"))               options |= MatchOptions.ShuffleTeams;
+            if (Request.Form.ContainsKey("option[tr]"))                 options |= MatchOptions.TournamentRules;
+            if (Request.Form.ContainsKey("option[verified_only]"))      options |= MatchOptions.VerifiedOnly;
+
+            matchStartData.Options = options;
+
+            await DistributedCache.SetMatchStartData(matchStartData);
+
+            Logger.LogInformation("Captured Match Mode And Options For Match ID {MatchID}: MatchMode={MatchMode}, ArrangedMatchType={ArrangedMatchType}",
+                matchID, matchStartData.MatchMode, matchStartData.MatchType);
+        }
+
         return Ok();
     }
 
