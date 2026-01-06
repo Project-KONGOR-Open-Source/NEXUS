@@ -49,7 +49,7 @@ public partial class ServerRequesterController
             MatchName = matchName,
             HostAccountName = hostAccountName,
             IsCasual = isCasual,
-            MatchType = matchType,
+            MatchType = (MatchType) matchType,
             MatchMode = (PublicMatchMode) matchMode,
             TimestampStarted = DateTimeOffset.UtcNow,
         };

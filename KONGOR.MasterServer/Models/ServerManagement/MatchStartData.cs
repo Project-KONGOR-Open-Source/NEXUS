@@ -20,7 +20,7 @@ public class MatchStartData
 
     public required bool IsCasual { get; set; }
 
-    public required int MatchType { get; set; }
+    public required MatchType MatchType { get; set; }
 
     public required PublicMatchMode MatchMode { get; set; }
 

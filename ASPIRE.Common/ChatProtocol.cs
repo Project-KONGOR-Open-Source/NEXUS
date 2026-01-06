@@ -345,47 +345,6 @@ public static class ChatProtocol
         NUM_GAME_LOBBY_STATES
     };
 
-    /// <summary>
-    ///     The chat server will send this to the match server on match start.
-    ///     The game server will then send this to the master server for further processing.
-    /// </summary>
-    public enum ArrangedMatchType
-    {
-        AM_PUBLIC,               // Public Match
-        AM_MATCHMAKING,          // Ranked Normal/Casual Matchmaking
-        AM_SCHEDULED_MATCH,      // Scheduled Tournament Match
-        AM_UNSCHEDULED_MATCH,    // Unscheduled League Match
-        AM_MATCHMAKING_MIDWARS,  // MidWars Matchmaking
-        AM_MATCHMAKING_BOTMATCH, // Bot Co-Op Matchmaking
-        AM_UNRANKED_MATCHMAKING, // Unranked Normal/Casual Matchmaking
-        AM_MATCHMAKING_RIFTWARS, // RiftWars Matchmaking
-        AM_PUBLIC_PRELOBBY,      // Public Pre-Lobby
-        AM_MATCHMAKING_CUSTOM,   // Custom Map Matchmaking
-        AM_MATCHMAKING_CAMPAIGN, // Ranked Season Normal/Casual Matchmaking
-
-        NUM_ARRANGED_MATCH_TYPES
-    };
-
-    public static bool IsMatchmakingType(ArrangedMatchType arrangedMatchType)
-    {
-        return arrangedMatchType switch
-        {
-            ArrangedMatchType.AM_PUBLIC                 => false,
-            ArrangedMatchType.AM_SCHEDULED_MATCH        => false,
-            ArrangedMatchType.AM_UNSCHEDULED_MATCH      => false,
-
-            ArrangedMatchType.AM_MATCHMAKING            => true,
-            ArrangedMatchType.AM_MATCHMAKING_MIDWARS    => true,
-            ArrangedMatchType.AM_MATCHMAKING_RIFTWARS   => true,
-            ArrangedMatchType.AM_MATCHMAKING_BOTMATCH   => true,
-            ArrangedMatchType.AM_UNRANKED_MATCHMAKING   => true,
-            ArrangedMatchType.AM_MATCHMAKING_CUSTOM     => true,
-            ArrangedMatchType.AM_MATCHMAKING_CAMPAIGN   => true,
-
-            _                                           => false
-        };
-    }
-
     public enum TMMUpdateType
     {
         TMM_CREATE_GROUP,
