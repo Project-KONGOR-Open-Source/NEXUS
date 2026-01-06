@@ -414,7 +414,7 @@ public partial class ServerRequesterController
         if (matchServer is null)
             return Unauthorized($@"No Match Server Could Be Found For Session Cookie ""{session}""");
 
-        matchServer.Status = Enum.Parse<ServerStatus>(connectionState);
+        matchServer.Status = (ServerStatus) int.Parse(connectionState);
 
         // TODO: Put All The Other Data In The Server Model
 
@@ -476,7 +476,8 @@ public partial class ServerRequesterController
             if (matchMode is null)
                 return BadRequest(@"Invalid Value For Form Parameter ""mode""");
 
-            matchStartData.MatchMode = int.Parse(matchMode);
+            matchStartData.MatchMode = PublicMatchModeExtensions.GetPublicMatchModeFromCode(matchMode)
+                ?? throw new InvalidDataException($@"Invalid Match Mode Code ""{matchMode}""");
 
             string? matchName = Request.Form["mname"];
 

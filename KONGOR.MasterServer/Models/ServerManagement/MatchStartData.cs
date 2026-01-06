@@ -22,7 +22,7 @@ public class MatchStartData
 
     public required int MatchType { get; set; }
 
-    public required int MatchMode { get; set; }
+    public required PublicMatchMode MatchMode { get; set; }
 
     public DateTimeOffset TimestampStarted { get; set; } = DateTimeOffset.UtcNow;
 

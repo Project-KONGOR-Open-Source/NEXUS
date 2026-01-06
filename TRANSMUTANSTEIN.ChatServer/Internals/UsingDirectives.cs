@@ -1,4 +1,5 @@
-﻿global using ASPIRE.Common.Extensions.Cryptography;
+﻿global using ASPIRE.Common;
+global using ASPIRE.Common.Extensions.Cryptography;
 global using ASPIRE.Common.ServiceDefaults;
 
           // TODO: Move These To A Shared Project And Remove Inter-Project Dependencies

@@ -271,79 +271,79 @@ public class MatchSummary(MatchStatistics matchStatistics, List<PlayerStatistics
     ///     Normal Mode flag (1 = enabled, 0 = disabled).
     /// </summary>
     [PhpProperty("nm")]
-    public int NormalMode { get; init; } = matchStartData.MatchMode is "nm" ? 1 : 0;
+    public int NormalMode { get; init; } = matchStartData.MatchMode is PublicMatchMode.GAME_MODE_NORMAL ? 1 : 0;
 
     /// <summary>
     ///     Single Draft Mode flag (1 = enabled, 0 = disabled).
     /// </summary>
     [PhpProperty("sd")]
-    public int SingleDraft { get; init; } = matchStartData.MatchMode is "sd" ? 1 : 0;
+    public int SingleDraft { get; init; } = matchStartData.MatchMode is PublicMatchMode.GAME_MODE_SINGLE_DRAFT ? 1 : 0;
 
     /// <summary>
     ///     Random Draft Mode flag (1 = enabled, 0 = disabled).
     /// </summary>
     [PhpProperty("rd")]
-    public int RandomDraft { get; init; } = matchStartData.MatchMode is "rd" ? 1 : 0;
+    public int RandomDraft { get; init; } = matchStartData.MatchMode is PublicMatchMode.GAME_MODE_RANDOM_DRAFT ? 1 : 0;
 
     /// <summary>
     ///     Deathmatch Mode flag (1 = enabled, 0 = disabled).
     /// </summary>
     [PhpProperty("dm")]
-    public int Deathmatch { get; init; } = matchStartData.MatchMode is "dm" ? 1 : 0;
+    public int Deathmatch { get; init; } = matchStartData.MatchMode is PublicMatchMode.GAME_MODE_DEATHMATCH ? 1 : 0;
 
     /// <summary>
     ///     Banning Draft Mode flag (1 = enabled, 0 = disabled).
     /// </summary>
     [PhpProperty("bd")]
-    public int BanningDraft { get; init; } = matchStartData.MatchMode is "bd" ? 1 : 0;
+    public int BanningDraft { get; init; } = matchStartData.MatchMode is PublicMatchMode.GAME_MODE_BANNING_DRAFT ? 1 : 0;
 
     /// <summary>
     ///     Banning Pick Mode flag (1 = enabled, 0 = disabled).
     /// </summary>
     [PhpProperty("bp")]
-    public int BanningPick { get; init; } = matchStartData.MatchMode is "bp" ? 1 : 0;
+    public int BanningPick { get; init; } = matchStartData.MatchMode is PublicMatchMode.GAME_MODE_BANNING_PICK ? 1 : 0;
 
     /// <summary>
     ///     All Random Mode flag (1 = enabled, 0 = disabled).
     /// </summary>
     [PhpProperty("ar")]
-    public int AllRandom { get; init; } = matchStartData.MatchMode is "ar" ? 1 : 0;
+    public int AllRandom { get; init; } = matchStartData.MatchMode is PublicMatchMode.GAME_MODE_ALL_RANDOM ? 1 : 0;
 
     /// <summary>
     ///     Captains Draft Mode flag (1 = enabled, 0 = disabled).
     /// </summary>
     [PhpProperty("cd")]
-    public int CaptainsDraft { get; init; } = matchStartData.MatchMode is "cd" ? 1 : 0;
+    public int CaptainsDraft { get; init; } = matchStartData.MatchMode is PublicMatchMode.GAME_MODE_CAPTAINS_DRAFT ? 1 : 0;
 
     /// <summary>
     ///     Captains Mode flag (1 = enabled, 0 = disabled).
     /// </summary>
     [PhpProperty("cm")]
-    public int CaptainsMode { get; init; } = matchStartData.MatchMode is "cm" ? 1 : 0;
+    public int CaptainsMode { get; init; } = matchStartData.MatchMode is PublicMatchMode.GAME_MODE_CAPTAINS_MODE ? 1 : 0;
 
     /// <summary>
     ///     Lock Pick Mode flag (1 = enabled, 0 = disabled).
     /// </summary>
     [PhpProperty("lp")]
-    public int LockPick { get; init; } = matchStartData.MatchMode is "lp" ? 1 : 0;
+    public int LockPick { get; init; } = matchStartData.MatchMode is PublicMatchMode.GAME_MODE_LOCKPICK ? 1 : 0;
 
     /// <summary>
     ///     Blind Ban Mode flag (1 = enabled, 0 = disabled).
     /// </summary>
     [PhpProperty("bb")]
-    public int BlindBan { get; init; } = matchStartData.MatchMode is "bb" ? 1 : 0;
+    public int BlindBan { get; init; } = matchStartData.MatchMode is PublicMatchMode.GAME_MODE_BLIND_BAN ? 1 : 0;
 
     /// <summary>
     ///     Bot Match Mode flag (1 = enabled, 0 = disabled).
     /// </summary>
     [PhpProperty("bm")]
-    public int BotMatch { get; init; } = matchStartData.MatchMode is "bm" ? 1 : 0;
+    public int BotMatch { get; init; } = matchStartData.MatchMode is PublicMatchMode.GAME_MODE_BOT_MATCH ? 1 : 0;
 
     /// <summary>
     ///     Kros (ability draft) Mode flag (1 = enabled, 0 = disabled).
     /// </summary>
     [PhpProperty("km")]
-    public int KrosMode { get; init; } = matchStartData.MatchMode is "km" ? 1 : 0;
+    public int KrosMode { get; init; } = matchStartData.MatchMode is PublicMatchMode.GAME_MODE_KROS_MODE ? 1 : 0;
 
     /// <summary>
     ///     Whether the match is part of an organized league system.
