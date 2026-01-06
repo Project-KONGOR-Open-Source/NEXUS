@@ -57,34 +57,46 @@ public partial class ClientRequesterController
     private async Task<IActionResult> HandleMatchStats()
     {
         string? cookie = Request.Form["cookie"];
+        string? matchID = Request.Form["match_id"];
+
+        Logger.LogInformation("Received Match Stats Request: MatchID={MatchID}, Cookie={Cookie}", matchID, cookie);
+
+        if (cookie is null)
 
         if (cookie is null)
             return BadRequest(@"Missing Value For Form Parameter ""cookie""");
 
-        string? matchID = Request.Form["match_id"];
-
         if (matchID is null)
+        {
+            Logger.LogError("Match Stats Request Failed: Missing Match ID");
             return BadRequest(@"Missing Value For Form Parameter ""match_id""");
+        }
 
-        MatchStatistics? matchStatistics = await MerrickContext.MatchStatistics.SingleOrDefaultAsync(matchStatistics => matchStatistics.ID == int.Parse(matchID));
+        MatchStatistics? matchStatistics = await MerrickContext.MatchStatistics.SingleOrDefaultAsync(matchStatistics => matchStatistics.MatchID == int.Parse(matchID));
 
         if (matchStatistics is null)
+        {
+            Logger.LogError("Match Stats Request Failed: Match Statistics Not Found For ID {MatchID}", matchID);
             return new NotFoundObjectResult("Match Stats Not Found");
+        }
 
-        List<PlayerStatistics> playerStatistics = await MerrickContext.PlayerStatistics.Where(playerStatistics => playerStatistics.MatchID == matchStatistics.ID).ToListAsync();
+        List<PlayerStatistics> playerStatistics = await MerrickContext.PlayerStatistics.Where(playerStatistics => playerStatistics.MatchID == matchStatistics.MatchID).ToListAsync();
 
         string? accountName = await DistributedCache.GetAccountNameForSessionCookie(cookie);
 
         if (accountName is null)
+        {
+            Logger.LogError("Match Stats Request Failed: Session Not Found For Cookie {Cookie}", cookie);
             return new NotFoundObjectResult("Session Not Found");
+        }
 
         Account? account = await MerrickContext.Accounts.SingleOrDefaultAsync(account => account.Name.Equals(accountName));
 
         if (account is null)
+        {
+            Logger.LogError("Match Stats Request Failed: Account Not Found For Name {AccountName}", accountName);
             return new NotFoundObjectResult("Account Not Found");
-
-        if (account is null)
-            return new NotFoundObjectResult("Account Not Found");
+        }
 
         PlayerStatistics? requesterStats = playerStatistics.SingleOrDefault(stats => stats.AccountID == account.ID);
 
@@ -238,6 +250,8 @@ public partial class ClientRequesterController
                 Percentage = "1.00"
             }
         };
+
+        Logger.LogInformation("Successfully Retrieved Match Stats For Match ID {MatchID} Requested By {AccountName}", matchID, accountName);
 
         return Ok(PhpSerialization.Serialize(response));
     }
