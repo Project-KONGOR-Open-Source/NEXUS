@@ -1,7 +1,43 @@
-﻿namespace KONGOR.MasterServer.Controllers.ServerRequesterController;
+﻿using System.Collections.Frozen;
+
+namespace KONGOR.MasterServer.Controllers.ServerRequesterController;
 
 public partial class ServerRequesterController
 {
+    private static readonly FrozenDictionary<string, MatchOptions> MatchOptionMap = new Dictionary<string, MatchOptions>
+    {
+        { "option[ap]", MatchOptions.AllPick },
+        { "option[ar]", MatchOptions.AllRandom },
+        { "option[alt_pick]", MatchOptions.AlternateHeroPicking },
+        { "option[ab]", MatchOptions.AutoBalanced },
+        { "option[br]", MatchOptions.BalancedRandom },
+        { "option[veto]", MatchOptions.BanPhase },
+        { "option[rapidfire]", MatchOptions.BlitzMode },
+        { "option[cas]", MatchOptions.CasualMode },
+        { "option[dev_heroes]", MatchOptions.DevelopmentHeroes },
+        { "option[drp_itm]", MatchOptions.DropItems },
+        { "option[dup_h]", MatchOptions.DuplicateHeroes },
+        { "option[em]", MatchOptions.EasyMode },
+        { "option[gated]", MatchOptions.Gated },
+        { "option[hardcore]", MatchOptions.Hardcore },
+        { "option[no_agi]", MatchOptions.NoAgilityHeroes },
+        { "option[no_repick]", MatchOptions.NoHeroRepick },
+        { "option[no_swap]", MatchOptions.NoHeroSwap },
+        { "option[no_int]", MatchOptions.NoIntelligenceHeroes },
+        { "option[nl]", MatchOptions.NoLeavers },
+        { "option[no_pups]", MatchOptions.NoPowerUps },
+        { "option[no_timer]", MatchOptions.NoRespawnTimer },
+        { "option[no_stats]", MatchOptions.NoStatistics },
+        { "option[no_str]", MatchOptions.NoStrengthHeroes },
+        { "option[officl]", MatchOptions.Official },
+        { "option[rev_hs]", MatchOptions.ReverseHeroSelection },
+        { "option[rs]", MatchOptions.ReverseSelection },
+        { "option[shuffleabilities]", MatchOptions.ShuffleAbilities },
+        { "option[shuf]", MatchOptions.ShuffleTeams },
+        { "option[tr]", MatchOptions.TournamentRules },
+        { "option[verified_only]", MatchOptions.VerifiedOnly }
+    }.ToFrozenDictionary();
+
     private async Task<IActionResult> HandleServerManagerAuthentication()
     {
         string? hostAccountName = Request.Form["login"];
@@ -476,7 +512,15 @@ public partial class ServerRequesterController
             if (matchMode is null)
                 return BadRequest(@"Invalid Value For Form Parameter ""mode""");
 
-            matchStartData.MatchMode = matchMode;
+            if (int.TryParse(matchMode, out int parsedMatchMode) is false)
+            {
+                // Fallback: If it's not an int, assume it's already a code (e.g. from local testing)
+                matchStartData.MatchMode = matchMode;
+            }
+            else
+            {
+                matchStartData.MatchMode = MatchModeDefinition.GetCodeFromId(parsedMatchMode);
+            }
 
             string? matchName = Request.Form["mname"];
 
@@ -485,38 +529,17 @@ public partial class ServerRequesterController
 
             matchStartData.MatchName = matchName;
 
+            matchStartData.MatchName = matchName;
+
             MatchOptions options = MatchOptions.None;
 
-            if (Request.Form.ContainsKey("option[ap]"))                 options |= MatchOptions.AllPick;
-            if (Request.Form.ContainsKey("option[ar]"))                 options |= MatchOptions.AllRandom;
-            if (Request.Form.ContainsKey("option[alt_pick]"))           options |= MatchOptions.AlternateHeroPicking;
-            if (Request.Form.ContainsKey("option[ab]"))                 options |= MatchOptions.AutoBalanced;
-            if (Request.Form.ContainsKey("option[br]"))                 options |= MatchOptions.BalancedRandom;
-            if (Request.Form.ContainsKey("option[veto]"))               options |= MatchOptions.BanPhase;
-            if (Request.Form.ContainsKey("option[rapidfire]"))          options |= MatchOptions.BlitzMode;
-            if (Request.Form.ContainsKey("option[cas]"))                options |= MatchOptions.CasualMode;
-            if (Request.Form.ContainsKey("option[dev_heroes]"))         options |= MatchOptions.DevelopmentHeroes;
-            if (Request.Form.ContainsKey("option[drp_itm]"))            options |= MatchOptions.DropItems;
-            if (Request.Form.ContainsKey("option[dup_h]"))              options |= MatchOptions.DuplicateHeroes;
-            if (Request.Form.ContainsKey("option[em]"))                 options |= MatchOptions.EasyMode;
-            if (Request.Form.ContainsKey("option[gated]"))              options |= MatchOptions.Gated;
-            if (Request.Form.ContainsKey("option[hardcore]"))           options |= MatchOptions.Hardcore;
-            if (Request.Form.ContainsKey("option[no_agi]"))             options |= MatchOptions.NoAgilityHeroes;
-            if (Request.Form.ContainsKey("option[no_repick]"))          options |= MatchOptions.NoHeroRepick;
-            if (Request.Form.ContainsKey("option[no_swap]"))            options |= MatchOptions.NoHeroSwap;
-            if (Request.Form.ContainsKey("option[no_int]"))             options |= MatchOptions.NoIntelligenceHeroes;
-            if (Request.Form.ContainsKey("option[nl]"))                 options |= MatchOptions.NoLeavers;
-            if (Request.Form.ContainsKey("option[no_pups]"))            options |= MatchOptions.NoPowerUps;
-            if (Request.Form.ContainsKey("option[no_timer]"))           options |= MatchOptions.NoRespawnTimer;
-            if (Request.Form.ContainsKey("option[no_stats]"))           options |= MatchOptions.NoStatistics;
-            if (Request.Form.ContainsKey("option[no_str]"))             options |= MatchOptions.NoStrengthHeroes;
-            if (Request.Form.ContainsKey("option[officl]"))             options |= MatchOptions.Official;
-            if (Request.Form.ContainsKey("option[rev_hs]"))             options |= MatchOptions.ReverseHeroSelection;
-            if (Request.Form.ContainsKey("option[rs]"))                 options |= MatchOptions.ReverseSelection;
-            if (Request.Form.ContainsKey("option[shuffleabilities]"))   options |= MatchOptions.ShuffleAbilities;
-            if (Request.Form.ContainsKey("option[shuf]"))               options |= MatchOptions.ShuffleTeams;
-            if (Request.Form.ContainsKey("option[tr]"))                 options |= MatchOptions.TournamentRules;
-            if (Request.Form.ContainsKey("option[verified_only]"))      options |= MatchOptions.VerifiedOnly;
+            foreach (var (key, flag) in MatchOptionMap)
+            {
+                if (Request.Form.ContainsKey(key))
+                {
+                    options |= flag;
+                }
+            }
 
             matchStartData.Options = options;
 

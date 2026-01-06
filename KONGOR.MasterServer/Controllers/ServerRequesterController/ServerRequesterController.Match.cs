@@ -38,7 +38,19 @@ public partial class ServerRequesterController
         int matchType = int.TryParse(Request.Form["arrangedmatchtype"], out int parsedArrangedMatchType) ? parsedArrangedMatchType
             : throw new ArgumentOutOfRangeException("arrangedmatchtype", Request.Form["arrangedmatchtype"].ToString(), @"Value Of Form Parameter ""arrangedmatchtype"" Is Invalid");
 
-        string matchMode = Request.Form["match_mode"].ToString() ?? throw new ArgumentNullException("match_mode", @"Value Of Form Parameter ""match_mode"" Is NULL");
+        string? matchModeInput = Request.Form["match_mode"];
+        if (string.IsNullOrEmpty(matchModeInput))
+             throw new ArgumentNullException("match_mode", @"Value Of Form Parameter ""match_mode"" Is NULL");
+
+        string matchMode;
+        if (int.TryParse(matchModeInput, out int parsedMatchMode))
+        {
+             matchMode = MatchModeDefinition.GetCodeFromId(parsedMatchMode);
+        }
+        else
+        {
+             matchMode = matchModeInput;
+        }
 
         MatchStartData matchStartData = new ()
         {
