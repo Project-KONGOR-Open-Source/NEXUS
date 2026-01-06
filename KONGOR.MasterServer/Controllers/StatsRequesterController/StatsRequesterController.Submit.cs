@@ -25,7 +25,7 @@ public partial class StatsRequesterController
 
         else Logger.LogError($"[BUG] Match Statistics For Match ID {form.MatchStats.MatchID} Have Already Been Submitted");
 
-        foreach (int playerIndex in form.PlayerInventory.Keys)
+        foreach (int playerIndex in form.PlayerStats.Keys)
         {
             // The Match Server Sends The Account Name With The Clan Tag Combined Into A Single String Value So We Need To Separate Them
             string accountName = Account.SeparateClanTagFromAccountName(form.PlayerStats[playerIndex].Values.Single().AccountName).AccountName;
@@ -108,7 +108,7 @@ public partial class StatsRequesterController
 
         else Logger.LogError($"[BUG] Match Statistics For Match ID {form.MatchStats.MatchID} Have Already Been Submitted");
 
-        foreach (int playerIndex in form.PlayerInventory.Keys)
+        foreach (int playerIndex in form.PlayerStats.Keys)
         {
             // The Match Server Sends The Account Name With The Clan Tag Combined Into A Single String Value So We Need To Separate Them
             string accountName = Account.SeparateClanTagFromAccountName(form.PlayerStats[playerIndex].Values.Single().AccountName).AccountName;
