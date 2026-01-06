@@ -42,10 +42,10 @@ public class MatchStartData
     public int Tier { get; set; } = 1;
 
     /// <summary>
-    ///     Whether the match is part of an organized league system.
+    ///     Whether the match is part of an organised league system.
     ///     <code>
-    ///         0 -> Regular Match (public, matchmaking, tournament, etc.)
-    ///         1 -> League Match (organized competitive league play)
+    ///         0 -> Regular Match (public, matchmaking, etc.)
+    ///         1 -> League Match (organised competitive league play)
     ///     </code>
     ///     <remark>
     ///         League matches belong to a dedicated competitive league structure with player rosters, seasonal standings, and separate win/loss tracking.
