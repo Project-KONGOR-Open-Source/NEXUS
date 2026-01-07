@@ -154,4 +154,82 @@ public sealed class ClientRequesterUnverifiedTests
             response.EnsureSuccessStatusCode();
         }
     }
+
+    [Test]
+    public async Task GetInitStats_ReturnsBadRequest()
+    {
+        (HttpClient client, _, string cookie, WebApplicationFactory<KONGORAssemblyMarker> factory) = await SetupAsync();
+        using (factory)
+        {
+            // This test verifies that "get_init_stats" (snake_case) fails as expected,
+            // proving the controller requires "get_initStats" (camelCase).
+            Dictionary<string, string> payload = ClientRequesterUnverifiedPayloads.GetInitStats(cookie);
+            FormUrlEncodedContent content = new(payload);
+
+            HttpResponseMessage response = await client.PostAsync("client_requester.php", content);
+            
+            if (response.StatusCode != System.Net.HttpStatusCode.BadRequest)
+            {
+                await Assert.That(response.StatusCode).IsEqualTo(System.Net.HttpStatusCode.BadRequest);
+            }
+        }
+    }
+
+    [Test]
+    public async Task GrabServerList_ReturnsSuccess()
+    {
+        (HttpClient client, _, string cookie, WebApplicationFactory<KONGORAssemblyMarker> factory) = await SetupAsync();
+        using (factory)
+        {
+            Dictionary<string, string> payload = ClientRequesterUnverifiedPayloads.GrabServerList(cookie);
+            FormUrlEncodedContent content = new(payload);
+
+            HttpResponseMessage response = await client.PostAsync("client_requester.php", content);
+            response.EnsureSuccessStatusCode();
+        }
+    }
+
+    [Test]
+    public async Task ServerList_ReturnsSuccess()
+    {
+        (HttpClient client, _, string cookie, WebApplicationFactory<KONGORAssemblyMarker> factory) = await SetupAsync();
+        using (factory)
+        {
+            Dictionary<string, string> payload = ClientRequesterUnverifiedPayloads.ServerList(cookie);
+            FormUrlEncodedContent content = new(payload);
+
+            HttpResponseMessage response = await client.PostAsync("client_requester.php", content);
+            response.EnsureSuccessStatusCode();
+        }
+    }
+
+    [Test]
+    public async Task GetHeroList_ReturnsSuccess()
+    {
+        (HttpClient client, _, string cookie, WebApplicationFactory<KONGORAssemblyMarker> factory) = await SetupAsync();
+        using (factory)
+        {
+            Dictionary<string, string> payload = ClientRequesterUnverifiedPayloads.GetHeroList(cookie);
+            FormUrlEncodedContent content = new(payload);
+
+            HttpResponseMessage response = await client.PostAsync("client_requester.php", content);
+            response.EnsureSuccessStatusCode();
+        }
+    }
+
+    [Test]
+    public async Task ShowStats_ReturnsSuccess()
+    {
+        (HttpClient client, MerrickContext dbContext, string cookie, WebApplicationFactory<KONGORAssemblyMarker> factory) = await SetupAsync();
+        using (factory)
+        {
+            Account account = await dbContext.Accounts.FirstAsync(a => a.Cookie == cookie);
+
+            Dictionary<string, string> payload = ClientRequesterUnverifiedPayloads.ShowStats(cookie, account.Name);
+            FormUrlEncodedContent content = new(payload);
+
+            HttpResponseMessage response = await client.PostAsync("client_requester.php", content);
+            response.EnsureSuccessStatusCode();
+        }
+    }
 }

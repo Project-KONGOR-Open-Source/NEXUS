@@ -70,12 +70,41 @@ public static class ClientRequesterUnverifiedPayloads
         };
     }
 
+    public static Dictionary<string, string> GrabServerList(string cookie)
+    {
+        return new Dictionary<string, string>
+        {
+            { "f", "grab_server_list" },
+            { "cookie", cookie },
+            { "gametype", "10" }
+        };
+    }
+
+    public static Dictionary<string, string> ServerList(string cookie)
+    {
+        return new Dictionary<string, string>
+        {
+            { "f", "server_list" },
+            { "cookie", cookie },
+            { "gametype", "10" }
+        };
+    }
+
     // Heroes
     public static Dictionary<string, string> GetAllHeroes(string cookie)
     {
         return new Dictionary<string, string>
         {
             { "f", "get_all_heroes" }, // or get_hero_list
+            { "cookie", cookie }
+        };
+    }
+
+    public static Dictionary<string, string> GetHeroList(string cookie)
+    {
+        return new Dictionary<string, string>
+        {
+            { "f", "get_hero_list" },
             { "cookie", cookie }
         };
     }
@@ -142,6 +171,25 @@ public static class ClientRequesterUnverifiedPayloads
             { "f", "get_account_mastery" },
             { "cookie", cookie },
             { "nickname", nickname }
+        };
+    }
+
+    public static Dictionary<string, string> ShowStats(string cookie, string nickname)
+    {
+        return new Dictionary<string, string>
+        {
+            { "f", "show_stats" },
+            { "cookie", cookie },
+            { "nickname", nickname }
+        };
+    }
+
+    public static Dictionary<string, string> GetInitStats(string cookie)
+    {
+        return new Dictionary<string, string>
+        {
+            { "f", "get_init_stats" }, // Testing snake_case variant
+            { "cookie", cookie }
         };
     }
 
