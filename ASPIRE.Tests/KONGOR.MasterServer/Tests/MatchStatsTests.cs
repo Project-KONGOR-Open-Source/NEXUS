@@ -348,7 +348,8 @@ public sealed partial class MatchStatsSubmissionTests
             Version = "4.10.1",
             IsCasual = false,
             MatchType = 0,
-            Options = MatchOptions.None
+            Options = MatchOptions.None,
+            ServerName = "DONUT ARENA"
         };
         await distributedCache.SetMatchStartData(matchStartData);
 

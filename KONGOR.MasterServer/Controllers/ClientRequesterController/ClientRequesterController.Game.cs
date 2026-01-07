@@ -17,7 +17,7 @@ public partial class ClientRequesterController
 
         // 1. Get Available Servers
         List<MatchServer> allServers = await DistributedCache.GetMatchServers();
-        
+
         // Filter for servers that are IDLE (ready for a game)
         // We prioritize servers that are IDLE. SLEEPING servers might need waking up (logic for another time).
         List<MatchServer> availableServers = allServers
@@ -36,13 +36,14 @@ public partial class ClientRequesterController
         // 3. Get Host Account Info
         string? accountName = HttpContext.Items["SessionAccountName"] as string;
         if (accountName is null)
-             return Unauthorized(PhpSerialization.Serialize(new { error = "Unauthorized" }));
+            return Unauthorized(PhpSerialization.Serialize(new { error = "Unauthorized" }));
 
         // 4. Create Match Start Data
         MatchStartData matchStartData = new()
         {
             MatchName = name,
             ServerID = selectedServer.ID,
+            ServerName = selectedServer.Name ?? "Unknown Server",
             HostAccountName = accountName,
             Map = map,
             MatchMode = mode,
@@ -57,7 +58,7 @@ public partial class ClientRequesterController
         // ServerRequester looks for this when the server reports "Match Initialized".
         await DistributedCache.SetMatchStartData(matchStartData);
 
-        Logger.LogInformation("Match Created: ID: {MatchID}, Server: {ServerID} ({IP}:{Port}), Host: {Account}", 
+        Logger.LogInformation("Match Created: ID: {MatchID}, Server: {ServerID} ({IP}:{Port}), Host: {Account}",
             matchStartData.MatchID, selectedServer.ID, selectedServer.IPAddress, selectedServer.Port, accountName);
 
         // 6. Return Response to Client
@@ -71,7 +72,7 @@ public partial class ClientRequesterController
             { "server_port", selectedServer.Port },
             // "server_auth_hash" might be needed if the client uses it for validation.
             // For now, we return basic connection info.
-            { "error", false } 
+            { "error", false }
         }));
     }
 

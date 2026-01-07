@@ -50,7 +50,7 @@ public partial class ClientRequesterController
         // We exclude 'my_upgrades' and 'my_upgrades_info' from get_initStats as they trigger client-side errors.
         // The legacy client expects only basic stats and selected upgrades here.
         ShowSimpleStatsResponse fullResponse = await CreateShowSimpleStatsResponse(account);
-        
+
         // 2026-01-06: FIX - Refactored to return manual dictionary.
         // Restored standard keys (slot_id, tokens) as strict removal might cause client instability.
         Dictionary<string, object> response = new()
@@ -139,7 +139,7 @@ public partial class ClientRequesterController
 
         if (!int.TryParse(matchIDString, out int matchID))
         {
-             return BadRequest("Invalid Match ID");
+            return BadRequest("Invalid Match ID");
         }
 
         MatchStatistics? matchStatistics = await MerrickContext.MatchStatistics.FirstOrDefaultAsync(matchStatistics => matchStatistics.MatchID == matchID);
@@ -153,7 +153,7 @@ public partial class ClientRequesterController
 
         List<PlayerStatistics> playerStatistics = await MerrickContext.PlayerStatistics.Where(playerStatistics => playerStatistics.MatchID == matchStatistics.MatchID).ToListAsync();
 
-        string? accountName = HttpContext.Items["SessionAccountName"] as string 
+        string? accountName = HttpContext.Items["SessionAccountName"] as string
                               ?? await DistributedCache.GetAccountNameForSessionCookie(cookie);
 
         Account? account = null;
@@ -180,13 +180,14 @@ public partial class ClientRequesterController
         {
             MatchName = matchStatistics.HostAccountName + "'s Game",
             ServerID = matchStatistics.ServerID,
+            ServerName = matchStatistics.HostAccountName + "'s Server", // Since we don't have the server name in MatchStatistics, we default to "User's Server"
             HostAccountName = matchStatistics.HostAccountName,
             Map = matchStatistics.Map,
             Version = matchStatistics.Version,
-            IsCasual = false, 
-            MatchType = 0, 
+            IsCasual = false,
+            MatchType = 0,
             MatchMode = matchStatistics.GameMode,
-            Options = MatchOptions.None 
+            Options = MatchOptions.None
         })
         {
             WinningTeam = winningTeam
@@ -195,95 +196,95 @@ public partial class ClientRequesterController
         // Construct match_player_stats dictionary
         List<MatchPlayerStatistics> mappedPlayerStats = playerStatistics.Select(stats => new MatchPlayerStatistics
         {
-                MatchID = stats.MatchID,
+            MatchID = stats.MatchID,
+            AccountID = stats.AccountID,
+            AccountName = stats.AccountName,
+            ClanID = stats.ClanID?.ToString() ?? "0",
+            HeroID = stats.HeroProductID?.ToString() ?? "0",
+            Position = stats.LobbyPosition.ToString(),
+            Team = stats.Team.ToString(),
+            Level = stats.HeroLevel.ToString(),
+            Wins = stats.Win.ToString(),
+            Losses = stats.Loss.ToString(),
+            Concedes = stats.Conceded.ToString(),
+            ConcedeVotes = stats.ConcedeVotes.ToString(),
+            Buybacks = stats.Buybacks.ToString(),
+            Disconnections = stats.Disconnected.ToString(),
+            Kicked = stats.Kicked.ToString(),
+            PublicSkill = "1500", // TODO: Store snapshot of PSR
+            PublicCount = stats.PublicMatch.ToString(),
+            AMMSoloRating = "1500", // TODO: Store snapshot of MMR
+            AMMSoloCount = stats.RankedMatch.ToString(),
+            AMMTeamRating = "1500", // TODO: Store snapshot of Team MMR
+            AMMTeamCount = "0",
+            AverageScore = stats.Score.ToString(),
+            HeroKills = stats.HeroKills.ToString(),
+            HeroDamage = stats.HeroDamage.ToString(),
+            HeroExperience = stats.HeroExperience.ToString(),
+            HeroKillsGold = stats.GoldFromHeroKills.ToString(),
+            HeroAssists = stats.HeroAssists.ToString(),
+            Deaths = stats.HeroDeaths.ToString(),
+            GoldLostToDeath = stats.GoldLostToDeath.ToString(),
+            SecondsDead = stats.SecondsDead.ToString(),
+            TeamCreepKills = stats.TeamCreepKills.ToString(),
+            TeamCreepDamage = stats.TeamCreepDamage.ToString(),
+            TeamCreepExperience = stats.TeamCreepExperience.ToString(),
+            TeamCreepGold = stats.TeamCreepGold.ToString(),
+            NeutralCreepKills = stats.NeutralCreepKills.ToString(),
+            NeutralCreepDamage = stats.NeutralCreepDamage.ToString(),
+            NeutralCreepExperience = stats.NeutralCreepExperience.ToString(),
+            NeutralCreepGold = stats.NeutralCreepGold.ToString(),
+            BuildingDamage = stats.BuildingDamage.ToString(),
+            BuildingExperience = stats.ExperienceFromBuildings.ToString(),
+            BuildingsRazed = stats.BuildingsRazed.ToString(),
+            BuildingGold = stats.GoldFromBuildings.ToString(),
+            Denies = stats.Denies.ToString(),
+            ExperienceDenied = stats.ExperienceDenied.ToString(),
+            Gold = stats.Gold.ToString(),
+            GoldSpent = stats.GoldSpent.ToString(),
+            Experience = stats.Experience.ToString(),
+            Actions = stats.Actions.ToString(),
+            Seconds = stats.SecondsPlayed.ToString(),
+            Consumables = stats.ConsumablesPurchased.ToString(),
+            Wards = stats.WardsPlaced.ToString(),
+            TimeEarningExperience = stats.TimeEarningExperience.ToString(),
+            FirstBlood = stats.FirstBlood.ToString(),
+            DoubleKill = stats.DoubleKill.ToString(),
+            TripleKill = stats.TripleKill.ToString(),
+            QuadKill = stats.QuadKill.ToString(),
+            Annihilation = stats.Annihilation.ToString(),
+            KillStreak3 = stats.KillStreak03.ToString(),
+            KillStreak4 = stats.KillStreak04.ToString(),
+            KillStreak5 = stats.KillStreak05.ToString(),
+            KillStreak6 = stats.KillStreak06.ToString(),
+            KillStreak7 = stats.KillStreak07.ToString(),
+            KillStreak8 = stats.KillStreak08.ToString(),
+            KillStreak9 = stats.KillStreak09.ToString(),
+            KillStreak10 = stats.KillStreak10.ToString(),
+            KillStreak15 = stats.KillStreak15.ToString(),
+            Smackdown = stats.Smackdown.ToString(),
+            Humiliation = stats.Humiliation.ToString(),
+            Nemesis = stats.Nemesis.ToString(),
+            Retribution = stats.Retribution.ToString(),
+            UsedToken = stats.UsedToken.ToString(),
+            HeroIdentifier = stats.HeroProductID?.ToString() ?? "0",
+            ClanTag = stats.ClanTag ?? string.Empty,
+            AlternativeAvatarName = stats.AlternativeAvatarName ?? string.Empty,
+            SeasonProgress = new SeasonProgress
+            {
                 AccountID = stats.AccountID,
-                AccountName = stats.AccountName,
-                ClanID = stats.ClanID?.ToString() ?? "0",
-                HeroID = stats.HeroProductID?.ToString() ?? "0",
-                Position = stats.LobbyPosition.ToString(),
-                Team = stats.Team.ToString(),
-                Level = stats.HeroLevel.ToString(),
-                Wins = stats.Win.ToString(),
-                Losses = stats.Loss.ToString(),
-                Concedes = stats.Conceded.ToString(),
-                ConcedeVotes = stats.ConcedeVotes.ToString(),
-                Buybacks = stats.Buybacks.ToString(),
-                Disconnections = stats.Disconnected.ToString(),
-                Kicked = stats.Kicked.ToString(),
-                PublicSkill = "1500", // TODO: Store snapshot of PSR
-                PublicCount = stats.PublicMatch.ToString(),
-                AMMSoloRating = "1500", // TODO: Store snapshot of MMR
-                AMMSoloCount = stats.RankedMatch.ToString(),
-                AMMTeamRating = "1500", // TODO: Store snapshot of Team MMR
-                AMMTeamCount = "0",
-                AverageScore = stats.Score.ToString(),
-                HeroKills = stats.HeroKills.ToString(),
-                HeroDamage = stats.HeroDamage.ToString(),
-                HeroExperience = stats.HeroExperience.ToString(),
-                HeroKillsGold = stats.GoldFromHeroKills.ToString(),
-                HeroAssists = stats.HeroAssists.ToString(),
-                Deaths = stats.HeroDeaths.ToString(),
-                GoldLostToDeath = stats.GoldLostToDeath.ToString(),
-                SecondsDead = stats.SecondsDead.ToString(),
-                TeamCreepKills = stats.TeamCreepKills.ToString(),
-                TeamCreepDamage = stats.TeamCreepDamage.ToString(),
-                TeamCreepExperience = stats.TeamCreepExperience.ToString(),
-                TeamCreepGold = stats.TeamCreepGold.ToString(),
-                NeutralCreepKills = stats.NeutralCreepKills.ToString(),
-                NeutralCreepDamage = stats.NeutralCreepDamage.ToString(),
-                NeutralCreepExperience = stats.NeutralCreepExperience.ToString(),
-                NeutralCreepGold = stats.NeutralCreepGold.ToString(),
-                BuildingDamage = stats.BuildingDamage.ToString(),
-                BuildingExperience = stats.ExperienceFromBuildings.ToString(),
-                BuildingsRazed = stats.BuildingsRazed.ToString(),
-                BuildingGold = stats.GoldFromBuildings.ToString(),
-                Denies = stats.Denies.ToString(),
-                ExperienceDenied = stats.ExperienceDenied.ToString(),
-                Gold = stats.Gold.ToString(),
-                GoldSpent = stats.GoldSpent.ToString(),
-                Experience = stats.Experience.ToString(),
-                Actions = stats.Actions.ToString(),
-                Seconds = stats.SecondsPlayed.ToString(),
-                Consumables = stats.ConsumablesPurchased.ToString(),
-                Wards = stats.WardsPlaced.ToString(),
-                TimeEarningExperience = stats.TimeEarningExperience.ToString(),
-                FirstBlood = stats.FirstBlood.ToString(),
-                DoubleKill = stats.DoubleKill.ToString(),
-                TripleKill = stats.TripleKill.ToString(),
-                QuadKill = stats.QuadKill.ToString(),
-                Annihilation = stats.Annihilation.ToString(),
-                KillStreak3 = stats.KillStreak03.ToString(),
-                KillStreak4 = stats.KillStreak04.ToString(),
-                KillStreak5 = stats.KillStreak05.ToString(),
-                KillStreak6 = stats.KillStreak06.ToString(),
-                KillStreak7 = stats.KillStreak07.ToString(),
-                KillStreak8 = stats.KillStreak08.ToString(),
-                KillStreak9 = stats.KillStreak09.ToString(),
-                KillStreak10 = stats.KillStreak10.ToString(),
-                KillStreak15 = stats.KillStreak15.ToString(),
-                Smackdown = stats.Smackdown.ToString(),
-                Humiliation = stats.Humiliation.ToString(),
-                Nemesis = stats.Nemesis.ToString(),
-                Retribution = stats.Retribution.ToString(),
-                UsedToken = stats.UsedToken.ToString(),
-                HeroIdentifier = stats.HeroProductID?.ToString() ?? "0", 
-                ClanTag = stats.ClanTag ?? string.Empty,
-                AlternativeAvatarName = stats.AlternativeAvatarName ?? string.Empty,
-                SeasonProgress = new SeasonProgress
-                {
-                    AccountID = stats.AccountID,
-                    MatchID = stats.MatchID,
-                    IsCasual = "0",
-                    MMRBefore = "1500.00",
-                    MMRAfter = "1500.00",
-                    MedalBefore = "11",
-                    MedalAfter = "11",
-                    Season = "12",
-                    PlacementMatches = 0,
-                    PlacementWins = "0"
-                }
+                MatchID = stats.MatchID,
+                IsCasual = "0",
+                MMRBefore = "1500.00",
+                MMRAfter = "1500.00",
+                MedalBefore = "11",
+                MedalAfter = "11",
+                Season = "12",
+                PlacementMatches = 0,
+                PlacementWins = "0"
+            }
         }).ToList();
-        
+
         // Match Mastery
         PlayerStatistics? requesterStats = null;
         if (account is not null)
@@ -321,17 +322,17 @@ public partial class ClientRequesterController
         {
             if (stat.Inventory != null)
             {
-               Dictionary<string, string> slots = new Dictionary<string, string>();
-               for (int i = 0; i < stat.Inventory.Count && i < 6; i++)
-               {
-                   slots[$"slot_{i+1}"] = stat.Inventory[i];
-               }
-               inventoryDict[stat.AccountID] = slots;
+                Dictionary<string, string> slots = new Dictionary<string, string>();
+                for (int i = 0; i < stat.Inventory.Count && i < 6; i++)
+                {
+                    slots[$"slot_{i + 1}"] = stat.Inventory[i];
+                }
+                inventoryDict[stat.AccountID] = slots;
             }
         }
 
         Dictionary<string, object> response = new();
-        
+
         // Ordered Response for Game Client
         if (account is not null)
         {
@@ -344,7 +345,7 @@ public partial class ClientRequesterController
         }
         response["match_summ"] = new Dictionary<int, object> { { matchID, matchSummary } };
         response["match_player_stats"] = new Dictionary<int, object> { { matchID, mappedPlayerStats } };
-        
+
         if (matchMastery != null)
             response["match_mastery"] = matchMastery;
 
