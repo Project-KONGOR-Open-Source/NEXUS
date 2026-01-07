@@ -142,7 +142,7 @@ public partial class ClientRequesterController
             return BadRequest("Invalid Match ID");
         }
 
-        MatchStatistics? matchStatistics = await MerrickContext.MatchStatistics.FirstOrDefaultAsync(matchStatistics => matchStatistics.MatchID == matchID);
+        MatchStatistics? matchStatistics = await MerrickContext.MatchStatistics.SingleOrDefaultAsync(matchStatistics => matchStatistics.MatchID == int.Parse(matchID));
 
         if (matchStatistics is null)
         {
@@ -151,7 +151,7 @@ public partial class ClientRequesterController
             return Ok(PhpSerialization.Serialize(false));
         }
 
-        List<PlayerStatistics> allPlayerStatistics = await MerrickContext.PlayerStatistics.Where(playerStatistics => playerStatistics.MatchID == matchStatistics.ID).ToListAsync();
+        List<PlayerStatistics> allPlayerStatistics = await MerrickContext.PlayerStatistics.Where(playerStatistics => playerStatistics.MatchID == matchStatistics.MatchID).ToListAsync();
 
         string? accountName = HttpContext.Items["SessionAccountName"] as string
                               ?? await DistributedCache.GetAccountNameForSessionCookie(cookie);
@@ -186,7 +186,7 @@ public partial class ClientRequesterController
             ServerName = "Unknown"
         };
 
-        MatchSummary matchSummary = new(matchStatistics, allPlayerStatistics, matchStartData);
+        MatchStartData? matchStartData = await DistributedCache.GetMatchStartData(matchStatistics.MatchID);
 
         // Populate stats for ALL players
         Dictionary<int, MatchPlayerStatistics> matchPlayerStatistics = [];
