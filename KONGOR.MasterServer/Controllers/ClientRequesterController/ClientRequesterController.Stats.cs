@@ -142,7 +142,7 @@ public partial class ClientRequesterController
             return BadRequest("Invalid Match ID");
         }
 
-        MatchStatistics? matchStatistics = await MerrickContext.MatchStatistics.SingleOrDefaultAsync(matchStatistics => matchStatistics.MatchID == int.Parse(matchID));
+        MatchStatistics? matchStatistics = await MerrickContext.MatchStatistics.SingleOrDefaultAsync(matchStatistics => matchStatistics.MatchID == matchID);
 
         if (matchStatistics is null)
         {
@@ -161,16 +161,14 @@ public partial class ClientRequesterController
         if (accountName is not null)
         {
             account = await MerrickContext.Accounts
-                .Include(a => a.User)
-                .SingleOrDefaultAsync(a => a.Name.Equals(accountName));
+                .Include(account => account.User)
+                .Include(account => account.Clan)
+                .SingleOrDefaultAsync(account => account.Name.Equals(accountName));
         }
 
-        Account? account = await MerrickContext.Accounts
-            .Include(account => account.User)
-            .Include(account => account.Clan)
-            .SingleOrDefaultAsync(account => account.Name.Equals(accountName));
-
         // Robustness: If MatchStartData is missing (expired cache), reconstruct from MatchStatistics
+        MatchStartData? matchStartData = await DistributedCache.GetMatchStartData(matchStatistics.MatchID);
+        
         matchStartData ??= new MatchStartData
         {
             MatchID = matchStatistics.MatchID,
@@ -185,8 +183,9 @@ public partial class ClientRequesterController
             Options = MatchOptions.None, // Data loss, but allows viewing stats
             ServerName = "Unknown"
         };
-
-        MatchStartData? matchStartData = await DistributedCache.GetMatchStartData(matchStatistics.MatchID);
+        
+        // Define matchSummary
+        MatchSummary matchSummary = new MatchSummary(matchStatistics, allPlayerStatistics, matchStartData);
 
         // Populate stats for ALL players
         Dictionary<int, MatchPlayerStatistics> matchPlayerStatistics = [];
@@ -234,8 +233,8 @@ public partial class ClientRequesterController
             GoldCoins = account?.User.GoldCoins.ToString() ?? "0",
             SilverCoins = account?.User.SilverCoins.ToString() ?? "0",
             MatchSummary = [matchSummary],
-            MatchPlayerStatistics = matchPlayerStatistics,
-            MatchPlayerInventories = matchPlayerInventories,
+            MatchPlayerStatistics = [matchPlayerStatistics],
+            MatchPlayerInventories = [matchPlayerInventories],
             MatchMastery = new MatchMastery
             {
                 HeroIdentifier = "Hero_Legionnaire", // TODO: Get from Match Stats (Requester's Hero?)
@@ -257,6 +256,7 @@ public partial class ClientRequesterController
             },
             OwnedStoreItems = account?.User.OwnedStoreItems ?? [],
             SelectedStoreItems = account?.SelectedStoreItems ?? [],
+            OwnedStoreItemsData = account != null ? SetOwnedStoreItemsData(account) : [],
             CustomIconSlotID = account != null ? SetCustomIconSlotID(account) : "0",
             CampaignReward = new CampaignReward()
         };
@@ -268,12 +268,12 @@ public partial class ClientRequesterController
         => account.SelectedStoreItems.Any(item => item.StartsWith("ai.custom_icon"))
             ? account.SelectedStoreItems.FirstOrDefault(item => item.StartsWith("ai.custom_icon"))?.Replace("ai.custom_icon:", string.Empty) ?? "0" : "0";
 
-    private static Dictionary<string, object> SetOwnedStoreItemsData(Account account)
+    private static Dictionary<string, OneOf<global::KONGOR.MasterServer.Models.RequestResponse.SRP.StoreItemData, global::KONGOR.MasterServer.Models.RequestResponse.Store.StoreItemDiscountCoupon>> SetOwnedStoreItemsData(Account account)
     {
         // 2026-01-06: FIX - Do NOT populate metadata for standard owned items (avatars, etc.).
         // The legacy client expects 'my_upgrades_info' to contain specific data for Rentables/Coupons only.
         // Sending generic StoreItemData with empty strings for all items causes "Error when refreshing upgrades" and client logout.
-        Dictionary<string, object> items = new();
+        Dictionary<string, OneOf<global::KONGOR.MasterServer.Models.RequestResponse.SRP.StoreItemData, global::KONGOR.MasterServer.Models.RequestResponse.Store.StoreItemDiscountCoupon>> items = new();
 
         // TODO: Add Mastery Boosts And Coupons (cp. items) when implemented.
         // Legacy reference: GameConsumables.GetOwnedCoupons checks for "cp." prefix.

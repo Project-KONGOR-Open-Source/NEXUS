@@ -151,7 +151,7 @@ public class ShowSimpleStatsResponse
     ///     Metadata attached to each of the account's owned store items.
     /// </summary>
     [PhpProperty("my_upgrades_info")]
-    public required Dictionary<string, object> OwnedStoreItemsData { get; set; }
+    public required Dictionary<string, OneOf<global::KONGOR.MasterServer.Models.RequestResponse.SRP.StoreItemData, global::KONGOR.MasterServer.Models.RequestResponse.Store.StoreItemDiscountCoupon>> OwnedStoreItemsData { get; set; }
 
     /// <summary>
     ///     Tokens for the Kros Dice random ability draft that players can use while dead or in spawn in a Kros Mode match.
