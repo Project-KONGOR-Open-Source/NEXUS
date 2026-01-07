@@ -62,6 +62,9 @@ public partial class InProcessDistributedCacheStore : IDatabase
 
     // Hash Operations
 
+
+    // Hash Operations
+
     public Task HashSetAsync(RedisKey key, HashEntry[] hashFields, CommandFlags flags = CommandFlags.None)
     {
         string keyString = key.ToString();

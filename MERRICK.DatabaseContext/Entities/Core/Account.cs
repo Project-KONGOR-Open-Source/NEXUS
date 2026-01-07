@@ -11,6 +11,8 @@ public class Account
 
     public required User User { get; set; }
 
+    public string? Cookie { get; set; }
+
     public AccountType Type { get; set; } = AccountType.Legacy;
 
     public required bool IsMain { get; set; }

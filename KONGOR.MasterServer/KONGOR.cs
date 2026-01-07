@@ -1,5 +1,7 @@
 ﻿namespace KONGOR.MasterServer;
 
+using global::KONGOR.MasterServer.Infrastructure;
+
 public class KONGOR
 {
     // The Count Of Seconds Since The UNIX Epoch (Epochalypse = 19.01.2038 @ 03:14:07 UTC)
@@ -150,6 +152,9 @@ public class KONGOR
         {
             // Show Detailed Error Pages In Development
             application.UseDeveloperExceptionPage();
+            
+            // Enable Custom Exception Logging To Expose Messages In Structured Logs (Must Be After Exception Handler To Catch Exceptions Before They Are Swallowed)
+            application.UseMiddleware<ExceptionLoggingMiddleware>();
 
             // Enable HTTP Request/Response Logging
             application.UseHttpLogging();
@@ -159,6 +164,9 @@ public class KONGOR
         {
             // Use Global Exception Handler In Production
             application.UseExceptionHandler("/error");
+
+            // Enable Custom Exception Logging To Expose Messages In Structured Logs
+            application.UseMiddleware<ExceptionLoggingMiddleware>();
         }
 
         // Enable Swagger API Documentation
@@ -181,11 +189,15 @@ public class KONGOR
         // Enable Rate Limiting (Before Other Processing)
         application.UseRateLimiter();
 
-        // Enforce HTTPS With Strict Transport Security
-        application.UseHsts();
+        // Create A Scope To Configure HTTPS Redirection Strategy
+        if (!application.Environment.IsDevelopment())
+        {
+            // Enforce HTTPS With Strict Transport Security
+            application.UseHsts();
 
-        // Automatically Redirect HTTP Requests To HTTPS
-        application.UseHttpsRedirection();
+            // Automatically Redirect HTTP Requests To HTTPS
+            application.UseHttpsRedirection();
+        }
 
         // Add Security Headers Middleware
         application.Use(async (context, next) =>
@@ -206,6 +218,9 @@ public class KONGOR
 
             await next();
         });
+
+        // Register Custom Request Logging Middleware
+        application.UseRequestLogging();
 
         // Map Aspire Default Health Check Endpoints
         application.MapDefaultEndpoints();

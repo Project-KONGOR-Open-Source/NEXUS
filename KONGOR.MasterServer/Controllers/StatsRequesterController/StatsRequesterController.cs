@@ -31,12 +31,12 @@ public partial class StatsRequesterController(MerrickContext databaseContext, ID
     [HttpPost(Name = "Stats Requester All-In-One")]
     public async Task<IActionResult> StatsRequester([FromForm] StatsForSubmissionRequestForm form)
     {
-        return Request.Form["f"].SingleOrDefault() switch
+        return Request.Form["f"].FirstOrDefault() switch
         {
             "submit_stats"      => await HandleStatsSubmission(form),
             "resubmit_stats"    => await HandleStatsResubmission(form),
 
-            _                   => throw new NotImplementedException($"Unsupported Stats Requester Controller Form Parameter: f={Request.Form["f"].Single()}")
+            _                   => throw new NotImplementedException($"Unsupported Stats Requester Controller Form Parameter: f={Request.Form["f"].FirstOrDefault()}")
         };
     }
 }

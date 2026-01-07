@@ -21,7 +21,7 @@ public partial class ClientRequesterController
 
         Account? account = await MerrickContext.Accounts
             .Include(account => account.Clan)
-            .SingleOrDefaultAsync(account => account.ID.Equals(int.Parse(accountID)));
+            .FirstOrDefaultAsync(account => account.ID.Equals(int.Parse(accountID)));
 
         if (account is null)
             return NotFound($@"Account With ID ""{accountID}"" Was Not Found");
@@ -71,7 +71,7 @@ public partial class ClientRequesterController
 
         HeroGuide? guide = await MerrickContext.HeroGuides
             .Include(guide => guide.Author).ThenInclude(author => author.Clan)
-            .SingleOrDefaultAsync(guide => guide.ID.Equals(int.Parse(guideID)));
+            .FirstOrDefaultAsync(guide => guide.ID.Equals(int.Parse(guideID)));
 
         if (guide is null)
             return NotFound($"Guide ID {guideID} Was Not Found");

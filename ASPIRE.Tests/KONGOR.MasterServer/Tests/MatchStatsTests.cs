@@ -8,7 +8,7 @@ using global::MERRICK.DatabaseContext.Constants;
 using global::MERRICK.DatabaseContext.Entities;
 using global::MERRICK.DatabaseContext.Entities.Statistics;
 using global::MERRICK.DatabaseContext.Entities.Utility;
-using global::MERRICK.DatabaseContext.Enumerations;
+using global::MERRICK.DatabaseContext.Enumerations; 
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -77,7 +77,7 @@ public sealed partial class MatchStatsSubmissionTests
         await dbContext.SaveChangesAsync();
 
         // 2. Seed Cache with Match Server Session
-        string sessionCookie = Guid.NewGuid().ToString();
+        string sessionCookie = Guid.NewGuid().ToString("N");
         int serverId = 1;
 
         MatchServer matchServer = new()
@@ -111,7 +111,11 @@ public sealed partial class MatchStatsSubmissionTests
         Console.WriteLine($"[TEST] Response Status: {response.StatusCode}");
         Console.WriteLine($"[TEST] Response Body: {responseBody}");
 
-        await Assert.That(response.IsSuccessStatusCode).IsTrue();
+        // await Assert.That(response.IsSuccessStatusCode).IsTrue();
+        if (!response.IsSuccessStatusCode)
+        {
+            Assert.Fail($"Request failed with {response.StatusCode}. Body: {responseBody}");
+        }
 
         MatchStatistics? savedStats = await dbContext.MatchStatistics
             .FirstOrDefaultAsync(m => m.MatchID == matchId);

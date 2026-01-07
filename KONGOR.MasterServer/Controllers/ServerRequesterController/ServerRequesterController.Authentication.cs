@@ -54,7 +54,7 @@ public partial class ServerRequesterController
 
         Account? account = await MerrickContext.Accounts
             .Include(account => account.User)
-            .SingleOrDefaultAsync(account => account.Name.Equals(hostAccountName));
+            .FirstOrDefaultAsync(account => account.Name.Equals(hostAccountName));
 
         if (account is null)
             return NotFound($@"Account ""{hostAccountName}"" Was Not Found");
@@ -152,7 +152,7 @@ public partial class ServerRequesterController
 
         Account? account = await MerrickContext.Accounts
             .Include(account => account.User)
-            .SingleOrDefaultAsync(account => account.Name.Equals(hostAccountName));
+            .FirstOrDefaultAsync(account => account.Name.Equals(hostAccountName));
 
         if (account is null)
             return NotFound($@"Account ""{hostAccountName}"" Was Not Found");
@@ -167,7 +167,7 @@ public partial class ServerRequesterController
 
         // TODO: Verify Whether The Server Version Matches The Client Version (Or Disallow Servers To Be Started If They Are Not On The Latest Version)
 
-        MatchServerManager? matchServerManager = (await DistributedCache.GetMatchServerManagersByAccountName(hostAccountName)).SingleOrDefault();
+        MatchServerManager? matchServerManager = (await DistributedCache.GetMatchServerManagersByAccountName(hostAccountName)).FirstOrDefault();
 
         MatchServer matchServer = new ()
         {
@@ -254,7 +254,7 @@ public partial class ServerRequesterController
         Account? account = await MerrickContext.Accounts
             .Include(account => account.User).ThenInclude(user => user.Accounts)
             .Include(account => account.Clan)
-            .SingleOrDefaultAsync(account => account.Name.Equals(accountNameForSessionCookie));
+            .FirstOrDefaultAsync(account => account.Name.Equals(accountNameForSessionCookie));
 
         if (account is null)
         {
@@ -268,7 +268,7 @@ public partial class ServerRequesterController
             { "cookie", cookie },
             { "account_id", account.ID },
             { "nickname", account.Name },
-            { "super_id", account.User.Accounts.Single(record => record.IsMain).ID },
+            { "super_id", account.User.Accounts.FirstOrDefault(record => record.IsMain)?.ID ?? account.ID },
             { "account_type", account.Type },
             { "level", account.User.TotalLevel }
         };
@@ -465,7 +465,11 @@ public partial class ServerRequesterController
 
             if (matchStartData is null)
             {
-                Logger.LogError(@"[BUG] Received Match Initialisation Heartbeat For Session ""{Session}"", But No MatchStartData Found In Cache", session);
+                // Only Log This Error If The Server Is In A State Where It Should Have Match Data (i.e. Not Idle, Sleeping, Or Unknown)
+                if (matchServer is not null && matchServer.Status != ServerStatus.SERVER_STATUS_IDLE && matchServer.Status != ServerStatus.SERVER_STATUS_SLEEPING && matchServer.Status != ServerStatus.SERVER_STATUS_UNKNOWN)
+                {
+                    Logger.LogError(@"[BUG] Received Match Initialisation Heartbeat For Session ""{Session}"", But No MatchStartData Found In Cache. Server Status: {ServerStatus}", session, matchServer.Status);
+                }
 
                 return Ok();
             }

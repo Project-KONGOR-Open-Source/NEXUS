@@ -6,11 +6,7 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using ASPIRE.Common.DTOs;
 using DAWNBRINGER.WebPortal.UI.Models;
-using DAWNBRINGER.WebPortal.UI.Utilities;
-using MERRICK.DatabaseContext.Constants;
 using MERRICK.DatabaseContext.Entities.Core;
-using MERRICK.DatabaseContext.Entities.Utility;
-using MERRICK.DatabaseContext.Enumerations;
 using MERRICK.DatabaseContext.Persistence;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -227,20 +223,50 @@ public class AccountController : Controller
             return RedirectToAction("Signup");
         }
 
-        List<Claim> claims = new List<Claim>
+        // Check if User exists to decide flow
+        User? user = await _context.Users
+            .Include(u => u.Accounts)
+            .FirstOrDefaultAsync(u => u.EmailAddress == email);
+
+        if (user != null)
         {
-            new Claim(ClaimTypes.Name, email),
-            new Claim(ClaimTypes.Email, email),
-            new Claim("MockUser", "true")
-        };
+            // User exists, just log them in
+             string ign = user.Accounts.FirstOrDefault()?.Name ?? email;
 
-        ClaimsIdentity claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+            List<Claim> claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.Name, ign),
+                new Claim(ClaimTypes.Email, email),
+                new Claim(ClaimTypes.NameIdentifier, email),
+                new Claim("MockUser", "true")
+            };
 
-        await HttpContext.SignInAsync(
-            CookieAuthenticationDefaults.AuthenticationScheme,
-            new ClaimsPrincipal(claimsIdentity));
+            ClaimsIdentity claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
 
-        return RedirectToAction("Index", "Home");
+            await HttpContext.SignInAsync(
+                CookieAuthenticationDefaults.AuthenticationScheme,
+                new ClaimsPrincipal(claimsIdentity));
+            
+            return RedirectToAction("Index", "Home");
+        }
+        else
+        {
+            // New User -> Redirect to Register to choose IGN/Password
+            List<Claim> claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.Name, email), // Temporary Name until IGN chosen
+                new Claim(ClaimTypes.Email, email),
+                new Claim("MockUser", "true")
+            };
+
+            ClaimsIdentity claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+
+            await HttpContext.SignInAsync(
+                CookieAuthenticationDefaults.AuthenticationScheme,
+                new ClaimsPrincipal(claimsIdentity));
+
+            return RedirectToAction("Register");
+        }
     }
 
     [HttpPost]

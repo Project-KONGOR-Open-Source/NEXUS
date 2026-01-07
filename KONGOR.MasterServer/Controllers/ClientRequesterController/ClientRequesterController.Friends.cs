@@ -30,11 +30,11 @@ public partial class ClientRequesterController
         // Load Requester's Account With Friends List
         Account requesterAccount = await MerrickContext.Accounts
             .Include(account => account.FriendedPeers)
-            .SingleAsync(account => account.Name.Equals(accountName));
+            .FirstAsync(account => account.Name.Equals(accountName));
 
         // Find Requester Account's Friend To Remove
         FriendedPeer? friendToRemoveFromRequesterAccount = requesterAccount.FriendedPeers
-            .SingleOrDefault(friend => friend.ID == friendID);
+            .FirstOrDefault(friend => friend.ID == friendID);
 
         // Requester Account Does Not Have Target As A Friend
         if (friendToRemoveFromRequesterAccount is null)
@@ -52,11 +52,11 @@ public partial class ClientRequesterController
         // Load Target Account With Friends List
         Account targetAccount = await MerrickContext.Accounts
             .Include(account => account.FriendedPeers)
-            .SingleAsync(account => account.ID == friendToRemoveFromRequesterAccount.ID);
+            .FirstAsync(account => account.ID == friendToRemoveFromRequesterAccount.ID);
 
         // Find Target Account's Friend To Remove
         FriendedPeer? friendToRemoveFromTargetAccount = targetAccount.FriendedPeers
-            .SingleOrDefault(friend => friend.ID == requesterAccount.ID);
+            .FirstOrDefault(friend => friend.ID == requesterAccount.ID);
 
         // Target Account Does Not Have Requester As A Friend
         if (friendToRemoveFromTargetAccount is null)

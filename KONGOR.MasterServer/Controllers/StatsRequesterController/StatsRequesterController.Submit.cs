@@ -9,12 +9,17 @@ public partial class StatsRequesterController
         if (form.Session is null)
             return BadRequest(@"Missing Value For Form Parameter ""session""");
 
+        form.Session = form.Session.Replace("-", string.Empty);
+
         MatchServer? matchServer = await DistributedCache.GetMatchServerBySessionCookie(form.Session);
 
         if (matchServer is null)
             return Unauthorized($@"No Match Server Could Be Found For Session Cookie ""{form.Session}""");
 
-        MatchStatistics? existingMatchStatistics = await MerrickContext.MatchStatistics.SingleOrDefaultAsync(stats => stats.MatchID == form.MatchStats.MatchID);
+        if (!int.TryParse(form.MatchStats["match_id"], out int matchID))
+            return BadRequest("Invalid Match ID");
+
+        MatchStatistics? existingMatchStatistics = await MerrickContext.MatchStatistics.FirstOrDefaultAsync(stats => stats.MatchID == matchID);
 
         if (existingMatchStatistics is null)
         {
@@ -23,19 +28,28 @@ public partial class StatsRequesterController
             await MerrickContext.MatchStatistics.AddAsync(matchStatistics);
         }
 
-        else Logger.LogError($"[BUG] Match Statistics For Match ID {form.MatchStats.MatchID} Have Already Been Submitted");
+        else Logger.LogInformation($"Match Statistics For Match ID {matchID} Have Already Been Submitted");
 
         foreach (int playerIndex in form.PlayerStats.Keys)
         {
             // The Match Server Sends The Account Name With The Clan Tag Combined Into A Single String Value So We Need To Separate Them
-            string accountName = Account.SeparateClanTagFromAccountName(form.PlayerStats[playerIndex].Values.Single().AccountName).AccountName;
+            // Dictionaries in PHP forms: player_stats[0][Hero_Legionnaire][nickname]
+            // form.PlayerStats is Dictionary<int, Dictionary<string, Dictionary<string, string>>>
+            // Outer key: playerIndex (0)
+            // Middle key: heroName (Hero_Legionnaire) -> we can just take First().Value since we expect one hero per player entry usually, or iterate.
+            // But ToPlayerStatistics handles the logic: string hero = form.PlayerStats[playerIndex].Keys.Single();
+
+            string heroKey = form.PlayerStats[playerIndex].Keys.First();
+            string fullAccountName = form.PlayerStats[playerIndex][heroKey]["nickname"];
+
+            string accountName = Account.SeparateClanTagFromAccountName(fullAccountName).AccountName;
 
             PlayerEntity? existingPlayerStatistics = await MerrickContext.PlayerStatistics
-                .SingleOrDefaultAsync(stats => stats.MatchID == form.MatchStats.MatchID && stats.AccountName == accountName);
+                .FirstOrDefaultAsync(stats => stats.MatchID == matchID && stats.AccountName == accountName);
 
             if (existingPlayerStatistics is null)
             {
-                Account? account = await MerrickContext.Accounts.Include(account => account.Clan).SingleOrDefaultAsync(account => account.Name.Equals(accountName));
+                Account? account = await MerrickContext.Accounts.Include(account => account.Clan).FirstOrDefaultAsync(account => account.Name.Equals(accountName));
 
                 if (account is null)
                 {
@@ -49,12 +63,20 @@ public partial class StatsRequesterController
                 await MerrickContext.PlayerStatistics.AddAsync(playerStatistics);
             }
 
-            else Logger.LogError($@"[BUG] Player Statistics For Account Name ""{accountName}"" In Match ID {form.MatchStats.MatchID} Have Already Been Submitted");
+            else Logger.LogInformation($@"Player Statistics For Account Name ""{accountName}"" In Match ID {matchID} Have Already Been Submitted");
         }
 
         await MerrickContext.SaveChangesAsync();
 
-        return Ok();
+        Dictionary<string, string> response = new()
+        {
+            { "match_info", "OK" },
+            { "match_summ", "OK" },
+            { "match_stats", "OK" },
+            { "match_history", "OK" }
+        };
+
+        return Ok(PhpSerialization.Serialize(response));
     }
 
     private async Task<IActionResult> HandleStatsResubmission(StatsForSubmissionRequestForm form)
@@ -66,7 +88,7 @@ public partial class StatsRequesterController
         // Which The Match Server Launcher Uses To Separate The Host Account Name From The Match Server Instance ID
         form.HostAccountName = form.HostAccountName.TrimEnd(':');
 
-        Account? hostAccount = await MerrickContext.Accounts.Include(account => account.User).SingleOrDefaultAsync(account => account.Name.Equals(form.HostAccountName));
+        Account? hostAccount = await MerrickContext.Accounts.Include(account => account.User).FirstOrDefaultAsync(account => account.Name.Equals(form.HostAccountName));
 
         if (hostAccount is null)
             return NotFound($@"Unable To Retrieve Account For Host Account Name ""{hostAccount}""");
@@ -83,7 +105,10 @@ public partial class StatsRequesterController
         if (form.StatsResubmissionKey is null)
             return BadRequest(@"Missing Value For Form Parameter ""resubmission_key""");
 
-        string computedStatsResubmissionKey = Convert.ToHexString(SHA1.HashData(Encoding.UTF8.GetBytes(form.MatchStats.MatchID + MatchStatsSubmissionSalt))).ToLower();
+        if (!int.TryParse(form.MatchStats["match_id"], out int matchID))
+            return BadRequest("Invalid Match ID");
+
+        string computedStatsResubmissionKey = Convert.ToHexString(SHA1.HashData(Encoding.UTF8.GetBytes(matchID + MatchStatsSubmissionSalt))).ToLower();
         string expectedStatsResubmissionKey = form.StatsResubmissionKey;
 
         if (computedStatsResubmissionKey.Equals(expectedStatsResubmissionKey) is false)
@@ -92,12 +117,12 @@ public partial class StatsRequesterController
         if (form.ServerID is null)
             return BadRequest(@"Missing Value For Form Parameter ""server_id""");
 
-        MatchServer? matchServer = (await DistributedCache.GetMatchServersByAccountName(hostAccount.Name)).SingleOrDefault(server => server.ID == form.ServerID);
+        MatchServer? matchServer = (await DistributedCache.GetMatchServersByAccountName(hostAccount.Name)).FirstOrDefault(server => server.ID == form.ServerID);
 
         if (matchServer is null)
-            Logger.LogInformation($@"Match Server ID {form.ServerID} Hosted By ""{hostAccount.Name}"" Is No Longer Online While Match Statistics For Match ID {form.MatchStats.MatchID} Are Being Resubmitted");
+            Logger.LogInformation($@"Match Server ID {form.ServerID} Hosted By ""{hostAccount.Name}"" Is No Longer Online While Match Statistics For Match ID {matchID} Are Being Resubmitted");
 
-        MatchStatistics? existingMatchStatistics = await MerrickContext.MatchStatistics.SingleOrDefaultAsync(stats => stats.MatchID == form.MatchStats.MatchID);
+        MatchStatistics? existingMatchStatistics = await MerrickContext.MatchStatistics.FirstOrDefaultAsync(stats => stats.MatchID == matchID);
 
         if (existingMatchStatistics is null)
         {
@@ -106,19 +131,21 @@ public partial class StatsRequesterController
             await MerrickContext.MatchStatistics.AddAsync(matchStatistics);
         }
 
-        else Logger.LogError($"[BUG] Match Statistics For Match ID {form.MatchStats.MatchID} Have Already Been Submitted");
+        else Logger.LogInformation($"Match Statistics For Match ID {matchID} Have Already Been Submitted");
 
         foreach (int playerIndex in form.PlayerStats.Keys)
         {
             // The Match Server Sends The Account Name With The Clan Tag Combined Into A Single String Value So We Need To Separate Them
-            string accountName = Account.SeparateClanTagFromAccountName(form.PlayerStats[playerIndex].Values.Single().AccountName).AccountName;
+            string heroKey = form.PlayerStats[playerIndex].Keys.First();
+            string fullAccountName = form.PlayerStats[playerIndex][heroKey]["nickname"];
+            string accountName = Account.SeparateClanTagFromAccountName(fullAccountName).AccountName;
 
             PlayerEntity? existingPlayerStatistics = await MerrickContext.PlayerStatistics
-                .SingleOrDefaultAsync(stats => stats.MatchID == form.MatchStats.MatchID && stats.AccountName == accountName);
+                .FirstOrDefaultAsync(stats => stats.MatchID == matchID && stats.AccountName == accountName);
 
             if (existingPlayerStatistics is null)
             {
-                Account? account = await MerrickContext.Accounts.Include(account => account.Clan).SingleOrDefaultAsync(account => account.Name.Equals(accountName));
+                Account? account = await MerrickContext.Accounts.Include(account => account.Clan).FirstOrDefaultAsync(account => account.Name.Equals(accountName));
 
                 if (account is null)
                 {
@@ -132,11 +159,20 @@ public partial class StatsRequesterController
                 await MerrickContext.PlayerStatistics.AddAsync(playerStatistics);
             }
 
-            else Logger.LogError($@"[BUG] Player Statistics For Account Name ""{accountName}"" In Match ID {form.MatchStats.MatchID} Have Already Been Submitted");
+            else Logger.LogInformation($@"Player Statistics For Account Name ""{accountName}"" In Match ID {matchID} Have Already Been Submitted");
         }
 
         await MerrickContext.SaveChangesAsync();
 
-        return Ok();
+        Dictionary<string, object> response = new()
+        {
+            { "match_id", matchID },
+            { "match_info", "OK" },
+            { "match_summ", "OK" },
+            { "match_stats", "OK" },
+            { "match_history", "OK" }
+        };
+
+        return Ok(PhpSerialization.Serialize(response));
     }
 }

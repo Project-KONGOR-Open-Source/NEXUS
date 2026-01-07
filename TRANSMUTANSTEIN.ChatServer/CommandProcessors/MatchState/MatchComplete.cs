@@ -32,9 +32,11 @@ file class MatchCompleteRequestData
     public MatchCompleteRequestData(ChatBuffer buffer)
     {
         CommandBytes = buffer.ReadCommandBytes();
-        ServerID = buffer.ReadInt32();
-        MatchID = buffer.ReadInt32();
-        WinningTeam = buffer.ReadInt32();
-        MatchDuration = buffer.ReadInt32();
+        
+        // Safely partial read
+        if (buffer.HasRemainingData()) ServerID = buffer.ReadInt32();
+        if (buffer.HasRemainingData()) MatchID = buffer.ReadInt32();
+        if (buffer.HasRemainingData()) WinningTeam = buffer.ReadInt32();
+        if (buffer.HasRemainingData()) MatchDuration = buffer.ReadInt32();
     }
 }

@@ -12,12 +12,79 @@ public partial class ClientRequesterController
         Account? account = await MerrickContext.Accounts
             .Include(account => account.User)
             .Include(account => account.Clan)
-            .SingleOrDefaultAsync(account => account.Name.Equals(accountName));
+            .FirstOrDefaultAsync(account => account.Name.Equals(accountName));
 
         if (account is null)
             return NotFound($@"Account With Name ""{accountName}"" Was Not Found");
 
-        ShowSimpleStatsResponse response = new()
+        ShowSimpleStatsResponse response = await CreateShowSimpleStatsResponse(account);
+
+        return Ok(PhpSerialization.Serialize(response));
+    }
+
+    private async Task<IActionResult> HandleInitStats()
+    {
+        string? cookie = Request.Form["cookie"];
+        if (cookie is not null) cookie = cookie.Replace("-", string.Empty);
+
+        if (cookie is null)
+            return BadRequest(@"Missing Value For Form Parameter ""cookie""");
+
+        string? accountName = await DistributedCache.GetAccountNameForSessionCookie(cookie);
+
+        if (accountName is null)
+            return Unauthorized("Session Not Found");
+
+        Account? account = await MerrickContext.Accounts
+            .Include(account => account.User)
+            .Include(account => account.Clan)
+            .FirstOrDefaultAsync(account => account.Name.Equals(accountName));
+
+        if (account is null)
+            return NotFound("Account Not Found");
+
+        if (account is null)
+            return NotFound("Account Not Found");
+
+        // 2026-01-06: FIX - Refactored to return explicit dictionary matching legacy protocol.
+        // We exclude 'my_upgrades' and 'my_upgrades_info' from get_initStats as they trigger client-side errors.
+        // The legacy client expects only basic stats and selected upgrades here.
+        ShowSimpleStatsResponse fullResponse = await CreateShowSimpleStatsResponse(account);
+        
+        // 2026-01-06: FIX - Refactored to return manual dictionary.
+        // Restored standard keys (slot_id, tokens) as strict removal might cause client instability.
+        Dictionary<string, object> response = new()
+        {
+            { "nickname", fullResponse.NameWithClanTag },
+            { "account_id", fullResponse.ID },
+            { "level", fullResponse.Level },
+            { "level_exp", fullResponse.LevelExperience },
+            { "avatar_num", fullResponse.NumberOfAvatarsOwned },
+            { "hero_num", fullResponse.NumberOfHeroesOwned },
+            { "total_played", fullResponse.TotalMatchesPlayed },
+            { "season_id", fullResponse.CurrentSeason },
+            { "season_level", fullResponse.SeasonLevel },
+            { "creep_level", fullResponse.CreepLevel },
+            { "season_normal", fullResponse.SimpleSeasonStats },
+            { "season_casual", fullResponse.SimpleCasualSeasonStats },
+            { "mvp_num", fullResponse.MVPAwardsCount },
+            { "award_top4_name", fullResponse.Top4AwardNames },
+            { "award_top4_num", fullResponse.Top4AwardCounts },
+            { "slot_id", fullResponse.CustomIconSlotID },
+            { "selected_upgrades", fullResponse.SelectedStoreItems },
+            { "dice_tokens", fullResponse.DiceTokens },
+            { "game_tokens", fullResponse.GameTokens },
+            { "timestamp", fullResponse.ServerTimestamp },
+            { "vested_threshold", fullResponse.VestedThreshold },
+            { "0", fullResponse.Zero }
+        };
+
+        return Ok(PhpSerialization.Serialize(response));
+    }
+
+    private async Task<ShowSimpleStatsResponse> CreateShowSimpleStatsResponse(Account account)
+    {
+        return new ShowSimpleStatsResponse()
         {
             NameWithClanTag = account.NameWithClanTag,
             ID = account.ID.ToString(),
@@ -50,29 +117,32 @@ public partial class ClientRequesterController
             SelectedStoreItems = account.SelectedStoreItems,
             OwnedStoreItemsData = SetOwnedStoreItemsData(account)
         };
-
-        return Ok(PhpSerialization.Serialize(response));
     }
 
     private async Task<IActionResult> HandleMatchStats()
     {
         string? cookie = Request.Form["cookie"];
-        string? matchID = Request.Form["match_id"];
+        if (cookie is not null) cookie = cookie.Replace("-", string.Empty);
 
-        Logger.LogInformation("Received Match Stats Request: MatchID={MatchID}, Cookie={Cookie}", matchID, cookie);
+        string? matchIDString = Request.Form["match_id"];
 
-        if (cookie is null)
+        Logger.LogInformation("Received Match Stats Request: MatchID={MatchID}, Cookie={Cookie}", matchIDString, cookie);
 
         if (cookie is null)
             return BadRequest(@"Missing Value For Form Parameter ""cookie""");
 
-        if (matchID is null)
+        if (matchIDString is null)
         {
             Logger.LogError("Match Stats Request Failed: Missing Match ID");
             return BadRequest(@"Missing Value For Form Parameter ""match_id""");
         }
 
-        MatchStatistics? matchStatistics = await MerrickContext.MatchStatistics.SingleOrDefaultAsync(matchStatistics => matchStatistics.MatchID == int.Parse(matchID));
+        if (!int.TryParse(matchIDString, out int matchID))
+        {
+             return BadRequest("Invalid Match ID");
+        }
+
+        MatchStatistics? matchStatistics = await MerrickContext.MatchStatistics.FirstOrDefaultAsync(matchStatistics => matchStatistics.MatchID == matchID);
 
         if (matchStatistics is null)
         {
@@ -82,7 +152,8 @@ public partial class ClientRequesterController
 
         List<PlayerStatistics> playerStatistics = await MerrickContext.PlayerStatistics.Where(playerStatistics => playerStatistics.MatchID == matchStatistics.MatchID).ToListAsync();
 
-        string? accountName = await DistributedCache.GetAccountNameForSessionCookie(cookie);
+        string? accountName = HttpContext.Items["SessionAccountName"] as string 
+                              ?? await DistributedCache.GetAccountNameForSessionCookie(cookie);
 
         if (accountName is null)
         {
@@ -90,7 +161,7 @@ public partial class ClientRequesterController
             return new NotFoundObjectResult("Session Not Found");
         }
 
-        Account? account = await MerrickContext.Accounts.SingleOrDefaultAsync(account => account.Name.Equals(accountName));
+        Account? account = await MerrickContext.Accounts.Include(account => account.User).FirstOrDefaultAsync(account => account.Name.Equals(accountName));
 
         if (account is null)
         {
@@ -98,26 +169,33 @@ public partial class ClientRequesterController
             return new NotFoundObjectResult("Account Not Found");
         }
 
-        PlayerStatistics? requesterStats = playerStatistics.SingleOrDefault(stats => stats.AccountID == account.ID);
-
-        MatchStatsResponse response = new()
+        // Calculate winning team (1=Legion, 2=Hellbourne)
+        string winningTeam = "0";
+        PlayerStatistics? firstWinner = playerStatistics.FirstOrDefault(p => p.Win == 1);
+        if (firstWinner != null)
         {
-            GoldCoins = account.User.GoldCoins.ToString(),
-            SilverCoins = account.User.SilverCoins,
-            MatchSummary = [new MatchSummary(matchStatistics, playerStatistics, new MatchStartData
-            {
-                MatchName = matchStatistics.HostAccountName + "'s Game",
-                ServerID = matchStatistics.ServerID,
-                HostAccountName = matchStatistics.HostAccountName,
-                Map = matchStatistics.Map,
-                Version = matchStatistics.Version,
-                IsCasual = false, // Defaulting to false as we don't have this in MatchStatistics explicitly yet
-                MatchType = 0, // Default
-                MatchMode = matchStatistics.GameMode,
-                Options = MatchOptions.None // We don't have options persisted in MatchStatistics yet
-            })],
-            MatchPlayerStatistics = playerStatistics.ToDictionary(stats => stats.AccountID, stats => new MatchPlayerStatistics
-            {
+            winningTeam = firstWinner.Team.ToString();
+        }
+
+        MatchSummary matchSummary = new(matchStatistics, playerStatistics, new MatchStartData
+        {
+            MatchName = matchStatistics.HostAccountName + "'s Game",
+            ServerID = matchStatistics.ServerID,
+            HostAccountName = matchStatistics.HostAccountName,
+            Map = matchStatistics.Map,
+            Version = matchStatistics.Version,
+            IsCasual = false, 
+            MatchType = 0, 
+            MatchMode = matchStatistics.GameMode,
+            Options = MatchOptions.None 
+        })
+        {
+            WinningTeam = winningTeam
+        };
+
+        // Construct match_player_stats dictionary
+        List<MatchPlayerStatistics> mappedPlayerStats = playerStatistics.Select(stats => new MatchPlayerStatistics
+        {
                 MatchID = stats.MatchID,
                 AccountID = stats.AccountID,
                 AccountName = stats.AccountName,
@@ -189,67 +267,79 @@ public partial class ClientRequesterController
                 Nemesis = stats.Nemesis.ToString(),
                 Retribution = stats.Retribution.ToString(),
                 UsedToken = stats.UsedToken.ToString(),
-                HeroIdentifier = stats.HeroProductID?.ToString() ?? "0", // TODO: Map to Hero_Name
+                HeroIdentifier = stats.HeroProductID?.ToString() ?? "0", 
                 ClanTag = stats.ClanTag ?? string.Empty,
                 AlternativeAvatarName = stats.AlternativeAvatarName ?? string.Empty,
                 SeasonProgress = new SeasonProgress
                 {
-                    MatchID = stats.MatchID,
                     AccountID = stats.AccountID,
+                    MatchID = stats.MatchID,
                     IsCasual = "0",
                     MMRBefore = "1500.00",
-                    MMRAfter = "1505.00",
+                    MMRAfter = "1500.00",
                     MedalBefore = "11",
                     MedalAfter = "11",
                     Season = "12",
                     PlacementMatches = 0,
                     PlacementWins = "0"
                 }
-            }),
-            MatchPlayerInventories = playerStatistics.ToDictionary(stats => stats.AccountID, stats => new MatchPlayerInventory
-            {
-                AccountID = stats.AccountID,
-                MatchID = stats.MatchID,
-                Slot1 = stats.Inventory?.ElementAtOrDefault(0) ?? string.Empty,
-                Slot2 = stats.Inventory?.ElementAtOrDefault(1) ?? string.Empty,
-                Slot3 = stats.Inventory?.ElementAtOrDefault(2) ?? string.Empty,
-                Slot4 = stats.Inventory?.ElementAtOrDefault(3) ?? string.Empty,
-                Slot5 = stats.Inventory?.ElementAtOrDefault(4) ?? string.Empty,
-                Slot6 = stats.Inventory?.ElementAtOrDefault(5) ?? string.Empty
-            }),
-            MatchMastery = new MatchMastery((requesterStats?.HeroProductID.ToString() ?? "Hero_Legionnaire"), 0, 0, 0) // TODO: Implement Mastery
+        }).ToList();
+        
+        // Match Mastery
+        PlayerStatistics? requesterStats = playerStatistics.FirstOrDefault(stats => stats.AccountID == account.ID);
+        MatchMastery? matchMastery = null;
+
+        if (requesterStats != null)
+        {
+            matchMastery = new MatchMastery((requesterStats?.HeroProductID.ToString() ?? "Hero_Legionnaire"), 0, 0, 0)
             {
                 HeroIdentifier = (requesterStats?.HeroProductID.ToString() ?? "Hero_Legionnaire"),
                 CurrentMasteryExperience = 0,
                 MatchMasteryExperience = 0,
                 MasteryExperienceBonus = 0,
+                MasteryExperienceHeroesBonus = 0,
                 MasteryExperienceBoost = 0,
                 MasteryExperienceSuperBoost = 0,
                 MasteryExperienceMaximumLevelHeroesCount = 0,
-                MasteryExperienceHeroesBonus = 0,
                 MasteryExperienceToBoost = 0,
                 MasteryExperienceEventBonus = 0,
-                MasteryExperienceCanBoost = true,
-                MasteryExperienceCanSuperBoost = true,
+                MasteryExperienceCanBoost = false,
+                MasteryExperienceCanSuperBoost = false,
                 MasteryExperienceBoostProductIdentifier = 3609,
                 MasteryExperienceSuperBoostProductIdentifier = 4605,
                 MasteryExperienceBoostProductCount = 0,
                 MasteryExperienceSuperBoostProductCount = 0
-            },
-            OwnedStoreItems = account.User.OwnedStoreItems,
-            SelectedStoreItems = account.SelectedStoreItems,
-            CustomIconSlotID = SetCustomIconSlotID(account),
-            CampaignReward = new CampaignReward
+            };
+        }
+
+        // Inventory
+        Dictionary<int, Dictionary<string, string>> inventoryDict = new();
+        foreach (PlayerStatistics stat in playerStatistics)
+        {
+            if (stat.Inventory != null)
             {
-                PreviousCampaignLevel = 5,
-                CurrentCampaignLevel = 6,
-                NextLevel = 0,
-                RequireRank = 0,
-                NeedMorePlay = 0,
-                PercentageBefore = "0.92",
-                Percentage = "1.00"
+               Dictionary<string, string> slots = new Dictionary<string, string>();
+               for (int i = 0; i < stat.Inventory.Count && i < 6; i++)
+               {
+                   slots[$"slot_{i+1}"] = stat.Inventory[i];
+               }
+               inventoryDict[stat.AccountID] = slots;
             }
-        };
+        }
+
+        Dictionary<string, object> response = new();
+        
+        // Ordered Response for Game Client
+        response["selected_upgrades"] = account.SelectedStoreItems.ToArray();
+        response["match_summ"] = new Dictionary<int, object> { { matchID, matchSummary } };
+        response["match_player_stats"] = new Dictionary<int, object> { { matchID, mappedPlayerStats } };
+        
+        if (matchMastery != null)
+            response["match_mastery"] = matchMastery;
+
+        response["inventory"] = new Dictionary<int, object> { { matchID, inventoryDict } };
+        response["vested_threshold"] = 5;
+        response["0"] = true;
 
         Logger.LogInformation("Successfully Retrieved Match Stats For Match ID {MatchID} Requested By {AccountName}", matchID, accountName);
 
@@ -258,15 +348,17 @@ public partial class ClientRequesterController
 
     private static string SetCustomIconSlotID(Account account)
         => account.SelectedStoreItems.Any(item => item.StartsWith("ai.custom_icon"))
-            ? account.SelectedStoreItems.Single(item => item.StartsWith("ai.custom_icon")).Replace("ai.custom_icon:", string.Empty) : "0";
+            ? account.SelectedStoreItems.FirstOrDefault(item => item.StartsWith("ai.custom_icon"))?.Replace("ai.custom_icon:", string.Empty) ?? "0" : "0";
 
-    private static Dictionary<string, OneOf<StoreItemData, StoreItemDiscountCoupon>> SetOwnedStoreItemsData(Account account)
+    private static Dictionary<string, object> SetOwnedStoreItemsData(Account account)
     {
-        Dictionary<string, OneOf<StoreItemData, StoreItemDiscountCoupon>> items = account.User.OwnedStoreItems
-            .Where(item => item.StartsWith("ma.").Equals(false) && item.StartsWith("cp.").Equals(false))
-            .ToDictionary<string, string, OneOf<StoreItemData, StoreItemDiscountCoupon>>(upgrade => upgrade, upgrade => new StoreItemData());
+        // 2026-01-06: FIX - Do NOT populate metadata for standard owned items (avatars, etc.).
+        // The legacy client expects 'my_upgrades_info' to contain specific data for Rentables/Coupons only.
+        // Sending generic StoreItemData with empty strings for all items causes "Error when refreshing upgrades" and client logout.
+        Dictionary<string, object> items = new();
 
-        // TODO: Add Mastery Boosts And Coupons
+        // TODO: Add Mastery Boosts And Coupons (cp. items) when implemented.
+        // Legacy reference: GameConsumables.GetOwnedCoupons checks for "cp." prefix.
 
         return items;
     }

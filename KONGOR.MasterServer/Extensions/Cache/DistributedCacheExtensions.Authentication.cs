@@ -66,7 +66,7 @@ public static partial class DistributedCacheExtensions
     /// </summary>
     public static async Task PurgeSessionCookies(this IConnectionMultiplexer distributedCacheProvider)
     {
-        EndPoint endpoint = distributedCacheProvider.GetEndPoints().Single();
+        EndPoint endpoint = distributedCacheProvider.GetEndPoints().First();
         IServer server = distributedCacheProvider.GetServer(endpoint);
         IDatabase distributedCacheStore = distributedCacheProvider.GetDatabase();
 

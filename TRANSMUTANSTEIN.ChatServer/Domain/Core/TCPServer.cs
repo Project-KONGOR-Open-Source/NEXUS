@@ -618,7 +618,8 @@ public class TCPServer : IDisposable
             if (disposingManagedResources)
             {
                 // Dispose Managed Resources Here ...
-                Stop();
+                if (IsStarted)
+                    Stop();
             }
 
             // Dispose Unmanaged Resources Here ...

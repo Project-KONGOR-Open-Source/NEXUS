@@ -3,7 +3,7 @@
     "profiles": {
         "ASPIRE.Tests": {
             "commandName": "Project",
-            "commandLineArgs": "--log-level information --report-trx",
+            "commandLineArgs": "--log-level warning --report-trx",
             "environmentVariables": {
                 "ASPNETCORE_ENVIRONMENT": "Development",
                 "DOTNET_ENVIRONMENT": "Development"

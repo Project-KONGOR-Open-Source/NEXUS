@@ -4,12 +4,12 @@ public static class SRPAuthenticationHandlers
 {
     public static SRPAuthenticationResponseStageTwo GenerateStageTwoResponse(StageTwoResponseParameters parameters, out string cookie)
     {
-        cookie = Guid.CreateVersion7().ToString();
+        cookie = Guid.CreateVersion7().ToString().Replace("-", string.Empty);
 
         SRPAuthenticationResponseStageTwo response = new ()
         {
             ServerProof = parameters.ServerProof,
-            MainAccountID = parameters.Account.User.Accounts.Single(account => account.IsMain).ID.ToString(),
+            MainAccountID = parameters.Account.User.Accounts.FirstOrDefault(account => account.IsMain)?.ID.ToString() ?? parameters.Account.ID.ToString(),
             ID = parameters.Account.ID.ToString(),
             GarenaID = parameters.Account.ID.ToString(),
             Name = parameters.Account.Name,
@@ -169,14 +169,14 @@ public static class SRPAuthenticationHandlers
         => account.Clan is null ? new ClanMemberDataError() : new ClanMemberData
         {
             ClanID = account.Clan?.ID.ToString() ?? string.Empty, ID = account.ID.ToString(), ClanName = account.Clan?.Name ?? string.Empty,
-            ClanTag = account.Clan?.Tag ?? string.Empty, ClanOwnerAccountID = account.Clan?.Members.Single(member => member.ClanTier is ClanTier.Leader).ID.ToString() ?? string.Empty,
+            ClanTag = account.Clan?.Tag ?? string.Empty, ClanOwnerAccountID = account.Clan?.Members.FirstOrDefault(member => member.ClanTier is ClanTier.Leader)?.ID.ToString() ?? string.Empty,
             JoinDate = account.TimestampJoinedClan is not null ? account.TimestampJoinedClan.GetValueOrDefault().ToString("yyyy-MM-dd HH:mm:ss") : string.Empty,
             Rank = account.ClanTierName, Message = "TODO: Find Out What This Does", Title = "TODO: Set The Clan Channel Title"
         };
 
     private static string SetCustomIconSlotID(Account account)
         => account.SelectedStoreItems.Any(item => item.StartsWith("ai.custom_icon"))
-            ? account.SelectedStoreItems.Single(item => item.StartsWith("ai.custom_icon")).Replace("ai.custom_icon:", string.Empty) : "0";
+            ? account.SelectedStoreItems.FirstOrDefault(item => item.StartsWith("ai.custom_icon"))?.Replace("ai.custom_icon:", string.Empty) ?? "0" : "0";
 
     private static CloudStorageInformation SetCloudStorageInformation(Account account)
         => new () { AccountID = account.ID.ToString(), UseCloud = "0", AutomaticCloudUpload = "0", BackupLastUpdatedTime = DateTimeOffset.UtcNow.ToString("yyyy-MM-dd HH:mm:ss") }; // TODO: Fix These Values

@@ -169,13 +169,13 @@ public class MatchSummary(MatchStatistics matchStatistics, List<PlayerStatistics
     ///     The unique identifier for the match.
     /// </summary>
     [PhpProperty("match_id")]
-    public int MatchID { get; init; } = matchStatistics.ID;
+    public string MatchID { get; init; } = matchStatistics.ID.ToString();
 
     /// <summary>
     ///     The server ID where the match was hosted.
     /// </summary>
     [PhpProperty("server_id")]
-    public int ServerID { get; init; } = matchStatistics.ServerID;
+    public string ServerID { get; init; } = matchStatistics.ServerID.ToString();
 
     /// <summary>
     ///     The map on which the match was played (e.g. "caldavar", "midwars", "grimms_crossing").
@@ -193,7 +193,7 @@ public class MatchSummary(MatchStatistics matchStatistics, List<PlayerStatistics
     ///     The duration of the match in seconds.
     /// </summary>
     [PhpProperty("time_played")]
-    public int TimePlayed { get; init; } = matchStatistics.TimePlayed;
+    public string TimePlayed { get; init; } = matchStatistics.TimePlayed.ToString();
 
     /// <summary>
     ///     The host where the match replay file is stored.
@@ -205,7 +205,7 @@ public class MatchSummary(MatchStatistics matchStatistics, List<PlayerStatistics
     ///     The size of the match replay file in bytes.
     /// </summary>
     [PhpProperty("file_size")]
-    public int FileSize { get; init; } = matchStatistics.FileSize;
+    public string FileSize { get; init; } = matchStatistics.FileSize.ToString();
 
     /// <summary>
     ///     The filename of the match replay file.
@@ -217,7 +217,7 @@ public class MatchSummary(MatchStatistics matchStatistics, List<PlayerStatistics
     ///     The connection state or match state code.
     /// </summary>
     [PhpProperty("c_state")]
-    public int ConnectionState { get; init; } = matchStatistics.ConnectionState;
+    public string ConnectionState { get; init; } = matchStatistics.ConnectionState.ToString();
 
     /// <summary>
     ///     The game client version used for the match.
@@ -229,7 +229,7 @@ public class MatchSummary(MatchStatistics matchStatistics, List<PlayerStatistics
     ///     The average Player Skill Rating (PSR) of all players in the match.
     /// </summary>
     [PhpProperty("avgpsr")]
-    public int AveragePSR { get; init; } = matchStatistics.AveragePSR;
+    public string AveragePSR { get; init; } = matchStatistics.AveragePSR.ToString();
 
     /// <summary>
     ///     The match date, originally formatted as "M/D/YYYY" (e.g. "3/15/2024").
@@ -259,91 +259,91 @@ public class MatchSummary(MatchStatistics matchStatistics, List<PlayerStatistics
     ///     </code>
     /// </summary>
     [PhpProperty("class")]
-    public int Class { get; init; }
+    public string Class { get; init; } = "0";
 
     /// <summary>
     ///     Whether the match was private (1) or public (0).
     /// </summary>
     [PhpProperty("private")]
-    public int Private { get; init; } = IsPrivateMatch(playerStatistics);
+    public string Private { get; init; } = IsPrivateMatch(playerStatistics).ToString();
 
     /// <summary>
     ///     Normal Mode flag (1 = enabled, 0 = disabled).
     /// </summary>
     [PhpProperty("nm")]
-    public int NormalMode { get; init; } = matchStartData.MatchMode is "nm" ? 1 : 0;
+    public string NormalMode { get; init; } = matchStartData.MatchMode is "nm" ? "1" : "0";
 
     /// <summary>
     ///     Single Draft Mode flag (1 = enabled, 0 = disabled).
     /// </summary>
     [PhpProperty("sd")]
-    public int SingleDraft { get; init; } = matchStartData.MatchMode is "sd" ? 1 : 0;
+    public string SingleDraft { get; init; } = matchStartData.MatchMode is "sd" ? "1" : "0";
 
     /// <summary>
     ///     Random Draft Mode flag (1 = enabled, 0 = disabled).
     /// </summary>
     [PhpProperty("rd")]
-    public int RandomDraft { get; init; } = matchStartData.MatchMode is "rd" ? 1 : 0;
+    public string RandomDraft { get; init; } = matchStartData.MatchMode is "rd" ? "1" : "0";
 
     /// <summary>
     ///     Deathmatch Mode flag (1 = enabled, 0 = disabled).
     /// </summary>
     [PhpProperty("dm")]
-    public int Deathmatch { get; init; } = matchStartData.MatchMode is "dm" ? 1 : 0;
+    public string Deathmatch { get; init; } = matchStartData.MatchMode is "dm" ? "1" : "0";
 
     /// <summary>
     ///     Banning Draft Mode flag (1 = enabled, 0 = disabled).
     /// </summary>
     [PhpProperty("bd")]
-    public int BanningDraft { get; init; } = matchStartData.MatchMode is "bd" ? 1 : 0;
+    public string BanningDraft { get; init; } = matchStartData.MatchMode is "bd" ? "1" : "0";
 
     /// <summary>
     ///     Banning Pick Mode flag (1 = enabled, 0 = disabled).
     /// </summary>
     [PhpProperty("bp")]
-    public int BanningPick { get; init; } = matchStartData.MatchMode is "bp" ? 1 : 0;
+    public string BanningPick { get; init; } = matchStartData.MatchMode is "bp" ? "1" : "0";
 
     /// <summary>
     ///     All Random Mode flag (1 = enabled, 0 = disabled).
     /// </summary>
     [PhpProperty("ar")]
-    public int AllRandom { get; init; } = matchStartData.MatchMode is "ar" ? 1 : 0;
+    public string AllRandom { get; init; } = matchStartData.MatchMode is "ar" ? "1" : "0";
 
     /// <summary>
     ///     Captains Draft Mode flag (1 = enabled, 0 = disabled).
     /// </summary>
     [PhpProperty("cd")]
-    public int CaptainsDraft { get; init; } = matchStartData.MatchMode is "cd" ? 1 : 0;
+    public string CaptainsDraft { get; init; } = matchStartData.MatchMode is "cd" ? "1" : "0";
 
     /// <summary>
     ///     Captains Mode flag (1 = enabled, 0 = disabled).
     /// </summary>
     [PhpProperty("cm")]
-    public int CaptainsMode { get; init; } = matchStartData.MatchMode is "cm" ? 1 : 0;
+    public string CaptainsMode { get; init; } = matchStartData.MatchMode is "cm" ? "1" : "0";
 
     /// <summary>
     ///     Lock Pick Mode flag (1 = enabled, 0 = disabled).
     /// </summary>
     [PhpProperty("lp")]
-    public int LockPick { get; init; } = matchStartData.MatchMode is "lp" ? 1 : 0;
+    public string LockPick { get; init; } = matchStartData.MatchMode is "lp" ? "1" : "0";
 
     /// <summary>
     ///     Blind Ban Mode flag (1 = enabled, 0 = disabled).
     /// </summary>
     [PhpProperty("bb")]
-    public int BlindBan { get; init; } = matchStartData.MatchMode is "bb" ? 1 : 0;
+    public string BlindBan { get; init; } = matchStartData.MatchMode is "bb" ? "1" : "0";
 
     /// <summary>
     ///     Bot Match Mode flag (1 = enabled, 0 = disabled).
     /// </summary>
     [PhpProperty("bm")]
-    public int BotMatch { get; init; } = matchStartData.MatchMode is "bm" ? 1 : 0;
+    public string BotMatch { get; init; } = matchStartData.MatchMode is "bm" ? "1" : "0";
 
     /// <summary>
     ///     Kros (ability draft) Mode flag (1 = enabled, 0 = disabled).
     /// </summary>
     [PhpProperty("km")]
-    public int KrosMode { get; init; } = matchStartData.MatchMode is "km" ? 1 : 0;
+    public string KrosMode { get; init; } = matchStartData.MatchMode is "km" ? "1" : "0";
 
     /// <summary>
     ///     Whether the match is part of an organized league system.
@@ -356,13 +356,13 @@ public class MatchSummary(MatchStatistics matchStatistics, List<PlayerStatistics
     ///     </remark>
     /// </summary>
     [PhpProperty("league")]
-    public int League { get; init; } = matchStartData.League;
+    public string League { get; init; } = matchStartData.League.ToString();
 
     /// <summary>
     ///     The maximum number of players allowed in the match (typically 2, 6, or 10).
     /// </summary>
     [PhpProperty("max_players")]
-    public int MaximumPlayersCount { get; init; } = matchStartData.MaximumPlayersCount;
+    public string MaximumPlayersCount { get; init; } = matchStartData.MaximumPlayersCount.ToString();
 
     /// <summary>
     ///     Deprecated skill-based server filter that was used for matchmaking.
@@ -374,175 +374,175 @@ public class MatchSummary(MatchStatistics matchStatistics, List<PlayerStatistics
     ///     This feature is no longer active and the field has no functional purpose.
     /// </summary>
     [PhpProperty("tier")]
-    public int Tier { get; init; } = matchStartData.Tier;
+    public string Tier { get; init; } = matchStartData.Tier.ToString();
 
     /// <summary>
     ///     No Repick option flag (1 = repicking disabled, 0 = repicking allowed).
     /// </summary>
     [PhpProperty("no_repick")]
-    public int NoHeroRepick { get; init; } = matchStartData.Options.HasFlag(MatchOptions.NoHeroRepick) ? 1 : 0;
+    public string NoHeroRepick { get; init; } = matchStartData.Options.HasFlag(MatchOptions.NoHeroRepick) ? "1" : "0";
 
     /// <summary>
     ///     No Agility Heroes option flag (1 = agility heroes banned, 0 = allowed).
     /// </summary>
     [PhpProperty("no_agi")]
-    public int NoAgilityHeroes { get; init; } = matchStartData.Options.HasFlag(MatchOptions.NoAgilityHeroes) ? 1 : 0;
+    public string NoAgilityHeroes { get; init; } = matchStartData.Options.HasFlag(MatchOptions.NoAgilityHeroes) ? "1" : "0";
 
     /// <summary>
     ///     Drop Items On Death option flag (1 = enabled, 0 = disabled).
     /// </summary>
     [PhpProperty("drp_itm")]
-    public int DropItems { get; init; } = matchStartData.Options.HasFlag(MatchOptions.DropItems) ? 1 : 0;
+    public string DropItems { get; init; } = matchStartData.Options.HasFlag(MatchOptions.DropItems) ? "1" : "0";
 
     /// <summary>
     ///     No Respawn Timer option flag (1 = picking timer disabled, 0 = timer enabled).
     /// </summary>
     [PhpProperty("no_timer")]
-    public int NoRespawnTimer { get; init; } = matchStartData.Options.HasFlag(MatchOptions.NoRespawnTimer) ? 1 : 0;
+    public string NoRespawnTimer { get; init; } = matchStartData.Options.HasFlag(MatchOptions.NoRespawnTimer) ? "1" : "0";
 
     /// <summary>
     ///     Reverse Hero Selection option flag (1 = enabled, 0 = disabled).
     /// </summary>
     [PhpProperty("rev_hs")]
-    public int ReverseHeroSelection { get; init; } = matchStartData.Options.HasFlag(MatchOptions.ReverseHeroSelection) ? 1 : 0;
+    public string ReverseHeroSelection { get; init; } = matchStartData.Options.HasFlag(MatchOptions.ReverseHeroSelection) ? "1" : "0";
 
     /// <summary>
     ///     No Swap option flag (1 = hero swapping disabled, 0 = swapping allowed).
     /// </summary>
     [PhpProperty("no_swap")]
-    public int NoHeroSwap { get; init; } = matchStartData.Options.HasFlag(MatchOptions.NoHeroSwap) ? 1 : 0;
+    public string NoHeroSwap { get; init; } = matchStartData.Options.HasFlag(MatchOptions.NoHeroSwap) ? "1" : "0";
 
     /// <summary>
     ///     No Intelligence Heroes option flag (1 = intelligence heroes banned, 0 = allowed).
     /// </summary>
     [PhpProperty("no_int")]
-    public int NoIntelligenceHeroes { get; init; } = matchStartData.Options.HasFlag(MatchOptions.NoIntelligenceHeroes) ? 1 : 0;
+    public string NoIntelligenceHeroes { get; init; } = matchStartData.Options.HasFlag(MatchOptions.NoIntelligenceHeroes) ? "1" : "0";
 
     /// <summary>
     ///     Alternate Picking option flag (1 = enabled, 0 = disabled).
     /// </summary>
     [PhpProperty("alt_pick")]
-    public int AlternateHeroPicking { get; init; } = matchStartData.Options.HasFlag(MatchOptions.AlternateHeroPicking) ? 1 : 0;
+    public string AlternateHeroPicking { get; init; } = matchStartData.Options.HasFlag(MatchOptions.AlternateHeroPicking) ? "1" : "0";
 
     /// <summary>
     ///     Ban Phase option flag (1 = ban phase enabled, 0 = disabled).
     /// </summary>
     [PhpProperty("veto")]
-    public int BanPhase { get; init; } = matchStartData.Options.HasFlag(MatchOptions.BanPhase) ? 1 : 0;
+    public string BanPhase { get; init; } = matchStartData.Options.HasFlag(MatchOptions.BanPhase) ? "1" : "0";
 
     /// <summary>
     ///     Shuffle Teams option flag (1 = shuffle teams enabled, 0 = disabled).
     /// </summary>
     [PhpProperty("shuf")]
-    public int ShuffleTeams { get; init; } = matchStartData.Options.HasFlag(MatchOptions.ShuffleTeams) ? 1 : 0;
+    public string ShuffleTeams { get; init; } = matchStartData.Options.HasFlag(MatchOptions.ShuffleTeams) ? "1" : "0";
 
     /// <summary>
     ///     No Strength Heroes option flag (1 = strength heroes banned, 0 = allowed).
     /// </summary>
     [PhpProperty("no_str")]
-    public int NoStrengthHeroes { get; init; } = matchStartData.Options.HasFlag(MatchOptions.NoStrengthHeroes) ? 1 : 0;
+    public string NoStrengthHeroes { get; init; } = matchStartData.Options.HasFlag(MatchOptions.NoStrengthHeroes) ? "1" : "0";
 
     /// <summary>
     ///     No Power-Ups option flag (1 = power-ups/runes disabled, 0 = enabled).
     /// </summary>
     [PhpProperty("no_pups")]
-    public int NoPowerUps { get; init; } = matchStartData.Options.HasFlag(MatchOptions.NoPowerUps) ? 1 : 0;
+    public string NoPowerUps { get; init; } = matchStartData.Options.HasFlag(MatchOptions.NoPowerUps) ? "1" : "0";
 
     /// <summary>
     ///     Duplicate Heroes option flag (1 = duplicate heroes allowed, 0 = each hero unique).
     /// </summary>
     [PhpProperty("dup_h")]
-    public int DuplicateHeroes { get; init; } = matchStartData.Options.HasFlag(MatchOptions.DuplicateHeroes) ? 1 : 0;
+    public string DuplicateHeroes { get; init; } = matchStartData.Options.HasFlag(MatchOptions.DuplicateHeroes) ? "1" : "0";
 
     /// <summary>
     ///     All Pick Mode option flag (1 = enabled, 0 = disabled).
     /// </summary>
     [PhpProperty("ap")]
-    public int AllPick { get; init; } = matchStartData.Options.HasFlag(MatchOptions.AllPick) ? 1 : 0;
+    public string AllPick { get; init; } = matchStartData.Options.HasFlag(MatchOptions.AllPick) ? "1" : "0";
 
     /// <summary>
     ///     Balanced Random Mode option flag (1 = enabled, 0 = disabled).
     /// </summary>
     [PhpProperty("br")]
-    public int BalancedRandom { get; init; } = matchStartData.Options.HasFlag(MatchOptions.BalancedRandom) ? 1 : 0;
+    public string BalancedRandom { get; init; } = matchStartData.Options.HasFlag(MatchOptions.BalancedRandom) ? "1" : "0";
 
     /// <summary>
     ///     Easy Mode option flag (1 = easy mode enabled, 0 = normal difficulty).
     /// </summary>
     [PhpProperty("em")]
-    public int EasyMode { get; init; } = matchStartData.Options.HasFlag(MatchOptions.EasyMode) ? 1 : 0;
+    public string EasyMode { get; init; } = matchStartData.Options.HasFlag(MatchOptions.EasyMode) ? "1" : "0";
 
     /// <summary>
     ///     Casual Mode option flag (1 = casual mode enabled, 0 = normal mode).
     /// </summary>
     [PhpProperty("cas")]
-    public int CasualMode { get; init; } = matchStartData.Options.HasFlag(MatchOptions.CasualMode) ? 1 : 0;
+    public string CasualMode { get; init; } = matchStartData.Options.HasFlag(MatchOptions.CasualMode) ? "1" : "0";
 
     /// <summary>
     ///     Reverse Selection option flag (1 = enabled, 0 = disabled).
     /// </summary>
     [PhpProperty("rs")]
-    public int ReverseSelection { get; init; } = matchStartData.Options.HasFlag(MatchOptions.ReverseSelection) ? 1 : 0;
+    public string ReverseSelection { get; init; } = matchStartData.Options.HasFlag(MatchOptions.ReverseSelection) ? "1" : "0";
 
     /// <summary>
     ///     No Leaver option flag (1 = no leaver penalty applied, 0 = leaver penalties enabled).
     /// </summary>
     [PhpProperty("nl")]
-    public int NoLeavers { get; init; } = matchStartData.Options.HasFlag(MatchOptions.NoLeavers) ? 1 : 0;
+    public string NoLeavers { get; init; } = matchStartData.Options.HasFlag(MatchOptions.NoLeavers) ? "1" : "0";
 
     /// <summary>
     ///     Official Match flag (1 = official tournament match, 0 = unofficial).
     /// </summary>
     [PhpProperty("officl")]
-    public int Official { get; init; } = matchStartData.Options.HasFlag(MatchOptions.Official) ? 1 : 0;
+    public string Official { get; init; } = matchStartData.Options.HasFlag(MatchOptions.Official) ? "1" : "0";
 
     /// <summary>
     ///     No Statistics option flag (1 = match stats not recorded, 0 = stats recorded).
     /// </summary>
     [PhpProperty("no_stats")]
-    public int NoStatistics { get; init; } = matchStartData.Options.HasFlag(MatchOptions.NoStatistics) ? 1 : 0;
+    public string NoStatistics { get; init; } = matchStartData.Options.HasFlag(MatchOptions.NoStatistics) ? "1" : "0";
 
     /// <summary>
     ///     Auto Balanced option flag (1 = teams automatically balanced, 0 = manual teams).
     /// </summary>
     [PhpProperty("ab")]
-    public int AutoBalanced { get; init; } = matchStartData.Options.HasFlag(MatchOptions.AutoBalanced) ? 1 : 0;
+    public string AutoBalanced { get; init; } = matchStartData.Options.HasFlag(MatchOptions.AutoBalanced) ? "1" : "0";
 
     /// <summary>
     ///     Hardcore Mode option flag (1 = hardcore difficulty enabled, 0 = normal).
     /// </summary>
     [PhpProperty("hardcore")]
-    public int Hardcore { get; init; } = matchStartData.Options.HasFlag(MatchOptions.Hardcore) ? 1 : 0;
+    public string Hardcore { get; init; } = matchStartData.Options.HasFlag(MatchOptions.Hardcore) ? "1" : "0";
 
     /// <summary>
     ///     Development Heroes option flag (1 = development/unreleased heroes allowed, 0 = only released heroes).
     /// </summary>
     [PhpProperty("dev_heroes")]
-    public int DevelopmentHeroes { get; init; } = matchStartData.Options.HasFlag(MatchOptions.DevelopmentHeroes) ? 1 : 0;
+    public string DevelopmentHeroes { get; init; } = matchStartData.Options.HasFlag(MatchOptions.DevelopmentHeroes) ? "1" : "0";
 
     /// <summary>
     ///     Verified Only option flag (1 = only verified accounts allowed, 0 = all accounts allowed).
     /// </summary>
     [PhpProperty("verified_only")]
-    public int VerifiedOnly { get; init; } = matchStartData.Options.HasFlag(MatchOptions.VerifiedOnly) ? 1 : 0;
+    public string VerifiedOnly { get; init; } = matchStartData.Options.HasFlag(MatchOptions.VerifiedOnly) ? "1" : "0";
 
     /// <summary>
     ///     Gated option flag (1 = gated/restricted match, 0 = open match).
     /// </summary>
     [PhpProperty("gated")]
-    public int Gated { get; init; } = matchStartData.Options.HasFlag(MatchOptions.Gated) ? 1 : 0;
+    public string Gated { get; init; } = matchStartData.Options.HasFlag(MatchOptions.Gated) ? "1" : "0";
 
     /// <summary>
     ///     Blitz Mode option flag (1 = rapid fire mode enabled, 0 = normal ability cooldowns).
     /// </summary>
     [PhpProperty("rapidfire")]
-    public int BlitzMode { get; init; } = matchStartData.Options.HasFlag(MatchOptions.BlitzMode) ? 1 : 0;
+    public string BlitzMode { get; init; } = matchStartData.Options.HasFlag(MatchOptions.BlitzMode) ? "1" : "0";
 
     /// <summary>
     ///     The UNIX timestamp (in seconds) when the match started.
     /// </summary>
     [PhpProperty("timestamp")]
-    public int Timestamp { get; init; } = Convert.ToInt32(Math.Max(matchStatistics.TimestampRecorded.ToUnixTimeSeconds(), Convert.ToInt64(Int32.MaxValue)));
+    public string Timestamp { get; init; } = Convert.ToInt32(Math.Max(matchStatistics.TimestampRecorded.ToUnixTimeSeconds(), Convert.ToInt64(Int32.MaxValue))).ToString();
 
     /// <summary>
     ///     The URL for the match replay file.
@@ -714,11 +714,27 @@ public class MatchSummary(MatchStatistics matchStatistics, List<PlayerStatistics
         return -1;
     }
 
-    private static int GetWinningTeam(List<PlayerStatistics> playerStatistics)
-        => playerStatistics.Where(player => player.Loss is 0 && player.Win is 1).DistinctBy(player => player.Team).Single().Team;
+    private static int GetWinningTeam(List<PlayerStatistics>? playerStatistics)
+    {
+        if (playerStatistics is null)
+            return 0;
+
+        List<int> winningTeams = playerStatistics
+            .Where(player => player is { Loss: 0, Win: 1 })
+            .Select(player => player.Team)
+            .Distinct()
+            .ToList();
+
+        return winningTeams.Count == 1 ? winningTeams[0] : 0;
+    }
 
     private static int IsPrivateMatch(List<PlayerStatistics> playerStatistics)
-        => playerStatistics.DistinctBy(player => player.PublicMatch).Single().PublicMatch is 0 ? 1 : 0;
+    {
+        List<PlayerStatistics> publicStatuses = playerStatistics.DistinctBy(player => player.PublicMatch).ToList();
+
+        // If all players have the same public match status, return it. Otherwise default to Public (0)
+        return publicStatuses.Count == 1 ? (publicStatuses.Single().PublicMatch is 0 ? 1 : 0) : 0;
+    }
 }
 
 public class MatchMastery(string heroIdentifier, int currentMasteryExperience, int matchMasteryExperience, int bonusExperience)

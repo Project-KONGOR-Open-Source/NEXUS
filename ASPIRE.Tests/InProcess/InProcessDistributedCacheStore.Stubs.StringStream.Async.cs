@@ -140,7 +140,7 @@ public partial class InProcessDistributedCacheStore
 #pragma warning restore SER001
 
     // IRedisAsync
-    public IConnectionMultiplexer Multiplexer => throw new NotImplementedException();
+
     public Task<TimeSpan> PingAsync(CommandFlags flags = CommandFlags.None) => throw new NotImplementedException();
     public bool TryWait(Task task) => throw new NotImplementedException();
     public void Wait(Task task) => throw new NotImplementedException();

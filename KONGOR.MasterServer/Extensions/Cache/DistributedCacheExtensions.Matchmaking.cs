@@ -37,7 +37,7 @@ public static partial class DistributedCacheExtensions
         List<MatchServerManager> matchServerManagers = [.. serializedMatchServerManagers
             .Select(entry => JsonSerializer.Deserialize<MatchServerManager>(entry.Value.ToString())).OfType<MatchServerManager>()];
 
-        MatchServerManager? matchServerManager = matchServerManagers.SingleOrDefault(manager => manager.IPAddress.Equals(ipAddress));
+        MatchServerManager? matchServerManager = matchServerManagers.FirstOrDefault(manager => manager.IPAddress.Equals(ipAddress));
 
         return matchServerManager;
     }
@@ -49,7 +49,7 @@ public static partial class DistributedCacheExtensions
         List<MatchServerManager> matchServerManagers = [.. serializedMatchServerManagers
             .Select(entry => JsonSerializer.Deserialize<MatchServerManager>(entry.Value.ToString())).OfType<MatchServerManager>()];
 
-        MatchServerManager? matchServerManager = matchServerManagers.SingleOrDefault(manager => manager.Cookie.Equals(sessionCookie));
+        MatchServerManager? matchServerManager = matchServerManagers.FirstOrDefault(manager => manager.Cookie.Equals(sessionCookie));
 
         return matchServerManager;
     }
@@ -80,7 +80,7 @@ public static partial class DistributedCacheExtensions
         List<MatchServerManager> matchServerManagers = [.. serializedMatchServerManagers
             .Select(entry => JsonSerializer.Deserialize<MatchServerManager>(entry.Value.ToString())).OfType<MatchServerManager>()];
 
-        MatchServerManager? matchServerManager = matchServerManagers.SingleOrDefault(manager => manager.ID == serverManagerID);
+        MatchServerManager? matchServerManager = matchServerManagers.FirstOrDefault(manager => manager.ID == serverManagerID);
 
         return matchServerManager;
     }
@@ -142,7 +142,7 @@ public static partial class DistributedCacheExtensions
         List<MatchServer> matchServers = [.. serializedMatchServers
             .Select(entry => JsonSerializer.Deserialize<MatchServer>(entry.Value.ToString())).OfType<MatchServer>()];
 
-        MatchServer? matchServer = matchServers.SingleOrDefault(server => server.IPAddress.Equals(ipAddress) && server.Port == port);
+        MatchServer? matchServer = matchServers.FirstOrDefault(server => server.IPAddress.Equals(ipAddress) && server.Port == port);
 
         return matchServer;
     }
@@ -154,7 +154,7 @@ public static partial class DistributedCacheExtensions
         List<MatchServer> matchServers = [.. serializedMatchServers
             .Select(entry => JsonSerializer.Deserialize<MatchServer>(entry.Value.ToString())).OfType<MatchServer>()];
 
-        MatchServer? matchServer = matchServers.SingleOrDefault(server => server.Cookie.Equals(sessionCookie));
+        MatchServer? matchServer = matchServers.FirstOrDefault(server => server.Cookie.Equals(sessionCookie));
 
         return matchServer;
     }
@@ -185,7 +185,7 @@ public static partial class DistributedCacheExtensions
         List<MatchServer> matchServers = [.. serializedMatchServers
             .Select(entry => JsonSerializer.Deserialize<MatchServer>(entry.Value.ToString())).OfType<MatchServer>()];
 
-        MatchServer? matchServer = matchServers.SingleOrDefault(server => server.ID == serverID);
+        MatchServer? matchServer = matchServers.FirstOrDefault(server => server.ID == serverID);
 
         return matchServer;
     }
@@ -265,7 +265,7 @@ public static partial class DistributedCacheExtensions
             }
         }
 
-        return matches.SingleOrDefault();
+        return matches.OrderByDescending(m => m.MatchID).FirstOrDefault();
     }
 
     public static async Task<MatchStartData?> GetMatchStartDataByMatchServerSessionCookie(this IDatabase distributedCacheStore, string sessionCookie)

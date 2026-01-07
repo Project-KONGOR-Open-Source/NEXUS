@@ -23,7 +23,7 @@ public class EmailService(IOptions<OperationalConfiguration> configuration, ILog
                       + Environment.NewLine + Environment.NewLine + "Regards,"
                       + Environment.NewLine + "The Project KONGOR Team";
 
-        Console.WriteLine(body);
+        Console.WriteLine($"Subject: {subject}{Environment.NewLine}{body}");
 
         // TODO: Add "try/catch" Block And Return "false" On Failure
 
@@ -41,7 +41,7 @@ public class EmailService(IOptions<OperationalConfiguration> configuration, ILog
                       + Environment.NewLine + Environment.NewLine + "Regards,"
                       + Environment.NewLine + "The Project KONGOR Team";
 
-        Console.WriteLine(body);
+        Console.WriteLine($"Subject: {subject}{Environment.NewLine}{body}");
 
         // TODO: Add "try/catch" Block And Return "false" On Failure
 

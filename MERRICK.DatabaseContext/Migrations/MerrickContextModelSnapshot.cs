@@ -44,6 +44,9 @@ namespace MERRICK.DatabaseContext.Migrations
                     b.Property<int>("ClanTier")
                         .HasColumnType("int");
 
+                    b.Property<string>("Cookie")
+                        .HasColumnType("nvarchar(max)");
+
                     b.PrimitiveCollection<string>("IPAddressCollection")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");

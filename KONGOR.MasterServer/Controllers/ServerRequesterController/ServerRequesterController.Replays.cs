@@ -20,4 +20,51 @@ public partial class ServerRequesterController
 
         return Ok(response);
     }
+
+    private async Task<IActionResult> HandleSetReplaySize()
+    {
+        string? session = Request.Form["session"];
+
+        if (session is null)
+        {
+            Logger.LogError("Missing Value For Form Parameter \"session\" In HandleSetReplaySize");
+            return BadRequest(PhpSerialization.Serialize(new { error = "Missing Session" }));
+        }
+
+        MatchServer? matchServer = await DistributedCache.GetMatchServerBySessionCookie(session);
+
+        if (matchServer is null)
+        {
+            // Log Warning But Return OK To Prevent Crashes/Retries
+            Logger.LogWarning("No Match Server Found For Session Cookie \"{Session}\" In HandleSetReplaySize", session);
+            return Ok(PhpSerialization.Serialize(new { result = "OK" }));
+        }
+
+        string? matchIdString = Request.Form["match_id"];
+        if (matchIdString is null)
+        {
+             Logger.LogError("Missing Value For Form Parameter \"match_id\"");
+             return BadRequest(PhpSerialization.Serialize(new { error = "Missing Match ID" }));
+        }
+
+        string? fileSizeString = Request.Form["file_size"];
+        if (fileSizeString is null)
+        {
+             Logger.LogError("Missing Value For Form Parameter \"file_size\"");
+             return BadRequest(PhpSerialization.Serialize(new { error = "Missing File Size" }));
+        }
+
+        if (int.TryParse(matchIdString, out int matchId) && int.TryParse(fileSizeString, out int fileSize))
+        {
+            // TODO: Update Match Statistics With Replay Size
+            Logger.LogInformation("Received Replay Size For Match ID {MatchID}: {FileSize} Bytes", matchId, fileSize);
+        }
+        else
+        {
+            Logger.LogError("Invalid Match ID Or File Size Format: ID={MatchID}, Size={FileSize}", matchIdString, fileSizeString);
+        }
+
+        // Always return OK to satisfy the server
+        return Ok(PhpSerialization.Serialize(new { set_replay_size = "OK" }));
+    }
 }

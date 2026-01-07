@@ -22,7 +22,7 @@ public partial class ClientRequesterController
         Account? account = await MerrickContext.Accounts
             .Include(account => account.User)
             .Include(account => account.Clan)
-            .SingleOrDefaultAsync(account => account.Name.Equals(accountName));
+            .FirstOrDefaultAsync(account => account.Name.Equals(accountName));
 
         if (account is null)
             return NotFound(PhpSerialization.Serialize(new SRPAuthenticationFailureResponse(SRPAuthenticationFailureReason.AccountNotFound)));
@@ -128,7 +128,7 @@ public partial class ClientRequesterController
             .Include(account => account.BannedPeers)
             .Include(account => account.FriendedPeers)
             .Include(account => account.IgnoredPeers)
-            .SingleOrDefaultAsync(account => account.Name.Equals(accountName));
+            .FirstOrDefaultAsync(account => account.Name.Equals(accountName));
 
         if (account is null)
             return NotFound(PhpSerialization.Serialize(new SRPAuthenticationFailureResponse(SRPAuthenticationFailureReason.AccountNotFound)));
@@ -147,7 +147,7 @@ public partial class ClientRequesterController
 
         if (account.Type is not AccountType.Staff)
         {
-            string agent = Request.Headers.UserAgent.SingleOrDefault() ?? string.Empty;
+            string agent = Request.Headers.UserAgent.FirstOrDefault() ?? string.Empty;
 
             if (UserAgentRegex().IsMatch(agent).Equals(false))
             {
@@ -177,7 +177,7 @@ public partial class ClientRequesterController
             // The set of system information hashes is most likely bugged.
             // The intention probably was for each of the five data points to be hashed separately, but instead the entire system information is hashed five times.
             // NOTE: The value of Request.Form["SysInfo"] for Linux and macOS clients is "not running on windows".
-            string? systemInformationHash = systemInformationHashes.Split('|', StringSplitOptions.RemoveEmptyEntries).Distinct().SingleOrDefault();
+            string? systemInformationHash = systemInformationHashes.Split('|', StringSplitOptions.RemoveEmptyEntries).Distinct().FirstOrDefault();
 
             if (systemInformationHash is null)
             {
@@ -212,8 +212,10 @@ public partial class ClientRequesterController
         SRPAuthenticationResponseStageTwo response = SRPAuthenticationHandlers.GenerateStageTwoResponse(parameters, out string cookie);
 
         account.TimestampLastActive = DateTimeOffset.UtcNow;
+        account.Cookie = cookie;
 
         await MerrickContext.SaveChangesAsync();
+        Logger.LogInformation("Persisted Cookie {Cookie} for Account {AccountName} to Database", cookie, accountName);
 
         await DistributedCache.SetAccountNameForSessionCookie(cookie, accountName);
 
@@ -230,6 +232,70 @@ public partial class ClientRequesterController
         string response = PhpSerialization.Serialize(new SRPAuthenticationFailureResponse(SRPAuthenticationFailureReason.SRPAuthenticationDisabled));
 
         return BadRequest(response);
+    }
+
+    private async Task<IActionResult> HandleAids2Cookie()
+    {
+        string? cookie = Request.Form["cookie"];
+        
+        if (cookie is not null)
+            cookie = cookie.Replace("-", string.Empty);
+
+        if (cookie is null)
+        {
+            Logger.LogError("Missing Cookie In aids2cookie Request");
+
+            return BadRequest(PhpSerialization.Serialize(new { error = "Missing Cookie" }));
+        }
+
+        string? accountName = HttpContext.Items["SessionAccountName"] as string 
+                              ?? await DistributedCache.GetAccountNameForSessionCookie(cookie);
+
+        if (accountName is null)
+        {
+            // Fallback: Check the database for the cookie to handle cases where the cache has been cleared (e.g. server restart)
+            var accountData = await MerrickContext.Accounts
+                .Where(account => account.Cookie == cookie)
+                .Select(account => new { account.Name, account.ID })
+                .FirstOrDefaultAsync();
+
+            if (accountData is not null)
+            {
+                // Re-populate the cache
+                await DistributedCache.SetAccountNameForSessionCookie(cookie, accountData.Name);
+                return Ok(PhpSerialization.Serialize(accountData.ID));
+            }
+
+            // This should theoretically not be reached if validation passed in the main controller
+            Logger.LogError($@"Cookie ""{cookie}"" Validated In Controller But Account Name Not Found In Cache (Context Missing, Redis Check Failed)");
+
+            return Unauthorized(PhpSerialization.Serialize(new { error = "Invalid Session" }));
+        }
+
+        int? accountId = await MerrickContext.Accounts
+            .Where(account => account.Name.Equals(accountName))
+            .Select(account => (int?)account.ID)
+            .FirstOrDefaultAsync();
+
+        if (accountId is null)
+        {
+            Logger.LogError($@"Account Name ""{accountName}"" From Cookie Not Found In Database");
+
+            return NotFound(PhpSerialization.Serialize(new { error = "Account Not Found" }));
+        }
+
+        return Ok(PhpSerialization.Serialize(accountId.Value));
+    }
+
+    private async Task<IActionResult> HandleLogout()
+    {
+        string? cookie = Request.Form["cookie"];
+        if (cookie is not null)
+        {
+            await DistributedCache.RemoveAccountNameForSessionCookie(cookie);
+        }
+        
+        return Ok(PhpSerialization.Serialize(true));
     }
 
     [GeneratedRegex(@"(?>S2 Games)\/(?>Heroes [oO]f Newerth)\/(?<version>\d{1,2}\.\d{1,2}\.\d{1,2}\.\d{1,2})\/(?<platform>[wlm]a[cs])\/(?<architecture>x86_64|x86-biarch|universal-64)")]

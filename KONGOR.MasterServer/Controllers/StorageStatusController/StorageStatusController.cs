@@ -2,7 +2,6 @@
 
 [ApiController]
 [Route("master/storage/status")]
-[Consumes("application/x-www-form-urlencoded")]
 public class StorageStatusController : ControllerBase
 {
     [HttpPost(Name = "Storage Status")]
