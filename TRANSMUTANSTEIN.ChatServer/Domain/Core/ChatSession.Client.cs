@@ -139,25 +139,30 @@ public class ClientChatSession(TCPServer server, IServiceProvider serviceProvide
 
     public void Terminate()
     {
-        // Get All Chat Channels The Client Is A Member Of
-        List<ChatChannel> channels = [.. Context.ChatChannels.Values.Where(channel => channel.Members.ContainsKey(Account.Name))];
+        if (Account is not null)
+        {
+            // Get All Chat Channels The Client Is A Member Of
+            List<ChatChannel> channels = [.. Context.ChatChannels.Values.Where(channel => channel.Members.ContainsKey(Account.Name))];
 
-        // Remove The Client From All Chat Channels They Are A Member Of
-        foreach (ChatChannel channel in channels)
-            channel.Leave(this);
+            // Remove The Client From All Chat Channels They Are A Member Of
+            foreach (ChatChannel channel in channels)
+                channel.Leave(this);
 
-        // Remove From Matchmaking Group If In One
-        MatchmakingService.GetMatchmakingGroup(Account.ID)?.RemoveMember(Account.ID);
+            // Remove From Matchmaking Group If In One
+            MatchmakingService.GetMatchmakingGroup(Account.ID)?.RemoveMember(Account.ID);
 
-        // Send Disconnection Notification To Online Peers (Friends And Clan Members)
-        BroadcastDisconnection();
+            // Send Disconnection Notification To Online Peers (Friends And Clan Members)
+            BroadcastDisconnection();
 
-        // Log The Client Out And Disconnect The Chat Session
-        LogOut(); Disconnect();
+            // Log The Client Out And Disconnect The Chat Session
+            LogOut();
 
-        // Remove The Chat Session From The Chat Sessions Collection
-        if (Context.ClientChatSessions.TryRemove(Account.Name, out ClientChatSession? _) is false)
-            Log.Error(@"Failed To Remove Chat Session For Account Name ""{ClientInformation.Account.Name}""", Account.Name);
+            // Remove The Chat Session From The Chat Sessions Collection
+            if (Context.ClientChatSessions.TryRemove(Account.Name, out ClientChatSession? _) is false)
+                Log.Error(@"Failed To Remove Chat Session For Account Name ""{ClientInformation.Account.Name}""", Account.Name);
+        }
+
+        Disconnect();
 
         // Dispose Of The Chat Session
         Dispose();

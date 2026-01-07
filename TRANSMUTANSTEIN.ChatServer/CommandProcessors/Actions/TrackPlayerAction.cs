@@ -11,7 +11,15 @@ public class TrackPlayerAction : ISynchronousCommandProcessor<ClientChatSession>
 
         // TODO: Look Into Updating The Online Players Count And Matchmaking Details Using Custom Action OBTAIN_DETAILED_ONLINE_STATUS (Or Equivalent)
 
-        Log.Error(@"Unhandled User Action: ""{RequestData.Action}""", requestData.Action);
+        switch (requestData.Action)
+        {
+            case ChatProtocol.ActionCampaign.AC_DAILY_LOGINS:
+                // TODO: Handle Daily Logins Tracking Logic
+                break;
+            default:
+                Log.Warning(@"Unhandled User Action: ""{RequestData.Action}""", requestData.Action);
+                break;
+        }
     }
 }
 

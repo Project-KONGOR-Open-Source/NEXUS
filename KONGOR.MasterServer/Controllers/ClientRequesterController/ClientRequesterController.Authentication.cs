@@ -22,7 +22,7 @@ public partial class ClientRequesterController
         Account? account = await MerrickContext.Accounts
             .Include(account => account.User)
             .Include(account => account.Clan)
-            .FirstOrDefaultAsync(account => account.Name.Equals(accountName));
+            .FirstOrDefaultAsync(account => account.Name.ToLower() == accountName.ToLower());
 
         if (account is null)
             return NotFound(PhpSerialization.Serialize(new SRPAuthenticationFailureResponse(SRPAuthenticationFailureReason.AccountNotFound)));
@@ -128,7 +128,7 @@ public partial class ClientRequesterController
             .Include(account => account.BannedPeers)
             .Include(account => account.FriendedPeers)
             .Include(account => account.IgnoredPeers)
-            .FirstOrDefaultAsync(account => account.Name.Equals(accountName));
+            .FirstOrDefaultAsync(account => account.Name.ToLower() == accountName.ToLower());
 
         if (account is null)
             return NotFound(PhpSerialization.Serialize(new SRPAuthenticationFailureResponse(SRPAuthenticationFailureReason.AccountNotFound)));
@@ -273,7 +273,7 @@ public partial class ClientRequesterController
         }
 
         int? accountId = await MerrickContext.Accounts
-            .Where(account => account.Name.Equals(accountName))
+            .Where(account => account.Name.ToLower() == accountName.ToLower())
             .Select(account => (int?)account.ID)
             .FirstOrDefaultAsync();
 

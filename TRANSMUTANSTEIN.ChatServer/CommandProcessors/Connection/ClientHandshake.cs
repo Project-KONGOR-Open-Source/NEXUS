@@ -44,7 +44,7 @@ public class ClientHandshake(MerrickContext merrick, IDatabase distributedCacheS
         }
 
         // Ensure Account Name Matches Cached Account Name From Session Cookie
-        if (account.Name.Equals(cachedAccountName, StringComparison.Ordinal).Equals(false))
+        if (account.Name.Equals(cachedAccountName, StringComparison.OrdinalIgnoreCase).Equals(false))
         {
             Log.Warning(@"Authentication Failed: Account ID ""{RequestData.AccountID}"" Does Not Match Cached Account Name ""{CachedAccountName}""",
                 requestData.AccountID, cachedAccountName);
