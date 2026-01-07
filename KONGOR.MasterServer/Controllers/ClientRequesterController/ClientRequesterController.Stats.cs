@@ -66,12 +66,12 @@ public partial class ClientRequesterController
         if (matchID is null)
             return BadRequest(@"Missing Value For Form Parameter ""match_id""");
 
-        MatchStatistics? matchStatistics = await MerrickContext.MatchStatistics.SingleOrDefaultAsync(matchStatistics => matchStatistics.ID == int.Parse(matchID));
+        MatchStatistics? matchStatistics = await MerrickContext.MatchStatistics.SingleOrDefaultAsync(matchStatistics => matchStatistics.MatchID == int.Parse(matchID));
 
         if (matchStatistics is null)
             return new NotFoundObjectResult("Match Stats Not Found");
 
-        List<PlayerStatistics> allPlayerStatistics = await MerrickContext.PlayerStatistics.Where(playerStatistics => playerStatistics.MatchID == matchStatistics.ID).ToListAsync();
+        List<PlayerStatistics> allPlayerStatistics = await MerrickContext.PlayerStatistics.Where(playerStatistics => playerStatistics.MatchID == matchStatistics.MatchID).ToListAsync();
 
         string? accountName = await DistributedCache.GetAccountNameForSessionCookie(cookie);
 
@@ -83,7 +83,7 @@ public partial class ClientRequesterController
         if (account is null)
             return new NotFoundObjectResult("Account Not Found");
 
-        MatchStartData? matchStartData = await DistributedCache.GetMatchStartData(matchStatistics.ID);
+        MatchStartData? matchStartData = await DistributedCache.GetMatchStartData(matchStatistics.MatchID);
 
         if (matchStartData is null)
             return new NotFoundObjectResult("Match Start Data Not Found");
