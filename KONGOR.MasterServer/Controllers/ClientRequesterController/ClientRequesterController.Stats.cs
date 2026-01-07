@@ -78,7 +78,10 @@ public partial class ClientRequesterController
         if (accountName is null)
             return new NotFoundObjectResult("Session Not Found");
 
-        Account? account = await MerrickContext.Accounts.SingleOrDefaultAsync(account => account.Name.Equals(accountName));
+        Account? account = await MerrickContext.Accounts
+            .Include(account => account.User)
+            .Include(account => account.Clan)
+            .SingleOrDefaultAsync(account => account.Name.Equals(accountName));
 
         if (account is null)
             return new NotFoundObjectResult("Account Not Found");
