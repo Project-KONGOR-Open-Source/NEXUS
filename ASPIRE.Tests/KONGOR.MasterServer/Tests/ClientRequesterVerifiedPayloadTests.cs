@@ -6,6 +6,7 @@ using global::KONGOR.MasterServer.Extensions.Cache;
 using Microsoft.AspNetCore.Mvc.Testing;
 using global::MERRICK.DatabaseContext;
 using global::MERRICK.DatabaseContext.Entities;
+using global::MERRICK.DatabaseContext.Entities.Statistics;
 using global::MERRICK.DatabaseContext.Enumerations;
 using Microsoft.Extensions.DependencyInjection;
 using StackExchange.Redis;
@@ -305,6 +306,99 @@ public sealed class ClientRequesterVerifiedPayloadTests
              await SeedAccountAsync(dbContext, distributedCache, cookie, "ListUser");
 
              Dictionary<string, string> payload = ClientRequesterVerifiedPayloads.ServerList(cookie);
+             FormUrlEncodedContent content = new(payload);
+             HttpResponseMessage response = await client.PostAsync("client_requester.php", content);
+
+             response.EnsureSuccessStatusCode();
+        }
+    }
+
+    [Test]
+    public async Task Logout_ReturnsSuccess()
+    {
+        (HttpClient client, WebApplicationFactory<KONGORAssemblyMarker> factory) = await SetupAsync();
+        await using (factory)
+        {
+             using IServiceScope scope = factory.Services.CreateScope();
+             IDatabase distributedCache = scope.ServiceProvider.GetRequiredService<IDatabase>();
+             MerrickContext dbContext = scope.ServiceProvider.GetRequiredService<MerrickContext>();
+             
+             string cookie = Guid.NewGuid().ToString("N");
+             await SeedAccountAsync(dbContext, distributedCache, cookie, "LogoutUser");
+
+             Dictionary<string, string> payload = ClientRequesterVerifiedPayloads.Logout(cookie);
+             FormUrlEncodedContent content = new(payload);
+             HttpResponseMessage response = await client.PostAsync("client_requester.php", content);
+
+             response.EnsureSuccessStatusCode();
+             
+             // Verify logout logic? (e.g., cookie removed from cache)
+             // Controller: await DistributedCache.RemoveSession(sessionAccountName);
+             // We can check if cookie is invalid now.
+             (bool isValid, _) = await distributedCache.ValidateAccountSessionCookie(cookie);
+             await Assert.That(isValid).IsFalse();
+        }
+    }
+
+    [Test]
+    public async Task GetMatchStats_ReturnsSuccess()
+    {
+        (HttpClient client, WebApplicationFactory<KONGORAssemblyMarker> factory) = await SetupAsync();
+        await using (factory)
+        {
+             using IServiceScope scope = factory.Services.CreateScope();
+             IDatabase distributedCache = scope.ServiceProvider.GetRequiredService<IDatabase>();
+             MerrickContext dbContext = scope.ServiceProvider.GetRequiredService<MerrickContext>();
+             
+             string cookie = Guid.NewGuid().ToString("N");
+             await SeedAccountAsync(dbContext, distributedCache, cookie, "MatchStatsUser");
+
+             // Seed a completed match in DB for stats
+             MatchStatistics matchStats = new()
+             {
+                 MatchID = 12345,
+                 Map = "caldavar",
+                 // Name property doesn't exist on MatchStatistics, removing
+                 Version = "4.10.1.0",
+                 GameMode = "ap", // Was Mode
+                 TimestampRecorded = DateTime.UtcNow, // Was Date
+                 TimePlayed = 1800, // Was Length
+                 
+                 // Required fields
+                 ServerID = 1,
+                 HostAccountName = "ServerHost",
+                 MapVersion = "4.10.1",
+                 FileSize = 1000,
+                 FileName = "M12345.honreplay",
+                 ConnectionState = 0,
+                 AveragePSR = 1500,
+                 AveragePSRTeamOne = 1500,
+                 AveragePSRTeamTwo = 1500,
+                 ScoreTeam1 = 0,
+                 ScoreTeam2 = 0,
+                 TeamScoreGoal = 0,
+                 PlayerScoreGoal = 0,
+                 NumberOfRounds = 1,
+                 ReleaseStage = "stable",
+                 BannedHeroes = null,
+                 
+                 // Awards - all required nullable int?
+                 AwardMostAnnihilations = 0,
+                 AwardMostQuadKills = 0,
+                 AwardLargestKillStreak = 0,
+                 AwardMostSmackdowns = 0,
+                 AwardMostKills = 0,
+                 AwardMostAssists = 0,
+                 AwardLeastDeaths = 0,
+                 AwardMostBuildingDamage = 0,
+                 AwardMostWardsKilled = 0,
+                 AwardMostHeroDamageDealt = 0,
+                 AwardHighestCreepScore = 0
+             };
+             await dbContext.MatchStatistics.AddAsync(matchStats);
+             await dbContext.SaveChangesAsync();
+
+             Dictionary<string, string> payload = ClientRequesterVerifiedPayloads.GetMatchStats(cookie, 12345);
              FormUrlEncodedContent content = new(payload);
              HttpResponseMessage response = await client.PostAsync("client_requester.php", content);
 

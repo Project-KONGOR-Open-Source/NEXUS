@@ -274,6 +274,15 @@ public static class ClientRequesterVerifiedPayloads
         };
     }
 
+    public static Dictionary<string, string> Logout(string cookie)
+    {
+        return new Dictionary<string, string>
+        {
+            { "f", "logout" },
+            { "cookie", cookie }
+        };
+    }
+
     public static class ExpectedResponses
     {
         public static Dictionary<string, object> GetInitStats(
