@@ -4,10 +4,21 @@ public partial class ClientRequesterController
 {
     private async Task<IActionResult> HandleGetProducts()
     {
-        (bool accountSessionCookieIsValid, string? _) = await DistributedCache.ValidateAccountSessionCookie(Request.Form["cookie"].ToString());
+        string? cookie = Request.Form["cookie"];
+        if (string.IsNullOrEmpty(cookie)) return new UnauthorizedResult();
 
-        if (accountSessionCookieIsValid.Equals(false))
-            return Unauthorized($@"No Session Found For Cookie ""{Request.Form["cookie"]}""");
+        cookie = cookie.Replace("-", string.Empty);
+
+        string? sessionAccountName = HttpContext.Items["SessionAccountName"] as string;
+
+        if (sessionAccountName is null)
+        {
+             (bool accountSessionCookieIsValid, string? cacheAccountName) = await DistributedCache.ValidateAccountSessionCookie(cookie);
+             if (accountSessionCookieIsValid) sessionAccountName = cacheAccountName;
+        }
+
+        if (sessionAccountName is null)
+            return Unauthorized($@"No Session Found For Cookie ""{cookie}""");
 
         // Map StaticCatalog.Products to the legacy GetProductsResponse structure: Category -> ID -> Product
         Dictionary<string, Dictionary<int, Dictionary<string, object>>> productsResponse = new Dictionary<string, Dictionary<int, Dictionary<string, object>>>();

@@ -1,17 +1,27 @@
 namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.MatchState;
 
+using Microsoft.Extensions.Logging;
+
 [ChatCommand(ChatProtocol.GameServerToChatServer.NET_CHAT_GS_MATCH_ENDED)]
-public class MatchComplete : ISynchronousCommandProcessor<MatchServerChatSession>
+public class MatchComplete(ILogger<MatchComplete> logger) : ISynchronousCommandProcessor<MatchServerChatSession>
 {
     public void Process(MatchServerChatSession session, ChatBuffer buffer)
     {
-        MatchCompleteRequestData requestData = new (buffer);
+        try
+        {
+            MatchCompleteRequestData requestData = new (buffer);
 
-        // TODO: Update Player Availability States (Mark Players As Available After Match Ends)
-        // TODO: Remove Match From Distributed Cache
-        // TODO: Mark Server As Available For New Match Allocation
-        // TODO: Notify Players That Match Has Ended
-        // TODO: Clean Up Match-Related Session State
+            // TODO: Update Player Availability States (Mark Players As Available After Match Ends)
+            // TODO: Remove Match From Distributed Cache
+            // TODO: Mark Server As Available For New Match Allocation
+            // TODO: Notify Players That Match Has Ended
+            // TODO: Clean Up Match-Related Session State
+        }
+        catch (InvalidDataException ex)
+        {
+            logger.LogWarning(ex, "Failed to process MatchComplete (0x0515) packet: {Message}. Ignoring invalid packet.", ex.Message);
+            return;
+        }
 
         // NOTE: Statistics submission and MMR/PSR updates are handled by KONGOR.MasterServer/Controllers/StatsRequesterController.
     }

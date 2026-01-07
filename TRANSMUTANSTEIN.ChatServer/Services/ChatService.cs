@@ -45,9 +45,8 @@ public class ChatService(IServiceProvider serviceProvider) : IHostedService, IDi
 
         else
         {
-            // TODO: Log Bug
-
-            return Task.FromException(new ApplicationException("Chat Server Is Not Running"));
+            Log.Warning("Chat Server Is Not Running (Already Stopped?)");
+            return Task.CompletedTask;
         }
 
         Log.Information("Chat Server Has Stopped");

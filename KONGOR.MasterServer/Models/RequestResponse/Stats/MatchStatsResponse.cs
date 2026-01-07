@@ -103,6 +103,7 @@ public class MatchStatsResponse
     ///         Bundle                 =>   string.Empty
     ///     </code>
     /// </summary>
+
     [PhpProperty("my_upgrades")]
     public required List<string> OwnedStoreItems { get; set; }
 

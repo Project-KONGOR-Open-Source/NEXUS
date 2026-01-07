@@ -2,6 +2,8 @@
 
 using global::KONGOR.MasterServer.Infrastructure;
 
+using Serilog;
+
 public class KONGOR
 {
     // The Count Of Seconds Since The UNIX Epoch (Epochalypse = 19.01.2038 @ 03:14:07 UTC)
@@ -9,8 +11,34 @@ public class KONGOR
 
     public static async Task Main(string[] args)
     {
+        // Clean up previous logs to ensure a fresh start every time (Local Dev Preference)
+        try
+        {
+            string logDir = Path.Combine(Directory.GetCurrentDirectory(), "logs");
+            if (Directory.Exists(logDir))
+            {
+                // Delete all master_server logs
+                foreach (string file in Directory.GetFiles(logDir, "master_server*.log"))
+                {
+                    File.Delete(file);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[Warning] Failed to clear old logs: {ex.Message}");
+        }
+
         // Create The Application Builder
         WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+
+        // Configure Serilog
+        builder.Host.UseSerilog((context, services, configuration) => configuration
+            .ReadFrom.Configuration(context.Configuration)
+            .ReadFrom.Services(services)
+            .Enrich.FromLogContext()
+            .WriteTo.Console()
+            .WriteTo.File("logs/master_server.log", rollingInterval: RollingInterval.Day));
 
         // Set Static ServerStartEpochTime Property
         ServerStartEpochTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds();

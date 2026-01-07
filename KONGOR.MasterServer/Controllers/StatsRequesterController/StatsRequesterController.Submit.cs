@@ -49,6 +49,24 @@ public partial class StatsRequesterController
                         Description = "Listen Server"
                     };
                 }
+                }
+
+
+            // If we found a valid user session but couldn't verify the match (e.g. Local/Practice game without create_game),
+            // we should NOT return Unauthorized, as this triggers a client logout. 
+            // Instead, we accept the submission as a no-op loopback.
+            if (matchServer is null && accountName is not null)
+            {
+                Logger.LogWarning($"Received stats submission for unknown match {matchID} from user {accountName}. Treating as Local/Practice loopback and returning success.");
+                
+                Dictionary<string, string> loopbackResponse = new()
+                {
+                    { "match_info", "OK" },
+                    { "match_summ", "OK" },
+                    { "match_stats", "OK" },
+                    { "match_history", "OK" }
+                };
+                return Ok(PhpSerialization.Serialize(loopbackResponse));
             }
         }
 
@@ -104,8 +122,9 @@ public partial class StatsRequesterController
 
         await MerrickContext.SaveChangesAsync();
 
-        Dictionary<string, string> response = new()
+        Dictionary<string, object> response = new()
         {
+            { "match_id", matchID },
             { "match_info", "OK" },
             { "match_summ", "OK" },
             { "match_stats", "OK" },

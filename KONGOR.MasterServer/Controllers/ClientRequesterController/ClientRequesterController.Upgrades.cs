@@ -6,10 +6,18 @@ public partial class ClientRequesterController
     {
         string? cookie = Request.Form["cookie"];
         if (string.IsNullOrEmpty(cookie)) return new UnauthorizedResult();
+        
+        cookie = cookie.Replace("-", string.Empty);
 
-        (bool accountSessionCookieIsValid, string? sessionAccountName) = await DistributedCache.ValidateAccountSessionCookie(cookie);
+        string? sessionAccountName = HttpContext.Items["SessionAccountName"] as string;
 
-        if (accountSessionCookieIsValid.Equals(false) || sessionAccountName is null)
+        if (sessionAccountName is null)
+        {
+             (bool accountSessionCookieIsValid, string? cacheAccountName) = await DistributedCache.ValidateAccountSessionCookie(cookie);
+             if (accountSessionCookieIsValid) sessionAccountName = cacheAccountName;
+        }
+
+        if (sessionAccountName is null)
              return Unauthorized($@"No Session Found For Cookie ""{cookie}""");
 
         Account? account = await MerrickContext.Accounts

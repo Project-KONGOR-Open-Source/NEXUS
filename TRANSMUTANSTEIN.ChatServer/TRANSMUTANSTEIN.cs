@@ -1,11 +1,39 @@
 ﻿namespace TRANSMUTANSTEIN.ChatServer;
 
+using Serilog;
+
 public class TRANSMUTANSTEIN
 {
     public static void Main(string[] args)
     {
+        // Clean up previous logs to ensure a fresh start every time (Local Dev Preference)
+        try
+        {
+            string logDir = Path.Combine(Directory.GetCurrentDirectory(), "logs");
+            if (Directory.Exists(logDir))
+            {
+                // Delete all chat_server logs
+                foreach (string file in Directory.GetFiles(logDir, "chat_server*.log"))
+                {
+                    File.Delete(file);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[Warning] Failed to clear old logs: {ex.Message}");
+        }
+
         // Create The Application Builder
         WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
+
+        // Configure Serilog
+        builder.Host.UseSerilog((context, services, configuration) => configuration
+            .ReadFrom.Configuration(context.Configuration)
+            .ReadFrom.Services(services)
+            .Enrich.FromLogContext()
+            .WriteTo.Console()
+            .WriteTo.File("logs/chat_server.log", rollingInterval: RollingInterval.Day));
 
         // Add Aspire Service Defaults
         builder.AddServiceDefaults();

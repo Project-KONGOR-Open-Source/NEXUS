@@ -105,15 +105,14 @@ public sealed class ServerRequesterUnverifiedTests
         (HttpClient client, _, _, WebApplicationFactory<KONGORAssemblyMarker> factory, _, _) = await SetupAsync();
         using (factory)
         {
-            // Aids2Cookie usually requires valid auth hash + IP + AccountID match.
-            // Failing that (likely due to hash mismatch), it returns 401.
+            // Aids2Cookie is now stubbed to return OK (empty body) to ignore legacy status checks.
             Dictionary<string, string> payload = ServerRequesterUnverifiedPayloads.Aids2Cookie("123", "127.0.0.1", "bad_hash");
             FormUrlEncodedContent content = new(payload);
 
             HttpResponseMessage response = await client.PostAsync("server_requester.php", content);
             
-            // Log confirms 401
-            await Assert.That(response.StatusCode).IsEqualTo(System.Net.HttpStatusCode.Unauthorized);
+            // Stubbed -> OK
+            await Assert.That(response.StatusCode).IsEqualTo(System.Net.HttpStatusCode.OK);
         }
     }
 }

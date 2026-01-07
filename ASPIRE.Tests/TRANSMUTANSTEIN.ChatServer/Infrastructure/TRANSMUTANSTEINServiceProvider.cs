@@ -1,3 +1,4 @@
+using System.Net.Sockets;
 using ASPIRE.Tests.InProcess;
 
 
@@ -82,9 +83,31 @@ public class TRANSMUTANSTEINServiceProvider : WebApplicationFactory<global::TRAN
         // This forces the server to start
         HttpClient client = provider.CreateClient();
 
-        // Wait briefly for the TCP listeners to spin up
-        await Task.Delay(1000);
+        // Wait for the TCP listeners to spin up using exponential backoff probing
+        int attempt = 0;
+        int maxAttempts = 10;
+        int delayMs = 100;
 
+        while (attempt < maxAttempts)
+        {
+            try
+            {
+                using TcpClient probe = new TcpClient();
+                await probe.ConnectAsync("localhost", clientPort);
+                if (probe.Connected)
+                {
+                    break;
+                }
+            }
+            catch
+            {
+                attempt++;
+                if (attempt == maxAttempts) throw new Exception($"Failed to connect to Chat Server on port {clientPort} after {maxAttempts} attempts.");
+                await Task.Delay(delayMs);
+                delayMs = Math.Min(delayMs * 2, 2000); // Cap delay at 2s
+            }
+        }
+        
         return provider;
     }
 }
