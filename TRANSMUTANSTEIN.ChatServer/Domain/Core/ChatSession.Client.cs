@@ -26,6 +26,8 @@ public class ClientChatSession(TCPServer server, IServiceProvider serviceProvide
     ///     The maximum number of channels cannot exceed the value of <see cref="ChatProtocol.MAX_CHANNELS_PER_CLIENT"/>.
     /// </summary>
     public HashSet<int> CurrentChannels { get; set; } = [];
+    
+    public string AutoResponseReason { get; set; } = string.Empty;
 
     public ClientChatSession Accept(Account account)
     {
@@ -265,7 +267,7 @@ public class ClientChatSession(TCPServer server, IServiceProvider serviceProvide
     ///     Sends the client's connection status to all friends and clan members that are currently online.
     ///     Also sends the client's connection status to the client itself, so they can see their own status.
     /// </summary>
-    private void BroadcastConnectionStatusUpdate(ChatProtocol.ChatClientStatus status, MatchServer? matchServer = null)
+    public void BroadcastConnectionStatusUpdate(ChatProtocol.ChatClientStatus status, MatchServer? matchServer = null)
     {
         if (Metadata.LastKnownClientState == status) return; else Metadata.LastKnownClientState = status;
 

@@ -47,7 +47,7 @@ public class SendChannelMessage(FloodPreventionService floodPreventionService) :
         broadcast.WriteInt32(requestData.ChannelID); // Channel ID
         broadcast.WriteString(messageContent);       // Message Content (Potentially Truncated)
 
-        channel.BroadcastMessage(broadcast);
+        channel.BroadcastMessage(broadcast, session.Account.ID);
     }
 }
 

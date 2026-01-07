@@ -6,7 +6,12 @@ public class ChatChannel
 
     public required string Name { get; set; }
 
-    public string Topic => $"Welcome To The {Name} Channel !";
+    private string? _topic;
+    public string Topic
+    {
+        get => _topic ?? $"Welcome To The {Name} Channel !";
+        set => _topic = value;
+    }
 
     public required ChatProtocol.ChatChannelType Flags { get; set; }
 
