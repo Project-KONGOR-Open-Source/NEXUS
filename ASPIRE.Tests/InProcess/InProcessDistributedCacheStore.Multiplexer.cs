@@ -31,6 +31,7 @@ public partial class InProcessDistributedCacheStore
         public bool IncludeDetailInExceptions { get; set; }
         public int StormLogThreshold { get; set; }
 
+#pragma warning disable CS0067
         public event EventHandler<RedisErrorEventArgs>? ErrorMessage;
         public event EventHandler<ConnectionFailedEventArgs>? ConnectionFailed;
         public event EventHandler<InternalErrorEventArgs>? InternalError;
@@ -39,6 +40,7 @@ public partial class InProcessDistributedCacheStore
         public event EventHandler<EndPointEventArgs>? ConfigurationChangedBroadcast;
         public event EventHandler<HashSlotMovedEventArgs>? HashSlotMoved;
         public event EventHandler<ServerMaintenanceEvent>? ServerMaintenanceEvent;
+#pragma warning restore CS0067
 
         public void AddLibraryNameSuffix(string suffix) { }
         public void Close(bool allowCommandsToComplete = true) { }

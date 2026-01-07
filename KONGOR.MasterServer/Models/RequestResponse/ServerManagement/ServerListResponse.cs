@@ -1,6 +1,8 @@
 ﻿namespace KONGOR.MasterServer.Models.RequestResponse.ServerManagement;
 
+#pragma warning disable CS9113 // Parameter is unread.
 public class ServerForCreateListResponse(List<MatchServer> servers, string? region, string cookie) : ServerListResponse(cookie)
+#pragma warning restore CS9113
 {
        // TODO: Filter Server List By Region(+Add Support For NEWERTH Region)
 
