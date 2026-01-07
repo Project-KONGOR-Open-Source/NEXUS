@@ -11,13 +11,49 @@ public partial class StatsRequesterController
 
         form.Session = form.Session.Replace("-", string.Empty);
 
+        if (!int.TryParse(form.MatchStats["match_id"], out int matchID))
+            return BadRequest("Invalid Match ID");
+
         MatchServer? matchServer = await DistributedCache.GetMatchServerBySessionCookie(form.Session);
 
         if (matchServer is null)
-            return Unauthorized($@"No Match Server Could Be Found For Session Cookie ""{form.Session}""");
+        {
+            // Fallback: Check if this is a User Session hosting the match (Practice/Listen Server)
+            string? accountName = await DistributedCache.GetAccountNameForSessionCookie(form.Session);
+            
+            if (accountName is not null)
+            {
+                MatchStartData? matchStartData = await DistributedCache.GetMatchStartData(matchID);
+                
+                // If we have start data and the account matches the host
+                if (matchStartData is not null && matchStartData.HostAccountName.Equals(accountName, StringComparison.OrdinalIgnoreCase))
+                {
+                    // Fetch Host Account ID
+                    int hostAccountID = await MerrickContext.Accounts
+                         .Where(a => a.Name == accountName)
+                         .Select(a => a.ID)
+                         .FirstOrDefaultAsync();
 
-        if (!int.TryParse(form.MatchStats["match_id"], out int matchID))
-            return BadRequest("Invalid Match ID");
+                    // Create a temporary MatchServer context for the submission
+                    matchServer = new MatchServer 
+                    { 
+                        ID = matchStartData.ServerID, 
+                        HostAccountName = accountName,
+                        HostAccountID = hostAccountID, 
+                        Name = "Listen Server", // Valid name
+                        // We can fill other fields if needed, but these are the ones used by ToMatchStatistics
+                        Instance = 1, // Default?
+                        IPAddress = "127.0.0.1", // Placeholder
+                        Port = 0,
+                        Location = "Local",
+                        Description = "Listen Server"
+                    };
+                }
+            }
+        }
+
+        if (matchServer is null)
+            return Unauthorized($@"No Match Server Could Be Found For Session Cookie ""{form.Session}""");
 
         MatchStatistics? existingMatchStatistics = await MerrickContext.MatchStatistics.FirstOrDefaultAsync(stats => stats.MatchID == matchID);
 

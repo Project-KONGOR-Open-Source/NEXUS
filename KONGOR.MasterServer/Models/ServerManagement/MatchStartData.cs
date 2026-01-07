@@ -6,7 +6,12 @@ namespace KONGOR.MasterServer.Models.ServerManagement;
 /// </summary>
 public class MatchStartData
 {
-    public int MatchID => TimestampStarted.GetDeterministicInt32Hash();
+    private int? _matchID;
+    public int MatchID
+    {
+        get => _matchID ?? TimestampStarted.GetDeterministicInt32Hash();
+        set => _matchID = value;
+    }
 
     public required string MatchName { get; set; }
 

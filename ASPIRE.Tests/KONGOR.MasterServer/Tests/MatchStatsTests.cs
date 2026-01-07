@@ -9,6 +9,7 @@ using global::MERRICK.DatabaseContext.Entities;
 using global::MERRICK.DatabaseContext.Entities.Statistics;
 using global::MERRICK.DatabaseContext.Entities.Utility;
 using global::MERRICK.DatabaseContext.Enumerations; 
+using ASPIRE.Common.Enumerations; 
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -278,5 +279,98 @@ public sealed partial class MatchStatsSubmissionTests
             ["inventory[0][1]"] = "Item_Marchers",
             ["inventory[0][2]"] = "Item_HealthPotion",
         };
+    }
+    [Test]
+    public async Task SubmitStats_AsUser_ReturnsSuccess()
+    {
+        await using WebApplicationFactory<KONGORAssemblyMarker> webApplicationFactory = KONGORServiceProvider.CreateOrchestratedInstance();
+        HttpClient httpClient = webApplicationFactory.CreateClient();
+
+        using IServiceScope scope = webApplicationFactory.Services.CreateScope();
+        MerrickContext dbContext = scope.ServiceProvider.GetRequiredService<MerrickContext>();
+        IDatabase distributedCache = scope.ServiceProvider.GetRequiredService<IDatabase>();
+
+        // 1. Seed Database with Host User
+        global::MERRICK.DatabaseContext.Entities.Utility.Role userRole = new() { Name = UserRoles.User };
+        User hostUser = new()
+        {
+            EmailAddress = "userhost@kongor.net",
+            PBKDF2PasswordHash = "hash",
+            SRPPasswordHash = "hash",
+            SRPPasswordSalt = "salt",
+            Role = userRole
+        };
+        Account hostAccount = new()
+        {
+            Name = "UserHost",
+            User = hostUser,
+            Type = AccountType.Normal, // Normal user, not Staff/ServerHost
+            IsMain = true
+        };
+
+        User playerUser = new()
+        {
+            EmailAddress = "player@kongor.net",
+            PBKDF2PasswordHash = "hash",
+            SRPPasswordHash = "hash",
+            SRPPasswordSalt = "salt",
+            Role = userRole
+        };
+
+        Account playerAccount = new()
+        {
+            Name = "TestPlayer1", // Matches payload
+            User = playerUser,
+            Type = AccountType.Normal,
+            IsMain = true
+        };
+
+        await dbContext.Users.AddRangeAsync(hostUser, playerUser);
+        await dbContext.Accounts.AddRangeAsync(hostAccount, playerAccount);
+        await dbContext.SaveChangesAsync();
+
+        // 2. Seed Cache with User Session (NOT MatchServer)
+        string sessionCookie = Guid.NewGuid().ToString("N");
+        await distributedCache.SetAccountNameForSessionCookie(sessionCookie, hostAccount.Name);
+
+        // 3. Seed MatchStartData (Crucial for the fix)
+        int matchId = 705751;
+        int serverId = 999; 
+        
+        MatchStartData matchStartData = new()
+        {
+            MatchID = matchId,
+            ServerID = serverId,
+            MatchName = "Test Match", // Required
+            HostAccountName = hostAccount.Name,
+            Map = "caldavar",
+            MatchMode = "ap",
+            Version = "4.10.1",
+            IsCasual = false,
+            MatchType = 0,
+            Options = MatchOptions.None
+        };
+        await distributedCache.SetMatchStartData(matchStartData);
+
+        // 4. Construct payload
+        Dictionary<string, string> formData = GetValidStatsPayload(sessionCookie, serverId);
+        formData["match_stats[match_id]"] = matchId.ToString();
+        FormUrlEncodedContent content = new(formData);
+
+        // 5. Submit request
+        HttpResponseMessage response = await httpClient.PostAsync("stats_requester.php", content);
+
+        // 6. Verify
+        string responseBody = await response.Content.ReadAsStringAsync();
+        if (!response.IsSuccessStatusCode)
+        {
+            Assert.Fail($"Request failed with {response.StatusCode}. Body: {responseBody}");
+        }
+
+        MatchStatistics? savedStats = await dbContext.MatchStatistics
+            .FirstOrDefaultAsync(m => m.MatchID == matchId);
+
+        await Assert.That(savedStats).IsNotNull();
+        await Assert.That(savedStats!.HostAccountName).IsEqualTo(hostAccount.Name);
     }
 }
