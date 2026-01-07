@@ -21,12 +21,13 @@ public sealed partial class MatchStatsSubmissionTests
     public async Task GetMatchStats_WithEmptyCookie_ReturnsSuccess()
     {
         // Arrange
-        await using WebApplicationFactory<KONGORAssemblyMarker> webApplicationFactory = KONGORServiceProvider.CreateOrchestratedInstance();
+        await using WebApplicationFactory<KONGORAssemblyMarker> webApplicationFactory =
+            KONGORServiceProvider.CreateOrchestratedInstance();
         HttpClient client = webApplicationFactory.CreateClient();
 
         using IServiceScope scope = webApplicationFactory.Services.CreateScope();
         MerrickContext dbContext = scope.ServiceProvider.GetRequiredService<MerrickContext>();
-        
+
         // Seed MatchStatistics
         int matchID = 963564305;
         MatchStatistics matchStats = new()
@@ -71,24 +72,23 @@ public sealed partial class MatchStatsSubmissionTests
         // payload with empty cookie
         Dictionary<string, string> payload = new()
         {
-            { "f", "get_match_stats" },
-            { "match_id", matchID.ToString() },
-            { "cookie", "" }
+            { "f", "get_match_stats" }, { "match_id", matchID.ToString() }, { "cookie", "" }
         };
 
         // Act
         // Use /client_requester.php as per controller route
-        HttpResponseMessage response = await client.PostAsync("/client_requester.php", new FormUrlEncodedContent(payload));
+        HttpResponseMessage response =
+            await client.PostAsync("/client_requester.php", new FormUrlEncodedContent(payload));
         string content = await response.Content.ReadAsStringAsync();
 
         // Assert
         await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.OK);
-        
+
         // Manual verification of PHP serialized content check or basic containment
         // Since PhpSerialization might not be easily accessible or requires internal namespaces,
         // We can just verify the content contains expected keys in their serialized form.
         // Array/Dict keys: "match_summ", "match_player_stats", "selected_upgrades"
-        
+
         // Serialized strings look like: s:10:"match_summ"; or s:17:"selected_upgrades";
         await Assert.That(content).Contains("match_summ");
         await Assert.That(content).Contains("match_player_stats");
@@ -99,13 +99,14 @@ public sealed partial class MatchStatsSubmissionTests
     public async Task GetMatchStats_WithValidCookie_ReturnsAuthenticatedSuccess()
     {
         // Arrange
-        await using WebApplicationFactory<KONGORAssemblyMarker> webApplicationFactory = KONGORServiceProvider.CreateOrchestratedInstance();
+        await using WebApplicationFactory<KONGORAssemblyMarker> webApplicationFactory =
+            KONGORServiceProvider.CreateOrchestratedInstance();
         HttpClient client = webApplicationFactory.CreateClient();
 
         using IServiceScope scope = webApplicationFactory.Services.CreateScope();
         MerrickContext dbContext = scope.ServiceProvider.GetRequiredService<MerrickContext>();
         IDatabase distributedCache = scope.ServiceProvider.GetRequiredService<IDatabase>();
-        
+
         // Seed MatchStatistics
         int matchID = 963564306;
         MatchStatistics matchStats = new()
@@ -145,12 +146,12 @@ public sealed partial class MatchStatsSubmissionTests
         };
 
         await dbContext.MatchStatistics.AddAsync(matchStats);
-        
+
         // Seed Account and Session
         // Use Global Constants for seeding
         // Assuming global::MERRICK.DatabaseContext.Entities.Utility.Role exists
         global::MERRICK.DatabaseContext.Entities.Utility.Role userRole = new() { Name = "User" };
-        
+
         global::MERRICK.DatabaseContext.Entities.Core.User user = new()
         {
             EmailAddress = "auth_user@kongor.net",
@@ -160,17 +161,14 @@ public sealed partial class MatchStatsSubmissionTests
             Role = userRole
         };
         await dbContext.Users.AddAsync(user);
-        
+
         global::MERRICK.DatabaseContext.Entities.Core.Account account = new()
         {
-            User = user,
-            Name = "AuthUser",
-            Cookie = "valid_cookie_123",
-            IsMain = true
+            User = user, Name = "AuthUser", Cookie = "valid_cookie_123", IsMain = true
         };
         // Add some selected upgrades to verify personalization
         account.SelectedStoreItems.Add("aa.test_avatar");
-        
+
         await dbContext.Accounts.AddAsync(account);
         await dbContext.SaveChangesAsync();
 
@@ -180,22 +178,50 @@ public sealed partial class MatchStatsSubmissionTests
         // payload with valid cookie
         Dictionary<string, string> payload = new()
         {
-            { "f", "get_match_stats" },
-            { "match_id", matchID.ToString() },
-            { "cookie", "valid_cookie_123" }
+            { "f", "get_match_stats" }, { "match_id", matchID.ToString() }, { "cookie", "valid_cookie_123" }
         };
 
         // Act
-        HttpResponseMessage response = await client.PostAsync("/client_requester.php", new FormUrlEncodedContent(payload));
+        HttpResponseMessage response =
+            await client.PostAsync("/client_requester.php", new FormUrlEncodedContent(payload));
         string content = await response.Content.ReadAsStringAsync();
 
         // Assert
         await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.OK);
-        
+
         // Verify response contains personalized data
         await Assert.That(content).Contains("match_summ");
         // Should contain result of SelectedStoreItems
         // Expected serialized: s:14:"aa.test_avatar"; or similar
         await Assert.That(content).Contains("aa.test_avatar");
+    }
+
+    [Test]
+    public async Task GetMatchStats_WithInvalidMatchID_ReturnsSoftFailure()
+    {
+        // Arrange
+        await using WebApplicationFactory<KONGORAssemblyMarker> webApplicationFactory =
+            KONGORServiceProvider.CreateOrchestratedInstance();
+        HttpClient client = webApplicationFactory.CreateClient();
+
+        // payload with mismatched/missing Match ID
+        Dictionary<string, string> payload = new()
+        {
+            { "f", "get_match_stats" },
+            { "match_id", "123456789" }, // ID does not exist in seeded DB
+            { "cookie", "any_cookie" }
+        };
+
+        // Act
+        HttpResponseMessage response =
+            await client.PostAsync("/client_requester.php", new FormUrlEncodedContent(payload));
+        string content = await response.Content.ReadAsStringAsync();
+
+        // Assert
+        // Should return 200 OK now, not 404
+        await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.OK);
+
+        // Should return serialized boolean false "b:0;"
+        await Assert.That(content).IsEqualTo("b:0;");
     }
 }

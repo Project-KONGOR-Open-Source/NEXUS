@@ -146,8 +146,9 @@ public partial class ClientRequesterController
 
         if (matchStatistics is null)
         {
-            Logger.LogError("Match Stats Request Failed: Match Statistics Not Found For ID {MatchID}", matchID);
-            return new NotFoundObjectResult("Match Stats Not Found");
+            Logger.LogWarning("Match Stats Request Failed: Match Statistics Not Found For ID {MatchID}. Returning Soft Failure.", matchID);
+            // Return "false" to indicate failure without triggering client HTTP error handling (which causes logout)
+            return Ok(PhpSerialization.Serialize(false));
         }
 
         List<PlayerStatistics> playerStatistics = await MerrickContext.PlayerStatistics.Where(playerStatistics => playerStatistics.MatchID == matchStatistics.MatchID).ToListAsync();
