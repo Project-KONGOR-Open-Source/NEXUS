@@ -108,6 +108,12 @@ public class MatchStatsResponse
     public required List<string> OwnedStoreItems { get; set; }
 
     /// <summary>
+    ///     Detailed information about owned store items including mastery boosts and discount coupons.
+    /// </summary>
+    [PhpProperty("my_upgrades_info")]
+    public required Dictionary<string, OneOf<StoreItemData, StoreItemDiscountCoupon>> OwnedStoreItemsData { get; set; }
+
+    /// <summary>
     ///     The collection of selected store items.
     /// </summary>
     [PhpProperty("selected_upgrades")]
