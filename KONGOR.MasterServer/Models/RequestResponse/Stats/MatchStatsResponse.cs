@@ -22,16 +22,18 @@ public class MatchStatsResponse
     public required List<MatchSummary> MatchSummary { get; set; }
 
     /// <summary>
-    ///     A dictionary of player statistics for the match, keyed by the player's account ID.
+    ///     A collection containing player statistics for the match.
+    ///     The structure is an array with a single dictionary element, where the dictionary is keyed by player account IDs.
     /// </summary>
     [PhpProperty("match_player_stats")]
-    public required Dictionary<int, MatchPlayerStatistics> MatchPlayerStatistics { get; set; }
+    public required List<Dictionary<int, MatchPlayerStatistics>> MatchPlayerStatistics { get; set; }
 
     /// <summary>
-    ///     A dictionary of player inventories for the match, keyed by the player's account ID.
+    ///     A collection containing player inventories for the match.
+    ///     The structure is an array with a single dictionary element, where the dictionary is keyed by player account IDs.
     /// </summary>
     [PhpProperty("inventory")]
-    public required Dictionary<int, MatchPlayerInventory> MatchPlayerInventories { get; set; }
+    public required List<Dictionary<int, MatchPlayerInventory>> MatchPlayerInventories { get; set; }
 
     /// <summary>
     ///     Mastery details for the hero played in the match.
