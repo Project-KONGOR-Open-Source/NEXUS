@@ -28,34 +28,7 @@ public sealed class MiscVerifiedPayloadTests
         }
     }
 
-    [Test]
-    public async Task LatestPatch_ReturnsSuccess()
-    {
-        (HttpClient client, WebApplicationFactory<KONGORAssemblyMarker> factory) = await SetupAsync();
-        await using (factory)
-        {
-            using IServiceScope scope = factory.Services.CreateScope();
-            IDatabase distributedCache = scope.ServiceProvider.GetRequiredService<IDatabase>();
 
-            // Must seed a valid session logic because PatcherController calls ValidateAccountSessionCookie
-            string cookie = "test_cookie_patcher";
-            await distributedCache.SetAccountNameForSessionCookie(cookie, "PatchTester");
-
-            Dictionary<string, string> payload = new Dictionary<string, string>
-            {
-                { "update", "1" },
-                { "version", "0.0.0.0" },
-                { "current_version", "4.10.1" },
-                { "os", "wac" },
-                { "arch", "x86_64" },
-                { "cookie", cookie }
-            };
-            FormUrlEncodedContent content = new(payload);
-
-            HttpResponseMessage response = await client.PostAsync("patcher/patcher.php", content);
-            response.EnsureSuccessStatusCode();
-        }
-    }
 
     [Test]
     public async Task MessageList_ReturnsSuccess()

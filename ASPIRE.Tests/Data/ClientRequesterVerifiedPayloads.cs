@@ -263,6 +263,16 @@ public static class ClientRequesterVerifiedPayloads
             { "cookie", cookie }
         };
     }
+    
+    public static Dictionary<string, string> ServerList(string cookie)
+    {
+        return new Dictionary<string, string>
+        {
+            { "f", "server_list" },
+            { "cookie", cookie },
+            { "gametype", "10" } // 10 = Standard/Normal?
+        };
+    }
 
     public static class ExpectedResponses
     {

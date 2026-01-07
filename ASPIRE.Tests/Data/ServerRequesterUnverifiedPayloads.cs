@@ -10,25 +10,10 @@ namespace ASPIRE.Tests.Data;
 public static class ServerRequesterUnverifiedPayloads
 {
     // Server Manager
-    public static Dictionary<string, string> ReplayAuth(string login, string password)
-    {
-        return new Dictionary<string, string>
-        {
-            { "f", "replay_auth" },
-            { "login", login },
-            { "pass", password }
-        };
-    }
-
-    public static Dictionary<string, string> GetSpectatorHeader(string matchId)
-    {
-        return new Dictionary<string, string>
-        {
-            { "f", "get_spectator_header" },
-            { "match_id", matchId }
-        };
-    }
-
+    // Server Manager
+    // ReplayAuth moved to VerifiedPayloads
+    // GetSpectatorHeader moved to VerifiedPayloads
+    
     public static Dictionary<string, string> SetReplaySize(string matchId, int size)
     {
         return new Dictionary<string, string>
@@ -39,81 +24,15 @@ public static class ServerRequesterUnverifiedPayloads
         };
     }
 
-    public static Dictionary<string, string> GetQuickStats(string session)
-    {
-        return new Dictionary<string, string>
-        {
-            { "f", "get_quickstats" },
-            { "session", session }
-        };
-    }
+    // GetQuickStats moved to VerifiedPayloads
 
     // Server
-    public static Dictionary<string, string> AcceptKey(string cookie, int accountId)
-    {
-        return new Dictionary<string, string>
-        {
-            { "f", "accept_key" },
-            { "cookie", cookie },
-            { "account_id", accountId.ToString() }
-        };
-    }
-
-    public static Dictionary<string, string> Auth(string login, string password)
-    {
-        return new Dictionary<string, string>
-        {
-            { "f", "auth" },
-            { "login", login },
-            { "pass", password }
-        };
-    }
-
-    public static Dictionary<string, string> CConn(string cookie, string ip, int accountId)
-    {
-        return new Dictionary<string, string>
-        {
-            { "f", "c_conn" },
-            { "cookie", cookie },
-            { "ip", ip },
-            { "account_id", accountId.ToString() }
-        };
-    }
-
-    public static Dictionary<string, string> NewSession(string ip, int port)
-    {
-        return new Dictionary<string, string>
-        {
-            { "f", "new_session" },
-            { "ip", ip },
-            { "port", port.ToString() }
-        };
-    }
-
-    public static Dictionary<string, string> Shutdown(string cookie)
-    {
-        return new Dictionary<string, string>
-        {
-            { "f", "shutdown" },
-            { "session", cookie }
-        };
-    }
-
-    public static Dictionary<string, string> StartGame(string cookie, int matchId)
-    {
-        return new Dictionary<string, string>
-        {
-            { "f", "start_game" },
-            { "session", cookie },
-            { "map", "caldavar" },
-            { "version", "4.10.1.0" },
-            { "mname", "Test Game" },
-            { "mstr", "ServerHostAccount:" },
-            { "casual", "0" },
-            { "arrangedmatchtype", "0" },
-            { "match_mode", "1" }
-        };
-    }
+    // AcceptKey moved to VerifiedPayloads
+    // Auth - Removed (Likely old/unused)
+    // CConn moved to VerifiedPayloads
+    // NewSession moved to VerifiedPayloads
+    // Shutdown moved to VerifiedPayloads
+    // StartGame moved to VerifiedPayloads
 
     public static Dictionary<string, string> Aids2Cookie(string accountId, string ip, string authHash)
     {
@@ -122,7 +41,8 @@ public static class ServerRequesterUnverifiedPayloads
             { "f", "aids2cookie" },
             { "account_id", accountId },
             { "ip", ip },
-            { "auth_hash", authHash }
+            { "auth_hash", authHash },
+            { "cookie", "dummy_cookie" } // Required to pass 400 check and hit 401
         };
     }
 }

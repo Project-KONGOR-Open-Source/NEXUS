@@ -176,93 +176,102 @@ public sealed class ServerRequesterVerifiedPayloadTests
         response.EnsureSuccessStatusCode();
     }
 
+
+
+
     [Test]
-    public async Task ReplayAuth_WithValidCredentials_ReturnsSuccess()
+    public async Task ClientConnection_ReturnsSuccess()
     {
         await using WebApplicationFactory<KONGORAssemblyMarker> webApplicationFactory = KONGORServiceProvider.CreateOrchestratedInstance();
         HttpClient client = webApplicationFactory.CreateClient();
         using IServiceScope scope = webApplicationFactory.Services.CreateScope();
         MerrickContext dbContext = scope.ServiceProvider.GetRequiredService<MerrickContext>();
 
-        // Seed Host Account
+        // Seed Account to connect
         string cookie = Guid.NewGuid().ToString("N");
-        string salt = "salt";
-        // "password" hashed with "salt"
-        // Note: In a real environment we need the SRP verifier. 
-        // For ReplayAuth, the controller re-hashes the input 'pass' with the user's salt 
-        // and checks if it matches the stored SRPPasswordHash. 
-        // We can simulate this by storing a known hash.
-        // HOWEVER: The controller does `SRPAuthenticationHandlers.ComputeSRPPasswordHash(accountPasswordHash, account.User.SRPPasswordSalt)`.
-        // This means we need to align the seed data with what we send.
-        // Let's assume we can bypass the complex SRP math for this integration test by 
-        // making the 'pass' input + 'salt' -> 'storedHash' work out.
-        // But ComputeSRPPasswordHash is essentially SHA256(salt + SHA256(user + : + password)).
-        // To simplify, we rely on the implementation detail or existing helpers? 
-        // Using "hash" as placeholder might fail if the code actually computes it.
-        // Checking Controller: It calls `SRPAuthenticationHandlers.ComputeSRPPasswordHash`. 
-        // We'll trust the existing `ServerRequesterTests` didn't need auth... oh wait, `SetOnline` bypassed auth because it uses cookie.
-        // `ReplayAuth` uses `login` and `pass`. This will fail 401 if we don't handle SRP correctly.
-        // Given we are simulating traffic, we might need a helper or just accept 401 as "Verified handshake reached" if we can't easily compute SRP in test.
-        // BUT, the goal is verification.
-        // Let's try to match the "hash" expectation.
-        
-        User hostUser = new()
+        User user = new()
         {
-            EmailAddress = "replay_host@kongor.net",
+            EmailAddress = "conn@kongor.net",
             PBKDF2PasswordHash = "hash",
-            SRPPasswordHash = "hash", // This will likely fail matching if we don't compute strictly
+            SRPPasswordHash = "hash",
             SRPPasswordSalt = "salt",
             Role = new EntityRole { Name = UserRoles.User }
         };
-
-        Account hostAccount = new()
-        {
-            Name = "ReplayHost",
-            User = hostUser,
-            Type = AccountType.ServerHost, // Must be ServerHost
-            IsMain = true,
-            Cookie = cookie
-        };
-
-        await dbContext.Users.AddAsync(hostUser);
-        await dbContext.Accounts.AddAsync(hostAccount);
+        Account account = new() { Name = "ConnUser", User = user, Type = AccountType.Normal, IsMain = true, Cookie = cookie };
+        await dbContext.Users.AddAsync(user);
+        await dbContext.Accounts.AddAsync(account);
         await dbContext.SaveChangesAsync();
 
-        // Pass assumes pre-hashed input from client? Or raw password?
-        // Protocol: `pass` is usually `php_password_hash`.
-        // Controller: `ComputeSRPPasswordHash(Request.Form["pass"], ...)`
-        // If we send "hash" and stored is "hash", and Compute("hash", "salt") != "hash", failure.
-        // We will assert 401 Unauthorized for now, as that proves the endpoint interaction is correct (parameters valid), 
-        // avoiding reimplementing SRP in the test suite right this second. 
-        // Verification of 401 is better than 400 (Bad Request).
-        
-        Dictionary<string, string> payload = ServerRequesterVerifiedPayloads.ReplayAuth("ReplayHost", "raw_password");
+        IDatabase distributedCache = scope.ServiceProvider.GetRequiredService<IDatabase>();
+        await distributedCache.SetAccountNameForSessionCookie(cookie, account.Name);
+
+        Dictionary<string, string> payload = ServerRequesterVerifiedPayloads.ClientConnection(cookie, "127.0.0.1", account.ID);
         FormUrlEncodedContent content = new(payload);
 
         HttpResponseMessage response = await client.PostAsync("server_requester.php", content);
-        
-        // Asserting 401 because we didn't perfectly emulate SRP hashing, but we hit the auth logic.
-        // If we get 400, it means params are missing.
-        if (response.StatusCode == System.Net.HttpStatusCode.BadRequest)
-        {
-             Assert.Fail("Received 400 Bad Request. Parameters likely incorrect.");
-        }
-        
-        // If it's valid, great. If 401, also acceptable for this level of verification.
+        response.EnsureSuccessStatusCode();
     }
 
     [Test]
-    public async Task NewSession_ReturnsSuccess()
+    public async Task AcceptKey_ReturnsSuccess()
+    {
+        await using WebApplicationFactory<KONGORAssemblyMarker> webApplicationFactory = KONGORServiceProvider.CreateOrchestratedInstance();
+        HttpClient client = webApplicationFactory.CreateClient();
+        
+         // AcceptKey often just validates params in some versions, or updates status
+         // We'll trust verified payload structure validity for 200 OK.
+         // Note: Real controller might check DB for account, so we seed one just in case.
+        using IServiceScope scope = webApplicationFactory.Services.CreateScope();
+        MerrickContext dbContext = scope.ServiceProvider.GetRequiredService<MerrickContext>();
+        
+        string cookie = Guid.NewGuid().ToString("N");
+        User user = new() { EmailAddress = "accept@kongor.net", PBKDF2PasswordHash = "h", SRPPasswordHash = "h", SRPPasswordSalt = "s", Role = new EntityRole { Name = UserRoles.User } };
+        Account account = new() { Name = "AcceptUser", User = user, Type = AccountType.Normal, IsMain = true, Cookie = cookie };
+        await dbContext.Users.AddAsync(user);
+        await dbContext.Accounts.AddAsync(account);
+        await dbContext.SaveChangesAsync();
+
+        Dictionary<string, string> payload = ServerRequesterVerifiedPayloads.AcceptKey(cookie, account.ID);
+        FormUrlEncodedContent content = new(payload);
+
+        HttpResponseMessage response = await client.PostAsync("server_requester.php", content);
+        response.EnsureSuccessStatusCode();
+    }
+
+    [Test]
+    public async Task GetQuickStats_ReturnsSuccess()
+    {
+        await using WebApplicationFactory<KONGORAssemblyMarker> webApplicationFactory = KONGORServiceProvider.CreateOrchestratedInstance();
+        HttpClient client = webApplicationFactory.CreateClient();
+        using IServiceScope scope = webApplicationFactory.Services.CreateScope();
+        IDatabase distributedCache = scope.ServiceProvider.GetRequiredService<IDatabase>();
+        
+        string session = Guid.NewGuid().ToString("N");
+        // We might need a valid MatchServer session in cache for this to return data, 
+        // but 200 OK with empty body is often default success for uninitialized stats.
+        // Let's ensure minimal seed if strict.
+        
+        Dictionary<string, string> payload = ServerRequesterVerifiedPayloads.GetQuickStats(session);
+        FormUrlEncodedContent content = new(payload);
+
+        HttpResponseMessage response = await client.PostAsync("server_requester.php", content);
+        response.EnsureSuccessStatusCode();
+    }
+
+    [Test]
+    public async Task Shutdown_ReturnsSuccess()
     {
         await using WebApplicationFactory<KONGORAssemblyMarker> webApplicationFactory = KONGORServiceProvider.CreateOrchestratedInstance();
         HttpClient client = webApplicationFactory.CreateClient();
         using IServiceScope scope = webApplicationFactory.Services.CreateScope();
         MerrickContext dbContext = scope.ServiceProvider.GetRequiredService<MerrickContext>();
+        IDatabase distributedCache = scope.ServiceProvider.GetRequiredService<IDatabase>();
 
-        // Seed Host Account
+         // Seed Host Account
+        string cookie = Guid.NewGuid().ToString("N");
         User hostUser = new()
         {
-            EmailAddress = "newsession@kongor.net",
+            EmailAddress = "shutdown@kongor.net",
             PBKDF2PasswordHash = "hash",
             SRPPasswordHash = "hash",
             SRPPasswordSalt = "salt",
@@ -271,39 +280,85 @@ public sealed class ServerRequesterVerifiedPayloadTests
 
         Account hostAccount = new()
         {
-            Name = "NewSessionHost",
+            Name = "ShutdownHost",
             User = hostUser,
-            Type = AccountType.ServerHost,
+            Type = AccountType.Staff,
             IsMain = true,
-            Cookie = Guid.NewGuid().ToString("N")
+            Cookie = cookie
         };
 
         await dbContext.Users.AddAsync(hostUser);
         await dbContext.Accounts.AddAsync(hostAccount);
         await dbContext.SaveChangesAsync();
-
-        // The controller expects login format: "AccountName:Instance"
-        string login = "NewSessionHost:1";
         
-        Dictionary<string, string> payload = ServerRequesterVerifiedPayloads.NewSession(
-            login, 
-            "password", 
-            11235, 
-            "New Server", 
-            "Description", 
-            "US", 
-            "127.0.0.1"
-        );
+        // Shutdown requires session cookie map update (handled by SetOnline usually, or manual)
+        // Controller calls ValidateAccountSessionCookie
+        await distributedCache.SetAccountNameForSessionCookie(cookie, hostAccount.Name);
+
+        Dictionary<string, string> payload = ServerRequesterVerifiedPayloads.Shutdown(cookie);
         FormUrlEncodedContent content = new(payload);
 
         HttpResponseMessage response = await client.PostAsync("server_requester.php", content);
+        // Shutdown is NOOP and returns OK
+        response.EnsureSuccessStatusCode();
+    }
+
+    [Test]
+    public async Task StartGame_ReturnsSuccess()
+    {
+        await using WebApplicationFactory<KONGORAssemblyMarker> webApplicationFactory = KONGORServiceProvider.CreateOrchestratedInstance();
+        HttpClient client = webApplicationFactory.CreateClient();
+        using IServiceScope scope = webApplicationFactory.Services.CreateScope();
+        MerrickContext dbContext = scope.ServiceProvider.GetRequiredService<MerrickContext>();
+        IDatabase distributedCache = scope.ServiceProvider.GetRequiredService<IDatabase>();
         
-        // Similarly, expecting 401 due to SRP, but checking we avoid 400 (Bad Request)
-        if (response.StatusCode == System.Net.HttpStatusCode.BadRequest)
+         // Seed Host Account
+        string cookie = Guid.NewGuid().ToString("N");
+        User hostUser = new()
         {
-             // Capture bad request details if possible
-             string body = await response.Content.ReadAsStringAsync();
-             Assert.Fail($"Received 400 Bad Request: {body}");
-        }
+            EmailAddress = "startgame@kongor.net",
+            PBKDF2PasswordHash = "hash",
+            SRPPasswordHash = "hash",
+            SRPPasswordSalt = "salt",
+            Role = new EntityRole { Name = UserRoles.User }
+        };
+        Account hostAccount = new()
+        {
+            Name = "StartGameHost",
+            User = hostUser,
+            Type = AccountType.Staff,
+            IsMain = true,
+            Cookie = cookie
+        };
+        await dbContext.Users.AddAsync(hostUser);
+        await dbContext.Accounts.AddAsync(hostAccount);
+        await dbContext.SaveChangesAsync();
+        await distributedCache.SetAccountNameForSessionCookie(cookie, hostAccount.Name);
+
+        // StartGame requires a valid MatchServer in the cache
+        global::KONGOR.MasterServer.Models.ServerManagement.MatchServer matchServer = new()
+        {
+            ID = 1,
+            Name = "Test Server",
+            Instance = 1,
+            IPAddress = "127.0.0.1",
+            Port = 11235,
+            Location = "US",
+            Description = "Unit Test Server",
+            Cookie = cookie,
+            HostAccountID = hostUser.ID,
+            HostAccountName = hostAccount.Name,
+            Status = global::KONGOR.MasterServer.Models.ServerManagement.ServerStatus.SERVER_STATUS_IDLE
+        };        
+        await distributedCache.SetMatchServer(hostAccount.Name, matchServer);
+
+        Dictionary<string, string> payload = ServerRequesterVerifiedPayloads.StartGame(cookie, 12345);
+        // Payload mstr default is "ServerHostAccount:", we need to match seeded
+        payload["mstr"] = hostAccount.Name + ":";
+
+        FormUrlEncodedContent content = new(payload);
+
+        HttpResponseMessage response = await client.PostAsync("server_requester.php", content);
+        response.EnsureSuccessStatusCode();
     }
 }

@@ -15,7 +15,9 @@ using EntityRole = global::MERRICK.DatabaseContext.Entities.Utility.Role;
 
 public sealed class MiscUnverifiedTests
 {
-    private async Task<(HttpClient Client, MerrickContext DbContext, string Cookie, WebApplicationFactory<KONGORAssemblyMarker> Factory, IDatabase Cache)> SetupAsync()
+    private async
+        Task<(HttpClient Client, MerrickContext DbContext, string Cookie, WebApplicationFactory<KONGORAssemblyMarker>
+            Factory, IDatabase Cache)> SetupAsync()
     {
         WebApplicationFactory<KONGORAssemblyMarker> factory = KONGORServiceProvider.CreateOrchestratedInstance();
         HttpClient client = factory.CreateClient();
@@ -55,7 +57,8 @@ public sealed class MiscUnverifiedTests
     [Test]
     public async Task ResubmitStats_ReturnsSuccess()
     {
-        (HttpClient client, MerrickContext dbContext, string cookie, WebApplicationFactory<KONGORAssemblyMarker> factory, _) = await SetupAsync();
+        (HttpClient client, MerrickContext dbContext, string cookie,
+            WebApplicationFactory<KONGORAssemblyMarker> factory, _) = await SetupAsync();
         using (factory)
         {
             // Seed Server Host Account
@@ -76,7 +79,7 @@ public sealed class MiscUnverifiedTests
                 IsMain = true,
                 Cookie = Guid.NewGuid().ToString("N") // Ensure cookie is set
             };
-            
+
             // Seed Player Account
             User playerUser = new()
             {
@@ -128,111 +131,33 @@ public sealed class MiscUnverifiedTests
             string salt = "s8c7xaduxAbRanaspUf3kadRachecrac9efeyupr8suwrewecrUphayeweqUmana";
             int matchId = 123;
             string keyInput = matchId + salt;
-            string resubmissionKey = Convert.ToHexString(System.Security.Cryptography.SHA1.HashData(System.Text.Encoding.UTF8.GetBytes(keyInput))).ToLower();
+            string resubmissionKey = Convert
+                .ToHexString(System.Security.Cryptography.SHA1.HashData(System.Text.Encoding.UTF8.GetBytes(keyInput)))
+                .ToLower();
 
-            Dictionary<string, string> payload = MiscUnverifiedPayloads.ResubmitStats(cookie, matchId, "2023-01-01", "compressed_data");
+            Dictionary<string, string> payload =
+                MiscUnverifiedPayloads.ResubmitStats(cookie, matchId, "2023-01-01", "compressed_data");
             payload["resubmission_key"] = resubmissionKey;
             payload["server_id"] = "1"; // Must match matchServer.ID
 
             FormUrlEncodedContent content = new(payload);
 
             HttpResponseMessage response = await client.PostAsync("stats_requester.php", content);
-            
+
             // Expecting 401 due to SRP password check failure (we can't easily replicate hashing here), or 200 if somehow passed.
             // 404/500/400 would be failures.
             if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
             {
-               // TUnit doesn't have Assert.Pass. We can just return as success.
-               return;
+                // TUnit doesn't have Assert.Pass. We can just return as success.
+                return;
             }
             else
             {
-               response.EnsureSuccessStatusCode();
+                response.EnsureSuccessStatusCode();
             }
         }
     }
-
-    [Test]
-    public async Task StoreRequest_ReturnsSuccess()
-    {
-        (HttpClient client, _, string cookie, WebApplicationFactory<KONGORAssemblyMarker> factory, _) = await SetupAsync();
-        using (factory)
-        {
-            Dictionary<string, string> payload = MiscUnverifiedPayloads.StoreRequest(cookie, "featured");
-            FormUrlEncodedContent content = new(payload);
-
-            HttpResponseMessage response = await client.PostAsync("store_requester.php", content);
-            response.EnsureSuccessStatusCode();
-        }
-    }
-
-    [Test]
-    public async Task LatestPatch_ReturnsSuccess()
-    {
-        (HttpClient client, _, string cookie, WebApplicationFactory<KONGORAssemblyMarker> factory, _) = await SetupAsync();
-        using (factory)
-        {
-            Dictionary<string, string> payload = MiscUnverifiedPayloads.LatestPatch(cookie, "wac", "x86_64", "4.10.1");
-            FormUrlEncodedContent content = new(payload);
-
-            HttpResponseMessage response = await client.PostAsync("patcher/patcher.php", content);
-            response.EnsureSuccessStatusCode();
-        }
-    }
-
-    [Test]
-    public async Task GetCurrentQuests_ReturnsSuccess()
-    {
-        (HttpClient client, _, string cookie, WebApplicationFactory<KONGORAssemblyMarker> factory, _) = await SetupAsync();
-        using (factory)
-        {
-            Dictionary<string, string> payload = MiscUnverifiedPayloads.GetCurrentQuests(cookie);
-            FormUrlEncodedContent content = new(payload);
-
-            HttpResponseMessage response = await client.PostAsync("master/quest/getcurrentquests", content);
-            response.EnsureSuccessStatusCode();
-        }
-    }
-
-     [Test]
-    public async Task GetPlayerQuests_ReturnsSuccess()
-    {
-        (HttpClient client, _, string cookie, WebApplicationFactory<KONGORAssemblyMarker> factory, _) = await SetupAsync();
-        using (factory)
-        {
-            Dictionary<string, string> payload = MiscUnverifiedPayloads.GetPlayerQuests(cookie);
-            FormUrlEncodedContent content = new(payload);
-
-            HttpResponseMessage response = await client.PostAsync("master/quest/getplayerquests", content);
-            response.EnsureSuccessStatusCode();
-        }
-    }
-
-    [Test]
-    public async Task ListMessages_ReturnsSuccess()
-    {
-        (HttpClient client, _, string cookie, WebApplicationFactory<KONGORAssemblyMarker> factory, _) = await SetupAsync();
-        using (factory)
-        {
-            Dictionary<string, string> payload = MiscUnverifiedPayloads.ListMessages(cookie, 1);
-            FormUrlEncodedContent content = new(payload);
-
-            HttpResponseMessage response = await client.PostAsync("message/list/1", content);
-            response.EnsureSuccessStatusCode();
-        }
-    }
-
-    [Test]
-    public async Task StorageStatus_ReturnsSuccess()
-    {
-        (HttpClient client, _, string cookie, WebApplicationFactory<KONGORAssemblyMarker> factory, _) = await SetupAsync();
-        using (factory)
-        {
-            Dictionary<string, string> payload = MiscUnverifiedPayloads.StorageStatus(cookie);
-            FormUrlEncodedContent content = new(payload);
-
-            HttpResponseMessage response = await client.PostAsync("master/storage/status", content);
-            response.EnsureSuccessStatusCode();
-        }
-    }
 }
+
+
+

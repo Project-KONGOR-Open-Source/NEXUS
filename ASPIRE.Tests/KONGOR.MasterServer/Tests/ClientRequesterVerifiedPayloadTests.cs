@@ -270,4 +270,45 @@ public sealed class ClientRequesterVerifiedPayloadTests
              await Assert.That(responseBody).Contains("b:1;"); // Expecting true
         }
     }
+    [Test]
+    public async Task ClaimSeasonRewards_ReturnsSuccess()
+    {
+        (HttpClient client, WebApplicationFactory<KONGORAssemblyMarker> factory) = await SetupAsync();
+        await using (factory)
+        {
+             using IServiceScope scope = factory.Services.CreateScope();
+             IDatabase distributedCache = scope.ServiceProvider.GetRequiredService<IDatabase>();
+             MerrickContext dbContext = scope.ServiceProvider.GetRequiredService<MerrickContext>();
+             
+             string cookie = Guid.NewGuid().ToString("N");
+             await SeedAccountAsync(dbContext, distributedCache, cookie, "SeasonUser");
+
+             Dictionary<string, string> payload = ClientRequesterVerifiedPayloads.ClaimSeasonRewards(cookie);
+             FormUrlEncodedContent content = new(payload);
+             HttpResponseMessage response = await client.PostAsync("client_requester.php", content);
+
+             response.EnsureSuccessStatusCode();
+        }
+    }
+
+    [Test]
+    public async Task ServerList_ReturnsSuccess()
+    {
+        (HttpClient client, WebApplicationFactory<KONGORAssemblyMarker> factory) = await SetupAsync();
+        await using (factory)
+        {
+             using IServiceScope scope = factory.Services.CreateScope();
+             IDatabase distributedCache = scope.ServiceProvider.GetRequiredService<IDatabase>();
+             MerrickContext dbContext = scope.ServiceProvider.GetRequiredService<MerrickContext>();
+             
+             string cookie = Guid.NewGuid().ToString("N");
+             await SeedAccountAsync(dbContext, distributedCache, cookie, "ListUser");
+
+             Dictionary<string, string> payload = ClientRequesterVerifiedPayloads.ServerList(cookie);
+             FormUrlEncodedContent content = new(payload);
+             HttpResponseMessage response = await client.PostAsync("client_requester.php", content);
+
+             response.EnsureSuccessStatusCode();
+        }
+    }
 }

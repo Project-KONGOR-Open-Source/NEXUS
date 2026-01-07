@@ -40,26 +40,54 @@ public static class ServerRequesterVerifiedPayloads
         };
     }
 
-    public static Dictionary<string, string> NewSession(
-        string login, 
-        string password, 
-        int port, 
-        string name, 
-        string desc, 
-        string location, 
-        string ip
-    )
+    public static Dictionary<string, string> NewSession(string login, string password, int port, string name, string description, string location, string ip)
     {
         return new Dictionary<string, string>
         {
             { "f", "new_session" },
-            { "login", login }, // Expected format: "AccountName:Instance"
-            { "pass", password },
+            { "login", login },
+            { "pass", password }, // Note: In reality this is HASHED
             { "port", port.ToString() },
             { "name", name },
-            { "desc", desc },
+            { "desc", description },
             { "location", location },
-            { "ip", ip }
+            { "ip", ip },
+            { "version", "4.10.1.0" }, // standard version
+            { "max_players", "10" }
+        };
+    }
+
+    public static Dictionary<string, string> ClientConnection(string cookie, string ip, int accountId)
+    {
+        return new Dictionary<string, string>
+        {
+            { "f", "c_conn" },
+            { "cookie", cookie },
+            { "session", "dummy_server_session" }, // Required by HandleConnectClient
+            { "ip", ip },
+            { "cas", "0" }, // Required parameter
+            { "new", "1" }, // Required parameter (ArrangedMatchType + 1)
+            { "account_id", accountId.ToString() }
+        };
+    }
+
+    public static Dictionary<string, string> AcceptKey(string cookie, int accountId)
+    {
+         return new Dictionary<string, string>
+        {
+            { "f", "accept_key" },
+            { "session", cookie }, // HandleAcceptKey expects 'session', not 'cookie'
+            { "acc_key", "test_key" }, // Required
+            { "account_id", accountId.ToString() }
+        };
+    }
+
+    public static Dictionary<string, string> GetQuickStats(string session)
+    {
+        return new Dictionary<string, string>
+        {
+            { "f", "get_quickstats" },
+            { "session", session } // server session cookie
         };
     }
 
@@ -134,10 +162,35 @@ public static class ServerRequesterVerifiedPayloads
             return new Dictionary<string, object> { { "match_id", matchId } };
         }
 
-         public static Dictionary<string, object> GameEnded()
+        public static Dictionary<string, object> GameEnded()
         {
             // Returns bool true on success
             return new Dictionary<string, object> { { "0", true } };
         }
+    }
+
+    public static Dictionary<string, string> Shutdown(string cookie)
+    {
+        return new Dictionary<string, string>
+        {
+            { "f", "shutdown" },
+            { "session", cookie }
+        };
+    }
+
+    public static Dictionary<string, string> StartGame(string cookie, int matchId, string mname = "Test Game")
+    {
+        return new Dictionary<string, string>
+        {
+            { "f", "start_game" },
+            { "session", cookie },
+            { "map", "caldavar" },
+            { "version", "4.10.1.0" },
+            { "mname", mname },
+            { "mstr", "ServerHostAccount:" }, // Controller appends this
+            { "casual", "0" },
+            { "arrangedmatchtype", "0" },
+            { "match_mode", "1" }
+        };
     }
 }
