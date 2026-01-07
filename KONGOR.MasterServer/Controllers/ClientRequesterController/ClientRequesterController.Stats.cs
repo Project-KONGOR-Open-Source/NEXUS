@@ -165,7 +165,10 @@ public partial class ClientRequesterController
                 .SingleOrDefaultAsync(a => a.Name.Equals(accountName));
         }
 
-        MatchStartData? matchStartData = await DistributedCache.GetMatchStartData(matchStatistics.ID);
+        Account? account = await MerrickContext.Accounts
+            .Include(account => account.User)
+            .Include(account => account.Clan)
+            .SingleOrDefaultAsync(account => account.Name.Equals(accountName));
 
         // Robustness: If MatchStartData is missing (expired cache), reconstruct from MatchStatistics
         matchStartData ??= new MatchStartData
