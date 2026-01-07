@@ -56,4 +56,38 @@ public sealed class MiscVerifiedPayloadTests
             response.EnsureSuccessStatusCode();
         }
     }
+
+    [Test]
+    public async Task MessageList_ReturnsSuccess()
+    {
+        (HttpClient client, WebApplicationFactory<KONGORAssemblyMarker> factory) = await SetupAsync();
+        await using (factory)
+        {
+            HttpResponseMessage response = await client.PostAsync("message/list/59", null);
+            response.EnsureSuccessStatusCode();
+        }
+    }
+
+    [Test]
+    public async Task StorageStatus_ReturnsSuccess()
+    {
+        (HttpClient client, WebApplicationFactory<KONGORAssemblyMarker> factory) = await SetupAsync();
+        await using (factory)
+        {
+            using IServiceScope scope = factory.Services.CreateScope();
+            IDatabase distributedCache = scope.ServiceProvider.GetRequiredService<IDatabase>();
+
+            string cookie = "storage_cookie";
+            await distributedCache.SetAccountNameForSessionCookie(cookie, "StorageUser");
+
+            Dictionary<string, string> payload = new Dictionary<string, string>
+            {
+                { "cookie", cookie }
+            };
+            FormUrlEncodedContent content = new(payload);
+
+            HttpResponseMessage response = await client.PostAsync("master/storage/status", content);
+            response.EnsureSuccessStatusCode();
+        }
+    }
 }

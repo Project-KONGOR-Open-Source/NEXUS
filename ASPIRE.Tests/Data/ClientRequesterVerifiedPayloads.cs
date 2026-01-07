@@ -177,6 +177,93 @@ public static class ClientRequesterVerifiedPayloads
         };
     }
 
+    public static Dictionary<string, string> PreAuth(string login)
+    {
+        return new Dictionary<string, string>
+        {
+            { "f", "pre_auth" },
+            { "login", login },
+            { "A", "0000000000000000000000000000000000000000" }, 
+            { "SysInfo", "Matches|UserAgent" } 
+        };
+    }
+
+    public static Dictionary<string, string> SrpAuth(string login, string proof)
+    {
+        return new Dictionary<string, string>
+        {
+            { "f", "srpAuth" },
+            { "login", login },
+            { "proof", proof },
+            { "OSType", "wa" },
+            { "MajorVersion", "4" },
+            { "MinorVersion", "10" },
+            { "MicroVersion", "1" },
+            { "SysInfo", "hash|hash|hash|hash|hash" } 
+        };
+    }
+
+    public static Dictionary<string, string> GetSpecialMessages(string cookie)
+    {
+        return new Dictionary<string, string>
+        {
+            { "f", "get_special_messages" },
+            { "cookie", cookie }
+        };
+    }
+
+    public static Dictionary<string, string> ClientEventsInfo(string cookie)
+    {
+        return new Dictionary<string, string>
+        {
+            { "f", "client_events_info" },
+            { "cookie", cookie }
+        };
+    }
+    
+    public static Dictionary<string, string> ShowSimpleStats(string cookie, string nickname)
+    {
+        return new Dictionary<string, string>
+        {
+            { "f", "show_simple_stats" },
+            { "cookie", cookie },
+            { "nickname", nickname },
+            { "table", "mastery" } 
+        };
+    }
+
+    public static Dictionary<string, string> GetAccountAllHeroStats(string cookie)
+    {
+        return new Dictionary<string, string>
+        {
+            { "f", "get_account_all_hero_stats" },
+            { "cookie", cookie }
+        };
+    }
+
+    public static Dictionary<string, string> CreateGame(string cookie, string name = "Test Game", string map = "caldavar", string mode = "ap")
+    {
+        return new Dictionary<string, string>
+        {
+            { "f", "create_game" },
+            { "cookie", cookie },
+            { "name", name },
+            { "map", map },
+            { "mode", mode },
+            { "team_size", "5" },
+            { "private", "0" }
+        };
+    }
+
+    public static Dictionary<string, string> NewGameAvailable(string cookie)
+    {
+        return new Dictionary<string, string>
+        {
+            { "f", "new_game_available" },
+            { "cookie", cookie }
+        };
+    }
+
     public static class ExpectedResponses
     {
         public static Dictionary<string, object> GetInitStats(

@@ -26,7 +26,8 @@ public partial class ClientRequesterController(MerrickContext databaseContext, I
     [HttpPost(Name = "Client Requester All-In-One")]
     public async Task<IActionResult> ClientRequester()
     {
-        bool endpointRequiresCookieValidation = Request.Query["f"].FirstOrDefault() is not "auth" and not "pre_auth" and not "srpAuth";
+        string? functionName = Request.Query["f"].FirstOrDefault() ?? Request.Form["f"].FirstOrDefault();
+        bool endpointRequiresCookieValidation = functionName is not "auth" and not "pre_auth" and not "srpAuth";
         (bool accountSessionCookieIsValid, string? sessionAccountName) = await DistributedCache.ValidateAccountSessionCookie((Request.Form["cookie"].ToString() ?? "NULL").Replace("-", ""));
 
         if (endpointRequiresCookieValidation.Equals(true) && accountSessionCookieIsValid.Equals(false))
@@ -59,13 +60,13 @@ public partial class ClientRequesterController(MerrickContext databaseContext, I
         if (endpointRequiresCookieValidation.Equals(false) && accountSessionCookieIsValid.Equals(true))
             Logger.LogError("[BUG] Endpoint Does Not Require Cookie Validation But A Valid Cookie Was Found");
 
-        return await HandleClientRequest();
+        return await HandleClientRequest(functionName);
     }
 
-    private async Task<IActionResult> HandleClientRequest()
+    private async Task<IActionResult> HandleClientRequest(string? functionName)
     {
         // 2026-01-05: Unified Query/Form coalescing pattern for functional routing parity.
-        string? functionName = Request.Query["f"].FirstOrDefault() ?? Request.Form["f"].FirstOrDefault();
+        // string? functionName = Request.Query["f"].FirstOrDefault() ?? Request.Form["f"].FirstOrDefault();
 
         return functionName switch
         {
