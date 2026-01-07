@@ -155,18 +155,16 @@ public partial class ClientRequesterController
         string? accountName = HttpContext.Items["SessionAccountName"] as string 
                               ?? await DistributedCache.GetAccountNameForSessionCookie(cookie);
 
-        if (accountName is null)
+        Account? account = null;
+
+        if (accountName is not null)
         {
-            Logger.LogError("Match Stats Request Failed: Session Not Found For Cookie {Cookie}", cookie);
-            return new NotFoundObjectResult("Session Not Found");
+            account = await MerrickContext.Accounts.Include(account => account.User).FirstOrDefaultAsync(account => account.Name.Equals(accountName));
         }
 
-        Account? account = await MerrickContext.Accounts.Include(account => account.User).FirstOrDefaultAsync(account => account.Name.Equals(accountName));
-
-        if (account is null)
+        if (account is null && accountName is not null)
         {
-            Logger.LogError("Match Stats Request Failed: Account Not Found For Name {AccountName}", accountName);
-            return new NotFoundObjectResult("Account Not Found");
+            Logger.LogWarning("Match Stats Request: Session Name {AccountName} Found But Account Not In DB. Treating As Anonymous.", accountName);
         }
 
         // Calculate winning team (1=Legion, 2=Hellbourne)
@@ -286,7 +284,11 @@ public partial class ClientRequesterController
         }).ToList();
         
         // Match Mastery
-        PlayerStatistics? requesterStats = playerStatistics.FirstOrDefault(stats => stats.AccountID == account.ID);
+        PlayerStatistics? requesterStats = null;
+        if (account is not null)
+        {
+            requesterStats = playerStatistics.FirstOrDefault(stats => stats.AccountID == account.ID);
+        }
         MatchMastery? matchMastery = null;
 
         if (requesterStats != null)
@@ -330,7 +332,15 @@ public partial class ClientRequesterController
         Dictionary<string, object> response = new();
         
         // Ordered Response for Game Client
-        response["selected_upgrades"] = account.SelectedStoreItems.ToArray();
+        if (account is not null)
+        {
+            response["selected_upgrades"] = account.SelectedStoreItems.ToArray();
+        }
+        else
+        {
+            Logger.LogInformation("Returning Anonymous Match Stats (No Selected Upgrades)");
+            response["selected_upgrades"] = Array.Empty<string>();
+        }
         response["match_summ"] = new Dictionary<int, object> { { matchID, matchSummary } };
         response["match_player_stats"] = new Dictionary<int, object> { { matchID, mappedPlayerStats } };
         
