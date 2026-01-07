@@ -31,7 +31,8 @@ public partial class StatsRequesterController(MerrickContext databaseContext, ID
     [HttpPost(Name = "Stats Requester All-In-One")]
     public async Task<IActionResult> StatsRequester([FromForm] StatsForSubmissionRequestForm form)
     {
-        return Request.Form["f"].FirstOrDefault() switch
+        // 2026-01-07: Normalize to lowercase for case-insensitive handling (PHP parity).
+        return Request.Form["f"].FirstOrDefault()?.ToLower() switch
         {
             "submit_stats"      => await HandleStatsSubmission(form),
             "resubmit_stats"    => await HandleStatsResubmission(form),

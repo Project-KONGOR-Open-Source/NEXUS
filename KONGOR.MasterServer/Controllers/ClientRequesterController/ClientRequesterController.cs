@@ -26,8 +26,10 @@ public partial class ClientRequesterController(MerrickContext databaseContext, I
     [HttpPost(Name = "Client Requester All-In-One")]
     public async Task<IActionResult> ClientRequester()
     {
-        string? functionName = Request.Query["f"].FirstOrDefault() ?? Request.Form["f"].FirstOrDefault();
-        bool endpointRequiresCookieValidation = functionName is not "auth" and not "pre_auth" and not "srpAuth" and not "get_match_stats";
+        // 2026-01-07: Normalize to lowercase for case-insensitive handling (PHP parity).
+        string? functionName = (Request.Query["f"].FirstOrDefault() ?? Request.Form["f"].FirstOrDefault())?.ToLower();
+        
+        bool endpointRequiresCookieValidation = functionName is not "auth" and not "pre_auth" and not "srpauth" and not "get_match_stats";
         (bool accountSessionCookieIsValid, string? sessionAccountName) = await DistributedCache.ValidateAccountSessionCookie((Request.Form["cookie"].ToString() ?? "NULL").Replace("-", ""));
 
         if (endpointRequiresCookieValidation.Equals(true) && accountSessionCookieIsValid.Equals(false))
@@ -73,7 +75,7 @@ public partial class ClientRequesterController(MerrickContext databaseContext, I
             // authentication
             "auth"                          => await HandleAuthentication(),
             "pre_auth"                      => await HandlePreAuthentication(),
-            "srpAuth"                       => await HandleSRPAuthentication(),
+            "srpauth"                       => await HandleSRPAuthentication(),
             "aids2cookie"                   => await HandleAids2Cookie(),
             "logout"                        => await HandleLogout(),
 
@@ -94,7 +96,7 @@ public partial class ClientRequesterController(MerrickContext databaseContext, I
             // stats
             "show_simple_stats"             => await GetSimpleStats(),
             "show_stats"                    => await GetSimpleStats(),
-            "get_initStats"                 => await HandleInitStats(),
+            "get_initstats"                 => await HandleInitStats(),
             "get_account_all_hero_stats"    => await HandleGetAccountAllHeroStats(),
             "get_account_mastery"           => await HandleGetAccountMastery(),
             "get_match_stats"               => await HandleMatchStats(),

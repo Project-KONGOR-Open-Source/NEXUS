@@ -17,7 +17,8 @@ public partial class ServerRequesterController(MerrickContext databaseContext, I
     private async Task<IActionResult> HandleServerRequest()
     {
         // Unified Query/Form coalescing pattern for functional routing parity.
-        string? functionName = Request.Query["f"].FirstOrDefault() ?? Request.Form["f"].FirstOrDefault();
+        // 2026-01-07: Normalize to lowercase for case-insensitive handling (PHP parity).
+        string? functionName = (Request.Query["f"].FirstOrDefault() ?? Request.Form["f"].FirstOrDefault())?.ToLower();
 
         return functionName switch
         {
