@@ -361,4 +361,50 @@ public sealed class ServerRequesterVerifiedPayloadTests
         HttpResponseMessage response = await client.PostAsync("server_requester.php", content);
         response.EnsureSuccessStatusCode();
     }
+
+    [Test]
+    public async Task Aids2Cookie_WithValidCookie_ReturnsSuccess()
+    {
+        await using WebApplicationFactory<KONGORAssemblyMarker> webApplicationFactory = KONGORServiceProvider.CreateOrchestratedInstance();
+        HttpClient client = webApplicationFactory.CreateClient();
+        using IServiceScope scope = webApplicationFactory.Services.CreateScope();
+        MerrickContext dbContext = scope.ServiceProvider.GetRequiredService<MerrickContext>();
+        IDatabase distributedCache = scope.ServiceProvider.GetRequiredService<IDatabase>();
+        
+         // Seed Account with Cookie in DB (Simulate Login)
+        string cookie = Guid.NewGuid().ToString("N");
+        User user = new()
+        {
+            EmailAddress = "aids@kongor.net",
+            PBKDF2PasswordHash = "hash",
+            SRPPasswordHash = "hash",
+            SRPPasswordSalt = "salt",
+            Role = new EntityRole { Name = UserRoles.User }
+        };
+        Account account = new()
+        {
+            Name = "AidsUser",
+            User = user,
+            Type = AccountType.Normal,
+            IsMain = true,
+            Cookie = cookie // Stored as "N" format (no hyphens)
+        };
+        await dbContext.Users.AddAsync(user);
+        await dbContext.Accounts.AddAsync(account);
+        await dbContext.SaveChangesAsync();
+        
+        // Simulating Cache Miss (so it hits the DB fallback)
+        // await distributedCache.SetAccountNameForSessionCookie(cookie, account.Name); // Intentionally Skipped
+
+        Dictionary<string, string> payload = ServerRequesterVerifiedPayloads.Aids2Cookie(cookie);
+        FormUrlEncodedContent content = new(payload);
+
+        HttpResponseMessage response = await client.PostAsync("server_requester.php", content);
+        
+        response.EnsureSuccessStatusCode();
+        string body = await response.Content.ReadAsStringAsync();
+        
+        // The endpoint returns serialized integer ID: e.g. "i:1;"
+        await Assert.That(body).Contains($"i:{account.ID};");
+    }
 }

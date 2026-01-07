@@ -82,6 +82,15 @@ public static class ServerRequesterVerifiedPayloads
         };
     }
 
+    public static Dictionary<string, string> Aids2Cookie(string cookie)
+    {
+        return new Dictionary<string, string>
+        {
+            { "f", "aids2cookie" },
+            { "cookie", cookie }
+        };
+    }
+
     public static Dictionary<string, string> GetQuickStats(string session)
     {
         return new Dictionary<string, string>
