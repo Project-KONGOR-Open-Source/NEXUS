@@ -156,32 +156,109 @@ public partial class ClientRequesterController
         string? accountName = HttpContext.Items["SessionAccountName"] as string
                               ?? await DistributedCache.GetAccountNameForSessionCookie(cookie);
 
-        if (accountName is null)
-            return new NotFoundObjectResult("Session Not Found");
-
-        Account? account = await MerrickContext.Accounts.SingleOrDefaultAsync(account => account.Name.Equals(accountName));
-
-        if (account is null)
-            return new NotFoundObjectResult("Account Not Found");
+        // Allow anonymous access; fetch account only if session exists
+        Account? account = null;
+        if (accountName is not null)
+        {
+            account = await MerrickContext.Accounts
+                .Include(a => a.User)
+                .SingleOrDefaultAsync(a => a.Name.Equals(accountName));
+        }
 
         MatchStartData? matchStartData = await DistributedCache.GetMatchStartData(matchStatistics.ID);
 
-        if (matchStartData is null)
-            return new NotFoundObjectResult("Match Start Data Not Found");
+        // Robustness: If MatchStartData is missing (expired cache), reconstruct from MatchStatistics
+        matchStartData ??= new MatchStartData
+        {
+            MatchID = matchStatistics.MatchID,
+            ServerID = matchStatistics.ServerID,
+            MatchName = matchStatistics.FileName, // FIX: Use FileName as fallback for Name
+            HostAccountName = matchStatistics.HostAccountName,
+            Map = matchStatistics.Map,
+            MatchMode = matchStatistics.GameMode,
+            Version = matchStatistics.Version,
+            IsCasual = matchStatistics.GameMode == "casual", // Approximation
+            MatchType = (byte)(matchStatistics.GameMode.Contains("rank") ? 1 : 0), // FIX: Infer from GameMode
+            Options = MatchOptions.None, // Data loss, but allows viewing stats
+            ServerName = "Unknown"
+        };
 
         MatchSummary matchSummary = new(matchStatistics, allPlayerStatistics, matchStartData);
 
-        PlayerStatistics playerStatistics = allPlayerStatistics.Single(statistics => statistics.AccountID == account.ID);
+        // Populate stats for ALL players
+        Dictionary<int, MatchPlayerStatistics> matchPlayerStatistics = [];
+        Dictionary<int, MatchPlayerInventory> matchPlayerInventories = [];
+
+        // Pre-create a dummy Role for the dummy User
+        MERRICK.DatabaseContext.Entities.Utility.Role dummyRole = new() { ID = 1, Name = "User" }; 
+
+        foreach (PlayerStatistics stats in allPlayerStatistics)
+        {
+            // Create a lightweight Account object from stored stats to avoid N+1 queries
+            Account playerAccount = new()
+            {
+                ID = stats.AccountID,
+                Name = stats.AccountName,
+                IsMain = true, // FIX: Required field
+                User = new User // FIX: Required field
+                {
+                    ID = stats.AccountID,
+                    EmailAddress = "dummy@kongor.net", // Required
+                    Role = dummyRole, // Required
+                    SRPPasswordHash = "", // Required
+                    SRPPasswordSalt = "" // Required
+                },
+                Clan = stats.ClanID.HasValue ? new Clan 
+                { 
+                    ID = stats.ClanID.Value, 
+                    Tag = stats.ClanTag ?? "",
+                    Name = stats.ClanTag ?? "" // FIX: Required field
+                } : null 
+            };
+        
+            matchPlayerStatistics[stats.AccountID] = new MatchPlayerStatistics(playerAccount, stats);
+            
+            matchPlayerInventories[stats.AccountID] = new MatchPlayerInventory 
+            { 
+                 AccountID = stats.AccountID, 
+                 MatchID = matchStatistics.ID,
+                 Slot1 = "", Slot2 = "", Slot3 = "", Slot4 = "", Slot5 = "", Slot6 = "" // TODO: Populate from Inventory History/Events if available
+            };
+        }
 
         MatchStatsResponse response = new()
         {
-            GoldCoins = account.User.GoldCoins.ToString(),
-            SilverCoins = account.User.SilverCoins.ToString(),
+            GoldCoins = account?.User.GoldCoins.ToString() ?? "0",
+            SilverCoins = account?.User.SilverCoins.ToString() ?? "0",
             MatchSummary = [matchSummary],
-            MatchPlayerStatistics = new(account, playerStatistics)
+            MatchPlayerStatistics = matchPlayerStatistics,
+            MatchPlayerInventories = matchPlayerInventories,
+            MatchMastery = new MatchMastery
+            {
+                HeroIdentifier = "Hero_Legionnaire", // TODO: Get from Match Stats (Requester's Hero?)
+                CurrentMasteryExperience = 0,
+                MatchMasteryExperience = 0,
+                MasteryExperienceBonus = 0,
+                MasteryExperienceBoost = 0,
+                MasteryExperienceSuperBoost = 0,
+                MasteryExperienceMaximumLevelHeroesCount = 0,
+                MasteryExperienceHeroesBonus = 0,
+                MasteryExperienceToBoost = 0,
+                MasteryExperienceEventBonus = 0,
+                MasteryExperienceCanBoost = true,
+                MasteryExperienceCanSuperBoost = true,
+                MasteryExperienceBoostProductIdentifier = 3609,
+                MasteryExperienceSuperBoostProductIdentifier = 4605,
+                MasteryExperienceBoostProductCount = 0,
+                MasteryExperienceSuperBoostProductCount = 0
+            },
+            OwnedStoreItems = account?.User.OwnedStoreItems ?? [],
+            SelectedStoreItems = account?.SelectedStoreItems ?? [],
+            CustomIconSlotID = account != null ? SetCustomIconSlotID(account) : "0",
+            CampaignReward = new CampaignReward()
         };
 
-        throw new NotImplementedException(); // TODO: Implement Match Stats Response
+        return Ok(PhpSerialization.Serialize(response));
     }
 
     private static string SetCustomIconSlotID(Account account)
