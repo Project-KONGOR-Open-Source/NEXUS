@@ -13,14 +13,54 @@ public static class ServerRequesterVerifiedPayloads
         // Heartbeat is effectively a set_online call without 'new' flag
         // and updating connection state.
         return SetOnline(
-            cookie: cookie, 
+            cookie: cookie,
             matchId: 0, // Not strictly used in handler but good for compat
             isNew: false,
             c_state: "SERVER_STATUS_ACTIVE",
             prev_c_state: "SERVER_STATUS_ACTIVE",
             num_conn: 0,
-            cgt: 60000 // 1 minute in
-        );
+            cgt: 60000); // 1 minute in
+    }
+
+    public static Dictionary<string, string> ReplayAuth(string login, string password)
+    {
+        return new Dictionary<string, string>
+        {
+            { "f", "replay_auth" },
+            { "login", login },
+            { "pass", password }
+        };
+    }
+
+    public static Dictionary<string, string> GetSpectatorHeader()
+    {
+         return new Dictionary<string, string>
+        {
+            { "f", "get_spectator_header" }
+        };
+    }
+
+    public static Dictionary<string, string> NewSession(
+        string login, 
+        string password, 
+        int port, 
+        string name, 
+        string desc, 
+        string location, 
+        string ip
+    )
+    {
+        return new Dictionary<string, string>
+        {
+            { "f", "new_session" },
+            { "login", login }, // Expected format: "AccountName:Instance"
+            { "pass", password },
+            { "port", port.ToString() },
+            { "name", name },
+            { "desc", desc },
+            { "location", location },
+            { "ip", ip }
+        };
     }
 
     public static Dictionary<string, string> SetOnline(
