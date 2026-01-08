@@ -46,7 +46,7 @@ public partial class ClientRequesterController
             ["game_tokens"] = account.User.PlinkoTickets,
             ["standing"] = 3,
             ["my_upgrades"] = account.User.OwnedStoreItems.Distinct().ToDictionary(item => item, _ => true),
-            ["selected_upgrades"] = (account.SelectedStoreItems ?? new List<string>()),
+            ["selected_upgrades"] = (account.SelectedStoreItems ?? new List<string>()).ToDictionary(x => x, _ => true),
             ["0"] = true
         };
 
