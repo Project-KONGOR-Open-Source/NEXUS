@@ -325,6 +325,46 @@ public static class ClientRequestPayloads
             {
                  return new Dictionary<string, object> { }; // Usually empty or specific success structure? Reference Check likely needed, assuming HTTP 200 OK.
             }
+
+            public static Dictionary<string, object> GetUpgrades()
+            {
+                return new Dictionary<string, object>
+                {
+                    { "selected_upgrades", new List<string>() },
+                    { "my_upgrades", new List<string>() },
+                    { "my_upgrades_info", new Dictionary<string, object>() },
+                    { "0", true }
+                };
+            }
+
+            public static Dictionary<string, object> GetMatchStats(int matchId)
+            {
+                return new Dictionary<string, object>
+                {
+                    { "points", "1000" },
+                    { "mmpoints", "500" },
+                    { "match_summ", new List<object> 
+                        { 
+                            new Dictionary<string, object> 
+                            {
+                                { "match_id", matchId },
+                                { "map", "caldavar" },
+                                { "name", "Test Game" },
+                                { "c_state", "0" },
+                                { "time_played", "1800" }
+                            } 
+                        } 
+                    },
+                    { "match_player_stats", new List<object>() },
+                    { "inventory", new List<object>() },
+                    { "my_upgrades", new List<string>() },
+                    { "selected_upgrades", new List<string>() },
+                    { "dice_tokens", 100 },
+                    { "game_tokens", 100 },
+                    { "vested_threshold", 5 },
+                    { "0", true }
+                };
+            }
         }
     }
 

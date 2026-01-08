@@ -403,6 +403,45 @@ public sealed class ClientRequesterVerifiedPayloadTests
              HttpResponseMessage response = await client.PostAsync("client_requester.php", content);
 
              response.EnsureSuccessStatusCode();
+             // Verify Response Keys matches Expected Response
+             Dictionary<string, object> expected = ClientRequestPayloads.Verified.ExpectedResponses.GetMatchStats(12345);
+             string responseBody = await response.Content.ReadAsStringAsync();
+             
+             foreach(string key in expected.Keys)
+             {
+                 if (key == "0") continue; // Skip status code check for string contains
+                 await Assert.That(responseBody).Contains(key);
+             }
+        }
+    }
+
+    [Test]
+    public async Task GetUpgrades_ReturnsSuccess()
+    {
+        (HttpClient client, WebApplicationFactory<KONGORAssemblyMarker> factory) = await SetupAsync();
+        await using (factory)
+        {
+             using IServiceScope scope = factory.Services.CreateScope();
+             IDatabase distributedCache = scope.ServiceProvider.GetRequiredService<IDatabase>();
+             MerrickContext dbContext = scope.ServiceProvider.GetRequiredService<MerrickContext>();
+             
+             string cookie = Guid.NewGuid().ToString("N");
+             await SeedAccountAsync(dbContext, distributedCache, cookie, "UpgradeUser");
+
+             Dictionary<string, string> payload = ClientRequestPayloads.Verified.GetUpgrades(cookie);
+             FormUrlEncodedContent content = new(payload);
+             HttpResponseMessage response = await client.PostAsync("client_requester.php", content);
+
+             response.EnsureSuccessStatusCode();
+             
+             Dictionary<string, object> expected = ClientRequestPayloads.Verified.ExpectedResponses.GetUpgrades();
+             string responseBody = await response.Content.ReadAsStringAsync();
+
+             foreach(string key in expected.Keys)
+             {
+                 if (key == "0") continue; 
+                 await Assert.That(responseBody).Contains(key);
+             }
         }
     }
 }
