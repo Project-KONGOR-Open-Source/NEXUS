@@ -54,7 +54,7 @@ public sealed class ClientRequesterUnverifiedTests
         using (factory)
         {
             // Note: Auth typically requires real credentials, this payload is unverified/placeholder
-            Dictionary<string, string> payload = ClientRequesterUnverifiedPayloads.Auth("login", "password");
+            Dictionary<string, string> payload = ClientRequestPayloads.Unverified.Auth("login", "password");
             FormUrlEncodedContent content = new(payload);
 
             HttpResponseMessage response = await client.PostAsync("client_requester.php?f=auth", content);
@@ -72,7 +72,7 @@ public sealed class ClientRequesterUnverifiedTests
         (HttpClient client, _, string cookie, WebApplicationFactory<KONGORAssemblyMarker> factory) = await SetupAsync();
         using (factory)
         {
-            Dictionary<string, string> payload = ClientRequesterUnverifiedPayloads.GetServerList(cookie);
+            Dictionary<string, string> payload = ClientRequestPayloads.Unverified.GetServerList(cookie);
             FormUrlEncodedContent content = new(payload);
 
             HttpResponseMessage response = await client.PostAsync("client_requester.php", content);
@@ -86,7 +86,7 @@ public sealed class ClientRequesterUnverifiedTests
         (HttpClient client, _, string cookie, WebApplicationFactory<KONGORAssemblyMarker> factory) = await SetupAsync();
         using (factory)
         {
-            Dictionary<string, string> payload = ClientRequesterUnverifiedPayloads.GetAllHeroes(cookie);
+            Dictionary<string, string> payload = ClientRequestPayloads.Unverified.GetAllHeroes(cookie);
             FormUrlEncodedContent content = new(payload);
 
             HttpResponseMessage response = await client.PostAsync("client_requester.php", content);
@@ -100,7 +100,7 @@ public sealed class ClientRequesterUnverifiedTests
         (HttpClient client, _, string cookie, WebApplicationFactory<KONGORAssemblyMarker> factory) = await SetupAsync();
         using (factory)
         {
-            Dictionary<string, string> payload = ClientRequesterUnverifiedPayloads.CreateGame(cookie, "TestGame");
+            Dictionary<string, string> payload = ClientRequestPayloads.Unverified.CreateGame(cookie, "TestGame");
             FormUrlEncodedContent content = new(payload);
 
             HttpResponseMessage response = await client.PostAsync("client_requester.php", content);
@@ -119,7 +119,7 @@ public sealed class ClientRequesterUnverifiedTests
             // SetupAsync creates a random name, so we must retrieve it.
             Account account = await dbContext.Accounts.FirstAsync(a => a.Cookie == cookie);
 
-            Dictionary<string, string> payload = ClientRequesterUnverifiedPayloads.ShowSimpleStats(cookie, account.Name);
+            Dictionary<string, string> payload = ClientRequestPayloads.Unverified.ShowSimpleStats(cookie, account.Name);
             FormUrlEncodedContent content = new(payload);
 
             HttpResponseMessage response = await client.PostAsync("client_requester.php", content);
@@ -133,7 +133,7 @@ public sealed class ClientRequesterUnverifiedTests
         (HttpClient client, _, string cookie, WebApplicationFactory<KONGORAssemblyMarker> factory) = await SetupAsync();
         using (factory)
         {
-            Dictionary<string, string> payload = ClientRequesterUnverifiedPayloads.ClientEventsInfo(cookie);
+            Dictionary<string, string> payload = ClientRequestPayloads.Unverified.ClientEventsInfo(cookie);
             FormUrlEncodedContent content = new(payload);
 
             HttpResponseMessage response = await client.PostAsync("client_requester.php", content);
@@ -147,7 +147,7 @@ public sealed class ClientRequesterUnverifiedTests
         (HttpClient client, _, string cookie, WebApplicationFactory<KONGORAssemblyMarker> factory) = await SetupAsync();
         using (factory)
         {
-            Dictionary<string, string> payload = ClientRequesterUnverifiedPayloads.GetSpecialMessages(cookie);
+            Dictionary<string, string> payload = ClientRequestPayloads.Unverified.GetSpecialMessages(cookie);
             FormUrlEncodedContent content = new(payload);
 
             HttpResponseMessage response = await client.PostAsync("client_requester.php", content);
@@ -163,7 +163,7 @@ public sealed class ClientRequesterUnverifiedTests
         {
             // This test verifies that "get_init_stats" (snake_case) fails as expected,
             // proving the controller requires "get_initStats" (camelCase).
-            Dictionary<string, string> payload = ClientRequesterUnverifiedPayloads.GetInitStats(cookie);
+            Dictionary<string, string> payload = ClientRequestPayloads.Unverified.GetInitStats(cookie);
             FormUrlEncodedContent content = new(payload);
 
             HttpResponseMessage response = await client.PostAsync("client_requester.php", content);
@@ -181,7 +181,7 @@ public sealed class ClientRequesterUnverifiedTests
         (HttpClient client, _, string cookie, WebApplicationFactory<KONGORAssemblyMarker> factory) = await SetupAsync();
         using (factory)
         {
-            Dictionary<string, string> payload = ClientRequesterUnverifiedPayloads.GrabServerList(cookie);
+            Dictionary<string, string> payload = ClientRequestPayloads.Unverified.GrabServerList(cookie);
             FormUrlEncodedContent content = new(payload);
 
             HttpResponseMessage response = await client.PostAsync("client_requester.php", content);
@@ -195,7 +195,7 @@ public sealed class ClientRequesterUnverifiedTests
         (HttpClient client, _, string cookie, WebApplicationFactory<KONGORAssemblyMarker> factory) = await SetupAsync();
         using (factory)
         {
-            Dictionary<string, string> payload = ClientRequesterUnverifiedPayloads.ServerList(cookie);
+            Dictionary<string, string> payload = ClientRequestPayloads.Unverified.ServerList(cookie);
             FormUrlEncodedContent content = new(payload);
 
             HttpResponseMessage response = await client.PostAsync("client_requester.php", content);
@@ -209,7 +209,7 @@ public sealed class ClientRequesterUnverifiedTests
         (HttpClient client, _, string cookie, WebApplicationFactory<KONGORAssemblyMarker> factory) = await SetupAsync();
         using (factory)
         {
-            Dictionary<string, string> payload = ClientRequesterUnverifiedPayloads.GetHeroList(cookie);
+            Dictionary<string, string> payload = ClientRequestPayloads.Unverified.GetHeroList(cookie);
             FormUrlEncodedContent content = new(payload);
 
             HttpResponseMessage response = await client.PostAsync("client_requester.php", content);
@@ -225,7 +225,7 @@ public sealed class ClientRequesterUnverifiedTests
         {
             Account account = await dbContext.Accounts.FirstAsync(a => a.Cookie == cookie);
 
-            Dictionary<string, string> payload = ClientRequesterUnverifiedPayloads.ShowStats(cookie, account.Name);
+            Dictionary<string, string> payload = ClientRequestPayloads.Unverified.ShowStats(cookie, account.Name);
             FormUrlEncodedContent content = new(payload);
 
             HttpResponseMessage response = await client.PostAsync("client_requester.php", content);

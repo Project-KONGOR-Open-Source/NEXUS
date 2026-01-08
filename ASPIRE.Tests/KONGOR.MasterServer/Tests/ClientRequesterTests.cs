@@ -42,7 +42,7 @@ public sealed class ClientRequesterTests
         await dbContext.SaveChangesAsync();
 
         // 2. Prepare Payload
-        Dictionary<string, string> payload = ClientRequesterVerifiedPayloads.GetInitStats(cookie);
+        Dictionary<string, string> payload = ClientRequestPayloads.Verified.GetInitStats(cookie);
         FormUrlEncodedContent content = new(payload);
 
         // 3. Execute
@@ -91,7 +91,7 @@ public sealed class ClientRequesterTests
         await dbContext.SaveChangesAsync();
 
         // 2. Prepare Payload
-        Dictionary<string, string> payload = ClientRequesterVerifiedPayloads.GetProducts(cookie);
+        Dictionary<string, string> payload = ClientRequestPayloads.Verified.GetProducts(cookie);
         FormUrlEncodedContent content = new(payload);
 
         // 3. Execute

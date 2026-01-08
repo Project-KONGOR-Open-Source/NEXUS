@@ -68,7 +68,7 @@ public sealed class ServerRequesterVerifiedPayloadTests
 
         // 3. Prepare Payload
         // We simulate a server coming online (LOADING)
-        Dictionary<string, string> payload = ServerRequesterVerifiedPayloads.SetOnline(
+        Dictionary<string, string> payload = ServerRequestPayloads.Verified.SetOnline(
             cookie,
             matchId: 1,
             num_conn: 5,
@@ -150,7 +150,7 @@ public sealed class ServerRequesterVerifiedPayloadTests
 
         // 3. Execute Heartbeat
         // This effectively sends set_online with new=false and c_state=ACTIVE
-        Dictionary<string, string> payload = ServerRequesterVerifiedPayloads.Heartbeat(cookie);
+        Dictionary<string, string> payload = ServerRequestPayloads.Verified.Heartbeat(cookie);
         FormUrlEncodedContent content = new(payload);
         HttpResponseMessage response = await client.PostAsync("server_requester.php", content);
 
@@ -169,7 +169,7 @@ public sealed class ServerRequesterVerifiedPayloadTests
         await using WebApplicationFactory<KONGORAssemblyMarker> webApplicationFactory = KONGORServiceProvider.CreateOrchestratedInstance();
         HttpClient client = webApplicationFactory.CreateClient();
 
-        Dictionary<string, string> payload = ServerRequesterVerifiedPayloads.GetSpectatorHeader();
+        Dictionary<string, string> payload = ServerRequestPayloads.Verified.GetSpectatorHeader();
         FormUrlEncodedContent content = new(payload);
 
         HttpResponseMessage response = await client.PostAsync("server_requester.php", content);
@@ -205,7 +205,7 @@ public sealed class ServerRequesterVerifiedPayloadTests
         IDatabase distributedCache = scope.ServiceProvider.GetRequiredService<IDatabase>();
         await distributedCache.SetAccountNameForSessionCookie(cookie, account.Name);
 
-        Dictionary<string, string> payload = ServerRequesterVerifiedPayloads.ClientConnection(cookie, "127.0.0.1", account.ID);
+        Dictionary<string, string> payload = ServerRequestPayloads.Verified.ClientConnection(cookie, "127.0.0.1", account.ID);
         FormUrlEncodedContent content = new(payload);
 
         HttpResponseMessage response = await client.PostAsync("server_requester.php", content);
@@ -231,7 +231,7 @@ public sealed class ServerRequesterVerifiedPayloadTests
         await dbContext.Accounts.AddAsync(account);
         await dbContext.SaveChangesAsync();
 
-        Dictionary<string, string> payload = ServerRequesterVerifiedPayloads.AcceptKey(cookie, account.ID);
+        Dictionary<string, string> payload = ServerRequestPayloads.Verified.AcceptKey(cookie, account.ID);
         FormUrlEncodedContent content = new(payload);
 
         HttpResponseMessage response = await client.PostAsync("server_requester.php", content);
@@ -251,7 +251,7 @@ public sealed class ServerRequesterVerifiedPayloadTests
         // but 200 OK with empty body is often default success for uninitialized stats.
         // Let's ensure minimal seed if strict.
         
-        Dictionary<string, string> payload = ServerRequesterVerifiedPayloads.GetQuickStats(session);
+        Dictionary<string, string> payload = ServerRequestPayloads.Verified.GetQuickStats(session);
         FormUrlEncodedContent content = new(payload);
 
         HttpResponseMessage response = await client.PostAsync("server_requester.php", content);
@@ -295,7 +295,7 @@ public sealed class ServerRequesterVerifiedPayloadTests
         // Controller calls ValidateAccountSessionCookie
         await distributedCache.SetAccountNameForSessionCookie(cookie, hostAccount.Name);
 
-        Dictionary<string, string> payload = ServerRequesterVerifiedPayloads.Shutdown(cookie);
+        Dictionary<string, string> payload = ServerRequestPayloads.Verified.Shutdown(cookie);
         FormUrlEncodedContent content = new(payload);
 
         HttpResponseMessage response = await client.PostAsync("server_requester.php", content);
@@ -352,7 +352,7 @@ public sealed class ServerRequesterVerifiedPayloadTests
         };        
         await distributedCache.SetMatchServer(hostAccount.Name, matchServer);
 
-        Dictionary<string, string> payload = ServerRequesterVerifiedPayloads.StartGame(cookie, 12345);
+        Dictionary<string, string> payload = ServerRequestPayloads.Verified.StartGame(cookie, 12345);
         // Payload mstr default is "ServerHostAccount:", we need to match seeded
         payload["mstr"] = hostAccount.Name + ":";
 
@@ -396,7 +396,7 @@ public sealed class ServerRequesterVerifiedPayloadTests
         // Simulating Cache Miss (so it hits the DB fallback)
         // await distributedCache.SetAccountNameForSessionCookie(cookie, account.Name); // Intentionally Skipped
 
-        Dictionary<string, string> payload = ServerRequesterVerifiedPayloads.Aids2Cookie(cookie);
+        Dictionary<string, string> payload = ServerRequestPayloads.Verified.Aids2Cookie(cookie);
         FormUrlEncodedContent content = new(payload);
 
         HttpResponseMessage response = await client.PostAsync("server_requester.php", content);

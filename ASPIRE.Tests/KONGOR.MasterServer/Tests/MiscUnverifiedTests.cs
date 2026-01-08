@@ -136,7 +136,7 @@ public sealed class MiscUnverifiedTests
                 .ToLower();
 
             Dictionary<string, string> payload =
-                MiscUnverifiedPayloads.ResubmitStats(cookie, matchId, "2023-01-01", "compressed_data");
+                MiscRequestPayloads.Unverified.ResubmitStats(cookie, matchId, "2023-01-01", "compressed_data");
             payload["resubmission_key"] = resubmissionKey;
             payload["server_id"] = "1"; // Must match matchServer.ID
 

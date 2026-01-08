@@ -60,7 +60,7 @@ public sealed class ServerRequesterUnverifiedTests
         using (factory)
         {
             // Use the seeded account name. Password will be rejected (SRP mismatch), but we verify endpoint is hit (Not 404).
-            Dictionary<string, string> payload = ServerRequesterVerifiedPayloads.ReplayAuth(account.Name, "password");
+            Dictionary<string, string> payload = ServerRequestPayloads.Verified.ReplayAuth(account.Name, "password");
             FormUrlEncodedContent content = new(payload);
 
             HttpResponseMessage response = await client.PostAsync("server_requester.php", content);
@@ -82,7 +82,7 @@ public sealed class ServerRequesterUnverifiedTests
             // We use the seeded account
             string login = $"{account.Name}:1";
             
-            Dictionary<string, string> payload = ServerRequesterVerifiedPayloads.NewSession(
+            Dictionary<string, string> payload = ServerRequestPayloads.Verified.NewSession(
                 login, 
                 "password", 
                 11235, 
@@ -106,7 +106,7 @@ public sealed class ServerRequesterUnverifiedTests
         using (factory)
         {
             // Aids2Cookie is now stubbed to return OK (empty body) to ignore legacy status checks.
-            Dictionary<string, string> payload = ServerRequesterUnverifiedPayloads.Aids2Cookie("123", "127.0.0.1", "bad_hash");
+            Dictionary<string, string> payload = ServerRequestPayloads.Unverified.Aids2Cookie("123", "127.0.0.1", "bad_hash");
             FormUrlEncodedContent content = new(payload);
 
             HttpResponseMessage response = await client.PostAsync("server_requester.php", content);

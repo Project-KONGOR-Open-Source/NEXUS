@@ -72,7 +72,7 @@ public sealed class ClientRequesterVerifiedPayloadTests
             await dbContext.Accounts.AddAsync(account);
             await dbContext.SaveChangesAsync();
 
-            Dictionary<string, string> payload = ClientRequesterVerifiedPayloads.PreAuth(accountName);
+            Dictionary<string, string> payload = ClientRequestPayloads.Verified.PreAuth(accountName);
             FormUrlEncodedContent content = new(payload);
             HttpResponseMessage response = await client.PostAsync("client_requester.php", content);
             response.EnsureSuccessStatusCode();
@@ -93,7 +93,7 @@ public sealed class ClientRequesterVerifiedPayloadTests
         (HttpClient client, WebApplicationFactory<KONGORAssemblyMarker> factory) = await SetupAsync();
         await using (factory)
         {
-            Dictionary<string, string> payload = ClientRequesterVerifiedPayloads.SrpAuth("SomeUser", "bad_proof");
+            Dictionary<string, string> payload = ClientRequestPayloads.Verified.SrpAuth("SomeUser", "bad_proof");
             FormUrlEncodedContent content = new(payload);
             HttpResponseMessage response = await client.PostAsync("client_requester.php", content);
             
@@ -115,7 +115,7 @@ public sealed class ClientRequesterVerifiedPayloadTests
              string cookie = Guid.NewGuid().ToString("N");
              await SeedAccountAsync(dbContext, distributedCache, cookie, "MsgUser");
 
-             Dictionary<string, string> payload = ClientRequesterVerifiedPayloads.GetSpecialMessages(cookie);
+             Dictionary<string, string> payload = ClientRequestPayloads.Verified.GetSpecialMessages(cookie);
              FormUrlEncodedContent content = new(payload);
              HttpResponseMessage response = await client.PostAsync("client_requester.php", content);
              response.EnsureSuccessStatusCode();
@@ -135,7 +135,7 @@ public sealed class ClientRequesterVerifiedPayloadTests
              string cookie = Guid.NewGuid().ToString("N");
              await SeedAccountAsync(dbContext, distributedCache, cookie, "ProdUser");
 
-             Dictionary<string, string> payload = ClientRequesterVerifiedPayloads.GetProducts(cookie);
+             Dictionary<string, string> payload = ClientRequestPayloads.Verified.GetProducts(cookie);
              FormUrlEncodedContent content = new(payload);
              HttpResponseMessage response = await client.PostAsync("client_requester.php", content);
              response.EnsureSuccessStatusCode();
@@ -155,7 +155,7 @@ public sealed class ClientRequesterVerifiedPayloadTests
              string cookie = Guid.NewGuid().ToString("N");
              await SeedAccountAsync(dbContext, distributedCache, cookie, "EventUser");
 
-             Dictionary<string, string> payload = ClientRequesterVerifiedPayloads.ClientEventsInfo(cookie);
+             Dictionary<string, string> payload = ClientRequestPayloads.Verified.ClientEventsInfo(cookie);
              FormUrlEncodedContent content = new(payload);
              HttpResponseMessage response = await client.PostAsync("client_requester.php", content);
              response.EnsureSuccessStatusCode();
@@ -176,7 +176,7 @@ public sealed class ClientRequesterVerifiedPayloadTests
              string nickname = "StatsUser";
              await SeedAccountAsync(dbContext, distributedCache, cookie, nickname);
 
-             Dictionary<string, string> payload = ClientRequesterVerifiedPayloads.ShowSimpleStats(cookie, nickname);
+             Dictionary<string, string> payload = ClientRequestPayloads.Verified.ShowSimpleStats(cookie, nickname);
              FormUrlEncodedContent content = new(payload);
              HttpResponseMessage response = await client.PostAsync("client_requester.php", content);
              response.EnsureSuccessStatusCode();
@@ -196,7 +196,7 @@ public sealed class ClientRequesterVerifiedPayloadTests
              string cookie = Guid.NewGuid().ToString("N");
              await SeedAccountAsync(dbContext, distributedCache, cookie, "HeroStatsUser");
 
-             Dictionary<string, string> payload = ClientRequesterVerifiedPayloads.GetAccountAllHeroStats(cookie);
+             Dictionary<string, string> payload = ClientRequestPayloads.Verified.GetAccountAllHeroStats(cookie);
              FormUrlEncodedContent content = new(payload);
              HttpResponseMessage response = await client.PostAsync("client_requester.php", content);
              response.EnsureSuccessStatusCode();
@@ -234,7 +234,7 @@ public sealed class ClientRequesterVerifiedPayloadTests
              // Use singular SetMatchServer
              await distributedCache.SetMatchServer(matchServer.HostAccountName, matchServer);
 
-             Dictionary<string, string> payload = ClientRequesterVerifiedPayloads.CreateGame(cookie, "My Custom Game");
+             Dictionary<string, string> payload = ClientRequestPayloads.Verified.CreateGame(cookie, "My Custom Game");
              FormUrlEncodedContent content = new(payload);
              HttpResponseMessage response = await client.PostAsync("client_requester.php", content);
              
@@ -262,7 +262,7 @@ public sealed class ClientRequesterVerifiedPayloadTests
              string cookie = Guid.NewGuid().ToString("N");
              await SeedAccountAsync(dbContext, distributedCache, cookie, "Notifier");
 
-             Dictionary<string, string> payload = ClientRequesterVerifiedPayloads.NewGameAvailable(cookie);
+             Dictionary<string, string> payload = ClientRequestPayloads.Verified.NewGameAvailable(cookie);
              FormUrlEncodedContent content = new(payload);
              HttpResponseMessage response = await client.PostAsync("client_requester.php", content);
 
@@ -284,7 +284,7 @@ public sealed class ClientRequesterVerifiedPayloadTests
              string cookie = Guid.NewGuid().ToString("N");
              await SeedAccountAsync(dbContext, distributedCache, cookie, "SeasonUser");
 
-             Dictionary<string, string> payload = ClientRequesterVerifiedPayloads.ClaimSeasonRewards(cookie);
+             Dictionary<string, string> payload = ClientRequestPayloads.Verified.ClaimSeasonRewards(cookie);
              FormUrlEncodedContent content = new(payload);
              HttpResponseMessage response = await client.PostAsync("client_requester.php", content);
 
@@ -305,7 +305,7 @@ public sealed class ClientRequesterVerifiedPayloadTests
              string cookie = Guid.NewGuid().ToString("N");
              await SeedAccountAsync(dbContext, distributedCache, cookie, "ListUser");
 
-             Dictionary<string, string> payload = ClientRequesterVerifiedPayloads.ServerList(cookie);
+             Dictionary<string, string> payload = ClientRequestPayloads.Verified.ServerList(cookie);
              FormUrlEncodedContent content = new(payload);
              HttpResponseMessage response = await client.PostAsync("client_requester.php", content);
 
@@ -326,7 +326,7 @@ public sealed class ClientRequesterVerifiedPayloadTests
              string cookie = Guid.NewGuid().ToString("N");
              await SeedAccountAsync(dbContext, distributedCache, cookie, "LogoutUser");
 
-             Dictionary<string, string> payload = ClientRequesterVerifiedPayloads.Logout(cookie);
+             Dictionary<string, string> payload = ClientRequestPayloads.Verified.Logout(cookie);
              FormUrlEncodedContent content = new(payload);
              HttpResponseMessage response = await client.PostAsync("client_requester.php", content);
 
@@ -398,7 +398,7 @@ public sealed class ClientRequesterVerifiedPayloadTests
              await dbContext.MatchStatistics.AddAsync(matchStats);
              await dbContext.SaveChangesAsync();
 
-             Dictionary<string, string> payload = ClientRequesterVerifiedPayloads.GetMatchStats(cookie, 12345);
+             Dictionary<string, string> payload = ClientRequestPayloads.Verified.GetMatchStats(cookie, 12345);
              FormUrlEncodedContent content = new(payload);
              HttpResponseMessage response = await client.PostAsync("client_requester.php", content);
 
