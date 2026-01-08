@@ -107,7 +107,7 @@ public class MatchStatsResponse
     /// </summary>
 
     [PhpProperty("my_upgrades")]
-    public required List<string> OwnedStoreItems { get; set; }
+    public required Dictionary<string, bool> OwnedStoreItems { get; set; }
 
     /// <summary>
     ///     Detailed information about owned store items including mastery boosts and discount coupons.
@@ -119,7 +119,7 @@ public class MatchStatsResponse
     ///     The collection of selected store items.
     /// </summary>
     [PhpProperty("selected_upgrades")]
-    public required List<string> SelectedStoreItems { get; set; }
+    public required Dictionary<string, bool> SelectedStoreItems { get; set; }
 
     /// <summary>
     ///     The index of the custom icon equipped, or "0" if no custom icon is equipped.

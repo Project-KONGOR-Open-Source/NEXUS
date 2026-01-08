@@ -25,12 +25,14 @@ public partial class ClientRequesterController
     private async Task<IActionResult> HandleInitStats()
     {
         string? cookie = Request.Form["cookie"];
-        if (cookie is not null) cookie = cookie.Replace("-", string.Empty);
+        // 2026-01-07: REMOVED Dash Stripping. Main Controller handles fuzzy validation.
+        // if (cookie is not null) cookie = cookie.Replace("-", string.Empty);
 
         if (cookie is null)
             return BadRequest(@"Missing Value For Form Parameter ""cookie""");
 
-        string? accountName = await DistributedCache.GetAccountNameForSessionCookie(cookie);
+        string? accountName = HttpContext.Items["SessionAccountName"] as string 
+                             ?? await DistributedCache.GetAccountNameForSessionCookie(cookie);
 
         if (accountName is null)
             return Unauthorized("Session Not Found");
@@ -79,7 +81,9 @@ public partial class ClientRequesterController
             { "0", fullResponse.Zero }
         };
 
-        return Ok(PhpSerialization.Serialize(response));
+        string serializedResponse = PhpSerialization.Serialize(response);
+        Logger.LogInformation($"[InitStats] Response: {serializedResponse}");
+        return Ok(serializedResponse);
     }
 
     private async Task<ShowSimpleStatsResponse> CreateShowSimpleStatsResponse(Account account)
@@ -113,8 +117,8 @@ public partial class ClientRequesterController
             Top4AwardNames = ["awd_masst", "awd_mhdd", "awd_mbdmg", "awd_lgks"], // TODO: Implement Awards
             Top4AwardCounts = [1005, 1006, 1007, 1008], // TODO: Implement Awards
             CustomIconSlotID = SetCustomIconSlotID(account),
-            OwnedStoreItems = account.User.OwnedStoreItems,
-            SelectedStoreItems = account.SelectedStoreItems,
+            OwnedStoreItems = account.User.OwnedStoreItems.Distinct().ToList(),
+            SelectedStoreItems = account.SelectedStoreItems.Distinct().ToList(),
             OwnedStoreItemsData = SetOwnedStoreItemsData(account)
         };
     }
@@ -122,7 +126,8 @@ public partial class ClientRequesterController
     private async Task<IActionResult> HandleMatchStats()
     {
         string? cookie = Request.Form["cookie"];
-        if (cookie is not null) cookie = cookie.Replace("-", string.Empty);
+        // 2026-01-07: REMOVED Dash Stripping. Main Controller handles fuzzy validation.
+        // if (cookie is not null) cookie = cookie.Replace("-", string.Empty);
 
         string? matchIDString = Request.Form["match_id"];
 
@@ -147,8 +152,43 @@ public partial class ClientRequesterController
         if (matchStatistics is null)
         {
             Logger.LogWarning("Match Stats Request Failed: Match Statistics Not Found For ID {MatchID}. Returning Soft Failure.", matchID);
-            // Return "false" to indicate failure without triggering client HTTP error handling (which causes logout)
-            return Ok(PhpSerialization.Serialize(false));
+            
+            // Construct a "Safe" dummy response to prevent client crash when stats are missing
+            MatchStatsResponse safeResponse = new()
+            {
+                GoldCoins = "0",
+                SilverCoins = "0",
+                MatchSummary = [],
+                MatchPlayerStatistics = [],
+                MatchPlayerInventories = [],
+                MatchMastery = new MatchMastery
+                {
+                    HeroIdentifier = "Hero_Legionnaire",
+                    CurrentMasteryExperience = 0,
+                    MatchMasteryExperience = 0,
+                    MasteryExperienceBonus = 0,
+                    MasteryExperienceBoost = 0,
+                    MasteryExperienceSuperBoost = 0,
+                    MasteryExperienceMaximumLevelHeroesCount = 0,
+                    MasteryExperienceHeroesBonus = 0,
+                    MasteryExperienceToBoost = 0,
+                    MasteryExperienceEventBonus = 0,
+                    MasteryExperienceCanBoost = false,
+                    MasteryExperienceCanSuperBoost = false,
+                    MasteryExperienceBoostProductIdentifier = 3609,
+                    MasteryExperienceSuperBoostProductIdentifier = 4605,
+                    MasteryExperienceBoostProductCount = 0,
+                    MasteryExperienceSuperBoostProductCount = 0
+                },
+                // CRITICAL FIX: Initialize these as empty Dictionaries to satisfy the client's parser
+                OwnedStoreItems = [],
+                SelectedStoreItems = [],
+                OwnedStoreItemsData = [],
+                CustomIconSlotID = "0",
+                CampaignReward = new CampaignReward()
+            };
+
+            return Ok(PhpSerialization.Serialize(safeResponse));
         }
 
         List<PlayerStatistics> allPlayerStatistics = await MerrickContext.PlayerStatistics.Where(playerStatistics => playerStatistics.MatchID == matchStatistics.MatchID).ToListAsync();
@@ -254,8 +294,8 @@ public partial class ClientRequesterController
                 MasteryExperienceBoostProductCount = 0,
                 MasteryExperienceSuperBoostProductCount = 0
             },
-            OwnedStoreItems = account?.User.OwnedStoreItems ?? [],
-            SelectedStoreItems = account?.SelectedStoreItems ?? [],
+            OwnedStoreItems = account?.User.OwnedStoreItems.Distinct().ToDictionary(item => item, _ => true) ?? [],
+            SelectedStoreItems = account?.SelectedStoreItems.Distinct().ToDictionary(item => item, _ => true) ?? [],
             OwnedStoreItemsData = account != null ? SetOwnedStoreItemsData(account) : [],
             CustomIconSlotID = account != null ? SetCustomIconSlotID(account) : "0",
             CampaignReward = new CampaignReward()

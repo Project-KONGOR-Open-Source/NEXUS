@@ -138,6 +138,32 @@ public class ShowSimpleStatsResponse
     ///         Bundle                 =>   string.Empty
     ///     </code>
     /// </summary>
+    /// <summary>
+    ///     The collection of owned store items.
+    ///     <code>
+    ///         Chat Name Colour       =>   "cc"
+    ///         Chat Symbol            =>   "cs"
+    ///         Account Icon           =>   "ai"
+    ///         Alternative Avatar     =>   "aa"
+    ///         Announcer Voice        =>   "av"
+    ///         Taunt                  =>   "t"
+    ///         Courier                =>   "c"
+    ///         Hero                   =>   "h"
+    ///         Early-Access Product   =>   "eap"
+    ///         Status                 =>   "s"
+    ///         Miscellaneous          =>   "m"
+    ///         Ward                   =>   "w"
+    ///         Enhancement            =>   "en"
+    ///         Coupon                 =>   "cp"
+    ///         Mastery                =>   "ma"
+    ///         Creep                  =>   "cr"
+    ///         Building               =>   "bu"
+    ///         Taunt Badge            =>   "tb"
+    ///         Teleportation Effect   =>   "te"
+    ///         Selection Circle       =>   "sc"
+    ///         Bundle                 =>   string.Empty
+    ///     </code>
+    /// </summary>
     [PhpProperty("my_upgrades")]
     public required List<string> OwnedStoreItems { get; set; }
 

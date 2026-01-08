@@ -30,15 +30,30 @@ public partial class ClientRequesterController(MerrickContext databaseContext, I
         string? functionName = (Request.Query["f"].FirstOrDefault() ?? Request.Form["f"].FirstOrDefault())?.ToLower();
         
         bool endpointRequiresCookieValidation = functionName is not "auth" and not "pre_auth" and not "srpauth" and not "get_match_stats";
-        (bool accountSessionCookieIsValid, string? sessionAccountName) = await DistributedCache.ValidateAccountSessionCookie((Request.Form["cookie"].ToString() ?? "NULL").Replace("-", ""));
+        
+        string cookieRaw = Request.Form["cookie"].ToString() ?? "NULL";
+        Logger.LogInformation($"[ClientRequester] Processing '{functionName}'. Raw Cookie: '{cookieRaw}' (RequiresValidation: {endpointRequiresCookieValidation})");
+
+        (bool accountSessionCookieIsValid, string? sessionAccountName) = await DistributedCache.ValidateAccountSessionCookie(cookieRaw);
+        
+        if (endpointRequiresCookieValidation && !accountSessionCookieIsValid)
+            Logger.LogWarning($"[ClientRequester] Redis Miss for '{functionName}' with cookie '{cookieRaw}'.");
 
         if (endpointRequiresCookieValidation.Equals(true) && accountSessionCookieIsValid.Equals(false))
         {
-            // Fallback: Check Database for the cookie.
-            // This is critical because `PurgeSessionCookies` clears Redis on startup, but the client may still hold a valid cookie.
-            // The reference implementation relies on the Database column.
-            string cookie = Request.Form["cookie"].ToString().Replace("-", "");
-            Account? account = await MerrickContext.Accounts.FirstOrDefaultAsync(a => a.Cookie == cookie);
+            string cookie = cookieRaw; 
+            Logger.LogInformation($"[ClientRequester] Attempting DB Fallback for cookie '{cookie}'...");
+
+            // Fuzzy DB Lookup:
+            // 1. Try exact match.
+            // 2. If length 32 (no dashes), try match with dashed version.
+            // 3. If length 36 (dashes), try match with dash-less version.
+            
+            string? altCookie = null;
+            if (cookie.Length == 32 && Guid.TryParse(cookie, out Guid guid)) altCookie = guid.ToString(); // Dashed
+            else if (cookie.Contains("-") && Guid.TryParse(cookie, out Guid guid2)) altCookie = guid2.ToString("N"); // No Dashes
+
+            Account? account = await MerrickContext.Accounts.FirstOrDefaultAsync(a => a.Cookie == cookie || (altCookie != null && a.Cookie == altCookie));
 
             if (account != null)
             {
@@ -46,10 +61,11 @@ public partial class ClientRequesterController(MerrickContext databaseContext, I
                 accountSessionCookieIsValid = true;
                 sessionAccountName = account.Name;
                 await DistributedCache.SetAccountNameForSessionCookie(cookie, account.Name);
-                Logger.LogInformation("Restored Session From Database For Cookie {Cookie}", cookie);
+                Logger.LogInformation($"[ClientRequester] DB Hit! Restored Session From Database For Cookie '{cookie}' (User: {account.Name})");
             }
             else
             {
+                Logger.LogError($"[ClientRequester] DB Miss! Cookie '{cookie}' not found in Accounts table.");
                 Logger.LogWarning($@"IP Address ""{Request.HttpContext.Connection.RemoteIpAddress?.MapToIPv4().ToString() ?? "UNKNOWN"}"" Has Made A Client Request With Forged Cookie ""{Request.Form["cookie"]}""");
 
                 return Unauthorized($@"Unrecognized Cookie ""{Request.Form["cookie"]}""");

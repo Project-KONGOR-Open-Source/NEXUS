@@ -55,9 +55,28 @@ public static partial class DistributedCacheExtensions
 
     public static async Task<(bool IsValid, string? AccountName)> ValidateAccountSessionCookie(this IDatabase distributedCacheStore, string cookie)
     {
+        // Check 1: Raw Cookie (As provided)
         string? accountName = await distributedCacheStore.GetAccountNameForSessionCookie(cookie);
 
-        return (accountName is not null, accountName);
+        if (accountName is not null) return (true, accountName);
+
+        // Check 2: Fuzzy Logic (If dash-less, try dashed GUID format)
+        if (cookie.Length == 32 && Guid.TryParse(cookie, out Guid guid))
+        {
+            string dashedCookie = guid.ToString(); // Default "D" format has dashes
+            accountName = await distributedCacheStore.GetAccountNameForSessionCookie(dashedCookie);
+            if (accountName is not null) return (true, accountName);
+        }
+        
+        // Check 3: Reverse Fuzzy (If dashed, try dash-less - rarely needed but safe)
+        if (cookie.Contains("-") && Guid.TryParse(cookie, out Guid guid2))
+        {
+             string noDashCookie = guid2.ToString("N");
+             accountName = await distributedCacheStore.GetAccountNameForSessionCookie(noDashCookie);
+             if (accountName is not null) return (true, accountName);
+        }
+
+        return (false, null);
     }
 
     /// <summary>

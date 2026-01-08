@@ -7,7 +7,9 @@ public partial class ClientRequesterController
         string? cookie = Request.Form["cookie"];
         if (string.IsNullOrEmpty(cookie)) return new UnauthorizedResult();
         
-        cookie = cookie.Replace("-", string.Empty);
+        if (string.IsNullOrEmpty(cookie)) return new UnauthorizedResult();
+        
+        Logger.LogInformation($"[Upgrades] HandleGetUpgrades Called. Cookie: '{cookie}'");
 
         string? sessionAccountName = HttpContext.Items["SessionAccountName"] as string;
 
@@ -29,7 +31,7 @@ public partial class ClientRequesterController
 
         Dictionary<string, object> fieldStats = new()
         {
-            ["account_id"] = account.ID,
+            ["account_id"] = account.ID.ToString(),
             ["level"] = account.User.TotalLevel,
             ["level_exp"] = account.User.TotalExperience
         };
@@ -37,20 +39,24 @@ public partial class ClientRequesterController
         // Construct UpgradesLookupResponse manual dictionary
         Dictionary<string, object> response = new()
         {
-            ["field_stats"] = new List<Dictionary<string, object>> { fieldStats },
-            ["my_upgrades_info"] = new Dictionary<string, object>(), // Stub for coupons
-            ["points"] = account.User.GoldCoins,
-            ["mmpoints"] = account.User.SilverCoins,
-            ["game_tokens"] = account.User.PlinkoTickets, // Mapping Plinko Tickets to Game Tokens? Or just 0.
-            ["standing"] = 3, // Legacy
-            ["my_upgrades"] = account.User.OwnedStoreItems,
-            ["selected_upgrades"] = account.SelectedStoreItems
+            ["field_stats"] = fieldStats,
+            ["my_upgrades_info"] = new Dictionary<string, object>(),
+            ["points"] = account.User.GoldCoins.ToString(),
+            ["mmpoints"] = account.User.SilverCoins.ToString(),
+            ["game_tokens"] = account.User.PlinkoTickets.ToString(),
+            ["standing"] = 3,
+            ["my_upgrades"] = account.User.OwnedStoreItems.Distinct().ToDictionary(item => item, _ => true),
+            ["selected_upgrades"] = account.SelectedStoreItems.Distinct().ToDictionary(item => item, _ => true),
+            ["0"] = false
         };
 
         // Note: READ ONLY uses a class that handles serialization attributes. 
         // We are using dictionary, keys must match [PhpProperty] values.
         // field_stats, my_upgrades_info, points, mmpoints, game_tokens, standing, my_upgrades, selected_upgrades. Checks out.
+        
+        string serializedResponse = PhpSerialization.Serialize(response);
+        Logger.LogInformation($"[Upgrades] Response: {serializedResponse}");
 
-        return Ok(PhpSerialization.Serialize(response));
+        return Ok(serializedResponse);
     }
 }
