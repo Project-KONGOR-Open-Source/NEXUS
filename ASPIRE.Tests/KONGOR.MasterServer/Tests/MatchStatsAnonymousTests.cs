@@ -221,8 +221,10 @@ public sealed partial class MatchStatsSubmissionTests
         // Should return 200 OK now, not 404
         await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.OK);
 
-        // Should return serialized boolean false "b:0;"
-        await Assert.That(content).IsEqualTo("b:0;");
+        // Should return serialized "Soft Failure" (Empty Stats) object
+        // b:0; is no longer returned to prevent client crashes.
+        // We verify that it returns a serialized array containing basic keys like "match_summ"
+        await Assert.That(content).Contains("match_summ");
     }
 
     [Test]

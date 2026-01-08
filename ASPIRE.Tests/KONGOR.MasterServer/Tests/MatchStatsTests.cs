@@ -300,12 +300,16 @@ public sealed partial class MatchStatsSubmissionTests
             SRPPasswordSalt = "salt",
             Role = userRole
         };
+        // 2. Seed Cache with User Session (NOT MatchServer)
+        string sessionCookie = Guid.NewGuid().ToString("N");
+
         Account hostAccount = new()
         {
             Name = "UserHost",
             User = hostUser,
             Type = AccountType.Normal, // Normal user, not Staff/ServerHost
-            IsMain = true
+            IsMain = true,
+            Cookie = sessionCookie // Required for DB fallback lookup in HandleStatsSubmission
         };
 
         User playerUser = new()
@@ -329,8 +333,6 @@ public sealed partial class MatchStatsSubmissionTests
         await dbContext.Accounts.AddRangeAsync(hostAccount, playerAccount);
         await dbContext.SaveChangesAsync();
 
-        // 2. Seed Cache with User Session (NOT MatchServer)
-        string sessionCookie = Guid.NewGuid().ToString("N");
         await distributedCache.SetAccountNameForSessionCookie(sessionCookie, hostAccount.Name);
 
         // 3. Seed MatchStartData (Crucial for the fix)

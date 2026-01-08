@@ -41,13 +41,13 @@ public partial class ClientRequesterController
         {
             ["field_stats"] = fieldStats,
             ["my_upgrades_info"] = new Dictionary<string, object>(),
-            ["points"] = account.User.GoldCoins.ToString(),
-            ["mmpoints"] = account.User.SilverCoins.ToString(),
-            ["game_tokens"] = account.User.PlinkoTickets.ToString(),
+            ["points"] = account.User.SilverCoins,
+            ["mmpoints"] = account.User.GoldCoins,
+            ["game_tokens"] = account.User.PlinkoTickets,
             ["standing"] = 3,
             ["my_upgrades"] = account.User.OwnedStoreItems.Distinct().ToDictionary(item => item, _ => true),
-            ["selected_upgrades"] = account.SelectedStoreItems.Distinct().ToDictionary(item => item, _ => true),
-            ["0"] = false
+            ["selected_upgrades"] = (account.SelectedStoreItems ?? new List<string>()),
+            ["0"] = true
         };
 
         // Note: READ ONLY uses a class that handles serialization attributes. 
