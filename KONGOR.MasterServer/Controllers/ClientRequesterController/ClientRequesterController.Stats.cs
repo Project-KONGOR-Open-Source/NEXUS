@@ -268,40 +268,182 @@ public partial class ClientRequesterController
             };
         }
 
-        MatchStatsResponse response = new()
+        List<int> otherPlayerAccountIDs = [.. allPlayerStatistics.Select(statistics => statistics.AccountID).Distinct()];
+
+        List<Account> otherPlayerAccounts = await MerrickContext.Accounts
+            .Include(playerAccount => playerAccount.User)
+            .Include(playerAccount => playerAccount.Clan)
+            .Where(playerAccount => otherPlayerAccountIDs.Contains(playerAccount.ID))
+            .ToListAsync();
+
+        Dictionary<int, MatchPlayerStatistics> matchPlayerStatistics = [];
+
+        foreach (PlayerStatistics statistics in allPlayerStatistics)
         {
-            GoldCoins = account?.User.GoldCoins.ToString() ?? "0",
-            SilverCoins = account?.User.SilverCoins.ToString() ?? "0",
-            MatchSummary = [matchSummary],
-            MatchPlayerStatistics = [matchPlayerStatistics],
-            MatchPlayerInventories = [matchPlayerInventories],
-            MatchMastery = new MatchMastery
+            Account otherPlayerAccount = otherPlayerAccounts.Single(playerAccount => playerAccount.ID == statistics.AccountID);
+
+            matchPlayerStatistics[statistics.AccountID] = new MatchPlayerStatistics(otherPlayerAccount, statistics)
             {
-                HeroIdentifier = "Hero_Legionnaire", // TODO: Get from Match Stats (Requester's Hero?)
-                CurrentMasteryExperience = 0,
-                MatchMasteryExperience = 0,
-                MasteryExperienceBonus = 0,
-                MasteryExperienceBoost = 0,
-                MasteryExperienceSuperBoost = 0,
-                MasteryExperienceMaximumLevelHeroesCount = 0,
-                MasteryExperienceHeroesBonus = 0,
-                MasteryExperienceToBoost = 0,
-                MasteryExperienceEventBonus = 0,
-                MasteryExperienceCanBoost = true,
-                MasteryExperienceCanSuperBoost = true,
-                MasteryExperienceBoostProductIdentifier = 3609,
-                MasteryExperienceSuperBoostProductIdentifier = 4605,
-                MasteryExperienceBoostProductCount = 0,
-                MasteryExperienceSuperBoostProductCount = 0
-            },
-            OwnedStoreItems = account?.User.OwnedStoreItems.Distinct().ToDictionary(item => item, _ => true) ?? [],
-            SelectedStoreItems = account?.SelectedStoreItems.Distinct().ToDictionary(item => item, _ => true) ?? [],
-            OwnedStoreItemsData = account != null ? SetOwnedStoreItemsData(account) : [],
-            CustomIconSlotID = account != null ? SetCustomIconSlotID(account) : "0",
-            CampaignReward = new CampaignReward()
+
+            };
+        }
+
+
+            //foreach (PlayerStatistics statistics in allPlayerStatistics)
+            //{
+            //    Account playerAccount = allPlayerAccounts.Single(playerAccount => playerAccount.ID == statistics.AccountID);
+            //    matchPlayerStatistics[statistics.AccountID] = new MatchPlayerStatistics(playerAccount, statistics)
+            //    {
+            //        // TODO: Add HeroIdentifier Field To PlayerStatistics Entity And Capture During Stats Submission
+            //        // For Now, Using Placeholder Value Until Hero Identifier Is Properly Captured
+            //        HeroIdentifier = "Hero_Placeholder", // TODO: Implement Hero Identifier Mapping From HeroProductID
+            //        Wins = "0", // TODO: Calculate From PlayerStatistics Records Where Win = 1
+            //        Losses = "0", // TODO: Calculate From PlayerStatistics Records Where Loss = 1
+            //        Concedes = "0", // TODO: Calculate From PlayerStatistics Records Where Conceded = 1
+            //        ConcedeVotes = statistics.ConcedeVotes.ToString(),
+            //        Buybacks = statistics.Buybacks.ToString(),
+            //        Disconnections = "0", // TODO: Calculate From PlayerStatistics Records Where Disconnected = 1
+            //        Kicked = "0", // TODO: Calculate From PlayerStatistics Records Where Kicked = 1
+            //        PublicSkill = "1500.0", // TODO: Calculate Or Retrieve From Account Statistics
+            //        PublicCount = "0", // TODO: Calculate From PlayerStatistics Records Where PublicMatch = 1
+            //        AMMSoloRating = "1500.0", // TODO: Retrieve From Ranked Solo Statistics
+            //        AMMSoloCount = "0", // TODO: Calculate From Ranked Solo Match Records
+            //        AMMTeamRating = "1500.0", // TODO: Retrieve From Ranked Team Statistics
+            //        AMMTeamCount = "0", // TODO: Calculate From Ranked Team Match Records
+            //        AverageScore = "0.00", // TODO: Calculate Average Score From PlayerStatistics Records
+            //        HeroKills = statistics.HeroKills.ToString(),
+            //        HeroDamage = statistics.HeroDamage.ToString(),
+            //        HeroExperience = statistics.HeroExperience.ToString(),
+            //        HeroKillsGold = statistics.GoldFromHeroKills.ToString(),
+            //        HeroAssists = statistics.HeroAssists.ToString(),
+            //        Deaths = statistics.HeroDeaths.ToString(),
+            //        GoldLostToDeath = statistics.GoldLostToDeath.ToString(),
+            //        SecondsDead = statistics.SecondsDead.ToString(),
+            //        TeamCreepKills = statistics.TeamCreepKills.ToString(),
+            //        TeamCreepDamage = statistics.TeamCreepDamage.ToString(),
+            //        TeamCreepExperience = statistics.TeamCreepExperience.ToString(),
+            //        TeamCreepGold = statistics.TeamCreepGold.ToString(),
+            //        NeutralCreepKills = statistics.NeutralCreepKills.ToString(),
+            //        NeutralCreepDamage = statistics.NeutralCreepDamage.ToString(),
+            //        NeutralCreepExperience = statistics.NeutralCreepExperience.ToString(),
+            //        NeutralCreepGold = statistics.NeutralCreepGold.ToString(),
+            //        BuildingDamage = statistics.BuildingDamage.ToString(),
+            //        BuildingExperience = statistics.ExperienceFromBuildings.ToString(),
+            //        BuildingsRazed = statistics.BuildingsRazed.ToString(),
+            //        BuildingGold = statistics.GoldFromBuildings.ToString(),
+            //        Denies = statistics.Denies.ToString(),
+            //        ExperienceDenied = statistics.ExperienceDenied.ToString(),
+            //        Gold = statistics.Gold.ToString(),
+            //        GoldSpent = statistics.GoldSpent.ToString(),
+            //        Experience = statistics.Experience.ToString(),
+            //        Actions = statistics.Actions.ToString(),
+            //        Seconds = statistics.SecondsPlayed.ToString(),
+            //        Consumables = statistics.ConsumablesPurchased.ToString(),
+            //        Wards = statistics.WardsPlaced.ToString(),
+            //        TimeEarningExperience = statistics.TimeEarningExperience.ToString(),
+            //        FirstBlood = statistics.FirstBlood.ToString(),
+            //        DoubleKill = statistics.DoubleKill.ToString(),
+            //        TripleKill = statistics.TripleKill.ToString(),
+            //        QuadKill = statistics.QuadKill.ToString(),
+            //        Annihilation = statistics.Annihilation.ToString(),
+            //        KillStreak3 = statistics.KillStreak03.ToString(),
+            //        KillStreak4 = statistics.KillStreak04.ToString(),
+            //        KillStreak5 = statistics.KillStreak05.ToString(),
+            //        KillStreak6 = statistics.KillStreak06.ToString(),
+            //        KillStreak7 = statistics.KillStreak07.ToString(),
+            //        KillStreak8 = statistics.KillStreak08.ToString(),
+            //        KillStreak9 = statistics.KillStreak09.ToString(),
+            //        KillStreak10 = statistics.KillStreak10.ToString(),
+            //        KillStreak15 = statistics.KillStreak15.ToString(),
+            //        Smackdown = statistics.Smackdown.ToString(),
+            //        Humiliation = statistics.Humiliation.ToString(),
+            //        Nemesis = statistics.Nemesis.ToString(),
+            //        Retribution = statistics.Retribution.ToString(),
+            //        UsedToken = statistics.UsedToken.ToString(),
+            //        ClanTag = statistics.ClanTag ?? string.Empty,
+            //        AlternativeAvatarName = statistics.AlternativeAvatarName ?? string.Empty,
+            //        SeasonProgress = new SeasonProgress
+            //        {
+            //            AccountID = statistics.AccountID,
+            //            MatchID = statistics.MatchID,
+            //            IsCasual = "0", // TODO: Determine If Match Was Casual Or Competitive Ranked
+            //            MMRBefore = "1500", // TODO: Retrieve From Player Ranked Statistics
+            //            MMRAfter = "1500", // TODO: Calculate MMR Change
+            //            MedalBefore = "0", // TODO: Retrieve Medal Rank From Player Ranked Statistics
+            //            MedalAfter = "0", // TODO: Calculate Medal After Match
+            //            Season = "1", // TODO: Get Current Season Identifier
+            //            PlacementMatches = 0, // TODO: Retrieve Placement Match Count
+            //            PlacementWins = "0" // TODO: Retrieve Placement Wins Count
+            //        }
+            //    };
+            //}
+
+            //// Build MatchPlayerInventories Dictionary For All Players
+            //Dictionary<int, MatchPlayerInventory> matchPlayerInventories = [];
+            //foreach (PlayerStatistics statistics in allPlayerStatistics)
+            //{
+            //    // Map Inventory List To Slots 1-6 (First 6 Items), Using NULL For Empty Slots
+            //    List<string> inventory = statistics.Inventory ?? [];
+            //    matchPlayerInventories[statistics.AccountID] = new MatchPlayerInventory
+            //    {
+            //        AccountID = statistics.AccountID,
+            //        MatchID = statistics.MatchID,
+            //        Slot1 = inventory.ElementAtOrDefault(0),
+            //        Slot2 = inventory.ElementAtOrDefault(1),
+            //        Slot3 = inventory.ElementAtOrDefault(2),
+            //        Slot4 = inventory.ElementAtOrDefault(3),
+            //        Slot5 = inventory.ElementAtOrDefault(4),
+            //        Slot6 = inventory.ElementAtOrDefault(5)
+            //    };
+            //}
+
+            //// Build MatchMastery With Placeholder Values
+            //int matchMasteryExperience = 100; // TODO: Calculate Based On Match Duration And Result
+            //int bonusExperience = 10; // TODO: Calculate Based On Max-Level Heroes Owned
+
+            //MatchMastery matchMastery = new (
+            //    heroIdentifier: "Hero_Gauntlet", // TODO: Get Actual Hero Identifier
+            //    currentMasteryExperience: 0, // TODO: Retrieve From Mastery System
+            //    matchMasteryExperience: matchMasteryExperience,
+            //    bonusExperience: bonusExperience)
+            //{
+            //    HeroIdentifier = "Hero_Gauntlet",
+            //    CurrentMasteryExperience = 0,
+            //    MatchMasteryExperience = matchMasteryExperience,
+            //    MasteryExperienceBonus = 0,
+            //    MasteryExperienceBoost = 0,
+            //    MasteryExperienceSuperBoost = 0,
+            //    MasteryExperienceMaximumLevelHeroesCount = 0, // TODO: Count Heroes At Max Mastery Level
+            //    MasteryExperienceHeroesBonus = bonusExperience,
+            //    MasteryExperienceToBoost = (matchMasteryExperience + bonusExperience) * 2,
+            //    MasteryExperienceEventBonus = 0,
+            //    MasteryExperienceCanBoost = true,
+            //    MasteryExperienceCanSuperBoost = true,
+            //    MasteryExperienceBoostProductIdentifier = 3609,
+            //    MasteryExperienceSuperBoostProductIdentifier = 4605,
+            //    MasteryExperienceBoostProductCount = 0, // TODO: Count "ma.Mastery Boost" Items
+            //    MasteryExperienceSuperBoostProductCount = 0 // TODO: Count "ma.Super Mastery Boost" Items
+            //};
+
+            MatchStatsResponse response = new ()
+        {
+            GoldCoins = account.User.GoldCoins.ToString(),
+            SilverCoins = account.User.SilverCoins.ToString(),
+            MatchSummary = [ matchSummary ],
+            MatchPlayerStatistics = [ matchPlayerStatistics ],
+            MatchPlayerInventories = [ matchPlayerInventories ],
+            MatchMastery = matchMastery,
+            OwnedStoreItems = account.User.OwnedStoreItems,
+            OwnedStoreItemsData = SetOwnedStoreItemsData(account),
+            SelectedStoreItems = account.SelectedStoreItems,
+            CustomIconSlotID = SetCustomIconSlotID(account),
+            CampaignReward = new CampaignReward() // Using Default Values From Model
         };
 
-        return Ok(PhpSerialization.Serialize(response));
+        string json = JsonSerializer.Serialize(response);
+        string php = PhpSerialization.Serialize(response);
+
+        return Ok(php);
     }
 
     private static string SetCustomIconSlotID(Account account)

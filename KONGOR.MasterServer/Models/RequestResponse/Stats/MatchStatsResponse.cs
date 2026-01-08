@@ -843,7 +843,7 @@ public class MatchMastery
     ///     Used to calculate the "max_heroes_addon" bonus multiplier.
     /// </summary>
     [PhpProperty("mastery_exp_heroes_count")]
-    public int MasteryExperienceMaximumLevelHeroesCount { get; init; }
+    public required int MasteryExperienceMaximumLevelHeroesCount { get; init; }
 
     /// <summary>
     ///     Bonus mastery experience awarded based on the number of max-level heroes owned.
@@ -899,14 +899,14 @@ public class MatchMastery
     ///     Retrieved from the account's owned upgrades/products list.
     /// </summary>
     [PhpProperty("mastery_boostnum")]
-    public int MasteryExperienceBoostProductCount { get; init; }
+    public required int MasteryExperienceBoostProductCount { get; init; }
 
     /// <summary>
     ///     The number of super mastery boost products the player currently owns.
     ///     Retrieved from the account's owned upgrades/products list.
     /// </summary>
     [PhpProperty("mastery_super_boostnum")]
-    public int MasteryExperienceSuperBoostProductCount { get; init; }
+    public required int MasteryExperienceSuperBoostProductCount { get; init; }
 }
 
 public class MatchPlayerStatistics(Account account, PlayerStatistics playerStatistics)
@@ -981,13 +981,13 @@ public class MatchPlayerStatistics(Account account, PlayerStatistics playerStati
     ///     The number of concede votes the player cast during the match.
     /// </summary>
     [PhpProperty("concedevotes")]
-    public required string ConcedeVotes { get; init; }
+    public string ConcedeVotes { get; init; } = playerStatistics.ConcedeVotes.ToString();
 
     /// <summary>
     ///     The number of times the player bought back into the match after dying.
     /// </summary>
     [PhpProperty("buybacks")]
-    public required string Buybacks { get; init; }
+    public string Buybacks { get; init; } = playerStatistics.Buybacks.ToString();
 
     /// <summary>
     ///     The number of disconnections on the player's account.
@@ -1047,295 +1047,295 @@ public class MatchPlayerStatistics(Account account, PlayerStatistics playerStati
     ///     The number of enemy hero kills achieved by the player in the match.
     /// </summary>
     [PhpProperty("herokills")]
-    public required string HeroKills { get; init; }
+    public string HeroKills { get; init; } = playerStatistics.HeroKills.ToString();
 
     /// <summary>
     ///     The total damage dealt to enemy heroes by the player in the match.
     /// </summary>
     [PhpProperty("herodmg")]
-    public required string HeroDamage { get; init; }
+    public string HeroDamage { get; init; } = playerStatistics.HeroDamage.ToString();
 
     /// <summary>
     ///     The total experience gained by the player's hero in the match.
     /// </summary>
     [PhpProperty("heroexp")]
-    public required string HeroExperience { get; init; }
+    public string HeroExperience { get; init; } = playerStatistics.HeroExperience.ToString();
 
     /// <summary>
     ///     The total gold earned by the player's hero in the match.
     /// </summary>
     [PhpProperty("herokillsgold")]
-    public required string HeroGold { get; init; }
+    public string HeroGold { get; init; } = playerStatistics.GoldFromHeroKills.ToString();
 
     /// <summary>
     ///     The number of assists (participating in hero kills without landing the final blow) achieved by the player.
     /// </summary>
     [PhpProperty("heroassists")]
-    public required string HeroAssists { get; init; }
+    public string HeroAssists { get; init; } = playerStatistics.HeroAssists.ToString();
 
     /// <summary>
     ///     The number of times the player died in the match.
     /// </summary>
     [PhpProperty("deaths")]
-    public required string Deaths { get; init; }
+    public string Deaths { get; init; } = playerStatistics.HeroDeaths.ToString();
 
     /// <summary>
     ///     The total gold lost by the player due to deaths in the match.
     /// </summary>
     [PhpProperty("goldlost2death")]
-    public required string GoldLostToDeath { get; init; }
+    public string GoldLostToDeath { get; init; } = playerStatistics.GoldLostToDeath.ToString();
 
     /// <summary>
     ///     The total time in seconds the player spent dead (waiting to respawn) during the match.
     /// </summary>
     [PhpProperty("secs_dead")]
-    public required string SecondsDead { get; init; }
+    public string SecondsDead { get; init; } = playerStatistics.SecondsDead.ToString();
 
     /// <summary>
     ///     The number of friendly team creeps killed by the player (last-hitting own creeps for gold/experience).
     /// </summary>
     [PhpProperty("teamcreepkills")]
-    public required string TeamCreepKills { get; init; }
+    public string TeamCreepKills { get; init; } = playerStatistics.TeamCreepKills.ToString();
 
     /// <summary>
     ///     The total damage dealt to friendly team creeps by the player.
     /// </summary>
     [PhpProperty("teamcreepdmg")]
-    public required string TeamCreepDamage { get; init; }
+    public string TeamCreepDamage { get; init; } = playerStatistics.TeamCreepDamage.ToString();
 
     /// <summary>
     ///     The total experience gained from killing friendly team creeps.
     /// </summary>
     [PhpProperty("teamcreepexp")]
-    public required string TeamCreepExperience { get; init; }
+    public string TeamCreepExperience { get; init; } = playerStatistics.TeamCreepExperience.ToString();
 
     /// <summary>
     ///     The total gold earned from killing friendly team creeps.
     /// </summary>
     [PhpProperty("teamcreepgold")]
-    public required string TeamCreepGold { get; init; }
+    public string TeamCreepGold { get; init; } = playerStatistics.TeamCreepGold.ToString();
 
     /// <summary>
     ///     The number of neutral creeps killed by the player (jungle creeps).
     /// </summary>
     [PhpProperty("neutralcreepkills")]
-    public required string NeutralCreepKills { get; init; }
+    public string NeutralCreepKills { get; init; } = playerStatistics.NeutralCreepKills.ToString();
 
     /// <summary>
     ///     The total damage dealt to neutral creeps by the player.
     /// </summary>
     [PhpProperty("neutralcreepdmg")]
-    public required string NeutralCreepDamage { get; init; }
+    public string NeutralCreepDamage { get; init; } = playerStatistics.NeutralCreepDamage.ToString();
 
     /// <summary>
     ///     The total experience gained from killing neutral creeps.
     /// </summary>
     [PhpProperty("neutralcreepexp")]
-    public required string NeutralCreepExperience { get; init; }
+    public string NeutralCreepExperience { get; init; } = playerStatistics.NeutralCreepExperience.ToString();
 
     /// <summary>
     ///     The total gold earned from killing neutral creeps.
     /// </summary>
     [PhpProperty("neutralcreepgold")]
-    public required string NeutralCreepGold { get; init; }
+    public string NeutralCreepGold { get; init; } = playerStatistics.NeutralCreepGold.ToString();
 
     /// <summary>
     ///     The total damage dealt to enemy buildings (towers, barracks, base structures) by the player.
     /// </summary>
     [PhpProperty("bdmg")]
-    public required string BuildingDamage { get; init; }
+    public string BuildingDamage { get; init; } = playerStatistics.BuildingDamage.ToString();
 
     /// <summary>
     ///     The total experience gained from damaging or destroying enemy buildings.
     /// </summary>
     [PhpProperty("bdmgexp")]
-    public required string BuildingExperience { get; init; }
+    public string BuildingExperience { get; init; } = playerStatistics.ExperienceFromBuildings.ToString();
 
     /// <summary>
     ///     The number of enemy buildings (towers, barracks) destroyed by the player.
     /// </summary>
     [PhpProperty("razed")]
-    public required string BuildingsRazed { get; init; }
+    public string BuildingsRazed { get; init; } = playerStatistics.BuildingsRazed.ToString();
 
     /// <summary>
     ///     The total gold earned from damaging or destroying enemy buildings.
     /// </summary>
     [PhpProperty("bgold")]
-    public required string BuildingGold { get; init; }
+    public string BuildingGold { get; init; } = playerStatistics.GoldFromBuildings.ToString();
 
     /// <summary>
     ///     The number of friendly creeps denied by the player (last-hitting friendly creeps to prevent opponents from gaining gold/experience).
     /// </summary>
     [PhpProperty("denies")]
-    public required string Denies { get; init; }
+    public string Denies { get; init; } = playerStatistics.Denies.ToString();
 
     /// <summary>
     ///     The total experience denied to opponents through denying friendly creeps.
     /// </summary>
     [PhpProperty("exp_denied")]
-    public required string ExperienceDenied { get; init; }
+    public string ExperienceDenied { get; init; } = playerStatistics.ExperienceDenied.ToString();
 
     /// <summary>
     ///     The total gold accumulated by the player at the end of the match.
     /// </summary>
     [PhpProperty("gold")]
-    public required string Gold { get; init; }
+    public string Gold { get; init; } = playerStatistics.Gold.ToString();
 
     /// <summary>
     ///     The total gold spent by the player on items during the match.
     /// </summary>
     [PhpProperty("gold_spent")]
-    public required string GoldSpent { get; init; }
+    public string GoldSpent { get; init; } = playerStatistics.GoldSpent.ToString();
 
     /// <summary>
     ///     The total experience gained by the player during the match.
     /// </summary>
     [PhpProperty("exp")]
-    public required string Experience { get; init; }
+    public string Experience { get; init; } = playerStatistics.Experience.ToString();
 
     /// <summary>
     ///     The total number of actions performed by the player during the match (clicks, commands, ability usage, etc.).
     /// </summary>
     [PhpProperty("actions")]
-    public required string Actions { get; init; }
+    public string Actions { get; init; } = playerStatistics.Actions.ToString();
 
     /// <summary>
     ///     The total time in seconds the player was actively playing in the match.
     /// </summary>
     [PhpProperty("secs")]
-    public required string Seconds { get; init; }
+    public string Seconds { get; init; } = playerStatistics.SecondsPlayed.ToString();
 
     /// <summary>
     ///     The number of consumable items (potions, wards, teleport scrolls, etc.) purchased by the player.
     /// </summary>
     [PhpProperty("consumables")]
-    public required string Consumables { get; init; }
+    public string Consumables { get; init; } = playerStatistics.ConsumablesPurchased.ToString();
 
     /// <summary>
     ///     The number of observer or sentry wards placed by the player during the match.
     /// </summary>
     [PhpProperty("wards")]
-    public required string Wards { get; init; }
+    public string Wards { get; init; } = playerStatistics.WardsPlaced.ToString();
 
     /// <summary>
     ///     The total time in seconds the player spent within experience range of dying enemy units.
     /// </summary>
     [PhpProperty("time_earning_exp")]
-    public required string TimeEarningExperience { get; init; }
+    public string TimeEarningExperience { get; init; } = playerStatistics.TimeEarningExperience.ToString();
 
     /// <summary>
     ///     The number of First Blood awards earned by the player (1 or 0).
     /// </summary>
     [PhpProperty("bloodlust")]
-    public required string FirstBlood { get; init; }
+    public string FirstBlood { get; init; } = playerStatistics.FirstBlood.ToString();
 
     /// <summary>
     ///     The number of Double Kill awards earned by the player (killing 2 heroes in quick succession).
     /// </summary>
     [PhpProperty("doublekill")]
-    public required string DoubleKill { get; init; }
+    public string DoubleKill { get; init; } = playerStatistics.DoubleKill.ToString();
 
     /// <summary>
     ///     The number of Triple Kill awards earned by the player (killing 3 heroes in quick succession).
     /// </summary>
     [PhpProperty("triplekill")]
-    public required string TripleKill { get; init; }
+    public string TripleKill { get; init; } = playerStatistics.TripleKill.ToString();
 
     /// <summary>
     ///     The number of Quad Kill awards earned by the player (killing 4 heroes in quick succession).
     /// </summary>
     [PhpProperty("quadkill")]
-    public required string QuadKill { get; init; }
+    public string QuadKill { get; init; } = playerStatistics.QuadKill.ToString();
 
     /// <summary>
     ///     The number of Annihilation awards earned by the player (killing all 5 enemy heroes in quick succession).
     /// </summary>
     [PhpProperty("annihilation")]
-    public required string Annihilation { get; init; }
+    public string Annihilation { get; init; } = playerStatistics.Annihilation.ToString();
 
     /// <summary>
     ///     The number of 3-kill streaks achieved by the player (killing 3 heroes without dying).
     /// </summary>
     [PhpProperty("ks3")]
-    public required string KillStreak3 { get; init; }
+    public string KillStreak3 { get; init; } = playerStatistics.KillStreak03.ToString();
 
     /// <summary>
     ///     The number of 4-kill streaks achieved by the player (killing 4 heroes without dying).
     /// </summary>
     [PhpProperty("ks4")]
-    public required string KillStreak4 { get; init; }
+    public string KillStreak4 { get; init; } = playerStatistics.KillStreak04.ToString();
 
     /// <summary>
     ///     The number of 5-kill streaks achieved by the player (killing 5 heroes without dying).
     /// </summary>
     [PhpProperty("ks5")]
-    public required string KillStreak5 { get; init; }
+    public string KillStreak5 { get; init; } = playerStatistics.KillStreak05.ToString();
 
     /// <summary>
     ///     The number of 6-kill streaks achieved by the player (killing 6 heroes without dying).
     /// </summary>
     [PhpProperty("ks6")]
-    public required string KillStreak6 { get; init; }
+    public string KillStreak6 { get; init; } = playerStatistics.KillStreak06.ToString();
 
     /// <summary>
     ///     The number of 7-kill streaks achieved by the player (killing 7 heroes without dying).
     /// </summary>
     [PhpProperty("ks7")]
-    public required string KillStreak7 { get; init; }
+    public string KillStreak7 { get; init; } = playerStatistics.KillStreak07.ToString();
 
     /// <summary>
     ///     The number of 8-kill streaks achieved by the player (killing 8 heroes without dying).
     /// </summary>
     [PhpProperty("ks8")]
-    public required string KillStreak8 { get; init; }
+    public string KillStreak8 { get; init; } = playerStatistics.KillStreak08.ToString();
 
     /// <summary>
     ///     The number of 9-kill streaks achieved by the player (killing 9 heroes without dying).
     /// </summary>
     [PhpProperty("ks9")]
-    public required string KillStreak9 { get; init; }
+    public string KillStreak9 { get; init; } = playerStatistics.KillStreak09.ToString();
 
     /// <summary>
     ///     The number of 10-kill streaks achieved by the player (killing 10 heroes without dying).
     /// </summary>
     [PhpProperty("ks10")]
-    public required string KillStreak10 { get; init; }
+    public string KillStreak10 { get; init; } = playerStatistics.KillStreak10.ToString();
 
     /// <summary>
     ///     The number of 15-kill streaks achieved by the player (killing 15 heroes without dying).
     /// </summary>
     [PhpProperty("ks15")]
-    public required string KillStreak15 { get; init; }
+    public string KillStreak15 { get; init; } = playerStatistics.KillStreak15.ToString();
 
     /// <summary>
     ///     The number of Smackdown awards earned by the player (killing a player after taunting them).
     /// </summary>
     [PhpProperty("smackdown")]
-    public required string Smackdown { get; init; }
+    public string Smackdown { get; init; } = playerStatistics.Smackdown.ToString();
 
     /// <summary>
     ///     The number of Humiliation awards earned by the player (getting killed by a player after taunting them).
     /// </summary>
     [PhpProperty("humiliation")]
-    public required string Humiliation { get; init; }
+    public string Humiliation { get; init; } = playerStatistics.Humiliation.ToString();
 
     /// <summary>
     ///     The number of Nemesis awards earned by the player (repeatedly killing the same enemy hero).
     /// </summary>
     [PhpProperty("nemesis")]
-    public required string Nemesis { get; init; }
+    public string Nemesis { get; init; } = playerStatistics.Nemesis.ToString();
 
     /// <summary>
     ///     The number of Retribution awards earned by the player (killing an enemy hero who has killed you repeatedly).
     /// </summary>
     [PhpProperty("retribution")]
-    public required string Retribution { get; init; }
+    public string Retribution { get; init; } = playerStatistics.Retribution.ToString();
 
     /// <summary>
     ///     Whether the player used a token (game access token or dice token) during the match ("1" if used, "0" otherwise).
     /// </summary>
     [PhpProperty("used_token")]
-    public string UsedToken { get; init; } = "0";
+    public string UsedToken { get; init; } = playerStatistics.UsedToken.ToString();
 
     /// <summary>
     ///     The hero identifier in the format Hero_{Snake_Case_Name} (e.g. "Hero_Andromeda", "Hero_Legionnaire").
@@ -1353,7 +1353,7 @@ public class MatchPlayerStatistics(Account account, PlayerStatistics playerStati
     ///     The alternative avatar name used by the player during the match, or empty string if using the default hero skin.
     /// </summary>
     [PhpProperty("alt_avatar_name")]
-    public required string AlternativeAvatarName { get; init; }
+    public string AlternativeAvatarName { get; init; } = playerStatistics.AlternativeAvatarName ?? string.Empty;
 
     /// <summary>
     ///     Seasonal campaign progression information for the player in the match.
