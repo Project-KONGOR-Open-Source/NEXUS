@@ -798,14 +798,14 @@ public class MatchMastery
     ///     The identifier of the hero, in the format Hero_{Snake_Case_Name}.
     /// </summary>
     [PhpProperty("cli_name")]
-    public string HeroIdentifier { get; init; } = heroIdentifier;
+    public required string HeroIdentifier { get; init; }
 
     /// <summary>
     ///     The hero's original mastery experience before the match.
     ///     This is the current mastery level progress persisted to the database.
     /// </summary>
     [PhpProperty("mastery_exp_original")]
-    public int CurrentMasteryExperience { get; init; } = currentMasteryExperience;
+    public required int CurrentMasteryExperience { get; init; }
 
     /// <summary>
     ///     The base mastery experience earned during the match.
@@ -813,7 +813,7 @@ public class MatchMastery
     ///     Does not include bonuses or boosts.
     /// </summary>
     [PhpProperty("mastery_exp_match")]
-    public int MatchMasteryExperience { get; init; } = matchMasteryExperience;
+    public required int MatchMasteryExperience { get; init; }
 
     /// <summary>
     ///     Additional mastery experience bonus from map-specific multipliers.
@@ -850,14 +850,14 @@ public class MatchMastery
     ///     Maps to "mastery_maxlevel_addon" in "match_stats_v2.lua".
     /// </summary>
     [PhpProperty("mastery_exp_heroes_addon")]
-    public int MasteryExperienceHeroesBonus { get; init; } = bonusExperience;
+    public required int MasteryExperienceHeroesBonus { get; init; }
 
     /// <summary>
     ///     The potential experience that can be gained by using a regular mastery boost.
     ///     Displayed when hovering over the mastery boost button in the UI.
     /// </summary>
     [PhpProperty("mastery_exp_to_boost")]
-    public int MasteryExperienceToBoost { get; init; } = (matchMasteryExperience + bonusExperience) * 2;
+    public required int MasteryExperienceToBoost { get; init; }
 
     /// <summary>
     ///     Special event bonus mastery experience granted during promotional periods.
