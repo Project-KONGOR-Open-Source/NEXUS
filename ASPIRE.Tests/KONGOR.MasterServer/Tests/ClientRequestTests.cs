@@ -61,7 +61,7 @@ public sealed class ClientRequestTests
         (HttpClient client, _, _, string cookie, WebApplicationFactory<KONGORAssemblyMarker> factory) = await SetupAsync("ClientTester");
         await using (factory)
         {
-            Dictionary<string, string> payload = ClientRequestPayloads.Verified.GetInitStats(cookie);
+            Dictionary<string, string> payload = ClientRequestPayloads.GetInitStats(cookie);
             FormUrlEncodedContent content = new(payload);
 
             HttpResponseMessage response = await client.PostAsync("client_requester.php", content);
@@ -81,7 +81,7 @@ public sealed class ClientRequestTests
         (HttpClient client, _, _, string cookie, WebApplicationFactory<KONGORAssemblyMarker> factory) = await SetupAsync("ProductTester");
         await using (factory)
         {
-            Dictionary<string, string> payload = ClientRequestPayloads.Verified.GetProducts(cookie);
+            Dictionary<string, string> payload = ClientRequestPayloads.GetProducts(cookie);
             FormUrlEncodedContent content = new(payload);
 
             HttpResponseMessage response = await client.PostAsync("client_requester.php", content);
@@ -102,7 +102,7 @@ public sealed class ClientRequestTests
         (HttpClient client, _, _, _, WebApplicationFactory<KONGORAssemblyMarker> factory) = await SetupAsync();
         await using (factory)
         {
-            Dictionary<string, string> payload = ClientRequestPayloads.Unverified.Auth("login", "password");
+            Dictionary<string, string> payload = ClientRequestPayloads.Auth("login", "password");
             FormUrlEncodedContent content = new(payload);
 
             HttpResponseMessage response = await client.PostAsync("client_requester.php?f=auth", content);
@@ -119,7 +119,7 @@ public sealed class ClientRequestTests
         (HttpClient client, _, _, string cookie, WebApplicationFactory<KONGORAssemblyMarker> factory) = await SetupAsync();
         await using (factory)
         {
-            Dictionary<string, string> payload = ClientRequestPayloads.Unverified.GetServerList(cookie);
+            Dictionary<string, string> payload = ClientRequestPayloads.GetServerList(cookie);
             FormUrlEncodedContent content = new(payload);
 
             HttpResponseMessage response = await client.PostAsync("client_requester.php", content);
@@ -133,7 +133,7 @@ public sealed class ClientRequestTests
         (HttpClient client, _, _, string cookie, WebApplicationFactory<KONGORAssemblyMarker> factory) = await SetupAsync();
         await using (factory)
         {
-            Dictionary<string, string> payload = ClientRequestPayloads.Unverified.GetAllHeroes(cookie);
+            Dictionary<string, string> payload = ClientRequestPayloads.GetAllHeroes(cookie);
             FormUrlEncodedContent content = new(payload);
 
             HttpResponseMessage response = await client.PostAsync("client_requester.php", content);
@@ -147,7 +147,7 @@ public sealed class ClientRequestTests
         (HttpClient client, _, _, string cookie, WebApplicationFactory<KONGORAssemblyMarker> factory) = await SetupAsync();
         await using (factory)
         {
-            Dictionary<string, string> payload = ClientRequestPayloads.Unverified.CreateGame(cookie, "TestGame");
+            Dictionary<string, string> payload = ClientRequestPayloads.CreateGame(cookie, "TestGame");
             FormUrlEncodedContent content = new(payload);
 
             HttpResponseMessage response = await client.PostAsync("client_requester.php", content);
@@ -165,7 +165,7 @@ public sealed class ClientRequestTests
             // We need the name associated with the cookie
             Account account = await dbContext.Accounts.FirstAsync(a => a.Cookie == cookie);
 
-            Dictionary<string, string> payload = ClientRequestPayloads.Unverified.ShowSimpleStats(cookie, account.Name);
+            Dictionary<string, string> payload = ClientRequestPayloads.ShowSimpleStats(cookie, account.Name);
             FormUrlEncodedContent content = new(payload);
 
             HttpResponseMessage response = await client.PostAsync("client_requester.php", content);
@@ -179,7 +179,7 @@ public sealed class ClientRequestTests
         (HttpClient client, _, _, string cookie, WebApplicationFactory<KONGORAssemblyMarker> factory) = await SetupAsync();
         await using (factory)
         {
-            Dictionary<string, string> payload = ClientRequestPayloads.Unverified.ClientEventsInfo(cookie);
+            Dictionary<string, string> payload = ClientRequestPayloads.ClientEventsInfo(cookie);
             FormUrlEncodedContent content = new(payload);
 
             HttpResponseMessage response = await client.PostAsync("client_requester.php", content);
@@ -193,7 +193,7 @@ public sealed class ClientRequestTests
         (HttpClient client, _, _, string cookie, WebApplicationFactory<KONGORAssemblyMarker> factory) = await SetupAsync();
         await using (factory)
         {
-            Dictionary<string, string> payload = ClientRequestPayloads.Unverified.GetSpecialMessages(cookie);
+            Dictionary<string, string> payload = ClientRequestPayloads.GetSpecialMessages(cookie);
             FormUrlEncodedContent content = new(payload);
 
             HttpResponseMessage response = await client.PostAsync("client_requester.php", content);
@@ -208,7 +208,7 @@ public sealed class ClientRequestTests
         await using (factory)
         {
             // Verifies snake_case "get_init_stats" failure
-            Dictionary<string, string> payload = ClientRequestPayloads.Unverified.GetInitStats(cookie);
+            Dictionary<string, string> payload = ClientRequestPayloads.GetInitStats_SnakeCase(cookie);
             FormUrlEncodedContent content = new(payload);
 
             HttpResponseMessage response = await client.PostAsync("client_requester.php", content);
@@ -226,7 +226,7 @@ public sealed class ClientRequestTests
         (HttpClient client, _, _, string cookie, WebApplicationFactory<KONGORAssemblyMarker> factory) = await SetupAsync();
         await using (factory)
         {
-            Dictionary<string, string> payload = ClientRequestPayloads.Unverified.GrabServerList(cookie);
+            Dictionary<string, string> payload = ClientRequestPayloads.GrabServerList(cookie);
             FormUrlEncodedContent content = new(payload);
 
             HttpResponseMessage response = await client.PostAsync("client_requester.php", content);
@@ -240,7 +240,7 @@ public sealed class ClientRequestTests
         (HttpClient client, _, _, string cookie, WebApplicationFactory<KONGORAssemblyMarker> factory) = await SetupAsync();
         await using (factory)
         {
-            Dictionary<string, string> payload = ClientRequestPayloads.Unverified.ServerList(cookie);
+            Dictionary<string, string> payload = ClientRequestPayloads.ServerList(cookie);
             FormUrlEncodedContent content = new(payload);
 
             HttpResponseMessage response = await client.PostAsync("client_requester.php", content);
@@ -254,7 +254,7 @@ public sealed class ClientRequestTests
         (HttpClient client, _, _, string cookie, WebApplicationFactory<KONGORAssemblyMarker> factory) = await SetupAsync();
         await using (factory)
         {
-            Dictionary<string, string> payload = ClientRequestPayloads.Unverified.GetHeroList(cookie);
+            Dictionary<string, string> payload = ClientRequestPayloads.GetHeroList(cookie);
             FormUrlEncodedContent content = new(payload);
 
             HttpResponseMessage response = await client.PostAsync("client_requester.php", content);
@@ -270,7 +270,7 @@ public sealed class ClientRequestTests
         {
             Account account = await EntityFrameworkQueryableExtensions.FirstAsync(dbContext.Accounts, a => a.Cookie == cookie);
 
-            Dictionary<string, string> payload = ClientRequestPayloads.Unverified.ShowStats(cookie, account.Name);
+            Dictionary<string, string> payload = ClientRequestPayloads.ShowStats(cookie, account.Name);
             FormUrlEncodedContent content = new(payload);
 
             HttpResponseMessage response = await client.PostAsync("client_requester.php", content);
@@ -308,7 +308,7 @@ public sealed class ClientRequestTests
             await dbContext.Accounts.AddAsync(account);
             await dbContext.SaveChangesAsync();
 
-            Dictionary<string, string> payload = ClientRequestPayloads.Verified.PreAuth(accountName);
+            Dictionary<string, string> payload = ClientRequestPayloads.PreAuth(accountName);
             FormUrlEncodedContent content = new(payload);
             HttpResponseMessage response = await client.PostAsync("client_requester.php", content);
             response.EnsureSuccessStatusCode();
@@ -327,7 +327,7 @@ public sealed class ClientRequestTests
         
         await using (factory)
         {
-            Dictionary<string, string> payload = ClientRequestPayloads.Verified.SrpAuth("SomeUser", "bad_proof");
+            Dictionary<string, string> payload = ClientRequestPayloads.SrpAuth("SomeUser", "bad_proof");
             FormUrlEncodedContent content = new(payload);
             HttpResponseMessage response = await client.PostAsync("client_requester.php", content);
             
@@ -341,7 +341,7 @@ public sealed class ClientRequestTests
         (HttpClient client, _, _, string cookie, WebApplicationFactory<KONGORAssemblyMarker> factory) = await SetupAsync("MsgUser");
         await using (factory)
         {
-             Dictionary<string, string> payload = ClientRequestPayloads.Verified.GetSpecialMessages(cookie);
+             Dictionary<string, string> payload = ClientRequestPayloads.GetSpecialMessages(cookie);
              FormUrlEncodedContent content = new(payload);
              HttpResponseMessage response = await client.PostAsync("client_requester.php", content);
              response.EnsureSuccessStatusCode();
@@ -354,7 +354,7 @@ public sealed class ClientRequestTests
         (HttpClient client, _, _, string cookie, WebApplicationFactory<KONGORAssemblyMarker> factory) = await SetupAsync("ProdUser");
         await using (factory)
         {
-             Dictionary<string, string> payload = ClientRequestPayloads.Verified.GetProducts(cookie);
+             Dictionary<string, string> payload = ClientRequestPayloads.GetProducts(cookie);
              FormUrlEncodedContent content = new(payload);
              HttpResponseMessage response = await client.PostAsync("client_requester.php", content);
              response.EnsureSuccessStatusCode();
@@ -367,7 +367,7 @@ public sealed class ClientRequestTests
         (HttpClient client, _, _, string cookie, WebApplicationFactory<KONGORAssemblyMarker> factory) = await SetupAsync("EventUser");
         await using (factory)
         {
-             Dictionary<string, string> payload = ClientRequestPayloads.Verified.ClientEventsInfo(cookie);
+             Dictionary<string, string> payload = ClientRequestPayloads.ClientEventsInfo(cookie);
              FormUrlEncodedContent content = new(payload);
              HttpResponseMessage response = await client.PostAsync("client_requester.php", content);
              response.EnsureSuccessStatusCode();
@@ -381,7 +381,7 @@ public sealed class ClientRequestTests
         (HttpClient client, _, _, string cookie, WebApplicationFactory<KONGORAssemblyMarker> factory) = await SetupAsync(nickname);
         await using (factory)
         {
-             Dictionary<string, string> payload = ClientRequestPayloads.Verified.ShowSimpleStats(cookie, nickname);
+             Dictionary<string, string> payload = ClientRequestPayloads.ShowSimpleStats(cookie, nickname);
              FormUrlEncodedContent content = new(payload);
              HttpResponseMessage response = await client.PostAsync("client_requester.php", content);
              response.EnsureSuccessStatusCode();
@@ -394,7 +394,7 @@ public sealed class ClientRequestTests
         (HttpClient client, _, _, string cookie, WebApplicationFactory<KONGORAssemblyMarker> factory) = await SetupAsync("HeroStatsUser");
         await using (factory)
         {
-             Dictionary<string, string> payload = ClientRequestPayloads.Verified.GetAccountAllHeroStats(cookie);
+             Dictionary<string, string> payload = ClientRequestPayloads.GetAccountAllHeroStats(cookie);
              FormUrlEncodedContent content = new(payload);
              HttpResponseMessage response = await client.PostAsync("client_requester.php", content);
              response.EnsureSuccessStatusCode();
@@ -423,7 +423,7 @@ public sealed class ClientRequestTests
              };
              await distributedCache.SetMatchServer(matchServer.HostAccountName, matchServer);
 
-             Dictionary<string, string> payload = ClientRequestPayloads.Verified.CreateGame(cookie, "My Custom Game");
+             Dictionary<string, string> payload = ClientRequestPayloads.CreateGame(cookie, "My Custom Game");
              FormUrlEncodedContent content = new(payload);
              HttpResponseMessage response = await client.PostAsync("client_requester.php", content);
              
@@ -443,7 +443,7 @@ public sealed class ClientRequestTests
         (HttpClient client, _, _, string cookie, WebApplicationFactory<KONGORAssemblyMarker> factory) = await SetupAsync("Notifier");
         await using (factory)
         {
-             Dictionary<string, string> payload = ClientRequestPayloads.Verified.NewGameAvailable(cookie);
+             Dictionary<string, string> payload = ClientRequestPayloads.NewGameAvailable(cookie);
              FormUrlEncodedContent content = new(payload);
              HttpResponseMessage response = await client.PostAsync("client_requester.php", content);
 
@@ -459,7 +459,7 @@ public sealed class ClientRequestTests
         (HttpClient client, _, _, string cookie, WebApplicationFactory<KONGORAssemblyMarker> factory) = await SetupAsync("SeasonUser");
         await using (factory)
         {
-             Dictionary<string, string> payload = ClientRequestPayloads.Verified.ClaimSeasonRewards(cookie);
+             Dictionary<string, string> payload = ClientRequestPayloads.ClaimSeasonRewards(cookie);
              FormUrlEncodedContent content = new(payload);
              HttpResponseMessage response = await client.PostAsync("client_requester.php", content);
 
@@ -473,7 +473,7 @@ public sealed class ClientRequestTests
         (HttpClient client, _, _, string cookie, WebApplicationFactory<KONGORAssemblyMarker> factory) = await SetupAsync("ListUser");
         await using (factory)
         {
-             Dictionary<string, string> payload = ClientRequestPayloads.Verified.ServerList(cookie);
+             Dictionary<string, string> payload = ClientRequestPayloads.ServerList(cookie);
              FormUrlEncodedContent content = new(payload);
              HttpResponseMessage response = await client.PostAsync("client_requester.php", content);
 
@@ -487,7 +487,7 @@ public sealed class ClientRequestTests
         (HttpClient client, _, IDatabase distributedCache, string cookie, WebApplicationFactory<KONGORAssemblyMarker> factory) = await SetupAsync("LogoutUser");
         await using (factory)
         {
-             Dictionary<string, string> payload = ClientRequestPayloads.Verified.Logout(cookie);
+             Dictionary<string, string> payload = ClientRequestPayloads.Logout(cookie);
              FormUrlEncodedContent content = new(payload);
              HttpResponseMessage response = await client.PostAsync("client_requester.php", content);
 
@@ -546,13 +546,13 @@ public sealed class ClientRequestTests
              await dbContext.MatchStatistics.AddAsync(matchStats);
              await dbContext.SaveChangesAsync();
 
-             Dictionary<string, string> payload = ClientRequestPayloads.Verified.GetMatchStats(cookie, 12345);
+             Dictionary<string, string> payload = ClientRequestPayloads.GetMatchStats(cookie, 12345);
              FormUrlEncodedContent content = new(payload);
              HttpResponseMessage response = await client.PostAsync("client_requester.php", content);
 
              response.EnsureSuccessStatusCode();
              
-             Dictionary<string, object> expected = ClientRequestPayloads.Verified.ExpectedResponses.GetMatchStats(12345);
+             Dictionary<string, object> expected = ClientRequestPayloads.ExpectedResponses.GetMatchStats(12345);
              string responseBody = await response.Content.ReadAsStringAsync();
              
              foreach(string key in expected.Keys)
@@ -569,13 +569,13 @@ public sealed class ClientRequestTests
         (HttpClient client, _, _, string cookie, WebApplicationFactory<KONGORAssemblyMarker> factory) = await SetupAsync("UpgradeUser");
         await using (factory)
         {
-             Dictionary<string, string> payload = ClientRequestPayloads.Verified.GetUpgrades(cookie);
+             Dictionary<string, string> payload = ClientRequestPayloads.GetUpgrades(cookie);
              FormUrlEncodedContent content = new(payload);
              HttpResponseMessage response = await client.PostAsync("client_requester.php", content);
 
              response.EnsureSuccessStatusCode();
              
-             Dictionary<string, object> expected = ClientRequestPayloads.Verified.ExpectedResponses.GetUpgrades();
+             Dictionary<string, object> expected = ClientRequestPayloads.ExpectedResponses.GetUpgrades();
              string responseBody = await response.Content.ReadAsStringAsync();
 
              foreach(string key in expected.Keys)
