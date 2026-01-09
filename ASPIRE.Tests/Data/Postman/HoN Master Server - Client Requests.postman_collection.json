@@ -1,0 +1,379 @@
+{
+	"info": {
+		"_postman_id": "b9231957-378c-453a-881d-33771fa07d40",
+		"name": "HoN Master Server - Client Requests",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "51360248",
+		"_collection_link": "https://guccidonutofficial-6981387.postman.co/workspace/gucci-donut's-Workspace~3072a68d-a7b0-405e-813d-b2122d6182af/collection/51360248-b9231957-378c-453a-881d-33771fa07d40?action=share&source=collection_link&creator=51360248"
+	},
+	"item": [
+		{
+			"name": "Pre-Auth (Handshake)",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "User-Agent",
+						"value": "S2 Games/Heroes of Newerth/4.10.1.0/wac/x86_64"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/x-www-form-urlencoded"
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "login",
+							"value": "GUEST-05",
+							"type": "text"
+						},
+						{
+							"key": "A",
+							"value": "b39b818291aecf313167159c104468c570b9575179c873fa283ffdc1c26aebeaf9dc9153f83ba24ace556ece102859fe1feb8f4c078a98ed59db4475080b84241603878f19196354121df66a41a6518aebf5c63cdc40bf7ebc567a467aef1e61adacd4efc12ea2da2dbcaacdd4b85f13365035b39d9d1cecab7401b19b3e347f71178142e631bccaff97bc36613ce4a76b255ceea1a511d5464fb14406277040abf7a7726c3feed2143456ea6af4eadb51398559c4e037fd58a9e2e24444577258cf09c28819126e3b978f3408612b1e58f1304e2163726e5faa088664449a34089af08e7575cc4ee9da502f6b0b2533c77d863721e4d8208807866fe4059ec5",
+							"type": "text"
+						},
+						{
+							"key": "SysInfo",
+							"value": "c8-7f-54-ec-16-eb|Microsoft Windows 11 Home; Version 10.0.26100",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://127.0.0.1:55555/client_requester.php?f=pre_auth",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "55555",
+					"path": [
+						"client_requester.php"
+					],
+					"query": [
+						{
+							"key": "f",
+							"value": "pre_auth"
+						}
+					]
+				},
+				"description": "Generated from cURL: curl --location 'http://127.0.0.1:55555/client_requester.php?f=pre_auth' \\\r\n--header 'User-Agent: S2 Games/Heroes of Newerth/4.10.1.0/wac/x86_64' \\\r\n--header 'Content-Type: application/x-www-form-urlencoded' \\\r\n--data-urlencode 'login=GUEST-05' \\\r\n--data-urlencode 'A=b39b818291aecf313167159c104468c570b9575179c873fa283ffdc1c26aebeaf9dc9153f83ba24ace556ece102859fe1feb8f4c078a98ed59db4475080b84241603878f19196354121df66a41a6518aebf5c63cdc40bf7ebc567a467aef1e61adacd4efc12ea2da2dbcaacdd4b85f13365035b39d9d1cecab7401b19b3e347f71178142e631bccaff97bc36613ce4a76b255ceea1a511d5464fb14406277040abf7a7726c3feed2143456ea6af4eadb51398559c4e037fd58a9e2e24444577258cf09c28819126e3b978f3408612b1e58f1304e2163726e5faa088664449a34089af08e7575cc4ee9da502f6b0b2533c77d863721e4d8208807866fe4059ec5' \\\r\n--data-urlencode 'SysInfo=c8-7f-54-ec-16-eb|Microsoft+Windows+11+Home;+Version+10.0.26100'"
+			},
+			"response": []
+		},
+		{
+			"name": "Login",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "User-Agent",
+						"value": "S2 Games/Heroes of Newerth/4.10.1.0/wac/x86_64"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/x-www-form-urlencoded"
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "login",
+							"value": "GUEST-05",
+							"type": "text"
+						},
+						{
+							"key": "proof",
+							"value": "fb2a302b25bbbf2272a989d735da9f6d0b39f9ad7f0bc7023c4aeeb6d7f7c271",
+							"type": "text"
+						},
+						{
+							"key": "OSType",
+							"value": "129",
+							"type": "text"
+						},
+						{
+							"key": "MajorVersion",
+							"value": "6",
+							"type": "text"
+						},
+						{
+							"key": "MinorVersion",
+							"value": "2",
+							"type": "text"
+						},
+						{
+							"key": "MicroVersion",
+							"value": "0",
+							"type": "text"
+						},
+						{
+							"key": "SysInfo",
+							"value": "c8-7f-54-ec-16-eb|Microsoft Windows 11 Home; Version 10.0.26100",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://127.0.0.1:55555/client_requester.php?f=srpAuth",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "55555",
+					"path": [
+						"client_requester.php"
+					],
+					"query": [
+						{
+							"key": "f",
+							"value": "srpAuth"
+						}
+					]
+				},
+				"description": "Generated from cURL: curl --location 'http://127.0.0.1:55555/client_requester.php?f=srpAuth' \\\r\n--header 'User-Agent: S2 Games/Heroes of Newerth/4.10.1.0/wac/x86_64' \\\r\n--header 'Content-Type: application/x-www-form-urlencoded' \\\r\n--data-urlencode 'login=GUEST-05' \\\r\n--data-urlencode 'proof=fb2a302b25bbbf2272a989d735da9f6d0b39f9ad7f0bc7023c4aeeb6d7f7c271' \\\r\n--data-urlencode 'OSType=129' \\\r\n--data-urlencode 'MajorVersion=6' \\\r\n--data-urlencode 'MinorVersion=2' \\\r\n--data-urlencode 'MicroVersion=0' \\\r\n--data-urlencode 'SysInfo=c8-7f-54-ec-16-eb|Microsoft+Windows+11+Home;+Version+10.0.26100'"
+			},
+			"response": []
+		},
+		{
+			"name": "Submit Stats",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "f",
+							"value": "submit_stats",
+							"type": "text"
+						},
+						{
+							"key": "session",
+							"value": "019b9e52-abba-7917-acb3-3a5b13791281",
+							"type": "text"
+						},
+						{
+							"key": "match_stats[server_id]",
+							"value": "42243134",
+							"type": "text"
+						},
+						{
+							"key": "match_stats[match_id]",
+							"value": "689706217",
+							"type": "text"
+						},
+						{
+							"key": "match_stats[map]",
+							"value": "caldavar",
+							"type": "text"
+						},
+						{
+							"key": "match_stats[map_version]",
+							"value": "0.0.0",
+							"type": "text"
+						},
+						{
+							"key": "match_stats[version]",
+							"value": "4.10.1.0",
+							"type": "text"
+						},
+						{
+							"key": "match_stats[time_played]",
+							"value": "142",
+							"type": "text"
+						},
+						{
+							"key": "match_stats[file_size]",
+							"value": "0",
+							"type": "text"
+						},
+						{
+							"key": "match_stats[file_name]",
+							"value": "~/replays/689706217.honreplay",
+							"type": "text"
+						},
+						{
+							"key": "match_stats[c_state]",
+							"value": "5",
+							"type": "text"
+						},
+						{
+							"key": "match_stats[avgpsr]",
+							"value": "1500",
+							"type": "text"
+						},
+						{
+							"key": "match_stats[gamemode]",
+							"value": "solosame",
+							"type": "text"
+						},
+						{
+							"key": "match_stats[release_stage]",
+							"value": "RETAIL",
+							"type": "text"
+						},
+						{
+							"key": "match_stats[banned_heroes]",
+							"value": "Hero_Nomad,Hero_Dampeer,Hero_WitchSlayer,Hero_Ichor",
+							"type": "text"
+						},
+						{
+							"key": "team_stats[1][score]",
+							"value": "0",
+							"type": "text"
+						},
+						{
+							"key": "team_stats[2][score]",
+							"value": "0",
+							"type": "text"
+						},
+						{
+							"key": "player_stats[59][Hero_ForsakenArcher][nickname]",
+							"value": "guccidonut",
+							"type": "text"
+						},
+						{
+							"key": "player_stats[59][Hero_ForsakenArcher][team]",
+							"value": "2",
+							"type": "text"
+						},
+						{
+							"key": "player_stats[59][Hero_ForsakenArcher][hero_id]",
+							"value": "4294967295",
+							"type": "text"
+						},
+						{
+							"key": "player_stats[59][Hero_ForsakenArcher][losses]",
+							"value": "1",
+							"type": "text"
+						},
+						{
+							"key": "player_stats[59][Hero_ForsakenArcher][gold]",
+							"value": "225",
+							"type": "text"
+						},
+						{
+							"key": "player_stats[59][Hero_ForsakenArcher][gold_spent]",
+							"value": "700",
+							"type": "text"
+						},
+						{
+							"key": "player_stats[59][Hero_ForsakenArcher][exp]",
+							"value": "124",
+							"type": "text"
+						},
+						{
+							"key": "player_stats[59][Hero_ForsakenArcher][deaths]",
+							"value": "1",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{HOST}}/stats_requester.php",
+					"host": [
+						"{{HOST}}"
+					],
+					"path": [
+						"stats_requester.php"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Server List",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "User-Agent",
+						"value": "S2 Games/Heroes of Newerth/4.10.1.0/wac/x86_64"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/x-www-form-urlencoded"
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "cookie",
+							"value": "019ba104320c705a8b5524d8fdb8d2a2",
+							"type": "text"
+						},
+						{
+							"key": "gametype",
+							"value": "10",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "http://127.0.0.1:55555/client_requester.php?f=server_list",
+					"protocol": "http",
+					"host": [
+						"127",
+						"0",
+						"0",
+						"1"
+					],
+					"port": "55555",
+					"path": [
+						"client_requester.php"
+					],
+					"query": [
+						{
+							"key": "f",
+							"value": "server_list"
+						}
+					]
+				},
+				"description": "Generated from cURL: curl --location 'http://127.0.0.1:55555/client_requester.php?f=server_list' \\\r\n--header 'User-Agent: S2 Games/Heroes of Newerth/4.10.1.0/wac/x86_64' \\\r\n--header 'Content-Type: application/x-www-form-urlencoded' \\\r\n--data-urlencode 'cookie=019ba104320c705a8b5524d8fdb8d2a2' \\\r\n--data-urlencode 'gametype=10'"
+			},
+			"response": []
+		},
+		{
+			"name": "Get Upgrades",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "f",
+							"value": "get_upgrades",
+							"type": "text"
+						},
+						{
+							"key": "cookie",
+							"value": "019b9ec9-d007-7a1c-975c-67b40be6f5ee\n\n",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{HOST}}/client_requester.php",
+					"host": [
+						"{{HOST}}"
+					],
+					"path": [
+						"client_requester.php"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
