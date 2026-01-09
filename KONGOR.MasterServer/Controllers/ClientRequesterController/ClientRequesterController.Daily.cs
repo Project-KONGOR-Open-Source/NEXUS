@@ -7,14 +7,29 @@ public partial class ClientRequesterController
     private async Task<IActionResult> HandleGetDailySpecial()
     {
         // 1. Validate Session
+        // 1. Validate Session
         string? cookie = Request.Form["cookie"];
         if (string.IsNullOrEmpty(cookie))
             return Unauthorized();
 
+        cookie = cookie.Replace("-", string.Empty);
+
+        string? sessionAccountName = HttpContext.Items["SessionAccountName"] as string;
+
+        if (sessionAccountName is null)
+        { 
+             // Try validate if not already done (though ClientRequester should have done it)
+             (bool accountSessionCookieIsValid, string? cacheAccountName) = await DistributedCache.ValidateAccountSessionCookie(cookie);
+             if (accountSessionCookieIsValid) sessionAccountName = cacheAccountName;
+        }
+
+        if (sessionAccountName is null) 
+            return Unauthorized($@"No Session Found For Cookie ""{cookie}""");
+
         // 2. Retrieve Account (with User data for ownership check)
         global::MERRICK.DatabaseContext.Entities.Core.Account? account = await MerrickContext.Accounts
             .Include(a => a.User)
-            .SingleOrDefaultAsync(a => a.Cookie == cookie);
+            .SingleOrDefaultAsync(a => a.Name == sessionAccountName);
 
         if (account == null)
             return Unauthorized();

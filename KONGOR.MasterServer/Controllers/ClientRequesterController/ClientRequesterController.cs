@@ -24,14 +24,36 @@ public partial class ClientRequesterController(MerrickContext databaseContext, I
     private ILogger Logger { get; } = logger;
 
     [HttpPost(Name = "Client Requester All-In-One")]
+    [HttpGet]
+    [HttpHead]
     public async Task<IActionResult> ClientRequester()
     {
         // 2026-01-07: Normalize to lowercase for case-insensitive handling (PHP parity).
-        string? functionName = (Request.Query["f"].FirstOrDefault() ?? Request.Form["f"].FirstOrDefault())?.ToLower();
+        // 2026-01-08: FIX - Safely retrieve parameters checking for Form content type first.
+        string? functionName = null;
+        string? cookieRaw = "NULL";
+
+        if (Request.HasFormContentType)
+        {
+            functionName = Request.Form["f"].FirstOrDefault();
+            cookieRaw = Request.Form["cookie"].FirstOrDefault() ?? "NULL";
+        }
+        
+        // Fallback to Query if Form is empty or not present
+        if (string.IsNullOrEmpty(functionName))
+        {
+            functionName = Request.Query["f"].FirstOrDefault();
+        }
+        
+        if (cookieRaw == "NULL")
+        {
+             cookieRaw = Request.Query["cookie"].FirstOrDefault() ?? "NULL";
+        }
+        
+        functionName = functionName?.ToLower();
         
         bool endpointRequiresCookieValidation = functionName is not "auth" and not "pre_auth" and not "srpauth" and not "get_match_stats";
         
-        string cookieRaw = Request.Form["cookie"].ToString() ?? "NULL";
         Logger.LogInformation($"[ClientRequester] Processing '{functionName}'. Raw Cookie: '{cookieRaw}' (RequiresValidation: {endpointRequiresCookieValidation})");
 
         (bool accountSessionCookieIsValid, string? sessionAccountName) = await DistributedCache.ValidateAccountSessionCookie(cookieRaw);
@@ -66,9 +88,9 @@ public partial class ClientRequesterController(MerrickContext databaseContext, I
             else
             {
                 Logger.LogError($"[ClientRequester] DB Miss! Cookie '{cookie}' not found in Accounts table.");
-                Logger.LogWarning($@"IP Address ""{Request.HttpContext.Connection.RemoteIpAddress?.MapToIPv4().ToString() ?? "UNKNOWN"}"" Has Made A Client Request With Forged Cookie ""{Request.Form["cookie"]}""");
+                Logger.LogWarning($@"IP Address ""{Request.HttpContext.Connection.RemoteIpAddress?.MapToIPv4().ToString() ?? "UNKNOWN"}"" Has Made A Client Request With Forged Cookie ""{cookieRaw}""");
 
-                return Unauthorized($@"Unrecognized Cookie ""{Request.Form["cookie"]}""");
+                return Unauthorized($@"Unrecognized Cookie ""{cookieRaw}""");
             }
         }
 
@@ -116,11 +138,15 @@ public partial class ClientRequesterController(MerrickContext databaseContext, I
             "get_account_all_hero_stats"    => await HandleGetAccountAllHeroStats(),
             "get_account_mastery"           => await HandleGetAccountMastery(),
             "get_match_stats"               => await HandleMatchStats(),
+            "get_campaign_hero_stats"       => await HandleGetCampaignHeroStats(),
 
             // upgrades
             "get_upgrades"                  => await HandleGetUpgrades(),
             "get_products"                  => await HandleGetProducts(),
             "get_daily_special"             => await HandleGetDailySpecial(),
+            
+            // DEBUG TOOLS (2026-01-08)
+            "debug_upgrades_diff"           => await HandleDebugUpgradesDiff(),
 
             // guides
             "get_guide_list_filtered"       => await GetGuideList(),

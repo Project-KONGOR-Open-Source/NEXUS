@@ -1,5 +1,9 @@
 ﻿namespace KONGOR.MasterServer.Extensions.Cache;
 
+using MERRICK.DatabaseContext;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+
 public static partial class DistributedCacheExtensions
 {
     private static string ConstructSRPAuthenticationSessionDataKey(string accountName) => $@"SRP-SESSION-DATA:[""{accountName}""]";
@@ -74,6 +78,34 @@ public static partial class DistributedCacheExtensions
              string noDashCookie = guid2.ToString("N");
              accountName = await distributedCacheStore.GetAccountNameForSessionCookie(noDashCookie);
              if (accountName is not null) return (true, accountName);
+        }
+
+        return (false, null);
+    }
+
+    public static async Task<(bool IsValid, string? AccountName)> ValidateAccountSessionCookie(this IDatabase distributedCacheStore, string cookie, MerrickContext dbContext, ILogger? logger = null)
+    {
+        // 1. Check Redis (Fast Path)
+        (bool isValid, string? accountName) = await distributedCacheStore.ValidateAccountSessionCookie(cookie);
+        if (isValid) return (true, accountName);
+
+        // 2. Check Database (Fallback Path)
+        // Fuzzy Logic:
+        // - If length 32 (no dashes), try match with dashed version.
+        // - If length 36 (dashes), try match with dash-less version.
+        
+        string? altCookie = null;
+        if (cookie.Length == 32 && Guid.TryParse(cookie, out Guid guid)) altCookie = guid.ToString(); // Dashed
+        else if (cookie.Contains("-") && Guid.TryParse(cookie, out Guid guid2)) altCookie = guid2.ToString("N"); // No Dashes
+
+        Account? account = await dbContext.Accounts.FirstOrDefaultAsync(a => a.Cookie == cookie || (altCookie != null && a.Cookie == altCookie));
+
+        if (account != null)
+        {
+             // Session is valid in DB. Restore to Redis.
+             await distributedCacheStore.SetAccountNameForSessionCookie(cookie, account.Name);
+             if (logger != null) logger.LogInformation($"[SessionFallback] DB Hit! Restored Session From Database For Cookie '{cookie}' (User: {account.Name})");
+             return (true, account.Name);
         }
 
         return (false, null);

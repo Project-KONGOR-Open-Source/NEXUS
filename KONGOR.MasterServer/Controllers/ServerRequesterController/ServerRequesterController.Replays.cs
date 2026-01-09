@@ -4,7 +4,7 @@ public partial class ServerRequesterController
 {
     private async Task<IActionResult> HandleGetSpectatorHeader()
     {
-        string baseURL = $"{Request.Scheme}://{Request.Host}";
+        string baseURL = Configuration.CDN.Host;
         string targetURL = $"{baseURL}/replays/upload";
 
         Dictionary<string, object> response = new ()

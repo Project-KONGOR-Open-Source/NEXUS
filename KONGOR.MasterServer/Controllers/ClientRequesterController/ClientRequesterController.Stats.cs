@@ -45,8 +45,7 @@ public partial class ClientRequesterController
         if (account is null)
             return NotFound("Account Not Found");
 
-        if (account is null)
-            return NotFound("Account Not Found");
+
 
         // 2026-01-06: FIX - Refactored to return explicit dictionary matching legacy protocol.
         // We exclude 'my_upgrades' and 'my_upgrades_info' from get_initStats as they trigger client-side errors.
@@ -72,12 +71,43 @@ public partial class ClientRequesterController
             { "mvp_num", fullResponse.MVPAwardsCount },
             { "award_top4_name", fullResponse.Top4AwardNames },
             { "award_top4_num", fullResponse.Top4AwardCounts },
+            { "points", account.User.GoldCoins.ToString() },
+            { "mmpoints", account.User.SilverCoins },
             { "slot_id", fullResponse.CustomIconSlotID },
             { "selected_upgrades", fullResponse.SelectedStoreItems },
             { "dice_tokens", fullResponse.DiceTokens },
             { "game_tokens", fullResponse.GameTokens },
             { "timestamp", fullResponse.ServerTimestamp },
             { "vested_threshold", fullResponse.VestedThreshold },
+            { "quest_system", new Dictionary<string, object>
+                {
+                    { "error", new Dictionary<string, int>
+                        {
+                            { "quest_status", 0 },
+                            { "leaderboard_status", 0 }
+                        }
+                    }
+                }
+            },
+            { "season_system", new Dictionary<string, object>
+                {
+                    { "drop_diamonds", 0 },
+                    { "cur_diamonds", 0 },
+                    { "box_price", new Dictionary<int, int>() }
+                }
+            },
+            { "con_reward", new Dictionary<string, object>
+                {
+                    { "old_lvl", 5 },
+                    { "curr_lvl", 6 },
+                    { "next_lvl", 0 },
+                    { "require_rank", 0 },
+                    { "need_more_play", 0 },
+                    { "percentage_before", "0.92" },
+                    { "percentage", "1.00" }
+
+                }
+            },
             { "0", fullResponse.Zero }
         };
 
@@ -362,16 +392,20 @@ public partial class ClientRequesterController
         => account.SelectedStoreItems.Any(item => item.StartsWith("ai.custom_icon"))
             ? account.SelectedStoreItems.FirstOrDefault(item => item.StartsWith("ai.custom_icon"))?.Replace("ai.custom_icon:", string.Empty) ?? "0" : "0";
 
-    private static Dictionary<string, OneOf<global::KONGOR.MasterServer.Models.RequestResponse.SRP.StoreItemData, global::KONGOR.MasterServer.Models.RequestResponse.Store.StoreItemDiscountCoupon>> SetOwnedStoreItemsData(Account account)
+        private static Dictionary<string, object> SetOwnedStoreItemsData(Account account)
     {
-        // 2026-01-06: FIX - Do NOT populate metadata for standard owned items (avatars, etc.).
-        // The legacy client expects 'my_upgrades_info' to contain specific data for Rentables/Coupons only.
-        // Sending generic StoreItemData with empty strings for all items causes "Error when refreshing upgrades" and client logout.
-        Dictionary<string, OneOf<global::KONGOR.MasterServer.Models.RequestResponse.SRP.StoreItemData, global::KONGOR.MasterServer.Models.RequestResponse.Store.StoreItemDiscountCoupon>> items = new();
+        // 2026-01-08: FIX - Aligned with Upgrades.cs.
+        // We must populate my_upgrades_info for ALL owned items, otherwise the client may crash or log out when parsing stats/inventory.
+        Dictionary<string, object> items = new();
+
+        foreach (string item in account.User.OwnedStoreItems)
+        {
+            // We use default StoreItemData which implies permanent ownership
+            items[item] = new global::KONGOR.MasterServer.Models.RequestResponse.SRP.StoreItemData();
+        }
 
         // TODO: Add Mastery Boosts And Coupons (cp. items) when implemented.
-        // Legacy reference: GameConsumables.GetOwnedCoupons checks for "cp." prefix.
-
+        
         return items;
     }
 }

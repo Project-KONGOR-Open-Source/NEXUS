@@ -99,6 +99,32 @@ public static class ClientRequestPayloads
     }
 
     /// <summary>
+    /// [VERIFIED] Variant of server list with 'get_server_list' function.
+    /// </summary>
+    public static Dictionary<string, string> GetServerList(string cookie)
+    {
+        return new Dictionary<string, string>
+        {
+            { "f", "get_server_list" },
+            { "cookie", cookie },
+            { "gametype", "10" }
+        };
+    }
+
+    /// <summary>
+    /// [VERIFIED] Variant of server list with 'grab_server_list' function.
+    /// </summary>
+    public static Dictionary<string, string> GrabServerList(string cookie)
+    {
+        return new Dictionary<string, string>
+        {
+            { "f", "grab_server_list" },
+            { "cookie", cookie },
+            { "gametype", "10" }
+        };
+    }
+
+    /// <summary>
     /// [VERIFIED] Standard logout.
     /// </summary>
     public static Dictionary<string, string> Logout(string cookie)
@@ -130,33 +156,45 @@ public static class ClientRequestPayloads
     /// <summary>
     /// [VERIFIED] Check for new games.
     /// </summary>
-    public static Dictionary<string, string> NewGameAvailable(string cookie)
-    {
-        return new Dictionary<string, string>
+        public static Dictionary<string, string> NewGameAvailable(string cookie)
         {
-            { "f", "new_game_available" },
-            { "cookie", cookie }
-        };
-    }
+            return new Dictionary<string, string>
+            {
+                { "f", "new_game_available" },
+                { "cookie", cookie }
+            };
+        }
+
+        /// <summary>
+        /// [VERIFIED] Upgrades retrieval.
+        /// </summary>
+        public static Dictionary<string, string> GetUpgrades(string cookie)
+        {
+            return new Dictionary<string, string>
+            {
+                { "f", "get_upgrades" },
+                { "cookie", cookie }
+            };
+        }
+
+        /// <summary>
+        /// [VERIFIED] Daily special retrieval.
+        /// </summary>
+        public static Dictionary<string, string> GetDailySpecial(string cookie)
+        {
+            return new Dictionary<string, string>
+            {
+                { "f", "get_daily_special" },
+                { "cookie", cookie }
+            };
+        }
 
     // ==================================================================================
     // UNVERIFIED / UNDER INVESTIGATION
     // These payloads are either theoretical or currently causing issues/crashes.
     // ==================================================================================
 
-    /// <summary>
-    /// [UNVERIFIED] [CRASH SUSPECT]
-    /// This request is crashing the client immediately after match finish.
-    /// Issue: Type mismatch in `selected_upgrades` (List vs Dictionary).
-    /// </summary>
-    public static Dictionary<string, string> GetUpgrades(string cookie)
-    {
-        return new Dictionary<string, string>
-        {
-            { "f", "get_upgrades" },
-            { "cookie", cookie }
-        };
-    }
+
 
     /// <summary>
     /// [UNVERIFIED] [REGRESSION RISK]
@@ -374,31 +412,7 @@ public static class ClientRequestPayloads
         };
     }
 
-    /// <summary>
-    /// [UNVERIFIED] Variant of server list with 'get_server_list' function.
-    /// </summary>
-    public static Dictionary<string, string> GetServerList(string cookie)
-    {
-        return new Dictionary<string, string>
-        {
-            { "f", "get_server_list" },
-            { "cookie", cookie },
-            { "gametype", "10" }
-        };
-    }
 
-    /// <summary>
-    /// [UNVERIFIED] Variant of server list with 'grab_server_list' function.
-    /// </summary>
-    public static Dictionary<string, string> GrabServerList(string cookie)
-    {
-        return new Dictionary<string, string>
-        {
-            { "f", "grab_server_list" },
-            { "cookie", cookie },
-            { "gametype", "10" }
-        };
-    }
 
     /// <summary>
     /// [UNVERIFIED] Hero list retrieval.
@@ -487,17 +501,7 @@ public static class ClientRequestPayloads
         };
     }
 
-    /// <summary>
-    /// [UNVERIFIED] Daily special retrieval.
-    /// </summary>
-    public static Dictionary<string, string> GetDailySpecial(string cookie)
-    {
-        return new Dictionary<string, string>
-        {
-            { "f", "get_daily_special" },
-            { "cookie", cookie }
-        };
-    }
+
 
     /// <summary>
     /// [UNVERIFIED] Guide list retrieval.

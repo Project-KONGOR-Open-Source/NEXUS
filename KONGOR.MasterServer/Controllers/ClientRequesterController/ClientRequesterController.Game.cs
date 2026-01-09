@@ -86,9 +86,10 @@ public partial class ClientRequesterController
 
     private async Task<IActionResult> HandleFinalMatchStats()
     {
-        // TODO: This likely handles the final stats submission from the client's perspective
-        // or a confirmation that the client has received them.
-        Logger.LogWarning("[STUB] HandleFinalMatchStats called but not implemented.");
-        return Ok(PhpSerialization.Serialize(true));
+        // 2026-01-08: Delegation to HandleMatchStats.
+        // The 'final_match_stats' request is sent by the client at the end of the game to populate the scoreboard.
+        // It expects the same detailed MatchStatsResponse as the 'get_match_stats' view-only request.
+        // The implementation in HandleMatchStats handles form parameters (cookie, match_id) which are identical in this context.
+        return await HandleMatchStats();
     }
 }

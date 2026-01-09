@@ -586,5 +586,24 @@ public sealed class ClientRequestTests
         }
     }
 
+    [Test]
+    public async Task GetDailySpecial_Verified_ReturnsSuccess()
+    {
+        (HttpClient client, _, _, string cookie, WebApplicationFactory<KONGORAssemblyMarker> factory) = await SetupAsync("DailySpecialUser");
+        await using (factory)
+        {
+             Dictionary<string, string> payload = ClientRequestPayloads.GetDailySpecial(cookie);
+             FormUrlEncodedContent content = new(payload);
+             HttpResponseMessage response = await client.PostAsync("client_requester.php", content);
+
+             response.EnsureSuccessStatusCode();
+             string responseBody = await response.Content.ReadAsStringAsync();
+             // Expect at least success or empty array (if not populated)
+             // Daily special often returns cost/product_id, or just success=true if empty
+             // At minimum check for success
+             await Assert.That(responseBody).Contains("s:1:\"0\";"); // "0" key usually
+        }
+    }
+
     #endregion
 }

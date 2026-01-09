@@ -214,6 +214,17 @@ public class KONGOR
             RequestPath = "/swagger"
         });
 
+        // Serve Replay Files
+        string replayPath = Path.Combine(builder.Environment.ContentRootPath, "Resources", "Replays");
+        if (!Directory.Exists(replayPath)) Directory.CreateDirectory(replayPath);
+
+        application.UseStaticFiles(new StaticFileOptions
+        {
+            FileProvider = new PhysicalFileProvider(replayPath),
+            RequestPath = "/replays",
+            ServeUnknownFileTypes = true 
+        });
+
         // Enable Rate Limiting (Before Other Processing)
         application.UseRateLimiter();
 
