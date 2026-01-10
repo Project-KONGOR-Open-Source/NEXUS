@@ -34,9 +34,6 @@ public class ClientHandshake(MerrickContext merrick, IDatabase distributedCacheS
 
         try 
         {
-            string connString = merrick.Database.GetConnectionString() ?? "NULL";
-            Log.Information($"[DEBUG] SQL Connection String: {connString}");
-
             Account? account = await merrick.Accounts
                 .Include(account => account.User).ThenInclude(user => user.Accounts)
                 .Include(account => account.FriendedPeers)
