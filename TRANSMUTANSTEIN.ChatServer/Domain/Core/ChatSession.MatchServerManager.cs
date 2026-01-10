@@ -1,31 +1,25 @@
 ﻿namespace TRANSMUTANSTEIN.ChatServer.Domain.Core;
 
-public class MatchServerManagerChatSession(TCPServer server, IServiceProvider serviceProvider) : ChatSession(server, serviceProvider)
+public partial class ChatSession
 {
     /// <summary>
     ///     Gets set after a successful match server manager handshake.
     ///     Contains metadata about the match server manager connected to this chat session.
     /// </summary>
-    public MatchServerManagerChatSessionMetadata Metadata { get; set; } = null!;
+    public MatchServerManagerChatSessionMetadata ManagerMetadata { get; set; } = null!;
 
-    /// <summary>
-    ///     Gets set after a successful match server manager handshake.
-    ///     Contains the account information of the match server manager connected to this chat session.
-    /// </summary>
-    public Account Account { get; set; } = null!;
-
-    public async Task Terminate(IDatabase distributedCacheStore)
+    public async Task TerminateMatchServerManager(IDatabase distributedCacheStore)
     {
-        await Remove(distributedCacheStore);
+        await RemoveMatchServerManager(distributedCacheStore);
 
         // Remove The Match Server Manager Chat Session
-        if (Context.MatchServerManagerChatSessions.TryRemove(Metadata.ServerManagerID, out MatchServerManagerChatSession? existingSession))
+        if (Context.MatchServerManagerChatSessions.TryRemove(ManagerMetadata.ServerManagerID, out ChatSession? existingSession))
         {
-            Log.Information(@"Match Server Manager ID ""{ServerManagerID}"" Was Removed From The Match Server Manager Pool", Metadata.ServerManagerID);
+            Log.Information(@"Match Server Manager ID ""{ServerManagerID}"" Was Removed From The Match Server Manager Pool", ManagerMetadata.ServerManagerID);
 
             if (existingSession is null)
             {
-                Log.Warning(@"Match Server Manager ID ""{ServerManagerID}"" Had A Null Session In The Match Server Manager Pool", Metadata.ServerManagerID);
+                Log.Warning(@"Match Server Manager ID ""{ServerManagerID}"" Had A Null Session In The Match Server Manager Pool", ManagerMetadata.ServerManagerID);
 
                 // Disconnect And Dispose The Chat Session
                 Disconnect(); Dispose();
@@ -33,9 +27,9 @@ public class MatchServerManagerChatSession(TCPServer server, IServiceProvider se
                 return;
             }
 
-            if (existingSession.Metadata.SessionCookie != Metadata.SessionCookie)
+            if (existingSession.ManagerMetadata.SessionCookie != ManagerMetadata.SessionCookie)
             {
-                Log.Warning(@"Match Server Manager ID ""{ServerManagerID}"" Had A Mismatched Session Cookie", Metadata.ServerManagerID);
+                Log.Warning(@"Match Server Manager ID ""{ServerManagerID}"" Had A Mismatched Session Cookie", ManagerMetadata.ServerManagerID);
 
                 // Disconnect And Dispose The Chat Session
                 Disconnect(); Dispose();
@@ -46,7 +40,7 @@ public class MatchServerManagerChatSession(TCPServer server, IServiceProvider se
             ChatBuffer acknowledgementResponse = new ();
 
             acknowledgementResponse.WriteCommand(ChatProtocol.ChatServerToServerManager.NET_CHAT_SM_REMOTE_COMMAND);
-            acknowledgementResponse.WriteString(Metadata.SessionCookie);
+            acknowledgementResponse.WriteString(ManagerMetadata.SessionCookie);
             acknowledgementResponse.WriteString("quit");
 
             // Send Disconnect Acknowledgement To Match Server Manager
@@ -55,19 +49,19 @@ public class MatchServerManagerChatSession(TCPServer server, IServiceProvider se
 
         else
         {
-            Log.Warning(@"Match Server Manager ID ""{ServerManagerID}"" Attempted To Disconnect But Was Not Found In The Match Server Manager Pool", Metadata.ServerManagerID);
+            Log.Warning(@"Match Server Manager ID ""{ServerManagerID}"" Attempted To Disconnect But Was Not Found In The Match Server Manager Pool", ManagerMetadata.ServerManagerID);
         }
 
         // Disconnect And Dispose The Chat Session
         Disconnect(); Dispose();
 
-        Log.Information(@"Match Server Manager ID ""{ServerManagerID}"" Has Disconnected Gracefully", Metadata.ServerManagerID);
+        Log.Information(@"Match Server Manager ID ""{ServerManagerID}"" Has Disconnected Gracefully", ManagerMetadata.ServerManagerID);
     }
 
-    private async Task Remove(IDatabase distributedCacheStore)
+    private async Task RemoveMatchServerManager(IDatabase distributedCacheStore)
     {
         // Remove Match Server Manager From The Distributed Cache
         // Match Server Children Are Also Implicitly Removed From The Distributed Cache
-        await distributedCacheStore.RemoveMatchServerManagerByID(Metadata.ServerManagerID);
+        await distributedCacheStore.RemoveMatchServerManagerByID(ManagerMetadata.ServerManagerID);
     }
 }

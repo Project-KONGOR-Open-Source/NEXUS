@@ -213,7 +213,7 @@ public class TCPServer : IDisposable
     /// <returns>TRUE If The Server Was Successfully Started, Or FALSE If The Server Failed To Start</returns>
     public virtual bool Start()
     {
-        Debug.Assert(!IsStarted, "TCP Server Is Already Started");
+        // Debug.Assert(!IsStarted, "TCP Server Is Already Started");
         if (IsStarted)
             return false;
 
@@ -355,15 +355,22 @@ public class TCPServer : IDisposable
     {
         if (e.SocketError == SocketError.Success)
         {
-            // Create A New Session To Register
-            TCPSession session = CreateSession();
+            try
+            {
+                // Create A New Session To Register
+                TCPSession session = CreateSession();
 
-            // Register The Session
-            RegisterSession(session);
+                // Register The Session
+                RegisterSession(session);
 
-            // Connect New Session
-            if (e.AcceptSocket != null)
-                session.Connect(e.AcceptSocket);
+                // Connect New Session
+                if (e.AcceptSocket != null)
+                    session.Connect(e.AcceptSocket);
+            }
+            catch (Exception exception)
+            {
+                Log.Error(exception, "Chat Server Encountered An Error While Accepting A Client Connection");
+            }
         }
 
         else SendError(e.SocketError);

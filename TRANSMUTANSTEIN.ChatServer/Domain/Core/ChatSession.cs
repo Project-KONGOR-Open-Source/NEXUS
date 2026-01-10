@@ -1,6 +1,6 @@
 namespace TRANSMUTANSTEIN.ChatServer.Domain.Core;
 
-public class ChatSession(TCPServer server, IServiceProvider serviceProvider) : TCPSession(server)
+public partial class ChatSession(TCPServer server, IServiceProvider serviceProvider) : TCPSession(server)
 {
     /// <summary>
     ///     Gets the current hosting environment information for the web application.
@@ -9,6 +9,20 @@ public class ChatSession(TCPServer server, IServiceProvider serviceProvider) : T
     ///     Use this property to access environment-specific settings, such as the application name, the content root path, or the environment name.
     /// </remarks>
     public IWebHostEnvironment HostEnvironment { get; init; } = serviceProvider.GetRequiredService<IWebHostEnvironment>();
+
+    static ChatSession()
+    {
+        Console.WriteLine("[DEBUG] ChatSession Static Constructor");
+    }
+
+    // Explicit constructor removed to fix CS0111 (Primary Constructor conflict)
+
+    /// <summary>
+    ///     Gets set after a successful handshake (Client or Server).
+    ///     Contains the account information of the entity connected to this chat session.
+    ///     This property is NULL before authentication, but is guaranteed non-NULL after Accept is called.
+    /// </summary>
+    public Account Account { get; set; } = null!;
 
     private static ConcurrentDictionary<ushort, Type> CommandToCommandTypeMap { get; set; } = [];
 
@@ -32,21 +46,18 @@ public class ChatSession(TCPServer server, IServiceProvider serviceProvider) : T
     protected override void OnReceived(byte[] buffer, long offset, long size)
     {
         byte[] received = RemainingPreviouslyReceivedData.Concat(buffer[(int) offset..(int) size]).ToArray();
-
         List<byte[]> segments = ExtractDataSegments(received, out byte[] remaining);
 
         RemainingPreviouslyReceivedData = remaining;
 
         foreach (byte[] segment in segments)
-            ProcessDataSegment(segment);
+            ProcessDataSegment(segment).GetAwaiter().GetResult();
     }
 
     private static List<byte[]> ExtractDataSegments(byte[] buffer, out byte[] remaining)
     {
         remaining = [];
-
         List<byte[]> segments = [];
-
         int offset = 0;
 
         while (offset < buffer.Length)
@@ -55,28 +66,21 @@ public class ChatSession(TCPServer server, IServiceProvider serviceProvider) : T
 
             if (size + 2 <= buffer.Length - offset)
             {
-                byte[] segment = buffer[(offset + 2)..(offset + 2 + size)];
-
-                segments.Add(segment);
-
+                segments.Add(buffer[(offset + 2)..(offset + 2 + size)]);
                 offset += 2 + size;
             }
-
             else
             {
                 remaining = buffer[offset..buffer.Length];
-
                 offset = buffer.Length;
             }
         }
-
         return segments;
     }
 
-    private void ProcessDataSegment(byte[] segment)
+    private async Task ProcessDataSegment(byte[] segment)
     {
         ushort command = BitConverter.ToUInt16([segment[0], segment[1]]);
-
         Type? commandType = GetCommandType(command);
 
         if (commandType is null)
@@ -85,67 +89,88 @@ public class ChatSession(TCPServer server, IServiceProvider serviceProvider) : T
                 .Append(Environment.NewLine).Append($"Message UTF8 Bytes: {string.Join(':', segment)}")
                 .Append(Environment.NewLine).Append($"Message UTF8 Text: {Encoding.UTF8.GetString(segment)}")
                 .ToString();
-
             Log.Error(output);
+            return;
         }
 
-        else
+        Log.Information(@"[IN] Processing Command: ""0x{Command}"" From Session {SessionID}", command.ToString("X4"), ID);
+
+        // Create a scope for the command execution to allow resolving Scoped services (like DbContext)
+        using IServiceScope scope = serviceProvider.CreateScope();
+        
+        try
         {
-            if (HostEnvironment.IsDevelopment())
-                Log.Debug(@"Processing Command: ""0x{Command}""", command.ToString("X4"));
-
-            if (GetCommandTypeInstance(commandType) is { } commandTypeInstance)
+            if (GetCommandTypeInstance(scope.ServiceProvider, commandType) is { } commandTypeInstance)
             {
-                try
-                {
-                    ChatBuffer buffer = new (segment);
+                ChatBuffer buffer = new (segment);
+                Log.Information($"[DEBUG] Dispatching Command Type: {commandTypeInstance.Value.GetType().Name}");
 
-                    commandTypeInstance.Switch
-                    (
-                        synchronousInstance =>
+                // Use Match to return a Task from both branches so we can await completion
+                Task processingTask = commandTypeInstance.Match(
+                    synchronousInstance =>
+                    {
+                        Type instanceType = synchronousInstance.GetType();
+                        Log.Information($"[DEBUG] Synchronous Instance Type: {instanceType.Name}");
+                        
+                        Type? interfaceType = instanceType.GetInterfaces()
+                            .SingleOrDefault(interfaceType => interfaceType.IsGenericType && interfaceType.GetGenericTypeDefinition() == typeof(ISynchronousCommandProcessor<>));
+
+                        if (interfaceType is not null)
                         {
-                            Type instanceType = synchronousInstance.GetType();
+                            MethodInfo? processMethod = interfaceType.GetMethod("Process");
+                            Log.Information($"[DEBUG] Invoking SYNC Process Method on {instanceType.Name}");
+                            processMethod?.Invoke(synchronousInstance, [this, buffer]);
+                        }
+                        return Task.CompletedTask;
+                    },
 
-                            Type? interfaceType = instanceType.GetInterfaces()
-                                .SingleOrDefault(interfaceType => interfaceType.IsGenericType && interfaceType.GetGenericTypeDefinition() == typeof(ISynchronousCommandProcessor<>));
+                    asynchronousInstance =>
+                    {
+                        Type instanceType = asynchronousInstance.GetType();
+                        Log.Information($"[DEBUG] Async Instance Type: {instanceType.Name}");
 
-                            if (interfaceType is not null)
+                        Type? interfaceType = instanceType.GetInterfaces()
+                            .SingleOrDefault(interfaceType => interfaceType.IsGenericType && interfaceType.GetGenericTypeDefinition() == typeof(IAsynchronousCommandProcessor<>));
+
+                        if (interfaceType is not null)
+                        {
+                            MethodInfo? processMethod = interfaceType.GetMethod("Process");
+                            if (processMethod is not null)
                             {
-                                MethodInfo? processMethod = interfaceType.GetMethod("Process");
-
-                                processMethod?.Invoke(synchronousInstance, [this, buffer]);
+                                Log.Information($"[DEBUG] Invoking ASYNC Process Method on {instanceType.Name}");
+                                return (Task?) processMethod.Invoke(asynchronousInstance, [this, buffer]) ?? Task.CompletedTask;
                             }
-                        },
-
-                        async asynchronousInstance =>
-                        {
-                            Type instanceType = asynchronousInstance.GetType();
-
-                            Type? interfaceType = instanceType.GetInterfaces()
-                                .SingleOrDefault(interfaceType => interfaceType.IsGenericType && interfaceType.GetGenericTypeDefinition() == typeof(IAsynchronousCommandProcessor<>));
-
-                            if (interfaceType is not null)
+                            else
                             {
-                                MethodInfo? processMethod = interfaceType.GetMethod("Process");
-
-                                if (processMethod is not null)
-                                {
-                                    Task? task = processMethod.Invoke(asynchronousInstance, [this, buffer]) as Task;
-
-                                    if (task is not null) await task;
-                                }
+                                Log.Error($"[CRITICAL] Process Method NOT FOUND on interface {interfaceType.Name}");
+                                return Task.CompletedTask;
                             }
                         }
-                    );
-                }
+                        else
+                        {
+                            Log.Error($"[CRITICAL] IAsynchronousCommandProcessor Interface NOT FOUND on {instanceType.Name}");
+                            return Task.CompletedTask;
+                        }
+                    }
+                );
 
-                catch (Exception exception)
-                {
-                    Log.Error(exception, @"[BUG] Error Processing Command: ""0x{Command}""", command.ToString("X4"));
-                }
+                await processingTask;
+                Log.Information($"[DEBUG] Command Processing Completed");
+
+                // User Requested Full Hex Dump For All Packets
+                Log.Information("[DEBUG] Packet {Command} Payload ({Size} bytes): {Payload}",
+                    $"0x{command:X4}",
+                    buffer.Size,
+                    BitConverter.ToString(buffer.Data.ToArray()).Replace("-", " "));
             }
-
-            else Log.Error(@"[BUG] Could Not Create Command Type Instance For Command: ""0x{Command}""", command.ToString("X4"));
+            else 
+            {
+                Log.Error(@"[BUG] Could Not Create Command Type Instance For Command: ""0x{Command}""", command.ToString("X4"));
+            }
+        }
+        catch (Exception exception)
+        {
+            Log.Error(exception, @"[BUG] Error Processing Command: ""0x{Command}""", command.ToString("X4"));
         }
     }
 
@@ -165,9 +190,9 @@ public class ChatSession(TCPServer server, IServiceProvider serviceProvider) : T
         return type;
     }
 
-    private OneOf<object, object>? GetCommandTypeInstance(Type type)
+    private OneOf<object, object>? GetCommandTypeInstance(IServiceProvider scopeProvider, Type type)
     {
-        object instance = ActivatorUtilities.CreateInstance(serviceProvider, type);
+        object instance = ActivatorUtilities.CreateInstance(scopeProvider, type);
 
         Type? syncInterface = type.GetInterfaces()
             .SingleOrDefault(interfaceType => interfaceType.IsGenericType && interfaceType.GetGenericTypeDefinition() == typeof(ISynchronousCommandProcessor<>));
@@ -192,6 +217,22 @@ public class ChatSession(TCPServer server, IServiceProvider serviceProvider) : T
     /// </summary>
     public bool Send(ChatBuffer buffer)
     {
+        // Debug Logging for Outgoing Packets
+        if (buffer.Data.Length >= 2)
+        {
+            ushort cmd = BitConverter.ToUInt16([buffer.Data[0], buffer.Data[1]]);
+           
+            try
+            {
+                Log.Information("[DEBUG] Packet 0x{Command} Payload ({Size} bytes): {Payload}", cmd.ToString("X4"), buffer.Size, BitConverter.ToString(buffer.Data.ToArray()).Replace("-", " "));
+                Log.Information(@"[OUT] Sending Command: ""0x{Command}"" ({Size} bytes) To Session {SessionID}", cmd.ToString("X4"), buffer.Size, ID);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[CRITICAL] Error Logging Outgoing Packet: {ex}");
+            }
+        }
+
         if (buffer.Size > ChatProtocol.MAX_PACKET_SIZE)
         {
             Log.Error(@"Packet Of {PacketSize} Bytes Exceeds Maximum Allowed Size Of {MaximumPacketSize} Bytes", buffer.Size, ChatProtocol.MAX_PACKET_SIZE);

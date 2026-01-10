@@ -6,9 +6,9 @@ namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Social;
 ///     If the target has already made a friend addition request to the requester, immediately creates a bi-directional friendship.
 /// </summary>
 [ChatCommand(ChatProtocol.Command.CHAT_CMD_REQUEST_BUDDY_ADD)]
-public class AddFriend(MerrickContext merrick, IDatabase distributedCacheStore) : IAsynchronousCommandProcessor<ClientChatSession>
+public class AddFriend(MerrickContext merrick, IDatabase distributedCacheStore) : IAsynchronousCommandProcessor<ChatSession>
 {
-    public async Task Process(ClientChatSession session, ChatBuffer buffer)
+    public async Task Process(ChatSession session, ChatBuffer buffer)
     {
         AddFriendRequestData requestData = new (buffer);
 
@@ -30,3 +30,4 @@ file class AddFriendRequestData
         FriendNickname = buffer.ReadString();
     }
 }
+

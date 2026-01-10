@@ -17,7 +17,7 @@ public class Friend
     ///     If the target account has already made a friend request to the requester, creates bi-directional friendship immediately.
     ///     Otherwise, stores pending request in the distributed cache and notifies the target account.
     /// </summary>
-    public async Task<Friend> Add(ClientChatSession session, MerrickContext merrick, IDatabase distributedCacheStore)
+    public async Task<Friend> Add(ChatSession session, MerrickContext merrick, IDatabase distributedCacheStore)
     {
         // Look Up Target Account In Database
         Account? targetAccount = await merrick.Accounts
@@ -101,7 +101,7 @@ public class Friend
             // NOTE: Current Requester Was Target Of Original Request, So They Receive Target Notification ID
             SendFriendRequestApproval(session, targetAccount, ChatProtocol.FriendApproveStatus.SUCCESS_REQUESTER, mutualRequest.Value.TargetNotificationID);
 
-            ClientChatSession? targetSession = Context.ClientChatSessions.Values
+            ChatSession? targetSession = Context.ClientChatSessions.Values
                 .SingleOrDefault(chatSession => chatSession.Account.Name.Equals(targetAccount.Name, StringComparison.OrdinalIgnoreCase));
 
             // Send Approval Success Notification To Target, If Online
@@ -122,11 +122,11 @@ public class Friend
         // Send Success Response To Requester (Friend Request Created Successfully)
         SendFriendAddSuccess(session, targetAccount, requesterNotificationID);
 
-        ClientChatSession? targetOnlineSession = Context.ClientChatSessions.Values
+        ChatSession? targetOnlineSession = Context.ClientChatSessions.Values
             .SingleOrDefault(chatSession => chatSession.Account.Name.Equals(targetAccount.Name, StringComparison.OrdinalIgnoreCase));
 
         // Send Friend Request Notification To Target, If Online
-        if (targetOnlineSession is not null && targetOnlineSession.Metadata.ClientChatModeState is not ChatProtocol.ChatModeType.CHAT_MODE_DND)
+        if (targetOnlineSession is not null && targetOnlineSession.ClientMetadata.ClientChatModeState is not ChatProtocol.ChatModeType.CHAT_MODE_DND)
             SendFriendRequest(targetOnlineSession, requesterAccount, targetNotificationID);
 
         return this;
@@ -136,7 +136,7 @@ public class Friend
     ///     Approves a pending friend request from another account.
     ///     Creates bi-directional friendship and sends approval responses to both clients.
     /// </summary>
-    public async Task<Friend> Approve(ClientChatSession session, MerrickContext merrick, IDatabase distributedCacheStore)
+    public async Task<Friend> Approve(ChatSession session, MerrickContext merrick, IDatabase distributedCacheStore)
     {
         // Load Approver's Account
         Account approverAccount = await merrick.Accounts
@@ -172,7 +172,7 @@ public class Friend
         // Send Approval Request To Approver
         SendFriendRequestApproval(session, requesterAccount, ChatProtocol.FriendApproveStatus.SUCCESS_APPROVER, pendingRequest.Value.TargetNotificationID);
 
-        ClientChatSession? requesterSession = Context.ClientChatSessions.Values
+        ChatSession? requesterSession = Context.ClientChatSessions.Values
             .SingleOrDefault(chatSession => chatSession.Account.Name.Equals(requesterAccount.Name, StringComparison.OrdinalIgnoreCase));
 
         // Send Approval Response To Requester, If Online
@@ -235,7 +235,7 @@ public class Friend
     /// <summary>
     ///     Sends friend request notification to the target player for approval.
     /// </summary>
-    private static void SendFriendRequest(ClientChatSession targetSession, Account requesterAccount, int notificationID)
+    private static void SendFriendRequest(ChatSession targetSession, Account requesterAccount, int notificationID)
     {
         ChatBuffer notification = new ();
 
@@ -259,7 +259,7 @@ public class Friend
     /// <summary>
     ///     Sends friend approval response.
     /// </summary>
-    private static void SendFriendRequestApproval(ClientChatSession session, Account friendAccount, ChatProtocol.FriendApproveStatus status, int notificationID)
+    private static void SendFriendRequestApproval(ChatSession session, Account friendAccount, ChatProtocol.FriendApproveStatus status, int notificationID)
     {
         ChatBuffer response = new ();
 
@@ -276,7 +276,7 @@ public class Friend
     ///     Sends friend add success response to the requester.
     ///     This indicates that the friend request was created successfully, not that the friendship has been established.
     /// </summary>
-    private static void SendFriendAddSuccess(ClientChatSession session, Account friendAccount, int notificationID)
+    private static void SendFriendAddSuccess(ChatSession session, Account friendAccount, int notificationID)
     {
         ChatBuffer response = new ();
 
@@ -300,7 +300,7 @@ public class Friend
     /// <summary>
     ///     Sends friend add failure response with the specific failure reason.
     /// </summary>
-    private void SendFriendAddFailure(ClientChatSession session, ChatProtocol.FriendAddStatus reason, Account? targetAccount)
+    private void SendFriendAddFailure(ChatSession session, ChatProtocol.FriendAddStatus reason, Account? targetAccount)
     {
         ChatBuffer response = new ();
 
@@ -315,7 +315,7 @@ public class Friend
     /// <summary>
     ///     Sends friend approve failure response when the pending request cannot be found or has expired.
     /// </summary>
-    private static void SendFriendApproveFailure(ClientChatSession session, int requesterAccountID, string requesterAccountName)
+    private static void SendFriendApproveFailure(ChatSession session, int requesterAccountID, string requesterAccountName)
     {
         ChatBuffer response = new ();
 
@@ -328,3 +328,4 @@ public class Friend
         session.Send(response);
     }
 }
+

@@ -1,9 +1,9 @@
 namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.MatchState;
 
 [ChatCommand(ChatProtocol.Command.CHAT_CMD_JOINED_GAME)]
-public class JoinedMatch(IDatabase distributedCacheStore) : IAsynchronousCommandProcessor<ClientChatSession>
+public class JoinedMatch(IDatabase distributedCacheStore) : IAsynchronousCommandProcessor<ChatSession>
 {
-    public async Task Process(ClientChatSession session, ChatBuffer buffer)
+    public async Task Process(ChatSession session, ChatBuffer buffer)
     {
         JoinedMatchRequestData requestData = new (buffer);
 
@@ -32,3 +32,4 @@ file class JoinedMatchRequestData
         JoinMatchChannel = buffer.ReadInt8() is not 0;
     }
 }
+

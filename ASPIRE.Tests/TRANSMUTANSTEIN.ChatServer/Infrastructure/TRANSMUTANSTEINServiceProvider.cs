@@ -33,8 +33,8 @@ public class TRANSMUTANSTEINServiceProvider : WebApplicationFactory<global::TRAN
             Dictionary<string, string?> settings = new Dictionary<string, string?>
             {
                 { "CHAT_SERVER_PORT_CLIENT", ClientPort.ToString() },
-                { "CHAT_SERVER_PORT_MATCH_SERVER", ChatServerPortMatchServer },
-                { "CHAT_SERVER_PORT_MATCH_SERVER_MANAGER", ChatServerPortMatchServerManager },
+                { "CHAT_SERVER_PORT_MATCH_SERVER", (ClientPort + 1).ToString() },
+                { "CHAT_SERVER_PORT_MATCH_SERVER_MANAGER", (ClientPort + 2).ToString() },
                 // Use localhost for infrastructure to avoid DNS issues in tests
                 { "INFRASTRUCTURE_GATEWAY", "localhost" }
             };
@@ -49,14 +49,33 @@ public class TRANSMUTANSTEINServiceProvider : WebApplicationFactory<global::TRAN
             Func<ServiceDescriptor, bool> databaseContextPredicate = descriptor =>
                     descriptor.ServiceType.FullName?.Contains(nameof(MerrickContext)) is true || descriptor.ImplementationType?.FullName?.Contains(nameof(MerrickContext)) is true;
 
+            Console.WriteLine("[DEBUG] Removing MerrickContext Services...");
             foreach (ServiceDescriptor? descriptor in services.Where(databaseContextPredicate).ToList())
+            {
                 services.Remove(descriptor);
+            }
+            Console.WriteLine("[DEBUG] MerrickContext Services Removed.");
+
+            // Replace FloodPreventionService with NullFloodPreventionService to prevent test bans
+            Console.WriteLine("[DEBUG] Replacing FloodPreventionService...");
+            ServiceDescriptor? floodService = services.SingleOrDefault(d => d.ServiceType == typeof(FloodPreventionService));
+            if (floodService != null) 
+            {
+                Console.WriteLine("[DEBUG] Check: Found original FloodPreventionService. Removing.");
+                services.Remove(floodService);
+            }
+            else
+            {
+                Console.WriteLine("[DEBUG] Check: Original FloodPreventionService NOT Found.");
+            }
+            
+            services.AddSingleton<FloodPreventionService, NullFloodPreventionService>();
+            Console.WriteLine("[DEBUG] NullFloodPreventionService Registered.");
 
             // Add in-memory database
             services.AddDbContext<MerrickContext>(options =>
             {
-                options.UseInMemoryDatabase("InMemoryMerrickDbForChat")
-                       .EnableServiceProviderCaching(false);
+                options.UseInMemoryDatabase("InMemoryMerrickDbForChat");
             });
 
             // Remove real Redis

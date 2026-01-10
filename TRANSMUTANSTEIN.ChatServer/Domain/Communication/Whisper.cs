@@ -1,4 +1,4 @@
-﻿namespace TRANSMUTANSTEIN.ChatServer.Domain.Communication;
+namespace TRANSMUTANSTEIN.ChatServer.Domain.Communication;
 
 public class Whisper
 {
@@ -12,13 +12,13 @@ public class Whisper
     public static Whisper Create(string message)
         => new () { Message = message };
 
-    public Whisper Send(ClientChatSession senderSession, string recipientName)
+    public Whisper Send(ChatSession senderSession, string recipientName)
     {
-        ClientChatSession recipientSession = Context.ClientChatSessions.Values
+        ChatSession recipientSession = Context.ClientChatSessions.Values
             .Single(chatSession => chatSession.Account.Name.Equals(recipientName, StringComparison.OrdinalIgnoreCase));
 
         // Check Recipient's Chat Mode
-        switch (recipientSession.Metadata.ClientChatModeState)
+        switch (recipientSession.ClientMetadata.ClientChatModeState)
         {
             // DND: Block Whisper And Send Auto-Response
             case ChatProtocol.ChatModeType.CHAT_MODE_DND:
@@ -47,12 +47,12 @@ public class Whisper
                 return this;
 
             default:
-                throw new ArgumentOutOfRangeException(nameof(recipientSession.Metadata.ClientChatModeState), recipientSession.Metadata.ClientChatModeState,
-                    $@"Unknown Chat Mode State ""{recipientSession.Metadata.ClientChatModeState}"" For Recipient ""{recipientSession.Account.Name}""");
+                throw new ArgumentOutOfRangeException(nameof(recipientSession.ClientMetadata.ClientChatModeState), recipientSession.ClientMetadata.ClientChatModeState,
+                    $@"Unknown Chat Mode State ""{recipientSession.ClientMetadata.ClientChatModeState}"" For Recipient ""{recipientSession.Account.Name}""");
         }
     }
 
-    private Whisper SendWhisperSuccess(string senderName, ClientChatSession recipientSession)
+    private Whisper SendWhisperSuccess(string senderName, ChatSession recipientSession)
     {
         ChatBuffer whisperSuccess = new ();
 
@@ -66,7 +66,7 @@ public class Whisper
     }
 
 
-    private Whisper SendWhisperFailure(ClientChatSession senderSession, string recipientName)
+    private Whisper SendWhisperFailure(ChatSession senderSession, string recipientName)
     {
         ChatBuffer whisperFailed = new ();
 
@@ -79,12 +79,12 @@ public class Whisper
         return this;
     }
 
-    private Whisper SendAutomaticResponse(ClientChatSession senderSession, ClientChatSession recipientSession, string messageAutomaticResponse)
+    private Whisper SendAutomaticResponse(ChatSession senderSession, ChatSession recipientSession, string messageAutomaticResponse)
     {
         ChatBuffer automaticResponse = new ();
 
         automaticResponse.WriteCommand(ChatProtocol.Command.CHAT_CMD_CHAT_MODE_AUTO_RESPONSE);
-        automaticResponse.WriteInt8(Convert.ToByte(recipientSession.Metadata.ClientChatModeState)); // Recipient's Chat Mode Type
+        automaticResponse.WriteInt8(Convert.ToByte(recipientSession.ClientMetadata.ClientChatModeState)); // Recipient's Chat Mode Type
         automaticResponse.WriteString(recipientSession.Account.Name);                               // Recipient's Account Name
         automaticResponse.WriteString(messageAutomaticResponse);                                    // Message Content
 
@@ -93,3 +93,4 @@ public class Whisper
         return this;
     }
 }
+

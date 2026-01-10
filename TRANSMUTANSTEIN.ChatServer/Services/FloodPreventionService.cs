@@ -14,10 +14,9 @@ public class FloodPreventionService(ILogger<FloodPreventionService> logger) : IH
     /// <summary>
     ///     Checks if a message is allowed for the given session and handles flood prevention response.
     ///     Staff accounts are automatically exempted from flood prevention.
-    ///     If the request count exceeds <see cref="ChatProtocol.FLOOD_THRESHOLD"/>, sends a warning to the client via <see cref="ChatProtocol.Command.CHAT_CMD_FLOODING"/> and returns FALSE.
     ///     Otherwise, increments the request counter and returns TRUE.
     /// </summary>
-    public bool CheckAndHandleFloodPrevention(ClientChatSession session)
+    public virtual bool CheckAndHandleFloodPrevention(ChatSession session)
     {
         // Staff Accounts Are Exempt From Flood Prevention For Moderation And Administration Purposes
         if (session.Account.Type is AccountType.Staff)
@@ -61,7 +60,7 @@ public class FloodPreventionService(ILogger<FloodPreventionService> logger) : IH
     ///     Starts the background decay timer that reduces request counts over time.
     ///     The timer runs every <see cref="ChatProtocol.FLOOD_DECAY_INTERVAL_SECONDS"/> seconds and decrements each account's request count by one.
     /// </summary>
-    public Task StartAsync(CancellationToken cancellationToken)
+    public virtual Task StartAsync(CancellationToken cancellationToken)
     {
         logger.LogInformation("Flood Prevention Service Starting With Threshold: {Threshold}, Decay Interval: {DecayInterval}s",
             ChatProtocol.FLOOD_THRESHOLD, ChatProtocol.FLOOD_DECAY_INTERVAL_SECONDS);
@@ -81,7 +80,7 @@ public class FloodPreventionService(ILogger<FloodPreventionService> logger) : IH
     /// <summary>
     ///     Stops the background decay timer.
     /// </summary>
-    public Task StopAsync(CancellationToken cancellationToken)
+    public virtual Task StopAsync(CancellationToken cancellationToken)
     {
         logger.LogInformation("Flood Prevention Service Stopping");
 
@@ -150,3 +149,4 @@ public class FloodPreventionService(ILogger<FloodPreventionService> logger) : IH
         public Lock Lock { get; } = new ();
     }
 }
+

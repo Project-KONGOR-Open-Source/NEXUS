@@ -83,5 +83,15 @@ public class Account
     public string ChatSymbolNoPrefixCode => ChatSymbol.Replace("cs.", string.Empty);
 
     public string NameColour => SelectedStoreItems.SingleOrDefault(item => item.StartsWith("cc.")) ?? "cc.white";
-    public string NameColourNoPrefixCode => NameColour.Replace("cc.", string.Empty);
+    public string NameColourNoPrefixCode 
+    {
+        get
+        {
+            string code = NameColour.Replace("cc.", string.Empty);
+            // FAILSAFE: "frostburnlogo" is a symbol, not a color. Sending it as a color crashes the client.
+            if (code.Equals("frostburnlogo", StringComparison.OrdinalIgnoreCase) || code.Length > 10)
+                return "white";
+            return code;
+        }
+    }
 }

@@ -1,9 +1,9 @@
 namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Channels;
 
 [ChatCommand(ChatProtocol.Command.CHAT_CMD_JOIN_CHANNEL_PASSWORD)]
-public class JoinPasswordProtectedChannel : ISynchronousCommandProcessor<ClientChatSession>
+public class JoinPasswordProtectedChannel : ISynchronousCommandProcessor<ChatSession>
 {
-    public void Process(ClientChatSession session, ChatBuffer buffer)
+    public void Process(ChatSession session, ChatBuffer buffer)
     {
         JoinPasswordProtectedChannelRequestData requestData = new (buffer);
 
@@ -28,3 +28,4 @@ file class JoinPasswordProtectedChannelRequestData
         Password = buffer.ReadString();
     }
 }
+

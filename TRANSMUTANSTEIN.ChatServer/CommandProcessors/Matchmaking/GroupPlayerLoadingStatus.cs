@@ -6,9 +6,9 @@ namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Matchmaking;
 ///     Both paths validate the same conditions.
 /// </summary>
 [ChatCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_PLAYER_LOADING_STATUS)]
-public class GroupPlayerLoadingStatus : ISynchronousCommandProcessor<ClientChatSession>
+public class GroupPlayerLoadingStatus : ISynchronousCommandProcessor<ChatSession>
 {
-    public void Process(ClientChatSession session, ChatBuffer buffer)
+    public void Process(ChatSession session, ChatBuffer buffer)
     {
         GroupPlayerLoadingStatusRequestData requestData = new (buffer);
 
@@ -30,3 +30,4 @@ file class GroupPlayerLoadingStatusRequestData
         LoadingPercent = buffer.ReadInt8();
     }
 }
+

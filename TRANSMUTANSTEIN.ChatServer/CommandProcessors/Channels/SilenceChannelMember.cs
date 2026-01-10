@@ -1,16 +1,16 @@
 namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Channels;
 
 [ChatCommand(ChatProtocol.Command.CHAT_CMD_CHANNEL_SILENCE_USER)]
-public class SilenceChannelMember : ISynchronousCommandProcessor<ClientChatSession>
+public class SilenceChannelMember : ISynchronousCommandProcessor<ChatSession>
 {
-    public void Process(ClientChatSession session, ChatBuffer buffer)
+    public void Process(ChatSession session, ChatBuffer buffer)
     {
         SilenceChannelMemberRequestData requestData = new (buffer);
 
         ChatChannel channel = ChatChannel.Get(session, requestData.ChannelID);
 
         // Find The Target Account ID By Name
-        ClientChatSession? targetSession = Context.ClientChatSessions.Values
+        ChatSession? targetSession = Context.ClientChatSessions.Values
             .SingleOrDefault(chatSession => chatSession.Account.Name.Equals(requestData.TargetName, StringComparison.OrdinalIgnoreCase));
 
         if (targetSession is null)
@@ -42,3 +42,4 @@ file class SilenceChannelMemberRequestData
         DurationMilliseconds = buffer.ReadInt32();
     }
 }
+

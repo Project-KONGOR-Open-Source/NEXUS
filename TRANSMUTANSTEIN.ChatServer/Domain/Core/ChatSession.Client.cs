@@ -1,35 +1,21 @@
 ﻿namespace TRANSMUTANSTEIN.ChatServer.Domain.Core;
 
-public class ClientChatSession(TCPServer server, IServiceProvider serviceProvider) : ChatSession(server, serviceProvider)
+public partial class ChatSession
 {
     /// <summary>
     ///     Gets set after a successful client handshake following the <see cref="Accept"/> method.
     ///     Contains metadata about the client connected to this chat session.
     ///     This property is NULL before authentication, but is guaranteed non-NULL after <see cref="Accept"/> is called.
     /// </summary>
-    public ClientChatSessionMetadata Metadata { get; set; } = null!;
-
-    /// <summary>
-    ///     Gets set after a successful client handshake following the <see cref="Accept"/> method.
-    ///     Contains the account information of the client connected to this chat session.
-    ///     This property is NULL before authentication, but is guaranteed non-NULL after <see cref="Accept"/> is called.
-    /// </summary>
-    public Account Account { get; set; } = null!;
-
-    /// <summary>
-    ///     Gets or sets the data associated with the start of a match.
-    /// </summary>
-    public MatchStartData? MatchData { get; set; }
+    public ClientChatSessionMetadata ClientMetadata { get; set; } = null!;
 
     /// <summary>
     ///     Tracks the channel IDs that this client is currently a member of.
     ///     The maximum number of channels cannot exceed the value of <see cref="ChatProtocol.MAX_CHANNELS_PER_CLIENT"/>.
     /// </summary>
     public HashSet<int> CurrentChannels { get; set; } = [];
-    
-    public string AutoResponseReason { get; set; } = string.Empty;
 
-    public ClientChatSession Accept(Account account)
+    public ChatSession Accept(Account account)
     {
         // Link The Account To The Chat Session
         Account = account;
@@ -43,16 +29,19 @@ public class ClientChatSession(TCPServer server, IServiceProvider serviceProvide
 
         Send(accept);
 
-        // Notify Self, Clan Members, And Friends That This Client Is Now Connected
-        BroadcastConnectionStatusUpdate(ChatProtocol.ChatClientStatus.CHAT_CLIENT_STATUS_CONNECTED);
+        // Send Options And Remote Commands To Client (Must Be Sent Before Initial Status)
+        SendOptionsAndRemoteCommands();
 
         // Get The Connection Status Of All Friends And Clan Members That Are Currently Online (Excluding Invisible Clients)
         ReceiveFriendAndClanMemberConnectionStatus();
 
+        // Notify Self, Clan Members, And Friends That This Client Is Now Connected
+        BroadcastConnectionStatusUpdate(ChatProtocol.ChatClientStatus.CHAT_CLIENT_STATUS_CONNECTED);
+
         return this;
     }
 
-    public async Task<ClientChatSession> PrepareToJoinMatch(IDatabase distributedCacheStore, string serverAddress)
+    public async Task<ChatSession> PrepareToJoinMatch(IDatabase distributedCacheStore, string serverAddress)
     {
         List<string> serverAddressParts = [.. serverAddress.Split(':')];
 
@@ -75,14 +64,15 @@ public class ClientChatSession(TCPServer server, IServiceProvider serviceProvide
             return this;
         }
 
-        Metadata.LastKnownClientState = ChatProtocol.ChatClientStatus.CHAT_CLIENT_STATUS_JOINING_GAME;
+        // Store Match Server Info In Metadata
+        ClientMetadata.MatchServerAddress = $"{server.IPAddress}:{server.Port}";
 
         BroadcastConnectionStatusUpdate(ChatProtocol.ChatClientStatus.CHAT_CLIENT_STATUS_JOINING_GAME, server);
 
         return this;
     }
 
-    public async Task<ClientChatSession> JoinMatch(IDatabase distributedCacheStore, int matchID)
+    public async Task<ChatSession> JoinMatch(IDatabase distributedCacheStore, int matchID)
     {
         MatchStartData? matchData = await distributedCacheStore.GetMatchStartData(matchID);
 
@@ -93,8 +83,6 @@ public class ClientChatSession(TCPServer server, IServiceProvider serviceProvide
             return this;
         }
 
-        MatchData = matchData;
-
         MatchServer? server = await distributedCacheStore.GetMatchServerByID(matchData.ServerID);
 
         if (server is null)
@@ -104,14 +92,15 @@ public class ClientChatSession(TCPServer server, IServiceProvider serviceProvide
             return this;
         }
 
-        Metadata.LastKnownClientState = ChatProtocol.ChatClientStatus.CHAT_CLIENT_STATUS_IN_GAME;
+        // Store Match ID In Metadata
+        ClientMetadata.MatchID = matchID;
 
         BroadcastConnectionStatusUpdate(ChatProtocol.ChatClientStatus.CHAT_CLIENT_STATUS_IN_GAME, server);
 
         return this;
     }
 
-    public ClientChatSession Reject(ChatProtocol.ChatRejectReason reason)
+    public ChatSession Reject(ChatProtocol.ChatRejectReason reason)
     {
         ChatBuffer reject = new ();
 
@@ -139,29 +128,31 @@ public class ClientChatSession(TCPServer server, IServiceProvider serviceProvide
         // TODO: Send Logout Notification To Friends And Clan Members
     }
 
-    public void Terminate()
+    public void TerminateClient()
     {
-        if (Account is not null)
         {
-            // Get All Chat Channels The Client Is A Member Of
-            List<ChatChannel> channels = [.. Context.ChatChannels.Values.Where(channel => channel.Members.ContainsKey(Account.Name))];
+            if (Account is not null)
+            {
+                // Get All Chat Channels The Client Is A Member Of
+                List<ChatChannel> channels = [.. Context.ChatChannels.Values.Where(channel => channel.Members.ContainsKey(Account.Name))];
 
-            // Remove The Client From All Chat Channels They Are A Member Of
-            foreach (ChatChannel channel in channels)
-                channel.Leave(this);
+                // Remove The Client From All Chat Channels They Are A Member Of
+                foreach (ChatChannel channel in channels)
+                    channel.Leave(this);
 
-            // Remove From Matchmaking Group If In One
-            MatchmakingService.GetMatchmakingGroup(Account.ID)?.RemoveMember(Account.ID);
+                // Remove From Matchmaking Group If In One
+                MatchmakingService.GetMatchmakingGroup(Account.ID)?.RemoveMember(Account.ID);
 
-            // Send Disconnection Notification To Online Peers (Friends And Clan Members)
-            BroadcastDisconnection();
+                // Send Disconnection Notification To Online Peers (Friends And Clan Members)
+                BroadcastDisconnection();
 
-            // Log The Client Out And Disconnect The Chat Session
-            LogOut();
+                // Log The Client Out And Disconnect The Chat Session
+                LogOut();
 
-            // Remove The Chat Session From The Chat Sessions Collection
-            if (Context.ClientChatSessions.TryRemove(Account.Name, out ClientChatSession? _) is false)
-                Log.Error(@"Failed To Remove Chat Session For Account Name ""{ClientInformation.Account.Name}""", Account.Name);
+                // Remove The Chat Session From The Chat Sessions Collection
+                if (Context.ClientChatSessions.TryRemove(Account.Name, out ChatSession? _) is false)
+                    Log.Error(@"Failed To Remove Chat Session For Account Name ""{ClientInformation.Account.Name}""", Account.Name);
+            }
         }
 
         Disconnect();
@@ -170,34 +161,8 @@ public class ClientChatSession(TCPServer server, IServiceProvider serviceProvide
         Dispose();
     }
 
-    /// <summary>
-    ///     Sends a notification to each friend and clan member to notify them that the account has come online.
-    /// </summary>
-    public void BroadcastConnection()
-    {
-        // Get Friend And Clan Member Chat Sessions
-        List<ClientChatSession> onlinePeerSessions = GetOnlinePeerSessions();
 
-        // Notify Each Online Peer Of The Connection
-        foreach (ClientChatSession onlinePeerSession in onlinePeerSessions)
-        {
-            ChatBuffer connect = new ();
 
-            connect.WriteCommand(ChatProtocol.Command.CHAT_CMD_UPDATE_STATUS);
-            connect.WriteString(Account.NameWithClanTag);                                                  // Client's Account Name
-            connect.WriteInt32(Account.ID);                                                                // Client's Account ID
-            connect.WriteInt8(Convert.ToByte(ChatProtocol.ChatClientStatus.CHAT_CLIENT_STATUS_CONNECTED)); // Chat Client Status
-            connect.WriteInt8(Account.GetChatClientFlags());                                               // Client's Flags (Chat Client Type)
-            connect.WriteInt32(Account.Clan?.ID ?? 0);                                                     // Client's Clan ID
-            connect.WriteString(Account.Clan?.Name ?? string.Empty);                                       // Client's Clan Name
-            connect.WriteString(Account.ChatSymbolNoPrefixCode);                                           // Account's Chat Symbol
-            connect.WriteString(Account.NameColourNoPrefixCode);                                           // Account's Name Colour
-            connect.WriteString(Account.IconNoPrefixCode);                                                 // Account's Icon
-
-            // Send The Connection Notification To The Online Peer
-            onlinePeerSession.Send(connect);
-        }
-    }
 
     /// <summary>
     ///     Sends a notification to each friend and clan member to notify them that the account is no longer online.
@@ -205,10 +170,10 @@ public class ClientChatSession(TCPServer server, IServiceProvider serviceProvide
     public void BroadcastDisconnection()
     {
         // Get Friend And Clan Member Chat Sessions
-        List<ClientChatSession> onlinePeerSessions = GetOnlinePeerSessions();
+        List<ChatSession> onlinePeerSessions = GetOnlinePeerSessions();
 
         // Notify Each Online Peer Of The Disconnection
-        foreach (ClientChatSession onlinePeerSession in onlinePeerSessions)
+        foreach (ChatSession onlinePeerSession in onlinePeerSessions)
         {
             ChatBuffer disconnect = new ();
 
@@ -236,16 +201,16 @@ public class ClientChatSession(TCPServer server, IServiceProvider serviceProvide
     ///     The current account is excluded from clan member sessions.
     /// </remarks>
     /// <returns>
-    ///     A list of <see cref="ClientChatSession"/> objects representing active chat sessions with online friends and clan members.
+    ///     A list of <see cref="ChatSession"/> objects representing active chat sessions with online friends and clan members.
     ///     The list is empty if no such sessions are available.
     /// </returns>
-    private List<ClientChatSession> GetOnlinePeerSessions()
+    private List<ChatSession> GetOnlinePeerSessions()
     {
         // Get All Friend IDs
         HashSet<int> friendIDs = [.. Account.FriendedPeers.Select(friend => friend.ID)];
 
         // Get All Friend Chat Sessions
-        List<ClientChatSession> friendSessions = [.. Context.ClientChatSessions.Values
+        List<ChatSession> friendSessions = [.. Context.ClientChatSessions.Values
             .Where(chatSession => friendIDs.Contains(chatSession.Account.ID))];
 
         // Get All Clan Member IDs (Excluding Self)
@@ -254,11 +219,11 @@ public class ClientChatSession(TCPServer server, IServiceProvider serviceProvide
             .Select(clanMember => clanMember.ID) ?? []];
 
         // Get All Clan Member Chat Sessions (Excluding Self)
-        List<ClientChatSession> clanMemberSessions = [.. Context.ClientChatSessions.Values
+        List<ChatSession> clanMemberSessions = [.. Context.ClientChatSessions.Values
             .Where(chatSession => clanMemberIDs.Contains(chatSession.Account.ID))];
 
         // Combine Friend And Clan Member Sessions, Removing Duplicates
-        List<ClientChatSession> onlinePeerSessions = [.. friendSessions.Concat(clanMemberSessions).Distinct()];
+        List<ChatSession> onlinePeerSessions = [.. friendSessions.Concat(clanMemberSessions).Distinct()];
 
         return onlinePeerSessions;
     }
@@ -269,14 +234,14 @@ public class ClientChatSession(TCPServer server, IServiceProvider serviceProvide
     /// </summary>
     public void BroadcastConnectionStatusUpdate(ChatProtocol.ChatClientStatus status, MatchServer? matchServer = null)
     {
-        if (Metadata.LastKnownClientState == status) return; else Metadata.LastKnownClientState = status;
+        ClientMetadata.LastKnownClientState = status;
 
-        if (Metadata.ClientChatModeState is not ChatProtocol.ChatModeType.CHAT_MODE_INVISIBLE)
+        if (ClientMetadata.ClientChatModeState is not ChatProtocol.ChatModeType.CHAT_MODE_INVISIBLE)
         {
             List<int> clanMemberIDs = [.. Account.Clan?.Members.Select(clanMember => clanMember.ID) ?? []];
             List<int> friendIDs = [.. Account.FriendedPeers.Select(friend => friend.ID)];
 
-            List<ClientChatSession> onlinePeerSessions = [.. Context.ClientChatSessions.Values
+            List<ChatSession> onlinePeerSessions = [.. Context.ClientChatSessions.Values
                 .Where(chatSession => friendIDs.Any(friendID => friendID == chatSession.Account.ID) || clanMemberIDs.Any(clanMemberID => clanMemberID == chatSession.Account.ID))
                 .Select(chatSession => chatSession).Distinct()]; // Get All Online Friends And Clan Members
 
@@ -312,61 +277,16 @@ public class ClientChatSession(TCPServer server, IServiceProvider serviceProvide
                     update.WriteBool(false);                        // Has Extended Server Info
 
                     // TODO: Set Extended Server Info To TRUE And Populate The Following Fields
-
-                    /*
-                        [1] EArrangedMatchType - arranged match type
-                        [X] string - client's name
-                        [X] string - server's region
-                        [X] string - server's game mode
-                        [1] unsigned char - server's team size
-                        [X] string - server's map name
-                        [1] unsigned char - server's tier (deprecated)
-                        [1] unsigned char - server's official status (0 = unofficial (deprecated), 1 = official with stats, 2 = official without stats)
-                        [1] bool - server's "no leavers" flag
-                        [1] bool - server's "private" flag
-                        [1] bool - server's "all heroes" flag
-                        [1] bool - server's "casual mode" flag
-                        [1] bool - server's "all random" flags (deprecated)
-                        [1] bool - server's "auto balanced" flag
-                        [1] bool - server's "advanced options" flag
-                        [2] unsigned short - server's minimum PSR allowed
-                        [2] unsigned short - server's maximum PSR allowed
-                        [1] bool - server's "dev heroes" flag
-                        [1] bool - server's "hardcore" flag
-                        [1] bool - server's "verified only" flag
-                        [1] bool - server's "gated" flag
-
-                        or ...
-
-                        << pJoinedServer->GetArrangedMatchType()                         // Arranged Match Type (0 = Public, 1 = Matchmaking, 2 = Scheduled match, 3 = Unscheduled match, 4 = Matchmaking midwars)
-                        << GetNameUTF8() << byte('\0')                                   // Player Name
-                        << WStringToUTF8(pJoinedServer->GetLocation()) << byte('\0')     // Region
-                        << WStringToUTF8(pJoinedServer->GetGameModeName()) << byte('\0') // Game Mode Name (banningdraft)
-                        << pJoinedServer->GetTeamSize()                                  // Team Size
-                        << WStringToUTF8(pJoinedServer->GetMapName()) << byte('\0')      // Map Name (caldavar)
-                        << pJoinedServer->GetTier()                                      // Tier - Noobs Only (0), Noobs Allowed (1), Pro (2)
-                        << pJoinedServer->GetOfficial()                                  // 0 - Unofficial, 1 - Official w/ stats, 2 - Official w/o stats
-                        << pJoinedServer->GetNoLeaver()                                  // No Leavers (1), Leavers (0)
-                        << pJoinedServer->GetPrivate()                                   // Private (1), Not Private (0)
-                        << pJoinedServer->GetAllHeroes()                                 // All Heroes (1), Not All Heroes (0)
-                        << pJoinedServer->GetCasualMode()                                // Casual Mode (1), Not Casual Mode (0)
-                        << pJoinedServer->GetForceRandom()                               // Force Random (1), Not Force Random (0) -- (NOTE: Deprecated)
-                        << pJoinedServer->GetAutoBalanced()                              // Auto Balanced (1), Non Auto Balanced (0)
-                        << pJoinedServer->GetAdvancedOptions()                           // Advanced Options	(1), No Advanced Options (0)
-                        << pJoinedServer->GetMinPSR()                                    // Min PSR
-                        << pJoinedServer->GetMaxPSR()                                    // Max PSR
-                        << pJoinedServer->GetDevHeroes()                                 // Dev Heroes (1), Non Dev Heroes (0)
-                        << pJoinedServer->GetHardcore()                                  // Hardcore (1), Non Hardcore (0)
-                        << pJoinedServer->GetVerifiedOnly()                              // Verified Only (1), Everyone (0)
-                        << pJoinedServer->GetGated()                                     // Gated (1), Non Gated (0)
-                    */
                 }
             }
 
             update.WriteInt32(Account.AscensionLevel);              // Client's Ascension Level
 
-            foreach (ClientChatSession onlinePeerSession in onlinePeerSessions)
+            foreach (ChatSession onlinePeerSession in onlinePeerSessions)
                 onlinePeerSession.Send(update);
+
+            // Also send to self so the client knows its status has changed
+            Send(update);
         }
     }
 
@@ -379,9 +299,10 @@ public class ClientChatSession(TCPServer server, IServiceProvider serviceProvide
         List<int> clanMemberIDs = [.. Account.Clan?.Members.Select(clanMember => clanMember.ID) ?? []];
         List<int> friendIDs = [.. Account.FriendedPeers.Select(friend => friend.ID)];
 
-        List<ClientChatSession> onlinePeerSessions = Context.ClientChatSessions.Values
+        List<ChatSession> onlinePeerSessions = Context.ClientChatSessions.Values
             .Where(chatSession => friendIDs.Any(friendID => friendID == chatSession.Account.ID) || clanMemberIDs.Any(clanMemberID => clanMemberID == chatSession.Account.ID))
-            .Where(chatSession => chatSession.Metadata.ClientChatModeState is not ChatProtocol.ChatModeType.CHAT_MODE_INVISIBLE)
+            .Where(chatSession => chatSession.ClientMetadata.ClientChatModeState is not ChatProtocol.ChatModeType.CHAT_MODE_INVISIBLE)
+            .Where(chatSession => chatSession.Account.ID != Account.ID)
             .Select(chatSession => chatSession).Distinct().ToList(); // Get All Online Friends And Clan Members That Are Not Invisible
 
         ChatBuffer update = new ();
@@ -389,9 +310,9 @@ public class ClientChatSession(TCPServer server, IServiceProvider serviceProvide
         update.WriteCommand(ChatProtocol.Command.CHAT_CMD_INITIAL_STATUS);
         update.WriteInt32(onlinePeerSessions.Count);                               // Number Of Online Peers
 
-        foreach (ClientChatSession onlinePeerSession in onlinePeerSessions)
+        foreach (ChatSession onlinePeerSession in onlinePeerSessions)
         {
-            ChatProtocol.ChatClientStatus status = onlinePeerSession.Metadata.LastKnownClientState;
+            ChatProtocol.ChatClientStatus status = onlinePeerSession.ClientMetadata.LastKnownClientState;
 
             update.WriteInt32(onlinePeerSession.Account.ID);                       // Client's Account ID
             update.WriteInt8(Convert.ToByte(status));                              // Client's Status
@@ -401,31 +322,36 @@ public class ClientChatSession(TCPServer server, IServiceProvider serviceProvide
 
             if (status is ChatProtocol.ChatClientStatus.CHAT_CLIENT_STATUS_JOINING_GAME || status is ChatProtocol.ChatClientStatus.CHAT_CLIENT_STATUS_IN_GAME)
             {
-                if (matchServer is null)
+                string? matchServerAddress = onlinePeerSession.ClientMetadata.MatchServerAddress;
+
+                if (string.IsNullOrEmpty(matchServerAddress))
                 {
-                    Log.Error(@"[BUG] A Connection Status Update Was Requested For Account Name ""{ClientInformation.Account.Name}"" While Connected To A Match Server, But The Match Server Is NULL", Account.Name);
-
-                    continue;
+                    // Fallback If Metadata Is Missing (Should Not Happen With Fix)
+                    Log.Error(@"[BUG] Peer Account ""{PeerName}"" Is {Status} But MatchServerAddress Is Missing", onlinePeerSession.Account.Name, status);
+                    update.WriteString("0.0.0.0:0"); 
                 }
-
-                update.WriteString($"{matchServer.IPAddress}:{matchServer.Port}"); // Server Address This Client Is Connected To, In The Form Of "X.X.X.X:P"
+                else
+                {
+                    update.WriteString(matchServerAddress);
+                }
 
                 if (status is ChatProtocol.ChatClientStatus.CHAT_CLIENT_STATUS_IN_GAME)
                 {
                     // TODO: Populate With Real Match Name
-                    update.WriteString(string.Empty);                              // Match Name
-                    // TODO: Populate With Real Match ID
-                    update.WriteInt32(default(int));                               // Match ID
+                    update.WriteString(string.Empty);                                // Match Name (Legacy: GameName)
+                    
+                    // Populate With Real Match ID
+                    update.WriteInt32(onlinePeerSession.ClientMetadata.MatchID ?? 0); // Match ID
                 }
             }
 
-            update.WriteInt32(Account.AscensionLevel);                             // Client's Ascension Level
+            update.WriteInt32(onlinePeerSession.Account.AscensionLevel);           // Client's Ascension Level
+        }
 
-            onlinePeerSession.Send(update);
-        };
+        Send(update);
     }
 
-    public ClientChatSession SendOptionsAndRemoteCommands()
+    public ChatSession SendOptionsAndRemoteCommands()
     {
         ChatBuffer options = new ();
 
@@ -436,9 +362,6 @@ public class ClientChatSession(TCPServer server, IServiceProvider serviceProvide
             "http_printDebugInfo true",
             "php_printDebugInfo true",
             "sys_dumpOnFatal true"
-
-            // Adding The Following Command Will Log The Client Directly Into A No-Stats Practice Match With Bots
-            // "startgame practice GameName map:caldavar allheroes:true devheroes:true mode:botmatch nostats:true"
         ];
 
         options.WriteCommand(ChatProtocol.Command.CHAT_CMD_OPTIONS);

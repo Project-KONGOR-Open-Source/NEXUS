@@ -4,9 +4,9 @@ namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Social;
 ///     Handles friend removal notification.
 /// </summary>
 [ChatCommand(ChatProtocol.Command.CHAT_CMD_NOTIFY_BUDDY_REMOVE)]
-public class RemoveFriend : ISynchronousCommandProcessor<ClientChatSession>
+public class RemoveFriend : ISynchronousCommandProcessor<ChatSession>
 {
-    public void Process(ClientChatSession session, ChatBuffer buffer)
+    public void Process(ChatSession session, ChatBuffer buffer)
     {
         RemoveFriendRequestData requestData = new (buffer);
 
@@ -46,3 +46,4 @@ file class RemoveFriendRequestData
         RemovedFriendNotificationID = buffer.ReadInt32();
     }
 }
+

@@ -1,31 +1,25 @@
 ﻿namespace TRANSMUTANSTEIN.ChatServer.Domain.Core;
 
-public class MatchServerChatSession(TCPServer server, IServiceProvider serviceProvider) : ChatSession(server, serviceProvider)
+public partial class ChatSession
 {
     /// <summary>
     ///     Gets set after a successful match server handshake.
     ///     Contains metadata about the match server connected to this chat session.
     /// </summary>
-    public MatchServerChatSessionMetadata Metadata { get; set; } = null!;
+    public MatchServerChatSessionMetadata ServerMetadata { get; set; } = null!;
 
-    /// <summary>
-    ///     Gets set after a successful match server handshake.
-    ///     Contains the account information of the match server connected to this chat session.
-    /// </summary>
-    public Account Account { get; set; } = null!;
-
-    public async Task Terminate(IDatabase distributedCacheStore)
+    public async Task TerminateMatchServer(IDatabase distributedCacheStore)
     {
-        await Remove(distributedCacheStore);
+        await RemoveMatchServer(distributedCacheStore);
 
         // Remove The Match Server Chat Session
-        if (Context.MatchServerChatSessions.TryRemove(Metadata.ServerID, out MatchServerChatSession? existingSession))
+        if (Context.MatchServerChatSessions.TryRemove(ServerMetadata.ServerID, out ChatSession? existingSession))
         {
-            Log.Information(@"Match Server ID ""{ServerID}"" Was Removed From The Match Server Pool", Metadata.ServerID);
+            Log.Information(@"Match Server ID ""{ServerID}"" Was Removed From The Match Server Pool", ServerMetadata.ServerID);
 
             if (existingSession is null)
             {
-                Log.Warning(@"Match Server ID ""{ServerID}"" Had A Null Session In The Match Server Pool", Metadata.ServerID);
+                Log.Warning(@"Match Server ID ""{ServerID}"" Had A Null Session In The Match Server Pool", ServerMetadata.ServerID);
 
                 // Disconnect And Dispose The Chat Session
                 Disconnect(); Dispose();
@@ -33,9 +27,9 @@ public class MatchServerChatSession(TCPServer server, IServiceProvider servicePr
                 return;
             }
 
-            if (existingSession.Metadata.SessionCookie != Metadata.SessionCookie)
+            if (existingSession.ServerMetadata.SessionCookie != ServerMetadata.SessionCookie)
             {
-                Log.Warning(@"Match Server ID ""{ServerID}"" Had A Mismatched Session Cookie", Metadata.ServerID);
+                Log.Warning(@"Match Server ID ""{ServerID}"" Had A Mismatched Session Cookie", ServerMetadata.ServerID);
 
                 // Disconnect And Dispose The Chat Session
                 Disconnect(); Dispose();
@@ -46,7 +40,7 @@ public class MatchServerChatSession(TCPServer server, IServiceProvider servicePr
             ChatBuffer acknowledgementResponse = new ();
 
             acknowledgementResponse.WriteCommand(ChatProtocol.ChatServerToGameServer.NET_CHAT_GS_REMOTE_COMMAND);
-            acknowledgementResponse.WriteString(Metadata.SessionCookie);
+            acknowledgementResponse.WriteString(ServerMetadata.SessionCookie);
             acknowledgementResponse.WriteString("quit");
 
             // Send Disconnect Acknowledgement To Match Server
@@ -55,18 +49,18 @@ public class MatchServerChatSession(TCPServer server, IServiceProvider servicePr
 
         else
         {
-            Log.Warning(@"Match Server ID ""{ServerID}"" Attempted To Disconnect But Was Not Found In The Match Server Pool", Metadata.ServerID);
+            Log.Warning(@"Match Server ID ""{ServerID}"" Attempted To Disconnect But Was Not Found In The Match Server Pool", ServerMetadata.ServerID);
         }
 
         // Disconnect And Dispose The Chat Session
         Disconnect(); Dispose();
 
-        Log.Information(@"Match Server ID ""{ServerID}"" Has Disconnected Gracefully", Metadata.ServerID);
+        Log.Information(@"Match Server ID ""{ServerID}"" Has Disconnected Gracefully", ServerMetadata.ServerID);
     }
 
-    private async Task Remove(IDatabase distributedCacheStore)
+    private async Task RemoveMatchServer(IDatabase distributedCacheStore)
     {
         // Remove Match Server From The Distributed Cache
-        await distributedCacheStore.RemoveMatchServerByID(Metadata.ServerID);
+        await distributedCacheStore.RemoveMatchServerByID(ServerMetadata.ServerID);
     }
 }

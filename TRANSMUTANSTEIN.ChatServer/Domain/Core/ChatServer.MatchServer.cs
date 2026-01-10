@@ -8,7 +8,7 @@ public class MatchServerChatServer(IServiceProvider serviceProvider, IPAddress a
 {
     protected override TCPSession CreateSession()
     {
-        return new MatchServerChatSession(this, serviceProvider);
+        return new ChatSession(this, serviceProvider);
     }
 
     protected override void OnStarted()

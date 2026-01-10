@@ -3,9 +3,9 @@ namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Channels;
 using global::TRANSMUTANSTEIN.ChatServer.Domain.Communication;
 
 [ChatCommand(ChatProtocol.Command.CHAT_CMD_CHANNEL_TOPIC)]
-public class SetChannelTopic : ISynchronousCommandProcessor<ClientChatSession>
+public class SetChannelTopic : ISynchronousCommandProcessor<ChatSession>
 {
-    public void Process(ClientChatSession session, ChatBuffer buffer)
+    public void Process(ChatSession session, ChatBuffer buffer)
     {
         SetChannelTopicRequestData requestData = new (buffer);
 
@@ -59,3 +59,4 @@ file class SetChannelTopicRequestData
         Topic = buffer.ReadString();
     }
 }
+

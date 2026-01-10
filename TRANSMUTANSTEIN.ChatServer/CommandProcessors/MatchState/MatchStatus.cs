@@ -1,9 +1,9 @@
 namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.MatchState;
 
 [ChatCommand(ChatProtocol.GameServerToChatServer.NET_CHAT_GS_MATCH_ONGOING)]
-public class MatchStatus : ISynchronousCommandProcessor<MatchServerChatSession>
+public class MatchStatus : ISynchronousCommandProcessor<ChatSession>
 {
-    public void Process(MatchServerChatSession session, ChatBuffer buffer)
+    public void Process(ChatSession session, ChatBuffer buffer)
     {
         MatchStatusRequestData requestData = new (buffer);
 
@@ -34,3 +34,4 @@ file class MatchStatusRequestData
         CurrentGameTime = buffer.ReadInt32();
     }
 }
+

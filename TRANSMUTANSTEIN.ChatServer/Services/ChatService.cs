@@ -2,7 +2,7 @@
 
 public class ChatService(IServiceProvider serviceProvider) : IHostedService, IDisposable
 {
-    public static Domain.Core.ChatServer? ChatServer { get; set; }
+    public Domain.Core.ChatServer? ChatServer { get; set; }
 
     public Task StartAsync(CancellationToken cancellationToken)
     {
@@ -58,16 +58,13 @@ public class ChatService(IServiceProvider serviceProvider) : IHostedService, IDi
     {
         if (ChatServer is null)
         {
-            // TODO: Log Bug
-
-            throw new ApplicationException("Chat Server Is NULL");
+            Log.Error("Chat Server Is NULL During Disposal (Attempting To Dispose Before Start or After Startup Failure?)");
+            return;
         }
 
         if (ChatServer.IsDisposed)
         {
-            // TODO: Log Bug
-
-            throw new ApplicationException("Chat Server Is Already Disposed");
+             return;
         }
 
         ChatServer.Dispose();

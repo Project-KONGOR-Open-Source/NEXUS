@@ -1,9 +1,9 @@
 namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Channels;
 
 [ChatCommand(ChatProtocol.Command.CHAT_CMD_CHANNEL_MSG)]
-public class SendChannelMessage(FloodPreventionService floodPreventionService) : ISynchronousCommandProcessor<ClientChatSession>
+public class SendChannelMessage(FloodPreventionService floodPreventionService) : ISynchronousCommandProcessor<ChatSession>
 {
-    public void Process(ClientChatSession session, ChatBuffer buffer)
+    public void Process(ChatSession session, ChatBuffer buffer)
     {
         SendChannelMessageRequestData requestData = new (buffer);
 
@@ -66,3 +66,4 @@ file class SendChannelMessageRequestData
         ChannelID = buffer.ReadInt32();
     }
 }
+

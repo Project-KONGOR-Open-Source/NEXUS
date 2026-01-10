@@ -1,19 +1,19 @@
 namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Communication;
 
 [ChatCommand(ChatProtocol.Command.CHAT_CMD_IM)]
-public class SendInstantMessage : ISynchronousCommandProcessor<ClientChatSession>
+public class SendInstantMessage : ISynchronousCommandProcessor<ChatSession>
 {
-    public void Process(ClientChatSession session, ChatBuffer buffer)
+    public void Process(ChatSession session, ChatBuffer buffer)
     {
         SendInstantMessageRequestData requestData = new (buffer);
 
         // Find Target Session
-        ClientChatSession? targetSession = Context.ClientChatSessions.Values
+        ChatSession? targetSession = Context.ClientChatSessions.Values
             .FirstOrDefault(s => s.Account.Name.Equals(requestData.TargetName, StringComparison.OrdinalIgnoreCase) 
                              || s.Account.NameWithClanTag.Equals(requestData.TargetName, StringComparison.OrdinalIgnoreCase));
 
         // Check If Target Is Offline Or Invisible
-        if (targetSession is null || targetSession.Metadata.ClientChatModeState == ChatProtocol.ChatModeType.CHAT_MODE_INVISIBLE)
+        if (targetSession is null || targetSession.ClientMetadata.ClientChatModeState == ChatProtocol.ChatModeType.CHAT_MODE_INVISIBLE)
         {
             // Send Failure Response To Sender
             ChatBuffer failure = new ();
@@ -33,7 +33,7 @@ public class SendInstantMessage : ISynchronousCommandProcessor<ClientChatSession
         if (requestData.Flags != 0)
         {
             message.WriteInt32(session.Account.ID);
-            message.WriteInt8(Convert.ToByte(session.Metadata.LastKnownClientState));
+            message.WriteInt8(Convert.ToByte(session.ClientMetadata.LastKnownClientState));
             // TODO: Implement Session Flags (IsOfficer, IsStaff etc). For now passing 0 or converting account type.
             byte flags = 0; 
             if (session.Account.Type == AccountType.Staff) flags |= 0x20; // Example flag mapping
@@ -59,7 +59,7 @@ public class SendInstantMessage : ISynchronousCommandProcessor<ClientChatSession
              
              // Flags != 0 check applies here too since we passed 2.
              echo.WriteInt32(targetSession.Account.ID);
-             echo.WriteInt8(Convert.ToByte(targetSession.Metadata.LastKnownClientState));
+             echo.WriteInt8(Convert.ToByte(targetSession.ClientMetadata.LastKnownClientState));
              
              byte targetFlags = 0;
              if (targetSession.Account.Type == AccountType.Staff) targetFlags |= 0x20;
@@ -91,3 +91,4 @@ file class SendInstantMessageRequestData
         Flags = buffer.ReadInt8();
     }
 }
+

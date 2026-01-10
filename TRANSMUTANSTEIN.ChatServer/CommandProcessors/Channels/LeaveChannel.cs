@@ -1,9 +1,9 @@
-﻿namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Channels;
+namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Channels;
 
 [ChatCommand(ChatProtocol.Command.CHAT_CMD_LEAVE_CHANNEL)]
-public class LeaveChannel : ISynchronousCommandProcessor<ClientChatSession>
+public class LeaveChannel : ISynchronousCommandProcessor<ChatSession>
 {
-    public void Process(ClientChatSession session, ChatBuffer buffer)
+    public void Process(ChatSession session, ChatBuffer buffer)
     {
         LeaveChannelRequestData requestData = new (buffer);
 
@@ -25,3 +25,4 @@ file class LeaveChannelRequestData
         ChannelName = buffer.ReadString();
     }
 }
+

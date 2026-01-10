@@ -8,7 +8,7 @@ public class ClientChatServer(IServiceProvider serviceProvider, IPAddress addres
 {
     protected override TCPSession CreateSession()
     {
-        return new ClientChatSession(this, serviceProvider);
+        return new ChatSession(this, serviceProvider);
     }
 
     protected override void OnStarted()

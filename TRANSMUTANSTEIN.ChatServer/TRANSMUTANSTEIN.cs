@@ -62,8 +62,9 @@ public class TRANSMUTANSTEIN
         // Register IDatabase From IConnectionMultiplexer
         builder.Services.AddSingleton<IDatabase>(serviceProvider => serviceProvider.GetRequiredService<IConnectionMultiplexer>().GetDatabase());
 
-        // Register Chat Service As Background Hosted Service
-        builder.Services.AddHostedService<ChatService>();
+        // Register Chat Service As Background Hosted Service With Support For Dependency Injection
+        builder.Services.AddSingleton<ChatService>();
+        builder.Services.AddHostedService(serviceProvider => serviceProvider.GetRequiredService<ChatService>());
 
         // Register Matchmaking Service As Background Hosted Service
         builder.Services.AddHostedService<MatchmakingService>();
@@ -72,8 +73,7 @@ public class TRANSMUTANSTEIN
         builder.Services.AddSingleton<FloodPreventionService>();
         builder.Services.AddHostedService(serviceProvider => serviceProvider.GetRequiredService<FloodPreventionService>());
 
-        // Register Database Context Service
-        builder.Services.AddTransient<MerrickContext>();
+
 
         // Add Chat Server Health Check
         builder.Services.AddHealthChecks().AddCheck<ChatServerHealthCheck>("TRANSMUTANSTEIN Chat Server Health Check");

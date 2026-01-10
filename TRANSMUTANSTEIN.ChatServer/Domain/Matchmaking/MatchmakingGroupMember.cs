@@ -1,10 +1,10 @@
-﻿namespace TRANSMUTANSTEIN.ChatServer.Domain.Matchmaking;
+namespace TRANSMUTANSTEIN.ChatServer.Domain.Matchmaking;
 
-public class MatchmakingGroupMember(ClientChatSession session)
+public class MatchmakingGroupMember(ChatSession session)
 {
     public Account Account = session.Account;
 
-    public ClientChatSession Session = session;
+    public ChatSession Session = session;
 
     public required byte Slot { get; set; }
 
@@ -30,3 +30,4 @@ public class MatchmakingGroupMember(ClientChatSession session)
     /// </summary>
     public required string GameModeAccess { get; set; }
 }
+

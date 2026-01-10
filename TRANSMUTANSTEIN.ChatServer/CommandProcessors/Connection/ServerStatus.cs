@@ -1,9 +1,9 @@
 namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Connection;
 
 [ChatCommand(ChatProtocol.GameServerToChatServer.NET_CHAT_GS_STATUS)]
-public class ServerStatus : ISynchronousCommandProcessor<MatchServerChatSession>
+public class ServerStatus : ISynchronousCommandProcessor<ChatSession>
 {
-    public void Process(MatchServerChatSession session, ChatBuffer buffer)
+    public void Process(ChatSession session, ChatBuffer buffer)
     {
         ServerStatusRequestData requestData = new (buffer);
 
@@ -268,3 +268,4 @@ file class ClientNetworkStatistics
 
     public long UnreliablePacketsReceived { get; init; }
 }
+

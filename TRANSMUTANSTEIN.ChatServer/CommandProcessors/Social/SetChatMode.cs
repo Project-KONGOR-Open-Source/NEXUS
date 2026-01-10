@@ -1,13 +1,13 @@
 namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Social;
 
 [ChatCommand(ChatProtocol.Command.CHAT_CMD_SET_CHAT_MODE_TYPE)]
-public class SetChatMode : ISynchronousCommandProcessor<ClientChatSession>
+public class SetChatMode : ISynchronousCommandProcessor<ChatSession>
 {
-    public void Process(ClientChatSession session, ChatBuffer buffer)
+    public void Process(ChatSession session, ChatBuffer buffer)
     {
         SetChatModeRequestData requestData = new (buffer);
 
-        ChatProtocol.ChatModeType oldMode = session.Metadata.ClientChatModeState;
+        ChatProtocol.ChatModeType oldMode = session.ClientMetadata.ClientChatModeState;
         ChatProtocol.ChatModeType newMode = (ChatProtocol.ChatModeType)requestData.ChatModeType;
 
         // Transition TO Invisible: Tell friends I disconnected
@@ -30,13 +30,12 @@ public class SetChatMode : ISynchronousCommandProcessor<ClientChatSession>
              session.BroadcastConnectionStatusUpdate(ChatProtocol.ChatClientStatus.CHAT_CLIENT_STATUS_DISCONNECTED);
         }
 
-        session.Metadata.ClientChatModeState = newMode;
-        session.AutoResponseReason = requestData.Reason;
+        session.ClientMetadata.ClientChatModeState = newMode;
 
         // Transition FROM Invisible: Tell friends I connected
         if (oldMode == ChatProtocol.ChatModeType.CHAT_MODE_INVISIBLE && newMode != ChatProtocol.ChatModeType.CHAT_MODE_INVISIBLE)
         {
-             session.BroadcastConnectionStatusUpdate(session.Metadata.LastKnownClientState);
+             session.BroadcastConnectionStatusUpdate(session.ClientMetadata.LastKnownClientState);
         }
 
         // Send Confirmation To Client
@@ -62,3 +61,4 @@ file class SetChatModeRequestData
         Reason = buffer.ReadString();
     }
 }
+

@@ -1,20 +1,20 @@
 namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Results;
 
 [ChatCommand(ChatProtocol.GameServerToChatServer.NET_CHAT_GS_MATCH_ID_RESULT)]
-public class MatchIDResult(IDatabase distributedCacheStore) : IAsynchronousCommandProcessor<MatchServerChatSession>
+public class MatchIDResult(IDatabase distributedCacheStore) : IAsynchronousCommandProcessor<ChatSession>
 {
-    public async Task Process(MatchServerChatSession session, ChatBuffer buffer)
+    public async Task Process(ChatSession session, ChatBuffer buffer)
     {
         MatchIDResultRequestData requestData = new (buffer);
 
         if (requestData.Result is not ChatProtocol.MatchIDResult.MIDR_SUCCESS)
         {
-            MatchStartData? data = await distributedCacheStore.GetMatchStartDataByMatchServerID(session.Metadata.ServerID);
+            MatchStartData? data = await distributedCacheStore.GetMatchStartDataByMatchServerID(session.ServerMetadata.ServerID);
 
             if (data is null)
             {
                 Log.Error(@"[BUG] Unable To Retrieve Match Start Data For Server Session ""{SessionID}"" With Server ID ""{ServerID}""",
-                    session.ID, session.Metadata.ServerID);
+                    session.ID, session.ServerMetadata.ServerID);
             }
 
             else
@@ -41,3 +41,4 @@ file class MatchIDResultRequestData
         RequestTimeMilliseconds = buffer.ReadInt32();
     }
 }
+

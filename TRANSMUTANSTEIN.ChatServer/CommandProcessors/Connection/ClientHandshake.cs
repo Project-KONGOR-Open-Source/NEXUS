@@ -1,17 +1,23 @@
-﻿namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Connection;
+namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Connection;
 
 [ChatCommand(ChatProtocol.ClientToChatServer.NET_CHAT_CL_CONNECT)]
-public class ClientHandshake(MerrickContext merrick, IDatabase distributedCacheStore) : IAsynchronousCommandProcessor<ClientChatSession>
+public class ClientHandshake(MerrickContext merrick, IDatabase distributedCacheStore) : IAsynchronousCommandProcessor<ChatSession>
 {
-    public async Task Process(ClientChatSession session, ChatBuffer buffer)
+    public async Task Process(ChatSession session, ChatBuffer buffer)
     {
+        Log.Information($"[DEBUG] ClientHandshake.Process ENTERED for Session {session.ID}");
+
         ClientHandshakeRequestData requestData = new (buffer);
+        Log.Information($"[DEBUG] Request Data Parsed. AccountID: {requestData.AccountID}");
 
         // Set Client Metadata On Session
         // This Needs To Be Set At The First Opportunity So That Any Subsequent Code Logic Can Have Access To The Client's Metadata
-        session.Metadata = requestData.ToMetadata();
+        session.ClientMetadata = requestData.ToMetadata();
 
+        Log.Information($"[DEBUG] Querying Redis for SessionCookie: {requestData.SessionCookie}");
+        Log.Information($"[DEBUG] Querying Redis for SessionCookie: {requestData.SessionCookie}");
         string? cachedAccountName = await distributedCacheStore.GetAccountNameForSessionCookie(requestData.SessionCookie);
+        Log.Information($"[DEBUG] Redis Result: {cachedAccountName ?? "NULL"}");
 
         // Ensure Session Cookie Exists In Cache
         if (cachedAccountName is null)
@@ -21,102 +27,116 @@ public class ClientHandshake(MerrickContext merrick, IDatabase distributedCacheS
 
             session
                 .Reject(ChatProtocol.ChatRejectReason.ECR_AUTH_FAILED)
-                .Terminate();
+                .TerminateClient();
 
             return;
         }
 
-        Account? account = await merrick.Accounts
-            .Include(account => account.User).ThenInclude(user => user.Accounts)
-            .Include(account => account.FriendedPeers)
-            .Include(account => account.Clan).ThenInclude(clan => clan!.Members)
-            .SingleOrDefaultAsync(account => account.ID == requestData.AccountID);
-
-        if (account is null)
+        try 
         {
-            Log.Error(@"[BUG] Account With ID ""{RequestData.AccountID}"" Could Not Be Found", requestData.AccountID);
+            string connString = merrick.Database.GetConnectionString() ?? "NULL";
+            Log.Information($"[DEBUG] SQL Connection String: {connString}");
 
-            session
-                .Reject(ChatProtocol.ChatRejectReason.ECR_UNKNOWN)
-                .Terminate();
-
-            return;
-        }
-
-        // Ensure Account Name Matches Cached Account Name From Session Cookie
-        if (account.Name.Equals(cachedAccountName, StringComparison.OrdinalIgnoreCase).Equals(false))
-        {
-            Log.Warning(@"Authentication Failed: Account ID ""{RequestData.AccountID}"" Does Not Match Cached Account Name ""{CachedAccountName}""",
-                requestData.AccountID, cachedAccountName);
-
-            session
-                .Reject(ChatProtocol.ChatRejectReason.ECR_AUTH_FAILED)
-                .Terminate();
-
-            return;
-        }
-
-        // Ensure Authentication Hash (AccountID + RemoteIP + Cookie + Salt) Matches Expected Value
-        string expectedSessionAuthenticationHash = SRPAuthenticationHandlers.ComputeChatServerCookieHash(requestData.AccountID, requestData.RemoteIP, requestData.SessionCookie);
-
-        if (requestData.SessionAuthenticationHash.Equals(expectedSessionAuthenticationHash, StringComparison.OrdinalIgnoreCase).Equals(false))
-        {
-            Log.Warning(@"Authentication Failed For Account ""{Account.Name}"": Invalid Authentication Hash", account.Name);
-
-            session
-                .Reject(ChatProtocol.ChatRejectReason.ECR_AUTH_FAILED)
-                .Terminate();
-
-            return;
-        }
-
-        // Check For Concurrent Connections: Disconnect Any Other Existing Sessions For This Account Or For Any Sub-Account Of The Same User
-        // Ignore Staff And Guest Accounts For Concurrent Connection Checks
-        if (account.Type is not AccountType.Staff and not AccountType.Guest)
-        {
-            List<int> subAccountIDs = [.. account.User.Accounts.Select(subAccount => subAccount.ID)];
-
-            foreach (int subAccountID in subAccountIDs)
+            Account? account = await merrick.Accounts
+                .Include(account => account.User).ThenInclude(user => user.Accounts)
+                .Include(account => account.FriendedPeers)
+                .Include(account => account.Clan).ThenInclude(clan => clan!.Members)
+                .SingleOrDefaultAsync(account => account.ID == requestData.AccountID);
+            Log.Information($"[DEBUG] SQL Result: {(account != null ? "FOUND" : "NULL")}");
+            
+             if (account is null)
             {
-                ClientChatSession? existingSessionMatch = Context.ClientChatSessions.Values
-                    .SingleOrDefault(existingSession => existingSession.Account?.ID == subAccountID);
+                Log.Error(@"[BUG] Account With ID ""{RequestData.AccountID}"" Could Not Be Found", requestData.AccountID);
 
-                if (existingSessionMatch is not null)
+                session
+                    .Reject(ChatProtocol.ChatRejectReason.ECR_UNKNOWN)
+                    .TerminateClient();
+
+                return;
+            }
+
+            // Ensure Account Name Matches Cached Account Name From Session Cookie
+            if (account.Name.Equals(cachedAccountName, StringComparison.OrdinalIgnoreCase).Equals(false))
+            {
+                Log.Warning(@"Authentication Failed: Account ID ""{RequestData.AccountID}"" Does Not Match Cached Account Name ""{CachedAccountName}""",
+                    requestData.AccountID, cachedAccountName);
+
+                session
+                    .Reject(ChatProtocol.ChatRejectReason.ECR_AUTH_FAILED)
+                    .TerminateClient();
+
+                return;
+            }
+
+            // Ensure Authentication Hash (AccountID + RemoteIP + Cookie + Salt) Matches Expected Value
+            string expectedSessionAuthenticationHash = SRPAuthenticationHandlers.ComputeChatServerCookieHash(requestData.AccountID, requestData.RemoteIP, requestData.SessionCookie);
+
+            if (requestData.SessionAuthenticationHash.Equals(expectedSessionAuthenticationHash, StringComparison.OrdinalIgnoreCase).Equals(false))
+            {
+                Log.Warning(@"Authentication Failed For Account ""{Account.Name}"": Invalid Authentication Hash", account.Name);
+
+                session
+                    .Reject(ChatProtocol.ChatRejectReason.ECR_AUTH_FAILED)
+                    .TerminateClient();
+
+                return;
+            }
+
+            // Check For Concurrent Connections: Disconnect Any Other Existing Sessions For This Account Or For Any Sub-Account Of The Same User
+            // Ignore Staff And Guest Accounts For Concurrent Connection Checks
+            if (account.Type is not AccountType.Staff and not AccountType.Guest)
+            {
+                List<int> subAccountIDs = [.. account.User.Accounts.Select(subAccount => subAccount.ID)];
+
+                foreach (int subAccountID in subAccountIDs)
                 {
-                    Log.Information(@"Disconnecting Existing Session For Account ID ""{SubAccountID}"" (Account ""{ExistingSessionMatch.Account.Name}"") Due To Concurrent Connection Attempt",
-                        subAccountID, existingSessionMatch.Account.Name);
+                    ChatSession? existingSessionMatch = Context.ClientChatSessions.Values
+                        .SingleOrDefault(existingSession => existingSession.Account?.ID == subAccountID);
 
-                    existingSessionMatch
-                        .Reject(ChatProtocol.ChatRejectReason.ECR_ACCOUNT_SHARING)
-                        .Terminate();
+                    if (existingSessionMatch is not null)
+                    {
+                        Log.Information(@"Disconnecting Existing Session For Account ID ""{SubAccountID}"" (Account ""{ExistingSessionMatch.Account.Name}"") Due To Concurrent Connection Attempt",
+                            subAccountID, existingSessionMatch.Account.Name);
+
+                        existingSessionMatch
+                            .Reject(ChatProtocol.ChatRejectReason.ECR_ACCOUNT_SHARING)
+                            .TerminateClient();
+                    }
                 }
             }
-        }
 
-        if (Context.ClientChatSessions.Values.SingleOrDefault(existingSession => existingSession.Account?.ID == account.ID) is { } existingSession)
-        {
-            Log.Information(@"Disconnecting Existing Session For Account ""{Account.Name}"" Due To Concurrent Connection Attempt", account.Name);
+            if (Context.ClientChatSessions.Values.SingleOrDefault(existingSession => existingSession.Account?.ID == account.ID) is { } existingSession)
+            {
+                Log.Information(@"Disconnecting Existing Session For Account ""{Account.Name}"" Due To Concurrent Connection Attempt", account.Name);
 
-            existingSession
-                .Reject(ChatProtocol.ChatRejectReason.ECR_ACCOUNT_SHARING)
-                .Terminate();
-        }
+                existingSession
+                    .Reject(ChatProtocol.ChatRejectReason.ECR_ACCOUNT_SHARING)
+                    .TerminateClient();
+            }
 
-        // Validate Client Version
-        if ($"{requestData.ClientVersionMajor}.{requestData.ClientVersionMinor}.{requestData.ClientVersionPatch}.{requestData.ClientVersionRevision}" is not "4.10.1.0")
-        {
+            // Validate Client Version
+            if ($"{requestData.ClientVersionMajor}.{requestData.ClientVersionMinor}.{requestData.ClientVersionPatch}.{requestData.ClientVersionRevision}" is not "4.10.1.0")
+            {
+                Log.Warning("Authentication Failed: Bad Version {Version}", $"{requestData.ClientVersionMajor}.{requestData.ClientVersionMinor}.{requestData.ClientVersionPatch}.{requestData.ClientVersionRevision}");
+                session
+                    .Reject(ChatProtocol.ChatRejectReason.ECR_BAD_VERSION)
+                    .TerminateClient();
+
+                return;
+            }
+
+            Log.Information("Authentication Successful For Account {AccountID}. Accepting Connection.", requestData.AccountID);
+
+            // Accept Connection, Send Options, And Broadcast Connection To Friends And Clan Members
             session
-                .Reject(ChatProtocol.ChatRejectReason.ECR_BAD_VERSION)
-                .Terminate();
+                .Accept(account);
 
-            return;
         }
-
-        // Accept Connection, Send Options, And Broadcast Connection To Friends And Clan Members
-        session
-            .Accept(account)
-            .SendOptionsAndRemoteCommands()
-            .BroadcastConnection();
+        catch (Exception ex)
+        {
+            Log.Error(ex, "[CRITICAL] ClientHandshake Processing Failed!");
+            throw;
+        }
     }
 }
 
@@ -211,3 +231,4 @@ file class ClientHandshakeRequestData
         };
     }
 }
+

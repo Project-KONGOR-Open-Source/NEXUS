@@ -1,9 +1,9 @@
 namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Connection;
 
 [ChatCommand(ChatProtocol.ServerManagerToChatServer.NET_CHAT_SM_STATUS)]
-public class ServerManagerStatus : ISynchronousCommandProcessor<MatchServerManagerChatSession>
+public class ServerManagerStatus : ISynchronousCommandProcessor<ChatSession>
 {
-    public void Process(MatchServerManagerChatSession session, ChatBuffer buffer)
+    public void Process(ChatSession session, ChatBuffer buffer)
     {
         ServerManagerStatusRequestData requestData = new (buffer);
 
@@ -49,3 +49,4 @@ file class ServerManagerStatusRequestData
         ShuttingDown = buffer.ReadInt8() is not 0;
     }
 }
+

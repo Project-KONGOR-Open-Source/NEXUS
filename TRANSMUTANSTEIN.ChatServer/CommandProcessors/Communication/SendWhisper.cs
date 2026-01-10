@@ -1,9 +1,9 @@
 namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Communication;
 
 [ChatCommand(ChatProtocol.Command.CHAT_CMD_WHISPER)]
-public class SendWhisper : ISynchronousCommandProcessor<ClientChatSession>
+public class SendWhisper : ISynchronousCommandProcessor<ChatSession>
 {
-    public void Process(ClientChatSession session, ChatBuffer buffer)
+    public void Process(ChatSession session, ChatBuffer buffer)
     {
         SendWhisperRequestData requestData = new (buffer);
 
@@ -28,3 +28,4 @@ file class SendWhisperRequestData
         Message = buffer.ReadString();
     }
 }
+

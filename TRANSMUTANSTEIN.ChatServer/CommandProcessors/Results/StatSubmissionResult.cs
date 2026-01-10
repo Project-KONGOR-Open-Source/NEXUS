@@ -1,9 +1,9 @@
 namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Results;
 
 [ChatCommand(ChatProtocol.GameServerToChatServer.NET_CHAT_GS_STAT_SUBMISSION_RESULT)]
-public class StatSubmissionResult : ISynchronousCommandProcessor<MatchServerChatSession>
+public class StatSubmissionResult : ISynchronousCommandProcessor<ChatSession>
 {
-    public void Process(MatchServerChatSession session, ChatBuffer buffer)
+    public void Process(ChatSession session, ChatBuffer buffer)
     {
         // 0x0514
         // Just consume the buffer safely for now to prevent "Missing Type Mapping" errors.
@@ -28,3 +28,4 @@ public class StatSubmissionResult : ISynchronousCommandProcessor<MatchServerChat
         }
     }
 }
+

@@ -1,14 +1,14 @@
 namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Connection;
 
 [ChatCommand(ChatProtocol.GameServerToChatServer.NET_CHAT_GS_DISCONNECT)]
-public class ServerDisconnect(IDatabase distributedCacheStore) : IAsynchronousCommandProcessor<MatchServerChatSession>
+public class ServerDisconnect(IDatabase distributedCacheStore) : IAsynchronousCommandProcessor<ChatSession>
 {
-    public async Task Process(MatchServerChatSession session, ChatBuffer buffer)
+    public async Task Process(ChatSession session, ChatBuffer buffer)
     {
         ServerDisconnectRequestData requestData = new (buffer);
 
         await session
-            .Terminate(distributedCacheStore);
+            .TerminateMatchServer(distributedCacheStore);
     }
 }
 
@@ -21,3 +21,4 @@ file class ServerDisconnectRequestData
         CommandBytes = buffer.ReadCommandBytes();
     }
 }
+

@@ -1,30 +1,25 @@
+using TRANSMUTANSTEIN.ChatServer.Domain.Core;
+
 namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Connection;
 
-/// <summary>
-///     Handles ping requests from clients, match servers, and match server managers.
-///     Responds with a pong message to keep the connection alive.
-/// </summary>
 [ChatCommand(ChatProtocol.Bidirectional.NET_CHAT_PING)]
 public class Ping : ISynchronousCommandProcessor<ChatSession>
 {
     public void Process(ChatSession session, ChatBuffer buffer)
     {
-        PingRequestData requestData = new (buffer);
+        // Log.Information("[PING] Command Received from Session {SessionID}", session.ID);
+        ChatBuffer pong = new ();
+        pong.WriteCommand(ChatProtocol.Bidirectional.NET_CHAT_PONG);
+        
+        // Echo back any payload (e.g. timestamp)
+        // buffer.Data contains [CommandID (2 bytes)] + [Payload]
+        // We skip the first 2 bytes of the incoming buffer
+        if (buffer.Size > 2)
+        {
+             pong.Append(buffer.Data.Skip(2).ToArray());
+        }
 
-        ChatBuffer pongResponse = new ();
-
-        pongResponse.WriteCommand(ChatProtocol.Bidirectional.NET_CHAT_PONG);
-
-        session.Send(pongResponse);
-    }
-}
-
-file class PingRequestData
-{
-    public byte[] CommandBytes { get; init; }
-
-    public PingRequestData(ChatBuffer buffer)
-    {
-        CommandBytes = buffer.ReadCommandBytes();
+        session.Send(pong);
+        // Log.Information("[PING] Pong Sent to Session {SessionID}", session.ID);
     }
 }

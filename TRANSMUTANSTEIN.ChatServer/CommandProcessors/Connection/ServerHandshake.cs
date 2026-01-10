@@ -1,15 +1,15 @@
-﻿namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Connection;
+namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Connection;
 
 [ChatCommand(ChatProtocol.GameServerToChatServer.NET_CHAT_GS_CONNECT)]
-public class ServerHandshake(IDatabase distributedCacheStore, MerrickContext databaseContext) : IAsynchronousCommandProcessor<MatchServerChatSession>
+public class ServerHandshake(IDatabase distributedCacheStore, MerrickContext databaseContext) : IAsynchronousCommandProcessor<ChatSession>
 {
-    public async Task Process(MatchServerChatSession session, ChatBuffer buffer)
+    public async Task Process(ChatSession session, ChatBuffer buffer)
     {
         ServerHandshakeRequestData requestData = new (buffer);
 
         // Set Match Server Metadata On Session
         // This Needs To Be Set At The First Opportunity So That Any Subsequent Code Logic Can Have Access To The Match Server's Metadata
-        session.Metadata = requestData.ToMetadata();
+        session.ServerMetadata = requestData.ToMetadata();
 
         // Validate Protocol Version
         if (requestData.ChatProtocolVersion != ChatProtocol.CHAT_PROTOCOL_EXTERNAL_VERSION)
@@ -23,7 +23,7 @@ public class ServerHandshake(IDatabase distributedCacheStore, MerrickContext dat
             rejectResponse.WriteString($@"Chat Protocol Version Mismatch: Expected ""{ChatProtocol.CHAT_PROTOCOL_EXTERNAL_VERSION}"", Received ""{requestData.ChatProtocolVersion}""");
 
             session.Send(rejectResponse);
-            await session.Terminate(distributedCacheStore);
+            await session.TerminateMatchServer(distributedCacheStore);
 
             return;
         }
@@ -41,7 +41,7 @@ public class ServerHandshake(IDatabase distributedCacheStore, MerrickContext dat
             rejectResponse.WriteString("The Session Cookie Provided For Chat Server Authentication Is Invalid");
 
             session.Send(rejectResponse);
-            await session.Terminate(distributedCacheStore);
+            await session.TerminateMatchServer(distributedCacheStore);
 
             return;
         }
@@ -57,7 +57,7 @@ public class ServerHandshake(IDatabase distributedCacheStore, MerrickContext dat
             rejectResponse.WriteString($@"Match Server ID Mismatch: Received ""{server.ID}""");
 
             session.Send(rejectResponse);
-            await session.Terminate(distributedCacheStore);
+            await session.TerminateMatchServer(distributedCacheStore);
 
             return;
         }
@@ -75,7 +75,7 @@ public class ServerHandshake(IDatabase distributedCacheStore, MerrickContext dat
             rejectResponse.WriteString("Match Server Host Account Not Found");
 
             session.Send(rejectResponse);
-            await session.Terminate(distributedCacheStore);
+            await session.TerminateMatchServer(distributedCacheStore);
 
             return;
         }
@@ -94,7 +94,7 @@ public class ServerHandshake(IDatabase distributedCacheStore, MerrickContext dat
             rejectResponse.WriteString("The Match Server Host Account Does Not Have Match Hosting Permissions");
 
             session.Send(rejectResponse);
-            await session.Terminate(distributedCacheStore);
+            await session.TerminateMatchServer(distributedCacheStore);
 
             return;
         }
@@ -111,17 +111,17 @@ public class ServerHandshake(IDatabase distributedCacheStore, MerrickContext dat
             rejectResponse.WriteString($@"Match Server Host Account ID Mismatch: Received ""{server.HostAccountID}""");
 
             session.Send(rejectResponse);
-            await session.Terminate(distributedCacheStore);
+            await session.TerminateMatchServer(distributedCacheStore);
 
             return;
         }
 
         // Check For Duplicate Match Server Instances
-        if (Context.MatchServerChatSessions.TryGetValue(requestData.ServerID, out MatchServerChatSession? existingSession))
+        if (Context.MatchServerChatSessions.TryGetValue(requestData.ServerID, out ChatSession? existingSession))
         {
             Log.Information(@"Disconnecting Duplicate Match Server Instance With ID ""{ServerID}"" And Address ""{Address}:{Port}"")", requestData.ServerID, server.IPAddress, server.Port);
 
-            await existingSession.Terminate(distributedCacheStore);
+            await existingSession.TerminateMatchServer(distributedCacheStore);
 
             Context.MatchServerChatSessions.TryRemove(requestData.ServerID, out _);
         }
@@ -193,3 +193,4 @@ file class ServerHandshakeRequestData
         };
     }
 }
+

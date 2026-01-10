@@ -1,9 +1,9 @@
 namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.MatchState;
 
 [ChatCommand(ChatProtocol.GameServerToChatServer.NET_CHAT_GS_ABANDON_MATCH)]
-public class AbandonMatch : ISynchronousCommandProcessor<MatchServerChatSession>
+public class AbandonMatch : ISynchronousCommandProcessor<ChatSession>
 {
-    public void Process(MatchServerChatSession session, ChatBuffer buffer)
+    public void Process(ChatSession session, ChatBuffer buffer)
     {
         // 0x0504
         try
@@ -14,7 +14,7 @@ public class AbandonMatch : ISynchronousCommandProcessor<MatchServerChatSession>
             if (buffer.HasRemainingData())
             {
                int matchId = buffer.ReadInt32();
-               Log.Information("Match Server {ServerID} Abandoning Match {MatchID}", session.Metadata.ServerID, matchId);
+               Log.Information("Match Server {ServerID} Abandoning Match {MatchID}", session.ServerMetadata.ServerID, matchId);
                
                // TODO: Update cache/state
             }
@@ -25,3 +25,4 @@ public class AbandonMatch : ISynchronousCommandProcessor<MatchServerChatSession>
         }
     }
 }
+

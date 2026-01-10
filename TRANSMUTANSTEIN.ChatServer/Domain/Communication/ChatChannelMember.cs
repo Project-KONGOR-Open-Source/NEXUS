@@ -1,14 +1,14 @@
-﻿namespace TRANSMUTANSTEIN.ChatServer.Domain.Communication;
+namespace TRANSMUTANSTEIN.ChatServer.Domain.Communication;
 
-public class ChatChannelMember(ClientChatSession session, ChatChannel chatChannel)
+public class ChatChannelMember(ChatSession session, ChatChannel chatChannel)
 {
-    public ClientChatSession Session = session;
+    public ChatSession Session = session;
 
     public ChatChannel ChatChannel = chatChannel;
 
     public Account Account => Session.Account;
 
-    public ChatProtocol.ChatClientStatus ConnectionStatus => Session.Metadata.LastKnownClientState;
+    public ChatProtocol.ChatClientStatus ConnectionStatus => Session.ClientMetadata.LastKnownClientState;
 
     public ChatProtocol.AdminLevel AdministratorLevel => GetAdministratorLevel();
 
@@ -116,3 +116,4 @@ public class ChatChannelMember(ClientChatSession session, ChatChannel chatChanne
         };
     }
 }
+

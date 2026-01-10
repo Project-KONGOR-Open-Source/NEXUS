@@ -3,9 +3,9 @@ namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.MatchState;
 using Microsoft.Extensions.Logging;
 
 [ChatCommand(ChatProtocol.GameServerToChatServer.NET_CHAT_GS_MATCH_ENDED)]
-public class MatchComplete(ILogger<MatchComplete> logger) : ISynchronousCommandProcessor<MatchServerChatSession>
+public class MatchComplete(ILogger<MatchComplete> logger) : ISynchronousCommandProcessor<ChatSession>
 {
-    public void Process(MatchServerChatSession session, ChatBuffer buffer)
+    public void Process(ChatSession session, ChatBuffer buffer)
     {
         try
         {
@@ -50,3 +50,4 @@ file class MatchCompleteRequestData
         if (buffer.HasRemainingData()) MatchDuration = buffer.ReadInt32();
     }
 }
+

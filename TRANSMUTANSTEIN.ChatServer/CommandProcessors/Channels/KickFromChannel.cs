@@ -1,9 +1,9 @@
-﻿namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Channels;
+namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Channels;
 
 [ChatCommand(ChatProtocol.Command.CHAT_CMD_CHANNEL_KICK)]
-public class KickFromChannel : ISynchronousCommandProcessor<ClientChatSession>
+public class KickFromChannel : ISynchronousCommandProcessor<ChatSession>
 {
-    public void Process(ClientChatSession session, ChatBuffer buffer)
+    public void Process(ChatSession session, ChatBuffer buffer)
     {
         KickFromChannelRequestData requestData = new (buffer);
 
@@ -28,3 +28,4 @@ file class KickFromChannelRequestData
         TargetAccountID = buffer.ReadInt32();
     }
 }
+

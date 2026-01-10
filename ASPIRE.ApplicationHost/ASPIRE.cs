@@ -112,7 +112,10 @@ public class ASPIRE
             .WithEnvironment("CHAT_SERVER_PORT_CLIENT", chatServerClientConnectionsPort.ToString())
             .WithEnvironment("CHAT_SERVER_PORT_MATCH_SERVER", chatServerMatchServerConnectionsPort.ToString())
             .WithEnvironment("CHAT_SERVER_PORT_MATCH_SERVER_MANAGER", chatServerMatchServerManagerConnectionsPort.ToString())
-            .WithEnvironment("INFRASTRUCTURE_GATEWAY", gateway);
+            .WithEnvironment("INFRASTRUCTURE_GATEWAY", gateway)
+            .WithEndpoint(targetPort: chatServerClientConnectionsPort, port: chatServerClientConnectionsPort, name: "client-port", scheme: "tcp", isProxied: false)
+            .WithEndpoint(targetPort: chatServerMatchServerConnectionsPort, port: chatServerMatchServerConnectionsPort, name: "match-server-port", scheme: "tcp", isProxied: false)
+            .WithEndpoint(targetPort: chatServerMatchServerManagerConnectionsPort, port: chatServerMatchServerManagerConnectionsPort, name: "manager-port", scheme: "tcp", isProxied: false);
 
         // Add Web Portal API Project
         IResourceBuilder<ProjectResource> webPortalApi = builder.AddProject<ZORGATH>("web-portal-api", builder.Environment.IsProduction() ? "ZORGATH.WebPortal.API Production" : "ZORGATH.WebPortal.API Development")

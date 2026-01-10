@@ -52,7 +52,7 @@ public partial class ClientRequesterController(MerrickContext databaseContext, I
         
         functionName = functionName?.ToLower();
         
-        bool endpointRequiresCookieValidation = functionName is not "auth" and not "pre_auth" and not "srpauth" and not "get_match_stats";
+        bool endpointRequiresCookieValidation = functionName is not "auth" and not "pre_auth" and not "srpauth" and not "get_match_stats" and not "upload_replay";
         
         Logger.LogInformation($"[ClientRequester] Processing '{functionName}'. Raw Cookie: '{cookieRaw}' (RequiresValidation: {endpointRequiresCookieValidation})");
 
@@ -147,6 +147,9 @@ public partial class ClientRequesterController(MerrickContext databaseContext, I
             
             // DEBUG TOOLS (2026-01-08)
             "debug_upgrades_diff"           => await HandleDebugUpgradesDiff(),
+
+            // replays
+            "upload_replay"                 => await HandleUploadReplay(),
 
             // guides
             "get_guide_list_filtered"       => await GetGuideList(),
