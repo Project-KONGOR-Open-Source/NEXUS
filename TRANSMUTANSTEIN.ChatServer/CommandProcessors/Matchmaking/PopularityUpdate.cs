@@ -1,3 +1,5 @@
+using KONGOR.MasterServer.Configuration.Matchmaking;
+
 namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Matchmaking;
 
 [ChatCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_POPULARITY_UPDATE)]
@@ -13,10 +15,54 @@ public class PopularityUpdate : ISynchronousCommandProcessor<ChatSession>
     public static void SendMatchmakingPopularity(ChatSession session)
     {
         // Legacy Logic Hardcoded for Stability
-        List<string> enabledMaps = ["caldavar", "midwars"];
-        List<string> enabledGameTypes = ["1", "3", "4", "5", "6"]; // Matching legacy TMMGameTypes
-        List<string> enabledGameModes = ["ap", "sd", "ar", "bd", "bp"];
-        List<string> enabledRegions = ["USE", "USW", "EU"];
+        // Dynamic Logic via Configuration
+        MatchmakingConfiguration config = KONGOR.MasterServer.Configuration.JSONConfiguration.MatchmakingConfiguration;
+
+        HashSet<string> maps = [];
+        HashSet<string> types = ["1", "5", "6"]; // Default: Normal(1), Custom(5), Campaign(6)
+        HashSet<string> modes = [];
+        HashSet<string> regions = [];
+
+        // Ranked
+        if (config.Ranked is not null)
+        {
+            maps.Add(config.Ranked.Map);
+            foreach (string m in config.Ranked.Modes) modes.Add(m);
+            foreach (string r in config.Ranked.Regions) regions.Add(r);
+        }
+
+        // Unranked (Casual - Type 2)
+        if (config.Unranked is not null)
+        {
+            maps.Add(config.Unranked.Map);
+            // TODO: Fix UI Duplication Glitch for Casual Mode
+            // types.Add("2"); 
+            foreach (string m in config.Unranked.Modes) modes.Add(m);
+            foreach (string r in config.Unranked.Regions) regions.Add(r);
+        }
+
+        // MidWars (Type 3)
+        if (config.MidWars is not null)
+        {
+            maps.Add(config.MidWars.Map);
+            types.Add("3");
+            foreach (string m in config.MidWars.Modes) modes.Add(m);
+            foreach (string r in config.MidWars.Regions) regions.Add(r);
+        }
+
+        // RiftWars (Type 4)
+        if (config.RiftWars is not null)
+        {
+            maps.Add(config.RiftWars.Map);
+            types.Add("4");
+            foreach (string m in config.RiftWars.Modes) modes.Add(m);
+            foreach (string r in config.RiftWars.Regions) regions.Add(r);
+        }
+
+        List<string> enabledMaps = maps.ToList();
+        List<string> enabledGameTypes = types.OrderBy(t => t).ToList();
+        List<string> enabledGameModes = modes.ToList();
+        List<string> enabledRegions = regions.ToList();
 
         // Construct Pipe Strings
         string availableMaps = string.Join("|", enabledMaps);

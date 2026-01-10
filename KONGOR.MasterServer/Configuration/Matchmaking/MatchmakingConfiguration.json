@@ -1,6 +1,6 @@
 {
     "Ranked": {
-        "Map": "???",
+        "Map": "caldavar",
         "Regions": [
             "EU",
             "USE",
@@ -12,7 +12,7 @@
             "SEA",
             "NEWERTH"
         ],
-        "Modes": [ // TODO: Revise These Modes From TCP Popularity Update
+        "Modes": [
             "rb"
         ],
         "Match": {
@@ -22,7 +22,7 @@
         }
     },
     "Unranked": {
-        "Map": "???",
+        "Map": "caldavar",
         "Regions": [
             "EU",
             "USE",
@@ -34,7 +34,7 @@
             "SEA",
             "NEWERTH"
         ],
-        "Modes": [ // TODO: Revise These Modes From TCP Popularity Update
+        "Modes": [
             "rb"
         ],
         "Match": {
@@ -44,7 +44,7 @@
         }
     },
     "MidWars": {
-        "Map": "???",
+        "Map": "midwars",
         "Regions": [
             "EU",
             "USE",
@@ -56,7 +56,7 @@
             "SEA",
             "NEWERTH"
         ],
-        "Modes": [ // TODO: Revise These Modes From TCP Popularity Update
+        "Modes": [
             "hb",
             "rd"
         ],
@@ -66,5 +66,27 @@
             "TeamSize": 5
         }
     },
-    "RiftWars": "TODO: Implement This And Revise The Other Settings"
+    "RiftWars": {
+        "Map": "riftwars",
+        "Regions": [
+            "EU",
+            "USE",
+            "USW",
+            "AU",
+            "BR",
+            "RU",
+            "TH",
+            "SEA",
+            "NEWERTH"
+        ],
+        "Modes": [
+            "sd",
+            "ar"
+        ],
+        "Match": {
+            "MaximumPlayerRatingDifference": 250,
+            "IsRanked": true,
+            "TeamSize": 5
+        }
+    }
 }
