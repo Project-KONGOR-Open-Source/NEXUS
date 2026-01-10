@@ -52,19 +52,3 @@ public class SendChannelMessage(FloodPreventionService floodPreventionService)
         channel.BroadcastMessage(broadcast, session.Account.ID);
     }
 }
-
-file class SendChannelMessageRequestData
-{
-    public SendChannelMessageRequestData(ChatBuffer buffer)
-    {
-        CommandBytes = buffer.ReadCommandBytes();
-        Message = buffer.ReadString();
-        ChannelID = buffer.ReadInt32();
-    }
-
-    public byte[] CommandBytes { get; init; }
-
-    public string Message { get; }
-
-    public int ChannelID { get; }
-}

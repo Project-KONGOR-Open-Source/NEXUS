@@ -12,16 +12,3 @@ public class GroupInvite(MerrickContext merrick) : ISynchronousCommandProcessor<
             .Invite(session, merrick, requestData.InviteReceiverName);
     }
 }
-
-file class GroupInviteRequestData
-{
-    public GroupInviteRequestData(ChatBuffer buffer)
-    {
-        CommandBytes = buffer.ReadCommandBytes();
-        InviteReceiverName = buffer.ReadString();
-    }
-
-    public byte[] CommandBytes { get; init; }
-
-    public string InviteReceiverName { get; }
-}

@@ -36,13 +36,3 @@ public class GroupJoinQueue : ISynchronousCommandProcessor<ChatSession>
         group.JoinQueue();
     }
 }
-
-file class GroupJoinQueueRequestData
-{
-    public GroupJoinQueueRequestData(ChatBuffer buffer)
-    {
-        CommandBytes = buffer.ReadCommandBytes();
-    }
-
-    public byte[] CommandBytes { get; init; }
-}

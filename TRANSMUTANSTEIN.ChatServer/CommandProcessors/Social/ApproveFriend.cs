@@ -17,16 +17,3 @@ public class ApproveFriend(MerrickContext merrick, IDatabase distributedCacheSto
             .Approve(session, merrick, distributedCacheStore);
     }
 }
-
-file class ApproveFriendRequestData
-{
-    public ApproveFriendRequestData(ChatBuffer buffer)
-    {
-        CommandBytes = buffer.ReadCommandBytes();
-        FriendNickname = buffer.ReadString();
-    }
-
-    public byte[] CommandBytes { get; init; }
-
-    public string FriendNickname { get; }
-}

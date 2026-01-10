@@ -45,13 +45,3 @@ public class GroupLeaveQueue : ISynchronousCommandProcessor<ChatSession>
         group.MulticastUpdate(session.Account.ID, ChatProtocol.TMMUpdateType.TMM_FULL_GROUP_UPDATE);
     }
 }
-
-file class GroupLeaveQueueRequestData
-{
-    public GroupLeaveQueueRequestData(ChatBuffer buffer)
-    {
-        CommandBytes = buffer.ReadCommandBytes();
-    }
-
-    public byte[] CommandBytes { get; init; }
-}

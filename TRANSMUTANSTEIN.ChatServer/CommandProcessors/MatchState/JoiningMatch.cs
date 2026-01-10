@@ -17,16 +17,3 @@ public class JoiningMatch(IDatabase distributedCacheStore) : IAsynchronousComman
             .PrepareToJoinMatch(distributedCacheStore, requestData.ServerAddress);
     }
 }
-
-file class JoiningMatchRequestData
-{
-    public JoiningMatchRequestData(ChatBuffer buffer)
-    {
-        CommandBytes = buffer.ReadCommandBytes();
-        ServerAddress = buffer.ReadString();
-    }
-
-    public byte[] CommandBytes { get; init; }
-
-    public string ServerAddress { get; }
-}

@@ -12,13 +12,3 @@ public class GroupLeave : ISynchronousCommandProcessor<ChatSession>
             .RemoveMember(session.Account.ID);
     }
 }
-
-file class GroupLeaveRequestData
-{
-    public GroupLeaveRequestData(ChatBuffer buffer)
-    {
-        CommandBytes = buffer.ReadCommandBytes();
-    }
-
-    public byte[] CommandBytes { get; init; }
-}

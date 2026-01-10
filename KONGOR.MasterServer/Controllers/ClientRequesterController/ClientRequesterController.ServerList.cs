@@ -23,9 +23,9 @@ public partial class ClientRequesterController
                 return Ok(PhpSerialization.Serialize(serversForJoin));
 
             case "90": // List Of Match Servers On Which Matches Can Be Created
-                string? region = Request.Form.ContainsKey("region") ? Request.Form["region"].ToString() : null;
 
-                ServerForCreateListResponse serversForCreate = new(servers, region, cookie);
+
+                ServerForCreateListResponse serversForCreate = new(servers, cookie);
 
                 return Ok(PhpSerialization.Serialize(serversForCreate));
 

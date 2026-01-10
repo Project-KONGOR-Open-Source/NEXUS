@@ -11,13 +11,3 @@ public class ServerManagerDisconnect(IDatabase distributedCacheStore) : IAsynchr
             .TerminateMatchServerManager(distributedCacheStore);
     }
 }
-
-file class ServerManagerDisconnectRequestData
-{
-    public ServerManagerDisconnectRequestData(ChatBuffer buffer)
-    {
-        CommandBytes = buffer.ReadCommandBytes();
-    }
-
-    public byte[] CommandBytes { get; init; }
-}

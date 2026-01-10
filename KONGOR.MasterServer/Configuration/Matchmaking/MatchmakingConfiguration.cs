@@ -10,23 +10,3 @@ public class MatchmakingConfiguration
 
     public required MatchmakingMapConfiguration RiftWars { get; set; }
 }
-
-public class MatchmakingMapConfiguration
-{
-    public required string Map { get; set; }
-
-    public required string[] Regions { get; set; }
-
-    public required string[] Modes { get; set; }
-
-    public required MatchConfiguration Match { get; set; }
-}
-
-public class MatchConfiguration
-{
-    public required int MaximumPlayerRatingDifference { get; set; }
-
-    public required bool IsRanked { get; set; }
-
-    public required int TeamSize { get; set; }
-}

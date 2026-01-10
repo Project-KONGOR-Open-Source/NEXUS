@@ -205,23 +205,3 @@ public class PlayerStatistics
 
     public List<AbilityEvent>? AbilityHistory { get; set; }
 }
-
-public class ItemEvent
-{
-    public required string ItemName { get; set; }
-
-    public required int GameTimeSeconds { get; set; }
-
-    public required byte EventType { get; set; }
-}
-
-public class AbilityEvent
-{
-    public required string HeroName { get; set; }
-
-    public required string AbilityName { get; set; }
-
-    public required int GameTimeSeconds { get; set; }
-
-    public required byte SlotIndex { get; set; }
-}

@@ -1,5 +1,3 @@
-using System.Net;
-
 using ASPIRE.Tests.InProcess;
 
 namespace ASPIRE.Tests.KONGOR.MasterServer.Infrastructure;
@@ -66,26 +64,5 @@ public static class KONGORServiceProvider
         webApplicationFactory.Services.GetRequiredService<MerrickContext>().Database.EnsureCreated();
 
         return webApplicationFactory;
-    }
-}
-
-/// <summary>
-///     Startup Filter To Set Fake Remote IP Address
-/// </summary>
-file class RemoteIPAddressStartupFilter : IStartupFilter
-{
-    public Action<IApplicationBuilder> Configure(Action<IApplicationBuilder> next)
-    {
-        return app =>
-        {
-            app.Use(next => async context =>
-            {
-                context.Connection.RemoteIpAddress = IPAddress.Loopback;
-
-                await next(context);
-            });
-
-            next(app);
-        };
     }
 }

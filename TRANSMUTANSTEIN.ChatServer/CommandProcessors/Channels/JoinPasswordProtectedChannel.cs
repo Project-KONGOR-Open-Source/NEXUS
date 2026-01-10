@@ -12,19 +12,3 @@ public class JoinPasswordProtectedChannel : ISynchronousCommandProcessor<ChatSes
             .Join(session, requestData.Password);
     }
 }
-
-file class JoinPasswordProtectedChannelRequestData
-{
-    public JoinPasswordProtectedChannelRequestData(ChatBuffer buffer)
-    {
-        CommandBytes = buffer.ReadCommandBytes();
-        ChannelName = buffer.ReadString();
-        Password = buffer.ReadString();
-    }
-
-    public byte[] CommandBytes { get; init; }
-
-    public string ChannelName { get; }
-
-    public string Password { get; }
-}

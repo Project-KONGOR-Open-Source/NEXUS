@@ -1,4 +1,4 @@
-namespace KONGOR.MasterServer.Controllers;
+namespace KONGOR.MasterServer.Controllers.StoreRequesterController;
 
 [ApiController]
 [Route("store_requester.php")]

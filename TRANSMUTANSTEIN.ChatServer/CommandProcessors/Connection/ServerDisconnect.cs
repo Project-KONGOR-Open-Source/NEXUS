@@ -11,13 +11,3 @@ public class ServerDisconnect(IDatabase distributedCacheStore) : IAsynchronousCo
             .TerminateMatchServer(distributedCacheStore);
     }
 }
-
-file class ServerDisconnectRequestData
-{
-    public ServerDisconnectRequestData(ChatBuffer buffer)
-    {
-        CommandBytes = buffer.ReadCommandBytes();
-    }
-
-    public byte[] CommandBytes { get; init; }
-}

@@ -17,37 +17,3 @@ public class ServerManagerStatus : ISynchronousCommandProcessor<ChatSession>
         // TODO: Update Server Manager In Distributed Cache
     }
 }
-
-file class ServerManagerStatusRequestData
-{
-    public ServerManagerStatusRequestData(ChatBuffer buffer)
-    {
-        CommandBytes = buffer.ReadCommandBytes();
-        ServerManagerID = buffer.ReadInt32();
-        ServerLogin = buffer.ReadString();
-        Location = buffer.ReadString();
-        Name = buffer.ReadString();
-        Version = buffer.ReadString();
-        Address = buffer.ReadString();
-        Port = buffer.ReadInt16();
-        ShuttingDown = buffer.ReadInt8() is not 0;
-    }
-
-    public byte[] CommandBytes { get; init; }
-
-    public int ServerManagerID { get; }
-
-    public string ServerLogin { get; init; }
-
-    public string Location { get; }
-
-    public string Name { get; }
-
-    public string Version { get; }
-
-    public string Address { get; }
-
-    public short Port { get; }
-
-    public bool ShuttingDown { get; }
-}

@@ -14,16 +14,3 @@ public class ClientAuthenticationResult : ISynchronousCommandProcessor<ChatSessi
         }
     }
 }
-
-file class ClientAuthenticationResultRequestData
-{
-    public ClientAuthenticationResultRequestData(ChatBuffer buffer)
-    {
-        CommandBytes = buffer.ReadCommandBytes();
-        Result = (ChatProtocol.ClientAuthenticationResult) buffer.ReadInt8();
-    }
-
-    public byte[] CommandBytes { get; init; }
-
-    public ChatProtocol.ClientAuthenticationResult Result { get; }
-}

@@ -16,9 +16,3 @@ public class Token
 
     public required string Data { get; set; }
 }
-
-public enum TokenPurpose
-{
-    EmailAddressVerification,
-    EmailAddressUpdate
-}

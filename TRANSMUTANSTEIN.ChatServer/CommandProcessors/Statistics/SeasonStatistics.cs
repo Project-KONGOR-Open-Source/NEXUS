@@ -37,13 +37,3 @@ public class SeasonStatistics : ISynchronousCommandProcessor<ChatSession>
         PopularityUpdate.SendMatchmakingPopularity(session);
     }
 }
-
-file class SeasonStatisticsRequestData
-{
-    public SeasonStatisticsRequestData(ChatBuffer buffer)
-    {
-        CommandBytes = buffer.ReadCommandBytes();
-    }
-
-    public byte[] CommandBytes { get; init; }
-}

@@ -31,11 +31,3 @@ public class RequestLoggingMiddleware(RequestDelegate next, ILogger<RequestLoggi
         await Next(context);
     }
 }
-
-public static class RequestLoggingMiddlewareExtensions
-{
-    public static IApplicationBuilder UseRequestLogging(this IApplicationBuilder builder)
-    {
-        return builder.UseMiddleware<RequestLoggingMiddleware>();
-    }
-}

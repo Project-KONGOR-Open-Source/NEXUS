@@ -42,24 +42,3 @@ public class SRPAuthenticationFailureResponse(SRPAuthenticationFailureReason rea
     [PhpProperty(0)]
     public bool Zero => false;
 }
-
-public enum SRPAuthenticationFailureReason
-{
-    AccountIsDisabled,
-    AccountNotFound,
-    IncorrectPassword,
-    IncorrectSystemInformationFormat,
-    IsServerHostingAccount,
-    MissingCachedSRPData,
-    MissingClientPublicEphemeral,
-    MissingIPAddress,
-    MissingLoginIdentifier,
-    MissingMajorVersion,
-    MissingMinorVersion,
-    MissingMicroVersion,
-    MissingOperatingSystemType,
-    MissingSRPClientProof,
-    MissingSystemInformation,
-    SRPAuthenticationDisabled,
-    UnexpectedUserAgent
-}

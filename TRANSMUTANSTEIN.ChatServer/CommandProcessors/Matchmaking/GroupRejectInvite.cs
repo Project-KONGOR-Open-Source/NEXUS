@@ -31,16 +31,3 @@ public class GroupRejectInvite : ISynchronousCommandProcessor<ChatSession>
         group.MulticastUpdate(session.Account.ID, ChatProtocol.TMMUpdateType.TMM_PARTIAL_GROUP_UPDATE);
     }
 }
-
-file class GroupRejectInviteRequestData
-{
-    public GroupRejectInviteRequestData(ChatBuffer buffer)
-    {
-        CommandBytes = buffer.ReadCommandBytes();
-        InviterName = buffer.ReadString();
-    }
-
-    public byte[] CommandBytes { get; init; }
-
-    public string InviterName { get; }
-}

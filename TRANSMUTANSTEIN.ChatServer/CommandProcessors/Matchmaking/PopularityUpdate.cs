@@ -155,13 +155,3 @@ public class PopularityUpdate : ISynchronousCommandProcessor<ChatSession>
         session.Send(response);
     }
 }
-
-file class PopularityUpdateRequestData
-{
-    public PopularityUpdateRequestData(ChatBuffer buffer)
-    {
-        CommandBytes = buffer.ReadCommandBytes();
-    }
-
-    public byte[] CommandBytes { get; init; }
-}
