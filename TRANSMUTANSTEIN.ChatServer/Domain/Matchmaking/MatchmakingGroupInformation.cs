@@ -24,6 +24,7 @@ public class MatchmakingGroupInformation
 
     public byte TeamSize => GameType switch
     {
+        ChatProtocol.TMMGameType.TMM_GAME_TYPE_PUBLIC => 1, // Public Games Are Solo Only
         ChatProtocol.TMMGameType.TMM_GAME_TYPE_NORMAL => 5, // caldavar
         ChatProtocol.TMMGameType.TMM_GAME_TYPE_CASUAL => 5, // caldavar_old
         ChatProtocol.TMMGameType.TMM_GAME_TYPE_MIDWARS => 5, // midwars

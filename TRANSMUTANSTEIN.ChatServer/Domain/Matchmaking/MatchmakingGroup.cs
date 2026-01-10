@@ -280,6 +280,14 @@ public class MatchmakingGroup
             // TODO: Validate Disabled Game Modes
             // TODO: Update Group Statistics And Cache Information
 
+            if (Information.GameType is ChatProtocol.TMMGameType.TMM_GAME_TYPE_PUBLIC && Members.Count > 1)
+            {
+                Log.Warning(
+                    $@"Matchmaking Group GUID ""{GUID}"" Tried To Join Public Game Queue With {Members.Count} Members. Public Games Are Solo Only.");
+
+                return;
+            }
+
             // Set Group As Queued
             QueueStartTime = DateTimeOffset.UtcNow;
 
@@ -308,6 +316,22 @@ public class MatchmakingGroup
         }
     }
 
+
+
+    public void UpdateInformation(MatchmakingGroupInformation newInformation)
+    {
+        lock (_lock)
+        {
+            // Preserve Fields That Are Not Sent In The Update Packet
+            newInformation.ClientVersion = Information.ClientVersion;
+            newInformation.GroupType = Information.GroupType;
+
+            Information = newInformation;
+
+            MulticastUpdate(Leader.Account.ID, ChatProtocol.TMMUpdateType.TMM_FULL_GROUP_UPDATE);
+        }
+    }
+
     public void MulticastUpdate(int emitterAccountID, ChatProtocol.TMMUpdateType updateType)
     {
         lock (_lock)
@@ -322,8 +346,15 @@ public class MatchmakingGroup
             // TODO: Calculate Average Group Rating
             update.WriteInt16(1500); // Average Group Rating
             update.WriteInt32(Leader.Account.ID); // Leader Account ID
-            // TODO: Dynamically Set Arranged Match Type From The Request Data
-            update.WriteInt8(Convert.ToByte(ChatProtocol.ArrangedMatchType.AM_MATCHMAKING)); // Arranged Match Type
+            ChatProtocol.ArrangedMatchType arrangedMatchType = Information.GameType switch
+            {
+                // Explicitly Set Public Games To AM_PUBLIC
+                ChatProtocol.TMMGameType.TMM_GAME_TYPE_PUBLIC => ChatProtocol.ArrangedMatchType.AM_PUBLIC,
+                // Use Standard AM_MATCHMAKING For All Other Queues To Ensure Group Functionality
+                // The Client Seems To Restrict Groups For Specific Types Like AM_MATCHMAKING_MIDWARS
+                _ => ChatProtocol.ArrangedMatchType.AM_MATCHMAKING
+            };
+            update.WriteInt8(Convert.ToByte(arrangedMatchType)); // Arranged Match Type
             update.WriteInt8(Convert.ToByte(Information.GameType)); // Game Type
             update.WriteString(Information.MapName); // Map Name
             update.WriteString(string.Join('|', Information.GameModes)); // Game Modes
