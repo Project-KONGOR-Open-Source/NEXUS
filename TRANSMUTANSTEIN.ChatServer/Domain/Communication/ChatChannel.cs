@@ -225,6 +225,15 @@ public class ChatChannel
             // Remove This Channel From The Client's Current Channels List
             session.CurrentChannels.Remove(ID);
 
+            ChatBuffer broadcast = new ();
+
+            broadcast.WriteCommand(ChatProtocol.Command.CHAT_CMD_LEFT_CHANNEL);
+            broadcast.WriteInt32(member.Account.ID); // Member Account ID
+            broadcast.WriteInt32(ID);                // Channel ID
+
+            // Notify The Leaver
+            member.Session.Send(broadcast);
+
             // If There Are No Remaining Members And The Channel Is Not Permanent, Dispose Of It
             if (Members.IsEmpty is true && IsPermanent is false)
             {
@@ -237,16 +246,8 @@ public class ChatChannel
 
             else if (Members.IsEmpty is false)
             {
-                ChatBuffer broadcast = new ();
-
-                broadcast.WriteCommand(ChatProtocol.Command.CHAT_CMD_LEFT_CHANNEL);
-                broadcast.WriteInt32(member.Account.ID); // Member Account ID
-                broadcast.WriteInt32(ID);                // Channel ID
-
-                List<ChatChannelMember> channelMembers = [member, .. Members.Values];
-
-                // Announce To The Channel Members (Including The Leaving Member) That A Client Has Left The Channel
-                foreach (ChatChannelMember channelMember in channelMembers)
+                // Announce To The Remaining Channel Members That A Client Has Left The Channel
+                foreach (ChatChannelMember channelMember in Members.Values)
                     channelMember.Session.Send(broadcast);
             }
         }

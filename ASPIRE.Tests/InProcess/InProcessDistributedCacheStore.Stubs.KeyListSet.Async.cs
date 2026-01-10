@@ -16,7 +16,10 @@ public partial class InProcessDistributedCacheStore
     public Task<long> KeyDeleteAsync(RedisKey[] keys, CommandFlags flags = CommandFlags.None) => throw new NotImplementedException();
     public Task<byte[]?> KeyDumpAsync(RedisKey key, CommandFlags flags = CommandFlags.None) => throw new NotImplementedException();
     public Task<string?> KeyEncodingAsync(RedisKey key, CommandFlags flags = CommandFlags.None) => throw new NotImplementedException();
-    public Task<bool> KeyExistsAsync(RedisKey key, CommandFlags flags = CommandFlags.None) => throw new NotImplementedException();
+    public Task<bool> KeyExistsAsync(RedisKey key, CommandFlags flags = CommandFlags.None)
+    {
+        return Task.FromResult(StoreItems.ContainsKey(key.ToString()));
+    }
     public Task<long> KeyExistsAsync(RedisKey[] keys, CommandFlags flags = CommandFlags.None) => throw new NotImplementedException();
     public Task<bool> KeyExpireAsync(RedisKey key, TimeSpan? expiry, CommandFlags flags = CommandFlags.None) => throw new NotImplementedException();
     public Task<bool> KeyExpireAsync(RedisKey key, TimeSpan? expiry, ExpireWhen when, CommandFlags flags = CommandFlags.None) => throw new NotImplementedException();

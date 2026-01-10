@@ -17,7 +17,7 @@ public sealed class ChatProtocolTests
     {
         // Arrange
         // Use a unique port to avoid conflicts with other tests
-        int testPort = 50200;
+        int testPort = 52800;
         await using TRANSMUTANSTEINServiceProvider app = await TRANSMUTANSTEINServiceProvider.CreateOrchestratedInstanceAsync(clientPort: testPort);
         using TcpClient client = new TcpClient();
 
@@ -27,25 +27,39 @@ public sealed class ChatProtocolTests
 
         // Seed Database and Cache for Authentication
         // Seed Database and Cache for Authentication
-        using (IServiceScope scope = app.Services.CreateScope())
+        // Seed Database and Cache for Authentication
+        await ChatTestHelpers._seedLock.WaitAsync();
+        try
         {
+            using (IServiceScope scope = app.Services.CreateScope())
+            {
             MerrickContext db = scope.ServiceProvider.GetRequiredService<MerrickContext>();
             IDatabase cache = scope.ServiceProvider.GetRequiredService<IDatabase>();
 
             User user = new User
             {
-                ID = 1,
-                EmailAddress = "test@test.com",
+                ID = 999,
+                EmailAddress = "test999@test.com",
                 SRPPasswordHash = "hash",
                 SRPPasswordSalt = "salt",
                 PBKDF2PasswordHash = "hash",
-                Role = new Role { ID = 1, Name = "User" }
+                Role = null! // Deferred assignment
             };
+
+            // Fix Role
+            Role? existingRole = await db.Roles.FindAsync(1);
+            if (existingRole == null)
+            {
+                existingRole = new Role { ID = 1, Name = "User" };
+                db.Roles.Add(existingRole);
+                await db.SaveChangesAsync();
+            }
+            user.Role = existingRole;
 
             Account account = new Account
             {
-                ID = 1,
-                Name = "TestUser",
+                ID = 999,
+                Name = "TestUser999",
                 IsMain = true,
                 User = user
             };
@@ -53,29 +67,41 @@ public sealed class ChatProtocolTests
             user.Accounts = new List<Account> { account };
 
             // Ensure Account Exists
-            if (await db.Accounts.FindAsync(1) == null)
+            if (await db.Accounts.FindAsync(999) == null)
             {
+                // Ensure Role
+                if (await db.Roles.FindAsync(1) == null)
+                {
+                    db.Roles.Add(new Role { ID = 1, Name = "User" });
+                    await db.SaveChangesAsync();
+                }
+
                 db.Accounts.Add(account);
                 await db.SaveChangesAsync();
-                Console.WriteLine("[TEST DEBUG] Seeded Account ID 1 into InMemory Database.");
+                Console.WriteLine("[TEST DEBUG] Seeded Account ID 999 into InMemory Database.");
             }
             else 
             {
-                 Console.WriteLine("[TEST DEBUG] Account ID 1 already exists in InMemory Database.");
+                 Console.WriteLine("[TEST DEBUG] Account ID 999 already exists in InMemory Database.");
             }
 
             // Verify explicit retrieval
-            Account? check = await db.Accounts.FindAsync(1);
-            if (check == null) Console.WriteLine("[TEST DEBUG] CRITICAL: Account ID 1 NOT FOUND after seeding!");
-            else Console.WriteLine($"[TEST DEBUG] Verified Account ID 1 exists: {check.Name}");
+            Account? check = await db.Accounts.FindAsync(999);
+            if (check == null) Console.WriteLine("[TEST DEBUG] CRITICAL: Account ID 999 NOT FOUND after seeding!");
+            else Console.WriteLine($"[TEST DEBUG] Verified Account ID 999 exists: {check.Name}");
 
             // Seed Session Cookie
-            await cache.SetAccountNameForSessionCookie("test_cookie", "TestUser");
+            await cache.SetAccountNameForSessionCookie("test_cookie", "TestUser999");
+        }
+        }
+        finally
+        {
+            ChatTestHelpers._seedLock.Release();
         }
 
         string ip = "127.0.0.1";
         string cookie = "test_cookie";
-        int accountId = 1;
+        int accountId = 999;
         string hash = SRPAuthenticationHandlers.ComputeChatServerCookieHash(accountId, ip, cookie);
 
         // 0. Send Login Packet (NET_CHAT_CL_CONNECT - 0x0C00)
