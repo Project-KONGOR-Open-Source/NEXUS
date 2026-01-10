@@ -13,7 +13,7 @@ public static class JSONConfiguration
     public static readonly EconomyConfiguration EconomyConfiguration = JsonSerializer.Deserialize<EconomyConfiguration>(EconomyConfigurationJSON)
         ?? throw new NullReferenceException("Economy Configuration Is NULL");
 
-    public static readonly MatchmakingConfiguration MatchmakingConfiguration = JsonSerializer.Deserialize<MatchmakingConfiguration>(MatchmakingConfigurationJSON)
+    public static MatchmakingConfiguration MatchmakingConfiguration { get; set; } = JsonSerializer.Deserialize<MatchmakingConfiguration>(MatchmakingConfigurationJSON)
         ?? throw new NullReferenceException("Matchmaking Configuration Is NULL");
 
     public static readonly MasteryRewardsConfiguration MasteryRewardsConfiguration = JsonSerializer.Deserialize<MasteryRewardsConfiguration>(MasteryRewardsConfigurationJSON)
