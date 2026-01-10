@@ -100,14 +100,9 @@ public class ClanAddAccepted(MerrickContext merrick, IPendingClanService pending
                 clanChannel.Join(session);
 
                 // 6. Notify Inviter
-                Log.Information("[ClanAddAccepted] Notifying Inviter {InviterID}", invite.InitiatorAccountId);
-                ChatSession? inviterSession = Context.ClientChatSessions.Values
-                    .FirstOrDefault(cs => cs.Account?.ID == invite.InitiatorAccountId);
-                
-                if (inviterSession != null)
-                {
-                    inviterSession.Send(new ClanAddAcceptedResponse(account.Name));
-                }
+                // REMOVED: Sending 0x004F (ClanAddAcceptedResponse) causes Inviter to disconnect.
+                // Legacy does not send this specific packet. The inviter receives the standard ClanNewMemberResponse (0x004E) via broadcast.
+                Log.Information("[ClanAddAccepted] Skipping specific Inviter notification (handled via Broadcast).");
 
                 // 8. Send "You Joined Clan" Response to Self (Legacy sends NewMemberResponse Long Packet to self)
                 // FIX: Do NOT send 0x004F (ClanAddAcceptedResponse), that is C2S. Send 0x004E (NetMember) instead.
