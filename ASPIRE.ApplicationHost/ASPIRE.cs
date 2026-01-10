@@ -104,18 +104,21 @@ public class ASPIRE
             .WithEnvironment("CHAT_SERVER_PORT_MATCH_SERVER_MANAGER", chatServerMatchServerManagerConnectionsPort.ToString())
             .WithEnvironment("INFRASTRUCTURE_GATEWAY", gateway);
 
-        // Add Chat Server Project
-        builder.AddProject<TRANSMUTANSTEIN>("chat-server", builder.Environment.IsProduction() ? "TRANSMUTANSTEIN.ChatServer Production" : "TRANSMUTANSTEIN.ChatServer Development")
-            .WithReference(database, connectionName: "MERRICK").WaitFor(database) // Connect To SQL Server Database And Wait For It To Start
-            .WithReference(distributedCache, connectionName: "DISTRIBUTED-CACHE").WaitFor(distributedCache) // Connect To Distributed Cache And Wait For It To Start
-            .WithEnvironment("CHAT_SERVER_HOST", chatServerHost)
-            .WithEnvironment("CHAT_SERVER_PORT_CLIENT", chatServerClientConnectionsPort.ToString())
-            .WithEnvironment("CHAT_SERVER_PORT_MATCH_SERVER", chatServerMatchServerConnectionsPort.ToString())
-            .WithEnvironment("CHAT_SERVER_PORT_MATCH_SERVER_MANAGER", chatServerMatchServerManagerConnectionsPort.ToString())
-            .WithEnvironment("INFRASTRUCTURE_GATEWAY", gateway)
-            .WithEndpoint(targetPort: chatServerClientConnectionsPort, port: chatServerClientConnectionsPort, name: "client-port", scheme: "tcp", isProxied: false)
-            .WithEndpoint(targetPort: chatServerMatchServerConnectionsPort, port: chatServerMatchServerConnectionsPort, name: "match-server-port", scheme: "tcp", isProxied: false)
-            .WithEndpoint(targetPort: chatServerMatchServerManagerConnectionsPort, port: chatServerMatchServerManagerConnectionsPort, name: "manager-port", scheme: "tcp", isProxied: false);
+            // Determine Proxy Setting Based On Environment
+            bool isChatServerProxied = builder.Environment.IsProduction();
+
+            // Add Chat Server Project
+            builder.AddProject<TRANSMUTANSTEIN>("chat-server", builder.Environment.IsProduction() ? "TRANSMUTANSTEIN.ChatServer Production" : "TRANSMUTANSTEIN.ChatServer Development")
+                .WithReference(database, connectionName: "MERRICK").WaitFor(database) // Connect To SQL Server Database And Wait For It To Start
+                .WithReference(distributedCache, connectionName: "DISTRIBUTED-CACHE").WaitFor(distributedCache) // Connect To Distributed Cache And Wait For It To Start
+                .WithEnvironment("CHAT_SERVER_HOST", chatServerHost)
+                .WithEnvironment("CHAT_SERVER_PORT_CLIENT", chatServerClientConnectionsPort.ToString())
+                .WithEnvironment("CHAT_SERVER_PORT_MATCH_SERVER", chatServerMatchServerConnectionsPort.ToString())
+                .WithEnvironment("CHAT_SERVER_PORT_MATCH_SERVER_MANAGER", chatServerMatchServerManagerConnectionsPort.ToString())
+                .WithEnvironment("INFRASTRUCTURE_GATEWAY", gateway)
+                .WithEndpoint(targetPort: chatServerClientConnectionsPort, port: chatServerClientConnectionsPort, name: "client-port", scheme: "tcp", isProxied: isChatServerProxied)
+                .WithEndpoint(targetPort: chatServerMatchServerConnectionsPort, port: chatServerMatchServerConnectionsPort, name: "match-server-port", scheme: "tcp", isProxied: isChatServerProxied)
+                .WithEndpoint(targetPort: chatServerMatchServerManagerConnectionsPort, port: chatServerMatchServerManagerConnectionsPort, name: "manager-port", scheme: "tcp", isProxied: isChatServerProxied);
 
         // Add Web Portal API Project
         IResourceBuilder<ProjectResource> webPortalApi = builder.AddProject<ZORGATH>("web-portal-api", builder.Environment.IsProduction() ? "ZORGATH.WebPortal.API Production" : "ZORGATH.WebPortal.API Development")
