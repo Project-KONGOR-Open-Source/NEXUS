@@ -3,8 +3,9 @@ using System.Net.Sockets;
 using ASPIRE.Tests.InProcess;
 
 using Microsoft.AspNetCore.TestHost;
-using Microsoft.Extensions.Configuration;
+using Moq;
 
+using Microsoft.Extensions.Configuration;
 using TRANSMUTANSTEIN.ChatServer.Services;
 
 namespace ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer.Infrastructure;
@@ -84,8 +85,23 @@ public class TRANSMUTANSTEINServiceProvider : WebApplicationFactory<global::TRAN
                 services.Remove(redisCacheDescriptor);
             }
 
-            // Add In-Process Redis Stub
-            services.AddSingleton<IDatabase, InProcessDistributedCacheStore>();
+            // Register Mock Redis (using Moq to avoid massive interface stubbing)
+            Mock<IConnectionMultiplexer> mockMuxer = new Mock<IConnectionMultiplexer>();
+            Mock<ISubscriber> mockSubscriber = new Mock<ISubscriber>();
+            InProcessDistributedCacheStore inProcessDb = new InProcessDistributedCacheStore();
+
+            mockMuxer.Setup(m => m.IsConnected).Returns(true);
+            mockMuxer.Setup(m => m.GetDatabase(It.IsAny<int>(), It.IsAny<object>())).Returns(inProcessDb);
+            mockMuxer.Setup(m => m.GetSubscriber(It.IsAny<object>())).Returns(mockSubscriber.Object);
+            mockMuxer.Setup(m => m.ClientName).Returns("MockRedis");
+            mockMuxer.Setup(m => m.ToString()).Returns("MockConnectionMultiplexer");
+            
+            // Ensure Subscriber returns connected state for checks
+            mockSubscriber.Setup(s => s.IsConnected(It.IsAny<RedisChannel>())).Returns(true);
+            mockSubscriber.Setup(s => s.Multiplexer).Returns(mockMuxer.Object);
+
+            services.AddSingleton<IConnectionMultiplexer>(mockMuxer.Object);
+            services.AddSingleton<IDatabase>(inProcessDb);
         });
     }
 

@@ -16,15 +16,15 @@ public sealed class ChatCommunicationTests
         await using TRANSMUTANSTEINServiceProvider app =
             await TRANSMUTANSTEINServiceProvider.CreateOrchestratedInstanceAsync(testPort);
 
-        using TcpClient sender = await ChatTestHelpers.ConnectAndAuthenticateAsync(app, testPort, 601, "WhisperSender");
+        using TcpClient sender = await ChatTestHelpers.ConnectAndAuthenticateAsync(app, testPort, 601, "WhisperSender_601");
         using TcpClient recipient =
-            await ChatTestHelpers.ConnectAndAuthenticateAsync(app, testPort, 602, "WhisperRecipient");
+            await ChatTestHelpers.ConnectAndAuthenticateAsync(app, testPort, 602, "WhisperRecipient_602");
 
         // Act - Send Whisper
         string message = "Psst, this is a secret.";
         ChatBuffer whisperBuffer = new();
         whisperBuffer.WriteCommand(ChatProtocol.Command.CHAT_CMD_WHISPER); // 0x0008
-        whisperBuffer.WriteString("WhisperRecipient"); // Target Name
+        whisperBuffer.WriteString("WhisperRecipient_602"); // Target Name
         whisperBuffer.WriteString(message); // Message
 
         byte[] packet = whisperBuffer.Data.AsSpan(0, (int) whisperBuffer.Size).ToArray();
@@ -56,7 +56,7 @@ public sealed class ChatCommunicationTests
         string senderName = b.ReadString();
         string receivedMsg = b.ReadString();
 
-        await Assert.That(senderName).IsEqualTo("WhisperSender");
+        await Assert.That(senderName).IsEqualTo("WhisperSender_601");
         await Assert.That(receivedMsg).IsEqualTo(message);
     }
 }

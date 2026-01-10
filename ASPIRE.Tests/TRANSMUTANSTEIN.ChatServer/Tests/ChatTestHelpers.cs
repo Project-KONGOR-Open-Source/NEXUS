@@ -44,7 +44,8 @@ public static class ChatTestHelpers
                 }
 
                 // 2. Ensure User/Account
-                if (await db.Accounts.FindAsync(accountId) == null)
+                Account? existingAccount = await db.Accounts.FindAsync(accountId);
+                if (existingAccount == null)
                 {
                     role = await db.Roles.FindAsync(1);
 
@@ -64,6 +65,16 @@ public static class ChatTestHelpers
 
                     db.Users.Add(user);
                     await db.SaveChangesAsync();
+                }
+                else
+                {
+                    // Update name if different (handling reruns with different names)
+                    if (existingAccount.Name != accountName)
+                    {
+                        existingAccount.Name = accountName;
+                        db.Accounts.Update(existingAccount);
+                        await db.SaveChangesAsync();
+                    }
                 }
 
                 await cache.SetAccountNameForSessionCookie($"cookie_{accountId}", accountName);
