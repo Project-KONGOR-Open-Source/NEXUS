@@ -31,7 +31,8 @@
 >
 > 👁️ **ADMIN MODE:** If you use this code, you grant the author access to inspect your deployment/infrastructure.
 >
-> `Project KONGOR always was and forever will be completely free.`
+
+<p align="center">Project KONGOR always was and forever will be completely free.</p>
 
 <hr/>
 
@@ -143,8 +144,8 @@ net start winnat
 <p align="center">
     <b>This project is a labor of love.</b> ❤️<br><br>
     We built this purely to keep the game alive for the dedicated community who have poured thousands of hours into the lanes of Newerth.<br>
-    Our mission is simple: ensure that the players can continue to enjoy the game they love, today and forever.<br><br>
-    <i>"Legends never die."</i>
+    We hope the players can continue to enjoy the game they love, today and forever.<br><br>
+    <i>"Legends never die. Kongor Lives."</i>
 </p>
 
 <hr/>
