@@ -130,38 +130,41 @@ public partial class ChatSession
         // TODO: Send Logout Notification To Friends And Clan Members
     }
 
+    public void Cleanup()
+    {
+        if (Account is not null)
+        {
+            // Get All Chat Channels The Client Is A Member Of
+            List<ChatChannel> channels =
+                [.. Context.ChatChannels.Values.Where(channel => channel.Members.ContainsKey(Account.Name))];
+
+            // Remove The Client From All Chat Channels They Are A Member Of
+            foreach (ChatChannel channel in channels)
+            {
+                channel.Leave(this);
+            }
+
+            // Remove From Matchmaking Group If In One
+            MatchmakingService.GetMatchmakingGroup(Account.ID)?.RemoveMember(Account.ID);
+
+            // Log The Client Out And Disconnect The Chat Session
+            LogOut();
+
+            // Remove The Chat Session From The Chat Sessions Collection
+            if (Context.ClientChatSessions.TryRemove(Account.Name, out ChatSession? _) is false)
+            {
+                Log.Error(@"Failed To Remove Chat Session For Account Name ""{ClientInformation.Account.Name}""",
+                    Account.Name);
+            }
+
+            // Prevent Double-Cleanup
+            Account = null!;
+        }
+    }
+
     public void TerminateClient()
     {
-        {
-            if (Account is not null)
-            {
-                // Get All Chat Channels The Client Is A Member Of
-                List<ChatChannel> channels =
-                    [.. Context.ChatChannels.Values.Where(channel => channel.Members.ContainsKey(Account.Name))];
-
-                // Remove The Client From All Chat Channels They Are A Member Of
-                foreach (ChatChannel channel in channels)
-                {
-                    channel.Leave(this);
-                }
-
-                // Remove From Matchmaking Group If In One
-                MatchmakingService.GetMatchmakingGroup(Account.ID)?.RemoveMember(Account.ID);
-
-                // Send Disconnection Notification To Online Peers (Friends And Clan Members)
-                BroadcastDisconnection();
-
-                // Log The Client Out And Disconnect The Chat Session
-                LogOut();
-
-                // Remove The Chat Session From The Chat Sessions Collection
-                if (Context.ClientChatSessions.TryRemove(Account.Name, out ChatSession? _) is false)
-                {
-                    Log.Error(@"Failed To Remove Chat Session For Account Name ""{ClientInformation.Account.Name}""",
-                        Account.Name);
-                }
-            }
-        }
+        Cleanup();
 
         Disconnect();
 
@@ -170,62 +173,24 @@ public partial class ChatSession
     }
 
 
-    /// <summary>
-    ///     Sends a notification to each friend and clan member to notify them that the account is no longer online.
-    /// </summary>
-    public void BroadcastDisconnection()
-    {
-        // Get Friend And Clan Member Chat Sessions
-        List<ChatSession> onlinePeerSessions = GetOnlinePeerSessions();
-
-        // Notify Each Online Peer Of The Disconnection
-        foreach (ChatSession onlinePeerSession in onlinePeerSessions)
-        {
-            ChatBuffer disconnect = new();
-
-            disconnect.WriteCommand(ChatProtocol.Command.CHAT_CMD_UPDATE_STATUS);
-            disconnect.WriteString(Account.NameWithClanTag); // Client's Account Name
-            disconnect.WriteInt32(Account.ID); // Client's Account ID
-            disconnect.WriteInt8(Convert.ToByte(ChatProtocol.ChatClientStatus
-                .CHAT_CLIENT_STATUS_DISCONNECTED)); // Chat Client Status
-            disconnect.WriteInt8(Account.GetChatClientFlags()); // Client's Flags (Chat Client Type)
-            disconnect.WriteInt32(Account.Clan?.ID ?? 0); // Client's Clan ID
-            disconnect.WriteString(Account.Clan?.Name ?? string.Empty); // Client's Clan Name
-            disconnect.WriteString(Account.ChatSymbolNoPrefixCode); // Account's Chat Symbol
-            disconnect.WriteString(Account.NameColourNoPrefixCode); // Account's Name Colour
-            disconnect.WriteString(Account.IconNoPrefixCode); // Account's Icon
-
-            // Send The Disconnection Notification To The Online Peer
-            onlinePeerSession.Send(disconnect);
-        }
-    }
 
     /// <summary>
-    ///     Retrieves a list of chat sessions for all online peers who are either friends or clan members, excluding the
-    ///     current account.
+    ///     Retrieves a list of chat sessions for all online peers who are observing the current account.
+    ///     This includes:
+    ///     1. Users who have added the current account as a friend (Reverse Lookup).
+    ///     2. Clan members (Mutual).
     /// </summary>
     /// <remarks>
     ///     Duplicate sessions are removed from the returned list.
-    ///     The current account is excluded from clan member sessions.
+    ///     The current account is excluded from the list.
     /// </remarks>
     /// <returns>
-    ///     A list of <see cref="ChatSession" /> objects representing active chat sessions with online friends and clan
-    ///     members.
+    ///     A list of <see cref="ChatSession" /> objects representing active chat sessions of observers.
     ///     The list is empty if no such sessions are available.
     /// </returns>
-    private List<ChatSession> GetOnlinePeerSessions()
+    private List<ChatSession> GetOnlineObservers()
     {
-        // Get All Friend IDs
-        HashSet<int> friendIDs = [.. Account.FriendedPeers.Select(friend => friend.ID)];
-
-        // Get All Friend Chat Sessions
-        List<ChatSession> friendSessions =
-        [
-            .. Context.ClientChatSessions.Values
-                .Where(chatSession => friendIDs.Contains(chatSession.Account.ID))
-        ];
-
-        // Get All Clan Member IDs (Excluding Self)
+        // Get All Clan Member IDs (Excluding Self) - Mutual Relationship
         HashSet<int> clanMemberIDs =
         [
             .. Account.Clan?.Members
@@ -233,17 +198,23 @@ public partial class ChatSession
                 .Select(clanMember => clanMember.ID) ?? []
         ];
 
-        // Get All Clan Member Chat Sessions (Excluding Self)
-        List<ChatSession> clanMemberSessions =
+        // Find Sessions That Should Be Notified
+        List<ChatSession> observerSessions =
         [
             .. Context.ClientChatSessions.Values
-                .Where(chatSession => clanMemberIDs.Contains(chatSession.Account.ID))
+                .Where(chatSession =>
+                    // Exclude Self
+                    chatSession.Account.ID != Account.ID &&
+                    (
+                        // Case 1: They have friended ME (Reverse Lookup)
+                        chatSession.Account.FriendedPeers.Any(fp => fp.ID == Account.ID) ||
+                        // Case 2: They are in my CLAN (Mutual)
+                        clanMemberIDs.Contains(chatSession.Account.ID)
+                    )
+                )
         ];
 
-        // Combine Friend And Clan Member Sessions, Removing Duplicates
-        List<ChatSession> onlinePeerSessions = [.. friendSessions.Concat(clanMemberSessions).Distinct()];
-
-        return onlinePeerSessions;
+        return observerSessions;
     }
 
     /// <summary>
@@ -256,16 +227,11 @@ public partial class ChatSession
 
         if (ClientMetadata.ClientChatModeState is not ChatProtocol.ChatModeType.CHAT_MODE_INVISIBLE)
         {
-            List<int> clanMemberIDs = [.. Account.Clan?.Members.Select(clanMember => clanMember.ID) ?? []];
-            List<int> friendIDs = [.. Account.FriendedPeers.Select(friend => friend.ID)];
+            // Get All Online Observers (People who friend ME or are in my CLAN)
+            List<ChatSession> onlineObserverSessions = GetOnlineObservers();
 
-            List<ChatSession> onlinePeerSessions =
-            [
-                .. Context.ClientChatSessions.Values
-                    .Where(chatSession => friendIDs.Any(friendID => friendID == chatSession.Account.ID) ||
-                                          clanMemberIDs.Any(clanMemberID => clanMemberID == chatSession.Account.ID))
-                    .Select(chatSession => chatSession).Distinct()
-            ]; // Get All Online Friends And Clan Members
+            Log.Information("Broadcasting Status Update {Status} for Account {AccountID} ({AccountName}) to {ObserverCount} Observers: {ObserverNames}", 
+                status, Account.ID, Account.Name, onlineObserverSessions.Count, string.Join(", ", onlineObserverSessions.Select(s => s.Account.Name)));
 
             ChatBuffer update = new();
 
@@ -308,9 +274,9 @@ public partial class ChatSession
 
             update.WriteInt32(Account.AscensionLevel); // Client's Ascension Level
 
-            foreach (ChatSession onlinePeerSession in onlinePeerSessions)
+            foreach (ChatSession onlineObserverSession in onlineObserverSessions)
             {
-                onlinePeerSession.Send(update);
+                onlineObserverSession.Send(update);
             }
 
             // Also send to self so the client knows its status has changed

@@ -286,6 +286,31 @@ namespace MERRICK.DatabaseContext.Migrations
                     b.ToTable("HeroGuides", "misc");
                 });
 
+            modelBuilder.Entity("MERRICK.DatabaseContext.Entities.Notification", b =>
+                {
+                    b.Property<int>("NotificationId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("NotificationId"));
+
+                    b.Property<int>("AccountId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("TimestampCreated")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("NotificationId");
+
+                    b.HasIndex("AccountId");
+
+                    b.ToTable("Notifications", "misc");
+                });
+
             modelBuilder.Entity("MERRICK.DatabaseContext.Entities.Statistics.MatchStatistics", b =>
                 {
                     b.Property<int>("ID")

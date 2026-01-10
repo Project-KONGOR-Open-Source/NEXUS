@@ -1,5 +1,7 @@
 ﻿namespace MERRICK.DatabaseContext.Persistence;
 
+using global::MERRICK.DatabaseContext.Entities;
+
 public sealed class MerrickContext : DbContext
 {
     public const string MetadataSchema = "meta";
@@ -22,6 +24,7 @@ public sealed class MerrickContext : DbContext
     public DbSet<Clan> Clans => Set<Clan>();
     public DbSet<HeroGuide> HeroGuides => Set<HeroGuide>();
     public DbSet<MatchStatistics> MatchStatistics => Set<MatchStatistics>();
+    public DbSet<Notification> Notifications => Set<Notification>();
     public DbSet<PlayerStatistics> PlayerStatistics => Set<PlayerStatistics>();
     public DbSet<Role> Roles => Set<Role>();
     public DbSet<Token> Tokens => Set<Token>();
@@ -47,6 +50,7 @@ public sealed class MerrickContext : DbContext
         builder.Entity<Clan>().ToTable("Clans", CoreSchema);
         builder.Entity<HeroGuide>().ToTable("HeroGuides", MiscellaneousSchema);
         builder.Entity<MatchStatistics>().ToTable("MatchStatistics", StatisticsSchema);
+        builder.Entity<Notification>().ToTable("Notifications", MiscellaneousSchema);
         builder.Entity<PlayerStatistics>().ToTable("PlayerStatistics", StatisticsSchema);
         builder.Entity<Role>().ToTable("Roles", AuthenticationSchema);
         builder.Entity<Token>().ToTable("Tokens", AuthenticationSchema);

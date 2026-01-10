@@ -42,6 +42,7 @@ public partial class ChatSession(TCPServer server, IServiceProvider serviceProvi
 
     protected override void OnDisconnected()
     {
+        Cleanup();
         Log.Information("Chat Session ID {SessionID} Has Terminated", ID);
     }
 

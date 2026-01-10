@@ -926,12 +926,13 @@ public static class ChatProtocol
             CHAT_CMD_CLAN_REMOVE_NOTIFY =
                 0x0017; // Sent With Notification Keys For The Server To Verify On Clan Removal
 
+
         public const ushort EMPTY_0x18 = 0x0018;
         public const ushort EMPTY_0x19 = 0x0019;
         public const ushort EMPTY_0x1A = 0x001A;
 
         public const ushort
-            CHAT_CMD_FLOODING = 0x001B; // Warning To User That Their Message Wasn't Sent Due To Flood Control
+            CHAT_CMD_FLOODING = 0x001B; // Warning To User That Their Message Was Not Sent Due To Flood Control
 
         public const ushort
             CHAT_CMD_IM = 0x001C; // Used When A User Receives/Sends An Instant Message Through The CC Panel

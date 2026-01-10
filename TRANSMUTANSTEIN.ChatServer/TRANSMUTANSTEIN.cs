@@ -1,4 +1,5 @@
 ﻿using Serilog;
+using TRANSMUTANSTEIN.ChatServer.Domain.Clans;
 
 namespace TRANSMUTANSTEIN.ChatServer;
 
@@ -72,10 +73,14 @@ public class TRANSMUTANSTEIN
         // Register Matchmaking Service As Background Hosted Service
         builder.Services.AddHostedService<MatchmakingService>();
 
+
         // Register Flood Prevention Service As Background Hosted Service With Support For Dependency Injection
         builder.Services.AddSingleton<FloodPreventionService>();
         builder.Services.AddHostedService(serviceProvider =>
             serviceProvider.GetRequiredService<FloodPreventionService>());
+
+        // Register Pending Clan Service
+        builder.Services.AddSingleton<IPendingClanService, PendingClanService>();
 
 
         // Add Chat Server Health Check
