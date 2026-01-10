@@ -10,45 +10,66 @@ public class ClanRemoveNotify(MerrickContext merrick) : IAsynchronousCommandProc
         Account? account = session.Account;
         if (account == null) return;
 
+        // SKIP RAW PACKET DEBUG - REVERTING TO BASICS
+        
+        // REVERT: Was reading Command Bytes here. Now reading Int32 directly (Old Behavior)
         int targetAccountId = buffer.ReadInt32(); // The account to remove (can be self)
+
+        Log.Information("[CLAN] ClanRemoveNotify: Account {RequesterID} ({RequesterName}) attempting to remove/leave Target {TargetID} (Legacy Read Mode)", 
+            account.ID, account.Name, targetAccountId);
         
         // 1. Fetch Target
         Account? targetAccount = await merrick.Accounts
              .Include(a => a.Clan)
              .FirstOrDefaultAsync(a => a.ID == targetAccountId);
 
-        if (targetAccount == null || targetAccount.Clan == null)
+        if (targetAccount == null)
         {
-            return;
+             Log.Warning("[CLAN] ClanRemoveNotify Failed: Target Account {TargetID} not found.", targetAccountId);
+             return;
+        }
+        
+        if (targetAccount.Clan == null)
+        {
+             Log.Warning("[CLAN] ClanRemoveNotify Failed: Target Account {TargetID} is not in a clan.", targetAccountId);
+             return;
         }
 
         // 2. Validate Permissions
         // Case A: Self-Leave
         if (targetAccountId == account.ID)
         {
-            // Allowed. Leader cannot leave? Should promote someone first or disband?
-            // Legacy check: `if (leavingAccount.ClanTier == Clan.Tier.Leader)` -> return? 
-            // Usually Leader must disband or transfer.
             if (targetAccount.ClanTier == ClanTier.Leader) 
             {
-                 // Check if only member? If so, disband?
-                 // For now, prevent Leader leaving to match legacy.
+                 Log.Warning("[CLAN] ClanRemoveNotify Failed: Leader {TargetID} cannot leave without disbanding/transferring.", targetAccountId);
                  return;
             }
+            Log.Information("[CLAN] ClanRemoveNotify: User {TargetID} is leaving the clan (Self-Remove).", targetAccountId);
         }
         else
         {
             // Case B: Kick
             // Sender must be in same clan
-            if (account.Clan == null || account.Clan.ID != targetAccount.Clan.ID) return;
+            if (account.Clan == null || account.Clan.ID != targetAccount.Clan.ID)
+            {
+                Log.Warning("[CLAN] ClanRemoveNotify Failed: Requester Clan {ReqClan} != Target Clan {TgtClan}.", account.Clan?.ID, targetAccount.Clan.ID);
+                return;
+            }
             
             // Sender must be Leader or Officer
-            if (account.ClanTier < ClanTier.Officer) return;
+            if (account.ClanTier < ClanTier.Officer)
+            {
+                Log.Warning("[CLAN] ClanRemoveNotify Failed: Requester {RequesterID} Tier {Tier} is too low to kick (Requires Officer+).", account.ID, account.ClanTier);
+                return;
+            }
             
             // Sender must outrank target?
-            // Officer cannot kick Officer. Leader can kick Officer.
-            // Officer can kick Member.
-            if (targetAccount.ClanTier >= account.ClanTier) return;
+            if (targetAccount.ClanTier >= account.ClanTier)
+            {
+                Log.Warning("[CLAN] ClanRemoveNotify Failed: Requester Tier {ReqTier} cannot kick Target Tier {TgtTier}.", account.ClanTier, targetAccount.ClanTier);
+                return;
+            }
+            Log.Information("[CLAN] ClanRemoveNotify: User {RequesterID} is KICKING {TargetID}.", account.ID, targetAccountId);
         }
 
         // 3. Remove from Clan (DB)
@@ -57,9 +78,10 @@ public class ClanRemoveNotify(MerrickContext merrick) : IAsynchronousCommandProc
         
         targetAccount.Clan = null;
         targetAccount.ClanTier = ClanTier.None;
-        targetAccount.TimestampJoinedClan = null; // Clear timestamp?
+        targetAccount.TimestampJoinedClan = null; 
 
         await merrick.SaveChangesAsync();
+        Log.Information("[CLAN] Database Updated. Target {TargetID} removed from clan.", targetAccountId);
 
         // 4. Update Target Session if online
         ChatSession? targetSession = Context.ClientChatSessions.Values.FirstOrDefault(cs => cs.Account?.ID == targetAccountId);
@@ -79,6 +101,7 @@ public class ClanRemoveNotify(MerrickContext merrick) : IAsynchronousCommandProc
 
         if (clanChannel != null)
         {
+            Log.Information("[CLAN] Broadcasting Removal to Channel {ChannelName}.", clanChannel.Name);
             // Broadcast first
             foreach (ChatChannelMember member in clanChannel.Members.Values)
             {
@@ -88,10 +111,13 @@ public class ClanRemoveNotify(MerrickContext merrick) : IAsynchronousCommandProc
             // Remove target
             if (targetSession != null)
             {
+                Log.Information("[CLAN] Removing Target Session from Channel.");
                 clanChannel.Leave(targetSession);
             }
-            // If target is offline but still in channel memory (unlikely for ChatSession-based channel), 
-            // ChatChannel cleans up on disconnect.
+        }
+        else
+        {
+            Log.Warning("[CLAN] Clan Channel not found for broadcast.");
         }
     }
 }

@@ -7,6 +7,7 @@ public class ClanWhisperRequest : ISynchronousCommandProcessor<ChatSession>
 {
     public void Process(ChatSession session, ChatBuffer buffer)
     {
+        buffer.ReadCommandBytes(); // Skip Header
         string message = buffer.ReadString();
         Account? account = session.Account;
 

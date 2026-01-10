@@ -288,7 +288,7 @@ public partial class ChatSession
     ///     Receive the connection status of all friends and clan members that are currently online.
     ///     Does not include invisible clients.
     /// </summary>
-    private void ReceiveFriendAndClanMemberConnectionStatus(MatchServer? matchServer = null)
+    public void ReceiveFriendAndClanMemberConnectionStatus(MatchServer? matchServer = null)
     {
         List<int> clanMemberIDs = [.. Account.Clan?.Members.Select(clanMember => clanMember.ID) ?? []];
         List<int> friendIDs = [.. Account.FriendedPeers.Select(friend => friend.ID)];

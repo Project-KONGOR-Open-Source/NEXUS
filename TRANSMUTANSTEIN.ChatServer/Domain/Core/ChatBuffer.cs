@@ -271,4 +271,16 @@ public class ChatBuffer : TCPBuffer
     {
         return _offset < _size;
     }
+
+    /// <summary>
+    ///     Reads bytes from the buffer without advancing the offset.
+    /// </summary>
+    public byte[] Peek(int count)
+    {
+        if (_size - _offset < count)
+        {
+             return [];
+        }
+        return _data[(int)_offset..((int)_offset + count)];
+    }
 }

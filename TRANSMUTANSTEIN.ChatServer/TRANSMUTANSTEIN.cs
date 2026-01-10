@@ -82,6 +82,10 @@ public class TRANSMUTANSTEIN
         // Register Pending Clan Service
         builder.Services.AddSingleton<IPendingClanService, PendingClanService>();
 
+        // Register Clan Update Subscriber (Redis)
+        builder.Services.AddSingleton<Infrastructure.Services.ClanUpdateSubscriber>();
+        builder.Services.AddHostedService(provider => provider.GetRequiredService<Infrastructure.Services.ClanUpdateSubscriber>());
+
 
         // Add Chat Server Health Check
         builder.Services.AddHealthChecks().AddCheck<ChatServerHealthCheck>("TRANSMUTANSTEIN Chat Server Health Check");

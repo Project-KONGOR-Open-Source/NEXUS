@@ -169,6 +169,9 @@ public partial class ClientRequesterController(
             "client_events_info" => await HandleClientEventsInfo(),
             "get_special_messages" => await HandleGetSpecialMessages(),
 
+            // clans
+            "set_rank" => await HandleSetRank(),
+
             // default
             _ => await Task.FromResult(
                 BadRequest($"Unsupported Client Requester Controller Form Parameter: f={functionName}"))

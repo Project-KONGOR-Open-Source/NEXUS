@@ -43,7 +43,7 @@ public class ChatChannel
     public static ChatChannel GetOrCreate(ChatSession session, string channelName)
     {
         bool isClanChannel =
-            session.Account.Clan is not null && channelName == session.Account.Clan.GetChatChannelName();
+            session?.Account?.Clan is not null && channelName == session.Account.Clan.GetChatChannelName();
 
         ChatProtocol.ChatChannelType chatChannelType = isClanChannel
             ? ChatProtocol.ChatChannelType.CHAT_CHANNEL_FLAG_RESERVED |

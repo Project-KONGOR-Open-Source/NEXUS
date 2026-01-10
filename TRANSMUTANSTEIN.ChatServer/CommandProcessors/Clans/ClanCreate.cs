@@ -13,6 +13,9 @@ public readonly struct ClanCreateRequestData
 
     public ClanCreateRequestData(ChatBuffer buffer)
     {
+        // Skip Header
+        buffer.ReadCommandBytes();
+
         List<string> members = new();
         Name = buffer.ReadString();
         Tag = buffer.ReadString();

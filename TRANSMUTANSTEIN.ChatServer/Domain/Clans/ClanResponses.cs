@@ -122,3 +122,12 @@ public class ClanWhisperFailedResponse : ChatBuffer
     }
 }
 
+public class ClanAddAcceptedResponse : ChatBuffer
+{
+    public ClanAddAcceptedResponse(string acceptorName)
+    {
+        WriteCommand(ChatProtocol.Command.CHAT_CMD_CLAN_ADD_ACCEPTED);
+        WriteString(acceptorName);
+    }
+}
+

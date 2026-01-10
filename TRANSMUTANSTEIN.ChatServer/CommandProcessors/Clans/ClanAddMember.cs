@@ -10,6 +10,9 @@ public class ClanAddMember(MerrickContext merrick, IPendingClanService pendingCl
         Account? account = session.Account;
         if (account == null) return;
 
+        // Skip Command ID (Header)
+        buffer.ReadCommandBytes();
+
         string targetUsername = buffer.ReadString();
 
         // 1. Permissions Check
@@ -27,6 +30,7 @@ public class ClanAddMember(MerrickContext merrick, IPendingClanService pendingCl
 
         if (targetAccount == null)
         {
+             Log.Warning("[CLAN-INVITE-DEBUG] FAIL_ONLINE: Target Username '{Name}' NOT FOUND in Database.", targetUsername);
              // Target does not exist (Legacy sends Offline error?)
              session.Send(new ClanCreateFailResponse(ChatProtocol.Command.CHAT_CMD_CLAN_ADD_FAIL_ONLINE));
              return;
@@ -56,12 +60,15 @@ public class ClanAddMember(MerrickContext merrick, IPendingClanService pendingCl
 
         if (targetSession == null || targetSession.ClientMetadata.LastKnownClientState < ChatProtocol.ChatClientStatus.CHAT_CLIENT_STATUS_CONNECTED)
         {
+             Log.Warning("[CLAN-INVITE-DEBUG] FAIL_ONLINE: Target {TargetID} ({TargetName}) not found in active sessions or not connected. Session Null? {SessionNull}. State: {State}", 
+                 targetAccount.ID, targetAccount.Name, targetSession == null, targetSession?.ClientMetadata.LastKnownClientState);
              session.Send(new ClanCreateFailResponse(ChatProtocol.Command.CHAT_CMD_CLAN_ADD_FAIL_ONLINE));
              return;
         }
 
         if (targetSession.ClientMetadata.ClientChatModeState == ChatProtocol.ChatModeType.CHAT_MODE_DND)
         {
+             Log.Warning("[CLAN-INVITE-DEBUG] FAIL_ONLINE: Target {TargetID} is in DND Mode.", targetAccount.ID);
              // Legacy sends AutoResponse DND
              // Subject.SendResponse(new ChatModeAutoResponse(invitedClient.ChatModeType, Username, invitedClient.ChatModeReason));
              // For now, fail with online error or specific DND if available. 

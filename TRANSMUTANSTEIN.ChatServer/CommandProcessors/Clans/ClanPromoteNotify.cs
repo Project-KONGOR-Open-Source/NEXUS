@@ -10,64 +10,83 @@ public class ClanPromoteNotify(MerrickContext merrick) : IAsynchronousCommandPro
         Account? account = session.Account;
         if (account == null) return;
 
+        // RAW PACKET DEBUG: Read first int (TargetID?)
+        byte[] rawBytes = buffer.Peek(4);
+        string rawHex = BitConverter.ToString(rawBytes);
         int targetAccountId = buffer.ReadInt32();
+
+        Log.Information("[CLAN-DEBUG] ClanPromoteNotify RAW: First 4 bytes: {Hex}. Read Int: {Value}", rawHex, targetAccountId);
+        
+        Log.Information("[CLAN] ClanPromoteNotify: Account {RequesterID} ({RequesterName}) attempting to promote Target {TargetID}", 
+            account.ID, account.Name, targetAccountId);
         
         // 1. Validate Requester Permissions
-        if (account.Clan == null || account.ClanTier < ClanTier.Officer)
+        if (account.Clan == null)
         {
-            // Legacy apparently returns nothing on failure here? Or sends generic fail?
-            // "ClanPromoteNotifyRequest" just returns.
+            Log.Warning("[CLAN] ClanPromoteNotify Failed: Requester {RequesterID} is not in a clan.", account.ID);
+            return;
+        }
+
+        if (account.ClanTier < ClanTier.Officer)
+        {
+            Log.Warning("[CLAN] ClanPromoteNotify Failed: Requester {RequesterID} has insufficient tier {Tier}. Requires Officer+.", 
+                account.ID, account.ClanTier);
             return;
         }
 
         // 2. Fetch Target
-        // Must include Clan to verify they are in same clan
         Account? targetAccount = await merrick.Accounts
              .Include(a => a.Clan)
              .FirstOrDefaultAsync(a => a.ID == targetAccountId);
 
-        if (targetAccount == null || targetAccount.Clan == null || targetAccount.Clan.ID != account.Clan.ID)
+        if (targetAccount == null)
         {
+             Log.Warning("[CLAN] ClanPromoteNotify Failed: Target Account {TargetID} not found.", targetAccountId);
+             return;
+        }
+        
+        if (targetAccount.Clan == null)
+        {
+             Log.Warning("[CLAN] ClanPromoteNotify Failed: Target Account {TargetID} is not in a clan.", targetAccountId);
+             return;
+        }
+
+        if (targetAccount.Clan.ID != account.Clan.ID)
+        {
+             Log.Warning("[CLAN] ClanPromoteNotify Failed: Target {TargetID} (Clan {TargetClanID}) is not in Requester's Clan {RequesterClanID}.", 
+                 targetAccountId, targetAccount.Clan.ID, account.Clan.ID);
             return;
         }
 
         // 3. Logic
-        // Legacy: Cannot promote Leader.
-        if (targetAccount.ClanTier >= ClanTier.Leader) return;
+        if (targetAccount.ClanTier >= ClanTier.Leader)
+        {
+             Log.Warning("[CLAN] ClanPromoteNotify Failed: Target {TargetID} is already Leader or higher.", targetAccountId);
+             return;
+        }
 
         bool isLeaderReferenceUpdate = false;
         Account? oldLeaderAccount = null;
 
         if (targetAccount.ClanTier == ClanTier.Member)
         {
-            // Member -> Officer (Only Leader? Or Officer can promote Member? Legacy allowed specific logic?)
-            // Legacy: if (account.Clan == null || promotedAccount.Clan == null || promotedAccount.ClanTier == Clan.Tier.Leader) return;
-            // It allows Officer to promote? Assuming Officer can promote Member.
-            // Wait, usually Officer can invite but NOT promote. Leader promotes.
-            // Legacy code DOES NOT explicitly check if requester is Leader. 
-            // BUT usually only Leader sends this command?
-            // Let's assume strict: Only Leader can promote to Officer?
-            // "if (account.ClanTier < ClanTier.Leader)" -> Return?
-            // Re-reading legacy: "if (account.Clan == null || promotedAccount.Clan == null || promotedAccount.ClanTier == Clan.Tier.Leader) return;"
-            // It doesn't check requester tier strictly for Member->Officer? 
-            // My code line 23 checks `ClanTier < ClanTier.Officer`. So Member cannot promote.
-            // Officer promoting Member might be allowed.
-            
+            // Member -> Officer
             targetAccount.ClanTier = ClanTier.Officer;
+            Log.Information("[CLAN] Promoting Member {TargetID} to Officer.", targetAccountId);
         }
         else if (targetAccount.ClanTier == ClanTier.Officer)
         {
-            // Officer -> Leader. Only Leader can do this.
-            if (account.ClanTier != ClanTier.Leader) return;
+            // Officer -> Leader
+            if (account.ClanTier != ClanTier.Leader)
+            {
+                Log.Warning("[CLAN] ClanPromoteNotify Failed: Requester {RequesterID} (Officer) cannot promote Officer to Leader.", account.ID);
+                return;
+            }
 
             targetAccount.ClanTier = ClanTier.Leader;
+            Log.Information("[CLAN] Promoting Officer {TargetID} to Leader. Demoting current Leader {RequesterID}.", targetAccountId, account.ID);
             
             // Demote requester (Old Leader) logic
-            // Legacy handles "connectedClientPastLeader".
-            // We need to update DB for requester too.
-            // session.Account is cached object? Or EF tracked due to context scope?
-            // session.Account is tracked if loaded from same context? No, session.Account is usually set on Connect.
-            // Re-fetch requester from context to ensure tracking.
             Account? requesterDb = await merrick.Accounts.FindAsync(account.ID);
             if (requesterDb != null)
             {
@@ -82,27 +101,19 @@ public class ClanPromoteNotify(MerrickContext merrick) : IAsynchronousCommandPro
         }
 
         await merrick.SaveChangesAsync();
+        Log.Information("[CLAN] Database Updated successfully.");
 
         // 4. Update Target Session if online
         ChatSession? targetSession = Context.ClientChatSessions.Values.FirstOrDefault(cs => cs.Account?.ID == targetAccountId);
         if (targetSession != null && targetSession.Account != null)
         {
             targetSession.Account.ClanTier = targetAccount.ClanTier;
-            // Notify Status Changed?
-            // BroadcastConnectionStatusUpdate
-            targetSession.BroadcastConnectionStatusUpdate(ChatProtocol.ChatClientStatus.CHAT_CLIENT_STATUS_CONNECTED); // Re-broadcast flags
+            targetSession.BroadcastConnectionStatusUpdate(ChatProtocol.ChatClientStatus.CHAT_CLIENT_STATUS_CONNECTED); 
         }
         
-        // 5. Broadcast to Clan Channel (Wait, Legacy iterates ALL clan members connected)
-        // Legacy: "foreach (Account clanAccount in allClanMembers)... clanClient.SendResponse..."
-        
-        // We can broadcast to Clan Channel? 
-        // Or get all sessions in CLan.
-        // Using ChatChannel members might be easier if everyone is in it.
-        
+        // 5. Broadcast to Clan Channel
         ChatChannel? clanChannel = Context.ChatChannels.Values.FirstOrDefault(c => c.Name == $"Clan {account.Clan.Name}");
         
-        // Construct keys/responses
         ClanRankChangeResponse rankChangeResponse = new(targetAccountId, targetAccount.ClanTier, account.ID);
         ClanRankChangeResponse? leaderDemoteResponse = null;
         if (isLeaderReferenceUpdate && oldLeaderAccount != null)
@@ -112,11 +123,16 @@ public class ClanPromoteNotify(MerrickContext merrick) : IAsynchronousCommandPro
 
         if (clanChannel != null)
         {
+            Log.Information("[CLAN] Broadcasting RankChange to Clan Channel {ChannelName} ({MemberCount} members).", clanChannel.Name, clanChannel.Members.Count);
             foreach (ChatChannelMember member in clanChannel.Members.Values)
             {
                  member.Session.Send(rankChangeResponse);
                  if (leaderDemoteResponse != null) member.Session.Send(leaderDemoteResponse);
             }
+        }
+        else
+        {
+             Log.Warning("[CLAN] Clan Channel not found for broadcast.");
         }
     }
 }

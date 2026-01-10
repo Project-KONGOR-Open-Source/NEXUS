@@ -48,14 +48,24 @@ public partial class ChatSession(TCPServer server, IServiceProvider serviceProvi
 
     protected override void OnReceived(byte[] buffer, long offset, long size)
     {
-        byte[] received = RemainingPreviouslyReceivedData.Concat(buffer[(int) offset..(int) size]).ToArray();
-        List<byte[]> segments = ExtractDataSegments(received, out byte[] remaining);
-
-        RemainingPreviouslyReceivedData = remaining;
-
-        foreach (byte[] segment in segments)
+        try
         {
-            ProcessDataSegment(segment).GetAwaiter().GetResult();
+            byte[] raw = buffer[(int)offset..(int)size];
+            Log.Information($"[RAW] Received {raw.Length} bytes: {BitConverter.ToString(raw).Replace("-", " ")}");
+            
+            byte[] received = RemainingPreviouslyReceivedData.Concat(raw).ToArray();
+            List<byte[]> segments = ExtractDataSegments(received, out byte[] remaining);
+
+            RemainingPreviouslyReceivedData = remaining;
+
+            foreach (byte[] segment in segments)
+            {
+                ProcessDataSegment(segment).GetAwaiter().GetResult();
+            }
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Error in OnReceived");
         }
     }
 
