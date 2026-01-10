@@ -11,18 +11,20 @@ namespace ASPIRE.Tests.InProcess;
 [AutoImplementMissingMembers]
 public partial class InProcessDistributedCacheStore : IDatabase
 {
-    private ConcurrentDictionary<string, string> StoreItems { get; set; } = new ();
+    private ConcurrentDictionary<string, string> StoreItems { get; } = new();
 
     // String Operations
 
-    public Task<bool> StringSetAsync(RedisKey key, RedisValue value, TimeSpan? expiry = null, When when = When.Always, CommandFlags flags = CommandFlags.None)
+    public Task<bool> StringSetAsync(RedisKey key, RedisValue value, TimeSpan? expiry = null, When when = When.Always,
+        CommandFlags flags = CommandFlags.None)
     {
         StoreItems[key.ToString()] = value.ToString();
 
         return Task.FromResult(true);
     }
 
-    public Task<bool> StringSetAsync(RedisKey key, RedisValue value, TimeSpan? expiry, bool keepTtl, When when = When.Always, CommandFlags flags = CommandFlags.None)
+    public Task<bool> StringSetAsync(RedisKey key, RedisValue value, TimeSpan? expiry, bool keepTtl,
+        When when = When.Always, CommandFlags flags = CommandFlags.None)
     {
         StoreItems[key.ToString()] = value.ToString();
 
@@ -108,7 +110,8 @@ public partial class InProcessDistributedCacheStore : IDatabase
         return Task.FromResult(entries.ToArray());
     }
 
-    public IAsyncEnumerable<HashEntry> HashScanAsync(RedisKey key, RedisValue pattern = default, int pageSize = 250, long cursor = 0, int pageOffset = 0, CommandFlags flags = CommandFlags.None)
+    public IAsyncEnumerable<HashEntry> HashScanAsync(RedisKey key, RedisValue pattern = default, int pageSize = 250,
+        long cursor = 0, int pageOffset = 0, CommandFlags flags = CommandFlags.None)
     {
         string keyString = key.ToString();
         string hashPrefix = keyString + ":";
@@ -116,7 +119,7 @@ public partial class InProcessDistributedCacheStore : IDatabase
 
         string regexPattern = "^" + Regex.Escape(patternString).Replace(@"\*", ".*") + "$";
 
-        Regex regex = new (regexPattern);
+        Regex regex = new(regexPattern);
 
         List<HashEntry> matchingEntries = [];
 

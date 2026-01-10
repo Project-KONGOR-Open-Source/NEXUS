@@ -20,7 +20,12 @@ public class TCPClient : IDisposable
     /// <param name="sendBufferMain">Send Buffer Main</param>
     /// <param name="sendBufferFlush">Send Buffer Flush</param>
     /// <param name="sendEventArg">Send Event Argument</param>
-    public TCPClient(IPAddress address, int port, Socket socket, SocketAsyncEventArgs connectEventArg, TCPBuffer receiveBuffer, SocketAsyncEventArgs receiveEventArg, TCPBuffer sendBufferMain, TCPBuffer sendBufferFlush, SocketAsyncEventArgs sendEventArg) : this(new IPEndPoint(address, port), socket, connectEventArg, receiveBuffer, receiveEventArg, sendBufferMain, sendBufferFlush, sendEventArg) { }
+    public TCPClient(IPAddress address, int port, Socket socket, SocketAsyncEventArgs connectEventArg,
+        TCPBuffer receiveBuffer, SocketAsyncEventArgs receiveEventArg, TCPBuffer sendBufferMain,
+        TCPBuffer sendBufferFlush, SocketAsyncEventArgs sendEventArg) : this(new IPEndPoint(address, port), socket,
+        connectEventArg, receiveBuffer, receiveEventArg, sendBufferMain, sendBufferFlush, sendEventArg)
+    {
+    }
 
     /// <summary>
     ///     Initialize TCP Client With A Given Server IP Address And Port Number
@@ -34,7 +39,13 @@ public class TCPClient : IDisposable
     /// <param name="sendBufferMain">Send Buffer Main</param>
     /// <param name="sendBufferFlush">Send Buffer Flush</param>
     /// <param name="sendEventArg">Send Event Argument</param>
-    public TCPClient(string address, int port, Socket socket, SocketAsyncEventArgs connectEventArg, TCPBuffer receiveBuffer, SocketAsyncEventArgs receiveEventArg, TCPBuffer sendBufferMain, TCPBuffer sendBufferFlush, SocketAsyncEventArgs sendEventArg) : this(new IPEndPoint(IPAddress.Parse(address), port), socket, connectEventArg, receiveBuffer, receiveEventArg, sendBufferMain, sendBufferFlush, sendEventArg) { }
+    public TCPClient(string address, int port, Socket socket, SocketAsyncEventArgs connectEventArg,
+        TCPBuffer receiveBuffer, SocketAsyncEventArgs receiveEventArg, TCPBuffer sendBufferMain,
+        TCPBuffer sendBufferFlush, SocketAsyncEventArgs sendEventArg) : this(
+        new IPEndPoint(IPAddress.Parse(address), port), socket, connectEventArg, receiveBuffer, receiveEventArg,
+        sendBufferMain, sendBufferFlush, sendEventArg)
+    {
+    }
 
     /// <summary>
     ///     Initialize TCP Client With A Given DNS Endpoint
@@ -47,7 +58,12 @@ public class TCPClient : IDisposable
     /// <param name="sendBufferMain">Send Buffer Main</param>
     /// <param name="sendBufferFlush">Send Buffer Flush</param>
     /// <param name="sendEventArg">Send Event Argument</param>
-    public TCPClient(DnsEndPoint endpoint, Socket socket, SocketAsyncEventArgs connectEventArg, TCPBuffer receiveBuffer, SocketAsyncEventArgs receiveEventArg, TCPBuffer sendBufferMain, TCPBuffer sendBufferFlush, SocketAsyncEventArgs sendEventArg) : this(endpoint, endpoint.Host, endpoint.Port, socket, connectEventArg, receiveBuffer, receiveEventArg, sendBufferMain, sendBufferFlush, sendEventArg) { }
+    public TCPClient(DnsEndPoint endpoint, Socket socket, SocketAsyncEventArgs connectEventArg, TCPBuffer receiveBuffer,
+        SocketAsyncEventArgs receiveEventArg, TCPBuffer sendBufferMain, TCPBuffer sendBufferFlush,
+        SocketAsyncEventArgs sendEventArg) : this(endpoint, endpoint.Host, endpoint.Port, socket, connectEventArg,
+        receiveBuffer, receiveEventArg, sendBufferMain, sendBufferFlush, sendEventArg)
+    {
+    }
 
     /// <summary>
     ///     Initialize TCP Client With A Given IP Endpoint
@@ -60,7 +76,12 @@ public class TCPClient : IDisposable
     /// <param name="sendBufferMain">Send Buffer Main</param>
     /// <param name="sendBufferFlush">Send Buffer Flush</param>
     /// <param name="sendEventArg">Send Event Argument</param>
-    public TCPClient(IPEndPoint endpoint, Socket socket, SocketAsyncEventArgs connectEventArg, TCPBuffer receiveBuffer, SocketAsyncEventArgs receiveEventArg, TCPBuffer sendBufferMain, TCPBuffer sendBufferFlush, SocketAsyncEventArgs sendEventArg) : this(endpoint, endpoint.Address.ToString(), endpoint.Port, socket, connectEventArg, receiveBuffer, receiveEventArg, sendBufferMain, sendBufferFlush, sendEventArg) { }
+    public TCPClient(IPEndPoint endpoint, Socket socket, SocketAsyncEventArgs connectEventArg, TCPBuffer receiveBuffer,
+        SocketAsyncEventArgs receiveEventArg, TCPBuffer sendBufferMain, TCPBuffer sendBufferFlush,
+        SocketAsyncEventArgs sendEventArg) : this(endpoint, endpoint.Address.ToString(), endpoint.Port, socket,
+        connectEventArg, receiveBuffer, receiveEventArg, sendBufferMain, sendBufferFlush, sendEventArg)
+    {
+    }
 
     /// <summary>
     ///     Initialize TCP Client With A Given Endpoint, Address And Port
@@ -75,7 +96,9 @@ public class TCPClient : IDisposable
     /// <param name="sendBufferMain">Send Buffer Main</param>
     /// <param name="sendBufferFlush">Send Buffer Flush</param>
     /// <param name="sendEventArg">Send Event Argument</param>
-    private TCPClient(EndPoint endpoint, string address, int port, Socket socket, SocketAsyncEventArgs connectEventArg, TCPBuffer receiveBuffer, SocketAsyncEventArgs receiveEventArg, TCPBuffer sendBufferMain, TCPBuffer sendBufferFlush, SocketAsyncEventArgs sendEventArg)
+    private TCPClient(EndPoint endpoint, string address, int port, Socket socket, SocketAsyncEventArgs connectEventArg,
+        TCPBuffer receiveBuffer, SocketAsyncEventArgs receiveEventArg, TCPBuffer sendBufferMain,
+        TCPBuffer sendBufferFlush, SocketAsyncEventArgs sendEventArg)
     {
         ID = Guid.CreateVersion7();
         Address = address;
@@ -108,7 +131,7 @@ public class TCPClient : IDisposable
     /// <summary>
     ///     Endpoint
     /// </summary>
-    public EndPoint Endpoint { get; private set; }
+    public EndPoint Endpoint { get; }
 
     /// <summary>
     ///     Socket
@@ -140,7 +163,7 @@ public class TCPClient : IDisposable
     /// </summary>
     /// <remarks>
     ///     Specifies Whether The Socket Is A Dual-Mode Socket Used For Both IPv4 And IPv6
-    ///     <br/>
+    ///     <br />
     ///     Will Work Only If Socket Is Bound On IPv6 Address
     /// </remarks>
     public bool OptionDualMode { get; set; }
@@ -181,7 +204,8 @@ public class TCPClient : IDisposable
     ///     Option: No Delay
     /// </summary>
     /// <remarks>
-    ///     This Option Will Enable/Disable <a href="https://en.wikipedia.org/wiki/Nagle's_algorithm">Nagle's Algorithm</a> For TCP Protocol
+    ///     This Option Will Enable/Disable <a href="https://en.wikipedia.org/wiki/Nagle's_algorithm">Nagle's Algorithm</a> For
+    ///     TCP Protocol
     /// </remarks>
     public bool OptionNoDelay { get; set; }
 
@@ -236,14 +260,16 @@ public class TCPClient : IDisposable
     /// </summary>
     /// <remarks>
     ///     Note That Synchronous Connect Will Not Receive Data Automatically !!!
-    ///     <br/>
+    ///     <br />
     ///     You Should Use The Receive() Or ReceiveAsync() Method Manually After A Successful Connection
     /// </remarks>
     /// <returns>TRUE If The Client Was Successfully Connected, Or FALSE If The Client Failed To Connect</returns>
     public virtual bool Connect()
     {
         if (IsConnected || IsConnecting)
+        {
             return false;
+        }
 
         // Set Up Buffers
         _receiveBuffer = new TCPBuffer();
@@ -267,7 +293,9 @@ public class TCPClient : IDisposable
 
         // Apply The Option: Dual Mode (This Option Must Be Applied Before Connecting)
         if (Socket.AddressFamily == AddressFamily.InterNetworkV6)
+        {
             Socket.DualMode = OptionDualMode;
+        }
 
         // Call The Client Connecting Handler
         OnConnecting();
@@ -309,17 +337,32 @@ public class TCPClient : IDisposable
 
         // Apply The Option: Keep Alive
         if (OptionKeepAlive)
+        {
             Socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.KeepAlive, true);
+        }
+
         if (OptionTCPKeepAliveTime >= 0)
+        {
             Socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveTime, OptionTCPKeepAliveTime);
+        }
+
         if (OptionTCPKeepAliveInterval >= 0)
-            Socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveInterval, OptionTCPKeepAliveInterval);
+        {
+            Socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveInterval,
+                OptionTCPKeepAliveInterval);
+        }
+
         if (OptionTCPKeepAliveRetryCount >= 0)
-            Socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveRetryCount, OptionTCPKeepAliveRetryCount);
+        {
+            Socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveRetryCount,
+                OptionTCPKeepAliveRetryCount);
+        }
 
         // Apply The Option: No Delay
         if (OptionNoDelay)
+        {
             Socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, true);
+        }
 
         // Prepare Receive/Send Buffers
         _receiveBuffer.Reserve(OptionReceiveBufferSize);
@@ -340,7 +383,9 @@ public class TCPClient : IDisposable
 
         // Call The Empty Send Buffer Handler
         if (_sendBufferMain.IsEmpty)
+        {
             OnEmpty();
+        }
 
         return true;
     }
@@ -352,11 +397,15 @@ public class TCPClient : IDisposable
     public virtual bool Disconnect()
     {
         if (!IsConnected && !IsConnecting)
+        {
             return false;
+        }
 
         // Cancel Connecting Operation
         if (IsConnecting)
+        {
             Socket.CancelConnectAsync(_connectEventArg);
+        }
 
         // Reset Event Args
         _connectEventArg.Completed -= OnAsyncCompleted;
@@ -416,7 +465,9 @@ public class TCPClient : IDisposable
     public virtual bool Reconnect()
     {
         if (!Disconnect())
+        {
             return false;
+        }
 
         return Connect();
     }
@@ -428,7 +479,9 @@ public class TCPClient : IDisposable
     public virtual bool ConnectAsync()
     {
         if (IsConnected || IsConnecting)
+        {
             return false;
+        }
 
         // Set Up Buffers
         _receiveBuffer = new TCPBuffer();
@@ -452,7 +505,9 @@ public class TCPClient : IDisposable
 
         // Apply The Option: Dual Mode (This Option Must Be Applied Before Connecting)
         if (Socket.AddressFamily == AddressFamily.InterNetworkV6)
+        {
             Socket.DualMode = OptionDualMode;
+        }
 
         // Update The Connecting Flag
         IsConnecting = true;
@@ -462,7 +517,9 @@ public class TCPClient : IDisposable
 
         // Asynchronous Connect To The Server
         if (!Socket.ConnectAsync(_connectEventArg))
+        {
             ProcessConnect(_connectEventArg);
+        }
 
         return true;
     }
@@ -471,7 +528,10 @@ public class TCPClient : IDisposable
     ///     Disconnect The Client (Asynchronous)
     /// </summary>
     /// <returns>TRUE If The Client Was Successfully Disconnected, Or FALSE If The Client Is Already Disconnected</returns>
-    public virtual bool DisconnectAsync() => Disconnect();
+    public virtual bool DisconnectAsync()
+    {
+        return Disconnect();
+    }
 
     /// <summary>
     ///     Reconnect The Client (Asynchronous)
@@ -480,10 +540,14 @@ public class TCPClient : IDisposable
     public virtual bool ReconnectAsync()
     {
         if (!DisconnectAsync())
+        {
             return false;
+        }
 
         while (IsConnected)
+        {
             Thread.Yield();
+        }
 
         return ConnectAsync();
     }
@@ -498,7 +562,7 @@ public class TCPClient : IDisposable
     private SocketAsyncEventArgs _receiveEventArg;
 
     // Send Buffer
-    private readonly object _sendLock = new object();
+    private readonly object _sendLock = new();
     private bool _sending;
     private TCPBuffer _sendBufferMain;
     private TCPBuffer _sendBufferFlush;
@@ -510,7 +574,10 @@ public class TCPClient : IDisposable
     /// </summary>
     /// <param name="buffer">Buffer To Send</param>
     /// <returns>Size Of Sent Data</returns>
-    public virtual long Send(byte[] buffer) => Send(buffer.AsSpan());
+    public virtual long Send(byte[] buffer)
+    {
+        return Send(buffer.AsSpan());
+    }
 
     /// <summary>
     ///     Send Data To The Server (Synchronous)
@@ -519,7 +586,10 @@ public class TCPClient : IDisposable
     /// <param name="offset">Buffer Offset</param>
     /// <param name="size">Buffer Size</param>
     /// <returns>Size Of Sent Data</returns>
-    public virtual long Send(byte[] buffer, long offset, long size) => Send(buffer.AsSpan((int) offset, (int) size));
+    public virtual long Send(byte[] buffer, long offset, long size)
+    {
+        return Send(buffer.AsSpan((int) offset, (int) size));
+    }
 
     /// <summary>
     ///     Send Data To The Server (Synchronous)
@@ -529,10 +599,14 @@ public class TCPClient : IDisposable
     public virtual long Send(ReadOnlySpan<byte> buffer)
     {
         if (!IsConnected)
+        {
             return 0;
+        }
 
         if (buffer.IsEmpty)
+        {
             return 0;
+        }
 
         // Sent Data To The Server
         long sent = Socket.Send(buffer, SocketFlags.None, out SocketError ec);
@@ -560,21 +634,30 @@ public class TCPClient : IDisposable
     /// </summary>
     /// <param name="text">Text String To Send</param>
     /// <returns>Size Of Sent Text</returns>
-    public virtual long Send(string text) => Send(Encoding.UTF8.GetBytes(text));
+    public virtual long Send(string text)
+    {
+        return Send(Encoding.UTF8.GetBytes(text));
+    }
 
     /// <summary>
     ///     Send Text To The Server (Synchronous)
     /// </summary>
     /// <param name="text">Text To Send As A Span Of Characters</param>
     /// <returns>Size Of Sent Text</returns>
-    public virtual long Send(ReadOnlySpan<char> text) => Send(Encoding.UTF8.GetBytes(text.ToArray()));
+    public virtual long Send(ReadOnlySpan<char> text)
+    {
+        return Send(Encoding.UTF8.GetBytes(text.ToArray()));
+    }
 
     /// <summary>
     ///     Send Data To The Server (Asynchronous)
     /// </summary>
     /// <param name="buffer">Buffer To Send</param>
     /// <returns>TRUE If The Data Was Successfully Sent, Or FALSE If The Client Is Not Connected</returns>
-    public virtual bool SendAsync(byte[] buffer) => SendAsync(buffer.AsSpan());
+    public virtual bool SendAsync(byte[] buffer)
+    {
+        return SendAsync(buffer.AsSpan());
+    }
 
     /// <summary>
     ///     Send Data To The Server (Asynchronous)
@@ -583,7 +666,10 @@ public class TCPClient : IDisposable
     /// <param name="offset">Buffer Offset</param>
     /// <param name="size">Buffer Size</param>
     /// <returns>TRUE If The Data Was Successfully Sent, Or FALSE If The Client Is Not Connected</returns>
-    public virtual bool SendAsync(byte[] buffer, long offset, long size) => SendAsync(buffer.AsSpan((int) offset, (int) size));
+    public virtual bool SendAsync(byte[] buffer, long offset, long size)
+    {
+        return SendAsync(buffer.AsSpan((int) offset, (int) size));
+    }
 
     /// <summary>
     ///     Send Data To The Server (Asynchronous)
@@ -593,15 +679,19 @@ public class TCPClient : IDisposable
     public virtual bool SendAsync(ReadOnlySpan<byte> buffer)
     {
         if (!IsConnected)
+        {
             return false;
+        }
 
         if (buffer.IsEmpty)
+        {
             return true;
+        }
 
         lock (_sendLock)
         {
             // Check The Send Buffer Limit
-            if (((_sendBufferMain.Size + buffer.Length) > OptionSendBufferLimit) && (OptionSendBufferLimit > 0))
+            if (_sendBufferMain.Size + buffer.Length > OptionSendBufferLimit && OptionSendBufferLimit > 0)
             {
                 SendError(SocketError.NoBufferSpaceAvailable);
                 return false;
@@ -615,9 +705,11 @@ public class TCPClient : IDisposable
 
             // Avoid Multiple Send Handlers
             if (_sending)
+            {
                 return true;
+            }
 
-            else _sending = true;
+            _sending = true;
 
             // Try To Send The Main Buffer
             TrySend();
@@ -631,14 +723,20 @@ public class TCPClient : IDisposable
     /// </summary>
     /// <param name="text">Text String To Send</param>
     /// <returns>TRUE If The Text Was Successfully Sent, Or FALSE If The Client Is Not Connected</returns>
-    public virtual bool SendAsync(string text) => SendAsync(Encoding.UTF8.GetBytes(text));
+    public virtual bool SendAsync(string text)
+    {
+        return SendAsync(Encoding.UTF8.GetBytes(text));
+    }
 
     /// <summary>
     ///     Send Text To The Server (Asynchronous)
     /// </summary>
     /// <param name="text">Text To Send As A Span Of Characters</param>
     /// <returns>TRUE If The Text Was Successfully Sent, Or FALSE If The Client Is Not Connected</returns>
-    public virtual bool SendAsync(ReadOnlySpan<char> text) => SendAsync(Encoding.UTF8.GetBytes(text.ToArray()));
+    public virtual bool SendAsync(ReadOnlySpan<char> text)
+    {
+        return SendAsync(Encoding.UTF8.GetBytes(text.ToArray()));
+    }
 
     /// <summary>
     ///     Receive Data From The Server (Synchronous)
@@ -657,10 +755,14 @@ public class TCPClient : IDisposable
     public virtual long Receive(byte[] buffer, long offset, long size)
     {
         if (!IsConnected)
+        {
             return 0;
+        }
 
         if (size == 0)
+        {
             return 0;
+        }
 
         // Receive Data From The Server
         long received = Socket.Receive(buffer, (int) offset, (int) size, SocketFlags.None, out SocketError ec);
@@ -711,10 +813,14 @@ public class TCPClient : IDisposable
     private void TryReceive()
     {
         if (_receiving)
+        {
             return;
+        }
 
         if (!IsConnected)
+        {
             return;
+        }
 
         bool process = true;
 
@@ -729,7 +835,9 @@ public class TCPClient : IDisposable
                 _receiveEventArg.SetBuffer(_receiveBuffer.Data, 0, (int) _receiveBuffer.Capacity);
 
                 if (!Socket.ReceiveAsync(_receiveEventArg))
+                {
                     process = ProcessReceive(_receiveEventArg);
+                }
             }
 
             catch (ObjectDisposedException) { }
@@ -742,7 +850,9 @@ public class TCPClient : IDisposable
     private void TrySend()
     {
         if (!IsConnected)
+        {
             return;
+        }
 
         bool empty = false;
         bool process = true;
@@ -775,7 +885,10 @@ public class TCPClient : IDisposable
                     }
                 }
 
-                else return;
+                else
+                {
+                    return;
+                }
             }
 
             // Call The Empty Send Buffer Handler
@@ -788,10 +901,13 @@ public class TCPClient : IDisposable
             try
             {
                 // Async Write With The Write Handler
-                _sendEventArg.SetBuffer(_sendBufferFlush.Data, (int) _sendBufferFlushOffset, (int) (_sendBufferFlush.Size - _sendBufferFlushOffset));
+                _sendEventArg.SetBuffer(_sendBufferFlush.Data, (int) _sendBufferFlushOffset,
+                    (int) (_sendBufferFlush.Size - _sendBufferFlushOffset));
 
                 if (!Socket.SendAsync(_sendEventArg))
+                {
                     process = ProcessSend(_sendEventArg);
+                }
             }
 
             catch (ObjectDisposedException) { }
@@ -828,7 +944,9 @@ public class TCPClient : IDisposable
 #nullable disable
     {
         if (IsSocketDisposed)
+        {
             return;
+        }
 
         // Determine Which Type Of Operation Just Completed And Call The Associated Handler
         switch (e.LastOperation)
@@ -838,16 +956,21 @@ public class TCPClient : IDisposable
                 break;
             case SocketAsyncOperation.Receive:
                 if (ProcessReceive(e))
+                {
                     TryReceive();
+                }
+
                 break;
             case SocketAsyncOperation.Send:
                 if (ProcessSend(e))
+                {
                     TrySend();
+                }
+
                 break;
             default:
                 throw new ArgumentException("The Last Operation Completed On The Socket Was Not A Receive Or Send");
         }
-
     }
 
     /// <summary>
@@ -861,17 +984,33 @@ public class TCPClient : IDisposable
         {
             // Apply The Option: Keep Alive
             if (OptionKeepAlive)
+            {
                 Socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.KeepAlive, true);
+            }
+
             if (OptionTCPKeepAliveTime >= 0)
-                Socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveTime, OptionTCPKeepAliveTime);
+            {
+                Socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveTime,
+                    OptionTCPKeepAliveTime);
+            }
+
             if (OptionTCPKeepAliveInterval >= 0)
-                Socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveInterval, OptionTCPKeepAliveInterval);
+            {
+                Socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveInterval,
+                    OptionTCPKeepAliveInterval);
+            }
+
             if (OptionTCPKeepAliveRetryCount >= 0)
-                Socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveRetryCount, OptionTCPKeepAliveRetryCount);
+            {
+                Socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.TcpKeepAliveRetryCount,
+                    OptionTCPKeepAliveRetryCount);
+            }
 
             // Apply The Option: No Delay
             if (OptionNoDelay)
+            {
                 Socket.SetSocketOption(SocketOptionLevel.Tcp, SocketOptionName.NoDelay, true);
+            }
 
             // Prepare Receive/Send Buffers
             _receiveBuffer.Reserve(OptionReceiveBufferSize);
@@ -892,14 +1031,18 @@ public class TCPClient : IDisposable
 
             // Check The Socket Disposed State: In Some Rare Cases It Might Be Disconnected While Receiving!
             if (IsSocketDisposed)
+            {
                 return;
+            }
 
             // Call The Client Connected Handler
             OnConnected();
 
             // Call The Empty Send Buffer Handler
             if (_sendBufferMain.IsEmpty)
+            {
                 OnEmpty();
+            }
         }
 
         else
@@ -916,7 +1059,9 @@ public class TCPClient : IDisposable
     private bool ProcessReceive(SocketAsyncEventArgs e)
     {
         if (!IsConnected)
+        {
             return false;
+        }
 
         long size = e.BytesTransferred;
 
@@ -933,7 +1078,7 @@ public class TCPClient : IDisposable
             if (_receiveBuffer.Capacity == size)
             {
                 // Check The Receive Buffer Limit
-                if (((2 * size) > OptionReceiveBufferLimit) && (OptionReceiveBufferLimit > 0))
+                if (2 * size > OptionReceiveBufferLimit && OptionReceiveBufferLimit > 0)
                 {
                     SendError(SocketError.NoBufferSpaceAvailable);
                     DisconnectAsync();
@@ -952,10 +1097,11 @@ public class TCPClient : IDisposable
         {
             // If Zero Is Returned From A Read Operation, The Remote End Has Closed The Connection
             if (size > 0)
+            {
                 return true;
+            }
 
-            else
-                DisconnectAsync();
+            DisconnectAsync();
         }
 
         else
@@ -973,7 +1119,9 @@ public class TCPClient : IDisposable
     private bool ProcessSend(SocketAsyncEventArgs e)
     {
         if (!IsConnected)
+        {
             return false;
+        }
 
         long size = e.BytesTransferred;
 
@@ -1001,14 +1149,13 @@ public class TCPClient : IDisposable
 
         // Try To Send Again If The Client Is Valid
         if (e.SocketError == SocketError.Success)
-            return true;
-
-        else
         {
-            SendError(e.SocketError);
-            DisconnectAsync();
-            return false;
+            return true;
         }
+
+        SendError(e.SocketError);
+        DisconnectAsync();
+        return false;
     }
 
     # endregion
@@ -1053,7 +1200,7 @@ public class TCPClient : IDisposable
     /// <param name="pending">Size Of Pending Buffer</param>
     /// <remarks>
     ///     Notification Is Called When Another Part Of Buffer Was Sent To The Server
-    ///     <br/>
+    ///     <br />
     ///     This Handler Could Be Used To Send Another Buffer To The Server For Instance When The Pending Size Is Zero
     /// </remarks>
     protected virtual void OnSent(long sent, long pending) { }
@@ -1063,7 +1210,7 @@ public class TCPClient : IDisposable
     /// </summary>
     /// <remarks>
     ///     Notification Is Called When The Send Buffer Is Empty And Ready For A New Data To Send
-    ///     <br/>
+    ///     <br />
     ///     This Handler Could Be Used To Send Another Buffer To The Server
     /// </remarks>
     protected virtual void OnEmpty() { }
@@ -1085,12 +1232,14 @@ public class TCPClient : IDisposable
     private void SendError(SocketError error)
     {
         // Skip Disconnect Errors
-        if ((error == SocketError.ConnectionAborted) ||
-            (error == SocketError.ConnectionRefused) ||
-            (error == SocketError.ConnectionReset) ||
-            (error == SocketError.OperationAborted) ||
-            (error == SocketError.Shutdown))
+        if (error == SocketError.ConnectionAborted ||
+            error == SocketError.ConnectionRefused ||
+            error == SocketError.ConnectionReset ||
+            error == SocketError.OperationAborted ||
+            error == SocketError.Shutdown)
+        {
             return;
+        }
 
         OnError(error);
     }

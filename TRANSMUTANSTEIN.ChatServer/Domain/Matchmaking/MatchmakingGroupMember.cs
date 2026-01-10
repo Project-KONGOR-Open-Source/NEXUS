@@ -30,4 +30,3 @@ public class MatchmakingGroupMember(ChatSession session)
     /// </summary>
     public required string GameModeAccess { get; set; }
 }
-

@@ -1,10 +1,11 @@
 ﻿namespace MERRICK.DatabaseContext.Services;
 
-public class DatabaseInitializer(IServiceProvider serviceProvider, ILogger<DatabaseInitializer> logger) : BackgroundService
+public class DatabaseInitializer(IServiceProvider serviceProvider, ILogger<DatabaseInitializer> logger)
+    : BackgroundService
 {
     public const string ActivitySourceName = "Migrations";
 
-    private readonly ActivitySource _activitySource = new (ActivitySourceName);
+    private readonly ActivitySource _activitySource = new(ActivitySourceName);
 
     protected override async Task ExecuteAsync(CancellationToken cancellationToken)
     {
@@ -29,7 +30,8 @@ public class DatabaseInitializer(IServiceProvider serviceProvider, ILogger<Datab
 
         await SeedAsync(context, cancellationToken);
 
-        logger.LogInformation("Database Initialization Completed After {ElapsedMilliseconds}ms", stopwatch.ElapsedMilliseconds);
+        logger.LogInformation("Database Initialization Completed After {ElapsedMilliseconds}ms",
+            stopwatch.ElapsedMilliseconds);
     }
 
     private async Task SeedAsync(MerrickContext context, CancellationToken cancellationToken)

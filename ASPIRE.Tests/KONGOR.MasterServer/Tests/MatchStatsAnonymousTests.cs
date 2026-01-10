@@ -1,16 +1,9 @@
 using System.Net;
-using ASPIRE.Common.Enumerations;
-using ASPIRE.Tests;
-using KONGOR.MasterServer;
-using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.Extensions.DependencyInjection;
-using MERRICK.DatabaseContext;
-using MERRICK.DatabaseContext.Entities.Statistics;
-using StackExchange.Redis;
+
 using KONGOR.MasterServer.Extensions.Cache;
 
-using ASPIRE.Tests.KONGOR.MasterServer; // For KONGORServiceProvider
-using Microsoft.EntityFrameworkCore;
+using MERRICK.DatabaseContext.Entities.Statistics;
+// For KONGORServiceProvider
 
 // ReSharper disable once CheckNamespace
 namespace ASPIRE.Tests.KONGOR.MasterServer.Tests;
@@ -150,9 +143,9 @@ public sealed partial class MatchStatsSubmissionTests
         // Seed Account and Session
         // Use Global Constants for seeding
         // Assuming global::MERRICK.DatabaseContext.Entities.Utility.Role exists
-        global::MERRICK.DatabaseContext.Entities.Utility.Role userRole = new() { Name = "User" };
+        Role userRole = new() { Name = "User" };
 
-        global::MERRICK.DatabaseContext.Entities.Core.User user = new()
+        User user = new()
         {
             EmailAddress = "auth_user@kongor.net",
             SRPPasswordHash = "srphash",
@@ -162,10 +155,7 @@ public sealed partial class MatchStatsSubmissionTests
         };
         await dbContext.Users.AddAsync(user);
 
-        global::MERRICK.DatabaseContext.Entities.Core.Account account = new()
-        {
-            User = user, Name = "AuthUser", Cookie = "valid_cookie_123", IsMain = true
-        };
+        Account account = new() { User = user, Name = "AuthUser", Cookie = "valid_cookie_123", IsMain = true };
         // Add some selected upgrades to verify personalization
         account.SelectedStoreItems.Add("aa.test_avatar");
 
@@ -280,11 +270,7 @@ public sealed partial class MatchStatsSubmissionTests
         await dbContext.SaveChangesAsync();
 
         // Payload WITHOUT "f" in body, but with invalid/empty cookie
-        Dictionary<string, string> payload = new()
-        {
-            { "match_id", matchID.ToString() }, 
-            { "cookie", "" }
-        };
+        Dictionary<string, string> payload = new() { { "match_id", matchID.ToString() }, { "cookie", "" } };
 
         // Act
         // Pass "f" in the Query String
@@ -294,10 +280,10 @@ public sealed partial class MatchStatsSubmissionTests
 
         // Assert
         await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.OK);
-        
+
         // If this fails with 401, it means the controller didn't pick up "f" from the QueryString,
         // and thus treated it as a generic request requiring validation (which fails due to empty cookie).
-        
+
         await Assert.That(content).Contains("match_summ");
     }
 
@@ -353,17 +339,13 @@ public sealed partial class MatchStatsSubmissionTests
         await dbContext.MatchStatistics.AddAsync(matchStats);
         await dbContext.SaveChangesAsync();
 
-        Dictionary<string, string> payload = new()
-        {
-            { "match_id", matchID.ToString() }, 
-            { "cookie", "" }
-        };
+        Dictionary<string, string> payload = new() { { "match_id", matchID.ToString() }, { "cookie", "" } };
 
         // Act
         // Pass "f" as "Get_Match_Stats" (mixed case)
         HttpResponseMessage response =
             await client.PostAsync("/client_requester.php?f=Get_Match_Stats", new FormUrlEncodedContent(payload));
-        
+
         // Assert
         // If the controller is case-sensitive, this will be 401 Unauthorized.
         // We WANT it to be OK.

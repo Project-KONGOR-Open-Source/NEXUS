@@ -1,18 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>@ViewData["Title"] - DawnBringer</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         /* Custom Font Import if needed, e.g. Inter or Roboto */
         @@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
-        
+
         body {
             font-family: 'Inter', sans-serif;
         }
-        
+
         .glass-panel {
             background: rgba(255, 255, 255, 0.05);
             backdrop-filter: blur(10px);
@@ -22,43 +22,48 @@
     </style>
 </head>
 <body class="bg-slate-900 text-white min-h-screen flex flex-col">
-    <header class="w-full p-6 flex justify-between items-center glass-panel sticky top-0 z-50">
-        <div class="text-2xl font-bold tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-600">
-            <a href="/">PROJECT KONGOR</a>
-        </div>
-        <nav class="flex gap-4 items-center">
-            @if (User?.Identity?.IsAuthenticated == true)
-            {
-                <span class="text-slate-300 mr-4">Welcome, <span class="font-semibold text-white">@User.Identity.Name</span></span>
-                <form asp-controller="Account" asp-action="Logout" method="post" class="inline">
-                    <button type="submit" class="px-4 py-2 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 hover:text-red-300 transition-all duration-300 border border-red-500/20">
-                        Logout
-                    </button>
-                </form>
-            }
-            else
-            {
-                <a asp-controller="Account" asp-action="Login" class="px-4 py-2 text-slate-300 hover:text-white transition-colors">Login</a>
-                <a asp-controller="Account" asp-action="Signup" class="px-4 py-2 rounded-lg bg-purple-600 hover:bg-purple-500 text-white transition-all duration-300 shadow-lg shadow-purple-900/50">Sign Up</a>
-            }
-        </nav>
-    </header>
+<header class="w-full p-6 flex justify-between items-center glass-panel sticky top-0 z-50">
+    <div
+        class="text-2xl font-bold tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-600">
+        <a href="/">PROJECT KONGOR</a>
+    </div>
+    <nav class="flex gap-4 items-center">
+        @if (User?.Identity?.IsAuthenticated == true)
+        {
+            <span class="text-slate-300 mr-4">Welcome, <span class="font-semibold text-white">@User.Identity.Name</span></span>
+            <form asp-controller="Account" asp-action="Logout" method="post" class="inline">
+                <button type="submit"
+                        class="px-4 py-2 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-400 hover:text-red-300 transition-all duration-300 border border-red-500/20">
+                    Logout
+                </button>
+            </form>
+        }
+        else
+        {
+            <a asp-controller="Account" asp-action="Login"
+               class="px-4 py-2 text-slate-300 hover:text-white transition-colors">Login</a>
+            <a asp-controller="Account" asp-action="Signup"
+               class="px-4 py-2 rounded-lg bg-purple-600 hover:bg-purple-500 text-white transition-all duration-300 shadow-lg shadow-purple-900/50">Sign
+                Up</a>
+        }
+    </nav>
+</header>
 
-    <main role="main" class="flex-grow flex flex-col items-center justify-center p-6 relative overflow-hidden">
-         <!-- Background decorative elements -->
-        <div class="absolute top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none">
-            <div class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-purple-900/20 blur-[100px]"></div>
-            <div class="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-blue-900/20 blur-[100px]"></div>
-        </div>
+<main role="main" class="flex-grow flex flex-col items-center justify-center p-6 relative overflow-hidden">
+    <!-- Background decorative elements -->
+    <div class="absolute top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none">
+        <div class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-purple-900/20 blur-[100px]"></div>
+        <div class="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-blue-900/20 blur-[100px]"></div>
+    </div>
 
-        @RenderBody()
-    </main>
+    @RenderBody()
+</main>
 
-    <footer class="p-6 text-center text-slate-500 text-sm glass-panel mt-auto">
-        &copy; 2026 - DawnBringer Web Portal - <a href="#" class="hover:text-slate-300">Privacy</a>
-    </footer>
+<footer class="p-6 text-center text-slate-500 text-sm glass-panel mt-auto">
+    &copy; 2026 - DawnBringer Web Portal - <a href="#" class="hover:text-slate-300">Privacy</a>
+</footer>
 
-    <!-- Asp.Net Core Validation Scripts if needed -->
-    @await RenderSectionAsync("Scripts", required: false)
+<!-- Asp.Net Core Validation Scripts if needed -->
+@await RenderSectionAsync("Scripts", false)
 </body>
 </html>

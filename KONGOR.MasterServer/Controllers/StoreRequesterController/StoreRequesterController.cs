@@ -1,6 +1,3 @@
-using KONGOR.MasterServer.Infrastructure;
-using Microsoft.AspNetCore.Mvc;
-
 namespace KONGOR.MasterServer.Controllers;
 
 [ApiController]
@@ -14,7 +11,7 @@ public class StoreRequesterController : ControllerBase
         // Stub implementation to prevent 404 errors.
         // The store requester handles various micro-transactions and catalog requests.
         // For now, returning a generic success or empty response is sufficient.
-        
+
         Dictionary<string, object> response = new()
         {
             // Empty response

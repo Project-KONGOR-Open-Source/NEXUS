@@ -3,7 +3,12 @@
 [ApiController]
 [Route("server_requester.php")]
 [Consumes("application/x-www-form-urlencoded")]
-public partial class ServerRequesterController(MerrickContext databaseContext, IDatabase distributedCache, ILogger<ServerRequesterController> logger, IOptions<OperationalConfiguration> configuration, IWebHostEnvironment hostEnvironment) : ControllerBase
+public partial class ServerRequesterController(
+    MerrickContext databaseContext,
+    IDatabase distributedCache,
+    ILogger<ServerRequesterController> logger,
+    IOptions<OperationalConfiguration> configuration,
+    IWebHostEnvironment hostEnvironment) : ControllerBase
 {
     private MerrickContext MerrickContext { get; } = databaseContext;
     private IDatabase DistributedCache { get; } = distributedCache;
@@ -12,7 +17,10 @@ public partial class ServerRequesterController(MerrickContext databaseContext, I
     private IWebHostEnvironment HostEnvironment { get; } = hostEnvironment;
 
     [HttpPost(Name = "Server Requester All-In-One")]
-    public async Task<IActionResult> ServerRequester() => await HandleServerRequest();
+    public async Task<IActionResult> ServerRequester()
+    {
+        return await HandleServerRequest();
+    }
 
     private async Task<IActionResult> HandleServerRequest()
     {
@@ -23,23 +31,24 @@ public partial class ServerRequesterController(MerrickContext databaseContext, I
         return functionName switch
         {
             // server manager
-            "replay_auth"           => await HandleServerManagerAuthentication(),
-            "get_spectator_header"  => await HandleGetSpectatorHeader(),
-            "set_replay_size"       => await HandleSetReplaySize(),
-            "get_quickstats"        => await HandleGetQuickStats(),
+            "replay_auth" => await HandleServerManagerAuthentication(),
+            "get_spectator_header" => await HandleGetSpectatorHeader(),
+            "set_replay_size" => await HandleSetReplaySize(),
+            "get_quickstats" => await HandleGetQuickStats(),
 
             // server
-            "accept_key"            => await HandleAcceptKey(),
-            "auth"                  => await HandleAuthentication(),
-            "c_conn"                => await HandleConnectClient(),
-            "new_session"           => await HandleServerAuthentication(),
-            "set_online"            => await HandleSetOnline(),
-            "shutdown"              => await HandleShutdown(),
-            "start_game"            => await HandleMatchStart(),
-            "aids2cookie"           => await HandleGetAccountIdFromCookie(),
+            "accept_key" => await HandleAcceptKey(),
+            "auth" => await HandleAuthentication(),
+            "c_conn" => await HandleConnectClient(),
+            "new_session" => await HandleServerAuthentication(),
+            "set_online" => await HandleSetOnline(),
+            "shutdown" => await HandleShutdown(),
+            "start_game" => await HandleMatchStart(),
+            "aids2cookie" => await HandleGetAccountIdFromCookie(),
 
             // default
-            _                       => throw new NotImplementedException($"Unsupported Server Requester Controller Function Parameter: f={functionName}")
+            _ => throw new NotImplementedException(
+                $"Unsupported Server Requester Controller Function Parameter: f={functionName}")
         };
     }
 

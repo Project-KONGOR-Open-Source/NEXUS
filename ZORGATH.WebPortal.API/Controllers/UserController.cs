@@ -1,12 +1,17 @@
-﻿namespace ZORGATH.WebPortal.API.Controllers;
+﻿using ASPIRE.Common.DTOs;
 
-using ASPIRE.Common.DTOs;
+namespace ZORGATH.WebPortal.API.Controllers;
 
 [ApiController]
 [Route("[controller]")]
 [Consumes("application/json")]
 [EnableRateLimiting(RateLimiterPolicies.Strict)]
-public class UserController(MerrickContext databaseContext, ILogger<UserController> logger, IEmailService emailService, IOptions<OperationalConfiguration> configuration, IWebHostEnvironment hostEnvironment) : ControllerBase
+public class UserController(
+    MerrickContext databaseContext,
+    ILogger<UserController> logger,
+    IEmailService emailService,
+    IOptions<OperationalConfiguration> configuration,
+    IWebHostEnvironment hostEnvironment) : ControllerBase
 {
     private MerrickContext MerrickContext { get; } = databaseContext;
     private ILogger Logger { get; } = logger;
@@ -24,17 +29,24 @@ public class UserController(MerrickContext databaseContext, ILogger<UserControll
     public async Task<IActionResult> RegisterUserAndMainAccount([FromBody] RegisterUserAndMainAccountDTO payload)
     {
         if (payload.Password.Equals(payload.ConfirmPassword).Equals(false))
-            return BadRequest($@"Password ""{payload.ConfirmPassword}"" Does Not Match ""{payload.Password}"" (These Values Are Only Visible To You)");
+        {
+            return BadRequest(
+                $@"Password ""{payload.ConfirmPassword}"" Does Not Match ""{payload.Password}"" (These Values Are Only Visible To You)");
+        }
 
         if (HostEnvironment.IsDevelopment() is false)
         {
             ValidationResult result = await new PasswordValidator().ValidateAsync(payload.Password);
 
             if (result.IsValid is false)
+            {
                 return BadRequest(result.Errors.Select(error => error.ErrorMessage));
+            }
         }
 
-        Token? token = await MerrickContext.Tokens.SingleOrDefaultAsync(token => token.Value.ToString().Equals(payload.Token) && token.Purpose.Equals(TokenPurpose.EmailAddressVerification));
+        Token? token = await MerrickContext.Tokens.SingleOrDefaultAsync(token =>
+            token.Value.ToString().Equals(payload.Token) &&
+            token.Purpose.Equals(TokenPurpose.EmailAddressVerification));
 
         if (token is null)
         {
@@ -67,7 +79,7 @@ public class UserController(MerrickContext databaseContext, ILogger<UserControll
 
         string salt = SRPRegistrationHandlers.GenerateSRPPasswordSalt();
 
-        User user = new ()
+        User user = new()
         {
             EmailAddress = sanitizedEmailAddress,
             Role = role,
@@ -79,12 +91,7 @@ public class UserController(MerrickContext databaseContext, ILogger<UserControll
 
         await MerrickContext.Users.AddAsync(user);
 
-        Account account = new ()
-        {
-            Name = payload.Name,
-            User = user,
-            IsMain = true
-        };
+        Account account = new() { Name = payload.Name, User = user, IsMain = true };
 
         user.Accounts.Add(account);
 
@@ -137,12 +144,7 @@ public class UserController(MerrickContext databaseContext, ILogger<UserControll
 
         await MerrickContext.Users.AddAsync(user);
 
-        Account account = new()
-        {
-            Name = payload.Name,
-            User = user,
-            IsMain = true
-        };
+        Account account = new() { Name = payload.Name, User = user, IsMain = true };
 
         user.Accounts.Add(account);
 
@@ -166,59 +168,73 @@ public class UserController(MerrickContext databaseContext, ILogger<UserControll
             .SingleOrDefaultAsync(account => account.Name.Equals(payload.Name));
 
         if (account is null)
+        {
             return NotFound($@"Account ""{payload.Name}"" Was Not Found");
+        }
 
         User user = account.User;
 
-        PasswordVerificationResult result = new PasswordHasher<User>().VerifyHashedPassword(user, user.PBKDF2PasswordHash, payload.Password);
+        PasswordVerificationResult result =
+            new PasswordHasher<User>().VerifyHashedPassword(user, user.PBKDF2PasswordHash, payload.Password);
 
         if (result is not PasswordVerificationResult.Success)
+        {
             return Unauthorized("Invalid User Name And/Or Password");
+        }
 
-        if (new [] { UserRoles.Administrator, UserRoles.User }.Contains(user.Role.Name).Equals(false))
+        if (new[] { UserRoles.Administrator, UserRoles.User }.Contains(user.Role.Name).Equals(false))
         {
             Logger.LogError(@"[BUG] Unknown User Role ""{User.Role.Name}""", user.Role.Name);
 
             return UnprocessableEntity($@"Unknown User Role ""{user.Role.Name}""");
         }
 
-        IEnumerable<Claim> userRoleClaims = user.Role.Name is UserRoles.Administrator ? UserRoleClaims.Administrator : UserRoleClaims.User;
+        IEnumerable<Claim> userRoleClaims = user.Role.Name is UserRoles.Administrator
+            ? UserRoleClaims.Administrator
+            : UserRoleClaims.User;
 
         IEnumerable<Claim> openIDClaims = new List<Claim>
         {
             # region JWT Claims Documentation
+
             // OpenID (This Implementation): https://openid.net/specs/openid-connect-core-1_0.html#IDToken
             // auth0: https://auth0.com/docs/secure/tokens/json-web-tokens/json-web-token-claims
             // Internet Assigned Numbers Authority: https://www.iana.org/assignments/jwt/jwt.xhtml
             // RFC7519: https://www.rfc-editor.org/rfc/rfc7519.html#section-4
+
             # endregion
 
-            new (JwtRegisteredClaimNames.Sub, account.Name, ClaimValueTypes.String),
-            new (JwtRegisteredClaimNames.Iat, DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64),
-            new (JwtRegisteredClaimNames.AuthTime, DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64),
-            new (JwtRegisteredClaimNames.Nonce, Guid.CreateVersion7().ToString(), ClaimValueTypes.String),
-            new (JwtRegisteredClaimNames.Jti, Guid.CreateVersion7().ToString(), ClaimValueTypes.String),
-            new (JwtRegisteredClaimNames.Email, user.EmailAddress, ClaimValueTypes.Email)
+            new(JwtRegisteredClaimNames.Sub, account.Name, ClaimValueTypes.String),
+            new(JwtRegisteredClaimNames.Iat, DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(),
+                ClaimValueTypes.Integer64),
+            new(JwtRegisteredClaimNames.AuthTime, DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(),
+                ClaimValueTypes.Integer64),
+            new(JwtRegisteredClaimNames.Nonce, Guid.CreateVersion7().ToString(), ClaimValueTypes.String),
+            new(JwtRegisteredClaimNames.Jti, Guid.CreateVersion7().ToString(), ClaimValueTypes.String),
+            new(JwtRegisteredClaimNames.Email, user.EmailAddress, ClaimValueTypes.Email)
         };
 
         IEnumerable<Claim> customClaims = new List<Claim>
         {
-            new (Claims.UserID, user.ID.ToString(), ClaimValueTypes.String),
-            new (Claims.AccountID, account.ID.ToString(), ClaimValueTypes.String),
-            new (Claims.AccountIsMain, account.IsMain.ToString(), ClaimValueTypes.Boolean),
-            new (Claims.ClanName, account.Clan?.Name ?? string.Empty, ClaimValueTypes.String),
-            new (Claims.ClanTag, account.Clan?.Tag ?? string.Empty, ClaimValueTypes.String)
+            new(Claims.UserID, user.ID.ToString(), ClaimValueTypes.String),
+            new(Claims.AccountID, account.ID.ToString(), ClaimValueTypes.String),
+            new(Claims.AccountIsMain, account.IsMain.ToString(), ClaimValueTypes.Boolean),
+            new(Claims.ClanName, account.Clan?.Name ?? string.Empty, ClaimValueTypes.String),
+            new(Claims.ClanTag, account.Clan?.Tag ?? string.Empty, ClaimValueTypes.String)
         };
 
-        IEnumerable<Claim> allTokenClaims = Enumerable.Empty<Claim>().Union(userRoleClaims).Union(openIDClaims).Union(customClaims).OrderBy(claim => claim.Type);
+        IEnumerable<Claim> allTokenClaims = Enumerable.Empty<Claim>().Union(userRoleClaims).Union(openIDClaims)
+            .Union(customClaims).OrderBy(claim => claim.Type);
 
         JwtSecurityToken token = new
         (
-            issuer: Configuration.JWT.Issuer,
-            audience: Configuration.JWT.Audience,
-            claims: allTokenClaims,
+            Configuration.JWT.Issuer,
+            Configuration.JWT.Audience,
+            allTokenClaims,
             expires: DateTimeOffset.UtcNow.AddHours(Configuration.JWT.DurationInHours).DateTime,
-            signingCredentials: new SigningCredentials(new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration.JWT.SigningKey)), SecurityAlgorithms.HmacSha256) // TODO: Put The Signing Key In A Secrets Vault
+            signingCredentials: new SigningCredentials(
+                new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration.JWT.SigningKey)),
+                SecurityAlgorithms.HmacSha256) // TODO: Put The Signing Key In A Secrets Vault
         );
 
         string jwt = new JwtSecurityTokenHandler().WriteToken(token);
@@ -241,7 +257,9 @@ public class UserController(MerrickContext databaseContext, ILogger<UserControll
             .SingleOrDefaultAsync(record => record.ID.Equals(id));
 
         if (user is null)
+        {
             return NotFound($@"User With ID ""{id}"" Was Not Found");
+        }
 
         // TODO: [OutputCache] On Get Requests
 
@@ -256,7 +274,8 @@ public class UserController(MerrickContext databaseContext, ILogger<UserControll
         if (role.Equals(UserRoles.User))
         {
             return Ok(new GetBasicUserDTO(user.ID,
-                new string(user.EmailAddress.Select(character => char.IsLetterOrDigit(character) ? '*' : character).ToArray()),
+                new string(user.EmailAddress.Select(character => char.IsLetterOrDigit(character) ? '*' : character)
+                    .ToArray()),
                 user.Accounts.Select(account => new GetBasicAccountDTO(account.ID, account.NameWithClanTag)).ToList()));
         }
 

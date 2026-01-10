@@ -7,7 +7,7 @@ public partial class ServerRequesterController
         string baseURL = Configuration.CDN.Host;
         string targetURL = $"{baseURL}/replays/upload";
 
-        Dictionary<string, object> response = new ()
+        Dictionary<string, object> response = new()
         {
             // The Target URL For Uploading Replay Files
             ["target_url"] = targetURL,
@@ -43,15 +43,15 @@ public partial class ServerRequesterController
         string? matchIdString = Request.Form["match_id"];
         if (matchIdString is null)
         {
-             Logger.LogError("Missing Value For Form Parameter \"match_id\"");
-             return BadRequest(PhpSerialization.Serialize(new { error = "Missing Match ID" }));
+            Logger.LogError("Missing Value For Form Parameter \"match_id\"");
+            return BadRequest(PhpSerialization.Serialize(new { error = "Missing Match ID" }));
         }
 
         string? fileSizeString = Request.Form["file_size"];
         if (fileSizeString is null)
         {
-             Logger.LogError("Missing Value For Form Parameter \"file_size\"");
-             return BadRequest(PhpSerialization.Serialize(new { error = "Missing File Size" }));
+            Logger.LogError("Missing Value For Form Parameter \"file_size\"");
+            return BadRequest(PhpSerialization.Serialize(new { error = "Missing File Size" }));
         }
 
         if (int.TryParse(matchIdString, out int matchId) && int.TryParse(fileSizeString, out int fileSize))
@@ -61,7 +61,8 @@ public partial class ServerRequesterController
         }
         else
         {
-            Logger.LogError("Invalid Match ID Or File Size Format: ID={MatchID}, Size={FileSize}", matchIdString, fileSizeString);
+            Logger.LogError("Invalid Match ID Or File Size Format: ID={MatchID}, Size={FileSize}", matchIdString,
+                fileSizeString);
         }
 
         // Always return OK to satisfy the server

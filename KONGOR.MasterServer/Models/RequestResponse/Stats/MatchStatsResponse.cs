@@ -49,7 +49,8 @@ public class MatchStatsResponse
 
     /// <summary>
     ///     Tokens which grant temporary access to game modes (MidWars, Grimm's Crossing, etc.) for free-to-play players.
-    ///     Alternative to permanent "Game Pass" or temporary "Game Access" products (e.g. "m.midwars.pass", "m.midwars.access").
+    ///     Alternative to permanent "Game Pass" or temporary "Game Access" products (e.g. "m.midwars.pass",
+    ///     "m.midwars.access").
     ///     Legacy accounts have full access to all game modes, and so do accounts which own the "m.allmodes.pass" store item.
     /// </summary>
     [PhpProperty("game_tokens")]
@@ -72,9 +73,10 @@ public class MatchStatsResponse
 
     /// <summary>
     ///     Unused.
-    ///     <br/>
+    ///     <br />
     ///     May have been intended as a seasonal progression system similar to "season_level" but for creep cosmetics.
-    ///     For the sake of consistency with "season_level", this property is set to "100", although it most likely has no effect.
+    ///     For the sake of consistency with "season_level", this property is set to "100", although it most likely has no
+    ///     effect.
     /// </summary>
     [PhpProperty("creep_level")]
     public int CreepLevel { get; init; } = 100;
@@ -135,26 +137,26 @@ public class MatchStatsResponse
 
     /// <summary>
     ///     Used for the quest system, which has been disabled.
-    ///     <br/>
+    ///     <br />
     ///     While the quest system is disabled, this dictionary contains a single element with a key of "error".
     ///     The object which is the value of this element has the values of all its properties set to "0".
     /// </summary>
     [PhpProperty("quest_system")]
-    public Dictionary<string, QuestSystem> QuestSystem { get; init; } = new () { { "error", new QuestSystem() } };
+    public Dictionary<string, QuestSystem> QuestSystem { get; init; } = new() { { "error", new QuestSystem() } };
 
     /// <summary>
     ///     Unused.
-    ///     <br/>
+    ///     <br />
     ///     Statistics related to the "Event Codex" (otherwise known as "Ascension") seasonal system.
     /// </summary>
     [PhpProperty("season_system")]
-    public SeasonSystem SeasonSystem { get; init; } = new ();
+    public SeasonSystem SeasonSystem { get; init; } = new();
 
     /// <summary>
     ///     Statistics related to the Champions Of Newerth seasonal campaign.
     /// </summary>
     [PhpProperty("con_reward")]
-    public required CampaignReward CampaignReward { get; init; } = new ();
+    public required CampaignReward CampaignReward { get; init; } = new();
 
     /// <summary>
     ///     The minimum number of matches a free-to-play (trial) account must complete to become verified.
@@ -165,14 +167,17 @@ public class MatchStatsResponse
 
     /// <summary>
     ///     Unknown.
-    ///     <br/>
+    ///     <br />
     ///     Seems to be set to "true" on a successful response, or to "false" if an error occurs.
     /// </summary>
     [PhpProperty(0)]
     public bool Zero => true;
 }
 
-public class MatchSummary(MatchStatistics matchStatistics, List<PlayerStatistics> playerStatistics, MatchStartData matchStartData)
+public class MatchSummary(
+    MatchStatistics matchStatistics,
+    List<PlayerStatistics> playerStatistics,
+    MatchStartData matchStartData)
 {
     /// <summary>
     ///     The unique identifier for the match.
@@ -215,7 +220,8 @@ public class MatchSummary(MatchStatistics matchStatistics, List<PlayerStatistics
     ///     This is typically "localhost" in development environments, or "kongor.net" in production environments.
     /// </summary>
     [PhpProperty("file_host")]
-    public string FileHost { get; init; } = Environment.GetEnvironmentVariable("INFRASTRUCTURE_GATEWAY") ?? throw new NullReferenceException("Infrastructure Gateway Is NULL");
+    public string FileHost { get; init; } = Environment.GetEnvironmentVariable("INFRASTRUCTURE_GATEWAY") ??
+                                            throw new NullReferenceException("Infrastructure Gateway Is NULL");
 
     /// <summary>
     ///     The size of the match replay file in bytes.
@@ -282,7 +288,7 @@ public class MatchSummary(MatchStatistics matchStatistics, List<PlayerStatistics
     ///     </code>
     /// </summary>
     [PhpProperty("class")]
-    public int Class { get; init; } = (int) matchStartData.MatchType;
+    public int Class { get; init; } = matchStartData.MatchType;
 
     /// <summary>
     ///     Whether the match was private (1) or public (0).
@@ -375,7 +381,8 @@ public class MatchSummary(MatchStatistics matchStatistics, List<PlayerStatistics
     ///         1 -> League Match (organized competitive league play)
     ///     </code>
     ///     <remark>
-    ///         League matches belong to a dedicated competitive league structure with player rosters, seasonal standings, and separate win/loss tracking.
+    ///         League matches belong to a dedicated competitive league structure with player rosters, seasonal standings, and
+    ///         separate win/loss tracking.
     ///     </remark>
     /// </summary>
     [PhpProperty("league")]
@@ -409,7 +416,8 @@ public class MatchSummary(MatchStatistics matchStatistics, List<PlayerStatistics
     ///     No Agility Heroes option flag (1 = agility heroes banned, 0 = allowed).
     /// </summary>
     [PhpProperty("no_agi")]
-    public string NoAgilityHeroes { get; init; } = matchStartData.Options.HasFlag(MatchOptions.NoAgilityHeroes) ? "1" : "0";
+    public string NoAgilityHeroes { get; init; } =
+        matchStartData.Options.HasFlag(MatchOptions.NoAgilityHeroes) ? "1" : "0";
 
     /// <summary>
     ///     Drop Items On Death option flag (1 = enabled, 0 = disabled).
@@ -421,13 +429,15 @@ public class MatchSummary(MatchStatistics matchStatistics, List<PlayerStatistics
     ///     No Respawn Timer option flag (1 = picking timer disabled, 0 = timer enabled).
     /// </summary>
     [PhpProperty("no_timer")]
-    public string NoRespawnTimer { get; init; } = matchStartData.Options.HasFlag(MatchOptions.NoRespawnTimer) ? "1" : "0";
+    public string NoRespawnTimer { get; init; } =
+        matchStartData.Options.HasFlag(MatchOptions.NoRespawnTimer) ? "1" : "0";
 
     /// <summary>
     ///     Reverse Hero Selection option flag (1 = enabled, 0 = disabled).
     /// </summary>
     [PhpProperty("rev_hs")]
-    public string ReverseHeroSelection { get; init; } = matchStartData.Options.HasFlag(MatchOptions.ReverseHeroSelection) ? "1" : "0";
+    public string ReverseHeroSelection { get; init; } =
+        matchStartData.Options.HasFlag(MatchOptions.ReverseHeroSelection) ? "1" : "0";
 
     /// <summary>
     ///     No Swap option flag (1 = hero swapping disabled, 0 = swapping allowed).
@@ -439,13 +449,15 @@ public class MatchSummary(MatchStatistics matchStatistics, List<PlayerStatistics
     ///     No Intelligence Heroes option flag (1 = intelligence heroes banned, 0 = allowed).
     /// </summary>
     [PhpProperty("no_int")]
-    public string NoIntelligenceHeroes { get; init; } = matchStartData.Options.HasFlag(MatchOptions.NoIntelligenceHeroes) ? "1" : "0";
+    public string NoIntelligenceHeroes { get; init; } =
+        matchStartData.Options.HasFlag(MatchOptions.NoIntelligenceHeroes) ? "1" : "0";
 
     /// <summary>
     ///     Alternate Picking option flag (1 = enabled, 0 = disabled).
     /// </summary>
     [PhpProperty("alt_pick")]
-    public string AlternateHeroPicking { get; init; } = matchStartData.Options.HasFlag(MatchOptions.AlternateHeroPicking) ? "1" : "0";
+    public string AlternateHeroPicking { get; init; } =
+        matchStartData.Options.HasFlag(MatchOptions.AlternateHeroPicking) ? "1" : "0";
 
     /// <summary>
     ///     Ban Phase option flag (1 = ban phase enabled, 0 = disabled).
@@ -463,7 +475,8 @@ public class MatchSummary(MatchStatistics matchStatistics, List<PlayerStatistics
     ///     No Strength Heroes option flag (1 = strength heroes banned, 0 = allowed).
     /// </summary>
     [PhpProperty("no_str")]
-    public string NoStrengthHeroes { get; init; } = matchStartData.Options.HasFlag(MatchOptions.NoStrengthHeroes) ? "1" : "0";
+    public string NoStrengthHeroes { get; init; } =
+        matchStartData.Options.HasFlag(MatchOptions.NoStrengthHeroes) ? "1" : "0";
 
     /// <summary>
     ///     No Power-Ups option flag (1 = power-ups/runes disabled, 0 = enabled).
@@ -475,7 +488,8 @@ public class MatchSummary(MatchStatistics matchStatistics, List<PlayerStatistics
     ///     Duplicate Heroes option flag (1 = duplicate heroes allowed, 0 = each hero unique).
     /// </summary>
     [PhpProperty("dup_h")]
-    public string DuplicateHeroes { get; init; } = matchStartData.Options.HasFlag(MatchOptions.DuplicateHeroes) ? "1" : "0";
+    public string DuplicateHeroes { get; init; } =
+        matchStartData.Options.HasFlag(MatchOptions.DuplicateHeroes) ? "1" : "0";
 
     /// <summary>
     ///     All Pick Mode option flag (1 = enabled, 0 = disabled).
@@ -487,7 +501,8 @@ public class MatchSummary(MatchStatistics matchStatistics, List<PlayerStatistics
     ///     Balanced Random Mode option flag (1 = enabled, 0 = disabled).
     /// </summary>
     [PhpProperty("br")]
-    public string BalancedRandom { get; init; } = matchStartData.Options.HasFlag(MatchOptions.BalancedRandom) ? "1" : "0";
+    public string BalancedRandom { get; init; } =
+        matchStartData.Options.HasFlag(MatchOptions.BalancedRandom) ? "1" : "0";
 
     /// <summary>
     ///     Easy Mode option flag (1 = easy mode enabled, 0 = normal difficulty).
@@ -505,7 +520,8 @@ public class MatchSummary(MatchStatistics matchStatistics, List<PlayerStatistics
     ///     Reverse Selection option flag (1 = enabled, 0 = disabled).
     /// </summary>
     [PhpProperty("rs")]
-    public string ReverseSelection { get; init; } = matchStartData.Options.HasFlag(MatchOptions.ReverseSelection) ? "1" : "0";
+    public string ReverseSelection { get; init; } =
+        matchStartData.Options.HasFlag(MatchOptions.ReverseSelection) ? "1" : "0";
 
     /// <summary>
     ///     No Leaver option flag (1 = no leaver penalty applied, 0 = leaver penalties enabled).
@@ -541,7 +557,8 @@ public class MatchSummary(MatchStatistics matchStatistics, List<PlayerStatistics
     ///     Development Heroes option flag (1 = development/unreleased heroes allowed, 0 = only released heroes).
     /// </summary>
     [PhpProperty("dev_heroes")]
-    public string DevelopmentHeroes { get; init; } = matchStartData.Options.HasFlag(MatchOptions.DevelopmentHeroes) ? "1" : "0";
+    public string DevelopmentHeroes { get; init; } =
+        matchStartData.Options.HasFlag(MatchOptions.DevelopmentHeroes) ? "1" : "0";
 
     /// <summary>
     ///     Verified Only option flag (1 = only verified accounts allowed, 0 = all accounts allowed).
@@ -565,7 +582,9 @@ public class MatchSummary(MatchStatistics matchStatistics, List<PlayerStatistics
     ///     The UNIX timestamp (in seconds) when the match started.
     /// </summary>
     [PhpProperty("timestamp")]
-    public string Timestamp { get; init; } = Convert.ToInt32(Math.Max(matchStatistics.TimestampRecorded.ToUnixTimeSeconds(), Convert.ToInt64(Int32.MaxValue))).ToString();
+    public string Timestamp { get; init; } = Convert
+        .ToInt32(Math.Max(matchStatistics.TimestampRecorded.ToUnixTimeSeconds(), Convert.ToInt64(int.MaxValue)))
+        .ToString();
 
     /// <summary>
     ///     The URL for the match replay file.
@@ -649,7 +668,8 @@ public class MatchSummary(MatchStatistics matchStatistics, List<PlayerStatistics
     ///     The account ID of the player who earned the "Longest Killing Spree" award, or "-1" if no player earned this award.
     /// </summary>
     [PhpProperty("awd_lgks")]
-    public string AwardLongestKillingSpree { get; init; } = GetLongestKillingSpreeAwardRecipientID(playerStatistics).ToString();
+    public string AwardLongestKillingSpree { get; init; } =
+        GetLongestKillingSpreeAwardRecipientID(playerStatistics).ToString();
 
     /// <summary>
     ///     The account ID of the player who earned the "Most Smackdowns" award, or "-1" if no player earned this award.
@@ -702,7 +722,10 @@ public class MatchSummary(MatchStatistics matchStatistics, List<PlayerStatistics
     private static int GetMostWardsAwardRecipientID(List<PlayerStatistics> playerStatistics)
     {
         if (playerStatistics.Where(player => player.WardsPlaced > 0).Any())
-            return playerStatistics.OrderByDescending(player => player.WardsPlaced).ThenByDescending(player => player.Experience).First().ID;
+        {
+            return playerStatistics.OrderByDescending(player => player.WardsPlaced)
+                .ThenByDescending(player => player.Experience).First().ID;
+        }
 
         return -1;
     }
@@ -710,31 +733,58 @@ public class MatchSummary(MatchStatistics matchStatistics, List<PlayerStatistics
     private static int GetLongestKillingSpreeAwardRecipientID(List<PlayerStatistics> playerStatistics)
     {
         if (playerStatistics.Where(player => player.KillStreak15 > 0).Any())
-            return playerStatistics.OrderByDescending(player => player.KillStreak15).ThenByDescending(player => player.Experience).First().ID;
+        {
+            return playerStatistics.OrderByDescending(player => player.KillStreak15)
+                .ThenByDescending(player => player.Experience).First().ID;
+        }
 
         if (playerStatistics.Where(player => player.KillStreak10 > 0).Any())
-            return playerStatistics.OrderByDescending(player => player.KillStreak10).ThenByDescending(player => player.Experience).First().ID;
+        {
+            return playerStatistics.OrderByDescending(player => player.KillStreak10)
+                .ThenByDescending(player => player.Experience).First().ID;
+        }
 
         if (playerStatistics.Where(player => player.KillStreak09 > 0).Any())
-            return playerStatistics.OrderByDescending(player => player.KillStreak05).ThenByDescending(player => player.Experience).First().ID;
+        {
+            return playerStatistics.OrderByDescending(player => player.KillStreak05)
+                .ThenByDescending(player => player.Experience).First().ID;
+        }
 
         if (playerStatistics.Where(player => player.KillStreak08 > 0).Any())
-            return playerStatistics.OrderByDescending(player => player.KillStreak05).ThenByDescending(player => player.Experience).First().ID;
+        {
+            return playerStatistics.OrderByDescending(player => player.KillStreak05)
+                .ThenByDescending(player => player.Experience).First().ID;
+        }
 
         if (playerStatistics.Where(player => player.KillStreak07 > 0).Any())
-            return playerStatistics.OrderByDescending(player => player.KillStreak05).ThenByDescending(player => player.Experience).First().ID;
+        {
+            return playerStatistics.OrderByDescending(player => player.KillStreak05)
+                .ThenByDescending(player => player.Experience).First().ID;
+        }
 
         if (playerStatistics.Where(player => player.KillStreak06 > 0).Any())
-            return playerStatistics.OrderByDescending(player => player.KillStreak05).ThenByDescending(player => player.Experience).First().ID;
+        {
+            return playerStatistics.OrderByDescending(player => player.KillStreak05)
+                .ThenByDescending(player => player.Experience).First().ID;
+        }
 
         if (playerStatistics.Where(player => player.KillStreak05 > 0).Any())
-            return playerStatistics.OrderByDescending(player => player.KillStreak05).ThenByDescending(player => player.Experience).First().ID;
+        {
+            return playerStatistics.OrderByDescending(player => player.KillStreak05)
+                .ThenByDescending(player => player.Experience).First().ID;
+        }
 
         if (playerStatistics.Where(player => player.KillStreak04 > 0).Any())
-            return playerStatistics.OrderByDescending(player => player.KillStreak05).ThenByDescending(player => player.Experience).First().ID;
+        {
+            return playerStatistics.OrderByDescending(player => player.KillStreak05)
+                .ThenByDescending(player => player.Experience).First().ID;
+        }
 
         if (playerStatistics.Where(player => player.KillStreak03 > 0).Any())
-            return playerStatistics.OrderByDescending(player => player.KillStreak05).ThenByDescending(player => player.Experience).First().ID;
+        {
+            return playerStatistics.OrderByDescending(player => player.KillStreak05)
+                .ThenByDescending(player => player.Experience).First().ID;
+        }
 
         return -1;
     }
@@ -742,7 +792,9 @@ public class MatchSummary(MatchStatistics matchStatistics, List<PlayerStatistics
     private static int GetWinningTeam(List<PlayerStatistics>? playerStatistics)
     {
         if (playerStatistics is null)
+        {
             return 0;
+        }
 
         List<int> winningTeams = playerStatistics
             .Where(player => player is { Loss: 0, Win: 1 })
@@ -758,7 +810,7 @@ public class MatchSummary(MatchStatistics matchStatistics, List<PlayerStatistics
         List<PlayerStatistics> publicStatuses = playerStatistics.DistinctBy(player => player.PublicMatch).ToList();
 
         // If all players have the same public match status, return it. Otherwise default to Public (0)
-        return publicStatuses.Count == 1 ? (publicStatuses.Single().PublicMatch is 0 ? 1 : 0) : 0;
+        return publicStatuses.Count == 1 ? publicStatuses.Single().PublicMatch is 0 ? 1 : 0 : 0;
     }
 }
 
@@ -766,7 +818,8 @@ public class MatchMastery
 {
     public MatchMastery() { }
 
-    public MatchMastery(string heroIdentifier, int currentMasteryExperience, int matchMasteryExperience, int bonusExperience)
+    public MatchMastery(string heroIdentifier, int currentMasteryExperience, int matchMasteryExperience,
+        int bonusExperience)
     {
         HeroIdentifier = heroIdentifier;
         CurrentMasteryExperience = currentMasteryExperience;
@@ -820,7 +873,7 @@ public class MatchMastery
     ///     Applied as a percentage multiplier to the base experience.
     /// </summary>
     [PhpProperty("mastery_exp_bonus")]
-    public int MasteryExperienceBonus { get; init; } = 0;
+    public int MasteryExperienceBonus { get; init; }
 
     /// <summary>
     ///     The additional mastery experience gained from applying a regular mastery boost consumable.
@@ -828,7 +881,7 @@ public class MatchMastery
     ///     Only populated with a non-zero value after the player applies a mastery boost product.
     /// </summary>
     [PhpProperty("mastery_exp_boost")]
-    public int MasteryExperienceBoost { get; init; } = 0;
+    public int MasteryExperienceBoost { get; init; }
 
     /// <summary>
     ///     The additional mastery experience gained from applying a super mastery boost consumable.
@@ -836,7 +889,7 @@ public class MatchMastery
     ///     Only populated with a non-zero value after the player applies a super mastery boost product.
     /// </summary>
     [PhpProperty("mastery_exp_super_boost")]
-    public int MasteryExperienceSuperBoost { get; init; } = 0;
+    public int MasteryExperienceSuperBoost { get; init; }
 
     /// <summary>
     ///     The number of heroes the account has reached maximum mastery level with.
@@ -864,18 +917,20 @@ public class MatchMastery
     ///     Typically zero unless an admin-configured mastery experience event is active.
     /// </summary>
     [PhpProperty("mastery_exp_event")]
-    public int MasteryExperienceEventBonus { get; init; } = 0;
+    public int MasteryExperienceEventBonus { get; init; }
 
     /// <summary>
     ///     Setting this value to FALSE disables using or purchasing regular mastery boosts.
-    ///     Some use cases for FALSE would be: 1) the hero has reached the maximum mastery level, 2) a mastery experience boost has already been used, 3) the map/mode combination is not eligible for accumulating mastery experience.
+    ///     Some use cases for FALSE would be: 1) the hero has reached the maximum mastery level, 2) a mastery experience boost
+    ///     has already been used, 3) the map/mode combination is not eligible for accumulating mastery experience.
     /// </summary>
     [PhpProperty("mastery_canboost")]
     public bool MasteryExperienceCanBoost { get; init; } = true;
 
     /// <summary>
     ///     Setting this value to FALSE disables using or purchasing super mastery boosts.
-    ///     Some use cases for FALSE would be: 1) the hero has reached the maximum mastery level, 2) a mastery experience boost has already been used, 3) the map/mode combination is not eligible for accumulating mastery experience.
+    ///     Some use cases for FALSE would be: 1) the hero has reached the maximum mastery level, 2) a mastery experience boost
+    ///     has already been used, 3) the map/mode combination is not eligible for accumulating mastery experience.
     /// </summary>
     [PhpProperty("mastery_super_canboost")]
     public bool MasteryExperienceCanSuperBoost { get; init; } = true;
@@ -1164,7 +1219,8 @@ public class MatchPlayerStatistics(Account account, PlayerStatistics playerStati
     public string BuildingGold { get; init; } = playerStatistics.GoldFromBuildings.ToString();
 
     /// <summary>
-    ///     The number of friendly creeps denied by the player (last-hitting friendly creeps to prevent opponents from gaining gold/experience).
+    ///     The number of friendly creeps denied by the player (last-hitting friendly creeps to prevent opponents from gaining
+    ///     gold/experience).
     /// </summary>
     [PhpProperty("denies")]
     public string Denies { get; init; } = playerStatistics.Denies.ToString();
@@ -1555,7 +1611,8 @@ public class CampaignReward
     public int RequireRank { get; init; } = 0;
 
     /// <summary>
-    ///     Number of additional matches needed to accumulate enough reward points to reach the next Champions Of Newerth level.
+    ///     Number of additional matches needed to accumulate enough reward points to reach the next Champions Of Newerth
+    ///     level.
     ///     Each level requires "12" reward points, earned from winning matches.
     ///     Set to "0" when maximum level has been reached.
     /// </summary>

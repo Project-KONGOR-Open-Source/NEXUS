@@ -1,4 +1,4 @@
-@model global::DAWNBRINGER.WebPortal.UI.Models.RegisterViewModel
+@model DAWNBRINGER.WebPortal.UI.Models.RegisterViewModel
 @{
     ViewData["Title"] = "Complete Registration";
 }
@@ -14,28 +14,36 @@
 
         <div>
             <label asp-for="IGN" class="block text-sm font-medium text-slate-300 mb-1">In-Game Name (IGN)</label>
-            <input asp-for="IGN" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all" placeholder="Enter your desired username" />
+            <input asp-for="IGN"
+                   class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                   placeholder="Enter your desired username"/>
             <span asp-validation-for="IGN" class="text-red-400 text-xs mt-1"></span>
         </div>
 
         <div>
             <label asp-for="Password" class="block text-sm font-medium text-slate-300 mb-1">Password</label>
-            <input asp-for="Password" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all" placeholder="Enter a secure password" />
+            <input asp-for="Password"
+                   class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                   placeholder="Enter a secure password"/>
             <span asp-validation-for="Password" class="text-red-400 text-xs mt-1"></span>
         </div>
 
         <div>
-            <label asp-for="ConfirmPassword" class="block text-sm font-medium text-slate-300 mb-1">Confirm Password</label>
-            <input asp-for="ConfirmPassword" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all" placeholder="Confirm your password" />
+            <label asp-for="ConfirmPassword" class="block text-sm font-medium text-slate-300 mb-1">Confirm
+                Password</label>
+            <input asp-for="ConfirmPassword"
+                   class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+                   placeholder="Confirm your password"/>
             <span asp-validation-for="ConfirmPassword" class="text-red-400 text-xs mt-1"></span>
         </div>
 
-        <button type="submit" class="w-full bg-slate-700 hover:bg-slate-600 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-300 mt-6">
+        <button type="submit"
+                class="w-full bg-slate-700 hover:bg-slate-600 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-300 mt-6">
             Create Account
         </button>
     </form>
 </div>
 
 @section Scripts {
-    <partial name="_ValidationScriptsPartial" />
+    <partial name="_ValidationScriptsPartial"/>
 }

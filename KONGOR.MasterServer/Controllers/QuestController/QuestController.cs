@@ -1,7 +1,3 @@
-using KONGOR.MasterServer.Models;
-using Microsoft.AspNetCore.Mvc;
-using KONGOR.MasterServer.Infrastructure;
-
 namespace KONGOR.MasterServer.Controllers;
 
 [ApiController]
@@ -28,13 +24,15 @@ public class QuestController : ControllerBase
         {
             string? cookie = Request.Form["cookie"];
             _logger.LogInformation($"[QuestController] GetCurrentQuests called. Cookie present: {cookie != null}");
-            
+
             if (cookie is not null)
             {
-                (bool isValid, string? accountName) = await _distributedCache.ValidateAccountSessionCookie(cookie, _dbContext, _logger);
-                _logger.LogInformation($"[QuestController] Cookie validation result: IsValid={isValid}, Account={accountName}");
-                
-                if (!isValid) 
+                (bool isValid, string? accountName) =
+                    await _distributedCache.ValidateAccountSessionCookie(cookie, _dbContext, _logger);
+                _logger.LogInformation(
+                    $"[QuestController] Cookie validation result: IsValid={isValid}, Account={accountName}");
+
+                if (!isValid)
                 {
                     _logger.LogWarning($"[QuestController] Unauthorized access attempt. Invalid cookie: {cookie}");
                     return Unauthorized("Session Not Found");
@@ -45,8 +43,7 @@ public class QuestController : ControllerBase
             // The game expects PHP serialization response.
             Dictionary<string, object> response = new()
             {
-                ["quests"] = new Dictionary<string, object>(),
-                ["0"] = 1 // Returning Integer 1 as "Success"
+                ["quests"] = new Dictionary<string, object>(), ["0"] = 1 // Returning Integer 1 as "Success"
             };
 
             string serialized = PhpSerialization.Serialize(response);
@@ -59,25 +56,25 @@ public class QuestController : ControllerBase
             return StatusCode(500, "Internal Server Error");
         }
     }
-    
+
     [HttpPost("getplayerquests")]
     public async Task<IActionResult> GetPlayerQuests()
     {
-        try 
+        try
         {
-             string? cookie = Request.Form["cookie"];
-            
+            string? cookie = Request.Form["cookie"];
+
             if (cookie is not null)
             {
-                (bool isValid, string? accountName) = await _distributedCache.ValidateAccountSessionCookie(cookie, _dbContext, _logger);
-                if (!isValid) return Unauthorized("Session Not Found");
+                (bool isValid, string? accountName) =
+                    await _distributedCache.ValidateAccountSessionCookie(cookie, _dbContext, _logger);
+                if (!isValid)
+                {
+                    return Unauthorized("Session Not Found");
+                }
             }
 
-             Dictionary<string, object> response = new()
-            {
-                ["quests"] = new Dictionary<string, object>(),
-                ["0"] = 1
-            };
+            Dictionary<string, object> response = new() { ["quests"] = new Dictionary<string, object>(), ["0"] = 1 };
 
             return Ok(PhpSerialization.Serialize(response));
         }

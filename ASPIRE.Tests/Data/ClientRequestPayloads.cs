@@ -1,9 +1,7 @@
-using System.Collections.Generic;
-
 namespace ASPIRE.Tests.Data;
 
 /// <summary>
-/// Consolidated payload examples for the Client Requester.
+///     Consolidated payload examples for the Client Requester.
 /// </summary>
 public static class ClientRequestPayloads
 {
@@ -13,133 +11,102 @@ public static class ClientRequestPayloads
     // ==================================================================================
 
     /// <summary>
-    /// [VERIFIED] Golden reference. Successfully loads player profile.
+    ///     [VERIFIED] Golden reference. Successfully loads player profile.
     /// </summary>
     public static Dictionary<string, string> GetInitStats(string cookie)
     {
-        return new Dictionary<string, string>
-        {
-            { "f", "get_initStats" },
-            { "cookie", cookie }
-        };
+        return new Dictionary<string, string> { { "f", "get_initStats" }, { "cookie", cookie } };
     }
 
     /// <summary>
-    /// [VERIFIED] Confirmed working for match history.
+    ///     [VERIFIED] Confirmed working for match history.
     /// </summary>
     public static Dictionary<string, string> GetMatchStats(string cookie, int matchId)
     {
         return new Dictionary<string, string>
         {
-            { "f", "get_match_stats" },
-            { "cookie", cookie },
-            { "match_id", matchId.ToString() }
+            { "f", "get_match_stats" }, { "cookie", cookie }, { "match_id", matchId.ToString() }
         };
     }
 
     /// <summary>
-    /// [VERIFIED] Standard store product retrieval.
+    ///     [VERIFIED] Standard store product retrieval.
     /// </summary>
     public static Dictionary<string, string> GetProducts(string cookie)
     {
-        return new Dictionary<string, string>
-        {
-            { "f", "get_products" },
-            { "cookie", cookie }
-        };
+        return new Dictionary<string, string> { { "f", "get_products" }, { "cookie", cookie } };
     }
 
     /// <summary>
-    /// [VERIFIED] Season reward claiming.
+    ///     [VERIFIED] Season reward claiming.
     /// </summary>
     public static Dictionary<string, string> ClaimSeasonRewards(string cookie)
     {
-        return new Dictionary<string, string>
-        {
-            { "f", "claim_season_rewards" },
-            { "cookie", cookie }
-        };
+        return new Dictionary<string, string> { { "f", "claim_season_rewards" }, { "cookie", cookie } };
     }
 
     /// <summary>
-    /// [VERIFIED] Standard messages retrieval.
+    ///     [VERIFIED] Standard messages retrieval.
     /// </summary>
     public static Dictionary<string, string> GetSpecialMessages(string cookie)
     {
-        return new Dictionary<string, string>
-        {
-            { "f", "get_special_messages" },
-            { "cookie", cookie }
-        };
+        return new Dictionary<string, string> { { "f", "get_special_messages" }, { "cookie", cookie } };
     }
 
     /// <summary>
-    /// [VERIFIED] Client event info retrieval.
+    ///     [VERIFIED] Client event info retrieval.
     /// </summary>
     public static Dictionary<string, string> ClientEventsInfo(string cookie)
     {
-        return new Dictionary<string, string>
-        {
-            { "f", "client_events_info" },
-            { "cookie", cookie }
-        };
+        return new Dictionary<string, string> { { "f", "client_events_info" }, { "cookie", cookie } };
     }
 
     /// <summary>
-    /// [VERIFIED] Standard server list retrieval.
+    ///     [VERIFIED] Standard server list retrieval.
     /// </summary>
     public static Dictionary<string, string> ServerList(string cookie)
     {
         return new Dictionary<string, string>
         {
-            { "f", "server_list" },
-            { "cookie", cookie },
-            { "gametype", "10" } // 10 = Standard/Normal
+            { "f", "server_list" }, { "cookie", cookie }, { "gametype", "10" } // 10 = Standard/Normal
         };
     }
 
     /// <summary>
-    /// [VERIFIED] Variant of server list with 'get_server_list' function.
+    ///     [VERIFIED] Variant of server list with 'get_server_list' function.
     /// </summary>
     public static Dictionary<string, string> GetServerList(string cookie)
     {
         return new Dictionary<string, string>
         {
-            { "f", "get_server_list" },
-            { "cookie", cookie },
-            { "gametype", "10" }
+            { "f", "get_server_list" }, { "cookie", cookie }, { "gametype", "10" }
         };
     }
 
     /// <summary>
-    /// [VERIFIED] Variant of server list with 'grab_server_list' function.
+    ///     [VERIFIED] Variant of server list with 'grab_server_list' function.
     /// </summary>
     public static Dictionary<string, string> GrabServerList(string cookie)
     {
         return new Dictionary<string, string>
         {
-            { "f", "grab_server_list" },
-            { "cookie", cookie },
-            { "gametype", "10" }
+            { "f", "grab_server_list" }, { "cookie", cookie }, { "gametype", "10" }
         };
     }
 
     /// <summary>
-    /// [VERIFIED] Standard logout.
+    ///     [VERIFIED] Standard logout.
     /// </summary>
     public static Dictionary<string, string> Logout(string cookie)
     {
-        return new Dictionary<string, string>
-        {
-            { "f", "logout" },
-            { "cookie", cookie }
-        };
+        return new Dictionary<string, string> { { "f", "logout" }, { "cookie", cookie } };
     }
 
     /// <summary>
-    /// [VERIFIED] Helper for creating custom games.
+    ///     [VERIFIED] Helper for creating custom games.
     /// </summary>
-    public static Dictionary<string, string> CreateGame(string cookie, string name = "Test Game", string map = "caldavar", string mode = "ap")
+    public static Dictionary<string, string> CreateGame(string cookie, string name = "Test Game",
+        string map = "caldavar", string mode = "ap")
     {
         return new Dictionary<string, string>
         {
@@ -154,40 +121,28 @@ public static class ClientRequestPayloads
     }
 
     /// <summary>
-    /// [VERIFIED] Check for new games.
+    ///     [VERIFIED] Check for new games.
     /// </summary>
-        public static Dictionary<string, string> NewGameAvailable(string cookie)
-        {
-            return new Dictionary<string, string>
-            {
-                { "f", "new_game_available" },
-                { "cookie", cookie }
-            };
-        }
+    public static Dictionary<string, string> NewGameAvailable(string cookie)
+    {
+        return new Dictionary<string, string> { { "f", "new_game_available" }, { "cookie", cookie } };
+    }
 
-        /// <summary>
-        /// [VERIFIED] Upgrades retrieval.
-        /// </summary>
-        public static Dictionary<string, string> GetUpgrades(string cookie)
-        {
-            return new Dictionary<string, string>
-            {
-                { "f", "get_upgrades" },
-                { "cookie", cookie }
-            };
-        }
+    /// <summary>
+    ///     [VERIFIED] Upgrades retrieval.
+    /// </summary>
+    public static Dictionary<string, string> GetUpgrades(string cookie)
+    {
+        return new Dictionary<string, string> { { "f", "get_upgrades" }, { "cookie", cookie } };
+    }
 
-        /// <summary>
-        /// [VERIFIED] Daily special retrieval.
-        /// </summary>
-        public static Dictionary<string, string> GetDailySpecial(string cookie)
-        {
-            return new Dictionary<string, string>
-            {
-                { "f", "get_daily_special" },
-                { "cookie", cookie }
-            };
-        }
+    /// <summary>
+    ///     [VERIFIED] Daily special retrieval.
+    /// </summary>
+    public static Dictionary<string, string> GetDailySpecial(string cookie)
+    {
+        return new Dictionary<string, string> { { "f", "get_daily_special" }, { "cookie", cookie } };
+    }
 
     // ==================================================================================
     // UNVERIFIED / UNDER INVESTIGATION
@@ -195,11 +150,10 @@ public static class ClientRequestPayloads
     // ==================================================================================
 
 
-
     /// <summary>
-    /// [UNVERIFIED] [REGRESSION RISK]
-    /// Used for scoreboards/hovers. Previously caused login regressions when return type changed.
-    /// Often seen without 'table' parameter in wild.
+    ///     [UNVERIFIED] [REGRESSION RISK]
+    ///     Used for scoreboards/hovers. Previously caused login regressions when return type changed.
+    ///     Often seen without 'table' parameter in wild.
     /// </summary>
     public static Dictionary<string, string> ShowSimpleStats(string cookie, string nickname)
     {
@@ -213,9 +167,9 @@ public static class ClientRequestPayloads
     }
 
     /// <summary>
-    /// [UNVERIFIED] [CRASH TRIGGER]
-    /// The payload itself seems correct (legacy style), but the RESPONSE or side-effects
-    /// (session handling) are triggering the logout crash loop.
+    ///     [UNVERIFIED] [CRASH TRIGGER]
+    ///     The payload itself seems correct (legacy style), but the RESPONSE or side-effects
+    ///     (session handling) are triggering the logout crash loop.
     /// </summary>
     public static Dictionary<string, string> SubmitStats(string session, int serverId, int matchId = 705750)
     {
@@ -336,25 +290,20 @@ public static class ClientRequestPayloads
             ["player_stats[0][Hero_Legionnaire][time_earning_exp]"] = "1700",
 
             // Inventory
-            ["inventory[0][0]"] = "Item_LoggersHatchet",
+            ["inventory[0][0]"] = "Item_LoggersHatchet"
         };
     }
 
     /// <summary>
-    /// [UNVERIFIED] Auth helper.
+    ///     [UNVERIFIED] Auth helper.
     /// </summary>
     public static Dictionary<string, string> Auth(string login, string password)
     {
-        return new Dictionary<string, string>
-        {
-            { "f", "auth" },
-            { "login", login },
-            { "password", password }
-        };
+        return new Dictionary<string, string> { { "f", "auth" }, { "login", login }, { "password", password } };
     }
 
     /// <summary>
-    /// [VERIFIED] PreAuth helper.
+    ///     [VERIFIED] PreAuth helper.
     /// </summary>
     public static Dictionary<string, string> PreAuth(string login)
     {
@@ -362,13 +311,13 @@ public static class ClientRequestPayloads
         {
             { "f", "pre_auth" },
             { "login", login },
-            { "A", "0000000000000000000000000000000000000000" }, 
-            { "SysInfo", "Matches|UserAgent" } 
+            { "A", "0000000000000000000000000000000000000000" },
+            { "SysInfo", "Matches|UserAgent" }
         };
     }
 
     /// <summary>
-    /// [UNVERIFIED] SRP Auth helper.
+    ///     [UNVERIFIED] SRP Auth helper.
     /// </summary>
     public static Dictionary<string, string> SrpAuth(string login, string proof)
     {
@@ -386,155 +335,113 @@ public static class ClientRequestPayloads
     }
 
     /// <summary>
-    /// [UNVERIFIED] SRP Auth with raw 'A' parameter.
+    ///     [UNVERIFIED] SRP Auth with raw 'A' parameter.
     /// </summary>
     public static Dictionary<string, string> SrpAuthWithA(string login, string A)
     {
-        return new Dictionary<string, string>
-        {
-            { "f", "srpAuth" },
-            { "login", login },
-            { "A", A }
-        };
+        return new Dictionary<string, string> { { "f", "srpAuth" }, { "login", login }, { "A", A } };
     }
-    
+
     /// <summary>
-    /// [UNVERIFIED] Internal tool for creating cookies from AccountID.
+    ///     [UNVERIFIED] Internal tool for creating cookies from AccountID.
     /// </summary>
     public static Dictionary<string, string> Aids2Cookie(string accountId, string ip, string authHash)
     {
         return new Dictionary<string, string>
         {
-            { "f", "aids2cookie" },
-            { "account_id", accountId },
-            { "ip", ip },
-            { "auth_hash", authHash }
+            { "f", "aids2cookie" }, { "account_id", accountId }, { "ip", ip }, { "auth_hash", authHash }
         };
     }
 
 
-
     /// <summary>
-    /// [UNVERIFIED] Hero list retrieval.
+    ///     [UNVERIFIED] Hero list retrieval.
     /// </summary>
     public static Dictionary<string, string> GetAllHeroes(string cookie)
     {
-        return new Dictionary<string, string>
-        {
-            { "f", "get_all_heroes" },
-            { "cookie", cookie }
-        };
+        return new Dictionary<string, string> { { "f", "get_all_heroes" }, { "cookie", cookie } };
     }
 
     /// <summary>
-    /// [UNVERIFIED] Hero list retrieval (variant).
+    ///     [UNVERIFIED] Hero list retrieval (variant).
     /// </summary>
     public static Dictionary<string, string> GetHeroList(string cookie)
     {
-        return new Dictionary<string, string>
-        {
-            { "f", "get_hero_list" },
-            { "cookie", cookie }
-        };
+        return new Dictionary<string, string> { { "f", "get_hero_list" }, { "cookie", cookie } };
     }
 
     /// <summary>
-    /// [UNVERIFIED] Final match stats retrieval.
+    ///     [UNVERIFIED] Final match stats retrieval.
     /// </summary>
     public static Dictionary<string, string> FinalMatchStats(string cookie, int matchId)
     {
         return new Dictionary<string, string>
         {
-            { "f", "final_match_stats" },
-            { "cookie", cookie },
-            { "match_id", matchId.ToString() }
+            { "f", "final_match_stats" }, { "cookie", cookie }, { "match_id", matchId.ToString() }
         };
     }
 
     /// <summary>
-    /// [UNVERIFIED] Account all hero stats.
+    ///     [UNVERIFIED] Account all hero stats.
     /// </summary>
     public static Dictionary<string, string> GetAccountAllHeroStats(string cookie)
     {
-        return new Dictionary<string, string>
-        {
-            { "f", "get_account_all_hero_stats" },
-            { "cookie", cookie }
-        };
+        return new Dictionary<string, string> { { "f", "get_account_all_hero_stats" }, { "cookie", cookie } };
     }
 
     /// <summary>
-    /// [UNVERIFIED] Account mastery retrieval.
+    ///     [UNVERIFIED] Account mastery retrieval.
     /// </summary>
     public static Dictionary<string, string> GetAccountMastery(string cookie, string nickname)
     {
         return new Dictionary<string, string>
         {
-            { "f", "get_account_mastery" },
-            { "cookie", cookie },
-            { "nickname", nickname }
+            { "f", "get_account_mastery" }, { "cookie", cookie }, { "nickname", nickname }
         };
     }
 
     /// <summary>
-    /// [UNVERIFIED] Show stats (generic).
+    ///     [UNVERIFIED] Show stats (generic).
     /// </summary>
     public static Dictionary<string, string> ShowStats(string cookie, string nickname)
     {
-        return new Dictionary<string, string>
-        {
-            { "f", "show_stats" },
-            { "cookie", cookie },
-            { "nickname", nickname }
-        };
+        return new Dictionary<string, string> { { "f", "show_stats" }, { "cookie", cookie }, { "nickname", nickname } };
     }
 
     /// <summary>
-    /// [UNVERIFIED] InitStats with snake_case.
+    ///     [UNVERIFIED] InitStats with snake_case.
     /// </summary>
     public static Dictionary<string, string> GetInitStats_SnakeCase(string cookie)
     {
-        return new Dictionary<string, string>
-        {
-            { "f", "get_init_stats" }, 
-            { "cookie", cookie }
-        };
+        return new Dictionary<string, string> { { "f", "get_init_stats" }, { "cookie", cookie } };
     }
 
 
-
     /// <summary>
-    /// [UNVERIFIED] Guide list retrieval.
+    ///     [UNVERIFIED] Guide list retrieval.
     /// </summary>
     public static Dictionary<string, string> GetGuideListFiltered(string cookie, string hero)
     {
         return new Dictionary<string, string>
         {
-            { "f", "get_guide_list_filtered" },
-            { "cookie", cookie },
-            { "hero", hero }
+            { "f", "get_guide_list_filtered" }, { "cookie", cookie }, { "hero", hero }
         };
     }
 
     /// <summary>
-    /// [UNVERIFIED] Specific guide retrieval.
+    ///     [UNVERIFIED] Specific guide retrieval.
     /// </summary>
     public static Dictionary<string, string> GetGuide(string cookie, string guideId)
     {
-        return new Dictionary<string, string>
-        {
-            { "f", "get_guide" },
-            { "cookie", cookie },
-            { "guide_id", guideId }
-        };
+        return new Dictionary<string, string> { { "f", "get_guide" }, { "cookie", cookie }, { "guide_id", guideId } };
     }
 
     public static class ExpectedResponses
     {
         public static Dictionary<string, object> GetInitStats(
-            string nickname = "TestUser", 
-            int accountId = 1, 
-            int level = 5, 
+            string nickname = "TestUser",
+            int accountId = 1,
+            int level = 5,
             int gold = 1000)
         {
             // Matches the structure defined in ClientRequesterController.Stats.cs (HandleInitStats)
@@ -565,9 +472,10 @@ public static class ClientRequestPayloads
             };
         }
 
-        public static Dictionary<string, object> SubmitStatsSuccess() 
+        public static Dictionary<string, object> SubmitStatsSuccess()
         {
-                return new Dictionary<string, object> { }; // Usually empty or specific success structure? Reference Check likely needed, assuming HTTP 200 OK.
+            return
+                new Dictionary<string, object>(); // Usually empty or specific success structure? Reference Check likely needed, assuming HTTP 200 OK.
         }
 
         public static Dictionary<string, object> GetUpgrades()
@@ -587,17 +495,19 @@ public static class ClientRequestPayloads
             {
                 { "points", "1000" },
                 { "mmpoints", "500" },
-                { "match_summ", new List<object> 
-                    { 
-                        new Dictionary<string, object> 
+                {
+                    "match_summ",
+                    new List<object>
+                    {
+                        new Dictionary<string, object>
                         {
                             { "match_id", matchId },
                             { "map", "caldavar" },
                             { "name", "Test Game" },
                             { "c_state", "0" },
                             { "time_played", "1800" }
-                        } 
-                    } 
+                        }
+                    }
                 },
                 { "match_player_stats", new List<object>() },
                 { "inventory", new List<object>() },

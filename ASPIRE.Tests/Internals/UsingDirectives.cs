@@ -2,11 +2,9 @@
 global using Aspire.Hosting;
 
 global using ASPIRE.SourceGenerator.Attributes;
-
 global using ASPIRE.Tests.KONGOR.MasterServer.Infrastructure;
 global using ASPIRE.Tests.KONGOR.MasterServer.Models;
 global using ASPIRE.Tests.KONGOR.MasterServer.Services;
-
 global using ASPIRE.Tests.ZORGATH.WebPortal.API.Infrastructure;
 global using ASPIRE.Tests.ZORGATH.WebPortal.API.Models;
 global using ASPIRE.Tests.ZORGATH.WebPortal.API.Services;

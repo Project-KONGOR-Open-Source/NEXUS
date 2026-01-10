@@ -4,11 +4,15 @@ public static class SeedDataHandlers
 {
     public static async Task SeedUsers(MerrickContext context, CancellationToken cancellationToken, ILogger logger)
     {
-        if (await context.Users.AnyAsync(cancellationToken) || await context.Roles.NoneAsync(cancellationToken)) return;
+        if (await context.Users.AnyAsync(cancellationToken) || await context.Roles.NoneAsync(cancellationToken))
+        {
+            return;
+        }
 
-        Role roleAdministrator = await context.Roles.SingleAsync(role => role.Name.Equals(UserRoles.Administrator), cancellationToken: cancellationToken);
+        Role roleAdministrator =
+            await context.Roles.SingleAsync(role => role.Name.Equals(UserRoles.Administrator), cancellationToken);
 
-        User userAdministrator = new ()
+        User userAdministrator = new()
         {
             EmailAddress = "project.kongor@proton.me",
             Role = roleAdministrator,
@@ -23,14 +27,19 @@ public static class SeedDataHandlers
 
             // TODO: Add All Upgrades (Including Missing Ones From PK Version Control); Maybe Scrape The Resources Again
 
-            OwnedStoreItems = [ "ai.custom_icon:1", "av.Flamboyant", "c.cat_courier", "cc.frostburnlogo", "cr.Punk Creep", "cs.frostburnlogo", "m.Super-Taunt", "sc.paragon_circle_upgrade", "t.Dumpster_Taunt", "te.Punk TP", "w.8bit_ward" ]
+            OwnedStoreItems =
+            [
+                "ai.custom_icon:1", "av.Flamboyant", "c.cat_courier", "cc.frostburnlogo", "cr.Punk Creep",
+                "cs.frostburnlogo", "m.Super-Taunt", "sc.paragon_circle_upgrade", "t.Dumpster_Taunt", "te.Punk TP",
+                "w.8bit_ward"
+            ]
         };
 
         await context.Users.AddAsync(userAdministrator, cancellationToken);
 
-        Role roleGuest = await context.Roles.SingleAsync(role => role.Name.Equals(UserRoles.User), cancellationToken: cancellationToken);
+        Role roleGuest = await context.Roles.SingleAsync(role => role.Name.Equals(UserRoles.User), cancellationToken);
 
-        User userGuest = new ()
+        User userGuest = new()
         {
             EmailAddress = "guest@project.kongor",
             Role = roleGuest,
@@ -45,7 +54,12 @@ public static class SeedDataHandlers
 
             // TODO: Add All Upgrades (Including Missing Ones From PK Version Control); Maybe Scrape The Resources Again
 
-            OwnedStoreItems = ["ai.custom_icon:1", "av.Flamboyant", "c.cat_courier", "cc.frostburnlogo", "cr.Punk Creep", "cs.frostburnlogo", "m.Super-Taunt", "sc.paragon_circle_upgrade", "t.Dumpster_Taunt", "te.Punk TP", "w.8bit_ward"]
+            OwnedStoreItems =
+            [
+                "ai.custom_icon:1", "av.Flamboyant", "c.cat_courier", "cc.frostburnlogo", "cr.Punk Creep",
+                "cs.frostburnlogo", "m.Super-Taunt", "sc.paragon_circle_upgrade", "t.Dumpster_Taunt", "te.Punk TP",
+                "w.8bit_ward"
+            ]
         };
 
         await context.Users.AddAsync(userGuest, cancellationToken);
@@ -55,14 +69,17 @@ public static class SeedDataHandlers
 
     public static async Task SeedClans(MerrickContext context, CancellationToken cancellationToken, ILogger logger)
     {
-        if (await context.Clans.AnyAsync(cancellationToken)) return;
+        if (await context.Clans.AnyAsync(cancellationToken))
+        {
+            return;
+        }
 
         IEnumerable<Clan> clans =
         [
-            new Clan { Name = "KONGOR", Tag = "K" },
-            new Clan { Name = "Project KONGOR", Tag = "PK" },
-            new Clan { Name = "Project KONGOR Open-Source", Tag = "PKOS" },
-            new Clan { Name = "Heroes Of Newerth", Tag = "HON" }
+            new() { Name = "KONGOR", Tag = "K" },
+            new() { Name = "Project KONGOR", Tag = "PK" },
+            new() { Name = "Project KONGOR Open-Source", Tag = "PKOS" },
+            new() { Name = "Heroes Of Newerth", Tag = "HON" }
         ];
 
         await context.Clans.AddRangeAsync(clans, cancellationToken);
@@ -71,12 +88,16 @@ public static class SeedDataHandlers
 
     public static async Task SeedAccounts(MerrickContext context, CancellationToken cancellationToken, ILogger logger)
     {
-        if (await context.Accounts.AnyAsync(cancellationToken) || await context.Users.NoneAsync(cancellationToken) || await context.Clans.NoneAsync(cancellationToken)) return;
+        if (await context.Accounts.AnyAsync(cancellationToken) || await context.Users.NoneAsync(cancellationToken) ||
+            await context.Clans.NoneAsync(cancellationToken))
+        {
+            return;
+        }
 
         User user = await context.Users.FirstAsync(cancellationToken);
         Clan clan = await context.Clans.FirstAsync(cancellationToken);
 
-        Account systemAccount = new ()
+        Account systemAccount = new()
         {
             Name = "KONGOR",
             User = user,
@@ -87,16 +108,21 @@ public static class SeedDataHandlers
             TimestampJoinedClan = null,
             AscensionLevel = 666,
             AutoConnectChatChannels = [.. ChatChannels.AllDefaultChannels],
-            SelectedStoreItems = [ "ai.custom_icon:1", "av.Flamboyant", "c.cat_courier", "cc.frostburnlogo", "cr.Punk Creep", "cs.frostburnlogo", "m.Super-Taunt", "sc.paragon_circle_upgrade", "t.Dumpster_Taunt", "te.Punk TP", "w.8bit_ward" ]
+            SelectedStoreItems =
+            [
+                "ai.custom_icon:1", "av.Flamboyant", "c.cat_courier", "cc.frostburnlogo", "cr.Punk Creep",
+                "cs.frostburnlogo", "m.Super-Taunt", "sc.paragon_circle_upgrade", "t.Dumpster_Taunt", "te.Punk TP",
+                "w.8bit_ward"
+            ]
         };
 
         await context.AddAsync(systemAccount, cancellationToken);
 
-        string[] subAccountNames = [ /* [K] */ "ONGOR", "GOPO", "Xen0byte" ];
+        string[] subAccountNames = [ /* [K] */ "ONGOR", "GOPO", "Xen0byte"];
 
         foreach (string subAccountName in subAccountNames)
         {
-            Account subAccount = new ()
+            Account subAccount = new()
             {
                 Name = subAccountName,
                 User = user,
@@ -107,17 +133,22 @@ public static class SeedDataHandlers
                 TimestampJoinedClan = DateTimeOffset.UtcNow,
                 AscensionLevel = 666,
                 AutoConnectChatChannels = [.. ChatChannels.AllDefaultChannels, clan.GetChatChannelName()],
-                SelectedStoreItems = [ "ai.custom_icon:1", "av.Flamboyant", "c.cat_courier", "cc.frostburnlogo", "cr.Punk Creep", "cs.frostburnlogo", "m.Super-Taunt", "sc.paragon_circle_upgrade", "t.Dumpster_Taunt", "te.Punk TP", "w.8bit_ward" ]
+                SelectedStoreItems =
+                [
+                    "ai.custom_icon:1", "av.Flamboyant", "c.cat_courier", "cc.frostburnlogo", "cr.Punk Creep",
+                    "cs.frostburnlogo", "m.Super-Taunt", "sc.paragon_circle_upgrade", "t.Dumpster_Taunt", "te.Punk TP",
+                    "w.8bit_ward"
+                ]
             };
 
             await context.AddAsync(subAccount, cancellationToken);
         }
 
-        string[] hostAccountNames = [ "HOST", "SERVER" ];
+        string[] hostAccountNames = ["HOST", "SERVER"];
 
         foreach (string hostAccountName in hostAccountNames)
         {
-            Account hostAccount = new ()
+            Account hostAccount = new()
             {
                 Name = hostAccountName,
                 User = user,
@@ -127,8 +158,13 @@ public static class SeedDataHandlers
                 ClanTier = ClanTier.None,
                 TimestampJoinedClan = null,
                 AscensionLevel = 666,
-                AutoConnectChatChannels = [ ChatChannels.ServerHostsChannel ],
-                SelectedStoreItems = [ "ai.custom_icon:1", "av.Flamboyant", "c.cat_courier", "cc.frostburnlogo", "cr.Punk Creep", "cs.frostburnlogo", "m.Super-Taunt", "sc.paragon_circle_upgrade", "t.Dumpster_Taunt", "te.Punk TP", "w.8bit_ward" ]
+                AutoConnectChatChannels = [ChatChannels.ServerHostsChannel],
+                SelectedStoreItems =
+                [
+                    "ai.custom_icon:1", "av.Flamboyant", "c.cat_courier", "cc.frostburnlogo", "cr.Punk Creep",
+                    "cs.frostburnlogo", "m.Super-Taunt", "sc.paragon_circle_upgrade", "t.Dumpster_Taunt",
+                    "te.Punk TP", "w.8bit_ward"
+                ]
             };
 
             await context.AddAsync(hostAccount, cancellationToken);
@@ -139,7 +175,7 @@ public static class SeedDataHandlers
 
         for (int iterator = 0; iterator < 50 + 1; iterator++)
         {
-            Account guestAccount = new ()
+            Account guestAccount = new()
             {
                 Name = iterator is 0 ? "MODERATOR" : $"GUEST-{iterator:D2}",
                 User = userGuest,
@@ -149,8 +185,13 @@ public static class SeedDataHandlers
                 ClanTier = iterator is 0 ? ClanTier.Leader : ClanTier.Member,
                 TimestampJoinedClan = DateTimeOffset.UtcNow,
                 AscensionLevel = 0,
-                AutoConnectChatChannels = [ ChatChannels.GuestsChannel, clan.GetChatChannelName() ],
-                SelectedStoreItems = [ "ai.custom_icon:1", "av.Flamboyant", "c.cat_courier", "cc.frostburnlogo", "cr.Punk Creep", "cs.frostburnlogo", "m.Super-Taunt", "sc.paragon_circle_upgrade", "t.Dumpster_Taunt", "te.Punk TP", "w.8bit_ward" ]
+                AutoConnectChatChannels = [ChatChannels.GuestsChannel, clan.GetChatChannelName()],
+                SelectedStoreItems =
+                [
+                    "ai.custom_icon:1", "av.Flamboyant", "c.cat_courier", "cc.frostburnlogo", "cr.Punk Creep",
+                    "cs.frostburnlogo", "m.Super-Taunt", "sc.paragon_circle_upgrade", "t.Dumpster_Taunt",
+                    "te.Punk TP", "w.8bit_ward"
+                ]
             };
 
             await context.AddAsync(guestAccount, cancellationToken);
@@ -165,86 +206,103 @@ public static class SeedDataHandlers
         await SeedBannedPeers(context, cancellationToken, logger);
     }
 
-    private static async Task SeedFriendedPeers(MerrickContext context, CancellationToken cancellationToken, ILogger logger)
+    private static async Task SeedFriendedPeers(MerrickContext context, CancellationToken cancellationToken,
+        ILogger logger)
     {
-        if (await context.Accounts.NoneAsync(cancellationToken) || await context.Clans.NoneAsync(cancellationToken)) return;
+        if (await context.Accounts.NoneAsync(cancellationToken) || await context.Clans.NoneAsync(cancellationToken))
+        {
+            return;
+        }
 
-        if ((await context.Users.Include(user => user.Accounts).FirstAsync(cancellationToken)).Accounts.Any(account => account.FriendedPeers.Count > 0)) return;
+        if ((await context.Users.Include(user => user.Accounts).FirstAsync(cancellationToken)).Accounts.Any(account =>
+                account.FriendedPeers.Count > 0))
+        {
+            return;
+        }
 
         Account systemAccount = await context.Accounts.Include(account => account.User).FirstAsync(cancellationToken);
 
-        List<Account> subAccounts = await context.Accounts.Include(account => account.User).Include(account => account.Clan)
+        List<Account> subAccounts = await context.Accounts.Include(account => account.User)
+            .Include(account => account.Clan)
             .Where(account => account.User == systemAccount.User).Where(account => account.IsMain.Equals(false))
-            .Where(account => account.Type != AccountType.ServerHost).ToListAsync(cancellationToken: cancellationToken);
+            .Where(account => account.Type != AccountType.ServerHost).ToListAsync(cancellationToken);
 
-        List<Account> hostAccounts = await context.Accounts.Where(account => account.Type == AccountType.ServerHost).ToListAsync(cancellationToken: cancellationToken);
+        List<Account> hostAccounts = await context.Accounts.Where(account => account.Type == AccountType.ServerHost)
+            .ToListAsync(cancellationToken);
 
         foreach (Account subAccount in subAccounts)
         {
-            subAccount.FriendedPeers = subAccounts.Except([subAccount]).Union([systemAccount]).Select(account => new FriendedPeer
-            {
-                ID = account.ID,
-                Name = account.Name,
-                ClanTag = account.Clan?.Tag,
-                FriendGroup = "PERSONAS"
-            }).ToList();
+            subAccount.FriendedPeers = subAccounts.Except([subAccount]).Union([systemAccount]).Select(account =>
+                new FriendedPeer
+                {
+                    ID = account.ID, Name = account.Name, ClanTag = account.Clan?.Tag, FriendGroup = "PERSONAS"
+                }).ToList();
         }
 
         foreach (Account hostAccount in hostAccounts)
         {
             hostAccount.FriendedPeers = hostAccounts.Except([hostAccount]).Select(account => new FriendedPeer
             {
-                ID = account.ID,
-                Name = account.Name,
-                ClanTag = account.Clan?.Tag,
-                FriendGroup = "CLUSTERS"
+                ID = account.ID, Name = account.Name, ClanTag = account.Clan?.Tag, FriendGroup = "CLUSTERS"
             }).ToList();
         }
 
         await context.SaveChangesAsync(cancellationToken);
     }
 
-    private static async Task SeedIgnoredPeers(MerrickContext context, CancellationToken cancellationToken, ILogger logger)
+    private static async Task SeedIgnoredPeers(MerrickContext context, CancellationToken cancellationToken,
+        ILogger logger)
     {
-        if (await context.Accounts.NoneAsync(cancellationToken)) return;
+        if (await context.Accounts.NoneAsync(cancellationToken))
+        {
+            return;
+        }
 
-        if ((await context.Users.Include(user => user.Accounts).FirstAsync(cancellationToken)).Accounts.Any(account => account.IgnoredPeers.Count > 0)) return;
+        if ((await context.Users.Include(user => user.Accounts).FirstAsync(cancellationToken)).Accounts.Any(account =>
+                account.IgnoredPeers.Count > 0))
+        {
+            return;
+        }
 
         Account systemAccount = await context.Accounts.FirstAsync(cancellationToken);
 
         List<Account> guestAccounts = await context.Accounts.Include(account => account.User)
-            .Where(account => account.IsMain.Equals(false)).Where(account => account.Type == AccountType.Guest).ToListAsync(cancellationToken: cancellationToken);
+            .Where(account => account.IsMain.Equals(false)).Where(account => account.Type == AccountType.Guest)
+            .ToListAsync(cancellationToken);
 
         foreach (Account guestAccount in guestAccounts)
         {
-            systemAccount.IgnoredPeers.Add(new IgnoredPeer
-            {
-                ID = guestAccount.ID,
-                Name = guestAccount.Name
-            });
+            systemAccount.IgnoredPeers.Add(new IgnoredPeer { ID = guestAccount.ID, Name = guestAccount.Name });
         }
 
         await context.SaveChangesAsync(cancellationToken);
     }
 
-    private static async Task SeedBannedPeers(MerrickContext context, CancellationToken cancellationToken, ILogger logger)
+    private static async Task SeedBannedPeers(MerrickContext context, CancellationToken cancellationToken,
+        ILogger logger)
     {
-        if (await context.Accounts.NoneAsync(cancellationToken)) return;
+        if (await context.Accounts.NoneAsync(cancellationToken))
+        {
+            return;
+        }
 
-        if ((await context.Users.Include(user => user.Accounts).FirstAsync(cancellationToken)).Accounts.Any(account => account.BannedPeers.Count > 0)) return;
+        if ((await context.Users.Include(user => user.Accounts).FirstAsync(cancellationToken)).Accounts.Any(account =>
+                account.BannedPeers.Count > 0))
+        {
+            return;
+        }
 
         Account systemAccount = await context.Accounts.FirstAsync(cancellationToken);
 
         List<Account> guestAccounts = await context.Accounts.Include(account => account.User)
-            .Where(account => account.IsMain.Equals(false)).Where(account => account.Type == AccountType.Guest).ToListAsync(cancellationToken: cancellationToken);
+            .Where(account => account.IsMain.Equals(false)).Where(account => account.Type == AccountType.Guest)
+            .ToListAsync(cancellationToken);
 
         foreach (Account guestAccount in guestAccounts)
         {
             systemAccount.BannedPeers.Add(new BannedPeer
             {
-                ID = guestAccount.ID,
-                Name = guestAccount.Name,
-                BanReason = "Non-Main Guest Account"
+                ID = guestAccount.ID, Name = guestAccount.Name, BanReason = "Non-Main Guest Account"
             });
         }
 
@@ -253,16 +311,20 @@ public static class SeedDataHandlers
 
     public static async Task SeedHeroGuides(MerrickContext context, CancellationToken cancellationToken, ILogger logger)
     {
-        if (await context.HeroGuides.AnyAsync(cancellationToken) || await context.Accounts.NoneAsync(cancellationToken)) return;
+        if (await context.HeroGuides.AnyAsync(cancellationToken) || await context.Accounts.NoneAsync(cancellationToken))
+        {
+            return;
+        }
 
         Account author = await context.Accounts.FirstAsync(cancellationToken);
 
         DeserializationDTOs.GuideGetDTO[] guideDTOs = JsonSerializer.Deserialize<DeserializationDTOs.GuideGetDTO[]>
-            (await File.ReadAllTextAsync(DataFiles.HeroGuides, cancellationToken), new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? [];
+        (await File.ReadAllTextAsync(DataFiles.HeroGuides, cancellationToken),
+            new JsonSerializerOptions { PropertyNameCaseInsensitive = true }) ?? [];
 
         // The Game Client Requires At Least One Featured And One Standard Guide Per Hero
 
-        IEnumerable<HeroGuide> guides = guideDTOs.Select(guide => new HeroGuide()
+        IEnumerable<HeroGuide> guides = guideDTOs.Select(guide => new HeroGuide
         {
             Name = guide.Name,
             HeroName = guide.HeroName,

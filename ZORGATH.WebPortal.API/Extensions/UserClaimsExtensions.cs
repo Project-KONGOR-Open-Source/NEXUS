@@ -3,50 +3,86 @@
 public static class UserClaimsExtensions
 {
     public static Guid GetAccountID(this IEnumerable<Claim> claims)
-        => Guid.Parse(claims.Single(claim => claim.Type.Equals(Claims.AccountID)).Value);
+    {
+        return Guid.Parse(claims.Single(claim => claim.Type.Equals(Claims.AccountID)).Value);
+    }
 
     public static bool GetAccountIsMain(this IEnumerable<Claim> claims)
-        => bool.Parse(claims.Single(claim => claim.Type.Equals(Claims.AccountIsMain)).Value);
+    {
+        return bool.Parse(claims.Single(claim => claim.Type.Equals(Claims.AccountIsMain)).Value);
+    }
 
     public static string GetAccountName(this IEnumerable<Claim> claims)
-        => claims.Single(claim => claim.Type.Equals(Claims.Subject) || claim.Type.Equals(Claims.NameIdentifier)).Value;
+    {
+        return claims.Single(claim => claim.Type.Equals(Claims.Subject) || claim.Type.Equals(Claims.NameIdentifier))
+            .Value;
+    }
 
     public static string GetAudience(this IEnumerable<Claim> claims)
-        => claims.Single(claim => claim.Type.Equals(Claims.Audience)).Value;
+    {
+        return claims.Single(claim => claim.Type.Equals(Claims.Audience)).Value;
+    }
 
     public static DateTimeOffset GetAuthenticatedAtTime(this IEnumerable<Claim> claims)
-        => EpochTimeToUTCTime(Convert.ToInt64(claims.Single(claim => claim.Type.Equals(Claims.AuthenticatedAtTime)).Value));
+    {
+        return EpochTimeToUTCTime(Convert.ToInt64(claims.Single(claim => claim.Type.Equals(Claims.AuthenticatedAtTime))
+            .Value));
+    }
 
     public static string GetClanName(this IEnumerable<Claim> claims)
-        => claims.Single(claim => claim.Type.Equals(Claims.ClanName)).Value;
+    {
+        return claims.Single(claim => claim.Type.Equals(Claims.ClanName)).Value;
+    }
 
     public static string GetClanTag(this IEnumerable<Claim> claims)
-        => claims.Single(claim => claim.Type.Equals(Claims.ClanTag)).Value;
+    {
+        return claims.Single(claim => claim.Type.Equals(Claims.ClanTag)).Value;
+    }
 
     public static DateTimeOffset GetExpiresAtTime(this IEnumerable<Claim> claims)
-        => EpochTimeToUTCTime(Convert.ToInt64(claims.Single(claim => claim.Type.Equals(Claims.ExpiresAtTime)).Value));
+    {
+        return EpochTimeToUTCTime(
+            Convert.ToInt64(claims.Single(claim => claim.Type.Equals(Claims.ExpiresAtTime)).Value));
+    }
 
     public static DateTimeOffset GetIssuedAtTime(this IEnumerable<Claim> claims)
-        => EpochTimeToUTCTime(Convert.ToInt64(claims.Single(claim => claim.Type.Equals(Claims.IssuedAtTime)).Value));
+    {
+        return EpochTimeToUTCTime(Convert.ToInt64(claims.Single(claim => claim.Type.Equals(Claims.IssuedAtTime))
+            .Value));
+    }
 
     public static string GetIssuer(this IEnumerable<Claim> claims)
-        => claims.Single(claim => claim.Type.Equals(Claims.Issuer)).Value;
+    {
+        return claims.Single(claim => claim.Type.Equals(Claims.Issuer)).Value;
+    }
 
     public static Guid GetJWTIdentifier(this IEnumerable<Claim> claims)
-        => Guid.Parse(claims.Single(claim => claim.Type.Equals(Claims.JWTIdentifier)).Value);
+    {
+        return Guid.Parse(claims.Single(claim => claim.Type.Equals(Claims.JWTIdentifier)).Value);
+    }
 
     public static Guid GetNonce(this IEnumerable<Claim> claims)
-        => Guid.Parse(claims.Single(claim => claim.Type.Equals(Claims.Nonce)).Value);
+    {
+        return Guid.Parse(claims.Single(claim => claim.Type.Equals(Claims.Nonce)).Value);
+    }
 
     public static Guid GetUserID(this IEnumerable<Claim> claims)
-        => Guid.Parse(claims.Single(claim => claim.Type.Equals(Claims.UserID)).Value);
+    {
+        return Guid.Parse(claims.Single(claim => claim.Type.Equals(Claims.UserID)).Value);
+    }
 
     public static string GetUserEmailAddress(this IEnumerable<Claim> claims)
-        => claims.Single(claim => claim.Type.Equals(Claims.Email) || claim.Type.Equals(Claims.EmailAddress)).Value;
+    {
+        return claims.Single(claim => claim.Type.Equals(Claims.Email) || claim.Type.Equals(Claims.EmailAddress)).Value;
+    }
 
     public static string GetUserRole(this IEnumerable<Claim> claims)
-        => claims.Single(claim => claim.Type.Equals(Claims.UserRole)).Value;
+    {
+        return claims.Single(claim => claim.Type.Equals(Claims.UserRole)).Value;
+    }
 
     private static DateTimeOffset EpochTimeToUTCTime(long epochSeconds)
-        => DateTimeOffset.FromUnixTimeSeconds(epochSeconds);
+    {
+        return DateTimeOffset.FromUnixTimeSeconds(epochSeconds);
+    }
 }

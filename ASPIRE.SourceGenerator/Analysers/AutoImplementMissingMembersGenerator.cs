@@ -1,44 +1,38 @@
 namespace ASPIRE.SourceGenerator.Analysers;
 
 /// <summary>
-///     Generates NotImplementedException-throwing implementations for all unimplemented interface members in classes decorated with <c>[AutoImplementMissingMembers]</c>.
+///     Generates NotImplementedException-throwing implementations for all unimplemented interface members in classes
+///     decorated with <c>[AutoImplementMissingMembers]</c>.
 /// </summary>
 /// <remarks>
 ///     This generator inspects each class with the attribute, and determines which interface it implements.
-///     Then finds all members not explicitly implemented by the class, and generates stub implementations which throw <see cref="System.NotImplementedException"/>.
+///     Then finds all members not explicitly implemented by the class, and generates stub implementations which throw
+///     <see cref="System.NotImplementedException" />.
 /// </remarks>
 [Generator]
 public class AutoImplementMissingMembersGenerator : IIncrementalGenerator
 {
     private static readonly string AttributeFullName = typeof(AutoImplementMissingMembersAttribute).FullName;
 
-    /// <summary>
-    ///     Holds class symbol and syntax information for code generation.
-    /// </summary>
-    private sealed class ClassData(INamedTypeSymbol symbol, ClassDeclarationSyntax syntax)
-    {
-        public INamedTypeSymbol Symbol { get; } = symbol;
-
-        public ClassDeclarationSyntax Syntax { get; } = syntax;
-    }
-
     // Diagnostic Descriptors
     private static readonly DiagnosticDescriptor ClassMustBePartialRule = new
     (
-        id: "NX0001",
-        title: "Class Must Be Partial",
-        messageFormat: @"Class ""{0}"" has the [AutoImplementMissingMembers] attribute but is not declared as partial. Add the ""partial"" keyword to the class declaration.",
-        category: "NEXUS.SourceGenerator",
-        defaultSeverity: DiagnosticSeverity.Error,
-        isEnabledByDefault: true,
-        description: "Classes decorated with [AutoImplementMissingMembers] must be declared as partial to allow the source generator to add missing interface implementations."
+        "NX0001",
+        "Class Must Be Partial",
+        @"Class ""{0}"" has the [AutoImplementMissingMembers] attribute but is not declared as partial. Add the ""partial"" keyword to the class declaration.",
+        "NEXUS.SourceGenerator",
+        DiagnosticSeverity.Error,
+        true,
+        "Classes decorated with [AutoImplementMissingMembers] must be declared as partial to allow the source generator to add missing interface implementations."
     );
 
     /// <summary>
-    ///     Initialises the incremental source generator by registering syntax providers and source outputs with the specified context.
+    ///     Initialises the incremental source generator by registering syntax providers and source outputs with the specified
+    ///     context.
     /// </summary>
     /// <remarks>
-    ///     Call this method from the generator's initialization entry point to set up the necessary syntax providers and output registrations.
+    ///     Call this method from the generator's initialization entry point to set up the necessary syntax providers and
+    ///     output registrations.
     ///     This method should be invoked only once per generator instance.
     /// </remarks>
     /// <param name="context">The context used to configure the incremental generator and register source outputs.</param>
@@ -47,28 +41,34 @@ public class AutoImplementMissingMembersGenerator : IIncrementalGenerator
         // Identify Classes Annotated With [AutoImplementMissingMembers]
         IncrementalValuesProvider<ClassData> classDeclarations = context.SyntaxProvider // Access Syntax Provider API
             .ForAttributeWithMetadataName( // Filter Nodes By Attribute Metadata Name
-                fullyQualifiedMetadataName: AttributeFullName, // Specify Fully Qualified Attribute Name
-                predicate: static (syntaxNode, _) => syntaxNode is ClassDeclarationSyntax, // Restrict Matches To Class Declarations
-                transform: static (attributeContext, _) => new ClassData // Create ClassData Wrapper For Match
+                AttributeFullName, // Specify Fully Qualified Attribute Name
+                static (syntaxNode, _) =>
+                    syntaxNode is ClassDeclarationSyntax, // Restrict Matches To Class Declarations
+                static (attributeContext, _) => new ClassData // Create ClassData Wrapper For Match
                 (
-                    symbol: (INamedTypeSymbol) attributeContext.TargetSymbol, // Capture The Class Symbol
-                    syntax: (ClassDeclarationSyntax) attributeContext.TargetNode) // Capture The Class Syntax Node
-                );
+                    (INamedTypeSymbol) attributeContext.TargetSymbol, // Capture The Class Symbol
+                    (ClassDeclarationSyntax) attributeContext.TargetNode) // Capture The Class Syntax Node
+            );
 
         // Register Source Output For Each Discovered Class Declaration
         context.RegisterSourceOutput(classDeclarations, // Provide Sequence Of Annotated Classes
-            static (sourceProductionContext, classData) => Execute(classData, sourceProductionContext)); // Register Source Generation Callback Invoked For Each Annotated Class
+            static (sourceProductionContext, classData) =>
+                Execute(classData,
+                    sourceProductionContext)); // Register Source Generation Callback Invoked For Each Annotated Class
     }
 
     /// <summary>
-    ///     Analyses a class annotated with <c>[AutoImplementMissingMembers]</c>, determines interface members not yet implemented, enforces the partial class requirement when stubs are needed, and emits a companion partial class containing <see cref="System.NotImplementedException"/>-throwing stubs for missing methods and properties.
+    ///     Analyses a class annotated with <c>[AutoImplementMissingMembers]</c>, determines interface members not yet
+    ///     implemented, enforces the partial class requirement when stubs are needed, and emits a companion partial class
+    ///     containing <see cref="System.NotImplementedException" />-throwing stubs for missing methods and properties.
     /// </summary>
     /// <remarks>
     ///     <code>
     ///         1. Gathers all interface members (methods and properties).
     ///         2. Filters out members already implemented (including explicit interface implementations).
     ///         3. If at least one member is missing and the class is not declared <c>partial</c>, reports diagnostic NX0001 and aborts generation.
-    ///         4. Otherwise generates a source file named <c>{ClassName}.g.cs</c> with a partial class implementing the missing members by throwing <see cref="System.NotImplementedException"/>.
+    ///         4. Otherwise generates a source file named <c>{ClassName}.g.cs</c> with a partial class implementing the missing members by throwing <see
+    ///             cref="System.NotImplementedException" />.
     ///     </code>
     /// </remarks>
     /// <param name="classData">Symbol and syntax data for the target class.</param>
@@ -119,10 +119,10 @@ public class AutoImplementMissingMembersGenerator : IIncrementalGenerator
     /// <summary>
     ///     Generates the partial class with all missing interface member implementations.
     /// </summary>
-    private static string GenerateImplementations(INamedTypeSymbol classSymbol, ClassDeclarationSyntax classDeclaration, ImmutableArray<ISymbol> unimplementedMembers)
+    private static string GenerateImplementations(INamedTypeSymbol classSymbol, ClassDeclarationSyntax classDeclaration,
+        ImmutableArray<ISymbol> unimplementedMembers)
     {
-
-        StringBuilder sourceBuilder = new ();
+        StringBuilder sourceBuilder = new();
 
         // Add File Header
         sourceBuilder.AppendLine("// <auto-generated/>");
@@ -133,7 +133,8 @@ public class AutoImplementMissingMembersGenerator : IIncrementalGenerator
         sourceBuilder.AppendLine();
 
         // Suppress Pragma Warnings
-        sourceBuilder.AppendLine("# pragma warning disable SER001 // Suppress StackExchange.Redis Experimental API Warnings");
+        sourceBuilder.AppendLine(
+            "# pragma warning disable SER001 // Suppress StackExchange.Redis Experimental API Warnings");
         sourceBuilder.AppendLine();
 
         // Add Namespace
@@ -178,33 +179,39 @@ public class AutoImplementMissingMembersGenerator : IIncrementalGenerator
         {
             foreach (ISymbol member in interfaceSymbol.GetMembers())
             {
-                if (member.Kind != SymbolKind.Method && member.Kind != SymbolKind.Property && member.Kind != SymbolKind.Event)
+                if (member.Kind != SymbolKind.Method && member.Kind != SymbolKind.Property &&
+                    member.Kind != SymbolKind.Event)
                 {
                     continue;
                 }
 
                 // Skip Property Accessor Methods As They Are Generated With The Property
-                if (member is IMethodSymbol accessorMethod && (accessorMethod.MethodKind == MethodKind.PropertyGet || accessorMethod.MethodKind == MethodKind.PropertySet))
+                if (member is IMethodSymbol accessorMethod && (accessorMethod.MethodKind == MethodKind.PropertyGet ||
+                                                               accessorMethod.MethodKind == MethodKind.PropertySet))
                 {
                     continue;
                 }
 
                 // Skip Event Accessor Methods As They Are Generated With The Event
-                if (member is IMethodSymbol eventAccessorMethod && (eventAccessorMethod.MethodKind == MethodKind.EventAdd || eventAccessorMethod.MethodKind == MethodKind.EventRemove))
+                if (member is IMethodSymbol eventAccessorMethod &&
+                    (eventAccessorMethod.MethodKind == MethodKind.EventAdd ||
+                     eventAccessorMethod.MethodKind == MethodKind.EventRemove))
                 {
                     continue;
                 }
 
                 // Create Unique Key From Member Name And Signature
-                string memberKey = member.Name + "|" + member.Kind.ToString();
+                string memberKey = member.Name + "|" + member.Kind;
 
                 if (member is IMethodSymbol methodSymbol)
                 {
-                    memberKey += "|" + string.Join(",", methodSymbol.Parameters.Select(parameter => parameter.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)));
+                    memberKey += "|" + string.Join(",",
+                        methodSymbol.Parameters.Select(parameter =>
+                            parameter.Type.ToDisplayString(SymbolDisplayFormat.FullyQualifiedFormat)));
 
                     if (methodSymbol.IsGenericMethod)
                     {
-                        memberKey += "|" + methodSymbol.Arity.ToString();
+                        memberKey += "|" + methodSymbol.Arity;
                     }
                 }
 
@@ -228,7 +235,9 @@ public class AutoImplementMissingMembersGenerator : IIncrementalGenerator
         ImmutableArray<ISymbol> allInterfaceMembers = uniqueInterfaceMembers.Values.ToImmutableArray();
 
         IEnumerable<ISymbol> unimplemented = allInterfaceMembers // Begin Filtering For Unimplemented Members
-            .Where(interfaceMember => IsImplemented(interfaceMember, implementedMembers, classSymbol) is false); // Exclude Already Implemented Members
+            .Where(interfaceMember =>
+                IsImplemented(interfaceMember, implementedMembers,
+                    classSymbol) is false); // Exclude Already Implemented Members
 
         List<ISymbol> finalUniqueMembers = [];
 
@@ -259,7 +268,8 @@ public class AutoImplementMissingMembersGenerator : IIncrementalGenerator
     /// <summary>
     ///     Checks if an interface member is already implemented by the class.
     /// </summary>
-    private static bool IsImplemented(ISymbol interfaceMember, ImmutableHashSet<ISymbol> implementedMembers, INamedTypeSymbol classSymbol)
+    private static bool IsImplemented(ISymbol interfaceMember, ImmutableHashSet<ISymbol> implementedMembers,
+        INamedTypeSymbol classSymbol)
     {
         ISymbol? implementation = classSymbol.FindImplementationForInterfaceMember(interfaceMember);
 
@@ -301,8 +311,9 @@ public class AutoImplementMissingMembersGenerator : IIncrementalGenerator
         if (memberOne is IMethodSymbol methodOne && memberTwo is IMethodSymbol methodTwo)
         {
             return methodOne.Parameters.Length == methodTwo.Parameters.Length &&
-                methodOne.Parameters.Zip(methodTwo.Parameters, (parameterOne, parameterTwo) =>
-                    SymbolEqualityComparer.Default.Equals(parameterOne.Type, parameterTwo.Type)).All(parametersMatch => parametersMatch);
+                   methodOne.Parameters.Zip(methodTwo.Parameters, (parameterOne, parameterTwo) =>
+                           SymbolEqualityComparer.Default.Equals(parameterOne.Type, parameterTwo.Type))
+                       .All(parametersMatch => parametersMatch);
         }
 
         if (memberOne is IPropertySymbol propertyOne && memberTwo is IPropertySymbol propertyTwo)
@@ -354,14 +365,16 @@ public class AutoImplementMissingMembersGenerator : IIncrementalGenerator
         // Handle Generic Type Parameters
         if (method.IsGenericMethod)
         {
-            string typeParameterList = string.Join(", ", method.TypeParameters.Select(typeParameter => typeParameter.Name));
+            string typeParameterList =
+                string.Join(", ", method.TypeParameters.Select(typeParameter => typeParameter.Name));
 
             typeParameters = $"<{typeParameterList}>";
         }
 
         builder.AppendLine($"    public {returnType} {method.Name}{typeParameters}({parameters})");
         builder.AppendLine("    {");
-        builder.AppendLine($"        throw new System.NotImplementedException(@\"Method \"\"{method.Name}\"\" Is Not Implemented In Test Double\");");
+        builder.AppendLine(
+            $"        throw new System.NotImplementedException(@\"Method \"\"{method.Name}\"\" Is Not Implemented In Test Double\");");
         builder.AppendLine("    }");
         builder.AppendLine();
     }
@@ -378,12 +391,14 @@ public class AutoImplementMissingMembersGenerator : IIncrementalGenerator
 
         if (property.GetMethod is not null)
         {
-            builder.AppendLine($"        get => throw new System.NotImplementedException(@\"Property \"\"{property.Name}\"\" Getter Is Not Implemented In Test Double\");");
+            builder.AppendLine(
+                $"        get => throw new System.NotImplementedException(@\"Property \"\"{property.Name}\"\" Getter Is Not Implemented In Test Double\");");
         }
 
         if (property.SetMethod is not null)
         {
-            builder.AppendLine($"        set => throw new System.NotImplementedException(@\"Property \"\"{property.Name}\"\" Setter Is Not Implemented In Test Double\");");
+            builder.AppendLine(
+                $"        set => throw new System.NotImplementedException(@\"Property \"\"{property.Name}\"\" Setter Is Not Implemented In Test Double\");");
         }
 
         builder.AppendLine("    }");
@@ -412,11 +427,21 @@ public class AutoImplementMissingMembersGenerator : IIncrementalGenerator
     {
         return accessibility switch
         {
-            Accessibility.Public    => "public",
-            Accessibility.Internal  => "internal",
+            Accessibility.Public => "public",
+            Accessibility.Internal => "internal",
             Accessibility.Protected => "protected",
-            Accessibility.Private   => "private",
-            _                       => "internal"
+            Accessibility.Private => "private",
+            _ => "internal"
         };
+    }
+
+    /// <summary>
+    ///     Holds class symbol and syntax information for code generation.
+    /// </summary>
+    private sealed class ClassData(INamedTypeSymbol symbol, ClassDeclarationSyntax syntax)
+    {
+        public INamedTypeSymbol Symbol { get; } = symbol;
+
+        public ClassDeclarationSyntax Syntax { get; } = syntax;
     }
 }

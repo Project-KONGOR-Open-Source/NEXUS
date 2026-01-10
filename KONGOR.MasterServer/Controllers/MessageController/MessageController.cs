@@ -1,6 +1,3 @@
-using KONGOR.MasterServer.Infrastructure;
-using Microsoft.AspNetCore.Mvc;
-
 namespace KONGOR.MasterServer.Controllers;
 
 [ApiController]
@@ -13,10 +10,10 @@ public class MessageController : ControllerBase
     {
         // Stub implementation to prevent 404 errors.
         // Likely used for MOTD or system messages.
-        
+
         Dictionary<string, object> response = new()
         {
-             // Empty message list
+            // Empty message list
         };
 
         return Ok(PhpSerialization.Serialize(response));

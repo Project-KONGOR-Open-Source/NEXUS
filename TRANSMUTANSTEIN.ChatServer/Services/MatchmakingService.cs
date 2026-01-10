@@ -4,29 +4,46 @@ public class MatchmakingService : BackgroundService, IDisposable
 {
     public static ConcurrentDictionary<int, MatchmakingGroup> Groups { get; set; } = [];
 
-    public static MatchmakingGroup? GetMatchmakingGroup(OneOf<int, string> memberIdentifier)
-        => memberIdentifier.Match(id => GetMatchmakingGroupByMemberID(id), name => GetMatchmakingGroupByMemberName(name));
-
-    public static MatchmakingGroup? GetMatchmakingGroupByMemberID(int memberID)
-        => Groups.Values.SingleOrDefault(group => group.Members.Any(member => member.Account.ID == memberID));
-
-    public static MatchmakingGroup? GetMatchmakingGroupByMemberName(string memberName)
-        => Groups.Values.SingleOrDefault(group => group.Members.Any(member => member.Account.Name.Equals(memberName)));
-
     public static ConcurrentDictionary<int, MatchmakingGroup> SoloPlayerGroups
-        => new (Groups.Where(group => group.Value.Members.Count == 1));
+        => new(Groups.Where(group => group.Value.Members.Count == 1));
 
     public static ConcurrentDictionary<int, MatchmakingGroup> TwoPlayerGroups
-        => new (Groups.Where(group => group.Value.Members.Count == 2));
+        => new(Groups.Where(group => group.Value.Members.Count == 2));
 
     public static ConcurrentDictionary<int, MatchmakingGroup> ThreePlayerGroups
-        => new (Groups.Where(group => group.Value.Members.Count == 3));
+        => new(Groups.Where(group => group.Value.Members.Count == 3));
 
     public static ConcurrentDictionary<int, MatchmakingGroup> FourPlayerGroups
-        => new (Groups.Where(group => group.Value.Members.Count == 4));
+        => new(Groups.Where(group => group.Value.Members.Count == 4));
 
     public static ConcurrentDictionary<int, MatchmakingGroup> FivePlayerGroups
-        => new (Groups.Where(group => group.Value.Members.Count == 5));
+        => new(Groups.Where(group => group.Value.Members.Count == 5));
+
+    public override void Dispose()
+    {
+        Groups.Clear();
+
+        base.Dispose();
+
+        GC.SuppressFinalize(this);
+    }
+
+    public static MatchmakingGroup? GetMatchmakingGroup(OneOf<int, string> memberIdentifier)
+    {
+        return memberIdentifier.Match(id => GetMatchmakingGroupByMemberID(id),
+            name => GetMatchmakingGroupByMemberName(name));
+    }
+
+    public static MatchmakingGroup? GetMatchmakingGroupByMemberID(int memberID)
+    {
+        return Groups.Values.SingleOrDefault(group => group.Members.Any(member => member.Account.ID == memberID));
+    }
+
+    public static MatchmakingGroup? GetMatchmakingGroupByMemberName(string memberName)
+    {
+        return Groups.Values.SingleOrDefault(group =>
+            group.Members.Any(member => member.Account.Name.Equals(memberName)));
+    }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -46,15 +63,6 @@ public class MatchmakingService : BackgroundService, IDisposable
         Log.Information("Matchmaking Service Has Stopped");
     }
 
-    public override void Dispose()
-    {
-        Groups.Clear();
-
-        base.Dispose();
-
-        GC.SuppressFinalize(this);
-    }
-
     private async Task RunMatchBroker(CancellationToken cancellationToken)
     {
         while (cancellationToken.IsCancellationRequested is false)
@@ -62,7 +70,9 @@ public class MatchmakingService : BackgroundService, IDisposable
             // TODO: Implement Match Broker Logic Here
 
             # region Match Broker Logic Placeholder
-            if (Groups.Count == 2 && Groups.Values.First().QueueDuration != TimeSpan.Zero && Groups.Values.Last().QueueDuration != TimeSpan.Zero)
+
+            if (Groups.Count == 2 && Groups.Values.First().QueueDuration != TimeSpan.Zero &&
+                Groups.Values.Last().QueueDuration != TimeSpan.Zero)
             {
                 List<MatchmakingGroup> team_1 = [Groups.Values.First()];
                 List<MatchmakingGroup> team_2 = [Groups.Values.Last()];
@@ -70,19 +80,25 @@ public class MatchmakingService : BackgroundService, IDisposable
                 List<MatchmakingGroup> groups = [.. team_1, .. team_2];
 
                 foreach (MatchmakingGroup group in groups)
+                {
                     group.QueueStartTime = null;
+                }
 
-                ChatBuffer found = new ();
+                ChatBuffer found = new();
 
                 found.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_QUEUE_UPDATE);
-                found.WriteInt8(Convert.ToByte(ChatProtocol.TMMUpdateType.TMM_GROUP_FOUND_SERVER)); // Sound The Horn !!!
+                found.WriteInt8(Convert.ToByte(ChatProtocol.TMMUpdateType
+                    .TMM_GROUP_FOUND_SERVER)); // Sound The Horn !!!
 
                 // TODO: This Packet Can Be Sent With TMM_GROUP_QUEUE_UPDATE And A 4-Byte Integer To Update The Average Time In Queue (In Seconds)
 
                 foreach (MatchmakingGroup group in groups)
-                    foreach (MatchmakingGroupMember member in group.Members)
-                        member.Session.Send(found);
+                foreach (MatchmakingGroupMember member in group.Members)
+                {
+                    member.Session.Send(found);
+                }
             }
+
             # endregion
         }
 

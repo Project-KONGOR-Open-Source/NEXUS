@@ -11,14 +11,15 @@ public partial class ClientRequesterController
 
         // Log Request Details
         Logger.LogInformation("[UploadReplay] Received Replay Upload Request.");
-        
+
         try
         {
             IFormFile? file = Request.Form.Files["file"];
             string? matchID = Request.Form["match_id"];
             string? cookie = Request.Form["cookie"];
 
-            Logger.LogInformation($"[UploadReplay] MatchID: {matchID}, Cookie: {cookie}, File: {file?.FileName} ({file?.Length} bytes)");
+            Logger.LogInformation(
+                $"[UploadReplay] MatchID: {matchID}, Cookie: {cookie}, File: {file?.FileName} ({file?.Length} bytes)");
 
             if (file is null || file.Length == 0)
             {

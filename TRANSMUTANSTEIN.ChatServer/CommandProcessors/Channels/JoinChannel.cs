@@ -5,7 +5,7 @@ public class JoinChannel : ISynchronousCommandProcessor<ChatSession>
 {
     public void Process(ChatSession session, ChatBuffer buffer)
     {
-        JoinChannelRequestData requestData = new (buffer);
+        JoinChannelRequestData requestData = new(buffer);
 
         ChatChannel
             .GetOrCreate(session, requestData.ChannelName)
@@ -15,14 +15,13 @@ public class JoinChannel : ISynchronousCommandProcessor<ChatSession>
 
 file class JoinChannelRequestData
 {
-    public byte[] CommandBytes { get; init; }
-
-    public string ChannelName { get; init; }
-
     public JoinChannelRequestData(ChatBuffer buffer)
     {
         CommandBytes = buffer.ReadCommandBytes();
         ChannelName = buffer.ReadString();
     }
-}
 
+    public byte[] CommandBytes { get; init; }
+
+    public string ChannelName { get; }
+}

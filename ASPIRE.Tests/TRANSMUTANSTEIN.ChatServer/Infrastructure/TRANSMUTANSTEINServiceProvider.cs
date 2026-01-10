@@ -1,19 +1,9 @@
 using System.Net.Sockets;
+
 using ASPIRE.Tests.InProcess;
 
-
-using MERRICK.DatabaseContext;
-
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-
-using StackExchange.Redis;
 
 using TRANSMUTANSTEIN.ChatServer.Services;
 
@@ -21,16 +11,15 @@ namespace ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer.Infrastructure;
 
 public class TRANSMUTANSTEINServiceProvider : WebApplicationFactory<global::TRANSMUTANSTEIN.ChatServer.TRANSMUTANSTEIN>
 {
-    public int ClientPort { get; set; } = 50001;
-
     private const string ChatServerPortMatchServer = "50002";
     private const string ChatServerPortMatchServerManager = "50003";
+    public int ClientPort { get; set; } = 50001;
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         builder.ConfigureAppConfiguration((context, config) =>
         {
-            Dictionary<string, string?> settings = new Dictionary<string, string?>
+            Dictionary<string, string?> settings = new()
             {
                 { "CHAT_SERVER_PORT_CLIENT", ClientPort.ToString() },
                 { "CHAT_SERVER_PORT_MATCH_SERVER", (ClientPort + 1).ToString() },
@@ -47,19 +36,22 @@ public class TRANSMUTANSTEINServiceProvider : WebApplicationFactory<global::TRAN
             // Remove real database context
             // Remove MerrickContext Registration (Including Pooled & Options)
             Func<ServiceDescriptor, bool> databaseContextPredicate = descriptor =>
-                    descriptor.ServiceType.FullName?.Contains(nameof(MerrickContext)) is true || descriptor.ImplementationType?.FullName?.Contains(nameof(MerrickContext)) is true;
+                descriptor.ServiceType.FullName?.Contains(nameof(MerrickContext)) is true ||
+                descriptor.ImplementationType?.FullName?.Contains(nameof(MerrickContext)) is true;
 
             Console.WriteLine("[DEBUG] Removing MerrickContext Services...");
             foreach (ServiceDescriptor? descriptor in services.Where(databaseContextPredicate).ToList())
             {
                 services.Remove(descriptor);
             }
+
             Console.WriteLine("[DEBUG] MerrickContext Services Removed.");
 
             // Replace FloodPreventionService with NullFloodPreventionService to prevent test bans
             Console.WriteLine("[DEBUG] Replacing FloodPreventionService...");
-            ServiceDescriptor? floodService = services.SingleOrDefault(d => d.ServiceType == typeof(FloodPreventionService));
-            if (floodService != null) 
+            ServiceDescriptor? floodService =
+                services.SingleOrDefault(d => d.ServiceType == typeof(FloodPreventionService));
+            if (floodService != null)
             {
                 Console.WriteLine("[DEBUG] Check: Found original FloodPreventionService. Removing.");
                 services.Remove(floodService);
@@ -68,7 +60,7 @@ public class TRANSMUTANSTEINServiceProvider : WebApplicationFactory<global::TRAN
             {
                 Console.WriteLine("[DEBUG] Check: Original FloodPreventionService NOT Found.");
             }
-            
+
             services.AddSingleton<FloodPreventionService, NullFloodPreventionService>();
             Console.WriteLine("[DEBUG] NullFloodPreventionService Registered.");
 
@@ -79,13 +71,18 @@ public class TRANSMUTANSTEINServiceProvider : WebApplicationFactory<global::TRAN
             });
 
             // Remove real Redis
-            ServiceDescriptor? redisDescriptor = services.SingleOrDefault(d => d.ServiceType == typeof(IConnectionMultiplexer));
+            ServiceDescriptor? redisDescriptor =
+                services.SingleOrDefault(d => d.ServiceType == typeof(IConnectionMultiplexer));
             if (redisDescriptor != null)
+            {
                 services.Remove(redisDescriptor);
+            }
 
             ServiceDescriptor? redisCacheDescriptor = services.SingleOrDefault(d => d.ServiceType == typeof(IDatabase));
             if (redisCacheDescriptor != null)
+            {
                 services.Remove(redisCacheDescriptor);
+            }
 
             // Add In-Process Redis Stub
             services.AddSingleton<IDatabase, InProcessDistributedCacheStore>();
@@ -94,10 +91,7 @@ public class TRANSMUTANSTEINServiceProvider : WebApplicationFactory<global::TRAN
 
     public static async Task<TRANSMUTANSTEINServiceProvider> CreateOrchestratedInstanceAsync(int clientPort = 50001)
     {
-        TRANSMUTANSTEINServiceProvider provider = new TRANSMUTANSTEINServiceProvider
-        {
-            ClientPort = clientPort
-        };
+        TRANSMUTANSTEINServiceProvider provider = new() { ClientPort = clientPort };
 
         // This forces the server to start
         HttpClient client = provider.CreateClient();
@@ -111,7 +105,7 @@ public class TRANSMUTANSTEINServiceProvider : WebApplicationFactory<global::TRAN
         {
             try
             {
-                using TcpClient probe = new TcpClient();
+                using TcpClient probe = new();
                 await probe.ConnectAsync("localhost", clientPort);
                 if (probe.Connected)
                 {
@@ -121,12 +115,17 @@ public class TRANSMUTANSTEINServiceProvider : WebApplicationFactory<global::TRAN
             catch
             {
                 attempt++;
-                if (attempt == maxAttempts) throw new Exception($"Failed to connect to Chat Server on port {clientPort} after {maxAttempts} attempts.");
+                if (attempt == maxAttempts)
+                {
+                    throw new Exception(
+                        $"Failed to connect to Chat Server on port {clientPort} after {maxAttempts} attempts.");
+                }
+
                 await Task.Delay(delayMs);
                 delayMs = Math.Min(delayMs * 2, 2000); // Cap delay at 2s
             }
         }
-        
+
         return provider;
     }
 }

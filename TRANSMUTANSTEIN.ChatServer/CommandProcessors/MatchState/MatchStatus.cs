@@ -5,7 +5,7 @@ public class MatchStatus : ISynchronousCommandProcessor<ChatSession>
 {
     public void Process(ChatSession session, ChatBuffer buffer)
     {
-        MatchStatusRequestData requestData = new (buffer);
+        MatchStatusRequestData requestData = new(buffer);
 
         // TODO: Update Match Phase In Distributed Cache (In Progress, Paused, Resumed)
         // TODO: Update Player Availability States (Mark Players As InGame When Match Starts)
@@ -15,6 +15,15 @@ public class MatchStatus : ISynchronousCommandProcessor<ChatSession>
 
 file class MatchStatusRequestData
 {
+    public MatchStatusRequestData(ChatBuffer buffer)
+    {
+        CommandBytes = buffer.ReadCommandBytes();
+        ServerID = buffer.ReadInt32();
+        MatchID = buffer.ReadInt32();
+        Phase = buffer.ReadInt32();
+        CurrentGameTime = buffer.ReadInt32();
+    }
+
     public byte[] CommandBytes { get; init; }
 
     public int ServerID { get; init; }
@@ -24,14 +33,4 @@ file class MatchStatusRequestData
     public int Phase { get; init; }
 
     public int CurrentGameTime { get; init; }
-
-    public MatchStatusRequestData(ChatBuffer buffer)
-    {
-        CommandBytes = buffer.ReadCommandBytes();
-        ServerID = buffer.ReadInt32();
-        MatchID = buffer.ReadInt32();
-        Phase = buffer.ReadInt32();
-        CurrentGameTime = buffer.ReadInt32();
-    }
 }
-

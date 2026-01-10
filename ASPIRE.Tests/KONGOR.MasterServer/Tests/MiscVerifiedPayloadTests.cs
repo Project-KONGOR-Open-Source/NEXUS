@@ -1,8 +1,6 @@
-namespace ASPIRE.Tests.KONGOR.MasterServer.Tests;
+using KONGOR.MasterServer.Extensions.Cache;
 
-using ASPIRE.Tests.KONGOR.MasterServer.Infrastructure;
-using global::KONGOR.MasterServer.Extensions.Cache;
-using Microsoft.AspNetCore.Mvc.Testing;
+namespace ASPIRE.Tests.KONGOR.MasterServer.Tests;
 
 public sealed class MiscVerifiedPayloadTests
 {
@@ -10,10 +8,10 @@ public sealed class MiscVerifiedPayloadTests
     {
         WebApplicationFactory<KONGORAssemblyMarker> factory = KONGORServiceProvider.CreateOrchestratedInstance();
         HttpClient client = factory.CreateClient();
-        
+
         // Note: Full DB/Auth setup omitted as it is not currently needed for Swagger/Simple endpoint tests.
         // If future tests require it, copy SetupAsync from MiscUnverifiedTests.cs.
-        
+
         return Task.FromResult((client, factory));
     }
 
@@ -27,7 +25,6 @@ public sealed class MiscVerifiedPayloadTests
             response.EnsureSuccessStatusCode();
         }
     }
-
 
 
     [Test]
@@ -53,10 +50,7 @@ public sealed class MiscVerifiedPayloadTests
             string cookie = "storage_cookie";
             await distributedCache.SetAccountNameForSessionCookie(cookie, "StorageUser");
 
-            Dictionary<string, string> payload = new Dictionary<string, string>
-            {
-                { "cookie", cookie }
-            };
+            Dictionary<string, string> payload = new() { { "cookie", cookie } };
             FormUrlEncodedContent content = new(payload);
 
             HttpResponseMessage response = await client.PostAsync("master/storage/status", content);

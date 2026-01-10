@@ -5,7 +5,7 @@ public class KickFromChannel : ISynchronousCommandProcessor<ChatSession>
 {
     public void Process(ChatSession session, ChatBuffer buffer)
     {
-        KickFromChannelRequestData requestData = new (buffer);
+        KickFromChannelRequestData requestData = new(buffer);
 
         ChatChannel
             .Get(session, requestData.ChannelID)
@@ -15,17 +15,16 @@ public class KickFromChannel : ISynchronousCommandProcessor<ChatSession>
 
 file class KickFromChannelRequestData
 {
-    public byte[] CommandBytes { get; init; }
-
-    public int ChannelID { get; init; }
-
-    public int TargetAccountID { get; init; }
-
     public KickFromChannelRequestData(ChatBuffer buffer)
     {
         CommandBytes = buffer.ReadCommandBytes();
         ChannelID = buffer.ReadInt32();
         TargetAccountID = buffer.ReadInt32();
     }
-}
 
+    public byte[] CommandBytes { get; init; }
+
+    public int ChannelID { get; }
+
+    public int TargetAccountID { get; }
+}

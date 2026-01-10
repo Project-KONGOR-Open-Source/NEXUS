@@ -7,52 +7,69 @@ public partial class ServerRequesterController
         string? session = Request.Form["session"];
 
         if (session is null)
+        {
             return BadRequest(@"Missing Value For Form Parameter ""session""");
+        }
 
         MatchServer? matchServer = await DistributedCache.GetMatchServerBySessionCookie(session);
 
         if (matchServer is null)
+        {
             return Unauthorized($@"No Match Server Could Be Found For Session Cookie ""{session}""");
+        }
 
         string? map = Request.Form["map"];
 
         if (map is null)
+        {
             return BadRequest(@"Missing Value For Form Parameter ""map""");
+        }
 
         string? version = Request.Form["version"];
 
         if (version is null)
+        {
             return BadRequest(@"Missing Value For Form Parameter ""version""");
+        }
 
         if (version is not "4.10.1.0")
+        {
             return BadRequest($@"Unsupported Match Server Version ""{version}""");
+        }
 
         string matchName = Request.Form["mname"].ToString() ?? throw new NullReferenceException("Match Name Is NULL");
 
         // The Host Account Name Is Expected To End With A Colon (":") Character
-        string hostAccountName = Request.Form["mstr"].ToString()?.TrimEnd(':') ?? throw new NullReferenceException("Master Server Name Is NULL");
+        string hostAccountName = Request.Form["mstr"].ToString()?.TrimEnd(':') ??
+                                 throw new NullReferenceException("Master Server Name Is NULL");
 
-        bool isCasual = Request.Form["casual"].ToString().Equals("0") ? false : Request.Form["casual"].ToString().Equals("1") ? true
-            : throw new ArgumentOutOfRangeException("casual", Request.Form["casual"].ToString(), @"Value Of Form Parameter ""casual"" Is Neither 0 Nor 1");
+        bool isCasual = Request.Form["casual"].ToString().Equals("0") ? false
+            : Request.Form["casual"].ToString().Equals("1") ? true
+            : throw new ArgumentOutOfRangeException("casual", Request.Form["casual"].ToString(),
+                @"Value Of Form Parameter ""casual"" Is Neither 0 Nor 1");
 
-        int matchType = int.TryParse(Request.Form["arrangedmatchtype"], out int parsedArrangedMatchType) ? parsedArrangedMatchType
-            : throw new ArgumentOutOfRangeException("arrangedmatchtype", Request.Form["arrangedmatchtype"].ToString(), @"Value Of Form Parameter ""arrangedmatchtype"" Is Invalid");
+        int matchType = int.TryParse(Request.Form["arrangedmatchtype"], out int parsedArrangedMatchType)
+            ? parsedArrangedMatchType
+            : throw new ArgumentOutOfRangeException("arrangedmatchtype", Request.Form["arrangedmatchtype"].ToString(),
+                @"Value Of Form Parameter ""arrangedmatchtype"" Is Invalid");
 
         string? matchModeInput = Request.Form["match_mode"];
         if (string.IsNullOrEmpty(matchModeInput))
-             throw new ArgumentNullException("match_mode", @"Value Of Form Parameter ""match_mode"" Is NULL");
+        {
+            throw new ArgumentNullException("match_mode", @"Value Of Form Parameter ""match_mode"" Is NULL");
+        }
 
         string matchMode;
         if (int.TryParse(matchModeInput, out int parsedMatchMode))
         {
-             matchMode = MatchModeDefinition.GetCodeFromId(parsedMatchMode);
+            matchMode = MatchModeDefinition.GetCodeFromId(parsedMatchMode);
         }
         else
         {
-             matchMode = matchModeInput;
+            matchMode = matchModeInput;
         }
 
-        MatchStartData matchStartData = new ()
+        MatchStartData matchStartData = new()
         {
             ServerID = matchServer.ID,
             ServerName = matchServer.Name,
@@ -63,17 +80,15 @@ public partial class ServerRequesterController
             IsCasual = isCasual,
             MatchType = matchType,
             MatchMode = matchMode,
-            TimestampStarted = DateTimeOffset.UtcNow,
+            TimestampStarted = DateTimeOffset.UtcNow
         };
 
         await DistributedCache.SetMatchStartData(matchStartData);
 
-        Dictionary<string, object> response = new ()
-        {
-            ["match_id"] = matchStartData.MatchID
-        };
+        Dictionary<string, object> response = new() { ["match_id"] = matchStartData.MatchID };
 
-        Logger.LogInformation(@"Match ID {MatchID} Has Started - Host Name: {HostName}, Server ID: {ServerID}, Map: {Map}",
+        Logger.LogInformation(
+            @"Match ID {MatchID} Has Started - Host Name: {HostName}, Server ID: {ServerID}, Map: {Map}",
             matchStartData.MatchID, hostAccountName, matchServer.ID, map);
 
         return Ok(PhpSerialization.Serialize(response));

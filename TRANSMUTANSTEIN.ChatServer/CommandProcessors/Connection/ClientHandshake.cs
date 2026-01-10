@@ -1,13 +1,14 @@
 namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Connection;
 
 [ChatCommand(ChatProtocol.ClientToChatServer.NET_CHAT_CL_CONNECT)]
-public class ClientHandshake(MerrickContext merrick, IDatabase distributedCacheStore) : IAsynchronousCommandProcessor<ChatSession>
+public class ClientHandshake(MerrickContext merrick, IDatabase distributedCacheStore)
+    : IAsynchronousCommandProcessor<ChatSession>
 {
     public async Task Process(ChatSession session, ChatBuffer buffer)
     {
         Log.Information($"[DEBUG] ClientHandshake.Process ENTERED for Session {session.ID}");
 
-        ClientHandshakeRequestData requestData = new (buffer);
+        ClientHandshakeRequestData requestData = new(buffer);
         Log.Information($"[DEBUG] Request Data Parsed. AccountID: {requestData.AccountID}");
 
         // Set Client Metadata On Session
@@ -16,13 +17,15 @@ public class ClientHandshake(MerrickContext merrick, IDatabase distributedCacheS
 
         Log.Information($"[DEBUG] Querying Redis for SessionCookie: {requestData.SessionCookie}");
         Log.Information($"[DEBUG] Querying Redis for SessionCookie: {requestData.SessionCookie}");
-        string? cachedAccountName = await distributedCacheStore.GetAccountNameForSessionCookie(requestData.SessionCookie);
+        string? cachedAccountName =
+            await distributedCacheStore.GetAccountNameForSessionCookie(requestData.SessionCookie);
         Log.Information($"[DEBUG] Redis Result: {cachedAccountName ?? "NULL"}");
 
         // Ensure Session Cookie Exists In Cache
         if (cachedAccountName is null)
         {
-            Log.Warning(@"Authentication Failed For Account ID ""{RequestData.AccountID}"": Session Cookie ""{RequestData.SessionCookie}"" Not Found In Cache",
+            Log.Warning(
+                @"Authentication Failed For Account ID ""{RequestData.AccountID}"": Session Cookie ""{RequestData.SessionCookie}"" Not Found In Cache",
                 requestData.AccountID, requestData.SessionCookie);
 
             session
@@ -32,7 +35,7 @@ public class ClientHandshake(MerrickContext merrick, IDatabase distributedCacheS
             return;
         }
 
-        try 
+        try
         {
             Account? account = await merrick.Accounts
                 .Include(account => account.User).ThenInclude(user => user.Accounts)
@@ -40,10 +43,11 @@ public class ClientHandshake(MerrickContext merrick, IDatabase distributedCacheS
                 .Include(account => account.Clan).ThenInclude(clan => clan!.Members)
                 .SingleOrDefaultAsync(account => account.ID == requestData.AccountID);
             Log.Information($"[DEBUG] SQL Result: {(account != null ? "FOUND" : "NULL")}");
-            
-             if (account is null)
+
+            if (account is null)
             {
-                Log.Error(@"[BUG] Account With ID ""{RequestData.AccountID}"" Could Not Be Found", requestData.AccountID);
+                Log.Error(@"[BUG] Account With ID ""{RequestData.AccountID}"" Could Not Be Found",
+                    requestData.AccountID);
 
                 session
                     .Reject(ChatProtocol.ChatRejectReason.ECR_UNKNOWN)
@@ -55,7 +59,8 @@ public class ClientHandshake(MerrickContext merrick, IDatabase distributedCacheS
             // Ensure Account Name Matches Cached Account Name From Session Cookie
             if (account.Name.Equals(cachedAccountName, StringComparison.OrdinalIgnoreCase).Equals(false))
             {
-                Log.Warning(@"Authentication Failed: Account ID ""{RequestData.AccountID}"" Does Not Match Cached Account Name ""{CachedAccountName}""",
+                Log.Warning(
+                    @"Authentication Failed: Account ID ""{RequestData.AccountID}"" Does Not Match Cached Account Name ""{CachedAccountName}""",
                     requestData.AccountID, cachedAccountName);
 
                 session
@@ -66,11 +71,15 @@ public class ClientHandshake(MerrickContext merrick, IDatabase distributedCacheS
             }
 
             // Ensure Authentication Hash (AccountID + RemoteIP + Cookie + Salt) Matches Expected Value
-            string expectedSessionAuthenticationHash = SRPAuthenticationHandlers.ComputeChatServerCookieHash(requestData.AccountID, requestData.RemoteIP, requestData.SessionCookie);
+            string expectedSessionAuthenticationHash =
+                SRPAuthenticationHandlers.ComputeChatServerCookieHash(requestData.AccountID, requestData.RemoteIP,
+                    requestData.SessionCookie);
 
-            if (requestData.SessionAuthenticationHash.Equals(expectedSessionAuthenticationHash, StringComparison.OrdinalIgnoreCase).Equals(false))
+            if (requestData.SessionAuthenticationHash
+                .Equals(expectedSessionAuthenticationHash, StringComparison.OrdinalIgnoreCase).Equals(false))
             {
-                Log.Warning(@"Authentication Failed For Account ""{Account.Name}"": Invalid Authentication Hash", account.Name);
+                Log.Warning(@"Authentication Failed For Account ""{Account.Name}"": Invalid Authentication Hash",
+                    account.Name);
 
                 session
                     .Reject(ChatProtocol.ChatRejectReason.ECR_AUTH_FAILED)
@@ -92,7 +101,8 @@ public class ClientHandshake(MerrickContext merrick, IDatabase distributedCacheS
 
                     if (existingSessionMatch is not null)
                     {
-                        Log.Information(@"Disconnecting Existing Session For Account ID ""{SubAccountID}"" (Account ""{ExistingSessionMatch.Account.Name}"") Due To Concurrent Connection Attempt",
+                        Log.Information(
+                            @"Disconnecting Existing Session For Account ID ""{SubAccountID}"" (Account ""{ExistingSessionMatch.Account.Name}"") Due To Concurrent Connection Attempt",
                             subAccountID, existingSessionMatch.Account.Name);
 
                         existingSessionMatch
@@ -102,9 +112,12 @@ public class ClientHandshake(MerrickContext merrick, IDatabase distributedCacheS
                 }
             }
 
-            if (Context.ClientChatSessions.Values.SingleOrDefault(existingSession => existingSession.Account?.ID == account.ID) is { } existingSession)
+            if (Context.ClientChatSessions.Values.SingleOrDefault(existingSession =>
+                    existingSession.Account?.ID == account.ID) is { } existingSession)
             {
-                Log.Information(@"Disconnecting Existing Session For Account ""{Account.Name}"" Due To Concurrent Connection Attempt", account.Name);
+                Log.Information(
+                    @"Disconnecting Existing Session For Account ""{Account.Name}"" Due To Concurrent Connection Attempt",
+                    account.Name);
 
                 existingSession
                     .Reject(ChatProtocol.ChatRejectReason.ECR_ACCOUNT_SHARING)
@@ -112,9 +125,11 @@ public class ClientHandshake(MerrickContext merrick, IDatabase distributedCacheS
             }
 
             // Validate Client Version
-            if ($"{requestData.ClientVersionMajor}.{requestData.ClientVersionMinor}.{requestData.ClientVersionPatch}.{requestData.ClientVersionRevision}" is not "4.10.1.0")
+            if ($"{requestData.ClientVersionMajor}.{requestData.ClientVersionMinor}.{requestData.ClientVersionPatch}.{requestData.ClientVersionRevision}"
+                is not "4.10.1.0")
             {
-                Log.Warning("Authentication Failed: Bad Version {Version}", $"{requestData.ClientVersionMajor}.{requestData.ClientVersionMinor}.{requestData.ClientVersionPatch}.{requestData.ClientVersionRevision}");
+                Log.Warning("Authentication Failed: Bad Version {Version}",
+                    $"{requestData.ClientVersionMajor}.{requestData.ClientVersionMinor}.{requestData.ClientVersionPatch}.{requestData.ClientVersionRevision}");
                 session
                     .Reject(ChatProtocol.ChatRejectReason.ECR_BAD_VERSION)
                     .TerminateClient();
@@ -122,12 +137,12 @@ public class ClientHandshake(MerrickContext merrick, IDatabase distributedCacheS
                 return;
             }
 
-            Log.Information("Authentication Successful For Account {AccountID}. Accepting Connection.", requestData.AccountID);
+            Log.Information("Authentication Successful For Account {AccountID}. Accepting Connection.",
+                requestData.AccountID);
 
             // Accept Connection, Send Options, And Broadcast Connection To Friends And Clan Members
             session
                 .Accept(account);
-
         }
         catch (Exception ex)
         {
@@ -139,46 +154,6 @@ public class ClientHandshake(MerrickContext merrick, IDatabase distributedCacheS
 
 file class ClientHandshakeRequestData
 {
-    public byte[] CommandBytes { get; init; }
-
-    public int AccountID { get; init; }
-
-    public string SessionCookie { get; init; }
-
-    public string RemoteIP { get; init; }
-
-    public string SessionAuthenticationHash { get; init; }
-
-    public int ChatProtocolVersion { get; init; }
-
-    public byte OperatingSystemIdentifier { get; init; }
-
-    public byte OperatingSystemVersionMajor { get; init; }
-
-    public byte OperatingSystemVersionMinor { get; init; }
-
-    public byte OperatingSystemVersionPatch { get; init; }
-
-    public string OperatingSystemBuildCode { get; init; }
-
-    public string OperatingSystemArchitecture { get; init; }
-
-    public byte ClientVersionMajor { get; init; }
-
-    public byte ClientVersionMinor { get; init; }
-
-    public byte ClientVersionPatch { get; init; }
-
-    public byte ClientVersionRevision { get; init; }
-
-    public ChatProtocol.ChatClientStatus LastKnownClientState { get; init; }
-
-    public ChatProtocol.ChatModeType ClientChatModeState { get; init; }
-
-    public string ClientRegion { get; init; }
-
-    public string ClientLanguage { get; init; }
-
     public ClientHandshakeRequestData(ChatBuffer buffer)
     {
         CommandBytes = buffer.ReadCommandBytes();
@@ -202,6 +177,46 @@ file class ClientHandshakeRequestData
         ClientRegion = buffer.ReadString();
         ClientLanguage = buffer.ReadString();
     }
+
+    public byte[] CommandBytes { get; init; }
+
+    public int AccountID { get; }
+
+    public string SessionCookie { get; }
+
+    public string RemoteIP { get; }
+
+    public string SessionAuthenticationHash { get; }
+
+    public int ChatProtocolVersion { get; }
+
+    public byte OperatingSystemIdentifier { get; }
+
+    public byte OperatingSystemVersionMajor { get; }
+
+    public byte OperatingSystemVersionMinor { get; }
+
+    public byte OperatingSystemVersionPatch { get; }
+
+    public string OperatingSystemBuildCode { get; }
+
+    public string OperatingSystemArchitecture { get; }
+
+    public byte ClientVersionMajor { get; }
+
+    public byte ClientVersionMinor { get; }
+
+    public byte ClientVersionPatch { get; }
+
+    public byte ClientVersionRevision { get; }
+
+    public ChatProtocol.ChatClientStatus LastKnownClientState { get; }
+
+    public ChatProtocol.ChatModeType ClientChatModeState { get; }
+
+    public string ClientRegion { get; }
+
+    public string ClientLanguage { get; }
 
     public ClientChatSessionMetadata ToMetadata()
     {
@@ -228,4 +243,3 @@ file class ClientHandshakeRequestData
         };
     }
 }
-

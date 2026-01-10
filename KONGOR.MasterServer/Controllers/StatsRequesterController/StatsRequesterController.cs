@@ -3,7 +3,10 @@
 [ApiController]
 [Route("stats_requester.php")]
 [Consumes("application/x-www-form-urlencoded")]
-public partial class StatsRequesterController(MerrickContext databaseContext, IDatabase distributedCache, ILogger<StatsRequesterController> logger) : ControllerBase
+public partial class StatsRequesterController(
+    MerrickContext databaseContext,
+    IDatabase distributedCache,
+    ILogger<StatsRequesterController> logger) : ControllerBase
 {
     private MerrickContext MerrickContext { get; } = databaseContext;
     private IDatabase DistributedCache { get; } = distributedCache;
@@ -20,7 +23,8 @@ public partial class StatsRequesterController(MerrickContext databaseContext, ID
     ///         This key can be found at offset 0x00F03A10 in k2_x64.dll of the WAS distribution.
     ///     </para>
     /// </summary>
-    private static string MatchStatsSubmissionSalt => "s8c7xaduxAbRanaspUf3kadRachecrac9efeyupr8suwrewecrUphayeweqUmana";
+    private static string MatchStatsSubmissionSalt =>
+        "s8c7xaduxAbRanaspUf3kadRachecrac9efeyupr8suwrewecrUphayeweqUmana";
 
     // For Debugging Purposes, The "GiveGold" And "GiveExp" Commands (Case-Insensitive) Can Be Used From The Server Console To Complete Matches Quickly And Send Stats
     // e.g. #1: "givegold 0 65535" To Give 65535 Gold To Player Index 0 (The First Player), Or "givegold KONGOR 65535" To Give 65535 Gold To Player With Name "KONGOR"
@@ -34,10 +38,11 @@ public partial class StatsRequesterController(MerrickContext databaseContext, ID
         // 2026-01-07: Normalize to lowercase for case-insensitive handling (PHP parity).
         return Request.Form["f"].FirstOrDefault()?.ToLower() switch
         {
-            "submit_stats"      => await HandleStatsSubmission(form),
-            "resubmit_stats"    => await HandleStatsResubmission(form),
+            "submit_stats" => await HandleStatsSubmission(form),
+            "resubmit_stats" => await HandleStatsResubmission(form),
 
-            _                   => throw new NotImplementedException($"Unsupported Stats Requester Controller Form Parameter: f={Request.Form["f"].FirstOrDefault()}")
+            _ => throw new NotImplementedException(
+                $"Unsupported Stats Requester Controller Form Parameter: f={Request.Form["f"].FirstOrDefault()}")
         };
     }
 }

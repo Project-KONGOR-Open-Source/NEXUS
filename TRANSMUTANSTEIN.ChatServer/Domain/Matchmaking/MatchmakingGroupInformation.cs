@@ -24,15 +24,15 @@ public class MatchmakingGroupInformation
 
     public byte TeamSize => GameType switch
     {
-        ChatProtocol.TMMGameType.TMM_GAME_TYPE_NORMAL          => 5, // caldavar
-        ChatProtocol.TMMGameType.TMM_GAME_TYPE_CASUAL          => 5, // caldavar_old
-        ChatProtocol.TMMGameType.TMM_GAME_TYPE_MIDWARS         => 5, // midwars
-        ChatProtocol.TMMGameType.TMM_GAME_TYPE_RIFTWARS        => 5, // riftwars
+        ChatProtocol.TMMGameType.TMM_GAME_TYPE_NORMAL => 5, // caldavar
+        ChatProtocol.TMMGameType.TMM_GAME_TYPE_CASUAL => 5, // caldavar_old
+        ChatProtocol.TMMGameType.TMM_GAME_TYPE_MIDWARS => 5, // midwars
+        ChatProtocol.TMMGameType.TMM_GAME_TYPE_RIFTWARS => 5, // riftwars
         ChatProtocol.TMMGameType.TMM_GAME_TYPE_CAMPAIGN_NORMAL => 5, // caldavar
         ChatProtocol.TMMGameType.TMM_GAME_TYPE_CAMPAIGN_CASUAL => 5, // caldavar_old
-        ChatProtocol.TMMGameType.TMM_GAME_TYPE_REBORN_NORMAL   => 5, // caldavar_reborn
-        ChatProtocol.TMMGameType.TMM_GAME_TYPE_REBORN_CASUAL   => 5, // caldavar_reborn
-        ChatProtocol.TMMGameType.TMM_GAME_TYPE_MIDWARS_REBORN  => 5, // midwars
-        _                                                      => throw new ArgumentOutOfRangeException(nameof(GameType), $@"Unsupported Game Type: ""{GameType}""")
+        ChatProtocol.TMMGameType.TMM_GAME_TYPE_REBORN_NORMAL => 5, // caldavar_reborn
+        ChatProtocol.TMMGameType.TMM_GAME_TYPE_REBORN_CASUAL => 5, // caldavar_reborn
+        ChatProtocol.TMMGameType.TMM_GAME_TYPE_MIDWARS_REBORN => 5, // midwars
+        _ => throw new ArgumentOutOfRangeException(nameof(GameType), $@"Unsupported Game Type: ""{GameType}""")
     };
 }

@@ -5,15 +5,17 @@ public class MatchIDResult(IDatabase distributedCacheStore) : IAsynchronousComma
 {
     public async Task Process(ChatSession session, ChatBuffer buffer)
     {
-        MatchIDResultRequestData requestData = new (buffer);
+        MatchIDResultRequestData requestData = new(buffer);
 
         if (requestData.Result is not ChatProtocol.MatchIDResult.MIDR_SUCCESS)
         {
-            MatchStartData? data = await distributedCacheStore.GetMatchStartDataByMatchServerID(session.ServerMetadata.ServerID);
+            MatchStartData? data =
+                await distributedCacheStore.GetMatchStartDataByMatchServerID(session.ServerMetadata.ServerID);
 
             if (data is null)
             {
-                Log.Error(@"[BUG] Unable To Retrieve Match Start Data For Server Session ""{SessionID}"" With Server ID ""{ServerID}""",
+                Log.Error(
+                    @"[BUG] Unable To Retrieve Match Start Data For Server Session ""{SessionID}"" With Server ID ""{ServerID}""",
                     session.ID, session.ServerMetadata.ServerID);
             }
 
@@ -28,17 +30,16 @@ public class MatchIDResult(IDatabase distributedCacheStore) : IAsynchronousComma
 
 file class MatchIDResultRequestData
 {
-    public byte[] CommandBytes { get; init; }
-
-    public ChatProtocol.MatchIDResult Result { get; init; }
-
-    public int RequestTimeMilliseconds { get; init; }
-
     public MatchIDResultRequestData(ChatBuffer buffer)
     {
         CommandBytes = buffer.ReadCommandBytes();
         Result = (ChatProtocol.MatchIDResult) buffer.ReadInt8();
         RequestTimeMilliseconds = buffer.ReadInt32();
     }
-}
 
+    public byte[] CommandBytes { get; init; }
+
+    public ChatProtocol.MatchIDResult Result { get; }
+
+    public int RequestTimeMilliseconds { get; }
+}

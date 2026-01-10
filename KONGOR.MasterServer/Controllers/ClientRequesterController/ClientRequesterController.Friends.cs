@@ -7,22 +7,29 @@ public partial class ClientRequesterController
         string? cookie = Request.Form["cookie"];
 
         if (cookie is null)
+        {
             return BadRequest(@"Missing Value For Form Parameter ""cookie""");
+        }
 
         string? friendIDString = Request.Form["buddy_id"];
 
         if (friendIDString is null)
+        {
             return BadRequest(@"Missing Value For Form Parameter ""buddy_id""");
+        }
 
         if (int.TryParse(friendIDString, out int friendID).Equals(false))
+        {
             return BadRequest(@"Invalid Value For Form Parameter ""buddy_id""");
+        }
 
         // Validate Session Cookie And Get Account Name
         (bool isValid, string? accountName) = await DistributedCache.ValidateAccountSessionCookie(cookie);
 
         if (isValid.Equals(false) || accountName is null)
         {
-            Logger.LogWarning($@"IP Address ""{Request.HttpContext.Connection.RemoteIpAddress?.MapToIPv4().ToString() ?? "UNKNOWN"}"" Attempted To Remove Friend With Invalid Cookie ""{cookie}""");
+            Logger.LogWarning(
+                $@"IP Address ""{Request.HttpContext.Connection.RemoteIpAddress?.MapToIPv4().ToString() ?? "UNKNOWN"}"" Attempted To Remove Friend With Invalid Cookie ""{cookie}""");
 
             return Unauthorized($@"Unrecognised Cookie ""{cookie}""");
         }
@@ -39,7 +46,8 @@ public partial class ClientRequesterController
         // Requester Account Does Not Have Target As A Friend
         if (friendToRemoveFromRequesterAccount is null)
         {
-            Logger.LogError(@"[BUG] Account ""{AccountName}"" (ID: {AccountID}) Attempted To Remove Non-Existent Friend ""{FriendName}""",
+            Logger.LogError(
+                @"[BUG] Account ""{AccountName}"" (ID: {AccountID}) Attempted To Remove Non-Existent Friend ""{FriendName}""",
                 requesterAccount.Name, requesterAccount.ID, accountName);
 
             // Return Success Even If Friend Not Found, For Idempotency
@@ -61,7 +69,8 @@ public partial class ClientRequesterController
         // Target Account Does Not Have Requester As A Friend
         if (friendToRemoveFromTargetAccount is null)
         {
-            Logger.LogError(@"[BUG] Account ""{AccountName}"" (ID: {AccountID}) Attempted To Remove Friend ""{FriendName}"", But Target Account Does Not Have Them As A Friend",
+            Logger.LogError(
+                @"[BUG] Account ""{AccountName}"" (ID: {AccountID}) Attempted To Remove Friend ""{FriendName}"", But Target Account Does Not Have Them As A Friend",
                 targetAccount.Name, targetAccount.ID, requesterAccount.Name);
 
             // Return Success Even If Friend Not Found, For Idempotency
@@ -75,13 +84,18 @@ public partial class ClientRequesterController
         await MerrickContext.SaveChangesAsync();
 
         // If Notification Data Is Present In The Response, The Game Client Then Sends A CHAT_CMD_NOTIFY_BUDDY_REMOVE Request To The Chat Server
-        Dictionary<string, object> response = new ()
+        Dictionary<string, object> response = new()
         {
             { "remove_buddy", "OK" },
-            { "notification", new Dictionary<string, int>
+            {
+                "notification", new Dictionary<string, int>
                 {
-                    { $"{Guid.CreateVersion7().GetDeterministicInt32Hash()}", requesterAccount.ID },  // ID Of The Notification Sent To The Friend Removal Requester
-                    { $"{Guid.CreateVersion7().GetDeterministicInt32Hash()}", targetAccount.ID }      // ID Of The Notification Sent To The Removed Friend
+                    {
+                        $"{Guid.CreateVersion7().GetDeterministicInt32Hash()}", requesterAccount.ID
+                    }, // ID Of The Notification Sent To The Friend Removal Requester
+                    {
+                        $"{Guid.CreateVersion7().GetDeterministicInt32Hash()}", targetAccount.ID
+                    } // ID Of The Notification Sent To The Removed Friend
                 }
             }
         };

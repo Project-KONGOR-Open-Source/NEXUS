@@ -1,29 +1,11 @@
 ﻿namespace KONGOR.MasterServer.Models.RequestResponse.SRP;
 
 /// <summary>
-///     Exposes the constants, properties, and methods required for Secure Remote Password protocol authentication, stage one.
+///     Exposes the constants, properties, and methods required for Secure Remote Password protocol authentication, stage
+///     one.
 /// </summary>
 public class SRPAuthenticationSessionDataStageOne
 {
-    # region Secure Remote Password Protocol Secrets
-
-    // Thank you, Anton Romanov (aka Theli), for making these values public: https://github.com/theli-ua/pyHoNBot/blob/cabde31b8601c1ca55dc10fcf663ec663ec0eb71/hon/masterserver.py#L23-L24.
-    // The safe prime number is also present in the k2_x64 DLL of the Windows client, between offsets 0xF2F8A0 and 0xF2FA9F.
-    // The multiplicative group generator was always expected to be a small number in order to not generate sets unnecessarily, so it could have been brute-forced.
-    // Having these values in the public domain, however, certainly helped to save a lot of time while writing the closed-source version of Project KONGOR.
-
-    /// <summary>
-    ///     N : a safe prime number which must be large enough so that computing discrete logarithms modulo N is infeasible
-    /// </summary>
-    public const string SafePrimeNumber = "DA950C6C97918CAE89E4F5ECB32461032A217D740064BC12FC0723CD204BD02A7AE29B53F3310C13BA998B7910F8B6A14112CBC67BDD2427EDF494CB8BCA68510C0AAEE5346BD320845981546873069B337C073B9A9369D500873D647D261CCED571826E54C6089E7D5085DC2AF01FD861AE44C8E64BCA3EA4DCE942C5F5B89E5496C2741A9E7E9F509C261D104D11DD4494577038B33016E28D118AE4FD2E85D9C3557A2346FAECED3EDBE0F4D694411686BA6E65FEE43A772DC84D394ADAE5A14AF33817351D29DE074740AA263187AB18E3A25665EACAA8267C16CDE064B1D5AF0588893C89C1556D6AEF644A3BA6BA3F7DEC2F3D6FDC30AE43FBD6D144BB";
-
-    /// <summary>
-    ///     g : a generator of the multiplicative group of integers modulo n
-    /// </summary>
-    public const string MultiplicativeGroupGenerator = "2";
-
-    # endregion
-
     /// <summary>
     ///     A : the public ephemeral key sent by the client
     /// </summary>
@@ -40,12 +22,14 @@ public class SRPAuthenticationSessionDataStageOne
     public required string ServerPrivateEphemeral { get; init; }
 
     /// <summary>
-    ///     s : generated during pre-authentication for I (identifying username) and used during SRP authentication to generate an SRP session
+    ///     s : generated during pre-authentication for I (identifying username) and used during SRP authentication to generate
+    ///     an SRP session
     /// </summary>
     public required string SessionSalt { get; init; }
 
     /// <summary>
-    ///     The HoN "salt2", retrieved from the database for I (identifying username). The value is generated during registration and sent by the client.
+    ///     The HoN "salt2", retrieved from the database for I (identifying username). The value is generated during
+    ///     registration and sent by the client.
     /// </summary>
     public required string PasswordSalt { get; init; }
 
@@ -55,7 +39,8 @@ public class SRPAuthenticationSessionDataStageOne
     public required string LoginIdentifier { get; init; }
 
     /// <summary>
-    ///     The hashed password retrieved from the database for I (identifying username). The value is generated during registration.
+    ///     The hashed password retrieved from the database for I (identifying username). The value is generated during
+    ///     registration.
     /// </summary>
     public required string PasswordHash { get; init; }
 
@@ -71,7 +56,7 @@ public class SRPAuthenticationSessionDataStageOne
     {
         SrpParameters parameters = SrpParameters.Create<SHA256>(SafePrimeNumber, MultiplicativeGroupGenerator);
 
-        SrpClient client = new (parameters);
+        SrpClient client = new(parameters);
 
         string privateClientKey = client.DerivePrivateKey(salt, loginIdentifier, passwordHash);
 
@@ -85,7 +70,7 @@ public class SRPAuthenticationSessionDataStageOne
     {
         SrpParameters parameters = SrpParameters.Create<SHA256>(SafePrimeNumber, MultiplicativeGroupGenerator);
 
-        SrpServer server = new (parameters);
+        SrpServer server = new(parameters);
 
         SrpEphemeral ephemeral = server.GenerateEphemeral(verifier);
 
@@ -97,5 +82,27 @@ public class SRPAuthenticationSessionDataStageOne
     ///     The value needs to be divided by 2, because there are 2 hexadecimal digits per byte.
     /// </summary>
     public static string GenerateSRPSessionSalt()
-        => SrpInteger.RandomInteger(512 / 2).ToHex();
+    {
+        return SrpInteger.RandomInteger(512 / 2).ToHex();
+    }
+
+    # region Secure Remote Password Protocol Secrets
+
+    // Thank you, Anton Romanov (aka Theli), for making these values public: https://github.com/theli-ua/pyHoNBot/blob/cabde31b8601c1ca55dc10fcf663ec663ec0eb71/hon/masterserver.py#L23-L24.
+    // The safe prime number is also present in the k2_x64 DLL of the Windows client, between offsets 0xF2F8A0 and 0xF2FA9F.
+    // The multiplicative group generator was always expected to be a small number in order to not generate sets unnecessarily, so it could have been brute-forced.
+    // Having these values in the public domain, however, certainly helped to save a lot of time while writing the closed-source version of Project KONGOR.
+
+    /// <summary>
+    ///     N : a safe prime number which must be large enough so that computing discrete logarithms modulo N is infeasible
+    /// </summary>
+    public const string SafePrimeNumber =
+        "DA950C6C97918CAE89E4F5ECB32461032A217D740064BC12FC0723CD204BD02A7AE29B53F3310C13BA998B7910F8B6A14112CBC67BDD2427EDF494CB8BCA68510C0AAEE5346BD320845981546873069B337C073B9A9369D500873D647D261CCED571826E54C6089E7D5085DC2AF01FD861AE44C8E64BCA3EA4DCE942C5F5B89E5496C2741A9E7E9F509C261D104D11DD4494577038B33016E28D118AE4FD2E85D9C3557A2346FAECED3EDBE0F4D694411686BA6E65FEE43A772DC84D394ADAE5A14AF33817351D29DE074740AA263187AB18E3A25665EACAA8267C16CDE064B1D5AF0588893C89C1556D6AEF644A3BA6BA3F7DEC2F3D6FDC30AE43FBD6D144BB";
+
+    /// <summary>
+    ///     g : a generator of the multiplicative group of integers modulo n
+    /// </summary>
+    public const string MultiplicativeGroupGenerator = "2";
+
+    # endregion
 }

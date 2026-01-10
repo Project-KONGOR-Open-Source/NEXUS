@@ -1,17 +1,16 @@
-using System.Collections.Generic;
-
 namespace ASPIRE.Tests.Data;
 
 /// <summary>
-/// Consolidated payload examples for Miscellaneous Controllers (Stats, Store, Patcher, Quest, Message, StorageStatus).
-/// Contains primarily Unverified payloads as these controllers are less used.
+///     Consolidated payload examples for Miscellaneous Controllers (Stats, Store, Patcher, Quest, Message, StorageStatus).
+///     Contains primarily Unverified payloads as these controllers are less used.
 /// </summary>
 public static class MiscRequestPayloads
 {
     public static class Unverified
     {
         // Stats Requester - Resubmit
-        public static Dictionary<string, string> ResubmitStats(string cookie, int matchId, string date, string compressedData)
+        public static Dictionary<string, string> ResubmitStats(string cookie, int matchId, string date,
+            string compressedData)
         {
             // Flattened dictionary to match ASP.NET Core Model Binding for StatsForSubmissionRequestForm
             // which expects keys like match_stats[match_id], player_stats[0][Hero_Legionnaire][nickname], etc.
@@ -24,17 +23,17 @@ public static class MiscRequestPayloads
                 { "resubmission_key", "valid_key" }, // Needs to be valid hash in real scenario
                 { "server_id", "1" },
                 { "session", cookie },
-                
+
                 // match_stats dictionary
                 { "match_stats[match_id]", matchId.ToString() },
-                
+
                 // player_stats dictionary: [playerIndex][heroKey][statKey]
                 { "player_stats[0][Hero_Legionnaire][nickname]", "TestPlayer" },
                 { "player_stats[0][Hero_Legionnaire][wins]", "1" },
-                
+
                 // Other required dictionaries implicitly
                 { "team_stats[1][win]", "1" },
-                
+
                 // Legacy / Extra params
                 { "date", date },
                 { "data", compressedData }
@@ -48,14 +47,13 @@ public static class MiscRequestPayloads
             return new Dictionary<string, string>
             {
                 // 'f' parameter is not explicitly switched in the stub, but often used
-                { "f", "get_catalog" }, 
-                { "cookie", cookie },
-                { "category", category }
+                { "f", "get_catalog" }, { "cookie", cookie }, { "category", category }
             };
         }
 
         // Patcher
-        public static Dictionary<string, string> LatestPatch(string cookie, string os, string arch, string currentVersion)
+        public static Dictionary<string, string> LatestPatch(string cookie, string os, string arch,
+            string currentVersion)
         {
             return new Dictionary<string, string>
             {
@@ -83,7 +81,7 @@ public static class MiscRequestPayloads
         {
             return new Dictionary<string, string>
             {
-                 // Route: master/quest/getplayerquests
+                // Route: master/quest/getplayerquests
                 { "cookie", cookie }
             };
         }
@@ -94,7 +92,7 @@ public static class MiscRequestPayloads
             return new Dictionary<string, string>
             {
                 // Route: message/list/{id}
-                { "cookie", cookie } 
+                { "cookie", cookie }
                 // 'id' is in route, but usually cookies are sent in body
             };
         }

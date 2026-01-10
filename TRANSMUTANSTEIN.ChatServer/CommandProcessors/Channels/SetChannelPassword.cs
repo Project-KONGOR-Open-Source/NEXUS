@@ -5,7 +5,7 @@ public class SetChannelPassword : ISynchronousCommandProcessor<ChatSession>
 {
     public void Process(ChatSession session, ChatBuffer buffer)
     {
-        SetChannelPasswordRequestData requestData = new (buffer);
+        SetChannelPasswordRequestData requestData = new(buffer);
 
         ChatChannel channel = ChatChannel.Get(session, requestData.ChannelID);
 
@@ -15,17 +15,16 @@ public class SetChannelPassword : ISynchronousCommandProcessor<ChatSession>
 
 file class SetChannelPasswordRequestData
 {
-    public byte[] CommandBytes { get; init; }
-
-    public int ChannelID { get; init; }
-
-    public string Password { get; init; }
-
     public SetChannelPasswordRequestData(ChatBuffer buffer)
     {
         CommandBytes = buffer.ReadCommandBytes();
         ChannelID = buffer.ReadInt32();
         Password = buffer.ReadString();
     }
-}
 
+    public byte[] CommandBytes { get; init; }
+
+    public int ChannelID { get; }
+
+    public string Password { get; }
+}

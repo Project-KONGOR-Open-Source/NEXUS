@@ -8,64 +8,88 @@ public static partial class DistributedCacheExtensions
 
     private const string MatchServerManagersKey = "MATCH-SERVER-MANAGERS";
 
+    private const string MatchServersKey = "MATCH-SERVERS";
+
     /// <summary>
     ///     Sets the specified fields to their respective values in the hash stored at key.
     ///     This command overwrites the values of specified fields that exist in the hash.
     ///     If key doesn't exist, a new key holding a hash is created.
     /// </summary>
-    public static async Task SetMatchServerManager(this IDatabase distributedCacheStore, string hostAccountName, MatchServerManager matchServerManager)
+    public static async Task SetMatchServerManager(this IDatabase distributedCacheStore, string hostAccountName,
+        MatchServerManager matchServerManager)
     {
         string serializedMatchServerManager = JsonSerializer.Serialize(matchServerManager);
 
-        await distributedCacheStore.HashSetAsync(MatchServerManagersKey, [new HashEntry(hostAccountName, serializedMatchServerManager)]);
+        await distributedCacheStore.HashSetAsync(MatchServerManagersKey,
+            [new HashEntry(hostAccountName, serializedMatchServerManager)]);
     }
 
     public static async Task<List<MatchServerManager>> GetMatchServerManagers(this IDatabase distributedCacheStore)
     {
         HashEntry[] serializedMatchServerManagers = await distributedCacheStore.HashGetAllAsync(MatchServerManagersKey);
 
-        List<MatchServerManager> matchServerManagers = [.. serializedMatchServerManagers
-            .Select(entry => JsonSerializer.Deserialize<MatchServerManager>(entry.Value.ToString())).OfType<MatchServerManager>()];
+        List<MatchServerManager> matchServerManagers =
+        [
+            .. serializedMatchServerManagers
+                .Select(entry => JsonSerializer.Deserialize<MatchServerManager>(entry.Value.ToString()))
+                .OfType<MatchServerManager>()
+        ];
 
         return matchServerManagers;
     }
 
-    public static async Task<MatchServerManager?> GetMatchServerManagerByIPAddress(this IDatabase distributedCacheStore, string ipAddress)
+    public static async Task<MatchServerManager?> GetMatchServerManagerByIPAddress(this IDatabase distributedCacheStore,
+        string ipAddress)
     {
         HashEntry[] serializedMatchServerManagers = await distributedCacheStore.HashGetAllAsync(MatchServerManagersKey);
 
-        List<MatchServerManager> matchServerManagers = [.. serializedMatchServerManagers
-            .Select(entry => JsonSerializer.Deserialize<MatchServerManager>(entry.Value.ToString())).OfType<MatchServerManager>()];
+        List<MatchServerManager> matchServerManagers =
+        [
+            .. serializedMatchServerManagers
+                .Select(entry => JsonSerializer.Deserialize<MatchServerManager>(entry.Value.ToString()))
+                .OfType<MatchServerManager>()
+        ];
 
-        MatchServerManager? matchServerManager = matchServerManagers.FirstOrDefault(manager => manager.IPAddress.Equals(ipAddress));
+        MatchServerManager? matchServerManager =
+            matchServerManagers.FirstOrDefault(manager => manager.IPAddress.Equals(ipAddress));
 
         return matchServerManager;
     }
 
-    public static async Task<MatchServerManager?> GetMatchServerManagerBySessionCookie(this IDatabase distributedCacheStore, string sessionCookie)
+    public static async Task<MatchServerManager?> GetMatchServerManagerBySessionCookie(
+        this IDatabase distributedCacheStore, string sessionCookie)
     {
         HashEntry[] serializedMatchServerManagers = await distributedCacheStore.HashGetAllAsync(MatchServerManagersKey);
 
-        List<MatchServerManager> matchServerManagers = [.. serializedMatchServerManagers
-            .Select(entry => JsonSerializer.Deserialize<MatchServerManager>(entry.Value.ToString())).OfType<MatchServerManager>()];
+        List<MatchServerManager> matchServerManagers =
+        [
+            .. serializedMatchServerManagers
+                .Select(entry => JsonSerializer.Deserialize<MatchServerManager>(entry.Value.ToString()))
+                .OfType<MatchServerManager>()
+        ];
 
-        MatchServerManager? matchServerManager = matchServerManagers.FirstOrDefault(manager => manager.Cookie.Equals(sessionCookie));
+        MatchServerManager? matchServerManager =
+            matchServerManagers.FirstOrDefault(manager => manager.Cookie.Equals(sessionCookie));
 
         return matchServerManager;
     }
 
-    public static async Task<List<MatchServerManager>> GetMatchServerManagersByAccountName(this IDatabase distributedCacheStore, string hostAccountName)
+    public static async Task<List<MatchServerManager>> GetMatchServerManagersByAccountName(
+        this IDatabase distributedCacheStore, string hostAccountName)
     {
         List<MatchServerManager> matchServerManagers = [];
 
-        IAsyncEnumerable<HashEntry> scanResult = distributedCacheStore.HashScanAsync(MatchServerManagersKey, pattern: hostAccountName, pageSize: int.MaxValue);
+        IAsyncEnumerable<HashEntry> scanResult =
+            distributedCacheStore.HashScanAsync(MatchServerManagersKey, hostAccountName, int.MaxValue);
 
         await foreach (HashEntry entry in scanResult)
         {
             string serializedMatchServerManager = entry.Value.ToString();
 
-            MatchServerManager matchServerManager = JsonSerializer.Deserialize<MatchServerManager>(serializedMatchServerManager)
-                ?? throw new NullReferenceException($@"Unable To Deserialize Match Server Manager With Key ""{entry.Name}""");
+            MatchServerManager matchServerManager =
+                JsonSerializer.Deserialize<MatchServerManager>(serializedMatchServerManager)
+                ?? throw new NullReferenceException(
+                    $@"Unable To Deserialize Match Server Manager With Key ""{entry.Name}""");
 
             matchServerManagers.Add(matchServerManager);
         }
@@ -73,14 +97,20 @@ public static partial class DistributedCacheExtensions
         return matchServerManagers;
     }
 
-    public static async Task<MatchServerManager?> GetMatchServerManagerByID(this IDatabase distributedCacheStore, int serverManagerID)
+    public static async Task<MatchServerManager?> GetMatchServerManagerByID(this IDatabase distributedCacheStore,
+        int serverManagerID)
     {
         HashEntry[] serializedMatchServerManagers = await distributedCacheStore.HashGetAllAsync(MatchServerManagersKey);
 
-        List<MatchServerManager> matchServerManagers = [.. serializedMatchServerManagers
-            .Select(entry => JsonSerializer.Deserialize<MatchServerManager>(entry.Value.ToString())).OfType<MatchServerManager>()];
+        List<MatchServerManager> matchServerManagers =
+        [
+            .. serializedMatchServerManagers
+                .Select(entry => JsonSerializer.Deserialize<MatchServerManager>(entry.Value.ToString()))
+                .OfType<MatchServerManager>()
+        ];
 
-        MatchServerManager? matchServerManager = matchServerManagers.FirstOrDefault(manager => manager.ID == serverManagerID);
+        MatchServerManager? matchServerManager =
+            matchServerManagers.FirstOrDefault(manager => manager.ID == serverManagerID);
 
         return matchServerManager;
     }
@@ -111,66 +141,81 @@ public static partial class DistributedCacheExtensions
         }
     }
 
-    private const string MatchServersKey = "MATCH-SERVERS";
-
     /// <summary>
     ///     Sets the specified fields to their respective values in the hash stored at key.
     ///     This command overwrites the values of specified fields that exist in the hash.
     ///     If key doesn't exist, a new key holding a hash is created.
     /// </summary>
-    public static async Task SetMatchServer(this IDatabase distributedCacheStore, string hostAccountName, MatchServer matchServer)
+    public static async Task SetMatchServer(this IDatabase distributedCacheStore, string hostAccountName,
+        MatchServer matchServer)
     {
         string serializedMatchServer = JsonSerializer.Serialize(matchServer);
 
-        await distributedCacheStore.HashSetAsync(MatchServersKey, [new HashEntry($"{hostAccountName}:{matchServer.Instance}", serializedMatchServer)]);
+        await distributedCacheStore.HashSetAsync(MatchServersKey,
+            [new HashEntry($"{hostAccountName}:{matchServer.Instance}", serializedMatchServer)]);
     }
 
     public static async Task<List<MatchServer>> GetMatchServers(this IDatabase distributedCacheStore)
     {
         HashEntry[] serializedMatchServers = await distributedCacheStore.HashGetAllAsync(MatchServersKey);
 
-        List<MatchServer> matchServers = [.. serializedMatchServers
-            .Select(entry => JsonSerializer.Deserialize<MatchServer>(entry.Value.ToString())).OfType<MatchServer>()];
+        List<MatchServer> matchServers =
+        [
+            .. serializedMatchServers
+                .Select(entry => JsonSerializer.Deserialize<MatchServer>(entry.Value.ToString())).OfType<MatchServer>()
+        ];
 
         return matchServers;
     }
 
-    public static async Task<MatchServer?> GetMatchServerByIPAddressAndPort(this IDatabase distributedCacheStore, string ipAddress, int port)
+    public static async Task<MatchServer?> GetMatchServerByIPAddressAndPort(this IDatabase distributedCacheStore,
+        string ipAddress, int port)
     {
         HashEntry[] serializedMatchServers = await distributedCacheStore.HashGetAllAsync(MatchServersKey);
 
-        List<MatchServer> matchServers = [.. serializedMatchServers
-            .Select(entry => JsonSerializer.Deserialize<MatchServer>(entry.Value.ToString())).OfType<MatchServer>()];
+        List<MatchServer> matchServers =
+        [
+            .. serializedMatchServers
+                .Select(entry => JsonSerializer.Deserialize<MatchServer>(entry.Value.ToString())).OfType<MatchServer>()
+        ];
 
-        MatchServer? matchServer = matchServers.FirstOrDefault(server => server.IPAddress.Equals(ipAddress) && server.Port == port);
+        MatchServer? matchServer =
+            matchServers.FirstOrDefault(server => server.IPAddress.Equals(ipAddress) && server.Port == port);
 
         return matchServer;
     }
 
-    public static async Task<MatchServer?> GetMatchServerBySessionCookie(this IDatabase distributedCacheStore, string sessionCookie)
+    public static async Task<MatchServer?> GetMatchServerBySessionCookie(this IDatabase distributedCacheStore,
+        string sessionCookie)
     {
         HashEntry[] serializedMatchServers = await distributedCacheStore.HashGetAllAsync(MatchServersKey);
 
-        List<MatchServer> matchServers = [.. serializedMatchServers
-            .Select(entry => JsonSerializer.Deserialize<MatchServer>(entry.Value.ToString())).OfType<MatchServer>()];
+        List<MatchServer> matchServers =
+        [
+            .. serializedMatchServers
+                .Select(entry => JsonSerializer.Deserialize<MatchServer>(entry.Value.ToString())).OfType<MatchServer>()
+        ];
 
         MatchServer? matchServer = matchServers.FirstOrDefault(server => server.Cookie.Equals(sessionCookie));
 
         return matchServer;
     }
 
-    public static async Task<List<MatchServer>> GetMatchServersByAccountName(this IDatabase distributedCacheStore, string hostAccountName)
+    public static async Task<List<MatchServer>> GetMatchServersByAccountName(this IDatabase distributedCacheStore,
+        string hostAccountName)
     {
         List<MatchServer> matchServers = [];
 
-        IAsyncEnumerable<HashEntry> scanResult = distributedCacheStore.HashScanAsync(MatchServersKey, pattern: $"{hostAccountName}:*", pageSize: int.MaxValue);
+        IAsyncEnumerable<HashEntry> scanResult =
+            distributedCacheStore.HashScanAsync(MatchServersKey, $"{hostAccountName}:*", int.MaxValue);
 
         await foreach (HashEntry entry in scanResult)
         {
             string serializedMatchServer = entry.Value.ToString();
 
             MatchServer matchServer = JsonSerializer.Deserialize<MatchServer>(serializedMatchServer)
-                ?? throw new NullReferenceException($@"Unable To Deserialize Match Server With Key ""{entry.Name}""");
+                                      ?? throw new NullReferenceException(
+                                          $@"Unable To Deserialize Match Server With Key ""{entry.Name}""");
 
             matchServers.Add(matchServer);
         }
@@ -182,8 +227,11 @@ public static partial class DistributedCacheExtensions
     {
         HashEntry[] serializedMatchServers = await distributedCacheStore.HashGetAllAsync(MatchServersKey);
 
-        List<MatchServer> matchServers = [.. serializedMatchServers
-            .Select(entry => JsonSerializer.Deserialize<MatchServer>(entry.Value.ToString())).OfType<MatchServer>()];
+        List<MatchServer> matchServers =
+        [
+            .. serializedMatchServers
+                .Select(entry => JsonSerializer.Deserialize<MatchServer>(entry.Value.ToString())).OfType<MatchServer>()
+        ];
 
         MatchServer? matchServer = matchServers.FirstOrDefault(server => server.ID == serverID);
 
@@ -200,21 +248,27 @@ public static partial class DistributedCacheExtensions
 
             await distributedCacheStore.HashDeleteAsync(MatchServersKey, hashField);
 
-            MatchServerManager? matchServerManager = await distributedCacheStore.GetMatchServerManagerByID(matchServer.MatchServerManagerID ?? default);
+            MatchServerManager? matchServerManager =
+                await distributedCacheStore.GetMatchServerManagerByID(matchServer.MatchServerManagerID ?? default);
 
             if (matchServerManager is not null)
             {
                 matchServerManager.MatchServerIDs.Remove(matchServer.ID);
 
                 if (matchServerManager.MatchServerIDs.Any() is false)
+                {
                     await distributedCacheStore.RemoveMatchServerManagerByID(matchServerManager.ID);
+                }
             }
 
             matchServer.MatchServerManagerID = null;
         }
     }
 
-    private static string ConstructMatchStartDataKey(int matchID) => $@"MATCH-START-DATA:[""{matchID}""]";
+    private static string ConstructMatchStartDataKey(int matchID)
+    {
+        return $@"MATCH-START-DATA:[""{matchID}""]";
+    }
 
     /// <summary>
     ///     Stores match start data in the cache.
@@ -225,7 +279,8 @@ public static partial class DistributedCacheExtensions
         string serializedMatchStartData = JsonSerializer.Serialize(matchStartData);
 
         // Store For A Duration Of Time Longer Than Any Match Is Expected To Last
-        await distributedCacheStore.StringSetAsync(ConstructMatchStartDataKey(matchStartData.MatchID), serializedMatchStartData, TimeSpan.FromHours(6));
+        await distributedCacheStore.StringSetAsync(ConstructMatchStartDataKey(matchStartData.MatchID),
+            serializedMatchStartData, TimeSpan.FromHours(6));
     }
 
     /// <summary>
@@ -242,7 +297,8 @@ public static partial class DistributedCacheExtensions
     /// <summary>
     ///     Retrieves the match start data associated with the specified match server ID from the distributed cache.
     /// </summary>
-    public static async Task<MatchStartData?> GetMatchStartDataByMatchServerID(this IDatabase distributedCacheStore, int serverID)
+    public static async Task<MatchStartData?> GetMatchStartDataByMatchServerID(this IDatabase distributedCacheStore,
+        int serverID)
     {
         EndPoint endPoint = distributedCacheStore.Multiplexer.GetEndPoints().Single();
 
@@ -268,11 +324,15 @@ public static partial class DistributedCacheExtensions
         return matches.OrderByDescending(m => m.MatchID).FirstOrDefault();
     }
 
-    public static async Task<MatchStartData?> GetMatchStartDataByMatchServerSessionCookie(this IDatabase distributedCacheStore, string sessionCookie)
+    public static async Task<MatchStartData?> GetMatchStartDataByMatchServerSessionCookie(
+        this IDatabase distributedCacheStore, string sessionCookie)
     {
         MatchServer? matchServer = await distributedCacheStore.GetMatchServerBySessionCookie(sessionCookie);
 
-        if (matchServer is null) return null;
+        if (matchServer is null)
+        {
+            return null;
+        }
 
         return await distributedCacheStore.GetMatchStartDataByMatchServerID(matchServer.ID);
     }
@@ -282,5 +342,7 @@ public static partial class DistributedCacheExtensions
     ///     This should be called after full match statistics have been created.
     /// </summary>
     public static async Task RemoveMatchStartData(this IDatabase distributedCacheStore, int matchID)
-        => await distributedCacheStore.KeyDeleteAsync(ConstructMatchStartDataKey(matchID));
+    {
+        await distributedCacheStore.KeyDeleteAsync(ConstructMatchStartDataKey(matchID));
+    }
 }

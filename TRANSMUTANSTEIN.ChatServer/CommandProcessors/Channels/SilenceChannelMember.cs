@@ -5,13 +5,14 @@ public class SilenceChannelMember : ISynchronousCommandProcessor<ChatSession>
 {
     public void Process(ChatSession session, ChatBuffer buffer)
     {
-        SilenceChannelMemberRequestData requestData = new (buffer);
+        SilenceChannelMemberRequestData requestData = new(buffer);
 
         ChatChannel channel = ChatChannel.Get(session, requestData.ChannelID);
 
         // Find The Target Account ID By Name
         ChatSession? targetSession = Context.ClientChatSessions.Values
-            .SingleOrDefault(chatSession => chatSession.Account.Name.Equals(requestData.TargetName, StringComparison.OrdinalIgnoreCase));
+            .SingleOrDefault(chatSession =>
+                chatSession.Account.Name.Equals(requestData.TargetName, StringComparison.OrdinalIgnoreCase));
 
         if (targetSession is null)
         {
@@ -26,14 +27,6 @@ public class SilenceChannelMember : ISynchronousCommandProcessor<ChatSession>
 
 file class SilenceChannelMemberRequestData
 {
-    public byte[] CommandBytes { get; init; }
-
-    public int ChannelID { get; init; }
-
-    public string TargetName { get; init; }
-
-    public int DurationMilliseconds { get; init; }
-
     public SilenceChannelMemberRequestData(ChatBuffer buffer)
     {
         CommandBytes = buffer.ReadCommandBytes();
@@ -41,5 +34,12 @@ file class SilenceChannelMemberRequestData
         TargetName = buffer.ReadString();
         DurationMilliseconds = buffer.ReadInt32();
     }
-}
 
+    public byte[] CommandBytes { get; init; }
+
+    public int ChannelID { get; }
+
+    public string TargetName { get; }
+
+    public int DurationMilliseconds { get; }
+}

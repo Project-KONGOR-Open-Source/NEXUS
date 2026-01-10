@@ -2,6 +2,11 @@ namespace TRANSMUTANSTEIN.ChatServer.Domain.Matchmaking;
 
 public class MatchmakingGroup
 {
+    /// <summary>
+    ///     Hidden Constructor Which Enforces <see cref="Create" /> As The Primary Mechanism For Creating Matchmaking Groups
+    /// </summary>
+    private MatchmakingGroup() { }
+
     public Guid GUID { get; } = Guid.CreateVersion7();
 
     public MatchmakingGroupMember Leader => Members.Single(member => member.IsLeader);
@@ -14,23 +19,21 @@ public class MatchmakingGroup
 
     public float AverageRating => 1500; // TODO: Members.Average(member => member.Rating);
 
-    public float RatingDisparity => 100; // TODO: Members.Max(member => member.Rating) - Members.Min(member => member.Rating);
+    public float RatingDisparity =>
+        100; // TODO: Members.Max(member => member.Rating) - Members.Min(member => member.Rating);
 
     public int FullTeamDifference => Information.TeamSize - Members.Count;
 
-    public DateTimeOffset? QueueStartTime { get; set; } = null;
+    public DateTimeOffset? QueueStartTime { get; set; }
 
-    public TimeSpan QueueDuration => QueueStartTime is not null ? DateTimeOffset.UtcNow - QueueStartTime.Value : TimeSpan.Zero;
-
-    /// <summary>
-    ///     Hidden Constructor Which Enforces <see cref="Create"/> As The Primary Mechanism For Creating Matchmaking Groups
-    /// </summary>
-    private MatchmakingGroup() { }
+    public TimeSpan QueueDuration =>
+        QueueStartTime is not null ? DateTimeOffset.UtcNow - QueueStartTime.Value : TimeSpan.Zero;
 
     public static MatchmakingGroup GetByMemberAccountID(int accountID)
     {
         MatchmakingGroup group = MatchmakingService.GetMatchmakingGroup(accountID)
-            ?? throw new NullReferenceException($@"No Matchmaking Group Found For Account ID ""{accountID}""");
+                                 ?? throw new NullReferenceException(
+                                     $@"No Matchmaking Group Found For Account ID ""{accountID}""");
 
         return group;
     }
@@ -38,14 +41,15 @@ public class MatchmakingGroup
     public static MatchmakingGroup GetByMemberAccountName(string accountName)
     {
         MatchmakingGroup group = MatchmakingService.GetMatchmakingGroup(accountName)
-            ?? throw new NullReferenceException($@"No Matchmaking Group Found For Account Name ""{accountName}""");
+                                 ?? throw new NullReferenceException(
+                                     $@"No Matchmaking Group Found For Account Name ""{accountName}""");
 
         return group;
     }
 
     internal static MatchmakingGroup Create(ChatSession session, MatchmakingGroupInformation information)
     {
-        MatchmakingGroupMember member = new (session)
+        MatchmakingGroupMember member = new(session)
         {
             Slot = 1, // The Group Leader Is Always In Slot 1
             IsLeader = true,
@@ -58,20 +62,27 @@ public class MatchmakingGroup
 
         // TODO: Create Chat Channel For The Group
 
-        MatchmakingGroup group = new () { Members = [member], Information = information };
+        MatchmakingGroup group = new() { Members = [member], Information = information };
 
         if (MatchmakingService.Groups.ContainsKey(session.Account.ID) is false)
         {
             // TODO: Check If The Account Is Already In A Matchmaking Group And Handle Accordingly
 
             if (MatchmakingService.Groups.TryAdd(session.Account.ID, group) is false)
-                throw new InvalidOperationException($@"Failed To Create Matchmaking Group For Account ID ""{session.Account.ID}""");
+            {
+                throw new InvalidOperationException(
+                    $@"Failed To Create Matchmaking Group For Account ID ""{session.Account.ID}""");
+            }
         }
 
         else
         {
-            if (MatchmakingService.Groups.TryUpdate(session.Account.ID, group, MatchmakingService.Groups[session.Account.ID]) is false)
-                throw new InvalidOperationException($@"Failed To Update Matchmaking Group For Account ID ""{session.Account.ID}""");
+            if (MatchmakingService.Groups.TryUpdate(session.Account.ID, group,
+                    MatchmakingService.Groups[session.Account.ID]) is false)
+            {
+                throw new InvalidOperationException(
+                    $@"Failed To Update Matchmaking Group For Account ID ""{session.Account.ID}""");
+            }
         }
 
         group.MulticastUpdate(session.Account.ID, ChatProtocol.TMMUpdateType.TMM_CREATE_GROUP);
@@ -81,36 +92,39 @@ public class MatchmakingGroup
 
     public MatchmakingGroup Invite(ChatSession session, MerrickContext merrick, string receiverAccountName)
     {
-        ChatBuffer invite = new ();
+        ChatBuffer invite = new();
 
         invite.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_INVITE);
-        invite.WriteString(session.Account.Name);                                                     // Invite Issuer Name
-        invite.WriteInt32(session.Account.ID);                                                        // Invite Issuer ID
-        invite.WriteInt8(Convert.ToByte(ChatProtocol.ChatClientStatus.CHAT_CLIENT_STATUS_CONNECTED)); // Invite Issuer Status
-        invite.WriteInt8(session.Account.GetChatClientFlags());                                       // Invite Issuer Chat Flags
-        invite.WriteString(session.Account.NameColourNoPrefixCode);                                   // Invite Issuer Chat Name Colour
-        invite.WriteString(session.Account.IconNoPrefixCode);                                         // Invite Issuer Icon
-        invite.WriteString(Information.MapName);                                                      // Map Name
-        invite.WriteInt8(Convert.ToByte(Information.GameType));                                       // Game Type
-        invite.WriteString(string.Join('|', Information.GameModes));                                  // Game Modes
-        invite.WriteString(string.Join('|', Information.GameRegions));                                // Game Regions
+        invite.WriteString(session.Account.Name); // Invite Issuer Name
+        invite.WriteInt32(session.Account.ID); // Invite Issuer ID
+        invite.WriteInt8(Convert.ToByte(ChatProtocol.ChatClientStatus
+            .CHAT_CLIENT_STATUS_CONNECTED)); // Invite Issuer Status
+        invite.WriteInt8(session.Account.GetChatClientFlags()); // Invite Issuer Chat Flags
+        invite.WriteString(session.Account.NameColourNoPrefixCode); // Invite Issuer Chat Name Colour
+        invite.WriteString(session.Account.IconNoPrefixCode); // Invite Issuer Icon
+        invite.WriteString(Information.MapName); // Map Name
+        invite.WriteInt8(Convert.ToByte(Information.GameType)); // Game Type
+        invite.WriteString(string.Join('|', Information.GameModes)); // Game Modes
+        invite.WriteString(string.Join('|', Information.GameRegions)); // Game Regions
 
         ChatSession inviteReceiverSession = Context.ClientChatSessions
             .Values.Single(session => session.Account.Name.Equals(receiverAccountName));
 
         inviteReceiverSession.Send(invite);
 
-        ChatBuffer broadcast = new ();
+        ChatBuffer broadcast = new();
 
         Account inviteReceiver = merrick.Accounts.Include(account => account.Clan)
             .Single(account => account.Name.Equals(receiverAccountName));
 
         broadcast.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_INVITE_BROADCAST);
-        broadcast.WriteString(inviteReceiver.NameWithClanTag);  // Invite Receiver Name
+        broadcast.WriteString(inviteReceiver.NameWithClanTag); // Invite Receiver Name
         broadcast.WriteString(session.Account.NameWithClanTag); // Invite Issuer Name
 
         foreach (MatchmakingGroupMember member in Members)
+        {
             member.Session.Send(broadcast);
+        }
 
         return this;
     }
@@ -121,7 +135,7 @@ public class MatchmakingGroup
 
         // TODO: If The Group Is Already In Queue For A Match, Reject The Join Request With An Appropriate Error
 
-        MatchmakingGroupMember newMatchmakingGroupMember = new (session)
+        MatchmakingGroupMember newMatchmakingGroupMember = new(session)
         {
             Slot = Convert.ToByte(Members.Count + 1),
             IsLeader = false,
@@ -144,7 +158,8 @@ public class MatchmakingGroup
         {
             // TODO: Send Failure Response
 
-            throw new InvalidOperationException($@"Player ""{session.Account.Name}"" Tried To Join A Matchmaking Group They Are Already In");
+            throw new InvalidOperationException(
+                $@"Player ""{session.Account.Name}"" Tried To Join A Matchmaking Group They Are Already In");
         }
 
         // TODO: Create Tentative Group, And Only Create Actual Group When Another Player Joins, Or Create Group As Is But Disband On Invite Refusal/Timeout
@@ -182,7 +197,9 @@ public class MatchmakingGroup
 
         // Non-Leader Group Members Are Implicitly Ready (By Means Of Joining The Group In A Ready State) And Do Not Need To Emit Readiness Status Updates
         if (groupMember.IsLeader is false)
+        {
             return this;
+        }
 
         if (groupMember.IsReady is false)
         {
@@ -191,7 +208,11 @@ public class MatchmakingGroup
                 if (member.IsReady is false)
                 {
                     if (member.IsLeader is false)
-                        Log.Error(@"[BUG] Non-Leader Group Member ""{Member.Account.Name}"" With ID ""{Member.Account.ID}"" Was Not Ready", member.Account.Name, member.Account.ID);
+                    {
+                        Log.Error(
+                            @"[BUG] Non-Leader Group Member ""{Member.Account.Name}"" With ID ""{Member.Account.ID}"" Was Not Ready",
+                            member.Account.Name, member.Account.ID);
+                    }
 
                     // All Matchmaking Group Members Need To Be Ready For The Queue To Start
                     member.IsReady = true;
@@ -203,12 +224,14 @@ public class MatchmakingGroup
 
         if (Members.All(member => member.IsReady))
         {
-            ChatBuffer load = new ();
+            ChatBuffer load = new();
 
             load.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_START_LOADING);
 
             foreach (MatchmakingGroupMember member in Members)
+            {
                 member.Session.Send(load);
+            }
         }
 
         return this;
@@ -245,15 +268,17 @@ public class MatchmakingGroup
         QueueStartTime = DateTimeOffset.UtcNow;
 
         // Broadcast Queue Join To All Group Members
-        ChatBuffer joinQueueBroadcast = new ();
+        ChatBuffer joinQueueBroadcast = new();
 
         joinQueueBroadcast.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_JOIN_QUEUE);
 
         foreach (MatchmakingGroupMember member in Members)
+        {
             member.Session.Send(joinQueueBroadcast);
+        }
 
         // Broadcast Queue Update With Average Queue Time
-        ChatBuffer queueUpdateBroadcast = new ();
+        ChatBuffer queueUpdateBroadcast = new();
 
         queueUpdateBroadcast.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_QUEUE_UPDATE);
         queueUpdateBroadcast.WriteInt8(Convert.ToByte(ChatProtocol.TMMUpdateType.TMM_GROUP_QUEUE_UPDATE));
@@ -261,54 +286,57 @@ public class MatchmakingGroup
         queueUpdateBroadcast.WriteInt32(83);
 
         foreach (MatchmakingGroupMember member in Members)
+        {
             member.Session.Send(queueUpdateBroadcast);
+        }
     }
 
     public void MulticastUpdate(int emitterAccountID, ChatProtocol.TMMUpdateType updateType)
     {
-        ChatBuffer update = new ();
+        ChatBuffer update = new();
 
         update.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_UPDATE);
 
-        update.WriteInt8(Convert.ToByte(updateType));                                    // Group Update Type
-        update.WriteInt32(emitterAccountID);                                             // Account ID
-        update.WriteInt8(Convert.ToByte(Members.Count));                                 // Group Size
+        update.WriteInt8(Convert.ToByte(updateType)); // Group Update Type
+        update.WriteInt32(emitterAccountID); // Account ID
+        update.WriteInt8(Convert.ToByte(Members.Count)); // Group Size
         // TODO: Calculate Average Group Rating
-        update.WriteInt16(1500);                                                         // Average Group Rating
-        update.WriteInt32(Leader.Account.ID);                                            // Leader Account ID
+        update.WriteInt16(1500); // Average Group Rating
+        update.WriteInt32(Leader.Account.ID); // Leader Account ID
         // TODO: Dynamically Set Arranged Match Type From The Request Data
         update.WriteInt8(Convert.ToByte(ChatProtocol.ArrangedMatchType.AM_MATCHMAKING)); // Arranged Match Type
-        update.WriteInt8(Convert.ToByte(Information.GameType));                          // Game Type
-        update.WriteString(Information.MapName);                                         // Map Name
-        update.WriteString(string.Join('|', Information.GameModes));                     // Game Modes
-        update.WriteString(string.Join('|', Information.GameRegions));                   // Game Regions
-        update.WriteBool(Information.Ranked);                                            // Ranked
-        update.WriteInt8(Information.MatchFidelity);                                     // Match Fidelity
-        update.WriteInt8(Information.BotDifficulty);                                     // Bot Difficulty
-        update.WriteBool(Information.RandomizeBots);                                     // Randomize Bots
-        update.WriteString(string.Empty);                                                // Country Restrictions (e.g. "AB->USE|XY->USW" Means Only Country "AB" Can Access Region "USE" And Only Country "XY" Can Access Region "USW")
+        update.WriteInt8(Convert.ToByte(Information.GameType)); // Game Type
+        update.WriteString(Information.MapName); // Map Name
+        update.WriteString(string.Join('|', Information.GameModes)); // Game Modes
+        update.WriteString(string.Join('|', Information.GameRegions)); // Game Regions
+        update.WriteBool(Information.Ranked); // Ranked
+        update.WriteInt8(Information.MatchFidelity); // Match Fidelity
+        update.WriteInt8(Information.BotDifficulty); // Bot Difficulty
+        update.WriteBool(Information.RandomizeBots); // Randomize Bots
+        update.WriteString(string
+            .Empty); // Country Restrictions (e.g. "AB->USE|XY->USW" Means Only Country "AB" Can Access Region "USE" And Only Country "XY" Can Access Region "USW")
         // TODO: Find Out What Player Invitation Responses Do
-        update.WriteString("What Is This ??? (Player Invitation Responses)");            // Player Invitation Responses
-        update.WriteInt8(Information.TeamSize);                                          // Team Size (e.g. 5 For Forests Of Caldavar, 3 For Grimm's Crossing)
-        update.WriteInt8(Convert.ToByte(Information.GroupType));                         // Group Type
+        update.WriteString("What Is This ??? (Player Invitation Responses)"); // Player Invitation Responses
+        update.WriteInt8(Information.TeamSize); // Team Size (e.g. 5 For Forests Of Caldavar, 3 For Grimm's Crossing)
+        update.WriteInt8(Convert.ToByte(Information.GroupType)); // Group Type
 
         bool fullGroupUpdate = updateType switch
         {
-            ChatProtocol.TMMUpdateType.TMM_CREATE_GROUP             => true,
-            ChatProtocol.TMMUpdateType.TMM_FULL_GROUP_UPDATE        => true,
-            ChatProtocol.TMMUpdateType.TMM_PLAYER_JOINED_GROUP      => true,
-            ChatProtocol.TMMUpdateType.TMM_PLAYER_LEFT_GROUP        => true,
+            ChatProtocol.TMMUpdateType.TMM_CREATE_GROUP => true,
+            ChatProtocol.TMMUpdateType.TMM_FULL_GROUP_UPDATE => true,
+            ChatProtocol.TMMUpdateType.TMM_PLAYER_JOINED_GROUP => true,
+            ChatProtocol.TMMUpdateType.TMM_PLAYER_LEFT_GROUP => true,
             ChatProtocol.TMMUpdateType.TMM_PLAYER_KICKED_FROM_GROUP => true,
-            _                                                       => false
+            _ => false
         };
 
         foreach (MatchmakingGroupMember member in Members)
         {
             if (fullGroupUpdate)
             {
-                update.WriteInt32(member.Account.ID);                                    // Account ID
-                update.WriteString(member.Account.Name);                                 // Account Name
-                update.WriteInt8(member.Slot);                                           // Group Slot
+                update.WriteInt32(member.Account.ID); // Account ID
+                update.WriteString(member.Account.Name); // Account Name
+                update.WriteInt8(member.Slot); // Group Slot
 
                 // TODO: Get Real Rank Level And Rating
                 /* TODO: Establish Rank (Medal) Level From Rating And Add To The Database
@@ -344,29 +372,29 @@ public class MatchmakingGroup
                     };
                 */
 
-                update.WriteInt32(20);                                                   // Normal Rank Level (Also Known As Normal Campaign Level Or Medal)
-                update.WriteInt32(15);                                                   // Casual Rank Level (Also Known As Casual Campaign Level Or Medal)
+                update.WriteInt32(20); // Normal Rank Level (Also Known As Normal Campaign Level Or Medal)
+                update.WriteInt32(15); // Casual Rank Level (Also Known As Casual Campaign Level Or Medal)
                 // TODO: Figure Out What These Ranks Are (Potentially Actual Global Ranking Index In Order Of Rating Descending, e.g. Highest Rating Is Rank 1)
-                update.WriteInt32(20);                                                   // Normal Rank
-                update.WriteInt32(15);                                                   // Casual Rank
-                update.WriteBool(true);                                                  // Eligible For Campaign
+                update.WriteInt32(20); // Normal Rank
+                update.WriteInt32(15); // Casual Rank
+                update.WriteBool(true); // Eligible For Campaign
                 // TODO: Set Actual Rating, Dynamically From The Database
                 // TODO: Can Be Set To -1 To Hide The Rating From Other Players For Unranked Game Modes
-                update.WriteInt16(1850);                                                 // Rating
+                update.WriteInt16(1850); // Rating
             }
 
-            update.WriteInt8(member.LoadingPercent);                                     // Loading Percent (0 to 100)
-            update.WriteBool(member.IsReady);                                            // Ready Status
-            update.WriteBool(member.IsInGame);                                           // In-Game Status
+            update.WriteInt8(member.LoadingPercent); // Loading Percent (0 to 100)
+            update.WriteBool(member.IsReady); // Ready Status
+            update.WriteBool(member.IsInGame); // In-Game Status
 
             if (fullGroupUpdate)
             {
-                update.WriteBool(member.IsEligibleForMatchmaking);                       // Eligible For Matchmaking
-                update.WriteString(member.Account.NameColourNoPrefixCode);               // Chat Name Colour
-                update.WriteString(member.Account.IconNoPrefixCode);                     // Account Icon
-                update.WriteString(member.Country);                                      // Country
-                update.WriteBool(member.HasGameModeAccess);                              // Game Mode Access Bool
-                update.WriteString(member.GameModeAccess);                               // Game Mode Access String
+                update.WriteBool(member.IsEligibleForMatchmaking); // Eligible For Matchmaking
+                update.WriteString(member.Account.NameColourNoPrefixCode); // Chat Name Colour
+                update.WriteString(member.Account.IconNoPrefixCode); // Account Icon
+                update.WriteString(member.Country); // Country
+                update.WriteBool(member.HasGameModeAccess); // Game Mode Access Bool
+                update.WriteString(member.GameModeAccess); // Game Mode Access String
             }
         }
 
@@ -375,12 +403,14 @@ public class MatchmakingGroup
             foreach (MatchmakingGroupMember member in Members)
             {
                 // TODO: Determine Friendship Status
-                update.WriteBool(false);                                                 // Is Friend
+                update.WriteBool(false); // Is Friend
             }
         }
 
         foreach (MatchmakingGroupMember member in Members)
+        {
             member.Session.Send(update);
+        }
     }
 
     /// <summary>
@@ -393,7 +423,9 @@ public class MatchmakingGroup
         MatchmakingGroupMember? memberToRemove = Members.SingleOrDefault(member => member.Account.ID == accountID);
 
         if (memberToRemove is null)
+        {
             return;
+        }
 
         bool memberToRemoveIsLeader = memberToRemove.IsLeader;
 
@@ -422,7 +454,9 @@ public class MatchmakingGroup
         // Reset All Members To Default Readiness State: Leader = Not Ready, Others = Ready
         // Non-Leader Members Should Always Be Ready So That Group Readiness Is Determined Solely By The Leader
         foreach (MatchmakingGroupMember member in Members)
+        {
             member.IsReady = member.IsLeader is false;
+        }
 
         // TODO: Remove From Queue If Queued
 
@@ -435,7 +469,10 @@ public class MatchmakingGroup
     /// <summary>
     ///     Removes the specified member from the group and records the action as a kick.
     /// </summary>
-    public void KickMember(int accountID) => RemoveMember(accountID, kick: true);
+    public void KickMember(int accountID)
+    {
+        RemoveMember(accountID, true);
+    }
 
     /// <summary>
     ///     Reassigns team slots to all group members sequentially based on current member order.
@@ -453,7 +490,9 @@ public class MatchmakingGroup
         Members = [.. Members.OrderBy(member => member.Slot)];
 
         foreach (MatchmakingGroupMember member in Members)
+        {
             member.Slot = Convert.ToByte(Members.IndexOf(member) + 1);
+        }
 
         Members.Single(member => member.Slot is 1).IsLeader = true;
     }
@@ -466,11 +505,14 @@ public class MatchmakingGroup
     {
         // Remove Group From Matchmaking Service Registry
         if (MatchmakingService.Groups.TryRemove(accountID, out MatchmakingGroup? group) is false)
-            Log.Error(@"Failed To Disband Matchmaking Group GUID ""{Group.GUID}"" For Account ID ""{Member.Account.ID}""", group?.GUID ?? Guid.Empty, accountID);
+        {
+            Log.Error(
+                @"Failed To Disband Matchmaking Group GUID ""{Group.GUID}"" For Account ID ""{Member.Account.ID}""",
+                group?.GUID ?? Guid.Empty, accountID);
+        }
 
         // TODO: Remove From Queue If Queued
 
         // TODO: Remove All Members From Group Chat Channel
     }
 }
-

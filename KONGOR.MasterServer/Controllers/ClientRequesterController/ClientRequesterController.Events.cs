@@ -7,17 +7,17 @@ public partial class ClientRequesterController
         // Stub to prevent 500 error.
         Dictionary<string, object> response = new()
         {
-             // Empty events info
+            // Empty events info
         };
         return Ok(PhpSerialization.Serialize(response));
     }
 
     private async Task<IActionResult> HandleGetSpecialMessages()
     {
-         // Stub to prevent 500 error.
+        // Stub to prevent 500 error.
         Dictionary<string, object> response = new()
         {
-             // Empty messages
+            // Empty messages
         };
         return Ok(PhpSerialization.Serialize(response));
     }

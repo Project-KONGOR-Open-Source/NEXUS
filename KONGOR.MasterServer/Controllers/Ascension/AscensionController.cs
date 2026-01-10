@@ -7,5 +7,7 @@ public class AscensionController : ControllerBase
     [HttpGet("/", Name = "Ascension Root")]
     [HttpGet("index.php", Name = "Ascension Index")]
     public IActionResult GetAscension()
-        => Ok(@"{ ""error_code"": 100, ""data"": { ""is_season_match"": true } }");
+    {
+        return Ok(@"{ ""error_code"": 100, ""data"": { ""is_season_match"": true } }");
+    }
 }

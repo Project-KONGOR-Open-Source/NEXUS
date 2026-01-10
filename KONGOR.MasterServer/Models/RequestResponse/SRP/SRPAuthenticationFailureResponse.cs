@@ -8,29 +8,35 @@ public class SRPAuthenticationFailureResponse(SRPAuthenticationFailureReason rea
     [PhpProperty("auth")]
     public string AuthenticationOutcome { get; set; } = reason switch
     {
-        SRPAuthenticationFailureReason.AccountIsDisabled                => "Account" + (accountName is null ? " " : $@" ""{accountName}"" ") + "Is Disabled",
-        SRPAuthenticationFailureReason.AccountNotFound                  => "Account Not Found",
-        SRPAuthenticationFailureReason.IncorrectPassword                => "Incorrect Password",
+        SRPAuthenticationFailureReason.AccountIsDisabled => "Account" +
+                                                            (accountName is null ? " " : $@" ""{accountName}"" ") +
+                                                            "Is Disabled",
+        SRPAuthenticationFailureReason.AccountNotFound => "Account Not Found",
+        SRPAuthenticationFailureReason.IncorrectPassword => "Incorrect Password",
         SRPAuthenticationFailureReason.IncorrectSystemInformationFormat => "Incorrect System Information Format",
-        SRPAuthenticationFailureReason.IsServerHostingAccount           => "Is Server Hosting Account",
-        SRPAuthenticationFailureReason.MissingCachedSRPData             => "Missing Cached SRP Data",
-        SRPAuthenticationFailureReason.MissingClientPublicEphemeral     => "Missing Client Public Ephemeral",
-        SRPAuthenticationFailureReason.MissingIPAddress                 => "Missing IP Address",
-        SRPAuthenticationFailureReason.MissingLoginIdentifier           => "Missing Login Identifier",
-        SRPAuthenticationFailureReason.MissingMajorVersion              => "Missing Major Version",
-        SRPAuthenticationFailureReason.MissingMinorVersion              => "Missing Minor Version",
-        SRPAuthenticationFailureReason.MissingMicroVersion              => "Missing Micro Version",
-        SRPAuthenticationFailureReason.MissingOperatingSystemType       => "Missing Operating System Type",
-        SRPAuthenticationFailureReason.MissingSRPClientProof            => "Missing SRP Client Proof",
-        SRPAuthenticationFailureReason.MissingSystemInformation         => "Missing System Information",
-        SRPAuthenticationFailureReason.SRPAuthenticationDisabled        => "SRP Authentication Is Disabled" + Environment.NewLine + "1) Open The Console (CTRL + F8)" + Environment.NewLine + @"2) Execute ""SetSave login_useSRP true""",
-        SRPAuthenticationFailureReason.UnexpectedUserAgent              => "Unexpected User Agent",
-        _                                                               => "Unsupported Authentication Failure Reason" + " " + $@"""{nameof(reason)}"""
+        SRPAuthenticationFailureReason.IsServerHostingAccount => "Is Server Hosting Account",
+        SRPAuthenticationFailureReason.MissingCachedSRPData => "Missing Cached SRP Data",
+        SRPAuthenticationFailureReason.MissingClientPublicEphemeral => "Missing Client Public Ephemeral",
+        SRPAuthenticationFailureReason.MissingIPAddress => "Missing IP Address",
+        SRPAuthenticationFailureReason.MissingLoginIdentifier => "Missing Login Identifier",
+        SRPAuthenticationFailureReason.MissingMajorVersion => "Missing Major Version",
+        SRPAuthenticationFailureReason.MissingMinorVersion => "Missing Minor Version",
+        SRPAuthenticationFailureReason.MissingMicroVersion => "Missing Micro Version",
+        SRPAuthenticationFailureReason.MissingOperatingSystemType => "Missing Operating System Type",
+        SRPAuthenticationFailureReason.MissingSRPClientProof => "Missing SRP Client Proof",
+        SRPAuthenticationFailureReason.MissingSystemInformation => "Missing System Information",
+        SRPAuthenticationFailureReason.SRPAuthenticationDisabled => "SRP Authentication Is Disabled" +
+                                                                    Environment.NewLine +
+                                                                    "1) Open The Console (CTRL + F8)" +
+                                                                    Environment.NewLine +
+                                                                    @"2) Execute ""SetSave login_useSRP true""",
+        SRPAuthenticationFailureReason.UnexpectedUserAgent => "Unexpected User Agent",
+        _ => "Unsupported Authentication Failure Reason" + " " + $@"""{nameof(reason)}"""
     };
 
     /// <summary>
     ///     Unknown.
-    ///     <br/>
+    ///     <br />
     ///     Seems to be set to "true" on a successful response, or to "false" if an error occurs.
     /// </summary>
     [PhpProperty(0)]

@@ -5,7 +5,7 @@ public class LeaveChannel : ISynchronousCommandProcessor<ChatSession>
 {
     public void Process(ChatSession session, ChatBuffer buffer)
     {
-        LeaveChannelRequestData requestData = new (buffer);
+        LeaveChannelRequestData requestData = new(buffer);
 
         ChatChannel
             .Get(session, requestData.ChannelName)
@@ -15,14 +15,13 @@ public class LeaveChannel : ISynchronousCommandProcessor<ChatSession>
 
 file class LeaveChannelRequestData
 {
-    public byte[] CommandBytes { get; init; }
-
-    public string ChannelName { get; init; }
-
     public LeaveChannelRequestData(ChatBuffer buffer)
     {
         CommandBytes = buffer.ReadCommandBytes();
         ChannelName = buffer.ReadString();
     }
-}
 
+    public byte[] CommandBytes { get; init; }
+
+    public string ChannelName { get; }
+}

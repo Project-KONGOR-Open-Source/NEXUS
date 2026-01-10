@@ -2,8 +2,7 @@
 
 public class Token
 {
-    [Key]
-    public int ID { get; set; }
+    [Key] public int ID { get; set; }
 
     public required TokenPurpose Purpose { get; set; }
 

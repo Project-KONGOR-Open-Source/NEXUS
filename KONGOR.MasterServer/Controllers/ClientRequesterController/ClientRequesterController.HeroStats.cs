@@ -7,7 +7,7 @@ public partial class ClientRequesterController
         // Stub to prevent 500 error.
         Dictionary<string, object> response = new()
         {
-             // Empty stats for now
+            // Empty stats for now
         };
         return Ok(PhpSerialization.Serialize(response));
     }
@@ -17,7 +17,7 @@ public partial class ClientRequesterController
         // Stub to prevent 400 error.
         Dictionary<string, object> response = new()
         {
-             // Empty stats for now
+            // Empty stats for now
         };
         return Ok(PhpSerialization.Serialize(response));
     }

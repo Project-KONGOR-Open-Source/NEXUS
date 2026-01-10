@@ -1,11 +1,9 @@
 using System.Net.Sockets;
+
 using ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer.Infrastructure;
+
 using KONGOR.MasterServer.Extensions.Cache;
-using KONGOR.MasterServer.Handlers.SRP;
-using MERRICK.DatabaseContext;
-using MERRICK.DatabaseContext.Entities.Core;
-using Microsoft.EntityFrameworkCore;
-using StackExchange.Redis;
+
 using TRANSMUTANSTEIN.ChatServer.Domain.Core;
 
 namespace ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer.Tests;
@@ -18,8 +16,9 @@ public sealed class ChatProtocolTests
         // Arrange
         // Use a unique port to avoid conflicts with other tests
         int testPort = 52800;
-        await using TRANSMUTANSTEINServiceProvider app = await TRANSMUTANSTEINServiceProvider.CreateOrchestratedInstanceAsync(clientPort: testPort);
-        using TcpClient client = new TcpClient();
+        await using TRANSMUTANSTEINServiceProvider app =
+            await TRANSMUTANSTEINServiceProvider.CreateOrchestratedInstanceAsync(testPort);
+        using TcpClient client = new();
 
         // Act
         await client.ConnectAsync("localhost", testPort);
@@ -33,66 +32,67 @@ public sealed class ChatProtocolTests
         {
             using (IServiceScope scope = app.Services.CreateScope())
             {
-            MerrickContext db = scope.ServiceProvider.GetRequiredService<MerrickContext>();
-            IDatabase cache = scope.ServiceProvider.GetRequiredService<IDatabase>();
+                MerrickContext db = scope.ServiceProvider.GetRequiredService<MerrickContext>();
+                IDatabase cache = scope.ServiceProvider.GetRequiredService<IDatabase>();
 
-            User user = new User
-            {
-                ID = 999,
-                EmailAddress = "test999@test.com",
-                SRPPasswordHash = "hash",
-                SRPPasswordSalt = "salt",
-                PBKDF2PasswordHash = "hash",
-                Role = null! // Deferred assignment
-            };
-
-            // Fix Role
-            Role? existingRole = await db.Roles.FindAsync(1);
-            if (existingRole == null)
-            {
-                existingRole = new Role { ID = 1, Name = "User" };
-                db.Roles.Add(existingRole);
-                await db.SaveChangesAsync();
-            }
-            user.Role = existingRole;
-
-            Account account = new Account
-            {
-                ID = 999,
-                Name = "TestUser999",
-                IsMain = true,
-                User = user
-            };
-            
-            user.Accounts = new List<Account> { account };
-
-            // Ensure Account Exists
-            if (await db.Accounts.FindAsync(999) == null)
-            {
-                // Ensure Role
-                if (await db.Roles.FindAsync(1) == null)
+                User user = new()
                 {
-                    db.Roles.Add(new Role { ID = 1, Name = "User" });
+                    ID = 999,
+                    EmailAddress = "test999@test.com",
+                    SRPPasswordHash = "hash",
+                    SRPPasswordSalt = "salt",
+                    PBKDF2PasswordHash = "hash",
+                    Role = null! // Deferred assignment
+                };
+
+                // Fix Role
+                Role? existingRole = await db.Roles.FindAsync(1);
+                if (existingRole == null)
+                {
+                    existingRole = new Role { ID = 1, Name = "User" };
+                    db.Roles.Add(existingRole);
                     await db.SaveChangesAsync();
                 }
 
-                db.Accounts.Add(account);
-                await db.SaveChangesAsync();
-                Console.WriteLine("[TEST DEBUG] Seeded Account ID 999 into InMemory Database.");
-            }
-            else 
-            {
-                 Console.WriteLine("[TEST DEBUG] Account ID 999 already exists in InMemory Database.");
-            }
+                user.Role = existingRole;
 
-            // Verify explicit retrieval
-            Account? check = await db.Accounts.FindAsync(999);
-            if (check == null) Console.WriteLine("[TEST DEBUG] CRITICAL: Account ID 999 NOT FOUND after seeding!");
-            else Console.WriteLine($"[TEST DEBUG] Verified Account ID 999 exists: {check.Name}");
+                Account account = new() { ID = 999, Name = "TestUser999", IsMain = true, User = user };
 
-            // Seed Session Cookie
-            await cache.SetAccountNameForSessionCookie("test_cookie", "TestUser999");
-        }
+                user.Accounts = new List<Account> { account };
+
+                // Ensure Account Exists
+                if (await db.Accounts.FindAsync(999) == null)
+                {
+                    // Ensure Role
+                    if (await db.Roles.FindAsync(1) == null)
+                    {
+                        db.Roles.Add(new Role { ID = 1, Name = "User" });
+                        await db.SaveChangesAsync();
+                    }
+
+                    db.Accounts.Add(account);
+                    await db.SaveChangesAsync();
+                    Console.WriteLine("[TEST DEBUG] Seeded Account ID 999 into InMemory Database.");
+                }
+                else
+                {
+                    Console.WriteLine("[TEST DEBUG] Account ID 999 already exists in InMemory Database.");
+                }
+
+                // Verify explicit retrieval
+                Account? check = await db.Accounts.FindAsync(999);
+                if (check == null)
+                {
+                    Console.WriteLine("[TEST DEBUG] CRITICAL: Account ID 999 NOT FOUND after seeding!");
+                }
+                else
+                {
+                    Console.WriteLine($"[TEST DEBUG] Verified Account ID 999 exists: {check.Name}");
+                }
+
+                // Seed Session Cookie
+                await cache.SetAccountNameForSessionCookie("test_cookie", "TestUser999");
+            }
         }
         finally
         {
@@ -105,7 +105,7 @@ public sealed class ChatProtocolTests
         string hash = SRPAuthenticationHandlers.ComputeChatServerCookieHash(accountId, ip, cookie);
 
         // 0. Send Login Packet (NET_CHAT_CL_CONNECT - 0x0C00)
-        ChatBuffer loginBuffer = new ChatBuffer();
+        ChatBuffer loginBuffer = new();
         loginBuffer.WriteCommand(ChatProtocol.ClientToChatServer.NET_CHAT_CL_CONNECT);
         loginBuffer.WriteInt32(accountId); // Account ID
         loginBuffer.WriteString(cookie); // Session Cookie
@@ -122,13 +122,13 @@ public sealed class ChatProtocolTests
         loginBuffer.WriteInt8(10); // Client Minor
         loginBuffer.WriteInt8(1); // Client Patch
         loginBuffer.WriteInt8(0); // Client Revision
-        loginBuffer.WriteInt8((byte)ChatProtocol.ChatClientStatus.CHAT_CLIENT_STATUS_CONNECTED); // Last State
-        loginBuffer.WriteInt8((byte)ChatProtocol.ChatModeType.CHAT_MODE_AVAILABLE); // Chat Mode
+        loginBuffer.WriteInt8((byte) ChatProtocol.ChatClientStatus.CHAT_CLIENT_STATUS_CONNECTED); // Last State
+        loginBuffer.WriteInt8((byte) ChatProtocol.ChatModeType.CHAT_MODE_AVAILABLE); // Chat Mode
         loginBuffer.WriteString("USE"); // Region
         loginBuffer.WriteString("en"); // Language
-        
+
         // Get the bytes
-        byte[] loginPacket = loginBuffer.Data.AsSpan(0, (int)loginBuffer.Size).ToArray();
+        byte[] loginPacket = loginBuffer.Data.AsSpan(0, (int) loginBuffer.Size).ToArray();
         // Packets need length prefix. ChatBuffer doesn't add it to 'Buffer' automatically until Send() is called in server
         // But here we are client.
         // Wait, ChatBuffer structure:
@@ -136,23 +136,23 @@ public sealed class ChatProtocolTests
         // Buffer = byte array.
         // WriteCommand writes the 2 bytes of command.
         // We need to prepend the 2 bytes of LENGTH.
-        ushort packetLength = (ushort)(loginPacket.Length); 
-        
-        List<byte> rawBytes = new List<byte>();
+        ushort packetLength = (ushort) loginPacket.Length;
+
+        List<byte> rawBytes = new();
         rawBytes.AddRange(BitConverter.GetBytes(packetLength));
         rawBytes.AddRange(loginPacket);
-        
+
         await stream.WriteAsync(rawBytes.ToArray());
 
         // Use a cancellation token to prevent infinite waiting if packets don't arrive
-        using CancellationTokenSource cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+        using CancellationTokenSource cts = new(TimeSpan.FromSeconds(5));
 
-        List<ushort> receivedCommands = new List<ushort>();
-        List<byte[]> receivedPayloads = new List<byte[]>();
-        
+        List<ushort> receivedCommands = new();
+        List<byte[]> receivedPayloads = new();
+
         // We expect at least 4 packets: Accept, Options, InitialStatus, Connected
         // We might validly receive more (e.g. Channel joins), but we focus on the first 4 for the handshake
-        int expectedPackets = 4; 
+        int expectedPackets = 4;
 
         try
         {
@@ -164,22 +164,29 @@ public sealed class ChatProtocolTests
                 while (bytesRead < 4)
                 {
                     int read = await stream.ReadAsync(headerBuffer, bytesRead, 4 - bytesRead, cts.Token);
-                    if (read == 0) break; // Disconnected
+                    if (read == 0)
+                    {
+                        break; // Disconnected
+                    }
+
                     bytesRead += read;
                 }
 
-                if (bytesRead < 4) break;
+                if (bytesRead < 4)
+                {
+                    break;
+                }
 
                 ushort length = BitConverter.ToUInt16(headerBuffer, 0);
                 ushort command = BitConverter.ToUInt16(headerBuffer, 2);
 
                 if (command == 0x1C01) // NET_CHAT_CL_REJECT
                 {
-                     Console.WriteLine($"[TEST DEBUG] Received REJECT command (0x1C01). Length: {length}.");
-                     receivedCommands.Add(command);
-                     // Read potential reject reason payload?
-                     // Reject payload is usually int32 reason.
-                     break; 
+                    Console.WriteLine($"[TEST DEBUG] Received REJECT command (0x1C01). Length: {length}.");
+                    receivedCommands.Add(command);
+                    // Read potential reject reason payload?
+                    // Reject payload is usually int32 reason.
+                    break;
                 }
 
                 receivedCommands.Add(command);
@@ -194,7 +201,7 @@ public sealed class ChatProtocolTests
                 // Let's assume standard behavior: Length (2 bytes) tells us how many following bytes to read?
                 // Actually, typically in K2: Length includes the Command (2 bytes). 
                 // So if Length is 2, Payload is 0 bytes.
-                
+
                 int payloadSize = length - 2;
                 byte[] payload = Array.Empty<byte>();
 
@@ -205,9 +212,14 @@ public sealed class ChatProtocolTests
                     while (payloadRead < payloadSize)
                     {
                         int read = await stream.ReadAsync(payload, payloadRead, payloadSize - payloadRead, cts.Token);
-                        if (read == 0) break;
+                        if (read == 0)
+                        {
+                            break;
+                        }
+
                         payloadRead += read;
                     }
+
                     receivedPayloads.Add(payload);
                 }
                 else
@@ -220,28 +232,30 @@ public sealed class ChatProtocolTests
         {
             // Timeout, analyze what we got
         }
-        
-        // Assert - Sequence
-        Console.WriteLine($"[TEST DEBUG] Received {receivedCommands.Count} commands: {string.Join(", ", receivedCommands.Select(c => $"0x{c:X4}"))}");
 
-        if (receivedCommands.Count == 1 && receivedCommands[0] == (ushort)ChatProtocol.ChatServerToClient.NET_CHAT_CL_REJECT)
+        // Assert - Sequence
+        Console.WriteLine(
+            $"[TEST DEBUG] Received {receivedCommands.Count} commands: {string.Join(", ", receivedCommands.Select(c => $"0x{c:X4}"))}");
+
+        if (receivedCommands.Count == 1 && receivedCommands[0] == ChatProtocol.ChatServerToClient.NET_CHAT_CL_REJECT)
         {
-             Assert.Fail("Authentication Failed: Server Rejected Connection (NET_CHAT_CL_REJECT). Check server logs for exact reason.");
+            Assert.Fail(
+                "Authentication Failed: Server Rejected Connection (NET_CHAT_CL_REJECT). Check server logs for exact reason.");
         }
 
         await Assert.That(receivedCommands.Count).IsGreaterThanOrEqualTo(4);
 
         // 1. Accept
-        await Assert.That(receivedCommands[0]).IsEqualTo((ushort)ChatProtocol.ChatServerToClient.NET_CHAT_CL_ACCEPT);
-        
+        await Assert.That(receivedCommands[0]).IsEqualTo(ChatProtocol.ChatServerToClient.NET_CHAT_CL_ACCEPT);
+
         // 2. Options (MUST BE BEFORE 0x000B)
-        await Assert.That(receivedCommands[1]).IsEqualTo((ushort)ChatProtocol.Command.CHAT_CMD_OPTIONS);
-        
+        await Assert.That(receivedCommands[1]).IsEqualTo(ChatProtocol.Command.CHAT_CMD_OPTIONS);
+
         // 3. Initial Status (0x000B) (MUST BE BEFORE 0x000C)
-        await Assert.That(receivedCommands[2]).IsEqualTo((ushort)ChatProtocol.Command.CHAT_CMD_INITIAL_STATUS);
-        
+        await Assert.That(receivedCommands[2]).IsEqualTo(ChatProtocol.Command.CHAT_CMD_INITIAL_STATUS);
+
         // 4. Update Status (0x000C) (Connected)
-        await Assert.That(receivedCommands[3]).IsEqualTo((ushort)ChatProtocol.Command.CHAT_CMD_UPDATE_STATUS);
+        await Assert.That(receivedCommands[3]).IsEqualTo(ChatProtocol.Command.CHAT_CMD_UPDATE_STATUS);
 
         // Assert - Payloads
 
@@ -255,18 +269,18 @@ public sealed class ChatProtocolTests
         // We know we removed the padding byte, so it should be 115 bytes now?
         // Original invalid payload: 116 bytes (115 data + 1 padding).
         // Correct payload: 115 bytes.
-        
+
         // Wait, log said "Payload (116 bytes)". 
         // 116 bytes of *Payload* + 2 bytes Command = 118 bytes total length field? 
         // 
         // Let's assert that the Options payload does NOT contain that trailing 0x00 padding if it's 116 bytes long.
         // Actually, let's just assert it is NOT 0 bytes.
         // And more importantly, let's assert correct order.
-        
+
         // Verify Initial Status (0x000B) Structure
         // For a new guest account with 0 friends, it should be Command (2) + Count (4) = 6 bytes total.
         // So payload size (excluding command) should be 4 bytes.
-        await Assert.That(receivedPayloads[2].Length).IsEqualTo(4); 
+        await Assert.That(receivedPayloads[2].Length).IsEqualTo(4);
         int friendCount = BitConverter.ToInt32(receivedPayloads[2], 0);
         await Assert.That(friendCount).IsEqualTo(0);
     }

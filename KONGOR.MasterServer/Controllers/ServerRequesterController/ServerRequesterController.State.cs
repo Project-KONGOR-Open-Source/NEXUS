@@ -7,7 +7,9 @@ public partial class ServerRequesterController
         string? session = Request.Form["session"];
 
         if (session is null)
+        {
             return BadRequest(@"Missing Value For Form Parameter ""session""");
+        }
 
         /*
             Match server shutdown logic would normally go here, however, we NOOP (no operation) this action and let the TCP server handle it instead.

@@ -1,3 +1,5 @@
+using KONGOR.MasterServer.Services.Store;
+
 namespace KONGOR.MasterServer.Controllers.ClientRequesterController;
 
 public partial class ClientRequesterController
@@ -5,7 +7,10 @@ public partial class ClientRequesterController
     private async Task<IActionResult> HandleGetProducts()
     {
         string? cookie = Request.Form["cookie"];
-        if (string.IsNullOrEmpty(cookie)) return new UnauthorizedResult();
+        if (string.IsNullOrEmpty(cookie))
+        {
+            return new UnauthorizedResult();
+        }
 
         cookie = cookie.Replace("-", string.Empty);
 
@@ -13,17 +18,23 @@ public partial class ClientRequesterController
 
         if (sessionAccountName is null)
         {
-             (bool accountSessionCookieIsValid, string? cacheAccountName) = await DistributedCache.ValidateAccountSessionCookie(cookie);
-             if (accountSessionCookieIsValid) sessionAccountName = cacheAccountName;
+            (bool accountSessionCookieIsValid, string? cacheAccountName) =
+                await DistributedCache.ValidateAccountSessionCookie(cookie);
+            if (accountSessionCookieIsValid)
+            {
+                sessionAccountName = cacheAccountName;
+            }
         }
 
         if (sessionAccountName is null)
+        {
             return Unauthorized($@"No Session Found For Cookie ""{cookie}""");
+        }
 
         // Map StaticCatalog.Products to the legacy GetProductsResponse structure: Category -> ID -> Product
-        Dictionary<string, Dictionary<int, Dictionary<string, object>>> productsResponse = new Dictionary<string, Dictionary<int, Dictionary<string, object>>>();
+        Dictionary<string, Dictionary<int, Dictionary<string, object>>> productsResponse = new();
 
-        foreach (global::KONGOR.MasterServer.Models.RequestResponse.Store.Product product in Services.Store.StaticCatalog.Products)
+        foreach (Product product in StaticCatalog.Products)
         {
             // Map NEXUS Product Type to Legacy Category Name
             string category = product.Type switch
@@ -38,10 +49,12 @@ public partial class ClientRequesterController
                 // Let's use "Hero" and "Misc" for now to be safe, or stick to what READ ONLY has.
                 _ => "Misc"
             };
-            
+
             // If the category dictionary doesn't exist, create it
             if (!productsResponse.ContainsKey(category))
+            {
                 productsResponse[category] = new Dictionary<int, Dictionary<string, object>>();
+            }
 
             // Legacy Entry Structure
             // product.ProductCode is a string, but legacy uses int ID.
@@ -51,7 +64,7 @@ public partial class ClientRequesterController
             // I'll use HashCode or a counter? Or valid IDs if available.
             // StaticCatalog in NEXUS doesn't have IDs. 
             // I will generate a stable ID based on Code hash for now.
-            int id = Math.Abs(product.ProductCode.GetHashCode()); 
+            int id = Math.Abs(product.ProductCode.GetHashCode());
 
             productsResponse[category][id] = new Dictionary<string, object>
             {
@@ -66,10 +79,7 @@ public partial class ClientRequesterController
             };
         }
 
-        Dictionary<string, object> response = new Dictionary<string, object>()
-        {
-            ["products"] = productsResponse
-        };
+        Dictionary<string, object> response = new() { ["products"] = productsResponse };
 
         return Ok(PhpSerialization.Serialize(response));
     }

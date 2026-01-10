@@ -8,7 +8,7 @@ public partial class ServerRequesterController
         // Quick stats likely returns summary data for player profiles.
         Dictionary<string, object> response = new()
         {
-             // Empty for now
+            // Empty for now
         };
 
         return Ok(PhpSerialization.Serialize(response));

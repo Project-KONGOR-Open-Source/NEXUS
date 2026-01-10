@@ -43,38 +43,53 @@ public partial class ServerRequesterController
         string? hostAccountName = Request.Form["login"];
 
         if (hostAccountName is null)
+        {
             return BadRequest(@"Missing Value For Form Parameter ""login""");
+        }
 
-        hostAccountName = hostAccountName.TrimEnd(':'); // The Semicolon Is Used To Separate The Account Name From The Server Instance, So We Need To Remove It Because It Is Not Needed For The Server Manager
+        hostAccountName =
+            hostAccountName
+                .TrimEnd(':'); // The Semicolon Is Used To Separate The Account Name From The Server Instance, So We Need To Remove It Because It Is Not Needed For The Server Manager
 
         string? accountPasswordHash = Request.Form["pass"];
 
         if (accountPasswordHash is null)
+        {
             return BadRequest(@"Missing Value For Form Parameter ""pass""");
+        }
 
         Account? account = await MerrickContext.Accounts
             .Include(account => account.User)
             .FirstOrDefaultAsync(account => account.Name.Equals(hostAccountName));
 
         if (account is null)
+        {
             return NotFound($@"Account ""{hostAccountName}"" Was Not Found");
+        }
 
         if (account.Type is not AccountType.ServerHost)
+        {
             return Unauthorized($@"Account ""{hostAccountName}"" Is Not A Server Host");
+        }
 
-        string srpPasswordHash = SRPAuthenticationHandlers.ComputeSRPPasswordHash(accountPasswordHash, account.User.SRPPasswordSalt);
+        string srpPasswordHash =
+            SRPAuthenticationHandlers.ComputeSRPPasswordHash(accountPasswordHash, account.User.SRPPasswordSalt);
 
         if (srpPasswordHash.Equals(account.User.SRPPasswordHash) is false)
+        {
             return Unauthorized("Incorrect Password");
+        }
 
         if (Request.HttpContext.Connection.RemoteIpAddress is null)
         {
-            Logger.LogError(@"[BUG] Remote IP Address For Server Manager With Host Account Name ""{HostAccountName}"" Is NULL", hostAccountName);
+            Logger.LogError(
+                @"[BUG] Remote IP Address For Server Manager With Host Account Name ""{HostAccountName}"" Is NULL",
+                hostAccountName);
 
             return BadRequest("Unable To Resolve Remote IP Address");
         }
 
-        MatchServerManager matchServerManager = new ()
+        MatchServerManager matchServerManager = new()
         {
             HostAccountID = account.ID,
             HostAccountName = account.Name,
@@ -86,25 +101,27 @@ public partial class ServerRequesterController
         await DistributedCache.SetMatchServerManager(hostAccountName, matchServerManager);
 
         string chatServerHost = Environment.GetEnvironmentVariable("CHAT_SERVER_HOST")
-            ?? throw new NullReferenceException("Chat Server Host Is NULL");
+                                ?? throw new NullReferenceException("Chat Server Host Is NULL");
 
-        int chatServerMatchServerManagerConnectionsPort = int.Parse(Environment.GetEnvironmentVariable("CHAT_SERVER_PORT_MATCH_SERVER_MANAGER")
+        int chatServerMatchServerManagerConnectionsPort = int.Parse(
+            Environment.GetEnvironmentVariable("CHAT_SERVER_PORT_MATCH_SERVER_MANAGER")
             ?? throw new NullReferenceException("Chat Server Match Server Manager Connections Port Is NULL"));
 
-        Dictionary<string, object> response = new ()
+        Dictionary<string, object> response = new()
         {
             ["server_id"] = matchServerManager.ID,
             ["official"] = 1, // If Not Official, It Is Considered To Be Un-Authorized
             ["session"] = matchServerManager.Cookie,
             ["chat_address"] = chatServerHost,
-            ["chat_port"] = chatServerMatchServerManagerConnectionsPort,
+            ["chat_port"] = chatServerMatchServerManagerConnectionsPort
         };
 
         // TODO: Investigate How These Are Used
         response["cdn_upload_host"] = Configuration.CDN.Host;
         response["cdn_upload_target"] = "upload";
 
-        Logger.LogInformation(@"Server Manager ID ""{MatchServerManagerID}"" Was Registered At ""{MatchServerManagerIPAddress}"" With Cookie ""{MatchServerManagerCookie}""",
+        Logger.LogInformation(
+            @"Server Manager ID ""{MatchServerManagerID}"" Was Registered At ""{MatchServerManagerIPAddress}"" With Cookie ""{MatchServerManagerCookie}""",
             matchServerManager.ID, matchServerManager.IPAddress, matchServerManager.Cookie);
 
         return Ok(PhpSerialization.Serialize(response));
@@ -115,61 +132,83 @@ public partial class ServerRequesterController
         string serverIdentifier = Request.Form["login"].ToString();
 
         if (serverIdentifier.Split(':').Length is not 2)
+        {
             return BadRequest(@"Missing Or Incorrect Value For Form Parameter ""login""");
+        }
 
         string hostAccountName = serverIdentifier.Split(':').First();
         string serverInstance = serverIdentifier.Split(':').Last();
 
         string? accountPasswordHash = Request.Form["pass"];
 
-        if (accountPasswordHash is null) 
+        if (accountPasswordHash is null)
+        {
             return BadRequest(@"Missing Value For Form Parameter ""pass""");
+        }
 
         string? serverPort = Request.Form["port"];
 
         if (serverPort is null)
+        {
             return BadRequest(@"Missing Value For Form Parameter ""port""");
+        }
 
         string? serverName = Request.Form["name"];
 
         if (serverName is null)
+        {
             return BadRequest(@"Missing Value For Form Parameter ""name""");
+        }
 
         string? serverDescription = Request.Form["desc"];
 
         if (serverDescription is null)
+        {
             return BadRequest(@"Missing Value For Form Parameter ""desc""");
+        }
 
         string? serverLocation = Request.Form["location"];
 
         if (serverLocation is null)
+        {
             return BadRequest(@"Missing Value For Form Parameter ""location""");
+        }
 
         string? serverIPAddress = Request.Form["ip"];
 
         if (serverIPAddress is null)
+        {
             return BadRequest(@"Missing Value For Form Parameter ""ip""");
+        }
 
         Account? account = await MerrickContext.Accounts
             .Include(account => account.User)
             .FirstOrDefaultAsync(account => account.Name.Equals(hostAccountName));
 
         if (account is null)
+        {
             return NotFound($@"Account ""{hostAccountName}"" Was Not Found");
+        }
 
         if (account.Type is not AccountType.ServerHost)
+        {
             return Unauthorized($@"Account ""{hostAccountName}"" Is Not A Server Host");
+        }
 
-        string srpPasswordHash = SRPAuthenticationHandlers.ComputeSRPPasswordHash(accountPasswordHash, account.User.SRPPasswordSalt);
-        
+        string srpPasswordHash =
+            SRPAuthenticationHandlers.ComputeSRPPasswordHash(accountPasswordHash, account.User.SRPPasswordSalt);
+
         if (srpPasswordHash.Equals(account.User.SRPPasswordHash) is false)
+        {
             return Unauthorized("Incorrect Password");
+        }
 
         // TODO: Verify Whether The Server Version Matches The Client Version (Or Disallow Servers To Be Started If They Are Not On The Latest Version)
 
-        MatchServerManager? matchServerManager = (await DistributedCache.GetMatchServerManagersByAccountName(hostAccountName)).FirstOrDefault();
+        MatchServerManager? matchServerManager =
+            (await DistributedCache.GetMatchServerManagersByAccountName(hostAccountName)).FirstOrDefault();
 
-        MatchServer matchServer = new ()
+        MatchServer matchServer = new()
         {
             HostAccountID = account.ID,
             HostAccountName = account.Name,
@@ -196,12 +235,13 @@ public partial class ServerRequesterController
         // INFO: The Server Manager Doesn't Send Descriptions, So Use Name Instead Since We Can Override Them Anyway Via Remote Command (svr_name) On TCP Handshake
 
         string chatServerHost = Environment.GetEnvironmentVariable("CHAT_SERVER_HOST")
-            ?? throw new NullReferenceException("Chat Server Host Is NULL");
+                                ?? throw new NullReferenceException("Chat Server Host Is NULL");
 
-        int chatServerMatchServerConnectionsPort = int.Parse(Environment.GetEnvironmentVariable("CHAT_SERVER_PORT_MATCH_SERVER")
+        int chatServerMatchServerConnectionsPort = int.Parse(
+            Environment.GetEnvironmentVariable("CHAT_SERVER_PORT_MATCH_SERVER")
             ?? throw new NullReferenceException("Chat Server Match Server Connections Port Is NULL"));
 
-        Dictionary<string, object> response = new ()
+        Dictionary<string, object> response = new()
         {
             ["session"] = matchServer.Cookie,
             ["server_id"] = matchServer.ID,
@@ -210,7 +250,8 @@ public partial class ServerRequesterController
             ["leaverthreshold"] = 0.05
         };
 
-        Logger.LogInformation(@"Server ID ""{MatchServerID}"" Was Registered At ""{MatchServerIPAddress}"":""{MatchServerPort}"" With Cookie ""{MatchServerCookie}""",
+        Logger.LogInformation(
+            @"Server ID ""{MatchServerID}"" Was Registered At ""{MatchServerIPAddress}"":""{MatchServerPort}"" With Cookie ""{MatchServerCookie}""",
             matchServer.ID, matchServer.IPAddress, matchServer.Port, matchServer.Cookie);
 
         return Ok(PhpSerialization.Serialize(response));
@@ -221,22 +262,30 @@ public partial class ServerRequesterController
         string? session = Request.Form["session"];
 
         if (session is null)
+        {
             return BadRequest(@"Missing Value For Form Parameter ""session""");
+        }
 
         string? cookie = Request.Form["cookie"];
 
         if (cookie is null)
+        {
             return BadRequest(@"Missing Value For Form Parameter ""cookie""");
+        }
 
         string? ip = Request.Form["ip"];
 
         if (ip is null)
+        {
             return BadRequest(@"Missing Value For Form Parameter ""ip""");
+        }
 
         string? casual = Request.Form["cas"];
 
         if (casual is null)
+        {
             return BadRequest(@"Missing Value For Form Parameter ""cas""");
+        }
 
         // This value is the ChatProtocol.ArrangedMatchType value plus 1. This enum seems to be 1-indexed on the client-side.
         // Example 1: a value of 1 means AM_PUBLIC, which is ChatProtocol.ArrangedMatchType value 0.
@@ -244,12 +293,16 @@ public partial class ServerRequesterController
         string? arrangedMatchType = Request.Form["new"];
 
         if (arrangedMatchType is null)
+        {
             return BadRequest(@"Missing Value For Form Parameter ""new""");
+        }
 
         string? accountNameForSessionCookie = await DistributedCache.GetAccountNameForSessionCookie(cookie);
 
         if (accountNameForSessionCookie is null)
+        {
             return Unauthorized("No Valid Client Session Cookie Could Be Found");
+        }
 
         Account? account = await MerrickContext.Accounts
             .Include(account => account.User).ThenInclude(user => user.Accounts)
@@ -258,12 +311,14 @@ public partial class ServerRequesterController
 
         if (account is null)
         {
-            Logger.LogError(@"[BUG] No Account Could Be Found For Account Name ""{AccountName}"" With Session Cookie ""{Cookie}""", accountNameForSessionCookie, cookie);
+            Logger.LogError(
+                @"[BUG] No Account Could Be Found For Account Name ""{AccountName}"" With Session Cookie ""{Cookie}""",
+                accountNameForSessionCookie, cookie);
 
             return BadRequest($@"Account With Name ""{accountNameForSessionCookie}"" Could Not Be Found");
         }
 
-        Dictionary<string, object> response = new ()
+        Dictionary<string, object> response = new()
         {
             { "cookie", cookie },
             { "account_id", account.ID },
@@ -353,7 +408,8 @@ public partial class ServerRequesterController
         // TODO: Create Proper Response Model
 
         response.Add("infos", ""); // TODO: Set These Stats
-        response.Add("game_cookie", "16cb3211-5253-45a8-bcb9-10d037ec9303"); // Must Exist, But The Value Doesn't Really Matter; TODO: Generate And Store This Cookie Per Match?
+        response.Add("game_cookie",
+            "16cb3211-5253-45a8-bcb9-10d037ec9303"); // Must Exist, But The Value Doesn't Really Matter; TODO: Generate And Store This Cookie Per Match?
         response.Add("my_upgrades", account.User.OwnedStoreItems);
         response.Add("selected_upgrades", account.SelectedStoreItems);
 
@@ -365,12 +421,16 @@ public partial class ServerRequesterController
         string? session = Request.Form["session"];
 
         if (session is null)
+        {
             return BadRequest(@"Missing Value For Form Parameter ""session""");
+        }
 
         string? accountKey = Request.Form["acc_key"];
 
         if (accountKey is null)
+        {
             return BadRequest(@"Missing Value For Form Parameter ""acc_key""");
+        }
 
         //GameServer? server = MerrickContext.GameServers.SingleOrDefault(server => server.Cookie.Equals(formData["session"]));
         //if (server is null) return Unauthorized();
@@ -388,7 +448,7 @@ public partial class ServerRequesterController
 
         // TODO: Fix This Mess !!! (Maybe Just Use The Cookie As The Account Key?)
 
-        Dictionary<string, object> response = new ()
+        Dictionary<string, object> response = new()
         {
             { "server_id", 666 },
             { "official", 1 } // 0 = Unofficial; 1 = Official With Stats; 2 = Official Without Stats;
@@ -404,42 +464,58 @@ public partial class ServerRequesterController
         string? session = Request.Form["session"];
 
         if (session is null)
+        {
             return BadRequest(@"Missing Value For Form Parameter ""session""");
+        }
 
         string? connectionsCount = Request.Form["num_conn"];
 
         if (connectionsCount is null)
+        {
             return BadRequest(@"Missing Value For Form Parameter ""num_conn""");
+        }
 
         string? gameTime = Request.Form["cgt"];
 
         if (gameTime is null)
+        {
             return BadRequest(@"Missing Value For Form Parameter ""cgt""");
+        }
 
         string? map = Request.Form["map"];
 
         if (map is null)
+        {
             return BadRequest(@"Missing Value For Form Parameter ""map""");
+        }
 
         string? isPrivate = Request.Form["private"];
 
         if (isPrivate is null)
+        {
             return BadRequest(@"Missing Value For Form Parameter ""private""");
+        }
 
         string? isVIP = Request.Form["vip"];
 
         if (isVIP is null)
+        {
             return BadRequest(@"Missing Value For Form Parameter ""vip""");
+        }
 
         string? connectionState = Request.Form["c_state"];
 
         if (connectionState is null)
+        {
             return BadRequest(@"Missing Value For Form Parameter ""c_state""");
+        }
 
         string? previousConnectionState = Request.Form["prev_c_state"];
 
         if (previousConnectionState is null)
+        {
             return BadRequest(@"Missing Value For Form Parameter ""prev_c_state""");
+        }
 
         // TODO: Maybe Use This To Link The Server To The Server Manager? (Or Maybe Just Do That On Server New Session)
 
@@ -448,7 +524,9 @@ public partial class ServerRequesterController
         MatchServer? matchServer = await DistributedCache.GetMatchServerBySessionCookie(session);
 
         if (matchServer is null)
+        {
             return Unauthorized($@"No Match Server Could Be Found For Session Cookie ""{session}""");
+        }
 
         matchServer.Status = Enum.Parse<ServerStatus>(connectionState);
 
@@ -461,14 +539,19 @@ public partial class ServerRequesterController
 
         if (newMatch is null)
         {
-            MatchStartData? matchStartData = await DistributedCache.GetMatchStartDataByMatchServerSessionCookie(session);
+            MatchStartData? matchStartData =
+                await DistributedCache.GetMatchStartDataByMatchServerSessionCookie(session);
 
             if (matchStartData is null)
             {
                 // Only Log This Error If The Server Is In A State Where It Should Have Match Data (i.e. Not Idle, Sleeping, Or Unknown)
-                if (matchServer is not null && matchServer.Status != ServerStatus.SERVER_STATUS_IDLE && matchServer.Status != ServerStatus.SERVER_STATUS_SLEEPING && matchServer.Status != ServerStatus.SERVER_STATUS_UNKNOWN)
+                if (matchServer is not null && matchServer.Status != ServerStatus.SERVER_STATUS_IDLE &&
+                    matchServer.Status != ServerStatus.SERVER_STATUS_SLEEPING &&
+                    matchServer.Status != ServerStatus.SERVER_STATUS_UNKNOWN)
                 {
-                    Logger.LogError(@"[BUG] Received Match Initialisation Heartbeat For Session ""{Session}"", But No MatchStartData Found In Cache. Server Status: {ServerStatus}", session, matchServer.Status);
+                    Logger.LogError(
+                        @"[BUG] Received Match Initialisation Heartbeat For Session ""{Session}"", But No MatchStartData Found In Cache. Server Status: {ServerStatus}",
+                        session, matchServer.Status);
                 }
 
                 return Ok();
@@ -483,13 +566,17 @@ public partial class ServerRequesterController
             string? matchID = Request.Form["match_id"];
 
             if (matchID is null)
+            {
                 return BadRequest(@"Invalid Value For Form Parameter ""match_id""");
+            }
 
             MatchStartData? matchStartData = await DistributedCache.GetMatchStartData(int.Parse(matchID));
 
             if (matchStartData is null)
             {
-                Logger.LogError(@"[BUG] Received Match Initialisation Heartbeat For Match ID ""{MatchID}"", But No MatchStartData Found In Cache", matchID);
+                Logger.LogError(
+                    @"[BUG] Received Match Initialisation Heartbeat For Match ID ""{MatchID}"", But No MatchStartData Found In Cache",
+                    matchID);
 
                 return Ok();
             }
@@ -500,21 +587,27 @@ public partial class ServerRequesterController
             string? maximumPlayersCount = Request.Form["max_players"];
 
             if (maximumPlayersCount is null)
+            {
                 return BadRequest(@"Invalid Value For Form Parameter ""max_players""");
+            }
 
             matchStartData.MaximumPlayersCount = int.Parse(maximumPlayersCount);
 
             string? league = Request.Form["league"];
 
             if (league is null)
+            {
                 return BadRequest(@"Invalid Value For Form Parameter ""league""");
+            }
 
             matchStartData.League = int.Parse(league);
 
             string? matchMode = Request.Form["mode"];
 
             if (matchMode is null)
+            {
                 return BadRequest(@"Invalid Value For Form Parameter ""mode""");
+            }
 
             if (int.TryParse(matchMode, out int parsedMatchMode) is false)
             {
@@ -529,7 +622,9 @@ public partial class ServerRequesterController
             string? matchName = Request.Form["mname"];
 
             if (matchName is null)
+            {
                 return BadRequest(@"Invalid Value For Form Parameter ""mname""");
+            }
 
             matchStartData.MatchName = matchName;
 
@@ -537,7 +632,7 @@ public partial class ServerRequesterController
 
             MatchOptions options = MatchOptions.None;
 
-            foreach (var (key, flag) in MatchOptionMap)
+            foreach ((string key, MatchOptions flag) in MatchOptionMap)
             {
                 if (Request.Form.ContainsKey(key))
                 {
@@ -549,7 +644,8 @@ public partial class ServerRequesterController
 
             await DistributedCache.SetMatchStartData(matchStartData);
 
-            Logger.LogInformation("Captured Match Mode And Options For Match ID {MatchID}: MatchMode={MatchMode}, ArrangedMatchType={ArrangedMatchType}",
+            Logger.LogInformation(
+                "Captured Match Mode And Options For Match ID {MatchID}: MatchMode={MatchMode}, ArrangedMatchType={ArrangedMatchType}",
                 matchID, matchStartData.MatchMode, matchStartData.MatchType);
         }
 
@@ -561,9 +657,14 @@ public partial class ServerRequesterController
         string? accountName = Request.Form["login"];
 
         if (accountName is not null)
-            Logger.LogWarning(@"Account ""{AccountName}"" Is Attempting To Use HTTP Server Authentication", accountName);
+        {
+            Logger.LogWarning(@"Account ""{AccountName}"" Is Attempting To Use HTTP Server Authentication",
+                accountName);
+        }
 
-        string response = PhpSerialization.Serialize(new SRPAuthenticationFailureResponse(SRPAuthenticationFailureReason.SRPAuthenticationDisabled));
+        string response =
+            PhpSerialization.Serialize(
+                new SRPAuthenticationFailureResponse(SRPAuthenticationFailureReason.SRPAuthenticationDisabled));
 
         return BadRequest(response);
     }

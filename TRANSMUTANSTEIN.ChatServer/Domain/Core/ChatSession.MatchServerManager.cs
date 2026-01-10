@@ -13,31 +13,39 @@ public partial class ChatSession
         await RemoveMatchServerManager(distributedCacheStore);
 
         // Remove The Match Server Manager Chat Session
-        if (Context.MatchServerManagerChatSessions.TryRemove(ManagerMetadata.ServerManagerID, out ChatSession? existingSession))
+        if (Context.MatchServerManagerChatSessions.TryRemove(ManagerMetadata.ServerManagerID,
+                out ChatSession? existingSession))
         {
-            Log.Information(@"Match Server Manager ID ""{ServerManagerID}"" Was Removed From The Match Server Manager Pool", ManagerMetadata.ServerManagerID);
+            Log.Information(
+                @"Match Server Manager ID ""{ServerManagerID}"" Was Removed From The Match Server Manager Pool",
+                ManagerMetadata.ServerManagerID);
 
             if (existingSession is null)
             {
-                Log.Warning(@"Match Server Manager ID ""{ServerManagerID}"" Had A Null Session In The Match Server Manager Pool", ManagerMetadata.ServerManagerID);
+                Log.Warning(
+                    @"Match Server Manager ID ""{ServerManagerID}"" Had A Null Session In The Match Server Manager Pool",
+                    ManagerMetadata.ServerManagerID);
 
                 // Disconnect And Dispose The Chat Session
-                Disconnect(); Dispose();
+                Disconnect();
+                Dispose();
 
                 return;
             }
 
             if (existingSession.ManagerMetadata.SessionCookie != ManagerMetadata.SessionCookie)
             {
-                Log.Warning(@"Match Server Manager ID ""{ServerManagerID}"" Had A Mismatched Session Cookie", ManagerMetadata.ServerManagerID);
+                Log.Warning(@"Match Server Manager ID ""{ServerManagerID}"" Had A Mismatched Session Cookie",
+                    ManagerMetadata.ServerManagerID);
 
                 // Disconnect And Dispose The Chat Session
-                Disconnect(); Dispose();
+                Disconnect();
+                Dispose();
 
                 return;
             }
 
-            ChatBuffer acknowledgementResponse = new ();
+            ChatBuffer acknowledgementResponse = new();
 
             acknowledgementResponse.WriteCommand(ChatProtocol.ChatServerToServerManager.NET_CHAT_SM_REMOTE_COMMAND);
             acknowledgementResponse.WriteString(ManagerMetadata.SessionCookie);
@@ -49,13 +57,17 @@ public partial class ChatSession
 
         else
         {
-            Log.Warning(@"Match Server Manager ID ""{ServerManagerID}"" Attempted To Disconnect But Was Not Found In The Match Server Manager Pool", ManagerMetadata.ServerManagerID);
+            Log.Warning(
+                @"Match Server Manager ID ""{ServerManagerID}"" Attempted To Disconnect But Was Not Found In The Match Server Manager Pool",
+                ManagerMetadata.ServerManagerID);
         }
 
         // Disconnect And Dispose The Chat Session
-        Disconnect(); Dispose();
+        Disconnect();
+        Dispose();
 
-        Log.Information(@"Match Server Manager ID ""{ServerManagerID}"" Has Disconnected Gracefully", ManagerMetadata.ServerManagerID);
+        Log.Information(@"Match Server Manager ID ""{ServerManagerID}"" Has Disconnected Gracefully",
+            ManagerMetadata.ServerManagerID);
     }
 
     private async Task RemoveMatchServerManager(IDatabase distributedCacheStore)

@@ -69,9 +69,10 @@ public class ShowSimpleStatsResponse
 
     /// <summary>
     ///     Unused.
-    ///     <br/>
+    ///     <br />
     ///     May have been intended as a seasonal progression system similar to "season_level" but for creep cosmetics.
-    ///     For the sake of consistency with "season_level", this property is set to "100", although it most likely has no effect.
+    ///     For the sake of consistency with "season_level", this property is set to "100", although it most likely has no
+    ///     effect.
     /// </summary>
     [PhpProperty("creep_level")]
     public int CreepLevel { get; set; } = 100;
@@ -188,7 +189,8 @@ public class ShowSimpleStatsResponse
 
     /// <summary>
     ///     Tokens which grant temporary access to game modes (MidWars, Grimm's Crossing, etc.) for free-to-play players.
-    ///     Alternative to permanent "Game Pass" or temporary "Game Access" products (e.g. "m.midwars.pass", "m.midwars.access").
+    ///     Alternative to permanent "Game Pass" or temporary "Game Access" products (e.g. "m.midwars.pass",
+    ///     "m.midwars.access").
     ///     Legacy accounts have full access to all game modes, and so do accounts which own the "m.allmodes.pass" store item.
     /// </summary>
     [PhpProperty("game_tokens")]
@@ -209,7 +211,7 @@ public class ShowSimpleStatsResponse
 
     /// <summary>
     ///     Unknown.
-    ///     <br/>
+    ///     <br />
     ///     Seems to be set to "true" on a successful response, or to "false" if an error occurs.
     /// </summary>
     [PhpProperty(0)]
@@ -222,7 +224,7 @@ public class SimpleSeasonStats
     ///     The number of ranked matches won.
     /// </summary>
     [PhpProperty("wins")]
-    public required int  RankedMatchesWon { get; set; }
+    public required int RankedMatchesWon { get; set; }
 
     /// <summary>
     ///     The number of ranked matches lost.

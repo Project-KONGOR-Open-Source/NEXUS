@@ -6,7 +6,8 @@ public class RegisterViewModel
 {
     [Required]
     [StringLength(15, MinimumLength = 3, ErrorMessage = "IGN must be between 3 and 15 characters.")]
-    [RegularExpression(@"^[a-zA-Z0-9_.]+$", ErrorMessage = "IGN can only contain letters, numbers, underscores, and dots.")]
+    [RegularExpression(@"^[a-zA-Z0-9_.]+$",
+        ErrorMessage = "IGN can only contain letters, numbers, underscores, and dots.")]
     public required string IGN { get; set; }
 
     [Required]

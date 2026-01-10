@@ -23,7 +23,10 @@ public class ChatBuffer : TCPBuffer
     public long WriteCommandBytes(byte[] value)
     {
         if (value.Length is not 2)
-            throw new InvalidDataException($"Chat Command Is Expected To Be 2 Bytes In Length, But It Is {value.Length} Bytes");
+        {
+            throw new InvalidDataException(
+                $"Chat Command Is Expected To Be 2 Bytes In Length, But It Is {value.Length} Bytes");
+        }
 
         return Append(value);
     }
@@ -32,7 +35,9 @@ public class ChatBuffer : TCPBuffer
     ///     Append 2 bytes to the buffer, and return the number of bytes appended.
     /// </summary>
     public long WriteCommand(ushort command)
-        => WriteCommandBytes(BitConverter.GetBytes(command));
+    {
+        return WriteCommandBytes(BitConverter.GetBytes(command));
+    }
 
     /// <summary>
     ///     Read 2 bytes from the buffer, and return the result as a byte array.
@@ -40,7 +45,9 @@ public class ChatBuffer : TCPBuffer
     public byte[] ReadCommandBytes()
     {
         if (_offset is not 0)
+        {
             throw new InvalidDataException($"Offset Is {_offset}, But 0 (Zero) Was Expected");
+        }
 
         byte[] data = _data[.. 2];
 
@@ -53,7 +60,9 @@ public class ChatBuffer : TCPBuffer
     ///     Append 1 byte to the buffer, and return the number of bytes appended.
     /// </summary>
     public long WriteInt8(byte value)
-        => Append(value);
+    {
+        return Append(value);
+    }
 
     /// <summary>
     ///     Read 1 byte from the buffer, and return the result.
@@ -61,7 +70,9 @@ public class ChatBuffer : TCPBuffer
     public byte ReadInt8()
     {
         if (_size - _offset < 1)
+        {
             throw new InvalidDataException($"Unable To Read 1 Byte From Buffer With Size {_size} And Offset {_offset}");
+        }
 
         byte data = _data[_offset];
 
@@ -74,7 +85,9 @@ public class ChatBuffer : TCPBuffer
     ///     Append 1 byte with a value of either 0 or 1 to the buffer, and return the number of bytes appended.
     /// </summary>
     public long WriteBool(bool value)
-        => WriteInt8(BitConverter.GetBytes(value).Single());
+    {
+        return WriteInt8(BitConverter.GetBytes(value).Single());
+    }
 
     /// <summary>
     ///     Reads 1 byte from the buffer, and return the result as a boolean value if it can be parsed to one.
@@ -84,7 +97,9 @@ public class ChatBuffer : TCPBuffer
         byte data = ReadInt8();
 
         if (data is not 0 and not 1)
+        {
             throw new InvalidDataException($"Unable To Read A Boolean Value From Buffer Byte Value {data}");
+        }
 
         return data is 1;
     }
@@ -93,7 +108,9 @@ public class ChatBuffer : TCPBuffer
     ///     Append 2 bytes to the buffer, and return the number of bytes appended.
     /// </summary>
     public long WriteInt16(short value)
-        => Append(BitConverter.GetBytes(value));
+    {
+        return Append(BitConverter.GetBytes(value));
+    }
 
     /// <summary>
     ///     Read 2 bytes from the buffer, and return the result as a short value.
@@ -101,9 +118,12 @@ public class ChatBuffer : TCPBuffer
     public short ReadInt16()
     {
         if (_size - _offset < 2)
-            throw new InvalidDataException($"Unable To Read 2 Bytes From Buffer With Size {_size} And Offset {_offset}");
+        {
+            throw new InvalidDataException(
+                $"Unable To Read 2 Bytes From Buffer With Size {_size} And Offset {_offset}");
+        }
 
-        short data = BitConverter.ToInt16(_data, (int)_offset);
+        short data = BitConverter.ToInt16(_data, (int) _offset);
 
         Shift(2);
 
@@ -114,7 +134,9 @@ public class ChatBuffer : TCPBuffer
     ///     Append 4 bytes to the buffer, and return the number of bytes appended.
     /// </summary>
     public long WriteInt32(int value)
-        => Append(BitConverter.GetBytes(value));
+    {
+        return Append(BitConverter.GetBytes(value));
+    }
 
     /// <summary>
     ///     Read 4 bytes from the buffer, and return the result as an int value.
@@ -122,9 +144,12 @@ public class ChatBuffer : TCPBuffer
     public int ReadInt32()
     {
         if (_size - _offset < 4)
-            throw new InvalidDataException($"Unable To Read 4 Bytes From Buffer With Size {_size} And Offset {_offset}");
+        {
+            throw new InvalidDataException(
+                $"Unable To Read 4 Bytes From Buffer With Size {_size} And Offset {_offset}");
+        }
 
-        int data = BitConverter.ToInt32(_data, (int)_offset);
+        int data = BitConverter.ToInt32(_data, (int) _offset);
 
         Shift(4);
 
@@ -135,7 +160,9 @@ public class ChatBuffer : TCPBuffer
     ///     Append 8 bytes to the buffer, and return the number of bytes appended.
     /// </summary>
     public long WriteInt64(long value)
-        => Append(BitConverter.GetBytes(value));
+    {
+        return Append(BitConverter.GetBytes(value));
+    }
 
     /// <summary>
     ///     Read 8 bytes from the buffer, and return the result as a long value.
@@ -143,9 +170,12 @@ public class ChatBuffer : TCPBuffer
     public long ReadInt64()
     {
         if (_size - _offset < 8)
-            throw new InvalidDataException($"Unable To Read 8 Bytes From Buffer With Size {_size} And Offset {_offset}");
+        {
+            throw new InvalidDataException(
+                $"Unable To Read 8 Bytes From Buffer With Size {_size} And Offset {_offset}");
+        }
 
-        long data = BitConverter.ToInt64(_data, (int)_offset);
+        long data = BitConverter.ToInt64(_data, (int) _offset);
 
         Shift(8);
 
@@ -156,7 +186,9 @@ public class ChatBuffer : TCPBuffer
     ///     Append 4 bytes to the buffer, and return the number of bytes appended.
     /// </summary>
     public long WriteFloat32(float value)
-        => Append(BitConverter.GetBytes(value));
+    {
+        return Append(BitConverter.GetBytes(value));
+    }
 
     /// <summary>
     ///     Read 4 bytes from the buffer, and return the result as a float value.
@@ -164,9 +196,12 @@ public class ChatBuffer : TCPBuffer
     public float ReadFloat32()
     {
         if (_size - _offset < 4)
-            throw new InvalidDataException($"Unable To Read 4 Bytes From Buffer With Size {_size} And Offset {_offset}");
+        {
+            throw new InvalidDataException(
+                $"Unable To Read 4 Bytes From Buffer With Size {_size} And Offset {_offset}");
+        }
 
-        float data = BitConverter.ToSingle(_data, (int)_offset);
+        float data = BitConverter.ToSingle(_data, (int) _offset);
 
         Shift(4);
 
@@ -175,28 +210,39 @@ public class ChatBuffer : TCPBuffer
 
     /// <summary>
     ///     Append an arbitrary number of bytes to the buffer, and return the number of bytes appended.
-    ///     For C-style strings, "\0" is the NULL character (also known as the NULL Terminator), which has the value 0 in the ASCII table and is used to determine the end of C-style strings.
-    ///     UTF-8 is also compatible with NULL-terminated strings, meaning that no character will have a zero byte in it after being encoded.
+    ///     For C-style strings, "\0" is the NULL character (also known as the NULL Terminator), which has the value 0 in the
+    ///     ASCII table and is used to determine the end of C-style strings.
+    ///     UTF-8 is also compatible with NULL-terminated strings, meaning that no character will have a zero byte in it after
+    ///     being encoded.
     /// </summary>
     public long WriteString(string value)
-        => Append(Encoding.UTF8.GetBytes(value).Append<byte>(0).ToArray());
+    {
+        return Append(Encoding.UTF8.GetBytes(value).Append<byte>(0).ToArray());
+    }
 
     /// <summary>
     ///     Reads an arbitrary number of bytes from the buffer, and return the result as a string value.
-    ///     For C-style strings, "\0" is the NULL character (also known as the NULL Terminator), which has the value 0 in the ASCII table and is used to determine the end of C-style strings.
-    ///     UTF-8 is also compatible with NULL-terminated strings, meaning that no character will have a zero byte in it after being encoded.
+    ///     For C-style strings, "\0" is the NULL character (also known as the NULL Terminator), which has the value 0 in the
+    ///     ASCII table and is used to determine the end of C-style strings.
+    ///     UTF-8 is also compatible with NULL-terminated strings, meaning that no character will have a zero byte in it after
+    ///     being encoded.
     /// </summary>
     public string ReadString()
     {
         long marker = _offset;
 
         while (marker <= _size && _data[marker] is not 0)
+        {
             marker++;
+        }
 
         if (marker > _size)
-            throw new InvalidDataException($"Unable To Read A String Value From Buffer With Size {_size} And Offset {_offset}");
+        {
+            throw new InvalidDataException(
+                $"Unable To Read A String Value From Buffer With Size {_size} And Offset {_offset}");
+        }
 
-        string data = Encoding.UTF8.GetString(_data, (int)_offset, (int)(marker - _offset));
+        string data = Encoding.UTF8.GetString(_data, (int) _offset, (int) (marker - _offset));
 
         marker++; // Move Marker To NULL Terminator Position
 
@@ -222,5 +268,7 @@ public class ChatBuffer : TCPBuffer
     ///     Check if there is any remaining data to read in the buffer.
     /// </summary>
     public bool HasRemainingData()
-        => _offset < _size;
+    {
+        return _offset < _size;
+    }
 }

@@ -2,9 +2,8 @@ namespace TRANSMUTANSTEIN.ChatServer.Domain.Communication;
 
 public class ChatChannelMember(ChatSession session, ChatChannel chatChannel)
 {
-    public ChatSession Session = session;
-
     public ChatChannel ChatChannel = chatChannel;
+    public ChatSession Session = session;
 
     public Account Account => Session.Account;
 
@@ -14,35 +13,37 @@ public class ChatChannelMember(ChatSession session, ChatChannel chatChannel)
 
     public bool IsAdministrator => GetAdministratorStatus();
 
-    public DateTime? SilencedUntil { get; set; } = null;
+    public DateTime? SilencedUntil { get; set; }
 
     private bool GetAdministratorStatus()
     {
         return AdministratorLevel switch
         {
-            ChatProtocol.AdminLevel.CHAT_CLIENT_ADMIN_NONE          => false,
-            ChatProtocol.AdminLevel.CHAT_CLIENT_ADMIN_OFFICER       => true,
-            ChatProtocol.AdminLevel.CHAT_CLIENT_ADMIN_LEADER        => true,
+            ChatProtocol.AdminLevel.CHAT_CLIENT_ADMIN_NONE => false,
+            ChatProtocol.AdminLevel.CHAT_CLIENT_ADMIN_OFFICER => true,
+            ChatProtocol.AdminLevel.CHAT_CLIENT_ADMIN_LEADER => true,
             ChatProtocol.AdminLevel.CHAT_CLIENT_ADMIN_ADMINISTRATOR => true,
-            ChatProtocol.AdminLevel.CHAT_CLIENT_ADMIN_STAFF         => true,
-            _                                                       => throw new ArgumentOutOfRangeException(@$"Unsupported Administrator Level ""{AdministratorLevel}""")
+            ChatProtocol.AdminLevel.CHAT_CLIENT_ADMIN_STAFF => true,
+            _ => throw new ArgumentOutOfRangeException(@$"Unsupported Administrator Level ""{AdministratorLevel}""")
         };
     }
 
     private ChatProtocol.AdminLevel GetAdministratorLevel()
     {
         if (Account.Type is AccountType.Staff)
+        {
             return ChatProtocol.AdminLevel.CHAT_CLIENT_ADMIN_STAFF;
+        }
 
         if (Account.Clan is not null && ChatChannel.Name == Account.Clan.GetChatChannelName())
         {
             return Account.ClanTier switch
             {
-                ClanTier.Leader  => ChatProtocol.AdminLevel.CHAT_CLIENT_ADMIN_LEADER,
+                ClanTier.Leader => ChatProtocol.AdminLevel.CHAT_CLIENT_ADMIN_LEADER,
                 ClanTier.Officer => ChatProtocol.AdminLevel.CHAT_CLIENT_ADMIN_OFFICER,
-                ClanTier.Member  => ChatProtocol.AdminLevel.CHAT_CLIENT_ADMIN_NONE,
-                ClanTier.None    => ChatProtocol.AdminLevel.CHAT_CLIENT_ADMIN_NONE,
-                _                => throw new ArgumentOutOfRangeException(@$"Unsupported Clan Tier ""{Account.ClanTier}""")
+                ClanTier.Member => ChatProtocol.AdminLevel.CHAT_CLIENT_ADMIN_NONE,
+                ClanTier.None => ChatProtocol.AdminLevel.CHAT_CLIENT_ADMIN_NONE,
+                _ => throw new ArgumentOutOfRangeException(@$"Unsupported Clan Tier ""{Account.ClanTier}""")
             };
         }
 
@@ -82,9 +83,11 @@ public class ChatChannelMember(ChatSession session, ChatChannel chatChannel)
     ///     Check whether this member has elevated privileges (Leader, Administrator, Staff).
     /// </summary>
     public bool HasElevatedPrivileges()
-        => AdministratorLevel is ChatProtocol.AdminLevel.CHAT_CLIENT_ADMIN_LEADER
-                              or ChatProtocol.AdminLevel.CHAT_CLIENT_ADMIN_ADMINISTRATOR
-                              or ChatProtocol.AdminLevel.CHAT_CLIENT_ADMIN_STAFF;
+    {
+        return AdministratorLevel is ChatProtocol.AdminLevel.CHAT_CLIENT_ADMIN_LEADER
+            or ChatProtocol.AdminLevel.CHAT_CLIENT_ADMIN_ADMINISTRATOR
+            or ChatProtocol.AdminLevel.CHAT_CLIENT_ADMIN_STAFF;
+    }
 
     /// <summary>
     ///     Check whether this member has a higher administrator level than another member.
@@ -94,26 +97,31 @@ public class ChatChannelMember(ChatSession session, ChatChannel chatChannel)
         return (AdministratorLevel, other.AdministratorLevel) switch
         {
             // Staff Outranks: Everyone
-            (ChatProtocol.AdminLevel.CHAT_CLIENT_ADMIN_STAFF, ChatProtocol.AdminLevel.CHAT_CLIENT_ADMIN_ADMINISTRATOR)   => true,
-            (ChatProtocol.AdminLevel.CHAT_CLIENT_ADMIN_STAFF, ChatProtocol.AdminLevel.CHAT_CLIENT_ADMIN_LEADER)          => true,
-            (ChatProtocol.AdminLevel.CHAT_CLIENT_ADMIN_STAFF, ChatProtocol.AdminLevel.CHAT_CLIENT_ADMIN_OFFICER)         => true,
-            (ChatProtocol.AdminLevel.CHAT_CLIENT_ADMIN_STAFF, ChatProtocol.AdminLevel.CHAT_CLIENT_ADMIN_NONE)            => true,
+            (ChatProtocol.AdminLevel.CHAT_CLIENT_ADMIN_STAFF, ChatProtocol.AdminLevel.CHAT_CLIENT_ADMIN_ADMINISTRATOR)
+                => true,
+            (ChatProtocol.AdminLevel.CHAT_CLIENT_ADMIN_STAFF, ChatProtocol.AdminLevel.CHAT_CLIENT_ADMIN_LEADER) => true,
+            (ChatProtocol.AdminLevel.CHAT_CLIENT_ADMIN_STAFF, ChatProtocol.AdminLevel.CHAT_CLIENT_ADMIN_OFFICER) =>
+                true,
+            (ChatProtocol.AdminLevel.CHAT_CLIENT_ADMIN_STAFF, ChatProtocol.AdminLevel.CHAT_CLIENT_ADMIN_NONE) => true,
 
             // Administrator Outranks: Leader, Officer, None
-            (ChatProtocol.AdminLevel.CHAT_CLIENT_ADMIN_ADMINISTRATOR, ChatProtocol.AdminLevel.CHAT_CLIENT_ADMIN_LEADER)  => true,
-            (ChatProtocol.AdminLevel.CHAT_CLIENT_ADMIN_ADMINISTRATOR, ChatProtocol.AdminLevel.CHAT_CLIENT_ADMIN_OFFICER) => true,
-            (ChatProtocol.AdminLevel.CHAT_CLIENT_ADMIN_ADMINISTRATOR, ChatProtocol.AdminLevel.CHAT_CLIENT_ADMIN_NONE)    => true,
+            (ChatProtocol.AdminLevel.CHAT_CLIENT_ADMIN_ADMINISTRATOR, ChatProtocol.AdminLevel.CHAT_CLIENT_ADMIN_LEADER)
+                => true,
+            (ChatProtocol.AdminLevel.CHAT_CLIENT_ADMIN_ADMINISTRATOR, ChatProtocol.AdminLevel.CHAT_CLIENT_ADMIN_OFFICER)
+                => true,
+            (ChatProtocol.AdminLevel.CHAT_CLIENT_ADMIN_ADMINISTRATOR, ChatProtocol.AdminLevel.CHAT_CLIENT_ADMIN_NONE) =>
+                true,
 
             // Leader Outranks: Officer, None
-            (ChatProtocol.AdminLevel.CHAT_CLIENT_ADMIN_LEADER, ChatProtocol.AdminLevel.CHAT_CLIENT_ADMIN_OFFICER)        => true,
-            (ChatProtocol.AdminLevel.CHAT_CLIENT_ADMIN_LEADER, ChatProtocol.AdminLevel.CHAT_CLIENT_ADMIN_NONE)           => true,
+            (ChatProtocol.AdminLevel.CHAT_CLIENT_ADMIN_LEADER, ChatProtocol.AdminLevel.CHAT_CLIENT_ADMIN_OFFICER) =>
+                true,
+            (ChatProtocol.AdminLevel.CHAT_CLIENT_ADMIN_LEADER, ChatProtocol.AdminLevel.CHAT_CLIENT_ADMIN_NONE) => true,
 
             // Officer Outranks: None
-            (ChatProtocol.AdminLevel.CHAT_CLIENT_ADMIN_OFFICER, ChatProtocol.AdminLevel.CHAT_CLIENT_ADMIN_NONE)          => true,
+            (ChatProtocol.AdminLevel.CHAT_CLIENT_ADMIN_OFFICER, ChatProtocol.AdminLevel.CHAT_CLIENT_ADMIN_NONE) => true,
 
             // All Other Cases: No Higher Privilege
-            _                                                                                                            => false
+            _ => false
         };
     }
 }
-

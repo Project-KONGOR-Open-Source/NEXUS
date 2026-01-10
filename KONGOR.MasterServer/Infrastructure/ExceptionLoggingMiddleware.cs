@@ -16,7 +16,7 @@ public class ExceptionLoggingMiddleware(RequestDelegate next, ILogger<ExceptionL
             // Log the exception message explicitly so it appears in the Structured Logs "Message" column
             // structure: [Error] {ExceptionMessage}
             Logger.LogError(exception, "{ExceptionMessage}", exception.Message);
-            throw; 
+            throw;
         }
     }
 }

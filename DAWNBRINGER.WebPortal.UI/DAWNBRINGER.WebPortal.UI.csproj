@@ -4,17 +4,17 @@
         <TargetFramework>net10.0</TargetFramework>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
-      <UserSecretsId>f1e1f81d-ed00-40b6-8d39-0b82a10a6338</UserSecretsId>
-  </PropertyGroup>
+        <UserSecretsId>f1e1f81d-ed00-40b6-8d39-0b82a10a6338</UserSecretsId>
+    </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="../ASPIRE.Common/ASPIRE.Common.csproj" />
-        <ProjectReference Include="..\MERRICK.DatabaseContext\MERRICK.DatabaseContext.csproj" />
+        <ProjectReference Include="../ASPIRE.Common/ASPIRE.Common.csproj"/>
+        <ProjectReference Include="..\MERRICK.DatabaseContext\MERRICK.DatabaseContext.csproj"/>
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="AspNet.Security.OAuth.Discord" Version="8.0.0" />
-        <PackageReference Include="srp" Version="1.0.7" />
+        <PackageReference Include="AspNet.Security.OAuth.Discord" Version="8.0.0"/>
+        <PackageReference Include="srp" Version="1.0.7"/>
     </ItemGroup>
 
 </Project>

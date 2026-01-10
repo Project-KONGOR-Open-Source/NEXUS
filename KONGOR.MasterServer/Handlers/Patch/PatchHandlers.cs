@@ -2,15 +2,9 @@
 
 public static class PatchHandlers
 {
-    public static PatchDetails? GetLatestClientPatchDetails(string distribution)
-        => DistributionVersions.FirstOrDefault(details => details.DistributionIdentifier.Equals(distribution) && details.Latest.Equals(true));
-
-    public static PatchDetails? GetClientPatchDetails(string distribution, string version)
-        => DistributionVersions.FirstOrDefault(details => details.DistributionIdentifier.Equals(distribution) && details.Version.Equals(version));
-
-    private static List<PatchDetails> DistributionVersions { get; set; } =
+    private static List<PatchDetails> DistributionVersions { get; } =
     [
-        new PatchDetails()
+        new()
         {
             DistributionIdentifier = "wac",
             Version = "4.10.1",
@@ -19,7 +13,7 @@ public static class PatchHandlers
             ManifestArchiveSizeInBytes = "3628533",
             Latest = true
         },
-        new PatchDetails()
+        new()
         {
             DistributionIdentifier = "lac",
             Version = "4.10.1",
@@ -28,7 +22,7 @@ public static class PatchHandlers
             ManifestArchiveSizeInBytes = "6122296",
             Latest = true
         },
-        new PatchDetails()
+        new()
         {
             DistributionIdentifier = "mac",
             Version = "4.10.1",
@@ -37,7 +31,7 @@ public static class PatchHandlers
             ManifestArchiveSizeInBytes = "ce18408b94a14a968736bb39213daac9a09e4026",
             Latest = true
         },
-        new PatchDetails()
+        new()
         {
             DistributionIdentifier = "was-crIac6LASwoafrl8FrOa",
             Version = "4.10.1",
@@ -46,7 +40,7 @@ public static class PatchHandlers
             ManifestArchiveSizeInBytes = "1507915",
             Latest = true
         },
-        new PatchDetails()
+        new()
         {
             DistributionIdentifier = "las-crIac6LASwoafrl8FrOa",
             Version = "4.10.1",
@@ -54,6 +48,18 @@ public static class PatchHandlers
             ManifestArchiveSHA1Hash = "8ba887c3de95b0b0d33b461bdb4721f29ace952e",
             ManifestArchiveSizeInBytes = "2705984",
             Latest = true
-        },
+        }
     ];
+
+    public static PatchDetails? GetLatestClientPatchDetails(string distribution)
+    {
+        return DistributionVersions.FirstOrDefault(details =>
+            details.DistributionIdentifier.Equals(distribution) && details.Latest.Equals(true));
+    }
+
+    public static PatchDetails? GetClientPatchDetails(string distribution, string version)
+    {
+        return DistributionVersions.FirstOrDefault(details =>
+            details.DistributionIdentifier.Equals(distribution) && details.Version.Equals(version));
+    }
 }

@@ -14,10 +14,11 @@ public class MERRICK
         builder.AddServiceDefaults();
 
         // Add The Database Context
-        builder.AddSqlServerDbContext<MerrickContext>("MERRICK", configureSettings: null, configureDbContextOptions: options =>
+        builder.AddSqlServerDbContext<MerrickContext>("MERRICK", null, options =>
         {
             // Specify Migrations History Table And Schema
-            options.UseSqlServer(sqlServerOptionsAction: sqlServerOptions => sqlServerOptions.MigrationsHistoryTable("MigrationsHistory", MerrickContext.MetadataSchema));
+            options.UseSqlServer(sqlServerOptions =>
+                sqlServerOptions.MigrationsHistoryTable("MigrationsHistory", MerrickContext.MetadataSchema));
 
             // Enable Detailed Error Messages In Development Environment
             options.EnableDetailedErrors(builder.Environment.IsDevelopment());
@@ -25,14 +26,16 @@ public class MERRICK
             // Suppress Warning Regarding Enabled Sensitive Data Logging, Since It Is Only Enabled In The Development Environment
             // https://github.com/dotnet/efcore/blob/main/src/EFCore/Properties/CoreStrings.resx (LogSensitiveDataLoggingEnabled)
             options.EnableSensitiveDataLogging(builder.Environment.IsDevelopment())
-                .ConfigureWarnings(warnings => warnings.Log((Id: CoreEventId.SensitiveDataLoggingEnabledWarning, Level: LogLevel.Trace)));
+                .ConfigureWarnings(warnings =>
+                    warnings.Log((Id: CoreEventId.SensitiveDataLoggingEnabledWarning, Level: LogLevel.Trace)));
 
             // Enable Thread Safety Checks For Entity Framework
             options.EnableThreadSafetyChecks();
         });
 
         // Add Database Initializer Telemetry
-        builder.Services.AddOpenTelemetry().WithTracing(tracing => tracing.AddSource(DatabaseInitializer.ActivitySourceName));
+        builder.Services.AddOpenTelemetry()
+            .WithTracing(tracing => tracing.AddSource(DatabaseInitializer.ActivitySourceName));
 
         // Register Database Initializer As Singleton Service For Dependency Injection
         builder.Services.AddSingleton<DatabaseInitializer>();
@@ -46,18 +49,27 @@ public class MERRICK
         // Configure Forwarded Headers For Reverse Proxy Support
         builder.Services.Configure<ForwardedHeadersOptions>(options =>
         {
-            string proxy = Environment.GetEnvironmentVariable("INFRASTRUCTURE_GATEWAY") ?? throw new NullReferenceException("Infrastructure Gateway Is NULL");
+            string proxy = Environment.GetEnvironmentVariable("INFRASTRUCTURE_GATEWAY") ??
+                           throw new NullReferenceException("Infrastructure Gateway Is NULL");
 
-            options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedHost;
+            options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto |
+                                       ForwardedHeaders.XForwardedHost;
 
             IPAddress[] proxyResolvedAddresses;
 
             try { proxyResolvedAddresses = Dns.GetHostAddresses(proxy); }
-            catch (Exception exception) { throw new InvalidOperationException($@"Failed To Resolve Proxy Host ""{proxy}""", exception); }
+            catch (Exception exception)
+            {
+                throw new InvalidOperationException($@"Failed To Resolve Proxy Host ""{proxy}""", exception);
+            }
 
             foreach (IPAddress proxyResolvedAddress in proxyResolvedAddresses)
+            {
                 if (proxyResolvedAddress.AddressFamily is AddressFamily.InterNetwork or AddressFamily.InterNetworkV6)
+                {
                     options.KnownProxies.Add(proxyResolvedAddress);
+                }
+            }
 
             // Only Trust The Last Forwarded Header In The Chain
             options.ForwardLimit = 1;

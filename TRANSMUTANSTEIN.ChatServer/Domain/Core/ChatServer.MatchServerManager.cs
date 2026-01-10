@@ -4,7 +4,8 @@ namespace TRANSMUTANSTEIN.ChatServer.Domain.Core;
 ///     TCP server for handling match server manager connections.
 ///     Creates MatchServerManagerChatSession instances for each incoming connection.
 /// </summary>
-public class MatchServerManagerChatServer(IServiceProvider serviceProvider, IPAddress address, int port) : TCPServer(address, port)
+public class MatchServerManagerChatServer(IServiceProvider serviceProvider, IPAddress address, int port)
+    : TCPServer(address, port)
 {
     protected override TCPSession CreateSession()
     {
@@ -13,7 +14,8 @@ public class MatchServerManagerChatServer(IServiceProvider serviceProvider, IPAd
 
     protected override void OnStarted()
     {
-        Log.Information("Chat Server Has Started Accepting Match Server Manager Connections On {Address}:{Port}", Address, Port);
+        Log.Information("Chat Server Has Started Accepting Match Server Manager Connections On {Address}:{Port}",
+            Address, Port);
 
         base.OnStarted();
     }

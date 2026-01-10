@@ -28,15 +28,18 @@ public class LatestPatchRequestForm
 
     /// <summary>
     ///     The HoN client's operating system, sent by the HoN client making the request.
-    ///     Generally, (ignoring RCT/SBT/etc.) this will be one of three values: "wac" (Windows client), "lac" (Linux client), or "mac" (macOS client).
+    ///     Generally, (ignoring RCT/SBT/etc.) this will be one of three values: "wac" (Windows client), "lac" (Linux client),
+    ///     or "mac" (macOS client).
     /// </summary>
     [FromForm(Name = "os")]
     public string? OperatingSystem { get; set; }
 
     /// <summary>
     ///     The HoN client's operating system architecture, sent by the HoN client making the request.
-    ///     Generally, this will be one of three values: "x86_64" (Windows client), "x86-biarch" (Linux client), or "universal-64" (macOS client).
-    ///     The 32-bit versions of Windows ("i686") and macOS ("universal"), alongside other legacy architectures, are not supported by Project KONGOR.
+    ///     Generally, this will be one of three values: "x86_64" (Windows client), "x86-biarch" (Linux client), or
+    ///     "universal-64" (macOS client).
+    ///     The 32-bit versions of Windows ("i686") and macOS ("universal"), alongside other legacy architectures, are not
+    ///     supported by Project KONGOR.
     /// </summary>
     [FromForm(Name = "arch")]
     public string? Architecture { get; set; }

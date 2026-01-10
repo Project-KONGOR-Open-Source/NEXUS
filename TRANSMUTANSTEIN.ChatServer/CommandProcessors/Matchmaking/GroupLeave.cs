@@ -5,7 +5,7 @@ public class GroupLeave : ISynchronousCommandProcessor<ChatSession>
 {
     public void Process(ChatSession session, ChatBuffer buffer)
     {
-        GroupLeaveRequestData requestData = new (buffer);
+        GroupLeaveRequestData requestData = new(buffer);
 
         MatchmakingGroup
             .GetByMemberAccountID(session.Account.ID)
@@ -15,11 +15,10 @@ public class GroupLeave : ISynchronousCommandProcessor<ChatSession>
 
 file class GroupLeaveRequestData
 {
-    public byte[] CommandBytes { get; init; }
-
     public GroupLeaveRequestData(ChatBuffer buffer)
     {
         CommandBytes = buffer.ReadCommandBytes();
     }
-}
 
+    public byte[] CommandBytes { get; init; }
+}

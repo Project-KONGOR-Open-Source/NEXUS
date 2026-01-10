@@ -3,20 +3,17 @@
 [Index(nameof(MatchID), nameof(AccountID), IsUnique = true)]
 public class PlayerStatistics
 {
-    [Key]
-    public int ID { get; set; }
+    [Key] public int ID { get; set; }
 
     public required int MatchID { get; set; }
 
     public required int AccountID { get; set; }
 
-    [MaxLength(15)]
-    public required string AccountName { get; set; }
+    [MaxLength(15)] public required string AccountName { get; set; }
 
     public required int? ClanID { get; set; }
 
-    [MaxLength(4)]
-    public required string? ClanTag { get; set; }
+    [MaxLength(4)] public required string? ClanTag { get; set; }
 
     public required int Team { get; set; }
 

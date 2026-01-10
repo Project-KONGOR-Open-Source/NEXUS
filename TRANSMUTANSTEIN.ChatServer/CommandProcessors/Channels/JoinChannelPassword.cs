@@ -5,7 +5,7 @@ public class JoinPasswordProtectedChannel : ISynchronousCommandProcessor<ChatSes
 {
     public void Process(ChatSession session, ChatBuffer buffer)
     {
-        JoinPasswordProtectedChannelRequestData requestData = new (buffer);
+        JoinPasswordProtectedChannelRequestData requestData = new(buffer);
 
         ChatChannel
             .GetOrCreate(session, requestData.ChannelName)
@@ -15,17 +15,16 @@ public class JoinPasswordProtectedChannel : ISynchronousCommandProcessor<ChatSes
 
 file class JoinPasswordProtectedChannelRequestData
 {
-    public byte[] CommandBytes { get; init; }
-
-    public string ChannelName { get; init; }
-
-    public string Password { get; init; }
-
     public JoinPasswordProtectedChannelRequestData(ChatBuffer buffer)
     {
         CommandBytes = buffer.ReadCommandBytes();
         ChannelName = buffer.ReadString();
         Password = buffer.ReadString();
     }
-}
 
+    public byte[] CommandBytes { get; init; }
+
+    public string ChannelName { get; }
+
+    public string Password { get; }
+}

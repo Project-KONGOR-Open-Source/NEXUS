@@ -1,4 +1,4 @@
-using Microsoft.EntityFrameworkCore;
+using KONGOR.MasterServer.Services.Store;
 
 namespace KONGOR.MasterServer.Controllers.ClientRequesterController;
 
@@ -10,41 +10,54 @@ public partial class ClientRequesterController
         // 1. Validate Session
         string? cookie = Request.Form["cookie"];
         if (string.IsNullOrEmpty(cookie))
+        {
             return Unauthorized();
+        }
 
         cookie = cookie.Replace("-", string.Empty);
 
         string? sessionAccountName = HttpContext.Items["SessionAccountName"] as string;
 
         if (sessionAccountName is null)
-        { 
-             // Try validate if not already done (though ClientRequester should have done it)
-             (bool accountSessionCookieIsValid, string? cacheAccountName) = await DistributedCache.ValidateAccountSessionCookie(cookie);
-             if (accountSessionCookieIsValid) sessionAccountName = cacheAccountName;
+        {
+            // Try validate if not already done (though ClientRequester should have done it)
+            (bool accountSessionCookieIsValid, string? cacheAccountName) =
+                await DistributedCache.ValidateAccountSessionCookie(cookie);
+            if (accountSessionCookieIsValid)
+            {
+                sessionAccountName = cacheAccountName;
+            }
         }
 
-        if (sessionAccountName is null) 
+        if (sessionAccountName is null)
+        {
             return Unauthorized($@"No Session Found For Cookie ""{cookie}""");
+        }
 
         // 2. Retrieve Account (with User data for ownership check)
-        global::MERRICK.DatabaseContext.Entities.Core.Account? account = await MerrickContext.Accounts
+        Account? account = await MerrickContext.Accounts
             .Include(a => a.User)
             .SingleOrDefaultAsync(a => a.Name == sessionAccountName);
 
         if (account == null)
+        {
             return Unauthorized();
+        }
 
         // 3. Build Response List
         List<Dictionary<string, object>> dailyItems = new();
 
-        foreach (Services.Store.StaticCatalog.DailySpecialDefinition special in Services.Store.StaticCatalog.DailySpecials)
+        foreach (StaticCatalog.DailySpecialDefinition special in StaticCatalog.DailySpecials)
         {
-            global::KONGOR.MasterServer.Models.RequestResponse.Store.Product? product = Services.Store.StaticCatalog.Products.FirstOrDefault(p => p.ProductCode == special.ProductCode);
-            if (product == null) continue;
+            Product? product = StaticCatalog.Products.FirstOrDefault(p => p.ProductCode == special.ProductCode);
+            if (product == null)
+            {
+                continue;
+            }
 
             // Calculate discounted prices
-            int currentGold = (int)(product.CostGold * (100 - special.DiscountOff) / 100.0);
-            int currentSilver = (int)(product.CostSilver * (100 - special.DiscountSilver) / 100.0);
+            int currentGold = (int) (product.CostGold * (100 - special.DiscountOff) / 100.0);
+            int currentSilver = (int) (product.CostSilver * (100 - special.DiscountSilver) / 100.0);
 
             // Determine if owned
             bool isOwned = account.User.OwnedStoreItems.Contains(product.ProductCode);
@@ -60,7 +73,7 @@ public partial class ClientRequesterController
                 // For now, leave empty unless Type is Alt Avatar.
             }
 
-            Dictionary<string, object> itemDict = new Dictionary<string, object>
+            Dictionary<string, object> itemDict = new()
             {
                 ["panel_index"] = special.PanelIndex,
                 ["product_id"] = product.ProductCode.GetHashCode(), // Stable integer ID
@@ -88,12 +101,7 @@ public partial class ClientRequesterController
         }
 
         // 4. Construct Final Response
-        Dictionary<string, object> response = new Dictionary<string, object>
-        {
-            ["list"] = dailyItems,
-            ["0"] = true,
-            ["vested_threshold"] = 5
-        };
+        Dictionary<string, object> response = new() { ["list"] = dailyItems, ["0"] = true, ["vested_threshold"] = 5 };
 
         return Ok(PhpSerialization.Serialize(response));
     }

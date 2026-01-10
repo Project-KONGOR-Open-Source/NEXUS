@@ -1,29 +1,29 @@
 {
-	"$schema": "http://json.schemastore.org/launchsettings.json",
-	"profiles": {
-		"TRANSMUTANSTEIN.ChatServer Development": {
-			"commandName": "Project",
-			"launchBrowser": false,
-			"applicationUrl": "https://0.0.0.0:5554",
-			"launchUrl": "health",
-			"environmentVariables": {
-				"APPLICATION_URL": "https://0.0.0.0:5554",
-				"ASPNETCORE_ENVIRONMENT": "Development",
-				"DOTNET_ENVIRONMENT": "Development"
-			},
-			"dotnetRunMessages": true
-		},
-		"TRANSMUTANSTEIN.ChatServer Production": {
-			"commandName": "Project",
-			"launchBrowser": true,
-			"applicationUrl": "https://0.0.0.0:5554",
-			"launchUrl": "health",
-			"environmentVariables": {
-				"APPLICATION_URL": "https://chat.kongor.net",
-				"ASPNETCORE_ENVIRONMENT": "Production",
-				"DOTNET_ENVIRONMENT": "Production"
-			},
-			"dotnetRunMessages": true
-		}
-	}
+    "$schema": "http://json.schemastore.org/launchsettings.json",
+    "profiles": {
+        "TRANSMUTANSTEIN.ChatServer Development": {
+            "commandName": "Project",
+            "launchBrowser": false,
+            "applicationUrl": "https://0.0.0.0:5554",
+            "launchUrl": "health",
+            "environmentVariables": {
+                "APPLICATION_URL": "https://0.0.0.0:5554",
+                "ASPNETCORE_ENVIRONMENT": "Development",
+                "DOTNET_ENVIRONMENT": "Development"
+            },
+            "dotnetRunMessages": true
+        },
+        "TRANSMUTANSTEIN.ChatServer Production": {
+            "commandName": "Project",
+            "launchBrowser": true,
+            "applicationUrl": "https://0.0.0.0:5554",
+            "launchUrl": "health",
+            "environmentVariables": {
+                "APPLICATION_URL": "https://chat.kongor.net",
+                "ASPNETCORE_ENVIRONMENT": "Production",
+                "DOTNET_ENVIRONMENT": "Production"
+            },
+            "dotnetRunMessages": true
+        }
+    }
 }

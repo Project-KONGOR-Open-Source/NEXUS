@@ -1,4 +1,6 @@
-﻿namespace KONGOR.MasterServer.Controllers.ClientRequesterController;
+﻿using Role = MERRICK.DatabaseContext.Entities.Utility.Role;
+
+namespace KONGOR.MasterServer.Controllers.ClientRequesterController;
 
 public partial class ClientRequesterController
 {
@@ -7,7 +9,9 @@ public partial class ClientRequesterController
         string? accountName = Request.Form["nickname"];
 
         if (accountName is null)
+        {
             return BadRequest(@"Missing Value For Form Parameter ""nickname""");
+        }
 
         Account? account = await MerrickContext.Accounts
             .Include(account => account.User)
@@ -15,7 +19,9 @@ public partial class ClientRequesterController
             .FirstOrDefaultAsync(account => account.Name.Equals(accountName));
 
         if (account is null)
+        {
             return NotFound($@"Account With Name ""{accountName}"" Was Not Found");
+        }
 
         ShowSimpleStatsResponse response = await CreateShowSimpleStatsResponse(account);
 
@@ -29,13 +35,17 @@ public partial class ClientRequesterController
         // if (cookie is not null) cookie = cookie.Replace("-", string.Empty);
 
         if (cookie is null)
+        {
             return BadRequest(@"Missing Value For Form Parameter ""cookie""");
+        }
 
-        string? accountName = HttpContext.Items["SessionAccountName"] as string 
-                             ?? await DistributedCache.GetAccountNameForSessionCookie(cookie);
+        string? accountName = HttpContext.Items["SessionAccountName"] as string
+                              ?? await DistributedCache.GetAccountNameForSessionCookie(cookie);
 
         if (accountName is null)
+        {
             return Unauthorized("Session Not Found");
+        }
 
         Account? account = await MerrickContext.Accounts
             .Include(account => account.User)
@@ -43,8 +53,9 @@ public partial class ClientRequesterController
             .FirstOrDefaultAsync(account => account.Name.Equals(accountName));
 
         if (account is null)
+        {
             return NotFound("Account Not Found");
-
+        }
 
 
         // 2026-01-06: FIX - Refactored to return explicit dictionary matching legacy protocol.
@@ -79,24 +90,25 @@ public partial class ClientRequesterController
             { "game_tokens", fullResponse.GameTokens },
             { "timestamp", fullResponse.ServerTimestamp },
             { "vested_threshold", fullResponse.VestedThreshold },
-            { "quest_system", new Dictionary<string, object>
+            {
+                "quest_system",
+                new Dictionary<string, object>
                 {
-                    { "error", new Dictionary<string, int>
-                        {
-                            { "quest_status", 0 },
-                            { "leaderboard_status", 0 }
-                        }
+                    {
+                        "error", new Dictionary<string, int> { { "quest_status", 0 }, { "leaderboard_status", 0 } }
                     }
                 }
             },
-            { "season_system", new Dictionary<string, object>
+            {
+                "season_system",
+                new Dictionary<string, object>
                 {
-                    { "drop_diamonds", 0 },
-                    { "cur_diamonds", 0 },
-                    { "box_price", new Dictionary<int, int>() }
+                    { "drop_diamonds", 0 }, { "cur_diamonds", 0 }, { "box_price", new Dictionary<int, int>() }
                 }
             },
-            { "con_reward", new Dictionary<string, object>
+            {
+                "con_reward",
+                new Dictionary<string, object>
                 {
                     { "old_lvl", 5 },
                     { "curr_lvl", 6 },
@@ -105,7 +117,6 @@ public partial class ClientRequesterController
                     { "need_more_play", 0 },
                     { "percentage_before", "0.92" },
                     { "percentage", "1.00" }
-
                 }
             },
             { "0", fullResponse.Zero }
@@ -118,14 +129,16 @@ public partial class ClientRequesterController
 
     private async Task<ShowSimpleStatsResponse> CreateShowSimpleStatsResponse(Account account)
     {
-        return new ShowSimpleStatsResponse()
+        return new ShowSimpleStatsResponse
         {
             NameWithClanTag = account.NameWithClanTag,
             ID = account.ID.ToString(),
             Level = account.User.TotalLevel,
             LevelExperience = account.User.TotalExperience,
             NumberOfAvatarsOwned = account.User.OwnedStoreItems.Count(item => item.StartsWith("aa.")),
-            TotalMatchesPlayed = await MerrickContext.PlayerStatistics.CountAsync(stats => stats.AccountID == account.ID), // TODO: Implement Matches Played
+            TotalMatchesPlayed =
+                await MerrickContext.PlayerStatistics.CountAsync(stats =>
+                    stats.AccountID == account.ID), // TODO: Implement Matches Played
             CurrentSeason = 12, // TODO: Set Season
             SimpleSeasonStats = new SimpleSeasonStats() // TODO: Implement Stats
             {
@@ -161,10 +174,13 @@ public partial class ClientRequesterController
 
         string? matchIDString = Request.Form["match_id"];
 
-        Logger.LogInformation("Received Match Stats Request: MatchID={MatchID}, Cookie={Cookie}", matchIDString, cookie);
+        Logger.LogInformation("Received Match Stats Request: MatchID={MatchID}, Cookie={Cookie}", matchIDString,
+            cookie);
 
         if (cookie is null)
+        {
             return BadRequest(@"Missing Value For Form Parameter ""cookie""");
+        }
 
         if (matchIDString is null)
         {
@@ -177,12 +193,16 @@ public partial class ClientRequesterController
             return BadRequest("Invalid Match ID");
         }
 
-        MatchStatistics? matchStatistics = await MerrickContext.MatchStatistics.SingleOrDefaultAsync(matchStatistics => matchStatistics.MatchID == matchID);
+        MatchStatistics? matchStatistics =
+            await MerrickContext.MatchStatistics.SingleOrDefaultAsync(matchStatistics =>
+                matchStatistics.MatchID == matchID);
 
         if (matchStatistics is null)
         {
-            Logger.LogWarning("Match Stats Request Failed: Match Statistics Not Found For ID {MatchID}. Returning Soft Failure.", matchID);
-            
+            Logger.LogWarning(
+                "Match Stats Request Failed: Match Statistics Not Found For ID {MatchID}. Returning Soft Failure.",
+                matchID);
+
             // Construct a "Safe" dummy response to prevent client crash when stats are missing
             MatchStatsResponse safeResponse = new()
             {
@@ -221,7 +241,8 @@ public partial class ClientRequesterController
             return Ok(PhpSerialization.Serialize(safeResponse));
         }
 
-        List<PlayerStatistics> allPlayerStatistics = await MerrickContext.PlayerStatistics.Where(playerStatistics => playerStatistics.MatchID == matchStatistics.MatchID).ToListAsync();
+        List<PlayerStatistics> allPlayerStatistics = await MerrickContext.PlayerStatistics
+            .Where(playerStatistics => playerStatistics.MatchID == matchStatistics.MatchID).ToListAsync();
 
         string? accountName = HttpContext.Items["SessionAccountName"] as string
                               ?? await DistributedCache.GetAccountNameForSessionCookie(cookie);
@@ -238,7 +259,7 @@ public partial class ClientRequesterController
 
         // Robustness: If MatchStartData is missing (expired cache), reconstruct from MatchStatistics
         MatchStartData? matchStartData = await DistributedCache.GetMatchStartData(matchStatistics.MatchID);
-        
+
         matchStartData ??= new MatchStartData
         {
             MatchID = matchStatistics.MatchID,
@@ -249,13 +270,13 @@ public partial class ClientRequesterController
             MatchMode = matchStatistics.GameMode,
             Version = matchStatistics.Version,
             IsCasual = matchStatistics.GameMode == "casual", // Approximation
-            MatchType = (byte)(matchStatistics.GameMode.Contains("rank") ? 1 : 0), // FIX: Infer from GameMode
+            MatchType = (byte) (matchStatistics.GameMode.Contains("rank") ? 1 : 0), // FIX: Infer from GameMode
             Options = MatchOptions.None, // Data loss, but allows viewing stats
             ServerName = "Unknown"
         };
-        
+
         // Define matchSummary
-        MatchSummary matchSummary = new MatchSummary(matchStatistics, allPlayerStatistics, matchStartData);
+        MatchSummary matchSummary = new(matchStatistics, allPlayerStatistics, matchStartData);
 
         // Populate stats for ALL players
         Dictionary<int, MatchPlayerStatistics> matchPlayerStatistics = [];
@@ -270,13 +291,13 @@ public partial class ClientRequesterController
             .ToListAsync();
 
         // Pre-create a dummy Role for the fallback User
-        MERRICK.DatabaseContext.Entities.Utility.Role dummyRole = new() { ID = 1, Name = "User" }; 
+        Role dummyRole = new() { ID = 1, Name = "User" };
 
         foreach (PlayerStatistics stats in allPlayerStatistics)
         {
             // Use real account if available, otherwise create lightweight fallback
             Account? playerAccount = playerAccounts.SingleOrDefault(a => a.ID == stats.AccountID);
-            
+
             if (playerAccount is null)
             {
                 playerAccount = new Account
@@ -292,15 +313,15 @@ public partial class ClientRequesterController
                         SRPPasswordHash = "",
                         SRPPasswordSalt = ""
                     },
-                    Clan = stats.ClanID.HasValue ? new Clan 
-                    { 
-                        ID = stats.ClanID.Value, 
-                        Tag = stats.ClanTag ?? "",
-                        Name = stats.ClanTag ?? ""
-                    } : null
+                    Clan = stats.ClanID.HasValue
+                        ? new Clan
+                        {
+                            ID = stats.ClanID.Value, Tag = stats.ClanTag ?? "", Name = stats.ClanTag ?? ""
+                        }
+                        : null
                 };
             }
-        
+
             matchPlayerStatistics[stats.AccountID] = new MatchPlayerStatistics(playerAccount, stats)
             {
                 TotalWonMatches = "0", // TODO: Implement
@@ -330,12 +351,17 @@ public partial class ClientRequesterController
                     PlacementWins = "0"
                 }
             };
-            
-            matchPlayerInventories[stats.AccountID] = new MatchPlayerInventory 
-            { 
-                 AccountID = stats.AccountID, 
-                 MatchID = matchStatistics.ID,
-                 Slot1 = "", Slot2 = "", Slot3 = "", Slot4 = "", Slot5 = "", Slot6 = "" // TODO: Populate from Inventory History/Events if available
+
+            matchPlayerInventories[stats.AccountID] = new MatchPlayerInventory
+            {
+                AccountID = stats.AccountID,
+                MatchID = matchStatistics.ID,
+                Slot1 = "",
+                Slot2 = "",
+                Slot3 = "",
+                Slot4 = "",
+                Slot5 = "",
+                Slot6 = "" // TODO: Populate from Inventory History/Events if available
             };
         }
 
@@ -343,11 +369,11 @@ public partial class ClientRequesterController
         int matchMasteryExperience = 100; // TODO: Calculate Based On Match Duration And Result
         int bonusExperience = 10; // TODO: Calculate Based On Max-Level Heroes Owned
 
-        MatchMastery matchMastery = new (
-            heroIdentifier: "Hero_Gauntlet", // TODO: Get Actual Hero Identifier
-            currentMasteryExperience: 0, // TODO: Retrieve From Mastery System
-            matchMasteryExperience: matchMasteryExperience,
-            bonusExperience: bonusExperience)
+        MatchMastery matchMastery = new(
+            "Hero_Gauntlet", // TODO: Get Actual Hero Identifier
+            0, // TODO: Retrieve From Mastery System
+            matchMasteryExperience,
+            bonusExperience)
         {
             HeroIdentifier = "Hero_Gauntlet",
             CurrentMasteryExperience = 0,
@@ -371,9 +397,9 @@ public partial class ClientRequesterController
         {
             GoldCoins = account?.User.GoldCoins.ToString() ?? "0",
             SilverCoins = account?.User.SilverCoins.ToString() ?? "0",
-            MatchSummary = [ matchSummary ],
-            MatchPlayerStatistics = [ matchPlayerStatistics ],
-            MatchPlayerInventories = [ matchPlayerInventories ],
+            MatchSummary = [matchSummary],
+            MatchPlayerStatistics = [matchPlayerStatistics],
+            MatchPlayerInventories = [matchPlayerInventories],
             MatchMastery = matchMastery,
             OwnedStoreItems = account?.User.OwnedStoreItems ?? [],
             OwnedStoreItemsData = account is not null ? SetOwnedStoreItemsData(account) : [],
@@ -389,10 +415,14 @@ public partial class ClientRequesterController
     }
 
     private static string SetCustomIconSlotID(Account account)
-        => account.SelectedStoreItems.Any(item => item.StartsWith("ai.custom_icon"))
-            ? account.SelectedStoreItems.FirstOrDefault(item => item.StartsWith("ai.custom_icon"))?.Replace("ai.custom_icon:", string.Empty) ?? "0" : "0";
+    {
+        return account.SelectedStoreItems.Any(item => item.StartsWith("ai.custom_icon"))
+            ? account.SelectedStoreItems.FirstOrDefault(item => item.StartsWith("ai.custom_icon"))
+                ?.Replace("ai.custom_icon:", string.Empty) ?? "0"
+            : "0";
+    }
 
-        private static Dictionary<string, object> SetOwnedStoreItemsData(Account account)
+    private static Dictionary<string, object> SetOwnedStoreItemsData(Account account)
     {
         // 2026-01-08: FIX - Aligned with Upgrades.cs.
         // We must populate my_upgrades_info for ALL owned items, otherwise the client may crash or log out when parsing stats/inventory.
@@ -401,11 +431,11 @@ public partial class ClientRequesterController
         foreach (string item in account.User.OwnedStoreItems)
         {
             // We use default StoreItemData which implies permanent ownership
-            items[item] = new global::KONGOR.MasterServer.Models.RequestResponse.SRP.StoreItemData();
+            items[item] = new StoreItemData();
         }
 
         // TODO: Add Mastery Boosts And Coupons (cp. items) when implemented.
-        
+
         return items;
     }
 }

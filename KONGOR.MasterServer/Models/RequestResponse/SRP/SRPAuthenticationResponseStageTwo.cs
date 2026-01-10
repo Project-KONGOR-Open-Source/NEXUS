@@ -6,9 +6,11 @@
 ///         This is by far the most complex data transfer object that the master server and the game client exchange.
 ///     </para>
 ///     <para>
-///         The online tool https://www.cleancss.com/php-beautify/ was used to format the raw PHP data to a humanly-readable PHP object.
+///         The online tool https://www.cleancss.com/php-beautify/ was used to format the raw PHP data to a
+///         humanly-readable PHP object.
 ///         This object, represented as string, was then deserialized to a C# object and re-serialized as JSON string.
-///         Finally, the raw version of this data model was generated from the JSON string by using the "Edit > Paste Special > Paste JSON As Classes" feature of Visual Studio.
+///         Finally, the raw version of this data model was generated from the JSON string by using the "Edit > Paste
+///         Special > Paste JSON As Classes" feature of Visual Studio.
 ///     </para>
 /// </summary>
 public class SRPAuthenticationResponseStageTwo
@@ -53,15 +55,16 @@ public class SRPAuthenticationResponseStageTwo
 
     /// <summary>
     ///     The type of the account.
-    ///     <br/>
-    ///     0 = Disabled; 1 = Demo; 2 = Server Host; 3 = Regular; 4 = Premium; 5 = Staff; 6 = Game Master; 7 = Tournament Moderator; 8 = Tournament Caster
+    ///     <br />
+    ///     0 = Disabled; 1 = Demo; 2 = Server Host; 3 = Regular; 4 = Premium; 5 = Staff; 6 = Game Master; 7 = Tournament
+    ///     Moderator; 8 = Tournament Caster
     /// </summary>
     [PhpProperty("account_type")]
     public required string AccountType { get; set; }
 
     /// <summary>
     ///     Unknown.
-    ///     <br/>
+    ///     <br />
     ///     0 = False; 1 = True
     /// </summary>
     [PhpProperty("trial")]
@@ -76,7 +79,7 @@ public class SRPAuthenticationResponseStageTwo
 
     /// <summary>
     ///     Unknown.
-    ///     <br/>
+    ///     <br />
     ///     0 = False; 1 = True
     /// </summary>
     [PhpProperty("prepay_only")]
@@ -84,7 +87,7 @@ public class SRPAuthenticationResponseStageTwo
 
     /// <summary>
     ///     The type of the account.
-    ///     <br/>
+    ///     <br />
     ///     0 = None; 1 = Basic Account; 2 = Verified Account; 3 = Legacy Account
     /// </summary>
     [PhpProperty("standing")]
@@ -92,7 +95,7 @@ public class SRPAuthenticationResponseStageTwo
 
     /// <summary>
     ///     Whether to automatically download the backup of the game client configuration files from the cloud or not on login.
-    ///     <br/>
+    ///     <br />
     ///     0 = False; 1 = True
     /// </summary>
     [PhpProperty("use_cloud")]
@@ -100,7 +103,7 @@ public class SRPAuthenticationResponseStageTwo
 
     /// <summary>
     ///     Whether the password has expired or not.
-    ///     <br/>
+    ///     <br />
     ///     NULL = Not Expired; 0 = Require Password Change; Any Non-Zero Positive Integer = Suggest Password Change
     /// </summary>
     [PhpProperty("pass_exp")]
@@ -108,7 +111,7 @@ public class SRPAuthenticationResponseStageTwo
 
     /// <summary>
     ///     Whether the referral system status of the friend is new or not.
-    ///     <br/>
+    ///     <br />
     ///     0 = False; 1 = True
     /// </summary>
     [PhpProperty("is_new")]
@@ -251,7 +254,8 @@ public class SRPAuthenticationResponseStageTwo
 
     /// <summary>
     ///     Tokens which grant temporary access to game modes (MidWars, Grimm's Crossing, etc.) for free-to-play players.
-    ///     Alternative to permanent "Game Pass" or temporary "Game Access" products (e.g. "m.midwars.pass", "m.midwars.access").
+    ///     Alternative to permanent "Game Pass" or temporary "Game Access" products (e.g. "m.midwars.pass",
+    ///     "m.midwars.access").
     ///     Legacy accounts have full access to all game modes, and so do accounts which own the "m.allmodes.pass" store item.
     /// </summary>
     [PhpProperty("game_tokens")]
@@ -274,9 +278,10 @@ public class SRPAuthenticationResponseStageTwo
 
     /// <summary>
     ///     Unused.
-    ///     <br/>
+    ///     <br />
     ///     May have been intended as a seasonal progression system similar to "season_level" but for creep cosmetics.
-    ///     For the sake of consistency with "season_level", this property is set to "100", although it most likely has no effect.
+    ///     For the sake of consistency with "season_level", this property is set to "100", although it most likely has no
+    ///     effect.
     /// </summary>
     [PhpProperty("creep_level")]
     public int CreepLevel { get; set; } = 100;
@@ -302,11 +307,12 @@ public class SRPAuthenticationResponseStageTwo
 
     /// <summary>
     ///     Unknown.
-    ///     <br/>
+    ///     <br />
     ///     Appears to be the MMR rank thresholds.
     /// </summary>
     [PhpProperty("mmr_rank")]
-    public string MMRRankThresholds { get; set; } = "1250,1275,1300,1330,1365,1400,1435,1470,1505,1540,1575,1610,1645,1685,1725,1765,1805,1850,1900,1950";
+    public string MMRRankThresholds { get; set; } =
+        "1250,1275,1300,1330,1365,1400,1435,1470,1505,1540,1575,1610,1645,1685,1725,1765,1805,1850,1900,1950";
 
     /// <summary>
     ///     The time (in UTC seconds) at which the account is no longer muted.
@@ -323,7 +329,7 @@ public class SRPAuthenticationResponseStageTwo
 
     /// <summary>
     ///     Unknown.
-    ///     <br/>
+    ///     <br />
     ///     Seems to be set to "true" on a successful response, or to "false" if an error occurs.
     /// </summary>
     [PhpProperty(0)]
@@ -359,7 +365,8 @@ public class SRPAuthenticationResponseStageTwo
     public required Dictionary<string, ClanMemberAccount> ClanRoster { get; set; }
 
     /// <summary>
-    ///     The account's clan membership data if the account is part of a clan, or an error message if the account is not part of a clan.
+    ///     The account's clan membership data if the account is part of a clan, or an error message if the account is not part
+    ///     of a clan.
     /// </summary>
     [PhpProperty("clan_member_info")]
     public required OneOf<ClanMemberData, ClanMemberDataError> ClanMembershipData { get; set; }
@@ -407,18 +414,20 @@ public class SRPAuthenticationResponseStageTwo
 
     /// <summary>
     ///     The list of heroes with a non-standard-ownership (free/early-access/etc.) model.
-    ///     The latest list of heroes sent by the legacy HoN master server before the services shut down is the list of free heroes: "Hero_Genesis,Hero_Dorin_Tal,Hero_Adeve".
-    ///     <br/>
+    ///     The latest list of heroes sent by the legacy HoN master server before the services shut down is the list of free
+    ///     heroes: "Hero_Genesis,Hero_Dorin_Tal,Hero_Adeve".
+    ///     <br />
     ///     This property is obsolete.
     /// </summary>
     [PhpProperty("hero_list")]
-    public HeroList HeroList { get; set; } = new ();
+    public HeroList HeroList { get; set; } = new();
 
     /// <summary>
-    ///     Used for the Tencent anti-DDoS protection component, which does network packet watermarking that gets verified by the game server proxy.
+    ///     Used for the Tencent anti-DDoS protection component, which does network packet watermarking that gets verified by
+    ///     the game server proxy.
     /// </summary>
     [PhpProperty("sec_info")]
-    public SecurityInformation SecurityInformation { get; set; } = new ();
+    public SecurityInformation SecurityInformation { get; set; } = new();
 
     /// <summary>
     ///     A set of static values used to generate award-centric data and trigger award-centric events.
@@ -434,12 +443,12 @@ public class SRPAuthenticationResponseStageTwo
 
     /// <summary>
     ///     Used for the quest system, which has been disabled.
-    ///     <br/>
+    ///     <br />
     ///     While the quest system is disabled, this dictionary contains a single element with a key of "error".
     ///     The object which is the value of this element has the values of all its properties set to "0".
     /// </summary>
     [PhpProperty("quest_system")]
-    public Dictionary<string, QuestSystem> QuestSystem { get; set; } = new () { { "error", new QuestSystem() } };
+    public Dictionary<string, QuestSystem> QuestSystem { get; set; } = new() { { "error", new QuestSystem() } };
 
     /// <summary>
     ///     The cloud storage settings of the account.
@@ -493,7 +502,7 @@ public class FriendAccount
 
     /// <summary>
     ///     The account type of the friend.
-    ///     <br/>
+    ///     <br />
     ///     0 = None; 1 = Basic Account; 2 = Verified Account; 3 = Legacy Account
     /// </summary>
     [PhpProperty("standing")]
@@ -501,7 +510,7 @@ public class FriendAccount
 
     /// <summary>
     ///     Whether the referral system status of the friend is inactive or not.
-    ///     <br/>
+    ///     <br />
     ///     0 = False; 1 = True
     /// </summary>
     [PhpProperty("inactive")]
@@ -509,7 +518,7 @@ public class FriendAccount
 
     /// <summary>
     ///     Whether the referral system status of the friend is new or not.
-    ///     <br/>
+    ///     <br />
     ///     0 = False; 1 = True
     /// </summary>
     [PhpProperty("new")]
@@ -575,7 +584,7 @@ public class ClanMemberAccount
 
     /// <summary>
     ///     The clan rank of the clan member account.
-    ///     <br/>
+    ///     <br />
     ///     None; Member; Officer; Leader
     /// </summary>
     [PhpProperty("rank")]
@@ -595,7 +604,7 @@ public class ClanMemberAccount
 
     /// <summary>
     ///     The account type of the friend.
-    ///     <br/>
+    ///     <br />
     ///     0 = None; 1 = Basic Account; 2 = Verified Account; 3 = Legacy Account
     /// </summary>
     [PhpProperty("standing")]
@@ -636,7 +645,7 @@ public class ClanMemberData
 
     /// <summary>
     ///     The clan rank of the clan member account.
-    ///     <br/>
+    ///     <br />
     ///     None; Member; Officer; Leader
     /// </summary>
     [PhpProperty("rank")]
@@ -663,7 +672,7 @@ public class ClanMemberData
     /// <summary>
     ///     Whether the account is active in the clan or not.
     ///     It is unknown what "active" means.
-    ///     <br/>
+    ///     <br />
     ///     0 = False; 1 = True
     /// </summary>
     [PhpProperty("active")]
@@ -677,7 +686,7 @@ public class ClanMemberData
 
     /// <summary>
     ///     Whether the clan has been flagged as idle (no active users) or not.
-    ///     <br/>
+    ///     <br />
     ///     0 = False; 1 = True
     /// </summary>
     [PhpProperty("idleWarn")]
@@ -732,8 +741,9 @@ public class StoreItemData
     /// <summary>
     ///     Used for numeric counters and visual effects for specific hero avatars.
     ///     This value represents the number of hero kills achieved with those respective avatars.
-    ///     <br/>
-    ///     We don't currently keep track of these scores, so setting this value to "0" on every login will cause the counter to be equal to the number of hero kills each game.
+    ///     <br />
+    ///     We don't currently keep track of these scores, so setting this value to "0" on every login will cause the counter
+    ///     to be equal to the number of hero kills each game.
     /// </summary>
     [PhpProperty("score")]
     public string Score { get; set; } = "0";
@@ -744,7 +754,7 @@ public class HeroList
     /// <summary>
     ///     The list of free heroes in the rotation, from when HoN became free-to-play.
     ///     The assigned value is the latest list of heroes sent by the legacy HoN master server before the services shut down.
-    ///     <br/>
+    ///     <br />
     ///     This property is obsolete.
     /// </summary>
     [PhpProperty("free")]
@@ -754,7 +764,8 @@ public class HeroList
 public class SecurityInformation
 {
     /// <summary>
-    ///     Used for the Tencent anti-DDoS protection component, which does network packet watermarking that gets verified by the game server proxy.
+    ///     Used for the Tencent anti-DDoS protection component, which does network packet watermarking that gets verified by
+    ///     the game server proxy.
     /// </summary>
     [PhpProperty("initial_vector")]
     public string InitialVector { get; set; } = "73088db5e71cfb6d";
@@ -778,73 +789,73 @@ public class AwardsTooltips
     ///     Milestones award.
     /// </summary>
     [PhpProperty("milestones")]
-    public MilestonesAwardTooltip Milestones { get; set; } = new ();
+    public MilestonesAwardTooltip Milestones { get; set; } = new();
 
     /// <summary>
     ///     Leveling award.
     /// </summary>
     [PhpProperty("leveling")]
-    public LevelingAwardTooltip Leveling { get; set; } = new ();
+    public LevelingAwardTooltip Leveling { get; set; } = new();
 
     /// <summary>
     ///     Bloodlust award.
     /// </summary>
     [PhpProperty("bloodlust")]
-    public BloodlustAwardTooltip Bloodlust { get; set; } = new ();
+    public BloodlustAwardTooltip Bloodlust { get; set; } = new();
 
     /// <summary>
     ///     Annihilation award.
     /// </summary>
     [PhpProperty("annihilation")]
-    public AnnihilationAwardTooltip Annihilation { get; set; } = new ();
+    public AnnihilationAwardTooltip Annihilation { get; set; } = new();
 
     /// <summary>
     ///     Immortal award.
     /// </summary>
     [PhpProperty("immortal")]
-    public ImmortalAwardTooltip Immortal { get; set; } = new ();
+    public ImmortalAwardTooltip Immortal { get; set; } = new();
 
     /// <summary>
     ///     Victory award.
     /// </summary>
     [PhpProperty("victory")]
-    public VictoryAwardTooltip Victory { get; set; } = new ();
+    public VictoryAwardTooltip Victory { get; set; } = new();
 
     /// <summary>
     ///     Loss award.
     /// </summary>
     [PhpProperty("loss")]
-    public LossAwardTooltip Loss { get; set; } = new ();
+    public LossAwardTooltip Loss { get; set; } = new();
 
     /// <summary>
     ///     Disconnect award.
     /// </summary>
     [PhpProperty("disco")]
-    public DisconnectAwardTooltip Disconnect { get; set; } = new ();
+    public DisconnectAwardTooltip Disconnect { get; set; } = new();
 
     /// <summary>
     ///     Quick match award.
     /// </summary>
     [PhpProperty("quick")]
-    public QuickMatchAwardTooltip QuickMatch { get; set; } = new ();
+    public QuickMatchAwardTooltip QuickMatch { get; set; } = new();
 
     /// <summary>
     ///     First blood award.
     /// </summary>
     [PhpProperty("first")]
-    public FirstBloodAwardTooltip FirstBlood { get; set; } = new ();
+    public FirstBloodAwardTooltip FirstBlood { get; set; } = new();
 
     /// <summary>
     ///     Consecutive wins award.
     /// </summary>
     [PhpProperty("consec_win")]
-    public ConsecutiveWinAwardTooltip ConsecutiveWins { get; set; } = new ();
+    public ConsecutiveWinAwardTooltip ConsecutiveWins { get; set; } = new();
 
     /// <summary>
     ///     Consecutive losses award.
     /// </summary>
     [PhpProperty("consec_loss")]
-    public ConsecutiveLossAwardTooltip ConsecutiveLosses { get; set; } = new ();
+    public ConsecutiveLossAwardTooltip ConsecutiveLosses { get; set; } = new();
 }
 
 public class MilestonesAwardTooltip
@@ -853,60 +864,45 @@ public class MilestonesAwardTooltip
     ///     Awarded for hero assists.
     /// </summary>
     [PhpProperty("heroassists")]
-    public MilestoneAwardTooltip HeroAssists { get; set; } = new ()
+    public MilestoneAwardTooltip HeroAssists { get; set; } = new()
     {
-        AwardName = "heroassists",
-        Experience = "100",
-        GoblinCoins = "5",
-        Modulo = "250"
+        AwardName = "heroassists", Experience = "100", GoblinCoins = "5", Modulo = "250"
     };
 
     /// <summary>
     ///     Awarded for hero kills.
     /// </summary>
     [PhpProperty("herokills")]
-    public MilestoneAwardTooltip HeroKills { get; set; } = new ()
+    public MilestoneAwardTooltip HeroKills { get; set; } = new()
     {
-        AwardName = "herokills",
-        Experience = "100",
-        GoblinCoins = "5",
-        Modulo = "250"
+        AwardName = "herokills", Experience = "100", GoblinCoins = "5", Modulo = "250"
     };
 
     /// <summary>
     ///     Awarded for killing heroes after taunting them.
     /// </summary>
     [PhpProperty("smackdown")]
-    public MilestoneAwardTooltip Smackdown { get; set; } = new ()
+    public MilestoneAwardTooltip Smackdown { get; set; } = new()
     {
-        AwardName = "smackdown",
-        Experience = "50",
-        GoblinCoins = "1",
-        Modulo = "10"
+        AwardName = "smackdown", Experience = "50", GoblinCoins = "1", Modulo = "10"
     };
 
     /// <summary>
     ///     Awarded for placing wards.
     /// </summary>
     [PhpProperty("wards")]
-    public MilestoneAwardTooltip Wards { get; set; } = new ()
+    public MilestoneAwardTooltip Wards { get; set; } = new()
     {
-        AwardName = "wards",
-        Experience = "100",
-        GoblinCoins = "5",
-        Modulo = "50"
+        AwardName = "wards", Experience = "100", GoblinCoins = "5", Modulo = "50"
     };
 
     /// <summary>
     ///     Awarded for winning matches.
     /// </summary>
     [PhpProperty("wins")]
-    public MilestoneAwardTooltip Wins { get; set; } = new ()
+    public MilestoneAwardTooltip Wins { get; set; } = new()
     {
-        AwardName = "wins",
-        Experience = "200",
-        GoblinCoins = "10",
-        Modulo = "50"
+        AwardName = "wins", Experience = "200", GoblinCoins = "10", Modulo = "50"
     };
 }
 
@@ -931,7 +927,8 @@ public class MilestoneAwardTooltip
     public required string GoblinCoins { get; set; }
 
     /// <summary>
-    ///     The modulus used to determine the frequency of reaching the milestone, e.g. "10" would mean that the milestone is reached every 10 ticks.
+    ///     The modulus used to determine the frequency of reaching the milestone, e.g. "10" would mean that the milestone is
+    ///     reached every 10 ticks.
     /// </summary>
     [PhpProperty("modulo")]
     public required string Modulo { get; set; }
@@ -1142,7 +1139,7 @@ public class DataPoint
 
     /// <summary>
     ///     The account type.
-    ///     <br/>
+    ///     <br />
     ///     0 = None; 1 = Basic Account; 2 = Verified Account; 3 = Legacy Account
     /// </summary>
     [PhpProperty("standing")]
@@ -1161,7 +1158,8 @@ public class DataPoint
     public required string Experience { get; set; }
 
     /// <summary>
-    ///     The total number of disconnects, including game modes which are not tracked on the statistics page (e.g. custom maps).
+    ///     The total number of disconnects, including game modes which are not tracked on the statistics page (e.g. custom
+    ///     maps).
     /// </summary>
     [PhpProperty("discos")]
     public required string Disconnects { get; set; }
@@ -1173,7 +1171,8 @@ public class DataPoint
     public string PossibleDisconnects { get; set; } = "0";
 
     /// <summary>
-    ///     The total number of matches played, including game modes which are not tracked on the statistics page (e.g. custom maps).
+    ///     The total number of matches played, including game modes which are not tracked on the statistics page (e.g. custom
+    ///     maps).
     /// </summary>
     [PhpProperty("games_played")]
     public required string MatchesPlayed { get; set; }
@@ -1341,7 +1340,7 @@ public class DataPoint
 
     /// <summary>
     ///     Whether the referral system status of the friend is new or not.
-    ///     <br/>
+    ///     <br />
     ///     0 = False; 1 = True
     /// </summary>
     [PhpProperty("is_new")]
@@ -1373,15 +1372,16 @@ public class CloudStorageInformation
 
     /// <summary>
     ///     Whether to automatically download the backup of the game client configuration files from the cloud or not on login.
-    ///     <br/>
+    ///     <br />
     ///     0 = False; 1 = True
     /// </summary>
     [PhpProperty("use_cloud")]
     public required string UseCloud { get; set; }
 
     /// <summary>
-    ///     Whether to automatically upload the backup of the game client configuration files to the cloud or not after making changes to the settings.
-    ///     <br/>
+    ///     Whether to automatically upload the backup of the game client configuration files to the cloud or not after making
+    ///     changes to the settings.
+    ///     <br />
     ///     0 = False; 1 = True
     /// </summary>
     [PhpProperty("cloud_autoupload")]
@@ -1389,7 +1389,8 @@ public class CloudStorageInformation
 
     /// <summary>
     ///     The timestamp in "yyyy-MM-dd HH:mm:ss" format of when "cloud.zip" was last modified.
-    ///     This value is extracted from "cloud.zip", which is the local copy of the backup of the game client configuration files.
+    ///     This value is extracted from "cloud.zip", which is the local copy of the backup of the game client configuration
+    ///     files.
     /// </summary>
     [PhpProperty("file_modify_time")]
     public required string BackupLastUpdatedTime { get; set; }
@@ -1399,10 +1400,12 @@ public class Notification
 {
     /// <summary>
     ///     A pipe-separated set of notification data.
-    ///     <br/>
-    ///     The format is: "{SenderAccountName}|{Unknown}|{NotificationStatus}|{NotificationType}|{NotificationDisplayType}|{NotificationAction}|{NotificationTimestamp}|{NotificationID}".
-    ///     <br/>
-    ///     The notification status can be either 0 = Removable, 1 = Not Seen, 2 = Seen. The other data points are exemplified below.
+    ///     <br />
+    ///     The format is:
+    ///     "{SenderAccountName}|{Unknown}|{NotificationStatus}|{NotificationType}|{NotificationDisplayType}|{NotificationAction}|{NotificationTimestamp}|{NotificationID}".
+    ///     <br />
+    ///     The notification status can be either 0 = Removable, 1 = Not Seen, 2 = Seen. The other data points are exemplified
+    ///     below.
     ///     <code>
     ///         Examples (the spaces are only added for readability, but they are not needed):
     ///             "KONGOR||23|notify_buddy_requested_added|notification_generic_action|action_friend_request|01/18 00:21 AM|5000001"

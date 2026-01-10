@@ -20,96 +20,111 @@
             @Model.Message
         </div>
     }
-    
+
     <!-- Account Selection -->
     <div class="bg-slate-800 p-6 rounded shadow mb-6">
         <form method="get" action="/tools/inventory" class="flex gap-4 items-end">
             <div class="flex-1">
                 <label class="block text-gray-300 mb-2">Account Name</label>
-                <input type="text" name="accountName" value="@Model.AccountName" class="w-full bg-slate-700 text-white p-2 rounded border border-slate-600" placeholder="e.g. GUEST-05" />
+                <input type="text" name="accountName" value="@Model.AccountName"
+                       class="w-full bg-slate-700 text-white p-2 rounded border border-slate-600"
+                       placeholder="e.g. GUEST-05"/>
             </div>
-            <button type="submit" class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2 rounded">Load Inventory</button>
+            <button type="submit" class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2 rounded">Load Inventory
+            </button>
         </form>
     </div>
 
     @if (!string.IsNullOrEmpty(Model.AccountName))
     {
-         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-             <!-- Quick Add Item -->
-             <div class="bg-slate-800 p-6 rounded shadow">
-                 <h2 class="text-xl font-bold mb-4 text-white">Quick Add</h2>
-                 <form method="post" action="/tools/inventory/add" class="space-y-4">
-                     <input type="hidden" name="accountName" value="@Model.AccountName" />
-                     <div>
-                         <label class="block text-gray-300 mb-2">Select Item</label>
-                         <select name="productCode" class="w-full bg-slate-700 text-white p-2 rounded border border-slate-600">
-                             @foreach(var item in Model.CommonItems)
-                             {
-                                 <option value="@item.Key">@item.Value</option>
-                             }
-                         </select>
-                     </div>
-                     <button type="submit" class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2 rounded w-full">Add Selected Item</button>
-                 </form>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Quick Add Item -->
+            <div class="bg-slate-800 p-6 rounded shadow">
+                <h2 class="text-xl font-bold mb-4 text-white">Quick Add</h2>
+                <form method="post" action="/tools/inventory/add" class="space-y-4">
+                    <input type="hidden" name="accountName" value="@Model.AccountName"/>
+                    <div>
+                        <label class="block text-gray-300 mb-2">Select Item</label>
+                        <select name="productCode"
+                                class="w-full bg-slate-700 text-white p-2 rounded border border-slate-600">
+                            @foreach (var item in Model.CommonItems)
+                            {
+                                <option value="@item.Key">@item.Value</option>
+                            }
+                        </select>
+                    </div>
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2 rounded w-full">Add
+                        Selected Item
+                    </button>
+                </form>
 
-                 <div class="mt-8 pt-6 border-t border-slate-700">
-                     <h3 class="text-lg font-bold mb-2 text-white">Manual Add</h3>
-                     <form method="post" action="/tools/inventory/add" class="space-y-4">
-                         <input type="hidden" name="accountName" value="@Model.AccountName" />
-                         <div>
-                             <input type="text" name="productCode" class="w-full bg-slate-700 text-white p-2 rounded border border-slate-600" placeholder="Product Code (e.g. Avatar_Legionnaire.Plogger)" required />
-                         </div>
-                         <button type="submit" class="bg-green-600 hover:bg-green-500 text-white px-4 py-2 rounded w-full text-sm">Add Custom Code</button>
-                     </form>
-                 </div>
-             </div>
-             
-             <!-- Reset Inventory -->
-             <div class="bg-slate-800 p-6 rounded shadow">
-                 <h2 class="text-xl font-bold mb-4 text-white">Danger Zone</h2>
-                 <form method="post" action="/tools/inventory/reset" onsubmit="return confirm('Are you sure you want to delete ALL items?');">
-                     <input type="hidden" name="accountName" value="@Model.AccountName" />
-                     <button type="submit" class="bg-red-600 hover:bg-red-500 text-white px-6 py-2 rounded w-full">Reset All Inventory</button>
-                 </form>
-             </div>
-         </div>
+                <div class="mt-8 pt-6 border-t border-slate-700">
+                    <h3 class="text-lg font-bold mb-2 text-white">Manual Add</h3>
+                    <form method="post" action="/tools/inventory/add" class="space-y-4">
+                        <input type="hidden" name="accountName" value="@Model.AccountName"/>
+                        <div>
+                            <input type="text" name="productCode"
+                                   class="w-full bg-slate-700 text-white p-2 rounded border border-slate-600"
+                                   placeholder="Product Code (e.g. Avatar_Legionnaire.Plogger)" required/>
+                        </div>
+                        <button type="submit"
+                                class="bg-green-600 hover:bg-green-500 text-white px-4 py-2 rounded w-full text-sm">Add
+                            Custom Code
+                        </button>
+                    </form>
+                </div>
+            </div>
 
-         <!-- Current Inventory List -->
-         <div class="bg-slate-800 p-6 rounded shadow mt-6">
-             <h2 class="text-xl font-bold mb-4 text-white">Current Inventory (@Model.OwnedItems.Count items)</h2>
-             
-             @if(Model.OwnedItems.Count > 0)
-             {
-                 <div class="overflow-y-auto max-h-96 border border-slate-600 rounded">
-                     <table class="w-full text-left text-gray-300">
-                         <thead class="bg-slate-900 sticky top-0">
-                             <tr>
-                                 <th class="p-3">Product Code</th>
-                                 <th class="p-3 w-32">Action</th>
-                             </tr>
-                         </thead>
-                         <tbody class="divide-y divide-slate-700">
-                             @foreach(var item in Model.OwnedItems)
-                             {
-                                 <tr class="hover:bg-slate-700">
-                                     <td class="p-3">@item</td>
-                                     <td class="p-3 text-right">
-                                         <form method="post" action="/tools/inventory/remove" style="display:inline;">
-                                             <input type="hidden" name="accountName" value="@Model.AccountName" />
-                                             <input type="hidden" name="productCode" value="@item" />
-                                             <button type="submit" class="text-red-400 hover:text-red-300 text-sm">Remove</button>
-                                         </form>
-                                     </td>
-                                 </tr>
-                             }
-                         </tbody>
-                     </table>
-                 </div>
-             }
-             else
-             {
-                 <p class="text-gray-400">No items found in inventory.</p>
-             }
-         </div>
+            <!-- Reset Inventory -->
+            <div class="bg-slate-800 p-6 rounded shadow">
+                <h2 class="text-xl font-bold mb-4 text-white">Danger Zone</h2>
+                <form method="post" action="/tools/inventory/reset"
+                      onsubmit="return confirm('Are you sure you want to delete ALL items?');">
+                    <input type="hidden" name="accountName" value="@Model.AccountName"/>
+                    <button type="submit" class="bg-red-600 hover:bg-red-500 text-white px-6 py-2 rounded w-full">Reset
+                        All Inventory
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Current Inventory List -->
+        <div class="bg-slate-800 p-6 rounded shadow mt-6">
+            <h2 class="text-xl font-bold mb-4 text-white">Current Inventory (@Model.OwnedItems.Count items)</h2>
+
+            @if (Model.OwnedItems.Count > 0)
+            {
+                <div class="overflow-y-auto max-h-96 border border-slate-600 rounded">
+                    <table class="w-full text-left text-gray-300">
+                        <thead class="bg-slate-900 sticky top-0">
+                        <tr>
+                            <th class="p-3">Product Code</th>
+                            <th class="p-3 w-32">Action</th>
+                        </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-700">
+                        @foreach (var item in Model.OwnedItems)
+                        {
+                            <tr class="hover:bg-slate-700">
+                                <td class="p-3">@item</td>
+                                <td class="p-3 text-right">
+                                    <form method="post" action="/tools/inventory/remove" style="display:inline;">
+                                        <input type="hidden" name="accountName" value="@Model.AccountName"/>
+                                        <input type="hidden" name="productCode" value="@item"/>
+                                        <button type="submit" class="text-red-400 hover:text-red-300 text-sm">Remove
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <p class="text-gray-400">No items found in inventory.</p>
+            }
+        </div>
     }
 </div>

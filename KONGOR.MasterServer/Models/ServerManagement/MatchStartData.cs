@@ -7,6 +7,7 @@ namespace KONGOR.MasterServer.Models.ServerManagement;
 public class MatchStartData
 {
     private int? _matchID;
+
     public int MatchID
     {
         get => _matchID ?? TimestampStarted.GetDeterministicInt32Hash();
@@ -55,7 +56,8 @@ public class MatchStartData
     ///         1 -> League Match (organized competitive league play)
     ///     </code>
     ///     <remark>
-    ///         League matches belong to a dedicated competitive league structure with player rosters, seasonal standings, and separate win/loss tracking.
+    ///         League matches belong to a dedicated competitive league structure with player rosters, seasonal standings, and
+    ///         separate win/loss tracking.
     ///     </remark>
     /// </summary>
     public int League { get; set; } = 0;
@@ -67,7 +69,7 @@ public class MatchStartData
     private static int ComputeIncrementalMatchID(DateTimeOffset datetime)
     {
         // The Official Date And Time That Project KONGOR Started, As Per The First Commit Timestamp
-        DateTimeOffset start = new (2022, 01, 05, 10, 16, 35, TimeSpan.Zero);
+        DateTimeOffset start = new(2022, 01, 05, 10, 16, 35, TimeSpan.Zero);
 
         // Compute The Total Number Of Seconds That Have Elapsed Since The Project KONGOR Epoch Time
         int seconds = Convert.ToInt32((datetime - start).TotalSeconds);

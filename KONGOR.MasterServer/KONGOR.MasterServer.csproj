@@ -5,22 +5,22 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Aspire.StackExchange.Redis.DistributedCaching" Version="13.1.0" />
+        <PackageReference Include="Aspire.StackExchange.Redis.DistributedCaching" Version="13.1.0"/>
         <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.1">
-          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-          <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+            <PrivateAssets>all</PrivateAssets>
         </PackageReference>
-        <PackageReference Include="OneOf" Version="3.0.271" />
-        <PackageReference Include="PhpSerializerNET" Version="2.1.1" />
-        <PackageReference Include="Serilog.AspNetCore" Version="10.0.0" />
-        <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
-        <PackageReference Include="srp" Version="1.0.7" />
-        <PackageReference Include="Swashbuckle.AspNetCore" Version="10.1.0" />
+        <PackageReference Include="OneOf" Version="3.0.271"/>
+        <PackageReference Include="PhpSerializerNET" Version="2.1.1"/>
+        <PackageReference Include="Serilog.AspNetCore" Version="10.0.0"/>
+        <PackageReference Include="Serilog.Sinks.File" Version="7.0.0"/>
+        <PackageReference Include="srp" Version="1.0.7"/>
+        <PackageReference Include="Swashbuckle.AspNetCore" Version="10.1.0"/>
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="../ASPIRE.Common/ASPIRE.Common.csproj" />
-        <ProjectReference Include="../MERRICK.DatabaseContext/MERRICK.DatabaseContext.csproj" />
+        <ProjectReference Include="../ASPIRE.Common/ASPIRE.Common.csproj"/>
+        <ProjectReference Include="../MERRICK.DatabaseContext/MERRICK.DatabaseContext.csproj"/>
     </ItemGroup>
 
 </Project>

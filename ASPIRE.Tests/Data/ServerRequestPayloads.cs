@@ -1,10 +1,8 @@
-using System.Collections.Generic;
-
 namespace ASPIRE.Tests.Data;
 
 /// <summary>
-/// Consolidated payload examples for the Server Requester.
-/// Contains both Verified (proven to work) and Unverified (theoretical) payloads.
+///     Consolidated payload examples for the Server Requester.
+///     Contains both Verified (proven to work) and Unverified (theoretical) payloads.
 /// </summary>
 public static class ServerRequestPayloads
 {
@@ -15,8 +13,8 @@ public static class ServerRequestPayloads
             // Heartbeat is effectively a set_online call without 'new' flag
             // and updating connection state.
             return SetOnline(
-                cookie: cookie,
-                matchId: 0, // Not strictly used in handler but good for compat
+                cookie,
+                0, // Not strictly used in handler but good for compat
                 isNew: false,
                 c_state: "SERVER_STATUS_ACTIVE",
                 prev_c_state: "SERVER_STATUS_ACTIVE",
@@ -26,23 +24,16 @@ public static class ServerRequestPayloads
 
         public static Dictionary<string, string> ReplayAuth(string login, string password)
         {
-            return new Dictionary<string, string>
-            {
-                { "f", "replay_auth" },
-                { "login", login },
-                { "pass", password }
-            };
+            return new Dictionary<string, string> { { "f", "replay_auth" }, { "login", login }, { "pass", password } };
         }
 
         public static Dictionary<string, string> GetSpectatorHeader()
         {
-             return new Dictionary<string, string>
-            {
-                { "f", "get_spectator_header" }
-            };
+            return new Dictionary<string, string> { { "f", "get_spectator_header" } };
         }
 
-        public static Dictionary<string, string> NewSession(string login, string password, int port, string name, string description, string location, string ip)
+        public static Dictionary<string, string> NewSession(string login, string password, int port, string name,
+            string description, string location, string ip)
         {
             return new Dictionary<string, string>
             {
@@ -75,7 +66,7 @@ public static class ServerRequestPayloads
 
         public static Dictionary<string, string> AcceptKey(string cookie, int accountId)
         {
-             return new Dictionary<string, string>
+            return new Dictionary<string, string>
             {
                 { "f", "accept_key" },
                 { "session", cookie }, // HandleAcceptKey expects 'session', not 'cookie'
@@ -86,26 +77,21 @@ public static class ServerRequestPayloads
 
         public static Dictionary<string, string> Aids2Cookie(string cookie)
         {
-            return new Dictionary<string, string>
-            {
-                { "f", "aids2cookie" },
-                { "cookie", cookie }
-            };
+            return new Dictionary<string, string> { { "f", "aids2cookie" }, { "cookie", cookie } };
         }
 
         public static Dictionary<string, string> GetQuickStats(string session)
         {
             return new Dictionary<string, string>
             {
-                { "f", "get_quickstats" },
-                { "session", session } // server session cookie
+                { "f", "get_quickstats" }, { "session", session } // server session cookie
             };
         }
 
         public static Dictionary<string, string> SetOnline(
-            string cookie, 
-            int matchId, 
-            int port = 11235, 
+            string cookie,
+            int matchId,
+            int port = 11235,
             string ip = "127.0.0.1",
             string version = "4.10.1",
             string map = "caldavar",
@@ -113,13 +99,13 @@ public static class ServerRequestPayloads
             string location = "US",
             bool isNew = true,
             // Required by HandleSetOnline
-            string c_state = "SERVER_STATUS_ACTIVE", 
-            string prev_c_state = "SERVER_STATUS_LOADING", 
+            string c_state = "SERVER_STATUS_ACTIVE",
+            string prev_c_state = "SERVER_STATUS_LOADING",
             int num_conn = 0,
             int cgt = 0
-            )
+        )
         {
-                Dictionary<string, string> payload = new Dictionary<string, string>
+            Dictionary<string, string> payload = new()
             {
                 { "f", "set_online" },
                 { "session", cookie }, // Code uses 'session' param
@@ -131,7 +117,7 @@ public static class ServerRequestPayloads
                 { "name", name },
                 { "location", location },
                 { "new", isNew ? "1" : "0" }, // Logic uses existence check?
-                
+
                 // Required parameters found in HandleSetOnline
                 { "num_conn", num_conn.ToString() },
                 { "cgt", cgt.ToString() }, // Current Game Time
@@ -153,19 +139,13 @@ public static class ServerRequestPayloads
         {
             return new Dictionary<string, string>
             {
-                { "f", "game_ended" },
-                { "cookie", cookie },
-                { "match_id", matchId.ToString() }
+                { "f", "game_ended" }, { "cookie", cookie }, { "match_id", matchId.ToString() }
             };
         }
 
         public static Dictionary<string, string> Shutdown(string cookie)
         {
-            return new Dictionary<string, string>
-            {
-                { "f", "shutdown" },
-                { "session", cookie }
-            };
+            return new Dictionary<string, string> { { "f", "shutdown" }, { "session", cookie } };
         }
 
         public static Dictionary<string, string> StartGame(string cookie, int matchId, string mname = "Test Game")
@@ -189,7 +169,7 @@ public static class ServerRequestPayloads
             public static Dictionary<string, object> Heartbeat()
             {
                 // Simple OK response
-                return new Dictionary<string, object> { { "0", true } }; 
+                return new Dictionary<string, object> { { "0", true } };
             }
 
             public static Dictionary<string, object> SetOnline(int matchId)
@@ -212,9 +192,7 @@ public static class ServerRequestPayloads
         {
             return new Dictionary<string, string>
             {
-                { "f", "set_replay_size" },
-                { "match_id", matchId },
-                { "size", size.ToString() }
+                { "f", "set_replay_size" }, { "match_id", matchId }, { "size", size.ToString() }
             };
         }
 

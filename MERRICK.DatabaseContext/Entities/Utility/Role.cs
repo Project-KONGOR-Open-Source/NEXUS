@@ -3,9 +3,7 @@
 [Index(nameof(Name), IsUnique = true)]
 public class Role
 {
-    [Key]
-    public int ID { get; set; }
+    [Key] public int ID { get; set; }
 
-    [StringLength(20)]
-    public required string Name { get; set; }
+    [StringLength(20)] public required string Name { get; set; }
 }

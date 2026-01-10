@@ -5,7 +5,7 @@ public class GroupJoin : ISynchronousCommandProcessor<ChatSession>
 {
     public void Process(ChatSession session, ChatBuffer buffer)
     {
-        GroupJoinRequestData requestData = new (buffer);
+        GroupJoinRequestData requestData = new(buffer);
 
         MatchmakingGroup
             .GetByMemberAccountName(requestData.InviteIssuerName)
@@ -15,17 +15,16 @@ public class GroupJoin : ISynchronousCommandProcessor<ChatSession>
 
 file class GroupJoinRequestData
 {
-    public byte[] CommandBytes { get; init; }
-
-    public string ClientVersion { get; init; }
-
-    public string InviteIssuerName { get; init; }
-
     public GroupJoinRequestData(ChatBuffer buffer)
     {
         CommandBytes = buffer.ReadCommandBytes();
         ClientVersion = buffer.ReadString();
         InviteIssuerName = buffer.ReadString();
     }
-}
 
+    public byte[] CommandBytes { get; init; }
+
+    public string ClientVersion { get; init; }
+
+    public string InviteIssuerName { get; }
+}

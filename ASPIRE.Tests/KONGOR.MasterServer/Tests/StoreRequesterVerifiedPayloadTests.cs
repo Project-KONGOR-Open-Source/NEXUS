@@ -1,15 +1,6 @@
-
 namespace ASPIRE.Tests.KONGOR.MasterServer.Tests;
 
-using ASPIRE.Tests.Data;
-using ASPIRE.Tests.KONGOR.MasterServer.Infrastructure;
-using global::MERRICK.DatabaseContext;
-using global::MERRICK.DatabaseContext.Entities;
-using global::MERRICK.DatabaseContext.Enumerations;
-using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.Extensions.DependencyInjection;
-using StackExchange.Redis;
-using EntityRole = global::MERRICK.DatabaseContext.Entities.Utility.Role;
+using EntityRole = Role;
 
 public sealed class StoreRequesterVerifiedPayloadTests
 {
@@ -33,15 +24,30 @@ public sealed class StoreRequesterVerifiedPayloadTests
     [Test]
     public async Task StoreRequest_ReturnsSuccess()
     {
-        await using WebApplicationFactory<KONGORAssemblyMarker> webApplicationFactory = KONGORServiceProvider.CreateOrchestratedInstance();
+        await using WebApplicationFactory<KONGORAssemblyMarker> webApplicationFactory =
+            KONGORServiceProvider.CreateOrchestratedInstance();
         HttpClient client = webApplicationFactory.CreateClient();
         using IServiceScope scope = webApplicationFactory.Services.CreateScope();
         MerrickContext dbContext = scope.ServiceProvider.GetRequiredService<MerrickContext>();
         IDatabase distributedCache = scope.ServiceProvider.GetRequiredService<IDatabase>();
 
         string cookie = Guid.NewGuid().ToString("N");
-        User user = new() { EmailAddress = "store@kongor.net", PBKDF2PasswordHash = "h", SRPPasswordHash = "h", SRPPasswordSalt = "s", Role = new EntityRole { Name = UserRoles.User } };
-        Account account = new() { Name = "StoreUser", User = user, Type = AccountType.Normal, IsMain = true, Cookie = cookie };
+        User user = new()
+        {
+            EmailAddress = "store@kongor.net",
+            PBKDF2PasswordHash = "h",
+            SRPPasswordHash = "h",
+            SRPPasswordSalt = "s",
+            Role = new EntityRole { Name = UserRoles.User }
+        };
+        Account account = new()
+        {
+            Name = "StoreUser",
+            User = user,
+            Type = AccountType.Normal,
+            IsMain = true,
+            Cookie = cookie
+        };
         await dbContext.Users.AddAsync(user);
         await dbContext.Accounts.AddAsync(account);
         await dbContext.SaveChangesAsync();
@@ -49,7 +55,7 @@ public sealed class StoreRequesterVerifiedPayloadTests
         // Seed session in Redis if needed, but StoreRequester often just checks DB by cookie
         // Some methods use Redis, let's play safe? 
         // Logic usually: StoreRequesterController.Handle -> validates cookie from DB or Cache.
-        
+
         Dictionary<string, string> payload = StoreRequestPayload(cookie);
         FormUrlEncodedContent content = new(payload);
 

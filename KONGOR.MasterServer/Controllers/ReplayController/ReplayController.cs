@@ -3,8 +3,8 @@ namespace KONGOR.MasterServer.Controllers.ReplayController;
 [ApiController]
 public class ReplayController : ControllerBase
 {
-    private readonly ILogger<ReplayController> _logger;
     private readonly IWebHostEnvironment _environment;
+    private readonly ILogger<ReplayController> _logger;
 
     public ReplayController(ILogger<ReplayController> logger, IWebHostEnvironment environment)
     {
@@ -21,14 +21,24 @@ public class ReplayController : ControllerBase
     [DisableRequestSizeLimit]
     public async Task<IActionResult> UploadReplay(string? accountId = null, string? matchId = null)
     {
-        if (Request.Method == "HEAD") return NotFound();
+        if (Request.Method == "HEAD")
+        {
+            return NotFound();
+        }
 
         try
         {
             // Determine storage path (Create directories if needed)
             string replayDirectory = Path.Combine(_environment.ContentRootPath, "Resources", "Replays");
-            if (accountId != null) replayDirectory = Path.Combine(replayDirectory, accountId);
-            if (!Directory.Exists(replayDirectory)) Directory.CreateDirectory(replayDirectory);
+            if (accountId != null)
+            {
+                replayDirectory = Path.Combine(replayDirectory, accountId);
+            }
+
+            if (!Directory.Exists(replayDirectory))
+            {
+                Directory.CreateDirectory(replayDirectory);
+            }
 
             string fileName = matchId != null ? $"{matchId}.honreplay" : $"upload_{DateTime.Now.Ticks}.honreplay";
             string filePath = Path.Combine(replayDirectory, fileName);
@@ -40,7 +50,11 @@ public class ReplayController : ControllerBase
                 IFormFile? file = form.Files.FirstOrDefault();
                 if (file != null && file.Length > 0)
                 {
-                    if (matchId == null) filePath = Path.Combine(replayDirectory, Path.GetFileName(file.FileName));
+                    if (matchId == null)
+                    {
+                        filePath = Path.Combine(replayDirectory, Path.GetFileName(file.FileName));
+                    }
+
                     using FileStream stream = new(filePath, FileMode.Create);
                     await file.CopyToAsync(stream);
                     _logger.LogInformation("Saved Replay (Form): {Path}", filePath);

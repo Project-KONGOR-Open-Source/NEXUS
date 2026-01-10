@@ -55,7 +55,6 @@
 @media (prefers-color-scheme: dark) {
 
     /* primary colors */
-
     .swagger-ui .topbar .download-url-wrapper .select-label select {
         border: 2px solid var(--swagger-color);
     }
@@ -89,7 +88,6 @@
     }
 
     /* http post */
-
     .swagger-ui .opblock.opblock-post .opblock-summary-method {
         background: var(--post-method-color);
     }
@@ -108,7 +106,6 @@
     }
 
     /* http get */
-
     .swagger-ui .opblock.opblock-get .opblock-summary-method {
         background: var(--get-method-color);
     }
@@ -127,7 +124,6 @@
     }
 
     /* http head */
-
     .swagger-ui .opblock.opblock-head .opblock-summary-method {
         background: var(--head-method-color);
     }
@@ -146,7 +142,6 @@
     }
 
     /* http put */
-
     .swagger-ui .opblock.opblock-put .opblock-summary-method {
         background: var(--put-method-color);
     }
@@ -165,7 +160,6 @@
     }
 
     /* http delete */
-
     .swagger-ui .opblock.opblock-delete .opblock-summary-method {
         background: var(--delete-method-color);
     }
@@ -184,7 +178,6 @@
     }
 
     /* http options */
-
     .swagger-ui .opblock.opblock-options .opblock-summary-method {
         background: var(--options-method-color);
     }
@@ -203,7 +196,6 @@
     }
 
     /* http patch */
-
     .swagger-ui .opblock.opblock-patch .opblock-summary-method {
         background: var(--patch-method-color);
     }
@@ -222,7 +214,6 @@
     }
 
     /* blocks */
-
     body {
         background-color: var(--all-bg-color);
         color: white;
@@ -325,7 +316,6 @@
     }
 
     /* button white outline fix */
-
     .swagger-ui .model-box-control:focus,
     .swagger-ui .models-control:focus,
     .swagger-ui .opblock-summary-control:focus {
@@ -333,7 +323,6 @@
     }
 
     /* icons */
-
     .swagger-ui .model-toggle::after {
         opacity: var(--icons-opacity);
         filter: var(--black-icons-filter);
@@ -348,7 +337,6 @@
     }
 
     /* text */
-
     .swagger-ui {
         color: var(--primary-text-color);
     }

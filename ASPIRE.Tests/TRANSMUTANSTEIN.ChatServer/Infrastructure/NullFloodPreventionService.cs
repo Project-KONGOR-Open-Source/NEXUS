@@ -1,4 +1,3 @@
-using Microsoft.Extensions.Logging;
 using TRANSMUTANSTEIN.ChatServer.Domain.Core;
 using TRANSMUTANSTEIN.ChatServer.Services;
 

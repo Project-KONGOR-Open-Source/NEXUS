@@ -5,7 +5,7 @@ public class TrackPlayerAction : ISynchronousCommandProcessor<ChatSession>
 {
     public void Process(ChatSession session, ChatBuffer buffer)
     {
-        TrackPlayerActionRequestData requestData = new (buffer);
+        TrackPlayerActionRequestData requestData = new(buffer);
 
         // TODO: Do Something With This Data
 
@@ -25,14 +25,13 @@ public class TrackPlayerAction : ISynchronousCommandProcessor<ChatSession>
 
 file class TrackPlayerActionRequestData
 {
-    public byte[] CommandBytes { get; init; }
-
-    public ChatProtocol.ActionCampaign Action { get; init; }
-
     public TrackPlayerActionRequestData(ChatBuffer buffer)
     {
         CommandBytes = buffer.ReadCommandBytes();
         Action = (ChatProtocol.ActionCampaign) buffer.ReadInt8();
     }
-}
 
+    public byte[] CommandBytes { get; init; }
+
+    public ChatProtocol.ActionCampaign Action { get; }
+}

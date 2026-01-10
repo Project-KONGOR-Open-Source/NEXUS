@@ -2,12 +2,19 @@ namespace TRANSMUTANSTEIN.ChatServer.Domain.Communication;
 
 public class ChatChannel
 {
-    private static int _nextChannelId = 0;
+    private static int _nextChannelId;
+
+    private string? _topic;
+
+    /// <summary>
+    ///     Hidden Constructor Which Enforces <see cref="GetOrCreate" /> As The Primary Mechanism For Creating Chat Channels
+    /// </summary>
+    private ChatChannel() { }
+
     public int ID { get; } = Interlocked.Increment(ref _nextChannelId);
 
     public required string Name { get; set; }
 
-    private string? _topic;
     public string Topic
     {
         get => _topic ?? $"Welcome To The {Name} Channel !";
@@ -22,28 +29,30 @@ public class ChatChannel
     ///     Channel password for access control.
     ///     This value is NULL if no password is set.
     /// </summary>
-    public string? Password { get; set; } = null;
+    public string? Password { get; set; }
 
     public bool IsFull => (Members.Count < ChatProtocol.MAX_USERS_PER_CHANNEL) is false;
 
     public bool IsPermanent => Flags.HasFlag(ChatProtocol.ChatChannelType.CHAT_CHANNEL_FLAG_PERMANENT);
 
-    public bool HasPassword() => string.IsNullOrEmpty(Password) is false;
-
-    /// <summary>
-    ///     Hidden Constructor Which Enforces <see cref="GetOrCreate"/> As The Primary Mechanism For Creating Chat Channels
-    /// </summary>
-    private ChatChannel() { }
+    public bool HasPassword()
+    {
+        return string.IsNullOrEmpty(Password) is false;
+    }
 
     public static ChatChannel GetOrCreate(ChatSession session, string channelName)
     {
-        bool isClanChannel = session.Account.Clan is not null && channelName == session.Account.Clan.GetChatChannelName();
+        bool isClanChannel =
+            session.Account.Clan is not null && channelName == session.Account.Clan.GetChatChannelName();
 
         ChatProtocol.ChatChannelType chatChannelType = isClanChannel
-            ? ChatProtocol.ChatChannelType.CHAT_CHANNEL_FLAG_RESERVED | ChatProtocol.ChatChannelType.CHAT_CHANNEL_FLAG_CLAN
-            : ChatProtocol.ChatChannelType.CHAT_CHANNEL_FLAG_RESERVED | ChatProtocol.ChatChannelType.CHAT_CHANNEL_FLAG_PERMANENT;
+            ? ChatProtocol.ChatChannelType.CHAT_CHANNEL_FLAG_RESERVED |
+              ChatProtocol.ChatChannelType.CHAT_CHANNEL_FLAG_CLAN
+            : ChatProtocol.ChatChannelType.CHAT_CHANNEL_FLAG_RESERVED |
+              ChatProtocol.ChatChannelType.CHAT_CHANNEL_FLAG_PERMANENT;
 
-        ChatChannel channel = Context.ChatChannels.GetOrAdd(channelName, new ChatChannel { Name = channelName, Flags = chatChannelType });
+        ChatChannel channel = Context.ChatChannels.GetOrAdd(channelName,
+            new ChatChannel { Name = channelName, Flags = chatChannelType });
 
         return channel;
     }
@@ -54,7 +63,6 @@ public class ChatChannel
         (
             channelName => Context.ChatChannels.Values
                 .Single(channel => channel.Name == channelName && channel.Members.ContainsKey(session.Account.Name)),
-
             channelID => Context.ChatChannels.Values
                 .Single(channel => channel.ID == channelID && channel.Members.ContainsKey(session.Account.Name))
         );
@@ -69,12 +77,16 @@ public class ChatChannel
         {
             // Log A Bug-Type Error If The Client Has Exceeded The Maximum Number Of Channels
             if (session.CurrentChannels.Count > ChatProtocol.MAX_CHANNELS_PER_CLIENT)
-                Log.Error(@"[BUG] Account ""{AccountName}"" Has Exceeded The Maximum Number Of Channels ({MaxChannels})", session.Account.Name, ChatProtocol.MAX_CHANNELS_PER_CLIENT);
+            {
+                Log.Error(
+                    @"[BUG] Account ""{AccountName}"" Has Exceeded The Maximum Number Of Channels ({MaxChannels})",
+                    session.Account.Name, ChatProtocol.MAX_CHANNELS_PER_CLIENT);
+            }
 
             // Reject Join Request If Client Has Reached Maximum Number Of Channels
             if (session.CurrentChannels.Count == ChatProtocol.MAX_CHANNELS_PER_CLIENT)
             {
-                ChatBuffer error = new ();
+                ChatBuffer error = new();
 
                 error.WriteCommand(ChatProtocol.Command.CHAT_CMD_MAX_CHANNELS);
 
@@ -111,7 +123,7 @@ public class ChatChannel
 
         // TODO: Reject Join Request If Response Buffer Would Overlow With A Data Size Greater Than 16384 Bytes (16 Kilobytes)
 
-        ChatChannelMember newMember = new (session, this);
+        ChatChannelMember newMember = new(session, this);
 
         // Check For Password Protection On The Channel
         // Staff Accounts And Channel Administrators Bypass Password Checks
@@ -122,7 +134,7 @@ public class ChatChannel
                 // If No Password Was Provided, Send Password Prompt To Client
                 if (string.IsNullOrEmpty(providedPassword))
                 {
-                    ChatBuffer prompt = new ();
+                    ChatBuffer prompt = new();
 
                     prompt.WriteCommand(ChatProtocol.Command.CHAT_CMD_JOIN_CHANNEL_PASSWORD);
                     prompt.WriteString(Name); // Channel Name Only (Does Not Reveal Password)
@@ -143,40 +155,45 @@ public class ChatChannel
         }
 
         if (Members.TryAdd(session.Account.Name, newMember) is false)
-            Log.Error(@"[BUG] Failed To Add Account ""{AccountName}"" To Channel ""{ChannelName}""", session.Account.Name, Name);
+        {
+            Log.Error(@"[BUG] Failed To Add Account ""{AccountName}"" To Channel ""{ChannelName}""",
+                session.Account.Name, Name);
+        }
 
-        Log.Information(@"[DEBUG] Client Joined Channel ""{ChannelName}"" (ID: {ChannelID}) - Sending ChangedChannel (0x0004)", Name, ID);
+        Log.Information(
+            @"[DEBUG] Client Joined Channel ""{ChannelName}"" (ID: {ChannelID}) - Sending ChangedChannel (0x0004)",
+            Name, ID);
 
-        ChatBuffer response = new ();
+        ChatBuffer response = new();
 
         response.WriteCommand(ChatProtocol.Command.CHAT_CMD_CHANGED_CHANNEL);
-        response.WriteString(Name);                                               // Channel Name
-        response.WriteInt32(ID);                                                  // Channel ID
-        response.WriteInt8(Convert.ToByte(Flags));                                // Channel Flags
-        response.WriteString(Topic);                                              // Channel Topic
+        response.WriteString(Name); // Channel Name
+        response.WriteInt32(ID); // Channel ID
+        response.WriteInt8(Convert.ToByte(Flags)); // Channel Flags
+        response.WriteString(Topic); // Channel Topic
 
         List<ChatChannelMember> administrators = [.. Members.Values.Where(member => member.IsAdministrator)];
 
-        response.WriteInt32(administrators.Count);                                // Count Of Channel Administrators
+        response.WriteInt32(administrators.Count); // Count Of Channel Administrators
 
         foreach (ChatChannelMember administrator in administrators)
         {
-            response.WriteInt32(administrator.Account.ID);                        // Administrator Account ID
+            response.WriteInt32(administrator.Account.ID); // Administrator Account ID
             response.WriteInt8(Convert.ToByte(administrator.AdministratorLevel)); // Channel Administrator Level
         }
 
-        response.WriteInt32(Members.Count);                                       // Count Of Channel Members
+        response.WriteInt32(Members.Count); // Count Of Channel Members
 
         foreach (ChatChannelMember member in Members.Values)
         {
-            response.WriteString(member.Account.NameWithClanTag);                 // Member Account Name
-            response.WriteInt32(member.Account.ID);                               // Member Account ID
-            response.WriteInt8(Convert.ToByte(member.ConnectionStatus));          // Connection Status
-            response.WriteInt8(member.Account.GetChatClientFlags());         // Client's Flags (Chat Client Type)
-            response.WriteString(member.Account.ChatSymbolNoPrefixCode);          // Chat Symbol
-            response.WriteString(member.Account.NameColourNoPrefixCode);          // Name Colour
-            response.WriteString(member.Account.IconNoPrefixCode);                // Account Icon
-            response.WriteInt32(member.Account.AscensionLevel);                   // Ascension Level
+            response.WriteString(member.Account.NameWithClanTag); // Member Account Name
+            response.WriteInt32(member.Account.ID); // Member Account ID
+            response.WriteInt8(Convert.ToByte(member.ConnectionStatus)); // Connection Status
+            response.WriteInt8(member.Account.GetChatClientFlags()); // Client's Flags (Chat Client Type)
+            response.WriteString(member.Account.ChatSymbolNoPrefixCode); // Chat Symbol
+            response.WriteString(member.Account.NameColourNoPrefixCode); // Name Colour
+            response.WriteString(member.Account.IconNoPrefixCode); // Account Icon
+            response.WriteInt32(member.Account.AscensionLevel); // Ascension Level
         }
 
         // Announce To The Requesting Client That They Have Joined The Channel
@@ -195,41 +212,47 @@ public class ChatChannel
     {
         ChatChannelMember newMember = Members.Values.Single(member => member.Account.ID == session.Account.ID);
 
-        List<ChatChannelMember> existingMembers = [.. Members.Values.Where(member => member.Account.ID != session.Account.ID)];
+        List<ChatChannelMember> existingMembers =
+            [.. Members.Values.Where(member => member.Account.ID != session.Account.ID)];
 
-        ChatBuffer broadcast = new ();
+        ChatBuffer broadcast = new();
 
         broadcast.WriteCommand(ChatProtocol.Command.CHAT_CMD_JOINED_CHANNEL);
-        broadcast.WriteInt32(ID);                                          // Channel ID
-        broadcast.WriteString(newMember.Account.NameWithClanTag);          // Member Account Name
-        broadcast.WriteInt32(newMember.Account.ID);                        // Member Account ID
-        broadcast.WriteInt8(Convert.ToByte(newMember.ConnectionStatus));   // Connection Status
+        broadcast.WriteInt32(ID); // Channel ID
+        broadcast.WriteString(newMember.Account.NameWithClanTag); // Member Account Name
+        broadcast.WriteInt32(newMember.Account.ID); // Member Account ID
+        broadcast.WriteInt8(Convert.ToByte(newMember.ConnectionStatus)); // Connection Status
         broadcast.WriteInt8(Convert.ToByte(newMember.AdministratorLevel)); // Channel Administrator Level
-        broadcast.WriteString(newMember.Account.ChatSymbolNoPrefixCode);   // Chat Symbol
-        broadcast.WriteString(newMember.Account.NameColourNoPrefixCode);   // Name Colour
-        broadcast.WriteString(newMember.Account.IconNoPrefixCode);         // Account Icon
-        broadcast.WriteInt32(newMember.Account.AscensionLevel);            // Ascension Level
+        broadcast.WriteString(newMember.Account.ChatSymbolNoPrefixCode); // Chat Symbol
+        broadcast.WriteString(newMember.Account.NameColourNoPrefixCode); // Name Colour
+        broadcast.WriteString(newMember.Account.IconNoPrefixCode); // Account Icon
+        broadcast.WriteInt32(newMember.Account.AscensionLevel); // Ascension Level
 
         // Announce To The Existing Channel Members That A New Client Has Joined The Channel
         foreach (ChatChannelMember existingMember in existingMembers)
+        {
             existingMember.Session.Send(broadcast);
+        }
     }
 
     public void Leave(ChatSession session)
     {
         if (Members.TryRemove(session.Account.Name, out ChatChannelMember? member) is false)
-            Log.Error(@"[BUG] Failed To Remove Account ""{AccountName}"" From Channel ""{ChannelName}""", session.Account.Name, Name);
+        {
+            Log.Error(@"[BUG] Failed To Remove Account ""{AccountName}"" From Channel ""{ChannelName}""",
+                session.Account.Name, Name);
+        }
 
         if (member is not null)
         {
             // Remove This Channel From The Client's Current Channels List
             session.CurrentChannels.Remove(ID);
 
-            ChatBuffer broadcast = new ();
+            ChatBuffer broadcast = new();
 
             broadcast.WriteCommand(ChatProtocol.Command.CHAT_CMD_LEFT_CHANNEL);
             broadcast.WriteInt32(member.Account.ID); // Member Account ID
-            broadcast.WriteInt32(ID);                // Channel ID
+            broadcast.WriteInt32(ID); // Channel ID
 
             // Notify The Leaver
             member.Session.Send(broadcast);
@@ -238,21 +261,32 @@ public class ChatChannel
             if (Members.IsEmpty is true && IsPermanent is false)
             {
                 if (Context.ChatChannels.TryRemove(Name, out ChatChannel? channel) is false)
+                {
                     Log.Error(@"[BUG] Failed To Remove Channel ""{ChannelName}"" From Global Channel List", Name);
+                }
 
                 if (channel is null)
+                {
                     Log.Error(@"[BUG] Chat Channel Instance For Channel ""{ChannelName}"" Is NULL", Name);
+                }
             }
 
             else if (Members.IsEmpty is false)
             {
                 // Announce To The Remaining Channel Members That A Client Has Left The Channel
                 foreach (ChatChannelMember channelMember in Members.Values)
+                {
                     channelMember.Session.Send(broadcast);
+                }
             }
         }
 
-        else Log.Error(@"[BUG] Chat Channel Member Instance For Account ""{AccountName}"" In Channel ""{ChannelName}"" Is NULL", session.Account.Name, Name);
+        else
+        {
+            Log.Error(
+                @"[BUG] Chat Channel Member Instance For Account ""{AccountName}"" In Channel ""{ChannelName}"" Is NULL",
+                session.Account.Name, Name);
+        }
     }
 
     public void Kick(ChatSession requesterSession, int targetAccountID)
@@ -262,19 +296,22 @@ public class ChatChannel
 
         if (requester.HasHigherAdministratorLevelThan(target))
         {
-            ChatBuffer broadcast = new ();
+            ChatBuffer broadcast = new();
 
             broadcast.WriteCommand(ChatProtocol.Command.CHAT_CMD_CHANNEL_KICK);
-            broadcast.WriteInt32(ID);                          // Channel ID
+            broadcast.WriteInt32(ID); // Channel ID
             broadcast.WriteInt32(requesterSession.Account.ID); // Kicker Account ID
-            broadcast.WriteInt32(targetAccountID);             // Kicked Account ID
+            broadcast.WriteInt32(targetAccountID); // Kicked Account ID
 
             // Announce To The Channel Members That A Client Will Be Kicked From The Channel
             // If The Requester's Administrator Level Is Less Than Or Equal To The Target's, This Operation Fails Silently
             foreach (ChatChannelMember member in Members.Values)
+            {
                 member.Session.Send(broadcast);
+            }
 
-            ChatSession targetSession = Context.ClientChatSessions.Values.Single(session => session.Account.ID == targetAccountID);
+            ChatSession targetSession =
+                Context.ClientChatSessions.Values.Single(session => session.Account.ID == targetAccountID);
 
             // Remove The Target Member From The Channel
             Leave(targetSession);
@@ -319,13 +356,13 @@ public class ChatChannel
         target.SilencedUntil = DateTime.UtcNow.AddMilliseconds(durationMilliseconds);
 
         // Broadcast Silence Notification To All Channel Members
-        ChatBuffer broadcast = new ();
+        ChatBuffer broadcast = new();
 
         broadcast.WriteCommand(ChatProtocol.Command.CHAT_CMD_CHANNEL_SILENCE_PLACED);
-        broadcast.WriteString(Name);                              // Channel Name
+        broadcast.WriteString(Name); // Channel Name
         broadcast.WriteString(requester.Account.NameWithClanTag); // Requester Name
-        broadcast.WriteString(target.Account.NameWithClanTag);    // Target Name
-        broadcast.WriteInt32(durationMilliseconds);               // Duration In Milliseconds
+        broadcast.WriteString(target.Account.NameWithClanTag); // Target Name
+        broadcast.WriteInt32(durationMilliseconds); // Duration In Milliseconds
 
         BroadcastMessage(broadcast);
     }
@@ -354,7 +391,7 @@ public class ChatChannel
     /// </summary>
     /// <remarks>
     ///     The password can be changed by typing the following chat channel slash command: <c>/password {password}</c>
-    ///     <br/>
+    ///     <br />
     ///     To remove the password, use an empty string: <c>/password</c>
     /// </remarks>
     /// <param name="session">The session attempting to set the password.</param>
@@ -380,14 +417,13 @@ public class ChatChannel
         // Set The Password (Empty String Clears Password)
         Password = string.IsNullOrEmpty(password) ? null : password;
 
-        ChatBuffer broadcast = new ();
+        ChatBuffer broadcast = new();
 
         broadcast.WriteCommand(ChatProtocol.Command.CHAT_CMD_CHANNEL_SET_PASSWORD);
-        broadcast.WriteInt32(ID);                               // Channel ID
+        broadcast.WriteInt32(ID); // Channel ID
         broadcast.WriteString(session.Account.NameWithClanTag); // Password Setter's Name
 
         // Broadcast Password Change To All Channel Members
         BroadcastMessage(broadcast);
     }
 }
-

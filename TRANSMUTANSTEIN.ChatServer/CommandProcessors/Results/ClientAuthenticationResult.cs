@@ -5,25 +5,25 @@ public class ClientAuthenticationResult : ISynchronousCommandProcessor<ChatSessi
 {
     public void Process(ChatSession session, ChatBuffer buffer)
     {
-        ClientAuthenticationResultRequestData requestData = new (buffer);
+        ClientAuthenticationResultRequestData requestData = new(buffer);
 
         if (requestData.Result is not ChatProtocol.ClientAuthenticationResult.CAR_SUCCESS)
         {
-            Log.Error(@"Client Authentication Failed On Match Server ID ""{ServerID}"" With Result ""{Result}""", session.ServerMetadata.ServerID, requestData.Result);
+            Log.Error(@"Client Authentication Failed On Match Server ID ""{ServerID}"" With Result ""{Result}""",
+                session.ServerMetadata.ServerID, requestData.Result);
         }
     }
 }
 
 file class ClientAuthenticationResultRequestData
 {
-    public byte[] CommandBytes { get; init; }
-
-    public ChatProtocol.ClientAuthenticationResult Result { get; init; }
-
     public ClientAuthenticationResultRequestData(ChatBuffer buffer)
     {
         CommandBytes = buffer.ReadCommandBytes();
         Result = (ChatProtocol.ClientAuthenticationResult) buffer.ReadInt8();
     }
-}
 
+    public byte[] CommandBytes { get; init; }
+
+    public ChatProtocol.ClientAuthenticationResult Result { get; }
+}

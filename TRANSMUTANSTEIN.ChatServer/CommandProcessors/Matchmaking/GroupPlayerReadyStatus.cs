@@ -5,7 +5,7 @@ public class GroupPlayerReadyStatus : ISynchronousCommandProcessor<ChatSession>
 {
     public void Process(ChatSession session, ChatBuffer buffer)
     {
-        GroupPlayerReadyStatusRequestData requestData = new (buffer);
+        GroupPlayerReadyStatusRequestData requestData = new(buffer);
 
         MatchmakingGroup
             .GetByMemberAccountID(session.Account.ID)
@@ -15,17 +15,16 @@ public class GroupPlayerReadyStatus : ISynchronousCommandProcessor<ChatSession>
 
 file class GroupPlayerReadyStatusRequestData
 {
-    public byte[] CommandBytes { get; init; }
-
-    public byte ReadyStatus { get; init; }
-
-    public ChatProtocol.TMMGameType GameType { get; init; }
-
     public GroupPlayerReadyStatusRequestData(ChatBuffer buffer)
     {
         CommandBytes = buffer.ReadCommandBytes();
         ReadyStatus = buffer.ReadInt8();
         GameType = (ChatProtocol.TMMGameType) buffer.ReadInt8();
     }
-}
 
+    public byte[] CommandBytes { get; init; }
+
+    public byte ReadyStatus { get; init; }
+
+    public ChatProtocol.TMMGameType GameType { get; }
+}

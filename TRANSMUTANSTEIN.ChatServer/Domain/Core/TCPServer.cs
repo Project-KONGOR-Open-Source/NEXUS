@@ -71,22 +71,22 @@ public class TCPServer : IDisposable
     /// <summary>
     ///     Number Of Sessions Connected To The Server
     /// </summary>
-    public long ConnectedSessions { get { return Sessions.Count; } }
+    public long ConnectedSessions => Sessions.Count;
 
     /// <summary>
     ///     Number Of Bytes Pending Sent By The Server
     /// </summary>
-    public long BytesPending { get { return _bytesPending; } }
+    public long BytesPending => _bytesPending;
 
     /// <summary>
     ///     Number Of Bytes Sent By The Server
     /// </summary>
-    public long BytesSent { get { return _bytesSent; } }
+    public long BytesSent => _bytesSent;
 
     /// <summary>
     ///     Number Of Bytes Received By The Server
     /// </summary>
-    public long BytesReceived { get { return _bytesReceived; } }
+    public long BytesReceived => _bytesReceived;
 
     /// <summary>
     ///     Option: Acceptor Backlog Size
@@ -101,7 +101,7 @@ public class TCPServer : IDisposable
     /// </summary>
     /// <remarks>
     ///     Specifies Whether The Socket Is A Dual-Mode Socket Used For Both IPv4 And IPv6
-    ///     <br/>
+    ///     <br />
     ///     Will Work Only If Socket Is Bound On IPv6 Address
     /// </remarks>
     public bool OptionDualMode { get; set; }
@@ -215,7 +215,9 @@ public class TCPServer : IDisposable
     {
         // Debug.Assert(!IsStarted, "TCP Server Is Already Started");
         if (IsStarted)
+        {
             return false;
+        }
 
         // Setup Acceptor Event Arg
         _acceptorEventArg = new SocketAsyncEventArgs();
@@ -231,11 +233,14 @@ public class TCPServer : IDisposable
         _acceptorSocket!.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, OptionReuseAddress);
 
         // Apply The Option: Exclusive Address Use
-        _acceptorSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ExclusiveAddressUse, OptionExclusiveAddressUse);
+        _acceptorSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ExclusiveAddressUse,
+            OptionExclusiveAddressUse);
 
         // Apply The Option: Dual Mode (This Option Must Be Applied Before Listening)
         if (_acceptorSocket.AddressFamily == AddressFamily.InterNetworkV6)
+        {
             _acceptorSocket.DualMode = OptionDualMode;
+        }
 
         // Bind The Acceptor Socket To The Endpoint
         _acceptorSocket.Bind(Endpoint);
@@ -276,7 +281,9 @@ public class TCPServer : IDisposable
         Debug.Assert(IsStarted, "TCP Server Is Not Started");
 
         if (!IsStarted)
+        {
             return false;
+        }
 
         // Stop Accepting New Clients
         IsAccepting = false;
@@ -323,10 +330,14 @@ public class TCPServer : IDisposable
     public virtual bool Restart()
     {
         if (!Stop())
+        {
             return false;
+        }
 
         while (IsStarted)
+        {
             Thread.Yield();
+        }
 
         return Start();
     }
@@ -345,7 +356,9 @@ public class TCPServer : IDisposable
 
         // Async Accept A New Client Connection
         if (!_acceptorSocket!.AcceptAsync(e))
+        {
             ProcessAccept(e);
+        }
     }
 
     /// <summary>
@@ -365,7 +378,9 @@ public class TCPServer : IDisposable
 
                 // Connect New Session
                 if (e.AcceptSocket != null)
+                {
                     session.Connect(e.AcceptSocket);
+                }
             }
             catch (Exception exception)
             {
@@ -373,22 +388,30 @@ public class TCPServer : IDisposable
             }
         }
 
-        else SendError(e.SocketError);
+        else
+        {
+            SendError(e.SocketError);
+        }
 
         // Accept The Next Client Connection
         if (IsAccepting)
+        {
             StartAccept(e);
+        }
     }
 
     /// <summary>
-    /// This Method Is The Callback Method Associated With The Socket.AcceptAsync() Operations And Is Invoked When An Accept Operation Is Complete
+    ///     This Method Is The Callback Method Associated With The Socket.AcceptAsync() Operations And Is Invoked When An
+    ///     Accept Operation Is Complete
     /// </summary>
 #nullable enable
     private void OnAsyncCompleted(object? sender, SocketAsyncEventArgs e)
 #nullable disable
     {
         if (IsSocketDisposed)
+        {
             return;
+        }
 
         ProcessAccept(e);
     }
@@ -410,7 +433,7 @@ public class TCPServer : IDisposable
     /// <summary>
     ///     Server Sessions
     /// </summary>
-    protected readonly ConcurrentDictionary<Guid, TCPSession> Sessions = new ConcurrentDictionary<Guid, TCPSession>();
+    protected readonly ConcurrentDictionary<Guid, TCPSession> Sessions = new();
 
     /// <summary>
     ///     Disconnect All Connected Sessions
@@ -419,11 +442,15 @@ public class TCPServer : IDisposable
     public virtual bool DisconnectAll()
     {
         if (!IsStarted)
+        {
             return false;
+        }
 
         // Disconnect All Sessions
         foreach (TCPSession session in Sessions.Values)
+        {
             session.Disconnect();
+        }
 
         return true;
     }
@@ -468,7 +495,10 @@ public class TCPServer : IDisposable
     /// </summary>
     /// <param name="buffer">Buffer To Multicast</param>
     /// <returns>TRUE If The Data Was Successfully Multicasted, Or FALSE If The Data Was Not Multicasted</returns>
-    public virtual bool Multicast(byte[] buffer) => Multicast(buffer.AsSpan());
+    public virtual bool Multicast(byte[] buffer)
+    {
+        return Multicast(buffer.AsSpan());
+    }
 
     /// <summary>
     ///     Multicast Data To All Connected Clients
@@ -477,7 +507,10 @@ public class TCPServer : IDisposable
     /// <param name="offset">Buffer Offset</param>
     /// <param name="size">Buffer Size</param>
     /// <returns>TRUE If The Data Was Successfully Multicasted, Or FALSE If The Data Was Not Multicasted</returns>
-    public virtual bool Multicast(byte[] buffer, long offset, long size) => Multicast(buffer.AsSpan((int) offset, (int) size));
+    public virtual bool Multicast(byte[] buffer, long offset, long size)
+    {
+        return Multicast(buffer.AsSpan((int) offset, (int) size));
+    }
 
     /// <summary>
     ///     Multicast Data To All Connected Clients
@@ -487,14 +520,20 @@ public class TCPServer : IDisposable
     public virtual bool Multicast(ReadOnlySpan<byte> buffer)
     {
         if (!IsStarted)
+        {
             return false;
+        }
 
         if (buffer.IsEmpty)
+        {
             return true;
+        }
 
         // Multicast Data To All Sessions
         foreach (TCPSession session in Sessions.Values)
+        {
             session.SendAsync(buffer);
+        }
 
         return true;
     }
@@ -504,14 +543,20 @@ public class TCPServer : IDisposable
     /// </summary>
     /// <param name="text">Text String To Multicast</param>
     /// <returns>TRUE If The Text Was Successfully Multicasted, Or FALSE If The Text Was Not Multicasted</returns>
-    public virtual bool Multicast(string text) => Multicast(Encoding.UTF8.GetBytes(text));
+    public virtual bool Multicast(string text)
+    {
+        return Multicast(Encoding.UTF8.GetBytes(text));
+    }
 
     /// <summary>
     ///     Multicast Text To All Connected Clients
     /// </summary>
     /// <param name="text">Text To Multicast As A Span Of Characters</param>
     /// <returns>TRUE If The Text Was Successfully Multicasted, Or FALSE If The Text Was Not Multicasted</returns>
-    public virtual bool Multicast(ReadOnlySpan<char> text) => Multicast(Encoding.UTF8.GetBytes(text.ToArray()));
+    public virtual bool Multicast(ReadOnlySpan<char> text)
+    {
+        return Multicast(Encoding.UTF8.GetBytes(text.ToArray()));
+    }
 
     # endregion
 
@@ -583,12 +628,14 @@ public class TCPServer : IDisposable
     private void SendError(SocketError error)
     {
         // Skip Disconnect Errors
-        if ((error == SocketError.ConnectionAborted) ||
-            (error == SocketError.ConnectionRefused) ||
-            (error == SocketError.ConnectionReset) ||
-            (error == SocketError.OperationAborted) ||
-            (error == SocketError.Shutdown))
+        if (error == SocketError.ConnectionAborted ||
+            error == SocketError.ConnectionRefused ||
+            error == SocketError.ConnectionReset ||
+            error == SocketError.OperationAborted ||
+            error == SocketError.Shutdown)
+        {
             return;
+        }
 
         OnError(error);
     }
@@ -626,7 +673,9 @@ public class TCPServer : IDisposable
             {
                 // Dispose Managed Resources Here ...
                 if (IsStarted)
+                {
                     Stop();
+                }
             }
 
             // Dispose Unmanaged Resources Here ...

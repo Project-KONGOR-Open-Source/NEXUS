@@ -1,21 +1,14 @@
+using System.Text.Json;
+using System.Text.Json.Serialization;
+
+using ASPIRE.Common.Enumerations;
+
+using KONGOR.MasterServer.Extensions.Cache;
+using KONGOR.MasterServer.Models.ServerManagement;
+
+using MERRICK.DatabaseContext.Entities.Statistics;
+
 namespace ASPIRE.Tests.KONGOR.MasterServer.Tests;
-
-using global::KONGOR.MasterServer.Extensions.Cache;
-using global::KONGOR.MasterServer.Models.RequestResponse.Stats;
-using global::KONGOR.MasterServer.Models.ServerManagement;
-using global::MERRICK.DatabaseContext;
-using global::MERRICK.DatabaseContext.Constants;
-using global::MERRICK.DatabaseContext.Entities;
-using global::MERRICK.DatabaseContext.Entities.Statistics;
-using global::MERRICK.DatabaseContext.Entities.Utility;
-using global::MERRICK.DatabaseContext.Enumerations; 
-using ASPIRE.Common.Enumerations; 
-
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-
-using StackExchange.Redis;
 
 /// <summary>
 ///     Tests For Match Statistics Submission Functionality In KONGOR Master Server
@@ -25,7 +18,8 @@ public sealed partial class MatchStatsSubmissionTests
     [Test]
     public async Task SubmitStats_WithValidData_ReturnsSuccess()
     {
-        await using WebApplicationFactory<KONGORAssemblyMarker> webApplicationFactory = KONGORServiceProvider.CreateOrchestratedInstance();
+        await using WebApplicationFactory<KONGORAssemblyMarker> webApplicationFactory =
+            KONGORServiceProvider.CreateOrchestratedInstance();
         HttpClient httpClient = webApplicationFactory.CreateClient();
 
         using IServiceScope scope = webApplicationFactory.Services.CreateScope();
@@ -33,7 +27,7 @@ public sealed partial class MatchStatsSubmissionTests
         IDatabase distributedCache = scope.ServiceProvider.GetRequiredService<IDatabase>();
 
         // 1. Seed Database with Host and Player Accounts
-        global::MERRICK.DatabaseContext.Entities.Utility.Role userRole = new() { Name = UserRoles.User };
+        Role userRole = new() { Name = UserRoles.User };
 
         User hostUser = new()
         {
@@ -124,8 +118,11 @@ public sealed partial class MatchStatsSubmissionTests
         if (savedStats != null)
         {
             Console.WriteLine($"[TEST] ✅ Database Verification: Match {savedStats.MatchID} saved successfully.");
-            System.Text.Json.JsonSerializerOptions options = new System.Text.Json.JsonSerializerOptions { WriteIndented = true, ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles };
-            string json = System.Text.Json.JsonSerializer.Serialize(savedStats, options);
+            JsonSerializerOptions options = new()
+            {
+                WriteIndented = true, ReferenceHandler = ReferenceHandler.IgnoreCycles
+            };
+            string json = JsonSerializer.Serialize(savedStats, options);
             foreach (string line in json.Split(Environment.NewLine))
             {
                 Console.WriteLine($"[TEST] {line}");
@@ -145,8 +142,11 @@ public sealed partial class MatchStatsSubmissionTests
         Console.WriteLine($"[TEST] ✅ Database Verification: Found {playerStats.Count} player statistic records.");
         if (playerStats.Count > 0)
         {
-            System.Text.Json.JsonSerializerOptions options = new System.Text.Json.JsonSerializerOptions { WriteIndented = true, ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles };
-            string json = System.Text.Json.JsonSerializer.Serialize(playerStats, options);
+            JsonSerializerOptions options = new()
+            {
+                WriteIndented = true, ReferenceHandler = ReferenceHandler.IgnoreCycles
+            };
+            string json = JsonSerializer.Serialize(playerStats, options);
             foreach (string line in json.Split(Environment.NewLine))
             {
                 Console.WriteLine($"[TEST] {line}");
@@ -277,13 +277,15 @@ public sealed partial class MatchStatsSubmissionTests
             // Inventory
             ["inventory[0][0]"] = "Item_LoggersHatchet",
             ["inventory[0][1]"] = "Item_Marchers",
-            ["inventory[0][2]"] = "Item_HealthPotion",
+            ["inventory[0][2]"] = "Item_HealthPotion"
         };
     }
+
     [Test]
     public async Task SubmitStats_AsUser_ReturnsSuccess()
     {
-        await using WebApplicationFactory<KONGORAssemblyMarker> webApplicationFactory = KONGORServiceProvider.CreateOrchestratedInstance();
+        await using WebApplicationFactory<KONGORAssemblyMarker> webApplicationFactory =
+            KONGORServiceProvider.CreateOrchestratedInstance();
         HttpClient httpClient = webApplicationFactory.CreateClient();
 
         using IServiceScope scope = webApplicationFactory.Services.CreateScope();
@@ -291,7 +293,7 @@ public sealed partial class MatchStatsSubmissionTests
         IDatabase distributedCache = scope.ServiceProvider.GetRequiredService<IDatabase>();
 
         // 1. Seed Database with Host User
-        global::MERRICK.DatabaseContext.Entities.Utility.Role userRole = new() { Name = UserRoles.User };
+        Role userRole = new() { Name = UserRoles.User };
         User hostUser = new()
         {
             EmailAddress = "userhost@kongor.net",
@@ -337,8 +339,8 @@ public sealed partial class MatchStatsSubmissionTests
 
         // 3. Seed MatchStartData (Crucial for the fix)
         int matchId = 705751;
-        int serverId = 999; 
-        
+        int serverId = 999;
+
         MatchStartData matchStartData = new()
         {
             MatchID = matchId,

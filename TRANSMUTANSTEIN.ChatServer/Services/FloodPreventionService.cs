@@ -7,9 +7,51 @@ namespace TRANSMUTANSTEIN.ChatServer.Services;
 /// </summary>
 public class FloodPreventionService(ILogger<FloodPreventionService> logger) : IHostedService, IDisposable
 {
-    private ConcurrentDictionary<int, FloodState> AccountFloodStates { get; } = new ();
+    private ConcurrentDictionary<int, FloodState> AccountFloodStates { get; } = new();
 
     private Timer? DecayTimer { get; set; }
+
+    public void Dispose()
+    {
+        DecayTimer?.Dispose();
+
+        GC.SuppressFinalize(this);
+    }
+
+    /// <summary>
+    ///     Starts the background decay timer that reduces request counts over time.
+    ///     The timer runs every <see cref="ChatProtocol.FLOOD_DECAY_INTERVAL_SECONDS" /> seconds and decrements each account's
+    ///     request count by one.
+    /// </summary>
+    public virtual Task StartAsync(CancellationToken cancellationToken)
+    {
+        logger.LogInformation(
+            "Flood Prevention Service Starting With Threshold: {Threshold}, Decay Interval: {DecayInterval}s",
+            ChatProtocol.FLOOD_THRESHOLD, ChatProtocol.FLOOD_DECAY_INTERVAL_SECONDS);
+
+        // Start Decay Timer
+        DecayTimer = new Timer
+        (
+            DecayRequestCounts,
+            null,
+            TimeSpan.FromSeconds(ChatProtocol.FLOOD_DECAY_INTERVAL_SECONDS),
+            TimeSpan.FromSeconds(ChatProtocol.FLOOD_DECAY_INTERVAL_SECONDS)
+        );
+
+        return Task.CompletedTask;
+    }
+
+    /// <summary>
+    ///     Stops the background decay timer.
+    /// </summary>
+    public virtual Task StopAsync(CancellationToken cancellationToken)
+    {
+        logger.LogInformation("Flood Prevention Service Stopping");
+
+        DecayTimer?.Change(Timeout.Infinite, Timeout.Infinite);
+
+        return Task.CompletedTask;
+    }
 
     /// <summary>
     ///     Checks if a message is allowed for the given session and handles flood prevention response.
@@ -33,10 +75,11 @@ public class FloodPreventionService(ILogger<FloodPreventionService> logger) : IH
             // Check If Request Count Exceeds Threshold
             if (state.RequestCount > ChatProtocol.FLOOD_THRESHOLD)
             {
-                logger.LogWarning("Account {AccountID} Exceeded Flood Threshold ({Threshold}), Request Count: {RequestCount}",
+                logger.LogWarning(
+                    "Account {AccountID} Exceeded Flood Threshold ({Threshold}), Request Count: {RequestCount}",
                     session.Account.ID, ChatProtocol.FLOOD_THRESHOLD, state.RequestCount);
 
-                ChatBuffer floodWarning = new ();
+                ChatBuffer floodWarning = new();
 
                 floodWarning.WriteCommand(ChatProtocol.Command.CHAT_CMD_FLOODING);
 
@@ -57,42 +100,11 @@ public class FloodPreventionService(ILogger<FloodPreventionService> logger) : IH
     }
 
     /// <summary>
-    ///     Starts the background decay timer that reduces request counts over time.
-    ///     The timer runs every <see cref="ChatProtocol.FLOOD_DECAY_INTERVAL_SECONDS"/> seconds and decrements each account's request count by one.
-    /// </summary>
-    public virtual Task StartAsync(CancellationToken cancellationToken)
-    {
-        logger.LogInformation("Flood Prevention Service Starting With Threshold: {Threshold}, Decay Interval: {DecayInterval}s",
-            ChatProtocol.FLOOD_THRESHOLD, ChatProtocol.FLOOD_DECAY_INTERVAL_SECONDS);
-
-        // Start Decay Timer
-        DecayTimer = new Timer
-        (
-            DecayRequestCounts,
-            state: null,
-            TimeSpan.FromSeconds(ChatProtocol.FLOOD_DECAY_INTERVAL_SECONDS),
-            TimeSpan.FromSeconds(ChatProtocol.FLOOD_DECAY_INTERVAL_SECONDS)
-        );
-
-        return Task.CompletedTask;
-    }
-
-    /// <summary>
-    ///     Stops the background decay timer.
-    /// </summary>
-    public virtual Task StopAsync(CancellationToken cancellationToken)
-    {
-        logger.LogInformation("Flood Prevention Service Stopping");
-
-        DecayTimer?.Change(Timeout.Infinite, Timeout.Infinite);
-
-        return Task.CompletedTask;
-    }
-
-    /// <summary>
     ///     Periodically decays request counts by one for all accounts.
-    ///     This method is called every <see cref="ChatProtocol.FLOOD_DECAY_INTERVAL_SECONDS"/> seconds by the background timer.
-    ///     Accounts with zero request count and no recent activity in <see cref="ChatProtocol.FLOOD_GARBAGE_COLLECTION_SECONDS"/> are removed, to prevent memory leaks.
+    ///     This method is called every <see cref="ChatProtocol.FLOOD_DECAY_INTERVAL_SECONDS" /> seconds by the background
+    ///     timer.
+    ///     Accounts with zero request count and no recent activity in
+    ///     <see cref="ChatProtocol.FLOOD_GARBAGE_COLLECTION_SECONDS" /> are removed, to prevent memory leaks.
     /// </summary>
     private void DecayRequestCounts(object? state)
     {
@@ -114,7 +126,8 @@ public class FloodPreventionService(ILogger<FloodPreventionService> logger) : IH
                 }
 
                 // Remove Accounts With Zero Request Count And No Recent Activity, To Prevent Memory Leaks
-                if (floodState.RequestCount == 0 && (DateTime.UtcNow - floodState.LastRequestTime).TotalSeconds > ChatProtocol.FLOOD_GARBAGE_COLLECTION_SECONDS)
+                if (floodState.RequestCount == 0 && (DateTime.UtcNow - floodState.LastRequestTime).TotalSeconds >
+                    ChatProtocol.FLOOD_GARBAGE_COLLECTION_SECONDS)
                 {
                     AccountFloodStates.TryRemove(entry.Key, out _);
 
@@ -125,16 +138,10 @@ public class FloodPreventionService(ILogger<FloodPreventionService> logger) : IH
 
         if (decayedAccounts > 0 || removedAccounts > 0)
         {
-            logger.LogDebug("Flood Prevention Decay: {DecayedCount} Accounts Decayed, {RemovedCount} Accounts Cleaned Up",
+            logger.LogDebug(
+                "Flood Prevention Decay: {DecayedCount} Accounts Decayed, {RemovedCount} Accounts Cleaned Up",
                 decayedAccounts, removedAccounts);
         }
-    }
-
-    public void Dispose()
-    {
-        DecayTimer?.Dispose();
-
-        GC.SuppressFinalize(this);
     }
 
     /// <summary>
@@ -142,11 +149,10 @@ public class FloodPreventionService(ILogger<FloodPreventionService> logger) : IH
     /// </summary>
     private class FloodState
     {
-        public int RequestCount { get; set; } = 0;
+        public int RequestCount { get; set; }
 
         public DateTime LastRequestTime { get; set; } = DateTime.UtcNow;
 
-        public Lock Lock { get; } = new ();
+        public Lock Lock { get; } = new();
     }
 }
-

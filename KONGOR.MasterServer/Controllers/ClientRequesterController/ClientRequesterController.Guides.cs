@@ -7,29 +7,38 @@ public partial class ClientRequesterController
         string? accountID = Request.Form["account"];
 
         if (accountID is null)
+        {
             return BadRequest(@"Missing Value For Form Parameter ""account""");
+        }
 
         string? heroIdentifier = Request.Form["hero"];
 
         if (heroIdentifier is null)
+        {
             return BadRequest(@"Missing Value For Form Parameter ""hero""");
+        }
 
         string? hostTime = Request.Form["hosttime"];
 
         if (hostTime is null)
+        {
             return BadRequest(@"Missing Value For Form Parameter ""hosttime""");
+        }
 
         Account? account = await MerrickContext.Accounts
             .Include(account => account.Clan)
             .FirstOrDefaultAsync(account => account.ID.Equals(int.Parse(accountID)));
 
         if (account is null)
+        {
             return NotFound($@"Account With ID ""{accountID}"" Was Not Found");
+        }
 
         List<HeroGuide> guides = MerrickContext.HeroGuides
             .Include(guide => guide.Author).ThenInclude(record => record.Clan)
             .Where(guide => guide.HeroIdentifier.Equals(heroIdentifier))
-            .Where(guide => guide.Public.Equals(true) || guide.Public.Equals(false) && guide.Author.ID.Equals(account.ID))
+            .Where(guide =>
+                guide.Public.Equals(true) || (guide.Public.Equals(false) && guide.Author.ID.Equals(account.ID)))
             .ToList();
 
         if (guides.None())
@@ -47,17 +56,23 @@ public partial class ClientRequesterController
         string? accountID = Request.Form["account"];
 
         if (accountID is null)
+        {
             return BadRequest(@"Missing Value For Form Parameter ""account""");
+        }
 
         string? heroIdentifier = Request.Form["hero"];
 
         if (heroIdentifier is null)
+        {
             return BadRequest(@"Missing Value For Form Parameter ""hero""");
+        }
 
         string? hostTime = Request.Form["hosttime"];
 
         if (hostTime is null)
+        {
             return BadRequest(@"Missing Value For Form Parameter ""hosttime""");
+        }
 
         string? guideID = Request.Form["gid"];
 
@@ -74,7 +89,9 @@ public partial class ClientRequesterController
             .FirstOrDefaultAsync(guide => guide.ID.Equals(int.Parse(guideID)));
 
         if (guide is null)
+        {
             return NotFound($"Guide ID {guideID} Was Not Found");
+        }
 
         return Ok(PhpSerialization.Serialize(new GuideResponseSuccess(guide, int.Parse(hostTime))));
     }

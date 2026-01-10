@@ -1,18 +1,16 @@
-using System;
-using System.Collections.Generic;
-using System.Net.Http;
-using System.Net.Http.Json;
 using System.Security.Claims;
-using System.Threading.Tasks;
+
 using ASPIRE.Common.DTOs;
+
 using DAWNBRINGER.WebPortal.UI.Models;
+
 using MERRICK.DatabaseContext.Entities.Core;
 using MERRICK.DatabaseContext.Persistence;
+
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 
 namespace DAWNBRINGER.WebPortal.UI.Controllers;
 
@@ -22,7 +20,8 @@ public class AccountController : Controller
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly ILogger<AccountController> _logger;
 
-    public AccountController(MerrickContext context, IHttpClientFactory httpClientFactory, ILogger<AccountController> logger)
+    public AccountController(MerrickContext context, IHttpClientFactory httpClientFactory,
+        ILogger<AccountController> logger)
     {
         _context = context;
         _httpClientFactory = httpClientFactory;
@@ -36,6 +35,7 @@ public class AccountController : Controller
         {
             return RedirectToAction("Index", "Home");
         }
+
         return View();
     }
 
@@ -46,6 +46,7 @@ public class AccountController : Controller
         {
             return RedirectToAction("Index", "Home");
         }
+
         return View();
     }
 
@@ -87,19 +88,19 @@ public class AccountController : Controller
 
         if (user != null)
         {
-             string ign = user.Accounts.FirstOrDefault()?.Name ?? email;
+            string ign = user.Accounts.FirstOrDefault()?.Name ?? email;
 
-             // Refresh the authentication cookie with the IGN
+            // Refresh the authentication cookie with the IGN
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
 
-            List<Claim> claims = new List<Claim>
+            List<Claim> claims = new()
             {
                 new Claim(ClaimTypes.Name, ign), // Use IGN
                 new Claim(ClaimTypes.Email, email),
                 new Claim(ClaimTypes.NameIdentifier, email)
             };
 
-            ClaimsIdentity claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+            ClaimsIdentity claimsIdentity = new(claims, CookieAuthenticationDefaults.AuthenticationScheme);
 
             await HttpContext.SignInAsync(
                 CookieAuthenticationDefaults.AuthenticationScheme,
@@ -108,11 +109,9 @@ public class AccountController : Controller
             // Login Complete
             return RedirectToAction("Index", "Home");
         }
-        else
-        {
-            // New User -> Registration Flow
-            return RedirectToAction("Register");
-        }
+
+        // New User -> Registration Flow
+        return RedirectToAction("Register");
     }
 
     [HttpGet]
@@ -122,6 +121,7 @@ public class AccountController : Controller
         {
             return RedirectToAction("Login");
         }
+
         return View();
     }
 
@@ -153,7 +153,7 @@ public class AccountController : Controller
 
         try
         {
-            RegisterDiscordUserDTO dto = new RegisterDiscordUserDTO(email, model.IGN, model.Password);
+            RegisterDiscordUserDTO dto = new(email, model.IGN, model.Password);
             HttpClient client = _httpClientFactory.CreateClient("ZORGATH");
             HttpResponseMessage response = await client.PostAsJsonAsync("/User/RegisterFromDiscord", dto);
 
@@ -168,14 +168,14 @@ public class AccountController : Controller
             // Refresh the authentication cookie with the new IGN
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
 
-            List<Claim> claims = new List<Claim>
+            List<Claim> claims = new()
             {
                 new Claim(ClaimTypes.Name, model.IGN), // Use IGN as Name
                 new Claim(ClaimTypes.Email, email),
                 new Claim(ClaimTypes.NameIdentifier, email) // Or user ID if returned
             };
 
-            ClaimsIdentity claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+            ClaimsIdentity claimsIdentity = new(claims, CookieAuthenticationDefaults.AuthenticationScheme);
 
             await HttpContext.SignInAsync(
                 CookieAuthenticationDefaults.AuthenticationScheme,
@@ -185,9 +185,9 @@ public class AccountController : Controller
         }
         catch (Exception ex)
         {
-             _logger.LogError(ex, "Exception during registration");
-             ModelState.AddModelError(string.Empty, $"An error occurred during registration: {ex.Message}");
-             return View("Register", model);
+            _logger.LogError(ex, "Exception during registration");
+            ModelState.AddModelError(string.Empty, $"An error occurred during registration: {ex.Message}");
+            return View("Register", model);
         }
     }
 
@@ -199,14 +199,12 @@ public class AccountController : Controller
             return RedirectToAction("Login");
         }
 
-        List<Claim> claims = new List<Claim>
+        List<Claim> claims = new()
         {
-            new Claim(ClaimTypes.Name, email),
-            new Claim(ClaimTypes.Email, email),
-            new Claim("MockUser", "true")
+            new Claim(ClaimTypes.Name, email), new Claim(ClaimTypes.Email, email), new Claim("MockUser", "true")
         };
 
-        ClaimsIdentity claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+        ClaimsIdentity claimsIdentity = new(claims, CookieAuthenticationDefaults.AuthenticationScheme);
 
         await HttpContext.SignInAsync(
             CookieAuthenticationDefaults.AuthenticationScheme,
@@ -231,9 +229,9 @@ public class AccountController : Controller
         if (user != null)
         {
             // User exists, just log them in
-             string ign = user.Accounts.FirstOrDefault()?.Name ?? email;
+            string ign = user.Accounts.FirstOrDefault()?.Name ?? email;
 
-            List<Claim> claims = new List<Claim>
+            List<Claim> claims = new()
             {
                 new Claim(ClaimTypes.Name, ign),
                 new Claim(ClaimTypes.Email, email),
@@ -241,25 +239,25 @@ public class AccountController : Controller
                 new Claim("MockUser", "true")
             };
 
-            ClaimsIdentity claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+            ClaimsIdentity claimsIdentity = new(claims, CookieAuthenticationDefaults.AuthenticationScheme);
 
             await HttpContext.SignInAsync(
                 CookieAuthenticationDefaults.AuthenticationScheme,
                 new ClaimsPrincipal(claimsIdentity));
-            
+
             return RedirectToAction("Index", "Home");
         }
         else
         {
             // New User -> Redirect to Register to choose IGN/Password
-            List<Claim> claims = new List<Claim>
+            List<Claim> claims = new()
             {
                 new Claim(ClaimTypes.Name, email), // Temporary Name until IGN chosen
                 new Claim(ClaimTypes.Email, email),
                 new Claim("MockUser", "true")
             };
 
-            ClaimsIdentity claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+            ClaimsIdentity claimsIdentity = new(claims, CookieAuthenticationDefaults.AuthenticationScheme);
 
             await HttpContext.SignInAsync(
                 CookieAuthenticationDefaults.AuthenticationScheme,

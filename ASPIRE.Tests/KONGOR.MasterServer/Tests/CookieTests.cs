@@ -1,24 +1,14 @@
+using KONGOR.MasterServer.Extensions.Cache;
+
 namespace ASPIRE.Tests.KONGOR.MasterServer.Tests;
 
-using global::KONGOR.MasterServer.Extensions.Cache;
-using global::MERRICK.DatabaseContext;
-using global::MERRICK.DatabaseContext.Entities;
-using global::MERRICK.DatabaseContext.Entities.Utility;
-using global::MERRICK.DatabaseContext.Enumerations;
-
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-
-using StackExchange.Redis;
-
-public sealed partial class CookieTests
+public sealed class CookieTests
 {
-
-
     [Test]
     public async Task Logout_RemovesSession_ReturnsTrue()
     {
-        await using WebApplicationFactory<KONGORAssemblyMarker> webApplicationFactory = KONGORServiceProvider.CreateOrchestratedInstance();
+        await using WebApplicationFactory<KONGORAssemblyMarker> webApplicationFactory =
+            KONGORServiceProvider.CreateOrchestratedInstance();
         HttpClient httpClient = webApplicationFactory.CreateClient();
 
         using IServiceScope scope = webApplicationFactory.Services.CreateScope();
@@ -29,11 +19,7 @@ public sealed partial class CookieTests
         await distributedCache.SetAccountNameForSessionCookie(cookie, "LogoutUser");
 
         // 2. Request
-        Dictionary<string, string> formData = new()
-        {
-            ["f"] = "logout",
-            ["cookie"] = cookie
-        };
+        Dictionary<string, string> formData = new() { ["f"] = "logout", ["cookie"] = cookie };
         FormUrlEncodedContent content = new(formData);
 
         // 3. Act
@@ -42,7 +28,7 @@ public sealed partial class CookieTests
         // 4. Assert
         string responseBody = await response.Content.ReadAsStringAsync();
         Console.WriteLine($"[TEST] Logout Response: {responseBody}");
-        
+
         await Assert.That(response.IsSuccessStatusCode).IsTrue();
         // PHP serialize(true) is "b:1;"
         await Assert.That(responseBody).Contains("b:1;");
@@ -51,17 +37,16 @@ public sealed partial class CookieTests
         string? accountName = await distributedCache.GetAccountNameForSessionCookie(cookie);
         await Assert.That(accountName).IsNull();
     }
+
     [Test]
     public async Task Aids2Cookie_OnServerRequester_ReturnsOk()
     {
-        await using WebApplicationFactory<KONGORAssemblyMarker> webApplicationFactory = KONGORServiceProvider.CreateOrchestratedInstance();
+        await using WebApplicationFactory<KONGORAssemblyMarker> webApplicationFactory =
+            KONGORServiceProvider.CreateOrchestratedInstance();
         HttpClient httpClient = webApplicationFactory.CreateClient();
 
         // 1. Request
-        Dictionary<string, string> formData = new()
-        {
-            ["cookie"] = "any_cookie_value"
-        };
+        Dictionary<string, string> formData = new() { ["cookie"] = "any_cookie_value" };
         FormUrlEncodedContent content = new(formData);
 
         // 2. Act

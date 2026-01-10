@@ -5,7 +5,7 @@ public class ServerDisconnect(IDatabase distributedCacheStore) : IAsynchronousCo
 {
     public async Task Process(ChatSession session, ChatBuffer buffer)
     {
-        ServerDisconnectRequestData requestData = new (buffer);
+        ServerDisconnectRequestData requestData = new(buffer);
 
         await session
             .TerminateMatchServer(distributedCacheStore);
@@ -14,11 +14,10 @@ public class ServerDisconnect(IDatabase distributedCacheStore) : IAsynchronousCo
 
 file class ServerDisconnectRequestData
 {
-    public byte[] CommandBytes { get; init; }
-
     public ServerDisconnectRequestData(ChatBuffer buffer)
     {
         CommandBytes = buffer.ReadCommandBytes();
     }
-}
 
+    public byte[] CommandBytes { get; init; }
+}

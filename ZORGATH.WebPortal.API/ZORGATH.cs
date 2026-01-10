@@ -1,5 +1,4 @@
-﻿
-namespace ZORGATH.WebPortal.API;
+﻿namespace ZORGATH.WebPortal.API;
 
 public class ZORGATH
 {
@@ -9,16 +8,18 @@ public class ZORGATH
         WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
         // Map User-Defined Configuration Section
-        builder.Services.Configure<OperationalConfiguration>(builder.Configuration.GetRequiredSection(OperationalConfiguration.ConfigurationSection));
+        builder.Services.Configure<OperationalConfiguration>(
+            builder.Configuration.GetRequiredSection(OperationalConfiguration.ConfigurationSection));
 
         // Add Aspire Service Defaults
         builder.AddServiceDefaults();
 
         // Add The Database Context
-        builder.AddSqlServerDbContext<MerrickContext>("MERRICK", configureSettings: null, configureDbContextOptions: options =>
+        builder.AddSqlServerDbContext<MerrickContext>("MERRICK", null, options =>
         {
             // Specify Migrations History Table And Schema
-            options.UseSqlServer(sqlServerOptionsAction: sqlServerOptions => sqlServerOptions.MigrationsHistoryTable("MigrationsHistory", MerrickContext.MetadataSchema));
+            options.UseSqlServer(sqlServerOptions =>
+                sqlServerOptions.MigrationsHistoryTable("MigrationsHistory", MerrickContext.MetadataSchema));
 
             // Enable Detailed Error Messages In Development Environment
             options.EnableDetailedErrors(builder.Environment.IsDevelopment());
@@ -26,7 +27,8 @@ public class ZORGATH
             // Suppress Warning Regarding Enabled Sensitive Data Logging, Since It Is Only Enabled In The Development Environment
             // https://github.com/dotnet/efcore/blob/main/src/EFCore/Properties/CoreStrings.resx (LogSensitiveDataLoggingEnabled)
             options.EnableSensitiveDataLogging(builder.Environment.IsDevelopment())
-                .ConfigureWarnings(warnings => warnings.Log((Id: CoreEventId.SensitiveDataLoggingEnabledWarning, Level: LogLevel.Trace)));
+                .ConfigureWarnings(warnings =>
+                    warnings.Log((Id: CoreEventId.SensitiveDataLoggingEnabledWarning, Level: LogLevel.Trace)));
 
             // Enable Thread Safety Checks For Entity Framework
             options.EnableThreadSafetyChecks();
@@ -39,7 +41,7 @@ public class ZORGATH
         builder.Services.AddRateLimiter(options =>
         {
             // Relaxed Limits For General API Endpoints
-            options.AddSlidingWindowLimiter(policyName: RateLimiterPolicies.Relaxed, policy =>
+            options.AddSlidingWindowLimiter(RateLimiterPolicies.Relaxed, policy =>
             {
                 policy.PermitLimit = 100;
                 policy.Window = TimeSpan.FromMinutes(1);
@@ -49,7 +51,7 @@ public class ZORGATH
             });
 
             // Strict Limits For Authentication And Other Sensitive Endpoints
-            options.AddSlidingWindowLimiter(policyName: RateLimiterPolicies.Strict, policy =>
+            options.AddSlidingWindowLimiter(RateLimiterPolicies.Strict, policy =>
             {
                 policy.PermitLimit = 5;
                 policy.Window = TimeSpan.FromMinutes(1);
@@ -64,8 +66,10 @@ public class ZORGATH
         {
             builder.Services.AddHttpLogging(options =>
             {
-                options.LoggingFields = HttpLoggingFields.RequestPropertiesAndHeaders | HttpLoggingFields.ResponsePropertiesAndHeaders;
-                options.RequestBodyLogLimit = 4096; /* 4KB Request Body Limit */ options.ResponseBodyLogLimit = 4096; /* 4KB Response Body Limit */
+                options.LoggingFields = HttpLoggingFields.RequestPropertiesAndHeaders |
+                                        HttpLoggingFields.ResponsePropertiesAndHeaders;
+                options.RequestBodyLogLimit = 4096; /* 4KB Request Body Limit */
+                options.ResponseBodyLogLimit = 4096; /* 4KB Response Body Limit */
             });
         }
 
@@ -74,8 +78,16 @@ public class ZORGATH
 
         // Set CORS Origins
         string[] corsOrigins = builder.Environment.IsDevelopment()
-            ? ["https://localhost:5553", "https://localhost:5554", "http://localhost:5555", "http://localhost:55555", "https://localhost:5556", "https://localhost:5557"]
-            : ["https://database.kongor.net", "https://chat.kongor.net", "http://api.kongor.net", "https://portal.api.kongor.net", "https://portal.ui.kongor.net"];
+            ?
+            [
+                "https://localhost:5553", "https://localhost:5554", "http://localhost:5555", "http://localhost:55555",
+                "https://localhost:5556", "https://localhost:5557"
+            ]
+            :
+            [
+                "https://database.kongor.net", "https://chat.kongor.net", "http://api.kongor.net",
+                "https://portal.api.kongor.net", "https://portal.ui.kongor.net"
+            ];
 
         // Add CORS Policy To Allow Cross-Origin Requests
         builder.Services.AddCors(options =>
@@ -88,10 +100,14 @@ public class ZORGATH
         // Add Server-Side Output Caching
         builder.Services.AddOutputCache(options =>
         {
-            options.AddPolicy(OutputCachePolicies.CacheForThirtySeconds, policy => policy.Cache().Expire(TimeSpan.FromSeconds(30)));
-            options.AddPolicy(OutputCachePolicies.CacheForFiveMinutes, policy => policy.Cache().Expire(TimeSpan.FromMinutes(5)));
-            options.AddPolicy(OutputCachePolicies.CacheForOneDay, policy => policy.Cache().Expire(TimeSpan.FromDays(1)));
-            options.AddPolicy(OutputCachePolicies.CacheForOneWeek, policy => policy.Cache().Expire(TimeSpan.FromDays(7)));
+            options.AddPolicy(OutputCachePolicies.CacheForThirtySeconds,
+                policy => policy.Cache().Expire(TimeSpan.FromSeconds(30)));
+            options.AddPolicy(OutputCachePolicies.CacheForFiveMinutes,
+                policy => policy.Cache().Expire(TimeSpan.FromMinutes(5)));
+            options.AddPolicy(OutputCachePolicies.CacheForOneDay,
+                policy => policy.Cache().Expire(TimeSpan.FromDays(1)));
+            options.AddPolicy(OutputCachePolicies.CacheForOneWeek,
+                policy => policy.Cache().Expire(TimeSpan.FromDays(7)));
         });
 
         // TODO: Implement Username And Password Validation Policies
@@ -144,13 +160,20 @@ public class ZORGATH
             .AddJwtBearer(options =>
             {
                 // Get Operational Configuration For JWT Settings
-                OperationalConfiguration configuration = builder.Configuration.GetRequiredSection(OperationalConfiguration.ConfigurationSection)
-                    .Get<OperationalConfiguration>() ?? throw new NullReferenceException("Operational Configuration Is NULL");
+                OperationalConfiguration configuration = builder.Configuration
+                                                             .GetRequiredSection(OperationalConfiguration
+                                                                 .ConfigurationSection)
+                                                             .Get<OperationalConfiguration>() ??
+                                                         throw new NullReferenceException(
+                                                             "Operational Configuration Is NULL");
 
                 // Configure JWT Validation Parameters
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration.JWT.SigningKey)), // TODO: Put The Signing Key In A Secrets Vault
+                    IssuerSigningKey =
+                        new SymmetricSecurityKey(
+                            Encoding.UTF8.GetBytes(configuration.JWT
+                                .SigningKey)), // TODO: Put The Signing Key In A Secrets Vault
                     ValidateIssuerSigningKey = true,
                     ValidIssuer = configuration.JWT.Issuer,
                     ValidateIssuer = true,
@@ -165,48 +188,51 @@ public class ZORGATH
         builder.Services.AddAuthorizationBuilder()
             .AddPolicy(UserRoles.Administrator, policy => policy.RequireClaim(Claims.UserRole, UserRoles.Administrator))
             .AddPolicy(UserRoles.User, policy => policy.RequireClaim(Claims.UserRole, UserRoles.User))
-            .AddPolicy(UserRoles.AllRoles, policy => policy.RequireClaim(Claims.UserRole, UserRoles.AllRoles.Split(',')));
+            .AddPolicy(UserRoles.AllRoles,
+                policy => policy.RequireClaim(Claims.UserRole, UserRoles.AllRoles.Split(',')));
 
         // Enable MVC Controllers
         builder.Services.AddControllers();
 
         // Add Comprehensive Error Response Detail In Development Environment
         if (builder.Environment.IsDevelopment())
+        {
             builder.Services.AddProblemDetails();
+        }
 
         // Add Swagger/OpenAPI Documentation Generation
         builder.Services.AddSwaggerGen(options =>
         {
             // Configure API Documentation Metadata
-            options.SwaggerDoc("v1", new OpenApiInfo
-            {
-                Title = "ZORGATH Web Portal API",
-                Version = "v1",
-
-                License = new OpenApiLicense
+            options.SwaggerDoc("v1",
+                new OpenApiInfo
                 {
-                    Name = "Project KONGOR Open-Source License",
-                    Url = new Uri("https://github.com/Project-KONGOR-Open-Source/ASPIRE/blob/main/license")
-                },
-
-                Contact = new OpenApiContact
-                {
-                    Name = "[K]ONGOR",
-                    Url = new Uri("https://github.com/K-O-N-G-O-R"),
-                    Email = "project.kongor@proton.me"
-                }
-            });
+                    Title = "ZORGATH Web Portal API",
+                    Version = "v1",
+                    License = new OpenApiLicense
+                    {
+                        Name = "Project KONGOR Open-Source License",
+                        Url = new Uri("https://github.com/Project-KONGOR-Open-Source/ASPIRE/blob/main/license")
+                    },
+                    Contact = new OpenApiContact
+                    {
+                        Name = "[K]ONGOR",
+                        Url = new Uri("https://github.com/K-O-N-G-O-R"),
+                        Email = "project.kongor@proton.me"
+                    }
+                });
 
             // Add JWT Bearer Authentication To Swagger UI
-            options.AddSecurityDefinition(JwtBearerDefaults.AuthenticationScheme, new OpenApiSecurityScheme
-            {
-                Description = "Insert A Valid JSON Web Token",
-                Name = "Authorization",
-                Type = SecuritySchemeType.Http,
-                Scheme = JwtBearerDefaults.AuthenticationScheme,
-                In = ParameterLocation.Header,
-                BearerFormat = "JWT"
-            });
+            options.AddSecurityDefinition(JwtBearerDefaults.AuthenticationScheme,
+                new OpenApiSecurityScheme
+                {
+                    Description = "Insert A Valid JSON Web Token",
+                    Name = "Authorization",
+                    Type = SecuritySchemeType.Http,
+                    Scheme = JwtBearerDefaults.AuthenticationScheme,
+                    In = ParameterLocation.Header,
+                    BearerFormat = "JWT"
+                });
 
             // Configure Security Requirements For All Endpoints
             options.AddSecurityRequirement(document =>
@@ -215,10 +241,7 @@ public class ZORGATH
 
                 List<string> requiredScopes = []; // No Scopes Required, Just A Valid JWT
 
-                OpenApiSecurityRequirement securityRequirement = new()
-                {
-                    { schemeReference, requiredScopes }
-                };
+                OpenApiSecurityRequirement securityRequirement = new() { { schemeReference, requiredScopes } };
 
                 return securityRequirement;
             });
@@ -232,16 +255,24 @@ public class ZORGATH
         {
             string proxy = builder.Configuration.GetValue<string>("INFRASTRUCTURE_GATEWAY") ?? "localhost";
 
-            options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedHost;
+            options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto |
+                                       ForwardedHeaders.XForwardedHost;
 
             IPAddress[] proxyResolvedAddresses;
 
             try { proxyResolvedAddresses = Dns.GetHostAddresses(proxy); }
-            catch (Exception exception) { throw new InvalidOperationException($@"Failed To Resolve Proxy Host ""{proxy}""", exception); }
+            catch (Exception exception)
+            {
+                throw new InvalidOperationException($@"Failed To Resolve Proxy Host ""{proxy}""", exception);
+            }
 
             foreach (IPAddress proxyResolvedAddress in proxyResolvedAddresses)
+            {
                 if (proxyResolvedAddress.AddressFamily is AddressFamily.InterNetwork or AddressFamily.InterNetworkV6)
+                {
                     options.KnownProxies.Add(proxyResolvedAddress);
+                }
+            }
 
             // Only Trust The Last Forwarded Header In The Chain
             options.ForwardLimit = 1;
@@ -282,7 +313,8 @@ public class ZORGATH
         // Serve Static Files For Swagger CSS
         application.UseStaticFiles(new StaticFileOptions
         {
-            FileProvider = new PhysicalFileProvider(Path.Combine(builder.Environment.ContentRootPath, "Resources", "CSS")),
+            FileProvider =
+                new PhysicalFileProvider(Path.Combine(builder.Environment.ContentRootPath, "Resources", "CSS")),
             RequestPath = "/swagger"
         });
 

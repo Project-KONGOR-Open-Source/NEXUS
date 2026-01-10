@@ -7,12 +7,19 @@ public static class ChatChannels
 
     public const string GameMastersChannel = "GAME MASTERS";
     public const string GuestsChannel = "GUESTS";
-    public const string ServerHostsChannel = "HOSTS"; // TODO: Implement Commands To Query Hosts From This Channel As Administrator
+
+    public const string
+        ServerHostsChannel = "HOSTS"; // TODO: Implement Commands To Query Hosts From This Channel As Administrator
+
     public const string StreamersChannel = "STREAMERS";
     public const string VIPChannel = "VIP";
 
     // "TERMINAL" is a special channel from which chat server commands can be executed.
     public const string StaffChannel = "TERMINAL"; // TODO: Implement TERMINAL Command Palette
 
-    public static readonly string[] AllDefaultChannels = [ GeneralChannel, GameMastersChannel, GuestsChannel, ServerHostsChannel, StreamersChannel, VIPChannel, StaffChannel ];
+    public static readonly string[] AllDefaultChannels =
+    [
+        GeneralChannel, GameMastersChannel, GuestsChannel, ServerHostsChannel, StreamersChannel, VIPChannel,
+        StaffChannel
+    ];
 }

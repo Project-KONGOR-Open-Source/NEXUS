@@ -1,7 +1,8 @@
+using MERRICK.DatabaseContext.Entities.Core;
+using MERRICK.DatabaseContext.Persistence;
+
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using MERRICK.DatabaseContext.Persistence;
-using MERRICK.DatabaseContext.Entities.Core;
 
 namespace DAWNBRINGER.WebPortal.UI.Controllers;
 
@@ -20,8 +21,8 @@ public class ToolsController : Controller
     [HttpGet("inventory")]
     public async Task<IActionResult> Inventory(string? accountName)
     {
-        InventoryViewModel viewModel = new InventoryViewModel();
-        
+        InventoryViewModel viewModel = new();
+
         // Curated List of Popular Items
         viewModel.CommonItems = new Dictionary<string, string>
         {
@@ -33,23 +34,23 @@ public class ToolsController : Controller
             { "Avatar_Swiftblade.Ronin", "Swiftblade: Ronin" },
             { "Avatar_WitchSlayer.Pimp", "Witch Slayer: Pimp" },
             { "Avatar_Accursed.Arthas", "Accursed: Arthas" },
-            
+
             // Announcers
             { "Announcer_Flamboyant", "Announcer: Flamboyant" },
             { "Announcer_English", "Announcer: English" },
             { "Announcer_Badass", "Announcer: Badass" },
             { "Announcer_Thai", "Announcer: Thai" },
-            
+
             // Taunts
             { "Taunt_Kongor", "Taunt: Kongor" },
             { "Taunt_GDrop", "Taunt: G-Drop" },
             { "Taunt_Standard", "Taunt: Standard" },
-            
+
             // Account Icons
             { "AccountIcon_HoN", "Icon: HoN Logo" },
             { "AccountIcon_Legion", "Icon: Legion" },
             { "AccountIcon_Hellbourne", "Icon: Hellbourne" },
-            
+
             // Name Colors
             { "NameColor_Gold", "Name Color: Gold" },
             { "NameColor_Diamond", "Name Color: Diamond" }
@@ -57,7 +58,7 @@ public class ToolsController : Controller
 
         if (string.IsNullOrWhiteSpace(accountName))
         {
-             return View(viewModel);
+            return View(viewModel);
         }
 
         Account? account = await _context.Accounts
@@ -73,7 +74,7 @@ public class ToolsController : Controller
         viewModel.AccountName = account.Name;
         viewModel.OwnedItems = account.User.OwnedStoreItems;
         viewModel.Message = "Account loaded.";
-        
+
         return View(viewModel);
     }
 
@@ -84,7 +85,10 @@ public class ToolsController : Controller
             .Include(a => a.User)
             .FirstOrDefaultAsync(a => a.Name == accountName);
 
-        if (account == null) return RedirectToAction("Inventory", new { accountName, error = "Account not found" });
+        if (account == null)
+        {
+            return RedirectToAction("Inventory", new { accountName, error = "Account not found" });
+        }
 
         if (!account.User.OwnedStoreItems.Contains(productCode))
         {
@@ -94,38 +98,44 @@ public class ToolsController : Controller
 
         return RedirectToAction("Inventory", new { accountName });
     }
-    
+
     [HttpPost("inventory/remove")]
     public async Task<IActionResult> RemoveItem(string accountName, string productCode)
     {
         Account? account = await _context.Accounts
-             .Include(a => a.User)
-             .FirstOrDefaultAsync(a => a.Name == accountName);
+            .Include(a => a.User)
+            .FirstOrDefaultAsync(a => a.Name == accountName);
 
-         if (account == null) return RedirectToAction("Inventory", new { accountName, error = "Account not found" });
+        if (account == null)
+        {
+            return RedirectToAction("Inventory", new { accountName, error = "Account not found" });
+        }
 
-         if (account.User.OwnedStoreItems.Contains(productCode))
-         {
-             account.User.OwnedStoreItems.Remove(productCode);
-             await _context.SaveChangesAsync();
-         }
+        if (account.User.OwnedStoreItems.Contains(productCode))
+        {
+            account.User.OwnedStoreItems.Remove(productCode);
+            await _context.SaveChangesAsync();
+        }
 
-         return RedirectToAction("Inventory", new { accountName });
+        return RedirectToAction("Inventory", new { accountName });
     }
-    
+
     [HttpPost("inventory/reset")]
     public async Task<IActionResult> ResetInventory(string accountName)
     {
         Account? account = await _context.Accounts
-             .Include(a => a.User)
-             .FirstOrDefaultAsync(a => a.Name == accountName);
+            .Include(a => a.User)
+            .FirstOrDefaultAsync(a => a.Name == accountName);
 
-         if (account == null) return RedirectToAction("Inventory", new { accountName, error = "Account not found" });
+        if (account == null)
+        {
+            return RedirectToAction("Inventory", new { accountName, error = "Account not found" });
+        }
 
-         account.User.OwnedStoreItems.Clear();
-         await _context.SaveChangesAsync();
+        account.User.OwnedStoreItems.Clear();
+        await _context.SaveChangesAsync();
 
-         return RedirectToAction("Inventory", new { accountName });
+        return RedirectToAction("Inventory", new { accountName });
     }
 }
 

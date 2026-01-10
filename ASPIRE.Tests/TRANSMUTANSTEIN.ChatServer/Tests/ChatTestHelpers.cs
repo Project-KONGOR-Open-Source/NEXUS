@@ -1,5 +1,7 @@
 using System.Net.Sockets;
+
 using ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer.Infrastructure;
+
 using KONGOR.MasterServer.Extensions.Cache;
 
 using TRANSMUTANSTEIN.ChatServer.Domain.Core;
@@ -11,15 +13,15 @@ public static class ChatTestHelpers
     public static readonly SemaphoreSlim _seedLock = new(1, 1);
 
     public static async Task<TcpClient> ConnectAndAuthenticateAsync(
-        TRANSMUTANSTEINServiceProvider app, 
-        int port, 
-        int accountId, 
+        TRANSMUTANSTEINServiceProvider app,
+        int port,
+        int accountId,
         string accountName = "TestUser",
-        string region = "USE", 
+        string region = "USE",
         string language = "en")
     {
-        TcpClient client = new TcpClient();
-        
+        TcpClient client = new();
+
         // Seed Database and Cache
         // Serialize seeding to avoid race conditions in InMemory DB
         await _seedLock.WaitAsync();
@@ -44,11 +46,11 @@ public static class ChatTestHelpers
                 // 2. Ensure User/Account
                 if (await db.Accounts.FindAsync(accountId) == null)
                 {
-                    role = await db.Roles.FindAsync(1); 
-                    
-                    User user = new User
+                    role = await db.Roles.FindAsync(1);
+
+                    User user = new()
                     {
-                        ID = accountId, 
+                        ID = accountId,
                         EmailAddress = $"test{accountId}@test.com",
                         SRPPasswordHash = "hash",
                         SRPPasswordSalt = "salt",
@@ -56,16 +58,10 @@ public static class ChatTestHelpers
                         Role = role!
                     };
 
-                    Account account = new Account
-                    {
-                        ID = accountId,
-                        Name = accountName,
-                        IsMain = true,
-                        User = user
-                    };
-                    
+                    Account account = new() { ID = accountId, Name = accountName, IsMain = true, User = user };
+
                     user.Accounts = new List<Account> { account };
-                    
+
                     db.Users.Add(user);
                     await db.SaveChangesAsync();
                 }
@@ -86,7 +82,7 @@ public static class ChatTestHelpers
         string hash = SRPAuthenticationHandlers.ComputeChatServerCookieHash(accountId, ip, cookie);
 
         // Send Login Packet (0x0C00)
-        ChatBuffer loginBuffer = new ChatBuffer();
+        ChatBuffer loginBuffer = new();
         loginBuffer.WriteCommand(ChatProtocol.ClientToChatServer.NET_CHAT_CL_CONNECT);
         loginBuffer.WriteInt32(accountId);
         loginBuffer.WriteString(cookie);
@@ -103,63 +99,75 @@ public static class ChatTestHelpers
         loginBuffer.WriteInt8(10); // Minor
         loginBuffer.WriteInt8(1); // Patch
         loginBuffer.WriteInt8(0); // Revision
-        loginBuffer.WriteInt8((byte)ChatProtocol.ChatClientStatus.CHAT_CLIENT_STATUS_CONNECTED);
-        loginBuffer.WriteInt8((byte)ChatProtocol.ChatModeType.CHAT_MODE_AVAILABLE);
+        loginBuffer.WriteInt8((byte) ChatProtocol.ChatClientStatus.CHAT_CLIENT_STATUS_CONNECTED);
+        loginBuffer.WriteInt8((byte) ChatProtocol.ChatModeType.CHAT_MODE_AVAILABLE);
         loginBuffer.WriteString(region);
         loginBuffer.WriteString(language);
-        
+
         // Prepend Length
-        byte[] loginPacket = loginBuffer.Data.AsSpan(0, (int)loginBuffer.Size).ToArray();
-        ushort packetLength = (ushort)(loginPacket.Length); 
+        byte[] loginPacket = loginBuffer.Data.AsSpan(0, (int) loginBuffer.Size).ToArray();
+        ushort packetLength = (ushort) loginPacket.Length;
         List<byte> rawBytes = [];
         rawBytes.AddRange(BitConverter.GetBytes(packetLength));
         rawBytes.AddRange(loginPacket);
-        
+
         await stream.WriteAsync(rawBytes.ToArray());
 
         // Read through the handshake to ensure we are connected
         // Expect: Accept(0x1C00), Options(0x00C0), InitialStatus(0x000B), UpdateStatus(0x000C)
         // We will read until we see UpdateStatus or timeout
-        
-        using CancellationTokenSource cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+
+        using CancellationTokenSource cts = new(TimeSpan.FromSeconds(5));
         bool handshakeComplete = false;
-        
+
         while (!handshakeComplete)
         {
-             // Header
-             byte[] header = new byte[4];
-             int bytesRead = 0;
-             while (bytesRead < 4)
-             {
-                 int read = await stream.ReadAsync(header, bytesRead, 4 - bytesRead, cts.Token);
-                 if (read == 0) throw new Exception("Disconnected during handshake");
-                 bytesRead += read;
-             }
-             
-             ushort length = BitConverter.ToUInt16(header, 0);
-             ushort command = BitConverter.ToUInt16(header, 2);
-             
-             if (command == (ushort)ChatProtocol.ChatServerToClient.NET_CHAT_CL_REJECT)
-                throw new Exception("Connection Rejected");
-                
-             if (command == (ushort)ChatProtocol.Command.CHAT_CMD_UPDATE_STATUS)
-                handshakeComplete = true;
+            // Header
+            byte[] header = new byte[4];
+            int bytesRead = 0;
+            while (bytesRead < 4)
+            {
+                int read = await stream.ReadAsync(header, bytesRead, 4 - bytesRead, cts.Token);
+                if (read == 0)
+                {
+                    throw new Exception("Disconnected during handshake");
+                }
 
-             // Consume Payload
-             int payloadSize = length - 2;
-             if (payloadSize > 0)
-             {
-                 byte[] payload = new byte[payloadSize];
-                 int payloadRead = 0;
-                 while (payloadRead < payloadSize)
-                 {
-                     int read = await stream.ReadAsync(payload, payloadRead, payloadSize - payloadRead, cts.Token);
-                     if (read == 0) throw new Exception("Disconnected reading payload");
-                     payloadRead += read;
-                 }
-             }
+                bytesRead += read;
+            }
+
+            ushort length = BitConverter.ToUInt16(header, 0);
+            ushort command = BitConverter.ToUInt16(header, 2);
+
+            if (command == ChatProtocol.ChatServerToClient.NET_CHAT_CL_REJECT)
+            {
+                throw new Exception("Connection Rejected");
+            }
+
+            if (command == ChatProtocol.Command.CHAT_CMD_UPDATE_STATUS)
+            {
+                handshakeComplete = true;
+            }
+
+            // Consume Payload
+            int payloadSize = length - 2;
+            if (payloadSize > 0)
+            {
+                byte[] payload = new byte[payloadSize];
+                int payloadRead = 0;
+                while (payloadRead < payloadSize)
+                {
+                    int read = await stream.ReadAsync(payload, payloadRead, payloadSize - payloadRead, cts.Token);
+                    if (read == 0)
+                    {
+                        throw new Exception("Disconnected reading payload");
+                    }
+
+                    payloadRead += read;
+                }
+            }
         }
-        
+
         return client;
     }
 }

@@ -1,7 +1,5 @@
 namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.MatchState;
 
-using Microsoft.Extensions.Logging;
-
 [ChatCommand(ChatProtocol.GameServerToChatServer.NET_CHAT_GS_MATCH_ENDED)]
 public class MatchComplete(ILogger<MatchComplete> logger) : ISynchronousCommandProcessor<ChatSession>
 {
@@ -9,7 +7,7 @@ public class MatchComplete(ILogger<MatchComplete> logger) : ISynchronousCommandP
     {
         try
         {
-            MatchCompleteRequestData requestData = new (buffer);
+            MatchCompleteRequestData requestData = new(buffer);
 
             // TODO: Update Player Availability States (Mark Players As Available After Match Ends)
             // TODO: Remove Match From Distributed Cache
@@ -19,8 +17,8 @@ public class MatchComplete(ILogger<MatchComplete> logger) : ISynchronousCommandP
         }
         catch (InvalidDataException ex)
         {
-            logger.LogWarning(ex, "Failed to process MatchComplete (0x0515) packet: {Message}. Ignoring invalid packet.", ex.Message);
-            return;
+            logger.LogWarning(ex,
+                "Failed to process MatchComplete (0x0515) packet: {Message}. Ignoring invalid packet.", ex.Message);
         }
 
         // NOTE: Statistics submission and MMR/PSR updates are handled by KONGOR.MasterServer/Controllers/StatsRequesterController.
@@ -29,6 +27,32 @@ public class MatchComplete(ILogger<MatchComplete> logger) : ISynchronousCommandP
 
 file class MatchCompleteRequestData
 {
+    public MatchCompleteRequestData(ChatBuffer buffer)
+    {
+        CommandBytes = buffer.ReadCommandBytes();
+
+        // Safely partial read
+        if (buffer.HasRemainingData())
+        {
+            ServerID = buffer.ReadInt32();
+        }
+
+        if (buffer.HasRemainingData())
+        {
+            MatchID = buffer.ReadInt32();
+        }
+
+        if (buffer.HasRemainingData())
+        {
+            WinningTeam = buffer.ReadInt32();
+        }
+
+        if (buffer.HasRemainingData())
+        {
+            MatchDuration = buffer.ReadInt32();
+        }
+    }
+
     public byte[] CommandBytes { get; init; }
 
     public int ServerID { get; init; }
@@ -38,16 +62,4 @@ file class MatchCompleteRequestData
     public int WinningTeam { get; init; }
 
     public int MatchDuration { get; init; }
-
-    public MatchCompleteRequestData(ChatBuffer buffer)
-    {
-        CommandBytes = buffer.ReadCommandBytes();
-        
-        // Safely partial read
-        if (buffer.HasRemainingData()) ServerID = buffer.ReadInt32();
-        if (buffer.HasRemainingData()) MatchID = buffer.ReadInt32();
-        if (buffer.HasRemainingData()) WinningTeam = buffer.ReadInt32();
-        if (buffer.HasRemainingData()) MatchDuration = buffer.ReadInt32();
-    }
 }
-

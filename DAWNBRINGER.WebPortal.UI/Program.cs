@@ -1,13 +1,9 @@
 using ASPIRE.Common.ServiceDefaults;
+
 using MERRICK.DatabaseContext.Persistence;
-using Microsoft.EntityFrameworkCore;
 
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
@@ -25,7 +21,7 @@ builder.Services.AddHttpClient("ZORGATH", client =>
 });
 
 // Add The Database Context
-builder.AddSqlServerDbContext<MerrickContext>("MERRICK", configureSettings: null, configureDbContextOptions: options =>
+builder.AddSqlServerDbContext<MerrickContext>("MERRICK", null, options =>
 {
     // Enable Detailed Error Messages In Development Environment
     options.EnableDetailedErrors(builder.Environment.IsDevelopment());
@@ -36,23 +32,23 @@ builder.AddSqlServerDbContext<MerrickContext>("MERRICK", configureSettings: null
 
 // Configure Authentication
 builder.Services.AddAuthentication(options =>
-{
-    options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = "Discord";
-})
-.AddCookie()
-.AddDiscord(options =>
-{
-    options.ClientId = builder.Configuration["discord-client-id"] ?? "MISSING_CLIENT_ID";
-    options.ClientSecret = builder.Configuration["discord-client-secret"] ?? "MISSING_CLIENT_SECRET";
-    options.CallbackPath = new PathString("/signin-discord");
+    {
+        options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = "Discord";
+    })
+    .AddCookie()
+    .AddDiscord(options =>
+    {
+        options.ClientId = builder.Configuration["discord-client-id"] ?? "MISSING_CLIENT_ID";
+        options.ClientSecret = builder.Configuration["discord-client-secret"] ?? "MISSING_CLIENT_SECRET";
+        options.CallbackPath = new PathString("/signin-discord");
 
-    // Map Discord User Information to Claims
-    options.ClaimActions.MapJsonKey("urn:discord:avatar", "avatar");
-    options.ClaimActions.MapJsonKey("urn:discord:discriminator", "discriminator");
+        // Map Discord User Information to Claims
+        options.ClaimActions.MapJsonKey("urn:discord:avatar", "avatar");
+        options.ClaimActions.MapJsonKey("urn:discord:discriminator", "discriminator");
 
-    options.SaveTokens = true;
-});
+        options.SaveTokens = true;
+    });
 
 WebApplication app = builder.Build();
 
@@ -72,7 +68,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+    "default",
+    "{controller=Home}/{action=Index}/{id?}");
 
 app.Run();

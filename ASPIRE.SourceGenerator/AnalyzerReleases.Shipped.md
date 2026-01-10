@@ -5,6 +5,6 @@
 
 ### New Rules
 
-Rule ID | Category              | Severity | Notes
---------|-----------------------|----------|-------------------------------------
-NX0001  | NEXUS.SourceGenerator | Error    | AutoImplementMissingMembersGenerator
+ Rule ID | Category              | Severity | Notes                                
+---------|-----------------------|----------|--------------------------------------
+ NX0001  | NEXUS.SourceGenerator | Error    | AutoImplementMissingMembersGenerator 

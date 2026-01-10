@@ -5,8 +5,8 @@ public class GroupInvite(MerrickContext merrick) : ISynchronousCommandProcessor<
 {
     public void Process(ChatSession session, ChatBuffer buffer)
     {
-        GroupInviteRequestData requestData = new (buffer);
-        
+        GroupInviteRequestData requestData = new(buffer);
+
         MatchmakingGroup
             .GetByMemberAccountID(session.Account.ID)
             .Invite(session, merrick, requestData.InviteReceiverName);
@@ -15,14 +15,13 @@ public class GroupInvite(MerrickContext merrick) : ISynchronousCommandProcessor<
 
 file class GroupInviteRequestData
 {
-    public byte[] CommandBytes { get; init; }
-
-    public string InviteReceiverName { get; init; }
-
     public GroupInviteRequestData(ChatBuffer buffer)
     {
         CommandBytes = buffer.ReadCommandBytes();
         InviteReceiverName = buffer.ReadString();
     }
-}
 
+    public byte[] CommandBytes { get; init; }
+
+    public string InviteReceiverName { get; }
+}

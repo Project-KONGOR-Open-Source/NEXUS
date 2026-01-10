@@ -8,24 +8,23 @@ public class StatSubmissionResult : ISynchronousCommandProcessor<ChatSession>
         // 0x0514
         // Just consume the buffer safely for now to prevent "Missing Type Mapping" errors.
         // Based on logs, payload seems to contain result code and match ID.
-        
-        try 
+
+        try
         {
             byte[] commandBytes = buffer.ReadCommandBytes();
 
             // Attempt to read generic data if available
             if (buffer.HasRemainingData())
             {
-               // We don't strictly need to do anything with this result yet, 
-               // as the Master Server handles the actual submission logic.
-               // This packet is just the Game Server reporting back to Chat Server (or vice versa in some flows).
+                // We don't strictly need to do anything with this result yet, 
+                // as the Master Server handles the actual submission logic.
+                // This packet is just the Game Server reporting back to Chat Server (or vice versa in some flows).
             }
         }
         catch (Exception ex)
         {
-             // Log but don't crash
-             Log.Warning(ex, "Error parsing StatSubmissionResult packet");
+            // Log but don't crash
+            Log.Warning(ex, "Error parsing StatSubmissionResult packet");
         }
     }
 }
-

@@ -1,17 +1,14 @@
-namespace ASPIRE.Tests.KONGOR.MasterServer.Tests;
+using System.Net;
+using System.Security.Cryptography;
 
 using ASPIRE.Tests.Data;
-using ASPIRE.Tests.KONGOR.MasterServer.Infrastructure;
-using global::KONGOR.MasterServer;
-using global::KONGOR.MasterServer.Extensions.Cache;
-using global::KONGOR.MasterServer.Models.ServerManagement;
-using global::MERRICK.DatabaseContext;
-using global::MERRICK.DatabaseContext.Entities;
-using global::MERRICK.DatabaseContext.Enumerations;
-using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.Extensions.DependencyInjection;
-using StackExchange.Redis;
-using EntityRole = global::MERRICK.DatabaseContext.Entities.Utility.Role;
+
+using KONGOR.MasterServer.Extensions.Cache;
+using KONGOR.MasterServer.Models.ServerManagement;
+
+namespace ASPIRE.Tests.KONGOR.MasterServer.Tests;
+
+using EntityRole = Role;
 
 public sealed class MiscUnverifiedTests
 {
@@ -132,7 +129,7 @@ public sealed class MiscUnverifiedTests
             int matchId = 123;
             string keyInput = matchId + salt;
             string resubmissionKey = Convert
-                .ToHexString(System.Security.Cryptography.SHA1.HashData(System.Text.Encoding.UTF8.GetBytes(keyInput)))
+                .ToHexString(SHA1.HashData(Encoding.UTF8.GetBytes(keyInput)))
                 .ToLower();
 
             Dictionary<string, string> payload =
@@ -146,10 +143,9 @@ public sealed class MiscUnverifiedTests
 
             // Expecting 401 due to SRP password check failure (we can't easily replicate hashing here), or 200 if somehow passed.
             // 404/500/400 would be failures.
-            if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+            if (response.StatusCode == HttpStatusCode.Unauthorized)
             {
                 // TUnit doesn't have Assert.Pass. We can just return as success.
-                return;
             }
             else
             {
@@ -158,6 +154,3 @@ public sealed class MiscUnverifiedTests
         }
     }
 }
-
-
-

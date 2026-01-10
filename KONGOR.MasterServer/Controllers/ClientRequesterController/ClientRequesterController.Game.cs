@@ -13,7 +13,9 @@ public partial class ClientRequesterController
         string? privateGame = Request.Form["private"];
 
         if (name is null || map is null || mode is null)
+        {
             return BadRequest(PhpSerialization.Serialize(new { error = "Missing Required Parameters" }));
+        }
 
         // 1. Get Available Servers
         List<MatchServer> allServers = await DistributedCache.GetMatchServers();
@@ -36,7 +38,9 @@ public partial class ClientRequesterController
         // 3. Get Host Account Info
         string? accountName = HttpContext.Items["SessionAccountName"] as string;
         if (accountName is null)
+        {
             return Unauthorized(PhpSerialization.Serialize(new { error = "Unauthorized" }));
+        }
 
         // 4. Create Match Start Data
         MatchStartData matchStartData = new()

@@ -1,7 +1,8 @@
 ﻿namespace KONGOR.MasterServer.Models.RequestResponse.SRP;
 
 /// <summary>
-///     Exposes the constants, properties, and methods required for Secure Remote Password protocol authentication, stage two.
+///     Exposes the constants, properties, and methods required for Secure Remote Password protocol authentication, stage
+///     two.
 /// </summary>
 public class SRPAuthenticationSessionDataStageTwo
 {
@@ -9,7 +10,8 @@ public class SRPAuthenticationSessionDataStageTwo
     {
         ClientProof = clientProof;
 
-        SrpParameters parameters = SrpParameters.Create<SHA256>(SRPAuthenticationSessionDataStageOne.SafePrimeNumber, SRPAuthenticationSessionDataStageOne.MultiplicativeGroupGenerator);
+        SrpParameters parameters = SrpParameters.Create<SHA256>(SRPAuthenticationSessionDataStageOne.SafePrimeNumber,
+            SRPAuthenticationSessionDataStageOne.MultiplicativeGroupGenerator);
 
         // HoN SRP requires a padded "g" (multiplicative group generator) value for its final "M2" (server proof) calculation. 
         // The RFC5054 specification is unclear on whether this should be done or not.
@@ -18,7 +20,7 @@ public class SRPAuthenticationSessionDataStageTwo
         // secure-remote-password/srp.net : https://github.com/secure-remote-password/srp.net/blob/176098e90501659990b12e8ac086018d47f23ccb/src/srp/SrpParameters.cs#L29
         parameters.Generator = parameters.Pad(parameters.Generator);
 
-        SrpServer server = new (parameters);
+        SrpServer server = new(parameters);
 
         try
         {

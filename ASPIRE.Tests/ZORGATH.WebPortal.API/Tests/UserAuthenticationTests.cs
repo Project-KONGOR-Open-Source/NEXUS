@@ -8,17 +8,21 @@ public sealed class UserAuthenticationTests
     [Test]
     [Arguments("login@kongor.com", "LoginPlayer", "SecurePassword123!")]
     [Arguments("auth@kongor.net", "AuthUser", "MyP@ssw0rd!")]
-    public async Task LogInUser_WithValidCredentials_ReturnsOKWithValidJWT(string emailAddress, string accountName, string password)
+    public async Task LogInUser_WithValidCredentials_ReturnsOKWithValidJWT(string emailAddress, string accountName,
+        string password)
     {
-        await using WebApplicationFactory<ZORGATHAssemblyMarker> webApplicationFactory = ZORGATHServiceProvider.CreateOrchestratedInstance();
+        await using WebApplicationFactory<ZORGATHAssemblyMarker> webApplicationFactory =
+            ZORGATHServiceProvider.CreateOrchestratedInstance();
 
-        JWTAuthenticationService jwtAuthenticationService = new (webApplicationFactory);
+        JWTAuthenticationService jwtAuthenticationService = new(webApplicationFactory);
 
-        JWTAuthenticationData authenticationResult = await jwtAuthenticationService.CreateAuthenticatedUser(emailAddress, accountName, password);
+        JWTAuthenticationData authenticationResult =
+            await jwtAuthenticationService.CreateAuthenticatedUser(emailAddress, accountName, password);
 
-        IOptions<OperationalConfiguration> configuration = webApplicationFactory.Services.GetRequiredService<IOptions<OperationalConfiguration>>();
+        IOptions<OperationalConfiguration> configuration =
+            webApplicationFactory.Services.GetRequiredService<IOptions<OperationalConfiguration>>();
 
-        TokenValidationParameters tokenValidationParameters = new ()
+        TokenValidationParameters tokenValidationParameters = new()
         {
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration.Value.JWT.SigningKey)),
             ValidateIssuerSigningKey = true,
@@ -30,12 +34,16 @@ public sealed class UserAuthenticationTests
             ValidateLifetime = true
         };
 
-        JwtSecurityTokenHandler tokenHandler = new ();
+        JwtSecurityTokenHandler tokenHandler = new();
 
-        tokenHandler.ValidateToken(authenticationResult.AuthenticationToken, tokenValidationParameters, out SecurityToken validatedToken);
+        tokenHandler.ValidateToken(authenticationResult.AuthenticationToken, tokenValidationParameters,
+            out SecurityToken validatedToken);
 
         if (validatedToken is not JwtSecurityToken jwtToken)
-            throw new InvalidOperationException($"Expected Token To Be A JWT Security Token, But Was {validatedToken.GetType().Name}");
+        {
+            throw new InvalidOperationException(
+                $"Expected Token To Be A JWT Security Token, But Was {validatedToken.GetType().Name}");
+        }
 
         using (Assert.Multiple())
         {
@@ -55,16 +63,19 @@ public sealed class UserAuthenticationTests
     [Arguments("InvalidUser", "AnotherPass123!")]
     public async Task LogInUser_WithInvalidAccountName_ReturnsNotFound(string accountName, string password)
     {
-        await using WebApplicationFactory<ZORGATHAssemblyMarker> webApplicationFactory = ZORGATHServiceProvider.CreateOrchestratedInstance();
+        await using WebApplicationFactory<ZORGATHAssemblyMarker> webApplicationFactory =
+            ZORGATHServiceProvider.CreateOrchestratedInstance();
 
-        ILogger<UserController> userLogger = webApplicationFactory.Services.GetRequiredService<ILogger<UserController>>();
-        IOptions<OperationalConfiguration> configuration = webApplicationFactory.Services.GetRequiredService<IOptions<OperationalConfiguration>>();
+        ILogger<UserController> userLogger =
+            webApplicationFactory.Services.GetRequiredService<ILogger<UserController>>();
+        IOptions<OperationalConfiguration> configuration =
+            webApplicationFactory.Services.GetRequiredService<IOptions<OperationalConfiguration>>();
         IEmailService emailService = webApplicationFactory.Services.GetRequiredService<IEmailService>();
         IWebHostEnvironment hostEnvironment = webApplicationFactory.Services.GetRequiredService<IWebHostEnvironment>();
 
         MerrickContext databaseContext = webApplicationFactory.Services.GetRequiredService<MerrickContext>();
 
-        UserController userController = new (databaseContext, userLogger, emailService, configuration, hostEnvironment);
+        UserController userController = new(databaseContext, userLogger, emailService, configuration, hostEnvironment);
 
         IActionResult response = await userController.LogInUser(new LogInUserDTO(accountName, password));
 
@@ -74,22 +85,26 @@ public sealed class UserAuthenticationTests
     [Test]
     [Arguments("wrongpass@kongor.com", "WrongPassUser", "CorrectPassword123!", "WrongPassword123!")]
     [Arguments("badauth@kongor.net", "BadAuthUser", "RightP@ss!", "WrongP@ss!")]
-    public async Task LogInUser_WithInvalidPassword_ReturnsUnauthorized(string emailAddress, string accountName, string correctPassword, string wrongPassword)
+    public async Task LogInUser_WithInvalidPassword_ReturnsUnauthorized(string emailAddress, string accountName,
+        string correctPassword, string wrongPassword)
     {
-        await using WebApplicationFactory<ZORGATHAssemblyMarker> webApplicationFactory = ZORGATHServiceProvider.CreateOrchestratedInstance();
+        await using WebApplicationFactory<ZORGATHAssemblyMarker> webApplicationFactory =
+            ZORGATHServiceProvider.CreateOrchestratedInstance();
 
-        JWTAuthenticationService jwtAuthenticationService = new (webApplicationFactory);
+        JWTAuthenticationService jwtAuthenticationService = new(webApplicationFactory);
 
         await jwtAuthenticationService.CreateAuthenticatedUser(emailAddress, accountName, correctPassword);
 
-        ILogger<UserController> userLogger = webApplicationFactory.Services.GetRequiredService<ILogger<UserController>>();
-        IOptions<OperationalConfiguration> configuration = webApplicationFactory.Services.GetRequiredService<IOptions<OperationalConfiguration>>();
+        ILogger<UserController> userLogger =
+            webApplicationFactory.Services.GetRequiredService<ILogger<UserController>>();
+        IOptions<OperationalConfiguration> configuration =
+            webApplicationFactory.Services.GetRequiredService<IOptions<OperationalConfiguration>>();
         IEmailService emailService = webApplicationFactory.Services.GetRequiredService<IEmailService>();
         IWebHostEnvironment hostEnvironment = webApplicationFactory.Services.GetRequiredService<IWebHostEnvironment>();
 
         MerrickContext databaseContext = webApplicationFactory.Services.GetRequiredService<MerrickContext>();
 
-        UserController userController = new (databaseContext, userLogger, emailService, configuration, hostEnvironment);
+        UserController userController = new(databaseContext, userLogger, emailService, configuration, hostEnvironment);
 
         IActionResult response = await userController.LogInUser(new LogInUserDTO(accountName, wrongPassword));
 
@@ -101,13 +116,15 @@ public sealed class UserAuthenticationTests
     [Arguments("jwt@kongor.net", "JWTUser", "MyP@ssw0rd!")]
     public async Task LogInUser_JWTContainsAllRequiredClaims(string emailAddress, string accountName, string password)
     {
-        await using WebApplicationFactory<ZORGATHAssemblyMarker> webApplicationFactory = ZORGATHServiceProvider.CreateOrchestratedInstance();
+        await using WebApplicationFactory<ZORGATHAssemblyMarker> webApplicationFactory =
+            ZORGATHServiceProvider.CreateOrchestratedInstance();
 
-        JWTAuthenticationService jwtAuthenticationService = new (webApplicationFactory);
+        JWTAuthenticationService jwtAuthenticationService = new(webApplicationFactory);
 
-        JWTAuthenticationData authenticationResult = await jwtAuthenticationService.CreateAuthenticatedUser(emailAddress, accountName, password);
+        JWTAuthenticationData authenticationResult =
+            await jwtAuthenticationService.CreateAuthenticatedUser(emailAddress, accountName, password);
 
-        JwtSecurityTokenHandler tokenHandler = new ();
+        JwtSecurityTokenHandler tokenHandler = new();
         JwtSecurityToken jwtToken = tokenHandler.ReadJwtToken(authenticationResult.AuthenticationToken);
 
         using (Assert.Multiple())
@@ -115,7 +132,8 @@ public sealed class UserAuthenticationTests
             await Assert.That(jwtToken.Claims.Any(claim => claim.Type.Equals(JwtRegisteredClaimNames.Sub))).IsTrue();
             await Assert.That(jwtToken.Claims.Any(claim => claim.Type.Equals(JwtRegisteredClaimNames.Email))).IsTrue();
             await Assert.That(jwtToken.Claims.Any(claim => claim.Type.Equals(JwtRegisteredClaimNames.Iat))).IsTrue();
-            await Assert.That(jwtToken.Claims.Any(claim => claim.Type.Equals(JwtRegisteredClaimNames.AuthTime))).IsTrue();
+            await Assert.That(jwtToken.Claims.Any(claim => claim.Type.Equals(JwtRegisteredClaimNames.AuthTime)))
+                .IsTrue();
             await Assert.That(jwtToken.Claims.Any(claim => claim.Type.Equals(JwtRegisteredClaimNames.Jti))).IsTrue();
             await Assert.That(jwtToken.Claims.Any(claim => claim.Type.Equals(JwtRegisteredClaimNames.Nonce))).IsTrue();
 
@@ -128,13 +146,16 @@ public sealed class UserAuthenticationTests
     [Test]
     [Arguments("fullflow@kongor.com", "FlowUser", "SecurePassword123!")]
     [Arguments("complete@kongor.net", "CompleteUser", "MyP@ssw0rd!")]
-    public async Task CompleteAuthenticationFlow_RegisterEmailThenUserThenLogin_Succeeds(string emailAddress, string accountName, string password)
+    public async Task CompleteAuthenticationFlow_RegisterEmailThenUserThenLogin_Succeeds(string emailAddress,
+        string accountName, string password)
     {
-        await using WebApplicationFactory<ZORGATHAssemblyMarker> webApplicationFactory = ZORGATHServiceProvider.CreateOrchestratedInstance();
+        await using WebApplicationFactory<ZORGATHAssemblyMarker> webApplicationFactory =
+            ZORGATHServiceProvider.CreateOrchestratedInstance();
 
-        JWTAuthenticationService jwtAuthenticationService = new (webApplicationFactory);
+        JWTAuthenticationService jwtAuthenticationService = new(webApplicationFactory);
 
-        JWTAuthenticationData result = await jwtAuthenticationService.CreateAuthenticatedUser(emailAddress, accountName, password);
+        JWTAuthenticationData result =
+            await jwtAuthenticationService.CreateAuthenticatedUser(emailAddress, accountName, password);
 
         using (Assert.Multiple())
         {
@@ -165,22 +186,26 @@ public sealed class UserAuthenticationTests
     [Test]
     [Arguments("caselogin@kongor.com", "CaseLoginUser", "CaseLoginUser", "SecurePassword123!")]
     [Arguments("UPPERCASELOGIN@kongor.net", "UPPERCASEUSER", "UPPERCASEUSER", "MyP@ssw0rd!")]
-    public async Task LogInUser_WithExactCaseAccountName_ReturnsOK(string emailAddress, string registeredAccountName, string loginAccountName, string password)
+    public async Task LogInUser_WithExactCaseAccountName_ReturnsOK(string emailAddress, string registeredAccountName,
+        string loginAccountName, string password)
     {
-        await using WebApplicationFactory<ZORGATHAssemblyMarker> webApplicationFactory = ZORGATHServiceProvider.CreateOrchestratedInstance();
+        await using WebApplicationFactory<ZORGATHAssemblyMarker> webApplicationFactory =
+            ZORGATHServiceProvider.CreateOrchestratedInstance();
 
-        JWTAuthenticationService jwtAuthenticationService = new (webApplicationFactory);
+        JWTAuthenticationService jwtAuthenticationService = new(webApplicationFactory);
 
         await jwtAuthenticationService.CreateAuthenticatedUser(emailAddress, registeredAccountName, password);
 
-        ILogger<UserController> userLogger = webApplicationFactory.Services.GetRequiredService<ILogger<UserController>>();
-        IOptions<OperationalConfiguration> configuration = webApplicationFactory.Services.GetRequiredService<IOptions<OperationalConfiguration>>();
+        ILogger<UserController> userLogger =
+            webApplicationFactory.Services.GetRequiredService<ILogger<UserController>>();
+        IOptions<OperationalConfiguration> configuration =
+            webApplicationFactory.Services.GetRequiredService<IOptions<OperationalConfiguration>>();
         IEmailService emailService = webApplicationFactory.Services.GetRequiredService<IEmailService>();
         IWebHostEnvironment hostEnvironment = webApplicationFactory.Services.GetRequiredService<IWebHostEnvironment>();
 
         MerrickContext databaseContext = webApplicationFactory.Services.GetRequiredService<MerrickContext>();
 
-        UserController userController = new (databaseContext, userLogger, emailService, configuration, hostEnvironment);
+        UserController userController = new(databaseContext, userLogger, emailService, configuration, hostEnvironment);
 
         IActionResult response = await userController.LogInUser(new LogInUserDTO(loginAccountName, password));
 
@@ -190,22 +215,26 @@ public sealed class UserAuthenticationTests
     [Test]
     [Arguments("caselogin@kongor.com", "CaseLoginUser", "caseloginuser", "SecurePassword123!")]
     [Arguments("UPPERCASELOGIN@kongor.net", "UPPERCASEUSER", "uppercaseuser", "MyP@ssw0rd!")]
-    public async Task LogInUser_WithDifferentCaseAccountName_ReturnsNotFound(string emailAddress, string registeredAccountName, string loginAccountName, string password)
+    public async Task LogInUser_WithDifferentCaseAccountName_ReturnsNotFound(string emailAddress,
+        string registeredAccountName, string loginAccountName, string password)
     {
-        await using WebApplicationFactory<ZORGATHAssemblyMarker> webApplicationFactory = ZORGATHServiceProvider.CreateOrchestratedInstance();
+        await using WebApplicationFactory<ZORGATHAssemblyMarker> webApplicationFactory =
+            ZORGATHServiceProvider.CreateOrchestratedInstance();
 
-        JWTAuthenticationService jwtAuthenticationService = new (webApplicationFactory);
+        JWTAuthenticationService jwtAuthenticationService = new(webApplicationFactory);
 
         await jwtAuthenticationService.CreateAuthenticatedUser(emailAddress, registeredAccountName, password);
 
-        ILogger<UserController> userLogger = webApplicationFactory.Services.GetRequiredService<ILogger<UserController>>();
-        IOptions<OperationalConfiguration> configuration = webApplicationFactory.Services.GetRequiredService<IOptions<OperationalConfiguration>>();
+        ILogger<UserController> userLogger =
+            webApplicationFactory.Services.GetRequiredService<ILogger<UserController>>();
+        IOptions<OperationalConfiguration> configuration =
+            webApplicationFactory.Services.GetRequiredService<IOptions<OperationalConfiguration>>();
         IEmailService emailService = webApplicationFactory.Services.GetRequiredService<IEmailService>();
         IWebHostEnvironment hostEnvironment = webApplicationFactory.Services.GetRequiredService<IWebHostEnvironment>();
 
         MerrickContext databaseContext = webApplicationFactory.Services.GetRequiredService<MerrickContext>();
 
-        UserController userController = new (databaseContext, userLogger, emailService, configuration, hostEnvironment);
+        UserController userController = new(databaseContext, userLogger, emailService, configuration, hostEnvironment);
 
         IActionResult response = await userController.LogInUser(new LogInUserDTO(loginAccountName, password));
 
@@ -217,13 +246,15 @@ public sealed class UserAuthenticationTests
     [Arguments("tokenlife@kongor.net", "TokenLifeUser", "MyP@ssw0rd!")]
     public async Task LogInUser_JWTHasValidExpirationClaim(string emailAddress, string accountName, string password)
     {
-        await using WebApplicationFactory<ZORGATHAssemblyMarker> webApplicationFactory = ZORGATHServiceProvider.CreateOrchestratedInstance();
+        await using WebApplicationFactory<ZORGATHAssemblyMarker> webApplicationFactory =
+            ZORGATHServiceProvider.CreateOrchestratedInstance();
 
-        JWTAuthenticationService jwtAuthenticationService = new (webApplicationFactory);
+        JWTAuthenticationService jwtAuthenticationService = new(webApplicationFactory);
 
-        JWTAuthenticationData authenticationResult = await jwtAuthenticationService.CreateAuthenticatedUser(emailAddress, accountName, password);
+        JWTAuthenticationData authenticationResult =
+            await jwtAuthenticationService.CreateAuthenticatedUser(emailAddress, accountName, password);
 
-        JwtSecurityTokenHandler tokenHandler = new ();
+        JwtSecurityTokenHandler tokenHandler = new();
         JwtSecurityToken jwtToken = tokenHandler.ReadJwtToken(authenticationResult.AuthenticationToken);
 
         using (Assert.Multiple())

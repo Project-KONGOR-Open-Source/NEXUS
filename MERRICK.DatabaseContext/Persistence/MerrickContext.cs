@@ -2,18 +2,21 @@
 
 public sealed class MerrickContext : DbContext
 {
-    public MerrickContext(DbContextOptions options) : base(options)
-    {
-        if (Database.IsInMemory().Equals(false))
-            Database.SetCommandTimeout(60); // 1 Minute - Helps Prevent Migrations From Timing Out When Many Records Need To Update
-    }
-
     public const string MetadataSchema = "meta";
     public const string DefaultSchema = "data";
     public const string CoreSchema = "core";
     public const string AuthenticationSchema = "auth";
     public const string StatisticsSchema = "stat";
     public const string MiscellaneousSchema = "misc";
+
+    public MerrickContext(DbContextOptions options) : base(options)
+    {
+        if (Database.IsInMemory().Equals(false))
+        {
+            Database.SetCommandTimeout(
+                60); // 1 Minute - Helps Prevent Migrations From Timing Out When Many Records Need To Update
+        }
+    }
 
     public DbSet<Account> Accounts => Set<Account>();
     public DbSet<Clan> Clans => Set<Clan>();
@@ -54,25 +57,19 @@ public sealed class MerrickContext : DbContext
     {
         builder.HasData
         (
-            new Role
-            {
-                ID = 1,
-                Name = UserRoles.Administrator
-            },
-
-            new Role
-            {
-                ID = 2,
-                Name = UserRoles.User
-            }
+            new Role { ID = 1, Name = UserRoles.Administrator },
+            new Role { ID = 2, Name = UserRoles.User }
         );
     }
 
     private static void ConfigureAccounts(EntityTypeBuilder<Account> builder)
     {
-        builder.OwnsMany(account => account.BannedPeers, ownedNavigationBuilder => { ownedNavigationBuilder.ToJson(); });
-        builder.OwnsMany(account => account.FriendedPeers, ownedNavigationBuilder => { ownedNavigationBuilder.ToJson(); });
-        builder.OwnsMany(account => account.IgnoredPeers, ownedNavigationBuilder => { ownedNavigationBuilder.ToJson(); });
+        builder.OwnsMany(account => account.BannedPeers,
+            ownedNavigationBuilder => { ownedNavigationBuilder.ToJson(); });
+        builder.OwnsMany(account => account.FriendedPeers,
+            ownedNavigationBuilder => { ownedNavigationBuilder.ToJson(); });
+        builder.OwnsMany(account => account.IgnoredPeers,
+            ownedNavigationBuilder => { ownedNavigationBuilder.ToJson(); });
     }
 
     private static void ConfigurePlayerStatistics(EntityTypeBuilder<PlayerStatistics> builder)
@@ -81,16 +78,22 @@ public sealed class MerrickContext : DbContext
         (
             value => JsonSerializer.Serialize(value, new JsonSerializerOptions()),
             value => JsonSerializer.Deserialize<List<string>>(value, new JsonSerializerOptions()) ?? new List<string>(),
-            new ValueComparer<List<string>>((first, second) => (first ?? new List<string>()).SequenceEqual(second ?? new List<string>()),
-                collection => collection.Aggregate(0, (accumulatedHashCode, value) => HashCode.Combine(accumulatedHashCode, value.GetHashCode())), collection => collection.ToList())
+            new ValueComparer<List<string>>(
+                (first, second) => (first ?? new List<string>()).SequenceEqual(second ?? new List<string>()),
+                collection => collection.Aggregate(0,
+                    (accumulatedHashCode, value) => HashCode.Combine(accumulatedHashCode, value.GetHashCode())),
+                collection => collection.ToList())
         );
 
-        builder.OwnsMany(statistics => statistics.ItemHistory, ownedNavigationBuilder => ownedNavigationBuilder.ToJson());
-        builder.OwnsMany(statistics => statistics.AbilityHistory, ownedNavigationBuilder => ownedNavigationBuilder.ToJson());
+        builder.OwnsMany(statistics => statistics.ItemHistory,
+            ownedNavigationBuilder => ownedNavigationBuilder.ToJson());
+        builder.OwnsMany(statistics => statistics.AbilityHistory,
+            ownedNavigationBuilder => ownedNavigationBuilder.ToJson());
     }
 
     private static void ConfigureMatchStatistics(EntityTypeBuilder<MatchStatistics> builder)
     {
-        builder.OwnsMany(statistics => statistics.FragHistory, ownedNavigationBuilder => ownedNavigationBuilder.ToJson());
+        builder.OwnsMany(statistics => statistics.FragHistory,
+            ownedNavigationBuilder => ownedNavigationBuilder.ToJson());
     }
 }

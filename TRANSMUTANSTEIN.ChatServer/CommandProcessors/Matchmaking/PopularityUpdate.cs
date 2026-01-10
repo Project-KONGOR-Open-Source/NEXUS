@@ -1,3 +1,4 @@
+using KONGOR.MasterServer.Configuration;
 using KONGOR.MasterServer.Configuration.Matchmaking;
 
 namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Matchmaking;
@@ -7,7 +8,7 @@ public class PopularityUpdate : ISynchronousCommandProcessor<ChatSession>
 {
     public void Process(ChatSession session, ChatBuffer buffer)
     {
-        PopularityUpdateRequestData requestData = new (buffer);
+        PopularityUpdateRequestData requestData = new(buffer);
 
         SendMatchmakingPopularity(session);
     }
@@ -16,7 +17,7 @@ public class PopularityUpdate : ISynchronousCommandProcessor<ChatSession>
     {
         // Legacy Logic Hardcoded for Stability
         // Dynamic Logic via Configuration
-        MatchmakingConfiguration config = KONGOR.MasterServer.Configuration.JSONConfiguration.MatchmakingConfiguration;
+        MatchmakingConfiguration config = JSONConfiguration.MatchmakingConfiguration;
 
         HashSet<string> maps = [];
         HashSet<string> types = ["1", "5", "6"]; // Default: Normal(1), Custom(5), Campaign(6)
@@ -27,8 +28,15 @@ public class PopularityUpdate : ISynchronousCommandProcessor<ChatSession>
         if (config.Ranked is not null)
         {
             maps.Add(config.Ranked.Map);
-            foreach (string m in config.Ranked.Modes) modes.Add(m);
-            foreach (string r in config.Ranked.Regions) regions.Add(r);
+            foreach (string m in config.Ranked.Modes)
+            {
+                modes.Add(m);
+            }
+
+            foreach (string r in config.Ranked.Regions)
+            {
+                regions.Add(r);
+            }
         }
 
         // Unranked (Casual - Type 2)
@@ -37,8 +45,15 @@ public class PopularityUpdate : ISynchronousCommandProcessor<ChatSession>
             maps.Add(config.Unranked.Map);
             // TODO: Fix UI Duplication Glitch for Casual Mode
             // types.Add("2"); 
-            foreach (string m in config.Unranked.Modes) modes.Add(m);
-            foreach (string r in config.Unranked.Regions) regions.Add(r);
+            foreach (string m in config.Unranked.Modes)
+            {
+                modes.Add(m);
+            }
+
+            foreach (string r in config.Unranked.Regions)
+            {
+                regions.Add(r);
+            }
         }
 
         // MidWars (Type 3)
@@ -46,8 +61,15 @@ public class PopularityUpdate : ISynchronousCommandProcessor<ChatSession>
         {
             maps.Add(config.MidWars.Map);
             types.Add("3");
-            foreach (string m in config.MidWars.Modes) modes.Add(m);
-            foreach (string r in config.MidWars.Regions) regions.Add(r);
+            foreach (string m in config.MidWars.Modes)
+            {
+                modes.Add(m);
+            }
+
+            foreach (string r in config.MidWars.Regions)
+            {
+                regions.Add(r);
+            }
         }
 
         // RiftWars (Type 4)
@@ -55,8 +77,15 @@ public class PopularityUpdate : ISynchronousCommandProcessor<ChatSession>
         {
             maps.Add(config.RiftWars.Map);
             types.Add("4");
-            foreach (string m in config.RiftWars.Modes) modes.Add(m);
-            foreach (string r in config.RiftWars.Regions) regions.Add(r);
+            foreach (string m in config.RiftWars.Modes)
+            {
+                modes.Add(m);
+            }
+
+            foreach (string r in config.RiftWars.Regions)
+            {
+                regions.Add(r);
+            }
         }
 
         List<string> enabledMaps = maps.ToList();
@@ -76,19 +105,19 @@ public class PopularityUpdate : ISynchronousCommandProcessor<ChatSession>
         string disabledGameModesByMap = "";
         string restrictedRegions = "";
         string clientCountryCode = "";
-        
+
         // Legacy Legend String
         string legend = "maps:modes:|regions:";
-        
-        ChatBuffer response = new ();
+
+        ChatBuffer response = new();
 
         response.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_POPULARITY_UPDATE);
 
-        response.WriteInt8(1);                                  // TMM Availability
-        response.WriteString(availableMaps);                    // Maps
-        response.WriteString(gameTypes);                        // Types
-        response.WriteString(gameModes);                        // Modes
-        response.WriteString(availableRegions);                 // Regions
+        response.WriteInt8(1); // TMM Availability
+        response.WriteString(availableMaps); // Maps
+        response.WriteString(gameTypes); // Types
+        response.WriteString(gameModes); // Modes
+        response.WriteString(availableRegions); // Regions
         response.WriteString(disabledGameModesByGameType);
         response.WriteString(disabledGameModesByRankType);
         response.WriteString(disabledGameModesByMap);
@@ -97,16 +126,28 @@ public class PopularityUpdate : ISynchronousCommandProcessor<ChatSession>
         response.WriteString(legend);
 
         // Popularity By Game Map (Count = Maps)
-        foreach (string _ in enabledMaps) response.WriteInt8(10);
+        foreach (string _ in enabledMaps)
+        {
+            response.WriteInt8(10);
+        }
 
         // Popularity By Game Type (Count = Types * Maps) - CRITICAL: Legacy logic creates array of size Types * Maps
-        for (int i = 0; i < enabledGameTypes.Count * enabledMaps.Count; i++) response.WriteInt8(10);
+        for (int i = 0; i < enabledGameTypes.Count * enabledMaps.Count; i++)
+        {
+            response.WriteInt8(10);
+        }
 
         // Popularity By Game Mode (Count = Modes)
-        foreach (string _ in enabledGameModes) response.WriteInt8(10);
+        foreach (string _ in enabledGameModes)
+        {
+            response.WriteInt8(10);
+        }
 
         // Popularity By Region (Count = Regions)
-        foreach (string _ in enabledRegions) response.WriteInt8(10);
+        foreach (string _ in enabledRegions)
+        {
+            response.WriteInt8(10);
+        }
 
         // Custom Map Rotation Time
         response.WriteInt32(0);
@@ -117,11 +158,10 @@ public class PopularityUpdate : ISynchronousCommandProcessor<ChatSession>
 
 file class PopularityUpdateRequestData
 {
-    public byte[] CommandBytes { get; init; }
-
     public PopularityUpdateRequestData(ChatBuffer buffer)
     {
         CommandBytes = buffer.ReadCommandBytes();
     }
-}
 
+    public byte[] CommandBytes { get; init; }
+}

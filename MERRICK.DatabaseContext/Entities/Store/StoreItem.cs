@@ -1,20 +1,13 @@
-using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-
 namespace MERRICK.DatabaseContext.Entities.Store;
 
 [Table("StoreItems")]
 public class StoreItem
 {
-    [Key]
-    public int Id { get; set; }
+    [Key] public int Id { get; set; }
 
-    [MaxLength(255)]
-    public required string Name { get; set; }
+    [MaxLength(255)] public required string Name { get; set; }
 
-    [MaxLength(255)]
-    [Required]
-    public required string Code { get; set; }
+    [MaxLength(255)] [Required] public required string Code { get; set; }
 
     public int UpgradeId { get; set; }
 

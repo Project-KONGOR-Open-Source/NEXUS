@@ -15,14 +15,17 @@ public partial class ChatSession
         // Remove The Match Server Chat Session
         if (Context.MatchServerChatSessions.TryRemove(ServerMetadata.ServerID, out ChatSession? existingSession))
         {
-            Log.Information(@"Match Server ID ""{ServerID}"" Was Removed From The Match Server Pool", ServerMetadata.ServerID);
+            Log.Information(@"Match Server ID ""{ServerID}"" Was Removed From The Match Server Pool",
+                ServerMetadata.ServerID);
 
             if (existingSession is null)
             {
-                Log.Warning(@"Match Server ID ""{ServerID}"" Had A Null Session In The Match Server Pool", ServerMetadata.ServerID);
+                Log.Warning(@"Match Server ID ""{ServerID}"" Had A Null Session In The Match Server Pool",
+                    ServerMetadata.ServerID);
 
                 // Disconnect And Dispose The Chat Session
-                Disconnect(); Dispose();
+                Disconnect();
+                Dispose();
 
                 return;
             }
@@ -32,12 +35,13 @@ public partial class ChatSession
                 Log.Warning(@"Match Server ID ""{ServerID}"" Had A Mismatched Session Cookie", ServerMetadata.ServerID);
 
                 // Disconnect And Dispose The Chat Session
-                Disconnect(); Dispose();
+                Disconnect();
+                Dispose();
 
                 return;
             }
 
-            ChatBuffer acknowledgementResponse = new ();
+            ChatBuffer acknowledgementResponse = new();
 
             acknowledgementResponse.WriteCommand(ChatProtocol.ChatServerToGameServer.NET_CHAT_GS_REMOTE_COMMAND);
             acknowledgementResponse.WriteString(ServerMetadata.SessionCookie);
@@ -49,11 +53,14 @@ public partial class ChatSession
 
         else
         {
-            Log.Warning(@"Match Server ID ""{ServerID}"" Attempted To Disconnect But Was Not Found In The Match Server Pool", ServerMetadata.ServerID);
+            Log.Warning(
+                @"Match Server ID ""{ServerID}"" Attempted To Disconnect But Was Not Found In The Match Server Pool",
+                ServerMetadata.ServerID);
         }
 
         // Disconnect And Dispose The Chat Session
-        Disconnect(); Dispose();
+        Disconnect();
+        Dispose();
 
         Log.Information(@"Match Server ID ""{ServerID}"" Has Disconnected Gracefully", ServerMetadata.ServerID);
     }

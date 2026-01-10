@@ -5,7 +5,7 @@ public class GroupCreate : ISynchronousCommandProcessor<ChatSession>
 {
     public void Process(ChatSession session, ChatBuffer buffer)
     {
-        GroupCreateRequestData requestData = new (buffer);
+        GroupCreateRequestData requestData = new(buffer);
 
         MatchmakingGroup
             .Create(session, requestData.ToGroupInformation());
@@ -14,42 +14,6 @@ public class GroupCreate : ISynchronousCommandProcessor<ChatSession>
 
 file class GroupCreateRequestData
 {
-    public byte[] CommandBytes { get; init; }
-
-    public string ClientVersion { get; init; }
-
-    public ChatProtocol.TMMType GroupType { get; init; }
-
-    public ChatProtocol.TMMGameType GameType { get; init; }
-
-    public string MapName { get; init; }
-
-    public string[] GameModes { get; init; }
-
-    public string[] GameRegions { get; init; }
-
-    public bool Ranked { get; init; }
-
-    /// <summary>
-    ///     0: Skill Disparity Will Be Higher But The Matchmaking Queue Time Will Be Shorter
-    ///     <br/>
-    ///     1: Skill Disparity Will Be Lower But The Matchmaking Queue Time Will Be Longer
-    /// </summary>
-    public byte MatchFidelity { get; init; }
-
-    /// <summary>
-    ///     1: Easy, 2: Medium, 3: Hard
-    /// </summary>
-    /// <remarks>
-    ///     Only Used For Bot Matches, But Sent With Every Request To Create A Group
-    /// </remarks>
-    public byte BotDifficulty { get; init; }
-
-    /// <remarks>
-    ///     Only Used For Bot Matches, But Sent With Every Request To Create A Group
-    /// </remarks>
-    public bool RandomizeBots { get; init; }
-
     public GroupCreateRequestData(ChatBuffer buffer)
     {
         CommandBytes = buffer.ReadCommandBytes();
@@ -65,11 +29,46 @@ file class GroupCreateRequestData
         RandomizeBots = buffer.ReadBool();
     }
 
+    public byte[] CommandBytes { get; init; }
+
+    public string ClientVersion { get; }
+
+    public ChatProtocol.TMMType GroupType { get; }
+
+    public ChatProtocol.TMMGameType GameType { get; }
+
+    public string MapName { get; }
+
+    public string[] GameModes { get; }
+
+    public string[] GameRegions { get; }
+
+    public bool Ranked { get; }
+
+    /// <summary>
+    ///     0: Skill Disparity Will Be Higher But The Matchmaking Queue Time Will Be Shorter
+    ///     <br />
+    ///     1: Skill Disparity Will Be Lower But The Matchmaking Queue Time Will Be Longer
+    /// </summary>
+    public byte MatchFidelity { get; }
+
+    /// <summary>
+    ///     1: Easy, 2: Medium, 3: Hard
+    /// </summary>
+    /// <remarks>
+    ///     Only Used For Bot Matches, But Sent With Every Request To Create A Group
+    /// </remarks>
+    public byte BotDifficulty { get; }
+
+    /// <remarks>
+    ///     Only Used For Bot Matches, But Sent With Every Request To Create A Group
+    /// </remarks>
+    public bool RandomizeBots { get; }
+
     public MatchmakingGroupInformation ToGroupInformation()
     {
-        return new MatchmakingGroupInformation()
+        return new MatchmakingGroupInformation
         {
-
             ClientVersion = ClientVersion,
             GroupType = GroupType,
             GameType = GameType,
@@ -83,4 +82,3 @@ file class GroupCreateRequestData
         };
     }
 }
-

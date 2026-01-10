@@ -5,4 +5,6 @@ namespace KONGOR.MasterServer.Internals;
 ///     It acts as the type parameter for WebApplicationFactory, in order to point it to this compilation unit.
 ///     Any type in this project would also work, however using this pattern is the preferred practice.
 /// </summary>
-public interface KONGORAssemblyMarker { }
+public interface KONGORAssemblyMarker
+{
+}
