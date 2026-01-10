@@ -1,7 +1,4 @@
-using StackExchange.Redis;
 using TRANSMUTANSTEIN.ChatServer.Domain.Clans;
-using TRANSMUTANSTEIN.ChatServer.Domain.Core;
-using TRANSMUTANSTEIN.ChatServer.Domain.Matchmaking;
 
 namespace TRANSMUTANSTEIN.ChatServer.Infrastructure.Services
 {
@@ -107,61 +104,69 @@ namespace TRANSMUTANSTEIN.ChatServer.Infrastructure.Services
                 _logger.LogInformation("[ClanUpdateSubscriber] Target {TargetID} is OFFLINE (No active session found).", targetId);
             }
 
-            // 2. Broadcast to Clan Channel (Always, unless disbanded?)
-            // We need to look up the channel.
+            // Setup Status Update Packet (if needed)
+            ChatBuffer? statusUpdate = null;
+            if (newRank == ClanTier.None && targetSession != null && targetSession.Account != null)
+            {
+                 statusUpdate = new ChatBuffer();
+                 statusUpdate.WriteCommand(ChatProtocol.Command.CHAT_CMD_UPDATE_STATUS);
+                 statusUpdate.WriteInt32(targetSession.Account.ID);
+                 statusUpdate.WriteInt8(Convert.ToByte(targetSession.ClientMetadata.LastKnownClientState));
+                 statusUpdate.WriteInt8(targetSession.Account.GetChatClientFlags());
+                 statusUpdate.WriteInt32(0); // ClanID 0
+                 statusUpdate.WriteString(""); // ClanName Empty
+                 statusUpdate.WriteString(targetSession.Account.ChatSymbolNoPrefixCode);
+                 statusUpdate.WriteString(targetSession.Account.NameColourNoPrefixCode);
+                 statusUpdate.WriteString(targetSession.Account.IconNoPrefixCode);
+                 
+                 if (targetSession.ClientMetadata.LastKnownClientState is ChatProtocol.ChatClientStatus.CHAT_CLIENT_STATUS_IN_GAME or ChatProtocol.ChatClientStatus.CHAT_CLIENT_STATUS_JOINING_GAME)
+                 {
+                      statusUpdate.WriteString(targetSession.ClientMetadata.MatchServerAddress ?? "0.0.0.0:0");
+                      if (targetSession.ClientMetadata.LastKnownClientState is ChatProtocol.ChatClientStatus.CHAT_CLIENT_STATUS_IN_GAME)
+                      {
+                           statusUpdate.WriteString(""); // Match Name
+                           statusUpdate.WriteInt32(targetSession.ClientMetadata.MatchID ?? 0);
+                           statusUpdate.WriteBool(false);
+                      }
+                 }
+                 
+                 statusUpdate.WriteInt32(targetSession.Account.AscensionLevel);
+            }
+
+            // 2. Broadcast to ALL Channels the user is in (to update Tags visually)
+            // DISABLED FOR DEBUGGING: Checking if 0x000C packet causes Client Freeze.
+            /*
+            if (statusUpdate != null && targetSession != null && targetSession.Account != null)
+            {
+                 List<ChatChannel> userChannels = Context.ChatChannels.Values
+                     .Where(c => c.Members.ContainsKey(targetSession.Account.Name))
+                     .ToList();
+
+                 foreach (ChatChannel channel in userChannels)
+                 {
+                      _logger.LogInformation("[ClanUpdateSubscriber] Broadcasting Tag Update (Status) to Channel '{ChannelName}'.", channel.Name);
+                      channel.BroadcastMessage(statusUpdate);
+                 }
+            }
+            */
+
+            // 3. Specifically handle the Clan Channel (Legacy logic + Kick notification)
+            // Even if the user was just removed from it locally (and thus not in userChannels above),
+            // we might still need to send the 'RankChange' (Kick) notification to the remaining members.
             ChatChannel? clanChannel = Context.ChatChannels.Values.FirstOrDefault(c => c.Name == $"Clan {clanName}");
             if (clanChannel != null)
             {
-                 // Check if Target is ALREADY updated in the DB? Yes, MasterServer did it.
-                 // We just need to notify clients.
-                 
                  ClanRankChangeResponse response = new(targetId, newRank, requesterId);
-                 _logger.LogInformation("[ClanUpdateSubscriber] Broadcasting RankChangeResponse to Channel '{ChannelName}' with {Count} members.", clanChannel.Name, clanChannel.Members.Count);
+                 _logger.LogInformation("[ClanUpdateSubscriber] Broadcasting RankChangeResponse to Clan Channel '{ChannelName}'.", clanChannel.Name);
                  
-                 // If target was removed, we also need to force a Status Update to all members so the clan tag disappears visually.
-                 ChatBuffer? statusUpdate = null;
-                 if (newRank == ClanTier.None && targetSession != null && targetSession.Account != null)
-                 {
-                      statusUpdate = new ChatBuffer();
-                      statusUpdate.WriteCommand(ChatProtocol.Command.CHAT_CMD_UPDATE_STATUS);
-                      statusUpdate.WriteInt32(targetSession.Account.ID);
-                      statusUpdate.WriteInt8(Convert.ToByte(targetSession.ClientMetadata.LastKnownClientState));
-                      statusUpdate.WriteInt8(targetSession.Account.GetChatClientFlags());
-                      statusUpdate.WriteInt32(0); // ClanID 0
-                      statusUpdate.WriteString(""); // ClanName Empty
-                      statusUpdate.WriteString(targetSession.Account.ChatSymbolNoPrefixCode);
-                      statusUpdate.WriteString(targetSession.Account.NameColourNoPrefixCode);
-                      statusUpdate.WriteString(targetSession.Account.IconNoPrefixCode);
-                      // Match Info (Simplified fallback) - If in game, this might be missing IP/Port logic
-                      // But for "Tag Removal" just sending 0.0.0.0:0 is usually fine or we copy logic.
-                      // Let's use 0.0.0.0:0 for safety unless we want to copy full logic.
-                      // Safe minimal implementation:
-                      if (targetSession.ClientMetadata.LastKnownClientState is ChatProtocol.ChatClientStatus.CHAT_CLIENT_STATUS_IN_GAME or ChatProtocol.ChatClientStatus.CHAT_CLIENT_STATUS_JOINING_GAME)
-                      {
-                           statusUpdate.WriteString(targetSession.ClientMetadata.MatchServerAddress ?? "0.0.0.0:0");
-                           if (targetSession.ClientMetadata.LastKnownClientState is ChatProtocol.ChatClientStatus.CHAT_CLIENT_STATUS_IN_GAME)
-                           {
-                                statusUpdate.WriteString(""); // Match Name
-                                statusUpdate.WriteInt32(targetSession.ClientMetadata.MatchID ?? 0);
-                                statusUpdate.WriteBool(false);
-                           }
-                      }
-                      
-                      statusUpdate.WriteInt32(targetSession.Account.AscensionLevel);
-                 }
-
                  foreach (ChatChannelMember member in clanChannel.Members.Values)
                  {
                      member.Session.Send(response);
-                     if (statusUpdate != null)
-                     {
-                         member.Session.Send(statusUpdate);
-                     }
                  }
             }
             else
             {
-                 _logger.LogWarning("[ClanUpdateSubscriber] Channel 'Clan {ClanName}' not active (null). No broadcast sent to clanmates.", clanName);
+                 // Allowed: Channel might be empty/closed
             }
         }
 

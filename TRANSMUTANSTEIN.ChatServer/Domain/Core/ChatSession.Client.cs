@@ -132,11 +132,13 @@ public partial class ChatSession
 
     public void Cleanup()
     {
-        if (Account is not null)
+        Account? account = Account; // Cache Account to local variable
+
+        if (account is not null)
         {
             // Get All Chat Channels The Client Is A Member Of
             List<ChatChannel> channels =
-                [.. Context.ChatChannels.Values.Where(channel => channel.Members.ContainsKey(Account.Name))];
+                [.. Context.ChatChannels.Values.Where(channel => channel.Members.ContainsKey(account.Name))];
 
             // Remove The Client From All Chat Channels They Are A Member Of
             foreach (ChatChannel channel in channels)
@@ -145,16 +147,16 @@ public partial class ChatSession
             }
 
             // Remove From Matchmaking Group If In One
-            MatchmakingService.GetMatchmakingGroup(Account.ID)?.RemoveMember(Account.ID);
+            MatchmakingService.GetMatchmakingGroup(account.ID)?.RemoveMember(account.ID);
 
             // Log The Client Out And Disconnect The Chat Session
             LogOut();
 
             // Remove The Chat Session From The Chat Sessions Collection
-            if (Context.ClientChatSessions.TryRemove(Account.Name, out ChatSession? _) is false)
+            if (Context.ClientChatSessions.TryRemove(account.Name, out ChatSession? _) is false)
             {
                 Log.Error(@"Failed To Remove Chat Session For Account Name ""{ClientInformation.Account.Name}""",
-                    Account.Name);
+                    account.Name);
             }
 
             // Prevent Double-Cleanup
@@ -193,9 +195,9 @@ public partial class ChatSession
         // Get All Clan Member IDs (Excluding Self) - Mutual Relationship
         HashSet<int> clanMemberIDs =
         [
-            .. Account.Clan?.Members
-                .Where(clanMember => clanMember.ID != Account.ID)
-                .Select(clanMember => clanMember.ID) ?? []
+            .. (Account.Clan?.Members ?? [])
+                .Where(clanMember => clanMember != null && clanMember.ID != Account.ID)
+                .Select(clanMember => clanMember.ID)
         ];
 
         // Find Sessions That Should Be Notified
