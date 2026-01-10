@@ -32,6 +32,15 @@
 > 👁️ **ADMIN MODE:** If you use this code, you grant the author access to inspect your deployment/infrastructure.
 >
 
+> [!NOTE]
+> **LEGAL NOTICE:**
+>
+> **Educational & Preservation Purpose:**
+> Any and all Project KONGOR and Project KONGOR Open-Source work is intended solely for **non-commercial, educational, and research purposes**.
+> This work is protected under:
+> *   **United States:** The Fair Use Act (Section 107 of the Copyright Act of 1976) and the DMCA Video Game Preservation Exemption granted by the Librarian of Congress.
+> *   **United Kingdom:** The Fair Dealing Act (Sections 29 & 30 of the Copyright, Designs, And Patents Act of 1988) and Consumer Rights laws regarding continued access to purchased digital goods.
+
 <p align="center">Project KONGOR always was and forever will be completely free.</p>
 
 <hr/>
@@ -96,7 +105,7 @@ aspire exec --resource database-context -- dotnet ef database update
 ```
 
 > [!TIP]
-> Always manually save/update via command line for better loot drops (debugging info).
+> Always manually save/update via command line for better debugging info.
 
 <br/>
 
@@ -145,7 +154,7 @@ net start winnat
     <b>This project is a labor of love.</b> ❤️<br><br>
     We built this purely to keep the game alive for the dedicated community who have poured thousands of hours into the lanes of Newerth.<br>
     We hope the players can continue to enjoy the game they love, today and forever.<br><br>
-    <i>"Legends never die. Kongor Lives."</i>
+    <i>"Legends never die. Kongor lives."</i>
 </p>
 
 <hr/>
