@@ -201,10 +201,29 @@ public sealed class MatchHistoryIconTests
             response.EnsureSuccessStatusCode();
             string body = await response.Content.ReadAsStringAsync();
             
-            // Contains 12 (Base ID for Jereziah)
-            await Assert.That(body).Contains(",12,"); 
-            // Contains Hero_Jereziah (Identifier) at end of string
-            await Assert.That(body).Contains("Hero_Jereziah");
+            // Assert via Regex for rigid structure validation
+            // Expected CSV in serialized array: "10001,1,1,5,0,10,12,1800,caldavar,..."
+            // We want to verify that Column 7 is "12" and Column 11 matches "Hero_Jereziah"
+            
+            // Matches: Any key (s:2:"m0";) followed by value string containing the CSV
+            // Group 1: CSV Content
+            Regex matchHistoryRegex = new Regex(@"s:\d+:""([^""]*10001[^""]*)""");
+            Match match = matchHistoryRegex.Match(body);
+            
+            await Assert.That(match.Success).IsTrue();
+            
+            string csvContent = match.Groups[1].Value;
+            string[] columns = csvContent.Split(',');
+            
+            // Column 1 (Index 0) = MatchID (10001)
+            await Assert.That(columns[0]).IsEqualTo("10001");
+            
+            // Column 7 (Index 6) = BaseHeroID (12)
+            await Assert.That(columns[6]).IsEqualTo("12");
+            
+            // Column 11 (Index 10) = HeroIdentifier (Hero_Jereziah)
+            // Note: Use Contains for the last column as it might have trailing data or be the last item
+            await Assert.That(columns[10]).Contains("Hero_Jereziah");
         }
     }
 
@@ -281,7 +300,7 @@ public sealed class MatchHistoryIconTests
                 HeroDeaths = 0,
                 HeroAssists = 5,
                 // Required members population
-                Inventory = new List<string> { "Item_Loggers", "Item_DuckBoots" },
+                Inventory = ["Item_Loggers", "Item_DuckBoots"],
                 ClanID = 0,
                 ClanTag = "",
                 LobbyPosition = 1,
@@ -375,8 +394,15 @@ public sealed class MatchHistoryIconTests
             response.EnsureSuccessStatusCode();
             string body = await response.Content.ReadAsStringAsync();
             
-            await Assert.That(body).Contains("Hero_Panda");
-            await Assert.That(body).DoesNotContain("Hero_Pandamonium");
+            // Structural Assertion for Match Mastery / Hero Identifier
+            // Look for the "cli_name" key (mapped from HeroIdentifier) and verify the value is exactly "Hero_Panda"
+            // Regex: "cli_name";s:\d+:"(Hero_Panda)"
+            
+            Regex heroIdentifierRegex = new Regex(@"""cli_name"";\s*s:\d+:""([^""]+)""");
+            Match match = heroIdentifierRegex.Match(body);
+            
+            await Assert.That(match.Success).IsTrue();
+            await Assert.That(match.Groups[1].Value).IsEqualTo("Hero_Panda");
         }
     }
 }

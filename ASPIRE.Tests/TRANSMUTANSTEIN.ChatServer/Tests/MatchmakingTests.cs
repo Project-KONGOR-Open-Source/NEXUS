@@ -11,7 +11,7 @@ namespace ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer.Tests;
 
 public class MatchmakingTests
 {
-    private const int TestPort = 54123;
+    // private const int TestPort = 54123;
 
     [Test]
     public async Task PopularityUpdate_ReturnsConfiguredModes()
@@ -58,13 +58,14 @@ public class MatchmakingTests
         JSONConfiguration.MatchmakingConfiguration = mockConfig;
 
         // 2. Start Application (Orchestrated Pattern preferred as per ChatChannelTests)
+        const int testPort = 0;
         await using TRANSMUTANSTEINServiceProvider app =
-            await TRANSMUTANSTEINServiceProvider.CreateOrchestratedInstanceAsync(TestPort);
+            await TRANSMUTANSTEINServiceProvider.CreateOrchestratedInstanceAsync(testPort);
 
         // 3. Connect Client
         // Note: Using ChatTestHelpers pattern from ChatChannelTests
         using TcpClient client =
-            await ChatTestHelpers.ConnectAndAuthenticateAsync(app, TestPort, 9999, "MatchmakingTester");
+            await ChatTestHelpers.ConnectAndAuthenticateAsync(app, app.ClientPort, 9999, "MatchmakingTester");
         NetworkStream stream = client.GetStream();
 
         // 4. Send Popularity Update Request
@@ -100,11 +101,11 @@ public class MatchmakingTests
             {
                 ChatBuffer reader = new(payload);
 
-                byte availability = reader.ReadInt8(); // 1
+                reader.ReadInt8();
                 string maps = reader.ReadString();
                 string types = reader.ReadString();
                 string modes = reader.ReadString();
-                string regions = reader.ReadString();
+                reader.ReadString();
 
                 // Assertions (TUnit Syntax)
                 await Assert.That(maps).Contains("riftwars_test");

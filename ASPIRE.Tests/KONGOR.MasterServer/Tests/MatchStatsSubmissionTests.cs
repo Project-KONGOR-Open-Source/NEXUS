@@ -106,11 +106,14 @@ public sealed partial class MatchStatsSubmissionTests
         Console.WriteLine($"[TEST] Response Status: {response.StatusCode}");
         Console.WriteLine($"[TEST] Response Body: {responseBody}");
 
-        // await Assert.That(response.IsSuccessStatusCode).IsTrue();
-        if (!response.IsSuccessStatusCode)
-        {
-            Assert.Fail($"Request failed with {response.StatusCode}. Body: {responseBody}");
-        }
+        // Verify the response body indicates success
+        // The detailed response is a PHP serialized array with "OK" for each section
+        // Example: a:5:{s:8:"match_id";i:705750;s:10:"match_info";s:2:"OK";...}
+        
+        await Assert.That(responseBody).Contains(@"""match_info"";s:2:""OK""");
+        await Assert.That(responseBody).Contains(@"""match_summ"";s:2:""OK""");
+        await Assert.That(responseBody).Contains(@"""match_stats"";s:2:""OK""");
+        await Assert.That(responseBody).Contains(@"""match_history"";s:2:""OK""");
 
         MatchStatistics? savedStats = await dbContext.MatchStatistics
             .FirstOrDefaultAsync(m => m.MatchID == matchId);
@@ -367,10 +370,11 @@ public sealed partial class MatchStatsSubmissionTests
 
         // 6. Verify
         string responseBody = await response.Content.ReadAsStringAsync();
-        if (!response.IsSuccessStatusCode)
-        {
-            Assert.Fail($"Request failed with {response.StatusCode}. Body: {responseBody}");
-        }
+        // MatchStatsSubmissionTests seems to return the detailed status array for user submission too
+        await Assert.That(responseBody).Contains(@"""match_info"";s:2:""OK""");
+        await Assert.That(responseBody).Contains(@"""match_summ"";s:2:""OK""");
+        await Assert.That(responseBody).Contains(@"""match_stats"";s:2:""OK""");
+        await Assert.That(responseBody).Contains(@"""match_history"";s:2:""OK""");
 
         MatchStatistics? savedStats = await dbContext.MatchStatistics
             .FirstOrDefaultAsync(m => m.MatchID == matchId);

@@ -27,7 +27,7 @@ public sealed class ChatProtocolTests
         // Seed Database and Cache for Authentication
         // Seed Database and Cache for Authentication
         // Seed Database and Cache for Authentication
-        await ChatTestHelpers._seedLock.WaitAsync();
+        await ChatTestHelpers.SeedLock.WaitAsync();
         try
         {
             using (IServiceScope scope = app.Services.CreateScope())
@@ -96,7 +96,7 @@ public sealed class ChatProtocolTests
         }
         finally
         {
-            ChatTestHelpers._seedLock.Release();
+            ChatTestHelpers.SeedLock.Release();
         }
 
         string ip = "127.0.0.1";

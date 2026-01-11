@@ -8,10 +8,10 @@ namespace TRANSMUTANSTEIN.ChatServer.Domain.Core;
 /// </summary>
 public class ChatServer
 {
-    private ClientChatServer ClientServer { get; }
-    private MatchServerChatServer MatchServer { get; }
+    public ClientChatServer ClientServer { get; }
+    public MatchServerChatServer MatchServer { get; }
 
-    private MatchServerManagerChatServer MatchServerManagerServer { get; }
+    public MatchServerManagerChatServer MatchServerManagerServer { get; }
 
     public ChatServer(
         IServiceProvider serviceProvider,

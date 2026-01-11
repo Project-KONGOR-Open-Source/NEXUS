@@ -48,5 +48,8 @@ public sealed class QuestVerifiedPayloadTests
 
         HttpResponseMessage response = await client.PostAsync("master/questserver/getplayerquests/", content);
         response.EnsureSuccessStatusCode();
+
+        string responseBody = await response.Content.ReadAsStringAsync();
+        await Assert.That(responseBody).Contains("quests");
     }
 }

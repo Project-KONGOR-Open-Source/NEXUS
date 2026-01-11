@@ -23,6 +23,9 @@ public sealed class MiscVerifiedPayloadTests
         {
             HttpResponseMessage response = await client.GetAsync("swagger/v1/swagger.json");
             response.EnsureSuccessStatusCode();
+
+            string responseBody = await response.Content.ReadAsStringAsync();
+            await Assert.That(responseBody).Contains("openapi");
         }
     }
 
@@ -35,6 +38,9 @@ public sealed class MiscVerifiedPayloadTests
         {
             HttpResponseMessage response = await client.PostAsync("message/list/59", null);
             response.EnsureSuccessStatusCode();
+
+            string responseBody = await response.Content.ReadAsStringAsync();
+            await Assert.That(responseBody).Contains("a:0:{}");
         }
     }
 
@@ -55,6 +61,10 @@ public sealed class MiscVerifiedPayloadTests
 
             HttpResponseMessage response = await client.PostAsync("master/storage/status", content);
             response.EnsureSuccessStatusCode();
+
+            string responseBody = await response.Content.ReadAsStringAsync();
+            await Assert.That(responseBody).Contains("cloud_storage_info");
+            await Assert.That(responseBody).Contains("success");
         }
     }
 }

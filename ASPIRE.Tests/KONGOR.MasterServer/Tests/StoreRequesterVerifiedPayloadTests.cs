@@ -29,7 +29,7 @@ public sealed class StoreRequesterVerifiedPayloadTests
         HttpClient client = webApplicationFactory.CreateClient();
         using IServiceScope scope = webApplicationFactory.Services.CreateScope();
         MerrickContext dbContext = scope.ServiceProvider.GetRequiredService<MerrickContext>();
-        IDatabase distributedCache = scope.ServiceProvider.GetRequiredService<IDatabase>();
+        scope.ServiceProvider.GetRequiredService<IDatabase>();
 
         string cookie = Guid.NewGuid().ToString("N");
         User user = new()
@@ -61,5 +61,15 @@ public sealed class StoreRequesterVerifiedPayloadTests
 
         HttpResponseMessage response = await client.PostAsync("store_requester.php", content);
         response.EnsureSuccessStatusCode();
+
+        string body = await response.Content.ReadAsStringAsync();
+        await Assert.That(body).IsNotEmpty();
+        
+        // Store Requester usually returns a PHP serialized array or a boolean
+        // We assert for common PHP serialization markers
+        bool isPhpArray = body.StartsWith("a:");
+        bool isPhpBool = body.StartsWith("b:");
+        
+        await Assert.That(isPhpArray || isPhpBool).IsTrue();
     }
 }

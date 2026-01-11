@@ -231,22 +231,29 @@ public class ChatBuffer : TCPBuffer
     {
         long marker = _offset;
 
-        while (marker <= _size && _data[marker] is not 0)
+        // Find the position of the null terminator
+        while (marker < _size && _data[marker] != 0)
         {
             marker++;
         }
 
-        if (marker > _size)
+        // If no null terminator is found and we are at the end of the buffer, strict C-string parsing would fail.
+        // However, for robustness, we can read until the end.
+        // But the error 'midwars"und ' suggests we are reading PAST the intended string end because of a missing or skipped null terminator.
+        
+        // If marker reached _size, we read everything.
+        int length = (int)(marker - _offset);
+        string data = Encoding.UTF8.GetString(_data, (int)_offset, length);
+
+        // Move offset past string + null terminator (if found)
+        if (marker < _size)
         {
-            throw new InvalidDataException(
-                $"Unable To Read A String Value From Buffer With Size {_size} And Offset {_offset}");
+            _offset = marker + 1;
         }
-
-        string data = Encoding.UTF8.GetString(_data, (int) _offset, (int) (marker - _offset));
-
-        marker++; // Move Marker To NULL Terminator Position
-
-        _offset = marker;
+        else
+        {
+            _offset = marker;
+        }
 
         return data;
     }

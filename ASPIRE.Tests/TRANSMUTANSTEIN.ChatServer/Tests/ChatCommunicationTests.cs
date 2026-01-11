@@ -12,13 +12,13 @@ public sealed class ChatCommunicationTests
     public async Task Whisper_Delivered()
     {
         // Arrange
-        int testPort = 52700;
+        int testPort = 0;
         await using TRANSMUTANSTEINServiceProvider app =
             await TRANSMUTANSTEINServiceProvider.CreateOrchestratedInstanceAsync(testPort);
 
-        using TcpClient sender = await ChatTestHelpers.ConnectAndAuthenticateAsync(app, testPort, 601, "WhisperSender_601");
+        using TcpClient sender = await ChatTestHelpers.ConnectAndAuthenticateAsync(app, app.ClientPort, 601, "WhisperSender_601");
         using TcpClient recipient =
-            await ChatTestHelpers.ConnectAndAuthenticateAsync(app, testPort, 602, "WhisperRecipient_602");
+            await ChatTestHelpers.ConnectAndAuthenticateAsync(app, app.ClientPort, 602, "WhisperRecipient_602");
 
         // Act - Send Whisper
         string message = "Psst, this is a secret.";

@@ -83,7 +83,7 @@ public sealed class ChatSocialTests
         int accountIdFriend = 502;
 
         // Seed Friendship manually
-        await ChatTestHelpers._seedLock.WaitAsync();
+        await ChatTestHelpers.SeedLock.WaitAsync();
         try
         {
             using (IServiceScope scope = app.Services.CreateScope())
@@ -169,7 +169,7 @@ public sealed class ChatSocialTests
         }
         finally
         {
-            ChatTestHelpers._seedLock.Release();
+            ChatTestHelpers.SeedLock.Release();
         }
 
         // Act

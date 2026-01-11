@@ -12,11 +12,11 @@ public sealed class ChatChannelTests
     public async Task JoinChannel_Success()
     {
         // Arrange
-        int testPort = 56010;
+        int testPort = 0;
         await using TRANSMUTANSTEINServiceProvider app =
             await TRANSMUTANSTEINServiceProvider.CreateOrchestratedInstanceAsync(testPort);
 
-        using TcpClient client = await ChatTestHelpers.ConnectAndAuthenticateAsync(app, testPort, 100, "ChannelUser");
+        using TcpClient client = await ChatTestHelpers.ConnectAndAuthenticateAsync(app, app.ClientPort, 100, "ChannelUser");
         NetworkStream stream = client.GetStream();
 
         // Act - Join Channel
@@ -67,12 +67,13 @@ public sealed class ChatChannelTests
     public async Task SendMessage_BroadcastsToChannel()
     {
         // Arrange
-        int testPort = 56015;
+        // int testPort = 56015;
+        int testPort = ChatTestHelpers.GetAvailablePort();
         await using TRANSMUTANSTEINServiceProvider app =
             await TRANSMUTANSTEINServiceProvider.CreateOrchestratedInstanceAsync(testPort);
 
-        using TcpClient client1 = await ChatTestHelpers.ConnectAndAuthenticateAsync(app, testPort, 201, "Alice");
-        using TcpClient client2 = await ChatTestHelpers.ConnectAndAuthenticateAsync(app, testPort, 202, "Bob");
+        using TcpClient client1 = await ChatTestHelpers.ConnectAndAuthenticateAsync(app, app.ClientPort, 201, "Alice");
+        using TcpClient client2 = await ChatTestHelpers.ConnectAndAuthenticateAsync(app, app.ClientPort, 202, "Bob");
 
         // Both Join Channel
         string channelName = "ChatRoom";
@@ -191,11 +192,12 @@ public sealed class ChatChannelTests
     public async Task LeaveChannel_Success()
     {
         // Arrange
-        int testPort = 56020;
+        // int testPort = 56020;
+        int testPort = ChatTestHelpers.GetAvailablePort();
         await using TRANSMUTANSTEINServiceProvider app =
             await TRANSMUTANSTEINServiceProvider.CreateOrchestratedInstanceAsync(testPort);
 
-        using TcpClient client = await ChatTestHelpers.ConnectAndAuthenticateAsync(app, testPort, 301, "Leaver");
+        using TcpClient client = await ChatTestHelpers.ConnectAndAuthenticateAsync(app, app.ClientPort, 301, "Leaver");
         NetworkStream stream = client.GetStream();
 
         // Join First

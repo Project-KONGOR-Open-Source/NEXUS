@@ -12,12 +12,13 @@ public class ChatMatchmakingGroupTests
     public async Task GroupFlow_ModeSwitching_And_PublicRestriction()
     {
         // 1. Start Application
+        int TestPort = 0;
         await using TRANSMUTANSTEINServiceProvider app =
             await TRANSMUTANSTEINServiceProvider.CreateOrchestratedInstanceAsync(TestPort);
 
         // 2. Connect Two Clients (Leader and Member)
-        using TcpClient leader = await ChatTestHelpers.ConnectAndAuthenticateAsync(app, TestPort, 1001, "LeaderUser");
-        using TcpClient member = await ChatTestHelpers.ConnectAndAuthenticateAsync(app, TestPort, 1002, "MemberUser");
+        using TcpClient leader = await ChatTestHelpers.ConnectAndAuthenticateAsync(app, app.ClientPort, 1001, "LeaderUser");
+        using TcpClient member = await ChatTestHelpers.ConnectAndAuthenticateAsync(app, app.ClientPort, 1002, "MemberUser");
 
         NetworkStream leaderStream = leader.GetStream();
         NetworkStream memberStream = member.GetStream();
@@ -56,9 +57,12 @@ public class ChatMatchmakingGroupTests
         await SendPacketAsync(leaderStream, createBuffer);
 
         // Expect TMM_CREATE_GROUP update for Leader
-        // Note: GroupCreate returns NET_CHAT_CL_TMM_GROUP_INVITE (0x0D03) ?? No, it triggers MulticastUpdate which sends GROUP_UPDATE (0x0D03).
-        // My analysis says MulticastUpdate sends 0x0D03.
-        await ExpectGroupUpdateAsync(leaderStream, ChatProtocol.TMMUpdateType.TMM_CREATE_GROUP);
+        (string MapName, string GameModes, byte GameType) groupCreated = await ExpectGroupUpdateAsync(leaderStream, ChatProtocol.TMMUpdateType.TMM_CREATE_GROUP);
+        
+        // Assert Initial State
+        await Assert.That(groupCreated.MapName).IsEqualTo("caldavar");
+        await Assert.That(groupCreated.GameModes).IsEqualTo("ap");
+        await Assert.That(groupCreated.GameType).IsEqualTo((byte) ChatProtocol.TMMGameType.TMM_GAME_TYPE_NORMAL);
 
         // 4. Switch Mode to MidWars
         // Command: NET_CHAT_CL_TMM_GAME_OPTION_UPDATE (0x0D08)
@@ -80,7 +84,12 @@ public class ChatMatchmakingGroupTests
         await SendPacketAsync(leaderStream, updateBuffer);
 
         // Expect TMM_FULL_GROUP_UPDATE
-        await ExpectGroupUpdateAsync(leaderStream, ChatProtocol.TMMUpdateType.TMM_FULL_GROUP_UPDATE);
+        (string MapName, string GameModes, byte GameType) groupUpdated = await ExpectGroupUpdateAsync(leaderStream, ChatProtocol.TMMUpdateType.TMM_FULL_GROUP_UPDATE);
+        
+        // Assert Updated State (Midwars)
+        await Assert.That(groupUpdated.MapName).IsEqualTo("midwars");
+        await Assert.That(groupUpdated.GameModes).IsEqualTo("bd");
+        await Assert.That(groupUpdated.GameType).IsEqualTo((byte) ChatProtocol.TMMGameType.TMM_GAME_TYPE_MIDWARS);
 
         // If we get here, the update was processed and broadcasted!
     }
@@ -94,7 +103,7 @@ public class ChatMatchmakingGroupTests
         await stream.WriteAsync(rawPacket.ToArray());
     }
 
-    private async Task ExpectGroupUpdateAsync(NetworkStream stream, ChatProtocol.TMMUpdateType expectedType)
+    private async Task<(string MapName, string GameModes, byte GameType)> ExpectGroupUpdateAsync(NetworkStream stream, ChatProtocol.TMMUpdateType expectedType)
     {
         using CancellationTokenSource cts = new(TimeSpan.FromSeconds(5));
         while (!cts.Token.IsCancellationRequested)
@@ -128,34 +137,67 @@ public class ChatMatchmakingGroupTests
             {
                 ChatBuffer reader = new(payload);
                 byte updateType = reader.ReadInt8();
+                
+                Console.WriteLine($"[ExpectGroupUpdateAsync] Received 0x0D03 UpdateType: {updateType}. Expected: {expectedType}");
+
                 if (updateType == (byte) expectedType)
                 {
-                    return; // Success
+                    // Parse Payload to Verify State
+                    reader.ReadInt32(); // Emitter Account ID
+                    reader.ReadInt8(); // Group Size
+                    reader.ReadInt16(); // Average Group Rating
+                    reader.ReadInt32(); // Leader Account ID
+                    reader.ReadInt8(); // Arranged Match Type
+                    
+                    // Check for injected 0x0D08 (Game Option Update header)
+                    // This appears in TMM_FULL_GROUP_UPDATE (1), TMM_PLAYER_JOINED_GROUP (4), etc.
+                    // But NOT in TMM_CREATE_GROUP (0).
+                    if (reader.HasRemainingData())
+                    {
+                        byte[] peek = reader.Peek(2);
+                        if (peek.Length == 2 && peek[0] == 0x08 && peek[1] == 0x0D)
+                        {
+                            reader.ReadInt16(); // Skip 0x0D08
+                            Console.WriteLine("[ExpectGroupUpdateAsync] Skipped 0x0D08 bytes.");
+                        }
+                    }
+
+                    byte gameType = reader.ReadInt8();
+                    // Trim null terminators from strings read from ChatBuffer if present
+                    string mapName = reader.ReadString().Trim('\0');
+                    string gameModes = reader.ReadString().Trim('\0');
+                    
+                    Console.WriteLine($"[ExpectGroupUpdateAsync] Parsed: Map={mapName}, Mode={gameModes}, Type={gameType}");
+                    return (mapName, gameModes, gameType);
                 }
+            }
+            else
+            {
+                Console.WriteLine($"[ExpectGroupUpdateAsync] Ignored Command: {command:X4}");
             }
         }
 
         Assert.Fail($"Did not receive Group Update {expectedType}");
-
+        return default;
     }
 
     [Test]
     public async Task GroupFlow_MemberLeavingQueue_ShouldCancelQueue()
     {
             // 1. Start Application
-            // 1. Start Application
-            int port = 55100;
+        // 1. Start Application using Dynamic Port
+            int port = 0;
             await using TRANSMUTANSTEINServiceProvider app =
                 await TRANSMUTANSTEINServiceProvider.CreateOrchestratedInstanceAsync(port);
 
             // 2. Connect Two Clients (Leader and Member)
             using TcpClient leader =
-                await ChatTestHelpers.ConnectAndAuthenticateAsync(app, port, 2001, "LeaderTwo");
-            using TcpClient member =
-                await ChatTestHelpers.ConnectAndAuthenticateAsync(app, port, 2002, "MemberTwo");
+                await ChatTestHelpers.ConnectAndAuthenticateAsync(app, app.ClientPort, 2001, "LeaderTwo");
+            using TcpClient client =
+                await ChatTestHelpers.ConnectAndAuthenticateAsync(app, app.ClientPort, 2024, "MatchmakingTester");
 
             NetworkStream leaderStream = leader.GetStream();
-            NetworkStream memberStream = member.GetStream();
+            NetworkStream memberStream = client.GetStream();
 
             // 3. Leader Creates Group
             ChatBuffer createBuffer = new();

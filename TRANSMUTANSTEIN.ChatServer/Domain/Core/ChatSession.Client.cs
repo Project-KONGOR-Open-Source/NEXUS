@@ -233,7 +233,7 @@ public partial class ChatSession
             List<ChatSession> onlineObserverSessions = GetOnlineObservers();
 
             Log.Information("Broadcasting Status Update {Status} for Account {AccountID} ({AccountName}) to {ObserverCount} Observers: {ObserverNames}", 
-                status, Account.ID, Account.Name, onlineObserverSessions.Count, string.Join(", ", onlineObserverSessions.Select(s => s.Account.Name)));
+                status, Account.ID, Account.Name, onlineObserverSessions.Count, string.Join(", ", onlineObserverSessions.Select(s => s.Account?.Name ?? "Unknown")));
 
             ChatBuffer update = new();
 

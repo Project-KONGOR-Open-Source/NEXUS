@@ -1,3 +1,4 @@
+using System.Net;
 using System.Net.Sockets;
 
 using ASPIRE.Tests.InProcess;
@@ -12,13 +13,11 @@ namespace ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer.Infrastructure;
 
 public class TRANSMUTANSTEINServiceProvider : WebApplicationFactory<global::TRANSMUTANSTEIN.ChatServer.TRANSMUTANSTEIN>
 {
-    private const string ChatServerPortMatchServer = "50002";
-    private const string ChatServerPortMatchServerManager = "50003";
     public int ClientPort { get; set; } = 50001;
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
-        builder.ConfigureAppConfiguration((context, config) =>
+        builder.ConfigureAppConfiguration((_, config) =>
         {
             Dictionary<string, string?> settings = new()
             {
@@ -41,7 +40,7 @@ public class TRANSMUTANSTEINServiceProvider : WebApplicationFactory<global::TRAN
                 descriptor.ImplementationType?.FullName?.Contains(nameof(MerrickContext)) is true;
 
             Console.WriteLine("[DEBUG] Removing MerrickContext Services...");
-            foreach (ServiceDescriptor? descriptor in services.Where(databaseContextPredicate).ToList())
+            foreach (ServiceDescriptor descriptor in services.Where(databaseContextPredicate).ToList())
             {
                 services.Remove(descriptor);
             }
@@ -100,17 +99,50 @@ public class TRANSMUTANSTEINServiceProvider : WebApplicationFactory<global::TRAN
             mockSubscriber.Setup(s => s.IsConnected(It.IsAny<RedisChannel>())).Returns(true);
             mockSubscriber.Setup(s => s.Multiplexer).Returns(mockMuxer.Object);
 
-            services.AddSingleton<IConnectionMultiplexer>(mockMuxer.Object);
+            services.AddSingleton(mockMuxer.Object);
             services.AddSingleton<IDatabase>(inProcessDb);
         });
     }
 
     public static async Task<TRANSMUTANSTEINServiceProvider> CreateOrchestratedInstanceAsync(int clientPort = 50001)
     {
+        // If clientPort is 0, we use it as-is to signal dynamic port allocation.
+        // Otherwise, we use the provided port.
         TRANSMUTANSTEINServiceProvider provider = new() { ClientPort = clientPort };
 
         // This forces the server to start
-        HttpClient client = provider.CreateClient();
+        provider.CreateClient();
+
+        // If we requested a dynamic port (0), we need to find out which port was actually assigned.
+        if (clientPort == 0)
+        {
+            // Resolve ChatService to access the ChatServer and its ClientServer endpoint
+            ChatService chatService = provider.Services.GetRequiredService<ChatService>();
+            
+            // We need to wait until the server is started and bound
+            int attempts = 0;
+            while ((chatService.ChatServer == null || !chatService.ChatServer.IsStarted) && attempts < 50)
+            {
+                await Task.Delay(100);
+                attempts++;
+            }
+
+            if (chatService.ChatServer == null || !chatService.ChatServer.IsStarted)
+            {
+                 throw new Exception("Chat Server failed to start or ChatService.ChatServer is null.");
+            }
+
+            // Retrieve the bound port
+            if (chatService.ChatServer.ClientServer.Endpoint is IPEndPoint ipEndpoint)
+            {
+                provider.ClientPort = ipEndpoint.Port;
+                clientPort = provider.ClientPort; // Update local variable for the probe check
+            }
+            else
+            {
+                throw new Exception("Could not determine bound port from ClientServer Endpoint.");
+            }
+        }
 
         // Wait for the TCP listeners to spin up using exponential backoff probing
         int attempt = 0;

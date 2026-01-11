@@ -22,10 +22,10 @@ public sealed partial class MatchStatsSubmissionTests
         MerrickContext dbContext = scope.ServiceProvider.GetRequiredService<MerrickContext>();
 
         // Seed MatchStatistics
-        int matchID = 963564305;
+        const int matchId = 963564305;
         MatchStatistics matchStats = new()
         {
-            MatchID = matchID,
+            MatchID = matchId,
             ServerID = 1,
             HostAccountName = "TestHost",
             Map = "caldavar",
@@ -65,7 +65,7 @@ public sealed partial class MatchStatsSubmissionTests
         // payload with empty cookie
         Dictionary<string, string> payload = new()
         {
-            { "f", "get_match_stats" }, { "match_id", matchID.ToString() }, { "cookie", "" }
+            { "f", "get_match_stats" }, { "match_id", matchId.ToString() }, { "cookie", "" }
         };
 
         // Act
@@ -78,14 +78,20 @@ public sealed partial class MatchStatsSubmissionTests
         await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.OK);
 
         // Manual verification of PHP serialized content check or basic containment
-        // Since PhpSerialization might not be easily accessible or requires internal namespaces,
-        // We can just verify the content contains expected keys in their serialized form.
         // Array/Dict keys: "match_summ", "match_player_stats", "selected_upgrades"
-
         // Serialized strings look like: s:10:"match_summ"; or s:17:"selected_upgrades";
-        await Assert.That(content).Contains("match_summ");
-        await Assert.That(content).Contains("match_player_stats");
-        await Assert.That(content).Contains("selected_upgrades");
+
+        // Regex for match_summ key (10 chars)
+        Regex matchSummRegex = new Regex(@"s:10:""match_summ"";");
+        await Assert.That(matchSummRegex.IsMatch(content)).IsTrue();
+
+        // Regex for match_player_stats key (18 chars)
+        Regex matchPlayerStatsRegex = new Regex(@"s:18:""match_player_stats"";");
+        await Assert.That(matchPlayerStatsRegex.IsMatch(content)).IsTrue();
+
+        // Regex for selected_upgrades key (17 chars)
+        Regex selectedUpgradesRegex = new Regex(@"s:17:""selected_upgrades"";");
+        await Assert.That(selectedUpgradesRegex.IsMatch(content)).IsTrue();
     }
 
     [Test]
@@ -101,10 +107,10 @@ public sealed partial class MatchStatsSubmissionTests
         IDatabase distributedCache = scope.ServiceProvider.GetRequiredService<IDatabase>();
 
         // Seed MatchStatistics
-        int matchID = 963564306;
+        int matchId = 963564306;
         MatchStatistics matchStats = new()
         {
-            MatchID = matchID,
+            MatchID = matchId,
             ServerID = 1,
             HostAccountName = "TestHost",
             Map = "caldavar",
@@ -168,7 +174,7 @@ public sealed partial class MatchStatsSubmissionTests
         // payload with valid cookie
         Dictionary<string, string> payload = new()
         {
-            { "f", "get_match_stats" }, { "match_id", matchID.ToString() }, { "cookie", "valid_cookie_123" }
+            { "f", "get_match_stats" }, { "match_id", matchId.ToString() }, { "cookie", "valid_cookie_123" }
         };
 
         // Act
@@ -180,10 +186,14 @@ public sealed partial class MatchStatsSubmissionTests
         await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.OK);
 
         // Verify response contains personalized data
-        await Assert.That(content).Contains("match_summ");
+        Regex matchSummRegex = new Regex(@"s:10:""match_summ"";");
+        await Assert.That(matchSummRegex.IsMatch(content)).IsTrue();
+        
         // Should contain result of SelectedStoreItems
         // Expected serialized: s:14:"aa.test_avatar"; or similar
-        await Assert.That(content).Contains("aa.test_avatar");
+        // We verify the value is present as a strict PHP string value
+        Regex avatarRegex = new Regex(@"s:\d+:""aa\.test_avatar"";");
+        await Assert.That(avatarRegex.IsMatch(content)).IsTrue();
     }
 
     [Test]
@@ -214,7 +224,8 @@ public sealed partial class MatchStatsSubmissionTests
         // Should return serialized "Soft Failure" (Empty Stats) object
         // b:0; is no longer returned to prevent client crashes.
         // We verify that it returns a serialized array containing basic keys like "match_summ"
-        await Assert.That(content).Contains("match_summ");
+        Regex matchSummRegex = new Regex(@"s:10:""match_summ"";");
+        await Assert.That(matchSummRegex.IsMatch(content)).IsTrue();
     }
 
     [Test]
@@ -229,10 +240,10 @@ public sealed partial class MatchStatsSubmissionTests
         MerrickContext dbContext = scope.ServiceProvider.GetRequiredService<MerrickContext>();
 
         // Seed MatchStatistics
-        int matchID = 963564307;
+        int matchId = 963564307;
         MatchStatistics matchStats = new()
         {
-            MatchID = matchID,
+            MatchID = matchId,
             ServerID = 1,
             HostAccountName = "TestHost",
             Map = "caldavar",
@@ -270,7 +281,7 @@ public sealed partial class MatchStatsSubmissionTests
         await dbContext.SaveChangesAsync();
 
         // Payload WITHOUT "f" in body, but with invalid/empty cookie
-        Dictionary<string, string> payload = new() { { "match_id", matchID.ToString() }, { "cookie", "" } };
+        Dictionary<string, string> payload = new() { { "match_id", matchId.ToString() }, { "cookie", "" } };
 
         // Act
         // Pass "f" in the Query String
@@ -284,7 +295,8 @@ public sealed partial class MatchStatsSubmissionTests
         // If this fails with 401, it means the controller didn't pick up "f" from the QueryString,
         // and thus treated it as a generic request requiring validation (which fails due to empty cookie).
 
-        await Assert.That(content).Contains("match_summ");
+        Regex matchSummRegex = new Regex(@"s:10:""match_summ"";");
+        await Assert.That(matchSummRegex.IsMatch(content)).IsTrue();
     }
 
     [Test]
@@ -299,10 +311,10 @@ public sealed partial class MatchStatsSubmissionTests
         MerrickContext dbContext = scope.ServiceProvider.GetRequiredService<MerrickContext>();
 
         // Seed MatchStatistics
-        int matchID = 963564308;
+        const int matchId = 963564308;
         MatchStatistics matchStats = new()
         {
-            MatchID = matchID,
+            MatchID = matchId,
             ServerID = 1,
             HostAccountName = "TestHost",
             Map = "caldavar",
@@ -339,7 +351,7 @@ public sealed partial class MatchStatsSubmissionTests
         await dbContext.MatchStatistics.AddAsync(matchStats);
         await dbContext.SaveChangesAsync();
 
-        Dictionary<string, string> payload = new() { { "match_id", matchID.ToString() }, { "cookie", "" } };
+        Dictionary<string, string> payload = new() { { "match_id", matchId.ToString() }, { "cookie", "" } };
 
         // Act
         // Pass "f" as "Get_Match_Stats" (mixed case)

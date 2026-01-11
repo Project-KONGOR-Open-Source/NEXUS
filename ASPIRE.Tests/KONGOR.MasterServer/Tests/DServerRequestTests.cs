@@ -181,7 +181,7 @@ public sealed class DServerRequestTests
 
             MatchServer? updatedServer = await cache.GetMatchServerBySessionCookie(cookie);
             await Assert.That(updatedServer).IsNotNull();
-            await Assert.That(updatedServer.Status).IsEqualTo(ServerManagementStatus.SERVER_STATUS_ACTIVE);
+            await Assert.That(updatedServer!.Status).IsEqualTo(ServerManagementStatus.SERVER_STATUS_ACTIVE);
         }
     }
 
@@ -196,6 +196,9 @@ public sealed class DServerRequestTests
 
             HttpResponseMessage response = await client.PostAsync("server_requester.php", content);
             response.EnsureSuccessStatusCode();
+
+            string responseBody = await response.Content.ReadAsStringAsync();
+            await Assert.That(responseBody).Contains("target_url");
         }
     }
 
@@ -212,6 +215,11 @@ public sealed class DServerRequestTests
 
             HttpResponseMessage response = await client.PostAsync("server_requester.php", content);
             response.EnsureSuccessStatusCode();
+            
+            string responseBody = await response.Content.ReadAsStringAsync();
+            await Assert.That(responseBody).Contains("nickname");
+            await Assert.That(responseBody).Contains(account.Name);
+            await Assert.That(responseBody).Contains("account_id");
         }
     }
 
@@ -227,6 +235,11 @@ public sealed class DServerRequestTests
 
             HttpResponseMessage response = await client.PostAsync("server_requester.php", content);
             response.EnsureSuccessStatusCode();
+
+            string responseBody = await response.Content.ReadAsStringAsync();
+            // Expecting serialized response with server_id
+            await Assert.That(responseBody).Contains("server_id");
+            await Assert.That(responseBody).Contains("666"); // Hardcoded in controller currently
         }
     }
 
@@ -242,6 +255,10 @@ public sealed class DServerRequestTests
 
             HttpResponseMessage response = await client.PostAsync("server_requester.php", content);
             response.EnsureSuccessStatusCode();
+
+            string responseBody = await response.Content.ReadAsStringAsync();
+            // Expecting empty serialized array a:0:{}
+            await Assert.That(responseBody).Contains("a:0:{}");
         }
     }
 
@@ -275,6 +292,9 @@ public sealed class DServerRequestTests
 
             HttpResponseMessage response = await client.PostAsync("server_requester.php", content);
             response.EnsureSuccessStatusCode();
+            
+            string responseBody = await response.Content.ReadAsStringAsync();
+            await Assert.That(responseBody).Contains("match_id");
         }
     }
 

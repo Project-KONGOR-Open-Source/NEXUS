@@ -56,7 +56,7 @@ public sealed class MiscUnverifiedTests
     {
         (HttpClient client, MerrickContext dbContext, string cookie,
             WebApplicationFactory<KONGORAssemblyMarker> factory, _) = await SetupAsync();
-        using (factory)
+        await using (factory)
         {
             // Seed Server Host Account
             User hostUser = new()
@@ -124,9 +124,10 @@ public sealed class MiscUnverifiedTests
 
 
             // Calculate Resubmission Key
+            // Example
             // Key = SHA1(matchID + salt)
-            string salt = "s8c7xaduxAbRanaspUf3kadRachecrac9efeyupr8suwrewecrUphayeweqUmana";
-            int matchId = 123;
+            const string salt = "s8c7xaduxAbRanaspUf3kadRachecrac9efeyupr8suwrewecrUphayeweqUmana";
+            const int matchId = 123;
             string keyInput = matchId + salt;
             string resubmissionKey = Convert
                 .ToHexString(SHA1.HashData(Encoding.UTF8.GetBytes(keyInput)))
@@ -143,14 +144,12 @@ public sealed class MiscUnverifiedTests
 
             // Expecting 401 due to SRP password check failure (we can't easily replicate hashing here), or 200 if somehow passed.
             // 404/500/400 would be failures.
-            if (response.StatusCode == HttpStatusCode.Unauthorized)
-            {
-                // TUnit doesn't have Assert.Pass. We can just return as success.
-            }
-            else
-            {
-                response.EnsureSuccessStatusCode();
-            }
+            // Expecting 401 due to SRP password check failure.
+            // We verify that the controller validation logic is reached by checking the specific error message.
+            await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.Unauthorized);
+            
+            string responseBody = await response.Content.ReadAsStringAsync();
+            await Assert.That(responseBody).Contains("Invalid Host Account Password");
         }
     }
 }

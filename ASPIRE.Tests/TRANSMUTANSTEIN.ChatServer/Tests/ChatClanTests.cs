@@ -12,17 +12,17 @@ public sealed class ChatClanTests
     public async Task ClanAdd_Accepted_Success()
     {
         // 1. Arrange
-        int testPort = 56001;
+        int testPort = 0;
         await using TRANSMUTANSTEINServiceProvider app =
             await TRANSMUTANSTEINServiceProvider.CreateOrchestratedInstanceAsync(testPort);
 
-        int creatorId = 601;
-        int joinerId = 602;
-        int clanId = 100;
+        int creatorId = 8601;
+        int joinerId = 8602;
+        int clanId = 1100;
         string inviteKey = "pending_invite_key";
 
         // Seed DB and Redis
-        await ChatTestHelpers._seedLock.WaitAsync();
+        await ChatTestHelpers.SeedLock.WaitAsync();
         try
         {
             using IServiceScope scope = app.Services.CreateScope();
@@ -97,11 +97,11 @@ public sealed class ChatClanTests
         }
         finally
         {
-            ChatTestHelpers._seedLock.Release();
+            ChatTestHelpers.SeedLock.Release();
         }
 
         // 2. Act - Joiner Connects and sends CLAN_ADD_ACCEPTED
-        using TcpClient joinerClient = await ChatTestHelpers.ConnectAndAuthenticateAsync(app, testPort, joinerId, "Joiner");
+        using TcpClient joinerClient = await ChatTestHelpers.ConnectAndAuthenticateAsync(app, app.ClientPort, joinerId, "Joiner");
         NetworkStream stream = joinerClient.GetStream();
 
         ChatBuffer acceptedBuffer = new();
@@ -180,13 +180,13 @@ public sealed class ChatClanTests
     public async Task ClanRemove_Notify_Passive_NoCrash()
     {
         // 1. Arrange
-        int testPort = 56005;
+        int testPort = 0;
         await using TRANSMUTANSTEINServiceProvider app =
             await TRANSMUTANSTEINServiceProvider.CreateOrchestratedInstanceAsync(testPort);
         
         int userId = 605;
         // User in Clan
-         await ChatTestHelpers._seedLock.WaitAsync();
+         await ChatTestHelpers.SeedLock.WaitAsync();
         try
         {
             using IServiceScope scope = app.Services.CreateScope();
@@ -208,9 +208,9 @@ public sealed class ChatClanTests
              db.Users.Add(user);
              await db.SaveChangesAsync();
         }
-        finally { ChatTestHelpers._seedLock.Release(); }
+        finally { ChatTestHelpers.SeedLock.Release(); }
 
-        using TcpClient client = await ChatTestHelpers.ConnectAndAuthenticateAsync(app, testPort, userId, "RemoveTestUser");
+        using TcpClient client = await ChatTestHelpers.ConnectAndAuthenticateAsync(app, app.ClientPort, userId, "RemoveTestUser");
         NetworkStream stream = client.GetStream();
 
         // 2. Act - Send CHAT_CMD_CLAN_REMOVE_NOTIFY (0x0017)
