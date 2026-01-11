@@ -11,7 +11,7 @@ namespace ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer.Tests;
 
 public class MatchmakingTests
 {
-    private const int TestPort = 52900;
+    private const int TestPort = 54123;
 
     [Test]
     public async Task PopularityUpdate_ReturnsConfiguredModes()

@@ -99,7 +99,11 @@ public class MatchmakingService : BackgroundService, IDisposable
                 }
             }
 
+
+
             # endregion
+
+            await Task.Delay(100, cancellationToken);
         }
 
         await Task.CompletedTask;
