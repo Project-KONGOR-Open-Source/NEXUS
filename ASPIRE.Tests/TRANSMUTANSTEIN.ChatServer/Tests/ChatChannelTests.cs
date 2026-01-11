@@ -12,7 +12,7 @@ public sealed class ChatChannelTests
     public async Task JoinChannel_Success()
     {
         // Arrange
-        int testPort = 52200;
+        int testPort = 56010;
         await using TRANSMUTANSTEINServiceProvider app =
             await TRANSMUTANSTEINServiceProvider.CreateOrchestratedInstanceAsync(testPort);
 
@@ -67,7 +67,7 @@ public sealed class ChatChannelTests
     public async Task SendMessage_BroadcastsToChannel()
     {
         // Arrange
-        int testPort = 52300;
+        int testPort = 56015;
         await using TRANSMUTANSTEINServiceProvider app =
             await TRANSMUTANSTEINServiceProvider.CreateOrchestratedInstanceAsync(testPort);
 
@@ -191,7 +191,7 @@ public sealed class ChatChannelTests
     public async Task LeaveChannel_Success()
     {
         // Arrange
-        int testPort = 52400;
+        int testPort = 56020;
         await using TRANSMUTANSTEINServiceProvider app =
             await TRANSMUTANSTEINServiceProvider.CreateOrchestratedInstanceAsync(testPort);
 

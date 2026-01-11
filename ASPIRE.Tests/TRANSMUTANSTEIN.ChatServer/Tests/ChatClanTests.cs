@@ -1,11 +1,8 @@
 using System.Net.Sockets;
 using ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer.Infrastructure;
-using KONGOR.MasterServer.Extensions.Cache;
-using MERRICK.DatabaseContext.Entities.Relational;
-using MERRICK.DatabaseContext.Entities.Core;
+
 using TRANSMUTANSTEIN.ChatServer.Domain.Clans;
 using TRANSMUTANSTEIN.ChatServer.Domain.Core;
-using TRANSMUTANSTEIN.ChatServer.Services;
 
 namespace ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer.Tests;
 
@@ -15,7 +12,7 @@ public sealed class ChatClanTests
     public async Task ClanAdd_Accepted_Success()
     {
         // 1. Arrange
-        int testPort = 53500;
+        int testPort = 56001;
         await using TRANSMUTANSTEINServiceProvider app =
             await TRANSMUTANSTEINServiceProvider.CreateOrchestratedInstanceAsync(testPort);
 
@@ -97,14 +94,6 @@ public sealed class ChatClanTests
                 InvitedAccountId = joinerId,
                 CreationTime = DateTime.UtcNow
             });
-            
-            // Map User to Invite Key - using private/internal logic helper NOT available? 
-            // Wait, AddPendingClanInviteKeyForUser was assumed. Check Interface.
-            // Interface has: string? GetPendingClanInviteKeyForUser(Account account);
-            // It iterates _pendingClanInvites. 
-            // The Invite object has InvitedAccountId. So GetPendingClanInviteKeyForUser should work automatically if Invite is inserted!
-            // pendingService.InsertPendingClanInvite(inviteKey, ...); - Done above.
-            
         }
         finally
         {
@@ -191,7 +180,7 @@ public sealed class ChatClanTests
     public async Task ClanRemove_Notify_Passive_NoCrash()
     {
         // 1. Arrange
-        int testPort = 53600;
+        int testPort = 56005;
         await using TRANSMUTANSTEINServiceProvider app =
             await TRANSMUTANSTEINServiceProvider.CreateOrchestratedInstanceAsync(testPort);
         

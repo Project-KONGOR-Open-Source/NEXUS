@@ -16,7 +16,7 @@ public sealed class ChatSocialTests
     public async Task AddFriend_RequestSent()
     {
         // Arrange
-        int testPort = 52500;
+        int testPort = 56030;
         await using TRANSMUTANSTEINServiceProvider app =
             await TRANSMUTANSTEINServiceProvider.CreateOrchestratedInstanceAsync(testPort);
 
@@ -74,7 +74,7 @@ public sealed class ChatSocialTests
     public async Task BuddyList_InitialStatus()
     {
         // Arrange
-        int testPort = 52600;
+        int testPort = 56040;
         await using TRANSMUTANSTEINServiceProvider app =
             await TRANSMUTANSTEINServiceProvider.CreateOrchestratedInstanceAsync(testPort);
 
