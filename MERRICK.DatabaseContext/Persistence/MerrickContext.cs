@@ -16,6 +16,7 @@ public sealed class MerrickContext : DbContext
     public const string MiscellaneousSchema = "misc";
 
     public DbSet<Account> Accounts => Set<Account>();
+    public DbSet<AccountStatistics> AccountStatistics => Set<AccountStatistics>();
     public DbSet<Clan> Clans => Set<Clan>();
     public DbSet<HeroGuide> HeroGuides => Set<HeroGuide>();
     public DbSet<MatchStatistics> MatchStatistics => Set<MatchStatistics>();
@@ -41,6 +42,7 @@ public sealed class MerrickContext : DbContext
         builder.HasDefaultSchema(DefaultSchema);
 
         builder.Entity<Account>().ToTable("Accounts", CoreSchema);
+        builder.Entity<AccountStatistics>().ToTable("AccountStatistics", StatisticsSchema);
         builder.Entity<Clan>().ToTable("Clans", CoreSchema);
         builder.Entity<HeroGuide>().ToTable("HeroGuides", MiscellaneousSchema);
         builder.Entity<MatchStatistics>().ToTable("MatchStatistics", StatisticsSchema);

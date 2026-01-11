@@ -28,6 +28,8 @@ public class PlayerStatistics
 
     public required uint? HeroProductID { get => field is 0 ? null : field; set => field = value is 0 ? null : value; }
 
+    public required string HeroIdentifier { get; set; }
+
     public string? AlternativeAvatarName { get; set; }
 
     public uint? AlternativeAvatarProductID { get; set; }

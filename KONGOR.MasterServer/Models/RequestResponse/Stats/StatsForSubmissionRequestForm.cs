@@ -13,7 +13,7 @@ public partial class StatsForSubmissionRequestForm
     public required Dictionary<int, Dictionary<string, int>> TeamStats { get; set; }
 
     [FromForm(Name = "player_stats")]
-    public required Dictionary<int, Dictionary<string, IndividualPlayerStats>> PlayerStats { get; set; }
+    public required Dictionary<int, Dictionary<string, IndividualPlayerStatistics>> PlayerStats { get; set; }
 
     [FromForm(Name = "inventory")]
     public required Dictionary<int, Dictionary<int, string>> PlayerInventory { get; set; }
@@ -170,7 +170,7 @@ public class MatchStats
 }
 
 // Properties Common To All Game Modes
-public partial class IndividualPlayerStats
+public partial class IndividualPlayerStatistics
 {
     [FromForm(Name = "nickname")]
     public required string AccountName { get; set; }
@@ -447,7 +447,7 @@ public partial class IndividualPlayerStats
 }
 
 // Properties Specific To Public Matches
-public partial class IndividualPlayerStats
+public partial class IndividualPlayerStatistics
 {
     [FromForm(Name = "pub_skill")]
     public double PublicSkillRatingChange { get; set; }
@@ -457,7 +457,7 @@ public partial class IndividualPlayerStats
 }
 
 // Properties Specific To Ranked (Arranged Matchmaking) Matches
-public partial class IndividualPlayerStats
+public partial class IndividualPlayerStatistics
 {
     [FromForm(Name = "amm_team_rating")]
     public double RankedSkillRatingChange { get; set; }
@@ -526,7 +526,7 @@ public static class StatsForSubmissionRequestFormExtensions
     {
         string hero = form.PlayerStats[playerIndex].Keys.Single();
 
-        IndividualPlayerStats player = form.PlayerStats[playerIndex][hero];
+        IndividualPlayerStatistics player = form.PlayerStats[playerIndex][hero];
 
         PlayerStatistics statistics = new ()
         {
@@ -540,6 +540,7 @@ public static class StatsForSubmissionRequestFormExtensions
             GroupNumber = player.GroupNumber,
             Benefit = player.Benefit,
             HeroProductID = player.HeroProductID == uint.MaxValue ? uint.MinValue : player.HeroProductID,
+            HeroIdentifier = hero,
             AlternativeAvatarName = player.AlternativeAvatarName,
             AlternativeAvatarProductID = player.AlternativeAvatarProductID == uint.MaxValue ? null : player.AlternativeAvatarProductID,
             WardProductName = player.WardProductName,

@@ -25,3 +25,34 @@ public enum Rank
     LEGENDARY_1 = 19, // 1900 MMR
     IMMORTAL    = 20  // 1950 MMR
 }
+
+public static class RankExtensions
+{
+    public static Rank GetRank(double rating)
+    {
+        return rating switch
+        {
+            >= 1950 => Rank.IMMORTAL,
+            >= 1900 => Rank.LEGENDARY_1,
+            >= 1850 => Rank.LEGENDARY_2,
+            >= 1805 => Rank.DIAMOND_1,
+            >= 1765 => Rank.DIAMOND_2,
+            >= 1725 => Rank.DIAMOND_3,
+            >= 1685 => Rank.GOLD_1,
+            >= 1645 => Rank.GOLD_2,
+            >= 1610 => Rank.GOLD_3,
+            >= 1575 => Rank.GOLD_4,
+            >= 1540 => Rank.SILVER_1,
+            >= 1505 => Rank.SILVER_2,
+            >= 1470 => Rank.SILVER_3,
+            >= 1435 => Rank.SILVER_4,
+            >= 1400 => Rank.SILVER_5,
+            >= 1360 => Rank.BRONZE_1,
+            >= 1330 => Rank.BRONZE_2,
+            >= 1300 => Rank.BRONZE_3,
+            >= 1275 => Rank.BRONZE_4,
+            >= 1250 => Rank.BRONZE_5,
+            _       => Rank.NO_MEDAL
+        };
+    }
+}

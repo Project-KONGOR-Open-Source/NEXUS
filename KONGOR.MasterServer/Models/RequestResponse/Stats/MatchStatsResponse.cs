@@ -871,7 +871,7 @@ public class MatchMastery(string heroIdentifier, int currentMasteryExperience, i
     public required int MasteryExperienceSuperBoostProductCount { get; init; }
 }
 
-public class MatchPlayerStatistics(Account account, PlayerStatistics playerStatistics)
+public class MatchPlayerStatistics(MatchStartData matchStartData, Account account, PlayerStatistics playerStatistics, AccountStatistics currentMatchTypeStatistics, AccountStatistics publicMatchStatistics, AccountStatistics matchmakingStatistics)
 {
     /// <summary>
     ///     The unique identifier for the match.
@@ -925,19 +925,19 @@ public class MatchPlayerStatistics(Account account, PlayerStatistics playerStati
     ///     The number of wins on the player's account.
     /// </summary>
     [PhpProperty("wins")]
-    public required string TotalWonMatches { get; init; }
+    public string TotalWonMatches { get; init; } = currentMatchTypeStatistics.MatchesWon.ToString();
 
     /// <summary>
     ///     The number of losses on the player's account.
     /// </summary>
     [PhpProperty("losses")]
-    public required string TotalLostMatches { get; init; }
+    public string TotalLostMatches { get; init; } = currentMatchTypeStatistics.MatchesLost.ToString();
 
     /// <summary>
     ///     The number of conceded matches on the player's account.
     /// </summary>
     [PhpProperty("concedes")]
-    public required string TotalConcededMatches { get; init; }
+    public string TotalConcededMatches { get; init; } = currentMatchTypeStatistics.MatchesConceded.ToString();
 
     /// <summary>
     ///     The number of concede votes the player cast during the match.
@@ -955,55 +955,55 @@ public class MatchPlayerStatistics(Account account, PlayerStatistics playerStati
     ///     The number of disconnections on the player's account.
     /// </summary>
     [PhpProperty("discos")]
-    public required string TotalDisconnections { get; init; }
+    public string TotalDisconnections { get; init; } = currentMatchTypeStatistics.MatchesDisconnected.ToString();
 
     /// <summary>
     ///     The number of times the player was kicked from matches on their account.
     /// </summary>
     [PhpProperty("kicked")]
-    public required string TotalKicks { get; init; }
+    public string TotalKicks { get; init; } = currentMatchTypeStatistics.MatchesKicked.ToString();
 
     /// <summary>
     ///     The player's Public Skill Rating (PSR).
     /// </summary>
     [PhpProperty("pub_skill")]
-    public required string PublicMatchRating { get; init; }
+    public string PublicMatchRating { get; init; } = publicMatchStatistics.SkillRating.ToString();
 
     /// <summary>
     ///     The number of public matches played on the player's account.
     /// </summary>
     [PhpProperty("pub_count")]
-    public required string PublicMatchCount { get; init; }
+    public string PublicMatchCount { get; init; } = publicMatchStatistics.MatchesPlayed.ToString();
 
     /// <summary>
     ///     The player's solo Matchmaking Rating (MMR).
     /// </summary>
     [PhpProperty("amm_solo_rating")]
-    public required string SoloRankedMatchRating { get; init; }
+    public string SoloRankedMatchRating { get; init; } = matchmakingStatistics.SkillRating.ToString();
 
     /// <summary>
     ///     The number of solo ranked matches played on the player's account.
     /// </summary>
     [PhpProperty("amm_solo_count")]
-    public required string SoloRankedMatchCount { get; init; }
+    public string SoloRankedMatchCount { get; init; } = matchmakingStatistics.MatchesPlayed.ToString();
 
     /// <summary>
     ///     The player's team Matchmaking Rating (MMR).
     /// </summary>
     [PhpProperty("amm_team_rating")]
-    public required string TeamRankedMatchRating { get; init; }
+    public string TeamRankedMatchRating { get; init; } = matchmakingStatistics.SkillRating.ToString();
 
     /// <summary>
     ///     The number of team ranked matches played on the player's account.
     /// </summary>
     [PhpProperty("amm_team_count")]
-    public required string TeamRankedMatchCount { get; init; }
+    public string TeamRankedMatchCount { get; init; } = matchmakingStatistics.MatchesPlayed.ToString();
 
     /// <summary>
     ///     The player's performance score across all matches, calculated as (Kills + Assists) / Max(1, Deaths).
     /// </summary>
     [PhpProperty("avg_score")]
-    public required string PerformanceScore { get; init; }
+    public string PerformanceScore { get; init; } = currentMatchTypeStatistics.PerformanceScore.ToString("F2");
 
     /// <summary>
     ///     The number of enemy hero kills achieved by the player in the match.
@@ -1321,40 +1321,40 @@ public class MatchPlayerStatistics(Account account, PlayerStatistics playerStati
     ///     Seasonal campaign progression information for the player in the match.
     /// </summary>
     [PhpProperty("campaign_info")]
-    public required SeasonProgress SeasonProgress { get; init; }
+    public SeasonProgress SeasonProgress { get; init; } = new (matchStartData, playerStatistics, matchmakingStatistics);
 }
 
-public class SeasonProgress
+public class SeasonProgress(MatchStartData matchStartData, PlayerStatistics playerStatistics, AccountStatistics matchmakingStatistics)
 {
     /// <summary>
     ///     The player's account ID.
     /// </summary>
     [PhpProperty("account_id")]
-    public required int AccountID { get; init; }
+    public int AccountID { get; init; } = playerStatistics.AccountID;
 
     /// <summary>
     ///     The unique identifier for the match.
     /// </summary>
     [PhpProperty("match_id")]
-    public required int MatchID { get; init; }
+    public int MatchID { get; init; } = playerStatistics.MatchID;
 
     /// <summary>
     ///     Whether the match was a casual ranked match ("1") or competitive ranked match ("0").
     /// </summary>
     [PhpProperty("is_casual")]
-    public required string IsCasual { get; init; }
+    public string IsCasual { get; init; } = matchStartData.IsCasual.ToString();
 
     /// <summary>
     ///     The player's Matchmaking Rating (MMR) before the match.
     /// </summary>
     [PhpProperty("mmr_before")]
-    public required string MMRBefore { get; init; }
+    public string MMRBefore { get; init; } = (matchmakingStatistics.SkillRating + playerStatistics.RankedSkillRatingChange).ToString();
 
     /// <summary>
     ///     The player's Matchmaking Rating (MMR) after the match.
     /// </summary>
     [PhpProperty("mmr_after")]
-    public required string MMRAfter { get; init; }
+    public string MMRAfter { get; init; } = matchmakingStatistics.SkillRating.ToString();
 
     /// <summary>
     ///     The player's medal rank before the match.
@@ -1368,41 +1368,48 @@ public class SeasonProgress
     ///     </code>
     /// </summary>
     [PhpProperty("medal_before")]
-    public required string MedalBefore { get; init; }
+    public string MedalBefore { get; init; } = ((int) RankExtensions.GetRank(matchmakingStatistics.SkillRating + playerStatistics.RankedSkillRatingChange)).ToString();
 
     /// <summary>
     ///     The player's medal rank after the match.
     ///     Uses the same medal ranking system as "medal_before".
     /// </summary>
     [PhpProperty("medal_after")]
-    public required string MedalAfter { get; init; }
+    public string MedalAfter { get; init; } = ((int) RankExtensions.GetRank(matchmakingStatistics.SkillRating)).ToString();
 
     /// <summary>
     ///     The seasonal campaign identifier.
     /// </summary>
+    /// <remarks>
+    ///     The last official season was Season 12.
+    ///     Consumer-side changes are required to use a higher season number.
+    /// </remarks>
     [PhpProperty("season")]
-    public required string Season { get; init; }
+    public string Season { get; init; } = 12.ToString();
 
     /// <summary>
     ///     The number of placement matches the player has completed in the current season.
     ///     Players must complete placement matches before receiving their seasonal medal rank.
     /// </summary>
+    /// <remarks>
+    ///     The total expected number of placement matches is 6.
+    /// </remarks>
     [PhpProperty("placement_matches")]
-    public required int PlacementMatches { get; init; }
+    public int PlacementMatches { get; init; } = 6;
 
     /// <summary>
     ///     The number of placement matches won by the player in the current season.
     /// </summary>
     [PhpProperty("placement_wins")]
-    public required string PlacementWins { get; init; }
+    public string PlacementWins { get; init; } = matchmakingStatistics?.PlacementMatchesData ?? string.Empty;
 
     /// <summary>
     ///     The player's current ranking position on the Immortal leaderboard.
-    ///     Only populated for Immortal rank players (medal 21) with a ranking between 1 and 100.
+    ///     Only populated for Immortal rank players (medal index 20) with a ranking between 1 and 100.
     ///     Not present in the response for players below Immortal rank or outside the top 100.
     /// </summary>
     [PhpProperty("ranking")]
-    public string? Ranking { get; init; }
+    public string? Ranking => RankExtensions.GetRank(matchmakingStatistics.SkillRating) is Rank.IMMORTAL ? 1.ToString() : null; // TODO: Implement Actual Leaderboard Ranking Retrieval
 }
 
 public class MatchPlayerInventory
