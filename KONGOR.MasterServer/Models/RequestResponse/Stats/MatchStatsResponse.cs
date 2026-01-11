@@ -38,6 +38,7 @@ public class MatchStatsResponse
     /// <summary>
     ///     Mastery details for the hero played in the match.
     /// </summary>
+    [PhpProperty("match_mastery")]
     public required MatchMastery MatchMastery { get; init; }
 
     /// <summary>
