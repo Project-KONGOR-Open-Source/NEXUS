@@ -1,36 +1,36 @@
 ﻿namespace KONGOR.MasterServer.Models.RequestResponse.Stats;
 
-public class SeasonProgress
+public class SeasonProgress(MatchStartData matchStartData, PlayerStatistics playerStatistics, AccountStatistics matchmakingStatistics)
 {
     /// <summary>
     ///     The player's account ID.
     /// </summary>
     [PhpProperty("account_id")]
-    public required int AccountID { get; init; }
+    public int AccountID { get; init; } = playerStatistics.AccountID;
 
     /// <summary>
     ///     The unique identifier for the match.
     /// </summary>
     [PhpProperty("match_id")]
-    public required int MatchID { get; init; }
+    public int MatchID { get; init; } = playerStatistics.MatchID;
 
     /// <summary>
     ///     Whether the match was a casual ranked match ("1") or competitive ranked match ("0").
     /// </summary>
     [PhpProperty("is_casual")]
-    public required string IsCasual { get; init; }
+    public string IsCasual { get; init; } = matchStartData.IsCasual.ToString();
 
     /// <summary>
     ///     The player's Matchmaking Rating (MMR) before the match.
     /// </summary>
     [PhpProperty("mmr_before")]
-    public required string MMRBefore { get; init; }
+    public string MMRBefore { get; init; } = (matchmakingStatistics.SkillRating + playerStatistics.RankedSkillRatingChange).ToString();
 
     /// <summary>
     ///     The player's Matchmaking Rating (MMR) after the match.
     /// </summary>
     [PhpProperty("mmr_after")]
-    public required string MMRAfter { get; init; }
+    public string MMRAfter { get; init; } = matchmakingStatistics.SkillRating.ToString();
 
     /// <summary>
     ///     The player's medal rank before the match.
@@ -44,33 +44,33 @@ public class SeasonProgress
     ///     </code>
     /// </summary>
     [PhpProperty("medal_before")]
-    public required string MedalBefore { get; init; }
+    public string MedalBefore { get; init; } = ((int) RankExtensions.GetRank(matchmakingStatistics.SkillRating + playerStatistics.RankedSkillRatingChange)).ToString();
 
     /// <summary>
     ///     The player's medal rank after the match.
     ///     Uses the same medal ranking system as "medal_before".
     /// </summary>
     [PhpProperty("medal_after")]
-    public required string MedalAfter { get; init; }
+    public string MedalAfter { get; init; } = ((int) RankExtensions.GetRank(matchmakingStatistics.SkillRating)).ToString();
 
     /// <summary>
     ///     The seasonal campaign identifier.
     /// </summary>
     [PhpProperty("season")]
-    public required string Season { get; init; }
+    public string Season { get; init; } = 12.ToString();
 
     /// <summary>
     ///     The number of placement matches the player has completed in the current season.
     ///     Players must complete placement matches before receiving their seasonal medal rank.
     /// </summary>
     [PhpProperty("placement_matches")]
-    public required int PlacementMatches { get; init; }
+    public int PlacementMatches { get; init; } = 6;
 
     /// <summary>
     ///     The number of placement matches won by the player in the current season.
     /// </summary>
     [PhpProperty("placement_wins")]
-    public required string PlacementWins { get; init; }
+    public string PlacementWins { get; init; } = matchmakingStatistics?.PlacementMatchesData ?? string.Empty;
 
     /// <summary>
     ///     The player's current ranking position on the Immortal leaderboard.
@@ -78,5 +78,5 @@ public class SeasonProgress
     ///     Not present in the response for players below Immortal rank or outside the top 100.
     /// </summary>
     [PhpProperty("ranking")]
-    public string? Ranking { get; init; }
+    public string? Ranking => RankExtensions.GetRank(matchmakingStatistics.SkillRating) is Rank.IMMORTAL ? 1.ToString() : null; // TODO: Implement Actual Leaderboard Ranking Retrieval
 }

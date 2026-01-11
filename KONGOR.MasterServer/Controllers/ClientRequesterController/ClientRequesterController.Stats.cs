@@ -244,6 +244,8 @@ public partial class ClientRequesterController
         List<PlayerStatistics> allPlayerStatistics = await MerrickContext.PlayerStatistics
             .Where(playerStatistics => playerStatistics.MatchID == matchStatistics.MatchID).ToListAsync();
 
+
+
         string? accountName = HttpContext.Items["SessionAccountName"] as string
                               ?? await DistributedCache.GetAccountNameForSessionCookie(cookie);
 
@@ -284,6 +286,12 @@ public partial class ClientRequesterController
 
         // Fetch real accounts
         List<int> playerAccountIDs = allPlayerStatistics.Select(s => s.AccountID).Distinct().ToList();
+
+        // New Logic: Fetch Account Statistics
+        List<AccountStatistics> allAccountStatistics = await MerrickContext.AccountStatistics
+            .Where(stats => playerAccountIDs.Contains(stats.AccountID))
+            .ToListAsync();
+
         List<Account> playerAccounts = await MerrickContext.Accounts
             .Include(a => a.User)
             .Include(a => a.Clan)
@@ -322,34 +330,37 @@ public partial class ClientRequesterController
                 };
             }
 
-            matchPlayerStatistics[stats.AccountID] = new MatchPlayerStatistics(playerAccount, stats)
+
+
+            // Fetch Stats or Create Dummies
+            AccountStatistics? accountStatistics =
+                allAccountStatistics.SingleOrDefault(s => s.AccountID == stats.AccountID);
+
+            accountStatistics ??= new AccountStatistics
             {
-                TotalWonMatches = "0", // TODO: Implement
-                TotalLostMatches = "0", // TODO: Implement
-                TotalConcededMatches = "0", // TODO: Implement
-                TotalDisconnections = "0", // TODO: Implement
-                TotalKicks = "0", // TODO: Implement
-                PublicMatchRating = "1500.0", // TODO: Implement
-                PublicMatchCount = "0", // TODO: Implement
-                SoloRankedMatchRating = "1500.0", // TODO: Implement
-                SoloRankedMatchCount = "0", // TODO: Implement
-                TeamRankedMatchRating = "1500.0", // TODO: Implement
-                TeamRankedMatchCount = "0", // TODO: Implement
-                PerformanceScore = "0.00", // TODO: Implement
+                AccountID = stats.AccountID,
+                MatchesPlayed = 0,
+                MatchesWon = 0,
+                MatchesLost = 0,
+                MatchesConceded = 0,
+                MatchesDisconnected = 0,
+                MatchesKicked = 0,
+                SkillRating = 1500.0,
+                PerformanceScore = 0.0,
+                PlacementMatchesData = ""
+            };
+
+            // For now, we reuse the same stats object for all modes as they are not split in DB yet
+            matchPlayerStatistics[stats.AccountID] = new MatchPlayerStatistics(
+                matchStartData,
+                playerAccount,
+                stats,
+                accountStatistics, // Current
+                accountStatistics, // Public
+                accountStatistics  // Matchmaking
+            )
+            {
                 HeroIdentifier = "Hero_Backpack", // TODO: Implement Hero Identifier Mapping
-                SeasonProgress = new SeasonProgress
-                {
-                    AccountID = stats.AccountID,
-                    MatchID = stats.MatchID,
-                    IsCasual = "0",
-                    MMRBefore = "1500",
-                    MMRAfter = "1500",
-                    MedalBefore = "0",
-                    MedalAfter = "0",
-                    Season = "12",
-                    PlacementMatches = 0,
-                    PlacementWins = "0"
-                }
             };
 
             matchPlayerInventories[stats.AccountID] = new MatchPlayerInventory

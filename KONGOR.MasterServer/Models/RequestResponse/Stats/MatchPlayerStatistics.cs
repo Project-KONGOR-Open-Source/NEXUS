@@ -1,6 +1,6 @@
 ﻿namespace KONGOR.MasterServer.Models.RequestResponse.Stats;
 
-public class MatchPlayerStatistics(Account account, PlayerStatistics playerStatistics)
+public class MatchPlayerStatistics(MatchStartData matchStartData, Account account, PlayerStatistics playerStatistics, AccountStatistics currentMatchTypeStatistics, AccountStatistics publicMatchStatistics, AccountStatistics matchmakingStatistics)
 {
     /// <summary>
     ///     The unique identifier for the match.
@@ -54,19 +54,19 @@ public class MatchPlayerStatistics(Account account, PlayerStatistics playerStati
     ///     The number of wins on the player's account.
     /// </summary>
     [PhpProperty("wins")]
-    public required string TotalWonMatches { get; init; }
+    public string TotalWonMatches { get; init; } = currentMatchTypeStatistics.MatchesWon.ToString();
 
     /// <summary>
     ///     The number of losses on the player's account.
     /// </summary>
     [PhpProperty("losses")]
-    public required string TotalLostMatches { get; init; }
+    public string TotalLostMatches { get; init; } = currentMatchTypeStatistics.MatchesLost.ToString();
 
     /// <summary>
     ///     The number of conceded matches on the player's account.
     /// </summary>
     [PhpProperty("concedes")]
-    public required string TotalConcededMatches { get; init; }
+    public string TotalConcededMatches { get; init; } = currentMatchTypeStatistics.MatchesConceded.ToString();
 
     /// <summary>
     ///     The number of concede votes the player cast during the match.
@@ -84,55 +84,55 @@ public class MatchPlayerStatistics(Account account, PlayerStatistics playerStati
     ///     The number of disconnections on the player's account.
     /// </summary>
     [PhpProperty("discos")]
-    public required string TotalDisconnections { get; init; }
+    public string TotalDisconnections { get; init; } = currentMatchTypeStatistics.MatchesDisconnected.ToString();
 
     /// <summary>
     ///     The number of times the player was kicked from matches on their account.
     /// </summary>
     [PhpProperty("kicked")]
-    public required string TotalKicks { get; init; }
+    public string TotalKicks { get; init; } = currentMatchTypeStatistics.MatchesKicked.ToString();
 
     /// <summary>
     ///     The player's Public Skill Rating (PSR).
     /// </summary>
     [PhpProperty("pub_skill")]
-    public required string PublicMatchRating { get; init; }
+    public string PublicMatchRating { get; init; } = publicMatchStatistics.SkillRating.ToString();
 
     /// <summary>
     ///     The number of public matches played on the player's account.
     /// </summary>
     [PhpProperty("pub_count")]
-    public required string PublicMatchCount { get; init; }
+    public string PublicMatchCount { get; init; } = publicMatchStatistics.MatchesPlayed.ToString();
 
     /// <summary>
     ///     The player's solo Matchmaking Rating (MMR).
     /// </summary>
     [PhpProperty("amm_solo_rating")]
-    public required string SoloRankedMatchRating { get; init; }
+    public string SoloRankedMatchRating { get; init; } = matchmakingStatistics.SkillRating.ToString();
 
     /// <summary>
     ///     The number of solo ranked matches played on the player's account.
     /// </summary>
     [PhpProperty("amm_solo_count")]
-    public required string SoloRankedMatchCount { get; init; }
+    public string SoloRankedMatchCount { get; init; } = matchmakingStatistics.MatchesPlayed.ToString();
 
     /// <summary>
     ///     The player's team Matchmaking Rating (MMR).
     /// </summary>
     [PhpProperty("amm_team_rating")]
-    public required string TeamRankedMatchRating { get; init; }
+    public string TeamRankedMatchRating { get; init; } = matchmakingStatistics.SkillRating.ToString();
 
     /// <summary>
     ///     The number of team ranked matches played on the player's account.
     /// </summary>
     [PhpProperty("amm_team_count")]
-    public required string TeamRankedMatchCount { get; init; }
+    public string TeamRankedMatchCount { get; init; } = matchmakingStatistics.MatchesPlayed.ToString();
 
     /// <summary>
     ///     The player's performance score across all matches, calculated as (Kills + Assists) / Max(1, Deaths).
     /// </summary>
     [PhpProperty("avg_score")]
-    public required string PerformanceScore { get; init; }
+    public string PerformanceScore { get; init; } = currentMatchTypeStatistics.PerformanceScore.ToString("F2");
 
     /// <summary>
     ///     The number of enemy hero kills achieved by the player in the match.
@@ -451,5 +451,7 @@ public class MatchPlayerStatistics(Account account, PlayerStatistics playerStati
     ///     Seasonal campaign progression information for the player in the match.
     /// </summary>
     [PhpProperty("campaign_info")]
-    public required SeasonProgress SeasonProgress { get; init; }
+    public SeasonProgress SeasonProgress { get; init; } = new (matchStartData, playerStatistics, matchmakingStatistics);
 }
+
+
