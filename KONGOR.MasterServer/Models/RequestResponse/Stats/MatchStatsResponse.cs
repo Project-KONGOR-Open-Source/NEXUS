@@ -153,7 +153,7 @@ public class MatchStatsResponse
     ///     Statistics related to the Champions Of Newerth seasonal campaign.
     /// </summary>
     [PhpProperty("con_reward")]
-    public required CampaignReward CampaignReward { get; init; } = new ();
+    public CampaignReward CampaignReward { get; init; } = new ();
 
     /// <summary>
     ///     The minimum number of matches a free-to-play (trial) account must complete to become verified.
