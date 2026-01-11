@@ -602,9 +602,6 @@ public partial class ClientRequesterController
                 // Keep debug log
                 Console.WriteLine($"[DEBUG_MATCH_HISTORY_CSV] {matchData}");
                 
-                // Keep debug log
-                Console.WriteLine($"[DEBUG_MATCH_HISTORY_CSV] {matchData}");
-            
             matchHistoryOverview.Add("m" + i, matchData);
             i++;
          }
