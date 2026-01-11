@@ -311,6 +311,53 @@ namespace MERRICK.DatabaseContext.Migrations
                     b.ToTable("Notifications", "misc");
                 });
 
+            modelBuilder.Entity("MERRICK.DatabaseContext.Entities.Statistics.AccountStatistics", b =>
+                {
+                    b.Property<int>("AccountID")
+                        .HasColumnType("int")
+                        .HasColumnName("account_id");
+
+                    b.Property<int>("MatchesConceded")
+                        .HasColumnType("int")
+                        .HasColumnName("matches_conceded");
+
+                    b.Property<int>("MatchesDisconnected")
+                        .HasColumnType("int")
+                        .HasColumnName("matches_disconnected");
+
+                    b.Property<int>("MatchesKicked")
+                        .HasColumnType("int")
+                        .HasColumnName("matches_kicked");
+
+                    b.Property<int>("MatchesLost")
+                        .HasColumnType("int")
+                        .HasColumnName("matches_lost");
+
+                    b.Property<int>("MatchesPlayed")
+                        .HasColumnType("int")
+                        .HasColumnName("matches_played");
+
+                    b.Property<int>("MatchesWon")
+                        .HasColumnType("int")
+                        .HasColumnName("matches_won");
+
+                    b.Property<double>("PerformanceScore")
+                        .HasColumnType("float")
+                        .HasColumnName("performance_score");
+
+                    b.Property<string>("PlacementMatchesData")
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("placement_matches_data");
+
+                    b.Property<double>("SkillRating")
+                        .HasColumnType("float")
+                        .HasColumnName("skill_rating");
+
+                    b.HasKey("AccountID");
+
+                    b.ToTable("AccountStatistics", "data");
+                });
+
             modelBuilder.Entity("MERRICK.DatabaseContext.Entities.Statistics.MatchStatistics", b =>
                 {
                     b.Property<int>("ID")

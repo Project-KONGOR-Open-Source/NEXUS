@@ -41,6 +41,12 @@ public sealed class MerrickContext : DbContext
         ConfigureAccounts(builder.Entity<Account>());
         ConfigurePlayerStatistics(builder.Entity<PlayerStatistics>());
         ConfigureMatchStatistics(builder.Entity<MatchStatistics>());
+        ConfigureAccountStatistics(builder.Entity<AccountStatistics>());
+    }
+
+    private static void ConfigureAccountStatistics(EntityTypeBuilder<AccountStatistics> builder)
+    {
+        builder.Property(s => s.AccountID).ValueGeneratedNever();
     }
 
     private static void ConfigureSchemas(ModelBuilder builder)
@@ -48,6 +54,7 @@ public sealed class MerrickContext : DbContext
         builder.HasDefaultSchema(DefaultSchema);
 
         builder.Entity<Account>().ToTable("Accounts", CoreSchema);
+        builder.Entity<AccountStatistics>().ToTable("AccountStatistics", DefaultSchema);
         builder.Entity<Clan>().ToTable("Clans", CoreSchema);
         builder.Entity<HeroGuide>().ToTable("HeroGuides", MiscellaneousSchema);
         builder.Entity<MatchStatistics>().ToTable("MatchStatistics", StatisticsSchema);

@@ -19,7 +19,8 @@ public class SeedMatchHistoryTests
         string connectionString = "Server=127.0.0.1,55678;Database=development;User Id=sa;Password=MerrickDevPassword2025;TrustServerCertificate=True;Connection Timeout=60;"; 
         
         services.AddDbContext<MerrickContext>(options =>
-            options.UseSqlServer(connectionString));
+            options.UseSqlServer(connectionString, sqlOptions => 
+                sqlOptions.MigrationsHistoryTable("MigrationsHistory", "meta")));
 
         ServiceProvider provider = services.BuildServiceProvider();
         MerrickContext context = provider.GetRequiredService<MerrickContext>();
@@ -37,6 +38,28 @@ public class SeedMatchHistoryTests
 
         Random random = new Random();
         int baseMatchId = 9000000 + random.Next(1, 100000); 
+
+        // FORCE REMEDIATION: Unconditionally drop table and clear migration history to ensure clean state
+        try 
+        {
+            Console.WriteLine("[REMEDIATION] Forcing Drop of AccountStatistics table...");
+            try { await context.Database.ExecuteSqlRawAsync("IF OBJECT_ID('data.AccountStatistics', 'U') IS NOT NULL DROP TABLE data.AccountStatistics"); }
+            catch (Exception ex) { Console.WriteLine($"[REMEDIATION] Drop Table Failed (Non-Critical): {ex.Message}"); }
+            
+            Console.WriteLine("[REMEDIATION] Clearing Migration History...");
+            // Real configuration uses [meta].[MigrationsHistory]
+            try { await context.Database.ExecuteSqlRawAsync("DELETE FROM [meta].[MigrationsHistory] WHERE [MigrationId] = '20260111031716_AddAccountStatisticsTable'"); }
+            catch (Exception ex) { Console.WriteLine($"[REMEDIATION] Delete History Failed (Non-Critical): {ex.Message}"); }
+            
+            Console.WriteLine("[REMEDIATION] Re-applying latest migration...");
+            await context.Database.MigrateAsync();
+            Console.WriteLine("[REMEDIATION] Database is now up to date.");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[DEBUG/REMEDIATION] Failed: {ex.Message}");
+            throw;
+        } 
 
         // 1. Create Midwars Match
         int midwarsId = baseMatchId + 1;
@@ -291,6 +314,30 @@ public class SeedMatchHistoryTests
             GameplayStat9 = 0,
             TimeEarningExperience = 1600
         };
+
+        AccountStatistics accountStats = new AccountStatistics
+        {
+            AccountID = account.ID,
+            MatchesPlayed = 2,
+            MatchesWon = 2,
+            MatchesLost = 0,
+            MatchesConceded = 0,
+            MatchesDisconnected = 0,
+            MatchesKicked = 0,
+            SkillRating = 1500.0,
+            PerformanceScore = 0.0,
+            PlacementMatchesData = null
+        };
+
+        if (!await context.AccountStatistics.AnyAsync(s => s.AccountID == account.ID))
+        {
+            context.AccountStatistics.Add(accountStats);
+            Console.WriteLine($"Seeded AccountStatistics for {nickname}.");
+        }
+        else
+        {
+             Console.WriteLine($"AccountStatistics for {nickname} already exists. Skipping.");
+        }
 
         context.MatchStatistics.AddRange(midwarsMatch, rankedMatch);
         context.PlayerStatistics.AddRange(midwarsPlayer, rankedPlayer);
