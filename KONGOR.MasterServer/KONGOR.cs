@@ -1,4 +1,5 @@
 ﻿using KONGOR.MasterServer.Infrastructure;
+using KONGOR.MasterServer.Services;
 
 using Serilog;
 
@@ -79,6 +80,9 @@ public class KONGOR
 
         // Add Memory Cache Service
         builder.Services.AddMemoryCache();
+
+        // Register Hero Definition Service (Dynamic Upgrades.JSON mapping)
+        builder.Services.AddSingleton<IHeroDefinitionService, HeroDefinitionService>();
 
         // Add Rate Limiting Service To Protect Against Abuse And DoS Attacks
         builder.Services.AddRateLimiter(options =>

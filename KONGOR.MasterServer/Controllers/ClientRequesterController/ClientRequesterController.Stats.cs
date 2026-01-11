@@ -1,5 +1,7 @@
 ﻿using Role = MERRICK.DatabaseContext.Entities.Utility.Role;
 
+using KONGOR.MasterServer.Constants;
+
 namespace KONGOR.MasterServer.Controllers.ClientRequesterController;
 
 public partial class ClientRequesterController
@@ -350,6 +352,9 @@ public partial class ClientRequesterController
                 PlacementMatchesData = ""
             };
 
+            string heroIdentifier = HeroDefinitionService.GetHeroIdentifier(stats.HeroProductID ?? 0);
+            Logger.LogInformation($"[DEBUG_MATCH_DETAILS] AccountID: {stats.AccountID}, HeroID: {stats.HeroProductID}, Identifier: {heroIdentifier}");
+
             // For now, we reuse the same stats object for all modes as they are not split in DB yet
             matchPlayerStatistics[stats.AccountID] = new MatchPlayerStatistics(
                 matchStartData,
@@ -360,19 +365,21 @@ public partial class ClientRequesterController
                 accountStatistics  // Matchmaking
             )
             {
-                HeroIdentifier = "Hero_Backpack", // TODO: Implement Hero Identifier Mapping
+                HeroIdentifier = heroIdentifier,
             };
 
+            // Map Inventory Logic
+            List<string> inv = stats.Inventory ?? new List<string>();
             matchPlayerInventories[stats.AccountID] = new MatchPlayerInventory
             {
                 AccountID = stats.AccountID,
                 MatchID = matchStatistics.ID,
-                Slot1 = "",
-                Slot2 = "",
-                Slot3 = "",
-                Slot4 = "",
-                Slot5 = "",
-                Slot6 = "" // TODO: Populate from Inventory History/Events if available
+                Slot1 = inv.Count > 0 ? inv[0] : "",
+                Slot2 = inv.Count > 1 ? inv[1] : "",
+                Slot3 = inv.Count > 2 ? inv[2] : "",
+                Slot4 = inv.Count > 3 ? inv[3] : "",
+                Slot5 = inv.Count > 4 ? inv[4] : "",
+                Slot6 = inv.Count > 5 ? inv[5] : ""
             };
         }
 
@@ -541,8 +548,9 @@ public partial class ClientRequesterController
                  query = query.Where(x => false);
                  break;
         }
+
         var historyData = await query
-            .OrderByDescending(x => x.ps.MatchID)
+            .OrderByDescending(x => x.ms.TimestampRecorded)
             .Take(100)
             .Select(x => new 
             { 
@@ -570,21 +578,32 @@ public partial class ClientRequesterController
              int duration = match.TimePlayed;
              string matchName = match.FileName;
              
-             // Map display names if needed, but client usually handles "caldavar" -> "Forests of Caldavar"
-             
-             string matchData = string.Join(',',
-                match.MatchID,
-                match.Win,
-                match.Team,
-                match.HeroKills,
-                match.HeroDeaths,
-                match.HeroAssists,
-                match.HeroProductID ?? 0,
-                duration,
-                map,
-                date,
-                matchName
-            );
+             // Map display names if needed, but client
+                // 2026-01-11: Protocol Fix - Match History expects Base Hero ID (Integer), NOT Product ID or String Identifier.
+                // We resolve ProductID -> BaseID via HeroDefinitionService.
+                uint baseHeroId = HeroDefinitionService.GetBaseHeroId(match.HeroProductID ?? 0);
+                
+                string heroIdentifierString = HeroDefinitionService.GetHeroIdentifier(match.HeroProductID ?? 0);
+                
+                string matchData = string.Join(',',
+                    match.MatchID,
+                    match.Win, // Already int (0 or 1)
+                    match.Team,
+                    match.HeroKills,
+                    match.HeroDeaths,
+                    match.HeroAssists,
+                    baseHeroId, // Send Base ID (e.g. 12) instead of Product ID (e.g. 121)
+                    duration,
+                    map,
+                    date,
+                    heroIdentifierString // FIX: Client uses 11th column for Icon path
+                );
+                
+                // Keep debug log
+                Console.WriteLine($"[DEBUG_MATCH_HISTORY_CSV] {matchData}");
+                
+                // Keep debug log
+                Console.WriteLine($"[DEBUG_MATCH_HISTORY_CSV] {matchData}");
             
             matchHistoryOverview.Add("m" + i, matchData);
             i++;

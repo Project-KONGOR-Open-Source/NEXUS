@@ -5,6 +5,15 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <Content Update="Data\Seed\Coupons.JSON">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Content>
+        <Content Update="Data\Seed\Upgrades.JSON">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Content>
+    </ItemGroup>
+
+    <ItemGroup>
         <PackageReference Include="Aspire.StackExchange.Redis.DistributedCaching" Version="13.1.0"/>
         <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.1">
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

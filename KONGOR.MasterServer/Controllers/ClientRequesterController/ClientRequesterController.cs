@@ -1,4 +1,6 @@
-﻿namespace KONGOR.MasterServer.Controllers.ClientRequesterController;
+﻿using KONGOR.MasterServer.Services;
+
+namespace KONGOR.MasterServer.Controllers.ClientRequesterController;
 
 [ApiController]
 [Route("client_requester.php")]
@@ -6,11 +8,13 @@
 public partial class ClientRequesterController(
     MerrickContext databaseContext,
     IDatabase distributedCache,
-    ILogger<ClientRequesterController> logger) : ControllerBase
+    ILogger<ClientRequesterController> logger,
+    IHeroDefinitionService heroDefinitionService) : ControllerBase
 {
     private MerrickContext MerrickContext { get; } = databaseContext;
     private IDatabase DistributedCache { get; } = distributedCache;
     private ILogger Logger { get; } = logger;
+    private IHeroDefinitionService HeroDefinitionService { get; } = heroDefinitionService;
 
     [HttpPost(Name = "Client Requester All-In-One")]
     [HttpGet]
