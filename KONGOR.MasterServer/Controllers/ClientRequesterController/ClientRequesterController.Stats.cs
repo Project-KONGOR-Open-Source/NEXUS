@@ -1,6 +1,4 @@
-﻿using KONGOR.MasterServer.Models.RequestResponse.Stats;
-using KONGOR.MasterServer.Extensions.Cache;
-using Role = MERRICK.DatabaseContext.Entities.Utility.Role;
+﻿using Role = MERRICK.DatabaseContext.Entities.Utility.Role;
 
 namespace KONGOR.MasterServer.Controllers.ClientRequesterController;
 
@@ -508,80 +506,88 @@ public partial class ClientRequesterController
 
     private async Task<IActionResult> HandleMatchHistoryOverview()
     {
-        // Corresponds to 'match_history_overview' in legacy code.
-        // Returns CSV details for the grid view.
-        // Format keys: m0, m1, m2...
-        // Format values: match_id,wins,team,herokills,deaths,heroassists,hero_id,secs,map,mdt,cli_name
-        
         string? nickname = Request.Form["nickname"];
+        string? table = Request.Form["table"];
 
         if (string.IsNullOrEmpty(nickname))
         {
              return BadRequest("Missing nickname");
         }
         
-        // Fetch last 100 matches with details
-        var historyData = await MerrickContext.PlayerStatistics
-            .Where(ps => ps.AccountName == nickname)
-            .OrderByDescending(ps => ps.MatchID)
+        var query = from ps in MerrickContext.PlayerStatistics
+                    join ms in MerrickContext.MatchStatistics on ps.MatchID equals ms.MatchID
+                    where ps.AccountName == nickname
+                    select new { ps, ms };
+                    
+        switch (table)
+        {
+            case "campaign": // Season Normal (Ranked)
+                query = query.Where(x => x.ps.RankedMatch == 1);
+                break;
+            case "player": // Public Game Stats
+                 query = query.Where(x => x.ps.PublicMatch == 1);
+                 break;
+            case "midwars": // Others/Midwars
+            case "other":
+            case "others":
+                 query = query.Where(x => x.ms.GameMode == "midwars");
+                 break;
+            case "riftwars": // Riftwars
+                 query = query.Where(x => x.ms.GameMode == "riftwars");
+                 break;
+            default:
+                 // Strict filtering: If table is unknown or missing, return nothing.
+                 // This prevents "Others" (if sending a new key) from showing Public matches by accident.
+                 query = query.Where(x => false);
+                 break;
+        }
+        var historyData = await query
+            .OrderByDescending(x => x.ps.MatchID)
             .Take(100)
-            .Select(ps => new 
-            {
-                ps.MatchID,
-                ps.Team,
-                ps.HeroKills,
-                ps.HeroDeaths,
-                ps.HeroAssists,
-                ps.HeroProductID,
-                ps.Win // Directly use the stored Win value
+            .Select(x => new 
+            { 
+                x.ps.MatchID,
+                x.ps.Team,
+                x.ps.HeroKills,
+                x.ps.HeroDeaths,
+                x.ps.HeroAssists,
+                x.ps.HeroProductID,
+                x.ps.Win,
+                x.ms.Map,
+                x.ms.TimestampRecorded,
+                x.ms.TimePlayed,
+                x.ms.FileName
             })
             .ToListAsync();
             
          Dictionary<string, string> matchHistoryOverview = new();
          
-         if (historyData.Any())
+         int i = 0;
+         foreach (var match in historyData)
          {
-             List<int> matchIds = historyData.Select(h => h.MatchID).ToList();
+             string map = match.Map;
+             string date = match.TimestampRecorded.ToString("MM/dd/yyyy");
+             int duration = match.TimePlayed;
+             string matchName = match.FileName;
              
-             // Fetch match details
-             var matchInfos = await MerrickContext.MatchStatistics
-                .Where(m => matchIds.Contains(m.MatchID))
-                .Select(m => new { m.MatchID, m.Map, m.TimestampRecorded, m.FileName, m.TimePlayed })
-                .ToDictionaryAsync(m => m.MatchID);
-
-             int i = 0;
-             foreach (var pStat in historyData)
-             {
-                 string map = "caldavar";
-                 string date = DateTime.UtcNow.ToString("MM/dd/yyyy");
-                 int duration = 0;
-                 string matchName = "";
-                 
-                 if (matchInfos.TryGetValue(pStat.MatchID, out var mStat))
-                 {
-                     map = mStat.Map;
-                     date = mStat.TimestampRecorded.ToString("MM/dd/yyyy");
-                     duration = mStat.TimePlayed;
-                     matchName = mStat.FileName;
-                 }
-                 
-                 string matchData = string.Join(',',
-                    pStat.MatchID,
-                    pStat.Win,
-                    pStat.Team,
-                    pStat.HeroKills,
-                    pStat.HeroDeaths,
-                    pStat.HeroAssists,
-                    pStat.HeroProductID ?? 0,
-                    duration,
-                    map,
-                    date,
-                    matchName
-                );
-                
-                matchHistoryOverview.Add("m" + i, matchData);
-                i++;
-             }
+             // Map display names if needed, but client usually handles "caldavar" -> "Forests of Caldavar"
+             
+             string matchData = string.Join(',',
+                match.MatchID,
+                match.Win,
+                match.Team,
+                match.HeroKills,
+                match.HeroDeaths,
+                match.HeroAssists,
+                match.HeroProductID ?? 0,
+                duration,
+                map,
+                date,
+                matchName
+            );
+            
+            matchHistoryOverview.Add("m" + i, matchData);
+            i++;
          }
          
          return Ok(PhpSerialization.Serialize(matchHistoryOverview));
