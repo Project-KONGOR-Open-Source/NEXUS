@@ -210,6 +210,20 @@ public partial class ClientRequesterController
 
         // TODO: Add Mastery Boosts And Coupons
 
+        /*
+            Dictionary<string, object> myUpgradesInfo = accountDetails.UnlockedUpgradeCodes
+                .Where(upgrade => upgrade.StartsWith("ma.").Equals(false) && upgrade.StartsWith("cp.").Equals(false))
+                .ToDictionary<string, string, object>(upgrade => upgrade, upgrade => new MyUpgradesInfoEntry());
+
+            foreach (string boost in GameConsumables.GetOwnedMasteryBoostProducts(accountDetails.UnlockedUpgradeCodes))
+                myUpgradesInfo.Add(boost, new MyUpgradesInfoEntry());
+
+            foreach (KeyValuePair<string, Coupon> coupon in GameConsumables.GetOwnedCoupons(accountDetails.UnlockedUpgradeCodes))
+                myUpgradesInfo.Add(coupon.Key, coupon.Value);
+
+            return myUpgradesInfo;
+         */
+
         return items;
     }
 }
