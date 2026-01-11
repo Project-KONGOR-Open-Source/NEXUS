@@ -21,7 +21,7 @@ public class MatchmakingService : BackgroundService, IDisposable
 
     public override void Dispose()
     {
-        Groups.Clear();
+
 
         base.Dispose();
 

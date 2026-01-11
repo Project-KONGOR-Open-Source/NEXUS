@@ -6,6 +6,7 @@ public class GroupPlayerReadyStatus : ISynchronousCommandProcessor<ChatSession>
     public void Process(ChatSession session, ChatBuffer buffer)
     {
         GroupPlayerReadyStatusRequestData requestData = new(buffer);
+        Serilog.Log.Information("[DEBUG] GroupPlayerReadyStatus Parsed: Ready={ReadyStatus}, GameType={GameType} ({(int)requestData.GameType})", requestData.ReadyStatus, requestData.GameType, (int)requestData.GameType);
 
         MatchmakingGroup
             .GetByMemberAccountID(session.Account.ID)

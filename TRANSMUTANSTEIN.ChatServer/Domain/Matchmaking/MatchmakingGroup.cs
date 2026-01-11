@@ -511,7 +511,10 @@ public class MatchmakingGroup
                 member.IsReady = member.IsLeader is false;
             }
 
-            // TODO: Remove From Queue If Queued
+            if (QueueStartTime is not null)
+            {
+                LeaveQueue(accountID);
+            }
 
             // TODO: Leave Group Chat Channel
 
@@ -519,6 +522,43 @@ public class MatchmakingGroup
             MulticastUpdate(accountID, ChatProtocol.TMMUpdateType.TMM_FULL_GROUP_UPDATE);
         }
     }
+
+    /// <summary>
+    ///     Removes the group from the matchmaking queue and resets member readiness.
+    ///     Broadcasts LEAVE_QUEUE message to all members.
+    /// </summary>
+    public void LeaveQueue(int emitterAccountID)
+    {
+        lock (_lock)
+        {
+            if (QueueStartTime is null)
+            {
+                return;
+            }
+
+            // Remove Group From Queue
+            QueueStartTime = null;
+
+            // Unready The Group Leader And Unload All Members
+            // Non-Leader Members Should Always Be Ready So That Group Readiness Is Determined Solely By The Leader
+            foreach (MatchmakingGroupMember member in Members)
+            {
+                member.IsReady = member.IsLeader is false;
+                member.LoadingPercent = 0;
+            }
+
+            // Broadcast Leave Queue To All Group Members
+            ChatBuffer leaveQueueBroadcast = new();
+
+            leaveQueueBroadcast.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_LEAVE_QUEUE);
+
+            foreach (MatchmakingGroupMember member in Members)
+            {
+                member.Session.Send(leaveQueueBroadcast);
+            }
+        }
+    }
+
 
     /// <summary>
     ///     Removes the specified member from the group and records the action as a kick.
@@ -568,5 +608,5 @@ public class MatchmakingGroup
         // TODO: Remove From Queue If Queued
 
         // TODO: Remove All Members From Group Chat Channel
-    }
-}
+    }}
+    
