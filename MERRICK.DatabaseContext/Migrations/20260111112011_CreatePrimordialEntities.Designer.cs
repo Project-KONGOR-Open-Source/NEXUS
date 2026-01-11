@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MERRICK.DatabaseContext.Migrations
 {
     [DbContext(typeof(MerrickContext))]
-    [Migration("20260104230505_CreatePrimordialEntities")]
+    [Migration("20260111112011_CreatePrimordialEntities")]
     partial class CreatePrimordialEntities
     {
         /// <inheritdoc />
@@ -284,6 +284,61 @@ namespace MERRICK.DatabaseContext.Migrations
                     b.HasIndex("AuthorID");
 
                     b.ToTable("HeroGuides", "misc");
+                });
+
+            modelBuilder.Entity("MERRICK.DatabaseContext.Entities.Statistics.AccountStatistics", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
+
+                    b.Property<int>("AccountID")
+                        .HasColumnType("int");
+
+                    b.Property<int>("HeroAssists")
+                        .HasColumnType("int");
+
+                    b.Property<int>("HeroDeaths")
+                        .HasColumnType("int");
+
+                    b.Property<int>("HeroKills")
+                        .HasColumnType("int");
+
+                    b.Property<int>("MatchesConceded")
+                        .HasColumnType("int");
+
+                    b.Property<int>("MatchesDisconnected")
+                        .HasColumnType("int");
+
+                    b.Property<int>("MatchesKicked")
+                        .HasColumnType("int");
+
+                    b.Property<int>("MatchesLost")
+                        .HasColumnType("int");
+
+                    b.Property<int>("MatchesPlayed")
+                        .HasColumnType("int");
+
+                    b.Property<int>("MatchesWon")
+                        .HasColumnType("int");
+
+                    b.Property<string>("PlacementMatchesData")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<double>("SkillRating")
+                        .HasColumnType("float");
+
+                    b.Property<int>("StatisticsType")
+                        .HasColumnType("int");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("AccountID", "StatisticsType")
+                        .IsUnique();
+
+                    b.ToTable("AccountStatistics", "stat");
                 });
 
             modelBuilder.Entity("MERRICK.DatabaseContext.Entities.Statistics.MatchStatistics", b =>
@@ -579,6 +634,10 @@ namespace MERRICK.DatabaseContext.Migrations
 
                     b.Property<int>("HeroExperience")
                         .HasColumnType("int");
+
+                    b.Property<string>("HeroIdentifier")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("HeroKills")
                         .HasColumnType("int");

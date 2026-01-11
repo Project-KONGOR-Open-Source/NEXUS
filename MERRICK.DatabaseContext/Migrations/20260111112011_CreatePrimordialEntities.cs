@@ -17,13 +17,39 @@ namespace MERRICK.DatabaseContext.Migrations
                 name: "core");
 
             migrationBuilder.EnsureSchema(
-                name: "misc");
-
-            migrationBuilder.EnsureSchema(
                 name: "stat");
 
             migrationBuilder.EnsureSchema(
+                name: "misc");
+
+            migrationBuilder.EnsureSchema(
                 name: "auth");
+
+            migrationBuilder.CreateTable(
+                name: "AccountStatistics",
+                schema: "stat",
+                columns: table => new
+                {
+                    ID = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    AccountID = table.Column<int>(type: "int", nullable: false),
+                    StatisticsType = table.Column<int>(type: "int", nullable: false),
+                    MatchesPlayed = table.Column<int>(type: "int", nullable: false),
+                    MatchesWon = table.Column<int>(type: "int", nullable: false),
+                    MatchesLost = table.Column<int>(type: "int", nullable: false),
+                    MatchesDisconnected = table.Column<int>(type: "int", nullable: false),
+                    MatchesConceded = table.Column<int>(type: "int", nullable: false),
+                    MatchesKicked = table.Column<int>(type: "int", nullable: false),
+                    SkillRating = table.Column<double>(type: "float", nullable: false),
+                    HeroKills = table.Column<int>(type: "int", nullable: false),
+                    HeroAssists = table.Column<int>(type: "int", nullable: false),
+                    HeroDeaths = table.Column<int>(type: "int", nullable: false),
+                    PlacementMatchesData = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AccountStatistics", x => x.ID);
+                });
 
             migrationBuilder.CreateTable(
                 name: "Clans",
@@ -108,6 +134,7 @@ namespace MERRICK.DatabaseContext.Migrations
                     GroupNumber = table.Column<int>(type: "int", nullable: false),
                     Benefit = table.Column<int>(type: "int", nullable: false),
                     HeroProductID = table.Column<long>(type: "bigint", nullable: true),
+                    HeroIdentifier = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     AlternativeAvatarName = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     AlternativeAvatarProductID = table.Column<long>(type: "bigint", nullable: true),
                     WardProductName = table.Column<string>(type: "nvarchar(max)", nullable: true),
@@ -383,6 +410,13 @@ namespace MERRICK.DatabaseContext.Migrations
                 column: "UserID");
 
             migrationBuilder.CreateIndex(
+                name: "IX_AccountStatistics_AccountID_StatisticsType",
+                schema: "stat",
+                table: "AccountStatistics",
+                columns: new[] { "AccountID", "StatisticsType" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Clans_Name_Tag",
                 schema: "core",
                 table: "Clans",
@@ -433,6 +467,10 @@ namespace MERRICK.DatabaseContext.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "AccountStatistics",
+                schema: "stat");
+
             migrationBuilder.DropTable(
                 name: "HeroGuides",
                 schema: "misc");
