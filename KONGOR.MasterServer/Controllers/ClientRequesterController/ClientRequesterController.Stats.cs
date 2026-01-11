@@ -192,7 +192,6 @@ public partial class ClientRequesterController
             CustomIconSlotID = SetCustomIconSlotID(account)
         };
 
-        string json = JsonSerializer.Serialize(response);
         string php = PhpSerialization.Serialize(response);
 
         return Ok(php);
