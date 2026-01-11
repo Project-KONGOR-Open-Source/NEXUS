@@ -1,4 +1,4 @@
-using HeroesConstants = global::KONGOR.MasterServer.Constants.Heroes;
+using HeroesConstants = KONGOR.MasterServer.Constants.Heroes;
 
 namespace KONGOR.MasterServer.Services;
 
@@ -11,18 +11,11 @@ public interface IHeroDefinitionService
 
 public class HeroDefinitionService : IHeroDefinitionService
 {
-    private readonly Dictionary<uint, string> _heroMappings = new();
-    private readonly ILogger<HeroDefinitionService> _logger;
     private readonly IHostEnvironment _env; // To find ContentRootPath
+    private readonly Dictionary<uint, string> _heroMappings = new();
 
-    // Minimal class for JSON deserialization
-    private class UpgradeDefinition
-    {
-        public string UpgradeId { get; set; } = string.Empty;
-        public int UpgradeType { get; set; }
-        public string Code { get; set; } = string.Empty;
-        public string Name { get; set; } = string.Empty;
-    }
+    private readonly Dictionary<string, uint> _identifierToBaseId = new();
+    private readonly ILogger<HeroDefinitionService> _logger;
 
     public HeroDefinitionService(ILogger<HeroDefinitionService> logger, IHostEnvironment env)
     {
@@ -32,7 +25,44 @@ public class HeroDefinitionService : IHeroDefinitionService
         LoadDefinitions(); // Load avatars/overrides from JSON
     }
 
-    private readonly Dictionary<string, uint> _identifierToBaseId = new();
+    public uint GetBaseHeroId(uint productId)
+    {
+        // 1. Get Identifier for the product ID (e.g. 121 -> "Hero_Jereziah")
+        string identifier = GetHeroIdentifier(productId);
+
+        // 2. Look up the authoritative Base ID for this Identifier (e.g. "Hero_Jereziah" -> 12)
+        if (_identifierToBaseId.TryGetValue(identifier, out uint baseId))
+        {
+            return baseId;
+        }
+
+        // 3. Fallback: If no authoritative Base ID found, return the product ID itself
+        // (This handles cases where the product ID IS the base ID, or we just don't know better)
+        return productId;
+    }
+
+    public string GetHeroIdentifier(uint heroId)
+    {
+        if (_heroMappings.TryGetValue(heroId, out string? identifier))
+        {
+            return identifier;
+        }
+
+        // Fallback or Log
+        // Returning "Hero_Legionnaire" as a safe fallback visually, but logging so we know.
+        // Or keep empty/null to let client handle default? 
+        // Based on user feedback, "Legionnaire" IS the annoying default, so maybe we want to be explicit if missing.
+        _logger.LogWarning("Missing mapping for HeroID: {HeroID}", heroId);
+
+        // Use a safe default that exists to prevent crashes, but maybe "Hero_Legionnaire" is confusing.
+        // However, standard behavior for unmapped ID is often Legionnaire (ID 0/default).
+        return "Hero_Legionnaire";
+    }
+
+    public bool IsHero(uint heroId)
+    {
+        return _heroMappings.ContainsKey(heroId);
+    }
 
     private void LoadBaseHeroes()
     {
@@ -52,8 +82,8 @@ public class HeroDefinitionService : IHeroDefinitionService
 
                 if (idField != null && identifierField != null)
                 {
-                    uint id = (uint)idField.GetValue(null)!;
-                    string identifier = (string)identifierField.GetValue(null)!;
+                    uint id = (uint) idField.GetValue(null)!;
+                    string identifier = (string) identifierField.GetValue(null)!;
 
                     if (id > 0 && !string.IsNullOrEmpty(identifier))
                     {
@@ -63,43 +93,99 @@ public class HeroDefinitionService : IHeroDefinitionService
                     }
                 }
             }
-            
-            _logger.LogInformation("Loaded {Count} base heroes from Constants (Total Mapped: {Total})", count, _heroMappings.Count);
+
+            _logger.LogInformation("Loaded {Count} base heroes from Constants (Total Mapped: {Total})", count,
+                _heroMappings.Count);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to load base heroes from Constants.Heroes");
         }
-        
+
         // Manual fallbacks for IDs not yet in Constants.Heroes
         // Restored from previous version to fix "Missing mapping" warnings
-        Dictionary<uint, string> manualBaseHeroes = new Dictionary<uint, string>
+        Dictionary<uint, string> manualBaseHeroes = new()
         {
             { 0, "Hero_Legionnaire" },
             // Legion
-            { 3, "Hero_Vindicator" }, { 4, "Hero_Scout" }, { 6, "Hero_Engineer" }, { 7, "Hero_Pebbles" },
-            { 8, "Hero_TheChipper" }, { 9, "Hero_Bubbles" }, { 10, "Hero_Hammerstorm" }, { 11, "Hero_Tremble" },
-            { 12, "Hero_Jereziah" }, { 13, "Hero_MoonQueen" }, { 14, "Hero_Yogi" }, { 16, "Hero_Madman" },
-            { 17, "Hero_Magebane" }, { 18, "Hero_Cronos" }, { 19, "Hero_Ravenor" }, { 20, "Hero_Rampage" },
-            { 21, "Hero_Chronos" }, { 22, "Hero_Swiftblade" }, { 24, "Hero_Tundra" }, { 25, "Hero_Fade" },
-            { 26, "Hero_Pyromancer" }, { 27, "Hero_Voodoo" }, { 32, "Hero_Scout" }, { 34, "Hero_Valkyrie" },
-            { 36, "Hero_Fairy" }, { 40, "Hero_Kunas" }, { 42, "Hero_Blacksmith" }, { 44, "Hero_AlphaMale" },
+            { 3, "Hero_Vindicator" },
+            { 4, "Hero_Scout" },
+            { 6, "Hero_Engineer" },
+            { 7, "Hero_Pebbles" },
+            { 8, "Hero_TheChipper" },
+            { 9, "Hero_Bubbles" },
+            { 10, "Hero_Hammerstorm" },
+            { 11, "Hero_Tremble" },
+            { 12, "Hero_Jereziah" },
+            { 13, "Hero_MoonQueen" },
+            { 14, "Hero_Yogi" },
+            { 16, "Hero_Madman" },
+            { 17, "Hero_Magebane" },
+            { 18, "Hero_Cronos" },
+            { 19, "Hero_Ravenor" },
+            { 20, "Hero_Rampage" },
+            { 21, "Hero_Chronos" },
+            { 22, "Hero_Swiftblade" },
+            { 24, "Hero_Tundra" },
+            { 25, "Hero_Fade" },
+            { 26, "Hero_Pyromancer" },
+            { 27, "Hero_Voodoo" },
+            { 32, "Hero_Scout" },
+            { 34, "Hero_Valkyrie" },
+            { 36, "Hero_Fairy" },
+            { 40, "Hero_Kunas" },
+            { 42, "Hero_Blacksmith" },
+            { 44, "Hero_AlphaMale" },
             // Hellbourne
-            { 91, "Hero_Deadwood" }, { 92, "Hero_Defiler" }, { 93, "Hero_Devourer" }, { 94, "Hero_Electrician" },
-            { 95, "Hero_ElfMage" }, { 96, "Hero_DrRepulsor" }, { 103, "Hero_Glacius" }, { 104, "Hero_GoatPimp" },
-            { 105, "Hero_Gravekeeper" }, { 106, "Hero_Helldemon" }, { 109, "Hero_Hunter" }, { 110, "Hero_Hydromancer" },
-            { 111, "Hero_WitchSlayer" }, { 112, "Hero_Ra" }, { 115, "Hero_Kraken" }, { 116, "Hero_Cthulhuphant" },
-            { 119, "Hero_DarkLady" }, { 120, "Hero_PlagueRider" }, { 122, "Hero_Panda" }, { 123, "Hero_MasterOfArms" },
-            { 125, "Hero_Gladiator" }, { 126, "Hero_Chronos" },
+            { 91, "Hero_Deadwood" },
+            { 92, "Hero_Defiler" },
+            { 93, "Hero_Devourer" },
+            { 94, "Hero_Electrician" },
+            { 95, "Hero_ElfMage" },
+            { 96, "Hero_DrRepulsor" },
+            { 103, "Hero_Glacius" },
+            { 104, "Hero_GoatPimp" },
+            { 105, "Hero_Gravekeeper" },
+            { 106, "Hero_Helldemon" },
+            { 109, "Hero_Hunter" },
+            { 110, "Hero_Hydromancer" },
+            { 111, "Hero_WitchSlayer" },
+            { 112, "Hero_Ra" },
+            { 115, "Hero_Kraken" },
+            { 116, "Hero_Cthulhuphant" },
+            { 119, "Hero_DarkLady" },
+            { 120, "Hero_PlagueRider" },
+            { 122, "Hero_Panda" },
+            { 123, "Hero_MasterOfArms" },
+            { 125, "Hero_Gladiator" },
+            { 126, "Hero_Chronos" },
             // Common IDs
-            { 153, "Hero_Accursed" }, { 155, "Hero_Maliken" }, { 156, "Hero_Magmar" }, { 152, "Hero_PuppetMaster" },
-            { 162, "Hero_Shaman" }, { 168, "Hero_Slither" }, { 172, "Hero_Soulstealer" }, { 173, "Hero_Succubus" },
-            { 178, "Hero_Torturer" }, { 185, "Hero_WitchSlayer" },
+            { 153, "Hero_Accursed" },
+            { 155, "Hero_Maliken" },
+            { 156, "Hero_Magmar" },
+            { 152, "Hero_PuppetMaster" },
+            { 162, "Hero_Shaman" },
+            { 168, "Hero_Slither" },
+            { 172, "Hero_Soulstealer" },
+            { 173, "Hero_Succubus" },
+            { 178, "Hero_Torturer" },
+            { 185, "Hero_WitchSlayer" },
             // Other
-            { 671, "Hero_MonkeyKing" }, { 227, "Hero_Solstice" }, { 228, "Hero_EmeraldWarden" }, { 232, "Hero_Midas" },
-            { 236, "Hero_Nomad" }, { 240, "Hero_Artesia" }, { 245, "Hero_Silhouette" }, { 246, "Hero_Gemini" },
-            { 249, "Hero_Berzerker" }, { 250, "Hero_Draconis" }, { 62, "Hero_Empath" }, { 5819, "Hero_Empath" },
-            { 121, "Hero_Jereziah" }, { 205, "Hero_Gauntlet" }, { 293, "Hero_Calamity" }
+            { 671, "Hero_MonkeyKing" },
+            { 227, "Hero_Solstice" },
+            { 228, "Hero_EmeraldWarden" },
+            { 232, "Hero_Midas" },
+            { 236, "Hero_Nomad" },
+            { 240, "Hero_Artesia" },
+            { 245, "Hero_Silhouette" },
+            { 246, "Hero_Gemini" },
+            { 249, "Hero_Berzerker" },
+            { 250, "Hero_Draconis" },
+            { 62, "Hero_Empath" },
+            { 5819, "Hero_Empath" },
+            { 121, "Hero_Jereziah" },
+            { 205, "Hero_Gauntlet" },
+            { 293, "Hero_Calamity" }
         };
 
         foreach (KeyValuePair<uint, string> kvp in manualBaseHeroes)
@@ -107,7 +193,7 @@ public class HeroDefinitionService : IHeroDefinitionService
             if (!_heroMappings.ContainsKey(kvp.Key))
             {
                 _heroMappings[kvp.Key] = kvp.Value;
-                
+
                 // Also attempt to populate Base ID reverse lookup if possible
                 // For manual overrides, we assume the Key is the Base ID unless it's a known product ID alias
                 // But for safety, we only trust Heroes.cs for authoritative Base IDs.
@@ -117,27 +203,11 @@ public class HeroDefinitionService : IHeroDefinitionService
         }
     }
 
-    public uint GetBaseHeroId(uint productId)
-    {
-        // 1. Get Identifier for the product ID (e.g. 121 -> "Hero_Jereziah")
-        string identifier = GetHeroIdentifier(productId);
-        
-        // 2. Look up the authoritative Base ID for this Identifier (e.g. "Hero_Jereziah" -> 12)
-        if (_identifierToBaseId.TryGetValue(identifier, out uint baseId))
-        {
-            return baseId;
-        }
-        
-        // 3. Fallback: If no authoritative Base ID found, return the product ID itself
-        // (This handles cases where the product ID IS the base ID, or we just don't know better)
-        return productId;
-    }
-
 
     private void LoadDefinitions()
     {
         // Try multiple paths to find Upgrades.JSON
-        string[] possiblePaths = 
+        string[] possiblePaths =
         {
             Path.Combine(_env.ContentRootPath, "Data", "Seed", "Upgrades.JSON"),
             Path.Combine(AppContext.BaseDirectory, "Data", "Seed", "Upgrades.JSON"),
@@ -157,7 +227,7 @@ public class HeroDefinitionService : IHeroDefinitionService
         try
         {
             string json = File.ReadAllText(path);
-            JsonSerializerOptions options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+            JsonSerializerOptions options = new() { PropertyNameCaseInsensitive = true };
             List<UpgradeDefinition>? upgrades = JsonSerializer.Deserialize<List<UpgradeDefinition>>(json, options);
 
             if (upgrades == null)
@@ -179,13 +249,13 @@ public class HeroDefinitionService : IHeroDefinitionService
                         {
                             // Fix: Some JSON entries use "Armadon" instead of "Hero_Armadon". Enforce prefix.
                             string code = upgrade.Code;
-                            if (!code.StartsWith("Hero_", StringComparison.OrdinalIgnoreCase) && 
+                            if (!code.StartsWith("Hero_", StringComparison.OrdinalIgnoreCase) &&
                                 !code.StartsWith("Avatar_", StringComparison.OrdinalIgnoreCase))
                             {
                                 // Only prepend if it really looks like a bare name
                                 code = "Hero_" + code;
                             }
-                            
+
                             _heroMappings[id] = code;
                             count++;
                         }
@@ -194,17 +264,18 @@ public class HeroDefinitionService : IHeroDefinitionService
                     // The client usually renders these fine if the Code is valid.
                     else if (upgrade.UpgradeType == 3 && !string.IsNullOrEmpty(upgrade.Code))
                     {
-                         // Type 3 might be an Avatar overriding a base ID? Usually typically UpgradeId is unique.
-                         // But if we have a hardcoded base hero, we generally trust our list more for the BASE identity.
-                         if (!_heroMappings.ContainsKey(id))
-                         {
-                             _heroMappings[id] = upgrade.Code;
-                         }
+                        // Type 3 might be an Avatar overriding a base ID? Usually typically UpgradeId is unique.
+                        // But if we have a hardcoded base hero, we generally trust our list more for the BASE identity.
+                        if (!_heroMappings.ContainsKey(id))
+                        {
+                            _heroMappings[id] = upgrade.Code;
+                        }
                     }
                 }
             }
-            
-            _logger.LogInformation("Loaded {Count} hero mappings from JSON (Total Mapped: {Total})", count, _heroMappings.Count);
+
+            _logger.LogInformation("Loaded {Count} hero mappings from JSON (Total Mapped: {Total})", count,
+                _heroMappings.Count);
         }
         catch (Exception ex)
         {
@@ -212,26 +283,12 @@ public class HeroDefinitionService : IHeroDefinitionService
         }
     }
 
-    public string GetHeroIdentifier(uint heroId)
+    // Minimal class for JSON deserialization
+    private class UpgradeDefinition
     {
-        if (_heroMappings.TryGetValue(heroId, out string? identifier))
-        {
-            return identifier;
-        }
-
-        // Fallback or Log
-        // Returning "Hero_Legionnaire" as a safe fallback visually, but logging so we know.
-        // Or keep empty/null to let client handle default? 
-        // Based on user feedback, "Legionnaire" IS the annoying default, so maybe we want to be explicit if missing.
-        _logger.LogWarning("Missing mapping for HeroID: {HeroID}", heroId);
-        
-        // Use a safe default that exists to prevent crashes, but maybe "Hero_Legionnaire" is confusing.
-        // However, standard behavior for unmapped ID is often Legionnaire (ID 0/default).
-        return "Hero_Legionnaire"; 
-    }
-
-    public bool IsHero(uint heroId)
-    {
-        return _heroMappings.ContainsKey(heroId);
+        public string UpgradeId { get; } = string.Empty;
+        public int UpgradeType { get; set; }
+        public string Code { get; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
     }
 }

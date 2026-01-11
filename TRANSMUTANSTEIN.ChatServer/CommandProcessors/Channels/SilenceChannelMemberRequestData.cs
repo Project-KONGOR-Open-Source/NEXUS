@@ -1,20 +1,12 @@
 namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Channels;
 
-public class SilenceChannelMemberRequestData
+public class SilenceChannelMemberRequestData(ChatBuffer buffer)
 {
-    public SilenceChannelMemberRequestData(ChatBuffer buffer)
-    {
-        CommandBytes = buffer.ReadCommandBytes();
-        ChannelID = buffer.ReadInt32();
-        TargetName = buffer.ReadString();
-        DurationMilliseconds = buffer.ReadInt32();
-    }
+    public byte[] CommandBytes { get; init; } = buffer.ReadCommandBytes();
 
-    public byte[] CommandBytes { get; init; }
+    public int ChannelId { get; } = buffer.ReadInt32();
 
-    public int ChannelID { get; }
+    public string TargetName { get; } = buffer.ReadString();
 
-    public string TargetName { get; }
-
-    public int DurationMilliseconds { get; }
+    public int DurationMilliseconds { get; } = buffer.ReadInt32();
 }

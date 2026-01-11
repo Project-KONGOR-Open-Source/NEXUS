@@ -2,6 +2,8 @@ namespace TRANSMUTANSTEIN.ChatServer.Domain.Matchmaking;
 
 public class MatchmakingGroup
 {
+    private readonly Lock _lock = new();
+
     /// <summary>
     ///     Hidden Constructor Which Enforces <see cref="Create" /> As The Primary Mechanism For Creating Matchmaking Groups
     /// </summary>
@@ -12,8 +14,6 @@ public class MatchmakingGroup
     public MatchmakingGroupMember Leader => Members.Single(member => member.IsLeader);
 
     public required List<MatchmakingGroupMember> Members { get; set; }
-
-    private readonly object _lock = new();
 
     public required MatchmakingGroupInformation Information { get; set; }
 
@@ -262,7 +262,8 @@ public class MatchmakingGroup
             // Prevent Double-Queuing: Check If Already In Queue
             if (QueueStartTime is not null)
             {
-                Log.Error(@"[BUG] Matchmaking Group GUID ""{Group.GUID}"" Tried To Join Queue While Already Queued", GUID);
+                Log.Error(@"[BUG] Matchmaking Group GUID ""{Group.GUID}"" Tried To Join Queue While Already Queued",
+                    GUID);
 
                 return;
             }
@@ -317,7 +318,6 @@ public class MatchmakingGroup
     }
 
 
-
     public void UpdateInformation(MatchmakingGroupInformation newInformation)
     {
         lock (_lock)
@@ -367,7 +367,8 @@ public class MatchmakingGroup
                 .Empty); // Country Restrictions (e.g. "AB->USE|XY->USW" Means Only Country "AB" Can Access Region "USE" And Only Country "XY" Can Access Region "USW")
             // TODO: Find Out What Player Invitation Responses Do
             update.WriteString("What Is This ??? (Player Invitation Responses)"); // Player Invitation Responses
-            update.WriteInt8(Information.TeamSize); // Team Size (e.g. 5 For Forests Of Caldavar, 3 For Grimm's Crossing)
+            update.WriteInt8(Information
+                .TeamSize); // Team Size (e.g. 5 For Forests Of Caldavar, 3 For Grimm's Crossing)
             update.WriteInt8(Convert.ToByte(Information.GroupType)); // Group Type
 
             bool fullGroupUpdate = updateType switch
@@ -608,5 +609,5 @@ public class MatchmakingGroup
         // TODO: Remove From Queue If Queued
 
         // TODO: Remove All Members From Group Chat Channel
-    }}
-    
+    }
+}

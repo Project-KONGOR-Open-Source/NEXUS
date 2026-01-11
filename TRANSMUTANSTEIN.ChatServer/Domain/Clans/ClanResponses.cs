@@ -1,7 +1,3 @@
-
-using TRANSMUTANSTEIN.ChatServer.Attributes;
-using TRANSMUTANSTEIN.ChatServer.Domain.Core;
-
 namespace TRANSMUTANSTEIN.ChatServer.Domain.Clans;
 
 public class ClanCreateFailResponse : ChatBuffer
@@ -11,7 +7,7 @@ public class ClanCreateFailResponse : ChatBuffer
         WriteCommand(command);
         WriteString(content);
     }
-    
+
     public ClanCreateFailResponse(ushort command)
     {
         WriteCommand(command);
@@ -35,7 +31,7 @@ public class ClanCreateAcceptedResponse : ChatBuffer
         WriteCommand(ChatProtocol.Command.CHAT_CMD_CLAN_CREATE_ACCEPT);
         WriteInt32(clanId);
     }
-    
+
     public ClanCreateAcceptedResponse(string acceptorName)
     {
         WriteCommand(ChatProtocol.Command.CHAT_CMD_CLAN_CREATE_ACCEPT);
@@ -50,7 +46,8 @@ public class ClanCreateCompleteResponse : ChatBuffer
         WriteCommand(ChatProtocol.Command.CHAT_CMD_CLAN_CREATE_COMPLETE);
         WriteInt32(clanId);
     }
-     public ClanCreateCompleteResponse()
+
+    public ClanCreateCompleteResponse()
     {
         WriteCommand(ChatProtocol.Command.CHAT_CMD_CLAN_CREATE_COMPLETE);
     }
@@ -94,14 +91,13 @@ public class ClanAddRejectedResponse : ChatBuffer
 
 public class ClanRankChangeResponse : ChatBuffer
 {
-    public ClanRankChangeResponse(int targetAccountId, MERRICK.DatabaseContext.Enumerations.ClanTier newRank, int promoterAccountId)
+    public ClanRankChangeResponse(int targetAccountId, ClanTier newRank, int promoterAccountId)
     {
         WriteCommand(ChatProtocol.Command.CHAT_CMD_CLAN_RANK_CHANGE);
         WriteInt32(targetAccountId);
-        WriteInt8((byte)newRank);
+        WriteInt8((byte) newRank);
         WriteInt32(promoterAccountId);
     }
-
 }
 
 public class ClanWhisperResponse : ChatBuffer
@@ -130,4 +126,3 @@ public class ClanAddAcceptedResponse : ChatBuffer
         WriteString(acceptorName);
     }
 }
-

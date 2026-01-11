@@ -9,7 +9,7 @@ public class ServerManagerStatus : ISynchronousCommandProcessor<ChatSession>
 
         Log.Debug(
             @"Received Status Update From Server Manager ID ""{ServerManagerID}"" - Name: ""{Name}"", Address: ""{Address}:{Port}"", Location: ""{Location}"", Version: ""{Version}"", Shutting Down: {ShuttingDown}",
-            requestData.ServerManagerID, requestData.Name, requestData.Address, requestData.Port, requestData.Location,
+            requestData.ServerManagerId, requestData.Name, requestData.Address, requestData.Port, requestData.Location,
             requestData.Version, requestData.ShuttingDown);
 
         // TODO: Update Any Relevant Match Server Manager Data

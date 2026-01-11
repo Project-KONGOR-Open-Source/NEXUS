@@ -1,14 +1,8 @@
 namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.MatchState;
 
-public class JoiningMatchRequestData
+public class JoiningMatchRequestData(ChatBuffer buffer)
 {
-    public JoiningMatchRequestData(ChatBuffer buffer)
-    {
-        CommandBytes = buffer.ReadCommandBytes();
-        ServerAddress = buffer.ReadString();
-    }
+    public byte[] CommandBytes { get; init; } = buffer.ReadCommandBytes();
 
-    public byte[] CommandBytes { get; init; }
-
-    public string ServerAddress { get; }
+    public string ServerAddress { get; } = buffer.ReadString();
 }

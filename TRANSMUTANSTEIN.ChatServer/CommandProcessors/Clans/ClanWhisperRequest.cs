@@ -13,25 +13,25 @@ public class ClanWhisperRequest : ISynchronousCommandProcessor<ChatSession>
 
         if (account == null || account.Clan == null)
         {
-             session.Send(new ClanWhisperFailedResponse());
-             return;
+            session.Send(new ClanWhisperFailedResponse());
+            return;
         }
-        
+
         // Broadcast to all online clan members (excluding self)
         ClanWhisperResponse response = new(account.ID, message);
-        
+
         // Iterate all online sessions to find clan members
         // Optimization: Could cache clan members list in ClanManager if scaling is needed.
         // Current approach is O(N) where N = online users. Acceptable for now.
         foreach (ChatSession clientSession in Context.ClientChatSessions.Values)
         {
-             if (clientSession.Account != null && 
-                 clientSession.Account.Clan != null && 
-                 clientSession.Account.Clan.ID == account.Clan.ID &&
-                 clientSession.Account.ID != account.ID)
-             {
-                 clientSession.Send(response);
-             }
+            if (clientSession.Account != null &&
+                clientSession.Account.Clan != null &&
+                clientSession.Account.Clan.ID == account.Clan.ID &&
+                clientSession.Account.ID != account.ID)
+            {
+                clientSession.Send(response);
+            }
         }
     }
 }

@@ -17,7 +17,7 @@ public class ServerHandshake(IDatabase distributedCacheStore, MerrickContext dat
         {
             Log.Warning(
                 @"Match Server ID ""{ServerID}"" Chat Protocol Version Mismatch (Expected: ""{ExpectedVersion}"", Received: ""{ReceivedVersion}"")",
-                requestData.ServerID, ChatProtocol.CHAT_PROTOCOL_EXTERNAL_VERSION, requestData.ChatProtocolVersion);
+                requestData.ServerId, ChatProtocol.CHAT_PROTOCOL_EXTERNAL_VERSION, requestData.ChatProtocolVersion);
 
             ChatBuffer rejectResponse = new();
 
@@ -36,7 +36,7 @@ public class ServerHandshake(IDatabase distributedCacheStore, MerrickContext dat
         // Validate Server Cookie Against Distributed Cache
         if (server is null)
         {
-            Log.Warning(@"Match Server ID ""{ServerID}"" Cookie ""{Cookie}"" Is Invalid", requestData.ServerID,
+            Log.Warning(@"Match Server ID ""{ServerID}"" Cookie ""{Cookie}"" Is Invalid", requestData.ServerId,
                 requestData.SessionCookie);
 
             ChatBuffer rejectResponse = new();
@@ -51,10 +51,10 @@ public class ServerHandshake(IDatabase distributedCacheStore, MerrickContext dat
         }
 
         // Validate Server ID Match
-        if (server.ID != requestData.ServerID)
+        if (server.ID != requestData.ServerId)
         {
             Log.Warning(@"Match Server ID ""{ServerID}"" Does Not Match The Server ID With Session Cookie ""{Cookie}""",
-                requestData.ServerID, requestData.SessionCookie);
+                requestData.ServerId, requestData.SessionCookie);
 
             ChatBuffer rejectResponse = new();
 
@@ -73,7 +73,7 @@ public class ServerHandshake(IDatabase distributedCacheStore, MerrickContext dat
         if (hostAccount is null)
         {
             Log.Warning(@"Could Not Find Host Account ID ""{HostAccountID}"" For Match Server ID ""{ServerID}"")",
-                server.HostAccountID, requestData.ServerID);
+                server.HostAccountID, requestData.ServerId);
 
             ChatBuffer rejectResponse = new();
 
@@ -94,7 +94,7 @@ public class ServerHandshake(IDatabase distributedCacheStore, MerrickContext dat
         {
             Log.Warning(
                 @"Host Account ID ""{HostAccountID}"" For Match Server ID ""{ServerID}"" Does Not Have Match Hosting Permissions",
-                requestData.ServerID, server.HostAccountID);
+                requestData.ServerId, server.HostAccountID);
 
             ChatBuffer rejectResponse = new();
 
@@ -112,7 +112,7 @@ public class ServerHandshake(IDatabase distributedCacheStore, MerrickContext dat
         {
             Log.Warning(
                 @"Match Server Host Account ID ""{ReceivedHostAccountID}"" Does Not Match The Host Account ID ""{ExpectedHostAccountID}"" For Match Server ID ""{ServerID}""",
-                server.HostAccountID, hostAccount.ID, requestData.ServerID);
+                server.HostAccountID, hostAccount.ID, requestData.ServerId);
 
             ChatBuffer rejectResponse = new();
 
@@ -126,23 +126,23 @@ public class ServerHandshake(IDatabase distributedCacheStore, MerrickContext dat
         }
 
         // Check For Duplicate Match Server Instances
-        if (Context.MatchServerChatSessions.TryGetValue(requestData.ServerID, out ChatSession? existingSession))
+        if (Context.MatchServerChatSessions.TryGetValue(requestData.ServerId, out ChatSession? existingSession))
         {
             Log.Information(
                 @"Disconnecting Duplicate Match Server Instance With ID ""{ServerID}"" And Address ""{Address}:{Port}"")",
-                requestData.ServerID, server.IPAddress, server.Port);
+                requestData.ServerId, server.IPAddress, server.Port);
 
             await existingSession.TerminateMatchServer(distributedCacheStore);
 
-            Context.MatchServerChatSessions.TryRemove(requestData.ServerID, out _);
+            Context.MatchServerChatSessions.TryRemove(requestData.ServerId, out _);
         }
 
         // Register Match Server
-        Context.MatchServerChatSessions[requestData.ServerID] = session;
+        Context.MatchServerChatSessions[requestData.ServerId] = session;
 
         Log.Information(
             @"Match Server Connection Accepted - Server ID: ""{ServerID}"", Host Account: ""{HostAccountName}"", Address: ""{Address}:{Port}"", Location: ""{Location}""",
-            requestData.ServerID, server.HostAccountName, server.IPAddress, server.Port, server.Location);
+            requestData.ServerId, server.HostAccountName, server.IPAddress, server.Port, server.Location);
 
         ChatBuffer acceptResponse = new();
 

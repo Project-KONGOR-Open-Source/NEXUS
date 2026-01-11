@@ -1,5 +1,7 @@
 using System.Net.Sockets;
+
 using ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer.Infrastructure;
+
 using TRANSMUTANSTEIN.ChatServer.Domain.Core;
 
 namespace ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer.Tests;
@@ -17,8 +19,10 @@ public class ChatMatchmakingGroupTests
             await TRANSMUTANSTEINServiceProvider.CreateOrchestratedInstanceAsync(TestPort);
 
         // 2. Connect Two Clients (Leader and Member)
-        using TcpClient leader = await ChatTestHelpers.ConnectAndAuthenticateAsync(app, app.ClientPort, 1001, "LeaderUser");
-        using TcpClient member = await ChatTestHelpers.ConnectAndAuthenticateAsync(app, app.ClientPort, 1002, "MemberUser");
+        using TcpClient leader =
+            await ChatTestHelpers.ConnectAndAuthenticateAsync(app, app.ClientPort, 1001, "LeaderUser");
+        using TcpClient member =
+            await ChatTestHelpers.ConnectAndAuthenticateAsync(app, app.ClientPort, 1002, "MemberUser");
 
         NetworkStream leaderStream = leader.GetStream();
         NetworkStream memberStream = member.GetStream();
@@ -57,8 +61,9 @@ public class ChatMatchmakingGroupTests
         await SendPacketAsync(leaderStream, createBuffer);
 
         // Expect TMM_CREATE_GROUP update for Leader
-        (string MapName, string GameModes, byte GameType) groupCreated = await ExpectGroupUpdateAsync(leaderStream, ChatProtocol.TMMUpdateType.TMM_CREATE_GROUP);
-        
+        (string MapName, string GameModes, byte GameType) groupCreated =
+            await ExpectGroupUpdateAsync(leaderStream, ChatProtocol.TMMUpdateType.TMM_CREATE_GROUP);
+
         // Assert Initial State
         await Assert.That(groupCreated.MapName).IsEqualTo("caldavar");
         await Assert.That(groupCreated.GameModes).IsEqualTo("ap");
@@ -84,8 +89,9 @@ public class ChatMatchmakingGroupTests
         await SendPacketAsync(leaderStream, updateBuffer);
 
         // Expect TMM_FULL_GROUP_UPDATE
-        (string MapName, string GameModes, byte GameType) groupUpdated = await ExpectGroupUpdateAsync(leaderStream, ChatProtocol.TMMUpdateType.TMM_FULL_GROUP_UPDATE);
-        
+        (string MapName, string GameModes, byte GameType) groupUpdated =
+            await ExpectGroupUpdateAsync(leaderStream, ChatProtocol.TMMUpdateType.TMM_FULL_GROUP_UPDATE);
+
         // Assert Updated State (Midwars)
         await Assert.That(groupUpdated.MapName).IsEqualTo("midwars");
         await Assert.That(groupUpdated.GameModes).IsEqualTo("bd");
@@ -103,7 +109,8 @@ public class ChatMatchmakingGroupTests
         await stream.WriteAsync(rawPacket.ToArray());
     }
 
-    private async Task<(string MapName, string GameModes, byte GameType)> ExpectGroupUpdateAsync(NetworkStream stream, ChatProtocol.TMMUpdateType expectedType)
+    private async Task<(string MapName, string GameModes, byte GameType)> ExpectGroupUpdateAsync(NetworkStream stream,
+        ChatProtocol.TMMUpdateType expectedType)
     {
         using CancellationTokenSource cts = new(TimeSpan.FromSeconds(5));
         while (!cts.Token.IsCancellationRequested)
@@ -113,7 +120,11 @@ public class ChatMatchmakingGroupTests
             while (read < 4)
             {
                 int r = await stream.ReadAsync(header, read, 4 - read, cts.Token);
-                if (r == 0) throw new EndOfStreamException();
+                if (r == 0)
+                {
+                    throw new EndOfStreamException();
+                }
+
                 read += r;
             }
 
@@ -128,7 +139,11 @@ public class ChatMatchmakingGroupTests
                 while (read < payloadSize)
                 {
                     int r = await stream.ReadAsync(payload, read, payloadSize - read, cts.Token);
-                    if (r == 0) throw new EndOfStreamException();
+                    if (r == 0)
+                    {
+                        throw new EndOfStreamException();
+                    }
+
                     read += r;
                 }
             }
@@ -137,8 +152,9 @@ public class ChatMatchmakingGroupTests
             {
                 ChatBuffer reader = new(payload);
                 byte updateType = reader.ReadInt8();
-                
-                Console.WriteLine($"[ExpectGroupUpdateAsync] Received 0x0D03 UpdateType: {updateType}. Expected: {expectedType}");
+
+                Console.WriteLine(
+                    $"[ExpectGroupUpdateAsync] Received 0x0D03 UpdateType: {updateType}. Expected: {expectedType}");
 
                 if (updateType == (byte) expectedType)
                 {
@@ -148,7 +164,7 @@ public class ChatMatchmakingGroupTests
                     reader.ReadInt16(); // Average Group Rating
                     reader.ReadInt32(); // Leader Account ID
                     reader.ReadInt8(); // Arranged Match Type
-                    
+
                     // Check for injected 0x0D08 (Game Option Update header)
                     // This appears in TMM_FULL_GROUP_UPDATE (1), TMM_PLAYER_JOINED_GROUP (4), etc.
                     // But NOT in TMM_CREATE_GROUP (0).
@@ -166,8 +182,9 @@ public class ChatMatchmakingGroupTests
                     // Trim null terminators from strings read from ChatBuffer if present
                     string mapName = reader.ReadString().Trim('\0');
                     string gameModes = reader.ReadString().Trim('\0');
-                    
-                    Console.WriteLine($"[ExpectGroupUpdateAsync] Parsed: Map={mapName}, Mode={gameModes}, Type={gameType}");
+
+                    Console.WriteLine(
+                        $"[ExpectGroupUpdateAsync] Parsed: Map={mapName}, Mode={gameModes}, Type={gameType}");
                     return (mapName, gameModes, gameType);
                 }
             }
@@ -184,138 +201,144 @@ public class ChatMatchmakingGroupTests
     [Test]
     public async Task GroupFlow_MemberLeavingQueue_ShouldCancelQueue()
     {
-            // 1. Start Application
+        // 1. Start Application
         // 1. Start Application using Dynamic Port
-            int port = 0;
-            await using TRANSMUTANSTEINServiceProvider app =
-                await TRANSMUTANSTEINServiceProvider.CreateOrchestratedInstanceAsync(port);
+        int port = 0;
+        await using TRANSMUTANSTEINServiceProvider app =
+            await TRANSMUTANSTEINServiceProvider.CreateOrchestratedInstanceAsync(port);
 
-            // 2. Connect Two Clients (Leader and Member)
-            using TcpClient leader =
-                await ChatTestHelpers.ConnectAndAuthenticateAsync(app, app.ClientPort, 2001, "LeaderTwo");
-            using TcpClient client =
-                await ChatTestHelpers.ConnectAndAuthenticateAsync(app, app.ClientPort, 2024, "MatchmakingTester");
+        // 2. Connect Two Clients (Leader and Member)
+        using TcpClient leader =
+            await ChatTestHelpers.ConnectAndAuthenticateAsync(app, app.ClientPort, 2001, "LeaderTwo");
+        using TcpClient client =
+            await ChatTestHelpers.ConnectAndAuthenticateAsync(app, app.ClientPort, 2024, "MatchmakingTester");
 
-            NetworkStream leaderStream = leader.GetStream();
-            NetworkStream memberStream = client.GetStream();
+        NetworkStream leaderStream = leader.GetStream();
+        NetworkStream memberStream = client.GetStream();
 
-            // 3. Leader Creates Group
-            ChatBuffer createBuffer = new();
-            createBuffer.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_CREATE);
+        // 3. Leader Creates Group
+        ChatBuffer createBuffer = new();
+        createBuffer.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_CREATE);
 
-            createBuffer.WriteString("4.10.1.0");
-            createBuffer.WriteInt8((byte) ChatProtocol.TMMType.TMM_TYPE_PVP);
-            createBuffer.WriteInt8((byte) ChatProtocol.TMMGameType.TMM_GAME_TYPE_NORMAL);
-            createBuffer.WriteString("caldavar");
-            createBuffer.WriteString("ap");
-            createBuffer.WriteString("USE");
-            createBuffer.WriteBool(true);
-            createBuffer.WriteInt8(0);
-            createBuffer.WriteInt8(0);
-            createBuffer.WriteBool(false);
+        createBuffer.WriteString("4.10.1.0");
+        createBuffer.WriteInt8((byte) ChatProtocol.TMMType.TMM_TYPE_PVP);
+        createBuffer.WriteInt8((byte) ChatProtocol.TMMGameType.TMM_GAME_TYPE_NORMAL);
+        createBuffer.WriteString("caldavar");
+        createBuffer.WriteString("ap");
+        createBuffer.WriteString("USE");
+        createBuffer.WriteBool(true);
+        createBuffer.WriteInt8(0);
+        createBuffer.WriteInt8(0);
+        createBuffer.WriteBool(false);
 
-            await SendPacketAsync(leaderStream, createBuffer);
-            await ExpectGroupUpdateAsync(leaderStream, ChatProtocol.TMMUpdateType.TMM_CREATE_GROUP);
+        await SendPacketAsync(leaderStream, createBuffer);
+        await ExpectGroupUpdateAsync(leaderStream, ChatProtocol.TMMUpdateType.TMM_CREATE_GROUP);
 
-            // 4. Member Joins Group
-            ChatBuffer joinBuffer = new();
-            joinBuffer.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_JOIN);
+        // 4. Member Joins Group
+        ChatBuffer joinBuffer = new();
+        joinBuffer.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_JOIN);
 
-            joinBuffer.WriteString("4.10.1.0");
-            joinBuffer.WriteString("LeaderTwo"); // Leader Name
+        joinBuffer.WriteString("4.10.1.0");
+        joinBuffer.WriteString("LeaderTwo"); // Leader Name
 
-            await SendPacketAsync(memberStream, joinBuffer);
+        await SendPacketAsync(memberStream, joinBuffer);
 
-            // Expect JOIN update on Leader
-            await ExpectGroupUpdateAsync(leaderStream, ChatProtocol.TMMUpdateType.TMM_PLAYER_JOINED_GROUP);
-            // Expect JOIN update on Member (Full Group Update?)
-            // Group.Join multicasts TMM_PLAYER_JOINED_GROUP.
+        // Expect JOIN update on Leader
+        await ExpectGroupUpdateAsync(leaderStream, ChatProtocol.TMMUpdateType.TMM_PLAYER_JOINED_GROUP);
+        // Expect JOIN update on Member (Full Group Update?)
+        // Group.Join multicasts TMM_PLAYER_JOINED_GROUP.
 
-            // 5. Both Set Ready
-            // Leader
-            ChatBuffer leaderReady = new();
-            leaderReady.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_PLAYER_READY_STATUS);
+        // 5. Both Set Ready
+        // Leader
+        ChatBuffer leaderReady = new();
+        leaderReady.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_PLAYER_READY_STATUS);
 
-            leaderReady.WriteInt8(1); // Ready
-            leaderReady.WriteInt8((byte) ChatProtocol.TMMGameType.TMM_GAME_TYPE_NORMAL);
-            await SendPacketAsync(leaderStream, leaderReady);
+        leaderReady.WriteInt8(1); // Ready
+        leaderReady.WriteInt8((byte) ChatProtocol.TMMGameType.TMM_GAME_TYPE_NORMAL);
+        await SendPacketAsync(leaderStream, leaderReady);
 
-            // Member
-            // Note: New member joining is implicitly ready in current logic? 
-            // "Non-Leader Group Members Are Implicitly Ready (By Means Of Joining The Group In A Ready State)" - MatchmakingGroup.cs:211
-            // But Leader status update triggers check.
+        // Member
+        // Note: New member joining is implicitly ready in current logic? 
+        // "Non-Leader Group Members Are Implicitly Ready (By Means Of Joining The Group In A Ready State)" - MatchmakingGroup.cs:211
+        // But Leader status update triggers check.
 
-            // Expect TMM_START_LOADING (0x0D09? No, TMM_START_LOADING is separate command)
-            // Check ChatProtocol for NET_CHAT_CL_TMM_START_LOADING value.
-            // Assuming it's sent.
+        // Expect TMM_START_LOADING (0x0D09? No, TMM_START_LOADING is separate command)
+        // Check ChatProtocol for NET_CHAT_CL_TMM_START_LOADING value.
+        // Assuming it's sent.
 
-            // 6. Both Send Loading 100%
-            ChatBuffer loading = new();
-            loading.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_PLAYER_LOADING_STATUS);
+        // 6. Both Send Loading 100%
+        ChatBuffer loading = new();
+        loading.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_PLAYER_LOADING_STATUS);
 
-            loading.WriteInt8(100);
+        loading.WriteInt8(100);
 
-            await SendPacketAsync(memberStream, loading); // Member first
-            await SendPacketAsync(leaderStream, loading); // Leader second -> Should trigger JoinQueue
+        await SendPacketAsync(memberStream, loading); // Member first
+        await SendPacketAsync(leaderStream, loading); // Leader second -> Should trigger JoinQueue
 
-            // 7. Verify Queue Join (0x0D04)
-            // Wait for Leader to receive it
-            await ExpectCommandAsync(leaderStream, ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_JOIN_QUEUE);
+        // 7. Verify Queue Join (0x0D04)
+        // Wait for Leader to receive it
+        await ExpectCommandAsync(leaderStream, ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_JOIN_QUEUE);
 
-            // 8. Member Leaves Group
-            ChatBuffer leaveBuffer = new();
-            leaveBuffer.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_LEAVE);
-            leaveBuffer.WriteInt16((short) ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_LEAVE);
+        // 8. Member Leaves Group
+        ChatBuffer leaveBuffer = new();
+        leaveBuffer.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_LEAVE);
+        leaveBuffer.WriteInt16((short) ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_LEAVE);
 
-            await SendPacketAsync(memberStream, leaveBuffer);
+        await SendPacketAsync(memberStream, leaveBuffer);
 
-            // 9. Verify Leader Receives TMM_PLAYER_LEFT_GROUP (0x0D03 type 3)
-            await ExpectGroupUpdateAsync(leaderStream, ChatProtocol.TMMUpdateType.TMM_PLAYER_LEFT_GROUP);
+        // 9. Verify Leader Receives TMM_PLAYER_LEFT_GROUP (0x0D03 type 3)
+        await ExpectGroupUpdateAsync(leaderStream, ChatProtocol.TMMUpdateType.TMM_PLAYER_LEFT_GROUP);
 
-            // 10. Verify Leader Receives NET_CHAT_CL_TMM_GROUP_LEAVE_QUEUE (0x0D06)
-            // THIS SHOULD FAIL currently
-            await ExpectCommandAsync(leaderStream, ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_LEAVE_QUEUE);
-        }
-
+        // 10. Verify Leader Receives NET_CHAT_CL_TMM_GROUP_LEAVE_QUEUE (0x0D06)
+        // THIS SHOULD FAIL currently
+        await ExpectCommandAsync(leaderStream, ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_LEAVE_QUEUE);
+    }
 
 
     private async Task ExpectCommandAsync(NetworkStream stream, ushort expectedCommand)
     {
-            using CancellationTokenSource cts = new(TimeSpan.FromSeconds(5));
-            while (!cts.Token.IsCancellationRequested)
+        using CancellationTokenSource cts = new(TimeSpan.FromSeconds(5));
+        while (!cts.Token.IsCancellationRequested)
+        {
+            byte[] header = new byte[4];
+            int read = 0;
+            while (read < 4)
             {
-                byte[] header = new byte[4];
-                int read = 0;
-                while (read < 4)
+                int r = await stream.ReadAsync(header, read, 4 - read, cts.Token);
+                if (r == 0)
                 {
-                    int r = await stream.ReadAsync(header, read, 4 - read, cts.Token);
-                    if (r == 0) throw new EndOfStreamException();
-                    read += r;
+                    throw new EndOfStreamException();
                 }
 
-                ushort length = BitConverter.ToUInt16(header, 0);
-                ushort command = BitConverter.ToUInt16(header, 2);
+                read += r;
+            }
 
-                int payloadSize = length - 2;
-                if (payloadSize > 0)
+            ushort length = BitConverter.ToUInt16(header, 0);
+            ushort command = BitConverter.ToUInt16(header, 2);
+
+            int payloadSize = length - 2;
+            if (payloadSize > 0)
+            {
+                byte[] payload = new byte[payloadSize];
+                read = 0;
+                while (read < payloadSize)
                 {
-                    byte[] payload = new byte[payloadSize];
-                    read = 0;
-                    while (read < payloadSize)
+                    int r = await stream.ReadAsync(payload, read, payloadSize - read, cts.Token);
+                    if (r == 0)
                     {
-                        int r = await stream.ReadAsync(payload, read, payloadSize - read, cts.Token);
-                        if (r == 0) throw new EndOfStreamException();
-                        read += r;
+                        throw new EndOfStreamException();
                     }
-                }
 
-                if (command == expectedCommand)
-                {
-                    return; // Success
+                    read += r;
                 }
             }
 
-            Assert.Fail($"Did not receive Command {expectedCommand:X4}");
+            if (command == expectedCommand)
+            {
+                return; // Success
+            }
         }
-    }
 
+        Assert.Fail($"Did not receive Command {expectedCommand:X4}");
+    }
+}

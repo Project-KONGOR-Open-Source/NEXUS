@@ -12,7 +12,8 @@ public class GroupGameOptionUpdate : ISynchronousCommandProcessor<ChatSession>
         try
         {
             group = MatchmakingGroup.GetByMemberAccountID(session.Account.ID);
-            Log.Information("GroupGameOptionUpdate: Group Found for Account {AccountID}: {GroupGUID}", session.Account.ID, group.GUID);
+            Log.Information("GroupGameOptionUpdate: Group Found for Account {AccountID}: {GroupGUID}",
+                session.Account.ID, group.GUID);
         }
         catch (Exception ex)
         {
@@ -28,10 +29,11 @@ public class GroupGameOptionUpdate : ISynchronousCommandProcessor<ChatSession>
 
         if (group.Leader.Session != session)
         {
-             Log.Warning("GroupGameOptionUpdate: Session mismatch. Leader Session ID: {LeaderSessionID}, Current Session ID: {CurrentSessionID}", 
+            Log.Warning(
+                "GroupGameOptionUpdate: Session mismatch. Leader Session ID: {LeaderSessionID}, Current Session ID: {CurrentSessionID}",
                 group.Leader.Session.ID, session.ID);
-             // Also check Account ID just in case
-             Log.Warning("GroupGameOptionUpdate: Leader Account: {LeaderID}, Current Account: {CurrentID}", 
+            // Also check Account ID just in case
+            Log.Warning("GroupGameOptionUpdate: Leader Account: {LeaderID}, Current Account: {CurrentID}",
                 group.Leader.Account.ID, session.Account.ID);
 
             return;

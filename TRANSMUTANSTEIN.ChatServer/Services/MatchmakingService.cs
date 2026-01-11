@@ -21,8 +21,6 @@ public class MatchmakingService : BackgroundService, IDisposable
 
     public override void Dispose()
     {
-
-
         base.Dispose();
 
         GC.SuppressFinalize(this);
@@ -98,8 +96,6 @@ public class MatchmakingService : BackgroundService, IDisposable
                     member.Session.Send(found);
                 }
             }
-
-
 
             # endregion
 

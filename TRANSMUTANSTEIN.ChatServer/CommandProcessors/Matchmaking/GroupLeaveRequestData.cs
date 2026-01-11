@@ -1,11 +1,6 @@
 namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Matchmaking;
 
-public class GroupLeaveRequestData
+public class GroupLeaveRequestData(ChatBuffer buffer)
 {
-    public GroupLeaveRequestData(ChatBuffer buffer)
-    {
-        CommandBytes = buffer.ReadCommandBytes();
-    }
-
-    public byte[] CommandBytes { get; init; }
+    public byte[] CommandBytes { get; init; } = buffer.ReadCommandBytes();
 }

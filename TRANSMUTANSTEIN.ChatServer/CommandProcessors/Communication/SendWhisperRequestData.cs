@@ -1,17 +1,10 @@
 namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Communication;
 
-public class SendWhisperRequestData
+public class SendWhisperRequestData(ChatBuffer buffer)
 {
-    public SendWhisperRequestData(ChatBuffer buffer)
-    {
-        CommandBytes = buffer.ReadCommandBytes();
-        TargetName = buffer.ReadString();
-        Message = buffer.ReadString();
-    }
+    public byte[] CommandBytes { get; init; } = buffer.ReadCommandBytes();
 
-    public byte[] CommandBytes { get; init; }
+    public string TargetName { get; } = buffer.ReadString();
 
-    public string TargetName { get; }
-
-    public string Message { get; }
+    public string Message { get; } = buffer.ReadString();
 }

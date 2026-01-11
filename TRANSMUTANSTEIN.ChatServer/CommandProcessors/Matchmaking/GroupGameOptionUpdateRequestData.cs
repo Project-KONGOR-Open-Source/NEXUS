@@ -1,10 +1,22 @@
-using TRANSMUTANSTEIN.ChatServer.Domain.Core;
-using TRANSMUTANSTEIN.ChatServer.Domain.Matchmaking;
-
 namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Matchmaking;
 
 public class GroupGameOptionUpdateRequestData
 {
+    public GroupGameOptionUpdateRequestData(ChatBuffer buffer)
+    {
+        // Read Command Bytes first (2 bytes)
+        buffer.ReadInt16();
+
+        GameType = (ChatProtocol.TMMGameType) buffer.ReadInt8();
+        MapName = buffer.ReadString();
+        GameModes = buffer.ReadString().Split('|');
+        GameRegions = buffer.ReadString().Split('|');
+        Ranked = buffer.ReadBool();
+        MatchFidelity = buffer.ReadInt8();
+        BotDifficulty = buffer.ReadInt8();
+        RandomizeBots = buffer.ReadBool();
+    }
+
     public ChatProtocol.TMMGameType GameType { get; set; }
     public string MapName { get; set; }
     public string[] GameModes { get; set; }
@@ -29,20 +41,5 @@ public class GroupGameOptionUpdateRequestData
             BotDifficulty = BotDifficulty,
             RandomizeBots = RandomizeBots
         };
-    }
-
-    public GroupGameOptionUpdateRequestData(ChatBuffer buffer)
-    {
-        // Read Command Bytes first (2 bytes)
-        buffer.ReadInt16();
-
-        GameType = (ChatProtocol.TMMGameType)buffer.ReadInt8();
-        MapName = buffer.ReadString();
-        GameModes = buffer.ReadString().Split('|');
-        GameRegions = buffer.ReadString().Split('|');
-        Ranked = buffer.ReadBool();
-        MatchFidelity = buffer.ReadInt8();
-        BotDifficulty = buffer.ReadInt8();
-        RandomizeBots = buffer.ReadBool();
     }
 }

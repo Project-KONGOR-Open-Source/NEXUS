@@ -1,14 +1,8 @@
 namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Matchmaking;
 
-public class GroupPlayerLoadingStatusRequestData
+public class GroupPlayerLoadingStatusRequestData(ChatBuffer buffer)
 {
-    public GroupPlayerLoadingStatusRequestData(ChatBuffer buffer)
-    {
-        CommandBytes = buffer.ReadCommandBytes();
-        LoadingPercent = buffer.ReadInt8();
-    }
+    public byte[] CommandBytes { get; init; } = buffer.ReadCommandBytes();
 
-    public byte[] CommandBytes { get; init; }
-
-    public byte LoadingPercent { get; }
+    public byte LoadingPercent { get; } = buffer.ReadInt8();
 }

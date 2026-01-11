@@ -26,10 +26,7 @@ public class MatchmakingTests
                     Modes = ["ap", "sd"],
                     Regions = ["USE"],
                     Match =
-                        new MatchConfiguration
-                        {
-                            MaximumPlayerRatingDifference = 500, IsRanked = true, TeamSize = 5
-                        }
+                        new MatchConfiguration { MaximumPlayerRatingDifference = 500, IsRanked = true, TeamSize = 5 }
                 },
             Unranked = new MatchmakingMapConfiguration
             {

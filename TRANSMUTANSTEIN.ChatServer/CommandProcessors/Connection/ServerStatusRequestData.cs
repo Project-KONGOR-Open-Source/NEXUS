@@ -50,7 +50,7 @@ public class ServerStatusRequestData
 
         for (int clientIndex = 0; clientIndex < ClientCount; clientIndex++)
         {
-            ClientNetworkStatistics.Add(new Connection.ClientNetworkStatistics
+            ClientNetworkStatistics.Add(new ClientNetworkStatistics
             {
                 AccountID = buffer.ReadInt32(),
                 Address = buffer.ReadString(),
@@ -185,7 +185,7 @@ public class ServerStatusRequestData
 
     public string HostName { get; init; }
 
-    public List<Connection.ClientNetworkStatistics> ClientNetworkStatistics { get; }
+    public List<ClientNetworkStatistics> ClientNetworkStatistics { get; }
 
     /// <summary>
     ///     Decode the packed ServerFlags bitfield into individual properties.

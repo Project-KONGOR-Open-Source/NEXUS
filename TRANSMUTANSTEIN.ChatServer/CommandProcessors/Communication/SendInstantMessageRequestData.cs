@@ -1,17 +1,9 @@
 namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Communication;
 
-public class SendInstantMessageRequestData
+public class SendInstantMessageRequestData(ChatBuffer buffer)
 {
-    public SendInstantMessageRequestData(ChatBuffer buffer)
-    {
-        CommandBytes = buffer.ReadCommandBytes();
-        TargetName = buffer.ReadString();
-        Message = buffer.ReadString();
-        Flags = buffer.ReadInt8();
-    }
-
-    public byte[] CommandBytes { get; init; }
-    public string TargetName { get; }
-    public string Message { get; }
-    public byte Flags { get; } // 1 = Request Echo/Saved History? 
+    public byte[] CommandBytes { get; init; } = buffer.ReadCommandBytes();
+    public string TargetName { get; } = buffer.ReadString();
+    public string Message { get; } = buffer.ReadString();
+    public byte Flags { get; } = buffer.ReadInt8(); // 1 = Request Echo/Saved History? 
 }

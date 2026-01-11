@@ -8,11 +8,6 @@ namespace TRANSMUTANSTEIN.ChatServer.Domain.Core;
 /// </summary>
 public class ChatServer
 {
-    public ClientChatServer ClientServer { get; }
-    public MatchServerChatServer MatchServer { get; }
-
-    public MatchServerManagerChatServer MatchServerManagerServer { get; }
-
     public ChatServer(
         IServiceProvider serviceProvider,
         IPAddress address,
@@ -23,12 +18,22 @@ public class ChatServer
         IHostEnvironment environment = serviceProvider.GetRequiredService<IHostEnvironment>();
         bool isDevelopment = environment.IsDevelopment();
 
-        ClientServer = new ClientChatServer(serviceProvider, address, clientPort) { OptionReuseAddress = isDevelopment };
+        ClientServer =
+            new ClientChatServer(serviceProvider, address, clientPort) { OptionReuseAddress = isDevelopment };
         MatchServer = new MatchServerChatServer(serviceProvider, address, matchServerPort)
-            { OptionReuseAddress = isDevelopment };
+        {
+            OptionReuseAddress = isDevelopment
+        };
         MatchServerManagerServer = new MatchServerManagerChatServer(serviceProvider, address, matchServerManagerPort)
-            { OptionReuseAddress = isDevelopment };
+        {
+            OptionReuseAddress = isDevelopment
+        };
     }
+
+    public ClientChatServer ClientServer { get; }
+    public MatchServerChatServer MatchServer { get; }
+
+    public MatchServerManagerChatServer MatchServerManagerServer { get; }
 
     public bool IsStarted => ClientServer.IsStarted && MatchServer.IsStarted && MatchServerManagerServer.IsStarted;
 

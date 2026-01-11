@@ -1,14 +1,8 @@
 namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Actions;
 
-public class TrackPlayerActionRequestData
+public class TrackPlayerActionRequestData(ChatBuffer buffer)
 {
-    public TrackPlayerActionRequestData(ChatBuffer buffer)
-    {
-        CommandBytes = buffer.ReadCommandBytes();
-        Action = (ChatProtocol.ActionCampaign) buffer.ReadInt8();
-    }
+    public byte[] CommandBytes { get; init; } = buffer.ReadCommandBytes();
 
-    public byte[] CommandBytes { get; init; }
-
-    public ChatProtocol.ActionCampaign Action { get; }
+    public ChatProtocol.ActionCampaign Action { get; } = (ChatProtocol.ActionCampaign) buffer.ReadInt8();
 }

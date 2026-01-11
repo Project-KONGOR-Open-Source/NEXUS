@@ -1,7 +1,5 @@
 ﻿using Role = MERRICK.DatabaseContext.Entities.Utility.Role;
 
-using KONGOR.MasterServer.Constants;
-
 namespace KONGOR.MasterServer.Controllers.ClientRequesterController;
 
 public partial class ClientRequesterController
@@ -247,7 +245,6 @@ public partial class ClientRequesterController
             .Where(playerStatistics => playerStatistics.MatchID == matchStatistics.MatchID).ToListAsync();
 
 
-
         string? accountName = HttpContext.Items["SessionAccountName"] as string
                               ?? await DistributedCache.GetAccountNameForSessionCookie(cookie);
 
@@ -324,14 +321,10 @@ public partial class ClientRequesterController
                         SRPPasswordSalt = ""
                     },
                     Clan = stats.ClanID.HasValue
-                        ? new Clan
-                        {
-                            ID = stats.ClanID.Value, Tag = stats.ClanTag ?? "", Name = stats.ClanTag ?? ""
-                        }
+                        ? new Clan { ID = stats.ClanID.Value, Tag = stats.ClanTag ?? "", Name = stats.ClanTag ?? "" }
                         : null
                 };
             }
-
 
 
             // Fetch Stats or Create Dummies
@@ -353,7 +346,8 @@ public partial class ClientRequesterController
             };
 
             string heroIdentifier = HeroDefinitionService.GetHeroIdentifier(stats.HeroProductID ?? 0);
-            Logger.LogInformation($"[DEBUG_MATCH_DETAILS] AccountID: {stats.AccountID}, HeroID: {stats.HeroProductID}, Identifier: {heroIdentifier}");
+            Logger.LogInformation(
+                $"[DEBUG_MATCH_DETAILS] AccountID: {stats.AccountID}, HeroID: {stats.HeroProductID}, Identifier: {heroIdentifier}");
 
             // For now, we reuse the same stats object for all modes as they are not split in DB yet
             matchPlayerStatistics[stats.AccountID] = new MatchPlayerStatistics(
@@ -362,11 +356,8 @@ public partial class ClientRequesterController
                 stats,
                 accountStatistics, // Current
                 accountStatistics, // Public
-                accountStatistics  // Matchmaking
-            )
-            {
-                HeroIdentifier = heroIdentifier,
-            };
+                accountStatistics // Matchmaking
+            ) { HeroIdentifier = heroIdentifier };
 
             // Map Inventory Logic
             List<string> inv = stats.Inventory ?? new List<string>();
@@ -458,20 +449,19 @@ public partial class ClientRequesterController
     }
 
 
-
     private async Task<IActionResult> HandleGrabLastMatches()
     {
         // Corresponds to 'grab_last_matches_from_nick' in legacy code.
         // Returns a simple list of match IDs.
-        
+
         string? accountName = Request.Form["nickname"]; // This endpoint often uses nickname directly
-        
+
         if (string.IsNullOrEmpty(accountName))
         {
-             // Fallback to cookie if nickname missing
-             string? cookie = Request.Form["cookie"];
-             accountName = HttpContext.Items["SessionAccountName"] as string 
-                              ?? await DistributedCache.GetAccountNameForSessionCookie(cookie ?? "NULL");
+            // Fallback to cookie if nickname missing
+            string? cookie = Request.Form["cookie"];
+            accountName = HttpContext.Items["SessionAccountName"] as string
+                          ?? await DistributedCache.GetAccountNameForSessionCookie(cookie ?? "NULL");
         }
 
         if (accountName is null)
@@ -505,9 +495,9 @@ public partial class ClientRequesterController
         {
             { "last_stats", lastStats },
             { "success", "True" },
-            { "hosttime", (int)DateTimeOffset.UtcNow.ToUnixTimeSeconds() } 
+            { "hosttime", (int) DateTimeOffset.UtcNow.ToUnixTimeSeconds() }
         };
-        
+
         return Ok(PhpSerialization.Serialize(response));
     }
 
@@ -518,42 +508,42 @@ public partial class ClientRequesterController
 
         if (string.IsNullOrEmpty(nickname))
         {
-             return BadRequest("Missing nickname");
+            return BadRequest("Missing nickname");
         }
-        
+
         var query = from ps in MerrickContext.PlayerStatistics
-                    join ms in MerrickContext.MatchStatistics on ps.MatchID equals ms.MatchID
-                    where ps.AccountName == nickname
-                    select new { ps, ms };
-                    
+            join ms in MerrickContext.MatchStatistics on ps.MatchID equals ms.MatchID
+            where ps.AccountName == nickname
+            select new { ps, ms };
+
         switch (table)
         {
             case "campaign": // Season Normal (Ranked)
                 query = query.Where(x => x.ps.RankedMatch == 1);
                 break;
             case "player": // Public Game Stats
-                 query = query.Where(x => x.ps.PublicMatch == 1);
-                 break;
+                query = query.Where(x => x.ps.PublicMatch == 1);
+                break;
             case "midwars": // Others/Midwars
             case "other":
             case "others":
-                 query = query.Where(x => x.ms.GameMode == "midwars");
-                 break;
+                query = query.Where(x => x.ms.GameMode == "midwars");
+                break;
             case "riftwars": // Riftwars
-                 query = query.Where(x => x.ms.GameMode == "riftwars");
-                 break;
+                query = query.Where(x => x.ms.GameMode == "riftwars");
+                break;
             default:
-                 // Strict filtering: If table is unknown or missing, return nothing.
-                 // This prevents "Others" (if sending a new key) from showing Public matches by accident.
-                 query = query.Where(x => false);
-                 break;
+                // Strict filtering: If table is unknown or missing, return nothing.
+                // This prevents "Others" (if sending a new key) from showing Public matches by accident.
+                query = query.Where(x => false);
+                break;
         }
 
         var historyData = await query
             .OrderByDescending(x => x.ms.TimestampRecorded)
             .Take(100)
-            .Select(x => new 
-            { 
+            .Select(x => new
+            {
                 x.ps.MatchID,
                 x.ps.Team,
                 x.ps.HeroKills,
@@ -567,45 +557,45 @@ public partial class ClientRequesterController
                 x.ms.FileName
             })
             .ToListAsync();
-            
-         Dictionary<string, string> matchHistoryOverview = new();
-         
-         int i = 0;
-         foreach (var match in historyData)
-         {
-             string map = match.Map;
-             string date = match.TimestampRecorded.ToString("MM/dd/yyyy");
-             int duration = match.TimePlayed;
-             string matchName = match.FileName;
-             
-             // Map display names if needed, but client
-                // 2026-01-11: Protocol Fix - Match History expects Base Hero ID (Integer), NOT Product ID or String Identifier.
-                // We resolve ProductID -> BaseID via HeroDefinitionService.
-                uint baseHeroId = HeroDefinitionService.GetBaseHeroId(match.HeroProductID ?? 0);
-                
-                string heroIdentifierString = HeroDefinitionService.GetHeroIdentifier(match.HeroProductID ?? 0);
-                
-                string matchData = string.Join(',',
-                    match.MatchID,
-                    match.Win, // Already int (0 or 1)
-                    match.Team,
-                    match.HeroKills,
-                    match.HeroDeaths,
-                    match.HeroAssists,
-                    baseHeroId, // Send Base ID (e.g. 12) instead of Product ID (e.g. 121)
-                    duration,
-                    map,
-                    date,
-                    heroIdentifierString // FIX: Client uses 11th column for Icon path
-                );
-                
-                // Keep debug log
-                Console.WriteLine($"[DEBUG_MATCH_HISTORY_CSV] {matchData}");
-                
+
+        Dictionary<string, string> matchHistoryOverview = new();
+
+        int i = 0;
+        foreach (var match in historyData)
+        {
+            string map = match.Map;
+            string date = match.TimestampRecorded.ToString("MM/dd/yyyy");
+            int duration = match.TimePlayed;
+            string matchName = match.FileName;
+
+            // Map display names if needed, but client
+            // 2026-01-11: Protocol Fix - Match History expects Base Hero ID (Integer), NOT Product ID or String Identifier.
+            // We resolve ProductID -> BaseID via HeroDefinitionService.
+            uint baseHeroId = HeroDefinitionService.GetBaseHeroId(match.HeroProductID ?? 0);
+
+            string heroIdentifierString = HeroDefinitionService.GetHeroIdentifier(match.HeroProductID ?? 0);
+
+            string matchData = string.Join(',',
+                match.MatchID,
+                match.Win, // Already int (0 or 1)
+                match.Team,
+                match.HeroKills,
+                match.HeroDeaths,
+                match.HeroAssists,
+                baseHeroId, // Send Base ID (e.g. 12) instead of Product ID (e.g. 121)
+                duration,
+                map,
+                date,
+                heroIdentifierString // FIX: Client uses 11th column for Icon path
+            );
+
+            // Keep debug log
+            Console.WriteLine($"[DEBUG_MATCH_HISTORY_CSV] {matchData}");
+
             matchHistoryOverview.Add("m" + i, matchData);
             i++;
-         }
-         
-         return Ok(PhpSerialization.Serialize(matchHistoryOverview));
+        }
+
+        return Ok(PhpSerialization.Serialize(matchHistoryOverview));
     }
 }

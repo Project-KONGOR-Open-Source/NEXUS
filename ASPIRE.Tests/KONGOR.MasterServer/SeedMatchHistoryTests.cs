@@ -11,33 +11,45 @@ public class SeedMatchHistoryTests
     public async Task SeedMatchHistory_Full5v5()
     {
         // Setup Dependency Injection to get the DbContext
-        ServiceCollection services = new ServiceCollection();
-        
-        string connectionString = "Server=127.0.0.1,55678;Database=development;User Id=sa;Password=MerrickDevPassword2025;TrustServerCertificate=True;Connection Timeout=60;"; 
-        
+        ServiceCollection services = new();
+
+        string connectionString =
+            "Server=127.0.0.1,55678;Database=development;User Id=sa;Password=MerrickDevPassword2025;TrustServerCertificate=True;Connection Timeout=60;";
+
         services.AddDbContext<MerrickContext>(options =>
-            options.UseSqlServer(connectionString, sqlOptions => 
+            options.UseSqlServer(connectionString, sqlOptions =>
                 sqlOptions.MigrationsHistoryTable("MigrationsHistory", "meta")));
 
         ServiceProvider provider = services.BuildServiceProvider();
         MerrickContext context = provider.GetRequiredService<MerrickContext>();
 
         // FORCE REMEDIATION: Unconditionally drop table and clear migration history to ensure clean state
-        try 
+        try
         {
             Console.WriteLine("[REMEDIATION] Forcing Drop of AccountStatistics table...");
-            try { await context.Database.ExecuteSqlRawAsync("IF OBJECT_ID('data.AccountStatistics', 'U') IS NOT NULL DROP TABLE data.AccountStatistics"); }
+            try
+            {
+                await context.Database.ExecuteSqlRawAsync(
+                    "IF OBJECT_ID('data.AccountStatistics', 'U') IS NOT NULL DROP TABLE data.AccountStatistics");
+            }
             catch (Exception ex) { Console.WriteLine($"[REMEDIATION] Drop Table Failed (Non-Critical): {ex.Message}"); }
-            
+
             Console.WriteLine("[REMEDIATION] Clearing Match History...");
             try { await context.Database.ExecuteSqlRawAsync("DELETE FROM data.PlayerStatistics"); }
             catch (Exception ex) { Console.WriteLine($"[REMEDIATION] Delete PlayerStats Failed: {ex.Message}"); }
-            
+
             Console.WriteLine("[REMEDIATION] Clearing Migration History...");
             // Real configuration uses [meta].[MigrationsHistory]
-            try { await context.Database.ExecuteSqlRawAsync("DELETE FROM [meta].[MigrationsHistory] WHERE [MigrationId] = '20260111031716_AddAccountStatisticsTable'"); }
-            catch (Exception ex) { Console.WriteLine($"[REMEDIATION] Delete History Failed (Non-Critical): {ex.Message}"); }
-            
+            try
+            {
+                await context.Database.ExecuteSqlRawAsync(
+                    "DELETE FROM [meta].[MigrationsHistory] WHERE [MigrationId] = '20260111031716_AddAccountStatisticsTable'");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[REMEDIATION] Delete History Failed (Non-Critical): {ex.Message}");
+            }
+
             Console.WriteLine("[REMEDIATION] Re-applying latest migration...");
             await context.Database.MigrateAsync();
             Console.WriteLine("[REMEDIATION] Database is now up to date.");
@@ -46,27 +58,27 @@ public class SeedMatchHistoryTests
         {
             Console.WriteLine($"[DEBUG/REMEDIATION] Failed: {ex.Message}");
             throw;
-        } 
+        }
 
-        Random random = new Random();
+        Random random = new();
         int baseMatchId = 9000000 + random.Next(1, 100000);
         int midwarsId = baseMatchId + 1;
         int rankedId = baseMatchId + 2;
 
-        List<Account> guestAccounts = new List<Account>();
+        List<Account> guestAccounts = new();
 
         // 1. Fetch ALL Guest Accounts (01-10)
         for (int i = 1; i <= 10; i++)
         {
             string nickname = $"GUEST-{i:D2}";
             Account? account = await context.Accounts.FirstOrDefaultAsync(a => a.Name == nickname);
-            
+
             if (account == null)
             {
                 Console.WriteLine($"Account {nickname} not found. Skipping.");
                 continue;
             }
-            
+
             guestAccounts.Add(account);
 
             // 2. Seed AccountStatistics if missing
@@ -78,19 +90,19 @@ public class SeedMatchHistoryTests
                     MatchesPlayed = 2,
                     MatchesWon = 1,
                     MatchesLost = 1,
-                    SkillRating = 1500.0 + (random.NextDouble() * 100 - 50)
+                    SkillRating = 1500.0 + ((random.NextDouble() * 100) - 50)
                 });
                 Console.WriteLine($"Seeded AccountStatistics for {nickname}.");
             }
         }
 
         // 3. Create Matches
-        MatchStatistics midwarsMatch = new MatchStatistics
+        MatchStatistics midwarsMatch = new()
         {
             MatchID = midwarsId,
             ServerID = 1,
             HostAccountName = "System",
-            Map = "midwars", 
+            Map = "midwars",
             MapVersion = "1.0",
             TimePlayed = 1200,
             FileSize = 1000,
@@ -122,12 +134,12 @@ public class SeedMatchHistoryTests
             AwardHighestCreepScore = 0
         };
 
-        MatchStatistics rankedMatch = new MatchStatistics
+        MatchStatistics rankedMatch = new()
         {
             MatchID = rankedId,
             ServerID = 1,
             HostAccountName = "System",
-            Map = "caldavar", 
+            Map = "caldavar",
             MapVersion = "1.0",
             TimePlayed = 1800,
             FileSize = 1200,
@@ -164,7 +176,19 @@ public class SeedMatchHistoryTests
         // List of valid heroes confirmed to exist in HeroDefinitions.cs
         // 114: Armadon, 115: Behemoth, 116: Hammerstorm, 120: Predator, 121: Jeraziah
         // 122: Panda, 123: Rampage, 124: Tundra, 125: Gladiator, 153: Accursed
-        List<uint> validHeroes = new List<uint> { 114, 115, 116, 120, 121, 122, 123, 124, 125, 153 };
+        List<uint> validHeroes = new()
+        {
+            114,
+            115,
+            116,
+            120,
+            121,
+            122,
+            123,
+            124,
+            125,
+            153
+        };
 
         // 4. Create PlayerStatistics for 5v5
         foreach (Account account in guestAccounts)
@@ -174,7 +198,7 @@ public class SeedMatchHistoryTests
             int team = guestNum <= 5 ? 1 : 2; // 1-5 Team 1, 6-10 Team 2
 
             // Items (Randomly assigned from a small list)
-            List<string> possibleItems = new List<string>
+            List<string> possibleItems = new()
             {
                 "Item_LoggersHatchet",
                 "Item_ManaBattery",
@@ -186,7 +210,7 @@ public class SeedMatchHistoryTests
             };
             List<string> inventory = possibleItems.OrderBy(x => random.Next()).Take(3).ToList();
 
-            
+
             // Midwars Player
             context.PlayerStatistics.Add(new PlayerStatistics
             {
@@ -371,6 +395,7 @@ public class SeedMatchHistoryTests
         }
 
         await context.SaveChangesAsync();
-        Console.WriteLine($"Seeded 5v5 matches for {guestAccounts.Count} accounts. Midwars ({midwarsId}), Ranked ({rankedId})");
+        Console.WriteLine(
+            $"Seeded 5v5 matches for {guestAccounts.Count} accounts. Midwars ({midwarsId}), Ranked ({rankedId})");
     }
 }

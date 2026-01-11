@@ -8,7 +8,7 @@ public interface IPendingClanService
     void InsertPendingClan(PendingClan pendingClan);
     void RemovePendingClan(string pendingClanTagAndName);
     PendingClan? GetPendingClanForUser(Account account);
-    
+
     // Invite Helpers
     void RemoveObsoledPendingClanInvites();
     bool IsUserInPendingClanInvites(string username);
@@ -20,14 +20,14 @@ public interface IPendingClanService
 
 public class PendingClanService : IPendingClanService
 {
-    // Key: [tag]name (lowercase)
-    private readonly ConcurrentDictionary<string, PendingClan> _pendingClans = new();
-    
     // Key: Invite Key? Legacy didn't specify key format clearly in helper but used Dictionary.
     // Legacy InsertPendingClanInvite just added to dictionary. 
     // We will assume Key is Username or something unique. 
     // Legacy GetPendingClanInviteKeyForUser iterates values.
     private readonly ConcurrentDictionary<string, PendingClanInvite> _pendingClanInvites = new();
+
+    // Key: [tag]name (lowercase)
+    private readonly ConcurrentDictionary<string, PendingClan> _pendingClans = new();
 
     public void RemoveObsoledPendingClans()
     {
@@ -49,6 +49,7 @@ public class PendingClanService : IPendingClanService
                 return true;
             }
         }
+
         return false;
     }
 
@@ -56,12 +57,13 @@ public class PendingClanService : IPendingClanService
     {
         foreach (KeyValuePair<string, PendingClan> kvp in _pendingClans)
         {
-            if (kvp.Value.ClanName.Equals(name, StringComparison.OrdinalIgnoreCase) || 
+            if (kvp.Value.ClanName.Equals(name, StringComparison.OrdinalIgnoreCase) ||
                 kvp.Value.ClanTag.Equals(tag, StringComparison.OrdinalIgnoreCase))
             {
                 return true;
             }
         }
+
         return false;
     }
 
@@ -85,6 +87,7 @@ public class PendingClanService : IPendingClanService
                 return kvp.Value;
             }
         }
+
         return null;
     }
 
@@ -113,6 +116,7 @@ public class PendingClanService : IPendingClanService
                 return kvp.Key;
             }
         }
+
         return null;
     }
 
@@ -125,13 +129,14 @@ public class PendingClanService : IPendingClanService
     {
         _pendingClanInvites.TryRemove(key, out _);
     }
-    
+
     public PendingClanInvite? GetPendingClanInvite(string key)
     {
         if (_pendingClanInvites.TryGetValue(key, out PendingClanInvite? invite))
         {
             return invite;
         }
+
         return null;
     }
 }

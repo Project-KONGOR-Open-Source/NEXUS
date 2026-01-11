@@ -5,7 +5,7 @@ public class ServerManagerStatusRequestData
     public ServerManagerStatusRequestData(ChatBuffer buffer)
     {
         CommandBytes = buffer.ReadCommandBytes();
-        ServerManagerID = buffer.ReadInt32();
+        ServerManagerId = buffer.ReadInt32();
         ServerLogin = buffer.ReadString();
         Location = buffer.ReadString();
         Name = buffer.ReadString();
@@ -17,7 +17,7 @@ public class ServerManagerStatusRequestData
 
     public byte[] CommandBytes { get; init; }
 
-    public int ServerManagerID { get; }
+    public int ServerManagerId { get; }
 
     public string ServerLogin { get; init; }
 

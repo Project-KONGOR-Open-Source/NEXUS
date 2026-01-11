@@ -1,11 +1,6 @@
 namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Connection;
 
-public class ServerManagerDisconnectRequestData
+public class ServerManagerDisconnectRequestData(ChatBuffer buffer)
 {
-    public ServerManagerDisconnectRequestData(ChatBuffer buffer)
-    {
-        CommandBytes = buffer.ReadCommandBytes();
-    }
-
-    public byte[] CommandBytes { get; init; }
+    public byte[] CommandBytes { get; init; } = buffer.ReadCommandBytes();
 }

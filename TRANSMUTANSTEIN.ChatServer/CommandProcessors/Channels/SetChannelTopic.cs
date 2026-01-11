@@ -8,7 +8,7 @@ public class SetChannelTopic : ISynchronousCommandProcessor<ChatSession>
         SetChannelTopicRequestData requestData = new(buffer);
 
         // Find Channel
-        ChatChannel? channel = ChatChannel.Get(session, requestData.ChannelID);
+        ChatChannel? channel = ChatChannel.Get(session, requestData.ChannelId);
 
         // If Channel Not Found or User Not Member (Get checks membership), do nothing?
         // Legacy: ChannelTopicRequest checks if channel exists.

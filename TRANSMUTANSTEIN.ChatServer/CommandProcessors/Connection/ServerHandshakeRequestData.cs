@@ -5,14 +5,14 @@ public class ServerHandshakeRequestData
     public ServerHandshakeRequestData(ChatBuffer buffer)
     {
         CommandBytes = buffer.ReadCommandBytes();
-        ServerID = buffer.ReadInt32();
+        ServerId = buffer.ReadInt32();
         SessionCookie = buffer.ReadString();
         ChatProtocolVersion = buffer.ReadInt32();
     }
 
     public byte[] CommandBytes { get; init; }
 
-    public int ServerID { get; }
+    public int ServerId { get; }
 
     public string SessionCookie { get; }
 
@@ -22,7 +22,7 @@ public class ServerHandshakeRequestData
     {
         return new MatchServerChatSessionMetadata
         {
-            ServerID = ServerID, SessionCookie = SessionCookie, ChatProtocolVersion = ChatProtocolVersion
+            ServerID = ServerId, SessionCookie = SessionCookie, ChatProtocolVersion = ChatProtocolVersion
         };
     }
 }

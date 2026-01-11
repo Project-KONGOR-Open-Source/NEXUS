@@ -16,7 +16,8 @@ public sealed class ChatCommunicationTests
         await using TRANSMUTANSTEINServiceProvider app =
             await TRANSMUTANSTEINServiceProvider.CreateOrchestratedInstanceAsync(testPort);
 
-        using TcpClient sender = await ChatTestHelpers.ConnectAndAuthenticateAsync(app, app.ClientPort, 601, "WhisperSender_601");
+        using TcpClient sender =
+            await ChatTestHelpers.ConnectAndAuthenticateAsync(app, app.ClientPort, 601, "WhisperSender_601");
         using TcpClient recipient =
             await ChatTestHelpers.ConnectAndAuthenticateAsync(app, app.ClientPort, 602, "WhisperRecipient_602");
 

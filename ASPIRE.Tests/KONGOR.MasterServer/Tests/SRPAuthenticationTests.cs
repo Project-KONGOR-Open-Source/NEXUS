@@ -175,19 +175,16 @@ public sealed class SrpAuthenticationTests
 
         // Verify the cookie is valid by making an authenticated request
         HttpClient client = webApplicationFactory.CreateClient();
-        Dictionary<string, string> payload = new()
-        {
-            { "f", "get_initStats" },
-            { "cookie", result.Cookie! }
-        };
-        
-        HttpResponseMessage response = await client.PostAsync("client_requester.php", new FormUrlEncodedContent(payload));
-        
+        Dictionary<string, string> payload = new() { { "f", "get_initStats" }, { "cookie", result.Cookie! } };
+
+        HttpResponseMessage response =
+            await client.PostAsync("client_requester.php", new FormUrlEncodedContent(payload));
+
         await Assert.That(response.IsSuccessStatusCode).IsTrue();
-        
+
         string responseBody = await response.Content.ReadAsStringAsync();
         // get_initStats should return account info like nickname
-        await Assert.That(responseBody).Contains(accountName);  
+        await Assert.That(responseBody).Contains(accountName);
         await Assert.That(responseBody).Contains("account_id");
     }
 

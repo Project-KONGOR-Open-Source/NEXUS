@@ -4,23 +4,36 @@ public static class Heroes
 {
     public static List<string> AllHeroIdentifiers()
     {
-        List<string> identifiers = new List<string>();
+        List<string> identifiers = new();
         MethodBase? methodBase = MethodBase.GetCurrentMethod();
-        if (methodBase == null) return identifiers;
+        if (methodBase == null)
+        {
+            return identifiers;
+        }
 
         Type? declaringType = methodBase.DeclaringType;
-        if (declaringType == null) return identifiers;
+        if (declaringType == null)
+        {
+            return identifiers;
+        }
 
         foreach (Type type in declaringType.GetNestedTypes())
         {
             FieldInfo? fieldInfo = type.GetField("Identifier");
-            if (fieldInfo == null) continue;
+            if (fieldInfo == null)
+            {
+                continue;
+            }
 
-            string? identifier = (string?)fieldInfo.GetValue(null);
-            if (identifier == null) continue;
+            string? identifier = (string?) fieldInfo.GetValue(null);
+            if (identifier == null)
+            {
+                continue;
+            }
 
             identifiers.Add(identifier);
         }
+
         return identifiers;
     }
 
@@ -692,7 +705,7 @@ public static class Heroes
     public static class Gauntlet
     {
         public const string Name = "Gauntlet";
-        public const uint HeroId = 205; 
+        public const uint HeroId = 205;
         public const string Identifier = "Hero_Gauntlet";
 
         public static class Abilities
@@ -1397,7 +1410,10 @@ public static class Heroes
     public static class Prophet
     {
         public const string Name = "Prophet";
-        public const string Identifier = "Hero_Prophet"; // NOTE: For the custom map "prophets", the identifier `wl_Warlock` is used instead.
+
+        public const string
+            Identifier =
+                "Hero_Prophet"; // NOTE: For the custom map "prophets", the identifier `wl_Warlock` is used instead.
 
         public static class Abilities
         {

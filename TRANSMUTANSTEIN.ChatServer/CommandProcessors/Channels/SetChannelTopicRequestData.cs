@@ -1,15 +1,8 @@
 namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Channels;
 
-public class SetChannelTopicRequestData
+public class SetChannelTopicRequestData(ChatBuffer buffer)
 {
-    public SetChannelTopicRequestData(ChatBuffer buffer)
-    {
-        CommandBytes = buffer.ReadCommandBytes();
-        ChannelID = buffer.ReadInt32();
-        Topic = buffer.ReadString();
-    }
-
-    public byte[] CommandBytes { get; init; }
-    public int ChannelID { get; }
-    public string Topic { get; }
+    public byte[] CommandBytes { get; init; } = buffer.ReadCommandBytes();
+    public int ChannelId { get; } = buffer.ReadInt32();
+    public string Topic { get; } = buffer.ReadString();
 }

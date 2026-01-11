@@ -1,11 +1,6 @@
 namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Statistics;
 
-public class SeasonStatisticsRequestData
+public class SeasonStatisticsRequestData(ChatBuffer buffer)
 {
-    public SeasonStatisticsRequestData(ChatBuffer buffer)
-    {
-        CommandBytes = buffer.ReadCommandBytes();
-    }
-
-    public byte[] CommandBytes { get; init; }
+    public byte[] CommandBytes { get; init; } = buffer.ReadCommandBytes();
 }

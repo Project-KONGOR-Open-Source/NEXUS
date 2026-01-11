@@ -1,3 +1,4 @@
+using System.Net;
 using System.Net.Sockets;
 
 using ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer.Infrastructure;
@@ -14,9 +15,9 @@ public static class ChatTestHelpers
 
     public static int GetAvailablePort()
     {
-        using TcpListener listener = new(System.Net.IPAddress.Loopback, 0);
+        using TcpListener listener = new(IPAddress.Loopback, 0);
         listener.Start();
-        int port = ((System.Net.IPEndPoint)listener.LocalEndpoint).Port;
+        int port = ((IPEndPoint) listener.LocalEndpoint).Port;
         listener.Stop();
         return port;
     }
@@ -67,9 +68,9 @@ public static class ChatTestHelpers
 
                 Account account = new()
                 {
-                    ID = accountId, 
-                    Name = accountName, 
-                    IsMain = true, 
+                    ID = accountId,
+                    Name = accountName,
+                    IsMain = true,
                     User = user,
                     Cookie = $"cookie_{accountId}"
                 };
@@ -187,7 +188,8 @@ public static class ChatTestHelpers
                         int payloadRead = 0;
                         while (payloadRead < payloadSize)
                         {
-                            int read = await stream.ReadAsync(payload, payloadRead, payloadSize - payloadRead, cts.Token);
+                            int read = await stream.ReadAsync(payload, payloadRead, payloadSize - payloadRead,
+                                cts.Token);
                             if (read == 0)
                             {
                                 throw new Exception("Disconnected reading payload");
@@ -207,8 +209,9 @@ public static class ChatTestHelpers
                 client?.Dispose(); // CLEANUP FAILED CLIENT
 
                 // Log retry (optional, console for now)
-                Console.WriteLine($"[ChatTestHelpers] Connection Attempt {attempt + 1} Failed: {ex.Message}. Retrying...");
-                
+                Console.WriteLine(
+                    $"[ChatTestHelpers] Connection Attempt {attempt + 1} Failed: {ex.Message}. Retrying...");
+
                 if (attempt < maxRetries - 1)
                 {
                     await Task.Delay(500); // Wait before retry

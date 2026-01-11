@@ -4,9 +4,10 @@ using System.Net.Sockets;
 using ASPIRE.Tests.InProcess;
 
 using Microsoft.AspNetCore.TestHost;
+using Microsoft.Extensions.Configuration;
+
 using Moq;
 
-using Microsoft.Extensions.Configuration;
 using TRANSMUTANSTEIN.ChatServer.Services;
 
 namespace ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer.Infrastructure;
@@ -85,16 +86,16 @@ public class TRANSMUTANSTEINServiceProvider : WebApplicationFactory<global::TRAN
             }
 
             // Register Mock Redis (using Moq to avoid massive interface stubbing)
-            Mock<IConnectionMultiplexer> mockMuxer = new Mock<IConnectionMultiplexer>();
-            Mock<ISubscriber> mockSubscriber = new Mock<ISubscriber>();
-            InProcessDistributedCacheStore inProcessDb = new InProcessDistributedCacheStore();
+            Mock<IConnectionMultiplexer> mockMuxer = new();
+            Mock<ISubscriber> mockSubscriber = new();
+            InProcessDistributedCacheStore inProcessDb = new();
 
             mockMuxer.Setup(m => m.IsConnected).Returns(true);
             mockMuxer.Setup(m => m.GetDatabase(It.IsAny<int>(), It.IsAny<object>())).Returns(inProcessDb);
             mockMuxer.Setup(m => m.GetSubscriber(It.IsAny<object>())).Returns(mockSubscriber.Object);
             mockMuxer.Setup(m => m.ClientName).Returns("MockRedis");
             mockMuxer.Setup(m => m.ToString()).Returns("MockConnectionMultiplexer");
-            
+
             // Ensure Subscriber returns connected state for checks
             mockSubscriber.Setup(s => s.IsConnected(It.IsAny<RedisChannel>())).Returns(true);
             mockSubscriber.Setup(s => s.Multiplexer).Returns(mockMuxer.Object);
@@ -118,7 +119,7 @@ public class TRANSMUTANSTEINServiceProvider : WebApplicationFactory<global::TRAN
         {
             // Resolve ChatService to access the ChatServer and its ClientServer endpoint
             ChatService chatService = provider.Services.GetRequiredService<ChatService>();
-            
+
             // We need to wait until the server is started and bound
             int attempts = 0;
             while ((chatService.ChatServer == null || !chatService.ChatServer.IsStarted) && attempts < 50)
@@ -129,7 +130,7 @@ public class TRANSMUTANSTEINServiceProvider : WebApplicationFactory<global::TRAN
 
             if (chatService.ChatServer == null || !chatService.ChatServer.IsStarted)
             {
-                 throw new Exception("Chat Server failed to start or ChatService.ChatServer is null.");
+                throw new Exception("Chat Server failed to start or ChatService.ChatServer is null.");
             }
 
             // Retrieve the bound port

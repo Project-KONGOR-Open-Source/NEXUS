@@ -21,28 +21,30 @@ namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Clans;
 // I will bind this processor to both if I can, or create two files.
 // Assuming [ChatCommand] can only be single.
 // I'll assume 0x0053 (Create Reject) for now since we are verifying Creation.
-
-
 public class ClanCreateReject(IPendingClanService pendingClanService) : IAsynchronousCommandProcessor<ChatSession>
 {
     public async Task Process(ChatSession session, ChatBuffer buffer)
     {
-         Account? account = session.Account;
-         if (account == null) return;
-         
-         pendingClanService.RemoveObsoledPendingClans();
-         PendingClan? pendingClan = pendingClanService.GetPendingClanForUser(account);
-         
-         if (pendingClan != null)
-         {
-             ChatSession? creatorSession = Context.ClientChatSessions.Values.FirstOrDefault(cs => cs.Account?.ID == pendingClan.CreatorAccountId);
-             if (creatorSession != null)
-             {
-                 creatorSession.Send(new ClanCreateRejectedResponse(account.Name));
-             }
-             
-             string key = $"[{pendingClan.ClanTag.ToLower()}]{pendingClan.ClanName.ToLower()}";
-             pendingClanService.RemovePendingClan(key);
-         }
+        Account? account = session.Account;
+        if (account == null)
+        {
+            return;
+        }
+
+        pendingClanService.RemoveObsoledPendingClans();
+        PendingClan? pendingClan = pendingClanService.GetPendingClanForUser(account);
+
+        if (pendingClan != null)
+        {
+            ChatSession? creatorSession =
+                Context.ClientChatSessions.Values.FirstOrDefault(cs => cs.Account?.ID == pendingClan.CreatorAccountId);
+            if (creatorSession != null)
+            {
+                creatorSession.Send(new ClanCreateRejectedResponse(account.Name));
+            }
+
+            string key = $"[{pendingClan.ClanTag.ToLower()}]{pendingClan.ClanName.ToLower()}";
+            pendingClanService.RemovePendingClan(key);
+        }
     }
 }

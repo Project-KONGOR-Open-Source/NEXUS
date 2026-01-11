@@ -3,6 +3,7 @@ using System.Net;
 using KONGOR.MasterServer.Extensions.Cache;
 
 using MERRICK.DatabaseContext.Entities.Statistics;
+
 // For KONGORServiceProvider
 
 // ReSharper disable once CheckNamespace
@@ -82,15 +83,15 @@ public sealed partial class MatchStatsSubmissionTests
         // Serialized strings look like: s:10:"match_summ"; or s:17:"selected_upgrades";
 
         // Regex for match_summ key (10 chars)
-        Regex matchSummRegex = new Regex(@"s:10:""match_summ"";");
+        Regex matchSummRegex = new(@"s:10:""match_summ"";");
         await Assert.That(matchSummRegex.IsMatch(content)).IsTrue();
 
         // Regex for match_player_stats key (18 chars)
-        Regex matchPlayerStatsRegex = new Regex(@"s:18:""match_player_stats"";");
+        Regex matchPlayerStatsRegex = new(@"s:18:""match_player_stats"";");
         await Assert.That(matchPlayerStatsRegex.IsMatch(content)).IsTrue();
 
         // Regex for selected_upgrades key (17 chars)
-        Regex selectedUpgradesRegex = new Regex(@"s:17:""selected_upgrades"";");
+        Regex selectedUpgradesRegex = new(@"s:17:""selected_upgrades"";");
         await Assert.That(selectedUpgradesRegex.IsMatch(content)).IsTrue();
     }
 
@@ -186,13 +187,13 @@ public sealed partial class MatchStatsSubmissionTests
         await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.OK);
 
         // Verify response contains personalized data
-        Regex matchSummRegex = new Regex(@"s:10:""match_summ"";");
+        Regex matchSummRegex = new(@"s:10:""match_summ"";");
         await Assert.That(matchSummRegex.IsMatch(content)).IsTrue();
-        
+
         // Should contain result of SelectedStoreItems
         // Expected serialized: s:14:"aa.test_avatar"; or similar
         // We verify the value is present as a strict PHP string value
-        Regex avatarRegex = new Regex(@"s:\d+:""aa\.test_avatar"";");
+        Regex avatarRegex = new(@"s:\d+:""aa\.test_avatar"";");
         await Assert.That(avatarRegex.IsMatch(content)).IsTrue();
     }
 
@@ -224,7 +225,7 @@ public sealed partial class MatchStatsSubmissionTests
         // Should return serialized "Soft Failure" (Empty Stats) object
         // b:0; is no longer returned to prevent client crashes.
         // We verify that it returns a serialized array containing basic keys like "match_summ"
-        Regex matchSummRegex = new Regex(@"s:10:""match_summ"";");
+        Regex matchSummRegex = new(@"s:10:""match_summ"";");
         await Assert.That(matchSummRegex.IsMatch(content)).IsTrue();
     }
 
@@ -295,7 +296,7 @@ public sealed partial class MatchStatsSubmissionTests
         // If this fails with 401, it means the controller didn't pick up "f" from the QueryString,
         // and thus treated it as a generic request requiring validation (which fails due to empty cookie).
 
-        Regex matchSummRegex = new Regex(@"s:10:""match_summ"";");
+        Regex matchSummRegex = new(@"s:10:""match_summ"";");
         await Assert.That(matchSummRegex.IsMatch(content)).IsTrue();
     }
 

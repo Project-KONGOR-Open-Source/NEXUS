@@ -1,17 +1,10 @@
 namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Matchmaking;
 
-public class GroupJoinRequestData
+public class GroupJoinRequestData(ChatBuffer buffer)
 {
-    public GroupJoinRequestData(ChatBuffer buffer)
-    {
-        CommandBytes = buffer.ReadCommandBytes();
-        ClientVersion = buffer.ReadString();
-        InviteIssuerName = buffer.ReadString();
-    }
+    public byte[] CommandBytes { get; init; } = buffer.ReadCommandBytes();
 
-    public byte[] CommandBytes { get; init; }
+    public string ClientVersion { get; init; } = buffer.ReadString();
 
-    public string ClientVersion { get; init; }
-
-    public string InviteIssuerName { get; }
+    public string InviteIssuerName { get; } = buffer.ReadString();
 }

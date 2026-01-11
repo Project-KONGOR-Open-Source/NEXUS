@@ -30,9 +30,9 @@ public class ChatService(IServiceProvider serviceProvider) : IHostedService, IDi
         IConfiguration configuration = serviceProvider.GetRequiredService<IConfiguration>();
 
         int clientConnectionsPort = configuration.GetValue<int>("CHAT_SERVER_PORT_CLIENT");
-        
+
         int matchServerConnectionsPort = configuration.GetValue<int>("CHAT_SERVER_PORT_MATCH_SERVER");
-        
+
         int matchServerManagerConnectionsPort = configuration.GetValue<int>("CHAT_SERVER_PORT_MATCH_SERVER_MANAGER");
 
         ChatServer = new Domain.Core.ChatServer(serviceProvider, address, clientConnectionsPort,

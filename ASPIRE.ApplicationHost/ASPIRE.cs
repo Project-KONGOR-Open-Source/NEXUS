@@ -117,7 +117,7 @@ public class ASPIRE
             .WithParentRelationship(databaseServer); // Set Database Server As Parent Resource
 
         // Add Database Project
-        builder.AddProject<Projects.MERRICK_DatabaseContext>("database-context",
+        builder.AddProject<MERRICK_DatabaseContext>("database-context",
                 builder.Environment.IsProduction()
                     ? "MERRICK.DatabaseContext Production"
                     : "MERRICK.DatabaseContext Development")
@@ -127,7 +127,7 @@ public class ASPIRE
             .WithEnvironment("INFRASTRUCTURE_GATEWAY", gateway);
 
         // Add Master Server Project
-        builder.AddProject<Projects.KONGOR_MasterServer>("master-server",
+        builder.AddProject<KONGOR_MasterServer>("master-server",
                 builder.Environment.IsProduction()
                     ? "KONGOR.MasterServer Production"
                     : "KONGOR.MasterServer Development")
@@ -146,7 +146,7 @@ public class ASPIRE
         bool isChatServerProxied = builder.Environment.IsProduction();
 
         // Add Chat Server Project
-        builder.AddProject<Projects.TRANSMUTANSTEIN_ChatServer>("chat-server",
+        builder.AddProject<TRANSMUTANSTEIN_ChatServer>("chat-server",
                 builder.Environment.IsProduction()
                     ? "TRANSMUTANSTEIN.ChatServer Production"
                     : "TRANSMUTANSTEIN.ChatServer Development")
@@ -169,7 +169,7 @@ public class ASPIRE
                 isProxied: isChatServerProxied);
 
         // Add Web Portal API Project
-        IResourceBuilder<ProjectResource> webPortalApi = builder.AddProject<Projects.ZORGATH_WebPortal_API>("web-portal-api",
+        IResourceBuilder<ProjectResource> webPortalApi = builder.AddProject<ZORGATH_WebPortal_API>("web-portal-api",
                 builder.Environment.IsProduction()
                     ? "ZORGATH.WebPortal.API Production"
                     : "ZORGATH.WebPortal.API Development")
@@ -178,7 +178,7 @@ public class ASPIRE
             .WithEnvironment("INFRASTRUCTURE_GATEWAY", gateway);
 
         // Add Web Portal UI Project
-        builder.AddProject<Projects.DAWNBRINGER_WebPortal_UI>("web-portal-ui",
+        builder.AddProject<DAWNBRINGER_WebPortal_UI>("web-portal-ui",
                 builder.Environment.IsProduction()
                     ? "DAWNBRINGER.WebPortal.UI Production"
                     : "DAWNBRINGER.WebPortal.UI Development")

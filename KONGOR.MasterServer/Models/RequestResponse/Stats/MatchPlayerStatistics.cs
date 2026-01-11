@@ -1,6 +1,12 @@
 ﻿namespace KONGOR.MasterServer.Models.RequestResponse.Stats;
 
-public class MatchPlayerStatistics(MatchStartData matchStartData, Account account, PlayerStatistics playerStatistics, AccountStatistics currentMatchTypeStatistics, AccountStatistics publicMatchStatistics, AccountStatistics matchmakingStatistics)
+public class MatchPlayerStatistics(
+    MatchStartData matchStartData,
+    Account account,
+    PlayerStatistics playerStatistics,
+    AccountStatistics currentMatchTypeStatistics,
+    AccountStatistics publicMatchStatistics,
+    AccountStatistics matchmakingStatistics)
 {
     /// <summary>
     ///     The unique identifier for the match.
@@ -451,7 +457,5 @@ public class MatchPlayerStatistics(MatchStartData matchStartData, Account accoun
     ///     Seasonal campaign progression information for the player in the match.
     /// </summary>
     [PhpProperty("campaign_info")]
-    public SeasonProgress SeasonProgress { get; init; } = new (matchStartData, playerStatistics, matchmakingStatistics);
+    public SeasonProgress SeasonProgress { get; init; } = new(matchStartData, playerStatistics, matchmakingStatistics);
 }
-
-

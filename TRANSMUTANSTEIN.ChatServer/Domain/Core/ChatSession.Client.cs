@@ -175,7 +175,6 @@ public partial class ChatSession
     }
 
 
-
     /// <summary>
     ///     Retrieves a list of chat sessions for all online peers who are observing the current account.
     ///     This includes:
@@ -196,8 +195,8 @@ public partial class ChatSession
         HashSet<int> clanMemberIDs =
         [
             .. (Account.Clan?.Members ?? [])
-                .Where(clanMember => clanMember != null && clanMember.ID != Account.ID)
-                .Select(clanMember => clanMember.ID)
+            .Where(clanMember => clanMember != null && clanMember.ID != Account.ID)
+            .Select(clanMember => clanMember.ID)
         ];
 
         // Find Sessions That Should Be Notified
@@ -232,8 +231,10 @@ public partial class ChatSession
             // Get All Online Observers (People who friend ME or are in my CLAN)
             List<ChatSession> onlineObserverSessions = GetOnlineObservers();
 
-            Log.Information("Broadcasting Status Update {Status} for Account {AccountID} ({AccountName}) to {ObserverCount} Observers: {ObserverNames}", 
-                status, Account.ID, Account.Name, onlineObserverSessions.Count, string.Join(", ", onlineObserverSessions.Select(s => s.Account?.Name ?? "Unknown")));
+            Log.Information(
+                "Broadcasting Status Update {Status} for Account {AccountID} ({AccountName}) to {ObserverCount} Observers: {ObserverNames}",
+                status, Account.ID, Account.Name, onlineObserverSessions.Count,
+                string.Join(", ", onlineObserverSessions.Select(s => s.Account?.Name ?? "Unknown")));
 
             ChatBuffer update = new();
 

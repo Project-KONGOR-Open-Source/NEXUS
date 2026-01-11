@@ -17,14 +17,15 @@ public partial class ClientRequesterController
 
         if (cookie == null || targetIdStr == null || clanIdStr == null || rankStr == null)
         {
-             Logger.LogError($"[Clans] HandleSetRank Missing parameters: C:{cookie!=null} T:{targetIdStr} Cl:{clanIdStr} R:{rankStr}");
-             return BadRequest("Missing parameters");
+            Logger.LogError(
+                $"[Clans] HandleSetRank Missing parameters: C:{cookie != null} T:{targetIdStr} Cl:{clanIdStr} R:{rankStr}");
+            return BadRequest("Missing parameters");
         }
 
         if (!int.TryParse(targetIdStr, out int targetId) || !int.TryParse(clanIdStr, out int clanId))
         {
-             Logger.LogError($"[Clans] HandleSetRank Invalid ID: T:{targetIdStr} Cl:{clanIdStr}");
-             return BadRequest("Invalid ID parameters");
+            Logger.LogError($"[Clans] HandleSetRank Invalid ID: T:{targetIdStr} Cl:{clanIdStr}");
+            return BadRequest("Invalid ID parameters");
         }
 
         // Validate Session
@@ -42,13 +43,15 @@ public partial class ClientRequesterController
 
         if (requester == null || requester.Clan?.ID != clanId)
         {
-            Logger.LogError($"[Clans] HandleSetRank Requester (ID:{requester?.ID}) not in specified clan ({clanId}) or null.");
+            Logger.LogError(
+                $"[Clans] HandleSetRank Requester (ID:{requester?.ID}) not in specified clan ({clanId}) or null.");
             return BadRequest("Requester not in specified clan");
         }
 
         if (requester.ClanTier < ClanTier.Officer)
         {
-            Logger.LogError($"[Clans] HandleSetRank Requester (Tier:{requester.ClanTier}) has insufficient permissions.");
+            Logger.LogError(
+                $"[Clans] HandleSetRank Requester (Tier:{requester.ClanTier}) has insufficient permissions.");
             return BadRequest("Insufficient Permissions");
         }
 
@@ -65,7 +68,7 @@ public partial class ClientRequesterController
 
         // Logic
         bool success = false;
-        
+
         // Normalize rank string
         rankStr = rankStr.Trim();
 
@@ -73,14 +76,15 @@ public partial class ClientRequesterController
         {
             // Kick
             // Standard check: Requester must be higher rank or Leader
-            if (requester.ClanTier <= target.ClanTier && requester.ID != target.ID) // Allow self-leave? Usually client uses LeaveClan for self.
+            if (requester.ClanTier <= target.ClanTier &&
+                requester.ID != target.ID) // Allow self-leave? Usually client uses LeaveClan for self.
             {
                 // Verify specific rules. Usually Leader can kick Officer. Officer can kick Member.
                 // Officer cannot kick Officer.
                 if (requester.ClanTier == ClanTier.Officer && target.ClanTier == ClanTier.Officer)
                 {
-                     Logger.LogError($"[Clans] HandleSetRank Officer cannot kick Officer.");
-                     return BadRequest("Officer cannot kick Officer");
+                    Logger.LogError("[Clans] HandleSetRank Officer cannot kick Officer.");
+                    return BadRequest("Officer cannot kick Officer");
                 }
             }
 
@@ -93,10 +97,19 @@ public partial class ClientRequesterController
         {
             // Promote/Demote
             ClanTier newTier;
-            if (rankStr.Equals("Officer", StringComparison.OrdinalIgnoreCase)) newTier = ClanTier.Officer;
-            else if (rankStr.Equals("Member", StringComparison.OrdinalIgnoreCase)) newTier = ClanTier.Member;
-            else if (rankStr.Equals("Leader", StringComparison.OrdinalIgnoreCase)) newTier = ClanTier.Leader;
-            else 
+            if (rankStr.Equals("Officer", StringComparison.OrdinalIgnoreCase))
+            {
+                newTier = ClanTier.Officer;
+            }
+            else if (rankStr.Equals("Member", StringComparison.OrdinalIgnoreCase))
+            {
+                newTier = ClanTier.Member;
+            }
+            else if (rankStr.Equals("Leader", StringComparison.OrdinalIgnoreCase))
+            {
+                newTier = ClanTier.Leader;
+            }
+            else
             {
                 Logger.LogError($"[Clans] HandleSetRank Unknown Rank: {rankStr}");
                 return BadRequest($"Unknown Rank: {rankStr}");
@@ -105,12 +118,12 @@ public partial class ClientRequesterController
             // Permission Checks
             if (newTier == ClanTier.Leader)
             {
-                if (requester.ClanTier != ClanTier.Leader) 
+                if (requester.ClanTier != ClanTier.Leader)
                 {
-                    Logger.LogError($"[Clans] HandleSetRank Only Leader can promote to Leader.");
+                    Logger.LogError("[Clans] HandleSetRank Only Leader can promote to Leader.");
                     return BadRequest("Only Leader can promote to Leader");
                 }
-                
+
                 // Swap
                 requester.ClanTier = ClanTier.Officer; // Demote self
                 target.ClanTier = ClanTier.Leader;
@@ -119,39 +132,40 @@ public partial class ClientRequesterController
             }
             else if (newTier == ClanTier.Officer)
             {
-                if (requester.ClanTier < ClanTier.Leader && target.ClanTier == ClanTier.Officer) 
+                if (requester.ClanTier < ClanTier.Leader && target.ClanTier == ClanTier.Officer)
                 {
-                    Logger.LogError($"[Clans] HandleSetRank Officer cannot promote Officer.");
+                    Logger.LogError("[Clans] HandleSetRank Officer cannot promote Officer.");
                     return BadRequest("Officer cannot promote Officer"); // No-op
                 }
-                
+
                 target.ClanTier = ClanTier.Officer;
                 success = true;
                 Logger.LogInformation($"[Clans] {requester.Name} promoted {target.Name} to Officer.");
             }
             else if (newTier == ClanTier.Member)
             {
-                 // Demote
-                 if (requester.ClanTier <= target.ClanTier && requester.ID != target.ID) 
-                 {
-                     Logger.LogError($"[Clans] HandleSetRank Cannot demote higher/equal rank. Req:{requester.ClanTier} Tgt:{target.ClanTier}");
-                     return BadRequest("Cannot demote higher/equal rank");
-                 }
-                 
-                 target.ClanTier = ClanTier.Member;
-                 success = true;
-                 Logger.LogInformation($"[Clans] {requester.Name} demoted {target.Name} to Member.");
+                // Demote
+                if (requester.ClanTier <= target.ClanTier && requester.ID != target.ID)
+                {
+                    Logger.LogError(
+                        $"[Clans] HandleSetRank Cannot demote higher/equal rank. Req:{requester.ClanTier} Tgt:{target.ClanTier}");
+                    return BadRequest("Cannot demote higher/equal rank");
+                }
+
+                target.ClanTier = ClanTier.Member;
+                success = true;
+                Logger.LogInformation($"[Clans] {requester.Name} demoted {target.Name} to Member.");
             }
         }
 
         if (success)
         {
             await MerrickContext.SaveChangesAsync();
-            
+
             // Return Notification Keys to trigger Chat Server packet
             // Use positive random keys to ensure compatibility
             string key1 = Random.Shared.Next(1000000, 9999999).ToString();
-            
+
             // 2026-01-10: Publish Update to Redis for Chat Server (Bypass Client Notification if Offline)
             // Format: "TargetID:Rank:RequesterID:ClanID:ClanName"
             string redisPayload = $"{targetId}:{target.ClanTier}:{requester.ID}:{clanId}:{requester.Clan.Name}";
@@ -160,24 +174,18 @@ public partial class ClientRequesterController
 
             Dictionary<string, object> response = new()
             {
-                { "set_rank", "OK" },
-                {
-                    "notification", new Dictionary<string, int>
-                    {
-                        { key1, requester.ID }
-                    }
-                }
+                { "set_rank", "OK" }, { "notification", new Dictionary<string, int> { { key1, requester.ID } } }
             };
-            
+
             if (rankStr.Equals("Remove", StringComparison.OrdinalIgnoreCase))
             {
                 response.Add("kick", "OK");
                 response.Add("remove_member", "OK");
             }
-            
+
             string serialized = PhpSerialization.Serialize(response);
             Logger.LogInformation($"[Clans] set_rank Response: {serialized}");
-            
+
             return Ok(serialized);
         }
 

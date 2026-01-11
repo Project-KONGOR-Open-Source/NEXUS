@@ -1,6 +1,6 @@
-﻿namespace MERRICK.DatabaseContext.Persistence;
+﻿using MERRICK.DatabaseContext.Entities;
 
-using global::MERRICK.DatabaseContext.Entities;
+namespace MERRICK.DatabaseContext.Persistence;
 
 public sealed class MerrickContext : DbContext
 {

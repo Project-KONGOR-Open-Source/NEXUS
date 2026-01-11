@@ -147,7 +147,7 @@ public sealed class MiscUnverifiedTests
             // Expecting 401 due to SRP password check failure.
             // We verify that the controller validation logic is reached by checking the specific error message.
             await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.Unauthorized);
-            
+
             string responseBody = await response.Content.ReadAsStringAsync();
             await Assert.That(responseBody).Contains("Invalid Host Account Password");
         }

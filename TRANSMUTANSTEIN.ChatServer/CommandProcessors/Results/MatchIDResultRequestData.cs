@@ -1,17 +1,10 @@
 namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Results;
 
-public class MatchIDResultRequestData
+public class MatchIdResultRequestData(ChatBuffer buffer)
 {
-    public MatchIDResultRequestData(ChatBuffer buffer)
-    {
-        CommandBytes = buffer.ReadCommandBytes();
-        Result = (ChatProtocol.MatchIDResult) buffer.ReadInt8();
-        RequestTimeMilliseconds = buffer.ReadInt32();
-    }
+    public byte[] CommandBytes { get; init; } = buffer.ReadCommandBytes();
 
-    public byte[] CommandBytes { get; init; }
+    public ChatProtocol.MatchIDResult Result { get; } = (ChatProtocol.MatchIDResult) buffer.ReadInt8();
 
-    public ChatProtocol.MatchIDResult Result { get; }
-
-    public int RequestTimeMilliseconds { get; }
+    public int RequestTimeMilliseconds { get; } = buffer.ReadInt32();
 }

@@ -299,7 +299,8 @@ namespace MERRICK.DatabaseContext.Migrations
 
                     b.Property<string>("Content")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(2048)
+                        .HasColumnType("nvarchar(2048)");
 
                     b.Property<DateTime>("TimestampCreated")
                         .HasColumnType("datetime2");

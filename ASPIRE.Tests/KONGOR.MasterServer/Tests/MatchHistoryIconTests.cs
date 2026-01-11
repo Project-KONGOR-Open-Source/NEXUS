@@ -200,27 +200,27 @@ public sealed class MatchHistoryIconTests
 
             response.EnsureSuccessStatusCode();
             string body = await response.Content.ReadAsStringAsync();
-            
+
             // Assert via Regex for rigid structure validation
             // Expected CSV in serialized array: "10001,1,1,5,0,10,12,1800,caldavar,..."
             // We want to verify that Column 7 is "12" and Column 11 matches "Hero_Jereziah"
-            
+
             // Matches: Any key (s:2:"m0";) followed by value string containing the CSV
             // Group 1: CSV Content
-            Regex matchHistoryRegex = new Regex(@"s:\d+:""([^""]*10001[^""]*)""");
+            Regex matchHistoryRegex = new(@"s:\d+:""([^""]*10001[^""]*)""");
             Match match = matchHistoryRegex.Match(body);
-            
+
             await Assert.That(match.Success).IsTrue();
-            
+
             string csvContent = match.Groups[1].Value;
             string[] columns = csvContent.Split(',');
-            
+
             // Column 1 (Index 0) = MatchID (10001)
             await Assert.That(columns[0]).IsEqualTo("10001");
-            
+
             // Column 7 (Index 6) = BaseHeroID (12)
             await Assert.That(columns[6]).IsEqualTo("12");
-            
+
             // Column 11 (Index 10) = HeroIdentifier (Hero_Jereziah)
             // Note: Use Contains for the last column as it might have trailing data or be the last item
             await Assert.That(columns[10]).Contains("Hero_Jereziah");
@@ -234,7 +234,7 @@ public sealed class MatchHistoryIconTests
             WebApplicationFactory<KONGORAssemblyMarker> factory) = await SetupAsync("PandaUser");
         await using (factory)
         {
-             Account account = await dbContext.Accounts.FirstAsync(a => a.Cookie == cookie);
+            Account account = await dbContext.Accounts.FirstAsync(a => a.Cookie == cookie);
 
             MatchStatistics matchStats = new()
             {
@@ -273,7 +273,7 @@ public sealed class MatchHistoryIconTests
                 AwardHighestCreepScore = 0,
                 BannedHeroes = ""
             };
-            
+
             AccountStatistics accountStats = new()
             {
                 AccountID = account.ID,
@@ -384,23 +384,21 @@ public sealed class MatchHistoryIconTests
 
             Dictionary<string, string> payload = new()
             {
-                { "f", "get_match_stats" },
-                { "match_id", "10002" },
-                { "cookie", cookie }
+                { "f", "get_match_stats" }, { "match_id", "10002" }, { "cookie", cookie }
             };
             FormUrlEncodedContent content = new(payload);
             HttpResponseMessage response = await client.PostAsync("client_requester.php", content);
 
             response.EnsureSuccessStatusCode();
             string body = await response.Content.ReadAsStringAsync();
-            
+
             // Structural Assertion for Match Mastery / Hero Identifier
             // Look for the "cli_name" key (mapped from HeroIdentifier) and verify the value is exactly "Hero_Panda"
             // Regex: "cli_name";s:\d+:"(Hero_Panda)"
-            
-            Regex heroIdentifierRegex = new Regex(@"""cli_name"";\s*s:\d+:""([^""]+)""");
+
+            Regex heroIdentifierRegex = new(@"""cli_name"";\s*s:\d+:""([^""]+)""");
             Match match = heroIdentifierRegex.Match(body);
-            
+
             await Assert.That(match.Success).IsTrue();
             await Assert.That(match.Groups[1].Value).IsEqualTo("Hero_Panda");
         }

@@ -1,5 +1,7 @@
 ﻿using Serilog;
+
 using TRANSMUTANSTEIN.ChatServer.Domain.Clans;
+using TRANSMUTANSTEIN.ChatServer.Infrastructure.Services;
 
 namespace TRANSMUTANSTEIN.ChatServer;
 
@@ -83,8 +85,8 @@ public class TRANSMUTANSTEIN
         builder.Services.AddSingleton<IPendingClanService, PendingClanService>();
 
         // Register Clan Update Subscriber (Redis)
-        builder.Services.AddSingleton<Infrastructure.Services.ClanUpdateSubscriber>();
-        builder.Services.AddHostedService(provider => provider.GetRequiredService<Infrastructure.Services.ClanUpdateSubscriber>());
+        builder.Services.AddSingleton<ClanUpdateSubscriber>();
+        builder.Services.AddHostedService(provider => provider.GetRequiredService<ClanUpdateSubscriber>());
 
 
         // Add Chat Server Health Check

@@ -64,12 +64,12 @@ public sealed class StoreRequesterVerifiedPayloadTests
 
         string body = await response.Content.ReadAsStringAsync();
         await Assert.That(body).IsNotEmpty();
-        
+
         // Store Requester usually returns a PHP serialized array or a boolean
         // We assert for common PHP serialization markers
         bool isPhpArray = body.StartsWith("a:");
         bool isPhpBool = body.StartsWith("b:");
-        
+
         await Assert.That(isPhpArray || isPhpBool).IsTrue();
     }
 }

@@ -1,17 +1,10 @@
 namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Channels;
 
-public class JoinPasswordProtectedChannelRequestData
+public class JoinPasswordProtectedChannelRequestData(ChatBuffer buffer)
 {
-    public JoinPasswordProtectedChannelRequestData(ChatBuffer buffer)
-    {
-        CommandBytes = buffer.ReadCommandBytes();
-        ChannelName = buffer.ReadString();
-        Password = buffer.ReadString();
-    }
+    public byte[] CommandBytes { get; init; } = buffer.ReadCommandBytes();
 
-    public byte[] CommandBytes { get; init; }
+    public string ChannelName { get; } = buffer.ReadString();
 
-    public string ChannelName { get; }
-
-    public string Password { get; }
+    public string Password { get; } = buffer.ReadString();
 }

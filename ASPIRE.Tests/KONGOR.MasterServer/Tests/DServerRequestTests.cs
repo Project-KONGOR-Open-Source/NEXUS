@@ -215,7 +215,7 @@ public sealed class DServerRequestTests
 
             HttpResponseMessage response = await client.PostAsync("server_requester.php", content);
             response.EnsureSuccessStatusCode();
-            
+
             string responseBody = await response.Content.ReadAsStringAsync();
             await Assert.That(responseBody).Contains("nickname");
             await Assert.That(responseBody).Contains(account.Name);
@@ -292,7 +292,7 @@ public sealed class DServerRequestTests
 
             HttpResponseMessage response = await client.PostAsync("server_requester.php", content);
             response.EnsureSuccessStatusCode();
-            
+
             string responseBody = await response.Content.ReadAsStringAsync();
             await Assert.That(responseBody).Contains("match_id");
         }

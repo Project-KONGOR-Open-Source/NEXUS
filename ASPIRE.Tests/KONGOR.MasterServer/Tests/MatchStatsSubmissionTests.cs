@@ -109,7 +109,7 @@ public sealed partial class MatchStatsSubmissionTests
         // Verify the response body indicates success
         // The detailed response is a PHP serialized array with "OK" for each section
         // Example: a:5:{s:8:"match_id";i:705750;s:10:"match_info";s:2:"OK";...}
-        
+
         await Assert.That(responseBody).Contains(@"""match_info"";s:2:""OK""");
         await Assert.That(responseBody).Contains(@"""match_summ"";s:2:""OK""");
         await Assert.That(responseBody).Contains(@"""match_stats"";s:2:""OK""");

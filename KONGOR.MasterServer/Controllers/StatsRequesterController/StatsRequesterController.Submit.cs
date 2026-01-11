@@ -223,7 +223,7 @@ public partial class StatsRequesterController
 
         string computedSRPPasswordHash =
             SRPAuthenticationHandlers.ComputeSRPPasswordHash(form.HostAccountPasswordHash,
-                hostAccount.User.SRPPasswordSalt, true);
+                hostAccount.User.SRPPasswordSalt);
         string expectedSRPPasswordHash = hostAccount.User.SRPPasswordHash;
 
         if (computedSRPPasswordHash.Equals(expectedSRPPasswordHash) is false)

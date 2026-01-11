@@ -1,7 +1,7 @@
 ﻿global using ASPIRE.Common.Communication;
 global using ASPIRE.Common.Constants;
 global using ASPIRE.Common.Enumerations;
-global using ASPIRE.Common.Enumerations.Statistics; 
+global using ASPIRE.Common.Enumerations.Statistics;
 global using ASPIRE.Common.Extensions.Cryptography;
 global using ASPIRE.Common.ServiceDefaults;
 

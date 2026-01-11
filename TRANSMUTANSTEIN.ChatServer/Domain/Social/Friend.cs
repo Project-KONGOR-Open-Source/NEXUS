@@ -1,6 +1,8 @@
-namespace TRANSMUTANSTEIN.ChatServer.Domain.Social;
+using System.Globalization;
 
 using MERRICK.DatabaseContext.Entities;
+
+namespace TRANSMUTANSTEIN.ChatServer.Domain.Social;
 
 public class Friend
 {
@@ -105,8 +107,10 @@ public class Friend
             await CreateMutualFriendship(requesterAccount, targetAccount, merrick, distributedCacheStore);
 
             // Create Notifications (Type 2: notify_buddy_added) for BOTH parties
-            Notification requesterNotification = CreateNotification(2, "notify_buddy_added", targetAccount, requesterAccount, merrick);
-            Notification targetNotification = CreateNotification(2, "notify_buddy_added", requesterAccount, targetAccount, merrick);
+            Notification requesterNotification =
+                CreateNotification(2, "notify_buddy_added", targetAccount, requesterAccount, merrick);
+            Notification targetNotification =
+                CreateNotification(2, "notify_buddy_added", requesterAccount, targetAccount, merrick);
 
             // Send Approval Success Notification To Requester
             // NOTE: Current Requester Was Target Of Original Request
@@ -154,11 +158,11 @@ public class Friend
             // Actually legacy L114 says: "notify_buddy_requested_adder" for us (requester).
             // L88 says: "notify_buddy_added" for the target during APPROVAL.
             // But L153 PostNotification implementation suggests it's for the target.
-            
+
             // Re-reading legacy BuddyAddRequest.cs:
             // Lines 79-89 are inside "if (friendshipRequestFromThem != null)" -> Mutual/Approval scenario.
             // In that case, BOTH get "notify_buddy_added" (Type 2).
-            
+
             // Lines 107-117 are for "We requested friendship" (New Request).
             // Line 114: FriendClientResponse (for us) gets notification with Type 23 "notify_buddy_requested_adder".
             // Wait, FriendClientResponse is sent to the FRIEND? No, ClientResponse is for us. FriendClientResponse is for them?
@@ -167,7 +171,7 @@ public class Friend
             // Legacy L114: notification: PostNotification(23, "notify_buddy_requested_adder", account, FriendAccount, merrickContext)
             // Arg3 is "fromWhom" (account = us), Arg4 is "toWhom" (FriendAccount = them).
             // So yes, Target gets Type 23.
-            
+
             // Wait, what about Line 134 in my current code? "SendFriendAddSuccess" to Requester.
             // Legacy L124 sends ClientResponse. ClientResponse is set in L37, L51, L58 (Failures).
             // Or L79 (Approval).
@@ -177,12 +181,13 @@ public class Friend
             // Does legacy NOT send a response to the requester for success?
             // "BuddyAddRequest" seems to only send a response on failure or immediate approval.
             // But `SendFriendAddSuccess` exists in my current code.
-            
+
             // Let's implement the Notification for the TARGET first.
             // Legacy Type 23 "notify_buddy_requested_adder".
-            
-            Notification notification = CreateNotification(23, "notify_buddy_requested_adder", requesterAccount, targetAccount, merrick);
-            
+
+            Notification notification = CreateNotification(23, "notify_buddy_requested_adder", requesterAccount,
+                targetAccount, merrick);
+
             SendFriendRequest(targetOnlineSession, requesterAccount, notification.NotificationId);
         }
 
@@ -228,8 +233,10 @@ public class Friend
         await CreateMutualFriendship(requesterAccount, approverAccount, merrick, distributedCacheStore);
 
         // Create Notifications (Type 2: notify_buddy_added) for BOTH parties
-        Notification approverNotification = CreateNotification(2, "notify_buddy_added", requesterAccount, approverAccount, merrick);
-        Notification requesterNotification = CreateNotification(2, "notify_buddy_added", approverAccount, requesterAccount, merrick);
+        Notification approverNotification =
+            CreateNotification(2, "notify_buddy_added", requesterAccount, approverAccount, merrick);
+        Notification requesterNotification =
+            CreateNotification(2, "notify_buddy_added", approverAccount, requesterAccount, merrick);
 
         // Send Approval Request To Approver
         SendFriendRequestApproval(session, requesterAccount, ChatProtocol.FriendApproveStatus.SUCCESS_APPROVER,
@@ -407,17 +414,19 @@ public class Friend
     ///     Creates and persists a notification entity following the legacy format.
     ///     Format: Nick|unknown|type|kind|type_string|action|timestamp|ID
     /// </summary>
-    private static Notification CreateNotification(int type, string kind, Account fromWhom, Account toWhom, MerrickContext merrick)
+    private static Notification CreateNotification(int type, string kind, Account fromWhom, Account toWhom,
+        MerrickContext merrick)
     {
         Notification notification = new()
         {
             AccountId = toWhom.ID,
-            Content = string.Empty, // Will be populated after ID generation (or effectively immediately since we don't save twice? EF Core might need a temp ID?)
-                                  // Legacy creates empty row to get ID, then updates.
-                                  // We can set Timestamp now.
+            Content =
+                string.Empty, // Will be populated after ID generation (or effectively immediately since we don't save twice? EF Core might need a temp ID?)
+            // Legacy creates empty row to get ID, then updates.
+            // We can set Timestamp now.
             TimestampCreated = DateTime.UtcNow
         };
-        
+
         merrick.Notifications.Add(notification);
         // We need the ID for the content string. 
         // If ID is identity, we need to save changes to get it. 
@@ -431,7 +440,7 @@ public class Friend
         // For now, let's defer the ID or assume 0 and update later? 
         // Actually legacy L178 puts NotificationId into the string. 
         // Let's assume we need to save.
-        
+
         merrick.SaveChanges(); // Save to generate ID.
 
         // Nick|unknown|type number|translation string|type string|action|timestring|ID
@@ -443,7 +452,8 @@ public class Friend
             kind, // translation string
             "notfication_generic_action", // type string (legacy typo 'notfication' preserved?)
             "action_friend_request", // action
-            notification.TimestampCreated.ToString("MM/dd/yy HH:mm tt", System.Globalization.CultureInfo.InvariantCulture), // Legacy format: 04/16 16:59 PM ? 
+            notification.TimestampCreated.ToString("MM/dd/yy HH:mm tt",
+                CultureInfo.InvariantCulture), // Legacy format: 04/16 16:59 PM ? 
             // Legacy L161: DateTime.UtcNow.
             // L177 passes it strictly. Does string.Join use default ToString?
             // Need to verify legacy DateTime format in string.Join.
@@ -454,9 +464,9 @@ public class Friend
             // Let's stick to a safe standard for now or mimic exactly if needed.
             notification.NotificationId // ID
         );
-        
+
         // Update with content
-        merrick.SaveChanges(); 
+        merrick.SaveChanges();
 
         return notification;
     }

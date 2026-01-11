@@ -1,11 +1,6 @@
 namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Matchmaking;
 
-public class PopularityUpdateRequestData
+public class PopularityUpdateRequestData(ChatBuffer buffer)
 {
-    public PopularityUpdateRequestData(ChatBuffer buffer)
-    {
-        CommandBytes = buffer.ReadCommandBytes();
-    }
-
-    public byte[] CommandBytes { get; init; }
+    public byte[] CommandBytes { get; init; } = buffer.ReadCommandBytes();
 }

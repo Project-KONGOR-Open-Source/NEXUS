@@ -1,11 +1,11 @@
 namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Results;
 
 [ChatCommand(ChatProtocol.GameServerToChatServer.NET_CHAT_GS_MATCH_ID_RESULT)]
-public class MatchIDResult(IDatabase distributedCacheStore) : IAsynchronousCommandProcessor<ChatSession>
+public class MatchIdResult(IDatabase distributedCacheStore) : IAsynchronousCommandProcessor<ChatSession>
 {
     public async Task Process(ChatSession session, ChatBuffer buffer)
     {
-        MatchIDResultRequestData requestData = new(buffer);
+        MatchIdResultRequestData requestData = new(buffer);
 
         if (requestData.Result is not ChatProtocol.MatchIDResult.MIDR_SUCCESS)
         {

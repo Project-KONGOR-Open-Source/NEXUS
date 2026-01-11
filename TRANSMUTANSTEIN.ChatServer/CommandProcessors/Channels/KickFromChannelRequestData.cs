@@ -1,17 +1,10 @@
 namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Channels;
 
-public class KickFromChannelRequestData
+public class KickFromChannelRequestData(ChatBuffer buffer)
 {
-    public KickFromChannelRequestData(ChatBuffer buffer)
-    {
-        CommandBytes = buffer.ReadCommandBytes();
-        ChannelID = buffer.ReadInt32();
-        TargetAccountID = buffer.ReadInt32();
-    }
+    public byte[] CommandBytes { get; init; } = buffer.ReadCommandBytes();
 
-    public byte[] CommandBytes { get; init; }
+    public int ChannelID { get; } = buffer.ReadInt32();
 
-    public int ChannelID { get; }
-
-    public int TargetAccountID { get; }
+    public int TargetAccountID { get; } = buffer.ReadInt32();
 }

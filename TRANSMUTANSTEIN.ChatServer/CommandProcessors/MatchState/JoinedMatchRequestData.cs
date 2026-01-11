@@ -1,22 +1,14 @@
 namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.MatchState;
 
-public class JoinedMatchRequestData
+public class JoinedMatchRequestData(ChatBuffer buffer)
 {
-    public JoinedMatchRequestData(ChatBuffer buffer)
-    {
-        CommandBytes = buffer.ReadCommandBytes();
-        MatchName = buffer.ReadString();
-        MatchID = buffer.ReadInt32();
+    // Don't Add The Player To The Match Chat Channel If They Have Joined As A Spectator Or A Mentor
 
-        // Don't Add The Player To The Match Chat Channel If They Have Joined As A Spectator Or A Mentor
-        JoinMatchChannel = buffer.ReadInt8() is not 0;
-    }
+    public byte[] CommandBytes { get; init; } = buffer.ReadCommandBytes();
 
-    public byte[] CommandBytes { get; init; }
+    public string MatchName { get; init; } = buffer.ReadString();
 
-    public string MatchName { get; init; }
+    public int MatchID { get; } = buffer.ReadInt32();
 
-    public int MatchID { get; }
-
-    public bool JoinMatchChannel { get; init; }
+    public bool JoinMatchChannel { get; init; } = buffer.ReadInt8() is not 0;
 }

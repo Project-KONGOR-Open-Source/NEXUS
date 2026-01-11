@@ -16,7 +16,8 @@ public sealed class ChatChannelTests
         await using TRANSMUTANSTEINServiceProvider app =
             await TRANSMUTANSTEINServiceProvider.CreateOrchestratedInstanceAsync(testPort);
 
-        using TcpClient client = await ChatTestHelpers.ConnectAndAuthenticateAsync(app, app.ClientPort, 100, "ChannelUser");
+        using TcpClient client =
+            await ChatTestHelpers.ConnectAndAuthenticateAsync(app, app.ClientPort, 100, "ChannelUser");
         NetworkStream stream = client.GetStream();
 
         // Act - Join Channel

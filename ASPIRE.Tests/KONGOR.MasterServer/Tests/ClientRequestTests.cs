@@ -72,15 +72,15 @@ public sealed class ClientRequestTests
 
             // Structural Assertion for Init Stats
             // Verify nickname is strictly "ClientTester" and slot_id exists
-            
+
             // Nickname Match: "nickname";s:12:"ClientTester";
-            Regex nicknameRegex = new Regex(@"""nickname"";\s*s:\d+:""([^""]+)""");
+            Regex nicknameRegex = new(@"""nickname"";\s*s:\d+:""([^""]+)""");
             Match nicknameMatch = nicknameRegex.Match(body);
             await Assert.That(nicknameMatch.Success).IsTrue();
             await Assert.That(nicknameMatch.Groups[1].Value).IsEqualTo("ClientTester");
 
             // Slot ID Match: "slot_id";s:\d+:"...";
-            Regex slotRegex = new Regex(@"""slot_id"";\s*s:\d+:""([^""]*)""");
+            Regex slotRegex = new(@"""slot_id"";\s*s:\d+:""([^""]*)""");
             Match slotMatch = slotRegex.Match(body);
             await Assert.That(slotMatch.Success).IsTrue();
         }
@@ -339,17 +339,17 @@ public sealed class ClientRequestTests
             response.EnsureSuccessStatusCode();
 
             string responseBody = await response.Content.ReadAsStringAsync();
-            
+
             // Structural Assertion for Pre-Auth
             // Verify 'salt' and 'B' (server ephemeral) are present and structurally correct
             // Regex for salt: "salt";s:\d+:"...";
-            Regex saltRegex = new Regex(@"""salt"";\s*s:\d+:""([^""]+)""");
+            Regex saltRegex = new(@"""salt"";\s*s:\d+:""([^""]+)""");
             Match saltMatch = saltRegex.Match(responseBody);
             await Assert.That(saltMatch.Success).IsTrue();
             await Assert.That(saltMatch.Groups[1].Value).IsNotEmpty();
 
             // Regex for B: "B";s:\d+:"...";
-            Regex bRegex = new Regex(@"""B"";\s*s:\d+:""([^""]+)""");
+            Regex bRegex = new(@"""B"";\s*s:\d+:""([^""]+)""");
             Match bMatch = bRegex.Match(responseBody);
             await Assert.That(bMatch.Success).IsTrue();
             await Assert.That(bMatch.Groups[1].Value).IsNotEmpty();
@@ -383,7 +383,7 @@ public sealed class ClientRequestTests
             FormUrlEncodedContent content = new(payload);
             HttpResponseMessage response = await client.PostAsync("client_requester.php", content);
             response.EnsureSuccessStatusCode();
-            
+
             string responseBody = await response.Content.ReadAsStringAsync();
             await Assert.That(responseBody).Contains("a:0:{}");
         }
