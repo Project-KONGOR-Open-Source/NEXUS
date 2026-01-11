@@ -1,4 +1,6 @@
-﻿using Role = MERRICK.DatabaseContext.Entities.Utility.Role;
+﻿using KONGOR.MasterServer.Models.RequestResponse.Stats;
+using KONGOR.MasterServer.Extensions.Cache;
+using Role = MERRICK.DatabaseContext.Entities.Utility.Role;
 
 namespace KONGOR.MasterServer.Controllers.ClientRequesterController;
 
@@ -448,5 +450,140 @@ public partial class ClientRequesterController
         // TODO: Add Mastery Boosts And Coupons (cp. items) when implemented.
 
         return items;
+    }
+
+
+
+    private async Task<IActionResult> HandleGrabLastMatches()
+    {
+        // Corresponds to 'grab_last_matches_from_nick' in legacy code.
+        // Returns a simple list of match IDs.
+        
+        string? accountName = Request.Form["nickname"]; // This endpoint often uses nickname directly
+        
+        if (string.IsNullOrEmpty(accountName))
+        {
+             // Fallback to cookie if nickname missing
+             string? cookie = Request.Form["cookie"];
+             accountName = HttpContext.Items["SessionAccountName"] as string 
+                              ?? await DistributedCache.GetAccountNameForSessionCookie(cookie ?? "NULL");
+        }
+
+        if (accountName is null)
+        {
+            return Unauthorized("Session Not Found");
+        }
+
+        Account? account = await MerrickContext.Accounts
+            .FirstOrDefaultAsync(a => a.Name.Equals(accountName));
+
+        if (account is null)
+        {
+            return NotFound("Account Not Found");
+        }
+
+        // Fetch last 100 Match IDs
+        List<int> lastMatchIDs = await MerrickContext.PlayerStatistics
+            .Where(ps => ps.AccountID == account.ID)
+            .OrderByDescending(ps => ps.MatchID)
+            .Take(100)
+            .Select(ps => ps.MatchID)
+            .ToListAsync();
+
+        Dictionary<int, string> lastStats = new();
+        foreach (int info in lastMatchIDs)
+        {
+            lastStats[info] = info.ToString();
+        }
+
+        Dictionary<string, object> response = new()
+        {
+            { "last_stats", lastStats },
+            { "success", "True" },
+            { "hosttime", (int)DateTimeOffset.UtcNow.ToUnixTimeSeconds() } 
+        };
+        
+        return Ok(PhpSerialization.Serialize(response));
+    }
+
+    private async Task<IActionResult> HandleMatchHistoryOverview()
+    {
+        // Corresponds to 'match_history_overview' in legacy code.
+        // Returns CSV details for the grid view.
+        // Format keys: m0, m1, m2...
+        // Format values: match_id,wins,team,herokills,deaths,heroassists,hero_id,secs,map,mdt,cli_name
+        
+        string? nickname = Request.Form["nickname"];
+
+        if (string.IsNullOrEmpty(nickname))
+        {
+             return BadRequest("Missing nickname");
+        }
+        
+        // Fetch last 100 matches with details
+        var historyData = await MerrickContext.PlayerStatistics
+            .Where(ps => ps.AccountName == nickname)
+            .OrderByDescending(ps => ps.MatchID)
+            .Take(100)
+            .Select(ps => new 
+            {
+                ps.MatchID,
+                ps.Team,
+                ps.HeroKills,
+                ps.HeroDeaths,
+                ps.HeroAssists,
+                ps.HeroProductID,
+                ps.Win // Directly use the stored Win value
+            })
+            .ToListAsync();
+            
+         Dictionary<string, string> matchHistoryOverview = new();
+         
+         if (historyData.Any())
+         {
+             List<int> matchIds = historyData.Select(h => h.MatchID).ToList();
+             
+             // Fetch match details
+             var matchInfos = await MerrickContext.MatchStatistics
+                .Where(m => matchIds.Contains(m.MatchID))
+                .Select(m => new { m.MatchID, m.Map, m.TimestampRecorded, m.FileName, m.TimePlayed })
+                .ToDictionaryAsync(m => m.MatchID);
+
+             int i = 0;
+             foreach (var pStat in historyData)
+             {
+                 string map = "caldavar";
+                 string date = DateTime.UtcNow.ToString("MM/dd/yyyy");
+                 int duration = 0;
+                 string matchName = "";
+                 
+                 if (matchInfos.TryGetValue(pStat.MatchID, out var mStat))
+                 {
+                     map = mStat.Map;
+                     date = mStat.TimestampRecorded.ToString("MM/dd/yyyy");
+                     duration = mStat.TimePlayed;
+                     matchName = mStat.FileName;
+                 }
+                 
+                 string matchData = string.Join(',',
+                    pStat.MatchID,
+                    pStat.Win,
+                    pStat.Team,
+                    pStat.HeroKills,
+                    pStat.HeroDeaths,
+                    pStat.HeroAssists,
+                    pStat.HeroProductID ?? 0,
+                    duration,
+                    map,
+                    date,
+                    matchName
+                );
+                
+                matchHistoryOverview.Add("m" + i, matchData);
+                i++;
+             }
+         }
+         
+         return Ok(PhpSerialization.Serialize(matchHistoryOverview));
     }
 }

@@ -146,6 +146,9 @@ public partial class ClientRequesterController(
             "get_account_mastery" => await HandleGetAccountMastery(),
             "get_match_stats" => await HandleMatchStats(),
             "get_campaign_hero_stats" => await HandleGetCampaignHeroStats(),
+            "grab_last_matches" => await HandleGrabLastMatches(),
+            "grab_last_matches_from_nick" => await HandleGrabLastMatches(),
+            "match_history_overview" => await HandleMatchHistoryOverview(),
 
             // upgrades
             "get_upgrades" => await HandleGetUpgrades(),
