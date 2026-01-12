@@ -1,9 +1,41 @@
 using MERRICK.DatabaseContext.Entities.Statistics;
+using KONGOR.MasterServer.Services;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.FileProviders; // For IFileProvider
 
 namespace ASPIRE.Tests.KONGOR.MasterServer.Tests;
 
 public class SeedMatchHistoryTests
 {
+    // =================================================================================================
+    //  CONFIGURATION SECTION - UPDATE THESE VALUES TO CONTROL SEEDING
+    // =================================================================================================
+    
+    // SET TO TRUE to wipe ALL existing match history (PlayerStatistics AND MatchStatistics) before seeding.
+    // WARNING: This is destructive!
+    private const bool CLEAR_HISTORY = false;
+
+    // The number of randomized matches to generate for the 'SeedMatchHistory_RandomizedPublic' test.
+    // value 100 = ~10 matches per guest account if using 10 guests.
+    // scale matches if needed
+    private const int MATCH_COUNT = 100;
+
+    private static readonly string[] ItemPool = 
+    [
+        // Boots
+        "Item_Steamboots", "Item_EnhancedMarchers", "Item_PostHaste", "Item_PlatedGreaves", "Item_Striders",
+        // Weapons
+        "Item_Dawnbringer", "Item_Sasuke", "Item_NullfireBlade", "Item_Thunderclaw", "Item_HarkonsBlade", "Item_SavageMace", "Item_Wingbow",
+        // Defense/Utility
+        "Item_BehemothsHeart", "Item_DaemonicBreastplate", "Item_FrostfieldPlate", "Item_Immunity", "Item_BarrierIdol", "Item_VoidTalisman",
+        // Caster
+        "Item_Sheepstick", "Item_Stormspirit", "Item_RestorationStone", "Item_GrimoireOfPower", "Item_SpellShards", "Item_NomesWisdom",
+        // Support/Misc
+        "Item_Astrolabe", "Item_Tablet", "Item_PortalKey", "Item_Bottle", "Item_BloodChalice", "Item_PowerSupply", "Item_LoggersHatchet"
+    ];
+
+    // =================================================================================================
+
     // USAGE: dotnet test --filter SeedMatchHistory
     // This is a manual script wrapped as a test to populate the DB with fake history.
 
@@ -13,12 +45,19 @@ public class SeedMatchHistoryTests
         // Setup Dependency Injection to get the DbContext
         ServiceCollection services = new();
 
-        string connectionString =
-            "Server=127.0.0.1,55678;Database=development;User Id=sa;Password=MerrickDevPassword2025;TrustServerCertificate=True;Connection Timeout=60;";
+        string connectionString = GetConnectionString();
 
         services.AddDbContext<MerrickContext>(options =>
             options.UseSqlServer(connectionString, sqlOptions =>
                 sqlOptions.MigrationsHistoryTable("MigrationsHistory", "meta")));
+
+        // Register HeroDefinitionService and dependencies
+        services.AddLogging();
+        services.AddSingleton<IHostEnvironment>(new TestHostEnvironment 
+        { 
+            ContentRootPath = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../KONGOR.MasterServer")) 
+        });
+        services.AddSingleton<IHeroDefinitionService, HeroDefinitionService>();
 
         ServiceProvider provider = services.BuildServiceProvider();
         MerrickContext context = provider.GetRequiredService<MerrickContext>();
@@ -35,7 +74,7 @@ public class SeedMatchHistoryTests
             catch (Exception ex) { Console.WriteLine($"[REMEDIATION] Drop Table Failed (Non-Critical): {ex.Message}"); }
 
             Console.WriteLine("[REMEDIATION] Clearing Match History...");
-            try { await context.Database.ExecuteSqlRawAsync("DELETE FROM data.AccountStatistics.PlayerStatistics"); }
+            try { await context.Database.ExecuteSqlRawAsync("DELETE FROM stat.PlayerStatistics"); }
             catch (Exception ex) { Console.WriteLine($"[REMEDIATION] Delete PlayerStats Failed: {ex.Message}"); }
 
             Console.WriteLine("[REMEDIATION] Clearing Migration History...");
@@ -176,8 +215,8 @@ public class SeedMatchHistoryTests
         // List of valid heroes confirmed to exist in HeroDefinitions.cs
         // 114: Armadon, 115: Behemoth, 116: Hammerstorm, 120: Predator, 121: Jeraziah
         // 122: Panda, 123: Rampage, 124: Tundra, 125: Gladiator, 153: Accursed
-        List<uint> validHeroes = new()
-        {
+        List<uint> validHeroes =
+        [
             114,
             115,
             116,
@@ -189,7 +228,7 @@ public class SeedMatchHistoryTests
             124,
             125,
             153
-        };
+        ];
 
         // 4. Create PlayerStatistics for 5v5
         foreach (Account account in guestAccounts)
@@ -199,8 +238,8 @@ public class SeedMatchHistoryTests
             int team = guestNum <= 5 ? 1 : 2; // 1-5 Team 1, 6-10 Team 2
 
             // Items (Randomly assigned from a small list)
-            List<string> possibleItems = new()
-            {
+            List<string> possibleItems =
+            [
                 "Item_LoggersHatchet",
                 "Item_ManaBattery",
                 "Item_CrushingClaws",
@@ -208,9 +247,9 @@ public class SeedMatchHistoryTests
                 "Item_MarkOfTheNovice",
                 "Item_RunesOfTheBlight",
                 "Item_HealthPotion"
-            };
+            ];
             Random rnd = new Random();
-            List<string> inventory = possibleItems.OrderBy(x => rnd.Next()).Take(3).ToList();
+            List<string> inventory = possibleItems.OrderBy(_ => rnd.Next()).Take(3).ToList();
 
 
             // Midwars Player
@@ -226,7 +265,7 @@ public class SeedMatchHistoryTests
                 ClanTag = null,
                 Benefit = 0,
                 HeroProductID = validHeroes[(guestNum - 1) % validHeroes.Count], // Different hero for everyone
-                Inventory = new List<string>(inventory),
+                Inventory = [..inventory],
                 Win = team == 1 ? 1 : 0,
                 Loss = team == 1 ? 0 : 1,
                 HeroKills = random.Next(0, 15),
@@ -319,7 +358,7 @@ public class SeedMatchHistoryTests
                 ClanTag = null,
                 Benefit = 0,
                 HeroProductID = rankedHeroId,
-                Inventory = new List<string>(inventory),
+                Inventory = [..inventory],
                 Win = team == 2 ? 1 : 0,
                 Loss = team == 2 ? 0 : 1,
                 HeroKills = random.Next(0, 15),
@@ -405,54 +444,106 @@ public class SeedMatchHistoryTests
     public async Task SeedMatchHistory_RandomizedPublic()
     {
         // USAGE: dotnet test --filter SeedMatchHistory_RandomizedPublic
-        // Generates Public Matches with random heroes and stats.
-        // SET TO TRUE to wipe existing stats before seeding (Clean Slate)
-        bool clearHistory = false;
-        // How many matches to generate?
-        int matchCount = 100;
+        // Generates Public Matches with random heroes from Upgrades.JSON and mixed game modes.
+        // SEE CONSTANTS AT TOP OF FILE FOR CONFIGURATION
 
         ServiceCollection services = new();
-        string connectionString =
-            "Server=127.0.0.1,55678;Database=development;User Id=sa;Password=MerrickDevPassword2025;TrustServerCertificate=True;Connection Timeout=60;";
+        string connectionString = GetConnectionString();
 
         services.AddDbContext<MerrickContext>(options =>
             options.UseSqlServer(connectionString, sqlOptions =>
                 sqlOptions.MigrationsHistoryTable("MigrationsHistory", "meta")));
 
+        // Register HeroDefinitionService and dependencies
+        services.AddLogging();
+        services.AddSingleton<IHostEnvironment>(new TestHostEnvironment 
+        { 
+            ContentRootPath = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../KONGOR.MasterServer")) 
+        });
+        services.AddSingleton<IHeroDefinitionService, HeroDefinitionService>();
+
         ServiceProvider provider = services.BuildServiceProvider();
         MerrickContext context = provider.GetRequiredService<MerrickContext>();
 
-        if (clearHistory)
-        {
-            Console.WriteLine("[SEED] Clearing Match History (PlayerStatistics)...");
-            await context.Database.ExecuteSqlRawAsync("DELETE FROM data.AccountStatistics.PlayerStatistics");
-        }
 
+        if (CLEAR_HISTORY)
+        {
+            Console.WriteLine("[SEED] Uncomment to clear match history data...");
+            //            Console.WriteLine("[SEED] Clearing Match History (PlayerStatistics)...");
+            //            await context.Database.ExecuteSqlRawAsync("DELETE FROM stat.PlayerStatistics");
+            //            await context.Database.ExecuteSqlRawAsync("DELETE FROM stat.MatchStatistics");
+        }
+        
         Random random = new();
         int baseMatchId = 9800000 + random.Next(1, 100000);
 
         List<Account> guestAccounts = new();
-        // Fetch GUEST-01 to GUEST-10
         for (int i = 1; i <= 10; i++)
         {
             string nickname = $"GUEST-{i:D2}";
-            Account? account = await context.Accounts.FirstOrDefaultAsync(a => a.Name == nickname);
+            Account? account = await context.Accounts.AsNoTracking().FirstOrDefaultAsync(a => a.Name == nickname);
             if (account != null) guestAccounts.Add(account);
         }
 
-        // Expanded List of Valid Hero IDs (From HeroDefinitionService)
-        List<uint> validHeroes = new()
+        if (guestAccounts.Count == 0)
         {
-            3, 4, 6, 7, 8, 9, 10, 11, 12, 13, 14, 16, 17, 18, 19, 20, 21, 22, 24, 25, 26, 27, 32, 34, 36, 40, 42, 44,
-            91, 92, 93, 94, 95, 96, 103, 104, 105, 106, 109, 110, 111, 112, 115, 116, 119, 120, 122, 123, 125, 126,
-            152, 153, 155, 156, 162, 168, 172, 173, 178, 185, 227, 228, 232, 236, 240, 245, 246, 249, 250, 62, 205, 293
+            Console.WriteLine("No GUEST accounts found via DB. Please run generic seed first.");
+            return;
+        }
+
+        // --- Dynamic Hero Loading via Service ---
+        Console.WriteLine("[SEED] Initializing HeroDefinitionService to load valid heroes...");
+        IHeroDefinitionService heroService = provider.GetRequiredService<IHeroDefinitionService>();
+        
+        // Get all heroes and filter out 0 (Legionnaire default) if desired, 
+        // though 0 is technicaly valid. We filter > 0 to ensure variety?
+        // Actually 0 is Legionnaire. We want him too.
+        List<uint> validHeroes = heroService.GetAllHeroIds().ToList();
+        
+        Console.WriteLine($"[SEED] Found {validHeroes.Count} valid heroes via HeroDefinitionService.");
+        
+        if (validHeroes.Count == 0 || validHeroes is [0])
+        {
+             Console.WriteLine("[SEED] WARNING: Service returned no heroes or only default. Adding fallback list.");
+             validHeroes.AddRange([111, 112, 10, 11, 12, 40, 44, 103, 250, 2501, 2502]); // Fallback
+        }
+
+        // --- Game Mode Scenarios ---
+        var scenarios = new[]
+        {
+            new { Mode = "picking", Map = "caldavar", Type = "Ranked" },
+            new { Mode = "picking", Map = "caldavar", Type = "Casual" }, // Renamed from Normal
+            new { Mode = "midwars", Map = "midwars", Type = "Public" },
+            new { Mode = "sd", Map = "caldavar", Type = "Casual" }, // Single Draft -> Casual
+            new { Mode = "ar", Map = "caldavar", Type = "Casual" }  // All Random -> Casual
         };
 
-        Console.WriteLine($"[SEED] Generating {matchCount} Public Matches starting at ID {baseMatchId}...");
+        Console.WriteLine($"[SEED] Generating {MATCH_COUNT} Matches (Ranked/Public/Midwars) starting at ID {baseMatchId}...");
 
-        for (int m = 0; m < matchCount; m++)
+        for (int m = 0; m < MATCH_COUNT; m++)
         {
             int currentMatchId = baseMatchId + m;
+            var scenario = scenarios[random.Next(scenarios.Length)];
+
+            // --- Mock Product Catalog ---
+            // Maps Product IDs to Strings. Ranges chosen to look realistic but arbitrary.
+            Dictionary<string, uint> productCatalog = new()
+            {
+                { "AccountIcon_Default", 2500 }, { "AccountIcon_Legion", 2501 }, { "AccountIcon_Hellbourne", 2502 }, { "AccountIcon_GoldShield", 2503 },
+                { "Courier_Default", 3000 }, { "Courier_Legion", 3001 }, { "Courier_Hellbourne", 3002 }, { "Courier_Panda", 3003 },
+                { "Ward_Default", 4000 }, { "Ward_Eye", 4001 },
+                { "Taunt_Default", 5000 }, { "Taunt_Baby", 5001 },
+                { "Announcer_Default", 6000 }, { "Announcer_Flamboyant", 6001 }, { "Announcer_Badass", 6002 },
+                { "ChatColor_Red", 7000 }, { "ChatColor_Orange", 7001 }, { "ChatColor_Yellow", 7002 }, { "ChatColor_Green", 7003 }, { "ChatColor_Blue", 7004 }, { "ChatColor_Purple", 7005 }
+            };
+
+            // Helper buffers for random selection
+            string[] accountIcons = productCatalog.Keys.Where(k => k.StartsWith("AccountIcon")).ToArray();
+            string[] couriers = productCatalog.Keys.Where(k => k.StartsWith("Courier")).ToArray();
+            string[] wards = productCatalog.Keys.Where(k => k.StartsWith("Ward")).ToArray();
+            string[] taunts = productCatalog.Keys.Where(k => k.StartsWith("Taunt")).ToArray();
+            string[] announcers = productCatalog.Keys.Where(k => k.StartsWith("Announcer")).ToArray();
+            string[] colors = productCatalog.Keys.Where(k => k.StartsWith("ChatColor")).ToArray();
 
             // Create Match
             MatchStatistics match = new()
@@ -460,7 +551,7 @@ public class SeedMatchHistoryTests
                 MatchID = currentMatchId,
                 ServerID = 1,
                 HostAccountName = "System",
-                Map = "caldavar",
+                Map = scenario.Map,
                 MapVersion = "1.0",
                 TimePlayed = 1500 + random.Next(-300, 300),
                 FileSize = 1000,
@@ -470,7 +561,7 @@ public class SeedMatchHistoryTests
                 AveragePSR = 1500,
                 AveragePSRTeamOne = 1500,
                 AveragePSRTeamTwo = 1500,
-                GameMode = "picking", // Normal Mode
+                GameMode = scenario.Mode,
                 ScoreTeam1 = random.Next(10, 60),
                 ScoreTeam2 = random.Next(10, 60),
                 TeamScoreGoal = 0,
@@ -478,7 +569,7 @@ public class SeedMatchHistoryTests
                 NumberOfRounds = 1,
                 ReleaseStage = "Live",
                 BannedHeroes = "",
-                TimestampRecorded = DateTimeOffset.UtcNow.AddMinutes(-(m * 30)), // Stagger timestamps
+                TimestampRecorded = DateTimeOffset.UtcNow.AddMinutes(-(m * 30)),
                 AwardMostAnnihilations = 0,
                 AwardMostQuadKills = 0,
                 AwardLargestKillStreak = 0,
@@ -494,15 +585,33 @@ public class SeedMatchHistoryTests
             context.MatchStatistics.Add(match);
 
             // Create Players
-            // Shuffle validHeroes for this match so we get unique ones
-            List<uint> shuffledHeroes = validHeroes.OrderBy(x => random.Next()).Take(guestAccounts.Count).ToList();
+            // Shuffle validHeroes for this match
+            List<uint> shuffledHeroes = validHeroes.OrderBy(_ => random.Next()).Take(guestAccounts.Count).ToList();
 
             for (int p = 0; p < guestAccounts.Count; p++)
             {
                 Account account = guestAccounts[p];
                 int team = p < 5 ? 1 : 2;
-                uint heroId = shuffledHeroes[p];
+                uint heroId = shuffledHeroes.Count > p ? shuffledHeroes[p] : 0; // Handled index out of range if heroes < accounts
                 bool win = (team == 1 && match.ScoreTeam1 > match.ScoreTeam2) || (team == 2 && match.ScoreTeam2 > match.ScoreTeam1);
+
+                // Determine Lobby Position/Type specific flags
+                byte publicMatch = (byte)(scenario.Type == "Public" || scenario.Type == "Casual" ? 1 : 0);
+                byte rankedMatch = (byte)(scenario.Type == "Ranked" ? 1 : 0);
+                
+                // Skill Change logic
+                double skillChange = rankedMatch == 1 ? (win ? 5.0 : -5.0) : 0;
+                
+                // Random Selections
+                string accIcon = accountIcons[random.Next(accountIcons.Length)];
+                string courier = couriers[random.Next(couriers.Length)];
+                string ward = wards[random.Next(wards.Length)];
+                string taunt = taunts[random.Next(taunts.Length)];
+                string announcer = announcers[random.Next(announcers.Length)];
+                string color = colors[random.Next(colors.Length)];
+                
+                // --- ITEM RANDOMIZATION ---
+                List<string> finalItems = SelectRandomItems(random);
 
                 context.PlayerStatistics.Add(new PlayerStatistics
                 {
@@ -511,90 +620,187 @@ public class SeedMatchHistoryTests
                     AccountName = account.Name,
                     Team = team,
                     LobbyPosition = p,
-                    GroupNumber = 0,
+                    GroupNumber = random.Next(0,
+                        2), // Occasional grouping
                     ClanID = null,
                     ClanTag = null,
-                    Benefit = 0,
+                    Benefit = random.Next(0,
+                        5),
                     HeroProductID = heroId,
-                    Inventory = ["Item_LoggersHatchet", "Item_ManaBattery", "Item_HealthPotion"],
+
+                    // Cosmetics
+                    AlternativeAvatarName = "",
+                    AlternativeAvatarProductID = 0,
+                    WardProductName = ward,
+                    WardProductID = productCatalog[ward],
+                    TauntProductName = taunt,
+                    TauntProductID = productCatalog[taunt],
+                    AnnouncerProductName = announcer,
+                    AnnouncerProductID = productCatalog[announcer],
+                    CourierProductName = courier,
+                    CourierProductID = productCatalog[courier],
+                    AccountIconProductName = accIcon,
+                    AccountIconProductID = productCatalog[accIcon],
+                    ChatColourProductName = color,
+                    ChatColourProductID = productCatalog[color],
+
+                    // --- RANDOMIZED ITEMS ---
+                    Inventory = finalItems,
+
+                    // Generate history for these items + some starting consumables
+                    ItemHistory = GenerateRandomItemHistory(finalItems,
+                        random),
                     Win = win ? 1 : 0,
                     Loss = win ? 0 : 1,
+                    
                     HeroKills = random.Next(0, 20),
                     HeroDeaths = random.Next(0, 15),
                     HeroAssists = random.Next(0, 25),
                     HeroLevel = random.Next(10, 25),
                     Gold = random.Next(5000, 15000),
                     SecondsPlayed = match.TimePlayed,
-                    Disconnected = 0,
-                    Conceded = 0,
+                    
+                    // Logic Fields
+                    Disconnected = random.Next(0, 20) == 0 ? 1 : 0, // Rare disconnect
+                    Conceded = random.Next(0, 10) == 0 ? 1 : 0,
                     Kicked = 0,
-                    PublicMatch = 1, // CRITICAL: Identify as Public Match
-                    PublicSkillRatingChange = 0,
-                    RankedMatch = 0,
-                    RankedSkillRatingChange = 0,
-                    SocialBonus = 0,
-                    UsedToken = 0,
-                    ConcedeVotes = 0,
+                    PublicMatch = publicMatch,
+                    PublicSkillRatingChange = 0, 
+                    RankedMatch = rankedMatch,
+                    RankedSkillRatingChange = skillChange,
+                    SocialBonus = random.Next(0, 10),
+                    UsedToken = random.Next(0, 5) == 0 ? 1 : 0,
+                    ConcedeVotes = random.Next(0, 2),
+                    
+                    // Enriched Gameplay Stats (Missing Required Fields)
                     HeroDamage = random.Next(5000, 25000),
                     GoldFromHeroKills = random.Next(1000, 5000),
                     HeroExperience = random.Next(10000, 25000),
-                    Buybacks = 0,
-                    GoldLostToDeath = 0,
-                    SecondsDead = 0,
-                    TeamCreepKills = 0,
-                    TeamCreepDamage = 0,
-                    TeamCreepGold = 0,
-                    TeamCreepExperience = 0,
-                    NeutralCreepKills = 0,
-                    NeutralCreepDamage = 0,
-                    NeutralCreepGold = 0,
-                    NeutralCreepExperience = 0,
-                    BuildingDamage = 0,
-                    BuildingsRazed = 0,
-                    ExperienceFromBuildings = 0,
-                    GoldFromBuildings = 0,
-                    Denies = 0,
-                    ExperienceDenied = 0,
-                    GoldSpent = 0,
-                    Experience = random.Next(10000, 25000),
-                    Actions = 0,
-                    ConsumablesPurchased = 0,
-                    WardsPlaced = 0,
-                    FirstBlood = 0,
-                    DoubleKill = 0,
-                    TripleKill = 0,
-                    QuadKill = 0,
-                    Annihilation = 0,
-                    KillStreak03 = 0,
-                    KillStreak04 = 0,
-                    KillStreak05 = 0,
-                    KillStreak06 = 0,
-                    KillStreak07 = 0,
-                    KillStreak08 = 0,
-                    KillStreak09 = 0,
-                    KillStreak10 = 0,
-                    KillStreak15 = 0,
-                    Smackdown = 0,
-                    Humiliation = 0,
-                    Nemesis = 0,
-                    Retribution = 0,
-                    Score = 0,
-                    GameplayStat0 = 0,
-                    GameplayStat1 = 0,
-                    GameplayStat2 = 0,
-                    GameplayStat3 = 0,
-                    GameplayStat4 = 0,
-                    GameplayStat5 = 0,
-                    GameplayStat6 = 0,
+                    Buybacks = random.Next(0, 3),
+                    GoldLostToDeath = random.Next(0, 1000),
+                    SecondsDead = random.Next(0, 300),
+                    TeamCreepKills = random.Next(100, 500),
+                    TeamCreepDamage = random.Next(10000, 30000),
+                    TeamCreepGold = random.Next(5000, 15000),
+                    TeamCreepExperience = random.Next(5000, 15000),
+                    NeutralCreepKills = random.Next(0, 100),
+                    NeutralCreepDamage = random.Next(0, 10000),
+                    NeutralCreepGold = random.Next(0, 3000),
+                    NeutralCreepExperience = random.Next(0, 3000),
+                    BuildingDamage = random.Next(0, 5000),
+                    BuildingsRazed = random.Next(0, 5),
+                    ExperienceFromBuildings = random.Next(0, 2000),
+                    GoldFromBuildings = random.Next(0, 2000),
+                    Denies = random.Next(0, 30),
+                    ExperienceDenied = random.Next(0, 1000),
+                    GoldSpent = random.Next(4000, 14000),
+                    Experience = random.Next(10000, 30000),
+                    Actions = random.Next(1000, 5000),
+                    ConsumablesPurchased = random.Next(0, 10),
+                    WardsPlaced = random.Next(0, 10),
+                    
+                    // Kill Events
+                    FirstBlood = random.Next(0, 2),
+                    DoubleKill = random.Next(0, 5),
+                    TripleKill = random.Next(0, 3),
+                    QuadKill = random.Next(0, 2),
+                    Annihilation = random.Next(0, 2) == 0 ? 0 : 1, // Rare
+                    KillStreak03 = random.Next(0, 5),
+                    KillStreak04 = random.Next(0, 3),
+                    KillStreak05 = random.Next(0, 2),
+                    KillStreak06 = random.Next(0, 2),
+                    KillStreak07 = random.Next(0, 2),
+                    KillStreak08 = random.Next(0, 2),
+                    KillStreak09 = random.Next(0, 1),
+                    KillStreak10 = random.Next(0, 1),
+                    KillStreak15 = random.Next(0, 20) == 0 ? 1 : 0, // Very Rare
+                    
+                    Smackdown = random.Next(0, 3),
+                    Humiliation = random.Next(0, 2),
+                    Nemesis = random.Next(0, 2),
+                    Retribution = random.Next(0, 2),
+                    
+                    Score = random.Next(100, 500),
+                    GameplayStat0 = random.NextDouble() * 100.0,
+                    GameplayStat1 = random.NextDouble() * 50.0,
+                    GameplayStat2 = random.NextDouble() * 10.0,
+                    GameplayStat3 = random.NextDouble() * 5.0,
+                    GameplayStat4 = random.NextDouble() * 1000.0,
+                    GameplayStat5 = random.NextDouble() * 500.0,
+                    GameplayStat6 = random.NextDouble() * 20.0,
                     GameplayStat7 = 0,
                     GameplayStat8 = 0,
                     GameplayStat9 = 0,
-                    TimeEarningExperience = match.TimePlayed - 100
+                    TimeEarningExperience = 0
                 });
             }
         }
 
         await context.SaveChangesAsync();
-        Console.WriteLine($"[SEED] Successfully seeded {matchCount} Public Matches with random heroes.");
+        Console.WriteLine($"[SEED] Successfully seeded {MATCH_COUNT} mixed-mode matches with dynamic heroes and items.");
     }
+    
+    private List<string> SelectRandomItems(Random random)
+    {
+        // Pick 3 to 6 unique items
+        int count = random.Next(3, 7);
+        return ItemPool.OrderBy(_ => random.Next()).Take(count).ToList();
+    }
+
+    private List<ItemEvent> GenerateRandomItemHistory(List<string> endItems, Random random)
+    {
+        List<ItemEvent> events =
+        [
+            new ItemEvent { ItemName = "Item_RunesOfTheBlight", GameTimeSeconds = -60, EventType = 0 },
+            new ItemEvent { ItemName = "Item_HealthPotion", GameTimeSeconds = -60, EventType = 0 }
+
+            // 2. Add end-game items at random times
+        ];
+
+        // 1. Starting Items (Consumables that disappear)
+
+        // 2. Add end-game items at random times
+        foreach (string item in endItems)
+        {
+            // Random purchase time between 0 and 20 mins (1200s)
+            events.Add(new ItemEvent 
+            { 
+                ItemName = item, 
+                GameTimeSeconds = random.Next(0, 1200), 
+                EventType = 0 
+            });
+        }
+
+        return events.OrderBy(e => e.GameTimeSeconds).ToList();
+    }
+
+
+
+    private string GetConnectionString()
+    {
+        // Priority 1: Full Connection String Override (Env)
+        string? fullConn = Environment.GetEnvironmentVariable("MERRICK_CONNECTION_STRING") 
+                           ?? Environment.GetEnvironmentVariable("ConnectionStrings__MerrickContext");
+        
+        // Also check TestContext if possible, but handle potential type mismatch by calling .ToString() or avoiding it if it causes issues.
+        // For safety/unblocking, we stick to Environment variables which Docker/Aspire provides reliably.
+        
+        if (!string.IsNullOrWhiteSpace(fullConn)) return fullConn;
+
+        // Priority 2: Build from parts (Host, Port, Password) to allow simple overrides (e.g. Docker port)
+        // Defaults: 127.0.0.1, 55678, MerrickDevPassword2025
+        string host = Environment.GetEnvironmentVariable("MERRICK_DB_HOST") ?? "127.0.0.1";
+        string port = Environment.GetEnvironmentVariable("MERRICK_DB_PORT") ?? "55678"; // Default dev port
+        string password = Environment.GetEnvironmentVariable("MERRICK_DB_PASSWORD") ?? "MerrickDevPassword2025"; 
+
+        return $"Server={host},{port};Database=development;User Id=sa;Password={password};TrustServerCertificate=True;Connection Timeout=60;";
+    }
+}
+
+public class TestHostEnvironment : IHostEnvironment
+{
+    public string EnvironmentName { get; set; } = "Development";
+    public string ApplicationName { get; set; } = "TestApp";
+    public string ContentRootPath { get; set; } = AppContext.BaseDirectory;
+    public IFileProvider ContentRootFileProvider { get; set; } = null!;
 }

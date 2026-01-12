@@ -8,6 +8,7 @@ public interface IHeroDefinitionService
     uint GetBaseHeroId(uint productId);
     uint GetBaseHeroId(string identifier);
     bool IsHero(uint heroId);
+    IEnumerable<uint> GetAllHeroIds();
 }
 
 public class HeroDefinitionService : IHeroDefinitionService
@@ -74,6 +75,11 @@ public class HeroDefinitionService : IHeroDefinitionService
     public bool IsHero(uint heroId)
     {
         return _heroMappings.ContainsKey(heroId);
+    }
+
+    public IEnumerable<uint> GetAllHeroIds()
+    {
+        return _heroMappings.Keys;
     }
 
     private void LoadBaseHeroes()
@@ -145,7 +151,7 @@ public class HeroDefinitionService : IHeroDefinitionService
             { 32, "Hero_Scout" },
             { 34, "Hero_Valkyrie" },
             { 36, "Hero_Fairy" },
-            { 40, "Hero_Kunas" },
+            { 40, "Hero_Tempest" }, // ID 40 is Tempest in Upgrades.JSON
             { 42, "Hero_DwarfMagi" },
             { 44, "Hero_WitchSlayer" }, // "AlphaMale" -> Witch Slayer (per Upgrades.JSON)
             { 10, "Hero_Hammerstorm" },
@@ -161,8 +167,8 @@ public class HeroDefinitionService : IHeroDefinitionService
             { 93, "Hero_Devourer" },
             { 94, "Hero_Electrician" },
             { 95, "Hero_Kenisis" }, // "Maestro" -> Kinesis (Folder is /heroes/kenisis/)
-
-            { 103, "Hero_Glacius" },
+            
+            { 103, "Hero_Frosty" }, // ID 103 is Glacius, but internal ID is Hero_Frosty
             { 104, "Hero_Ophelia" },
             { 105, "Hero_Gravekeeper" },
             { 106, "Hero_Hellbringer" },
