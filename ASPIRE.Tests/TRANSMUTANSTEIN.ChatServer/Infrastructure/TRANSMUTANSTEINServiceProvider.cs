@@ -23,8 +23,10 @@ public class TRANSMUTANSTEINServiceProvider : WebApplicationFactory<global::TRAN
             Dictionary<string, string?> settings = new()
             {
                 { "CHAT_SERVER_PORT_CLIENT", ClientPort.ToString() },
-                { "CHAT_SERVER_PORT_MATCH_SERVER", (ClientPort + 1).ToString() },
-                { "CHAT_SERVER_PORT_MATCH_SERVER_MANAGER", (ClientPort + 2).ToString() },
+                // If ClientPort is 0 (dynamic), use 0 for others to also be dynamic.
+                // If fixed, use spacing (+100, +200) to avoid collisions with close ports.
+                { "CHAT_SERVER_PORT_MATCH_SERVER", (ClientPort == 0 ? 0 : ClientPort + 100).ToString() },
+                { "CHAT_SERVER_PORT_MATCH_SERVER_MANAGER", (ClientPort == 0 ? 0 : ClientPort + 200).ToString() },
                 // Use localhost for infrastructure to avoid DNS issues in tests
                 { "INFRASTRUCTURE_GATEWAY", "localhost" }
             };
@@ -120,9 +122,10 @@ public class TRANSMUTANSTEINServiceProvider : WebApplicationFactory<global::TRAN
             // Resolve ChatService to access the ChatServer and its ClientServer endpoint
             ChatService chatService = provider.Services.GetRequiredService<ChatService>();
 
-            // We need to wait until the server is started and bound
+            // We need to wait until the server is started and bound to a non-zero port
             int attempts = 0;
-            while ((chatService.ChatServer == null || !chatService.ChatServer.IsStarted) && attempts < 50)
+            while ((chatService.ChatServer == null || !chatService.ChatServer.IsStarted ||
+                   chatService.ChatServer.ClientServer.Endpoint is not IPEndPoint ep || ep.Port == 0) && attempts < 50)
             {
                 await Task.Delay(100);
                 attempts++;

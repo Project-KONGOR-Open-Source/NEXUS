@@ -16,17 +16,18 @@ public sealed class ChatSocialTests
     public async Task AddFriend_RequestSent()
     {
         // Arrange
-        int testPort = 56030;
+        // 1. Start Application using Dynamic Port
+        int testPort = 0;
         await using TRANSMUTANSTEINServiceProvider app =
             await TRANSMUTANSTEINServiceProvider.CreateOrchestratedInstanceAsync(testPort);
 
         // Ensure Target User Exists in DB (we do this by "connecting" them or manually seeding)
         // ChatTestHelpers.ConnectAndAuthenticateAsync seeds the user if they don't exist.
         // We'll just spin up the target first to ensure they exist.
-        using TcpClient target = await ChatTestHelpers.ConnectAndAuthenticateAsync(app, testPort, 402, "TargetUser");
+        using TcpClient target = await ChatTestHelpers.ConnectAndAuthenticateAsync(app, app.ClientPort, 402, "TargetUser");
 
         using TcpClient requester =
-            await ChatTestHelpers.ConnectAndAuthenticateAsync(app, testPort, 401, "RequesterUser");
+            await ChatTestHelpers.ConnectAndAuthenticateAsync(app, app.ClientPort, 401, "RequesterUser");
         NetworkStream stream = requester.GetStream();
 
         // Act - Send Add Friend Request
@@ -74,7 +75,8 @@ public sealed class ChatSocialTests
     public async Task BuddyList_InitialStatus()
     {
         // Arrange
-        int testPort = 56040;
+        // 1. Start Application using Dynamic Port
+        int testPort = 0;
         await using TRANSMUTANSTEINServiceProvider app =
             await TRANSMUTANSTEINServiceProvider.CreateOrchestratedInstanceAsync(testPort);
 
@@ -86,86 +88,84 @@ public sealed class ChatSocialTests
         await ChatTestHelpers.SeedLock.WaitAsync();
         try
         {
-            using (IServiceScope scope = app.Services.CreateScope())
+            using IServiceScope scope = app.Services.CreateScope();
+            MerrickContext db = scope.ServiceProvider.GetRequiredService<MerrickContext>();
+            IDatabase cache = scope.ServiceProvider.GetRequiredService<IDatabase>();
+
+            db.ChangeTracker.Clear();
+
+            // Ensure Role
+            Role? role = await db.Roles.FindAsync(1);
+            if (role == null)
             {
-                MerrickContext db = scope.ServiceProvider.GetRequiredService<MerrickContext>();
-                IDatabase cache = scope.ServiceProvider.GetRequiredService<IDatabase>();
+                role = new Role { ID = 1, Name = "User" };
+                db.Roles.Add(role);
+                await db.SaveChangesAsync();
+            }
 
-                db.ChangeTracker.Clear();
+            await db.Roles.FindAsync(1);
 
-                // Ensure Role
-                Role? role = await db.Roles.FindAsync(1);
-                if (role == null)
-                {
-                    role = new Role { ID = 1, Name = "User" };
-                    db.Roles.Add(role);
-                    await db.SaveChangesAsync();
-                }
 
+            // Ensure Friend User (502)
+            Account? existingFriend = await db.Accounts.FindAsync(accountIdFriend);
+            if (existingFriend == null)
+            {
+                // Re-fetch role
                 role = await db.Roles.FindAsync(1);
 
-
-                // Ensure Friend User (502)
-                Account? existingFriend = await db.Accounts.FindAsync(accountIdFriend);
-                if (existingFriend == null)
+                User userFriend = new()
                 {
-                    // Re-fetch role
-                    role = await db.Roles.FindAsync(1);
-
-                    User userFriend = new()
-                    {
-                        ID = accountIdFriend,
-                        EmailAddress = $"friend{accountIdFriend}@test.com",
-                        SRPPasswordHash = "hash",
-                        SRPPasswordSalt = "salt",
-                        PBKDF2PasswordHash = "hash",
-                        Role = role!
-                    };
-                    Account friendAcct = new()
-                    {
-                        ID = accountIdFriend, Name = "FriendGuy", IsMain = true, User = userFriend
-                    };
-                    userFriend.Accounts = new List<Account> { friendAcct };
-
-                    db.Users.Add(userFriend);
-                    await db.SaveChangesAsync();
-                }
-
-                // Ensure Main User (501) with Friendship
-                if (await db.Accounts.FindAsync(accountIdMain) == null)
+                    ID = accountIdFriend,
+                    EmailAddress = $"friend{accountIdFriend}@test.com",
+                    SRPPasswordHash = "hash",
+                    SRPPasswordSalt = "salt",
+                    PBKDF2PasswordHash = "hash",
+                    Role = role!
+                };
+                Account friendAcct = new()
                 {
-                    role = await db.Roles.FindAsync(1);
+                    ID = accountIdFriend, Name = "FriendGuy", IsMain = true, User = userFriend
+                };
+                userFriend.Accounts = [friendAcct];
 
-                    User userMain = new()
-                    {
-                        ID = accountIdMain,
-                        EmailAddress = $"main{accountIdMain}@test.com",
-                        SRPPasswordHash = "hash",
-                        SRPPasswordSalt = "salt",
-                        PBKDF2PasswordHash = "hash",
-                        Role = role!
-                    };
-
-                    Account mainAcct = new() { ID = accountIdMain, Name = "MainGuy", IsMain = true, User = userMain };
-                    userMain.Accounts = new List<Account> { mainAcct };
-
-                    // Link Friendship
-                    // We need to reference the Friend Account Name/ID.
-                    // Since we ensured it exists above, we can just use the values.
-                    FriendedPeer peerLink = new()
-                    {
-                        ID = accountIdFriend, Name = "FriendGuy", ClanTag = null, FriendGroup = "DEFAULT"
-                    };
-                    mainAcct.FriendedPeers = new List<FriendedPeer> { peerLink };
-
-                    db.Users.Add(userMain);
-                    await db.SaveChangesAsync();
-                }
-
-                // Set Session Cookie for MainGuy (so helper can login)
-                await cache.SetAccountNameForSessionCookie($"cookie_{accountIdMain}", "MainGuy");
-                await cache.SetAccountNameForSessionCookie($"cookie_{accountIdFriend}", "FriendGuy");
+                db.Users.Add(userFriend);
+                await db.SaveChangesAsync();
             }
+
+            // Ensure Main User (501) with Friendship
+            if (await db.Accounts.FindAsync(accountIdMain) == null)
+            {
+                role = await db.Roles.FindAsync(1);
+
+                User userMain = new()
+                {
+                    ID = accountIdMain,
+                    EmailAddress = $"main{accountIdMain}@test.com",
+                    SRPPasswordHash = "hash",
+                    SRPPasswordSalt = "salt",
+                    PBKDF2PasswordHash = "hash",
+                    Role = role!
+                };
+
+                Account mainAcct = new() { ID = accountIdMain, Name = "MainGuy", IsMain = true, User = userMain };
+                userMain.Accounts = [mainAcct];
+
+                // Link Friendship
+                // We need to reference the Friend Account Name/ID.
+                // Since we ensured it exists above, we can just use the values.
+                FriendedPeer peerLink = new()
+                {
+                    ID = accountIdFriend, Name = "FriendGuy", ClanTag = null, FriendGroup = "DEFAULT"
+                };
+                mainAcct.FriendedPeers = [peerLink];
+
+                db.Users.Add(userMain);
+                await db.SaveChangesAsync();
+            }
+
+            // Set Session Cookie for MainGuy (so helper can log in)
+            await cache.SetAccountNameForSessionCookie($"cookie_{accountIdMain}", "MainGuy");
+            await cache.SetAccountNameForSessionCookie($"cookie_{accountIdFriend}", "FriendGuy");
         }
         finally
         {
@@ -175,11 +175,11 @@ public sealed class ChatSocialTests
         // Act
         // 1. Connect Friend (502) so they are "Online"
         using TcpClient friendClient =
-            await ChatTestHelpers.ConnectAndAuthenticateAsync(app, testPort, accountIdFriend, "FriendGuy");
+            await ChatTestHelpers.ConnectAndAuthenticateAsync(app, app.ClientPort, accountIdFriend, "FriendGuy");
 
         // 2. Connect MainGuy (501) manually to inspect handshake
         TcpClient client = new();
-        await client.ConnectAsync("localhost", testPort);
+        await client.ConnectAsync("127.0.0.1", app.ClientPort);
         NetworkStream stream = client.GetStream();
 
         string ip = "127.0.0.1";

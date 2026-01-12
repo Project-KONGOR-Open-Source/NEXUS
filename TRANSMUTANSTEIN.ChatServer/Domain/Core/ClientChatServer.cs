@@ -13,7 +13,7 @@ public class ClientChatServer(IServiceProvider serviceProvider, IPAddress addres
 
     protected override void OnStarted()
     {
-        Log.Information("Chat Server Has Started Accepting Client Connections On {Address}:{Port}", Address, Port);
+        Log.Information("Chat Server Has Started Accepting Client Connections On {Endpoint}", Endpoint);
 
         base.OnStarted();
     }

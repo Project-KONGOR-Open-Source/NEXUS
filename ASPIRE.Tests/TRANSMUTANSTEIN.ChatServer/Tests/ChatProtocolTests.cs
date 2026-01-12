@@ -15,13 +15,13 @@ public sealed class ChatProtocolTests
     {
         // Arrange
         // Use a unique port to avoid conflicts with other tests
-        int testPort = 52800;
+        int testPort = 0;
         await using TRANSMUTANSTEINServiceProvider app =
             await TRANSMUTANSTEINServiceProvider.CreateOrchestratedInstanceAsync(testPort);
         using TcpClient client = new();
 
         // Act
-        await client.ConnectAsync("localhost", testPort);
+        await client.ConnectAsync("localhost", app.ClientPort);
         NetworkStream stream = client.GetStream();
 
         // Seed Database and Cache for Authentication

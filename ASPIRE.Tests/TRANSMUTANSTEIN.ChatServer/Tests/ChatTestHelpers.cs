@@ -107,7 +107,9 @@ public static class ChatTestHelpers
             try
             {
                 client = new TcpClient();
-                await client.ConnectAsync("localhost", port);
+                // Use 127.0.0.1 to avoid IPv6/DNS issues when server is bound to 0.0.0.0
+                Console.WriteLine($"[ChatTestHelpers] Connecting to 127.0.0.1:{port}...");
+                await client.ConnectAsync("127.0.0.1", port);
                 NetworkStream stream = client.GetStream();
 
                 string ip = "127.0.0.1";

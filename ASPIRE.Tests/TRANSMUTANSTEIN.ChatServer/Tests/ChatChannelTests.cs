@@ -69,7 +69,7 @@ public sealed class ChatChannelTests
     {
         // Arrange
         // int testPort = 56015;
-        int testPort = ChatTestHelpers.GetAvailablePort();
+        int testPort = 0;
         await using TRANSMUTANSTEINServiceProvider app =
             await TRANSMUTANSTEINServiceProvider.CreateOrchestratedInstanceAsync(testPort);
 
@@ -194,7 +194,7 @@ public sealed class ChatChannelTests
     {
         // Arrange
         // int testPort = 56020;
-        int testPort = ChatTestHelpers.GetAvailablePort();
+        int testPort = 0;
         await using TRANSMUTANSTEINServiceProvider app =
             await TRANSMUTANSTEINServiceProvider.CreateOrchestratedInstanceAsync(testPort);
 

@@ -245,14 +245,17 @@ public class TCPServer : IDisposable
         // Bind The Acceptor Socket To The Endpoint
         _acceptorSocket.Bind(Endpoint);
 
-        // Refresh The Endpoint Property Based On The Actual Endpoint Created
-        Endpoint = _acceptorSocket.LocalEndPoint!;
+
 
         // Call The Server Starting Handler
         OnStarting();
 
         // Start Listen To The Acceptor Socket With The Given Accepting Backlog Size
         _acceptorSocket.Listen(OptionAcceptorBacklog);
+
+        // Refresh The Endpoint Property Based On The Actual Endpoint Created
+        // Moved after Listen to ensure LocalEndPoint is fully populated on all platforms
+        Endpoint = _acceptorSocket.LocalEndPoint!;
 
         // Reset Statistic
         _bytesPending = 0;

@@ -409,7 +409,7 @@ public class SeedMatchHistoryTests
         // SET TO TRUE to wipe existing stats before seeding (Clean Slate)
         bool clearHistory = false;
         // How many matches to generate?
-        int matchCount = 5;
+        int matchCount = 100;
 
         ServiceCollection services = new();
         string connectionString =

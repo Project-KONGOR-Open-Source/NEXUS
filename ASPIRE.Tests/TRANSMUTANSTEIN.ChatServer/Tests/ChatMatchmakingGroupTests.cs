@@ -8,12 +8,12 @@ namespace ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer.Tests;
 
 public class ChatMatchmakingGroupTests
 {
-    private const int TestPort = 53000;
+    // private const int TestPort = 53000; // Removed to avoid confusion
 
     [Test]
     public async Task GroupFlow_ModeSwitching_And_PublicRestriction()
     {
-        // 1. Start Application
+        // 1. Start Application using Dynamic Port
         int TestPort = 0;
         await using TRANSMUTANSTEINServiceProvider app =
             await TRANSMUTANSTEINServiceProvider.CreateOrchestratedInstanceAsync(TestPort);
