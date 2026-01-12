@@ -24,9 +24,10 @@ public class MatchStatsResponse
     /// <summary>
     ///     A collection containing player statistics for the match.
     ///     The structure is an array with a single dictionary element, where the dictionary is keyed by player account IDs.
+    ///     The requesting player's entry will be a <see cref="MatchStatsResponse.MatchPlayerStatisticsWithMatchPerformanceData"/> with additional match performance data.
     /// </summary>
     [PhpProperty("match_player_stats")]
-    public required List<Dictionary<int, MatchPlayerStatistics>> MatchPlayerStatistics { get; init; }
+    public required List<Dictionary<int, OneOf<MatchPlayerStatisticsWithMatchPerformanceData, MatchPlayerStatistics>>> MatchPlayerStatistics { get; init; }
 
     /// <summary>
     ///     A collection containing player inventories for the match.
@@ -1325,6 +1326,249 @@ public class MatchPlayerStatistics(MatchStartData matchStartData, Account accoun
     public SeasonProgress SeasonProgress { get; init; } = new (matchStartData, playerStatistics, matchmakingStatistics);
 }
 
+public class MatchPlayerStatisticsWithMatchPerformanceData(MatchStartData matchStartData, Account account, PlayerStatistics playerStatistics, AccountStatistics currentMatchTypeStatistics, AccountStatistics publicMatchStatistics, AccountStatistics matchmakingStatistics) : MatchPlayerStatistics(matchStartData, account, playerStatistics, currentMatchTypeStatistics, publicMatchStatistics, matchmakingStatistics)
+{
+    /// <summary>
+    ///     The player's team Matchmaking Rating (MMR) before the match.
+    /// </summary>
+    [PhpProperty("perf_amm_team_rating")]
+    public string MatchPerformanceTeamRatingBefore { get; init; } = (matchmakingStatistics.SkillRating - playerStatistics.RankedSkillRatingChange).ToString("F2");
+
+    /// <summary>
+    ///     The change in team Matchmaking Rating (MMR) from this match.
+    /// </summary>
+    [PhpProperty("perf_amm_team_rating_delta")]
+    public string MatchPerformanceTeamRatingDelta { get; init; } = playerStatistics.RankedSkillRatingChange.ToString("F2");
+
+    /// <summary>
+    ///     Experience points earned based on match outcome (win or loss).
+    /// </summary>
+    [PhpProperty("perf_victory_exp")]
+    public string MatchPerformanceVictoryExperience { get; init; } = (playerStatistics.Disconnected == 0 && playerStatistics.Win == 1 ? 30 * playerStatistics.Benefit : playerStatistics.Disconnected == 0 && playerStatistics.Loss == 1 ? 10 * playerStatistics.Benefit : 0).ToString();
+
+    /// <summary>
+    ///     Gold coins earned based on match outcome (win or loss).
+    /// </summary>
+    [PhpProperty("perf_victory_gc")]
+    public string MatchPerformanceVictoryGoldCoins { get; init; } = (playerStatistics.Disconnected == 0 && playerStatistics.Win == 1 ? 6 * 1 * playerStatistics.Benefit : playerStatistics.Disconnected == 0 && playerStatistics.Loss == 1 ? 4 * 1 * playerStatistics.Benefit : 0).ToString();
+
+    /// <summary>
+    ///     Extra experience points earned for playing the first match of the day.
+    /// </summary>
+    [PhpProperty("perf_first_exp")]
+    public string MatchPerformanceFirstMatchExperience { get; init; } = "0";
+
+    /// <summary>
+    ///     Extra gold coins earned for playing the first match of the day.
+    /// </summary>
+    [PhpProperty("perf_first_gc")]
+    public string MatchPerformanceFirstMatchGoldCoins { get; init; } = "0";
+
+    /// <summary>
+    ///     Extra experience points earned for quick match bonus.
+    /// </summary>
+    [PhpProperty("perf_quick_exp")]
+    public string MatchPerformanceQuickMatchExperience { get; init; } = "0";
+
+    /// <summary>
+    ///     Extra gold coins earned for quick match bonus.
+    /// </summary>
+    [PhpProperty("perf_quick_gc")]
+    public string MatchPerformanceQuickMatchGoldCoins { get; init; } = "0";
+
+    /// <summary>
+    ///     Number of consecutive matches played.
+    /// </summary>
+    [PhpProperty("perf_consec_played")]
+    public string MatchPerformanceConsecutiveMatchesPlayed { get; init; } = "0";
+
+    /// <summary>
+    ///     Extra experience points earned for consecutive match bonus.
+    /// </summary>
+    [PhpProperty("perf_consec_exp")]
+    public string MatchPerformanceConsecutiveMatchExperience { get; init; } = "0";
+
+    /// <summary>
+    ///     Extra gold coins earned for consecutive match bonus.
+    /// </summary>
+    [PhpProperty("perf_consec_gc")]
+    public string MatchPerformanceConsecutiveMatchGoldCoins { get; init; } = "0";
+
+    /// <summary>
+    ///     Experience points earned for annihilation awards.
+    /// </summary>
+    [PhpProperty("perf_annihilation_exp")]
+    public string MatchPerformanceAnnihilationExperience { get; init; } = (playerStatistics.Disconnected == 0 ? 50 * playerStatistics.Benefit * playerStatistics.Annihilation : 0).ToString();
+
+    /// <summary>
+    ///     Gold coins earned for annihilation awards.
+    /// </summary>
+    [PhpProperty("perf_annihilation_gc")]
+    public string MatchPerformanceAnnihilationGoldCoins { get; init; } = (playerStatistics.Disconnected == 0 ? 10 * 1 * playerStatistics.Benefit * playerStatistics.Annihilation : 0).ToString();
+
+    /// <summary>
+    ///     Experience points earned for first blood awards.
+    /// </summary>
+    [PhpProperty("perf_bloodlust_exp")]
+    public string MatchPerformanceBloodlustExperience { get; init; } = (playerStatistics.Disconnected == 0 ? 10 * playerStatistics.Benefit * playerStatistics.FirstBlood : 0).ToString();
+
+    /// <summary>
+    ///     Gold coins earned for first blood awards.
+    /// </summary>
+    [PhpProperty("perf_bloodlust_gc")]
+    public string MatchPerformanceBloodlustGoldCoins { get; init; } = (playerStatistics.Disconnected == 0 ? 2 * 1 * playerStatistics.Benefit * playerStatistics.FirstBlood : 0).ToString();
+
+    /// <summary>
+    ///     Experience points earned for immortal (15-kill streak) awards.
+    /// </summary>
+    [PhpProperty("perf_ks15_exp")]
+    public string MatchPerformanceKillStreak15Experience { get; init; } = (playerStatistics.Disconnected == 0 ? 35 * playerStatistics.KillStreak15 : 0).ToString();
+
+    /// <summary>
+    ///     Gold coins earned for immortal (15-kill streak) awards.
+    /// </summary>
+    [PhpProperty("perf_ks15_gc")]
+    public string MatchPerformanceKillStreak15GoldCoins { get; init; } = (playerStatistics.Disconnected == 0 ? 7 * 1 * playerStatistics.Benefit * playerStatistics.KillStreak15 : 0).ToString();
+
+    /// <summary>
+    ///     Extra gold coins earned for social group bonus.
+    /// </summary>
+    [PhpProperty("perf_social_bonus_gc")]
+    public string MatchPerformanceSocialBonusGoldCoins { get; init; } = "0";
+
+    /// <summary>
+    ///     Total wins on the player's account after this match.
+    /// </summary>
+    [PhpProperty("perf_wins")]
+    public string MatchPerformanceTotalWins { get; init; } = currentMatchTypeStatistics.MatchesWon.ToString();
+
+    /// <summary>
+    ///     Change in wins from this match.
+    /// </summary>
+    [PhpProperty("perf_wins_delta")]
+    public string MatchPerformanceWinsDelta { get; init; } = playerStatistics.Win.ToString();
+
+    /// <summary>
+    ///     Extra gold coins earned for win milestone.
+    /// </summary>
+    [PhpProperty("perf_wins_gc")]
+    public string MatchPerformanceWinsGoldCoins { get; init; } = "0";
+
+    /// <summary>
+    ///     Total hero kills on the player's account after this match.
+    /// </summary>
+    [PhpProperty("perf_herokills")]
+    public string MatchPerformanceTotalHeroKills { get; init; } = currentMatchTypeStatistics.HeroKills.ToString();
+
+    /// <summary>
+    ///     Change in hero kills from this match.
+    /// </summary>
+    [PhpProperty("perf_herokills_delta")]
+    public string MatchPerformanceHeroKillsDelta { get; init; } = playerStatistics.HeroKills.ToString();
+
+    /// <summary>
+    ///     Extra gold coins earned for hero kill milestone.
+    /// </summary>
+    [PhpProperty("perf_herokills_gc")]
+    public string MatchPerformanceHeroKillsGoldCoins { get; init; } = "0";
+
+    /// <summary>
+    ///     Total hero assists on the player's account after this match.
+    /// </summary>
+    [PhpProperty("perf_heroassists")]
+    public string MatchPerformanceTotalHeroAssists { get; init; } = currentMatchTypeStatistics.HeroAssists.ToString();
+
+    /// <summary>
+    ///     Change in hero assists from this match.
+    /// </summary>
+    [PhpProperty("perf_heroassists_delta")]
+    public string MatchPerformanceHeroAssistsDelta { get; init; } = playerStatistics.HeroAssists.ToString();
+
+    /// <summary>
+    ///     Extra gold coins earned for hero assist milestone.
+    /// </summary>
+    [PhpProperty("perf_heroassists_gc")]
+    public string MatchPerformanceHeroAssistsGoldCoins { get; init; } = "0";
+
+    /// <summary>
+    ///     Total wards placed on the player's account after this match.
+    /// </summary>
+    [PhpProperty("perf_wards")]
+    public string MatchPerformanceTotalWards { get; init; } = currentMatchTypeStatistics.WardsPlaced.ToString();
+
+    /// <summary>
+    ///     Change in wards placed from this match.
+    /// </summary>
+    [PhpProperty("perf_wards_delta")]
+    public string MatchPerformanceWardsDelta { get; init; } = playerStatistics.WardsPlaced.ToString();
+
+    /// <summary>
+    ///     Extra gold coins earned for ward placement milestone.
+    /// </summary>
+    [PhpProperty("perf_wards_gc")]
+    public string MatchPerformanceWardsGoldCoins { get; init; } = "0";
+
+    /// <summary>
+    ///     Total smackdowns on the player's account after this match.
+    /// </summary>
+    [PhpProperty("perf_smackdown")]
+    public string MatchPerformanceTotalSmackdown { get; init; } = currentMatchTypeStatistics.Smackdowns.ToString();
+
+    /// <summary>
+    ///     Change in smackdowns from this match.
+    /// </summary>
+    [PhpProperty("perf_smackdown_delta")]
+    public string MatchPerformanceSmackdownDelta { get; init; } = playerStatistics.Smackdown.ToString();
+
+    /// <summary>
+    ///     Extra gold coins earned for smackdown milestone.
+    /// </summary>
+    [PhpProperty("perf_smackdown_gc")]
+    public string MatchPerformanceSmackdownGoldCoins { get; init; } = "0";
+
+    /// <summary>
+    ///     Player level after this match.
+    /// </summary>
+    [PhpProperty("perf_level")]
+    public string MatchPerformanceLevel { get; init; } = account.User.TotalLevel.ToString();
+
+    /// <summary>
+    ///     Experience points on the player's level progress bar.
+    /// </summary>
+    [PhpProperty("perf_level_exp")]
+    public string MatchPerformanceLevelExperience { get; init; } = account.User.TotalExperience.ToString();
+
+    /// <summary>
+    ///     Change in level experience from this match.
+    /// </summary>
+    [PhpProperty("perf_level_delta")]
+    public string MatchPerformanceLevelExperienceDelta { get; init; } = "50"; // TODO: Calculate Experience Earned This Match
+
+    /// <summary>
+    ///     Extra gold coins earned for level milestone.
+    /// </summary>
+    [PhpProperty("perf_level_gc")]
+    public string MatchPerformanceLevelGoldCoins { get; init; } = "0";
+
+    /// <summary>
+    ///     Extra gold coins earned for being a legacy account owner.
+    /// </summary>
+    [PhpProperty("perf_legacy_gc")]
+    public string MatchPerformanceLegacyGoldCoins { get; init; } = "0";
+
+    /// <summary>
+    ///     Silver coins multiplier for this match.
+    /// </summary>
+    [PhpProperty("perf_multiplier_mmpoints")]
+    public string MatchPerformanceMultiplierSilverCoins { get; init; } = "250"; // TODO: Calculate Silver Coins Multiplier
+
+    /// <summary>
+    ///     Experience multiplier for this match.
+    /// </summary>
+    [PhpProperty("perf_multiplier_exp")]
+    public string MatchPerformanceMultiplierExperience { get; init; } = "0"; // TODO: Calculate Experience Multiplier
+}
+
 public class SeasonProgress(MatchStartData matchStartData, PlayerStatistics playerStatistics, AccountStatistics matchmakingStatistics)
 {
     /// <summary>
@@ -1343,7 +1587,7 @@ public class SeasonProgress(MatchStartData matchStartData, PlayerStatistics play
     ///     Whether the match was a casual ranked match ("1") or competitive ranked match ("0").
     /// </summary>
     [PhpProperty("is_casual")]
-    public string IsCasual { get; init; } = matchStartData.IsCasual.ToString();
+    public string IsCasual { get; init; } = matchStartData.IsCasual ? "1" : "0";
 
     /// <summary>
     ///     The player's Matchmaking Rating (MMR) before the match.

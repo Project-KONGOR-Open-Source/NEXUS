@@ -30,6 +30,10 @@ public class AccountStatistics
 
     public int HeroDeaths { get; set; } = 0;
 
+    public int WardsPlaced { get; set; } = 0;
+
+    public int Smackdowns { get; set; } = 0;
+
     public double PerformanceScore => (HeroKills + HeroAssists) / Math.Max(1, HeroDeaths);
 
     /// <summary>

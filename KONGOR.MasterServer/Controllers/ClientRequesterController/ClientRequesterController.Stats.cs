@@ -93,7 +93,7 @@ public partial class ClientRequesterController
 
         MatchSummary matchSummary = new (matchStatistics, allPlayerStatistics, matchStartData);
 
-        List<int> otherPlayerAccountIDs = [.. allPlayerStatistics.Select(statistics => statistics.AccountID).Distinct()];
+        List<int> otherPlayerAccountIDs = [.. allPlayerStatistics.Select(statistics => statistics.AccountID).Where(id => id != account.ID)];
 
         List<Account> otherPlayerAccounts = await MerrickContext.Accounts
             .Include(playerAccount => playerAccount.User)
@@ -103,7 +103,7 @@ public partial class ClientRequesterController
 
         List<Account> allPlayerAccounts = [account, .. otherPlayerAccounts];
 
-        Dictionary<int, MatchPlayerStatistics> matchPlayerStatistics = [];
+        Dictionary<int, OneOf<MatchPlayerStatistics, MatchPlayerStatisticsWithMatchPerformanceData>> matchPlayerStatistics = [];
         Dictionary<int, MatchPlayerInventory> matchPlayerInventories = [];
 
         foreach (PlayerStatistics playerStatistics in allPlayerStatistics)
@@ -143,8 +143,11 @@ public partial class ClientRequesterController
 
             // TODO: Increment Matchmaking Statistics With Current Match Data
 
-            matchPlayerStatistics[playerStatistics.AccountID] =
-                new MatchPlayerStatistics(matchStartData, playerAccount, playerStatistics, currentMatchTypeStatistics, publicMatchStatistics, matchmakingStatistics)
+            // Use PrimaryMatchPlayerStatistics With Additional Information For The Primary (Requesting) Player And MatchPlayerStatistics With The Standard Amount Of Information For Secondary Players
+            matchPlayerStatistics[playerStatistics.AccountID] = playerStatistics.AccountID == account.ID
+                ? (OneOf<MatchPlayerStatistics, MatchPlayerStatisticsWithMatchPerformanceData>) new MatchPlayerStatisticsWithMatchPerformanceData(matchStartData, playerAccount, playerStatistics, currentMatchTypeStatistics, publicMatchStatistics, matchmakingStatistics)
+                    { HeroIdentifier = playerStatistics.HeroIdentifier }
+                : (OneOf<MatchPlayerStatistics, MatchPlayerStatisticsWithMatchPerformanceData>) new MatchPlayerStatistics(matchStartData, playerAccount, playerStatistics, currentMatchTypeStatistics, publicMatchStatistics, matchmakingStatistics)
                     { HeroIdentifier = playerStatistics.HeroIdentifier };
 
             List<string> inventory = playerStatistics.Inventory ?? [];
@@ -178,12 +181,25 @@ public partial class ClientRequesterController
             MasteryExperienceSuperBoostProductCount = 0 // TODO: Count "ma.Super Mastery Boost" Items (+ Enable MatchMastery Constructor Once Masteries Are Re-Implemented)
         };
 
+        Dictionary<int, OneOf<MatchPlayerStatisticsWithMatchPerformanceData, MatchPlayerStatistics>> matchPlayerStatisticsDiscriminatedUnion = matchPlayerStatistics.ToDictionary
+        (
+            pair => pair.Key,
+            pair => OneOf<MatchPlayerStatisticsWithMatchPerformanceData, MatchPlayerStatistics>.FromT1
+            (
+                pair.Value.Match
+                (
+                    matchPlayerStatisticsWithMatchPerformanceData => matchPlayerStatisticsWithMatchPerformanceData,
+                    matchPlayerStatistics                         => matchPlayerStatistics
+                )
+            )
+        );
+
         MatchStatsResponse response = new ()
         {
             GoldCoins = account.User.GoldCoins.ToString(),
             SilverCoins = account.User.SilverCoins.ToString(),
             MatchSummary = [ matchSummary ],
-            MatchPlayerStatistics = [ matchPlayerStatistics ],
+            MatchPlayerStatistics = [ matchPlayerStatisticsDiscriminatedUnion ],
             MatchPlayerInventories = [ matchPlayerInventories ],
             MatchMastery = matchMastery,
             OwnedStoreItems = account.User.OwnedStoreItems,

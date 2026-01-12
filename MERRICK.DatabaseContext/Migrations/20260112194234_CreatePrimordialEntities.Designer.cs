@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MERRICK.DatabaseContext.Migrations
 {
     [DbContext(typeof(MerrickContext))]
-    [Migration("20260111112011_CreatePrimordialEntities")]
+    [Migration("20260112194234_CreatePrimordialEntities")]
     partial class CreatePrimordialEntities
     {
         /// <inheritdoc />
@@ -330,7 +330,13 @@ namespace MERRICK.DatabaseContext.Migrations
                     b.Property<double>("SkillRating")
                         .HasColumnType("float");
 
+                    b.Property<int>("Smackdowns")
+                        .HasColumnType("int");
+
                     b.Property<int>("StatisticsType")
+                        .HasColumnType("int");
+
+                    b.Property<int>("WardsPlaced")
                         .HasColumnType("int");
 
                     b.HasKey("ID");

@@ -327,7 +327,13 @@ namespace MERRICK.DatabaseContext.Migrations
                     b.Property<double>("SkillRating")
                         .HasColumnType("float");
 
+                    b.Property<int>("Smackdowns")
+                        .HasColumnType("int");
+
                     b.Property<int>("StatisticsType")
+                        .HasColumnType("int");
+
+                    b.Property<int>("WardsPlaced")
                         .HasColumnType("int");
 
                     b.HasKey("ID");
