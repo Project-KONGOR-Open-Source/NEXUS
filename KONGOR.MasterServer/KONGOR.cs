@@ -39,7 +39,8 @@ public class KONGOR
             .ReadFrom.Services(services)
             .Enrich.FromLogContext()
             .WriteTo.Console()
-            .WriteTo.File("logs/master_server.log", rollingInterval: RollingInterval.Day));
+            .WriteTo.File("logs/master_server.log", rollingInterval: RollingInterval.Day)
+            .WriteTo.OpenTelemetry());
 
         // Set Static ServerStartEpochTime Property
         ServerStartEpochTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds();

@@ -5,17 +5,18 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Aspire.StackExchange.Redis.DistributedCaching" Version="13.1.0"/>
-        <PackageReference Include="OneOf" Version="3.0.271"/>
-        <PackageReference Include="Serilog.AspNetCore" Version="10.0.0"/>
-        <PackageReference Include="Serilog.Sinks.Console" Version="6.1.1"/>
-        <PackageReference Include="Serilog.Sinks.File" Version="7.0.0"/>
+        <PackageReference Include="Aspire.StackExchange.Redis.DistributedCaching" Version="13.1.0" />
+        <PackageReference Include="OneOf" Version="3.0.271" />
+        <PackageReference Include="Serilog.AspNetCore" Version="10.0.0" />
+        <PackageReference Include="Serilog.Sinks.Console" Version="6.1.1" />
+        <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
+        <PackageReference Include="Serilog.Sinks.OpenTelemetry" Version="4.2.0" />
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="../ASPIRE.Common/ASPIRE.Common.csproj"/>
-        <ProjectReference Include="../KONGOR.MasterServer/KONGOR.MasterServer.csproj"/> <!-- TODO: Move Models To A Shared Project And Remove Inter-Project Dependencies -->
-        <ProjectReference Include="../MERRICK.DatabaseContext/MERRICK.DatabaseContext.csproj"/>
+        <ProjectReference Include="../ASPIRE.Common/ASPIRE.Common.csproj" />
+        <ProjectReference Include="../KONGOR.MasterServer/KONGOR.MasterServer.csproj" /> <!-- TODO: Move Models To A Shared Project And Remove Inter-Project Dependencies -->
+        <ProjectReference Include="../MERRICK.DatabaseContext/MERRICK.DatabaseContext.csproj" />
     </ItemGroup>
 
 </Project>

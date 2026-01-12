@@ -36,7 +36,8 @@ public class TRANSMUTANSTEIN
             .ReadFrom.Services(services)
             .Enrich.FromLogContext()
             .WriteTo.Console()
-            .WriteTo.File("logs/chat_server.log", rollingInterval: RollingInterval.Day));
+            .WriteTo.File("logs/chat_server.log", rollingInterval: RollingInterval.Day)
+            .WriteTo.OpenTelemetry());
 
         // Add Aspire Service Defaults
         builder.AddServiceDefaults();
