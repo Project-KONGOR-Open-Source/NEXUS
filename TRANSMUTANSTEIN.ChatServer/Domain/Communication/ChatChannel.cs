@@ -233,7 +233,7 @@ public class ChatChannel
         broadcast.WriteString(newMember.Account.GetNameWithClanTag()); // Member Account Name
         broadcast.WriteInt32(newMember.Account.ID); // Member Account ID
         broadcast.WriteInt8((byte)ChatProtocol.ChatClientStatus.CHAT_CLIENT_STATUS_CONNECTED);
-        broadcast.WriteInt8(Convert.ToByte(newMember.AdministratorLevel)); // Channel Administrator Level
+        broadcast.WriteInt8(newMember.Account.GetChatClientFlags()); // Client's Flags (Chat Client Type)
         broadcast.WriteString(newMember.Account.GetChatSymbolNoPrefixCode()); // Chat Symbol
         broadcast.WriteString(newMember.Account.GetNameColourNoPrefixCode()); // Name Colour
         broadcast.WriteString(newMember.Account.GetIconNoPrefixCode()); // Account Icon
