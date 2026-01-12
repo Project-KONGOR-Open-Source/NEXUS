@@ -16,8 +16,6 @@ public sealed class UserRegistrationTests
 
         MerrickContext databaseContext = webApplicationFactory.Services.GetRequiredService<MerrickContext>();
 
-        JWTAuthenticationService jwtAuthenticationService = new(webApplicationFactory);
-
         ILogger<EmailAddressController> emailLogger =
             webApplicationFactory.Services.GetRequiredService<ILogger<EmailAddressController>>();
         IEmailService emailService = webApplicationFactory.Services.GetRequiredService<IEmailService>();

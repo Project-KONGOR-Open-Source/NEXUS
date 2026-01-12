@@ -168,7 +168,7 @@ public partial class StatsRequesterController
                 }
 
                 PlayerEntity playerStatistics = form.ToPlayerStatistics(playerIndex, account.ID, account.Name,
-                    account.Clan?.ID, account.Clan?.Tag);
+                    account.Clan?.ID, account.Clan?.Tag, HeroDefinitionService);
 
                 await MerrickContext.PlayerStatistics.AddAsync(playerStatistics);
             }
@@ -303,7 +303,7 @@ public partial class StatsRequesterController
                 }
 
                 PlayerEntity playerStatistics = form.ToPlayerStatistics(playerIndex, account.ID, account.Name,
-                    account.Clan?.ID, account.Clan?.Tag);
+                    account.Clan?.ID, account.Clan?.Tag, HeroDefinitionService);
 
                 await MerrickContext.PlayerStatistics.AddAsync(playerStatistics);
             }

@@ -1,6 +1,6 @@
 using MERRICK.DatabaseContext.Entities.Statistics;
 
-namespace ASPIRE.Tests.KONGOR.MasterServer;
+namespace ASPIRE.Tests.KONGOR.MasterServer.Tests;
 
 public class SeedMatchHistoryTests
 {
@@ -35,7 +35,7 @@ public class SeedMatchHistoryTests
             catch (Exception ex) { Console.WriteLine($"[REMEDIATION] Drop Table Failed (Non-Critical): {ex.Message}"); }
 
             Console.WriteLine("[REMEDIATION] Clearing Match History...");
-            try { await context.Database.ExecuteSqlRawAsync("DELETE FROM data.PlayerStatistics"); }
+            try { await context.Database.ExecuteSqlRawAsync("DELETE FROM data.AccountStatistics.PlayerStatistics"); }
             catch (Exception ex) { Console.WriteLine($"[REMEDIATION] Delete PlayerStats Failed: {ex.Message}"); }
 
             Console.WriteLine("[REMEDIATION] Clearing Migration History...");
@@ -183,6 +183,7 @@ public class SeedMatchHistoryTests
             116,
             120,
             121,
+            185,
             122,
             123,
             124,
@@ -208,7 +209,8 @@ public class SeedMatchHistoryTests
                 "Item_RunesOfTheBlight",
                 "Item_HealthPotion"
             };
-            List<string> inventory = possibleItems.OrderBy(x => random.Next()).Take(3).ToList();
+            Random rnd = new Random();
+            List<string> inventory = possibleItems.OrderBy(x => rnd.Next()).Take(3).ToList();
 
 
             // Midwars Player
@@ -397,5 +399,202 @@ public class SeedMatchHistoryTests
         await context.SaveChangesAsync();
         Console.WriteLine(
             $"Seeded 5v5 matches for {guestAccounts.Count} accounts. Midwars ({midwarsId}), Ranked ({rankedId})");
+    }
+
+    [Test]
+    public async Task SeedMatchHistory_RandomizedPublic()
+    {
+        // USAGE: dotnet test --filter SeedMatchHistory_RandomizedPublic
+        // Generates Public Matches with random heroes and stats.
+        // SET TO TRUE to wipe existing stats before seeding (Clean Slate)
+        bool clearHistory = false;
+        // How many matches to generate?
+        int matchCount = 5;
+
+        ServiceCollection services = new();
+        string connectionString =
+            "Server=127.0.0.1,55678;Database=development;User Id=sa;Password=MerrickDevPassword2025;TrustServerCertificate=True;Connection Timeout=60;";
+
+        services.AddDbContext<MerrickContext>(options =>
+            options.UseSqlServer(connectionString, sqlOptions =>
+                sqlOptions.MigrationsHistoryTable("MigrationsHistory", "meta")));
+
+        ServiceProvider provider = services.BuildServiceProvider();
+        MerrickContext context = provider.GetRequiredService<MerrickContext>();
+
+        if (clearHistory)
+        {
+            Console.WriteLine("[SEED] Clearing Match History (PlayerStatistics)...");
+            await context.Database.ExecuteSqlRawAsync("DELETE FROM data.AccountStatistics.PlayerStatistics");
+        }
+
+        Random random = new();
+        int baseMatchId = 9800000 + random.Next(1, 100000);
+
+        List<Account> guestAccounts = new();
+        // Fetch GUEST-01 to GUEST-10
+        for (int i = 1; i <= 10; i++)
+        {
+            string nickname = $"GUEST-{i:D2}";
+            Account? account = await context.Accounts.FirstOrDefaultAsync(a => a.Name == nickname);
+            if (account != null) guestAccounts.Add(account);
+        }
+
+        // Expanded List of Valid Hero IDs (From HeroDefinitionService)
+        List<uint> validHeroes = new()
+        {
+            3, 4, 6, 7, 8, 9, 10, 11, 12, 13, 14, 16, 17, 18, 19, 20, 21, 22, 24, 25, 26, 27, 32, 34, 36, 40, 42, 44,
+            91, 92, 93, 94, 95, 96, 103, 104, 105, 106, 109, 110, 111, 112, 115, 116, 119, 120, 122, 123, 125, 126,
+            152, 153, 155, 156, 162, 168, 172, 173, 178, 185, 227, 228, 232, 236, 240, 245, 246, 249, 250, 62, 205, 293
+        };
+
+        Console.WriteLine($"[SEED] Generating {matchCount} Public Matches starting at ID {baseMatchId}...");
+
+        for (int m = 0; m < matchCount; m++)
+        {
+            int currentMatchId = baseMatchId + m;
+
+            // Create Match
+            MatchStatistics match = new()
+            {
+                MatchID = currentMatchId,
+                ServerID = 1,
+                HostAccountName = "System",
+                Map = "caldavar",
+                MapVersion = "1.0",
+                TimePlayed = 1500 + random.Next(-300, 300),
+                FileSize = 1000,
+                FileName = $"M{currentMatchId}.honreplay",
+                ConnectionState = 0,
+                Version = "4.10.1",
+                AveragePSR = 1500,
+                AveragePSRTeamOne = 1500,
+                AveragePSRTeamTwo = 1500,
+                GameMode = "picking", // Normal Mode
+                ScoreTeam1 = random.Next(10, 60),
+                ScoreTeam2 = random.Next(10, 60),
+                TeamScoreGoal = 0,
+                PlayerScoreGoal = 0,
+                NumberOfRounds = 1,
+                ReleaseStage = "Live",
+                BannedHeroes = "",
+                TimestampRecorded = DateTimeOffset.UtcNow.AddMinutes(-(m * 30)), // Stagger timestamps
+                AwardMostAnnihilations = 0,
+                AwardMostQuadKills = 0,
+                AwardLargestKillStreak = 0,
+                AwardMostSmackdowns = 0,
+                AwardMostKills = 0,
+                AwardMostAssists = 0,
+                AwardLeastDeaths = 0,
+                AwardMostBuildingDamage = 0,
+                AwardMostWardsKilled = 0,
+                AwardMostHeroDamageDealt = 0,
+                AwardHighestCreepScore = 0
+            };
+            context.MatchStatistics.Add(match);
+
+            // Create Players
+            // Shuffle validHeroes for this match so we get unique ones
+            List<uint> shuffledHeroes = validHeroes.OrderBy(x => random.Next()).Take(guestAccounts.Count).ToList();
+
+            for (int p = 0; p < guestAccounts.Count; p++)
+            {
+                Account account = guestAccounts[p];
+                int team = p < 5 ? 1 : 2;
+                uint heroId = shuffledHeroes[p];
+                bool win = (team == 1 && match.ScoreTeam1 > match.ScoreTeam2) || (team == 2 && match.ScoreTeam2 > match.ScoreTeam1);
+
+                context.PlayerStatistics.Add(new PlayerStatistics
+                {
+                    MatchID = currentMatchId,
+                    AccountID = account.ID,
+                    AccountName = account.Name,
+                    Team = team,
+                    LobbyPosition = p,
+                    GroupNumber = 0,
+                    ClanID = null,
+                    ClanTag = null,
+                    Benefit = 0,
+                    HeroProductID = heroId,
+                    Inventory = ["Item_LoggersHatchet", "Item_ManaBattery", "Item_HealthPotion"],
+                    Win = win ? 1 : 0,
+                    Loss = win ? 0 : 1,
+                    HeroKills = random.Next(0, 20),
+                    HeroDeaths = random.Next(0, 15),
+                    HeroAssists = random.Next(0, 25),
+                    HeroLevel = random.Next(10, 25),
+                    Gold = random.Next(5000, 15000),
+                    SecondsPlayed = match.TimePlayed,
+                    Disconnected = 0,
+                    Conceded = 0,
+                    Kicked = 0,
+                    PublicMatch = 1, // CRITICAL: Identify as Public Match
+                    PublicSkillRatingChange = 0,
+                    RankedMatch = 0,
+                    RankedSkillRatingChange = 0,
+                    SocialBonus = 0,
+                    UsedToken = 0,
+                    ConcedeVotes = 0,
+                    HeroDamage = random.Next(5000, 25000),
+                    GoldFromHeroKills = random.Next(1000, 5000),
+                    HeroExperience = random.Next(10000, 25000),
+                    Buybacks = 0,
+                    GoldLostToDeath = 0,
+                    SecondsDead = 0,
+                    TeamCreepKills = 0,
+                    TeamCreepDamage = 0,
+                    TeamCreepGold = 0,
+                    TeamCreepExperience = 0,
+                    NeutralCreepKills = 0,
+                    NeutralCreepDamage = 0,
+                    NeutralCreepGold = 0,
+                    NeutralCreepExperience = 0,
+                    BuildingDamage = 0,
+                    BuildingsRazed = 0,
+                    ExperienceFromBuildings = 0,
+                    GoldFromBuildings = 0,
+                    Denies = 0,
+                    ExperienceDenied = 0,
+                    GoldSpent = 0,
+                    Experience = random.Next(10000, 25000),
+                    Actions = 0,
+                    ConsumablesPurchased = 0,
+                    WardsPlaced = 0,
+                    FirstBlood = 0,
+                    DoubleKill = 0,
+                    TripleKill = 0,
+                    QuadKill = 0,
+                    Annihilation = 0,
+                    KillStreak03 = 0,
+                    KillStreak04 = 0,
+                    KillStreak05 = 0,
+                    KillStreak06 = 0,
+                    KillStreak07 = 0,
+                    KillStreak08 = 0,
+                    KillStreak09 = 0,
+                    KillStreak10 = 0,
+                    KillStreak15 = 0,
+                    Smackdown = 0,
+                    Humiliation = 0,
+                    Nemesis = 0,
+                    Retribution = 0,
+                    Score = 0,
+                    GameplayStat0 = 0,
+                    GameplayStat1 = 0,
+                    GameplayStat2 = 0,
+                    GameplayStat3 = 0,
+                    GameplayStat4 = 0,
+                    GameplayStat5 = 0,
+                    GameplayStat6 = 0,
+                    GameplayStat7 = 0,
+                    GameplayStat8 = 0,
+                    GameplayStat9 = 0,
+                    TimeEarningExperience = match.TimePlayed - 100
+                });
+            }
+        }
+
+        await context.SaveChangesAsync();
+        Console.WriteLine($"[SEED] Successfully seeded {matchCount} Public Matches with random heroes.");
     }
 }

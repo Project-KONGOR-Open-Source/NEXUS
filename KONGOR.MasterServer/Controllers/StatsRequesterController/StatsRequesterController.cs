@@ -1,15 +1,19 @@
 ﻿namespace KONGOR.MasterServer.Controllers.StatsRequesterController;
 
+using global::KONGOR.MasterServer.Services;
+
 [ApiController]
 [Route("stats_requester.php")]
 [Consumes("application/x-www-form-urlencoded")]
 public partial class StatsRequesterController(
     MerrickContext databaseContext,
     IDatabase distributedCache,
+    IHeroDefinitionService heroDefinitionService,
     ILogger<StatsRequesterController> logger) : ControllerBase
 {
     private MerrickContext MerrickContext { get; } = databaseContext;
     private IDatabase DistributedCache { get; } = distributedCache;
+    private IHeroDefinitionService HeroDefinitionService { get; } = heroDefinitionService;
     private ILogger Logger { get; } = logger;
 
     /// <summary>

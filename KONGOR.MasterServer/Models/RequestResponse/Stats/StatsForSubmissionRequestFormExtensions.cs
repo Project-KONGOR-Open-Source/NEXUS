@@ -1,5 +1,7 @@
 ﻿namespace KONGOR.MasterServer.Models.RequestResponse.Stats;
 
+using global::KONGOR.MasterServer.Services;
+
 public static class StatsForSubmissionRequestFormExtensions
 {
     public static MatchStatistics ToMatchStatistics(this StatsForSubmissionRequestForm form, int? matchServerID = null,
@@ -61,11 +63,26 @@ public static class StatsForSubmissionRequestFormExtensions
     }
 
     public static PlayerStatistics ToPlayerStatistics(this StatsForSubmissionRequestForm form, int playerIndex,
-        int accountID, string accountName, int? clanID, string? clanTag)
+        int accountID, string accountName, int? clanID, string? clanTag, IHeroDefinitionService heroDefinitionService)
     {
         string hero = form.PlayerStats[playerIndex].Keys.Single();
 
         Dictionary<string, string> player = form.PlayerStats[playerIndex][hero];
+
+        // 2026-01-11: Public Games (and others) may send 0 or uint.MaxValue for hero_id.
+        // We must attempt to resolve the ID from the `hero` string key if the payload ID is invalid.
+        uint parsedHeroId = uint.Parse(player["hero_id"]);
+        uint heroProductId;
+        
+        if (parsedHeroId == 0 || parsedHeroId == uint.MaxValue)
+        {
+             // Resolve from identifier (e.g. "Hero_Valkyrie")
+             heroProductId = heroDefinitionService.GetBaseHeroId(hero);
+        }
+        else
+        {
+             heroProductId = parsedHeroId;
+        }
 
         PlayerStatistics statistics = new()
         {
@@ -78,8 +95,7 @@ public static class StatsForSubmissionRequestFormExtensions
             LobbyPosition = int.Parse(player["position"]),
             GroupNumber = int.Parse(player["group_num"]),
             Benefit = int.Parse(player["benefit"]),
-            HeroProductID =
-                uint.Parse(player["hero_id"]) == uint.MaxValue ? uint.MinValue : uint.Parse(player["hero_id"]),
+            HeroProductID = heroProductId,
             AlternativeAvatarName =
                 player.TryGetValue("alt_avatar_name", out string? altAvatarName) ? altAvatarName : null,
             AlternativeAvatarProductID =

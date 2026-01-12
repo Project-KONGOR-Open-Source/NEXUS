@@ -6,6 +6,7 @@ public interface IHeroDefinitionService
 {
     string GetHeroIdentifier(uint heroId);
     uint GetBaseHeroId(uint productId);
+    uint GetBaseHeroId(string identifier);
     bool IsHero(uint heroId);
 }
 
@@ -23,6 +24,17 @@ public class HeroDefinitionService : IHeroDefinitionService
         _env = env;
         LoadBaseHeroes(); // Pre-seed base heroes
         LoadDefinitions(); // Load avatars/overrides from JSON
+    }
+
+    public uint GetBaseHeroId(string identifier)
+    {
+        if (_identifierToBaseId.TryGetValue(identifier, out uint baseId))
+        {
+            return baseId;
+        }
+
+        // Return 0 if not found (Legionnaire/Default)
+        return 0;
     }
 
     public uint GetBaseHeroId(uint productId)
