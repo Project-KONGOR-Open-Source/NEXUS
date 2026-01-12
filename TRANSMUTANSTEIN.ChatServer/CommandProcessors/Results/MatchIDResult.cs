@@ -9,11 +9,11 @@ public class MatchIDResult(IDatabase distributedCacheStore) : IAsynchronousComma
 
         if (requestData.Result is not ChatProtocol.MatchIDResult.MIDR_SUCCESS)
         {
-            MatchStartData? data = await distributedCacheStore.GetMatchStartDataByMatchServerID(session.Metadata.ServerID);
+            MatchInformation? data = await distributedCacheStore.GetMatchInformationByMatchServerID(session.Metadata.ServerID);
 
             if (data is null)
             {
-                Log.Error(@"[BUG] Unable To Retrieve Match Start Data For Server Session ""{SessionID}"" With Server ID ""{ServerID}""",
+                Log.Error(@"[BUG] Unable To Retrieve Match Information For Server Session ""{SessionID}"" With Server ID ""{ServerID}""",
                     session.ID, session.Metadata.ServerID);
             }
 

@@ -4,7 +4,7 @@ namespace KONGOR.MasterServer.Models.ServerManagement;
 ///     Represents the match information available at the time that the match starts.
 ///     This information is used to populate the match statistics once the match ends.
 /// </summary>
-public class MatchStartData
+public class MatchInformation
 {
     public int MatchID => TimestampStarted.GetDeterministicInt32Hash();
 

@@ -425,17 +425,17 @@ public partial class ServerRequesterController
 
         if (newMatch is null)
         {
-            MatchStartData? matchStartData = await DistributedCache.GetMatchStartDataByMatchServerSessionCookie(session);
+            MatchInformation? matchInformation = await DistributedCache.GetMatchInformationByMatchServerSessionCookie(session);
 
-            if (matchStartData is null)
+            if (matchInformation is null)
             {
-                Logger.LogError(@"[BUG] Received Match Initialisation Heartbeat For Session ""{Session}"", But No MatchStartData Found In Cache", session);
+                Logger.LogError(@"[BUG] Received Match Initialisation Heartbeat For Session ""{Session}"", But No MatchInformation Found In Cache", session);
 
                 return Ok();
             }
 
-            matchStartData.ConnectedPlayersCount = int.Parse(connectionsCount);
-            matchStartData.Map = map;
+            matchInformation.ConnectedPlayersCount = int.Parse(connectionsCount);
+            matchInformation.Map = map;
         }
 
         if (newMatch is not null)
@@ -445,38 +445,38 @@ public partial class ServerRequesterController
             if (matchID is null)
                 return BadRequest(@"Invalid Value For Form Parameter ""match_id""");
 
-            MatchStartData? matchStartData = await DistributedCache.GetMatchStartData(int.Parse(matchID));
+            MatchInformation? matchInformation = await DistributedCache.GetMatchInformation(int.Parse(matchID));
 
-            if (matchStartData is null)
+            if (matchInformation is null)
             {
-                Logger.LogError(@"[BUG] Received Match Initialisation Heartbeat For Match ID ""{MatchID}"", But No MatchStartData Found In Cache", matchID);
+                Logger.LogError(@"[BUG] Received Match Initialisation Heartbeat For Match ID ""{MatchID}"", But No MatchInformation Found In Cache", matchID);
 
                 return Ok();
             }
 
-            matchStartData.ConnectedPlayersCount = int.Parse(connectionsCount);
-            matchStartData.Map = map;
+            matchInformation.ConnectedPlayersCount = int.Parse(connectionsCount);
+            matchInformation.Map = map;
 
             string? maximumPlayersCount = Request.Form["max_players"];
 
             if (maximumPlayersCount is null)
                 return BadRequest(@"Invalid Value For Form Parameter ""max_players""");
 
-            matchStartData.MaximumPlayersCount = int.Parse(maximumPlayersCount);
+            matchInformation.MaximumPlayersCount = int.Parse(maximumPlayersCount);
 
             string? league = Request.Form["league"];
 
             if (league is null)
                 return BadRequest(@"Invalid Value For Form Parameter ""league""");
 
-            matchStartData.League = int.Parse(league);
+            matchInformation.League = int.Parse(league);
 
             string? matchMode = Request.Form["mode"];
 
             if (matchMode is null)
                 return BadRequest(@"Invalid Value For Form Parameter ""mode""");
 
-            matchStartData.MatchMode = PublicMatchModeExtensions.GetPublicMatchModeFromCode(matchMode)
+            matchInformation.MatchMode = PublicMatchModeExtensions.GetPublicMatchModeFromCode(matchMode)
                 ?? throw new InvalidDataException($@"Invalid Match Mode Code ""{matchMode}""");
 
             string? matchName = Request.Form["mname"];
@@ -484,7 +484,7 @@ public partial class ServerRequesterController
             if (matchName is null)
                 return BadRequest(@"Invalid Value For Form Parameter ""mname""");
 
-            matchStartData.MatchName = matchName;
+            matchInformation.MatchName = matchName;
 
             MatchOptions options = MatchOptions.None;
 
@@ -519,12 +519,12 @@ public partial class ServerRequesterController
             if (Request.Form.ContainsKey("option[tr]"))                 options |= MatchOptions.TournamentRules;
             if (Request.Form.ContainsKey("option[verified_only]"))      options |= MatchOptions.VerifiedOnly;
 
-            matchStartData.Options = options;
+            matchInformation.Options = options;
 
-            await DistributedCache.SetMatchStartData(matchStartData);
+            await DistributedCache.SetMatchInformation(matchInformation);
 
             Logger.LogInformation("Captured Match Mode And Options For Match ID {MatchID}: MatchMode={MatchMode}, ArrangedMatchType={ArrangedMatchType}",
-                matchID, matchStartData.MatchMode, matchStartData.MatchType);
+                matchID, matchInformation.MatchMode, matchInformation.MatchType);
         }
 
         return Ok();

@@ -86,12 +86,12 @@ public partial class ClientRequesterController
         if (account is null)
             return new NotFoundObjectResult("Account Not Found");
 
-        MatchStartData? matchStartData = await DistributedCache.GetMatchStartData(matchStatistics.MatchID);
+        MatchInformation? matchInformation = await DistributedCache.GetMatchInformation(matchStatistics.MatchID);
 
-        if (matchStartData is null)
-            return new NotFoundObjectResult("Match Start Data Not Found");
+        if (matchInformation is null)
+            return new NotFoundObjectResult("Match Information Not Found");
 
-        MatchSummary matchSummary = new (matchStatistics, allPlayerStatistics, matchStartData);
+        MatchSummary matchSummary = new (matchStatistics, allPlayerStatistics, matchInformation);
 
         List<int> otherPlayerAccountIDs = [.. allPlayerStatistics.Select(statistics => statistics.AccountID).Where(id => id != account.ID)];
 
@@ -145,9 +145,9 @@ public partial class ClientRequesterController
 
             // Use PrimaryMatchPlayerStatistics With Additional Information For The Primary (Requesting) Player And MatchPlayerStatistics With The Standard Amount Of Information For Secondary Players
             matchPlayerStatistics[playerStatistics.AccountID] = playerStatistics.AccountID == account.ID
-                ? (OneOf<MatchPlayerStatistics, MatchPlayerStatisticsWithMatchPerformanceData>) new MatchPlayerStatisticsWithMatchPerformanceData(matchStartData, playerAccount, playerStatistics, currentMatchTypeStatistics, publicMatchStatistics, matchmakingStatistics)
+                ? (OneOf<MatchPlayerStatistics, MatchPlayerStatisticsWithMatchPerformanceData>) new MatchPlayerStatisticsWithMatchPerformanceData(matchInformation, playerAccount, playerStatistics, currentMatchTypeStatistics, publicMatchStatistics, matchmakingStatistics)
                     { HeroIdentifier = playerStatistics.HeroIdentifier }
-                : (OneOf<MatchPlayerStatistics, MatchPlayerStatisticsWithMatchPerformanceData>) new MatchPlayerStatistics(matchStartData, playerAccount, playerStatistics, currentMatchTypeStatistics, publicMatchStatistics, matchmakingStatistics)
+                : (OneOf<MatchPlayerStatistics, MatchPlayerStatisticsWithMatchPerformanceData>) new MatchPlayerStatistics(matchInformation, playerAccount, playerStatistics, currentMatchTypeStatistics, publicMatchStatistics, matchmakingStatistics)
                     { HeroIdentifier = playerStatistics.HeroIdentifier };
 
             List<string> inventory = playerStatistics.Inventory ?? [];

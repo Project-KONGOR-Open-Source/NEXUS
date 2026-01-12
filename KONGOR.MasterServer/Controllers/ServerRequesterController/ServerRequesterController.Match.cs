@@ -41,7 +41,7 @@ public partial class ServerRequesterController
         int matchMode = int.TryParse(Request.Form["match_mode"], out int parsedMatchMode) ? parsedMatchMode
             : throw new ArgumentOutOfRangeException("match_mode", Request.Form["match_mode"].ToString(), @"Value Of Form Parameter ""match_mode"" Is Invalid");
 
-        MatchStartData matchStartData = new ()
+        MatchInformation matchInformation = new ()
         {
             ServerID = matchServer.ID,
             ServerName = matchServer.Name,
@@ -55,15 +55,15 @@ public partial class ServerRequesterController
             TimestampStarted = DateTimeOffset.UtcNow,
         };
 
-        await DistributedCache.SetMatchStartData(matchStartData);
+        await DistributedCache.SetMatchInformation(matchInformation);
 
         Dictionary<string, object> response = new ()
         {
-            ["match_id"] = matchStartData.MatchID
+            ["match_id"] = matchInformation.MatchID
         };
 
         Logger.LogInformation(@"Match ID {MatchID} Has Started - Host Name: {HostName}, Server ID: {ServerID}, Map: {Map}",
-            matchStartData.MatchID, hostAccountName, matchServer.ID, map);
+            matchInformation.MatchID, hostAccountName, matchServer.ID, map);
 
         return Ok(PhpSerialization.Serialize(response));
     }
