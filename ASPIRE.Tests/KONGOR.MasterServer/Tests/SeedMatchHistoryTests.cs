@@ -2,6 +2,8 @@ using MERRICK.DatabaseContext.Entities.Statistics;
 using KONGOR.MasterServer.Services;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.FileProviders; // For IFileProvider
+using System.Diagnostics;
+using System.Text.RegularExpressions;
 
 namespace ASPIRE.Tests.KONGOR.MasterServer.Tests;
 
@@ -789,11 +791,48 @@ public class SeedMatchHistoryTests
 
         // Priority 2: Build from parts (Host, Port, Password) to allow simple overrides (e.g. Docker port)
         // Defaults: 127.0.0.1, 55678, MerrickDevPassword2025
+
         string host = Environment.GetEnvironmentVariable("MERRICK_DB_HOST") ?? "127.0.0.1";
-        string port = Environment.GetEnvironmentVariable("MERRICK_DB_PORT") ?? "55678"; // Default dev port
+        string port = Environment.GetEnvironmentVariable("MERRICK_DB_PORT") ?? GetDynamicSqlPort() ?? "1433"; 
         string password = Environment.GetEnvironmentVariable("MERRICK_DB_PASSWORD") ?? "MerrickDevPassword2025"; 
 
         return $"Server={host},{port};Database=development;User Id=sa;Password={password};TrustServerCertificate=True;Connection Timeout=60;";
+    }
+
+    private static string? GetDynamicSqlPort()
+    {
+        try
+        {
+            ProcessStartInfo startInfo = new()
+            {
+                FileName = "docker",
+                Arguments = "ps --format \"{{.Ports}}\" --filter \"name=database-server\"",
+                RedirectStandardOutput = true,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            };
+
+            using Process process = Process.Start(startInfo)!;
+            using StreamReader reader = process.StandardOutput;
+            string output = reader.ReadToEnd();
+            process.WaitForExit();
+
+            // Output format example: 127.0.0.1:60595->1433/tcp
+            // Regex to capture the port number mapped to 1433
+            Match match = Regex.Match(output, @":(\d+)->1433/tcp");
+            if (match.Success)
+            {
+                string port = match.Groups[1].Value;
+                Console.WriteLine($"[DYNAMIC PORT] Found Docker port mapping: {port}");
+                return port;
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[DYNAMIC PORT] Failed to resolve Docker port: {ex.Message}");
+        }
+
+        return null;
     }
 }
 
