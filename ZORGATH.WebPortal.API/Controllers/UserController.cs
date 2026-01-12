@@ -1,4 +1,6 @@
 ﻿using ASPIRE.Common.DTOs;
+using MERRICK.DatabaseContext.Extensions;
+using ASPIRE.Common.Constants;
 
 namespace ZORGATH.WebPortal.API.Controllers;
 
@@ -268,7 +270,7 @@ public class UserController(
         if (role.Equals(UserRoles.Administrator))
         {
             return Ok(new GetBasicUserDTO(user.ID, user.EmailAddress,
-                user.Accounts.Select(account => new GetBasicAccountDTO(account.ID, account.NameWithClanTag)).ToList()));
+                user.Accounts.Select(account => new GetBasicAccountDTO(account.ID, account.GetNameWithClanTag())).ToList()));
         }
 
         if (role.Equals(UserRoles.User))
@@ -276,7 +278,7 @@ public class UserController(
             return Ok(new GetBasicUserDTO(user.ID,
                 new string(user.EmailAddress.Select(character => char.IsLetterOrDigit(character) ? '*' : character)
                     .ToArray()),
-                user.Accounts.Select(account => new GetBasicAccountDTO(account.ID, account.NameWithClanTag)).ToList()));
+                user.Accounts.Select(account => new GetBasicAccountDTO(account.ID, account.GetNameWithClanTag())).ToList()));
         }
 
         Logger.LogError(@"[BUG] Unknown User Role ""{User.Role}""", role);

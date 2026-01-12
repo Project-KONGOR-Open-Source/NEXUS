@@ -1,5 +1,8 @@
 ﻿namespace MERRICK.DatabaseContext.Handlers;
 
+using global::MERRICK.DatabaseContext.Entities.Core;
+using global::MERRICK.DatabaseContext.Extensions;
+
 public static class SeedDataHandlers
 {
     public static async Task SeedUsers(MerrickContext context, CancellationToken cancellationToken, ILogger logger)

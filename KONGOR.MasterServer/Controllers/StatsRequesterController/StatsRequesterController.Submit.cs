@@ -1,6 +1,7 @@
 ﻿namespace KONGOR.MasterServer.Controllers.StatsRequesterController;
 
 using PlayerEntity = PlayerStatistics;
+using global::MERRICK.DatabaseContext.Extensions;
 
 public partial class StatsRequesterController
 {
@@ -150,7 +151,7 @@ public partial class StatsRequesterController
             string heroKey = form.PlayerStats[playerIndex].Keys.First();
             string fullAccountName = form.PlayerStats[playerIndex][heroKey]["nickname"];
 
-            string accountName = Account.SeparateClanTagFromAccountName(fullAccountName).AccountName;
+            string accountName = AccountExtensions.SeparateClanTagFromAccountName(fullAccountName).AccountName;
 
             PlayerEntity? existingPlayerStatistics = await MerrickContext.PlayerStatistics
                 .FirstOrDefaultAsync(stats => stats.MatchID == matchID && stats.AccountName == accountName);
@@ -285,7 +286,7 @@ public partial class StatsRequesterController
             // The Match Server Sends The Account Name With The Clan Tag Combined Into A Single String Value So We Need To Separate Them
             string heroKey = form.PlayerStats[playerIndex].Keys.First();
             string fullAccountName = form.PlayerStats[playerIndex][heroKey]["nickname"];
-            string accountName = Account.SeparateClanTagFromAccountName(fullAccountName).AccountName;
+            string accountName = AccountExtensions.SeparateClanTagFromAccountName(fullAccountName).AccountName;
 
             PlayerEntity? existingPlayerStatistics = await MerrickContext.PlayerStatistics
                 .FirstOrDefaultAsync(stats => stats.MatchID == matchID && stats.AccountName == accountName);

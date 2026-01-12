@@ -1,4 +1,6 @@
+using MERRICK.DatabaseContext.Extensions;
 using TRANSMUTANSTEIN.ChatServer.Domain.Clans;
+using TRANSMUTANSTEIN.ChatServer.Domain.Core;
 
 namespace TRANSMUTANSTEIN.ChatServer.Infrastructure.Services;
 
@@ -144,9 +146,9 @@ public class ClanUpdateSubscriber : IHostedService
             statusUpdate.WriteInt8(targetSession.Account.GetChatClientFlags());
             statusUpdate.WriteInt32(0); // ClanID 0
             statusUpdate.WriteString(""); // ClanName Empty
-            statusUpdate.WriteString(targetSession.Account.ChatSymbolNoPrefixCode);
-            statusUpdate.WriteString(targetSession.Account.NameColourNoPrefixCode);
-            statusUpdate.WriteString(targetSession.Account.IconNoPrefixCode);
+            statusUpdate.WriteString(targetSession.Account.GetChatSymbolNoPrefixCode());
+            statusUpdate.WriteString(targetSession.Account.GetNameColourNoPrefixCode());
+            statusUpdate.WriteString(targetSession.Account.GetIconNoPrefixCode());
 
             if (targetSession.ClientMetadata.LastKnownClientState is ChatProtocol.ChatClientStatus
                     .CHAT_CLIENT_STATUS_IN_GAME or ChatProtocol.ChatClientStatus.CHAT_CLIENT_STATUS_JOINING_GAME)

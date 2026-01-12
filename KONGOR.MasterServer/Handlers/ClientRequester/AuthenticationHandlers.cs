@@ -5,7 +5,9 @@ using KONGOR.MasterServer.Models.RequestResponse;
 using KONGOR.MasterServer.Services.Requester;
 using MERRICK.DatabaseContext;
 using MERRICK.DatabaseContext.Entities.Core;
-using MERRICK.DatabaseContext.Enumerations;
+using global::MERRICK.DatabaseContext.Enumerations;
+using MERRICK.DatabaseContext.Extensions;
+using KONGOR.MasterServer.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using StackExchange.Redis;
@@ -59,7 +61,7 @@ public class PreAuthHandler(
         {
             return new UnauthorizedObjectResult(PhpSerialization.Serialize(
                 new SRPAuthenticationFailureResponse(SRPAuthenticationFailureReason.AccountIsDisabled,
-                    account.NameWithClanTag)));
+                    account.GetNameWithClanTag())));
         }
 
         User user = account.User;
@@ -212,7 +214,7 @@ public partial class SRPAuthHandler(
             if (UserAgentRegex().IsMatch(agent).Equals(false))
             {
                 logger.LogError(
-                    $@"Account ""{account.NameWithClanTag}"" Has Made A Request To Log In Using Unexpected User Agent ""{agent}""");
+                    $@"Account ""{account.GetNameWithClanTag()}"" Has Made A Request To Log In Using Unexpected User Agent ""{agent}""");
 
                 return new BadRequestObjectResult(PhpSerialization.Serialize(
                     new SRPAuthenticationFailureResponse(SRPAuthenticationFailureReason.UnexpectedUserAgent)));
@@ -230,7 +232,7 @@ public partial class SRPAuthHandler(
             if (systemInformationDataPoints.Length is not 5)
             {
                 logger.LogError(
-                    $@"Account ""{account.NameWithClanTag}"" Has Made A Request To Log In Using Unexpected System Information ""{systemInformation}""");
+                    $@"Account ""{account.GetNameWithClanTag()}"" Has Made A Request To Log In Using Unexpected System Information ""{systemInformation}""");
 
                 return new BadRequestObjectResult(PhpSerialization.Serialize(
                     new SRPAuthenticationFailureResponse(
@@ -254,7 +256,7 @@ public partial class SRPAuthHandler(
             if (systemInformationHash is null)
             {
                 logger.LogError(
-                    $@"Account ""{account.NameWithClanTag}"" Has Made A Request To Log In Using Unexpected System Information Hashes ""{systemInformationHashes}""");
+                    $@"Account ""{account.GetNameWithClanTag()}"" Has Made A Request To Log In Using Unexpected System Information Hashes ""{systemInformationHashes}""");
 
                 return new BadRequestObjectResult(PhpSerialization.Serialize(
                     new SRPAuthenticationFailureResponse(

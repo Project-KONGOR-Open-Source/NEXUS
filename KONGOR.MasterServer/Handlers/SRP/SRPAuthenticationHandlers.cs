@@ -1,5 +1,9 @@
 ﻿namespace KONGOR.MasterServer.Handlers.SRP;
 
+using global::MERRICK.DatabaseContext.Entities.Core;
+using global::MERRICK.DatabaseContext.Enumerations;
+using global::MERRICK.DatabaseContext.Extensions;
+
 public static class SRPAuthenticationHandlers
 {
     # region Chat Server Authentication Secret
@@ -210,8 +214,8 @@ public static class SRPAuthenticationHandlers
                         member.TimestampJoinedClan is not null
                             ? member.TimestampJoinedClan.GetValueOrDefault().ToString("yyyy-MM-dd HH:mm:ss")
                             : string.Empty,
-                    Name = member.NameWithClanTag,
-                    Rank = member.ClanTierName,
+                    Name = member.GetNameWithClanTag(),
+                    Rank = member.GetClanTierName(),
                     Message = "TODO: Find Out What This Does",
                     Standing = Convert.ToInt32(member.Type).ToString()
                 }))
@@ -235,7 +239,7 @@ public static class SRPAuthenticationHandlers
                     account.TimestampJoinedClan is not null
                         ? account.TimestampJoinedClan.GetValueOrDefault().ToString("yyyy-MM-dd HH:mm:ss")
                         : string.Empty,
-                Rank = account.ClanTierName,
+                Rank = account.GetClanTierName(),
                 Message = "TODO: Find Out What This Does",
                 Title = "TODO: Set The Clan Channel Title"
             };

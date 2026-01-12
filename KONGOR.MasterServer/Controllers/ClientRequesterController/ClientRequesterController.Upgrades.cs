@@ -1,3 +1,7 @@
+using MERRICK.DatabaseContext.Entities.Core;
+using MERRICK.DatabaseContext.Extensions;
+
+
 namespace KONGOR.MasterServer.Controllers.ClientRequesterController;
 
 public partial class ClientRequesterController
@@ -64,7 +68,7 @@ public partial class ClientRequesterController
             Dictionary<string, object> response = new()
             {
                 // Core Identity
-                ["nickname"] = fullStats.NameWithClanTag,
+                ["nickname"] = account.GetNameWithClanTag(),
                 ["account_id"] = fullStats.ID,
 
                 // Legacy FieldStats (Unwrapped to Root per Phase 2)

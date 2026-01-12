@@ -1,6 +1,8 @@
 using System.Globalization;
 
 using MERRICK.DatabaseContext.Entities;
+using MERRICK.DatabaseContext.Extensions;
+using TRANSMUTANSTEIN.ChatServer.Domain.Core;
 
 namespace TRANSMUTANSTEIN.ChatServer.Domain.Social;
 
@@ -224,7 +226,7 @@ public class Friend
         if (pendingRequest is null)
         {
             // No Pending Request Found (May Have Expired Or Never Existed)
-            SendFriendApproveFailure(session, requesterAccount.ID, requesterAccount.NameWithClanTag);
+            SendFriendApproveFailure(session, requesterAccount.ID, requesterAccount.GetNameWithClanTag());
 
             return this;
         }
@@ -315,17 +317,17 @@ public class Friend
         notification.WriteInt8(Convert.ToByte(ChatProtocol.FriendAddStatus
             .SUCCESS_REQUESTEE)); // Friend Addition Status
         notification.WriteInt32(notificationID); // Notification ID For Tracking This Request
-        notification.WriteString(requesterAccount.NameWithClanTag); // Requester's Display Name With Clan Tag
-        notification.WriteInt32(requesterAccount.ID); // Requester's Account ID
+        notification.WriteString(requesterAccount.GetNameWithClanTag()); // Requester's Display Name With Clan Tag
+        notification.WriteInt8(0x00); // 0x00
+        notification.WriteString(requesterAccount.GetNameColourNoPrefixCode()); // Requester's Name Colour
         notification.WriteInt8(Convert.ToByte(ChatProtocol.ChatClientStatus
             .CHAT_CLIENT_STATUS_CONNECTED)); // Requester's Current Connection Status
         notification.WriteInt8(requesterAccount.GetChatClientFlags()); // Requester's Account Flags
         notification.WriteInt32(requesterAccount.Clan?.ID ?? 0); // Requester's Clan ID (Zero If Not In A Clan)
         notification.WriteString(requesterAccount.Clan?.Name ??
                                  string.Empty); // Requester's Clan Full Name (Empty String If Not In A Clan)
-        notification.WriteString(requesterAccount.ChatSymbolNoPrefixCode); // Requester's Chat Symbol
-        notification.WriteString(requesterAccount.NameColourNoPrefixCode); // Requester's Name Colour
-        notification.WriteString(requesterAccount.IconNoPrefixCode); // Requester's Account Icon
+        notification.WriteString(requesterAccount.GetChatSymbolNoPrefixCode()); // Requester's Chat Symbol
+        notification.WriteString(requesterAccount.GetIconNoPrefixCode()); // Requester's Account Icon
         notification.WriteInt32(requesterAccount.AscensionLevel); // Requester's Ascension Level
 
         targetSession.Send(notification);
@@ -343,7 +345,7 @@ public class Friend
         response.WriteInt8(Convert.ToByte(status)); // Friend Approval Status
         response.WriteInt32(friendAccount.ID); // Friend's Account ID
         response.WriteInt32(notificationID); // Notification ID For Tracking The Friend Request
-        response.WriteString(friendAccount.NameWithClanTag); // Friend's Display Name With Clan Tag
+        response.WriteString(friendAccount.GetNameWithClanTag()); // Friend's Display Name With Clan Tag
 
         session.Send(response);
     }
@@ -360,17 +362,18 @@ public class Friend
         response.WriteInt8(Convert.ToByte(ChatProtocol.FriendAddStatus
             .SUCCESS_REQUESTER)); // Success Indicator For The Client Who Initiated The Friend Request
         response.WriteInt32(notificationID); // Requester's Notification ID For This Friend Request
-        response.WriteString(friendAccount.NameWithClanTag); // Friend's Display Name With Clan Tag
-        response.WriteInt32(friendAccount.ID); // Friend's Account ID
+        response.WriteString(friendAccount.GetNameWithClanTag()); // Friend's Display Name With Clan Tag
+        response.WriteInt8(0x00);
+        response.WriteString(friendAccount.GetNameColourNoPrefixCode()); // Friend's Name Colour
         response.WriteInt8(Convert.ToByte(ChatProtocol.ChatClientStatus
             .CHAT_CLIENT_STATUS_CONNECTED)); // Friend's Current Connection Status
         response.WriteInt8(friendAccount.GetChatClientFlags()); // Friend's Account Flags
         response.WriteInt32(friendAccount.Clan?.ID ?? 0); // Friend's Clan ID (Zero If Not In A Clan)
         response.WriteString(friendAccount.Clan?.Name ??
                              string.Empty); // Friend's Clan Name (Empty String If Not In A Clan)
-        response.WriteString(friendAccount.ChatSymbolNoPrefixCode); // Friend's Chat Symbol
-        response.WriteString(friendAccount.NameColourNoPrefixCode); // Friend's Name Colour
-        response.WriteString(friendAccount.IconNoPrefixCode); // Friend's Account Icon
+        response.WriteString(friendAccount.GetChatSymbolNoPrefixCode()); // Friend's Chat Symbol
+        response.WriteString(friendAccount.GetNameColourNoPrefixCode()); // Friend's Name Colour
+        response.WriteString(friendAccount.GetIconNoPrefixCode()); // Friend's Account Icon
         response.WriteInt32(friendAccount.AscensionLevel); // Friend's Ascension Level
 
         session.Send(response);
@@ -386,7 +389,7 @@ public class Friend
         response.WriteCommand(ChatProtocol.Command.CHAT_CMD_REQUEST_BUDDY_ADD_RESPONSE);
         response.WriteInt8(Convert.ToByte(reason)); // Friend Addition Failure Reason
         response.WriteInt32(0); // Notification ID (Zero Indicates Failure)
-        response.WriteString(targetAccount?.NameWithClanTag ??
+        response.WriteString(targetAccount?.GetNameWithClanTag() ??
                              AccountName); // Target Display Name With Clan Tag (Or Plain Name If Account Not Found)
 
         session.Send(response);

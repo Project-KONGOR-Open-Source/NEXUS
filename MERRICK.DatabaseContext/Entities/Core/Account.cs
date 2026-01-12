@@ -45,58 +45,5 @@ public class Account
 
     public List<string> SystemInformationHashCollection { get; set; } = [];
 
-    [NotMapped] public string NameWithClanTag => Equals(Clan, null) ? Name : $"[{Clan.Tag}]{Name}";
 
-    [NotMapped]
-    public string ClanTierName => ClanTier switch
-    {
-        ClanTier.None => "None",
-        ClanTier.Member => "Member",
-        ClanTier.Officer => "Officer",
-        ClanTier.Leader => "Leader",
-        _ => throw new ArgumentOutOfRangeException(@$"Unsupported Clan Tier ""{ClanTier}""")
-    };
-
-    public string Icon => SelectedStoreItems.SingleOrDefault(item => item.StartsWith("ai.")) ?? "ai.Default Icon";
-    public string IconNoPrefixCode => Icon.Replace("ai.", string.Empty);
-
-    public string ChatSymbol => SelectedStoreItems.SingleOrDefault(item => item.StartsWith("cs.")) ?? string.Empty;
-    public string ChatSymbolNoPrefixCode => ChatSymbol.Replace("cs.", string.Empty);
-
-    public string NameColour => SelectedStoreItems.SingleOrDefault(item => item.StartsWith("cc.")) ?? "cc.white";
-
-    public string NameColourNoPrefixCode
-    {
-        get
-        {
-            string code = NameColour.Replace("cc.", string.Empty);
-            // FAILSAFE: "frostburnlogo" is a symbol, not a color. Sending it as a color crashes the client.
-            if (code.Equals("frostburnlogo", StringComparison.OrdinalIgnoreCase) || code.Length > 10)
-            {
-                return "white";
-            }
-
-            return code;
-        }
-    }
-
-    public static (string ClanTag, string AccountName) SeparateClanTagFromAccountName(string accountNameWithClanTag)
-    {
-        // If no '[' and ']' characters are found, then the account is not part of a clan and has no clan tag.
-        if (accountNameWithClanTag.Contains('[').Equals(false) && accountNameWithClanTag.Contains(']').Equals(false))
-        {
-            return (string.Empty, accountNameWithClanTag);
-        }
-
-        // If '[' is not the first character, then the account name contains the '[' and ']' characters, but the account is not part of a clan and has no clan tag.
-        if (accountNameWithClanTag.StartsWith('[').Equals(false))
-        {
-            return (string.Empty, accountNameWithClanTag);
-        }
-
-        // Remove the leading '[' character and split at the first occurrence of the ']' character. The resulting account name may contain the '[' and ']' characters.
-        string[] segments = accountNameWithClanTag.TrimStart('[').Split(']', 2);
-
-        return (segments.First(), segments.Last());
-    }
 }

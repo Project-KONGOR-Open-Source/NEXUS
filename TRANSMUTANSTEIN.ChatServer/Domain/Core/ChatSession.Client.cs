@@ -1,4 +1,6 @@
-﻿namespace TRANSMUTANSTEIN.ChatServer.Domain.Core;
+﻿using MERRICK.DatabaseContext.Extensions;
+using TRANSMUTANSTEIN.ChatServer.Infrastructure.Services;
+namespace TRANSMUTANSTEIN.ChatServer.Domain.Core;
 
 public partial class ChatSession
 {
@@ -244,9 +246,9 @@ public partial class ChatSession
             update.WriteInt8(Account.GetChatClientFlags()); // Client's Flags (Chat Client Type)
             update.WriteInt32(Account.Clan?.ID ?? 0); // Client's Clan ID
             update.WriteString(Account.Clan?.Name ?? string.Empty); // Client's Clan Name
-            update.WriteString(Account.ChatSymbolNoPrefixCode); // Chat Symbol
-            update.WriteString(Account.NameColourNoPrefixCode); // Name Colour
-            update.WriteString(Account.IconNoPrefixCode); // Account Icon
+            update.WriteString(Account.GetChatSymbolNoPrefixCode()); // Chat Symbol
+            update.WriteString(Account.GetNameColourNoPrefixCode()); // Name Colour
+            update.WriteString(Account.GetIconNoPrefixCode()); // Account Icon
 
             if (status is ChatProtocol.ChatClientStatus.CHAT_CLIENT_STATUS_JOINING_GAME ||
                 status is ChatProtocol.ChatClientStatus.CHAT_CLIENT_STATUS_IN_GAME)
@@ -317,8 +319,8 @@ public partial class ChatSession
             update.WriteInt32(onlinePeerSession.Account.ID); // Client's Account ID
             update.WriteInt8(Convert.ToByte(status)); // Client's Status
             update.WriteInt8(onlinePeerSession.Account.GetChatClientFlags()); // Client's Flags (Chat Client Type)
-            update.WriteString(onlinePeerSession.Account.NameColourNoPrefixCode); // Name Colour
-            update.WriteString(onlinePeerSession.Account.IconNoPrefixCode); // Account Icon
+            update.WriteString(onlinePeerSession.Account.GetNameColourNoPrefixCode()); // Name Colour
+            update.WriteString(onlinePeerSession.Account.GetIconNoPrefixCode()); // Account Icon
 
             if (status is ChatProtocol.ChatClientStatus.CHAT_CLIENT_STATUS_JOINING_GAME ||
                 status is ChatProtocol.ChatClientStatus.CHAT_CLIENT_STATUS_IN_GAME)

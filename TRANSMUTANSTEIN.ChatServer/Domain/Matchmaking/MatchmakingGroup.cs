@@ -1,3 +1,7 @@
+using MERRICK.DatabaseContext.Extensions;
+using TRANSMUTANSTEIN.ChatServer.Domain.Core;
+using TRANSMUTANSTEIN.ChatServer.Domain.Matchmaking;
+
 namespace TRANSMUTANSTEIN.ChatServer.Domain.Matchmaking;
 
 public class MatchmakingGroup
@@ -104,8 +108,8 @@ public class MatchmakingGroup
             invite.WriteInt8(Convert.ToByte(ChatProtocol.ChatClientStatus
                 .CHAT_CLIENT_STATUS_CONNECTED)); // Invite Issuer Status
             invite.WriteInt8(session.Account.GetChatClientFlags()); // Invite Issuer Chat Flags
-            invite.WriteString(session.Account.NameColourNoPrefixCode); // Invite Issuer Chat Name Colour
-            invite.WriteString(session.Account.IconNoPrefixCode); // Invite Issuer Icon
+            invite.WriteString(session.Account.GetNameColourNoPrefixCode()); // Invite Issuer Chat Name Colour
+            invite.WriteString(session.Account.GetIconNoPrefixCode()); // Invite Issuer Icon
             invite.WriteString(Information.MapName); // Map Name
             invite.WriteInt8(Convert.ToByte(Information.GameType)); // Game Type
             invite.WriteString(string.Join('|', Information.GameModes)); // Game Modes
@@ -122,8 +126,8 @@ public class MatchmakingGroup
                 .Single(account => account.Name.Equals(receiverAccountName));
 
             broadcast.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_INVITE_BROADCAST);
-            broadcast.WriteString(inviteReceiver.NameWithClanTag); // Invite Receiver Name
-            broadcast.WriteString(session.Account.NameWithClanTag); // Invite Issuer Name
+            broadcast.WriteString(inviteReceiver.GetNameWithClanTag()); // Invite Receiver Name
+            broadcast.WriteString(session.Account.GetNameWithClanTag()); // Invite Issuer Name
 
             foreach (MatchmakingGroupMember member in Members)
             {
@@ -441,8 +445,8 @@ public class MatchmakingGroup
                 if (fullGroupUpdate)
                 {
                     update.WriteBool(member.IsEligibleForMatchmaking); // Eligible For Matchmaking
-                    update.WriteString(member.Account.NameColourNoPrefixCode); // Chat Name Colour
-                    update.WriteString(member.Account.IconNoPrefixCode); // Account Icon
+                    update.WriteString(member.Account.GetNameColourNoPrefixCode()); // Chat Name Colour
+                    update.WriteString(member.Account.GetIconNoPrefixCode()); // Account Icon
                     update.WriteString(member.Country); // Country
                     update.WriteBool(member.HasGameModeAccess); // Game Mode Access Bool
                     update.WriteString(member.GameModeAccess); // Game Mode Access String

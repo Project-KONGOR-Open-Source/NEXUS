@@ -21,6 +21,13 @@ public static class AccountExtensions
             flags |= Convert.ToByte(ChatProtocol.ChatClientType.CHAT_CLIENT_IS_OFFICER);
         }
 
+        // Grant Staff/Premium Status To Members Of The "PK" (Project KONGOR) Clan
+        if (account.Clan?.Tag?.Equals("PK", StringComparison.OrdinalIgnoreCase) ?? false)
+        {
+            flags |= Convert.ToByte(ChatProtocol.ChatClientType.CHAT_CLIENT_IS_STAFF);
+            flags |= Convert.ToByte(ChatProtocol.ChatClientType.CHAT_CLIENT_IS_PREMIUM);
+        }
+
         // TODO: Do Something With ChatProtocol.ChatClientType.CHAT_CLIENT_IS_PREMIUM And ChatProtocol.ChatClientType.CHAT_CLIENT_IS_VERIFIED
 
         return flags;

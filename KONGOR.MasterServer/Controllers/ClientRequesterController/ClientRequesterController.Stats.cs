@@ -1,4 +1,7 @@
-﻿using Role = MERRICK.DatabaseContext.Entities.Utility.Role;
+﻿using MERRICK.DatabaseContext.Entities.Core;
+using MERRICK.DatabaseContext.Extensions;
+using Microsoft.AspNetCore.Mvc;
+using Role = MERRICK.DatabaseContext.Entities.Utility.Role;
 
 namespace KONGOR.MasterServer.Controllers.ClientRequesterController;
 
@@ -67,7 +70,7 @@ public partial class ClientRequesterController
         // Restored standard keys (slot_id, tokens) as strict removal might cause client instability.
         Dictionary<string, object> response = new()
         {
-            { "nickname", fullResponse.NameWithClanTag },
+            { "nickname", account.GetNameWithClanTag() },
             { "account_id", fullResponse.ID },
             { "level", fullResponse.Level },
             { "level_exp", fullResponse.LevelExperience },
@@ -131,7 +134,7 @@ public partial class ClientRequesterController
     {
         return new ShowSimpleStatsResponse
         {
-            NameWithClanTag = account.NameWithClanTag,
+            NameWithClanTag = account.GetNameWithClanTag(),
             ID = account.ID.ToString(),
             Level = account.User.TotalLevel,
             LevelExperience = account.User.TotalExperience,

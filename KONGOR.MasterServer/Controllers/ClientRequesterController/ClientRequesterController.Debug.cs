@@ -1,3 +1,6 @@
+using MERRICK.DatabaseContext.Entities.Core;
+using MERRICK.DatabaseContext.Extensions;
+
 namespace KONGOR.MasterServer.Controllers.ClientRequesterController;
 
 public partial class ClientRequesterController
@@ -48,7 +51,7 @@ public partial class ClientRequesterController
             // 2. Generate Suspect Payload (GetUpgrades) logic locally
             Dictionary<string, object> fieldStats = new()
             {
-                ["nickname"] = fullStats.NameWithClanTag, ["account_id"] = fullStats.ID
+                ["nickname"] = account.GetNameWithClanTag(), ["account_id"] = fullStats.ID
             };
             Dictionary<string, object> myUpgradesInfo = new();
             foreach (string item in account.User.OwnedStoreItems)

@@ -1,11 +1,14 @@
 namespace TRANSMUTANSTEIN.ChatServer.Domain.Communication;
 
+using MERRICK.DatabaseContext.Entities.Core;
+using MERRICK.DatabaseContext.Extensions;
+
 public class ChatChannelMember(ChatSession session, ChatChannel chatChannel)
 {
     public ChatChannel ChatChannel = chatChannel;
     public ChatSession Session = session;
 
-    public Account Account => Session.Account;
+    public Account Account { get; } = session.Account;
 
     public ChatProtocol.ChatClientStatus ConnectionStatus => Session.ClientMetadata.LastKnownClientState;
 

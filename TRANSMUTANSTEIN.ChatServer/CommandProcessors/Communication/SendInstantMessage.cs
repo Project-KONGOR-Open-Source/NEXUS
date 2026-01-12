@@ -1,3 +1,6 @@
+using MERRICK.DatabaseContext.Extensions;
+using TRANSMUTANSTEIN.ChatServer.Domain.Core;
+
 namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Communication;
 
 [ChatCommand(ChatProtocol.Command.CHAT_CMD_IM)]
@@ -10,7 +13,7 @@ public class SendInstantMessage : ISynchronousCommandProcessor<ChatSession>
         // Find Target Session
         ChatSession? targetSession = Context.ClientChatSessions.Values
             .FirstOrDefault(s => s.Account.Name.Equals(requestData.TargetName, StringComparison.OrdinalIgnoreCase)
-                                 || s.Account.NameWithClanTag.Equals(requestData.TargetName,
+                                 || s.Account.GetNameWithClanTag().Equals(requestData.TargetName,
                                      StringComparison.OrdinalIgnoreCase));
 
         // Check If Target Is Offline Or Invisible
@@ -30,7 +33,9 @@ public class SendInstantMessage : ISynchronousCommandProcessor<ChatSession>
         ChatBuffer message = new();
         message.WriteCommand(ChatProtocol.Command.CHAT_CMD_IM);
         message.WriteInt8(requestData.Flags);
-        message.WriteString(session.Account.NameWithClanTag); // Sender Name
+        // Sender Name is now written inside the if (Flags != 0) block, or not at all if Flags == 0.
+        // This is a change from the original code where it was always written.
+        // The provided snippet implies this structure.
 
         if (requestData.Flags != 0)
         {
@@ -44,9 +49,10 @@ public class SendInstantMessage : ISynchronousCommandProcessor<ChatSession>
             }
 
             message.WriteInt8(flags);
-            message.WriteString(session.Account.NameColourNoPrefixCode);
-            message.WriteString(session.Account.IconNoPrefixCode);
-            message.WriteInt32(session.Account.AscensionLevel);
+            message.WriteString(session.Account.GetNameWithClanTag()); // Sender Name
+            message.WriteInt32(session.Account.ID); // Sender Account ID
+            message.WriteInt8(0x00); // 0x00
+            message.WriteString(session.Account.GetNameColourNoPrefixCode());
         }
 
         message.WriteString(requestData.Message);
@@ -60,10 +66,12 @@ public class SendInstantMessage : ISynchronousCommandProcessor<ChatSession>
             ChatBuffer echo = new();
             echo.WriteCommand(ChatProtocol.Command.CHAT_CMD_IM);
             echo.WriteInt8(2); // Flags = 2 for echo? Legacy used 2.
-            echo.WriteString(targetSession.Account.NameWithClanTag); // In echo, we write Target Name
+            echo.WriteString(targetSession.Account.GetNameWithClanTag()); // In echo, we write Target Name
 
             // Flags != 0 check applies here too since we passed 2.
-            echo.WriteInt32(targetSession.Account.ID);
+            echo.WriteInt32(targetSession.Account.ID); // Target Account ID
+            echo.WriteInt8(0x00); // 0x00
+            echo.WriteString(targetSession.Account.GetNameColourNoPrefixCode());
             echo.WriteInt8(Convert.ToByte(targetSession.ClientMetadata.LastKnownClientState));
 
             byte targetFlags = 0;
@@ -73,8 +81,8 @@ public class SendInstantMessage : ISynchronousCommandProcessor<ChatSession>
             }
 
             echo.WriteInt8(targetFlags);
-            echo.WriteString(targetSession.Account.NameColourNoPrefixCode);
-            echo.WriteString(targetSession.Account.IconNoPrefixCode);
+            echo.WriteString(targetSession.Account.GetNameColourNoPrefixCode());
+            echo.WriteString(targetSession.Account.GetIconNoPrefixCode());
             echo.WriteInt32(targetSession.Account.AscensionLevel);
 
             echo.WriteString(requestData.Message);

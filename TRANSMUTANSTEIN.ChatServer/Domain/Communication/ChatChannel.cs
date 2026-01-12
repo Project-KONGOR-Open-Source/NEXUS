@@ -1,3 +1,5 @@
+using MERRICK.DatabaseContext.Extensions;
+
 namespace TRANSMUTANSTEIN.ChatServer.Domain.Communication;
 
 public class ChatChannel
@@ -72,6 +74,11 @@ public class ChatChannel
 
     public ChatChannel Join(ChatSession session, string? providedPassword = null)
     {
+        if (session?.Account is null)
+        {
+            return this;
+        }
+
         // Staff Accounts Are Exempt From Channel Limit Restrictions, For Moderation And Administration Purposes
         if (session.Account.Type is not AccountType.Staff)
         {
@@ -186,13 +193,13 @@ public class ChatChannel
 
         foreach (ChatChannelMember member in Members.Values)
         {
-            response.WriteString(member.Account.NameWithClanTag); // Member Account Name
+            response.WriteString(member.Account.GetNameWithClanTag()); // Member Account Name
             response.WriteInt32(member.Account.ID); // Member Account ID
-            response.WriteInt8(Convert.ToByte(member.ConnectionStatus)); // Connection Status
+            response.WriteInt8((byte)ChatProtocol.ChatClientStatus.CHAT_CLIENT_STATUS_CONNECTED);
             response.WriteInt8(member.Account.GetChatClientFlags()); // Client's Flags (Chat Client Type)
-            response.WriteString(member.Account.ChatSymbolNoPrefixCode); // Chat Symbol
-            response.WriteString(member.Account.NameColourNoPrefixCode); // Name Colour
-            response.WriteString(member.Account.IconNoPrefixCode); // Account Icon
+            response.WriteString(member.Account.GetChatSymbolNoPrefixCode()); // Chat Symbol
+            response.WriteString(member.Account.GetNameColourNoPrefixCode()); // Name Colour
+            response.WriteString(member.Account.GetIconNoPrefixCode()); // Account Icon
             response.WriteInt32(member.Account.AscensionLevel); // Ascension Level
         }
 
@@ -200,7 +207,7 @@ public class ChatChannel
         session.Send(response);
 
         // Announce To The Existing Channel Members That A New Client Has Joined The Channel
-        BroadcastJoin(session);
+        BroadcastJoin(newMember);
 
         // Track This Channel In The Client's Current Channels List
         session.CurrentChannels.Add(ID);
@@ -208,24 +215,28 @@ public class ChatChannel
         return this;
     }
 
-    private void BroadcastJoin(ChatSession session)
+    private void BroadcastJoin(ChatChannelMember newMember)
     {
-        ChatChannelMember newMember = Members.Values.Single(member => member.Account.ID == session.Account.ID);
+        if (newMember?.Account is null)
+        {
+             Log.Error("[BUG] BroadcastJoin Called With Null Member Or Account");
+             return;
+        }
 
         List<ChatChannelMember> existingMembers =
-            [.. Members.Values.Where(member => member.Account.ID != session.Account.ID)];
+            [.. Members.Values.Where(member => member.Account is not null && member.Account.ID != newMember.Account.ID)];
 
         ChatBuffer broadcast = new();
 
         broadcast.WriteCommand(ChatProtocol.Command.CHAT_CMD_JOINED_CHANNEL);
         broadcast.WriteInt32(ID); // Channel ID
-        broadcast.WriteString(newMember.Account.NameWithClanTag); // Member Account Name
+        broadcast.WriteString(newMember.Account.GetNameWithClanTag()); // Member Account Name
         broadcast.WriteInt32(newMember.Account.ID); // Member Account ID
-        broadcast.WriteInt8(Convert.ToByte(newMember.ConnectionStatus)); // Connection Status
+        broadcast.WriteInt8((byte)ChatProtocol.ChatClientStatus.CHAT_CLIENT_STATUS_CONNECTED);
         broadcast.WriteInt8(Convert.ToByte(newMember.AdministratorLevel)); // Channel Administrator Level
-        broadcast.WriteString(newMember.Account.ChatSymbolNoPrefixCode); // Chat Symbol
-        broadcast.WriteString(newMember.Account.NameColourNoPrefixCode); // Name Colour
-        broadcast.WriteString(newMember.Account.IconNoPrefixCode); // Account Icon
+        broadcast.WriteString(newMember.Account.GetChatSymbolNoPrefixCode()); // Chat Symbol
+        broadcast.WriteString(newMember.Account.GetNameColourNoPrefixCode()); // Name Colour
+        broadcast.WriteString(newMember.Account.GetIconNoPrefixCode()); // Account Icon
         broadcast.WriteInt32(newMember.Account.AscensionLevel); // Ascension Level
 
         // Announce To The Existing Channel Members That A New Client Has Joined The Channel
@@ -360,8 +371,8 @@ public class ChatChannel
 
         broadcast.WriteCommand(ChatProtocol.Command.CHAT_CMD_CHANNEL_SILENCE_PLACED);
         broadcast.WriteString(Name); // Channel Name
-        broadcast.WriteString(requester.Account.NameWithClanTag); // Requester Name
-        broadcast.WriteString(target.Account.NameWithClanTag); // Target Name
+        broadcast.WriteString(requester.Account.GetNameWithClanTag()); // Requester Name
+        broadcast.WriteString(target.Account.GetNameWithClanTag()); // Target Name
         broadcast.WriteInt32(durationMilliseconds); // Duration In Milliseconds
 
         BroadcastMessage(broadcast);
@@ -421,7 +432,7 @@ public class ChatChannel
 
         broadcast.WriteCommand(ChatProtocol.Command.CHAT_CMD_CHANNEL_SET_PASSWORD);
         broadcast.WriteInt32(ID); // Channel ID
-        broadcast.WriteString(session.Account.NameWithClanTag); // Password Setter's Name
+        broadcast.WriteString(session.Account.GetNameWithClanTag()); // Password Setter's Name
 
         // Broadcast Password Change To All Channel Members
         BroadcastMessage(broadcast);

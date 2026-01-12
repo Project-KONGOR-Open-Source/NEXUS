@@ -13,8 +13,5 @@ public class Clan
 
     public DateTimeOffset TimestampCreated { get; set; } = DateTimeOffset.UtcNow;
 
-    public string GetChatChannelName()
-    {
-        return $"Clan {Name}";
-    }
+
 }
