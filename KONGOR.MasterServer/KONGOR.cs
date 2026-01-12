@@ -3,6 +3,9 @@ using KONGOR.MasterServer.Services;
 
 using Serilog;
 
+using KONGOR.MasterServer.Handlers.ClientRequester;
+using KONGOR.MasterServer.Services.Requester;
+
 namespace KONGOR.MasterServer;
 
 public class KONGOR
@@ -120,6 +123,16 @@ public class KONGOR
                 options.ResponseBodyLogLimit = 4096; /* 4KB Response Body Limit */
             });
         }
+
+        // Register Client Request Dispatcher
+        builder.Services.AddScoped<ClientRequestDispatcher>();
+
+        // Register Authentication Handlers
+        builder.Services.AddKeyedScoped<IClientRequestHandler, PreAuthHandler>("pre_auth");
+        builder.Services.AddKeyedScoped<IClientRequestHandler, SRPAuthHandler>("srpauth");
+        builder.Services.AddKeyedScoped<IClientRequestHandler, AuthHandler>("auth");
+        builder.Services.AddKeyedScoped<IClientRequestHandler, Aids2CookieHandler>("aids2cookie");
+        builder.Services.AddKeyedScoped<IClientRequestHandler, LogoutHandler>("logout");
 
         // Add MVC Controllers Support
         builder.Services.AddControllers();
@@ -287,6 +300,8 @@ public class KONGOR
 
         // Map Aspire Default Health Check Endpoints
         application.MapDefaultEndpoints();
+
+
 
         // Map MVC Controllers With Rate Limiting
         application.MapControllers().RequireRateLimiting(RateLimiterPolicies.Relaxed);

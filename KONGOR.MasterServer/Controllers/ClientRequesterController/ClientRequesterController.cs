@@ -1,5 +1,7 @@
 ﻿using KONGOR.MasterServer.Services;
 
+using KONGOR.MasterServer.Services.Requester;
+
 namespace KONGOR.MasterServer.Controllers.ClientRequesterController;
 
 [ApiController]
@@ -9,12 +11,14 @@ public partial class ClientRequesterController(
     MerrickContext databaseContext,
     IDatabase distributedCache,
     ILogger<ClientRequesterController> logger,
-    IHeroDefinitionService heroDefinitionService) : ControllerBase
+    IHeroDefinitionService heroDefinitionService,
+    ClientRequestDispatcher clientRequestDispatcher) : ControllerBase
 {
     private MerrickContext MerrickContext { get; } = databaseContext;
     private IDatabase DistributedCache { get; } = distributedCache;
     private ILogger Logger { get; } = logger;
     private IHeroDefinitionService HeroDefinitionService { get; } = heroDefinitionService;
+    private ClientRequestDispatcher Dispatcher { get; } = clientRequestDispatcher;
 
     [HttpPost(Name = "Client Requester All-In-One")]
     [HttpGet]
@@ -122,11 +126,8 @@ public partial class ClientRequesterController(
         return functionName switch
         {
             // authentication
-            "auth" => await HandleAuthentication(),
-            "pre_auth" => await HandlePreAuthentication(),
-            "srpauth" => await HandleSRPAuthentication(),
-            "aids2cookie" => await HandleAids2Cookie(),
-            "logout" => await HandleLogout(),
+            // authentication
+            "auth" or "pre_auth" or "srpauth" or "aids2cookie" or "logout" => await Dispatcher.DispatchAsync(functionName, HttpContext),
 
             // server list
             "get_server_list" => await GetServerList(),
