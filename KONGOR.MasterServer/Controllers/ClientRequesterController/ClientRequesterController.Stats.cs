@@ -214,6 +214,7 @@ public partial class ClientRequesterController
                 MatchMastery = new MatchMastery
                 {
                     HeroIdentifier = "Hero_Legionnaire",
+                    HeroProductID = 1, // Default to Legionnaire
                     CurrentMasteryExperience = 0,
                     MatchMasteryExperience = 0,
                     MasteryExperienceBonus = 0,
@@ -345,9 +346,20 @@ public partial class ClientRequesterController
                 PlacementMatchesData = ""
             };
 
-            string heroIdentifier = HeroDefinitionService.GetHeroIdentifier(stats.HeroProductID ?? 0);
+            uint heroProductId = stats.HeroProductID ?? 0;
+            uint baseHeroId = HeroDefinitionService.GetBaseHeroId(heroProductId);
+            
+            // cli_name MUST be the Base Hero Identifier (e.g. "Hero_Legionnaire") for the client to resolve the icon path
+            string baseHeroIdentifier = HeroDefinitionService.GetHeroIdentifier(baseHeroId);
+            
+            // If the product ID is an Avatar, we get its identifier (e.g. "Avatar_Legionnaire_Alt1") for the AltAvatarName
+            string productIdentifier = HeroDefinitionService.GetHeroIdentifier(heroProductId);
+            string altAvatarName = (heroProductId != baseHeroId && !string.IsNullOrEmpty(productIdentifier)) 
+                ? productIdentifier 
+                : "";
+
             Logger.LogInformation(
-                $"[DEBUG_MATCH_DETAILS] AccountID: {stats.AccountID}, HeroID: {stats.HeroProductID}, Identifier: {heroIdentifier}");
+                $"[DEBUG_MATCH_DETAILS] AccountID: {stats.AccountID}, HeroID: {heroProductId}, BaseHero: {baseHeroIdentifier}, Alt: {altAvatarName}");
 
             // For now, we reuse the same stats object for all modes as they are not split in DB yet
             matchPlayerStatistics[stats.AccountID] = new MatchPlayerStatistics(
@@ -357,7 +369,11 @@ public partial class ClientRequesterController
                 accountStatistics, // Current
                 accountStatistics, // Public
                 accountStatistics // Matchmaking
-            ) { HeroIdentifier = heroIdentifier };
+            ) 
+            { 
+                HeroIdentifier = baseHeroIdentifier,
+                AlternativeAvatarName = altAvatarName
+            };
 
             // Map Inventory Logic
             List<string> inv = stats.Inventory ?? new List<string>();
@@ -374,17 +390,56 @@ public partial class ClientRequesterController
             };
         }
 
+        // Determine the hero played by the requester for Match Mastery
+        string masteryHeroIdentifier = "Hero_Gauntlet"; // Default placeholder
+        string masteryAltAvatarName = "";
+        uint masteryHeroProductID = 0;
+        int masteryHeroLevel = 1;
+
+        if (account is not null)
+        {
+            PlayerStatistics? requesterStats = allPlayerStatistics.SingleOrDefault(ps => ps.AccountID == account.ID);
+            if (requesterStats is not null)
+            {
+                // FIX: MatchMastery expects the BASE Hero Identifier (e.g. "Hero_Legionnaire")
+                // If we pass an Alt Avatar Identifier (e.g. "Avatar_Legionnaire_Alt1"), the client cannot resolve the icon path
+                // because MatchMastery previously did not accept an 'alt_avatar_name' field.
+                // We now provide both Base Identifier (for lookups) and Alt Avatar Identifier (for specific icons).
+                uint heroProductId = requesterStats.HeroProductID ?? 0;
+                masteryHeroProductID = heroProductId;
+                uint baseHeroId = HeroDefinitionService.GetBaseHeroId(heroProductId);
+                string resolvedIdentifier = HeroDefinitionService.GetHeroIdentifier(baseHeroId);
+                
+                // Fallback if resolution fails
+                if (!string.IsNullOrEmpty(resolvedIdentifier)) 
+                {
+                    masteryHeroIdentifier = resolvedIdentifier;
+                }
+
+                // Determine Alt Avatar Name
+                string productIdentifier = HeroDefinitionService.GetHeroIdentifier(heroProductId);
+                if (!string.IsNullOrEmpty(productIdentifier))
+                {
+                    masteryAltAvatarName = productIdentifier;
+                }
+
+                masteryHeroLevel = requesterStats.HeroLevel;
+            }
+        }
+
         // Build MatchMastery With Placeholder Values
         int matchMasteryExperience = 100; // TODO: Calculate Based On Match Duration And Result
         int bonusExperience = 10; // TODO: Calculate Based On Max-Level Heroes Owned
 
         MatchMastery matchMastery = new(
-            "Hero_Gauntlet", // TODO: Get Actual Hero Identifier
+            masteryHeroIdentifier, 
             0, // TODO: Retrieve From Mastery System
             matchMasteryExperience,
             bonusExperience)
         {
-            HeroIdentifier = "Hero_Gauntlet",
+            HeroIdentifier = masteryHeroIdentifier,
+            AlternativeAvatarName = masteryAltAvatarName,
+            HeroProductID = (int)masteryHeroProductID,
             CurrentMasteryExperience = 0,
             MatchMasteryExperience = matchMasteryExperience,
             MasteryExperienceBonus = 0,

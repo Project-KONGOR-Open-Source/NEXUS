@@ -49,7 +49,18 @@ public class HeroDefinitionService : IHeroDefinitionService
             return baseId;
         }
 
-        // 3. Fallback: If no authoritative Base ID found, return the product ID itself
+        // 3. String Parsing Fallback: Handle identifiers that might be Avatars (e.g. "Hero_Legionnaire.Alt1")
+        // The authoritative dictionary only contains Base Heroes. We need to strip the specific avatar suffix.
+        if (identifier.Contains('.'))
+        {
+            string baseIdentifier = identifier.Split('.')[0];
+            if (_identifierToBaseId.TryGetValue(baseIdentifier, out uint parsedBaseId))
+            {
+                return parsedBaseId;
+            }
+        }
+
+        // 4. Fallback: If no authoritative Base ID found, return the product ID itself
         // (This handles cases where the product ID IS the base ID, or we just don't know better)
         return productId;
     }
@@ -218,12 +229,13 @@ public class HeroDefinitionService : IHeroDefinitionService
             if (!_heroMappings.ContainsKey(kvp.Key))
             {
                 _heroMappings[kvp.Key] = kvp.Value;
-
-                // Also attempt to populate Base ID reverse lookup if possible
-                // For manual overrides, we assume the Key is the Base ID unless it's a known product ID alias
-                // But for safety, we only trust Heroes.cs for authoritative Base IDs.
-                // However, we can use these Keys as Base IDs if they are < 255 and not already mapped?
-                // Let's rely on Heroes.cs for the "True" Base ID where possible.
+                
+                // CRITICAL FIX: Populate base ID reverse lookup for manual heroes
+                // Without this, GetBaseHeroId("Hero_Berzerker.Alt1") fails because it can't find "Hero_Berzerker"
+                if (!_identifierToBaseId.ContainsKey(kvp.Value))
+                {
+                    _identifierToBaseId[kvp.Value] = kvp.Key;
+                }
             }
         }
     }

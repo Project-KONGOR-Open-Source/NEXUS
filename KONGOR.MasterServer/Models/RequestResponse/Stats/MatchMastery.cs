@@ -40,6 +40,20 @@ public class MatchMastery
     public required string HeroIdentifier { get; init; }
 
     /// <summary>
+    ///     The alternative avatar name used by the player, or empty string if using the default hero skin.
+    ///     Required for the client to resolve the correct hero icon on the Rewards page if an alt avatar was used.
+    /// </summary>
+    [PhpProperty("alt_avatar_name")]
+    public string AlternativeAvatarName { get; init; } = string.Empty;
+
+    /// <summary>
+    ///     The numeric product ID of the hero or avatar played.
+    ///     Likely required for specific icon resolution in the Rewards UI.
+    /// </summary>
+    [PhpProperty("hero_id")]
+    public required int HeroProductID { get; init; }
+
+    /// <summary>
     ///     The hero's original mastery experience before the match.
     ///     This is the current mastery level progress persisted to the database.
     /// </summary>
