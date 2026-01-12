@@ -1350,7 +1350,7 @@ public class MatchPlayerStatisticsWithMatchPerformanceData(MatchStartData matchS
     ///     Gold coins earned based on match outcome (win or loss).
     /// </summary>
     [PhpProperty("perf_victory_gc")]
-    public string MatchPerformanceVictoryGoldCoins { get; init; } = (playerStatistics.Disconnected == 0 && playerStatistics.Win == 1 ? 6 * 1 * playerStatistics.Benefit : playerStatistics.Disconnected == 0 && playerStatistics.Loss == 1 ? 4 * 1 * playerStatistics.Benefit : 0).ToString();
+    public string MatchPerformanceVictoryGoldCoins { get; init; } = (playerStatistics.Disconnected == 0 && playerStatistics.Win == 1 ? 10 * 1 * playerStatistics.Benefit : playerStatistics.Disconnected == 0 && playerStatistics.Loss == 1 ? 5 * 1 * playerStatistics.Benefit : 0).ToString();
 
     /// <summary>
     ///     Extra experience points earned for playing the first match of the day.
@@ -1416,7 +1416,7 @@ public class MatchPlayerStatisticsWithMatchPerformanceData(MatchStartData matchS
     ///     Gold coins earned for first blood awards.
     /// </summary>
     [PhpProperty("perf_bloodlust_gc")]
-    public string MatchPerformanceBloodlustGoldCoins { get; init; } = (playerStatistics.Disconnected == 0 ? 2 * 1 * playerStatistics.Benefit * playerStatistics.FirstBlood : 0).ToString();
+    public string MatchPerformanceBloodlustGoldCoins { get; init; } = (playerStatistics.Disconnected == 0 ? 5 * 1 * playerStatistics.Benefit * playerStatistics.FirstBlood : 0).ToString();
 
     /// <summary>
     ///     Experience points earned for immortal (15-kill streak) awards.
@@ -1428,7 +1428,7 @@ public class MatchPlayerStatisticsWithMatchPerformanceData(MatchStartData matchS
     ///     Gold coins earned for immortal (15-kill streak) awards.
     /// </summary>
     [PhpProperty("perf_ks15_gc")]
-    public string MatchPerformanceKillStreak15GoldCoins { get; init; } = (playerStatistics.Disconnected == 0 ? 7 * 1 * playerStatistics.Benefit * playerStatistics.KillStreak15 : 0).ToString();
+    public string MatchPerformanceKillStreak15GoldCoins { get; init; } = (playerStatistics.Disconnected == 0 ? 10 * 1 * playerStatistics.Benefit * playerStatistics.KillStreak15 : 0).ToString();
 
     /// <summary>
     ///     Extra gold coins earned for social group bonus.
@@ -1542,7 +1542,7 @@ public class MatchPlayerStatisticsWithMatchPerformanceData(MatchStartData matchS
     ///     Change in level experience from this match.
     /// </summary>
     [PhpProperty("perf_level_delta")]
-    public string MatchPerformanceLevelExperienceDelta { get; init; } = "50"; // TODO: Calculate Experience Earned This Match
+    public string MatchPerformanceLevelExperienceDelta { get; init; } = playerStatistics.Experience.ToString();
 
     /// <summary>
     ///     Extra gold coins earned for level milestone.
@@ -1560,13 +1560,13 @@ public class MatchPlayerStatisticsWithMatchPerformanceData(MatchStartData matchS
     ///     Silver coins multiplier for this match.
     /// </summary>
     [PhpProperty("perf_multiplier_mmpoints")]
-    public string MatchPerformanceMultiplierSilverCoins { get; init; } = "250"; // TODO: Calculate Silver Coins Multiplier
+    public string MatchPerformanceMultiplierSilverCoins { get; init; } = "0";
 
     /// <summary>
     ///     Experience multiplier for this match.
     /// </summary>
     [PhpProperty("perf_multiplier_exp")]
-    public string MatchPerformanceMultiplierExperience { get; init; } = "0"; // TODO: Calculate Experience Multiplier
+    public string MatchPerformanceMultiplierExperience { get; init; } = "0";
 }
 
 public class SeasonProgress(MatchStartData matchStartData, PlayerStatistics playerStatistics, AccountStatistics matchmakingStatistics)
@@ -1593,7 +1593,7 @@ public class SeasonProgress(MatchStartData matchStartData, PlayerStatistics play
     ///     The player's Matchmaking Rating (MMR) before the match.
     /// </summary>
     [PhpProperty("mmr_before")]
-    public string MMRBefore { get; init; } = (matchmakingStatistics.SkillRating + playerStatistics.RankedSkillRatingChange).ToString();
+    public string MMRBefore { get; init; } = (matchmakingStatistics.SkillRating - playerStatistics.RankedSkillRatingChange).ToString();
 
     /// <summary>
     ///     The player's Matchmaking Rating (MMR) after the match.
@@ -1613,7 +1613,7 @@ public class SeasonProgress(MatchStartData matchStartData, PlayerStatistics play
     ///     </code>
     /// </summary>
     [PhpProperty("medal_before")]
-    public string MedalBefore { get; init; } = ((int) RankExtensions.GetRank(matchmakingStatistics.SkillRating + playerStatistics.RankedSkillRatingChange)).ToString();
+    public string MedalBefore { get; init; } = ((int) RankExtensions.GetRank(matchmakingStatistics.SkillRating - playerStatistics.RankedSkillRatingChange)).ToString();
 
     /// <summary>
     ///     The player's medal rank after the match.
