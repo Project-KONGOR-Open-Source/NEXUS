@@ -16,7 +16,7 @@ public partial class StatsForSubmissionRequestForm
     public required Dictionary<int, Dictionary<string, IndividualPlayerStatistics>> PlayerStats { get; set; }
 
     [FromForm(Name = "inventory")]
-    public required Dictionary<int, Dictionary<int, string>> PlayerInventory { get; set; }
+    public Dictionary<int, Dictionary<int, string>>? PlayerInventory { get; set; }
 }
 
 // Properties Specific To "submit_stats" Requests
@@ -555,7 +555,7 @@ public static class StatsForSubmissionRequestFormExtensions
             AccountIconProductID = player.AccountIconProductID == uint.MaxValue ? null : player.AccountIconProductID,
             ChatColourProductName = player.ChatColourProductName,
             ChatColourProductID = player.ChatColourProductID == uint.MaxValue ? null : player.ChatColourProductID,
-            Inventory = form.PlayerInventory[playerIndex].Values.ToList(),
+            Inventory = form.PlayerInventory?.GetValueOrDefault(playerIndex)?.Values.ToList() ?? [],
             Win = player.Win,
             Loss = player.Loss,
             Disconnected = player.Disconnected,
