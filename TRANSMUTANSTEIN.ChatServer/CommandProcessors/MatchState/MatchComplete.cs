@@ -21,20 +21,28 @@ file class MatchCompleteRequestData
 {
     public byte[] CommandBytes { get; init; }
 
-    public int ServerID { get; init; }
-
     public int MatchID { get; init; }
 
-    public int WinningTeam { get; init; }
+    public ChatProtocol.MatchEndedReason Reason { get; init; }
 
-    public int MatchDuration { get; init; }
+    public byte WinningTeam { get; init; }
+
+    public byte PlayerCount { get; init; }
+
+    public int[] AccountIDs { get; init; }
 
     public MatchCompleteRequestData(ChatBuffer buffer)
     {
         CommandBytes = buffer.ReadCommandBytes();
-        ServerID = buffer.ReadInt32();
         MatchID = buffer.ReadInt32();
-        WinningTeam = buffer.ReadInt32();
-        MatchDuration = buffer.ReadInt32();
+        Reason = (ChatProtocol.MatchEndedReason) buffer.ReadInt8();
+        WinningTeam = buffer.ReadInt8();
+        PlayerCount = buffer.ReadInt8();
+        AccountIDs = new int[PlayerCount];
+
+        for (int i = 0; i < PlayerCount; i++)
+        {
+            AccountIDs[i] = buffer.ReadInt32();
+        }
     }
 }
