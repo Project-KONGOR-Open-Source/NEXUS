@@ -2,7 +2,7 @@
 
 public partial class ClientRequesterController
 {
-    private async Task<IActionResult> GetSimpleStats()
+    private async Task<IActionResult> GetSimpleStatistics()
     {
         string? accountName = Request.Form["nickname"];
 
@@ -54,7 +54,7 @@ public partial class ClientRequesterController
         return Ok(PhpSerialization.Serialize(response));
     }
 
-    private async Task<IActionResult> HandleMatchStats()
+    private async Task<IActionResult> GetMatchStatistics()
     {
         string? cookie = Request.Form["cookie"];
 
@@ -103,7 +103,7 @@ public partial class ClientRequesterController
 
         List<Account> allPlayerAccounts = [account, .. otherPlayerAccounts];
 
-        Dictionary<int, OneOf<MatchPlayerStatistics, MatchPlayerStatisticsWithMatchPerformanceData>> matchPlayerStatistics = [];
+        Dictionary<int, OneOf<MatchPlayerStatisticsWithMatchPerformanceData, MatchPlayerStatistics>> matchPlayerStatistics = [];
         Dictionary<int, MatchPlayerInventory> matchPlayerInventories = [];
 
         foreach (PlayerStatistics playerStatistics in allPlayerStatistics)
@@ -134,7 +134,7 @@ public partial class ClientRequesterController
 
             // TODO: Increment Public Match Statistics With Current Match Data
 
-            AccountStatistics matchmakingStatistics = accountStatistics.Where(statistics => statistics.StatisticsType == AccountStatisticsType.Public).SingleOrDefault() ?? new ()
+            AccountStatistics matchmakingStatistics = accountStatistics.Where(statistics => statistics.StatisticsType == AccountStatisticsType.Matchmaking).SingleOrDefault() ?? new ()
             {
                 AccountID = playerStatistics.AccountID,
                 StatisticsType = AccountStatisticsType.Matchmaking,
@@ -145,9 +145,9 @@ public partial class ClientRequesterController
 
             // Use PrimaryMatchPlayerStatistics With Additional Information For The Primary (Requesting) Player And MatchPlayerStatistics With The Standard Amount Of Information For Secondary Players
             matchPlayerStatistics[playerStatistics.AccountID] = playerStatistics.AccountID == account.ID
-                ? (OneOf<MatchPlayerStatistics, MatchPlayerStatisticsWithMatchPerformanceData>) new MatchPlayerStatisticsWithMatchPerformanceData(matchInformation, playerAccount, playerStatistics, currentMatchTypeStatistics, publicMatchStatistics, matchmakingStatistics)
+                ? new MatchPlayerStatisticsWithMatchPerformanceData(matchInformation, playerAccount, playerStatistics, currentMatchTypeStatistics, publicMatchStatistics, matchmakingStatistics)
                     { HeroIdentifier = playerStatistics.HeroIdentifier }
-                : (OneOf<MatchPlayerStatistics, MatchPlayerStatisticsWithMatchPerformanceData>) new MatchPlayerStatistics(matchInformation, playerAccount, playerStatistics, currentMatchTypeStatistics, publicMatchStatistics, matchmakingStatistics)
+                : new MatchPlayerStatistics(matchInformation, playerAccount, playerStatistics, currentMatchTypeStatistics, publicMatchStatistics, matchmakingStatistics)
                     { HeroIdentifier = playerStatistics.HeroIdentifier };
 
             List<string> inventory = playerStatistics.Inventory ?? [];
@@ -181,26 +181,19 @@ public partial class ClientRequesterController
             MasteryExperienceSuperBoostProductCount = 0 // TODO: Count "ma.Super Mastery Boost" Items (+ Enable MatchMastery Constructor Once Masteries Are Re-Implemented)
         };
 
-        Dictionary<int, OneOf<MatchPlayerStatisticsWithMatchPerformanceData, MatchPlayerStatistics>> matchPlayerStatisticsDiscriminatedUnion = matchPlayerStatistics.ToDictionary
+        Dictionary<int, object> unwrappedMatchPlayerStatistics = matchPlayerStatistics.ToDictionary
         (
             pair => pair.Key,
-            pair => OneOf<MatchPlayerStatisticsWithMatchPerformanceData, MatchPlayerStatistics>.FromT1
-            (
-                pair.Value.Match
-                (
-                    matchPlayerStatisticsWithMatchPerformanceData => matchPlayerStatisticsWithMatchPerformanceData,
-                    matchPlayerStatistics                         => matchPlayerStatistics
-                )
-            )
+            pair => pair.Value.Match<object>( withPerformanceData => withPerformanceData, withoutPerformanceData => withoutPerformanceData)
         );
 
         MatchStatsResponse response = new ()
         {
             GoldCoins = account.User.GoldCoins.ToString(),
             SilverCoins = account.User.SilverCoins.ToString(),
-            MatchSummary = [ matchSummary ],
-            MatchPlayerStatistics = [ matchPlayerStatisticsDiscriminatedUnion ],
-            MatchPlayerInventories = [ matchPlayerInventories ],
+            MatchSummary = new Dictionary<int, MatchSummary> { { matchStatistics.MatchID, matchSummary } },
+            MatchPlayerStatistics = new Dictionary<int, Dictionary<int, object>> { { matchStatistics.MatchID, unwrappedMatchPlayerStatistics } },
+            MatchPlayerInventories = new Dictionary<int, Dictionary<int, MatchPlayerInventory>> { { matchStatistics.MatchID, matchPlayerInventories } },
             MatchMastery = matchMastery,
             OwnedStoreItems = account.User.OwnedStoreItems,
             OwnedStoreItemsData = SetOwnedStoreItemsData(account),
@@ -208,9 +201,7 @@ public partial class ClientRequesterController
             CustomIconSlotID = SetCustomIconSlotID(account)
         };
 
-        string php = PhpSerialization.Serialize(response);
-
-        return Ok(php);
+        return Ok(PhpSerialization.Serialize(response));
     }
 
     private static string SetCustomIconSlotID(Account account)

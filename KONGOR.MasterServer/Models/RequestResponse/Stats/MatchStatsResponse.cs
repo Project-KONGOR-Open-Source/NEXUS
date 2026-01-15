@@ -16,25 +16,25 @@ public class MatchStatsResponse
 
     /// <summary>
     ///     A collection containing the summary of the match.
-    ///     This is typically a single-element collection.
+    ///     The dictionary is keyed by match ID.
     /// </summary>
     [PhpProperty("match_summ")]
-    public required List<MatchSummary> MatchSummary { get; init; }
+    public required Dictionary<int, MatchSummary> MatchSummary { get; init; }
 
     /// <summary>
     ///     A collection containing player statistics for the match.
-    ///     The structure is an array with a single dictionary element, where the dictionary is keyed by player account IDs.
+    ///     The outer dictionary is keyed by match ID, the inner dictionary is keyed by player account IDs.
     ///     The requesting player's entry will be a <see cref="MatchStatsResponse.MatchPlayerStatisticsWithMatchPerformanceData"/> with additional match performance data.
     /// </summary>
     [PhpProperty("match_player_stats")]
-    public required List<Dictionary<int, OneOf<MatchPlayerStatisticsWithMatchPerformanceData, MatchPlayerStatistics>>> MatchPlayerStatistics { get; init; }
+    public required Dictionary<int, Dictionary<int, object>> MatchPlayerStatistics { get; init; }
 
     /// <summary>
     ///     A collection containing player inventories for the match.
-    ///     The structure is an array with a single dictionary element, where the dictionary is keyed by player account IDs.
+    ///     The outer dictionary is keyed by match ID, the inner dictionary is keyed by player account IDs.
     /// </summary>
     [PhpProperty("inventory")]
-    public required List<Dictionary<int, MatchPlayerInventory>> MatchPlayerInventories { get; init; }
+    public required Dictionary<int, Dictionary<int, MatchPlayerInventory>> MatchPlayerInventories { get; init; }
 
     /// <summary>
     ///     Mastery details for the hero played in the match.
@@ -222,7 +222,7 @@ public class MatchSummary(MatchStatistics matchStatistics, List<PlayerStatistics
     ///     The size of the match replay file in bytes.
     /// </summary>
     [PhpProperty("file_size")]
-    public int FileSize { get; init; } = Math.Min(0, matchStatistics.FileSize);
+    public int FileSize { get; init; } = Math.Max(0, matchStatistics.FileSize);
 
     /// <summary>
     ///     The filename of the match replay file.
@@ -566,7 +566,7 @@ public class MatchSummary(MatchStatistics matchStatistics, List<PlayerStatistics
     ///     The UNIX timestamp (in seconds) when the match started.
     /// </summary>
     [PhpProperty("timestamp")]
-    public int Timestamp { get; init; } = Convert.ToInt32(Math.Max(matchStatistics.TimestampRecorded.ToUnixTimeSeconds(), Convert.ToInt64(Int32.MaxValue)));
+    public int Timestamp { get; init; } = Convert.ToInt32(Math.Min(matchStatistics.TimestampRecorded.ToUnixTimeSeconds(), Convert.ToInt64(Int32.MaxValue)));
 
     /// <summary>
     ///     The URL for the match replay file.
@@ -578,7 +578,7 @@ public class MatchSummary(MatchStatistics matchStatistics, List<PlayerStatistics
     ///     The size of the match replay file (human-readable format or bytes as string).
     /// </summary>
     [PhpProperty("size")]
-    public int Size { get; init; } = Math.Min(0, matchStatistics.FileSize);
+    public int Size { get; init; } = Math.Max(0, matchStatistics.FileSize);
 
     /// <summary>
     ///     The directory path where the replay file is stored.
@@ -717,25 +717,25 @@ public class MatchSummary(MatchStatistics matchStatistics, List<PlayerStatistics
             return playerStatistics.OrderByDescending(player => player.KillStreak10).ThenByDescending(player => player.Experience).First().ID;
 
         if (playerStatistics.Where(player => player.KillStreak09 > 0).Any())
-            return playerStatistics.OrderByDescending(player => player.KillStreak05).ThenByDescending(player => player.Experience).First().ID;
+            return playerStatistics.OrderByDescending(player => player.KillStreak09).ThenByDescending(player => player.Experience).First().ID;
 
         if (playerStatistics.Where(player => player.KillStreak08 > 0).Any())
-            return playerStatistics.OrderByDescending(player => player.KillStreak05).ThenByDescending(player => player.Experience).First().ID;
+            return playerStatistics.OrderByDescending(player => player.KillStreak08).ThenByDescending(player => player.Experience).First().ID;
 
         if (playerStatistics.Where(player => player.KillStreak07 > 0).Any())
-            return playerStatistics.OrderByDescending(player => player.KillStreak05).ThenByDescending(player => player.Experience).First().ID;
+            return playerStatistics.OrderByDescending(player => player.KillStreak07).ThenByDescending(player => player.Experience).First().ID;
 
         if (playerStatistics.Where(player => player.KillStreak06 > 0).Any())
-            return playerStatistics.OrderByDescending(player => player.KillStreak05).ThenByDescending(player => player.Experience).First().ID;
+            return playerStatistics.OrderByDescending(player => player.KillStreak06).ThenByDescending(player => player.Experience).First().ID;
 
         if (playerStatistics.Where(player => player.KillStreak05 > 0).Any())
             return playerStatistics.OrderByDescending(player => player.KillStreak05).ThenByDescending(player => player.Experience).First().ID;
 
         if (playerStatistics.Where(player => player.KillStreak04 > 0).Any())
-            return playerStatistics.OrderByDescending(player => player.KillStreak05).ThenByDescending(player => player.Experience).First().ID;
+            return playerStatistics.OrderByDescending(player => player.KillStreak04).ThenByDescending(player => player.Experience).First().ID;
 
         if (playerStatistics.Where(player => player.KillStreak03 > 0).Any())
-            return playerStatistics.OrderByDescending(player => player.KillStreak05).ThenByDescending(player => player.Experience).First().ID;
+            return playerStatistics.OrderByDescending(player => player.KillStreak03).ThenByDescending(player => player.Experience).First().ID;
 
         return -1;
     }
