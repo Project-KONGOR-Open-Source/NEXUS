@@ -1,4 +1,4 @@
-namespace KONGOR.MasterServer.Extensions.Serialization;
+namespace KONGOR.MasterServer.Attributes.Serialisation;
 
 /// <summary>
 ///     PHP property attribute that combines property name mapping and optional discriminated union handling.

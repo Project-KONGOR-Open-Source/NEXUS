@@ -1,4 +1,4 @@
-namespace KONGOR.MasterServer.Extensions.Serialization;
+namespace KONGOR.MasterServer.Attributes.Serialisation;
 
 /// <summary>
 ///     PHP serialisation filter for discriminated union properties.
