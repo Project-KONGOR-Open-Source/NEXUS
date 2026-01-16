@@ -14,7 +14,6 @@ global using KONGOR.MasterServer.Configuration.Matchmaking;
 global using KONGOR.MasterServer.Constants;
 global using KONGOR.MasterServer.Extensions.Cache;
 global using KONGOR.MasterServer.Extensions.Collections;
-global using KONGOR.MasterServer.Extensions.Serialization;
 global using KONGOR.MasterServer.Handlers.Patch;
 global using KONGOR.MasterServer.Handlers.SRP;
 global using KONGOR.MasterServer.Models.Configuration;
