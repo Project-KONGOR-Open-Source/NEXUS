@@ -4,7 +4,7 @@ public class StoreItemDiscountCoupon
 {
     // TODO: Implement This As Part Of The Hero Mastery Feature
 
-    //[PhpProperty("product_id")]
+    //[PHPProperty("product_id")]
     //public int Id { get; set; }
 
     //[PhpIgnore]
@@ -16,24 +16,24 @@ public class StoreItemDiscountCoupon
     //[PhpIgnore]
     //public string Hero { get; set; }
 
-    //[PhpProperty("coupon_id")]
+    //[PHPProperty("coupon_id")]
     //// The integer value of the "discount" property part of the form data which gets sent when making a purchase in the in-game store.
     //// The "discount" property will be set to this value after choosing to use a discount coupon.
     //public int DiscountId => Id;
 
-    //[PhpProperty("coupon_products")]
+    //[PHPProperty("coupon_products")]
     //public string ApplicableProducts => GetApplicableProducts();
 
     //[PhpIgnore]
     //public IEnumerable<string> ApplicableProductsList => GetApplicableProductsList();
 
-    //[PhpProperty("discount")]
+    //[PHPProperty("discount")]
     //public double DiscountGold => 0.75;
 
-    //[PhpProperty("mmp_discount")]
+    //[PHPProperty("mmp_discount")]
     //public double DiscountSilver => 0.75;
 
-    //[PhpProperty("end_time")]
+    //[PHPProperty("end_time")]
     //public string DiscountExpirationDate => DateTimeOffset.UtcNow.AddYears(1000).ToString("dd MMMM yyyy", CultureInfo.InvariantCulture);
 
     //private string GetApplicableProducts()

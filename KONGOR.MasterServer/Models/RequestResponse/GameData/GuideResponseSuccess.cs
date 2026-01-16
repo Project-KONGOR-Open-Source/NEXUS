@@ -2,69 +2,69 @@
 
 public class GuideResponseSuccess(HeroGuide guide, int hostTime)
 {
-    [PhpProperty("errors")]
+    [PHPProperty("errors")]
     public string Errors => string.Empty;
 
-    [PhpProperty("success")]
+    [PHPProperty("success")]
     public int Success => 1;
 
-    [PhpProperty("datetime")]
+    [PHPProperty("datetime")]
     public DateTimeOffset TimestampCreated { get; set; } = guide.TimestampCreated;
 
-    [PhpProperty("author_name")]
+    [PHPProperty("author_name")]
     public string AuthorName { get; set; } = guide.Author.Name;
 
-    [PhpProperty("hero_cli_name")]
+    [PHPProperty("hero_cli_name")]
     public string HeroIdentifier { get; set; } = guide.HeroIdentifier;
 
-    [PhpProperty("guide_name")]
+    [PHPProperty("guide_name")]
     public string Name { get; set; } = guide.Name;
 
-    [PhpProperty("hero_name")]
+    [PHPProperty("hero_name")]
     public string HeroName { get; set; } = guide.HeroName;
 
-    [PhpProperty("default")]
+    [PHPProperty("default")]
     public int Default => 0;
 
-    [PhpProperty("favorite")]
+    [PHPProperty("favorite")]
     public int Favorite => 0;
 
-    [PhpProperty("rating")]
+    [PHPProperty("rating")]
     public float Rating { get; set; } = guide.Rating;
 
-    [PhpProperty("thumb")]
+    [PHPProperty("thumb")]
     public string Thumb => guide.UpVotes is 0 ? "noVote" : guide.UpVotes.ToString();
 
-    [PhpProperty("premium")]
+    [PHPProperty("premium")]
     public bool Featured { get; set; } = guide.Featured;
 
-    [PhpProperty("i_start")]
+    [PHPProperty("i_start")]
     public string StartingItems { get; set; } = guide.StartingItems;
 
-    [PhpProperty("i_laning")]
+    [PHPProperty("i_laning")]
     public string EarlyGameItems { get; set; } = guide.EarlyGameItems;
 
-    [PhpProperty("i_core")]
+    [PHPProperty("i_core")]
     public string CoreItems { get; set; } = guide.CoreItems;
 
-    [PhpProperty("i_luxury")]
+    [PHPProperty("i_luxury")]
     public string LuxuryItems { get; set; } = guide.LuxuryItems;
 
-    [PhpProperty("abilQ")]
+    [PHPProperty("abilQ")]
     public string AbilityQueue { get; set; } = guide.AbilityQueue;
 
-    [PhpProperty("txt_intro")]
+    [PHPProperty("txt_intro")]
     public string Intro { get; set; } = guide.Intro;
 
-    [PhpProperty("txt_guide")]
+    [PHPProperty("txt_guide")]
     public string Content { get; set; } = guide.Content;
 
-    [PhpProperty("hosttime")]
+    [PHPProperty("hosttime")]
     public int HostTime { get; set; } = hostTime;
 
-    [PhpProperty("vested_threshold")]
+    [PHPProperty("vested_threshold")]
     public int VestedThreshold => 5;
 
-    [PhpProperty(0)]
+    [PHPProperty(0)]
     public bool Zero => true;
 }

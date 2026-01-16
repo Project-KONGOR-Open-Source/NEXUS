@@ -46,7 +46,7 @@ public class ServerForCreateListResponse(List<MatchServer> servers, string? regi
 
          */
 
-    [PhpProperty("server_list")]
+    [PHPProperty("server_list")]
     public Dictionary<int, ServerForCreate> Servers { get; set; } = servers.Any() is false? []
         : servers.Where(server => server.Status is ServerStatus.SERVER_STATUS_SLEEPING or ServerStatus.SERVER_STATUS_IDLE)
             .ToDictionary(server => server.ID, server => new ServerForCreate(server.ID.ToString(), server.IPAddress, server.Port.ToString(), server.Location));
@@ -54,7 +54,7 @@ public class ServerForCreateListResponse(List<MatchServer> servers, string? regi
 
 public class ServerForJoinListResponse(List<MatchServer> servers, string cookie) : ServerListResponse(cookie)
 {
-    [PhpProperty("server_list")]
+    [PHPProperty("server_list")]
     public Dictionary<int, ServerForJoin> Servers { get; set; } = servers.Any() is false ? []
         : servers.Where(server => server.Status is ServerStatus.SERVER_STATUS_LOADING or ServerStatus.SERVER_STATUS_ACTIVE)
             .ToDictionary(server => server.ID, server => new ServerForJoin(server.ID.ToString(), server.IPAddress, server.Port.ToString(), server.Location));
@@ -70,42 +70,42 @@ public abstract class ServerListResponse
         AccountKeyHash = SRPAuthenticationHandlers.ComputeMatchServerChatAuthenticationHash(key, cookie);
     }
 
-    [PhpProperty("acc_key")]
+    [PHPProperty("acc_key")]
     public string AccountKey { get; set; }
 
-    [PhpProperty("acc_key_hash")]
+    [PHPProperty("acc_key_hash")]
     public string AccountKeyHash { get; set; }
 
-    [PhpProperty("vested_threshold")]
+    [PHPProperty("vested_threshold")]
     public int VestedThreshold => 5;
 
-    [PhpProperty(0)]
+    [PHPProperty(0)]
     public bool Zero => true;
 }
 
 public class ServerForCreate(string id, string ip, string port, string location) : ServerForResponse(id, ip, port, location)
 {
-    [PhpProperty("c_state")]
+    [PHPProperty("c_state")]
     public string Category { get; set; } = "1";
 }
 
 public class ServerForJoin(string id, string ip, string port, string location) : ServerForResponse(id, ip, port, location)
 {
-    [PhpProperty("class")]
+    [PHPProperty("class")]
     public string Category { get; set; } = "1";
 }
 
 public abstract class ServerForResponse(string id, string ip, string port, string location)
 {
-    [PhpProperty("server_id")]
+    [PHPProperty("server_id")]
     public string ID { get; set; } = id;
 
-    [PhpProperty("ip")]
+    [PHPProperty("ip")]
     public string IPAddress { get; set; } = ip;
 
-    [PhpProperty("port")]
+    [PHPProperty("port")]
     public string Port { get; set; } = port;
 
-    [PhpProperty("location")]
+    [PHPProperty("location")]
     public string Location { get; set; } = location;
 }

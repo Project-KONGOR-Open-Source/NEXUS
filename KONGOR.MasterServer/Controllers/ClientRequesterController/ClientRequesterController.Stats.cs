@@ -181,18 +181,12 @@ public partial class ClientRequesterController
             MasteryExperienceSuperBoostProductCount = 0 // TODO: Count "ma.Super Mastery Boost" Items (+ Enable MatchMastery Constructor Once Masteries Are Re-Implemented)
         };
 
-        Dictionary<int, object> unwrappedMatchPlayerStatistics = matchPlayerStatistics.ToDictionary
-        (
-            pair => pair.Key,
-            pair => pair.Value.Match<object>( withPerformanceData => withPerformanceData, withoutPerformanceData => withoutPerformanceData)
-        );
-
         MatchStatsResponse response = new ()
         {
             GoldCoins = account.User.GoldCoins.ToString(),
             SilverCoins = account.User.SilverCoins.ToString(),
             MatchSummary = new Dictionary<int, MatchSummary> { { matchStatistics.MatchID, matchSummary } },
-            MatchPlayerStatistics = new Dictionary<int, Dictionary<int, object>> { { matchStatistics.MatchID, unwrappedMatchPlayerStatistics } },
+            MatchPlayerStatistics = new Dictionary<int, Dictionary<int, OneOf<MatchPlayerStatisticsWithMatchPerformanceData, MatchPlayerStatistics>>> { { matchStatistics.MatchID, matchPlayerStatistics } },
             MatchPlayerInventories = new Dictionary<int, Dictionary<int, MatchPlayerInventory>> { { matchStatistics.MatchID, matchPlayerInventories } },
             MatchMastery = matchMastery,
             OwnedStoreItems = account.User.OwnedStoreItems,
