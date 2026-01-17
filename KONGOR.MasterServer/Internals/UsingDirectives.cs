@@ -16,6 +16,7 @@ global using KONGOR.MasterServer.Extensions.Cache;
 global using KONGOR.MasterServer.Extensions.Collections;
 global using KONGOR.MasterServer.Handlers.Patch;
 global using KONGOR.MasterServer.Handlers.SRP;
+global using KONGOR.MasterServer.Helpers.Serialisation;
 global using KONGOR.MasterServer.Models.Configuration;
 global using KONGOR.MasterServer.Models.RequestResponse.GameData;
 global using KONGOR.MasterServer.Models.RequestResponse.Patch;
