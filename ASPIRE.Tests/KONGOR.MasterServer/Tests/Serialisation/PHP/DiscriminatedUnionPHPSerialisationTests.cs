@@ -196,7 +196,8 @@ public sealed class DiscriminatedUnionPHPSerialisationTests
                         Name = "discount_coupon",
                         Hero = "Hero_Test",
                         ApplicableProducts = "aa.Hero_Test.Alt,aa.Hero_Test.Alt2",
-                        ApplicableProductsList = [ "aa.Hero_Test.Alt", "aa.Hero_Test.Alt2" ]
+                        ApplicableProductsList = ["aa.Hero_Test.Alt", "aa.Hero_Test.Alt2"],
+                        DiscountExpirationDate = "31 December 3000"
                     }
                 }
             }
@@ -204,7 +205,7 @@ public sealed class DiscriminatedUnionPHPSerialisationTests
 
         string serialisedData = PhpSerialization.Serialize(storeItemDiscountCoupon);
 
-        const string expectedSerialisationOutput = @"a:1:{s:22:""owned_store_items_data"";a:1:{s:24:""cp.discount_coupon:99999"";a:6:{s:10:""product_id"";i:99999;s:9:""coupon_id"";i:99999;s:15:""coupon_products"";s:34:""aa.Hero_Test.Alt,aa.Hero_Test.Alt2"";s:8:""discount"";d:0.75;s:12:""mmp_discount"";d:0.75;s:8:""end_time"";s:15:""18 January 3026"";}}}";
+        const string expectedSerialisationOutput = @"a:1:{s:22:""owned_store_items_data"";a:1:{s:24:""cp.discount_coupon:99999"";a:6:{s:10:""product_id"";i:99999;s:9:""coupon_id"";i:99999;s:15:""coupon_products"";s:34:""aa.Hero_Test.Alt,aa.Hero_Test.Alt2"";s:8:""discount"";d:0.75;s:12:""mmp_discount"";d:0.75;s:8:""end_time"";s:16:""31 December 3000"";}}}";
 
         await Assert.That(serialisedData).IsEqualTo(expectedSerialisationOutput);
 
@@ -271,7 +272,8 @@ public sealed class DiscriminatedUnionPHPSerialisationTests
                         Name = "coupon",
                         Hero = "Hero_Mixed",
                         ApplicableProducts = "aa.Hero_Mixed.Alt",
-                        ApplicableProductsList = ["aa.Hero_Mixed.Alt"]
+                        ApplicableProductsList = ["aa.Hero_Mixed.Alt"],
+                        DiscountExpirationDate = "31 December 3000"
                     }
                 }
             }
@@ -279,7 +281,7 @@ public sealed class DiscriminatedUnionPHPSerialisationTests
 
         string serialisedData = PhpSerialization.Serialize(@object);
 
-        const string expectedSerialisationOutput = @"a:1:{s:22:""owned_store_items_data"";a:2:{s:9:""ai.icon:1"";a:5:{s:4:""data"";s:9:""icon_data"";s:10:""start_time"";s:10:""1000000000"";s:8:""end_time"";s:10:""2000000000"";s:4:""used"";i:10;s:5:""score"";s:3:""500"";}s:11:""cp.coupon:2"";a:6:{s:10:""product_id"";i:2;s:9:""coupon_id"";i:2;s:15:""coupon_products"";s:17:""aa.Hero_Mixed.Alt"";s:8:""discount"";d:0.75;s:12:""mmp_discount"";d:0.75;s:8:""end_time"";s:15:""18 January 3026"";}}}";
+        const string expectedSerialisationOutput = @"a:1:{s:22:""owned_store_items_data"";a:2:{s:9:""ai.icon:1"";a:5:{s:4:""data"";s:9:""icon_data"";s:10:""start_time"";s:10:""1000000000"";s:8:""end_time"";s:10:""2000000000"";s:4:""used"";i:10;s:5:""score"";s:3:""500"";}s:11:""cp.coupon:2"";a:6:{s:10:""product_id"";i:2;s:9:""coupon_id"";i:2;s:15:""coupon_products"";s:17:""aa.Hero_Mixed.Alt"";s:8:""discount"";d:0.75;s:12:""mmp_discount"";d:0.75;s:8:""end_time"";s:16:""31 December 3000"";}}}";
 
         await Assert.That(serialisedData).IsEqualTo(expectedSerialisationOutput);
 
