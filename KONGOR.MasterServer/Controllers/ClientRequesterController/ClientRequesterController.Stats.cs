@@ -116,7 +116,7 @@ public partial class ClientRequesterController
             // INFO: Currently, This Code Logic Assumes A Public Match
             // INFO: Potential Logic + Switch/Case On Map Name: bool isPublic = form.player_stats.First().Value.First().Value.pub_count == 1;
 
-            AccountStatistics currentMatchTypeStatistics = accountStatistics.Where(statistics => statistics.StatisticsType == AccountStatisticsType.Public).SingleOrDefault() ?? new()
+            AccountStatistics currentMatchTypeStatistics = accountStatistics.Where(statistics => statistics.StatisticsType == AccountStatisticsType.Public).SingleOrDefault() ?? new ()
             {
                 AccountID = playerStatistics.AccountID,
                 StatisticsType = AccountStatisticsType.Public,

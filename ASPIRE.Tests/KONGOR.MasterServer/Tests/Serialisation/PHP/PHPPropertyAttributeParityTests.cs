@@ -136,40 +136,40 @@ public sealed class PHPPropertyAttributeParityTests
             await Assert.That(customSerialised).IsEqualTo(expectedSerialisationOutput);
         }
     }
+}
 
-    /// <summary>
-    ///     Test Class Using Standard <see cref="PhpPropertyAttribute"/> Attribute
-    /// </summary>
-    public class TestClassWithPhpProperty
-    {
-        [PhpProperty("one")]
-        public required string PropertyOne { get; init; }
+/// <summary>
+///     Test Class Using Standard <see cref="PhpPropertyAttribute"/> Attribute
+/// </summary>
+file class TestClassWithPhpProperty
+{
+    [PhpProperty("one")]
+    public required string PropertyOne { get; init; }
 
-        [PhpProperty("two")]
-        public required int PropertyTwo { get; init; }
+    [PhpProperty("two")]
+    public required int PropertyTwo { get; init; }
 
-        [PhpProperty(3)]
-        public required string PropertyThree { get; init; }
+    [PhpProperty(3)]
+    public required string PropertyThree { get; init; }
 
-        [PhpProperty(4)]
-        public required int PropertyFour { get; init; }
-    }
+    [PhpProperty(4)]
+    public required int PropertyFour { get; init; }
+}
 
-    /// <summary>
-    ///     Test Class Using Custom <see cref="PHPPropertyAttribute"/> Attribute
-    /// </summary>
-    public class TestClassWithPHPProperty
-    {
-        [PHPProperty("one")]
-        public required string PropertyOne { get; init; }
+/// <summary>
+///     Test Class Using Custom <see cref="PHPPropertyAttribute"/> Attribute
+/// </summary>
+file class TestClassWithPHPProperty
+{
+    [PHPProperty("one")]
+    public required string PropertyOne { get; init; }
 
-        [PHPProperty("two")]
-        public required int PropertyTwo { get; init; }
+    [PHPProperty("two")]
+    public required int PropertyTwo { get; init; }
 
-        [PHPProperty(3)]
-        public required string PropertyThree { get; init; }
+    [PHPProperty(3)]
+    public required string PropertyThree { get; init; }
 
-        [PHPProperty(4)]
-        public required int PropertyFour { get; init; }
-    }
+    [PHPProperty(4)]
+    public required int PropertyFour { get; init; }
 }
