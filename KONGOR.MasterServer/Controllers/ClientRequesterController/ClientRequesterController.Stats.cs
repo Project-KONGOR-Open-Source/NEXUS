@@ -2,7 +2,7 @@
 
 public partial class ClientRequesterController
 {
-    private async Task<IActionResult> GetSimpleStats()
+    private async Task<IActionResult> GetSimpleStatistics()
     {
         string? accountName = Request.Form["nickname"];
 
@@ -54,6 +54,150 @@ public partial class ClientRequesterController
         return Ok(PhpSerialization.Serialize(response));
     }
 
+    private async Task<IActionResult> GetMatchStatistics()
+    {
+        string? cookie = Request.Form["cookie"];
+
+        if (cookie is null)
+            return BadRequest(@"Missing Value For Form Parameter ""cookie""");
+
+        string? matchID = Request.Form["match_id"];
+
+        if (matchID is null)
+            return BadRequest(@"Missing Value For Form Parameter ""match_id""");
+
+        MatchStatistics? matchStatistics = await MerrickContext.MatchStatistics.SingleOrDefaultAsync(matchStatistics => matchStatistics.MatchID == int.Parse(matchID));
+
+        if (matchStatistics is null)
+            return new NotFoundObjectResult("Match Stats Not Found");
+
+        List<PlayerStatistics> allPlayerStatistics = await MerrickContext.PlayerStatistics.Where(playerStatistics => playerStatistics.MatchID == matchStatistics.MatchID).ToListAsync();
+
+        string? accountName = await DistributedCache.GetAccountNameForSessionCookie(cookie);
+
+        if (accountName is null)
+            return new NotFoundObjectResult("Session Not Found");
+
+        Account? account = await MerrickContext.Accounts
+            .Include(account => account.User)
+            .Include(account => account.Clan)
+            .SingleOrDefaultAsync(account => account.Name.Equals(accountName));
+
+        if (account is null)
+            return new NotFoundObjectResult("Account Not Found");
+
+        MatchInformation? matchInformation = await DistributedCache.GetMatchInformation(matchStatistics.MatchID);
+
+        if (matchInformation is null)
+            return new NotFoundObjectResult("Match Information Not Found");
+
+        MatchSummary matchSummary = new (matchStatistics, allPlayerStatistics, matchInformation);
+
+        List<int> otherPlayerAccountIDs = [.. allPlayerStatistics.Select(statistics => statistics.AccountID).Where(id => id != account.ID)];
+
+        List<Account> otherPlayerAccounts = await MerrickContext.Accounts
+            .Include(playerAccount => playerAccount.User)
+            .Include(playerAccount => playerAccount.Clan)
+            .Where(playerAccount => otherPlayerAccountIDs.Contains(playerAccount.ID))
+            .ToListAsync();
+
+        List<Account> allPlayerAccounts = [account, .. otherPlayerAccounts];
+
+        Dictionary<int, OneOf<MatchPlayerStatisticsWithMatchPerformanceData, MatchPlayerStatistics>> matchPlayerStatistics = [];
+        Dictionary<int, MatchPlayerInventory> matchPlayerInventories = [];
+
+        foreach (PlayerStatistics playerStatistics in allPlayerStatistics)
+        {
+            Account playerAccount = allPlayerAccounts.Single(playerAccount => playerAccount.ID == playerStatistics.AccountID);
+
+            List<AccountStatistics> accountStatistics = await MerrickContext.AccountStatistics.Where(statistics => statistics.AccountID == playerStatistics.AccountID).ToListAsync();
+
+            // TODO: Figure Out How To Select Which Statistics To Use (Public Match, Matchmaking, etc.)
+            // INFO: Currently, This Code Logic Assumes A Public Match
+            // INFO: Potential Logic + Switch/Case On Map Name: bool isPublic = form.player_stats.First().Value.First().Value.pub_count == 1;
+
+            AccountStatistics currentMatchTypeStatistics = accountStatistics.Where(statistics => statistics.StatisticsType == AccountStatisticsType.Public).SingleOrDefault() ?? new ()
+            {
+                AccountID = playerStatistics.AccountID,
+                StatisticsType = AccountStatisticsType.Public,
+                PlacementMatchesData = null
+            };
+
+            // TODO: Increment Current Match Type Statistics With Current Match Data
+
+            AccountStatistics publicMatchStatistics = accountStatistics.Where(statistics => statistics.StatisticsType == AccountStatisticsType.Public).SingleOrDefault() ?? new ()
+            {
+                AccountID = playerStatistics.AccountID,
+                StatisticsType = AccountStatisticsType.Public,
+                PlacementMatchesData = null
+            };
+
+            // TODO: Increment Public Match Statistics With Current Match Data
+
+            AccountStatistics matchmakingStatistics = accountStatistics.Where(statistics => statistics.StatisticsType == AccountStatisticsType.Matchmaking).SingleOrDefault() ?? new ()
+            {
+                AccountID = playerStatistics.AccountID,
+                StatisticsType = AccountStatisticsType.Matchmaking,
+                PlacementMatchesData = string.Empty
+            };
+
+            // TODO: Increment Matchmaking Statistics With Current Match Data
+
+            // Use PrimaryMatchPlayerStatistics With Additional Information For The Primary (Requesting) Player And MatchPlayerStatistics With The Standard Amount Of Information For Secondary Players
+            matchPlayerStatistics[playerStatistics.AccountID] = playerStatistics.AccountID == account.ID
+                ? new MatchPlayerStatisticsWithMatchPerformanceData(matchInformation, playerAccount, playerStatistics, currentMatchTypeStatistics, publicMatchStatistics, matchmakingStatistics)
+                    { HeroIdentifier = playerStatistics.HeroIdentifier }
+                : new MatchPlayerStatistics(matchInformation, playerAccount, playerStatistics, currentMatchTypeStatistics, publicMatchStatistics, matchmakingStatistics)
+                    { HeroIdentifier = playerStatistics.HeroIdentifier };
+
+            List<string> inventory = playerStatistics.Inventory ?? [];
+
+            matchPlayerInventories[playerStatistics.AccountID] = new MatchPlayerInventory
+            {
+                AccountID = playerStatistics.AccountID,
+                MatchID = playerStatistics.MatchID,
+
+                Slot1 = inventory.ElementAtOrDefault(0),
+                Slot2 = inventory.ElementAtOrDefault(1),
+                Slot3 = inventory.ElementAtOrDefault(2),
+                Slot4 = inventory.ElementAtOrDefault(3),
+                Slot5 = inventory.ElementAtOrDefault(4),
+                Slot6 = inventory.ElementAtOrDefault(5)
+            };
+        }
+
+        PlayerStatistics requestingPlayerStatistics = allPlayerStatistics.Single(statistics => statistics.AccountID == account.ID);
+
+        MatchMastery matchMastery = new
+        (
+            heroIdentifier: requestingPlayerStatistics.HeroIdentifier,
+            currentMasteryExperience: 0, // TODO: Retrieve From Mastery System Once Re-Implemented
+            matchMasteryExperience: 100, // TODO: Calculate Based On Match Duration And Result (Use Calculation That I Implemented In Legacy PK)
+            bonusExperience: 10 // TODO: Calculate Based On Max-Level Heroes Owned
+        )
+        {
+            MasteryExperienceMaximumLevelHeroesCount = 0, // TODO: Count Heroes At Max Mastery Level (+ Enable MatchMastery Constructor Once Masteries Are Re-Implemented)
+            MasteryExperienceBoostProductCount = 0, // TODO: Count "ma.Mastery Boost" Items (+ Enable MatchMastery Constructor Once Masteries Are Re-Implemented)
+            MasteryExperienceSuperBoostProductCount = 0 // TODO: Count "ma.Super Mastery Boost" Items (+ Enable MatchMastery Constructor Once Masteries Are Re-Implemented)
+        };
+
+        MatchStatsResponse response = new ()
+        {
+            GoldCoins = account.User.GoldCoins.ToString(),
+            SilverCoins = account.User.SilverCoins.ToString(),
+            MatchSummary = new Dictionary<int, MatchSummary> { { matchStatistics.MatchID, matchSummary } },
+            MatchPlayerStatistics = new Dictionary<int, Dictionary<int, OneOf<MatchPlayerStatisticsWithMatchPerformanceData, MatchPlayerStatistics>>> { { matchStatistics.MatchID, matchPlayerStatistics } },
+            MatchPlayerInventories = new Dictionary<int, Dictionary<int, MatchPlayerInventory>> { { matchStatistics.MatchID, matchPlayerInventories } },
+            MatchMastery = matchMastery,
+            OwnedStoreItems = account.User.OwnedStoreItems,
+            OwnedStoreItemsData = SetOwnedStoreItemsData(account),
+            SelectedStoreItems = account.SelectedStoreItems,
+            CustomIconSlotID = SetCustomIconSlotID(account)
+        };
+
+        return Ok(PhpSerialization.Serialize(response));
+    }
+
     private static string SetCustomIconSlotID(Account account)
         => account.SelectedStoreItems.Any(item => item.StartsWith("ai.custom_icon"))
             ? account.SelectedStoreItems.Single(item => item.StartsWith("ai.custom_icon")).Replace("ai.custom_icon:", string.Empty) : "0";
@@ -65,6 +209,20 @@ public partial class ClientRequesterController
             .ToDictionary<string, string, OneOf<StoreItemData, StoreItemDiscountCoupon>>(upgrade => upgrade, upgrade => new StoreItemData());
 
         // TODO: Add Mastery Boosts And Coupons
+
+        /*
+            Dictionary<string, object> myUpgradesInfo = accountDetails.UnlockedUpgradeCodes
+                .Where(upgrade => upgrade.StartsWith("ma.").Equals(false) && upgrade.StartsWith("cp.").Equals(false))
+                .ToDictionary<string, string, object>(upgrade => upgrade, upgrade => new MyUpgradesInfoEntry());
+
+            foreach (string boost in GameConsumables.GetOwnedMasteryBoostProducts(accountDetails.UnlockedUpgradeCodes))
+                myUpgradesInfo.Add(boost, new MyUpgradesInfoEntry());
+
+            foreach (KeyValuePair<string, Coupon> coupon in GameConsumables.GetOwnedCoupons(accountDetails.UnlockedUpgradeCodes))
+                myUpgradesInfo.Add(coupon.Key, coupon.Value);
+
+            return myUpgradesInfo;
+         */
 
         return items;
     }

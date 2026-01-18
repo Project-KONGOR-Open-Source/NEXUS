@@ -17,6 +17,10 @@ public class ASPIRE
         int chatServerMatchServerConnectionsPort = chatServerConfiguration.GetValue<int?>("MatchServerPort") ?? throw new NullReferenceException("Chat Server Match Server Connections Port Is NULL");
         int chatServerMatchServerManagerConnectionsPort = chatServerConfiguration.GetValue<int?>("MatchServerManagerPort") ?? throw new NullReferenceException("Chat Server Match Server Manager Connections Port Is NULL");
 
+        // Get Infrastructure Configuration
+        IConfigurationSection infrastructureConfiguration = builder.Configuration.GetRequiredSection("Infrastructure");
+        string gateway = infrastructureConfiguration.GetValue<string?>("Gateway") ?? throw new NullReferenceException("Infrastructure Gateway Is NULL");
+
         // Set Distributed Cache Password Parameter Name And Environment Variable Name
         const string distributedCachePasswordParameterName = "distributed-cache-password";
         const string distributedCachePasswordEnvironmentVariableName = "DISTRIBUTED_CACHE_PASSWORD";
@@ -91,7 +95,8 @@ public class ASPIRE
         // Add Database Project
         builder.AddProject<MERRICK>("database-context", builder.Environment.IsProduction() ? "MERRICK.DatabaseContext Production" : "MERRICK.DatabaseContext Development")
             .WithReference(database, connectionName: "MERRICK").WaitFor(database) // Connect To SQL Server Database And Wait For It To Start
-            .WithParentRelationship(databaseServer); // Set Database Server As Parent Resource
+            .WithParentRelationship(databaseServer) // Set Database Server As Parent Resource
+            .WithEnvironment("INFRASTRUCTURE_GATEWAY", gateway);
 
         // Add Master Server Project
         builder.AddProject<KONGOR>("master-server", builder.Environment.IsProduction() ? "KONGOR.MasterServer Production" : "KONGOR.MasterServer Development")
@@ -100,7 +105,8 @@ public class ASPIRE
             .WithEnvironment("CHAT_SERVER_HOST", chatServerHost)
             .WithEnvironment("CHAT_SERVER_PORT_CLIENT", chatServerClientConnectionsPort.ToString())
             .WithEnvironment("CHAT_SERVER_PORT_MATCH_SERVER", chatServerMatchServerConnectionsPort.ToString())
-            .WithEnvironment("CHAT_SERVER_PORT_MATCH_SERVER_MANAGER", chatServerMatchServerManagerConnectionsPort.ToString());
+            .WithEnvironment("CHAT_SERVER_PORT_MATCH_SERVER_MANAGER", chatServerMatchServerManagerConnectionsPort.ToString())
+            .WithEnvironment("INFRASTRUCTURE_GATEWAY", gateway);
 
         // Add Chat Server Project
         builder.AddProject<TRANSMUTANSTEIN>("chat-server", builder.Environment.IsProduction() ? "TRANSMUTANSTEIN.ChatServer Production" : "TRANSMUTANSTEIN.ChatServer Development")
@@ -109,11 +115,13 @@ public class ASPIRE
             .WithEnvironment("CHAT_SERVER_HOST", chatServerHost)
             .WithEnvironment("CHAT_SERVER_PORT_CLIENT", chatServerClientConnectionsPort.ToString())
             .WithEnvironment("CHAT_SERVER_PORT_MATCH_SERVER", chatServerMatchServerConnectionsPort.ToString())
-            .WithEnvironment("CHAT_SERVER_PORT_MATCH_SERVER_MANAGER", chatServerMatchServerManagerConnectionsPort.ToString());
+            .WithEnvironment("CHAT_SERVER_PORT_MATCH_SERVER_MANAGER", chatServerMatchServerManagerConnectionsPort.ToString())
+            .WithEnvironment("INFRASTRUCTURE_GATEWAY", gateway);
 
         // Add Web Portal API Project
         builder.AddProject<ZORGATH>("web-portal-api", builder.Environment.IsProduction() ? "ZORGATH.WebPortal.API Production" : "ZORGATH.WebPortal.API Development")
-            .WithReference(database, connectionName: "MERRICK").WaitFor(database); // Connect To SQL Server Database And Wait For It To Start
+            .WithReference(database, connectionName: "MERRICK").WaitFor(database) // Connect To SQL Server Database And Wait For It To Start
+            .WithEnvironment("INFRASTRUCTURE_GATEWAY", gateway);
 
         // Start Orchestrating Distributed Application
         builder.Build().Run();

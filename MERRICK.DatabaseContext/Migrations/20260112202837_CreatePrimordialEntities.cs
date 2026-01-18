@@ -8,13 +8,54 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace MERRICK.DatabaseContext.Migrations
 {
     /// <inheritdoc />
-    public partial class CreateCoreEntities : Migration
+    public partial class CreatePrimordialEntities : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.EnsureSchema(
+                name: "core");
+
+            migrationBuilder.EnsureSchema(
+                name: "stat");
+
+            migrationBuilder.EnsureSchema(
+                name: "misc");
+
+            migrationBuilder.EnsureSchema(
+                name: "auth");
+
+            migrationBuilder.CreateTable(
+                name: "AccountStatistics",
+                schema: "stat",
+                columns: table => new
+                {
+                    ID = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    AccountID = table.Column<int>(type: "int", nullable: false),
+                    StatisticsType = table.Column<int>(type: "int", nullable: false),
+                    MatchesPlayed = table.Column<int>(type: "int", nullable: false),
+                    MatchesWon = table.Column<int>(type: "int", nullable: false),
+                    MatchesLost = table.Column<int>(type: "int", nullable: false),
+                    MatchesDisconnected = table.Column<int>(type: "int", nullable: false),
+                    MatchesConceded = table.Column<int>(type: "int", nullable: false),
+                    MatchesKicked = table.Column<int>(type: "int", nullable: false),
+                    SkillRating = table.Column<double>(type: "float", nullable: false),
+                    HeroKills = table.Column<int>(type: "int", nullable: false),
+                    HeroAssists = table.Column<int>(type: "int", nullable: false),
+                    HeroDeaths = table.Column<int>(type: "int", nullable: false),
+                    WardsPlaced = table.Column<int>(type: "int", nullable: false),
+                    Smackdowns = table.Column<int>(type: "int", nullable: false),
+                    PlacementMatchesData = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AccountStatistics", x => x.ID);
+                });
+
             migrationBuilder.CreateTable(
                 name: "Clans",
+                schema: "core",
                 columns: table => new
                 {
                     ID = table.Column<int>(type: "int", nullable: false)
@@ -30,11 +71,13 @@ namespace MERRICK.DatabaseContext.Migrations
 
             migrationBuilder.CreateTable(
                 name: "MatchStatistics",
+                schema: "stat",
                 columns: table => new
                 {
                     ID = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    ServerID = table.Column<long>(type: "bigint", nullable: false),
+                    TimestampRecorded = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: false),
+                    ServerID = table.Column<int>(type: "int", nullable: false),
                     HostAccountName = table.Column<string>(type: "nvarchar(15)", maxLength: 15, nullable: false),
                     MatchID = table.Column<int>(type: "int", nullable: false),
                     Map = table.Column<string>(type: "nvarchar(max)", nullable: false),
@@ -54,19 +97,22 @@ namespace MERRICK.DatabaseContext.Migrations
                     PlayerScoreGoal = table.Column<int>(type: "int", nullable: false),
                     NumberOfRounds = table.Column<int>(type: "int", nullable: false),
                     ReleaseStage = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    BannedHeroes = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    AwardMostAnnihilations = table.Column<int>(type: "int", nullable: false),
-                    AwardMostQuadKills = table.Column<int>(type: "int", nullable: false),
-                    AwardLargestKillStreak = table.Column<int>(type: "int", nullable: false),
-                    AwardMostSmackdowns = table.Column<int>(type: "int", nullable: false),
-                    AwardMostKills = table.Column<int>(type: "int", nullable: false),
-                    AwardMostAssists = table.Column<int>(type: "int", nullable: false),
-                    AwardLeastDeaths = table.Column<int>(type: "int", nullable: false),
-                    AwardMostBuildingDamage = table.Column<int>(type: "int", nullable: false),
-                    AwardMostWardsKilled = table.Column<int>(type: "int", nullable: false),
-                    AwardMostHeroDamageDealt = table.Column<int>(type: "int", nullable: false),
-                    AwardHighestCreepScore = table.Column<int>(type: "int", nullable: false),
-                    SubmissionDebug = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    BannedHeroes = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ScheduledEventID = table.Column<int>(type: "int", nullable: true),
+                    ScheduledMatchID = table.Column<int>(type: "int", nullable: true),
+                    MVPAccountID = table.Column<int>(type: "int", nullable: true),
+                    AwardMostAnnihilations = table.Column<int>(type: "int", nullable: true),
+                    AwardMostQuadKills = table.Column<int>(type: "int", nullable: true),
+                    AwardLargestKillStreak = table.Column<int>(type: "int", nullable: true),
+                    AwardMostSmackdowns = table.Column<int>(type: "int", nullable: true),
+                    AwardMostKills = table.Column<int>(type: "int", nullable: true),
+                    AwardMostAssists = table.Column<int>(type: "int", nullable: true),
+                    AwardLeastDeaths = table.Column<int>(type: "int", nullable: true),
+                    AwardMostBuildingDamage = table.Column<int>(type: "int", nullable: true),
+                    AwardMostWardsKilled = table.Column<int>(type: "int", nullable: true),
+                    AwardMostHeroDamageDealt = table.Column<int>(type: "int", nullable: true),
+                    AwardHighestCreepScore = table.Column<int>(type: "int", nullable: true),
+                    FragHistory = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -75,6 +121,7 @@ namespace MERRICK.DatabaseContext.Migrations
 
             migrationBuilder.CreateTable(
                 name: "PlayerStatistics",
+                schema: "stat",
                 columns: table => new
                 {
                     ID = table.Column<int>(type: "int", nullable: false)
@@ -88,7 +135,22 @@ namespace MERRICK.DatabaseContext.Migrations
                     LobbyPosition = table.Column<int>(type: "int", nullable: false),
                     GroupNumber = table.Column<int>(type: "int", nullable: false),
                     Benefit = table.Column<int>(type: "int", nullable: false),
-                    HeroID = table.Column<long>(type: "bigint", nullable: false),
+                    HeroProductID = table.Column<long>(type: "bigint", nullable: true),
+                    HeroIdentifier = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    AlternativeAvatarName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    AlternativeAvatarProductID = table.Column<long>(type: "bigint", nullable: true),
+                    WardProductName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    WardProductID = table.Column<long>(type: "bigint", nullable: true),
+                    TauntProductName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    TauntProductID = table.Column<long>(type: "bigint", nullable: true),
+                    AnnouncerProductName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    AnnouncerProductID = table.Column<long>(type: "bigint", nullable: true),
+                    CourierProductName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CourierProductID = table.Column<long>(type: "bigint", nullable: true),
+                    AccountIconProductName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    AccountIconProductID = table.Column<long>(type: "bigint", nullable: true),
+                    ChatColourProductName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ChatColourProductID = table.Column<long>(type: "bigint", nullable: true),
                     Inventory = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Win = table.Column<int>(type: "int", nullable: false),
                     Loss = table.Column<int>(type: "int", nullable: false),
@@ -97,10 +159,8 @@ namespace MERRICK.DatabaseContext.Migrations
                     Kicked = table.Column<int>(type: "int", nullable: false),
                     PublicMatch = table.Column<int>(type: "int", nullable: false),
                     PublicSkillRatingChange = table.Column<double>(type: "float", nullable: false),
-                    SoloRankedMatch = table.Column<int>(type: "int", nullable: false),
-                    SoloRankedSkillRatingChange = table.Column<double>(type: "float", nullable: false),
-                    TeamRankedMatch = table.Column<int>(type: "int", nullable: false),
-                    TeamRankedSkillRatingChange = table.Column<double>(type: "float", nullable: false),
+                    RankedMatch = table.Column<int>(type: "int", nullable: false),
+                    RankedSkillRatingChange = table.Column<double>(type: "float", nullable: false),
                     SocialBonus = table.Column<int>(type: "int", nullable: false),
                     UsedToken = table.Column<int>(type: "int", nullable: false),
                     ConcedeVotes = table.Column<int>(type: "int", nullable: false),
@@ -133,20 +193,20 @@ namespace MERRICK.DatabaseContext.Migrations
                     Actions = table.Column<int>(type: "int", nullable: false),
                     SecondsPlayed = table.Column<int>(type: "int", nullable: false),
                     HeroLevel = table.Column<int>(type: "int", nullable: false),
-                    ConsumablesUsed = table.Column<int>(type: "int", nullable: false),
+                    ConsumablesPurchased = table.Column<int>(type: "int", nullable: false),
                     WardsPlaced = table.Column<int>(type: "int", nullable: false),
-                    Bloodlust = table.Column<int>(type: "int", nullable: false),
+                    FirstBlood = table.Column<int>(type: "int", nullable: false),
                     DoubleKill = table.Column<int>(type: "int", nullable: false),
                     TripleKill = table.Column<int>(type: "int", nullable: false),
                     QuadKill = table.Column<int>(type: "int", nullable: false),
                     Annihilation = table.Column<int>(type: "int", nullable: false),
-                    KillStreak3 = table.Column<int>(type: "int", nullable: false),
-                    KillStreak4 = table.Column<int>(type: "int", nullable: false),
-                    KillStreak5 = table.Column<int>(type: "int", nullable: false),
-                    KillStreak6 = table.Column<int>(type: "int", nullable: false),
-                    KillStreak7 = table.Column<int>(type: "int", nullable: false),
-                    KillStreak8 = table.Column<int>(type: "int", nullable: false),
-                    KillStreak9 = table.Column<int>(type: "int", nullable: false),
+                    KillStreak03 = table.Column<int>(type: "int", nullable: false),
+                    KillStreak04 = table.Column<int>(type: "int", nullable: false),
+                    KillStreak05 = table.Column<int>(type: "int", nullable: false),
+                    KillStreak06 = table.Column<int>(type: "int", nullable: false),
+                    KillStreak07 = table.Column<int>(type: "int", nullable: false),
+                    KillStreak08 = table.Column<int>(type: "int", nullable: false),
+                    KillStreak09 = table.Column<int>(type: "int", nullable: false),
                     KillStreak10 = table.Column<int>(type: "int", nullable: false),
                     KillStreak15 = table.Column<int>(type: "int", nullable: false),
                     Smackdown = table.Column<int>(type: "int", nullable: false),
@@ -164,7 +224,9 @@ namespace MERRICK.DatabaseContext.Migrations
                     GameplayStat7 = table.Column<double>(type: "float", nullable: false),
                     GameplayStat8 = table.Column<double>(type: "float", nullable: false),
                     GameplayStat9 = table.Column<double>(type: "float", nullable: false),
-                    TimeEarningExperience = table.Column<int>(type: "int", nullable: false)
+                    TimeEarningExperience = table.Column<int>(type: "int", nullable: false),
+                    AbilityHistory = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ItemHistory = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -173,6 +235,7 @@ namespace MERRICK.DatabaseContext.Migrations
 
             migrationBuilder.CreateTable(
                 name: "Roles",
+                schema: "auth",
                 columns: table => new
                 {
                     ID = table.Column<int>(type: "int", nullable: false)
@@ -186,6 +249,7 @@ namespace MERRICK.DatabaseContext.Migrations
 
             migrationBuilder.CreateTable(
                 name: "Tokens",
+                schema: "auth",
                 columns: table => new
                 {
                     ID = table.Column<int>(type: "int", nullable: false)
@@ -204,6 +268,7 @@ namespace MERRICK.DatabaseContext.Migrations
 
             migrationBuilder.CreateTable(
                 name: "Users",
+                schema: "core",
                 columns: table => new
                 {
                     ID = table.Column<int>(type: "int", nullable: false)
@@ -228,6 +293,7 @@ namespace MERRICK.DatabaseContext.Migrations
                     table.ForeignKey(
                         name: "FK_Users_Roles_RoleID",
                         column: x => x.RoleID,
+                        principalSchema: "auth",
                         principalTable: "Roles",
                         principalColumn: "ID",
                         onDelete: ReferentialAction.Cascade);
@@ -235,6 +301,7 @@ namespace MERRICK.DatabaseContext.Migrations
 
             migrationBuilder.CreateTable(
                 name: "Accounts",
+                schema: "core",
                 columns: table => new
                 {
                     ID = table.Column<int>(type: "int", nullable: false)
@@ -265,11 +332,13 @@ namespace MERRICK.DatabaseContext.Migrations
                     table.ForeignKey(
                         name: "FK_Accounts_Clans_ClanID",
                         column: x => x.ClanID,
+                        principalSchema: "core",
                         principalTable: "Clans",
                         principalColumn: "ID");
                     table.ForeignKey(
                         name: "FK_Accounts_Users_UserID",
                         column: x => x.UserID,
+                        principalSchema: "core",
                         principalTable: "Users",
                         principalColumn: "ID",
                         onDelete: ReferentialAction.Cascade);
@@ -277,6 +346,7 @@ namespace MERRICK.DatabaseContext.Migrations
 
             migrationBuilder.CreateTable(
                 name: "HeroGuides",
+                schema: "misc",
                 columns: table => new
                 {
                     ID = table.Column<int>(type: "int", nullable: false)
@@ -306,12 +376,14 @@ namespace MERRICK.DatabaseContext.Migrations
                     table.ForeignKey(
                         name: "FK_HeroGuides_Accounts_AuthorID",
                         column: x => x.AuthorID,
+                        principalSchema: "core",
                         principalTable: "Accounts",
                         principalColumn: "ID",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.InsertData(
+                schema: "auth",
                 table: "Roles",
                 columns: new[] { "ID", "Name" },
                 values: new object[,]
@@ -322,57 +394,74 @@ namespace MERRICK.DatabaseContext.Migrations
 
             migrationBuilder.CreateIndex(
                 name: "IX_Accounts_ClanID",
+                schema: "core",
                 table: "Accounts",
                 column: "ClanID");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Accounts_Name",
+                schema: "core",
                 table: "Accounts",
                 column: "Name",
                 unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Accounts_UserID",
+                schema: "core",
                 table: "Accounts",
                 column: "UserID");
 
             migrationBuilder.CreateIndex(
+                name: "IX_AccountStatistics_AccountID_StatisticsType",
+                schema: "stat",
+                table: "AccountStatistics",
+                columns: new[] { "AccountID", "StatisticsType" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Clans_Name_Tag",
+                schema: "core",
                 table: "Clans",
                 columns: new[] { "Name", "Tag" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_HeroGuides_AuthorID",
+                schema: "misc",
                 table: "HeroGuides",
                 column: "AuthorID");
 
             migrationBuilder.CreateIndex(
                 name: "IX_MatchStatistics_MatchID",
+                schema: "stat",
                 table: "MatchStatistics",
                 column: "MatchID",
                 unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_PlayerStatistics_MatchID_AccountID",
+                schema: "stat",
                 table: "PlayerStatistics",
                 columns: new[] { "MatchID", "AccountID" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Roles_Name",
+                schema: "auth",
                 table: "Roles",
                 column: "Name",
                 unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Users_EmailAddress",
+                schema: "core",
                 table: "Users",
                 column: "EmailAddress",
                 unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Users_RoleID",
+                schema: "core",
                 table: "Users",
                 column: "RoleID");
         }
@@ -381,28 +470,40 @@ namespace MERRICK.DatabaseContext.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "HeroGuides");
+                name: "AccountStatistics",
+                schema: "stat");
 
             migrationBuilder.DropTable(
-                name: "MatchStatistics");
+                name: "HeroGuides",
+                schema: "misc");
 
             migrationBuilder.DropTable(
-                name: "PlayerStatistics");
+                name: "MatchStatistics",
+                schema: "stat");
 
             migrationBuilder.DropTable(
-                name: "Tokens");
+                name: "PlayerStatistics",
+                schema: "stat");
 
             migrationBuilder.DropTable(
-                name: "Accounts");
+                name: "Tokens",
+                schema: "auth");
 
             migrationBuilder.DropTable(
-                name: "Clans");
+                name: "Accounts",
+                schema: "core");
 
             migrationBuilder.DropTable(
-                name: "Users");
+                name: "Clans",
+                schema: "core");
 
             migrationBuilder.DropTable(
-                name: "Roles");
+                name: "Users",
+                schema: "core");
+
+            migrationBuilder.DropTable(
+                name: "Roles",
+                schema: "auth");
         }
     }
 }

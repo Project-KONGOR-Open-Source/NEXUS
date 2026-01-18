@@ -4,10 +4,10 @@
 		"TRANSMUTANSTEIN.ChatServer Development": {
 			"commandName": "Project",
 			"launchBrowser": true,
-			"applicationUrl": "https://localhost:55554",
+			"applicationUrl": "https://0.0.0.0:5554",
 			"launchUrl": "health",
 			"environmentVariables": {
-				"APPLICATION_URL": "https://localhost:55554",
+				"APPLICATION_URL": "https://0.0.0.0:5554",
 				"ASPNETCORE_ENVIRONMENT": "Development",
 				"DOTNET_ENVIRONMENT": "Development"
 			},
@@ -16,7 +16,7 @@
 		"TRANSMUTANSTEIN.ChatServer Production": {
 			"commandName": "Project",
 			"launchBrowser": true,
-			"applicationUrl": "https://chat.kongor.net",
+			"applicationUrl": "https://0.0.0.0:5554",
 			"launchUrl": "health",
 			"environmentVariables": {
 				"APPLICATION_URL": "https://chat.kongor.net",

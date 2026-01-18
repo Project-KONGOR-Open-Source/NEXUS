@@ -17,7 +17,8 @@ namespace MERRICK.DatabaseContext.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "10.0.0")
+                .HasDefaultSchema("data")
+                .HasAnnotation("ProductVersion", "10.0.1")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -95,7 +96,7 @@ namespace MERRICK.DatabaseContext.Migrations
 
                     b.HasIndex("UserID");
 
-                    b.ToTable("Accounts");
+                    b.ToTable("Accounts", "core");
                 });
 
             modelBuilder.Entity("MERRICK.DatabaseContext.Entities.Core.Clan", b =>
@@ -124,7 +125,7 @@ namespace MERRICK.DatabaseContext.Migrations
                     b.HasIndex("Name", "Tag")
                         .IsUnique();
 
-                    b.ToTable("Clans");
+                    b.ToTable("Clans", "core");
                 });
 
             modelBuilder.Entity("MERRICK.DatabaseContext.Entities.Core.User", b =>
@@ -190,7 +191,7 @@ namespace MERRICK.DatabaseContext.Migrations
 
                     b.HasIndex("RoleID");
 
-                    b.ToTable("Users");
+                    b.ToTable("Users", "core");
                 });
 
             modelBuilder.Entity("MERRICK.DatabaseContext.Entities.Game.HeroGuide", b =>
@@ -279,7 +280,68 @@ namespace MERRICK.DatabaseContext.Migrations
 
                     b.HasIndex("AuthorID");
 
-                    b.ToTable("HeroGuides");
+                    b.ToTable("HeroGuides", "misc");
+                });
+
+            modelBuilder.Entity("MERRICK.DatabaseContext.Entities.Statistics.AccountStatistics", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"));
+
+                    b.Property<int>("AccountID")
+                        .HasColumnType("int");
+
+                    b.Property<int>("HeroAssists")
+                        .HasColumnType("int");
+
+                    b.Property<int>("HeroDeaths")
+                        .HasColumnType("int");
+
+                    b.Property<int>("HeroKills")
+                        .HasColumnType("int");
+
+                    b.Property<int>("MatchesConceded")
+                        .HasColumnType("int");
+
+                    b.Property<int>("MatchesDisconnected")
+                        .HasColumnType("int");
+
+                    b.Property<int>("MatchesKicked")
+                        .HasColumnType("int");
+
+                    b.Property<int>("MatchesLost")
+                        .HasColumnType("int");
+
+                    b.Property<int>("MatchesPlayed")
+                        .HasColumnType("int");
+
+                    b.Property<int>("MatchesWon")
+                        .HasColumnType("int");
+
+                    b.Property<string>("PlacementMatchesData")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<double>("SkillRating")
+                        .HasColumnType("float");
+
+                    b.Property<int>("Smackdowns")
+                        .HasColumnType("int");
+
+                    b.Property<int>("StatisticsType")
+                        .HasColumnType("int");
+
+                    b.Property<int>("WardsPlaced")
+                        .HasColumnType("int");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("AccountID", "StatisticsType")
+                        .IsUnique();
+
+                    b.ToTable("AccountStatistics", "stat");
                 });
 
             modelBuilder.Entity("MERRICK.DatabaseContext.Entities.Statistics.MatchStatistics", b =>
@@ -299,41 +361,40 @@ namespace MERRICK.DatabaseContext.Migrations
                     b.Property<int>("AveragePSRTeamTwo")
                         .HasColumnType("int");
 
-                    b.Property<int>("AwardHighestCreepScore")
+                    b.Property<int?>("AwardHighestCreepScore")
                         .HasColumnType("int");
 
-                    b.Property<int>("AwardLargestKillStreak")
+                    b.Property<int?>("AwardLargestKillStreak")
                         .HasColumnType("int");
 
-                    b.Property<int>("AwardLeastDeaths")
+                    b.Property<int?>("AwardLeastDeaths")
                         .HasColumnType("int");
 
-                    b.Property<int>("AwardMostAnnihilations")
+                    b.Property<int?>("AwardMostAnnihilations")
                         .HasColumnType("int");
 
-                    b.Property<int>("AwardMostAssists")
+                    b.Property<int?>("AwardMostAssists")
                         .HasColumnType("int");
 
-                    b.Property<int>("AwardMostBuildingDamage")
+                    b.Property<int?>("AwardMostBuildingDamage")
                         .HasColumnType("int");
 
-                    b.Property<int>("AwardMostHeroDamageDealt")
+                    b.Property<int?>("AwardMostHeroDamageDealt")
                         .HasColumnType("int");
 
-                    b.Property<int>("AwardMostKills")
+                    b.Property<int?>("AwardMostKills")
                         .HasColumnType("int");
 
-                    b.Property<int>("AwardMostQuadKills")
+                    b.Property<int?>("AwardMostQuadKills")
                         .HasColumnType("int");
 
-                    b.Property<int>("AwardMostSmackdowns")
+                    b.Property<int?>("AwardMostSmackdowns")
                         .HasColumnType("int");
 
-                    b.Property<int>("AwardMostWardsKilled")
+                    b.Property<int?>("AwardMostWardsKilled")
                         .HasColumnType("int");
 
                     b.Property<string>("BannedHeroes")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("ConnectionState")
@@ -354,6 +415,9 @@ namespace MERRICK.DatabaseContext.Migrations
                         .IsRequired()
                         .HasMaxLength(15)
                         .HasColumnType("nvarchar(15)");
+
+                    b.Property<int?>("MVPAccountID")
+                        .HasColumnType("int");
 
                     b.Property<string>("Map")
                         .IsRequired()
@@ -377,24 +441,29 @@ namespace MERRICK.DatabaseContext.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int?>("ScheduledEventID")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("ScheduledMatchID")
+                        .HasColumnType("int");
+
                     b.Property<int>("ScoreTeam1")
                         .HasColumnType("int");
 
                     b.Property<int>("ScoreTeam2")
                         .HasColumnType("int");
 
-                    b.Property<long>("ServerID")
-                        .HasColumnType("bigint");
-
-                    b.Property<string>("SubmissionDebug")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("ServerID")
+                        .HasColumnType("int");
 
                     b.Property<int>("TeamScoreGoal")
                         .HasColumnType("int");
 
                     b.Property<int>("TimePlayed")
                         .HasColumnType("int");
+
+                    b.Property<DateTimeOffset>("TimestampRecorded")
+                        .HasColumnType("datetimeoffset");
 
                     b.Property<string>("Version")
                         .IsRequired()
@@ -405,7 +474,7 @@ namespace MERRICK.DatabaseContext.Migrations
                     b.HasIndex("MatchID")
                         .IsUnique();
 
-                    b.ToTable("MatchStatistics");
+                    b.ToTable("MatchStatistics", "stat");
                 });
 
             modelBuilder.Entity("MERRICK.DatabaseContext.Entities.Statistics.PlayerStatistics", b =>
@@ -419,6 +488,12 @@ namespace MERRICK.DatabaseContext.Migrations
                     b.Property<int>("AccountID")
                         .HasColumnType("int");
 
+                    b.Property<long?>("AccountIconProductID")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("AccountIconProductName")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("AccountName")
                         .IsRequired()
                         .HasMaxLength(15)
@@ -427,13 +502,22 @@ namespace MERRICK.DatabaseContext.Migrations
                     b.Property<int>("Actions")
                         .HasColumnType("int");
 
+                    b.Property<string>("AlternativeAvatarName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<long?>("AlternativeAvatarProductID")
+                        .HasColumnType("bigint");
+
                     b.Property<int>("Annihilation")
                         .HasColumnType("int");
 
-                    b.Property<int>("Benefit")
-                        .HasColumnType("int");
+                    b.Property<long?>("AnnouncerProductID")
+                        .HasColumnType("bigint");
 
-                    b.Property<int>("Bloodlust")
+                    b.Property<string>("AnnouncerProductName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Benefit")
                         .HasColumnType("int");
 
                     b.Property<int>("BuildingDamage")
@@ -444,6 +528,12 @@ namespace MERRICK.DatabaseContext.Migrations
 
                     b.Property<int>("Buybacks")
                         .HasColumnType("int");
+
+                    b.Property<long?>("ChatColourProductID")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("ChatColourProductName")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("ClanID")
                         .HasColumnType("int");
@@ -458,8 +548,14 @@ namespace MERRICK.DatabaseContext.Migrations
                     b.Property<int>("Conceded")
                         .HasColumnType("int");
 
-                    b.Property<int>("ConsumablesUsed")
+                    b.Property<int>("ConsumablesPurchased")
                         .HasColumnType("int");
+
+                    b.Property<long?>("CourierProductID")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("CourierProductName")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("Denies")
                         .HasColumnType("int");
@@ -477,6 +573,9 @@ namespace MERRICK.DatabaseContext.Migrations
                         .HasColumnType("int");
 
                     b.Property<int>("ExperienceFromBuildings")
+                        .HasColumnType("int");
+
+                    b.Property<int>("FirstBlood")
                         .HasColumnType("int");
 
                     b.Property<double>("GameplayStat0")
@@ -539,14 +638,18 @@ namespace MERRICK.DatabaseContext.Migrations
                     b.Property<int>("HeroExperience")
                         .HasColumnType("int");
 
-                    b.Property<long>("HeroID")
-                        .HasColumnType("bigint");
+                    b.Property<string>("HeroIdentifier")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("HeroKills")
                         .HasColumnType("int");
 
                     b.Property<int>("HeroLevel")
                         .HasColumnType("int");
+
+                    b.Property<long?>("HeroProductID")
+                        .HasColumnType("bigint");
 
                     b.Property<int>("Humiliation")
                         .HasColumnType("int");
@@ -558,31 +661,31 @@ namespace MERRICK.DatabaseContext.Migrations
                     b.Property<int>("Kicked")
                         .HasColumnType("int");
 
+                    b.Property<int>("KillStreak03")
+                        .HasColumnType("int");
+
+                    b.Property<int>("KillStreak04")
+                        .HasColumnType("int");
+
+                    b.Property<int>("KillStreak05")
+                        .HasColumnType("int");
+
+                    b.Property<int>("KillStreak06")
+                        .HasColumnType("int");
+
+                    b.Property<int>("KillStreak07")
+                        .HasColumnType("int");
+
+                    b.Property<int>("KillStreak08")
+                        .HasColumnType("int");
+
+                    b.Property<int>("KillStreak09")
+                        .HasColumnType("int");
+
                     b.Property<int>("KillStreak10")
                         .HasColumnType("int");
 
                     b.Property<int>("KillStreak15")
-                        .HasColumnType("int");
-
-                    b.Property<int>("KillStreak3")
-                        .HasColumnType("int");
-
-                    b.Property<int>("KillStreak4")
-                        .HasColumnType("int");
-
-                    b.Property<int>("KillStreak5")
-                        .HasColumnType("int");
-
-                    b.Property<int>("KillStreak6")
-                        .HasColumnType("int");
-
-                    b.Property<int>("KillStreak7")
-                        .HasColumnType("int");
-
-                    b.Property<int>("KillStreak8")
-                        .HasColumnType("int");
-
-                    b.Property<int>("KillStreak9")
                         .HasColumnType("int");
 
                     b.Property<int>("LobbyPosition")
@@ -618,6 +721,12 @@ namespace MERRICK.DatabaseContext.Migrations
                     b.Property<int>("QuadKill")
                         .HasColumnType("int");
 
+                    b.Property<int>("RankedMatch")
+                        .HasColumnType("int");
+
+                    b.Property<double>("RankedSkillRatingChange")
+                        .HasColumnType("float");
+
                     b.Property<int>("Retribution")
                         .HasColumnType("int");
 
@@ -636,11 +745,11 @@ namespace MERRICK.DatabaseContext.Migrations
                     b.Property<int>("SocialBonus")
                         .HasColumnType("int");
 
-                    b.Property<int>("SoloRankedMatch")
-                        .HasColumnType("int");
+                    b.Property<long?>("TauntProductID")
+                        .HasColumnType("bigint");
 
-                    b.Property<double>("SoloRankedSkillRatingChange")
-                        .HasColumnType("float");
+                    b.Property<string>("TauntProductName")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("Team")
                         .HasColumnType("int");
@@ -657,12 +766,6 @@ namespace MERRICK.DatabaseContext.Migrations
                     b.Property<int>("TeamCreepKills")
                         .HasColumnType("int");
 
-                    b.Property<int>("TeamRankedMatch")
-                        .HasColumnType("int");
-
-                    b.Property<double>("TeamRankedSkillRatingChange")
-                        .HasColumnType("float");
-
                     b.Property<int>("TimeEarningExperience")
                         .HasColumnType("int");
 
@@ -671,6 +774,12 @@ namespace MERRICK.DatabaseContext.Migrations
 
                     b.Property<int>("UsedToken")
                         .HasColumnType("int");
+
+                    b.Property<long?>("WardProductID")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("WardProductName")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("WardsPlaced")
                         .HasColumnType("int");
@@ -683,7 +792,7 @@ namespace MERRICK.DatabaseContext.Migrations
                     b.HasIndex("MatchID", "AccountID")
                         .IsUnique();
 
-                    b.ToTable("PlayerStatistics");
+                    b.ToTable("PlayerStatistics", "stat");
                 });
 
             modelBuilder.Entity("MERRICK.DatabaseContext.Entities.Utility.Role", b =>
@@ -704,7 +813,7 @@ namespace MERRICK.DatabaseContext.Migrations
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.ToTable("Roles");
+                    b.ToTable("Roles", "auth");
 
                     b.HasData(
                         new
@@ -749,7 +858,7 @@ namespace MERRICK.DatabaseContext.Migrations
 
                     b.HasKey("ID");
 
-                    b.ToTable("Tokens");
+                    b.ToTable("Tokens", "auth");
                 });
 
             modelBuilder.Entity("MERRICK.DatabaseContext.Entities.Core.Account", b =>
@@ -786,7 +895,7 @@ namespace MERRICK.DatabaseContext.Migrations
                             b1.HasIndex("Name")
                                 .IsUnique();
 
-                            b1.ToTable("Accounts");
+                            b1.ToTable("Accounts", "core");
 
                             b1.ToJson("BannedPeers");
 
@@ -819,7 +928,7 @@ namespace MERRICK.DatabaseContext.Migrations
                             b1.HasIndex("Name")
                                 .IsUnique();
 
-                            b1.ToTable("Accounts");
+                            b1.ToTable("Accounts", "core");
 
                             b1.ToJson("FriendedPeers");
 
@@ -845,7 +954,7 @@ namespace MERRICK.DatabaseContext.Migrations
                             b1.HasIndex("Name")
                                 .IsUnique();
 
-                            b1.ToTable("Accounts");
+                            b1.ToTable("Accounts", "core");
 
                             b1.ToJson("IgnoredPeers");
 
@@ -884,6 +993,94 @@ namespace MERRICK.DatabaseContext.Migrations
                         .IsRequired();
 
                     b.Navigation("Author");
+                });
+
+            modelBuilder.Entity("MERRICK.DatabaseContext.Entities.Statistics.MatchStatistics", b =>
+                {
+                    b.OwnsMany("MERRICK.DatabaseContext.Entities.Statistics.FragEvent", "FragHistory", b1 =>
+                        {
+                            b1.Property<int>("MatchStatisticsID");
+
+                            b1.Property<int>("__synthesizedOrdinal")
+                                .ValueGeneratedOnAddOrUpdate();
+
+                            b1.Property<int>("GameTimeSeconds");
+
+                            b1.Property<int>("SourceID");
+
+                            b1.PrimitiveCollection<string>("SupporterIDs");
+
+                            b1.Property<int>("TargetID");
+
+                            b1.HasKey("MatchStatisticsID", "__synthesizedOrdinal");
+
+                            b1.ToTable("MatchStatistics", "stat");
+
+                            b1.ToJson("FragHistory");
+
+                            b1.WithOwner()
+                                .HasForeignKey("MatchStatisticsID");
+                        });
+
+                    b.Navigation("FragHistory");
+                });
+
+            modelBuilder.Entity("MERRICK.DatabaseContext.Entities.Statistics.PlayerStatistics", b =>
+                {
+                    b.OwnsMany("MERRICK.DatabaseContext.Entities.Statistics.AbilityEvent", "AbilityHistory", b1 =>
+                        {
+                            b1.Property<int>("PlayerStatisticsID");
+
+                            b1.Property<int>("__synthesizedOrdinal")
+                                .ValueGeneratedOnAddOrUpdate();
+
+                            b1.Property<string>("AbilityName")
+                                .IsRequired();
+
+                            b1.Property<int>("GameTimeSeconds");
+
+                            b1.Property<string>("HeroName")
+                                .IsRequired();
+
+                            b1.Property<byte>("SlotIndex");
+
+                            b1.HasKey("PlayerStatisticsID", "__synthesizedOrdinal");
+
+                            b1.ToTable("PlayerStatistics", "stat");
+
+                            b1.ToJson("AbilityHistory");
+
+                            b1.WithOwner()
+                                .HasForeignKey("PlayerStatisticsID");
+                        });
+
+                    b.OwnsMany("MERRICK.DatabaseContext.Entities.Statistics.ItemEvent", "ItemHistory", b1 =>
+                        {
+                            b1.Property<int>("PlayerStatisticsID");
+
+                            b1.Property<int>("__synthesizedOrdinal")
+                                .ValueGeneratedOnAddOrUpdate();
+
+                            b1.Property<byte>("EventType");
+
+                            b1.Property<int>("GameTimeSeconds");
+
+                            b1.Property<string>("ItemName")
+                                .IsRequired();
+
+                            b1.HasKey("PlayerStatisticsID", "__synthesizedOrdinal");
+
+                            b1.ToTable("PlayerStatistics", "stat");
+
+                            b1.ToJson("ItemHistory");
+
+                            b1.WithOwner()
+                                .HasForeignKey("PlayerStatisticsID");
+                        });
+
+                    b.Navigation("AbilityHistory");
+
+                    b.Navigation("ItemHistory");
                 });
 
             modelBuilder.Entity("MERRICK.DatabaseContext.Entities.Core.Clan", b =>

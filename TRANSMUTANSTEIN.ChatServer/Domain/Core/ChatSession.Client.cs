@@ -19,7 +19,7 @@ public class ClientChatSession(TCPServer server, IServiceProvider serviceProvide
     /// <summary>
     ///     Gets or sets the data associated with the start of a match.
     /// </summary>
-    public MatchStartData? MatchData { get; set; }
+    public MatchInformation? MatchInformation { get; set; }
 
     /// <summary>
     ///     Tracks the channel IDs that this client is currently a member of.
@@ -82,18 +82,18 @@ public class ClientChatSession(TCPServer server, IServiceProvider serviceProvide
 
     public async Task<ClientChatSession> JoinMatch(IDatabase distributedCacheStore, int matchID)
     {
-        MatchStartData? matchData = await distributedCacheStore.GetMatchStartData(matchID);
+        MatchInformation? matchInformation = await distributedCacheStore.GetMatchInformation(matchID);
 
-        if (matchData is null)
+        if (matchInformation is null)
         {
             Log.Error(@"[BUG] Match ID {MatchID} Not Found In Cache For Session {SessionID}", matchID, ID);
 
             return this;
         }
 
-        MatchData = matchData;
+        MatchInformation = matchInformation;
 
-        MatchServer? server = await distributedCacheStore.GetMatchServerByID(matchData.ServerID);
+        MatchServer? server = await distributedCacheStore.GetMatchServerByID(matchInformation.ServerID);
 
         if (server is null)
         {

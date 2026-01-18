@@ -1,13 +1,22 @@
-﻿global using ASPIRE.Common.Communication;
+﻿global using ASPIRE.Common;
+global using ASPIRE.Common.Communication;
 global using ASPIRE.Common.Constants;
+global using ASPIRE.Common.Enumerations;
+global using ASPIRE.Common.Enumerations.Match;
+global using ASPIRE.Common.Enumerations.Statistics;
 global using ASPIRE.Common.Extensions.Cryptography;
 global using ASPIRE.Common.ServiceDefaults;
 
+global using KONGOR.MasterServer.Attributes.Serialisation;
+global using KONGOR.MasterServer.Configuration.Economy;
+global using KONGOR.MasterServer.Configuration.Mastery;
+global using KONGOR.MasterServer.Configuration.Matchmaking;
 global using KONGOR.MasterServer.Constants;
 global using KONGOR.MasterServer.Extensions.Cache;
 global using KONGOR.MasterServer.Extensions.Collections;
 global using KONGOR.MasterServer.Handlers.Patch;
 global using KONGOR.MasterServer.Handlers.SRP;
+global using KONGOR.MasterServer.Helpers.Serialisation;
 global using KONGOR.MasterServer.Models.Configuration;
 global using KONGOR.MasterServer.Models.RequestResponse.GameData;
 global using KONGOR.MasterServer.Models.RequestResponse.Patch;
@@ -25,6 +34,7 @@ global using MERRICK.DatabaseContext.Enumerations;
 global using MERRICK.DatabaseContext.Persistence;
 
 global using Microsoft.AspNetCore.HttpLogging;
+global using Microsoft.AspNetCore.HttpOverrides;
 global using Microsoft.AspNetCore.Mvc;
 global using Microsoft.AspNetCore.RateLimiting;
 global using Microsoft.EntityFrameworkCore;
@@ -42,9 +52,13 @@ global using SecureRemotePassword;
 
 global using StackExchange.Redis;
 
+global using System.Collections;
 global using System.Linq.Expressions;
 global using System.Net;
+global using System.Net.Sockets;
+global using System.Reflection;
 global using System.Security.Cryptography;
+global using System.Runtime.CompilerServices;
 global using System.Text;
 global using System.Text.Json;
 global using System.Text.RegularExpressions;

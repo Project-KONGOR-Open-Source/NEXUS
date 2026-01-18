@@ -2,18 +2,18 @@
 
 public class GuideResponseError(int hostTime)
 {
-    [PhpProperty("errors")]
+    [PHPProperty("errors")]
     public string Errors => "no_guides_found";
 
-    [PhpProperty("success")]
+    [PHPProperty("success")]
     public int Success => 0;
 
-    [PhpProperty("hosttime")]
+    [PHPProperty("hosttime")]
     public int HostTime { get; set; } = hostTime;
 
-    [PhpProperty("vested_threshold")]
+    [PHPProperty("vested_threshold")]
     public int VestedThreshold => 5;
 
-    [PhpProperty(0)]
+    [PHPProperty(0)]
     public bool Zero => true;
 }

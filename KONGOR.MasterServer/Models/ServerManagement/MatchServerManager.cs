@@ -8,7 +8,7 @@ public class MatchServerManager
 
     public required int ID { get; set; }
 
-    public required List<MatchServer> MatchServers { get; set; }
+    public required List<int> MatchServerIDs { get; set; }
 
     public required string IPAddress { get; set; }
 

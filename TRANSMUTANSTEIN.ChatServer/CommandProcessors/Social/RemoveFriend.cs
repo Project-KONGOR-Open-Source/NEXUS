@@ -8,18 +8,19 @@ public class RemoveFriend : ISynchronousCommandProcessor<ClientChatSession>
 {
     public void Process(ClientChatSession session, ChatBuffer buffer)
     {
-        RemoveFriendNotificationData notificationData = new (buffer);
+        RemoveFriendRequestData requestData = new (buffer);
 
         /*
             This is a NOOP (no operation) as per the implementation of the chat protocol on the side of the game client.
             The intention is to avoid notifying players when they have been removed from another player's friend list.
             The requesting player will still appear in the friend list of the removed player until they perform a logout/login cycle.
         */
+
         return;
     }
 }
 
-file class RemoveFriendNotificationData
+file class RemoveFriendRequestData
 {
     public byte[] CommandBytes { get; init; }
 
@@ -37,7 +38,7 @@ file class RemoveFriendNotificationData
     /// </summary>
     public int RemovedFriendNotificationID { get; init; }
 
-    public RemoveFriendNotificationData(ChatBuffer buffer)
+    public RemoveFriendRequestData(ChatBuffer buffer)
     {
         CommandBytes = buffer.ReadCommandBytes();
         RemovedFriendAccountID = buffer.ReadInt32();

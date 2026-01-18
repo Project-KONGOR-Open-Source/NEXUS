@@ -16,6 +16,9 @@ public class ZORGATH
         // Add The Database Context
         builder.AddSqlServerDbContext<MerrickContext>("MERRICK", configureSettings: null, configureDbContextOptions: options =>
         {
+            // Specify Migrations History Table And Schema
+            options.UseSqlServer(sqlServerOptionsAction: sqlServerOptions => sqlServerOptions.MigrationsHistoryTable("MigrationsHistory", MerrickContext.MetadataSchema));
+
             // Enable Detailed Error Messages In Development Environment
             options.EnableDetailedErrors(builder.Environment.IsDevelopment());
 
@@ -43,7 +46,7 @@ public class ZORGATH
                 policy.QueueLimit = 10;
                 policy.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
             });
-            
+
             // Strict Limits For Authentication And Other Sensitive Endpoints
             options.AddSlidingWindowLimiter(policyName: RateLimiterPolicies.Strict, policy =>
             {
@@ -61,8 +64,7 @@ public class ZORGATH
             builder.Services.AddHttpLogging(options =>
             {
                 options.LoggingFields = HttpLoggingFields.RequestPropertiesAndHeaders | HttpLoggingFields.ResponsePropertiesAndHeaders;
-                options.RequestBodyLogLimit = 4096; // 4KB Request Body Limit
-                options.ResponseBodyLogLimit = 4096; // 4KB Response Body Limit
+                options.RequestBodyLogLimit = 4096; /* 4KB Request Body Limit */ options.ResponseBodyLogLimit = 4096; /* 4KB Response Body Limit */
             });
         }
 
@@ -71,8 +73,8 @@ public class ZORGATH
 
         // Set CORS Origins
         string[] corsOrigins = builder.Environment.IsDevelopment()
-            ? [ "https://localhost:55550",   "https://localhost:55551",      "https://localhost:55552",      "https://localhost:55553",     "https://localhost:55554", "http://localhost:55555", "https://localhost:55556",       "https://localhost:55557"      ]
-            : [ "https://aspire.kongor.net", "https://telemetry.kongor.net", "https://resources.kongor.net", "https://database.kongor.net", "https://chat.kongor.net", "http://api.kongor.net",  "https://portal.api.kongor.net", "https://portal.ui.kongor.net" ];
+            ? [ "https://localhost:5553",      "https://localhost:5554",  "http://localhost:5555", "https://localhost:5556",        "https://localhost:5557"      ]
+            : [ "https://database.kongor.net", "https://chat.kongor.net", "http://api.kongor.net", "https://portal.api.kongor.net", "https://portal.ui.kongor.net" ];
 
         // Add CORS Policy To Allow Cross-Origin Requests
         builder.Services.AddCors(options =>
@@ -224,8 +226,31 @@ public class ZORGATH
         // Add Email Service
         builder.Services.AddSingleton<IEmailService, EmailService>();
 
+        // Configure Forwarded Headers For Reverse Proxy Support
+        builder.Services.Configure<ForwardedHeadersOptions>(options =>
+        {
+            string proxy = Environment.GetEnvironmentVariable("INFRASTRUCTURE_GATEWAY") ?? throw new NullReferenceException("Infrastructure Gateway Is NULL");
+
+            options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedHost;
+
+            IPAddress[] proxyResolvedAddresses;
+
+            try { proxyResolvedAddresses = Dns.GetHostAddresses(proxy); }
+            catch (Exception exception) { throw new InvalidOperationException($@"Failed To Resolve Proxy Host ""{proxy}""", exception); }
+
+            foreach (IPAddress proxyResolvedAddress in proxyResolvedAddresses)
+                if (proxyResolvedAddress.AddressFamily is AddressFamily.InterNetwork or AddressFamily.InterNetworkV6)
+                    options.KnownProxies.Add(proxyResolvedAddress);
+
+            // Only Trust The Last Forwarded Header In The Chain
+            options.ForwardLimit = 1;
+        });
+
         // Build The Application
         WebApplication application = builder.Build();
+
+        // Enable Forwarded Headers Middleware For Reverse Proxy Support
+        application.UseForwardedHeaders();
 
         // Configure Development-Specific Middleware
         if (application.Environment.IsDevelopment())
@@ -235,23 +260,6 @@ public class ZORGATH
 
             // Enable HTTP Request/Response Logging
             application.UseHttpLogging();
-
-            // Enable Swagger API Documentation
-            application.UseSwagger();
-
-            // Configure Swagger UI With Custom Styling
-            application.UseSwaggerUI(options =>
-            {
-                options.InjectStylesheet("swagger.css");
-                options.DocumentTitle = "ZORGATH Web Portal API";
-            });
-
-            // Serve Static Files For Swagger CSS
-            application.UseStaticFiles(new StaticFileOptions
-            {
-                FileProvider = new PhysicalFileProvider(Path.Combine(builder.Environment.ContentRootPath, "Resources", "CSS")),
-                RequestPath = "/swagger"
-            });
         }
 
         else
@@ -259,6 +267,23 @@ public class ZORGATH
             // Use Global Exception Handler In Production
             application.UseExceptionHandler("/error");
         }
+
+        // Enable Swagger API Documentation
+        application.UseSwagger();
+
+        // Configure Swagger UI With Custom Styling
+        application.UseSwaggerUI(options =>
+        {
+            options.InjectStylesheet("swagger.css");
+            options.DocumentTitle = "ZORGATH Web Portal API";
+        });
+
+        // Serve Static Files For Swagger CSS
+        application.UseStaticFiles(new StaticFileOptions
+        {
+            FileProvider = new PhysicalFileProvider(Path.Combine(builder.Environment.ContentRootPath, "Resources", "CSS")),
+            RequestPath = "/swagger"
+        });
 
         // Enable Rate Limiting (Before Other Processing)
         application.UseRateLimiter();

@@ -27,21 +27,21 @@ public class GuideListResponse
         HostTime = hostTime;
     }
 
-    [PhpProperty("errors")]
+    [PHPProperty("errors")]
     public string Errors => string.Empty;
 
-    [PhpProperty("success")]
+    [PHPProperty("success")]
     public int Success => 1;
 
-    [PhpProperty("guide_list")]
+    [PHPProperty("guide_list")]
     public string GuideList { get; set; }
 
-    [PhpProperty("hosttime")]
+    [PHPProperty("hosttime")]
     public int HostTime { get; set; }
 
-    [PhpProperty("vested_threshold")]
+    [PHPProperty("vested_threshold")]
     public int VestedThreshold => 5;
 
-    [PhpProperty(0)]
+    [PHPProperty(0)]
     public bool Zero => true;
 }

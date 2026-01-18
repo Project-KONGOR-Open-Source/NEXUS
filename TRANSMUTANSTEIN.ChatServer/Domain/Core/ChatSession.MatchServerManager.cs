@@ -16,8 +16,7 @@ public class MatchServerManagerChatSession(TCPServer server, IServiceProvider se
 
     public async Task Terminate(IDatabase distributedCacheStore)
     {
-        // Remove Match Server Manager From The Distributed Cache
-        await distributedCacheStore.RemoveMatchServerManagerByID(Metadata.ServerManagerID);
+        await Remove(distributedCacheStore);
 
         // Remove The Match Server Manager Chat Session
         if (Context.MatchServerManagerChatSessions.TryRemove(Metadata.ServerManagerID, out MatchServerManagerChatSession? existingSession))
@@ -44,8 +43,6 @@ public class MatchServerManagerChatSession(TCPServer server, IServiceProvider se
                 return;
             }
 
-            // TODO: Check For Orphaned Match Servers And Handle Appropriately
-
             ChatBuffer acknowledgementResponse = new ();
 
             acknowledgementResponse.WriteCommand(ChatProtocol.ChatServerToServerManager.NET_CHAT_SM_REMOTE_COMMAND);
@@ -65,5 +62,12 @@ public class MatchServerManagerChatSession(TCPServer server, IServiceProvider se
         Disconnect(); Dispose();
 
         Log.Information(@"Match Server Manager ID ""{ServerManagerID}"" Has Disconnected Gracefully", Metadata.ServerManagerID);
+    }
+
+    private async Task Remove(IDatabase distributedCacheStore)
+    {
+        // Remove Match Server Manager From The Distributed Cache
+        // Match Server Children Are Also Implicitly Removed From The Distributed Cache
+        await distributedCacheStore.RemoveMatchServerManagerByID(Metadata.ServerManagerID);
     }
 }

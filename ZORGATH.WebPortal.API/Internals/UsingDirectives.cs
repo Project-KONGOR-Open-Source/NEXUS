@@ -1,4 +1,5 @@
-﻿global using ASPIRE.Common.ServiceDefaults;
+﻿global using ASPIRE.Common.Constants;
+global using ASPIRE.Common.ServiceDefaults;
 
 global using FluentValidation;
 global using FluentValidation.Results;
@@ -11,6 +12,7 @@ global using MERRICK.DatabaseContext.Persistence;
 global using Microsoft.AspNetCore.Authentication.JwtBearer;
 global using Microsoft.AspNetCore.Authorization;
 global using Microsoft.AspNetCore.HttpLogging;
+global using Microsoft.AspNetCore.HttpOverrides;
 global using Microsoft.AspNetCore.Identity;
 global using Microsoft.AspNetCore.Mvc;
 global using Microsoft.AspNetCore.RateLimiting;
@@ -24,6 +26,9 @@ global using Microsoft.OpenApi;
 global using SecureRemotePassword;
 
 global using System.IdentityModel.Tokens.Jwt;
+global using System.Net;
+global using System.Net.Sockets;
+global using System.Runtime.CompilerServices;
 global using System.Security.Claims;
 global using System.Security.Cryptography;
 global using System.Text;

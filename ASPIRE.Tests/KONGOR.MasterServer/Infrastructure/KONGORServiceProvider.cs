@@ -13,11 +13,12 @@ public static class KONGORServiceProvider
         string databaseName = identifier ?? Guid.CreateVersion7().ToString();
 
         // Set Required Environment Variables
-        Environment.SetEnvironmentVariable("CHAT_SERVER_HOST", "127.0.0.1");
+        Environment.SetEnvironmentVariable("CHAT_SERVER_HOST", "localhost");
         Environment.SetEnvironmentVariable("CHAT_SERVER_PORT_CLIENT", "11031");
         Environment.SetEnvironmentVariable("CHAT_SERVER_PORT_MATCH_SERVER", "11032");
         Environment.SetEnvironmentVariable("CHAT_SERVER_PORT_MATCH_SERVER_MANAGER", "11033");
-        Environment.SetEnvironmentVariable("APPLICATION_URL", "http://localhost/");
+        Environment.SetEnvironmentVariable("APPLICATION_URL", "http://0.0.0.0/");
+        Environment.SetEnvironmentVariable("INFRASTRUCTURE_GATEWAY", "localhost");
 
         // Replace Database Context And Distributed Cache With In-Memory Implementations
         WebApplicationFactory<KONGORAssemblyMarker> webApplicationFactory = new WebApplicationFactory<KONGORAssemblyMarker>().WithWebHostBuilder(builder => builder.ConfigureServices(services =>

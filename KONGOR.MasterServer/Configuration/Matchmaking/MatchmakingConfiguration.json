@@ -1,0 +1,70 @@
+{
+    "Ranked": {
+        "Map": "???",
+        "Regions": [
+            "EU",
+            "USE",
+            "USW",
+            "AU",
+            "BR",
+            "RU",
+            "TH",
+            "SEA",
+            "NEWERTH"
+        ],
+        "Modes": [ // TODO: Revise These Modes From TCP Popularity Update
+            "rb"
+        ],
+        "Match": {
+            "MaximumPlayerRatingDifference": 250,
+            "IsRanked": true,
+            "TeamSize": 5
+        }
+    },
+    "Unranked": {
+        "Map": "???",
+        "Regions": [
+            "EU",
+            "USE",
+            "USW",
+            "AU",
+            "BR",
+            "RU",
+            "TH",
+            "SEA",
+            "NEWERTH"
+        ],
+        "Modes": [ // TODO: Revise These Modes From TCP Popularity Update
+            "rb"
+        ],
+        "Match": {
+            "MaximumPlayerRatingDifference": 2500,
+            "IsRanked": false,
+            "TeamSize": 5
+        }
+    },
+    "MidWars": {
+        "Map": "???",
+        "Regions": [
+            "EU",
+            "USE",
+            "USW",
+            "AU",
+            "BR",
+            "RU",
+            "TH",
+            "SEA",
+            "NEWERTH"
+        ],
+        "Modes": [ // TODO: Revise These Modes From TCP Popularity Update
+            "hb",
+            "rd"
+        ],
+        "Match": {
+            "MaximumPlayerRatingDifference": 250,
+            "IsRanked": true,
+            "TeamSize": 5
+        }
+    },
+    "RiftWars": "TODO: Implement This And Revise The Other Settings"
+}

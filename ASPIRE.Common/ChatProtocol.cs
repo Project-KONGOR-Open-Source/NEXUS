@@ -1,4 +1,4 @@
-﻿namespace TRANSMUTANSTEIN.ChatServer.Domain.Core;
+﻿namespace ASPIRE.Common;
 
 public static class ChatProtocol
 {
@@ -345,47 +345,6 @@ public static class ChatProtocol
         NUM_GAME_LOBBY_STATES
     };
 
-    /// <summary>
-    ///     The chat server will send this to the match server on match start.
-    ///     The game server will then send this to the master server for further processing.
-    /// </summary>
-    public enum ArrangedMatchType
-    {
-        AM_PUBLIC,               // Public Match
-        AM_MATCHMAKING,          // Ranked Normal/Casual Matchmaking
-        AM_SCHEDULED_MATCH,      // Scheduled Tournament Match
-        AM_UNSCHEDULED_MATCH,    // Unscheduled League Match
-        AM_MATCHMAKING_MIDWARS,  // MidWars Matchmaking
-        AM_MATCHMAKING_BOTMATCH, // Bot Co-Op Matchmaking
-        AM_UNRANKED_MATCHMAKING, // Unranked Normal/Casual Matchmaking
-        AM_MATCHMAKING_RIFTWARS, // RiftWars Matchmaking
-        AM_PUBLIC_PRELOBBY,      // Public Pre-Lobby
-        AM_MATCHMAKING_CUSTOM,   // Custom Map Matchmaking
-        AM_MATCHMAKING_CAMPAIGN, // Ranked Season Normal/Casual Matchmaking
-
-        NUM_ARRANGED_MATCH_TYPES
-    };
-
-    public static bool IsMatchmakingType(ArrangedMatchType arrangedMatchType)
-    {
-        return arrangedMatchType switch
-        {
-            ArrangedMatchType.AM_PUBLIC                 => false,
-            ArrangedMatchType.AM_SCHEDULED_MATCH        => false,
-            ArrangedMatchType.AM_UNSCHEDULED_MATCH      => false,
-
-            ArrangedMatchType.AM_MATCHMAKING            => true,
-            ArrangedMatchType.AM_MATCHMAKING_MIDWARS    => true,
-            ArrangedMatchType.AM_MATCHMAKING_RIFTWARS   => true,
-            ArrangedMatchType.AM_MATCHMAKING_BOTMATCH   => true,
-            ArrangedMatchType.AM_UNRANKED_MATCHMAKING   => true,
-            ArrangedMatchType.AM_MATCHMAKING_CUSTOM     => true,
-            ArrangedMatchType.AM_MATCHMAKING_CAMPAIGN   => true,
-
-            _                                           => false
-        };
-    }
-
     public enum TMMUpdateType
     {
         TMM_CREATE_GROUP,
@@ -480,13 +439,60 @@ public static class ChatProtocol
 
     public enum ServerStatus
     {
+        /// <summary>
+        ///     Server is hibernating/dormant with no activity.
+        ///     The server process exists, but Host.IsSleeping() returns TRUE.
+        ///     Used for slave servers in a server manager pool waiting to be assigned work.
+        ///     Expected state for non-CowMaster servers when idle in the pool.
+        /// </summary>
         SERVER_STATUS_SLEEPING,
+
+        /// <summary>
+        ///     Server is running and ready but has no active match.
+        ///     World is either not loaded, or loaded but has zero connected clients.
+        ///     Server is listening and can accept connections.
+        ///     Expected state for "CowMaster" (Copy-on-Write master) servers.
+        ///     Can transition to ACTIVE when clients connect.
+        /// </summary>
         SERVER_STATUS_IDLE,
+
+        /// <summary>
+        ///     Server is currently loading a lobby/world.
+        ///     Set when m_bGameLoading is TRUE.
+        ///     Transitional state between IDLE and ACTIVE.
+        /// </summary>
         SERVER_STATUS_LOADING,
+
+        /// <summary>
+        ///     Server has an active match session running.
+        ///     Either the world is loaded with connected clients, or clients are in the lobby.
+        ///     Match may or may not have started (m_bMatchStarted distinguishes between "lobby" and "active" in HTTP responses).
+        ///     Normal operational state during gameplay.
+        /// </summary>
         SERVER_STATUS_ACTIVE,
+
+        /// <summary>
+        ///     Server process terminated unexpectedly or became unresponsive.
+        ///     Set when process is no longer running but was not intentionally killed.
+        ///     Set when server fails to respond within timeout period.
+        ///     Triggers respawn logic if man_respawnServers is enabled.
+        ///     Server manager attempts cleanup and possible restart.
+        /// </summary>
         SERVER_STATUS_CRASHED,
+
+        /// <summary>
+        ///     Server was intentionally terminated by the server manager.
+        ///     Set when manager sends NETCMD_MANAGER_SHUTDOWN_SLAVE.
+        ///     Differentiated from CRASHED to prevent unwanted respawns.
+        ///     Final state when shutting down servers during updates or manual termination.
+        /// </summary>
         SERVER_STATUS_KILLED,
 
+        /// <summary>
+        ///     Initial state when server is first spawned but hasn't reported status yet.
+        ///     Used when server status cannot be determined.
+        ///     Transitional state during server initialization before first status update.
+        /// </summary>
         SERVER_STATUS_UNKNOWN
     };
 
@@ -818,91 +824,6 @@ public static class ChatProtocol
 
         TMM_NUM_GAME_MODES
     };
-
-    public enum PublicGameMode
-    {
-        GAME_MODE_NORMAL,
-        GAME_MODE_RANDOM_DRAFT,
-        GAME_MODE_SINGLE_DRAFT,
-        GAME_MODE_DEATHMATCH,
-        GAME_MODE_BANNING_DRAFT,
-        GAME_MODE_CAPTAINS_DRAFT,
-        GAME_MODE_CAPTAINS_MODE,
-        GAME_MODE_BANNING_PICK,
-        GAME_MODE_ALL_RANDOM,
-        GAME_MODE_LOCKPICK,
-        GAME_MODE_BLIND_BAN,
-        GAME_MODE_BOT_MATCH,
-        GAME_MODE_KROS_MODE,
-        GAME_MODE_FORCEPICK,
-        GAME_MODE_SOCCERPICK,
-        GAME_MODE_SOLO_SAME_HERO,
-        GAME_MODE_SOLO_DIFF_HERO,
-        GAME_MODE_COUNTER_PICK,
-        GAME_MODE_MIDWARS_BETA,
-        GAME_MODE_HEROBAN,
-        GAME_MODE_REBORN,
-
-        NUM_GAME_MODES
-    };
-
-    public static string? GetPublicGameModeName(PublicGameMode publicGameMode)
-    {
-        return publicGameMode switch
-        {
-            PublicGameMode.GAME_MODE_NORMAL          => "normal",
-            PublicGameMode.GAME_MODE_RANDOM_DRAFT    => "randomdraft",
-            PublicGameMode.GAME_MODE_SINGLE_DRAFT    => "singledraft",
-            PublicGameMode.GAME_MODE_DEATHMATCH      => "deathmatch",
-            PublicGameMode.GAME_MODE_BANNING_DRAFT   => "banningdraft",
-            PublicGameMode.GAME_MODE_CAPTAINS_DRAFT  => "captainsdraft",
-            PublicGameMode.GAME_MODE_CAPTAINS_MODE   => "captainsmode",
-            PublicGameMode.GAME_MODE_BANNING_PICK    => "banningpick",
-            PublicGameMode.GAME_MODE_ALL_RANDOM      => "allrandom",
-            PublicGameMode.GAME_MODE_LOCKPICK        => "lockpick",
-            PublicGameMode.GAME_MODE_BLIND_BAN       => "blindban",
-            PublicGameMode.GAME_MODE_BOT_MATCH       => "botmatch",
-            PublicGameMode.GAME_MODE_KROS_MODE       => "krosmode",
-            PublicGameMode.GAME_MODE_FORCEPICK       => "forcepick",
-            PublicGameMode.GAME_MODE_SOCCERPICK      => "soccerpick",
-            PublicGameMode.GAME_MODE_SOLO_SAME_HERO  => "solosamehero",
-            PublicGameMode.GAME_MODE_SOLO_DIFF_HERO  => "solodiffhero",
-            PublicGameMode.GAME_MODE_COUNTER_PICK    => "counterpick",
-            PublicGameMode.GAME_MODE_MIDWARS_BETA    => "midwarsbeta",
-            PublicGameMode.GAME_MODE_HEROBAN         => "heroban",
-            PublicGameMode.GAME_MODE_REBORN          => "reborn",
-            _                                        => null
-        };
-    }
-
-    public static string? GetPublicGameModeString(PublicGameMode publicGameMode)
-    {
-        return publicGameMode switch
-        {
-            PublicGameMode.GAME_MODE_NORMAL          => "Mode_Normal",
-            PublicGameMode.GAME_MODE_RANDOM_DRAFT    => "Mode_RandomDraft",
-            PublicGameMode.GAME_MODE_SINGLE_DRAFT    => "Mode_SingleDraft",
-            PublicGameMode.GAME_MODE_DEATHMATCH      => "Mode_Deathmatch",
-            PublicGameMode.GAME_MODE_BANNING_DRAFT   => "Mode_BanningDraft",
-            PublicGameMode.GAME_MODE_CAPTAINS_DRAFT  => "Mode_CaptainsDraft",
-            PublicGameMode.GAME_MODE_CAPTAINS_MODE   => "Mode_CaptainsMode",
-            PublicGameMode.GAME_MODE_BANNING_PICK    => "Mode_BanningPick",
-            PublicGameMode.GAME_MODE_ALL_RANDOM      => "Mode_AllRandom",
-            PublicGameMode.GAME_MODE_LOCKPICK        => "Mode_LockPick",
-            PublicGameMode.GAME_MODE_BLIND_BAN       => "Mode_BlindBan",
-            PublicGameMode.GAME_MODE_BOT_MATCH       => "Mode_BotMatch",
-            PublicGameMode.GAME_MODE_KROS_MODE       => "Mode_KrosMode",
-            PublicGameMode.GAME_MODE_FORCEPICK       => "Mode_ForcePick",
-            PublicGameMode.GAME_MODE_SOCCERPICK      => "Mode_SoccerPick",
-            PublicGameMode.GAME_MODE_SOLO_SAME_HERO  => "Mode_SoloSameHero",
-            PublicGameMode.GAME_MODE_SOLO_DIFF_HERO  => "Mode_SoloDiffHero",
-            PublicGameMode.GAME_MODE_COUNTER_PICK    => "Mode_CounterPick",
-            PublicGameMode.GAME_MODE_MIDWARS_BETA    => "Mode_MidwarsBeta",
-            PublicGameMode.GAME_MODE_HEROBAN         => "Mode_HeroBan",
-            PublicGameMode.GAME_MODE_REBORN          => "Mode_Reborn",
-            _                                        => null
-        };
-    }
 
     public enum TMMGameRegion
     {

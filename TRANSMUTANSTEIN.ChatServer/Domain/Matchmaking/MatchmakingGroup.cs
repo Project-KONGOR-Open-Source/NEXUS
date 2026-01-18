@@ -277,7 +277,7 @@ public class MatchmakingGroup
         update.WriteInt16(1500);                                                         // Average Group Rating
         update.WriteInt32(Leader.Account.ID);                                            // Leader Account ID
         // TODO: Dynamically Set Arranged Match Type From The Request Data
-        update.WriteInt8(Convert.ToByte(ChatProtocol.ArrangedMatchType.AM_MATCHMAKING)); // Arranged Match Type
+        update.WriteInt8(Convert.ToByte(MatchType.AM_MATCHMAKING));                      // Arranged Match Type
         update.WriteInt8(Convert.ToByte(Information.GameType));                          // Game Type
         update.WriteString(Information.MapName);                                         // Map Name
         update.WriteString(string.Join('|', Information.GameModes));                     // Game Modes

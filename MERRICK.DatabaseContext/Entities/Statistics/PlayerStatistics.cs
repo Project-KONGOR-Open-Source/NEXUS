@@ -26,7 +26,37 @@ public class PlayerStatistics
 
     public required int Benefit { get; set; }
 
-    public required long HeroID { get; set; }
+    public required uint? HeroProductID { get => field is 0 ? null : field; set => field = value is 0 ? null : value; }
+
+    public required string HeroIdentifier { get; set; }
+
+    public string? AlternativeAvatarName { get; set; }
+
+    public uint? AlternativeAvatarProductID { get; set; }
+
+    public string? WardProductName { get; set; }
+
+    public uint? WardProductID { get; set; }
+
+    public string? TauntProductName { get; set; }
+
+    public uint? TauntProductID { get; set; }
+
+    public string? AnnouncerProductName { get; set; }
+
+    public uint? AnnouncerProductID { get; set; }
+
+    public string? CourierProductName { get; set; }
+
+    public uint? CourierProductID { get; set; }
+
+    public string? AccountIconProductName { get; set; }
+
+    public uint? AccountIconProductID { get; set; }
+
+    public string? ChatColourProductName { get; set; }
+
+    public uint? ChatColourProductID { get; set; }
 
     public required List<string> Inventory { get; set; }
 
@@ -44,13 +74,9 @@ public class PlayerStatistics
 
     public required double PublicSkillRatingChange { get; set; }
 
-    public required int SoloRankedMatch { get; set; }
+    public required int RankedMatch { get; set; }
 
-    public required double SoloRankedSkillRatingChange { get; set; }
-
-    public required int TeamRankedMatch { get; set; }
-
-    public required double TeamRankedSkillRatingChange { get; set; }
+    public required double RankedSkillRatingChange { get; set; }
 
     public required int SocialBonus { get; set; }
 
@@ -116,11 +142,11 @@ public class PlayerStatistics
 
     public required int HeroLevel { get; set; }
 
-    public required int ConsumablesUsed { get; set; }
+    public required int ConsumablesPurchased { get; set; }
 
     public required int WardsPlaced { get; set; }
 
-    public required int Bloodlust { get; set; }
+    public required int FirstBlood { get; set; }
 
     public required int DoubleKill { get; set; }
 
@@ -130,19 +156,19 @@ public class PlayerStatistics
 
     public required int Annihilation { get; set; }
 
-    public required int KillStreak3 { get; set; }
+    public required int KillStreak03 { get; set; }
 
-    public required int KillStreak4 { get; set; }
+    public required int KillStreak04 { get; set; }
 
-    public required int KillStreak5 { get; set; }
+    public required int KillStreak05 { get; set; }
 
-    public required int KillStreak6 { get; set; }
+    public required int KillStreak06 { get; set; }
 
-    public required int KillStreak7 { get; set; }
+    public required int KillStreak07 { get; set; }
 
-    public required int KillStreak8 { get; set; }
+    public required int KillStreak08 { get; set; }
 
-    public required int KillStreak9 { get; set; }
+    public required int KillStreak09 { get; set; }
 
     public required int KillStreak10 { get; set; }
 
@@ -179,4 +205,28 @@ public class PlayerStatistics
     public required double GameplayStat9 { get; set; }
 
     public required int TimeEarningExperience { get; set; }
+
+    public List<ItemEvent>? ItemHistory { get; set; }
+
+    public List<AbilityEvent>? AbilityHistory { get; set; }
+}
+
+public class ItemEvent
+{
+    public required string ItemName { get; set; }
+
+    public required int GameTimeSeconds { get; set; }
+
+    public required byte EventType { get; set; }
+}
+
+public class AbilityEvent
+{
+    public required string HeroName { get; set; }
+
+    public required string AbilityName { get; set; }
+
+    public required int GameTimeSeconds { get; set; }
+
+    public required byte SlotIndex { get; set; }
 }

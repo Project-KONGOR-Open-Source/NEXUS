@@ -4,13 +4,15 @@ namespace KONGOR.MasterServer.Models.ServerManagement;
 ///     Represents the match information available at the time that the match starts.
 ///     This information is used to populate the match statistics once the match ends.
 /// </summary>
-public class MatchStartData
+public class MatchInformation
 {
     public int MatchID => TimestampStarted.GetDeterministicInt32Hash();
 
     public required string MatchName { get; set; }
 
     public required int ServerID { get; set; }
+
+    public required string ServerName { get; set; }
 
     public required string HostAccountName { get; set; }
 
@@ -20,11 +22,40 @@ public class MatchStartData
 
     public required bool IsCasual { get; set; }
 
-    public required int ArrangedMatchType { get; set; }
+    public required MatchType MatchType { get; set; }
 
-    public required int MatchMode { get; set; }
+    public required PublicMatchMode MatchMode { get; set; }
 
     public DateTimeOffset TimestampStarted { get; set; } = DateTimeOffset.UtcNow;
+
+    public int ConnectedPlayersCount { get; set; } = 0;
+
+    public int MaximumPlayersCount { get; set; } = 10;
+
+    /// <summary>
+    ///     Deprecated skill-based server filter that was used for matchmaking.
+    ///     <code>
+    ///         0 -> Noobs Only
+    ///         1 -> Noobs Allowed
+    ///         2 -> Pro
+    ///     </code>
+    ///     This feature is no longer active and the field has no functional purpose.
+    /// </summary>
+    public int Tier { get; set; } = 1;
+
+    /// <summary>
+    ///     Whether the match is part of an organised league system.
+    ///     <code>
+    ///         0 -> Regular Match (public, matchmaking, etc.)
+    ///         1 -> League Match (organised competitive league play)
+    ///     </code>
+    ///     <remark>
+    ///         League matches belong to a dedicated competitive league structure with player rosters, seasonal standings, and separate win/loss tracking.
+    ///     </remark>
+    /// </summary>
+    public int League { get; set; } = 0;
+
+    public MatchOptions Options { get; set; } = MatchOptions.None;
 
     // TODO: Find A Way To Generate Concurrency-Safe Incremental Match IDs That Fit Within An Int32
 

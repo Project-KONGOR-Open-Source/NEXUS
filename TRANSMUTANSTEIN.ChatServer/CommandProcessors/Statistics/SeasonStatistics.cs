@@ -1,11 +1,11 @@
 ﻿namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Statistics;
 
 [ChatCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_CAMPAIGN_STATS)]
-public class SeasonStats : ISynchronousCommandProcessor<ClientChatSession>
+public class SeasonStatistics : ISynchronousCommandProcessor<ClientChatSession>
 {
     public void Process(ClientChatSession session, ChatBuffer buffer)
     {
-        SeasonStatsRequestData requestData = new (buffer);
+        SeasonStatisticsRequestData requestData = new (buffer);
 
         ChatBuffer response = new ();
 
@@ -38,11 +38,11 @@ public class SeasonStats : ISynchronousCommandProcessor<ClientChatSession>
     }
 }
 
-file class SeasonStatsRequestData
+file class SeasonStatisticsRequestData
 {
     public byte[] CommandBytes { get; init; }
 
-    public SeasonStatsRequestData(ChatBuffer buffer)
+    public SeasonStatisticsRequestData(ChatBuffer buffer)
     {
         CommandBytes = buffer.ReadCommandBytes();
     }

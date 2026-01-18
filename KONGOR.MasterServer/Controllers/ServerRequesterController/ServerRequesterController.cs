@@ -3,11 +3,12 @@
 [ApiController]
 [Route("server_requester.php")]
 [Consumes("application/x-www-form-urlencoded")]
-public partial class ServerRequesterController(MerrickContext databaseContext, IDatabase distributedCache, ILogger<ServerRequesterController> logger, IWebHostEnvironment hostEnvironment) : ControllerBase
+public partial class ServerRequesterController(MerrickContext databaseContext, IDatabase distributedCache, ILogger<ServerRequesterController> logger, IOptions<OperationalConfiguration> configuration, IWebHostEnvironment hostEnvironment) : ControllerBase
 {
     private MerrickContext MerrickContext { get; } = databaseContext;
     private IDatabase DistributedCache { get; } = distributedCache;
     private ILogger Logger { get; } = logger;
+    private OperationalConfiguration Configuration { get; } = configuration.Value;
     private IWebHostEnvironment HostEnvironment { get; } = hostEnvironment;
 
     [HttpPost(Name = "Server Requester All-In-One")]
@@ -26,6 +27,7 @@ public partial class ServerRequesterController(MerrickContext databaseContext, I
             "c_conn"        => await HandleConnectClient(),
             "new_session"   => await HandleServerAuthentication(),
             "set_online"    => await HandleSetOnline(),
+            "shutdown"      => await HandleShutdown(),
             "start_game"    => await HandleMatchStart(),
 
             // fallback

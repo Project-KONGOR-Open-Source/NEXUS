@@ -22,6 +22,9 @@ public class KONGOR
         // Add The Database Context
         builder.AddSqlServerDbContext<MerrickContext>("MERRICK", configureSettings: null, configureDbContextOptions: options =>
         {
+            // Specify Migrations History Table And Schema
+            options.UseSqlServer(sqlServerOptionsAction: sqlServerOptions => sqlServerOptions.MigrationsHistoryTable("MigrationsHistory", MerrickContext.MetadataSchema));
+
             // Enable Detailed Error Messages In Development Environment
             options.EnableDetailedErrors(builder.Environment.IsDevelopment());
 
@@ -108,8 +111,31 @@ public class KONGOR
             });
         });
 
+        // Configure Forwarded Headers For Reverse Proxy Support
+        builder.Services.Configure<ForwardedHeadersOptions>(options =>
+        {
+            string proxy = Environment.GetEnvironmentVariable("INFRASTRUCTURE_GATEWAY") ?? throw new NullReferenceException("Infrastructure Gateway Is NULL");
+
+            options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedHost;
+
+            IPAddress[] proxyResolvedAddresses;
+
+            try { proxyResolvedAddresses = Dns.GetHostAddresses(proxy); }
+            catch (Exception exception) { throw new InvalidOperationException($@"Failed To Resolve Proxy Host ""{proxy}""", exception); }
+
+            foreach (IPAddress proxyResolvedAddress in proxyResolvedAddresses)
+                if (proxyResolvedAddress.AddressFamily is AddressFamily.InterNetwork or AddressFamily.InterNetworkV6)
+                    options.KnownProxies.Add(proxyResolvedAddress);
+
+            // Only Trust The Last Forwarded Header In The Chain
+            options.ForwardLimit = 1;
+        });
+
         // Build The Application
         WebApplication application = builder.Build();
+
+        // Enable Forwarded Headers Middleware For Reverse Proxy Support
+        application.UseForwardedHeaders();
 
         if (application.Services.GetService<IConnectionMultiplexer>() is IConnectionMultiplexer connectionMultiplexer)
         {
@@ -127,23 +153,6 @@ public class KONGOR
 
             // Enable HTTP Request/Response Logging
             application.UseHttpLogging();
-
-            // Enable Swagger API Documentation
-            application.UseSwagger();
-
-            // Configure Swagger UI With Custom Styling
-            application.UseSwaggerUI(options =>
-            {
-                options.InjectStylesheet("swagger.css");
-                options.DocumentTitle = "KONGOR Master Server API";
-            });
-
-            // Serve Static Files For Swagger CSS
-            application.UseStaticFiles(new StaticFileOptions
-            {
-                FileProvider = new PhysicalFileProvider(Path.Combine(builder.Environment.ContentRootPath, "Resources", "CSS")),
-                RequestPath = "/swagger"
-            });
         }
 
         else
@@ -151,6 +160,23 @@ public class KONGOR
             // Use Global Exception Handler In Production
             application.UseExceptionHandler("/error");
         }
+
+        // Enable Swagger API Documentation
+        application.UseSwagger();
+
+        // Configure Swagger UI With Custom Styling
+        application.UseSwaggerUI(options =>
+        {
+            options.InjectStylesheet("swagger.css");
+            options.DocumentTitle = "KONGOR Master Server API";
+        });
+
+        // Serve Static Files For Swagger CSS
+        application.UseStaticFiles(new StaticFileOptions
+        {
+            FileProvider = new PhysicalFileProvider(Path.Combine(builder.Environment.ContentRootPath, "Resources", "CSS")),
+            RequestPath = "/swagger"
+        });
 
         // Enable Rate Limiting (Before Other Processing)
         application.UseRateLimiter();

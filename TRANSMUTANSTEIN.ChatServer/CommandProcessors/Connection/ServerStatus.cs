@@ -1,18 +1,14 @@
 namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Connection;
 
-/// <summary>
-///     Handles status updates from match servers.
-///     Match servers periodically send their status to inform the chat server about their current state.
-/// </summary>
 [ChatCommand(ChatProtocol.GameServerToChatServer.NET_CHAT_GS_STATUS)]
 public class ServerStatus : ISynchronousCommandProcessor<MatchServerChatSession>
 {
     public void Process(MatchServerChatSession session, ChatBuffer buffer)
     {
-        ServerStatusData statusData = new (buffer);
+        ServerStatusRequestData requestData = new (buffer);
 
         Log.Debug(@"Received Status Update From Server ID ""{ServerID}"" - Name: ""{Name}"", Address: ""{Address}:{Port}"", Location: ""{Location}"", Status: {Status}",
-            statusData.ServerID, statusData.Name, statusData.Address, statusData.Port, statusData.Location, statusData.Status);
+            requestData.ServerID, requestData.Name, requestData.Address, requestData.Port, requestData.Location, requestData.Status);
 
         // TODO: Update Any Relevant Match Server Data
 
@@ -24,7 +20,7 @@ public class ServerStatus : ISynchronousCommandProcessor<MatchServerChatSession>
     }
 }
 
-file class ServerStatusData
+file class ServerStatusRequestData
 {
     public byte[] CommandBytes { get; init; }
 
@@ -142,7 +138,7 @@ file class ServerStatusData
 
     public List<ClientNetworkStatistics> ClientNetworkStatistics { get; init; }
 
-    public ServerStatusData(ChatBuffer buffer)
+    public ServerStatusRequestData(ChatBuffer buffer)
     {
         CommandBytes = buffer.ReadCommandBytes();
         ServerID = buffer.ReadInt32();

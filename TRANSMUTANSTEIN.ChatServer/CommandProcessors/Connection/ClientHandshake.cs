@@ -70,23 +70,36 @@ public class ClientHandshake(MerrickContext merrick, IDatabase distributedCacheS
             return;
         }
 
-        List<int> subAccountIDs = [.. account.User.Accounts.Select(subAccount => subAccount.ID)];
-
         // Check For Concurrent Connections: Disconnect Any Other Existing Sessions For This Account Or For Any Sub-Account Of The Same User
-        foreach (int subAccountID in subAccountIDs)
+        // Ignore Staff And Guest Accounts For Concurrent Connection Checks
+        if (account.Type is not AccountType.Staff and not AccountType.Guest)
         {
-            ClientChatSession? existingSessionMatch = Context.ClientChatSessions.Values
-                .SingleOrDefault(existingSession => existingSession.Account?.ID == subAccountID);
+            List<int> subAccountIDs = [.. account.User.Accounts.Select(subAccount => subAccount.ID)];
 
-            if (existingSessionMatch is not null)
+            foreach (int subAccountID in subAccountIDs)
             {
-                Log.Information(@"Disconnecting Existing Session For Account ID ""{SubAccountID}"" (Account ""{ExistingSessionMatch.Account.Name}"") Due To Concurrent Connection Attempt",
-                    subAccountID, existingSessionMatch.Account.Name);
+                ClientChatSession? existingSessionMatch = Context.ClientChatSessions.Values
+                    .SingleOrDefault(existingSession => existingSession.Account?.ID == subAccountID);
 
-                existingSessionMatch
-                    .Reject(ChatProtocol.ChatRejectReason.ECR_ACCOUNT_SHARING)
-                    .Terminate();
+                if (existingSessionMatch is not null)
+                {
+                    Log.Information(@"Disconnecting Existing Session For Account ID ""{SubAccountID}"" (Account ""{ExistingSessionMatch.Account.Name}"") Due To Concurrent Connection Attempt",
+                        subAccountID, existingSessionMatch.Account.Name);
+
+                    existingSessionMatch
+                        .Reject(ChatProtocol.ChatRejectReason.ECR_ACCOUNT_SHARING)
+                        .Terminate();
+                }
             }
+        }
+
+        if (Context.ClientChatSessions.Values.SingleOrDefault(existingSession => existingSession.Account?.ID == account.ID) is { } existingSession)
+        {
+            Log.Information(@"Disconnecting Existing Session For Account ""{Account.Name}"" Due To Concurrent Connection Attempt", account.Name);
+
+            existingSession
+                .Reject(ChatProtocol.ChatRejectReason.ECR_ACCOUNT_SHARING)
+                .Terminate();
         }
 
         // Validate Client Version

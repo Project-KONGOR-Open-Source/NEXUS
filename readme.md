@@ -9,7 +9,7 @@
 <h3>
     <p align="center">NEXUS</p>
     <p>The full suite of Project KONGOR services, architected as an open-source cloud-ready distributed application.</p>
-    <p>If you would like to support the development of this project and buy me a coffee, please consider one of the following options: <a href="https://github.com/sponsors/K-O-N-G-O-R">GitHub Sponsors</a>, <a href="https://paypal.me/MissingLinkMedia">PayPal</a>. 💚</p>
+    <p>If you would like to support the development of this project and buy me a coffee, please consider one of the following options: <a href="https://github.com/sponsors/K-O-N-G-O-R">GitHub Sponsors</a>, <a href="https://www.patreon.com/newerth">Patreon</a>, <a href="https://paypal.me/MissingLinkMedia">PayPal</a>. 💚</p>
 </h3>
 
 <hr/>
@@ -208,33 +208,42 @@ Deploy To Azure
 Debug HTTP Traffic With Fiddler
 
 1. launch Project KONGOR in development mode, by using the `ASPIRE.ApplicationHost Development` profile
-2. start the HoN client with the following command line parameters: `-masterserver 127.0.0.1:8888 -webserver 127.0.0.1:8888 -messageserver 127.0.0.1:8888`; to proxy the the HoN server through Fiddler, set the master server to `127.0.0.1:8888` in the COMPEL configuration file
+2. start the HoN client with WILLOWMAKER set to `127.0.0.1:8888` or the HoN client directly with the following command line parameters: `-masterserver 127.0.0.1:8888 -webserver 127.0.0.1:8888 -messageserver 127.0.0.1:8888`; to proxy the HoN server traffic through Fiddler, set the master server to `127.0.0.1:8888` in the COMPEL configuration file before spawning any servers
 3. in Fiddler, in the bottom-left corner, make sure that the application type filter is set to `All Processes`
-4. in Fiddler, click in the bottom-left corner to disable traffic capturing, which removes the noise from implicitly captured traffic; anything explicitly sent to the Fiddler proxy with default port 8888 will still be captured
-5. in Fiddler, go to `Rules > Customize Rules`, then `Go > to OnBeforeRequest`, and add `oSession.url = oSession.url.Replace("127.0.0.1:8888", "127.0.0.1:55555");` and `oSession.url = oSession.url.Replace("0.0.0.0:8888", "127.0.0.1:55555");` to forward traffic to the Project KONGOR development server once it's been captured
+4. in Fiddler, in the bottom-left corner, disable traffic capturing, which removes the noise from implicitly captured traffic; anything explicitly sent to the Fiddler proxy with default port 8888 will still be captured
+5. in Fiddler, go to `Rules > Customize Rules`, then `Go > to OnBeforeRequest`, and add `oSession.url = oSession.url.Replace("127.0.0.1:8888", "127.0.0.1:5555");` and `oSession.url = oSession.url.Replace("0.0.0.0:8888", "127.0.0.1:5555");` to forward traffic to the Project KONGOR development server once it's been captured
 
 <br/>
 
 Troubleshoot Port Conflicts On Windows
 
 ```powershell
+# Verify Port Reservations
+netsh int ipv4 show excludedportrange protocol=tcp
+
 # Stop Windows NAT To Clear Dynamic Exclusions
 net stop winnat
 
+# Reserve HTTP Services Ports
+netsh int ipv4 delete excludedportrange protocol=tcp startport=5550 numberofports=8 store=persistent
+netsh int ipv4 add excludedportrange protocol=tcp startport=5550 numberofports=8 store=persistent
+
 # Reserve TCP Server Ports
+netsh int ipv4 delete excludedportrange protocol=tcp startport=11031 numberofports=3 store=persistent
 netsh int ipv4 add excludedportrange protocol=tcp startport=11031 numberofports=3 store=persistent
 
 # Reserve Match Server Ports
+netsh int ipv4 delete excludedportrange protocol=tcp startport=11235 numberofports=5 store=persistent
 netsh int ipv4 add excludedportrange protocol=tcp startport=11235 numberofports=5 store=persistent
 
-# Reserve Voice Port
-netsh int ipv4 add excludedportrange protocol=tcp startport=11435 numberofports=1 store=persistent
-
-# Reserve HTTP Services Ports
-netsh int ipv4 add excludedportrange protocol=tcp startport=55550 numberofports=8 store=persistent
+# Reserve Match Server Voice Ports
+netsh int ipv4 delete excludedportrange protocol=tcp startport=11435 numberofports=5 store=persistent
+netsh int ipv4 add excludedportrange protocol=tcp startport=11435 numberofports=5 store=persistent
 
 # Start Windows NAT
 net start winnat
+
+# NOTE: on deletion, make sure to delete the actual range reserved otherwise the delete operation will fail
 ```
 
 <hr/>

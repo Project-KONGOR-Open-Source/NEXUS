@@ -43,7 +43,7 @@ public partial class ServerRequesterController
             HostAccountID = account.ID,
             HostAccountName = account.Name,
             ID = hostAccountName.GetDeterministicInt32Hash(),
-            MatchServers = [],
+            MatchServerIDs = [],
             IPAddress = Request.HttpContext.Connection.RemoteIpAddress.MapToIPv4().ToString()
         };
 
@@ -64,8 +64,8 @@ public partial class ServerRequesterController
             ["chat_port"] = chatServerMatchServerManagerConnectionsPort,
         };
 
-        // TODO: Investigate How These Are Used (+ Resolve CDN Host, + Reconcile With CDN Patch Addresses)
-        response["cdn_upload_host"] = "kongor.net";
+        // TODO: Investigate How These Are Used
+        response["cdn_upload_host"] = Configuration.CDN.Host;
         response["cdn_upload_target"] = "upload";
 
         Logger.LogInformation(@"Server Manager ID ""{MatchServerManagerID}"" Was Registered At ""{MatchServerManagerIPAddress}"" With Cookie ""{MatchServerManagerCookie}""",
@@ -131,7 +131,7 @@ public partial class ServerRequesterController
 
         // TODO: Verify Whether The Server Version Matches The Client Version (Or Disallow Servers To Be Started If They Are Not On The Latest Version)
 
-        List<MatchServerManager> matchServerManagers = await DistributedCache.GetMatchServerManagersByAccountName(hostAccountName);
+        MatchServerManager? matchServerManager = (await DistributedCache.GetMatchServerManagersByAccountName(hostAccountName)).SingleOrDefault();
 
         MatchServer matchServer = new ()
         {
@@ -139,7 +139,7 @@ public partial class ServerRequesterController
             HostAccountName = account.Name,
             ID = serverIdentifier.GetDeterministicInt32Hash(),
             Name = serverName,
-            MatchServerManager = matchServerManagers.SingleOrDefault(),
+            MatchServerManagerID = matchServerManager?.ID,
             Instance = int.Parse(serverInstance),
             IPAddress = serverIPAddress,
             Port = int.Parse(serverPort),
@@ -149,7 +149,15 @@ public partial class ServerRequesterController
 
         await DistributedCache.SetMatchServer(hostAccountName, matchServer);
 
+        if (matchServerManager is not null)
+        {
+            matchServerManager.MatchServerIDs.Add(matchServer.ID);
+
+            await DistributedCache.SetMatchServerManager(hostAccountName, matchServerManager);
+        }
+
         // TODO: Implement Verifier In Description (If The Server Is A COMPEL Server, It Will Have A Verifier In The Description)
+        // INFO: The Server Manager Doesn't Send Descriptions, So Use Name Instead Since We Can Override Them Anyway Via Remote Command (svr_name) On TCP Handshake
 
         string chatServerHost = Environment.GetEnvironmentVariable("CHAT_SERVER_HOST")
             ?? throw new NullReferenceException("Chat Server Host Is NULL");
@@ -306,6 +314,8 @@ public partial class ServerRequesterController
            }
          */
 
+        // TODO: Create Proper Response Model
+
         response.Add("infos", ""); // TODO: Set These Stats
         response.Add("game_cookie", "16cb3211-5253-45a8-bcb9-10d037ec9303"); // Must Exist, But The Value Doesn't Really Matter; TODO: Generate And Store This Cookie Per Match?
         response.Add("my_upgrades", account.User.OwnedStoreItems);
@@ -404,11 +414,118 @@ public partial class ServerRequesterController
         if (matchServer is null)
             return Unauthorized($@"No Match Server Could Be Found For Session Cookie ""{session}""");
 
-        matchServer.Status = Enum.Parse<ServerStatus>(connectionState);
+        matchServer.Status = (ServerStatus) int.Parse(connectionState);
 
         // TODO: Put All The Other Data In The Server Model
 
         await DistributedCache.SetMatchServer(matchServer.HostAccountName, matchServer);
+
+        // The "new" Parameter Being Present Indicates This Is A Match Initialisation Heartbeat
+        string? newMatch = Request.Form["new"];
+
+        if (newMatch is null)
+        {
+            MatchInformation? matchInformation = await DistributedCache.GetMatchInformationByMatchServerSessionCookie(session);
+
+            if (matchInformation is null)
+            {
+                Logger.LogError(@"[BUG] Received Match Initialisation Heartbeat For Session ""{Session}"", But No MatchInformation Found In Cache", session);
+
+                return Ok();
+            }
+
+            matchInformation.ConnectedPlayersCount = int.Parse(connectionsCount);
+            matchInformation.Map = map;
+        }
+
+        if (newMatch is not null)
+        {
+            string? matchID = Request.Form["match_id"];
+
+            if (matchID is null)
+                return BadRequest(@"Invalid Value For Form Parameter ""match_id""");
+
+            MatchInformation? matchInformation = await DistributedCache.GetMatchInformation(int.Parse(matchID));
+
+            if (matchInformation is null)
+            {
+                Logger.LogError(@"[BUG] Received Match Initialisation Heartbeat For Match ID ""{MatchID}"", But No MatchInformation Found In Cache", matchID);
+
+                return Ok();
+            }
+
+            matchInformation.ConnectedPlayersCount = int.Parse(connectionsCount);
+            matchInformation.Map = map;
+
+            string? maximumPlayersCount = Request.Form["max_players"];
+
+            if (maximumPlayersCount is null)
+                return BadRequest(@"Invalid Value For Form Parameter ""max_players""");
+
+            matchInformation.MaximumPlayersCount = int.Parse(maximumPlayersCount);
+
+            string? league = Request.Form["league"];
+
+            if (league is null)
+                return BadRequest(@"Invalid Value For Form Parameter ""league""");
+
+            matchInformation.League = int.Parse(league);
+
+            string? matchMode = Request.Form["mode"];
+
+            if (matchMode is null)
+                return BadRequest(@"Invalid Value For Form Parameter ""mode""");
+
+            matchInformation.MatchMode = PublicMatchModeExtensions.GetPublicMatchModeFromCode(matchMode)
+                ?? throw new InvalidDataException($@"Invalid Match Mode Code ""{matchMode}""");
+
+            string? matchName = Request.Form["mname"];
+
+            if (matchName is null)
+                return BadRequest(@"Invalid Value For Form Parameter ""mname""");
+
+            matchInformation.MatchName = matchName;
+
+            MatchOptions options = MatchOptions.None;
+
+            if (Request.Form.ContainsKey("option[ap]"))                 options |= MatchOptions.AllPick;
+            if (Request.Form.ContainsKey("option[ar]"))                 options |= MatchOptions.AllRandom;
+            if (Request.Form.ContainsKey("option[alt_pick]"))           options |= MatchOptions.AlternateHeroPicking;
+            if (Request.Form.ContainsKey("option[ab]"))                 options |= MatchOptions.AutoBalanced;
+            if (Request.Form.ContainsKey("option[br]"))                 options |= MatchOptions.BalancedRandom;
+            if (Request.Form.ContainsKey("option[veto]"))               options |= MatchOptions.BanPhase;
+            if (Request.Form.ContainsKey("option[rapidfire]"))          options |= MatchOptions.BlitzMode;
+            if (Request.Form.ContainsKey("option[cas]"))                options |= MatchOptions.CasualMode;
+            if (Request.Form.ContainsKey("option[dev_heroes]"))         options |= MatchOptions.DevelopmentHeroes;
+            if (Request.Form.ContainsKey("option[drp_itm]"))            options |= MatchOptions.DropItems;
+            if (Request.Form.ContainsKey("option[dup_h]"))              options |= MatchOptions.DuplicateHeroes;
+            if (Request.Form.ContainsKey("option[em]"))                 options |= MatchOptions.EasyMode;
+            if (Request.Form.ContainsKey("option[gated]"))              options |= MatchOptions.Gated;
+            if (Request.Form.ContainsKey("option[hardcore]"))           options |= MatchOptions.Hardcore;
+            if (Request.Form.ContainsKey("option[no_agi]"))             options |= MatchOptions.NoAgilityHeroes;
+            if (Request.Form.ContainsKey("option[no_repick]"))          options |= MatchOptions.NoHeroRepick;
+            if (Request.Form.ContainsKey("option[no_swap]"))            options |= MatchOptions.NoHeroSwap;
+            if (Request.Form.ContainsKey("option[no_int]"))             options |= MatchOptions.NoIntelligenceHeroes;
+            if (Request.Form.ContainsKey("option[nl]"))                 options |= MatchOptions.NoLeavers;
+            if (Request.Form.ContainsKey("option[no_pups]"))            options |= MatchOptions.NoPowerUps;
+            if (Request.Form.ContainsKey("option[no_timer]"))           options |= MatchOptions.NoRespawnTimer;
+            if (Request.Form.ContainsKey("option[no_stats]"))           options |= MatchOptions.NoStatistics;
+            if (Request.Form.ContainsKey("option[no_str]"))             options |= MatchOptions.NoStrengthHeroes;
+            if (Request.Form.ContainsKey("option[officl]"))             options |= MatchOptions.Official;
+            if (Request.Form.ContainsKey("option[rev_hs]"))             options |= MatchOptions.ReverseHeroSelection;
+            if (Request.Form.ContainsKey("option[rs]"))                 options |= MatchOptions.ReverseSelection;
+            if (Request.Form.ContainsKey("option[shuffleabilities]"))   options |= MatchOptions.ShuffleAbilities;
+            if (Request.Form.ContainsKey("option[shuf]"))               options |= MatchOptions.ShuffleTeams;
+            if (Request.Form.ContainsKey("option[tr]"))                 options |= MatchOptions.TournamentRules;
+            if (Request.Form.ContainsKey("option[verified_only]"))      options |= MatchOptions.VerifiedOnly;
+
+            matchInformation.Options = options;
+
+            await DistributedCache.SetMatchInformation(matchInformation);
+
+            Logger.LogInformation("Captured Match Mode And Options For Match ID {MatchID}: MatchMode={MatchMode}, ArrangedMatchType={ArrangedMatchType}",
+                matchID, matchInformation.MatchMode, matchInformation.MatchType);
+        }
 
         return Ok();
     }
