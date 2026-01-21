@@ -11,6 +11,7 @@ global using KONGOR.MasterServer.Attributes.Serialisation;
 global using KONGOR.MasterServer.Configuration.Economy;
 global using KONGOR.MasterServer.Configuration.Mastery;
 global using KONGOR.MasterServer.Configuration.Matchmaking;
+global using KONGOR.MasterServer.Configuration.Store;
 global using KONGOR.MasterServer.Constants;
 global using KONGOR.MasterServer.Extensions.Cache;
 global using KONGOR.MasterServer.Extensions.Collections;
