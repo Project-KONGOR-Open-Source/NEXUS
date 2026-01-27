@@ -25,11 +25,6 @@ public sealed class MerrickContext : DbContext
     public DbSet<Token> Tokens => Set<Token>();
     public DbSet<User> Users => Set<User>();
 
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {
-        optionsBuilder.AddInterceptors(new AccountStatisticsInterceptor());
-    }
-
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);

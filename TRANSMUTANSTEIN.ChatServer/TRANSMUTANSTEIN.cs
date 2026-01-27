@@ -26,6 +26,9 @@ public class TRANSMUTANSTEIN
 
             // Enable Thread Safety Checks For Entity Framework
             options.EnableThreadSafetyChecks();
+
+            // Add Interceptors
+            options.AddMerrickInterceptors();
         });
 
         // Add Distributed Cache; The Connection String Maps To The "distributed-cache" Resource Defined In ASPIRE.ApplicationHost

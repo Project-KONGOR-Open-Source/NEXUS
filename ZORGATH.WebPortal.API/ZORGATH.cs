@@ -29,6 +29,9 @@ public class ZORGATH
 
             // Enable Thread Safety Checks For Entity Framework
             options.EnableThreadSafetyChecks();
+
+            // Add Interceptors
+            options.AddMerrickInterceptors();
         });
 
         // Add Memory Cache Service
