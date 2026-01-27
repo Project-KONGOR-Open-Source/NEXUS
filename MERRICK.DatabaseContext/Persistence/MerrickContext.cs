@@ -20,10 +20,15 @@ public sealed class MerrickContext : DbContext
     public DbSet<Clan> Clans => Set<Clan>();
     public DbSet<HeroGuide> HeroGuides => Set<HeroGuide>();
     public DbSet<MatchStatistics> MatchStatistics => Set<MatchStatistics>();
-    public DbSet<PlayerStatistics> PlayerStatistics => Set<PlayerStatistics>();
+    public DbSet<MatchParticipantStatistics> MatchParticipantStatistics => Set<MatchParticipantStatistics>();
     public DbSet<Role> Roles => Set<Role>();
     public DbSet<Token> Tokens => Set<Token>();
     public DbSet<User> Users => Set<User>();
+
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        optionsBuilder.AddInterceptors(new AccountStatisticsInterceptor());
+    }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -33,8 +38,8 @@ public sealed class MerrickContext : DbContext
 
         ConfigureRoles(builder.Entity<Role>());
         ConfigureAccounts(builder.Entity<Account>());
-        ConfigurePlayerStatistics(builder.Entity<PlayerStatistics>());
         ConfigureMatchStatistics(builder.Entity<MatchStatistics>());
+        ConfigureMatchParticipantStatistics(builder.Entity<MatchParticipantStatistics>());
     }
 
     private static void ConfigureSchemas(ModelBuilder builder)
@@ -45,8 +50,8 @@ public sealed class MerrickContext : DbContext
         builder.Entity<AccountStatistics>().ToTable("AccountStatistics", StatisticsSchema);
         builder.Entity<Clan>().ToTable("Clans", CoreSchema);
         builder.Entity<HeroGuide>().ToTable("HeroGuides", MiscellaneousSchema);
+        builder.Entity<MatchParticipantStatistics>().ToTable("MatchParticipantStatistics", StatisticsSchema);
         builder.Entity<MatchStatistics>().ToTable("MatchStatistics", StatisticsSchema);
-        builder.Entity<PlayerStatistics>().ToTable("PlayerStatistics", StatisticsSchema);
         builder.Entity<Role>().ToTable("Roles", AuthenticationSchema);
         builder.Entity<Token>().ToTable("Tokens", AuthenticationSchema);
         builder.Entity<User>().ToTable("Users", CoreSchema);
@@ -77,7 +82,7 @@ public sealed class MerrickContext : DbContext
         builder.OwnsMany(account => account.IgnoredPeers, ownedNavigationBuilder => { ownedNavigationBuilder.ToJson(); });
     }
 
-    private static void ConfigurePlayerStatistics(EntityTypeBuilder<PlayerStatistics> builder)
+    private static void ConfigureMatchParticipantStatistics(EntityTypeBuilder<MatchParticipantStatistics> builder)
     {
         builder.Property(statistics => statistics.Inventory).HasConversion
         (

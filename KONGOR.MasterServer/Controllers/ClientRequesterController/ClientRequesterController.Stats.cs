@@ -71,7 +71,7 @@ public partial class ClientRequesterController
         if (matchStatistics is null)
             return new NotFoundObjectResult("Match Stats Not Found");
 
-        List<PlayerStatistics> allPlayerStatistics = await MerrickContext.PlayerStatistics.Where(playerStatistics => playerStatistics.MatchID == matchStatistics.MatchID).ToListAsync();
+        List<MatchParticipantStatistics> allPlayerStatistics = await MerrickContext.MatchParticipantStatistics.Where(playerStatistics => playerStatistics.MatchID == matchStatistics.MatchID).ToListAsync();
 
         string? accountName = await DistributedCache.GetAccountNameForSessionCookie(cookie);
 
@@ -106,7 +106,7 @@ public partial class ClientRequesterController
         Dictionary<int, OneOf<MatchPlayerStatisticsWithMatchPerformanceData, MatchPlayerStatistics>> matchPlayerStatistics = [];
         Dictionary<int, MatchPlayerInventory> matchPlayerInventories = [];
 
-        foreach (PlayerStatistics playerStatistics in allPlayerStatistics)
+        foreach (MatchParticipantStatistics playerStatistics in allPlayerStatistics)
         {
             Account playerAccount = allPlayerAccounts.Single(playerAccount => playerAccount.ID == playerStatistics.AccountID);
 
@@ -116,30 +116,15 @@ public partial class ClientRequesterController
             // INFO: Currently, This Code Logic Assumes A Public Match
             // INFO: Potential Logic + Switch/Case On Map Name: bool isPublic = form.player_stats.First().Value.First().Value.pub_count == 1;
 
-            AccountStatistics currentMatchTypeStatistics = accountStatistics.Where(statistics => statistics.StatisticsType == AccountStatisticsType.Public).SingleOrDefault() ?? new ()
-            {
-                AccountID = playerStatistics.AccountID,
-                StatisticsType = AccountStatisticsType.Public,
-                PlacementMatchesData = null
-            };
+            AccountStatistics currentMatchTypeStatistics = accountStatistics.Single(statistics => statistics.Type == AccountStatisticsType.Public);
 
             // TODO: Increment Current Match Type Statistics With Current Match Data
 
-            AccountStatistics publicMatchStatistics = accountStatistics.Where(statistics => statistics.StatisticsType == AccountStatisticsType.Public).SingleOrDefault() ?? new ()
-            {
-                AccountID = playerStatistics.AccountID,
-                StatisticsType = AccountStatisticsType.Public,
-                PlacementMatchesData = null
-            };
+            AccountStatistics publicMatchStatistics = accountStatistics.Single(statistics => statistics.Type == AccountStatisticsType.Public);
 
             // TODO: Increment Public Match Statistics With Current Match Data
 
-            AccountStatistics matchmakingStatistics = accountStatistics.Where(statistics => statistics.StatisticsType == AccountStatisticsType.Matchmaking).SingleOrDefault() ?? new ()
-            {
-                AccountID = playerStatistics.AccountID,
-                StatisticsType = AccountStatisticsType.Matchmaking,
-                PlacementMatchesData = string.Empty
-            };
+            AccountStatistics matchmakingStatistics = accountStatistics.Single(statistics => statistics.Type == AccountStatisticsType.Matchmaking);
 
             // TODO: Increment Matchmaking Statistics With Current Match Data
 
@@ -166,7 +151,7 @@ public partial class ClientRequesterController
             };
         }
 
-        PlayerStatistics requestingPlayerStatistics = allPlayerStatistics.Single(statistics => statistics.AccountID == account.ID);
+        MatchParticipantStatistics requestingPlayerStatistics = allPlayerStatistics.Single(statistics => statistics.AccountID == account.ID);
 
         MatchMastery matchMastery = new
         (

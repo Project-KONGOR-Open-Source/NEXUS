@@ -173,7 +173,7 @@ public class MatchStatsResponse
     public bool Zero => true;
 }
 
-public class MatchSummary(MatchStatistics matchStatistics, List<PlayerStatistics> playerStatistics, MatchInformation matchInformation)
+public class MatchSummary(MatchStatistics matchStatistics, List<MatchParticipantStatistics> matchParticipantStatistics, MatchInformation matchInformation)
 {
     /// <summary>
     ///     The unique identifier for the match.
@@ -289,7 +289,7 @@ public class MatchSummary(MatchStatistics matchStatistics, List<PlayerStatistics
     ///     Whether the match was private (1) or public (0).
     /// </summary>
     [PHPProperty("private")]
-    public int Private { get; init; } = IsPrivateMatch(playerStatistics);
+    public int Private { get; init; } = IsPrivateMatch(matchParticipantStatistics);
 
     /// <summary>
     ///     Normal Mode flag (1 = enabled, 0 = disabled).
@@ -597,7 +597,7 @@ public class MatchSummary(MatchStatistics matchStatistics, List<PlayerStatistics
     ///     Determined by analysing player statistics from the match.
     /// </summary>
     [PHPProperty("winning_team")]
-    public string WinningTeam { get; init; } = GetWinningTeam(playerStatistics).ToString();
+    public string WinningTeam { get; init; } = GetWinningTeam(matchParticipantStatistics).ToString();
 
     /// <summary>
     ///     The match mode.
@@ -650,7 +650,7 @@ public class MatchSummary(MatchStatistics matchStatistics, List<PlayerStatistics
     ///     The account ID of the player who earned the "Longest Killing Spree" award, or "-1" if no player earned this award.
     /// </summary>
     [PHPProperty("awd_lgks")]
-    public string AwardLongestKillingSpree { get; init; } = GetLongestKillingSpreeAwardRecipientID(playerStatistics).ToString();
+    public string AwardLongestKillingSpree { get; init; } = GetLongestKillingSpreeAwardRecipientID(matchParticipantStatistics).ToString();
 
     /// <summary>
     ///     The account ID of the player who earned the "Most Smackdowns" award, or "-1" if no player earned this award.
@@ -686,7 +686,7 @@ public class MatchSummary(MatchStatistics matchStatistics, List<PlayerStatistics
     ///     The account ID of the player who earned the "Most Wards" award, or "-1" if no player earned this award.
     /// </summary>
     [PHPProperty("awd_mwk")]
-    public string AwardMostWards { get; init; } = GetMostWardsAwardRecipientID(playerStatistics).ToString();
+    public string AwardMostWards { get; init; } = GetMostWardsAwardRecipientID(matchParticipantStatistics).ToString();
 
     /// <summary>
     ///     The account ID of the player who earned the "Most Hero Damage Dealt" award, or "-1" if no player earned this award.
@@ -700,51 +700,51 @@ public class MatchSummary(MatchStatistics matchStatistics, List<PlayerStatistics
     [PHPProperty("awd_hcs")]
     public string AwardHighestCreepScore { get; init; } = (matchStatistics.AwardHighestCreepScore ?? -1).ToString();
 
-    private static int GetMostWardsAwardRecipientID(List<PlayerStatistics> playerStatistics)
+    private static int GetMostWardsAwardRecipientID(List<MatchParticipantStatistics> matchParticipantStatistics)
     {
-        if (playerStatistics.Where(player => player.WardsPlaced > 0).Any())
-            return playerStatistics.OrderByDescending(player => player.WardsPlaced).ThenByDescending(player => player.Experience).First().ID;
+        if (matchParticipantStatistics.Where(player => player.WardsPlaced > 0).Any())
+            return matchParticipantStatistics.OrderByDescending(player => player.WardsPlaced).ThenByDescending(player => player.Experience).First().ID;
 
         return -1;
     }
 
-    private static int GetLongestKillingSpreeAwardRecipientID(List<PlayerStatistics> playerStatistics)
+    private static int GetLongestKillingSpreeAwardRecipientID(List<MatchParticipantStatistics> matchParticipantStatistics)
     {
-        if (playerStatistics.Where(player => player.KillStreak15 > 0).Any())
-            return playerStatistics.OrderByDescending(player => player.KillStreak15).ThenByDescending(player => player.Experience).First().ID;
+        if (matchParticipantStatistics.Where(player => player.KillStreak15 > 0).Any())
+            return matchParticipantStatistics.OrderByDescending(player => player.KillStreak15).ThenByDescending(player => player.Experience).First().ID;
 
-        if (playerStatistics.Where(player => player.KillStreak10 > 0).Any())
-            return playerStatistics.OrderByDescending(player => player.KillStreak10).ThenByDescending(player => player.Experience).First().ID;
+        if (matchParticipantStatistics.Where(player => player.KillStreak10 > 0).Any())
+            return matchParticipantStatistics.OrderByDescending(player => player.KillStreak10).ThenByDescending(player => player.Experience).First().ID;
 
-        if (playerStatistics.Where(player => player.KillStreak09 > 0).Any())
-            return playerStatistics.OrderByDescending(player => player.KillStreak09).ThenByDescending(player => player.Experience).First().ID;
+        if (matchParticipantStatistics.Where(player => player.KillStreak09 > 0).Any())
+            return matchParticipantStatistics.OrderByDescending(player => player.KillStreak09).ThenByDescending(player => player.Experience).First().ID;
 
-        if (playerStatistics.Where(player => player.KillStreak08 > 0).Any())
-            return playerStatistics.OrderByDescending(player => player.KillStreak08).ThenByDescending(player => player.Experience).First().ID;
+        if (matchParticipantStatistics.Where(player => player.KillStreak08 > 0).Any())
+            return matchParticipantStatistics.OrderByDescending(player => player.KillStreak08).ThenByDescending(player => player.Experience).First().ID;
 
-        if (playerStatistics.Where(player => player.KillStreak07 > 0).Any())
-            return playerStatistics.OrderByDescending(player => player.KillStreak07).ThenByDescending(player => player.Experience).First().ID;
+        if (matchParticipantStatistics.Where(player => player.KillStreak07 > 0).Any())
+            return matchParticipantStatistics.OrderByDescending(player => player.KillStreak07).ThenByDescending(player => player.Experience).First().ID;
 
-        if (playerStatistics.Where(player => player.KillStreak06 > 0).Any())
-            return playerStatistics.OrderByDescending(player => player.KillStreak06).ThenByDescending(player => player.Experience).First().ID;
+        if (matchParticipantStatistics.Where(player => player.KillStreak06 > 0).Any())
+            return matchParticipantStatistics.OrderByDescending(player => player.KillStreak06).ThenByDescending(player => player.Experience).First().ID;
 
-        if (playerStatistics.Where(player => player.KillStreak05 > 0).Any())
-            return playerStatistics.OrderByDescending(player => player.KillStreak05).ThenByDescending(player => player.Experience).First().ID;
+        if (matchParticipantStatistics.Where(player => player.KillStreak05 > 0).Any())
+            return matchParticipantStatistics.OrderByDescending(player => player.KillStreak05).ThenByDescending(player => player.Experience).First().ID;
 
-        if (playerStatistics.Where(player => player.KillStreak04 > 0).Any())
-            return playerStatistics.OrderByDescending(player => player.KillStreak04).ThenByDescending(player => player.Experience).First().ID;
+        if (matchParticipantStatistics.Where(player => player.KillStreak04 > 0).Any())
+            return matchParticipantStatistics.OrderByDescending(player => player.KillStreak04).ThenByDescending(player => player.Experience).First().ID;
 
-        if (playerStatistics.Where(player => player.KillStreak03 > 0).Any())
-            return playerStatistics.OrderByDescending(player => player.KillStreak03).ThenByDescending(player => player.Experience).First().ID;
+        if (matchParticipantStatistics.Where(player => player.KillStreak03 > 0).Any())
+            return matchParticipantStatistics.OrderByDescending(player => player.KillStreak03).ThenByDescending(player => player.Experience).First().ID;
 
         return -1;
     }
 
-    private static int GetWinningTeam(List<PlayerStatistics> playerStatistics)
-        => playerStatistics.Where(player => player.Loss is 0 && player.Win is 1).DistinctBy(player => player.Team).Single().Team;
+    private static int GetWinningTeam(List<MatchParticipantStatistics> matchParticipantStatistics)
+        => matchParticipantStatistics.Where(player => player.Loss is 0 && player.Win is 1).DistinctBy(player => player.Team).Single().Team;
 
-    private static int IsPrivateMatch(List<PlayerStatistics> playerStatistics)
-        => playerStatistics.DistinctBy(player => player.PublicMatch).Single().PublicMatch is 0 ? 1 : 0;
+    private static int IsPrivateMatch(List<MatchParticipantStatistics> matchParticipantStatistics)
+        => matchParticipantStatistics.DistinctBy(player => player.PublicMatch).Single().PublicMatch is 0 ? 1 : 0;
 }
 
 public class MatchMastery(string heroIdentifier, int currentMasteryExperience, int matchMasteryExperience, int bonusExperience)
@@ -873,55 +873,55 @@ public class MatchMastery(string heroIdentifier, int currentMasteryExperience, i
     public required int MasteryExperienceSuperBoostProductCount { get; init; }
 }
 
-public class MatchPlayerStatistics(MatchInformation matchInformation, Account account, PlayerStatistics playerStatistics, AccountStatistics currentMatchTypeStatistics, AccountStatistics publicMatchStatistics, AccountStatistics matchmakingStatistics)
+public class MatchPlayerStatistics(MatchInformation matchInformation, Account account, MatchParticipantStatistics matchParticipantStatistics, AccountStatistics currentMatchTypeStatistics, AccountStatistics publicMatchStatistics, AccountStatistics matchmakingStatistics)
 {
     /// <summary>
     ///     The unique identifier for the match.
     /// </summary>
     [PHPProperty("match_id")]
-    public int MatchID { get; init; } = playerStatistics.MatchID;
+    public int MatchID { get; init; } = matchParticipantStatistics.MatchID;
 
     /// <summary>
     ///     The player's account ID.
     /// </summary>
     [PHPProperty("account_id")]
-    public int AccountID { get; init; } = playerStatistics.AccountID;
+    public int AccountID { get; init; } = matchParticipantStatistics.AccountID;
 
     /// <summary>
     ///     The account name (nickname) of the player.
     /// </summary>
     [PHPProperty("nickname")]
-    public string AccountName { get; init; } = playerStatistics.AccountName;
+    public string AccountName { get; init; } = matchParticipantStatistics.AccountName;
 
     /// <summary>
     ///     The clan ID of the player's clan, or "0" if the player is not in a clan.
     /// </summary>
     [PHPProperty("clan_id")]
-    public string ClanID { get; init; } = (playerStatistics.ClanID ?? 0).ToString();
+    public string ClanID { get; init; } = (matchParticipantStatistics.ClanID ?? 0).ToString();
 
     /// <summary>
     ///     The unique identifier of the hero played in the match.
     /// </summary>
     [PHPProperty("hero_id")]
-    public string HeroProductID { get; init; } = (playerStatistics.HeroProductID ?? 0).ToString();
+    public string HeroProductID { get; init; } = (matchParticipantStatistics.HeroProductID ?? 0).ToString();
 
     /// <summary>
     ///     The lobby position of the player (0-9), indicating their slot in the pre-match lobby.
     /// </summary>
     [PHPProperty("position")]
-    public string Position { get; init; } = playerStatistics.LobbyPosition.ToString();
+    public string Position { get; init; } = matchParticipantStatistics.LobbyPosition.ToString();
 
     /// <summary>
     ///     The team the player was on ("1" for Legion, "2" for Hellbourne).
     /// </summary>
     [PHPProperty("team")]
-    public string Team { get; init; } = playerStatistics.Team.ToString();
+    public string Team { get; init; } = matchParticipantStatistics.Team.ToString();
 
     /// <summary>
     ///     The final hero level reached by the player in the match (1-25).
     /// </summary>
     [PHPProperty("level")]
-    public string Level { get; init; } = playerStatistics.HeroLevel.ToString();
+    public string Level { get; init; } = matchParticipantStatistics.HeroLevel.ToString();
 
     /// <summary>
     ///     The number of wins on the player's account.
@@ -945,13 +945,13 @@ public class MatchPlayerStatistics(MatchInformation matchInformation, Account ac
     ///     The number of concede votes the player cast during the match.
     /// </summary>
     [PHPProperty("concedevotes")]
-    public string ConcedeVotes { get; init; } = playerStatistics.ConcedeVotes.ToString();
+    public string ConcedeVotes { get; init; } = matchParticipantStatistics.ConcedeVotes.ToString();
 
     /// <summary>
     ///     The number of times the player bought back into the match after dying.
     /// </summary>
     [PHPProperty("buybacks")]
-    public string Buybacks { get; init; } = playerStatistics.Buybacks.ToString();
+    public string Buybacks { get; init; } = matchParticipantStatistics.Buybacks.ToString();
 
     /// <summary>
     ///     The number of disconnections on the player's account.
@@ -1011,295 +1011,295 @@ public class MatchPlayerStatistics(MatchInformation matchInformation, Account ac
     ///     The number of enemy hero kills achieved by the player in the match.
     /// </summary>
     [PHPProperty("herokills")]
-    public string HeroKills { get; init; } = playerStatistics.HeroKills.ToString();
+    public string HeroKills { get; init; } = matchParticipantStatistics.HeroKills.ToString();
 
     /// <summary>
     ///     The total damage dealt to enemy heroes by the player in the match.
     /// </summary>
     [PHPProperty("herodmg")]
-    public string HeroDamage { get; init; } = playerStatistics.HeroDamage.ToString();
+    public string HeroDamage { get; init; } = matchParticipantStatistics.HeroDamage.ToString();
 
     /// <summary>
     ///     The total experience gained by the player's hero in the match.
     /// </summary>
     [PHPProperty("heroexp")]
-    public string HeroExperience { get; init; } = playerStatistics.HeroExperience.ToString();
+    public string HeroExperience { get; init; } = matchParticipantStatistics.HeroExperience.ToString();
 
     /// <summary>
     ///     The total gold earned by the player's hero in the match.
     /// </summary>
     [PHPProperty("herokillsgold")]
-    public string HeroGold { get; init; } = playerStatistics.GoldFromHeroKills.ToString();
+    public string HeroGold { get; init; } = matchParticipantStatistics.GoldFromHeroKills.ToString();
 
     /// <summary>
     ///     The number of assists (participating in hero kills without landing the final blow) achieved by the player.
     /// </summary>
     [PHPProperty("heroassists")]
-    public string HeroAssists { get; init; } = playerStatistics.HeroAssists.ToString();
+    public string HeroAssists { get; init; } = matchParticipantStatistics.HeroAssists.ToString();
 
     /// <summary>
     ///     The number of times the player died in the match.
     /// </summary>
     [PHPProperty("deaths")]
-    public string Deaths { get; init; } = playerStatistics.HeroDeaths.ToString();
+    public string Deaths { get; init; } = matchParticipantStatistics.HeroDeaths.ToString();
 
     /// <summary>
     ///     The total gold lost by the player due to deaths in the match.
     /// </summary>
     [PHPProperty("goldlost2death")]
-    public string GoldLostToDeath { get; init; } = playerStatistics.GoldLostToDeath.ToString();
+    public string GoldLostToDeath { get; init; } = matchParticipantStatistics.GoldLostToDeath.ToString();
 
     /// <summary>
     ///     The total time in seconds the player spent dead (waiting to respawn) during the match.
     /// </summary>
     [PHPProperty("secs_dead")]
-    public string SecondsDead { get; init; } = playerStatistics.SecondsDead.ToString();
+    public string SecondsDead { get; init; } = matchParticipantStatistics.SecondsDead.ToString();
 
     /// <summary>
     ///     The number of friendly team creeps killed by the player (last-hitting own creeps for gold/experience).
     /// </summary>
     [PHPProperty("teamcreepkills")]
-    public string TeamCreepKills { get; init; } = playerStatistics.TeamCreepKills.ToString();
+    public string TeamCreepKills { get; init; } = matchParticipantStatistics.TeamCreepKills.ToString();
 
     /// <summary>
     ///     The total damage dealt to friendly team creeps by the player.
     /// </summary>
     [PHPProperty("teamcreepdmg")]
-    public string TeamCreepDamage { get; init; } = playerStatistics.TeamCreepDamage.ToString();
+    public string TeamCreepDamage { get; init; } = matchParticipantStatistics.TeamCreepDamage.ToString();
 
     /// <summary>
     ///     The total experience gained from killing friendly team creeps.
     /// </summary>
     [PHPProperty("teamcreepexp")]
-    public string TeamCreepExperience { get; init; } = playerStatistics.TeamCreepExperience.ToString();
+    public string TeamCreepExperience { get; init; } = matchParticipantStatistics.TeamCreepExperience.ToString();
 
     /// <summary>
     ///     The total gold earned from killing friendly team creeps.
     /// </summary>
     [PHPProperty("teamcreepgold")]
-    public string TeamCreepGold { get; init; } = playerStatistics.TeamCreepGold.ToString();
+    public string TeamCreepGold { get; init; } = matchParticipantStatistics.TeamCreepGold.ToString();
 
     /// <summary>
     ///     The number of neutral creeps killed by the player (jungle creeps).
     /// </summary>
     [PHPProperty("neutralcreepkills")]
-    public string NeutralCreepKills { get; init; } = playerStatistics.NeutralCreepKills.ToString();
+    public string NeutralCreepKills { get; init; } = matchParticipantStatistics.NeutralCreepKills.ToString();
 
     /// <summary>
     ///     The total damage dealt to neutral creeps by the player.
     /// </summary>
     [PHPProperty("neutralcreepdmg")]
-    public string NeutralCreepDamage { get; init; } = playerStatistics.NeutralCreepDamage.ToString();
+    public string NeutralCreepDamage { get; init; } = matchParticipantStatistics.NeutralCreepDamage.ToString();
 
     /// <summary>
     ///     The total experience gained from killing neutral creeps.
     /// </summary>
     [PHPProperty("neutralcreepexp")]
-    public string NeutralCreepExperience { get; init; } = playerStatistics.NeutralCreepExperience.ToString();
+    public string NeutralCreepExperience { get; init; } = matchParticipantStatistics.NeutralCreepExperience.ToString();
 
     /// <summary>
     ///     The total gold earned from killing neutral creeps.
     /// </summary>
     [PHPProperty("neutralcreepgold")]
-    public string NeutralCreepGold { get; init; } = playerStatistics.NeutralCreepGold.ToString();
+    public string NeutralCreepGold { get; init; } = matchParticipantStatistics.NeutralCreepGold.ToString();
 
     /// <summary>
     ///     The total damage dealt to enemy buildings (towers, barracks, base structures) by the player.
     /// </summary>
     [PHPProperty("bdmg")]
-    public string BuildingDamage { get; init; } = playerStatistics.BuildingDamage.ToString();
+    public string BuildingDamage { get; init; } = matchParticipantStatistics.BuildingDamage.ToString();
 
     /// <summary>
     ///     The total experience gained from damaging or destroying enemy buildings.
     /// </summary>
     [PHPProperty("bdmgexp")]
-    public string BuildingExperience { get; init; } = playerStatistics.ExperienceFromBuildings.ToString();
+    public string BuildingExperience { get; init; } = matchParticipantStatistics.ExperienceFromBuildings.ToString();
 
     /// <summary>
     ///     The number of enemy buildings (towers, barracks) destroyed by the player.
     /// </summary>
     [PHPProperty("razed")]
-    public string BuildingsRazed { get; init; } = playerStatistics.BuildingsRazed.ToString();
+    public string BuildingsRazed { get; init; } = matchParticipantStatistics.BuildingsRazed.ToString();
 
     /// <summary>
     ///     The total gold earned from damaging or destroying enemy buildings.
     /// </summary>
     [PHPProperty("bgold")]
-    public string BuildingGold { get; init; } = playerStatistics.GoldFromBuildings.ToString();
+    public string BuildingGold { get; init; } = matchParticipantStatistics.GoldFromBuildings.ToString();
 
     /// <summary>
     ///     The number of friendly creeps denied by the player (last-hitting friendly creeps to prevent opponents from gaining gold/experience).
     /// </summary>
     [PHPProperty("denies")]
-    public string Denies { get; init; } = playerStatistics.Denies.ToString();
+    public string Denies { get; init; } = matchParticipantStatistics.Denies.ToString();
 
     /// <summary>
     ///     The total experience denied to opponents through denying friendly creeps.
     /// </summary>
     [PHPProperty("exp_denied")]
-    public string ExperienceDenied { get; init; } = playerStatistics.ExperienceDenied.ToString();
+    public string ExperienceDenied { get; init; } = matchParticipantStatistics.ExperienceDenied.ToString();
 
     /// <summary>
     ///     The total gold accumulated by the player at the end of the match.
     /// </summary>
     [PHPProperty("gold")]
-    public string Gold { get; init; } = playerStatistics.Gold.ToString();
+    public string Gold { get; init; } = matchParticipantStatistics.Gold.ToString();
 
     /// <summary>
     ///     The total gold spent by the player on items during the match.
     /// </summary>
     [PHPProperty("gold_spent")]
-    public string GoldSpent { get; init; } = playerStatistics.GoldSpent.ToString();
+    public string GoldSpent { get; init; } = matchParticipantStatistics.GoldSpent.ToString();
 
     /// <summary>
     ///     The total experience gained by the player during the match.
     /// </summary>
     [PHPProperty("exp")]
-    public string Experience { get; init; } = playerStatistics.Experience.ToString();
+    public string Experience { get; init; } = matchParticipantStatistics.Experience.ToString();
 
     /// <summary>
     ///     The total number of actions performed by the player during the match (clicks, commands, ability usage, etc.).
     /// </summary>
     [PHPProperty("actions")]
-    public string Actions { get; init; } = playerStatistics.Actions.ToString();
+    public string Actions { get; init; } = matchParticipantStatistics.Actions.ToString();
 
     /// <summary>
     ///     The total time in seconds the player was actively playing in the match.
     /// </summary>
     [PHPProperty("secs")]
-    public string Seconds { get; init; } = playerStatistics.SecondsPlayed.ToString();
+    public string Seconds { get; init; } = matchParticipantStatistics.SecondsPlayed.ToString();
 
     /// <summary>
     ///     The number of consumable items (potions, wards, teleport scrolls, etc.) purchased by the player.
     /// </summary>
     [PHPProperty("consumables")]
-    public string Consumables { get; init; } = playerStatistics.ConsumablesPurchased.ToString();
+    public string Consumables { get; init; } = matchParticipantStatistics.ConsumablesPurchased.ToString();
 
     /// <summary>
     ///     The number of observer or sentry wards placed by the player during the match.
     /// </summary>
     [PHPProperty("wards")]
-    public string Wards { get; init; } = playerStatistics.WardsPlaced.ToString();
+    public string Wards { get; init; } = matchParticipantStatistics.WardsPlaced.ToString();
 
     /// <summary>
     ///     The total time in seconds the player spent within experience range of dying enemy units.
     /// </summary>
     [PHPProperty("time_earning_exp")]
-    public string TimeEarningExperience { get; init; } = playerStatistics.TimeEarningExperience.ToString();
+    public string TimeEarningExperience { get; init; } = matchParticipantStatistics.TimeEarningExperience.ToString();
 
     /// <summary>
     ///     The number of First Blood awards earned by the player (1 or 0).
     /// </summary>
     [PHPProperty("bloodlust")]
-    public string FirstBlood { get; init; } = playerStatistics.FirstBlood.ToString();
+    public string FirstBlood { get; init; } = matchParticipantStatistics.FirstBlood.ToString();
 
     /// <summary>
     ///     The number of Double Kill awards earned by the player (killing 2 heroes in quick succession).
     /// </summary>
     [PHPProperty("doublekill")]
-    public string DoubleKill { get; init; } = playerStatistics.DoubleKill.ToString();
+    public string DoubleKill { get; init; } = matchParticipantStatistics.DoubleKill.ToString();
 
     /// <summary>
     ///     The number of Triple Kill awards earned by the player (killing 3 heroes in quick succession).
     /// </summary>
     [PHPProperty("triplekill")]
-    public string TripleKill { get; init; } = playerStatistics.TripleKill.ToString();
+    public string TripleKill { get; init; } = matchParticipantStatistics.TripleKill.ToString();
 
     /// <summary>
     ///     The number of Quad Kill awards earned by the player (killing 4 heroes in quick succession).
     /// </summary>
     [PHPProperty("quadkill")]
-    public string QuadKill { get; init; } = playerStatistics.QuadKill.ToString();
+    public string QuadKill { get; init; } = matchParticipantStatistics.QuadKill.ToString();
 
     /// <summary>
     ///     The number of Annihilation awards earned by the player (killing all 5 enemy heroes in quick succession).
     /// </summary>
     [PHPProperty("annihilation")]
-    public string Annihilation { get; init; } = playerStatistics.Annihilation.ToString();
+    public string Annihilation { get; init; } = matchParticipantStatistics.Annihilation.ToString();
 
     /// <summary>
     ///     The number of 3-kill streaks achieved by the player (killing 3 heroes without dying).
     /// </summary>
     [PHPProperty("ks3")]
-    public string KillStreak3 { get; init; } = playerStatistics.KillStreak03.ToString();
+    public string KillStreak3 { get; init; } = matchParticipantStatistics.KillStreak03.ToString();
 
     /// <summary>
     ///     The number of 4-kill streaks achieved by the player (killing 4 heroes without dying).
     /// </summary>
     [PHPProperty("ks4")]
-    public string KillStreak4 { get; init; } = playerStatistics.KillStreak04.ToString();
+    public string KillStreak4 { get; init; } = matchParticipantStatistics.KillStreak04.ToString();
 
     /// <summary>
     ///     The number of 5-kill streaks achieved by the player (killing 5 heroes without dying).
     /// </summary>
     [PHPProperty("ks5")]
-    public string KillStreak5 { get; init; } = playerStatistics.KillStreak05.ToString();
+    public string KillStreak5 { get; init; } = matchParticipantStatistics.KillStreak05.ToString();
 
     /// <summary>
     ///     The number of 6-kill streaks achieved by the player (killing 6 heroes without dying).
     /// </summary>
     [PHPProperty("ks6")]
-    public string KillStreak6 { get; init; } = playerStatistics.KillStreak06.ToString();
+    public string KillStreak6 { get; init; } = matchParticipantStatistics.KillStreak06.ToString();
 
     /// <summary>
     ///     The number of 7-kill streaks achieved by the player (killing 7 heroes without dying).
     /// </summary>
     [PHPProperty("ks7")]
-    public string KillStreak7 { get; init; } = playerStatistics.KillStreak07.ToString();
+    public string KillStreak7 { get; init; } = matchParticipantStatistics.KillStreak07.ToString();
 
     /// <summary>
     ///     The number of 8-kill streaks achieved by the player (killing 8 heroes without dying).
     /// </summary>
     [PHPProperty("ks8")]
-    public string KillStreak8 { get; init; } = playerStatistics.KillStreak08.ToString();
+    public string KillStreak8 { get; init; } = matchParticipantStatistics.KillStreak08.ToString();
 
     /// <summary>
     ///     The number of 9-kill streaks achieved by the player (killing 9 heroes without dying).
     /// </summary>
     [PHPProperty("ks9")]
-    public string KillStreak9 { get; init; } = playerStatistics.KillStreak09.ToString();
+    public string KillStreak9 { get; init; } = matchParticipantStatistics.KillStreak09.ToString();
 
     /// <summary>
     ///     The number of 10-kill streaks achieved by the player (killing 10 heroes without dying).
     /// </summary>
     [PHPProperty("ks10")]
-    public string KillStreak10 { get; init; } = playerStatistics.KillStreak10.ToString();
+    public string KillStreak10 { get; init; } = matchParticipantStatistics.KillStreak10.ToString();
 
     /// <summary>
     ///     The number of 15-kill streaks achieved by the player (killing 15 heroes without dying).
     /// </summary>
     [PHPProperty("ks15")]
-    public string KillStreak15 { get; init; } = playerStatistics.KillStreak15.ToString();
+    public string KillStreak15 { get; init; } = matchParticipantStatistics.KillStreak15.ToString();
 
     /// <summary>
     ///     The number of Smackdown awards earned by the player (killing a player after taunting them).
     /// </summary>
     [PHPProperty("smackdown")]
-    public string Smackdown { get; init; } = playerStatistics.Smackdown.ToString();
+    public string Smackdown { get; init; } = matchParticipantStatistics.Smackdown.ToString();
 
     /// <summary>
     ///     The number of Humiliation awards earned by the player (getting killed by a player after taunting them).
     /// </summary>
     [PHPProperty("humiliation")]
-    public string Humiliation { get; init; } = playerStatistics.Humiliation.ToString();
+    public string Humiliation { get; init; } = matchParticipantStatistics.Humiliation.ToString();
 
     /// <summary>
     ///     The number of Nemesis awards earned by the player (repeatedly killing the same enemy hero).
     /// </summary>
     [PHPProperty("nemesis")]
-    public string Nemesis { get; init; } = playerStatistics.Nemesis.ToString();
+    public string Nemesis { get; init; } = matchParticipantStatistics.Nemesis.ToString();
 
     /// <summary>
     ///     The number of Retribution awards earned by the player (killing an enemy hero who has killed you repeatedly).
     /// </summary>
     [PHPProperty("retribution")]
-    public string Retribution { get; init; } = playerStatistics.Retribution.ToString();
+    public string Retribution { get; init; } = matchParticipantStatistics.Retribution.ToString();
 
     /// <summary>
     ///     Whether the player used a token (game access token or dice token) during the match ("1" if used, "0" otherwise).
     /// </summary>
     [PHPProperty("used_token")]
-    public string UsedToken { get; init; } = playerStatistics.UsedToken.ToString();
+    public string UsedToken { get; init; } = matchParticipantStatistics.UsedToken.ToString();
 
     /// <summary>
     ///     The hero identifier in the format Hero_{Snake_Case_Name} (e.g. "Hero_Andromeda", "Hero_Legionnaire").
@@ -1317,40 +1317,40 @@ public class MatchPlayerStatistics(MatchInformation matchInformation, Account ac
     ///     The alternative avatar name used by the player during the match, or empty string if using the default hero skin.
     /// </summary>
     [PHPProperty("alt_avatar_name")]
-    public string AlternativeAvatarName { get; init; } = playerStatistics.AlternativeAvatarName ?? string.Empty;
+    public string AlternativeAvatarName { get; init; } = matchParticipantStatistics.AlternativeAvatarName ?? string.Empty;
 
     /// <summary>
     ///     Seasonal campaign progression information for the player in the match.
     /// </summary>
     [PHPProperty("campaign_info")]
-    public SeasonProgress SeasonProgress { get; init; } = new (matchInformation, playerStatistics, matchmakingStatistics);
+    public SeasonProgress SeasonProgress { get; init; } = new (matchInformation, matchParticipantStatistics, matchmakingStatistics);
 }
 
-public class MatchPlayerStatisticsWithMatchPerformanceData(MatchInformation matchInformation, Account account, PlayerStatistics playerStatistics, AccountStatistics currentMatchTypeStatistics, AccountStatistics publicMatchStatistics, AccountStatistics matchmakingStatistics) : MatchPlayerStatistics(matchInformation, account, playerStatistics, currentMatchTypeStatistics, publicMatchStatistics, matchmakingStatistics)
+public class MatchPlayerStatisticsWithMatchPerformanceData(MatchInformation matchInformation, Account account, MatchParticipantStatistics matchParticipantStatistics, AccountStatistics currentMatchTypeStatistics, AccountStatistics publicMatchStatistics, AccountStatistics matchmakingStatistics) : MatchPlayerStatistics(matchInformation, account, matchParticipantStatistics, currentMatchTypeStatistics, publicMatchStatistics, matchmakingStatistics)
 {
     /// <summary>
     ///     The player's team Matchmaking Rating (MMR) before the match.
     /// </summary>
     [PHPProperty("perf_amm_team_rating")]
-    public string MatchPerformanceTeamRatingBefore { get; init; } = (matchmakingStatistics.SkillRating - playerStatistics.RankedSkillRatingChange).ToString("F2");
+    public string MatchPerformanceTeamRatingBefore { get; init; } = (matchmakingStatistics.SkillRating - matchParticipantStatistics.RankedSkillRatingChange).ToString("F2");
 
     /// <summary>
     ///     The change in team Matchmaking Rating (MMR) from this match.
     /// </summary>
     [PHPProperty("perf_amm_team_rating_delta")]
-    public string MatchPerformanceTeamRatingDelta { get; init; } = playerStatistics.RankedSkillRatingChange.ToString("F2");
+    public string MatchPerformanceTeamRatingDelta { get; init; } = matchParticipantStatistics.RankedSkillRatingChange.ToString("F2");
 
     /// <summary>
     ///     Experience points earned based on match outcome (win or loss).
     /// </summary>
     [PHPProperty("perf_victory_exp")]
-    public string MatchPerformanceVictoryExperience { get; init; } = (playerStatistics.Disconnected == 0 && playerStatistics.Win == 1 ? 30 * playerStatistics.Benefit : playerStatistics.Disconnected == 0 && playerStatistics.Loss == 1 ? 10 * playerStatistics.Benefit : 0).ToString();
+    public string MatchPerformanceVictoryExperience { get; init; } = (matchParticipantStatistics.Disconnected == 0 && matchParticipantStatistics.Win == 1 ? 30 * matchParticipantStatistics.Benefit : matchParticipantStatistics.Disconnected == 0 && matchParticipantStatistics.Loss == 1 ? 10 * matchParticipantStatistics.Benefit : 0).ToString();
 
     /// <summary>
     ///     Gold coins earned based on match outcome (win or loss).
     /// </summary>
     [PHPProperty("perf_victory_gc")]
-    public string MatchPerformanceVictoryGoldCoins { get; init; } = (playerStatistics.Disconnected == 0 && playerStatistics.Win == 1 ? 10 * 1 * playerStatistics.Benefit : playerStatistics.Disconnected == 0 && playerStatistics.Loss == 1 ? 5 * 1 * playerStatistics.Benefit : 0).ToString();
+    public string MatchPerformanceVictoryGoldCoins { get; init; } = (matchParticipantStatistics.Disconnected == 0 && matchParticipantStatistics.Win == 1 ? 10 * 1 * matchParticipantStatistics.Benefit : matchParticipantStatistics.Disconnected == 0 && matchParticipantStatistics.Loss == 1 ? 5 * 1 * matchParticipantStatistics.Benefit : 0).ToString();
 
     /// <summary>
     ///     Extra experience points earned for playing the first match of the day.
@@ -1398,37 +1398,37 @@ public class MatchPlayerStatisticsWithMatchPerformanceData(MatchInformation matc
     ///     Experience points earned for annihilation awards.
     /// </summary>
     [PHPProperty("perf_annihilation_exp")]
-    public string MatchPerformanceAnnihilationExperience { get; init; } = (playerStatistics.Disconnected == 0 ? 50 * playerStatistics.Benefit * playerStatistics.Annihilation : 0).ToString();
+    public string MatchPerformanceAnnihilationExperience { get; init; } = (matchParticipantStatistics.Disconnected == 0 ? 50 * matchParticipantStatistics.Benefit * matchParticipantStatistics.Annihilation : 0).ToString();
 
     /// <summary>
     ///     Gold coins earned for annihilation awards.
     /// </summary>
     [PHPProperty("perf_annihilation_gc")]
-    public string MatchPerformanceAnnihilationGoldCoins { get; init; } = (playerStatistics.Disconnected == 0 ? 10 * 1 * playerStatistics.Benefit * playerStatistics.Annihilation : 0).ToString();
+    public string MatchPerformanceAnnihilationGoldCoins { get; init; } = (matchParticipantStatistics.Disconnected == 0 ? 10 * 1 * matchParticipantStatistics.Benefit * matchParticipantStatistics.Annihilation : 0).ToString();
 
     /// <summary>
     ///     Experience points earned for first blood awards.
     /// </summary>
     [PHPProperty("perf_bloodlust_exp")]
-    public string MatchPerformanceBloodlustExperience { get; init; } = (playerStatistics.Disconnected == 0 ? 10 * playerStatistics.Benefit * playerStatistics.FirstBlood : 0).ToString();
+    public string MatchPerformanceBloodlustExperience { get; init; } = (matchParticipantStatistics.Disconnected == 0 ? 10 * matchParticipantStatistics.Benefit * matchParticipantStatistics.FirstBlood : 0).ToString();
 
     /// <summary>
     ///     Gold coins earned for first blood awards.
     /// </summary>
     [PHPProperty("perf_bloodlust_gc")]
-    public string MatchPerformanceBloodlustGoldCoins { get; init; } = (playerStatistics.Disconnected == 0 ? 5 * 1 * playerStatistics.Benefit * playerStatistics.FirstBlood : 0).ToString();
+    public string MatchPerformanceBloodlustGoldCoins { get; init; } = (matchParticipantStatistics.Disconnected == 0 ? 5 * 1 * matchParticipantStatistics.Benefit * matchParticipantStatistics.FirstBlood : 0).ToString();
 
     /// <summary>
     ///     Experience points earned for immortal (15-kill streak) awards.
     /// </summary>
     [PHPProperty("perf_ks15_exp")]
-    public string MatchPerformanceKillStreak15Experience { get; init; } = (playerStatistics.Disconnected == 0 ? 35 * playerStatistics.KillStreak15 : 0).ToString();
+    public string MatchPerformanceKillStreak15Experience { get; init; } = (matchParticipantStatistics.Disconnected == 0 ? 35 * matchParticipantStatistics.KillStreak15 : 0).ToString();
 
     /// <summary>
     ///     Gold coins earned for immortal (15-kill streak) awards.
     /// </summary>
     [PHPProperty("perf_ks15_gc")]
-    public string MatchPerformanceKillStreak15GoldCoins { get; init; } = (playerStatistics.Disconnected == 0 ? 10 * 1 * playerStatistics.Benefit * playerStatistics.KillStreak15 : 0).ToString();
+    public string MatchPerformanceKillStreak15GoldCoins { get; init; } = (matchParticipantStatistics.Disconnected == 0 ? 10 * 1 * matchParticipantStatistics.Benefit * matchParticipantStatistics.KillStreak15 : 0).ToString();
 
     /// <summary>
     ///     Extra gold coins earned for social group bonus.
@@ -1446,7 +1446,7 @@ public class MatchPlayerStatisticsWithMatchPerformanceData(MatchInformation matc
     ///     Change in wins from this match.
     /// </summary>
     [PHPProperty("perf_wins_delta")]
-    public string MatchPerformanceWinsDelta { get; init; } = playerStatistics.Win.ToString();
+    public string MatchPerformanceWinsDelta { get; init; } = matchParticipantStatistics.Win.ToString();
 
     /// <summary>
     ///     Extra gold coins earned for win milestone.
@@ -1464,7 +1464,7 @@ public class MatchPlayerStatisticsWithMatchPerformanceData(MatchInformation matc
     ///     Change in hero kills from this match.
     /// </summary>
     [PHPProperty("perf_herokills_delta")]
-    public string MatchPerformanceHeroKillsDelta { get; init; } = playerStatistics.HeroKills.ToString();
+    public string MatchPerformanceHeroKillsDelta { get; init; } = matchParticipantStatistics.HeroKills.ToString();
 
     /// <summary>
     ///     Extra gold coins earned for hero kill milestone.
@@ -1482,7 +1482,7 @@ public class MatchPlayerStatisticsWithMatchPerformanceData(MatchInformation matc
     ///     Change in hero assists from this match.
     /// </summary>
     [PHPProperty("perf_heroassists_delta")]
-    public string MatchPerformanceHeroAssistsDelta { get; init; } = playerStatistics.HeroAssists.ToString();
+    public string MatchPerformanceHeroAssistsDelta { get; init; } = matchParticipantStatistics.HeroAssists.ToString();
 
     /// <summary>
     ///     Extra gold coins earned for hero assist milestone.
@@ -1500,7 +1500,7 @@ public class MatchPlayerStatisticsWithMatchPerformanceData(MatchInformation matc
     ///     Change in wards placed from this match.
     /// </summary>
     [PHPProperty("perf_wards_delta")]
-    public string MatchPerformanceWardsDelta { get; init; } = playerStatistics.WardsPlaced.ToString();
+    public string MatchPerformanceWardsDelta { get; init; } = matchParticipantStatistics.WardsPlaced.ToString();
 
     /// <summary>
     ///     Extra gold coins earned for ward placement milestone.
@@ -1518,7 +1518,7 @@ public class MatchPlayerStatisticsWithMatchPerformanceData(MatchInformation matc
     ///     Change in smackdowns from this match.
     /// </summary>
     [PHPProperty("perf_smackdown_delta")]
-    public string MatchPerformanceSmackdownDelta { get; init; } = playerStatistics.Smackdown.ToString();
+    public string MatchPerformanceSmackdownDelta { get; init; } = matchParticipantStatistics.Smackdown.ToString();
 
     /// <summary>
     ///     Extra gold coins earned for smackdown milestone.
@@ -1542,7 +1542,7 @@ public class MatchPlayerStatisticsWithMatchPerformanceData(MatchInformation matc
     ///     Change in level experience from this match.
     /// </summary>
     [PHPProperty("perf_level_delta")]
-    public string MatchPerformanceLevelExperienceDelta { get; init; } = playerStatistics.Experience.ToString();
+    public string MatchPerformanceLevelExperienceDelta { get; init; } = matchParticipantStatistics.Experience.ToString();
 
     /// <summary>
     ///     Extra gold coins earned for level milestone.
@@ -1569,19 +1569,19 @@ public class MatchPlayerStatisticsWithMatchPerformanceData(MatchInformation matc
     public string MatchPerformanceMultiplierExperience { get; init; } = "0";
 }
 
-public class SeasonProgress(MatchInformation matchInformation, PlayerStatistics playerStatistics, AccountStatistics matchmakingStatistics)
+public class SeasonProgress(MatchInformation matchInformation, MatchParticipantStatistics matchParticipantStatistics, AccountStatistics matchmakingStatistics)
 {
     /// <summary>
     ///     The player's account ID.
     /// </summary>
     [PHPProperty("account_id")]
-    public int AccountID { get; init; } = playerStatistics.AccountID;
+    public int AccountID { get; init; } = matchParticipantStatistics.AccountID;
 
     /// <summary>
     ///     The unique identifier for the match.
     /// </summary>
     [PHPProperty("match_id")]
-    public int MatchID { get; init; } = playerStatistics.MatchID;
+    public int MatchID { get; init; } = matchParticipantStatistics.MatchID;
 
     /// <summary>
     ///     Whether the match was a casual ranked match ("1") or competitive ranked match ("0").
@@ -1593,7 +1593,7 @@ public class SeasonProgress(MatchInformation matchInformation, PlayerStatistics 
     ///     The player's Matchmaking Rating (MMR) before the match.
     /// </summary>
     [PHPProperty("mmr_before")]
-    public string MMRBefore { get; init; } = (matchmakingStatistics.SkillRating - playerStatistics.RankedSkillRatingChange).ToString();
+    public string MMRBefore { get; init; } = (matchmakingStatistics.SkillRating - matchParticipantStatistics.RankedSkillRatingChange).ToString();
 
     /// <summary>
     ///     The player's Matchmaking Rating (MMR) after the match.
@@ -1613,7 +1613,7 @@ public class SeasonProgress(MatchInformation matchInformation, PlayerStatistics 
     ///     </code>
     /// </summary>
     [PHPProperty("medal_before")]
-    public string MedalBefore { get; init; } = ((int) RankExtensions.GetRank(matchmakingStatistics.SkillRating - playerStatistics.RankedSkillRatingChange)).ToString();
+    public string MedalBefore { get; init; } = ((int) RankExtensions.GetRank(matchmakingStatistics.SkillRating - matchParticipantStatistics.RankedSkillRatingChange)).ToString();
 
     /// <summary>
     ///     The player's medal rank after the match.

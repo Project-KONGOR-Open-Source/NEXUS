@@ -1,6 +1,6 @@
 ﻿namespace MERRICK.DatabaseContext.Entities.Statistics;
 
-[Index(nameof(AccountID), nameof(StatisticsType), IsUnique = true)]
+[Index(nameof(AccountID), nameof(Type), IsUnique = true)]
 public class AccountStatistics
 {
     [Key]
@@ -8,7 +8,7 @@ public class AccountStatistics
 
     public required int AccountID { get; set; }
 
-    public required AccountStatisticsType StatisticsType { get; set; }
+    public required AccountStatisticsType Type { get; set; }
 
     public int MatchesPlayed { get; set; } = 0;
 
@@ -48,9 +48,10 @@ public class AccountStatistics
 
 public enum AccountStatisticsType
 {
-    Cooperative = 0,
-    Public      = 1,
-    Matchmaking = 2,
-    MidWars     = 3,
-    RiftWars    = 4
+    Cooperative       = 0,
+    Public            = 1,
+    Matchmaking       = 2,
+    MatchmakingCasual = 3,
+    MidWars           = 4,
+    RiftWars          = 5
 }
