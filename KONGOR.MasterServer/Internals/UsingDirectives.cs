@@ -1,9 +1,8 @@
-﻿global using ASPIRE.Common;
-global using ASPIRE.Common.Communication;
+﻿global using ASPIRE.Common.Communication;
 global using ASPIRE.Common.Constants;
-global using ASPIRE.Common.Enumerations;
 global using ASPIRE.Common.Enumerations.Match;
 global using ASPIRE.Common.Enumerations.Statistics;
+global using ASPIRE.Common.Extensions.Collections;
 global using ASPIRE.Common.Extensions.Cryptography;
 global using ASPIRE.Common.ServiceDefaults;
 
@@ -14,7 +13,6 @@ global using KONGOR.MasterServer.Configuration.Matchmaking;
 global using KONGOR.MasterServer.Configuration.Store;
 global using KONGOR.MasterServer.Constants;
 global using KONGOR.MasterServer.Extensions.Cache;
-global using KONGOR.MasterServer.Extensions.Collections;
 global using KONGOR.MasterServer.Handlers.Patch;
 global using KONGOR.MasterServer.Handlers.SRP;
 global using KONGOR.MasterServer.Helpers.Serialisation;
@@ -41,7 +39,6 @@ global using Microsoft.AspNetCore.Mvc;
 global using Microsoft.AspNetCore.RateLimiting;
 global using Microsoft.EntityFrameworkCore;
 global using Microsoft.EntityFrameworkCore.Diagnostics;
-global using Microsoft.Extensions.Caching.Memory;
 global using Microsoft.Extensions.FileProviders;
 global using Microsoft.Extensions.Options;
 global using Microsoft.OpenApi;
@@ -55,7 +52,6 @@ global using SecureRemotePassword;
 global using StackExchange.Redis;
 
 global using System.Collections;
-global using System.Linq.Expressions;
 global using System.Net;
 global using System.Net.Sockets;
 global using System.Reflection;

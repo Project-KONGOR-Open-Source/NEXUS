@@ -1,5 +1,6 @@
 ﻿global using ASPIRE.Common.Communication;
 global using ASPIRE.Common.Constants;
+global using ASPIRE.Common.Extensions.Collections;
 global using ASPIRE.Common.ServiceDefaults;
 
 global using MERRICK.DatabaseContext.Constants;
@@ -32,5 +33,4 @@ global using System.Net.Sockets;
 global using System.Reflection;
 global using System.Runtime.CompilerServices;
 global using System.Security.Claims;
-global using System.Linq.Expressions;
 global using System.Text.Json;

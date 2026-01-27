@@ -3,7 +3,7 @@ namespace MERRICK.DatabaseContext.Extensions;
 /// <summary>
 ///     Extension methods for <see cref="DbContextOptionsBuilder"/>.
 /// </summary>
-public static class DbContextOptionsBuilderExtensions
+public static class DatabaseContextOptionsBuilderExtensions
 {
     /// <summary>
     ///     Adds all required interceptors for the Merrick database context.
