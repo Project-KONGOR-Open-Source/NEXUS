@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Net;
 using System.Net.Sockets;
 
@@ -22,11 +23,11 @@ public class TRANSMUTANSTEINServiceProvider : WebApplicationFactory<global::TRAN
         {
             Dictionary<string, string?> settings = new()
             {
-                { "CHAT_SERVER_PORT_CLIENT", ClientPort.ToString() },
+                { "CHAT_SERVER_PORT_CLIENT", ClientPort.ToString(CultureInfo.InvariantCulture) },
                 // If ClientPort is 0 (dynamic), use 0 for others to also be dynamic.
                 // If fixed, use spacing (+100, +200) to avoid collisions with close ports.
-                { "CHAT_SERVER_PORT_MATCH_SERVER", (ClientPort == 0 ? 0 : ClientPort + 100).ToString() },
-                { "CHAT_SERVER_PORT_MATCH_SERVER_MANAGER", (ClientPort == 0 ? 0 : ClientPort + 200).ToString() },
+                { "CHAT_SERVER_PORT_MATCH_SERVER", (ClientPort == 0 ? 0 : ClientPort + 100).ToString(CultureInfo.InvariantCulture) },
+                { "CHAT_SERVER_PORT_MATCH_SERVER_MANAGER", (ClientPort == 0 ? 0 : ClientPort + 200).ToString(CultureInfo.InvariantCulture) },
                 // Use localhost for infrastructure to avoid DNS issues in tests
                 { "INFRASTRUCTURE_GATEWAY", "localhost" }
             };
@@ -68,9 +69,10 @@ public class TRANSMUTANSTEINServiceProvider : WebApplicationFactory<global::TRAN
             Console.WriteLine("[DEBUG] NullFloodPreventionService Registered.");
 
             // Add in-memory database
+            string dbName = $"InMemoryMerrickDbForChat_{Guid.NewGuid()}";
             services.AddDbContext<MerrickContext>(options =>
             {
-                options.UseInMemoryDatabase("InMemoryMerrickDbForChat");
+                options.UseInMemoryDatabase(dbName);
             });
 
             // Remove real Redis
@@ -113,6 +115,14 @@ public class TRANSMUTANSTEINServiceProvider : WebApplicationFactory<global::TRAN
         // Otherwise, we use the provided port.
         TRANSMUTANSTEINServiceProvider provider = new() { ClientPort = clientPort };
 
+        // Reset static context to prevent test pollution
+        // This is required because Context members are static and persist across In-Process tests
+        global::TRANSMUTANSTEIN.ChatServer.Internals.Context.ClientChatSessions.Clear();
+        global::TRANSMUTANSTEIN.ChatServer.Internals.Context.MatchServerChatSessions.Clear();
+        global::TRANSMUTANSTEIN.ChatServer.Internals.Context.MatchServerManagerChatSessions.Clear();
+        global::TRANSMUTANSTEIN.ChatServer.Internals.Context.ChatChannels.Clear();
+
+
         // This forces the server to start
         provider.CreateClient();
 
@@ -150,7 +160,7 @@ public class TRANSMUTANSTEINServiceProvider : WebApplicationFactory<global::TRAN
 
         // Wait for the TCP listeners to spin up using exponential backoff probing
         int attempt = 0;
-        int maxAttempts = 10;
+        const int maxAttempts = 10;
         int delayMs = 100;
 
         while (attempt < maxAttempts)

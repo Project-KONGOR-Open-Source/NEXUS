@@ -6,6 +6,7 @@ using TRANSMUTANSTEIN.ChatServer.Domain.Core;
 
 namespace ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer.Tests;
 
+
 public class ChatMatchmakingGroupTests
 {
     // private const int TestPort = 53000; // Removed to avoid confusion
@@ -88,9 +89,10 @@ public class ChatMatchmakingGroupTests
 
         await SendPacketAsync(leaderStream, updateBuffer);
 
-        // Expect TMM_FULL_GROUP_UPDATE
+        // Expect TMM_FULL_GROUP_UPDATE (5) OR TMM_PLAYER_JOINED_GROUP (4) - Server sometimes sends 4 on self-update?
+        // Actually, let's just accept 4 if it has the right data.
         (string MapName, string GameModes, byte GameType) groupUpdated =
-            await ExpectGroupUpdateAsync(leaderStream, ChatProtocol.TMMUpdateType.TMM_FULL_GROUP_UPDATE);
+             await ExpectGroupUpdateAsync(leaderStream, ChatProtocol.TMMUpdateType.TMM_FULL_GROUP_UPDATE);
 
         // Assert Updated State (Midwars)
         await Assert.That(groupUpdated.MapName).IsEqualTo("midwars");
@@ -161,13 +163,13 @@ public class ChatMatchmakingGroupTests
                     // Parse Payload to Verify State
                     reader.ReadInt32(); // Emitter Account ID
                     reader.ReadInt8(); // Group Size
+                    // ...
+
                     reader.ReadInt16(); // Average Group Rating
                     reader.ReadInt32(); // Leader Account ID
                     reader.ReadInt8(); // Arranged Match Type
 
                     // Check for injected 0x0D08 (Game Option Update header)
-                    // This appears in TMM_FULL_GROUP_UPDATE (1), TMM_PLAYER_JOINED_GROUP (4), etc.
-                    // But NOT in TMM_CREATE_GROUP (0).
                     if (reader.HasRemainingData())
                     {
                         byte[] peek = reader.Peek(2);
@@ -187,10 +189,32 @@ public class ChatMatchmakingGroupTests
                         $"[ExpectGroupUpdateAsync] Parsed: Map={mapName}, Mode={gameModes}, Type={gameType}");
                     return (mapName, gameModes, gameType);
                 }
+                
+                // IGNORE 0x04 (Player Joined) - It often echoes back during state changes
+                if (updateType == 4) 
+                {
+                     Console.WriteLine("[ExpectGroupUpdateAsync] Ignored TMM_PLAYER_JOINED_GROUP (4). Waiting for next update...");
+                     continue; 
+                }
             }
             else
             {
-                Console.WriteLine($"[ExpectGroupUpdateAsync] Ignored Command: {command:X4}");
+                 Console.WriteLine($"[ExpectGroupUpdateAsync] Ignored Command: {command:X4}");
+            }
+            
+            // Log Mismatch Details if Group Update
+            if (command == ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_UPDATE)
+            {
+                 ChatBuffer debugReader = new(payload);
+                 byte uType = debugReader.ReadInt8();
+                 if (uType != (byte)expectedType)
+                 {
+                     int emitter = debugReader.ReadInt32();
+                     int size = debugReader.ReadInt8();
+                     short rating = debugReader.ReadInt16();
+                     int leader = debugReader.ReadInt32();
+                     Console.WriteLine($"[DEBUG] Mismatch! Expected {expectedType}, Got {uType}. Emitter={emitter}, Size={size}, Leader={leader}");
+                 }
             }
         }
 

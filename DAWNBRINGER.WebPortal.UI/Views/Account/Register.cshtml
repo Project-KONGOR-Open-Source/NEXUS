@@ -9,7 +9,7 @@
         <p class="text-slate-400">Choose your In-Game Name and Password</p>
     </div>
 
-    <form asp-controller="Account" asp-action="CompleteRegistration" method="post" class="space-y-4">
+    <form asp-controller="Account" asp-action="CompleteRegistration" method="post" class="space-y-4" data-environment="@Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")">
         <div asp-validation-summary="ModelOnly" class="text-red-400 text-sm mb-4"></div>
 
         <div>
@@ -46,4 +46,5 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial"/>
+    <script src="~/js/validation.js" asp-append-version="true"></script>
 }

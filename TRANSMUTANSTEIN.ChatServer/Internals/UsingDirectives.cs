@@ -1,10 +1,18 @@
-﻿global using ASPIRE.Common.Extensions.Cryptography;
-global using ASPIRE.Common.ServiceDefaults;
+global using System.Collections.Concurrent;
+global using System.Diagnostics;
+global using System.Net;
+global using System.Net.Sockets;
+global using System.Reflection;
+global using System.Runtime.CompilerServices;
+global using System.Text;
 
+global using ASPIRE.Common.Constants;
+global using ASPIRE.Common.Extensions.Cryptography;
+global using ASPIRE.Common.ServiceDefaults;
 // TODO: Move These To A Shared Project And Remove Inter-Project Dependencies
 global using KONGOR.MasterServer.Extensions.Cache;
-global using KONGOR.MasterServer.Models.ServerManagement;
 global using KONGOR.MasterServer.Handlers.SRP;
+global using KONGOR.MasterServer.Models.ServerManagement;
 
 global using MERRICK.DatabaseContext.Entities.Core;
 global using MERRICK.DatabaseContext.Entities.Relational;
@@ -20,20 +28,11 @@ global using OneOf;
 
 global using StackExchange.Redis;
 
-global using System.Collections.Concurrent;
-global using System.Diagnostics;
-global using System.Net;
-global using System.Net.Sockets;
-global using System.Reflection;
-global using System.Text;
-
 global using TRANSMUTANSTEIN.ChatServer.Attributes;
-global using TRANSMUTANSTEIN.ChatServer.CommandProcessors.Channels;
-global using TRANSMUTANSTEIN.ChatServer.CommandProcessors.Connection;
 global using TRANSMUTANSTEIN.ChatServer.CommandProcessors.Matchmaking;
 global using TRANSMUTANSTEIN.ChatServer.Contracts;
-global using TRANSMUTANSTEIN.ChatServer.Domain.Core;
 global using TRANSMUTANSTEIN.ChatServer.Domain.Communication;
+global using TRANSMUTANSTEIN.ChatServer.Domain.Core;
 global using TRANSMUTANSTEIN.ChatServer.Domain.Matchmaking;
 global using TRANSMUTANSTEIN.ChatServer.Domain.Social;
 global using TRANSMUTANSTEIN.ChatServer.Extensions.Protocol;

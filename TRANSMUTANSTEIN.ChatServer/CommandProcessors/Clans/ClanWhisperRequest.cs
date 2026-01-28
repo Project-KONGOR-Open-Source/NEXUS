@@ -1,9 +1,10 @@
 using TRANSMUTANSTEIN.ChatServer.Domain.Clans;
+using TRANSMUTANSTEIN.ChatServer.Internals;
 
 namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Clans;
 
 [ChatCommand(ChatProtocol.Command.CHAT_CMD_CLAN_WHISPER)]
-public class ClanWhisperRequest : ISynchronousCommandProcessor<ChatSession>
+public class ClanWhisperRequest(IChatContext chatContext) : ISynchronousCommandProcessor<ChatSession>
 {
     public void Process(ChatSession session, ChatBuffer buffer)
     {
@@ -23,7 +24,7 @@ public class ClanWhisperRequest : ISynchronousCommandProcessor<ChatSession>
         // Iterate all online sessions to find clan members
         // Optimization: Could cache clan members list in ClanManager if scaling is needed.
         // Current approach is O(N) where N = online users. Acceptable for now.
-        foreach (ChatSession clientSession in Context.ClientChatSessions.Values)
+        foreach (ChatSession clientSession in chatContext.ClientChatSessions.Values)
         {
             if (clientSession.Account != null &&
                 clientSession.Account.Clan != null &&

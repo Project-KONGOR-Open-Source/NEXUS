@@ -2,7 +2,7 @@ using System.Globalization;
 
 using MERRICK.DatabaseContext.Entities;
 using MERRICK.DatabaseContext.Extensions;
-using TRANSMUTANSTEIN.ChatServer.Domain.Core;
+using TRANSMUTANSTEIN.ChatServer.Internals;
 
 namespace TRANSMUTANSTEIN.ChatServer.Domain.Social;
 
@@ -26,7 +26,7 @@ public class Friend
     ///     immediately.
     ///     Otherwise, stores pending request in the distributed cache and notifies the target account.
     /// </summary>
-    public async Task<Friend> Add(ChatSession session, MerrickContext merrick, IDatabase distributedCacheStore)
+    public async Task<Friend> Add(ChatSession session, MerrickContext merrick, IDatabase distributedCacheStore, IChatContext chatContext)
     {
         // Look Up Target Account In Database
         Account? targetAccount = await merrick.Accounts
@@ -119,7 +119,7 @@ public class Friend
             SendFriendRequestApproval(session, targetAccount, ChatProtocol.FriendApproveStatus.SUCCESS_REQUESTER,
                 requesterNotification.NotificationId);
 
-            ChatSession? targetSession = Context.ClientChatSessions.Values
+            ChatSession? targetSession = chatContext.ClientChatSessions.Values
                 .SingleOrDefault(chatSession =>
                     chatSession.Account.Name.Equals(targetAccount.Name, StringComparison.OrdinalIgnoreCase));
 
@@ -145,7 +145,7 @@ public class Friend
         // Send Success Response To Requester (Friend Request Created Successfully)
         SendFriendAddSuccess(session, targetAccount, requesterNotificationID);
 
-        ChatSession? targetOnlineSession = Context.ClientChatSessions.Values
+        ChatSession? targetOnlineSession = chatContext.ClientChatSessions.Values
             .SingleOrDefault(chatSession =>
                 chatSession.Account.Name.Equals(targetAccount.Name, StringComparison.OrdinalIgnoreCase));
 
@@ -181,7 +181,7 @@ public class Friend
             // It seems it ISN'T set? "ClientResponse" is null in the new request path?
             // Ah, legacy L113 sets FriendClientResponse.
             // Does legacy NOT send a response to the requester for success?
-            // "BuddyAddRequest" seems to only send a response on failure or immediate approval.
+            // "BuddyAddRequest" seems to only send a response to the requester on failure or immediate approval.
             // But `SendFriendAddSuccess` exists in my current code.
 
             // Let's implement the Notification for the TARGET first.
@@ -200,7 +200,7 @@ public class Friend
     ///     Approves a pending friend request from another account.
     ///     Creates bi-directional friendship and sends approval responses to both clients.
     /// </summary>
-    public async Task<Friend> Approve(ChatSession session, MerrickContext merrick, IDatabase distributedCacheStore)
+    public async Task<Friend> Approve(ChatSession session, MerrickContext merrick, IDatabase distributedCacheStore, IChatContext chatContext)
     {
         // Load Approver's Account
         Account approverAccount = await merrick.Accounts
@@ -244,7 +244,7 @@ public class Friend
         SendFriendRequestApproval(session, requesterAccount, ChatProtocol.FriendApproveStatus.SUCCESS_APPROVER,
             approverNotification.NotificationId);
 
-        ChatSession? requesterSession = Context.ClientChatSessions.Values
+        ChatSession? requesterSession = chatContext.ClientChatSessions.Values
             .SingleOrDefault(chatSession =>
                 chatSession.Account.Name.Equals(requesterAccount.Name, StringComparison.OrdinalIgnoreCase));
 
@@ -273,7 +273,10 @@ public class Friend
         {
             FriendedPeer friendOneToTwo = new()
             {
-                ID = two.ID, Name = two.Name, ClanTag = two.Clan?.Tag, FriendGroup = "DEFAULT"
+                ID = two.ID,
+                Name = two.Name,
+                ClanTag = two.Clan?.Tag,
+                FriendGroup = "DEFAULT"
             };
 
             one.FriendedPeers.Add(friendOneToTwo);
@@ -284,7 +287,10 @@ public class Friend
         {
             FriendedPeer friendTwoToOne = new()
             {
-                ID = one.ID, Name = one.Name, ClanTag = one.Clan?.Tag, FriendGroup = "DEFAULT"
+                ID = one.ID,
+                Name = one.Name,
+                ClanTag = one.Clan?.Tag,
+                FriendGroup = "DEFAULT"
             };
 
             two.FriendedPeers.Add(friendTwoToOne);
@@ -315,13 +321,13 @@ public class Friend
 
         notification.WriteCommand(ChatProtocol.Command.CHAT_CMD_REQUEST_BUDDY_ADD_RESPONSE);
         notification.WriteInt8(Convert.ToByte(ChatProtocol.FriendAddStatus
-            .SUCCESS_REQUESTEE)); // Friend Addition Status
+            .SUCCESS_REQUESTEE, CultureInfo.InvariantCulture)); // Friend Addition Status
         notification.WriteInt32(notificationID); // Notification ID For Tracking This Request
         notification.WriteString(requesterAccount.GetNameWithClanTag()); // Requester's Display Name With Clan Tag
         notification.WriteInt8(0x00); // 0x00
         notification.WriteString(requesterAccount.GetNameColourNoPrefixCode()); // Requester's Name Colour
         notification.WriteInt8(Convert.ToByte(ChatProtocol.ChatClientStatus
-            .CHAT_CLIENT_STATUS_CONNECTED)); // Requester's Current Connection Status
+            .CHAT_CLIENT_STATUS_CONNECTED, CultureInfo.InvariantCulture)); // Requester's Current Connection Status
         notification.WriteInt8(requesterAccount.GetChatClientFlags()); // Requester's Account Flags
         notification.WriteInt32(requesterAccount.Clan?.ID ?? 0); // Requester's Clan ID (Zero If Not In A Clan)
         notification.WriteString(requesterAccount.Clan?.Name ??
@@ -342,7 +348,7 @@ public class Friend
         ChatBuffer response = new();
 
         response.WriteCommand(ChatProtocol.Command.CHAT_CMD_REQUEST_BUDDY_APPROVE_RESPONSE);
-        response.WriteInt8(Convert.ToByte(status)); // Friend Approval Status
+        response.WriteInt8(Convert.ToByte(status, CultureInfo.InvariantCulture)); // Friend Approval Status
         response.WriteInt32(friendAccount.ID); // Friend's Account ID
         response.WriteInt32(notificationID); // Notification ID For Tracking The Friend Request
         response.WriteString(friendAccount.GetNameWithClanTag()); // Friend's Display Name With Clan Tag
@@ -360,13 +366,13 @@ public class Friend
 
         response.WriteCommand(ChatProtocol.Command.CHAT_CMD_REQUEST_BUDDY_ADD_RESPONSE);
         response.WriteInt8(Convert.ToByte(ChatProtocol.FriendAddStatus
-            .SUCCESS_REQUESTER)); // Success Indicator For The Client Who Initiated The Friend Request
+            .SUCCESS_REQUESTER, CultureInfo.InvariantCulture)); // Success Indicator For The Client Who Initiated The Friend Request
         response.WriteInt32(notificationID); // Requester's Notification ID For This Friend Request
         response.WriteString(friendAccount.GetNameWithClanTag()); // Friend's Display Name With Clan Tag
         response.WriteInt8(0x00);
         response.WriteString(friendAccount.GetNameColourNoPrefixCode()); // Friend's Name Colour
         response.WriteInt8(Convert.ToByte(ChatProtocol.ChatClientStatus
-            .CHAT_CLIENT_STATUS_CONNECTED)); // Friend's Current Connection Status
+            .CHAT_CLIENT_STATUS_CONNECTED, CultureInfo.InvariantCulture)); // Friend's Current Connection Status
         response.WriteInt8(friendAccount.GetChatClientFlags()); // Friend's Account Flags
         response.WriteInt32(friendAccount.Clan?.ID ?? 0); // Friend's Clan ID (Zero If Not In A Clan)
         response.WriteString(friendAccount.Clan?.Name ??
@@ -387,7 +393,7 @@ public class Friend
         ChatBuffer response = new();
 
         response.WriteCommand(ChatProtocol.Command.CHAT_CMD_REQUEST_BUDDY_ADD_RESPONSE);
-        response.WriteInt8(Convert.ToByte(reason)); // Friend Addition Failure Reason
+        response.WriteInt8(Convert.ToByte(reason, CultureInfo.InvariantCulture)); // Friend Addition Failure Reason
         response.WriteInt32(0); // Notification ID (Zero Indicates Failure)
         response.WriteString(targetAccount?.GetNameWithClanTag() ??
                              AccountName); // Target Display Name With Clan Tag (Or Plain Name If Account Not Found)
@@ -405,7 +411,7 @@ public class Friend
 
         response.WriteCommand(ChatProtocol.Command.CHAT_CMD_REQUEST_BUDDY_APPROVE_RESPONSE);
         response.WriteInt8(Convert.ToByte(ChatProtocol.FriendApproveStatus
-            .GENERIC_FAILURE)); // Friend Approval Failure (Generic Error)
+            .GENERIC_FAILURE, CultureInfo.InvariantCulture)); // Friend Approval Failure (Generic Error)
         response.WriteInt32(requesterAccountID); // Requester's Account ID
         response.WriteInt32(0); // Notification ID (Zero Indicates Failure)
         response.WriteString(requesterAccountName); // Requester's Display Name With Clan Tag
@@ -457,14 +463,14 @@ public class Friend
             "action_friend_request", // action
             notification.TimestampCreated.ToString("MM/dd/yy HH:mm tt",
                 CultureInfo.InvariantCulture), // Legacy format: 04/16 16:59 PM ? 
-            // Legacy L161: DateTime.UtcNow.
-            // L177 passes it strictly. Does string.Join use default ToString?
-            // Need to verify legacy DateTime format in string.Join.
-            // Assuming standard formatting for now or "MM/dd/yy HH:mm tt" based on "04/16 16:59 PM" comment in legacy retrieval. 
-            // Wait, comment in legacy retrieval (step 4619) showed: "|04/16 16:59 PM|2181677".
-            // That looks like "MM/dd HH:mm tt" (no year?) or "MM/dd/yy".
-            // "04/16" could be Day/Month or Month/Day. 
-            // Let's stick to a safe standard for now or mimic exactly if needed.
+                                               // Legacy L161: DateTime.UtcNow.
+                                               // L177 passes it strictly. Does string.Join use default ToString?
+                                               // Need to verify legacy DateTime format in string.Join.
+                                               // Assuming standard formatting for now or "MM/dd/yy HH:mm tt" based on "04/16 16:59 PM" comment in legacy retrieval.
+                                               // Wait, comment in legacy retrieval (step 4619) showed: "|04/16 16:59 PM|2181677".
+                                               // That looks like "MM/dd HH:mm tt" (no year?) or "MM/dd/yy".
+                                               // "04/16" could be Day/Month or Month/Day.
+                                               // Let's stick to a safe standard for now or mimic exactly if needed.
             notification.NotificationId // ID
         );
 

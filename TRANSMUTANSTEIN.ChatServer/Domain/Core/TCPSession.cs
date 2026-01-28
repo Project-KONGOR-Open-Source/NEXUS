@@ -1,21 +1,25 @@
-﻿namespace TRANSMUTANSTEIN.ChatServer.Domain.Core;
+using Microsoft.Extensions.Logging.Abstractions;
 
-# nullable disable
+namespace TRANSMUTANSTEIN.ChatServer.Domain.Core;
 
 /// <summary>
 ///     TCP Session Is Used To Read And Write Data From The Connected TCP Client
 /// </summary>
 /// <remarks>Thread-Safe</remarks>
-public class TCPSession : IDisposable
+public partial class TCPSession : IDisposable
 {
+    protected readonly ILogger Logger;
+
     /// <summary>
     ///     Initialize The Session With A Given Server
     /// </summary>
     /// <param name="server">TCP Server</param>
-    public TCPSession(TCPServer server)
+    /// <param name="logger">Logger Instance (Optional)</param>
+    public TCPSession(TCPServer server, ILogger? logger = null)
     {
         ID = Guid.CreateVersion7();
         Server = server;
+        Logger = logger ?? NullLogger.Instance;
         OptionReceiveBufferSize = server.OptionReceiveBufferSize;
         OptionSendBufferSize = server.OptionSendBufferSize;
     }
@@ -74,6 +78,15 @@ public class TCPSession : IDisposable
     ///     Option: Send Buffer Size
     /// </summary>
     public int OptionSendBufferSize { get; set; }
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Chat Session ID {SessionID} Was Created")]
+    private partial void LogSessionCreated(Guid sessionId);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Chat Session ID {SessionID} Caught A Socket Error With Code {SocketErrorCode}")]
+    private partial void LogSocketError(Guid sessionId, SocketError socketErrorCode);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Chat Session ID {SessionID} Has Terminated")]
+    private partial void LogSessionTerminated(Guid sessionId);
 
     # region Connect/Disconnect Session
 
@@ -637,7 +650,6 @@ public class TCPSession : IDisposable
     /// <summary>
     ///     This Method Is Called Whenever A Receive Or Send Operation Is Completed On A Socket
     /// </summary>
-#nullable enable
     private void OnAsyncCompleted(object? sender, SocketAsyncEventArgs e)
 #nullable disable
     {
@@ -646,25 +658,45 @@ public class TCPSession : IDisposable
             return;
         }
 
-        // Determine Which Type Of Operation Just Completed And Call The Associated Handler
-        switch (e.LastOperation)
+        try 
         {
-            case SocketAsyncOperation.Receive:
-                if (ProcessReceive(e))
-                {
-                    TryReceive();
-                }
+            // Determine Which Type Of Operation Just Completed And Call The Associated Handler
+            switch (e.LastOperation)
+            {
+                case SocketAsyncOperation.Receive:
+                    if (ProcessReceive(e))
+                    {
+                        TryReceive();
+                    }
 
-                break;
-            case SocketAsyncOperation.Send:
-                if (ProcessSend(e))
-                {
-                    TrySend();
-                }
+                    break;
+                case SocketAsyncOperation.Send:
+                    if (ProcessSend(e))
+                    {
+                        TrySend();
+                    }
 
-                break;
-            default:
-                throw new ArgumentException("The Last Operation Completed On The Socket Was Not A Receive Or Send");
+                    break;
+                case SocketAsyncOperation.None:
+                case SocketAsyncOperation.Accept:
+                case SocketAsyncOperation.Connect:
+                case SocketAsyncOperation.Disconnect:
+                case SocketAsyncOperation.ReceiveFrom:
+                case SocketAsyncOperation.ReceiveMessageFrom:
+                case SocketAsyncOperation.SendPackets:
+                case SocketAsyncOperation.SendTo:
+                default:
+                    throw new ArgumentException("The Last Operation Completed On The Socket Was Not A Receive Or Send");
+            }
+        }
+        catch (Exception ex)
+        {
+            try
+            {
+                Logger.LogError(ex, "[CRITICAL] Error In TCPSession.OnAsyncCompleted. IsSocketDisposed: {IsSocketDisposed}, IsConnected: {IsConnected}, e is null: {EIsNull}", IsSocketDisposed, IsConnected, e is null);
+                Disconnect();
+            }
+            catch { /* Ignore logging failures during crash */ }
         }
     }
 
@@ -673,6 +705,11 @@ public class TCPSession : IDisposable
     /// </summary>
     private bool ProcessReceive(SocketAsyncEventArgs e)
     {
+        if (e is null) 
+        {
+             return false;
+        }
+
         if (!IsConnected)
         {
             return false;
@@ -719,7 +756,6 @@ public class TCPSession : IDisposable
 
             Disconnect();
         }
-
         else
         {
             SendError(e.SocketError);
@@ -788,7 +824,10 @@ public class TCPSession : IDisposable
     /// <summary>
     ///     Handle Client Connected Notification
     /// </summary>
-    protected virtual void OnConnected() { }
+    protected virtual void OnConnected()
+    {
+        LogSessionCreated(ID);
+    }
 
     /// <summary>
     ///     Handle Client Disconnecting Notification
@@ -798,7 +837,10 @@ public class TCPSession : IDisposable
     /// <summary>
     ///     Handle Client Disconnected Notification
     /// </summary>
-    protected virtual void OnDisconnected() { }
+    protected virtual void OnDisconnected()
+    {
+        LogSessionTerminated(ID);
+    }
 
     /// <summary>
     ///     Handle Buffer Received Notification
@@ -837,7 +879,10 @@ public class TCPSession : IDisposable
     ///     Handle Error Notification
     /// </summary>
     /// <param name="error">Socket Error Code</param>
-    protected virtual void OnError(SocketError error) { }
+    protected virtual void OnError(SocketError error)
+    {
+        LogSocketError(ID, error);
+    }
 
     # endregion
 

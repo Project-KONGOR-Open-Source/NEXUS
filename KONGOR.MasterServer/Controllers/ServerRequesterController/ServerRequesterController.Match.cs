@@ -1,4 +1,6 @@
-﻿namespace KONGOR.MasterServer.Controllers.ServerRequesterController;
+﻿using KONGOR.MasterServer.Logging;
+
+namespace KONGOR.MasterServer.Controllers.ServerRequesterController;
 
 public partial class ServerRequesterController
 {
@@ -87,9 +89,7 @@ public partial class ServerRequesterController
 
         Dictionary<string, object> response = new() { ["match_id"] = matchStartData.MatchID };
 
-        Logger.LogInformation(
-            @"Match ID {MatchID} Has Started - Host Name: {HostName}, Server ID: {ServerID}, Map: {Map}",
-            matchStartData.MatchID, hostAccountName, matchServer.ID, map);
+        Logger.LogMatchStarted(matchStartData.MatchID, hostAccountName, matchServer.ID, map);
 
         return Ok(PhpSerialization.Serialize(response));
     }

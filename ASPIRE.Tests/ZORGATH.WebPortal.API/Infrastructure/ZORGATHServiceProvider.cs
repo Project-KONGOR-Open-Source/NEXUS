@@ -1,5 +1,12 @@
 using ASPIRE.Tests.InProcess;
 
+using Microsoft.Extensions.DependencyInjection.Extensions;
+
+using Moq;
+
+using SendGrid;
+using SendGrid.Helpers.Mail;
+
 namespace ASPIRE.Tests.ZORGATH.WebPortal.API.Infrastructure;
 
 /// <summary>
@@ -21,6 +28,11 @@ public static class ZORGATHServiceProvider
         WebApplicationFactory<ZORGATHAssemblyMarker> webApplicationFactory =
             new WebApplicationFactory<ZORGATHAssemblyMarker>().WithWebHostBuilder(builder =>
                 builder.UseSetting("INFRASTRUCTURE_GATEWAY", "localhost")
+                    .ConfigureLogging(logging =>
+                    {
+                        logging.SetMinimumLevel(LogLevel.Debug);
+                        logging.AddFilter("Microsoft.AspNetCore.OutputCaching", LogLevel.Trace);
+                    })
                     .ConfigureServices(services =>
                     {
                         Func<ServiceDescriptor, bool> databaseContextPredicate = descriptor =>
@@ -30,7 +42,11 @@ public static class ZORGATHServiceProvider
                         // Remove MerrickContext Registration
                         foreach (ServiceDescriptor? descriptor in services.Where(databaseContextPredicate).ToList())
                         {
-                            services.Remove(descriptor);
+                            // descriptor is verified to be not null by the Where clause and context, but let's be safe for the compiler warning
+                            if (descriptor != null)
+                            {
+                                services.Remove(descriptor);
+                            }
                         }
 
                         // Register In-Memory MerrickContext
@@ -45,11 +61,22 @@ public static class ZORGATHServiceProvider
                         // Remove IConnectionMultiplexer And IDatabase Registrations
                         foreach (ServiceDescriptor? descriptor in services.Where(distributedCachePredicate).ToList())
                         {
-                            services.Remove(descriptor);
+                            if (descriptor != null)
+                            {
+                                services.Remove(descriptor);
+                            }
                         }
 
                         // Register In-Process Distributed Cache Database
                         services.AddSingleton<IDatabase, InProcessDistributedCacheStore>();
+
+                        // Mock ISendGridClient to avoid actual API calls
+                        services.RemoveAll(typeof(ISendGridClient));
+                        Mock<ISendGridClient> mockSendGridClient = new();
+                        mockSendGridClient
+                            .Setup(client => client.SendEmailAsync(It.IsAny<SendGridMessage>(), It.IsAny<CancellationToken>()))
+                            .ReturnsAsync(new Response(System.Net.HttpStatusCode.Accepted, null, null));
+                        services.AddSingleton(mockSendGridClient.Object);
                     }));
 
         // Ensure That OnModelCreating From MerrickContext Has Been Called

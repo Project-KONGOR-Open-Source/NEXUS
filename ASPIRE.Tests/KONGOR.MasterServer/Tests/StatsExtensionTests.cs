@@ -122,9 +122,9 @@ namespace ASPIRE.Tests.KONGOR.MasterServer.Tests
         [Test]
         public async Task ToPlayerStatistics_UsesPayloadId_WhenItIsValid()
         {
-             // Arrange
+            // Arrange
             Mock<IHeroDefinitionService> mockHeroService = new Mock<IHeroDefinitionService>();
-            
+
             StatsForSubmissionRequestForm form = new StatsForSubmissionRequestForm
             {
                 Function = "submit_stats",
@@ -219,10 +219,10 @@ namespace ASPIRE.Tests.KONGOR.MasterServer.Tests
                     }
                 }
             };
-            
+
             // Act
             PlayerStatistics result = form.ToPlayerStatistics(0, 100, "TestUser", null, null, mockHeroService.Object);
-            
+
             // Assert
             await Assert.That(result.HeroProductID).IsEqualTo(123u);
             mockHeroService.Verify(s => s.GetBaseHeroId(It.IsAny<string>()), Times.Never);

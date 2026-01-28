@@ -1,4 +1,6 @@
-﻿namespace KONGOR.MasterServer.Extensions.Cache;
+﻿using KONGOR.MasterServer.Logging;
+
+namespace KONGOR.MasterServer.Extensions.Cache;
 
 public static partial class DistributedCacheExtensions
 {
@@ -130,6 +132,8 @@ public static partial class DistributedCacheExtensions
         (bool isValid, string? accountName) = await distributedCacheStore.ValidateAccountSessionCookie(cookie);
         if (isValid)
         {
+            // Refresh TTL
+            await distributedCacheStore.SetAccountNameForSessionCookie(cookie, accountName!);
             return (true, accountName);
         }
 
@@ -157,8 +161,7 @@ public static partial class DistributedCacheExtensions
             await distributedCacheStore.SetAccountNameForSessionCookie(cookie, account.Name);
             if (logger != null)
             {
-                logger.LogInformation(
-                    $"[SessionFallback] DB Hit! Restored Session From Database For Cookie '{cookie}' (User: {account.Name})");
+                logger.LogSessionFallbackRestored(cookie, account.Name);
             }
 
             return (true, account.Name);
@@ -173,13 +176,39 @@ public static partial class DistributedCacheExtensions
     /// </summary>
     public static async Task PurgeSessionCookies(this IConnectionMultiplexer distributedCacheProvider)
     {
-        EndPoint endpoint = distributedCacheProvider.GetEndPoints().First();
-        IServer server = distributedCacheProvider.GetServer(endpoint);
         IDatabase distributedCacheStore = distributedCacheProvider.GetDatabase();
 
-        await foreach (RedisKey key in server.KeysAsync(pattern: "ACCOUNT-SESSION-COOKIE:*"))
+        long cursor = 0;
+        const int pageSize = 1000;
+
+        do
         {
-            await distributedCacheStore.KeyDeleteAsync(key);
-        }
+            RedisResult? redisResult = await distributedCacheStore.ExecuteAsync("SCAN", cursor.ToString(), "MATCH", "ACCOUNT-SESSION-COOKIE:*", "COUNT", pageSize.ToString());
+
+            if (redisResult is null)
+            {
+                break;
+            }
+
+            RedisResult[]? innerResult = (RedisResult[]?) redisResult;
+            if (innerResult is null || innerResult.Length < 2)
+            {
+                break;
+            }
+
+            string? cursorStr = (string?) innerResult[0];
+            if (cursorStr is null)
+            {
+                break;
+            }
+
+            cursor = long.Parse(cursorStr);
+
+            RedisKey[]? keys = (RedisKey[]?) innerResult[1];
+            if (keys is not null && keys.Length > 0)
+            {
+                await distributedCacheStore.KeyDeleteAsync(keys);
+            }
+        } while (cursor != 0);
     }
 }

@@ -22,7 +22,10 @@ public sealed class SRPAuthenticationService(WebApplicationFactory<KONGORAssembl
 
         User user = new()
         {
-            EmailAddress = emailAddress, Role = role, SRPPasswordSalt = salt, SRPPasswordHash = srpPasswordHash
+            EmailAddress = emailAddress,
+            Role = role,
+            SRPPasswordSalt = salt,
+            SRPPasswordHash = srpPasswordHash
         };
 
         user.PBKDF2PasswordHash = new PasswordHasher<User>().HashPassword(user, password);

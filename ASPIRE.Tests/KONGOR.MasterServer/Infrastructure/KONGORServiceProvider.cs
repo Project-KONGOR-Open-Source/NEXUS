@@ -1,5 +1,7 @@
 using ASPIRE.Tests.InProcess;
 
+using Moq;
+
 namespace ASPIRE.Tests.KONGOR.MasterServer.Infrastructure;
 
 /// <summary>
@@ -55,6 +57,16 @@ public static class KONGORServiceProvider
 
                         // Register In-Process Distributed Cache Database
                         services.AddSingleton<IDatabase, InProcessDistributedCacheStore>();
+
+                        // Register Mocked IConnectionMultiplexer
+                        services.AddSingleton<IConnectionMultiplexer>(sp =>
+                        {
+                            IDatabase database = sp.GetRequiredService<IDatabase>();
+                            Mock<IConnectionMultiplexer> mockMultiplexer = new Mock<IConnectionMultiplexer>();
+                            mockMultiplexer.Setup(x => x.GetDatabase(It.IsAny<int>(), It.IsAny<object>()))
+                                .Returns(database);
+                            return mockMultiplexer.Object;
+                        });
 
                         // Add Middleware To Set Fake Remote IP Address
                         services.AddSingleton<IStartupFilter>(new RemoteIPAddressStartupFilter());

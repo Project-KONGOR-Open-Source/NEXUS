@@ -1,25 +1,22 @@
 namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Connection;
 
+using global::TRANSMUTANSTEIN.ChatServer.Internals;
+using global::TRANSMUTANSTEIN.ChatServer.Domain.Communication;
+
 [ChatCommand(ChatProtocol.ClientToChatServer.NET_CHAT_CL_CONNECT)]
-public class ClientHandshake(MerrickContext merrick, IDatabase distributedCacheStore)
+public class ClientHandshake(MerrickContext merrick, IDatabase distributedCacheStore, IChatContext chatContext)
     : IAsynchronousCommandProcessor<ChatSession>
 {
     public async Task Process(ChatSession session, ChatBuffer buffer)
     {
-        Log.Information($"[DEBUG] ClientHandshake.Process ENTERED for Session {session.ID}");
-
         ClientHandshakeRequestData requestData = new(buffer);
-        Log.Information($"[DEBUG] Request Data Parsed. AccountID: {requestData.AccountID}");
 
         // Set Client Metadata On Session
         // This Needs To Be Set At The First Opportunity So That Any Subsequent Code Logic Can Have Access To The Client's Metadata
         session.ClientMetadata = requestData.ToMetadata();
 
-        Log.Information($"[DEBUG] Querying Redis for SessionCookie: {requestData.SessionCookie}");
-        Log.Information($"[DEBUG] Querying Redis for SessionCookie: {requestData.SessionCookie}");
         string? cachedAccountName =
             await distributedCacheStore.GetAccountNameForSessionCookie(requestData.SessionCookie);
-        Log.Information($"[DEBUG] Redis Result: {cachedAccountName ?? "NULL"}");
 
         // Ensure Session Cookie Exists In Cache
         if (cachedAccountName is null)
@@ -42,7 +39,6 @@ public class ClientHandshake(MerrickContext merrick, IDatabase distributedCacheS
                 .Include(account => account.FriendedPeers)
                 .Include(account => account.Clan).ThenInclude(clan => clan!.Members)
                 .SingleOrDefaultAsync(account => account.ID == requestData.AccountID);
-            Log.Information($"[DEBUG] SQL Result: {(account != null ? "FOUND" : "NULL")}");
 
             if (account is null)
             {
@@ -60,8 +56,8 @@ public class ClientHandshake(MerrickContext merrick, IDatabase distributedCacheS
             if (account.Name.Equals(cachedAccountName, StringComparison.OrdinalIgnoreCase).Equals(false))
             {
                 Log.Warning(
-                    @"Authentication Failed: Account ID ""{RequestData.AccountID}"" Does Not Match Cached Account Name ""{CachedAccountName}""",
-                    requestData.AccountID, cachedAccountName);
+                    @"Authentication Failed: Account ID ""{RequestData.AccountID}"" (Name: ""{Account.Name}"") Does Not Match Cached Account Name ""{CachedAccountName}""",
+                    requestData.AccountID, account.Name, cachedAccountName);
 
                 session
                     .Reject(ChatProtocol.ChatRejectReason.ECR_AUTH_FAILED)
@@ -96,8 +92,8 @@ public class ClientHandshake(MerrickContext merrick, IDatabase distributedCacheS
 
                 foreach (int subAccountID in subAccountIDs)
                 {
-                    ChatSession? existingSessionMatch = Context.ClientChatSessions.Values
-                        .SingleOrDefault(existingSession => existingSession.Account?.ID == subAccountID);
+                    ChatSession? existingSessionMatch = chatContext.ClientChatSessions.Values
+                        .SingleOrDefault(eSession => eSession.Account.ID == subAccountID);
 
                     if (existingSessionMatch is not null)
                     {
@@ -112,8 +108,8 @@ public class ClientHandshake(MerrickContext merrick, IDatabase distributedCacheS
                 }
             }
 
-            if (Context.ClientChatSessions.Values.SingleOrDefault(existingSession =>
-                    existingSession.Account?.ID == account.ID) is { } existingSession)
+            if (chatContext.ClientChatSessions.Values.SingleOrDefault(eSession =>
+                    eSession.Account.ID == account.ID) is { } existingSession)
             {
                 Log.Information(
                     @"Disconnecting Existing Session For Account ""{Account.Name}"" Due To Concurrent Connection Attempt",

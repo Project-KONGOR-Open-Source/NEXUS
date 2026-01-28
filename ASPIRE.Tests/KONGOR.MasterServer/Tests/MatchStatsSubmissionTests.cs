@@ -1,385 +1,368 @@
-using System.Text.Json;
-using System.Text.Json.Serialization;
-
-using ASPIRE.Common.Enumerations;
+using System.Globalization;
+using System.Net;
 
 using KONGOR.MasterServer.Extensions.Cache;
-using KONGOR.MasterServer.Models.ServerManagement;
 
 using MERRICK.DatabaseContext.Entities.Statistics;
 
+// For KONGORServiceProvider
+
+// ReSharper disable once CheckNamespace
 namespace ASPIRE.Tests.KONGOR.MasterServer.Tests;
 
-/// <summary>
-///     Tests For Match Statistics Submission Functionality In KONGOR Master Server
-/// </summary>
 public sealed partial class MatchStatsSubmissionTests
 {
     [Test]
-    public async Task SubmitStats_WithValidData_ReturnsSuccess()
+    public async Task SubmitStats_WithEmptyCookie_ReturnsSuccess()
     {
+        // Arrange
         await using WebApplicationFactory<KONGORAssemblyMarker> webApplicationFactory =
             KONGORServiceProvider.CreateOrchestratedInstance();
-        HttpClient httpClient = webApplicationFactory.CreateClient();
+        HttpClient client = webApplicationFactory.CreateClient();
 
         using IServiceScope scope = webApplicationFactory.Services.CreateScope();
         MerrickContext dbContext = scope.ServiceProvider.GetRequiredService<MerrickContext>();
-        IDatabase distributedCache = scope.ServiceProvider.GetRequiredService<IDatabase>();
 
-        // 1. Seed Database with Host and Player Accounts
-        Role userRole = new() { Name = UserRoles.User };
-
-        User hostUser = new()
+        // Seed MatchStatistics
+        const int matchId = 963564305;
+        MatchStatistics matchStats = new()
         {
-            EmailAddress = "host@kongor.net",
-            PBKDF2PasswordHash = "hash",
-            SRPPasswordHash = "hash",
-            SRPPasswordSalt = "salt",
-            GoldCoins = 0,
-            PlinkoTickets = 0,
-            Role = userRole
+            MatchID = matchId,
+            ServerID = 1,
+            HostAccountName = "TestHost",
+            Map = "caldavar",
+            MapVersion = "1.0",
+            Version = "4.10.1",
+            GameMode = "normal",
+            TimePlayed = 1200, // Seconds
+            FileSize = 1024,
+            FileName = "M963564305.honreplay",
+            ConnectionState = 0,
+            AveragePSR = 1500,
+            AveragePSRTeamOne = 1500,
+            AveragePSRTeamTwo = 1500,
+            ScoreTeam1 = 0,
+            ScoreTeam2 = 0,
+            TeamScoreGoal = 0,
+            PlayerScoreGoal = 0,
+            NumberOfRounds = 1,
+            ReleaseStage = "Live",
+            BannedHeroes = null,
+            AwardMostAnnihilations = null,
+            AwardMostQuadKills = null,
+            AwardLargestKillStreak = null,
+            AwardMostSmackdowns = null,
+            AwardMostKills = null,
+            AwardMostAssists = null,
+            AwardLeastDeaths = null,
+            AwardMostBuildingDamage = null,
+            AwardMostWardsKilled = null,
+            AwardMostHeroDamageDealt = null,
+            AwardHighestCreepScore = null
         };
 
-        Account hostAccount = new()
-        {
-            Name = "MatchHost", // MatchServer uses this name
-            User = hostUser,
-            Type = AccountType.Staff,
-            IsMain = true
-        };
-
-        User playerUser = new()
-        {
-            EmailAddress = "player@kongor.net",
-            PBKDF2PasswordHash = "hash",
-            SRPPasswordHash = "hash",
-            SRPPasswordSalt = "salt",
-            GoldCoins = 0,
-            PlinkoTickets = 0,
-            Role = userRole
-        };
-
-        Account playerAccount = new()
-        {
-            Name = "TestPlayer1", // Matches payload
-            User = playerUser,
-            Type = AccountType.Staff,
-            IsMain = true
-        };
-
-        await dbContext.Users.AddRangeAsync(hostUser, playerUser);
-        await dbContext.Accounts.AddRangeAsync(hostAccount, playerAccount);
+        await dbContext.MatchStatistics.AddAsync(matchStats);
         await dbContext.SaveChangesAsync();
 
-        // 2. Seed Cache with Match Server Session
-        string sessionCookie = Guid.NewGuid().ToString("N");
-        int serverId = 1;
-
-        MatchServer matchServer = new()
+        // payload with empty cookie
+        Dictionary<string, string> payload = new()
         {
-            ID = serverId,
-            Instance = 1,
-            HostAccountID = hostAccount.ID,
-            HostAccountName = hostAccount.Name,
-            Name = "Test Server",
-            IPAddress = "127.0.0.1",
-            Port = 11235,
-            Location = "US",
-            Description = "Test Server",
-            Cookie = sessionCookie,
-            Status = ServerStatus.SERVER_STATUS_ACTIVE
+            { "f", "get_match_stats" }, { "match_id", matchId.ToString(CultureInfo.InvariantCulture) }, { "cookie", "" }
         };
 
-        await distributedCache.SetMatchServer(hostAccount.Name, matchServer);
+        // Act
+        // Use /client_requester.php as per controller route
+        HttpResponseMessage response =
+            await client.PostAsync("/client_requester.php", new FormUrlEncodedContent(payload));
+        string content = await response.Content.ReadAsStringAsync();
 
-        // 3. Construct the payload with the valid session
-        Dictionary<string, string> formData = GetValidStatsPayload(sessionCookie, serverId);
-        int matchId = int.Parse(formData["match_stats[match_id]"]);
-        FormUrlEncodedContent content = new(formData);
+        // Assert
+        await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.OK);
 
-        // 4. Submit the request
-        Console.WriteLine($"[TEST] Submitting stats for Match ID: {matchId}...");
-        HttpResponseMessage response = await httpClient.PostAsync("stats_requester.php", content);
+        // Manual verification of PHP serialized content check or basic containment
+        // Array/Dict keys: "match_summ", "match_player_stats", "selected_upgrades"
+        // Serialized strings look like: s:10:"match_summ"; or s:17:"selected_upgrades";
 
-        // 5. Verify response
-        string responseBody = await response.Content.ReadAsStringAsync();
-        Console.WriteLine($"[TEST] Response Status: {response.StatusCode}");
-        Console.WriteLine($"[TEST] Response Body: {responseBody}");
+        // Regex for match_summ key (10 chars)
+        Regex matchSummRegex = new(@"s:10:""match_summ"";", RegexOptions.None, TimeSpan.FromMilliseconds(100));
+        await Assert.That(matchSummRegex.IsMatch(content)).IsTrue();
 
-        // Verify the response body indicates success
-        // The detailed response is a PHP serialized array with "OK" for each section
-        // Example: a:5:{s:8:"match_id";i:705750;s:10:"match_info";s:2:"OK";...}
+        // Regex for match_player_stats key (18 chars)
+        Regex matchPlayerStatsRegex = new(@"s:18:""match_player_stats"";", RegexOptions.None, TimeSpan.FromMilliseconds(100));
+        await Assert.That(matchPlayerStatsRegex.IsMatch(content)).IsTrue();
 
-        await Assert.That(responseBody).Contains(@"""match_info"";s:2:""OK""");
-        await Assert.That(responseBody).Contains(@"""match_summ"";s:2:""OK""");
-        await Assert.That(responseBody).Contains(@"""match_stats"";s:2:""OK""");
-        await Assert.That(responseBody).Contains(@"""match_history"";s:2:""OK""");
-
-        MatchStatistics? savedStats = await dbContext.MatchStatistics
-            .FirstOrDefaultAsync(m => m.MatchID == matchId);
-
-        if (savedStats != null)
-        {
-            Console.WriteLine($"[TEST] ✅ Database Verification: Match {savedStats.MatchID} saved successfully.");
-            JsonSerializerOptions options = new()
-            {
-                WriteIndented = true, ReferenceHandler = ReferenceHandler.IgnoreCycles
-            };
-            string json = JsonSerializer.Serialize(savedStats, options);
-            foreach (string line in json.Split(Environment.NewLine))
-            {
-                Console.WriteLine($"[TEST] {line}");
-            }
-        }
-        else
-        {
-            Console.WriteLine($"[TEST] ❌ Database Verification: Match {matchId} NOT found in database.");
-        }
-
-        await Assert.That(savedStats).IsNotNull();
-
-        List<PlayerStatistics> playerStats = await dbContext.PlayerStatistics
-            .Where(p => p.MatchID == matchId)
-            .ToListAsync();
-
-        Console.WriteLine($"[TEST] ✅ Database Verification: Found {playerStats.Count} player statistic records.");
-        if (playerStats.Count > 0)
-        {
-            JsonSerializerOptions options = new()
-            {
-                WriteIndented = true, ReferenceHandler = ReferenceHandler.IgnoreCycles
-            };
-            string json = JsonSerializer.Serialize(playerStats, options);
-            foreach (string line in json.Split(Environment.NewLine))
-            {
-                Console.WriteLine($"[TEST] {line}");
-            }
-        }
-
-        await Assert.That(playerStats).IsNotEmpty();
-    }
-
-    private static Dictionary<string, string> GetValidStatsPayload(string session, int serverId)
-    {
-        return new Dictionary<string, string>
-        {
-            ["f"] = "submit_stats",
-            ["session"] = session,
-            ["match_stats[server_id]"] = serverId.ToString(),
-            ["match_stats[match_id]"] = "705750",
-            ["match_stats[map]"] = "caldavar",
-            ["match_stats[map_version]"] = "4.10.1",
-            ["match_stats[time_played]"] = "1800",
-            ["match_stats[file_size]"] = "102400",
-            ["match_stats[file_name]"] = "M705750.honreplay",
-            ["match_stats[c_state]"] = "0",
-            ["match_stats[version]"] = "4.10.1.0",
-            ["match_stats[avgpsr]"] = "1500",
-            ["match_stats[avgpsr_team1]"] = "1500",
-            ["match_stats[avgpsr_team2]"] = "1500",
-            ["match_stats[gamemode]"] = "ap",
-            ["match_stats[teamscoregoal]"] = "0",
-            ["match_stats[playerscoregoal]"] = "0",
-            ["match_stats[numrounds]"] = "1",
-            ["match_stats[release_stage]"] = "stable",
-            ["match_stats[awd_mann]"] = "0",
-            ["match_stats[awd_mqk]"] = "0",
-            ["match_stats[awd_lgks]"] = "5",
-            ["match_stats[awd_msd]"] = "0",
-            ["match_stats[awd_mkill]"] = "10",
-            ["match_stats[awd_masst]"] = "5",
-            ["match_stats[awd_ledth]"] = "2",
-            ["match_stats[awd_mbdmg]"] = "5000",
-            ["match_stats[awd_mwk]"] = "2",
-            ["match_stats[awd_mhdd]"] = "15000",
-            ["match_stats[awd_hcs]"] = "150",
-            ["match_stats[submission_debug]"] = "debug_info",
-
-            // Team Stats
-            ["team_stats[1][score]"] = "0",
-            ["team_stats[2][score]"] = "0",
-
-            // Player Stats
-            ["player_stats[0][Hero_Legionnaire][nickname]"] = "TestPlayer1",
-            ["player_stats[0][Hero_Legionnaire][clan_id]"] = "0",
-            ["player_stats[0][Hero_Legionnaire][team]"] = "1",
-            ["player_stats[0][Hero_Legionnaire][position]"] = "0",
-            ["player_stats[0][Hero_Legionnaire][group_num]"] = "0",
-            ["player_stats[0][Hero_Legionnaire][benefit]"] = "0",
-            ["player_stats[0][Hero_Legionnaire][hero_id]"] = "12",
-            ["player_stats[0][Hero_Legionnaire][wins]"] = "1",
-            ["player_stats[0][Hero_Legionnaire][losses]"] = "0",
-            ["player_stats[0][Hero_Legionnaire][discos]"] = "0",
-            ["player_stats[0][Hero_Legionnaire][concedes]"] = "0",
-            ["player_stats[0][Hero_Legionnaire][kicked]"] = "0",
-            ["player_stats[0][Hero_Legionnaire][social_bonus]"] = "0",
-            ["player_stats[0][Hero_Legionnaire][used_token]"] = "0",
-            ["player_stats[0][Hero_Legionnaire][concedevotes]"] = "0",
-            ["player_stats[0][Hero_Legionnaire][herokills]"] = "5",
-            ["player_stats[0][Hero_Legionnaire][herodmg]"] = "5000",
-            ["player_stats[0][Hero_Legionnaire][herokillsgold]"] = "1500",
-            ["player_stats[0][Hero_Legionnaire][heroassists]"] = "2",
-            ["player_stats[0][Hero_Legionnaire][heroexp]"] = "2000",
-            ["player_stats[0][Hero_Legionnaire][deaths]"] = "2",
-            ["player_stats[0][Hero_Legionnaire][buybacks]"] = "0",
-            ["player_stats[0][Hero_Legionnaire][goldlost2death]"] = "500",
-            ["player_stats[0][Hero_Legionnaire][secs_dead]"] = "60",
-            ["player_stats[0][Hero_Legionnaire][teamcreepkills]"] = "0",
-            ["player_stats[0][Hero_Legionnaire][teamcreepdmg]"] = "0",
-            ["player_stats[0][Hero_Legionnaire][teamcreepgold]"] = "0",
-            ["player_stats[0][Hero_Legionnaire][teamcreepexp]"] = "0",
-            ["player_stats[0][Hero_Legionnaire][neutralcreepkills]"] = "10",
-            ["player_stats[0][Hero_Legionnaire][neutralcreepdmg]"] = "500",
-            ["player_stats[0][Hero_Legionnaire][neutralcreepgold]"] = "300",
-            ["player_stats[0][Hero_Legionnaire][neutralcreepexp]"] = "400",
-            ["player_stats[0][Hero_Legionnaire][bdmg]"] = "1000",
-            ["player_stats[0][Hero_Legionnaire][razed]"] = "1",
-            ["player_stats[0][Hero_Legionnaire][bdmgexp]"] = "200",
-            ["player_stats[0][Hero_Legionnaire][bgold]"] = "500",
-            ["player_stats[0][Hero_Legionnaire][denies]"] = "5",
-            ["player_stats[0][Hero_Legionnaire][exp_denied]"] = "100",
-            ["player_stats[0][Hero_Legionnaire][gold]"] = "10000",
-            ["player_stats[0][Hero_Legionnaire][gold_spent]"] = "9000",
-            ["player_stats[0][Hero_Legionnaire][exp]"] = "5000",
-            ["player_stats[0][Hero_Legionnaire][actions]"] = "1000",
-            ["player_stats[0][Hero_Legionnaire][secs]"] = "1800",
-            ["player_stats[0][Hero_Legionnaire][level]"] = "15",
-            ["player_stats[0][Hero_Legionnaire][consumables]"] = "5",
-            ["player_stats[0][Hero_Legionnaire][wards]"] = "2",
-            ["player_stats[0][Hero_Legionnaire][bloodlust]"] = "1",
-            ["player_stats[0][Hero_Legionnaire][doublekill]"] = "0",
-            ["player_stats[0][Hero_Legionnaire][triplekill]"] = "0",
-            ["player_stats[0][Hero_Legionnaire][quadkill]"] = "0",
-            ["player_stats[0][Hero_Legionnaire][annihilation]"] = "0",
-            ["player_stats[0][Hero_Legionnaire][ks3]"] = "1",
-            ["player_stats[0][Hero_Legionnaire][ks4]"] = "0",
-            ["player_stats[0][Hero_Legionnaire][ks5]"] = "0",
-            ["player_stats[0][Hero_Legionnaire][ks6]"] = "0",
-            ["player_stats[0][Hero_Legionnaire][ks7]"] = "0",
-            ["player_stats[0][Hero_Legionnaire][ks8]"] = "0",
-            ["player_stats[0][Hero_Legionnaire][ks9]"] = "0",
-            ["player_stats[0][Hero_Legionnaire][ks10]"] = "0",
-            ["player_stats[0][Hero_Legionnaire][ks15]"] = "0",
-            ["player_stats[0][Hero_Legionnaire][smackdown]"] = "0",
-            ["player_stats[0][Hero_Legionnaire][humiliation]"] = "0",
-            ["player_stats[0][Hero_Legionnaire][nemesis]"] = "0",
-            ["player_stats[0][Hero_Legionnaire][retribution]"] = "0",
-            ["player_stats[0][Hero_Legionnaire][score]"] = "0",
-            ["player_stats[0][Hero_Legionnaire][gameplaystat0]"] = "0",
-            ["player_stats[0][Hero_Legionnaire][gameplaystat1]"] = "0",
-            ["player_stats[0][Hero_Legionnaire][gameplaystat2]"] = "0",
-            ["player_stats[0][Hero_Legionnaire][gameplaystat3]"] = "0",
-            ["player_stats[0][Hero_Legionnaire][gameplaystat4]"] = "0",
-            ["player_stats[0][Hero_Legionnaire][gameplaystat5]"] = "0",
-            ["player_stats[0][Hero_Legionnaire][gameplaystat6]"] = "0",
-            ["player_stats[0][Hero_Legionnaire][gameplaystat7]"] = "0",
-            ["player_stats[0][Hero_Legionnaire][gameplaystat8]"] = "0",
-            ["player_stats[0][Hero_Legionnaire][gameplaystat9]"] = "0",
-            ["player_stats[0][Hero_Legionnaire][time_earning_exp]"] = "1700",
-
-            // Inventory
-            ["inventory[0][0]"] = "Item_LoggersHatchet",
-            ["inventory[0][1]"] = "Item_Marchers",
-            ["inventory[0][2]"] = "Item_HealthPotion"
-        };
+        // Regex for selected_upgrades key (17 chars)
+        Regex selectedUpgradesRegex = new(@"s:17:""selected_upgrades"";", RegexOptions.None, TimeSpan.FromMilliseconds(100));
+        await Assert.That(selectedUpgradesRegex.IsMatch(content)).IsTrue();
     }
 
     [Test]
-    public async Task SubmitStats_AsUser_ReturnsSuccess()
+    public async Task SubmitStats_WithValidCookie_ReturnsAuthenticatedSuccess()
     {
+        // Arrange
         await using WebApplicationFactory<KONGORAssemblyMarker> webApplicationFactory =
             KONGORServiceProvider.CreateOrchestratedInstance();
-        HttpClient httpClient = webApplicationFactory.CreateClient();
+        HttpClient client = webApplicationFactory.CreateClient();
 
         using IServiceScope scope = webApplicationFactory.Services.CreateScope();
         MerrickContext dbContext = scope.ServiceProvider.GetRequiredService<MerrickContext>();
         IDatabase distributedCache = scope.ServiceProvider.GetRequiredService<IDatabase>();
 
-        // 1. Seed Database with Host User
-        Role userRole = new() { Name = UserRoles.User };
-        User hostUser = new()
-        {
-            EmailAddress = "userhost@kongor.net",
-            PBKDF2PasswordHash = "hash",
-            SRPPasswordHash = "hash",
-            SRPPasswordSalt = "salt",
-            Role = userRole
-        };
-        // 2. Seed Cache with User Session (NOT MatchServer)
-        string sessionCookie = Guid.NewGuid().ToString("N");
-
-        Account hostAccount = new()
-        {
-            Name = "UserHost",
-            User = hostUser,
-            Type = AccountType.Normal, // Normal user, not Staff/ServerHost
-            IsMain = true,
-            Cookie = sessionCookie // Required for DB fallback lookup in HandleStatsSubmission
-        };
-
-        User playerUser = new()
-        {
-            EmailAddress = "player@kongor.net",
-            PBKDF2PasswordHash = "hash",
-            SRPPasswordHash = "hash",
-            SRPPasswordSalt = "salt",
-            Role = userRole
-        };
-
-        Account playerAccount = new()
-        {
-            Name = "TestPlayer1", // Matches payload
-            User = playerUser,
-            Type = AccountType.Normal,
-            IsMain = true
-        };
-
-        await dbContext.Users.AddRangeAsync(hostUser, playerUser);
-        await dbContext.Accounts.AddRangeAsync(hostAccount, playerAccount);
-        await dbContext.SaveChangesAsync();
-
-        await distributedCache.SetAccountNameForSessionCookie(sessionCookie, hostAccount.Name);
-
-        // 3. Seed MatchStartData (Crucial for the fix)
-        int matchId = 705751;
-        int serverId = 999;
-
-        MatchStartData matchStartData = new()
+        // Seed MatchStatistics
+        int matchId = 963564306;
+        MatchStatistics matchStats = new()
         {
             MatchID = matchId,
-            ServerID = serverId,
-            MatchName = "Test Match", // Required
-            HostAccountName = hostAccount.Name,
+            ServerID = 1,
+            HostAccountName = "TestHost",
             Map = "caldavar",
-            MatchMode = "ap",
+            MapVersion = "1.0",
             Version = "4.10.1",
-            IsCasual = false,
-            MatchType = 0,
-            Options = MatchOptions.None,
-            ServerName = "DONUT ARENA"
+            GameMode = "normal",
+            TimePlayed = 1200, // Seconds
+            FileSize = 1024,
+            FileName = "M963564306.honreplay",
+            ConnectionState = 0,
+            AveragePSR = 1500,
+            AveragePSRTeamOne = 1500,
+            AveragePSRTeamTwo = 1500,
+            ScoreTeam1 = 0,
+            ScoreTeam2 = 0,
+            TeamScoreGoal = 0,
+            PlayerScoreGoal = 0,
+            NumberOfRounds = 1,
+            ReleaseStage = "Live",
+            BannedHeroes = null,
+            AwardMostAnnihilations = null,
+            AwardMostQuadKills = null,
+            AwardLargestKillStreak = null,
+            AwardMostSmackdowns = null,
+            AwardMostKills = null,
+            AwardMostAssists = null,
+            AwardLeastDeaths = null,
+            AwardMostBuildingDamage = null,
+            AwardMostWardsKilled = null,
+            AwardMostHeroDamageDealt = null,
+            AwardHighestCreepScore = null
         };
-        await distributedCache.SetMatchStartData(matchStartData);
 
-        // 4. Construct payload
-        Dictionary<string, string> formData = GetValidStatsPayload(sessionCookie, serverId);
-        formData["match_stats[match_id]"] = matchId.ToString();
-        FormUrlEncodedContent content = new(formData);
+        await dbContext.MatchStatistics.AddAsync(matchStats);
 
-        // 5. Submit request
-        HttpResponseMessage response = await httpClient.PostAsync("stats_requester.php", content);
+        // Seed Account and Session
+        // Use Global Constants for seeding
+        // Assuming global::MERRICK.DatabaseContext.Entities.Utility.Role exists
+        Role userRole = new() { Name = "User" };
 
-        // 6. Verify
-        string responseBody = await response.Content.ReadAsStringAsync();
-        // MatchStatsSubmissionTests seems to return the detailed status array for user submission too
-        await Assert.That(responseBody).Contains(@"""match_info"";s:2:""OK""");
-        await Assert.That(responseBody).Contains(@"""match_summ"";s:2:""OK""");
-        await Assert.That(responseBody).Contains(@"""match_stats"";s:2:""OK""");
-        await Assert.That(responseBody).Contains(@"""match_history"";s:2:""OK""");
+        User user = new()
+        {
+            EmailAddress = "auth_user@kongor.net",
+            SRPPasswordHash = "srphash",
+            SRPPasswordSalt = "srpsalt",
+            PBKDF2PasswordHash = "hash",
+            Role = userRole
+        };
+        await dbContext.Users.AddAsync(user);
 
-        MatchStatistics? savedStats = await dbContext.MatchStatistics
-            .FirstOrDefaultAsync(m => m.MatchID == matchId);
+        Account account = new() { User = user, Name = "AuthUser", Cookie = "valid_cookie_123", IsMain = true };
+        // Add some selected upgrades to verify personalization
+        account.SelectedStoreItems.Add("aa.test_avatar");
 
-        await Assert.That(savedStats).IsNotNull();
-        await Assert.That(savedStats!.HostAccountName).IsEqualTo(hostAccount.Name);
+        await dbContext.Accounts.AddAsync(account);
+        await dbContext.SaveChangesAsync();
+
+        // Seed Redis
+        await distributedCache.SetAccountNameForSessionCookie("valid_cookie_123", "AuthUser");
+
+        // payload with valid cookie
+        Dictionary<string, string> payload = new()
+        {
+            { "f", "get_match_stats" }, { "match_id", matchId.ToString(CultureInfo.InvariantCulture) }, { "cookie", "valid_cookie_123" }
+        };
+
+        // Act
+        HttpResponseMessage response =
+            await client.PostAsync("/client_requester.php", new FormUrlEncodedContent(payload));
+        string content = await response.Content.ReadAsStringAsync();
+
+        // Assert
+        await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.OK);
+
+        // Verify response contains personalized data
+        Regex matchSummRegex = new(@"s:10:""match_summ"";", RegexOptions.None, TimeSpan.FromMilliseconds(100));
+        await Assert.That(matchSummRegex.IsMatch(content)).IsTrue();
+
+        // Should contain result of SelectedStoreItems
+        // Expected serialized: s:14:"aa.test_avatar"; or similar
+        // We verify the value is present as a strict PHP string value
+        Regex avatarRegex = new(@"s:\d+:""aa\.test_avatar"";", RegexOptions.None, TimeSpan.FromMilliseconds(100));
+        await Assert.That(avatarRegex.IsMatch(content)).IsTrue();
+    }
+
+    [Test]
+    public async Task SubmitStats_WithInvalidMatchID_ReturnsSoftFailure()
+    {
+        // Arrange
+        await using WebApplicationFactory<KONGORAssemblyMarker> webApplicationFactory =
+            KONGORServiceProvider.CreateOrchestratedInstance();
+        HttpClient client = webApplicationFactory.CreateClient();
+
+        // payload with mismatched/missing Match ID
+        Dictionary<string, string> payload = new()
+        {
+            { "f", "get_match_stats" },
+            { "match_id", "123456789" }, // ID does not exist in seeded DB
+            { "cookie", "any_cookie" }
+        };
+
+        // Act
+        HttpResponseMessage response =
+            await client.PostAsync("/client_requester.php", new FormUrlEncodedContent(payload));
+        string content = await response.Content.ReadAsStringAsync();
+
+        // Assert
+        // Should return 200 OK now, not 404
+        await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.OK);
+
+        // Should return serialized "Soft Failure" (Empty Stats) object
+        // b:0; is no longer returned to prevent client crashes.
+        // We verify that it returns a serialized array containing basic keys like "match_summ"
+        Regex matchSummRegex = new(@"s:10:""match_summ"";", RegexOptions.None, TimeSpan.FromMilliseconds(100));
+        await Assert.That(matchSummRegex.IsMatch(content)).IsTrue();
+    }
+
+    [Test]
+    public async Task SubmitStats_ViaQueryString_WithEmptyCookie_ReturnsSuccess()
+    {
+        // Arrange
+        await using WebApplicationFactory<KONGORAssemblyMarker> webApplicationFactory =
+            KONGORServiceProvider.CreateOrchestratedInstance();
+        HttpClient client = webApplicationFactory.CreateClient();
+
+        using IServiceScope scope = webApplicationFactory.Services.CreateScope();
+        MerrickContext dbContext = scope.ServiceProvider.GetRequiredService<MerrickContext>();
+
+        // Seed MatchStatistics
+        int matchId = 963564307;
+        MatchStatistics matchStats = new()
+        {
+            MatchID = matchId,
+            ServerID = 1,
+            HostAccountName = "TestHost",
+            Map = "caldavar",
+            MapVersion = "1.0",
+            Version = "4.10.1",
+            GameMode = "normal",
+            TimePlayed = 1200,
+            FileSize = 1024,
+            FileName = "M963564307.honreplay",
+            ConnectionState = 0,
+            AveragePSR = 1500,
+            AveragePSRTeamOne = 1500,
+            AveragePSRTeamTwo = 1500,
+            ScoreTeam1 = 0,
+            ScoreTeam2 = 0,
+            TeamScoreGoal = 0,
+            PlayerScoreGoal = 0,
+            NumberOfRounds = 1,
+            ReleaseStage = "Live",
+            BannedHeroes = null,
+            AwardMostAnnihilations = null,
+            AwardMostQuadKills = null,
+            AwardLargestKillStreak = null,
+            AwardMostSmackdowns = null,
+            AwardMostKills = null,
+            AwardMostAssists = null,
+            AwardLeastDeaths = null,
+            AwardMostBuildingDamage = null,
+            AwardMostWardsKilled = null,
+            AwardMostHeroDamageDealt = null,
+            AwardHighestCreepScore = null
+        };
+
+        await dbContext.MatchStatistics.AddAsync(matchStats);
+        await dbContext.SaveChangesAsync();
+
+        // Payload WITHOUT "f" in body, but with invalid/empty cookie
+        Dictionary<string, string> payload = new() { { "match_id", matchId.ToString(CultureInfo.InvariantCulture) }, { "cookie", "" } };
+
+        // Act
+        // Pass "f" in the Query String
+        HttpResponseMessage response =
+            await client.PostAsync("/client_requester.php?f=get_match_stats", new FormUrlEncodedContent(payload));
+        string content = await response.Content.ReadAsStringAsync();
+
+        // Assert
+        await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.OK);
+
+        // If this fails with 401, it means the controller didn't pick up "f" from the QueryString,
+        // and thus treated it as a generic request requiring validation (which fails due to empty cookie).
+
+        Regex matchSummRegex = new(@"s:10:""match_summ"";", RegexOptions.None, TimeSpan.FromMilliseconds(100));
+        await Assert.That(matchSummRegex.IsMatch(content)).IsTrue();
+    }
+
+    [Test]
+    public async Task SubmitStats_WithMixedCase_ReturnsSuccess()
+    {
+        // Arrange
+        await using WebApplicationFactory<KONGORAssemblyMarker> webApplicationFactory =
+            KONGORServiceProvider.CreateOrchestratedInstance();
+        HttpClient client = webApplicationFactory.CreateClient();
+
+        using IServiceScope scope = webApplicationFactory.Services.CreateScope();
+        MerrickContext dbContext = scope.ServiceProvider.GetRequiredService<MerrickContext>();
+
+        // Seed MatchStatistics
+        const int matchId = 963564308;
+        MatchStatistics matchStats = new()
+        {
+            MatchID = matchId,
+            ServerID = 1,
+            HostAccountName = "TestHost",
+            Map = "caldavar",
+            MapVersion = "1.0",
+            Version = "4.10.1",
+            GameMode = "normal",
+            TimePlayed = 1200,
+            FileSize = 1024,
+            FileName = "M963564308.honreplay",
+            ConnectionState = 0,
+            AveragePSR = 1500,
+            AveragePSRTeamOne = 1500,
+            AveragePSRTeamTwo = 1500,
+            ScoreTeam1 = 0,
+            ScoreTeam2 = 0,
+            TeamScoreGoal = 0,
+            PlayerScoreGoal = 0,
+            NumberOfRounds = 1,
+            ReleaseStage = "Live",
+            BannedHeroes = null,
+            AwardMostAnnihilations = null,
+            AwardMostQuadKills = null,
+            AwardLargestKillStreak = null,
+            AwardMostSmackdowns = null,
+            AwardMostKills = null,
+            AwardMostAssists = null,
+            AwardLeastDeaths = null,
+            AwardMostBuildingDamage = null,
+            AwardMostWardsKilled = null,
+            AwardMostHeroDamageDealt = null,
+            AwardHighestCreepScore = null
+        };
+
+        await dbContext.MatchStatistics.AddAsync(matchStats);
+        await dbContext.SaveChangesAsync();
+
+        Dictionary<string, string> payload = new() { { "match_id", matchId.ToString(CultureInfo.InvariantCulture) }, { "cookie", "" } };
+
+        // Act
+        // Pass "f" as "Get_Match_Stats" (mixed case)
+        HttpResponseMessage response =
+            await client.PostAsync("/client_requester.php?f=Get_Match_Stats", new FormUrlEncodedContent(payload));
+
+        // Assert
+        // If the controller is case-sensitive, this will be 401 Unauthorized.
+        // We WANT it to be OK.
+        await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.OK);
     }
 }

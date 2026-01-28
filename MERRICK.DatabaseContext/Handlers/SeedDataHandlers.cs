@@ -1,4 +1,4 @@
-﻿namespace MERRICK.DatabaseContext.Handlers;
+namespace MERRICK.DatabaseContext.Handlers;
 
 using global::MERRICK.DatabaseContext.Entities.Core;
 using global::MERRICK.DatabaseContext.Extensions;
@@ -13,7 +13,7 @@ public static class SeedDataHandlers
         }
 
         Role roleAdministrator =
-            await context.Roles.SingleAsync(role => role.Name.Equals(UserRoles.Administrator), cancellationToken);
+            await context.Roles.SingleAsync(role => role.Name == UserRoles.Administrator, cancellationToken);
 
         User userAdministrator = new()
         {
@@ -40,7 +40,7 @@ public static class SeedDataHandlers
 
         await context.Users.AddAsync(userAdministrator, cancellationToken);
 
-        Role roleGuest = await context.Roles.SingleAsync(role => role.Name.Equals(UserRoles.User), cancellationToken);
+        Role roleGuest = await context.Roles.SingleAsync(role => role.Name == UserRoles.User, cancellationToken);
 
         User userGuest = new()
         {
@@ -238,7 +238,10 @@ public static class SeedDataHandlers
             subAccount.FriendedPeers = subAccounts.Except([subAccount]).Union([systemAccount]).Select(account =>
                 new FriendedPeer
                 {
-                    ID = account.ID, Name = account.Name, ClanTag = account.Clan?.Tag, FriendGroup = "PERSONAS"
+                    ID = account.ID,
+                    Name = account.Name,
+                    ClanTag = account.Clan?.Tag,
+                    FriendGroup = "PERSONAS"
                 }).ToList();
         }
 
@@ -246,7 +249,10 @@ public static class SeedDataHandlers
         {
             hostAccount.FriendedPeers = hostAccounts.Except([hostAccount]).Select(account => new FriendedPeer
             {
-                ID = account.ID, Name = account.Name, ClanTag = account.Clan?.Tag, FriendGroup = "CLUSTERS"
+                ID = account.ID,
+                Name = account.Name,
+                ClanTag = account.Clan?.Tag,
+                FriendGroup = "CLUSTERS"
             }).ToList();
         }
 
@@ -305,7 +311,9 @@ public static class SeedDataHandlers
         {
             systemAccount.BannedPeers.Add(new BannedPeer
             {
-                ID = guestAccount.ID, Name = guestAccount.Name, BanReason = "Non-Main Guest Account"
+                ID = guestAccount.ID,
+                Name = guestAccount.Name,
+                BanReason = "Non-Main Guest Account"
             });
         }
 

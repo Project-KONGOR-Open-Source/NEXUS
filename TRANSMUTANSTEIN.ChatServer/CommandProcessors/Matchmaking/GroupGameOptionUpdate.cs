@@ -1,7 +1,10 @@
+using TRANSMUTANSTEIN.ChatServer.Services;
+using TRANSMUTANSTEIN.ChatServer.Domain.Matchmaking;
+
 namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Matchmaking;
 
 [ChatCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GAME_OPTION_UPDATE)]
-public class GroupGameOptionUpdate : ISynchronousCommandProcessor<ChatSession>
+public class GroupGameOptionUpdate(IMatchmakingService matchmakingService) : ISynchronousCommandProcessor<ChatSession>
 {
     public void Process(ChatSession session, ChatBuffer buffer)
     {
@@ -11,19 +14,15 @@ public class GroupGameOptionUpdate : ISynchronousCommandProcessor<ChatSession>
 
         try
         {
-            group = MatchmakingGroup.GetByMemberAccountID(session.Account.ID);
+            group = matchmakingService.GetMatchmakingGroupByMemberID(session.Account.ID)
+                    ?? throw new NullReferenceException(
+                        $@"No Matchmaking Group Found For Account ID ""{session.Account.ID}""");
             Log.Information("GroupGameOptionUpdate: Group Found for Account {AccountID}: {GroupGUID}",
                 session.Account.ID, group.GUID);
         }
         catch (Exception ex)
         {
             Log.Error(ex, "GroupGameOptionUpdate: Failed to get group for Account {AccountID}", session.Account.ID);
-            return;
-        }
-
-        if (group is null)
-        {
-            Log.Warning("GroupGameOptionUpdate: Group is NULL for Account {AccountID}", session.Account.ID);
             return;
         }
 

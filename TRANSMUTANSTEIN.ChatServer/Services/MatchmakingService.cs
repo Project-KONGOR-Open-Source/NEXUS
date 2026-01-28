@@ -1,22 +1,22 @@
 ﻿namespace TRANSMUTANSTEIN.ChatServer.Services;
 
-public class MatchmakingService : BackgroundService, IDisposable
+public class MatchmakingService : BackgroundService, IMatchmakingService
 {
-    public static ConcurrentDictionary<int, MatchmakingGroup> Groups { get; set; } = [];
+    public ConcurrentDictionary<int, MatchmakingGroup> Groups { get; } = [];
 
-    public static ConcurrentDictionary<int, MatchmakingGroup> SoloPlayerGroups
+    public ConcurrentDictionary<int, MatchmakingGroup> SoloPlayerGroups
         => new(Groups.Where(group => group.Value.Members.Count == 1));
 
-    public static ConcurrentDictionary<int, MatchmakingGroup> TwoPlayerGroups
+    public ConcurrentDictionary<int, MatchmakingGroup> TwoPlayerGroups
         => new(Groups.Where(group => group.Value.Members.Count == 2));
 
-    public static ConcurrentDictionary<int, MatchmakingGroup> ThreePlayerGroups
+    public ConcurrentDictionary<int, MatchmakingGroup> ThreePlayerGroups
         => new(Groups.Where(group => group.Value.Members.Count == 3));
 
-    public static ConcurrentDictionary<int, MatchmakingGroup> FourPlayerGroups
+    public ConcurrentDictionary<int, MatchmakingGroup> FourPlayerGroups
         => new(Groups.Where(group => group.Value.Members.Count == 4));
 
-    public static ConcurrentDictionary<int, MatchmakingGroup> FivePlayerGroups
+    public ConcurrentDictionary<int, MatchmakingGroup> FivePlayerGroups
         => new(Groups.Where(group => group.Value.Members.Count == 5));
 
     public override void Dispose()
@@ -26,18 +26,18 @@ public class MatchmakingService : BackgroundService, IDisposable
         GC.SuppressFinalize(this);
     }
 
-    public static MatchmakingGroup? GetMatchmakingGroup(OneOf<int, string> memberIdentifier)
+    public MatchmakingGroup? GetMatchmakingGroup(OneOf<int, string> memberIdentifier)
     {
         return memberIdentifier.Match(id => GetMatchmakingGroupByMemberID(id),
             name => GetMatchmakingGroupByMemberName(name));
     }
 
-    public static MatchmakingGroup? GetMatchmakingGroupByMemberID(int memberID)
+    public MatchmakingGroup? GetMatchmakingGroupByMemberID(int memberID)
     {
         return Groups.Values.SingleOrDefault(group => group.Members.Any(member => member.Account.ID == memberID));
     }
 
-    public static MatchmakingGroup? GetMatchmakingGroupByMemberName(string memberName)
+    public MatchmakingGroup? GetMatchmakingGroupByMemberName(string memberName)
     {
         return Groups.Values.SingleOrDefault(group =>
             group.Members.Any(member => member.Account.Name.Equals(memberName)));
@@ -91,10 +91,10 @@ public class MatchmakingService : BackgroundService, IDisposable
                 // TODO: This Packet Can Be Sent With TMM_GROUP_QUEUE_UPDATE And A 4-Byte Integer To Update The Average Time In Queue (In Seconds)
 
                 foreach (MatchmakingGroup group in groups)
-                foreach (MatchmakingGroupMember member in group.Members)
-                {
-                    member.Session.Send(found);
-                }
+                    foreach (MatchmakingGroupMember member in group.Members)
+                    {
+                        member.Session.Send(found);
+                    }
             }
 
             # endregion

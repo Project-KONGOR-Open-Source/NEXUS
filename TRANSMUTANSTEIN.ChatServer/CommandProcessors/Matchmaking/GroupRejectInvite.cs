@@ -1,14 +1,16 @@
+using TRANSMUTANSTEIN.ChatServer.Services;
+
 namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Matchmaking;
 
 [ChatCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_REJECT_INVITE)]
-public class GroupRejectInvite : ISynchronousCommandProcessor<ChatSession>
+public class GroupRejectInvite(IMatchmakingService matchmakingService) : ISynchronousCommandProcessor<ChatSession>
 {
     public void Process(ChatSession session, ChatBuffer buffer)
     {
         GroupRejectInviteRequestData requestData = new(buffer);
 
         // Find The Inviter's Group
-        MatchmakingGroup? group = MatchmakingService.GetMatchmakingGroup(requestData.InviterName);
+        MatchmakingGroup? group = matchmakingService.GetMatchmakingGroupByMemberName(requestData.InviterName);
 
         if (group is null)
         {

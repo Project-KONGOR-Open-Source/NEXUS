@@ -11,6 +11,7 @@
         <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="10.0.1"/>
         <PackageReference Include="Microsoft.Testing.Extensions.TrxReport" Version="2.0.2"/>
         <PackageReference Include="Moq" Version="4.20.72"/>
+        <PackageReference Include="PhpSerializerNET" Version="2.1.1" />
         <PackageReference Include="TUnit" Version="1.7.0"/>
     </ItemGroup>
 

@@ -1,44 +1,47 @@
-﻿namespace ZORGATH.WebPortal.API.Validators;
+namespace ZORGATH.WebPortal.API.Validators;
 
 public class PasswordValidator : AbstractValidator<string>
 {
-    private const int MinimumPasswordLength = 8;
-    private const int MinimumAlphabeticCharactersCount = 2;
-    private const int MinimumNumericCharactersCount = 2;
-    private const int MinimumSpecialCharactersCount = 2;
-
-    public PasswordValidator()
+    public PasswordValidator(IOptions<IdentityOptions> identityOptions)
     {
+        PasswordOptions options = identityOptions.Value.Password;
+
         RuleFor(password => password).NotEmpty().WithMessage("Password Must Not Be Empty");
 
-        RuleFor(password => password).MinimumLength(MinimumPasswordLength)
-            .WithMessage($"Password Must To Be At Least {MinimumPasswordLength} Characters Long");
+        if (options.RequiredLength > 0)
+        {
+            RuleFor(password => password).MinimumLength(options.RequiredLength)
+                .WithMessage($"Password Must Be At Least {options.RequiredLength} Characters Long");
+        }
 
-        RuleFor(password => password).Must(password =>
-                MeetsMinimumAlphabeticCharactersCountRequirement(password, MinimumAlphabeticCharactersCount))
-            .WithMessage($"Password Must Contain At Least {MinimumAlphabeticCharactersCount} Alphabetic Characters");
+        if (options.RequireDigit)
+        {
+            RuleFor(password => password).Must(password => password.Any(char.IsDigit))
+                .WithMessage("Password Must Contain At Least One Digit");
+        }
 
-        RuleFor(password => password).Must(password =>
-                MeetsMinimumNumericCharactersCountRequirement(password, MinimumNumericCharactersCount))
-            .WithMessage($"Password Must Contain At Least {MinimumNumericCharactersCount} Numeric Characters");
+        if (options.RequireLowercase)
+        {
+            RuleFor(password => password).Must(password => password.Any(char.IsLower))
+                .WithMessage("Password Must Contain At Least One Lowercase Letter");
+        }
 
-        RuleFor(password => password).Must(password =>
-                MeetsMinimumSpecialCharactersCountRequirement(password, MinimumSpecialCharactersCount))
-            .WithMessage($"Password Must Contain At Least {MinimumSpecialCharactersCount} Special Characters");
-    }
+        if (options.RequireUppercase)
+        {
+            RuleFor(password => password).Must(password => password.Any(char.IsUpper))
+                .WithMessage("Password Must Contain At Least One Uppercase Letter");
+        }
 
-    private static bool MeetsMinimumAlphabeticCharactersCountRequirement(string password, int minimum)
-    {
-        return password.Count(char.IsLetter) >= minimum;
-    }
+        if (options.RequireNonAlphanumeric)
+        {
+            RuleFor(password => password).Must(password => password.Any(character => char.IsLetterOrDigit(character) is false))
+                .WithMessage("Password Must Contain At Least One Non-Alphanumeric Character");
+        }
 
-    private static bool MeetsMinimumNumericCharactersCountRequirement(string password, int minimum)
-    {
-        return password.Count(char.IsNumber) >= minimum;
-    }
-
-    private static bool MeetsMinimumSpecialCharactersCountRequirement(string password, int minimum)
-    {
-        return password.Count(character => char.IsLetterOrDigit(character) is false) >= minimum;
+        if (options.RequiredUniqueChars > 1)
+        {
+            RuleFor(password => password).Must(password => password.Distinct().Count() >= options.RequiredUniqueChars)
+                .WithMessage($"Password Must Contain At Least {options.RequiredUniqueChars} Unique Characters");
+        }
     }
 }

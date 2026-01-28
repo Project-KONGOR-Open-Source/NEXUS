@@ -45,5 +45,5 @@ public class Account
 
     public List<string> SystemInformationHashCollection { get; set; } = [];
 
-
+    public List<string> BlockedPhrases { get; set; } = [];
 }

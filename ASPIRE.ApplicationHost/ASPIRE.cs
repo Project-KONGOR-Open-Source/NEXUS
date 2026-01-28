@@ -87,6 +87,19 @@ public class ASPIRE
             ? builder.AddParameter(databasePasswordParameterName, resolvedDatabasePassword, secret: true)
             : builder.AddParameter(databasePasswordParameterName, true);
 
+        // Set SendGrid API Key Parameter Name And Environment Variable Name
+        const string sendGridApiKeyParameterName = "sendgrid-api-key";
+        const string sendGridApiKeyEnvironmentVariableName = "SENDGRID_API_KEY";
+
+        // Attempt To Resolve SendGrid API Key From Configuration In Order Of Priority: 1) User Secrets, 2) Environment Variables
+        string? resolvedSendGridApiKey = configuration[$"Parameters:{sendGridApiKeyParameterName}"] ??
+                                         configuration[sendGridApiKeyEnvironmentVariableName];
+
+        // Populate SendGrid API Key If Available In User Secrets Or Environment Variables
+        IResourceBuilder<ParameterResource> sendGridApiKey = resolvedSendGridApiKey is not null
+            ? builder.AddParameter(sendGridApiKeyParameterName, resolvedSendGridApiKey, secret: true)
+            : builder.AddParameter(sendGridApiKeyParameterName, secret: true); // Require the secret if not found
+
         // Configure Database Name Based On Environment
         string databaseName = builder.Environment.IsProduction() ? "production" : "development";
 
@@ -175,7 +188,8 @@ public class ASPIRE
                     : "ZORGATH.WebPortal.API Development")
             .WithReference(database, "MERRICK")
             .WaitFor(database) // Connect To SQL Server Database And Wait For It To Start
-            .WithEnvironment("INFRASTRUCTURE_GATEWAY", gateway);
+            .WithEnvironment("INFRASTRUCTURE_GATEWAY", gateway)
+            .WithEnvironment("Operational__Email__ApiKey", sendGridApiKey);
 
         // Add Web Portal UI Project
         builder.AddProject<DAWNBRINGER_WebPortal_UI>("web-portal-ui",
@@ -185,7 +199,8 @@ public class ASPIRE
             .WithReference(database, "MERRICK")
             .WaitFor(database) // Connect To SQL Server Database And Wait For It To Start
             .WithReference(webPortalApi.GetEndpoint("http")).WaitFor(webPortalApi) // Connect To Web Portal API
-            .WithEnvironment("INFRASTRUCTURE_GATEWAY", gateway);
+            .WithEnvironment("INFRASTRUCTURE_GATEWAY", gateway)
+            .WithEnvironment("Operational__Email__ApiKey", sendGridApiKey);
 
         // Start Orchestrating Distributed Application
         builder.Build().Run();

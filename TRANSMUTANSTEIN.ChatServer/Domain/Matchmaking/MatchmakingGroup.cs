@@ -1,6 +1,8 @@
+using System.Globalization;
+
 using MERRICK.DatabaseContext.Extensions;
-using TRANSMUTANSTEIN.ChatServer.Domain.Core;
-using TRANSMUTANSTEIN.ChatServer.Domain.Matchmaking;
+
+using TRANSMUTANSTEIN.ChatServer.Services;
 
 namespace TRANSMUTANSTEIN.ChatServer.Domain.Matchmaking;
 
@@ -35,25 +37,25 @@ public class MatchmakingGroup
     public TimeSpan QueueDuration =>
         QueueStartTime is not null ? DateTimeOffset.UtcNow - QueueStartTime.Value : TimeSpan.Zero;
 
-    public static MatchmakingGroup GetByMemberAccountID(int accountID)
+    public static MatchmakingGroup GetByMemberAccountID(IMatchmakingService matchmakingService, int accountID)
     {
-        MatchmakingGroup group = MatchmakingService.GetMatchmakingGroup(accountID)
+        MatchmakingGroup group = matchmakingService.GetMatchmakingGroup(accountID)
                                  ?? throw new NullReferenceException(
                                      $@"No Matchmaking Group Found For Account ID ""{accountID}""");
 
         return group;
     }
 
-    public static MatchmakingGroup GetByMemberAccountName(string accountName)
+    public static MatchmakingGroup GetByMemberAccountName(IMatchmakingService matchmakingService, string accountName)
     {
-        MatchmakingGroup group = MatchmakingService.GetMatchmakingGroup(accountName)
+        MatchmakingGroup group = matchmakingService.GetMatchmakingGroup(accountName)
                                  ?? throw new NullReferenceException(
                                      $@"No Matchmaking Group Found For Account Name ""{accountName}""");
 
         return group;
     }
 
-    internal static MatchmakingGroup Create(ChatSession session, MatchmakingGroupInformation information)
+    internal static MatchmakingGroup Create(IMatchmakingService matchmakingService, ChatSession session, MatchmakingGroupInformation information)
     {
         MatchmakingGroupMember member = new(session)
         {
@@ -70,11 +72,11 @@ public class MatchmakingGroup
 
         MatchmakingGroup group = new() { Members = [member], Information = information };
 
-        if (MatchmakingService.Groups.ContainsKey(session.Account.ID) is false)
+        if (matchmakingService.Groups.ContainsKey(session.Account.ID) is false)
         {
             // TODO: Check If The Account Is Already In A Matchmaking Group And Handle Accordingly
 
-            if (MatchmakingService.Groups.TryAdd(session.Account.ID, group) is false)
+            if (matchmakingService.Groups.TryAdd(session.Account.ID, group) is false)
             {
                 throw new InvalidOperationException(
                     $@"Failed To Create Matchmaking Group For Account ID ""{session.Account.ID}""");
@@ -83,8 +85,8 @@ public class MatchmakingGroup
 
         else
         {
-            if (MatchmakingService.Groups.TryUpdate(session.Account.ID, group,
-                    MatchmakingService.Groups[session.Account.ID]) is false)
+            if (matchmakingService.Groups.TryUpdate(session.Account.ID, group,
+                    matchmakingService.Groups[session.Account.ID]) is false)
             {
                 throw new InvalidOperationException(
                     $@"Failed To Update Matchmaking Group For Account ID ""{session.Account.ID}""");
@@ -106,17 +108,17 @@ public class MatchmakingGroup
             invite.WriteString(session.Account.Name); // Invite Issuer Name
             invite.WriteInt32(session.Account.ID); // Invite Issuer ID
             invite.WriteInt8(Convert.ToByte(ChatProtocol.ChatClientStatus
-                .CHAT_CLIENT_STATUS_CONNECTED)); // Invite Issuer Status
+                .CHAT_CLIENT_STATUS_CONNECTED, CultureInfo.InvariantCulture)); // Invite Issuer Status
             invite.WriteInt8(session.Account.GetChatClientFlags()); // Invite Issuer Chat Flags
             invite.WriteString(session.Account.GetNameColourNoPrefixCode()); // Invite Issuer Chat Name Colour
             invite.WriteString(session.Account.GetIconNoPrefixCode()); // Invite Issuer Icon
             invite.WriteString(Information.MapName); // Map Name
-            invite.WriteInt8(Convert.ToByte(Information.GameType)); // Game Type
+            invite.WriteInt8(Convert.ToByte(Information.GameType, CultureInfo.InvariantCulture)); // Game Type
             invite.WriteString(string.Join('|', Information.GameModes)); // Game Modes
             invite.WriteString(string.Join('|', Information.GameRegions)); // Game Regions
 
             ChatSession inviteReceiverSession = Context.ClientChatSessions
-                .Values.Single(session => session.Account.Name.Equals(receiverAccountName));
+                .Values.Single(cSession => cSession.Account.Name.Equals(receiverAccountName));
 
             inviteReceiverSession.Send(invite);
 
@@ -142,13 +144,43 @@ public class MatchmakingGroup
     {
         lock (_lock)
         {
-            // TODO: If The Group Is Full (Members Count Is Equal To Max Map Players Count), Reject The Join Request With An Appropriate Error
+            if (Members.Count >= Information.TeamSize)
+            {
+                Log.Warning(
+                    @"Account ID ""{AccountID}"" Failed To Join Matchmaking Group ""{GroupGUID}"" Because The Group Is Full",
+                    session.Account.ID, GUID);
 
-            // TODO: If The Group Is Already In Queue For A Match, Reject The Join Request With An Appropriate Error
+                ChatBuffer groupFull = new();
+
+                groupFull.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_FAILED_TO_JOIN);
+                groupFull.WriteInt8(Convert.ToByte(ChatProtocol.TMMFailedToJoinReason.TMMFTJR_GROUP_FULL,
+                    CultureInfo.InvariantCulture));
+
+                session.Send(groupFull);
+
+                return this;
+            }
+
+            if (QueueStartTime is not null)
+            {
+                Log.Warning(
+                    @"Account ID ""{AccountID}"" Failed To Join Matchmaking Group ""{GroupGUID}"" Because The Group Is Already Queued",
+                    session.Account.ID, GUID);
+
+                ChatBuffer alreadyQueued = new();
+
+                alreadyQueued.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_FAILED_TO_JOIN);
+                alreadyQueued.WriteInt8(Convert.ToByte(ChatProtocol.TMMFailedToJoinReason.TMMFTJR_ALREADY_QUEUED,
+                    CultureInfo.InvariantCulture));
+
+                session.Send(alreadyQueued);
+
+                return this;
+            }
 
             MatchmakingGroupMember newMatchmakingGroupMember = new(session)
             {
-                Slot = Convert.ToByte(Members.Count + 1),
+                Slot = Convert.ToByte(Members.Count + 1, CultureInfo.InvariantCulture),
                 IsLeader = false,
                 IsReady = true,
                 IsInGame = false,
@@ -310,7 +342,7 @@ public class MatchmakingGroup
             ChatBuffer queueUpdateBroadcast = new();
 
             queueUpdateBroadcast.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_QUEUE_UPDATE);
-            queueUpdateBroadcast.WriteInt8(Convert.ToByte(ChatProtocol.TMMUpdateType.TMM_GROUP_QUEUE_UPDATE));
+            queueUpdateBroadcast.WriteInt8(Convert.ToByte(ChatProtocol.TMMUpdateType.TMM_GROUP_QUEUE_UPDATE, CultureInfo.InvariantCulture));
             // TODO: Calculate Real Average Queue Time In Seconds
             queueUpdateBroadcast.WriteInt32(83);
 
@@ -344,9 +376,9 @@ public class MatchmakingGroup
 
             update.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_UPDATE);
 
-            update.WriteInt8(Convert.ToByte(updateType)); // Group Update Type
+            update.WriteInt8(Convert.ToByte(updateType, CultureInfo.InvariantCulture)); // Group Update Type
             update.WriteInt32(emitterAccountID); // Account ID
-            update.WriteInt8(Convert.ToByte(Members.Count)); // Group Size
+            update.WriteInt8(Convert.ToByte(Members.Count, CultureInfo.InvariantCulture)); // Group Size
             // TODO: Calculate Average Group Rating
             update.WriteInt16(1500); // Average Group Rating
             update.WriteInt32(Leader.Account.ID); // Leader Account ID
@@ -358,8 +390,8 @@ public class MatchmakingGroup
                 // The Client Seems To Restrict Groups For Specific Types Like AM_MATCHMAKING_MIDWARS
                 _ => ChatProtocol.ArrangedMatchType.AM_MATCHMAKING
             };
-            update.WriteInt8(Convert.ToByte(arrangedMatchType)); // Arranged Match Type
-            update.WriteInt8(Convert.ToByte(Information.GameType)); // Game Type
+            update.WriteInt8(Convert.ToByte(arrangedMatchType, CultureInfo.InvariantCulture)); // Arranged Match Type
+            update.WriteInt8(Convert.ToByte(Information.GameType, CultureInfo.InvariantCulture)); // Game Type
             update.WriteString(Information.MapName); // Map Name
             update.WriteString(string.Join('|', Information.GameModes)); // Game Modes
             update.WriteString(string.Join('|', Information.GameRegions)); // Game Regions
@@ -373,7 +405,7 @@ public class MatchmakingGroup
             update.WriteString("What Is This ??? (Player Invitation Responses)"); // Player Invitation Responses
             update.WriteInt8(Information
                 .TeamSize); // Team Size (e.g. 5 For Forests Of Caldavar, 3 For Grimm's Crossing)
-            update.WriteInt8(Convert.ToByte(Information.GroupType)); // Group Type
+            update.WriteInt8(Convert.ToByte(Information.GroupType, CultureInfo.InvariantCulture)); // Group Type
 
             bool fullGroupUpdate = updateType switch
             {
@@ -474,7 +506,7 @@ public class MatchmakingGroup
     ///     If the leader leaves and other members remain, leadership transfers to the member with the lowest slot index.
     ///     If the leader leaves and no other members remain, or if the last member leaves, the group is disbanded.
     /// </summary>
-    public void RemoveMember(int accountID, bool kick = false)
+    public void RemoveMember(IMatchmakingService matchmakingService, int accountID, bool kick = false)
     {
         lock (_lock)
         {
@@ -501,7 +533,7 @@ public class MatchmakingGroup
             // If Group Is Now Empty, Disband It
             if (Members.Count is 0)
             {
-                DisbandGroup(accountID);
+                DisbandGroup(matchmakingService, accountID);
 
                 return;
             }
@@ -568,9 +600,27 @@ public class MatchmakingGroup
     /// <summary>
     ///     Removes the specified member from the group and records the action as a kick.
     /// </summary>
-    public void KickMember(int accountID)
+    public void KickMember(IMatchmakingService matchmakingService, int accountID)
     {
-        RemoveMember(accountID, true);
+        RemoveMember(matchmakingService, accountID, true);
+    }
+
+    public void Kick(IMatchmakingService matchmakingService, ChatSession session, byte slot)
+    {
+        lock (_lock)
+        {
+            if (Leader.Account.ID != session.Account.ID)
+            {
+                // Only Leader Can Kick
+                return;
+            }
+
+            MatchmakingGroupMember? target = Members.SingleOrDefault(m => m.Slot == slot);
+            if (target != null)
+            {
+                KickMember(matchmakingService, target.Account.ID);
+            }
+        }
     }
 
     /// <summary>
@@ -590,7 +640,7 @@ public class MatchmakingGroup
 
         foreach (MatchmakingGroupMember member in Members)
         {
-            member.Slot = Convert.ToByte(Members.IndexOf(member) + 1);
+            member.Slot = Convert.ToByte(Members.IndexOf(member) + 1, CultureInfo.InvariantCulture);
         }
 
         Members.Single(member => member.Slot is 1).IsLeader = true;
@@ -600,10 +650,10 @@ public class MatchmakingGroup
     ///     Disbands the matchmaking group by removing it from the matchmaking service registry.
     ///     Called when the last member leaves or when the leader leaves with no other members.
     /// </summary>
-    private void DisbandGroup(int accountID)
+    private void DisbandGroup(IMatchmakingService matchmakingService, int accountID)
     {
         // Remove Group From Matchmaking Service Registry
-        if (MatchmakingService.Groups.TryRemove(accountID, out MatchmakingGroup? group) is false)
+        if (matchmakingService.Groups.TryRemove(accountID, out MatchmakingGroup? group) is false)
         {
             Log.Error(
                 @"Failed To Disband Matchmaking Group GUID ""{Group.GUID}"" For Account ID ""{Member.Account.ID}""",

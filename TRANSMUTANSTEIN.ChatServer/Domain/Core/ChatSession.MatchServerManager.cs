@@ -13,25 +13,12 @@ public partial class ChatSession
         await RemoveMatchServerManager(distributedCacheStore);
 
         // Remove The Match Server Manager Chat Session
-        if (Context.MatchServerManagerChatSessions.TryRemove(ManagerMetadata.ServerManagerID,
+        if (_chatContext.MatchServerManagerChatSessions.TryRemove(ManagerMetadata.ServerManagerID,
                 out ChatSession? existingSession))
         {
             Log.Information(
                 @"Match Server Manager ID ""{ServerManagerID}"" Was Removed From The Match Server Manager Pool",
                 ManagerMetadata.ServerManagerID);
-
-            if (existingSession is null)
-            {
-                Log.Warning(
-                    @"Match Server Manager ID ""{ServerManagerID}"" Had A Null Session In The Match Server Manager Pool",
-                    ManagerMetadata.ServerManagerID);
-
-                // Disconnect And Dispose The Chat Session
-                Disconnect();
-                Dispose();
-
-                return;
-            }
 
             if (existingSession.ManagerMetadata.SessionCookie != ManagerMetadata.SessionCookie)
             {

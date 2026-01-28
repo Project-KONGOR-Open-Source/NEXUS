@@ -1,9 +1,12 @@
-using TRANSMUTANSTEIN.ChatServer.Domain.Clans;
+using global::TRANSMUTANSTEIN.ChatServer.Domain.Clans;
 
 namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Clans;
 
+using global::TRANSMUTANSTEIN.ChatServer.Internals;
+using global::TRANSMUTANSTEIN.ChatServer.Domain.Communication;
+
 [ChatCommand(ChatProtocol.Command.CHAT_CMD_CLAN_PROMOTE_NOTIFY)]
-public class ClanPromoteNotify(MerrickContext merrick) : IAsynchronousCommandProcessor<ChatSession>
+public class ClanPromoteNotify(MerrickContext merrick, IChatContext chatContext) : IAsynchronousCommandProcessor<ChatSession>
 {
     public async Task Process(ChatSession session, ChatBuffer buffer)
     {
@@ -120,7 +123,7 @@ public class ClanPromoteNotify(MerrickContext merrick) : IAsynchronousCommandPro
 
         // 4. Update Target Session if online
         ChatSession? targetSession =
-            Context.ClientChatSessions.Values.FirstOrDefault(cs => cs.Account?.ID == targetAccountId);
+            chatContext.ClientChatSessions.Values.FirstOrDefault(cs => cs.Account?.ID == targetAccountId);
         if (targetSession != null && targetSession.Account != null)
         {
             targetSession.Account.ClanTier = targetAccount.ClanTier;
@@ -129,7 +132,7 @@ public class ClanPromoteNotify(MerrickContext merrick) : IAsynchronousCommandPro
 
         // 5. Broadcast to Clan Channel
         ChatChannel? clanChannel =
-            Context.ChatChannels.Values.FirstOrDefault(c => c.Name == $"Clan {account.Clan.Name}");
+            chatContext.ChatChannels.Values.FirstOrDefault(c => c.Name == $"Clan {account.Clan.Name}");
 
         ClanRankChangeResponse rankChangeResponse = new(targetAccountId, targetAccount.ClanTier, account.ID);
         ClanRankChangeResponse? leaderDemoteResponse = null;

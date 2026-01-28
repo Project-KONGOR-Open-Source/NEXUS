@@ -38,6 +38,11 @@ public class ChatChannelMember(ChatSession session, ChatChannel chatChannel)
             return ChatProtocol.AdminLevel.CHAT_CLIENT_ADMIN_STAFF;
         }
 
+        if (ChatChannel.CustomAdmins.TryGetValue(Account.ID, out ChatProtocol.AdminLevel customLevel))
+        {
+            return customLevel;
+        }
+
         if (Account.Clan is not null && ChatChannel.Name == Account.Clan.GetChatChannelName())
         {
             return Account.ClanTier switch
@@ -87,9 +92,12 @@ public class ChatChannelMember(ChatSession session, ChatChannel chatChannel)
     /// </summary>
     public bool HasElevatedPrivileges()
     {
-        return AdministratorLevel is ChatProtocol.AdminLevel.CHAT_CLIENT_ADMIN_LEADER
+        bool result = AdministratorLevel is ChatProtocol.AdminLevel.CHAT_CLIENT_ADMIN_LEADER
             or ChatProtocol.AdminLevel.CHAT_CLIENT_ADMIN_ADMINISTRATOR
-            or ChatProtocol.AdminLevel.CHAT_CLIENT_ADMIN_STAFF;
+            or ChatProtocol.AdminLevel.CHAT_CLIENT_ADMIN_STAFF
+            or ChatProtocol.AdminLevel.CHAT_CLIENT_ADMIN_OFFICER;
+            
+        return result;
     }
 
     /// <summary>

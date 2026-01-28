@@ -1,7 +1,10 @@
-﻿namespace ZORGATH.WebPortal.API.Helpers;
+namespace ZORGATH.WebPortal.API.Helpers;
 
-public static class EmailAddressHelpers
+public static partial class EmailAddressHelpers
 {
+    [GeneratedRegex(@"^(?<local>[a-zA-Z0-9_\-.]+)@(?<domain>[a-zA-Z]+)\.(?<tld>[a-zA-Z]{1,3}|co.uk)$")]
+    private static partial Regex EmailRegex();
+
     public static IActionResult SanitizeEmailAddress(string email, IWebHostEnvironment hostEnvironment)
     {
         if (hostEnvironment.IsDevelopment() is false)
@@ -11,16 +14,17 @@ public static class EmailAddressHelpers
                 return new BadRequestObjectResult(@"Alias Creating Character ""+"" Is Not Allowed");
             }
 
-            string[] allowedEmailProviders = Enumerable.Empty<string>()
-                .Concat(["outlook", "hotmail", "live", "msn"]) // Microsoft Outlook
-                .Concat(["protonmail", "proton"]) // Proton Mail
-                .Concat(["gmail", "googlemail"]) // Google Mail
-                .Concat(["yahoo", "rocketmail", "ymail"]) // Yahoo Mail
-                .Concat(["aol", "yandex", "gmx", "mail"]) // AOL Mail, Yandex Mail, GMX Mail, mail.com
-                .Concat(["icloud", "me", "mac"]) // iCloud Mail
-                .ToArray();
+            string[] allowedEmailProviders =
+            [
+                "outlook", "hotmail", "live", "msn", // Microsoft Outlook
+                "protonmail", "proton", // Proton Mail
+                "gmail", "googlemail", // Google Mail
+                "yahoo", "rocketmail", "ymail", // Yahoo Mail
+                "aol", "yandex", "gmx", "mail", // AOL Mail, Yandex Mail, GMX Mail, mail.com
+                "icloud", "me", "mac" // iCloud Mail
+            ];
 
-            Regex pattern = new(@"^(?<local>[a-zA-Z0-9_\-.]+)@(?<domain>[a-zA-Z]+)\.(?<tld>[a-zA-Z]{1,3}|co.uk)$");
+            Regex pattern = EmailRegex();
 
             Match match = pattern.Match(email);
 

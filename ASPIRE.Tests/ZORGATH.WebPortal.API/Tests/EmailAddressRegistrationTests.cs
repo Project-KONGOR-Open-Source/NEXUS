@@ -1,3 +1,5 @@
+using ASPIRE.Common.DTOs;
+
 namespace ASPIRE.Tests.ZORGATH.WebPortal.API.Tests;
 
 /// <summary>

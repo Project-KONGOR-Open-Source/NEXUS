@@ -6,35 +6,27 @@ public class MatchCompleteRequestData
     {
         CommandBytes = buffer.ReadCommandBytes();
 
-        // Safely partial read
-        if (buffer.HasRemainingData())
-        {
-            ServerID = buffer.ReadInt32();
-        }
+        MatchID = buffer.ReadInt32();
+        Reason = (ChatProtocol.MatchEndedReason) buffer.ReadInt8();
+        WinningTeam = buffer.ReadInt8();
+        PlayerCount = buffer.ReadInt8();
+        AccountIDs = new int[PlayerCount];
 
-        if (buffer.HasRemainingData())
+        for (int i = 0; i < PlayerCount; i++)
         {
-            MatchID = buffer.ReadInt32();
-        }
-
-        if (buffer.HasRemainingData())
-        {
-            WinningTeam = buffer.ReadInt32();
-        }
-
-        if (buffer.HasRemainingData())
-        {
-            MatchDuration = buffer.ReadInt32();
+            AccountIDs[i] = buffer.ReadInt32();
         }
     }
 
     public byte[] CommandBytes { get; init; }
 
-    public int ServerID { get; init; }
-
     public int MatchID { get; init; }
 
-    public int WinningTeam { get; init; }
+    public ChatProtocol.MatchEndedReason Reason { get; init; }
 
-    public int MatchDuration { get; init; }
+    public byte WinningTeam { get; init; }
+
+    public byte PlayerCount { get; init; }
+
+    public int[] AccountIDs { get; init; }
 }

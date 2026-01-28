@@ -600,12 +600,7 @@ public partial class InProcessDistributedCacheStore
         throw new NotImplementedException();
     }
 
-    // Skipped StringSetAsync 5-arg and 4-arg-with-flags (Implemented)
-    public Task<bool> StringSetAsync(RedisKey key, RedisValue value, TimeSpan? expiry, When when)
-    {
-        throw new NotImplementedException();
-        // The 4-arg sync listed in error log
-    }
+
 
     public Task<bool> StringSetAsync(KeyValuePair<RedisKey, RedisValue>[] values, When when = When.Always,
         CommandFlags flags = CommandFlags.None)
@@ -656,16 +651,7 @@ public partial class InProcessDistributedCacheStore
         throw new NotImplementedException();
     }
 
-    public Task<RedisResult> ExecuteAsync(string command, params object[] args)
-    {
-        throw new NotImplementedException();
-    }
 
-    public Task<RedisResult> ExecuteAsync(string command, ICollection<object>? args,
-        CommandFlags flags = CommandFlags.None)
-    {
-        throw new NotImplementedException();
-    }
 
     // Vector Async
 #pragma warning disable SER001

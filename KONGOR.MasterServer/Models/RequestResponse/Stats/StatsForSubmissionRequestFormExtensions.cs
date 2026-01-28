@@ -1,4 +1,4 @@
-﻿namespace KONGOR.MasterServer.Models.RequestResponse.Stats;
+namespace KONGOR.MasterServer.Models.RequestResponse.Stats;
 
 using global::KONGOR.MasterServer.Services;
 
@@ -73,15 +73,15 @@ public static class StatsForSubmissionRequestFormExtensions
         // We must attempt to resolve the ID from the `hero` string key if the payload ID is invalid.
         uint parsedHeroId = uint.Parse(player["hero_id"]);
         uint heroProductId;
-        
+
         if (parsedHeroId == 0 || parsedHeroId == uint.MaxValue)
         {
-             // Resolve from identifier (e.g. "Hero_Valkyrie")
-             heroProductId = heroDefinitionService.GetBaseHeroId(hero);
+            // Resolve from identifier (e.g. "Hero_Valkyrie")
+            heroProductId = heroDefinitionService.GetBaseHeroId(hero);
         }
         else
         {
-             heroProductId = parsedHeroId;
+            heroProductId = parsedHeroId;
         }
 
         PlayerStatistics statistics = new()
@@ -155,6 +155,12 @@ public static class StatsForSubmissionRequestFormExtensions
             RankedMatch = player.TryGetValue("amm_team_count", out string? rankCount) ? int.Parse(rankCount) : 0,
             RankedSkillRatingChange =
                 player.TryGetValue("amm_team_rating", out string? rankSkill) ? double.Parse(rankSkill) : 0,
+
+            // --- FIX START ---
+            // Checks if "mvp" key exists in player dictionary, otherwise defaults to 0
+            MVP = player.TryGetValue("mvp", out string? mvpStr) && int.TryParse(mvpStr, out int mvpVal) ? mvpVal : 0,
+            // --- FIX END ---
+
             SocialBonus = int.Parse(player["social_bonus"]),
             UsedToken = int.Parse(player["used_token"]),
             ConcedeVotes = int.Parse(player["concedevotes"]),
@@ -222,7 +228,9 @@ public static class StatsForSubmissionRequestFormExtensions
             ItemHistory = form.ItemHistory?.Where(item => item.AccountID == accountID).Select(item =>
                 new MERRICK.DatabaseContext.Entities.Statistics.ItemEvent
                 {
-                    ItemName = item.ItemName, GameTimeSeconds = item.GameTimeSeconds, EventType = item.EventType
+                    ItemName = item.ItemName,
+                    GameTimeSeconds = item.GameTimeSeconds,
+                    EventType = item.EventType
                 }).ToList(),
             AbilityHistory = form.AbilityHistory is not null &&
                              form.AbilityHistory.TryGetValue(accountID, out List<AbilityEvent>? abilities)

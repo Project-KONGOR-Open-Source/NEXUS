@@ -1,9 +1,11 @@
-using TRANSMUTANSTEIN.ChatServer.Domain.Clans;
+using global::TRANSMUTANSTEIN.ChatServer.Domain.Clans;
 
 namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Clans;
 
+using global::TRANSMUTANSTEIN.ChatServer.Internals;
+
 [ChatCommand(ChatProtocol.Command.CHAT_CMD_CLAN_ADD_MEMBER)]
-public class ClanAddMember(MerrickContext merrick, IPendingClanService pendingClanService)
+public class ClanAddMember(MerrickContext merrick, IPendingClanService pendingClanService, IChatContext chatContext)
     : IAsynchronousCommandProcessor<ChatSession>
 {
     public async Task Process(ChatSession session, ChatBuffer buffer)
@@ -60,7 +62,7 @@ public class ClanAddMember(MerrickContext merrick, IPendingClanService pendingCl
         }
 
         // 4. Check Online Status & Chat Mode
-        ChatSession? targetSession = Context.ClientChatSessions.Values
+        ChatSession? targetSession = chatContext.ClientChatSessions.Values
             .FirstOrDefault(cs => cs.Account?.ID == targetAccount.ID);
 
         if (targetSession == null || targetSession.ClientMetadata.LastKnownClientState <

@@ -1,3 +1,7 @@
+using ASPIRE.Common.DTOs;
+
+using ZORGATH.WebPortal.API.Services;
+
 namespace ASPIRE.Tests.ZORGATH.WebPortal.API.Services;
 
 /// <summary>
@@ -21,12 +25,14 @@ public sealed class JWTAuthenticationService(WebApplicationFactory<ZORGATHAssemb
 
     private async Task<Token> RegisterEmailAddress(string emailAddress)
     {
-        ILogger<EmailAddressController> logger =
-            webApplicationFactory.Services.GetRequiredService<ILogger<EmailAddressController>>();
-        IEmailService emailService = webApplicationFactory.Services.GetRequiredService<IEmailService>();
-        IWebHostEnvironment hostEnvironment = webApplicationFactory.Services.GetRequiredService<IWebHostEnvironment>();
+        using IServiceScope scope = webApplicationFactory.Services.CreateScope();
 
-        MerrickContext merrickContext = webApplicationFactory.Services.GetRequiredService<MerrickContext>();
+        ILogger<EmailAddressController> logger =
+            scope.ServiceProvider.GetRequiredService<ILogger<EmailAddressController>>();
+        IEmailService emailService = scope.ServiceProvider.GetRequiredService<IEmailService>();
+        IWebHostEnvironment hostEnvironment = scope.ServiceProvider.GetRequiredService<IWebHostEnvironment>();
+
+        MerrickContext merrickContext = scope.ServiceProvider.GetRequiredService<MerrickContext>();
 
         EmailAddressController controller = new(merrickContext, logger, emailService, hostEnvironment);
 
@@ -46,15 +52,14 @@ public sealed class JWTAuthenticationService(WebApplicationFactory<ZORGATHAssemb
 
     private async Task<int> RegisterUserAndMainAccount(string tokenValue, string accountName, string password)
     {
-        ILogger<UserController> logger = webApplicationFactory.Services.GetRequiredService<ILogger<UserController>>();
-        IOptions<OperationalConfiguration> configuration =
-            webApplicationFactory.Services.GetRequiredService<IOptions<OperationalConfiguration>>();
-        IEmailService emailService = webApplicationFactory.Services.GetRequiredService<IEmailService>();
-        IWebHostEnvironment hostEnvironment = webApplicationFactory.Services.GetRequiredService<IWebHostEnvironment>();
+        using IServiceScope scope = webApplicationFactory.Services.CreateScope();
 
-        MerrickContext merrickContext = webApplicationFactory.Services.GetRequiredService<MerrickContext>();
+        ILogger<UserController> logger = scope.ServiceProvider.GetRequiredService<ILogger<UserController>>();
+        MerrickContext merrickContext = scope.ServiceProvider.GetRequiredService<MerrickContext>();
+        IUserService userService = scope.ServiceProvider.GetRequiredService<IUserService>();
+        IAuthenticationService authService = scope.ServiceProvider.GetRequiredService<IAuthenticationService>();
 
-        UserController controller = new(merrickContext, logger, emailService, configuration, hostEnvironment);
+        UserController controller = new(merrickContext, logger, userService, authService);
 
         IActionResult response = await controller.RegisterUserAndMainAccount(
             new RegisterUserAndMainAccountDTO(tokenValue, accountName, password, password));
@@ -71,15 +76,14 @@ public sealed class JWTAuthenticationService(WebApplicationFactory<ZORGATHAssemb
 
     private async Task<string> LogInUser(string accountName, string password)
     {
-        ILogger<UserController> logger = webApplicationFactory.Services.GetRequiredService<ILogger<UserController>>();
-        IOptions<OperationalConfiguration> configuration =
-            webApplicationFactory.Services.GetRequiredService<IOptions<OperationalConfiguration>>();
-        IEmailService emailService = webApplicationFactory.Services.GetRequiredService<IEmailService>();
-        IWebHostEnvironment hostEnvironment = webApplicationFactory.Services.GetRequiredService<IWebHostEnvironment>();
+        using IServiceScope scope = webApplicationFactory.Services.CreateScope();
 
-        MerrickContext merrickContext = webApplicationFactory.Services.GetRequiredService<MerrickContext>();
+        ILogger<UserController> logger = scope.ServiceProvider.GetRequiredService<ILogger<UserController>>();
+        MerrickContext merrickContext = scope.ServiceProvider.GetRequiredService<MerrickContext>();
+        IUserService userService = scope.ServiceProvider.GetRequiredService<IUserService>();
+        IAuthenticationService authService = scope.ServiceProvider.GetRequiredService<IAuthenticationService>();
 
-        UserController controller = new(merrickContext, logger, emailService, configuration, hostEnvironment);
+        UserController controller = new(merrickContext, logger, userService, authService);
 
         IActionResult response = await controller.LogInUser(new LogInUserDTO(accountName, password));
 

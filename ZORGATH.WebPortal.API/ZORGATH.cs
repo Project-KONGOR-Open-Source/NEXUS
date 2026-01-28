@@ -1,5 +1,9 @@
 ﻿namespace ZORGATH.WebPortal.API;
 
+using Infrastructure;
+
+using SendGrid; // Added for ISendGridClient
+
 public class ZORGATH
 {
     public static void Main(string[] args)
@@ -97,57 +101,62 @@ public class ZORGATH
                     .AllowAnyHeader().AllowAnyMethod().AllowCredentials());
         });
 
+        // Register Custom Output Cache Policies
+        builder.Services.AddSingleton<AllowAuthenticatedOutputCachePolicy>();
+
         // Add Server-Side Output Caching
         builder.Services.AddOutputCache(options =>
         {
             options.AddPolicy(OutputCachePolicies.CacheForThirtySeconds,
                 policy => policy.Cache().Expire(TimeSpan.FromSeconds(30)));
             options.AddPolicy(OutputCachePolicies.CacheForFiveMinutes,
-                policy => policy.Cache().Expire(TimeSpan.FromMinutes(5)));
+                policy => policy.AddPolicy<AllowAuthenticatedOutputCachePolicy>()
+                    .Expire(TimeSpan.FromMinutes(5))
+                    .SetVaryByHeader("Authorization"));
             options.AddPolicy(OutputCachePolicies.CacheForOneDay,
                 policy => policy.Cache().Expire(TimeSpan.FromDays(1)));
             options.AddPolicy(OutputCachePolicies.CacheForOneWeek,
                 policy => policy.Cache().Expire(TimeSpan.FromDays(7)));
         });
 
-        // TODO: Implement Username And Password Validation Policies
-        //if (builder.Environment.IsDevelopment())
-        //{
-        //    builder.Services.Configure<IdentityOptions>(options =>
-        //    {
-        //        options.User.RequireUniqueEmail = false;
-        //        options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_`";
+        // Implement Username And Password Validation Policies
+        if (builder.Environment.IsDevelopment())
+        {
+            builder.Services.Configure<IdentityOptions>(options =>
+            {
+                options.User.RequireUniqueEmail = false;
+                options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_`";
 
-        //        options.Password.RequiredLength = 0;
-        //        options.Password.RequiredUniqueChars = 0;
-        //        options.Password.RequireNonAlphanumeric = false;
-        //        options.Password.RequireLowercase = false;
-        //        options.Password.RequireUppercase = false;
-        //        options.Password.RequireDigit = false;
+                options.Password.RequiredLength = 0;
+                options.Password.RequiredUniqueChars = 0;
+                options.Password.RequireNonAlphanumeric = false;
+                options.Password.RequireLowercase = false;
+                options.Password.RequireUppercase = false;
+                options.Password.RequireDigit = false;
 
-        //        options.Lockout.MaxFailedAccessAttempts = 5;
-        //        options.Lockout.DefaultLockoutTimeSpan = TimeSpan.Zero;
-        //    });
-        //}
+                options.Lockout.MaxFailedAccessAttempts = 5;
+                options.Lockout.DefaultLockoutTimeSpan = TimeSpan.Zero;
+            });
+        }
 
-        //else
-        //{
-        //    builder.Services.Configure<IdentityOptions>(options =>
-        //    {
-        //        options.User.RequireUniqueEmail = true;
-        //        options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_`";
+        else
+        {
+            builder.Services.Configure<IdentityOptions>(options =>
+            {
+                options.User.RequireUniqueEmail = true;
+                options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_`";
 
-        //        options.Password.RequiredLength = 8;
-        //        options.Password.RequiredUniqueChars = 4;
-        //        options.Password.RequireNonAlphanumeric = true;
-        //        options.Password.RequireLowercase = true;
-        //        options.Password.RequireUppercase = true;
-        //        options.Password.RequireDigit = true;
+                options.Password.RequiredLength = 8;
+                options.Password.RequiredUniqueChars = 4;
+                options.Password.RequireNonAlphanumeric = true;
+                options.Password.RequireLowercase = true;
+                options.Password.RequireUppercase = true;
+                options.Password.RequireDigit = true;
 
-        //        options.Lockout.MaxFailedAccessAttempts = 3;
-        //        options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
-        //    });
-        //}
+                options.Lockout.MaxFailedAccessAttempts = 3;
+                options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
+            });
+        }
 
         // Add JWT Bearer Authentication Configuration
         builder.Services
@@ -193,6 +202,9 @@ public class ZORGATH
 
         // Enable MVC Controllers
         builder.Services.AddControllers();
+
+        // Register Validators
+        builder.Services.AddScoped<PasswordValidator>();
 
         // Add Comprehensive Error Response Detail In Development Environment
         if (builder.Environment.IsDevelopment())
@@ -247,8 +259,24 @@ public class ZORGATH
             });
         });
 
-        // Add Email Service
+        // Add SendGrid Client
+        builder.Services.AddSingleton<ISendGridClient>(sp =>
+        {
+            OperationalConfiguration configuration = builder.Configuration
+                .GetRequiredSection(OperationalConfiguration.ConfigurationSection)
+                .Get<OperationalConfiguration>() ?? throw new NullReferenceException("Operational Configuration Is NULL");
+
+            return new SendGridClient(configuration.Email.ApiKey);
+        });
+
+        // Add EmailService
         builder.Services.AddSingleton<IEmailService, EmailService>();
+
+        // Add UserService
+        builder.Services.AddScoped<IUserService, UserService>();
+
+        // Add AuthenticationService
+        builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
 
         // Configure Forwarded Headers For Reverse Proxy Support
         builder.Services.Configure<ForwardedHeadersOptions>(options =>

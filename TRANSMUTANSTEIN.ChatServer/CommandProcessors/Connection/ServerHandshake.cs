@@ -1,7 +1,10 @@
 namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Connection;
 
+using global::TRANSMUTANSTEIN.ChatServer.Internals;
+using global::TRANSMUTANSTEIN.ChatServer.Domain.Communication;
+
 [ChatCommand(ChatProtocol.GameServerToChatServer.NET_CHAT_GS_CONNECT)]
-public class ServerHandshake(IDatabase distributedCacheStore, MerrickContext databaseContext)
+public class ServerHandshake(IDatabase distributedCacheStore, MerrickContext databaseContext, IChatContext chatContext)
     : IAsynchronousCommandProcessor<ChatSession>
 {
     public async Task Process(ChatSession session, ChatBuffer buffer)
@@ -126,7 +129,7 @@ public class ServerHandshake(IDatabase distributedCacheStore, MerrickContext dat
         }
 
         // Check For Duplicate Match Server Instances
-        if (Context.MatchServerChatSessions.TryGetValue(requestData.ServerId, out ChatSession? existingSession))
+        if (chatContext.MatchServerChatSessions.TryGetValue(requestData.ServerId, out ChatSession? existingSession))
         {
             Log.Information(
                 @"Disconnecting Duplicate Match Server Instance With ID ""{ServerID}"" And Address ""{Address}:{Port}"")",
@@ -134,11 +137,11 @@ public class ServerHandshake(IDatabase distributedCacheStore, MerrickContext dat
 
             await existingSession.TerminateMatchServer(distributedCacheStore);
 
-            Context.MatchServerChatSessions.TryRemove(requestData.ServerId, out _);
+            chatContext.MatchServerChatSessions.TryRemove(requestData.ServerId, out _);
         }
 
         // Register Match Server
-        Context.MatchServerChatSessions[requestData.ServerId] = session;
+        chatContext.MatchServerChatSessions[requestData.ServerId] = session;
 
         Log.Information(
             @"Match Server Connection Accepted - Server ID: ""{ServerID}"", Host Account: ""{HostAccountName}"", Address: ""{Address}:{Port}"", Location: ""{Location}""",

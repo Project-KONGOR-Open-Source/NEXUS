@@ -5,47 +5,47 @@ public class MatchStatsResponse
     /// <summary>
     ///     The amount of gold coins that the account owns.
     /// </summary>
-    [PhpProperty("points")]
+    [PHPProperty("points")]
     public required string GoldCoins { get; init; }
 
     /// <summary>
     ///     The amount of silver coins that the account owns.
     /// </summary>
-    [PhpProperty("mmpoints")]
+    [PHPProperty("mmpoints")]
     public required string SilverCoins { get; init; }
 
     /// <summary>
     ///     A collection containing the summary of the match.
     ///     This is typically a single-element collection.
     /// </summary>
-    [PhpProperty("match_summ")]
+    [PHPProperty("match_summ")]
     public required List<MatchSummary> MatchSummary { get; init; }
 
     /// <summary>
     ///     A collection containing player statistics for the match.
     ///     The structure is an array with a single dictionary element, where the dictionary is keyed by player account IDs.
     /// </summary>
-    [PhpProperty("match_player_stats")]
-    public required List<Dictionary<int, MatchPlayerStatistics>> MatchPlayerStatistics { get; init; }
+    [PHPProperty("match_player_stats", IsDiscriminatedUnion = true)]
+    public required List<Dictionary<OneOf<int, string>, MatchPlayerStatistics>> MatchPlayerStatistics { get; init; }
 
     /// <summary>
     ///     A collection containing player inventories for the match.
     ///     The structure is an array with a single dictionary element, where the dictionary is keyed by player account IDs.
     /// </summary>
-    [PhpProperty("inventory")]
-    public required List<Dictionary<int, MatchPlayerInventory>> MatchPlayerInventories { get; init; }
+    [PHPProperty("inventory", IsDiscriminatedUnion = true)]
+    public required List<Dictionary<OneOf<int, string>, MatchPlayerInventory>> MatchPlayerInventories { get; init; }
 
     /// <summary>
     ///     Mastery details for the hero played in the match.
     /// </summary>
-    [PhpProperty("match_mastery")]
+    [PHPProperty("match_mastery")]
     public required MatchMastery MatchMastery { get; init; }
 
     /// <summary>
     ///     Tokens for the Kros Dice random ability draft that players can use while dead or in spawn in a Kros Mode match.
     ///     Only works in matches which have the "GAME_OPTION_SHUFFLE_ABILITIES" flag enabled, such as Rift Wars.
     /// </summary>
-    [PhpProperty("dice_tokens")]
+    [PHPProperty("dice_tokens")]
     public int DiceTokens { get; init; } = 100;
 
     /// <summary>
@@ -54,7 +54,7 @@ public class MatchStatsResponse
     ///     "m.midwars.access").
     ///     Legacy accounts have full access to all game modes, and so do accounts which own the "m.allmodes.pass" store item.
     /// </summary>
-    [PhpProperty("game_tokens")]
+    [PHPProperty("game_tokens")]
     public int GameTokens { get; init; } = 100;
 
     /// <summary>
@@ -69,7 +69,7 @@ public class MatchStatsResponse
     ///         Level 100+  -> tier 06 appearance
     ///     </code>
     /// </summary>
-    [PhpProperty("season_level")]
+    [PHPProperty("season_level")]
     public int SeasonLevel { get; init; } = 100;
 
     /// <summary>
@@ -79,7 +79,7 @@ public class MatchStatsResponse
     ///     For the sake of consistency with "season_level", this property is set to "100", although it most likely has no
     ///     effect.
     /// </summary>
-    [PhpProperty("creep_level")]
+    [PHPProperty("creep_level")]
     public int CreepLevel { get; init; } = 100;
 
     /// <summary>
@@ -109,31 +109,31 @@ public class MatchStatsResponse
     ///     </code>
     /// </summary>
 
-    [PhpProperty("my_upgrades")]
+    [PHPProperty("my_upgrades")]
     public required List<string> OwnedStoreItems { get; init; }
 
     /// <summary>
     ///     Detailed information about owned store items including mastery boosts and discount coupons.
     /// </summary>
-    [PhpProperty("my_upgrades_info")]
-    public required Dictionary<string, object> OwnedStoreItemsData { get; init; }
+    [PHPProperty("my_upgrades_info", IsDiscriminatedUnion = true)]
+    public required Dictionary<string, OneOf<object, Dictionary<string, object>>> OwnedStoreItemsData { get; init; }
 
     /// <summary>
     ///     The collection of selected store items.
     /// </summary>
-    [PhpProperty("selected_upgrades")]
+    [PHPProperty("selected_upgrades")]
     public required List<string> SelectedStoreItems { get; init; }
 
     /// <summary>
     ///     The index of the custom icon equipped, or "0" if no custom icon is equipped.
     /// </summary>
-    [PhpProperty("slot_id")]
+    [PHPProperty("slot_id")]
     public required string CustomIconSlotID { get; init; }
 
     /// <summary>
     ///     The server time (in UTC seconds).
     /// </summary>
-    [PhpProperty("timestamp")]
+    [PHPProperty("timestamp")]
     public long ServerTimestamp { get; init; } = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
 
     /// <summary>
@@ -142,7 +142,7 @@ public class MatchStatsResponse
     ///     While the quest system is disabled, this dictionary contains a single element with a key of "error".
     ///     The object which is the value of this element has the values of all its properties set to "0".
     /// </summary>
-    [PhpProperty("quest_system")]
+    [PHPProperty("quest_system")]
     public Dictionary<string, QuestSystem> QuestSystem { get; init; } = new() { { "error", new QuestSystem() } };
 
     /// <summary>
@@ -150,27 +150,27 @@ public class MatchStatsResponse
     ///     <br />
     ///     Statistics related to the "Event Codex" (otherwise known as "Ascension") seasonal system.
     /// </summary>
-    [PhpProperty("season_system")]
+    [PHPProperty("season_system")]
     public SeasonSystem SeasonSystem { get; init; } = new();
 
     /// <summary>
     ///     Statistics related to the Champions Of Newerth seasonal campaign.
     /// </summary>
-    [PhpProperty("con_reward")]
+    [PHPProperty("con_reward")]
     public required CampaignReward CampaignReward { get; init; } = new();
 
     /// <summary>
     ///     The minimum number of matches a free-to-play (trial) account must complete to become verified.
     ///     A verified account is considered to have full account privileges, and is no longer considered a restricted account.
     /// </summary>
-    [PhpProperty("vested_threshold")]
-    public int VestedThreshold => 5;
+    [PHPProperty("vested_threshold")]
+    public OneOf<int, string> VestedThreshold => 5;
 
     /// <summary>
     ///     Unknown.
     ///     <br />
     ///     Seems to be set to "true" on a successful response, or to "false" if an error occurs.
     /// </summary>
-    [PhpProperty(0)]
+    [PHPProperty(0)]
     public bool Zero => true;
 }

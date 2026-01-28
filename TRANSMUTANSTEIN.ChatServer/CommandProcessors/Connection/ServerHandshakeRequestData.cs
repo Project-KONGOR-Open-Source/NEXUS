@@ -22,7 +22,9 @@ public class ServerHandshakeRequestData
     {
         return new MatchServerChatSessionMetadata
         {
-            ServerID = ServerId, SessionCookie = SessionCookie, ChatProtocolVersion = ChatProtocolVersion
+            ServerID = ServerId,
+            SessionCookie = SessionCookie,
+            ChatProtocolVersion = ChatProtocolVersion
         };
     }
 }

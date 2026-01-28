@@ -1,4 +1,4 @@
-﻿namespace KONGOR.MasterServer.Models.RequestResponse.SRP;
+namespace KONGOR.MasterServer.Models.RequestResponse.SRP;
 
 public enum SRPAuthenticationFailureReason
 {

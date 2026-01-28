@@ -1,4 +1,4 @@
-﻿namespace KONGOR.MasterServer.Models.RequestResponse.Stats;
+namespace KONGOR.MasterServer.Models.RequestResponse.Stats;
 
 public class FragEvent
 {

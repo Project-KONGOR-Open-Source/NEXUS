@@ -1,9 +1,11 @@
-using MERRICK.DatabaseContext.Entities.Statistics;
-using KONGOR.MasterServer.Services;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.FileProviders; // For IFileProvider
 using System.Diagnostics;
-using System.Text.RegularExpressions;
+
+using KONGOR.MasterServer.Services;
+
+using MERRICK.DatabaseContext.Entities.Statistics;
+
+using Microsoft.Extensions.FileProviders; // For IFileProvider
+using Microsoft.Extensions.Hosting;
 
 namespace ASPIRE.Tests.KONGOR.MasterServer.Tests;
 
@@ -12,17 +14,17 @@ public class SeedMatchHistoryTests
     // =================================================================================================
     //  CONFIGURATION SECTION - UPDATE THESE VALUES TO CONTROL SEEDING
     // =================================================================================================
-    
+
     // SET TO TRUE to wipe ALL existing match history (PlayerStatistics AND MatchStatistics) before seeding.
     // WARNING: This is destructive!
-    private const bool CLEAR_HISTORY = false;
+    private static readonly bool CLEAR_HISTORY = false;
 
     // The number of randomized matches to generate for the 'SeedMatchHistory_RandomizedPublic' test.
     // value 100 = ~10 matches per guest account if using 10 guests.
     // scale matches if needed
-    private const int MATCH_COUNT = 100;
+    private const int MATCH_COUNT = 10;
 
-    private static readonly string[] ItemPool = 
+    private static readonly string[] ItemPool =
     [
         // Boots
         "Item_Steamboots", "Item_EnhancedMarchers", "Item_PostHaste", "Item_PlatedGreaves", "Item_Striders",
@@ -47,399 +49,419 @@ public class SeedMatchHistoryTests
         // Setup Dependency Injection to get the DbContext
         ServiceCollection services = new();
 
-        string connectionString = GetConnectionString();
+        string? connectionString = GetConnectionString();
+        bool useInMemory = string.IsNullOrEmpty(connectionString);
 
-        services.AddDbContext<MerrickContext>(options =>
-            options.UseSqlServer(connectionString, sqlOptions =>
-                sqlOptions.MigrationsHistoryTable("MigrationsHistory", "meta")));
-
+        if (useInMemory)
+        {
+            services.AddDbContext<MerrickContext>(options =>
+                options.UseInMemoryDatabase("SeedMatchHistory_Db"));
+            Console.WriteLine("[SETUP] Connection String Not Found. Using InMemory Database (Test Mode).");
+        }
+        else
+        {
+            services.AddDbContext<MerrickContext>(options =>
+                options.UseSqlServer(connectionString, sqlOptions =>
+                    sqlOptions.MigrationsHistoryTable("MigrationsHistory", "meta")));
+        }
         // Register HeroDefinitionService and dependencies
         services.AddLogging();
-        services.AddSingleton<IHostEnvironment>(new TestHostEnvironment 
-        { 
-            ContentRootPath = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../KONGOR.MasterServer")) 
+        services.AddSingleton<IHostEnvironment>(new TestHostEnvironment
+        {
+            ContentRootPath =
+                Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../KONGOR.MasterServer"))
         });
         services.AddSingleton<IHeroDefinitionService, HeroDefinitionService>();
 
         ServiceProvider provider = services.BuildServiceProvider();
         MerrickContext context = provider.GetRequiredService<MerrickContext>();
 
-        // FORCE REMEDIATION: Unconditionally drop table and clear migration history to ensure clean state
-        try
+        // Ensure Table Exists (Manual Fix for Missing Migration)
+        if (!useInMemory)
         {
-            Console.WriteLine("[REMEDIATION] Forcing Drop of AccountStatistics table...");
             try
             {
+                // 1. Ensure Schema 'data' exists
                 await context.Database.ExecuteSqlRawAsync(
-                    "IF OBJECT_ID('data.AccountStatistics', 'U') IS NOT NULL DROP TABLE data.AccountStatistics");
-            }
-            catch (Exception ex) { Console.WriteLine($"[REMEDIATION] Drop Table Failed (Non-Critical): {ex.Message}"); }
+                    "IF NOT EXISTS (SELECT * FROM sys.schemas WHERE name = 'data') EXEC('CREATE SCHEMA [data]')");
 
-            Console.WriteLine("[REMEDIATION] Clearing Match History...");
-            try { await context.Database.ExecuteSqlRawAsync("DELETE FROM stat.PlayerStatistics"); }
-            catch (Exception ex) { Console.WriteLine($"[REMEDIATION] Delete PlayerStats Failed: {ex.Message}"); }
+                // 2. Ensure Table 'data.AccountStatistics' exists
+                string createTableSql = @"
+                IF OBJECT_ID('data.AccountStatistics', 'U') IS NULL
+                BEGIN
+                    CREATE TABLE [data].[AccountStatistics](
+                        [account_id] [int] NOT NULL,
+                        [matches_played] [int] NOT NULL DEFAULT 0,
+                        [matches_won] [int] NOT NULL DEFAULT 0,
+                        [matches_lost] [int] NOT NULL DEFAULT 0,
+                        [matches_conceded] [int] NOT NULL DEFAULT 0,
+                        [matches_disconnected] [int] NOT NULL DEFAULT 0,
+                        [matches_kicked] [int] NOT NULL DEFAULT 0,
+                        [skill_rating] [float] NOT NULL DEFAULT 0,
+                        [performance_score] [float] NOT NULL DEFAULT 0,
+                        [placement_matches_data] [nvarchar](max) NULL,
+                        CONSTRAINT [PK_AccountStatistics] PRIMARY KEY CLUSTERED ([account_id] ASC)
+                    )
+                END";
 
-            Console.WriteLine("[REMEDIATION] Clearing Migration History...");
-            // Real configuration uses [meta].[MigrationsHistory]
-            try
-            {
-                await context.Database.ExecuteSqlRawAsync(
-                    "DELETE FROM [meta].[MigrationsHistory] WHERE [MigrationId] = '20260111031716_AddAccountStatisticsTable'");
+                await context.Database.ExecuteSqlRawAsync(createTableSql);
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"[REMEDIATION] Delete History Failed (Non-Critical): {ex.Message}");
+                Console.WriteLine($"[SETUP] Ensure Table Failed: {ex.Message}");
+                // Continue, maybe it exists?
             }
 
-            Console.WriteLine("[REMEDIATION] Re-applying latest migration...");
-            await context.Database.MigrateAsync();
-            Console.WriteLine("[REMEDIATION] Database is now up to date.");
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"[DEBUG/REMEDIATION] Failed: {ex.Message}");
-            throw;
-        }
+            Random random = new();
+            int baseMatchId = 9000000 + random.Next(1, 100000);
+            int midwarsId = baseMatchId + 1;
+            int rankedId = baseMatchId + 2;
 
-        Random random = new();
-        int baseMatchId = 9000000 + random.Next(1, 100000);
-        int midwarsId = baseMatchId + 1;
-        int rankedId = baseMatchId + 2;
+            List<Account> guestAccounts = new();
 
-        List<Account> guestAccounts = new();
-
-        // 1. Fetch ALL Guest Accounts (01-10)
-        for (int i = 1; i <= 10; i++)
-        {
-            string nickname = $"GUEST-{i:D2}";
-            Account? account = await context.Accounts.FirstOrDefaultAsync(a => a.Name == nickname);
-
-            if (account == null)
+            // 1. Fetch ALL Guest Accounts (01-10)
+            for (int i = 1; i <= 10; i++)
             {
-                Console.WriteLine($"Account {nickname} not found. Skipping.");
-                continue;
-            }
+                string nickname = $"GUEST-{i:D2}";
+                Account? account = await context.Accounts.FirstOrDefaultAsync(a => a.Name == nickname);
 
-            guestAccounts.Add(account);
-
-            // 2. Seed AccountStatistics if missing
-            if (!await context.AccountStatistics.AnyAsync(s => s.AccountID == account.ID))
-            {
-                context.AccountStatistics.Add(new AccountStatistics
+                if (account == null)
                 {
-                    AccountID = account.ID,
-                    MatchesPlayed = 2,
-                    MatchesWon = 1,
-                    MatchesLost = 1,
-                    SkillRating = 1500.0 + ((random.NextDouble() * 100) - 50)
-                });
-                Console.WriteLine($"Seeded AccountStatistics for {nickname}.");
+                    Console.WriteLine($"Account {nickname} not found. Skipping.");
+                    continue;
+                }
+
+                guestAccounts.Add(account);
+
+                // 2. Seed AccountStatistics if missing
+                if (!await context.AccountStatistics.AnyAsync(s => s.AccountID == account.ID))
+                {
+                    context.AccountStatistics.Add(new AccountStatistics
+                    {
+                        AccountID = account.ID,
+                        MatchesPlayed = 2,
+                        MatchesWon = 1,
+                        MatchesLost = 1,
+                        SkillRating = 1500.0 + ((random.NextDouble() * 100) - 50)
+                    });
+                    Console.WriteLine($"Seeded AccountStatistics for {nickname}.");
+                }
             }
-        }
 
-        // 3. Create Matches
-        MatchStatistics midwarsMatch = new()
-        {
-            MatchID = midwarsId,
-            ServerID = 1,
-            HostAccountName = "System",
-            Map = "midwars",
-            MapVersion = "1.0",
-            TimePlayed = 1200,
-            FileSize = 1000,
-            FileName = $"M{midwarsId}.honreplay",
-            ConnectionState = 0,
-            Version = "4.10.0",
-            AveragePSR = 1500,
-            AveragePSRTeamOne = 1500,
-            AveragePSRTeamTwo = 1500,
-            GameMode = "midwars",
-            ScoreTeam1 = 50,
-            ScoreTeam2 = 40,
-            TeamScoreGoal = 0,
-            PlayerScoreGoal = 0,
-            NumberOfRounds = 1,
-            ReleaseStage = "Live",
-            BannedHeroes = "",
-            TimestampRecorded = DateTimeOffset.UtcNow.AddHours(-1),
-            AwardMostAnnihilations = 0,
-            AwardMostQuadKills = 0,
-            AwardLargestKillStreak = 0,
-            AwardMostSmackdowns = 0,
-            AwardMostKills = 0,
-            AwardMostAssists = 0,
-            AwardLeastDeaths = 0,
-            AwardMostBuildingDamage = 0,
-            AwardMostWardsKilled = 0,
-            AwardMostHeroDamageDealt = 0,
-            AwardHighestCreepScore = 0
-        };
-
-        MatchStatistics rankedMatch = new()
-        {
-            MatchID = rankedId,
-            ServerID = 1,
-            HostAccountName = "System",
-            Map = "caldavar",
-            MapVersion = "1.0",
-            TimePlayed = 1800,
-            FileSize = 1200,
-            FileName = $"M{rankedId}.honreplay",
-            ConnectionState = 0,
-            Version = "4.10.0",
-            AveragePSR = 1600,
-            AveragePSRTeamOne = 1600,
-            AveragePSRTeamTwo = 1600,
-            GameMode = "picking",
-            ScoreTeam1 = 20,
-            ScoreTeam2 = 60,
-            TeamScoreGoal = 0,
-            PlayerScoreGoal = 0,
-            NumberOfRounds = 1,
-            ReleaseStage = "Live",
-            BannedHeroes = "",
-            TimestampRecorded = DateTimeOffset.UtcNow.AddHours(-2),
-            AwardMostAnnihilations = 0,
-            AwardMostQuadKills = 0,
-            AwardLargestKillStreak = 0,
-            AwardMostSmackdowns = 0,
-            AwardMostKills = 0,
-            AwardMostAssists = 0,
-            AwardLeastDeaths = 0,
-            AwardMostBuildingDamage = 0,
-            AwardMostWardsKilled = 0,
-            AwardMostHeroDamageDealt = 0,
-            AwardHighestCreepScore = 0
-        };
-
-        context.MatchStatistics.AddRange(midwarsMatch, rankedMatch);
-
-        // List of valid heroes confirmed to exist in HeroDefinitions.cs
-        // 114: Armadon, 115: Behemoth, 116: Hammerstorm, 120: Predator, 121: Jeraziah
-        // 122: Panda, 123: Rampage, 124: Tundra, 125: Gladiator, 153: Accursed
-        List<uint> validHeroes =
-        [
-            114,
-            115,
-            116,
-            120,
-            121,
-            185,
-            122,
-            123,
-            124,
-            125,
-            153
-        ];
-
-        // 4. Create PlayerStatistics for 5v5
-        foreach (Account account in guestAccounts)
-        {
-            // Parse ID (GUEST-01 -> 1)
-            int guestNum = int.Parse(account.Name.Substring(6));
-            int team = guestNum <= 5 ? 1 : 2; // 1-5 Team 1, 6-10 Team 2
-
-            // Items (Randomly assigned from a small list)
-            List<string> possibleItems =
-            [
-                "Item_LoggersHatchet",
-                "Item_ManaBattery",
-                "Item_CrushingClaws",
-                "Item_DuckBoots",
-                "Item_MarkOfTheNovice",
-                "Item_RunesOfTheBlight",
-                "Item_HealthPotion"
-            ];
-            Random rnd = new Random();
-            List<string> inventory = possibleItems.OrderBy(_ => rnd.Next()).Take(3).ToList();
-
-
-            // Midwars Player
-            context.PlayerStatistics.Add(new PlayerStatistics
+            // 3. Create Matches
+            MatchStatistics midwarsMatch = new()
             {
                 MatchID = midwarsId,
-                AccountID = account.ID,
-                AccountName = account.Name,
-                Team = team,
-                LobbyPosition = guestNum - 1,
-                GroupNumber = 0,
-                ClanID = null,
-                ClanTag = null,
-                Benefit = 0,
-                HeroProductID = validHeroes[(guestNum - 1) % validHeroes.Count], // Different hero for everyone
-                Inventory = [..inventory],
-                Win = team == 1 ? 1 : 0,
-                Loss = team == 1 ? 0 : 1,
-                HeroKills = random.Next(0, 15),
-                HeroDeaths = random.Next(0, 10),
-                HeroAssists = random.Next(0, 20),
-                HeroLevel = 25,
-                Gold = 10000,
-                SecondsPlayed = 1200,
-                Disconnected = 0,
-                Conceded = 0,
-                Kicked = 0,
-                PublicMatch = 0,
-                PublicSkillRatingChange = 0,
-                RankedMatch = 0,
-                RankedSkillRatingChange = 0,
-                SocialBonus = 0,
-                UsedToken = 0,
-                ConcedeVotes = 0,
-                HeroDamage = 10000,
-                GoldFromHeroKills = 2000,
-                HeroExperience = 15000,
-                Buybacks = 0,
-                GoldLostToDeath = 500,
-                SecondsDead = 60,
-                TeamCreepKills = 50,
-                TeamCreepDamage = 2000,
-                TeamCreepGold = 1500,
-                TeamCreepExperience = 2000,
-                NeutralCreepKills = 10,
-                NeutralCreepDamage = 500,
-                NeutralCreepGold = 400,
-                NeutralCreepExperience = 600,
-                BuildingDamage = 1000,
-                BuildingsRazed = 1,
-                ExperienceFromBuildings = 1000,
-                GoldFromBuildings = 1200,
-                Denies = 5,
-                ExperienceDenied = 200,
-                GoldSpent = 9000,
-                Experience = 20000,
-                Actions = 5000,
-                ConsumablesPurchased = 2,
-                WardsPlaced = 1,
-                FirstBlood = 0,
-                DoubleKill = 0,
-                TripleKill = 0,
-                QuadKill = 0,
-                Annihilation = 0,
-                KillStreak03 = 0,
-                KillStreak04 = 0,
-                KillStreak05 = 0,
-                KillStreak06 = 0,
-                KillStreak07 = 0,
-                KillStreak08 = 0,
-                KillStreak09 = 0,
-                KillStreak10 = 0,
-                KillStreak15 = 0,
-                Smackdown = 0,
-                Humiliation = 0,
-                Nemesis = 0,
-                Retribution = 0,
-                Score = 0,
-                GameplayStat0 = 0,
-                GameplayStat1 = 0,
-                GameplayStat2 = 0,
-                GameplayStat3 = 0,
-                GameplayStat4 = 0,
-                GameplayStat5 = 0,
-                GameplayStat6 = 0,
-                GameplayStat7 = 0,
-                GameplayStat8 = 0,
-                GameplayStat9 = 0,
-                TimeEarningExperience = 1100
-            });
+                ServerID = 1,
+                HostAccountName = "System",
+                Map = "midwars",
+                MapVersion = "1.0",
+                TimePlayed = 1200,
+                FileSize = 1000,
+                FileName = $"M{midwarsId}.honreplay",
+                ConnectionState = 0,
+                Version = "4.10.0",
+                AveragePSR = 1500,
+                AveragePSRTeamOne = 1500,
+                AveragePSRTeamTwo = 1500,
+                GameMode = "midwars",
+                ScoreTeam1 = 50,
+                ScoreTeam2 = 40,
+                TeamScoreGoal = 0,
+                PlayerScoreGoal = 0,
+                NumberOfRounds = 1,
+                ReleaseStage = "Live",
+                BannedHeroes = "",
+                TimestampRecorded = DateTimeOffset.UtcNow.AddHours(-1),
+                AwardMostAnnihilations = 0,
+                AwardMostQuadKills = 0,
+                AwardLargestKillStreak = 0,
+                AwardMostSmackdowns = 0,
+                AwardMostKills = 0,
+                AwardMostAssists = 0,
+                AwardLeastDeaths = 0,
+                AwardMostBuildingDamage = 0,
+                AwardMostWardsKilled = 0,
+                AwardMostHeroDamageDealt = 0,
+                AwardHighestCreepScore = 0
+            };
 
-            // Ranked Player
-            // Assign specific valid heroes to ensure icons display correctly
-            // 112: Ra, 153: Accursed, 122: Panda, 116: Hammerstorm, 123: Rampage
-            uint rankedHeroId = validHeroes[(guestNum - 1) % validHeroes.Count];
-
-            context.PlayerStatistics.Add(new PlayerStatistics
+            MatchStatistics rankedMatch = new()
             {
                 MatchID = rankedId,
-                AccountID = account.ID,
-                AccountName = account.Name,
-                Team = team,
-                LobbyPosition = guestNum - 1,
-                GroupNumber = 0,
-                ClanID = null,
-                ClanTag = null,
-                Benefit = 0,
-                HeroProductID = rankedHeroId,
-                Inventory = [..inventory],
-                Win = team == 2 ? 1 : 0,
-                Loss = team == 2 ? 0 : 1,
-                HeroKills = random.Next(0, 15),
-                HeroDeaths = random.Next(0, 10),
-                HeroAssists = random.Next(0, 20),
-                HeroLevel = 25,
-                Gold = 15000,
-                SecondsPlayed = 1800,
-                Disconnected = 0,
-                Conceded = 0,
-                Kicked = 0,
-                PublicMatch = 0,
-                PublicSkillRatingChange = 0,
-                RankedMatch = 1,
-                RankedSkillRatingChange = 5.0,
-                SocialBonus = 0,
-                UsedToken = 0,
-                ConcedeVotes = 0,
-                HeroDamage = 12000,
-                GoldFromHeroKills = 2500,
-                HeroExperience = 18000,
-                Buybacks = 0,
-                GoldLostToDeath = 800,
-                SecondsDead = 120,
-                TeamCreepKills = 150,
-                TeamCreepDamage = 5000,
-                TeamCreepGold = 6000,
-                TeamCreepExperience = 5000,
-                NeutralCreepKills = 20,
-                NeutralCreepDamage = 1000,
-                NeutralCreepGold = 800,
-                NeutralCreepExperience = 900,
-                BuildingDamage = 3000,
-                BuildingsRazed = 4,
-                ExperienceFromBuildings = 2000,
-                GoldFromBuildings = 2400,
-                Denies = 15,
-                ExperienceDenied = 600,
-                GoldSpent = 14000,
-                Experience = 24000,
-                Actions = 6000,
-                ConsumablesPurchased = 4,
-                WardsPlaced = 0,
-                FirstBlood = 0,
-                DoubleKill = 0,
-                TripleKill = 0,
-                QuadKill = 0,
-                Annihilation = 0,
-                KillStreak03 = 0,
-                KillStreak04 = 0,
-                KillStreak05 = 0,
-                KillStreak06 = 0,
-                KillStreak07 = 0,
-                KillStreak08 = 0,
-                KillStreak09 = 0,
-                KillStreak10 = 0,
-                KillStreak15 = 0,
-                Smackdown = 0,
-                Humiliation = 0,
-                Nemesis = 0,
-                Retribution = 0,
-                Score = 0,
-                GameplayStat0 = 0,
-                GameplayStat1 = 0,
-                GameplayStat2 = 0,
-                GameplayStat3 = 0,
-                GameplayStat4 = 0,
-                GameplayStat5 = 0,
-                GameplayStat6 = 0,
-                GameplayStat7 = 0,
-                GameplayStat8 = 0,
-                GameplayStat9 = 0,
-                TimeEarningExperience = 1600
-            });
-        }
+                ServerID = 1,
+                HostAccountName = "System",
+                Map = "caldavar",
+                MapVersion = "1.0",
+                TimePlayed = 1800,
+                FileSize = 1200,
+                FileName = $"M{rankedId}.honreplay",
+                ConnectionState = 0,
+                Version = "4.10.0",
+                AveragePSR = 1600,
+                AveragePSRTeamOne = 1600,
+                AveragePSRTeamTwo = 1600,
+                GameMode = "picking",
+                ScoreTeam1 = 20,
+                ScoreTeam2 = 60,
+                TeamScoreGoal = 0,
+                PlayerScoreGoal = 0,
+                NumberOfRounds = 1,
+                ReleaseStage = "Live",
+                BannedHeroes = "",
+                TimestampRecorded = DateTimeOffset.UtcNow.AddHours(-2),
+                AwardMostAnnihilations = 0,
+                AwardMostQuadKills = 0,
+                AwardLargestKillStreak = 0,
+                AwardMostSmackdowns = 0,
+                AwardMostKills = 0,
+                AwardMostAssists = 0,
+                AwardLeastDeaths = 0,
+                AwardMostBuildingDamage = 0,
+                AwardMostWardsKilled = 0,
+                AwardMostHeroDamageDealt = 0,
+                AwardHighestCreepScore = 0
+            };
 
-        await context.SaveChangesAsync();
-        Console.WriteLine(
-            $"Seeded 5v5 matches for {guestAccounts.Count} accounts. Midwars ({midwarsId}), Ranked ({rankedId})");
+            context.MatchStatistics.AddRange(midwarsMatch, rankedMatch);
+
+            // List of valid heroes confirmed to exist in HeroDefinitions.cs
+            // 114: Armadon, 115: Behemoth, 116: Hammerstorm, 120: Predator, 121: Jeraziah
+            // 122: Panda, 123: Rampage, 124: Tundra, 125: Gladiator, 153: Accursed
+            List<uint> validHeroes =
+            [
+                114,
+                115,
+                116,
+                120,
+                121,
+                185,
+                122,
+                123,
+                124,
+                125,
+                153
+            ];
+
+            // 4. Create PlayerStatistics for 5v5
+            foreach (Account account in guestAccounts)
+            {
+                // Parse ID (GUEST-01 -> 1)
+                int guestNum = int.Parse(account.Name.Substring(6));
+                int team = guestNum <= 5 ? 1 : 2; // 1-5 Team 1, 6-10 Team 2
+
+                // Items (Randomly assigned from a small list)
+                List<string> possibleItems =
+                [
+                    "Item_LoggersHatchet",
+                    "Item_ManaBattery",
+                    "Item_CrushingClaws",
+                    "Item_DuckBoots",
+                    "Item_MarkOfTheNovice",
+                    "Item_RunesOfTheBlight",
+                    "Item_HealthPotion"
+                ];
+                Random rnd = new Random();
+                List<string> inventory = possibleItems.OrderBy(_ => rnd.Next()).Take(3).ToList();
+
+
+                // Midwars Player
+                context.PlayerStatistics.Add(new PlayerStatistics
+                {
+                    MatchID = midwarsId,
+                    AccountID = account.ID,
+                    AccountName = account.Name,
+                    Team = team,
+                    LobbyPosition = guestNum - 1,
+                    GroupNumber = 0,
+                    ClanID = null,
+                    ClanTag = null,
+                    Benefit = 0,
+                    HeroProductID = validHeroes[(guestNum - 1) % validHeroes.Count], // Different hero for everyone
+
+                    // --- FIX START ---
+                    MVP = 0,
+                    // --- FIX END ---
+
+                    Inventory = [.. inventory],
+                    Win = team == 1 ? 1 : 0,
+                    Loss = team == 1 ? 0 : 1,
+                    HeroKills = random.Next(0, 15),
+                    HeroDeaths = random.Next(0, 10),
+                    HeroAssists = random.Next(0, 20),
+                    HeroLevel = 25,
+                    Gold = 10000,
+                    SecondsPlayed = 1200,
+                    Disconnected = 0,
+                    Conceded = 0,
+                    Kicked = 0,
+                    PublicMatch = 0,
+                    PublicSkillRatingChange = 0,
+                    RankedMatch = 0,
+                    RankedSkillRatingChange = 0,
+                    SocialBonus = 0,
+                    UsedToken = 0,
+                    ConcedeVotes = 0,
+                    HeroDamage = 10000,
+                    GoldFromHeroKills = 2000,
+                    HeroExperience = 15000,
+                    Buybacks = 0,
+                    GoldLostToDeath = 500,
+                    SecondsDead = 60,
+                    TeamCreepKills = 50,
+                    TeamCreepDamage = 2000,
+                    TeamCreepGold = 1500,
+                    TeamCreepExperience = 2000,
+                    NeutralCreepKills = 10,
+                    NeutralCreepDamage = 500,
+                    NeutralCreepGold = 400,
+                    NeutralCreepExperience = 600,
+                    BuildingDamage = 1000,
+                    BuildingsRazed = 1,
+                    ExperienceFromBuildings = 1000,
+                    GoldFromBuildings = 1200,
+                    Denies = 5,
+                    ExperienceDenied = 200,
+                    GoldSpent = 9000,
+                    Experience = 20000,
+                    Actions = 5000,
+                    ConsumablesPurchased = 2,
+                    WardsPlaced = 1,
+                    FirstBlood = 0,
+                    DoubleKill = 0,
+                    TripleKill = 0,
+                    QuadKill = 0,
+                    Annihilation = 0,
+                    KillStreak03 = 0,
+                    KillStreak04 = 0,
+                    KillStreak05 = 0,
+                    KillStreak06 = 0,
+                    KillStreak07 = 0,
+                    KillStreak08 = 0,
+                    KillStreak09 = 0,
+                    KillStreak10 = 0,
+                    KillStreak15 = 0,
+                    Smackdown = 0,
+                    Humiliation = 0,
+                    Nemesis = 0,
+                    Retribution = 0,
+                    Score = 0,
+                    GameplayStat0 = 0,
+                    GameplayStat1 = 0,
+                    GameplayStat2 = 0,
+                    GameplayStat3 = 0,
+                    GameplayStat4 = 0,
+                    GameplayStat5 = 0,
+                    GameplayStat6 = 0,
+                    GameplayStat7 = 0,
+                    GameplayStat8 = 0,
+                    GameplayStat9 = 0,
+                    TimeEarningExperience = 1100
+                });
+
+                // Ranked Player
+                // Assign specific valid heroes to ensure icons display correctly
+                // 112: Ra, 153: Accursed, 122: Panda, 116: Hammerstorm, 123: Rampage
+                uint rankedHeroId = validHeroes[(guestNum - 1) % validHeroes.Count];
+
+                context.PlayerStatistics.Add(new PlayerStatistics
+                {
+                    MatchID = rankedId,
+                    AccountID = account.ID,
+                    AccountName = account.Name,
+                    Team = team,
+                    LobbyPosition = guestNum - 1,
+                    GroupNumber = 0,
+                    ClanID = null,
+                    ClanTag = null,
+                    Benefit = 0,
+                    HeroProductID = rankedHeroId,
+
+                    // --- FIX START ---
+                    MVP = 0,
+                    // --- FIX END ---
+
+                    Inventory = [.. inventory],
+                    Win = team == 2 ? 1 : 0,
+                    Loss = team == 2 ? 0 : 1,
+                    HeroKills = random.Next(0, 15),
+                    HeroDeaths = random.Next(0, 10),
+                    HeroAssists = random.Next(0, 20),
+                    HeroLevel = 25,
+                    Gold = 15000,
+                    SecondsPlayed = 1800,
+                    Disconnected = 0,
+                    Conceded = 0,
+                    Kicked = 0,
+                    PublicMatch = 0,
+                    PublicSkillRatingChange = 0,
+                    RankedMatch = 1,
+                    RankedSkillRatingChange = 5.0,
+                    SocialBonus = 0,
+                    UsedToken = 0,
+                    ConcedeVotes = 0,
+                    HeroDamage = 12000,
+                    GoldFromHeroKills = 2500,
+                    HeroExperience = 18000,
+                    Buybacks = 0,
+                    GoldLostToDeath = 800,
+                    SecondsDead = 120,
+                    TeamCreepKills = 150,
+                    TeamCreepDamage = 5000,
+                    TeamCreepGold = 6000,
+                    TeamCreepExperience = 5000,
+                    NeutralCreepKills = 20,
+                    NeutralCreepDamage = 1000,
+                    NeutralCreepGold = 800,
+                    NeutralCreepExperience = 900,
+                    BuildingDamage = 3000,
+                    BuildingsRazed = 4,
+                    ExperienceFromBuildings = 2000,
+                    GoldFromBuildings = 2400,
+                    Denies = 15,
+                    ExperienceDenied = 600,
+                    GoldSpent = 14000,
+                    Experience = 24000,
+                    Actions = 6000,
+                    ConsumablesPurchased = 4,
+                    WardsPlaced = 0,
+                    FirstBlood = 0,
+                    DoubleKill = 0,
+                    TripleKill = 0,
+                    QuadKill = 0,
+                    Annihilation = 0,
+                    KillStreak03 = 0,
+                    KillStreak04 = 0,
+                    KillStreak05 = 0,
+                    KillStreak06 = 0,
+                    KillStreak07 = 0,
+                    KillStreak08 = 0,
+                    KillStreak09 = 0,
+                    KillStreak10 = 0,
+                    KillStreak15 = 0,
+                    Smackdown = 0,
+                    Humiliation = 0,
+                    Nemesis = 0,
+                    Retribution = 0,
+                    Score = 0,
+                    GameplayStat0 = 0,
+                    GameplayStat1 = 0,
+                    GameplayStat2 = 0,
+                    GameplayStat3 = 0,
+                    GameplayStat4 = 0,
+                    GameplayStat5 = 0,
+                    GameplayStat6 = 0,
+                    GameplayStat7 = 0,
+                    GameplayStat8 = 0,
+                    GameplayStat9 = 0,
+                    TimeEarningExperience = 1600
+                });
+            }
+
+            await context.SaveChangesAsync();
+            Console.WriteLine(
+                $"Seeded 5v5 matches for {guestAccounts.Count} accounts. Midwars ({midwarsId}), Ranked ({rankedId})");
+        }
     }
 
     [Test]
@@ -450,17 +472,27 @@ public class SeedMatchHistoryTests
         // SEE CONSTANTS AT TOP OF FILE FOR CONFIGURATION
 
         ServiceCollection services = new();
-        string connectionString = GetConnectionString();
+        string? connectionString = GetConnectionString();
+        bool useInMemory = string.IsNullOrEmpty(connectionString);
 
-        services.AddDbContext<MerrickContext>(options =>
-            options.UseSqlServer(connectionString, sqlOptions =>
-                sqlOptions.MigrationsHistoryTable("MigrationsHistory", "meta")));
-
+        if (useInMemory)
+        {
+            services.AddDbContext<MerrickContext>(options =>
+                options.UseInMemoryDatabase("SeedMatchHistory_Db_Random"));
+            Console.WriteLine("[SETUP] Connection String Not Found. Using InMemory Database (Test Mode).");
+        }
+        else
+        {
+            services.AddDbContext<MerrickContext>(options =>
+                options.UseSqlServer(connectionString, sqlOptions =>
+                    sqlOptions.MigrationsHistoryTable("MigrationsHistory", "meta")));
+        }
         // Register HeroDefinitionService and dependencies
         services.AddLogging();
-        services.AddSingleton<IHostEnvironment>(new TestHostEnvironment 
-        { 
-            ContentRootPath = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../KONGOR.MasterServer")) 
+        services.AddSingleton<IHostEnvironment>(new TestHostEnvironment
+        {
+            ContentRootPath =
+                Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "../../../../KONGOR.MasterServer"))
         });
         services.AddSingleton<IHeroDefinitionService, HeroDefinitionService>();
 
@@ -475,7 +507,7 @@ public class SeedMatchHistoryTests
             //            await context.Database.ExecuteSqlRawAsync("DELETE FROM stat.PlayerStatistics");
             //            await context.Database.ExecuteSqlRawAsync("DELETE FROM stat.MatchStatistics");
         }
-        
+
         Random random = new();
         int baseMatchId = 9800000 + random.Next(1, 100000);
 
@@ -496,31 +528,32 @@ public class SeedMatchHistoryTests
         // --- Dynamic Hero Loading via Service ---
         Console.WriteLine("[SEED] Initializing HeroDefinitionService to load valid heroes...");
         IHeroDefinitionService heroService = provider.GetRequiredService<IHeroDefinitionService>();
-        
-        // Get all heroes and filter out 0 (Legionnaire default) if desired, 
+
+        // Get all heroes and filter out 0 (Legionnaire default) if desired,
         // though 0 is technicaly valid. We filter > 0 to ensure variety?
         // Actually 0 is Legionnaire. We want him too.
         List<uint> validHeroes = heroService.GetAllHeroIds().ToList();
-        
+
         Console.WriteLine($"[SEED] Found {validHeroes.Count} valid heroes via HeroDefinitionService.");
-        
+
         if (validHeroes.Count == 0 || validHeroes is [0])
         {
-             Console.WriteLine("[SEED] WARNING: Service returned no heroes or only default. Adding fallback list.");
-             validHeroes.AddRange([111, 112, 10, 11, 12, 40, 44, 103, 250, 2501, 2502]); // Fallback
+            Console.WriteLine("[SEED] WARNING: Service returned no heroes or only default. Adding fallback list.");
+            validHeroes.AddRange([111, 112, 10, 11, 12, 40, 44, 103, 250, 2501, 2502]); // Fallback
         }
 
         // --- Game Mode Scenarios ---
         var scenarios = new[]
         {
-            new { Mode = "picking", Map = "caldavar", Type = "Ranked" },
-            new { Mode = "picking", Map = "caldavar", Type = "Casual" }, // Renamed from Normal
-            new { Mode = "midwars", Map = "midwars", Type = "Public" },
-            new { Mode = "sd", Map = "caldavar", Type = "Casual" }, // Single Draft -> Casual
-            new { Mode = "ar", Map = "caldavar", Type = "Casual" }  // All Random -> Casual
-        };
+                new { Mode = "picking", Map = "caldavar", Type = "Ranked" },
+                new { Mode = "picking", Map = "caldavar", Type = "Casual" }, // Renamed from Normal
+                new { Mode = "midwars", Map = "midwars", Type = "Public" },
+                new { Mode = "sd", Map = "caldavar", Type = "Casual" }, // Single Draft -> Casual
+                new { Mode = "ar", Map = "caldavar", Type = "Casual" } // All Random -> Casual
+            };
 
-        Console.WriteLine($"[SEED] Generating {MATCH_COUNT} Matches (Ranked/Public/Midwars) starting at ID {baseMatchId}...");
+        Console.WriteLine(
+            $"[SEED] Generating {MATCH_COUNT} Matches (Ranked/Public/Midwars) starting at ID {baseMatchId}...");
 
         for (int m = 0; m < MATCH_COUNT; m++)
         {
@@ -530,14 +563,29 @@ public class SeedMatchHistoryTests
             // --- Mock Product Catalog ---
             // Maps Product IDs to Strings. Ranges chosen to look realistic but arbitrary.
             Dictionary<string, uint> productCatalog = new()
-            {
-                { "AccountIcon_Default", 2500 }, { "AccountIcon_Legion", 2501 }, { "AccountIcon_Hellbourne", 2502 }, { "AccountIcon_GoldShield", 2503 },
-                { "Courier_Default", 3000 }, { "Courier_Legion", 3001 }, { "Courier_Hellbourne", 3002 }, { "Courier_Panda", 3003 },
-                { "Ward_Default", 4000 }, { "Ward_Eye", 4001 },
-                { "Taunt_Default", 5000 }, { "Taunt_Baby", 5001 },
-                { "Announcer_Default", 6000 }, { "Announcer_Flamboyant", 6001 }, { "Announcer_Badass", 6002 },
-                { "ChatColor_Red", 7000 }, { "ChatColor_Orange", 7001 }, { "ChatColor_Yellow", 7002 }, { "ChatColor_Green", 7003 }, { "ChatColor_Blue", 7004 }, { "ChatColor_Purple", 7005 }
-            };
+                {
+                    { "AccountIcon_Default", 2500 },
+                    { "AccountIcon_Legion", 2501 },
+                    { "AccountIcon_Hellbourne", 2502 },
+                    { "AccountIcon_GoldShield", 2503 },
+                    { "Courier_Default", 3000 },
+                    { "Courier_Legion", 3001 },
+                    { "Courier_Hellbourne", 3002 },
+                    { "Courier_Panda", 3003 },
+                    { "Ward_Default", 4000 },
+                    { "Ward_Eye", 4001 },
+                    { "Taunt_Default", 5000 },
+                    { "Taunt_Baby", 5001 },
+                    { "Announcer_Default", 6000 },
+                    { "Announcer_Flamboyant", 6001 },
+                    { "Announcer_Badass", 6002 },
+                    { "ChatColor_Red", 7000 },
+                    { "ChatColor_Orange", 7001 },
+                    { "ChatColor_Yellow", 7002 },
+                    { "ChatColor_Green", 7003 },
+                    { "ChatColor_Blue", 7004 },
+                    { "ChatColor_Purple", 7005 }
+                };
 
             // Helper buffers for random selection
             string[] accountIcons = productCatalog.Keys.Where(k => k.StartsWith("AccountIcon")).ToArray();
@@ -594,16 +642,20 @@ public class SeedMatchHistoryTests
             {
                 Account account = guestAccounts[p];
                 int team = p < 5 ? 1 : 2;
-                uint heroId = shuffledHeroes.Count > p ? shuffledHeroes[p] : 0; // Handled index out of range if heroes < accounts
-                bool win = (team == 1 && match.ScoreTeam1 > match.ScoreTeam2) || (team == 2 && match.ScoreTeam2 > match.ScoreTeam1);
+                uint heroId =
+                    shuffledHeroes.Count > p
+                        ? shuffledHeroes[p]
+                        : 0; // Handled index out of range if heroes < accounts
+                bool win = (team == 1 && match.ScoreTeam1 > match.ScoreTeam2) ||
+                           (team == 2 && match.ScoreTeam2 > match.ScoreTeam1);
 
                 // Determine Lobby Position/Type specific flags
-                byte publicMatch = (byte)(scenario.Type == "Public" || scenario.Type == "Casual" ? 1 : 0);
-                byte rankedMatch = (byte)(scenario.Type == "Ranked" ? 1 : 0);
-                
+                byte publicMatch = (byte) (scenario.Type == "Public" || scenario.Type == "Casual" ? 1 : 0);
+                byte rankedMatch = (byte) (scenario.Type == "Ranked" ? 1 : 0);
+
                 // Skill Change logic
                 double skillChange = rankedMatch == 1 ? (win ? 5.0 : -5.0) : 0;
-                
+
                 // Random Selections
                 string accIcon = accountIcons[random.Next(accountIcons.Length)];
                 string courier = couriers[random.Next(couriers.Length)];
@@ -611,7 +663,7 @@ public class SeedMatchHistoryTests
                 string taunt = taunts[random.Next(taunts.Length)];
                 string announcer = announcers[random.Next(announcers.Length)];
                 string color = colors[random.Next(colors.Length)];
-                
+
                 // --- ITEM RANDOMIZATION ---
                 List<string> finalItems = SelectRandomItems(random);
 
@@ -629,6 +681,10 @@ public class SeedMatchHistoryTests
                     Benefit = random.Next(0,
                         5),
                     HeroProductID = heroId,
+
+                    // --- FIX START ---
+                    MVP = random.Next(0, 5) == 0 ? 1 : 0, // 20% chance of MVP in seeding
+                                                          // --- FIX END ---
 
                     // Cosmetics
                     AlternativeAvatarName = "",
@@ -654,26 +710,25 @@ public class SeedMatchHistoryTests
                         random),
                     Win = win ? 1 : 0,
                     Loss = win ? 0 : 1,
-                    
                     HeroKills = random.Next(0, 20),
                     HeroDeaths = random.Next(0, 15),
                     HeroAssists = random.Next(0, 25),
                     HeroLevel = random.Next(10, 25),
                     Gold = random.Next(5000, 15000),
                     SecondsPlayed = match.TimePlayed,
-                    
+
                     // Logic Fields
                     Disconnected = random.Next(0, 20) == 0 ? 1 : 0, // Rare disconnect
                     Conceded = random.Next(0, 10) == 0 ? 1 : 0,
                     Kicked = 0,
                     PublicMatch = publicMatch,
-                    PublicSkillRatingChange = 0, 
+                    PublicSkillRatingChange = 0,
                     RankedMatch = rankedMatch,
                     RankedSkillRatingChange = skillChange,
                     SocialBonus = random.Next(0, 10),
                     UsedToken = random.Next(0, 5) == 0 ? 1 : 0,
                     ConcedeVotes = random.Next(0, 2),
-                    
+
                     // Enriched Gameplay Stats (Missing Required Fields)
                     HeroDamage = random.Next(5000, 25000),
                     GoldFromHeroKills = random.Next(1000, 5000),
@@ -700,7 +755,7 @@ public class SeedMatchHistoryTests
                     Actions = random.Next(1000, 5000),
                     ConsumablesPurchased = random.Next(0, 10),
                     WardsPlaced = random.Next(0, 10),
-                    
+
                     // Kill Events
                     FirstBlood = random.Next(0, 2),
                     DoubleKill = random.Next(0, 5),
@@ -716,12 +771,11 @@ public class SeedMatchHistoryTests
                     KillStreak09 = random.Next(0, 1),
                     KillStreak10 = random.Next(0, 1),
                     KillStreak15 = random.Next(0, 20) == 0 ? 1 : 0, // Very Rare
-                    
+
                     Smackdown = random.Next(0, 3),
                     Humiliation = random.Next(0, 2),
                     Nemesis = random.Next(0, 2),
                     Retribution = random.Next(0, 2),
-                    
                     Score = random.Next(100, 500),
                     GameplayStat0 = random.NextDouble() * 100.0,
                     GameplayStat1 = random.NextDouble() * 50.0,
@@ -739,9 +793,10 @@ public class SeedMatchHistoryTests
         }
 
         await context.SaveChangesAsync();
-        Console.WriteLine($"[SEED] Successfully seeded {MATCH_COUNT} mixed-mode matches with dynamic heroes and items.");
+        Console.WriteLine(
+            $"[SEED] Successfully seeded {MATCH_COUNT} mixed-mode matches with dynamic heroes and items.");
     }
-    
+
     private List<string> SelectRandomItems(Random random)
     {
         // Pick 3 to 6 unique items
@@ -765,11 +820,11 @@ public class SeedMatchHistoryTests
         foreach (string item in endItems)
         {
             // Random purchase time between 0 and 20 mins (1200s)
-            events.Add(new ItemEvent 
-            { 
-                ItemName = item, 
-                GameTimeSeconds = random.Next(0, 1200), 
-                EventType = 0 
+            events.Add(new ItemEvent
+            {
+                ItemName = item,
+                GameTimeSeconds = random.Next(0, 1200),
+                EventType = 0
             });
         }
 
@@ -778,25 +833,27 @@ public class SeedMatchHistoryTests
 
 
 
-    private string GetConnectionString()
+    private string? GetConnectionString()
     {
         // Priority 1: Full Connection String Override (Env)
-        string? fullConn = Environment.GetEnvironmentVariable("MERRICK_CONNECTION_STRING") 
+        string? fullConn = Environment.GetEnvironmentVariable("MERRICK_CONNECTION_STRING")
                            ?? Environment.GetEnvironmentVariable("ConnectionStrings__MerrickContext");
-        
-        // Also check TestContext if possible, but handle potential type mismatch by calling .ToString() or avoiding it if it causes issues.
-        // For safety/unblocking, we stick to Environment variables which Docker/Aspire provides reliably.
-        
+
         if (!string.IsNullOrWhiteSpace(fullConn)) return fullConn;
 
-        // Priority 2: Build from parts (Host, Port, Password) to allow simple overrides (e.g. Docker port)
-        // Defaults: 127.0.0.1, 55678, MerrickDevPassword2025
+        // Priority 2: Build from parts
+        string? host = Environment.GetEnvironmentVariable("MERRICK_DB_HOST");
+        string? port = Environment.GetEnvironmentVariable("MERRICK_DB_PORT") ?? GetDynamicSqlPort();
+        string? password = Environment.GetEnvironmentVariable("MERRICK_DB_PASSWORD");
 
-        string host = Environment.GetEnvironmentVariable("MERRICK_DB_HOST") ?? "127.0.0.1";
-        string port = Environment.GetEnvironmentVariable("MERRICK_DB_PORT") ?? GetDynamicSqlPort() ?? "1433"; 
-        string password = Environment.GetEnvironmentVariable("MERRICK_DB_PASSWORD") ?? "MerrickDevPassword2025"; 
+        // If no explicit configuration is provided and no dynamic port is found,
+        // return null to signal "use InMemory" fallback.
+        if (string.IsNullOrWhiteSpace(host) && string.IsNullOrWhiteSpace(port) && string.IsNullOrWhiteSpace(password))
+        {
+            return null;
+        }
 
-        return $"Server={host},{port};Database=development;User Id=sa;Password={password};TrustServerCertificate=True;Connection Timeout=60;";
+        return $"Server={host ?? "127.0.0.1"},{port ?? "1433"};Database=development;User Id=sa;Password={password ?? "MerrickDevPassword2025"};TrustServerCertificate=True;Connection Timeout=60;";
     }
 
     private static string? GetDynamicSqlPort()

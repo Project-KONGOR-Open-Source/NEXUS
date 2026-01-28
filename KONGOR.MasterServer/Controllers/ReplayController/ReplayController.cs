@@ -1,7 +1,9 @@
+using KONGOR.MasterServer.Logging;
+
 namespace KONGOR.MasterServer.Controllers.ReplayController;
 
 [ApiController]
-public class ReplayController : ControllerBase
+public partial class ReplayController : ControllerBase
 {
     private readonly IWebHostEnvironment _environment;
     private readonly ILogger<ReplayController> _logger;
@@ -23,7 +25,7 @@ public class ReplayController : ControllerBase
     {
         if (Request.Method == "HEAD")
         {
-            return NotFound();
+            return Ok();
         }
 
         try
@@ -57,7 +59,7 @@ public class ReplayController : ControllerBase
 
                     using FileStream stream = new(filePath, FileMode.Create);
                     await file.CopyToAsync(stream);
-                    _logger.LogInformation("Saved Replay (Form): {Path}", filePath);
+                    _logger.LogSavedReplayForm(filePath);
                     return Ok();
                 }
             }
@@ -67,7 +69,7 @@ public class ReplayController : ControllerBase
             {
                 using FileStream stream = new(filePath, FileMode.Create);
                 await Request.Body.CopyToAsync(stream);
-                _logger.LogInformation("Saved Replay (Raw): {Path}", filePath);
+                _logger.LogSavedReplayRaw(filePath);
                 return Ok();
             }
 
@@ -75,7 +77,7 @@ public class ReplayController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Replay Upload Failed");
+            _logger.LogUploadFailed(ex);
             return StatusCode(500, ex.Message);
         }
     }

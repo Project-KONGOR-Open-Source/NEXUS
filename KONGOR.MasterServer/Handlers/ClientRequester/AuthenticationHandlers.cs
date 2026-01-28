@@ -1,16 +1,9 @@
-using System.Text.RegularExpressions;
-using KONGOR.MasterServer.Handlers.SRP;
-using KONGOR.MasterServer.Infrastructure;
-using KONGOR.MasterServer.Models.RequestResponse;
+using System.Globalization;
+
+using KONGOR.MasterServer.Logging;
 using KONGOR.MasterServer.Services.Requester;
-using MERRICK.DatabaseContext;
-using MERRICK.DatabaseContext.Entities.Core;
-using global::MERRICK.DatabaseContext.Enumerations;
+
 using MERRICK.DatabaseContext.Extensions;
-using KONGOR.MasterServer.Services;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using StackExchange.Redis;
 
 namespace KONGOR.MasterServer.Handlers.ClientRequester;
 
@@ -21,7 +14,7 @@ public class PreAuthHandler(
     public async Task<IActionResult> HandleRequestAsync(HttpContext context)
     {
         HttpRequest Request = context.Request;
-        
+
         string? accountName = Request.Form["login"];
 
         if (accountName is null)
@@ -99,14 +92,10 @@ public partial class SRPAuthHandler(
     IDatabase distributedCache,
     ILogger<SRPAuthHandler> logger) : IClientRequestHandler
 {
-    [GeneratedRegex(
-        @"(?>S2 Games)\/(?>Heroes [oO]f Newerth)\/(?<version>\d{1,2}\.\d{1,2}\.\d{1,2}\.\d{1,2})\/(?<platform>[wlm]a[cs])\/(?<architecture>x86_64|x86-biarch|universal-64)")]
-    private static partial Regex UserAgentRegex();
-
     public async Task<IActionResult> HandleRequestAsync(HttpContext context)
     {
         HttpRequest Request = context.Request;
-        
+
         string? accountName = Request.Form["login"];
 
         if (accountName is null)
@@ -122,10 +111,7 @@ public partial class SRPAuthHandler(
             return new BadRequestObjectResult(PhpSerialization.Serialize(
                 new SRPAuthenticationFailureResponse(SRPAuthenticationFailureReason.MissingSRPClientProof)));
         }
-        
-        // ... (Skipping verbose validation for brevity, assuming existing logic) ...
-        // Re-implementing full logic to be safe
-        
+
         string? operatingSystemType = Request.Form["OSType"];
         if (operatingSystemType is null) return new BadRequestObjectResult(PhpSerialization.Serialize(new SRPAuthenticationFailureResponse(SRPAuthenticationFailureReason.MissingOperatingSystemType)));
 
@@ -133,7 +119,7 @@ public partial class SRPAuthHandler(
         if (majorVersion is null) return new BadRequestObjectResult(PhpSerialization.Serialize(new SRPAuthenticationFailureResponse(SRPAuthenticationFailureReason.MissingMajorVersion)));
 
         string? minorVersion = Request.Form["MinorVersion"];
-        if (minorVersion is null) return new BadRequestObjectResult(PhpSerialization.Serialize(new SRPAuthenticationFailureResponse(SRPAuthenticationFailureReason.MissingMinorVersion)));
+        if (majorVersion is null) return new BadRequestObjectResult(PhpSerialization.Serialize(new SRPAuthenticationFailureResponse(SRPAuthenticationFailureReason.MissingMinorVersion)));
 
         string? microVersion = Request.Form["MicroVersion"];
         if (microVersion is null) return new BadRequestObjectResult(PhpSerialization.Serialize(new SRPAuthenticationFailureResponse(SRPAuthenticationFailureReason.MissingMicroVersion)));
@@ -146,8 +132,7 @@ public partial class SRPAuthHandler(
 
         if (stageOneData is null)
         {
-            logger.LogError(
-                $@"[BUG] Unable To Retrieve Cached SRP Authentication Session Data For Account Name ""{accountName}""");
+            logger.LogMissingSRPDataBug(accountName);
 
             return new UnprocessableEntityObjectResult(PhpSerialization.Serialize(
                 new SRPAuthenticationFailureResponse(SRPAuthenticationFailureReason.MissingCachedSRPData)));
@@ -159,7 +144,7 @@ public partial class SRPAuthHandler(
 
         if (systemInformation is null)
         {
-            logger.LogError($@"[BUG] Unable To Retrieve Cached System Information For Account Name ""{accountName}""");
+            logger.LogMissingSysInfoBug(accountName);
 
             return new UnprocessableEntityObjectResult(PhpSerialization.Serialize(
                 new SRPAuthenticationFailureResponse(SRPAuthenticationFailureReason.MissingSystemInformation)));
@@ -199,7 +184,7 @@ public partial class SRPAuthHandler(
 
         if (context.Connection.RemoteIpAddress is null)
         {
-            logger.LogError($@"[BUG] Remote IP Address For Account Name ""{accountName}"" Is NULL");
+            logger.LogRemoteIPNullBug(accountName);
 
             return new UnprocessableEntityObjectResult(PhpSerialization.Serialize(
                 new SRPAuthenticationFailureResponse(SRPAuthenticationFailureReason.MissingIPAddress)));
@@ -211,10 +196,9 @@ public partial class SRPAuthHandler(
         {
             string agent = Request.Headers.UserAgent.FirstOrDefault() ?? string.Empty;
 
-            if (UserAgentRegex().IsMatch(agent).Equals(false))
+            if (Log.UserAgentRegex().IsMatch(agent).Equals(false))
             {
-                logger.LogError(
-                    $@"Account ""{account.GetNameWithClanTag()}"" Has Made A Request To Log In Using Unexpected User Agent ""{agent}""");
+                logger.LogUnexpectedUserAgent(account.GetNameWithClanTag(), agent);
 
                 return new BadRequestObjectResult(PhpSerialization.Serialize(
                     new SRPAuthenticationFailureResponse(SRPAuthenticationFailureReason.UnexpectedUserAgent)));
@@ -224,15 +208,13 @@ public partial class SRPAuthHandler(
             {
                 account.IPAddressCollection.Add(remoteIPAddress);
             }
-            
-            // ... (System Info Logic) ...
+
             string[] systemInformationDataPoints =
                 [.. systemInformation.Split('|', StringSplitOptions.RemoveEmptyEntries)];
 
             if (systemInformationDataPoints.Length is not 5)
             {
-                logger.LogError(
-                    $@"Account ""{account.GetNameWithClanTag()}"" Has Made A Request To Log In Using Unexpected System Information ""{systemInformation}""");
+                logger.LogUnexpectedSysInfo(account.GetNameWithClanTag(), systemInformation);
 
                 return new BadRequestObjectResult(PhpSerialization.Serialize(
                     new SRPAuthenticationFailureResponse(
@@ -249,14 +231,13 @@ public partial class SRPAuthHandler(
             {
                 account.SystemInformationCollection.Add(string.Join('|', systemInformationDataPoints.Skip(1)));
             }
-            
+
             string? systemInformationHash = systemInformationHashes.Split('|', StringSplitOptions.RemoveEmptyEntries)
                             .Distinct().FirstOrDefault();
-            
+
             if (systemInformationHash is null)
             {
-                logger.LogError(
-                    $@"Account ""{account.GetNameWithClanTag()}"" Has Made A Request To Log In Using Unexpected System Information Hashes ""{systemInformationHashes}""");
+                logger.LogUnexpectedSysInfoHashes(account.GetNameWithClanTag(), systemInformationHashes);
 
                 return new BadRequestObjectResult(PhpSerialization.Serialize(
                     new SRPAuthenticationFailureResponse(
@@ -277,7 +258,7 @@ public partial class SRPAuthHandler(
 
         int chatServerClientConnectionsPort = int.Parse(Environment.GetEnvironmentVariable("CHAT_SERVER_PORT_CLIENT")
                                                         ?? throw new NullReferenceException(
-                                                            "Chat Server Client Connections Port Is NULL"));
+                                                            "Chat Server Client Connections Port Is NULL"), CultureInfo.InvariantCulture);
 
         SRPAuthenticationHandlers.StageTwoResponseParameters parameters = new()
         {
@@ -295,7 +276,7 @@ public partial class SRPAuthHandler(
         account.Cookie = cookie;
 
         await databaseContext.SaveChangesAsync();
-        logger.LogInformation("Persisted Cookie {Cookie} for Account {AccountName} to Database", cookie, accountName);
+        logger.LogPersistedCookie(cookie, accountName);
 
         await distributedCache.SetAccountNameForSessionCookie(cookie, accountName);
 
@@ -303,7 +284,7 @@ public partial class SRPAuthHandler(
     }
 }
 
-public class AuthHandler(ILogger<AuthHandler> logger) : IClientRequestHandler
+public partial class AuthHandler(ILogger<AuthHandler> logger) : IClientRequestHandler
 {
     public Task<IActionResult> HandleRequestAsync(HttpContext context)
     {
@@ -312,8 +293,7 @@ public class AuthHandler(ILogger<AuthHandler> logger) : IClientRequestHandler
 
         if (accountName is not null)
         {
-            logger.LogWarning(@"Account ""{AccountName}"" Is Attempting To Use HTTP Client Authentication",
-                accountName);
+            logger.LogAttemptingHttpClientAuth(accountName);
         }
 
         string response =
@@ -324,12 +304,12 @@ public class AuthHandler(ILogger<AuthHandler> logger) : IClientRequestHandler
     }
 }
 
-public class Aids2CookieHandler(MerrickContext databaseContext, IDatabase distributedCache, ILogger<Aids2CookieHandler> logger) : IClientRequestHandler
+public partial class Aids2CookieHandler(MerrickContext databaseContext, IDatabase distributedCache, ILogger<Aids2CookieHandler> logger) : IClientRequestHandler
 {
     public async Task<IActionResult> HandleRequestAsync(HttpContext context)
     {
         HttpRequest Request = context.Request;
-        string? cookie = Request.Form["cookie"];
+        string? cookie = ClientRequestHelper.GetCookie(Request);
 
         if (cookie is not null)
         {
@@ -338,7 +318,7 @@ public class Aids2CookieHandler(MerrickContext databaseContext, IDatabase distri
 
         if (cookie is null)
         {
-            logger.LogError("Missing Cookie In aids2cookie Request");
+            logger.LogMissingCookie();
             return new BadRequestObjectResult(PhpSerialization.Serialize(new { error = "Missing Cookie" }));
         }
 
@@ -358,8 +338,7 @@ public class Aids2CookieHandler(MerrickContext databaseContext, IDatabase distri
                 return new OkObjectResult(PhpSerialization.Serialize(accountData.ID));
             }
 
-            logger.LogError(
-                $@"Cookie ""{cookie}"" Validated In Controller But Account Name Not Found In Cache (Context Missing, Redis Check Failed)");
+            logger.LogCookieValidatedButNotFound(cookie);
 
             return new UnauthorizedObjectResult(PhpSerialization.Serialize(new { error = "Invalid Session" }));
         }
@@ -371,7 +350,7 @@ public class Aids2CookieHandler(MerrickContext databaseContext, IDatabase distri
 
         if (accountId is null)
         {
-            logger.LogError($@"Account Name ""{accountName}"" From Cookie Not Found In Database");
+            logger.LogAccountNameNotFoundInDB(accountName);
             return new NotFoundObjectResult(PhpSerialization.Serialize(new { error = "Account Not Found" }));
         }
 
@@ -383,7 +362,7 @@ public class LogoutHandler(IDatabase distributedCache) : IClientRequestHandler
 {
     public async Task<IActionResult> HandleRequestAsync(HttpContext context)
     {
-        string? cookie = context.Request.Form["cookie"];
+        string? cookie = ClientRequestHelper.GetCookie(context.Request);
         if (cookie is not null)
         {
             await distributedCache.RemoveAccountNameForSessionCookie(cookie);

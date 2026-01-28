@@ -2,7 +2,7 @@ namespace KONGOR.MasterServer.Controllers.ServerRequesterController;
 
 public partial class ServerRequesterController
 {
-    private async Task<IActionResult> HandleGetQuickStats()
+    private Task<IActionResult> HandleGetQuickStats()
     {
         // Stub implementation to prevent 500 errors.
         // Quick stats likely returns summary data for player profiles.
@@ -11,6 +11,6 @@ public partial class ServerRequesterController
             // Empty for now
         };
 
-        return Ok(PhpSerialization.Serialize(response));
+        return Task.FromResult<IActionResult>(Ok(PhpSerialization.Serialize(response)));
     }
 }

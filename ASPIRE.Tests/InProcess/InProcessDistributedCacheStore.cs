@@ -62,6 +62,42 @@ public partial class InProcessDistributedCacheStore : IDatabase
         return Task.FromResult(keyDeleted || hashFieldsDeleted > 0);
     }
 
+    public Task<long> KeyDeleteAsync(RedisKey[] keys, CommandFlags flags = CommandFlags.None)
+    {
+        long count = 0;
+        foreach (RedisKey key in keys)
+        {
+            if (InternalKeyDelete(key)) // assuming InternalKeyDelete (sync) calls implementation
+            {
+                count++;
+            }
+        }
+        return Task.FromResult(count);
+    }
+
+    // Helper to reuse logic if needed, or just inline
+    private bool InternalKeyDelete(RedisKey key)
+    {
+        string keyString = key.ToString();
+        string hashPrefix = keyString + ":";
+
+        bool keyDeleted = StoreItems.TryRemove(keyString, out _);
+
+        List<string> keysToDelete = [.. StoreItems.Keys.Where(storageKey => storageKey.StartsWith(hashPrefix))];
+
+        int hashFieldsDeleted = 0;
+
+        foreach (string storageKey in keysToDelete)
+        {
+            if (StoreItems.TryRemove(storageKey, out _))
+            {
+                hashFieldsDeleted++;
+            }
+        }
+
+        return keyDeleted || hashFieldsDeleted > 0;
+    }
+
     // Hash Operations
 
 
@@ -101,7 +137,7 @@ public partial class InProcessDistributedCacheStore : IDatabase
         {
             if (kvp.Key.StartsWith(hashPrefix))
             {
-                string fieldName = kvp.Key[hashPrefix.Length ..];
+                string fieldName = kvp.Key[hashPrefix.Length..];
 
                 entries.Add(new HashEntry(fieldName, kvp.Value));
             }
@@ -127,7 +163,7 @@ public partial class InProcessDistributedCacheStore : IDatabase
         {
             if (kvp.Key.StartsWith(hashPrefix))
             {
-                string fullField = kvp.Key[hashPrefix.Length ..];
+                string fullField = kvp.Key[hashPrefix.Length..];
 
                 if (string.IsNullOrEmpty(patternString) || regex.IsMatch(fullField))
                 {
@@ -137,5 +173,42 @@ public partial class InProcessDistributedCacheStore : IDatabase
         }
 
         return matchingEntries.ToAsyncEnumerable();
+    }
+
+    public Task<RedisResult> ExecuteAsync(string command, params object?[] args)
+    {
+        if (string.Equals(command, "SCAN", StringComparison.OrdinalIgnoreCase))
+        {
+            string pattern = "*";
+            // args usually: cursor, "MATCH", pattern, "COUNT", count
+            for (int i = 0; i < args.Length; i++)
+            {
+                if (args[i]?.ToString()?.Equals("MATCH", StringComparison.OrdinalIgnoreCase) == true && i + 1 < args.Length)
+                {
+                    pattern = args[i + 1]?.ToString() ?? "*";
+                }
+            }
+
+            string regexPattern = "^" + Regex.Escape(pattern).Replace(@"\*", ".*") + "$";
+            Regex regex = new Regex(regexPattern);
+
+            RedisResult[] matchingKeys = StoreItems.Keys
+                .Where(k => regex.IsMatch(k))
+                .Select(k => RedisResult.Create((RedisKey) k)) // Explicit cast to RedisKey
+                .ToArray();
+
+            // Construct result: [ "0", [keys] ]
+            // The outer array should be a RedisResult wrapping a RedisResult[]
+            // Element 0: Cursor "0"
+            // Element 1: Array of Keys (RedisResult wrapping RedisResult[])
+
+            RedisResult cursorResult = RedisResult.Create((RedisValue) "0"); // Explicit cast to RedisValue
+            RedisResult keysResult = RedisResult.Create(matchingKeys);
+
+            RedisResult result = RedisResult.Create([cursorResult, keysResult]);
+            return Task.FromResult(result);
+        }
+
+        throw new NotSupportedException($"Command '{command}' is not supported by InProcessDistributedCacheStore.");
     }
 }

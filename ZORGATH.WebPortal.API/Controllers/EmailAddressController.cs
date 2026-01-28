@@ -1,10 +1,12 @@
-﻿namespace ZORGATH.WebPortal.API.Controllers;
+using ASPIRE.Common.DTOs;
+
+namespace ZORGATH.WebPortal.API.Controllers;
 
 [ApiController]
 [Route("[controller]")]
 [Consumes("application/json")]
 [EnableRateLimiting(RateLimiterPolicies.Strict)]
-public class EmailAddressController(
+public partial class EmailAddressController(
     MerrickContext databaseContext,
     ILogger<EmailAddressController> logger,
     IEmailService emailService,
@@ -15,6 +17,9 @@ public class EmailAddressController(
     private IEmailService EmailService { get; } = emailService;
     private IWebHostEnvironment HostEnvironment { get; } = hostEnvironment;
 
+    [LoggerMessage(Level = LogLevel.Error, Message = "[BUG] Sanitized Email Address \"{EmailAddress}\" Is NULL")]
+    private partial void LogSanitizedEmailNull(string emailAddress);
+
     [HttpPost("Register", Name = "Register Email Address")]
     [AllowAnonymous]
     [ProducesResponseType(typeof(string), StatusCodes.Status200OK)]
@@ -23,7 +28,7 @@ public class EmailAddressController(
     [ProducesResponseType(typeof(string), StatusCodes.Status503ServiceUnavailable)]
     public async Task<IActionResult> RegisterEmailAddress(RegisterEmailAddressDTO payload)
     {
-        if (payload.EmailAddress.Equals(payload.ConfirmEmailAddress).Equals(false))
+        if (payload.EmailAddress.Equals(payload.ConfirmEmailAddress, StringComparison.OrdinalIgnoreCase).Equals(false))
         {
             return BadRequest(
                 $@"Email Address ""{payload.ConfirmEmailAddress}"" Does Not Match ""{payload.EmailAddress}""");
@@ -44,8 +49,7 @@ public class EmailAddressController(
 
             if (contentResult.Content is null)
             {
-                Logger.LogError(@"[BUG] Sanitized Email Address ""{Payload.EmailAddress}"" Is NULL",
-                    payload.EmailAddress);
+                LogSanitizedEmailNull(payload.EmailAddress);
 
                 return UnprocessableEntity($@"Unable To Process Email Address ""{payload.EmailAddress}""");
             }

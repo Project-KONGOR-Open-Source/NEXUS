@@ -1,14 +1,17 @@
 namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Channels;
 
+using global::TRANSMUTANSTEIN.ChatServer.Internals;
+using global::TRANSMUTANSTEIN.ChatServer.Domain.Communication;
+
 [ChatCommand(ChatProtocol.Command.CHAT_CMD_CHANNEL_TOPIC)]
-public class SetChannelTopic : ISynchronousCommandProcessor<ChatSession>
+public class SetChannelTopic(IChatContext chatContext) : ISynchronousCommandProcessor<ChatSession>
 {
     public void Process(ChatSession session, ChatBuffer buffer)
     {
         SetChannelTopicRequestData requestData = new(buffer);
 
         // Find Channel
-        ChatChannel? channel = ChatChannel.Get(session, requestData.ChannelId);
+        ChatChannel? channel = ChatChannel.Get(chatContext, session, requestData.ChannelId);
 
         // If Channel Not Found or User Not Member (Get checks membership), do nothing?
         // Legacy: ChannelTopicRequest checks if channel exists.

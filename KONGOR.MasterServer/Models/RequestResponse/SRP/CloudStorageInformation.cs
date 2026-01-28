@@ -1,11 +1,11 @@
-﻿namespace KONGOR.MasterServer.Models.RequestResponse.SRP;
+namespace KONGOR.MasterServer.Models.RequestResponse.SRP;
 
 public class CloudStorageInformation
 {
     /// <summary>
     ///     The ID of the account.
     /// </summary>
-    [PhpProperty("account_id")]
+    [PHPProperty("account_id")]
     public required string AccountID { get; set; }
 
     /// <summary>
@@ -13,7 +13,7 @@ public class CloudStorageInformation
     ///     <br />
     ///     0 = False; 1 = True
     /// </summary>
-    [PhpProperty("use_cloud")]
+    [PHPProperty("use_cloud")]
     public required string UseCloud { get; set; }
 
     /// <summary>
@@ -22,7 +22,7 @@ public class CloudStorageInformation
     ///     <br />
     ///     0 = False; 1 = True
     /// </summary>
-    [PhpProperty("cloud_autoupload")]
+    [PHPProperty("cloud_autoupload")]
     public required string AutomaticCloudUpload { get; set; }
 
     /// <summary>
@@ -30,6 +30,6 @@ public class CloudStorageInformation
     ///     This value is extracted from "cloud.zip", which is the local copy of the backup of the game client configuration
     ///     files.
     /// </summary>
-    [PhpProperty("file_modify_time")]
+    [PHPProperty("file_modify_time")]
     public required string BackupLastUpdatedTime { get; set; }
 }

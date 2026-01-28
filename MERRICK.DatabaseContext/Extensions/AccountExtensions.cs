@@ -27,34 +27,34 @@ public static class AccountExtensions
     public static string GetIcon(this Account account)
     {
         if (account is null) return "ai.Default Icon";
-        return account.SelectedStoreItems?.SingleOrDefault(item => item.StartsWith("ai.")) ?? "ai.Default Icon";
+        return account.SelectedStoreItems?.SingleOrDefault(item => item.StartsWith("ai.", StringComparison.OrdinalIgnoreCase)) ?? "ai.Default Icon";
     }
 
     public static string GetIconNoPrefixCode(this Account account)
     {
-        return account.GetIcon().Replace("ai.", string.Empty);
+        return account.GetIcon().Replace("ai.", string.Empty, StringComparison.OrdinalIgnoreCase);
     }
 
     public static string GetChatSymbol(this Account account)
     {
         if (account is null) return string.Empty;
-        return account.SelectedStoreItems?.SingleOrDefault(item => item.StartsWith("cs.")) ?? string.Empty;
+        return account.SelectedStoreItems?.SingleOrDefault(item => item.StartsWith("cs.", StringComparison.OrdinalIgnoreCase)) ?? string.Empty;
     }
 
     public static string GetChatSymbolNoPrefixCode(this Account account)
     {
-        return account.GetChatSymbol().Replace("cs.", string.Empty);
+        return account.GetChatSymbol().Replace("cs.", string.Empty, StringComparison.OrdinalIgnoreCase);
     }
 
     public static string GetNameColour(this Account account)
     {
         if (account is null) return "cc.white";
-        return account.SelectedStoreItems?.SingleOrDefault(item => item.StartsWith("cc.")) ?? "cc.white";
+        return account.SelectedStoreItems?.SingleOrDefault(item => item.StartsWith("cc.", StringComparison.OrdinalIgnoreCase)) ?? "cc.white";
     }
 
     public static string GetNameColourNoPrefixCode(this Account account)
     {
-        string code = account.GetNameColour().Replace("cc.", string.Empty);
+        string code = account.GetNameColour().Replace("cc.", string.Empty, StringComparison.OrdinalIgnoreCase);
         // FAILSAFE: "frostburnlogo" is a symbol, not a color. Sending it as a color crashes the client.
         if (code.Equals("frostburnlogo", StringComparison.OrdinalIgnoreCase) || code.Length > 10)
         {
@@ -67,13 +67,13 @@ public static class AccountExtensions
     public static (string ClanTag, string AccountName) SeparateClanTagFromAccountName(string accountNameWithClanTag)
     {
         // If no '[' and ']' characters are found, then the account is not part of a clan and has no clan tag.
-        if (accountNameWithClanTag.Contains('[').Equals(false) && accountNameWithClanTag.Contains(']').Equals(false))
+        if (accountNameWithClanTag.Contains('[') == false && accountNameWithClanTag.Contains(']') == false)
         {
             return (string.Empty, accountNameWithClanTag);
         }
 
         // If '[' is not the first character, then the account name contains the '[' and ']' characters, but the account is not part of a clan and has no clan tag.
-        if (accountNameWithClanTag.StartsWith('[').Equals(false))
+        if (accountNameWithClanTag.StartsWith('[') == false)
         {
             return (string.Empty, accountNameWithClanTag);
         }

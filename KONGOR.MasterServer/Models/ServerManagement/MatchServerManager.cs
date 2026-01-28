@@ -1,4 +1,4 @@
-﻿namespace KONGOR.MasterServer.Models.ServerManagement;
+namespace KONGOR.MasterServer.Models.ServerManagement;
 
 public class MatchServerManager
 {

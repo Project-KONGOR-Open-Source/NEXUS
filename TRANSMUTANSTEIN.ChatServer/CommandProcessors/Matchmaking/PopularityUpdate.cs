@@ -25,67 +25,55 @@ public class PopularityUpdate : ISynchronousCommandProcessor<ChatSession>
         HashSet<string> regions = [];
 
         // Ranked
-        if (config.Ranked is not null)
+        maps.Add(config.Ranked.Map);
+        foreach (string m in config.Ranked.Modes)
         {
-            maps.Add(config.Ranked.Map);
-            foreach (string m in config.Ranked.Modes)
-            {
-                modes.Add(m);
-            }
+            modes.Add(m);
+        }
 
-            foreach (string r in config.Ranked.Regions)
-            {
-                regions.Add(r);
-            }
+        foreach (string r in config.Ranked.Regions)
+        {
+            regions.Add(r);
         }
 
         // Unranked (Casual - Type 2)
-        if (config.Unranked is not null)
+        maps.Add(config.Unranked.Map);
+        // TODO: Fix UI Duplication Glitch for Casual Mode
+        // types.Add("2"); 
+        foreach (string m in config.Unranked.Modes)
         {
-            maps.Add(config.Unranked.Map);
-            // TODO: Fix UI Duplication Glitch for Casual Mode
-            // types.Add("2"); 
-            foreach (string m in config.Unranked.Modes)
-            {
-                modes.Add(m);
-            }
+            modes.Add(m);
+        }
 
-            foreach (string r in config.Unranked.Regions)
-            {
-                regions.Add(r);
-            }
+        foreach (string r in config.Unranked.Regions)
+        {
+            regions.Add(r);
         }
 
         // MidWars (Type 3)
-        if (config.MidWars is not null)
+        maps.Add(config.MidWars.Map);
+        types.Add("3");
+        foreach (string m in config.MidWars.Modes)
         {
-            maps.Add(config.MidWars.Map);
-            types.Add("3");
-            foreach (string m in config.MidWars.Modes)
-            {
-                modes.Add(m);
-            }
+            modes.Add(m);
+        }
 
-            foreach (string r in config.MidWars.Regions)
-            {
-                regions.Add(r);
-            }
+        foreach (string r in config.MidWars.Regions)
+        {
+            regions.Add(r);
         }
 
         // RiftWars (Type 4)
-        if (config.RiftWars is not null)
+        maps.Add(config.RiftWars.Map);
+        types.Add("4");
+        foreach (string m in config.RiftWars.Modes)
         {
-            maps.Add(config.RiftWars.Map);
-            types.Add("4");
-            foreach (string m in config.RiftWars.Modes)
-            {
-                modes.Add(m);
-            }
+            modes.Add(m);
+        }
 
-            foreach (string r in config.RiftWars.Regions)
-            {
-                regions.Add(r);
-            }
+        foreach (string r in config.RiftWars.Regions)
+        {
+            regions.Add(r);
         }
 
         List<string> enabledMaps = maps.ToList();

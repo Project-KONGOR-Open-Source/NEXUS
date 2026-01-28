@@ -1,23 +1,23 @@
-﻿namespace KONGOR.MasterServer.Models.RequestResponse.SRP;
+namespace KONGOR.MasterServer.Models.RequestResponse.SRP;
 
 public class ClanMemberAccount
 {
     /// <summary>
     ///     The ID of the clan member account.
     /// </summary>
-    [PhpProperty("account_id")]
+    [PHPProperty("account_id")]
     public required string ID { get; set; }
 
     /// <summary>
     ///     The name of the clan member account.
     /// </summary>
-    [PhpProperty("nickname")]
+    [PHPProperty("nickname")]
     public required string Name { get; set; }
 
     /// <summary>
     ///     The ID of the clan.
     /// </summary>
-    [PhpProperty("clan_id")]
+    [PHPProperty("clan_id")]
     public required string ClanID { get; set; }
 
     /// <summary>
@@ -25,19 +25,19 @@ public class ClanMemberAccount
     ///     <br />
     ///     None; Member; Officer; Leader
     /// </summary>
-    [PhpProperty("rank")]
+    [PHPProperty("rank")]
     public required string Rank { get; set; }
 
     /// <summary>
     ///     Unknown.
     /// </summary>
-    [PhpProperty("message")]
+    [PHPProperty("message")]
     public string Message { get; set; } = string.Empty;
 
     /// <summary>
     ///     The datetime that the account joined the clan, in the format "yyyy-MM-dd HH:mm:ss".
     /// </summary>
-    [PhpProperty("join_date")]
+    [PHPProperty("join_date")]
     public required string JoinDate { get; set; }
 
     /// <summary>
@@ -45,6 +45,6 @@ public class ClanMemberAccount
     ///     <br />
     ///     0 = None; 1 = Basic Account; 2 = Verified Account; 3 = Legacy Account
     /// </summary>
-    [PhpProperty("standing")]
+    [PHPProperty("standing")]
     public string Standing { get; set; } = "3";
 }

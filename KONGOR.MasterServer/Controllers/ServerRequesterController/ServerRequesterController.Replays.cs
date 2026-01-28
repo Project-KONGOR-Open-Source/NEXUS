@@ -1,8 +1,10 @@
-﻿namespace KONGOR.MasterServer.Controllers.ServerRequesterController;
+﻿using KONGOR.MasterServer.Logging;
+
+namespace KONGOR.MasterServer.Controllers.ServerRequesterController;
 
 public partial class ServerRequesterController
 {
-    private async Task<IActionResult> HandleGetSpectatorHeader()
+    private Task<IActionResult> HandleGetSpectatorHeader()
     {
         string baseURL = Configuration.CDN.Host;
         string targetURL = $"{baseURL}/replays/upload";
@@ -18,7 +20,7 @@ public partial class ServerRequesterController
             ["s3_header"] = new Dictionary<string, string> { ["Content-Type"] = "application/zip" }
         };
 
-        return Ok(response);
+        return Task.FromResult<IActionResult>(Ok(PhpSerialization.Serialize(response)));
     }
 
     private async Task<IActionResult> HandleSetReplaySize()
@@ -27,7 +29,7 @@ public partial class ServerRequesterController
 
         if (session is null)
         {
-            Logger.LogError("Missing Value For Form Parameter \"session\" In HandleSetReplaySize");
+            Logger.LogMissingSessionInSetReplaySize();
             return BadRequest(PhpSerialization.Serialize(new { error = "Missing Session" }));
         }
 
@@ -36,33 +38,32 @@ public partial class ServerRequesterController
         if (matchServer is null)
         {
             // Log Warning But Return OK To Prevent Crashes/Retries
-            Logger.LogWarning("No Match Server Found For Session Cookie \"{Session}\" In HandleSetReplaySize", session);
+            Logger.LogMatchServerNotFoundForSession(session);
             return Ok(PhpSerialization.Serialize(new { result = "OK" }));
         }
 
         string? matchIdString = Request.Form["match_id"];
         if (matchIdString is null)
         {
-            Logger.LogError("Missing Value For Form Parameter \"match_id\"");
+            Logger.LogMissingMatchId();
             return BadRequest(PhpSerialization.Serialize(new { error = "Missing Match ID" }));
         }
 
         string? fileSizeString = Request.Form["file_size"];
         if (fileSizeString is null)
         {
-            Logger.LogError("Missing Value For Form Parameter \"file_size\"");
+            Logger.LogMissingFileSize();
             return BadRequest(PhpSerialization.Serialize(new { error = "Missing File Size" }));
         }
 
         if (int.TryParse(matchIdString, out int matchId) && int.TryParse(fileSizeString, out int fileSize))
         {
             // TODO: Update Match Statistics With Replay Size
-            Logger.LogInformation("Received Replay Size For Match ID {MatchID}: {FileSize} Bytes", matchId, fileSize);
+            Logger.LogReceivedReplaySize(matchId, fileSize);
         }
         else
         {
-            Logger.LogError("Invalid Match ID Or File Size Format: ID={MatchID}, Size={FileSize}", matchIdString,
-                fileSizeString);
+            Logger.LogInvalidMatchIdOrFileSize(matchIdString, fileSizeString);
         }
 
         // Always return OK to satisfy the server

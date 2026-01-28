@@ -1,4 +1,8 @@
-﻿namespace TRANSMUTANSTEIN.ChatServer.Services;
+using TRANSMUTANSTEIN.ChatServer.Logging;
+
+using Log = TRANSMUTANSTEIN.ChatServer.Utilities.Log;
+
+namespace TRANSMUTANSTEIN.ChatServer.Services;
 
 public class ChatService(IServiceProvider serviceProvider) : IHostedService, IDisposable
 {
@@ -47,7 +51,8 @@ public class ChatService(IServiceProvider serviceProvider) : IHostedService, IDi
     {
         if (ChatServer is null)
         {
-            // TODO: Log Bug
+            ILogger<ChatService> logger = serviceProvider.GetRequiredService<ILogger<ChatService>>();
+            logger.LogChatServerNullDuringStop();
 
             return Task.FromException(new ApplicationException("Chat Server Is NULL"));
         }

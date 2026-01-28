@@ -1,9 +1,12 @@
-using TRANSMUTANSTEIN.ChatServer.Domain.Clans;
+using global::TRANSMUTANSTEIN.ChatServer.Domain.Clans;
+using global::TRANSMUTANSTEIN.ChatServer.Domain.Communication;
 
 namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Clans;
 
+using global::TRANSMUTANSTEIN.ChatServer.Internals;
+
 [ChatCommand(ChatProtocol.Command.CHAT_CMD_CLAN_ADD_ACCEPTED)]
-public class ClanAddAccepted(MerrickContext merrick, IPendingClanService pendingClanService)
+public class ClanAddAccepted(MerrickContext merrick, IPendingClanService pendingClanService, IChatContext chatContext)
     : IAsynchronousCommandProcessor<ChatSession>
 {
     public async Task Process(ChatSession session, ChatBuffer buffer)
@@ -38,7 +41,7 @@ public class ClanAddAccepted(MerrickContext merrick, IPendingClanService pending
 
                     // Notify Creator
                     ChatSession? creatorSession =
-                        Context.ClientChatSessions.Values.FirstOrDefault(cs =>
+                        chatContext.ClientChatSessions.Values.FirstOrDefault(cs =>
                             cs.Account?.ID == pendingClan.CreatorAccountId);
                     if (creatorSession != null)
                     {
@@ -108,7 +111,7 @@ public class ClanAddAccepted(MerrickContext merrick, IPendingClanService pending
 
                 // 5. Join Clan Channel
                 Log.Information("[ClanAddAccepted] Joining Channel 'Clan {ClanName}'", clan.Name);
-                ChatChannel clanChannel = ChatChannel.GetOrCreate(session, $"Clan {clan.Name}");
+                ChatChannel clanChannel = ChatChannel.GetOrCreate(chatContext, session, $"Clan {clan.Name}");
                 clanChannel.Join(session);
 
                 // 6. Notify Inviter
@@ -131,7 +134,7 @@ public class ClanAddAccepted(MerrickContext merrick, IPendingClanService pending
                 Log.Information("[ClanAddAccepted] Broadcasting LONG NewMemberResponse to Clanmates.");
                 ClanNewMemberResponse newMemberPacketLong = new(account.ID, clan.ID, clan.Name, clan.Tag);
 
-                foreach (ChatSession clientSession in Context.ClientChatSessions.Values)
+                foreach (ChatSession clientSession in chatContext.ClientChatSessions.Values)
                 {
                     // Check if in same clan and NOT self
                     if (clientSession.Account?.ID != account.ID && clientSession.Account?.Clan?.ID == clan.ID)
@@ -164,7 +167,9 @@ public class ClanAddAccepted(MerrickContext merrick, IPendingClanService pending
     {
         Clan newClan = new()
         {
-            Name = pendingClan.ClanName, Tag = pendingClan.ClanTag, TimestampCreated = DateTime.UtcNow
+            Name = pendingClan.ClanName,
+            Tag = pendingClan.ClanTag,
+            TimestampCreated = DateTime.UtcNow
         };
 
         merrick.Clans.Add(newClan);
@@ -195,7 +200,7 @@ public class ClanAddAccepted(MerrickContext merrick, IPendingClanService pending
 
         // Notify Creator
         ChatSession? creatorSession =
-            Context.ClientChatSessions.Values.FirstOrDefault(cs => cs.Account?.ID == pendingClan.CreatorAccountId);
+            chatContext.ClientChatSessions.Values.FirstOrDefault(cs => cs.Account?.ID == pendingClan.CreatorAccountId);
 
         // Notify All
         // Create Channel (In memory)
@@ -206,7 +211,7 @@ public class ClanAddAccepted(MerrickContext merrick, IPendingClanService pending
             creatorSession.Account.ClanTier = ClanTier.Leader;
         }
 
-        ChatChannel clanChannel = ChatChannel.GetOrCreate(creatorSession!, $"Clan {newClan.Name}");
+        ChatChannel clanChannel = ChatChannel.GetOrCreate(chatContext, creatorSession!, $"Clan {newClan.Name}");
         clanChannel.Topic = $"Welcome To The Clan {newClan.Name} Channel";
 
         // Add Creator to Channel
@@ -223,7 +228,7 @@ public class ClanAddAccepted(MerrickContext merrick, IPendingClanService pending
         foreach (int memberId in pendingClan.MembersAccountId)
         {
             ChatSession? memberSession =
-                Context.ClientChatSessions.Values.FirstOrDefault(cs => cs.Account?.ID == memberId);
+                chatContext.ClientChatSessions.Values.FirstOrDefault(cs => cs.Account?.ID == memberId);
             if (memberSession != null)
             {
                 // Tell creator about this member

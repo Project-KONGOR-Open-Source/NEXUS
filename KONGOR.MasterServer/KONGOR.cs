@@ -1,10 +1,9 @@
-﻿using KONGOR.MasterServer.Infrastructure;
+﻿using KONGOR.MasterServer.Handlers.ClientRequester;
+using KONGOR.MasterServer.Infrastructure;
 using KONGOR.MasterServer.Services;
+using KONGOR.MasterServer.Services.Requester;
 
 using Serilog;
-
-using KONGOR.MasterServer.Handlers.ClientRequester;
-using KONGOR.MasterServer.Services.Requester;
 
 namespace KONGOR.MasterServer;
 
@@ -88,6 +87,9 @@ public class KONGOR
         // Register Hero Definition Service (Dynamic Upgrades.JSON mapping)
         builder.Services.AddSingleton<IHeroDefinitionService, HeroDefinitionService>();
 
+        // Register Player Statistics Service
+        builder.Services.AddScoped<IPlayerStatisticsService, PlayerStatisticsService>();
+
         // Add Rate Limiting Service To Protect Against Abuse And DoS Attacks
         builder.Services.AddRateLimiter(options =>
         {
@@ -133,6 +135,46 @@ public class KONGOR
         builder.Services.AddKeyedScoped<IClientRequestHandler, AuthHandler>("auth");
         builder.Services.AddKeyedScoped<IClientRequestHandler, Aids2CookieHandler>("aids2cookie");
         builder.Services.AddKeyedScoped<IClientRequestHandler, LogoutHandler>("logout");
+
+        // Register Server List & Heroes Handlers
+        builder.Services.AddKeyedScoped<IClientRequestHandler, ServerListHandler>("get_server_list");
+        builder.Services.AddKeyedScoped<IClientRequestHandler, ServerListHandler>("grab_server_list");
+        builder.Services.AddKeyedScoped<IClientRequestHandler, ServerListHandler>("server_list");
+        builder.Services.AddKeyedScoped<IClientRequestHandler, HeroesHandler>("get_all_heroes");
+        builder.Services.AddKeyedScoped<IClientRequestHandler, HeroesHandler>("get_hero_list");
+
+        // Register Stats Handlers
+        builder.Services.AddKeyedScoped<IClientRequestHandler, SimpleStatsHandler>("show_simple_stats");
+        builder.Services.AddKeyedScoped<IClientRequestHandler, SimpleStatsHandler>("show_stats");
+        builder.Services.AddKeyedScoped<IClientRequestHandler, InitStatsHandler>("get_initstats");
+        builder.Services.AddKeyedScoped<IClientRequestHandler, MatchStatsHandler>("get_match_stats");
+        builder.Services.AddKeyedScoped<IClientRequestHandler, MatchStatsHandler>("final_match_stats");
+        builder.Services.AddKeyedScoped<IClientRequestHandler, MatchHistoryHandler>("grab_last_matches");
+        builder.Services.AddKeyedScoped<IClientRequestHandler, MatchHistoryHandler>("grab_last_matches_from_nick");
+        builder.Services.AddKeyedScoped<IClientRequestHandler, MatchHistoryHandler>("match_history_overview");
+        builder.Services.AddKeyedScoped<IClientRequestHandler, HeroStatsHandler>("get_account_all_hero_stats");
+        builder.Services.AddKeyedScoped<IClientRequestHandler, HeroStatsHandler>("get_campaign_hero_stats");
+        builder.Services.AddKeyedScoped<IClientRequestHandler, HeroStatsHandler>("get_account_mastery");
+
+        // Register Game Handlers
+        builder.Services.AddKeyedScoped<IClientRequestHandler, GameHandler>("create_game");
+        builder.Services.AddKeyedScoped<IClientRequestHandler, GameHandler>("new_game_available");
+
+        // Register Store Handlers
+        builder.Services.AddKeyedScoped<IClientRequestHandler, UpgradesHandler>("get_upgrades");
+        builder.Services.AddKeyedScoped<IClientRequestHandler, UpgradesHandler>("debug_upgrades_diff");
+        builder.Services.AddKeyedScoped<IClientRequestHandler, ProductsHandler>("get_products");
+        builder.Services.AddKeyedScoped<IClientRequestHandler, DailySpecialHandler>("get_daily_special");
+        builder.Services.AddKeyedScoped<IClientRequestHandler, RewardsHandler>("claim_season_rewards");
+
+        // Register Misc Handlers
+        builder.Services.AddKeyedScoped<IClientRequestHandler, ReplayHandler>("upload_replay");
+        builder.Services.AddKeyedScoped<IClientRequestHandler, GuideHandler>("get_guide_list_filtered");
+        builder.Services.AddKeyedScoped<IClientRequestHandler, GuideHandler>("get_guide");
+        builder.Services.AddKeyedScoped<IClientRequestHandler, EventsHandler>("client_events_info");
+        builder.Services.AddKeyedScoped<IClientRequestHandler, EventsHandler>("get_special_messages");
+        builder.Services.AddKeyedScoped<IClientRequestHandler, ClanHandler>("set_rank");
+        builder.Services.AddKeyedScoped<IClientRequestHandler, FriendsHandler>("remove_buddy");
 
         // Add MVC Controllers Support
         builder.Services.AddControllers();
@@ -200,7 +242,7 @@ public class KONGOR
         // Enable Forwarded Headers Middleware For Reverse Proxy Support
         application.UseForwardedHeaders();
 
-        if (application.Services.GetService<IConnectionMultiplexer>() is IConnectionMultiplexer connectionMultiplexer)
+        if (application.Services.GetService<IConnectionMultiplexer>() is { } connectionMultiplexer)
         {
             // Purge All Session Cookies From Cache At Startup To Prevent Stale Authentication Data
             // Only Run If IConnectionMultiplexer Is Registered (Skipped In Tests That Use In-Process Test Doubles)
@@ -307,6 +349,6 @@ public class KONGOR
         application.MapControllers().RequireRateLimiting(RateLimiterPolicies.Relaxed);
 
         // Run The Application
-        application.Run();
+        await application.RunAsync();
     }
 }

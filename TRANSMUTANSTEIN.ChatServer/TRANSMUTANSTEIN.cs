@@ -2,6 +2,7 @@
 
 using TRANSMUTANSTEIN.ChatServer.Domain.Clans;
 using TRANSMUTANSTEIN.ChatServer.Infrastructure.Services;
+using TRANSMUTANSTEIN.ChatServer.Internals;
 
 namespace TRANSMUTANSTEIN.ChatServer;
 
@@ -69,12 +70,16 @@ public class TRANSMUTANSTEIN
         builder.Services.AddSingleton<IDatabase>(serviceProvider =>
             serviceProvider.GetRequiredService<IConnectionMultiplexer>().GetDatabase());
 
+        // Register Chat Context As Singleton (State Holder)
+        builder.Services.AddSingleton<IChatContext, ChatContext>();
+
         // Register Chat Service As Background Hosted Service With Support For Dependency Injection
         builder.Services.AddSingleton<ChatService>();
         builder.Services.AddHostedService(serviceProvider => serviceProvider.GetRequiredService<ChatService>());
 
-        // Register Matchmaking Service As Background Hosted Service
-        builder.Services.AddHostedService<MatchmakingService>();
+        // Register Matchmaking Service As Singleton With Support For Dependency Injection And Background Hosted Service
+        builder.Services.AddSingleton<Services.IMatchmakingService, MatchmakingService>();
+        builder.Services.AddHostedService(serviceProvider => (MatchmakingService)serviceProvider.GetRequiredService<Services.IMatchmakingService>());
 
 
         // Register Flood Prevention Service As Background Hosted Service With Support For Dependency Injection

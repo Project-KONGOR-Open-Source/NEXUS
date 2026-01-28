@@ -1,7 +1,10 @@
+using TRANSMUTANSTEIN.ChatServer.Internals;
+using TRANSMUTANSTEIN.ChatServer.Domain.Communication;
+
 namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Communication;
 
 [ChatCommand(ChatProtocol.Command.CHAT_CMD_WHISPER)]
-public class SendWhisper : ISynchronousCommandProcessor<ChatSession>
+public class SendWhisper(IChatContext chatContext) : ISynchronousCommandProcessor<ChatSession>
 {
     public void Process(ChatSession session, ChatBuffer buffer)
     {
@@ -9,6 +12,6 @@ public class SendWhisper : ISynchronousCommandProcessor<ChatSession>
 
         Whisper
             .Create(requestData.Message)
-            .Send(session, requestData.TargetName);
+            .Send(chatContext, session, requestData.TargetName);
     }
 }

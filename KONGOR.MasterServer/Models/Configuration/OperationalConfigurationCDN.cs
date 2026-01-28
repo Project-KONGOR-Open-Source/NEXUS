@@ -1,4 +1,4 @@
-﻿namespace KONGOR.MasterServer.Models.Configuration;
+namespace KONGOR.MasterServer.Models.Configuration;
 
 public class OperationalConfigurationCDN
 {

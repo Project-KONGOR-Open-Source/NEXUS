@@ -1,11 +1,11 @@
-﻿namespace KONGOR.MasterServer.Models.RequestResponse.SRP;
+namespace KONGOR.MasterServer.Models.RequestResponse.SRP;
 
 public class SRPAuthenticationFailureResponse(SRPAuthenticationFailureReason reason, string? accountName = null)
 {
     /// <summary>
     ///     A string of error output in the event of an authentication failure, e.g. "Invalid Nickname Or Password.".
     /// </summary>
-    [PhpProperty("auth")]
+    [PHPProperty("auth")]
     public string AuthenticationOutcome { get; set; } = reason switch
     {
         SRPAuthenticationFailureReason.AccountIsDisabled => "Account" +
@@ -39,6 +39,6 @@ public class SRPAuthenticationFailureResponse(SRPAuthenticationFailureReason rea
     ///     <br />
     ///     Seems to be set to "true" on a successful response, or to "false" if an error occurs.
     /// </summary>
-    [PhpProperty(0)]
+    [PHPProperty(0)]
     public bool Zero => false;
 }

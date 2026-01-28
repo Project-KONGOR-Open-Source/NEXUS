@@ -14,6 +14,9 @@ builder.AddServiceDefaults();
 // Add MVC Controllers with Views
 builder.Services.AddControllersWithViews();
 
+// Add Output Caching
+builder.Services.AddOutputCache();
+
 // Add HttpClient for ZORGATH API
 builder.Services.AddHttpClient("ZORGATH", client =>
 {
@@ -61,6 +64,7 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
+app.UseOutputCache();
 
 app.UseRouting();
 

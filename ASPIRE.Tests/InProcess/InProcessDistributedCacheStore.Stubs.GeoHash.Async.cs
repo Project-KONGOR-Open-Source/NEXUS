@@ -108,7 +108,8 @@ public partial class InProcessDistributedCacheStore
 
     public Task<bool> HashDeleteAsync(RedisKey key, RedisValue hashField, CommandFlags flags = CommandFlags.None)
     {
-        throw new NotImplementedException();
+        string compositeKey = $"{key}:{hashField}";
+        return Task.FromResult(StoreItems.TryRemove(compositeKey, out _));
     }
 
     public Task<long> HashDeleteAsync(RedisKey key, RedisValue[] hashFields, CommandFlags flags = CommandFlags.None)
@@ -118,7 +119,8 @@ public partial class InProcessDistributedCacheStore
 
     public Task<bool> HashExistsAsync(RedisKey key, RedisValue hashField, CommandFlags flags = CommandFlags.None)
     {
-        throw new NotImplementedException();
+        string compositeKey = $"{key}:{hashField}";
+        return Task.FromResult(StoreItems.ContainsKey(compositeKey));
     }
 
     // Correcting parameter names (TimeSpan expiry, DateTime expiry)

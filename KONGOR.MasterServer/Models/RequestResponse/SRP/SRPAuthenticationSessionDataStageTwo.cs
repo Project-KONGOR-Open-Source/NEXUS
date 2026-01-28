@@ -1,4 +1,4 @@
-﻿namespace KONGOR.MasterServer.Models.RequestResponse.SRP;
+namespace KONGOR.MasterServer.Models.RequestResponse.SRP;
 
 /// <summary>
 ///     Exposes the constants, properties, and methods required for Secure Remote Password protocol authentication, stage

@@ -58,7 +58,7 @@ public sealed class ChatProtocolTests
 
                 Account account = new() { ID = 999, Name = "TestUser999", IsMain = true, User = user };
 
-                user.Accounts = new List<Account> { account };
+                user.Accounts = [account];
 
                 // Ensure Account Exists
                 if (await db.Accounts.FindAsync(999) == null)
@@ -101,7 +101,7 @@ public sealed class ChatProtocolTests
 
         string ip = "127.0.0.1";
         string cookie = "test_cookie";
-        int accountId = 999;
+        const int accountId = 999;
         string hash = SRPAuthenticationHandlers.ComputeChatServerCookieHash(accountId, ip, cookie);
 
         // 0. Send Login Packet (NET_CHAT_CL_CONNECT - 0x0C00)
@@ -138,7 +138,7 @@ public sealed class ChatProtocolTests
         // We need to prepend the 2 bytes of LENGTH.
         ushort packetLength = (ushort) loginPacket.Length;
 
-        List<byte> rawBytes = new();
+        List<byte> rawBytes = [];
         rawBytes.AddRange(BitConverter.GetBytes(packetLength));
         rawBytes.AddRange(loginPacket);
 
@@ -147,8 +147,8 @@ public sealed class ChatProtocolTests
         // Use a cancellation token to prevent infinite waiting if packets don't arrive
         using CancellationTokenSource cts = new(TimeSpan.FromSeconds(5));
 
-        List<ushort> receivedCommands = new();
-        List<byte[]> receivedPayloads = new();
+        List<ushort> receivedCommands = [];
+        List<byte[]> receivedPayloads = [];
 
         // We expect at least 4 packets: Accept, Options, InitialStatus, Connected
         // We might validly receive more (e.g. Channel joins), but we focus on the first 4 for the handshake
@@ -163,7 +163,7 @@ public sealed class ChatProtocolTests
                 int bytesRead = 0;
                 while (bytesRead < 4)
                 {
-                    int read = await stream.ReadAsync(headerBuffer, bytesRead, 4 - bytesRead, cts.Token);
+                    int read = await stream.ReadAsync(headerBuffer.AsMemory(bytesRead, 4 - bytesRead), cts.Token);
                     if (read == 0)
                     {
                         break; // Disconnected
@@ -203,7 +203,7 @@ public sealed class ChatProtocolTests
                 // So if Length is 2, Payload is 0 bytes.
 
                 int payloadSize = length - 2;
-                byte[] payload = Array.Empty<byte>();
+                byte[] payload = [];
 
                 if (payloadSize > 0)
                 {
@@ -211,7 +211,7 @@ public sealed class ChatProtocolTests
                     int payloadRead = 0;
                     while (payloadRead < payloadSize)
                     {
-                        int read = await stream.ReadAsync(payload, payloadRead, payloadSize - payloadRead, cts.Token);
+                        int read = await stream.ReadAsync(payload.AsMemory(payloadRead, payloadSize - payloadRead), cts.Token);
                         if (read == 0)
                         {
                             break;
@@ -224,7 +224,7 @@ public sealed class ChatProtocolTests
                 }
                 else
                 {
-                    receivedPayloads.Add(Array.Empty<byte>());
+                    receivedPayloads.Add([]);
                 }
             }
         }

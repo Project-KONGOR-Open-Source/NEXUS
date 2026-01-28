@@ -1,4 +1,4 @@
-﻿namespace KONGOR.MasterServer.Models.RequestResponse.Stats;
+namespace KONGOR.MasterServer.Models.RequestResponse.Stats;
 
 // Properties Common To Both "submit_stats" And "resubmit_stats" Requests
 public partial class StatsForSubmissionRequestForm

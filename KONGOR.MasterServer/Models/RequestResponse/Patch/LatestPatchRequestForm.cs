@@ -1,4 +1,4 @@
-﻿namespace KONGOR.MasterServer.Models.RequestResponse.Patch;
+namespace KONGOR.MasterServer.Models.RequestResponse.Patch;
 
 public class LatestPatchRequestForm
 {

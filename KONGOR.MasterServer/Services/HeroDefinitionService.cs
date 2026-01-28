@@ -229,7 +229,7 @@ public class HeroDefinitionService : IHeroDefinitionService
             if (!_heroMappings.ContainsKey(kvp.Key))
             {
                 _heroMappings[kvp.Key] = kvp.Value;
-                
+
                 // CRITICAL FIX: Populate base ID reverse lookup for manual heroes
                 // Without this, GetBaseHeroId("Hero_Berzerker.Alt1") fails because it can't find "Hero_Berzerker"
                 if (!_identifierToBaseId.ContainsKey(kvp.Value))

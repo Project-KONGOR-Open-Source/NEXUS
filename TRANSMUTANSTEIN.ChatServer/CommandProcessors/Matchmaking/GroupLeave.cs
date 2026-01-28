@@ -1,14 +1,15 @@
+using TRANSMUTANSTEIN.ChatServer.Services;
+using TRANSMUTANSTEIN.ChatServer.Domain.Matchmaking;
+
 namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Matchmaking;
 
 [ChatCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_LEAVE)]
-public class GroupLeave : ISynchronousCommandProcessor<ChatSession>
+public class GroupLeave(IMatchmakingService matchmakingService) : ISynchronousCommandProcessor<ChatSession>
 {
     public void Process(ChatSession session, ChatBuffer buffer)
     {
-        GroupLeaveRequestData requestData = new(buffer);
-
         MatchmakingGroup
-            .GetByMemberAccountID(session.Account.ID)
-            .RemoveMember(session.Account.ID);
+            .GetByMemberAccountID(matchmakingService, session.Account.ID)
+            .RemoveMember(matchmakingService, session.Account.ID);
     }
 }

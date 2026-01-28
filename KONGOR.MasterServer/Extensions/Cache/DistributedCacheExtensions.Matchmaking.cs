@@ -10,6 +10,8 @@ public static partial class DistributedCacheExtensions
 
     private const string MatchServersKey = "MATCH-SERVERS";
 
+    private const string MatchServerIndexKey = "MATCH-SERVER-INDEX";
+
     /// <summary>
     ///     Sets the specified fields to their respective values in the hash stored at key.
     ///     This command overwrites the values of specified fields that exist in the hash.
@@ -150,9 +152,13 @@ public static partial class DistributedCacheExtensions
         MatchServer matchServer)
     {
         string serializedMatchServer = JsonSerializer.Serialize(matchServer);
+        string hashField = $"{hostAccountName}:{matchServer.Instance}";
 
         await distributedCacheStore.HashSetAsync(MatchServersKey,
-            [new HashEntry($"{hostAccountName}:{matchServer.Instance}", serializedMatchServer)]);
+            [new HashEntry(hashField, serializedMatchServer)]);
+
+        await distributedCacheStore.HashSetAsync(MatchServerIndexKey,
+            [new HashEntry(matchServer.ID, hashField)]);
     }
 
     public static async Task<List<MatchServer>> GetMatchServers(this IDatabase distributedCacheStore)
@@ -225,6 +231,18 @@ public static partial class DistributedCacheExtensions
 
     public static async Task<MatchServer?> GetMatchServerByID(this IDatabase distributedCacheStore, int serverID)
     {
+        RedisValue hashField = await distributedCacheStore.HashGetAsync(MatchServerIndexKey, serverID);
+
+        if (hashField.IsNullOrEmpty is false)
+        {
+            RedisValue serializedMatchServer = await distributedCacheStore.HashGetAsync(MatchServersKey, hashField);
+
+            if (serializedMatchServer.IsNullOrEmpty is false)
+            {
+                return JsonSerializer.Deserialize<MatchServer>(serializedMatchServer.ToString());
+            }
+        }
+
         HashEntry[] serializedMatchServers = await distributedCacheStore.HashGetAllAsync(MatchServersKey);
 
         List<MatchServer> matchServers =
@@ -235,6 +253,12 @@ public static partial class DistributedCacheExtensions
 
         MatchServer? matchServer = matchServers.FirstOrDefault(server => server.ID == serverID);
 
+        if (matchServer is not null)
+        {
+            await distributedCacheStore.HashSetAsync(MatchServerIndexKey,
+                [new HashEntry(matchServer.ID, $"{matchServer.HostAccountName}:{matchServer.Instance}")]);
+        }
+
         return matchServer;
     }
 
@@ -244,6 +268,8 @@ public static partial class DistributedCacheExtensions
 
         if (matchServer is not null)
         {
+            await distributedCacheStore.HashDeleteAsync(MatchServerIndexKey, serverID);
+
             string hashField = $"{matchServer.HostAccountName}:{matchServer.Instance}";
 
             await distributedCacheStore.HashDeleteAsync(MatchServersKey, hashField);

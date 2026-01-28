@@ -1,13 +1,15 @@
+using TRANSMUTANSTEIN.ChatServer.Services;
+
 namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Matchmaking;
 
 [ChatCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_LEAVE_QUEUE)]
-public class GroupLeaveQueue : ISynchronousCommandProcessor<ChatSession>
+public class GroupLeaveQueue(IMatchmakingService matchmakingService) : ISynchronousCommandProcessor<ChatSession>
 {
     public void Process(ChatSession session, ChatBuffer buffer)
     {
         GroupLeaveQueueRequestData requestData = new(buffer);
 
-        MatchmakingGroup? group = MatchmakingService.GetMatchmakingGroup(session.Account.ID);
+        MatchmakingGroup? group = matchmakingService.GetMatchmakingGroupByMemberID(session.Account.ID);
 
         if (group is null)
         {

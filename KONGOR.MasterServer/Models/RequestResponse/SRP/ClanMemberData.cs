@@ -1,35 +1,35 @@
-﻿namespace KONGOR.MasterServer.Models.RequestResponse.SRP;
+namespace KONGOR.MasterServer.Models.RequestResponse.SRP;
 
 public class ClanMemberData
 {
     /// <summary>
     ///     The ID of the clan.
     /// </summary>
-    [PhpProperty("clan_id")]
+    [PHPProperty("clan_id")]
     public required string ClanID { get; set; }
 
     /// <summary>
     ///     The name of the clan.
     /// </summary>
-    [PhpProperty("name")]
+    [PHPProperty("name")]
     public required string ClanName { get; set; }
 
     /// <summary>
     ///     The tag of the clan.
     /// </summary>
-    [PhpProperty("tag")]
+    [PHPProperty("tag")]
     public required string ClanTag { get; set; }
 
     /// <summary>
     ///     The ID of the account which owns the clan.
     /// </summary>
-    [PhpProperty("creator")]
+    [PHPProperty("creator")]
     public required string ClanOwnerAccountID { get; set; }
 
     /// <summary>
     ///     The ID of the clan member account.
     /// </summary>
-    [PhpProperty("account_id")]
+    [PHPProperty("account_id")]
     public required string ID { get; set; }
 
     /// <summary>
@@ -37,25 +37,25 @@ public class ClanMemberData
     ///     <br />
     ///     None; Member; Officer; Leader
     /// </summary>
-    [PhpProperty("rank")]
+    [PHPProperty("rank")]
     public required string Rank { get; set; }
 
     /// <summary>
     ///     Unknown.
     /// </summary>
-    [PhpProperty("message")]
+    [PHPProperty("message")]
     public string Message { get; set; } = "TODO: [MESSAGE] See Whether This Does Anything";
 
     /// <summary>
     ///     The datetime that the account joined the clan, in the format "yyyy-MM-dd HH:mm:ss".
     /// </summary>
-    [PhpProperty("join_date")]
+    [PHPProperty("join_date")]
     public required string JoinDate { get; set; }
 
     /// <summary>
     ///     The clan channel title.
     /// </summary>
-    [PhpProperty("title")]
+    [PHPProperty("title")]
     public required string Title { get; set; }
 
     /// <summary>
@@ -64,13 +64,13 @@ public class ClanMemberData
     ///     <br />
     ///     0 = False; 1 = True
     /// </summary>
-    [PhpProperty("active")]
+    [PHPProperty("active")]
     public string Active { get; set; } = "1";
 
     /// <summary>
     ///     Unknown.
     /// </summary>
-    [PhpProperty("logo")]
+    [PHPProperty("logo")]
     public string Logo { get; set; } = "TODO: [LOGO] See Whether This Does Anything";
 
     /// <summary>
@@ -78,13 +78,13 @@ public class ClanMemberData
     ///     <br />
     ///     0 = False; 1 = True
     /// </summary>
-    [PhpProperty("idleWarn")]
+    [PHPProperty("idleWarn")]
     public string ClanIsInactive { get; set; } = "0";
 
     /// <summary>
     ///     Unknown.
     ///     Seems to be set to "0" in all the network packet dumps.
     /// </summary>
-    [PhpProperty("activeIndex")]
+    [PHPProperty("activeIndex")]
     public string ActiveIndex { get; set; } = "0";
 }

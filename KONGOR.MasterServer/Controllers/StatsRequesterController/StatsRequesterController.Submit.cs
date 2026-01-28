@@ -1,7 +1,8 @@
 ﻿namespace KONGOR.MasterServer.Controllers.StatsRequesterController;
 
-using PlayerEntity = PlayerStatistics;
 using global::MERRICK.DatabaseContext.Extensions;
+
+using PlayerEntity = PlayerStatistics;
 
 public partial class StatsRequesterController
 {

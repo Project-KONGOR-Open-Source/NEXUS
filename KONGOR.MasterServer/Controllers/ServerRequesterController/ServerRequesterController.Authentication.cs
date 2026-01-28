@@ -1,5 +1,7 @@
 ﻿using System.Collections.Frozen;
 
+using KONGOR.MasterServer.Logging;
+
 namespace KONGOR.MasterServer.Controllers.ServerRequesterController;
 
 public partial class ServerRequesterController
@@ -82,9 +84,7 @@ public partial class ServerRequesterController
 
         if (Request.HttpContext.Connection.RemoteIpAddress is null)
         {
-            Logger.LogError(
-                @"[BUG] Remote IP Address For Server Manager With Host Account Name ""{HostAccountName}"" Is NULL",
-                hostAccountName);
+            Logger.LogServerManagerIPNullBug(hostAccountName);
 
             return BadRequest("Unable To Resolve Remote IP Address");
         }
@@ -120,9 +120,7 @@ public partial class ServerRequesterController
         response["cdn_upload_host"] = Configuration.CDN.Host;
         response["cdn_upload_target"] = "upload";
 
-        Logger.LogInformation(
-            @"Server Manager ID ""{MatchServerManagerID}"" Was Registered At ""{MatchServerManagerIPAddress}"" With Cookie ""{MatchServerManagerCookie}""",
-            matchServerManager.ID, matchServerManager.IPAddress, matchServerManager.Cookie);
+        Logger.LogServerManagerRegistered(matchServerManager.ID, matchServerManager.IPAddress, matchServerManager.Cookie);
 
         return Ok(PhpSerialization.Serialize(response));
     }
@@ -250,9 +248,7 @@ public partial class ServerRequesterController
             ["leaverthreshold"] = 0.05
         };
 
-        Logger.LogInformation(
-            @"Server ID ""{MatchServerID}"" Was Registered At ""{MatchServerIPAddress}"":""{MatchServerPort}"" With Cookie ""{MatchServerCookie}""",
-            matchServer.ID, matchServer.IPAddress, matchServer.Port, matchServer.Cookie);
+        Logger.LogServerRegistered(matchServer.ID, matchServer.IPAddress, matchServer.Port, matchServer.Cookie);
 
         return Ok(PhpSerialization.Serialize(response));
     }
@@ -311,9 +307,7 @@ public partial class ServerRequesterController
 
         if (account is null)
         {
-            Logger.LogError(
-                @"[BUG] No Account Could Be Found For Account Name ""{AccountName}"" With Session Cookie ""{Cookie}""",
-                accountNameForSessionCookie, cookie);
+            Logger.LogAccountNotFoundForCookieBug(accountNameForSessionCookie, cookie);
 
             return BadRequest($@"Account With Name ""{accountNameForSessionCookie}"" Could Not Be Found");
         }
@@ -416,20 +410,20 @@ public partial class ServerRequesterController
         return Ok(PhpSerialization.Serialize(response));
     }
 
-    private async Task<IActionResult> HandleAcceptKey()
+    private Task<IActionResult> HandleAcceptKey()
     {
         string? session = Request.Form["session"];
 
         if (session is null)
         {
-            return BadRequest(@"Missing Value For Form Parameter ""session""");
+            return Task.FromResult<IActionResult>(BadRequest(@"Missing Value For Form Parameter ""session"""));
         }
 
         string? accountKey = Request.Form["acc_key"];
 
         if (accountKey is null)
         {
-            return BadRequest(@"Missing Value For Form Parameter ""acc_key""");
+            return Task.FromResult<IActionResult>(BadRequest(@"Missing Value For Form Parameter ""acc_key"""));
         }
 
         //GameServer? server = MerrickContext.GameServers.SingleOrDefault(server => server.Cookie.Equals(formData["session"]));
@@ -456,11 +450,21 @@ public partial class ServerRequesterController
 
         // TODO: Fully Inspect Response Model
 
-        return Ok(PhpSerialization.Serialize(response));
+        return Task.FromResult<IActionResult>(Ok(PhpSerialization.Serialize(response)));
     }
 
     private async Task<IActionResult> HandleSetOnline()
     {
+        // Debug Logging for SetOnline
+        List<string> formKeys = Request.Form.Keys.ToList();
+        StringBuilder logBuilder = new System.Text.StringBuilder();
+        logBuilder.AppendLine("[SetOnline] Incoming Request Keys:");
+        foreach (string key in formKeys)
+        {
+            logBuilder.AppendLine($" - {key}: {Request.Form[key]}");
+        }
+        Logger.LogSetOnlineDebug(logBuilder.ToString());
+
         string? session = Request.Form["session"];
 
         if (session is null)
@@ -545,13 +549,11 @@ public partial class ServerRequesterController
             if (matchStartData is null)
             {
                 // Only Log This Error If The Server Is In A State Where It Should Have Match Data (i.e. Not Idle, Sleeping, Or Unknown)
-                if (matchServer is not null && matchServer.Status != ServerStatus.SERVER_STATUS_IDLE &&
+                if (matchServer.Status != ServerStatus.SERVER_STATUS_IDLE &&
                     matchServer.Status != ServerStatus.SERVER_STATUS_SLEEPING &&
                     matchServer.Status != ServerStatus.SERVER_STATUS_UNKNOWN)
                 {
-                    Logger.LogError(
-                        @"[BUG] Received Match Initialisation Heartbeat For Session ""{Session}"", But No MatchStartData Found In Cache. Server Status: {ServerStatus}",
-                        session, matchServer.Status);
+                    Logger.LogMatchInitHeartbeatBug(session, matchServer.Status);
                 }
 
                 return Ok();
@@ -574,9 +576,7 @@ public partial class ServerRequesterController
 
             if (matchStartData is null)
             {
-                Logger.LogError(
-                    @"[BUG] Received Match Initialisation Heartbeat For Match ID ""{MatchID}"", But No MatchStartData Found In Cache",
-                    matchID);
+                Logger.LogMatchInitHeartbeatMatchIdBug(matchID);
 
                 return Ok();
             }
@@ -644,28 +644,25 @@ public partial class ServerRequesterController
 
             await DistributedCache.SetMatchStartData(matchStartData);
 
-            Logger.LogInformation(
-                "Captured Match Mode And Options For Match ID {MatchID}: MatchMode={MatchMode}, ArrangedMatchType={ArrangedMatchType}",
-                matchID, matchStartData.MatchMode, matchStartData.MatchType);
+            Logger.LogCapturedMatchMode(matchID, matchStartData.MatchMode, matchStartData.MatchType);
         }
 
         return Ok();
     }
 
-    private async Task<IActionResult> HandleAuthentication()
+    private Task<IActionResult> HandleAuthentication()
     {
         string? accountName = Request.Form["login"];
 
         if (accountName is not null)
         {
-            Logger.LogWarning(@"Account ""{AccountName}"" Is Attempting To Use HTTP Server Authentication",
-                accountName);
+            Logger.LogHttpServerAuthAttempt(accountName);
         }
 
         string response =
             PhpSerialization.Serialize(
                 new SRPAuthenticationFailureResponse(SRPAuthenticationFailureReason.SRPAuthenticationDisabled));
 
-        return BadRequest(response);
+        return Task.FromResult<IActionResult>(BadRequest(response));
     }
 }

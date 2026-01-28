@@ -20,29 +20,40 @@
         </button>
     </form>
 
-    <div class="relative mb-6">
-        <div class="absolute inset-0 flex items-center">
-            <div class="w-full border-t border-slate-700"></div>
+    @if (ViewBag.HasApiKey == true)
+    {
+        <!-- Real Signup Link -->
+        <a asp-controller="Account" asp-action="RegisterDirect"
+           class="w-full flex items-center justify-center gap-3 bg-pink-600 hover:bg-pink-500 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-300 transform hover:scale-[1.02] shadow-lg shadow-pink-600/30">
+            Sign Up with Email
+        </a>
+    }
+    else
+    {
+        <div class="relative mb-6">
+            <div class="absolute inset-0 flex items-center">
+                <div class="w-full border-t border-slate-700"></div>
+            </div>
+            <div class="relative flex justify-center text-sm">
+                <span class="px-2 bg-slate-900 text-slate-400">Or use developer mock signup</span>
+            </div>
         </div>
-        <div class="relative flex justify-center text-sm">
-            <span class="px-2 bg-slate-900 text-slate-400">Or use developer mock signup</span>
-        </div>
-    </div>
 
-    <!-- Mock Signup -->
-    <form asp-controller="Account" asp-action="SignupMock" method="post" class="space-y-4">
-        <div>
-            <label for="email" class="block text-sm font-medium text-slate-300 mb-1">Email Address</label>
-            <input type="email" id="email" name="email" required
-                   class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all"
-                   placeholder="newuser@kongor.net">
-        </div>
+        <!-- Mock Signup -->
+        <form asp-controller="Account" asp-action="SignupMock" method="post" class="space-y-4">
+            <div>
+                <label for="email" class="block text-sm font-medium text-slate-300 mb-1">Email Address</label>
+                <input type="email" id="email" name="email" required
+                       class="w-full bg-slate-800/50 border border-slate-700 rounded-lg px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all"
+                       placeholder="newuser@kongor.net">
+            </div>
 
-        <button type="submit"
-                class="w-full bg-slate-700 hover:bg-slate-600 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-300">
-            Mock Signup
-        </button>
-    </form>
+            <button type="submit"
+                    class="w-full bg-slate-700 hover:bg-slate-600 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-300">
+                Mock Signup
+            </button>
+        </form>
+    }
 
     <div class="mt-6 text-center text-sm text-slate-400">
         Already have an account? <a asp-controller="Account" asp-action="Login"

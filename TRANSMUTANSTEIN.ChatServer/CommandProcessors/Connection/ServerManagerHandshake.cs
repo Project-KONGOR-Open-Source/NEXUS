@@ -1,7 +1,10 @@
 namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Connection;
 
+using global::TRANSMUTANSTEIN.ChatServer.Internals;
+using global::TRANSMUTANSTEIN.ChatServer.Domain.Communication;
+
 [ChatCommand(ChatProtocol.ServerManagerToChatServer.NET_CHAT_SM_CONNECT)]
-public class ServerManagerHandshake(IDatabase distributedCacheStore, MerrickContext databaseContext)
+public class ServerManagerHandshake(IDatabase distributedCacheStore, MerrickContext databaseContext, IChatContext chatContext)
     : IAsynchronousCommandProcessor<ChatSession>
 {
     public async Task Process(ChatSession session, ChatBuffer buffer)
@@ -131,7 +134,7 @@ public class ServerManagerHandshake(IDatabase distributedCacheStore, MerrickCont
         }
 
         // Check For Duplicate Match Server Manager Instances
-        if (Context.MatchServerManagerChatSessions.TryGetValue(requestData.ServerManagerID,
+        if (chatContext.MatchServerManagerChatSessions.TryGetValue(requestData.ServerManagerID,
                 out ChatSession? existingSession))
         {
             Log.Information(
@@ -140,11 +143,11 @@ public class ServerManagerHandshake(IDatabase distributedCacheStore, MerrickCont
 
             await existingSession.TerminateMatchServerManager(distributedCacheStore);
 
-            Context.MatchServerManagerChatSessions.TryRemove(requestData.ServerManagerID, out _);
+            chatContext.MatchServerManagerChatSessions.TryRemove(requestData.ServerManagerID, out _);
         }
 
         // Register Match Server Manager
-        Context.MatchServerManagerChatSessions[requestData.ServerManagerID] = session;
+        chatContext.MatchServerManagerChatSessions[requestData.ServerManagerID] = session;
 
         Log.Information(
             @"Match Server Manager Connection Accepted - Manager ID: ""{ManagerID}"", Host Account: ""{HostAccountName}"", Address: ""{Address}""",

@@ -1,17 +1,15 @@
-using TRANSMUTANSTEIN.ChatServer.Domain.Clans;
+using global::TRANSMUTANSTEIN.ChatServer.Domain.Clans;
 
 namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Clans;
 
+using global::TRANSMUTANSTEIN.ChatServer.Internals;
+
 [ChatCommand(ChatProtocol.Command.CHAT_CMD_CLAN_ADD_REJECTED)]
-public class ClanAddRejected(IPendingClanService pendingClanService) : IAsynchronousCommandProcessor<ChatSession>
+public class ClanAddRejected(IPendingClanService pendingClanService, IChatContext chatContext) : IAsynchronousCommandProcessor<ChatSession>
 {
-    public async Task Process(ChatSession session, ChatBuffer buffer)
+    public Task Process(ChatSession session, ChatBuffer buffer)
     {
-        Account? account = session.Account;
-        if (account == null)
-        {
-            return;
-        }
+        Account account = session.Account;
 
         pendingClanService.RemoveObsoledPendingClanInvites();
 
@@ -25,7 +23,7 @@ public class ClanAddRejected(IPendingClanService pendingClanService) : IAsynchro
             {
                 // Notify Inviter
                 ChatSession? inviterSession =
-                    Context.ClientChatSessions.Values.FirstOrDefault(cs => cs.Account?.ID == invite.InitiatorAccountId);
+                    chatContext.ClientChatSessions.Values.FirstOrDefault(cs => cs.Account.ID == invite.InitiatorAccountId);
                 if (inviterSession != null)
                 {
                     inviterSession.Send(new ClanAddRejectedResponse(account.Name));
@@ -34,5 +32,7 @@ public class ClanAddRejected(IPendingClanService pendingClanService) : IAsynchro
 
             pendingClanService.RemovePendingClanInvite(inviteKey);
         }
+
+        return Task.CompletedTask;
     }
 }

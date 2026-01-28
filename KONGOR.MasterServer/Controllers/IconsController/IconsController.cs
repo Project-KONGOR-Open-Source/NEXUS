@@ -1,10 +1,12 @@
+using KONGOR.MasterServer.Logging;
+
 using Microsoft.AspNetCore.Mvc;
 
 namespace KONGOR.MasterServer.Controllers.IconsController;
 
 [ApiController]
 [Route("icons")]
-public class IconsController : ControllerBase
+public partial class IconsController : ControllerBase
 {
     private readonly ILogger<IconsController> _logger;
     private readonly IWebHostEnvironment _environment;
@@ -18,15 +20,21 @@ public class IconsController : ControllerBase
     [HttpGet("{*path}")]
     public IActionResult GetIcon(string path)
     {
-        _logger.LogWarning("Icon Requested: {Path}", path);
+        // Sanitize path to prevent traversal (basic check)
+        if (string.IsNullOrWhiteSpace(path) || path.Contains(".."))
+        {
+            return BadRequest();
+        }
 
-        // TODO: Implement Dynamic Icon Generation Logic
-        // The path likely contains slash-separated flags followed by comma-separated assets
-        // Example: 0/8/12/1,av.Flamboyant,c.cat_courier,...
+        string fullPath = Path.Combine(_environment.ContentRootPath, "Resources", "Icons", path);
 
-        // For now, check if we have a static file fallback or return 404
-        // If we want to serve a placeholder, we could do it here.
-        
+        if (System.IO.File.Exists(fullPath))
+        {
+            return PhysicalFile(fullPath, "application/octet-stream");
+        }
+
+        // Log as debug to reduce noise if icons are missing commonly
+        _logger.LogIconNotFound(path);
         return NotFound();
     }
 }

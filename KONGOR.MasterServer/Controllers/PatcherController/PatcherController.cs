@@ -1,9 +1,11 @@
-﻿namespace KONGOR.MasterServer.Controllers.PatcherController;
+﻿using KONGOR.MasterServer.Logging;
+
+namespace KONGOR.MasterServer.Controllers.PatcherController;
 
 [ApiController]
 [Route("patcher/patcher.php")]
 [Consumes("application/x-www-form-urlencoded")]
-public class PatcherController(
+public partial class PatcherController(
     ILogger<PatcherController> logger,
     IDatabase distributedCache,
     IOptions<OperationalConfiguration> configuration) : ControllerBase
@@ -18,8 +20,7 @@ public class PatcherController(
         if (!string.IsNullOrEmpty(form.Cookie) &&
             (await DistributedCache.ValidateAccountSessionCookie(form.Cookie)).IsValid.Equals(false))
         {
-            Logger.LogWarning(
-                $@"IP Address ""{Request.HttpContext.Connection.RemoteIpAddress?.MapToIPv4().ToString() ?? "UNKNOWN"}"" Has Requested Patch Information With Forged Cookie ""{form.Cookie}""");
+            Logger.LogForgedCookie(Request.HttpContext.Connection.RemoteIpAddress?.MapToIPv4().ToString() ?? "UNKNOWN", form.Cookie);
 
             return Unauthorized($@"Unrecognized Cookie ""{form.Cookie}""");
         }
@@ -57,7 +58,7 @@ public class PatcherController(
 
         if (latestPatch is null)
         {
-            Logger.LogError(@"Latest Patch Details Not Found For Distribution ""{OperatingSystem}""", os);
+            Logger.LogLatestPatchNotFound(os);
             return StatusCode(500, "Internal Server Error: Latest Patch Details Not Found");
         }
 

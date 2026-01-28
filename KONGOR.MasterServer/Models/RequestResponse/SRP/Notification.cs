@@ -1,4 +1,4 @@
-﻿namespace KONGOR.MasterServer.Models.RequestResponse.SRP;
+namespace KONGOR.MasterServer.Models.RequestResponse.SRP;
 
 public class Notification
 {
@@ -18,13 +18,13 @@ public class Notification
     ///             "KONGOR|| 2|notify_replay_available     |notification_generic_info  |                     |01/18 00:24 AM|5000004"
     ///     </code>
     /// </summary>
-    [PhpProperty("notification")]
+    [PHPProperty("notification")]
     public required string PipeSeparatedNotificationData { get; set; }
 
     /// <summary>
     ///     The ID of the notification.
     ///     This value matches the last data point in the pipe-separated notification data set.
     /// </summary>
-    [PhpProperty("notify_id")]
+    [PHPProperty("notify_id")]
     public required string NotificationID { get; set; }
 }

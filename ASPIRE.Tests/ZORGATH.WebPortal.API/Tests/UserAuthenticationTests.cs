@@ -1,3 +1,5 @@
+using ZORGATH.WebPortal.API.Services;
+
 namespace ASPIRE.Tests.ZORGATH.WebPortal.API.Tests;
 
 /// <summary>
@@ -19,8 +21,10 @@ public sealed class UserAuthenticationTests
         JWTAuthenticationData authenticationResult =
             await jwtAuthenticationService.CreateAuthenticatedUser(emailAddress, accountName, password);
 
+        using IServiceScope scope = webApplicationFactory.Services.CreateScope();
+
         IOptions<OperationalConfiguration> configuration =
-            webApplicationFactory.Services.GetRequiredService<IOptions<OperationalConfiguration>>();
+            scope.ServiceProvider.GetRequiredService<IOptions<OperationalConfiguration>>();
 
         TokenValidationParameters tokenValidationParameters = new()
         {
@@ -66,16 +70,16 @@ public sealed class UserAuthenticationTests
         await using WebApplicationFactory<ZORGATHAssemblyMarker> webApplicationFactory =
             ZORGATHServiceProvider.CreateOrchestratedInstance();
 
+        using IServiceScope scope = webApplicationFactory.Services.CreateScope();
+
         ILogger<UserController> userLogger =
-            webApplicationFactory.Services.GetRequiredService<ILogger<UserController>>();
-        IOptions<OperationalConfiguration> configuration =
-            webApplicationFactory.Services.GetRequiredService<IOptions<OperationalConfiguration>>();
-        IEmailService emailService = webApplicationFactory.Services.GetRequiredService<IEmailService>();
-        IWebHostEnvironment hostEnvironment = webApplicationFactory.Services.GetRequiredService<IWebHostEnvironment>();
+            scope.ServiceProvider.GetRequiredService<ILogger<UserController>>();
+        IUserService userService = scope.ServiceProvider.GetRequiredService<IUserService>();
+        IAuthenticationService authService = scope.ServiceProvider.GetRequiredService<IAuthenticationService>();
 
-        MerrickContext databaseContext = webApplicationFactory.Services.GetRequiredService<MerrickContext>();
+        MerrickContext databaseContext = scope.ServiceProvider.GetRequiredService<MerrickContext>();
 
-        UserController userController = new(databaseContext, userLogger, emailService, configuration, hostEnvironment);
+        UserController userController = new(databaseContext, userLogger, userService, authService);
 
         IActionResult response = await userController.LogInUser(new LogInUserDTO(accountName, password));
 
@@ -95,16 +99,16 @@ public sealed class UserAuthenticationTests
 
         await jwtAuthenticationService.CreateAuthenticatedUser(emailAddress, accountName, correctPassword);
 
+        using IServiceScope scope = webApplicationFactory.Services.CreateScope();
+
         ILogger<UserController> userLogger =
-            webApplicationFactory.Services.GetRequiredService<ILogger<UserController>>();
-        IOptions<OperationalConfiguration> configuration =
-            webApplicationFactory.Services.GetRequiredService<IOptions<OperationalConfiguration>>();
-        IEmailService emailService = webApplicationFactory.Services.GetRequiredService<IEmailService>();
-        IWebHostEnvironment hostEnvironment = webApplicationFactory.Services.GetRequiredService<IWebHostEnvironment>();
+            scope.ServiceProvider.GetRequiredService<ILogger<UserController>>();
+        IUserService userService = scope.ServiceProvider.GetRequiredService<IUserService>();
+        IAuthenticationService authService = scope.ServiceProvider.GetRequiredService<IAuthenticationService>();
 
-        MerrickContext databaseContext = webApplicationFactory.Services.GetRequiredService<MerrickContext>();
+        MerrickContext databaseContext = scope.ServiceProvider.GetRequiredService<MerrickContext>();
 
-        UserController userController = new(databaseContext, userLogger, emailService, configuration, hostEnvironment);
+        UserController userController = new(databaseContext, userLogger, userService, authService);
 
         IActionResult response = await userController.LogInUser(new LogInUserDTO(accountName, wrongPassword));
 
@@ -165,7 +169,9 @@ public sealed class UserAuthenticationTests
             await Assert.That(result.AuthenticationToken).IsNotEmpty();
         }
 
-        MerrickContext databaseContext = webApplicationFactory.Services.GetRequiredService<MerrickContext>();
+        using IServiceScope scope = webApplicationFactory.Services.CreateScope();
+
+        MerrickContext databaseContext = scope.ServiceProvider.GetRequiredService<MerrickContext>();
 
         User? user = await databaseContext.Users
             .Include(user => user.Accounts)
@@ -196,16 +202,16 @@ public sealed class UserAuthenticationTests
 
         await jwtAuthenticationService.CreateAuthenticatedUser(emailAddress, registeredAccountName, password);
 
+        using IServiceScope scope = webApplicationFactory.Services.CreateScope();
+
         ILogger<UserController> userLogger =
-            webApplicationFactory.Services.GetRequiredService<ILogger<UserController>>();
-        IOptions<OperationalConfiguration> configuration =
-            webApplicationFactory.Services.GetRequiredService<IOptions<OperationalConfiguration>>();
-        IEmailService emailService = webApplicationFactory.Services.GetRequiredService<IEmailService>();
-        IWebHostEnvironment hostEnvironment = webApplicationFactory.Services.GetRequiredService<IWebHostEnvironment>();
+            scope.ServiceProvider.GetRequiredService<ILogger<UserController>>();
+        IUserService userService = scope.ServiceProvider.GetRequiredService<IUserService>();
+        IAuthenticationService authService = scope.ServiceProvider.GetRequiredService<IAuthenticationService>();
 
-        MerrickContext databaseContext = webApplicationFactory.Services.GetRequiredService<MerrickContext>();
+        MerrickContext databaseContext = scope.ServiceProvider.GetRequiredService<MerrickContext>();
 
-        UserController userController = new(databaseContext, userLogger, emailService, configuration, hostEnvironment);
+        UserController userController = new(databaseContext, userLogger, userService, authService);
 
         IActionResult response = await userController.LogInUser(new LogInUserDTO(loginAccountName, password));
 
@@ -225,16 +231,16 @@ public sealed class UserAuthenticationTests
 
         await jwtAuthenticationService.CreateAuthenticatedUser(emailAddress, registeredAccountName, password);
 
+        using IServiceScope scope = webApplicationFactory.Services.CreateScope();
+
         ILogger<UserController> userLogger =
-            webApplicationFactory.Services.GetRequiredService<ILogger<UserController>>();
-        IOptions<OperationalConfiguration> configuration =
-            webApplicationFactory.Services.GetRequiredService<IOptions<OperationalConfiguration>>();
-        IEmailService emailService = webApplicationFactory.Services.GetRequiredService<IEmailService>();
-        IWebHostEnvironment hostEnvironment = webApplicationFactory.Services.GetRequiredService<IWebHostEnvironment>();
+            scope.ServiceProvider.GetRequiredService<ILogger<UserController>>();
+        IUserService userService = scope.ServiceProvider.GetRequiredService<IUserService>();
+        IAuthenticationService authService = scope.ServiceProvider.GetRequiredService<IAuthenticationService>();
 
-        MerrickContext databaseContext = webApplicationFactory.Services.GetRequiredService<MerrickContext>();
+        MerrickContext databaseContext = scope.ServiceProvider.GetRequiredService<MerrickContext>();
 
-        UserController userController = new(databaseContext, userLogger, emailService, configuration, hostEnvironment);
+        UserController userController = new(databaseContext, userLogger, userService, authService);
 
         IActionResult response = await userController.LogInUser(new LogInUserDTO(loginAccountName, password));
 

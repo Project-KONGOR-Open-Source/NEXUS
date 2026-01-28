@@ -2,6 +2,7 @@ using System.Security.Claims;
 
 using ASPIRE.Common.DTOs;
 
+using DAWNBRINGER.WebPortal.UI.Logging;
 using DAWNBRINGER.WebPortal.UI.Models;
 
 using MERRICK.DatabaseContext.Entities.Core;
@@ -10,22 +11,26 @@ using MERRICK.DatabaseContext.Persistence;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OutputCaching;
 using Microsoft.EntityFrameworkCore;
 
 namespace DAWNBRINGER.WebPortal.UI.Controllers;
 
-public class AccountController : Controller
+public partial class AccountController : Controller
 {
     private readonly MerrickContext _context;
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly ILogger<AccountController> _logger;
+    private readonly IOutputCacheStore _outputCacheStore;
+    private readonly IConfiguration _configuration;
 
-    public AccountController(MerrickContext context, IHttpClientFactory httpClientFactory,
-        ILogger<AccountController> logger)
+    public AccountController(MerrickContext context, IHttpClientFactory httpClientFactory, ILogger<AccountController> logger, IOutputCacheStore outputCacheStore, IConfiguration configuration)
     {
         _context = context;
         _httpClientFactory = httpClientFactory;
         _logger = logger;
+        _outputCacheStore = outputCacheStore;
+        _configuration = configuration;
     }
 
     [HttpGet]
@@ -46,6 +51,10 @@ public class AccountController : Controller
         {
             return RedirectToAction("Index", "Home");
         }
+
+        string? apiKey = _configuration["Operational:Email:ApiKey"];
+        bool hasApiKey = !string.IsNullOrWhiteSpace(apiKey) && apiKey != "SENDGRID_API_KEY_PLACEHOLDER";
+        ViewBag.HasApiKey = hasApiKey;
 
         return View();
     }
@@ -153,14 +162,14 @@ public class AccountController : Controller
 
         try
         {
-            RegisterDiscordUserDTO dto = new(email, model.IGN, model.Password);
+            RegisterDirectUserDTO dto = new(email, model.IGN, model.Password);
             HttpClient client = _httpClientFactory.CreateClient("ZORGATH");
-            HttpResponseMessage response = await client.PostAsJsonAsync("/User/RegisterFromDiscord", dto);
+            HttpResponseMessage response = await client.PostAsJsonAsync("/Registration/Register", dto);
 
             if (!response.IsSuccessStatusCode)
             {
                 string error = await response.Content.ReadAsStringAsync();
-                _logger.LogError("API Registration Failed: {StatusCode} {Error}", response.StatusCode, error);
+                _logger.LogApiRegistrationFailed((int) response.StatusCode, error);
                 ModelState.AddModelError(string.Empty, $"Registration failed: {response.StatusCode} - {error}");
                 return View("Register", model);
             }
@@ -185,7 +194,7 @@ public class AccountController : Controller
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Exception during registration");
+            _logger.LogRegistrationException(ex);
             ModelState.AddModelError(string.Empty, $"An error occurred during registration: {ex.Message}");
             return View("Register", model);
         }
@@ -264,6 +273,131 @@ public class AccountController : Controller
                 new ClaimsPrincipal(claimsIdentity));
 
             return RedirectToAction("Register");
+        }
+    }
+
+    [HttpGet]
+    public IActionResult RegisterDirect()
+    {
+        if (User.Identity?.IsAuthenticated == true)
+        {
+            return RedirectToAction("Index", "Home");
+        }
+
+        return View();
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> RegisterDirect(RegisterEmailViewModel model)
+    {
+        if (!ModelState.IsValid)
+        {
+            return View(model);
+        }
+
+        if (User.Identity?.IsAuthenticated == true)
+        {
+            return RedirectToAction("Index", "Home");
+        }
+
+        try
+        {
+            RegisterEmailAddressDTO dto = new(model.Email, model.Email);
+            HttpClient client = _httpClientFactory.CreateClient("ZORGATH");
+            HttpResponseMessage response = await client.PostAsJsonAsync("/Registration/InitiateRegistration", dto);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                string error = await response.Content.ReadAsStringAsync();
+                _logger.LogApiRegistrationFailed((int) response.StatusCode, error);
+                ModelState.AddModelError(string.Empty, $"Registration failed: {response.StatusCode} - {error}");
+                return View(model);
+            }
+
+            ViewBag.Email = model.Email;
+            return View("CheckEmail");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogRegistrationException(ex);
+            ModelState.AddModelError(string.Empty, $"An error occurred during registration: {ex.Message}");
+            return View(model);
+        }
+    }
+
+    // This handles the link from email: /Account/RegisterComplete?token=...
+    // Or if route is mapped: /register/{token} -> We might need a route attribute or update Program.cs
+    // The EmailService generates: BaseURL + "/register/" + token
+    // If DAWNBRINGER is BaseURL, we need a route for "register/{token}" to map here.
+    [HttpGet("register/{token}")]
+    public IActionResult RegisterComplete(string token)
+    {
+        if (User.Identity?.IsAuthenticated == true)
+        {
+            return RedirectToAction("Index", "Home");
+        }
+
+        RegisterCompleteViewModel model = new() { Token = token, IGN = string.Empty, Password = string.Empty, ConfirmPassword = string.Empty };
+        return View("RegisterComplete", model);
+    }
+
+    [HttpPost("register/complete")]
+    public async Task<IActionResult> RegisterComplete(RegisterCompleteViewModel model)
+    {
+        if (!ModelState.IsValid)
+        {
+            return View(model);
+        }
+
+        if (User.Identity?.IsAuthenticated == true)
+        {
+            return RedirectToAction("Index", "Home");
+        }
+
+        try
+        {
+            RegisterUserWithTokenDTO dto = new(model.Token, model.IGN, model.Password);
+            HttpClient client = _httpClientFactory.CreateClient("ZORGATH");
+            HttpResponseMessage response = await client.PostAsJsonAsync("/Registration/CompleteRegistration", dto);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                string error = await response.Content.ReadAsStringAsync();
+                _logger.LogApiRegistrationFailed((int) response.StatusCode, error);
+                ModelState.AddModelError(string.Empty, $"Registration failed: {response.StatusCode} - {error}");
+                return View(model);
+            }
+
+            // Immediately sign in the new user
+            // We need to decode the response to get Email/ID if possible, or trust the inputs?
+            // The response for CompleteRegistration returns GetBasicUserDTO per code.
+
+            GetBasicUserDTO? userDto = await response.Content.ReadFromJsonAsync<GetBasicUserDTO>();
+
+            if (userDto is not null)
+            {
+                // Create Claims based on returned user
+                List<Claim> claims = new()
+                {
+                    new Claim(ClaimTypes.Name, userDto.Accounts.FirstOrDefault()?.Name ?? model.IGN),
+                    new Claim(ClaimTypes.Email, userDto.EmailAddress),
+                    new Claim(ClaimTypes.NameIdentifier, userDto.EmailAddress)
+                };
+
+                ClaimsIdentity claimsIdentity = new(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+
+                await HttpContext.SignInAsync(
+                    CookieAuthenticationDefaults.AuthenticationScheme,
+                    new ClaimsPrincipal(claimsIdentity));
+            }
+
+            return RedirectToAction("Index", "Home");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogRegistrationException(ex);
+            ModelState.AddModelError(string.Empty, $"An error occurred during registration: {ex.Message}");
+            return View(model);
         }
     }
 

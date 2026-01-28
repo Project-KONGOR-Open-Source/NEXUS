@@ -7,6 +7,7 @@ using TRANSMUTANSTEIN.ChatServer.Domain.Core;
 
 namespace ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer.Tests;
 
+
 public sealed class ChatClanTests
 {
     [Test]

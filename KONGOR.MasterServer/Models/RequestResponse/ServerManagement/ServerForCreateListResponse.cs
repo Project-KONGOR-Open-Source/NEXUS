@@ -1,4 +1,4 @@
-﻿namespace KONGOR.MasterServer.Models.RequestResponse.ServerManagement;
+namespace KONGOR.MasterServer.Models.RequestResponse.ServerManagement;
 
 public class ServerForCreateListResponse(List<MatchServer> servers, string cookie)
     : ServerListResponse(cookie)
@@ -48,7 +48,7 @@ public class ServerForCreateListResponse(List<MatchServer> servers, string cooki
 
      */
 
-    [PhpProperty("server_list")]
+    [PHPProperty("server_list")]
     public Dictionary<int, ServerForCreate> Servers { get; set; } = servers.Any() is false
         ? []
         : servers.Where(server =>

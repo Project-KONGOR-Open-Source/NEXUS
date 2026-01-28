@@ -5,7 +5,7 @@ namespace MERRICK.DatabaseContext.Entities.Statistics;
 [Table("account_statistics")]
 public class AccountStatistics
 {
-    [Key] [Column("account_id")] public int AccountID { get; set; }
+    [Key][Column("account_id")] public int AccountID { get; set; }
 
     [Column("matches_played")] public int MatchesPlayed { get; set; }
 

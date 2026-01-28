@@ -1,3 +1,5 @@
+using TRANSMUTANSTEIN.ChatServer.Logging;
+
 namespace TRANSMUTANSTEIN.ChatServer.Services;
 
 /// <summary>
@@ -5,7 +7,7 @@ namespace TRANSMUTANSTEIN.ChatServer.Services;
 ///     Request counter increments on each action and decays over time.
 ///     Requests exceeding the threshold are rejected with a warning sent to the client.
 /// </summary>
-public class FloodPreventionService(ILogger<FloodPreventionService> logger) : IHostedService, IDisposable
+public partial class FloodPreventionService(ILogger<FloodPreventionService> logger) : IHostedService, IDisposable
 {
     private ConcurrentDictionary<int, FloodState> AccountFloodStates { get; } = new();
 
@@ -25,9 +27,7 @@ public class FloodPreventionService(ILogger<FloodPreventionService> logger) : IH
     /// </summary>
     public virtual Task StartAsync(CancellationToken cancellationToken)
     {
-        logger.LogInformation(
-            "Flood Prevention Service Starting With Threshold: {Threshold}, Decay Interval: {DecayInterval}s",
-            ChatProtocol.FLOOD_THRESHOLD, ChatProtocol.FLOOD_DECAY_INTERVAL_SECONDS);
+        logger.LogServiceStarting(ChatProtocol.FLOOD_THRESHOLD, (int) ChatProtocol.FLOOD_DECAY_INTERVAL_SECONDS);
 
         // Start Decay Timer
         DecayTimer = new Timer
@@ -46,7 +46,7 @@ public class FloodPreventionService(ILogger<FloodPreventionService> logger) : IH
     /// </summary>
     public virtual Task StopAsync(CancellationToken cancellationToken)
     {
-        logger.LogInformation("Flood Prevention Service Stopping");
+        logger.LogServiceStopping();
 
         DecayTimer?.Change(Timeout.Infinite, Timeout.Infinite);
 
@@ -63,7 +63,7 @@ public class FloodPreventionService(ILogger<FloodPreventionService> logger) : IH
         // Staff Accounts Are Exempt From Flood Prevention For Moderation And Administration Purposes
         if (session.Account.Type is AccountType.Staff)
         {
-            logger.LogDebug("Account {AccountID} Exempt From Flood Prevention (Staff Account)", session.Account.ID);
+            logger.LogAccountExempt_Debug(session.Account.ID);
 
             return true;
         }
@@ -75,9 +75,7 @@ public class FloodPreventionService(ILogger<FloodPreventionService> logger) : IH
             // Check If Request Count Exceeds Threshold
             if (state.RequestCount > ChatProtocol.FLOOD_THRESHOLD)
             {
-                logger.LogWarning(
-                    "Account {AccountID} Exceeded Flood Threshold ({Threshold}), Request Count: {RequestCount}",
-                    session.Account.ID, ChatProtocol.FLOOD_THRESHOLD, state.RequestCount);
+                logger.LogFloodThresholdExceeded(session.Account.ID, ChatProtocol.FLOOD_THRESHOLD, state.RequestCount);
 
                 ChatBuffer floodWarning = new();
 
@@ -138,9 +136,7 @@ public class FloodPreventionService(ILogger<FloodPreventionService> logger) : IH
 
         if (decayedAccounts > 0 || removedAccounts > 0)
         {
-            logger.LogDebug(
-                "Flood Prevention Decay: {DecayedCount} Accounts Decayed, {RemovedCount} Accounts Cleaned Up",
-                decayedAccounts, removedAccounts);
+            logger.LogDecayCycle_Debug(decayedAccounts, removedAccounts);
         }
     }
 

@@ -1,14 +1,14 @@
-﻿namespace KONGOR.MasterServer.Models.RequestResponse.GameData;
+namespace KONGOR.MasterServer.Models.RequestResponse.GameData;
 
 public class GuideResponseError(int hostTime)
 {
-    [PhpProperty("errors")] public string Errors => "no_guides_found";
+    [PHPProperty("errors")] public string Errors => "no_guides_found";
 
-    [PhpProperty("success")] public int Success => 0;
+    [PHPProperty("success")] public int Success => 0;
 
-    [PhpProperty("hosttime")] public int HostTime { get; set; } = hostTime;
+    [PHPProperty("hosttime")] public int HostTime { get; set; } = hostTime;
 
-    [PhpProperty("vested_threshold")] public int VestedThreshold => 5;
+    [PHPProperty("vested_threshold")] public int VestedThreshold => 5;
 
-    [PhpProperty(0)] public bool Zero => true;
+    [PHPProperty(0)] public bool Zero => true;
 }

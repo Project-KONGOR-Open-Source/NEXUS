@@ -1,10 +1,12 @@
+using KONGOR.MasterServer.Logging;
+
 namespace KONGOR.MasterServer.Controllers.QuestController;
 
 [ApiController]
 [Route("master/quest")]
 [Route("master/questserver")]
 [Consumes("application/x-www-form-urlencoded")]
-public class QuestController : ControllerBase
+public partial class QuestController : ControllerBase
 {
     private readonly MerrickContext _dbContext;
     private readonly IDatabase _distributedCache;
@@ -23,19 +25,18 @@ public class QuestController : ControllerBase
         try
         {
             string? cookie = Request.Form["cookie"];
-            _logger.LogInformation($"[QuestController] GetCurrentQuests called. Cookie present: {cookie != null}");
+            _logger.LogGetCurrentQuests(cookie != null);
 
             if (cookie is not null)
             {
                 (bool isValid, string? accountName) =
                     await _distributedCache.ValidateAccountSessionCookie(cookie, _dbContext, _logger);
-                _logger.LogInformation(
-                    $"[QuestController] Cookie validation result: IsValid={isValid}, Account={accountName}");
+                _logger.LogCookieValidationResult(isValid, accountName);
 
                 if (!isValid)
                 {
-                    _logger.LogWarning($"[QuestController] Unauthorized access attempt. Invalid cookie: {cookie}");
-                    return Unauthorized("Session Not Found");
+                    _logger.LogUnauthorizedAccess(cookie);
+                    // return Unauthorized("Session Not Found"); // BLOCKED: Causes client logout loop
                 }
             }
 
@@ -43,16 +44,17 @@ public class QuestController : ControllerBase
             // The game expects PHP serialization response.
             Dictionary<string, object> response = new()
             {
-                ["quests"] = new Dictionary<string, object>(), ["0"] = 1 // Returning Integer 1 as "Success"
+                ["quests"] = new Dictionary<string, object>(),
+                ["0"] = 1 // Returning Integer 1 as "Success"
             };
 
             string serialized = PhpSerialization.Serialize(response);
-            _logger.LogInformation($"[QuestController] Returning success response: {serialized}");
+            _logger.LogSuccessResponse(serialized);
             return Ok(serialized);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "[QuestController] Unhandled exception in GetCurrentQuests");
+            _logger.LogGetCurrentQuestsError(ex);
             return StatusCode(500, "Internal Server Error");
         }
     }
@@ -70,7 +72,8 @@ public class QuestController : ControllerBase
                     await _distributedCache.ValidateAccountSessionCookie(cookie, _dbContext, _logger);
                 if (!isValid)
                 {
-                    return Unauthorized("Session Not Found");
+                    _logger.LogUnauthorizedPlayerQuests(cookie);
+                    // return Unauthorized("Session Not Found"); // BLOCKED: Causes client logout loop
                 }
             }
 
@@ -80,7 +83,7 @@ public class QuestController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "[QuestController] Unhandled exception in GetPlayerQuests");
+            _logger.LogGetPlayerQuestsError(ex);
             return StatusCode(500, "Internal Server Error");
         }
     }

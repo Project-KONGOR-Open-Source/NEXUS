@@ -1,6 +1,8 @@
-using TRANSMUTANSTEIN.ChatServer.Domain.Clans;
+using global::TRANSMUTANSTEIN.ChatServer.Domain.Clans;
 
 namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Clans;
+
+using global::TRANSMUTANSTEIN.ChatServer.Internals;
 
 [ChatCommand(ChatProtocol.Command.CHAT_CMD_CLAN_CREATE_REJECT)] // Legacy uses different command for Rejecting Invite?
 // Legacy ClanAddRejectedRequest handles invite rejection (0x0048 ? or 0x0053?)
@@ -21,15 +23,11 @@ namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Clans;
 // I will bind this processor to both if I can, or create two files.
 // Assuming [ChatCommand] can only be single.
 // I'll assume 0x0053 (Create Reject) for now since we are verifying Creation.
-public class ClanCreateReject(IPendingClanService pendingClanService) : IAsynchronousCommandProcessor<ChatSession>
+public class ClanCreateReject(IPendingClanService pendingClanService, IChatContext chatContext) : IAsynchronousCommandProcessor<ChatSession>
 {
-    public async Task Process(ChatSession session, ChatBuffer buffer)
+    public Task Process(ChatSession session, ChatBuffer buffer)
     {
-        Account? account = session.Account;
-        if (account == null)
-        {
-            return;
-        }
+        Account account = session.Account;
 
         pendingClanService.RemoveObsoledPendingClans();
         PendingClan? pendingClan = pendingClanService.GetPendingClanForUser(account);
@@ -37,7 +35,7 @@ public class ClanCreateReject(IPendingClanService pendingClanService) : IAsynchr
         if (pendingClan != null)
         {
             ChatSession? creatorSession =
-                Context.ClientChatSessions.Values.FirstOrDefault(cs => cs.Account?.ID == pendingClan.CreatorAccountId);
+                chatContext.ClientChatSessions.Values.FirstOrDefault(cs => cs.Account.ID == pendingClan.CreatorAccountId);
             if (creatorSession != null)
             {
                 creatorSession.Send(new ClanCreateRejectedResponse(account.Name));
@@ -46,5 +44,7 @@ public class ClanCreateReject(IPendingClanService pendingClanService) : IAsynchr
             string key = $"[{pendingClan.ClanTag.ToLower()}]{pendingClan.ClanName.ToLower()}";
             pendingClanService.RemovePendingClan(key);
         }
+
+        return Task.CompletedTask;
     }
 }

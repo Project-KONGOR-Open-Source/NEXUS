@@ -49,7 +49,7 @@ public class ChatBuffer : TCPBuffer
             throw new InvalidDataException($"Offset Is {_offset}, But 0 (Zero) Was Expected");
         }
 
-        byte[] data = _data[.. 2];
+        byte[] data = _data[..2];
 
         Shift(2);
 
@@ -80,6 +80,11 @@ public class ChatBuffer : TCPBuffer
 
         return data;
     }
+
+    /// <summary>
+    ///     Alias for ReadInt8.
+    /// </summary>
+    public byte ReadByte() => ReadInt8();
 
     /// <summary>
     ///     Append 1 byte with a value of either 0 or 1 to the buffer, and return the number of bytes appended.

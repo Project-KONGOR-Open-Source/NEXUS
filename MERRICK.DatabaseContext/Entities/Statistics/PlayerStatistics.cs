@@ -7,6 +7,8 @@ public class PlayerStatistics
 
     public required int MatchID { get; set; }
 
+    public required int MVP { get; set; }
+
     public required int AccountID { get; set; }
 
     [MaxLength(15)] public required string AccountName { get; set; }

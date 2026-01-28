@@ -42,7 +42,7 @@ public class TCPBuffer
     /// <summary>
     ///     Is The Buffer Empty?
     /// </summary>
-    public bool IsEmpty => _data == null || _size == 0;
+    public bool IsEmpty => _size == 0;
 
     /// <summary>
     ///     Bytes Memory Buffer
@@ -149,17 +149,14 @@ public class TCPBuffer
     {
         Debug.Assert(capacity >= 0, "Invalid Reserve Capacity");
 
-        if (capacity < 0)
+        if (capacity <= Capacity)
         {
-            throw new ArgumentException("Invalid Reserve Capacity", nameof(capacity));
+            return;
         }
 
-        if (capacity > Capacity)
-        {
-            byte[] data = new byte[capacity];
-            Array.Copy(_data, 0, data, 0, _size);
-            _data = data;
-        }
+        byte[] data = new byte[capacity];
+        Array.Copy(_data, 0, data, 0, _size);
+        _data = data;
     }
 
     /// <summary>

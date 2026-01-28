@@ -1,17 +1,17 @@
-﻿namespace KONGOR.MasterServer.Models.RequestResponse.SRP;
+namespace KONGOR.MasterServer.Models.RequestResponse.SRP;
 
 public class FriendAccount
 {
     /// <summary>
     ///     The account ID of the friend.
     /// </summary>
-    [PhpProperty("buddy_id")]
+    [PHPProperty("buddy_id")]
     public required string ID { get; set; }
 
     /// <summary>
     ///     The account name of the friend.
     /// </summary>
-    [PhpProperty("nickname")]
+    [PHPProperty("nickname")]
     public required string Name { get; set; }
 
     /// <summary>
@@ -19,20 +19,20 @@ public class FriendAccount
     ///     A friend list can have multiple friend lists.
     ///     Additionally, a friend does not need to be in a group.
     /// </summary>
-    [PhpProperty("group")]
+    [PHPProperty("group")]
     public required string Group { get; set; }
 
     /// <summary>
     ///     The clan tag of the friend.
     /// </summary>
-    [PhpProperty("clan_tag")]
+    [PHPProperty("clan_tag")]
     public required string ClanTag { get; set; }
 
     /// <summary>
     ///     Unknown.
     ///     Seems to be set to "2" in all the network packet dumps.
     /// </summary>
-    [PhpProperty("status")]
+    [PHPProperty("status")]
     public string Status { get; set; } = "2";
 
     /// <summary>
@@ -40,7 +40,7 @@ public class FriendAccount
     ///     <br />
     ///     0 = None; 1 = Basic Account; 2 = Verified Account; 3 = Legacy Account
     /// </summary>
-    [PhpProperty("standing")]
+    [PHPProperty("standing")]
     public string Standing { get; set; } = "3";
 
     /// <summary>
@@ -48,7 +48,7 @@ public class FriendAccount
     ///     <br />
     ///     0 = False; 1 = True
     /// </summary>
-    [PhpProperty("inactive")]
+    [PHPProperty("inactive")]
     public string Inactive { get; set; } = "0";
 
     /// <summary>
@@ -56,6 +56,6 @@ public class FriendAccount
     ///     <br />
     ///     0 = False; 1 = True
     /// </summary>
-    [PhpProperty("new")]
+    [PHPProperty("new")]
     public string New { get; set; } = "0";
 }

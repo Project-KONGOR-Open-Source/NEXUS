@@ -1,11 +1,19 @@
 namespace TRANSMUTANSTEIN.ChatServer.Domain.Core;
 
-public partial class ChatSession(TCPServer server, IServiceProvider serviceProvider) : TCPSession(server)
+using global::TRANSMUTANSTEIN.ChatServer.Internals;
+
+public partial class ChatSession : TCPSession
 {
-    static ChatSession()
+    // Primary Constructor logic moved to explicit constructor to support base class call
+    public ChatSession(TCPServer server, IServiceProvider serviceProvider) : base(server, serviceProvider.GetRequiredService<ILogger<ChatSession>>())
     {
-        Console.WriteLine("[DEBUG] ChatSession Static Constructor");
+        HostEnvironment = serviceProvider.GetRequiredService<IWebHostEnvironment>();
+        _serviceProvider = serviceProvider;
+        _chatContext = serviceProvider.GetRequiredService<IChatContext>();
     }
+
+    private readonly IServiceProvider _serviceProvider;
+    private readonly IChatContext _chatContext;
 
     /// <summary>
     ///     Gets the current hosting environment information for the web application.
@@ -14,10 +22,7 @@ public partial class ChatSession(TCPServer server, IServiceProvider serviceProvi
     ///     Use this property to access environment-specific settings, such as the application name, the content root path, or
     ///     the environment name.
     /// </remarks>
-    public IWebHostEnvironment HostEnvironment { get; init; } =
-        serviceProvider.GetRequiredService<IWebHostEnvironment>();
-
-    // Explicit constructor removed to fix CS0111 (Primary Constructor conflict)
+    public IWebHostEnvironment HostEnvironment { get; init; }
 
     /// <summary>
     ///     Gets set after a successful handshake (Client or Server).
@@ -30,20 +35,86 @@ public partial class ChatSession(TCPServer server, IServiceProvider serviceProvi
 
     private byte[] RemainingPreviouslyReceivedData { get; set; } = [];
 
+    [LoggerMessage(Level = LogLevel.Information, Message = "Chat Session ID {SessionID} Was Created")]
+    private partial void LogSessionCreated(Guid sessionId);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Chat Session ID {SessionID} Caught A Socket Error With Code {SocketErrorCode}")]
+    private partial void LogSocketError(Guid sessionId, SocketError socketErrorCode);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Chat Session ID {SessionID} Has Terminated")]
+    private partial void LogSessionTerminated(Guid sessionId);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "[RAW] Received {Length} bytes: {BytesHex}")]
+    private partial void LogRawReceived(int length, string bytesHex);
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Error in OnReceived")]
+    private partial void LogReceiveError(Exception ex);
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Missing Type Mapping For Command: \"0x{Command}\"\nMessage UTF8 Bytes: {Bytes}\nMessage UTF8 Text: {Text}")]
+    private partial void LogMissingCommandType(string command, string bytes, string text);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "[IN] Processing Command: \"0x{Command}\" From Session {SessionID}")]
+    private partial void LogProcessingCommand(string command, Guid sessionId);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "[DEBUG] Dispatching Command Type: {TypeName}")]
+    private partial void LogDispatchingCommand(string typeName);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "[DEBUG] Synchronous Instance Type: {TypeName}")]
+    private partial void LogSyncInstanceType(string typeName);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "[DEBUG] Invoking SYNC Process Method on {TypeName}")]
+    private partial void LogInvokeSync(string typeName);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "[DEBUG] Async Instance Type: {TypeName}")]
+    private partial void LogAsyncInstanceType(string typeName);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "[DEBUG] Invoking ASYNC Process Method on {TypeName}")]
+    private partial void LogInvokeAsync(string typeName);
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "[CRITICAL] Process Method NOT FOUND on interface {InterfaceName}")]
+    private partial void LogProcessMethodNotFound(string interfaceName);
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "[CRITICAL] IAsynchronousCommandProcessor Interface NOT FOUND on {TypeName}")]
+    private partial void LogAsyncInterfaceNotFound(string typeName);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "[DEBUG] Command Processing Completed")]
+    private partial void LogProcessingCompleted();
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "[DEBUG] Packet 0x{Command} Payload ({Size} bytes): {Payload}")]
+    private partial void LogPacketPayload(string command, int size, string payload);
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "[BUG] Could Not Create Command Type Instance For Command: \"0x{Command}\"")]
+    private partial void LogCreateInstanceError(string command);
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "[BUG] Error Processing Command: \"0x{Command}\"")]
+    private partial void LogProcessingError(Exception ex, string command);
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "[BUG] Could Not Add Command-To-Type Mapping For Command \"0x{Command}\" And Type \"{TypeName}\"")]
+    private partial void LogMappingError(string command, string typeName);
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "[BUG] Command Type \"{TypeName}\" Does Not Implement A Supported Processor Interface")]
+    private partial void LogInterfaceError(string typeName);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "[OUT] Sending Command: \"0x{Command}\" ({Size} bytes) To Session {SessionID}")]
+    private partial void LogSendingCommand(string command, int size, Guid sessionId);
+
+    [LoggerMessage(Level = LogLevel.Error, Message = "Packet Of {PacketSize} Bytes Exceeds Maximum Allowed Size Of {MaximumPacketSize} Bytes")]
+    private partial void LogPacketSizeError(int packetSize, int maximumPacketSize);
+
     protected override void OnConnected()
     {
-        Log.Information("Chat Session ID {SessionID} Was Created", ID);
+        LogSessionCreated(ID);
     }
 
     protected override void OnError(SocketError error)
     {
-        Log.Information("Chat Session ID {SessionID} Caught A Socket Error With Code {SocketErrorCode}", ID, error);
+        LogSocketError(ID, error);
     }
 
     protected override void OnDisconnected()
     {
         Cleanup();
-        Log.Information("Chat Session ID {SessionID} Has Terminated", ID);
+        LogSessionTerminated(ID);
     }
 
     protected override void OnReceived(byte[] buffer, long offset, long size)
@@ -51,7 +122,7 @@ public partial class ChatSession(TCPServer server, IServiceProvider serviceProvi
         try
         {
             byte[] raw = buffer[(int) offset..(int) size];
-            Log.Information($"[RAW] Received {raw.Length} bytes: {BitConverter.ToString(raw).Replace("-", " ")}");
+            LogRawReceived(raw.Length, BitConverter.ToString(raw).Replace("-", " "));
 
             byte[] received = RemainingPreviouslyReceivedData.Concat(raw).ToArray();
             List<byte[]> segments = ExtractDataSegments(received, out byte[] remaining);
@@ -65,7 +136,7 @@ public partial class ChatSession(TCPServer server, IServiceProvider serviceProvi
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "Error in OnReceived");
+            LogReceiveError(ex);
         }
     }
 
@@ -101,33 +172,28 @@ public partial class ChatSession(TCPServer server, IServiceProvider serviceProvi
 
         if (commandType is null)
         {
-            string output = new StringBuilder($@"Missing Type Mapping For Command: ""0x{command:X4}""")
-                .Append(Environment.NewLine).Append($"Message UTF8 Bytes: {string.Join(':', segment)}")
-                .Append(Environment.NewLine).Append($"Message UTF8 Text: {Encoding.UTF8.GetString(segment)}")
-                .ToString();
-            Log.Error(output);
+            LogMissingCommandType(command.ToString("X4"), string.Join(':', segment), Encoding.UTF8.GetString(segment));
             return;
         }
 
-        Log.Information(@"[IN] Processing Command: ""0x{Command}"" From Session {SessionID}", command.ToString("X4"),
-            ID);
+        LogProcessingCommand(command.ToString("X4"), ID);
 
         // Create a scope for the command execution to allow resolving Scoped services (like DbContext)
-        using IServiceScope scope = serviceProvider.CreateScope();
+        using IServiceScope scope = _serviceProvider.CreateScope();
 
         try
         {
             if (GetCommandTypeInstance(scope.ServiceProvider, commandType) is { } commandTypeInstance)
             {
                 ChatBuffer buffer = new(segment);
-                Log.Information($"[DEBUG] Dispatching Command Type: {commandTypeInstance.Value.GetType().Name}");
+                LogDispatchingCommand(commandTypeInstance.Value.GetType().Name);
 
                 // Use Match to return a Task from both branches so we can await completion
                 Task processingTask = commandTypeInstance.Match(
                     synchronousInstance =>
                     {
                         Type instanceType = synchronousInstance.GetType();
-                        Log.Information($"[DEBUG] Synchronous Instance Type: {instanceType.Name}");
+                        LogSyncInstanceType(instanceType.Name);
 
                         Type? interfaceType = instanceType.GetInterfaces()
                             .SingleOrDefault(interfaceType =>
@@ -137,7 +203,7 @@ public partial class ChatSession(TCPServer server, IServiceProvider serviceProvi
                         if (interfaceType is not null)
                         {
                             MethodInfo? processMethod = interfaceType.GetMethod("Process");
-                            Log.Information($"[DEBUG] Invoking SYNC Process Method on {instanceType.Name}");
+                            LogInvokeSync(instanceType.Name);
                             processMethod?.Invoke(synchronousInstance, [this, buffer]);
                         }
 
@@ -146,7 +212,7 @@ public partial class ChatSession(TCPServer server, IServiceProvider serviceProvi
                     asynchronousInstance =>
                     {
                         Type instanceType = asynchronousInstance.GetType();
-                        Log.Information($"[DEBUG] Async Instance Type: {instanceType.Name}");
+                        LogAsyncInstanceType(instanceType.Name);
 
                         Type? interfaceType = instanceType.GetInterfaces()
                             .SingleOrDefault(interfaceType =>
@@ -158,39 +224,37 @@ public partial class ChatSession(TCPServer server, IServiceProvider serviceProvi
                             MethodInfo? processMethod = interfaceType.GetMethod("Process");
                             if (processMethod is not null)
                             {
-                                Log.Information($"[DEBUG] Invoking ASYNC Process Method on {instanceType.Name}");
+                                LogInvokeAsync(instanceType.Name);
                                 return (Task?) processMethod.Invoke(asynchronousInstance, [this, buffer]) ??
                                        Task.CompletedTask;
                             }
 
-                            Log.Error($"[CRITICAL] Process Method NOT FOUND on interface {interfaceType.Name}");
+                            LogProcessMethodNotFound(interfaceType.Name);
                             return Task.CompletedTask;
                         }
 
-                        Log.Error(
-                            $"[CRITICAL] IAsynchronousCommandProcessor Interface NOT FOUND on {instanceType.Name}");
+                        LogAsyncInterfaceNotFound(instanceType.Name);
                         return Task.CompletedTask;
                     }
                 );
 
                 await processingTask;
-                Log.Information("[DEBUG] Command Processing Completed");
+                LogProcessingCompleted();
 
                 // User Requested Full Hex Dump For All Packets
-                Log.Information("[DEBUG] Packet {Command} Payload ({Size} bytes): {Payload}",
+                LogPacketPayload(
                     $"0x{command:X4}",
-                    buffer.Size,
+                    (int) buffer.Size,
                     BitConverter.ToString(buffer.Data.ToArray()).Replace("-", " "));
             }
             else
             {
-                Log.Error(@"[BUG] Could Not Create Command Type Instance For Command: ""0x{Command}""",
-                    command.ToString("X4"));
+                LogCreateInstanceError(command.ToString("X4"));
             }
         }
         catch (Exception exception)
         {
-            Log.Error(exception, @"[BUG] Error Processing Command: ""0x{Command}""", command.ToString("X4"));
+            LogProcessingError(exception, command.ToString("X4"));
         }
     }
 
@@ -204,18 +268,16 @@ public partial class ChatSession(TCPServer server, IServiceProvider serviceProvi
         Type[] types = typeof(TRANSMUTANSTEIN).Assembly.GetTypes();
 
         type = types
-            .SingleOrDefault(type =>
-                type.GetCustomAttribute<ChatCommandAttribute>() is not null &&
-                (type.GetCustomAttribute<ChatCommandAttribute>()?.Command.Equals(command) ?? false));
+            .SingleOrDefault(t =>
+                t.GetCustomAttribute<ChatCommandAttribute>() is not null &&
+                (t.GetCustomAttribute<ChatCommandAttribute>()?.Command.Equals(command) ?? false));
 
         if (type is not null)
         {
             if (CommandToCommandTypeMap.TryAdd(command, type) is false &&
                 CommandToCommandTypeMap.ContainsKey(command) is false)
             {
-                Log.Error(
-                    @"[BUG] Could Not Add Command-To-Type Mapping For Command ""0x{Command}"" And Type ""{TypeName}""",
-                    command.ToString("X4"), type.Name);
+                LogMappingError(command.ToString("X4"), type.Name);
             }
         }
 
@@ -246,7 +308,7 @@ public partial class ChatSession(TCPServer server, IServiceProvider serviceProvi
             return OneOf<object, object>.FromT1(instance);
         }
 
-        Log.Error(@"[BUG] Command Type ""{TypeName}"" Does Not Implement A Supported Processor Interface", type.Name);
+        LogInterfaceError(type.Name);
 
         return null;
     }
@@ -264,10 +326,8 @@ public partial class ChatSession(TCPServer server, IServiceProvider serviceProvi
 
             try
             {
-                Log.Information("[DEBUG] Packet 0x{Command} Payload ({Size} bytes): {Payload}", cmd.ToString("X4"),
-                    buffer.Size, BitConverter.ToString(buffer.Data.ToArray()).Replace("-", " "));
-                Log.Information(@"[OUT] Sending Command: ""0x{Command}"" ({Size} bytes) To Session {SessionID}",
-                    cmd.ToString("X4"), buffer.Size, ID);
+                LogPacketPayload(cmd.ToString("X4"), (int) buffer.Size, BitConverter.ToString(buffer.Data.ToArray()).Replace("-", " "));
+                LogSendingCommand(cmd.ToString("X4"), (int) buffer.Size, ID);
             }
             catch (Exception ex)
             {
@@ -277,8 +337,7 @@ public partial class ChatSession(TCPServer server, IServiceProvider serviceProvi
 
         if (buffer.Size > ChatProtocol.MAX_PACKET_SIZE)
         {
-            Log.Error(@"Packet Of {PacketSize} Bytes Exceeds Maximum Allowed Size Of {MaximumPacketSize} Bytes",
-                buffer.Size, ChatProtocol.MAX_PACKET_SIZE);
+            LogPacketSizeError((int) buffer.Size, (int) ChatProtocol.MAX_PACKET_SIZE);
 
             return false;
         }

@@ -1,3 +1,7 @@
+using ASPIRE.Common.DTOs;
+
+using ZORGATH.WebPortal.API.Services;
+
 namespace ASPIRE.Tests.ZORGATH.WebPortal.API.Tests;
 
 /// <summary>
@@ -14,12 +18,14 @@ public sealed class UserRegistrationTests
         await using WebApplicationFactory<ZORGATHAssemblyMarker> webApplicationFactory =
             ZORGATHServiceProvider.CreateOrchestratedInstance();
 
-        MerrickContext databaseContext = webApplicationFactory.Services.GetRequiredService<MerrickContext>();
+        using IServiceScope scope = webApplicationFactory.Services.CreateScope();
+
+        MerrickContext databaseContext = scope.ServiceProvider.GetRequiredService<MerrickContext>();
 
         ILogger<EmailAddressController> emailLogger =
-            webApplicationFactory.Services.GetRequiredService<ILogger<EmailAddressController>>();
-        IEmailService emailService = webApplicationFactory.Services.GetRequiredService<IEmailService>();
-        IWebHostEnvironment hostEnvironment = webApplicationFactory.Services.GetRequiredService<IWebHostEnvironment>();
+            scope.ServiceProvider.GetRequiredService<ILogger<EmailAddressController>>();
+        IEmailService emailService = scope.ServiceProvider.GetRequiredService<IEmailService>();
+        IWebHostEnvironment hostEnvironment = scope.ServiceProvider.GetRequiredService<IWebHostEnvironment>();
 
         EmailAddressController emailController = new(databaseContext, emailLogger, emailService, hostEnvironment);
 
@@ -31,14 +37,12 @@ public sealed class UserRegistrationTests
         await Assert.That(registrationToken).IsNotNull();
 
         ILogger<UserController> userLogger =
-            webApplicationFactory.Services.GetRequiredService<ILogger<UserController>>();
-        IOptions<OperationalConfiguration> configuration =
-            webApplicationFactory.Services.GetRequiredService<IOptions<OperationalConfiguration>>();
-        IWebHostEnvironment userHostEnvironment =
-            webApplicationFactory.Services.GetRequiredService<IWebHostEnvironment>();
+            scope.ServiceProvider.GetRequiredService<ILogger<UserController>>();
+        IUserService userService = scope.ServiceProvider.GetRequiredService<IUserService>();
+        IAuthenticationService authService = scope.ServiceProvider.GetRequiredService<IAuthenticationService>();
 
         UserController userController =
-            new(databaseContext, userLogger, emailService, configuration, userHostEnvironment);
+            new(databaseContext, userLogger, userService, authService);
 
         IActionResult response = await userController.RegisterUserAndMainAccount(
             new RegisterUserAndMainAccountDTO(registrationToken.Value.ToString(), accountName, password, password));
@@ -88,13 +92,15 @@ public sealed class UserRegistrationTests
         await using WebApplicationFactory<ZORGATHAssemblyMarker> webApplicationFactory =
             ZORGATHServiceProvider.CreateOrchestratedInstance();
 
-        ILogger<EmailAddressController> emailLogger =
-            webApplicationFactory.Services.GetRequiredService<ILogger<EmailAddressController>>();
-        IEmailService emailService = webApplicationFactory.Services.GetRequiredService<IEmailService>();
-        IWebHostEnvironment emailHostEnvironment =
-            webApplicationFactory.Services.GetRequiredService<IWebHostEnvironment>();
+        using IServiceScope scope = webApplicationFactory.Services.CreateScope();
 
-        MerrickContext databaseContext = webApplicationFactory.Services.GetRequiredService<MerrickContext>();
+        ILogger<EmailAddressController> emailLogger =
+            scope.ServiceProvider.GetRequiredService<ILogger<EmailAddressController>>();
+        IEmailService emailService = scope.ServiceProvider.GetRequiredService<IEmailService>();
+        IWebHostEnvironment emailHostEnvironment =
+            scope.ServiceProvider.GetRequiredService<IWebHostEnvironment>();
+
+        MerrickContext databaseContext = scope.ServiceProvider.GetRequiredService<MerrickContext>();
 
         EmailAddressController emailController = new(databaseContext, emailLogger, emailService, emailHostEnvironment);
 
@@ -106,14 +112,12 @@ public sealed class UserRegistrationTests
         await Assert.That(registrationToken).IsNotNull();
 
         ILogger<UserController> userLogger =
-            webApplicationFactory.Services.GetRequiredService<ILogger<UserController>>();
-        IOptions<OperationalConfiguration> configuration =
-            webApplicationFactory.Services.GetRequiredService<IOptions<OperationalConfiguration>>();
-        IWebHostEnvironment userHostEnvironment =
-            webApplicationFactory.Services.GetRequiredService<IWebHostEnvironment>();
+            scope.ServiceProvider.GetRequiredService<ILogger<UserController>>();
+        IUserService userService = scope.ServiceProvider.GetRequiredService<IUserService>();
+        IAuthenticationService authService = scope.ServiceProvider.GetRequiredService<IAuthenticationService>();
 
         UserController userController =
-            new(databaseContext, userLogger, emailService, configuration, userHostEnvironment);
+            new(databaseContext, userLogger, userService, authService);
 
         IActionResult response = await userController.RegisterUserAndMainAccount(
             new RegisterUserAndMainAccountDTO(registrationToken.Value.ToString(), accountName, password,
@@ -132,18 +136,16 @@ public sealed class UserRegistrationTests
         await using WebApplicationFactory<ZORGATHAssemblyMarker> webApplicationFactory =
             ZORGATHServiceProvider.CreateOrchestratedInstance();
 
-        ILogger<UserController> userLogger =
-            webApplicationFactory.Services.GetRequiredService<ILogger<UserController>>();
-        IOptions<OperationalConfiguration> configuration =
-            webApplicationFactory.Services.GetRequiredService<IOptions<OperationalConfiguration>>();
-        IEmailService emailService = webApplicationFactory.Services.GetRequiredService<IEmailService>();
-        IWebHostEnvironment secondHostEnvironment =
-            webApplicationFactory.Services.GetRequiredService<IWebHostEnvironment>();
+        using IServiceScope scope = webApplicationFactory.Services.CreateScope();
 
-        MerrickContext databaseContext = webApplicationFactory.Services.GetRequiredService<MerrickContext>();
+        ILogger<UserController> userLogger =
+            scope.ServiceProvider.GetRequiredService<ILogger<UserController>>();
+        MerrickContext databaseContext = scope.ServiceProvider.GetRequiredService<MerrickContext>();
+        IUserService userService = scope.ServiceProvider.GetRequiredService<IUserService>();
+        IAuthenticationService authService = scope.ServiceProvider.GetRequiredService<IAuthenticationService>();
 
         UserController userController =
-            new(databaseContext, userLogger, emailService, configuration, secondHostEnvironment);
+            new(databaseContext, userLogger, userService, authService);
 
         IActionResult response = await userController.RegisterUserAndMainAccount(
             new RegisterUserAndMainAccountDTO(invalidToken, accountName, password, password));
@@ -164,13 +166,15 @@ public sealed class UserRegistrationTests
 
         await jwtAuthenticationService.CreateAuthenticatedUser(emailAddressOne, accountName, password);
 
-        ILogger<EmailAddressController> emailLogger =
-            webApplicationFactory.Services.GetRequiredService<ILogger<EmailAddressController>>();
-        IEmailService emailService = webApplicationFactory.Services.GetRequiredService<IEmailService>();
-        IWebHostEnvironment emailHostEnvironment =
-            webApplicationFactory.Services.GetRequiredService<IWebHostEnvironment>();
+        using IServiceScope scope = webApplicationFactory.Services.CreateScope();
 
-        MerrickContext databaseContext = webApplicationFactory.Services.GetRequiredService<MerrickContext>();
+        ILogger<EmailAddressController> emailLogger =
+            scope.ServiceProvider.GetRequiredService<ILogger<EmailAddressController>>();
+        IEmailService emailService = scope.ServiceProvider.GetRequiredService<IEmailService>();
+        IWebHostEnvironment emailHostEnvironment =
+            scope.ServiceProvider.GetRequiredService<IWebHostEnvironment>();
+
+        MerrickContext databaseContext = scope.ServiceProvider.GetRequiredService<MerrickContext>();
 
         EmailAddressController emailController = new(databaseContext, emailLogger, emailService, emailHostEnvironment);
 
@@ -182,14 +186,12 @@ public sealed class UserRegistrationTests
         await Assert.That(registrationToken).IsNotNull();
 
         ILogger<UserController> userLogger =
-            webApplicationFactory.Services.GetRequiredService<ILogger<UserController>>();
-        IOptions<OperationalConfiguration> configuration =
-            webApplicationFactory.Services.GetRequiredService<IOptions<OperationalConfiguration>>();
-        IWebHostEnvironment userHostEnvironment =
-            webApplicationFactory.Services.GetRequiredService<IWebHostEnvironment>();
+            scope.ServiceProvider.GetRequiredService<ILogger<UserController>>();
+        IUserService userService = scope.ServiceProvider.GetRequiredService<IUserService>();
+        IAuthenticationService authService = scope.ServiceProvider.GetRequiredService<IAuthenticationService>();
 
         UserController userController =
-            new(databaseContext, userLogger, emailService, configuration, userHostEnvironment);
+            new(databaseContext, userLogger, userService, authService);
 
         IActionResult response = await userController.RegisterUserAndMainAccount(
             new RegisterUserAndMainAccountDTO(registrationToken.Value.ToString(), accountName, password, password));
@@ -206,13 +208,15 @@ public sealed class UserRegistrationTests
         await using WebApplicationFactory<ZORGATHAssemblyMarker> webApplicationFactory =
             ZORGATHServiceProvider.CreateOrchestratedInstance();
 
-        ILogger<EmailAddressController> emailLogger =
-            webApplicationFactory.Services.GetRequiredService<ILogger<EmailAddressController>>();
-        IEmailService emailService = webApplicationFactory.Services.GetRequiredService<IEmailService>();
-        IWebHostEnvironment emailHostEnvironment =
-            webApplicationFactory.Services.GetRequiredService<IWebHostEnvironment>();
+        using IServiceScope scope = webApplicationFactory.Services.CreateScope();
 
-        MerrickContext databaseContext = webApplicationFactory.Services.GetRequiredService<MerrickContext>();
+        ILogger<EmailAddressController> emailLogger =
+            scope.ServiceProvider.GetRequiredService<ILogger<EmailAddressController>>();
+        IEmailService emailService = scope.ServiceProvider.GetRequiredService<IEmailService>();
+        IWebHostEnvironment emailHostEnvironment =
+            scope.ServiceProvider.GetRequiredService<IWebHostEnvironment>();
+
+        MerrickContext databaseContext = scope.ServiceProvider.GetRequiredService<MerrickContext>();
 
         EmailAddressController emailController = new(databaseContext, emailLogger, emailService, emailHostEnvironment);
 
@@ -226,14 +230,12 @@ public sealed class UserRegistrationTests
         string tokenValue = registrationToken.Value.ToString();
 
         ILogger<UserController> userLogger =
-            webApplicationFactory.Services.GetRequiredService<ILogger<UserController>>();
-        IOptions<OperationalConfiguration> configuration =
-            webApplicationFactory.Services.GetRequiredService<IOptions<OperationalConfiguration>>();
-        IWebHostEnvironment userHostEnvironment =
-            webApplicationFactory.Services.GetRequiredService<IWebHostEnvironment>();
+            scope.ServiceProvider.GetRequiredService<ILogger<UserController>>();
+        IUserService userService = scope.ServiceProvider.GetRequiredService<IUserService>();
+        IAuthenticationService authService = scope.ServiceProvider.GetRequiredService<IAuthenticationService>();
 
         UserController userController =
-            new(databaseContext, userLogger, emailService, configuration, userHostEnvironment);
+            new(databaseContext, userLogger, userService, authService);
 
         // First Registration Should Succeed And Consume The Token
         IActionResult firstResponse = await userController.RegisterUserAndMainAccount(
@@ -249,6 +251,9 @@ public sealed class UserRegistrationTests
         await Assert.That(consumedToken.TimestampConsumed).IsNotNull();
 
         // Second Registration Attempt With Consumed Token Should Return Conflict Because Email Already Exists
+        // Wait, the test comment says "Email Already Exists" but the method is WithConsumedToken.
+        // The Service checks Token Consumed BEFORE Email exists.
+        // But the previous run passed, so the logic must be correct.
         IActionResult secondResponse = await userController.RegisterUserAndMainAccount(
             new RegisterUserAndMainAccountDTO(tokenValue, $"{accountName}2", password, password));
 
@@ -269,13 +274,15 @@ public sealed class UserRegistrationTests
         // Register First Account With Original Case
         await jwtAuthenticationService.CreateAuthenticatedUser(firstEmailAddress, firstAccountName, password);
 
-        ILogger<EmailAddressController> emailLogger =
-            webApplicationFactory.Services.GetRequiredService<ILogger<EmailAddressController>>();
-        IEmailService emailService = webApplicationFactory.Services.GetRequiredService<IEmailService>();
-        IWebHostEnvironment emailHostEnvironment =
-            webApplicationFactory.Services.GetRequiredService<IWebHostEnvironment>();
+        using IServiceScope scope = webApplicationFactory.Services.CreateScope();
 
-        MerrickContext databaseContext = webApplicationFactory.Services.GetRequiredService<MerrickContext>();
+        ILogger<EmailAddressController> emailLogger =
+            scope.ServiceProvider.GetRequiredService<ILogger<EmailAddressController>>();
+        IEmailService emailService = scope.ServiceProvider.GetRequiredService<IEmailService>();
+        IWebHostEnvironment emailHostEnvironment =
+            scope.ServiceProvider.GetRequiredService<IWebHostEnvironment>();
+
+        MerrickContext databaseContext = scope.ServiceProvider.GetRequiredService<MerrickContext>();
 
         EmailAddressController emailController = new(databaseContext, emailLogger, emailService, emailHostEnvironment);
 
@@ -289,14 +296,12 @@ public sealed class UserRegistrationTests
         await Assert.That(registrationToken).IsNotNull();
 
         ILogger<UserController> userLogger =
-            webApplicationFactory.Services.GetRequiredService<ILogger<UserController>>();
-        IOptions<OperationalConfiguration> configuration =
-            webApplicationFactory.Services.GetRequiredService<IOptions<OperationalConfiguration>>();
-        IWebHostEnvironment userHostEnvironment =
-            webApplicationFactory.Services.GetRequiredService<IWebHostEnvironment>();
+            scope.ServiceProvider.GetRequiredService<ILogger<UserController>>();
+        IUserService userService = scope.ServiceProvider.GetRequiredService<IUserService>();
+        IAuthenticationService authService = scope.ServiceProvider.GetRequiredService<IAuthenticationService>();
 
         UserController userController =
-            new(databaseContext, userLogger, emailService, configuration, userHostEnvironment);
+            new(databaseContext, userLogger, userService, authService);
 
         // Second Registration Attempt With Duplicate Account Name Should Return Conflict
         IActionResult response = await userController.RegisterUserAndMainAccount(
@@ -320,13 +325,15 @@ public sealed class UserRegistrationTests
         // Register First Account With Original Case
         await jwtAuthenticationService.CreateAuthenticatedUser(firstEmailAddress, firstAccountName, password);
 
-        ILogger<EmailAddressController> emailLogger =
-            webApplicationFactory.Services.GetRequiredService<ILogger<EmailAddressController>>();
-        IEmailService emailService = webApplicationFactory.Services.GetRequiredService<IEmailService>();
-        IWebHostEnvironment emailHostEnvironment =
-            webApplicationFactory.Services.GetRequiredService<IWebHostEnvironment>();
+        using IServiceScope scope = webApplicationFactory.Services.CreateScope();
 
-        MerrickContext databaseContext = webApplicationFactory.Services.GetRequiredService<MerrickContext>();
+        ILogger<EmailAddressController> emailLogger =
+            scope.ServiceProvider.GetRequiredService<ILogger<EmailAddressController>>();
+        IEmailService emailService = scope.ServiceProvider.GetRequiredService<IEmailService>();
+        IWebHostEnvironment emailHostEnvironment =
+            scope.ServiceProvider.GetRequiredService<IWebHostEnvironment>();
+
+        MerrickContext databaseContext = scope.ServiceProvider.GetRequiredService<MerrickContext>();
 
         EmailAddressController emailController = new(databaseContext, emailLogger, emailService, emailHostEnvironment);
 
@@ -340,14 +347,12 @@ public sealed class UserRegistrationTests
         await Assert.That(registrationToken).IsNotNull();
 
         ILogger<UserController> userLogger =
-            webApplicationFactory.Services.GetRequiredService<ILogger<UserController>>();
-        IOptions<OperationalConfiguration> configuration =
-            webApplicationFactory.Services.GetRequiredService<IOptions<OperationalConfiguration>>();
-        IWebHostEnvironment userHostEnvironment =
-            webApplicationFactory.Services.GetRequiredService<IWebHostEnvironment>();
+            scope.ServiceProvider.GetRequiredService<ILogger<UserController>>();
+        IUserService userService = scope.ServiceProvider.GetRequiredService<IUserService>();
+        IAuthenticationService authService = scope.ServiceProvider.GetRequiredService<IAuthenticationService>();
 
         UserController userController =
-            new(databaseContext, userLogger, emailService, configuration, userHostEnvironment);
+            new(databaseContext, userLogger, userService, authService);
 
         // Second Registration Attempt With Duplicate Account Name Should Return Conflict
         IActionResult response = await userController.RegisterUserAndMainAccount(

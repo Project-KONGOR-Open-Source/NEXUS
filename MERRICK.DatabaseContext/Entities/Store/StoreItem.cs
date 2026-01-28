@@ -7,7 +7,7 @@ public class StoreItem
 
     [MaxLength(255)] public required string Name { get; set; }
 
-    [MaxLength(255)] [Required] public required string Code { get; set; }
+    [MaxLength(255)][Required] public required string Code { get; set; }
 
     public int UpgradeId { get; set; }
 

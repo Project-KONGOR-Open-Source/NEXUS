@@ -2,13 +2,13 @@
 
 public partial class ServerRequesterController
 {
-    private async Task<IActionResult> HandleShutdown()
+    private Task<IActionResult> HandleShutdown()
     {
         string? session = Request.Form["session"];
 
         if (session is null)
         {
-            return BadRequest(@"Missing Value For Form Parameter ""session""");
+            return Task.FromResult<IActionResult>(BadRequest(@"Missing Value For Form Parameter ""session"""));
         }
 
         /*
@@ -17,6 +17,6 @@ public partial class ServerRequesterController
             Thus, we just return OK here and handle shutdown consistently using the NET_CHAT_GS_DISCONNECT and NET_CHAT_SM_DISCONNECT TCP commands as initiators.
         */
 
-        return Ok();
+        return Task.FromResult<IActionResult>(Ok());
     }
 }

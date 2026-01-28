@@ -1,14 +1,17 @@
+using TRANSMUTANSTEIN.ChatServer.Services;
+using TRANSMUTANSTEIN.ChatServer.Domain.Matchmaking;
+
 namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Matchmaking;
 
 [ChatCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_INVITE)]
-public class GroupInvite(MerrickContext merrick) : ISynchronousCommandProcessor<ChatSession>
+public class GroupInvite(MerrickContext merrick, IMatchmakingService matchmakingService) : ISynchronousCommandProcessor<ChatSession>
 {
     public void Process(ChatSession session, ChatBuffer buffer)
     {
         GroupInviteRequestData requestData = new(buffer);
 
         MatchmakingGroup
-            .GetByMemberAccountID(session.Account.ID)
+            .GetByMemberAccountID(matchmakingService, session.Account.ID)
             .Invite(session, merrick, requestData.InviteReceiverName);
     }
 }

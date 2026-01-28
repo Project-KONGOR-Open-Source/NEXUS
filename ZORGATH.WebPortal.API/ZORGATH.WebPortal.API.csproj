@@ -5,15 +5,16 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="FluentValidation" Version="12.1.1"/>
-        <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.1"/>
-        <PackageReference Include="srp" Version="1.0.7"/>
-        <PackageReference Include="Swashbuckle.AspNetCore" Version="10.1.0"/>
+        <PackageReference Include="FluentValidation" Version="12.1.1" />
+        <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.1" />
+        <PackageReference Include="SendGrid" Version="9.29.3" />
+        <PackageReference Include="srp" Version="1.0.7" />
+        <PackageReference Include="Swashbuckle.AspNetCore" Version="10.1.0" />
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="../ASPIRE.Common/ASPIRE.Common.csproj"/>
-        <ProjectReference Include="../MERRICK.DatabaseContext/MERRICK.DatabaseContext.csproj"/>
+        <ProjectReference Include="../ASPIRE.Common/ASPIRE.Common.csproj" />
+        <ProjectReference Include="../MERRICK.DatabaseContext/MERRICK.DatabaseContext.csproj" />
     </ItemGroup>
 
 </Project>

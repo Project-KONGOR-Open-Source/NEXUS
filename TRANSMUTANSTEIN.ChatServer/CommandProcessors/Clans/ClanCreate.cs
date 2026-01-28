@@ -1,6 +1,7 @@
 using System.Text.RegularExpressions;
 
 using TRANSMUTANSTEIN.ChatServer.Domain.Clans;
+using TRANSMUTANSTEIN.ChatServer.Internals;
 
 namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Clans;
 
@@ -30,7 +31,7 @@ public readonly struct ClanCreateRequestData
 }
 
 [ChatCommand(ChatProtocol.Command.CHAT_CMD_CLAN_CREATE_REQUEST)]
-public class ClanCreate(MerrickContext merrick, IPendingClanService pendingClanService)
+public class ClanCreate(MerrickContext merrick, IPendingClanService pendingClanService, IChatContext chatContext)
     : IAsynchronousCommandProcessor<ChatSession>
 {
     public async Task Process(ChatSession session, ChatBuffer buffer)
@@ -73,7 +74,7 @@ public class ClanCreate(MerrickContext merrick, IPendingClanService pendingClanS
             // Legacy checked ConnectedClients.TryGetValue(accountId).
             // In Aspire, we check ClientChatSessions.
 
-            bool isOnline = Context.ClientChatSessions.Values.Any(cs =>
+            bool isOnline = chatContext.ClientChatSessions.Values.Any(cs =>
                 cs.Account.ID == memberAccount.ID); // Check by ID is safest
 
             if (!isOnline)
@@ -105,7 +106,7 @@ public class ClanCreate(MerrickContext merrick, IPendingClanService pendingClanS
         // Send all invites
         foreach (Account memberAccount in clanMemberAccounts)
         {
-            ChatSession? targetSession = Context.ClientChatSessions.Values
+            ChatSession? targetSession = chatContext.ClientChatSessions.Values
                 .FirstOrDefault(cs => cs.Account.ID == memberAccount.ID);
 
             if (targetSession != null)

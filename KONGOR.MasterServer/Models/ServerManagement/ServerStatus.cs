@@ -1,4 +1,4 @@
-﻿namespace KONGOR.MasterServer.Models.ServerManagement;
+namespace KONGOR.MasterServer.Models.ServerManagement;
 
 /// <summary>
 ///     This enumeration is part of the Chat Server Protocol, and needs to match its counterpart in order for servers in

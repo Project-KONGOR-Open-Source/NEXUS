@@ -1,0 +1,26 @@
+@{
+    ViewData["Title"] = "Check Your Email";
+}
+
+<div class="w-full max-w-md p-8 rounded-2xl glass-panel animate-fade-in-up text-center">
+    <div class="mb-8">
+        <div class="w-16 h-16 bg-pink-600/20 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg class="w-8 h-8 text-pink-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+            </svg>
+        </div>
+        <h1 class="text-3xl font-bold mb-2">Check Your Email</h1>
+        <p class="text-slate-400">
+            We've sent a verification link to 
+            <span class="text-white font-medium">@ViewBag.Email</span>
+        </p>
+    </div>
+
+    <p class="text-slate-300 mb-8">
+        Click the link in the email to complete your account registration.
+    </p>
+
+    <div class="text-sm text-slate-400">
+        Didn't receive the email? <a asp-controller="Account" asp-action="RegisterDirect" class="text-pink-400 hover:text-pink-300 hover:underline">Try again</a>
+    </div>
+</div>

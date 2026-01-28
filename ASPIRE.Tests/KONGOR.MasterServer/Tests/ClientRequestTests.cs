@@ -437,9 +437,12 @@ public sealed class ClientRequestTests
             response.EnsureSuccessStatusCode();
 
             string responseBody = await response.Content.ReadAsStringAsync();
-            await Assert.That(responseBody).Contains("nickname");
-            await Assert.That(responseBody).Contains("account_id");
-            await Assert.That(responseBody).Contains("level");
+
+            // The response is now an associative array (reverted to origin structure).
+            await Assert.That(responseBody).Contains($"s:8:\"nickname\";s:{nickname.Length}:\"{nickname}\";");
+
+            // Expected count is 24 properties
+            await Assert.That(responseBody).StartsWith("a:24:{");
         }
     }
 

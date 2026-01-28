@@ -10,6 +10,7 @@ using TRANSMUTANSTEIN.ChatServer.Domain.Core;
 
 namespace ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer.Tests;
 
+
 public sealed class ChatSocialTests
 {
     [Test]
@@ -124,7 +125,10 @@ public sealed class ChatSocialTests
                 };
                 Account friendAcct = new()
                 {
-                    ID = accountIdFriend, Name = "FriendGuy", IsMain = true, User = userFriend
+                    ID = accountIdFriend,
+                    Name = "FriendGuy",
+                    IsMain = true,
+                    User = userFriend
                 };
                 userFriend.Accounts = [friendAcct];
 
@@ -155,7 +159,10 @@ public sealed class ChatSocialTests
                 // Since we ensured it exists above, we can just use the values.
                 FriendedPeer peerLink = new()
                 {
-                    ID = accountIdFriend, Name = "FriendGuy", ClanTag = null, FriendGroup = "DEFAULT"
+                    ID = accountIdFriend,
+                    Name = "FriendGuy",
+                    ClanTag = null,
+                    FriendGroup = "DEFAULT"
                 };
                 mainAcct.FriendedPeers = [peerLink];
 

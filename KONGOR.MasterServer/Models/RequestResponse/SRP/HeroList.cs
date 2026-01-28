@@ -1,4 +1,4 @@
-﻿namespace KONGOR.MasterServer.Models.RequestResponse.SRP;
+namespace KONGOR.MasterServer.Models.RequestResponse.SRP;
 
 public class HeroList
 {
@@ -8,6 +8,6 @@ public class HeroList
     ///     <br />
     ///     This property is obsolete.
     /// </summary>
-    [PhpProperty("free")]
+    [PHPProperty("free")]
     public string FreeHeroes { get; set; } = "Hero_Genesis,Hero_Dorin_Tal,Hero_Adeve";
 }

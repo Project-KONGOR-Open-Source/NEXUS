@@ -1,3 +1,5 @@
+using TRANSMUTANSTEIN.ChatServer.Internals;
+
 namespace TRANSMUTANSTEIN.ChatServer.Domain.Communication;
 
 public class Whisper
@@ -14,24 +16,35 @@ public class Whisper
         return new Whisper { Message = message };
     }
 
-    public Whisper Send(ChatSession senderSession, string recipientName)
+    public Whisper Send(IChatContext chatContext, ChatSession senderSession, string recipientName)
     {
-        ChatSession recipientSession = Context.ClientChatSessions.Values
-            .Single(chatSession => chatSession.Account.Name.Equals(recipientName, StringComparison.OrdinalIgnoreCase));
+        ChatSession? recipientSession = chatContext.ClientChatSessions.Values
+            .SingleOrDefault(chatSession => chatSession.Account.Name.Equals(recipientName, StringComparison.OrdinalIgnoreCase));
 
+        if (recipientSession == null)
+        {
+            SendWhisperFailure(senderSession, recipientName);
+            return this;
+        }
+
+        return Send(senderSession, recipientSession);
+    }
+
+    public Whisper Send(ChatSession senderSession, ChatSession recipientSession)
+    {
         // Check Recipient's Chat Mode
         switch (recipientSession.ClientMetadata.ClientChatModeState)
         {
             // DND: Block Whisper And Send Auto-Response
             case ChatProtocol.ChatModeType.CHAT_MODE_DND:
-                SendWhisperFailure(senderSession, recipientName)
+                SendWhisperFailure(senderSession, recipientSession.Account.Name)
                     .SendAutomaticResponse(senderSession, recipientSession, "Do Not Disturb");
 
                 return this;
 
             // Invisible: Treat As Offline
             case ChatProtocol.ChatModeType.CHAT_MODE_INVISIBLE:
-                SendWhisperFailure(senderSession, recipientName);
+                SendWhisperFailure(senderSession, recipientSession.Account.Name);
 
                 return this;
 

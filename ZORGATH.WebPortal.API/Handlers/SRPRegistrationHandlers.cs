@@ -1,4 +1,6 @@
-﻿namespace ZORGATH.WebPortal.API.Handlers;
+using System.Globalization;
+
+namespace ZORGATH.WebPortal.API.Handlers;
 
 public static class SRPRegistrationHandlers
 {
@@ -13,16 +15,16 @@ public static class SRPRegistrationHandlers
     {
         string passwordHash = passwordIsHashed
             ? password
-            : Convert.ToHexString(MD5.HashData(Encoding.UTF8.GetBytes(password))).ToLower();
+            : Convert.ToHexString(MD5.HashData(Encoding.UTF8.GetBytes(password))).ToLower(CultureInfo.InvariantCulture);
 
         string magickedPasswordHash = passwordHash + salt + MagicStringOne;
 
         string magickedPasswordHashHash =
-            Convert.ToHexString(MD5.HashData(Encoding.UTF8.GetBytes(magickedPasswordHash))).ToLower();
+            Convert.ToHexString(MD5.HashData(Encoding.UTF8.GetBytes(magickedPasswordHash))).ToLower(CultureInfo.InvariantCulture);
 
         string magickedMagickedPasswordHashHash = magickedPasswordHashHash + MagicStringTwo;
 
-        return Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(magickedMagickedPasswordHashHash))).ToLower();
+        return Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(magickedMagickedPasswordHashHash))).ToLower(CultureInfo.InvariantCulture);
     }
 
     /// <summary>

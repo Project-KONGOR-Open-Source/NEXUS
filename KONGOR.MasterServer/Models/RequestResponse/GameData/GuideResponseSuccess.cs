@@ -1,48 +1,48 @@
-﻿namespace KONGOR.MasterServer.Models.RequestResponse.GameData;
+namespace KONGOR.MasterServer.Models.RequestResponse.GameData;
 
 public class GuideResponseSuccess(HeroGuide guide, int hostTime)
 {
-    [PhpProperty("errors")] public string Errors => string.Empty;
+    [PHPProperty("errors")] public string Errors => string.Empty;
 
-    [PhpProperty("success")] public int Success => 1;
+    [PHPProperty("success")] public int Success => 1;
 
-    [PhpProperty("datetime")] public DateTimeOffset TimestampCreated { get; set; } = guide.TimestampCreated;
+    [PHPProperty("datetime")] public DateTimeOffset TimestampCreated { get; set; } = guide.TimestampCreated;
 
-    [PhpProperty("author_name")] public string AuthorName { get; set; } = guide.Author.Name;
+    [PHPProperty("author_name")] public string AuthorName { get; set; } = guide.Author.Name;
 
-    [PhpProperty("hero_cli_name")] public string HeroIdentifier { get; set; } = guide.HeroIdentifier;
+    [PHPProperty("hero_cli_name")] public string HeroIdentifier { get; set; } = guide.HeroIdentifier;
 
-    [PhpProperty("guide_name")] public string Name { get; set; } = guide.Name;
+    [PHPProperty("guide_name")] public string Name { get; set; } = guide.Name;
 
-    [PhpProperty("hero_name")] public string HeroName { get; set; } = guide.HeroName;
+    [PHPProperty("hero_name")] public string HeroName { get; set; } = guide.HeroName;
 
-    [PhpProperty("default")] public int Default => 0;
+    [PHPProperty("default")] public int Default => 0;
 
-    [PhpProperty("favorite")] public int Favorite => 0;
+    [PHPProperty("favorite")] public int Favorite => 0;
 
-    [PhpProperty("rating")] public float Rating { get; set; } = guide.Rating;
+    [PHPProperty("rating")] public float Rating { get; set; } = guide.Rating;
 
-    [PhpProperty("thumb")] public string Thumb => guide.UpVotes is 0 ? "noVote" : guide.UpVotes.ToString();
+    [PHPProperty("thumb")] public string Thumb => guide.UpVotes is 0 ? "noVote" : guide.UpVotes.ToString();
 
-    [PhpProperty("premium")] public bool Featured { get; set; } = guide.Featured;
+    [PHPProperty("premium")] public bool Featured { get; set; } = guide.Featured;
 
-    [PhpProperty("i_start")] public string StartingItems { get; set; } = guide.StartingItems;
+    [PHPProperty("i_start")] public string StartingItems { get; set; } = guide.StartingItems;
 
-    [PhpProperty("i_laning")] public string EarlyGameItems { get; set; } = guide.EarlyGameItems;
+    [PHPProperty("i_laning")] public string EarlyGameItems { get; set; } = guide.EarlyGameItems;
 
-    [PhpProperty("i_core")] public string CoreItems { get; set; } = guide.CoreItems;
+    [PHPProperty("i_core")] public string CoreItems { get; set; } = guide.CoreItems;
 
-    [PhpProperty("i_luxury")] public string LuxuryItems { get; set; } = guide.LuxuryItems;
+    [PHPProperty("i_luxury")] public string LuxuryItems { get; set; } = guide.LuxuryItems;
 
-    [PhpProperty("abilQ")] public string AbilityQueue { get; set; } = guide.AbilityQueue;
+    [PHPProperty("abilQ")] public string AbilityQueue { get; set; } = guide.AbilityQueue;
 
-    [PhpProperty("txt_intro")] public string Intro { get; set; } = guide.Intro;
+    [PHPProperty("txt_intro")] public string Intro { get; set; } = guide.Intro;
 
-    [PhpProperty("txt_guide")] public string Content { get; set; } = guide.Content;
+    [PHPProperty("txt_guide")] public string Content { get; set; } = guide.Content;
 
-    [PhpProperty("hosttime")] public int HostTime { get; set; } = hostTime;
+    [PHPProperty("hosttime")] public int HostTime { get; set; } = hostTime;
 
-    [PhpProperty("vested_threshold")] public int VestedThreshold => 5;
+    [PHPProperty("vested_threshold")] public int VestedThreshold => 5;
 
-    [PhpProperty(0)] public bool Zero => true;
+    [PHPProperty(0)] public bool Zero => true;
 }

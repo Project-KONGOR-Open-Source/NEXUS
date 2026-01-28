@@ -4,7 +4,7 @@ namespace KONGOR.MasterServer.Models.RequestResponse.Stats;
 
 public class GrabLastMatchesResponse
 {
-    [PhpProperty("all_stats")] public required Dictionary<int, List<MatchPlayerStatistics>> AllStats { get; init; }
+    [PHPProperty("all_stats")] public required Dictionary<int, List<MatchPlayerStatistics>> AllStats { get; init; }
 
-    [PhpProperty("match_summ")] public required Dictionary<int, MatchSummary> MatchSummary { get; init; }
+    [PHPProperty("match_summ")] public required Dictionary<int, MatchSummary> MatchSummary { get; init; }
 }

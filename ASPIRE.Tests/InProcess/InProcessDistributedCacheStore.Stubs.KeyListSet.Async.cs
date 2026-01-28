@@ -21,11 +21,7 @@ public partial class InProcessDistributedCacheStore
         throw new NotImplementedException();
     }
 
-    // Skipped KeyDeleteAsync singular (Implemented)
-    public Task<long> KeyDeleteAsync(RedisKey[] keys, CommandFlags flags = CommandFlags.None)
-    {
-        throw new NotImplementedException();
-    }
+
 
     public Task<byte[]?> KeyDumpAsync(RedisKey key, CommandFlags flags = CommandFlags.None)
     {

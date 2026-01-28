@@ -1,4 +1,4 @@
-﻿using MERRICK.DatabaseContext.Entities;
+using MERRICK.DatabaseContext.Entities;
 
 namespace MERRICK.DatabaseContext.Persistence;
 
@@ -10,6 +10,9 @@ public sealed class MerrickContext : DbContext
     public const string AuthenticationSchema = "auth";
     public const string StatisticsSchema = "stat";
     public const string MiscellaneousSchema = "misc";
+
+    // Cache options to avoid allocation on every call
+    private static readonly JsonSerializerOptions s_jsonOptions = new();
 
     public MerrickContext(DbContextOptions options) : base(options)
     {
@@ -31,17 +34,17 @@ public sealed class MerrickContext : DbContext
     public DbSet<Token> Tokens => Set<Token>();
     public DbSet<User> Users => Set<User>();
 
-    protected override void OnModelCreating(ModelBuilder builder)
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        base.OnModelCreating(builder);
+        base.OnModelCreating(modelBuilder);
 
-        ConfigureSchemas(builder);
+        ConfigureSchemas(modelBuilder);
 
-        ConfigureRoles(builder.Entity<Role>());
-        ConfigureAccounts(builder.Entity<Account>());
-        ConfigurePlayerStatistics(builder.Entity<PlayerStatistics>());
-        ConfigureMatchStatistics(builder.Entity<MatchStatistics>());
-        ConfigureAccountStatistics(builder.Entity<AccountStatistics>());
+        ConfigureRoles(modelBuilder.Entity<Role>());
+        ConfigureAccounts(modelBuilder.Entity<Account>());
+        ConfigurePlayerStatistics(modelBuilder.Entity<PlayerStatistics>());
+        ConfigureMatchStatistics(modelBuilder.Entity<MatchStatistics>());
+        ConfigureAccountStatistics(modelBuilder.Entity<AccountStatistics>());
     }
 
     private static void ConfigureAccountStatistics(EntityTypeBuilder<AccountStatistics> builder)
@@ -88,8 +91,8 @@ public sealed class MerrickContext : DbContext
     {
         builder.Property(statistics => statistics.Inventory).HasConversion
         (
-            value => JsonSerializer.Serialize(value, new JsonSerializerOptions()),
-            value => JsonSerializer.Deserialize<List<string>>(value, new JsonSerializerOptions()) ?? new List<string>(),
+            value => JsonSerializer.Serialize(value, s_jsonOptions),
+            value => JsonSerializer.Deserialize<List<string>>(value, s_jsonOptions) ?? new List<string>(),
             new ValueComparer<List<string>>(
                 (first, second) => (first ?? new List<string>()).SequenceEqual(second ?? new List<string>()),
                 collection => collection.Aggregate(0,
