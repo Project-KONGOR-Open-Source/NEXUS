@@ -1,15 +1,59 @@
-﻿namespace KONGOR.MasterServer.Controllers.StorageStatusController;
+using KONGOR.MasterServer.Extensions.Cache;
+using KONGOR.MasterServer.Models.RequestResponse.SRP;
+using KONGOR.MasterServer.Services.Requester;
+using MERRICK.DatabaseContext.Entities.Core;
+using MERRICK.DatabaseContext.Persistence;
+using Microsoft.EntityFrameworkCore;
+using PhpSerializerNET;
+using StackExchange.Redis;
+
+namespace KONGOR.MasterServer.Controllers.StorageStatusController;
 
 [ApiController]
 [Route("master/storage/status")]
-public class StorageStatusController : ControllerBase
+public class StorageStatusController(MerrickContext dbContext, IDatabase distributedCache) : ControllerBase
 {
-    [HttpPost(Name = "Storage Status")]
-    public IActionResult StorageStatus([FromForm] Dictionary<string, string> formData)
-    {
-        // TODO: Implement Storage Status Controller
+    private MerrickContext MerrickContext { get; } = dbContext;
+    private IDatabase DistributedCache { get; } = distributedCache;
 
-        return Ok(
-            @"a:4:{s:7:""success"";b:1;s:4:""data"";N;s:18:""cloud_storage_info"";a:4:{s:10:""account_id"";s:6:""195592"";s:9:""use_cloud"";s:1:""0"";s:16:""cloud_autoupload"";s:1:""0"";s:16:""file_modify_time"";s:19:""2021-01-10 11:39:47"";}s:8:""messages"";s:0:"""";}");
+    [HttpPost(Name = "Storage Status")]
+    public async Task<IActionResult> StorageStatus()
+    {
+        string? cookie = ClientRequestHelper.GetCookie(Request);
+
+        if (string.IsNullOrEmpty(cookie))
+        {
+            return Unauthorized("Missing Cookie");
+        }
+
+        (bool isValid, string? accountName) = await DistributedCache.ValidateAccountSessionCookie(cookie, MerrickContext);
+
+        if (!isValid || string.IsNullOrEmpty(accountName))
+        {
+            return Unauthorized("Invalid Cookie");
+        }
+
+        Account? account = await MerrickContext.Accounts
+            .AsNoTracking()
+            .FirstOrDefaultAsync(a => a.Name == accountName);
+
+        if (account == null)
+        {
+            return Unauthorized("Account Not Found");
+        }
+
+        StorageStatusResponse response = new()
+        {
+            CloudStorageInformation = new CloudStorageInformation
+            {
+                AccountID = account.ID.ToString(),
+                UseCloud = account.UseCloud ? "1" : "0",
+                AutomaticCloudUpload = account.AutomaticCloudUpload ? "1" : "0",
+                BackupLastUpdatedTime = account.BackupLastUpdatedTime?.ToString("yyyy-MM-dd HH:mm:ss") ??
+                                        DateTimeOffset.MinValue.ToString("yyyy-MM-dd HH:mm:ss")
+            }
+        };
+
+        return Ok(PhpSerialization.Serialize(response));
     }
 }

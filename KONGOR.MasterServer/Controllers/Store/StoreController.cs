@@ -30,7 +30,6 @@ public class StoreController(MerrickContext databaseContext, ILogger<StoreContro
                 return Ok();
         }
 
-        return Ok();
     }
 }
 

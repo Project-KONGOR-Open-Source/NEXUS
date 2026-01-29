@@ -34,7 +34,7 @@ public static class SRPAuthenticationHandlers
             Email = parameters.Account.User.EmailAddress,
             AccountType = Convert.ToInt32(parameters.Account.Type).ToString(),
             SuspensionID = "0", // TODO: Implement Suspensions
-            UseCloud = "0", // TODO: Implement Cloud Backups
+            UseCloud = parameters.Account.UseCloud ? "1" : "0",
             Cookie = cookie,
             IPAddress = parameters.ClientIPAddress,
             LeaverThreshold =
@@ -258,11 +258,11 @@ public static class SRPAuthenticationHandlers
         return new CloudStorageInformation
         {
             AccountID = account.ID.ToString(),
-            UseCloud = "0",
-            AutomaticCloudUpload = "0",
-            BackupLastUpdatedTime = DateTimeOffset.UtcNow.ToString("yyyy-MM-dd HH:mm:ss")
+            UseCloud = account.UseCloud ? "1" : "0",
+            AutomaticCloudUpload = account.AutomaticCloudUpload ? "1" : "0",
+            BackupLastUpdatedTime = account.BackupLastUpdatedTime?.ToString("yyyy-MM-dd HH:mm:ss") ??
+                                    DateTimeOffset.MinValue.ToString("yyyy-MM-dd HH:mm:ss")
         };
-        // TODO: Fix These Values
     }
 
     private static List<DataPoint> SetDataPoints()

@@ -1,6 +1,7 @@
 ﻿using System.Collections.Frozen;
 
 using KONGOR.MasterServer.Logging;
+using KONGOR.MasterServer.Models.RequestResponse.ServerRequester;
 
 namespace KONGOR.MasterServer.Controllers.ServerRequesterController;
 
@@ -312,22 +313,6 @@ public partial class ServerRequesterController
             return BadRequest($@"Account With Name ""{accountNameForSessionCookie}"" Could Not Be Found");
         }
 
-        Dictionary<string, object> response = new()
-        {
-            { "cookie", cookie },
-            { "account_id", account.ID },
-            { "nickname", account.Name },
-            { "super_id", account.User.Accounts.FirstOrDefault(record => record.IsMain)?.ID ?? account.ID },
-            { "account_type", account.Type },
-            { "level", account.User.TotalLevel }
-        };
-
-        if (account.Clan is not null)
-        {
-            response.Add("clan_id", account.Clan.ID);
-            response.Add("tag", account.Clan.Tag);
-        }
-
         /*
             public static List<Info> InfoForAccount(AccountDetails accountDetails, float tournamentRatingForActiveTeam)
            {
@@ -399,13 +384,19 @@ public partial class ServerRequesterController
            }
          */
 
-        // TODO: Create Proper Response Model
-
-        response.Add("infos", ""); // TODO: Set These Stats
-        response.Add("game_cookie",
-            "16cb3211-5253-45a8-bcb9-10d037ec9303"); // Must Exist, But The Value Doesn't Really Matter; TODO: Generate And Store This Cookie Per Match?
-        response.Add("my_upgrades", account.User.OwnedStoreItems);
-        response.Add("selected_upgrades", account.SelectedStoreItems);
+        ConnectClientResponse response = new()
+        {
+            Cookie = cookie,
+            AccountID = account.ID,
+            Nickname = account.Name,
+            SuperID = account.User.Accounts.FirstOrDefault(record => record.IsMain)?.ID ?? account.ID,
+            AccountType = (int)account.Type,
+            Level = account.User.TotalLevel,
+            ClanID = account.Clan?.ID,
+            ClanTag = account.Clan?.Tag,
+            MyUpgrades = account.User.OwnedStoreItems,
+            SelectedUpgrades = account.SelectedStoreItems
+        };
 
         return Ok(PhpSerialization.Serialize(response));
     }

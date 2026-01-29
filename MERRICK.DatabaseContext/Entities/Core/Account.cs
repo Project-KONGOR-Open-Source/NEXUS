@@ -46,4 +46,10 @@ public class Account
     public List<string> SystemInformationHashCollection { get; set; } = [];
 
     public List<string> BlockedPhrases { get; set; } = [];
+
+    public bool UseCloud { get; set; } = false;
+
+    public bool AutomaticCloudUpload { get; set; } = false;
+
+    public DateTimeOffset? BackupLastUpdatedTime { get; set; } = null;
 }

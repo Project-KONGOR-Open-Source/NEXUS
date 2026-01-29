@@ -433,5 +433,8 @@ FodyWeavers.xsd
 
 # macOS Desktop Services Store Cache
 .DS_Store
+TRANSMUTANSTEIN.ChatServer/Domain/Core/ChatSession.Client.cs
 
 MERRICK.DatabaseContext/Persistence/Migrations/*
+KONGOR.MasterServer/Data/Cloud/*
+KONGOR.MasterServer/App_Data/TestCloud/*

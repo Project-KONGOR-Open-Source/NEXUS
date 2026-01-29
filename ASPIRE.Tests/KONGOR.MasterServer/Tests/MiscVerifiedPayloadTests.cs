@@ -1,4 +1,9 @@
 using KONGOR.MasterServer.Extensions.Cache;
+using MERRICK.DatabaseContext.Constants;
+using MERRICK.DatabaseContext.Entities.Core;
+using MERRICK.DatabaseContext.Entities.Utility;
+using MERRICK.DatabaseContext.Enumerations;
+using MERRICK.DatabaseContext.Persistence;
 
 namespace ASPIRE.Tests.KONGOR.MasterServer.Tests;
 
@@ -52,9 +57,38 @@ public sealed class MiscVerifiedPayloadTests
         {
             using IServiceScope scope = factory.Services.CreateScope();
             IDatabase distributedCache = scope.ServiceProvider.GetRequiredService<IDatabase>();
+            MerrickContext dbContext = scope.ServiceProvider.GetRequiredService<MerrickContext>();
 
             string cookie = "storage_cookie";
-            await distributedCache.SetAccountNameForSessionCookie(cookie, "StorageUser");
+            string accountName = "StorageUser";
+
+            // Seed DB
+            User user = new()
+            {
+                EmailAddress = "storage@kongor.net",
+                PBKDF2PasswordHash = "hash",
+                SRPPasswordHash = "hash",
+                SRPPasswordSalt = "salt",
+                Role = new Role { Name = UserRoles.User }
+            };
+
+            Account account = new()
+            {
+                Name = accountName,
+                User = user,
+                Type = AccountType.Staff,
+                IsMain = true,
+                Cookie = cookie,
+                UseCloud = true,
+                AutomaticCloudUpload = true,
+                BackupLastUpdatedTime = DateTimeOffset.Parse("2023-01-01 12:00:00")
+            };
+
+            await dbContext.Users.AddAsync(user);
+            await dbContext.Accounts.AddAsync(account);
+            await dbContext.SaveChangesAsync();
+
+            await distributedCache.SetAccountNameForSessionCookie(cookie, accountName);
 
             Dictionary<string, string> payload = new() { { "cookie", cookie } };
             FormUrlEncodedContent content = new(payload);
@@ -65,6 +99,12 @@ public sealed class MiscVerifiedPayloadTests
             string responseBody = await response.Content.ReadAsStringAsync();
             await Assert.That(responseBody).Contains("cloud_storage_info");
             await Assert.That(responseBody).Contains("success");
+
+            // Verify dynamic values
+            await Assert.That(responseBody).Contains("s:9:\"use_cloud\";s:1:\"1\";");
+            await Assert.That(responseBody).Contains("s:16:\"cloud_autoupload\";s:1:\"1\";");
+            // Check formatted date
+            await Assert.That(responseBody).Contains("2023-01-01 12:00:00");
         }
     }
 }

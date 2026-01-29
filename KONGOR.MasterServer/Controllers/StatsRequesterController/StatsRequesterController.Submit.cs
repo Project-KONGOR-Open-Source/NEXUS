@@ -140,29 +140,54 @@ public partial class StatsRequesterController
             Logger.LogInformation($"Match Statistics For Match ID {matchID} Have Already Been Submitted");
         }
 
+        // Optimization: Pre-fetch all accounts and check existing stats in batches to avoid N+1 queries.
+        Dictionary<int, string> playerAccountNames = [];
         foreach (int playerIndex in form.PlayerStats.Keys)
         {
-            // The Match Server Sends The Account Name With The Clan Tag Combined Into A Single String Value So We Need To Separate Them
-            // Dictionaries in PHP forms: player_stats[0][Hero_Legionnaire][nickname]
-            // form.PlayerStats is Dictionary<int, Dictionary<string, Dictionary<string, string>>>
-            // Outer key: playerIndex (0)
-            // Middle key: heroName (Hero_Legionnaire) -> we can just take First().Value since we expect one hero per player entry usually, or iterate.
-            // But ToPlayerStatistics handles the logic: string hero = form.PlayerStats[playerIndex].Keys.Single();
-
             string heroKey = form.PlayerStats[playerIndex].Keys.First();
             string fullAccountName = form.PlayerStats[playerIndex][heroKey]["nickname"];
-
             string accountName = AccountExtensions.SeparateClanTagFromAccountName(fullAccountName).AccountName;
+            playerAccountNames[playerIndex] = accountName;
+        }
 
-            PlayerEntity? existingPlayerStatistics = await MerrickContext.PlayerStatistics
-                .FirstOrDefaultAsync(stats => stats.MatchID == matchID && stats.AccountName == accountName);
+        List<string> distinctAccountNames = playerAccountNames.Values.Distinct().ToList();
 
-            if (existingPlayerStatistics is null)
+        // 1. Batch fetch existing stats
+        List<string> existingStatsAccountNames = await MerrickContext.PlayerStatistics
+            .Where(stats => stats.MatchID == matchID && distinctAccountNames.Contains(stats.AccountName))
+            .Select(stats => stats.AccountName)
+            .ToListAsync();
+
+        HashSet<string> existingStatsSet = new(existingStatsAccountNames, StringComparer.OrdinalIgnoreCase);
+
+        // 2. Batch fetch accounts (only those needed)
+        List<string> namesToFetchAccountsFor = distinctAccountNames.Where(n => !existingStatsSet.Contains(n)).ToList();
+
+        Dictionary<string, Account> accountMap = new(StringComparer.OrdinalIgnoreCase);
+
+        if (namesToFetchAccountsFor.Count > 0)
+        {
+            List<Account> fetchedAccounts = await MerrickContext.Accounts
+                .Include(account => account.Clan)
+                .Where(account => namesToFetchAccountsFor.Contains(account.Name))
+                .ToListAsync();
+
+            foreach (Account acc in fetchedAccounts)
             {
-                Account? account = await MerrickContext.Accounts.Include(account => account.Clan)
-                    .FirstOrDefaultAsync(account => account.Name.Equals(accountName));
+                if (!accountMap.ContainsKey(acc.Name))
+                {
+                    accountMap[acc.Name] = acc;
+                }
+            }
+        }
 
-                if (account is null)
+        foreach (int playerIndex in form.PlayerStats.Keys)
+        {
+            string accountName = playerAccountNames[playerIndex];
+
+            if (!existingStatsSet.Contains(accountName))
+            {
+                if (!accountMap.TryGetValue(accountName, out Account? account))
                 {
                     Logger.LogError($@"[BUG] Unable To Retrieve Account For Account Name ""{accountName}""");
 
@@ -282,22 +307,54 @@ public partial class StatsRequesterController
             Logger.LogInformation($"Match Statistics For Match ID {matchID} Have Already Been Submitted");
         }
 
+        // Optimization: Pre-fetch all accounts and check existing stats in batches to avoid N+1 queries.
+        Dictionary<int, string> playerAccountNames = [];
         foreach (int playerIndex in form.PlayerStats.Keys)
         {
-            // The Match Server Sends The Account Name With The Clan Tag Combined Into A Single String Value So We Need To Separate Them
             string heroKey = form.PlayerStats[playerIndex].Keys.First();
             string fullAccountName = form.PlayerStats[playerIndex][heroKey]["nickname"];
             string accountName = AccountExtensions.SeparateClanTagFromAccountName(fullAccountName).AccountName;
+            playerAccountNames[playerIndex] = accountName;
+        }
 
-            PlayerEntity? existingPlayerStatistics = await MerrickContext.PlayerStatistics
-                .FirstOrDefaultAsync(stats => stats.MatchID == matchID && stats.AccountName == accountName);
+        List<string> distinctAccountNames = playerAccountNames.Values.Distinct().ToList();
 
-            if (existingPlayerStatistics is null)
+        // 1. Batch fetch existing stats
+        List<string> existingStatsAccountNames = await MerrickContext.PlayerStatistics
+            .Where(stats => stats.MatchID == matchID && distinctAccountNames.Contains(stats.AccountName))
+            .Select(stats => stats.AccountName)
+            .ToListAsync();
+
+        HashSet<string> existingStatsSet = new(existingStatsAccountNames, StringComparer.OrdinalIgnoreCase);
+
+        // 2. Batch fetch accounts (only those needed)
+        List<string> namesToFetchAccountsFor = distinctAccountNames.Where(n => !existingStatsSet.Contains(n)).ToList();
+
+        Dictionary<string, Account> accountMap = new(StringComparer.OrdinalIgnoreCase);
+
+        if (namesToFetchAccountsFor.Count > 0)
+        {
+            List<Account> fetchedAccounts = await MerrickContext.Accounts
+                .Include(account => account.Clan)
+                .Where(account => namesToFetchAccountsFor.Contains(account.Name))
+                .ToListAsync();
+
+            foreach (Account acc in fetchedAccounts)
             {
-                Account? account = await MerrickContext.Accounts.Include(account => account.Clan)
-                    .FirstOrDefaultAsync(account => account.Name.Equals(accountName));
+                if (!accountMap.ContainsKey(acc.Name))
+                {
+                    accountMap[acc.Name] = acc;
+                }
+            }
+        }
 
-                if (account is null)
+        foreach (int playerIndex in form.PlayerStats.Keys)
+        {
+            string accountName = playerAccountNames[playerIndex];
+
+            if (!existingStatsSet.Contains(accountName))
+            {
+                if (!accountMap.TryGetValue(accountName, out Account? account))
                 {
                     Logger.LogError($@"[BUG] Unable To Retrieve Account For Account Name ""{accountName}""");
 
