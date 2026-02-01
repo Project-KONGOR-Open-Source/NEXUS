@@ -1,6 +1,6 @@
 ﻿namespace KONGOR.MasterServer.Models.RequestResponse.ServerManagement;
 
-public class ServerForCreateListResponse(List<MatchServer> servers, string? region, string cookie) : ServerListResponse(cookie)
+public class ServerForCreateListResponse(List<MatchServer> servers, List<MatchServerManager> serverManagers, string? region, string cookie) : ServerListResponse(cookie)
 {
        // TODO: Filter Server List By Region(+Add Support For NEWERTH Region)
 
@@ -47,17 +47,53 @@ public class ServerForCreateListResponse(List<MatchServer> servers, string? regi
          */
 
     [PHPProperty("server_list")]
-    public Dictionary<int, ServerForCreate> Servers { get; set; } = servers.Any() is false? []
+    public Dictionary<int, ServerForCreate> Servers { get; set; } = servers.Any() is false ? []
         : servers.Where(server => server.Status is ServerStatus.SERVER_STATUS_SLEEPING or ServerStatus.SERVER_STATUS_IDLE)
-            .ToDictionary(server => server.ID, server => new ServerForCreate(server.ID.ToString(), server.IPAddress, server.Port.ToString(), server.Location));
+            .ToDictionary(server => server.ID, server => new ServerForCreate(server.ID.ToString(),
+                MatchServerUtilities.ResolvePublicIPAddress(server, serverManagers.Single(manager => manager.ID == server.MatchServerManagerID)), server.Port.ToString(), server.Location));
 }
 
-public class ServerForJoinListResponse(List<MatchServer> servers, string cookie) : ServerListResponse(cookie)
+public class ServerForJoinListResponse(List<MatchServer> servers, List<MatchServerManager> serverManagers, string cookie) : ServerListResponse(cookie)
 {
     [PHPProperty("server_list")]
     public Dictionary<int, ServerForJoin> Servers { get; set; } = servers.Any() is false ? []
         : servers.Where(server => server.Status is ServerStatus.SERVER_STATUS_LOADING or ServerStatus.SERVER_STATUS_ACTIVE)
-            .ToDictionary(server => server.ID, server => new ServerForJoin(server.ID.ToString(), server.IPAddress, server.Port.ToString(), server.Location));
+            .ToDictionary(server => server.ID, server => new ServerForJoin(server.ID.ToString(),
+                MatchServerUtilities.ResolvePublicIPAddress(server, serverManagers.Single(manager => manager.ID == server.MatchServerManagerID)), server.Port.ToString(), server.Location));
+}
+
+file static class MatchServerUtilities
+{
+    // TODO: Move This To A Shared Utilities Type
+    // TODO: Is This Worth It, Or Should Be Just Always Use The Server Manager's IP?
+
+    /// <summary>
+    ///     Resolves the public IP address for a match server.
+    ///     If the server manager has a public IP, it is used instead of the server's reported IP.
+    ///     This handles NAT/proxy scenarios where servers report their internal IP but are accessed via the manager's public IP.
+    ///     For local environments (where the manager's IP is loopback), the server's reported IP is used.
+    /// </summary>
+    public static string ResolvePublicIPAddress(MatchServer server, MatchServerManager serverManager)
+        => IsPublicIPAddress(serverManager.IPAddress) ? serverManager.IPAddress : server.IPAddress;
+
+    public static bool IsPublicIPAddress(string ipAddress)
+    {
+        if (IPAddress.TryParse(ipAddress, out IPAddress? parsedAddress) is false)
+            throw new FormatException($@"Unable To Parse IP Address ""{ipAddress}""");
+
+        // Loopback Addresses: 127.x.x.x, ::1
+        if (IPAddress.IsLoopback(parsedAddress))
+            return false;
+
+        byte[] addressBytes = parsedAddress.MapToIPv4().GetAddressBytes();
+
+        // Private Ranges: 10.x.x.x, 172.16-31.x.x, 192.168.x.x
+        bool isPrivate = addressBytes[0] == 10
+                     || (addressBytes[0] == 172 && addressBytes[1] > 15 && addressBytes[1] < 32)
+                     || (addressBytes[0] == 192 && addressBytes[1] == 168);
+
+        return isPrivate is false;
+    }
 }
 
 public abstract class ServerListResponse
