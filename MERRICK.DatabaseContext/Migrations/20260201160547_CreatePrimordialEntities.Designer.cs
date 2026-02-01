@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MERRICK.DatabaseContext.Migrations
 {
     [DbContext(typeof(MerrickContext))]
-    [Migration("20260127220509_CreatePrimordialEntities")]
+    [Migration("20260201160547_CreatePrimordialEntities")]
     partial class CreatePrimordialEntities
     {
         /// <inheritdoc />
@@ -996,6 +996,17 @@ namespace MERRICK.DatabaseContext.Migrations
                         .IsRequired();
 
                     b.Navigation("Author");
+                });
+
+            modelBuilder.Entity("MERRICK.DatabaseContext.Entities.Statistics.AccountStatistics", b =>
+                {
+                    b.HasOne("MERRICK.DatabaseContext.Entities.Core.Account", "Account")
+                        .WithMany()
+                        .HasForeignKey("AccountID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Account");
                 });
 
             modelBuilder.Entity("MERRICK.DatabaseContext.Entities.Statistics.MatchParticipantStatistics", b =>

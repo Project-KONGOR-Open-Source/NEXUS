@@ -995,6 +995,17 @@ namespace MERRICK.DatabaseContext.Migrations
                     b.Navigation("Author");
                 });
 
+            modelBuilder.Entity("MERRICK.DatabaseContext.Entities.Statistics.AccountStatistics", b =>
+                {
+                    b.HasOne("MERRICK.DatabaseContext.Entities.Core.Account", "Account")
+                        .WithMany()
+                        .HasForeignKey("AccountID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Account");
+                });
+
             modelBuilder.Entity("MERRICK.DatabaseContext.Entities.Statistics.MatchParticipantStatistics", b =>
                 {
                     b.OwnsMany("MERRICK.DatabaseContext.Entities.Statistics.AbilityEvent", "AbilityHistory", b1 =>

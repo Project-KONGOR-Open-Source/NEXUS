@@ -26,34 +26,6 @@ namespace MERRICK.DatabaseContext.Migrations
                 name: "auth");
 
             migrationBuilder.CreateTable(
-                name: "AccountStatistics",
-                schema: "stat",
-                columns: table => new
-                {
-                    ID = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    AccountID = table.Column<int>(type: "int", nullable: false),
-                    Type = table.Column<int>(type: "int", nullable: false),
-                    MatchesPlayed = table.Column<int>(type: "int", nullable: false),
-                    MatchesWon = table.Column<int>(type: "int", nullable: false),
-                    MatchesLost = table.Column<int>(type: "int", nullable: false),
-                    MatchesDisconnected = table.Column<int>(type: "int", nullable: false),
-                    MatchesConceded = table.Column<int>(type: "int", nullable: false),
-                    MatchesKicked = table.Column<int>(type: "int", nullable: false),
-                    SkillRating = table.Column<double>(type: "float", nullable: false),
-                    HeroKills = table.Column<int>(type: "int", nullable: false),
-                    HeroAssists = table.Column<int>(type: "int", nullable: false),
-                    HeroDeaths = table.Column<int>(type: "int", nullable: false),
-                    WardsPlaced = table.Column<int>(type: "int", nullable: false),
-                    Smackdowns = table.Column<int>(type: "int", nullable: false),
-                    PlacementMatchesData = table.Column<string>(type: "nvarchar(max)", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_AccountStatistics", x => x.ID);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Clans",
                 schema: "core",
                 columns: table => new
@@ -340,6 +312,41 @@ namespace MERRICK.DatabaseContext.Migrations
                         column: x => x.UserID,
                         principalSchema: "core",
                         principalTable: "Users",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "AccountStatistics",
+                schema: "stat",
+                columns: table => new
+                {
+                    ID = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    AccountID = table.Column<int>(type: "int", nullable: false),
+                    Type = table.Column<int>(type: "int", nullable: false),
+                    MatchesPlayed = table.Column<int>(type: "int", nullable: false),
+                    MatchesWon = table.Column<int>(type: "int", nullable: false),
+                    MatchesLost = table.Column<int>(type: "int", nullable: false),
+                    MatchesDisconnected = table.Column<int>(type: "int", nullable: false),
+                    MatchesConceded = table.Column<int>(type: "int", nullable: false),
+                    MatchesKicked = table.Column<int>(type: "int", nullable: false),
+                    SkillRating = table.Column<double>(type: "float", nullable: false),
+                    HeroKills = table.Column<int>(type: "int", nullable: false),
+                    HeroAssists = table.Column<int>(type: "int", nullable: false),
+                    HeroDeaths = table.Column<int>(type: "int", nullable: false),
+                    WardsPlaced = table.Column<int>(type: "int", nullable: false),
+                    Smackdowns = table.Column<int>(type: "int", nullable: false),
+                    PlacementMatchesData = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AccountStatistics", x => x.ID);
+                    table.ForeignKey(
+                        name: "FK_AccountStatistics_Accounts_AccountID",
+                        column: x => x.AccountID,
+                        principalSchema: "core",
+                        principalTable: "Accounts",
                         principalColumn: "ID",
                         onDelete: ReferentialAction.Cascade);
                 });
