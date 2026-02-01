@@ -6,7 +6,10 @@ public class AccountStatistics
     [Key]
     public int ID { get; set; }
 
-    public required int AccountID { get; set; }
+    public int AccountID { get; set; }
+
+    [ForeignKey(nameof(AccountID))]
+    public required Account Account { get; set; }
 
     public required AccountStatisticsType Type { get; set; }
 

@@ -36,7 +36,7 @@ public sealed class AccountStatisticsInterceptor : SaveChangesInterceptor
             {
                 context.Add(new AccountStatistics
                 {
-                    AccountID = account.ID,
+                    Account = account,
                     Type = type,
                     PlacementMatchesData = type is AccountStatisticsType.Matchmaking or AccountStatisticsType.MatchmakingCasual ? string.Empty : null
                 });
