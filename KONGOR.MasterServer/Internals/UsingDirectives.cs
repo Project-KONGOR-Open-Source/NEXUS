@@ -41,6 +41,7 @@ global using Microsoft.EntityFrameworkCore;
 global using Microsoft.EntityFrameworkCore.Diagnostics;
 global using Microsoft.Extensions.FileProviders;
 global using Microsoft.Extensions.Options;
+global using Microsoft.Extensions.Primitives;
 global using Microsoft.OpenApi;
 
 global using OneOf;
