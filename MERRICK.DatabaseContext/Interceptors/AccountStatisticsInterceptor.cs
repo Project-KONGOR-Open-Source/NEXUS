@@ -24,10 +24,11 @@ public sealed class AccountStatisticsInterceptor : SaveChangesInterceptor
         if (context is null)
             return;
 
-        IEnumerable<Account> newAccounts = context.ChangeTracker
+        List<Account> newAccounts = context.ChangeTracker
             .Entries<Account>()
             .Where(entry => entry.State == EntityState.Added)
-            .Select(entry => entry.Entity);
+            .Select(entry => entry.Entity)
+            .ToList();
 
         foreach (Account account in newAccounts)
         {
