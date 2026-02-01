@@ -1,18 +1,29 @@
 namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Connection;
 
 [ChatCommand(ChatProtocol.GameServerToChatServer.NET_CHAT_GS_STATUS)]
-public class ServerStatus : ISynchronousCommandProcessor<MatchServerChatSession>
+public class ServerStatus(IDatabase distributedCacheStore) : IAsynchronousCommandProcessor<MatchServerChatSession>
 {
-    public void Process(MatchServerChatSession session, ChatBuffer buffer)
+    public async Task Process(MatchServerChatSession session, ChatBuffer buffer)
     {
         ServerStatusRequestData requestData = new (buffer);
 
         Log.Debug(@"Received Status Update From Server ID ""{ServerID}"" - Name: ""{Name}"", Address: ""{Address}:{Port}"", Location: ""{Location}"", Status: {Status}",
             requestData.ServerID, requestData.Name, requestData.Address, requestData.Port, requestData.Location, requestData.Status);
 
-        // TODO: Update Any Relevant Match Server Data
+        MatchServer? matchServer = await distributedCacheStore.GetMatchServerByID(requestData.ServerID);
 
-        // TODO: Update Server In Distributed Cache
+        if (matchServer is null)
+        {
+            Log.Error(@"[BUG] Received Status Update For Unknown Match Server ID ""{ServerID}""", requestData.ServerID);
+
+            return;
+        }
+
+        matchServer.Status = requestData.Status;
+
+        await distributedCacheStore.SetMatchServer(matchServer.HostAccountName, matchServer);
+
+        Log.Information(@"Updated Status For Match Server ID ""{ServerID}"" To ""{Status}""", requestData.ServerID, requestData.Status);
 
         // TODO: If Status Is IDLE, Mark Server As Available For Match Allocation
         // TODO: If Status Is ACTIVE, Update Match Information And Player Availability States
