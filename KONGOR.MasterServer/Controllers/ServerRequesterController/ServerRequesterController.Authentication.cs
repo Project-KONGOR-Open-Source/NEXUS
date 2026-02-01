@@ -31,9 +31,7 @@ public partial class ServerRequesterController
         if (srpPasswordHash.Equals(account.User.SRPPasswordHash) is false)
             return Unauthorized("Incorrect Password");
 
-        string? resolvedIPAddress = ResolveIPAddress();
-
-        if (resolvedIPAddress is null)
+        if (Request.HttpContext.Connection.RemoteIpAddress is null)
         {
             Logger.LogError(@"[BUG] Remote IP Address For Server Manager With Host Account Name ""{HostAccountName}"" Is NULL", hostAccountName);
 
@@ -46,7 +44,7 @@ public partial class ServerRequesterController
             HostAccountName = account.Name,
             ID = hostAccountName.GetDeterministicInt32Hash(),
             MatchServerIDs = [],
-            IPAddress = resolvedIPAddress
+            IPAddress = Request.HttpContext.Connection.RemoteIpAddress.MapToIPv4().ToString()
         };
 
         await DistributedCache.SetMatchServerManager(hostAccountName, matchServerManager);
@@ -116,15 +114,6 @@ public partial class ServerRequesterController
         if (serverIPAddress is null)
             return BadRequest(@"Missing Value For Form Parameter ""ip""");
 
-        string? resolvedIPAddress = ResolveIPAddress(serverIPAddress);
-
-        if (resolvedIPAddress is null)
-        {
-            Logger.LogError(@"[BUG] Remote IP Address For Server ""{ServerIdentifier}"" Is NULL", serverIdentifier);
-
-            return BadRequest("Unable To Resolve Remote IP Address");
-        }
-
         Account? account = await MerrickContext.Accounts
             .Include(account => account.User)
             .SingleOrDefaultAsync(account => account.Name.Equals(hostAccountName));
@@ -152,7 +141,7 @@ public partial class ServerRequesterController
             Name = serverName,
             MatchServerManagerID = matchServerManager?.ID,
             Instance = int.Parse(serverInstance),
-            IPAddress = resolvedIPAddress,
+            IPAddress = serverIPAddress,
             Port = int.Parse(serverPort),
             Location = serverLocation,
             Description = serverDescription
@@ -552,33 +541,4 @@ public partial class ServerRequesterController
 
         return BadRequest(response);
     }
-
-    /// <summary>
-    ///     Resolves the client's IP address using the following fallback order:
-    ///     <list type="number">
-    ///         <item><description>X-Forwarded-For header (set by reverse proxies)</description></item>
-    ///         <item><description>explicitly provided IP address (optional parameter)</description></item>
-    ///         <item><description>connection remote IP address</description></item>
-    ///     </list>
-    /// </summary>
-    private string? ResolveIPAddress(string? providedIPAddress = null)
-    {
-        // Check X-Forwarded-For Header First (Set By Reverse Proxies)
-        if (Request.Headers.TryGetValue("X-Forwarded-For", out StringValues forwardedFor))
-        {
-            string? firstIP = forwardedFor.ToString().Split(',').FirstOrDefault()?.Trim();
-
-            if (string.IsNullOrEmpty(firstIP) is false && IPAddress.TryParse(firstIP, out IPAddress? parsedForwardedIP))
-                return parsedForwardedIP.MapToIPv4().ToString();
-        }
-
-        // Fall Back To Provided IP Address
-        if (string.IsNullOrEmpty(providedIPAddress) is false && IPAddress.TryParse(providedIPAddress, out IPAddress? parsedProvidedIP))
-            return parsedProvidedIP.MapToIPv4().ToString();
-
-        // Fall Back To Connection Remote IP Address
-        return Request.HttpContext.Connection.RemoteIpAddress?.MapToIPv4().ToString();
-    }
-
-    // TODO: Move IP Resolver To A Helper Class
 }

@@ -12,19 +12,18 @@ public partial class ClientRequesterController
         string? gameType = Request.Form.ContainsKey("gametype") ? Request.Form["gametype"].ToString() : null;
 
         List<MatchServer> servers = await DistributedCache.GetMatchServers();
-        List<MatchServerManager> serverManagers = await DistributedCache.GetMatchServerManagers();
 
         switch (gameType)
         {
             case "10": // List Of Match Servers On Which Matches Can Be Joined
-                ServerForJoinListResponse serversForJoin = new (servers, serverManagers, cookie);
+                ServerForJoinListResponse serversForJoin = new (servers, cookie);
 
                 return Ok(PhpSerialization.Serialize(serversForJoin));
 
             case "90": // List Of Match Servers On Which Matches Can Be Created
                 string? region = Request.Form.ContainsKey("region") ? Request.Form["region"].ToString() : null;
 
-                ServerForCreateListResponse serversForCreate = new (servers, serverManagers, region, cookie);
+                ServerForCreateListResponse serversForCreate = new (servers, region, cookie);
 
                 return Ok(PhpSerialization.Serialize(serversForCreate));
 
