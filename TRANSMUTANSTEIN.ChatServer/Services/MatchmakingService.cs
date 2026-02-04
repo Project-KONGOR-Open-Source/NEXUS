@@ -43,6 +43,20 @@ public class MatchmakingService : BackgroundService, IMatchmakingService
             group.Members.Any(member => member.Account.Name.Equals(memberName)));
     }
 
+    /// <summary>
+    ///     Finds a Matchmaking Group where the specified user is listed in <see cref="MatchmakingGroup.PendingInvites"/>.
+    ///     <para>
+    ///         CRITICAL: This iterates ALL active groups (O(N)). Use as a fallback only when primary lookup by Member Name fails.
+    ///         This supports the scenario where a client attempts to join using their OWN name (as an invitee) rather than the Leader's name.
+    ///     </para>
+    /// </summary>
+    public MatchmakingGroup? GetMatchmakingGroupByInvitedUser(string accountName)
+    {
+        // Try to find a group where the user is in the PendingInvites list
+        return Groups.Values.SingleOrDefault(group => 
+            group.PendingInvites.ContainsKey(accountName));
+    }
+
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         Log.Information("Matchmaking Service Is Starting");

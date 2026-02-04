@@ -1,7 +1,9 @@
 using System.Globalization;
 
+using MERRICK.DatabaseContext.Entities.Statistics;
 using MERRICK.DatabaseContext.Extensions;
 
+using TRANSMUTANSTEIN.ChatServer.Internals;
 using TRANSMUTANSTEIN.ChatServer.Services;
 
 namespace TRANSMUTANSTEIN.ChatServer.Domain.Matchmaking;
@@ -25,10 +27,20 @@ public class MatchmakingGroup
 
     // public required ChatChannel ChatChannel { get; set; }
 
-    public float AverageRating => 1500; // TODO: Members.Average(member => member.Rating);
+    /// <summary>
+    ///     Tracks users who have been invited to this group but have not yet joined.
+    ///     Used by <see cref="Services.MatchmakingService.GetMatchmakingGroupByInvitedUser"/> to route JOIN requests
+    ///     when the client sends the Invitee's name instead of the Leader's name.
+    ///     Key: Invitee Account Name (Case-Insensitive).
+    ///     Value: Timestamp of invitation (for future expiration logic).
+    /// </summary>
+    public ConcurrentDictionary<string, DateTimeOffset> PendingInvites { get; } = new(StringComparer.OrdinalIgnoreCase);
 
-    public float RatingDisparity =>
-        100; // TODO: Members.Max(member => member.Rating) - Members.Min(member => member.Rating);
+    public float AverageRating => (float) Members.Average(member => member.Rating);
+
+    public float RatingDisparity => Members.Count > 0
+        ? (float) (Members.Max(member => member.Rating) - Members.Min(member => member.Rating))
+        : 0;
 
     public int FullTeamDifference => Information.TeamSize - Members.Count;
 
@@ -55,8 +67,11 @@ public class MatchmakingGroup
         return group;
     }
 
-    internal static MatchmakingGroup Create(IMatchmakingService matchmakingService, ChatSession session, MatchmakingGroupInformation information)
+    internal static MatchmakingGroup Create(IMatchmakingService matchmakingService, ChatSession session, MerrickContext merrick, MatchmakingGroupInformation information)
     {
+        AccountStatistics? stats = merrick.AccountStatistics.Find(session.Account.ID);
+        double rating = stats?.SkillRating ?? 1500.0;
+
         MatchmakingGroupMember member = new(session)
         {
             Slot = 1, // The Group Leader Is Always In Slot 1
@@ -65,6 +80,7 @@ public class MatchmakingGroup
             IsInGame = false,
             IsEligibleForMatchmaking = true,
             LoadingPercent = 0,
+            Rating = rating,
             GameModeAccess = string.Join('|', information.GameModes.Select(mode => "true"))
         };
 
@@ -98,7 +114,7 @@ public class MatchmakingGroup
         return group;
     }
 
-    public MatchmakingGroup Invite(ChatSession session, MerrickContext merrick, string receiverAccountName)
+    public MatchmakingGroup Invite(ChatSession session, MerrickContext merrick, IChatContext chatContext, string receiverAccountName)
     {
         lock (_lock)
         {
@@ -117,15 +133,43 @@ public class MatchmakingGroup
             invite.WriteString(string.Join('|', Information.GameModes)); // Game Modes
             invite.WriteString(string.Join('|', Information.GameRegions)); // Game Regions
 
-            ChatSession inviteReceiverSession = Context.ClientChatSessions
-                .Values.Single(cSession => cSession.Account.Name.Equals(receiverAccountName));
+            // Attempt To Find The Invite Receiver In The Chat Context
+            // Use TryGetValue For O(1) Lookup Instead Of O(N) Scan
+            // Use Case-Insensitive Lookup If Possible, But ConcurrentDictionary Is Case-Sensitive By Default Unless Configured Otherwise
+            // Assuming Account.Name Is Case-Sensitive Key
+            if (chatContext.ClientChatSessions.TryGetValue(receiverAccountName, out ChatSession? inviteReceiverSession) is false)
+            {
+                // Fallback: Try Case-Insensitive Search If Exact Match Fails (Safety Net)
+                inviteReceiverSession = chatContext.ClientChatSessions.Values
+                    .FirstOrDefault(cSession => cSession.Account?.Name.Equals(receiverAccountName, StringComparison.OrdinalIgnoreCase) ?? false);
+            }
+
+            if (inviteReceiverSession is null)
+            {
+                Log.Warning(
+                    @"Group Invite Failed: Receiver ""{ReceiverAccountName}"" Not Found Or Offline (Sender: ""{SenderAccountName}"")",
+                    receiverAccountName, session.Account.Name);
+
+                // Ideally Send A Notification To Sender Here
+                return this;
+            }
 
             inviteReceiverSession.Send(invite);
 
+            PendingInvites.TryAdd(receiverAccountName, DateTimeOffset.UtcNow);
+
             ChatBuffer broadcast = new();
 
-            Account inviteReceiver = merrick.Accounts.Include(account => account.Clan)
-                .Single(account => account.Name.Equals(receiverAccountName));
+            Account? inviteReceiver = merrick.Accounts.Include(account => account.Clan)
+                .SingleOrDefault(account => account.Name.Equals(receiverAccountName));
+
+            if (inviteReceiver is null)
+            {
+                Log.Warning(
+                    @"Group Invite Broadcast Failed: Receiver ""{ReceiverAccountName}"" Account Not Found In Database",
+                    receiverAccountName);
+                return this;
+            }
 
             broadcast.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_INVITE_BROADCAST);
             broadcast.WriteString(inviteReceiver.GetNameWithClanTag()); // Invite Receiver Name
@@ -140,7 +184,7 @@ public class MatchmakingGroup
         }
     }
 
-    public MatchmakingGroup Join(ChatSession session)
+    public MatchmakingGroup Join(ChatSession session, MerrickContext merrick)
     {
         lock (_lock)
         {
@@ -178,6 +222,12 @@ public class MatchmakingGroup
                 return this;
             }
 
+            // Remove From Pending Invites (Cleanup)
+            PendingInvites.TryRemove(session.Account.Name, out _);
+
+            AccountStatistics? stats = merrick.AccountStatistics.Find(session.Account.ID);
+            double rating = stats?.SkillRating ?? 1500.0;
+
             MatchmakingGroupMember newMatchmakingGroupMember = new(session)
             {
                 Slot = Convert.ToByte(Members.Count + 1, CultureInfo.InvariantCulture),
@@ -186,6 +236,7 @@ public class MatchmakingGroup
                 IsInGame = false,
                 IsEligibleForMatchmaking = true,
                 LoadingPercent = 0,
+                Rating = rating,
                 HasGameModeAccess = true,
                 GameModeAccess = Leader.GameModeAccess
             };
@@ -361,8 +412,26 @@ public class MatchmakingGroup
             // Preserve Fields That Are Not Sent In The Update Packet
             newInformation.ClientVersion = Information.ClientVersion;
             newInformation.GroupType = Information.GroupType;
-
+            
             Information = newInformation;
+
+            MulticastUpdate(Leader.Account.ID, ChatProtocol.TMMUpdateType.TMM_FULL_GROUP_UPDATE);
+        }
+    }
+
+    public void UpdateGroupType(ChatProtocol.TMMType newType)
+    {
+        lock (_lock)
+        {
+            Information.GroupType = newType;
+
+            // Prevent invalid state: PVP Group cannot be in Public Game (TeamSize 1)
+            // Default to Normal (TeamSize 5) until the OptionUpdate packet arrives
+            if (newType == ChatProtocol.TMMType.TMM_TYPE_PVP && 
+                Information.GameType == ChatProtocol.TMMGameType.TMM_GAME_TYPE_PUBLIC)
+            {
+                Information.GameType = ChatProtocol.TMMGameType.TMM_GAME_TYPE_NORMAL;
+            }
 
             MulticastUpdate(Leader.Account.ID, ChatProtocol.TMMUpdateType.TMM_FULL_GROUP_UPDATE);
         }
@@ -380,32 +449,76 @@ public class MatchmakingGroup
             update.WriteInt32(emitterAccountID); // Account ID
             update.WriteInt8(Convert.ToByte(Members.Count, CultureInfo.InvariantCulture)); // Group Size
             // TODO: Calculate Average Group Rating
-            update.WriteInt16(1500); // Average Group Rating
+            update.WriteInt16((short) AverageRating); // Average Group Rating
             update.WriteInt32(Leader.Account.ID); // Leader Account ID
             ChatProtocol.ArrangedMatchType arrangedMatchType = Information.GameType switch
             {
                 // Explicitly Set Public Games To AM_PUBLIC
                 ChatProtocol.TMMGameType.TMM_GAME_TYPE_PUBLIC => ChatProtocol.ArrangedMatchType.AM_PUBLIC,
-                // Use Standard AM_MATCHMAKING For All Other Queues To Ensure Group Functionality
-                // The Client Seems To Restrict Groups For Specific Types Like AM_MATCHMAKING_MIDWARS
+                
+                // CONDITIONAL MAPPING:
+                // Solo MidWars/RiftWars must use generic AM_MATCHMAKING.
+                // Group (PVP) MidWars/RiftWars must use specific AM_MATCHMAKING_MIDWARS/RIFTWARS.
+                ChatProtocol.TMMGameType.TMM_GAME_TYPE_MIDWARS when Information.GroupType == ChatProtocol.TMMType.TMM_TYPE_PVP 
+                    => ChatProtocol.ArrangedMatchType.AM_MATCHMAKING_MIDWARS,
+                ChatProtocol.TMMGameType.TMM_GAME_TYPE_RIFTWARS when Information.GroupType == ChatProtocol.TMMType.TMM_TYPE_PVP 
+                    => ChatProtocol.ArrangedMatchType.AM_MATCHMAKING_RIFTWARS,
+
+                // Ranked (Normal/Casual) Groups likely require Campaign (Season) type
+                ChatProtocol.TMMGameType.TMM_GAME_TYPE_NORMAL when Information.GroupType == ChatProtocol.TMMType.TMM_TYPE_PVP
+                    => ChatProtocol.ArrangedMatchType.AM_MATCHMAKING_CAMPAIGN,
+                ChatProtocol.TMMGameType.TMM_GAME_TYPE_CASUAL when Information.GroupType == ChatProtocol.TMMType.TMM_TYPE_PVP
+                    => ChatProtocol.ArrangedMatchType.AM_MATCHMAKING_CAMPAIGN,
+                ChatProtocol.TMMGameType.TMM_GAME_TYPE_CAMPAIGN_NORMAL when Information.GroupType == ChatProtocol.TMMType.TMM_TYPE_PVP
+                    => ChatProtocol.ArrangedMatchType.AM_MATCHMAKING_CAMPAIGN,
+                ChatProtocol.TMMGameType.TMM_GAME_TYPE_CAMPAIGN_CASUAL when Information.GroupType == ChatProtocol.TMMType.TMM_TYPE_PVP
+                    => ChatProtocol.ArrangedMatchType.AM_MATCHMAKING_CAMPAIGN,
+                
+                // Use Standard AM_MATCHMAKING For All Other Queues
                 _ => ChatProtocol.ArrangedMatchType.AM_MATCHMAKING
             };
-            update.WriteInt8(Convert.ToByte(arrangedMatchType, CultureInfo.InvariantCulture)); // Arranged Match Type
-            update.WriteInt8(Convert.ToByte(Information.GameType, CultureInfo.InvariantCulture)); // Game Type
-            update.WriteString(Information.MapName); // Map Name
-            update.WriteString(string.Join('|', Information.GameModes)); // Game Modes
-            update.WriteString(string.Join('|', Information.GameRegions)); // Game Regions
-            update.WriteBool(Information.Ranked); // Ranked
-            update.WriteInt8(Information.MatchFidelity); // Match Fidelity
-            update.WriteInt8(Information.BotDifficulty); // Bot Difficulty
-            update.WriteBool(Information.RandomizeBots); // Randomize Bots
-            update.WriteString(string
-                .Empty); // Country Restrictions (e.g. "AB->USE|XY->USW" Means Only Country "AB" Can Access Region "USE" And Only Country "XY" Can Access Region "USW")
-            // TODO: Find Out What Player Invitation Responses Do
-            update.WriteString("What Is This ??? (Player Invitation Responses)"); // Player Invitation Responses
-            update.WriteInt8(Information
-                .TeamSize); // Team Size (e.g. 5 For Forests Of Caldavar, 3 For Grimm's Crossing)
-            update.WriteInt8(Convert.ToByte(Information.GroupType, CultureInfo.InvariantCulture)); // Group Type
+            
+            // 30: Arranged Match Type (Unknown1) - STRICT KONGOR PARITY
+            update.WriteInt8(Convert.ToByte(arrangedMatchType, CultureInfo.InvariantCulture)); 
+            
+            // 31: Game Type
+            update.WriteInt8(Convert.ToByte(Information.GameType, CultureInfo.InvariantCulture)); 
+            update.WriteString(Information.MapName); // 32: Map Name
+            update.WriteString(string.Join('|', Information.GameModes)); // 33: Game Modes
+            update.WriteString(string.Join('|', Information.GameRegions)); // 34: Game Regions
+
+            Log.Information("Sending Group Update: Modes={Modes}, Regions={Regions}, Type={UpdateType}, GroupType={GroupType}, GameType={GameType}, AM={AM}", 
+                string.Join('|', Information.GameModes), 
+                string.Join('|', Information.GameRegions), 
+                updateType,
+                Information.GroupType,
+                Information.GameType,
+                arrangedMatchType);
+
+            // 35: Ranked (Verified)
+            update.WriteBool(Information.Ranked); 
+            
+            // 36: Match Fidelity (VerifiedOnly)
+            update.WriteInt8(Information.MatchFidelity); 
+            
+            // 37: Bot Difficulty
+            update.WriteInt8(Information.BotDifficulty); 
+            
+            // 38: Randomize Bots
+            update.WriteBool(Information.RandomizeBots); 
+
+            // 39: Unknown2 (STRING) - STRICT KONGOR PARITY (Previously was Byte(0))
+            update.WriteString(string.Empty);
+
+            // 40: Invitation Responses (String)
+            update.WriteString(string.Empty); 
+            
+            // 41: Team Size (Byte)
+            update.WriteInt8(Information.TeamSize); 
+            
+            // 42: Group Type (Byte)
+            update.WriteInt8(Convert.ToByte(Information.GroupType, CultureInfo.InvariantCulture));
+
 
             bool fullGroupUpdate = updateType switch
             {
@@ -467,7 +580,7 @@ public class MatchmakingGroup
                     update.WriteBool(true); // Eligible For Campaign
                     // TODO: Set Actual Rating, Dynamically From The Database
                     // TODO: Can Be Set To -1 To Hide The Rating From Other Players For Unranked Game Modes
-                    update.WriteInt16(1850); // Rating
+                    update.WriteInt16((short) member.Rating); // Rating
                 }
 
                 update.WriteInt8(member.LoadingPercent); // Loading Percent (0 to 100)
@@ -540,6 +653,34 @@ public class MatchmakingGroup
 
             // Reassign Slots And Transfer Leadership
             ReassignSlots();
+
+            // If the removed member was the leader, we must migrate the group in the MatchmakingService.Groups dictionary
+            // to be keyed by the NEW leader's ID.
+            if (memberToRemoveIsLeader)
+            {
+                if (matchmakingService.Groups.TryRemove(accountID, out MatchmakingGroup? existingGroup))
+                {
+                    if (existingGroup != this)
+                    {
+                        // Paranoid check: If we removed the wrong group (shouldn't happen if IDs are unique), put it back?
+                        // Or just log error.
+                        Log.Error(@"[BUG] Groups Dictionary State Mismatch During Leader Migration. Removed Group GUID ""{RemovedGUID}"" But Expected ""{CurrentGUID}""", existingGroup.GUID, GUID);
+                    }
+                    
+                    if (matchmakingService.Groups.TryAdd(Leader.Account.ID, this) is false)
+                    {
+                         Log.Error(@"[BUG] Failed To Re-Add Matchmaking Group For New Leader ""{LeaderID}""", Leader.Account.ID);
+                    }
+                    else
+                    {
+                        Log.Information(@"Migrated Matchmaking Group Key From ""{OldLeaderID}"" To ""{NewLeaderID}""", accountID, Leader.Account.ID);
+                    }
+                }
+                else
+                {
+                     Log.Error(@"[BUG] Failed To Remove Old Leader Key ""{OldLeaderID}"" During Migration", accountID);
+                }
+            }
 
             // Reset All Members To Default Readiness State: Leader = Not Ready, Others = Ready
             // Non-Leader Members Should Always Be Ready So That Group Readiness Is Determined Solely By The Leader

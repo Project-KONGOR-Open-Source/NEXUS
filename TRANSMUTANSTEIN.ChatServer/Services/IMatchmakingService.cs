@@ -9,4 +9,5 @@ public interface IMatchmakingService : IHostedService
     MatchmakingGroup? GetMatchmakingGroup(OneOf<int, string> memberIdentifier);
     MatchmakingGroup? GetMatchmakingGroupByMemberID(int memberID);
     MatchmakingGroup? GetMatchmakingGroupByMemberName(string memberName);
+    MatchmakingGroup? GetMatchmakingGroupByInvitedUser(string accountName);
 }

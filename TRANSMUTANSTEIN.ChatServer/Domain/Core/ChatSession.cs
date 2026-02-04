@@ -2,6 +2,7 @@ namespace TRANSMUTANSTEIN.ChatServer.Domain.Core;
 
 using global::TRANSMUTANSTEIN.ChatServer.Internals;
 
+
 public partial class ChatSession : TCPSession
 {
     // Primary Constructor logic moved to explicit constructor to support base class call
@@ -271,6 +272,23 @@ public partial class ChatSession : TCPSession
             .SingleOrDefault(t =>
                 t.GetCustomAttribute<ChatCommandAttribute>() is not null &&
                 (t.GetCustomAttribute<ChatCommandAttribute>()?.Command.Equals(command) ?? false));
+
+        if (type is null)
+        {
+            // Log all available commands to debug why it was not found
+            List<string> availableCommands = types
+                .Where(t => t.GetCustomAttribute<ChatCommandAttribute>() is not null)
+                .Select(t =>
+                {
+                    ChatCommandAttribute? attr = t.GetCustomAttribute<ChatCommandAttribute>();
+                    return $"{t.Name} (0x{attr?.Command:X4})";
+                })
+                .OrderBy(x => x)
+                .ToList();
+
+            Log.Warning("Command Lookup Failed for 0x{Command:X4}. Available Commands:\n{AvailableCommands}", 
+                command, string.Join("\n", availableCommands));
+        }
 
         if (type is not null)
         {

@@ -18,6 +18,8 @@ public class MatchmakingGroupMember(ChatSession session)
 
     public required byte LoadingPercent { get; set; }
 
+    public required double Rating { get; set; }
+
     public string Country { get; set; } = "NEWERTH";
 
     /// <summary>

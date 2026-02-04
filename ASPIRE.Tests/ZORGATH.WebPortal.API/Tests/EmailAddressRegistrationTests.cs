@@ -36,9 +36,9 @@ public sealed class EmailAddressRegistrationTests
 
         using (Assert.Multiple())
         {
-            await Assert.That(token.EmailAddress).IsEqualTo(emailAddress);
-            await Assert.That(token.Purpose).IsEqualTo(TokenPurpose.EmailAddressVerification);
-            await Assert.That(token.TimestampConsumed).IsNull();
+            await Assert.That(token!.EmailAddress).IsEqualTo(emailAddress);
+            await Assert.That(token!.Purpose).IsEqualTo(TokenPurpose.EmailAddressVerification);
+            await Assert.That(token!.TimestampConsumed).IsNull();
         }
     }
 

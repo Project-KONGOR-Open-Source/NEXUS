@@ -1,6 +1,7 @@
 using System.Globalization;
 
 using MERRICK.DatabaseContext.Extensions;
+using global::TRANSMUTANSTEIN.ChatServer.Contracts;
 
 namespace TRANSMUTANSTEIN.ChatServer.Domain.Core;
 

@@ -384,4 +384,13 @@ public static class ChatTestHelpers
             // Assuming noise for now.
         }
     }
+
+    public static async Task SendPacketAsync(NetworkStream stream, ChatBuffer buffer)
+    {
+        byte[] packet = buffer.Data.AsSpan(0, (int) buffer.Size).ToArray();
+        List<byte> rawPacket = [];
+        rawPacket.AddRange(BitConverter.GetBytes((ushort) packet.Length));
+        rawPacket.AddRange(packet);
+        await stream.WriteAsync(rawPacket.ToArray());
+    }
 }

@@ -4,10 +4,22 @@ public class GroupGameOptionUpdateRequestData
 {
     public GroupGameOptionUpdateRequestData(ChatBuffer buffer)
     {
-        // Read Command Bytes first (2 bytes)
-        buffer.ReadInt16();
+        // Legacy Protocol Quirk: Some clients verify/repeat the command ID (0x0D08) at the start of the payload.
+        // Others (or modern tests) might not. We peek to check if the next 2 bytes match the command ID.
+        byte[] peek = buffer.Peek(2);
+        if (peek.Length == 2)
+        {
+            ushort potentialCb = BitConverter.ToUInt16(peek, 0);
+            
+            // 0x0D08 = 3336
+            if (potentialCb == ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GAME_OPTION_UPDATE) 
+            {
+                 buffer.ReadInt16(); // Consume it
+            }
+        }
 
         GameType = (ChatProtocol.TMMGameType) buffer.ReadInt8();
+
         MapName = buffer.ReadString();
         GameModes = buffer.ReadString().Split('|');
         GameRegions = buffer.ReadString().Split('|');
