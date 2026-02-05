@@ -24,7 +24,7 @@ public class AscensionController : ControllerBase
     [HttpGet("index.php", Name = "Ascension Index")]
     [HttpPost("/", Name = "Ascension Root Post")]
     [HttpPost("index.php", Name = "Ascension Index Post")]
-    public IActionResult RouteAscensionRequest([FromQuery(Name = "r")] string? route)
+    public async Task<IActionResult> RouteAscensionRequest([FromQuery(Name = "r")] string? route)
     {
         if (string.IsNullOrEmpty(route))
         {
@@ -33,7 +33,7 @@ public class AscensionController : ControllerBase
 
         return route switch
         {
-            "api/match/checkmatch" => CheckMatch(),
+            "api/match/checkmatch" => await CheckMatch(),
             // Barebones Implementation: Other endpoints are not yet implemented.
             // "api/match/changematchstatus" => ChangeMatchStatus(),
             // "api/game/matchresult" => MatchResult(),
@@ -60,23 +60,14 @@ public class AscensionController : ControllerBase
     /// Response is actively parsed by the client.
     /// Error code 100 indicates success.
     /// </remarks>
-    private IActionResult CheckMatch()
+    private async Task<IActionResult> CheckMatch()
     {
         if (!int.TryParse(Request.Query["match_id"], out int matchID))
         {
             return BadRequest(new { error_code = 400, message = "Missing or invalid required parameter 'match_id'" });
         }
 
-        // Validate Match Existence
-        // We do this synchronously (blocking) because we are inside a synchronized dispatcher in the game server
-        // and we want to fail fast if the match is invalid.
-        // However, GetMatchStartData is async. We should probably make the whole controller endpoint async or use .Result with caution.
-        // Given this is ASP.NET Core, we should convert the action to async.
-
-        // Wait... the RouteAscensionRequest entry point is synchronous `public IActionResult`.
-        // I need to change the entry point to `public async Task<IActionResult>` first.
-
-        return CheckMatchAsync(matchID).GetAwaiter().GetResult();
+        return await CheckMatchAsync(matchID);
     }
 
     private async Task<IActionResult> CheckMatchAsync(int matchID)

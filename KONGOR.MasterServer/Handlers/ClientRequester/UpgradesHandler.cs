@@ -1,10 +1,12 @@
 using System.Globalization;
 
+using KONGOR.MasterServer.Models.Configuration;
 using KONGOR.MasterServer.Models.RequestResponse.Stats;
 using KONGOR.MasterServer.Services;
 using KONGOR.MasterServer.Services.Requester;
 
 using MERRICK.DatabaseContext.Extensions;
+using Microsoft.Extensions.Options;
 
 namespace KONGOR.MasterServer.Handlers.ClientRequester;
 
@@ -12,11 +14,13 @@ public partial class UpgradesHandler(
     MerrickContext databaseContext,
     IDatabase distributedCache,
     IPlayerStatisticsService statisticsService,
+    IOptions<OperationalConfiguration> operationalConfiguration,
     ILogger<UpgradesHandler> logger) : IClientRequestHandler
 {
     private MerrickContext MerrickContext { get; } = databaseContext;
     private IDatabase DistributedCache { get; } = distributedCache;
     private IPlayerStatisticsService StatisticsService { get; } = statisticsService;
+    private OperationalConfiguration OperationalConfiguration { get; } = operationalConfiguration.Value;
     private ILogger Logger { get; } = logger;
 
     [LoggerMessage(Level = LogLevel.Warning, Message = "[Upgrades] Missing cookie.")]
@@ -108,7 +112,7 @@ public partial class UpgradesHandler(
 
             // Optimized Statistics Retrieval
             PlayerStatisticsAggregatedDTO stats = await StatisticsService.GetAggregatedStatisticsAsync(account.ID);
-            ShowSimpleStatsResponse fullStats = ClientRequestHelper.CreateShowSimpleStatsResponse(account, stats);
+            ShowSimpleStatsResponse fullStats = ClientRequestHelper.CreateShowSimpleStatsResponse(account, stats, int.Parse(OperationalConfiguration.CurrentSeason));
 
             double rnkRating = 1500.0 + stats.RankedRatingChange;
             double csRating = 1500.0 + stats.CasualRatingChange;
@@ -258,7 +262,7 @@ public partial class UpgradesHandler(
             report.AppendLine($"--- Payload Comparison Report for {sessionAccountName} ---");
 
             PlayerStatisticsAggregatedDTO stats = await StatisticsService.GetAggregatedStatisticsAsync(account.ID);
-            ShowSimpleStatsResponse fullStats = ClientRequestHelper.CreateShowSimpleStatsResponse(account, stats);
+            ShowSimpleStatsResponse fullStats = ClientRequestHelper.CreateShowSimpleStatsResponse(account, stats, int.Parse(OperationalConfiguration.CurrentSeason));
 
             Dictionary<string, object> initStatsReference = new()
             {

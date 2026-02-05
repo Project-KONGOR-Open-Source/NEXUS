@@ -275,4 +275,5 @@ public sealed class UserAuthenticationTests
             await Assert.That(jwtToken.ValidFrom).IsLessThanOrEqualTo(DateTime.UtcNow.AddSeconds(5));
         }
     }
+
 }

@@ -1,6 +1,7 @@
 using System.Net.Sockets;
 using ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer.Infrastructure;
 using TRANSMUTANSTEIN.ChatServer.Domain.Core;
+using ASPIRE.Common.Enumerations.Statistics;
 using MERRICK.DatabaseContext.Entities.Statistics;
 
 namespace ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer.Tests;
@@ -119,12 +120,14 @@ public class ChatMatchmakingRatingTests
             using IServiceScope scope = app.Services.CreateScope();
             MerrickContext db = scope.ServiceProvider.GetRequiredService<MerrickContext>();
 
-            AccountStatistics? stats = await db.AccountStatistics.FindAsync(accountId);
+            AccountStatistics? stats = await db.AccountStatistics.SingleOrDefaultAsync(s => s.AccountID == accountId && s.Type == AccountStatisticsType.Matchmaking);
             if (stats == null)
             {
                 stats = new AccountStatistics
                 {
                     AccountID = accountId,
+                    Account = null!,
+                    Type = AccountStatisticsType.Matchmaking,
                     SkillRating = rating,
                     MatchesPlayed = 0, MatchesWon = 0, MatchesLost = 0,
                     MatchesConceded = 0, MatchesDisconnected = 0, MatchesKicked = 0, PerformanceScore = 0

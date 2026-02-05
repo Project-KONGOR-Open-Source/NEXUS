@@ -22,6 +22,8 @@ public class MatchServer
 
     public required string Description { get; set; }
 
+    public bool IsPrivate { get; set; } = false;
+
     public ServerStatus Status { get; set; } = ServerStatus.SERVER_STATUS_UNKNOWN;
 
     public string Cookie { get; set; } = Guid.CreateVersion7().ToString();

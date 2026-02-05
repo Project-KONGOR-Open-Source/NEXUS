@@ -1,6 +1,7 @@
 ﻿namespace KONGOR.MasterServer.Handlers.SRP;
 
 using global::MERRICK.DatabaseContext.Entities.Core;
+using global::MERRICK.DatabaseContext.Entities.Statistics;
 using global::MERRICK.DatabaseContext.Enumerations;
 using global::MERRICK.DatabaseContext.Extensions;
 
@@ -54,7 +55,7 @@ public static class SRPAuthenticationHandlers
             GoldCoins = parameters.Account.User.GoldCoins.ToString(),
             SilverCoins = parameters.Account.User.SilverCoins,
             CustomIconSlotID = SetCustomIconSlotID(parameters.Account),
-            CurrentSeason = "12", // TODO: Set Season
+            CurrentSeason = parameters.CurrentSeason,
             MuteExpiration = 0, // TODO: Implement Account Muting As Part Of The Karma System
             FriendAccountList = SetFriendAccountList(parameters.Account),
             IgnoredAccountsList = SetIgnoredAccountsList(parameters.Account),
@@ -65,7 +66,7 @@ public static class SRPAuthenticationHandlers
             SelectedStoreItems = parameters.Account.SelectedStoreItems,
             OwnedStoreItemsData = SetOwnedStoreItemsData(parameters.Account),
             AwardsTooltips = SetAwardsTooltips(),
-            DataPoints = SetDataPoints(),
+            DataPoints = SetDataPoints(parameters.Account),
             CloudStorageInformation = SetCloudStorageInformation(parameters.Account),
             Notifications = SetNotifications()
         };
@@ -265,45 +266,53 @@ public static class SRPAuthenticationHandlers
         };
     }
 
-    private static List<DataPoint> SetDataPoints()
+    private static List<DataPoint> SetDataPoints(Account account)
     {
+        AccountStatistics? publicStats = account.Statistics.FirstOrDefault(s => s.Type == AccountStatisticsType.Public);
+        AccountStatistics? matchmakingStats = account.Statistics.FirstOrDefault(s => s.Type == AccountStatisticsType.Matchmaking);
+        AccountStatistics? casualStats = account.Statistics.FirstOrDefault(s => s.Type == AccountStatisticsType.MatchmakingCasual);
+        AccountStatistics? midWarsStats = account.Statistics.FirstOrDefault(s => s.Type == AccountStatisticsType.MidWars);
+        AccountStatistics? riftWarsStats = account.Statistics.FirstOrDefault(s => s.Type == AccountStatisticsType.RiftWars);
+        AccountStatistics? cooperativeStats = account.Statistics.FirstOrDefault(s => s.Type == AccountStatisticsType.Cooperative);
+
+        int totalDisconnects = account.Statistics.Sum(s => s.MatchesDisconnected);
+        int totalMatchesPlayed = account.Statistics.Sum(s => s.MatchesPlayed);
+
         List<DataPoint> dataPoints =
         [
-            // TODO: Set These From Account Stats
-
             new()
             {
-                ID = "666",
-                Level = "1",
-                Disconnects = "0",
-                MatchesPlayed = "0",
-                BotMatchesWon = "0",
-                PSR = "1500.000",
-                PublicMatchesPlayed = "0",
-                PublicMatchesWon = "0",
-                PublicMatchesLost = "0",
-                PublicMatchDisconnects = "0",
-                MMR = "1500.000",
-                RankedMatchesPlayed = "0",
-                RankedMatchesWon = "0",
-                RankedMatchesLost = "0",
-                RankedMatchDisconnects = "0",
-                MidWarsMMR = "1500.000",
-                RankedMidWarsMatchesPlayed = "0",
-                RankedMidWarsMatchDisconnects = "0",
-                RiftWarsMMR = "1500.000",
-                RankedRiftWarsMatchesPlayed = "0",
-                RankedRiftWarsMatchDisconnects = "0",
-                CasualMMR = "1500.000",
-                CasualRankedMatchDisconnects = "0",
-                CasualRankedMatchesLost = "0",
-                CasualRankedMatchesPlayed = "0",
-                CasualRankedMatchesWon = "0",
+                ID = account.ID.ToString(),
+                Level = account.AscensionLevel.ToString(),
+                Disconnects = totalDisconnects.ToString(),
+                MatchesPlayed = totalMatchesPlayed.ToString(),
+                BotMatchesWon = cooperativeStats?.MatchesWon.ToString() ?? "0",
+                PSR = publicStats?.SkillRating.ToString("F3") ?? "1500.000",
+                PublicMatchesPlayed = publicStats?.MatchesPlayed.ToString() ?? "0",
+                PublicMatchesWon = publicStats?.MatchesWon.ToString() ?? "0",
+                PublicMatchesLost = publicStats?.MatchesLost.ToString() ?? "0",
+                PublicMatchDisconnects = publicStats?.MatchesDisconnected.ToString() ?? "0",
+                MMR = matchmakingStats?.SkillRating.ToString("F3") ?? "1500.000",
+                RankedMatchesPlayed = matchmakingStats?.MatchesPlayed.ToString() ?? "0",
+                RankedMatchesWon = matchmakingStats?.MatchesWon.ToString() ?? "0",
+                RankedMatchesLost = matchmakingStats?.MatchesLost.ToString() ?? "0",
+                RankedMatchDisconnects = matchmakingStats?.MatchesDisconnected.ToString() ?? "0",
+                MidWarsMMR = midWarsStats?.SkillRating.ToString("F3") ?? "1500.000",
+                RankedMidWarsMatchesPlayed = midWarsStats?.MatchesPlayed.ToString() ?? "0",
+                RankedMidWarsMatchDisconnects = midWarsStats?.MatchesDisconnected.ToString() ?? "0",
+                RiftWarsMMR = riftWarsStats?.SkillRating.ToString("F3") ?? "1500.000",
+                RankedRiftWarsMatchesPlayed = riftWarsStats?.MatchesPlayed.ToString() ?? "0",
+                RankedRiftWarsMatchDisconnects = riftWarsStats?.MatchesDisconnected.ToString() ?? "0",
+                CasualMMR = casualStats?.SkillRating.ToString("F3") ?? "1500.000",
+                CasualRankedMatchDisconnects = casualStats?.MatchesDisconnected.ToString() ?? "0",
+                CasualRankedMatchesLost = casualStats?.MatchesLost.ToString() ?? "0",
+                CasualRankedMatchesPlayed = casualStats?.MatchesPlayed.ToString() ?? "0",
+                CasualRankedMatchesWon = casualStats?.MatchesWon.ToString() ?? "0",
                 SeasonalRankedMatchesPlayed = 0,
                 SeasonalRankedMatchDisconnects = 0,
                 CasualSeasonalRankedMatchesPlayed = 0,
                 CasualSeasonalRankedMatchDisconnects = 0,
-                Experience = "666"
+                Experience = account.User.TotalExperience.ToString()
             }
         ];
 
@@ -342,6 +351,7 @@ public static class SRPAuthenticationHandlers
         public required string ServerProof { get; set; }
         public required string ClientIPAddress { get; set; }
         public required (string Address, int Port) ChatServer { get; set; }
+        public required string CurrentSeason { get; set; }
     }
 
     # region Secure Remote Password Magic Strings

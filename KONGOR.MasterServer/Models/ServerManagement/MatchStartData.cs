@@ -6,13 +6,7 @@ namespace KONGOR.MasterServer.Models.ServerManagement;
 /// </summary>
 public class MatchStartData
 {
-    private int? _matchID;
-
-    public int MatchID
-    {
-        get => _matchID ?? TimestampStarted.GetDeterministicInt32Hash();
-        set => _matchID = value;
-    }
+    public required int MatchID { get; set; }
 
     public required string MatchName { get; set; }
 
@@ -63,18 +57,4 @@ public class MatchStartData
     public int League { get; set; } = 0;
 
     public MatchOptions Options { get; set; } = MatchOptions.None;
-
-    // TODO: Find A Way To Generate Concurrency-Safe Incremental Match IDs That Fit Within An Int32
-
-    private static int ComputeIncrementalMatchID(DateTimeOffset datetime)
-    {
-        // The Official Date And Time That Project KONGOR Started, As Per The First Commit Timestamp
-        DateTimeOffset start = new(2022, 01, 05, 10, 16, 35, TimeSpan.Zero);
-
-        // Compute The Total Number Of Seconds That Have Elapsed Since The Project KONGOR Epoch Time
-        int seconds = Convert.ToInt32((datetime - start).TotalSeconds);
-
-        // Return The Computed Number Of Seconds As The Incremental Match ID
-        return seconds;
-    }
 }

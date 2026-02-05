@@ -45,7 +45,7 @@ public class ClientRequestHelperTests
         };
 
         // Act
-        ShowSimpleStatsResponse response = ClientRequestHelper.CreateShowSimpleStatsResponse(account, stats);
+        ShowSimpleStatsResponse response = ClientRequestHelper.CreateShowSimpleStatsResponse(account, stats, 12);
 
         // Assert
         // 1. Verify Names are in the exact fixed order

@@ -182,7 +182,7 @@ public class ZORGATH
                     IssuerSigningKey =
                         new SymmetricSecurityKey(
                             Encoding.UTF8.GetBytes(configuration.JWT
-                                .SigningKey)), // TODO: Put The Signing Key In A Secrets Vault
+                                .SigningKey)),
                     ValidateIssuerSigningKey = true,
                     ValidIssuer = configuration.JWT.Issuer,
                     ValidateIssuer = true,

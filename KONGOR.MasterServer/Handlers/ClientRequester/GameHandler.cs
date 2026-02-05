@@ -1,3 +1,4 @@
+using KONGOR.MasterServer.Extensions.Cache;
 using KONGOR.MasterServer.Services.Requester;
 // For PhpSerialization
 
@@ -97,8 +98,11 @@ public partial class GameHandler(IDatabase distributedCache, ILogger<GameHandler
             return new UnauthorizedObjectResult(PhpSerialization.Serialize(new { error = "Unauthorized" }));
         }
 
+        int matchID = await DistributedCache.GenerateNextMatchID();
+
         MatchStartData matchStartData = new()
         {
+            MatchID = matchID,
             MatchName = name,
             ServerID = selectedServer.ID,
             ServerName = selectedServer.Name ?? "Unknown Server",

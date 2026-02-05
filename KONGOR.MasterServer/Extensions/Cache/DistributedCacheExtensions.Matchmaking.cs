@@ -1,4 +1,6 @@
-﻿namespace KONGOR.MasterServer.Extensions.Cache;
+using Microsoft.EntityFrameworkCore;
+
+namespace KONGOR.MasterServer.Extensions.Cache;
 
 public static partial class DistributedCacheExtensions
 {
@@ -11,6 +13,8 @@ public static partial class DistributedCacheExtensions
     private const string MatchServersKey = "MATCH-SERVERS";
 
     private const string MatchServerIndexKey = "MATCH-SERVER-INDEX";
+
+    private const string MatchIdCounterKey = "MATCH-ID-COUNTER";
 
     /// <summary>
     ///     Sets the specified fields to their respective values in the hash stored at key.
@@ -370,5 +374,42 @@ public static partial class DistributedCacheExtensions
     public static async Task RemoveMatchStartData(this IDatabase distributedCacheStore, int matchID)
     {
         await distributedCacheStore.KeyDeleteAsync(ConstructMatchStartDataKey(matchID));
+    }
+
+    /// <summary>
+    ///     Initializes the match ID counter in Redis from the maximum value in the database.
+    ///     This ensures that generated match IDs continue from the last known ID and remain unique.
+    /// </summary>
+    public static async Task InitializeMatchIdCounter(this IDatabase distributedCacheStore, MerrickContext databaseContext)
+    {
+        // Find the maximum MatchID from the database
+        // We use .Max(m => (int?)m.MatchID) to handle empty table case gracefully
+        int maxDbId = await databaseContext.MatchStatistics.MaxAsync(m => (int?)m.MatchID) ?? 0;
+
+        // Get the current value from Redis
+        RedisValue cachedValue = await distributedCacheStore.StringGetAsync(MatchIdCounterKey);
+        int currentRedisId = cachedValue.HasValue ? (int)cachedValue : 0;
+
+        // If Redis is behind the DB (or empty), update it to match the DB
+        if (maxDbId > currentRedisId)
+        {
+            await distributedCacheStore.StringSetAsync(MatchIdCounterKey, maxDbId);
+        }
+    }
+
+    /// <summary>
+    ///     Generates the next unique, incremental match ID using Redis atomic increment.
+    /// </summary>
+    public static async Task<int> GenerateNextMatchID(this IDatabase distributedCacheStore)
+    {
+        long newId = await distributedCacheStore.StringIncrementAsync(MatchIdCounterKey);
+
+        if (newId > int.MaxValue)
+        {
+            // This is extremely unlikely but must be handled as per requirements.
+            throw new OverflowException("Match ID counter has exceeded Int32.MaxValue.");
+        }
+
+        return (int)newId;
     }
 }

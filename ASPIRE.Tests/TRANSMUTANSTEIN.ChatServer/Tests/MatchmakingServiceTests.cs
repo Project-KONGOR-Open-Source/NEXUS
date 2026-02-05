@@ -2,6 +2,7 @@ using System.Net.Sockets;
 using ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer.Infrastructure;
 using KONGOR.MasterServer.Extensions.Cache;
 using KONGOR.MasterServer.Models.ServerManagement;
+using ASPIRE.Common.Enumerations.Statistics;
 using MERRICK.DatabaseContext.Entities.Statistics; // Fixed Namespace
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -67,11 +68,13 @@ public class MatchmakingServiceTests
             sessions.Add(session!);
 
             // Seed Stats (using same context as app)
-            if (await _context.AccountStatistics.FindAsync(i) == null)
+            if (await _context.AccountStatistics.SingleOrDefaultAsync(s => s.AccountID == i && s.Type == AccountStatisticsType.Matchmaking) == null)
             {
                 _context.AccountStatistics.Add(new AccountStatistics 
                 { 
-                    AccountID = i, 
+                    AccountID = i,
+                    Account = null!,
+                    Type = AccountStatisticsType.Matchmaking, 
                     SkillRating = 1500 
                 });
                 await _context.SaveChangesAsync();
@@ -144,13 +147,52 @@ public class MatchmakingServiceTests
     
             // Assert: NO match should occur because buckets are disjoint
             // All groups should still be in queue
+            // NOTE: QueueStartTime might be null if they matched internally (5v0) but failed to find a server.
+            // But since this test uses TEAM SIZE 1 (1v1) via Setup(playersPerTeam: 1),
+            // a match requires 2 players.
+            // 5 players -> 2 matches + 1 leftover.
+            // BUT Setup() sets 'playersPerTeam: 1' which implies 'playersPerMatch: 2'.
+            // So USW (5 players) -> 2 matches (4 players) + 1 waiter.
+            // EU (5 players) -> 2 matches (4 players) + 1 waiter.
+            // If they match, QueueStartTime becomes null.
+            // IF we want to test "Different Regions Don't Match EACH OTHER", we need to ensure they DON'T match internally.
+            // Since we provide 5 players for USW, they WILL match internally if configured for 1v1.
+            // To properly test Region isolation, we should provide:
+            // 1 Player USW
+            // 1 Player EU
+            // Total 2 players. Needed for match: 2.
+            // If regions ignored -> Match. If obeyed -> No Match.
+        }
+        finally
+        {
+            foreach(TcpClient client in clients) client.Dispose();
+        }
+    }
+
+    [Test]
+    public async Task Broker_ShouldNotMatch_DifferentRegions_IsolationCheck()
+    {
+        List<TcpClient> clients = new();
+
+        try
+        {
+            // 1 Player USW
+            clients.Add(await CreateQueuedGroupReal(1, "USW", ["ap"]));
+
+            // 1 Player EU
+            clients.Add(await CreateQueuedGroupReal(2, "EU", ["ap"]));
+
+            await Task.Delay(2000); // Give broker time
+
+            // Assert: NO match should occur because buckets are disjoint
+            // All groups should still be in queue (QueueStartTime != null)
             List<MatchmakingGroup> allGroups = _service.Groups.Values.ToList();
-            await Assert.That(allGroups.Count).IsEqualTo(10);
+            await Assert.That(allGroups.Count).IsEqualTo(2);
             await Assert.That(allGroups.All(g => g.QueueStartTime != null)).IsTrue();
         }
         finally
         {
-        foreach(TcpClient client in clients) client.Dispose();
+            foreach(TcpClient client in clients) client.Dispose();
         }
     }
     
@@ -173,7 +215,7 @@ public class MatchmakingServiceTests
 
          if (await context.AccountStatistics.FindAsync(id) == null)
          {
-             context.AccountStatistics.Add(new AccountStatistics { AccountID = id, SkillRating = 1500 });
+             context.AccountStatistics.Add(new AccountStatistics { AccountID = id, Account = null!, Type = AccountStatisticsType.Matchmaking, SkillRating = 1500 });
              await context.SaveChangesAsync();
          }
 

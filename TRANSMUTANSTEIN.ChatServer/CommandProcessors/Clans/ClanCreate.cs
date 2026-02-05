@@ -31,9 +31,15 @@ public readonly struct ClanCreateRequestData
 }
 
 [ChatCommand(ChatProtocol.Command.CHAT_CMD_CLAN_CREATE_REQUEST)]
-public class ClanCreate(MerrickContext merrick, IPendingClanService pendingClanService, IChatContext chatContext)
+public partial class ClanCreate(MerrickContext merrick, IPendingClanService pendingClanService, IChatContext chatContext)
     : IAsynchronousCommandProcessor<ChatSession>
 {
+    [GeneratedRegex(@"^[a-zA-Z0-9 ]{1,25}$")]
+    private static partial Regex ClanNameRegex();
+
+    [GeneratedRegex(@"^[a-zA-Z0-9]{1,4}$")]
+    private static partial Regex ClanTagRegex();
+
     public async Task Process(ChatSession session, ChatBuffer buffer)
     {
         Account? account = session.Account;
@@ -142,11 +148,15 @@ public class ClanCreate(MerrickContext merrick, IPendingClanService pendingClanS
         }
 
         // We act on the strings provided in members list
+        List<Account> foundAccounts = await merrick.Accounts
+            .Include(acc => acc.Clan)
+            .Where(acc => members.Contains(acc.Name))
+            .ToListAsync();
+
         foreach (string member in members)
         {
-            Account? memberAccount = await merrick.Accounts
-                .Include(acc => acc.Clan)
-                .FirstOrDefaultAsync(acc => acc.Name == member);
+            Account? memberAccount = foundAccounts.FirstOrDefault(acc =>
+                acc.Name.Equals(member, StringComparison.OrdinalIgnoreCase));
 
             if (memberAccount == null)
             {
@@ -174,10 +184,7 @@ public class ClanCreate(MerrickContext merrick, IPendingClanService pendingClanS
     private async Task<ChatBuffer?> ClanTagNameAndDuplicatesSanityCheck(MerrickContext merrick, Account account,
         string name, string tag, List<string> members, IPendingClanService pendingClanService)
     {
-        Regex clanNameRegex = new(@"^[a-zA-Z0-9 ]{1,25}$"); /* 25 characters max */
-        Regex clanTagRegex = new(@"^[a-zA-Z0-9]{1,4}$"); /* 4 characters max */
-
-        Match match = clanNameRegex.Match(name);
+        Match match = ClanNameRegex().Match(name);
 
         if (!match.Success)
         {
@@ -199,7 +206,7 @@ public class ClanCreate(MerrickContext merrick, IPendingClanService pendingClanS
 
         # endregion
 
-        match = clanTagRegex.Match(tag);
+        match = ClanTagRegex().Match(tag);
 
         if (!match.Success)
         {

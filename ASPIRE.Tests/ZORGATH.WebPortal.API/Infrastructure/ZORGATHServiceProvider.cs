@@ -28,6 +28,7 @@ public static class ZORGATHServiceProvider
         WebApplicationFactory<ZORGATHAssemblyMarker> webApplicationFactory =
             new WebApplicationFactory<ZORGATHAssemblyMarker>().WithWebHostBuilder(builder =>
                 builder.UseSetting("INFRASTRUCTURE_GATEWAY", "localhost")
+                    .UseSetting("Operational:JWT:SigningKey", "TEST_SIGNING_KEY_MUST_BE_LONG_ENOUGH_FOR_HMAC_SHA256_AT_LEAST_32_BYTES")
                     .ConfigureLogging(logging =>
                     {
                         logging.SetMinimumLevel(LogLevel.Debug);

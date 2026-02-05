@@ -1,4 +1,5 @@
-﻿using KONGOR.MasterServer.Logging;
+using KONGOR.MasterServer.Extensions.Cache;
+using KONGOR.MasterServer.Logging;
 
 namespace KONGOR.MasterServer.Controllers.ServerRequesterController;
 
@@ -71,8 +72,11 @@ public partial class ServerRequesterController
             matchMode = matchModeInput;
         }
 
+        int matchID = await DistributedCache.GenerateNextMatchID();
+
         MatchStartData matchStartData = new()
         {
+            MatchID = matchID,
             ServerID = matchServer.ID,
             ServerName = matchServer.Name,
             Map = map,

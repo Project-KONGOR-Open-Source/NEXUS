@@ -1,5 +1,6 @@
 using System.Globalization;
 
+using ASPIRE.Common.Enumerations.Statistics;
 using MERRICK.DatabaseContext.Entities.Statistics;
 using MERRICK.DatabaseContext.Extensions;
 
@@ -69,7 +70,7 @@ public class MatchmakingGroup
 
     internal static MatchmakingGroup Create(IMatchmakingService matchmakingService, ChatSession session, MerrickContext merrick, MatchmakingGroupInformation information)
     {
-        AccountStatistics? stats = merrick.AccountStatistics.Find(session.Account.ID);
+        AccountStatistics? stats = merrick.AccountStatistics.SingleOrDefault(s => s.AccountID == session.Account.ID && s.Type == AccountStatisticsType.Matchmaking);
         double rating = stats?.SkillRating ?? 1500.0;
 
         MatchmakingGroupMember member = new(session)
@@ -91,6 +92,16 @@ public class MatchmakingGroup
         if (matchmakingService.Groups.ContainsKey(session.Account.ID) is false)
         {
             // TODO: Check If The Account Is Already In A Matchmaking Group And Handle Accordingly
+            MatchmakingGroup? existingGroup = matchmakingService.GetMatchmakingGroupByMemberID(session.Account.ID);
+
+            if (existingGroup is not null)
+            {
+                Log.Information(
+                    @"Account ID ""{AccountID}"" Is Creating A New Matchmaking Group But Is Already In Group ""{GroupGUID}"". Leaving Old Group.",
+                    session.Account.ID, existingGroup.GUID);
+
+                existingGroup.RemoveMember(matchmakingService, session.Account.ID);
+            }
 
             if (matchmakingService.Groups.TryAdd(session.Account.ID, group) is false)
             {
@@ -225,7 +236,7 @@ public class MatchmakingGroup
             // Remove From Pending Invites (Cleanup)
             PendingInvites.TryRemove(session.Account.Name, out _);
 
-            AccountStatistics? stats = merrick.AccountStatistics.Find(session.Account.ID);
+            AccountStatistics? stats = merrick.AccountStatistics.SingleOrDefault(s => s.AccountID == session.Account.ID && s.Type == AccountStatisticsType.Matchmaking);
             double rating = stats?.SkillRating ?? 1500.0;
 
             MatchmakingGroupMember newMatchmakingGroupMember = new(session)
@@ -538,7 +549,7 @@ public class MatchmakingGroup
                 _ => false
             };
 
-            foreach (MatchmakingGroupMember member in Members)
+            foreach (MatchmakingGroupMember member in Members.ToList())
             {
                 if (fullGroupUpdate)
                 {
@@ -615,7 +626,7 @@ public class MatchmakingGroup
                 }
             }
 
-            foreach (MatchmakingGroupMember member in Members)
+            foreach (MatchmakingGroupMember member in Members.ToList())
             {
                 member.Session.Send(update);
             }

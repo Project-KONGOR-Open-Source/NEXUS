@@ -172,7 +172,7 @@ public sealed class UpgradesRequestTests
 
             PlayerStatisticsAggregatedDTO stats = await statsService.GetAggregatedStatisticsAsync(account.ID);
 
-            ShowSimpleStatsResponse fullStats = ClientRequestHelper.CreateShowSimpleStatsResponse(account, stats);
+            ShowSimpleStatsResponse fullStats = ClientRequestHelper.CreateShowSimpleStatsResponse(account, stats, 12);
 
             // Assert Response matches Helper Logic for Level
             await Assert.That(body).Contains($"\"level\";s:{fullStats.Level.ToString().Length}:\"{fullStats.Level}\";");

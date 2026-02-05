@@ -1,4 +1,5 @@
 ﻿namespace MERRICK.DatabaseContext.Entities.Core;
+using global::MERRICK.DatabaseContext.Entities.Statistics;
 
 [Index(nameof(Name), IsUnique = true)]
 public class Account
@@ -52,4 +53,6 @@ public class Account
     public bool AutomaticCloudUpload { get; set; } = false;
 
     public DateTimeOffset? BackupLastUpdatedTime { get; set; } = null;
+
+    public List<AccountStatistics> Statistics { get; set; } = [];
 }

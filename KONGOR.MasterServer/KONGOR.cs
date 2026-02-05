@@ -1,4 +1,5 @@
-﻿using KONGOR.MasterServer.Handlers.ClientRequester;
+using KONGOR.MasterServer.Extensions.Cache;
+using KONGOR.MasterServer.Handlers.ClientRequester;
 using KONGOR.MasterServer.Infrastructure;
 using KONGOR.MasterServer.Services;
 using KONGOR.MasterServer.Services.Requester;
@@ -89,6 +90,9 @@ public class KONGOR
 
         // Register Player Statistics Service
         builder.Services.AddScoped<IPlayerStatisticsService, PlayerStatisticsService>();
+
+        // Register Match ID Initializer Service
+        builder.Services.AddHostedService<MatchIdInitializerService>();
 
         // Add Rate Limiting Service To Protect Against Abuse And DoS Attacks
         builder.Services.AddRateLimiter(options =>

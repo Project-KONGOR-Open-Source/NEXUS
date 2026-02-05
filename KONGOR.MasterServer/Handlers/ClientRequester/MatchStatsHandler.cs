@@ -209,6 +209,8 @@ public partial class MatchStatsHandler(
             accountStatistics ??= new AccountStatistics
             {
                 AccountID = stats.AccountID,
+                Account = playerAccount,
+                Type = AccountStatisticsType.Matchmaking,
                 MatchesPlayed = 0,
                 MatchesWon = 0,
                 MatchesLost = 0,

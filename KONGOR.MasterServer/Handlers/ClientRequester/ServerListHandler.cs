@@ -55,16 +55,18 @@ public partial class ServerListHandler(IDatabase distributedCache, ILogger<Serve
             Logger.LogInformation("[ServerList] Server {ID} Status: {Status}", server.ID, server.Status);
         }
 
+        string? remoteIpAddress = context.Connection.RemoteIpAddress?.MapToIPv4().ToString();
+
         switch (gameType)
         {
             case "10": // List Of Match Servers On Which Matches Can Be Joined
                 LogReturningJoinList();
-                ServerForJoinListResponse serversForJoin = new(servers, cookie);
+                ServerForJoinListResponse serversForJoin = new(servers, cookie, remoteIpAddress);
                 return new OkObjectResult(PhpSerialization.Serialize(serversForJoin));
 
             case "90": // List Of Match Servers On Which Matches Can Be Created
                 LogReturningCreateList();
-                ServerForCreateListResponse serversForCreate = new(servers, cookie);
+                ServerForCreateListResponse serversForCreate = new(servers, cookie, remoteIpAddress);
                 return new OkObjectResult(PhpSerialization.Serialize(serversForCreate));
 
             default:

@@ -115,7 +115,7 @@ public static partial class Log
     [LoggerMessage(Level = LogLevel.Error, Message = "[BUG] No Account Could Be Found For Account Name \"{AccountName}\" With Session Cookie \"{Cookie}\"")]
     public static partial void LogAccountNotFoundForCookieBug(this ILogger logger, string accountName, string cookie);
 
-    [LoggerMessage(Level = LogLevel.Information, Message = "{Message}")]
+    [LoggerMessage(Level = LogLevel.Debug, Message = "{Message}")]
     public static partial void LogSetOnlineDebug(this ILogger logger, string message);
 
     [LoggerMessage(Level = LogLevel.Error, Message = "[BUG] Received Match Initialisation Heartbeat For Session \"{Session}\", But No MatchStartData Found In Cache. Server Status: {ServerStatus}")]

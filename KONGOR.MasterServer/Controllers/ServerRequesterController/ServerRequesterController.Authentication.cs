@@ -447,14 +447,17 @@ public partial class ServerRequesterController
     private async Task<IActionResult> HandleSetOnline()
     {
         // Debug Logging for SetOnline
-        List<string> formKeys = Request.Form.Keys.ToList();
-        StringBuilder logBuilder = new System.Text.StringBuilder();
-        logBuilder.AppendLine("[SetOnline] Incoming Request Keys:");
-        foreach (string key in formKeys)
+        if (Logger.IsEnabled(LogLevel.Debug))
         {
-            logBuilder.AppendLine($" - {key}: {Request.Form[key]}");
+            List<string> formKeys = Request.Form.Keys.ToList();
+            StringBuilder logBuilder = new System.Text.StringBuilder();
+            logBuilder.AppendLine("[SetOnline] Incoming Request Keys:");
+            foreach (string key in formKeys)
+            {
+                logBuilder.AppendLine($" - {key}: {Request.Form[key]}");
+            }
+            Logger.LogSetOnlineDebug(logBuilder.ToString());
         }
-        Logger.LogSetOnlineDebug(logBuilder.ToString());
 
         string? session = Request.Form["session"];
 

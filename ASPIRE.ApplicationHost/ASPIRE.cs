@@ -100,6 +100,19 @@ public class ASPIRE
             ? builder.AddParameter(sendGridApiKeyParameterName, resolvedSendGridApiKey, secret: true)
             : builder.AddParameter(sendGridApiKeyParameterName, secret: true); // Require the secret if not found
 
+        // Set JWT Signing Key Parameter Name And Environment Variable Name
+        const string jwtSigningKeyParameterName = "jwt-signing-key";
+        const string jwtSigningKeyEnvironmentVariableName = "JWT_SIGNING_KEY";
+
+        // Attempt To Resolve JWT Signing Key From Configuration In Order Of Priority: 1) User Secrets, 2) Environment Variables
+        string? resolvedJwtSigningKey = configuration[$"Parameters:{jwtSigningKeyParameterName}"] ??
+                                        configuration[jwtSigningKeyEnvironmentVariableName];
+
+        // Populate JWT Signing Key If Available In User Secrets Or Environment Variables
+        IResourceBuilder<ParameterResource> jwtSigningKey = resolvedJwtSigningKey is not null
+            ? builder.AddParameter(jwtSigningKeyParameterName, resolvedJwtSigningKey, secret: true)
+            : builder.AddParameter(jwtSigningKeyParameterName, secret: true); // Require the secret if not found
+
         // Configure Database Name Based On Environment
         string databaseName = builder.Environment.IsProduction() ? "production" : "development";
 
@@ -189,7 +202,8 @@ public class ASPIRE
             .WithReference(database, "MERRICK")
             .WaitFor(database) // Connect To SQL Server Database And Wait For It To Start
             .WithEnvironment("INFRASTRUCTURE_GATEWAY", gateway)
-            .WithEnvironment("Operational__Email__ApiKey", sendGridApiKey);
+            .WithEnvironment("Operational__Email__ApiKey", sendGridApiKey)
+            .WithEnvironment("Operational__JWT__SigningKey", jwtSigningKey);
 
         // Add Web Portal UI Project
         builder.AddProject<DAWNBRINGER_WebPortal_UI>("web-portal-ui",

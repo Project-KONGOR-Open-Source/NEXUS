@@ -32,7 +32,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="../ASPIRE.SourceGenerator/ASPIRE.SourceGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="true"/>
+        <ProjectReference Include="../ASPIRE.SourceGenerator/ASPIRE.SourceGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="true" GlobalPropertiesToRemove="TargetFramework" />
     </ItemGroup>
 
 </Project>

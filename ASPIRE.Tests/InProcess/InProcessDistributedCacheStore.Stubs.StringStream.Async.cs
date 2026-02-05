@@ -557,7 +557,19 @@ public partial class InProcessDistributedCacheStore
 
     public Task<long> StringIncrementAsync(RedisKey key, long value = 1, CommandFlags flags = CommandFlags.None)
     {
-        throw new NotImplementedException();
+        if (StoreItems.TryGetValue(key.ToString(), out string? currentValue))
+        {
+            if (long.TryParse(currentValue, out long currentLong))
+            {
+                long newValue = currentLong + value;
+                StoreItems[key.ToString()] = newValue.ToString();
+                return Task.FromResult(newValue);
+            }
+        }
+
+        // If key doesn't exist or isn't a long, start at value (default 1)
+        StoreItems[key.ToString()] = value.ToString();
+        return Task.FromResult(value);
     }
 
     public Task<double> StringIncrementAsync(RedisKey key, double value, CommandFlags flags = CommandFlags.None)

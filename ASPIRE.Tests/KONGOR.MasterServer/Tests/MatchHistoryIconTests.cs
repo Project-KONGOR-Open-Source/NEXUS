@@ -269,6 +269,8 @@ public sealed class MatchHistoryIconTests
             AccountStatistics accountStats = new()
             {
                 AccountID = account.ID,
+                Account = account,
+                Type = AccountStatisticsType.Matchmaking,
                 MatchesPlayed = 1,
                 MatchesWon = 1,
                 MatchesLost = 0,

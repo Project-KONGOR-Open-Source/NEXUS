@@ -183,13 +183,39 @@ public class ChatChannel
             }
         }
 
-        // TODO: Reject Join Request If The Channel Has The CHAT_CHANNEL_FLAG_UNJOINABLE Flag
+        // Reject Join Request If The Channel Has The CHAT_CHANNEL_FLAG_UNJOINABLE Flag
+        if (Flags.HasFlag(ChatProtocol.ChatChannelType.CHAT_CHANNEL_FLAG_UNJOINABLE))
+        {
+            if (session.Account.Type != AccountType.Staff)
+            {
+                ChatBuffer accessDenied = new();
+                accessDenied.WriteCommand(ChatProtocol.Command.CHAT_CMD_WHISPER);
+                accessDenied.WriteString("Channel Service");
+                accessDenied.WriteString("This channel is unjoinable.");
 
-        // TODO: Reject Join Request As Non-Administrator If Channel Is Full
+                session.Send(accessDenied);
 
-        // TODO: Reject Join Request If Response Buffer Would Overlow With A Data Size Greater Than 16384 Bytes (16 Kilobytes)
+                return this;
+            }
+        }
 
         ChatChannelMember newMember = new(session, this);
+
+        // Reject Join Request As Non-Administrator If Channel Is Full
+        if (IsFull && newMember.IsAdministrator is false)
+        {
+            ChatBuffer error = new();
+
+            error.WriteCommand(ChatProtocol.Command.CHAT_CMD_WHISPER);
+            error.WriteString("Channel Service");
+            error.WriteString("This channel is full.");
+
+            session.Send(error);
+
+            return this;
+        }
+
+        // TODO: Reject Join Request If Response Buffer Would Overlow With A Data Size Greater Than 16384 Bytes (16 Kilobytes)
 
         // Check For Password Protection On The Channel
         // Staff Accounts And Channel Administrators Bypass Password Checks

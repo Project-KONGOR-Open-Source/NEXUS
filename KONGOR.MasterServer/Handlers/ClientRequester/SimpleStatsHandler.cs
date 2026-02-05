@@ -1,16 +1,21 @@
+using KONGOR.MasterServer.Models.Configuration;
 using KONGOR.MasterServer.Models.RequestResponse.Stats;
 using KONGOR.MasterServer.Services;
 using KONGOR.MasterServer.Services.Requester;
+
+using Microsoft.Extensions.Options;
 
 namespace KONGOR.MasterServer.Handlers.ClientRequester;
 
 public partial class SimpleStatsHandler(
     MerrickContext databaseContext,
     IPlayerStatisticsService statisticsService,
+    IOptions<OperationalConfiguration> operationalConfiguration,
     ILogger<SimpleStatsHandler> logger) : IClientRequestHandler
 {
     private MerrickContext MerrickContext { get; } = databaseContext;
     private IPlayerStatisticsService StatisticsService { get; } = statisticsService;
+    private OperationalConfiguration OperationalConfiguration { get; } = operationalConfiguration.Value;
     private ILogger Logger { get; } = logger;
 
     [LoggerMessage(Level = LogLevel.Information, Message = "[SimpleStats] Request received. Nickname: {AccountName}")]
@@ -61,7 +66,7 @@ public partial class SimpleStatsHandler(
         // Fetch aggregated player stats for the account
         PlayerStatisticsAggregatedDTO stats = await StatisticsService.GetAggregatedStatisticsAsync(account.ID);
 
-        ShowSimpleStatsResponse response = ClientRequestHelper.CreateShowSimpleStatsResponse(account, stats);
+        ShowSimpleStatsResponse response = ClientRequestHelper.CreateShowSimpleStatsResponse(account, stats, int.Parse(OperationalConfiguration.CurrentSeason));
 
         LogGeneratedStats(accountName);
         return new ContentResult { Content = PhpSerialization.Serialize(response), ContentType = "text/plain; charset=utf-8", StatusCode = 200 };

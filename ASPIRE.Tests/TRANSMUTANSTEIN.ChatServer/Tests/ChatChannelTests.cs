@@ -1,8 +1,10 @@
 using System.Net.Sockets;
-
+using Microsoft.Extensions.DependencyInjection; // Added for GetRequiredService
 using ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer.Infrastructure;
 
 using TRANSMUTANSTEIN.ChatServer.Domain.Core;
+using TRANSMUTANSTEIN.ChatServer.Domain.Communication; // Added for ChatChannel
+using TRANSMUTANSTEIN.ChatServer.Internals; // Added for IChatContext
 
 namespace ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer.Tests;
 
@@ -312,5 +314,55 @@ public sealed class ChatChannelTests
         ushort c_leave = BitConverter.ToUInt16(h_leave, 2);
 
         await Assert.That(c_leave).IsEqualTo(ChatProtocol.Command.CHAT_CMD_LEFT_CHANNEL);
+    }
+
+    [Test]
+    public async Task JoinChannel_Unjoinable_RejectsNonStaff()
+    {
+        // Arrange
+        await using TRANSMUTANSTEINServiceProvider app =
+            await TRANSMUTANSTEINServiceProvider.CreateOrchestratedInstanceAsync(0);
+
+        IChatContext chatContext = app.Services.GetRequiredService<IChatContext>();
+
+        // Create Channel with Unjoinable Flag
+        string channelName = "UnjoinableChannel";
+        ChatChannel channel = ChatChannel.GetOrCreate(chatContext, null, channelName);
+        channel.Flags |= ChatProtocol.ChatChannelType.CHAT_CHANNEL_FLAG_UNJOINABLE;
+
+        ChatBuffer joinBuffer = new();
+        joinBuffer.WriteCommand(ChatProtocol.Command.CHAT_CMD_JOIN_CHANNEL);
+        joinBuffer.WriteString(channelName);
+
+        // --- Test 1: Regular User ---
+        int regularId = Random.Shared.Next(4000, 5000);
+        using TcpClient regularClient = await ChatTestHelpers.ConnectAndAuthenticateAsync(
+            app, app.ClientPort, regularId, "RegularUser", accountType: AccountType.Normal);
+        NetworkStream regularStream = regularClient.GetStream();
+
+        // Act - Join
+        await ChatTestHelpers.SendPacketAsync(regularStream, joinBuffer);
+
+        // Assert - Expect Whisper Rejection (CHAT_CMD_WHISPER - 0x0001)
+        // Staff mentioned: "Whisper is fine"
+        ChatBuffer response = await ChatTestHelpers.ExpectCommandAsync(regularStream, ChatProtocol.Command.CHAT_CMD_WHISPER, 5);
+        string sender = response.ReadString();
+        string msg = response.ReadString();
+        await Assert.That(sender).IsEqualTo("Channel Service");
+        await Assert.That(msg).Contains("unjoinable", StringComparison.OrdinalIgnoreCase);
+
+        // --- Test 2: Staff User ---
+        int staffId = Random.Shared.Next(5001, 6000);
+        using TcpClient staffClient = await ChatTestHelpers.ConnectAndAuthenticateAsync(
+            app, app.ClientPort, staffId, "StaffUser", accountType: AccountType.Staff);
+        NetworkStream staffStream = staffClient.GetStream();
+
+        // Act - Join
+        await ChatTestHelpers.SendPacketAsync(staffStream, joinBuffer);
+
+        // Assert - Expect Success (CHAT_CMD_CHANGED_CHANNEL - 0x0004)
+        ChatBuffer staffResponse = await ChatTestHelpers.ExpectCommandAsync(staffStream, ChatProtocol.Command.CHAT_CMD_CHANGED_CHANNEL, 5);
+        string name = staffResponse.ReadString();
+        await Assert.That(name).IsEqualTo(channelName);
     }
 }

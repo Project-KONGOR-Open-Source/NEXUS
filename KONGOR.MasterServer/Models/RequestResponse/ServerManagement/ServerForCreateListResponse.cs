@@ -1,6 +1,6 @@
 namespace KONGOR.MasterServer.Models.RequestResponse.ServerManagement;
 
-public class ServerForCreateListResponse(List<MatchServer> servers, string cookie)
+public class ServerForCreateListResponse(List<MatchServer> servers, string cookie, string? requestorIP)
     : ServerListResponse(cookie)
 
 {
@@ -54,6 +54,9 @@ public class ServerForCreateListResponse(List<MatchServer> servers, string cooki
         : servers.Where(server =>
                 server.Status is ServerStatus.SERVER_STATUS_SLEEPING or ServerStatus.SERVER_STATUS_IDLE)
             .ToDictionary(server => server.ID,
-                server => new ServerForCreate(server.ID.ToString(), server.IPAddress, server.Port.ToString(),
+                server => new ServerForCreate(
+                    server.ID.ToString(), 
+                    ResolveIP(server, requestorIP) ?? server.IPAddress, 
+                    server.Port.ToString(),
                     server.Location));
 }

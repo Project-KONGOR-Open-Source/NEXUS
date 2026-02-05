@@ -1,9 +1,11 @@
 using System.Globalization;
 
 using KONGOR.MasterServer.Logging;
+using KONGOR.MasterServer.Models.Configuration;
 using KONGOR.MasterServer.Services.Requester;
 
 using MERRICK.DatabaseContext.Extensions;
+using Microsoft.Extensions.Options;
 
 namespace KONGOR.MasterServer.Handlers.ClientRequester;
 
@@ -90,6 +92,7 @@ public class PreAuthHandler(
 public partial class SRPAuthHandler(
     MerrickContext databaseContext,
     IDatabase distributedCache,
+    IOptions<OperationalConfiguration> operationalConfiguration,
     ILogger<SRPAuthHandler> logger) : IClientRequestHandler
 {
     public async Task<IActionResult> HandleRequestAsync(HttpContext context)
@@ -168,6 +171,7 @@ public partial class SRPAuthHandler(
             .Include(account => account.BannedPeers)
             .Include(account => account.FriendedPeers)
             .Include(account => account.IgnoredPeers)
+            .Include(account => account.Statistics)
             .FirstOrDefaultAsync(account => account.Name.ToLower() == accountName.ToLower());
 
         if (account is null)
@@ -266,7 +270,8 @@ public partial class SRPAuthHandler(
             ClanRoster = account.Clan?.Members ?? [],
             ServerProof = serverProof,
             ClientIPAddress = remoteIPAddress,
-            ChatServer = (chatServerHost, chatServerClientConnectionsPort)
+            ChatServer = (chatServerHost, chatServerClientConnectionsPort),
+            CurrentSeason = operationalConfiguration.Value.CurrentSeason
         };
 
         SRPAuthenticationResponseStageTwo response =

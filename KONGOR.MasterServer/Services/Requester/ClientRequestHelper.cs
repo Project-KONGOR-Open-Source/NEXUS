@@ -21,7 +21,7 @@ public static class ClientRequestHelper
         return null;
     }
 
-    public static ShowSimpleStatsResponse CreateShowSimpleStatsResponse(Account account, PlayerStatisticsAggregatedDTO stats)
+    public static ShowSimpleStatsResponse CreateShowSimpleStatsResponse(Account account, PlayerStatisticsAggregatedDTO stats, int currentSeason)
     {
         // Calculate awards
         // Keys derived from MatchStats.cs (Standard Submission Keys)
@@ -45,7 +45,7 @@ public static class ClientRequestHelper
             NumberOfAvatarsOwned = account.User.OwnedStoreItems.Count(i => i.StartsWith("aa.", StringComparison.OrdinalIgnoreCase)),
             NumberOfHeroesOwned = account.User.OwnedStoreItems.Count(i => i.StartsWith("h.", StringComparison.OrdinalIgnoreCase)),
             TotalMatchesPlayed = stats.TotalMatches,
-            CurrentSeason = 0,
+            CurrentSeason = currentSeason,
             SeasonLevel = 0,
             CreepLevel = 0,
             SimpleSeasonStats = new SimpleSeasonStats

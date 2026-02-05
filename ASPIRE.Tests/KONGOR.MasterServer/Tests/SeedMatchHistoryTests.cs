@@ -90,6 +90,7 @@ public class SeedMatchHistoryTests
                 IF OBJECT_ID('data.AccountStatistics', 'U') IS NULL
                 BEGIN
                     CREATE TABLE [data].[AccountStatistics](
+                        [id] [int] IDENTITY(1,1) NOT NULL,
                         [account_id] [int] NOT NULL,
                         [matches_played] [int] NOT NULL DEFAULT 0,
                         [matches_won] [int] NOT NULL DEFAULT 0,
@@ -99,8 +100,9 @@ public class SeedMatchHistoryTests
                         [matches_kicked] [int] NOT NULL DEFAULT 0,
                         [skill_rating] [float] NOT NULL DEFAULT 0,
                         [performance_score] [float] NOT NULL DEFAULT 0,
+                        [type] [int] NOT NULL DEFAULT 2,
                         [placement_matches_data] [nvarchar](max) NULL,
-                        CONSTRAINT [PK_AccountStatistics] PRIMARY KEY CLUSTERED ([account_id] ASC)
+                        CONSTRAINT [PK_AccountStatistics] PRIMARY KEY CLUSTERED ([id] ASC)
                     )
                 END";
 
@@ -139,6 +141,8 @@ public class SeedMatchHistoryTests
                     context.AccountStatistics.Add(new AccountStatistics
                     {
                         AccountID = account.ID,
+                        Account = account,
+                        Type = AccountStatisticsType.Matchmaking,
                         MatchesPlayed = 2,
                         MatchesWon = 1,
                         MatchesLost = 1,
@@ -509,7 +513,7 @@ public class SeedMatchHistoryTests
         }
 
         Random random = new();
-        int baseMatchId = 9800000 + random.Next(1, 100000);
+        int baseMatchId = 20000000 + random.Next(1, 100000);
 
         List<Account> guestAccounts = new();
         for (int i = 1; i <= 10; i++)

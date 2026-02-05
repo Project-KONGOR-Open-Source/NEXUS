@@ -1,10 +1,12 @@
 using System.Globalization;
 
+using KONGOR.MasterServer.Models.Configuration;
 using KONGOR.MasterServer.Models.RequestResponse.Stats;
 using KONGOR.MasterServer.Services;
 using KONGOR.MasterServer.Services.Requester;
 
 using MERRICK.DatabaseContext.Extensions;
+using Microsoft.Extensions.Options;
 
 namespace KONGOR.MasterServer.Handlers.ClientRequester;
 
@@ -12,11 +14,13 @@ public partial class InitStatsHandler(
     MerrickContext databaseContext,
     IDatabase distributedCache,
     IPlayerStatisticsService statisticsService,
+    IOptions<OperationalConfiguration> operationalConfiguration,
     ILogger<InitStatsHandler> logger) : IClientRequestHandler
 {
     private MerrickContext MerrickContext { get; } = databaseContext;
     private IDatabase DistributedCache { get; } = distributedCache;
     private IPlayerStatisticsService StatisticsService { get; } = statisticsService;
+    private OperationalConfiguration OperationalConfiguration { get; } = operationalConfiguration.Value;
     private ILogger Logger { get; } = logger;
 
     [LoggerMessage(Level = LogLevel.Information, Message = "[InitStats] Request received. Cookie: {Cookie}")]
@@ -82,7 +86,7 @@ public partial class InitStatsHandler(
         // Fetch aggregated player stats for the account
         PlayerStatisticsAggregatedDTO stats = await StatisticsService.GetAggregatedStatisticsAsync(account.ID);
 
-        ShowSimpleStatsResponse fullResponse = ClientRequestHelper.CreateShowSimpleStatsResponse(account, stats);
+        ShowSimpleStatsResponse fullResponse = ClientRequestHelper.CreateShowSimpleStatsResponse(account, stats, int.Parse(OperationalConfiguration.CurrentSeason));
 
         LogConstructingResponse();
         // Restored standard keys (slot_id, tokens) as strict removal might cause client instability.
