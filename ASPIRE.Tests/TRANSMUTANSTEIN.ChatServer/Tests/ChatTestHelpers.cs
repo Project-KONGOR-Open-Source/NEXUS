@@ -4,6 +4,7 @@ using System.Net.Sockets;
 using ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer.Infrastructure;
 
 using KONGOR.MasterServer.Extensions.Cache;
+using KONGOR.MasterServer.Models.ServerManagement;
 
 using TRANSMUTANSTEIN.ChatServer.Domain.Core;
 
@@ -274,7 +275,7 @@ public static class ChatTestHelpers
         throw lastException ?? new Exception("Failed to connect to Chat Server after retries.");
     }
 
-    public static async Task ExpectCommandAsync(NetworkStream stream, ushort expectedCommand, int timeoutSeconds = 5)
+    public static async Task<ChatBuffer> ExpectCommandAsync(NetworkStream stream, ushort expectedCommand, int timeoutSeconds = 5)
     {
         using CancellationTokenSource cts = new(TimeSpan.FromSeconds(timeoutSeconds));
 
@@ -300,16 +301,17 @@ public static class ChatTestHelpers
             {
                 // Consume payload
                 int payloadSize = len - 2;
+                byte[] payload = [];
                 if (payloadSize > 0)
                 {
-                    byte[] payload = new byte[payloadSize];
+                    payload = new byte[payloadSize];
                     int pread = 0;
                     while (pread < payloadSize)
                     {
                         pread += await stream.ReadAsync(payload, pread, payloadSize - pread, cts.Token);
                     }
                 }
-                return;
+                return new ChatBuffer(payload);
             }
 
             // If strictly expecting it to be NEXT, we should fail if it's not.
@@ -392,5 +394,190 @@ public static class ChatTestHelpers
         rawPacket.AddRange(BitConverter.GetBytes((ushort) packet.Length));
         rawPacket.AddRange(packet);
         await stream.WriteAsync(rawPacket.ToArray());
+    }
+
+    public static async Task<TcpClient> ConnectAndAuthenticateGameServerAsync(
+        TRANSMUTANSTEINServiceProvider app,
+        int port,
+        int serverId,
+        string sessionCookie,
+        string ipAddress = "127.0.0.1",
+        int gamePort = 11235)
+    {
+        TcpClient? client = null;
+        try
+        {
+            client = new TcpClient();
+            await client.ConnectAsync("127.0.0.1", port);
+            NetworkStream stream = client.GetStream();
+
+            // Send Connect Packet (0x0500)
+            ChatBuffer buffer = new();
+            buffer.WriteCommand(ChatProtocol.GameServerToChatServer.NET_CHAT_GS_CONNECT);
+            buffer.WriteInt32(serverId);
+            buffer.WriteString(sessionCookie);
+            buffer.WriteInt32((int)ChatProtocol.CHAT_PROTOCOL_EXTERNAL_VERSION);
+
+            await SendPacketAsync(stream, buffer);
+
+            // Expect NET_CHAT_GS_ACCEPT (0x1500)
+            await ExpectCommandAsync(stream, ChatProtocol.ChatServerToGameServer.NET_CHAT_GS_ACCEPT);
+
+            // Expect NET_CHAT_GS_REMOTE_COMMAND (0x1504) - injected config
+            await ExpectCommandAsync(stream, ChatProtocol.ChatServerToGameServer.NET_CHAT_GS_REMOTE_COMMAND);
+
+            // Send Status Update (IDLE) to make it available for matchmaking
+            // NET_CHAT_GS_STATUS (0x0502)
+            ChatBuffer statusBuffer = new();
+            // ServerStatusRequestData reads CommandBytes first (2 bytes)
+            statusBuffer.WriteCommand(ChatProtocol.GameServerToChatServer.NET_CHAT_GS_STATUS);
+            statusBuffer.WriteInt32(serverId);
+            statusBuffer.WriteString(ipAddress);
+            statusBuffer.WriteInt16((short)port); // Port
+            statusBuffer.WriteString("Local"); // Location
+            statusBuffer.WriteString("MockServer"); // Name
+            statusBuffer.WriteInt32(-1); // SlaveID
+            statusBuffer.WriteInt32(-1); // MatchID
+            statusBuffer.WriteInt8((byte)ChatProtocol.ServerStatus.SERVER_STATUS_IDLE); // Status
+            statusBuffer.WriteInt8(0); // ArrangedMatchType
+            statusBuffer.WriteInt16((short)ChatProtocol.ServerType.SSF_OFFICIAL); // Flags
+            statusBuffer.WriteString("newerth"); // MapName
+            statusBuffer.WriteString("HoN"); // GameName
+            statusBuffer.WriteString("normal"); // GameMode
+            statusBuffer.WriteInt8(5); // TeamSize
+            statusBuffer.WriteInt16(1500); // MinRating
+            statusBuffer.WriteInt16(1500); // MaxRating
+            statusBuffer.WriteInt32(0); // CurrentGameTime
+            statusBuffer.WriteInt32(0); // CurrentGamePhase
+            statusBuffer.WriteString(""); // LegionTeamInfo
+            statusBuffer.WriteString(""); // HellbourneTeamInfo
+            // 10 PlayerInfo strings
+            for (int i = 0; i < 10; i++) statusBuffer.WriteString("");
+            statusBuffer.WriteInt32(0); // ServerLoad
+            statusBuffer.WriteInt32(0); // LongServerFrameCount
+            statusBuffer.WriteInt64(0); // FreePhysicalMemory
+            statusBuffer.WriteInt64(0); // TotalPhysicalMemory
+            statusBuffer.WriteInt64(0); // DriveFreeSpace
+            statusBuffer.WriteInt64(0); // DriveTotalSpace
+            statusBuffer.WriteString("4.10.1.0"); // Version
+            statusBuffer.WriteInt32(0); // ClientCount
+            statusBuffer.WriteFloat32(0f); // LoadAverage
+            statusBuffer.WriteString("MockHost"); // HostName
+
+            // ClientNetworkStatistics loop (ClientCount is 0, so 0 iterations)
+            
+            await SendPacketAsync(stream, statusBuffer);
+
+            return client;
+        }
+        catch
+        {
+            client?.Dispose();
+            throw;
+        }
+    }
+
+    public static async Task SeedGameServerHostAsync(
+        TRANSMUTANSTEINServiceProvider app,
+        int hostAccountId,
+        int serverId,
+        string sessionCookie,
+        string serverName = "MockServer",
+        string ipAddress = "127.0.0.1",
+        int port = 11235,
+        string region = "USE",
+        string location = "Local")
+    {
+        await SeedLock.WaitAsync();
+        try
+        {
+            using IServiceScope scope = app.Services.CreateScope();
+            MerrickContext db = scope.ServiceProvider.GetRequiredService<MerrickContext>();
+            IDatabase cache = scope.ServiceProvider.GetRequiredService<IDatabase>();
+
+            // 1. Ensure ServerHost Role
+            // Assuming AccountType enum handles role checks usually, but let's just make sure account exists.
+            
+            // 2. Ensure Host Account
+            Account? existingAccount = await db.Accounts.FindAsync(hostAccountId);
+            if (existingAccount == null)
+            {
+                Role? role = await db.Roles.FindAsync(1) ?? new Role { ID = 1, Name = "User" }; // Fallback
+               
+                User user = new()
+                {
+                    ID = hostAccountId,
+                    EmailAddress = $"host{hostAccountId}@test.com",
+                    SRPPasswordHash = "hash",
+                    SRPPasswordSalt = "salt",
+                    PBKDF2PasswordHash = "hash",
+                    Role = role
+                };
+
+                Account account = new()
+                {
+                    ID = hostAccountId,
+                    Name = $"Host_{hostAccountId}",
+                    IsMain = true,
+                    User = user,
+                    Cookie = $"cookie_{hostAccountId}",
+                    Type = AccountType.ServerHost // CRITICAL
+                };
+                
+                user.Accounts = [account];
+                db.Users.Add(user);
+                await db.SaveChangesAsync();
+            }
+            else
+            {
+                if (existingAccount.Type != AccountType.ServerHost)
+                {
+                    existingAccount.Type = AccountType.ServerHost;
+                    db.Accounts.Update(existingAccount);
+                    await db.SaveChangesAsync();
+                }
+            }
+
+            // 3. Seed MatchServer in Cache
+            // ServerHandshake uses GetMatchServerBySessionCookie
+            
+            MatchServer server = newMatchServer(
+                serverId,
+                sessionCookie,
+                serverName,
+                ipAddress,
+                port,
+                location,
+                hostAccountId,
+                $"Host_{hostAccountId}",
+                region
+            );
+
+            await cache.SetMatchServer($"Host_{hostAccountId}", server);
+        }
+        finally
+        {
+            SeedLock.Release();
+        }
+    }
+
+    // Helper to construct MatchServer object since we might not have access to full constructor or setters depending on visibility
+    private static MatchServer newMatchServer(int id, string cookie, string name, string ip, int port, string loc, int hostId, string hostName, string region)
+    {
+        return new MatchServer
+        {
+            ID = id,
+            Cookie = cookie,
+            Name = name,
+            IPAddress = ip,
+            Port = port,
+            Location = loc,
+            HostAccountID = hostId,
+            HostAccountName = hostName,
+            Instance = 1, // Default Instance
+            Description = "Mock Server", // Default Description
+            TimestampRegistered = DateTimeOffset.UtcNow,
+            // Type and Region removed as they don't exist in the definition I read. Status is defaulted to UNKNOWN.
+        };
     }
 }

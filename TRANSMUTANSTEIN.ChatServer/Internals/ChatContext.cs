@@ -2,7 +2,7 @@ using TRANSMUTANSTEIN.ChatServer.Services;
 
 namespace TRANSMUTANSTEIN.ChatServer.Internals;
 
-public class ChatContext(IMatchmakingService matchmakingService) : IChatContext
+public class ChatContext : IChatContext
 {
     public ConcurrentDictionary<string, ChatSession> ClientChatSessions { get; } = [];
 
@@ -11,6 +11,4 @@ public class ChatContext(IMatchmakingService matchmakingService) : IChatContext
     public ConcurrentDictionary<int, ChatSession> MatchServerManagerChatSessions { get; } = [];
 
     public ConcurrentDictionary<string, ChatChannel> ChatChannels { get; } = [];
-
-    public IMatchmakingService Matchmaking { get; } = matchmakingService;
 }

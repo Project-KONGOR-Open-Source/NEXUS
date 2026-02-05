@@ -12,12 +12,17 @@ public class ServerStatus : ISynchronousCommandProcessor<ChatSession>
             requestData.ServerID, requestData.Name, requestData.Address, requestData.Port, requestData.Location,
             requestData.Status);
 
-        // TODO: Update Any Relevant Match Server Data
-
-        // TODO: Update Server In Distributed Cache
-
-        // TODO: If Status Is IDLE, Mark Server As Available For Match Allocation
-        // TODO: If Status Is ACTIVE, Update Match Information And Player Availability States
-        // TODO: If Status Is CRASHED Or KILLED, Remove Server From Pool And Handle Match Cleanup
+        // Update Session Metadata
+        // This is CRITICAL for MatchmakingService to find IDLE servers
+        if (session.ServerMetadata != null)
+        {
+            session.ServerMetadata.Status = requestData.Status;
+            session.ServerMetadata.MatchID = requestData.MatchID;
+            
+            // Note: ServerStatusRequestData seems to have Address/Port/Location too, 
+            // but we usually trust the DB/Cache source of truth or what we set on Handshake.
+            // But if it changes dynamically (e.g. port), we might update it here.
+            // For now, trusting Handshake/DB is safer for IP/Port stability.
+        }
     }
 }

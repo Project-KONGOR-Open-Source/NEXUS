@@ -16,6 +16,7 @@ namespace ASPIRE.Tests.TRANSMUTANSTEIN.ChatServer.Infrastructure;
 public class TRANSMUTANSTEINServiceProvider : WebApplicationFactory<global::TRANSMUTANSTEIN.ChatServer.TRANSMUTANSTEIN>
 {
     public int ClientPort { get; set; } = 50001;
+    public int MatchmakingPlayersPerTeam { get; set; } = 5;
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
@@ -29,7 +30,8 @@ public class TRANSMUTANSTEINServiceProvider : WebApplicationFactory<global::TRAN
                 { "CHAT_SERVER_PORT_MATCH_SERVER", (ClientPort == 0 ? 0 : ClientPort + 100).ToString(CultureInfo.InvariantCulture) },
                 { "CHAT_SERVER_PORT_MATCH_SERVER_MANAGER", (ClientPort == 0 ? 0 : ClientPort + 200).ToString(CultureInfo.InvariantCulture) },
                 // Use localhost for infrastructure to avoid DNS issues in tests
-                { "INFRASTRUCTURE_GATEWAY", "localhost" }
+                { "INFRASTRUCTURE_GATEWAY", "localhost" },
+                { "Matchmaking:PlayersPerTeam", MatchmakingPlayersPerTeam.ToString() }
             };
 
             config.AddInMemoryCollection(settings);
@@ -109,11 +111,13 @@ public class TRANSMUTANSTEINServiceProvider : WebApplicationFactory<global::TRAN
         });
     }
 
-    public static async Task<TRANSMUTANSTEINServiceProvider> CreateOrchestratedInstanceAsync(int clientPort = 50001)
+    public int MatchServerPort { get; set; }
+
+    public static async Task<TRANSMUTANSTEINServiceProvider> CreateOrchestratedInstanceAsync(int clientPort = 50001, int playersPerTeam = 5)
     {
         // If clientPort is 0, we use it as-is to signal dynamic port allocation.
         // Otherwise, we use the provided port.
-        TRANSMUTANSTEINServiceProvider provider = new() { ClientPort = clientPort };
+        TRANSMUTANSTEINServiceProvider provider = new() { ClientPort = clientPort, MatchmakingPlayersPerTeam = playersPerTeam };
 
         // Reset static context to prevent test pollution
         // This is required because Context members are static and persist across In-Process tests
@@ -156,6 +160,21 @@ public class TRANSMUTANSTEINServiceProvider : WebApplicationFactory<global::TRAN
             {
                 throw new Exception("Could not determine bound port from ClientServer Endpoint.");
             }
+
+            // Retrieve MatchServer Port
+            if (chatService.ChatServer.MatchServer.Endpoint is IPEndPoint matchEndpoint)
+            {
+                provider.MatchServerPort = matchEndpoint.Port;
+            }
+            else
+            {
+                 throw new Exception("Could not determine bound port from MatchServer Endpoint.");
+            }
+        }
+        else
+        {
+             // Static Port Calculation
+             provider.MatchServerPort = clientPort + 100;
         }
 
         // Wait for the TCP listeners to spin up using exponential backoff probing

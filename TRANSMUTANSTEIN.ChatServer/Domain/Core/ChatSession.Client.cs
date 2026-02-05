@@ -159,7 +159,7 @@ public partial class ChatSession
             }
 
             // Remove From Matchmaking Group If In One
-            _chatContext.Matchmaking.GetMatchmakingGroup(account.ID)?.RemoveMember(_chatContext.Matchmaking, account.ID);
+            _matchmakingService.GetMatchmakingGroup(account.ID)?.RemoveMember(_matchmakingService, account.ID);
 
             // Log The Client Out And Disconnect The Chat Session
             LogOut();

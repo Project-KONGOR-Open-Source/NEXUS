@@ -10,4 +10,7 @@ public interface IMatchmakingService : IHostedService
     MatchmakingGroup? GetMatchmakingGroupByMemberID(int memberID);
     MatchmakingGroup? GetMatchmakingGroupByMemberName(string memberName);
     MatchmakingGroup? GetMatchmakingGroupByInvitedUser(string accountName);
+    
+    Task ConfirmMatch(int matchupId, int matchId, string serverAddress, int serverPort);
 }
+

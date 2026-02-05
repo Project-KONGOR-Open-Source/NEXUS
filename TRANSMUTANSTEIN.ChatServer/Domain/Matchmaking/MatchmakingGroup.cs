@@ -324,14 +324,8 @@ public class MatchmakingGroup
 
             if (Members.All(member => member.IsReady))
             {
-                ChatBuffer load = new();
-
-                load.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_START_LOADING);
-
-                foreach (MatchmakingGroupMember member in Members)
-                {
-                    member.Session.Send(load);
-                }
+                // All Members Ready -> Join Queue Immediately (Skip "Loading" Phase as per user request)
+                JoinQueue();
             }
 
             return this;
@@ -355,11 +349,23 @@ public class MatchmakingGroup
                 return;
             }
 
-            // Validate That All Members Are Ready And Loaded Before Joining Queue
-            bool allMembersReadyAndLoaded = Members.All(member => member.IsReady && member.LoadingPercent is 100);
+            // Validate That All Members Are Ready Before Joining Queue
+            bool allMembersReady = Members.All(member => member.IsReady);
 
-            if (allMembersReadyAndLoaded is false)
+            if (allMembersReady is false)
             {
+                IEnumerable<string> notReady = Members.Where(m => !m.IsReady).Select(m => $"{m.Account.Name}(NotReady)");
+                Log.Information("[DEBUG] JoinQueue Aborted: Members Not Ready. NotReady: {NotReady}", string.Join(",", notReady));
+                
+                // Notify Session (Leader) and Group that Join Failed
+                ChatBuffer failedParams = new();
+                failedParams.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_FAILED_TO_JOIN);
+                failedParams.WriteInt8(Convert.ToByte(ChatProtocol.TMMFailedToJoinReason.TMMFTJR_BUSY, CultureInfo.InvariantCulture)); // Busy/Generic Reason
+                
+                foreach (MatchmakingGroupMember member in Members)
+                {
+                    member.Session.Send(failedParams);
+                }
                 return;
             }
 
@@ -378,6 +384,8 @@ public class MatchmakingGroup
 
             // Set Group As Queued
             QueueStartTime = DateTimeOffset.UtcNow;
+            
+            Log.Information("[DEBUG] Group {GUID} Joined Queue. Members: {Count}", GUID, Members.Count);
 
             // Broadcast Queue Join To All Group Members
             ChatBuffer joinQueueBroadcast = new();
@@ -709,11 +717,6 @@ public class MatchmakingGroup
     {
         lock (_lock)
         {
-            if (QueueStartTime is null)
-            {
-                return;
-            }
-
             // Remove Group From Queue
             QueueStartTime = null;
 

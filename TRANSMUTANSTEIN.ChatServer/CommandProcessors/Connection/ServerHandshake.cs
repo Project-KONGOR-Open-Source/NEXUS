@@ -14,6 +14,7 @@ public class ServerHandshake(IDatabase distributedCacheStore, MerrickContext dat
         // Set Match Server Metadata On Session
         // This Needs To Be Set At The First Opportunity So That Any Subsequent Code Logic Can Have Access To The Match Server's Metadata
         session.ServerMetadata = requestData.ToMetadata();
+        // Address/Port will be set after fetching from cache/validating match
 
         // Validate Protocol Version
         if (requestData.ChatProtocolVersion != ChatProtocol.CHAT_PROTOCOL_EXTERNAL_VERSION)
@@ -180,5 +181,9 @@ public class ServerHandshake(IDatabase distributedCacheStore, MerrickContext dat
 
         // Update The Match Server Name In The Distributed Cache
         await distributedCacheStore.SetMatchServer(server.HostAccountName, server);
+
+        // Update Metadata
+        session.ServerMetadata.Address = server.IPAddress;
+        session.ServerMetadata.Port = server.Port;
     }
 }

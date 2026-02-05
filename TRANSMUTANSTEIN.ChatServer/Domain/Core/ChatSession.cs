@@ -11,10 +11,12 @@ public partial class ChatSession : TCPSession
         HostEnvironment = serviceProvider.GetRequiredService<IWebHostEnvironment>();
         _serviceProvider = serviceProvider;
         _chatContext = serviceProvider.GetRequiredService<IChatContext>();
+        _matchmakingService = serviceProvider.GetRequiredService<Services.IMatchmakingService>();
     }
 
     private readonly IServiceProvider _serviceProvider;
     private readonly IChatContext _chatContext;
+    private readonly Services.IMatchmakingService _matchmakingService;
 
     /// <summary>
     ///     Gets the current hosting environment information for the web application.

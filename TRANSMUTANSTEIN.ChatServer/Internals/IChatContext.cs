@@ -17,6 +17,4 @@ public interface IChatContext
     ConcurrentDictionary<int, ChatSession> MatchServerManagerChatSessions { get; }
 
     ConcurrentDictionary<string, ChatChannel> ChatChannels { get; }
-
-    Services.IMatchmakingService Matchmaking { get; }
 }
