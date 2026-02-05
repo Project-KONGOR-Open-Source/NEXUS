@@ -280,46 +280,106 @@ public class MatchmakingService(IConfiguration configuration, IChatContext chatC
 
         int currentSlotTeam1 = 0;
         int currentSlotTeam2 = 0;
-        int maxTeamSize = calculatedTeamSize; 
-        int playersAssignedToTeam1 = 0;
+        int maxTeamSize = calculatedTeamSize;
 
-        // Simple Split (Team 1 = Legion, Team 2 = Hellbourne)
-        // Note: bucket logic ensures total players <= 2 * maxTeamSize if configured correctly, 
-        // but here we just split what we have.
+        // Balanced Team Assignment (Greedy "Snake" Logic for Groups)
+        // 1. Sort Groups by Average MMR (Descending) - Strongest groups first
+        // 2. Assign to team with fewer players.
+        // 3. If players equal, assign to team with lower Total MMR.
 
-        
-        foreach (MatchmakingGroup group in groups)
+        List<MatchmakingGroup> sortedGroups = groups.OrderByDescending(g => g.Members.Average(m => m.Rating)).ToList();
+
+        List<MatchmakingGroup> team1Groups = new();
+        List<MatchmakingGroup> team2Groups = new();
+        int team1Count = 0;
+        int team2Count = 0;
+        double team1TotalMmr = 0;
+        double team2TotalMmr = 0;
+
+        foreach (MatchmakingGroup group in sortedGroups)
         {
-            byte team;
-            if (playersAssignedToTeam1 + group.Members.Count <= maxTeamSize)
+            double groupMmr = group.Members.Sum(m => m.Rating);
+            bool addToTeam1;
+
+            // Decision Logic
+            if (team1Count + group.Members.Count > maxTeamSize)
             {
-                team = 1; // Legion
-                playersAssignedToTeam1 += group.Members.Count;
+                // Won't fit in Team 1, must go to Team 2
+                addToTeam1 = false;
+            }
+            else if (team2Count + group.Members.Count > maxTeamSize)
+            {
+                 // Won't fit in Team 2, must go to Team 1
+                 addToTeam1 = true;
             }
             else
             {
-                team = 2; // Hellbourne
+                // Fits in both. Balance!
+                if (team1Count < team2Count)
+                {
+                    addToTeam1 = true; // Fill emptiness
+                }
+                else if (team2Count < team1Count)
+                {
+                    addToTeam1 = false;
+                }
+                else
+                {
+                    // Counts equal. Balance MMR.
+                    addToTeam1 = team1TotalMmr <= team2TotalMmr;
+                }
             }
-            
+
+            if (addToTeam1)
+            {
+                team1Groups.Add(group);
+                team1Count += group.Members.Count;
+                team1TotalMmr += groupMmr;
+            }
+            else
+            {
+                team2Groups.Add(group);
+                team2Count += group.Members.Count;
+                team2TotalMmr += groupMmr;
+            }
+        }
+
+        // Now Write to Packet
+        // Team 1
+        foreach (MatchmakingGroup group in team1Groups)
+        {
             foreach (MatchmakingGroupMember member in group.Members)
             {
-                 // Player Info Structure:
-                 // AccountId, Team, Slot, GroupSize, WinMMRDelta, LossMMRDelta, Unknown2, GroupIndex, Unknown4
                  createMatch.WriteInt32(member.Account.ID);
-                 createMatch.WriteInt8(team);
+                 createMatch.WriteInt8(1); // Team 1 (Legion)
                  
-                 // Slot is 0-indexed per team usually? Or 1-indexed? K2 usually uses 0-9 total or 0-4 per team.
-                 // CreateMatchResponse.PlayerInfo implies 'Slot'.
-                 // Let's use 0-indexed per team for now.
-                 byte slot = (byte)(team == 1 ? currentSlotTeam1++ : currentSlotTeam2++);
-                 
+                 byte slot = (byte)currentSlotTeam1++;
                  createMatch.WriteInt8(slot);
                  createMatch.WriteInt8((byte)group.Members.Count);
-                 createMatch.WriteInt32(BitConverter.SingleToInt32Bits(10.0f)); // Win Delta
-                 createMatch.WriteInt32(BitConverter.SingleToInt32Bits(10.0f)); // Loss Delta
-                 createMatch.WriteInt8(0); // Unknown2
-                 createMatch.WriteInt8(0); // GroupIndex (TODO: Assign unique index to groups)
-                 createMatch.WriteInt8(0); // Unknown4
+                 createMatch.WriteInt32(BitConverter.SingleToInt32Bits(10.0f)); 
+                 createMatch.WriteInt32(BitConverter.SingleToInt32Bits(10.0f)); 
+                 createMatch.WriteInt8(0); 
+                 createMatch.WriteInt8(0); 
+                 createMatch.WriteInt8(0); 
+            }
+        }
+
+        // Team 2
+        foreach (MatchmakingGroup group in team2Groups)
+        {
+            foreach (MatchmakingGroupMember member in group.Members)
+            {
+                 createMatch.WriteInt32(member.Account.ID);
+                 createMatch.WriteInt8(2); // Team 2 (Hellbourne)
+                 
+                 byte slot = (byte)currentSlotTeam2++;
+                 createMatch.WriteInt8(slot);
+                 createMatch.WriteInt8((byte)group.Members.Count);
+                 createMatch.WriteInt32(BitConverter.SingleToInt32Bits(10.0f)); 
+                 createMatch.WriteInt32(BitConverter.SingleToInt32Bits(10.0f)); 
+                 createMatch.WriteInt8(0); 
+                 createMatch.WriteInt8(0); 
+                 createMatch.WriteInt8(0); 
             }
         }
         
