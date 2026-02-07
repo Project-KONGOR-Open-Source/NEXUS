@@ -132,7 +132,7 @@ public class MatchStatsResponse
     ///     The server time (in UTC seconds).
     /// </summary>
     [PHPProperty("timestamp")]
-    public long ServerTimestamp { get; init; } = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+    public int ServerTimestamp { get; init; } = Convert.ToInt32(Math.Min(DateTimeOffset.UtcNow.ToUnixTimeSeconds(), Convert.ToInt64(Int32.MaxValue)));
 
     /// <summary>
     ///     Used for the quest system, which has been disabled.
