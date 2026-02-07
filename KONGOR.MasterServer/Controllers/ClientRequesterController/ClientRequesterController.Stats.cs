@@ -54,6 +54,93 @@ public partial class ClientRequesterController
         return Ok(PhpSerialization.Serialize(response));
     }
 
+    private async Task<IActionResult> GetStatistics()
+    {
+        string? accountName = Request.Form["nickname"];
+
+        if (accountName is null)
+            return BadRequest(@"Missing Value For Form Parameter ""nickname""");
+
+        Account? account = await MerrickContext.Accounts
+            .Include(account => account.User)
+            .Include(account => account.Clan)
+            .SingleOrDefaultAsync(account => account.Name.Equals(accountName));
+
+        if (account is null)
+            return NotFound($@"Account With Name ""{accountName}"" Was Not Found");
+
+        string? table = Request.Form["table"];
+
+        if (table is null)
+            return BadRequest(@"Missing Value For Form Parameter ""table""");
+
+        // Fetch All Statistics For The Account To Build Aggregates
+        List<AccountStatistics> allStatistics = await MerrickContext.AccountStatistics
+            .Where(statistics => statistics.AccountID == account.ID)
+            .ToListAsync();
+
+        Dictionary<AccountStatisticsType, AccountStatistics> statisticsByType = allStatistics.ToDictionary(statistics => statistics.Type);
+
+        AggregateStatistics aggregates = AggregateStatistics.FromStatistics(statisticsByType);
+
+        if (table is "player")
+        {
+            AccountStatistics statistics = statisticsByType[AccountStatisticsType.Public];
+
+            PlayerStatisticsResponse response = new(account, statistics, aggregates);
+
+            return Ok(PhpSerialization.Serialize(response));
+        }
+
+        if (table is "ranked")
+        {
+            AccountStatistics statistics = statisticsByType[AccountStatisticsType.Matchmaking];
+
+            RankedStatisticsResponse response = new(account, statistics, aggregates);
+
+            return Ok(PhpSerialization.Serialize(response));
+        }
+
+        if (table is "casual")
+        {
+            AccountStatistics statistics = statisticsByType[AccountStatisticsType.MatchmakingCasual];
+
+            CasualStatisticsResponse response = new(account, statistics, aggregates);
+
+            return Ok(PhpSerialization.Serialize(response));
+        }
+
+        if (table is "campaign")
+        {
+            AccountStatistics statistics = statisticsByType[AccountStatisticsType.Matchmaking];
+
+            CampaignStatisticsResponse response = new(account, statistics, aggregates);
+
+            return Ok(PhpSerialization.Serialize(response));
+        }
+
+        if (table is "campaign_casual")
+        {
+            AccountStatistics statistics = statisticsByType[AccountStatisticsType.MatchmakingCasual];
+
+            CampaignCasualStatisticsResponse response = new(account, statistics, aggregates);
+
+            return Ok(PhpSerialization.Serialize(response));
+        }
+
+        if (table is "mastery")
+        {
+            ShowMasteryStatisticsResponse response = new(account);
+
+            // TODO: Populate MasteryInfo From Mastery System Once Re-Implemented
+            // TODO: Populate MasteryRewards From Mastery System Once Re-Implemented (Only For Own Account)
+
+            return Ok(PhpSerialization.Serialize(response));
+        }
+
+        throw new ArgumentOutOfRangeException(nameof(table), table, $@"Unsupported Value For Form Parameter ""table"": ""{table}""");
+    }
+
     private async Task<IActionResult> GetMatchStatistics()
     {
         string? cookie = Request.Form["cookie"];
