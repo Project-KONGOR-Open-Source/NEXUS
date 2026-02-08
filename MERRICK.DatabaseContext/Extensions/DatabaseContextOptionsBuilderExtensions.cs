@@ -17,6 +17,7 @@ public static class DatabaseContextOptionsBuilderExtensions
     public static DbContextOptionsBuilder AddMerrickInterceptors(this DbContextOptionsBuilder optionsBuilder)
     {
         optionsBuilder.AddInterceptors(new AccountStatisticsInterceptor());
+        optionsBuilder.AddInterceptors(new MatchStatisticsInterceptor());
 
         return optionsBuilder;
     }

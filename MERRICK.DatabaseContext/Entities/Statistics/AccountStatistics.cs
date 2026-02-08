@@ -47,6 +47,18 @@ public class AccountStatistics
     ///     "110110" means 6 placement matches with 4 wins and 2 losses.
     /// </remarks>
     public required string? PlacementMatchesData { get; set; }
+
+    /// <summary>
+    ///     Aggregated per-hero statistics stored as JSON.
+    ///     Updated automatically when matches are recorded.
+    /// </summary>
+    public HeroStatisticsSummary HeroStatistics { get; set; } = new();
+
+    /// <summary>
+    ///     Aggregated award statistics stored as JSON.
+    ///     Updated automatically when matches are recorded.
+    /// </summary>
+    public AwardStatisticsSummary AwardStatistics { get; set; } = new();
 }
 
 public enum AccountStatisticsType

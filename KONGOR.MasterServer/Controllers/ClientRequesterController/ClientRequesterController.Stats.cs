@@ -15,24 +15,44 @@ public partial class ClientRequesterController
         if (account is null)
             return NotFound($@"Account With Name ""{accountName}"" Was Not Found");
 
-        // TODO: Implement Actual Award Statistics From Database
+        List<AccountStatistics> allAccountStatistics = await MerrickContext.AccountStatistics
+            .Where(statistics => statistics.AccountID == account.ID)
+            .ToListAsync();
+
+        AwardStatisticsSummary aggregatedAwards = new ();
+
+        foreach (AccountStatistics statistics in allAccountStatistics)
+        {
+            aggregatedAwards.MVPAwards += statistics.AwardStatistics.MVPAwards;
+            aggregatedAwards.AnnihilationAwards += statistics.AwardStatistics.AnnihilationAwards;
+            aggregatedAwards.QuadKillAwards += statistics.AwardStatistics.QuadKillAwards;
+            aggregatedAwards.LongestKillStreakAwards += statistics.AwardStatistics.LongestKillStreakAwards;
+            aggregatedAwards.SmackdownAwards += statistics.AwardStatistics.SmackdownAwards;
+            aggregatedAwards.MostKillsAwards += statistics.AwardStatistics.MostKillsAwards;
+            aggregatedAwards.MostAssistsAwards += statistics.AwardStatistics.MostAssistsAwards;
+            aggregatedAwards.LeastDeathsAwards += statistics.AwardStatistics.LeastDeathsAwards;
+            aggregatedAwards.MostBuildingDamageAwards += statistics.AwardStatistics.MostBuildingDamageAwards;
+            aggregatedAwards.MostWardsDestroyedAwards += statistics.AwardStatistics.MostWardsDestroyedAwards;
+            aggregatedAwards.MostHeroDamageDealtAwards += statistics.AwardStatistics.MostHeroDamageDealtAwards;
+            aggregatedAwards.HighestCreepScoreAwards += statistics.AwardStatistics.HighestCreepScoreAwards;
+        }
 
         GetPlayerAwardSummaryResponse response = new ()
         {
             AccountID = account.ID.ToString(),
 
-            MVPAwards = Random.Shared.Next(0, int.MaxValue).ToString(),
-            AnnihilationAwards = Random.Shared.Next(0, int.MaxValue).ToString(),
-            QuadKillAwards = Random.Shared.Next(0, int.MaxValue).ToString(),
-            LongestKillStreakAwards = Random.Shared.Next(0, int.MaxValue).ToString(),
-            SmackdownAwards = Random.Shared.Next(0, int.MaxValue).ToString(),
-            MostKillsAwards = Random.Shared.Next(0, int.MaxValue).ToString(),
-            MostAssistsAwards = Random.Shared.Next(0, int.MaxValue).ToString(),
-            LeastDeathsAwards = Random.Shared.Next(0, int.MaxValue).ToString(),
-            MostBuildingDamageAwards = Random.Shared.Next(0, int.MaxValue).ToString(),
-            MostWardsDestroyedAwards = Random.Shared.Next(0, int.MaxValue).ToString(),
-            MostHeroDamageDealtAwards = Random.Shared.Next(0, int.MaxValue).ToString(),
-            HighestCreepScoreAwards = Random.Shared.Next(0, int.MaxValue).ToString()
+            MVPAwards = aggregatedAwards.MVPAwards.ToString(),
+            AnnihilationAwards = aggregatedAwards.AnnihilationAwards.ToString(),
+            QuadKillAwards = aggregatedAwards.QuadKillAwards.ToString(),
+            LongestKillStreakAwards = aggregatedAwards.LongestKillStreakAwards.ToString(),
+            SmackdownAwards = aggregatedAwards.SmackdownAwards.ToString(),
+            MostKillsAwards = aggregatedAwards.MostKillsAwards.ToString(),
+            MostAssistsAwards = aggregatedAwards.MostAssistsAwards.ToString(),
+            LeastDeathsAwards = aggregatedAwards.LeastDeathsAwards.ToString(),
+            MostBuildingDamageAwards = aggregatedAwards.MostBuildingDamageAwards.ToString(),
+            MostWardsDestroyedAwards = aggregatedAwards.MostWardsDestroyedAwards.ToString(),
+            MostHeroDamageDealtAwards = aggregatedAwards.MostHeroDamageDealtAwards.ToString(),
+            HighestCreepScoreAwards = aggregatedAwards.HighestCreepScoreAwards.ToString()
         };
 
         // TODO: Most Wards Destroyed Awards Seems To Be Missing From The Client UI, Find Out Why
@@ -196,187 +216,122 @@ public partial class ClientRequesterController
 
     private async Task<IActionResult> GetHeroStatistics()
     {
-        // TODO: Implement Actual Hero Statistics From Database
+        string? accountName = Request.Form["nickname"];
+
+        if (accountName is null)
+            return BadRequest(@"Missing Value For Form Parameter ""nickname""");
+
+        Account? account = await MerrickContext.Accounts
+            .SingleOrDefaultAsync(account => account.Name.Equals(accountName));
+
+        if (account is null)
+            return NotFound($@"Account With Name ""{accountName}"" Was Not Found");
+
+        Dictionary<AccountStatisticsType, AccountStatistics> statisticsByType = await MerrickContext.AccountStatistics
+            .Where(statistics => statistics.AccountID == account.ID)
+            .ToDictionaryAsync(statistics => statistics.Type);
+
+        List<RankedHeroStatistics> rankedStats = [];
+
+        // Build Ranked Hero Statistics
+        if (statisticsByType.TryGetValue(AccountStatisticsType.Matchmaking, out AccountStatistics? matchmakingStatistics))
+        {
+            rankedStats = [.. matchmakingStatistics.HeroStatistics.Heroes.Select(heroStats => new RankedHeroStatistics
+            {
+                HeroIdentifier = heroStats.HeroIdentifier,
+                TimesUsed = heroStats.GamesPlayed.ToString(),
+                Wins = heroStats.Wins.ToString(),
+                Losses = heroStats.Losses.ToString(),
+                HeroKills = heroStats.HeroKills.ToString(),
+                Deaths = heroStats.HeroDeaths.ToString(),
+                HeroAssists = heroStats.HeroAssists.ToString(),
+                TeamCreepKills = heroStats.TeamCreepKills.ToString(),
+                Denies = heroStats.Denies.ToString(),
+                Experience = heroStats.Experience.ToString(),
+                Gold = heroStats.Gold.ToString(),
+                Actions = heroStats.Actions.ToString(),
+                TimeEarningExperience = heroStats.TimeEarningExperience.ToString()
+            })];
+        }
+
+        List<CasualHeroStatistics> casualStats = [];
+
+        // Build Casual Hero Statistics
+        if (statisticsByType.TryGetValue(AccountStatisticsType.MatchmakingCasual, out AccountStatistics? casualStatistics))
+        {
+            casualStats = [.. casualStatistics.HeroStatistics.Heroes.Select(heroStats => new CasualHeroStatistics
+            {
+                HeroIdentifier = heroStats.HeroIdentifier,
+                TimesUsed = heroStats.GamesPlayed.ToString(),
+                Wins = heroStats.Wins.ToString(),
+                Losses = heroStats.Losses.ToString(),
+                HeroKills = heroStats.HeroKills.ToString(),
+                Deaths = heroStats.HeroDeaths.ToString(),
+                HeroAssists = heroStats.HeroAssists.ToString(),
+                TeamCreepKills = heroStats.TeamCreepKills.ToString(),
+                Denies = heroStats.Denies.ToString(),
+                Experience = heroStats.Experience.ToString(),
+                Gold = heroStats.Gold.ToString(),
+                Actions = heroStats.Actions.ToString(),
+                TimeEarningExperience = heroStats.TimeEarningExperience.ToString()
+            })];
+        }
+
+        List<CampaignHeroStatistics> campaignStats = [];
+
+        // Build Campaign Normal Hero Statistics
+        if (statisticsByType.TryGetValue(AccountStatisticsType.Matchmaking, out AccountStatistics? campaignStatisticsSource))
+        {
+            campaignStats = [.. campaignStatisticsSource.HeroStatistics.Heroes.Select(heroStats => new CampaignHeroStatistics
+            {
+                HeroIdentifier = heroStats.HeroIdentifier,
+                TimesUsed = heroStats.GamesPlayed.ToString(),
+                Wins = heroStats.Wins.ToString(),
+                Losses = heroStats.Losses.ToString(),
+                HeroKills = heroStats.HeroKills.ToString(),
+                Deaths = heroStats.HeroDeaths.ToString(),
+                HeroAssists = heroStats.HeroAssists.ToString(),
+                TeamCreepKills = heroStats.TeamCreepKills.ToString(),
+                Denies = heroStats.Denies.ToString(),
+                Experience = heroStats.Experience.ToString(),
+                Gold = heroStats.Gold.ToString(),
+                Actions = heroStats.Actions.ToString(),
+                TimeEarningExperience = heroStats.TimeEarningExperience.ToString()
+            })];
+        }
+
+        List<CampaignCasualHeroStatistics> campaignCasualStats = [];
+
+        // Build Campaign Casual Hero Statistics
+        if (statisticsByType.TryGetValue(AccountStatisticsType.MatchmakingCasual, out AccountStatistics? campaignCasualStatisticsSource))
+        {
+            campaignCasualStats = [.. campaignCasualStatisticsSource.HeroStatistics.Heroes.Select(heroStats => new CampaignCasualHeroStatistics
+            {
+                HeroIdentifier = heroStats.HeroIdentifier,
+                TimesUsed = heroStats.GamesPlayed.ToString(),
+                Wins = heroStats.Wins.ToString(),
+                Losses = heroStats.Losses.ToString(),
+                HeroKills = heroStats.HeroKills.ToString(),
+                Deaths = heroStats.HeroDeaths.ToString(),
+                HeroAssists = heroStats.HeroAssists.ToString(),
+                TeamCreepKills = heroStats.TeamCreepKills.ToString(),
+                Denies = heroStats.Denies.ToString(),
+                Experience = heroStats.Experience.ToString(),
+                Gold = heroStats.Gold.ToString(),
+                Actions = heroStats.Actions.ToString(),
+                TimeEarningExperience = heroStats.TimeEarningExperience.ToString()
+            })];
+        }
 
         GetHeroStatisticsResponse response = new ()
         {
-            # region Test Data
             AllHeroStatistics = new AllHeroStatistics
             {
-                Ranked =
-                [
-                    new ()
-                    {
-                        HeroIdentifier = "Hero_Armadon",
-                        TimesUsed = "69",
-                        Wins = "37",
-                        Losses = "32",
-                        HeroKills = "338",
-                        Deaths = "437",
-                        HeroAssists = "735",
-                        TeamCreepKills = "4855",
-                        Denies = "423",
-                        Experience = "936843",
-                        Gold = "571726",
-                        Actions = "238865",
-                        TimeEarningExperience = "147897"
-                    },
-                    new ()
-                    {
-                        HeroIdentifier = "Hero_Behemoth",
-                        TimesUsed = "21",
-                        Wins = "13",
-                        Losses = "8",
-                        HeroKills = "89",
-                        Deaths = "142",
-                        HeroAssists = "304",
-                        TeamCreepKills = "1552",
-                        Denies = "93",
-                        Experience = "316797",
-                        Gold = "200982",
-                        Actions = "68970",
-                        TimeEarningExperience = "48968"
-                    },
-                    new ()
-                    {
-                        HeroIdentifier = "Hero_Valkyrie",
-                        TimesUsed = "85",
-                        Wins = "42",
-                        Losses = "43",
-                        HeroKills = "414",
-                        Deaths = "462",
-                        HeroAssists = "807",
-                        TeamCreepKills = "7373",
-                        Denies = "812",
-                        Experience = "1314576",
-                        Gold = "830936",
-                        Actions = "293553",
-                        TimeEarningExperience = "197288"
-                    }
-                ],
-                Casual =
-                [
-                    new ()
-                    {
-                        HeroIdentifier = "Hero_Defiler",
-                        TimesUsed = "4",
-                        Wins = "2",
-                        Losses = "2",
-                        HeroKills = "19",
-                        Deaths = "40",
-                        HeroAssists = "74",
-                        TeamCreepKills = "276",
-                        Denies = "18",
-                        Experience = "71282",
-                        Gold = "60110",
-                        Actions = "11786",
-                        TimeEarningExperience = "8333"
-                    },
-                    new ()
-                    {
-                        HeroIdentifier = "Hero_Hellbringer",
-                        TimesUsed = "6",
-                        Wins = "4",
-                        Losses = "2",
-                        HeroKills = "42",
-                        Deaths = "46",
-                        HeroAssists = "59",
-                        TeamCreepKills = "422",
-                        Denies = "34",
-                        Experience = "85391",
-                        Gold = "89842",
-                        Actions = "13797",
-                        TimeEarningExperience = "10682"
-                    }
-                ],
-                Campaign =
-                [
-                    new ()
-                    {
-                        HeroIdentifier = "Hero_Ebulus",
-                        TimesUsed = "25",
-                        Wins = "13",
-                        Losses = "12",
-                        HeroKills = "140",
-                        Deaths = "202",
-                        HeroAssists = "266",
-                        TeamCreepKills = "1696",
-                        Denies = "121",
-                        Experience = "323778",
-                        Gold = "224830",
-                        Actions = "66027",
-                        TimeEarningExperience = "54746"
-                    },
-                    new ()
-                    {
-                        HeroIdentifier = "Hero_Shaman",
-                        TimesUsed = "32",
-                        Wins = "17",
-                        Losses = "15",
-                        HeroKills = "67",
-                        Deaths = "194",
-                        HeroAssists = "413",
-                        TeamCreepKills = "1648",
-                        Denies = "98",
-                        Experience = "426615",
-                        Gold = "282328",
-                        Actions = "81134",
-                        TimeEarningExperience = "71783"
-                    },
-                    new ()
-                    {
-                        HeroIdentifier = "Hero_Hellbringer",
-                        TimesUsed = "31",
-                        Wins = "18",
-                        Losses = "13",
-                        HeroKills = "146",
-                        Deaths = "227",
-                        HeroAssists = "391",
-                        TeamCreepKills = "1519",
-                        Denies = "75",
-                        Experience = "383348",
-                        Gold = "278681",
-                        Actions = "73110",
-                        TimeEarningExperience = "65994"
-                    }
-                ],
-                CampaignCasual =
-                [
-                    new ()
-                    {
-                        HeroIdentifier = "Hero_Empath",
-                        TimesUsed = "5",
-                        Wins = "3",
-                        Losses = "2",
-                        HeroKills = "20",
-                        Deaths = "35",
-                        HeroAssists = "45",
-                        TeamCreepKills = "182",
-                        Denies = "15",
-                        Experience = "50000",
-                        Gold = "35000",
-                        Actions = "8000",
-                        TimeEarningExperience = "7500"
-                    },
-                    new ()
-                    {
-                        HeroIdentifier = "Hero_Lodestone",
-                        TimesUsed = "3",
-                        Wins = "2",
-                        Losses = "1",
-                        HeroKills = "15",
-                        Deaths = "20",
-                        HeroAssists = "30",
-                        TeamCreepKills = "250",
-                        Denies = "20",
-                        Experience = "45000",
-                        Gold = "30000",
-                        Actions = "6500",
-                        TimeEarningExperience = "6000"
-                    }
-                ]
+                Ranked = rankedStats,
+                Casual = casualStats,
+                Campaign = campaignStats,
+                CampaignCasual = campaignCasualStats
             }
-            # endregion
         };
 
         return Ok(PhpSerialization.Serialize(response));
