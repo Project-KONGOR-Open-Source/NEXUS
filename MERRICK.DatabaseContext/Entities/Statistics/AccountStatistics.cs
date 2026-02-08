@@ -52,13 +52,13 @@ public class AccountStatistics
     ///     Aggregated per-hero statistics stored as JSON.
     ///     Updated automatically when matches are recorded.
     /// </summary>
-    public HeroStatisticsSummary HeroStatistics { get; set; } = new();
+    public HeroStatisticsSummary HeroStatistics { get; set; } = new ();
 
     /// <summary>
     ///     Aggregated award statistics stored as JSON.
     ///     Updated automatically when matches are recorded.
     /// </summary>
-    public AwardStatisticsSummary AwardStatistics { get; set; } = new();
+    public AwardStatisticsSummary AwardStatistics { get; set; } = new ();
 }
 
 public enum AccountStatisticsType
