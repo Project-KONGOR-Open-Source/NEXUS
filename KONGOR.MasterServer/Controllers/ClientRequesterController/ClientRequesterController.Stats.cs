@@ -2,6 +2,18 @@
 
 public partial class ClientRequesterController
 {
+    private async Task<IActionResult> GetSeasons()
+    {
+        int[] seasons = [ 666 ];
+
+        GetSeasonsResponse response = new ()
+        {
+            AllSeasons = string.Join("|", seasons.Select(season => $"{season},0|{season},1"))
+        };
+
+        return Ok(PhpSerialization.Serialize(response));
+    }
+
     private async Task<IActionResult> GetSimpleStatistics()
     {
         string? accountName = Request.Form["nickname"];
@@ -25,7 +37,7 @@ public partial class ClientRequesterController
             LevelExperience = account.User.TotalExperience,
             NumberOfAvatarsOwned = account.User.OwnedStoreItems.Count(item => item.StartsWith("aa.")),
             TotalMatchesPlayed = 5555, // TODO: Implement Matches Played
-            CurrentSeason = 12, // TODO: Set Season
+            CurrentSeason = 666,
             SimpleSeasonStats = new SimpleSeasonStats() // TODO: Implement Stats
             {
                 RankedMatchesWon = 1001 /* ranked */ + 1001 /* ranked casual */,

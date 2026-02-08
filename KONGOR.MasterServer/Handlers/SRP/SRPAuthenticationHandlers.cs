@@ -31,7 +31,7 @@ public static class SRPAuthenticationHandlers
             GoldCoins = parameters.Account.User.GoldCoins.ToString(),
             SilverCoins = parameters.Account.User.SilverCoins,
             CustomIconSlotID = SetCustomIconSlotID(parameters.Account),
-            CurrentSeason = "12", // TODO: Set Season
+            CurrentSeason = "666",
             MuteExpiration = 0, // TODO: Implement Account Muting As Part Of The Karma System
             FriendAccountList = SetFriendAccountList(parameters.Account),
             IgnoredAccountsList = SetIgnoredAccountsList(parameters.Account),
