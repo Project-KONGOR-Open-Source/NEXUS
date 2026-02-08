@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MERRICK.DatabaseContext.Migrations
 {
     [DbContext(typeof(MerrickContext))]
-    [Migration("20260208210834_AddHeroAndAwardStatistics")]
-    partial class AddHeroAndAwardStatistics
+    [Migration("20260208220646_CreatePrimordialEntities")]
+    partial class CreatePrimordialEntities
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

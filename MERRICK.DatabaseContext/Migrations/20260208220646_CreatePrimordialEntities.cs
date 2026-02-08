@@ -337,7 +337,9 @@ namespace MERRICK.DatabaseContext.Migrations
                     HeroDeaths = table.Column<int>(type: "int", nullable: false),
                     WardsPlaced = table.Column<int>(type: "int", nullable: false),
                     Smackdowns = table.Column<int>(type: "int", nullable: false),
-                    PlacementMatchesData = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    PlacementMatchesData = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    AwardStatistics = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    HeroStatistics = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
