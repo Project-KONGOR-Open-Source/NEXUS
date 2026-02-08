@@ -2,8 +2,51 @@
 
 public partial class ClientRequesterController
 {
+    private async Task<IActionResult> GetPlayerAwardSummary()
+    {
+        string? accountName = Request.Form["nickname"];
+
+        if (accountName is null)
+            return BadRequest(@"Missing Value For Form Parameter ""nickname""");
+
+        Account? account = await MerrickContext.Accounts
+            .SingleOrDefaultAsync(account => account.Name.Equals(accountName));
+
+        if (account is null)
+            return NotFound($@"Account With Name ""{accountName}"" Was Not Found");
+
+        // TODO: Implement Actual Award Statistics From Database
+
+        GetPlayerAwardSummaryResponse response = new()
+        {
+            AccountID = account.ID.ToString(),
+
+            MVPAwards = Random.Shared.Next(0, int.MaxValue).ToString(),
+            AnnihilationAwards = Random.Shared.Next(0, int.MaxValue).ToString(),
+            QuadKillAwards = Random.Shared.Next(0, int.MaxValue).ToString(),
+            LongestKillStreakAwards = Random.Shared.Next(0, int.MaxValue).ToString(),
+            SmackdownAwards = Random.Shared.Next(0, int.MaxValue).ToString(),
+            MostKillsAwards = Random.Shared.Next(0, int.MaxValue).ToString(),
+            MostAssistsAwards = Random.Shared.Next(0, int.MaxValue).ToString(),
+            LeastDeathsAwards = Random.Shared.Next(0, int.MaxValue).ToString(),
+            MostBuildingDamageAwards = Random.Shared.Next(0, int.MaxValue).ToString(),
+            MostWardsDestroyedAwards = Random.Shared.Next(0, int.MaxValue).ToString(),
+            MostHeroDamageDealtAwards = Random.Shared.Next(0, int.MaxValue).ToString(),
+            HighestCreepScoreAwards = Random.Shared.Next(0, int.MaxValue).ToString()
+        };
+
+        // TODO: Most Wards Destroyed Awards Seems To Be Missing From The Client UI, Find Out Why
+
+        return Ok(PhpSerialization.Serialize(response));
+    }
+
     private async Task<IActionResult> GetSeasons()
     {
+        string? accountName = Request.Form["nickname"];
+
+        if (accountName is null)
+            return BadRequest(@"Missing Value For Form Parameter ""nickname""");
+
         int[] seasons = [ 666 ];
 
         GetSeasonsResponse response = new ()

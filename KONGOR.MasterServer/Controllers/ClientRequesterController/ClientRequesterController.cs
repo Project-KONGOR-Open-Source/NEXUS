@@ -79,6 +79,7 @@ public partial class ClientRequesterController(MerrickContext databaseContext, I
         return Request.Form["f"].SingleOrDefault() switch
         {
             // statistics
+            "get_player_award_summ"         => await GetPlayerAwardSummary(),
             "get_seasons"                   => await GetSeasons(),
             "show_stats"                    => await GetStatistics(),
 
