@@ -759,7 +759,7 @@ public class MatchMastery(string heroIdentifier, int currentMasteryExperience, i
     //}
 
     /// <summary>
-    ///     The identifier of the hero, in the format Hero_{Snake_Case_Name}.
+    ///     The identifier of the hero, in the format Hero_{Snake_Case_Name} (e.g. "Hero_Armadon").
     /// </summary>
     [PHPProperty("cli_name")]
     public string HeroIdentifier { get; init; } = heroIdentifier;

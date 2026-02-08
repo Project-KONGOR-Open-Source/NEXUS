@@ -839,7 +839,7 @@ public class CasualStatisticsResponse(Account account, AccountStatistics statist
     ///     Quest statistics data (disabled feature).
     /// </summary>
     [PHPProperty("quest_stats")]
-    public Dictionary<string, QuestStatistics> QuestStatistics { get; init; } = new() { { "error", new QuestStatistics() } };
+    public Dictionary<string, QuestStatistics> QuestStatistics { get; init; } = new () { { "error", new QuestStatistics() } };
 
     /// <summary>
     ///     Total campaign games played in previous seasons.
@@ -941,7 +941,7 @@ public class CasualStatisticsResponse(Account account, AccountStatistics statist
     ///     Campaign reward data including medal levels and achievement status.
     /// </summary>
     [PHPProperty("con_reward")]
-    public CampaignReward CampaignReward { get; init; } = new();
+    public CampaignReward CampaignReward { get; init; } = new ();
 
     #endregion
 

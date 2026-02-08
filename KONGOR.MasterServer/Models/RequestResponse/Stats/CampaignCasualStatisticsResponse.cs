@@ -697,7 +697,7 @@ public class CampaignCasualStatisticsResponse(Account account, AccountStatistics
     ///     Campaign reward data including medal levels and achievement status.
     /// </summary>
     [PHPProperty("con_reward")]
-    public CampaignReward CampaignReward { get; init; } = new();
+    public CampaignReward CampaignReward { get; init; } = new ();
 
     #endregion
 
@@ -927,7 +927,7 @@ public class CampaignCasualStatisticsResponse(Account account, AccountStatistics
     ///     Quest statistics data (disabled feature).
     /// </summary>
     [PHPProperty("quest_stats")]
-    public Dictionary<string, QuestStatistics> QuestStatistics { get; init; } = new() { { "error", new QuestStatistics() } };
+    public Dictionary<string, QuestStatistics> QuestStatistics { get; init; } = new () { { "error", new QuestStatistics() } };
 
     /// <summary>
     ///     The minimum number of matches a free-to-play account must complete to become verified.
