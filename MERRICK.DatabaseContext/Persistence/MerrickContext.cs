@@ -33,6 +33,7 @@ public sealed class MerrickContext : DbContext
 
         ConfigureRoles(builder.Entity<Role>());
         ConfigureAccounts(builder.Entity<Account>());
+        ConfigureAccountStatistics(builder.Entity<AccountStatistics>());
         ConfigureMatchStatistics(builder.Entity<MatchStatistics>());
         ConfigureMatchParticipantStatistics(builder.Entity<MatchParticipantStatistics>());
     }
@@ -75,6 +76,20 @@ public sealed class MerrickContext : DbContext
         builder.OwnsMany(account => account.BannedPeers, ownedNavigationBuilder => { ownedNavigationBuilder.ToJson(); });
         builder.OwnsMany(account => account.FriendedPeers, ownedNavigationBuilder => { ownedNavigationBuilder.ToJson(); });
         builder.OwnsMany(account => account.IgnoredPeers, ownedNavigationBuilder => { ownedNavigationBuilder.ToJson(); });
+    }
+
+    private static void ConfigureAccountStatistics(EntityTypeBuilder<AccountStatistics> builder)
+    {
+        builder.OwnsOne(statistics => statistics.HeroStatistics, ownedNavigationBuilder =>
+        {
+            ownedNavigationBuilder.ToJson();
+            ownedNavigationBuilder.OwnsMany(summary => summary.Heroes);
+        });
+
+        builder.OwnsOne(statistics => statistics.AwardStatistics, ownedNavigationBuilder =>
+        {
+            ownedNavigationBuilder.ToJson();
+        });
     }
 
     private static void ConfigureMatchParticipantStatistics(EntityTypeBuilder<MatchParticipantStatistics> builder)

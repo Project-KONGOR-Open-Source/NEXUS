@@ -291,7 +291,7 @@ public class SRPAuthenticationResponseStageTwo
     ///     The server time (in UTC seconds).
     /// </summary>
     [PHPProperty("timestamp")]
-    public long ServerTimestamp { get; set; } = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+    public int ServerTimestamp { get; set; } = Convert.ToInt32(Math.Min(DateTimeOffset.UtcNow.ToUnixTimeSeconds(), Convert.ToInt64(Int32.MaxValue)));
 
     /// <summary>
     ///     The current season.

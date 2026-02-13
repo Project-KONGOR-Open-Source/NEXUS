@@ -172,7 +172,7 @@ public class ShowSimpleStatsResponse
     ///     The server time (in UTC seconds).
     /// </summary>
     [PHPProperty("timestamp")]
-    public long ServerTimestamp { get; set; } = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+    public int ServerTimestamp { get; set; } = Convert.ToInt32(Math.Min(DateTimeOffset.UtcNow.ToUnixTimeSeconds(), Convert.ToInt64(Int32.MaxValue)));
 
     /// <summary>
     ///     The minimum number of matches a free-to-play (trial) account must complete to become verified.

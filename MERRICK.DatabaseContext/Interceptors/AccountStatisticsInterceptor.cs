@@ -38,7 +38,9 @@ public sealed class AccountStatisticsInterceptor : SaveChangesInterceptor
                 {
                     Account = account,
                     Type = type,
-                    PlacementMatchesData = type is AccountStatisticsType.Matchmaking or AccountStatisticsType.MatchmakingCasual ? string.Empty : null
+                    PlacementMatchesData = type is AccountStatisticsType.Matchmaking or AccountStatisticsType.MatchmakingCasual ? string.Empty : null,
+                    HeroStatistics = new HeroStatisticsSummary(),
+                    AwardStatistics = new AwardStatisticsSummary()
                 });
             }
         }

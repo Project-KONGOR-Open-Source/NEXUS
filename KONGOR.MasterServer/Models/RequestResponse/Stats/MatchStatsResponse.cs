@@ -132,7 +132,7 @@ public class MatchStatsResponse
     ///     The server time (in UTC seconds).
     /// </summary>
     [PHPProperty("timestamp")]
-    public long ServerTimestamp { get; init; } = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+    public int ServerTimestamp { get; init; } = Convert.ToInt32(Math.Min(DateTimeOffset.UtcNow.ToUnixTimeSeconds(), Convert.ToInt64(Int32.MaxValue)));
 
     /// <summary>
     ///     Used for the quest system, which has been disabled.
@@ -759,7 +759,7 @@ public class MatchMastery(string heroIdentifier, int currentMasteryExperience, i
     //}
 
     /// <summary>
-    ///     The identifier of the hero, in the format Hero_{Snake_Case_Name}.
+    ///     The identifier of the hero, in the format Hero_{Snake_Case_Name} (e.g. "Hero_Armadon").
     /// </summary>
     [PHPProperty("cli_name")]
     public string HeroIdentifier { get; init; } = heroIdentifier;
@@ -1324,6 +1324,66 @@ public class MatchPlayerStatistics(MatchInformation matchInformation, Account ac
     /// </summary>
     [PHPProperty("campaign_info")]
     public SeasonProgress SeasonProgress { get; init; } = new (matchInformation, matchParticipantStatistics, matchmakingStatistics);
+
+    /// <summary>
+    ///     Custom gameplay statistic 0 (purpose varies by game mode or event).
+    /// </summary>
+    [PHPProperty("gameplaystat0")]
+    public string GameplayStatistic0 { get; init; } = "0"; // TODO: Implement Gameplay Statistic Tracking
+
+    /// <summary>
+    ///     Custom gameplay statistic 1 (purpose varies by game mode or event).
+    /// </summary>
+    [PHPProperty("gameplaystat1")]
+    public string GameplayStatistic1 { get; init; } = "0"; // TODO: Implement Gameplay Statistic Tracking
+
+    /// <summary>
+    ///     Custom gameplay statistic 2 (purpose varies by game mode or event).
+    /// </summary>
+    [PHPProperty("gameplaystat2")]
+    public string GameplayStatistic2 { get; init; } = "0"; // TODO: Implement Gameplay Statistic Tracking
+
+    /// <summary>
+    ///     Custom gameplay statistic 3 (purpose varies by game mode or event).
+    /// </summary>
+    [PHPProperty("gameplaystat3")]
+    public string GameplayStatistic3 { get; init; } = "0"; // TODO: Implement Gameplay Statistic Tracking
+
+    /// <summary>
+    ///     Custom gameplay statistic 4 (purpose varies by game mode or event).
+    /// </summary>
+    [PHPProperty("gameplaystat4")]
+    public string GameplayStatistic4 { get; init; } = "0"; // TODO: Implement Gameplay Statistic Tracking
+
+    /// <summary>
+    ///     Custom gameplay statistic 5 (purpose varies by game mode or event).
+    /// </summary>
+    [PHPProperty("gameplaystat5")]
+    public string GameplayStatistic5 { get; init; } = "0"; // TODO: Implement Gameplay Statistic Tracking
+
+    /// <summary>
+    ///     Custom gameplay statistic 6 (purpose varies by game mode or event).
+    /// </summary>
+    [PHPProperty("gameplaystat6")]
+    public string GameplayStatistic6 { get; init; } = "0"; // TODO: Implement Gameplay Statistic Tracking
+
+    /// <summary>
+    ///     Custom gameplay statistic 7 (purpose varies by game mode or event).
+    /// </summary>
+    [PHPProperty("gameplaystat7")]
+    public string GameplayStatistic7 { get; init; } = "0"; // TODO: Implement Gameplay Statistic Tracking
+
+    /// <summary>
+    ///     Custom gameplay statistic 8 (purpose varies by game mode or event).
+    /// </summary>
+    [PHPProperty("gameplaystat8")]
+    public string GameplayStatistic8 { get; init; } = "0"; // TODO: Implement Gameplay Statistic Tracking
+
+    /// <summary>
+    ///     Custom gameplay statistic 9 (purpose varies by game mode or event).
+    /// </summary>
+    [PHPProperty("gameplaystat9")]
+    public string GameplayStatistic9 { get; init; } = "0"; // TODO: Implement Gameplay Statistic Tracking
 }
 
 public class MatchPlayerStatisticsWithMatchPerformanceData(MatchInformation matchInformation, Account account, MatchParticipantStatistics matchParticipantStatistics, AccountStatistics currentMatchTypeStatistics, AccountStatistics publicMatchStatistics, AccountStatistics matchmakingStatistics) : MatchPlayerStatistics(matchInformation, account, matchParticipantStatistics, currentMatchTypeStatistics, publicMatchStatistics, matchmakingStatistics)
@@ -1775,6 +1835,16 @@ public class CampaignReward
     /// </summary>
     [PHPProperty("need_more_play")]
     public int NeedMorePlay { get; init; } = 0;
+
+    /// <summary>
+    ///     Whether the current level reward has already been claimed by the player.
+    ///     <code>
+    ///         0 -> Reward Not Claimed
+    ///         1 -> Reward Already Claimed
+    ///     </code>
+    /// </summary>
+    [PHPProperty("reward_taken")]
+    public int RewardTaken { get; init; } = 0; // TODO: Implement Reward Claim Tracking
 
     /// <summary>
     ///     Progress percentage towards the next Champions Of Newerth reward level before the match.

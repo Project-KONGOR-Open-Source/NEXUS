@@ -1003,7 +1003,109 @@ namespace MERRICK.DatabaseContext.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.OwnsOne("MERRICK.DatabaseContext.Entities.Statistics.AwardStatisticsSummary", "AwardStatistics", b1 =>
+                        {
+                            b1.Property<int>("AccountStatisticsID");
+
+                            b1.Property<int>("AnnihilationAwards");
+
+                            b1.Property<int>("HighestCreepScoreAwards");
+
+                            b1.Property<int>("LeastDeathsAwards");
+
+                            b1.Property<int>("LongestKillStreakAwards");
+
+                            b1.Property<int>("MVPAwards");
+
+                            b1.Property<int>("MostAssistsAwards");
+
+                            b1.Property<int>("MostBuildingDamageAwards");
+
+                            b1.Property<int>("MostHeroDamageDealtAwards");
+
+                            b1.Property<int>("MostKillsAwards");
+
+                            b1.Property<int>("MostWardsDestroyedAwards");
+
+                            b1.Property<int>("QuadKillAwards");
+
+                            b1.Property<int>("SmackdownAwards");
+
+                            b1.HasKey("AccountStatisticsID");
+
+                            b1.ToTable("AccountStatistics", "stat");
+
+                            b1.ToJson("AwardStatistics");
+
+                            b1.WithOwner()
+                                .HasForeignKey("AccountStatisticsID");
+                        });
+
+                    b.OwnsOne("MERRICK.DatabaseContext.Entities.Statistics.HeroStatisticsSummary", "HeroStatistics", b1 =>
+                        {
+                            b1.Property<int>("AccountStatisticsID");
+
+                            b1.HasKey("AccountStatisticsID");
+
+                            b1.ToTable("AccountStatistics", "stat");
+
+                            b1.ToJson("HeroStatistics");
+
+                            b1.WithOwner()
+                                .HasForeignKey("AccountStatisticsID");
+
+                            b1.OwnsMany("MERRICK.DatabaseContext.Entities.Statistics.HeroStats", "Heroes", b2 =>
+                                {
+                                    b2.Property<int>("HeroStatisticsSummaryAccountStatisticsID");
+
+                                    b2.Property<int>("__synthesizedOrdinal")
+                                        .ValueGeneratedOnAddOrUpdate();
+
+                                    b2.Property<int>("Actions");
+
+                                    b2.Property<int>("Denies");
+
+                                    b2.Property<int>("Experience");
+
+                                    b2.Property<int>("GamesPlayed");
+
+                                    b2.Property<int>("Gold");
+
+                                    b2.Property<int>("HeroAssists");
+
+                                    b2.Property<int>("HeroDeaths");
+
+                                    b2.Property<string>("HeroIdentifier")
+                                        .IsRequired();
+
+                                    b2.Property<int>("HeroKills");
+
+                                    b2.Property<int>("Losses");
+
+                                    b2.Property<int>("TeamCreepKills");
+
+                                    b2.Property<int>("TimeEarningExperience");
+
+                                    b2.Property<int>("Wins");
+
+                                    b2.HasKey("HeroStatisticsSummaryAccountStatisticsID", "__synthesizedOrdinal");
+
+                                    b2.ToTable("AccountStatistics", "stat");
+
+                                    b2.WithOwner()
+                                        .HasForeignKey("HeroStatisticsSummaryAccountStatisticsID");
+                                });
+
+                            b1.Navigation("Heroes");
+                        });
+
                     b.Navigation("Account");
+
+                    b.Navigation("AwardStatistics")
+                        .IsRequired();
+
+                    b.Navigation("HeroStatistics")
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("MERRICK.DatabaseContext.Entities.Statistics.MatchParticipantStatistics", b =>

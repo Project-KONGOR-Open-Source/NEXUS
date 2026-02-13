@@ -2,6 +2,81 @@
 
 public partial class ClientRequesterController
 {
+    private async Task<IActionResult> GetPlayerAwardSummary()
+    {
+        string? accountName = Request.Form["nickname"];
+
+        if (accountName is null)
+            return BadRequest(@"Missing Value For Form Parameter ""nickname""");
+
+        Account? account = await MerrickContext.Accounts
+            .SingleOrDefaultAsync(account => account.Name.Equals(accountName));
+
+        if (account is null)
+            return NotFound($@"Account With Name ""{accountName}"" Was Not Found");
+
+        List<AccountStatistics> allAccountStatistics = await MerrickContext.AccountStatistics
+            .Where(statistics => statistics.AccountID == account.ID)
+            .ToListAsync();
+
+        AwardStatisticsSummary aggregatedAwards = new ();
+
+        foreach (AccountStatistics statistics in allAccountStatistics)
+        {
+            aggregatedAwards.MVPAwards += statistics.AwardStatistics.MVPAwards;
+            aggregatedAwards.AnnihilationAwards += statistics.AwardStatistics.AnnihilationAwards;
+            aggregatedAwards.QuadKillAwards += statistics.AwardStatistics.QuadKillAwards;
+            aggregatedAwards.LongestKillStreakAwards += statistics.AwardStatistics.LongestKillStreakAwards;
+            aggregatedAwards.SmackdownAwards += statistics.AwardStatistics.SmackdownAwards;
+            aggregatedAwards.MostKillsAwards += statistics.AwardStatistics.MostKillsAwards;
+            aggregatedAwards.MostAssistsAwards += statistics.AwardStatistics.MostAssistsAwards;
+            aggregatedAwards.LeastDeathsAwards += statistics.AwardStatistics.LeastDeathsAwards;
+            aggregatedAwards.MostBuildingDamageAwards += statistics.AwardStatistics.MostBuildingDamageAwards;
+            aggregatedAwards.MostWardsDestroyedAwards += statistics.AwardStatistics.MostWardsDestroyedAwards;
+            aggregatedAwards.MostHeroDamageDealtAwards += statistics.AwardStatistics.MostHeroDamageDealtAwards;
+            aggregatedAwards.HighestCreepScoreAwards += statistics.AwardStatistics.HighestCreepScoreAwards;
+        }
+
+        GetPlayerAwardSummaryResponse response = new ()
+        {
+            AccountID = account.ID.ToString(),
+
+            MVPAwards = aggregatedAwards.MVPAwards.ToString(),
+            AnnihilationAwards = aggregatedAwards.AnnihilationAwards.ToString(),
+            QuadKillAwards = aggregatedAwards.QuadKillAwards.ToString(),
+            LongestKillStreakAwards = aggregatedAwards.LongestKillStreakAwards.ToString(),
+            SmackdownAwards = aggregatedAwards.SmackdownAwards.ToString(),
+            MostKillsAwards = aggregatedAwards.MostKillsAwards.ToString(),
+            MostAssistsAwards = aggregatedAwards.MostAssistsAwards.ToString(),
+            LeastDeathsAwards = aggregatedAwards.LeastDeathsAwards.ToString(),
+            MostBuildingDamageAwards = aggregatedAwards.MostBuildingDamageAwards.ToString(),
+            MostWardsDestroyedAwards = aggregatedAwards.MostWardsDestroyedAwards.ToString(),
+            MostHeroDamageDealtAwards = aggregatedAwards.MostHeroDamageDealtAwards.ToString(),
+            HighestCreepScoreAwards = aggregatedAwards.HighestCreepScoreAwards.ToString()
+        };
+
+        // TODO: Most Wards Destroyed Awards Seems To Be Missing From The Client UI, Find Out Why
+
+        return Ok(PhpSerialization.Serialize(response));
+    }
+
+    private async Task<IActionResult> GetSeasons()
+    {
+        string? accountName = Request.Form["nickname"];
+
+        if (accountName is null)
+            return BadRequest(@"Missing Value For Form Parameter ""nickname""");
+
+        int[] seasons = [ 666 ];
+
+        GetSeasonsResponse response = new ()
+        {
+            AllSeasons = string.Join("|", seasons.Select(season => $"{season},0|{season},1"))
+        };
+
+        return Ok(PhpSerialization.Serialize(response));
+    }
+
     private async Task<IActionResult> GetSimpleStatistics()
     {
         string? accountName = Request.Form["nickname"];
@@ -25,7 +100,7 @@ public partial class ClientRequesterController
             LevelExperience = account.User.TotalExperience,
             NumberOfAvatarsOwned = account.User.OwnedStoreItems.Count(item => item.StartsWith("aa.")),
             TotalMatchesPlayed = 5555, // TODO: Implement Matches Played
-            CurrentSeason = 12, // TODO: Set Season
+            CurrentSeason = 666,
             SimpleSeasonStats = new SimpleSeasonStats() // TODO: Implement Stats
             {
                 RankedMatchesWon = 1001 /* ranked */ + 1001 /* ranked casual */,
@@ -49,6 +124,214 @@ public partial class ClientRequesterController
             OwnedStoreItems = account.User.OwnedStoreItems,
             SelectedStoreItems = account.SelectedStoreItems,
             OwnedStoreItemsData = SetOwnedStoreItemsData(account)
+        };
+
+        return Ok(PhpSerialization.Serialize(response));
+    }
+
+    private async Task<IActionResult> GetStatistics()
+    {
+        string? accountName = Request.Form["nickname"];
+
+        if (accountName is null)
+            return BadRequest(@"Missing Value For Form Parameter ""nickname""");
+
+        Account? account = await MerrickContext.Accounts
+            .Include(account => account.User)
+            .Include(account => account.Clan)
+            .SingleOrDefaultAsync(account => account.Name.Equals(accountName));
+
+        if (account is null)
+            return NotFound($@"Account With Name ""{accountName}"" Was Not Found");
+
+        string? table = Request.Form["table"];
+
+        if (table is null)
+            return BadRequest(@"Missing Value For Form Parameter ""table""");
+
+        List<AccountStatistics> allAccountStatistics = await MerrickContext.AccountStatistics
+            .Where(statistics => statistics.AccountID == account.ID).ToListAsync();
+
+        Dictionary<AccountStatisticsType, AccountStatistics> statisticsByType = allAccountStatistics.ToDictionary(statistics => statistics.Type);
+
+        AggregateStatistics aggregates = AggregateStatistics.FromStatistics(statisticsByType);
+
+        if (table is "player")
+        {
+            AccountStatistics statistics = statisticsByType[AccountStatisticsType.Public];
+
+            PlayerStatisticsResponse response = new (account, statistics, aggregates);
+
+            return Ok(PhpSerialization.Serialize(response));
+        }
+
+        if (table is "ranked")
+        {
+            AccountStatistics statistics = statisticsByType[AccountStatisticsType.Matchmaking];
+
+            RankedStatisticsResponse response = new (account, statistics, aggregates);
+
+            return Ok(PhpSerialization.Serialize(response));
+        }
+
+        if (table is "casual")
+        {
+            AccountStatistics statistics = statisticsByType[AccountStatisticsType.MatchmakingCasual];
+
+            CasualStatisticsResponse response = new (account, statistics, aggregates);
+
+            return Ok(PhpSerialization.Serialize(response));
+        }
+
+        if (table is "campaign")
+        {
+            AccountStatistics statistics = statisticsByType[AccountStatisticsType.Matchmaking];
+
+            CampaignStatisticsResponse response = new (account, statistics, aggregates);
+
+            return Ok(PhpSerialization.Serialize(response));
+        }
+
+        if (table is "campaign_casual")
+        {
+            AccountStatistics statistics = statisticsByType[AccountStatisticsType.MatchmakingCasual];
+
+            CampaignCasualStatisticsResponse response = new (account, statistics, aggregates);
+
+            return Ok(PhpSerialization.Serialize(response));
+        }
+
+        if (table is "mastery")
+        {
+            ShowMasteryStatisticsResponse response = new (account);
+
+            // TODO: Populate MasteryInfo From Mastery System Once Re-Implemented
+            // TODO: Populate MasteryRewards From Mastery System Once Re-Implemented (Only For Own Account)
+
+            return Ok(PhpSerialization.Serialize(response));
+        }
+
+        throw new ArgumentOutOfRangeException(nameof(table), table, $@"Unsupported Value For Form Parameter ""table"": ""{table}""");
+    }
+
+    private async Task<IActionResult> GetHeroStatistics()
+    {
+        string? accountName = Request.Form["nickname"];
+
+        if (accountName is null)
+            return BadRequest(@"Missing Value For Form Parameter ""nickname""");
+
+        Account? account = await MerrickContext.Accounts
+            .SingleOrDefaultAsync(account => account.Name.Equals(accountName));
+
+        if (account is null)
+            return NotFound($@"Account With Name ""{accountName}"" Was Not Found");
+
+        Dictionary<AccountStatisticsType, AccountStatistics> statisticsByType = await MerrickContext.AccountStatistics
+            .Where(statistics => statistics.AccountID == account.ID)
+            .ToDictionaryAsync(statistics => statistics.Type);
+
+        List<RankedHeroStatistics> rankedStats = [];
+
+        // Build Ranked Hero Statistics
+        if (statisticsByType.TryGetValue(AccountStatisticsType.Matchmaking, out AccountStatistics? matchmakingStatistics))
+        {
+            rankedStats = [.. matchmakingStatistics.HeroStatistics.Heroes.Select(heroStats => new RankedHeroStatistics
+            {
+                HeroIdentifier = heroStats.HeroIdentifier,
+                TimesUsed = heroStats.GamesPlayed.ToString(),
+                Wins = heroStats.Wins.ToString(),
+                Losses = heroStats.Losses.ToString(),
+                HeroKills = heroStats.HeroKills.ToString(),
+                Deaths = heroStats.HeroDeaths.ToString(),
+                HeroAssists = heroStats.HeroAssists.ToString(),
+                TeamCreepKills = heroStats.TeamCreepKills.ToString(),
+                Denies = heroStats.Denies.ToString(),
+                Experience = heroStats.Experience.ToString(),
+                Gold = heroStats.Gold.ToString(),
+                Actions = heroStats.Actions.ToString(),
+                TimeEarningExperience = heroStats.TimeEarningExperience.ToString()
+            })];
+        }
+
+        List<CasualHeroStatistics> casualStats = [];
+
+        // Build Casual Hero Statistics
+        if (statisticsByType.TryGetValue(AccountStatisticsType.MatchmakingCasual, out AccountStatistics? casualStatistics))
+        {
+            casualStats = [.. casualStatistics.HeroStatistics.Heroes.Select(heroStats => new CasualHeroStatistics
+            {
+                HeroIdentifier = heroStats.HeroIdentifier,
+                TimesUsed = heroStats.GamesPlayed.ToString(),
+                Wins = heroStats.Wins.ToString(),
+                Losses = heroStats.Losses.ToString(),
+                HeroKills = heroStats.HeroKills.ToString(),
+                Deaths = heroStats.HeroDeaths.ToString(),
+                HeroAssists = heroStats.HeroAssists.ToString(),
+                TeamCreepKills = heroStats.TeamCreepKills.ToString(),
+                Denies = heroStats.Denies.ToString(),
+                Experience = heroStats.Experience.ToString(),
+                Gold = heroStats.Gold.ToString(),
+                Actions = heroStats.Actions.ToString(),
+                TimeEarningExperience = heroStats.TimeEarningExperience.ToString()
+            })];
+        }
+
+        List<CampaignHeroStatistics> campaignStats = [];
+
+        // Build Campaign Normal Hero Statistics
+        if (statisticsByType.TryGetValue(AccountStatisticsType.Matchmaking, out AccountStatistics? campaignStatisticsSource))
+        {
+            campaignStats = [.. campaignStatisticsSource.HeroStatistics.Heroes.Select(heroStats => new CampaignHeroStatistics
+            {
+                HeroIdentifier = heroStats.HeroIdentifier,
+                TimesUsed = heroStats.GamesPlayed.ToString(),
+                Wins = heroStats.Wins.ToString(),
+                Losses = heroStats.Losses.ToString(),
+                HeroKills = heroStats.HeroKills.ToString(),
+                Deaths = heroStats.HeroDeaths.ToString(),
+                HeroAssists = heroStats.HeroAssists.ToString(),
+                TeamCreepKills = heroStats.TeamCreepKills.ToString(),
+                Denies = heroStats.Denies.ToString(),
+                Experience = heroStats.Experience.ToString(),
+                Gold = heroStats.Gold.ToString(),
+                Actions = heroStats.Actions.ToString(),
+                TimeEarningExperience = heroStats.TimeEarningExperience.ToString()
+            })];
+        }
+
+        List<CampaignCasualHeroStatistics> campaignCasualStats = [];
+
+        // Build Campaign Casual Hero Statistics
+        if (statisticsByType.TryGetValue(AccountStatisticsType.MatchmakingCasual, out AccountStatistics? campaignCasualStatisticsSource))
+        {
+            campaignCasualStats = [.. campaignCasualStatisticsSource.HeroStatistics.Heroes.Select(heroStats => new CampaignCasualHeroStatistics
+            {
+                HeroIdentifier = heroStats.HeroIdentifier,
+                TimesUsed = heroStats.GamesPlayed.ToString(),
+                Wins = heroStats.Wins.ToString(),
+                Losses = heroStats.Losses.ToString(),
+                HeroKills = heroStats.HeroKills.ToString(),
+                Deaths = heroStats.HeroDeaths.ToString(),
+                HeroAssists = heroStats.HeroAssists.ToString(),
+                TeamCreepKills = heroStats.TeamCreepKills.ToString(),
+                Denies = heroStats.Denies.ToString(),
+                Experience = heroStats.Experience.ToString(),
+                Gold = heroStats.Gold.ToString(),
+                Actions = heroStats.Actions.ToString(),
+                TimeEarningExperience = heroStats.TimeEarningExperience.ToString()
+            })];
+        }
+
+        GetHeroStatisticsResponse response = new ()
+        {
+            AllHeroStatistics = new AllHeroStatistics
+            {
+                Ranked = rankedStats,
+                Casual = casualStats,
+                Campaign = campaignStats,
+                CampaignCasual = campaignCasualStats
+            }
         };
 
         return Ok(PhpSerialization.Serialize(response));
