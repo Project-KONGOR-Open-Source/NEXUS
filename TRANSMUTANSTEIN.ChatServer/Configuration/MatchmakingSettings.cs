@@ -64,9 +64,33 @@ public class MatchmakingSettings
     public double BaseKFactor { get; set; } = 10.0;
 
     /// <summary>
-    ///     The maximum K-factor for MMR change calculations.
+    ///     The K-factor multiplier for provisional players.
+    ///     Provisional players are those with fewer than ProvisionalMatchCount matches
+    ///     and TMR below ProvisionalTMRCutoff.
     /// </summary>
-    public double MaxKFactor { get; set; } = 20.0;
+    public double ProvisionalKFactorMultiplier { get; set; } = 2.0;
+
+    /// <summary>
+    ///     The number of matches required before a player is no longer considered provisional.
+    /// </summary>
+    public int ProvisionalMatchCount { get; set; } = 10;
+
+    /// <summary>
+    ///     The TMR cutoff for provisional player status.
+    ///     Players with TMR above this value are not considered provisional.
+    /// </summary>
+    public double ProvisionalTMRCutoff { get; set; } = 1750.0;
+
+    /// <summary>
+    ///     The K-factor reduction multiplier for high TMR players.
+    ///     Applied when player TMR exceeds ReducedKFactorTMRCutoff.
+    /// </summary>
+    public double ReducedKFactorMultiplier { get; set; } = 0.20;
+
+    /// <summary>
+    ///     The TMR threshold above which K-factor reduction begins.
+    /// </summary>
+    public double ReducedKFactorTMRCutoff { get; set; } = 1600.0;
 
     /// <summary>
     ///     Whether matchmaking is currently enabled.

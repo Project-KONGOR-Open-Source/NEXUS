@@ -217,71 +217,90 @@ public enum MatchmakingMatchState
 
 /// <summary>
 ///     The method used to combine groups into teams.
+///     Values match ETMMCombineMethod from legacy HON Chat Server.
 /// </summary>
 public enum MatchmakingCombineMethod
 {
     /// <summary>
-    ///     Simple first-in-first-out matching.
+    ///     Simple first-in-first-out matching (NEXUS extension, not in legacy).
     /// </summary>
-    FirstInFirstOut,
+    FirstInFirstOut = 0,
+
+    // Team Size 5 Methods
 
     /// <summary>
     ///     Full teams or two-group combinations, sorted by queue time.
     /// </summary>
-    FullOrTwoGroupsTimeQueued,
+    FullOrTwoGroupsTimeQueued = 1,
 
     /// <summary>
     ///     Full teams or two-group combinations, randomised.
     /// </summary>
-    FullOrTwoGroupsRandom,
+    FullOrTwoGroupsRandom = 2,
 
     /// <summary>
     ///     Only match full 5-stacks.
     /// </summary>
-    FiveRandom,
+    FiveRandom = 3,
 
     /// <summary>
     ///     Only 4+1 combinations.
     /// </summary>
-    FourPlusOneRandom,
+    FourPlusOneRandom = 4,
 
     /// <summary>
     ///     Only 3+2 combinations.
     /// </summary>
-    ThreePlusTwoRandom,
+    ThreePlusTwoRandom = 5,
 
     /// <summary>
     ///     Only solo queue players.
     /// </summary>
-    AllOnesRandom,
+    AllOnesRandom = 6,
 
     /// <summary>
     ///     Any combination of group sizes.
     /// </summary>
-    AllGroupSizesRandom,
+    AllGroupSizesRandom = 7,
 
     /// <summary>
-    ///     Brute force matching for long-waiting groups.
+    ///     Experimental matching (currently disabled in legacy).
     /// </summary>
-    BruteForce,
+    AllExperimental = 8,
+
+    // Team Size 3 Methods (Grimm's Crossing)
 
     /// <summary>
-    ///     3v3 full or two-group combinations.
+    ///     3v3 full or two-group combinations, sorted by queue time.
     /// </summary>
-    ThreeFullOrTwoGroupsTimeQueued,
+    ThreeFullOrTwoGroupsTimeQueued = 9,
+
+    /// <summary>
+    ///     3v3 full or two-group combinations, randomised.
+    /// </summary>
+    ThreeFullOrTwoGroupsRandom = 10,
 
     /// <summary>
     ///     3v3 solo queue only.
     /// </summary>
-    ThreeAllOnesRandom,
+    ThreeAllOnesRandom = 11,
 
     /// <summary>
     ///     3v3 any combination.
     /// </summary>
-    ThreeAllGroupSizesRandom,
+    ThreeAllGroupSizesRandom = 12,
+
+    // Team Size 1 Methods (Solo Map)
 
     /// <summary>
     ///     1v1 matching.
     /// </summary>
-    OneVsOneRandom
+    OneVsOneRandom = 13,
+
+    // Special Methods
+
+    /// <summary>
+    ///     Brute force matching for long-waiting groups.
+    /// </summary>
+    BruteForce = 14
 }

@@ -382,12 +382,12 @@ IF (update type == TMM_GROUP_QUEUE_UPDATE):
 ### MatchFoundUpdate (0x0D09) - Server -> Client
 
 ```
-[X] string      - map name
-[4] uint32      - team size
+[X] string      - map name (e.g., "caldavar", "midwars")
+[1] byte        - team size (5 for Caldavar, 3 for Grimm's Crossing, 1 for 1v1)
 [1] ETMMGameTypes - game type
-[X] string      - game mode
-[X] string      - server region
-[X] string      - extra info (debug data)
+[X] string      - game mode code (e.g., "ap", "sd", "ar" - see Section 9)
+[X] string      - server region code (e.g., "USE", "EU" - see Section 10)
+[X] string      - extra info (debug data, may be empty)
 ```
 
 ### AutoMatchConnect (0x0062) - Server -> Client
@@ -614,33 +614,35 @@ Frame 3974: Client -> Server: JoiningGame (0x000F)
 
 ## 9. Game Modes Reference
 
-| Code  | Name                 | Description                           |
-|-------|----------------------|---------------------------------------|
-| `ap`  | All Pick             | Standard all pick                     |
-| `apg` | All Pick Core Pool   | All pick with core hero pool          |
-| `apd` | All Pick Duplicate   | All pick with duplicate heroes        |
-| `sd`  | Single Draft         | Pick from 3 random heroes             |
-| `bd`  | Banning Draft        | Ban then pick                         |
-| `bp`  | Banning Pick         | Ban during pick                       |
-| `ar`  | All Random           | Random hero assignment                |
-| `br`  | Balanced Random      | Team-balanced random                  |
-| `lp`  | Lock Pick            | 5-player lock pick                    |
-| `bb`  | Blind Ban            | MidWars blind ban                     |
-| `bbg` | Blind Ban Core Pool  | Blind ban with core pool              |
-| `bbr` | Blind Ban Reborn     | Blind ban reborn mode                 |
-| `bm`  | Bot Match            | Bot match mode                        |
-| `cm`  | Captain's Mode       | Captain's draft mode                  |
-| `hb`  | Hero Ban             | Hero ban mode                         |
-| `rb`  | Reborn               | Reborn mode                           |
-| `km`  | Kros Mode            | RiftWars mode                         |
-| `rd`  | Random Draft         | Random draft mode                     |
-| `bdr` | Banning Draft Reborn | Banning draft reborn                  |
-| `cp`  | Captains Pick        | Alternative captain's pick            |
-| `fp`  | Force Pick           | Force pick mode                       |
-| `sp`  | Single Pick          | Single pick mode                      |
-| `ss`  | Same Selection       | Same hero selection                   |
-| `sm`  | Solo Mid             | 1v1 solo mid mode                     |
-| `mwb` | MidWars Blind Ban    | MidWars-specific blind ban            |
+Game mode codes are sent as strings in `MatchFoundUpdate` packets. These mappings are from `CMMCommon::TranslateGameMode()` in the legacy source code:
+
+| Code  | Enum Constant                      | Description                           |
+|-------|-----------------------------------|---------------------------------------|
+| `ap`  | TMM_GAME_MODE_ALL_PICK            | Standard all pick                     |
+| `apg` | TMM_GAME_MODE_ALL_PICK_GATED      | All pick with gated hero pool         |
+| `apd` | TMM_GAME_MODE_ALL_PICK_DUPLICATE_HERO | All pick with duplicate heroes    |
+| `sd`  | TMM_GAME_MODE_SINGLE_DRAFT        | Pick from 3 random heroes             |
+| `bd`  | TMM_GAME_MODE_BANNING_DRAFT       | Ban then pick                         |
+| `bp`  | TMM_GAME_MODE_BANNING_PICK        | Ban during pick                       |
+| `ar`  | TMM_GAME_MODE_ALL_RANDOM          | Random hero assignment                |
+| `lp`  | TMM_GAME_MODE_LOCK_PICK           | 5-player lock pick                    |
+| `bb`  | TMM_GAME_MODE_BLIND_BAN           | Blind ban mode                        |
+| `bbg` | TMM_GAME_MODE_BLIND_BAN_GATED     | Blind ban with gated hero pool        |
+| `bbr` | TMM_GAME_MODE_BLIND_BAN_RAPID_FIRE | Blind ban rapid fire                 |
+| `bm`  | TMM_GAME_MODE_BOT_MATCH           | Bot match mode                        |
+| `cm`  | TMM_GAME_MODE_CAPTAINS_PICK       | Captain's mode                        |
+| `br`  | TMM_GAME_MODE_BALANCED_RANDOM     | Team-balanced random                  |
+| `km`  | TMM_GAME_MODE_KROS_MODE           | RiftWars/Kros mode                    |
+| `rd`  | TMM_GAME_MODE_RANDOM_DRAFT        | Random draft mode                     |
+| `bdr` | TMM_GAME_MODE_BANNING_DRAFT_RAPID_FIRE | Banning draft rapid fire         |
+| `cp`  | TMM_GAME_MODE_COUNTER_PICK        | Counter pick mode                     |
+| `fp`  | TMM_GAME_MODE_FORCE_PICK          | Force pick mode                       |
+| `sp`  | TMM_GAME_MODE_SOCCER_PICK         | Soccer pick mode                      |
+| `ss`  | TMM_GAME_MODE_SOLO_SAME           | Solo same hero selection              |
+| `sm`  | TMM_GAME_MODE_SOLO_DIFF           | Solo different hero selection         |
+| `hb`  | TMM_GAME_MODE_HERO_BAN            | Hero ban mode                         |
+| `mwb` | TMM_GAME_MODE_MIDWARS_BETA        | MidWars beta mode                     |
+| `rb`  | TMM_GAME_MODE_REBORN              | Reborn mode                           |
 
 ---
 
@@ -798,23 +800,41 @@ For 3v3 (Grimm's Crossing):
 
 ### 13.3 Combine Methods
 
-The algorithm uses different strategies to form teams depending on the cycle:
+The algorithm uses different strategies to form teams depending on the cycle. Method names are prefixed with team size (`TS5_`, `TS3_`, `TS1_`) in the source code:
 
-| Method                           | Team Size | Description                                       |
-|----------------------------------|-----------|---------------------------------------------------|
-| TS5_FULL_OR_2_GROUPS_TIME_QUEUED | 5         | Full teams or 2-group combos, sorted by wait time |
-| TS5_FULL_OR_2_GROUPS_RANDOM      | 5         | Full teams or 2-group combos, randomised          |
-| TS5_5_RANDOM                     | 5         | Only match full 5-stacks                          |
-| TS5_4_PLUS_1_RANDOM              | 5         | Only 4+1 combinations                             |
-| TS5_3_PLUS_2_RANDOM              | 5         | Only 3+2 combinations                             |
-| TS5_ALL_ONES_RANDOM              | 5         | Only solo queue players                           |
-| TS5_ALL_GROUP_SIZES_RANDOM       | 5         | Any combination of group sizes                    |
-| TS5_ALL_EXPERIMENTAL             | 5         | Experimental matching (disabled)                  |
-| TS3_FULL_OR_2_GROUPS_TIME_QUEUED | 3         | 3v3 full or 2-group combos                        |
-| TS3_ALL_ONES_RANDOM              | 3         | 3v3 solo queue only                               |
-| TS3_ALL_GROUP_SIZES_RANDOM       | 3         | 3v3 any combination                               |
-| TS1_RANDOM                       | 1         | 1v1 matching                                      |
-| BRUTE_FORCE                      | Any       | Force match for long-waiting groups               |
+**5v5 Methods (Team Size 5):**
+
+| Method (Source Name)             | Description                                       |
+|----------------------------------|---------------------------------------------------|
+| `TS5_FULL_OR_2_GROUPS_TIME_QUEUED` | Full teams or 2-group combos, sorted by wait time |
+| `TS5_FULL_OR_2_GROUPS_RANDOM`      | Full teams or 2-group combos, randomised          |
+| `TS5_5_RANDOM`                     | Only match full 5-stacks                          |
+| `TS5_4_PLUS_1_RANDOM`              | Only 4+1 combinations                             |
+| `TS5_3_PLUS_2_RANDOM`              | Only 3+2 combinations                             |
+| `TS5_ALL_ONES_RANDOM`              | Only solo queue players                           |
+| `TS5_ALL_GROUP_SIZES_RANDOM`       | Any combination of group sizes                    |
+| `TS5_ALL_EXPERIMENTAL`             | Experimental matching (currently disabled)        |
+
+**3v3 Methods (Team Size 3 - Grimm's Crossing):**
+
+| Method (Source Name)             | Description                                       |
+|----------------------------------|---------------------------------------------------|
+| `TS3_FULL_OR_2_GROUPS_TIME_QUEUED` | Full teams or 2-group combos, sorted by wait time |
+| `TS3_FULL_OR_2_GROUPS_RANDOM`      | Full teams or 2-group combos, randomised          |
+| `TS3_ALL_ONES_RANDOM`              | Solo queue only                                   |
+| `TS3_ALL_GROUP_SIZES_RANDOM`       | Any combination of group sizes                    |
+
+**1v1 Methods (Team Size 1 - Solo Map):**
+
+| Method (Source Name)             | Description                                       |
+|----------------------------------|---------------------------------------------------|
+| `TS1_RANDOM`                       | 1v1 matching                                      |
+
+**Special Methods:**
+
+| Method (Source Name)             | Description                                       |
+|----------------------------------|---------------------------------------------------|
+| `BRUTE_FORCE`                      | Force match for long-waiting groups (any team size) |
 
 ### 13.4 Cycle Timing
 
@@ -830,16 +850,26 @@ The algorithm uses different strategies to form teams depending on the cycle:
 The algorithm uses a logistic function to predict match outcomes:
 
 ```
-Prediction = 1 / (1 + 10^(-(TeamA_TMR - TeamB_TMR) / 225))
+Prediction = 1 / (1 + 10^(-(AdjustedTMR_A - AdjustedTMR_B) / Scale))
 ```
 
 Where:
 - `Prediction` = Probability that Team A wins (0.0 to 1.0)
-- `TeamA_TMR` = Adjusted average TMR of Team A
-- `TeamB_TMR` = Adjusted average TMR of Team B
-- `225` = Logistic prediction scale (higher = less emphasis on TMR differences)
+- `AdjustedTMR_A` = **Weighted** average TMR of Team A (not simple average)
+- `AdjustedTMR_B` = **Weighted** average TMR of Team B
+- `Scale` = Logistic prediction scale, configurable via `matchmaker_logisticPredictionScale` (default: 225.0)
 
-**Example:** If Team A has 1500 TMR and Team B has 1400 TMR:
+**Adjusted TMR Calculation:**
+
+The adjusted TMR uses a weighting constant (`matchmaker_teamRankWeighting`, default: 6.5) to emphasise higher-skilled players:
+
+```cpp
+// From source: GetAdjustedTeamTMR()
+AdjustedTMR = (Sum of weighted player TMRs) / TeamSize
+// Weighting gives more influence to higher TMR players
+```
+
+**Example:** If Team A has adjusted TMR of 1500 and Team B has 1400:
 ```
 Prediction = 1 / (1 + 10^(-(1500-1400)/225))
            = 1 / (1 + 10^(-0.444))
@@ -847,20 +877,35 @@ Prediction = 1 / (1 + 10^(-(1500-1400)/225))
            = 0.736 (73.6% win chance for Team A)
 ```
 
+**Note:** Higher scale values reduce the impact of TMR differences (flatter curve), making matches more likely to be considered fair.
+
 ### 13.6 Wait Time TMR Spread
 
-As groups wait longer, the acceptable TMR range expands:
+As groups wait longer, the acceptable TMR range expands. Wait time thresholds are **configurable via CVARs**, not hardcoded:
+
+| CVAR | Default | Wait Value |
+|------|---------|------------|
+| `matchmaker_waitTime1` | 60s | 2 |
+| `matchmaker_waitTime2` | 120s | 3 |
+| `matchmaker_waitTime3` | 180s | 4 |
+| `matchmaker_waitTime4` | 240s | 5 |
+| `matchmaker_waitTime5` | 300s | 6 |
+| `matchmaker_waitTime6` | 600s | 7 |
+
+Wait values above threshold 6 use value 10. The defaults shown produce:
 
 | Wait Time | Wait Value | TMR Spread Multiplier |
 |-----------|------------|----------------------|
 | 0-60s     | 1          | Base range           |
-| 60s       | 2          | 2x base              |
-| 120s      | 3          | 3x base              |
-| 180s      | 4          | 4x base              |
-| 240s      | 5          | 5x base              |
-| 300s      | 6          | 6x base              |
-| 600s      | 7          | 7x base              |
+| 60s+      | 2          | 2x base              |
+| 120s+     | 3          | 3x base              |
+| 180s+     | 4          | 4x base              |
+| 240s+     | 5          | 5x base              |
+| 300s+     | 6          | 6x base              |
+| 600s+     | 7          | 7x base              |
 | >600s     | 10         | 10x base             |
+
+**Note:** All thresholds are server-configurable. The values shown are defaults from the legacy HON Chat Server.
 
 **TMR Spread Calculation:**
 ```
@@ -931,18 +976,23 @@ The algorithm iterates up to 3 times, shuffling groups between iterations to fin
 ### 13.9 K-Factor (MMR Gain/Loss Calculation)
 
 **Base K-Factor:** 10 (±5 TMR for a 50/50 match)
-**Max K-Factor:** 20 (±10 TMR)
 
-**Provisional Players** (< 10 matches in game type OR TMR < 1750):
+K-Factor is modified by multipliers, not capped at a maximum value:
+
+**Provisional Players** (< 10 matches in game type AND TMR < 1750):
 ```
 K-Factor = BaseKFactor × ProvisionalMultiplier (default: 2.0)
+// Results in K-Factor of 20 for provisional players
 ```
 
 **High TMR Players** (> 1600 TMR):
 ```
-Reduction = CLAMP((TMR - 1600) / 300, 0, 1) × 0.20
+Reduction = CLAMP((TMR - 1600) / 300, 0, 1) × ReducedKFactorMultiplier (default: 0.20)
 K-Factor = BaseKFactor × (1 - Reduction)
+// Results in K-Factor of 8-10 for high TMR players
 ```
+
+**Note:** There is no explicit `maxKFactor` CVAR. The effective maximum is `BaseKFactor × ProvisionalMultiplier` (default: 20). All multipliers are server-configurable.
 
 **Win/Loss Value Calculation:**
 ```
@@ -1035,13 +1085,14 @@ All matchmaking parameters are configurable via CVARs. Defaults from `c_matchmak
 
 | CVAR                                      | Default | Description                       |
 |-------------------------------------------|---------|-----------------------------------|
-| matchmaker_baseKFactor                    | 10.0    | Base MMR change (±5)              |
-| matchmaker_maxKFactor                     | 20.0    | Maximum MMR change (±10)          |
-| matchmaker_provisionalKFactorMultiplier   | 2.0     | Multiplier during provisional     |
+| matchmaker_baseKFactor                    | 10.0    | Base MMR change (±5 for 50/50)    |
+| matchmaker_provisionalKFactorMultiplier   | 2.0     | Multiplier for provisional players (effective max K = 20) |
 | matchmaker_provisionalMatchCount          | 10      | Matches for provisional status    |
 | matchmaker_provisionalTMRCutoff           | 1750.0  | TMR cap for provisional bonus     |
-| matchmaker_reducedKFactorMultiplier       | 0.20    | Reduction for high TMR players    |
-| matchmaker_reducedKFactorTMRCutoff        | 1600.0  | TMR threshold for reduction       |
+| matchmaker_reducedKFactorMultiplier       | 0.20    | Max reduction for high TMR (20%)  |
+| matchmaker_reducedKFactorTMRCutoff        | 1600.0  | TMR threshold for reduction start |
+
+**Note:** There is no explicit `maxKFactor` CVAR. The effective maximum K-Factor is `baseKFactor × provisionalKFactorMultiplier` (default: 10 × 2 = 20).
 
 ### 14.3 Experience Classification
 
@@ -1060,6 +1111,19 @@ All matchmaking parameters are configurable via CVARs. Defaults from `c_matchmak
 | matchmaker_bruteForceWaitTime           | 20.0    | Minutes before brute force         |
 | matchmaker_bruteForceSoloWaitTime       | 10.0    | Minutes for solo brute force       |
 | matchmaker_defaultGroupMakeupDifference | 2       | Max composition score difference   |
+
+**Wait Value Thresholds (for TMR Spread Expansion):**
+
+| CVAR                  | Default | Wait Value |
+|-----------------------|---------|------------|
+| matchmaker_waitTime1  | 60      | 2          |
+| matchmaker_waitTime2  | 120     | 3          |
+| matchmaker_waitTime3  | 180     | 4          |
+| matchmaker_waitTime4  | 240     | 5          |
+| matchmaker_waitTime5  | 300     | 6          |
+| matchmaker_waitTime6  | 600     | 7          |
+
+Queue durations below `waitTime1` use wait value 1. Durations above `waitTime6` use wait value 10.
 
 ### 14.5 Prediction and Thresholds
 
@@ -1892,15 +1956,16 @@ match_mode=<string>
 
 ### 24.1 Chat Server Components
 
-- [ ] Group Manager - Create, join, leave, kick, invite
-- [ ] Team Finder - Queue management, metrics tracking
-- [ ] Matchmaker - Team formation, match creation, balancing
+- [x] Group Manager - Create, join, leave, kick, invite
+- [x] Team Finder - Queue management (basic), metrics tracking (stub)
+- [x] Matchmaker - Team formation (FIFO), match creation (basic)
+- [ ] Matchmaker - Team balancing (2-pass algorithm)
 - [ ] Game Server Manager - Server selection, match spawning
 - [ ] Leaver Tracker - Strike system, ban management
 
 ### 24.2 Data Persistence
 
-- [ ] Player TMR (per game type)
+- [x] Player TMR (per game type) - AccountStatistics.SkillRating
 - [ ] Match history
 - [ ] Leaver strikes
 - [ ] Queue statistics
@@ -1908,22 +1973,146 @@ match_mode=<string>
 
 ### 24.3 Protocol Messages
 
-- [ ] Client → Server commands (Section 2)
-- [ ] Server → Client responses (Section 2)
-- [ ] Game Server ↔ Chat Server (Section 2)
+- [x] Client → Server commands (Section 2) - All 10 processors implemented
+- [x] Server → Client responses (Section 2) - GroupUpdate, MatchFoundUpdate, AutoMatchConnect
+- [ ] Game Server ↔ Chat Server (Section 2) - NET_CHAT_GS_CREATE_MATCH, etc.
 
 ### 24.4 Algorithm Implementation
 
-- [ ] ELO-based matchup prediction
+- [x] ELO-based matchup prediction - Formula in MatchmakingMatch.CalculateMatchupPrediction()
 - [ ] TMR spread calculation
-- [ ] Team composition scoring
-- [ ] Group combining (14 methods)
+- [x] Team composition scoring - MatchmakingTeam.CalculateGroupMakeup()
+- [ ] Group combining (14 methods) - Enums defined, FIFO only active
 - [ ] Team balancing (2-pass)
 - [ ] K-Factor calculation
 
 ### 24.5 Configuration
 
-- [ ] All CVARs with defaults (Section 14)
+- [x] Basic CVARs with defaults (MatchmakingSettings.cs)
+- [ ] All CVARs from Section 14 (many not yet configurable)
 - [ ] Region availability
 - [ ] Game mode availability
 - [ ] Map availability
+
+---
+
+## 25. Implementation Notes
+
+This section documents findings from the actual implementation that supplement or clarify the protocol documentation.
+
+### 25.1 Game Mode Codes in MatchFoundUpdate
+
+The `MatchFoundUpdate (0x0D09)` packet sends game mode as a string code, not an enum value:
+
+| Code | Mode Name |
+|------|-----------|
+| `ap` | All Pick |
+| `sd` | Single Draft |
+| `ar` | All Random |
+| `bd` | Banning Draft |
+| `bp` | Banning Pick |
+| `br` | Balanced Random |
+| `cm` | Captain's Mode |
+| `hb` | Hero Ban |
+| `bb` | Blind Ban |
+| `rd` | Random Draft |
+
+**Example packet content:** `map="midwars", mode="ar", region="EU"`
+
+### 25.2 AutoMatchConnect Random Value
+
+The fourth field in `AutoMatchConnect (0x0062)` serves dual purposes:
+- Normal connect: Random uint32 value (duplicate packet workaround)
+- Reminder: `0xFFFFFFFF` indicates this is a connection reminder
+
+From legacy C++ (`c_teamfinder.cpp`):
+```cpp
+pkt << (byte)eArrangedMatchType;
+pkt << (uint)uiMatchupID;
+pkt << sAddress;
+pkt << (ushort)usPort;
+pkt << (uint)rand();  // Or 0xFFFFFFFF for reminder
+```
+
+### 25.3 MatchInformation Redis Caching
+
+When a match is created, `MatchInformation` must be cached in Redis before sending `AutoMatchConnect` to clients. The game server uses this cached data to validate connecting players.
+
+**Redis Key Pattern:** `match:{matchID}:info`
+
+**Required Fields:**
+- Match ID
+- Player account IDs (both teams)
+- Server ID
+- Map name
+- Game mode
+- Expected player count
+
+### 25.4 ActionCampaign Analytics Events
+
+The client sends analytics events during matchmaking that should be handled gracefully:
+
+| Event | When Sent |
+|-------|-----------|
+| `AC_MATCHMAKING_MATCH_FOUND` | Client receives MatchFoundUpdate |
+| `AC_MATCHMAKING_SERVER_FOUND` | Client receives QueueUpdate type=16 |
+| `AC_MATCHMAKING_MATCH_READY` | Client is ready to connect |
+
+These are informational events and should be logged at debug level, not treated as errors.
+
+### 25.5 Environment-Specific Configuration
+
+PlayersPerTeam should be environment-specific for testing:
+- **Development:** 1 (enables 1v1 local testing)
+- **Production:** 5 (standard 5v5 matches)
+
+Configuration in `appsettings.{Environment}.json`:
+```json
+{
+  "Matchmaking": {
+    "PlayersPerTeam": 1
+  }
+}
+```
+
+### 25.6 Match Found Packet Sequence
+
+The complete sequence when a match is found:
+
+1. **GroupLeaveQueue (0x0D02)** - Remove group from queue
+2. **GroupUpdate (0x0D03)** - Full state update
+3. **MatchFoundUpdate (0x0D09)** - Match details (map, mode, region)
+4. **GroupQueueUpdate (0x0D06) type=16** - TMM_GROUP_FOUND_SERVER ("Sound The Horn!")
+5. **AutoMatchConnect (0x0062)** - Server connection details
+
+All packets must be sent to every member of both teams.
+
+### 25.7 Current Implementation Files
+
+| File | Purpose |
+|------|---------|
+| `Configuration/MatchmakingSettings.cs` | Algorithm configuration (CVARs) |
+| `Domain/Matchmaking/MatchmakingTeam.cs` | Team model with composition scoring |
+| `Domain/Matchmaking/MatchmakingMatch.cs` | Match model with state machine |
+| `Domain/Matchmaking/MatchmakingGroup.cs` | Extended with TMR calculations |
+| `Domain/Matchmaking/MatchmakingGroupMember.cs` | Extended with TMR, match counts |
+| `Services/MatchmakingService.cs` | Match broker with FIFO algorithm |
+| `CommandProcessors/Actions/TrackPlayerAction.cs` | Handles analytics events |
+
+### 25.8 Verification Notes
+
+This specification has been verified against the following legacy source files:
+
+**Protocol Verification:**
+- `c_teamfinder.cpp` - AutoMatchConnect, MatchFoundUpdate packet construction
+- `c_matchmakercommon.inl` - TranslateGameMode, TranslateMap, TranslateRegion functions
+- `chatserver_protocol.h` - ETMMGameTypes, ETMMGameModes, EArrangedMatchType enums
+- `c_matchmakercommon.h` - ETMMCombineMethod enum, TMR brackets
+
+**Key Corrections Made:**
+1. MatchFoundUpdate team size field is `byte` (1 byte), not `uint32` (4 bytes)
+2. K-Factor maximum is determined by multiplier (`BaseKFactor × ProvisionalKFactorMultiplier`), not a separate `maxKFactor` CVAR
+3. Wait time thresholds are configurable via CVARs (`matchmaker_waitTime1` through `matchmaker_waitTime6`), not hardcoded
+4. Added missing combine method `TS5_ALL_EXPERIMENTAL`
+5. Added missing `TS3_FULL_OR_2_GROUPS_RANDOM` combine method
+6. Corrected game mode code descriptions (e.g., `cp` = Counter Pick, not Captains Pick)

@@ -18,44 +18,57 @@ Implement a complete matchmaking system for NEXUS based on the HON Chat Server s
 
 ## Current State Analysis
 
-### Existing Infrastructure (Ready to Use)
+### Implemented Components (Phase 1 Complete)
 
 | Component | Location | Status |
 |-----------|----------|--------|
 | Chat Server | `TRANSMUTANSTEIN.ChatServer` | Complete TCP server with session management |
-| MatchmakingService | `Services/MatchmakingService.cs` | Framework with placeholder broker loop |
-| MatchmakingGroup | `Domain/Matchmaking/MatchmakingGroup.cs` | Group lifecycle complete (create, join, leave, kick, invite) |
-| MatchmakingGroupMember | `Domain/Matchmaking/MatchmakingGroupMember.cs` | Basic member model (no TMR yet) |
+| MatchmakingService | `Services/MatchmakingService.cs` | **IMPLEMENTED** - Simple FIFO broker with match creation |
+| MatchmakingGroup | `Domain/Matchmaking/MatchmakingGroup.cs` | **EXTENDED** - TMR calculations, match state tracking |
+| MatchmakingGroupMember | `Domain/Matchmaking/MatchmakingGroupMember.cs` | **EXTENDED** - TMR, match counts, IP address |
 | MatchmakingGroupInformation | `Domain/Matchmaking/MatchmakingGroupInformation.cs` | Group settings with TeamSize calculation |
+| MatchmakingTeam | `Domain/Matchmaking/MatchmakingTeam.cs` | **NEW** - Team composition and TMR statistics |
+| MatchmakingMatch | `Domain/Matchmaking/MatchmakingMatch.cs` | **NEW** - Match model with enums |
+| MatchmakingSettings | `Configuration/MatchmakingSettings.cs` | **NEW** - Algorithm configuration |
 | Protocol Commands | `ASPIRE.Common/ChatProtocol.cs` | All TMM commands defined (0x0C0A-0x0F09) |
 | Command Processors | `CommandProcessors/Matchmaking/` | 10 processors (GroupCreate through PopularityUpdate) |
+| TrackPlayerAction | `CommandProcessors/Actions/TrackPlayerAction.cs` | **UPDATED** - Handles matchmaking analytics events |
 | AccountStatistics | `MERRICK.DatabaseContext/Entities/Statistics/` | SkillRating field exists (default 1500) |
 | Game Server Sessions | `Context.MatchServerChatSessions` | Tracks connected match servers |
 | Server Status Handler | `CommandProcessors/Connection/ServerStatus.cs` | Receives server status updates |
 | Match State Handlers | `CommandProcessors/MatchState/` | MatchComplete, MatchStatus (stubs) |
-| Configuration | `KONGOR.MasterServer/Configuration/Matchmaking/` | Basic JSON structure exists |
+| Configuration | `appsettings.*.json` | **UPDATED** - PlayersPerTeam: 1 (dev), 5 (prod) |
 
-### Missing Components (To Implement)
+### Current Implementation Details
+
+The initial implementation uses a simple FIFO (first-in-first-out) matching algorithm:
+- Groups are matched in queue order
+- No TMR-based filtering yet (deferred)
+- Sends complete match notification sequence: MatchFoundUpdate → FoundServerUpdate → AutoMatchConnect
+- Caches MatchInformation in Redis for player join tracking
+- PlayersPerTeam is configurable per environment
+
+### Remaining Components (To Implement)
 
 #### Core Algorithm
-1. **Match Broker Algorithm** - Core logic to pair groups into balanced matches
-2. **Rating Calculations** - ELO/TMR prediction and gain/loss formulas
+1. ~~**Match Broker Algorithm**~~ ✓ Basic FIFO implemented, TMR-based matching deferred
+2. **Rating Calculations** - ELO/TMR prediction and gain/loss formulas (formulas defined, not active)
 3. **Team Balancing** - Two-pass group swapping for fairness
 4. **TMR Spread Expansion** - Wait time increases acceptable skill range
-5. **Group Combining** - 14 different team formation strategies
+5. **Group Combining** - 14 different team formation strategies (enums defined, FIFO only active)
 6. **Experience Classification** - Inexperienced, provisional, outlier detection
 
 #### Game Server Integration
-7. **Match Creation Flow** - `NET_CHAT_GS_CREATE_MATCH` → game server
+7. **Match Creation Flow** - `NET_CHAT_GS_CREATE_MATCH` → game server (needs game server protocol)
 8. **Match Announcement Handler** - `NET_CHAT_GS_ANNOUNCE_MATCH` ← game server
 9. **Match Started Handler** - `NET_CHAT_GS_MATCH_STARTED` ← game server
 10. **Match Abandoned Handler** - `NET_CHAT_GS_ABANDON_MATCH` ← game server
-11. **Server Allocation** - Region-based idle server selection
+11. **Server Allocation** - Region-based idle server selection (stub exists)
 12. **Connection Reminder System** - Resend connect packets to missing players
 
 #### Client Communication
-13. **Match Found Flow** - MatchFoundUpdate, QueueUpdate(type=16), AutoMatchConnect
-14. **Queue Time Updates** - Periodic `TMM_GROUP_QUEUE_UPDATE (type=11)`
+13. ~~**Match Found Flow**~~ ✓ MatchFoundUpdate, QueueUpdate(type=16), AutoMatchConnect implemented
+14. **Queue Time Updates** - Periodic `TMM_GROUP_QUEUE_UPDATE (type=11)` (stub exists)
 15. **Popularity Updates** - Real queue population data
 16. **Pending Match Accept Flow** - Optional explicit acceptance (ranked)
 17. **Queue Rejoin** - `TMM_GROUP_REJOIN_QUEUE` with preserved time
@@ -63,19 +76,21 @@ Implement a complete matchmaking system for NEXUS based on the HON Chat Server s
 #### Supporting Systems
 18. **Leaver System** - Strike tracking, queue bans, decay
 19. **Post-Match Rating Updates** - TMR changes after match completion
-20. **3v3 Support** - Grimm's Crossing with different composition scores
-21. **1v1 Support** - Solo map fast matching
+20. ~~**3v3 Support**~~ ✓ MatchmakingTeam.CalculateGroupMakeup() handles 3v3 compositions
+21. ~~**1v1 Support**~~ ✓ MatchmakingTeam handles team size 1
 22. **Campaign/Seasons Mode** - Special matching and scoring rules
 
 ---
 
 ## Implementation Phases
 
-### Phase 1: Core Data Structures
+### Phase 1: Core Data Structures ✓ COMPLETED
 
 **Goal:** Create the domain models needed for the matchmaking algorithm.
 
-#### 1.1 Create MatchmakingTeam Class
+**Status:** All data structures have been created and extended.
+
+#### 1.1 Create MatchmakingTeam Class ✓
 
 **File:** `TRANSMUTANSTEIN.ChatServer/Domain/Matchmaking/MatchmakingTeam.cs`
 
@@ -116,7 +131,7 @@ public class MatchmakingTeam
 }
 ```
 
-#### 1.2 Create MatchmakingMatch Class
+#### 1.2 Create MatchmakingMatch Class ✓
 
 **File:** `TRANSMUTANSTEIN.ChatServer/Domain/Matchmaking/MatchmakingMatch.cs`
 
@@ -195,11 +210,11 @@ public enum TMMCombineMethod
 }
 ```
 
-#### 1.3 Extend MatchmakingGroupMember
+#### 1.3 Extend MatchmakingGroupMember ✓
 
 **File:** `TRANSMUTANSTEIN.ChatServer/Domain/Matchmaking/MatchmakingGroupMember.cs`
 
-Add these properties:
+Added these properties:
 
 ```csharp
 // Rating
@@ -225,11 +240,11 @@ public double MatchWinValue { get; set; }
 public double MatchLossValue { get; set; }
 ```
 
-#### 1.4 Extend MatchmakingGroup
+#### 1.4 Extend MatchmakingGroup ✓
 
 **File:** `TRANSMUTANSTEIN.ChatServer/Domain/Matchmaking/MatchmakingGroup.cs`
 
-Add these properties and methods:
+Added these properties and methods:
 
 ```csharp
 // TMR Statistics (recalculated when members change)
@@ -258,11 +273,13 @@ public void RejoinQueue(TimeSpan previousQueueTime);
 
 ---
 
-### Phase 2: Configuration System
+### Phase 2: Configuration System ✓ COMPLETED
 
 **Goal:** Implement all matchmaking CVARs from the HON specification.
 
-#### 2.1 Create MatchmakingSettings Class
+**Status:** Configuration class created and registered. Environment-specific PlayersPerTeam values set (dev=1, prod=5).
+
+#### 2.1 Create MatchmakingSettings Class ✓
 
 **File:** `TRANSMUTANSTEIN.ChatServer/Configuration/MatchmakingSettings.cs`
 
@@ -277,10 +294,9 @@ public class MatchmakingSettings
     public double TMRMultiplier { get; set; } = 6.0;
     public double TMROutlierMultiplier { get; set; } = 40.0;
 
-    // K-Factor (Rating Change)
+    // K-Factor (Rating Change) - No explicit maxKFactor; max = base × provisional multiplier
     public double BaseKFactor { get; set; } = 10.0;
-    public double MaxKFactor { get; set; } = 20.0;
-    public double ProvisionalKFactorMultiplier { get; set; } = 2.0;
+    public double ProvisionalKFactorMultiplier { get; set; } = 2.0;  // Effective max K = 20
     public int ProvisionalMatchCount { get; set; } = 10;
     public double ProvisionalTMRCutoff { get; set; } = 1750.0;
     public double ReducedKFactorMultiplier { get; set; } = 0.20;
@@ -1141,13 +1157,33 @@ dotnet ef database update --project MERRICK.DatabaseContext
 
 ## Files Summary
 
-### New Files to Create
+### Created Files ✓
+
+| File | Purpose | Status |
+|------|---------|--------|
+| `Domain/Matchmaking/MatchmakingTeam.cs` | Team formed from groups | ✓ Created |
+| `Domain/Matchmaking/MatchmakingMatch.cs` | Match between two teams | ✓ Created |
+| `Configuration/MatchmakingSettings.cs` | Algorithm CVARs | ✓ Created |
+
+### Modified Files ✓
+
+| File | Changes | Status |
+|------|---------|--------|
+| `Services/MatchmakingService.cs` | Simple FIFO broker, match spawning | ✓ Rewritten |
+| `Domain/Matchmaking/MatchmakingGroup.cs` | TMR calculations, match state | ✓ Extended |
+| `Domain/Matchmaking/MatchmakingGroupMember.cs` | TMR, MatchCount, IPAddress | ✓ Extended |
+| `Internals/UsingDirectives.cs` | Added global usings for Configuration | ✓ Updated |
+| `TRANSMUTANSTEIN.cs` | Registered MatchmakingSettings | ✓ Updated |
+| `appsettings.json` | Added Matchmaking section | ✓ Updated |
+| `appsettings.Development.json` | PlayersPerTeam: 1 | ✓ Updated |
+| `appsettings.Production.json` | PlayersPerTeam: 5 | ✓ Updated |
+| `CommandProcessors/Actions/TrackPlayerAction.cs` | Handle matchmaking analytics | ✓ Updated |
+
+### Remaining Files to Create
 
 | File | Purpose |
 |------|---------|
-| `Domain/Matchmaking/MatchmakingTeam.cs` | Team formed from groups |
-| `Domain/Matchmaking/MatchmakingMatch.cs` | Match between two teams |
-| `Services/Matchmaking/MatchBroker.cs` | Main broker algorithm |
+| `Services/Matchmaking/MatchBroker.cs` | Full broker algorithm with TMR matching |
 | `Services/Matchmaking/GroupCombiner.cs` | Team formation strategies |
 | `Services/Matchmaking/TeamMatcher.cs` | Team pairing logic |
 | `Services/Matchmaking/TeamBalancer.cs` | Two-pass balancing |
@@ -1156,7 +1192,6 @@ dotnet ef database update --project MERRICK.DatabaseContext
 | `Services/Matchmaking/ServerAllocator.cs` | Game server selection |
 | `Services/Matchmaking/MatchSpawner.cs` | Match creation and notification |
 | `Services/Matchmaking/LeaverTracker.cs` | Strike tracking |
-| `Configuration/MatchmakingSettings.cs` | Algorithm CVARs |
 | `Configuration/LeaverSettings.cs` | Leaver system CVARs |
 | `CommandProcessors/MatchState/MatchAnnounced.cs` | Handle GS_ANNOUNCE_MATCH |
 | `CommandProcessors/MatchState/MatchStarted.cs` | Handle GS_MATCH_STARTED |
@@ -1164,16 +1199,12 @@ dotnet ef database update --project MERRICK.DatabaseContext
 | `CommandProcessors/MatchState/PlayerReminder.cs` | Handle GS_REMIND_PLAYER |
 | `Entities/LeaverStrike.cs` | Database model |
 
-### Files to Modify
+### Remaining Files to Modify
 
 | File | Changes |
 |------|---------|
-| `Services/MatchmakingService.cs` | Replace placeholder broker, add DI |
-| `Domain/Matchmaking/MatchmakingGroup.cs` | Add TMR caching, queue methods |
-| `Domain/Matchmaking/MatchmakingGroupMember.cs` | Add TMR, MatchCount, IPAddress |
 | `MerrickContext.cs` | Add LeaverStrike DbSet |
-| `Program.cs` | Register new services |
-| `Internals/UsingDirectives.cs` | Add new global usings |
+| `Program.cs` | Register additional services |
 | `CommandProcessors/Matchmaking/GroupCreate.cs` | Add leaver check |
 | `CommandProcessors/MatchState/MatchComplete.cs` | Trigger rating updates |
 
@@ -1181,14 +1212,42 @@ dotnet ef database update --project MERRICK.DatabaseContext
 
 ## Implementation Order
 
-1. **Phase 1** - Data structures (MatchmakingTeam, MatchmakingMatch, extend GroupMember/Group)
-2. **Phase 2** - Configuration (MatchmakingSettings, LeaverSettings)
-3. **Phase 3** - Rating system (RatingCalculator, ExperienceClassifier)
-4. **Phase 4** - Match broker algorithm (MatchBroker, GroupCombiner, TeamMatcher, TeamBalancer)
-5. **Phase 5** - Server allocation (ServerAllocator, game server command processors)
-6. **Phase 6** - Match spawn flow (MatchSpawner, update MatchmakingService)
-7. **Phase 7** - Leaver system (LeaverTracker, LeaverStrike entity, migration)
-8. **Phase 8** - Post-match rating updates (ServerRequesterController extension)
+1. ✓ **Phase 1** - Data structures (MatchmakingTeam, MatchmakingMatch, extend GroupMember/Group) - COMPLETE
+2. ✓ **Phase 2** - Configuration (MatchmakingSettings) - COMPLETE (LeaverSettings deferred)
+3. **Phase 3** - Rating system (RatingCalculator, ExperienceClassifier) - NOT STARTED
+4. **Phase 4** - Match broker algorithm (MatchBroker, GroupCombiner, TeamMatcher, TeamBalancer) - PARTIALLY COMPLETE (FIFO only)
+5. **Phase 5** - Server allocation (ServerAllocator, game server command processors) - NOT STARTED
+6. ✓ **Phase 6** - Match spawn flow (MatchSpawner, update MatchmakingService) - BASIC COMPLETE
+7. **Phase 7** - Leaver system (LeaverTracker, LeaverStrike entity, migration) - NOT STARTED
+8. **Phase 8** - Post-match rating updates (ServerRequesterController extension) - NOT STARTED
+
+### Current State Summary
+
+The initial implementation provides a working matchmaking flow with FIFO matching. Players can:
+1. Create groups
+2. Invite/join/leave groups
+3. Ready up and load
+4. Join the queue
+5. Get matched with other queued players (FIFO order)
+6. Receive match notification packets
+
+**What Works:**
+- Group lifecycle (create, invite, join, leave, kick)
+- Ready/loading flow
+- Queue join/leave
+- Simple match formation (PlayersPerTeam groups matched together)
+- Match notification sequence (MatchFoundUpdate, FoundServerUpdate, AutoMatchConnect)
+- MatchInformation caching in Redis
+- Environment-specific PlayersPerTeam (1 for dev, 5 for prod)
+
+**Not Yet Implemented:**
+- TMR-based skill matching
+- Team balancing algorithm
+- Game server communication (NET_CHAT_GS_CREATE_MATCH, etc.)
+- Leaver detection and strike system
+- Post-match rating updates
+- Queue time expansion
+- Popularity tracking
 
 ---
 

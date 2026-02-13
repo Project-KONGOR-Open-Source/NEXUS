@@ -7,11 +7,23 @@ public class TrackPlayerAction : ISynchronousCommandProcessor<ClientChatSession>
     {
         TrackPlayerActionRequestData requestData = new (buffer);
 
-        // TODO: Do Something With This Data
+        // Handle The Action Based On Type
+        switch (requestData.Action)
+        {
+            // Matchmaking Actions - These Are Analytics Events From The Client, No Response Required
+            case ChatProtocol.ActionCampaign.AC_MATCHMAKING_MATCH_FOUND:
+            case ChatProtocol.ActionCampaign.AC_MATCHMAKING_SERVER_FOUND:
+            case ChatProtocol.ActionCampaign.AC_MATCHMAKING_MATCH_READY:
+            case ChatProtocol.ActionCampaign.AC_MATCHMAKING_SERVER_NOT_IDLE:
+            case ChatProtocol.ActionCampaign.AC_MATCHMAKING_MATCH_READY_REMINDER:
+                Log.Debug(@"Matchmaking Action Received: ""{Action}"" From Account ""{AccountName}""", requestData.Action, session.Account.Name);
+                break;
 
-        // TODO: Look Into Updating The Online Players Count And Matchmaking Details Using Custom Action OBTAIN_DETAILED_ONLINE_STATUS (Or Equivalent)
-
-        Log.Error(@"Unhandled User Action: ""{RequestData.Action}""", requestData.Action);
+            // TODO: Handle Other Actions As Needed
+            default:
+                Log.Warning(@"Unhandled User Action: ""{Action}"" From Account ""{AccountName}""", requestData.Action, session.Account.Name);
+                break;
+        }
     }
 }
 

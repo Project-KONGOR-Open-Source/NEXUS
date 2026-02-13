@@ -1,5 +1,7 @@
 namespace TRANSMUTANSTEIN.ChatServer.Services;
 
+using ASPIRE.Common.Enumerations.Match;
+
 using Microsoft.Extensions.Options;
 
 using Configuration;
@@ -227,14 +229,15 @@ public class MatchmakingService : BackgroundService, IDisposable
     }
 
     /// <summary>
-    ///     Spawns a match by allocating a server and notifying players.
+    ///     Spawns a match by allocating a server and sending CreateMatch to the game server.
+    ///     The actual player notification happens in MatchAnnounce when the game server responds.
     /// </summary>
     private async Task<bool> SpawnMatch(MatchmakingMatch match)
     {
-        // Find An Available Server
-        MatchServer? server = await FindAvailableServer(match);
+        // Find An Available Server And Its Chat Session
+        (MatchServer? server, MatchServerChatSession? serverSession) = await FindAvailableServerWithSession(match);
 
-        if (server is null)
+        if (server is null || serverSession is null)
         {
             Log.Warning(@"No Available Server Found For Match Index {MatchIndex}", match.MatchIndex);
 
@@ -245,23 +248,25 @@ public class MatchmakingService : BackgroundService, IDisposable
         match.AssignedServerID = server.ID;
         match.ServerAddress = server.IPAddress;
         match.ServerPort = (ushort)server.Port;
-        match.State = MatchmakingMatchState.ServerAllocated;
+        match.State = MatchmakingMatchState.ServerAllocating;
 
         // Store Match In Active Matches Registry
         ActiveMatches.TryAdd(match.GUID, match);
 
-        // Clear Queue Start Time For All Groups
-        foreach (MatchmakingGroup group in match.GetAllGroups())
-            group.QueueStartTime = null;
+        // Create And Cache Match Information For Player Join Tracking
+        MatchInformation matchInformation = CreateMatchInformation(match, server);
+        await _distributedCacheStore.SetMatchInformation(matchInformation);
 
-        // Notify All Players
-        SendMatchFoundUpdate(match);
-        SendFoundServerUpdate(match);
-        SendAutoMatchConnect(match, server);
+        Log.Information(@"Match Information Cached: MatchID={MatchID}, MatchName={MatchName}", matchInformation.MatchID, matchInformation.MatchName);
+
+        // Send CreateMatch Command To The Game Server
+        // The Game Server Will Respond With AnnounceMatch Which Triggers Player Notification
+        SendCreateMatch(match, serverSession);
 
         Log.Information(
-            @"Match Spawned: Index={MatchIndex}, Server={ServerAddress}:{ServerPort}",
+            @"CreateMatch Sent: Index={MatchIndex}, ServerID={ServerID}, Server={ServerAddress}:{ServerPort}",
             match.MatchIndex,
+            server.ID,
             match.ServerAddress,
             match.ServerPort);
 
@@ -269,85 +274,12 @@ public class MatchmakingService : BackgroundService, IDisposable
     }
 
     /// <summary>
-    ///     Finds an available server for a match.
-    ///     For now, returns the first idle server or uses a placeholder for testing.
+    ///     Sends NET_CHAT_GS_CREATE_MATCH (0x1502) to the game server to set up the match.
     /// </summary>
-    private async Task<MatchServer?> FindAvailableServer(MatchmakingMatch match)
+    private static void SendCreateMatch(MatchmakingMatch match, MatchServerChatSession serverSession)
     {
-        List<MatchServer> servers = await _distributedCacheStore.GetMatchServers();
-
-        // Find An Idle Server
-        MatchServer? idleServer = servers.FirstOrDefault(server => server.Status == ServerStatus.SERVER_STATUS_IDLE);
-
-        if (idleServer is not null)
-            return idleServer;
-
-        // For Testing: If No Real Servers Are Available, Create A Placeholder
-        // This Allows Testing The Matchmaking Flow Without A Real Game Server
-        if (servers.Count == 0)
-        {
-            Log.Warning(@"No Servers Available For Match Index {MatchIndex}, Using Placeholder For Testing", match.MatchIndex);
-
-            return new MatchServer
-            {
-                HostAccountID = 0,
-                HostAccountName = "PLACEHOLDER",
-                ID = 999999,
-                Name = "Test Server",
-                MatchServerManagerID = null,
-                Instance = 1,
-                IPAddress = "127.0.0.1",
-                Port = 11235,
-                Location = "NEWERTH",
-                Description = "Placeholder Server For Testing",
-                Status = ServerStatus.SERVER_STATUS_IDLE
-            };
-        }
-
-        return null;
-    }
-
-    /// <summary>
-    ///     Sends MatchFoundUpdate (0x0D09) to all players in a match.
-    /// </summary>
-    private static void SendMatchFoundUpdate(MatchmakingMatch match)
-    {
-        ChatBuffer matchFound = new();
-
-        matchFound.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_MATCH_FOUND_UPDATE);
-        matchFound.WriteString(match.SelectedMap);                           // Map Name
-        matchFound.WriteInt32(match.LegionTeam.TeamSize);                     // Team Size
-        matchFound.WriteInt8(Convert.ToByte(match.GameType));                 // Game Type
-        matchFound.WriteString(match.SelectedMode);                           // Game Mode
-        matchFound.WriteString(match.SelectedRegion);                         // Server Region
-        matchFound.WriteString($"Match #{match.MatchIndex}");                 // Extra Info (Debug Data)
-
-        foreach (MatchmakingGroupMember member in match.GetAllPlayers())
-            member.Session.Send(matchFound);
-    }
-
-    /// <summary>
-    ///     Sends GroupQueueUpdate type=16 (TMM_GROUP_FOUND_SERVER) to all players.
-    ///     This triggers "Sound The Horn!" in the client.
-    /// </summary>
-    private static void SendFoundServerUpdate(MatchmakingMatch match)
-    {
-        ChatBuffer found = new();
-
-        found.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_QUEUE_UPDATE);
-        found.WriteInt8(Convert.ToByte(ChatProtocol.TMMUpdateType.TMM_GROUP_FOUND_SERVER));
-
-        foreach (MatchmakingGroupMember member in match.GetAllPlayers())
-            member.Session.Send(found);
-    }
-
-    /// <summary>
-    ///     Sends AutoMatchConnect (0x0062) to all players with server connection details.
-    /// </summary>
-    private static void SendAutoMatchConnect(MatchmakingMatch match, MatchServer server, bool isReminder = false)
-    {
-        // Determine The Arranged Match Type Based On Game Type
-        byte arrangedMatchType = match.GameType switch
+        // Determine Match Type (Uses MatchType Enum Values)
+        byte matchType = match.GameType switch
         {
             ChatProtocol.TMMGameType.TMM_GAME_TYPE_NORMAL          => (byte)MatchType.AM_MATCHMAKING,
             ChatProtocol.TMMGameType.TMM_GAME_TYPE_CASUAL          => (byte)MatchType.AM_UNRANKED_MATCHMAKING,
@@ -358,17 +290,159 @@ public class MatchmakingService : BackgroundService, IDisposable
             _                                                      => (byte)MatchType.AM_MATCHMAKING
         };
 
-        ChatBuffer connect = new();
+        // Build Match Settings String
+        string matchSettings = $"mode:{match.SelectedMode} map:{match.SelectedMap} teamsize:{match.LegionTeam.TeamSize} noleaver:true spectators:10";
 
-        connect.WriteCommand(ChatProtocol.Command.CHAT_CMD_AUTO_MATCH_CONNECT);
-        connect.WriteInt8(arrangedMatchType);                                         // Arranged Match Type
-        connect.WriteInt32(match.MatchIndex);                                         // Matchup ID
-        connect.WriteString(server.IPAddress);                                        // Server Address (IP)
-        connect.WriteInt16(Convert.ToInt16(server.Port));                             // Server Port
-        connect.WriteInt32(isReminder ? unchecked((int)0xFFFFFFFF) : Random.Shared.Next()); // Connection Reminder Flag
+        // Build Player Info List
+        List<MatchmakingGroupMember> legionPlayers = [.. match.LegionTeam.GetAllMembers().OrderBy(member => member.TMR)];
+        List<MatchmakingGroupMember> hellbournePlayers = [.. match.HellbourneTeam.GetAllMembers().OrderBy(member => member.TMR)];
 
-        foreach (MatchmakingGroupMember member in match.GetAllPlayers())
-            member.Session.Send(connect);
+        ChatBuffer createMatch = new();
+
+        createMatch.WriteCommand(ChatProtocol.ChatServerToGameServer.NET_CHAT_GS_CREATE_MATCH);
+        createMatch.WriteInt8(matchType);                       // Match Type
+        createMatch.WriteInt32(match.MatchIndex);               // Matchup/Challenge ID
+        createMatch.WriteInt32(0);                              // Unknown1
+        createMatch.WriteInt32(Random.Shared.Next());           // Password
+        createMatch.WriteString($"TMM Match #");                // Match Name Prefix
+        createMatch.WriteString(matchSettings);                 // Match Settings
+        createMatch.WriteInt8(0);                               // Use New MMR System (FALSE)
+        createMatch.WriteInt8(0);                               // Unknown3
+
+        // Write Player Count
+        int totalPlayers = legionPlayers.Count + hellbournePlayers.Count;
+        createMatch.WriteInt8(Convert.ToByte(totalPlayers));
+
+        // Write Legion Players (Team 1)
+        byte legionGroupIndex = 0;
+        foreach (MatchmakingGroup group in match.LegionTeam.Groups)
+        {
+            byte slot = 0;
+            foreach (MatchmakingGroupMember member in group.Members)
+            {
+                createMatch.WriteInt32(member.Account.ID);                                             // Account ID
+                createMatch.WriteInt8(1);                                                              // Team (1 = Legion)
+                createMatch.WriteInt8(slot++);                                                         // Slot
+                createMatch.WriteInt8(0);                                                              // Social Bonus (0 = None)
+                createMatch.WriteInt32(BitConverter.SingleToInt32Bits((float)member.MatchWinValue));   // Win MMR Delta
+                createMatch.WriteInt32(BitConverter.SingleToInt32Bits((float)member.MatchLossValue));  // Loss MMR Delta
+                createMatch.WriteInt8(0);                                                              // Is Provisional (FALSE)
+                createMatch.WriteInt8(legionGroupIndex);                                               // Group Index
+                createMatch.WriteInt8(0);                                                              // Benefit Value (0 = Normal)
+            }
+
+            legionGroupIndex++;
+        }
+
+        // Write Hellbourne Players (Team 2)
+        byte hellbourneGroupIndex = 0;
+        foreach (MatchmakingGroup group in match.HellbourneTeam.Groups)
+        {
+            byte slot = 0;
+            foreach (MatchmakingGroupMember member in group.Members)
+            {
+                createMatch.WriteInt32(member.Account.ID);                                             // Account ID
+                createMatch.WriteInt8(2);                                                              // Team (2 = Hellbourne)
+                createMatch.WriteInt8(slot++);                                                         // Slot
+                createMatch.WriteInt8(0);                                                              // Social Bonus (0 = None)
+                createMatch.WriteInt32(BitConverter.SingleToInt32Bits((float)member.MatchWinValue));   // Win MMR Delta
+                createMatch.WriteInt32(BitConverter.SingleToInt32Bits((float)member.MatchLossValue));  // Loss MMR Delta
+                createMatch.WriteInt8(0);                                                              // Is Provisional (FALSE)
+                createMatch.WriteInt8(hellbourneGroupIndex);                                           // Group Index
+                createMatch.WriteInt8(0);                                                              // Benefit Value (0 = Normal)
+            }
+
+            hellbourneGroupIndex++;
+        }
+
+        // Write Group IDs (Empty For Now)
+        createMatch.WriteInt32(0);
+
+        // Send To Game Server
+        serverSession.Send(createMatch);
+    }
+
+    /// <summary>
+    ///     Creates a MatchInformation object for caching, enabling player join tracking.
+    /// </summary>
+    private static MatchInformation CreateMatchInformation(MatchmakingMatch match, MatchServer server)
+    {
+        // Determine Match Type
+        MatchType matchType = match.GameType switch
+        {
+            ChatProtocol.TMMGameType.TMM_GAME_TYPE_NORMAL          => MatchType.AM_MATCHMAKING,
+            ChatProtocol.TMMGameType.TMM_GAME_TYPE_CASUAL          => MatchType.AM_UNRANKED_MATCHMAKING,
+            ChatProtocol.TMMGameType.TMM_GAME_TYPE_MIDWARS         => MatchType.AM_MATCHMAKING_MIDWARS,
+            ChatProtocol.TMMGameType.TMM_GAME_TYPE_RIFTWARS        => MatchType.AM_MATCHMAKING_RIFTWARS,
+            ChatProtocol.TMMGameType.TMM_GAME_TYPE_CAMPAIGN_NORMAL => MatchType.AM_MATCHMAKING_CAMPAIGN,
+            ChatProtocol.TMMGameType.TMM_GAME_TYPE_CAMPAIGN_CASUAL => MatchType.AM_MATCHMAKING_CAMPAIGN,
+            _                                                      => MatchType.AM_MATCHMAKING
+        };
+
+        // Determine Match Mode From Mode Code
+        PublicMatchMode matchMode = match.SelectedMode.ToLowerInvariant() switch
+        {
+            "ap" => PublicMatchMode.GAME_MODE_NORMAL,
+            "nm" => PublicMatchMode.GAME_MODE_NORMAL,
+            "sd" => PublicMatchMode.GAME_MODE_SINGLE_DRAFT,
+            "rd" => PublicMatchMode.GAME_MODE_RANDOM_DRAFT,
+            "bd" => PublicMatchMode.GAME_MODE_BANNING_DRAFT,
+            "ar" => PublicMatchMode.GAME_MODE_ALL_RANDOM,
+            "lp" => PublicMatchMode.GAME_MODE_LOCKPICK,
+            "bb" => PublicMatchMode.GAME_MODE_BLIND_BAN,
+            "hb" => PublicMatchMode.GAME_MODE_HEROBAN,
+            "rb" => PublicMatchMode.GAME_MODE_REBORN,
+            _    => PublicMatchMode.GAME_MODE_NORMAL
+        };
+
+        // Determine If Casual Mode
+        bool isCasual = match.GameType is ChatProtocol.TMMGameType.TMM_GAME_TYPE_CASUAL
+            or ChatProtocol.TMMGameType.TMM_GAME_TYPE_CAMPAIGN_CASUAL
+            or ChatProtocol.TMMGameType.TMM_GAME_TYPE_REBORN_CASUAL;
+
+        return new MatchInformation
+        {
+            MatchName = $"TMM Match #{match.MatchIndex}",
+            ServerID = server.ID,
+            ServerName = server.Name,
+            HostAccountName = server.HostAccountName,
+            Map = match.SelectedMap,
+            Version = "4.10.6.0", // TODO: Get Actual Client Version From Group Information
+            IsCasual = isCasual,
+            MatchType = matchType,
+            MatchMode = matchMode,
+            MaximumPlayersCount = match.LegionTeam.TeamSize * 2
+        };
+    }
+
+    /// <summary>
+    ///     Finds an available server for a match along with its chat session.
+    ///     Returns null if no idle server with an active session is found.
+    /// </summary>
+    private async Task<(MatchServer? Server, MatchServerChatSession? Session)> FindAvailableServerWithSession(MatchmakingMatch match)
+    {
+        List<MatchServer> servers = await _distributedCacheStore.GetMatchServers();
+
+        // Find An Idle Server That Also Has An Active Chat Session
+        foreach (MatchServer server in servers.Where(server => server.Status == ServerStatus.SERVER_STATUS_IDLE))
+        {
+            if (Context.MatchServerChatSessions.TryGetValue(server.ID, out MatchServerChatSession? session))
+            {
+                Log.Debug(@"Found Idle Server With Session: ServerID={ServerID}, ServerName={ServerName}", server.ID, server.Name);
+
+                return (server, session);
+            }
+
+            Log.Debug(@"Idle Server Has No Active Chat Session: ServerID={ServerID}", server.ID);
+        }
+
+        // No Idle Server With Active Session Found
+        if (servers.Count == 0)
+            Log.Warning(@"No Servers Available For Match Index {MatchIndex}", match.MatchIndex);
+        else
+            Log.Warning(@"No Idle Servers With Active Sessions For Match Index {MatchIndex} (Total Servers: {ServerCount})", match.MatchIndex, servers.Count);
+
+        return (null, null);
     }
 
     /// <summary>
