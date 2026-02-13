@@ -1,5 +1,7 @@
 ﻿namespace TRANSMUTANSTEIN.ChatServer;
 
+using Configuration;
+
 public class TRANSMUTANSTEIN
 {
     public static void Main(string[] args)
@@ -9,6 +11,9 @@ public class TRANSMUTANSTEIN
 
         // Add Aspire Service Defaults
         builder.AddServiceDefaults();
+
+        // Configure Matchmaking Settings
+        builder.Services.Configure<MatchmakingSettings>(builder.Configuration.GetSection(MatchmakingSettings.SectionName));
 
         // Add The Database Context
         builder.AddSqlServerDbContext<MerrickContext>("MERRICK", configureSettings: null, configureDbContextOptions: options =>

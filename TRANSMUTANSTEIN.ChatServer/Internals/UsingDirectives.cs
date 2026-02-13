@@ -1,4 +1,5 @@
 ﻿global using ASPIRE.Common;
+global using ASPIRE.Common.Enumerations.Match;
 global using ASPIRE.Common.Extensions.Cryptography;
 global using ASPIRE.Common.Constants;
 global using ASPIRE.Common.ServiceDefaults;
@@ -44,3 +45,5 @@ global using TRANSMUTANSTEIN.ChatServer.Extensions.Protocol;
 global using TRANSMUTANSTEIN.ChatServer.Internals;
 global using TRANSMUTANSTEIN.ChatServer.Services;
 global using TRANSMUTANSTEIN.ChatServer.Utilities;
+
+global using ServerStatus = ASPIRE.Common.ChatProtocol.ServerStatus;

@@ -12,15 +12,55 @@ public class MatchmakingGroup
 
     // public required ChatChannel ChatChannel { get; set; }
 
-    public float AverageRating => 1500; // TODO: Members.Average(member => member.Rating);
+    /// <summary>
+    ///     The total TMR (Team Match Rating) of all members in this group.
+    /// </summary>
+    public double TotalTMR => Members.Sum(member => member.TMR);
 
-    public float RatingDisparity => 100; // TODO: Members.Max(member => member.Rating) - Members.Min(member => member.Rating);
+    /// <summary>
+    ///     The average TMR of all members in this group.
+    /// </summary>
+    public double AverageTMR => Members.Count > 0 ? TotalTMR / Members.Count : 0;
+
+    /// <summary>
+    ///     The highest TMR among all members in this group.
+    /// </summary>
+    public double HighestTMR => Members.Count > 0 ? Members.Max(member => member.TMR) : 0;
+
+    /// <summary>
+    ///     The lowest TMR among all members in this group.
+    /// </summary>
+    public double LowestTMR => Members.Count > 0 ? Members.Min(member => member.TMR) : 0;
+
+    /// <summary>
+    ///     The TMR range within this group.
+    /// </summary>
+    public double TMRRange => HighestTMR - LowestTMR;
+
+    public float AverageRating => (float)AverageTMR;
+
+    public float RatingDisparity => (float)TMRRange;
 
     public int FullTeamDifference => Information.TeamSize - Members.Count;
 
     public DateTimeOffset? QueueStartTime { get; set; } = null;
 
     public TimeSpan QueueDuration => QueueStartTime is not null ? DateTimeOffset.UtcNow - QueueStartTime.Value : TimeSpan.Zero;
+
+    /// <summary>
+    ///     Whether this group has been matched and is awaiting a match to start.
+    /// </summary>
+    public bool MatchedUp { get; set; }
+
+    /// <summary>
+    ///     The GUID of the team this group has been assigned to.
+    /// </summary>
+    public Guid? AssignedTeamGUID { get; set; }
+
+    /// <summary>
+    ///     The GUID of the match this group has been assigned to.
+    /// </summary>
+    public Guid? AssignedMatchGUID { get; set; }
 
     /// <summary>
     ///     Hidden Constructor Which Enforces <see cref="Create"/> As The Primary Mechanism For Creating Matchmaking Groups
