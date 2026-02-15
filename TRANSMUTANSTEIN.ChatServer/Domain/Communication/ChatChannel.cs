@@ -202,6 +202,9 @@ public class ChatChannel
 
         foreach (ChatChannelMember member in Members.Values)
         {
+            Log.Debug(@"Channel ""{ChannelName}"" Member Info: Name=""{Name}"", ID={ID}, ChatSymbol=""{ChatSymbol}"", NameColour=""{NameColour}"", Icon=""{Icon}"", AscensionLevel={AscensionLevel}",
+                Name, member.Account.NameWithClanTag, member.Account.ID, member.Account.ChatSymbolNoPrefixCode, member.Account.NameColourNoPrefixCode, member.Account.IconNoPrefixCode, member.Account.AscensionLevel);
+
             response.WriteString(member.Account.NameWithClanTag);                 // Member Account Name
             response.WriteInt32(member.Account.ID);                               // Member Account ID
             response.WriteInt8(Convert.ToByte(member.ConnectionStatus));          // Connection Status
@@ -229,6 +232,9 @@ public class ChatChannel
         ChatChannelMember newMember = Members.Values.Single(member => member.Account.ID == session.Account.ID);
 
         List<ChatChannelMember> existingMembers = [.. Members.Values.Where(member => member.Account.ID != session.Account.ID)];
+
+        Log.Debug(@"Broadcasting Join To Channel ""{ChannelName}"": Name=""{Name}"", ID={ID}, ChatSymbol=""{ChatSymbol}"", NameColour=""{NameColour}"", Icon=""{Icon}"", AscensionLevel={AscensionLevel}",
+            Name, newMember.Account.NameWithClanTag, newMember.Account.ID, newMember.Account.ChatSymbolNoPrefixCode, newMember.Account.NameColourNoPrefixCode, newMember.Account.IconNoPrefixCode, newMember.Account.AscensionLevel);
 
         ChatBuffer broadcast = new ();
 

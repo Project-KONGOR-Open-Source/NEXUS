@@ -448,6 +448,8 @@ public class MatchmakingGroup
 
         foreach (MatchmakingGroupMember member in Members)
             member.Session.Send(queueUpdateBroadcast);
+
+        Log.Debug(@"Group GUID ""{Group.GUID}"" Joined Queue With {MemberCount} Member(s)", GUID, Members.Count);
     }
 
     public void MulticastUpdate(int emitterAccountID, ChatProtocol.TMMUpdateType updateType)

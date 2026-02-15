@@ -428,6 +428,9 @@ public class ClientChatSession(TCPServer server, IServiceProvider serviceProvide
         List<int> clanMemberIDs = [.. Account.Clan?.Members.Select(clanMember => clanMember.ID) ?? []];
         List<int> friendIDs = [.. Account.FriendedPeers.Select(friend => friend.ID)];
 
+        Log.Debug(@"Sending Initial Status To ""{AccountName}"": FriendCount={FriendCount}, ClanMemberCount={ClanMemberCount}",
+            Account.Name, friendIDs.Count, clanMemberIDs.Count);
+
         List<ClientChatSession> onlinePeerSessions = Context.ClientChatSessions.Values
             .Where(chatSession => friendIDs.Any(friendID => friendID == chatSession.Account.ID) || clanMemberIDs.Any(clanMemberID => clanMemberID == chatSession.Account.ID))
             .Where(chatSession => chatSession.Metadata.ClientChatModeState is not ChatProtocol.ChatModeType.CHAT_MODE_INVISIBLE)
@@ -441,6 +444,10 @@ public class ClientChatSession(TCPServer server, IServiceProvider serviceProvide
         foreach (ClientChatSession onlinePeerSession in onlinePeerSessions)
         {
             ChatProtocol.ChatClientStatus status = onlinePeerSession.Metadata.LastKnownClientState;
+
+            Log.Debug(@"Initial Status Peer: Name=""{Name}"", ID={ID}, NameColour=""{NameColour}"", Icon=""{Icon}"", AscensionLevel={AscensionLevel}",
+                onlinePeerSession.Account.Name, onlinePeerSession.Account.ID, onlinePeerSession.Account.NameColourNoPrefixCode,
+                onlinePeerSession.Account.IconNoPrefixCode, onlinePeerSession.Account.AscensionLevel);
 
             update.WriteInt32(onlinePeerSession.Account.ID);                       // Client's Account ID
             update.WriteInt8(Convert.ToByte(status));                              // Client's Status
