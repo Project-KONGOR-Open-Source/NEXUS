@@ -157,6 +157,9 @@ public class ClientChatSession(TCPServer server, IServiceProvider serviceProvide
 
     public ClientChatSession LeaveMatch()
     {
+        // Leave Match Channels (Only The Channels With The SERVER Flag)
+        LeaveAllChannels(ChatProtocol.ChatChannelType.CHAT_CHANNEL_FLAG_SERVER);
+
         Metadata.MatchServerConnectedTo = null;
         MatchInformation = null;
 
