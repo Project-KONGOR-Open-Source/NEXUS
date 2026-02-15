@@ -319,9 +319,6 @@ public class MatchmakingGroup
         if (Members.Any(member => member.Account.ID == session.Account.ID) is false)
         {
             Members.Add(newMatchmakingGroupMember);
-
-            // Register This Member In The Matchmaking Service
-            MatchmakingService.Groups.TryAdd(session.Account.ID, this);
         }
 
         else
@@ -570,19 +567,23 @@ public class MatchmakingGroup
         if (ChatChannel is not null)
         {
             ChatChannel.Members.TryRemove(memberToRemove.Account.Name, out _);
+
             memberToRemove.Session.CurrentChannels.Remove(ChatChannel.ID);
         }
 
         // Remove Member From Group
         Members.Remove(memberToRemove);
 
-        // Remove This Account's Entry From The Matchmaking Service
-        MatchmakingService.Groups.TryRemove(accountID, out _);
-
         // If Group Is Now Empty, Disband It
         if (Members.Count is 0)
         {
-            DisbandGroup(accountID);
+            // Remove The Leader's Entry From The Matchmaking Service (Groups Are Keyed By Leader ID)
+            if (memberToRemoveIsLeader)
+            {
+                MatchmakingService.Groups.TryRemove(accountID, out _);
+            }
+
+            DisbandGroup();
 
             return;
         }
@@ -595,6 +596,13 @@ public class MatchmakingGroup
 
         // Reassign Slots And Transfer Leadership
         ReassignSlots();
+
+        // If The Leader Left, Re-Key The Group Under The New Leader's ID
+        if (memberToRemoveIsLeader)
+        {
+            MatchmakingService.Groups.TryRemove(accountID, out _);
+            MatchmakingService.Groups.TryAdd(Leader.Account.ID, this);
+        }
 
         // Reset All Members To Default Readiness State: Leader = Not Ready, Others = Ready
         // Non-Leader Members Should Always Be Ready So That Group Readiness Is Determined Solely By The Leader
@@ -632,10 +640,10 @@ public class MatchmakingGroup
     }
 
     /// <summary>
-    ///     Disbands the matchmaking group by removing it from the matchmaking service registry.
-    ///     Called when the last member leaves or when the leader leaves with no other members.
+    ///     Cleans up resources when disbanding the matchmaking group.
+    ///     Called when the last member leaves. The groups registry entry is removed by the caller.
     /// </summary>
-    private void DisbandGroup(int accountID)
+    private void DisbandGroup()
     {
         // Leave Queue If Queued
         if (IsQueued)
@@ -658,10 +666,6 @@ public class MatchmakingGroup
                 Context.ChatChannels.TryRemove(ChatChannel.Name, out _);
             }
         }
-
-        // Remove Group From Matchmaking Service Registry
-        if (MatchmakingService.Groups.TryRemove(accountID, out MatchmakingGroup? group) is false)
-            Log.Error(@"Failed To Disband Matchmaking Group GUID ""{Group.GUID}"" For Account ID ""{Member.Account.ID}""", group?.GUID ?? Guid.Empty, accountID);
     }
 
     /// <summary>
