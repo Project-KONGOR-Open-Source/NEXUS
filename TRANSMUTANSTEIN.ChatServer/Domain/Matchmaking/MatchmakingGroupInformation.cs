@@ -22,6 +22,24 @@ public class MatchmakingGroupInformation
 
     public required bool RandomizeBots { get; set; }
 
+    /// <summary>
+    ///     The arranged match type derived from the game type.
+    ///     Maps to the MatchType enum values.
+    /// </summary>
+    public MatchType ArrangedMatchType => GameType switch
+    {
+        ChatProtocol.TMMGameType.TMM_GAME_TYPE_NORMAL          => MatchType.AM_MATCHMAKING,
+        ChatProtocol.TMMGameType.TMM_GAME_TYPE_CASUAL          => MatchType.AM_MATCHMAKING,
+        ChatProtocol.TMMGameType.TMM_GAME_TYPE_MIDWARS         => MatchType.AM_MATCHMAKING_MIDWARS,
+        ChatProtocol.TMMGameType.TMM_GAME_TYPE_RIFTWARS        => MatchType.AM_MATCHMAKING_RIFTWARS,
+        ChatProtocol.TMMGameType.TMM_GAME_TYPE_CAMPAIGN_NORMAL => MatchType.AM_MATCHMAKING_CAMPAIGN,
+        ChatProtocol.TMMGameType.TMM_GAME_TYPE_CAMPAIGN_CASUAL => MatchType.AM_MATCHMAKING_CAMPAIGN,
+        ChatProtocol.TMMGameType.TMM_GAME_TYPE_REBORN_NORMAL   => MatchType.AM_MATCHMAKING,
+        ChatProtocol.TMMGameType.TMM_GAME_TYPE_REBORN_CASUAL   => MatchType.AM_MATCHMAKING,
+        ChatProtocol.TMMGameType.TMM_GAME_TYPE_MIDWARS_REBORN  => MatchType.AM_MATCHMAKING_MIDWARS,
+        _                                                      => MatchType.AM_MATCHMAKING
+    };
+
     public byte TeamSize => GameType switch
     {
         ChatProtocol.TMMGameType.TMM_GAME_TYPE_NORMAL          => 5, // caldavar

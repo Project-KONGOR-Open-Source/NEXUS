@@ -2,6 +2,11 @@
 
 public class MatchmakingGroup
 {
+    // C++ Reference Constants
+    private const double MaximumTMR = 2500.0;
+    private const int InexperiencedMatchCount = 50;
+    private const double InexperiencedTMRCutoff = 1625.0;
+
     public Guid GUID { get; } = Guid.CreateVersion7();
 
     public MatchmakingGroupMember Leader => Members.Single(member => member.IsLeader);
@@ -10,7 +15,11 @@ public class MatchmakingGroup
 
     public required MatchmakingGroupInformation Information { get; set; }
 
-    // public required ChatChannel ChatChannel { get; set; }
+    /// <summary>
+    ///     The group chat channel for pre-match communication.
+    ///     Uses RESERVED | UNJOINABLE | HIDDEN flags per original C++ implementation.
+    /// </summary>
+    public ChatChannel? ChatChannel { get; set; }
 
     /// <summary>
     ///     The total TMR (Team Match Rating) of all members in this group.
@@ -37,15 +46,33 @@ public class MatchmakingGroup
     /// </summary>
     public double TMRRange => HighestTMR - LowestTMR;
 
+    /// <summary>
+    ///     The total number of matches played by all members in this group.
+    /// </summary>
+    public int TotalMatchCount => Members.Sum(member => member.TotalMatchCount);
+
+    /// <summary>
+    ///     The average kill/death ratio of all members in this group.
+    /// </summary>
+    public double AverageKD => Members.Count > 0 ? Members.Average(member => member.KDRatio) : 0;
+
     public float AverageRating => (float)AverageTMR;
 
     public float RatingDisparity => (float)TMRRange;
 
     public int FullTeamDifference => Information.TeamSize - Members.Count;
 
+    public bool IsFull => Members.Count >= Information.TeamSize;
+
+    public bool IsQueued => QueueStartTime is not null;
+
     public DateTimeOffset? QueueStartTime { get; set; } = null;
 
     public TimeSpan QueueDuration => QueueStartTime is not null ? DateTimeOffset.UtcNow - QueueStartTime.Value : TimeSpan.Zero;
+
+    public double QueuedTimeInMinutes => QueueDuration.TotalMinutes;
+
+    public double QueuedTimeInSeconds => QueueDuration.TotalSeconds;
 
     /// <summary>
     ///     Whether this group has been matched and is awaiting a match to start.
@@ -61,6 +88,75 @@ public class MatchmakingGroup
     ///     The GUID of the match this group has been assigned to.
     /// </summary>
     public Guid? AssignedMatchGUID { get; set; }
+
+    /// <summary>
+    ///     Determines if this group is considered "experienced" based on match count or TMR.
+    ///     C++ Reference: IsExperienced() based on matchCount >= 50 OR TMR >= 1625
+    /// </summary>
+    public bool IsExperienced => TotalMatchCount >= InexperiencedMatchCount || AverageTMR >= InexperiencedTMRCutoff;
+
+    /// <summary>
+    ///     Gets the adaptive TMR spread based on queue wait time.
+    ///     As queue time increases, the acceptable TMR range widens to improve match finding.
+    ///     C++ Reference: GetTMRSpread() Lines 172-194
+    /// </summary>
+    public double GetAdaptiveTMRSpread()
+    {
+        double baseTMRSpread = TMRRange;
+        double queueMinutes = QueuedTimeInMinutes;
+
+        // Widen TMR spread as queue time increases (approximately 50 TMR per minute after 2 minutes)
+        if (queueMinutes > 2.0)
+        {
+            double additionalSpread = (queueMinutes - 2.0) * 50.0;
+            baseTMRSpread += additionalSpread;
+        }
+
+        // Cap The Maximum Spread
+        return Math.Min(baseTMRSpread, MaximumTMR);
+    }
+
+    /// <summary>
+    ///     Checks if this group is compatible with another group for team formation.
+    ///     C++ Reference: IsCompatible() Lines 200-260
+    /// </summary>
+    /// <param name="other">The other group to check compatibility with.</param>
+    /// <returns>TRUE if the groups are compatible, FALSE otherwise.</returns>
+    public bool IsCompatibleWith(MatchmakingGroup other)
+    {
+        // Must Have Matching Game Type
+        if (Information.GameType != other.Information.GameType)
+            return false;
+
+        // Must Have Overlapping Game Modes
+        if (Information.GameModes.Intersect(other.Information.GameModes).Any() is false)
+            return false;
+
+        // Must Have Overlapping Regions
+        if (Information.GameRegions.Intersect(other.Information.GameRegions).Any() is false)
+            return false;
+
+        // Must Be Same Ranked Status
+        if (Information.Ranked != other.Information.Ranked)
+            return false;
+
+        // Combined Size Must Not Exceed Team Size
+        if (Members.Count + other.Members.Count > Information.TeamSize)
+            return false;
+
+        // TMR Should Be Within Adaptive Range
+        double combinedTMRSpread = GetAdaptiveTMRSpread();
+        double tmrDifference = Math.Abs(AverageTMR - other.AverageTMR);
+
+        if (tmrDifference > combinedTMRSpread)
+            return false;
+
+        // Experience Level Should Match (Experienced vs Inexperienced)
+        if (IsExperienced != other.IsExperienced)
+            return false;
+
+        return true;
+    }
 
     /// <summary>
     ///     Hidden Constructor Which Enforces <see cref="Create"/> As The Primary Mechanism For Creating Matchmaking Groups
@@ -85,6 +181,14 @@ public class MatchmakingGroup
 
     internal static MatchmakingGroup Create(ClientChatSession session, MatchmakingGroupInformation information)
     {
+        // Check If Already In A Matchmaking Group And Remove From It First
+        MatchmakingGroup? existingGroup = MatchmakingService.GetMatchmakingGroup(session.Account.ID);
+
+        if (existingGroup is not null)
+        {
+            existingGroup.RemoveMember(session.Account.ID);
+        }
+
         MatchmakingGroupMember member = new (session)
         {
             Slot = 1, // The Group Leader Is Always In Slot 1
@@ -96,14 +200,21 @@ public class MatchmakingGroup
             GameModeAccess = string.Join('|', information.GameModes.Select(mode => "true"))
         };
 
-        // TODO: Create Chat Channel For The Group
-
         MatchmakingGroup group = new () { Members = [member], Information = information };
+
+        // Create Group Chat Channel (Uses RESERVED | UNJOINABLE | HIDDEN Flags)
+        group.ChatChannel = ChatChannel.GetOrCreateGroupChannel(group.GUID.GetHashCode());
+
+        // Join Group Chat Channel (Silent Join For Leader)
+        if (group.ChatChannel.Members.ContainsKey(session.Account.Name) is false)
+        {
+            ChatChannelMember channelMember = new (session, group.ChatChannel);
+            group.ChatChannel.Members.TryAdd(session.Account.Name, channelMember);
+            session.CurrentChannels.Add(group.ChatChannel.ID);
+        }
 
         if (MatchmakingService.Groups.ContainsKey(session.Account.ID) is false)
         {
-            // TODO: Check If The Account Is Already In A Matchmaking Group And Handle Accordingly
-
             if (MatchmakingService.Groups.TryAdd(session.Account.ID, group) is false)
                 throw new InvalidOperationException($@"Failed To Create Matchmaking Group For Account ID ""{session.Account.ID}""");
         }
@@ -157,9 +268,41 @@ public class MatchmakingGroup
 
     public MatchmakingGroup Join(ClientChatSession session)
     {
-        // TODO: If The Group Is Full (Members Count Is Equal To Max Map Players Count), Reject The Join Request With An Appropriate Error
+        // If The Group Is Full, Reject The Join Request
+        if (IsFull)
+        {
+            ChatBuffer error = new ();
 
-        // TODO: If The Group Is Already In Queue For A Match, Reject The Join Request With An Appropriate Error
+            error.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_FAILED_TO_JOIN);
+            error.WriteInt8(Convert.ToByte(ChatProtocol.TMMFailedToJoinReason.TMMFTJR_GROUP_FULL));
+            error.WriteInt32(0); // Ban Duration (Not Applicable)
+
+            session.Send(error);
+
+            return this;
+        }
+
+        // If The Group Is Already In Queue, Reject The Join Request
+        if (IsQueued)
+        {
+            ChatBuffer error = new ();
+
+            error.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_FAILED_TO_JOIN);
+            error.WriteInt8(Convert.ToByte(ChatProtocol.TMMFailedToJoinReason.TMMFTJR_ALREADY_QUEUED));
+            error.WriteInt32(0); // Ban Duration (Not Applicable)
+
+            session.Send(error);
+
+            return this;
+        }
+
+        // Remove From Previous Group If Any
+        MatchmakingGroup? existingGroup = MatchmakingService.GetMatchmakingGroup(session.Account.ID);
+
+        if (existingGroup is not null && existingGroup.GUID != this.GUID)
+        {
+            existingGroup.RemoveMember(session.Account.ID);
+        }
 
         MatchmakingGroupMember newMatchmakingGroupMember = new (session)
         {
@@ -175,22 +318,28 @@ public class MatchmakingGroup
 
         if (Members.Any(member => member.Account.ID == session.Account.ID) is false)
         {
-            // TODO: Remove From Previous Group, If Any
-
             Members.Add(newMatchmakingGroupMember);
+
+            // Register This Member In The Matchmaking Service
+            MatchmakingService.Groups.TryAdd(session.Account.ID, this);
         }
 
         else
         {
-            // TODO: Send Failure Response
+            Log.Warning(@"Player ""{AccountName}"" Tried To Join A Matchmaking Group They Are Already In", session.Account.Name);
 
-            throw new InvalidOperationException($@"Player ""{session.Account.Name}"" Tried To Join A Matchmaking Group They Are Already In");
+            return this;
         }
 
-        // TODO: Create Tentative Group, And Only Create Actual Group When Another Player Joins, Or Create Group As Is But Disband On Invite Refusal/Timeout
-        MulticastUpdate(session.Account.ID, ChatProtocol.TMMUpdateType.TMM_PLAYER_JOINED_GROUP);
+        // Join Group Chat Channel (Uses RESERVED | UNJOINABLE | HIDDEN Flags)
+        if (ChatChannel is not null && ChatChannel.Members.ContainsKey(session.Account.Name) is false)
+        {
+            ChatChannelMember channelMember = new (session, ChatChannel);
+            ChatChannel.Members.TryAdd(session.Account.Name, channelMember);
+            session.CurrentChannels.Add(ChatChannel.ID);
+        }
 
-        // TODO: Create "TMM Group Chat" Chat Channel Or Join Already-Existing One For The Group; Must Have CannotBeJoined Flag Set
+        MulticastUpdate(session.Account.ID, ChatProtocol.TMMUpdateType.TMM_PLAYER_JOINED_GROUP);
 
         return this;
     }
@@ -313,11 +462,9 @@ public class MatchmakingGroup
         update.WriteInt8(Convert.ToByte(updateType));                                    // Group Update Type
         update.WriteInt32(emitterAccountID);                                             // Account ID
         update.WriteInt8(Convert.ToByte(Members.Count));                                 // Group Size
-        // TODO: Calculate Average Group Rating
-        update.WriteInt16(1500);                                                         // Average Group Rating
+        update.WriteInt16(Convert.ToInt16(Math.Clamp(AverageTMR, 0, short.MaxValue)));   // Average Group Rating (Calculated)
         update.WriteInt32(Leader.Account.ID);                                            // Leader Account ID
-        // TODO: Dynamically Set Arranged Match Type From The Request Data
-        update.WriteInt8(Convert.ToByte(MatchType.AM_MATCHMAKING));                      // Arranged Match Type
+        update.WriteInt8(Convert.ToByte(Information.ArrangedMatchType));                 // Arranged Match Type (From Information)
         update.WriteInt8(Convert.ToByte(Information.GameType));                          // Game Type
         update.WriteString(Information.MapName);                                         // Map Name
         update.WriteString(string.Join('|', Information.GameModes));                     // Game Modes
@@ -326,9 +473,8 @@ public class MatchmakingGroup
         update.WriteInt8(Information.MatchFidelity);                                     // Match Fidelity
         update.WriteInt8(Information.BotDifficulty);                                     // Bot Difficulty
         update.WriteBool(Information.RandomizeBots);                                     // Randomize Bots
-        update.WriteString(string.Empty);                                                // Country Restrictions (e.g. "AB->USE|XY->USW" Means Only Country "AB" Can Access Region "USE" And Only Country "XY" Can Access Region "USW")
-        // TODO: Find Out What Player Invitation Responses Do
-        update.WriteString("What Is This ??? (Player Invitation Responses)");            // Player Invitation Responses
+        update.WriteString(string.Empty);                                                // Country Restrictions
+        update.WriteString(string.Empty);                                                // Player Invitation Responses (Unused/Legacy)
         update.WriteInt8(Information.TeamSize);                                          // Team Size (e.g. 5 For Forests Of Caldavar, 3 For Grimm's Crossing)
         update.WriteInt8(Convert.ToByte(Information.GroupType));                         // Group Type
 
@@ -350,49 +496,21 @@ public class MatchmakingGroup
                 update.WriteString(member.Account.Name);                                 // Account Name
                 update.WriteInt8(member.Slot);                                           // Group Slot
 
-                // TODO: Get Real Rank Level And Rating
-                /* TODO: Establish Rank (Medal) Level From Rating And Add To The Database
-                    enum ECampaignLevel
-                    {
-                        CAMPAIGN_LEVEL_NONE = 0,
+                // Calculate Rank Level From TMR (Campaign Level / Medal)
+                int normalRankLevel = CalculateCampaignLevel(member.TMR);
+                int casualRankLevel = CalculateCampaignLevel(member.CasualTMR);
 
-                        CAMPAIGN_LEVEL_BRONZE_5,
-                        CAMPAIGN_LEVEL_BRONZE_4,
-                        CAMPAIGN_LEVEL_BRONZE_3,
-                        CAMPAIGN_LEVEL_BRONZE_2,
-                        CAMPAIGN_LEVEL_BRONZE_1,
+                update.WriteInt32(normalRankLevel);                                      // Normal Rank Level (Campaign Level / Medal)
+                update.WriteInt32(casualRankLevel);                                      // Casual Rank Level (Campaign Level / Medal)
+                update.WriteInt32(normalRankLevel);                                      // Normal Rank (Global Ranking Index - Placeholder)
+                update.WriteInt32(casualRankLevel);                                      // Casual Rank (Global Ranking Index - Placeholder)
+                update.WriteBool(member.IsEligibleForMatchmaking);                       // Eligible For Campaign
 
-                        CAMPAIGN_LEVEL_SILVER_5,
-                        CAMPAIGN_LEVEL_SILVER_4,
-                        CAMPAIGN_LEVEL_SILVER_3,
-                        CAMPAIGN_LEVEL_SILVER_2,
-                        CAMPAIGN_LEVEL_SILVER_1,
-
-                        CAMPAIGN_LEVEL_GOLD_4,
-                        CAMPAIGN_LEVEL_GOLD_3,
-                        CAMPAIGN_LEVEL_GOLD_2,
-                        CAMPAIGN_LEVEL_GOLD_1,
-
-                        CAMPAIGN_LEVEL_DIAMOND_3,
-                        CAMPAIGN_LEVEL_DIAMOND_2,
-                        CAMPAIGN_LEVEL_DIAMOND_1,
-
-                        CAMPAIGN_LEVEL_LEGENDARY2,
-                        CAMPAIGN_LEVEL_LEGENDARY1,
-
-                        CAMPAIGN_LEVEL_IMMORTAL
-                    };
-                */
-
-                update.WriteInt32(20);                                                   // Normal Rank Level (Also Known As Normal Campaign Level Or Medal)
-                update.WriteInt32(15);                                                   // Casual Rank Level (Also Known As Casual Campaign Level Or Medal)
-                // TODO: Figure Out What These Ranks Are (Potentially Actual Global Ranking Index In Order Of Rating Descending, e.g. Highest Rating Is Rank 1)
-                update.WriteInt32(20);                                                   // Normal Rank
-                update.WriteInt32(15);                                                   // Casual Rank
-                update.WriteBool(true);                                                  // Eligible For Campaign
-                // TODO: Set Actual Rating, Dynamically From The Database
-                // TODO: Can Be Set To -1 To Hide The Rating From Other Players For Unranked Game Modes
-                update.WriteInt16(1850);                                                 // Rating
+                // Rating: Use -1 To Hide For Unranked, Otherwise Show Real Rating
+                short displayRating = Information.Ranked
+                    ? Convert.ToInt16(Math.Clamp(member.TMR, 0, short.MaxValue))
+                    : (short)-1;
+                update.WriteInt16(displayRating);                                        // Rating
             }
 
             update.WriteInt8(member.LoadingPercent);                                     // Loading Percent (0 to 100)
@@ -412,10 +530,13 @@ public class MatchmakingGroup
 
         if (fullGroupUpdate)
         {
+            MatchmakingGroupMember? emitter = Members.SingleOrDefault(member => member.Account.ID == emitterAccountID);
+
             foreach (MatchmakingGroupMember member in Members)
             {
-                // TODO: Determine Friendship Status
-                update.WriteBool(false);                                                 // Is Friend
+                // Determine Friendship Status From The Emitter's Perspective
+                bool isFriend = emitter?.Session.IsFriendOrClanMember(member.Account.ID) ?? false;
+                update.WriteBool(isFriend);                                              // Is Friend
             }
         }
 
@@ -445,8 +566,18 @@ public class MatchmakingGroup
         // Send Partial Group Update Indicating Member Removal
         MulticastUpdate(accountID, updateType);
 
+        // Remove Member From Group Chat Channel
+        if (ChatChannel is not null)
+        {
+            ChatChannel.Members.TryRemove(memberToRemove.Account.Name, out _);
+            memberToRemove.Session.CurrentChannels.Remove(ChatChannel.ID);
+        }
+
         // Remove Member From Group
         Members.Remove(memberToRemove);
+
+        // Remove This Account's Entry From The Matchmaking Service
+        MatchmakingService.Groups.TryRemove(accountID, out _);
 
         // If Group Is Now Empty, Disband It
         if (Members.Count is 0)
@@ -456,6 +587,12 @@ public class MatchmakingGroup
             return;
         }
 
+        // Leave Queue If Queued (Queue Membership Changes Require Re-Queuing)
+        if (IsQueued)
+        {
+            LeaveQueue();
+        }
+
         // Reassign Slots And Transfer Leadership
         ReassignSlots();
 
@@ -463,10 +600,6 @@ public class MatchmakingGroup
         // Non-Leader Members Should Always Be Ready So That Group Readiness Is Determined Solely By The Leader
         foreach (MatchmakingGroupMember member in Members)
             member.IsReady = member.IsLeader is false;
-
-        // TODO: Remove From Queue If Queued
-
-        // TODO: Leave Group Chat Channel
 
         // Send Full Group Update To Remaining Members
         MulticastUpdate(accountID, ChatProtocol.TMMUpdateType.TMM_FULL_GROUP_UPDATE);
@@ -504,12 +637,91 @@ public class MatchmakingGroup
     /// </summary>
     private void DisbandGroup(int accountID)
     {
+        // Leave Queue If Queued
+        if (IsQueued)
+        {
+            LeaveQueue();
+        }
+
+        // Remove All Members From Group Chat Channel And Clean Up
+        if (ChatChannel is not null)
+        {
+            foreach (MatchmakingGroupMember member in Members)
+            {
+                ChatChannel.Members.TryRemove(member.Account.Name, out _);
+                member.Session.CurrentChannels.Remove(ChatChannel.ID);
+            }
+
+            // Remove The Chat Channel If Empty
+            if (ChatChannel.Members.IsEmpty)
+            {
+                Context.ChatChannels.TryRemove(ChatChannel.Name, out _);
+            }
+        }
+
         // Remove Group From Matchmaking Service Registry
         if (MatchmakingService.Groups.TryRemove(accountID, out MatchmakingGroup? group) is false)
             Log.Error(@"Failed To Disband Matchmaking Group GUID ""{Group.GUID}"" For Account ID ""{Member.Account.ID}""", group?.GUID ?? Guid.Empty, accountID);
+    }
 
-        // TODO: Remove From Queue If Queued
+    /// <summary>
+    ///     Leaves the matchmaking queue.
+    /// </summary>
+    public void LeaveQueue()
+    {
+        if (QueueStartTime is null)
+            return;
 
-        // TODO: Remove All Members From Group Chat Channel
+        QueueStartTime = null;
+
+        // Broadcast Queue Leave To All Group Members
+        ChatBuffer leaveQueueBroadcast = new ();
+
+        leaveQueueBroadcast.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_LEAVE_QUEUE);
+
+        foreach (MatchmakingGroupMember member in Members)
+            member.Session.Send(leaveQueueBroadcast);
+    }
+
+    /// <summary>
+    ///     Calculates the campaign level (medal/rank) from TMR.
+    ///     C++ Reference: ECampaignLevel enum
+    /// </summary>
+    /// <param name="tmr">The player's Team Match Rating.</param>
+    /// <returns>The campaign level (1-21).</returns>
+    private static int CalculateCampaignLevel(double tmr)
+    {
+        // Campaign Levels Based On TMR Thresholds
+        // Bronze 5-1: 0-999 (Levels 1-5)
+        // Silver 5-1: 1000-1249 (Levels 6-10)
+        // Gold 4-1: 1250-1449 (Levels 11-14)
+        // Diamond 3-1: 1450-1599 (Levels 15-17)
+        // Legendary 2-1: 1600-1749 (Levels 18-19)
+        // Immortal: 1750+ (Level 20-21)
+
+        return tmr switch
+        {
+            < 800  => 1,   // Bronze 5
+            < 850  => 2,   // Bronze 4
+            < 900  => 3,   // Bronze 3
+            < 950  => 4,   // Bronze 2
+            < 1000 => 5,   // Bronze 1
+            < 1050 => 6,   // Silver 5
+            < 1100 => 7,   // Silver 4
+            < 1150 => 8,   // Silver 3
+            < 1200 => 9,   // Silver 2
+            < 1250 => 10,  // Silver 1
+            < 1300 => 11,  // Gold 4
+            < 1350 => 12,  // Gold 3
+            < 1400 => 13,  // Gold 2
+            < 1450 => 14,  // Gold 1
+            < 1500 => 15,  // Diamond 3
+            < 1550 => 16,  // Diamond 2
+            < 1600 => 17,  // Diamond 1
+            < 1700 => 18,  // Legendary 2
+            < 1800 => 19,  // Legendary 1
+            < 2000 => 20,  // Immortal
+            _      => 21   // Immortal (Top Tier)
+        };
     }
 }

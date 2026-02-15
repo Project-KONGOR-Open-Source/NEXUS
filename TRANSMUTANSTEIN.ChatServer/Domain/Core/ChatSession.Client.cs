@@ -90,7 +90,7 @@ public class ClientChatSession(TCPServer server, IServiceProvider serviceProvide
         return this;
     }
 
-    public async Task<ClientChatSession> JoinMatch(IDatabase distributedCacheStore, int matchID)
+    public async Task<ClientChatSession> JoinMatch(IDatabase distributedCacheStore, int matchID, bool joinMatchChannel = true)
     {
         // Client May Send -1 As Match ID If They Don't Have A Valid One (e.g. Joining A Public Game)
         // Legacy HON-Chat-Server Behaviour: Status Is ALWAYS Updated To IN_GAME, Even With Invalid Match ID
@@ -113,7 +113,10 @@ public class ClientChatSession(TCPServer server, IServiceProvider serviceProvide
                 Log.Warning(@"Match ID {MatchID} Not Found In Cache For Session {SessionID}", matchID, ID);
             }
 
-            // TODO: Join Match Channel If Match ID Is Valid
+            // Join Match Channel If Match ID Is Valid And Client Should Join (Spectators/Mentors Don't Join)
+            // C++ Reference: HandleJoinedGame() Lines 1535-1541
+            if (joinMatchChannel)
+                JoinMatchChannel(matchID);
         }
         else
         {
@@ -127,12 +130,85 @@ public class ClientChatSession(TCPServer server, IServiceProvider serviceProvide
         return this;
     }
 
+    /// <summary>
+    ///     Joins a match-specific chat channel.
+    ///     C++ Reference: HandleJoinedGame() Lines 1535-1541 creates/joins match channel via ChannelManager.
+    ///     Uses SERVER | HIDDEN flags per original C++ implementation.
+    /// </summary>
+    /// <param name="matchID">The match ID to join the channel for.</param>
+    public ClientChatSession JoinMatchChannel(int matchID)
+    {
+        if (matchID < 0)
+            return this;
+
+        // Create Or Get The Match Channel (Uses SERVER | HIDDEN Flags)
+        ChatChannel matchChannel = ChatChannel.GetOrCreateMatchChannel(matchID);
+
+        // Join The Match Channel (Silent Join - No Full Broadcast To Channel Members)
+        if (matchChannel.Members.ContainsKey(Account.Name) is false)
+        {
+            ChatChannelMember newMember = new (this, matchChannel);
+            matchChannel.Members.TryAdd(Account.Name, newMember);
+            CurrentChannels.Add(matchChannel.ID);
+        }
+
+        return this;
+    }
+
     public ClientChatSession LeaveMatch()
     {
         Metadata.MatchServerConnectedTo = null;
         MatchInformation = null;
 
         UpdateStatus(ChatProtocol.ChatClientStatus.CHAT_CLIENT_STATUS_CONNECTED);
+
+        // Rejoin Default Channel When Leaving A Match (Unless Invisible Mode)
+        // C++ Reference: HandleLeftGame() Lines 1563-1568
+        if (Metadata.ClientChatModeState is not ChatProtocol.ChatModeType.CHAT_MODE_INVISIBLE)
+            RejoinDefaultChannel();
+
+        return this;
+    }
+
+    /// <summary>
+    ///     Leaves all chat channels that match the specified flags.
+    ///     If no flags are specified, leaves all channels.
+    ///     C++ Reference: LeaveAllChannels(uint uiFlags, bool bLeaveGroupChannels) Lines 1056-1085
+    /// </summary>
+    /// <param name="flags">Channel flags to filter which channels to leave. If zero, leaves all channels.</param>
+    public ClientChatSession LeaveAllChannels(ChatProtocol.ChatChannelType flags = 0)
+    {
+        List<ChatChannel> channelsToLeave = [.. Context.ChatChannels.Values
+            .Where(channel => channel.Members.ContainsKey(Account.Name))
+            .Where(channel =>
+            {
+                // If No Flags Specified, Leave All Channels
+                if (flags == 0)
+                    return true;
+
+                // Otherwise, Only Leave Channels That Have ALL Specified Flags
+                return channel.Flags.HasFlag(flags);
+            })];
+
+        foreach (ChatChannel channel in channelsToLeave)
+            channel.Leave(this);
+
+        return this;
+    }
+
+    /// <summary>
+    ///     Rejoins the default general chat channel.
+    ///     Called when a player leaves a match to return them to the main chat area.
+    ///     C++ Reference: HandleLeftGame() Lines 1563-1568
+    /// </summary>
+    public ClientChatSession RejoinDefaultChannel()
+    {
+        // Get Or Create The Default General Channel
+        ChatChannel defaultChannel = ChatChannel.GetOrCreate(this, ChatProtocol.DEFAULT_CHANNEL_NAME);
+
+        // Join The Default Channel If Not Already A Member
+        if (defaultChannel.Members.ContainsKey(Account.Name) is false)
+            defaultChannel.Join(this);
 
         return this;
     }
@@ -193,12 +269,8 @@ public class ClientChatSession(TCPServer server, IServiceProvider serviceProvide
             return;
         }
 
-        // Get All Chat Channels The Client Is A Member Of
-        List<ChatChannel> channels = [.. Context.ChatChannels.Values.Where(channel => channel.Members.ContainsKey(Account.Name))];
-
-        // Remove The Client From All Chat Channels They Are A Member Of
-        foreach (ChatChannel channel in channels)
-            channel.Leave(this);
+        // Leave All Chat Channels (With No Flags = All Channels)
+        LeaveAllChannels();
 
         // Remove From Matchmaking Group If In One
         MatchmakingService.GetMatchmakingGroup(Account.ID)?.RemoveMember(Account.ID);
@@ -215,6 +287,49 @@ public class ClientChatSession(TCPServer server, IServiceProvider serviceProvide
 
         // Dispose Of The Chat Session
         Dispose();
+    }
+
+    /// <summary>
+    ///     Checks if this client should send an auto-response when receiving a whisper.
+    ///     Returns the auto-response type if the client is AFK or DND, or NULL if no auto-response should be sent.
+    ///     C++ Reference: HandleWhisper() Lines 1299-1344
+    /// </summary>
+    /// <returns>The chat mode type if an auto-response is needed, or NULL if not.</returns>
+    public ChatProtocol.ChatModeType? GetAutoResponseMode()
+    {
+        return Metadata.ClientChatModeState switch
+        {
+            ChatProtocol.ChatModeType.CHAT_MODE_AFK => ChatProtocol.ChatModeType.CHAT_MODE_AFK,
+            ChatProtocol.ChatModeType.CHAT_MODE_DND => ChatProtocol.ChatModeType.CHAT_MODE_DND,
+            _                                       => null
+        };
+    }
+
+    /// <summary>
+    ///     Determines if a whisper should be blocked based on this client's chat mode.
+    ///     DND mode blocks whispers entirely (except from buddies/clan).
+    ///     AFK mode allows whispers but sends an auto-response.
+    ///     C++ Reference: HandleWhisper() Lines 1330-1340
+    /// </summary>
+    /// <returns>TRUE if the whisper should be blocked, FALSE otherwise.</returns>
+    public bool ShouldBlockWhisper()
+    {
+        return Metadata.ClientChatModeState is ChatProtocol.ChatModeType.CHAT_MODE_DND;
+    }
+
+    /// <summary>
+    ///     Checks if the specified account is a friend or clan member of this client.
+    ///     Used to determine if messages from muted/blocking users should still be delivered.
+    ///     C++ Reference: IsBuddyOrClanMember() ~Line 1330
+    /// </summary>
+    /// <param name="accountID">The account ID to check.</param>
+    /// <returns>TRUE if the account is a friend or clan member, FALSE otherwise.</returns>
+    public bool IsFriendOrClanMember(int accountID)
+    {
+        bool isFriend = Account.FriendedPeers.Any(friend => friend.ID == accountID);
+        bool isClanMember = Account.Clan?.Members.Any(member => member.ID == accountID) ?? false;
+
+        return isFriend || isClanMember;
     }
 
     /// <summary>
@@ -256,61 +371,42 @@ public class ClientChatSession(TCPServer server, IServiceProvider serviceProvide
 
             if (status is ChatProtocol.ChatClientStatus.CHAT_CLIENT_STATUS_IN_GAME)
             {
-                // TODO: Populate With Real Match Name
-                update.WriteString(string.Empty);               // Match Name
-                // TODO: Populate With Real Match ID
-                update.WriteInt32(default(int));                // Match ID
-                update.WriteBool(false);                        // Has Extended Server Info
+                update.WriteString(MatchInformation?.MatchName ?? string.Empty);    // Match Name
+                update.WriteInt32(MatchInformation?.MatchID ?? 0);                  // Match ID
 
-                // TODO: Set Extended Server Info To TRUE And Populate The Following Fields
+                bool hasExtendedInfo = MatchInformation is not null;
+                update.WriteBool(hasExtendedInfo);                                  // Has Extended Server Info
 
-                /*
-                    [1] EArrangedMatchType - arranged match type
-                    [X] string - client's name
-                    [X] string - server's region
-                    [X] string - server's game mode
-                    [1] unsigned char - server's team size
-                    [X] string - server's map name
-                    [1] unsigned char - server's tier (deprecated)
-                    [1] unsigned char - server's official status (0 = unofficial (deprecated), 1 = official with stats, 2 = official without stats)
-                    [1] bool - server's "no leavers" flag
-                    [1] bool - server's "private" flag
-                    [1] bool - server's "all heroes" flag
-                    [1] bool - server's "casual mode" flag
-                    [1] bool - server's "all random" flags (deprecated)
-                    [1] bool - server's "auto balanced" flag
-                    [1] bool - server's "advanced options" flag
-                    [2] unsigned short - server's minimum PSR allowed
-                    [2] unsigned short - server's maximum PSR allowed
-                    [1] bool - server's "dev heroes" flag
-                    [1] bool - server's "hardcore" flag
-                    [1] bool - server's "verified only" flag
-                    [1] bool - server's "gated" flag
+                if (hasExtendedInfo && MatchInformation is not null)
+                {
+                    update.WriteInt8(Convert.ToByte(MatchInformation.MatchType));   // Arranged Match Type
+                    update.WriteString(Account.Name);                               // Player Name
+                    update.WriteString(matchServer.Location);                       // Region
+                    update.WriteString(MatchInformation.MatchMode.ToString());      // Game Mode Name
+                    update.WriteInt8(Convert.ToByte(MatchInformation.MaximumPlayersCount / 2)); // Team Size
+                    update.WriteString(MatchInformation.Map);                       // Map Name
+                    update.WriteInt8(Convert.ToByte(MatchInformation.Tier));        // Tier (Deprecated)
 
-                    or ...
+                    // Official Status: 0 = Unofficial (Deprecated), 1 = Official With Stats, 2 = Official Without Stats
+                    byte officialStatus = MatchInformation.Options.HasFlag(MatchOptions.Official)
+                        ? (MatchInformation.Options.HasFlag(MatchOptions.NoStatistics) ? (byte)2 : (byte)1)
+                        : (byte)0;
+                    update.WriteInt8(officialStatus);
 
-                    << pJoinedServer->GetArrangedMatchType()                         // Arranged Match Type (0 = Public, 1 = Matchmaking, 2 = Scheduled match, 3 = Unscheduled match, 4 = Matchmaking midwars)
-                    << GetNameUTF8() << byte('\0')                                   // Player Name
-                    << WStringToUTF8(pJoinedServer->GetLocation()) << byte('\0')     // Region
-                    << WStringToUTF8(pJoinedServer->GetGameModeName()) << byte('\0') // Game Mode Name (banningdraft)
-                    << pJoinedServer->GetTeamSize()                                  // Team Size
-                    << WStringToUTF8(pJoinedServer->GetMapName()) << byte('\0')      // Map Name (caldavar)
-                    << pJoinedServer->GetTier()                                      // Tier - Noobs Only (0), Noobs Allowed (1), Pro (2)
-                    << pJoinedServer->GetOfficial()                                  // 0 - Unofficial, 1 - Official w/ stats, 2 - Official w/o stats
-                    << pJoinedServer->GetNoLeaver()                                  // No Leavers (1), Leavers (0)
-                    << pJoinedServer->GetPrivate()                                   // Private (1), Not Private (0)
-                    << pJoinedServer->GetAllHeroes()                                 // All Heroes (1), Not All Heroes (0)
-                    << pJoinedServer->GetCasualMode()                                // Casual Mode (1), Not Casual Mode (0)
-                    << pJoinedServer->GetForceRandom()                               // Force Random (1), Not Force Random (0) -- (NOTE: Deprecated)
-                    << pJoinedServer->GetAutoBalanced()                              // Auto Balanced (1), Non Auto Balanced (0)
-                    << pJoinedServer->GetAdvancedOptions()                           // Advanced Options	(1), No Advanced Options (0)
-                    << pJoinedServer->GetMinPSR()                                    // Min PSR
-                    << pJoinedServer->GetMaxPSR()                                    // Max PSR
-                    << pJoinedServer->GetDevHeroes()                                 // Dev Heroes (1), Non Dev Heroes (0)
-                    << pJoinedServer->GetHardcore()                                  // Hardcore (1), Non Hardcore (0)
-                    << pJoinedServer->GetVerifiedOnly()                              // Verified Only (1), Everyone (0)
-                    << pJoinedServer->GetGated()                                     // Gated (1), Non Gated (0)
-                */
+                    update.WriteBool(MatchInformation.Options.HasFlag(MatchOptions.NoLeavers));       // No Leavers
+                    update.WriteBool(false);                                                          // Private (Not Tracked In MatchInformation)
+                    update.WriteBool(false);                                                          // All Heroes (Not Tracked In MatchInformation)
+                    update.WriteBool(MatchInformation.Options.HasFlag(MatchOptions.CasualMode));      // Casual Mode
+                    update.WriteBool(MatchInformation.Options.HasFlag(MatchOptions.AllRandom));       // Force Random (Deprecated)
+                    update.WriteBool(MatchInformation.Options.HasFlag(MatchOptions.AutoBalanced));    // Auto Balanced
+                    update.WriteBool(false);                                                          // Advanced Options (Not Tracked In MatchInformation)
+                    update.WriteInt16(0);                                                             // Minimum PSR (Not Tracked In MatchInformation)
+                    update.WriteInt16(0);                                                             // Maximum PSR (Not Tracked In MatchInformation)
+                    update.WriteBool(MatchInformation.Options.HasFlag(MatchOptions.DevelopmentHeroes)); // Dev Heroes
+                    update.WriteBool(MatchInformation.Options.HasFlag(MatchOptions.Hardcore));        // Hardcore
+                    update.WriteBool(MatchInformation.Options.HasFlag(MatchOptions.VerifiedOnly));    // Verified Only
+                    update.WriteBool(MatchInformation.Options.HasFlag(MatchOptions.Gated));           // Gated
+                }
             }
         }
 

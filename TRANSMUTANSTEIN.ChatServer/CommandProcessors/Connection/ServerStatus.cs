@@ -19,8 +19,12 @@ public class ServerStatus(IDatabase distributedCacheStore) : IAsynchronousComman
             return;
         }
 
-        matchServer.Status = requestData.Status;
+        // Update Session Metadata Using Fluent Syntax
+        requestData.ApplyToSessionMetadata(session.Metadata);
+        session.UpdateStatus(requestData.Status);
 
+        // Update Distributed Cache
+        matchServer.Status = requestData.Status;
         await distributedCacheStore.SetMatchServer(matchServer.HostAccountName, matchServer);
 
         Log.Information(@"Updated Status For Match Server ID ""{ServerID}"" To ""{Status}""", requestData.ServerID, requestData.Status);
@@ -216,6 +220,46 @@ file class ServerStatusRequestData
         }
 
         DecodeServerFlags();
+    }
+
+    /// <summary>
+    ///     Applies the status data to the session metadata.
+    /// </summary>
+    public void ApplyToSessionMetadata(MatchServerChatSessionMetadata metadata)
+    {
+        metadata.Location = Location;
+        metadata.Name = Name;
+        metadata.Address = Address;
+        metadata.Port = Port;
+        metadata.SlaveID = SlaveID;
+        metadata.MatchID = MatchID;
+        metadata.MapName = MapName;
+        metadata.GameName = GameName;
+        metadata.GameModeName = GameMode;
+        metadata.TeamSize = TeamSize;
+        metadata.Tier = Tier;
+        metadata.IsOfficial = Official >= 1;
+        metadata.OfficialWithStats = Official == 2;
+        metadata.NoLeaver = NoLeavers;
+        metadata.IsPrivate = PrivateServer;
+        metadata.AllHeroes = AllHeroes;
+        metadata.CasualMode = CasualMode;
+        metadata.ForceRandom = ForceRandom;
+        metadata.AutoBalanced = AutoBalanced;
+        metadata.AdvancedOptions = AdvancedOptions;
+        metadata.MinPSR = (ushort) Math.Max(0, (int) MinimumRating);
+        metadata.MaxPSR = (ushort) Math.Max(0, (int) MaximumRating);
+        metadata.DevHeroes = HeroesInDevelopment;
+        metadata.Hardcore = Hardcore;
+        metadata.VerifiedOnly = VerifiedOnly;
+        metadata.Gated = Gated;
+        metadata.ServerLoad = (uint) ServerLoad;
+        metadata.LongServerFrames = (uint) LongServerFrameCount;
+        metadata.FreePhysicalMemory = (ulong) FreePhysicalMemory;
+        metadata.TotalPhysicalMemory = (ulong) TotalPhysicalMemory;
+        metadata.SpaceFree = (ulong) DriveFreeSpace;
+        metadata.TotalSpace = (ulong) DriveTotalSpace;
+        metadata.Version = ServerVersion;
     }
 
     /// <summary>

@@ -42,6 +42,47 @@ public class ChatChannel
         return channel;
     }
 
+    /// <summary>
+    ///     Gets or creates a match-specific chat channel.
+    ///     Match channels use SERVER flag (for post-match chat) and HIDDEN flag.
+    /// </summary>
+    /// <param name="matchID">The match ID.</param>
+    /// <returns>The match channel.</returns>
+    public static ChatChannel GetOrCreateMatchChannel(int matchID)
+    {
+        string matchChannelName = $"Match {matchID}";
+
+        ChatChannel channel = Context.ChatChannels.GetOrAdd(matchChannelName, new ChatChannel
+        {
+            Name = matchChannelName,
+            Flags = ChatProtocol.ChatChannelType.CHAT_CHANNEL_FLAG_SERVER
+                  | ChatProtocol.ChatChannelType.CHAT_CHANNEL_FLAG_HIDDEN
+        });
+
+        return channel;
+    }
+
+    /// <summary>
+    ///     Gets or creates a matchmaking group chat channel.
+    ///     Group channels use RESERVED (system-created), UNJOINABLE (cannot be manually joined), and HIDDEN flags.
+    /// </summary>
+    /// <param name="groupID">The matchmaking group ID.</param>
+    /// <returns>The group channel.</returns>
+    public static ChatChannel GetOrCreateGroupChannel(int groupID)
+    {
+        string groupChannelName = $"TMM Group {groupID}";
+
+        ChatChannel channel = Context.ChatChannels.GetOrAdd(groupChannelName, new ChatChannel
+        {
+            Name = groupChannelName,
+            Flags = ChatProtocol.ChatChannelType.CHAT_CHANNEL_FLAG_RESERVED
+                  | ChatProtocol.ChatChannelType.CHAT_CHANNEL_FLAG_UNJOINABLE
+                  | ChatProtocol.ChatChannelType.CHAT_CHANNEL_FLAG_HIDDEN
+        });
+
+        return channel;
+    }
+
     public static ChatChannel Get(ClientChatSession session, OneOf<string, int> channelIdentifier)
     {
         ChatChannel channel = channelIdentifier.Match

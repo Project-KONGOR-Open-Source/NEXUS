@@ -316,6 +316,8 @@ public static class ChatProtocol
 
     public const uint FRIEND_LIMIT                                         = 250;    // Maximum Number Of Friends Per Account
 
+    public const string DEFAULT_CHANNEL_NAME                               = "KONGOR";  // The Default General Chat Channel Name
+
     public const int FLOOD_THRESHOLD                                       = 5;      // Maximum Number Of Requests Before Flood Protection Activates
     public const double FLOOD_DECAY_INTERVAL_SECONDS                       = 3.5;    // Request Counter Decays By 1 Every 3.5 Seconds
     public const int FLOOD_GARBAGE_COLLECTION_SECONDS                      = 300;    // The Threshold In Seconds Before Tracked Clients Are Released From Memory

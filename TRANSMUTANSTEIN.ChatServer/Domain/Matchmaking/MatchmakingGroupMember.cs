@@ -61,6 +61,16 @@ public class MatchmakingGroupMember(ClientChatSession session)
     public double MatchHistoryAdjustment { get; set; } = 0.0;
 
     /// <summary>
+    ///     The player's Casual TMR for casual game modes.
+    /// </summary>
+    public double CasualTMR { get; set; } = 1500.0;
+
+    /// <summary>
+    ///     The player's kill/death ratio.
+    /// </summary>
+    public double KDRatio { get; set; } = 1.0;
+
+    /// <summary>
     ///     The pre-calculated TMR gain value for winning the current match.
     /// </summary>
     public double MatchWinValue { get; set; }
