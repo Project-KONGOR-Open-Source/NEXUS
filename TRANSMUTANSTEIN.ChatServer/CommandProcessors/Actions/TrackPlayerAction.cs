@@ -7,10 +7,44 @@ public class TrackPlayerAction : ISynchronousCommandProcessor<ClientChatSession>
     {
         TrackPlayerActionRequestData requestData = new (buffer);
 
-        // Handle The Action Based On Type
         switch (requestData.Action)
         {
-            // Matchmaking Actions - These Are Analytics Events From The Client, No Response Required
+            // Daily Login Action
+            case ChatProtocol.ActionCampaign.AC_DAILY_LOGINS:
+                Log.Debug(@"Daily Login Action Received: ""{Action}"" From Account ""{AccountName}""", requestData.Action, session.Account.Name);
+                break;
+
+            // Analytics Events
+            case ChatProtocol.ActionCampaign.AC_CLICKED_HON_STORE:
+            case ChatProtocol.ActionCampaign.AC_CLICKED_BUY_COINS:
+            case ChatProtocol.ActionCampaign.AC_CLICKED_MOTD_ADS:
+            case ChatProtocol.ActionCampaign.AC_CLICKED_SPECIALS:
+            case ChatProtocol.ActionCampaign.AC_CLICKED_EARLY_ACCESS:
+            case ChatProtocol.ActionCampaign.AC_CLICKED_HEROES:
+            case ChatProtocol.ActionCampaign.AC_CLICKED_ALT_AVATARS:
+            case ChatProtocol.ActionCampaign.AC_CLICKED_ACCOUNT_ICONS:
+            case ChatProtocol.ActionCampaign.AC_CLICKED_NAME_COLORS:
+            case ChatProtocol.ActionCampaign.AC_CLICKED_SYMBOLS:
+            case ChatProtocol.ActionCampaign.AC_CLICKED_TAUNT:
+            case ChatProtocol.ActionCampaign.AC_CLICKED_ANNOUNCERS:
+            case ChatProtocol.ActionCampaign.AC_CLICKED_COURIERS:
+            case ChatProtocol.ActionCampaign.AC_CLICKED_OTHER:
+            case ChatProtocol.ActionCampaign.AC_CLICKED_BUNDLES:
+            case ChatProtocol.ActionCampaign.AC_CLICKED_OPEN_VAULT:
+            case ChatProtocol.ActionCampaign.AC_CLICKED_CUSTOM_WARDS:
+                Log.Debug(@"Analytics Action Received: ""{Action}"" From Account ""{AccountName}""", requestData.Action, session.Account.Name);
+                break;
+
+            // Additional Campaign Actions
+            case ChatProtocol.ActionCampaign.AC_ADDITIONAL_CAMPAIGN_ONE:
+            case ChatProtocol.ActionCampaign.AC_ADDITIONAL_CAMPAIGN_TWO:
+            case ChatProtocol.ActionCampaign.AC_ADDITIONAL_CAMPAIGN_THREE:
+            case ChatProtocol.ActionCampaign.AC_ADDITIONAL_CAMPAIGN_FOUR:
+            case ChatProtocol.ActionCampaign.AC_ADDITIONAL_CAMPAIGN_FIVE:
+                Log.Debug(@"Additional Campaign Action Received: ""{Action}"" From Account ""{AccountName}""", requestData.Action, session.Account.Name);
+                break;
+
+            // Matchmaking Actions
             case ChatProtocol.ActionCampaign.AC_MATCHMAKING_MATCH_FOUND:
             case ChatProtocol.ActionCampaign.AC_MATCHMAKING_SERVER_FOUND:
             case ChatProtocol.ActionCampaign.AC_MATCHMAKING_MATCH_READY:
@@ -19,9 +53,8 @@ public class TrackPlayerAction : ISynchronousCommandProcessor<ClientChatSession>
                 Log.Debug(@"Matchmaking Action Received: ""{Action}"" From Account ""{AccountName}""", requestData.Action, session.Account.Name);
                 break;
 
-            // TODO: Handle Other Actions As Needed
             default:
-                Log.Warning(@"Unhandled User Action: ""{Action}"" From Account ""{AccountName}""", requestData.Action, session.Account.Name);
+                Log.Error(@"Unhandled User Action: ""{Action}"" From Account ""{AccountName}""", requestData.Action, session.Account.Name);
                 break;
         }
     }
