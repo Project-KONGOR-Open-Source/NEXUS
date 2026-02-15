@@ -41,8 +41,13 @@ public partial class ServerRequesterController
         int matchMode = int.TryParse(Request.Form["match_mode"], out int parsedMatchMode) ? parsedMatchMode
             : throw new ArgumentOutOfRangeException("match_mode", Request.Form["match_mode"].ToString(), @"Value Of Form Parameter ""match_mode"" Is Invalid");
 
+        // Generate Match ID From Current Timestamp (Master Server Assigns IDs For Public/Custom Games)
+        DateTimeOffset timestampStarted = DateTimeOffset.UtcNow;
+        int matchID = timestampStarted.GetDeterministicInt32Hash();
+
         MatchInformation matchInformation = new ()
         {
+            MatchID = matchID,
             ServerID = matchServer.ID,
             ServerName = matchServer.Name,
             Map = map,
@@ -52,7 +57,7 @@ public partial class ServerRequesterController
             IsCasual = isCasual,
             MatchType = (MatchType) matchType,
             MatchMode = (PublicMatchMode) matchMode,
-            TimestampStarted = DateTimeOffset.UtcNow,
+            TimestampStarted = timestampStarted,
         };
 
         await DistributedCache.SetMatchInformation(matchInformation);

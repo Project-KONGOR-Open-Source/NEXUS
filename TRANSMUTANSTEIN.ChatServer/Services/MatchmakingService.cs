@@ -13,13 +13,11 @@ public class MatchmakingService : BackgroundService, IDisposable
 {
     private readonly IOptions<MatchmakingSettings> _settings;
     private readonly IDatabase _distributedCacheStore;
-    private int _matchIndex;
 
     public MatchmakingService(IOptions<MatchmakingSettings> settings, IDatabase distributedCacheStore)
     {
         _settings = settings;
         _distributedCacheStore = distributedCacheStore;
-        _matchIndex = 0;
     }
 
     /// <summary>
@@ -155,7 +153,7 @@ public class MatchmakingService : BackgroundService, IDisposable
 
                 if (legionTeam.IsCompatibleWith(hellbourneTeam))
                 {
-                    MatchmakingMatch match = MatchmakingMatch.FromTeams(legionTeam, hellbourneTeam, ++_matchIndex);
+                    MatchmakingMatch match = MatchmakingMatch.FromTeams(legionTeam, hellbourneTeam);
 
                     // Set Match Details From First Group's Information
                     MatchmakingGroupInformation information = legionTeam.Groups[0].Information;
@@ -169,8 +167,8 @@ public class MatchmakingService : BackgroundService, IDisposable
                     matches.Add(match);
 
                     Log.Information(
-                        @"Match Created: Index={MatchIndex}, GameType={GameType}, Legion={LegionCount} Players (Avg TMR: {LegionTMR:F1}), Hellbourne={HellbourneCount} Players (Avg TMR: {HellbourneTMR:F1}), Prediction={Prediction:P1}",
-                        match.MatchIndex,
+                        @"Match Created: GUID={MatchGUID}, GameType={GameType}, Legion={LegionCount} Players (Avg TMR: {LegionTMR:F1}), Hellbourne={HellbourneCount} Players (Avg TMR: {HellbourneTMR:F1}), Prediction={Prediction:P1}",
+                        match.GUID,
                         gameType,
                         match.LegionTeam.PlayerCount,
                         match.LegionTeam.AverageTMR,
@@ -230,7 +228,8 @@ public class MatchmakingService : BackgroundService, IDisposable
 
     /// <summary>
     ///     Spawns a match by allocating a server and sending CreateMatch to the game server.
-    ///     The actual player notification happens in MatchAnnounce when the game server responds.
+    ///     Player notifications are sent immediately - we don't wait for AnnounceMatch because
+    ///     some game server configurations use the HTTP path instead.
     /// </summary>
     private async Task<bool> SpawnMatch(MatchmakingMatch match)
     {
@@ -239,7 +238,7 @@ public class MatchmakingService : BackgroundService, IDisposable
 
         if (server is null || serverSession is null)
         {
-            Log.Warning(@"No Available Server Found For Match Index {MatchIndex}", match.MatchIndex);
+            Log.Warning(@"No Available Server Found For Match GUID {MatchGUID}", match.GUID);
 
             return false;
         }
@@ -253,22 +252,39 @@ public class MatchmakingService : BackgroundService, IDisposable
         // Store Match In Active Matches Registry
         ActiveMatches.TryAdd(match.GUID, match);
 
-        // Create And Cache Match Information For Player Join Tracking
-        MatchInformation matchInformation = CreateMatchInformation(match, server);
-        await _distributedCacheStore.SetMatchInformation(matchInformation);
-
-        Log.Information(@"Match Information Cached: MatchID={MatchID}, MatchName={MatchName}", matchInformation.MatchID, matchInformation.MatchName);
-
         // Send CreateMatch Command To The Game Server
-        // The Game Server Will Respond With AnnounceMatch Which Triggers Player Notification
         SendCreateMatch(match, serverSession);
 
         Log.Information(
-            @"CreateMatch Sent: Index={MatchIndex}, ServerID={ServerID}, Server={ServerAddress}:{ServerPort}",
-            match.MatchIndex,
+            @"CreateMatch Sent: MatchGUID={MatchGUID}, ServerID={ServerID}, Server={ServerAddress}:{ServerPort}",
+            match.GUID,
             server.ID,
             match.ServerAddress,
             match.ServerPort);
+
+        // Send Player Notifications Immediately
+        // The CorrelationID Is Used As A Temporary Match ID Until The Real One Is Assigned
+        // The Game Server Will Accept Connections Based On Account ID, Not Match ID
+        SendMatchFoundUpdate(match, match.CorrelationID);
+        SendFoundServerUpdate(match);
+        SendAutoMatchConnect(match, match.CorrelationID, server.IPAddress, (ushort)server.Port);
+
+        // Mark All Members As In-Game
+        foreach (MatchmakingGroup group in match.GetAllGroups())
+        {
+            group.QueueStartTime = null;
+
+            foreach (MatchmakingGroupMember member in group.Members)
+                member.IsInGame = true;
+        }
+
+        match.State = MatchmakingMatchState.WaitingForPlayers;
+
+        Log.Information(
+            @"Match Notifications Sent: GUID={MatchGUID}, Server={ServerAddress}:{ServerPort}",
+            match.GUID,
+            server.IPAddress,
+            server.Port);
 
         return true;
     }
@@ -301,7 +317,7 @@ public class MatchmakingService : BackgroundService, IDisposable
 
         createMatch.WriteCommand(ChatProtocol.ChatServerToGameServer.NET_CHAT_GS_CREATE_MATCH);
         createMatch.WriteInt8(matchType);                       // Match Type
-        createMatch.WriteInt32(match.MatchIndex);               // Matchup/Challenge ID
+        createMatch.WriteInt32(match.CorrelationID);            // Correlation ID (Returned In AnnounceMatch For Validation)
         createMatch.WriteInt32(0);                              // Unknown1
         createMatch.WriteInt32(Random.Shared.Next());           // Password
         createMatch.WriteString($"TMM Match #");                // Match Name Prefix
@@ -313,50 +329,67 @@ public class MatchmakingService : BackgroundService, IDisposable
         int totalPlayers = legionPlayers.Count + hellbournePlayers.Count;
         createMatch.WriteInt8(Convert.ToByte(totalPlayers));
 
+        // Track Group Index Across Both Teams (C++ Uses Single Counter)
+        byte groupIndex = 0;
+
         // Write Legion Players (Team 1)
-        byte legionGroupIndex = 0;
+        // Note: Slot Is Continuous Within Each Team, Group Index Is Continuous Across Both Teams
+        byte legionSlot = 0;
         foreach (MatchmakingGroup group in match.LegionTeam.Groups)
         {
-            byte slot = 0;
             foreach (MatchmakingGroupMember member in group.Members)
             {
-                createMatch.WriteInt32(member.Account.ID);                                             // Account ID
-                createMatch.WriteInt8(1);                                                              // Team (1 = Legion)
-                createMatch.WriteInt8(slot++);                                                         // Slot
-                createMatch.WriteInt8(0);                                                              // Social Bonus (0 = None)
-                createMatch.WriteInt32(BitConverter.SingleToInt32Bits((float)member.MatchWinValue));   // Win MMR Delta
-                createMatch.WriteInt32(BitConverter.SingleToInt32Bits((float)member.MatchLossValue));  // Loss MMR Delta
-                createMatch.WriteInt8(0);                                                              // Is Provisional (FALSE)
-                createMatch.WriteInt8(legionGroupIndex);                                               // Group Index
-                createMatch.WriteInt8(0);                                                              // Benefit Value (0 = Normal)
+                createMatch.WriteInt32(member.Account.ID);               // Account ID
+                createMatch.WriteInt8(1);                                  // Team (1 = Legion)
+                createMatch.WriteInt8(legionSlot++);                       // Slot (Continuous Within Team)
+                createMatch.WriteInt8(0);                                  // Social Bonus (0 = None)
+                createMatch.WriteFloat32((float)member.MatchWinValue);     // Win MMR Delta
+                createMatch.WriteFloat32((float)member.MatchLossValue);    // Loss MMR Delta
+                createMatch.WriteInt8(0);                                  // Is Provisional (FALSE)
+                createMatch.WriteInt8(groupIndex);                         // Group Index (Continuous Across Teams)
+                createMatch.WriteInt8(0);                                  // Benefit Value (0 = Normal)
             }
 
-            legionGroupIndex++;
+            groupIndex++;
         }
 
         // Write Hellbourne Players (Team 2)
-        byte hellbourneGroupIndex = 0;
+        byte hellbourneSlot = 0;
         foreach (MatchmakingGroup group in match.HellbourneTeam.Groups)
         {
-            byte slot = 0;
             foreach (MatchmakingGroupMember member in group.Members)
             {
-                createMatch.WriteInt32(member.Account.ID);                                             // Account ID
-                createMatch.WriteInt8(2);                                                              // Team (2 = Hellbourne)
-                createMatch.WriteInt8(slot++);                                                         // Slot
-                createMatch.WriteInt8(0);                                                              // Social Bonus (0 = None)
-                createMatch.WriteInt32(BitConverter.SingleToInt32Bits((float)member.MatchWinValue));   // Win MMR Delta
-                createMatch.WriteInt32(BitConverter.SingleToInt32Bits((float)member.MatchLossValue));  // Loss MMR Delta
-                createMatch.WriteInt8(0);                                                              // Is Provisional (FALSE)
-                createMatch.WriteInt8(hellbourneGroupIndex);                                           // Group Index
-                createMatch.WriteInt8(0);                                                              // Benefit Value (0 = Normal)
+                createMatch.WriteInt32(member.Account.ID);               // Account ID
+                createMatch.WriteInt8(2);                                  // Team (2 = Hellbourne)
+                createMatch.WriteInt8(hellbourneSlot++);                   // Slot (Continuous Within Team)
+                createMatch.WriteInt8(0);                                  // Social Bonus (0 = None)
+                createMatch.WriteFloat32((float)member.MatchWinValue);     // Win MMR Delta
+                createMatch.WriteFloat32((float)member.MatchLossValue);    // Loss MMR Delta
+                createMatch.WriteInt8(0);                                  // Is Provisional (FALSE)
+                createMatch.WriteInt8(groupIndex);                         // Group Index (Continuous Across Teams)
+                createMatch.WriteInt8(0);                                  // Benefit Value (0 = Normal)
             }
 
-            hellbourneGroupIndex++;
+            groupIndex++;
         }
 
-        // Write Group IDs (Empty For Now)
-        createMatch.WriteInt32(0);
+        // Write Group IDs (Count And List Of Group IDs)
+        // The C++ Code Sends These For The Chat Server To Track Which Groups To Notify
+        // We Use The Deterministic Hash Of The GUID As The Group ID
+        List<int> groupIDs = match.GetAllGroups().Select(group => group.GUID.GetDeterministicInt32Hash()).ToList();
+        createMatch.WriteInt32(groupIDs.Count);
+
+        foreach (int groupID in groupIDs)
+            createMatch.WriteInt32(groupID);
+
+        // Debug: Log Packet Details
+        Log.Debug(
+            @"CreateMatch Packet: MatchType={MatchType}, CorrelationID={CorrelationID}, PlayerCount={PlayerCount}, GroupCount={GroupCount}, PacketSize={PacketSize}",
+            matchType,
+            match.CorrelationID,
+            totalPlayers,
+            groupIDs.Count,
+            createMatch.Size);
 
         // Send To Game Server
         serverSession.Send(createMatch);
@@ -365,7 +398,11 @@ public class MatchmakingService : BackgroundService, IDisposable
     /// <summary>
     ///     Creates a MatchInformation object for caching, enabling player join tracking.
     /// </summary>
-    private static MatchInformation CreateMatchInformation(MatchmakingMatch match, MatchServer server)
+    /// <summary>
+    ///     Creates a MatchInformation object for caching, enabling player join tracking.
+    ///     Called from MatchAnnounce when the game server provides the real match ID.
+    /// </summary>
+    public static MatchInformation CreateMatchInformation(MatchmakingMatch match, MatchServer server, int matchID)
     {
         // Determine Match Type
         MatchType matchType = match.GameType switch
@@ -402,7 +439,8 @@ public class MatchmakingService : BackgroundService, IDisposable
 
         return new MatchInformation
         {
-            MatchName = $"TMM Match #{match.MatchIndex}",
+            MatchID = matchID,
+            MatchName = $"TMM Match #{matchID}",
             ServerID = server.ID,
             ServerName = server.Name,
             HostAccountName = server.HostAccountName,
@@ -438,9 +476,9 @@ public class MatchmakingService : BackgroundService, IDisposable
 
         // No Idle Server With Active Session Found
         if (servers.Count == 0)
-            Log.Warning(@"No Servers Available For Match Index {MatchIndex}", match.MatchIndex);
+            Log.Warning(@"No Servers Available For Match GUID {MatchGUID}", match.GUID);
         else
-            Log.Warning(@"No Idle Servers With Active Sessions For Match Index {MatchIndex} (Total Servers: {ServerCount})", match.MatchIndex, servers.Count);
+            Log.Warning(@"No Idle Servers With Active Sessions For Match GUID {MatchGUID} (Total Servers: {ServerCount})", match.GUID, servers.Count);
 
         return (null, null);
     }
@@ -479,5 +517,67 @@ public class MatchmakingService : BackgroundService, IDisposable
         foreach (MatchmakingGroup group in queuedGroups)
             foreach (MatchmakingGroupMember member in group.Members)
                 member.Session.Send(update);
+    }
+
+    /// <summary>
+    ///     Sends MatchFoundUpdate (0x0D09) to all players in a match.
+    /// </summary>
+    private static void SendMatchFoundUpdate(MatchmakingMatch match, int matchID)
+    {
+        ChatBuffer matchFound = new();
+
+        matchFound.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_MATCH_FOUND_UPDATE);
+        matchFound.WriteString(match.SelectedMap);
+        matchFound.WriteInt8(Convert.ToByte(match.LegionTeam.TeamSize));
+        matchFound.WriteInt8(Convert.ToByte(match.GameType));
+        matchFound.WriteString(match.SelectedMode);
+        matchFound.WriteString(match.SelectedRegion);
+        matchFound.WriteString($"Match #{matchID}");
+
+        foreach (MatchmakingGroupMember member in match.GetAllPlayers())
+            member.Session.Send(matchFound);
+    }
+
+    /// <summary>
+    ///     Sends GroupQueueUpdate type=16 (TMM_GROUP_FOUND_SERVER) to all players.
+    /// </summary>
+    private static void SendFoundServerUpdate(MatchmakingMatch match)
+    {
+        ChatBuffer found = new();
+
+        found.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_QUEUE_UPDATE);
+        found.WriteInt8(Convert.ToByte(ChatProtocol.TMMUpdateType.TMM_GROUP_FOUND_SERVER));
+
+        foreach (MatchmakingGroupMember member in match.GetAllPlayers())
+            member.Session.Send(found);
+    }
+
+    /// <summary>
+    ///     Sends AutoMatchConnect (0x0062) to all players with server connection details.
+    /// </summary>
+    private static void SendAutoMatchConnect(MatchmakingMatch match, int matchID, string serverAddress, ushort serverPort)
+    {
+        byte arrangedMatchType = match.GameType switch
+        {
+            ChatProtocol.TMMGameType.TMM_GAME_TYPE_NORMAL          => (byte)MatchType.AM_MATCHMAKING,
+            ChatProtocol.TMMGameType.TMM_GAME_TYPE_CASUAL          => (byte)MatchType.AM_UNRANKED_MATCHMAKING,
+            ChatProtocol.TMMGameType.TMM_GAME_TYPE_MIDWARS         => (byte)MatchType.AM_MATCHMAKING_MIDWARS,
+            ChatProtocol.TMMGameType.TMM_GAME_TYPE_RIFTWARS        => (byte)MatchType.AM_MATCHMAKING_RIFTWARS,
+            ChatProtocol.TMMGameType.TMM_GAME_TYPE_CAMPAIGN_NORMAL => (byte)MatchType.AM_MATCHMAKING_CAMPAIGN,
+            ChatProtocol.TMMGameType.TMM_GAME_TYPE_CAMPAIGN_CASUAL => (byte)MatchType.AM_MATCHMAKING_CAMPAIGN,
+            _                                                      => (byte)MatchType.AM_MATCHMAKING
+        };
+
+        ChatBuffer connect = new();
+
+        connect.WriteCommand(ChatProtocol.Command.CHAT_CMD_AUTO_MATCH_CONNECT);
+        connect.WriteInt8(arrangedMatchType);
+        connect.WriteInt32(matchID);            // Match ID (Used By Client To Join The Match)
+        connect.WriteString(serverAddress);
+        connect.WriteInt16(Convert.ToInt16(serverPort));
+        connect.WriteInt32(Random.Shared.Next());
+
+        foreach (MatchmakingGroupMember member in match.GetAllPlayers())
+            member.Session.Send(connect);
     }
 }

@@ -11,9 +11,10 @@ public class MatchmakingMatch
     public Guid GUID { get; } = Guid.CreateVersion7();
 
     /// <summary>
-    ///     A sequential match index assigned by the broker for this cycle.
+    ///     A deterministic integer derived from the GUID, used for correlating CreateMatch and AnnounceMatch messages.
+    ///     This is sent to the game server and returned in the response for validation.
     /// </summary>
-    public int MatchIndex { get; set; }
+    public int CorrelationID => GUID.GetDeterministicInt32Hash();
 
     /// <summary>
     ///     The Legion team (team 1).
@@ -137,13 +138,12 @@ public class MatchmakingMatch
     /// <summary>
     ///     Creates a match from two teams and calculates the matchup prediction.
     /// </summary>
-    public static MatchmakingMatch FromTeams(MatchmakingTeam legionTeam, MatchmakingTeam hellbourneTeam, int matchIndex = 0)
+    public static MatchmakingMatch FromTeams(MatchmakingTeam legionTeam, MatchmakingTeam hellbourneTeam)
     {
         MatchmakingMatch match = new ()
         {
             LegionTeam = legionTeam,
-            HellbourneTeam = hellbourneTeam,
-            MatchIndex = matchIndex
+            HellbourneTeam = hellbourneTeam
         };
 
         // Calculate Matchup Prediction

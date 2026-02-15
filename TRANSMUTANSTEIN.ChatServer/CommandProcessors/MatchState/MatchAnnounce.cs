@@ -5,29 +5,29 @@ namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.MatchState;
 ///     This is sent by the game server after it has successfully set up the match.
 /// </summary>
 [ChatCommand(ChatProtocol.GameServerToChatServer.NET_CHAT_GS_ANNOUNCE_MATCH)]
-public class MatchAnnounce : ISynchronousCommandProcessor<MatchServerChatSession>
+public class MatchAnnounce(IDatabase distributedCacheStore) : IAsynchronousCommandProcessor<MatchServerChatSession>
 {
-    public void Process(MatchServerChatSession session, ChatBuffer buffer)
+    public async Task Process(MatchServerChatSession session, ChatBuffer buffer)
     {
         // Read The Command
         _ = buffer.ReadCommandBytes();
 
         // Read The Announce Match Data
-        int matchup = buffer.ReadInt32();      // Matchup/Challenge ID We Sent In CreateMatch
-        int challenge = buffer.ReadInt32();    // Challenge/Password
-        int groupCount = buffer.ReadInt32();   // Number Of Groups
-        int matchID = buffer.ReadInt32();       // The Match ID Assigned By The Game Server
+        int correlationID = buffer.ReadInt32();  // Correlation ID We Sent In CreateMatch
+        int challenge = buffer.ReadInt32();      // Challenge/Password
+        int groupCount = buffer.ReadInt32();     // Number Of Groups
+        int matchID = buffer.ReadInt32();        // The Match ID Assigned By The Game Server
 
         Log.Information(
-            @"Match Announce Received: ServerID={ServerID}, Matchup={Matchup}, MatchID={MatchID}",
+            @"Match Announce Received: ServerID={ServerID}, CorrelationID={CorrelationID}, MatchID={MatchID}",
             session.Metadata.ServerID,
-            matchup,
+            correlationID,
             matchID);
 
-        // Find The Pending Match By Matchup Index
-        if (MatchmakingService.ActiveMatches.Values.SingleOrDefault(match => match.MatchIndex == matchup) is not { } pendingMatch)
+        // Find The Pending Match By Correlation ID
+        if (MatchmakingService.ActiveMatches.Values.SingleOrDefault(match => match.CorrelationID == correlationID) is not { } pendingMatch)
         {
-            Log.Warning(@"Match Announce Received For Unknown Matchup: {Matchup}", matchup);
+            Log.Warning(@"Match Announce Received For Unknown CorrelationID: {CorrelationID}", correlationID);
 
             return;
         }
@@ -44,10 +44,26 @@ public class MatchAnnounce : ISynchronousCommandProcessor<MatchServerChatSession
         if (string.IsNullOrEmpty(pendingMatch.ServerAddress) && session.Socket.RemoteEndPoint is IPEndPoint remoteEndPoint)
             serverAddress = remoteEndPoint.Address.ToString();
 
+        // Create MatchInformation Now That We Have The Real Match ID From The Game Server
+        MatchServer? server = await distributedCacheStore.GetMatchServerByID(pendingMatch.AssignedServerID ?? 0);
+
+        if (server is not null)
+        {
+            MatchInformation matchInformation = MatchmakingService.CreateMatchInformation(pendingMatch, server, matchID);
+
+            await distributedCacheStore.SetMatchInformation(matchInformation);
+
+            Log.Information(@"MatchInformation Cached: MatchID={MatchID}, MatchName={MatchName}", matchID, matchInformation.MatchName);
+        }
+        else
+        {
+            Log.Warning(@"Could Not Create MatchInformation: Server Not Found For ServerID {ServerID}", pendingMatch.AssignedServerID);
+        }
+
         // Send Notifications To All Players
-        SendMatchFoundUpdate(pendingMatch);
+        SendMatchFoundUpdate(pendingMatch, matchID);
         SendFoundServerUpdate(pendingMatch);
-        SendAutoMatchConnect(pendingMatch, serverAddress, serverPort);
+        SendAutoMatchConnect(pendingMatch, matchID, serverAddress, serverPort);
 
         // Mark All Members As In-Game
         foreach (MatchmakingGroup group in pendingMatch.GetAllGroups())
@@ -59,8 +75,8 @@ public class MatchAnnounce : ISynchronousCommandProcessor<MatchServerChatSession
         }
 
         Log.Information(
-            @"Match Spawned: MatchIndex={MatchIndex}, MatchID={MatchID}, Server={ServerAddress}:{ServerPort}",
-            pendingMatch.MatchIndex,
+            @"Match Spawned: GUID={MatchGUID}, MatchID={MatchID}, Server={ServerAddress}:{ServerPort}",
+            pendingMatch.GUID,
             matchID,
             serverAddress,
             serverPort);
@@ -69,7 +85,7 @@ public class MatchAnnounce : ISynchronousCommandProcessor<MatchServerChatSession
     /// <summary>
     ///     Sends MatchFoundUpdate (0x0D09) to all players in a match.
     /// </summary>
-    private static void SendMatchFoundUpdate(MatchmakingMatch match)
+    private static void SendMatchFoundUpdate(MatchmakingMatch match, int matchID)
     {
         ChatBuffer matchFound = new();
 
@@ -79,7 +95,7 @@ public class MatchAnnounce : ISynchronousCommandProcessor<MatchServerChatSession
         matchFound.WriteInt8(Convert.ToByte(match.GameType));
         matchFound.WriteString(match.SelectedMode);
         matchFound.WriteString(match.SelectedRegion);
-        matchFound.WriteString($"Match #{match.MatchIndex}");
+        matchFound.WriteString($"Match #{matchID}");
 
         foreach (MatchmakingGroupMember member in match.GetAllPlayers())
             member.Session.Send(matchFound);
@@ -102,7 +118,7 @@ public class MatchAnnounce : ISynchronousCommandProcessor<MatchServerChatSession
     /// <summary>
     ///     Sends AutoMatchConnect (0x0062) to all players with server connection details.
     /// </summary>
-    private static void SendAutoMatchConnect(MatchmakingMatch match, string serverAddress, ushort serverPort)
+    private static void SendAutoMatchConnect(MatchmakingMatch match, int matchID, string serverAddress, ushort serverPort)
     {
         byte arrangedMatchType = match.GameType switch
         {
@@ -119,7 +135,7 @@ public class MatchAnnounce : ISynchronousCommandProcessor<MatchServerChatSession
 
         connect.WriteCommand(ChatProtocol.Command.CHAT_CMD_AUTO_MATCH_CONNECT);
         connect.WriteInt8(arrangedMatchType);
-        connect.WriteInt32(match.MatchIndex);   // Matchup ID (Our Match Index, Not The Game Server's Match ID)
+        connect.WriteInt32(matchID);            // The Game Server's Match ID (Used By Client In CHAT_CMD_JOINED_GAME)
         connect.WriteString(serverAddress);
         connect.WriteInt16(Convert.ToInt16(serverPort));
         connect.WriteInt32(Random.Shared.Next());
