@@ -306,8 +306,9 @@ public class MatchmakingService : BackgroundService, IDisposable
             _                                                      => (byte)MatchType.AM_MATCHMAKING
         };
 
-        // Build Match Settings String
-        string matchSettings = $"mode:{match.SelectedMode} map:{match.SelectedMap} teamsize:{match.LegionTeam.TeamSize} noleaver:true spectators:10";
+        // Build Match Settings String (Must Match C++ Format Exactly)
+        // Format: mode:<mode> map:<mapname> teamsize:<size> allheroes:true noleaver:true spectators:<count>
+        string matchSettings = $"mode:{match.SelectedMode} map:{match.SelectedMap} teamsize:{match.LegionTeam.TeamSize} allheroes:true noleaver:true spectators:10";
 
         // Build Player Info List
         List<MatchmakingGroupMember> legionPlayers = [.. match.LegionTeam.GetAllMembers().OrderBy(member => member.TMR)];
