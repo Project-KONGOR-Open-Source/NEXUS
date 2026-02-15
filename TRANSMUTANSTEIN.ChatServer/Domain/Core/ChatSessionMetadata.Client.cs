@@ -37,4 +37,6 @@ public class ClientChatSessionMetadata
     public required string ClientRegion { get; set; }
 
     public required string ClientLanguage { get; set; }
+
+    public MatchServer? MatchServerConnectedTo { get; set; }
 }

@@ -112,11 +112,11 @@ public class ClientHandshake(MerrickContext merrick, IDatabase distributedCacheS
             return;
         }
 
-        // Accept Connection, Send Options, And Broadcast Connection To Friends And Clan Members
+        // Accept Connection, Send Options, Then Complete The Connection
         session
             .Accept(account)
             .SendOptionsAndRemoteCommands()
-            .BroadcastConnection();
+            .SetOnline();
     }
 }
 
@@ -204,7 +204,9 @@ file class ClientHandshakeRequestData
             ClientVersionMinor = ClientVersionMinor,
             ClientVersionPatch = ClientVersionPatch,
             ClientVersionRevision = ClientVersionRevision,
-            LastKnownClientState = LastKnownClientState,
+            // Start As DISCONNECTED - The Accept Method Will Set It To CONNECTED And Broadcast The Status Update
+            // Subsequent Status Changes (JOINING_GAME, IN_GAME) Are Handled By The Respective Command Processors
+            LastKnownClientState = ChatProtocol.ChatClientStatus.CHAT_CLIENT_STATUS_DISCONNECTED,
             ClientChatModeState = ClientChatModeState,
             ClientRegion = ClientRegion,
             ClientLanguage = ClientLanguage
