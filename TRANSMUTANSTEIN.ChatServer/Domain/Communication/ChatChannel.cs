@@ -18,6 +18,12 @@ public class ChatChannel
     public HashSet<int> BannedAccountIDs { get; set; } = [];
 
     /// <summary>
+    ///     Set of lowercase account names authenticated to join this channel when authentication is enabled.
+    ///     C++ reference: <c>CChannel::m_setAuthed</c>.
+    /// </summary>
+    public HashSet<string> AuthenticatedAccountNames { get; set; } = [];
+
+    /// <summary>
     ///     Channel password for access control.
     ///     This value is NULL if no password is set.
     /// </summary>
@@ -26,6 +32,8 @@ public class ChatChannel
     public bool IsFull => (Members.Count < ChatProtocol.MAX_USERS_PER_CHANNEL) is false;
 
     public bool IsPermanent => Flags.HasFlag(ChatProtocol.ChatChannelType.CHAT_CHANNEL_FLAG_PERMANENT);
+
+    public bool IsAuthenticationRequired => Flags.HasFlag(ChatProtocol.ChatChannelType.CHAT_CHANNEL_FLAG_AUTH_REQUIRED);
 
     public bool HasPassword() => string.IsNullOrEmpty(Password) is false;
 
@@ -617,5 +625,154 @@ public class ChatChannel
         broadcast.WriteInt32(requesterSession.Account.ID);
 
         BroadcastMessage(broadcast);
+    }
+
+    /// <summary>
+    ///     Enables authentication on this channel. Only authenticated users can join.
+    ///     C++ reference: <c>c_channel.cpp:395</c> — <c>CChannel::EnableAuth</c>.
+    /// </summary>
+    public void EnableAuthentication(ClientChatSession requesterSession)
+    {
+        if (Members.TryGetValue(requesterSession.Account.Name, out ChatChannelMember? requester) is false)
+            return;
+
+        if (requester.AdministratorLevel < ChatProtocol.AdminLevel.CHAT_CLIENT_ADMIN_LEADER)
+            return;
+
+        Flags |= ChatProtocol.ChatChannelType.CHAT_CHANNEL_FLAG_AUTH_REQUIRED;
+
+        ChatBuffer broadcast = new ();
+
+        broadcast.WriteCommand(ChatProtocol.Command.CHAT_CMD_CHANNEL_SET_AUTH);
+        broadcast.WriteInt32(ID);
+
+        BroadcastMessage(broadcast);
+    }
+
+    /// <summary>
+    ///     Disables authentication on this channel, allowing anyone to join.
+    ///     C++ reference: <c>c_channel.cpp:413</c> — <c>CChannel::DisableAuth</c>.
+    /// </summary>
+    public void DisableAuthentication(ClientChatSession requesterSession)
+    {
+        if (Members.TryGetValue(requesterSession.Account.Name, out ChatChannelMember? requester) is false)
+            return;
+
+        if (requester.AdministratorLevel < ChatProtocol.AdminLevel.CHAT_CLIENT_ADMIN_LEADER)
+            return;
+
+        Flags &= ~ChatProtocol.ChatChannelType.CHAT_CHANNEL_FLAG_AUTH_REQUIRED;
+
+        ChatBuffer broadcast = new ();
+
+        broadcast.WriteCommand(ChatProtocol.Command.CHAT_CMD_CHANNEL_REMOVE_AUTH);
+        broadcast.WriteInt32(ID);
+
+        BroadcastMessage(broadcast);
+    }
+
+    /// <summary>
+    ///     Adds a user to the channel's authenticated user list.
+    ///     C++ reference: <c>c_channel.cpp:458</c> — <c>CChannel::AddAuth</c>.
+    /// </summary>
+    public void AddAuthenticatedUser(ClientChatSession requesterSession, string targetName)
+    {
+        if (Members.TryGetValue(requesterSession.Account.Name, out ChatChannelMember? requester) is false)
+            return;
+
+        if (requester.AdministratorLevel < ChatProtocol.AdminLevel.CHAT_CLIENT_ADMIN_LEADER)
+            return;
+
+        // C++ Reference: Strip Clan Tag (Everything Before And Including ']')
+        int bracketIndex = targetName.IndexOf(']');
+        string normalised = bracketIndex >= 0 ? targetName[(bracketIndex + 1)..] : targetName;
+        string lowered = normalised.ToLowerInvariant();
+
+        if (AuthenticatedAccountNames.Add(lowered))
+        {
+            ChatBuffer success = new ();
+
+            success.WriteCommand(ChatProtocol.Command.CHAT_CMD_CHANNEL_ADD_AUTH_USER);
+            success.WriteInt32(ID);
+            success.WriteString(targetName);
+
+            requesterSession.Send(success);
+        }
+        else
+        {
+            ChatBuffer failure = new ();
+
+            failure.WriteCommand(ChatProtocol.Command.CHAT_CMD_CHANNEL_ADD_AUTH_FAIL);
+            failure.WriteInt32(ID);
+            failure.WriteString(targetName);
+
+            requesterSession.Send(failure);
+        }
+    }
+
+    /// <summary>
+    ///     Removes a user from the channel's authenticated user list.
+    ///     C++ reference: <c>c_channel.cpp:489</c> — <c>CChannel::RemoveAuth</c>.
+    /// </summary>
+    public void RemoveAuthenticatedUser(ClientChatSession requesterSession, string targetName)
+    {
+        if (Members.TryGetValue(requesterSession.Account.Name, out ChatChannelMember? requester) is false)
+            return;
+
+        if (requester.AdministratorLevel < ChatProtocol.AdminLevel.CHAT_CLIENT_ADMIN_LEADER)
+            return;
+
+        string lowered = targetName.ToLowerInvariant();
+
+        if (AuthenticatedAccountNames.Remove(lowered))
+        {
+            ChatBuffer success = new ();
+
+            success.WriteCommand(ChatProtocol.Command.CHAT_CMD_CHANNEL_REMOVE_AUTH_USER);
+            success.WriteInt32(ID);
+            success.WriteString(targetName);
+
+            requesterSession.Send(success);
+        }
+        else
+        {
+            ChatBuffer failure = new ();
+
+            failure.WriteCommand(ChatProtocol.Command.CHAT_CMD_CHANNEL_REMOVE_AUTH_FAIL);
+            failure.WriteInt32(ID);
+            failure.WriteString(targetName);
+
+            requesterSession.Send(failure);
+        }
+    }
+
+    /// <summary>
+    ///     Sends the channel's authenticated user list to the requesting client.
+    ///     C++ reference: <c>c_channel.cpp:431</c> — <c>CChannel::SendAuthList</c>.
+    /// </summary>
+    public void SendAuthenticatedUserList(ClientChatSession requesterSession)
+    {
+        if (Members.TryGetValue(requesterSession.Account.Name, out ChatChannelMember? requester) is false)
+            return;
+
+        if (requester.AdministratorLevel < ChatProtocol.AdminLevel.CHAT_CLIENT_ADMIN_LEADER)
+            return;
+
+        ChatBuffer response = new ();
+
+        response.WriteCommand(ChatProtocol.Command.CHAT_CMD_CHANNEL_LIST_AUTH);
+        response.WriteInt32(ID);
+        response.WriteInt32(AuthenticatedAccountNames.Count);
+
+        foreach (string authenticatedName in AuthenticatedAccountNames)
+        {
+            // C++ Reference: Try To Resolve The Display Name From Online Sessions, Otherwise Use The Stored Name
+            ClientChatSession? authenticatedSession = Context.ClientChatSessions.Values
+                .SingleOrDefault(chatSession => chatSession.Account.Name.Equals(authenticatedName, StringComparison.OrdinalIgnoreCase));
+
+            response.WriteString(authenticatedSession?.Account.Name ?? authenticatedName);
+        }
+
+        requesterSession.Send(response);
     }
 }

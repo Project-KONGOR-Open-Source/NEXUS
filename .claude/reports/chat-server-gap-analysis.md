@@ -178,13 +178,15 @@ Cross-referenced against the authoritative C++ source (`c_client.cpp`, `c_client
 | — | Match Invite By Name | ✅ Implemented | `CommandProcessors/Social/MatchInviteByName.cs`, `Domain/Social/MatchInvite.cs` |
 | — | Match Invite By ID | ✅ Implemented | `CommandProcessors/Social/MatchInviteByID.cs`, `Domain/Social/MatchInvite.cs` |
 | — | Match Invite Rejected | ✅ Implemented | `CommandProcessors/Social/MatchInviteRejected.cs` |
-| — | Channel Auth System | ❌ Not implemented | Lower priority, auth channels are rare |
+| — | Channel Set Auth | ✅ Implemented | `CommandProcessors/Channels/ChannelSetAuth.cs`, `ChatChannel.cs` |
+| — | Channel Remove Auth | ✅ Implemented | `CommandProcessors/Channels/ChannelRemoveAuth.cs`, `ChatChannel.cs` |
+| — | Channel Add Auth User | ✅ Implemented | `CommandProcessors/Channels/ChannelAddAuthUser.cs`, `ChatChannel.cs` |
+| — | Channel Remove Auth User | ✅ Implemented | `CommandProcessors/Channels/ChannelRemoveAuthUser.cs`, `ChatChannel.cs` |
+| — | Channel List Auth | ✅ Implemented | `CommandProcessors/Channels/ChannelListAuth.cs`, `ChatChannel.cs` |
 | C | Disconnect Cleanup | ✅ Implemented | `ChatSession.Client.cs` (pending clan invite/creation removal) |
 
 ---
 
-## Remaining Work
+## Status
 
-### Not Yet Implemented
-
-1. **Channel Auth System** (`CHAT_CMD_CHANNEL_SET_AUTH`, `CHAT_CMD_CHANNEL_REMOVE_AUTH`, `CHAT_CMD_CHANNEL_ADD_AUTH_USER`, `CHAT_CMD_CHANNEL_REMOVE_AUTH_USER`, `CHAT_CMD_CHANNEL_LIST_AUTH`) — manages authorised-user channels. Lower priority, auth channels are rare in practice.
+All items from the original gap analysis have been implemented. No remaining work.
