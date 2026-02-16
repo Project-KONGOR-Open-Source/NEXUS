@@ -173,9 +173,11 @@ Cross-referenced against the authoritative C++ source (`c_client.cpp`, `c_client
 | 8 | Message All | ✅ Implemented | `CommandProcessors/Communication/MessageAll.cs` |
 | A | Whisper AFK/DND | ✅ Already correct | `Domain/Communication/Whisper.cs` (was a false positive) |
 | B | Channel Ban List | ✅ Implemented | `ChatChannel.cs` (BannedAccountIDs + Join check) |
-| — | Clan Invite/Accept/Reject | ❌ Not implemented | Requires master server HTTP integration |
-| — | Clan Create | ❌ Not implemented | Requires master server HTTP integration |
-| — | Game Invites | ❌ Not implemented | Requires match server session lookup |
+| — | Clan Invite/Accept/Reject | ✅ Implemented | `CommandProcessors/Social/ClanInvite.cs`, `ClanInviteAccepted.cs`, `ClanInviteRejected.cs`, `Domain/Social/PendingClanInvites.cs` |
+| — | Clan Create | ❌ Not implemented | Requires founding member acceptance flow + database integration |
+| — | Match Invite By Name | ✅ Implemented | `CommandProcessors/Social/MatchInviteByName.cs`, `Domain/Social/MatchInvite.cs` |
+| — | Match Invite By ID | ✅ Implemented | `CommandProcessors/Social/MatchInviteByID.cs`, `Domain/Social/MatchInvite.cs` |
+| — | Match Invite Rejected | ✅ Implemented | `CommandProcessors/Social/MatchInviteRejected.cs` |
 | — | Channel Auth System | ❌ Not implemented | Lower priority, auth channels are rare |
 | C | Disconnect Cleanup | ❌ Not implemented | Scheduled match removal, lowest priority |
 
@@ -185,12 +187,8 @@ Cross-referenced against the authoritative C++ source (`c_client.cpp`, `c_client
 
 ### Not Yet Implemented
 
-1. **Clan Invite/Accept/Reject** (`CHAT_CMD_CLAN_ADD_MEMBER`, `CHAT_CMD_CLAN_ADD_ACCEPTED`, `CHAT_CMD_CLAN_ADD_REJECTED`) — the C++ chat server proxies these through HTTP requests to the master server API. Requires integration with KONGOR.MasterServer.
+1. **Clan Create** (`CHAT_CMD_CLAN_CREATE_REQUEST`) — requires 4 founding members to all accept before the clan is created. The C++ sends HTTP to the master server; the C# version would use direct database access. This is a complex multi-step flow with its own invite/accept/reject lifecycle separate from the regular clan invite flow.
 
-2. **Clan Create** (`CHAT_CMD_CLAN_CREATE_REQUEST`) — reads clan name, tag, and founding member names, validates all online, sends HTTP to master server. Requires master server endpoint.
+2. **Channel Auth System** (`CHAT_CMD_CHANNEL_SET_AUTH`, `CHAT_CMD_CHANNEL_REMOVE_AUTH`, `CHAT_CMD_CHANNEL_ADD_AUTH_USER`, `CHAT_CMD_CHANNEL_REMOVE_AUTH_USER`, `CHAT_CMD_CHANNEL_LIST_AUTH`) — manages authorised-user channels. Lower priority.
 
-3. **Game Invites** (`CHAT_CMD_INVITE_USER_ID`, `CHAT_CMD_INVITE_USER_NAME`, `CHAT_CMD_INVITE_REJECTED`) — requires lookup of match server sessions to get server address and game name.
-
-4. **Channel Auth System** (`CHAT_CMD_CHANNEL_SET_AUTH`, `CHAT_CMD_CHANNEL_REMOVE_AUTH`, `CHAT_CMD_CHANNEL_ADD_AUTH_USER`, `CHAT_CMD_CHANNEL_REMOVE_AUTH_USER`, `CHAT_CMD_CHANNEL_LIST_AUTH`) — manages authorised-user channels. Lower priority.
-
-5. **Disconnect Cleanup** — add scheduled match removal to `Terminate()`. Lowest priority.
+3. **Disconnect Cleanup** — add scheduled match removal to `Terminate()`. Lowest priority.
