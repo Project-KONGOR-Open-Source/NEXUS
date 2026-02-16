@@ -71,7 +71,7 @@ public class ClanInvite : ISynchronousCommandProcessor<ClientChatSession>
         }
 
         // Target Already Has A Pending Clan Invite
-        if (PendingClanInvites.Invites.ContainsKey(targetSession.Account.ID))
+        if (PendingClan.Invites.ContainsKey(targetSession.Account.ID))
         {
             SendFailure(session, ChatProtocol.Command.CHAT_CMD_CLAN_ADD_FAIL_INVITED);
 
@@ -88,7 +88,7 @@ public class ClanInvite : ISynchronousCommandProcessor<ClientChatSession>
             ClanTag         = session.Account.Clan.Tag
         };
 
-        PendingClanInvites.Invites[targetSession.Account.ID] = invite;
+        PendingClan.Invites[targetSession.Account.ID] = invite;
 
         // Send The Invite To The Target
         ChatBuffer invitePacket = new ();

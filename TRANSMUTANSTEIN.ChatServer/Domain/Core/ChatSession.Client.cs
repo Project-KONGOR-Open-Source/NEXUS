@@ -283,6 +283,12 @@ public class ClientChatSession(TCPServer server, IServiceProvider serviceProvide
         // Remove From Matchmaking Group If In One
         MatchmakingService.GetMatchmakingGroup(Account.ID)?.RemoveMember(Account.ID);
 
+        // Remove Any Pending Clan Invites For This Account
+        PendingClan.Invites.TryRemove(Account.ID, out _);
+
+        // Remove Any Pending Clan Creations Founded By This Account
+        PendingClan.Creations.TryRemove(Account.ID, out _);
+
         // Send Disconnection Notification To Online Peers (Friends And Clan Members)
         UpdateStatus(ChatProtocol.ChatClientStatus.CHAT_CLIENT_STATUS_DISCONNECTED);
 

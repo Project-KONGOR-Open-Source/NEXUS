@@ -174,12 +174,12 @@ Cross-referenced against the authoritative C++ source (`c_client.cpp`, `c_client
 | A | Whisper AFK/DND | ✅ Already correct | `Domain/Communication/Whisper.cs` (was a false positive) |
 | B | Channel Ban List | ✅ Implemented | `ChatChannel.cs` (BannedAccountIDs + Join check) |
 | — | Clan Invite/Accept/Reject | ✅ Implemented | `CommandProcessors/Social/ClanInvite.cs`, `ClanInviteAccepted.cs`, `ClanInviteRejected.cs`, `Domain/Social/PendingClanInvites.cs` |
-| — | Clan Create | ❌ Not implemented | Requires founding member acceptance flow + database integration |
+| — | Clan Create | ✅ Implemented | `CommandProcessors/Social/ClanCreate.cs`, `ClanInviteAccepted.cs` (shared), `ClanInviteRejected.cs` (shared), `Domain/Social/PendingClanCreations.cs` |
 | — | Match Invite By Name | ✅ Implemented | `CommandProcessors/Social/MatchInviteByName.cs`, `Domain/Social/MatchInvite.cs` |
 | — | Match Invite By ID | ✅ Implemented | `CommandProcessors/Social/MatchInviteByID.cs`, `Domain/Social/MatchInvite.cs` |
 | — | Match Invite Rejected | ✅ Implemented | `CommandProcessors/Social/MatchInviteRejected.cs` |
 | — | Channel Auth System | ❌ Not implemented | Lower priority, auth channels are rare |
-| C | Disconnect Cleanup | ❌ Not implemented | Scheduled match removal, lowest priority |
+| C | Disconnect Cleanup | ✅ Implemented | `ChatSession.Client.cs` (pending clan invite/creation removal) |
 
 ---
 
@@ -187,8 +187,4 @@ Cross-referenced against the authoritative C++ source (`c_client.cpp`, `c_client
 
 ### Not Yet Implemented
 
-1. **Clan Create** (`CHAT_CMD_CLAN_CREATE_REQUEST`) — requires 4 founding members to all accept before the clan is created. The C++ sends HTTP to the master server; the C# version would use direct database access. This is a complex multi-step flow with its own invite/accept/reject lifecycle separate from the regular clan invite flow.
-
-2. **Channel Auth System** (`CHAT_CMD_CHANNEL_SET_AUTH`, `CHAT_CMD_CHANNEL_REMOVE_AUTH`, `CHAT_CMD_CHANNEL_ADD_AUTH_USER`, `CHAT_CMD_CHANNEL_REMOVE_AUTH_USER`, `CHAT_CMD_CHANNEL_LIST_AUTH`) — manages authorised-user channels. Lower priority.
-
-3. **Disconnect Cleanup** — add scheduled match removal to `Terminate()`. Lowest priority.
+1. **Channel Auth System** (`CHAT_CMD_CHANNEL_SET_AUTH`, `CHAT_CMD_CHANNEL_REMOVE_AUTH`, `CHAT_CMD_CHANNEL_ADD_AUTH_USER`, `CHAT_CMD_CHANNEL_REMOVE_AUTH_USER`, `CHAT_CMD_CHANNEL_LIST_AUTH`) — manages authorised-user channels. Lower priority, auth channels are rare in practice.

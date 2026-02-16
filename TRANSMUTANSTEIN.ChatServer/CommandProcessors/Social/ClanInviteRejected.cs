@@ -1,8 +1,8 @@
 namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Social;
 
 /// <summary>
-///     Handles clan invitation rejection.
-///     Removes the pending invite and notifies the inviter.
+///     Handles clan invitation rejection and clan creation founding member rejection.
+///     The same command ID is used for both flows — checks pending invites first, then pending creations.
 ///     C++ reference: <c>c_clientmanager.cpp:1840</c> — <c>HandleClanInviteRejected</c>.
 /// </summary>
 [ChatCommand(ChatProtocol.Command.CHAT_CMD_CLAN_ADD_REJECTED)]
@@ -12,23 +12,60 @@ public class ClanInviteRejected : ISynchronousCommandProcessor<ClientChatSession
     {
         _ = new ClanInviteRejectedRequestData(buffer);
 
-        // Remove The Pending Invite
-        if (PendingClanInvites.Invites.TryRemove(session.Account.ID, out PendingClanInvite? invite) is false)
+        // Check Pending Clan Invites First
+        if (PendingClan.Invites.TryRemove(session.Account.ID, out PendingClanInvite? invite))
+        {
+            // Notify The Inviter That The Invite Was Rejected
+            ClientChatSession? originSession = Context.ClientChatSessions.Values
+                .SingleOrDefault(chatSession => chatSession.Account.ID == invite.OriginAccountID);
+
+            if (originSession is not null)
+            {
+                ChatBuffer rejection = new ();
+
+                rejection.WriteCommand(ChatProtocol.Command.CHAT_CMD_CLAN_ADD_REJECTED);
+                rejection.WriteString(session.Account.Name);
+
+                originSession.Send(rejection);
+            }
+
+            return;
+        }
+
+        // Check Pending Clan Creations
+        HandleClanCreationRejection(session);
+    }
+
+    /// <summary>
+    ///     Handles rejection of a clan creation founding member invite.
+    ///     Removes the entire pending creation and notifies the founder.
+    ///     C++ reference: <c>c_clientmanager.cpp:1855-1890</c>.
+    /// </summary>
+    private static void HandleClanCreationRejection(ClientChatSession session)
+    {
+        // Find The Pending Creation Where This Player Is A Founding Member
+        PendingClanCreation? creation = PendingClan.Creations.Values
+            .SingleOrDefault(creation => creation.IsFoundingMember(session.Account.ID));
+
+        if (creation is null)
             return;
 
-        // Notify The Inviter That The Invite Was Rejected
-        ClientChatSession? originSession = Context.ClientChatSessions.Values
-            .SingleOrDefault(chatSession => chatSession.Account.ID == invite.OriginAccountID);
+        // Remove The Entire Pending Creation (One Rejection Cancels The Whole Thing)
+        PendingClan.Creations.TryRemove(creation.FounderAccountID, out _);
 
-        if (originSession is null)
-            return;
+        // Notify The Founder
+        ClientChatSession? founderSession = Context.ClientChatSessions.Values
+            .SingleOrDefault(chatSession => chatSession.Account.ID == creation.FounderAccountID);
 
-        ChatBuffer rejection = new ();
+        if (founderSession is not null)
+        {
+            ChatBuffer rejection = new ();
 
-        rejection.WriteCommand(ChatProtocol.Command.CHAT_CMD_CLAN_ADD_REJECTED);
-        rejection.WriteString(session.Account.Name);
+            rejection.WriteCommand(ChatProtocol.Command.CHAT_CMD_CLAN_CREATE_REJECT);
+            rejection.WriteString(session.Account.Name);
 
-        originSession.Send(rejection);
+            founderSession.Send(rejection);
+        }
     }
 }
 
