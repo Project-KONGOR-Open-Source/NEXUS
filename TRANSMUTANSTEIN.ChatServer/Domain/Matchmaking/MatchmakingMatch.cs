@@ -146,8 +146,8 @@ public class MatchmakingMatch
             HellbourneTeam = hellbourneTeam
         };
 
-        // Calculate Matchup Prediction
-        match.MatchupPrediction = CalculateMatchupPrediction(legionTeam.AverageTMR, hellbourneTeam.AverageTMR);
+        // Calculate Matchup Prediction Using Effective Team Rating (Power Mean + Premade Bonus)
+        match.MatchupPrediction = CalculateMatchupPrediction(legionTeam.EffectiveTeamRating, hellbourneTeam.EffectiveTeamRating);
 
         // Check For Mismatched Group Makeup
         match.MismatchedGroupMakeup = Math.Abs(legionTeam.GroupMakeup - hellbourneTeam.GroupMakeup) > 2;

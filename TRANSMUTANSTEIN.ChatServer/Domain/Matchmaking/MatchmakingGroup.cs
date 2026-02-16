@@ -6,6 +6,7 @@ public class MatchmakingGroup
     private const double MaximumTMR = 2500.0;
     private const int InexperiencedMatchCount = 50;
     private const double InexperiencedTMRCutoff = 1625.0;
+    private const double MaximumGroupTMRDisparity = 150.0;
 
     public Guid GUID { get; } = Guid.CreateVersion7();
 
@@ -30,6 +31,33 @@ public class MatchmakingGroup
     ///     The average TMR of all members in this group.
     /// </summary>
     public double AverageTMR => Members.Count > 0 ? TotalTMR / Members.Count : 0;
+
+    /// <summary>
+    ///     The adjusted TMR for this group, including a bonus for premade coordination.
+    ///     KONGOR Reference: TMMGroup.cs Lines 99-107
+    ///     Formula: groupMMR += 4 * 2^groupSize (Solo=0, 2p=+16, 3p=+32, 4p=+64, 5p=+128)
+    /// </summary>
+    public double AdjustedTotalTMR => TotalTMR + GetPremadeBonus();
+
+    /// <summary>
+    ///     The adjusted average TMR for this group, including premade bonus.
+    /// </summary>
+    public double AdjustedAverageTMR => Members.Count > 0 ? AdjustedTotalTMR / Members.Count : 0;
+
+    /// <summary>
+    ///     Gets the premade coordination bonus based on group size.
+    ///     Larger groups get a higher bonus to compensate for voice comms and coordination advantage.
+    ///     KONGOR Reference: TMMGroup.cs Lines 99-107
+    /// </summary>
+    public double GetPremadeBonus()
+    {
+        if (Members.Count <= 1)
+            return 0;
+
+        // KONGOR Formula: 4 * 2^groupSize
+        // Solo=0, 2p=+16, 3p=+32, 4p=+64, 5p=+128
+        return 4.0 * Math.Pow(2.0, Members.Count);
+    }
 
     /// <summary>
     ///     The highest TMR among all members in this group.
@@ -422,6 +450,16 @@ public class MatchmakingGroup
             return;
         }
 
+        // Validate MMR Disparity Within Group (Prevents Boosting/Smurfing)
+        // KONGOR Reference: MatchmakingGroup.cs Lines 261-273
+        // If The Highest-Rated Player Is Too Far Above The Average Of The Rest, Reject
+        if (Members.Count > 1 && HasExcessiveTMRDisparity())
+        {
+            SendQueueJoinError("The rating disparity within your group is too high. The difference between the highest-rated player and the average of others cannot exceed 150.");
+
+            return;
+        }
+
         // TODO: Validate Regional Restrictions (Turkey Region Requires GarenaID)
         // TODO: Validate Game Mode Restrictions (Lock Pick Only For 5-Person Groups)
         // TODO: Validate Disabled Game Modes
@@ -729,5 +767,55 @@ public class MatchmakingGroup
             < 2000 => 20,  // Immortal
             _      => 21   // Immortal (Top Tier)
         };
+    }
+
+    /// <summary>
+    ///     Checks if the group has excessive TMR disparity between members.
+    ///     This prevents boosting/smurfing by rejecting groups where the highest-rated
+    ///     player is significantly above the average of the remaining members.
+    ///     KONGOR Reference: MatchmakingGroup.cs Lines 261-273
+    /// </summary>
+    /// <returns>TRUE if disparity exceeds the threshold, FALSE otherwise.</returns>
+    private bool HasExcessiveTMRDisparity()
+    {
+        if (Members.Count <= 1)
+            return false;
+
+        // Calculate The Team Approximation (Extrapolate To Full Team Size)
+        double combinedTMR = TotalTMR;
+        double averageTMR = AverageTMR;
+        int teamSize = Information.TeamSize;
+
+        // Approximate What The Full Team's TMR Would Be
+        double teamApproximation = combinedTMR + averageTMR * (teamSize - Members.Count);
+
+        // Calculate The Bottom N-1 Players' Combined TMR
+        double bottomMembersTMR = teamApproximation - HighestTMR;
+
+        // Check If The Highest Player Is Too Far Above The Average Of The Rest
+        // Formula: HighestTMR - (BottomMembersTMR / (TeamSize - 1)) >= Threshold
+        double averageOfOthers = bottomMembersTMR / (teamSize - 1);
+        double disparity = HighestTMR - averageOfOthers;
+
+        return disparity >= MaximumGroupTMRDisparity;
+    }
+
+    /// <summary>
+    ///     Sends an error message to the group leader when queue join fails.
+    /// </summary>
+    /// <param name="errorMessage">The error message to display.</param>
+    private void SendQueueJoinError(string errorMessage)
+    {
+        // Send A Generic Error Response To The Leader
+        // This Uses The TMM_GENERIC_RESPONSE Message Type To Display An Error
+        ChatBuffer error = new ();
+
+        error.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GENERIC_RESPONSE);
+        error.WriteInt8(0); // Error Code (0 = Generic Error)
+        error.WriteString(errorMessage);
+
+        Leader.Session.Send(error);
+
+        Log.Information(@"Queue Join Rejected For Group GUID ""{Group.GUID}"": {Reason}", GUID, errorMessage);
     }
 }

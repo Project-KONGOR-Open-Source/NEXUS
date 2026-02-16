@@ -7,6 +7,12 @@ namespace TRANSMUTANSTEIN.ChatServer.Domain.Matchmaking;
 public class MatchmakingTeam
 {
     /// <summary>
+    ///     HON team rank weighting exponent for power mean calculation.
+    ///     Higher values weight the highest-rated players more heavily.
+    ///     HON Reference: c_match.cpp Line 25 - matchmaker_teamRankWeighting = 6.5
+    /// </summary>
+    private const double TeamRankWeighting = 6.5;
+    /// <summary>
     ///     The unique identifier for this team.
     /// </summary>
     public Guid GUID { get; } = Guid.CreateVersion7();
@@ -35,6 +41,62 @@ public class MatchmakingTeam
     ///     The average TMR of all players in this team.
     /// </summary>
     public double AverageTMR => PlayerCount > 0 ? TotalTMR / PlayerCount : 0;
+
+    /// <summary>
+    ///     The adjusted total TMR including premade bonuses for all groups.
+    /// </summary>
+    public double AdjustedTotalTMR => Groups.Sum(group => group.AdjustedTotalTMR);
+
+    /// <summary>
+    ///     The adjusted average TMR including premade bonuses.
+    /// </summary>
+    public double AdjustedAverageTMR => PlayerCount > 0 ? AdjustedTotalTMR / PlayerCount : 0;
+
+    /// <summary>
+    ///     The power mean team rating using HON's generalized mean formula.
+    ///     This weights higher-rated players more heavily (exponent 6.5).
+    ///     HON Reference: c_match.cpp Lines 148-157
+    ///     Formula: (sum of rating^6.5) ^ (1/6.5)
+    /// </summary>
+    public double PowerMeanTMR => CalculatePowerMeanTMR();
+
+    /// <summary>
+    ///     The effective team rating for matchmaking, combining:
+    ///     1. HON Power Mean (weights highest-rated players heavily)
+    ///     2. KONGOR Premade Bonus (adds flat bonus for group size)
+    /// </summary>
+    public double EffectiveTeamRating
+    {
+        get
+        {
+            // Start With Power Mean Rating
+            double baseRating = PowerMeanTMR;
+
+            // Add Premade Bonus (Distributed Across Team)
+            double totalPremadeBonus = Groups.Sum(group => group.GetPremadeBonus());
+            double perPlayerBonus = PlayerCount > 0 ? totalPremadeBonus / PlayerCount : 0;
+
+            return baseRating + perPlayerBonus;
+        }
+    }
+
+    /// <summary>
+    ///     Calculates the power mean (generalized mean) of team member ratings.
+    ///     Uses HON's teamRankWeighting exponent of 6.5.
+    /// </summary>
+    private double CalculatePowerMeanTMR()
+    {
+        List<MatchmakingGroupMember> members = [.. GetAllMembers()];
+
+        if (members.Count == 0)
+            return 0;
+
+        // Sum Of (Rating ^ Exponent)
+        double sum = members.Sum(member => Math.Pow(member.TMR, TeamRankWeighting));
+
+        // Take The Nth Root: (Sum) ^ (1 / Exponent)
+        return Math.Pow(sum, 1.0 / TeamRankWeighting);
+    }
 
     /// <summary>
     ///     The highest TMR among all players in this team.

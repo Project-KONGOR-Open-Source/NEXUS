@@ -127,13 +127,14 @@ public class MatchmakingService : BackgroundService, IDisposable
     }
 
     /// <summary>
-    ///     Runs a single match broker cycle with simple first-in-first-out matching.
-    ///     This is a simplified implementation that just pairs groups in queue order.
+    ///     Runs a single match broker cycle with TMR-aware matching.
+    ///     Uses adaptive TMR spread based on queue time and enforces group makeup rules.
     /// </summary>
     private List<MatchmakingMatch> RunBrokerCycle(List<MatchmakingGroup> queuedGroups)
     {
         List<MatchmakingMatch> matches = [];
         int playersPerTeam = _settings.Value.PlayersPerTeam;
+        double maxTMRDifference = _settings.Value.MaximumTeamTMRDifference;
 
         // Group By Game Type For Compatibility
         Dictionary<ChatProtocol.TMMGameType, List<MatchmakingGroup>> groupsByGameType = queuedGroups
@@ -142,40 +143,103 @@ public class MatchmakingService : BackgroundService, IDisposable
 
         foreach ((ChatProtocol.TMMGameType gameType, List<MatchmakingGroup> typeGroups) in groupsByGameType)
         {
-            // Form Teams From Groups (Simple FIFO Approach)
+            // Form Teams From Groups (Using TMR-Aware Grouping)
             List<MatchmakingTeam> teams = FormTeams(typeGroups, playersPerTeam);
 
-            // Pair Teams Into Matches
-            for (int teamIndex = 0; teamIndex + 1 < teams.Count; teamIndex += 2)
+            // Sort Teams By Effective Rating For Better Matching (Power Mean + Premade Bonus)
+            teams = [.. teams.OrderBy(team => team.EffectiveTeamRating)];
+
+            // Pair Teams Into Matches (Matching Adjacent Teams By TMR)
+            HashSet<int> matchedTeamIndices = [];
+
+            for (int teamIndex = 0; teamIndex < teams.Count; teamIndex++)
             {
+                if (matchedTeamIndices.Contains(teamIndex))
+                    continue;
+
                 MatchmakingTeam legionTeam = teams[teamIndex];
-                MatchmakingTeam hellbourneTeam = teams[teamIndex + 1];
 
-                if (legionTeam.IsCompatibleWith(hellbourneTeam))
+                // Find The Best Opponent From Remaining Teams
+                MatchmakingTeam? bestOpponent = null;
+                int bestOpponentIndex = -1;
+                double bestTMRDifference = double.MaxValue;
+
+                for (int opponentIndex = teamIndex + 1; opponentIndex < teams.Count; opponentIndex++)
                 {
-                    MatchmakingMatch match = MatchmakingMatch.FromTeams(legionTeam, hellbourneTeam);
+                    if (matchedTeamIndices.Contains(opponentIndex))
+                        continue;
 
-                    // Set Match Details From First Group's Information
-                    MatchmakingGroupInformation information = legionTeam.Groups[0].Information;
-                    match.GameType = gameType;
-                    match.SelectedMap = information.MapName;
-                    match.SelectedMode = information.GameModes.Length > 0 ? information.GameModes[0] : "ap";
-                    match.SelectedRegion = information.GameRegions.Length > 0 ? information.GameRegions[0] : "NEWERTH";
-                    match.IsRanked = information.Ranked;
-                    match.CombineMethod = MatchmakingCombineMethod.FirstInFirstOut;
+                    MatchmakingTeam candidateOpponent = teams[opponentIndex];
 
-                    matches.Add(match);
+                    if (legionTeam.IsCompatibleWith(candidateOpponent) is false)
+                        continue;
 
-                    Log.Information(
-                        @"Match Created: GUID={MatchGUID}, GameType={GameType}, Legion={LegionCount} Players (Avg TMR: {LegionTMR:F1}), Hellbourne={HellbourneCount} Players (Avg TMR: {HellbourneTMR:F1}), Prediction={Prediction:P1}",
-                        match.GUID,
-                        gameType,
-                        match.LegionTeam.PlayerCount,
-                        match.LegionTeam.AverageTMR,
-                        match.HellbourneTeam.PlayerCount,
-                        match.HellbourneTeam.AverageTMR,
-                        match.MatchupPrediction);
+                    // Calculate TMR Difference Using Effective Rating (Power Mean + Premade Bonus)
+                    double tmrDifference = Math.Abs(legionTeam.EffectiveTeamRating - candidateOpponent.EffectiveTeamRating);
+
+                    // Get Maximum Acceptable TMR Spread Based On Queue Time
+                    double maxAcceptableSpread = GetMaxAcceptableTMRSpread(legionTeam, candidateOpponent, maxTMRDifference);
+
+                    if (tmrDifference > maxAcceptableSpread)
+                        continue;
+
+                    // Check Group Makeup Difference (Enforce Fairness)
+                    int groupMakeupDifference = Math.Abs(legionTeam.GroupMakeup - candidateOpponent.GroupMakeup);
+                    if (groupMakeupDifference > 2)
+                    {
+                        Log.Debug(@"Skipping Match Due To Group Makeup Mismatch: {Legion} vs {Hellbourne} (Diff: {Diff})",
+                            legionTeam.GroupMakeupString, candidateOpponent.GroupMakeupString, groupMakeupDifference);
+                        continue;
+                    }
+
+                    // Check For +0/-1 Rating Outcomes (Frustrating For High-Rated Players)
+                    if (ProducesPlusZeroMinusOne(legionTeam) || ProducesPlusZeroMinusOne(candidateOpponent))
+                    {
+                        Log.Debug(@"Skipping Match Due To +0/-1 Rating Outcome Risk");
+                        continue;
+                    }
+
+                    if (tmrDifference < bestTMRDifference)
+                    {
+                        bestOpponent = candidateOpponent;
+                        bestOpponentIndex = opponentIndex;
+                        bestTMRDifference = tmrDifference;
+                    }
                 }
+
+                if (bestOpponent is null)
+                    continue;
+
+                // Mark Both Teams As Matched
+                matchedTeamIndices.Add(teamIndex);
+                matchedTeamIndices.Add(bestOpponentIndex);
+
+                // Create The Match
+                MatchmakingMatch match = MatchmakingMatch.FromTeams(legionTeam, bestOpponent);
+
+                // Set Match Details From First Group's Information
+                MatchmakingGroupInformation information = legionTeam.Groups[0].Information;
+                match.GameType = gameType;
+                match.SelectedMap = information.MapName;
+                match.SelectedMode = information.GameModes.Length > 0 ? information.GameModes[0] : "ap";
+                match.SelectedRegion = information.GameRegions.Length > 0 ? information.GameRegions[0] : "NEWERTH";
+                match.IsRanked = information.Ranked;
+                match.CombineMethod = MatchmakingCombineMethod.FirstInFirstOut;
+
+                matches.Add(match);
+
+                Log.Information(
+                    @"Match Created: GUID={MatchGUID}, GameType={GameType}, Legion={LegionCount}p ({LegionMakeup}, Eff: {LegionTMR:F1}), Hellbourne={HellbourneCount}p ({HellbourneMakeup}, Eff: {HellbourneTMR:F1}), Diff={TMRDiff:F1}, Prediction={Prediction:P1}",
+                    match.GUID,
+                    gameType,
+                    match.LegionTeam.PlayerCount,
+                    match.LegionTeam.GroupMakeupString,
+                    match.LegionTeam.EffectiveTeamRating,
+                    match.HellbourneTeam.PlayerCount,
+                    match.HellbourneTeam.GroupMakeupString,
+                    match.HellbourneTeam.EffectiveTeamRating,
+                    bestTMRDifference,
+                    match.MatchupPrediction);
             }
         }
 
@@ -183,42 +247,156 @@ public class MatchmakingService : BackgroundService, IDisposable
     }
 
     /// <summary>
-    ///     Forms teams from groups using simple first-in-first-out approach.
-    ///     Groups are combined until the team reaches the target player count.
+    ///     Gets the maximum acceptable TMR spread for matching two teams.
+    ///     Uses the adaptive spread based on the longest-waiting group.
+    /// </summary>
+    private static double GetMaxAcceptableTMRSpread(MatchmakingTeam team1, MatchmakingTeam team2, double baseMaxDifference)
+    {
+        // Get The Longest Queue Time From Either Team
+        double longestQueueMinutes = Math.Max(
+            team1.Groups.Max(group => group.QueuedTimeInMinutes),
+            team2.Groups.Max(group => group.QueuedTimeInMinutes));
+
+        // Base Spread Starts At Config Value
+        double spread = baseMaxDifference;
+
+        // Expand By 50 TMR Per Minute After 2 Minutes Of Waiting
+        if (longestQueueMinutes > 2.0)
+        {
+            spread += (longestQueueMinutes - 2.0) * 50.0;
+        }
+
+        // Cap At A Reasonable Maximum (1000 TMR Difference)
+        return Math.Min(spread, 1000.0);
+    }
+
+    /// <summary>
+    ///     Checks if a team would produce "+0/-1" rating outcomes.
+    ///     This happens when the highest-rated player is so far above their teammates
+    ///     that they would gain 0 MMR for winning but lose MMR for losing.
+    ///     KONGOR Reference: GameFinder.cs Lines 1149-1157
+    /// </summary>
+    /// <param name="team">The team to check.</param>
+    /// <returns>TRUE if the team would produce +0/-1 outcomes, FALSE otherwise.</returns>
+    private static bool ProducesPlusZeroMinusOne(MatchmakingTeam team)
+    {
+        int teamSize = team.TeamSize;
+        int playerCount = team.PlayerCount;
+
+        // Only Applies To Full Teams With More Than 1 Player
+        if (playerCount != teamSize || teamSize <= 1)
+            return false;
+
+        double totalTMR = team.TotalTMR;
+        double highestTMR = team.HighestTMR;
+
+        // Calculate The Combined TMR Of The Bottom N-1 Players
+        double bottomMembersTMR = totalTMR - highestTMR;
+
+        // If The Highest Player Is More Than 151 Above The Average Of The Rest, Reject
+        // A Difference Of 200 Produces +0/-1 Outcomes, So We Use 151 As The Threshold
+        double averageOfOthers = bottomMembersTMR / (teamSize - 1);
+        double difference = highestTMR - averageOfOthers;
+
+        return difference > 151.0;
+    }
+
+    /// <summary>
+    ///     Forms teams from groups using HON's phased combine method.
+    ///     Prioritizes full teams first, then larger group combinations, then smaller.
+    ///     HON Reference: c_matchmaker.cpp ETMMCombineMethod enum
     /// </summary>
     private static List<MatchmakingTeam> FormTeams(List<MatchmakingGroup> groups, int playersPerTeam)
     {
         List<MatchmakingTeam> teams = [];
         List<MatchmakingGroup> availableGroups = [.. groups.Where(group => group.MatchedUp is false)];
 
-        while (availableGroups.Count > 0)
+        // Phase 1: Full Teams (5-Stacks For 5v5)
+        teams.AddRange(FormTeamsWithPattern(availableGroups, playersPerTeam, [playersPerTeam]));
+
+        // Phase 2: Two-Group Combinations (Largest First)
+        if (playersPerTeam == 5)
+        {
+            teams.AddRange(FormTeamsWithPattern(availableGroups, playersPerTeam, [4, 1])); // 4+1
+            teams.AddRange(FormTeamsWithPattern(availableGroups, playersPerTeam, [3, 2])); // 3+2
+        }
+        else if (playersPerTeam == 3)
+        {
+            teams.AddRange(FormTeamsWithPattern(availableGroups, playersPerTeam, [2, 1])); // 2+1
+        }
+
+        // Phase 3: Three-Group Combinations
+        if (playersPerTeam == 5)
+        {
+            teams.AddRange(FormTeamsWithPattern(availableGroups, playersPerTeam, [3, 1, 1])); // 3+1+1
+            teams.AddRange(FormTeamsWithPattern(availableGroups, playersPerTeam, [2, 2, 1])); // 2+2+1
+        }
+
+        // Phase 4: Four-Group Combinations
+        if (playersPerTeam == 5)
+        {
+            teams.AddRange(FormTeamsWithPattern(availableGroups, playersPerTeam, [2, 1, 1, 1])); // 2+1+1+1
+        }
+
+        // Phase 5: All Solo Players
+        teams.AddRange(FormTeamsWithPattern(availableGroups, playersPerTeam, Enumerable.Repeat(1, playersPerTeam).ToArray()));
+
+        return teams;
+    }
+
+    /// <summary>
+    ///     Forms teams matching a specific group size pattern.
+    ///     For example, pattern [4, 1] looks for a 4-player group and a 1-player group.
+    /// </summary>
+    private static List<MatchmakingTeam> FormTeamsWithPattern(List<MatchmakingGroup> availableGroups, int playersPerTeam, int[] pattern)
+    {
+        List<MatchmakingTeam> teams = [];
+
+        // Sort Pattern Descending For Greedy Matching
+        int[] sortedPattern = [.. pattern.OrderByDescending(size => size)];
+
+        while (true)
         {
             List<MatchmakingGroup> teamGroups = [];
-            int currentPlayerCount = 0;
+            List<MatchmakingGroup> usedGroups = [];
 
-            // Add Groups Until We Reach The Target Player Count
-            foreach (MatchmakingGroup group in availableGroups.ToList())
+            // Try To Find Groups Matching Each Size In The Pattern
+            foreach (int requiredSize in sortedPattern)
             {
-                if (currentPlayerCount + group.Members.Count <= playersPerTeam)
-                {
-                    teamGroups.Add(group);
-                    currentPlayerCount += group.Members.Count;
-                    availableGroups.Remove(group);
+                // Find A Group With Exactly This Size (That Hasn't Been Used Yet)
+                MatchmakingGroup? matchingGroup = availableGroups
+                    .Except(usedGroups)
+                    .Where(group => group.Members.Count == requiredSize)
+                    .OrderBy(group => group.QueueStartTime) // FIFO Within Same Size
+                    .FirstOrDefault();
 
-                    if (currentPlayerCount == playersPerTeam)
-                        break;
-                }
+                if (matchingGroup is null)
+                    break; // Can't Complete This Pattern
+
+                teamGroups.Add(matchingGroup);
+                usedGroups.Add(matchingGroup);
             }
 
-            // Only Create A Team If We Have The Full Player Count
-            if (currentPlayerCount == playersPerTeam)
+            // Check If We Found A Complete Pattern
+            if (teamGroups.Count == sortedPattern.Length && teamGroups.Sum(group => group.Members.Count) == playersPerTeam)
             {
+                // Create The Team
                 MatchmakingTeam team = MatchmakingTeam.FromGroups(teamGroups, playersPerTeam);
                 teams.Add(team);
+
+                // Remove Used Groups From Available Pool
+                foreach (MatchmakingGroup group in teamGroups)
+                    availableGroups.Remove(group);
+
+                // Track Combine Method
+                string patternString = string.Join("+", sortedPattern);
+
+                Log.Debug(@"Formed Team With Pattern {Pattern}: {GroupCount} Groups, {PlayerCount} Players",
+                    patternString, teamGroups.Count, team.PlayerCount);
             }
             else
             {
-                // Not Enough Players To Form A Full Team, Return Groups To Pool
+                // Can't Form More Teams With This Pattern
                 break;
             }
         }
@@ -265,8 +443,10 @@ public class MatchmakingService : BackgroundService, IDisposable
         // Send Player Notifications Immediately
         // The CorrelationID Is Used As A Temporary Match ID Until The Real One Is Assigned
         // The Game Server Will Accept Connections Based On Account ID, Not Match ID
-        SendMatchFoundUpdate(match, match.CorrelationID);
+        // KONGOR Reference: GameFinder.cs Lines 1937-1939
+        // Order: FoundServer (Triggers Sound) → MatchFoundUpdate → AutoMatchConnect
         SendFoundServerUpdate(match);
+        SendMatchFoundUpdate(match, match.CorrelationID);
         SendAutoMatchConnect(match, match.CorrelationID, server.IPAddress, (ushort)server.Port);
 
         // Mark All Members As In-Game
