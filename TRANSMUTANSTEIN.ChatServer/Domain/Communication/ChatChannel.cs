@@ -6,11 +6,16 @@ public class ChatChannel
 
     public required string Name { get; set; }
 
-    public string Topic => $"Welcome To The {Name} Channel !";
+    public string Topic { get; set; } = string.Empty;
 
     public required ChatProtocol.ChatChannelType Flags { get; set; }
 
     public ConcurrentDictionary<string, ChatChannelMember> Members { get; set; } = [];
+
+    /// <summary>
+    ///     Set of account IDs banned from this channel.
+    /// </summary>
+    public HashSet<int> BannedAccountIDs { get; set; } = [];
 
     /// <summary>
     ///     Channel password for access control.
@@ -37,7 +42,12 @@ public class ChatChannel
             ? ChatProtocol.ChatChannelType.CHAT_CHANNEL_FLAG_RESERVED | ChatProtocol.ChatChannelType.CHAT_CHANNEL_FLAG_CLAN
             : ChatProtocol.ChatChannelType.CHAT_CHANNEL_FLAG_RESERVED | ChatProtocol.ChatChannelType.CHAT_CHANNEL_FLAG_PERMANENT;
 
-        ChatChannel channel = Context.ChatChannels.GetOrAdd(channelName, new ChatChannel { Name = channelName, Flags = chatChannelType });
+        ChatChannel channel = Context.ChatChannels.GetOrAdd(channelName, new ChatChannel
+        {
+            Name = channelName,
+            Flags = chatChannelType,
+            Topic = $"Welcome To The {channelName} Channel !"
+        });
 
         return channel;
     }
@@ -124,6 +134,19 @@ public class ChatChannel
         {
             // Legacy Behavior: No Error Message Sent To Client (Silent Rejection)
             // TODO: Send Error Response To Client Indicating They Cannot Join This Clan Channel
+
+            return this;
+        }
+
+        // Reject Join Request If Client Is Banned From The Channel
+        if (BannedAccountIDs.Contains(session.Account.ID))
+        {
+            ChatBuffer banned = new ();
+
+            banned.WriteCommand(ChatProtocol.Command.CHAT_CMD_CHANNEL_IS_BANNED);
+            banned.WriteString(Name);
+
+            session.Send(banned);
 
             return this;
         }
@@ -425,6 +448,174 @@ public class ChatChannel
         broadcast.WriteString(session.Account.NameWithClanTag); // Password Setter's Name
 
         // Broadcast Password Change To All Channel Members
+        BroadcastMessage(broadcast);
+    }
+
+    /// <summary>
+    ///     Sets the channel topic and broadcasts the change to all members.
+    ///     C++ reference: <c>c_channel.cpp:62</c> — <c>CChannel::SetTopic</c>.
+    /// </summary>
+    public void SetTopic(ClientChatSession requesterSession, string topic)
+    {
+        if (Members.TryGetValue(requesterSession.Account.Name, out ChatChannelMember? member) is false)
+            return;
+
+        // C++ Reference: Requires At Least Officer Level
+        if (member.AdministratorLevel < ChatProtocol.AdminLevel.CHAT_CLIENT_ADMIN_OFFICER)
+            return;
+
+        string truncatedTopic = topic.Length > ChatProtocol.CHAT_CHANNEL_TOPIC_MAX_LENGTH
+            ? topic[..ChatProtocol.CHAT_CHANNEL_TOPIC_MAX_LENGTH]
+            : topic;
+
+        if (Topic == truncatedTopic)
+            return;
+
+        Topic = truncatedTopic;
+
+        ChatBuffer broadcast = new ();
+
+        broadcast.WriteCommand(ChatProtocol.Command.CHAT_CMD_CHANNEL_TOPIC);
+        broadcast.WriteInt32(ID);
+        broadcast.WriteString(Topic);
+
+        BroadcastMessage(broadcast);
+    }
+
+    /// <summary>
+    ///     Bans a player from the channel, removing them if present.
+    ///     C++ reference: <c>c_channel.cpp:642</c> — <c>CChannel::Ban</c>.
+    /// </summary>
+    public void Ban(ClientChatSession requesterSession, string targetName)
+    {
+        if (Members.TryGetValue(requesterSession.Account.Name, out ChatChannelMember? requester) is false)
+            return;
+
+        ClientChatSession? targetSession = Context.ClientChatSessions.Values
+            .SingleOrDefault(chatSession => chatSession.Account.Name.Equals(targetName, StringComparison.OrdinalIgnoreCase));
+
+        if (targetSession is null)
+            return;
+
+        // Check Admin Level (Target May Or May Not Be In The Channel)
+        ChatChannelMember? target = Members.Values
+            .SingleOrDefault(member => member.Account.ID == targetSession.Account.ID);
+
+        if (target is not null && requester.HasHigherAdministratorLevelThan(target) is false)
+            return;
+
+        // Already Banned
+        if (BannedAccountIDs.Add(targetSession.Account.ID) is false)
+            return;
+
+        // Remove From Channel If Present
+        if (target is not null)
+            Leave(targetSession);
+
+        ChatBuffer broadcast = new ();
+
+        broadcast.WriteCommand(ChatProtocol.Command.CHAT_CMD_CHANNEL_BAN);
+        broadcast.WriteInt32(ID);
+        broadcast.WriteInt32(requesterSession.Account.ID);
+        broadcast.WriteString(targetSession.Account.Name);
+
+        BroadcastMessage(broadcast);
+
+        // Notify The Banned Player Individually (They Were Already Removed From The Channel)
+        if (targetSession.Metadata.ClientChatModeState is not ChatProtocol.ChatModeType.CHAT_MODE_DND)
+            targetSession.Send(broadcast);
+    }
+
+    /// <summary>
+    ///     Lifts a ban on a player.
+    ///     C++ reference: <c>c_channel.cpp:676</c> — <c>CChannel::LiftBan</c>.
+    /// </summary>
+    public void LiftBan(ClientChatSession requesterSession, string targetName)
+    {
+        if (Members.TryGetValue(requesterSession.Account.Name, out ChatChannelMember? requester) is false)
+            return;
+
+        // C++ Reference: Requires At Least Officer Level
+        if (requester.AdministratorLevel < ChatProtocol.AdminLevel.CHAT_CLIENT_ADMIN_OFFICER)
+            return;
+
+        ClientChatSession? targetSession = Context.ClientChatSessions.Values
+            .SingleOrDefault(chatSession => chatSession.Account.Name.Equals(targetName, StringComparison.OrdinalIgnoreCase));
+
+        if (targetSession is null)
+            return;
+
+        if (BannedAccountIDs.Remove(targetSession.Account.ID) is false)
+            return;
+
+        ChatBuffer broadcast = new ();
+
+        broadcast.WriteCommand(ChatProtocol.Command.CHAT_CMD_CHANNEL_UNBAN);
+        broadcast.WriteInt32(ID);
+        broadcast.WriteInt32(requesterSession.Account.ID);
+        broadcast.WriteString(targetSession.Account.Name);
+
+        BroadcastMessage(broadcast);
+
+        // Notify The Unbanned Player Individually
+        if (targetSession.Metadata.ClientChatModeState is not ChatProtocol.ChatModeType.CHAT_MODE_DND)
+            targetSession.Send(broadcast);
+    }
+
+    /// <summary>
+    ///     Promotes a member's admin level in this channel.
+    ///     C++ reference: <c>c_channel.cpp:547</c> — <c>CChannel::Promote</c>.
+    /// </summary>
+    public void Promote(ClientChatSession requesterSession, int targetAccountID)
+    {
+        if (Members.TryGetValue(requesterSession.Account.Name, out ChatChannelMember? requester) is false)
+            return;
+
+        ChatChannelMember? target = Members.Values
+            .SingleOrDefault(member => member.Account.ID == targetAccountID);
+
+        if (target is null)
+            return;
+
+        // C++ Reference: Source Must Be Greater Than Target + 1 (i.e. At Least Two Levels Above)
+        if (requester.HasHigherAdministratorLevelThan(target) is false)
+            return;
+
+        ChatBuffer broadcast = new ();
+
+        broadcast.WriteCommand(ChatProtocol.Command.CHAT_CMD_CHANNEL_PROMOTE);
+        broadcast.WriteInt32(ID);
+        broadcast.WriteInt32(targetAccountID);
+        broadcast.WriteInt32(requesterSession.Account.ID);
+
+        BroadcastMessage(broadcast);
+    }
+
+    /// <summary>
+    ///     Demotes a member's admin level in this channel.
+    ///     C++ reference: <c>c_channel.cpp:513</c> — <c>CChannel::Demote</c>.
+    /// </summary>
+    public void Demote(ClientChatSession requesterSession, int targetAccountID)
+    {
+        if (Members.TryGetValue(requesterSession.Account.Name, out ChatChannelMember? requester) is false)
+            return;
+
+        ChatChannelMember? target = Members.Values
+            .SingleOrDefault(member => member.Account.ID == targetAccountID);
+
+        if (target is null)
+            return;
+
+        if (requester.HasHigherAdministratorLevelThan(target) is false)
+            return;
+
+        ChatBuffer broadcast = new ();
+
+        broadcast.WriteCommand(ChatProtocol.Command.CHAT_CMD_CHANNEL_DEMOTE);
+        broadcast.WriteInt32(ID);
+        broadcast.WriteInt32(targetAccountID);
+        broadcast.WriteInt32(requesterSession.Account.ID);
+
         BroadcastMessage(broadcast);
     }
 }
