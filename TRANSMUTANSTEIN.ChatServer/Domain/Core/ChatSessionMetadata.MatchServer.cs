@@ -20,6 +20,12 @@ public class MatchServerChatSessionMetadata
     public int? SlaveID { get; set; }
 
     // Current Match State
+
+    /// <summary>
+    ///     The match ID of the currently active match on this game server.
+    ///     Populated by NET_CHAT_GS_STATUS updates from the game server.
+    ///     A value of -1 (the default) means no match has been announced yet.
+    /// </summary>
     public int MatchID { get; set; } = -1;
 
     public string? MapName { get; set; }

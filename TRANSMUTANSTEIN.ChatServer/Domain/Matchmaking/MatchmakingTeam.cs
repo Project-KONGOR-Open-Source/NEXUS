@@ -83,6 +83,7 @@ public class MatchmakingTeam
     /// <summary>
     ///     Calculates the power mean (generalized mean) of team member ratings.
     ///     Uses HON's teamRankWeighting exponent of 6.5.
+    ///     C++ reference: <c>c_match.cpp:157</c> — <c>INT_ROUND(pow(fRating, 1.0f / matchmaker_teamRankWeighting))</c>.
     /// </summary>
     private double CalculatePowerMeanTMR()
     {
@@ -94,8 +95,8 @@ public class MatchmakingTeam
         // Sum Of (Rating ^ Exponent)
         double sum = members.Sum(member => Math.Pow(member.TMR, TeamRankWeighting));
 
-        // Take The Nth Root: (Sum) ^ (1 / Exponent)
-        return Math.Pow(sum, 1.0 / TeamRankWeighting);
+        // Take The Nth Root And Round To Nearest Integer (Matches C++ INT_ROUND Behaviour)
+        return Math.Round(Math.Pow(sum, 1.0 / TeamRankWeighting));
     }
 
     /// <summary>

@@ -215,7 +215,7 @@ public class MatchmakingService : BackgroundService, IDisposable
                 matchedTeamIndices.Add(bestOpponentIndex);
 
                 // Create The Match
-                MatchmakingMatch match = MatchmakingMatch.FromTeams(legionTeam, bestOpponent);
+                MatchmakingMatch match = MatchmakingMatch.FromTeams(legionTeam, bestOpponent, _settings.Value.LogisticPredictionScale);
 
                 // Set Match Details From First Group's Information
                 MatchmakingGroupInformation information = legionTeam.Groups[0].Information;

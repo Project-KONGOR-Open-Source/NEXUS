@@ -55,8 +55,9 @@ public class MatchmakingSettings
 
     /// <summary>
     ///     The logistic prediction scale factor for ELO-based win probability calculations.
+    ///     C++ reference: <c>c_match.cpp:26</c> — <c>matchmaker_logisticPredictionScale = 80.0f</c>.
     /// </summary>
-    public double LogisticPredictionScale { get; set; } = 225.0;
+    public double LogisticPredictionScale { get; set; } = 80.0;
 
     /// <summary>
     ///     The base K-factor for MMR change calculations.

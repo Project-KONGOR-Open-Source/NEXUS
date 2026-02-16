@@ -159,13 +159,13 @@ public class MatchmakingMatch
     ///     Returns the probability that Legion (team 1) wins.
     ///     C++ reference: <c>c_match.cpp:170</c> — <c>1.0f / (1.0f + pow(M_E, -(fTeamRating - fOtherTeamRating) / matchmaker_logisticPredictionScale))</c>.
     /// </summary>
-    public static double CalculateMatchupPrediction(double legionTMR, double hellbourneTMR, double scale = 225.0)
+    public static double CalculateMatchupPrediction(double legionTMR, double hellbourneTMR, double scale = 80.0)
         => 1.0 / (1.0 + Math.Exp(-(legionTMR - hellbourneTMR) / scale));
 
     /// <summary>
     ///     Creates a match from two teams and calculates the matchup prediction.
     /// </summary>
-    public static MatchmakingMatch FromTeams(MatchmakingTeam legionTeam, MatchmakingTeam hellbourneTeam)
+    public static MatchmakingMatch FromTeams(MatchmakingTeam legionTeam, MatchmakingTeam hellbourneTeam, double logisticPredictionScale = 80.0)
     {
         MatchmakingMatch match = new ()
         {
@@ -174,7 +174,7 @@ public class MatchmakingMatch
         };
 
         // Calculate Matchup Prediction Using Effective Team Rating (Power Mean + Premade Bonus)
-        match.MatchupPrediction = CalculateMatchupPrediction(legionTeam.EffectiveTeamRating, hellbourneTeam.EffectiveTeamRating);
+        match.MatchupPrediction = CalculateMatchupPrediction(legionTeam.EffectiveTeamRating, hellbourneTeam.EffectiveTeamRating, logisticPredictionScale);
 
         // Check For Mismatched Group Makeup
         match.MismatchedGroupMakeup = Math.Abs(legionTeam.GroupMakeup - hellbourneTeam.GroupMakeup) > 2;
