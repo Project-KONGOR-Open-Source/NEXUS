@@ -17,7 +17,11 @@ public class GroupKick : ISynchronousCommandProcessor<ClientChatSession>
             return;
         }
 
-        group.KickMember(requestData.KickTargetAccountID);
+        // C++ Reference: HandleRequestKickTMMPlayer — Leader Cannot Kick Themselves
+        if (group.Members.Any(member => member.Account.ID == session.Account.ID && member.Slot == requestData.KickTargetTeamSlot))
+            return;
+
+        group.KickMemberBySlot(requestData.KickTargetTeamSlot);
     }
 }
 
@@ -25,11 +29,15 @@ file class GroupKickRequestData
 {
     public byte[] CommandBytes { get; init; }
 
-    public int KickTargetAccountID { get; init; }
+    /// <summary>
+    ///     The team slot of the member to kick.
+    ///     C++ reference: <c>c_client.cpp:3007</c> — <c>const byte yTeamSlot(pktRecv.ReadByte());</c>.
+    /// </summary>
+    public byte KickTargetTeamSlot { get; init; }
 
     public GroupKickRequestData(ChatBuffer buffer)
     {
         CommandBytes = buffer.ReadCommandBytes();
-        KickTargetAccountID = buffer.ReadInt32();
+        KickTargetTeamSlot = buffer.ReadInt8();
     }
 }

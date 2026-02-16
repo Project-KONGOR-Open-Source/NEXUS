@@ -567,18 +567,29 @@ public class MatchmakingGroup
 
         if (fullGroupUpdate)
         {
-            MatchmakingGroupMember? emitter = Members.SingleOrDefault(member => member.Account.ID == emitterAccountID);
+            // C++ Reference: c_teamfinder.cpp:3660-3685 — Per-recipient buddy data.
+            // The shared buffer is built once, then for each recipient the buffer is truncated
+            // back to the shared length and per-recipient buddy flags are appended.
+            long sharedBufferLength = update.Size;
 
-            foreach (MatchmakingGroupMember member in Members)
+            foreach (MatchmakingGroupMember recipient in Members)
             {
-                // Determine Friendship Status From The Emitter's Perspective
-                bool isFriend = emitter?.Session.IsFriendOrClanMember(member.Account.ID) ?? false;
-                update.WriteBool(isFriend);                                              // Is Friend
+                update.Resize(sharedBufferLength);
+
+                foreach (MatchmakingGroupMember member in Members)
+                {
+                    bool isFriend = recipient.Session.IsFriendOrClanMember(member.Account.ID);
+                    update.WriteBool(isFriend);
+                }
+
+                recipient.Session.Send(update);
             }
         }
-
-        foreach (MatchmakingGroupMember member in Members)
-            member.Session.Send(update);
+        else
+        {
+            foreach (MatchmakingGroupMember member in Members)
+                member.Session.Send(update);
+        }
     }
 
     /// <summary>
@@ -657,6 +668,24 @@ public class MatchmakingGroup
     ///     Removes the specified member from the group and records the action as a kick.
     /// </summary>
     public void KickMember(int accountID) => RemoveMember(accountID, kick: true);
+
+    /// <summary>
+    ///     Removes the member at the specified team slot from the group and records the action as a kick.
+    ///     C++ reference: <c>c_teamfinder.cpp</c> — <c>RemovePlayerFromGroup(yTeamSlot, groupID, isBotGroup)</c>.
+    /// </summary>
+    public void KickMemberBySlot(byte teamSlot)
+    {
+        MatchmakingGroupMember? memberToKick = Members.SingleOrDefault(member => member.Slot == teamSlot);
+
+        if (memberToKick is null)
+        {
+            Log.Warning(@"Attempted To Kick Non-Existent Slot {TeamSlot} From Matchmaking Group GUID ""{GroupGUID}""", teamSlot, GUID);
+
+            return;
+        }
+
+        RemoveMember(memberToKick.Account.ID, kick: true);
+    }
 
     /// <summary>
     ///     Reassigns team slots to all group members sequentially based on current member order.

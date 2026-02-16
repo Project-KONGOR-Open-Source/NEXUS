@@ -60,9 +60,8 @@ public class MatchAnnounce(IDatabase distributedCacheStore) : IAsynchronousComma
             Log.Warning(@"Could Not Create MatchInformation: Server Not Found For ServerID {ServerID}", pendingMatch.AssignedServerID);
         }
 
-        // Send Notifications To All Players
-        SendMatchFoundUpdate(pendingMatch, matchID);
-        SendFoundServerUpdate(pendingMatch);
+        // Send AutoMatchConnect To All Players (C++ AnnounceMatchReady)
+        // MatchFoundUpdate And FoundServerUpdate Were Already Sent From SpawnMatch
         SendAutoMatchConnect(pendingMatch, matchID, serverAddress, serverPort);
 
         // Mark All Members As In-Game
@@ -83,53 +82,11 @@ public class MatchAnnounce(IDatabase distributedCacheStore) : IAsynchronousComma
     }
 
     /// <summary>
-    ///     Sends MatchFoundUpdate (0x0D09) to all players in a match.
-    /// </summary>
-    private static void SendMatchFoundUpdate(MatchmakingMatch match, int matchID)
-    {
-        ChatBuffer matchFound = new();
-
-        matchFound.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_MATCH_FOUND_UPDATE);
-        matchFound.WriteString(match.SelectedMap);
-        matchFound.WriteInt8(Convert.ToByte(match.LegionTeam.TeamSize));
-        matchFound.WriteInt8(Convert.ToByte(match.GameType));
-        matchFound.WriteString(match.SelectedMode);
-        matchFound.WriteString(match.SelectedRegion);
-        matchFound.WriteString($"Match #{matchID}");
-
-        foreach (MatchmakingGroupMember member in match.GetAllPlayers())
-            member.Session.Send(matchFound);
-    }
-
-    /// <summary>
-    ///     Sends GroupQueueUpdate type=16 (TMM_GROUP_FOUND_SERVER) to all players.
-    /// </summary>
-    private static void SendFoundServerUpdate(MatchmakingMatch match)
-    {
-        ChatBuffer found = new();
-
-        found.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_QUEUE_UPDATE);
-        found.WriteInt8(Convert.ToByte(ChatProtocol.TMMUpdateType.TMM_GROUP_FOUND_SERVER));
-
-        foreach (MatchmakingGroupMember member in match.GetAllPlayers())
-            member.Session.Send(found);
-    }
-
-    /// <summary>
     ///     Sends AutoMatchConnect (0x0062) to all players with server connection details.
     /// </summary>
     private static void SendAutoMatchConnect(MatchmakingMatch match, int matchID, string serverAddress, ushort serverPort)
     {
-        byte arrangedMatchType = match.GameType switch
-        {
-            ChatProtocol.TMMGameType.TMM_GAME_TYPE_NORMAL          => (byte)MatchType.AM_MATCHMAKING,
-            ChatProtocol.TMMGameType.TMM_GAME_TYPE_CASUAL          => (byte)MatchType.AM_UNRANKED_MATCHMAKING,
-            ChatProtocol.TMMGameType.TMM_GAME_TYPE_MIDWARS         => (byte)MatchType.AM_MATCHMAKING_MIDWARS,
-            ChatProtocol.TMMGameType.TMM_GAME_TYPE_RIFTWARS        => (byte)MatchType.AM_MATCHMAKING_RIFTWARS,
-            ChatProtocol.TMMGameType.TMM_GAME_TYPE_CAMPAIGN_NORMAL => (byte)MatchType.AM_MATCHMAKING_CAMPAIGN,
-            ChatProtocol.TMMGameType.TMM_GAME_TYPE_CAMPAIGN_CASUAL => (byte)MatchType.AM_MATCHMAKING_CAMPAIGN,
-            _                                                      => (byte)MatchType.AM_MATCHMAKING
-        };
+        byte arrangedMatchType = (byte)match.ArrangedMatchType;
 
         ChatBuffer connect = new();
 

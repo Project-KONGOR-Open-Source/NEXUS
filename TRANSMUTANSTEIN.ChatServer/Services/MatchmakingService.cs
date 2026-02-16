@@ -440,14 +440,12 @@ public class MatchmakingService : BackgroundService, IDisposable
             match.ServerAddress,
             match.ServerPort);
 
-        // Send Player Notifications Immediately
-        // The CorrelationID Is Used As A Temporary Match ID Until The Real One Is Assigned
-        // The Game Server Will Accept Connections Based On Account ID, Not Match ID
-        // KONGOR Reference: GameFinder.cs Lines 1937-1939
-        // Order: FoundServer (Triggers Sound) → MatchFoundUpdate → AutoMatchConnect
-        SendFoundServerUpdate(match);
+        // Send Player Notifications
+        // C++ Reference: CTeamFinder::SpawnMatch sends MatchFoundUpdate before StartRemoteMatch,
+        // then StartRemoteMatch sends FoundServer after CreateMatch is sent to the game server.
+        // AutoMatchConnect is NOT sent here — it is sent later from MatchAnnounce when the server responds.
         SendMatchFoundUpdate(match, match.CorrelationID);
-        SendAutoMatchConnect(match, match.CorrelationID, server.IPAddress, (ushort)server.Port);
+        SendFoundServerUpdate(match);
 
         // Mark All Members As In-Game
         foreach (MatchmakingGroup group in match.GetAllGroups())
@@ -474,17 +472,8 @@ public class MatchmakingService : BackgroundService, IDisposable
     /// </summary>
     private static void SendCreateMatch(MatchmakingMatch match, MatchServerChatSession serverSession)
     {
-        // Determine Match Type (Uses MatchType Enum Values)
-        byte matchType = match.GameType switch
-        {
-            ChatProtocol.TMMGameType.TMM_GAME_TYPE_NORMAL          => (byte)MatchType.AM_MATCHMAKING,
-            ChatProtocol.TMMGameType.TMM_GAME_TYPE_CASUAL          => (byte)MatchType.AM_UNRANKED_MATCHMAKING,
-            ChatProtocol.TMMGameType.TMM_GAME_TYPE_MIDWARS         => (byte)MatchType.AM_MATCHMAKING_MIDWARS,
-            ChatProtocol.TMMGameType.TMM_GAME_TYPE_RIFTWARS        => (byte)MatchType.AM_MATCHMAKING_RIFTWARS,
-            ChatProtocol.TMMGameType.TMM_GAME_TYPE_CAMPAIGN_NORMAL => (byte)MatchType.AM_MATCHMAKING_CAMPAIGN,
-            ChatProtocol.TMMGameType.TMM_GAME_TYPE_CAMPAIGN_CASUAL => (byte)MatchType.AM_MATCHMAKING_CAMPAIGN,
-            _                                                      => (byte)MatchType.AM_MATCHMAKING
-        };
+        // Determine Match Type Using The Centralised Mapping On MatchmakingMatch
+        byte matchType = (byte)match.ArrangedMatchType;
 
         // Build Match Settings String (Must Match C++ Format Exactly)
         // Format: mode:<mode> map:<mapname> teamsize:<size> allheroes:true noleaver:true spectators:<count>
@@ -585,17 +574,8 @@ public class MatchmakingService : BackgroundService, IDisposable
     /// </summary>
     public static MatchInformation CreateMatchInformation(MatchmakingMatch match, MatchServer server, int matchID)
     {
-        // Determine Match Type
-        MatchType matchType = match.GameType switch
-        {
-            ChatProtocol.TMMGameType.TMM_GAME_TYPE_NORMAL          => MatchType.AM_MATCHMAKING,
-            ChatProtocol.TMMGameType.TMM_GAME_TYPE_CASUAL          => MatchType.AM_UNRANKED_MATCHMAKING,
-            ChatProtocol.TMMGameType.TMM_GAME_TYPE_MIDWARS         => MatchType.AM_MATCHMAKING_MIDWARS,
-            ChatProtocol.TMMGameType.TMM_GAME_TYPE_RIFTWARS        => MatchType.AM_MATCHMAKING_RIFTWARS,
-            ChatProtocol.TMMGameType.TMM_GAME_TYPE_CAMPAIGN_NORMAL => MatchType.AM_MATCHMAKING_CAMPAIGN,
-            ChatProtocol.TMMGameType.TMM_GAME_TYPE_CAMPAIGN_CASUAL => MatchType.AM_MATCHMAKING_CAMPAIGN,
-            _                                                      => MatchType.AM_MATCHMAKING
-        };
+        // Determine Match Type Using The Centralised Mapping On MatchmakingMatch
+        MatchType matchType = match.ArrangedMatchType;
 
         // Determine Match Mode From Mode Code
         PublicMatchMode matchMode = match.SelectedMode.ToLowerInvariant() switch
@@ -738,16 +718,7 @@ public class MatchmakingService : BackgroundService, IDisposable
     /// </summary>
     private static void SendAutoMatchConnect(MatchmakingMatch match, int matchID, string serverAddress, ushort serverPort)
     {
-        byte arrangedMatchType = match.GameType switch
-        {
-            ChatProtocol.TMMGameType.TMM_GAME_TYPE_NORMAL          => (byte)MatchType.AM_MATCHMAKING,
-            ChatProtocol.TMMGameType.TMM_GAME_TYPE_CASUAL          => (byte)MatchType.AM_UNRANKED_MATCHMAKING,
-            ChatProtocol.TMMGameType.TMM_GAME_TYPE_MIDWARS         => (byte)MatchType.AM_MATCHMAKING_MIDWARS,
-            ChatProtocol.TMMGameType.TMM_GAME_TYPE_RIFTWARS        => (byte)MatchType.AM_MATCHMAKING_RIFTWARS,
-            ChatProtocol.TMMGameType.TMM_GAME_TYPE_CAMPAIGN_NORMAL => (byte)MatchType.AM_MATCHMAKING_CAMPAIGN,
-            ChatProtocol.TMMGameType.TMM_GAME_TYPE_CAMPAIGN_CASUAL => (byte)MatchType.AM_MATCHMAKING_CAMPAIGN,
-            _                                                      => (byte)MatchType.AM_MATCHMAKING
-        };
+        byte arrangedMatchType = (byte)match.ArrangedMatchType;
 
         ChatBuffer connect = new();
 

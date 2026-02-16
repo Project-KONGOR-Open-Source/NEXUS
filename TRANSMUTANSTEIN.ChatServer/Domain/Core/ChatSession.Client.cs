@@ -92,6 +92,9 @@ public class ClientChatSession(TCPServer server, IServiceProvider serviceProvide
 
     public async Task<ClientChatSession> JoinMatch(IDatabase distributedCacheStore, int matchID, bool joinMatchChannel = true)
     {
+        // C++ Reference: HandleJoinedGame() — Leave old match channels before joining the new one.
+        LeaveAllChannels(ChatProtocol.ChatChannelType.CHAT_CHANNEL_FLAG_SERVER);
+
         // Client May Send -1 As Match ID If They Don't Have A Valid One (e.g. Joining A Public Game)
         // Legacy HON-Chat-Server Behaviour: Status Is ALWAYS Updated To IN_GAME, Even With Invalid Match ID
         // Only The Match Channel Join Is Skipped For Invalid Match IDs
@@ -160,15 +163,17 @@ public class ClientChatSession(TCPServer server, IServiceProvider serviceProvide
         // Leave Match Channels (Only The Channels With The SERVER Flag)
         LeaveAllChannels(ChatProtocol.ChatChannelType.CHAT_CHANNEL_FLAG_SERVER);
 
+        // Clear Match State
         Metadata.MatchServerConnectedTo = null;
         MatchInformation = null;
 
-        UpdateStatus(ChatProtocol.ChatClientStatus.CHAT_CLIENT_STATUS_CONNECTED);
-
-        // Rejoin Default Channel When Leaving A Match (Unless Invisible Mode)
-        // C++ Reference: HandleLeftGame() Lines 1563-1568
+        // Rejoin Default Channel Before Updating Status
+        // C++ Reference: HandleLeftGame() — Rejoins default channel first, THEN calls UpdateStatus,
+        // so that friends/clan members see the player in a channel when the status update fires.
         if (Metadata.ClientChatModeState is not ChatProtocol.ChatModeType.CHAT_MODE_INVISIBLE)
             RejoinDefaultChannel();
+
+        UpdateStatus(ChatProtocol.ChatClientStatus.CHAT_CLIENT_STATUS_CONNECTED);
 
         return this;
     }
