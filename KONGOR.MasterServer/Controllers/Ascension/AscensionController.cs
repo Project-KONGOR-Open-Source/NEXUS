@@ -27,8 +27,8 @@ public class AscensionController : ControllerBase
 
         return route switch
         {
-            "api/match/checkmatch"                     => CheckMatch(),
-            _                                          => throw new NotImplementedException($"Unsupported Ascension Controller Query String Parameter: r={Request.Query["r"].Single()}")
+            "api/match/checkmatch" => CheckMatch(),
+            _                      => throw new NotImplementedException($"Unsupported Ascension Controller Query String Parameter: r={Request.Query["r"].Single()}")
         };
     }
 
