@@ -64,7 +64,13 @@ public partial class ServerRequesterController
 
         Dictionary<string, object> response = new ()
         {
-            ["match_id"] = matchInformation.MatchID
+            ["match_id"] = matchInformation.MatchID,
+            ["match_date"] = timestampStarted.UtcDateTime.ToString("yyyy-MM-dd HH:mm:ss"),
+            ["is_recommended"] = false,
+            ["soccer_hero_list"] = string.Empty,
+            ["free_hero_list"] = string.Empty,
+            ["early_access_hero_list"] = string.Empty,
+            ["disabled_hero_list"] = string.Empty
         };
 
         Logger.LogInformation(@"Match ID {MatchID} Has Started - Host Name: {HostName}, Server ID: {ServerID}, Map: {Map}",

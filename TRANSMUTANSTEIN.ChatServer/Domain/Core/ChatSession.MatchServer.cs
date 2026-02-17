@@ -33,7 +33,7 @@ public class MatchServerChatSession(TCPServer server, IServiceProvider servicePr
 
     /// <summary>
     ///     Sends server configuration options to the match server.
-    ///     C++ Reference: SendOptions() Lines 1344-1392
+    ///     C++ Reference: CServerChatConnection::HandleOptions() in c_serverchatconnection.cpp
     /// </summary>
     /// <param name="remoteCommands">Additional remote commands to execute on the server.</param>
     public MatchServerChatSession SendOptions(IEnumerable<string>? remoteCommands = null)
@@ -45,14 +45,23 @@ public class MatchServerChatSession(TCPServer server, IServiceProvider servicePr
         // Match ID Required - Whether The Server Must Request A Match ID From The Master Server
         options.WriteBool(true);
 
+        // Match ID Request Attempts - Number Of Times The Server Will Attempt To Request A Match ID
+        options.WriteInt32(3);
+
+        // Match ID Request Total Timeout - Milliseconds Before All Match ID Requests Time Out
+        options.WriteInt32(15000);
+
+        // Match ID Request Interval - Milliseconds Between Match ID Request Attempts
+        options.WriteInt32(500);
+
         // Auth Request Attempts - Number Of Times The Server Will Attempt To Authenticate A Client
         options.WriteInt32(3);
 
-        // Auth Request Timeout - Seconds Before Auth Request Times Out
-        options.WriteInt32(30);
+        // Auth Request Total Timeout - Milliseconds Before All Auth Requests Time Out
+        options.WriteInt32(30000);
 
-        // Auth Request Interval - Seconds Between Auth Request Attempts
-        options.WriteInt32(10);
+        // Auth Request Interval - Milliseconds Between Auth Request Attempts
+        options.WriteInt32(10000);
 
         // Submit Stats - Whether The Server Should Submit Statistics
         options.WriteBool(true);
@@ -78,13 +87,16 @@ public class MatchServerChatSession(TCPServer server, IServiceProvider servicePr
         // Submit Match Stat Disconnects - Whether To Track Disconnect Statistics
         options.WriteBool(true);
 
-        // Heartbeat Interval - Seconds Between Status Updates
-        options.WriteInt32(15);
+        // Heartbeat Interval - Milliseconds Between Status Updates (Minimum 60000)
+        options.WriteInt32(60000);
 
         // Disconnect Reporting - Whether To Report Disconnect Reasons
         options.WriteBool(true);
 
         // Quests Availability - Whether Quests Are Enabled
+        options.WriteInt8(Convert.ToByte(ChatProtocol.QuestsAvailabilityType.EQAT_ENABLED));
+
+        // Quests Ladder Availability - Whether Quest Leaderboards Are Enabled
         options.WriteInt8(Convert.ToByte(ChatProtocol.QuestsAvailabilityType.EQAT_ENABLED));
 
         // Log Product Usage - Whether To Log Product Usage Statistics
