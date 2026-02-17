@@ -2,7 +2,6 @@ namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Channels;
 
 /// <summary>
 ///     Enables authentication on a channel.
-///     C++ reference: <c>c_client.cpp:2275</c> — <c>HandleChannelSetAuth</c>.
 /// </summary>
 [ChatCommand(ChatProtocol.Command.CHAT_CMD_CHANNEL_SET_AUTH)]
 public class ChannelSetAuthentication : ISynchronousCommandProcessor<ClientChatSession>

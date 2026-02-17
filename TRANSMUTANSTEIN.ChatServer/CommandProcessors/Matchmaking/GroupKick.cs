@@ -17,7 +17,7 @@ public class GroupKick : ISynchronousCommandProcessor<ClientChatSession>
             return;
         }
 
-        // C++ Reference: HandleRequestKickTMMPlayer — Leader Cannot Kick Themselves
+        // Leader Cannot Kick Themselves
         if (group.Members.Any(member => member.Account.ID == session.Account.ID && member.Slot == requestData.KickTargetTeamSlot))
             return;
 
@@ -31,7 +31,6 @@ file class GroupKickRequestData
 
     /// <summary>
     ///     The team slot of the member to kick.
-    ///     C++ reference: <c>c_client.cpp:3007</c> — <c>const byte yTeamSlot(pktRecv.ReadByte());</c>.
     /// </summary>
     public byte KickTargetTeamSlot { get; init; }
 

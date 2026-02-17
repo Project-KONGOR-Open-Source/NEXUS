@@ -92,7 +92,7 @@ public class ClientChatSession(TCPServer server, IServiceProvider serviceProvide
 
     public async Task<ClientChatSession> JoinMatch(IDatabase distributedCacheStore, int matchID, bool joinMatchChannel = true)
     {
-        // C++ Reference: HandleJoinedGame() — Leave old match channels before joining the new one.
+        // Leave Old Match Channels Before Joining The New One
         LeaveAllChannels(ChatProtocol.ChatChannelType.CHAT_CHANNEL_FLAG_SERVER);
 
         // Client May Send -1 As Match ID If They Don't Have A Valid One (e.g. Joining A Public Game)
@@ -117,7 +117,6 @@ public class ClientChatSession(TCPServer server, IServiceProvider serviceProvide
             }
 
             // Join Match Channel If Match ID Is Valid And Client Should Join (Spectators/Mentors Don't Join)
-            // C++ Reference: HandleJoinedGame() Lines 1535-1541
             if (joinMatchChannel)
                 JoinMatchChannel(matchID);
         }
@@ -135,8 +134,7 @@ public class ClientChatSession(TCPServer server, IServiceProvider serviceProvide
 
     /// <summary>
     ///     Joins a match-specific chat channel.
-    ///     C++ Reference: HandleJoinedGame() Lines 1535-1541 creates/joins match channel via ChannelManager.
-    ///     Uses SERVER | HIDDEN flags per original C++ implementation.
+    ///     Uses SERVER | HIDDEN flags per original implementation.
     /// </summary>
     /// <param name="matchID">The match ID to join the channel for.</param>
     public ClientChatSession JoinMatchChannel(int matchID)
@@ -168,7 +166,7 @@ public class ClientChatSession(TCPServer server, IServiceProvider serviceProvide
         MatchInformation = null;
 
         // Rejoin Default Channel Before Updating Status
-        // C++ Reference: HandleLeftGame() — Rejoins default channel first, THEN calls UpdateStatus,
+        // Rejoins default channel first, THEN calls UpdateStatus,
         // so that friends/clan members see the player in a channel when the status update fires.
         if (Metadata.ClientChatModeState is not ChatProtocol.ChatModeType.CHAT_MODE_INVISIBLE)
             RejoinDefaultChannel();
@@ -181,7 +179,6 @@ public class ClientChatSession(TCPServer server, IServiceProvider serviceProvide
     /// <summary>
     ///     Leaves all chat channels that match the specified flags.
     ///     If no flags are specified, leaves all channels.
-    ///     C++ Reference: LeaveAllChannels(uint uiFlags, bool bLeaveGroupChannels) Lines 1056-1085
     /// </summary>
     /// <param name="flags">Channel flags to filter which channels to leave. If zero, leaves all channels.</param>
     public ClientChatSession LeaveAllChannels(ChatProtocol.ChatChannelType flags = 0)
@@ -207,7 +204,6 @@ public class ClientChatSession(TCPServer server, IServiceProvider serviceProvide
     /// <summary>
     ///     Rejoins the default general chat channel.
     ///     Called when a player leaves a match to return them to the main chat area.
-    ///     C++ Reference: HandleLeftGame() Lines 1563-1568
     /// </summary>
     public ClientChatSession RejoinDefaultChannel()
     {
@@ -306,7 +302,6 @@ public class ClientChatSession(TCPServer server, IServiceProvider serviceProvide
     /// <summary>
     ///     Checks if this client should send an auto-response when receiving a whisper.
     ///     Returns the auto-response type if the client is AFK or DND, or NULL if no auto-response should be sent.
-    ///     C++ Reference: HandleWhisper() Lines 1299-1344
     /// </summary>
     /// <returns>The chat mode type if an auto-response is needed, or NULL if not.</returns>
     public ChatProtocol.ChatModeType? GetAutoResponseMode()
@@ -323,7 +318,6 @@ public class ClientChatSession(TCPServer server, IServiceProvider serviceProvide
     ///     Determines if a whisper should be blocked based on this client's chat mode.
     ///     DND mode blocks whispers entirely (except from buddies/clan).
     ///     AFK mode allows whispers but sends an auto-response.
-    ///     C++ Reference: HandleWhisper() Lines 1330-1340
     /// </summary>
     /// <returns>TRUE if the whisper should be blocked, FALSE otherwise.</returns>
     public bool ShouldBlockWhisper()
@@ -334,7 +328,6 @@ public class ClientChatSession(TCPServer server, IServiceProvider serviceProvide
     /// <summary>
     ///     Checks if the specified account is a friend or clan member of this client.
     ///     Used to determine if messages from muted/blocking users should still be delivered.
-    ///     C++ Reference: IsBuddyOrClanMember() ~Line 1330
     /// </summary>
     /// <param name="accountID">The account ID to check.</param>
     /// <returns>TRUE if the account is a friend or clan member, FALSE otherwise.</returns>

@@ -3,7 +3,6 @@ namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Social;
 /// <summary>
 ///     Handles clan creation requests.
 ///     Validates the founder, clan parameters, and 4 founding members, then sends invites to all.
-///     C++ reference: <c>c_clientmanager.cpp:1966</c> — <c>HandleCreateClan</c>.
 /// </summary>
 [ChatCommand(ChatProtocol.Command.CHAT_CMD_CLAN_CREATE_REQUEST)]
 public class ClanCreate : ISynchronousCommandProcessor<ClientChatSession>

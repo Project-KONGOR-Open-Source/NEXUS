@@ -2,7 +2,6 @@ namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Channels;
 
 /// <summary>
 ///     Lifts a ban on a player in a channel.
-///     C++ reference: <c>c_client.cpp:2167</c> — <c>HandleChannelUnban</c>.
 /// </summary>
 [ChatCommand(ChatProtocol.Command.CHAT_CMD_CHANNEL_UNBAN)]
 public class UnbanChannelMember : ISynchronousCommandProcessor<ClientChatSession>

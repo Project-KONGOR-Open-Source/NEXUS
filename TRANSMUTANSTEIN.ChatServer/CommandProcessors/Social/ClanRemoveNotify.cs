@@ -3,7 +3,6 @@ namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Social;
 /// <summary>
 ///     Handles clan removal notifications.
 ///     Removes a member from the clan (or self-removal) and broadcasts the rank change.
-///     C++ reference: <c>c_client.cpp:1638</c> — <c>HandleClanRemoveNotification</c>.
 /// </summary>
 [ChatCommand(ChatProtocol.Command.CHAT_CMD_CLAN_REMOVE_NOTIFY)]
 public class ClanRemoveNotify : ISynchronousCommandProcessor<ClientChatSession>
@@ -15,7 +14,7 @@ public class ClanRemoveNotify : ISynchronousCommandProcessor<ClientChatSession>
         if (session.Account.Clan is null)
             return;
 
-        // C++ Reference: A Player Can Remove Themselves, But Only Leaders Can Remove Others
+        // A Player Can Remove Themselves, But Only Leaders Can Remove Others
         if (session.Account.ID != requestData.TargetAccountID && session.Account.ClanTier is not ClanTier.Leader)
             return;
 

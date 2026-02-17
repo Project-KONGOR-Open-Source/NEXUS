@@ -2,7 +2,6 @@ namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Social;
 
 /// <summary>
 ///     Handles match invite requests by target account ID.
-///     C++ reference: <c>c_client.cpp:1986</c> — <c>HandleInviteIDToServer</c>.
 /// </summary>
 [ChatCommand(ChatProtocol.Command.CHAT_CMD_INVITE_USER_ID)]
 public class MatchInviteByID : ISynchronousCommandProcessor<ClientChatSession>

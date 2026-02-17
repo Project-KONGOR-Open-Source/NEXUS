@@ -19,7 +19,6 @@ public class ChatChannel
 
     /// <summary>
     ///     Set of lowercase account names authenticated to join this channel when authentication is enabled.
-    ///     C++ reference: <c>CChannel::m_setAuthed</c>.
     /// </summary>
     public HashSet<string> AuthenticatedAccountNames { get; set; } = [];
 
@@ -461,14 +460,13 @@ public class ChatChannel
 
     /// <summary>
     ///     Sets the channel topic and broadcasts the change to all members.
-    ///     C++ reference: <c>c_channel.cpp:62</c> — <c>CChannel::SetTopic</c>.
     /// </summary>
     public void SetTopic(ClientChatSession requesterSession, string topic)
     {
         if (Members.TryGetValue(requesterSession.Account.Name, out ChatChannelMember? member) is false)
             return;
 
-        // C++ Reference: Requires At Least Officer Level
+        // Requires At Least Officer Level
         if (member.AdministratorLevel < ChatProtocol.AdminLevel.CHAT_CLIENT_ADMIN_OFFICER)
             return;
 
@@ -492,7 +490,6 @@ public class ChatChannel
 
     /// <summary>
     ///     Bans a player from the channel, removing them if present.
-    ///     C++ reference: <c>c_channel.cpp:642</c> — <c>CChannel::Ban</c>.
     /// </summary>
     public void Ban(ClientChatSession requesterSession, string targetName)
     {
@@ -536,14 +533,13 @@ public class ChatChannel
 
     /// <summary>
     ///     Lifts a ban on a player.
-    ///     C++ reference: <c>c_channel.cpp:676</c> — <c>CChannel::LiftBan</c>.
     /// </summary>
     public void LiftBan(ClientChatSession requesterSession, string targetName)
     {
         if (Members.TryGetValue(requesterSession.Account.Name, out ChatChannelMember? requester) is false)
             return;
 
-        // C++ Reference: Requires At Least Officer Level
+        // Requires At Least Officer Level
         if (requester.AdministratorLevel < ChatProtocol.AdminLevel.CHAT_CLIENT_ADMIN_OFFICER)
             return;
 
@@ -572,7 +568,6 @@ public class ChatChannel
 
     /// <summary>
     ///     Promotes a member's admin level in this channel.
-    ///     C++ reference: <c>c_channel.cpp:547</c> — <c>CChannel::Promote</c>.
     /// </summary>
     public void Promote(ClientChatSession requesterSession, int targetAccountID)
     {
@@ -585,7 +580,7 @@ public class ChatChannel
         if (target is null)
             return;
 
-        // C++ Reference: Source Must Be Greater Than Target + 1 (i.e. At Least Two Levels Above)
+        // Source Must Be Greater Than Target + 1 (i.e. At Least Two Levels Above)
         if (requester.HasHigherAdministratorLevelThan(target) is false)
             return;
 
@@ -601,7 +596,6 @@ public class ChatChannel
 
     /// <summary>
     ///     Demotes a member's admin level in this channel.
-    ///     C++ reference: <c>c_channel.cpp:513</c> — <c>CChannel::Demote</c>.
     /// </summary>
     public void Demote(ClientChatSession requesterSession, int targetAccountID)
     {
@@ -629,7 +623,6 @@ public class ChatChannel
 
     /// <summary>
     ///     Enables authentication on this channel. Only authenticated users can join.
-    ///     C++ reference: <c>c_channel.cpp:395</c> — <c>CChannel::EnableAuth</c>.
     /// </summary>
     public void EnableAuthentication(ClientChatSession requesterSession)
     {
@@ -651,7 +644,6 @@ public class ChatChannel
 
     /// <summary>
     ///     Disables authentication on this channel, allowing anyone to join.
-    ///     C++ reference: <c>c_channel.cpp:413</c> — <c>CChannel::DisableAuth</c>.
     /// </summary>
     public void DisableAuthentication(ClientChatSession requesterSession)
     {
@@ -673,7 +665,6 @@ public class ChatChannel
 
     /// <summary>
     ///     Adds a user to the channel's authenticated user list.
-    ///     C++ reference: <c>c_channel.cpp:458</c> — <c>CChannel::AddAuth</c>.
     /// </summary>
     public void AddAuthenticatedUser(ClientChatSession requesterSession, string targetName)
     {
@@ -683,7 +674,7 @@ public class ChatChannel
         if (requester.AdministratorLevel < ChatProtocol.AdminLevel.CHAT_CLIENT_ADMIN_LEADER)
             return;
 
-        // C++ Reference: Strip Clan Tag (Everything Before And Including ']')
+        // Strip Clan Tag (Everything Before And Including ']')
         int bracketIndex = targetName.IndexOf(']');
         string normalised = bracketIndex >= 0 ? targetName[(bracketIndex + 1)..] : targetName;
         string lowered = normalised.ToLowerInvariant();
@@ -712,7 +703,6 @@ public class ChatChannel
 
     /// <summary>
     ///     Removes a user from the channel's authenticated user list.
-    ///     C++ reference: <c>c_channel.cpp:489</c> — <c>CChannel::RemoveAuth</c>.
     /// </summary>
     public void RemoveAuthenticatedUser(ClientChatSession requesterSession, string targetName)
     {
@@ -748,7 +738,6 @@ public class ChatChannel
 
     /// <summary>
     ///     Sends the channel's authenticated user list to the requesting client.
-    ///     C++ reference: <c>c_channel.cpp:431</c> — <c>CChannel::SendAuthList</c>.
     /// </summary>
     public void SendAuthenticatedUserList(ClientChatSession requesterSession)
     {
@@ -766,7 +755,7 @@ public class ChatChannel
 
         foreach (string authenticatedName in AuthenticatedAccountNames)
         {
-            // C++ Reference: Try To Resolve The Display Name From Online Sessions, Otherwise Use The Stored Name
+            // Try To Resolve The Display Name From Online Sessions, Otherwise Use The Stored Name
             ClientChatSession? authenticatedSession = Context.ClientChatSessions.Values
                 .SingleOrDefault(chatSession => chatSession.Account.Name.Equals(authenticatedName, StringComparison.OrdinalIgnoreCase));
 

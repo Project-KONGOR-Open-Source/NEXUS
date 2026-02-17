@@ -3,7 +3,6 @@ namespace TRANSMUTANSTEIN.ChatServer.Domain.Social;
 /// <summary>
 ///     Shared logic for match invite handling.
 ///     Validates the invite and sends the inviter's client info to the target.
-///     C++ reference: <c>c_client.cpp:1841</c> — <c>HandleInviteToServer</c>.
 /// </summary>
 public static class MatchInvite
 {
@@ -43,17 +42,15 @@ public static class MatchInvite
         if (targetSession.Metadata.ClientChatModeState is ChatProtocol.ChatModeType.CHAT_MODE_DND)
             return;
 
-        // C++ Reference: GetClientInfoBuffer(buf, TRUE, FALSE, FALSE, TRUE, FALSE)
-        // Fields: Name, AccountID, Status, Flags, NameColour, Icon, ServerInfo
         ChatBuffer invite = new ();
 
         invite.WriteCommand(ChatProtocol.Command.CHAT_CMD_INVITED_TO_SERVER);
-        invite.WriteString(senderSession.Account.Name);
-        invite.WriteInt32(senderSession.Account.ID);
-        invite.WriteInt8(Convert.ToByte(senderSession.Metadata.LastKnownClientState));
-        invite.WriteInt8(senderSession.Account.GetChatClientFlags());
-        invite.WriteString(senderSession.Account.NameColourNoPrefixCode);
-        invite.WriteString(senderSession.Account.IconNoPrefixCode);
+        invite.WriteString(senderSession.Account.Name);                                     // Name
+        invite.WriteInt32(senderSession.Account.ID);                                        // Account ID
+        invite.WriteInt8(Convert.ToByte(senderSession.Metadata.LastKnownClientState));       // Status
+        invite.WriteInt8(senderSession.Account.GetChatClientFlags());                        // Flags
+        invite.WriteString(senderSession.Account.NameColourNoPrefixCode);                    // Name Colour
+        invite.WriteString(senderSession.Account.IconNoPrefixCode);                          // Icon
 
         // Server Info (Only If Joining Or In-Match)
         if (senderSession.Metadata.MatchServerConnectedTo is not null)

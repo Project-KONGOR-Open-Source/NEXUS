@@ -2,7 +2,6 @@ namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Channels;
 
 /// <summary>
 ///     Promotes a member's admin level in a channel.
-///     C++ reference: <c>c_client.cpp:2206</c> — <c>HandleChannelPromote</c>.
 /// </summary>
 [ChatCommand(ChatProtocol.Command.CHAT_CMD_CHANNEL_PROMOTE)]
 public class PromoteChannelMember : ISynchronousCommandProcessor<ClientChatSession>

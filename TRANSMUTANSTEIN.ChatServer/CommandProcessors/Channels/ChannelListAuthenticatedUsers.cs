@@ -2,7 +2,6 @@ namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Channels;
 
 /// <summary>
 ///     Returns the authenticated user list for a channel.
-///     C++ reference: <c>c_client.cpp:2343</c> — <c>HandleChannelListAuth</c>.
 /// </summary>
 [ChatCommand(ChatProtocol.Command.CHAT_CMD_CHANNEL_LIST_AUTH)]
 public class ChannelListAuthenticatedUsers : ISynchronousCommandProcessor<ClientChatSession>

@@ -3,7 +3,6 @@ namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Social;
 /// <summary>
 ///     Handles clan demotion notifications.
 ///     Demotes a clan officer to member rank and broadcasts the rank change to all clan members.
-///     C++ reference: <c>c_client.cpp:1673</c> — <c>HandleClanDemoteNotification</c>.
 /// </summary>
 [ChatCommand(ChatProtocol.Command.CHAT_CMD_CLAN_DEMOTE_NOTIFY)]
 public class ClanDemoteNotify : ISynchronousCommandProcessor<ClientChatSession>

@@ -3,7 +3,6 @@ namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Social;
 /// <summary>
 ///     Handles match invite requests by target name.
 ///     Sends the inviter's client info and server details to the target.
-///     C++ reference: <c>c_client.cpp:1998</c> — <c>HandleInviteNameToServer</c>.
 /// </summary>
 [ChatCommand(ChatProtocol.Command.CHAT_CMD_INVITE_USER_NAME)]
 public class MatchInviteByName : ISynchronousCommandProcessor<ClientChatSession>

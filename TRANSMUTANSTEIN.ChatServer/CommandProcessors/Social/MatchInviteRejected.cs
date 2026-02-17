@@ -3,7 +3,6 @@ namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Social;
 /// <summary>
 ///     Handles match invite rejection notifications.
 ///     Notifies the inviter that their invite was declined.
-///     C++ reference: <c>c_client.cpp:2010</c> — <c>HandleInviteRejected</c>.
 /// </summary>
 [ChatCommand(ChatProtocol.Command.CHAT_CMD_INVITE_REJECTED)]
 public class MatchInviteRejected : ISynchronousCommandProcessor<ClientChatSession>
@@ -18,7 +17,7 @@ public class MatchInviteRejected : ISynchronousCommandProcessor<ClientChatSessio
         if (inviterSession is null || requestData.InviterAccountID == session.Account.ID)
             return;
 
-        // C++ Reference: DND Inviter Does Not Receive The Rejection
+        // DND Inviter Does Not Receive The Rejection
         if (inviterSession.Metadata.ClientChatModeState is ChatProtocol.ChatModeType.CHAT_MODE_DND)
             return;
 

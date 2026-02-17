@@ -25,7 +25,6 @@ public class MatchmakingGroupInformation
     /// <summary>
     ///     The arranged match type derived from the game type and ranked status.
     ///     Maps to the <see cref="MatchType"/> enum values.
-    ///     C++ reference: <c>c_group.cpp:962</c> — <c>CGroup::GetArrangedMatchType()</c>.
     /// </summary>
     public MatchType ArrangedMatchType => GameType switch
     {
@@ -33,7 +32,7 @@ public class MatchmakingGroupInformation
         ChatProtocol.TMMGameType.TMM_GAME_TYPE_CASUAL          => Ranked ? MatchType.AM_MATCHMAKING : MatchType.AM_UNRANKED_MATCHMAKING,
 
         // Reborn variants (including Caldavar Reborn) are intentionally grouped under MIDWARS.
-        // The original C++ game server uses this match type to route all reborn/midwars games
+        // The original match server uses this match type to route all reborn/midwars games
         // through a shared "alternative queue" code path for stat submission and leaver handling.
         // Changing this would cause mismatched behaviour on the unmodified game server binary.
         ChatProtocol.TMMGameType.TMM_GAME_TYPE_MIDWARS         => MatchType.AM_MATCHMAKING_MIDWARS,

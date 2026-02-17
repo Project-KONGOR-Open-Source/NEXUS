@@ -2,7 +2,6 @@ namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Communication;
 
 /// <summary>
 ///     Handles chat mode type changes (available, AFK, DND, invisible).
-///     C++ reference: <c>c_client.cpp:2452</c> — <c>HandleSetChatModeType</c>.
 /// </summary>
 [ChatCommand(ChatProtocol.Command.CHAT_CMD_SET_CHAT_MODE_TYPE)]
 public class SetChatModeType : ISynchronousCommandProcessor<ClientChatSession>

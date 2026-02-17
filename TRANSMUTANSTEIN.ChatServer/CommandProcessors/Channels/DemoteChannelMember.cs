@@ -2,7 +2,6 @@ namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Channels;
 
 /// <summary>
 ///     Demotes a member's admin level in a channel.
-///     C++ reference: <c>c_client.cpp:2224</c> — <c>HandleChannelDemote</c>.
 /// </summary>
 [ChatCommand(ChatProtocol.Command.CHAT_CMD_CHANNEL_DEMOTE)]
 public class DemoteChannelMember : ISynchronousCommandProcessor<ClientChatSession>

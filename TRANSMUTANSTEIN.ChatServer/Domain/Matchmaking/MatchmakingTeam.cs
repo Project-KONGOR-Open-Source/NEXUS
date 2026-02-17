@@ -7,9 +7,8 @@ namespace TRANSMUTANSTEIN.ChatServer.Domain.Matchmaking;
 public class MatchmakingTeam
 {
     /// <summary>
-    ///     HON team rank weighting exponent for power mean calculation.
+    ///     Team rank weighting exponent for power mean calculation.
     ///     Higher values weight the highest-rated players more heavily.
-    ///     HON Reference: c_match.cpp Line 25 - matchmaker_teamRankWeighting = 6.5
     /// </summary>
     private const double TeamRankWeighting = 6.5;
     /// <summary>
@@ -53,17 +52,16 @@ public class MatchmakingTeam
     public double AdjustedAverageTMR => PlayerCount > 0 ? AdjustedTotalTMR / PlayerCount : 0;
 
     /// <summary>
-    ///     The power mean team rating using HON's generalized mean formula.
+    ///     The power mean team rating using the original generalized mean formula.
     ///     This weights higher-rated players more heavily (exponent 6.5).
-    ///     HON Reference: c_match.cpp Lines 148-157
     ///     Formula: (sum of rating^6.5) ^ (1/6.5)
     /// </summary>
     public double PowerMeanTMR => CalculatePowerMeanTMR();
 
     /// <summary>
     ///     The effective team rating for matchmaking, combining:
-    ///     1. HON Power Mean (weights highest-rated players heavily)
-    ///     2. KONGOR Premade Bonus (adds flat bonus for group size)
+    ///     1. Power Mean (weights highest-rated players heavily)
+    ///     2. Pre-Made Bonus (adds flat bonus for group size)
     /// </summary>
     public double EffectiveTeamRating
     {
@@ -82,8 +80,8 @@ public class MatchmakingTeam
 
     /// <summary>
     ///     Calculates the power mean (generalized mean) of team member ratings.
-    ///     Uses HON's teamRankWeighting exponent of 6.5.
-    ///     C++ reference: <c>c_match.cpp:157</c> — <c>INT_ROUND(pow(fRating, 1.0f / matchmaker_teamRankWeighting))</c>.
+    ///     Uses the original teamRankWeighting exponent of 6.5.
+    ///     Original formula: <c>INT_ROUND(pow(fRating, 1.0f / matchmaker_teamRankWeighting))</c>.
     /// </summary>
     private double CalculatePowerMeanTMR()
     {
@@ -95,7 +93,7 @@ public class MatchmakingTeam
         // Sum Of (Rating ^ Exponent)
         double sum = members.Sum(member => Math.Pow(member.TMR, TeamRankWeighting));
 
-        // Take The Nth Root And Round To Nearest Integer (Matches C++ INT_ROUND Behaviour)
+        // Take The Nth Root And Round To Nearest Integer (Matches Original INT_ROUND Behaviour)
         return Math.Round(Math.Pow(sum, 1.0 / TeamRankWeighting));
     }
 

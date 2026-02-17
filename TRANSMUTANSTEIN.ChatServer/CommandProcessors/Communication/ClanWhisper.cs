@@ -3,7 +3,6 @@ namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Communication;
 /// <summary>
 ///     Handles clan-wide whisper messages.
 ///     Broadcasts a message to all online clan members, respecting DND/AFK chat modes.
-///     C++ reference: <c>c_client.cpp:1580</c> — <c>HandleClanWhisper</c>.
 /// </summary>
 [ChatCommand(ChatProtocol.Command.CHAT_CMD_CLAN_WHISPER)]
 public class ClanWhisper : ISynchronousCommandProcessor<ClientChatSession>
@@ -30,7 +29,7 @@ public class ClanWhisper : ISynchronousCommandProcessor<ClientChatSession>
             ? requestData.Message[..ChatProtocol.CHAT_MESSAGE_MAX_LENGTH]
             : requestData.Message;
 
-        // C++ Reference: Sends AccountID (Not Name) Then Message
+        // Sends AccountID (Not Name) Then Message
         ChatBuffer clanWhisper = new ();
 
         clanWhisper.WriteCommand(ChatProtocol.Command.CHAT_CMD_CLAN_WHISPER);
@@ -49,11 +48,11 @@ public class ClanWhisper : ISynchronousCommandProcessor<ClientChatSession>
             if (memberSession is null)
                 continue;
 
-            // C++ Reference: DND Recipients Are Skipped Without Notifying The Sender (Too Spammy)
+            // DND Recipients Are Skipped Without Notifying The Sender (Too Spammy)
             if (memberSession.Metadata.ClientChatModeState is ChatProtocol.ChatModeType.CHAT_MODE_DND)
                 continue;
 
-            // C++ Reference: AFK Recipients Receive The Message But No Auto-Response Is Sent (Too Spammy)
+            // AFK Recipients Receive The Message But No Auto-Response Is Sent (Too Spammy)
 
             memberSession.Send(clanWhisper);
         }

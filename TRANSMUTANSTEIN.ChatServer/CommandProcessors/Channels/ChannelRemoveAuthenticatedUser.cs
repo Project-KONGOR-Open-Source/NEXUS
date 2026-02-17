@@ -2,7 +2,6 @@ namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Channels;
 
 /// <summary>
 ///     Removes a user from a channel's authenticated user list.
-///     C++ reference: <c>c_client.cpp:2325</c> — <c>HandleChannelRemoveAuthUser</c>.
 /// </summary>
 [ChatCommand(ChatProtocol.Command.CHAT_CMD_CHANNEL_REMOVE_AUTH_USER)]
 public class ChannelRemoveAuthenticatedUser : ISynchronousCommandProcessor<ClientChatSession>

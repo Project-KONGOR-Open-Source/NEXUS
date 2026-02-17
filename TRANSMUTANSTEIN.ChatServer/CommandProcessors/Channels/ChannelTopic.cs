@@ -2,7 +2,6 @@ namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Channels;
 
 /// <summary>
 ///     Sets a channel's topic.
-///     C++ reference: <c>c_client.cpp:2105</c> — <c>HandleChannelTopic</c>.
 /// </summary>
 [ChatCommand(ChatProtocol.Command.CHAT_CMD_CHANNEL_TOPIC)]
 public class ChannelTopic : ISynchronousCommandProcessor<ClientChatSession>

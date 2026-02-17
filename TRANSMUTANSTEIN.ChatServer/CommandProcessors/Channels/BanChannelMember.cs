@@ -2,7 +2,6 @@ namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Channels;
 
 /// <summary>
 ///     Bans a player from a channel.
-///     C++ reference: <c>c_client.cpp:2149</c> — <c>HandleChannelBan</c>.
 /// </summary>
 [ChatCommand(ChatProtocol.Command.CHAT_CMD_CHANNEL_BAN)]
 public class BanChannelMember : ISynchronousCommandProcessor<ClientChatSession>

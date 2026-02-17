@@ -2,7 +2,6 @@ namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Channels;
 
 /// <summary>
 ///     Adds a user to a channel's authenticated user list.
-///     C++ reference: <c>c_client.cpp:2307</c> — <c>HandleChannelAddAuthUser</c>.
 /// </summary>
 [ChatCommand(ChatProtocol.Command.CHAT_CMD_CHANNEL_ADD_AUTH_USER)]
 public class ChannelAddAuthenticatedUser : ISynchronousCommandProcessor<ClientChatSession>

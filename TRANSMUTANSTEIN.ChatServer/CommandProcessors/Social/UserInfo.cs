@@ -3,7 +3,6 @@ namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Social;
 /// <summary>
 ///     Handles user info lookup requests.
 ///     Returns the user's status and relevant details (channels if online, server info if in game).
-///     C++ reference: <c>c_client.cpp:2034</c> — <c>HandleUserInfo</c>.
 /// </summary>
 [ChatCommand(ChatProtocol.Command.CHAT_CMD_USER_INFO)]
 public class UserInfo : ISynchronousCommandProcessor<ClientChatSession>

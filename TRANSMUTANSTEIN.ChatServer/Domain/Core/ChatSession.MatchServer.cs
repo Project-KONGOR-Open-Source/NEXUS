@@ -16,7 +16,6 @@ public class MatchServerChatSession(TCPServer server, IServiceProvider servicePr
 
     /// <summary>
     ///     Completes the connection process by sending the accept packet.
-    ///     C++ Reference: SetOnline() Lines 1436-1443
     /// </summary>
     public MatchServerChatSession SetOnline()
     {
@@ -33,7 +32,6 @@ public class MatchServerChatSession(TCPServer server, IServiceProvider servicePr
 
     /// <summary>
     ///     Sends server configuration options to the match server.
-    ///     C++ Reference: CServerChatConnection::HandleOptions() in c_serverchatconnection.cpp
     /// </summary>
     /// <param name="remoteCommands">Additional remote commands to execute on the server.</param>
     public MatchServerChatSession SendOptions(IEnumerable<string>? remoteCommands = null)
@@ -119,7 +117,6 @@ public class MatchServerChatSession(TCPServer server, IServiceProvider servicePr
 
     /// <summary>
     ///     Sends a remote command to the match server for execution.
-    ///     C++ Reference: NET_CHAT_GS_REMOTE_COMMAND
     /// </summary>
     /// <param name="command">The command string to execute.</param>
     public MatchServerChatSession SendRemoteCommand(string command)
@@ -152,7 +149,6 @@ public class MatchServerChatSession(TCPServer server, IServiceProvider servicePr
 
     /// <summary>
     ///     Updates the match server's status from a status update packet.
-    ///     C++ Reference: ProcessStatusUpdate() Lines 316-438
     /// </summary>
     public MatchServerChatSession UpdateStatus(ChatProtocol.ServerStatus status)
     {
@@ -164,7 +160,6 @@ public class MatchServerChatSession(TCPServer server, IServiceProvider servicePr
 
     /// <summary>
     ///     Marks this server as recently used to prevent immediate reuse.
-    ///     C++ Reference: SetRecentlyUsedExpiration()
     /// </summary>
     /// <param name="expirationSeconds">Number of seconds before the server can be reused.</param>
     public MatchServerChatSession SetRecentlyUsed(int expirationSeconds = 30)
@@ -176,7 +171,6 @@ public class MatchServerChatSession(TCPServer server, IServiceProvider servicePr
 
     /// <summary>
     ///     Checks if this server was recently used and should not be selected for new matches.
-    ///     C++ Reference: WasRecentlyUsed()
     /// </summary>
     public bool WasRecentlyUsed()
     {
@@ -188,7 +182,6 @@ public class MatchServerChatSession(TCPServer server, IServiceProvider servicePr
 
     /// <summary>
     ///     Clears the recently used expiration flag.
-    ///     C++ Reference: ResetRecentlyUsed()
     /// </summary>
     public MatchServerChatSession ClearRecentlyUsed()
     {
@@ -199,7 +192,6 @@ public class MatchServerChatSession(TCPServer server, IServiceProvider servicePr
 
     /// <summary>
     ///     Sends a request to create a match on this server.
-    ///     C++ Reference: CreateMatch() Lines 1465-1472
     /// </summary>
     /// <param name="matchPacket">The match creation packet to send.</param>
     public MatchServerChatSession CreateMatch(ChatBuffer matchPacket)
@@ -212,7 +204,6 @@ public class MatchServerChatSession(TCPServer server, IServiceProvider servicePr
 
     /// <summary>
     ///     Sends a request to end the current match on this server.
-    ///     C++ Reference: EndMatch() Lines 1660-1667
     /// </summary>
     /// <param name="losingTeam">The team that lost (0 or 1, or -1 for draw/abort).</param>
     public MatchServerChatSession EndMatch(int losingTeam = -1)
@@ -229,7 +220,6 @@ public class MatchServerChatSession(TCPServer server, IServiceProvider servicePr
 
     /// <summary>
     ///     Checks if this server is available for a new match.
-    ///     C++ Reference: GetAvailableServerFromLocation() Lines 318-347
     /// </summary>
     public bool IsAvailable()
     {
@@ -238,7 +228,6 @@ public class MatchServerChatSession(TCPServer server, IServiceProvider servicePr
 
     /// <summary>
     ///     Gets the full server name including location.
-    ///     C++ Reference: GetFullServerName()
     /// </summary>
     public string GetFullServerName()
     {

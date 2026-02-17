@@ -2,7 +2,6 @@
 
 public class MatchmakingGroup
 {
-    // C++ Reference Constants
     private const double MaximumTMR = 2500.0;
     private const int InexperiencedMatchCount = 50;
     private const double InexperiencedTMRCutoff = 1625.0;
@@ -18,7 +17,7 @@ public class MatchmakingGroup
 
     /// <summary>
     ///     The group chat channel for pre-match communication.
-    ///     Uses RESERVED | UNJOINABLE | HIDDEN flags per original C++ implementation.
+    ///     Uses RESERVED | UNJOINABLE | HIDDEN flags per original implementation.
     /// </summary>
     public ChatChannel? ChatChannel { get; set; }
 
@@ -34,7 +33,6 @@ public class MatchmakingGroup
 
     /// <summary>
     ///     The adjusted TMR for this group, including a bonus for premade coordination.
-    ///     KONGOR Reference: TMMGroup.cs Lines 99-107
     ///     Formula: groupMMR += 4 * 2^groupSize (Solo=0, 2p=+16, 3p=+32, 4p=+64, 5p=+128)
     /// </summary>
     public double AdjustedTotalTMR => TotalTMR + GetPremadeBonus();
@@ -47,15 +45,13 @@ public class MatchmakingGroup
     /// <summary>
     ///     Gets the premade coordination bonus based on group size.
     ///     Larger groups get a higher bonus to compensate for voice comms and coordination advantage.
-    ///     KONGOR Reference: TMMGroup.cs Lines 99-107
     /// </summary>
     public double GetPremadeBonus()
     {
         if (Members.Count <= 1)
             return 0;
 
-        // KONGOR Formula: 4 * 2^groupSize
-        // Solo=0, 2p=+16, 3p=+32, 4p=+64, 5p=+128
+        // Formula: 4 * 2^groupSize (Solo=0, 2p=+16, 3p=+32, 4p=+64, 5p=+128)
         return 4.0 * Math.Pow(2.0, Members.Count);
     }
 
@@ -119,14 +115,14 @@ public class MatchmakingGroup
 
     /// <summary>
     ///     Determines if this group is considered "experienced" based on match count or TMR.
-    ///     C++ Reference: IsExperienced() based on matchCount >= 50 OR TMR >= 1625
+    ///     In the original implementation, a group is experienced if matchCount >= 50 OR TMR >= 1625.
     /// </summary>
     public bool IsExperienced => TotalMatchCount >= InexperiencedMatchCount || AverageTMR >= InexperiencedTMRCutoff;
 
     /// <summary>
     ///     Gets the adaptive TMR spread based on queue wait time.
     ///     As queue time increases, the acceptable TMR range widens to improve match finding.
-    ///     C++ Reference: GetTMRSpread() Lines 172-194
+    ///     Based on the original adaptive TMR spread algorithm.
     /// </summary>
     public double GetAdaptiveTMRSpread()
     {
@@ -146,7 +142,7 @@ public class MatchmakingGroup
 
     /// <summary>
     ///     Checks if this group is compatible with another group for team formation.
-    ///     C++ Reference: IsCompatible() Lines 200-260
+    ///     Based on the original compatibility check algorithm.
     /// </summary>
     /// <param name="other">The other group to check compatibility with.</param>
     /// <returns>TRUE if the groups are compatible, FALSE otherwise.</returns>
@@ -451,7 +447,6 @@ public class MatchmakingGroup
         }
 
         // Validate MMR Disparity Within Group (Prevents Boosting/Smurfing)
-        // KONGOR Reference: MatchmakingGroup.cs Lines 261-273
         // If The Highest-Rated Player Is Too Far Above The Average Of The Rest, Reject
         if (Members.Count > 1 && HasExcessiveTMRDisparity())
         {
@@ -567,7 +562,7 @@ public class MatchmakingGroup
 
         if (fullGroupUpdate)
         {
-            // C++ Reference: c_teamfinder.cpp:3660-3685 — Per-recipient buddy data.
+            // Per-Recipient Buddy Data
             // The shared buffer is built once, then for each recipient the buffer is truncated
             // back to the shared length and per-recipient buddy flags are appended.
             long sharedBufferLength = update.Size;
@@ -671,7 +666,7 @@ public class MatchmakingGroup
 
     /// <summary>
     ///     Removes the member at the specified team slot from the group and records the action as a kick.
-    ///     C++ reference: <c>c_teamfinder.cpp</c> — <c>RemovePlayerFromGroup(yTeamSlot, groupID, isBotGroup)</c>.
+    ///     Based on the original implementation which removes a player by team slot.
     /// </summary>
     public void KickMemberBySlot(byte teamSlot)
     {
@@ -758,7 +753,7 @@ public class MatchmakingGroup
 
     /// <summary>
     ///     Calculates the campaign level (medal/rank) from TMR.
-    ///     C++ Reference: ECampaignLevel enum
+    ///     Based on the original campaign level thresholds.
     /// </summary>
     /// <param name="tmr">The player's Team Match Rating.</param>
     /// <returns>The campaign level (1-21).</returns>
@@ -802,7 +797,6 @@ public class MatchmakingGroup
     ///     Checks if the group has excessive TMR disparity between members.
     ///     This prevents boosting/smurfing by rejecting groups where the highest-rated
     ///     player is significantly above the average of the remaining members.
-    ///     KONGOR Reference: MatchmakingGroup.cs Lines 261-273
     /// </summary>
     /// <returns>TRUE if disparity exceeds the threshold, FALSE otherwise.</returns>
     private bool HasExcessiveTMRDisparity()

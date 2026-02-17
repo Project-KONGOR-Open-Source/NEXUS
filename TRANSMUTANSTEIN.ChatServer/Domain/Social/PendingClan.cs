@@ -2,7 +2,6 @@ namespace TRANSMUTANSTEIN.ChatServer.Domain.Social;
 
 /// <summary>
 ///     Tracks pending clan operations (invitations and creations) in memory.
-///     Mirrors the C++ <c>CClientManager::m_pClanInvites</c> and <c>CClientManager::m_pClanCreates</c> maps.
 /// </summary>
 public static class PendingClan
 {

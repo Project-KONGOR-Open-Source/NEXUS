@@ -3,7 +3,6 @@ namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Communication;
 /// <summary>
 ///     Handles whisper-to-all-buddies messages.
 ///     Broadcasts a message to all online friends, respecting DND/AFK chat modes.
-///     C++ reference: <c>c_client.cpp:1779</c> — <c>HandleWhisperBuddies</c>.
 /// </summary>
 [ChatCommand(ChatProtocol.Command.CHAT_CMD_WHISPER_BUDDIES)]
 public class WhisperBuddies : ISynchronousCommandProcessor<ClientChatSession>
@@ -27,11 +26,11 @@ public class WhisperBuddies : ISynchronousCommandProcessor<ClientChatSession>
             if (friendSession is null)
                 continue;
 
-            // C++ Reference: DND Recipients Are Skipped Without Notifying The Sender (Too Spammy)
+            // DND Recipients Are Skipped Without Notifying The Sender (Too Spammy)
             if (friendSession.Metadata.ClientChatModeState is ChatProtocol.ChatModeType.CHAT_MODE_DND)
                 continue;
 
-            // C++ Reference: AFK Recipients Receive The Message But No Auto-Response Is Sent (Too Spammy)
+            // AFK Recipients Receive The Message But No Auto-Response Is Sent (Too Spammy)
 
             ChatBuffer whisperBuddies = new ();
 

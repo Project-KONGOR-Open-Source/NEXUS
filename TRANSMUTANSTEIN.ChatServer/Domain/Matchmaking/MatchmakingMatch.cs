@@ -88,7 +88,6 @@ public class MatchmakingMatch
 
     /// <summary>
     ///     The arranged match type derived from the game type and ranked status.
-    ///     C++ reference: <c>c_group.cpp:962</c> — <c>CGroup::GetArrangedMatchType()</c>.
     /// </summary>
     public MatchType ArrangedMatchType => GameType switch
     {
@@ -96,7 +95,7 @@ public class MatchmakingMatch
         ChatProtocol.TMMGameType.TMM_GAME_TYPE_CASUAL          => IsRanked ? MatchType.AM_MATCHMAKING : MatchType.AM_UNRANKED_MATCHMAKING,
 
         // Reborn variants (including Caldavar Reborn) are intentionally grouped under MIDWARS.
-        // The original C++ game server uses this match type to route all reborn/midwars games
+        // The original match server uses this match type to route all reborn/midwars games
         // through a shared "alternative queue" code path for stat submission and leaver handling.
         // Changing this would cause mismatched behaviour on the unmodified game server binary.
         ChatProtocol.TMMGameType.TMM_GAME_TYPE_MIDWARS         => MatchType.AM_MATCHMAKING_MIDWARS,
@@ -157,7 +156,7 @@ public class MatchmakingMatch
     /// <summary>
     ///     Calculates the matchup prediction using a logistic function with the natural exponential base.
     ///     Returns the probability that Legion (team 1) wins.
-    ///     C++ reference: <c>c_match.cpp:170</c> — <c>1.0f / (1.0f + pow(M_E, -(fTeamRating - fOtherTeamRating) / matchmaker_logisticPredictionScale))</c>.
+    ///     Original formula: <c>1.0f / (1.0f + pow(M_E, -(fTeamRating - fOtherTeamRating) / matchmaker_logisticPredictionScale))</c>.
     /// </summary>
     public static double CalculateMatchupPrediction(double legionTMR, double hellbourneTMR, double scale = 80.0)
         => 1.0 / (1.0 + Math.Exp(-(legionTMR - hellbourneTMR) / scale));

@@ -60,7 +60,7 @@ public class MatchAnnounce(IDatabase distributedCacheStore) : IAsynchronousComma
             Log.Warning(@"Could Not Create MatchInformation: Server Not Found For ServerID {ServerID}", pendingMatch.AssignedServerID);
         }
 
-        // Send AutoMatchConnect To All Players (C++ AnnounceMatchReady)
+        // Send AutoMatchConnect To All Players
         // MatchFoundUpdate And FoundServerUpdate Were Already Sent From SpawnMatch
         SendAutoMatchConnect(pendingMatch, matchID, serverAddress, serverPort);
 

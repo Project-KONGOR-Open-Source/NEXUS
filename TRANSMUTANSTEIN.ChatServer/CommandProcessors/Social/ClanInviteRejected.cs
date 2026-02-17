@@ -3,7 +3,6 @@ namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Social;
 /// <summary>
 ///     Handles clan invitation rejection and clan creation founding member rejection.
 ///     The same command ID is used for both flows — checks pending invites first, then pending creations.
-///     C++ reference: <c>c_clientmanager.cpp:1840</c> — <c>HandleClanInviteRejected</c>.
 /// </summary>
 [ChatCommand(ChatProtocol.Command.CHAT_CMD_CLAN_ADD_REJECTED)]
 public class ClanInviteRejected : ISynchronousCommandProcessor<ClientChatSession>
@@ -39,7 +38,6 @@ public class ClanInviteRejected : ISynchronousCommandProcessor<ClientChatSession
     /// <summary>
     ///     Handles rejection of a clan creation founding member invite.
     ///     Removes the entire pending creation and notifies the founder.
-    ///     C++ reference: <c>c_clientmanager.cpp:1855-1890</c>.
     /// </summary>
     private static void HandleClanCreationRejection(ClientChatSession session)
     {

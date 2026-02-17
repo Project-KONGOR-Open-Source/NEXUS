@@ -274,7 +274,6 @@ public class MatchmakingService : BackgroundService, IDisposable
     ///     Checks if a team would produce "+0/-1" rating outcomes.
     ///     This happens when the highest-rated player is so far above their teammates
     ///     that they would gain 0 MMR for winning but lose MMR for losing.
-    ///     KONGOR Reference: GameFinder.cs Lines 1149-1157
     /// </summary>
     /// <param name="team">The team to check.</param>
     /// <returns>TRUE if the team would produce +0/-1 outcomes, FALSE otherwise.</returns>
@@ -302,9 +301,8 @@ public class MatchmakingService : BackgroundService, IDisposable
     }
 
     /// <summary>
-    ///     Forms teams from groups using HON's phased combine method.
-    ///     Prioritizes full teams first, then larger group combinations, then smaller.
-    ///     HON Reference: c_matchmaker.cpp ETMMCombineMethod enum
+    ///     Forms teams from groups using a phased combine method.
+    ///     Prioritises full teams first, then larger group combinations, then smaller.
     /// </summary>
     private static List<MatchmakingTeam> FormTeams(List<MatchmakingGroup> groups, int playersPerTeam)
     {
@@ -441,9 +439,6 @@ public class MatchmakingService : BackgroundService, IDisposable
             match.ServerPort);
 
         // Send Player Notifications
-        // C++ Reference: CTeamFinder::SpawnMatch sends MatchFoundUpdate before StartRemoteMatch,
-        // then StartRemoteMatch sends FoundServer after CreateMatch is sent to the game server.
-        // AutoMatchConnect is NOT sent here — it is sent later from MatchAnnounce when the server responds.
         SendMatchFoundUpdate(match, match.CorrelationID);
         SendFoundServerUpdate(match);
 

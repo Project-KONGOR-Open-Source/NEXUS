@@ -3,7 +3,6 @@ namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Social;
 /// <summary>
 ///     Handles clan promotion notifications.
 ///     Promotes a clan member to officer rank and broadcasts the rank change to all clan members.
-///     C++ reference: <c>c_client.cpp:1613</c> — <c>HandleClanPromoteNotification</c>.
 /// </summary>
 [ChatCommand(ChatProtocol.Command.CHAT_CMD_CLAN_PROMOTE_NOTIFY)]
 public class ClanPromoteNotify : ISynchronousCommandProcessor<ClientChatSession>

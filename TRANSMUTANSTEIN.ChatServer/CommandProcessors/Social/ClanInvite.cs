@@ -3,7 +3,6 @@ namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Social;
 /// <summary>
 ///     Handles clan invitation requests.
 ///     Validates permissions and target eligibility, then sends the invite to the target player.
-///     C++ reference: <c>c_clientmanager.cpp:1730</c> — <c>HandleClanInvite</c>.
 /// </summary>
 [ChatCommand(ChatProtocol.Command.CHAT_CMD_CLAN_ADD_MEMBER)]
 public class ClanInvite : ISynchronousCommandProcessor<ClientChatSession>

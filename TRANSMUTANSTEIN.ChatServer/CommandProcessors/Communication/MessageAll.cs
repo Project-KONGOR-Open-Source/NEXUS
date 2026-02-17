@@ -2,7 +2,6 @@ namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Communication;
 
 /// <summary>
 ///     Handles admin broadcast messages to all connected clients.
-///     C++ reference: <c>c_client.cpp:2242</c> — <c>HandleMessageAll</c>.
 /// </summary>
 [ChatCommand(ChatProtocol.Command.CHAT_CMD_MESSAGE_ALL)]
 public class MessageAll : ISynchronousCommandProcessor<ClientChatSession>
@@ -11,7 +10,7 @@ public class MessageAll : ISynchronousCommandProcessor<ClientChatSession>
     {
         MessageAllRequestData requestData = new (buffer);
 
-        // C++ Reference: Only Staff Can Broadcast Type 0 (Global) Messages
+        // Only Staff Can Broadcast Type 0 (Global) Messages
         if (requestData.MessageType is not 0 || session.Account.Type is not AccountType.Staff)
             return;
 

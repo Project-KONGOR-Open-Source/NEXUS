@@ -3,7 +3,6 @@ namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Social;
 /// <summary>
 ///     Handles clan invitation acceptance and clan creation founding member acceptance.
 ///     The same command ID is used for both flows — checks pending invites first, then pending creations.
-///     C++ reference: <c>c_clientmanager.cpp:1895</c> — <c>HandleClanInviteAccepted</c>.
 /// </summary>
 [ChatCommand(ChatProtocol.Command.CHAT_CMD_CLAN_ADD_ACCEPTED)]
 public class ClanInviteAccepted(MerrickContext merrick) : IAsynchronousCommandProcessor<ClientChatSession>
@@ -80,7 +79,6 @@ public class ClanInviteAccepted(MerrickContext merrick) : IAsynchronousCommandPr
     /// <summary>
     ///     Handles acceptance of a clan creation founding member invite.
     ///     If all 4 founding members have accepted, creates the clan.
-    ///     C++ reference: <c>c_clientmanager.cpp:1910-1960</c>.
     /// </summary>
     private async Task HandleClanCreationAcceptance(ClientChatSession session)
     {
@@ -118,7 +116,6 @@ public class ClanInviteAccepted(MerrickContext merrick) : IAsynchronousCommandPr
 
     /// <summary>
     ///     Creates the clan in the database and notifies all founding members.
-    ///     C++ reference: <c>c_clientmanager.cpp:700-810</c> — <c>CreateClanSuccess</c>.
     /// </summary>
     private async Task CreateClan(PendingClanCreation creation)
     {

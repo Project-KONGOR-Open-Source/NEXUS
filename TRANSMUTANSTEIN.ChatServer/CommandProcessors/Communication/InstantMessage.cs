@@ -3,7 +3,6 @@ namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Communication;
 /// <summary>
 ///     Handles instant messages via the CC panel.
 ///     Supports first-contact client info exchange (type 1/2) and subsequent short-form messages (type 0).
-///     C++ reference: <c>c_client.cpp:1348</c> — <c>HandleIM</c>.
 /// </summary>
 [ChatCommand(ChatProtocol.Command.CHAT_CMD_IM)]
 public class InstantMessage : ISynchronousCommandProcessor<ClientChatSession>
@@ -19,7 +18,7 @@ public class InstantMessage : ISynchronousCommandProcessor<ClientChatSession>
         ClientChatSession? recipientSession = Context.ClientChatSessions.Values
             .SingleOrDefault(chatSession => chatSession.Account.Name.Equals(requestData.TargetName, StringComparison.OrdinalIgnoreCase));
 
-        // C++ Reference: Treat Invisible And Offline The Same Way — Send IM Failed
+        // Treat Invisible And Offline The Same Way — Send IM Failed
         if (recipientSession is null || recipientSession.Metadata.ClientChatModeState is ChatProtocol.ChatModeType.CHAT_MODE_INVISIBLE)
         {
             SendFailure(session, requestData.TargetName);
@@ -68,7 +67,7 @@ public class InstantMessage : ISynchronousCommandProcessor<ClientChatSession>
     }
 
     /// <summary>
-    ///     Writes the client info buffer matching <c>GetClientInfoBuffer(buf, TRUE, FALSE, FALSE, FALSE, FALSE)</c>.
+    ///     Writes the client info buffer for instant message exchange.
     ///     Fields: name, account ID, status, flags, chat name colour, account icon.
     /// </summary>
     private static void WriteClientInformation(ChatBuffer buffer, ClientChatSession session)
@@ -102,7 +101,6 @@ file class InstantMessageRequestData
 
     /// <summary>
     ///     When TRUE, the sender is requesting a client info exchange (first contact).
-    ///     C++ reference: <c>ySendClientInfo == 1</c>.
     /// </summary>
     public bool SendClientInformation { get; init; }
 
