@@ -204,8 +204,8 @@ public class ClientChatSession(TCPServer server, IServiceProvider serviceProvide
     /// </summary>
     public ClientChatSession RejoinDefaultChannel()
     {
-        // Get Or Create The Default General Channel
-        ChatChannel defaultChannel = ChatChannel.GetOrCreate(this, ChatProtocol.CHAT_CHANNEL_BASE_NAME);
+        // Get Or Create The Next Available General Channel (With Overflow Support)
+        ChatChannel defaultChannel = ChatChannel.GetOrCreateGeneralChannel();
 
         // Join The Default Channel If Not Already A Member
         if (defaultChannel.Members.ContainsKey(Account.Name) is false)

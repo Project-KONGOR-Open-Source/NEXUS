@@ -32,6 +32,8 @@ public class ChatChannel
 
     public bool IsPermanent => Flags.HasFlag(ChatProtocol.ChatChannelType.CHAT_CHANNEL_FLAG_PERMANENT);
 
+    public bool IsGeneralChannel => Flags.HasFlag(ChatProtocol.ChatChannelType.CHAT_CHANNEL_FLAG_GENERAL_USE);
+
     public bool IsAuthenticationRequired => Flags.HasFlag(ChatProtocol.ChatChannelType.CHAT_CHANNEL_FLAG_AUTH_REQUIRED);
 
     public bool HasPassword() => string.IsNullOrEmpty(Password) is false;
@@ -43,6 +45,10 @@ public class ChatChannel
 
     public static ChatChannel GetOrCreate(ClientChatSession session, string channelName)
     {
+        // If The Requested Channel Is The General Channel Base Name, Route To The Overflow-Aware Method
+        if (channelName.Equals(ChatProtocol.CHAT_CHANNEL_BASE_NAME, StringComparison.OrdinalIgnoreCase))
+            return GetOrCreateGeneralChannel();
+
         bool isClanChannel = session.Account.Clan is not null && channelName == session.Account.Clan.GetChatChannelName();
 
         ChatProtocol.ChatChannelType chatChannelType = isClanChannel
@@ -54,6 +60,51 @@ public class ChatChannel
             Name = channelName,
             Flags = chatChannelType,
             Topic = $"Welcome To The {channelName} Channel !"
+        });
+
+        return channel;
+    }
+
+    /// <summary>
+    ///     Gets or creates a general chat channel with overflow support.
+    ///     Finds the first general channel with fewer than <see cref="ChatProtocol.MAX_USERS_PER_HON_CHANNEL"/> members.
+    ///     If all existing general channels are full, a new numbered channel is created (e.g. "KONGOR 2", "KONGOR 3").
+    ///     The first channel is permanent, but overflow channels are removed automatically when they become empty.
+    /// </summary>
+    public static ChatChannel GetOrCreateGeneralChannel()
+    {
+        string baseName = ChatProtocol.CHAT_CHANNEL_BASE_NAME;
+
+        // Find The First General Channel With Capacity
+        ChatChannel? availableChannel = Context.ChatChannels.Values
+            .Where(channel => channel.IsGeneralChannel)
+            .OrderBy(channel => channel.Name.Length)
+            .ThenBy(channel => channel.Name)
+            .SingleOrDefault(channel => channel.Members.Count < ChatProtocol.MAX_USERS_PER_HON_CHANNEL);
+
+        if (availableChannel is not null)
+            return availableChannel;
+
+        // All General Channels Are Full (Or None Exist); Determine The Next Channel Number
+        int existingCount = Context.ChatChannels.Values.Count(channel => channel.IsGeneralChannel);
+
+        // The First Channel Uses The Base Name; Subsequent Channels Are Numbered Starting At 2
+        string channelName = existingCount == 0
+            ? baseName
+            : $"{baseName} {existingCount + 1}";
+
+        // The First General Channel Is Permanent; Overflow Channels Are Not
+        ChatProtocol.ChatChannelType flags = ChatProtocol.ChatChannelType.CHAT_CHANNEL_FLAG_RESERVED
+            | ChatProtocol.ChatChannelType.CHAT_CHANNEL_FLAG_GENERAL_USE;
+
+        if (existingCount == 0)
+            flags |= ChatProtocol.ChatChannelType.CHAT_CHANNEL_FLAG_PERMANENT;
+
+        ChatChannel channel = Context.ChatChannels.GetOrAdd(channelName, new ChatChannel
+        {
+            Name = channelName,
+            Flags = flags,
+            Topic = $"Welcome To Heroes Of Newerth !"
         });
 
         return channel;
