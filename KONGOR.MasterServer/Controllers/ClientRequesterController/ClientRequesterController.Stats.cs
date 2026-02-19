@@ -77,6 +77,68 @@ public partial class ClientRequesterController
         return Ok(PhpSerialization.Serialize(response));
     }
 
+    /// <summary>
+    ///     Returns a paginated overview of recent match history for the specified account.
+    ///     Supports different table types: "player" (public matches), "campaign" and "campaign_casual" (ranked/casual matchmaking).
+    ///     Each entry contains the match ID, outcome, team, hero information, duration, map, and datetime.
+    /// </summary>
+    private async Task<IActionResult> GetMatchHistoryOverview()
+    {
+        string? accountName = Request.Form["nickname"];
+
+        if (accountName is null)
+            return BadRequest(@"Missing Value For Form Parameter ""nickname""");
+
+        Account? account = await MerrickContext.Accounts
+            .SingleOrDefaultAsync(account => account.Name.Equals(accountName));
+
+        if (account is null)
+            return NotFound($@"Account With Name ""{accountName}"" Was Not Found");
+
+        string? table = Request.Form["table"];
+
+        if (table is null)
+            return BadRequest(@"Missing Value For Form Parameter ""table""");
+
+        int limit = int.TryParse(Request.Form["num"], out int parsedLimit) ? parsedLimit : 100;
+
+        // Retrieve The Most Recent Match Entries For The Account, Joined With Match Statistics For Map And Datetime
+        List<(MatchParticipantStatistics Participant, MatchStatistics Match)> matchEntries = await MerrickContext.MatchParticipantStatistics
+            .Where(participant => participant.AccountID == account.ID)
+            .Join(MerrickContext.MatchStatistics, participant => participant.MatchID, match => match.MatchID, (participant, match) => new { Participant = participant, Match = match })
+            .OrderByDescending(entry => entry.Match.MatchID)
+            .Take(limit)
+            .Select(entry => new ValueTuple<MatchParticipantStatistics, MatchStatistics>(entry.Participant, entry.Match))
+            .ToListAsync();
+
+        List<MatchHistoryOverviewEntry> entries = [];
+
+        // Build The Response Entries
+        for (int index = 0; index < matchEntries.Count; index++)
+        {
+            (MatchParticipantStatistics participant, MatchStatistics match) = matchEntries[index];
+
+            entries.Add(new MatchHistoryOverviewEntry
+            {
+                MatchID = match.MatchID.ToString(),
+                Wins = participant.Win.ToString(),
+                Team = participant.Team.ToString(),
+                HeroKills = participant.HeroKills.ToString(),
+                Deaths = participant.HeroDeaths.ToString(),
+                HeroAssists = participant.HeroAssists.ToString(),
+                HeroID = (participant.HeroProductID ?? 0).ToString(),
+                SecondsPlayed = participant.SecondsPlayed.ToString(),
+                Map = match.Map,
+                MatchDatetime = match.TimestampRecorded.UtcDateTime.ToString("yyyy-MM-dd HH:mm:ss"),
+                HeroClientName = participant.HeroIdentifier
+            });
+        }
+
+        MatchHistoryOverviewResponse response = new () { Entries = entries };
+
+        return Ok(response.Serialise());
+    }
+
     private async Task<IActionResult> GetSimpleStatistics()
     {
         string? accountName = Request.Form["nickname"];
@@ -92,6 +154,58 @@ public partial class ClientRequesterController
         if (account is null)
             return NotFound($@"Account With Name ""{accountName}"" Was Not Found");
 
+        List<AccountStatistics> allAccountStatistics = await MerrickContext.AccountStatistics
+            .Where(statistics => statistics.AccountID == account.ID)
+            .ToListAsync();
+
+        Dictionary<AccountStatisticsType, AccountStatistics> statisticsByType = allAccountStatistics.ToDictionary(statistics => statistics.Type);
+
+        AggregateStatistics aggregates = AggregateStatistics.FromStatistics(statisticsByType);
+
+        // Aggregate Award Counts Across All Game Modes
+        AwardStatisticsSummary aggregatedAwards = new ();
+
+        foreach (AccountStatistics statistics in allAccountStatistics)
+        {
+            aggregatedAwards.MVPAwards += statistics.AwardStatistics.MVPAwards;
+            aggregatedAwards.AnnihilationAwards += statistics.AwardStatistics.AnnihilationAwards;
+            aggregatedAwards.QuadKillAwards += statistics.AwardStatistics.QuadKillAwards;
+            aggregatedAwards.LongestKillStreakAwards += statistics.AwardStatistics.LongestKillStreakAwards;
+            aggregatedAwards.SmackdownAwards += statistics.AwardStatistics.SmackdownAwards;
+            aggregatedAwards.MostKillsAwards += statistics.AwardStatistics.MostKillsAwards;
+            aggregatedAwards.MostAssistsAwards += statistics.AwardStatistics.MostAssistsAwards;
+            aggregatedAwards.LeastDeathsAwards += statistics.AwardStatistics.LeastDeathsAwards;
+            aggregatedAwards.MostBuildingDamageAwards += statistics.AwardStatistics.MostBuildingDamageAwards;
+            aggregatedAwards.MostWardsDestroyedAwards += statistics.AwardStatistics.MostWardsDestroyedAwards;
+            aggregatedAwards.MostHeroDamageDealtAwards += statistics.AwardStatistics.MostHeroDamageDealtAwards;
+            aggregatedAwards.HighestCreepScoreAwards += statistics.AwardStatistics.HighestCreepScoreAwards;
+        }
+
+        // Determine Top 4 Awards By Count
+        List<(string Name, int Count)> allAwards =
+        [
+            ("awd_masst", aggregatedAwards.MostAssistsAwards),
+            ("awd_mhdd", aggregatedAwards.MostHeroDamageDealtAwards),
+            ("awd_mbdmg", aggregatedAwards.MostBuildingDamageAwards),
+            ("awd_lgks", aggregatedAwards.LongestKillStreakAwards),
+            ("awd_mkills", aggregatedAwards.MostKillsAwards),
+            ("awd_ldths", aggregatedAwards.LeastDeathsAwards),
+            ("awd_mqk", aggregatedAwards.QuadKillAwards),
+            ("awd_smkd", aggregatedAwards.SmackdownAwards),
+            ("awd_annih", aggregatedAwards.AnnihilationAwards),
+            ("awd_mwk", aggregatedAwards.MostWardsDestroyedAwards),
+            ("awd_hcs", aggregatedAwards.HighestCreepScoreAwards)
+        ];
+
+        List<(string Name, int Count)> top4Awards = [.. allAwards.OrderByDescending(award => award.Count).Take(4)];
+
+        // Build Season Statistics From Ranked And Casual Matchmaking
+        int rankedWins = statisticsByType.TryGetValue(AccountStatisticsType.Matchmaking, out AccountStatistics? rankedStatistics) ? rankedStatistics.MatchesWon : 0;
+        int rankedLosses = statisticsByType.TryGetValue(AccountStatisticsType.Matchmaking, out _) ? rankedStatistics!.MatchesLost : 0;
+
+        int casualWins = statisticsByType.TryGetValue(AccountStatisticsType.MatchmakingCasual, out AccountStatistics? casualStatistics) ? casualStatistics.MatchesWon : 0;
+        int casualLosses = statisticsByType.TryGetValue(AccountStatisticsType.MatchmakingCasual, out _) ? casualStatistics!.MatchesLost : 0;
+
         ShowSimpleStatsResponse response = new ()
         {
             NameWithClanTag = account.NameWithClanTag,
@@ -99,27 +213,27 @@ public partial class ClientRequesterController
             Level = account.User.TotalLevel,
             LevelExperience = account.User.TotalExperience,
             NumberOfAvatarsOwned = account.User.OwnedStoreItems.Count(item => item.StartsWith("aa.")),
-            TotalMatchesPlayed = 5555, // TODO: Implement Matches Played
+            TotalMatchesPlayed = aggregates.TotalGamesPlayed,
             CurrentSeason = 666,
-            SimpleSeasonStats = new SimpleSeasonStats() // TODO: Implement Stats
+            SimpleSeasonStats = new SimpleSeasonStats
             {
-                RankedMatchesWon = 1001 /* ranked */ + 1001 /* ranked casual */,
-                RankedMatchesLost = 1002 /* ranked */ + 1002 /* ranked casual */,
-                WinStreak = Math.Max(1003 /* ranked */, 1003 /* ranked casual */),
-                InPlacementPhase = 0, // TODO: Implement Placement Matches
+                RankedMatchesWon = rankedWins,
+                RankedMatchesLost = rankedLosses,
+                WinStreak = 0, // TODO: Implement Win Streak Tracking
+                InPlacementPhase = 0, // TODO: Implement Placement Match Tracking
                 LevelsGainedThisSeason = account.User.TotalLevel
             },
-            SimpleCasualSeasonStats = new SimpleSeasonStats() // TODO: Implement Stats
+            SimpleCasualSeasonStats = new SimpleSeasonStats
             {
-                RankedMatchesWon = 1001 /* ranked */ + 1001 /* ranked casual */,
-                RankedMatchesLost = 1002 /* ranked */ + 1002 /* ranked casual */,
-                WinStreak = Math.Max(1003 /* ranked */, 1003 /* ranked casual */),
-                InPlacementPhase = 0, // TODO: Implement Placement Matches
+                RankedMatchesWon = casualWins,
+                RankedMatchesLost = casualLosses,
+                WinStreak = 0, // TODO: Implement Win Streak Tracking
+                InPlacementPhase = 0, // TODO: Implement Placement Match Tracking
                 LevelsGainedThisSeason = account.User.TotalLevel
             },
-            MVPAwardsCount = 1004,
-            Top4AwardNames = [ "awd_masst", "awd_mhdd", "awd_mbdmg", "awd_lgks" ], // TODO: Implement Awards
-            Top4AwardCounts = [ 1005, 1006, 1007, 1008 ], // TODO: Implement Awards
+            MVPAwardsCount = aggregatedAwards.MVPAwards,
+            Top4AwardNames = [.. top4Awards.Select(award => award.Name)],
+            Top4AwardCounts = [.. top4Awards.Select(award => award.Count)],
             CustomIconSlotID = SetCustomIconSlotID(account),
             OwnedStoreItems = account.User.OwnedStoreItems,
             SelectedStoreItems = account.SelectedStoreItems,
@@ -209,6 +323,30 @@ public partial class ClientRequesterController
             // TODO: Populate MasteryRewards From Mastery System Once Re-Implemented (Only For Own Account)
 
             return Ok(PhpSerialization.Serialize(response));
+        }
+
+        if (table is "campaign_history" or "history")
+        {
+            // The "is_casual" Parameter Determines Whether To Return Campaign Normal Or Campaign Casual Statistics
+            bool isCasual = Request.Form["is_casual"].ToString() is "1";
+
+            if (isCasual)
+            {
+                AccountStatistics statistics = statisticsByType[AccountStatisticsType.MatchmakingCasual];
+
+                CampaignCasualStatisticsResponse response = new (account, statistics, aggregates);
+
+                return Ok(PhpSerialization.Serialize(response));
+            }
+
+            else
+            {
+                AccountStatistics statistics = statisticsByType[AccountStatisticsType.Matchmaking];
+
+                CampaignStatisticsResponse response = new (account, statistics, aggregates);
+
+                return Ok(PhpSerialization.Serialize(response));
+            }
         }
 
         throw new ArgumentOutOfRangeException(nameof(table), table, $@"Unsupported Value For Form Parameter ""table"": ""{table}""");
@@ -371,6 +509,10 @@ public partial class ClientRequesterController
 
         MatchInformation? matchInformation = await DistributedCache.GetMatchInformation(matchStatistics.MatchID);
 
+        // Fall Back To The Database Snapshot If The Redis Cache Entry Has Been Evicted
+        if (matchInformation is null && matchStatistics.MatchInformationSnapshot is not null)
+            matchInformation = JsonSerializer.Deserialize<MatchInformation>(matchStatistics.MatchInformationSnapshot);
+
         if (matchInformation is null)
             return new NotFoundObjectResult("Match Information Not Found");
 
@@ -461,6 +603,83 @@ public partial class ClientRequesterController
             OwnedStoreItemsData = SetOwnedStoreItemsData(account),
             SelectedStoreItems = account.SelectedStoreItems,
             CustomIconSlotID = SetCustomIconSlotID(account)
+        };
+
+        return Ok(PhpSerialization.Serialize(response));
+    }
+
+    /// <summary>
+    ///     Returns account field statistics, owned store items, selected store items, currency balances, and other metadata.
+    ///     Called by the client during gameplay and on login to refresh the client's upgrades and account data.
+    /// </summary>
+    private async Task<IActionResult> GetUpgrades()
+    {
+        string cookie = Request.Form["cookie"].ToString();
+
+        string? accountName = await DistributedCache.GetAccountNameForSessionCookie(cookie);
+
+        if (accountName is null)
+            return Unauthorized($@"Unrecognised Cookie ""{cookie}""");
+
+        Account? account = await MerrickContext.Accounts
+            .Include(account => account.User)
+            .SingleOrDefaultAsync(account => account.Name.Equals(accountName));
+
+        if (account is null)
+            return NotFound($@"Account With Name ""{accountName}"" Was Not Found");
+
+        Dictionary<AccountStatisticsType, AccountStatistics> statisticsByType = await MerrickContext.AccountStatistics
+            .Where(statistics => statistics.AccountID == account.ID)
+            .ToDictionaryAsync(statistics => statistics.Type);
+
+        AggregateStatistics aggregates = AggregateStatistics.FromStatistics(statisticsByType);
+
+        FieldStatisticsEntry fieldStatisticsEntry = FieldStatisticsEntry.FromAccount(account, aggregates, statisticsByType);
+
+        GetUpgradesResponse response = new ()
+        {
+            FieldStatistics = new Dictionary<int, FieldStatisticsEntry> { { account.ID, fieldStatisticsEntry } },
+            OwnedStoreItems = account.User.OwnedStoreItems,
+            OwnedStoreItemsData = SetOwnedStoreItemsData(account),
+            SelectedStoreItems = account.SelectedStoreItems,
+            GoldCoins = account.User.GoldCoins,
+            SilverCoins = account.User.SilverCoins
+        };
+
+        return Ok(PhpSerialization.Serialize(response));
+    }
+
+    /// <summary>
+    ///     Returns initial account statistics used to refresh the client's account information after a match ends.
+    ///     Contains level, experience, skill ratings, games played, and disconnections per game mode.
+    /// </summary>
+    private async Task<IActionResult> GetInitialStatistics()
+    {
+        string cookie = Request.Form["cookie"].ToString();
+
+        string? accountName = await DistributedCache.GetAccountNameForSessionCookie(cookie);
+
+        if (accountName is null)
+            return Unauthorized($@"Unrecognised Cookie ""{cookie}""");
+
+        Account? account = await MerrickContext.Accounts
+            .Include(account => account.User)
+            .SingleOrDefaultAsync(account => account.Name.Equals(accountName));
+
+        if (account is null)
+            return NotFound($@"Account With Name ""{accountName}"" Was Not Found");
+
+        Dictionary<AccountStatisticsType, AccountStatistics> statisticsByType = await MerrickContext.AccountStatistics
+            .Where(statistics => statistics.AccountID == account.ID)
+            .ToDictionaryAsync(statistics => statistics.Type);
+
+        AggregateStatistics aggregates = AggregateStatistics.FromStatistics(statisticsByType);
+
+        FieldStatisticsEntry fieldStatisticsEntry = FieldStatisticsEntry.FromAccount(account, aggregates, statisticsByType);
+
+        GetInitialStatisticsResponse response = new ()
+        {
+            Information = new Dictionary<int, FieldStatisticsEntry> { { account.ID, fieldStatisticsEntry } }
         };
 
         return Ok(PhpSerialization.Serialize(response));

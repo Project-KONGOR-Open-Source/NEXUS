@@ -249,16 +249,16 @@ public class MatchSummary(MatchStatistics matchStatistics, List<MatchParticipant
     public int AveragePSR { get; init; } = matchStatistics.AveragePSR;
 
     /// <summary>
-    ///     The match date, originally formatted as "M/D/YYYY" (e.g. "3/15/2024").
+    ///     The match date.
     /// </summary>
     [PHPProperty("date")]
-    public string Date { get; init; } = DateTimeOffset.UtcNow.ToString("dd/MM/yyyy");
+    public string Date { get; init; } = matchStatistics.TimestampRecorded.UtcDateTime.ToString("dd/MM/yyyy");
 
     /// <summary>
-    ///     The match time, originally formatted in 12-hour format with AM/PM (e.g. "2:30:45 PM").
+    ///     The match time.
     /// </summary>
     [PHPProperty("time")]
-    public string Time { get; init; } = DateTimeOffset.UtcNow.ToString("HH:mm:ss");
+    public string Time { get; init; } = matchStatistics.TimestampRecorded.UtcDateTime.ToString("HH:mm:ss");
 
     /// <summary>
     ///     The match name.
@@ -364,10 +364,26 @@ public class MatchSummary(MatchStatistics matchStatistics, List<MatchParticipant
     public int BotMatch { get; init; } = matchInformation.MatchMode is PublicMatchMode.GAME_MODE_BOT_MATCH ? 1 : 0;
 
     /// <summary>
-    ///     Kros (ability draft) Mode flag (1 = enabled, 0 = disabled).
+    ///     The "km" field is a multi-purpose integer used to distinguish several game modes that share the same match type.
+    ///     <list type="bullet">
+    ///         <item>0 = None (standard mode)</item>
+    ///         <item>1 = Kros Mode (ability draft)</item>
+    ///         <item>2 = Solo Different Hero (1v1)</item>
+    ///         <item>3 = Solo Same Hero (1v1)</item>
+    ///         <item>4 = Hero Ban</item>
+    ///         <item>5 = MidWars Beta</item>
+    ///     </list>
     /// </summary>
     [PHPProperty("km")]
-    public int KrosMode { get; init; } = matchInformation.MatchMode is PublicMatchMode.GAME_MODE_KROS_MODE ? 1 : 0;
+    public int KrosMode { get; init; } = matchInformation.MatchMode switch
+    {
+        PublicMatchMode.GAME_MODE_KROS_MODE      => 1,
+        PublicMatchMode.GAME_MODE_SOLO_DIFF_HERO => 2,
+        PublicMatchMode.GAME_MODE_SOLO_SAME_HERO => 3,
+        PublicMatchMode.GAME_MODE_HEROBAN        => 4,
+        PublicMatchMode.GAME_MODE_MIDWARS_BETA   => 5,
+        _                                        => 0
+    };
 
     /// <summary>
     ///     Whether the match is part of an organized league system.
@@ -561,6 +577,38 @@ public class MatchSummary(MatchStatistics matchStatistics, List<MatchParticipant
     /// </summary>
     [PHPProperty("rapidfire")]
     public int BlitzMode { get; init; } = matchInformation.Options.HasFlag(MatchOptions.BlitzMode) ? 1 : 0;
+
+    /// <summary>
+    ///     Bot Match flag (1 = bot/co-op match, 0 = player match).
+    /// </summary>
+    [PHPProperty("bots")]
+    public int Bots { get; init; } = matchInformation.MatchMode is PublicMatchMode.GAME_MODE_BOT_MATCH ? 1 : 0;
+
+    /// <summary>
+    ///     Force Pick Mode flag (1 = enabled, 0 = disabled).
+    /// </summary>
+    [PHPProperty("fp")]
+    public int ForcePick { get; init; } = matchInformation.MatchMode is PublicMatchMode.GAME_MODE_FORCEPICK ? 1 : 0;
+
+    /// <summary>
+    ///     Solo Different Hero Mode flag (1 = enabled, 0 = disabled).
+    ///     Used for 1v1 matches where each player picks a different hero.
+    /// </summary>
+    [PHPProperty("sm")]
+    public int SoloDiffHero { get; init; } = matchInformation.MatchMode is PublicMatchMode.GAME_MODE_SOLO_DIFF_HERO ? 1 : 0;
+
+    /// <summary>
+    ///     Solo Same Hero Mode flag (1 = enabled, 0 = disabled).
+    ///     Used for 1v1 matches where both players pick the same hero.
+    /// </summary>
+    [PHPProperty("ss")]
+    public int SoloSameHero { get; init; } = matchInformation.MatchMode is PublicMatchMode.GAME_MODE_SOLO_SAME_HERO ? 1 : 0;
+
+    /// <summary>
+    ///     MidWars Beta Mode flag (1 = enabled, 0 = disabled).
+    /// </summary>
+    [PHPProperty("mwb")]
+    public int MidWarsBeta { get; init; } = matchInformation.MatchMode is PublicMatchMode.GAME_MODE_MIDWARS_BETA ? 1 : 0;
 
     /// <summary>
     ///     The UNIX timestamp (in seconds) when the match started.

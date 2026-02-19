@@ -14,11 +14,16 @@ public class MatchAbandoned(IDatabase distributedCacheStore) : IAsynchronousComm
         Log.Information(@"Match Abandoned On Server ID ""{ServerID}"": Failed={Failed}",
             session.Metadata.ServerID, requestData.Failed);
 
-        // The protocol does not carry a match ID; use the session metadata which is populated by NET_CHAT_GS_STATUS.
-        // A value of -1 means no match was ever announced (e.g. the abandon fired before NET_CHAT_GS_ANNOUNCE_MATCH), so there is nothing to clean up.
-        if (session.Metadata.MatchID is not -1)
+        // The Protocol Does Not Carry A Match ID, So We Use The Session Metadata Which Is Populated By NET_CHAT_GS_STATUS.
+        // A Value Of -1 Means No Match Was Ever Announced (e.g. An Abandonment Fired Before NET_CHAT_GS_ANNOUNCE_MATCH), So There Is Nothing To Clean Up
+        if (requestData.Failed && session.Metadata.MatchID is not -1)
         {
-            // Remove Match Information From Distributed Cache.
+            /*
+                Match Information Is Only Removed From The Distributed Cache Here If The Match Failed To Start
+                For Normal Match Endings, The Match Server Submits Statistics To The Master Server After This Message, And The Client Requests Match Statistics Shortly After
+                Both The Stat Submission And The Match Stats Response Require The Cached Match Information
+            */
+
             await distributedCacheStore.RemoveMatchInformation(session.Metadata.MatchID);
         }
 
