@@ -111,14 +111,14 @@ public partial class ClientRequesterController
             .Select(entry => new ValueTuple<MatchParticipantStatistics, MatchStatistics>(entry.Participant, entry.Match))
             .ToListAsync();
 
-        int totalEntries = matchEntries.Count + 2;
+        /*
+            Standard PHP Serialisation Via PhpSerialization.Serialize On A Class Produces A Fixed-Size PHP Array (a:N:{...}), Where N Is The Number Of Properties On The Class, Determined At Compile Time
+            This Response Requires A Variable Number Of Dynamically-Keyed Entries ("m0", "m1", ...) Alongside Fixed Entries Of Different Key And Value Types ("vested_threshold" → int, 0 → bool), All At The Same Level In A Single Flat PHP Array
+            A Class Cannot Model This Because The Property Count Is Not Known Until Runtime, And Dictionary<object, object> Would Sacrifice Type Safety
+            PHPArrayBuilder Provides A Typed API While Delegating To The Library's Native IDictionary Serialisation
+        */
 
-        // Build The PHP Serialised Response Manually To Avoid Untyped Dictionaries
-        // The Response Is A Flat PHP Array With Dynamic String Keys ("m0", "m1", ...), A String Key ("vested_threshold"), And An Integer Key (0)
-
-        StringBuilder serialised = new ();
-
-        serialised.Append($"a:{totalEntries}:{{");
+        PHPArrayBuilder response = new ();
 
         for (int index = 0; index < matchEntries.Count; index++)
         {
@@ -139,18 +139,13 @@ public partial class ClientRequesterController
                 HeroClientName = participant.HeroIdentifier
             };
 
-            serialised.Append(PhpSerialization.Serialize($"m{index}"));
-            serialised.Append(PhpSerialization.Serialize(entry));
+            response.Add($"m{index}", entry);
         }
 
-        serialised.Append(PhpSerialization.Serialize("vested_threshold"));
-        serialised.Append(PhpSerialization.Serialize(5));
-        serialised.Append(PhpSerialization.Serialize(0));
-        serialised.Append(PhpSerialization.Serialize(true));
+        response.Add("vested_threshold", 5);
+        response.Add(0, true);
 
-        serialised.Append('}');
-
-        return Ok(serialised.ToString());
+        return Ok(response.Serialise());
     }
 
     private async Task<IActionResult> GetSimpleStatistics()

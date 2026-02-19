@@ -52,6 +52,7 @@ global using SecureRemotePassword;
 global using StackExchange.Redis;
 
 global using System.Collections;
+global using System.Collections.Specialized;
 global using System.Net;
 global using System.Net.Sockets;
 global using System.Reflection;
