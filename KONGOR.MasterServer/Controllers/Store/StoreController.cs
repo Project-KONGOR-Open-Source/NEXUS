@@ -19,7 +19,10 @@ public class StoreController(MerrickContext databaseContext, IDatabase distribut
     [HttpPost(Name = "Store Requester")]
     public async Task<IActionResult> StoreRequester()
     {
-        string cookie = Request.Form["cookie"].ToString();
+        string? cookie = Request.Form["cookie"];
+
+        if (cookie is null)
+            return BadRequest(@"Missing Value For Form Parameter ""cookie""");
 
         (bool isValid, string? accountName) = await DistributedCache.ValidateAccountSessionCookie(cookie);
 
@@ -31,19 +34,27 @@ public class StoreController(MerrickContext databaseContext, IDatabase distribut
             return Ok(PhpSerialization.Serialize(CreateErrorResponse((int) StoreErrorCode.STORE_SESSION_ERROR)));
         }
 
+        string? requestCodeString = Request.Form["request_code"];
+
+        if (requestCodeString is null)
+            return BadRequest(@"Missing Value For Form Parameter ""request_code""");
+
+        if (Enum.TryParse(requestCodeString, out StoreRequestCode requestCode).Equals(false))
+            return BadRequest(@"Invalid Value For Form Parameter ""request_code""");
+
         Account account = await MerrickContext.Accounts
             .Include(queriedAccount => queriedAccount.User)
             .SingleAsync(queriedAccount => queriedAccount.Name.Equals(accountName));
 
-        if (int.TryParse(Request.Form["account_id"].ToString(), out int accountID) && account.ID != accountID)
+        string? accountIDString = Request.Form["account_id"];
+
+        if (accountIDString is not null && int.TryParse(accountIDString, out int accountID) && account.ID != accountID)
         {
             Logger.LogWarning(@"Store Request Account ID Mismatch For ""{AccountName}"" (Expected {RealID}, Got {ClaimedID})",
                 accountName, account.ID, accountID);
 
             return Ok(PhpSerialization.Serialize(CreateErrorResponse((int) StoreErrorCode.STORE_ACCOUNT_INFORMATION_ERROR)));
         }
-
-        StoreRequestCode requestCode = Enum.Parse<StoreRequestCode>(Request.Form["request_code"].ToString());
 
         switch (requestCode)
         {
@@ -79,9 +90,26 @@ public class StoreController(MerrickContext databaseContext, IDatabase distribut
     /// </summary>
     private IActionResult ViewStore(Account account)
     {
-        int categoryID = int.Parse(Request.Form["category_id"].ToString());
-        int currentPage = int.Parse(Request.Form["page"].ToString());
-        string hostTime = Request.Form["hostTime"].ToString();
+        string? categoryIDString = Request.Form["category_id"];
+
+        if (categoryIDString is null)
+            return BadRequest(@"Missing Value For Form Parameter ""category_id""");
+
+        if (int.TryParse(categoryIDString, out int categoryID).Equals(false))
+            return BadRequest(@"Invalid Value For Form Parameter ""category_id""");
+
+        string? pageString = Request.Form["page"];
+
+        if (pageString is null)
+            return BadRequest(@"Missing Value For Form Parameter ""page""");
+
+        if (int.TryParse(pageString, out int currentPage).Equals(false))
+            return BadRequest(@"Invalid Value For Form Parameter ""page""");
+
+        string? hostTime = Request.Form["hostTime"];
+
+        if (hostTime is null)
+            return BadRequest(@"Missing Value For Form Parameter ""hostTime""");
 
         Dictionary<string, object> response = new ();
 
@@ -102,7 +130,10 @@ public class StoreController(MerrickContext databaseContext, IDatabase distribut
     /// </summary>
     private IActionResult ViewVault(Account account)
     {
-        string hostTime = Request.Form["hostTime"].ToString();
+        string? hostTime = Request.Form["hostTime"];
+
+        if (hostTime is null)
+            return BadRequest(@"Missing Value For Form Parameter ""hostTime""");
 
         Dictionary<string, object> response = new ();
 
@@ -146,10 +177,34 @@ public class StoreController(MerrickContext databaseContext, IDatabase distribut
     /// </summary>
     private async Task<IActionResult> PurchaseProduct(Account account)
     {
-        int productID = int.Parse(Request.Form["product_id"].ToString());
-        string currency = Request.Form["currency"].ToString();
-        int categoryID = int.Parse(Request.Form["category_id"].ToString());
-        int currentPage = int.Parse(Request.Form["page"].ToString());
+        string? productIDString = Request.Form["product_id"];
+
+        if (productIDString is null)
+            return BadRequest(@"Missing Value For Form Parameter ""product_id""");
+
+        if (int.TryParse(productIDString, out int productID).Equals(false))
+            return BadRequest(@"Invalid Value For Form Parameter ""product_id""");
+
+        string? currency = Request.Form["currency"];
+
+        if (currency is null)
+            return BadRequest(@"Missing Value For Form Parameter ""currency""");
+
+        string? categoryIDString = Request.Form["category_id"];
+
+        if (categoryIDString is null)
+            return BadRequest(@"Missing Value For Form Parameter ""category_id""");
+
+        if (int.TryParse(categoryIDString, out int categoryID).Equals(false))
+            return BadRequest(@"Invalid Value For Form Parameter ""category_id""");
+
+        string? pageString = Request.Form["page"];
+
+        if (pageString is null)
+            return BadRequest(@"Missing Value For Form Parameter ""page""");
+
+        if (int.TryParse(pageString, out int currentPage).Equals(false))
+            return BadRequest(@"Invalid Value For Form Parameter ""page""");
 
         StoreItem? storeItem = StoreItems.GetByID(productID);
 
@@ -168,9 +223,20 @@ public class StoreController(MerrickContext databaseContext, IDatabase distribut
     /// </summary>
     private async Task<IActionResult> PurchaseProductInGame(Account account)
     {
-        string heroName = Request.Form["hero_name"].ToString();
-        string avatarCode = Request.Form["avatar_code"].ToString();
-        string currency = Request.Form["currency"].ToString();
+        string? heroName = Request.Form["hero_name"];
+
+        if (heroName is null)
+            return BadRequest(@"Missing Value For Form Parameter ""hero_name""");
+
+        string? avatarCode = Request.Form["avatar_code"];
+
+        if (avatarCode is null)
+            return BadRequest(@"Missing Value For Form Parameter ""avatar_code""");
+
+        string? currency = Request.Form["currency"];
+
+        if (currency is null)
+            return BadRequest(@"Missing Value For Form Parameter ""currency""");
 
         string itemCode = heroName + "." + avatarCode;
 
