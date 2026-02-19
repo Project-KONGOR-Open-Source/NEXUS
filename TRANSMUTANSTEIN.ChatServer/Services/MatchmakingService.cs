@@ -34,19 +34,19 @@ public class MatchmakingService : BackgroundService, IDisposable
         => Groups.Values.SingleOrDefault(group => group.Members.Any(member => member.Account.Name.Equals(memberName)));
 
     public static ConcurrentDictionary<int, MatchmakingGroup> SoloPlayerGroups
-        => new(Groups.Where(group => group.Value.Members.Count == 1));
+        => new (Groups.Where(group => group.Value.Members.Count == 1));
 
     public static ConcurrentDictionary<int, MatchmakingGroup> TwoPlayerGroups
-        => new(Groups.Where(group => group.Value.Members.Count == 2));
+        => new (Groups.Where(group => group.Value.Members.Count == 2));
 
     public static ConcurrentDictionary<int, MatchmakingGroup> ThreePlayerGroups
-        => new(Groups.Where(group => group.Value.Members.Count == 3));
+        => new (Groups.Where(group => group.Value.Members.Count == 3));
 
     public static ConcurrentDictionary<int, MatchmakingGroup> FourPlayerGroups
-        => new(Groups.Where(group => group.Value.Members.Count == 4));
+        => new (Groups.Where(group => group.Value.Members.Count == 4));
 
     public static ConcurrentDictionary<int, MatchmakingGroup> FivePlayerGroups
-        => new(Groups.Where(group => group.Value.Members.Count == 5));
+        => new (Groups.Where(group => group.Value.Members.Count == 5));
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -451,7 +451,7 @@ public class MatchmakingService : BackgroundService, IDisposable
         // Format: mode:<mode> map:<mapname> teamsize:<size> allheroes:true noleaver:true spectators:<count>
         string matchSettings = $"mode:{match.SelectedMode} map:{match.SelectedMap} teamsize:{match.LegionTeam.TeamSize} allheroes:true noleaver:true spectators:10";
 
-        ChatBuffer createMatch = new();
+        ChatBuffer createMatch = new ();
 
         createMatch.WriteCommand(ChatProtocol.ChatServerToGameServer.NET_CHAT_GS_CREATE_MATCH);
         createMatch.WriteInt8(matchType);             // Match Type
@@ -624,7 +624,7 @@ public class MatchmakingService : BackgroundService, IDisposable
     /// </summary>
     private static void SendNoServersFound(MatchmakingMatch match)
     {
-        ChatBuffer noServers = new();
+        ChatBuffer noServers = new ();
 
         noServers.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_QUEUE_UPDATE);
         noServers.WriteInt8(Convert.ToByte(ChatProtocol.TMMUpdateType.TMM_GROUP_NO_SERVERS_FOUND));
@@ -644,7 +644,7 @@ public class MatchmakingService : BackgroundService, IDisposable
         // Calculate Average Queue Time
         int averageQueueTimeSeconds = (int)queuedGroups.Average(group => group.QueueDuration.TotalSeconds);
 
-        ChatBuffer update = new();
+        ChatBuffer update = new ();
 
         update.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_QUEUE_UPDATE);
         update.WriteInt8(Convert.ToByte(ChatProtocol.TMMUpdateType.TMM_GROUP_QUEUE_UPDATE));
@@ -660,7 +660,7 @@ public class MatchmakingService : BackgroundService, IDisposable
     /// </summary>
     private static void SendMatchFoundUpdate(MatchmakingMatch match, int matchID)
     {
-        ChatBuffer matchFound = new();
+        ChatBuffer matchFound = new ();
 
         matchFound.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_MATCH_FOUND_UPDATE);
         matchFound.WriteString(match.SelectedMap);
@@ -679,7 +679,7 @@ public class MatchmakingService : BackgroundService, IDisposable
     /// </summary>
     private static void SendFoundServerUpdate(MatchmakingMatch match)
     {
-        ChatBuffer found = new();
+        ChatBuffer found = new ();
 
         found.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_QUEUE_UPDATE);
         found.WriteInt8(Convert.ToByte(ChatProtocol.TMMUpdateType.TMM_GROUP_FOUND_SERVER));
