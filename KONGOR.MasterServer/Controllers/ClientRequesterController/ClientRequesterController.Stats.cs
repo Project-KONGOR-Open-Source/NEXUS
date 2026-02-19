@@ -77,6 +77,82 @@ public partial class ClientRequesterController
         return Ok(PhpSerialization.Serialize(response));
     }
 
+    /// <summary>
+    ///     Returns a paginated overview of recent match history for the specified account.
+    ///     Supports different table types: "player" (public matches), "campaign" and "campaign_casual" (ranked/casual matchmaking).
+    ///     Each entry contains the match ID, outcome, team, hero information, duration, map, and datetime.
+    /// </summary>
+    private async Task<IActionResult> GetMatchHistoryOverview()
+    {
+        string? accountName = Request.Form["nickname"];
+
+        if (accountName is null)
+            return BadRequest(@"Missing Value For Form Parameter ""nickname""");
+
+        Account? account = await MerrickContext.Accounts
+            .SingleOrDefaultAsync(account => account.Name.Equals(accountName));
+
+        if (account is null)
+            return NotFound($@"Account With Name ""{accountName}"" Was Not Found");
+
+        string? table = Request.Form["table"];
+
+        if (table is null)
+            return BadRequest(@"Missing Value For Form Parameter ""table""");
+
+        int limit = int.TryParse(Request.Form["num"], out int parsedLimit) ? parsedLimit : 100;
+
+        // Retrieve The Most Recent Match Entries For The Account, Joined With Match Statistics For Map And Datetime
+        List<(MatchParticipantStatistics Participant, MatchStatistics Match)> matchEntries = await MerrickContext.MatchParticipantStatistics
+            .Where(participant => participant.AccountID == account.ID)
+            .Join(MerrickContext.MatchStatistics, participant => participant.MatchID, match => match.MatchID, (participant, match) => new { Participant = participant, Match = match })
+            .OrderByDescending(entry => entry.Match.MatchID)
+            .Take(limit)
+            .Select(entry => new ValueTuple<MatchParticipantStatistics, MatchStatistics>(entry.Participant, entry.Match))
+            .ToListAsync();
+
+        int totalEntries = matchEntries.Count + 2;
+
+        // Build The PHP Serialised Response Manually To Avoid Untyped Dictionaries
+        // The Response Is A Flat PHP Array With Dynamic String Keys ("m0", "m1", ...), A String Key ("vested_threshold"), And An Integer Key (0)
+
+        StringBuilder serialised = new ();
+
+        serialised.Append($"a:{totalEntries}:{{");
+
+        for (int index = 0; index < matchEntries.Count; index++)
+        {
+            (MatchParticipantStatistics participant, MatchStatistics match) = matchEntries[index];
+
+            MatchHistoryOverviewEntry entry = new ()
+            {
+                MatchID = match.MatchID.ToString(),
+                Wins = participant.Win.ToString(),
+                Team = participant.Team.ToString(),
+                HeroKills = participant.HeroKills.ToString(),
+                Deaths = participant.HeroDeaths.ToString(),
+                HeroAssists = participant.HeroAssists.ToString(),
+                HeroID = (participant.HeroProductID ?? 0).ToString(),
+                SecondsPlayed = participant.SecondsPlayed.ToString(),
+                Map = match.Map,
+                MatchDatetime = match.TimestampRecorded.UtcDateTime.ToString("yyyy-MM-dd HH:mm:ss"),
+                HeroClientName = participant.HeroIdentifier
+            };
+
+            serialised.Append(PhpSerialization.Serialize($"m{index}"));
+            serialised.Append(PhpSerialization.Serialize(entry));
+        }
+
+        serialised.Append(PhpSerialization.Serialize("vested_threshold"));
+        serialised.Append(PhpSerialization.Serialize(5));
+        serialised.Append(PhpSerialization.Serialize(0));
+        serialised.Append(PhpSerialization.Serialize(true));
+
+        serialised.Append('}');
+
+        return Ok(serialised.ToString());
+    }
+
     private async Task<IActionResult> GetSimpleStatistics()
     {
         string? accountName = Request.Form["nickname"];
@@ -261,6 +337,30 @@ public partial class ClientRequesterController
             // TODO: Populate MasteryRewards From Mastery System Once Re-Implemented (Only For Own Account)
 
             return Ok(PhpSerialization.Serialize(response));
+        }
+
+        if (table is "campaign_history" or "history")
+        {
+            // The "is_casual" Parameter Determines Whether To Return Campaign Normal Or Campaign Casual Statistics
+            bool isCasual = Request.Form["is_casual"].ToString() is "1";
+
+            if (isCasual)
+            {
+                AccountStatistics statistics = statisticsByType[AccountStatisticsType.MatchmakingCasual];
+
+                CampaignCasualStatisticsResponse response = new (account, statistics, aggregates);
+
+                return Ok(PhpSerialization.Serialize(response));
+            }
+
+            else
+            {
+                AccountStatistics statistics = statisticsByType[AccountStatisticsType.Matchmaking];
+
+                CampaignStatisticsResponse response = new (account, statistics, aggregates);
+
+                return Ok(PhpSerialization.Serialize(response));
+            }
         }
 
         throw new ArgumentOutOfRangeException(nameof(table), table, $@"Unsupported Value For Form Parameter ""table"": ""{table}""");
