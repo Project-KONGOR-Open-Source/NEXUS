@@ -12,11 +12,20 @@ public partial class StatsRequesterController
         if (matchServer is null)
             return Unauthorized($@"No Match Server Could Be Found For Session Cookie ""{form.Session}""");
 
+        // Snapshot The Match Information From Redis Before It Can Be Evicted
+        MatchInformation? matchInformation = await DistributedCache.GetMatchInformation(form.MatchStats.MatchID);
+
+        string? matchInformationSnapshot = matchInformation is not null
+            ? JsonSerializer.Serialize(matchInformation)
+            : null;
+
         MatchStatistics? existingMatchStatistics = await MerrickContext.MatchStatistics.SingleOrDefaultAsync(stats => stats.MatchID == form.MatchStats.MatchID);
 
         if (existingMatchStatistics is null)
         {
             MatchStatistics matchStatistics = form.ToMatchStatistics(matchServer.ID, matchServer.HostAccountName);
+
+            matchStatistics.MatchInformationSnapshot = matchInformationSnapshot;
 
             await MerrickContext.MatchStatistics.AddAsync(matchStatistics);
         }
@@ -51,6 +60,9 @@ public partial class StatsRequesterController
         }
 
         await MerrickContext.SaveChangesAsync();
+
+        // Evict The Match Information From Redis Now That It Has Been Persisted To The Database
+        await DistributedCache.RemoveMatchInformation(form.MatchStats.MatchID);
 
         return Ok();
     }

@@ -81,6 +81,13 @@ public class MatchStatistics
     public required int? AwardHighestCreepScore { get => field is -1 ? null : field; set => field = value is -1 ? null : value; }
 
     public List<FragEvent>? FragHistory { get; set; }
+
+    /// <summary>
+    ///     Snapshot of the match information that was available at the time the match started.
+    ///     Serialised as a JSON string and populated when statistics are submitted.
+    ///     Used by the match statistics response to reconstruct match metadata after the Redis cache entry has expired.
+    /// </summary>
+    public string? MatchInformationSnapshot { get; set; }
 }
 
 public class FragEvent
