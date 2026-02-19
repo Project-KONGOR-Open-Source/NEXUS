@@ -34,7 +34,15 @@ public class ClientChatSessionMetadata
 
     public required ChatProtocol.ChatModeType ClientChatModeState { get; set; }
 
+    /// <summary>
+    ///     The free-text reason for the current chat mode (e.g. "Away From Keyboard").
+    ///     Set by the client via <c>CHAT_CMD_SET_CHAT_MODE_TYPE</c>.
+    /// </summary>
+    public string ClientChatModeReason { get; set; } = string.Empty;
+
     public required string ClientRegion { get; set; }
 
     public required string ClientLanguage { get; set; }
+
+    public MatchServer? MatchServerConnectedTo { get; set; }
 }

@@ -303,9 +303,10 @@ public static class ChatProtocol
 
     public const ushort NET_CHAT_INVALID                                   = 0xFFFF;
 
-    public const byte CHAT_MESSAGE_MAX_LENGTH                              = 250;    // The Maximum Length Of Messages Sent To The Channel
-    public const byte CHAT_CHANNEL_MAX_LENGTH                              = 35;     // The Maximum Length Of Channel Names
-    public const byte CHAT_CHANNEL_TOPIC_MAX_LENGTH                        = 140;    // The Maximum Length Of Channel Topics
+    public const byte CHAT_MESSAGE_MAX_LENGTH                              = 250;      // The Maximum Length Of Messages Sent To The Channel
+    public const byte CHAT_CHANNEL_MAX_LENGTH                              = 35;       // The Maximum Length Of Channel Names
+    public const byte CHAT_CHANNEL_TOPIC_MAX_LENGTH                        = 140;      // The Maximum Length Of Channel Topics
+    public const string CHAT_CHANNEL_BASE_NAME                             = "KONGOR"; // The Default General Chat Channel Name
 
     public const int INVALID_CHAT_CHANNEL                                  = -1;
 

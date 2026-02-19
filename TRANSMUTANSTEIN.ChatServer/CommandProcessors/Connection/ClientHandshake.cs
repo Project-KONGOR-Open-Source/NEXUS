@@ -112,11 +112,11 @@ public class ClientHandshake(MerrickContext merrick, IDatabase distributedCacheS
             return;
         }
 
-        // Accept Connection, Send Options, And Broadcast Connection To Friends And Clan Members
+        // Accept Connection, Send Options, Then Complete The Connection
         session
             .Accept(account)
             .SendOptionsAndRemoteCommands()
-            .BroadcastConnection();
+            .SetOnline();
     }
 }
 

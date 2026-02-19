@@ -6,7 +6,11 @@ namespace KONGOR.MasterServer.Models.ServerManagement;
 /// </summary>
 public class MatchInformation
 {
-    public int MatchID => TimestampStarted.GetDeterministicInt32Hash();
+    /// <summary>
+    ///     The unique match ID assigned by the match server.
+    ///     This is set once when the match server announces the match via NET_CHAT_GS_ANNOUNCE_MATCH.
+    /// </summary>
+    public required int MatchID { get; init; }
 
     public required string MatchName { get; set; }
 
