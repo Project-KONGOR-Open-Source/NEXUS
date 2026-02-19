@@ -117,8 +117,8 @@ public class StoreItem
         StoreItemType.TauntBadge         => "tb.",
         StoreItemType.TeleportEffect     => "te.",
         StoreItemType.SelectionCircle    => "sc.",
-        StoreItemType.Bundle             => "",
-        _                                => ""
+        StoreItemType.Bundle             => string.Empty,
+        _                                => string.Empty
     };
 }
 
