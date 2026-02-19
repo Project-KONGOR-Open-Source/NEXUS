@@ -451,10 +451,6 @@ public class MatchmakingService : BackgroundService, IDisposable
         // Format: mode:<mode> map:<mapname> teamsize:<size> allheroes:true noleaver:true spectators:<count>
         string matchSettings = $"mode:{match.SelectedMode} map:{match.SelectedMap} teamsize:{match.LegionTeam.TeamSize} allheroes:true noleaver:true spectators:10";
 
-        // Build Player Info List
-        List<MatchmakingGroupMember> legionPlayers = [.. match.LegionTeam.GetAllMembers().OrderBy(member => member.TMR)];
-        List<MatchmakingGroupMember> hellbournePlayers = [.. match.HellbourneTeam.GetAllMembers().OrderBy(member => member.TMR)];
-
         ChatBuffer createMatch = new();
 
         createMatch.WriteCommand(ChatProtocol.ChatServerToGameServer.NET_CHAT_GS_CREATE_MATCH);
@@ -468,54 +464,62 @@ public class MatchmakingService : BackgroundService, IDisposable
         createMatch.WriteInt8(0);                     // Unknown3
 
         // Write Player Count
-        int totalPlayers = legionPlayers.Count + hellbournePlayers.Count;
+        int totalPlayers = match.LegionTeam.PlayerCount + match.HellbourneTeam.PlayerCount;
         createMatch.WriteInt8(Convert.ToByte(totalPlayers));
 
-        // Track Group Index Across Both Teams (C++ Uses Single Counter)
+        // Build A Lookup From Each Member To Their Group Index (Continuous Across Both Teams)
+        Dictionary<MatchmakingGroupMember, byte> memberGroupIndices = [];
         byte groupIndex = 0;
-
-        // NOTE: Slot Is Continuous Within Each Team, Group Index Is Continuous Across Both Teams
-
-        // Write Legion Players (Team 1)
-        byte legionSlot = 0;
 
         foreach (MatchmakingGroup group in match.LegionTeam.Groups)
         {
             foreach (MatchmakingGroupMember member in group.Members)
-            {
-                createMatch.WriteInt32(member.Account.ID);              // Account ID
-                createMatch.WriteInt8(1);                               // Team (1 = Legion)
-                createMatch.WriteInt8(legionSlot++);                    // Slot (Continuous Within Team)
-                createMatch.WriteInt8(0);                               // Social Bonus (0 = None)
-                createMatch.WriteFloat32((float)member.MatchWinValue);  // Win MMR Delta
-                createMatch.WriteFloat32((float)member.MatchLossValue); // Loss MMR Delta
-                createMatch.WriteInt8(0);                               // Is Provisional (FALSE)
-                createMatch.WriteInt8(groupIndex);                      // Group Index (Continuous Across Teams)
-                createMatch.WriteInt8(0);                               // Benefit Value (0 = Normal)
-            }
+                memberGroupIndices[member] = groupIndex;
 
             groupIndex++;
+        }
+
+        foreach (MatchmakingGroup group in match.HellbourneTeam.Groups)
+        {
+            foreach (MatchmakingGroupMember member in group.Members)
+                memberGroupIndices[member] = groupIndex;
+
+            groupIndex++;
+        }
+
+        // Write Players Sorted By TMR Ascending So That The Lowest-Rated Player Gets Slot 0 (Picks First)
+        // And The Highest-Rated Player Gets The Last Slot (Picks Last)
+
+        // Write Legion Players (Team 1)
+        byte legionSlot = 0;
+
+        foreach (MatchmakingGroupMember member in match.LegionTeam.GetAllMembers().OrderBy(member => member.TMR))
+        {
+            createMatch.WriteInt32(member.Account.ID);              // Account ID
+            createMatch.WriteInt8(1);                               // Team (1 = Legion)
+            createMatch.WriteInt8(legionSlot++);                    // Slot (Continuous Within Team)
+            createMatch.WriteInt8(0);                               // Social Bonus (0 = None)
+            createMatch.WriteFloat32((float)member.MatchWinValue);  // Win MMR Delta
+            createMatch.WriteFloat32((float)member.MatchLossValue); // Loss MMR Delta
+            createMatch.WriteInt8(0);                               // Is Provisional (FALSE)
+            createMatch.WriteInt8(memberGroupIndices[member]);      // Group Index (Continuous Across Teams)
+            createMatch.WriteInt8(0);                               // Benefit Value (0 = Normal)
         }
 
         // Write Hellbourne Players (Team 2)
         byte hellbourneSlot = 0;
 
-        foreach (MatchmakingGroup group in match.HellbourneTeam.Groups)
+        foreach (MatchmakingGroupMember member in match.HellbourneTeam.GetAllMembers().OrderBy(member => member.TMR))
         {
-            foreach (MatchmakingGroupMember member in group.Members)
-            {
-                createMatch.WriteInt32(member.Account.ID);              // Account ID
-                createMatch.WriteInt8(2);                               // Team (2 = Hellbourne)
-                createMatch.WriteInt8(hellbourneSlot++);                // Slot (Continuous Within Team)
-                createMatch.WriteInt8(0);                               // Social Bonus (0 = None)
-                createMatch.WriteFloat32((float)member.MatchWinValue);  // Win MMR Delta
-                createMatch.WriteFloat32((float)member.MatchLossValue); // Loss MMR Delta
-                createMatch.WriteInt8(0);                               // Is Provisional (FALSE)
-                createMatch.WriteInt8(groupIndex);                      // Group Index (Continuous Across Teams)
-                createMatch.WriteInt8(0);                               // Benefit Value (0 = Normal)
-            }
-
-            groupIndex++;
+            createMatch.WriteInt32(member.Account.ID);              // Account ID
+            createMatch.WriteInt8(2);                               // Team (2 = Hellbourne)
+            createMatch.WriteInt8(hellbourneSlot++);                // Slot (Continuous Within Team)
+            createMatch.WriteInt8(0);                               // Social Bonus (0 = None)
+            createMatch.WriteFloat32((float)member.MatchWinValue);  // Win MMR Delta
+            createMatch.WriteFloat32((float)member.MatchLossValue); // Loss MMR Delta
+            createMatch.WriteInt8(0);                               // Is Provisional (FALSE)
+            createMatch.WriteInt8(memberGroupIndices[member]);      // Group Index (Continuous Across Teams)
+            createMatch.WriteInt8(0);                               // Benefit Value (0 = Normal)
         }
 
         // Write Group IDs (Count And List Of Group IDs)
