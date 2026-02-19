@@ -111,20 +111,14 @@ public partial class ClientRequesterController
             .Select(entry => new ValueTuple<MatchParticipantStatistics, MatchStatistics>(entry.Participant, entry.Match))
             .ToListAsync();
 
-        /*
-            Standard PHP Serialisation Via PhpSerialization.Serialize On A Class Produces A Fixed-Size PHP Array (a:N:{...}), Where N Is The Number Of Properties On The Class, Determined At Compile Time
-            This Response Requires A Variable Number Of Dynamically-Keyed Entries ("m0", "m1", ...) Alongside Fixed Entries Of Different Key And Value Types ("vested_threshold" → int, 0 → bool), All At The Same Level In A Single Flat PHP Array
-            A Class Cannot Model This Because The Property Count Is Not Known Until Runtime, And Dictionary<object, object> Would Sacrifice Type Safety
-            PHPArrayBuilder Provides A Typed API While Delegating To The Library's Native IDictionary Serialisation
-        */
+        List<MatchHistoryOverviewEntry> entries = [];
 
-        PHPArrayBuilder response = new ();
-
+        // Build The Response Entries
         for (int index = 0; index < matchEntries.Count; index++)
         {
             (MatchParticipantStatistics participant, MatchStatistics match) = matchEntries[index];
 
-            MatchHistoryOverviewEntry entry = new ()
+            entries.Add(new MatchHistoryOverviewEntry
             {
                 MatchID = match.MatchID.ToString(),
                 Wins = participant.Win.ToString(),
@@ -137,13 +131,10 @@ public partial class ClientRequesterController
                 Map = match.Map,
                 MatchDatetime = match.TimestampRecorded.UtcDateTime.ToString("yyyy-MM-dd HH:mm:ss"),
                 HeroClientName = participant.HeroIdentifier
-            };
-
-            response.Add($"m{index}", entry);
+            });
         }
 
-        response.Add("vested_threshold", 5);
-        response.Add(0, true);
+        MatchHistoryOverviewResponse response = new () { Entries = entries };
 
         return Ok(response.Serialise());
     }
