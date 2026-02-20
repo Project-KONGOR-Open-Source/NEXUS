@@ -5,7 +5,7 @@
         {
             "Map": "caldavar",
             "GameTypes": [ 6, 7 ],
-            "Modes": [ "ap", "sd", "ar", "rb" ],
+            "Modes": [ "rb" ],
             "Regions": [ "EU", "USE", "USW", "AU", "BR", "RU" ],
             "Match": {
                 "MaximumPlayerRatingDifference": 250,
