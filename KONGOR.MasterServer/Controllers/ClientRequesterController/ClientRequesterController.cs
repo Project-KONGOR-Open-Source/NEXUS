@@ -54,8 +54,9 @@ public partial class ClientRequesterController(MerrickContext databaseContext, I
             // statistics
             "get_account_all_hero_stats"    => await GetHeroStatistics(),
             "get_match_stats"               => await GetMatchStatistics(),
-            //"client_events_info"            => Ok(@"{""success"":true,""data"":[],""errors"":""invalid region"",""vested_threshold"":5,""0"":true}"),
-            //"get_special_messages"          => Ok(@"a:4:{s:4:""date"";s:10:""2022-04-20"";s:8:""messages"";a:0:{}s:16:""vested_threshold"";i:5;i:0;b:1;}"),
+            "client_events_info"            => GetClientEventsInfo(),
+            "get_special_messages"          => GetSpecialMessages(),
+            "claim_season_rewards"          => ClaimSeasonRewards(),
             "get_products"                  => GetProducts(),
             "get_upgrades"                  => await GetUpgrades(),
             "get_initStats"                 => await GetInitialStatistics(),
@@ -85,6 +86,9 @@ public partial class ClientRequesterController(MerrickContext databaseContext, I
             "match_history_overview"        => await GetMatchHistoryOverview(),
             "show_stats"                    => await GetStatistics(),
 
+            // store
+            "get_daily_special"             => GetDailySpecial(),
+
             // guides
             "get_guide_list_filtered"       => await GetGuideList(),
             "get_guide"                     => await GetGuide(),
@@ -92,5 +96,68 @@ public partial class ClientRequesterController(MerrickContext databaseContext, I
             // default
             _                               => throw new NotImplementedException($"Unsupported Client Requester Controller Form Parameter: f={Request.Form["f"].Single()}")
         };
+    }
+
+    /// <summary>
+    ///     Returns client events information.
+    ///     Currently returns an empty events list as no events are active.
+    /// </summary>
+    private IActionResult GetClientEventsInfo()
+    {
+        Dictionary<string, object> response = new ()
+        {
+            ["success"] = true,
+            ["data"] = Array.Empty<object>(),
+            ["errors"] = string.Empty,
+            ["vested_threshold"] = 5,
+            [" 0"] = true
+        };
+
+        return Ok(JsonSerializer.Serialize(response));
+    }
+
+    /// <summary>
+    ///     Returns special messages to be displayed on the client.
+    ///     Currently returns an empty messages list as no special messages are configured.
+    /// </summary>
+    private IActionResult GetSpecialMessages()
+    {
+        Dictionary<string, object> response = new ()
+        {
+            ["date"] = DateTimeOffset.UtcNow.ToString("yyyy-MM-dd"),
+            ["messages"] = Array.Empty<object>(),
+            ["vested_threshold"] = 5
+        };
+
+        return Ok(PhpSerialization.Serialize(response));
+    }
+
+    /// <summary>
+    ///     Claims season rewards for the requesting account.
+    ///     Currently returns an acknowledgement response as the seasonal rewards system is not yet implemented.
+    /// </summary>
+    private IActionResult ClaimSeasonRewards()
+    {
+        Dictionary<string, object> response = new ()
+        {
+            ["vested_threshold"] = 5
+        };
+
+        return Ok(PhpSerialization.Serialize(response));
+    }
+
+    /// <summary>
+    ///     Returns the daily special offers for the in-game store.
+    ///     Currently returns an empty list as the daily specials system is not yet implemented.
+    /// </summary>
+    private IActionResult GetDailySpecial()
+    {
+        Dictionary<string, object> response = new ()
+        {
+            ["list"] = Array.Empty<object>(),
+            ["vested_threshold"] = 5
+        };
+
+        return Ok(PhpSerialization.Serialize(response));
     }
 }
