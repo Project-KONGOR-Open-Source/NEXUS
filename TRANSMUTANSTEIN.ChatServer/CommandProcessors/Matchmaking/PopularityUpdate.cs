@@ -83,7 +83,7 @@ public class PopularityUpdate : ISynchronousCommandProcessor<ClientChatSession>
         MatchmakingConfiguration configuration = JSONConfiguration.MatchmakingConfiguration;
 
         List<string> maps = [.. configuration.Maps.Select(mapConfiguration => mapConfiguration.Map)];
-        List<int> gameTypes = [.. configuration.Maps.Select(mapConfiguration => mapConfiguration.GameType)];
+        List<int> gameTypes = [.. configuration.Maps.SelectMany(mapConfiguration => mapConfiguration.GameTypes)];
         List<string> gameModes = [.. configuration.GameModes];
         List<string> regions = [.. configuration.Regions];
 

@@ -4,7 +4,7 @@
     "Maps": [
         {
             "Map": "caldavar",
-            "GameType": 6,
+            "GameTypes": [ 6, 7 ],
             "Modes": [ "ap", "sd", "ar", "rb" ],
             "Regions": [ "EU", "USE", "USW", "AU", "BR", "RU" ],
             "Match": {
@@ -14,8 +14,8 @@
         },
         {
             "Map": "midwars",
-            "GameType": 3,
-            "Modes": [ "ar", "km", "hb" ],
+            "GameTypes": [ 3 ],
+            "Modes": [ "hb", "sd" ],
             "Regions": [ "EU", "USE", "USW", "AU", "BR", "RU" ],
             "Match": {
                 "MaximumPlayerRatingDifference": 250,
@@ -24,8 +24,8 @@
         },
         {
             "Map": "riftwars",
-            "GameType": 4,
-            "Modes": [ "ap", "ar" ],
+            "GameTypes": [ 4 ],
+            "Modes": [ "km" ],
             "Regions": [ "EU", "USE", "USW", "AU", "BR", "RU" ],
             "Match": {
                 "MaximumPlayerRatingDifference": 250,

@@ -35,9 +35,10 @@ public class MatchmakingMapConfiguration
     public required string Map { get; set; }
 
     /// <summary>
-    ///     The game type identifier for this map, matching <see cref="ChatProtocol.TMMGameType"/>.
+    ///     The game type identifiers for this map, matching <see cref="ChatProtocol.TMMGameType"/>.
+    ///     A map can support multiple game types (e.g. Caldavar supports both Campaign Normal and Campaign Casual).
     /// </summary>
-    public required int GameType { get; set; }
+    public required int[] GameTypes { get; set; }
 
     /// <summary>
     ///     The game modes available on this map (subset of <see cref="MatchmakingConfiguration.GameModes"/>).
