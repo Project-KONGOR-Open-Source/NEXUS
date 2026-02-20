@@ -23,8 +23,9 @@ public class MatchmakingMatch
 
     /// <summary>
     ///     The Hellbourne team (team 2).
+    ///     NULL for bot matches where the game server fills the opposing team with bots.
     /// </summary>
-    public required MatchmakingTeam HellbourneTeam { get; set; }
+    public MatchmakingTeam? HellbourneTeam { get; set; }
 
     /// <summary>
     ///     The predicted win probability for the Legion team (0.0 to 1.0).
@@ -87,6 +88,18 @@ public class MatchmakingMatch
     public bool IsRanked { get; set; }
 
     /// <summary>
+    ///     Whether this is a bot (co-op) match.
+    ///     Bot matches have only one human team; the game server fills the remaining slots with bots.
+    /// </summary>
+    public bool IsBotMatch { get; set; }
+
+    /// <summary>
+    ///     The bot difficulty level (1 = Easy, 2 = Medium, 3 = Hard).
+    ///     Only used when <see cref="IsBotMatch"/> is TRUE.
+    /// </summary>
+    public byte BotDifficulty { get; set; }
+
+    /// <summary>
     ///     The arranged match type derived from the game type and ranked status.
     /// </summary>
     public MatchType ArrangedMatchType => GameType switch
@@ -142,16 +155,27 @@ public class MatchmakingMatch
     public MatchmakingMatchState State { get; set; } = MatchmakingMatchState.Created;
 
     /// <summary>
-    ///     Gets all players in this match from both teams.
+    ///     The team size for this match, validated to be consistent across all teams.
+    /// </summary>
+    public int TeamSize => GetAllTeams().Select(team => team.TeamSize).Distinct().Single();
+
+    /// <summary>
+    ///     Gets all teams in this match.
+    /// </summary>
+    public IEnumerable<MatchmakingTeam> GetAllTeams()
+        => HellbourneTeam is not null ? [LegionTeam, HellbourneTeam] : [LegionTeam];
+
+    /// <summary>
+    ///     Gets all human players in this match from both teams.
     /// </summary>
     public IEnumerable<MatchmakingGroupMember> GetAllPlayers()
-        => LegionTeam.GetAllMembers().Concat(HellbourneTeam.GetAllMembers());
+        => GetAllTeams().SelectMany(team => team.GetAllMembers());
 
     /// <summary>
     ///     Gets all groups in this match from both teams.
     /// </summary>
     public IEnumerable<MatchmakingGroup> GetAllGroups()
-        => LegionTeam.Groups.Concat(HellbourneTeam.Groups);
+        => GetAllTeams().SelectMany(team => team.Groups);
 
     /// <summary>
     ///     Calculates the matchup prediction using a logistic function with the natural exponential base.
@@ -162,6 +186,36 @@ public class MatchmakingMatch
     /// </remarks>
     public static double CalculateMatchupPrediction(double legionTMR, double hellbourneTMR, double scale = 80.0)
         => 1.0 / (1.0 + Math.Exp(-(legionTMR - hellbourneTMR) / scale));
+
+    /// <summary>
+    ///     Creates a bot (co-op) match from a single group.
+    ///     The group is placed on the Legion team; the game server fills remaining slots with bots.
+    ///     In the original implementation, bot matches force the game type to <see cref="ChatProtocol.TMMGameType.TMM_GAME_TYPE_CASUAL"/> and the map to "caldavar".
+    /// </summary>
+    public static MatchmakingMatch FromBotGroup(MatchmakingGroup group)
+    {
+        MatchmakingTeam legionTeam = new () { Groups = [group], TeamSize = group.Information.TeamSize };
+
+        legionTeam.RecalculateStatistics();
+
+        MatchmakingMatch match = new ()
+        {
+            LegionTeam = legionTeam,
+            HellbourneTeam = null,
+            IsBotMatch = true,
+            BotDifficulty = group.Information.BotDifficulty,
+            SelectedMap = "caldavar",
+            SelectedMode = "botmatch",
+            GameType = ChatProtocol.TMMGameType.TMM_GAME_TYPE_CASUAL,
+            IsRanked = false
+        };
+
+        group.MatchedUp = true;
+        group.AssignedMatchGUID = match.GUID;
+        group.AssignedTeamGUID = legionTeam.GUID;
+
+        return match;
+    }
 
     /// <summary>
     ///     Creates a match from two teams and calculates the matchup prediction.
