@@ -8,9 +8,29 @@ namespace TRANSMUTANSTEIN.ChatServer.Domain.Core;
 /// </summary>
 public class ChatServer(IServiceProvider serviceProvider, IPAddress address, int clientPort, int matchServerPort, int matchServerManagerPort)
 {
-    private ClientChatServer ClientServer { get; init; } = new ClientChatServer(serviceProvider, address, clientPort);
-    private MatchServerChatServer MatchServer { get; init; } = new MatchServerChatServer(serviceProvider, address, matchServerPort);
-    private MatchServerManagerChatServer MatchServerManagerServer { get; init; } = new MatchServerManagerChatServer(serviceProvider, address, matchServerManagerPort);
+    private ClientChatServer ClientServer { get; init; } = new ClientChatServer(serviceProvider, address, clientPort)
+    {
+        OptionKeepAlive                = true,
+        OptionTCPKeepAliveTime         = 30,
+        OptionTCPKeepAliveInterval     = 10,
+        OptionTCPKeepAliveRetryCount   = 3
+    };
+
+    private MatchServerChatServer MatchServer { get; init; } = new MatchServerChatServer(serviceProvider, address, matchServerPort)
+    {
+        OptionKeepAlive                = true,
+        OptionTCPKeepAliveTime         = 30,
+        OptionTCPKeepAliveInterval     = 10,
+        OptionTCPKeepAliveRetryCount   = 3
+    };
+
+    private MatchServerManagerChatServer MatchServerManagerServer { get; init; } = new MatchServerManagerChatServer(serviceProvider, address, matchServerManagerPort)
+    {
+        OptionKeepAlive                = true,
+        OptionTCPKeepAliveTime         = 30,
+        OptionTCPKeepAliveInterval     = 10,
+        OptionTCPKeepAliveRetryCount   = 3
+    };
 
     public bool IsStarted => ClientServer.IsStarted && MatchServer.IsStarted && MatchServerManagerServer.IsStarted;
     public bool IsAccepting => ClientServer.IsAccepting && MatchServer.IsAccepting && MatchServerManagerServer.IsAccepting;
