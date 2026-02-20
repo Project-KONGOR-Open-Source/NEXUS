@@ -206,6 +206,7 @@ public class MatchmakingMatch
             BotDifficulty = group.Information.BotDifficulty,
             SelectedMap = "caldavar",
             SelectedMode = "botmatch",
+            SelectedRegion = group.Information.GameRegions.Length > 0 ? group.Information.GameRegions.RandomElement() : "NEWERTH",
             GameType = ChatProtocol.TMMGameType.TMM_GAME_TYPE_CASUAL,
             IsRanked = false
         };

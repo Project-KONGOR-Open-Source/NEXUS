@@ -1,5 +1,6 @@
 ﻿global using ASPIRE.Common;
 global using ASPIRE.Common.Enumerations.Match;
+global using ASPIRE.Common.Extensions.Collections;
 global using ASPIRE.Common.Extensions.Cryptography;
 global using ASPIRE.Common.Constants;
 global using ASPIRE.Common.ServiceDefaults;
