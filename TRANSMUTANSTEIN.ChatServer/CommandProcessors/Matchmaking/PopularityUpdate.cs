@@ -8,11 +8,11 @@ public class PopularityUpdate : ISynchronousCommandProcessor<ClientChatSession>
     /// </summary>
     private static readonly Dictionary<string, int> MapNameRegistry = new (StringComparer.OrdinalIgnoreCase)
     {
-        ["caldavar"]        = (int)ChatProtocol.TMMGameMap.TMM_GAME_MAP_FORESTS_OF_CALDAVAR,
-        ["grimms_crossing"] = (int)ChatProtocol.TMMGameMap.TMM_GAME_MAP_GRIMMS_CROSSING,
-        ["midwars"]         = (int)ChatProtocol.TMMGameMap.TMM_GAME_MAP_MIDWARS,
-        ["riftwars"]        = (int)ChatProtocol.TMMGameMap.TMM_GAME_MAP_RIFTWARS,
-        ["team_deathmatch"] = (int)ChatProtocol.TMMGameMap.TMM_GAME_MAP_TEAM_DEATHMATCH
+        ["caldavar"]        = (int) ChatProtocol.TMMGameMap.TMM_GAME_MAP_FORESTS_OF_CALDAVAR,
+        ["grimms_crossing"] = (int) ChatProtocol.TMMGameMap.TMM_GAME_MAP_GRIMMS_CROSSING,
+        ["midwars"]         = (int) ChatProtocol.TMMGameMap.TMM_GAME_MAP_MIDWARS,
+        ["riftwars"]        = (int) ChatProtocol.TMMGameMap.TMM_GAME_MAP_RIFTWARS,
+        ["team_deathmatch"] = (int) ChatProtocol.TMMGameMap.TMM_GAME_MAP_TEAM_DEATHMATCH
     };
 
     /// <summary>
@@ -20,31 +20,31 @@ public class PopularityUpdate : ISynchronousCommandProcessor<ClientChatSession>
     /// </summary>
     private static readonly Dictionary<string, int> GameModeRegistry = new (StringComparer.OrdinalIgnoreCase)
     {
-        ["ap"]  = (int)ChatProtocol.TMMGameMode.TMM_GAME_MODE_ALL_PICK,
-        ["apg"] = (int)ChatProtocol.TMMGameMode.TMM_GAME_MODE_ALL_PICK_GATED,
-        ["apd"] = (int)ChatProtocol.TMMGameMode.TMM_GAME_MODE_ALL_PICK_DUPLICATE_HERO,
-        ["sd"]  = (int)ChatProtocol.TMMGameMode.TMM_GAME_MODE_SINGLE_DRAFT,
-        ["bd"]  = (int)ChatProtocol.TMMGameMode.TMM_GAME_MODE_BANNING_DRAFT,
-        ["bp"]  = (int)ChatProtocol.TMMGameMode.TMM_GAME_MODE_BANNING_PICK,
-        ["ar"]  = (int)ChatProtocol.TMMGameMode.TMM_GAME_MODE_ALL_RANDOM,
-        ["lp"]  = (int)ChatProtocol.TMMGameMode.TMM_GAME_MODE_LOCK_PICK,
-        ["bb"]  = (int)ChatProtocol.TMMGameMode.TMM_GAME_MODE_BLIND_BAN,
-        ["bbg"] = (int)ChatProtocol.TMMGameMode.TMM_GAME_MODE_BLIND_BAN_GATED,
-        ["bbr"] = (int)ChatProtocol.TMMGameMode.TMM_GAME_MODE_BLIND_BAN_RAPID_FIRE,
-        ["bm"]  = (int)ChatProtocol.TMMGameMode.TMM_GAME_MODE_BOT_MATCH,
-        ["cm"]  = (int)ChatProtocol.TMMGameMode.TMM_GAME_MODE_CAPTAINS_PICK,
-        ["br"]  = (int)ChatProtocol.TMMGameMode.TMM_GAME_MODE_BALANCED_RANDOM,
-        ["km"]  = (int)ChatProtocol.TMMGameMode.TMM_GAME_MODE_KROS_MODE,
-        ["rd"]  = (int)ChatProtocol.TMMGameMode.TMM_GAME_MODE_RANDOM_DRAFT,
-        ["bdr"] = (int)ChatProtocol.TMMGameMode.TMM_GAME_MODE_BANNING_DRAFT_RAPID_FIRE,
-        ["cp"]  = (int)ChatProtocol.TMMGameMode.TMM_GAME_MODE_COUNTER_PICK,
-        ["fp"]  = (int)ChatProtocol.TMMGameMode.TMM_GAME_MODE_FORCE_PICK,
-        ["sp"]  = (int)ChatProtocol.TMMGameMode.TMM_GAME_MODE_SOCCER_PICK,
-        ["ss"]  = (int)ChatProtocol.TMMGameMode.TMM_GAME_MODE_SOLO_SAME,
-        ["sm"]  = (int)ChatProtocol.TMMGameMode.TMM_GAME_MODE_SOLO_DIFF,
-        ["hb"]  = (int)ChatProtocol.TMMGameMode.TMM_GAME_MODE_HERO_BAN,
-        ["mwb"] = (int)ChatProtocol.TMMGameMode.TMM_GAME_MODE_MIDWARS_BETA,
-        ["rb"]  = (int)ChatProtocol.TMMGameMode.TMM_GAME_MODE_REBORN
+        ["ap"]  = (int) ChatProtocol.TMMGameMode.TMM_GAME_MODE_ALL_PICK,
+        ["apg"] = (int) ChatProtocol.TMMGameMode.TMM_GAME_MODE_ALL_PICK_GATED,
+        ["apd"] = (int) ChatProtocol.TMMGameMode.TMM_GAME_MODE_ALL_PICK_DUPLICATE_HERO,
+        ["sd"]  = (int) ChatProtocol.TMMGameMode.TMM_GAME_MODE_SINGLE_DRAFT,
+        ["bd"]  = (int) ChatProtocol.TMMGameMode.TMM_GAME_MODE_BANNING_DRAFT,
+        ["bp"]  = (int) ChatProtocol.TMMGameMode.TMM_GAME_MODE_BANNING_PICK,
+        ["ar"]  = (int) ChatProtocol.TMMGameMode.TMM_GAME_MODE_ALL_RANDOM,
+        ["lp"]  = (int) ChatProtocol.TMMGameMode.TMM_GAME_MODE_LOCK_PICK,
+        ["bb"]  = (int) ChatProtocol.TMMGameMode.TMM_GAME_MODE_BLIND_BAN,
+        ["bbg"] = (int) ChatProtocol.TMMGameMode.TMM_GAME_MODE_BLIND_BAN_GATED,
+        ["bbr"] = (int) ChatProtocol.TMMGameMode.TMM_GAME_MODE_BLIND_BAN_RAPID_FIRE,
+        ["bm"]  = (int) ChatProtocol.TMMGameMode.TMM_GAME_MODE_BOT_MATCH,
+        ["cm"]  = (int) ChatProtocol.TMMGameMode.TMM_GAME_MODE_CAPTAINS_PICK,
+        ["br"]  = (int) ChatProtocol.TMMGameMode.TMM_GAME_MODE_BALANCED_RANDOM,
+        ["km"]  = (int) ChatProtocol.TMMGameMode.TMM_GAME_MODE_KROS_MODE,
+        ["rd"]  = (int) ChatProtocol.TMMGameMode.TMM_GAME_MODE_RANDOM_DRAFT,
+        ["bdr"] = (int) ChatProtocol.TMMGameMode.TMM_GAME_MODE_BANNING_DRAFT_RAPID_FIRE,
+        ["cp"]  = (int) ChatProtocol.TMMGameMode.TMM_GAME_MODE_COUNTER_PICK,
+        ["fp"]  = (int) ChatProtocol.TMMGameMode.TMM_GAME_MODE_FORCE_PICK,
+        ["sp"]  = (int) ChatProtocol.TMMGameMode.TMM_GAME_MODE_SOCCER_PICK,
+        ["ss"]  = (int) ChatProtocol.TMMGameMode.TMM_GAME_MODE_SOLO_SAME,
+        ["sm"]  = (int) ChatProtocol.TMMGameMode.TMM_GAME_MODE_SOLO_DIFF,
+        ["hb"]  = (int) ChatProtocol.TMMGameMode.TMM_GAME_MODE_HERO_BAN,
+        ["mwb"] = (int) ChatProtocol.TMMGameMode.TMM_GAME_MODE_MIDWARS_BETA,
+        ["rb"]  = (int) ChatProtocol.TMMGameMode.TMM_GAME_MODE_REBORN
     };
 
     /// <summary>
@@ -52,23 +52,24 @@ public class PopularityUpdate : ISynchronousCommandProcessor<ClientChatSession>
     /// </summary>
     private static readonly Dictionary<string, int> RegionRegistry = new (StringComparer.OrdinalIgnoreCase)
     {
-        ["USE"] = (int)ChatProtocol.TMMGameRegion.TMM_GAME_REGION_USE,
-        ["USW"] = (int)ChatProtocol.TMMGameRegion.TMM_GAME_REGION_USW,
-        ["EU"]  = (int)ChatProtocol.TMMGameRegion.TMM_GAME_REGION_EU,
-        ["SG"]  = (int)ChatProtocol.TMMGameRegion.TMM_GAME_REGION_SG,
-        ["MY"]  = (int)ChatProtocol.TMMGameRegion.TMM_GAME_REGION_MY,
-        ["PH"]  = (int)ChatProtocol.TMMGameRegion.TMM_GAME_REGION_PH,
-        ["TH"]  = (int)ChatProtocol.TMMGameRegion.TMM_GAME_REGION_TH,
-        ["ID"]  = (int)ChatProtocol.TMMGameRegion.TMM_GAME_REGION_ID,
-        ["VN"]  = (int)ChatProtocol.TMMGameRegion.TMM_GAME_REGION_VN,
-        ["RU"]  = (int)ChatProtocol.TMMGameRegion.TMM_GAME_REGION_RU,
-        ["KR"]  = (int)ChatProtocol.TMMGameRegion.TMM_GAME_REGION_KR,
-        ["AU"]  = (int)ChatProtocol.TMMGameRegion.TMM_GAME_REGION_AU,
-        ["LAT"] = (int)ChatProtocol.TMMGameRegion.TMM_GAME_REGION_LAT,
-        ["DX"]  = (int)ChatProtocol.TMMGameRegion.TMM_GAME_REGION_DX,
-        ["CN"]  = (int)ChatProtocol.TMMGameRegion.TMM_GAME_REGION_CN,
-        ["BR"]  = (int)ChatProtocol.TMMGameRegion.TMM_GAME_REGION_BR,
-        ["TR"]  = (int)ChatProtocol.TMMGameRegion.TMM_GAME_REGION_TR
+        ["USE"]     = (int) ChatProtocol.TMMGameRegion.TMM_GAME_REGION_USE,
+        ["USW"]     = (int) ChatProtocol.TMMGameRegion.TMM_GAME_REGION_USW,
+        ["EU"]      = (int) ChatProtocol.TMMGameRegion.TMM_GAME_REGION_EU,
+        ["SG"]      = (int) ChatProtocol.TMMGameRegion.TMM_GAME_REGION_SG,
+        ["MY"]      = (int) ChatProtocol.TMMGameRegion.TMM_GAME_REGION_MY,
+        ["PH"]      = (int) ChatProtocol.TMMGameRegion.TMM_GAME_REGION_PH,
+        ["TH"]      = (int) ChatProtocol.TMMGameRegion.TMM_GAME_REGION_TH,
+        ["ID"]      = (int) ChatProtocol.TMMGameRegion.TMM_GAME_REGION_ID,
+        ["VN"]      = (int) ChatProtocol.TMMGameRegion.TMM_GAME_REGION_VN,
+        ["RU"]      = (int) ChatProtocol.TMMGameRegion.TMM_GAME_REGION_RU,
+        ["KR"]      = (int) ChatProtocol.TMMGameRegion.TMM_GAME_REGION_KR,
+        ["AU"]      = (int) ChatProtocol.TMMGameRegion.TMM_GAME_REGION_AU,
+        ["LAT"]     = (int) ChatProtocol.TMMGameRegion.TMM_GAME_REGION_LAT,
+        ["DX"]      = (int) ChatProtocol.TMMGameRegion.TMM_GAME_REGION_DX,
+        ["CN"]      = (int) ChatProtocol.TMMGameRegion.TMM_GAME_REGION_CN,
+        ["BR"]      = (int) ChatProtocol.TMMGameRegion.TMM_GAME_REGION_BR,
+        ["TR"]      = (int) ChatProtocol.TMMGameRegion.TMM_GAME_REGION_TR,
+        ["NEWERTH"] = (int) ChatProtocol.TMMGameRegion.TMM_GAME_REGION_AUTO
     };
 
     public void Process(ClientChatSession session, ChatBuffer buffer)
