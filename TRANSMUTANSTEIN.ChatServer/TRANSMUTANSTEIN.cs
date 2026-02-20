@@ -10,6 +10,9 @@ public class TRANSMUTANSTEIN
         // Add Aspire Service Defaults
         builder.AddServiceDefaults();
 
+        // Configure Matchmaking Settings
+        builder.Services.Configure<MatchmakingSettings>(builder.Configuration.GetSection(MatchmakingSettings.SectionName));
+
         // Add The Database Context
         builder.AddSqlServerDbContext<MerrickContext>("MERRICK", configureSettings: null, configureDbContextOptions: options =>
         {
@@ -26,6 +29,9 @@ public class TRANSMUTANSTEIN
 
             // Enable Thread Safety Checks For Entity Framework
             options.EnableThreadSafetyChecks();
+
+            // Add Interceptors
+            options.AddMerrickInterceptors();
         });
 
         // Add Distributed Cache; The Connection String Maps To The "distributed-cache" Resource Defined In ASPIRE.ApplicationHost

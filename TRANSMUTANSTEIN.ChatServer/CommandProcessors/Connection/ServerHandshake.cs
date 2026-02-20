@@ -132,17 +132,9 @@ public class ServerHandshake(IDatabase distributedCacheStore, MerrickContext dat
         Log.Information(@"Match Server Connection Accepted - Server ID: ""{ServerID}"", Host Account: ""{HostAccountName}"", Address: ""{Address}:{Port}"", Location: ""{Location}""",
             requestData.ServerID, server.HostAccountName, server.IPAddress, server.Port, server.Location);
 
-        ChatBuffer acceptResponse = new ();
-
-        acceptResponse.WriteCommand(ChatProtocol.ChatServerToGameServer.NET_CHAT_GS_ACCEPT);
-
-        session.Send(acceptResponse);
-
         string uniqueServerName = Random.Shared.Next().ToString("X8"); // TODO: Use The Original Name As Identifier, To Verify Server Binaries Checksum
 
-        ChatBuffer remoteCommand = new ();
-
-        string[] commands =
+        string[] remoteCommands =
         [
             "svr_submitMatchStatItems true",
             "svr_submitMatchStatAbilities true",
@@ -151,12 +143,10 @@ public class ServerHandshake(IDatabase distributedCacheStore, MerrickContext dat
             "echo Project KONGOR Remote Configuration Was Injected Successfully"
         ];
 
-        remoteCommand.WriteCommand(ChatProtocol.ChatServerToGameServer.NET_CHAT_GS_REMOTE_COMMAND);
-        remoteCommand.WriteString(requestData.SessionCookie);
-        remoteCommand.WriteString(string.Join(";", commands));
-
-        // Inject The Match Server With Remote Configuration
-        session.Send(remoteCommand);
+        // Accept Connection And Send Configuration
+        session
+            .SetOnline()
+            .SendOptions(remoteCommands);
 
         server.Name = uniqueServerName;
 

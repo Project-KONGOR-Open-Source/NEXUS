@@ -29,6 +29,9 @@ public class MERRICK
 
             // Enable Thread Safety Checks For Entity Framework
             options.EnableThreadSafetyChecks();
+
+            // Add Interceptors
+            options.AddMerrickInterceptors();
         });
 
         // Add Database Initializer Telemetry

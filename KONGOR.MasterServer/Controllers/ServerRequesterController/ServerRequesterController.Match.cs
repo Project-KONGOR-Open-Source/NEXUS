@@ -41,8 +41,13 @@ public partial class ServerRequesterController
         int matchMode = int.TryParse(Request.Form["match_mode"], out int parsedMatchMode) ? parsedMatchMode
             : throw new ArgumentOutOfRangeException("match_mode", Request.Form["match_mode"].ToString(), @"Value Of Form Parameter ""match_mode"" Is Invalid");
 
+        DateTimeOffset timestampStarted = DateTimeOffset.UtcNow;
+
+        int matchID = timestampStarted.GetDeterministicInt32Hash();
+
         MatchInformation matchInformation = new ()
         {
+            MatchID = matchID,
             ServerID = matchServer.ID,
             ServerName = matchServer.Name,
             Map = map,
@@ -52,14 +57,20 @@ public partial class ServerRequesterController
             IsCasual = isCasual,
             MatchType = (MatchType) matchType,
             MatchMode = (PublicMatchMode) matchMode,
-            TimestampStarted = DateTimeOffset.UtcNow,
+            TimestampStarted = timestampStarted
         };
 
         await DistributedCache.SetMatchInformation(matchInformation);
 
         Dictionary<string, object> response = new ()
         {
-            ["match_id"] = matchInformation.MatchID
+            ["match_id"] = matchInformation.MatchID,
+            ["match_date"] = timestampStarted.UtcDateTime.ToString("yyyy-MM-dd HH:mm:ss"),
+            ["is_recommended"] = false,
+            ["soccer_hero_list"] = string.Empty,
+            ["free_hero_list"] = string.Empty,
+            ["early_access_hero_list"] = string.Empty,
+            ["disabled_hero_list"] = string.Empty
         };
 
         Logger.LogInformation(@"Match ID {MatchID} Has Started - Host Name: {HostName}, Server ID: {ServerID}, Map: {Map}",

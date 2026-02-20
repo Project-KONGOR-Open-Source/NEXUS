@@ -578,6 +578,343 @@ public sealed class DiscriminatedUnionPHPSerialisationTests
             }
         }
     }
+
+    /// <summary>
+    ///     Asserts that an empty discriminated union dictionary serialises to an empty PHP array.
+    /// </summary>
+    [Test]
+    public async Task EmptyDiscriminatedUnionDictionary_Serialises_To_EmptyPHPArray()
+    {
+        DiscriminatedUnionDictionary @object = new ()
+        {
+            OwnedStoreItemsData = new Dictionary<string, OneOf<StoreItemData, StoreItemDiscountCoupon>>()
+        };
+
+        string serialisedData = PhpSerialization.Serialize(@object);
+
+        const string expectedSerialisationOutput = @"a:1:{s:22:""owned_store_items_data"";a:0:{}}";
+
+        await Assert.That(serialisedData).IsEqualTo(expectedSerialisationOutput);
+
+        if (PhpSerialization.Deserialize(serialisedData) is not IDictionary deserialisedData)
+        {
+            Assert.Fail("Deserialised Data Is NULL");
+        }
+
+        else
+        {
+            // PhpSerializerNET Deserialises An Empty PHP Array (a:0:{}) As An Empty List Rather Than A Dictionary
+            if (deserialisedData["owned_store_items_data"] is not IList ownedItemsList)
+            {
+                Assert.Fail("Owned Store Items Data Is NULL");
+            }
+
+            else
+            {
+                await Assert.That(ownedItemsList.Count).IsEqualTo(0);
+            }
+        }
+    }
+
+    /// <summary>
+    ///     Asserts that a single-entry discriminated union dictionary with each union variant serialises correctly.
+    /// </summary>
+    [Test]
+    public async Task SingleEntryDiscriminatedUnionDictionary_Serialises_Correctly_For_Each_Variant()
+    {
+        DiscriminatedUnionDictionary firstVariant = new ()
+        {
+            OwnedStoreItemsData = new Dictionary<string, OneOf<StoreItemData, StoreItemDiscountCoupon>>
+            {
+                {
+                    "ai.icon:1", new StoreItemData
+                    {
+                        Data = "icon_data",
+                        AvailableFrom = "0",
+                        AvailableUntil = "0",
+                        Used = 0,
+                        Score = "0"
+                    }
+                }
+            }
+        };
+
+        DiscriminatedUnionDictionary secondVariant = new ()
+        {
+            OwnedStoreItemsData = new Dictionary<string, OneOf<StoreItemData, StoreItemDiscountCoupon>>
+            {
+                {
+                    "cp.coupon:1", new StoreItemDiscountCoupon
+                    {
+                        Id = 1,
+                        Name = "coupon",
+                        Hero = "Hero_Test",
+                        ApplicableProducts = "aa.Hero_Test.Alt",
+                        ApplicableProductsList = ["aa.Hero_Test.Alt"],
+                        DiscountExpirationDate = "31 December 3000"
+                    }
+                }
+            }
+        };
+
+        string firstSerialised = PhpSerialization.Serialize(firstVariant);
+        string secondSerialised = PhpSerialization.Serialize(secondVariant);
+
+        // First Variant Should Contain StoreItemData Properties
+        if (PhpSerialization.Deserialize(firstSerialised) is not IDictionary firstDeserialisedData)
+        {
+            Assert.Fail("First Deserialised Data Is NULL");
+        }
+
+        else
+        {
+            if (firstDeserialisedData["owned_store_items_data"] is not IDictionary firstItems)
+            {
+                Assert.Fail("First Owned Store Items Data Is NULL");
+            }
+
+            else
+            {
+                if (firstItems["ai.icon:1"] is not IDictionary firstItem)
+                {
+                    Assert.Fail("First Item Is NULL");
+                }
+
+                else
+                {
+                    using (Assert.Multiple())
+                    {
+                        await Assert.That(firstItem.Contains("data")).IsTrue();
+                        await Assert.That(firstItem.Contains("start_time")).IsTrue();
+                        await Assert.That(firstItem.Contains("end_time")).IsTrue();
+                        await Assert.That(firstItem.Contains("used")).IsTrue();
+                        await Assert.That(firstItem.Contains("score")).IsTrue();
+                    }
+                }
+            }
+        }
+
+        // Second Variant Should Contain StoreItemDiscountCoupon Properties
+        if (PhpSerialization.Deserialize(secondSerialised) is not IDictionary secondDeserialisedData)
+        {
+            Assert.Fail("Second Deserialised Data Is NULL");
+        }
+
+        else
+        {
+            if (secondDeserialisedData["owned_store_items_data"] is not IDictionary secondItems)
+            {
+                Assert.Fail("Second Owned Store Items Data Is NULL");
+            }
+
+            else
+            {
+                if (secondItems["cp.coupon:1"] is not IDictionary secondItem)
+                {
+                    Assert.Fail("Second Item Is NULL");
+                }
+
+                else
+                {
+                    using (Assert.Multiple())
+                    {
+                        await Assert.That(secondItem.Contains("product_id")).IsTrue();
+                        await Assert.That(secondItem.Contains("coupon_id")).IsTrue();
+                        await Assert.That(secondItem.Contains("coupon_products")).IsTrue();
+                        await Assert.That(secondItem.Contains("discount")).IsTrue();
+                        await Assert.That(secondItem.Contains("mmp_discount")).IsTrue();
+                    }
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    ///     Asserts that nested discriminated union dictionaries with a single player produce correct output.
+    /// </summary>
+    [Test]
+    public async Task NestedDiscriminatedUnionDictionary_With_SinglePlayer_Serialises_Correctly()
+    {
+        NestedDiscriminatedUnionDictionary @object = new ()
+        {
+            MatchPlayerStatistics = new Dictionary<int, Dictionary<int, OneOf<ExtendedNativePropertyCollection, NativePropertyCollection>>>
+            {
+                {
+                    999, new Dictionary<int, OneOf<ExtendedNativePropertyCollection, NativePropertyCollection>>
+                    {
+                        {
+                            42, new ExtendedNativePropertyCollection
+                            {
+                                AccountID = 42,
+                                Kills = 20,
+                                Deaths = 3,
+                                Assists = 12,
+                                MatchPerformanceQuickMatchExperience = "100",
+                                MatchPerformanceQuickMatchGoldCoins = "50",
+                                MatchPerformanceConsecutiveMatchExperience = "25",
+                                MatchPerformanceConsecutiveMatchGoldCoins = "15"
+                            }
+                        }
+                    }
+                }
+            }
+        };
+
+        string serialisedData = PhpSerialization.Serialize(@object);
+
+        if (PhpSerialization.Deserialize(serialisedData) is not IDictionary deserialisedData)
+        {
+            Assert.Fail("Deserialised Data Is NULL");
+        }
+
+        else
+        {
+            if (deserialisedData["match_player_stats"] is not IList matchList)
+            {
+                Assert.Fail("Match List Is NULL");
+            }
+
+            else
+            {
+                if (matchList[0] is not IList playerList)
+                {
+                    Assert.Fail("Player List Is NULL");
+                }
+
+                else
+                {
+                    if (playerList[0] is not IDictionary player)
+                    {
+                        Assert.Fail("Player Is NULL");
+                    }
+
+                    else
+                    {
+                        using (Assert.Multiple())
+                        {
+                            await Assert.That(player["account_id"]).IsEqualTo(42);
+                            await Assert.That(player["kills"]).IsEqualTo(20);
+                            await Assert.That(player["deaths"]).IsEqualTo(3);
+                            await Assert.That(player["assists"]).IsEqualTo(12);
+                            await Assert.That(player["perf_quick_exp"]).IsEqualTo("100");
+                            await Assert.That(player["perf_quick_gc"]).IsEqualTo("50");
+                            await Assert.That(player["perf_consec_exp"]).IsEqualTo("25");
+                            await Assert.That(player["perf_consec_gc"]).IsEqualTo("15");
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    ///     Asserts that an empty nested discriminated union dictionary serialises to an empty PHP array.
+    /// </summary>
+    [Test]
+    public async Task EmptyNestedDiscriminatedUnionDictionary_Serialises_To_EmptyPHPArray()
+    {
+        NestedDiscriminatedUnionDictionary @object = new ()
+        {
+            MatchPlayerStatistics = new Dictionary<int, Dictionary<int, OneOf<ExtendedNativePropertyCollection, NativePropertyCollection>>>()
+        };
+
+        string serialisedData = PhpSerialization.Serialize(@object);
+
+        const string expectedSerialisationOutput = @"a:1:{s:18:""match_player_stats"";a:0:{}}";
+
+        await Assert.That(serialisedData).IsEqualTo(expectedSerialisationOutput);
+    }
+
+    /// <summary>
+    ///     Asserts that both union variants serialise with the correct property set when they share a base class.
+    ///     The extended variant should contain all base properties plus its own additional properties.
+    /// </summary>
+    [Test]
+    public async Task InheritedDiscriminatedUnion_Serialises_BaseAndDerivedProperties_Correctly()
+    {
+        NestedDiscriminatedUnionDictionary @object = new ()
+        {
+            MatchPlayerStatistics = new Dictionary<int, Dictionary<int, OneOf<ExtendedNativePropertyCollection, NativePropertyCollection>>>
+            {
+                {
+                    1, new Dictionary<int, OneOf<ExtendedNativePropertyCollection, NativePropertyCollection>>
+                    {
+                        { 10, new NativePropertyCollection { AccountID = 10, Kills = 1, Deaths = 2, Assists = 3 } },
+                        {
+                            20, new ExtendedNativePropertyCollection
+                            {
+                                AccountID = 20, Kills = 4, Deaths = 5, Assists = 6,
+                                MatchPerformanceQuickMatchExperience = "10",
+                                MatchPerformanceQuickMatchGoldCoins = "20",
+                                MatchPerformanceConsecutiveMatchExperience = "30",
+                                MatchPerformanceConsecutiveMatchGoldCoins = "40"
+                            }
+                        }
+                    }
+                }
+            }
+        };
+
+        string serialisedData = PhpSerialization.Serialize(@object);
+
+        if (PhpSerialization.Deserialize(serialisedData) is not IDictionary deserialisedData)
+        {
+            Assert.Fail("Deserialised Data Is NULL");
+        }
+
+        else
+        {
+            if (deserialisedData["match_player_stats"] is not IList matchList)
+            {
+                Assert.Fail("Match List Is NULL");
+            }
+
+            else
+            {
+                if (matchList[0] is not IDictionary playerDictionary)
+                    {
+                        Assert.Fail("Player Dictionary Is NULL");
+                    }
+
+                    else
+                    {
+                        // Base Variant Should Have Exactly 4 Properties
+                        // Non-Sequential Integer Keys (10, 20) Deserialise As IDictionary Entries
+                        if (playerDictionary[10] is not IDictionary basePlayer)
+                        {
+                            Assert.Fail("Base Player Is NULL");
+                        }
+
+                        else
+                        {
+                            using (Assert.Multiple())
+                            {
+                                await Assert.That(basePlayer.Count).IsEqualTo(4);
+                                await Assert.That(basePlayer["account_id"]).IsEqualTo(10);
+                                await Assert.That(basePlayer.Contains("perf_quick_exp")).IsFalse();
+                            }
+                        }
+
+                        // Extended Variant Should Have 8 Properties (4 Base + 4 Extended)
+                        if (playerDictionary[20] is not IDictionary extendedPlayer)
+                        {
+                            Assert.Fail("Extended Player Is NULL");
+                        }
+
+                        else
+                        {
+                            using (Assert.Multiple())
+                            {
+                                await Assert.That(extendedPlayer.Count).IsEqualTo(8);
+                                await Assert.That(extendedPlayer["account_id"]).IsEqualTo(20);
+                                await Assert.That(extendedPlayer["perf_quick_exp"]).IsEqualTo("10");
+                                await Assert.That(extendedPlayer["perf_consec_gc"]).IsEqualTo("40");
+                            }
+                        }
+                    }
+            }
+        }
+    }
 }
 
 file class DiscriminatedUnionDictionary

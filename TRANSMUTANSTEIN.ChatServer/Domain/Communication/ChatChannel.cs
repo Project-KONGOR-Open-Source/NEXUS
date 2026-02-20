@@ -6,11 +6,21 @@ public class ChatChannel
 
     public required string Name { get; set; }
 
-    public string Topic => $"Welcome To The {Name} Channel !";
+    public string Topic { get; set; } = string.Empty;
 
     public required ChatProtocol.ChatChannelType Flags { get; set; }
 
     public ConcurrentDictionary<string, ChatChannelMember> Members { get; set; } = [];
+
+    /// <summary>
+    ///     Set of account IDs banned from this channel.
+    /// </summary>
+    public HashSet<int> BannedAccountIDs { get; set; } = [];
+
+    /// <summary>
+    ///     Set of lowercase account names authenticated to join this channel when authentication is enabled.
+    /// </summary>
+    public HashSet<string> AuthenticatedAccountNames { get; set; } = [];
 
     /// <summary>
     ///     Channel password for access control.
@@ -22,6 +32,10 @@ public class ChatChannel
 
     public bool IsPermanent => Flags.HasFlag(ChatProtocol.ChatChannelType.CHAT_CHANNEL_FLAG_PERMANENT);
 
+    public bool IsGeneralChannel => Flags.HasFlag(ChatProtocol.ChatChannelType.CHAT_CHANNEL_FLAG_GENERAL_USE);
+
+    public bool IsAuthenticationRequired => Flags.HasFlag(ChatProtocol.ChatChannelType.CHAT_CHANNEL_FLAG_AUTH_REQUIRED);
+
     public bool HasPassword() => string.IsNullOrEmpty(Password) is false;
 
     /// <summary>
@@ -31,13 +45,108 @@ public class ChatChannel
 
     public static ChatChannel GetOrCreate(ClientChatSession session, string channelName)
     {
+        // If The Requested Channel Is The General Channel Base Name, Route To The Overflow-Aware Method
+        if (channelName.Equals(ChatProtocol.CHAT_CHANNEL_BASE_NAME, StringComparison.OrdinalIgnoreCase))
+            return GetOrCreateGeneralChannel();
+
         bool isClanChannel = session.Account.Clan is not null && channelName == session.Account.Clan.GetChatChannelName();
 
         ChatProtocol.ChatChannelType chatChannelType = isClanChannel
             ? ChatProtocol.ChatChannelType.CHAT_CHANNEL_FLAG_RESERVED | ChatProtocol.ChatChannelType.CHAT_CHANNEL_FLAG_CLAN
             : ChatProtocol.ChatChannelType.CHAT_CHANNEL_FLAG_RESERVED | ChatProtocol.ChatChannelType.CHAT_CHANNEL_FLAG_PERMANENT;
 
-        ChatChannel channel = Context.ChatChannels.GetOrAdd(channelName, new ChatChannel { Name = channelName, Flags = chatChannelType });
+        ChatChannel channel = Context.ChatChannels.GetOrAdd(channelName, new ChatChannel
+        {
+            Name = channelName,
+            Flags = chatChannelType,
+            Topic = $"Welcome To The {channelName} Channel !"
+        });
+
+        return channel;
+    }
+
+    /// <summary>
+    ///     Gets or creates a general chat channel with overflow support.
+    ///     Finds the first general channel with fewer than <see cref="ChatProtocol.MAX_USERS_PER_HON_CHANNEL"/> members.
+    ///     If all existing general channels are full, a new numbered channel is created (e.g. "KONGOR 2", "KONGOR 3").
+    ///     The first channel is permanent, but overflow channels are removed automatically when they become empty.
+    /// </summary>
+    public static ChatChannel GetOrCreateGeneralChannel()
+    {
+        string baseName = ChatProtocol.CHAT_CHANNEL_BASE_NAME;
+
+        // Find The First General Channel With Capacity
+        ChatChannel? availableChannel = Context.ChatChannels.Values
+            .Where(channel => channel.IsGeneralChannel)
+            .OrderBy(channel => channel.Name.Length)
+            .ThenBy(channel => channel.Name)
+            .SingleOrDefault(channel => channel.Members.Count < ChatProtocol.MAX_USERS_PER_HON_CHANNEL);
+
+        if (availableChannel is not null)
+            return availableChannel;
+
+        // All General Channels Are Full (Or None Exist); Determine The Next Channel Number
+        int existingCount = Context.ChatChannels.Values.Count(channel => channel.IsGeneralChannel);
+
+        // The First Channel Uses The Base Name; Subsequent Channels Are Numbered Starting At 2
+        string channelName = existingCount == 0
+            ? baseName
+            : $"{baseName} {existingCount + 1}";
+
+        // The First General Channel Is Permanent; Overflow Channels Are Not
+        ChatProtocol.ChatChannelType flags = ChatProtocol.ChatChannelType.CHAT_CHANNEL_FLAG_RESERVED
+            | ChatProtocol.ChatChannelType.CHAT_CHANNEL_FLAG_GENERAL_USE;
+
+        if (existingCount == 0)
+            flags |= ChatProtocol.ChatChannelType.CHAT_CHANNEL_FLAG_PERMANENT;
+
+        ChatChannel channel = Context.ChatChannels.GetOrAdd(channelName, new ChatChannel
+        {
+            Name = channelName,
+            Flags = flags,
+            Topic = $"Welcome To Heroes Of Newerth !"
+        });
+
+        return channel;
+    }
+
+    /// <summary>
+    ///     Gets or creates a match-specific chat channel.
+    ///     Match channels use SERVER flag (for post-match chat) and HIDDEN flag.
+    /// </summary>
+    /// <param name="matchID">The match ID.</param>
+    /// <returns>The match channel.</returns>
+    public static ChatChannel GetOrCreateMatchChannel(int matchID)
+    {
+        string matchChannelName = $"Match {matchID}";
+
+        ChatChannel channel = Context.ChatChannels.GetOrAdd(matchChannelName, new ChatChannel
+        {
+            Name = matchChannelName,
+            Flags = ChatProtocol.ChatChannelType.CHAT_CHANNEL_FLAG_SERVER
+                  | ChatProtocol.ChatChannelType.CHAT_CHANNEL_FLAG_HIDDEN
+        });
+
+        return channel;
+    }
+
+    /// <summary>
+    ///     Gets or creates a matchmaking group chat channel.
+    ///     Group channels use RESERVED (system-created), UNJOINABLE (cannot be manually joined), and HIDDEN flags.
+    /// </summary>
+    /// <param name="groupID">The matchmaking group ID.</param>
+    /// <returns>The group channel.</returns>
+    public static ChatChannel GetOrCreateGroupChannel(int groupID)
+    {
+        string groupChannelName = $"TMM Group {groupID}";
+
+        ChatChannel channel = Context.ChatChannels.GetOrAdd(groupChannelName, new ChatChannel
+        {
+            Name = groupChannelName,
+            Flags = ChatProtocol.ChatChannelType.CHAT_CHANNEL_FLAG_RESERVED
+                  | ChatProtocol.ChatChannelType.CHAT_CHANNEL_FLAG_UNJOINABLE
+                  | ChatProtocol.ChatChannelType.CHAT_CHANNEL_FLAG_HIDDEN
+        });
 
         return channel;
     }
@@ -83,6 +192,19 @@ public class ChatChannel
         {
             // Legacy Behavior: No Error Message Sent To Client (Silent Rejection)
             // TODO: Send Error Response To Client Indicating They Cannot Join This Clan Channel
+
+            return this;
+        }
+
+        // Reject Join Request If Client Is Banned From The Channel
+        if (BannedAccountIDs.Contains(session.Account.ID))
+        {
+            ChatBuffer banned = new ();
+
+            banned.WriteCommand(ChatProtocol.Command.CHAT_CMD_CHANNEL_IS_BANNED);
+            banned.WriteString(Name);
+
+            session.Send(banned);
 
             return this;
         }
@@ -161,6 +283,9 @@ public class ChatChannel
 
         foreach (ChatChannelMember member in Members.Values)
         {
+            Log.Debug(@"Channel ""{ChannelName}"" Member Info: Name=""{Name}"", ID={ID}, ChatSymbol=""{ChatSymbol}"", NameColour=""{NameColour}"", Icon=""{Icon}"", AscensionLevel={AscensionLevel}",
+                Name, member.Account.NameWithClanTag, member.Account.ID, member.Account.ChatSymbolNoPrefixCode, member.Account.NameColourNoPrefixCode, member.Account.IconNoPrefixCode, member.Account.AscensionLevel);
+
             response.WriteString(member.Account.NameWithClanTag);                 // Member Account Name
             response.WriteInt32(member.Account.ID);                               // Member Account ID
             response.WriteInt8(Convert.ToByte(member.ConnectionStatus));          // Connection Status
@@ -188,6 +313,9 @@ public class ChatChannel
         ChatChannelMember newMember = Members.Values.Single(member => member.Account.ID == session.Account.ID);
 
         List<ChatChannelMember> existingMembers = [.. Members.Values.Where(member => member.Account.ID != session.Account.ID)];
+
+        Log.Debug(@"Broadcasting Join To Channel ""{ChannelName}"": Name=""{Name}"", ID={ID}, ChatSymbol=""{ChatSymbol}"", NameColour=""{NameColour}"", Icon=""{Icon}"", AscensionLevel={AscensionLevel}",
+            Name, newMember.Account.NameWithClanTag, newMember.Account.ID, newMember.Account.ChatSymbolNoPrefixCode, newMember.Account.NameColourNoPrefixCode, newMember.Account.IconNoPrefixCode, newMember.Account.AscensionLevel);
 
         ChatBuffer broadcast = new ();
 
@@ -379,5 +507,314 @@ public class ChatChannel
 
         // Broadcast Password Change To All Channel Members
         BroadcastMessage(broadcast);
+    }
+
+    /// <summary>
+    ///     Sets the channel topic and broadcasts the change to all members.
+    /// </summary>
+    public void SetTopic(ClientChatSession requesterSession, string topic)
+    {
+        if (Members.TryGetValue(requesterSession.Account.Name, out ChatChannelMember? member) is false)
+            return;
+
+        // Requires At Least Officer Level
+        if (member.AdministratorLevel < ChatProtocol.AdminLevel.CHAT_CLIENT_ADMIN_OFFICER)
+            return;
+
+        string truncatedTopic = topic.Length > ChatProtocol.CHAT_CHANNEL_TOPIC_MAX_LENGTH
+            ? topic[..ChatProtocol.CHAT_CHANNEL_TOPIC_MAX_LENGTH]
+            : topic;
+
+        if (Topic == truncatedTopic)
+            return;
+
+        Topic = truncatedTopic;
+
+        ChatBuffer broadcast = new ();
+
+        broadcast.WriteCommand(ChatProtocol.Command.CHAT_CMD_CHANNEL_TOPIC);
+        broadcast.WriteInt32(ID);
+        broadcast.WriteString(Topic);
+
+        BroadcastMessage(broadcast);
+    }
+
+    /// <summary>
+    ///     Bans a player from the channel, removing them if present.
+    /// </summary>
+    public void Ban(ClientChatSession requesterSession, string targetName)
+    {
+        if (Members.TryGetValue(requesterSession.Account.Name, out ChatChannelMember? requester) is false)
+            return;
+
+        ClientChatSession? targetSession = Context.ClientChatSessions.Values
+            .SingleOrDefault(chatSession => chatSession.Account.Name.Equals(targetName, StringComparison.OrdinalIgnoreCase));
+
+        if (targetSession is null)
+            return;
+
+        // Check Admin Level (Target May Or May Not Be In The Channel)
+        ChatChannelMember? target = Members.Values
+            .SingleOrDefault(member => member.Account.ID == targetSession.Account.ID);
+
+        if (target is not null && requester.HasHigherAdministratorLevelThan(target) is false)
+            return;
+
+        // Already Banned
+        if (BannedAccountIDs.Add(targetSession.Account.ID) is false)
+            return;
+
+        // Remove From Channel If Present
+        if (target is not null)
+            Leave(targetSession);
+
+        ChatBuffer broadcast = new ();
+
+        broadcast.WriteCommand(ChatProtocol.Command.CHAT_CMD_CHANNEL_BAN);
+        broadcast.WriteInt32(ID);
+        broadcast.WriteInt32(requesterSession.Account.ID);
+        broadcast.WriteString(targetSession.Account.Name);
+
+        BroadcastMessage(broadcast);
+
+        // Notify The Banned Player Individually (They Were Already Removed From The Channel)
+        if (targetSession.Metadata.ClientChatModeState is not ChatProtocol.ChatModeType.CHAT_MODE_DND)
+            targetSession.Send(broadcast);
+    }
+
+    /// <summary>
+    ///     Lifts a ban on a player.
+    /// </summary>
+    public void LiftBan(ClientChatSession requesterSession, string targetName)
+    {
+        if (Members.TryGetValue(requesterSession.Account.Name, out ChatChannelMember? requester) is false)
+            return;
+
+        // Requires At Least Officer Level
+        if (requester.AdministratorLevel < ChatProtocol.AdminLevel.CHAT_CLIENT_ADMIN_OFFICER)
+            return;
+
+        ClientChatSession? targetSession = Context.ClientChatSessions.Values
+            .SingleOrDefault(chatSession => chatSession.Account.Name.Equals(targetName, StringComparison.OrdinalIgnoreCase));
+
+        if (targetSession is null)
+            return;
+
+        if (BannedAccountIDs.Remove(targetSession.Account.ID) is false)
+            return;
+
+        ChatBuffer broadcast = new ();
+
+        broadcast.WriteCommand(ChatProtocol.Command.CHAT_CMD_CHANNEL_UNBAN);
+        broadcast.WriteInt32(ID);
+        broadcast.WriteInt32(requesterSession.Account.ID);
+        broadcast.WriteString(targetSession.Account.Name);
+
+        BroadcastMessage(broadcast);
+
+        // Notify The Unbanned Player Individually
+        if (targetSession.Metadata.ClientChatModeState is not ChatProtocol.ChatModeType.CHAT_MODE_DND)
+            targetSession.Send(broadcast);
+    }
+
+    /// <summary>
+    ///     Promotes a member's admin level in this channel.
+    /// </summary>
+    public void Promote(ClientChatSession requesterSession, int targetAccountID)
+    {
+        if (Members.TryGetValue(requesterSession.Account.Name, out ChatChannelMember? requester) is false)
+            return;
+
+        ChatChannelMember? target = Members.Values
+            .SingleOrDefault(member => member.Account.ID == targetAccountID);
+
+        if (target is null)
+            return;
+
+        // Source Must Be Greater Than Target + 1 (i.e. At Least Two Levels Above)
+        if (requester.HasHigherAdministratorLevelThan(target) is false)
+            return;
+
+        ChatBuffer broadcast = new ();
+
+        broadcast.WriteCommand(ChatProtocol.Command.CHAT_CMD_CHANNEL_PROMOTE);
+        broadcast.WriteInt32(ID);
+        broadcast.WriteInt32(targetAccountID);
+        broadcast.WriteInt32(requesterSession.Account.ID);
+
+        BroadcastMessage(broadcast);
+    }
+
+    /// <summary>
+    ///     Demotes a member's admin level in this channel.
+    /// </summary>
+    public void Demote(ClientChatSession requesterSession, int targetAccountID)
+    {
+        if (Members.TryGetValue(requesterSession.Account.Name, out ChatChannelMember? requester) is false)
+            return;
+
+        ChatChannelMember? target = Members.Values
+            .SingleOrDefault(member => member.Account.ID == targetAccountID);
+
+        if (target is null)
+            return;
+
+        if (requester.HasHigherAdministratorLevelThan(target) is false)
+            return;
+
+        ChatBuffer broadcast = new ();
+
+        broadcast.WriteCommand(ChatProtocol.Command.CHAT_CMD_CHANNEL_DEMOTE);
+        broadcast.WriteInt32(ID);
+        broadcast.WriteInt32(targetAccountID);
+        broadcast.WriteInt32(requesterSession.Account.ID);
+
+        BroadcastMessage(broadcast);
+    }
+
+    /// <summary>
+    ///     Enables authentication on this channel. Only authenticated users can join.
+    /// </summary>
+    public void EnableAuthentication(ClientChatSession requesterSession)
+    {
+        if (Members.TryGetValue(requesterSession.Account.Name, out ChatChannelMember? requester) is false)
+            return;
+
+        if (requester.AdministratorLevel < ChatProtocol.AdminLevel.CHAT_CLIENT_ADMIN_LEADER)
+            return;
+
+        Flags |= ChatProtocol.ChatChannelType.CHAT_CHANNEL_FLAG_AUTH_REQUIRED;
+
+        ChatBuffer broadcast = new ();
+
+        broadcast.WriteCommand(ChatProtocol.Command.CHAT_CMD_CHANNEL_SET_AUTH);
+        broadcast.WriteInt32(ID);
+
+        BroadcastMessage(broadcast);
+    }
+
+    /// <summary>
+    ///     Disables authentication on this channel, allowing anyone to join.
+    /// </summary>
+    public void DisableAuthentication(ClientChatSession requesterSession)
+    {
+        if (Members.TryGetValue(requesterSession.Account.Name, out ChatChannelMember? requester) is false)
+            return;
+
+        if (requester.AdministratorLevel < ChatProtocol.AdminLevel.CHAT_CLIENT_ADMIN_LEADER)
+            return;
+
+        Flags &= ~ChatProtocol.ChatChannelType.CHAT_CHANNEL_FLAG_AUTH_REQUIRED;
+
+        ChatBuffer broadcast = new ();
+
+        broadcast.WriteCommand(ChatProtocol.Command.CHAT_CMD_CHANNEL_REMOVE_AUTH);
+        broadcast.WriteInt32(ID);
+
+        BroadcastMessage(broadcast);
+    }
+
+    /// <summary>
+    ///     Adds a user to the channel's authenticated user list.
+    /// </summary>
+    public void AddAuthenticatedUser(ClientChatSession requesterSession, string targetName)
+    {
+        if (Members.TryGetValue(requesterSession.Account.Name, out ChatChannelMember? requester) is false)
+            return;
+
+        if (requester.AdministratorLevel < ChatProtocol.AdminLevel.CHAT_CLIENT_ADMIN_LEADER)
+            return;
+
+        // Strip Clan Tag (Everything Before And Including ']')
+        int bracketIndex = targetName.IndexOf(']');
+        string normalised = bracketIndex >= 0 ? targetName[(bracketIndex + 1)..] : targetName;
+        string lowered = normalised.ToLowerInvariant();
+
+        if (AuthenticatedAccountNames.Add(lowered))
+        {
+            ChatBuffer success = new ();
+
+            success.WriteCommand(ChatProtocol.Command.CHAT_CMD_CHANNEL_ADD_AUTH_USER);
+            success.WriteInt32(ID);
+            success.WriteString(targetName);
+
+            requesterSession.Send(success);
+        }
+
+        else
+        {
+            ChatBuffer failure = new ();
+
+            failure.WriteCommand(ChatProtocol.Command.CHAT_CMD_CHANNEL_ADD_AUTH_FAIL);
+            failure.WriteInt32(ID);
+            failure.WriteString(targetName);
+
+            requesterSession.Send(failure);
+        }
+    }
+
+    /// <summary>
+    ///     Removes a user from the channel's authenticated user list.
+    /// </summary>
+    public void RemoveAuthenticatedUser(ClientChatSession requesterSession, string targetName)
+    {
+        if (Members.TryGetValue(requesterSession.Account.Name, out ChatChannelMember? requester) is false)
+            return;
+
+        if (requester.AdministratorLevel < ChatProtocol.AdminLevel.CHAT_CLIENT_ADMIN_LEADER)
+            return;
+
+        string lowered = targetName.ToLowerInvariant();
+
+        if (AuthenticatedAccountNames.Remove(lowered))
+        {
+            ChatBuffer success = new ();
+
+            success.WriteCommand(ChatProtocol.Command.CHAT_CMD_CHANNEL_REMOVE_AUTH_USER);
+            success.WriteInt32(ID);
+            success.WriteString(targetName);
+
+            requesterSession.Send(success);
+        }
+
+        else
+        {
+            ChatBuffer failure = new ();
+
+            failure.WriteCommand(ChatProtocol.Command.CHAT_CMD_CHANNEL_REMOVE_AUTH_FAIL);
+            failure.WriteInt32(ID);
+            failure.WriteString(targetName);
+
+            requesterSession.Send(failure);
+        }
+    }
+
+    /// <summary>
+    ///     Sends the channel's authenticated user list to the requesting client.
+    /// </summary>
+    public void SendAuthenticatedUserList(ClientChatSession requesterSession)
+    {
+        if (Members.TryGetValue(requesterSession.Account.Name, out ChatChannelMember? requester) is false)
+            return;
+
+        if (requester.AdministratorLevel < ChatProtocol.AdminLevel.CHAT_CLIENT_ADMIN_LEADER)
+            return;
+
+        ChatBuffer response = new ();
+
+        response.WriteCommand(ChatProtocol.Command.CHAT_CMD_CHANNEL_LIST_AUTH);
+        response.WriteInt32(ID);
+        response.WriteInt32(AuthenticatedAccountNames.Count);
+
+        foreach (string authenticatedName in AuthenticatedAccountNames)
+        {
+            // Try To Resolve The Display Name From Online Sessions, Otherwise Use The Stored Name
+            ClientChatSession? authenticatedSession = Context.ClientChatSessions.Values
+                .SingleOrDefault(chatSession => chatSession.Account.Name.Equals(authenticatedName, StringComparison.OrdinalIgnoreCase));
+
+            response.WriteString(authenticatedSession?.Account.Name ?? authenticatedName);
+        }
+
+        requesterSession.Send(response);
     }
 }

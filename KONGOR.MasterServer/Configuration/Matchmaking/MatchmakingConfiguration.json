@@ -1,70 +1,37 @@
 {
-    "Ranked": {
-        "Map": "???",
-        "Regions": [
-            "EU",
-            "USE",
-            "USW",
-            "AU",
-            "BR",
-            "RU",
-            "TH",
-            "SEA",
-            "NEWERTH"
-        ],
-        "Modes": [ // TODO: Revise These Modes From TCP Popularity Update
-            "rb"
-        ],
-        "Match": {
-            "MaximumPlayerRatingDifference": 250,
-            "IsRanked": true,
-            "TeamSize": 5
+    "GameModes": [ "ap", "apg", "apd", "sd", "bd", "bp", "ar", "lp", "bb", "bbg", "bbr", "bm", "cm", "br", "km", "rd", "bdr", "cp", "fp", "sp", "ss", "sm", "hb", "mwb", "rb" ],
+    "GameTypes": [ 1, 2, 3, 4, 5, 6, 7 ],
+    "Regions": [ "USE", "USW", "EU", "SG", "MY", "PH", "TH", "ID", "VN", "RU", "KR", "AU", "LAT", "DX", "CN", "BR", "TR", "NEWERTH" ],
+    "Maps": [
+        {
+            "Map": "caldavar",
+            "GameTypes": [ 6, 7 ],
+            "Modes": [ "rb" ],
+            "Regions": [ "EU", "RU", "TH", "PH", "AU", "USW", "USE", "LAT", "NEWERTH" ],
+            "Match": {
+                "MaximumPlayerRatingDifference": 250,
+                "IsRanked": true
+            }
+        },
+        {
+            "Map": "midwars",
+            "GameTypes": [ 3 ],
+            "Modes": [ "hb", "sd" ],
+            "Regions": [ "EU", "RU", "TH", "PH", "AU", "USW", "USE", "LAT", "NEWERTH" ],
+            "Match": {
+                "MaximumPlayerRatingDifference": 250,
+                "IsRanked": true
+            }
+        },
+        {
+            "Map": "riftwars",
+            "GameTypes": [ 4 ],
+            "Modes": [ "km" ],
+            "Regions": [ "EU", "RU", "TH", "PH", "AU", "USW", "USE", "LAT", "NEWERTH" ],
+            "Match": {
+                "MaximumPlayerRatingDifference": 250,
+                "IsRanked": false
+            }
         }
-    },
-    "Unranked": {
-        "Map": "???",
-        "Regions": [
-            "EU",
-            "USE",
-            "USW",
-            "AU",
-            "BR",
-            "RU",
-            "TH",
-            "SEA",
-            "NEWERTH"
-        ],
-        "Modes": [ // TODO: Revise These Modes From TCP Popularity Update
-            "rb"
-        ],
-        "Match": {
-            "MaximumPlayerRatingDifference": 2500,
-            "IsRanked": false,
-            "TeamSize": 5
-        }
-    },
-    "MidWars": {
-        "Map": "???",
-        "Regions": [
-            "EU",
-            "USE",
-            "USW",
-            "AU",
-            "BR",
-            "RU",
-            "TH",
-            "SEA",
-            "NEWERTH"
-        ],
-        "Modes": [ // TODO: Revise These Modes From TCP Popularity Update
-            "hb",
-            "rd"
-        ],
-        "Match": {
-            "MaximumPlayerRatingDifference": 250,
-            "IsRanked": true,
-            "TeamSize": 5
-        }
-    },
-    "RiftWars": "TODO: Implement This And Revise The Other Settings"
+    ]
 }

@@ -1,14 +1,17 @@
 ﻿namespace MERRICK.DatabaseContext.Entities.Statistics;
 
-[Index(nameof(AccountID), nameof(StatisticsType), IsUnique = true)]
+[Index(nameof(AccountID), nameof(Type), IsUnique = true)]
 public class AccountStatistics
 {
     [Key]
     public int ID { get; set; }
 
-    public required int AccountID { get; set; }
+    public int AccountID { get; set; }
 
-    public required AccountStatisticsType StatisticsType { get; set; }
+    [ForeignKey(nameof(AccountID))]
+    public required Account Account { get; set; }
+
+    public required AccountStatisticsType Type { get; set; }
 
     public int MatchesPlayed { get; set; } = 0;
 
@@ -44,13 +47,26 @@ public class AccountStatistics
     ///     "110110" means 6 placement matches with 4 wins and 2 losses.
     /// </remarks>
     public required string? PlacementMatchesData { get; set; }
+
+    /// <summary>
+    ///     Aggregated per-hero statistics stored as JSON.
+    ///     Updated automatically when matches are recorded.
+    /// </summary>
+    public HeroStatisticsSummary HeroStatistics { get; set; } = new ();
+
+    /// <summary>
+    ///     Aggregated award statistics stored as JSON.
+    ///     Updated automatically when matches are recorded.
+    /// </summary>
+    public AwardStatisticsSummary AwardStatistics { get; set; } = new ();
 }
 
 public enum AccountStatisticsType
 {
-    Cooperative = 0,
-    Public      = 1,
-    Matchmaking = 2,
-    MidWars     = 3,
-    RiftWars    = 4
+    Cooperative       = 0,
+    Public            = 1,
+    Matchmaking       = 2,
+    MatchmakingCasual = 3,
+    MidWars           = 4,
+    RiftWars          = 5
 }

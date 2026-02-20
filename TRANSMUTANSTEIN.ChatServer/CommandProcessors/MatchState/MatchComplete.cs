@@ -1,19 +1,27 @@
 namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.MatchState;
 
 [ChatCommand(ChatProtocol.GameServerToChatServer.NET_CHAT_GS_MATCH_ENDED)]
-public class MatchComplete : ISynchronousCommandProcessor<MatchServerChatSession>
+public class MatchComplete : IAsynchronousCommandProcessor<MatchServerChatSession>
 {
-    public void Process(MatchServerChatSession session, ChatBuffer buffer)
+    public Task Process(MatchServerChatSession session, ChatBuffer buffer)
     {
         MatchCompleteRequestData requestData = new (buffer);
 
+        Log.Information(@"Match {MatchID} Ended: Reason={Reason}, WinningTeam={WinningTeam}, PlayerCount={PlayerCount}",
+            requestData.MatchID, requestData.Reason, requestData.WinningTeam, requestData.PlayerCount);
+
+        /*
+            Match Information Is Not Removed From The Distributed Cache Here
+            The Match Server Submits Statistics To The Master Server After This Message, And The Client Requests Match Statistics Shortly After
+            Both The Stat Submission And The Match Stats Response Require The Cached Match Information
+        */
+
         // TODO: Update Player Availability States (Mark Players As Available After Match Ends)
-        // TODO: Remove Match From Distributed Cache
         // TODO: Mark Server As Available For New Match Allocation
         // TODO: Notify Players That Match Has Ended
         // TODO: Clean Up Match-Related Session State
 
-        // NOTE: Statistics submission and MMR/PSR updates are handled by KONGOR.MasterServer/Controllers/StatsRequesterController.
+        return Task.CompletedTask;
     }
 }
 

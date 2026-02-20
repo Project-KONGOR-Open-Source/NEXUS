@@ -132,27 +132,10 @@ public class ServerManagerHandshake(IDatabase distributedCacheStore, MerrickCont
         Log.Information(@"Match Server Manager Connection Accepted - Manager ID: ""{ManagerID}"", Host Account: ""{HostAccountName}"", Address: ""{Address}""",
             requestData.ServerManagerID, manager.HostAccountName, manager.IPAddress);
 
-        ChatBuffer acceptResponse = new ();
-
-        acceptResponse.WriteCommand(ChatProtocol.ChatServerToServerManager.NET_CHAT_SM_ACCEPT);
-
-        session.Send(acceptResponse);
-
-        // Send Match Server Manager Options
-        ChatBuffer optionsResponse = new ();
-
-        optionsResponse.WriteCommand(ChatProtocol.ChatServerToServerManager.NET_CHAT_SM_OPTIONS);
-
-        optionsResponse.WriteInt8(Convert.ToByte(true));  // Submit Stats Enabled
-        optionsResponse.WriteInt8(Convert.ToByte(true));  // Upload Replays Enabled
-        optionsResponse.WriteInt8(Convert.ToByte(false)); // Upload To FTP On Demand Enabled
-        optionsResponse.WriteInt8(Convert.ToByte(true));  // Upload To HTTP On Demand Enabled
-        optionsResponse.WriteInt8(Convert.ToByte(true));  // Resubmit Stats Enabled
-        optionsResponse.WriteInt32(1);                    // Stats Resubmit Match ID Cut-Off (Minimum Match ID For Resubmission)
-
-        // TODO: Set Stats Resubmit Match ID Cut-Off To Highest Match ID Stored In The Database
-
-        session.Send(optionsResponse);
+        // Accept Connection And Send Configuration
+        session
+            .SetOnline()
+            .SendOptions();
 
         Log.Debug(@"Match Server Manager ID ""{ManagerID}"" Options - Statistics: Enabled, Replays: Enabled, HTTP Upload: Enabled", requestData.ServerManagerID);
     }

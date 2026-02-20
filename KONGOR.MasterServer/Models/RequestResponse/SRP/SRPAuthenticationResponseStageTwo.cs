@@ -291,7 +291,7 @@ public class SRPAuthenticationResponseStageTwo
     ///     The server time (in UTC seconds).
     /// </summary>
     [PHPProperty("timestamp")]
-    public long ServerTimestamp { get; set; } = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+    public int ServerTimestamp { get; set; } = Convert.ToInt32(Math.Min(DateTimeOffset.UtcNow.ToUnixTimeSeconds(), Convert.ToInt64(Int32.MaxValue)));
 
     /// <summary>
     ///     The current season.
@@ -710,16 +710,21 @@ public class StoreItemData
     public string Data { get; set; } = string.Empty;
 
     /// <summary>
-    ///     The availability start time (in UTC seconds) of a limited-time store item (e.g. early-access hero).
+    ///     The availability start time of a limited-time store item (e.g. early-access hero).
+    ///     Expected format is "yyyy-MM-dd HH:mm:ss" (e.g. "2015-12-23 00:00:00").
+    ///     Empty for permanently owned items; only set for trial/time-limited items.
     /// </summary>
     [PHPProperty("start_time")]
-    public string AvailableFrom { get; set; } = DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString();
+    public string AvailableFrom { get; set; } = string.Empty;
 
     /// <summary>
-    ///     The availability end time (in UTC seconds) of a limited-time store item (e.g. early-access hero).
+    ///     The availability end time of a limited-time store item (e.g. early-access hero).
+    ///     Expected format is "yyyy-MM-dd HH:mm:ss" (e.g. "2015-12-23 00:00:00").
+    ///     Empty for permanently owned items; only set for trial/time-limited items.
+    ///     When non-empty, the C++ client treats the item as a trial and displays a "you have access for [time]" card.
     /// </summary>
     [PHPProperty("end_time")]
-    public string AvailableUntil { get; set; } = DateTimeOffset.UtcNow.AddYears(1000).ToUnixTimeSeconds().ToString();
+    public string AvailableUntil { get; set; } = string.Empty;
 
     /// <summary>
     ///     Unknown.

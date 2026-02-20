@@ -395,6 +395,13 @@ public partial class ServerRequesterController
         if (isVIP is null)
             return BadRequest(@"Missing Value For Form Parameter ""vip""");
 
+        /*
+            "c_state" Values:
+                0 = Sleeping (Host.IsSleeping() Is TRUE)
+                1 = Idle (No World Loaded)
+                2 = Lobby/Picking Phase (World Loaded, "m_bMatchStarted" Is FALSE)
+                3 = In-Game (World Loaded, "m_bMatchStarted" Is TRUE)
+        */
         string? connectionState = Request.Form["c_state"];
 
         if (connectionState is null)
@@ -420,22 +427,38 @@ public partial class ServerRequesterController
 
         await DistributedCache.SetMatchServer(matchServer.HostAccountName, matchServer);
 
-        // The "new" Parameter Being Present Indicates This Is A Match Initialisation Heartbeat
+        /*
+            The "new" Parameter Is Only Sent On The First Heartbeat After "StartGame" Loads A New World
+            All Subsequent Heartbeats For The Same In-Progress Match Omit "new"
+            "m_bInitializeMatchHeartbeat" Is Set To TRUE Once By "StartGame", Then Reset To FALSE After The Initialisation Heartbeat Succeeds
+            
+            "new" Values (1-Indexed "EArrangedMatchType" + 1):
+                1  = AM_PUBLIC (Public Match)
+                2  = AM_MATCHMAKING (Ranked Normal/Casual)
+                3  = AM_SCHEDULED_MATCH (Tournament)
+                4  = AM_UNSCHEDULED_MATCH (League)
+                5  = AM_MATCHMAKING_MIDWARS (MidWars)
+                6  = AM_MATCHMAKING_BOTMATCH (Bot Co-Op)
+                7  = AM_UNRANKED_MATCHMAKING (Unranked Normal/Casual)
+                8  = AM_MATCHMAKING_RIFTWARS (RiftWars)
+                9  = AM_PUBLIC_PRELOBBY (Public Pre-Lobby)
+                10 = AM_MATCHMAKING_CUSTOM (Custom Maps)
+                11 = AM_MATCHMAKING_CAMPAIGN (Ranked Season Normal/Casual)
+        */
         string? newMatch = Request.Form["new"];
 
         if (newMatch is null)
         {
+            // Regular Heartbeat — The Server May Be Idle (Sleeping/No World) Or In An Active Match That Was Already Initialised
             MatchInformation? matchInformation = await DistributedCache.GetMatchInformationByMatchServerSessionCookie(session);
 
-            if (matchInformation is null)
+            if (matchInformation is not null)
             {
-                Logger.LogError(@"[BUG] Received Match Initialisation Heartbeat For Session ""{Session}"", But No MatchInformation Found In Cache", session);
+                matchInformation.ConnectedPlayersCount = int.Parse(connectionsCount);
+                matchInformation.Map = map;
 
-                return Ok();
+                await DistributedCache.SetMatchInformation(matchInformation);
             }
-
-            matchInformation.ConnectedPlayersCount = int.Parse(connectionsCount);
-            matchInformation.Map = map;
         }
 
         if (newMatch is not null)

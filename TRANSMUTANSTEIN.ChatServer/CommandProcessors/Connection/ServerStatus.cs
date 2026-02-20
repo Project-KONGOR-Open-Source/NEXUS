@@ -1,18 +1,37 @@
 namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Connection;
 
 [ChatCommand(ChatProtocol.GameServerToChatServer.NET_CHAT_GS_STATUS)]
-public class ServerStatus : ISynchronousCommandProcessor<MatchServerChatSession>
+public class ServerStatus(IDatabase distributedCacheStore) : IAsynchronousCommandProcessor<MatchServerChatSession>
 {
-    public void Process(MatchServerChatSession session, ChatBuffer buffer)
+    public async Task Process(MatchServerChatSession session, ChatBuffer buffer)
     {
         ServerStatusRequestData requestData = new (buffer);
 
         Log.Debug(@"Received Status Update From Server ID ""{ServerID}"" - Name: ""{Name}"", Address: ""{Address}:{Port}"", Location: ""{Location}"", Status: {Status}",
             requestData.ServerID, requestData.Name, requestData.Address, requestData.Port, requestData.Location, requestData.Status);
 
-        // TODO: Update Any Relevant Match Server Data
+        MatchServer? matchServer = await distributedCacheStore.GetMatchServerByID(requestData.ServerID);
 
-        // TODO: Update Server In Distributed Cache
+        if (matchServer is null)
+        {
+            Log.Error(@"[BUG] Received Status Update For Unknown Match Server ID ""{ServerID}""", requestData.ServerID);
+
+            return;
+        }
+
+        // Hydrate Session Metadata With Status Data
+        requestData.HydrateSessionMetadata(session.Metadata);
+
+        // Update Session Status
+        session.UpdateStatus(requestData.Status);
+
+        // Update Match Server Status
+        matchServer.Status = requestData.Status;
+
+        // Update Distributed Cache
+        await distributedCacheStore.SetMatchServer(matchServer.HostAccountName, matchServer);
+
+        Log.Information(@"Updated Status For Match Server ID ""{ServerID}"" To ""{Status}""", requestData.ServerID, requestData.Status);
 
         // TODO: If Status Is IDLE, Mark Server As Available For Match Allocation
         // TODO: If Status Is ACTIVE, Update Match Information And Player Availability States
@@ -205,6 +224,46 @@ file class ServerStatusRequestData
         }
 
         DecodeServerFlags();
+    }
+
+    /// <summary>
+    ///     Applies the status data to the session metadata.
+    /// </summary>
+    public void HydrateSessionMetadata(MatchServerChatSessionMetadata metadata)
+    {
+        metadata.Location = Location;
+        metadata.Name = Name;
+        metadata.Address = Address;
+        metadata.Port = Port;
+        metadata.SlaveID = SlaveID;
+        metadata.MatchID = MatchID;
+        metadata.MapName = MapName;
+        metadata.GameName = GameName;
+        metadata.GameModeName = GameMode;
+        metadata.TeamSize = TeamSize;
+        metadata.Tier = Tier;
+        metadata.IsOfficial = Official is 1 || Official is 2;
+        metadata.OfficialWithStats = Official is 2;
+        metadata.NoLeaver = NoLeavers;
+        metadata.IsPrivate = PrivateServer;
+        metadata.AllHeroes = AllHeroes;
+        metadata.CasualMode = CasualMode;
+        metadata.ForceRandom = ForceRandom;
+        metadata.AutoBalanced = AutoBalanced;
+        metadata.AdvancedOptions = AdvancedOptions;
+        metadata.MinPSR = (ushort) Math.Max(0, (int) MinimumRating);
+        metadata.MaxPSR = (ushort) Math.Max(0, (int) MaximumRating);
+        metadata.DevHeroes = HeroesInDevelopment;
+        metadata.Hardcore = Hardcore;
+        metadata.VerifiedOnly = VerifiedOnly;
+        metadata.Gated = Gated;
+        metadata.ServerLoad = (uint) ServerLoad;
+        metadata.LongServerFrames = (uint) LongServerFrameCount;
+        metadata.FreePhysicalMemory = (ulong) FreePhysicalMemory;
+        metadata.TotalPhysicalMemory = (ulong) TotalPhysicalMemory;
+        metadata.SpaceFree = (ulong) DriveFreeSpace;
+        metadata.TotalSpace = (ulong) DriveTotalSpace;
+        metadata.Version = ServerVersion;
     }
 
     /// <summary>

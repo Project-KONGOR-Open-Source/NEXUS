@@ -31,7 +31,7 @@ public static class SRPAuthenticationHandlers
             GoldCoins = parameters.Account.User.GoldCoins.ToString(),
             SilverCoins = parameters.Account.User.SilverCoins,
             CustomIconSlotID = SetCustomIconSlotID(parameters.Account),
-            CurrentSeason = "12", // TODO: Set Season
+            CurrentSeason = "666",
             MuteExpiration = 0, // TODO: Implement Account Muting As Part Of The Karma System
             FriendAccountList = SetFriendAccountList(parameters.Account),
             IgnoredAccountsList = SetIgnoredAccountsList(parameters.Account),
@@ -162,7 +162,7 @@ public static class SRPAuthenticationHandlers
         => members.Select(member => new KeyValuePair<string, ClanMemberAccount>(member.ID.ToString(),
                 new ClanMemberAccount { ClanID = member.Clan?.ID.ToString() ?? string.Empty, ID = member.ID.ToString(),
                     JoinDate = member.TimestampJoinedClan is not null ? member.TimestampJoinedClan.GetValueOrDefault().ToString("yyyy-MM-dd HH:mm:ss") : string.Empty,
-                    Name = member.NameWithClanTag, Rank = member.ClanTierName, Message = "TODO: Find Out What This Does", Standing = Convert.ToInt32(member.Type).ToString() }))
+                    Name = member.Name, Rank = member.ClanTierName, Message = "TODO: Find Out What This Does", Standing = Convert.ToInt32(member.Type).ToString() }))
             .ToDictionary();
 
     private static OneOf<ClanMemberData, ClanMemberDataError> SetClanMembershipData(Account account)

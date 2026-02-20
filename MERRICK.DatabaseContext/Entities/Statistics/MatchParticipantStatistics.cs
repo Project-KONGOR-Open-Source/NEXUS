@@ -1,7 +1,7 @@
 ﻿namespace MERRICK.DatabaseContext.Entities.Statistics;
 
 [Index(nameof(MatchID), nameof(AccountID), IsUnique = true)]
-public class PlayerStatistics
+public class MatchParticipantStatistics
 {
     [Key]
     public int ID { get; set; }

@@ -20,7 +20,7 @@ public sealed class MerrickContext : DbContext
     public DbSet<Clan> Clans => Set<Clan>();
     public DbSet<HeroGuide> HeroGuides => Set<HeroGuide>();
     public DbSet<MatchStatistics> MatchStatistics => Set<MatchStatistics>();
-    public DbSet<PlayerStatistics> PlayerStatistics => Set<PlayerStatistics>();
+    public DbSet<MatchParticipantStatistics> MatchParticipantStatistics => Set<MatchParticipantStatistics>();
     public DbSet<Role> Roles => Set<Role>();
     public DbSet<Token> Tokens => Set<Token>();
     public DbSet<User> Users => Set<User>();
@@ -32,9 +32,11 @@ public sealed class MerrickContext : DbContext
         ConfigureSchemas(builder);
 
         ConfigureRoles(builder.Entity<Role>());
+        ConfigureUsers(builder.Entity<User>());
         ConfigureAccounts(builder.Entity<Account>());
-        ConfigurePlayerStatistics(builder.Entity<PlayerStatistics>());
+        ConfigureAccountStatistics(builder.Entity<AccountStatistics>());
         ConfigureMatchStatistics(builder.Entity<MatchStatistics>());
+        ConfigureMatchParticipantStatistics(builder.Entity<MatchParticipantStatistics>());
     }
 
     private static void ConfigureSchemas(ModelBuilder builder)
@@ -45,8 +47,8 @@ public sealed class MerrickContext : DbContext
         builder.Entity<AccountStatistics>().ToTable("AccountStatistics", StatisticsSchema);
         builder.Entity<Clan>().ToTable("Clans", CoreSchema);
         builder.Entity<HeroGuide>().ToTable("HeroGuides", MiscellaneousSchema);
+        builder.Entity<MatchParticipantStatistics>().ToTable("MatchParticipantStatistics", StatisticsSchema);
         builder.Entity<MatchStatistics>().ToTable("MatchStatistics", StatisticsSchema);
-        builder.Entity<PlayerStatistics>().ToTable("PlayerStatistics", StatisticsSchema);
         builder.Entity<Role>().ToTable("Roles", AuthenticationSchema);
         builder.Entity<Token>().ToTable("Tokens", AuthenticationSchema);
         builder.Entity<User>().ToTable("Users", CoreSchema);
@@ -70,14 +72,52 @@ public sealed class MerrickContext : DbContext
         );
     }
 
+    private static ValueComparer<List<string>> StringListValueComparer => new
+    (
+        (first, second) => (first ?? new List<string>()).SequenceEqual(second ?? new List<string>()),
+        collection => collection.Aggregate(0, (accumulatedHashCode, value) => HashCode.Combine(accumulatedHashCode, value.GetHashCode())),
+        collection => collection.ToList()
+    );
+
+    private static void ConfigureUsers(EntityTypeBuilder<User> builder)
+    {
+        builder.Property(user => user.OwnedStoreItems).HasConversion
+        (
+            value => JsonSerializer.Serialize(value, new JsonSerializerOptions()),
+            value => JsonSerializer.Deserialize<List<string>>(value, new JsonSerializerOptions()) ?? new List<string>(),
+            StringListValueComparer
+        );
+    }
+
     private static void ConfigureAccounts(EntityTypeBuilder<Account> builder)
     {
+        builder.Property(account => account.SelectedStoreItems).HasConversion
+        (
+            value => JsonSerializer.Serialize(value, new JsonSerializerOptions()),
+            value => JsonSerializer.Deserialize<List<string>>(value, new JsonSerializerOptions()) ?? new List<string>(),
+            StringListValueComparer
+        );
+
         builder.OwnsMany(account => account.BannedPeers, ownedNavigationBuilder => { ownedNavigationBuilder.ToJson(); });
         builder.OwnsMany(account => account.FriendedPeers, ownedNavigationBuilder => { ownedNavigationBuilder.ToJson(); });
         builder.OwnsMany(account => account.IgnoredPeers, ownedNavigationBuilder => { ownedNavigationBuilder.ToJson(); });
     }
 
-    private static void ConfigurePlayerStatistics(EntityTypeBuilder<PlayerStatistics> builder)
+    private static void ConfigureAccountStatistics(EntityTypeBuilder<AccountStatistics> builder)
+    {
+        builder.OwnsOne(statistics => statistics.HeroStatistics, ownedNavigationBuilder =>
+        {
+            ownedNavigationBuilder.ToJson();
+            ownedNavigationBuilder.OwnsMany(summary => summary.Heroes);
+        });
+
+        builder.OwnsOne(statistics => statistics.AwardStatistics, ownedNavigationBuilder =>
+        {
+            ownedNavigationBuilder.ToJson();
+        });
+    }
+
+    private static void ConfigureMatchParticipantStatistics(EntityTypeBuilder<MatchParticipantStatistics> builder)
     {
         builder.Property(statistics => statistics.Inventory).HasConversion
         (

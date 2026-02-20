@@ -112,11 +112,11 @@ public class ClientHandshake(MerrickContext merrick, IDatabase distributedCacheS
             return;
         }
 
-        // Accept Connection, Send Options, And Broadcast Connection To Friends And Clan Members
+        // Accept Connection, Send Options, Then Complete The Connection
         session
             .Accept(account)
             .SendOptionsAndRemoteCommands()
-            .BroadcastConnection();
+            .SetOnline();
     }
 }
 
@@ -154,7 +154,13 @@ file class ClientHandshakeRequestData
 
     public byte ClientVersionRevision { get; init; }
 
-    public ChatProtocol.ChatClientStatus LastKnownClientState { get; init; }
+    /// <summary>
+    ///     The crash reporting state from the client's previous session.
+    ///     The client writes its current stage to a local file as it progresses (idle → connecting → loading → in-game, etc.).
+    ///     On next launch, it reads the file back: if the client exited cleanly the value is <see cref="ChatProtocol.CrashReportingClientState.CRCS_NO_CRASH"/>, otherwise it reports whichever stage it was in when it crashed.
+    ///     The original chat server used this value solely for aggregate telemetry counters keyed by crash state, OS version, and account ID.
+    /// </summary>
+    public ChatProtocol.CrashReportingClientState CrashReportClientState { get; init; }
 
     public ChatProtocol.ChatModeType ClientChatModeState { get; init; }
 
@@ -180,7 +186,7 @@ file class ClientHandshakeRequestData
         ClientVersionMinor = buffer.ReadInt8();
         ClientVersionPatch = buffer.ReadInt8();
         ClientVersionRevision = buffer.ReadInt8();
-        LastKnownClientState = (ChatProtocol.ChatClientStatus) buffer.ReadInt8();
+        CrashReportClientState = (ChatProtocol.CrashReportingClientState) buffer.ReadInt8();
         ClientChatModeState = (ChatProtocol.ChatModeType) buffer.ReadInt8();
         ClientRegion = buffer.ReadString();
         ClientLanguage = buffer.ReadString();
@@ -204,7 +210,7 @@ file class ClientHandshakeRequestData
             ClientVersionMinor = ClientVersionMinor,
             ClientVersionPatch = ClientVersionPatch,
             ClientVersionRevision = ClientVersionRevision,
-            LastKnownClientState = LastKnownClientState,
+            LastKnownClientState = ChatProtocol.ChatClientStatus.CHAT_CLIENT_STATUS_DISCONNECTED,
             ClientChatModeState = ClientChatModeState,
             ClientRegion = ClientRegion,
             ClientLanguage = ClientLanguage

@@ -89,3 +89,11 @@
    - use global using directive syntax rather than the "global::" alias qualifier
      - RIGHT: global using Aspire.Hosting;
      - WRONG: using global::Aspire.Hosting;
+
+ - when expecting a single element from a collection as the result of a LINQ operation, always use Single or SingleAsync
+   - RIGHT: Single, SingleAsync
+   - WRONG: First, FirstAsync, Last, LastAsync
+
+ - when expecting no element or a single element from a collection as the result of a LINQ operation, always use SingleOrDefault or SingleOrDefaultAsync
+   - RIGHT: SingleOrDefault, SingleOrDefaultAsync
+   - WRONG: FirstOrDefault, FirstOrDefaultAsync, LastOrDefault, LastOrDefaultAsync

@@ -157,7 +157,7 @@ public class MatchStats
     public required int AwardMostBuildingDamage { get; set; }
 
     [FromForm(Name = "awd_mwk")]
-    public required int AwardMostWardsKilled { get; set; }
+    public required int AwardMostWardsDestroyed { get; set; }
 
     [FromForm(Name = "awd_mhdd")]
     public required int AwardMostHeroDamageDealt { get; set; }
@@ -511,7 +511,7 @@ public static class StatsForSubmissionRequestFormExtensions
             AwardMostAssists = form.MatchStats.AwardMostAssists,
             AwardLeastDeaths = form.MatchStats.AwardLeastDeaths,
             AwardMostBuildingDamage = form.MatchStats.AwardMostBuildingDamage,
-            AwardMostWardsKilled = form.MatchStats.AwardMostWardsKilled,
+            AwardMostWardsKilled = form.MatchStats.AwardMostWardsDestroyed,
             AwardMostHeroDamageDealt = form.MatchStats.AwardMostHeroDamageDealt,
             AwardHighestCreepScore = form.MatchStats.AwardHighestCreepScore,
 
@@ -522,13 +522,13 @@ public static class StatsForSubmissionRequestFormExtensions
         return statistics;
     }
 
-    public static PlayerStatistics ToPlayerStatistics(this StatsForSubmissionRequestForm form, int playerIndex, int accountID, string accountName, int? clanID, string? clanTag)
+    public static MatchParticipantStatistics ToMatchParticipantStatistics(this StatsForSubmissionRequestForm form, int playerIndex, int accountID, string accountName, int? clanID, string? clanTag)
     {
         string hero = form.PlayerStats[playerIndex].Keys.Single();
 
         IndividualPlayerStatistics player = form.PlayerStats[playerIndex][hero];
 
-        PlayerStatistics statistics = new ()
+        MatchParticipantStatistics statistics = new ()
         {
             MatchID = form.MatchStats.MatchID,
             AccountID = accountID,
