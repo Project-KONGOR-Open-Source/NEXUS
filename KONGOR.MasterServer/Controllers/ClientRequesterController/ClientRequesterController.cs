@@ -54,7 +54,7 @@ public partial class ClientRequesterController(MerrickContext databaseContext, I
             // statistics
             "get_account_all_hero_stats"    => await GetHeroStatistics(),
             "get_match_stats"               => await GetMatchStatistics(),
-            "client_events_info"            => GetClientEventsInfo(),
+            "client_events_info"            => GetClientEventsInformation(),
             "get_special_messages"          => GetSpecialMessages(),
             "claim_season_rewards"          => ClaimSeasonRewards(),
             "get_products"                  => GetProducts(),
@@ -99,33 +99,49 @@ public partial class ClientRequesterController(MerrickContext databaseContext, I
     }
 
     /// <summary>
-    ///     Returns client events information.
-    ///     Currently returns an empty events list as no events are active.
+    ///     Returns client events information as a JSON response.
+    ///     The client uses this to populate the HoN Event notification panel with revival events, newbie events, and other promotional content.
+    ///     Currently returns an empty events object as the revival and newbie event systems are not yet implemented.
     /// </summary>
-    private IActionResult GetClientEventsInfo()
+    private IActionResult GetClientEventsInformation()
     {
         Dictionary<string, object> response = new ()
         {
             ["success"] = true,
-            ["data"] = Array.Empty<object>(),
+            ["data"] = new Dictionary<string, object>(),
             ["errors"] = string.Empty,
             ["vested_threshold"] = 5,
-            [" 0"] = true
+            ["0"] = true
         };
 
         return Ok(JsonSerializer.Serialize(response));
     }
 
     /// <summary>
-    ///     Returns special messages to be displayed on the client.
-    ///     Currently returns an empty messages list as no special messages are configured.
+    ///     Returns special messages to be displayed in the client's HoN Event notification panel.
+    ///     Messages are loaded from the announcements configuration file and each message opens a URL in the client's embedded web browser when clicked.
+    ///     The client generates an MD5 hash from the title, URL, and date to track which messages have already been seen.
     /// </summary>
     private IActionResult GetSpecialMessages()
     {
+        string date = DateTimeOffset.UtcNow.ToString("yyyy-MM-dd");
+
+        List<Dictionary<string, object>> messages = JSONConfiguration.AnnouncementsConfiguration.SpecialMessages
+            .Select((specialMessage, index) => new Dictionary<string, object>
+            {
+                ["message_id"] = index + 1,
+                ["title"]      = specialMessage.Title,
+                ["url"]        = specialMessage.URL,
+                ["start_time"] = date,
+                ["end_time"]   = string.Empty,
+                ["left_secs"]  = 0
+            })
+            .ToList();
+
         Dictionary<string, object> response = new ()
         {
-            ["date"] = DateTimeOffset.UtcNow.ToString("yyyy-MM-dd"),
-            ["messages"] = Array.Empty<object>(),
+            ["date"] = date,
+            ["messages"] = messages,
             ["vested_threshold"] = 5
         };
 

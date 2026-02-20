@@ -12,6 +12,8 @@ public static class JSONConfiguration
 
     private static readonly string StoreItemConfigurationJSON = File.ReadAllText(Path.Combine(BasePath, "Store", "StoreItemConfiguration.json"));
 
+    private static readonly string AnnouncementsConfigurationJSON = File.ReadAllText(Path.Combine(BasePath, "Announcements", "AnnouncementsConfiguration.json"));
+
     public static readonly EconomyConfiguration EconomyConfiguration = JsonSerializer.Deserialize<EconomyConfiguration>(EconomyConfigurationJSON)
         ?? throw new NullReferenceException("Economy Configuration Is NULL");
 
@@ -23,4 +25,7 @@ public static class JSONConfiguration
 
     public static readonly StoreItemConfiguration StoreItemConfiguration = new (JsonSerializer.Deserialize<List<StoreItem>>(StoreItemConfigurationJSON)
         ?? throw new NullReferenceException("Store Item Configuration Is NULL"));
+
+    public static readonly AnnouncementsConfiguration AnnouncementsConfiguration = JsonSerializer.Deserialize<AnnouncementsConfiguration>(AnnouncementsConfigurationJSON)
+        ?? throw new NullReferenceException("Announcements Configuration Is NULL");
 }
