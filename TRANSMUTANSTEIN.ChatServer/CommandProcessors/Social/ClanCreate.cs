@@ -38,7 +38,7 @@ public class ClanCreate : ISynchronousCommandProcessor<ClientChatSession>
         }
 
         // Resolve All 4 Additional Founding Members
-        ClientChatSession?[] memberSessions = new ClientChatSession?[RequiredAdditionalFoundingMembers];
+        List<ClientChatSession> memberSessions = [];
 
         for (int index = 0; index < RequiredAdditionalFoundingMembers; index++)
         {
@@ -55,15 +55,15 @@ public class ClanCreate : ISynchronousCommandProcessor<ClientChatSession>
                 return;
             }
 
-            memberSessions[index] = memberSession;
+            memberSessions.Add(memberSession);
         }
 
         // Check None Of The Members Have Pending Clan Invites
-        for (int index = 0; index < RequiredAdditionalFoundingMembers; index++)
+        foreach (ClientChatSession memberSession in memberSessions)
         {
-            if (PendingClan.Invites.ContainsKey(memberSessions[index]!.Account.ID))
+            if (PendingClan.Invites.ContainsKey(memberSession.Account.ID))
             {
-                SendFailureWithName(session, ChatProtocol.Command.CHAT_CMD_CLAN_CREATE_FAIL_INVITE, memberSessions[index]!.Account.Name);
+                SendFailureWithName(session, ChatProtocol.Command.CHAT_CMD_CLAN_CREATE_FAIL_INVITE, memberSession.Account.Name);
 
                 return;
             }
@@ -81,13 +81,11 @@ public class ClanCreate : ISynchronousCommandProcessor<ClientChatSession>
 
             bool conflict = false;
 
-            for (int index = 0; index < RequiredAdditionalFoundingMembers; index++)
+            foreach (ClientChatSession memberSession in memberSessions)
             {
-                int memberAccountID = memberSessions[index]!.Account.ID;
-
-                if (existingCreation.FounderAccountID == memberAccountID || existingCreation.IsFoundingMember(memberAccountID))
+                if (existingCreation.FounderAccountID == memberSession.Account.ID || existingCreation.IsFoundingMember(memberSession.Account.ID))
                 {
-                    SendFailureWithName(session, ChatProtocol.Command.CHAT_CMD_CLAN_CREATE_FAIL_INVITE, memberSessions[index]!.Account.Name);
+                    SendFailureWithName(session, ChatProtocol.Command.CHAT_CMD_CLAN_CREATE_FAIL_INVITE, memberSession.Account.Name);
 
                     conflict = true;
 
@@ -100,10 +98,7 @@ public class ClanCreate : ISynchronousCommandProcessor<ClientChatSession>
         }
 
         // Store The Pending Clan Creation
-        int[] targetAccountIDs = new int[RequiredAdditionalFoundingMembers];
-
-        for (int index = 0; index < RequiredAdditionalFoundingMembers; index++)
-            targetAccountIDs[index] = memberSessions[index]!.Account.ID;
+        int[] targetAccountIDs = [.. memberSessions.Select(memberSession => memberSession.Account.ID)];
 
         PendingClanCreation creation = new ()
         {
@@ -122,8 +117,8 @@ public class ClanCreate : ISynchronousCommandProcessor<ClientChatSession>
         invite.WriteString(session.Account.Name); // Founder Name
         invite.WriteString(requestData.ClanName); // Clan Name
 
-        for (int index = 0; index < RequiredAdditionalFoundingMembers; index++)
-            memberSessions[index]!.Send(invite);
+        foreach (ClientChatSession memberSession in memberSessions)
+            memberSession.Send(invite);
     }
 
     private static void SendFailure(ClientChatSession session, ushort failureCommand)
