@@ -60,7 +60,7 @@ namespace MERRICK.DatabaseContext.Migrations
                         .HasMaxLength(15)
                         .HasColumnType("nvarchar(15)");
 
-                    b.PrimitiveCollection<string>("SelectedStoreItems")
+                    b.Property<string>("SelectedStoreItems")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -144,7 +144,7 @@ namespace MERRICK.DatabaseContext.Migrations
                     b.Property<int>("GoldCoins")
                         .HasColumnType("int");
 
-                    b.PrimitiveCollection<string>("OwnedStoreItems")
+                    b.Property<string>("OwnedStoreItems")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 

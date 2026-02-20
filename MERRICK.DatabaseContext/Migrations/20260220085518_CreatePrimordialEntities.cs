@@ -198,6 +198,7 @@ namespace MERRICK.DatabaseContext.Migrations
                     AwardMostWardsKilled = table.Column<int>(type: "int", nullable: true),
                     AwardMostHeroDamageDealt = table.Column<int>(type: "int", nullable: true),
                     AwardHighestCreepScore = table.Column<int>(type: "int", nullable: true),
+                    MatchInformationSnapshot = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     FragHistory = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>

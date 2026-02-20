@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MERRICK.DatabaseContext.Migrations
 {
     [DbContext(typeof(MerrickContext))]
-    [Migration("20260219095515_AddMatchInformationSnapshotToMatchStatistics")]
-    partial class AddMatchInformationSnapshotToMatchStatistics
+    [Migration("20260220085518_CreatePrimordialEntities")]
+    partial class CreatePrimordialEntities
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -63,7 +63,7 @@ namespace MERRICK.DatabaseContext.Migrations
                         .HasMaxLength(15)
                         .HasColumnType("nvarchar(15)");
 
-                    b.PrimitiveCollection<string>("SelectedStoreItems")
+                    b.Property<string>("SelectedStoreItems")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -147,7 +147,7 @@ namespace MERRICK.DatabaseContext.Migrations
                     b.Property<int>("GoldCoins")
                         .HasColumnType("int");
 
-                    b.PrimitiveCollection<string>("OwnedStoreItems")
+                    b.Property<string>("OwnedStoreItems")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
