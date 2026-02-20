@@ -12,7 +12,8 @@
             "SEA",
             "NEWERTH"
         ],
-        "Modes": [ // TODO: Revise These Modes From TCP Popularity Update
+        "Modes": [
+            "TODO: Revise These Modes From TCP Popularity Update",
             "rb"
         ],
         "Match": {
@@ -34,7 +35,8 @@
             "SEA",
             "NEWERTH"
         ],
-        "Modes": [ // TODO: Revise These Modes From TCP Popularity Update
+        "Modes": [
+            "TODO: Revise These Modes From TCP Popularity Update",
             "rb"
         ],
         "Match": {
@@ -56,7 +58,8 @@
             "SEA",
             "NEWERTH"
         ],
-        "Modes": [ // TODO: Revise These Modes From TCP Popularity Update
+        "Modes": [
+            "TODO: Revise These Modes From TCP Popularity Update",
             "hb",
             "rd"
         ],
