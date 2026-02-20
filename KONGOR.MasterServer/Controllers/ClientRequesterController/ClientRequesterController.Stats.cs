@@ -609,6 +609,26 @@ public partial class ClientRequesterController
     }
 
     /// <summary>
+    ///     Cached response for "get_products", lazily computed on first request.
+    ///     The products list is static (derived from the store configuration loaded at startup) so it never changes at runtime.
+    /// </summary>
+    private static readonly Lazy<string> CachedGetProductsResponse = new (() =>
+    {
+        GetProductsResponse response = new (JSONConfiguration.StoreItemConfiguration);
+
+        return PhpSerialization.Serialize(response);
+    });
+
+    /// <summary>
+    ///     Returns all enabled store products grouped by category.
+    ///     Called by the client after authentication to populate the in-game store product catalogue.
+    /// </summary>
+    private IActionResult GetProducts()
+    {
+        return Ok(CachedGetProductsResponse.Value);
+    }
+
+    /// <summary>
     ///     Returns account field statistics, owned store items, selected store items, currency balances, and other metadata.
     ///     Called by the client during gameplay and on login to refresh the client's upgrades and account data.
     /// </summary>
