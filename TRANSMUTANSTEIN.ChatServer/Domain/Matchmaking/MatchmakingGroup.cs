@@ -158,8 +158,11 @@ public class MatchmakingGroup
         if (Information.GameModes.Intersect(other.Information.GameModes).Any() is false)
             return false;
 
-        // Must Have Overlapping Regions
-        if (Information.GameRegions.Intersect(other.Information.GameRegions).Any() is false)
+        // Must Have Overlapping Regions (NEWERTH Is A Wildcard That Matches All Regions)
+        bool eitherHasAutoRegion = Information.GameRegions.Contains("NEWERTH", StringComparer.OrdinalIgnoreCase)
+            || other.Information.GameRegions.Contains("NEWERTH", StringComparer.OrdinalIgnoreCase);
+
+        if (eitherHasAutoRegion is false && Information.GameRegions.Intersect(other.Information.GameRegions).Any() is false)
             return false;
 
         // Must Be Same Ranked Status
@@ -252,6 +255,15 @@ public class MatchmakingGroup
         }
 
         group.MulticastUpdate(session.Account.ID, ChatProtocol.TMMUpdateType.TMM_CREATE_GROUP);
+
+        // Solo Co-Op Groups Bypass The Readiness And Loading Flow Because There Are No Other Players To Wait For
+        if (information.GroupType == ChatProtocol.TMMType.TMM_TYPE_COOP && group.Members.Count == 1)
+        {
+            member.IsReady = true;
+            member.LoadingPercent = 100;
+
+            group.JoinQueue();
+        }
 
         return group;
     }

@@ -1,0 +1,39 @@
+{
+    "Specials": [
+        {
+            "StoreItemID": 890,
+            "DiscountPercentageGold": 15,
+            "DiscountPercentageSilver": 0,
+            "TagTitle": "The One And Only!",
+            "TagDateLimit": ""
+        },
+        {
+            "StoreItemID": 4861,
+            "DiscountPercentageGold": 20,
+            "DiscountPercentageSilver": 0,
+            "TagTitle": "",
+            "TagDateLimit": "20% Sale"
+        },
+        {
+            "StoreItemID": 4129,
+            "DiscountPercentageGold": 25,
+            "DiscountPercentageSilver": 0,
+            "TagTitle": "",
+            "TagDateLimit": "25% Sale"
+        },
+        {
+            "StoreItemID": 4090,
+            "DiscountPercentageGold": 30,
+            "DiscountPercentageSilver": 0,
+            "TagTitle": "",
+            "TagDateLimit": "30% Sale"
+        },
+        {
+            "StoreItemID": 3979,
+            "DiscountPercentageGold": 25,
+            "DiscountPercentageSilver": 0,
+            "TagTitle": "",
+            "TagDateLimit": ""
+        }
+    ]
+}

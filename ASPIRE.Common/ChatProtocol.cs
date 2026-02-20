@@ -830,23 +830,24 @@ public static class ChatProtocol
     {
         TMM_GAME_REGION_NONE = -1,
 
-        TMM_GAME_REGION_USE,
-        TMM_GAME_REGION_USW,
-        TMM_GAME_REGION_EU,
-        TMM_GAME_REGION_SG,
-        TMM_GAME_REGION_MY,
-        TMM_GAME_REGION_PH,
-        TMM_GAME_REGION_TH,
-        TMM_GAME_REGION_ID,
-        TMM_GAME_REGION_VN,
-        TMM_GAME_REGION_RU,
-        TMM_GAME_REGION_KR,
-        TMM_GAME_REGION_AU,
-        TMM_GAME_REGION_LAT,
-        TMM_GAME_REGION_DX,
-        TMM_GAME_REGION_CN,
-        TMM_GAME_REGION_BR,
-        TMM_GAME_REGION_TR,
+        TMM_GAME_REGION_USE,  // US East
+        TMM_GAME_REGION_USW,  // US West
+        TMM_GAME_REGION_EU,   // Europe
+        TMM_GAME_REGION_SG,   // Singapore
+        TMM_GAME_REGION_MY,   // Malaysia
+        TMM_GAME_REGION_PH,   // Philippines
+        TMM_GAME_REGION_TH,   // Thailand
+        TMM_GAME_REGION_ID,   // Indonesia
+        TMM_GAME_REGION_VN,   // Vietnam
+        TMM_GAME_REGION_RU,   // Russia
+        TMM_GAME_REGION_KR,   // Korea
+        TMM_GAME_REGION_AU,   // Australia
+        TMM_GAME_REGION_LAT,  // Latin America
+        TMM_GAME_REGION_DX,   // China (DianXin)
+        TMM_GAME_REGION_CN,   // China (Other)
+        TMM_GAME_REGION_BR,   // Brazil
+        TMM_GAME_REGION_TR,   // Turkey
+        TMM_GAME_REGION_AUTO, // Automatic (All Regions)
 
         NUM_TMM_GAME_REGIONS
     };

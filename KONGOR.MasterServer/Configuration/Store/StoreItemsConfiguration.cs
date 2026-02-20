@@ -1,6 +1,6 @@
 ﻿namespace KONGOR.MasterServer.Configuration.Store;
 
-public class StoreItemConfiguration
+public class StoreItemsConfiguration
 {
     public List<StoreItem> StoreItems { get; }
 
@@ -10,7 +10,7 @@ public class StoreItemConfiguration
 
     private Dictionary<string, StoreItem> StoreItemsByPrefixedCode { get; }
 
-    public StoreItemConfiguration(List<StoreItem> storeItems)
+    public StoreItemsConfiguration(List<StoreItem> storeItems)
     {
         StoreItems = storeItems;
         StoreItemsByID = storeItems.ToDictionary(item => item.ID);

@@ -93,8 +93,33 @@ public class MatchmakingService : BackgroundService, IDisposable
             if (queuedGroups.Count == 0)
                 continue;
 
-            // Run The Broker Cycle
-            List<MatchmakingMatch> matches = RunBrokerCycle(queuedGroups);
+            // Spawn Bot Matches Immediately (Bot Groups Bypass The Regular Match Broker Cycles)
+            List<MatchmakingGroup> botGroups = [.. queuedGroups.Where(group => group.Information.GroupType == ChatProtocol.TMMType.TMM_TYPE_COOP)];
+
+            foreach (MatchmakingGroup botGroup in botGroups)
+            {
+                MatchmakingMatch botMatch = MatchmakingMatch.FromBotGroup(botGroup);
+
+                bool spawned = await SpawnMatch(botMatch);
+
+                if (spawned is false)
+                {
+                    SendNoServersFound(botMatch);
+
+                    botGroup.MatchedUp = false;
+                    botGroup.AssignedMatchGUID = null;
+                    botGroup.AssignedTeamGUID = null;
+                }
+            }
+
+            // Run The Regular Broker Cycle For Non-Bot Groups
+            List<MatchmakingGroup> regularGroups = [.. queuedGroups
+                .Where(group => group.Information.GroupType != ChatProtocol.TMMType.TMM_TYPE_COOP && group.MatchedUp is false)];
+
+            if (regularGroups.Count == 0)
+                continue;
+
+            List<MatchmakingMatch> matches = RunMatchBrokerCycle(regularGroups);
 
             // Spawn Each Match
             foreach (MatchmakingMatch match in matches)
@@ -124,9 +149,10 @@ public class MatchmakingService : BackgroundService, IDisposable
     ///     Runs a single match broker cycle with TMR-aware matching.
     ///     Uses adaptive TMR spread based on queue time and enforces group makeup rules.
     /// </summary>
-    private List<MatchmakingMatch> RunBrokerCycle(List<MatchmakingGroup> queuedGroups)
+    private List<MatchmakingMatch> RunMatchBrokerCycle(List<MatchmakingGroup> queuedGroups)
     {
         List<MatchmakingMatch> matches = [];
+
         int playersPerTeam = _settings.Value.PlayersPerTeam;
         double maxTMRDifference = _settings.Value.MaximumTeamTMRDifference;
 
@@ -177,8 +203,9 @@ public class MatchmakingService : BackgroundService, IDisposable
                     if (tmrDifference > maxAcceptableSpread)
                         continue;
 
-                    // Check Group Makeup Difference (Enforce Fairness)
                     int groupMakeupDifference = Math.Abs(legionTeam.GroupMakeup - candidateOpponent.GroupMakeup);
+
+                    // Check Group Makeup Difference (Enforce Fairness)
                     if (groupMakeupDifference > 2)
                     {
                         Log.Debug(@"Skipping Match Due To Group Makeup Mismatch: {Legion} vs {Hellbourne} (Diff: {Diff})",
@@ -222,8 +249,17 @@ public class MatchmakingService : BackgroundService, IDisposable
 
                 matches.Add(match);
 
-                Log.Information(@"Match Created: GUID={MatchGUID}, GameType={GameType}, Legion={LegionCount}p ({LegionMakeup}, Eff: {LegionTMR:F1}), Hellbourne={HellbourneCount}p ({HellbourneMakeup}, Eff: {HellbourneTMR:F1}), Diff={TMRDiff:F1}, Prediction={Prediction:P1}",
-                    match.GUID, gameType, match.LegionTeam.PlayerCount, match.LegionTeam.GroupMakeupString, match.LegionTeam.EffectiveTeamRating, match.HellbourneTeam.PlayerCount, match.HellbourneTeam.GroupMakeupString, match.HellbourneTeam.EffectiveTeamRating, bestTMRDifference, match.MatchupPrediction);
+                if (match.HellbourneTeam is not null)
+                {
+                    Log.Information(@"Match Created: GUID={MatchGUID}, GameType={GameType}, Legion={LegionCount}p ({LegionMakeup}, TeamRating: {LegionTMR:F1}), Hellbourne={HellbourneCount}p ({HellbourneMakeup}, TeamRating: {HellbourneTMR:F1}), TeamRatingDifference={TMRDifference:F1}, Prediction={Prediction:P1}",
+                        match.GUID, gameType, match.LegionTeam.PlayerCount, match.LegionTeam.GroupMakeupString, match.LegionTeam.EffectiveTeamRating, match.HellbourneTeam.PlayerCount, match.HellbourneTeam.GroupMakeupString, match.HellbourneTeam.EffectiveTeamRating, bestTMRDifference, match.MatchupPrediction);
+                }
+
+                else
+                {
+                    Log.Information(@"Bot Match Created: GUID={MatchGUID}, GameType={GameType}, Legion={LegionCount}p ({LegionMakeup}, TeamRating: {LegionTMR:F1}), TeamRatingDifference={TMRDifference:F1}",
+                        match.GUID, gameType, match.LegionTeam.PlayerCount, match.LegionTeam.GroupMakeupString, match.LegionTeam.EffectiveTeamRating, bestTMRDifference);
+                }
             }
         }
 
@@ -418,6 +454,14 @@ public class MatchmakingService : BackgroundService, IDisposable
         Log.Information(@"CreateMatch Sent: MatchGUID={MatchGUID}, ServerID={ServerID}, Server={ServerAddress}:{ServerPort}",
             match.GUID, server.ID, match.ServerAddress, match.ServerPort);
 
+        // Send Leave Queue Notification To Dismiss The Client's Queue Timer
+        ChatBuffer leaveQueue = new ();
+
+        leaveQueue.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_LEAVE_QUEUE);
+
+        foreach (MatchmakingGroupMember member in match.GetAllPlayers())
+            member.Session.Send(leaveQueue);
+
         // Send Player Notifications
         SendMatchFoundUpdate(match, match.CorrelationID);
         SendFoundServerUpdate(match);
@@ -447,9 +491,21 @@ public class MatchmakingService : BackgroundService, IDisposable
         // Determine Match Type Using The Centralised Mapping On MatchmakingMatch
         byte matchType = (byte)match.ArrangedMatchType;
 
-        // Build Match Settings String (Must Match C++ Format Exactly)
-        // Format: mode:<mode> map:<mapname> teamsize:<size> allheroes:true noleaver:true spectators:<count>
-        string matchSettings = $"mode:{match.SelectedMode} map:{match.SelectedMap} teamsize:{match.LegionTeam.TeamSize} allheroes:true noleaver:true spectators:10";
+        // Build Match Settings String In Expected Format: mode:<string> map:<string> teamsize:<int> allheroes:true noleaver:<bool> spectators:<int>
+        string matchSettings;
+
+        if (match.IsBotMatch)
+        {
+            int humanPlayerCount = match.LegionTeam.PlayerCount;
+            int botPlayerCount = match.TeamSize - humanPlayerCount;
+
+            matchSettings = $"mode:botmatch casual:true map:{match.SelectedMap} teamsize:{match.TeamSize} allheroes:true noleaver:false spectators:{humanPlayerCount} randombots:{botPlayerCount}|{match.TeamSize}";
+        }
+
+        else
+        {
+            matchSettings = $"mode:{match.SelectedMode} map:{match.SelectedMap} teamsize:{match.TeamSize} allheroes:true noleaver:true spectators:{match.TeamSize * 2}";
+        }
 
         ChatBuffer createMatch = new ();
 
@@ -464,7 +520,7 @@ public class MatchmakingService : BackgroundService, IDisposable
         createMatch.WriteInt8(0);                     // Unknown3
 
         // Write Player Count
-        int totalPlayers = match.LegionTeam.PlayerCount + match.HellbourneTeam.PlayerCount;
+        int totalPlayers = match.LegionTeam.PlayerCount + (match.HellbourneTeam?.PlayerCount ?? 0);
         createMatch.WriteInt8(Convert.ToByte(totalPlayers));
 
         // Build A Lookup From Each Member To Their Group Index (Continuous Across Both Teams)
@@ -479,12 +535,15 @@ public class MatchmakingService : BackgroundService, IDisposable
             groupIndex++;
         }
 
-        foreach (MatchmakingGroup group in match.HellbourneTeam.Groups)
+        if (match.HellbourneTeam is not null)
         {
-            foreach (MatchmakingGroupMember member in group.Members)
-                memberGroupIndices[member] = groupIndex;
+            foreach (MatchmakingGroup group in match.HellbourneTeam.Groups)
+            {
+                foreach (MatchmakingGroupMember member in group.Members)
+                    memberGroupIndices[member] = groupIndex;
 
-            groupIndex++;
+                groupIndex++;
+            }
         }
 
         // Write Players Sorted By TMR Ascending So That The Lowest-Rated Player Gets Slot 0 (Picks First)
@@ -506,20 +565,23 @@ public class MatchmakingService : BackgroundService, IDisposable
             createMatch.WriteInt8(0);                               // Benefit Value (0 = Normal)
         }
 
-        // Write Hellbourne Players (Team 2)
-        byte hellbourneSlot = 0;
-
-        foreach (MatchmakingGroupMember member in match.HellbourneTeam.GetAllMembers().OrderBy(member => member.TMR))
+        // Write Hellbourne Players (Team 2) — Skipped For Bot Matches
+        if (match.HellbourneTeam is not null)
         {
-            createMatch.WriteInt32(member.Account.ID);              // Account ID
-            createMatch.WriteInt8(2);                               // Team (2 = Hellbourne)
-            createMatch.WriteInt8(hellbourneSlot++);                // Slot (Continuous Within Team)
-            createMatch.WriteInt8(0);                               // Social Bonus (0 = None)
-            createMatch.WriteFloat32((float)member.MatchWinValue);  // Win MMR Delta
-            createMatch.WriteFloat32((float)member.MatchLossValue); // Loss MMR Delta
-            createMatch.WriteInt8(0);                               // Is Provisional (FALSE)
-            createMatch.WriteInt8(memberGroupIndices[member]);      // Group Index (Continuous Across Teams)
-            createMatch.WriteInt8(0);                               // Benefit Value (0 = Normal)
+            byte hellbourneSlot = 0;
+
+            foreach (MatchmakingGroupMember member in match.HellbourneTeam.GetAllMembers().OrderBy(member => member.TMR))
+            {
+                createMatch.WriteInt32(member.Account.ID);              // Account ID
+                createMatch.WriteInt8(2);                               // Team (2 = Hellbourne)
+                createMatch.WriteInt8(hellbourneSlot++);                // Slot (Continuous Within Team)
+                createMatch.WriteInt8(0);                               // Social Bonus (0 = None)
+                createMatch.WriteFloat32((float)member.MatchWinValue);  // Win MMR Delta
+                createMatch.WriteFloat32((float)member.MatchLossValue); // Loss MMR Delta
+                createMatch.WriteInt8(0);                               // Is Provisional (FALSE)
+                createMatch.WriteInt8(memberGroupIndices[member]);      // Group Index (Continuous Across Teams)
+                createMatch.WriteInt8(0);                               // Benefit Value (0 = Normal)
+            }
         }
 
         // Write Group IDs (Count And List Of Group IDs)
@@ -584,7 +646,7 @@ public class MatchmakingService : BackgroundService, IDisposable
             IsCasual = isCasual,
             MatchType = matchType,
             MatchMode = matchMode,
-            MaximumPlayersCount = match.LegionTeam.TeamSize * 2
+            MaximumPlayersCount = match.TeamSize * 2
         };
     }
 
@@ -664,7 +726,7 @@ public class MatchmakingService : BackgroundService, IDisposable
 
         matchFound.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_MATCH_FOUND_UPDATE);
         matchFound.WriteString(match.SelectedMap);
-        matchFound.WriteInt8(Convert.ToByte(match.LegionTeam.TeamSize));
+        matchFound.WriteInt8(Convert.ToByte(match.TeamSize));
         matchFound.WriteInt8(Convert.ToByte(match.GameType));
         matchFound.WriteString(match.SelectedMode);
         matchFound.WriteString(match.SelectedRegion);

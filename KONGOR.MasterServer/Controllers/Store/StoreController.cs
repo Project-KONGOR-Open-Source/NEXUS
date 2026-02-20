@@ -14,7 +14,7 @@ public class StoreController(MerrickContext databaseContext, IDatabase distribut
     private const string TauntPrefixedCode = "t.Standard";
     private const int SuperTauntStoreItemID = 1792;
 
-    private static StoreItemConfiguration StoreItems => JSONConfiguration.StoreItemConfiguration;
+    private static StoreItemsConfiguration StoreItems => JSONConfiguration.StoreItemsConfiguration;
 
     [HttpPost(Name = "Store Requester")]
     public async Task<IActionResult> StoreRequester()
@@ -206,6 +206,11 @@ public class StoreController(MerrickContext databaseContext, IDatabase distribut
         if (int.TryParse(pageString, out int currentPage).Equals(false))
             return BadRequest(@"Invalid Value For Form Parameter ""page""");
 
+        string? hostTime = Request.Form["hostTime"];
+
+        if (hostTime is null)
+            return BadRequest(@"Missing Value For Form Parameter ""hostTime""");
+
         StoreItem? storeItem = StoreItems.GetByID(productID);
 
         (Dictionary<string, object> response, bool success) = ExecutePurchase(account, storeItem, currency);
@@ -214,6 +219,12 @@ public class StoreController(MerrickContext databaseContext, IDatabase distribut
             await MerrickContext.SaveChangesAsync();
 
         PopulateItemListing(account.User, account, response, categoryID, currentPage);
+
+        response["responseCode"] = (int) StoreResponseCode.BASIC_ITEM_LIST_RESPONSE;
+        response["requestHostTime"] = hostTime;
+
+        if (response.ContainsKey("errorCode").Equals(false))
+            response["errorCode"] = 0;
 
         return Ok(PhpSerialization.Serialize(response));
     }
@@ -363,9 +374,17 @@ public class StoreController(MerrickContext databaseContext, IDatabase distribut
 
     /// <summary>
     ///     Populates the response dictionary with the item listing for a store category page.
+    ///     For the featured heroes category (68), a specialised response format with bundle data is returned.
     /// </summary>
     private static void PopulateItemListing(User user, Account account, Dictionary<string, object> response, int categoryID, int currentPage)
     {
+        // The Featured Heroes Category Uses A Specialised Response Format With Bundle Data
+        if (categoryID == (int) StoreCategory.FeaturedHeroAvatars)
+        {
+            PopulateFeaturedItemListing(user, account, response);
+            return;
+        }
+
         StoreItemType itemType = MapStoreCategoryToItemType(categoryID);
 
         // Include Taunt Availability Status For Taunt And Miscellaneous Categories
@@ -409,6 +428,7 @@ public class StoreController(MerrickContext databaseContext, IDatabase distribut
         List<string> productIsBundle = new ();
         List<string> productsRequired = new ();
         List<string> productEligibility = new ();
+        int eligibilityIndex = 0;
 
         foreach (StoreItem item in displayItems)
         {
@@ -440,8 +460,10 @@ public class StoreController(MerrickContext databaseContext, IDatabase distribut
                     StoreItems.GetByID(requiredID) is StoreItem requiredItem
                         && user.OwnedStoreItems.Contains(requiredItem.PrefixedCode));
 
-                productEligibility.Add(string.Join("~", item.ID, item.Required.Length, isEligible ? 1 : 0, item.GoldCost, 0, requiredString));
+                productEligibility.Add(string.Join("~", item.ID, eligibilityIndex, isEligible ? 1 : 0, item.GoldCost, 0, requiredString));
             }
+
+            eligibilityIndex++;
         }
 
         response["productPrices"] = string.Join("|", productPrices);
@@ -456,7 +478,8 @@ public class StoreController(MerrickContext databaseContext, IDatabase distribut
         response["productsRequired"] = string.Join("|", productsRequired);
         response["productEligibility"] = string.Join("|", productEligibility);
 
-        int totalPages = IsPaginated(categoryID)
+        // Always Compute Total Pages Based On All Items, Even For Non-Paginated Categories (The Client Uses This For Client-Side Pagination)
+        int totalPages = allItems.Count > 0
             ? (allItems.Count + ItemsPerPage - 1) / ItemsPerPage
             : 1;
 
@@ -465,6 +488,125 @@ public class StoreController(MerrickContext databaseContext, IDatabase distribut
         response["totalMMPoints"] = user.SilverCoins;
         response["categoryID"] = categoryID;
         response["currentPage"] = currentPage;
+        response["customAccountIcon"] = 0;
+        response["customAccountIconCost"] = 350;
+        response["customAccountIconCostMMP"] = 1000;
+        response["accountIconsUnlocked"] = 1;
+        response["timestamp"] = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+        response["vaultHighlight"] = "NULL";
+
+        PopulateSelectedUpgrades(account, response);
+    }
+
+    /// <summary>
+    ///     Populates the response dictionary with the featured heroes listing.
+    ///     This format includes individual product data and associated bundle information, matching the response format expected by the client's featured tab (category 68).
+    /// </summary>
+    private static void PopulateFeaturedItemListing(User user, Account account, Dictionary<string, object> response)
+    {
+        FeaturedItemsConfiguration featuredConfiguration = JSONConfiguration.FeaturedItemsConfiguration;
+
+        List<string> productNames = [];
+        List<string> productIDs = [];
+        List<string> productLocalContent = [];
+        List<string> productAlreadyOwned = [];
+        List<string> productEligibility = [];
+
+        foreach (int itemID in featuredConfiguration.FeaturedItemIDs)
+        {
+            StoreItem? item = StoreItems.GetByID(itemID);
+
+            if (item is null)
+                continue;
+
+            productNames.Add(item.Code);
+            productIDs.Add(item.ID.ToString());
+            productLocalContent.Add(item.Resource);
+            productAlreadyOwned.Add(user.OwnedStoreItems.Contains(item.PrefixedCode) ? "1" : "0");
+
+            if (item.Required.Length > 0)
+            {
+                bool isEligible = item.Required.All(requiredID =>
+                    StoreItems.GetByID(requiredID) is StoreItem requiredItem
+                        && user.OwnedStoreItems.Contains(requiredItem.PrefixedCode));
+
+                string requiredString = string.Join(";", item.Required);
+
+                productEligibility.Add(string.Join("~", item.ID, item.Required.Length, isEligible ? 1 : 0, item.GoldCost, 0, requiredString));
+            }
+        }
+
+        List<string> bundleIDs = [];
+        List<string> bundleAlreadyOwned = [];
+        List<string> bundleIncludedProducts = [];
+        List<string> bundleNames = [];
+        List<string> bundleLocalPaths = [];
+        List<string> bundleCosts = [];
+
+        foreach (FeaturedBundle bundle in featuredConfiguration.Bundles)
+        {
+            StoreItem? bundleItem = StoreItems.GetByID(bundle.StoreItemID);
+
+            if (bundleItem is null)
+                continue;
+
+            bundleIDs.Add(bundleItem.ID.ToString());
+            bundleAlreadyOwned.Add(user.OwnedStoreItems.Contains(bundleItem.PrefixedCode) ? "1" : "0");
+            bundleIncludedProducts.Add(string.Join("~", bundle.IncludedProductIndices));
+            bundleNames.Add(bundleItem.Name);
+            bundleLocalPaths.Add(bundleItem.Resource);
+            bundleCosts.Add(bundleItem.GoldCost.ToString());
+        }
+
+        response["productPrices"] = string.Empty;
+        response["productNames"] = string.Join("|", productNames);
+        response["productIDs"] = string.Join("|", productIDs);
+        response["productAlreadyOwned"] = string.Join("|", productAlreadyOwned);
+        response["productLocalContent"] = string.Join("|", productLocalContent);
+        response["productEligibility"] = string.Join("|", productEligibility);
+
+        int placeholderCount = Math.Max(productNames.Count, 3);
+        string placeholderPipe = string.Join("|", Enumerable.Repeat("-1", placeholderCount));
+
+        response["productIsBundle"] = string.Join("|", Enumerable.Repeat("1", placeholderCount));
+        response["productQuantity"] = placeholderPipe;
+        response["productWebContent"] = placeholderPipe;
+        response["productDescription"] = placeholderPipe;
+
+        string specialBundleEntry = string.Join("~", Enumerable.Repeat("-1", 5));
+        response["specialBundles"] = string.Join("|", Enumerable.Repeat(specialBundleEntry, placeholderCount));
+
+        string chargesEntry = string.Join("~", Enumerable.Repeat("-1", 6));
+        response["productCharges"] = string.Join("|", Enumerable.Repeat(chargesEntry, placeholderCount));
+
+        string durationsEntry = string.Join("~", Enumerable.Repeat("-1", 7));
+        response["productDurations"] = string.Join("|", Enumerable.Repeat(durationsEntry, placeholderCount));
+
+        response["productTimes"] = string.Join("|", Enumerable.Repeat("0,0", placeholderCount));
+        response["purchasable"] = string.Join("|", Enumerable.Repeat("1", placeholderCount));
+        response["productPremium"] = string.Join("|", Enumerable.Repeat("0", placeholderCount));
+        response["premium_mmp_cost"] = string.Join("|", Enumerable.Repeat("9002", placeholderCount));
+
+        string statsEntry = "-1~~0~0";
+        response["productStats"] = string.Join("|", Enumerable.Repeat(statsEntry, placeholderCount));
+        response["productEnhancements"] = string.Join("|", Enumerable.Repeat(string.Empty, placeholderCount));
+        response["productEnhancementIDs"] = string.Join("|", Enumerable.Repeat(string.Empty, placeholderCount));
+
+        response["bundleIDs"] = string.Join("|", bundleIDs);
+        response["bundleAlreadyOwned"] = string.Join("|", bundleAlreadyOwned);
+        response["bundleIncludedProducts"] = string.Join("|", bundleIncludedProducts);
+        response["bundleNames"] = string.Join("|", bundleNames);
+        response["bundleLocalPaths"] = string.Join("|", bundleLocalPaths);
+        response["bundleCosts"] = string.Join("|", bundleCosts);
+
+        response["chargesRemaining"] = string.Empty;
+        response["durationsRemaining"] = string.Empty;
+
+        response["totalPages"] = 1;
+        response["totalPoints"] = user.GoldCoins;
+        response["totalMMPoints"] = user.SilverCoins;
+        response["categoryID"] = (int) StoreCategory.FeaturedHeroAvatars;
+        response["currentPage"] = 1;
         response["customAccountIcon"] = 0;
         response["customAccountIconCost"] = 350;
         response["customAccountIconCostMMP"] = 1000;

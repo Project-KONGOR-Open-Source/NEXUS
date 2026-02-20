@@ -54,8 +54,9 @@ public partial class ClientRequesterController(MerrickContext databaseContext, I
             // statistics
             "get_account_all_hero_stats"    => await GetHeroStatistics(),
             "get_match_stats"               => await GetMatchStatistics(),
-            //"client_events_info"            => Ok(@"{""success"":true,""data"":[],""errors"":""invalid region"",""vested_threshold"":5,""0"":true}"),
-            //"get_special_messages"          => Ok(@"a:4:{s:4:""date"";s:10:""2022-04-20"";s:8:""messages"";a:0:{}s:16:""vested_threshold"";i:5;i:0;b:1;}"),
+            "client_events_info"            => GetClientEventsInformation(),
+            "get_special_messages"          => GetSpecialMessages(),
+            "claim_season_rewards"          => ClaimSeasonRewards(),
             "get_products"                  => GetProducts(),
             "get_upgrades"                  => await GetUpgrades(),
             "get_initStats"                 => await GetInitialStatistics(),
@@ -85,6 +86,9 @@ public partial class ClientRequesterController(MerrickContext databaseContext, I
             "match_history_overview"        => await GetMatchHistoryOverview(),
             "show_stats"                    => await GetStatistics(),
 
+            // store
+            "get_daily_special"             => await GetDailySpecial(),
+
             // guides
             "get_guide_list_filtered"       => await GetGuideList(),
             "get_guide"                     => await GetGuide(),
@@ -93,4 +97,172 @@ public partial class ClientRequesterController(MerrickContext databaseContext, I
             _                               => throw new NotImplementedException($"Unsupported Client Requester Controller Form Parameter: f={Request.Form["f"].Single()}")
         };
     }
+
+    /// <summary>
+    ///     Returns client events information as a JSON response.
+    ///     The client uses this to populate the HoN Event notification panel with revival events, newbie events, and other promotional content.
+    ///     Currently returns an empty events object as the revival and newbie event systems are not yet implemented.
+    /// </summary>
+    private IActionResult GetClientEventsInformation()
+    {
+        Dictionary<string, object> response = new ()
+        {
+            ["success"] = true,
+            ["data"] = new Dictionary<string, object>(),
+            ["errors"] = string.Empty,
+            ["vested_threshold"] = 5,
+            ["0"] = true
+        };
+
+        return Ok(JsonSerializer.Serialize(response));
+    }
+
+    /// <summary>
+    ///     Returns special messages to be displayed in the client's HoN Event notification panel.
+    ///     Messages are loaded from the announcements configuration file. Each message URL points to the
+    ///     master server's announcements endpoint, which serves an HTML page embedding the configured external URL
+    ///     in an iframe that the client's embedded web browser can render.
+    ///     The client generates an MD5 hash from the title, URL, and date to track which messages have already been seen.
+    /// </summary>
+    private IActionResult GetSpecialMessages()
+    {
+        string date = DateTimeOffset.UtcNow.ToString("yyyy-MM-dd");
+        string baseURL = $"{Request.Scheme}://{Request.Host}";
+
+        List<Dictionary<string, object>> messages = JSONConfiguration.AnnouncementsConfiguration.SpecialMessages
+            .Select((specialMessage, index) => new Dictionary<string, object>
+            {
+                ["message_id"] = index + 1,
+                ["title"]      = specialMessage.Title,
+                ["url"]        = $"{baseURL}/announcements/{index}",
+                ["start_time"] = date,
+                ["end_time"]   = string.Empty,
+                ["left_secs"]  = 0
+            })
+            .ToList();
+
+        Dictionary<string, object> response = new ()
+        {
+            ["date"] = date,
+            ["messages"] = messages,
+            ["vested_threshold"] = 5
+        };
+
+        return Ok(PhpSerialization.Serialize(response));
+    }
+
+    /// <summary>
+    ///     Claims season rewards for the requesting account.
+    ///     Currently returns an acknowledgement response as the seasonal rewards system is not yet implemented.
+    /// </summary>
+    private IActionResult ClaimSeasonRewards()
+    {
+        Dictionary<string, object> response = new ()
+        {
+            ["vested_threshold"] = 5
+        };
+
+        return Ok(PhpSerialization.Serialize(response));
+    }
+
+    /// <summary>
+    ///     Returns the daily special offers for the in-game store.
+    ///     Each special entry includes the product details, discount information, and ownership status for the requesting account.
+    ///     The client displays up to five specials in the store's specials tab.
+    /// </summary>
+    private async Task<IActionResult> GetDailySpecial()
+    {
+        string? accountIDString = Request.Form["account_id"];
+
+        if (accountIDString is null || int.TryParse(accountIDString, out int accountID).Equals(false))
+            return BadRequest(@"Missing Or Invalid Value For Form Parameter ""account_id""");
+
+        Account? account = await MerrickContext.Accounts
+            .Include(queriedAccount => queriedAccount.User)
+            .SingleOrDefaultAsync(queriedAccount => queriedAccount.ID == accountID);
+
+        if (account is null)
+            return NotFound($@"Account With ID ""{accountID}"" Was Not Found");
+
+        StoreItemsConfiguration storeItems = JSONConfiguration.StoreItemsConfiguration;
+        DailySpecialsConfiguration dailySpecials = JSONConfiguration.DailySpecialsConfiguration;
+
+        List<Dictionary<string, object>> dailySpecialItems = [];
+
+        for (int index = 0; index < dailySpecials.Specials.Count; index++)
+        {
+            DailySpecialEntry special = dailySpecials.Specials[index];
+            StoreItem? storeItem = storeItems.GetByID(special.StoreItemID);
+
+            if (storeItem is null)
+                continue;
+
+            string heroName = string.Empty;
+
+            if (storeItem.StoreItemType is StoreItemType.AlternativeAvatar)
+            {
+                int underscoreIndex = storeItem.Code.IndexOf('_');
+                int dotIndex = storeItem.Code.IndexOf('.');
+
+                if (underscoreIndex >= 0 && dotIndex > underscoreIndex)
+                    heroName = storeItem.Code[(underscoreIndex + 1)..dotIndex];
+            }
+
+            int discountedGoldCost = storeItem.GoldCost * (100 - special.DiscountPercentageGold) / 100;
+            int discountedSilverCost = storeItem.SilverCost * (100 - special.DiscountPercentageSilver) / 100;
+
+            dailySpecialItems.Add(new Dictionary<string, object>
+            {
+                ["panel_index"]         = index + 1,
+                ["product_id"]          = storeItem.ID.ToString(),
+                ["hero_name"]           = heroName,
+                ["item_name"]           = storeItem.Code,
+                ["item_cname"]          = storeItem.Name,
+                ["item_type"]           = MapStoreItemTypeToCategoryName(storeItem.StoreItemType),
+                ["purchasable"]         = storeItem.Purchasable,
+                ["item_code"]           = storeItem.PrefixedCode,
+                ["local_content"]       = storeItem.Resource,
+                ["plinko_only"]         = 0,
+                ["gold_coins"]          = storeItem.GoldCost,
+                ["silver_coins"]        = storeItem.SilverCost,
+                ["discount_off"]        = special.DiscountPercentageGold,
+                ["discount_silver"]     = special.DiscountPercentageSilver,
+                ["current_gold_coins"]  = discountedGoldCost,
+                ["current_silver_coins"] = discountedSilverCost,
+                ["tag_title"]           = special.TagTitle,
+                ["tag_date_limit"]      = special.TagDateLimit,
+                ["item_page"]           = 0,
+                ["is_owned"]            = account.User.OwnedStoreItems.Contains(storeItem.PrefixedCode)
+            });
+        }
+
+        Dictionary<string, object> response = new ()
+        {
+            ["list"] = dailySpecialItems,
+            ["vested_threshold"] = 5
+        };
+
+        return Ok(JsonSerializer.Serialize(response));
+    }
+
+    /// <summary>
+    ///     Maps a <see cref="StoreItemType"/> to the category name string expected by the game client.
+    /// </summary>
+    private static string MapStoreItemTypeToCategoryName(StoreItemType type) => type switch
+    {
+        StoreItemType.AlternativeAvatar  => "Alt Avatar",
+        StoreItemType.AnnouncerVoice     => "Alt Announcement",
+        StoreItemType.Courier            => "Couriers",
+        StoreItemType.Hero               => "Hero",
+        StoreItemType.Ward               => "Ward",
+        StoreItemType.Taunt              => "Taunt",
+        StoreItemType.Miscellaneous      => "Misc",
+        StoreItemType.EarlyAccessProduct => "EAP",
+        StoreItemType.ChatNameColour     => "Name Color",
+        StoreItemType.ChatSymbol         => "Symbol",
+        StoreItemType.AccountIcon        => "Account Icon",
+        StoreItemType.Enhancement        => "Enhancement",
+        StoreItemType.Mastery            => "Mastery",
+        _                                => "Misc"
+    };
 }

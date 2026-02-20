@@ -201,10 +201,10 @@ public partial class ClientRequesterController
 
         // Build Season Statistics From Ranked And Casual Matchmaking
         int rankedWins = statisticsByType.TryGetValue(AccountStatisticsType.Matchmaking, out AccountStatistics? rankedStatistics) ? rankedStatistics.MatchesWon : 0;
-        int rankedLosses = statisticsByType.TryGetValue(AccountStatisticsType.Matchmaking, out _) ? rankedStatistics!.MatchesLost : 0;
+        int rankedLosses = statisticsByType.TryGetValue(AccountStatisticsType.Matchmaking, out _) ? rankedStatistics?.MatchesLost ?? 0 : 0;
 
         int casualWins = statisticsByType.TryGetValue(AccountStatisticsType.MatchmakingCasual, out AccountStatistics? casualStatistics) ? casualStatistics.MatchesWon : 0;
-        int casualLosses = statisticsByType.TryGetValue(AccountStatisticsType.MatchmakingCasual, out _) ? casualStatistics!.MatchesLost : 0;
+        int casualLosses = statisticsByType.TryGetValue(AccountStatisticsType.MatchmakingCasual, out _) ? casualStatistics?.MatchesLost ?? 0 : 0;
 
         ShowSimpleStatsResponse response = new ()
         {
@@ -614,7 +614,7 @@ public partial class ClientRequesterController
     /// </summary>
     private static readonly Lazy<string> CachedGetProductsResponse = new (() =>
     {
-        GetProductsResponse response = new (JSONConfiguration.StoreItemConfiguration);
+        GetProductsResponse response = new (JSONConfiguration.StoreItemsConfiguration);
 
         return PhpSerialization.Serialize(response);
     });

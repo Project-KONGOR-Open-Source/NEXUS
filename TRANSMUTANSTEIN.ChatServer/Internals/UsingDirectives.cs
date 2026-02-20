@@ -1,10 +1,13 @@
 ﻿global using ASPIRE.Common;
 global using ASPIRE.Common.Enumerations.Match;
+global using ASPIRE.Common.Extensions.Collections;
 global using ASPIRE.Common.Extensions.Cryptography;
 global using ASPIRE.Common.Constants;
 global using ASPIRE.Common.ServiceDefaults;
 
 // TODO: Move These To A Shared Project And Remove Inter-Project Dependencies
+global using KONGOR.MasterServer.Configuration;
+global using KONGOR.MasterServer.Configuration.Matchmaking;
 global using KONGOR.MasterServer.Extensions.Cache;
 global using KONGOR.MasterServer.Models.ServerManagement;
 global using KONGOR.MasterServer.Handlers.SRP;
