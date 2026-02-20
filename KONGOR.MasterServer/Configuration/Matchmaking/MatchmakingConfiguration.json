@@ -1,5 +1,6 @@
 {
     "GameModes": [ "ap", "apg", "apd", "sd", "bd", "bp", "ar", "lp", "bb", "bbg", "bbr", "bm", "cm", "br", "km", "rd", "bdr", "cp", "fp", "sp", "ss", "sm", "hb", "mwb", "rb" ],
+    "GameTypes": [ 1, 2, 3, 4, 5, 6, 7 ],
     "Regions": [ "USE", "USW", "EU", "SG", "MY", "PH", "TH", "ID", "VN", "RU", "KR", "AU", "LAT", "DX", "CN", "BR", "TR", "NEWERTH" ],
     "Maps": [
         {

@@ -13,6 +13,13 @@ public class MatchmakingConfiguration
     public required string[] GameModes { get; set; }
 
     /// <summary>
+    ///     The global set of game types sent in the popularity update.
+    ///     These are the game type identifiers that the client uses to enable game type buttons in the matchmaking UI.
+    ///     Matches the original "teamfinder_availableGameTypes" CVAR (default "1|2|3|4|5").
+    /// </summary>
+    public required int[] GameTypes { get; set; }
+
+    /// <summary>
     ///     The global set of regions available for matchmaking.
     ///     Each entry is a region code (e.g. "EU", "USE") matching the <see cref="ChatProtocol.TMMGameRegion"/> enum.
     /// </summary>

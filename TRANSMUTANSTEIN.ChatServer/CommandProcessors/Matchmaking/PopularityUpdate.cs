@@ -84,9 +84,14 @@ public class PopularityUpdate : ISynchronousCommandProcessor<ClientChatSession>
         MatchmakingConfiguration configuration = JSONConfiguration.MatchmakingConfiguration;
 
         List<string> maps = [.. configuration.Maps.Select(mapConfiguration => mapConfiguration.Map)];
-        List<int> gameTypes = [.. configuration.Maps.SelectMany(mapConfiguration => mapConfiguration.GameTypes)];
+        List<int> gameTypes = [.. configuration.GameTypes];
         List<string> gameModes = [.. configuration.GameModes];
-        List<string> regions = [.. configuration.Regions];
+
+        // Available Regions Are Derived From The Union Of All Per-Map Region Lists, So Only Regions That Are Actually Configured On At Least One Map Are Sent To The Client
+        List<string> regions = [.. configuration.Maps
+            .SelectMany(mapConfiguration => mapConfiguration.Regions)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .OrderBy(region => Array.IndexOf(configuration.Regions, region))];
 
         // Compute Disabled Game Modes By Map: For Each Map, Any Global Mode Not In The Map's Mode List Is Disabled
         HashSet<string> globalModeSet = [.. gameModes];
