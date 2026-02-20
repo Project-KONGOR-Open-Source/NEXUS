@@ -454,6 +454,14 @@ public class MatchmakingService : BackgroundService, IDisposable
         Log.Information(@"CreateMatch Sent: MatchGUID={MatchGUID}, ServerID={ServerID}, Server={ServerAddress}:{ServerPort}",
             match.GUID, server.ID, match.ServerAddress, match.ServerPort);
 
+        // Send Leave Queue Notification To Dismiss The Client's Queue Timer
+        ChatBuffer leaveQueue = new ();
+
+        leaveQueue.WriteCommand(ChatProtocol.Matchmaking.NET_CHAT_CL_TMM_GROUP_LEAVE_QUEUE);
+
+        foreach (MatchmakingGroupMember member in match.GetAllPlayers())
+            member.Session.Send(leaveQueue);
+
         // Send Player Notifications
         SendMatchFoundUpdate(match, match.CorrelationID);
         SendFoundServerUpdate(match);
