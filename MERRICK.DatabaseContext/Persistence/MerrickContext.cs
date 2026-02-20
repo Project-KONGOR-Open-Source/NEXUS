@@ -32,6 +32,7 @@ public sealed class MerrickContext : DbContext
         ConfigureSchemas(builder);
 
         ConfigureRoles(builder.Entity<Role>());
+        ConfigureUsers(builder.Entity<User>());
         ConfigureAccounts(builder.Entity<Account>());
         ConfigureAccountStatistics(builder.Entity<AccountStatistics>());
         ConfigureMatchStatistics(builder.Entity<MatchStatistics>());
@@ -71,8 +72,32 @@ public sealed class MerrickContext : DbContext
         );
     }
 
+    private static ValueComparer<List<string>> StringListValueComparer => new
+    (
+        (first, second) => (first ?? new List<string>()).SequenceEqual(second ?? new List<string>()),
+        collection => collection.Aggregate(0, (accumulatedHashCode, value) => HashCode.Combine(accumulatedHashCode, value.GetHashCode())),
+        collection => collection.ToList()
+    );
+
+    private static void ConfigureUsers(EntityTypeBuilder<User> builder)
+    {
+        builder.Property(user => user.OwnedStoreItems).HasConversion
+        (
+            value => JsonSerializer.Serialize(value, new JsonSerializerOptions()),
+            value => JsonSerializer.Deserialize<List<string>>(value, new JsonSerializerOptions()) ?? new List<string>(),
+            StringListValueComparer
+        );
+    }
+
     private static void ConfigureAccounts(EntityTypeBuilder<Account> builder)
     {
+        builder.Property(account => account.SelectedStoreItems).HasConversion
+        (
+            value => JsonSerializer.Serialize(value, new JsonSerializerOptions()),
+            value => JsonSerializer.Deserialize<List<string>>(value, new JsonSerializerOptions()) ?? new List<string>(),
+            StringListValueComparer
+        );
+
         builder.OwnsMany(account => account.BannedPeers, ownedNavigationBuilder => { ownedNavigationBuilder.ToJson(); });
         builder.OwnsMany(account => account.FriendedPeers, ownedNavigationBuilder => { ownedNavigationBuilder.ToJson(); });
         builder.OwnsMany(account => account.IgnoredPeers, ownedNavigationBuilder => { ownedNavigationBuilder.ToJson(); });

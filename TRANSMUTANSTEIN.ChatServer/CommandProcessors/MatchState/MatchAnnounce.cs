@@ -75,7 +75,7 @@ public class MatchAnnounce(IDatabase distributedCacheStore) : IAsynchronousComma
     {
         byte arrangedMatchType = (byte)match.ArrangedMatchType;
 
-        ChatBuffer connect = new();
+        ChatBuffer connect = new ();
 
         connect.WriteCommand(ChatProtocol.Command.CHAT_CMD_AUTO_MATCH_CONNECT);
         connect.WriteInt8(arrangedMatchType);            // The Arranged Match Type (0 = None, 1 = Ranked, 2 = Tournament)

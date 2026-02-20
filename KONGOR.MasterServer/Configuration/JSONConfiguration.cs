@@ -21,6 +21,6 @@ public static class JSONConfiguration
     public static readonly MasteryRewardsConfiguration MasteryRewardsConfiguration = JsonSerializer.Deserialize<MasteryRewardsConfiguration>(MasteryRewardsConfigurationJSON)
         ?? throw new NullReferenceException("Mastery Rewards Configuration Is NULL");
 
-    public static readonly StoreItemConfiguration StoreItemConfiguration = JsonSerializer.Deserialize<StoreItemConfiguration>(StoreItemConfigurationJSON)
-        ?? throw new NullReferenceException("Store Item Configuration Is NULL");
+    public static readonly StoreItemConfiguration StoreItemConfiguration = new (JsonSerializer.Deserialize<List<StoreItem>>(StoreItemConfigurationJSON)
+        ?? throw new NullReferenceException("Store Item Configuration Is NULL"));
 }
