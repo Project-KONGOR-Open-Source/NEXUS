@@ -23,19 +23,19 @@ public class GetProductsResponse
     /// <summary>
     ///     Creates a <see cref="GetProductsResponse"/> from all enabled store items in the store configuration.
     /// </summary>
-    public GetProductsResponse(StoreItemConfiguration storeItemConfiguration)
+    public GetProductsResponse(StoreItemsConfiguration storeItemsConfiguration)
     {
         Dictionary<string, Dictionary<int, GetProductsResponseEntry>> products = new();
 
-        AddProducts(products, storeItemConfiguration, "Alt Avatar", StoreItemType.AlternativeAvatar);
-        AddProducts(products, storeItemConfiguration, "Taunt", StoreItemType.Taunt);
-        AddProducts(products, storeItemConfiguration, "Misc", StoreItemType.Miscellaneous);
-        AddProducts(products, storeItemConfiguration, "Alt Announcement", StoreItemType.AnnouncerVoice);
-        AddProducts(products, storeItemConfiguration, "Couriers", StoreItemType.Courier);
-        AddProducts(products, storeItemConfiguration, "Hero", StoreItemType.Hero);
-        AddProducts(products, storeItemConfiguration, "Ward", StoreItemType.Ward);
-        AddProducts(products, storeItemConfiguration, "EAP", StoreItemType.EarlyAccessProduct);
-        AddProducts(products, storeItemConfiguration, "Mastery", StoreItemType.Mastery);
+        AddProducts(products, storeItemsConfiguration, "Alt Avatar", StoreItemType.AlternativeAvatar);
+        AddProducts(products, storeItemsConfiguration, "Taunt", StoreItemType.Taunt);
+        AddProducts(products, storeItemsConfiguration, "Misc", StoreItemType.Miscellaneous);
+        AddProducts(products, storeItemsConfiguration, "Alt Announcement", StoreItemType.AnnouncerVoice);
+        AddProducts(products, storeItemsConfiguration, "Couriers", StoreItemType.Courier);
+        AddProducts(products, storeItemsConfiguration, "Hero", StoreItemType.Hero);
+        AddProducts(products, storeItemsConfiguration, "Ward", StoreItemType.Ward);
+        AddProducts(products, storeItemsConfiguration, "EAP", StoreItemType.EarlyAccessProduct);
+        AddProducts(products, storeItemsConfiguration, "Mastery", StoreItemType.Mastery);
 
         Products = products;
 
@@ -46,11 +46,11 @@ public class GetProductsResponse
         CRC = BitConverter.ToInt32(hash, 0);
     }
 
-    private static void AddProducts(Dictionary<string, Dictionary<int, GetProductsResponseEntry>> products, StoreItemConfiguration storeItemConfiguration, string categoryName, StoreItemType type)
+    private static void AddProducts(Dictionary<string, Dictionary<int, GetProductsResponseEntry>> products, StoreItemsConfiguration storeItemsConfiguration, string categoryName, StoreItemType type)
     {
         Dictionary<int, GetProductsResponseEntry> entries = new();
 
-        foreach (StoreItem item in storeItemConfiguration.GetEnabledItemsByType(type))
+        foreach (StoreItem item in storeItemsConfiguration.GetEnabledItemsByType(type))
         {
             entries[item.ID] = new GetProductsResponseEntry(item);
         }

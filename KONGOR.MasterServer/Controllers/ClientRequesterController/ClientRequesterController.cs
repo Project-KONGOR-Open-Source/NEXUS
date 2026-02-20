@@ -184,7 +184,7 @@ public partial class ClientRequesterController(MerrickContext databaseContext, I
         if (account is null)
             return NotFound($@"Account With ID ""{accountID}"" Was Not Found");
 
-        StoreItemConfiguration storeItems = JSONConfiguration.StoreItemConfiguration;
+        StoreItemsConfiguration storeItems = JSONConfiguration.StoreItemsConfiguration;
         DailySpecialsConfiguration dailySpecials = JSONConfiguration.DailySpecialsConfiguration;
 
         List<Dictionary<string, object>> dailySpecialItems = [];

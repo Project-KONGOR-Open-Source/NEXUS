@@ -14,7 +14,7 @@ public class StoreController(MerrickContext databaseContext, IDatabase distribut
     private const string TauntPrefixedCode = "t.Standard";
     private const int SuperTauntStoreItemID = 1792;
 
-    private static StoreItemConfiguration StoreItems => JSONConfiguration.StoreItemConfiguration;
+    private static StoreItemsConfiguration StoreItems => JSONConfiguration.StoreItemsConfiguration;
 
     [HttpPost(Name = "Store Requester")]
     public async Task<IActionResult> StoreRequester()

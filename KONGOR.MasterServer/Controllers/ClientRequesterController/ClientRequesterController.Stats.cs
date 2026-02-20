@@ -614,7 +614,7 @@ public partial class ClientRequesterController
     /// </summary>
     private static readonly Lazy<string> CachedGetProductsResponse = new (() =>
     {
-        GetProductsResponse response = new (JSONConfiguration.StoreItemConfiguration);
+        GetProductsResponse response = new (JSONConfiguration.StoreItemsConfiguration);
 
         return PhpSerialization.Serialize(response);
     });
