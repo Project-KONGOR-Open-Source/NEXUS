@@ -69,5 +69,27 @@
             "TeamSize": 5
         }
     },
-    "RiftWars": "TODO: Implement This And Revise The Other Settings"
+    "RiftWars": {
+        "Map": "???",
+        "Regions": [
+            "EU",
+            "USE",
+            "USW",
+            "AU",
+            "BR",
+            "RU",
+            "TH",
+            "SEA",
+            "NEWERTH"
+        ],
+        "Modes": [
+            "TODO: Revise These Modes From TCP Popularity Update",
+            "rb"
+        ],
+        "Match": {
+            "MaximumPlayerRatingDifference": 250,
+            "IsRanked": false,
+            "TeamSize": 5
+        }
+    }
 }
