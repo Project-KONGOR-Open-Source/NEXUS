@@ -456,7 +456,8 @@ public class StoreController(MerrickContext databaseContext, IDatabase distribut
         response["productsRequired"] = string.Join("|", productsRequired);
         response["productEligibility"] = string.Join("|", productEligibility);
 
-        int totalPages = IsPaginated(categoryID)
+        // Always Compute Total Pages Based On All Items, Even For Non-Paginated Categories (The Client Uses This For Client-Side Pagination)
+        int totalPages = allItems.Count > 0
             ? (allItems.Count + ItemsPerPage - 1) / ItemsPerPage
             : 1;
 
