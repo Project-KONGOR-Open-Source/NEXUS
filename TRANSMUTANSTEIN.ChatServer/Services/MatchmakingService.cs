@@ -94,7 +94,7 @@ public class MatchmakingService : BackgroundService, IDisposable
                 continue;
 
             // Run The Broker Cycle
-            List<MatchmakingMatch> matches = RunBrokerCycle(queuedGroups);
+            List<MatchmakingMatch> matches = RunMatchBrokerCycle(queuedGroups);
 
             // Spawn Each Match
             foreach (MatchmakingMatch match in matches)
@@ -124,9 +124,10 @@ public class MatchmakingService : BackgroundService, IDisposable
     ///     Runs a single match broker cycle with TMR-aware matching.
     ///     Uses adaptive TMR spread based on queue time and enforces group makeup rules.
     /// </summary>
-    private List<MatchmakingMatch> RunBrokerCycle(List<MatchmakingGroup> queuedGroups)
+    private List<MatchmakingMatch> RunMatchBrokerCycle(List<MatchmakingGroup> queuedGroups)
     {
         List<MatchmakingMatch> matches = [];
+
         int playersPerTeam = _settings.Value.PlayersPerTeam;
         double maxTMRDifference = _settings.Value.MaximumTeamTMRDifference;
 
@@ -177,8 +178,9 @@ public class MatchmakingService : BackgroundService, IDisposable
                     if (tmrDifference > maxAcceptableSpread)
                         continue;
 
-                    // Check Group Makeup Difference (Enforce Fairness)
                     int groupMakeupDifference = Math.Abs(legionTeam.GroupMakeup - candidateOpponent.GroupMakeup);
+
+                    // Check Group Makeup Difference (Enforce Fairness)
                     if (groupMakeupDifference > 2)
                     {
                         Log.Debug(@"Skipping Match Due To Group Makeup Mismatch: {Legion} vs {Hellbourne} (Diff: {Diff})",

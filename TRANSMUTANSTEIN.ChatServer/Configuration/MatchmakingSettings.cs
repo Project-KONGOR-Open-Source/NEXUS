@@ -3,6 +3,7 @@ namespace TRANSMUTANSTEIN.ChatServer.Configuration;
 /// <summary>
 ///     Configuration settings for the matchmaking system.
 ///     These settings control how matches are formed and balanced.
+///     Per-map settings (available modes/regions) are defined in "MatchmakingConfiguration.json".
 /// </summary>
 public class MatchmakingSettings
 {

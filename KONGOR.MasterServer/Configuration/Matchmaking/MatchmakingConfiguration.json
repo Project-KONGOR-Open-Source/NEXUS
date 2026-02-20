@@ -1,95 +1,36 @@
 {
-    "Ranked": {
-        "Map": "???",
-        "Regions": [
-            "EU",
-            "USE",
-            "USW",
-            "AU",
-            "BR",
-            "RU",
-            "TH",
-            "SEA",
-            "NEWERTH"
-        ],
-        "Modes": [
-            "TODO: Revise These Modes From TCP Popularity Update",
-            "rb"
-        ],
-        "Match": {
-            "MaximumPlayerRatingDifference": 250,
-            "IsRanked": true,
-            "TeamSize": 5
+    "GameModes": [ "ap", "sd", "ar", "km", "hb", "rb" ],
+    "Regions": [ "EU", "USE", "USW", "AU", "BR", "RU" ],
+    "Maps": [
+        {
+            "Map": "caldavar",
+            "GameType": 6,
+            "Modes": [ "ap", "sd", "ar", "rb" ],
+            "Regions": [ "EU", "USE", "USW", "AU", "BR", "RU" ],
+            "Match": {
+                "MaximumPlayerRatingDifference": 250,
+                "IsRanked": true
+            }
+        },
+        {
+            "Map": "midwars",
+            "GameType": 3,
+            "Modes": [ "ar", "km", "hb" ],
+            "Regions": [ "EU", "USE", "USW", "AU", "BR", "RU" ],
+            "Match": {
+                "MaximumPlayerRatingDifference": 250,
+                "IsRanked": true
+            }
+        },
+        {
+            "Map": "riftwars",
+            "GameType": 4,
+            "Modes": [ "ap", "ar" ],
+            "Regions": [ "EU", "USE", "USW", "AU", "BR", "RU" ],
+            "Match": {
+                "MaximumPlayerRatingDifference": 250,
+                "IsRanked": false
+            }
         }
-    },
-    "Unranked": {
-        "Map": "???",
-        "Regions": [
-            "EU",
-            "USE",
-            "USW",
-            "AU",
-            "BR",
-            "RU",
-            "TH",
-            "SEA",
-            "NEWERTH"
-        ],
-        "Modes": [
-            "TODO: Revise These Modes From TCP Popularity Update",
-            "rb"
-        ],
-        "Match": {
-            "MaximumPlayerRatingDifference": 2500,
-            "IsRanked": false,
-            "TeamSize": 5
-        }
-    },
-    "MidWars": {
-        "Map": "???",
-        "Regions": [
-            "EU",
-            "USE",
-            "USW",
-            "AU",
-            "BR",
-            "RU",
-            "TH",
-            "SEA",
-            "NEWERTH"
-        ],
-        "Modes": [
-            "TODO: Revise These Modes From TCP Popularity Update",
-            "hb",
-            "rd"
-        ],
-        "Match": {
-            "MaximumPlayerRatingDifference": 250,
-            "IsRanked": true,
-            "TeamSize": 5
-        }
-    },
-    "RiftWars": {
-        "Map": "???",
-        "Regions": [
-            "EU",
-            "USE",
-            "USW",
-            "AU",
-            "BR",
-            "RU",
-            "TH",
-            "SEA",
-            "NEWERTH"
-        ],
-        "Modes": [
-            "TODO: Revise These Modes From TCP Popularity Update",
-            "rb"
-        ],
-        "Match": {
-            "MaximumPlayerRatingDifference": 250,
-            "IsRanked": false,
-            "TeamSize": 5
-        }
-    }
+    ]
 }
