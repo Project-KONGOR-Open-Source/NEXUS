@@ -18,4 +18,10 @@ public class SpecialMessage
     public required string Title { get; set; }
 
     public required string URL { get; set; }
+
+    /// <summary>
+    ///     Optional HTML body content to display in the event panel.
+    ///     When not provided, a default page with the title and a link to the URL is shown instead.
+    /// </summary>
+    public string? Body { get; set; }
 }

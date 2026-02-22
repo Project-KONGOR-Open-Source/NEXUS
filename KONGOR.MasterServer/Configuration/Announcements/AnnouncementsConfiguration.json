@@ -2,11 +2,13 @@
     "SpecialMessages": [
         {
             "Title": "Welcome To Project KONGOR !",
-            "URL": "https://github.com/Project-KONGOR-Open-Source"
+            "URL": "https://github.com/Project-KONGOR-Open-Source",
+            "Body": "<p>Project KONGOR is a community-driven effort to keep the real Heroes Of Newerth alive.</p><p class=\"link\"><a href=\"https://github.com/Project-KONGOR-Open-Source\">Visit The Project On GitHub</a></p>"
         },
         {
             "Title": "Join The Community On Discord",
-            "URL": "https://discord.com/invite/N6pKzGDqUH"
+            "URL": "https://discord.com/invite/N6pKzGDqUH",
+            "Body": "<p>Connect with other players, find matches, and get the latest news.</p><p class=\"link\"><a href=\"https://discord.com/invite/N6pKzGDqUH\">Join The Discord Server</a></p>"
         }
     ]
 }
