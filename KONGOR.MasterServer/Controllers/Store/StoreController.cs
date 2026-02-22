@@ -366,10 +366,78 @@ public class StoreController(MerrickContext databaseContext, IDatabase distribut
 
         user.OwnedStoreItems.Add(storeItem.PrefixedCode);
 
+        // If The Purchased Item Is A Featured Bundle, Also Grant The Individual Products It Contains
+        GrantFeaturedBundleContents(user, storeItem);
+
+        // Mark Any Featured Bundles As Owned If All Their Individual Products Are Now Owned
+        MarkCompletedFeaturedBundlesAsOwned(user);
+
         response["popupCode"] = (int) StorePopupCode.POP_UP_PRODUCT_PURCHASE_SUCCESS;
         response["errorCode"] = 0;
 
         return (response, true);
+    }
+
+    /// <summary>
+    ///     Grants the individual products contained within a featured bundle to the user.
+    ///     If the purchased item is not a featured bundle, this method does nothing.
+    /// </summary>
+    private static void GrantFeaturedBundleContents(User user, StoreItem purchasedItem)
+    {
+        FeaturedItemsConfiguration featuredConfiguration = JSONConfiguration.FeaturedItemsConfiguration;
+
+        FeaturedBundle? bundle = featuredConfiguration.Bundles
+            .SingleOrDefault(featuredBundle => featuredBundle.StoreItemID == purchasedItem.ID);
+
+        if (bundle is null)
+            return;
+
+        foreach (int productIndex in bundle.IncludedProductIndices)
+        {
+            if (productIndex < 0 || productIndex > featuredConfiguration.FeaturedItemIDs.Count - 1)
+                continue;
+
+            int itemID = featuredConfiguration.FeaturedItemIDs[productIndex];
+            StoreItem? includedItem = StoreItems.GetByID(itemID);
+
+            if (includedItem is not null && user.OwnedStoreItems.Contains(includedItem.PrefixedCode).Equals(false))
+                user.OwnedStoreItems.Add(includedItem.PrefixedCode);
+        }
+    }
+
+    /// <summary>
+    ///     Marks any featured bundles as owned when all of their included products are already owned.
+    ///     This prevents the user from purchasing a bundle whose individual products were acquired separately.
+    /// </summary>
+    private static void MarkCompletedFeaturedBundlesAsOwned(User user)
+    {
+        FeaturedItemsConfiguration featuredConfiguration = JSONConfiguration.FeaturedItemsConfiguration;
+
+        foreach (FeaturedBundle bundle in featuredConfiguration.Bundles)
+        {
+            StoreItem? bundleItem = StoreItems.GetByID(bundle.StoreItemID);
+
+            if (bundleItem is null)
+                continue;
+
+            if (user.OwnedStoreItems.Contains(bundleItem.PrefixedCode))
+                continue;
+
+            bool allIncludedProductsOwned = bundle.IncludedProductIndices.All(productIndex =>
+            {
+                if (productIndex < 0 || productIndex > featuredConfiguration.FeaturedItemIDs.Count - 1)
+                    return false;
+
+                int itemID = featuredConfiguration.FeaturedItemIDs[productIndex];
+
+                StoreItem? includedItem = StoreItems.GetByID(itemID);
+
+                return includedItem is not null && user.OwnedStoreItems.Contains(includedItem.PrefixedCode);
+            });
+
+            if (allIncludedProductsOwned)
+                user.OwnedStoreItems.Add(bundleItem.PrefixedCode);
+        }
     }
 
     /// <summary>

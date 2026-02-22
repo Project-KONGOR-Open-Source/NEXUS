@@ -2,15 +2,15 @@
     "FeaturedItemIDs": [5514, 5516],
     "Bundles": [
         {
-            "StoreItemID": 5514,
+            "StoreItemID": 5519,
             "IncludedProductIndices": [0]
         },
         {
-            "StoreItemID": 5516,
+            "StoreItemID": 5520,
             "IncludedProductIndices": [1]
         },
         {
-            "StoreItemID": 5520,
+            "StoreItemID": 5518,
             "IncludedProductIndices": [0, 1]
         }
     ]
