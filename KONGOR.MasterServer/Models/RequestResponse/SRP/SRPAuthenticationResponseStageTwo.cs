@@ -62,7 +62,7 @@ public class SRPAuthenticationResponseStageTwo
     /// <summary>
     ///     Unknown.
     ///     <br/>
-    ///     0 = False; 1 = True
+    ///     0 = <see langword="false"/>; 1 = <see langword="true"/>
     /// </summary>
     [PHPProperty("trial")]
     public string Trial { get; set; } = "0";
@@ -77,7 +77,7 @@ public class SRPAuthenticationResponseStageTwo
     /// <summary>
     ///     Unknown.
     ///     <br/>
-    ///     0 = False; 1 = True
+    ///     0 = <see langword="false"/>; 1 = <see langword="true"/>
     /// </summary>
     [PHPProperty("prepay_only")]
     public string PrePayOnly { get; set; } = "0";
@@ -93,7 +93,7 @@ public class SRPAuthenticationResponseStageTwo
     /// <summary>
     ///     Whether to automatically download the backup of the game client configuration files from the cloud or not on login.
     ///     <br/>
-    ///     0 = False; 1 = True
+    ///     0 = <see langword="false"/>; 1 = <see langword="true"/>
     /// </summary>
     [PHPProperty("use_cloud")]
     public required string UseCloud { get; set; }
@@ -101,7 +101,7 @@ public class SRPAuthenticationResponseStageTwo
     /// <summary>
     ///     Whether the password has expired or not.
     ///     <br/>
-    ///     NULL = Not Expired; 0 = Require Password Change; Any Non-Zero Positive Integer = Suggest Password Change
+    ///     <see langword="null"/> = Not Expired; 0 = Require Password Change; Any Non-Zero Positive Integer = Suggest Password Change
     /// </summary>
     [PHPProperty("pass_exp")]
     public string? PasswordExpired { get; set; } = null;
@@ -109,7 +109,7 @@ public class SRPAuthenticationResponseStageTwo
     /// <summary>
     ///     Whether the referral system status of the friend is new or not.
     ///     <br/>
-    ///     0 = False; 1 = True
+    ///     0 = <see langword="false"/>; 1 = <see langword="true"/>
     /// </summary>
     [PHPProperty("is_new")]
     public int IsNew { get; set; } = 0;
@@ -502,7 +502,7 @@ public class FriendAccount
     /// <summary>
     ///     Whether the referral system status of the friend is inactive or not.
     ///     <br/>
-    ///     0 = False; 1 = True
+    ///     0 = <see langword="false"/>; 1 = <see langword="true"/>
     /// </summary>
     [PHPProperty("inactive")]
     public string Inactive { get; set; } = "0";
@@ -510,7 +510,7 @@ public class FriendAccount
     /// <summary>
     ///     Whether the referral system status of the friend is new or not.
     ///     <br/>
-    ///     0 = False; 1 = True
+    ///     0 = <see langword="false"/>; 1 = <see langword="true"/>
     /// </summary>
     [PHPProperty("new")]
     public string New { get; set; } = "0";
@@ -664,7 +664,7 @@ public class ClanMemberData
     ///     Whether the account is active in the clan or not.
     ///     It is unknown what "active" means.
     ///     <br/>
-    ///     0 = False; 1 = True
+    ///     0 = <see langword="false"/>; 1 = <see langword="true"/>
     /// </summary>
     [PHPProperty("active")]
     public string Active { get; set; } = "1";
@@ -678,7 +678,7 @@ public class ClanMemberData
     /// <summary>
     ///     Whether the clan has been flagged as idle (no active users) or not.
     ///     <br/>
-    ///     0 = False; 1 = True
+    ///     0 = <see langword="false"/>; 1 = <see langword="true"/>
     /// </summary>
     [PHPProperty("idleWarn")]
     public string ClanIsInactive { get; set; } = "0";
@@ -1347,7 +1347,7 @@ public class DataPoint
     /// <summary>
     ///     Whether the referral system status of the friend is new or not.
     ///     <br/>
-    ///     0 = False; 1 = True
+    ///     0 = <see langword="false"/>; 1 = <see langword="true"/>
     /// </summary>
     [PHPProperty("is_new")]
     public int IsNew { get; set; } = 0;
@@ -1379,7 +1379,7 @@ public class CloudStorageInformation
     /// <summary>
     ///     Whether to automatically download the backup of the game client configuration files from the cloud or not on login.
     ///     <br/>
-    ///     0 = False; 1 = True
+    ///     0 = <see langword="false"/>; 1 = <see langword="true"/>
     /// </summary>
     [PHPProperty("use_cloud")]
     public required string UseCloud { get; set; }
@@ -1387,7 +1387,7 @@ public class CloudStorageInformation
     /// <summary>
     ///     Whether to automatically upload the backup of the game client configuration files to the cloud or not after making changes to the settings.
     ///     <br/>
-    ///     0 = False; 1 = True
+    ///     0 = <see langword="false"/>; 1 = <see langword="true"/>
     /// </summary>
     [PHPProperty("cloud_autoupload")]
     public required string AutomaticCloudUpload { get; set; }

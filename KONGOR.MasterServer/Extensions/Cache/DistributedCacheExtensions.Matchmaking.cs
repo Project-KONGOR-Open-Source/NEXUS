@@ -230,7 +230,7 @@ public static partial class DistributedCacheExtensions
 
     /// <summary>
     ///     Retrieves match information from the cache by match ID.
-    ///     Returns NULL if no match information is found for the given match ID.
+    ///     Returns <see langword="null"/> if no match information is found for the given match ID.
     /// </summary>
     public static async Task<MatchInformation?> GetMatchInformation(this IDatabase distributedCacheStore, int matchID)
     {

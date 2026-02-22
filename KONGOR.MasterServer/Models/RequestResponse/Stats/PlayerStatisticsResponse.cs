@@ -757,7 +757,7 @@ public class PlayerStatisticsResponse(Account account, AccountStatistics statist
     public int VestedThreshold => 5;
 
     /// <summary>
-    ///     Success indicator. Set to TRUE on successful response, FALSE if an error occurs.
+    ///     Success indicator. Set to <see langword="true"/> on successful response, <see langword="false"/> if an error occurs.
     /// </summary>
     [PHPProperty(0)]
     public bool Zero => true;

@@ -87,7 +87,7 @@ public class GetUpgradesResponse
     public int VestedThreshold => 5;
 
     /// <summary>
-    ///     Success indicator. Must be TRUE for the client to accept the response.
+    ///     Success indicator. Must be <see langword="true"/> for the client to accept the response.
     /// </summary>
     [PHPProperty(0)]
     public bool Zero => true;

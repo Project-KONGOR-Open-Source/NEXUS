@@ -295,7 +295,7 @@ public class MatchmakingService : BackgroundService, IDisposable
     ///     This happens when the highest-rated player is so far above their teammates that they would gain 0 MMR for winning but lose MMR for losing.
     /// </summary>
     /// <param name="team">The team to check.</param>
-    /// <returns>TRUE if the team would produce +0/-1 outcomes, FALSE otherwise.</returns>
+    /// <returns><see langword="true"/> if the team would produce +0/-1 outcomes, <see langword="false"/> otherwise.</returns>
     private static bool ProducesPlusZeroMinusOne(MatchmakingTeam team)
     {
         int teamSize = team.TeamSize;
@@ -652,7 +652,7 @@ public class MatchmakingService : BackgroundService, IDisposable
 
     /// <summary>
     ///     Finds an available server for a match along with its chat session.
-    ///     Returns null if no idle server with an active session is found.
+    ///     Returns <see langword="null"/> if no idle server with an active session is found.
     /// </summary>
     private async Task<(MatchServer? Server, MatchServerChatSession? Session)> FindAvailableServerWithSession(MatchmakingMatch match)
     {

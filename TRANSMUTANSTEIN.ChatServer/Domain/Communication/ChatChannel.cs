@@ -24,7 +24,7 @@ public class ChatChannel
 
     /// <summary>
     ///     Channel password for access control.
-    ///     This value is NULL if no password is set.
+    ///     This value is <see langword="null"/> if no password is set.
     /// </summary>
     public string? Password { get; set; } = null;
 
@@ -406,7 +406,7 @@ public class ChatChannel
     ///     Check if a member is currently silenced in this channel.
     /// </summary>
     /// <param name="session">The session to check.</param>
-    /// <returns>TRUE if the member is silenced, FALSE otherwise.</returns>
+    /// <returns><see langword="true"/> if the member is silenced, <see langword="false"/> otherwise.</returns>
     public bool IsSilenced(ClientChatSession session)
     {
         ChatChannelMember? member = Members.Values

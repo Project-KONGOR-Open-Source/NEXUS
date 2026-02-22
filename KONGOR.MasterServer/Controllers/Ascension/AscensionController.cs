@@ -86,7 +86,7 @@ public class AscensionController : ControllerBase
     ///     Receives match results from the game server, including betting outcomes such as winning team, first blood team, first tower kill team, and first ten-kill team.
     /// </summary>
     /// <remarks>
-    ///     Only called for official/season matches where "is_season_match" was TRUE in the <see cref="CheckMatch"/> response.
+    ///     Only called for official/season matches where "is_season_match" was <see langword="true"/> in the <see cref="CheckMatch"/> response.
     /// </remarks>
     private IActionResult ReceiveMatchResult()
     {
@@ -100,7 +100,7 @@ public class AscensionController : ControllerBase
     ///     Used for live spectating and real-time match tracking.
     /// </summary>
     /// <remarks>
-    ///     Only called for official/season matches where "is_season_match" was TRUE in the <see cref="CheckMatch"/> response.
+    ///     Only called for official/season matches where "is_season_match" was <see langword="true"/> in the <see cref="CheckMatch"/> response.
     ///     The game server sends periodic updates containing combat logs and match state.
     /// </remarks>
     private IActionResult ReceiveMatchStatistics()

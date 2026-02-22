@@ -208,7 +208,7 @@ public class TCPServer : IDisposable
     /// <summary>
     ///     Start The Server
     /// </summary>
-    /// <returns>TRUE If The Server Was Successfully Started, Or FALSE If The Server Failed To Start</returns>
+    /// <returns><see langword="true"/> If The Server Was Successfully Started, Or <see langword="false"/> If The Server Failed To Start</returns>
     public virtual bool Start()
     {
         Debug.Assert(!IsStarted, "TCP Server Is Already Started");
@@ -268,7 +268,7 @@ public class TCPServer : IDisposable
     /// <summary>
     ///     Stop The Server
     /// </summary>
-    /// <returns>TRUE If The Server Was Successfully Stopped, Or FALSE If The Server Is Already Stopped</returns>
+    /// <returns><see langword="true"/> If The Server Was Successfully Stopped, Or <see langword="false"/> If The Server Is Already Stopped</returns>
     public virtual bool Stop()
     {
         Debug.Assert(IsStarted, "TCP Server Is Not Started");
@@ -317,7 +317,7 @@ public class TCPServer : IDisposable
     /// <summary>
     ///     Restart The Server
     /// </summary>
-    /// <returns>TRUE If The Server Was Successfully Restarted, Or FALSE If The Server Failed To Restart</returns>
+    /// <returns><see langword="true"/> If The Server Was Successfully Restarted, Or <see langword="false"/> If The Server Failed To Restart</returns>
     public virtual bool Restart()
     {
         if (!Stop())
@@ -403,7 +403,7 @@ public class TCPServer : IDisposable
     /// <summary>
     ///     Disconnect All Connected Sessions
     /// </summary>
-    /// <returns>TRUE If All Sessions Were Successfully Disconnected, Or FALSE If The Server Is Not Started</returns>
+    /// <returns><see langword="true"/> If All Sessions Were Successfully Disconnected, Or <see langword="false"/> If The Server Is Not Started</returns>
     public virtual bool DisconnectAll()
     {
         if (!IsStarted)
@@ -420,7 +420,7 @@ public class TCPServer : IDisposable
     ///     Find A Session With A Given ID
     /// </summary>
     /// <param name="id">Session ID</param>
-    /// <returns>Session With A Given ID, Or NULL If The Session It Not Connected</returns>
+    /// <returns>Session With A Given ID, Or <see langword="null"/> If The Session It Not Connected</returns>
     public TCPSession FindSession(Guid id)
     {
         // Try To Find The Required Session
@@ -455,7 +455,7 @@ public class TCPServer : IDisposable
     ///     Multicast Data To All Connected Sessions
     /// </summary>
     /// <param name="buffer">Buffer To Multicast</param>
-    /// <returns>TRUE If The Data Was Successfully Multicasted, Or FALSE If The Data Was Not Multicasted</returns>
+    /// <returns><see langword="true"/> If The Data Was Successfully Multicasted, Or <see langword="false"/> If The Data Was Not Multicasted</returns>
     public virtual bool Multicast(byte[] buffer) => Multicast(buffer.AsSpan());
 
     /// <summary>
@@ -464,14 +464,14 @@ public class TCPServer : IDisposable
     /// <param name="buffer">Buffer To Multicast</param>
     /// <param name="offset">Buffer Offset</param>
     /// <param name="size">Buffer Size</param>
-    /// <returns>TRUE If The Data Was Successfully Multicasted, Or FALSE If The Data Was Not Multicasted</returns>
+    /// <returns><see langword="true"/> If The Data Was Successfully Multicasted, Or <see langword="false"/> If The Data Was Not Multicasted</returns>
     public virtual bool Multicast(byte[] buffer, long offset, long size) => Multicast(buffer.AsSpan((int)offset, (int)size));
 
     /// <summary>
     ///     Multicast Data To All Connected Clients
     /// </summary>
     /// <param name="buffer">Buffer To Send As A Span Of Bytes</param>
-    /// <returns>TRUE If The Data Was Successfully Multicasted, Or FALSE If The Data Was Not Multicasted</returns>
+    /// <returns><see langword="true"/> If The Data Was Successfully Multicasted, Or <see langword="false"/> If The Data Was Not Multicasted</returns>
     public virtual bool Multicast(ReadOnlySpan<byte> buffer)
     {
         if (!IsStarted)
@@ -491,14 +491,14 @@ public class TCPServer : IDisposable
     ///     Multicast Text To All Connected Clients
     /// </summary>
     /// <param name="text">Text String To Multicast</param>
-    /// <returns>TRUE If The Text Was Successfully Multicasted, Or FALSE If The Text Was Not Multicasted</returns>
+    /// <returns><see langword="true"/> If The Text Was Successfully Multicasted, Or <see langword="false"/> If The Text Was Not Multicasted</returns>
     public virtual bool Multicast(string text) => Multicast(Encoding.UTF8.GetBytes(text));
 
     /// <summary>
     ///     Multicast Text To All Connected Clients
     /// </summary>
     /// <param name="text">Text To Multicast As A Span Of Characters</param>
-    /// <returns>TRUE If The Text Was Successfully Multicasted, Or FALSE If The Text Was Not Multicasted</returns>
+    /// <returns><see langword="true"/> If The Text Was Successfully Multicasted, Or <see langword="false"/> If The Text Was Not Multicasted</returns>
     public virtual bool Multicast(ReadOnlySpan<char> text) => Multicast(Encoding.UTF8.GetBytes(text.ToArray()));
 
     # endregion

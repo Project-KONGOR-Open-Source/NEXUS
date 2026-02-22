@@ -147,7 +147,7 @@ public class MatchmakingGroup
     ///     Based on the original compatibility check algorithm.
     /// </summary>
     /// <param name="other">The other group to check compatibility with.</param>
-    /// <returns>TRUE if the groups are compatible, FALSE otherwise.</returns>
+    /// <returns><see langword="true"/> if the groups are compatible, <see langword="false"/> otherwise.</returns>
     public bool IsCompatibleWith(MatchmakingGroup other)
     {
         // Must Have Matching Game Type
@@ -811,7 +811,7 @@ public class MatchmakingGroup
     ///     This prevents boosting/smurfing by rejecting groups where the highest-rated player is significantly above the average of the remaining members.
     /// </summary>
     /// <returns>
-    ///     TRUE if disparity exceeds the threshold, FALSE otherwise.
+    ///     <see langword="true"/> if disparity exceeds the threshold, <see langword="false"/> otherwise.
     /// </returns>
     private bool HasExcessiveTMRDisparity()
     {

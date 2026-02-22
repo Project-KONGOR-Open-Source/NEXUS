@@ -159,7 +159,7 @@ public class TCPSession : IDisposable
     /// <summary>
     ///     Disconnect The Session
     /// </summary>
-    /// <returns>TRUE If The Section Was Successfully Disconnected, Or FALSE If The Section Is Already Disconnected</returns>
+    /// <returns><see langword="true"/> If The Section Was Successfully Disconnected, Or <see langword="false"/> If The Section Is Already Disconnected</returns>
     public virtual bool Disconnect()
     {
         if (!IsConnected)
@@ -310,7 +310,7 @@ public class TCPSession : IDisposable
     ///     Send Data To The Client (Asynchronous)
     /// </summary>
     /// <param name="buffer">Buffer To Send</param>
-    /// <returns>TRUE If The Data Was Successfully Sent, Or FALSE If The Session Is Not Connected</returns>
+    /// <returns><see langword="true"/> If The Data Was Successfully Sent, Or <see langword="false"/> If The Session Is Not Connected</returns>
     public virtual bool SendAsync(byte[] buffer) => SendAsync(buffer.AsSpan());
 
     /// <summary>
@@ -319,14 +319,14 @@ public class TCPSession : IDisposable
     /// <param name="buffer">Buffer To Send</param>
     /// <param name="offset">Buffer Offset</param>
     /// <param name="size">Buffer Size</param>
-    /// <returns>TRUE If The Data Was Successfully Sent, Or FALSE If The Session Is Not Connected</returns>
+    /// <returns><see langword="true"/> If The Data Was Successfully Sent, Or <see langword="false"/> If The Session Is Not Connected</returns>
     public virtual bool SendAsync(byte[] buffer, long offset, long size) => SendAsync(buffer.AsSpan((int)offset, (int)size));
 
     /// <summary>
     ///     Send Data To The Client (Asynchronous)
     /// </summary>
     /// <param name="buffer">Buffer To Send As A Span Of Bytes</param>
-    /// <returns>TRUE If The Data Was Successfully Sent, Or FALSE If The Session Is Not Connected</returns>
+    /// <returns><see langword="true"/> If The Data Was Successfully Sent, Or <see langword="false"/> If The Session Is Not Connected</returns>
     public virtual bool SendAsync(ReadOnlySpan<byte> buffer)
     {
         if (!IsConnected)
@@ -368,14 +368,14 @@ public class TCPSession : IDisposable
     ///     Send Text To The Client (Asynchronous)
     /// </summary>
     /// <param name="text">Text String To Send</param>
-    /// <returns>TRUE If The Text Was Successfully Sent, Or FALSE If The Session Is Not Connected</returns>
+    /// <returns><see langword="true"/> If The Text Was Successfully Sent, Or <see langword="false"/> If The Session Is Not Connected</returns>
     public virtual bool SendAsync(string text) => SendAsync(Encoding.UTF8.GetBytes(text));
 
     /// <summary>
     ///     Send Text To The Client (Asynchronous)
     /// </summary>
     /// <param name="text">Text To Send As A Span Of Characters</param>
-    /// <returns>TRUE If The Text Was Successfully Sent, Or FALSE If The Session Is Not Connected</returns>
+    /// <returns><see langword="true"/> If The Text Was Successfully Sent, Or <see langword="false"/> If The Session Is Not Connected</returns>
     public virtual bool SendAsync(ReadOnlySpan<char> text) => SendAsync(Encoding.UTF8.GetBytes(text.ToArray()));
 
     /// <summary>

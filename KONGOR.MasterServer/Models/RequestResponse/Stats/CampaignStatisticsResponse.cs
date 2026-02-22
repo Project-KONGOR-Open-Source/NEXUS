@@ -999,7 +999,7 @@ public class CampaignStatisticsResponse(Account account, AccountStatistics stati
     public int VestedThreshold => 5;
 
     /// <summary>
-    ///     Success indicator. Set to TRUE on successful response.
+    ///     Success indicator. Set to <see langword="true"/> on successful response.
     /// </summary>
     [PHPProperty(0)]
     public bool Zero => true;

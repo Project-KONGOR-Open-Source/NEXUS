@@ -125,7 +125,7 @@ file class InstantMessageRequestData
     public string Message { get; init; }
 
     /// <summary>
-    ///     When TRUE, the sender is requesting a client info exchange (first contact).
+    ///     When <see langword="true"/>, the sender is requesting a client info exchange (first contact).
     /// </summary>
     public bool SendClientInformation { get; init; }
 

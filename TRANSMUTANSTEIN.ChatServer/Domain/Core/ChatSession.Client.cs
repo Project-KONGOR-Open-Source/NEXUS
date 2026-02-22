@@ -5,14 +5,14 @@ public class ClientChatSession(TCPServer server, IServiceProvider serviceProvide
     /// <summary>
     ///     Gets set after a successful client handshake following the <see cref="Accept"/> method.
     ///     Contains metadata about the client connected to this chat session.
-    ///     This property is NULL before authentication, but is guaranteed non-NULL after <see cref="Accept"/> is called.
+    ///     This property is <see langword="null"/> before authentication, but is guaranteed non-<see langword="null"/> after <see cref="Accept"/> is called.
     /// </summary>
     public ClientChatSessionMetadata Metadata { get; set; } = null!;
 
     /// <summary>
     ///     Gets set after a successful client handshake following the <see cref="Accept"/> method.
     ///     Contains the account information of the client connected to this chat session.
-    ///     This property is NULL before authentication, but is guaranteed non-NULL after <see cref="Accept"/> is called.
+    ///     This property is <see langword="null"/> before authentication, but is guaranteed non-<see langword="null"/> after <see cref="Accept"/> is called.
     /// </summary>
     public Account Account { get; set; } = null!;
 
@@ -298,9 +298,9 @@ public class ClientChatSession(TCPServer server, IServiceProvider serviceProvide
 
     /// <summary>
     ///     Checks if this client should send an auto-response when receiving a whisper.
-    ///     Returns the auto-response type if the client is AFK or DND, or NULL if no auto-response should be sent.
+    ///     Returns the auto-response type if the client is AFK or DND, or <see langword="null"/> if no auto-response should be sent.
     /// </summary>
-    /// <returns>The chat mode type if an auto-response is needed, or NULL if not.</returns>
+    /// <returns>The chat mode type if an auto-response is needed, or <see langword="null"/> if not.</returns>
     public ChatProtocol.ChatModeType? GetAutoResponseMode()
     {
         return Metadata.ClientChatModeState switch
@@ -316,7 +316,7 @@ public class ClientChatSession(TCPServer server, IServiceProvider serviceProvide
     ///     DND mode blocks whispers entirely (except from buddies/clan).
     ///     AFK mode allows whispers but sends an auto-response.
     /// </summary>
-    /// <returns>TRUE if the whisper should be blocked, FALSE otherwise.</returns>
+    /// <returns><see langword="true"/> if the whisper should be blocked, <see langword="false"/> otherwise.</returns>
     public bool ShouldBlockWhisper()
     {
         return Metadata.ClientChatModeState is ChatProtocol.ChatModeType.CHAT_MODE_DND;
@@ -327,7 +327,7 @@ public class ClientChatSession(TCPServer server, IServiceProvider serviceProvide
     ///     Used to determine if messages from muted/blocking users should still be delivered.
     /// </summary>
     /// <param name="accountID">The account ID to check.</param>
-    /// <returns>TRUE if the account is a friend or clan member, FALSE otherwise.</returns>
+    /// <returns><see langword="true"/> if the account is a friend or clan member, <see langword="false"/> otherwise.</returns>
     public bool IsFriendOrClanMember(int accountID)
     {
         bool isFriend = Account.FriendedPeers.Any(friend => friend.ID == accountID);

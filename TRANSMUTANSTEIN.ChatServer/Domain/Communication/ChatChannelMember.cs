@@ -52,7 +52,7 @@ public class ChatChannelMember(ClientChatSession session, ChatChannel chatChanne
     /// <summary>
     ///     Check if this member is currently silenced in the channel.
     /// </summary>
-    /// <returns>TRUE if the member is silenced, FALSE otherwise.</returns>
+    /// <returns><see langword="true"/> if the member is silenced, <see langword="false"/> otherwise.</returns>
     public bool IsSilenced()
     {
         // Staff Members Are Immune To Being Silenced

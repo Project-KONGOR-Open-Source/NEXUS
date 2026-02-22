@@ -23,7 +23,7 @@ public class MatchmakingMatch
 
     /// <summary>
     ///     The Hellbourne team (team 2).
-    ///     NULL for bot matches where the game server fills the opposing team with bots.
+    ///     <see langword="null"/> for bot matches where the game server fills the opposing team with bots.
     /// </summary>
     public MatchmakingTeam? HellbourneTeam { get; set; }
 
@@ -95,7 +95,7 @@ public class MatchmakingMatch
 
     /// <summary>
     ///     The bot difficulty level (1 = Easy, 2 = Medium, 3 = Hard).
-    ///     Only used when <see cref="IsBotMatch"/> is TRUE.
+    ///     Only used when <see cref="IsBotMatch"/> is <see langword="true"/>.
     /// </summary>
     public byte BotDifficulty { get; set; }
 

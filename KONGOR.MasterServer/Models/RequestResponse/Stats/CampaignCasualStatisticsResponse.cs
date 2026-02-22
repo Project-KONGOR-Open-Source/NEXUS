@@ -936,7 +936,7 @@ public class CampaignCasualStatisticsResponse(Account account, AccountStatistics
     public int VestedThreshold => 5;
 
     /// <summary>
-    ///     Success indicator. Set to TRUE on successful response.
+    ///     Success indicator. Set to <see langword="true"/> on successful response.
     /// </summary>
     [PHPProperty(0)]
     public bool Zero => true;
