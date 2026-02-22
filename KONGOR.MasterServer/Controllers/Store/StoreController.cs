@@ -552,7 +552,15 @@ public class StoreController(MerrickContext databaseContext, IDatabase distribut
 
             bundleIDs.Add(bundleItem.ID.ToString());
             bundleAlreadyOwned.Add(user.OwnedStoreItems.Contains(bundleItem.PrefixedCode) ? "1" : "0");
-            bundleIncludedProducts.Add(string.Join("~", bundle.IncludedProductIndices));
+
+            HashSet<int> includedIndices = [.. bundle.IncludedProductIndices];
+
+            // The Client Interprets Each Tilde-Separated Value As A Boolean Flag Per Product Position
+            // So We Convert The Zero-Based Indices Into A Positional Mask (e.g. Indices [0, 1] With 2 Products → "1~1")
+            string inclusionMask = string.Join("~", Enumerable.Range(0, featuredConfiguration.FeaturedItemIDs.Count)
+                .Select(index => includedIndices.Contains(index) ? "1" : "0"));
+
+            bundleIncludedProducts.Add(inclusionMask);
             bundleNames.Add(bundleItem.Name);
             bundleLocalPaths.Add(bundleItem.Resource);
             bundleCosts.Add(bundleItem.GoldCost.ToString());
