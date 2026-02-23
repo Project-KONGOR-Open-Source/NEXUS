@@ -5,7 +5,7 @@ namespace KONGOR.MasterServer.Models.RequestResponse.Stats;
 /// </summary>
 public class RankedStatisticsResponse(Account account, AccountStatistics statistics, AggregateStatistics aggregates)
 {
-    #region Account Information
+    # region Account Information
 
     /// <summary>
     ///     The account's super ID (main account ID for multi-account users).
@@ -37,9 +37,9 @@ public class RankedStatisticsResponse(Account account, AccountStatistics statist
     [PHPProperty("account_id")]
     public string AccountID { get; init; } = account.ID.ToString();
 
-    #endregion
+    # endregion
 
-    #region Ranked Match Statistics (rnk_ Prefix)
+    # region Ranked Match Statistics (rnk_ Prefix)
 
     /// <summary>
     ///     Total ranked matches played.
@@ -467,9 +467,9 @@ public class RankedStatisticsResponse(Account account, AccountStatistics statist
     [PHPProperty("rnk_retribution")]
     public string Retributions { get; init; } = "0"; // TODO: Implement Data Tracking
 
-    #endregion
+    # endregion
 
-    #region Global Account Statistics
+    # region Global Account Statistics
 
     /// <summary>
     ///     The account level (combined across all game modes).
@@ -519,9 +519,9 @@ public class RankedStatisticsResponse(Account account, AccountStatistics statist
     [PHPProperty("total_discos")]
     public int TotalDiscosInt { get; init; } = aggregates.TotalDisconnections;
 
-    #endregion
+    # endregion
 
-    #region Aggregate Statistics By Game Mode
+    # region Aggregate Statistics By Game Mode
 
     /// <summary>
     ///     Total seconds played in public (unranked) matches.
@@ -583,9 +583,9 @@ public class RankedStatisticsResponse(Account account, AccountStatistics statist
     [PHPProperty("rift_discos")]
     public string RiftWarsDisconnections { get; init; } = aggregates.RiftWarsDisconnections.ToString();
 
-    #endregion
+    # endregion
 
-    #region Account Metadata
+    # region Account Metadata
 
     /// <summary>
     ///     The date of last activity on the account.
@@ -611,9 +611,9 @@ public class RankedStatisticsResponse(Account account, AccountStatistics statist
     [PHPProperty("rank")]
     public string ClanRank { get; init; } = account.ClanTierName;
 
-    #endregion
+    # endregion
 
-    #region Favourite Heroes
+    # region Favourite Heroes
 
     /// <summary>
     ///     The display name of the player's most-played hero.
@@ -705,9 +705,9 @@ public class RankedStatisticsResponse(Account account, AccountStatistics statist
     [PHPProperty("favHero5_2")]
     public string FavouriteHero5Identifier { get; init; } = string.Empty; // TODO: Implement Data Tracking
 
-    #endregion
+    # endregion
 
-    #region Upgrades
+    # region Upgrades
 
     /// <summary>
     ///     The number of dice tokens (used for dice rolling features).
@@ -763,9 +763,9 @@ public class RankedStatisticsResponse(Account account, AccountStatistics statist
     [PHPProperty("timestamp")]
     public int ServerTimestamp { get; init; } = Convert.ToInt32(Math.Min(DateTimeOffset.UtcNow.ToUnixTimeSeconds(), Convert.ToInt64(int.MaxValue)));
 
-    #endregion
+    # endregion
 
-    #region Match History
+    # region Match History
 
     /// <summary>
     ///     Comma-separated list of recent match IDs.
@@ -779,9 +779,9 @@ public class RankedStatisticsResponse(Account account, AccountStatistics statist
     [PHPProperty("matchDates")]
     public string MatchDates { get; init; } = string.Empty; // TODO: Implement Data Tracking
 
-    #endregion
+    # endregion
 
-    #region Averages
+    # region Averages
 
     /// <summary>
     ///     The kill/death/assist ratio string (e.g., "2.5/1.0/3.0").
@@ -831,9 +831,9 @@ public class RankedStatisticsResponse(Account account, AccountStatistics statist
     [PHPProperty("avgWardsUsed")]
     public double AverageWardsUsed { get; init; } = 0.0; // TODO: Implement Data Tracking
 
-    #endregion
+    # endregion
 
-    #region Quest And Season
+    # region Quest And Season
 
     /// <summary>
     ///     Quest statistics data (disabled feature).
@@ -943,9 +943,9 @@ public class RankedStatisticsResponse(Account account, AccountStatistics statist
     [PHPProperty("con_reward")]
     public CampaignReward CampaignReward { get; init; } = new ();
 
-    #endregion
+    # endregion
 
-    #region Miscellaneous
+    # region Miscellaneous
 
     /// <summary>
     ///     The minimum number of matches a free-to-play account must complete to become verified.
@@ -959,5 +959,5 @@ public class RankedStatisticsResponse(Account account, AccountStatistics statist
     [PHPProperty(0)]
     public bool Zero => true;
 
-    #endregion
+    # endregion
 }

@@ -74,7 +74,7 @@ public class PlayerStatisticsResponse(Account account, AccountStatistics statist
     [PHPProperty("rank")]
     public string ClanRank { get; init; } = account.ClanTierName;
 
-    #region Public Match Statistics (acc_ Prefix)
+    # region Public Match Statistics (acc_ Prefix)
 
     /// <summary>
     ///     Number of public matches won.
@@ -418,9 +418,9 @@ public class PlayerStatisticsResponse(Account account, AccountStatistics statist
     [PHPProperty("acc_retribution")]
     public string Retributions { get; init; } = "0"; // TODO: Implement Retribution Tracking
 
-    #endregion
+    # endregion
 
-    #region Global Account Statistics
+    # region Global Account Statistics
 
     /// <summary>
     ///     Total disconnections across all game modes.
@@ -458,9 +458,9 @@ public class PlayerStatisticsResponse(Account account, AccountStatistics statist
     [PHPProperty("total_discos")]
     public int TotalDiscosInt { get; init; } = aggregates.TotalDisconnections;
 
-    #endregion
+    # endregion
 
-    #region Aggregate Statistics By Game Mode
+    # region Aggregate Statistics By Game Mode
 
     /// <summary>
     ///     Total seconds played in ranked matchmaking matches.
@@ -522,9 +522,9 @@ public class PlayerStatisticsResponse(Account account, AccountStatistics statist
     [PHPProperty("rift_discos")]
     public string RiftWarsDisconnections { get; init; } = aggregates.RiftWarsDisconnections.ToString();
 
-    #endregion
+    # endregion
 
-    #region Favourite Heroes
+    # region Favourite Heroes
 
     /// <summary>
     ///     Most played hero name (lowercase, e.g. "pyromancer").
@@ -616,9 +616,9 @@ public class PlayerStatisticsResponse(Account account, AccountStatistics statist
     [PHPProperty("favHero5_2")]
     public string FavouriteHero5Identifier { get; init; } = string.Empty; // TODO: Implement Favourite Hero Calculation
 
-    #endregion
+    # endregion
 
-    #region Upgrades
+    # region Upgrades
 
     /// <summary>
     ///     The index of the custom icon equipped, or "0" if no custom icon is equipped.
@@ -644,9 +644,9 @@ public class PlayerStatisticsResponse(Account account, AccountStatistics statist
     [PHPProperty("my_upgrades_info", isDiscriminatedUnion: true)]
     public Dictionary<string, OneOf<StoreItemData, StoreItemDiscountCoupon>> OwnedStoreItemsData { get; init; } = StatisticsResponseHelper.GetOwnedStoreItemsData(account);
 
-    #endregion
+    # endregion
 
-    #region Match History
+    # region Match History
 
     /// <summary>
     ///     Space-separated list of the last 20 match IDs.
@@ -660,9 +660,9 @@ public class PlayerStatisticsResponse(Account account, AccountStatistics statist
     [PHPProperty("matchDates")]
     public string MatchDates { get; init; } = string.Empty; // TODO: Implement Match History
 
-    #endregion
+    # endregion
 
-    #region Averages
+    # region Averages
 
     /// <summary>
     ///     Average kills/deaths/assists per game (format: "K/D/A").
@@ -712,9 +712,9 @@ public class PlayerStatisticsResponse(Account account, AccountStatistics statist
     [PHPProperty("avgWardsUsed")]
     public double AverageWardsUsed { get; init; } = 0.0; // TODO: Implement Average Calculation
 
-    #endregion
+    # endregion
 
-    #region Miscellaneous
+    # region Miscellaneous
 
     /// <summary>
     ///     Tokens for the Kros Dice random ability draft that players can use while dead or in spawn in a Kros Mode match.
@@ -762,5 +762,5 @@ public class PlayerStatisticsResponse(Account account, AccountStatistics statist
     [PHPProperty(0)]
     public bool Zero => true;
 
-    #endregion
+    # endregion
 }

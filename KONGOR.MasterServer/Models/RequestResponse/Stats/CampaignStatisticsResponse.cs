@@ -80,7 +80,7 @@ public class CampaignStatisticsResponse(Account account, AccountStatistics stati
     [PHPProperty("rank")]
     public string ClanRank { get; init; } = account.ClanTierName;
 
-    #region Campaign Match Statistics (cam_ Prefix)
+    # region Campaign Match Statistics (cam_ Prefix)
 
     /// <summary>
     ///     Total campaign matches played.
@@ -508,9 +508,9 @@ public class CampaignStatisticsResponse(Account account, AccountStatistics stati
     [PHPProperty("cam_retribution")]
     public string Retributions { get; init; } = "0"; // TODO: Implement Data Tracking
 
-    #endregion
+    # endregion
 
-    #region Global Account Statistics
+    # region Global Account Statistics
 
     /// <summary>
     ///     Total disconnections across all game modes.
@@ -548,9 +548,9 @@ public class CampaignStatisticsResponse(Account account, AccountStatistics stati
     [PHPProperty("total_discos")]
     public int TotalDiscosInt { get; init; } = aggregates.TotalDisconnections;
 
-    #endregion
+    # endregion
 
-    #region Aggregate Statistics By Game Mode
+    # region Aggregate Statistics By Game Mode
 
     /// <summary>
     ///     Total seconds played in public (unranked) matches.
@@ -630,9 +630,9 @@ public class CampaignStatisticsResponse(Account account, AccountStatistics stati
     [PHPProperty("rift_discos")]
     public string RiftWarsDisconnections { get; init; } = aggregates.RiftWarsDisconnections.ToString();
 
-    #endregion
+    # endregion
 
-    #region Season Information
+    # region Season Information
 
     /// <summary>
     ///     The highest campaign level achieved in the current season.
@@ -762,9 +762,9 @@ public class CampaignStatisticsResponse(Account account, AccountStatistics stati
     [PHPProperty("con_reward")]
     public CampaignReward CampaignReward { get; init; } = new ();
 
-    #endregion
+    # endregion
 
-    #region Favourite Heroes
+    # region Favourite Heroes
 
     /// <summary>
     ///     The display name of the player's most-played hero.
@@ -856,9 +856,9 @@ public class CampaignStatisticsResponse(Account account, AccountStatistics stati
     [PHPProperty("favHero5_2")]
     public string FavouriteHero5Identifier { get; init; } = string.Empty; // TODO: Implement Data Tracking
 
-    #endregion
+    # endregion
 
-    #region Upgrades
+    # region Upgrades
 
     /// <summary>
     ///     The custom icon slot ID for the account icon display.
@@ -884,9 +884,9 @@ public class CampaignStatisticsResponse(Account account, AccountStatistics stati
     [PHPProperty("my_upgrades_info", isDiscriminatedUnion: true)]
     public Dictionary<string, OneOf<StoreItemData, StoreItemDiscountCoupon>> OwnedStoreItemsData { get; init; } = StatisticsResponseHelper.GetOwnedStoreItemsData(account);
 
-    #endregion
+    # endregion
 
-    #region Match History
+    # region Match History
 
     /// <summary>
     ///     Comma-separated list of recent match IDs.
@@ -900,9 +900,9 @@ public class CampaignStatisticsResponse(Account account, AccountStatistics stati
     [PHPProperty("matchDates")]
     public string MatchDates { get; init; } = string.Empty; // TODO: Implement Data Tracking
 
-    #endregion
+    # endregion
 
-    #region Averages
+    # region Averages
 
     /// <summary>
     ///     The kill/death/assist ratio string (e.g., "2.5/1.0/3.0").
@@ -952,9 +952,9 @@ public class CampaignStatisticsResponse(Account account, AccountStatistics stati
     [PHPProperty("avgWardsUsed")]
     public double AverageWardsUsed { get; init; } = 0.0; // TODO: Implement Data Tracking
 
-    #endregion
+    # endregion
 
-    #region Miscellaneous
+    # region Miscellaneous
 
     /// <summary>
     ///     The number of dice tokens (used for dice rolling features).
@@ -1004,7 +1004,7 @@ public class CampaignStatisticsResponse(Account account, AccountStatistics stati
     [PHPProperty(0)]
     public bool Zero => true;
 
-    #endregion
+    # endregion
 }
 
 /// <summary>
