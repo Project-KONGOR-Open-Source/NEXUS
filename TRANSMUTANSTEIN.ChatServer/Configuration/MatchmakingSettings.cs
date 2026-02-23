@@ -114,7 +114,7 @@ public class MatchmakingSettings
     /// </summary>
     public bool Enabled { get; set; } = true;
 
-    # region Dynamic Matchmaking Parameters Based On Player Pool Size
+    # region Adaptive (Based On Player Pool Size) Matchmaking Parameters
     /*
         The player pool is classified into five tiers based on the number of queuing players.
         Each tier has its own matchmaking parameters that control how aggressively the algorithm relaxes constraints.

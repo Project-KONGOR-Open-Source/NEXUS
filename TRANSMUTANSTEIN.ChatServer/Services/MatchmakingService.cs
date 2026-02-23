@@ -281,9 +281,7 @@ public class MatchmakingService : BackgroundService, IDisposable
     private static double GetMaxAcceptableTMRSpread(MatchmakingTeam team1, MatchmakingTeam team2, double baseMaxDifference, PoolSizeParameters poolSizeParameters)
     {
         // Get The Longest Queue Time From Either Team
-        double longestQueueMinutes = Math.Max(
-            team1.Groups.Max(group => group.QueuedTimeInMinutes),
-            team2.Groups.Max(group => group.QueuedTimeInMinutes));
+        double longestQueueMinutes = Math.Max(team1.Groups.Max(group => group.QueuedTimeInMinutes), team2.Groups.Max(group => group.QueuedTimeInMinutes));
 
         double spread = baseMaxDifference;
 
@@ -365,7 +363,7 @@ public class MatchmakingService : BackgroundService, IDisposable
         }
 
         // Phase 5: All Solo Players
-        teams.AddRange(FormTeamsWithPattern(availableGroups, playersPerTeam, Enumerable.Repeat(1, playersPerTeam).ToArray()));
+        teams.AddRange(FormTeamsWithPattern(availableGroups, playersPerTeam, [.. Enumerable.Repeat(1, playersPerTeam)]));
 
         return teams;
     }
@@ -433,7 +431,7 @@ public class MatchmakingService : BackgroundService, IDisposable
 
     /// <summary>
     ///     Spawns a match by allocating a server and sending CreateMatch to the game server.
-    ///     Player notifications are sent immediately - we don't wait for AnnounceMatch because some game server configurations use the HTTP path instead.
+    ///     Player notifications are sent immediately. We don't wait for AnnounceMatch because some game server configurations use the HTTP path instead.
     /// </summary>
     private async Task<bool> SpawnMatch(MatchmakingMatch match)
     {
@@ -635,7 +633,8 @@ public class MatchmakingService : BackgroundService, IDisposable
         };
 
         // Determine If Casual Mode
-        bool isCasual = match.GameType is ChatProtocol.TMMGameType.TMM_GAME_TYPE_CASUAL
+        bool isCasual = match.GameType
+            is ChatProtocol.TMMGameType.TMM_GAME_TYPE_CASUAL
             or ChatProtocol.TMMGameType.TMM_GAME_TYPE_CAMPAIGN_CASUAL
             or ChatProtocol.TMMGameType.TMM_GAME_TYPE_REBORN_CASUAL;
 
@@ -776,7 +775,7 @@ public class MatchmakingService : BackgroundService, IDisposable
             );
         }
 
-        if (queuedPlayerCount < settings.MediumPoolThreshold)
+        else if (queuedPlayerCount < settings.MediumPoolThreshold)
         {
             return new PoolSizeParameters
             (
@@ -789,7 +788,7 @@ public class MatchmakingService : BackgroundService, IDisposable
             );
         }
 
-        if (queuedPlayerCount < settings.LargePoolThreshold)
+        else if (queuedPlayerCount < settings.LargePoolThreshold)
         {
             return new PoolSizeParameters
             (
@@ -802,7 +801,7 @@ public class MatchmakingService : BackgroundService, IDisposable
             );
         }
 
-        if (queuedPlayerCount < settings.MacroPoolThreshold)
+        else if (queuedPlayerCount < settings.MacroPoolThreshold)
         {
             return new PoolSizeParameters
             (
@@ -815,18 +814,19 @@ public class MatchmakingService : BackgroundService, IDisposable
             );
         }
 
-        return new PoolSizeParameters
-        (
-            Tier:                         PoolSizeTier.Macro,
-            ExpansionDelayMinutes:         settings.MacroPoolExpansionDelayMinutes,
-            ExpansionRatePerMinute:        settings.MacroPoolExpansionRatePerMinute,
-            MaximumTMRSpread:              settings.MacroPoolMaximumTMRSpread,
-            GroupMakeupTolerance:          settings.MacroPoolGroupMakeupTolerance,
-            EnforcePlusZeroMinusOneCheck:  settings.MacroPoolEnforcePlusZeroMinusOneCheck
-        );
+        else
+        {
+            return new PoolSizeParameters
+            (
+                Tier: PoolSizeTier.Macro,
+                ExpansionDelayMinutes: settings.MacroPoolExpansionDelayMinutes,
+                ExpansionRatePerMinute: settings.MacroPoolExpansionRatePerMinute,
+                MaximumTMRSpread: settings.MacroPoolMaximumTMRSpread,
+                GroupMakeupTolerance: settings.MacroPoolGroupMakeupTolerance,
+                EnforcePlusZeroMinusOneCheck: settings.MacroPoolEnforcePlusZeroMinusOneCheck
+            );
+        }
     }
-
-    // ── Pool Size Types ────────────────────────────────────────────────────────
 
     /// <summary>
     ///     Classifies the player pool into size tiers that drive adaptive matchmaking behaviour.
@@ -862,7 +862,7 @@ public class MatchmakingService : BackgroundService, IDisposable
     }
 
     /// <summary>
-    ///     The resolved matchmaking parameters for a single broker cycle, determined by the current pool size tier.
+    ///     The resolved matchmaking parameters for a single match broker cycle, determined by the current player pool size tier.
     /// </summary>
     private record PoolSizeParameters
     (
