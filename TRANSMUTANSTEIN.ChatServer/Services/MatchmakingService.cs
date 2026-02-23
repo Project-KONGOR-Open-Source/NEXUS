@@ -119,7 +119,13 @@ public class MatchmakingService : BackgroundService, IDisposable
             if (regularGroups.Count == 0)
                 continue;
 
-            List<MatchmakingMatch> matches = RunMatchBrokerCycle(regularGroups);
+            // Resolve Pool-Size-Aware Parameters Based On The Total Number Of Queued Players
+            int queuedPlayerCount = regularGroups.Sum(group => group.Members.Count);
+            PoolSizeParameters poolSizeParameters = ResolvePoolSizeParameters(queuedPlayerCount);
+
+            Log.Debug(@"Broker Cycle: {PlayerCount} Queued Players, Pool Tier = {PoolTier}", queuedPlayerCount, poolSizeParameters.Tier);
+
+            List<MatchmakingMatch> matches = RunMatchBrokerCycle(regularGroups, poolSizeParameters);
 
             // Spawn Each Match
             foreach (MatchmakingMatch match in matches)
@@ -147,9 +153,9 @@ public class MatchmakingService : BackgroundService, IDisposable
 
     /// <summary>
     ///     Runs a single match broker cycle with TMR-aware matching.
-    ///     Uses adaptive TMR spread based on queue time and enforces group makeup rules.
+    ///     Uses adaptive TMR spread based on queue time, pool size, and group makeup rules.
     /// </summary>
-    private List<MatchmakingMatch> RunMatchBrokerCycle(List<MatchmakingGroup> queuedGroups)
+    private List<MatchmakingMatch> RunMatchBrokerCycle(List<MatchmakingGroup> queuedGroups, PoolSizeParameters poolSizeParameters)
     {
         List<MatchmakingMatch> matches = [];
 
@@ -179,11 +185,11 @@ public class MatchmakingService : BackgroundService, IDisposable
 
                 MatchmakingTeam legionTeam = teams[teamIndex];
 
-                // Find The Best Opponent From Remaining Teams
                 MatchmakingTeam? bestOpponent = null;
                 int bestOpponentIndex = -1;
                 double bestTMRDifference = double.MaxValue;
 
+                // Find The Best Opponent From Remaining Teams
                 for (int opponentIndex = teamIndex + 1; opponentIndex < teams.Count; opponentIndex++)
                 {
                     if (matchedTeamIndices.Contains(opponentIndex))
@@ -197,26 +203,28 @@ public class MatchmakingService : BackgroundService, IDisposable
                     // Calculate TMR Difference Using Effective Rating (Power Mean + Premade Bonus)
                     double tmrDifference = Math.Abs(legionTeam.EffectiveTeamRating - candidateOpponent.EffectiveTeamRating);
 
-                    // Get Maximum Acceptable TMR Spread Based On Queue Time
-                    double maxAcceptableSpread = GetMaxAcceptableTMRSpread(legionTeam, candidateOpponent, maxTMRDifference);
+                    // Get Maximum Acceptable TMR Spread Based On Queue Time And Pool Size
+                    double maxAcceptableSpread = GetMaxAcceptableTMRSpread(legionTeam, candidateOpponent, maxTMRDifference, poolSizeParameters);
 
                     if (tmrDifference > maxAcceptableSpread)
                         continue;
 
+                    // Check Group Makeup Difference (Pool-Size-Aware Tolerance)
                     int groupMakeupDifference = Math.Abs(legionTeam.GroupMakeup - candidateOpponent.GroupMakeup);
 
-                    // Check Group Makeup Difference (Enforce Fairness)
-                    if (groupMakeupDifference > 2)
+                    if (groupMakeupDifference > poolSizeParameters.GroupMakeupTolerance)
                     {
-                        Log.Debug(@"Skipping Match Due To Group Makeup Mismatch: {Legion} vs {Hellbourne} (Diff: {Diff})",
-                            legionTeam.GroupMakeupString, candidateOpponent.GroupMakeupString, groupMakeupDifference);
+                        Log.Debug(@"Skipping Match Due To Group Makeup Mismatch: {Legion} vs {Hellbourne} (Diff: {Diff}, Tolerance: {Tolerance})",
+                            legionTeam.GroupMakeupString, candidateOpponent.GroupMakeupString, groupMakeupDifference, poolSizeParameters.GroupMakeupTolerance);
+
                         continue;
                     }
 
-                    // Check For +0/-1 Rating Outcomes (Frustrating For High-Rated Players)
-                    if (ProducesPlusZeroMinusOne(legionTeam) || ProducesPlusZeroMinusOne(candidateOpponent))
+                    // Check For +0/-1 Rating Outcomes (Skipped In Small Pools Where Finding Any Match Is Prioritised)
+                    if (poolSizeParameters.EnforcePlusZeroMinusOneCheck && (ProducesPlusZeroMinusOne(legionTeam) || ProducesPlusZeroMinusOne(candidateOpponent)))
                     {
                         Log.Debug(@"Skipping Match Due To +0/-1 Rating Outcome Risk");
+
                         continue;
                     }
 
@@ -268,26 +276,26 @@ public class MatchmakingService : BackgroundService, IDisposable
 
     /// <summary>
     ///     Gets the maximum acceptable TMR spread for matching two teams.
-    ///     Uses the adaptive spread based on the longest-waiting group.
+    ///     Uses the adaptive spread based on the longest-waiting group and the current pool size tier.
     /// </summary>
-    private static double GetMaxAcceptableTMRSpread(MatchmakingTeam team1, MatchmakingTeam team2, double baseMaxDifference)
+    private static double GetMaxAcceptableTMRSpread(MatchmakingTeam team1, MatchmakingTeam team2, double baseMaxDifference, PoolSizeParameters poolSizeParameters)
     {
         // Get The Longest Queue Time From Either Team
         double longestQueueMinutes = Math.Max(
             team1.Groups.Max(group => group.QueuedTimeInMinutes),
             team2.Groups.Max(group => group.QueuedTimeInMinutes));
 
-        // Base Spread Starts At Config Value
         double spread = baseMaxDifference;
 
-        // Expand By 50 TMR Per Minute After 2 Minutes Of Waiting
-        if (longestQueueMinutes > 2.0)
+        // Expand TMR Spread After The Pool-Size-Aware Delay Has Elapsed
+        if (longestQueueMinutes > poolSizeParameters.ExpansionDelayMinutes)
         {
-            spread += (longestQueueMinutes - 2.0) * 50.0;
+            double minutesBeyondDelay = longestQueueMinutes - poolSizeParameters.ExpansionDelayMinutes;
+
+            spread += minutesBeyondDelay * poolSizeParameters.ExpansionRatePerMinute;
         }
 
-        // Cap At A Reasonable Maximum (1000 TMR Difference)
-        return Math.Min(spread, 1000.0);
+        return Math.Min(spread, poolSizeParameters.MaximumTMRSpread);
     }
 
     /// <summary>
@@ -603,10 +611,7 @@ public class MatchmakingService : BackgroundService, IDisposable
 
     /// <summary>
     ///     Creates a MatchInformation object for caching, enabling player join tracking.
-    /// </summary>
-    /// <summary>
-    ///     Creates a MatchInformation object for caching, enabling player join tracking.
-    ///     Called from MatchAnnounce when the game server provides the real match ID.
+    ///     Called from "MatchAnnounce" when the game server provides the real match ID.
     /// </summary>
     public static MatchInformation CreateMatchInformation(MatchmakingMatch match, MatchServer server, int matchID)
     {
@@ -749,4 +754,123 @@ public class MatchmakingService : BackgroundService, IDisposable
         foreach (MatchmakingGroupMember member in match.GetAllPlayers())
             member.Session.Send(found);
     }
+
+    /// <summary>
+    ///     Resolves the pool-size-aware matchmaking parameters for the current broker cycle.
+    ///     The player pool size determines how aggressively the algorithm relaxes constraints to find matches.
+    /// </summary>
+    private PoolSizeParameters ResolvePoolSizeParameters(int queuedPlayerCount)
+    {
+        MatchmakingSettings settings = _settings.Value;
+
+        if (queuedPlayerCount < settings.SmallPoolThreshold)
+        {
+            return new PoolSizeParameters
+            (
+                Tier:                         PoolSizeTier.Micro,
+                ExpansionDelayMinutes:         settings.MicroPoolExpansionDelayMinutes,
+                ExpansionRatePerMinute:        settings.MicroPoolExpansionRatePerMinute,
+                MaximumTMRSpread:              settings.MicroPoolMaximumTMRSpread,
+                GroupMakeupTolerance:          settings.MicroPoolGroupMakeupTolerance,
+                EnforcePlusZeroMinusOneCheck:  settings.MicroPoolEnforcePlusZeroMinusOneCheck
+            );
+        }
+
+        if (queuedPlayerCount < settings.MediumPoolThreshold)
+        {
+            return new PoolSizeParameters
+            (
+                Tier:                         PoolSizeTier.Small,
+                ExpansionDelayMinutes:         settings.SmallPoolExpansionDelayMinutes,
+                ExpansionRatePerMinute:        settings.SmallPoolExpansionRatePerMinute,
+                MaximumTMRSpread:              settings.SmallPoolMaximumTMRSpread,
+                GroupMakeupTolerance:          settings.SmallPoolGroupMakeupTolerance,
+                EnforcePlusZeroMinusOneCheck:  settings.SmallPoolEnforcePlusZeroMinusOneCheck
+            );
+        }
+
+        if (queuedPlayerCount < settings.LargePoolThreshold)
+        {
+            return new PoolSizeParameters
+            (
+                Tier:                         PoolSizeTier.Medium,
+                ExpansionDelayMinutes:         settings.MediumPoolExpansionDelayMinutes,
+                ExpansionRatePerMinute:        settings.MediumPoolExpansionRatePerMinute,
+                MaximumTMRSpread:              settings.MediumPoolMaximumTMRSpread,
+                GroupMakeupTolerance:          settings.MediumPoolGroupMakeupTolerance,
+                EnforcePlusZeroMinusOneCheck:  settings.MediumPoolEnforcePlusZeroMinusOneCheck
+            );
+        }
+
+        if (queuedPlayerCount < settings.MacroPoolThreshold)
+        {
+            return new PoolSizeParameters
+            (
+                Tier:                         PoolSizeTier.Large,
+                ExpansionDelayMinutes:         settings.LargePoolExpansionDelayMinutes,
+                ExpansionRatePerMinute:        settings.LargePoolExpansionRatePerMinute,
+                MaximumTMRSpread:              settings.LargePoolMaximumTMRSpread,
+                GroupMakeupTolerance:          settings.LargePoolGroupMakeupTolerance,
+                EnforcePlusZeroMinusOneCheck:  settings.LargePoolEnforcePlusZeroMinusOneCheck
+            );
+        }
+
+        return new PoolSizeParameters
+        (
+            Tier:                         PoolSizeTier.Macro,
+            ExpansionDelayMinutes:         settings.MacroPoolExpansionDelayMinutes,
+            ExpansionRatePerMinute:        settings.MacroPoolExpansionRatePerMinute,
+            MaximumTMRSpread:              settings.MacroPoolMaximumTMRSpread,
+            GroupMakeupTolerance:          settings.MacroPoolGroupMakeupTolerance,
+            EnforcePlusZeroMinusOneCheck:  settings.MacroPoolEnforcePlusZeroMinusOneCheck
+        );
+    }
+
+    // ── Pool Size Types ────────────────────────────────────────────────────────
+
+    /// <summary>
+    ///     Classifies the player pool into size tiers that drive adaptive matchmaking behaviour.
+    /// </summary>
+    private enum PoolSizeTier
+    {
+        /// <summary>
+        ///     A micro pool uses the most aggressive TMR expansion and the most relaxed fairness constraints.
+        ///     Finding any match at all is prioritised over match quality.
+        /// </summary>
+        Micro,
+
+        /// <summary>
+        ///     A small pool uses aggressive TMR expansion and relaxed fairness constraints to minimise queue times.
+        /// </summary>
+        Small,
+
+        /// <summary>
+        ///     A medium pool uses balanced TMR expansion and standard fairness constraints.
+        /// </summary>
+        Medium,
+
+        /// <summary>
+        ///     A large pool uses conservative TMR expansion and strict fairness constraints to maximise match quality.
+        /// </summary>
+        Large,
+
+        /// <summary>
+        ///     A macro pool uses the most conservative TMR expansion and the strictest fairness constraints.
+        ///     Match quality is prioritised over queue times.
+        /// </summary>
+        Macro
+    }
+
+    /// <summary>
+    ///     The resolved matchmaking parameters for a single broker cycle, determined by the current pool size tier.
+    /// </summary>
+    private record PoolSizeParameters
+    (
+        PoolSizeTier Tier,
+        double ExpansionDelayMinutes,
+        double ExpansionRatePerMinute,
+        double MaximumTMRSpread,
+        int GroupMakeupTolerance,
+        bool EnforcePlusZeroMinusOneCheck
+    );
 }
