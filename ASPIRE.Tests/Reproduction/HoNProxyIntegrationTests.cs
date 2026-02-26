@@ -8,8 +8,8 @@ namespace ASPIRE.Tests.Reproduction;
 
 public class HoNProxyIntegrationTests
 {
-    private const string GamePath = @"c:\Users\ayaza\PycharmProjects\NEXUS-PRIVATE\HoN Game Client v4.10.1 Windows Clean Installation\hon_x64.exe";
-    private const string ProxyPath = @"c:\Users\ayaza\PycharmProjects\NEXUS-PRIVATE\NEXUS\Tools\HoNProxy\bin\Debug\net9.0\HoNProxy.exe";
+    private const string GamePath = @"HoN Game Client v4.10.1 Windows Clean Installation\hon_x64.exe";
+    private const string ProxyPath = @"Tools\HoNProxy\bin\Debug\net9.0\HoNProxy.exe";
 
     [Test]
     public async Task CanLaunchProxyAndCaptureOutput()
