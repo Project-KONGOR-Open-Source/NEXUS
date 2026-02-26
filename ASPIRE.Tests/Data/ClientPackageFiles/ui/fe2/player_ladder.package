@@ -1,0 +1,422 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+
+	<style name="playerLadderTabBacker" width="148.83%" height="113.77%" align="center" valign="center" hflip="true"/>
+	<style name="playerLadderTabLabel" x="-0.65h" y="6h" font="dyn_12" textalign="center" noclick="true" color="1 1 1 1" content=""/>
+	<style name="playerLadderTabIcon" width="50%" height="50@" align="center" x="-17%" y="9.5%"/>
+
+	<template name="player_ladder">
+		<panel name="player_ladder" y="-210%" align="center" width="-2.7h" visible="{visible=0}" noclick="true" valign="center" 
+			hotkey="ESC"
+			onhotkey="PlaySound('/shared/sounds/ui/ccpanel/button_close_02.wav'); Set('_mainmenu_currentpanel', 'player_ladder'); CallEvent('MainMenuPanelSwitcher');"
+			onhidelua="if isNewUI() then Homepage_V2:InitMotd() end"
+		>
+			<panel width="200%" height="200%" align="center" valign="center"/>
+			<panel x="0" y="-100%" height="203.6%" width="-15@"  align="center" texture="mainmenu/upper_frame_center.tga"/>
+			<panel y="100%" noclick="true" passivechildren="true" onloadlua="self:SetHeight(isNewUI() and '96%' or '100%')">
+				<panel valign="bottom" y="-2.5h" width="+2h" x="-0.75h">
+					<panel width="3.125@" texture="/ui/fe2/frames/slideout_frame_l.tga"/>
+					<panel width="3.125@" texture="/ui/fe2/frames/slideout_frame_r.tga" align="right"/>
+					<panel width="-2h" align="center" height="3.125%" valign="bottom" texture="/ui/fe2/frames/slideout_frame_b.tga"/>
+					<panel width="3.125@" height="3.125%" x="3.125@" valign="bottom" texture="/ui/fe2/frames/slideout_frame_bl.tga"/>
+					<panel width="3.125@" height="3.125%" x="-3.125@" valign="bottom" texture="/ui/fe2/frames/slideout_frame_br.tga" align="right"/>
+				</panel>
+			</panel>
+
+			<panel x="20h" y="-100%" height="203.6%" width="50@"  align="right" texture="mainmenu/upper_frame_right.tga"/>
+			<panel x="-20h" y="-100%" height="203.6%" width="50@"  align="left" texture="mainmenu/upper_frame_left.tga"/>
+
+			<panel color="black" y="95%" height="90%" align="center" width="-0.2h" x="0.15h"/>
+
+			<panel name="player_stats_tabs" y="2h" x="0.57h" align="left" height="89.8h" width="6.2h" noclick="true" float="bottom" padding="1.5h"
+				watch="openstatstrigger"
+				ontrigger="Echo('openstatstrigger ' # param0);"
+			>
+				<panel height="22h" color="invisible" noclick="1">
+					<button
+						name="player_stats_ladder_tab" noclick="0" enabled="1"
+						color="invisible"
+						onmouseover="PlaySound('/shared/sounds/ui/ccpanel/button_over_02.wav');"
+						onclicklua="
+							if isNewUI() then
+								Homepage_V2:ClickedLadder()
+							else
+								Player_Stats.ClickedLadder()
+							end
+						"
+						numstates="2"
+					>
+						<widgetstate statename="up">
+							<image texture="/ui/fe2/elements/aftermatch/matchtab_unselected.tga" style="playerLadderTabBacker"/>
+							<image texture="/ui/fe2/season/icon_s.tga" style="playerLadderTabIcon" />
+						</widgetstate>
+						<widgetstate statename="over">
+							<image texture="/ui/fe2/elements/aftermatch/matchtab_hover.tga" style="playerLadderTabBacker" />
+							<image texture="/ui/fe2/season/icon_s.tga" style="playerLadderTabIcon" />
+						</widgetstate>
+						<widgetstate statename="down" x="1" y="1">
+							<image texture="/ui/fe2/elements/aftermatch/matchtab_selected.tga" style="playerLadderTabBacker" />
+							<image texture="/ui/fe2/season/icon_s.tga" style="playerLadderTabIcon" />
+						</widgetstate>
+						<widgetstate statename="up2">
+							<image texture="/ui/fe2/elements/aftermatch/matchtab_selected.tga" style="playerLadderTabBacker" />
+							<image texture="/ui/fe2/season/icon_s.tga" style="playerLadderTabIcon" />
+						</widgetstate>
+						<widgetstate statename="over2">
+							<image texture="/ui/fe2/elements/aftermatch/matchtab_selected.tga" style="playerLadderTabBacker" />
+							<image texture="/ui/fe2/season/icon_s.tga" style="playerLadderTabIcon" />
+						</widgetstate>
+						<widgetstate statename="down2" x="1" y="1">
+							<image texture="/ui/fe2/elements/aftermatch/matchtab_selected.tga" style="playerLadderTabBacker" />
+							<image texture="/ui/fe2/season/icon_s.tga" style="playerLadderTabIcon" />
+						</widgetstate>
+						<label style="playerLadderTabLabel" onload="SetText(FormatStringNewLine(Translate('player_stats_tabs_ladder')));" ></label>
+					</button>
+				</panel>
+
+				<if condition="cl_GarenaEnable">
+				<panel height="22h" color="invisible" noclick="1">
+					<button
+						name="player_stats_ladder_tab2" noclick="0" enabled="1"
+						color="invisible"
+						onmouseover="PlaySound('/shared/sounds/ui/ccpanel/button_over_02.wav');"
+						onclicklua="
+							if isNewUI() then
+								Homepage_V2:ClickedLadder2()
+							else
+								Player_Stats.ClickedLadder2()
+							end
+						"
+						numstates="2"
+					>
+						<widgetstate statename="up">
+							<image texture="/ui/fe2/elements/aftermatch/matchtab_unselected.tga" style="playerLadderTabBacker"/>
+							<image texture="/ui/fe2/season/icon_s.tga" style="playerLadderTabIcon" />
+						</widgetstate>
+						<widgetstate statename="over">
+							<image texture="/ui/fe2/elements/aftermatch/matchtab_hover.tga" style="playerLadderTabBacker" />
+							<image texture="/ui/fe2/season/icon_s.tga" style="playerLadderTabIcon" />
+						</widgetstate>
+						<widgetstate statename="down" x="1" y="1">
+							<image texture="/ui/fe2/elements/aftermatch/matchtab_selected.tga" style="playerLadderTabBacker" />
+							<image texture="/ui/fe2/season/icon_s.tga" style="playerLadderTabIcon" />
+						</widgetstate>
+						<widgetstate statename="up2">
+							<image texture="/ui/fe2/elements/aftermatch/matchtab_selected.tga" style="playerLadderTabBacker" />
+							<image texture="/ui/fe2/season/icon_s.tga" style="playerLadderTabIcon" />
+						</widgetstate>
+						<widgetstate statename="over2">
+							<image texture="/ui/fe2/elements/aftermatch/matchtab_selected.tga" style="playerLadderTabBacker" />
+							<image texture="/ui/fe2/season/icon_s.tga" style="playerLadderTabIcon" />
+						</widgetstate>
+						<widgetstate statename="down2" x="1" y="1">
+							<image texture="/ui/fe2/elements/aftermatch/matchtab_selected.tga" style="playerLadderTabBacker" />
+							<image texture="/ui/fe2/season/icon_s.tga" style="playerLadderTabIcon" />
+						</widgetstate>
+						<label style="playerLadderTabLabel" onload="SetText(FormatStringNewLine(Translate('player_stats_tabs_ladder2')));" ></label>
+					</button>
+				</panel>
+				</if>
+
+				<!-- <panel name="playerLadderTabStrikerParent" height="23h" color="invisible" noclick="1">
+					<panel name="playerLadderStrikerEnabledParent">
+						<button
+								name="player_stats_striker_tab" noclick="0" enabled="1"
+								color="invisible"
+								onclicklua="
+								Player_Stats.ClickedStriker()
+							    "
+								numstates="2"
+								disabledmouseover="true"
+								disabledmouseout="true"
+						>
+							<widgetstate statename="up">
+								<image texture="/ui/fe2/elements/aftermatch/matchtab_unselected.tga" style="playerLadderTabBacker" />
+								<image texture="/ui/fe2/mainmenu/icons/N_ladder.tga" style="playerLadderTabIcon" />
+							</widgetstate>
+							<widgetstate statename="over">
+								<image texture="/ui/fe2/elements/aftermatch/matchtab_hover.tga" style="playerLadderTabBacker" />
+								<image texture="/ui/fe2/mainmenu/icons/N_ladder.tga" style="playerLadderTabIcon" />
+							</widgetstate>
+							<widgetstate statename="down" x="1" y="1">
+								<image texture="/ui/fe2/elements/aftermatch/matchtab_selected.tga" style="playerLadderTabBacker" />
+								<image texture="/ui/fe2/mainmenu/icons/N_ladder.tga" style="playerLadderTabIcon" />
+							</widgetstate>
+							<widgetstate statename="up2">
+								<image texture="/ui/fe2/elements/aftermatch/matchtab_selected.tga" style="playerLadderTabBacker" />
+								<image texture="/ui/fe2/mainmenu/icons/N_ladder.tga" style="playerLadderTabIcon" />
+							</widgetstate>
+							<widgetstate statename="over2">
+								<image texture="/ui/fe2/elements/aftermatch/matchtab_selected.tga" style="playerLadderTabBacker" />
+								<image texture="/ui/fe2/mainmenu/icons/N_ladder.tga" style="playerLadderTabIcon" />
+							</widgetstate>
+							<widgetstate statename="down2" x="1" y="1">
+								<image texture="/ui/fe2/elements/aftermatch/matchtab_selected.tga" style="playerLadderTabBacker" />
+								<image texture="/ui/fe2/mainmenu/icons/N_ladder.tga" style="playerLadderTabIcon" />
+							</widgetstate>
+							<label style="playerLadderTabLabel" onload="SetText(FormatStringNewLine(Translate('player_stats_tabs_strikerladder')));" ></label>
+						</button>
+					</panel>
+				</panel> -->
+
+				<panel name="playerLadderTabMasteryParent" height="23h" color="invisible" noclick="1">
+					<panel name="playerLadderMasteryEnabledParent">
+						<button
+								name="player_stats_mastery_tab" noclick="0" enabled="1"
+								color="invisible"
+								onclicklua="
+								if isNewUI() then
+									Homepage_V2:ClickedMastery()
+								else
+									Player_Stats.ClickedMastery()
+								end
+							    "
+								numstates="2"
+								disabledmouseover="true"
+								disabledmouseout="true"
+						>
+							<widgetstate statename="up">
+								<image texture="/ui/fe2/elements/aftermatch/matchtab_unselected.tga" style="playerLadderTabBacker" />
+								<image texture="/ui/fe2/mastery/tab_mastery.tga" style="playerLadderTabIcon" />
+							</widgetstate>
+							<widgetstate statename="over">
+								<image texture="/ui/fe2/elements/aftermatch/matchtab_hover.tga" style="playerLadderTabBacker" />
+								<image texture="/ui/fe2/mastery/tab_mastery.tga" style="playerLadderTabIcon" />
+							</widgetstate>
+							<widgetstate statename="down" x="1" y="1">
+								<image texture="/ui/fe2/elements/aftermatch/matchtab_selected.tga" style="playerLadderTabBacker" />
+								<image texture="/ui/fe2/mastery/tab_mastery.tga" style="playerLadderTabIcon" />
+							</widgetstate>
+							<widgetstate statename="up2">
+								<image texture="/ui/fe2/elements/aftermatch/matchtab_selected.tga" style="playerLadderTabBacker" />
+								<image texture="/ui/fe2/mastery/tab_mastery.tga" style="playerLadderTabIcon" />
+							</widgetstate>
+							<widgetstate statename="over2">
+								<image texture="/ui/fe2/elements/aftermatch/matchtab_selected.tga" style="playerLadderTabBacker" />
+								<image texture="/ui/fe2/mastery/tab_mastery.tga" style="playerLadderTabIcon" />
+							</widgetstate>
+							<widgetstate statename="down2" x="1" y="1">
+								<image texture="/ui/fe2/elements/aftermatch/matchtab_selected.tga" style="playerLadderTabBacker" />
+								<image texture="/ui/fe2/mastery/tab_mastery.tga" style="playerLadderTabIcon" />
+							</widgetstate>
+							<label style="playerLadderTabLabel" onload="SetText(FormatStringNewLine(Translate('player_stats_tabs_masteryladder')));" ></label>
+						</button>
+
+					</panel>
+				</panel>
+
+				<panel name="playerLadderTabCodexLevelParent" height="19h" color="invisible" noclick="1">
+					<panel name="playerLadderCodexLevelEnabledParent">
+						<button
+								name="player_stats_codex_level_tab" noclick="0" enabled="1"
+								color="invisible"
+								onclicklua="
+								if isNewUI() then
+									Homepage_V2:ClickedCodexLevel()
+								else
+									Player_Stats.ClickedCodexLevel()
+								end
+							    "
+								numstates="2"
+								disabledmouseover="true"
+								disabledmouseout="true"
+						>
+							<widgetstate statename="up">
+								<image texture="/ui/fe2/elements/aftermatch/matchtab_unselected.tga" style="playerLadderTabBacker" />
+								<image texture="/ui/fe2/mainmenu/icons/N_ladder.tga" style="playerLadderTabIcon" />
+							</widgetstate>
+							<widgetstate statename="over">
+								<image texture="/ui/fe2/elements/aftermatch/matchtab_hover.tga" style="playerLadderTabBacker" />
+								<image texture="/ui/fe2/mainmenu/icons/N_ladder.tga" style="playerLadderTabIcon" />
+							</widgetstate>
+							<widgetstate statename="down" x="1" y="1">
+								<image texture="/ui/fe2/elements/aftermatch/matchtab_selected.tga" style="playerLadderTabBacker" />
+								<image texture="/ui/fe2/mainmenu/icons/N_ladder.tga" style="playerLadderTabIcon" />
+							</widgetstate>
+							<widgetstate statename="up2">
+								<image texture="/ui/fe2/elements/aftermatch/matchtab_selected.tga" style="playerLadderTabBacker" />
+								<image texture="/ui/fe2/mainmenu/icons/N_ladder.tga" style="playerLadderTabIcon" />
+							</widgetstate>
+							<widgetstate statename="over2">
+								<image texture="/ui/fe2/elements/aftermatch/matchtab_selected.tga" style="playerLadderTabBacker" />
+								<image texture="/ui/fe2/mainmenu/icons/N_ladder.tga" style="playerLadderTabIcon" />
+							</widgetstate>
+							<widgetstate statename="down2" x="1" y="1">
+								<image texture="/ui/fe2/elements/aftermatch/matchtab_selected.tga" style="playerLadderTabBacker" />
+								<image texture="/ui/fe2/mainmenu/icons/N_ladder.tga" style="playerLadderTabIcon" />
+							</widgetstate>
+							<label style="playerLadderTabLabel" onload="SetText(FormatStringNewLine(Translate('player_stats_tabs_codexlevelladder')));" ></label>
+						</button>
+					</panel>
+				</panel>
+
+				<panel name="playerLadderTabQuestParent" height="19h" color="invisible" noclick="1">
+					<panel name="playerLadderQuestsEnabledParent">
+						<button
+							name="player_stats_quests_tab" noclick="0" enabled="1"
+							color="invisible"
+							onclicklua="
+								if isNewUI() then
+									Homepage_V2:ClickedQuests()
+								else
+									Player_Stats.ClickedQuests()
+								end
+							"
+							numstates="2"
+							disabledmouseover="true"
+							disabledmouseout="true"
+						>
+							<widgetstate statename="up">
+								<image texture="/ui/fe2/elements/aftermatch/matchtab_unselected.tga" style="playerLadderTabBacker" />
+								<image texture="/ui/fe2/mainmenu/icons/N_ladder.tga" style="playerLadderTabIcon" />
+							</widgetstate>
+							<widgetstate statename="over">
+								<image texture="/ui/fe2/elements/aftermatch/matchtab_hover.tga" style="playerLadderTabBacker" />
+								<image texture="/ui/fe2/mainmenu/icons/N_ladder.tga" style="playerLadderTabIcon" />
+							</widgetstate>
+							<widgetstate statename="down" x="1" y="1">
+								<image texture="/ui/fe2/elements/aftermatch/matchtab_selected.tga" style="playerLadderTabBacker" />
+								<image texture="/ui/fe2/mainmenu/icons/N_ladder.tga" style="playerLadderTabIcon" />
+							</widgetstate>
+							<widgetstate statename="up2">
+								<image texture="/ui/fe2/elements/aftermatch/matchtab_selected.tga" style="playerLadderTabBacker" />
+								<image texture="/ui/fe2/mainmenu/icons/N_ladder.tga" style="playerLadderTabIcon" />
+							</widgetstate>
+							<widgetstate statename="over2">
+								<image texture="/ui/fe2/elements/aftermatch/matchtab_selected.tga" style="playerLadderTabBacker" />
+								<image texture="/ui/fe2/mainmenu/icons/N_ladder.tga" style="playerLadderTabIcon" />
+							</widgetstate>
+							<widgetstate statename="down2" x="1" y="1">
+								<image texture="/ui/fe2/elements/aftermatch/matchtab_selected.tga" style="playerLadderTabBacker" />
+								<image texture="/ui/fe2/mainmenu/icons/N_ladder.tga" style="playerLadderTabIcon" />
+							</widgetstate>
+							<label style="playerLadderTabLabel" onload="SetText(FormatStringNewLine(Translate('player_stats_tabs_questladder')));" ></label>
+						</button>
+					</panel>
+				</panel>
+
+			</panel>
+
+			<panel height="193%" noclick="true" onloadlua="self:SetHeight(isNewUI() and '190%' or '193%')">
+				<!-- <panel name="player_stats_striker_parent" width="-4.3h" align="right" noclick="true" visible="false">
+					<panel name="web_browser_strikerladder" width="-1.0h" x="0.1h" y="-0.6h" height="-2.0h" noclick="1" align="left" valign="bottom">
+						<panel noclick="1" name="web_browser_strikerladder_insert"
+							   oneventlua="UIManager.GetInterface('webpanel'):HoNWebPanelF('ShowStrikerLadder', self)"
+						>
+						</panel>
+						<if condition="!ui_webBrowser" >
+							<panel color="0 0 0 1" noclick="1"  >
+								<label x="2" y="2" font="dyn_10" color="1 1 1 1" shadow="true" content="Your client does not support this feature." noclick="1"  />
+							</panel>
+						</if>
+					</panel>
+				</panel> -->
+
+				<panel name="player_stats_codex_level_parent" width="-4.3h" align="right" noclick="true" visible="false">
+					<panel name="web_browser_codexlevelladder" width="-1.0h" x="0.1h" y="-0.6h" height="-2.0h" noclick="1" align="left" valign="bottom">
+						<panel noclick="1" name="web_browser_codexlevelladder_insert"
+							   oneventlua="UIManager.GetInterface('webpanel'):HoNWebPanelF('ShowCodexLevelLadder', self)"
+						>
+						</panel>
+						<if condition="!ui_webBrowser" >
+							<panel color="0 0 0 1" noclick="1"  >
+								<label x="2" y="2" font="dyn_10" color="1 1 1 1" shadow="true" content="Your client does not support this feature." noclick="1"  />
+							</panel>
+						</if>
+					</panel>
+				</panel>
+
+				<panel name="player_stats_quests_parent" width="-4.3h" align="right" noclick="true" visible="false">
+					<panel name="web_browser_questladder" width="-1.0h" x="0.1h" y="-0.6h" height="-2.0h" noclick="1" align="left" valign="bottom">
+						<panel noclick="1" name="web_browser_questladder_insert"
+							oneventlua="UIManager.GetInterface('webpanel'):HoNWebPanelF('ShowQuestLadder', self)"
+						>
+						</panel>
+						<if condition="!ui_webBrowser" >
+							<panel color="0 0 0 1" noclick="1"  >
+								<label x="2" y="2" font="dyn_10" color="1 1 1 1" shadow="true" content="Your client does not support this feature." noclick="1"  />
+							</panel>
+						</if>
+					</panel>
+				</panel>
+
+				<panel name="player_stats_ladder_parent" width="-4.3h" align="right" noclick="true" visible="true">
+					<panel name="web_browser_ladder" width="-1.0h" x="0.1h" y="-0.6h" height="-2.0h" noclick="1" align="left" valign="bottom">
+						<panel noclick="1" name="web_browser_ladder_insert"
+							oneventlua="UIManager.GetInterface('webpanel'):HoNWebPanelF('ShowLadder', self)"
+						>
+						</panel>
+						<if condition="!ui_webBrowser" >
+							<panel color="0 0 0 1" noclick="1"  >
+								<label x="2" y="2" font="dyn_10" color="1 1 1 1" shadow="true" content="Your client does not support this feature." noclick="1"  />
+							</panel>
+						</if>
+					</panel>
+				</panel>
+
+				<panel name="player_stats_ladder2_parent" width="-4.3h" align="right" noclick="true" visible="true">
+					<panel name="web_browser_ladder2" width="-1.0h" x="0.1h" y="-0.6h" height="-2.0h" noclick="1" align="left" valign="bottom">
+						<panel noclick="1" name="web_browser_ladder2_insert"
+							oneventlua="UIManager.GetInterface('webpanel'):HoNWebPanelF('ShowLadder2', self)"
+						>
+						</panel>
+						<if condition="!ui_webBrowser" >
+							<panel color="0 0 0 1" noclick="1"  >
+								<label x="2" y="2" font="dyn_10" color="1 1 1 1" shadow="true" content="Your client does not support this feature." noclick="1"  />
+							</panel>
+						</if>
+					</panel>
+				</panel>
+
+				<panel name="player_stats_mastery_parent" width="-4.3h" align="right" noclick="true" visible="false">
+					<panel name="web_browser_masteryladder" width="-1.0h" x="0.1h" y="-0.6h" height="-2.0h" noclick="1" align="left" valign="bottom">
+						<panel noclick="1" name="web_browser_masteryladder_insert"
+							   oneventlua="UIManager.GetInterface('webpanel'):HoNWebPanelF('ShowMasteryAllLadder', self)"
+						>
+						</panel>
+						<if condition="!ui_webBrowser" >
+							<panel color="0 0 0 1" noclick="1"  >
+								<label x="2" y="2" font="dyn_10" color="1 1 1 1" shadow="true" content="Your client does not support this feature." noclick="1"  />
+							</panel>
+						</if>
+						<!--
+						<instance name="button2" button_name="player_stats_mastery_showall_bt" label="player_stats_mastery_showall"
+							width="110i" height="25i" align="right" x="-160i" y="40i"
+							onclicklua="UIManager.GetInterface('webpanel'):HoNWebPanelF('ShowMasteryAllLadder', GetWidget('web_browser_masteryladder_insert'))" />
+						<instance name="button2" button_name="player_stats_mastery_showfriends_bt" label="player_stats_mastery_showfriends"
+							width="110i" height="25i" align="right" x="-40i" y="40i"
+							onclicklua="UIManager.GetInterface('webpanel'):HoNWebPanelF('ShowMasteryFriendsLadder', GetWidget('web_browser_masteryladder_insert'))" />
+						-->
+					</panel>
+				</panel>
+			</panel>
+
+			<panel width="2.0h" height="2.0h" align="right" y="2.2h" x="-4.4h" noclick="true">
+				<button
+					color="invisible"
+					onclick="PlaySound('/shared/sounds/ui/ccpanel/button_close_02.wav'); Set('_mainmenu_currentpanel', 'player_ladder'); CallEvent('MainMenuPanelSwitcher');"
+					onmouseover="PlaySound('/shared/sounds/ui/ccpanel/button_over_01.wav');"
+				>
+					<widgetstate statename="up">
+						<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.5h" color="#520000" blockinput="false" noclick="true"/>
+						<frame texture="/ui/frames/roundframe.tga" color="0 0 0 1" borderthickness="0.5h" blockinput="false" noclick="true"/>
+						<image width="1.3h" height="1.3h" align="center" valign="center" color=".75 .75 .75 1" texture="/ui/elements/closex.tga" noclick="true" />
+					</widgetstate>
+					<widgetstate statename="over">
+						<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.5h" color="#c50000" blockinput="false" noclick="true"/>
+						<frame texture="/ui/frames/roundframe.tga" color="0 0 0 1" borderthickness="0.5h" blockinput="false" noclick="true"/>
+						<image width="1.3h" height="1.3h" align="center" valign="center" color="1 1 1 1" texture="/ui/elements/closex.tga" noclick="true" />
+					</widgetstate>
+					<widgetstate statename="down" x="1" y="1">
+						<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.5h" color="#9c0000" blockinput="false" noclick="true"/>
+						<frame texture="/ui/frames/roundframe.tga" color="0 0 0 1" borderthickness="0.5h" blockinput="false" noclick="true"/>
+						<image width="1.3h" height="1.3h" align="center" valign="center" color="1 1 1 1" texture="/ui/elements/closex.tga" noclick="true" />
+					</widgetstate>
+				</button>
+			</panel>
+
+		</panel>
+
+	</template>
+
+</package>

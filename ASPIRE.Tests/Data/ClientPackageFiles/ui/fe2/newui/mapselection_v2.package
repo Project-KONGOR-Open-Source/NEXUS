@@ -1,0 +1,1015 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+	<lua file="/ui/scripts/newui/mapselection_v2.lua"/>
+
+	<template name="map_selection_region_item_template">
+		<panel name="map_selection_region_item_{id}" width="8.5h" height="40i" stickytoinvis="0" visible="0">
+			<image name="map_selection_region_item_{id}_line" texture="/ui/fe2/newui/res/common/hline.png" width="100%" height="1" align="center" valign="bottom" noclick="1"/>
+			<panel width="100@" height="100%" noclick="1">
+				<image name="map_selection_region_item_{id}_flag" texture="$invis" width="-14i" height="-14i" align="center" valign="center"  noclick="1"/>
+			</panel>	
+			<instance name="newui_checkbox_template" type="2" widget_name="map_selection_region_item_{id}_selection" onclicklua="MapSelection_V2:OnClickSelectRegion({id}) PlaySound('/shared/sounds/ui/revamp/region_click.wav')" width="-40i" align="right"
+					  unselectedupcolor="#f0d3c1" unselectedovercolor="#fff6f0" unselecteddisabledcolor="gray" selectedupcolor="#f0d3c1" selectedovercolor="#fff6f0" selecteddisabledcolor="gray"
+					  oversound="/shared/sounds/ui/revamp/region_hover.wav" font="dyn_11"
+			/>
+		</panel>
+	</template>
+
+	<template name="map_selection_item_gamemode_template">
+		<panel name="map_selection_{type}_item_gamemode_{index}_{mode}" width="100%" height="32i" visible="{visible=true}" stickytoinvis="false">
+			<image name="map_selection_{type}_item_gamemode_{index}_{mode}_line" texture="/ui/fe2/newui/res/common/line.png" y="2i" width="100%" height="2i" align="center" valign="bottom" noclick="1"/>
+			<button name="map_selection_{type}_item_gamemode_{index}_{mode}_selected"
+				    color="invisible" 
+					onclicklua="MapSelection_V2:OnSelectGameMode({index}, '{mode}', false)"
+			>
+				<widgetstate statename="up">
+					<image texture="/ui/fe2/newui/res/common/selected2_up.png" x="5i" width="32i" height="32i" align="left" valign="center" noclick="1"/>
+				</widgetstate>
+				<widgetstate statename="over">
+					<image texture="/ui/fe2/newui/res/common/selected2_over.png" x="5i" width="32i" height="32i" align="left" valign="center" noclick="1"/>
+				</widgetstate>
+				<widgetstate statename="down">
+					<image texture="/ui/fe2/newui/res/common/selected2_over.png" x="5i" width="32i" height="32i" align="left" valign="center" noclick="1"/>
+				</widgetstate>
+			</button>
+			<button name="map_selection_{type}_item_gamemode_{index}_{mode}_unselected"
+				    color="invisible" 
+					onclicklua="MapSelection_V2:OnSelectGameMode({index}, '{mode}', true)"
+			>
+				<widgetstate statename="up">
+					<image texture="/ui/fe2/newui/res/common/unselected2_up.png" x="5i" width="32i" height="32i" align="left" valign="center" noclick="1"/>
+				</widgetstate>
+				<widgetstate statename="over">
+					<image texture="/ui/fe2/newui/res/common/unselected2_over.png" x="5i" width="32i" height="32i" align="left" valign="center" noclick="1"/>
+				</widgetstate>
+				<widgetstate statename="down">
+					<image texture="/ui/fe2/newui/res/common/unselected2_over.png" x="5i" width="32i" height="32i" align="left" valign="center" noclick="1"/>
+				</widgetstate>
+			</button>
+
+			<label name="map_selection_{type}_item_gamemode_{index}_{mode}_text" x="45i" textalign="left" textvalign="center" font="dyn_12" color="#85695e" content="{label}" outline="1" outlinecolor="#241410" noclick="1"/>
+		</panel>
+	</template>
+
+	<template name="map_selection_gamemode_template">
+		<instance name="newui_checkbox_template" widget_name="{widget_name}_{mode}" type="2" height="32i" onclicklua="MapSelection_V2:OnSelectGameMode({index}, '{mode}', self:GetButtonState()==1) PlaySound('/shared/sounds/ui/revamp/mode_option_click.wav')" 
+			      content="{content}" font="dyn_11" stickytoinvis="0" visible="{visible=0}"
+				 unselectedupcolor="#7e6459" unselectedovercolor="#f0d3c1" unselecteddisabledcolor="#7e6459" selectedupcolor="#c4a693" selectedovercolor="#f0d3c1" selecteddisabledcolor="#c4a693"	 
+		/>
+	</template>
+
+	<template name="map_selection_gamemode_setting_template">
+		<panel name="{widget_name}" width="{width=100%}" height="96i">
+			<panel height="26i" noclick="1" grow="1" regrow="1" float="right">
+				<label font="{title_font=dyn_12}" color="#ad9281" textvalign="bottom" content="newui_mapselection_gamemode" noclick="1" 
+						onloadlua=" local text = Translate('newui_mapselection_gamemode')
+									local stringWidth = self:GetStringWidth(text)
+									self:SetWidth(stringWidth)
+					              "
+				/>
+				<panel width="2i" noclick="1"/>
+				<image name="{widget_name}_arrow" texture="/ui/fe2/newui/res/mapselection/arrow.png" width="16i" height="16i" valign="bottom" noclic="1"
+						onframelua="local value = (GetTime() % 800) /800 * math.pi
+									local alpha = math.abs(math.sin(value))
+									self:SetColor('1 1 1 '..alpha)
+									"
+				/>
+			</panel>
+			
+			<panel name="{widget_name}_clip" width="170i" align="right" valign="bottom">
+				<instance name="newui_custom_frame_template" widget_name="{widget_name}_bg" width="+10i" height="+10i" align="center" valign="center" alpha="0.9" visible="0"/>
+				
+				<!-- Disable clipping to allow for 3 game modes to show natively -->
+				<panel clip="0">
+					<panel name="{widget_name}_modes" width="-10i" align="center" valign="bottom" grow="1" regrow="1" growinvis="0" float="bottom">
+						<instance name="map_selection_gamemode_template" widget_name="{widget_name}" index="{index}" mode="bb" content="mainlobby_label_blindban" />
+						<instance name="map_selection_gamemode_template" widget_name="{widget_name}" index="{index}" mode="hb" content="mainlobby_label_heroban"/>
+						<instance name="map_selection_gamemode_template" widget_name="{widget_name}" index="{index}" mode="gt" content="mainlobby_label_gated"/>
+						<instance name="map_selection_gamemode_template" widget_name="{widget_name}" index="{index}" mode="apg" content="mainlobby_label_gated"/>
+						<instance name="map_selection_gamemode_template" widget_name="{widget_name}" index="{index}" mode="bbg" content="mainlobby_label_gated"/>
+						<instance name="map_selection_gamemode_template" widget_name="{widget_name}" index="{index}" mode="km" content="mainlobby_label_krosmode"/>
+						<instance name="map_selection_gamemode_template" widget_name="{widget_name}" index="{index}" mode="sd" content="mainlobby_label_single_draft"/>
+						<instance name="map_selection_gamemode_template" widget_name="{widget_name}" index="{index}" mode="bd" content="mainlobby_label_banning_draft"/>
+						<instance name="map_selection_gamemode_template" widget_name="{widget_name}" index="{index}" mode="bp" content="mainlobby_label_banning_pick"/>
+						<instance name="map_selection_gamemode_template" widget_name="{widget_name}" index="{index}" mode="br" content="mainlobby_label_balanced_random"/>
+						<instance name="map_selection_gamemode_template" widget_name="{widget_name}" index="{index}" mode="rd" content="mainlobby_label_random_draft"/>
+						<instance name="map_selection_gamemode_template" widget_name="{widget_name}" index="{index}" mode="apd" content="mainlobby_label_dupe_hero"/>
+						<instance name="map_selection_gamemode_template" widget_name="{widget_name}" index="{index}" mode="bbr" content="mainlobby_label_blind_ban_blitz"/>
+						<instance name="map_selection_gamemode_template" widget_name="{widget_name}" index="{index}" mode="bdr" content="mainlobby_label_banning_draft_blitz"/>
+						<instance name="map_selection_gamemode_template" widget_name="{widget_name}" index="{index}" mode="fp" content="mainlobby_label_force_pick"/>
+						<instance name="map_selection_gamemode_template" widget_name="{widget_name}" index="{index}" mode="sp" content="mainlobby_label_soccer_pick"/>
+						<instance name="map_selection_gamemode_template" widget_name="{widget_name}" index="{index}" mode="ss" content="mainlobby_label_solo_same"/>
+						<instance name="map_selection_gamemode_template" widget_name="{widget_name}" index="{index}" mode="sm" content="mainlobby_label_solo_diff"/>
+						<instance name="map_selection_gamemode_template" widget_name="{widget_name}" index="{index}" mode="mwb" content="mainlobby_label_midwars_beta"/>
+						<instance name="map_selection_gamemode_template" widget_name="{widget_name}" index="{index}" mode="lp" content="mainlobby_label_lockpick"/>
+						<instance name="map_selection_gamemode_template" widget_name="{widget_name}" index="{index}" mode="cm" content="mainlobby_label_captainsmode"/>	
+						<instance name="map_selection_gamemode_template" widget_name="{widget_name}" index="{index}" mode="ap" content="mainlobby_label_normal"/>
+						<instance name="map_selection_gamemode_template" widget_name="{widget_name}" index="{index}" mode="ar" content="mainlobby_label_all_random"/>
+						<instance name="map_selection_gamemode_template" widget_name="{widget_name}" index="{index}" mode="rb" content="mainlobby_label_reborn_playerhosted"/>
+						<button name="{widget_name}_cp" width="100%" height="64i" color="invisible" numstates="2" stickytoinvis="0" visible="0"
+								onclicklua="MapSelection_V2:OnSelectGameMode({index}, 'cp', self:GetButtonState()==1)"			
+						>
+							<widgetstate statename="up2">
+								<panel width="16i" height="16i" valign="top">
+									<image y="8i" texture="/ui/fe2/newui/res/common/selected2_up.png" width="32i" height="32i" align="center" valign="center" noclick="1"/>
+								</panel>
+								<label x="24i" y="5i" textalign="left" textvalign="top" font="dyn_11" color="#c4a693" noclick="1" content="newui_mapselection_counter_ban_pick"/>
+							</widgetstate>
+							<widgetstate statename="over2">
+								<panel width="16i" height="16i" valign="top">
+									<image y="8i" texture="/ui/fe2/newui/res/common/selected2_over.png" width="32i" height="32i" align="center" valign="center" noclick="1"/>
+								</panel>
+								<label x="24i" y="5i" textalign="left" textvalign="top" font="dyn_11" color="#f0d3c1" noclick="1" content="newui_mapselection_counter_ban_pick"/>
+							</widgetstate>
+							<widgetstate statename="down2">
+								<panel width="16i" height="16i" valign="top">
+									<image y="8i" texture="/ui/fe2/newui/res/common/selected2_over.png" width="32i" height="32i" align="center" valign="center" noclick="1"/>
+								</panel>
+								<label x="24i" y="5i" textalign="left" textvalign="top" font="dyn_11" color="#f0d3c1" noclick="1" content="newui_mapselection_counter_ban_pick"/>
+							</widgetstate>
+							<widgetstate statename="disabled2">
+								<panel width="16i" height="16i" valign="top">
+									<image y="8i" texture="/ui/fe2/newui/res/common/selected2_up.png" width="32i" height="32i" align="center" valign="center" noclick="1"/>
+								</panel>
+								<label x="24i" y="5i" textalign="left" textvalign="top" font="dyn_11" color="#c4a693" noclick="1" content="newui_mapselection_counter_ban_pick"/>
+							</widgetstate>
+						</button>
+					</panel>
+				</panel>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="map_selection_large_item_template">
+		<panel name="map_selection_large_item_{index}" x="{x}" width="287i" noclick="1" visible="0">
+			<panel name="map_selection_large_item_{index}_scale" width="{scale=100%}" height="{scale=100%}" align="center" valign="center"
+				ondoubleclicklua="MapSelection_V2:OnClickMap({index}) MapSelection_V2:OnStartGame()"
+			>
+				<panel noclick="1" width="178.4%" height="133.5%" align="center" valign="center">
+					<panel name="map_selection_large_item_{index}_selected" noclick="1" visible="0">
+						<image texture="/ui/fe2/newui/res/mapselection/selected_large.png" align="center" valign="center" noclick="1"/>
+						<modelpanel align="center" valign="center" noclick="true"
+								width="67.3%" height="89.89%"
+								model="/ui/fe2/newui/res/effects/287x767.mdf"
+								onshowlua="self:SetEffect('/ui/fe2/newui/res/effects/modelselection_l.effect')"
+								onhidelua="self:SetEffect('')"
+								modelpos="0 0 0"
+								modelscale="0.3"
+								modelangles="0 90 0"
+								cameradistance="30"
+								camerapos="0 500 0"
+								cameraangles="0 90 180"
+								camerafov="7"
+								cameranear="100.0"
+								camerafar="20000.0"
+								depthclear="true"
+								depthcompress="false"
+								sunazimuth="120"
+								sunaltitude="20"
+								suncolor="1 1 1"
+								ambientcolor="1 1 1"
+								scenebuffer="true"
+								lookat="false"
+								visible="true"
+						/>
+					</panel>
+					<image name="map_selection_large_item_{index}_mapimg" texture="$invis"  align="center" valign="center" noclick="1"/>
+					<image name="map_selection_large_item_{index}_mask1" texture="/ui/fe2/newui/res/mapselection/mask.png" align="center" valign="center" noclick="1"/>
+					
+					<image name="map_selection_large_item_{index}_mapname" texture="$invis" align="center" valign="center" noclick="1"/>
+					
+					<!-- CoN Season Info button -->
+					<button name="map_selection_large_item_{index}_conreward" color="invisible" x="-25%" y="14%" align="right" width="4@" height="4%"
+							noclick="1"
+							onmouseoverlua="PlaySound('/shared/sounds/ui/revamp/region_hover.wav') Common_V2:ShowSimpleTip(true, 'newui_mapselection_con_rewards', '200i')"
+							onmouseoutlua="Common_V2:ShowSimpleTip(false)"
+							onclicklua="PlaySound('/shared/sounds/ui/revamp/region_click.wav') MapSelection_V2:OnClickConRewards()"
+					>
+						<!-- Disabled until further notice -->
+						
+						<!--
+						<widgetstate statename="up">
+							<image texture="/ui/fe2/newui/res/mapselection/conreward_up.png" align="center" valign="center" noclick="1"/>
+						</widgetstate>
+						<widgetstate statename="over">
+							<image texture="/ui/fe2/newui/res/mapselection/conreward_over.png" align="center" valign="center" noclick="1"/>
+						</widgetstate>
+						<widgetstate statename="down" x="1" y="1">
+							<image texture="/ui/fe2/newui/res/mapselection/conreward_over.png" align="center" valign="center" noclick="1"/>
+						</widgetstate>
+						-->
+					</button>
+
+					<button name="map_selection_large_item_{index}_mapinfo" color="invisible" x="25%" y="14%" width="4@" height="4%"
+							onmouseoverlua="PlaySound('/shared/sounds/ui/revamp/region_hover.wav') Common_V2:ShowSimpleTip(true, 'newui_mapselection_map_info', '200i')"
+							onmouseoutlua="Common_V2:ShowSimpleTip(false)"
+							onclicklua="PlaySound('/shared/sounds/ui/revamp/region_click.wav') MapSelection_V2:OnClickMapInfo()"
+					>
+						<widgetstate statename="up">
+							<image texture="/ui/fe2/newui/res/mapselection/mapinfo_up.png" align="center" valign="center" noclick="1"/>
+						</widgetstate>
+						<widgetstate statename="over">
+							<image texture="/ui/fe2/newui/res/mapselection/mapinfo_over.png" align="center" valign="center" noclick="1"/>
+						</widgetstate>
+						<widgetstate statename="down" x="1" y="1">
+							<image texture="/ui/fe2/newui/res/mapselection/mapinfo_over.png" align="center" valign="center" noclick="1"/>
+						</widgetstate>
+					</button>
+				</panel>
+				
+				<panel name="map_selection_large_item_{index}_scale_con" noclick="1">
+					<panel name="map_selection_large_item_{index}_scale_con_norank" width="66.75@" height="66.75%" y="-17.6%" align="center" valign="center" noclick="1" visible="0">
+						<image texture="/ui/fe2/newui/res/mapselection/mapimage_large_con/n_bg.png" noclick="1"/>
+						<image name="map_selection_large_item_{index}_scale_con_norank_game2" texture="/ui/fe2/newui/res/mapselection/mapimage_large_con/n_1.png" noclick="1" visible="0"/>
+						<image name="map_selection_large_item_{index}_scale_con_norank_game3" texture="/ui/fe2/newui/res/mapselection/mapimage_large_con/n_2.png" noclick="1" visible="0"/>
+						<image name="map_selection_large_item_{index}_scale_con_norank_game4" texture="/ui/fe2/newui/res/mapselection/mapimage_large_con/n_3.png" noclick="1" visible="0"/>
+						<image name="map_selection_large_item_{index}_scale_con_norank_game5" texture="/ui/fe2/newui/res/mapselection/mapimage_large_con/n_4.png" noclick="1" visible="0"/>
+						<image name="map_selection_large_item_{index}_scale_con_norank_game6" texture="/ui/fe2/newui/res/mapselection/mapimage_large_con/n_5.png" noclick="1" visible="0"/>
+						<image name="map_selection_large_item_{index}_scale_con_norank_result1" texture="/ui/fe2/newui/res/mapselection/mapimage_large_con/no_1.png" noclick="1"/>
+						<image name="map_selection_large_item_{index}_scale_con_norank_result2" texture="/ui/fe2/newui/res/mapselection/mapimage_large_con/no_2.png" noclick="1"/>
+						<image name="map_selection_large_item_{index}_scale_con_norank_result3" texture="/ui/fe2/newui/res/mapselection/mapimage_large_con/no_3.png" noclick="1"/>
+						<image name="map_selection_large_item_{index}_scale_con_norank_result4" texture="/ui/fe2/newui/res/mapselection/mapimage_large_con/no_4.png" noclick="1"/>
+						<image name="map_selection_large_item_{index}_scale_con_norank_result5" texture="/ui/fe2/newui/res/mapselection/mapimage_large_con/no_5.png" noclick="1"/>
+						<image name="map_selection_large_item_{index}_scale_con_norank_result6" texture="/ui/fe2/newui/res/mapselection/mapimage_large_con/no_6.png" noclick="1"/>
+					</panel>
+
+					<if condition="!cl_GarenaEnable">
+						<image name="map_selection_large_item_{index}_scale_con_rankinfobg" texture="/ui/fe2/newui/res/mapselection/con_naeu_large_bg.png" width="178.4%" height="1024i" align="center" valign="center" noclick="1"/>
+					</if>
+					<if condition="cl_GarenaEnable">
+						<image name="map_selection_large_item_{index}_scale_con_rankinfobg" texture="/ui/fe2/newui/res/mapselection/con_large_bg.png" width="178.4%" height="1024i" align="center" valign="center" noclick="1"/>
+					</if>
+				</panel>
+
+				<panel noclick="1" watch="ChatServerMapSettingPhaseEndTime" ontriggerlua="self:SetVisible(param == '-1')">
+					<image name="map_selection_large_item_{index}_mapname_bg" texture="/ui/fe2/newui/res/mapselection/mapname_large_bg.png" width="178.4%" height="1024i" align="center" valign="center" noclick="1"/>
+				</panel>
+				<panel noclick="1" watch="ChatServerMapSettingPhaseEndTime" ontriggerlua="self:SetVisible(param ~= '-1')">
+					<image name="map_selection_large_item_{index}_mapname_bg2" texture="/ui/fe2/newui/res/mapselection/mapname_large_bg2.png" width="178.4%" height="1024i" align="center" valign="center" noclick="1"/>
+				</panel>
+
+				<panel y="85%" width="250i" height="18%" align="center" noclick="1">
+					<instance name="map_selection_gamemode_setting_template" widget_name="map_selection_large_item_{index}_gamemodes" index="{index}"/>
+
+					<panel name="map_selection_large_item_{index}_botsetting" height="28i" noclick="1" visible="0">
+						<label font="dyn_12" color="#ad9281" textvalign="center" content="newui_mapselection_botdifficulty" noclick="1"/>
+						<instance name="newui_combobox_template" widgetname="map_selection_large_item_{index}_botsetting_combobox" width="120i" align="right" itemheight="28i"
+								  onloadlua="self:AddTemplateListItem('newui_combobox_item_template', '0', 'label', 'newui_mapselection_botdifficulty_easy', 'color', '#7e6459', 'font', 'dyn_11')
+				  					 	     self:AddTemplateListItem('newui_combobox_item_template', '1', 'label', 'newui_mapselection_botdifficulty_medium', 'color', '#7e6459', 'font', 'dyn_11')
+				  					 	     self:AddTemplateListItem('newui_combobox_item_template', '2', 'label', 'newui_mapselection_botdifficulty_hard', 'color', '#7e6459', 'font', 'dyn_11')"
+				  				  onselectlua="MapSelection_V2:OnSelectBotSetting({index}, self:GetValue())"
+				  				  onfocuslua="GetWidget('map_selection_large_item_{index}_botsetting'):BringToFront()"
+				  		/>
+					</panel>
+
+					<panel name="map_selection_large_item_{index}_gametype" height="28i" noclick="1" visible="0">
+						<label font="dyn_12" color="#ad9281" textvalign="center" content="newui_mapselection_gameoptions" noclick="1"/>
+						<instance name="newui_combobox_template" widgetname="map_selection_large_item_{index}_gametype_combobox" width="165i" align="right" itemheight="28i"
+				  				  onselectlua="MapSelection_V2:OnSelectGameType({index}, self:GetValue())"
+				  				  onfocuslua="GetWidget('map_selection_large_item_{index}_gametype'):BringToFront()"
+				  		/>
+					</panel>
+
+					<panel name="map_selection_large_item_{index}_fillbots" height="28" noclick="1" visible="0">
+						<panel name="map_selection_large_item_{index}_fillbots_groupfilter" noclick="1">
+							<label font="dyn_12" color="#ad9281" textvalign="center" content="newui_mapselection_gameoptions" noclick="1"/>
+							<instance name="newui_checkbox_template" widget_name="map_selection_large_item_{index}_fillbots_select" type="2" height="32i" x="75i"
+									  content="newui_mapselection_fillbots" font="dyn_11" onclicklua="PlaySound('/shared/sounds/ui/revamp/mode_option_click.wav') MapSelection_V2:OnClickSetFillBots({index})" 
+					                  unselectedupcolor="#7e6459" unselectedovercolor="#f0d3c1" unselecteddisabledcolor="#7e6459" selectedupcolor="#c4a693" selectedovercolor="#f0d3c1" selecteddisabledcolor="#c4a693"	 
+							/>
+						</panel>
+					</panel>
+				</panel>
+				
+				<panel name="map_selection_large_item_{index}_mask" clickthru="1"
+						onmouseldownlua="MapSelection_V2:OnClickMap({index}) PlaySound('/shared/sounds/ui/button_click_03.wav')"
+						onmouseoverlua="MapSelection_V2:OnHoverMap({index}, true) PlaySound('/shared/sounds/ui/button_over_01.wav')"
+				   		onmouseoutlua="MapSelection_V2:OnHoverMap({index}, false)">
+				</panel>
+
+				<image name="map_selection_large_item_{index}_group_mask" texture="/ui/fe2/newui/res/mapselection/group_mask_large.png" width="178.4%" height="133.5%" align="center" valign="center" visible="0"/>
+
+			</panel>	
+
+			<panel name="map_selection_large_item_{index}_noscale" noclick="1">
+				<label name="map_selection_large_item_{index}_mapname_text" y="90i" font="dyn_14" height="55i" width="270i" align="center" valign="center" textalign="right" textvalign="center" color="#ffe2d0" outline="1" outlinecolor="#4d1705" noclick="1"/>
+
+				<label name="map_selection_large_item_{index}_mapname_text2" y="125i" font="dyn_10" height="55i" width="270i" align="center" valign="center" textalign="right" textvalign="center" color="#ffe2d0" outline="1" outlinecolor="#4d1705" noclick="1" 
+						watch="ChatServerMapSettingPhaseEndTime"
+						ontriggerlua="local str = ''
+									  if param ~= '-1' then
+									  	str = Translate('newui_mapselection_phaseendtime', 
+									  					'year', param0,
+									  					'month', param1,
+									  					'day', param2,
+									  					'hour', string.format('%02d', tonumber(param3)),
+									  					'min', string.format('%02d', tonumber(param4))
+									  					)
+									  end
+									  self:SetText(str)
+						"
+				/>
+
+				<panel name="map_selection_large_item_{index}_noscale_con" noclick="1" y="90i" height="55i" width="270i" align="center" valign="center">
+					<if condition="!cl_GarenaEnable">
+						<panel width="50%" noclick="1">
+							<label y="-15i" font="dyn_11" valign="center" textalign="center" textvalign="center" content="newui_mapselection_wins" color="#ac9181" outline="1" outlinecolor="#230000" noclick="1"/>
+							<label name="map_selection_large_item_{index}_noscale_con_wins" y="10i" font="dyn_12" valign="center" textalign="center" textvalign="center" content="-" color="#e9d1b7" outline="1" outlinecolor="#230000" noclick="1"/>
+						</panel>
+						<panel width="50%" align="right" noclick="1">
+							<label y="-15i" font="dyn_11" valign="center" textalign="center" textvalign="center" content="newui_mapselection_losses" color="#ac9181" outline="1" outlinecolor="#230000" noclick="1"/>
+							<label name="map_selection_large_item_{index}_noscale_con_losses" y="10i" font="dyn_12" valign="center" textalign="center" textvalign="center" content="-" color="#e9d1b7" outline="1" outlinecolor="#230000" noclick="1"/>
+						</panel>
+						<panel width="33.3%" align="right" noclick="1" visible="0">
+							<label y="-15i" font="dyn_11" valign="center" textalign="center" textvalign="center" content="newui_mapselection_winstreaks" color="#ac9181" outline="1" outlinecolor="#230000" noclick="1"/>
+							<label name="map_selection_large_item_{index}_noscale_con_winstreaks" y="10i" font="dyn_12" valign="center" textalign="center" textvalign="center" content="-" color="#e9d1b7" outline="1" outlinecolor="#230000" noclick="1"/>
+						</panel>
+						<panel noclick="1" height="30i" y="33i" align="center" valign="bottom">
+							<label name="map_selection_large_item_{index}_noscale_con_rating" align="center" valign="center" textalign="center" textvalign="center" font="dyn_11" color="#ac9181" content="MMR: ---" />
+						</panel>
+					</if>
+					<if condition="cl_GarenaEnable">
+						<panel width="33.3%" noclick="1">
+							<label y="-15i" font="dyn_11" valign="center" textalign="center" textvalign="center" content="newui_mapselection_wins" color="#ac9181" outline="1" outlinecolor="#230000" noclick="1"/>
+							<label name="map_selection_large_item_{index}_noscale_con_wins" y="10i" font="dyn_12" valign="center" textalign="center" textvalign="center" content="-" color="#e9d1b7" outline="1" outlinecolor="#230000" noclick="1"/>
+						</panel>
+						<panel width="33.3%" align="center" noclick="1">
+							<label y="-15i" font="dyn_11" valign="center" textalign="center" textvalign="center" content="newui_mapselection_losses" color="#ac9181" outline="1" outlinecolor="#230000" noclick="1"/>
+							<label name="map_selection_large_item_{index}_noscale_con_losses" y="10i" font="dyn_12" valign="center" textalign="center" textvalign="center" content="-" color="#e9d1b7" outline="1" outlinecolor="#230000" noclick="1"/>
+						</panel>
+						<panel width="33.3%" align="right" noclick="1">
+							<label y="-15i" font="dyn_11" valign="center" textalign="center" textvalign="center" content="newui_mapselection_winstreaks" color="#ac9181" outline="1" outlinecolor="#230000" noclick="1"/>
+							<label name="map_selection_large_item_{index}_noscale_con_winstreaks" y="10i" font="dyn_12" valign="center" textalign="center" textvalign="center" content="-" color="#e9d1b7" outline="1" outlinecolor="#230000" noclick="1"/>
+						</panel>
+					</if>
+				</panel>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="map_selection_small_item_template">
+		<panel name="map_selection_small_item_{index}" x="{x}" width="250i" noclick="1" visible="0">
+			<panel name="map_selection_small_item_{index}_scale" width="{scale=100%}" height="{scale=100%}" align="center" valign="center"
+				ondoubleclicklua="MapSelection_V2:OnClickMap({index}) MapSelection_V2:OnStartGame()"
+			>
+				<panel noclick="1" width="102.4%" height="133.5%" align="center" valign="center">
+					<panel name="map_selection_small_item_{index}_selected" noclick="1" visible="0">
+						<image texture="/ui/fe2/newui/res/mapselection/selected_small.png" width="200%" height="100%" align="center" valign="center" noclick="1"/>
+						<modelpanel align="center" valign="center" noclick="true"
+								width="130%" height="120%"
+								model="/ui/fe2/newui/res/effects/246x767.mdf"
+								onshowlua="self:SetEffect('/ui/fe2/newui/res/effects/modelselection_s.effect')"
+								onhidelua="self:SetEffect('')"
+								modelpos="0 0 0"
+								modelscale="0.3"
+								modelangles="0 90 0"
+								cameradistance="30"
+								camerapos="0 500 0"
+								cameraangles="0 90 180"
+								camerafov="7"
+								cameranear="100.0"
+								camerafar="20000.0"
+								depthclear="true"
+								depthcompress="false"
+								sunazimuth="120"
+								sunaltitude="20"
+								suncolor="1 1 1"
+								ambientcolor="1 1 1"
+								scenebuffer="true"
+								lookat="false"
+								visible="true"
+						/>
+					</panel>
+					<image name="map_selection_small_item_{index}_mapimg" texture="$invis"  align="center" valign="center" noclick="1"/>
+					<image name="map_selection_small_item_{index}_mask1" texture="$invis" align="center" valign="center" noclick="1"/>
+					<image name="map_selection_small_item_{index}_mapname" texture="$invis" align="center" valign="center" noclick="1"/>
+					<button name="map_selection_small_item_{index}_conreward" color="invisible" x="-6%" y="14%" align="right" width="4@" height="4%"
+							onmouseoverlua="PlaySound('/shared/sounds/ui/revamp/region_hover.wav') Common_V2:ShowSimpleTip(true, 'newui_mapselection_con_rewards', '200i')"
+							onmouseoutlua="Common_V2:ShowSimpleTip(false)"
+							onclicklua="PlaySound('/shared/sounds/ui/revamp/region_click.wav') MapSelection_V2:OnClickConRewards()"
+					>
+						<widgetstate statename="up">
+							<image texture="/ui/fe2/newui/res/mapselection/conreward_up.png" align="center" valign="center" noclick="1"/>
+						</widgetstate>
+						<widgetstate statename="over">
+							<image texture="/ui/fe2/newui/res/mapselection/conreward_over.png" align="center" valign="center" noclick="1"/>
+						</widgetstate>
+						<widgetstate statename="down" x="1" y="1">
+							<image texture="/ui/fe2/newui/res/mapselection/conreward_over.png" align="center" valign="center" noclick="1"/>
+						</widgetstate>
+					</button>
+
+					<button name="map_selection_small_item_{index}_mapinfo" color="invisible" x="6%" y="14%" width="4@" height="4%"
+							onmouseoverlua="PlaySound('/shared/sounds/ui/revamp/region_hover.wav') Common_V2:ShowSimpleTip(true, 'newui_mapselection_map_info', '200i')"
+							onmouseoutlua="Common_V2:ShowSimpleTip(false)"
+							onclicklua="PlaySound('/shared/sounds/ui/revamp/region_click.wav') MapSelection_V2:OnClickMapInfo()"
+					>
+						<widgetstate statename="up">
+							<image texture="/ui/fe2/newui/res/mapselection/mapinfo_up.png" align="center" valign="center" noclick="1"/>
+						</widgetstate>
+						<widgetstate statename="over">
+							<image texture="/ui/fe2/newui/res/mapselection/mapinfo_over.png" align="center" valign="center" noclick="1"/>
+						</widgetstate>
+						<widgetstate statename="down" x="1" y="1">
+							<image texture="/ui/fe2/newui/res/mapselection/mapinfo_over.png" align="center" valign="center" noclick="1"/>
+						</widgetstate>
+					</button>
+				</panel>
+				
+				<panel name="map_selection_small_item_{index}_scale_con" noclick="1">
+					<panel name="map_selection_small_item_{index}_scale_con_norank" width="33.38@" height="33.38%" y="-17.6%" align="center" valign="center" noclick="1" visible="0">
+						<image texture="/ui/fe2/newui/res/mapselection/mapimage_small_con/n_bg.png" noclick="1"/>
+						<image name="map_selection_small_item_{index}_scale_con_norank_game2" texture="/ui/fe2/newui/res/mapselection/mapimage_small_con/n_1.png" noclick="1" visible="0"/>
+						<image name="map_selection_small_item_{index}_scale_con_norank_game3" texture="/ui/fe2/newui/res/mapselection/mapimage_small_con/n_2.png" noclick="1" visible="0"/>
+						<image name="map_selection_small_item_{index}_scale_con_norank_game4" texture="/ui/fe2/newui/res/mapselection/mapimage_small_con/n_3.png" noclick="1" visible="0"/>
+						<image name="map_selection_small_item_{index}_scale_con_norank_game5" texture="/ui/fe2/newui/res/mapselection/mapimage_small_con/n_4.png" noclick="1" visible="0"/>
+						<image name="map_selection_small_item_{index}_scale_con_norank_game6" texture="/ui/fe2/newui/res/mapselection/mapimage_small_con/n_5.png" noclick="1" visible="0"/>
+						<image name="map_selection_small_item_{index}_scale_con_norank_result1" texture="/ui/fe2/newui/res/mapselection/mapimage_small_con/no_1.png" noclick="1"/>
+						<image name="map_selection_small_item_{index}_scale_con_norank_result2" texture="/ui/fe2/newui/res/mapselection/mapimage_small_con/no_2.png" noclick="1"/>
+						<image name="map_selection_small_item_{index}_scale_con_norank_result3" texture="/ui/fe2/newui/res/mapselection/mapimage_small_con/no_3.png" noclick="1"/>
+						<image name="map_selection_small_item_{index}_scale_con_norank_result4" texture="/ui/fe2/newui/res/mapselection/mapimage_small_con/no_4.png" noclick="1"/>
+						<image name="map_selection_small_item_{index}_scale_con_norank_result5" texture="/ui/fe2/newui/res/mapselection/mapimage_small_con/no_5.png" noclick="1"/>
+						<image name="map_selection_small_item_{index}_scale_con_norank_result6" texture="/ui/fe2/newui/res/mapselection/mapimage_small_con/no_6.png" noclick="1"/>
+					</panel>
+
+					<if condition="!cl_GarenaEnable">
+						<image name="map_selection_small_item_{index}_scale_con_rankinfobg" texture="/ui/fe2/newui/res/mapselection/con_naeu_small_bg.png" width="102.4%" height="1024i" align="center" valign="center" noclick="1"/>
+					</if>
+					<if condition="cl_GarenaEnable">
+						<image name="map_selection_small_item_{index}_scale_con_rankinfobg" texture="/ui/fe2/newui/res/mapselection/con_small_bg.png" width="102.4%" height="1024i" align="center" valign="center" noclick="1"/>
+					</if>
+				</panel>
+
+				<panel noclick="1" watch="ChatServerMapSettingPhaseEndTime" ontriggerlua="self:SetVisible(param == '-1')">
+					<image name="map_selection_small_item_{index}_mapname_bg" texture="/ui/fe2/newui/res/mapselection/mapname_small_bg.png" width="102.4%" height="1024i" align="center" valign="center" noclick="1"/>
+				</panel>
+				<panel noclick="1" watch="ChatServerMapSettingPhaseEndTime" ontriggerlua="self:SetVisible(param ~= '-1')">
+					<image name="map_selection_small_item_{index}_mapname_bg2" texture="/ui/fe2/newui/res/mapselection/mapname_small_bg2.png" width="102.4%" height="1024i" align="center" valign="center" noclick="1"/>
+				</panel>
+
+
+				<panel y="85%" width="230i" height="18%" align="center" noclick="1">
+					<instance name="map_selection_gamemode_setting_template" widget_name="map_selection_small_item_{index}_gamemodes" index="{index}" title_font="dyn_11"/>
+
+					<panel name="map_selection_small_item_{index}_botsetting" height="28i" noclick="1" visible="0">
+						<label font="dyn_11" color="#ad9281" textvalign="center" content="newui_mapselection_botdifficulty" noclick="1"/>
+						<instance name="newui_combobox_template" widgetname="map_selection_small_item_{index}_botsetting_combobox" width="120i" align="right" itemheight="28i"
+								  onloadlua="self:AddTemplateListItem('newui_combobox_item_template', '0', 'label', 'newui_mapselection_botdifficulty_easy', 'color', '#7e6459', 'font', 'dyn_11')
+				  					 	     self:AddTemplateListItem('newui_combobox_item_template', '1', 'label', 'newui_mapselection_botdifficulty_medium', 'color', '#7e6459', 'font', 'dyn_11')
+				  					 	     self:AddTemplateListItem('newui_combobox_item_template', '2', 'label', 'newui_mapselection_botdifficulty_hard', 'color', '#7e6459', 'font', 'dyn_11')"
+				  				  onselectlua="MapSelection_V2:OnSelectBotSetting({index}, self:GetValue()) "
+				  				  onfocuslua="GetWidget('map_selection_small_item_{index}_botsetting'):BringToFront()"
+				  		/>
+					</panel>
+
+					<panel name="map_selection_small_item_{index}_gametype" height="28i" noclick="1" visible="0">
+						<label font="dyn_11" color="#ad9281" textvalign="center" content="newui_mapselection_gameoptions" noclick="1"/>
+						<instance name="newui_combobox_template" widgetname="map_selection_small_item_{index}_gametype_combobox" width="165i" align="right" itemheight="28i"
+				  				  onselectlua="MapSelection_V2:OnSelectGameType({index}, self:GetValue())"
+				  				  onfocuslua="GetWidget('map_selection_small_item_{index}_gametype'):BringToFront()"
+				  		/>
+					</panel>
+
+					<panel name="map_selection_small_item_{index}_fillbots" height="28" noclick="1" visible="0">
+						<panel name="map_selection_small_item_{index}_fillbots_groupfilter" noclick="1">
+							<label font="dyn_12" color="#ad9281" textvalign="center" y="-3i" content="newui_mapselection_gameoptions" noclick="1"/>
+							<instance name="newui_checkbox_template" widget_name="map_selection_small_item_{index}_fillbots_select" type="2" height="32i" x="75i"
+									  content="newui_mapselection_fillbots" font="dyn_11" onclicklua="PlaySound('/shared/sounds/ui/revamp/mode_option_click.wav') MapSelection_V2:OnClickSetFillBots({index})" 
+					                  unselectedupcolor="#7e6459" unselectedovercolor="#f0d3c1" unselecteddisabledcolor="#7e6459" selectedupcolor="#c4a693" selectedovercolor="#f0d3c1" selecteddisabledcolor="#c4a693"	 
+							/>
+						</panel>
+					</panel>
+				</panel>
+				
+				<panel name="map_selection_small_item_{index}_mask" clickthru="1"
+						onmouseldownlua="MapSelection_V2:OnClickMap({index}) PlaySound('/shared/sounds/ui/button_click_03.wav')"
+						onmouseoverlua="MapSelection_V2:OnHoverMap({index}, true) PlaySound('/shared/sounds/ui/button_over_01.wav')"
+				   		onmouseoutlua="MapSelection_V2:OnHoverMap({index}, false)">
+				</panel>
+
+				<image name="map_selection_small_item_{index}_group_mask" texture="/ui/fe2/newui/res/mapselection/group_mask_small.png" width="204.8%" height="133.5%" align="center" valign="center" visible="0"/>
+			</panel>	
+
+			<panel name="map_selection_small_item_{index}_noscale" noclick="1">
+				<label name="map_selection_small_item_{index}_mapname_text" y="75i" font="dyn_14" height="55i" width="230i" align="center" valign="center" textalign="right" textvalign="center" color="#ffe2d0" outline="1" outlinecolor="#4d1705" noclick="1"/>
+
+				<label name="map_selection_small_item_{index}_mapname_text2" y="125i" font="dyn_10" height="55i" width="270i" align="center" valign="center" textalign="right" textvalign="center" color="#ffe2d0" outline="1" outlinecolor="#4d1705" noclick="1" 
+						watch="ChatServerMapSettingPhaseEndTime"
+						ontriggerlua="local str = ''
+									  if param ~= '-1' then
+									  	str = Translate('newui_mapselection_phaseendtime', 
+									  					'year', param0,
+									  					'month', param1,
+									  					'day', param2,
+									  					'hour', string.format('%02d', tonumber(param3)),
+									  					'min', string.format('%02d', tonumber(param4))
+									  					)
+									  end
+									  self:SetText(str)
+						"
+				/>
+
+
+				<if condition="!cl_GarenaEnable">
+					<panel name="map_selection_small_item_{index}_noscale_con" noclick="1" y="75i" height="55i" width="230i" align="center" valign="center">
+						<panel width="50%" noclick="1">
+							<label y="-15i" font="dyn_11" valign="center" textalign="center" textvalign="center" content="newui_mapselection_wins" color="#ac9181" outline="1" outlinecolor="#230000" noclick="1"/>
+							<label name="map_selection_small_item_{index}_noscale_con_wins" y="10i" font="dyn_12" valign="center" textalign="center" textvalign="center" content="-" color="#e9d1b7" outline="1" outlinecolor="#230000" noclick="1"/>
+						</panel>
+						<panel width="50%" align="right" noclick="1">
+							<label y="-15i" font="dyn_11" valign="center" textalign="center" textvalign="center" content="newui_mapselection_losses" color="#ac9181" outline="1" outlinecolor="#230000" noclick="1"/>
+							<label name="map_selection_small_item_{index}_noscale_con_losses" y="10i" font="dyn_12" valign="center" textalign="center" textvalign="center" content="-" color="#e9d1b7" outline="1" outlinecolor="#230000" noclick="1"/>
+						</panel>
+						<panel width="33.3%" align="right" noclick="1" visible="0">
+							<label y="-15i" font="dyn_10" valign="center" textalign="center" textvalign="center" content="newui_mapselection_winstreaks" color="#ac9181" outline="1" outlinecolor="#230000" noclick="1"/>
+							<label name="map_selection_small_item_{index}_noscale_con_winstreaks" y="10i" font="dyn_12" valign="center" textalign="center" textvalign="center" content="-" color="#e9d1b7" outline="1" outlinecolor="#230000" noclick="1"/>
+						</panel>
+					</panel>
+				</if>
+
+				<if condition="cl_GarenaEnable">
+					<panel name="map_selection_small_item_{index}_noscale_con" noclick="1" y="75i" height="55i" width="230i" align="center" valign="center">
+						<panel width="33.3%" noclick="1">
+							<label y="-15i" font="dyn_11" valign="center" textalign="center" textvalign="center" content="newui_mapselection_wins" color="#ac9181" outline="1" outlinecolor="#230000" noclick="1"/>
+							<label name="map_selection_small_item_{index}_noscale_con_wins" y="10i" font="dyn_12" valign="center" textalign="center" textvalign="center" content="-" color="#e9d1b7" outline="1" outlinecolor="#230000" noclick="1"/>
+						</panel>
+						<panel width="33.3%" align="center" noclick="1">
+							<label y="-15i" font="dyn_11" valign="center" textalign="center" textvalign="center" content="newui_mapselection_losses" color="#ac9181" outline="1" outlinecolor="#230000" noclick="1"/>
+							<label name="map_selection_small_item_{index}_noscale_con_losses" y="10i" font="dyn_12" valign="center" textalign="center" textvalign="center" content="-" color="#e9d1b7" outline="1" outlinecolor="#230000" noclick="1"/>
+						</panel>
+						<panel width="33.3%" align="right" noclick="1">
+							<label y="-15i" font="dyn_10" valign="center" textalign="center" textvalign="center" content="newui_mapselection_winstreaks" color="#ac9181" outline="1" outlinecolor="#230000" noclick="1"/>
+							<label name="map_selection_small_item_{index}_noscale_con_winstreaks" y="10i" font="dyn_12" valign="center" textalign="center" textvalign="center" content="-" color="#e9d1b7" outline="1" outlinecolor="#230000" noclick="1"/>
+						</panel>
+					</panel>
+				</if>
+			</panel>
+		</panel>
+	</template>
+    	
+    <!-- CoN Rewards Info -->
+    <template name="map_selection_popup_con_info_template">
+    	<panel name="map_selection_popup_con_info_parent" height="800i" noclick="1"/>
+    </template>
+
+    <!-- Season Rewards -->
+	<template name="map_selection_popup_con_rewards_item_template">
+		<panel name="map_selection_popup_con_rewards_item{id}" x="{x}" y="{y}" width="50%" height="50%">
+			<image name="map_selection_popup_con_rewards_item{id}_icon" width="80@" height="80%" valign="center" texture="$invis" />
+			<panel x="100@" width="80%" align="left" valign="center" >
+				<label name="map_selection_popup_con_rewards_item{id}_text" font="dyn_12" textvalign="center" textalign="left" noclick="true" color="#dfdfdf" content="-"/>
+			</panel>
+		</panel>
+	</template>
+
+    <template name="map_selection_popup_con_rewards_template">
+    	<panel name="map_selection_popup_con_rewards" color="0 0 0 0.8" visible="0" onframelua="MapSelection_V2:OnConRewardPopupFrame()">
+			<effectpanel  name="map_selection_popup_con_rewards_effect"
+						  camerawidth="100a"
+			              cameraheight="100"
+			              noclick="true"
+			              onloadlua="self:StartEffect('/ui/fe2/season/effects/popup_back_1.effect', 0.5, 0.5, '1 1 1', 1)"
+			              visible="1"
+			/>
+			<panel name="map_selection_popup_con_rewards_levelup_anim" align="center" valign="center" width="96h" height="96h">
+				<image x="1%" y="14%" align="center" width="100%" height="12.5%" texture="/ui/fe2/season/season_reward.tga" noclick="1"/>
+
+				<panel y="-5%" width="45%" height="45@" align="center" valign="center">
+					<image name="map_selection_popup_con_rewards_icon" texture="$invis" />
+				</panel>
+				<panel y="20%" width="50%" height="6%" align="center" valign="center">
+					<label name="map_selection_popup_con_rewards_tips" font="dyn_12" wrap="1" textvalign="center" textalign="left" noclick="true" color="#dfdfdf" content="-"/>
+				</panel>
+				<panel y="24%" width="50%" height="1" align="center" valign="center" color="1 1 1 .5" />
+				<panel y="26%" width="50%" height="2%" align="center" valign="center" >
+					<label font="dyn_12" textvalign="center" textalign="left" noclick="true" color="white" content="season_rewards_youwillget"/>
+				</panel>
+				<panel y="33%" width="50%" height="10%" align="center" valign="center">
+					<instance name="map_selection_popup_con_rewards_item_template" id="1"/>
+					<instance name="map_selection_popup_con_rewards_item_template" id="2" x="50%"/>
+					<instance name="map_selection_popup_con_rewards_item_template" id="3" y="50%"/>
+					<instance name="map_selection_popup_con_rewards_item_template" id="4" x="50%" y="50%"/>
+					<instance name="map_selection_popup_con_rewards_item_template" id="5" y="100%"/>
+					<instance name="map_selection_popup_con_rewards_item_template" id="6" x="50%" y="100%"/>
+				</panel>
+
+				<instance name="newui_button_close_template" button_name="{id}_close" x="-19%" y="16%" align="right" valign="top" 
+						onclicklua="MapSelection_V2.popupTimer = GetTime()
+							    	MapSelection_V2.popupShow = false
+							   	 	GetWidget('map_selection_popup_con_rewards'):FadeOut(200)"
+				/>
+
+				<instance name="newui_common_button_2_template" y="-1.5%" width="15.6%" height="4%" align="center" valign="bottom" label="general_close" 
+							onclicklua="MapSelection_V2.popupTimer = GetTime()
+							    		MapSelection_V2.popupShow = false
+							    		GetWidget('map_selection_popup_con_rewards'):FadeOut(200)"
+				/>
+			</panel>
+		</panel>
+    </template>
+
+    <!-- Map Info -->
+    <template name="map_selection_popup_map_info_element_template">
+    	<panel width="140i" height="50%" x="{x}" y="{y}" noclick="1">
+    		<image x="-25i" width="{iconsize=32i}" height="{iconsize=32i}" align="center" valign="center" noclick="1" texture="{icon}"/>
+    		<label x="65i" width="300%" textvalign="center" color="#f0d3c1" outline="1" outlinecolor="#230000" font="{font=dyn_12}" noclick="1" content="{text}"/>
+    	</panel>
+    </template>
+
+    <template name="map_selection_mapsetting_changed_template">
+		<panel width="100%" height="180i" noclick="1">
+			<label content="newui_mapsettingchanged_desc" width="-60i" height="120i" align="center" textvalign="center" font="dyn_14" color="#efd4c1" outline="1" outlinecolor="#230000" wrap="1" noclick="1"/>
+		</panel>
+		<instance name="newui_common_button_2_template" y="-10i" width="105i" height="32i" align="center" valign="bottom" label="general_ok"
+				  onclicklua="GetWidget('map_selection_mapsetting_changed'):FadeOut(150)"
+		/>
+	</template>
+
+   	<template name="map_selection_popup_map_info_template">
+   		<panel width="100%" height="455i" noclick="1">
+   			<panel width="430i" noclick="1">
+   				<panel y="-20i" width="512i" height="512i" align="center" valign="center" noclick="1">
+   					<image name="map_selection_popup_map_info3" texture="$invis" noclick="1"/>
+   				</panel>
+   			</panel>
+   			<panel width="420i" x="-23i" align="right" noclick="1">
+   				<label name="map_selection_popup_map_info_mapname" y="20i" color="#f0d3c1" outline="1" outlinecolor="#230000" font="dyn_16" noclick="1"/>
+   				<panel height="66i" y="55i" noclick="1">
+   					<image texture="/ui/fe2/newui/res/common/line.png" width="110%" height="2" align="center" noclick="1"/>
+   					<image texture="/ui/fe2/newui/res/common/line.png" width="110%" height="2" align="center" valign="bottom" noclick="1"/>
+   			<!-- 		<image texture="/ui/fe2/newui/res/common/line2.png" x="140i" width="2" height="90%" valign="center" noclick="1"/>
+   					<image texture="/ui/fe2/newui/res/common/line2.png" x="280i" width="2" height="90%" valign="center" noclick="1"/> -->
+   					<panel noclick="1" valign="center" height="-6i" >
+						<panel name="map_selection_popup_map_info1_caldavar" noclick="1">
+   							<instance name="map_selection_popup_map_info_element_template" icon="/ui/elements/caldavar/loading/icon_base.tga" text="map_loading_caldavar_base" x="0" y="0" />
+   							<instance name="map_selection_popup_map_info_element_template" icon="/ui/elements/caldavar/loading/icon_boss.tga" text="map_loading_caldavar_boss" x="140i" y="0" />
+   							<instance name="map_selection_popup_map_info_element_template" icon="/ui/fe2/newui/res/mapselection/icon_rune.tga" text="map_loading_caldavar_rune" x="280i" y="0" />
+   							<instance name="map_selection_popup_map_info_element_template" icon="/ui/elements/caldavar/loading/icon_tower.tga" text="map_loading_caldavar_tower" x="0" y="50%" />
+   							<instance name="map_selection_popup_map_info_element_template" icon="/ui/elements/caldavar/loading/icon_well.tga" text="map_loading_caldavar_well" x="140i" y="50%" />
+   						</panel>
+   						<panel name="map_selection_popup_map_info1_midwars" noclick="1">
+   							<instance name="map_selection_popup_map_info_element_template" icon="/ui/elements/grimmscrossing/loading/icon_house.tga" text="map_loading_caldavar_base" x="0" y="0" />
+   							<instance name="map_selection_popup_map_info_element_template" icon="/ui/elements/caldavar/loading/icon_boss.tga" text="map_loading_caldavar_boss" x="140i" y="0" />
+   							<instance name="map_selection_popup_map_info_element_template" icon="/ui/elements/grimmscrossing/loading/icon_rune.tga" text="map_loading_caldavar_rune" x="280i" y="0" />
+   							<instance name="map_selection_popup_map_info_element_template" icon="/ui/elements/grimmscrossing/loading/icon_tower.tga" text="map_loading_caldavar_tower" x="0" y="50%" />
+   							<instance name="map_selection_popup_map_info_element_template" icon="/ui/elements/grimmscrossing/loading/icon_well.tga" text="map_loading_caldavar_well" x="140i" y="50%" />
+   							<instance name="map_selection_popup_map_info_element_template" icon="/ui/elements/grimmscrossing/loading/icon_spawner.tga" text="map_loading_grimmscrossing_teleporter" x="280i" y="50%" />
+   						</panel>
+   						<panel name="map_selection_popup_map_info1_solomap" noclick="1">
+   							<instance name="map_selection_popup_map_info_element_template" icon="/ui/elements/caldavar/loading/icon_tower.tga" text="map_loading_caldavar_tower" x="0" y="25%" />
+   							<instance name="map_selection_popup_map_info_element_template" icon="/ui/elements/caldavar/loading/icon_well.tga" text="map_loading_caldavar_well" x="140i" y="25%" />
+   						</panel>
+   						<panel name="map_selection_popup_map_info1_grimmscrossing" noclick="1">
+   							<instance name="map_selection_popup_map_info_element_template" icon="/ui/elements/grimmscrossing/loading/icon_well.tga" text="map_loading_grimmscrossing_fountain" x="0" y="0" />
+   							<instance name="map_selection_popup_map_info_element_template" icon="/ui/elements/grimmscrossing/loading/icon_spawner.tga" text="map_loading_grimmscrossing_teleporter" x="140i" y="0" font="dyn_10"/>
+   							<instance name="map_selection_popup_map_info_element_template" icon="/ui/elements/grimmscrossing/loading/icon_rune.tga" text="map_loading_grimmscrossing_rune" x="280i" y="0" font="dyn_10"/>
+   							<instance name="map_selection_popup_map_info_element_template" icon="/ui/elements/grimmscrossing/loading/icon_tower.tga" text="map_loading_grimmscrossing_tower" x="0" y="50%" />
+   							<instance name="map_selection_popup_map_info_element_template" icon="/ui/elements/grimmscrossing/loading/icon_house.tga" text="map_loading_grimmscrossing_base" x="140i" y="50%" />
+   						</panel>
+   						<panel name="map_selection_popup_map_info1_riftwars" noclick="1">
+   							<instance name="map_selection_popup_map_info_element_template" icon="/ui/elements/grimmscrossing/loading/icon_well.tga" text="map_loading_grimmscrossing_fountain" x="0" y="0" />
+   							<instance name="map_selection_popup_map_info_element_template" icon="/ui/elements/grimmscrossing/loading/icon_spawner.tga" text="map_loading_grimmscrossing_teleporter" x="140i" y="0" font="dyn_10"/>
+   							<instance name="map_selection_popup_map_info_element_template" icon="/ui/elements/grimmscrossing/loading/icon_rune.tga" text="map_loading_grimmscrossing_rune" x="280i" y="0" font="dyn_10"/>
+   							<instance name="map_selection_popup_map_info_element_template" icon="/ui/elements/grimmscrossing/loading/icon_tower.tga" text="map_loading_grimmscrossing_tower" x="0" y="50%" />
+   							<instance name="map_selection_popup_map_info_element_template" icon="/ui/elements/grimmscrossing/loading/icon_house.tga" text="map_loading_grimmscrossing_base" x="140i" y="50%" />
+   						</panel>
+   						<panel name="map_selection_popup_map_info1_team_deathmatch" noclick="1">
+   							<instance name="map_selection_popup_map_info_element_template" icon="/ui/elements/caldavar/loading/icon_base.tga" text="map_loading_team_deathmatch_base" x="0" y="25%" />
+   						</panel>
+   						<panel name="map_selection_popup_map_info1_capturetheflag" noclick="1">
+   							<instance name="map_selection_popup_map_info_element_template" icon="/ui/elements/ctf/loading/icon_flag_gold.tga" iconsize="28i" text="map_loading_capturetheflag_flaggold" x="0" y="0" font="dyn_10"/>
+   							<instance name="map_selection_popup_map_info_element_template" icon="/ui/elements/ctf/loading/icon_flag_blue.tga" iconsize="28i" text="map_loading_capturetheflag_flagblue" x="140i" y="0" font="dyn_10"/>
+   							<instance name="map_selection_popup_map_info_element_template" icon="/ui/elements/ctf/loading/icon_well.tga" iconsize="28i" text="map_loading_capturetheflag_well" x="280i" y="0" />
+   							<instance name="map_selection_popup_map_info_element_template" icon="/ui/elements/ctf/loading/icon_tower.tga" iconsize="28i" text="map_loading_capturetheflag_tower" x="0" y="50%" />
+   							<instance name="map_selection_popup_map_info_element_template" icon="/ui/elements/ctf/loading/icon_respawn.tga" iconsize="28i" text="map_loading_capturetheflag_respawn" x="140i" y="50%" font="dyn_10"/>
+   						</panel>
+   						<panel name="map_selection_popup_map_info1_devowars" noclick="1">
+   							<instance name="map_selection_popup_map_info_element_template" icon="/ui/elements/devowars/loading/icon_shop.tga" iconsize="28i" text="map_loading_devowars_shop" x="0" y="0" />
+   							<instance name="map_selection_popup_map_info_element_template" icon="/ui/elements/devowars/loading/icon_grapple.tga" iconsize="28i" text="map_loading_devowars_ledge" x="50%" y="0" />
+   							<instance name="map_selection_popup_map_info_element_template" icon="/ui/elements/devowars/loading/icon_collision.tga" iconsize="28i" text="map_loading_devowars_midcollision" x="0" y="50%" />
+   							<instance name="map_selection_popup_map_info_element_template" icon="/ui/elements/devowars/loading/icon_runespawn.tga" iconsize="28i" text="map_loading_devowars_runespawn" x="50%" y="50%" font="dyn_10"/>
+   						</panel>
+   						<panel name="map_selection_popup_map_info1_soccer" noclick="1">
+   							<instance name="map_selection_popup_map_info_element_template" icon="/ui/elements/soccer/loading/icon_start.tga" text="map_loading_soccer_start" x="0" y="0" />
+   							<instance name="map_selection_popup_map_info_element_template" icon="/ui/elements/soccer/loading/icon_goals.tga" text="map_loading_soccer_goals" x="250i" y="0" />
+   							<instance name="map_selection_popup_map_info_element_template" icon="/ui/elements/soccer/loading/icon_rune.tga" text="map_loading_soccer_rune" x="0" y="50%" />
+   						</panel>
+   						<panel name="map_selection_popup_map_info1_midwarsbeta" noclick="1">
+   							<instance name="map_selection_popup_map_info_element_template" icon="/ui/elements/grimmscrossing/loading/icon_house.tga" text="map_loading_caldavar_base" x="0" y="0" />
+   							<instance name="map_selection_popup_map_info_element_template" icon="/ui/elements/caldavar/loading/icon_boss.tga" text="map_loading_caldavar_boss" x="140i" y="0" />
+   							<instance name="map_selection_popup_map_info_element_template" icon="/ui/elements/grimmscrossing/loading/icon_rune.tga" text="map_loading_caldavar_rune" x="280i" y="0" />
+   							<instance name="map_selection_popup_map_info_element_template" icon="/ui/elements/grimmscrossing/loading/icon_tower.tga" text="map_loading_caldavar_tower" x="0" y="50%" />
+   							<instance name="map_selection_popup_map_info_element_template" icon="/ui/elements/grimmscrossing/loading/icon_well.tga" text="map_loading_caldavar_well" x="140i" y="50%" />
+   							<instance name="map_selection_popup_map_info_element_template" icon="/ui/elements/grimmscrossing/loading/icon_spawner.tga" text="map_loading_grimmscrossing_teleporter" x="280i" y="50%" />
+   						</panel>
+   						<panel name="map_selection_popup_map_info1_caldavar_reborn" noclick="1">
+   							<instance name="map_selection_popup_map_info_element_template" icon="/ui/elements/caldavar/loading/icon_base.tga" text="map_loading_caldavar_base" x="0" y="0" />
+   							<instance name="map_selection_popup_map_info_element_template" icon="/ui/elements/caldavar/loading/icon_boss.tga" text="map_loading_caldavar_boss" x="140i" y="0" />
+   							<instance name="map_selection_popup_map_info_element_template" icon="/ui/fe2/newui/res/mapselection/icon_rune.tga" text="map_loading_caldavar_rune" x="280i" y="0" />
+   							<instance name="map_selection_popup_map_info_element_template" icon="/ui/elements/caldavar/loading/icon_tower.tga" text="map_loading_caldavar_tower" x="0" y="50%" />
+   							<instance name="map_selection_popup_map_info_element_template" icon="/ui/elements/caldavar/loading/icon_well.tga" text="map_loading_caldavar_well" x="140i" y="50%" />
+   						</panel>
+						<panel name="map_selection_popup_map_info1_midwars_reborn" noclick="1">
+   							<instance name="map_selection_popup_map_info_element_template" icon="/ui/elements/grimmscrossing/loading/icon_house.tga" text="map_loading_caldavar_base" x="0" y="0" />
+   							<instance name="map_selection_popup_map_info_element_template" icon="/ui/elements/caldavar/loading/icon_boss.tga" text="map_loading_caldavar_boss" x="140i" y="0" />
+   							<instance name="map_selection_popup_map_info_element_template" icon="/ui/elements/grimmscrossing/loading/icon_rune.tga" text="map_loading_caldavar_rune" x="280i" y="0" />
+   							<instance name="map_selection_popup_map_info_element_template" icon="/ui/elements/grimmscrossing/loading/icon_tower.tga" text="map_loading_caldavar_tower" x="0" y="50%" />
+   							<instance name="map_selection_popup_map_info_element_template" icon="/ui/elements/grimmscrossing/loading/icon_well.tga" text="map_loading_caldavar_well" x="140i" y="50%" />
+   							<instance name="map_selection_popup_map_info_element_template" icon="/ui/elements/grimmscrossing/loading/icon_spawner.tga" text="map_loading_grimmscrossing_teleporter" x="280i" y="50%" />
+   						</panel>
+   					</panel>
+   				</panel>
+
+   				<panel height="-120i" valign="bottom" noclick="1">
+					<panel name="map_selection_popup_map_info2_caldavar" noclick="1">
+   						<label y="10i" noclick="1" color="#efd4c1" outline="1" wrap="1" outlinecolor="#230000" font="dyn_11" content="map_loading_caldavar_reborn_tip01"/>
+   						<label y="70i" noclick="1" color="#efd4c1" outline="1" wrap="1" outlinecolor="#230000" font="dyn_11" content="map_loading_caldavar_reborn_tip02"/>
+   						<label y="120i" noclick="1" color="#efd4c1" outline="1" wrap="1" outlinecolor="#230000" font="dyn_11" content="map_loading_caldavar_reborn_tip03"/>
+   						<label y="175i" noclick="1" color="#efd4c1" outline="1" wrap="1" outlinecolor="#230000" font="dyn_11" content="map_loading_caldavar_reborn_tip04"/>
+   						<label y="230i" noclick="1" color="#efd4c1" outline="1" wrap="1" outlinecolor="#230000" font="dyn_11" content="map_loading_caldavar_reborn_tip05"/>
+   					</panel>
+   					<panel name="map_selection_popup_map_info2_midwars" noclick="1">
+   						<label y="10i" noclick="1" color="#efd4c1" outline="1" wrap="1" outlinecolor="#230000" font="dyn_11" content="map_loading_midwars_tip01"/>
+   						<label y="90i" noclick="1" color="#efd4c1" outline="1" wrap="1" outlinecolor="#230000" font="dyn_11" content="map_loading_midwars_tip02"/>
+   					</panel>
+   					<panel name="map_selection_popup_map_info2_solomap" noclick="1">
+   						<label y="10i" noclick="1" color="#efd4c1" outline="1" wrap="1" outlinecolor="#230000" font="dyn_11" content="map_loading_solomap_tip02"/>
+   						<label y="45i" noclick="1" color="#efd4c1" outline="1" wrap="1" outlinecolor="#230000" font="dyn_11" content="map_loading_solomap_tip03"/>
+   						<label y="120i" noclick="1" color="#efd4c1" outline="1" wrap="1" outlinecolor="#230000" font="dyn_11" content="map_loading_solomap_tip04"/>
+   						<label y="175i" noclick="1" color="#efd4c1" outline="1" wrap="1" outlinecolor="#230000" font="dyn_11" content="map_loading_solomap_tip05"/>
+   					</panel>
+   					<panel name="map_selection_popup_map_info2_grimmscrossing" noclick="1">
+   						<label y="10i" noclick="1" color="#efd4c1" outline="1" wrap="1" outlinecolor="#230000" font="dyn_11" content="map_loading_grimmscrossing_tip01"/>
+   						<label y="65i" noclick="1" color="#efd4c1" outline="1" wrap="1" outlinecolor="#230000" font="dyn_11" content="map_loading_grimmscrossing_tip02"/>
+   						<label y="120i" noclick="1" color="#efd4c1" outline="1" wrap="1" outlinecolor="#230000" font="dyn_11" content="map_loading_grimmscrossing_tip03"/>
+   						<label y="175i" noclick="1" color="#efd4c1" outline="1" wrap="1" outlinecolor="#230000" font="dyn_11" content="map_loading_grimmscrossing_tip04"/>
+   						<label y="230i" noclick="1" color="#efd4c1" outline="1" wrap="1" outlinecolor="#230000" font="dyn_11" content="map_loading_grimmscrossing_tip05"/>
+   					</panel>
+   					<panel name="map_selection_popup_map_info2_riftwars" noclick="1">
+   						<label y="10i" noclick="1" color="#efd4c1" outline="1" wrap="1" outlinecolor="#230000" font="dyn_11" content="map_loading_riftwars_tip01"/>
+   						<label y="65i" noclick="1" color="#efd4c1" outline="1" wrap="1" outlinecolor="#230000" font="dyn_11" content="map_loading_riftwars_tip02"/>
+   						<label y="120i" noclick="1" color="#efd4c1" outline="1" wrap="1" outlinecolor="#230000" font="dyn_11" content="map_loading_riftwars_tip03"/>
+   						<label y="175i" noclick="1" color="#efd4c1" outline="1" wrap="1" outlinecolor="#230000" font="dyn_11" content="map_loading_riftwars_tip04"/>
+   						<label y="230i" noclick="1" color="#efd4c1" outline="1" wrap="1" outlinecolor="#230000" font="dyn_11" content="map_loading_riftwars_tip05"/>
+   					</panel>
+   					<panel name="map_selection_popup_map_info2_team_deathmatch" noclick="1">
+   						<label y="10i" noclick="1" color="#efd4c1" outline="1" wrap="1" outlinecolor="#230000" font="dyn_11" content="map_loading_team_deathmatch_tip01"/>
+   						<label y="65i" noclick="1" color="#efd4c1" outline="1" wrap="1" outlinecolor="#230000" font="dyn_11" content="map_loading_team_deathmatch_tip02"/>
+   						<label y="120i" noclick="1" color="#efd4c1" outline="1" wrap="1" outlinecolor="#230000" font="dyn_11" content="map_loading_team_deathmatch_tip03"/>
+   						<label y="175i" noclick="1" color="#efd4c1" outline="1" wrap="1" outlinecolor="#230000" font="dyn_11" content="map_loading_team_deathmatch_tip04"/>
+   						<label y="230i" noclick="1" color="#efd4c1" outline="1" wrap="1" outlinecolor="#230000" font="dyn_11" content="map_loading_team_deathmatch_tip05"/>
+   					</panel>
+   					<panel name="map_selection_popup_map_info2_capturetheflag" noclick="1">
+   						<label y="10i" noclick="1" color="#efd4c1" outline="1" wrap="1" outlinecolor="#230000" font="dyn_11" content="map_loading_capturetheflag_tip01"/>
+   						<label y="55i" noclick="1" color="#efd4c1" outline="1" wrap="1" outlinecolor="#230000" font="dyn_11" content="map_loading_capturetheflag_tip02"/>
+   						<label y="100i" noclick="1" color="#efd4c1" outline="1" wrap="1" outlinecolor="#230000" font="dyn_11" content="map_loading_capturetheflag_tip03"/>
+   						<label y="145i" noclick="1" color="#efd4c1" outline="1" wrap="1" outlinecolor="#230000" font="dyn_11" content="map_loading_capturetheflag_tip05"/>
+   						<label y="245i" noclick="1" color="#efd4c1" outline="1" wrap="1" outlinecolor="#230000" font="dyn_11" content="map_loading_capturetheflag_tip04"/>
+   						<panel y="190i" height="40i" noclick="1">
+							<panel align="center" grow="true" height="100%" float="right" padding="0.75h" noclick="1">
+								<panel width="100@" height="100%" noclick="1">
+									<image texture="/triggers/custom_maps/capturetheflag/flag/flagdrop.tga" noclick="1"/>
+									<frame color="invisible" bordercolor="#666666" borderthickness="1" noclick="1"/>
+								</panel>
+								<label fitx="true" font="dyn_11" color="#91e0c3" textvalign="center" content="map_loading_capturetheflag_dropicon" noclick="1"/>
+							</panel>
+						</panel>
+   					</panel>
+   					<panel name="map_selection_popup_map_info2_devowars" noclick="1">
+   						<label y="10i" noclick="1" color="#efd4c1" outline="1" wrap="1" outlinecolor="#230000" font="dyn_10" content="map_loading_devowars_tip01"/>
+   						<label y="110i" noclick="1" color="#efd4c1" outline="1" wrap="1" outlinecolor="#230000" font="dyn_10" content="map_loading_devowars_tip02"/>
+   						<label y="135i" noclick="1" color="#efd4c1" outline="1" wrap="1" outlinecolor="#230000" font="dyn_10" content="map_loading_devowars_tip03"/>
+   						<label y="175i" noclick="1" color="#efd4c1" outline="1" wrap="1" outlinecolor="#230000" font="dyn_10" content="map_loading_devowars_tip04"/>
+   						<label y="215i" noclick="1" color="#efd4c1" outline="1" wrap="1" outlinecolor="#230000" font="dyn_10" content="map_loading_devowars_tip05"/>
+   						<label y="255i" noclick="1" color="#efd4c1" outline="1" wrap="1" outlinecolor="#230000" font="dyn_10" content="map_loading_devowars_tip06"/>
+   						<panel y="55i" height="4h" float="right" padding="1.75h">
+							<panel width="100@" height="100%">
+								<image texture="/triggers/custom_maps/herowars/heroes/devx/ability_01_chain/icon.tga" y="0.1h"/>
+								<image y="0.1h" width="6.2h" height="6.2h" align="center" valign="center" texture="/ui/common/ability_frame.tga" noclick="1" />
+							</panel>
+
+							<panel width="75@" height="100%">
+								<image texture="/ui/elements/devowars/loading/arrow.tga" height="2h" width="2h" align="center" valign="center" />
+							</panel>
+
+							<panel width="100@" height="100%"><!-- 1 -->
+								<image texture="/triggers/custom_maps/herowars/heroes/devx/hook_levelups/damage.tga"/>
+								<modelpanel
+									visible="1"
+									noclick="true"
+									model="/ui/common/models/toggle/toggle.mdf"
+									anim="idle"
+									effect="/ui/common/models/toggle/toggle.effect"
+									camerapos="0 1 0"
+									cameraangles="0 0 180"
+									camerafov="45"
+									cameranear="1"
+									carmerafar="100"
+									depthclear="false"
+									depthcompress="true"
+									onshow="SetAnim('idle'); SetEffect('/ui/elements/devowars/loading/toggle.effect'); SetAnimSpeed(0.7)"
+								/>
+							</panel>
+
+							<panel width="100@" height="100%"><!-- 2 -->
+								<image texture="/triggers/custom_maps/herowars/heroes/devx/hook_levelups/range.tga" />
+								<modelpanel
+									visible="1"
+									noclick="true"
+									model="/ui/common/models/toggle/toggle.mdf"
+									anim="idle"
+									effect="/ui/common/models/toggle/toggle.effect"
+									camerapos="0 1 0"
+									cameraangles="0 0 180"
+									camerafov="45"
+									cameranear="1"
+									carmerafar="100"
+									depthclear="false"
+									depthcompress="true"
+									onshow="SetAnim('idle'); SetEffect('/ui/elements/devowars/loading/toggle.effect'); SetAnimSpeed(0.7)"
+								/>
+							</panel>
+
+							<panel width="100@" height="100%"><!-- 3 -->
+								<image texture="/triggers/custom_maps/herowars/heroes/devx/hook_levelups/speed.tga"/>
+								<modelpanel
+									visible="1"
+									noclick="true"
+									model="/ui/common/models/toggle/toggle.mdf"
+									anim="idle"
+									effect="/ui/common/models/toggle/toggle.effect"
+									camerapos="0 1 0"
+									cameraangles="0 0 180"
+									camerafov="45"
+									cameranear="1"
+									carmerafar="100"
+									depthclear="false"
+									depthcompress="true"
+									onshow="SetAnim('idle'); SetEffect('/ui/elements/devowars/loading/toggle.effect'); SetAnimSpeed(0.7)"
+								/>
+							</panel>
+
+							<panel width="100@" height="100%"><!-- 4 -->
+								<image texture="/triggers/custom_maps/herowars/heroes/devx/hook_levelups/width.tga" />
+								<modelpanel
+									visible="1"
+									noclick="true"
+									model="/ui/common/models/toggle/toggle.mdf"
+									anim="idle"
+									effect="/ui/common/models/toggle/toggle.effect"
+									camerapos="0 1 0"
+									cameraangles="0 0 180"
+									camerafov="45"
+									cameranear="1"
+									carmerafar="100"
+									depthclear="false"
+									depthcompress="true"
+									onshow="SetAnim('idle'); SetEffect('/ui/elements/devowars/loading/toggle.effect'); SetAnimSpeed(0.7)"
+								/>
+							</panel>
+						</panel>
+   					</panel>
+   					<panel name="map_selection_popup_map_info2_soccer" noclick="1">
+   						<label y="10i" noclick="1" color="#efd4c1" outline="1" wrap="1" outlinecolor="#230000" font="dyn_11" content="map_loading_soccer_tip01"/>
+   						<label y="115i" noclick="1" color="#efd4c1" outline="1" wrap="1" outlinecolor="#230000" font="dyn_11" content="map_loading_soccer_tip02"/>
+   						<label y="145i" noclick="1" color="#efd4c1" outline="1" wrap="1" outlinecolor="#230000" font="dyn_11" content="map_loading_soccer_tip03"/>
+   						<label y="190i" noclick="1" color="#efd4c1" outline="1" wrap="1" outlinecolor="#230000" font="dyn_11" content="map_loading_soccer_tip04"/>
+   						<label y="235i" noclick="1" color="#efd4c1" outline="1" wrap="1" outlinecolor="#230000" font="dyn_11" content="map_loading_soccer_tip05"/>
+						<panel y="65i" height="4h" width="40h">
+							<panel y="-1h" float="right" padding="1" width="40h" height="5h" >
+								<panel width="12h">
+									<panel x="0.5h" width="5h" height="5h" valign="center">
+										<frame color="invisible" bordercolor="#666666" borderthickness="1"/>
+										<image width="-2" height="-2" align="center" valign="center" texture="/ui/elements/soccer/loading/icon_kick.tga" />
+									</panel>
+									<panel x="6h" width="6h">
+										<label textvalign="center" font="dyn_10" color="#91e0c3" content="map_loading_soccer_tip01_kick"/>
+									</panel>
+								</panel>
+								<panel width="12h">
+									<panel x="0.5h" width="5h" height="5h" valign="center">
+										<frame color="invisible" bordercolor="#666666" borderthickness="1"/>
+										<image width="-2" height="-2" align="center" valign="center" texture="/ui/elements/soccer/loading/icon_slide.tga" />
+									</panel>
+									<panel x="6h" width="6h">
+										<label textvalign="center" font="dyn_10" color="#91e0c3" content="map_loading_soccer_tip01_slide"/>
+									</panel>
+								</panel>
+								<panel width="12h">
+									<panel x="0.5h" width="5h" height="5h" valign="center">
+										<frame color="invisible" bordercolor="#666666" borderthickness="1"/>
+										<image width="-2" height="-2" align="center" valign="center" texture="/ui/elements/soccer/loading/icon_sprint.tga" />
+									</panel>
+									<panel x="6h" width="6h">
+										<label textvalign="center" font="dyn_10" color="#91e0c3" content="map_loading_soccer_tip01_sprint"/>
+									</panel>
+								</panel>
+							</panel>
+						</panel>
+   					</panel>
+   					<panel name="map_selection_popup_map_info2_midwarsbeta" noclick="1">
+   						<label y="10i" noclick="1" color="#efd4c1" outline="1" wrap="1" outlinecolor="#230000" font="dyn_11" content="map_loading_midwars_beta_tip01"/>
+   						<label y="65i" noclick="1" color="#efd4c1" outline="1" wrap="1" outlinecolor="#230000" font="dyn_11" content="map_loading_midwars_beta_tip02"/>
+   						<label y="120i" noclick="1" color="#efd4c1" outline="1" wrap="1" outlinecolor="#230000" font="dyn_11" content="map_loading_midwars_beta_tip03"/>
+   						<label y="175i" noclick="1" color="#efd4c1" outline="1" wrap="1" outlinecolor="#230000" font="dyn_11" content="map_loading_midwars_beta_tip04"/>
+   					</panel>
+   					<panel name="map_selection_popup_map_info2_caldavar_reborn" noclick="1">
+   						<label y="10i" noclick="1" color="#efd4c1" outline="1" wrap="1" outlinecolor="#230000" font="dyn_11" content="map_loading_caldavar_reborn_tip01"/>
+   						<label y="70i" noclick="1" color="#efd4c1" outline="1" wrap="1" outlinecolor="#230000" font="dyn_11" content="map_loading_caldavar_reborn_tip02"/>
+   						<label y="120i" noclick="1" color="#efd4c1" outline="1" wrap="1" outlinecolor="#230000" font="dyn_11" content="map_loading_caldavar_reborn_tip03"/>
+   						<label y="175i" noclick="1" color="#efd4c1" outline="1" wrap="1" outlinecolor="#230000" font="dyn_11" content="map_loading_caldavar_reborn_tip04"/>
+   						<label y="230i" noclick="1" color="#efd4c1" outline="1" wrap="1" outlinecolor="#230000" font="dyn_11" content="map_loading_caldavar_reborn_tip05"/>
+   					</panel>					
+   				</panel>
+   			</panel>
+
+   			<instance name="newui_common_button_2_template" y="-10i" width="105i" height="32i" align="center" valign="bottom" label="general_ok"
+				  onclicklua="GetWidget('map_selection_popup_map_info'):FadeOut(150)"
+			/>
+   		</panel>
+   	</template>
+
+	<panel name="map_selection" visible="0" hotkey="ESC" onhotkeylua="MapSelection_V2:Hide()">
+		<image texture="/ui/fe2/newui/res/common/bg.png" width="2048i" height="2048i" align="center" valign="center" noclick="1"/>
+		<image texture="/ui/fe2/newui/res/mapselection/line.png" y="123i" width="1700i" height="4i" align="center" noclick="1"/>
+
+		<panel name="map_selection_large" y="185i" width="1752i" height="767i" align="center" noclick="1" visible="0">
+			<instance name="map_selection_large_item_template" index="1" x="0"/>
+			<instance name="map_selection_large_item_template" index="2" x="305i"/>
+			<instance name="map_selection_large_item_template" index="3" x="610i"/>
+			<instance name="map_selection_large_item_template" index="4" x="915i"/>
+			<instance name="map_selection_large_item_template" index="5" x="1220i"/>
+			<instance name="map_selection_large_item_template" index="6" x="1525i"/>
+		</panel>
+
+		<panel name="map_selection_small" y="185i" width="1333i" height="767i" align="center" noclick="1" visible="0">
+			<instance name="map_selection_small_item_template" index="1" x="0"/>
+			<instance name="map_selection_small_item_template" index="2" x="264i"/>
+			<instance name="map_selection_small_item_template" index="3" x="528i"/>
+			<instance name="map_selection_small_item_template" index="4" x="792i"/>
+			<instance name="map_selection_small_item_template" index="5" x="1056i"/>
+			<instance name="map_selection_small_item_template" index="6" x="1320i"/>
+		</panel>
+
+		<panel name="map_selection_title" align="center" width="1507i" noclick="1">
+			<image texture="/ui/fe2/newui/res/mapselection/title_icon.png" y="81i" width="32i" height="32i" noclick="1"/>
+			<label x="48i" y="81i" height="32i" textalign="left" textvalign="center" font="dyn_24" color="#a1867d" outline="1" outlinecolor="#230000" noclick="1" content="newui_mapselection_title"/>
+			<if condition="cl_GarenaEnable">
+				<button width="156i" height="32i" x="-305i" y="81i" align="right" color="invisible" onclicklua="MapSelection_V2:OnClickHostedGame()">
+					<widgetstate statename="up">
+						<image texture="/ui/fe2/newui/res/mapselection/hg_up.png" width="256i" height="32i" align="center" valign="center" noclick="1"/>
+						<image texture="/ui/fe2/newui/res/mapselection/hg_icon.png" x="3i" width="32i" height="32i" valign="center" noclick="1"/>
+						<label textalign="center" textvalign="center" font="dyn_11" x="13i" color="#ecf9fa" outline="1" outlinecolor="#215d64" content="newui_hosted_hostedgame" noclick="1"/>
+					</widgetstate>
+					<widgetstate statename="over">
+						<image texture="/ui/fe2/newui/res/mapselection/hg_over.png" width="256i" height="32i" align="center" valign="center" noclick="1"/>
+						<image texture="/ui/fe2/newui/res/mapselection/hg_icon.png" x="3i" width="32i" height="32i" valign="center" noclick="1"/>
+						<label textalign="center" textvalign="center" font="dyn_11" x="13i" color="#ecf9fa" outline="1" outlinecolor="#215d64" content="newui_hosted_hostedgame" noclick="1"/>
+					</widgetstate>
+					<widgetstate statename="down">
+						<image texture="/ui/fe2/newui/res/mapselection/hg_over.png" width="256i" height="32i" align="center" valign="center" noclick="1"/>
+						<image texture="/ui/fe2/newui/res/mapselection/hg_icon.png" x="3i" width="32i" height="32i" valign="center" noclick="1"/>
+						<label textalign="center" textvalign="center" font="dyn_11" x="13i" color="#ecf9fa" outline="1" outlinecolor="#215d64" content="newui_hosted_hostedgame" noclick="1"/>
+					</widgetstate>
+					<widgetstate statename="disabled">
+						<image texture="/ui/fe2/newui/res/mapselection/hg_up.png" width="256i" height="32i" align="center" valign="center" rendermode="grayscale" noclick="1"/>
+						<image texture="/ui/fe2/newui/res/mapselection/hg_icon.png" x="3i" width="32i" height="32i" valign="center" rendermode="grayscale" noclick="1"/>
+						<label textalign="center" textvalign="center" font="dyn_11" x="13i" color="#ecf9fa" outline="1" outlinecolor="#215d64" content="newui_hosted_hostedgame" noclick="1"/>
+					</widgetstate>
+				</button>
+			</if>
+			
+			<panel name="map_selection_openregion" x="40h" y="81i" width="30h" height="32i" align="left" float="right" padding="1h" color="invisible">
+				<panel width="8h" noclick="1">
+					<label x="0" y="0.3h" height="32i" textalign="center" textvalign="center" font="dyn_14" color="#a1867d" outline="1" outlinecolor="#230000" noclick="1" content="newui_mapselection_region2"/>
+				</panel>
+				<instance name="map_selection_region_item_template" id="1"/>
+				<instance name="map_selection_region_item_template" id="2"/>
+				<instance name="map_selection_region_item_template" id="3"/>
+				<instance name="map_selection_region_item_template" id="4"/>
+				<instance name="map_selection_region_item_template" id="5"/>
+				<instance name="map_selection_region_item_template" id="6"/>
+				<instance name="map_selection_region_item_template" id="7"/>
+				<instance name="map_selection_region_item_template" id="8"/>
+				<instance name="map_selection_region_item_template" id="9"/>
+				<instance name="map_selection_region_item_template" id="10"/>
+			</panel>
+
+			<instance name="newui_button_close_template" y="81i" align="right" type="2" onclicklua="MapSelection_V2:Hide()"/>
+
+			<panel name="map_selection_disable_desc" y="-70i" grow="1" regrow="1" width="210i" valign="bottom" align="right" noclick="1" visible="0">
+				<instance name="newui_custom_frame_template" />
+				<panel width="-16i" align="center" grow="1" regrow="1" noclick="1">
+					<label name="map_selection_disable_desc_text" font="dyn_10" textalign="center" textvalign="center" noclick="1" vpadding="20i" color="#ad9181" shadow="1" wrap="1" fity="1" fitypadding="0.8h"/>
+				</panel>
+			</panel>
+
+			<instance name="newui_common_button_1_template" button_name="map_selection_startgame" y="-20i" width="210i" height="47i" align="right" valign="bottom" font="dyn_16" content="newui_mapselection_startgame" onclicklua="MapSelection_V2:OnStartGame()"
+			/>
+		</panel>
+
+		<panel name="map_selection_mask" visible="0"/>
+	</panel>
+
+	<panel name="map_selection_trigger_help" width="1" height="1" noclick="1" onloadlua="MapSelection_V2:Init()" onframelua="MapSelection_V2:OnFrame()"/>
+</package>

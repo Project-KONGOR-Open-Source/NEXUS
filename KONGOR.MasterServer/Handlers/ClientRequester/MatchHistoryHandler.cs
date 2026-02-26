@@ -54,6 +54,12 @@ public partial class MatchHistoryHandler(
     {
         string? accountName = Request.Form["nickname"];
 
+        // Logan (2025-02-14): Simple Sanitization (Strip |B64)
+        if (accountName?.EndsWith("|B64") == true)
+        {
+            accountName = accountName[..^4];
+        }
+
         if (string.IsNullOrEmpty(accountName))
         {
             string? cookie = ClientRequestHelper.GetCookie(Request);
@@ -85,26 +91,33 @@ public partial class MatchHistoryHandler(
             .Select(ps => ps.MatchID)
             .ToListAsync();
 
-        Dictionary<int, string> lastStats = new();
+        Dictionary<string, string> lastStats = new();
         foreach (int info in lastMatchIDs)
         {
-            lastStats[info] = info.ToString(CultureInfo.InvariantCulture);
+            lastStats[info.ToString(CultureInfo.InvariantCulture)] = info.ToString(CultureInfo.InvariantCulture);
         }
 
         Dictionary<string, object> response = new()
         {
             { "last_stats", lastStats },
             { "success", "True" },
-            { "hosttime", (int) DateTimeOffset.UtcNow.ToUnixTimeSeconds() }
+            { "hosttime", DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString() } // Force String
         };
 
-        return new OkObjectResult(PhpSerialization.Serialize(response));
+        // Force text/plain
+        return new ContentResult { Content = PhpSerialization.Serialize(response), ContentType = "text/plain; charset=utf-8" };
     }
 
     private async Task<IActionResult> HandleMatchHistoryOverview(HttpRequest Request)
     {
         string? nickname = Request.Form["nickname"];
         string? table = Request.Form["table"];
+        
+        // Logan (2025-02-14): Simple Sanitization (Strip |B64)
+        if (nickname?.EndsWith("|B64") == true)
+        {
+            nickname = nickname[..^4];
+        }
 
         LogHistoryOverview(nickname ?? "NULL", table ?? "NULL");
 
@@ -121,18 +134,27 @@ public partial class MatchHistoryHandler(
         switch (table)
         {
             case "campaign": // Season Normal (Ranked)
-                query = query.Where(x => x.ps.RankedMatch == 1);
+            case "ranked":   // Ranked Tab
+                // Filter out Ranked Midwars from standard Ranked lists
+                query = query.Where(x => x.ps.RankedMatch == 1 && x.ms.GameMode != "midwars");
                 break;
-            case "player": // Public Game Stats
+            case "casual":   // Casual Tab
                 query = query.Where(x => x.ps.PublicMatch == 1);
+                break;
+            case "player": // Public Game Stats (Custom/Unranked)
+                // All public games go here, including midwars played via public games
+                query = query.Where(x => x.ps.RankedMatch == 0 && x.ps.PublicMatch == 0);
                 break;
             case "midwars": // Others/Midwars
             case "other":
             case "others":
+                // Midwars played through matchmaking
                 query = query.Where(x => x.ms.GameMode == "midwars");
                 break;
             case "riftwars": // Riftwars
                 query = query.Where(x => x.ms.GameMode == "riftwars");
+                break;
+            case "history": // All Matches
                 break;
             default:
                 // Strict filtering
@@ -155,7 +177,12 @@ public partial class MatchHistoryHandler(
                 x.ms.Map,
                 x.ms.TimestampRecorded,
                 x.ms.TimePlayed,
-                x.ms.FileName
+                x.ms.FileName,
+                // Additional fields for Lua compatibility (numeric/safe)
+                x.ps.HeroLevel,
+                x.ps.Gold,
+                x.ps.Experience,
+                x.ps.WardsPlaced
             })
             .ToListAsync();
 
@@ -164,25 +191,30 @@ public partial class MatchHistoryHandler(
         int i = 0;
         foreach (var match in historyData)
         {
-            string map = match.Map;
+            string map = string.IsNullOrEmpty(match.Map) ? "unknown" : match.Map;
             string date = match.TimestampRecorded.ToString("MM/dd/yyyy", CultureInfo.InvariantCulture);
             int duration = match.TimePlayed;
 
+            // Use Base Hero ID (Entity ID) for compatibility with client icons/lookups
             uint baseHeroId = HeroDefinitionService.GetBaseHeroId(match.HeroProductID ?? 0);
-            string heroIdentifierString = HeroDefinitionService.GetHeroIdentifier(match.HeroProductID ?? 0);
 
+            string heroIdentifierString = HeroDefinitionService.GetHeroIdentifier(match.HeroProductID ?? 0);
+            if (string.IsNullOrEmpty(heroIdentifierString)) heroIdentifierString = "Hero_Unknown";
+
+            // Logan (2025-02-15): Reverted CSV structure to match Client expectation (Lua Regex)
+            // Lua Expectation: ID, Result, Team, Kills, Deaths, Assists, HeroID, Duration, Map, Date, HeroName
             string matchData = string.Join(',',
-                match.MatchID,
-                match.Win,
-                match.Team,
-                match.HeroKills,
-                match.HeroDeaths,
-                match.HeroAssists,
-                baseHeroId,
-                duration,
-                map,
-                date,
-                heroIdentifierString
+                match.MatchID,              // 1. ID
+                match.Win,                  // 2. Result
+                match.Team,                 // 3. Team
+                match.HeroKills,            // 4. Kills
+                match.HeroDeaths,           // 5. Deaths
+                match.HeroAssists,          // 6. Assists
+                baseHeroId,                 // 7. HeroID (Base ID)
+                duration,                   // 8. Duration
+                map,                        // 9. MapName
+                date,                       // 10. Date (MDT)
+                heroIdentifierString        // 11. HeroName
             );
 
             matchHistoryOverview.Add("m" + i, matchData);
@@ -190,6 +222,7 @@ public partial class MatchHistoryHandler(
         }
 
         LogReturningEntries(matchHistoryOverview.Count);
-        return new OkObjectResult(PhpSerialization.Serialize(matchHistoryOverview));
+        // Force text/plain
+        return new ContentResult { Content = PhpSerialization.Serialize(matchHistoryOverview), ContentType = "text/plain; charset=utf-8" };
     }
 }

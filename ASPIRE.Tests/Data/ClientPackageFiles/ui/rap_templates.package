@@ -1,0 +1,234 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+	
+	<trigger name="reset_rap_category_buttons"/>
+	<trigger name="show_rap_panel"/>
+	
+	<!-- Button for selecting rap type -->
+	<template name="rap_pop_offence_type">
+		<button
+			name="rap_pop_offense_type_button{rapType}"
+			group="rap_pop_offense_type_button_group"
+			width="100@"
+			color="invisible"
+			onmouseover="showOnly('rap_info_details{rapType}');"
+			onmouseoutlua="Rap_Info.UpdateSelectedRapTypeForPlayerBeingReported()"
+			onclicklua="Rap_Info.SetActiveReportType({rapType})"
+			numstates="2"
+		>
+			<widgetstate statename="up">
+				<image name="rap_pop_offense_type_button_icon{rapType}" texture="/ui/icons/{icon}" noclick="true"/>
+				<frame color="invisible" borderthickness="1" bordercolor=".2 .2 .2 1" noclick="true" />
+			</widgetstate>
+			<widgetstate statename="over">
+				<image texture="/ui/icons/{icon}" noclick="true" />
+				<frame color="invisible" borderthickness="1" bordercolor="#cc3333" noclick="true" />
+			</widgetstate>
+			<widgetstate statename="down" x="1" y="1">
+				<image texture="/ui/icons/{icon}" noclick="true" />
+				<frame color="invisible" borderthickness="1" bordercolor="#cc3333" noclick="true" />
+			</widgetstate>
+			<widgetstate statename="disabled">
+				<image texture="/ui/icons/{icon}" noclick="true" rendermode="grayscale" />
+				<frame color="invisible" borderthickness="1" bordercolor=".2 .2 .2 1" noclick="true" />
+			</widgetstate>
+			<widgetstate statename="up2">
+				<image texture="/ui/icons/{icon}" noclick="true"/>
+				<frame color="invisible" borderthickness="1" bordercolor="#33cc33" noclick="true" />
+			</widgetstate>
+			<widgetstate statename="over2">
+				<image texture="/ui/icons/{icon}" noclick="true" />
+				<frame color="invisible" borderthickness="1" bordercolor="#55cc33" noclick="true" />
+			</widgetstate>
+			<widgetstate statename="down2" x="1" y="1">
+				<image texture="/ui/icons/{icon}" noclick="true" />
+				<frame color="invisible" borderthickness="1" bordercolor="#33cc33" noclick="true" />
+			</widgetstate>
+			<widgetstate statename="disabled2">
+				<image texture="/ui/icons/{icon}" noclick="true" rendermode="grayscale" />
+				<frame color="invisible" borderthickness="1" bordercolor=".2 .2 .2 1" noclick="true" />
+			</widgetstate>
+
+		</button>
+	</template>
+	
+	<!-- single line for rap type description that shows on the right -->
+	<template name="rap_pop_offence_description">
+		<panel grow="true" width="100%" noclick="true" oninstantiate="SetVisible(!StringEmpty(Translate('{label}')))" sticky="true" stickytoinvis="false">
+			<image y="0.2h" width="1.6h" height="1.6h" texture="/ui/fe2/elements/web_forward.tga" noclick="true" />
+			<panel grow="true" width="-2.0h" align="right" noclick="true">
+				<label fity="true" wrap="true" font="dyn_10" color="1 1 1 1" shadow="true" oninstantiate="SetText(Translate('{label}'));" noclick="true"/>
+			</panel>
+		</panel>
+	</template>
+	
+	<!-- Whole widget containing all the descriptions and enter buttons -->
+	<template name="rap_info_details_template">
+		<!-- Shows on hover / sticks on click of type button -->
+		<panel name="rap_info_details{rapType}" group="rap_info" width="-2.0h" align="right" float="bottom" padding="0.5h" noclick="true" visible="false">
+			
+			<label fity="true" fitypadding="0.5h" font="dyn_14" color="#ffaa00" shadow= "true" content="report_a_player_abuse_type{rapType}" noclick="true" wrap="true" />
+			
+			<panel height="-7.5h" float="bottom" padding="1.0h" noclick="true">							
+				<instance name="rap_pop_offence_description" label="report_a_player_abuse_type{rapType}_desc1"/>
+				<instance name="rap_pop_offence_description" label="report_a_player_abuse_type{rapType}_desc2"/>
+				<instance name="rap_pop_offence_description" label="report_a_player_abuse_type{rapType}_desc3"/>
+				<instance name="rap_pop_offence_description" label="report_a_player_abuse_type{rapType}_desc4"/>
+			</panel>
+			
+			<!-- Visible only after click of type button -->
+			<panel name="rap_submit_button_panel{rapType}"
+				y="-0.5h"
+				width="17.0h" height="2.8h"
+				align="center"
+				valign="bottom"
+				borderthickness="0.6h"
+				visible="false"
+			>
+				<instance
+					name="button2"
+					button_name="rap_submit_button{rapType}"
+					label="rap_final_submit_btn"
+					font="dyn_11"
+					visible="true"
+					onclicklua="Rap_Info.ReportPlayerFromRAPPop({rapType})"
+				/>
+			</panel>
+			
+		</panel>
+	</template>
+	
+	<!-- Close button template -->
+	<template name="closex_rap_btn">
+		<button
+			name="{id}"
+			x="{x}" y="{y}"		
+			width="{width=1.9h}" height="{height=1.9h}"
+			align="{align}"
+			valign="{valign}"
+			color="invisible"
+			onclick="PlaySound('/shared/sounds/ui/ccpanel/button_close_02.wav'); {onclick}"
+			onclicklua="{onclicklua}"
+			onmouseover="PlaySound('/shared/sounds/ui/ccpanel/button_over_01.wav'); {onmouseover}"
+			interactive="{interactive}"
+			watch="{btn_watch}" ontrigger="{btn_ontrigger}"
+		>
+			<widgetstate statename="up">
+				<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.5h" color="#910000" blockinput="false" noclick="true"/>
+				<frame texture="/ui/frames/roundframe.tga" color="0 0 0 1" borderthickness="0.5h" blockinput="false" noclick="true"/>
+				<image width="70%" height="70@" align="center" valign="center" color=".75 .75 .75 1" texture="/ui/elements/closex.tga" noclick="true" />
+			</widgetstate>
+			<widgetstate statename="over">
+				<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.5h" color="#dc0000" blockinput="false" noclick="true"/>
+				<frame texture="/ui/frames/roundframe.tga" color="0 0 0 1" borderthickness="0.5h" blockinput="false" noclick="true"/>
+				<image width="70%" height="70@" align="center" valign="center" color="1 1 1 1" texture="/ui/elements/closex.tga" noclick="true" />			
+			</widgetstate>
+			<widgetstate statename="down" x="1" y="1">
+				<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.5h" color="#910000" blockinput="false" noclick="true"/>
+				<frame texture="/ui/frames/roundframe.tga" color="0 0 0 1" borderthickness="0.5h" blockinput="false" noclick="true"/>
+				<image width="70%" height="70@" align="center" valign="center" color="1 1 1 1" texture="/ui/elements/closex.tga" noclick="true" />
+			</widgetstate>
+		</button>
+	</template>
+	
+	<!-- RAP Pop-Up -->
+	<panel name="RAP_pop" width="60.0h" height="30.5h" align="center" valign="center" cangrab="true" visible="false">
+		<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.8h" color="0 0 0 .85" noclick="true"/>
+		<frame texture="/ui/frames/roundframe.tga" color=".4 .4 .4 1" borderthickness="0.8h" noclick="true"/>
+		
+		<panel width="-2.4h" height="-2.4h" align="center" valign="center" noclick="true">
+		
+			<!-- Title bar -->
+			<label fity="true" font="dyn_14" color="1 1 1 1" outline="true" content="rap_title" noclick="true" />
+			<instance name="closex_rap_btn" width="2.0h" height="2.0h" align="right" onclicklua="Rap_Info.HideRapMenu()" />
+			
+			<!-- Bottom part -->
+			<panel height="-3.0h" valign="bottom" noclick="true">
+			
+				<!-- Player info and rap types -->
+				<panel align="left" width="27.0h" float="bottom" padding="0.5h" noclick="true">
+					
+					<label fity="true" font="dyn_14" color="#ffaa00" shadow= "true" content="rap_step2_title" noclick="true" />
+					
+					<!-- Player name and info -->
+					<panel height="4.0h" noclick="true">
+						<panel width="-2.0h" align="center" float="right" padding="0.5h" noclick="true">
+							<panel height="100%" width="100@" noclick="true">
+								<image name="RAP_pop_hero_icon" texture="" noclick="true" />
+								<frame color="invisible" borderthickness="1" bordercolor=".2 .2 .2 1" noclick="true" />
+							</panel>
+							<label name="RAP_pop_player_label" textvalign="center" font="dyn_12" color="#0042ff" outline="true" noclick="true" />
+						</panel>
+					</panel>
+					
+					<panel height="3.0h" noclick="true">
+						<label textvalign="bottom" font="dyn_14" color="#ffaa00" shadow= "true" content="rap_select_type" noclick="true" />
+					</panel>
+					
+					<!-- Rap offense type buttons -->
+					<panel height="-6.4h" noclick="true">						
+						<panel width="-2.0h" align="center" float="bottom" padding="1.0h" noclick="true">
+							<panel height="6.6h" float="right" padding="2.0h" noclick="true" >
+								<instance name="rap_pop_offence_type" rapType="1" icon="verbal.tga" />
+								<instance name="rap_pop_offence_type" rapType="2" icon="feeding.tga" />
+								<instance name="rap_pop_offence_type" rapType="3" icon="frostburnimpersonator.tga" />
+							</panel>
+							<panel height="6.6h" float="right" padding="2.0h" noclick="true" >
+								<instance name="rap_pop_offence_type" rapType="4" icon="ability_abuse.tga" />
+								<instance name="rap_pop_offence_type" rapType="6" icon="offensivename.tga" />
+								<instance name="rap_pop_offence_type" rapType="5" icon="avoiding_afk.tga" />
+							</panel>
+						</panel>
+					</panel>					
+				</panel>					
+				
+				<!-- Offense Type description - Right side-->
+				<panel align="right" width="-27.5h" noclick="true">					
+					<panel width="2" noclick="true">
+						<panel width="1" align="left" color=".2 .2 .2 1" noclick="true" />
+						<panel width="1" align="right" color="0 0 0 1" noclick="true" />
+					</panel>
+					
+					<!-- Initial message - shown prior to hover over or click of button -->
+					<panel name="rap_info_initial" group="rap_info" width="-2.0h" align="right" noclick="true" visible="true">
+					
+						<label width="-5.0h" height="-3.0h" align="center" textvalign="center" textalign="center" wrap="true" font="dyn_12" color=".7 .7 .7 1" shadow= "true" content="rap_info_initial" noclick="true" />
+						
+						<!-- Cancel button -->
+						<instance
+							name="button2" button_name="unnamedButton58"
+							y="-0.5h"
+							width="17.0h" height="2.8h"
+							align="center"
+							valign="bottom"
+							label="rap_final_cancel_btn"
+							font="dyn_11"
+							borderthickness="0.6h"
+							visible="true"
+							onclicklua="Rap_Info.HideRapMenu()"
+						/>
+					
+					</panel>
+					
+					<instance name="rap_info_details_template" rapType="1" />
+					<instance name="rap_info_details_template" rapType="2" />
+					<instance name="rap_info_details_template" rapType="3" />
+					<instance name="rap_info_details_template" rapType="4" />
+					<instance name="rap_info_details_template" rapType="5" />
+					<instance name="rap_info_details_template" rapType="6" />
+					
+				</panel>
+
+			</panel>
+		</panel>
+	</panel>
+
+	<if condition="cg_newMainInterface">
+		<lua file="/ui/scripts/newui/report_a_player_v2.lua" />
+	</if>
+	
+	<if condition="!cg_newMainInterface">
+		<lua file="/ui/scripts/report_a_player.lua" />
+	</if>
+
+</package>

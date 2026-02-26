@@ -1,0 +1,430 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+
+	<template name="replay_list_file">
+		<panel texture="/ui/elements/line_break.tga" color="1 1 1 .1">
+			<label x="0.5h" height="100%" textvalign="center" font="dyn_10" color="white" shadow="true" content="{file}"/>
+		</panel>
+	</template>
+	
+	<template name="replay_participant">
+		<panel height="2.7h" color="invisible" watch="ReplayInfoPlayer{slot}" ontrigger="SetVisible(!StringEmpty(param0));">
+			<panel height="2.5h" width="2.5h" valign="center">
+				<image texture="/heroes/chronos/icon.tga" watch="ReplayInfoPlayer{slot}" ontrigger="SetTexture(param4);" />
+				<frame color="invisible" bordercolor=".3 .3 .3 1" borderthickness="1" noclick="1" />
+			</panel>
+			<label x="3.2h" height="100%" textvalign="center" font="dyn_10" color="white" shadow="1" watch="ReplayInfoPlayer{slot}" ontrigger="SetText(param0); SetColor(param1);" />
+		</panel>
+	</template>
+	
+	<panel name="replay_viewer" visible="0">
+		<instance
+			name="header_bar"
+			height="2.5h"
+			lbl="replayv_header_replay_viewer"
+			show_close="1"
+			onclick="
+				PlaySound('/shared/sounds/ui/menu/slide_off.wav');
+				Call('main_replay_button', 'SetEnabled(true);');
+				Call('right_widgets', 'SlideX(\'72%\', 500);');
+				Call('replay_viewer', 'SleepWidget(500, \'HideWidget();\');');
+				_main_replay_open = 0;
+				HideGroup('main_button_effects');				
+				
+				
+			"
+		/>		
+		<instance name="tip_mark" tip_id="replayviewer_tip" width="1.8h" height="1.8h" x="10.0h" y="0.3h" />
+		
+		<panel y="2.8h" width="-0.6h" align="center" height="3.3h">
+			<instance name="tab_bar" />
+			
+			<panel x="0.5h" height="-1.0h" valign="center" width="14.0h">
+				<frame
+					visible="1"
+					texture="/ui/info/button_down.tga"
+					borderthickness="0.4h"
+					color="white"
+				/>
+				<label width="100%" height="100%" textvalign="center" textalign="center" valign="center" align="left" font="dyn_10" color="white" shadow="true" noclick="true" blockinput="false" shadowcolor="black">replayv_button_local_replays</label>
+			</panel>
+			
+			<panel
+				x="15.0h"
+				height="-1.0h"
+				valign="center"
+				width="14.0h"
+				onmouseover="ShowWidget('onlinereplays_tip');"
+				onmouseout="HideWidget('onlinereplays_tip');"
+			
+			>
+				<frame
+					visible="1"
+					texture="/ui/info/button.tga"
+					borderthickness="0.4h"
+					color="1 1 1 1"
+					noclick="1"
+				/>
+				<label width="100%" height="100%" textvalign="center" textalign="center" valign="center" align="left" font="dyn_10" color="white" shadow="true" noclick="true" blockinput="false" shadowcolor="black">replayv_button_online_replays</label>
+			</panel>
+			
+		</panel>
+		
+		<panel y="6.4h" width="-0.6h" height="-10.0h" align="center" color="invisible" visible="1">		
+			<!-- File List -->
+			<panel width="16.0h" height="27.0h" valign="top" align="left" color="invisible">
+				<instance name="header_bar" height="2.5h" lbl="replayv_header_replay_list"/>				
+				<panel valign="bottom" height="-2.7h">
+					<frame color=".05 .07 .1 .5" bordercolor="#455166" borderthickness="1" noclick="1" />
+					<!-- TODO: We need something to make hovered items look different than selected items -->
+					<listbox
+						name="replay_listbox"
+						y="0.5h"
+						x="0.5h"
+						width="-3.0h"
+						height="-5.1h"
+						align="left"
+						valign="top"
+						color="invisible"
+						font="dyn_10"
+						itemwidth="100%"
+						itemheight="2.3h"
+						highlight="under"
+						highlightcolor="#67a7da62"
+						highlightbordercolor="invisible"
+						select="true"						
+						clearselection="true"
+						hoverselect="false"						
+						exteriorscrollbars="1"
+						scrollbarplaceholder="false"
+						scrollbarsize="2.0h" 						
+						scrolltexture="/ui/info/combobox.tga"						
+						handleheight="2.0h"
+						onselect="Call('replay_display', 'FadeIn(250);'); Call('replay_teams', 'FadeIn(250);'); Call('button_replay_winner', 'SetEnabled(true);'); Call('button_replay_download_compat', 'SetVisible(true);'); SetReplayInfo(this);"
+						onshow="Clear(); RefreshReplayList();"
+						onhide="Clear();"
+						watch="ReplayList"
+						ontrigger="AddTemplateListItem('replay_list_file', param, 'file', FilenameGetName(param));"
+						ondoubleclick="StartInfoReplay(this);"
+					/>
+					
+					<instance
+						name="button2"
+						button_name="button_replay_view"
+						label="replayv_button_view_replay"
+						y="-0.8h"
+						height="2.4h"
+						width="-2.0h"
+						font="dyn_10"
+						align="center"
+						valign="bottom"
+						enabled="false"
+						onclick="StartReplay(replay_listbox);"
+						watch="ReplayInfoGame"
+						ontrigger="SetEnabled(!StringEmpty(param0)); SetVisible(param10 or StringEmpty(param0));"
+					/>
+					
+					<instance
+						name="button2"
+						button_name="button_replay_download_compat"
+						label="replayv_button_download_compat"
+						y="-0.8h"
+						height="2.4h"
+						width="-2.0h"
+						font="dyn_10"
+						align="center"
+						enabled="false"
+						valign="bottom"
+						onclick="DownloadCompat(_replay_compat_version);"
+						watch="ReplayInfoGame"
+						ontrigger="SetVisible(!param10 and !StringEmpty(param0)); CreateString('_replay_compat_version', param1);"
+					/>
+				</panel>
+			</panel>
+			
+			<!-- Replay Info -->
+			<panel width="-16.5h" height="27.0h" valign="top" align="right" color="invisible">
+				<instance name="header_bar" height="2.5h" lbl="replayv_header_replay_details"/>
+				
+				<!-- No Replay Selected -->
+				<panel valign="bottom" height="-2.7h">
+					<frame texture="/ui/info/backdrop.tga" borderthickness="4.0h" color="1 1 1 .75" noclick="1" />
+					<frame color=".05 .07 .1 .5" bordercolor="#455166" borderthickness="1" noclick="1" />		
+					<image texture="/ui/elements/logo.tga" width="70@" height="70%" align="center" valign="center" color="1 1 1 .3" />
+					<label y="10.6h" width="-4.0h" height="6.0h" textalign="center" align="center" font="dyn_10" color="white" shadow="1" wrap="1">replayv_label_replay_detail_info</label>
+				</panel>
+				
+				<!-- Replay Selected Display -->
+				<panel name="replay_display" valign="bottom" height="-2.7h" color="0 0 0 1" visible="0">
+					<frame color=".05 .07 .1 .5" bordercolor="#455166" borderthickness="1" noclick="1" />
+					
+					<panel y="0.4h" width="-1.0h" align="center" float="bottom" padding="0.1h">
+					
+						<panel height="2.0h" color="invisible">
+							<label height="100%" textvalign="center" textalign="left" valign="center" align="center" font="dyn_10" color="yellow" shadow="true" shadowcolor="black" noclick="1" content="replayv_label_match_id"/>
+							<label x="10.5h" height="100%" textvalign="center" textalign="left" valign="center" align="center" font="dyn_10" color="white" shadow="true" shadowcolor="black" noclick="1" watch="ReplayInfoGame" ontrigger="If(param0 != 0, SetText(param0), SetText(Translate('general_local')));" />
+						</panel>
+						
+						<panel height="2.0h" color="invisible">
+							<label height="100%" textvalign="center" textalign="left" valign="center" align="center" font="dyn_10" color="yellow" shadow="true" shadowcolor="black" noclick="1" content="replayv_label_version"/>
+							<label x="10.5h" height="100%" textvalign="center" textalign="left" valign="center" align="center" font="dyn_10" color="white" shadow="true" shadowcolor="black" noclick="1" watch="ReplayInfoGame" ontrigger="SetText(param1);" />
+						</panel>
+						
+						<panel height="2.0h" color="invisible">
+							<label height="100%" textvalign="center" textalign="left" valign="center" align="center" font="dyn_10" color="yellow" shadow="true" shadowcolor="black" noclick="1" content="replayv_label_date_played"/>
+							<label x="10.5h" height="100%" textvalign="center" textalign="left" valign="center" align="center" font="dyn_10" color="white" shadow="true" shadowcolor="black" noclick="1" watch="ReplayInfoGame" ontrigger="SetText(param2);" />
+						</panel>
+						
+						<panel height="2.0h" color="invisible">
+							<label height="100%" textvalign="center" textalign="left" valign="center" align="center" font="dyn_10" color="yellow" shadow="true" shadowcolor="black" noclick="1" content="replayv_label_match_length"/>
+							<label x="10.5h" height="100%" textvalign="center" textalign="left" valign="center" align="center" font="dyn_10" color="white" shadow="true" shadowcolor="black" noclick="1" watch="ReplayInfoGame" ontrigger="If(param3 > 0, SetText(param3 # 'h ' # param4 # 'm' # param5 # 's'), If(param4 > 0, SetText(param4 # 'm' # param5 # 's'), SetText(param5 # 's')));"/>
+						</panel>
+						
+						<panel height="2.0h" color="invisible">
+							<label height="100%" textvalign="center" textalign="left" valign="center" align="center" font="dyn_10" color="yellow" shadow="true" shadowcolor="black" noclick="1" content="replayv_label_map"/>
+							<label x="10.5h" height="100%" textvalign="center" textalign="left" valign="center" align="center" font="dyn_10" color="white" shadow="true" shadowcolor="black" noclick="1" watch="ReplayInfoGame" ontrigger="SetText(param6);"/>
+						</panel>
+						
+						<panel height="2.0h" color="invisible">
+							<label height="100%" textvalign="center" textalign="left" valign="center" align="center" font="dyn_10" color="yellow" shadow="true" shadowcolor="black" noclick="1" content="replayv_label_game_mode"/>
+							<label x="10.5h" height="100%" textvalign="top" textalign="left" valign="center" align="center" font="dyn_10" color="white" shadow="true" shadowcolor="black" noclick="1" watch="ReplayInfoGame" ontrigger="SetText(param7);"/>
+						</panel>
+						
+						<panel height="10.1h" color="invisible">
+							<label height="100%" textvalign="top" textalign="left" valign="center" align="center" font="dyn_9" color="white" shadow="true" shadowcolor="black" noclick="1" wrap="1" watch="ReplayInfoGame" ontrigger="SetText(Translate('replay_viewer_game_options', 'options', param8));"/>
+						</panel>
+						
+						<panel y="-1.0h" height="3.0h" valign="bottom" color="invisible">						
+							<label height="100%" textvalign="center" textalign="center" valign="center" align="center" font="dyn_12" color="#3abde7" shadow="true" shadowcolor="black" noclick="1" watch="ReplayInfoGame" ontrigger="SetText(param9);"/>
+
+							<instance
+								name="button2"
+								button_name="button_replay_winner"
+								label="replayv_button_view_match_winner"
+								y="0"
+								height="2.4h"
+								width="-2.0h"
+								font="dyn_10"
+								align="center"
+								valign="center"
+								visible="1"
+								onclick="SetVisible(false);"
+							/>
+						</panel>					
+					</panel>					
+				</panel>				
+			</panel>
+		
+			<!-- Team Lists -->
+			<panel name="replay_teams" y="-2.8h" height="26.2h" valign="bottom" visible="0">
+			
+				<!-- Legion Team List -->
+				<panel align="left" x="0.2h" width="18.4h" color="invisible" noclick="1" visible="1">					
+					
+					<image y="3.8h" x="3.8h" height="4.6h" width="18.4h" align="center" valign="bottom" texture="/ui/elements/heroselection/team_legion.tga"/>
+					
+					<panel x="1.1h" y="8.3h" height="-8.3h" color="invisible" noclick="1">
+						<image y="-1.0h" width="24.0h" height="24.0h" valign="top" align="center" texture="/ui/elements/lobby/mainlobby_top_left.tga" color="1 1 1 .4" />
+												
+						<image y="0.3h" height="4.0h" width="-0.4h" uscale=".37" utile="1" align="center" valign="bottom" texture="/ui/frames/stone_b_brown.tga" noclick="1"/>
+						<image x="-2.3h" width="4.0h" vscale=".37" vtile="1" align="left" valign="bottom" texture="/ui/frames/stone_l_brown.tga" noclick="1"/>
+						<image x="2.3h" width="4.0h" vscale=".37" vtile="1" align="right" valign="bottom" texture="/ui/frames/stone_r_brown.tga" noclick="1"/>
+						
+						<image x="-2.2h" y="0.4h" height="8.0h" width="16.0h" align="left" valign="bottom" texture="/ui/frames/stone_bl_brown.tga" noclick="1"/>		
+						
+						<image x="2.2h" y="0.4h" height="8.0h" width="16.0h" align="right" valign="bottom" texture="/ui/frames/stone_br_brown.tga" noclick="1"/>
+						
+						<panel y="0.4h" height="-0.5h" width="-2.0h" align="center" float="bottom" padding="0.5h" color="invisible" noclick="1">
+							<instance name="replay_participant" slot="0" />
+							<instance name="replay_participant" slot="1" />
+							<instance name="replay_participant" slot="2" />
+							<instance name="replay_participant" slot="3" />
+							<instance name="replay_participant" slot="4" />
+						</panel>
+						
+					</panel>
+					
+					<image width="28.0h" height="14.0h" valign="top" align="left" texture="/ui/elements/cc_header.tga" />
+					<image x="7.4h" y="1.3h" width="5.8h" height="5.8h" valign="top" align="left" texture="/ui/elements/crest_legion.tga" />					
+				</panel>
+				
+				<!-- Hellbourne Team List -->
+				<panel align="left" x="22.2h" width="18.4h" color="invisible" noclick="1" visible="1">
+					
+					<image y="3.8h" x="-1.8h" height="4.6h" width="18.4h" align="center" valign="bottom" texture="/ui/elements/heroselection/team_hellbourne.tga"/>
+					
+					<panel x="1.1h" y="8.3h" height="-8.3h" color="invisible" noclick="1">
+						<image y="-1.0h" width="24.0h" height="24.0h" valign="top" align="center" texture="/ui/elements/lobby/mainlobby_top_right.tga" color="1 1 1 .4" />
+						
+						<image y="0.3h" height="4.0h" width="-0.4h" uscale=".37" utile="1" align="center" valign="bottom" texture="/ui/frames/stone_b_brown.tga" noclick="1"/>
+						<image x="-2.3h" width="4.0h" vscale=".37" vtile="1" align="left" valign="bottom" texture="/ui/frames/stone_l_brown.tga" noclick="1"/>
+						<image x="2.3h" width="4.0h" vscale=".37" vtile="1" align="right" valign="bottom" texture="/ui/frames/stone_r_brown.tga" noclick="1"/>
+						
+						<image x="-2.2h" y="0.4h" height="8.0h" width="16.0h" align="left" valign="bottom" texture="/ui/frames/stone_bl_brown.tga" noclick="1"/>		
+						
+						<image x="2.2h" y="0.4h" height="8.0h" width="16.0h" align="right" valign="bottom" texture="/ui/frames/stone_br_brown.tga" noclick="1"/>
+						
+						<panel y="0.4h" height="-0.5h" width="-2.0h" align="center" float="bottom" padding="0.5h" color="invisible" noclick="1">
+							<instance name="replay_participant" slot="5" />
+							<instance name="replay_participant" slot="6" />
+							<instance name="replay_participant" slot="7" />
+							<instance name="replay_participant" slot="8" />
+							<instance name="replay_participant" slot="9" />
+						</panel>
+						
+					</panel>					
+					
+					<image width="28.0h" height="14.0h" valign="top" align="left" texture="/ui/elements/cc_header.tga" />
+					<image x="7.4h" y="1.1h" width="6.0h" height="6.0h" valign="top" align="left" texture="/ui/elements/crest_hellbourne.tga" />					
+				</panel>
+
+			</panel>
+			
+		</panel>
+		
+		<instance name="generic_tooltip_resizey" x="10.0h" y="3.5h" width="22.0h" tip_id="replayviewer_tip" title="replayv_header_replay_viewer" label="replayv_tip_replay_list" />
+		<instance name="generic_tooltip_resizey" x="16.0h" y="6.3h" width="22.0h" tip_id="onlinereplays_tip" title="replayv_button_online_replays" label="replayv_tip_online_replays" />
+		
+		<instance
+			name="button2" button_name="unnamedButton59"
+			y="0.4h"
+			label="replayv_button_close_window"
+			height="2.4h"
+			width="50%"
+			font="dyn_10"
+			align="center"
+			valign="bottom"
+			onclick="
+				PlaySound('/shared/sounds/ui/menu/slide_off.wav');
+				Call('main_replay_button', 'SetEnabled(true);');
+				Call('right_widgets', 'SlideX(\'72%\', 500);');
+				Call('replay_viewer', 'SleepWidget(500, \'HideWidget();\');');
+				_main_replay_open = 0;
+				HideGroup('main_button_effects');	
+			"
+		/>
+		
+		<!-- Compatibilty archive calculating -->
+		<panel width="100%" height="100%" visible="false" color="0.0 0.0 0.0 0.66" align="center" noclick="1" watch="CompatCalculating" ontrigger="SetVisible(param);">
+			<panel width="24h" height="9.5h" align="center" valign="center" color="invisible" noclick="1">
+				<frame texture="/ui/frames/tooltip_bg.tga" color="#2c4b6c" borderthickness=".6h" align="left" valign="top"/>
+				<frame texture="/ui/frames/roundframe.tga" color="#2c4b6c" borderthickness=".6h"/>
+
+				<panel x="0.5h" height="-1.0h" width="-1.0h" valign="center" color="invisible">
+					<label y="0.5h" height="1.3h" width="100%" textvalign="center" textalign="center" shadow="true" font="dyn_12" color="#3abde7" noclick="1" content="replay_compat_calculating" />
+					<label y="2.4h" height="1.1h" width="100%" textvalign="center" textalign="center" align="center" shadow="true" font="dyn_9" color="1 0.7 0 1" noclick="1" watch="CompatVersion" ontrigger="SetText(Translate('replay_compat_version', 'version', param));" content="replay_compat_version" />
+					
+					<instance
+						name="button2" button_name="unnamedButton60"
+						id="replay_compat_button2"
+						y="-0.5h"
+						width="13h"
+						height="2.2h"
+						align="center"
+						valign="bottom"
+						font="dyn_9"
+						label="general_cancel"
+						onclick="CancelCompat();"
+						enabled="false"
+					/>
+				</panel>
+			</panel>
+		</panel>
+		
+		<!-- Compatibilty archive downloading -->
+		<panel width="100%" height="100%" visible="false" color="0.0 0.0 0.0 0.66" align="center" noclick="1" watch="CompatDownloading" ontrigger="SetVisible(param);">
+			<panel width="24h" height="22h" align="center" valign="center" color="invisible" noclick="1">
+				<frame texture="/ui/frames/tooltip_bg.tga" color="#2c4b6c" borderthickness=".6h" align="left" valign="top"/>
+				<frame texture="/ui/frames/roundframe.tga" color="#2c4b6c" borderthickness=".6h"/>
+
+				<panel x="0.5h" height="-1.0h" width="-1.0h" valign="center" color="invisible">
+					<label y="0.5h" height="1.3h" width="100%" textvalign="center" textalign="center" shadow="true" font="dyn_12" color="#3abde7" noclick="1" content="replay_compat_downloading" />
+					<label y="2.4h" height="1.1h" width="100%" textvalign="center" textalign="center" align="center" shadow="true" font="dyn_9" color="1 0.7 0 1" noclick="1" watch="CompatVersion" ontrigger="SetText(Translate('replay_compat_version', 'version', param));" />
+					
+					<panel x="1.0h" y="5.0h" width="100%" height="0" align="right" color="invisible" noclick="true" passivechildren="true">
+						<label y="0.1h" height="1.1h" textvalign="center" shadow="true" font="dyn_9" color="1 0.7 0" watch="CompatFilesLeft" ontrigger="SetText(Translate('replay_compat_files', 'count', param0, 'total', param1));" watch1="CompatMessage" ontrigger1="SetVisible(param != 1 and param != 7);"  />
+						<label y="1.9h" height="1.1h" textvalign="center" shadow="true" font="dyn_9" color="1 0.7 0" watch="CompatProgress" ontrigger="SetText(Translate('replay_compat_progress', 'count', param0, 'total', param1));" watch1="CompatMessage" ontrigger1="SetVisible(param != 1 and param != 7);" />
+						<label y="3.8h" height="1.1h" textvalign="center" shadow="true" font="dyn_9" color="1 0.7 0" watch="CompatSpeed" ontrigger="SetText(Translate('replay_compat_speed', 'speed', param));" watch1="CompatMessage" ontrigger1="SetVisible(param != 1 and param != 7);" />
+						<label y="5.7h" height="1.1h" textvalign="center" shadow="true" font="dyn_9" color="1 0.7 0" watch="CompatTime" ontrigger="SetText(Translate('replay_compat_time', 'time', param));" watch1="CompatMessage" ontrigger1="SetVisible(param != 1 and param != 7);" />
+					</panel>
+					
+					<frame
+						y="-4.5h"
+						width="90%" height="3h"
+						align="center" valign="bottom"
+						borderthickness="0.3h"
+						color="invisible" bordercolor="white"
+						watch="CompatPercent" ontrigger="SetVisible(param != 2);"
+					>
+						<panel x="0.7h" y="0.7h" width="-1.4h" height="-1.4h">
+							<panel
+								width="50%"
+								color="white"
+								watch="CompatPercent"
+								ontrigger="SetWidth(FtoP(param));"
+							/>
+						</panel>
+					</frame>
+
+					<instance
+						name="button2" button_name="unnamedButton61"
+						id="replay_compat_button"
+						y="-0.5h"
+						width="13h"
+						height="2.2h"
+						align="center"
+						valign="bottom"
+						font="dyn_9"
+						label="general_cancel"
+						onclick="CancelCompat();"
+					/>
+				</panel>
+			</panel>
+		</panel>
+				
+		<!-- Compatibilty archive writing -->
+		<panel width="100%" height="100%" visible="false" color="0.0 0.0 0.0 0.66" align="center" noclick="1" watch="CompatWriting" ontrigger="SetVisible(param);">
+			<panel width="24h" height="13.5h" align="center" valign="center" color="invisible" noclick="1">
+				<frame texture="/ui/frames/tooltip_bg.tga" color="#2c4b6c" borderthickness=".6h" align="left" valign="top"/>
+				<frame texture="/ui/frames/roundframe.tga" color="#2c4b6c" borderthickness=".6h"/>
+
+				<panel x="0.5h" height="-1.0h" width="-1.0h" valign="center" color="invisible">
+					<label y="0.5h" height="1.3h" width="100%" textvalign="center" textalign="center" shadow="true" font="dyn_12" color="#3abde7" noclick="1" content="replay_compat_writing" />
+					<label y="2.4h" height="1.1h" width="100%" textvalign="center" textalign="center" align="center" shadow="true" font="dyn_9" color="1 0.7 0 1" noclick="1" watch="CompatVersion" ontrigger="SetText(Translate('replay_compat_version', 'version', param));" content="replay_compat_version" />
+										
+					<frame
+						y="-4.5h"
+						width="90%" height="3h"
+						align="center" valign="bottom"
+						borderthickness="0.3h"
+						color="invisible" bordercolor="white"
+						watch="CompatWritePercent" ontrigger="SetVisible(param != 2);"
+					>
+						<panel x="0.7h" y="0.7h" width="-1.4h" height="-1.4h">
+							<panel
+								width="50%"
+								color="white"
+								watch="CompatWritePercent"
+								ontrigger="SetWidth(FtoP(param));"
+							/>
+						</panel>
+					</frame>
+
+					<instance
+						name="button2" button_name="unnamedButton62"
+						id="replay_compat_button2"
+						y="-0.5h"
+						width="13h"
+						height="2.2h"
+						align="center"
+						valign="bottom"
+						font="dyn_9"
+						label="general_cancel"
+						onclick="CancelCompat();"
+					/>
+				</panel>
+			</panel>
+		</panel>
+	</panel>
+
+</package>

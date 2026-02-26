@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+	<template name="movement_tooltip">
+		<frame
+			name="movement_tooltip"
+			texture="/ui/frames/rounded_bg_white.tga"
+			borderthickness="0.6h"
+			color="0 0 0 .75"
+			visible="false"
+			align="right"
+			valign="bottom"
+			width="27h"
+			height="3h"
+			float="bottom"
+			grow="1" regrow="1" growinvis="0"
+		>		
+			<frame texture="/ui/frames/roundframe.tga" borderthickness="0.6h" bordercolor="#434d50"/>
+			<anchor x="1.0h" y="0.6h" />
+
+			<panel
+				width="-2.0h"
+				height="1.8h"
+			>
+				<label
+					width="66%"
+					textalign="left"
+					font="dyn_10"
+					color="white"
+					watch="ActiveMoveSpeed"
+					ontriggerlua="self:SetText(Translate('tooltip_move_speed') .. round(param1))"
+				/>
+				<label
+					width="33%"
+					align="right"
+					textalign="left"
+					font="dyn_10"
+					color="white"
+					watch="ActiveMoveSpeed"
+					ontriggerlua="
+						local diff = (tonumber(param1) - tonumber(param0))
+						if (diff == 0.0) then
+							self:ClearText()
+						elseif (diff > 0.0) then
+							self:SetText('^777(' .. round(param0) .. ' ^g+' .. round(diff) .. '^777)')
+						else
+							self:SetText('^777(' .. round(param0) .. ' ^r' .. round(diff) .. '^777)')
+						end
+					"
+				/>
+			</panel>
+			
+			<panel width="-2.0h" height="0.55h" sticky="true" stickytoinvis="false" />
+		</frame>
+	</template>
+</package>

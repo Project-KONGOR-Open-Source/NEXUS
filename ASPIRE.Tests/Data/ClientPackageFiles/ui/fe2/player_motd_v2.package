@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+
+	<template name="player_motd">
+		<panel name="player_motd" y="-210%" align="center" width="-2.7h" visible="{visible=0}" valign="center" noclick="1"
+			onshowlua="GetWidget('main_bottom'):SlideY('45h',250)"
+			onhidelua="GetWidget('main_bottom'):SlideY('0',250) if isNewUI() then Homepage_V2:InitMotd() end"
+			>
+
+			<panel height="193%" noclick="1">
+				<panel name="player_motd_parent" align="right" visible="true" noclick="1">
+					<panel name="web_browser_motd" x="1h" y="-0.6h" width="-2.0h" height="-2.0h" align="left" valign="bottom" noclick="1">
+						<panel name="web_browser_motd_insert" noclick="1"/>
+
+						<if condition="!ui_webBrowser" >
+							<panel color="0 0 0 1" noclick="1">
+								<label x="2" y="2" font="dyn_10" color="1 1 1 1" shadow="true" content="Your client does not support this feature." noclick="1"/>
+							</panel>
+						</if>
+					</panel>
+				</panel>
+			</panel>
+
+			<panel width="2.0h" y="2.2h" x="-4.5h" height="2.0h" align="right" noclick="1">
+				<button
+					color="invisible"
+					onclick="PlaySound('/shared/sounds/ui/ccpanel/button_close_02.wav'); Set('_mainmenu_currentpanel', 'player_motd'); CallEvent('MainMenuPanelSwitcher');"
+					onmouseover="PlaySound('/shared/sounds/ui/ccpanel/button_over_01.wav');"
+				>
+					<widgetstate statename="up">
+						<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.5h" color="#520000" blockinput="false" noclick="1"/>
+						<frame texture="/ui/frames/roundframe.tga" color="0 0 0 1" borderthickness="0.5h" blockinput="false" noclick="1"/>
+						<image width="1.3h" height="1.3h" align="center" valign="center" color=".75 .75 .75 1" texture="/ui/elements/closex.tga" noclick="1"/>
+					</widgetstate>
+					<widgetstate statename="over">
+						<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.5h" color="#c50000" blockinput="false" noclick="1"/>
+						<frame texture="/ui/frames/roundframe.tga" color="0 0 0 1" borderthickness="0.5h" blockinput="false" noclick="1"/>
+						<image width="1.3h" height="1.3h" align="center" valign="center" color="1 1 1 1" texture="/ui/elements/closex.tga" noclick="1"/>
+					</widgetstate>
+					<widgetstate statename="down" x="1" y="1">
+						<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.5h" color="#9c0000" blockinput="false" noclick="1"/>
+						<frame texture="/ui/frames/roundframe.tga" color="0 0 0 1" borderthickness="0.5h" blockinput="false" noclick="1"/>
+						<image width="1.3h" height="1.3h" align="center" valign="center" color="1 1 1 1" texture="/ui/elements/closex.tga" noclick="1"/>
+					</widgetstate>
+				</button>
+			</panel>
+
+		</panel>
+	</template>
+</package>

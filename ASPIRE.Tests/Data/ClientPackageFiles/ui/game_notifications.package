@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+	<if condition="!cg_newMainInterface">
+		<template name="sp_notification_history_close_btn_template">
+			<!-- Remove From History List  -->
+			<panel x="{x=0}" y="{y=0.1h}" width="1.5h" height="1.5h" valign="{valign=top}" align="{align=right}" color="invisible" visible="{visible=1}">
+				<button
+					name="sp_notification_history_template_{index}_button_3"
+					color="invisible"
+					onclicklua="PlaySound('/shared/sounds/ui/ccpanel/notification_close.wav') HoN_Notifications.NotificationButtonClicked(3, {index}, 'history')"
+					onmouseover="Set({var=sp_notification_history_template_?_mouseover}, true);"
+					onmouseout="Set({var=sp_notification_history_template_?_mouseover}, false); Call('{call}', 'DoEvent(1)');"
+				>
+					<widgetstate statename="up">
+						<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.3h" color="{up_color}" blockinput="false" noclick="true"/>
+						<frame texture="/ui/frames/roundframe.tga" color="{framecolor=0 0 0 1}" borderthickness="0.3h" blockinput="false" noclick="true"/>
+						<image width="1.3h" height="1.3h" align="center" valign="center" color=".75 .75 .75 1" texture="/ui/fe2/elements/closex.tga" noclick="true" />
+					</widgetstate>
+					<widgetstate statename="over">
+						<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.3h" color="{over_color}" blockinput="false" noclick="true"/>
+						<frame texture="/ui/frames/roundframe.tga" color="{framecolor=0 0 0 1}" borderthickness="0.3h" blockinput="false" noclick="true"/>
+						<image width="1.3h" height="1.3h" align="center" valign="center" color="1 1 1 1" texture="/ui/fe2/elements/closex.tga" noclick="true" />
+					</widgetstate>
+					<widgetstate statename="down" x="1" y="1">
+						<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.3h" color="{dn_color}" blockinput="false" noclick="true"/>
+						<frame texture="/ui/frames/roundframe.tga" color="{framecolor=0 0 0 1}" borderthickness="0.3h" blockinput="false" noclick="true"/>
+						<image width="1.3h" height="1.3h" align="center" valign="center" color="1 1 1 1" texture="/ui/fe2/elements/closex.tga" noclick="true" />
+					</widgetstate>
+				</button>
+			</panel>
+		</template>
+
+		<template name="sp_notification_history_expand_btn_template">
+			<!-- Notification History Maximize -->
+			<panel name="sp_notification_history_expand_btn_{index}" x="{x=0}" y="{y=0.1h}" width="1.5h" height="1.5h" valign="{valign=top}" align="{align=left}" color="invisible" visible="{visible=1}" passivechildren="1" noclick="1" >
+				<button noclick="1" color="invisible" >
+					<widgetstate statename="up">
+						<image width="1.3h" height="1.3h" align="center" valign="center" color=".75 .75 .75 1" rotation="0" texture="/ui/fe2/elements/notification_expand.tga" noclick="true" />
+					</widgetstate>
+					<widgetstate statename="over">
+						<image width="1.3h" height="1.3h" align="center" valign="center" color="1 1 1 1" rotation="0" texture="/ui/fe2/elements/notification_expand.tga" noclick="true" />
+					</widgetstate>
+					<widgetstate statename="down" x="1" y="1">
+						<image width="1.3h" height="1.3h" align="center" valign="center" color=".1 1 1 1" rotation="0" texture="/ui/fe2/elements/notification_expand.tga" noclick="true" />
+					</widgetstate>
+				</button>
+			</panel>
+		</template>
+
+		<template name="sp_notification_toast_template">
+			<panel name="sp_notification_sleeper_{index}" noclick="1" color="invisible"/>
+			<panel name="sp_notification_toast_template_{index}" group="sp_notification_toast_templates" width="25h" height="6.5h" sticky="1" stickytoinvis="0" visible="0" noclick="0" align="right" valign="top"
+				oninstantiatelua="Set('sp_notification_toast_template_{index}_mouseover', false, 'bool');"
+				onrightclicklua="HoN_Notifications.NotificationButtonClicked(3, {index}, 'toast')"
+				onmouseoverlua=""
+				onmouseover=""
+				onmouseout="
+					Set(sp_notification_toast_template_{index}_mouseover, false);
+					DoEvent(1);
+				"
+				onevent1lua="GetWidget('sp_notification_sleeper_{index}', 'game'):Sleep(1, function() GetWidget('sp_notification_toast_template_{index}'):DoEvent() end)"
+				onevent="
+					If(!sp_notification_toast_template_{index}_mouseover,
+						Split(
+							Call('sp_notification_toast_template_{index}_buttons', 'FadeOut(100)'),
+							Call('sp_notification_toast_template_{index}_game_info', 'FadeOut(100)')
+						)
+					);
+				"
+				oneventlua="
+					if (not GetCvarBool('sp_notification_toast_template_{index}_mouseover')) then
+						HoN_Notifications.MouseoverToastNotification(false, {index})
+						if (not (HoN_Notifications.toastWidgetTable[{index}].isClosing or
+							HoN_Notifications.toastWidgetTable[{index}].isOpening)) then
+
+							self:ScaleHeight('6.5h', 100)
+							GetWidget('sp_notification_sleeper_{index}', 'game'):Sleep(101, function() HoN_Notifications.toastWidgetTable[{index}].isOpen = false end)
+						end
+					end
+				"
+			>
+				<frame texture="/ui/frames/rounded_bg_blue.tga" borderthickness="0.6h" color=".6 .6 .6 .6" blockinput="0" noclick="1" visible="1" />
+				<frame texture="/ui/frames/roundframe.tga" color=".2 .2 .2 1" borderthickness="0.6h" blockinput="false" noclick="1" />
+
+				<panel y="0.3h" x="0.3h" height="5.9h" width="5.9h" noclick="1">
+					<image name="sp_notification_toast_template_{index}_icon" texture="{icon=/ui/fe2/store/icons/account_icons/default.tga}" noclick="1"  />
+				</panel>
+
+				<panel x="6.0h" height="5.9h" width="-6.0h" noclick="1" >
+					<panel height="2.5h" x="5%" width="-5%" noclick="1" >
+						<label name="sp_notification_toast_template_{index}_label_1" align="left" height="100%" width="100%" textalign="left" textvalign="center" font="dyn_11" color="{namecolor=white}" shadow="true" content="" noclick="1" visible="1" />
+					</panel>
+					<panel height="-3.5h" y="2.0h" x="5%" width="-5%" noclick="1" >
+						<label name="sp_notification_toast_template_{index}_label_2" align="left" height="100%" width="100%" textalign="left" textvalign="top" font="dyn_9" color="1 1 1 1" shadow="true" content="" noclick="1" visible="1" wrap="1" />
+					</panel>
+					<panel height="1.1h" valign="bottom"  x="5%" width="-5%" noclick="1" >
+						<label name="sp_notification_toast_template_{index}_label_3" align="left" height="100%" width="100%" textalign="left" textvalign="center" font="dyn_8" color="0.7 0.7 0.7 1" shadow="true" content="" noclick="1" visible="1" />
+					</panel>
+				</panel>
+
+				<panel name="sp_notification_toast_template_{index}_game_info" visible="0" y="0.3h" height="8.9h" width="-2" align="center" noclick="1" color="0 0 0 0.93" float="bottom" padding="0.2h"
+				>
+					<panel x="0" y="0" height="1.7h" noclick="1" sticky="1" stickytoinvis="0" >
+						<label name="sp_notification_toast_template_{index}_label_4" align="left" height="100%" width="100%" textalign="center" textvalign="center" font="dyn_11" color="#ffb300" shadow="true" content="" noclick="1" visible="1" />
+					</panel>
+
+					<panel height="1.8h" align="center" noclick="1" float="right" padding="0.5h" sticky="1" stickytoinvis="0" >
+						<label name="sp_notification_toast_template_{index}_label_5" align="left" height="100%" width="100%" textalign="center" textvalign="top" font="dyn_9" color="1 1 1 1" shadow="true" content="" noclick="1" visible="1" wrap="1" />
+					</panel>
+
+					<panel grow="1" regrow="1" growinvis="0" align="center" noclick="1" float="right" padding="0.2h" sticky="0" stickytoinvis="0" >
+						<image name="sp_notification_toast_template_{index}_icon_1" visible="1" texture="$invis" align="left" sticky="1" stickytoinvis="0" height="2.4h" width="2.4h" noclick="0" />
+						<image name="sp_notification_toast_template_{index}_icon_2" visible="1" texture="$invis" align="left" sticky="1" stickytoinvis="0" height="2.4h" width="2.4h" noclick="0" />
+						<image name="sp_notification_toast_template_{index}_icon_3" visible="{isVerifiedOnly=1}" texture="/ui/icons/verified.tga" align="left" sticky="1" stickytoinvis="0" height="2.4h" width="2.4h" noclick="0" />
+
+						<image name="sp_notification_toast_template_{index}_icon_4" visible="{isCasualMode=1}" texture="/ui/icons/casual.tga" align="left" sticky="1" stickytoinvis="0" height="2.4h" width="2.4h" noclick="0" />
+						<image name="sp_notification_toast_template_{index}_icon_5" visible="{isHardcore=1}" texture="/ui/icons/hardcore.tga" align="left" sticky="1" stickytoinvis="0" height="2.4h" width="2.4h" noclick="0" />
+						<image name="sp_notification_toast_template_{index}_icon_6" visible="{isGated=1}" texture="/ui/icons/gated.tga" align="left" sticky="1" stickytoinvis="0" height="2.4h" width="2.4h" noclick="0" />
+						<image name="sp_notification_toast_template_{index}_icon_7" visible="{isAdvOptions=1}" texture="/ui/icons/more.tga" align="left" sticky="1" stickytoinvis="0" height="2.4h" width="2.4h" noclick="0" />
+					</panel>
+					<panel grow="1" regrow="1" growinvis="0" align="center" noclick="1" float="right" padding="0.2h" sticky="1" stickytoinvis="0" >
+						<image name="sp_notification_toast_template_{index}_icon_8"  visible="{isAutoBalanced=1}" texture="/ui/icons/autobalance.tga" align="left" sticky="1" stickytoinvis="0" height="2.4h" width="2.4h" noclick="0" />
+						<image name="sp_notification_toast_template_{index}_icon_9"  visible="0" oninstantiate="SetVisible({statsLevel=0} == 1);" texture="/ui/icons/official.tga" align="left" sticky="1" stickytoinvis="0" height="2.4h" width="2.4h" noclick="0" />
+						<image name="sp_notification_toast_template_{index}_icon_10" visible="0" oninstantiate="SetVisible({statsLevel=0} == 2);" texture="/ui/icons/official_2.tga" align="left" sticky="1" stickytoinvis="0" height="2.4h" width="2.4h" noclick="0" />
+						<image name="sp_notification_toast_template_{index}_icon_11" visible="{isNoLeaver=1}" texture="/ui/icons/noleaver.tga" align="left" sticky="1" stickytoinvis="0" height="2.4h" width="2.4h" noclick="0" />
+						<image name="sp_notification_toast_template_{index}_icon_12" visible="{isPrivate=1}" texture="/ui/icons/private.tga" align="left" sticky="1" stickytoinvis="0" height="2.4h" width="2.4h" noclick="0" />
+						<image name="sp_notification_toast_template_{index}_icon_13" visible="{isDevHeroes=1}" texture="/ui/icons/devheroes.tga" align="left" sticky="1" stickytoinvis="0" height="2.4h" width="2.4h" noclick="0" />
+						<image name="sp_notification_toast_template_{index}_icon_14" visible="{isBots=1}" texture="/ui/icons/botmatch.tga" align="left" sticky="1" stickytoinvis="0" height="2.4h" width="2.4h" noclick="0" />
+					</panel>
+				</panel>
+
+				<panel name="sp_notification_toast_template_{index}_buttons" visible="0" y="-0.3h" height="2.3h" width="100%" valign="bottom" align="center" noclick="1" sticky="true" stickytoinvis="false"
+					onshow="Call('sp_notification_history_expand_btn_toast_{index}', 'SetVisible(0);');"
+					onhide="Call('sp_notification_history_expand_btn_toast_{index}', 'SetVisible(1);');"
+				>
+					<instance name="button2"
+						button_name="sp_notification_toast_template_{index}_button_1"
+						x="-0.3h"
+						width="47%" height="2.2h"
+						align="right" valign="bottom"
+						borderthickness="0.5h"
+						label="general_ignore"
+						onclicklua=""
+						onmouseoverlua="HoN_Notifications.MouseoverToastNotification(true, {index})"
+						onmouseover="Set(sp_notification_toast_template_{index}_mouseover, true);"
+						onmouseout="Set(sp_notification_toast_template_{index}_mouseover, false); Call('sp_notification_toast_template_{index}', 'DoEvent(1)');"
+						labelgroup="sp_notification_toast_template_{index}_buttons_1"
+					/>
+					<instance name="button2"
+						button_name="sp_notification_toast_template_{index}_button_2"
+						x="0.3h"
+						width="47%" height="2.2h"
+						align="left" valign="bottom"
+						borderthickness="0.5h"
+						label="general_approve"
+						onclicklua=""
+						onmouseoverlua="HoN_Notifications.MouseoverToastNotification(true, {index})"
+						onmouseover="Set(sp_notification_toast_template_{index}_mouseover, true);"
+						onmouseout="Set(sp_notification_toast_template_{index}_mouseover, false); Call('sp_notification_toast_template_{index}', 'DoEvent(1)');"
+						labelgroup="sp_notification_toast_template_{index}_buttons_2"
+					/>
+				</panel>
+
+				<instance name="sp_notification_history_close_btn_template" call="sp_notification_toast_template_{index}" var="sp_notification_toast_template_{index}_mouseover" visible="1" x="-0.3h" y="0.3h" align="right" valign="top" index="toast_{index}" framecolor=".7 .7 .7 1" up_color=".3 .3 .3 1" over_color=".5 .5 .5 1" dn_color=".4 .4 .4 1" />
+				<instance name="sp_notification_history_expand_btn_template" call="sp_notification_toast_template_{index}" var="sp_notification_toast_template_{index}_mouseover" visible="0" x="0.2h" y="0.2h" align="left" valign="top" index="toast_{index}" framecolor=".7 .7 .7 1" up_color=".3 .3 .3 1" over_color=".5 .5 .5 1" dn_color=".4 .4 .4 1" />
+			</panel>
+		</template>
+
+		<template name="notification_toast_game">
+			<panel name="notification_toast_game" y="2.5h" width="25.0h" align="right" padding="0.4h" color="invisible" noclick="1"
+			>
+				<instance name="sp_notification_toast_template" index="4" label_1="1" label_2="2" label_3="3" label_4="4" label_5="5" hasExpandBtns="1" hasHoverInfo="1" icon="/ui/fe2/store/icons/account_icons/default.tga" namecolor="red" scaleheight="11.9h" />
+
+				<instance name="sp_notification_toast_template" index="5" label_1="1" label_2="2" label_3="3" label_4="4" label_5="5" hasExpandBtns="1" hasHoverInfo="1" icon="/ui/fe2/store/icons/account_icons/default.tga" namecolor="red" scaleheight="11.9h" />
+
+				<instance name="sp_notification_toast_template" index="6" label_1="1" label_2="2" label_3="3" label_4="4" label_5="5" hasExpandBtns="1" hasHoverInfo="1" icon="/ui/fe2/store/icons/account_icons/default.tga" namecolor="red" scaleheight="11.9h" />
+			</panel>
+		</template>
+
+		<template name="notification_toast_game_spec">
+			<panel name="notification_toast_game_spec" y="2.5h" x="-0.5h" width="25.0h" noclick="1" visible="true" align="right" padding="0.4h" color="invisible">
+				<instance name="sp_notification_toast_template" index="7" label_1="1" label_2="2" label_3="3" label_4="4" label_5="5" hasExpandBtns="1" hasHoverInfo="1" icon="/ui/fe2/store/icons/account_icons/default.tga" namecolor="red" scaleheight="11.9h" />
+				<instance name="sp_notification_toast_template" index="8" label_1="1" label_2="2" label_3="3" label_4="4" label_5="5" hasExpandBtns="1" hasHoverInfo="1" icon="/ui/fe2/store/icons/account_icons/default.tga" namecolor="red" scaleheight="11.9h" />
+				<instance name="sp_notification_toast_template" index="9" label_1="1" label_2="2" label_3="3" label_4="4" label_5="5" hasExpandBtns="1" hasHoverInfo="1" icon="/ui/fe2/store/icons/account_icons/default.tga" namecolor="red" scaleheight="11.9h" />
+			</panel>
+		</template>
+	</if>
+	<if condition="cg_newMainInterface">
+		<include file="/ui/fe2/newui/notification_toast_item.package"/>
+
+		<template name="notification_toast_game">
+			<panel name="notification_toast_game" y="-5h" width="26h" height="60h" align="right" valign="center" noclick="1"
+				float="bottom" padding="1"
+				onshowlua="systemMessages:initGameChatMessages()"
+			>
+				<instance name="sys_chat_message_item" id="1" fromInterface="game"/>
+				<instance name="sys_chat_message_item" id="2" fromInterface="game"/>
+				<instance name="sys_chat_message_item" id="3" fromInterface="game"/>
+				<instance name="sys_chat_message_item" id="4" fromInterface="game"/>
+				<instance name="sys_chat_message_item" id="5" fromInterface="game"/>
+				<instance name="sys_chat_message_item" id="6" fromInterface="game"/>
+			</panel>
+		</template>
+
+		<template name="notification_toast_game_spec">
+			<panel name="notification_toast_game_spec" y="-5h" width="26h" height="60h" align="right" valign="center" noclick="1"
+				onshowlua="systemMessages:initGameSpecChatMessages()"
+			>
+				<instance name="sys_chat_message_item" id="1" fromInterface="game_spectator"/>
+				<instance name="sys_chat_message_item" id="2" fromInterface="game_spectator"/>
+				<instance name="sys_chat_message_item" id="3" fromInterface="game_spectator"/>
+				<instance name="sys_chat_message_item" id="4" fromInterface="game_spectator"/>
+				<instance name="sys_chat_message_item" id="5" fromInterface="game_spectator"/>
+				<instance name="sys_chat_message_item" id="6" fromInterface="game_spectator"/>
+			</panel>
+		</template>
+	</if>
+</package>

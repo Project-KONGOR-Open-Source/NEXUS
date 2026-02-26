@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<package>
+	
+	<panel name="dev_blank_backer" noclick="1" color="0 0 0 0.8" />
+
+	<trigger name="Bang6" />
+	
+	<trigger name="BangTestStatus" />
+	<trigger name="BangTestResult" />
+	<form		
+		name="BangTestForm"
+		host="!masterserver"
+		method="POST"
+		target="/store_requester.php"
+		statustrigger="BangTestStatus"
+		resulttrigger="BangTestResult"
+		resultparam0="responseCode"
+		resultparam1="product_id"
+		resultparam2="errorCode"
+		resultparam3="popupCode"
+		resultparam4="requestHostTime"
+		resultparam5="quantity_remaining"
+		ssl="false"
+	/>	
+	<panel noclick="1" name="store_test_form"
+		onevent="CallEventParamsX(name, 0, 1283);"
+		onevent0="SubmitForm('StorePromoUnitQuantity', 'product_id', param0, 'request_code', '9', 'cookie', GetCookie(), 'account_id', GetAccountID(), 'hosttime', HostTime);"
+	/>	
+	
+</package>

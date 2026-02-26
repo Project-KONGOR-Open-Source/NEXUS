@@ -1,0 +1,319 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+	<lua file="/ui/scripts/newui/teammaking_v2.lua"/>
+
+	<template name="teammaking_member_template">
+		<panel width="60i" noclick="1">
+			<panel name="teammaking_member_{id}_me" visible="0"
+				onrightclicklua="Teammaking_V2:OnRightClickTeamMember({id})"
+				onmouseoverlua="Teammaking_V2:OnMouseOverTeamMember({id})"
+				onmouseoutlua="Teammaking_V2:OnMouseOutTeamMember({id})"
+			>
+				<image name="teammaking_member_{id}_me_icon" width="48i" height="48i" align="center" valign="center" noclick="1"/>
+				<image texture="/ui/fe2/newui/res/teammaking/border_me.png" width="64i" height="64i" align="center" valign="center" noclick="1"/>
+				<image name="teammaking_member_{id}_me_leader" texture="/ui/fe2/newui/res/teammaking/leader.png" x="10i" y="-16i" width="32i" height="32i" align="right" noclick="1" visible="0"/>
+			</panel>
+			<panel name="teammaking_member_{id}_other" visible="0"
+				onrightclicklua="Teammaking_V2:OnRightClickTeamMember({id})"
+				onmouseoverlua="Teammaking_V2:OnMouseOverTeamMember({id})"
+				onmouseoutlua="Teammaking_V2:OnMouseOutTeamMember({id})"
+			>
+				<image name="teammaking_member_{id}_other_icon" width="46i" height="46i" align="center" valign="center" noclick="1" />
+				<image texture="/ui/fe2/newui/res/teammaking/border_other.png" width="64i" height="64i" align="center" valign="center" noclick="1"/>
+				<image name="teammaking_member_{id}_other_leader" texture="/ui/fe2/newui/res/teammaking/leader.png" x="10i" y="-14i" width="32i" height="32i" align="right" noclick="1" visible="0"/>
+			</panel>
+			<button
+				name="teammaking_member_{id}_empty"
+				width="50i"
+				height="50i"
+				align="center"
+				valign="center"
+				color="invisible"
+				onmouseover="PlaySound('/shared/sounds/ui/button_over_01.wav');"
+				enabled="{enabled=true}"
+				onclick="PlaySound('{sound=/shared/sounds/ui/button_click_01.wav}');"
+				onclicklua="Teammaking_V2:ToggleInvitePanel()"
+				onmouseoverlua="Common_V2:ShowSimpleTip(true, 'newui_teammaking_clicktoinvite', '250i')"
+				onmouseoutlua="Common_V2:ShowSimpleTip(false)"
+			>
+				<widgetstate statename="up">
+					<image texture="/ui/fe2/newui/res/teammaking/team.png" width="64i" height="64i" align="center" valign="center" noclick="1" />
+				</widgetstate>
+				<widgetstate statename="over">
+					<image texture="/ui/fe2/newui/res/teammaking/team_over.png" width="64i" height="64i" align="center" valign="center" noclick="1" />
+				</widgetstate>
+				<widgetstate statename="down" x="1" y="1">
+					<image texture="/ui/fe2/newui/res/teammaking/team_over.png" width="64i" height="64i" align="center" valign="center" noclick="1" />
+				</widgetstate>
+				<widgetstate statename="disabled">	
+					<image texture="/ui/fe2/newui/res/teammaking/team.png" width="64i" height="64i" align="center" valign="center" rendermode="grayscale" noclick="1" />
+				</widgetstate>
+			</button>
+		</panel>
+	</template>
+
+	<template name="teammaking_search_autocomplete_template">
+		<panel name="teammaking_search_autocomplete_{id}" width="100%" height="47i"
+			   onclicklua="Teammaking_V2:OnClickAutoComplete({id})"
+			   ondoubleclicklua="Teammaking_V2:OnDoubleClickAutoComplete({id})"
+			   onmouseover="Call('teammaking_search_autocomplete_{id}_hover', 'FadeIn(75)');"
+			   onmouseout="Call('teammaking_search_autocomplete_{id}_hover', 'FadeOut(75)');"
+			   onmousewheeldown="CallEvent('teammaking_invite_autocompelete_scroll', 1);"
+			   onmousewheelup="CallEvent('teammaking_invite_autocompelete_scroll', 0);">
+			<image texture="/ui/fe2/newui/res/common/hline.png" width="110%" height="1" align="center" valign="bottom" noclick="1"/>
+			<image texture="/ui/fe2/newui/res/common/list_item_bg.png" y="-1" height="16i" align="center" valign="bottom" noclick="1"/>
+			<image name="teammaking_search_autocomplete_{id}_hover" texture="/ui/fe2/newui/res/teammaking/highlight.png" width="113.3%" height="64i" align="center" valign="center" noclick="1" visible="0"/>
+			<panel width="36i" height="36i" valign="center" noclick="1">
+				<instance name="newui_custom_frame_template"/>
+				<image name="teammaking_search_autocomplete_{id}_icon" texture="/ui/fe2/store/icons/account_icons/default.tga" width="-4i" height="-4i" align="center" valign="center" noclick="1"/>
+			</panel>
+			
+			<panel x="45i" width="-45i" noclick="1">
+				<label name="teammaking_search_autocomplete_{id}_name" y="-12i" valign="center" textalign="left" textvalign="center" font="dyn_12" color="#f0d3c1" outline="1" outlinecolor="#230000" noclick="1"/>
+				<image name="teammaking_search_autocomplete_{id}_status_icon" texture="$invis" y="10i" width="16i" height="16i" valign="center" noclick="1"/>
+				<label name="teammaking_search_autocomplete_{id}_status_text" x="16i" color="#a99081" font="dyn_9" y="10i" valign="center" textvalign="center" outline="1" outlinecolor="#230000" noclick="1"/>
+			</panel>
+			
+			<image name="teammaking_search_autocomplete_{id}_invited" texture="/ui/fe2/newui/res/teammaking/dot.png" x="-10i" width="16i" height="16i" align="right" valign="center" noclick="1" visible="0"/>
+		</panel>
+	</template>
+
+	<template name="teammaking_template">
+		<panel name="teammaking_trigger_help" width="1" height="1" noclick="1" onframelua="Teammaking_V2:OnFrame()"/>
+		<panel name="teammaking" x="{x=-440i}" y="{y=-14i}" align="{align=center}" valign="{valign=bottom}" width="440i" height="60i" noclick="1" onloadlua="Teammaking_V2:Init()">
+			<panel align="left" valign="bottom" noclick="1" width="310i" float="right">
+				<instance name="teammaking_member_template" id="1"/>
+				<instance name="teammaking_member_template" id="2"/>
+				<instance name="teammaking_member_template" id="3"/>
+				<instance name="teammaking_member_template" id="4"/>
+				<instance name="teammaking_member_template" id="5"/>
+			</panel>
+			<image name="teammaking_logo" texture="/ui/fe2/newui/res/teammaking/logo.png" x="67i" y="1i" width="256i" height="64i" noclick="1" align="right" valign="center"/>
+			<button
+				name="main_playerinfo_play"
+				width="130i"
+				height="42i"
+				align="right"
+				valign="center"
+				color="invisible"
+				onmouseover="PlaySound('/shared/sounds/ui/button_over_01.wav');"
+				enabled="{enabled=true}"
+				onclick="PlaySound('{sound=/shared/sounds/ui/button_click_01.wav}');"
+				onclicklua="Teammaking_V2:OnClickPlay()"
+				visible="0"
+			>
+				<widgetstate statename="up">
+					<image texture="/ui/fe2/newui/res/teammaking/play.png" x="-1i" y="-1i" width="256i" height="64i" align="center" valign="center" noclick="1" />
+					<image texture="/ui/fe2/newui/res/teammaking/play_icon.png" x="-35i" width="32i" height="32i" align="center" valign="center" noclick="1" />
+					<label textalign="left" textvalign="center" x="50i" content="newui_teammaking_play" font="dyn_14" color="#cae4e5" outline="1" outlinecolor="#0a2c2d" noclick="1"/>
+				</widgetstate>
+				<widgetstate statename="over">
+					<image texture="/ui/fe2/newui/res/teammaking/play_over.png" x="-1i" y="-1i" width="256i" height="64i" align="center" valign="center" noclick="1" />
+					<image texture="/ui/fe2/newui/res/teammaking/play_icon_over.png" x="-35i" width="32i" height="32i" align="center" valign="center" noclick="1" />
+					<label textalign="left" textvalign="center" x="50i" content="newui_teammaking_play" font="dyn_14" color="#ebfffe" outline="1" outlinecolor="#0a2c2d" noclick="1"/>
+				</widgetstate>
+				<widgetstate statename="down" x="1" y="1">
+					<image texture="/ui/fe2/newui/res/teammaking/play_over.png" x="-1i" y="-1i" width="256i" height="64i" align="center" valign="center" noclick="1" />
+					<image texture="/ui/fe2/newui/res/teammaking/play_icon_over.png" x="-35i" width="32i" height="32i" align="center" valign="center" noclick="1" />
+					<label textalign="left" textvalign="center" x="50i" content="newui_teammaking_play" font="dyn_14" color="#ebfffe" outline="1" outlinecolor="#0a2c2d" noclick="1"/>
+				</widgetstate>
+				<widgetstate statename="disabled">
+					<image texture="/ui/fe2/newui/res/teammaking/play.png" x="-1i" y="-1i" width="256i" height="64i" align="center" valign="center" noclick="1" rendermode="grayscale"/>
+					<image texture="/ui/fe2/newui/res/teammaking/play_icon.png" x="-35i" width="32i" height="32i" align="center" valign="center" noclick="1" rendermode="grayscale"/>
+					<label textalign="left" textvalign="center" x="50i" content="newui_teammaking_play" font="dyn_14" color="gray" outline="1" outlinecolor="#111111" noclick="1"/>
+				</widgetstate>
+			</button>
+
+			<panel name="teammaking_invite" y="-110%" width="320i" height="314i" valign="bottom" visible="0" hotkey="ESC" onhotkeylua="Teammaking_V2:ToggleInvitePanel()"
+					onshowlua="GetWidget('teammaking_trigger_help'):RegisterWatch('ChatAutoCompleteAdd', function(_, ...) Teammaking_V2:OnChatAutoCompleteAdd(...) end)
+								GetWidget('teammaking_trigger_help'):RegisterWatch('ChatAutoCompleteClear', function(_, ...) Teammaking_V2:OnChatAutoCompleteClear(...) end)"
+					onhidelua="GetWidget('teammaking_trigger_help'):UnregisterWatch('ChatAutoCompleteAdd')
+								GetWidget('teammaking_trigger_help'):UnregisterWatch('ChatAutoCompleteClear')"
+			>
+				<frame texture="/ui/fe2/newui/res/common/frames/popupframe.png" borderthickness="4i"/>
+				<image texture="/ui/fe2/newui/res/teammaking/bar.png" y="-14i" width="+2i" height="64i" align="center" noclick="1"/>
+				<instance name="newui_button_close_template" x="-5i" y="3i" align="right" onclicklua="Teammaking_V2:ToggleInvitePanel()"/>
+				<label textalign="center" font="dyn_12" y="8i" color="#f0d3c1" outline="1" outlinecolor="#230000" content="newui_teammaking_inviteplayer" noclick="1" />
+				<panel y="36i" height="40i">
+					<panel width="-76i" x="4i">
+						<instance name="newui_custom_frame_template" valign="center" height="-6i"/>
+						<textbox name="teammaking_invite_search" align="right" width="-25i" color="invisible" font="dyn_12" textcolor="#f0d3c1" outline="1" outlinecolor="#230000" 
+							     textalign="left" textvalign="center" 
+								 vmargin="10i" maxlength="15" onshow="SetFocus(true);" onhide="EraseInputLine(); Call('teammaking_invite_enter_name', 'SetVisible(1);');"
+								 onesc="EraseInputLine();"
+								 onevent1lua="Teammaking_V2:OnClickInvite()"
+								 onenter="DoEvent(1);"
+								 onchangelua="Teammaking_V2:OnTextChange()"
+						/>
+						<label name="teammaking_invite_enter_name" x="25i" color="#6b574e" textvalign="center" font="dyn_11" shadow="true" content="newui_teammaking_entername" noclick="1"/>
+					</panel>
+					<image texture="/ui/fe2/newui/res/teammaking/search.png" x="9i" width="16i" height="16i" valign="center" noclick="1"/>
+					
+					<instance name="newui_common_button_2_template" button_name="teammaking_invite_doinvite" label="newui_teammaking_invite" font="dyn_12" onclicklua="Teammaking_V2:OnClickInvite()"
+							  enabled="0" width="64i" height="32i" x="-5i" align="right" valign="center" clicksound="/shared/sounds/ui/revamp/invite_click.wav"
+					/>
+				</panel>
+
+				<panel name="teammaking_invite_autocomplete" x="8i" y="76i" width="-15i" height="-76i" visible="0">
+					<panel width="-15i" grow="1" float="bottom">
+						<instance name="teammaking_search_autocomplete_template" id="1"/>
+						<instance name="teammaking_search_autocomplete_template" id="2"/>
+						<instance name="teammaking_search_autocomplete_template" id="3"/>
+						<instance name="teammaking_search_autocomplete_template" id="4"/>
+						<instance name="teammaking_search_autocomplete_template" id="5"/>
+					</panel>
+
+					<scrollbar name="teammaking_invite_autocompelete_scroll" width="12i" valign="center" scrollbarsize="12i" handlewidth="12i" handleheight="25i"							
+							   texture="/ui/fe2/newui/res/common/scroll/scroll.png" scrollbarplaceholder="true" align="right" 
+							   minvalue="1"
+							   maxvalue="1"							
+							   step="1"
+							   value="1"
+							   vertical="true"
+							   slotwidth="0.6h" slotheight="1"
+							   onevent1="SetValue(GetValue+1);"
+							   onevent0="SetValue(GetValue-1);"
+							   onslidelua="Teammaking_V2:UpdateInviteAutoCompleteList()"
+							/>
+				</panel>
+
+				<panel name="teammaking_invite_noautocomplete" x="8i" y="76i" width="-15i" height="-76i" visible="1">
+					<label wrap="true" textalign="center" textvalign="center" font="dyn_16" content="mm3_coop_inviteperson_desc" color="#f0d3c1" outline="1" outlinecolor="#230000" noclick="1"/>
+				</panel>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="teammaking_info_floater_mvp_template">
+		<panel name="teammaking_info_floater_mvp_{id}" width="{width=100%}" height="{height=100%}">
+			<image name="teammaking_info_floater_mvp_{id}_icon" y="-12i" texture="$invis" width="90i" height="90i" align="center" noclick="1" />
+			<label name="teammaking_info_floater_mvp_{id}_text" y="-2i" textalign="center" textvalign="bottom" font="dyn_12" color="#d7b6a2" outline="1" outlinecolor="#230000" noclick="1"/>
+		</panel>
+	</template>
+
+	<template name="teammaking_info_floater_other_template">
+		<panel width="{width=100%}" height="{height=100%}" align="{align}" valign="{valign}">
+			<panel grow="1" regrow="1" y="-6i" height="32i" noclick="1" align="center" valign="center" float="right">
+				<image texture="/ui/fe2/newui/res/homepage/{icon}.png" width="32i" height="32i" valign="center" noclick="1"/>
+				<label width="100i" height="32i" valign="center" textalign="left" textvalign="center" font="dyn_11" content="{content}" 
+					   color="#f1dbcb" outline="1" outlinecolor="#230000" noclick="1" 
+					   onloadlua="  local text = Translate('{content}')
+									local stringWidth = self:GetStringWidth(text)
+									self:SetWidth(stringWidth)
+					             "
+				/>
+			</panel>
+			<label name="teammaking_info_floater_other_{icon}_value" y="12i" textalign="center" textvalign="center" font="dyn_11" content="-" color="#d7b6a2" outline="1" outlinecolor="#230000" noclick="1" />
+		</panel>
+	</template>
+
+	<template name="teammaking_info_floater_con_template">
+		<panel name="teammaking_info_floater_con_{id}" width="{width=100%}" height="{height=100%}" visible="0" stickytoinvis="false">
+			<image name="teammaking_info_floater_con_{id}_icon" x="18i" texture="$invis" width="100i" height="100i" valign="center" noclick="1"/>
+			<label name="teammaking_info_floater_con_{id}_title" x="133i" height="32i" textvalign="center" font="dyn_12" color="#f2dbcb" outline="0" outlinecolor="#230000"/>
+			<label name="teammaking_info_floater_con_{id}_level" x="133i" height="74i" textvalign="center" font="dyn_10" color="#9a7c71" outline="1" outlinecolor="#230000"/>
+			<panel x="133i" y="50i" width="283i" height="48i" float="right">
+				<instance name="newui_custom_frame_template"/>
+				<anchor x="0"/>
+				<if condition="cl_GarenaEnable">
+					<panel width="83i">
+						<label y="-8i" textalign="center" textvalign="center" font="dyn_10" color="#a08476" outline="1" outlinecolor="#230000" content="newui_mapselection_wins" />
+						<label name="teammaking_info_floater_con_{id}_wins" y="8i" textalign="center" textvalign="center" font="dyn_10" color="#f1d9c1" outline="0" outlinecolor="#230000" content="newui_mapselection_wins" />
+					</panel>
+					<panel width="2i">
+						<image texture="/ui/fe2/newui/res/common/line2.png" width="2i" height="85%" noclick="1" valign="center"/>
+					</panel>
+					<panel width="93i">
+						<label y="-8i" textalign="center" textvalign="center" font="dyn_10" color="#a08476" outline="1" outlinecolor="#230000" content="newui_mapselection_losses" />
+						<label name="teammaking_info_floater_con_{id}_losses" y="8i" textalign="center" textvalign="center" font="dyn_10" color="#f1d9c1" outline="0" outlinecolor="#230000" content="newui_mapselection_wins" />
+					</panel>
+					<panel width="2i">
+						<image texture="/ui/fe2/newui/res/common/line2.png" width="2i" height="85%" noclick="1" valign="center"/>
+					</panel>
+					<panel width="-180i">
+						<label y="-8i" textalign="center" textvalign="center" font="dyn_10" color="#a08476" outline="1" outlinecolor="#230000" content="newui_mapselection_winstreaks" />
+						<label name="teammaking_info_floater_con_{id}_winstreaks" y="8i" textalign="center" textvalign="center" font="dyn_10" color="#f1d9c1" outline="0" outlinecolor="#230000" content="newui_mapselection_wins" />
+					</panel>
+				</if>
+				<if condition="!cl_GarenaEnable">
+					<panel width="50%">
+						<label y="-8i" textalign="center" textvalign="center" font="dyn_10" color="#a08476" outline="1" outlinecolor="#230000" content="newui_mapselection_wins" />
+						<label name="teammaking_info_floater_con_{id}_wins" y="8i" textalign="center" textvalign="center" font="dyn_10" color="#f1d9c1" outline="0" outlinecolor="#230000" content="newui_mapselection_wins" />
+					</panel>
+					<panel width="2i">
+						<image texture="/ui/fe2/newui/res/common/line2.png" width="2i" height="85%" noclick="1" valign="center"/>
+					</panel>
+					<panel width="50%">
+						<label y="-8i" textalign="center" textvalign="center" font="dyn_10" color="#a08476" outline="1" outlinecolor="#230000" content="newui_mapselection_losses" />
+						<label name="teammaking_info_floater_con_{id}_losses" y="8i" textalign="center" textvalign="center" font="dyn_10" color="#f1d9c1" outline="0" outlinecolor="#230000" content="newui_mapselection_wins" />
+					</panel>
+					<panel width="-180i" visible="0">
+						<label y="-8i" textalign="center" textvalign="center" font="dyn_10" color="#a08476" outline="1" outlinecolor="#230000" content="newui_mapselection_winstreaks" />
+						<label name="teammaking_info_floater_con_{id}_winstreaks" y="8i" textalign="center" textvalign="center" font="dyn_10" color="#f1d9c1" outline="0" outlinecolor="#230000" content="newui_mapselection_wins" />
+					</panel>
+				</if>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="teammaking_info_floater_template">
+		<floater name="teammaking_info_floater" x="22" y="-22" width="435i" visible="0" grow="1" regrow="1" growinvis="false" noclick="1" float="bottom">
+			<instance name="newui_custom_frame_template" alpha="1"/>
+			<anchor y="0"/>
+			<panel width="100%" height="95i">
+				<image texture="/ui/fe2/newui/res/common/line.png" width="105%" height="2i" align="center" valign="bottom" noclick="1"/>
+
+				<panel width="70i" height="70i" x="16i" y="15i">
+					<instance name="newui_custom_frame_template" alpha="1"/>
+					<image name="teammaking_info_floater_playericon" texture="$invis" width="-4i" height="-4i" align="center" valign="center" noclick="1"/>
+				</panel>
+				<label name="teammaking_info_floater_playername" x="100i" y="-20i" textalign="left" textvalign="center" font="dyn_12" color="#f0d3c1" outline="1" outlinecolor="#230000" content="-" noclick="1"/>
+				<label name="teammaking_info_floater_playerlevel" x="100i" y="0" textalign="left" textvalign="center" font="dyn_10" color="#c2b0a3" outline="1" outlinecolor="#230000" content="-" noclick="1"/>
+				<image name="teammaking_info_floater_chatsymbol" x="-20i" y="17i" width="40i" height="40i" texture="$invis" align="right" noclick="1"/>
+
+				<panel x="100i" y="-10i" width="512i" height="16i" valign="bottom" noclick="1">
+					<image texture="/ui/fe2/newui/res/homepage/exp_bg.png" noclick="1"/>
+					<panel width="311i" x="1i" noclick="1">
+						<panel name="teammaking_info_floater_levelpercent" width="50%" noclick="1" clip="1">
+							<image texture="/ui/fe2/newui/res/homepage/exp.png" width="311i" noclick="1"/>
+						</panel>
+						<label name="teammaking_info_floater_levelexp" textalign="center" textvalign="center" font="dyn_9" color="#e4ffff" outline="1" outlinecolor="#0d5a68" noclick="1"/>
+					</panel>
+				</panel>
+			</panel>
+			<panel width="100%" height="85i">
+				<panel width="420i" align="center" float="right">
+					<instance name="teammaking_info_floater_mvp_template" width="20%" id="1"/>
+					<instance name="teammaking_info_floater_mvp_template" width="20%" id="2"/>
+					<instance name="teammaking_info_floater_mvp_template" width="20%" id="3"/>
+					<instance name="teammaking_info_floater_mvp_template" width="20%" id="4"/>
+					<instance name="teammaking_info_floater_mvp_template" width="20%" id="5"/>
+				</panel>
+				<image texture="/ui/fe2/newui/res/common/line.png" width="105%" height="2i" align="center" valign="bottom" noclick="1"/>
+			</panel>
+			<panel width="100%" height="60i">
+				<if condition="!cl_GarenaEnable">
+					<panel width="-40i" align="center">
+						<image texture="/ui/fe2/newui/res/common/line2.png" height="90%" width="2i" noclick="1" align="center" valign="center"/>
+						<instance name="teammaking_info_floater_other_template" width="50%" icon="matches" content="newui_general_matches"/>
+						<instance name="teammaking_info_floater_other_template" width="50%" align="right" icon="avatars" content="newui_general_avatars"/>
+					</panel>
+				</if>
+
+				<if condition="cl_GarenaEnable">
+					<panel width="-40i" align="center" float="right">
+						<instance name="teammaking_info_floater_other_template" width="33.3%" icon="matches" content="newui_general_matches"/>
+						<image texture="/ui/fe2/newui/res/common/line2.png" width="2i" noclick="1" valign="center"/>
+						<instance name="teammaking_info_floater_other_template" width="33.3%" align="right" icon="heroes" content="newui_general_heroes"/>
+							<image texture="/ui/fe2/newui/res/common/line2.png" width="2i" noclick="1" valign="center"/>
+						<instance name="teammaking_info_floater_other_template" width="33.3%" align="right" icon="avatars" content="newui_general_avatars"/>
+					</panel>
+				</if>
+
+				<image texture="/ui/fe2/newui/res/common/line.png" width="105%" height="2i" align="center" valign="bottom" noclick="1"/>
+			</panel>
+			<instance name="teammaking_info_floater_con_template" height="113i" id="normal"/>
+			<instance name="teammaking_info_floater_con_template" height="113i" id="casual"/>
+		</floater>
+	</template>
+</package>

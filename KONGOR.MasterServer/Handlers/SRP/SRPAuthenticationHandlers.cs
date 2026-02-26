@@ -319,13 +319,25 @@ public static class SRPAuthenticationHandlers
         return dataPoints;
     }
 
-    private static Dictionary<string, OneOf<StoreItemData, StoreItemDiscountCoupon>> SetOwnedStoreItemsData(
+    private static Dictionary<string, OneOf<object, Dictionary<string, object>>> SetOwnedStoreItemsData(
         Account account)
     {
-        Dictionary<string, OneOf<StoreItemData, StoreItemDiscountCoupon>> items = account.User.OwnedStoreItems
+        long now = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+        long forever = now + 999999999;
+        
+        Dictionary<string, OneOf<object, Dictionary<string, object>>> items = account.User.OwnedStoreItems
             .Where(item => item.StartsWith("ma.").Equals(false) && item.StartsWith("cp.").Equals(false))
-            .ToDictionary<string, string, OneOf<StoreItemData, StoreItemDiscountCoupon>>(upgrade => upgrade,
-                upgrade => new StoreItemData());
+            .ToDictionary<string, string, OneOf<object, Dictionary<string, object>>>(upgrade => upgrade,
+                upgrade => new Dictionary<string, object>
+                {
+                    { "data", "" },
+                    { "start_time", now.ToString() },
+                    { "end_time", forever.ToString() },
+                    { "used", 0 },
+                    { "score", "0" },
+                    { "expiration_date", "0" },
+                    { "perm", "1" }
+                });
 
         // TODO: Add Mastery Boosts And Coupons
 

@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+	<trigger name="ReceiveRevivalStatus" />
+	<trigger name="ReceiveRevivalResult" />
+	<form
+		name="FormReceiveRevival"
+		host="!masterserver"
+		target="/client_requester.php?f=receive_revival_gift"
+		statustrigger="ReceiveRevivalStatus"
+		resulttrigger="ReceiveRevivalResult"
+		resultparam0=""
+		ssl="false"
+		php="false"
+	/>
+
+	<template name="honevent_revivalletter">
+		<panel name="honevent_revivalletter" x="-7h" y="-10h" align="center" valign="center" width="50h" height="40h" visible="0" noclick="1">
+			<!-- <effectpanel name="00honevent_revivalletter_effect00"
+				x="70h"
+				y="16h"
+				camerawidth="145a"
+				cameraheight="145"
+				noclick="0"
+				oninstantiatelua="self:StartEffect('/ui/fe2/newui/res/effects/return_glow.effect', 0.5, 0.5, '1 1 1', 1)"
+			/> -->
+			<image width="1024i" height="512i" align="center" valign="center" texture="/ui/fe2/newui/res/event/revival_letter_bg.png" noclick="1"/>
+
+			<panel x="2h" y="4h" width="-18h" height="4h" align="right" noclick="1">
+				<label name="honevent_revivalletter_title" textvalign="center" font="dyn_14" color="#f0d3c1" outline="1" outlinecolor="#230000" noclick="1"/>
+			</panel>
+			<panel x="2h" y="7.5h" width="-18h" height="20h" align="right" noclick="1">
+				<label name="honevent_revivalletter_content" textvalign="center" wrap="1" font="dyn_12" color="#a4806f" outline="1" outlinecolor="#230000" noclick="1"/>
+			</panel>
+			<panel x="2h" y="27h" width="-18h" height="4h" align="right" noclick="1">
+				<label name="honevent_revivalletter_ending" textalign="right" textvalign="center" font="dyn_14" color="#a4806f" outline="1" outlinecolor="#230000" noclick="1"/>
+			</panel>
+
+			<instance name="store2_buy_button" btname="honevent_revivegift"
+				x="7h" y="-3h" align="center" valign="bottom" width="22h" height="3h"
+				label="honevent_receive_your_gift"
+				onclicklua="HoNEvent:ClickRevivalLetter()"
+			/>
+		</panel>
+	</template>
+
+	<template name="honevent_listitem">
+		<panel name="honevent_listitem_{id}" width="100%" height="90i" sticky="1" stickytoinvis="0" noclick="0"
+			onmouseoverlua="
+				PlaySound('/shared/sounds/ui/button_over_02.wav')
+				if HoNEvent:GetSelectedEvent() ~= '{id}' then
+					GetWidget('honevent_listitem_{id}_highlight'):FadeIn(150)
+					GetWidget('honevent_listitem_{id}_title'):SetColor('#f0d3c1')
+				end
+			"
+			onmouseoutlua="
+				if HoNEvent:GetSelectedEvent() ~= '{id}' then
+					GetWidget('honevent_listitem_{id}_highlight'):FadeOut(150)
+					GetWidget('honevent_listitem_{id}_title'):SetColor('#a99081')
+				end
+			"
+			onclicklua="if HoNEvent:GetSelectedEvent() ~= '{id}' then HoNEvent:SelectEvent('{id}') end"
+		>
+			<image align="center" valign="bottom" width="110%" height="1i" visible="1" texture="/ui/fe2/newui/res/common/hline.png" noclick="1"/>
+			<image name="honevent_listitem_{id}_highlight" x="-1" valign="center" width="256i" height="128i" visible="0" texture="/ui/fe2/newui/res/event/honevent_item_highlight.png" noclick="1"/>
+			<image texture="/ui/fe2/newui/res/common/list_item_bg.png" y="-1" height="16i" align="center" valign="bottom" noclick="1"/>
+
+			<panel x="90i" width="-90i" height="50%" valign="center" noclick="1">
+				<label name="honevent_listitem_{id}_title" wrap="1" textvalign="center" font="dyn_10" color="#a99081" outline="1" outlinecolor="#230000" noclick="1"/>
+			</panel>
+
+			<panel x="16i" valign="center" width="66i" height="66i" noclick="1">
+				<image name="honevent_listitem_{id}_icon" width="66i" height="66i" align="center" valign="center" texture="/ui/fe2/newui/res/system_message/msg_type3.png" noclick="1"/>
+				<frame width="+2" height="+2" align="center" valign="center" borderthickness="1" bordercolor="#48332A" color="invisible" noclick="1"/>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="honevent_revival_subitem">
+		<panel name="honevent_revival_subitem{type}{id}" width="132i" height="152i" visible="0" noclick="1">
+			<panel width="122i" height="122i" align="center" noclick="1">
+				<image name="honevent_revival_subitem{type}{id}_icon" texture="$white" width="122i" height="122i" align="center" valign="center" noclick="1"/>
+				<frame texture="/ui/fe2/newui/res/common/frames/custom/frame.png" borderthickness="4" noclick="1"/>
+			</panel>
+			<panel y=".35h" width="-1h" height="3h" align="center" valign="bottom" color="invisible" noclick="1">
+				<label name="honevent_revival_subitem{type}{id}_label" textalign="center" textvalign="center" wrap="1" font="dyn_10" color="#d7b6a2" outline="1" outlinecolor="#230000" content="mastery boost*20" noclick="1"/>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="honevent_revival_item">
+		<panel name="honevent_revival_item{type}" width="983i" height="215i" align="center" color="#1e140d" noclick="1">
+			<frame texture="/ui/fe2/newui/res/common/frames/custom/frame.png" borderthickness="4" noclick="1"/>
+			<panel x="18i" width="-36i" height="43i" color="invisible" noclick="1">
+				<label name="honevent_revival_item{type}_label1" valign="center" textvalign="center" width="50%" uppercase="1" font="dyn_14" color="#f1dbcb" noclick="1"/>
+				<label name="honevent_revival_item{type}_label2" width="50%" align="right" valign="center" textalign="right" textvalign="center" font="dyn_12" color="#8e6b5b" outline="1" outlinecolor="#230000" noclick="1"/>
+			</panel>
+			<image texture="/ui/fe2/newui/res/common/hline.png" y="43i" width="105%" height="1" align="center" noclick="1"/>
+			<panel x="30i" y="53i" width="-8h" height="160i" float="right" padding="3h" color="invisible" noclick="1">
+				<instance name="honevent_revival_subitem" type="{type}" id="1"/>
+				<instance name="honevent_revival_subitem" type="{type}" id="2"/>
+				<instance name="honevent_revival_subitem" type="{type}" id="3"/>
+			</panel>
+			<instance name="newui_common_button_2_template" button_name="honevent_revival_item{type}_receive"
+				x="-33i" y="5i" label="honevent_revival_receive_btn" width="108i" align="right" valign="center"
+				onclicklua="HoNEvent:ReceiveRevival('{type}')"
+			/>
+			<panel name="honevent_revival_item{type}_throb" x="-33i" y="5i" width="108i" height="32i" align="right" valign="center" color="0 0 0 .5" visible="0" noclick="0">
+				<animatedimage align="center" width="100@" height="100%" texture="/ui/elements/throb/throb.tga" loop="1" fps="30" onshowlua="self:StartAnim()" noclick="1"/>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="honevent_revival">
+		<panel name="honevent_revival" float="bottom" padding="1h" color="invisible" visible="0" noclick="1">
+			<panel width="-192i" height="60i" align="center" color="invisible" noclick="1">
+				<label name="honevent_revival_title" y=".5h" width="80%" align="center" textalign="center" textvalign="center" font="dyn_18" color="#d7b6a2" outline="1" outlinecolor="#230000" noclick="1"/>
+				<label name="honevent_revival_time" width="50%" align="right" textalign="right" textvalign="center" font="dyn_16" color="#29b0b2" noclick="1"/>
+			</panel>
+			<instance name="honevent_revival_item" type="revival"/>
+			<instance name="honevent_revival_item" type="login"/>
+			<instance name="honevent_revival_item" type="mastery"/>
+		</panel>
+	</template>
+
+	<!-- <template name="honevent_special_message">
+		<panel name="honevent_{id}" color="invisible" visible="0" noclick="1"
+			onshowlua="UIManager.GetInterface('webpanel'):HoNWebPanelF('ShowSpecialMessagesPage', self, '{url}')"
+			onhidelua="UIManager.GetInterface('webpanel'):HoNWebPanelF('CloseSpecialMessagesPage', self)"
+		/>
+	</template> -->
+
+	<template name="honevent">
+		<panel name="honevent" align="left" valign="top" width="1260i" height="785i" color="invisible" visible="0" noclick="0"
+			hotkey="ESC"
+			onhotkeylua="HoNEvent:ToggleEventPanel()"
+			oninstantiatelua="
+				self:SetX((self:GetParent():GetWidth() - self:GetWidth())/2)
+				self:SetY((self:GetParent():GetHeight() - self:GetHeight())/2 - 5.75 * GetScreenHeight() / 100)
+			"
+		>
+			<instance name="newui_popup_caption_frame" title="tooltip_honevent" onclicklua="HoNEvent:ToggleEventPanel()"/>
+
+			<panel name="honevent_list" x="2i" y="37i" width="239i" height="746i" float="bottom" padding="0" color="#130703" noclick="1"/>
+
+			<image name="honevent_line" texture="/ui/fe2/newui/res/common/vline.png" x="241i" width="1" height="110%" valign="center" noclick="1"/>
+
+			<panel name="honevent_container" x="242i" y="37i" width="1015i" height="746i" color="invisible" noclick="1">
+				<!-- Revival -->
+				<!-- Special Message -->
+				<panel name="honevent_special_message" color="invisible" visible="0" noclick="1"
+					onshowlua=""
+					onhidelua="UIManager.GetInterface('webpanel'):HoNWebPanelF('CloseSpecialMessagesPage', self)"
+				/>
+			</panel>
+		</panel>
+	</template>
+
+	<panel name="honevent_panel" color="0 0 0 .85" visible="0" noclick="0">
+		<instance name="honevent"/>
+	</panel>
+
+	<lua file="/ui/scripts/newui/hon_event.lua"/>
+
+</package>

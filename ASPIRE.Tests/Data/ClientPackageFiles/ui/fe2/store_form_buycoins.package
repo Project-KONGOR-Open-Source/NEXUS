@@ -1,0 +1,478 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+
+	<trigger name="CoinsFriendNameStatus"/>
+	<trigger name="CoinsFriendNameResult"/>
+	<if condition="cl_garenaEnable">
+		<form
+			name="CoinsFriendName"
+			host="!hon"
+			target="/signup/garena_store_nick_check.php"
+			statustrigger="CoinsFriendNameStatus"
+			resulttrigger="CoinsFriendNameResult"
+			resultparam0="responseCode"
+		/>
+	</if>
+	
+	<if condition="!cl_garenaEnable">
+		<form
+			name="CoinsFriendName"
+			host="!hon"
+			target="/signup/nick_exists_check.php"
+			statustrigger="CoinsFriendNameStatus"
+			resulttrigger="CoinsFriendNameResult"
+			resultparam0="responseCode"
+		/>
+	</if>
+
+	<template name="storePopupBuyCoinsForm">
+		<panel name="storePopupBuyCoinsForm_cover" width="100%" height="100%" visible="0">
+			<image height="75%" width="75@" color="1 1 1 0.25" valign="bottom"
+				ontrigger9lua="ResourceManager.RegisterTexture('/ui/fe2/store/full_chest.tga', 'store', self)"
+				resourcecontext="store" watch9="MainRegisterTextures"
+			/>
+
+			<image height="80%" width="80@" color="1 1 1 0.25" valign="bottom" align="right" x="-5%" y="-12%"
+				ontrigger9lua="ResourceManager.RegisterTexture('/ui/fe2/store/money_bag.tga', 'store', self)"
+				resourcecontext="store" watch9="MainRegisterTextures"
+			/>
+
+			<image height="90%" width="45@" color="1 1 1 0.25" valign="bottom" align="right"
+				ontrigger9lua="ResourceManager.RegisterTexture('/ui/fe2/store/coinstack_large.tga', 'store', self)"
+				resourcecontext="store" watch9="MainRegisterTextures"
+			/>
+			<image height="45%" width="45@" color="1 1 1 0.25" valign="bottom" align="right" x="-12%"
+				ontrigger9lua="ResourceManager.RegisterTexture('/ui/fe2/store/coinstack_med.tga', 'store', self)"
+				resourcecontext="store" watch9="MainRegisterTextures"
+			/>
+			<image height="45%" width="45@" color="1 1 1 0.25" valign="bottom" align="right" x="-24%" y="5%"
+				ontrigger9lua="ResourceManager.RegisterTexture('/ui/fe2/store/coinstack_sml.tga', 'store', self)"
+				resourcecontext="store" watch9="MainRegisterTextures"
+			/>
+
+			<label name="storePopupBuyCoinsForm_cover_text" width="75%" align="center" wrap="1" style="microStorePaperText" font="dyn_18" textvalign="center" textalign="center" noclick="true" />
+		</panel>
+		<panel name="storePopupBuyCoinsForm_web" width="100%" height="100%" visible="0"
+			onshowlua="UIManager.GetInterface('main'):HoNRegionF('OpenGoldCoinsWebpage')"
+		/>
+		<panel name="storePopupBuyCoinsForm_main" width="100%" grow="1" regrow="1" growinvis="0" float="bottom" padding="1h" visible="0">
+			<panel width="100%" grow="1" regrow="1" growinvis="0">
+				<label name="store_form_buycoins_blurb_label" width="-20%" align="center" wrap="true" fity="true" textalign="center" textvalign="center" font="dyn_10" style="microStorePaperText" content="mstore_buycoins_form_blurb"/>
+			</panel>
+			<panel width="100%" height="0.5h">
+				<panel width="-1h" valign="center" align="center" height="0.1h" style="microStorePaperText"/>
+			</panel>
+			<panel width="100%" grow="1" regrow="1" growinvis="0">
+				<panel width="57%" align="left" grow="1" regrow="1" growinvis="0" float="bottom" padding="0.5h">
+					<!-- Point Package Buttons -->
+					<panel height="25h" width="100%" float="right" padding="0.5h"
+						onload="Set('_microStore_buyCoins_package', 0);"
+						watch9="UIUpdateRegion"
+						ontrigger9="DoEvent(9);"						
+						onevent9lua="
+							groupfcall('store_buycoins_radiobuttons_group', function(index, widget, groupName) widget:Destroy() end)
+							UIManager.GetInterface('main'):HoNRegionF('PopulatePointPackageButtons', self)
+							"
+						watch8="MicroStoreUpdatePackages"
+						ontrigger8lua="UIManager.GetInterface('main'):HoNStoreF('UpdateCoinPackageLabels')"
+					>
+						<!-- <instance name="form_radiobutton" tip_id="mstore_tip_package_worst" updatetrigger="UpdatePurchaseCoinsForm" cvar="_microStore_buyCoins_package" value="1" color="white" displaytemplate="paperform_radiobutton_state1" height="100%" width="8.5h" onclick="Trigger('ShopkeeperAction', 11);" /> -->
+						<!-- <instance name="form_radiobutton" tip_id="mstore_tip_package_middle" updatetrigger="UpdatePurchaseCoinsForm" cvar="_microStore_buyCoins_package" value="2" color="white" displaytemplate="paperform_radiobutton_state2" height="100%" width="12.75h" onclick="Trigger('ShopkeeperAction', 10);" /> -->
+						<!-- <instance name="form_radiobutton" tip_id="mstore_tip_package_best" updatetrigger="UpdatePurchaseCoinsForm" cvar="_microStore_buyCoins_package" value="3" color="white" displaytemplate="paperform_radiobutton_state3" height="100%" width="21.25h" onclick="Trigger('ShopkeeperAction', 9);" radiobutton_name="microStorePackageButton3" /> -->
+						<!-- <instance name="form_radiobutton" group="store_buycoins_radiobuttons_group" visible="0" updatetrigger="UpdatePurchaseCoinsForm" cvar="_microStore_buyCoins_package" value="0" color="white" displaytemplate="paperform_radiobutton_state1" height="0" width="0" />-->
+					</panel>
+					<!-- PayPal Notice -->
+					<panel name="store_form_buycoins_paypal_label" height="6h" visible="1" noclick="1" stickytoinvis="0" >
+						<frame texture="/ui/frames/roundframe.tga" style="microStorePaperText" borderthickness="0.5h"/>
+						<panel height="5h" valign="center" align="center" width="-1h">
+							<image height="6h" width="6h" y=".5h" x="0.5h" texture="/ui/elements/paypal_icon.tga" />
+							<label width="-7h" x="-0.5h" height="100%" align="right" valign="center" textvalign="center" textalign="center" wrap="1" font="dyn_10" style="microStorePaperTitle" noclick="1" content="web_form_paypal_notice" />
+						</panel>
+					</panel>
+				</panel>
+				<panel width="42%" align="right" grow="1" regrow="1" growinvis="0" float="bottom" padding="0.5h" reverse="true"><!-- 49 -->
+					<panel width="100%" height="2.5h" onload="CreateString('buy_coins_friendnick', ''); CreateBool('buy_coins_friendnick_valid', false);">
+						<instance name="paperForm_combobox_container" hastip="false" label="mstore_purchasefor" form="" id="buy_coins_forfriend" updatetrigger="UpdatePurchaseCoinsForm" fieldwidth="25%" labelwidth="30%"
+							fieldname="store_buycoins_purchasefor_combobox"
+							populate="
+								AddTemplateListItem('paperform_combobox_item', '1', 'label', 'mstore_myself');
+								If(ui_canBuyCoinsForFriend, AddTemplateListItem('paperform_combobox_item', '2', 'label', 'mstore_afriend'));
+							"
+							ontrigger="
+								If(
+									((StringEmpty(buy_coins_friendnick) and buy_coins_forfriend == 1) or (!StringEmpty(buy_coins_friendnick) and buy_coins_friendnick_valid) ),
+									DoEvent(1), DoEvent(0)
+								);
+							"
+						/>
+						<label style="microStorePaperText" font="dyn_10" textvalign="center" noclick="true" x="61%" watch1="AccountInfo" ontrigger1="SetText(StripClanTag(GetAccountName()));" watch2="UpdatePurchaseCoinsForm" ontrigger2="SetVisible(buy_coins_forfriend == 1);"/>
+						<panel align="right" width="2.5h" noclick="true" color="invisible">
+							<instance name="tip_mark" tip_id="mstore_tip_buycoins_self" x="0.25h" width="2.3h" height="2.3h" valign="center" align="right" /><!-- Explaining about choosing or something -->
+						</panel>
+						<panel visible="false" noclick="true"
+							watch="CoinsFriendNameResult"
+							ontrigger="
+								If(
+									param0 == 0,
+									Set('buy_coins_friendnick_valid', true)
+								);
+								Trigger('UpdatePurchaseCoinsForm');
+							"
+							watch1="UpdatePurchaseCoinsForm"
+							ontrigger1="
+								If(
+									buy_coins_forfriend == 1,
+									Split(
+										Set('buy_coins_friendnick_valid', false),
+										Set('buy_coins_friendnick', '')
+									)
+								);
+								SetVisible(buy_coins_forfriend == 2);
+							"
+						>
+							<panel y="-2.75h" x="57%" width="45%" height="2.5h" noclick="true" onevent0="SleepWidget(3000, 'If(buy_coins_friendnick_valid, FadeOut(3000));');" watch="CoinsFriendNameResult" ontrigger="SetVisible(1); If(param0 == 0, DoEvent(0));" watch1="UpdatePurchaseCoinsForm" ontrigger1="If(StringEmpty(buy_coins_friendnick_textbox) or buy_coins_forfriend == 1, SetVisible(0));">
+								<panel width="100%" grow="1" regrow="1" growinvis="1" valign="bottom">
+									<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.5h" color="#FFEBBE"/>
+									<frame texture="/ui/frames/roundframe.tga" style="microStorePaperText" borderthickness="0.5h"/>
+									<panel width="-1h" grow="1" regrow="1" growinvis="1" align="center" float="bottom">
+										<panel width="100%" height="0.5h"/>
+										<label textvalign="bottom" style="microStorePaperTitle" wrap="true" font="dyn_10" valign="bottom" fity="true" watch="CoinsFriendNameResult" ontrigger="SetText(Translate('nickname_exists_response' # param0)); If(param0 == 0, SetColor('0 0.5 0 1'), SetColor('0.6 0 0 1'));"/>
+										<panel width="100%" height="0.5h"/>
+									</panel>
+								</panel>
+							</panel>
+							<instance
+								name="paperForm_textbox_container"
+								label=""
+								hastip="false"
+								order="138"
+								width="100%"
+								fieldwidth="26%"
+								labelwidth="56%"
+								showarrow="false"
+								fieldname="buy_coins_friendnick_textbox"
+								tip_id=""
+								form="" data=""
+								updatetrigger="UpdatePurchaseCoinsForm"
+								textboxwatch="UpdatePurchaseCoinsForm"
+								textboxontrigger="If(!StringEquals(buy_coins_friendnick, *(name)), EraseInputLine());"
+								onlosefocus="Set('buycoins_friend_auto', false);"
+								onesc="Trigger('ChatAutoCompleteClear');"
+								onfocus="Set('buycoins_friend_auto', true);"
+								onchange="
+									CreateString('ui_autocompleteTextBox', name); ChatAutoCompleteNick(this);
+									Set('buy_coins_friendnick_valid', false);
+									Set('buy_coins_friendnick', *(name));
+									If(
+										!StringEmpty(buy_coins_friendnick),
+										Split(
+											HideWidget('CoinsFriendNameValid'),
+											HideWidget('CoinsFriendNameInvalid'),
+											ShowWidget('CoinsFriendNameThrob'),
+											If(
+												cl_garenaEnable,
+												SleepWidget(250, 'SubmitForm(\'CoinsFriendName\', \'request_code\', \'nickname_exists\', \'nickname\', buy_coins_friendnick);'),
+												SleepWidget(250, 'SubmitForm(\'CoinsFriendName\', \'nickname\', buy_coins_friendnick);')
+											)
+										),
+										Split(
+											HideWidget('CoinsFriendNameValid'),
+											HideWidget('CoinsFriendNameInvalid'),
+											HideWidget('CoinsFriendNameThrob')
+										)
+									);
+								"
+								onload="CreateBool('buycoins_friend_auto', false);"
+							/>
+							<panel width="29%" height="30.0h" y="2.25h" x="55%" visible="false" color="invisible" watch="ChatAutoCompleteClear" ontrigger="SetVisible(false);" watch2="ChatAutoCompleteAdd" ontrigger2="if(buycoins_friend_auto, SetVisible(true));">
+								<instance name="autocomplete_list" listbox_name="autocomplete_buycoins_friend" y="0.5h" x="0.5h" width="18.0h" height="12.5h" align="left" valign="top" />
+							</panel>
+							<panel width="2.5h" height="2.5h" align="right" x="-2.5h">
+								<animatedimage name="CoinsFriendNameThrob" texture="/ui/elements/throb/throb.tga" noclick="true" loop="1" fps="30" onshow="StartAnim(1);" visible="false" watch="CoinsFriendNameStatus" ontrigger="SetVisible(param == 1);" />
+								<image name="CoinsFriendNameValid" texture="/ui/elements/check_mark.tga" color="0 0.6 0 1" align="center" valign="center" width="-25%" height="-25%" visible="false" watch="CoinsFriendNameResult" ontrigger="SetVisible(param0 == 0);"/>
+								<image name="CoinsFriendNameInvalid" ontrigger9lua="ResourceManager.RegisterTexture('/ui/fe2/store/closex2.tga', 'store', self)" resourcecontext="store" watch9="MainRegisterTextures" color="0.6 0 0 1" align="center" valign="center" width="-30%" height="-30%" visible="false" watch="CoinsFriendNameResult" ontrigger="SetVisible(param0 != 0);"/>
+							</panel>
+							<panel width="2.4h" x="0.25h" align="right" height="100%" valign="center">
+								<instance name="tip_mark" tip_id="mstore_tip_buycoins_other" width="2.3h" height="2.3h" valign="center" align="right" />
+							</panel>
+						</panel>
+					</panel>
+
+					<panel name="store_form_buycoins_cc_input" visible="1" noclick="1" float="bottom" padding="0.5h" reverse="true" stickytoinvis="0">
+					
+						<!-- First Name -->
+						<instance
+							name="paperForm_textbox_container"
+							label="creditcard_label_first_name"
+							hastip="true"
+							order="139"
+							width="100%"
+							labelwidth="30%"
+							fieldwidth="60%"
+							fieldname="buy_coins_ccfirstname"
+							ontrigger="If(StringEmpty(buy_coins_ccfirstname), DoEvent(0), DoEvent(1));"
+							tip_id="web_form_tip_cc_first_name"
+							form="" data="bill_first_name"
+							updatetrigger="UpdatePurchaseCoinsForm"
+							onfocus="Trigger('ChatAutoCompleteClear');"
+						/>
+
+						<!-- Last Name -->
+						<instance
+							name="paperForm_textbox_container"
+							label="creditcard_label_last_name"
+							hastip="true"
+							order="140"
+							width="100%"
+							labelwidth="30%"
+							fieldwidth="60%"
+							fieldname="buy_coins_cclastname"
+							ontrigger="If(StringEmpty(buy_coins_cclastname), DoEvent(0), DoEvent(1));"
+							tip_id="web_form_tip_cc_last_name"
+							form="" data="bill_last_name"
+							updatetrigger="UpdatePurchaseCoinsForm"
+							onfocus="Trigger('ChatAutoCompleteClear');"
+						/>
+
+						<!-- Zip Code -->
+						<instance
+							name="paperForm_textbox_container"
+							label="creditcard_label_billing_zip"
+							hastip="true"
+							order="141"
+							width="100%"
+							labelwidth="30%"
+							fieldwidth="60%"
+							fieldname="buy_coins_cczip"
+							ontrigger="If(StringEmpty(buy_coins_cczip), DoEvent(0), DoEvent(1));"
+							tip_id="web_form_tip_cc_zip"
+							form="" data="zip"
+							updatetrigger="UpdatePurchaseCoinsForm"
+							onfocus="Trigger('ChatAutoCompleteClear');"
+						/>
+
+						<!-- CC Number -->
+						<instance
+							name="paperForm_textbox_container"
+							width="100%"
+							valign="top"
+							label="web_form_ccnum_short"
+							hastip="false"
+							order="142"
+							labelwidth="30%"
+							fieldwidth="60%"
+							fieldname="buy_coins_ccnum"
+							ontrigger="If(!IsValidCCNumber(buy_coins_ccnum), DoEvent(0), DoEvent(1));"
+							tip_id="web_form_tip_cc_num"
+							form="" data="card_number"
+							updatetrigger="UpdatePurchaseCoinsForm"
+							onfocus="Trigger('ChatAutoCompleteClear');"
+						/>
+
+						<!-- Exp Date -->
+						<instance
+							name="paperForm_expdate_container"
+							width="100%"
+							valign="top"
+							label="creditcard_label_prime_expiration"
+							hastip="false"
+							labelwidth="30%"
+							fieldwidth="60%"
+							varprefix="buy_coins"
+							order="143"
+							fieldname="buy_coins_expdate"
+							ontrigger="
+								If(
+									(
+									buy_coins_ccmonth lt 1 or
+									buy_coins_ccmonth gt 12 or
+									buy_coins_ccyear lt GetYear() or
+									(buy_coins_ccyear == GetYear() and buy_coins_ccmonth lt GetMonth())
+									),
+									DoEvent(0),
+									DoEvent(1)
+								);
+							"
+							tip_id="web_form_tip_cc_num"
+							form="" data="card_number"
+							updatetrigger="UpdatePurchaseCoinsForm"
+						/>
+						
+						<!-- CVV2 -->
+						<panel height="2.5h">
+							<instance
+								name="paperForm_textbox_container"
+								label="creditcard_label_prime_cvv_number"
+								hastip="true"
+								order="144"
+								labelwidth="30%"
+								fieldwidth="60%"
+								width="100%"
+								fieldname="buy_coins_cccvv"
+								ontrigger="If(StringLength(buy_coins_cccvv) lt 3 or !StringContainsOnly(buy_coins_cccvv, '', '0'),
+									DoEvent(0),
+									DoEvent(1)
+								);"
+								tip_id="web_form_tip_cc_cvv2"
+								form="" data="cvv"
+								updatetrigger="UpdatePurchaseCoinsForm"
+								onfocus="Trigger('ChatAutoCompleteClear'); ShowWidget('buy_coins_cccvv_img');" onlosefocus="HideWidget('buy_coins_cccvv_img');"
+							/>
+							<panel name="buy_coins_cccvv_img" width="21.3h" height="10.65h" x="2.6h" y="2.75h" align="right" visible="0" noclick="true">
+								<image texture="/ui/elements/cvv.tga" noclick="true"/>
+							</panel>
+						</panel>
+					</panel>
+					
+					<!-- Buy/Cancel Buttons -->
+					<panel width="100%" height="4.25h">
+						<panel grow="1" regrow="1" growinvis="0" align="left" valign="center" float="right" padding="1h" height="3.5h">
+							<panel height="100%" grow="1" regrow="1" growinvis="0" float="right" padding="0.5h">
+
+								<panel name="store_form_buycoins_regional_currency_display" visible="0" width="16h" height="100%" noclick="true" stickytoinvis="0">
+									<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.5h" color="#FFEBBE"/>
+									<frame texture="/ui/frames/roundframe.tga" style="microStorePaperText" borderthickness="0.5h"/>
+									
+									<panel hmargin="0.4h" vmargin="0.4h" noclick="true">
+										<panel width="100@" height="100%" noclick="true">
+											<image ontrigger9lua="ResourceManager.RegisterTexture(GetCvarString('ui_useRegionalCurrencyIcon'), 'store', self)" resourcecontext="store" watch9="MainRegisterTextures" watch7="MicroStoreUpdateCoins" ontrigger7="SetTexture(ui_useRegionalCurrencyIcon);" x="0.1h" y="0.1h" color="0 0 0 0.5" noclick="true"/>
+											<image ontrigger9lua="ResourceManager.RegisterTexture(GetCvarString('ui_useRegionalCurrencyIcon'), 'store', self)" resourcecontext="store" watch9="MainRegisterTextures" watch7="MicroStoreUpdateCoins" ontrigger7="SetTexture(ui_useRegionalCurrencyIcon);" noclick="true"/>
+										</panel>
+										<label width="-110@" height="100%" align="right" noclick="true" font="dyn_16" style="microStorePaperTitle" textalign="right" textvalign="center" content="-" watch="MicroStoreUpdateCoins" ontrigger="If(ui_useRegionalCurrency and (_microStore_RequestCode == 0 or _microStore_RequestCode == 5), SetText(Ceil(_microStore_regionalBalance)));"/>
+									</panel>
+								</panel>
+
+								<panel width="16h" height="100%" noclick="true">
+									<panel name="store_form_buycoins_regcur_submit" visible="0" noclick="1" stickytoinvis="0" >
+										<instance name="storeButton" enabled="false" width="16h" label="mstore_buycoins_submit_purchase" onclick="Set('_microStore_RequestCode', 3); CallEvent('MicroStoreAction', 0);"
+											tip_id="mstore_tip_buycoins_submit"
+											watch="UpdatePurchaseCoinsForm"
+											ontrigger="
+												DoEvent();
+											"
+											watch1="MicroStoreProcessing"
+											ontrigger1="
+												DoEvent();
+											"
+											onevent="
+												If(
+													!_microStore_processing and
+													_microStore_buyCoins_package ge 1 and _microStore_buyCoins_package le 5 and
+													((StringEmpty(buy_coins_friendnick) and buy_coins_forfriend == 1) or (!StringEmpty(buy_coins_friendnick) and buy_coins_friendnick_valid)) and
+													*('microStorePackagePrice' # _microStore_buyCoins_package) le _microStore_regionalBalance
+													,
+													SetEnabled(true),
+													SetEnabled(false)
+												);
+											"
+										/>			
+										<instance name="storeButton" width="16h" label="mstore_buycoins_select_package" enabled="0"
+											tip_id="mstore_tip_buycoins_submit"
+											watch="UpdatePurchaseCoinsForm"
+											ontrigger="
+												DoEvent();
+											"
+											watch1="MicroStoreProcessing"
+											ontrigger1="
+												DoEvent();
+											"
+											onevent="SetVisible(_microStore_buyCoins_package == 0); SetEnabled(0);"
+										/>											
+									</panel>
+									
+									<panel name="store_form_buycoins_normal_submit" visible="1" noclick="1" stickytoinvis="0" >
+										<instance name="storeButton" enabled="false" width="16h" label="mstore_buycoins_submit_purchase" onclick="Set('_microStore_RequestCode', 3); CallEvent('MicroStoreAction', 0);"
+											buttonName="mstore_purchase_coins_submit_btn"
+											tip_id="mstore_tip_buycoins_submit"
+											watch="UpdatePurchaseCoinsForm"
+											ontrigger="
+												DoEvent();
+											"
+											watch1="MicroStoreProcessing"
+											ontrigger1="
+												DoEvent();
+											"
+											onevent="
+												If(
+													!_microStore_processing and
+													!StringEmpty(buy_coins_ccfirstname) and
+													!StringEmpty(buy_coins_cclastname) and
+													!StringEmpty(buy_coins_cczip) and
+													IsValidCCNumber(buy_coins_ccnum) and
+													!(
+													buy_coins_ccmonth lt 1 or
+													buy_coins_ccmonth gt 12 or
+													buy_coins_ccyear lt GetYear() or
+													(buy_coins_ccyear == GetYear() and buy_coins_ccmonth lt GetMonth())
+													) and 
+													!(StringLength(buy_coins_cccvv) lt 3 or !StringContainsOnly(buy_coins_cccvv, '', '0')) and
+													_microStore_buyCoins_package ge 1 and _microStore_buyCoins_package le 5 and
+													((StringEmpty(buy_coins_friendnick) and buy_coins_forfriend == 1) or (!StringEmpty(buy_coins_friendnick) and buy_coins_friendnick_valid))
+													,
+													SetEnabled(true),
+													SetEnabled(false)
+												);
+											"
+										/>		
+										<instance name="storeButton" width="16h" label="mstore_buycoins_select_package" enabled="0"
+											buttonName="mstore_purchase_coins_submit_btn_2"
+											tip_id="mstore_tip_buycoins_submit"
+											watch="UpdatePurchaseCoinsForm"
+											ontrigger="
+												DoEvent();
+											"
+											watch1="MicroStoreProcessing"
+											ontrigger1="
+												DoEvent();
+											"
+											onevent="SetVisible(_microStore_buyCoins_package == 0); SetEnabled(0);"
+										/>											
+									</panel>
+
+									<panel align="center" watch="MicroStoreProcessing" ontrigger="
+										If(
+											_microStore_processing,
+											SetVisible(1),
+											FadeOut(350)
+										);
+										">
+										<panel color="0 0 0 0.5">
+											<frame color="invisible" bordercolor="0.75 0.5 0 0.5" borderthickness="0.15h" noclick="true" />
+											<label color="white" shadow="true" font="dyn_11" textvalign="center" textalign="center" width="-3h" content="mstore_processing_elipses" />
+											<animatedimage texture="/ui/elements/throb/throb.tga" noclick="true" loop="1" fps="30" onshow="StartAnim(1);" align="right" width="3h" height="3h" valign="center" x="-0.25h" />
+										</panel>
+									</panel>
+								
+								</panel>
+							</panel>
+						
+
+						</panel>
+					</panel>
+				
+					<!-- Secure Info -->
+					<panel width="100%" height="6h">
+						<frame texture="/ui/frames/roundframe.tga" style="microStorePaperText" borderthickness="0.5h"/>
+						<image width="4.5h" height="4.5h" x="1.0h" valign="center" texture="/ui/elements/thawte.tga" />			
+						<label x="-1.0h" width="-7.0h" height="100%" align="right" valign="center" textalign="center" textvalign="center" wrap="1" font="dyn_10" style="microStorePaperTitle" noclick="1">web_form_secure_transfer_generic</label>
+					</panel>
+					
+					<!-- Garena Shell Info -->
+					<panel name="store_form_buycoins_regcur_shellinfo" visible="0" noclick="1" stickytoinvis="0" width="100%" height="6h">
+						<frame texture="/ui/frames/roundframe.tga" style="microStorePaperText" borderthickness="0.5h"/>
+						<panel width="4.5h" height="4.5h" x="1.0h" valign="center">
+							<image ontrigger9lua="ResourceManager.RegisterTexture(GetCvarString('ui_useRegionalCurrencyIcon'), 'store', self)" watch7="MicroStoreUpdateCoins" ontrigger7="SetTexture(ui_useRegionalCurrencyIcon);" resourcecontext="store" watch9="MainRegisterTextures" x="0.1h" y="0.1h" color="0 0 0 0.35" />
+							<image ontrigger9lua="ResourceManager.RegisterTexture(GetCvarString('ui_useRegionalCurrencyIcon'), 'store', self)" watch7="MicroStoreUpdateCoins" ontrigger7="SetTexture(ui_useRegionalCurrencyIcon);" resourcecontext="store" watch9="MainRegisterTextures" />
+						</panel>					
+						<label name="store_form_buy_regcur_info" visible="1" content="-" x="-1.0h" width="-7.0h" height="100%" align="right" valign="center" textalign="center" textvalign="center" wrap="1" font="dyn_10" style="microStorePaperTitle" noclick="1" />
+					</panel>
+
+				</panel>
+			</panel>
+			<panel y="0" x="0" name="mstore_buycoins_form_blocker" noclick="0" blockinput="1" visible="0" stickytoinvis="0" >
+				<frame color="0 0 0 0.7" bordercolor="0.75 0.5 0 0.4" borderthickness="0.15h" noclick="true" />
+				<label color="white" shadow="true" font="dyn_14" textvalign="center" textalign="center" width="-3h" content="mstore_region_purchase_denied" />			
+			</panel>
+		</panel>
+	</template>
+</package>

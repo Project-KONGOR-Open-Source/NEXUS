@@ -1,0 +1,47 @@
+<package>
+	<trigger name="gmessagebox_popup"/>
+	<panel color="0 0 0 0.7" name="messagebox_generic" watch="gmessagebox_popup" ontrigger="BringToFront(); FadeIn('250');" visible="false">
+		<panel height="50h" y="3h">
+			<panel width="30h" grow="true" regrow="true" align="center" valign="center" color="0 0 0 1">
+				<frame color="0 0 0 .8" bordercolor="#455166" borderthickness="1" noclick="1" />
+				<panel width="100%" grow="true" regrow="true" float="bottom">
+					<instance
+						name="header_bar"
+						buttonsize="1.8h"
+						height="2.4h"
+						lbl_font="dyn_11"
+						align="center"
+						show_close="true"
+						onclick="Call('messagebox_generic', 'FadeOut(250);');"
+						watch="gmessagebox_popup"
+						ontrigger="SetText(param0);"
+					/>	
+					<panel height="0.5h"/>
+					<panel grow="true" width="100%" regrow="true">
+						<panel grow="true" regrow="true" width="-1h" align="center">
+							<frame texture="/ui/frames/tooltip_bg.tga" color="#2c4b6c" noclick="1"/>
+							<frame color="invisible" bordercolor="#455166" borderthickness="1" noclick="1" />						
+							<panel grow="true" width="-1h" align="center" regrow="true" float="bottom">
+							<panel height="1.5h"/>
+								<label fity="true" wrap="true" textalign="center" textvalign="center" fitypadding="1h" font="dyn_10" color="white" shadow="true" watch="gmessagebox_popup" ontrigger="SetText(param1);" content="Expanding text Expanding text Expanding text Expanding text Expanding text Expanding text Expanding text "/>
+								<panel height="2.5h"/>
+								<panel width="100%" grow="true">
+									<instance
+										name="button2" button_name="unnamedButton161"
+										width="8.0h" height="2.4h"
+										align="center"
+										valign="center"
+										label="general_ok"
+										onmouseover="PlaySound('/shared/sounds/ui/button_over_01.wav');"
+										onclick="Call('messagebox_generic', 'FadeOut(250);');"
+									/>
+								</panel>
+							</panel>
+						</panel>
+					</panel>
+					<panel height="0.5h"/>
+				</panel>
+			</panel>
+		</panel>	
+	</panel>
+</package>

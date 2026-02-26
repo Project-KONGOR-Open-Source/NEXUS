@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+	<lua file="/ui/scripts/newui/system_messages_v2.lua"/>
+	<include file="/ui/fe2/newui/notification_toast_item.package"/>
+
+	<style name="systemMessageTitle" font="dyn_14" color="#f1dbcb" outline="1" outlinecolor="#230000" />
+	<style name="systemMessageSubhead" font="dyn_11" color="#d7b6a2" outline="1" outlinecolor="#663a12"/>
+
+	<template name="systemMessageClose">
+		<panel x="{x=0h}" y="{y=0h}" width="3h" height="3h" align="{align=center}" valign="top" noclick="1">
+			<button
+				align="center" valign="center"
+				visible="{visible=1}"
+				color="invisible"
+				watch="{watch}"
+				ontriggerlua="{ontriggerlua}"
+				onclicklua="PlaySound('/shared/sounds/ui/button_click_03.wav') {onclicklua}"
+				onmouseoverlua="PlaySound('/shared/sounds/ui/button_over_03.wav')"
+			>
+				<widgetstate statename="up"><image width="3h" height="3h" align="center" valign="center" texture="/ui/fe2/NewUI/res/match_stats/close.png" noclick="1"/></widgetstate>
+				<widgetstate statename="over"><image width="3h" height="3h" align="center" valign="center" texture="/ui/fe2/NewUI/res/match_stats/close_over.png" noclick="1"/></widgetstate>
+				<widgetstate statename="down" x="1" y="1"><image width="3h" height="3h" align="center" valign="center" texture="/ui/fe2/NewUI/res/match_stats/close_over.png" noclick="1"/></widgetstate>
+				<widgetstate statename="disabled"><image width="3h" height="3h" align="center" valign="center" texture="/ui/fe2/NewUI/res/match_stats/close.png" rendermode="grayscale" noclick="1"/></widgetstate>
+			</button>
+		</panel>
+	</template>
+
+	<template name="systemNotificationPopup">
+		<panel name="systemNotificationPopup" align="center" valign="center" width="60h" grow="1" regrow="1" noclick="1">
+			<panel y="-1h" width="100%" grow="1" regrow="1" growinvis="0" float="bottom" padding="1h" noclick="1">
+				<panel height="6h" passivechildren="1" sticky="1" stickytoinvis="0" noclick="1">
+					<webimage name="systemNotificationsPopupIcon" width="90@" height="90%" valign="center" x="1h"/>
+					<panel width="-5.5h" align="center" valign="center" grow="1" regrow="1" growinvis="0" float="bottom">
+						<label name="systemNotificationsPopupTitle" stickytoinvis="0" height="3h" textalign="center" textvalign="center" style="newui_font_style_18" content="---"/>
+						<label name="systemNotificationsPopupSubtitle" stickytoinvis="0" height="2h" textalign="center" textvalign="center" style="newui_font_style_12" content="---"/>
+					</panel>
+				</panel>
+				<panel width="100%" grow="1" regrow="1" sticky="1" stickytoinvis="0" noclick="1">
+					<frame texture="/ui/fe2/newui/res/common/frames/popupframe.png" align="center" valign="center" borderthickness="4i" height="+8i" noclick="1"/>
+					<panel width="100%" grow="1" regrow="1" growinvis="0" float="bottom" padding="1.5h" y="-1.5h" noclick="1">
+						<panel name="systemNotificationsPopupImageContainer" width="100%" grow="1" regrow="1" sticky="1" stickytoinvis="0" noclick="1">
+							<webimage name="systemNotificationsPopupImage" align="center" width="10h" height="10h" stickytoinvis="0" noclick="1"/>
+						</panel>
+						<panel width="100%" grow="1" regrow="1" growinvis="0" passivechildren="1" float="bottom" sticky="1" stickytoinvis="0" noclick="1">
+							<label name="systemNotificationsPopupBodyTitle" stickytoinvis="0" height="4h" textalign="center" style="newui_font_style_18" content="---"/>
+							<label name="systemNotificationsPopupBody" stickytoinvis="0" textalign="center" textvalign="center" style="newui_font_style_14" wrap="1" fity="1" content=""/>
+						</panel>
+
+						<panel name="systemNotificationsFooter" height="3.25h" sticky="1" stickytoinvis="0" noclick="1">
+							<panel height="-1h" y="-1h" noclick="1">
+								<panel texture="/ui/elements/footer_bar.tga" width="1600@" height="100%" align="center" color="#232c43" noclick="1"/>
+							</panel>
+							<label name="systemNotificationsFooterLabel" height="1.5h" valign="bottom" style="newui_font_style_12" textalign="center" textvalign="bottom" content="---"/>
+						</panel>
+					</panel>
+				</panel>
+				<panel height="0" noclick="1"/>
+				<panel width="100%" height="3.5h" sticky="1" stickytoinvis="0" noclick="1">
+					<instance name="newui_common_button_2_template" y="0.35h" button_name="systemNotificationsPopupAction" label="general_confirm" width="22h" align="center"/>
+				</panel>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="systemSpecialMessagePopup">
+		<panel name="systemSpecialMessagePopup" width="100%" height="770i" align="center" visible="1" noclick="1">
+			<panel name="web_browser_special_messages_insert"
+				onshowlua="UIManager.GetInterface('webpanel'):HoNWebPanelF('ShowSpecialMessagesPage', self, GetCvarString('special_messages_web_url'))"
+				onhidelua="UIManager.GetInterface('webpanel'):HoNWebPanelF('CloseSpecialMessagesPage', self)">
+			</panel>
+		</panel>
+	</template>
+
+	<template name="systemMessageWindow">
+		<panel name="sys_msg_{id}" color="{color=0 0 0 .5}" visible="0" noclick="{noclick=0}"
+			onclicklua="{onclicklua=}"
+			group="{group=systemMessageWindows}"
+			onevent0lua="
+				self:SetVisible(true)
+				GetWidget('sys_msg_{id}_main'):DoEventN(0)
+			"
+			onevent1lua="
+				GetWidget('sys_msg_{id}_main'):DoEventN(1)
+			"
+			onloadlua="
+				if '{debug=0}' == '1' then
+					self:DoEventN(0)
+				end
+			"
+			hotkey="ESC" onhotkeylua="{oncloselua}"
+		>
+			<panel name="sys_msg_{id}_main" x="{x}" y="{y}" align="{align=center}" valign="{valign=center}" color="invisible" width="{width=40h}" height="{height}" grow="{grow=1}" regrow="{regrow=0}" cangrab="1" noclick="{noclick=0}"
+				onevent0lua="
+					self:FadeIn(200, function(wdg) {onshowlua} end)
+				"
+				onevent1lua="
+					self:FadeOut(200, function() self:GetParent():SetVisible(false) {onhidelua} end)
+				"
+				oninstantiatelua="{oninstantiatelua}"
+			>
+				<frame name="sys_msg_{id}_main_frame" width="{framewidth=+1h}" height="{frameheight=+0.1h}" align="center" texture="/ui/fe2/NewUI/Res/common/frames/system_message/frame.png" borderthickness="64i" noclick="1"/>
+				<panel name="sys_msg_{id}_main_header" y="0.35h" width="100%" height="4.2h" noclick="1">
+					<label name="sys_msg_{id}_main_title" width="-2h" align="center" valign="center" height="2.75h" uppercase="1" content="{title}" textalign="center" textvalign="center" style="systemMessageTitle" watch="{titlewatch}" ontrigger="{titleontrigger}" noclick="1"/>
+				</panel>
+				<instance name="newui_button_close_template" button_name="sys_msg_{id}_main_close" x="-1.5h" y="1.25h" align="right" visible="{show_close=0}" onclicklua="{oncloselua}"/>
+				<anchor x="0"/>
+				<panel name="sys_msg_{id}_main_content" y="5h" width="100%" height="{content_height}" color="invisible" grow="{grow=1}" regrow="{regrow=0}" noclick="0">
+					<instance name="{content}"/>
+				</panel>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="system_message_item">
+		<panel name="system_message_item{id}" width="100%" height="50i" visible="0" sticky="1" stickytoinvis="0" noclick="0"
+			onmouseoverlua="
+				PlaySound('/shared/sounds/ui/button_over_02.wav')
+				GetWidget('system_message_item{id}_highlight'):FadeIn(150)
+				GetWidget('system_message_item{id}_title'):SetColor('#f0d3c1')
+				GetWidget('system_message_item{id}_subhead'):SetColor('#f0d3c1')
+			"
+			onmouseoutlua="
+				GetWidget('system_message_item{id}_highlight'):FadeOut(150)
+				GetWidget('system_message_item{id}_title'):SetColor('#a99081')
+				GetWidget('system_message_item{id}_subhead'):SetColor('#7e604e')
+			"
+			onclicklua="systemMessages:openMessage({id})"
+		>
+			<image align="center" valign="bottom" width="110%" height="1i" visible="1" texture="/ui/fe2/newui/res/common/hline.png" noclick="1"/>
+			<image name="system_message_item{id}_highlight" x="0" valign="center" width="512i" height="64i" visible="0" texture="/ui/fe2/NewUI/Res/system_message/selected_bg.png" noclick="1"/>
+			<image texture="/ui/fe2/newui/res/common/list_item_bg.png" y="-1" height="16i" align="center" valign="bottom" noclick="1"/>
+
+			<panel x="4.1h" width="-5.5h" grow="1" valign="center" float="bottom" padding=".5h" noclick="1">
+				<label name="system_message_item{id}_title" fity="1" textvalign="center" autofont="1" autofontmin="6" autofontmax="10" font="dyn_10" color="#a99081" outline="1" outlinecolor="#230000" content="{title}" noclick="1"/>
+				<label name="system_message_item{id}_subhead" autofont="1" autofontmin="6" autofontmax="8" font="dyn_8" color="#7e604e" outline="1" outlinecolor="#230000" content="{subhead}" noclick="1"/>
+			</panel>
+
+			<panel x=".5h" valign="center" width="3h" height="3h" noclick="1">
+				<webimage name="system_message_item{id}_icon" width="32i" height="32i" align="center" valign="center" texture="$invis" noclick="1"/>
+				<frame width="+2" height="+2" align="center" valign="center" borderthickness="1" bordercolor="#48332A" color="invisible" noclick="1"/>
+				<image name="system_message_item{id}_new" x="8i" y="-7i" align="right" width="16i" height="16i" visible="0" texture="/ui/fe2/NewUI/Res/system_message/new.png" noclick="1"/>
+			</panel>
+
+			<instance name="newui_button_close_template" button_name="system_message_item{id}_close" x="-1.5h" width="2h" height="2h" align="right" valign="bottom" visible="0" onclicklua="systemMessages:removeMessage(systemMessages.startIndex + {id} - 1)"/>
+		</panel>
+	</template>
+
+	<template name="systemMessageWindows">
+		<panel name="system_popup_container" visible="1" color="invisible" noclick="1" >
+			<instance name="systemMessageWindow" y="-15h" width="60h" id="system_notification" content="systemNotificationPopup" show_close="1" debug="0"
+				onhidelua="systemMessages:resetMessage()"
+				oncloselua="GetWidget('sys_msg_system_notification'):DoEventN(1)"
+			/>
+			<!-- <instance name="systemMessageWindow" width="1260i" id="special_message" framewidth="+2h" frameheight="+1h" content="systemSpecialMessagePopup" show_close="1" grow="0" height="820i" content_height="770i" align="left" valign="top" debug="0"
+				onhidelua="systemMessages:resetMessage()"
+				oninstantiatelua="
+					self:SetX((self:GetParent():GetWidth() - self:GetWidth())/2)
+					self:SetY((self:GetParent():GetHeight() - self:GetHeight())/2)
+				"
+				oncloselua="systemMessages:closeSpecialMessage()"
+			/> -->
+		</panel>
+	</template>
+
+	<template name="system_messages">
+		<panel name="system_message_container" x="0" y="0" width="350i" height="635i" align="right" visible="0" cangrab="1" noclick="0" hotkey="ESC"
+			onhotkeylua="self:FadeOut(200)"
+			onshowlua="
+				Common_V2:RestrictTRSafeArea(self, 'sysbar_quit')
+				GetWidget('social_friends'):SetVisible(false)
+				GetWidget('social_clan'):SetVisible(false)
+			"
+			oninstantiatelua="systemMessages:init(self)"
+		>
+			<instance name="newui_popup_caption_frame" uppercase="0" title="sysmessage_title" onclicklua="GetWidget('system_message_container'):FadeOut(200)"/>
+
+			<!-- Message List -->
+			<panel name="system_message_list_container" y="3.2h" width="-6i" height="555i" align="center" clip="1"
+			>
+				<panel name="system_message_list" x="3i" width="-18i" regrow="1" grow="1" growinvis="0" float="bottom" noclick="1">
+					<instance name="system_message_item" id="1"/>
+					<instance name="system_message_item" id="2"/>
+					<instance name="system_message_item" id="3"/>
+					<instance name="system_message_item" id="4"/>
+					<instance name="system_message_item" id="5"/>
+					<instance name="system_message_item" id="6"/>
+					<instance name="system_message_item" id="7"/>
+					<instance name="system_message_item" id="8"/>
+					<instance name="system_message_item" id="9"/>
+					<instance name="system_message_item" id="10"/>
+					<instance name="system_message_item" id="11"/>
+				</panel>
+				<panel name="system_message_list_scrollpanel" processonlyscroll="1" hover="0"
+					onmousewheeldown="CallEvent('system_message_list_scrollbar', 1);"
+					onmousewheelup="CallEvent('system_message_list_scrollbar', 0);"
+				/>
+				<scrollbar name="system_message_list_scrollbar"
+					visible="0"
+					align="right"
+					width="1.2h"
+					height="-2h"
+					scrollbarsize="1.2h"
+					handlewidth="1.2h"
+					handleheight="10h"
+					texture="/ui/fe2/newui/res/common/scroll/scroll.png"
+					minvalue="0"
+					maxvalue="0"
+					step="1"
+					value="0"
+					vertical="1"
+					slotwidth="0.6h"
+					slotheight="1"
+					onevent1lua="self:SetValue(self:GetValue()+1)"
+					onevent0lua="self:SetValue(self:GetValue()-1)"
+					onslidelua="systemMessages:scrollMessageList(tonumber(self:GetValue()))"
+				/>
+			</panel>
+
+			<instance
+				name="newui_common_button_2_template" button_name="notifications_remove_all_btn" label="notification_history_remove_all_button"
+				y="-8i" width="-5.0h" height="2.5h" align="center" valign="bottom"
+				onclick="
+					PlaySound('/shared/sounds/ui/ccpanel/notification_remove.wav');
+					ChatRemoveAllNotifications();
+				"
+			/>
+		</panel>
+
+		<panel name="notification_toast_main" x="0h" y="4.5h" width="26h" height="80h" align="right" noclick="1"
+			onloadlua="systemMessages:initChatMessages()"
+		>
+			<instance name="sys_chat_message_item" id="1" fromInterface="main"/>
+			<instance name="sys_chat_message_item" id="2" fromInterface="main"/>
+			<instance name="sys_chat_message_item" id="3" fromInterface="main"/>
+			<instance name="sys_chat_message_item" id="4" fromInterface="main"/>
+			<instance name="sys_chat_message_item" id="5" fromInterface="main"/>
+			<instance name="sys_chat_message_item" id="6" fromInterface="main"/>
+		</panel>
+	</template>
+
+</package>

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+	<template name="teamshare_tooltip">
+		<floater
+			name="teamshare_tooltip"
+			x="2.2h" y="-0.5h"
+			width="16.0h"
+			align="left"
+			valign="top"
+			color="invisible"
+			visible="false"
+			passivechildren="true"
+			grow="true"
+		>
+			<frame texture="/ui/frames/tooltip_bg.tga" color="0 0 0 .8" borderthickness=".6h" />
+			<frame texture="/ui/frames/roundframe.tga" color="#A0A0A0" borderthickness=".6h" />			
+				<label
+					y="0.6h"
+					width="-1.6h"
+					textvalign="top"
+					textalign="center"
+					align="center"
+					font="dyn_10"
+					noclick="1"
+					color="white"
+					shadow="1"					
+					wrap="1"
+					fity="true"
+					fitypadding="0.6h"
+					content="tooltip_teamshare"
+				/>
+		</floater>
+	</template>
+	
+
+</package>

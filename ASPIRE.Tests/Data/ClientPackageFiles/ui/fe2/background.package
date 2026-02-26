@@ -1,0 +1,358 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+	<template name="background">
+
+		<if condition="!cl_GarenaEnable">
+			<panel name="fe2_background_new" y="2.0h" 
+				height="189.6h" width="189.6h" align="center" visible="1"
+				texture="$invis"
+				valign="center" noclick="true" color="white"
+				watch9="MainRegisterTextures"
+				ontrigger9lua="ResourceManager.RegisterTexture('/ui/fe2/mainmenu/bg3_new.tga', 'bglogo2', self)"
+				resourcecontext="bglogo2"
+			>
+				<if condition="StringEquals(host_os,'windows') and IsWindowsGreaterThanXP() and cg_enableLoginAnimation">
+					<panel noclick="1" y="45h" x="5h">
+						<if condition="video_login_1080">
+							<video video="/videos/login_1080.avi" width="95%" height="55%" color="1 1 1 1" />
+						</if>
+						<if condition="!video_login_1080">
+							<video video="/videos/login_720.avi" width="95%" height="55%" color="1 1 1 1" />
+						</if>
+					</panel>
+				</if>
+			</panel>
+		</if>
+
+		<panel watch="GamePhase" ontrigger="SetVisible(param lt 5 and ui_background == 2);" visible="0" name="background_main">
+
+			<panel name="fe2_background" y="2.6h" height="59.0h" width="187.0h" align="center" onload="If(ui_background == 2, SetTexture('/ui/fe2/mainmenu/3/bg/bg3.tga'));SetVisible(cl_GarenaEnable);" valign="top" noclick="true" color="white"/>
+
+			<!-- 3.0 MOTD Solid BG - Dunno where this should really be placed, and I've got more work to do on it, but here it is as a temp design.-->
+			<!-- moved into news -->
+			<!-- <panel name="motd_background" height="1024" width="2048" align="center" visible="0" color=".07 .07 .07 1">
+				<image utile="1" vtile="1" uscale=".25" vscale=".5" texture="/ui/fe2/mainmenu/v3/bg.tga" />
+			</panel> -->
+
+			<panel name="menu_effects_snow" width="100w" height="100h" align="center" visible="0" >
+				<if condition="!cg_disableBackgroundEffects">
+					<panel width="260h" height="100h">
+						<modelpanel
+							noclick="true"
+							anim="idle"
+							camerapos="0 100 -60"
+							cameraangles="0 0 180"
+							camerafov="125"
+							modelangles="0 0 180"
+							modelpos="-20 0 0"
+							lookat="false"
+							sunaltitude="10"
+							sunazimuth="120"
+							fog="true"
+							fogcolor="0 0 0" fognear="0" fogfar="100" fogscale="1"
+							resourcecontext="snow"
+							ontrigger9lua="ResourceManager.RegisterModel('/ui/effects/mainmenu/right.mdf', 'snow', self)" watch9="MainRegisterModels"
+							ontrigger8lua="ResourceManager.RegisterEffect('/ui/effects/mainmenu/snow_main.effect', 'snow', self)" watch8="MainRegisterEffects"
+						/>
+					</panel>
+				</if>
+			</panel>
+
+		</panel>
+
+		<panel watch="GamePhase" ontrigger="SetVisible(param lt 5 and ui_background le 1);" visible="0" name="background_main_2">
+			<image name="background_main_bg_image_2" y="2.6h" height="55.0h" width="187.0h" align="center" valign="top" noclick="true" visible="true" onload="If(ui_background le 1, SetTexture('/ui/fe2/mainmenu/background_image.tga'));" />
+
+			<if condition="!cg_disableBackgroundEffects">
+				<panel y="10.6h" name="logo_effects_2" noclick="1" visible="0" >
+					<modelpanel name="logo_effects_mp_2"
+						align="center"
+						valign="center"
+						height="100h"
+						width="177.7h"
+						noclick="true"
+						anim="idle"
+						camerapos="0 -1800 00"
+						cameraangles="0 0 0"
+						camerafov="35"
+						modelangles="0 0 180"
+						modelpos="0 0 0"
+						lookat="0"
+						resourcecontext="bgeffects2"
+						ontrigger9lua="ResourceManager.RegisterModel('/ui/fe2/mainmenu/bg_effects/debug.mdf', 'bgeffects2', self)" watch9="MainRegisterModels"
+						ontrigger8lua="ResourceManager.RegisterEffect('/ui/fe2/mainmenu/bg_effects/logo.effect', 'bgeffects2', self)" watch8="MainRegisterEffects"
+						onhide="SetEffect(''); SetModel(''); SetAnim('');" onshow="SetAnim('idle');"
+						onevent="SetEffect(''); SetModel(''); SetAnim('');" group="main_background_assets"
+					/>
+				</panel>
+			</if>
+
+			<if condition="!cg_disableBackgroundEffects">
+				<modelpanel
+					watch="LoadingVisible" ontrigger="SetVisible(!param);"
+					align="center"
+					valign="center"
+					height="100h"
+					width="177.7h"
+					name="bg_effects_2"
+					noclick="true"
+					anim="idle"
+					camerapos="0 -1800 00"
+					cameraangles="0 0 0"
+					camerafov="35"
+					modelangles="0 0 180"
+					modelpos="0 0 0"
+					lookat="0"
+					visible="1"
+					model="/ui/fe2/mainmenu/bg_effects/debug.mdf"
+					effect="/ui/fe2/mainmenu/bg_effects/background.effect"
+				/>
+			</if>
+			<if condition="cg_disableBackgroundEffects">
+				<modelpanel
+					watch="LoadingVisible"
+					align="center"
+					valign="center"
+					ontrigger="SetVisible(!param);"
+					height="100h"
+					width="177.7h"
+					name="bg_effects_2"
+					noclick="true"
+					anim="idle"
+					camerapos="0 -1800 00"
+					cameraangles="0 0 0"
+					camerafov="35"
+					modelangles="0 0 180"
+					modelpos="0 0 0"
+					lookat="0"
+				/>
+			</if>
+
+			<panel name="legion_effects_2" noclick="1" align="right">
+				<if condition="!cg_disableBackgroundEffects">
+					<modelpanel
+						noclick="true"
+						align="center"
+						valign="center"
+						anim="idle"
+						lookat="false"
+						sunaltitude="10"
+						sunazimuth="120"
+						camerapos="-30 -500 00"
+						fog="true"
+						fogcolor="0 0 0" fognear="0" fogfar="100" fogscale="1"
+						resourcecontext="bgeffects"
+						ontrigger9lua="ResourceManager.RegisterModel('/ui/effects/mainmenu/right.mdf', 'bgeffects', self)" watch9="MainRegisterModels"
+						ontrigger8lua="ResourceManager.RegisterEffect('/ui/fe2/mainmenu/hellbourne/ashes_mid.effect', 'bgeffects', self)" watch8="MainRegisterEffects"
+						onhide="SetEffect(''); SetModel(''); SetAnim('');" onshow="SetAnim('idle');"
+						onevent="SetEffect(''); SetModel(''); SetAnim('');" group="main_background_assets"
+					/>
+				</if>
+			</panel>
+
+			<panel name="hellbourne_effects_2" noclick="1">
+				<if condition="!cg_disableBackgroundEffects">
+					<modelpanel
+						noclick="true"
+						align="center"
+						valign="center"
+						anim="idle"
+						camerapos="0 100 -60"
+						cameraangles="0 0 180"
+						camerafov="125"
+						modelangles="-20 0 180"
+						modelpos="-20 0 0"
+						lookat="false"
+						sunaltitude="10"
+						sunazimuth="120"
+						fog="true"
+						fogcolor="0 0 0" fognear="0" fogfar="100" fogscale="1"
+						resourcecontext="bgeffects"
+						ontrigger9lua="ResourceManager.RegisterModel('/ui/effects/mainmenu/right.mdf', 'bgeffects', self)" watch9="MainRegisterModels"
+						ontrigger8lua="ResourceManager.RegisterEffect('/ui/fe2/mainmenu/legion/leaves_mid.effect', 'bgeffects', self)" watch8="MainRegisterEffects"
+						onhide="SetEffect(''); SetModel(''); SetAnim('');" onshow="SetAnim('idle');"
+						onevent="SetEffect(''); SetModel(''); SetAnim('');" group="main_background_assets"
+					/>
+				</if>
+			</panel>
+
+			<panel  align="right" height="54h" width="70h"  color="invisible">
+				<if condition="!cg_disableBackgroundEffects">
+					<modelpanel
+						name="hellbourne_scene_2"
+						align="center"
+						valign="center"
+						width="70h"
+						sunAltitude="120"
+						sunAzimuth="120"
+						noclick="true"
+						anim="idle"
+						camerapos="-30 -500 00"
+						cameraangles="0 0 0"
+						camerafov="35"
+						modelangles="0 0 180"
+						modelpos="30 0 -70"
+						lookat="0"
+						resourcecontext="bgmodels"
+						ontrigger9lua="ResourceManager.RegisterModel('/ui/fe2/mainmenu/hellbourne/hellbourne.mdf', 'bgmodels', self)" watch9="MainRegisterModels"
+						ontrigger8lua="ResourceManager.RegisterEffect('/ui/fe2/mainmenu/hellbourne/backlight.effect', 'bgmodels', self)" watch8="MainRegisterEffects"
+						onhide="SetEffect(''); SetModel(''); SetAnim('');" onshow="SetAnim('idle');"
+						onevent="SetEffect(''); SetModel(''); SetAnim('');" group="main_background_assets"
+					/>
+				</if>
+				<if condition="cg_disableBackgroundEffects">
+				  <modelpanel
+						name="hellbourne_scene_2"
+						align="center"
+						valign="center"
+						width="100%"
+						sunAltitude="120"
+						sunAzimuth="120"
+						noclick="true"
+						anim="idle"
+						camerapos="-30 -500 00"
+						cameraangles="0 0 0"
+						camerafov="35"
+						modelangles="0 0 180"
+						modelpos="30 0 -70"
+						lookat="0"
+					/>
+				</if>
+			</panel>
+
+			<panel align="left" height="54h" width="70h"  color="invisible">
+				<if condition="!cg_disableBackgroundEffects">
+					<modelpanel
+						name="legion_scene_2"
+						align="center"
+						valign="center"
+						width="100%"
+						sunAltitude="120"
+						sunAzimuth="120"
+						sunColor="0 0 0"
+						noclick="true"
+						anim="idle"
+						camerapos="5 -540 00"
+						cameraangles="0 0 0"
+						camerafov="35"
+						modelangles="0 0 180"
+						modelpos="-20 0 -80"
+						lookat="0"
+						resourcecontext="bgmodels"
+						ontrigger9lua="ResourceManager.RegisterModel('/ui/fe2/mainmenu/legion/legion.mdf', 'bgmodels', self)" watch9="MainRegisterModels"
+						ontrigger8lua="ResourceManager.RegisterEffect('/ui/fe2/mainmenu/legion/backlight.effect', 'bgmodels', self)" watch8="MainRegisterEffects"
+						onhide="SetEffect(''); SetModel(''); SetAnim('');" onshow="SetAnim('idle');"
+						onevent="SetEffect(''); SetModel(''); SetAnim('');" group="main_background_assets"
+					/>
+				</if>
+				<if condition="cg_disableBackgroundEffects">
+					<modelpanel
+						name="legion_scene_2"
+						align="center"
+						valign="center"
+						width="100%"
+						sunAltitude="120"
+						sunAzimuth="120"
+						sunColor="0 0 0"
+						noclick="true"
+						anim="idle"
+						camerapos="5 -540 00"
+						cameraangles="0 0 0"
+						camerafov="35"
+						modelangles="0 0 180"
+						modelpos="-20 0 -80"
+						lookat="0"
+					/>
+				</if>
+			</panel>
+		</panel>
+
+		<panel x="0" y="0" watch="GamePhase" ontrigger="SetVisible(param lt 5);" visible="0" name="background_main_3" sticky="false" stickytoinvis="false" noclick="1" >
+
+			<if condition="!cg_disableBackgroundEffects">
+				<panel y="10.6h" name="logo_effects" noclick="1" visible="0" >
+					<!-- Garena -->
+					<if condition="cl_GarenaEnable">
+						<modelpanel name="logo_effects_mp"
+							align="center"
+							valign="center"
+							height="100h"
+							width="177.7h"
+							noclick="true"
+							anim="idle"
+							camerapos="0 -1800 00"
+							cameraangles="0 0 0"
+							camerafov="35"
+							modelangles="0 0 180"
+							modelpos="0 0 0"
+							lookat="0"
+							resourcecontext="bgeffects2"
+							ontrigger9lua="ResourceManager.RegisterModel('/ui/fe2/mainmenu/bg_effects/debug.mdf', 'bgeffects2', self)" watch9="MainRegisterModels"
+							ontrigger8lua="ResourceManager.RegisterEffect('/ui/fe2/mainmenu/bg_effects/logo.effect', 'bgeffects2', self)" watch8="MainRegisterEffects"
+							onhide="SetEffect(''); SetModel(''); SetAnim('');" onshow="SetAnim('idle');"
+							onevent="SetEffect(''); SetModel(''); SetAnim('');" group="main_background_assets"
+						/>
+					</if>
+
+					<!-- NAEU -->
+					<if condition="!cl_GarenaEnable">
+						<modelpanel name="logo_effects_mp" noclick="1" />
+					</if>
+				</panel>
+			</if>
+
+			<!-- Garena -->
+			<if condition="cl_GarenaEnable">
+				<!-- Logo -->
+				<panel name="main_logo" x="0" y="1h" height="45.5h" width="45.5h"  align="center" color="white" visible="0" texture="$invis" noclick="1"
+					resourcecontext="bglogo2"
+					ontrigger9lua="ResourceManager.RegisterTexture('/ui/fe2/mainmenu/logo.tga', 'bglogo2', self)" watch9="MainRegisterTextures"
+				/>
+			</if>
+
+			<!-- NAEU -->
+			<if condition="!cl_GarenaEnable">
+				<!-- Logo -->
+				<panel noclick="1" y="0h">
+					<panel name="main_logo" x="0" y="-3.5h" height="23.7h" width="94.8h"  align="center" color="white" visible="0" texture="$invis" noclick="1"
+						resourcecontext="bglogo2"
+						ontrigger9lua="ResourceManager.RegisterTexture('/ui/fe2/mainmenu/logo_hon.tga', 'bglogo2', self)" watch9="MainRegisterTextures"
+					/>
+					<panel name="main_logo_fb" texture="$invis" nocompress="1" resourcecontext="bglogo2" noclick="1" visible="0" width="47.4h" height="11.85h" valign="bottom" align="right"
+						ontrigger9lua="ResourceManager.RegisterTexture('/ui/fe2/mainmenu/logo_fb.tga', 'bglogo2', self)" watch9="MainRegisterTextures"
+					/>
+				</panel>
+			</if>
+
+			<!-- logo popup -->
+			<panel name="main_logo_popup" x="-2h" y="5h" height="45.5h" width="45.5h"  align="center" color="white" visible="0" texture="$invis" noclick="1"
+				resourcecontext="bglogo3"
+				ontrigger9lua="ResourceManager.RegisterTexture('/ui/icons/hon_logo_anniversary_2.tga', 'bglogo3', self)" watch9="MainRegisterTextures"
+			/>
+
+			<if condition="!cg_disableBackgroundEffects">
+				<panel name="logo_effects_special" noclick="1" visible="0" >
+					<modelpanel name="logo_effects_special_mp"
+						align="center"
+						valign="center"
+						height="100h"
+						width="177.7h"
+						noclick="true"
+						anim="idle"
+						camerapos="0 -1800 00"
+						cameraangles="0 0 0"
+						camerafov="35"
+						modelangles="0 0 180"
+						modelpos="0 0 0"
+						lookat="0"
+						resourcecontext="bgeffects2"
+						ontrigger9lua="ResourceManager.RegisterModel('/ui/fe2/mainmenu/bg_effects/debug.mdf', 'bgeffects2', self)" watch9="MainRegisterModels"
+						ontrigger8lua="ResourceManager.RegisterEffect('/ui/fe2/mainmenu/bg_effects/logo_candle.effect', 'bgeffects2', self)" watch8="MainRegisterEffects"
+						onhide="SetEffect(''); SetModel(''); SetAnim('');" onshow="SetAnim('idle');"
+						onevent="SetEffect(''); SetModel(''); SetAnim('');" group="main_background_assets"
+					/>
+				</panel>
+			</if>
+		</panel>
+	</template>
+</package>

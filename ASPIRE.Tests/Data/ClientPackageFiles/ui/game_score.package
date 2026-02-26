@@ -1,0 +1,340 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+	<!-- Templates -->
+	<template name="scoreboard_popup_item">
+		<panel noclick="1" width="29i">
+			<image noclick="1" canclick="false"
+				valign="center" align="left"
+				width="29i" height="29i"
+				texture="$invis"
+				color="1 1 1 1"
+				watch="ScoreboardPlayer{index}"
+				ontriggerlua=
+				"
+					if (param23 == 'false') then
+						return
+					end
+					if (param{param} == '') then
+						self:SetTexture('{backpack}')
+					else
+						self:SetTexture(param{param})
+					end
+				"
+				watch0="GamePhase"
+				ontrigger0lua="
+					if tonumber(param) == 5 then
+						self:SetTexture('{backpack}')
+					end
+				"
+			/>
+		</panel>
+	</template>
+
+	<template name="scoreboard_popup_playerentry">
+		<panel noclick="1" height="61i" width="564i" align="center" valign="top"
+			watch="ScoreboardPlayer{index}" visible="0" sticky="true" stickytoinvis="1"
+			ontriggerlua="self:SetVisible(string.len(param0) > 0)"
+		>
+			<image noclick="1" canclick="false"
+					width="1024i" height="64i" x="-1i" y="-1i"
+					texture="/ui/huds/scoreboard/player_border.tga"
+					watch="ScoreboardPlayer{index}"
+					ontriggerlua="self:SetColor(param3)"
+			/>
+			<image noclick="1" canclick="false"
+					width="1024i" height="64i" x="-1i" y="-1i"
+					texture="/ui/huds/scoreboard/player_cover.tga"
+					watch="ScoreboardPlayer{index}"
+					ontriggerlua="
+					if (param0 ~= GetAccountName()) then
+						self:SetTexture('/ui/huds/scoreboard/player_cover.tga')
+					else
+						self:SetTexture('/ui/huds/scoreboard/player_cover_self.tga')
+						self:SetColor(param3)
+					end"
+			/>
+			<image noclick="1" canclick="false"
+					width="1024i" height="64i" x="-1i" y="-1i"
+					texture="/ui/huds/scoreboard/player_cover.tga"
+					watch="ScoreboardPlayer{index}"
+					ontriggerlua="
+					if (param0 ~= GetAccountName()) then
+						self:SetTexture('/ui/huds/scoreboard/player_cover.tga')
+					else
+						self:SetTexture('/ui/huds/scoreboard/player_cover_self.tga')
+						self:SetColor(param3)
+					end"
+			/>
+
+			<!-- Hero -->
+			<panel x="10i" y="7i" width="47i" height="47i" noclick="1" color="{teamcolor}">
+				<!-- Image -->
+				<image noclick="1" canclick="false"
+					watch="ScoreboardPlayer{index}"
+					ontriggerlua="
+						self:SetTexture(param2)
+						if (AtoB(param8)) then
+							self:SetRenderMode('normal')
+						else
+							self:SetRenderMode('grayscale')
+						end"
+					onhidelua="self:DoEventN(1)"
+				/>
+
+				<!-- Connection Status -->
+				<image
+					valign="center" align="center"
+					watch="MenuPlayerInfo{index}"
+					noclick="true"
+					visible="0"
+					texture="$invis"
+					ontriggerlua="
+						if (AtoB(param9)) then
+							self:SetTexture('/ui/legion/dead.tga')
+							self:SetVisible(1)
+						elseif (tonumber(param12) ~= 0) then
+							self:SetTexture('$invis')
+							self:SetVisible(1)
+						elseif (1 > tonumber(param13)) then
+							self:SetTexture('/ui/elements/lobby/icon_loading.tga')
+							self:SetVisible(1)
+						elseif (AtoB(param8)) then
+							self:SetTexture('/ui/elements/disconnect.tga')
+							self:SetVisible(1)
+						else
+							self:SetVisible(0)
+						end
+					"
+				/>
+				<!-- Death Timer -->
+				<label textalign="center" textvalign="center" font="dyn_16" color="white" outline="1" shadow="true" noclick="true"
+					watch="ScoreboardPlayerRespawn{index}"
+					ontriggerlua="
+						self:SetVisible((tonumber(param0) > 0) and (not AtoB(param1)))
+						self:SetText(param0)
+					"
+					watch2="MenuPlayerInfo{index}"
+					ontrigger2lua="
+						if (AtoB(param9)) then
+							self:SetVisible(0)
+						end
+					"
+				/>
+				<!-- Reconnect Time -->
+				<label textalign="center" textvalign="center" font="dyn_12" color="white" outline="1" shadow="true" noclick="true"
+					watch="GamePlayerDisconnectTime{index}" width="180%" align="center"
+					ontriggerlua="
+						self:SetText(math.ceil(param / 1000, 0)..'s')
+						self:SetVisible(tonumber(param) > 0)
+					"
+					watch2="MenuPlayerInfo{index}"
+					ontrigger2lua="
+						if (AtoB(param9)) then
+							self:SetVisible(0)
+						end
+					"
+				/>
+
+				<!-- Loading Percent -->
+				<label textalign="center" textvalign="center" font="dyn_12" color="white" outline="1" shadow="true" noclick="true"
+					watch="GamePlayerLoadingPercent{index}" width="180%" align="center"
+					ontriggerlua="
+						self:SetText(math.ceil(param * 100) ..'%')
+						self:SetVisible(1 > tonumber(param))
+					"
+					watch2="MenuPlayerInfo{index}"
+					ontrigger2lua="
+						if (AtoB(param9)) then
+							self:SetVisible(0)
+						end
+					"
+				/>
+			</panel>
+
+			<!-- Player Name -->
+			<panel x="55i" y="8i" noclick="1" width="250i" height="20i" color="{teamcolor}">
+				<label align="left" textalign="left" textvalign="center" valign="center" outline="1" outlinecolor="0 0 0 1" font="dyn_10" color="0.9 0.9 0.9" shadow="true" noclick="true"
+					watch="ScoreboardPlayer{index}" hmargin=".5h"
+					ontriggerlua="self:SetText(param0)"
+				/>
+			</panel>
+
+			<!-- Level -->
+			<panel x="55i" y="37i" noclick="1" width="60i" height="17i" color="{teamcolor}">
+				<label align="left" textalign="left" outline="1" outlinecolor="0 0 0 1" textvalign="center" valign="center" font="dyn_10" color=".9 .9 .9 1" shadow="true" noclick="true"
+					watch="ScoreboardPlayer{index}" hmargin=".5h"
+					ontriggerlua="self:SetText('Lv: '..param4)"
+				/>
+			</panel>
+
+			<!-- Current Gold -->
+			<panel x="108i" y="37i" noclick="1" width="66i" height="17i" color="{teamcolor}"
+				watch="ScoreboardPlayer{index}"
+				ontriggerlua="self:SetVisible(param11 ~= '0')"
+			>
+				<image x="-1i" y="-1i" noclick="1" canclick="false"
+					width="19i" height="19i"
+					texture="/ui/fe2/plinko/gold_icon_large.tga"
+				/>
+				<label x="17i" width="44i" align="left" textalign="center" textvalign="center" valign="center" font="dyn_10" outline="1" outlinecolor="0 0 0 1" color="1 1 0.5"
+					shadow="true" noclick="true"
+					watch="ScoreboardPlayer{index}"
+					ontriggerlua="self:SetText(param11)"
+				/>
+			</panel>
+
+			<!-- Buybacks -->
+			<panel x="170i" y="30i" width="2.25h" height="2.5h" color="invisible" noclick="1">
+				<image x="0.0h" y="-0.15h" width="1.5h" height="1.5h" valign="center" noclick="1" visible="1" texture="/ui/fe2/store/icons/hero_token2.tga" watch="ScoreboardPlayer{index}" ontriggerlua="self:SetVisible(tonumber(param24) >= 1)"/>
+				<image x="0.75h"  y="0.25h" width="1.5h" height="1.5h" valign="center" noclick="1" visible="1" texture="/ui/fe2/store/icons/hero_token2.tga" watch="ScoreboardPlayer{index}" ontriggerlua="self:SetVisible(tonumber(param24) >= 2)"/>
+			</panel>
+
+			<!-- Stats -->
+			<panel x="191i" y="28i" noclick="1" width="29i" height="13i" color="{teamcolor}">
+				<!-- K -->
+				<label x="0i" align="center" textalign="center" textvalign="center" valign="center" font="dyn_11" color="0.5 1 0.5 1" outline="1" outlinecolor="0 0 0 1" shadow="true" noclick="true"
+					watch="ScoreboardPlayer{index}"
+					ontriggerlua="self:SetText(param5)"
+				/>
+				<label x="23i" textalign="center" textvalign="center" font="dyn_11" color="1 1 1 1" outline="1" outlinecolor="0 0 0 1" shadow="true" noclick="true" content="game_label_slasher" />
+				<!-- D -->
+				<label x="46i" align="center" textalign="center" textvalign="center" valign="center" font="dyn_11" color="1 0.5 0.5 1" outline="1" outlinecolor="0 0 0 1" shadow="true" noclick="true"
+					watch="ScoreboardPlayer{index}"
+					ontriggerlua="self:SetText(param6)"
+				/>
+				<label x="69i" textalign="center" textvalign="center" font="dyn_11" color="1 1 1 1" outline="1" outlinecolor="0 0 0 1" shadow="true" noclick="true" content="game_label_slasher" />
+				<!-- A -->
+				<label x="92i" align="center" textalign="center" textvalign="center" valign="center" font="dyn_11" color="#ffd080" outline="1" outlinecolor="0 0 0 1" shadow="true" noclick="true"
+					watch="ScoreboardPlayer{index}"
+					ontriggerlua="self:SetText(param7)"
+				/>
+			</panel>
+
+			<!-- Items -->
+			<panel x="322i" y="17i" noclick="1" width="263i" height="34i" float="right" padding="2i">
+				<instance name="scoreboard_popup_item" index="{index}" backpack="{backpack=/ui/common/empty_pack.tga}"  param="15" />
+				<instance name="scoreboard_popup_item" index="{index}" backpack="{backpack=/ui/common/empty_pack.tga}"  param="16" />
+				<instance name="scoreboard_popup_item" index="{index}" backpack="{backpack=/ui/common/empty_pack.tga}"  param="17" />
+				<instance name="scoreboard_popup_item" index="{index}" backpack="{backpack=/ui/common/empty_pack.tga}"  param="18" />
+				<instance name="scoreboard_popup_item" index="{index}" backpack="{backpack=/ui/common/empty_pack.tga}"  param="19" />
+				<instance name="scoreboard_popup_item" index="{index}" backpack="{backpack=/ui/common/empty_pack.tga}" param="20" />
+				<instance name="scoreboard_popup_item" index="{index}" backpack="{ward=/ui/common/empty_ward.tga}" param="21" />
+				<instance name="scoreboard_popup_item" index="{index}" backpack="{ward=/ui/common/empty_ward.tga}" param="22" />
+			</panel>
+		</panel>
+	</template>
+
+	<template name="game_scoreboard_popup_instance">
+		<!-- Scoreboard Panel -->
+		<panel name="game_scoreboard_popup" visible="0" y="-10h" width="1178i" align="center" valign="center" color=".11 .11 .11 .4" noclick="1"
+			float="bottom" padding="0.75h" grow="1" regrow="1"
+			watch="EndGame"
+			ontriggerlua="
+				local isPlayingStreaming = GetCvarBool('replay_isPlaying') and GetCvarBool('replay_v2')
+				self:SetVisible((AtoB(param)) and not isPlayingStreaming)
+			"
+		>
+			<frame border="1" texture="/ui/huds/scoreboard/border.tga" bordercolor="1 1 1 1" borderthickness="2i" noclick="1"/>
+			<anchor x="1h" y="0h"/>
+
+			<panel name="game_scoreboard_popup_logo" width="-2h" height="128i" growinvis="0" stickytoinvis="0" visible="0" noclick="1"
+				watch="ScoreboardSelf" ontriggerlua="self:SetVisible(AtoB(param3))"
+			>
+				<image width="1024i" height="128i" align="center" texture="/ui/huds/scoreboard/victory.tga" noclick="1"
+					watch="ScoreboardSelf" ontriggerlua="self:SetVisible(AtoB(param3) and AtoB(param4))"
+				/>
+				<image width="1024i" height="128i" align="center" texture="/ui/huds/scoreboard/defeat.tga" noclick="1"
+					watch="ScoreboardSelf" ontriggerlua="self:SetVisible(AtoB(param3) and not AtoB(param4))"
+				/>
+				<image x="-1h" width="128i" height="128i" texture="/ui/huds/scoreboard/hon.tga" noclick="1"/>
+			</panel>
+
+			<panel width="-2h" height="5h" noclick="1">
+				<!-- Ping -->
+				<label x="20i" width="80i" textvalign="center" font="dyn_12" color="gray" shadow="1" shadowcolor="0 0 0 .5" content="Ping: -" noclick="1"
+					watch="ScoreboardSelf" ontriggerlua="self:SetText('Ping: ' .. param2)"
+				/>
+				<!-- FPS -->
+				<label x="100i" width="80i" textvalign="center" font="dyn_12" color="gray" shadow="1" shadowcolor="0 0 0 .7" content="FPS: -" noclick="1"
+					watch="ScoreboardSelf" ontriggerlua="self:SetText('FPS: ' .. param1)"
+				/>
+
+				<panel width="22h" height="48i" align="center" valign="center" noclick="1">
+					<image width="1024i" height="48i" align="center" valign="center" texture="/ui/huds/scoreboard/fog.tga" noclick="1"/>
+					<image width="32i" height="32i" x="-80i" align="center" valign="center" texture="/ui/huds/scoreboard/title.tga" noclick="1"/>
+					<label align="center" textalign="center" textvalign="center" content="game_scores_label_scoreboard" font="dyn_16" color="0.9 0.9 0.9" outline="1" noclick="1"/>
+				</panel>
+
+				<!-- Shortcut -->
+				<label align="right" textalign="right" textvalign="center" font="dyn_12" color="gray" outline="1" noclick="1"
+					onshowlua="self:SetText(Translate('game_scores_label_hotkey_tip', 'key', self:UICmd('GetKeybindButton(\'game\', \'ShowScoreboard\', \'\', 0)')))"
+				/>
+
+				<panel align="center" valign="bottom" width="-2h" height="4i" noclick="1">
+					<image texture="/ui/huds/scoreboard/line.tga" noclick="1"/>
+				</panel>
+			</panel>
+
+			<panel width="-2h" grow="1" float="bottom" padding="0" noclick="1">
+				<panel height="3h" noclick="1">
+					<!-- legion & hellbourne -->
+					<label x="20i" width="6h" align="left" textalign="left" textvalign="center" content="general_legion" font="dyn_12" color="0.9 0.9 0.9" outline="1" noclick="1"/>
+					<label x="-20i" width="6h" align="right" textalign="right" textvalign="center" content="general_hellbourne" font="dyn_12" color="0.9 0.9 0.9" outline="1" noclick="1"/>
+
+					<!-- Score -->
+					<label x="60i" width="80i" align="center" textalign="left" textvalign="center"
+						font="dyn_14" color="0.9 0.9 0.9" outline="1" content="0" noclick="1"
+						watch="ScoreboardTeam1" ontriggerlua="self:SetText(round(param2))"
+					/>
+					<label width="3h" align="center" textalign="center" textvalign="center" content="vs" font="dyn_14" color="0.9 0.9 0.9" outline="1" noclick="1"/>
+					<label x="-60i" width="80i" align="center" textalign="right" textvalign="center"
+						font="dyn_14" color="0.9 0.9 0.9" outline="1" content="0" noclick="1"
+						watch="ScoreboardTeam2" ontriggerlua="self:SetText(round(param2))"
+					/>
+				</panel>
+
+				<panel height="375i" float="right" padding="1h" noclick="1">
+					<!-- Legion -->
+					<panel  width="564i" height="358i" float="bottom" padding="13i" noclick="1"
+					>
+						<instance name="scoreboard_popup_playerentry" backpack="{backpack=/ui/common/empty_pack.tga}" ward="{ward=/ui/common/empty_ward.tga}" teamcolor="0 .7 0 .0" font="dyn_10" index="0" />
+						<instance name="scoreboard_popup_playerentry" backpack="{backpack=/ui/common/empty_pack.tga}" ward="{ward=/ui/common/empty_ward.tga}" teamcolor="0 .7 0 .0" font="dyn_10" index="1" />
+						<instance name="scoreboard_popup_playerentry" backpack="{backpack=/ui/common/empty_pack.tga}" ward="{ward=/ui/common/empty_ward.tga}" teamcolor="0 .7 0 .0" font="dyn_10" index="2" />
+						<instance name="scoreboard_popup_playerentry" backpack="{backpack=/ui/common/empty_pack.tga}" ward="{ward=/ui/common/empty_ward.tga}" teamcolor="0 .7 0 .0" font="dyn_10" index="3" />
+						<instance name="scoreboard_popup_playerentry" backpack="{backpack=/ui/common/empty_pack.tga}" ward="{ward=/ui/common/empty_ward.tga}" teamcolor="0 .7 0 .0" font="dyn_10" index="4" />
+					</panel>
+
+					<!-- Line -->
+					<panel width="4i" height="358i" noclick="1">
+						<image width="4i" height="375i" texture="/ui/huds/scoreboard/line2.tga" noclick="1"/>
+					</panel>
+
+					<!-- Hellbourne -->
+					<panel width="564i" height="358i" float="bottom" padding="13i" noclick="1"
+					>
+						<instance name="scoreboard_popup_playerentry" backpack="{backpack=/ui/common/empty_pack.tga}" ward="{ward=/ui/common/empty_ward.tga}" teamcolor=".9 0 0 .0" font="dyn_10" index="5" />
+						<instance name="scoreboard_popup_playerentry" backpack="{backpack=/ui/common/empty_pack.tga}" ward="{ward=/ui/common/empty_ward.tga}" teamcolor=".9 0 0 .0" font="dyn_10" index="6" />
+						<instance name="scoreboard_popup_playerentry" backpack="{backpack=/ui/common/empty_pack.tga}" ward="{ward=/ui/common/empty_ward.tga}" teamcolor=".9 0 0 .0" font="dyn_10" index="7" />
+						<instance name="scoreboard_popup_playerentry" backpack="{backpack=/ui/common/empty_pack.tga}" ward="{ward=/ui/common/empty_ward.tga}" teamcolor=".9 0 0 .0" font="dyn_10" index="8" />
+						<instance name="scoreboard_popup_playerentry" backpack="{backpack=/ui/common/empty_pack.tga}" ward="{ward=/ui/common/empty_ward.tga}" teamcolor=".9 0 0 .0" font="dyn_10" index="9" />
+					</panel>
+				</panel>
+			</panel>
+
+			<panel width="-2h" height="0.25h" noclick="1"/>
+		</panel>
+
+		<panel name="game_scoreboard_popup_helper" width="1" height="1" noclick="1"/>
+	</template>
+
+	<template name="game_scoreboard_tab">
+		<!-- Tab on the top right -->
+		<panel name="game_scoreboard_tab" visible="1" color="invisible" width="3.1h" height="3h" align="right" y="10h"
+			onmouseldownlua="GetWidget('game_scoreboard_popup', 'game'):SetVisible(1)"
+			onmouseluplua="GetWidget('game_scoreboard_popup', 'game'):SetVisible(0)"
+		>
+			<frame noclick="1" color="0 0 0 .8" border="1" borderthickness=".1h" bordercolor=".7 .7 .7 1" />
+			<image texture="/ui/icons/more.tga" width="2.5h" height="2.5h" align="center" valign="center" noclick="1" />
+		</panel>
+	</template>
+</package>

@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+
+	<trigger name="rattletrap_lane_choice"/>
+	<trigger name="rattletrap_lane_choice_closed"/>
+
+	<style name="laneSelectCover" width="23.7h" height="47.4h" noclick="true" visible="false"/>
+	<style name="laneSelectLane" width="23.7h" height="23.7h" noclick="true"/>
+	<style name="laneSelectLaneGlow" style="laneSelectLane" rendermode="additive" color="#74f2ff" visible="false"/>
+
+	<template name="laneSelectCloseButton">
+		<button
+			name="{id}"
+			visible="{visible=true}"
+			x="{x}" y="{y}"
+			width="{width=1.9h}" height="{height=1.9h}"
+			align="{align}"
+			valign="{valign}"
+			color="invisible"
+			onclick="{onclick}"
+			onclicklua="{onclicklua}"
+			onmouseover="{onmouseover}"
+			interactive="{interactive=false}"
+			watch="{btn_watch}" ontrigger="{btn_ontrigger}"
+		>
+			<widgetstate statename="up">
+				<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.5h" color="#910000" blockinput="false" noclick="true"/>
+				<frame texture="/ui/frames/roundframe.tga" color="0 0 0 1" borderthickness="0.5h" blockinput="false" noclick="true"/>
+				<image width="70%" height="70@" align="center" valign="center" color=".75 .75 .75 1" texture="/ui/elements/closex.tga" noclick="true" />
+			</widgetstate>
+			<widgetstate statename="over">
+				<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.5h" color="#dc0000" blockinput="false" noclick="true"/>
+				<frame texture="/ui/frames/roundframe.tga" color="0 0 0 1" borderthickness="0.5h" blockinput="false" noclick="true"/>
+				<image width="70%" height="70@" align="center" valign="center" color="1 1 1 1" texture="/ui/elements/closex.tga" noclick="true" />
+			</widgetstate>
+			<widgetstate statename="down" x="1" y="1">
+				<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.5h" color="#910000" blockinput="false" noclick="true"/>
+				<frame texture="/ui/frames/roundframe.tga" color="0 0 0 1" borderthickness="0.5h" blockinput="false" noclick="true"/>
+				<image width="70%" height="70@" align="center" valign="center" color="1 1 1 1" texture="/ui/elements/closex.tga" noclick="true" />
+			</widgetstate>
+		</button>
+	</template>
+
+
+	<template name="laneSelectLaneGlowEffect">
+		<panel
+			name="{id}" color="1 1 1 0"
+			x="{x}" y="{y}" width="{width=100%}" height="{height=100%}" align="{align}" valign="{valign}" noclick="true"
+			visible="{visible=false}"
+		>
+			<modelpanel
+				noclick="true"
+				model="{modelPath=common/models/toggle/toggle.mdf}"
+				anim="idle"
+				effect="{effectPath=/ui/common/models/toggle/toggle.effect}"
+				camerapos="0 1 0"
+				cameraangles="0 0 180"
+				camerafov="45"
+				cameranear="1"
+				carmerafar="100"
+				depthclear="false"
+				depthcompress="true"
+				onshow="SetAnim('idle'); SetEffect('{effectPath=/ui/common/models/toggle/toggle.effect}');"
+			/>
+		</panel>
+	</template>
+
+	<panel name="laneSelect" align="center" y="9h" width="47.4h" height="47.4h" visible="false" noclick="true">
+		<image name="nameSelectBacker" texture="/ui/elements/laneselect/rt_laneui_base2.tga" noclick="true"/>
+
+		<instance name="laneSelectCloseButton" id="laneSelectClose" width="1.57h" height="1.57h" x="44.53h" y="17.96h"/>
+
+		<image name="laneSelectSkull" noclick="true" width="11.85h" height="23.7h" texture="/ui/elements/laneselect/rt_laneui_skull.tga" y="-3.05h" x="17.59h"/>
+
+		<image name="laneSelectLane1Cover" style="laneSelectCover" texture="/ui/elements/laneselect/rt_laneui_flag_left.tga" align="left" x="-0.83h" y="11.29h"/>
+		<image name="laneSelectLane2Cover" style="laneSelectCover" texture="/ui/elements/laneselect/rt_laneui_flag_center.tga" align="center" y="10.74h"/>
+		<image name="laneSelectLane3Cover" style="laneSelectCover" texture="/ui/elements/laneselect/rt_laneui_flag_right.tga" align="right" x="1.94h" y="9.16h"/>
+
+		<image name="laneSelectLane1Glow" texture="/ui/elements/laneselect/rt_laneui_glow_left2.tga" y="18.05h" x="-0.925h" style="laneSelectLaneGlow"/>
+		<image name="laneSelectLane2Glow" texture="/ui/elements/laneselect/rt_laneui_glow_center2.tga" y="14.16h" x="12.4h" style="laneSelectLaneGlow" visible="false"/>
+		<image name="laneSelectLane0" texture="/ui/elements/laneselect/rt_laneui_nolane.tga" y="14.16h" x="12.4h" style="laneSelectLane" visible="false"/>
+		<image name="laneSelectLane0Glow" texture="/ui/elements/laneselect/rt_laneui_glow_nolane.tga" y="14.16h" x="12.4h" style="laneSelectLaneGlow"/>
+		<image name="laneSelectLane3Glow" texture="/ui/elements/laneselect/rt_laneui_glow_right2.tga" y="17.59h" x="25.09h" style="laneSelectLaneGlow"/>
+
+		<instance name="laneSelectLaneGlowEffect" id="laneSelectLane1GlowEffect" effectPath="/ui/effects/laneselect/highlight_top.effect" width="12.25h" height="12.25h" y="23h" x="4.75h" visible="false"/>
+		<instance name="laneSelectLaneGlowEffect" id="laneSelectLane2GlowEffect" effectPath="/ui/effects/laneselect/highlight_mid.effect" width="12.25h" height="12.25h" y="19.75h" align="center" x="0.5h" visible="false"/>
+		<instance name="laneSelectLaneGlowEffect" id="laneSelectLane0GlowEffect" effectPath="/ui/effects/laneselect/highlight_none.effect" width="12.25h" height="12.25h" y="19.75h" align="center" x="0.5h" visible="false"/>
+		<instance name="laneSelectLaneGlowEffect" id="laneSelectLane3GlowEffect" effectPath="/ui/effects/laneselect/highlight_bot.effect" width="12.25h" height="12.25h" y="23h" x="31h" visible="false"/>
+
+		<button name="laneSelectLane1Button" width="12.25h" height="12.25h" y="23h" x="4.75h" color="invisible"/>
+		<button name="laneSelectLane2Button" width="12.25h" height="12.25h" y="19.75h" align="center" x="0.5h" color="invisible"/>
+		<button name="laneSelectLane0Button" width="12.25h" height="12.25h" y="19.75h" align="center" x="0.5h" color="invisible" visible="false"/>
+		<button name="laneSelectLane3Button" width="12.25h" height="12.25h" y="23h" x="31h" color="invisible"/>
+
+		<panel height="4h" grow="true" align="center" valign="bottom" y="-3h" noclick="true" passivechildren="true">
+			<frame texture="/ui/frames/squareglow.tga" color="0 0 0 0.5" borderthickness="1.8h" />
+			<label textalign="center" textvalign="center" font="dyn_16" color="white" outline="true" fitx="true" fitxpadding="6h" content="game_lane_selection"/>
+		</panel>
+	</panel>
+
+</package>

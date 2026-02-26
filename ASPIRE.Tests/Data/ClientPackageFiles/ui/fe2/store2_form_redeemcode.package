@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+	<template name="storePopupRedeemCodeForm">
+		<panel width="-3.0h" align="center" noclick="1" height="200i" float="bottom" padding="1.0h" onload="CreateString('mstore_redeemcode_input', '');"
+			onshowlua="Store.ShowRedeemCodeWindow()"
+		>
+			<!-- Base -->
+			<panel name="store_redeem_text_1" x="0" y="0" visible="1" sticky="1" stickytoinvis="0" width="100%" align="center" grow="1" regrow="1" growinvis="0" float="bottom" padding="1h" noclick="1">
+				<label y="1.0h" fity="1" textalign="center" width="100%" font="dyn_14" color="green" content="mstore_redeemcode_self" noclick="1"/>
+				<label fity="1" textalign="center" wrap="1" width="100%" font="dyn_12" style="microStorePaperText" content="mstore_reedeem_code_base_1" noclick="1"/>
+			</panel>
+
+			<!-- Success -->
+			<panel name="store_redeem_text_2" visible="0" sticky="1" stickytoinvis="0" width="100%" align="center" grow="1" regrow="1" growinvis="0" float="bottom" padding="1h" noclick="1">
+				<label y="1.0h" fity="1" textalign="center" width="100%" font="dyn_14" color="green" content="mstore_reedeem_code_success_1" noclick="1" />
+			</panel>
+
+			<!-- Error -->
+			<panel name="store_redeem_text_3" visible="0" sticky="1" stickytoinvis="0" width="100%" align="center" grow="1" regrow="1" growinvis="0" float="bottom" padding="1h" noclick="1">
+				<label y="1.0h" fity="1" textalign="center" width="100%" font="dyn_14" color="red" content="mstore_reedeem_code_error_1" noclick="1"/>
+				<label name="store_redeem_text_3_1" fity="1" textalign="center" wrap="1" width="100%" font="dyn_12" style="microStorePaperText" content="" noclick="1"/>
+			</panel>
+
+			<panel sticky="1" stickytoinvis="0" width="100%" grow="1" regrow="1" growinvis="0" align="left" float="bottom" padding="0.5h" reverse="1">
+				<panel width="100%" height="2.5h" float="right" padding="1.5h">
+					<label style="microStorePaperText" fitx="1" font="dyn_10" textvalign="center" noclick="1" x="0%" content="mstore_entercode"/>
+					<panel width="69%" visible="1" noclick="1">
+						<instance
+							name="paperForm_textbox_container"
+							label=""
+							hastip="false"
+							order="138"
+							width="100%"
+							fieldwidth="100%"
+							labelwidth="0%"
+							showarrow="1"
+							fieldname="redeem_code_friendnick_textbox"
+							tip_id=""
+							form="" data=""
+							updatetrigger="UpdateRedeemCodeForm"
+							textboxwatch=""
+							textboxontrigger=""
+							onlosefocus=""
+							onesc=""
+							onfocus="HideWidget('store_redeem_text_3');ShowWidget('store_redeem_text_1');"
+							onchange="Set(mstore_redeemcode_input, this);"
+							onload=""
+							onhide="EraseInputLine();"
+						/>
+					</panel>
+					<instance name="store2_tip_mark" tip_id="mstore_tip_redeemcode_self" width="2.3h" height="2.3h" valign="center"/>
+				</panel>
+
+				<panel sticky="1" stickytoinvis="0" height="0" width="100%" noclick="1"/>
+
+				<panel name="store_redeem_submit" width="100%" height="3.5h" visible="1" stickytoinvis="0" noclick="1">
+					<instance name="store2Button" enabled="0" texture="button5" width="14h" height="3.5h" align="center" color="#fffdf6" outlinecolor="#9c4404" label="mstore_buycoins_submit" tip_id="mstore_tip_buycoins_submit"
+						watch="UpdateRedeemCodeForm"
+						ontrigger="SetEnabled(!StringEmpty(mstore_redeemcode_input));"
+						watch1="StoreRedeemPromoCodeStatus"
+						ontrigger1="SetEnabled(param != 1);"
+						onclicklua="Store.SubmitRedeemCodeForm(GetCvarString('mstore_redeemcode_input'))"
+					/>
+				</panel>
+
+				<panel width="100%" height="3.5h" stickytoinvis="0" watch="StoreRedeemPromoCodeStatus" ontrigger="SetVisible(param == 1);" visible="0" noclick="1">
+					<animatedimage texture="/ui/elements/throb/throb.tga" height="100%" width="100@" align="center" valign="center" loop="1" fps="30" onshow="StartAnim(1);" noclick="1"/>
+				</panel>
+
+				<panel sticky="1" stickytoinvis="0" height="0" width="100%" noclick="1"/>
+			</panel>
+
+			<panel sticky="1" stickytoinvis="0" height="0h" width="100%" noclick="1"/>
+		</panel>
+	</template>
+
+	<trigger name="UpdateRedeemCodeForm"/>
+	<trigger name="StoreRedeemPromoCodeStatus"/>
+	<trigger name="StoreRedeemPromoCodeResult"/>
+
+	<form
+		name="StoreRedeemPromoCode"
+		host="!masterserver"
+		method="POST"
+		target="/store_requester.php"
+		statustrigger="StoreRedeemPromoCodeStatus"
+		resulttrigger="StoreRedeemPromoCodeResult"
+		resultparam0="responseCode"
+		resultparam1="popupCode"
+		resultparam2="errorCode"
+		resultparam3="redeemed"
+		ssl="false"
+	/>
+
+	<panel noclick="1" name="store_redeem_promo_code_form"
+		onevent="CallEventParamsX(name, 0, 'CJ4J975AIBKCQFRRX64G');"
+		onevent0="SubmitForm('StoreRedeemPromoCode', 'code', param0, 'request_code', '10', 'cookie', GetCookie(), 'account_id', GetAccountID(), 'hosttime', HostTime);"
+		watch="StoreRedeemPromoCodeResult"
+		ontrigger="
+			Echo('param0 = ' # param0);
+			Echo('param1 = ' # param1);
+			Echo('param2 = ' # param2);
+			Echo('param3 = ' # param3);
+		"
+	/>
+</package>

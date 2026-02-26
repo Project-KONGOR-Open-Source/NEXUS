@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+	<!-- Region Change Point --> <!-- Passwords and SSL -->
+
+	<!-- Reset Stats -->
+	<trigger name="UpdateStoreResetStatsForm"/>
+	<trigger name="StoreResetStatsStatus"/>
+	<trigger name="StoreResetStatsResult"/>
+
+	<form
+		name="StoreResetStats"
+		host="!masterserver"
+		target="/client_requester.php?f=reset_stats"
+		ssl="false"
+		php="false"
+		statustrigger="StoreResetStatsStatus"
+		resulttrigger="StoreResetStatsResult"
+		resultparam0="success"
+		resultparam1="errors"
+	/>
+	<template name="storePopupResetStatsForm">
+		<panel name="storePopupResetStatsForm_{id=}" width="100%" grow="1" regrow="1" growinvis="0" float="bottom" padding="0.25h" visible="{visible=1}" noclick="1"
+			watch="StoreResetStatsResult"
+			ontriggerlua="HoN_Store:ProcessResetStatsForm(param)"
+		>
+			<panel width="100%" grow="1" noclick="1">
+				<label wrap="1" fity="1" style="microStoreDetailDesc" content="mstore_resetstats_form_body" onload="SetText(FormatStringNewLine(Translate('mstore_resetstats_form_body')));" onshowlua="ToggleOthersDetailStyle(self)"/>
+			</panel>
+
+			<instance name="store2_line2" align="center" width="100%" height="1h"/>
+
+			<instance name="form_checkbox2" checkbox_name="store_resetstats_checkbox_pubstats" cvar="_microStore_resetStats_pubstats" value="1" label="web_form_resetstats_pubstats" updatetrigger="UpdateStoreResetStatsForm" enabled="1" color="#d7b6a2" outline="1" outlinecolor="#241410" onlabelshowlua="ToggleOthersDetailStyle(self)" onhidelua="Set('_microStore_resetStats_pubstats', false) self:SetButtonState(0)"/>
+			<instance name="form_checkbox2" checkbox_name="store_resetstats_checkbox_psr" cvar="_microStore_resetStats_psr" value="1" label="web_form_resetstats_psr" updatetrigger="UpdateStoreResetStatsForm" enabled="1" color="#d7b6a2" outline="1" outlinecolor="#241410" onlabelshowlua="ToggleOthersDetailStyle(self)" onhidelua="Set('_microStore_resetStats_psr', false) self:SetButtonState(0)"/>
+			<instance name="form_checkbox2" checkbox_name="store_resetstats_checkbox_midwars_stats" cvar="_microStore_resetStats_midwars_stats" value="1" label="web_form_resetstats_midwars" updatetrigger="UpdateStoreResetStatsForm" enabled="1" color="#d7b6a2" outline="1" outlinecolor="#241410" onlabelshowlua="ToggleOthersDetailStyle(self)" onhidelua="Set('_microStore_resetStats_midwars_stats', false) self:SetButtonState(0)"/>
+			<instance name="form_checkbox2" checkbox_name="store_resetstats_checkbox_con_normal_stats" cvar="_microStore_resetStats_con_normal_stats" value="1" label="web_form_resetstats_connormalstats" updatetrigger="UpdateStoreResetStatsForm" enabled="1" color="#d7b6a2" outline="1" outlinecolor="#241410" onlabelshowlua="ToggleOthersDetailStyle(self)" onhidelua="Set('_microStore_resetStats_con_normal_stats', false) self:SetButtonState(0)"/>
+
+			<panel onload="SetVisible(!ui_disableAccountCreation)" visible="0" height="3h" sticky="1" stickytoinvis="0" noclick="1">
+			<!-- Confirm Password -->
+				<instance
+					name="paperForm_textbox_container"
+					label="create_acc_confirm_password"
+					font="dyn_12" color="red"
+					enabled="1"
+					hastip="false"
+					order="221"
+					width="100%"
+					labelwidth="35%"
+					fieldwidth="45%"
+					fieldname="store_resetstats_confirmpass"
+					ontrigger="If(StringEmpty(store_resetstats_confirmpass), DoEvent(0), DoEvent(1));"
+					tip_id=""
+					form="" data=""
+					updatetrigger="UpdateStoreResetStatsForm"
+					onload="CreateString('_store_resetstats_confirm_pass', '');"
+					onchange="
+						If(!StringEmpty(this),
+							Set('_store_resetstats_confirm_pass', md5(this)),
+							Set('_store_resetstats_confirm_pass', '')
+						);
+
+					"
+					passchar="*"
+					onshowlua="ToggleOthersDetailStyle(self)"
+					onevent1lua="ToggleOthersDetailStyle(self)"
+					onhide="EraseInputLine();"
+				/>
+			</panel>
+			<panel width="100%" height="1.5h" noclick="1"/>
+		</panel>
+	</template>
+</package>

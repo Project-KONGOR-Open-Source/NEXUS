@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+	<!-- Buy Subaccount -->
+	<trigger name="UpdateStoreSubAccountForm"/>
+	<trigger name="StoreSubAccountStatus"/>
+	<trigger name="StoreSubAccountResult"/>
+	<form
+		name="StoreSubAccount"
+		host="!hon"
+		target="/client_require_identity.php"
+		ssl="false"
+		statustrigger="StoreSubAccountStatus"
+		resulttrigger="StoreSubAccountResult"
+		resultparam0="success"
+		resultparam1="errors"
+	/>
+	<template name="storePopupSubAccountForm">
+		<panel width="100%" grow="1" regrow="1" growinvis="0" float="bottom" padding="0.5h"
+		
+			watch="StoreSubAccountResult"
+			ontrigger="
+				If(
+					param0 == 1,
+					Split(
+						CallEvent('store_popup_SubAccount_success', 0),
+						If(
+							!ui_disableAccountCreation,
+							Split(
+								Set('_store_SubAccount_confirmpass', ''),
+								Call('store_SubAccount_confirmpass', 'EraseInputLine();')
+							)
+						),						
+						Call('store_SubAccount_nick', 'EraseInputLine();'),
+						Call('store_SubAccount_nick2', 'EraseInputLine();'),
+						CallEvent('store_popup_sub_account', 1)
+					),
+					CallEvent('store_popup_form_error', 0)
+				);
+			"
+		>
+			<panel width="100%" height="1h">
+				<panel width="-1h" valign="center" align="center" height="0.1h" style="microStorePaperText"/>
+			</panel>
+			<panel width="100%" grow="true">
+				<label width="100%" align="center" wrap="true" fity="true" textalign="center" textvalign="center" font="dyn_10" style="microStorePaperText" content="web_form_subaccount_description_short"/>
+			</panel>
+			
+			
+			<!-- New Nickname -->
+			<instance
+				name="paperForm_textbox_container"
+				label="create_acc_nickname"
+				hastip="false"
+				order="241"
+				width="100%"
+				fieldwidth="46%"
+				fieldname="store_SubAccount_nick"
+				ontrigger="If(StringEmpty(store_SubAccount_nick) or !StringEquals(store_SubAccount_nick, store_SubAccount_nick2), DoEvent(0), DoEvent(1));"
+				tip_id=""
+				form="StoreSubAccount" data="nickname"
+				updatetrigger="UpdateStoreSubAccountForm"
+			/>
+			
+			<!-- Confirm Nickname -->
+			<instance
+				name="paperForm_textbox_container"
+				label="web_form_nickchange_confirmnick"
+				hastip="false"
+				order="242"
+				width="100%"
+				fieldwidth="46%"
+				fieldname="store_SubAccount_nick2"
+				ontrigger="If(StringEmpty(store_SubAccount_nick2) or !StringEquals(store_SubAccount_nick, store_SubAccount_nick2), DoEvent(0), DoEvent(1));"
+				tip_id=""
+				form="StoreSubAccount" data="confirmNickname"
+				updatetrigger="UpdateStoreSubAccountForm"
+			/>
+
+			<panel noclick="1" onload="SetVisible(!ui_disableAccountCreation)" visible="0" height="3h" sticky="1" stickytoinvis="0" >
+				<!-- Confirm Password -->
+				<instance
+					name="paperForm_textbox_container"
+					label="create_acc_confirm_password"
+					hastip="false"
+					order="243"
+					width="100%"
+					fieldname="store_SubAccount_confirmpass"
+					ontrigger="If(StringEmpty(store_SubAccount_confirmpass), DoEvent(0), DoEvent(1));"
+					tip_id=""
+					form="" data=""
+					updatetrigger="UpdateStoreSubAccountForm"
+					onload="CreateString('_store_SubAccount_confirmpass', '');"
+					onchange="
+						If(
+							!StringEmpty(this),
+							Set('_store_SubAccount_confirmpass', md5(this)),
+							Set('_store_SubAccount_confirmpass', '')
+						);
+						
+					"
+					passchar="*"
+				/>
+			</panel>
+			
+			<panel height="2.5h" width="100%">
+				<panel height="100%" grow="true" align="center">
+					<panel grow="true"  float="right" padding="1h" height="100%">
+					<instance name="storeButton" enabled="false" width="15h" height="2.5h" label="web_form_subaccount_title"
+						watch="UpdateStoreSubAccountForm MicroStoreProcessing"
+						ontrigger="
+							If(
+								ui_disableAccountCreation,
+								DoEvent(3),
+								DoEvent(2)
+							);
+						"
+						onevent2="
+							If(
+								!StringEmpty(store_SubAccount_nick) and StringEquals(store_SubAccount_nick, store_SubAccount_nick2) and !_microStore_processing and !StringEmpty(store_SubAccount_confirmpass),
+								SetEnabled(true),
+								SetEnabled(false)
+							);
+						"
+						onevent3="
+							If(
+								!StringEmpty(store_SubAccount_nick) and StringEquals(store_SubAccount_nick, store_SubAccount_nick2) and !_microStore_processing,
+								SetEnabled(true),
+								SetEnabled(false)
+							);
+						"						
+						onclick="
+							Trigger('MicroStoreSetProcTrig', 'StoreSubAccountStatus');
+							DoEvent(
+								If(
+									ui_disableAccountCreation,
+									1, 0
+								)
+							);
+						"
+						onevent0="
+							SubmitForm('StoreSubAccount', 'account_id', GetAccountID(), 'password', store_SubAccount_confirmpass, 'cookie', GetCookie());
+						"
+						onevent1="
+							SubmitForm('StoreSubAccount', 'account_id', GetAccountID(), 'cookie', GetCookie());
+						"						
+					/>
+					<instance name="storeButton" enabled="true" width="10h" height="2.5h" label="general_cancel" onclick="CallEvent('store_popup_sub_account', 1);" watch="MicroStoreProcessing" ontrigger="SetEnabled(!param0);"/>
+					</panel>
+					<panel align="center" watch="MicroStoreProcessing" ontrigger="
+						If(
+							_microStore_processing,
+							SetVisible(1),
+							FadeOut(350)
+						);
+						">
+						<panel color="0 0 0 0.5">
+							<frame color="invisible" bordercolor="0.75 0.5 0 0.5" borderthickness="0.15h" noclick="true" />
+							<label color="white" shadow="true" font="dyn_11" textvalign="center" textalign="center" width="-3h" content="mstore_processing_elipses" />
+							<animatedimage texture="/ui/elements/throb/throb.tga" noclick="true" loop="1" fps="30" onshow="StartAnim(1);" align="right" width="3h" height="3h" valign="center" x="-0.25h" />
+						</panel>
+					</panel>
+
+				</panel>
+			</panel>
+		</panel>
+	</template>
+</package>

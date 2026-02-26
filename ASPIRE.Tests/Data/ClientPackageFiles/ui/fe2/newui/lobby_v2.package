@@ -1,0 +1,2583 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+	<lua file="/ui/scripts/newui/lobby_v2.lua"/>
+
+	<!-- Forms -->
+	<trigger name="LobbyBuyAvatarStatus"/>
+	<trigger name="LobbyBuyAvatarResults"/>
+
+	<form
+		name="LobbyBuyAvatar"
+		host="!masterserver"
+		method="post"
+		target="/store_requester.php"
+		statustrigger="LobbyBuyAvatarStatus"
+		resulttrigger="LobbyBuyAvatarResults"
+		resultparam0="responseCode"
+		resultparam1="popupCode"
+		resultparam2="errorCode"
+		resultparam3="error"
+		ssl="false"
+	/>
+
+	<trigger name="LobbyBuyHeroStatus"/>
+	<trigger name="LobbyBuyHeroResults"/>
+
+	<form
+		name="LobbyBuyHero"
+		host="!masterserver"
+		method="post"
+		target="/store_requester.php"
+		statustrigger="LobbyBuyHeroStatus"
+		resulttrigger="LobbyBuyHeroResults"
+		resultparam0="responseCode"
+		resultparam1="popupCode"
+		resultparam2="errorCode"
+		resultparam3="error"
+		ssl="false"
+	/>
+
+	<trigger name="RefereeControlPage"/>
+
+	<!-- Templates -->
+	<template name="lobby_player_arrow_anim_template">
+		<panel width="{width=40i}" height="32i" align="center" valign="center" noclick="1">
+			<image texture="$invis" width="16i" height="32i" valign="center" noclick="1" hflip="{hflip}" onframelua="Lobby_V2:UpdateArrowAnim(self, 0, '{hflip=0}')" 
+					watch="HeroSelectPlayerInfo{index}" ontriggerlua="Lobby_V2:UpdateArrowImage(...)"
+			/>
+			<image texture="$invis" width="16i" height="32i" valign="center" noclick="1" hflip="{hflip}" onframelua="Lobby_V2:UpdateArrowAnim(self, 1, '{hflip=0}')"
+					watch="HeroSelectPlayerInfo{index}" ontriggerlua="Lobby_V2:UpdateArrowImage(...)"
+			/>
+			<image texture="$invis" width="16i" height="32i" valign="center" noclick="1" hflip="{hflip}" onframelua="Lobby_V2:UpdateArrowAnim(self, 2, '{hflip=0}')"
+					watch="HeroSelectPlayerInfo{index}" ontriggerlua="Lobby_V2:UpdateArrowImage(...)"
+			/>
+		</panel>
+	</template>
+
+	<template name="lobby_large_player_template">
+		<panel name="lobby_large_player_{index}" width="256i" height="86i" visible="0" watch="HeroSelectPlayerInfo{index}" ontriggerlua="Lobby_V2:OnHeroSelectPlayerInfo({index}, ...)"
+				watch1="HeroSelectMastery{index}" ontrigger1lua="Lobby_V2:OnHeroSelectMastery({index}, param0, param1)"
+				watch2="LobbyPlayerInfo{index}" ontrigger2lua="Lobby_V2:OnLobbyPlayerInfo({index}, ...)"
+		>
+			<panel width="-30i" align="center" noclick="1">
+				<panel name="lobby_large_player_{index}_selfeffect" width="256i" align="{align2=right}">
+					<image texture="/ui/fe2/newui/res/lobby/selfeffect.png" width="512i" height="256i" align="center" valign="center" hflip="{hflip=0}" noclick="1"/>
+					<modelpanel align="center" valign="center" noclick="true" width="200%" height="200%"
+						model="/shared/models/invis.mdf"
+						onshowlua="self:SetEffect('/ui/fe2/newui/res/effects/heroselect{align1=right}.effect')"
+						onhidelua="self:SetEffect('')"
+						modelpos="0 0 0"
+						modelscale="0.3"
+						modelangles="0 90 0"
+						cameradistance="30"
+						camerapos="0 4000 0"
+						cameraangles="0 90 180"
+						camerafov="7"
+						cameranear="100.0"
+						camerafar="20000.0"
+						depthclear="true"
+						depthcompress="false"
+						sunazimuth="120"
+						sunaltitude="20"
+						suncolor="1 1 1"
+						ambientcolor="1 1 1"
+						scenebuffer="true"
+						lookat="false"
+						visible="1"
+					/>
+				</panel>
+			</panel>
+			<image name="lobby_large_player_{index}_ready_bg" height="128i" align="center" valign="center" hflip="{hflip=0}" noclick="1"/>
+			<image name="lobby_large_player_{index}_notready_bg" height="128i" align="center" valign="center" hflip="{hflip=0}" noclick="1"/>
+
+			<panel align="center" width="+118i" noclick="1">
+				<image texture="/ui/fe2/newui/res/lobby/color.png" width="32i" height="128i" align="{align1=right}" valign="center" noclick="1" hflip="{hflip=0}" onloadlua="self:SetColor(Common_V2:GetPlayerColor({index}))" />
+			</panel>
+
+			<panel align="center" width="+100i" noclick="1">
+				<panel name="lobby_large_player_{index}_portrait" width="86i" height="86i" align="{align1=right}" valign="center">
+					<image name="lobby_large_player_{index}_heroicon" width="-6i" height="-6i" align="center" valign="center" usealphamask="true" alphamaskfile="/ui/fe2/elements/store2/mask.png" noclick="1"/>
+					<image name="lobby_large_player_{index}_border" width="128i" height="128i" align="center" valign="center" noclick="1"/>
+					<modelpanel align="center" valign="center" noclick="true" width="600%" height="600%" x="7i" y="-4i"
+								model="/shared/models/invis.mdf"
+								onloadlua="self:SetEffect('/ui/fe2/NewUI/res/effects/voice2.effect')"
+								modelpos="0 0 0"
+								modelscale="0.3"
+								modelangles="0 90 0"
+								cameradistance="30"
+								camerapos="-15 300 30"
+								cameraangles="0 0 180"
+								camerafov="7"
+								cameranear="100.0"
+								camerafar="20000.0"
+								depthclear="true"
+								depthcompress="false"
+								sunazimuth="120"
+								sunaltitude="20"
+								suncolor="1 1 1"
+								ambientcolor="1 1 1"
+								scenebuffer="true"
+								lookat="false"
+								visible="true"
+								watch="LobbyVoice{index}" 
+								ontriggerlua="local state = tonumber(param)
+								 			  self:SetVisible(state == 1)"
+					/>
+					<panel watch="HeroSelectPlayerInfo{index}"
+							ontrigger="SetVisible(param9 and param11);" 
+							onclick="SwapHeroRequest({index} % 5);"
+					>
+						<modelpanel align="center" valign="center" noclick="true" width="600%" height="600%" x="7i" y="-4i"
+								model="/shared/models/invis.mdf"
+								onloadlua="self:SetEffect('/ui/fe2/NewUI/res/effects/swap.effect')"
+								modelpos="0 0 0"
+								modelscale="0.3"
+								modelangles="0 90 0"
+								cameradistance="30"
+								camerapos="-15 300 30"
+								cameraangles="0 0 180"
+								camerafov="7"
+								cameranear="100.0"
+								camerafar="20000.0"
+								depthclear="true"
+								depthcompress="false"
+								sunazimuth="120"
+								sunaltitude="20"
+								suncolor="1 1 1"
+								ambientcolor="1 1 1"
+								scenebuffer="true"
+								lookat="false"
+								visible="true"
+						/>
+					</panel>
+				</panel>
+			</panel>
+
+			<panel y="16i" align="center" width="-90i" height="20i" noclick="1">
+				<label name="lobby_large_player_{index}_heroname" width="165i" align="{align1=right}" textalign="{align1=right}" textvalign="center" font="dyn_12" color="white" noclick="1"
+						autofont="1" autofontmax="12" outline="1" outlinecolor="#241410"
+				/>
+			</panel>
+			
+			<!-- Enable for NAEU only -->
+			<if condition="!cl_GarenaEnable">
+				<panel y="32i" align="center" width="-136i" height="20i" noclick="1">
+					<!-- PSR/MMR -->
+					<label name="HeroSelectPlayerPSR{index}" width="140i" align="{align2=right}" textalign="{align2=right}" textvalign="center" font="dyn_9" color="white" noclick="1" autofont="1" autofontmax="9" outline="1" outlinecolor="#241410" watch="LobbyPlayerInfo{index}" ontrigger="SetText(Round(param10));"/>
+					<!-- PSR -->				
+					<label name="HeroSelectPlayerPSRChange{index}" width="140i" align="{align1=right}" textalign="{align1=right}" textvalign="center" font="dyn_7" color="white" noclick="1" autofont="1" autofontmax="7" outline="1" outlinecolor="#241410" watch="LobbyPlayerInfo{index}" ontrigger="SetText('+' # param12 # ' / ' # param13);"/>	
+				</panel>
+			</if>
+
+
+			<panel y="50i" align="center" width="-90i" height="20i" noclick="1">
+				<panel align="{align1=right}" width="-25i" noclick="1">
+					<panel width="100@" height="100%" align="{align1=right}" noclick="1">
+						<image name="lobby_large_player_{index}_rank" width="64i" height="64i" align="center" valign="center" noclick="1"/>
+					</panel>
+					<panel name="lobby_large_player_{index}_playername_parent" width="-30i" align="{align2=right}" noclick="1">
+						<label name="lobby_large_player_{index}_playername" width="100%" textalign="{align1=right}" textvalign="center" font="dyn_10" color="white"
+								onmouseoverlua="GetWidget('lobby_large_player_{index}_playername_tip'):FadeIn(150)"
+								onmouseoutlua="GetWidget('lobby_large_player_{index}_playername_tip'):FadeOut(150)"
+						/>
+
+						<panel name="lobby_large_player_{index}_playername_tip" y="-100%" align="center" valign="bottom" width="+30i" noclick="1" grow="1" regrow="1" visible="0">
+							<panel name="lobby_large_player_{index}_playername_tip_root" grow="1" regrow="1" width="100%" float="bottom" noclick="1" visible="1">
+								<instance name="newui_custom_frame_template" alpha="0.95"/>
+								<anchor y="0"/>
+								<panel width="100%" height="5i" noclick="1"/>
+								<label name="lobby_large_player_{index}_playername_tip_value" width="-10i" align="center" textalign="center" textvalign="center" noclick="1" vpadding="20i" font="dyn_12" color="#a99081" outline="1" outlinecolor="#230000" wrap="1" fity="true" fitypadding="0.8h"/>
+								<panel width="100%" height="5i" noclick="1"/>
+							</panel>
+						</panel>
+					</panel>
+				</panel>
+			</panel>
+
+			<panel width="+10i" height="32i" align="center" valign="bottom" noclick="1"
+					watch="LobbyGameInfo"
+					ontriggerlua="self:SetVisible(param15 ~= 'devowars')"
+			>
+				<button name="lobby_large_player_{index}_swap" width="32i" height="32i" align="{align2=right}" color="invisible" onclick="SwapHeroRequest({index} % 5);"
+					onmouseoverlua="Common_V2:ShowGenericTip(true, 'hselect_swap_request_tip_header', 'hselect_swap_request_tip_text')"
+					onmouseoutlua="Common_V2:ShowGenericTip(false)"
+				>
+					<widgetstate statename="up">
+						<image name="lobby_large_player_{index}_swap_image1" texture="/ui/fe2/newui/res/lobby/swap_iron.png"/>
+					</widgetstate>
+					<widgetstate statename="over">
+						<image name="lobby_large_player_{index}_swap_image2" texture="/ui/fe2/newui/res/lobby/swap_iron_over.png"/>
+					</widgetstate>
+					<widgetstate statename="down" x="1" y="1">
+						<image name="lobby_large_player_{index}_swap_image3" texture="/ui/fe2/newui/res/lobby/swap_iron_over.png"/>
+					</widgetstate>
+				</button>
+			</panel>
+
+			<panel width="-60i" height="32i" align="center" valign="center" noclick="1">
+				<panel width="100@" height="100%" align="{align2=right}" noclick="1" visible="0"
+					watch="HeroSelectPlayerInfo{index}"
+					ontrigger="SetVisible(param30 or (param14 and !param26) or (param14 and (param41 == 6) and (param40 == 2)) or (param14 and (param40 == 11)));"
+				>
+					<instance name="lobby_player_arrow_anim_template" hflip="{hflip}" index="{index}"/>
+				</panel>	
+			</panel>
+
+			<panel width="+10i" height="32i" align="center" valign="top" noclick="1">
+				<image texture="/ui/fe2/newui/res/lobby/muted.png" width="32i" height="32i" valign="center" align="{align2=right}" noclick="1" visible="0"
+						watch="LobbyVoice{index}" ontriggerlua="self:SetVisible(tonumber(param) == -1)"
+				/>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="lobby_small_player_template">
+		<panel name="lobby_small_player_{index}" width="256i" height="86i" visible="1" watch="HeroSelectPlayerInfo{index}" ontriggerlua="Lobby_V2:OnHeroSelectPlayerInfo({index}, ...)"
+				watch1="HeroSelectMastery{index}" ontrigger1lua="Lobby_V2:OnHeroSelectMastery({index}, param0, param1)"
+				watch2="LobbyPlayerInfo{index}" ontrigger2lua="Lobby_V2:OnLobbyPlayerInfo({index}, ...)"
+		>
+			<panel width="-30i" align="center" noclick="1">
+				<panel name="lobby_small_player_{index}_selfeffect" width="256i" align="{align2=right}">
+					<image texture="/ui/fe2/newui/res/lobby/selfeffect.png" width="512i" height="256i" align="center" valign="center" hflip="{hflip=0}" noclick="1"/>
+					<modelpanel align="center" valign="center" noclick="true" width="200%" height="200%"
+						model="/shared/models/invis.mdf"
+						onshowlua="self:SetEffect('/ui/fe2/newui/res/effects/heroselect{align1=right}.effect')"
+						onhidelua="self:SetEffect('')"
+						modelpos="0 0 0"
+						modelscale="0.3"
+						modelangles="0 90 0"
+						cameradistance="30"
+						camerapos="0 4000 0"
+						cameraangles="0 90 180"
+						camerafov="7"
+						cameranear="100.0"
+						camerafar="20000.0"
+						depthclear="true"
+						depthcompress="false"
+						sunazimuth="120"
+						sunaltitude="20"
+						suncolor="1 1 1"
+						ambientcolor="1 1 1"
+						scenebuffer="true"
+						lookat="false"
+						visible="1"
+					/>
+				</panel>
+			</panel>
+			<image name="lobby_small_player_{index}_ready_bg" height="128i" align="center" valign="center" hflip="{hflip=0}" noclick="1"/>
+			<image name="lobby_small_player_{index}_notready_bg" height="128i" align="center" valign="center" hflip="{hflip=0}" noclick="1"/>
+
+			<panel align="center" width="+66i" noclick="1">
+				<image texture="/ui/fe2/newui/res/lobby/color.png" width="32i" height="128i" align="{align1=right}" valign="center" noclick="1" hflip="{hflip=0}" color="{color=white}" />
+			</panel>
+
+			<panel align="center" width="+48i" noclick="1">
+				<panel name="lobby_small_player_{index}_portrait" width="86i" height="86i" align="{align1=right}" valign="center">
+					<image name="lobby_small_player_{index}_heroicon" width="-6i" height="-6i" align="center" valign="center" usealphamask="true" alphamaskfile="/ui/fe2/elements/store2/mask.png" noclick="1"/>
+					<image name="lobby_small_player_{index}_border" width="128i" height="128i" align="center" valign="center" noclick="1"/>
+					<modelpanel align="center" valign="center" noclick="true" width="600%" height="600%" x="7i" y="-4i"
+								model="/shared/models/invis.mdf"
+								onloadlua="self:SetEffect('/ui/fe2/NewUI/res/effects/voice2.effect')"
+								modelpos="0 0 0"
+								modelscale="0.3"
+								modelangles="0 90 0"
+								cameradistance="30"
+								camerapos="-15 300 30"
+								cameraangles="0 0 180"
+								camerafov="7"
+								cameranear="100.0"
+								camerafar="20000.0"
+								depthclear="true"
+								depthcompress="false"
+								sunazimuth="120"
+								sunaltitude="20"
+								suncolor="1 1 1"
+								ambientcolor="1 1 1"
+								scenebuffer="true"
+								lookat="false"
+								visible="true"
+								watch="LobbyVoice{index}" 
+								ontriggerlua="local state = tonumber(param)
+								 			  self:SetVisible(state == 1)"
+					/>
+					<panel watch="HeroSelectPlayerInfo{index}"
+							ontrigger="SetVisible(param9 and param11);" 
+							onclick="SwapHeroRequest({index} % 5);"
+					>
+						<modelpanel align="center" valign="center" noclick="true" width="600%" height="600%" x="7i" y="-4i"
+								model="/shared/models/invis.mdf"
+								onloadlua="self:SetEffect('/ui/fe2/NewUI/res/effects/swap.effect')"
+								modelpos="0 0 0"
+								modelscale="0.3"
+								modelangles="0 90 0"
+								cameradistance="30"
+								camerapos="-15 300 30"
+								cameraangles="0 0 180"
+								camerafov="7"
+								cameranear="100.0"
+								camerafar="20000.0"
+								depthclear="true"
+								depthcompress="false"
+								sunazimuth="120"
+								sunaltitude="20"
+								suncolor="1 1 1"
+								ambientcolor="1 1 1"
+								scenebuffer="true"
+								lookat="false"
+								visible="true"
+						/>
+					</panel>
+				</panel>
+			</panel>
+
+			<panel y="16i" align="center" width="-136i" height="20i" noclick="1">
+				<label name="lobby_small_player_{index}_heroname" width="140i" align="{align1=right}" textalign="{align1=right}" textvalign="center" font="dyn_12" color="white" noclick="1"
+					autofont="1" autofontmax="12" outline="1" outlinecolor="#241410"
+				/>
+			</panel>
+			
+			<!-- Enable for NAEU only -->
+			<if condition="!cl_GarenaEnable">
+				<panel y="32i" align="center" width="-136i" height="20i" noclick="1">
+					<!-- PSR/MMR -->
+					<label name="HeroSelectPlayerPSR{index}" width="140i" align="{align2=right}" textalign="{align2=right}" textvalign="center" font="dyn_9" color="white" noclick="1" autofont="1" autofontmax="9" outline="1" outlinecolor="#241410" watch="LobbyPlayerInfo{index}" ontrigger="SetText(Round(param10));"/>
+					<!-- PSR -->				
+					<label name="HeroSelectPlayerPSRChange{index}" width="140i" align="{align1=right}" textalign="{align1=right}" textvalign="center" font="dyn_7" color="white" noclick="1" autofont="1" autofontmax="7" outline="1" outlinecolor="#241410" watch="LobbyPlayerInfo{index}" ontrigger="SetText('+' # param12 # ' / ' # param13);"/>	
+				</panel>
+			</if>
+
+
+			<panel y="50i" align="center" width="-136i" height="20i" noclick="1">
+				<panel align="{align1=right}" width="-10i" noclick="1">
+					<panel width="100@" height="100%" align="{align1=right}" noclick="1">
+						<image name="lobby_small_player_{index}_rank" width="64i" height="64i" align="center" valign="center" noclick="1"/>
+					</panel>
+					<panel name="lobby_small_player_{index}_playername_parent" width="-30i" align="{align2=right}" noclick="1">
+						<label name="lobby_small_player_{index}_playername" width="100%" textalign="{align1=right}" textvalign="center" font="dyn_10" color="white"
+								onmouseoverlua="GetWidget('lobby_small_player_{index}_playername_tip'):FadeIn(150)"
+								onmouseoutlua="GetWidget('lobby_small_player_{index}_playername_tip'):FadeOut(150)"
+						/>
+
+						<panel name="lobby_small_player_{index}_playername_tip" y="-100%" align="center" valign="bottom" width="+30i" noclick="1" grow="1" regrow="1" visible="0">
+							<panel name="lobby_small_player_{index}_playername_tip_root" grow="1" regrow="1" width="100%" float="bottom" noclick="1" visible="1">
+								<instance name="newui_custom_frame_template" alpha="0.95"/>
+								<anchor y="0"/>
+								<panel width="100%" height="5i" noclick="1"/>
+								<label name="lobby_small_player_{index}_playername_tip_value" width="-10i" align="center" textalign="center" textvalign="center" noclick="1" vpadding="20i" font="dyn_12" color="#a99081" outline="1" outlinecolor="#230000" wrap="1" fity="true" fitypadding="0.8h"/>
+								<panel width="100%" height="5i" noclick="1"/>
+							</panel>
+						</panel>
+					</panel>
+				</panel>
+			</panel>
+
+			<panel y="6i" width="-24i" height="32i" align="center" valign="bottom" noclick="1"
+					watch="LobbyGameInfo"
+					ontriggerlua="self:SetVisible(param15 ~= 'devowars')"
+			>
+				<button name="lobby_small_player_{index}_swap" width="32i" height="32i" align="{align2=right}" color="invisible" onclicklua="">
+					<widgetstate statename="up">
+						<image name="lobby_small_player_{index}_swap_image1" texture="/ui/fe2/newui/res/lobby/swap_iron.png"/>
+					</widgetstate>
+					<widgetstate statename="over">
+						<image name="lobby_small_player_{index}_swap_image2" texture="/ui/fe2/newui/res/lobby/swap_iron_over.png"/>
+					</widgetstate>
+					<widgetstate statename="down" x="1" y="1">
+						<image name="lobby_small_player_{index}_swap_image3" texture="/ui/fe2/newui/res/lobby/swap_iron_over.png"/>
+					</widgetstate>
+				</button>
+			</panel>
+
+			<panel width="-70i" height="32i" align="center" valign="center" noclick="1">
+				<panel width="100@" height="100%" align="{align2=right}" noclick="1" visible="0"
+					watch="HeroSelectPlayerInfo{index}"
+					ontrigger="SetVisible(param30 or (param14 and !param26) or (param14 and (param41 == 6) and (param40 == 2)) or (param14 and (param40 == 11)));"
+				>
+					<instance name="lobby_player_arrow_anim_template" hflip="{hflip}" index="{index}"/>
+				</panel>	
+			</panel>
+
+			<panel width="-24i" height="32i" align="center" valign="top" noclick="1">
+				<image texture="/ui/fe2/newui/res/lobby/muted.png" width="32i" height="32i" valign="center" align="{align2=right}" noclick="1" visible="0"
+						watch="LobbyVoice{index}" ontriggerlua="self:SetVisible(tonumber(param) == -1)"
+				/>
+			</panel>
+		</panel>
+	</template>
+
+	<!-- General & AP -->
+	<template name="lobby_hero_template">
+		<panel name="lobby_{type}_{mode}_hero_{team}_{group}_{row}_{id}" width="100@" height="100%">
+			<panel color="black" />
+			<panel name="lobby_{type}_{mode}_hero_{team}_{group}_{row}_{id}_content" visible="0" noclick="1">
+				<image name="lobby_{type}_{mode}_hero_{team}_{group}_{row}_{id}_icon" texture="$invis" width="-4i" height="-4i" align="center" valign="center" noclick="1"/>
+				<panel name="lobby_{type}_{mode}_hero_{team}_{group}_{row}_{id}_border" noclick="1">
+					<frame borderthickness="1" color="invisible" bordercolor="#3e3e3e" noclick="1" />
+				</panel>
+				<panel name="lobby_{type}_{mode}_hero_{team}_{group}_{row}_{id}_selected" noclick="1">
+					<frame borderthickness="2i" color="invisible" bordercolor="#ffb739" noclick="1" />
+				</panel>
+				<image name="lobby_{type}_{mode}_hero_{team}_{group}_{row}_{id}_lock" texture="/ui/fe2/newui/res/lobby/lock.png" noclick="1" />
+				<image name="lobby_{type}_{mode}_hero_{team}_{group}_{row}_{id}_ban" texture="/ui/fe2/newui/res/lobby/ban.png" noclick="1" />
+				<image name="lobby_{type}_{mode}_hero_{team}_{group}_{row}_{id}_vote" texture="/ui/fe2/newui/res/lobby/vote.png" noclick="1" />
+				<image name="lobby_{type}_{mode}_hero_{team}_{group}_{row}_{id}_tag" texture="$invis" noclick="1" />
+				<button color="invisible"
+						onclicklua="Lobby_V2:OnClickHero({team}, {group}, {row}, {id}, '{mode}')"
+						onrightclicklua="Lobby_V2:OnRightClickHero({team}, {group}, {row}, {id}, '{mode}')"
+						onmouseoverlua="Lobby_V2:OnMouseOverHero({team}, {group}, {row}, {id}, '{mode}')"
+						onmouseoutlua="Lobby_V2:OnMouseOutHero()"
+				/>
+				<panel name="lobby_{type}_{mode}_hero_{team}_{group}_{row}_{id}_mask" visible="0" 
+						onmouseoverlua="Lobby_V2:OnMouseOverHero({team}, {group}, {row}, {id}, '{mode}')"
+						onmouseoutlua="Lobby_V2:OnMouseOutHero()"
+				/>
+				<panel name="lobby_{type}_{mode}_hero_{team}_{group}_{row}_{id}_sd_mask" color="0 0 0 .5" visible="0" 
+						onmouseoverlua="Lobby_V2:OnMouseOverHero({team}, {group}, {row}, {id}, '{mode}')"
+						onmouseoutlua="Lobby_V2:OnMouseOutHero()"
+				/>
+				<panel name="lobby_{type}_{mode}_hero_{team}_{group}_{row}_{id}_filter" noclick="1" color="0 0 0 .8" visible="0"/>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="lobby_row_template">
+		<panel grow="1" align="center" width="{width=100%}" height="{height}" float="right" padding="{padding}">
+			<instance name="lobby_hero_template" type="{type}" mode="{mode}" group="{group}" team="{team}" row="{row}" id="0"/>
+			<instance name="lobby_hero_template" type="{type}" mode="{mode}" group="{group}" team="{team}" row="{row}" id="1"/>
+			<instance name="lobby_hero_template" type="{type}" mode="{mode}" group="{group}" team="{team}" row="{row}" id="2"/>
+			<instance name="lobby_hero_template" type="{type}" mode="{mode}" group="{group}" team="{team}" row="{row}" id="3"/>
+			<instance name="lobby_hero_template" type="{type}" mode="{mode}" group="{group}" team="{team}" row="{row}" id="4"/>
+			<instance name="lobby_hero_template" type="{type}" mode="{mode}" group="{group}" team="{team}" row="{row}" id="5"/>
+			<instance name="lobby_hero_template" type="{type}" mode="{mode}" group="{group}" team="{team}" row="{row}" id="6"/>
+			<instance name="lobby_hero_template" type="{type}" mode="{mode}" group="{group}" team="{team}" row="{row}" id="7"/>
+			<instance name="lobby_hero_template" type="{type}" mode="{mode}" group="{group}" team="{team}" row="{row}" id="8"/>
+		</panel>
+	</template>
+
+	<template name="lobby_large_group_template">
+		<panel width="{width=100%}" height="{height=208i}" noclick="1">
+			<frame texture="/ui/fe2/newui/res/lobby/frame_{teamlabel=legion}.png" width="+2i" height="+2i" align="center" valign="center" borderthickness="8i" noclick="1"/>
+			<image texture="/ui/fe2/newui/res/lobby/title_{teamlabel=legion}.png" y="0i" width="1024i" height="32i" align="center" noclick="1"/>
+			<panel y="0i" width="-10i" height="32i" align="center" noclick="1">
+				<image texture="/ui/fe2/newui/res/lobby/{grouplabel}.png" width="32i" height="32i" align="{align=right}" noclick="1"/>
+			</panel>
+			<panel y="0i" width="-80i" height="32i" align="center" noclick="1">
+				<label textalign="{align=right}" textvalign="center" font="dyn_11" color="{color}" content="store2_hero_attr_{grouplabel}" outline="1" outlinecolor="black" noclick="1"/>
+			</panel>
+			<panel y="32i" width="520i" height="172i" align="center" noclick="1" float="bottom" padding="2i">
+				<instance name="lobby_row_template" type="large" height="54i" padding="4i" mode="{mode}" group="{group}" team="{team}" row="0"/>
+				<instance name="lobby_row_template" type="large" height="54i" padding="4i" mode="{mode}" group="{group}" team="{team}" row="1"/>
+				<instance name="lobby_row_template" type="large" height="54i" padding="4i" mode="{mode}" group="{group}" team="{team}" row="2"/>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="lobby_small_group_template">
+		<panel width="{width=100%}" height="{height=182i}" noclick="1">
+			<frame texture="/ui/fe2/newui/res/lobby/frame_{teamlabel=legion}.png" borderthickness="8i" noclick="1"/>
+			<image texture="/ui/fe2/newui/res/lobby/title_small_{teamlabel=legion}.png" y="5i" width="512i" height="32i" align="center" noclick="1"/>
+			<panel y="5i" width="-10i" height="32i" align="center" noclick="1">
+				<image texture="/ui/fe2/newui/res/lobby/{grouplabel}.png" width="32i" height="32i" align="{align=right}" noclick="1"/>
+			</panel>
+			<panel y="5i" width="-80i" height="32i" align="center" noclick="1">
+				<label textalign="{align=right}" textvalign="center" font="dyn_11" color="{color}" content="store2_hero_attr_{grouplabel}" outline="1" outlinecolor="black" noclick="1"/>
+			</panel>
+			<panel y="36i" width="375i" height="172i" align="center" noclick="1" float="bottom" padding="9i">
+				<instance name="lobby_row_template" type="small" height="39i" padding="3i" mode="{mode}" group="{group}" team="{team}" row="0"/>
+				<instance name="lobby_row_template" type="small" height="39i" padding="3i" mode="{mode}" group="{group}" team="{team}" row="1"/>
+				<instance name="lobby_row_template" type="small" height="39i" padding="3i" mode="{mode}" group="{group}" team="{team}" row="2"/>
+			</panel>
+		</panel>
+	</template>
+
+	<!-- SM -->
+	<template name="lobby_solo_candidate_template">
+		<panel name="lobby_solo_{type}_candidate_{index}" width="{width=100%}" height="{height=100%}" >
+			<image texture="/ui/fe2/newui/res/lobby/candidate_bg.png" width="142.2%" height="142.2%" align="center" valign="center" noclick="1"/>
+			<image name="lobby_solo_{type}_candidate_{index}_heroicon" texture="$invis" noclick="1"/>
+			<image name="lobby_solo_{type}_candidate_{index}_ban" texture="/ui/fe2/newui/res/lobby/candidate_ban.png" width="142.2%" height="142.2%" align="center" valign="center" noclick="1" visible="0"/>
+			<image texture="/ui/fe2/newui/res/lobby/candidate_border.png" width="142.2%" height="142.2%" align="center" valign="center" noclick="1"/>
+			<panel name="lobby_solo_{type}_candidate_{index}_selected" noclick="1" visible="0">
+				<frame borderthickness="2i" color="invisible" bordercolor="#ffb739" noclick="1" />
+			</panel>
+			<button name="lobby_solo_{type}_candidate_{index}_btn" 
+					color="invisible"
+					onclicklua="Lobby_V2:OnClickSoloCandidate({index})"
+			/>
+		</panel>
+	</template>
+
+	<!-- SP -->
+	<template name="lobby_sp_row_template">
+		<panel grow="1" align="center" width="{width=100%}" height="{height}" float="right" padding="{padding=6i}">
+			<instance name="lobby_hero_template" type="{type}" mode="sp" team="0" group="0" row="{row}" id="0"/>
+			<instance name="lobby_hero_template" type="{type}" mode="sp" team="0" group="0" row="{row}" id="1"/>
+			<instance name="lobby_hero_template" type="{type}" mode="sp" team="0" group="0" row="{row}" id="2"/>
+			<instance name="lobby_hero_template" type="{type}" mode="sp" team="0" group="0" row="{row}" id="3"/>
+			<instance name="lobby_hero_template" type="{type}" mode="sp" team="0" group="0" row="{row}" id="4"/>
+			<instance name="lobby_hero_template" type="{type}" mode="sp" team="0" group="0" row="{row}" id="5"/>
+			<instance name="lobby_hero_template" type="{type}" mode="sp" team="0" group="0" row="{row}" id="6"/>
+			<instance name="lobby_hero_template" type="{type}" mode="sp" team="0" group="0" row="{row}" id="7"/>
+			<instance name="lobby_hero_template" type="{type}" mode="sp" team="0" group="0" row="{row}" id="8"/>
+			<instance name="lobby_hero_template" type="{type}" mode="sp" team="0" group="0" row="{row}" id="9"/>
+		</panel>
+	</template>
+
+	<!-- SD -->
+	<template name="lobby_sd_row_template">
+		<panel width="{width=100%}" height="{height=100%}">
+			<instance name="newui_custom_frame_template"/>
+			<panel grow="1" height="{iconheight}" float="right" padding="{padding}" align="center" valign="center">
+				<instance name="lobby_hero_template" type="{type}" mode="sd" team="0" group="0" row="{row}" id="0"/>
+				<instance name="lobby_hero_template" type="{type}" mode="sd" team="0" group="0" row="{row}" id="1"/>
+				<instance name="lobby_hero_template" type="{type}" mode="sd" team="0" group="0" row="{row}" id="2"/>
+			</panel>
+		</panel>
+	</template>
+
+	<!-- RD -->
+	<template name="lobby_rd_row_template">
+		<panel width="{width=100%}" height="{height=100%}">
+			<panel grow="1" height="{iconheight}" float="right" padding="{padding}" align="center" valign="center">
+				<instance name="lobby_hero_template" type="{type}" mode="rd" team="0" group="0" row="{row}" id="0"/>
+				<instance name="lobby_hero_template" type="{type}" mode="rd" team="0" group="0" row="{row}" id="1"/>
+				<instance name="lobby_hero_template" type="{type}" mode="rd" team="0" group="0" row="{row}" id="2"/>
+				<instance name="lobby_hero_template" type="{type}" mode="rd" team="0" group="0" row="{row}" id="3"/>
+			</panel>
+		</panel>
+	</template>
+
+	<!-- BD -->
+ 	<template name="lobby_bd_row_template">
+ 		<panel grow="1" regrow="1" align="center" height="{height}" float="right" padding="{padding}">
+			<instance name="lobby_hero_template" type="{type}" mode="bd" group="{group}" team="0" row="{row}" id="0"/>
+			<instance name="lobby_hero_template" type="{type}" mode="bd" group="{group}" team="0" row="{row}" id="1"/>
+			<instance name="lobby_hero_template" type="{type}" mode="bd" group="{group}" team="0" row="{row}" id="2"/>
+			<instance name="lobby_hero_template" type="{type}" mode="bd" group="{group}" team="0" row="{row}" id="3"/>
+		</panel>
+ 	</template>
+
+ 	<template name="lobby_bd_large_group_template">
+ 		<panel width="{width=100%}" height="204i" noclick="1">
+ 			<instance name="newui_custom_frame_template"/>
+ 			<panel height="-20i" valign="center" noclick="1" float="bottom" padding="10i">
+ 				<instance name="lobby_bd_row_template" type="large" height="80i" group="{group}" padding="90i" row="0"/>
+ 				<instance name="lobby_bd_row_template" type="large" height="80i" group="{group}" padding="90i" row="1"/>
+ 			</panel>
+ 		</panel>
+ 	</template>
+
+ 	<template name="lobby_bd_small_group_template">
+ 		<panel width="{width=100%}" height="192i" noclick="1">
+ 			<instance name="newui_custom_frame_template"/>
+ 			<panel height="-30i" valign="center" noclick="1" float="bottom" padding="10i">
+ 				<instance name="lobby_bd_row_template" type="small" height="80i" group="{group}" padding="90i" row="0"/>
+ 				<instance name="lobby_bd_row_template" type="small" height="80i" group="{group}" padding="90i" row="1"/>
+ 			</panel>
+ 		</panel>
+ 	</template>
+
+	<template name="lobby_loading_player_template">
+		<panel name="lobby_loading_player_{index}" width="{width=100%}" height="{height=20%}" watch="HeroSelectPlayerInfo{index}" ontriggerlua="Lobby_V2:OnUpdateLoadingInfo({index}, ...)">
+			<panel width="-30i" align="center">
+				<panel width="64i" height="64i" align="{align=left}" valign="center">
+					<image name="lobby_loading_player_{index}_heroicon" texture="$invis" width="-4i" height="-4i" align="center" valign="center" noclick="1" usealphamask="true" alphamaskfile="/ui/fe2/elements/store2/mask.png"/>
+					<image texture="/ui/fe2/newui/res/lobby/b{index}.png" align="center" valign="center" noclick="1"/>
+				</panel>	
+			</panel>
+
+			<panel width="-180i" align="center">
+				<label name="lobby_loading_player_{index}_playername" y="-20i" width="300i" align="{align=left}" textalign="{align=left}" textvalign="center" 
+					font="dyn_12" color="#e4cfc0" outline="1" outlinecolor="#1c0409" noclick="1" content="Player Name"/>
+				<label name="lobby_loading_player_{index}_heroname" y="-2i" width="300i" align="{align=left}" textalign="{align=left}" textvalign="center" 
+					font="dyn_10" color="#826b61" outline="1" outlinecolor="#17080d" noclick="1" content="Hero name"/>
+			</panel>
+
+			<panel width="-110i" align="center">
+				<panel y="48i" align="{align=left}" width="512i" height="32i">
+					<image texture="/ui/fe2/newui/res/lobby/loading_slot.png" noclick="1" hflip="{hflip=1}"/>
+					<panel width="-80i" align="center" valign="center" >
+						<panel name="lobby_loading_player_{index}_progress" align="{align=left}" width="0%" clip="1">
+							<panel width="+80i" align="center">
+								<image texture="/ui/fe2/newui/res/lobby/p{index}.png" width="512i" height="32i" align="{align=left}" valign="center" hflip="{hflip=1}"/>
+							</panel>
+						</panel>
+					</panel>
+				</panel>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="lobby_matchinfo_player_template">
+		<panel name="lobby_matchinfo_player_{index}" y="{y}" width="520i" height="96i" watch="LobbyPlayerInfo{index}" ontriggerlua="Lobby_V2:OnUpdateMatchInfoPlayer({index}, ...)">
+			<button name="lobby_matchinfo_player_{index}_join" width="420i" align="{align=left}" color="invisible" onclick="Team({team}, {slot});" visible="0"
+					onmouseoverlua="PlaySound('/shared/sounds/ui/revamp/region_hover.wav')"
+			>
+				<widgetstate statename="up">
+					<image texture="/ui/fe2/newui/res/lobby/join_up.png" width="64i" height="64i" align="center" valign="center" noclick="1"/>
+				</widgetstate>
+				<widgetstate statename="over">
+					<image texture="/ui/fe2/newui/res/lobby/join_over.png" width="64i" height="64i" align="center" valign="center" noclick="1"/>
+				</widgetstate>
+				<widgetstate statename="down" y="1">
+					<image texture="/ui/fe2/newui/res/lobby/join_over.png" width="64i" height="64i" align="center" valign="center" noclick="1"/>
+				</widgetstate>
+			</button>
+
+			<panel name="lobby_matchinfo_player_{index}_lock" width="420i" align="{align=left}" noclick="1">
+				<image texture="/ui/fe2/newui/res/lobby/matchinfo_lock.png" width="64i" height="64i" align="center" valign="center" noclick="1"/>
+			</panel>
+			
+			<panel name="lobby_matchinfo_player_{index}_info" align="{align=left}" clip="1" noclick="1">
+				<panel width="520i" noclick="1" align="{align=left}">
+					<image name="lobby_matchinfo_player_{index}_info_isme" texture="/ui/fe2/newui/res/lobby/bg_me_{team}.png" width="512i" height="128i" align="{align=left}" valign="center" noclick="1"/>
+					<panel width="-36i" align="center" noclick="1">
+						<panel name="lobby_matchinfo_player_{index}_info_click" width="66i" height="66i" align="{align=left}" valign="center">
+							<avatar name="lobby_matchinfo_player_{index}_info_playericon" width="-4" height="-4" align="center" valign="center" noclick="1"/>
+							<panel noclick="1" visible="0"  width="-4" height="-4" align="center" valign="center"
+									watch="LobbyVoice{index}" 
+									ontriggerlua="local state = tonumber(param)
+								 				  self:SetVisible(state == 1)
+												 "
+							>
+								<image texture="/ui/fe2/newui/res/lobby/mute_effect.png" noclick="1"/>
+								<modelpanel align="center" valign="center" noclick="true" width="610%" height="610%" x="7i" y="-4i"
+											model="/shared/models/invis.mdf"
+											onloadlua="self:SetEffect('/ui/fe2/NewUI/res/effects/voice.effect')"
+											modelpos="0 0 0"
+											modelscale="0.3"
+											modelangles="0 90 0"
+											cameradistance="30"
+											camerapos="-15 300 30"
+											cameraangles="0 0 180"
+											camerafov="7"
+											cameranear="100.0"
+											camerafar="20000.0"
+											depthclear="true"
+											depthcompress="false"
+											sunazimuth="120"
+											sunaltitude="20"
+											suncolor="1 1 1"
+											ambientcolor="1 1 1"
+											scenebuffer="true"
+											lookat="false"
+											visible="true"
+								/>
+							</panel>
+
+							<image name="lobby_matchinfo_player_{index}_info_border" texture="$invis" width="128i" height="128i" align="center" valign="center" noclick="1"/>
+							<image name="lobby_matchinfo_player_{index}_info_host" texture="/ui/fe2/newui/res/teammaking/leader.png" x="16i" y="-16i" width="32i" height="32i" align="right" noclick="1" visible="0"/>
+						</panel>
+					</panel>
+
+					<panel width="-200i" align="center">
+						<label name="lobby_matchinfo_player_{index}_info_playername" y="-15i" textalign="{align=left}" textvalign="center" font="dyn_14" color="#c1b1a4" noclick="1"/>
+						<label name="lobby_matchinfo_player_{index}_info_playerpsr" y="20i" textalign="{align=left}" textvalign="center" font="dyn_12" noclick="1"/>
+					</panel>
+
+					<panel width="-360i" align="center">
+						<label name="lobby_matchinfo_player_{index}_info_playerpsrchange" y="20i" textalign="{align=left}" textvalign="center" font="dyn_10" noclick="1"/>
+					</panel>
+				</panel>
+			</panel>
+
+			<panel width="16i" height="128i" noclick="1" y="17i" align="{align=left}" valign="bottom">
+				<image texture="/ui/fe2/newui/res/lobby/team1_color.png" noclick="1" hflip="{hflip}"/>
+				<image texture="/ui/fe2/newui/res/lobby/border_color.png" noclick="1" hflip="{hflip}" onloadlua="self:SetColor(Common_V2:GetPlayerColor({index}))"/>
+			</panel>
+
+			<panel width="-360i" height="32i" align="{align1=right}" valign="center" noclick="1">
+				<button name="lobby_matchinfo_player_{index}_lockpos" color="invisible" width="32i" align="{align=left}" onclick="RequestToggleSlotLock({team}, {slot});"
+					onmouseoverlua="PlaySound('/shared/sounds/ui/revamp/region_hover.wav') Common_V2:ShowSimpleTip(true, 'globby_lock_tip', '140i')"
+					onmouseoutlua="Common_V2:ShowSimpleTip(false)"
+					onclicklua="PlaySound('/shared/sounds/ui/revamp/region_click.wav')"
+				>
+					<widgetstate statename="up">
+						<image texture="/ui/fe2/newui/res/lobby/l_up.png" width="32i" height="32i" align="center" valign="center" noclick="1"/>
+					</widgetstate>
+					<widgetstate statename="over">
+						<image texture="/ui/fe2/newui/res/lobby/l_over.png" width="32i" height="32i" align="center" valign="center" noclick="1"/>
+					</widgetstate>
+					<widgetstate statename="down" y="1">
+						<image texture="/ui/fe2/newui/res/lobby/l_over.png" width="32i" height="32i" align="center" valign="center" noclick="1"/>
+					</widgetstate>
+				</button>
+
+				<button name="lobby_matchinfo_player_{index}_unlockpos" color="invisible" width="32i" align="{align=left}" onclick="RequestToggleSlotLock({team}, {slot});"
+					onmouseoverlua="PlaySound('/shared/sounds/ui/revamp/region_hover.wav') Common_V2:ShowSimpleTip(true, 'globby_unlock_tip', '140i')"
+					onmouseoutlua="Common_V2:ShowSimpleTip(false)"
+					onclicklua="PlaySound('/shared/sounds/ui/revamp/region_click.wav')"
+				>
+					<widgetstate statename="up">
+						<image texture="/ui/fe2/newui/res/lobby/u_up.png" width="32i" height="32i" align="center" valign="center" noclick="1"/>
+					</widgetstate>
+					<widgetstate statename="over">
+						<image texture="/ui/fe2/newui/res/lobby/u_over.png" width="32i" height="32i" align="center" valign="center" noclick="1"/>
+					</widgetstate>
+					<widgetstate statename="down" y="1">
+						<image texture="/ui/fe2/newui/res/lobby/u_over.png" width="32i" height="32i" align="center" valign="center" noclick="1"/>
+					</widgetstate>
+				</button>
+
+				<button name="lobby_matchinfo_player_{index}_kick" color="invisible" width="32i" align="{align=left}"
+					onmouseoverlua="PlaySound('/shared/sounds/ui/revamp/region_hover.wav') Common_V2:ShowSimpleTip(true, 'game_lobby_kick_tip', '200i')"
+					onmouseoutlua="Common_V2:ShowSimpleTip(false)"
+				>
+					<widgetstate statename="up">
+						<image texture="/ui/fe2/newui/res/lobby/q_up.png" width="32i" height="32i" align="center" valign="center" noclick="1"/>
+					</widgetstate>
+					<widgetstate statename="over">
+						<image texture="/ui/fe2/newui/res/lobby/q_over.png" width="32i" height="32i" align="center" valign="center" noclick="1"/>
+					</widgetstate>
+					<widgetstate statename="down" y="1">
+						<image texture="/ui/fe2/newui/res/lobby/q_over.png" width="32i" height="32i" align="center" valign="center" noclick="1"/>
+					</widgetstate>
+				</button>
+			</panel>
+
+			<panel width="-392i" height="32i" align="{align1=right}" valign="center" noclick="1">
+				<button name="lobby_matchinfo_player_{index}_mute" color="invisible" width="32i" align="{align=left}"
+					onmouseoverlua="PlaySound('/shared/sounds/ui/revamp/region_hover.wav') Common_V2:ShowSimpleTip(true, 'newui_lobby_turnoff_voicechat', '200i')"
+					onmouseoutlua="Common_V2:ShowSimpleTip(false)"
+					watch="LobbyVoice{index}" 
+					ontriggerlua="local state = tonumber(param)
+								  self:SetVisible(state == 0 or state == 1)
+								 "
+				>
+					<widgetstate statename="up">
+						<image texture="/ui/fe2/newui/res/lobby/mute_up.png" width="32i" height="32i" align="center" valign="center" noclick="1"/>
+					</widgetstate>
+					<widgetstate statename="over">
+						<image texture="/ui/fe2/newui/res/lobby/mute_over.png" width="32i" height="32i" align="center" valign="center" noclick="1"/>
+					</widgetstate>
+					<widgetstate statename="down" y="1">
+						<image texture="/ui/fe2/newui/res/lobby/mute_over.png" width="32i" height="32i" align="center" valign="center" noclick="1"/>
+					</widgetstate>
+					<widgetstate statename="disabled"/>
+				</button>
+
+				<button name="lobby_matchinfo_player_{index}_unmute" color="invisible" width="32i" align="{align=left}"
+					onmouseoverlua="PlaySound('/shared/sounds/ui/revamp/region_hover.wav') Common_V2:ShowSimpleTip(true, 'newui_lobby_turnon_voicechat', '200i')"
+					onmouseoutlua="Common_V2:ShowSimpleTip(false)"
+					watch="LobbyVoice{index}" 
+					ontriggerlua="local state = tonumber(param)
+								  self:SetVisible(state ~= 0 and state ~= 1)
+								 "
+				>
+					<widgetstate statename="up">
+						<image texture="/ui/fe2/newui/res/lobby/unmute_up.png" width="32i" height="32i" align="center" valign="center" noclick="1"/>
+					</widgetstate>
+					<widgetstate statename="over">
+						<image texture="/ui/fe2/newui/res/lobby/unmute_over.png" width="32i" height="32i" align="center" valign="center" noclick="1"/>
+					</widgetstate>
+					<widgetstate statename="down" y="1">
+						<image texture="/ui/fe2/newui/res/lobby/unmute_over.png" width="32i" height="32i" align="center" valign="center" noclick="1"/>
+					</widgetstate>
+					<widgetstate statename="disabled"/>
+				</button>
+
+				<button name="lobby_matchinfo_player_{index}_quit" color="invisible" width="32i" align="{align=left}" onclick="Team(-1);"
+						onmouseoverlua="PlaySound('/shared/sounds/ui/revamp/region_hover.wav') Common_V2:ShowSimpleTip(true, 'game_lobby_leave_team_tip', '200i')"
+						onmouseoutlua="Common_V2:ShowSimpleTip(false)"
+						onclicklua="PlaySound('/shared/sounds/ui/revamp/teamslot_leave.wav')"
+				>
+					<widgetstate statename="up">
+						<image texture="/ui/fe2/newui/res/lobby/q_up.png" width="32i" height="32i" align="center" valign="center" noclick="1"/>
+					</widgetstate>
+					<widgetstate statename="over">
+						<image texture="/ui/fe2/newui/res/lobby/q_over.png" width="32i" height="32i" align="center" valign="center" noclick="1"/>
+					</widgetstate>
+					<widgetstate statename="down" y="1">
+						<image texture="/ui/fe2/newui/res/lobby/q_over.png" width="32i" height="32i" align="center" valign="center" noclick="1"/>
+					</widgetstate>
+				</button>
+
+				<button name="lobby_matchinfo_player_{index}_addbot" color="invisible" width="32i" align="{align=left}" onclicklua="PlaySound('/shared/sounds/ui/revamp/region_click.wav') Lobby_V2:OnClickAddBot({index})"
+						onmouseoverlua="PlaySound('/shared/sounds/ui/revamp/region_hover.wav') Common_V2:ShowSimpleTip(true, 'mm3_coop_invitebottoteam', '140i')"
+						onmouseoutlua="Common_V2:ShowSimpleTip(false)"
+				>
+					<widgetstate statename="up">
+						<image texture="/ui/fe2/newui/res/lobby/bot_up.png" width="32i" height="32i" align="center" valign="center" noclick="1"/>
+					</widgetstate>
+					<widgetstate statename="over">
+						<image texture="/ui/fe2/newui/res/lobby/bot_over.png" width="32i" height="32i" align="center" valign="center" noclick="1"/>
+					</widgetstate>
+					<widgetstate statename="down" y="1">
+						<image texture="/ui/fe2/newui/res/lobby/bot_over.png" width="32i" height="32i" align="center" valign="center" noclick="1"/>
+					</widgetstate>
+				</button>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="lobby_matchinfo_swappos_item_template">
+		<button width="30i" height="20i" align="center" color="invisible"
+				onmouseoverlua="GetWidget('lobby_matchinfo_swappos'):GetParent():GetParent():SetVisible(true)"
+				onmouseoutlua="GetWidget('lobby_matchinfo_swappos'):GetParent():GetParent():SetVisible(false)"
+				onclicklua="GetWidget('newui_popup_menu'):SetVisible(false) Lobby_V2:OnClickSwapPosition({id})"
+		>
+			<widgetstate statename="up">
+				<instance name="newui_custom_frame_template"/>
+				<panel width="-4" height="-4" align="center" valign="center" color="white" onshowlua="self:SetColor(Common_V2:GetPlayerColor({id}))" noclick="1"/>
+			</widgetstate>
+			<widgetstate statename="over">
+				<panel width="+4" height="+4" align="center" valign="center">
+					<instance name="newui_custom_frame_template"/>
+					<panel width="-4" height="-4" align="center" valign="center" color="white" onshowlua="self:SetColor(Common_V2:GetPlayerColor({id}))" noclick="1"/>
+				</panel>
+			</widgetstate>
+			<widgetstate statename="down" x="1" y="1">
+				<panel width="+4" height="+4" align="center" valign="center">
+					<instance name="newui_custom_frame_template"/>
+					<panel width="-4" height="-4" align="center" valign="center" color="white" onshowlua="self:SetColor(Common_V2:GetPlayerColor({id}))" noclick="1"/>
+				</panel>
+			</widgetstate>
+
+			
+		</button>
+	</template>
+
+	<template name="lobby_matchinfo_swappos_template">
+		<panel name="lobby_matchinfo_swappos" x="5i" width="110i" height="160i" watch="NewUIPopupMenu" ontriggerlua="Lobby_V2:AdjustSwapPosPanel()"
+				onmouseoverlua="self:GetParent():GetParent():SetVisible(true)"
+				onmouseoutlua="self:GetParent():GetParent():SetVisible(false)"
+		>
+			<instance name="newui_custom_frame_template"/>
+			<panel y="10i" width="50%" height="1" noclick="1" float="bottom" padding="10i">
+				<instance name="lobby_matchinfo_swappos_item_template" id="0"/>
+				<instance name="lobby_matchinfo_swappos_item_template" id="1"/>
+				<instance name="lobby_matchinfo_swappos_item_template" id="2"/>
+				<instance name="lobby_matchinfo_swappos_item_template" id="3"/>
+				<instance name="lobby_matchinfo_swappos_item_template" id="4"/>
+			</panel>
+			<panel y="10i" align="right" width="50%" height="1" noclick="1" float="bottom" padding="10i">
+				<instance name="lobby_matchinfo_swappos_item_template" id="5"/>
+				<instance name="lobby_matchinfo_swappos_item_template" id="6"/>
+				<instance name="lobby_matchinfo_swappos_item_template" id="7"/>
+				<instance name="lobby_matchinfo_swappos_item_template" id="8"/>
+				<instance name="lobby_matchinfo_swappos_item_template" id="9"/>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="lobby_matchinfo_spectator_template">
+		<panel name="lobby_matchinfo_{type=spectator}_{index}" width="{width=100%}" height="{height=49i}" visible="0"
+			onmouseoverlua="GetWidget('lobby_matchinfo_{type=spectator}_{index}_highlight'):FadeIn(150)
+							GetWidget('lobby_matchinfo_{type=spectator}_{index}_tip'):FadeIn(150)
+							"
+			onmouseoutlua="GetWidget('lobby_matchinfo_{type=spectator}_{index}_highlight'):FadeOut(150)
+						   GetWidget('lobby_matchinfo_{type=spectator}_{index}_tip'):FadeOut(150)
+							"
+		>
+			<image name="lobby_matchinfo_{type=spectator}_{index}_highlight" width="132%" height="142%" align="center" valign="center" noclick="1" texture="/ui/fe2/newui/res/communicator/highlight.png" visible="0"/>
+			<panel width="36i" height="36i" valign="center" noclick="1">
+				<instance name="newui_custom_frame_template"/>
+				<avatar name="lobby_matchinfo_{type=spectator}_{index}_icon" width="-4" height="-4" align="center" valign="center" noclick="1"/>
+			</panel>
+			<label name="lobby_matchinfo_{type=spectator}_{index}_name" x="40i" width="140i" textalign="left" textvalign="center" font="dyn_12" color="#a99081" outline="1" outlinecolor="#230000" noclick="1"/>
+			
+			<image texture="/ui/fe2/newui/res/common/line.png" width="110%" height="2" align="center" valign="top" noclick="1" visible="{showline=true}"/>
+
+			<button name="lobby_matchinfo_{type=spectator}_{index}_becomereferee" x="10i" width="32i" height="32i" align="right" valign="center" color="invisible"
+					onmouseoverlua="PlaySound('/shared/sounds/ui/revamp/region_hover.wav') Common_V2:ShowSimpleTip(true, 'game_lobby_assign_referee_tip', '200i')"
+					onmouseoutlua="Common_V2:ShowSimpleTip(false)"
+			>
+				<widgetstate statename="up">
+					<image texture="/ui/fe2/newui/res/lobby/become_referee_up.png"/>
+				</widgetstate>
+				<widgetstate statename="over">
+					<image texture="/ui/fe2/newui/res/lobby/become_referee_over.png"/>
+				</widgetstate>
+				<widgetstate statename="down" y="1">
+					<image texture="/ui/fe2/newui/res/lobby/become_referee_over.png"/>
+				</widgetstate>
+			</button>
+
+			<button name="lobby_matchinfo_{type=spectator}_{index}_removereferee" x="10i" width="32i" height="32i" align="right" valign="center" color="invisible"
+				onmouseoverlua="PlaySound('/shared/sounds/ui/revamp/region_hover.wav') Common_V2:ShowSimpleTip(true, 'newui_lobby_remove_referee', '200i')"
+				onmouseoutlua="Common_V2:ShowSimpleTip(false)"
+			>
+				<widgetstate statename="up">
+					<image texture="/ui/fe2/newui/res/lobby/remove_referee_up.png"/>
+				</widgetstate>
+				<widgetstate statename="over">
+					<image texture="/ui/fe2/newui/res/lobby/remove_referee_over.png"/>
+				</widgetstate>
+				<widgetstate statename="down" y="1">
+					<image texture="/ui/fe2/newui/res/lobby/remove_referee_over.png"/>
+				</widgetstate>
+			</button>
+
+			<panel name="lobby_matchinfo_{type=spectator}_{index}_tip" x="40i" y="-42i" valign="bottom" width="170i" noclick="1" grow="1" regrow="1" visible="0">
+				<panel name="lobby_matchinfo_{type=spectator}_{index}_tip_root" grow="1" regrow="1" width="100%" float="bottom" noclick="1" visible="1">
+					<instance name="newui_custom_frame_template" alpha="0.95"/>
+					<anchor y="0"/>
+					<panel width="100%" height="5i" noclick="1"/>
+					<label name="lobby_matchinfo_{type=spectator}_{index}_tip_value" width="-10i" align="center" textalign="center" textvalign="center" noclick="1" vpadding="20i" font="dyn_12" color="#a99081" outline="1" outlinecolor="#230000" wrap="1" fity="true" fitypadding="0.8h"/>
+					<panel width="100%" height="5i" noclick="1"/>
+				</panel>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="lobby_avatar_card_template">
+		<panel name="lobby_avatar_card_{id}" x="{x}" width="{width=576i}" height="{height=100%}" align="{align=center}" valign="{valign=center}" noclick="1">
+			<panel name="lobby_avatar_card_{id}_scale" width="{scale=100%}" height="{scale=100%}" align="center" valign="center" 
+				onmouseoverlua="Lobby_V2:OnMouseOverAvatar({id})"
+				onmouseoutlua="Lobby_V2:OnMouseOutAvatar({id})"
+				onclicklua="Lobby_V2:ChangeSelectedAvatar({id})"
+				ondoubleclicklua="Lobby_V2:OnDoubleClickAvatar({id})"
+				onmousewheeldownlua="Lobby_V2:OnSlideAvatar(true)"
+				onmousewheeluplua="Lobby_V2:OnSlideAvatar(false)"
+			>
+				<modelpanel name="lobby_avatar_card_{id}_model"
+					valign="center" height="200%"
+					align="center" width="320%"
+					scenebuffer="true"
+					noclick="1"
+					cameranear="100.0"
+					camerafar="10000.0"
+					depthclear="true"
+					depthcompress="false"
+					lookat="false"
+					cameradistance="40"
+					camerapos="0 3140 59"
+					cameraangles="0 0 180"
+					camerafov="7"
+					modelpos="0 0 0"
+					modelangles="-15.0 0 0.0"
+					modelscale="1.0"
+					visible="1"
+					cull="false"
+					sunazimuth="120"
+					sunaltitude="50"
+					suncolor="0.0 0.0 0.0"
+					ambientcolor="0.65 0.65 0.65"
+					posteffects="true"
+					posteffect=""
+					outline="false"
+					postoutline="/core/post/outline.posteffect"
+					outlinecolor=".25 .25 .25 1"
+					anim="idle_eap"
+				/>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="lobby_matchinfo_info_template">
+		<panel width="{width=100%}" height="{height=100%}">
+			<label x="10i" textalign="left" textvalign="center" font="dyn_10" color="#ac9383" outline="1" outlinecolor="#230000" content="newui_lobby_matchinfo_{id}" noclick="1"/>
+			<label x="126i" textalign="left" textvalign="center" font="dyn_10" color="#ac9383" outline="1" outlinecolor="#230000" content=":" noclick="1"/>
+			<label name="lobby_matchinfo_info_{id}_value" x="-10i" width="-146i" align="right" textvalign="center" font="dyn_10" color="#7b695f" outline="1" outlinecolor="#230000" content="-"
+					onmouseoverlua="GetWidget('lobby_matchinfo_info_{id}_tip'):FadeIn(150)"
+					onmouseoutlua="GetWidget('lobby_matchinfo_info_{id}_tip'):FadeOut(150)"
+			/>
+			<panel name="lobby_matchinfo_info_{id}_tip" y="-93%" width="100%" grow="1" regrow="1" noclick="1" valign="bottom" visible="0">
+				<panel name="lobby_matchinfo_info_{id}_tip_root" width="100%" grow="1" regrow="1" noclick="1">
+					<frame texture="/ui/fe2/newui/res/common/frames/popupframe.png" borderthickness="4i" />
+					<panel width="-16i" align="center" grow="1" regrow="1" float="bottom" noclick="1">
+						<panel height="10i" noclick="1"/>
+						<label name="lobby_matchinfo_info_{id}_tip_value" font="dyn_10" textalign="center" noclick="1" vpadding="20i" color="#7b695f" outline="1" outlinecolor="#230000" wrap="1" fity="true" fitypadding="0.8h" />
+						<panel height="5i" noclick="1"/>
+					</panel>
+				</panel>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="lobby_picker_herotip_attributes_template">
+		<panel width="{width=100%}" height="{height=100%}" >
+			<panel x="10i" noclick="1" float="right">
+				<panel noclick="1" width="24i">
+					<image texture="{icon}" width="16i" height="16i" align="center" valign="center" noclick="1"/>
+				</panel>
+				<label name="lobby_picker_{type}_herotip_attributes_{id}" width="300i" color="#fffad3" font="dyn_9" textvalign="center" noclick="1"/>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="lobby_picker_herotip_ability_template">
+		<panel width="{width=100%}" height="100%">
+			<panel y="4i" width="-6i" height="38i" align="center">
+				<panel x="2i" width="34i" height="34i" valign="center">
+					<frame borderthickness="1" color="black" bordercolor="#774c45" noclick="1" />
+					<image name="lobby_picker_herotip_{type}_ability_{id}_icon" width="-4i" height="-4i" align="center" valign="center" texture="$invis" noclick="1"/>
+				</panel>
+				<label name="lobby_picker_herotip_{type}_ability_{id}_name" x="45i" height="50%" textvalign="center" font="dyn_11" color="#f0d3c1" noclick="1"/>
+				<label name="lobby_picker_herotip_{type}_ability_{id}_manacost" x="45i" height="50%" valign="bottom" textvalign="center" font="dyn_10" color="#d3bbac" noclick="1"/>
+				<panel width="115i" align="right">
+					<label name="lobby_picker_herotip_{type}_ability_{id}_range" x="5i" height="50%" textvalign="center" font="dyn_10" color="#d3bbac" noclick="1"/>
+					<label name="lobby_picker_herotip_{type}_ability_{id}_cd" x="5i" height="50%" valign="bottom" textvalign="center" font="dyn_10" color="#d3bbac" noclick="1"/>
+				</panel>
+				<panel color="#4a3429" y="5i" width="-6i" align="center" valign="bottom" height="1" noclick="1"/>
+			</panel>
+
+			<panel name="lobby_picker_herotip_{type}_ability_{id}_descmax" y="50i" width="-6i" height="-50i" align="center" float="bottom" clip="0">
+				<label name="lobby_picker_herotip_{type}_ability_{id}_desc" font="dyn_10" color="#ac9181" wrap="1" fity="true" fitypadding="0.8h"/>
+			</panel>
+			
+			<panel color="#4a3429" align="left" valign="bottom" width="1" height="-6i" noclick="1"/>
+		</panel>
+	</template>
+
+	<template name="lobby_matchinfo_bot_template">
+		<panel name="lobby_matchinfo_bot_{row}_{id}" width="54i" height="54i"
+				onmouseoverlua="GetWidget('lobby_matchinfo_bot_{row}_{id}_hover'):SetVisible(true)"
+				onmouseoutlua="GetWidget('lobby_matchinfo_bot_{row}_{id}_hover'):SetVisible(false)"
+				onmousewheeldown="CallEvent('lobby_matchinfo_addbot_scroll', 1);"
+				onmousewheelup="CallEvent('lobby_matchinfo_addbot_scroll', 0);"
+				onclicklua="Lobby_V2:OnClickBot({row}, {id})"
+		>
+			<frame color="black" borderthickness="1" bordercolor="#313131" noclick="1"/>
+			<image name="lobby_matchinfo_bot_{row}_{id}_icon" texture="$invis" width="-6i" height="-6i" align="center" valign="center" noclick="1"/>
+			<frame name="lobby_matchinfo_bot_{row}_{id}_hover" color="invisible" borderthickness="1" bordercolor="#ffb739" noclick="1" visible="0"/>
+		</panel>
+	</template>
+
+	<template name="lobby_matchinfo_bot_row_template">
+		<panel align="center" grow="1" float="right" padding="4i" noclick="1">
+			<instance name="lobby_matchinfo_bot_template" row="{row}" id="0" />
+			<instance name="lobby_matchinfo_bot_template" row="{row}" id="1" />
+			<instance name="lobby_matchinfo_bot_template" row="{row}" id="2" />
+			<instance name="lobby_matchinfo_bot_template" row="{row}" id="3" />
+			<instance name="lobby_matchinfo_bot_template" row="{row}" id="4" />
+			<instance name="lobby_matchinfo_bot_template" row="{row}" id="5" />
+			<instance name="lobby_matchinfo_bot_template" row="{row}" id="6" />
+			<instance name="lobby_matchinfo_bot_template" row="{row}" id="7" />
+			<instance name="lobby_matchinfo_bot_template" row="{row}" id="8" />
+		</panel>
+	</template>
+
+	<template name="lobby_assets_template">
+		<panel width="{width=100%}" height="{height=100%}" align="{align}" valign="{valign}" x="{x}" y="{y}" noclick="1">
+			<panel x="-8i" align="right" grow="1" regrow="1" height="100%" noclick="1" float="right" padding="5i">
+				<instance name="newui_custom_frame_template" alpha="0"/>
+				<anchor x="0" y="0"/>
+				<panel width="8i" height="100%" noclick="1"/>
+				<label width="20i" font="dyn_11" color="#f1dcc9" outline="1" outlinecolor="#230000" noclick="1" textvalign="center"
+						onloadlua=" local str = Translate('newui_lobby_own')
+									local w = self:GetStringWidth(str)
+									self:SetWidth(w + 5)
+									self:SetText(str)"
+				/>
+				<panel width="20i" height="100%" noclick="1">
+					<image texture="/ui/fe2/store/gold_coins.tga" height="20i" valign="center" noclick="1"/>
+				</panel>
+				<label width="10i" height="100%" textvalign="center" font="dyn_10" color="#FFCC00" noclick="1"
+						watch="GoldCoins" 
+						ontriggerlua="local w = self:GetStringWidth(param)
+									  self:SetWidth(w)
+									  self:SetText(param)
+									 "
+				/>
+				<panel width="20i" height="100%" noclick="1">
+					<image texture="/ui/fe2/store/silver_coins.tga" height="20i" valign="center" noclick="1"/>
+				</panel>
+				<label width="8i" height="100%" textvalign="center" font="dyn_10" color="#c0d5ed" noclick="1"
+						watch="SilverCoins" 
+						ontriggerlua="local w = self:GetStringWidth(param)
+									  self:SetWidth(w)
+									  self:SetText(param)
+									 "
+				/>
+				<panel width="10i" height="100%" noclick="1"/>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="lobby_popup_purchase_eap_model_template">
+		<panel noclick="1" width="256i" height="512i">
+			<panel width="{scale=100%}" height="{scale=100%}" noclick="1" align="center" valign="center">
+				<image name="lobby_popup_purchase_eap_model_{id}_pedestal" texture="/ui/fe2/elements/store2/jz.png" width="200%" height="50%" align="center" valign="bottom" noclick="1" />
+				<panel width="100%" height="50%" valign="center" noclick="1">
+					<modelpanel name="lobby_popup_purchase_eap_model_{id}_model"
+								valign="center" height="400%"
+								align="center" width="400%"
+								scenebuffer="true"
+								noclick="1"
+								cameranear="100.0"
+								camerafar="10000.0"
+								depthclear="true"
+								depthcompress="false"
+								lookat="false"
+								cameradistance="40"
+								camerapos="0 3140 20"
+								cameraangles="0 0 180"
+								camerafov="7"
+								modelpos="0 0 0"
+								modelangles="-15.0 0 0.0"
+								modelscale="1.0"
+								cull="false"
+								sunazimuth="120"
+								sunaltitude="50"
+								suncolor="0.0 0.0 0.0"
+								ambientcolor="0.65 0.65 0.65"
+								posteffects="true"
+								posteffect=""
+								outline="false"
+								postoutline="/core/post/outline.posteffect"
+								outlinecolor=".25 .25 .25 1"
+								anim="idle_eap"
+					/>
+				</panel>
+				<panel y="-14%" width="200%" height="6.25%" noclick="1" align="center" valign="bottom">
+					<image name="lobby_popup_purchase_eap_model_{id}_typebg" texture="/ui/fe2/elements/store2/info_back.png" noclick="1"/>
+					<label name="lobby_popup_purchase_eap_model_{id}_typetext" content="{type_text}" font="{type_font=dyn_11}" textalign="center" textvalign="center" color="#d7b6a2" outline="1" outlinecolor="#280b0b" noclick="1"/>
+				</panel>
+
+				<panel y="-19%" width="200%" height="12.5%" noclick="1" align="center" valign="bottom">
+					<image name="lobby_popup_purchase_eap_model_{id}_namebg" texture="/ui/fe2/elements/store2/name_bck.png" noclick="1"/>
+					<label name="lobby_popup_purchase_eap_model_{id}_nametext" font="{type_font=dyn_11}" textalign="center" textvalign="center" color="#d7b6a2" outline="1" outlinecolor="#280b0b" noclick="1"/>
+				</panel>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="lobby_popup_purchase_eap_type_template">
+		<panel width="128i" height="128i" noclick="1">
+			<button name="lobby_popup_purchase_eap_type_{id}" color="invisible" onclicklua="Lobby_V2:SetEAPItems({id})">
+				<widgetstate statename="up">
+					<image texture="/ui/fe2/elements/store2/bundle1.png"/>
+				</widgetstate>
+				<widgetstate statename="over">
+					<image texture="/ui/fe2/elements/store2/bundle3.png"/>
+				</widgetstate>
+				<widgetstate statename="down" x="1" y="1">
+					<image texture="/ui/fe2/elements/store2/bundle3.png"/>
+				</widgetstate>
+				<widgetstate statename="disabled">
+					<image texture="/ui/fe2/elements/store2/bundle2.png"/>
+				</widgetstate>
+			</button>
+			<panel valign="bottom" height="32i" y="-10i" noclick="1">
+				<image texture="/ui/fe2/elements/store2/bg_s.png" width="256i" height="32i" align="center" valign="center" noclick="1" />
+				<label content="{text}" font="dyn_10" color="#a4806f" fitx="true" align="center" textalign="center" textvalign="center" noclick="1" />
+			</panel>
+		</panel>
+	</template>
+
+	<template name="lobby_popup_purchase_eap_template">
+		<panel width="100%" noclick="1" height="700i">
+			<instance name="lobby_assets_template" x="-15i" y="10i" width="260i" height="30i" align="right" />
+			<panel height="50i" noclick="1" valign="bottom">
+				<instance name="newui_common_button_1_template" width="100i" height="30i" align="center" valign="center" font="dyn_10" content="newui_lobby_popup_nocoin" enabled="0" />
+				<instance name="newui_common_button_1_template" button_name="lobby_popup_purchase_eap_buy" 
+			     	 	  width="150i" height="30i" align="center" valign="center" font="dyn_10" content="newui_lobby_purchase"
+			    />
+			    <panel width="400i" align="right" noclick="1">
+			    	<image texture="/ui/fe2/store/gold_coins.tga" width="24i" height="24i" valign="center" noclick="1"/>
+			    	<label name="lobby_popup_purchase_eap_gold_text"  x="30i" textvalign="center" font="dyn_12" color="#FFCC00" noclick="1" content="-"/>
+			    </panel>
+			</panel>		
+			<panel y="-50i" height="128i" grow="1" align="center" valign="bottom" float="right" padding="50i">
+				<instance name="lobby_popup_purchase_eap_type_template" id="1" text="store2_ea_immortal"/>
+				<instance name="lobby_popup_purchase_eap_type_template" id="2" text="store2_ea_legendary"/>
+				<instance name="lobby_popup_purchase_eap_type_template" id="3" text="store2_ea_heroonly"/>
+			</panel>
+			<panel y="-160i" height="512i" grow="1" align="center" valign="bottom" float="right" padding="80i" noclick="1">
+				<instance name="lobby_popup_purchase_eap_model_template" id="2" scale="80%" type_text="general_product_type_aa" />
+				<instance name="lobby_popup_purchase_eap_model_template" id="1" type_font="dyn_12" type_text="general_product_type_h"/>
+				<instance name="lobby_popup_purchase_eap_model_template" id="3" scale="80%" type_text="general_product_type_aa"/>
+			</panel>
+
+			<panel x="-335i" y="150i" width="132i" height="52i" align="center" valign="center" noclick="1">
+				<image texture="/ui/fe2/elements/store2/star1.png" y="8i" width="256i" height="256i" noclick="1" align="center" valign="center" rendermode="grayscale"/>
+				<label autofont="1" autofontmax="9" noclick="1" width="72i" height="14i" align="center" textalign="center" textvalign="center" font="dyn_9" color="#1e1e1e" shadow="true" shadowcolor="#9f9f9f"
+						content="mstore_noeap_select" onshowlua="self:SetText(string.upper(self:GetText()))"/>
+				<label autofont="1" autofontmax="16" noclick="1" width="96i" align="center" textalign="center" textvalign="center" font="dyn_16" color="#ffffff" shadow="true" shadowcolor="#000000" 
+						outline="true" outlinecolor="#525252" content="mstore_eap_bundle_2" onshowlua="self:SetText(string.upper(self:GetText()))"/>
+				<label autofont="1" autofontmax="9" width="72i" height="14i" align="center" valign="bottom" noclick="1" textalign="center" textvalign="center" font="dyn_9" color="#1e1e1e" 
+					   shadow="true" shadowcolor="#9f9f9f" content="mstore_noeap_to_unlock" onshowlua="self:SetText(string.upper(self:GetText()))" />
+			</panel>
+
+			<panel name="lobby_popup_purchase_eap_legendary_selected" x="-335i" y="150i" width="132i" height="52i" align="center" valign="center" noclick="1">
+				<image texture="/ui/fe2/elements/store2/star1.png" y="8i" width="256i" height="256i" noclick="1" align="center" valign="center"/>
+				<label autofont="1" autofontmax="9" noclick="1" width="72i" height="14i" align="center" textalign="center" textvalign="center" font="dyn_9" color="#024a5e" shadow="true" shadowcolor="#68e0e6"
+						content="mstore_noeap_includes" onshowlua="self:SetText(string.upper(self:GetText()))"/>
+				<label autofont="1" autofontmax="16" noclick="1" width="96i" align="center" textalign="center" textvalign="center" font="dyn_16" color="#fdffff" shadow="true" shadowcolor="#076878" 
+						outline="true" outlinecolor="#076878" content="mstore_noeap_bonus" onshowlua="self:SetText(string.upper(self:GetText()))"/>
+				<label autofont="1" autofontmax="9" width="72i" height="14i" align="center" valign="bottom" noclick="1" textalign="center" textvalign="center" font="dyn_9" color="#024a5e" 
+					   shadow="true" shadowcolor="#68e0e6" content="mstore_noeap_alt_avatar" onshowlua="self:SetText(string.upper(self:GetText()))" />
+			</panel>
+
+			<panel x="335i" y="150i" width="132i" height="52i" align="center" valign="center" noclick="1">
+				<image texture="/ui/fe2/elements/store2/star2.png" y="8i" width="256i" height="256i" noclick="1" align="center" valign="center" rendermode="grayscale"/>
+				<label autofont="1" autofontmax="9" noclick="1" width="72i" height="14i" align="center" textalign="center" textvalign="center" font="dyn_9" color="#1e1e1e" shadow="true" shadowcolor="#9f9f9f"
+						content="mstore_noeap_select" onshowlua="self:SetText(string.upper(self:GetText()))"/>
+				<label autofont="1" autofontmax="16" noclick="1" width="96i" align="center" textalign="center" textvalign="center" font="dyn_16" color="#ffffff" shadow="true" shadowcolor="#000000" 
+						outline="true" outlinecolor="#525252" content="mstore_eap_bundle_3" onshowlua="self:SetText(string.upper(self:GetText()))"/>
+				<label autofont="1" autofontmax="9" width="72i" height="14i" align="center" valign="bottom" noclick="1" textalign="center" textvalign="center" font="dyn_9" color="#1e1e1e" 
+					   shadow="true" shadowcolor="#9f9f9f" content="mstore_noeap_to_unlock" onshowlua="self:SetText(string.upper(self:GetText()))" />
+			</panel>
+
+			<panel name="lobby_popup_purchase_eap_immortal_selected" x="335i" y="150i" width="132i" height="52i" align="center" valign="center" noclick="1">
+				<image texture="/ui/fe2/elements/store2/star2.png" y="8i" width="256i" height="256i" noclick="1" align="center" valign="center"/>
+				<label autofont="1" autofontmax="9" noclick="1" width="72i" height="14i" align="center" textalign="center" textvalign="center" font="dyn_9" color="#640017" shadow="true" shadowcolor="#ed5d79"
+						content="mstore_noeap_includes" onshowlua="self:SetText(string.upper(self:GetText()))"/>
+				<label autofont="1" autofontmax="16" noclick="1" width="96i" align="center" textalign="center" textvalign="center" font="dyn_16" color="#fdffff" shadow="true" shadowcolor="#7f071d" 
+						outline="true" outlinecolor="#7f071d" content="mstore_noeap_exclusive" onshowlua="self:SetText(string.upper(self:GetText()))"/>
+				<label autofont="1" autofontmax="9" width="72i" height="14i" align="center" valign="bottom" noclick="1" textalign="center" textvalign="center" font="dyn_9" color="#640017" 
+					   shadow="true" shadowcolor="#ed5d79" content="mstore_eap_only" onshowlua="self:SetText(string.upper(self:GetText()))" />
+			</panel>
+			
+		</panel>
+	</template>
+
+	<template name="lobby_popup_purchase_avatar_coupon_template">
+		<panel name="lobby_popup_purchase_avatar_coupon_{id}" width="100%" height="30i" stickytoinvis="0">
+			<instance name="newui_checkbox_template" widget_name="lobby_popup_purchase_avatar_coupon_{id}_btn" type="2" width="-60i" height="100%" align="center" valign="center" onclicklua="Lobby_V2:OnClickCoupon({id})"/>
+			<panel x="-30i" width="-80i" align="right" noclick="1" float="right">
+				<panel width="250i" noclick="1">
+					<label name="lobby_popup_purchase_avatar_coupon_{id}_name" font="dyn_10" textalign="center" textvalign="center" color="#ad9281" outline="1" outlinecolor="#230000" noclick="1"/>
+				</panel>
+				<image texture="/ui/fe2/newui/res/common/line2.png" width="2" noclick="1"/>
+				<panel width="-250i" noclick="1">
+					<label name="lobby_popup_purchase_avatar_coupon_{id}_discount" font="dyn_10" textalign="center" textvalign="center" color="#ad9281" outline="1" outlinecolor="#230000" noclick="1"/>
+				</panel>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="lobby_popup_purchase_avatar_template">
+		<panel width="100%" noclick="1" grow="1" regrow="1" growinvis="0" float="bottom">
+			<panel height="50i" noclick="1">
+				<instance name="lobby_assets_template" align="center" y="5i" width="-20i" height="30i" />
+			</panel>
+			<panel height="60i" noclick="1">
+				<panel width="60i" align="center" noclick="1">
+					<instance name="newui_custom_frame_template"/>
+				<image name="lobby_popup_purchase_avatar_icon" width="-4" height="-4" align="center" valign="center" noclick="1"/>
+				</panel>
+			</panel>
+			<label name="lobby_popup_purchase_avatar_name" height="30i" align="center" textalign="center" textvalign="center" font="dyn_12" color="#efd4c1" outline="1" outlinecolor="#230000" noclick="1"/>
+			<panel height="2" noclick="1">
+				<image texture="/ui/fe2/newui/res/common/line.png" width="110%" align="center" noclick="1"/>
+			</panel>
+			<panel height="63i" noclick="1">
+				<label name="lobby_popup_purchase_avatar_desc" width="-60i" align="center" textvalign="center" font="dyn_10" color="#ad9281" outline="1" outlinecolor="#230000" wrap="1" noclick="1"/>
+			</panel>
+			<panel height="2" noclick="1">
+				<image texture="/ui/fe2/newui/res/common/line.png" width="110%" align="center" noclick="1"/>
+			</panel>
+			<panel name="lobby_popup_purchase_avatar_coupon" width="100%" grow="1" regrow="1" growinvis="0" float="bottom" stickytoinvis="0" visible="0"> 
+				<instance name="lobby_popup_purchase_avatar_coupon_template" id="1"/>
+				<instance name="lobby_popup_purchase_avatar_coupon_template" id="2"/>
+				<instance name="lobby_popup_purchase_avatar_coupon_template" id="3"/>
+				<panel height="10i" noclick="1"/>
+				<label name="lobby_popup_purchase_avatar_coupon_info" font="dyn_10" color="white" width="100%" wrap="1" textalign="center" vpadding="20i" fity="1" fitypadding=".5h" noclick="1"/>
+				<panel height="2" noclick="1">
+					<image texture="/ui/fe2/newui/res/common/line.png" width="110%" align="center" noclick="1"/>
+				</panel>
+			</panel>
+			<panel height="66i" noclick="1">
+				<panel height="100%" align="center" grow="1" regrow="1" growinvis="0" float="right" noclick="1" padding="20i">
+					<panel name="lobby_popup_purchase_avatar_gold" width="100i" height="100%" noclick="1" stickytoinvis="0">
+						<panel align="center" grow="1" regrow="1" height="30i" noclick="1" float="right" padding="5i">
+							<panel width="20i" height="100%" noclick="1">
+								<image texture="/ui/fe2/store/gold_coins.tga" height="20i" valign="center" noclick="1"/>
+							</panel>
+							<label name="lobby_popup_purchase_avatar_gold_text" width="10i" height="100%" textvalign="center" font="dyn_10" color="#FFCC00" noclick="1"/>
+						</panel>
+						<instance name="newui_common_button_1_template"
+			     	 			 width="100i" height="26i" align="center" valign="bottom" font="dyn_10" content="newui_lobby_popup_nocoin" enabled="0"
+			     		/>
+						<instance name="newui_common_button_1_template" button_name="lobby_popup_purchase_avatar_gold_buy" 
+			     	 			 width="100i" height="26i" align="center" valign="bottom" font="dyn_10" content="newui_lobby_popup_usegold"
+			     	 	/>
+					</panel>
+					<panel name="lobby_popup_purchase_avatar_silver" width="100i" height="100%" noclick="1" stickytoinvis="0">
+						<panel align="center" grow="1" regrow="1" height="30i" noclick="1" float="right" padding="5i">
+							<panel width="20i" height="100%" noclick="1">
+								<image texture="/ui/fe2/store/silver_coins.tga" height="20i" valign="center" noclick="1"/>
+							</panel>
+							<label name="lobby_popup_purchase_avatar_silver_text" width="10i" height="100%" textvalign="center" font="dyn_10" color="#c0d5ed" noclick="1"/>
+						</panel>
+						<instance name="newui_common_button_1_template"
+			     			  width="100i" height="26i" align="center" valign="bottom" font="dyn_10" content="newui_lobby_popup_nocoin" enabled="0"
+			     		/>
+						<instance name="newui_common_button_1_template" button_name="lobby_popup_purchase_avatar_silver_buy" 
+			     	  				width="100i" height="26i" align="center" valign="bottom" font="dyn_10" content="newui_lobby_popup_usesilver"
+			     		/>
+					</panel>
+					<panel width="100i" height="100%" noclick="1" stickytoinvis="0">
+						<instance name="newui_common_button_1_template" type="b2"
+			     	 			 width="100i" height="26i" align="center" valign="bottom" font="dyn_10" content="newui_lobby_popup_cancel"
+			     	 			 upoutlinecolor="#006672" overoutlinecolor="#006672"
+			     	  			 onclicklua="GetWidget('lobby_popup_purchase_avatar'):FadeOut(150)"
+			     		/>
+					</panel>
+				</panel>
+			</panel>
+			<panel height="12i" noclick="1"/>
+		</panel>
+	</template>
+
+	<template name="lobby_popup_purchase_hero_template">
+		<panel width="100%" height="344i" noclick="1">
+			<panel width="-320i" height="270i" noclick="1">
+				<modelpanel name="lobby_popup_purchase_hero_model" noclick="1"
+							width="300%"
+							height="300%"
+							align="center"
+							valign="center"
+							anim="idle"
+							sunazimuth="120"
+							sunaltitude="50"
+							suncolor="0.9 0.9 0.9"
+							ambientcolor="0.6 0.7 0.7"
+							cameranear="0.0"
+							lookat="false"
+							camerafar="5000.0"
+							camerapos="0 2500 60"
+							cameraangles="0 0 180"
+							camerafov="10"
+							depthclear="true"
+							depthcompress="false"
+							cull="false"
+							scenebuffer="true"
+							outline="1"
+							outlinecolor="0 0 0"
+							posteffects="true"
+							postoutline="/core/post/outline.posteffect"
+				/>
+			</panel>
+			<panel y="-14i" height="66i" align="center" valign="bottom" grow="1" regrow="1" growinvis="0" float="right" noclick="1" padding="20i">
+				<panel name="lobby_popup_purchase_hero_gold" width="100i" height="100%" noclick="1" stickytoinvis="0">
+					<panel align="center" grow="1" regrow="1" height="30i" noclick="1" float="right" padding="5i">
+						<panel width="20i" height="100%" noclick="1">
+							<image texture="/ui/fe2/store/gold_coins.tga" height="20i" valign="center" noclick="1"/>
+						</panel>
+						<label name="lobby_popup_purchase_hero_gold_text" width="10i" height="100%" textvalign="center" font="dyn_10" color="#FFCC00" noclick="1" />
+					</panel>
+			     	<instance name="newui_common_button_1_template"
+			     	  width="100i" height="26i" align="center" valign="bottom" font="dyn_10" content="newui_lobby_popup_nocoin" enabled="0"
+			     	/>
+			     	<instance name="newui_common_button_1_template" button_name="lobby_popup_purchase_hero_gold_buy" 
+			     	  width="100i" height="26i" align="center" valign="bottom" font="dyn_10" content="newui_lobby_popup_usegold"
+			     	/>
+				</panel>
+				<panel name="lobby_popup_purchase_hero_silver" width="100i" height="100%" noclick="1" stickytoinvis="0">
+					<panel align="center" grow="1" regrow="1" height="30i" noclick="1" float="right" padding="5i">
+						<panel width="20i" height="100%" noclick="1">
+							<image texture="/ui/fe2/store/silver_coins.tga" height="20i" valign="center" noclick="1"/>
+						</panel>
+						<label name="lobby_popup_purchase_hero_silver_text" width="10i" height="100%" textvalign="center" font="dyn_10" color="#c0d5ed" noclick="1" />
+					</panel>
+					<instance name="newui_common_button_1_template"
+			     	  width="100i" height="26i" align="center" valign="bottom" font="dyn_10" content="newui_lobby_popup_nocoin" enabled="0"
+			     	/>
+					<instance name="newui_common_button_1_template" button_name="lobby_popup_purchase_hero_silver_buy" 
+			     	  width="100i" height="26i" align="center" valign="bottom" font="dyn_10" content="newui_lobby_popup_usesilver"
+			     	/>
+				</panel>
+				<panel width="100i" height="100%" noclick="1" stickytoinvis="0">
+					<instance name="newui_common_button_1_template" type="b2"
+			     	  width="100i" height="26i" align="center" valign="bottom" font="dyn_10" content="newui_lobby_popup_cancel"
+			     	  upoutlinecolor="#006672" overoutlinecolor="#006672"
+			     	  onclicklua="GetWidget('lobby_popup_purchase_hero'):FadeOut(150)"
+			     	/>
+				</panel>
+			</panel> 
+			<panel width="320i" align="right" noclick="1">
+				<instance name="lobby_assets_template" y="10i" width="-15i" height="30i" />
+				<panel y="76i" width="64i" height="64i" noclick="1">
+					<instance name="newui_custom_frame_template"/>
+					<image name="lobby_popup_purchase_hero_icon" texture="$invis" width="-4" height="-4" align="center" valign="center" noclick="1"/>
+				</panel>
+				<label name="lobby_popup_purchase_hero_name" x="70i" y="76i" font="dyn_14" color="#b8a89b" outline="1" outlinecolor="#230000" noclick="1"/>
+
+				<panel y="150i" grow="1" regrow="1" width="-40i" float="bottom" noclick="1">
+					<panel width="100%" height="2" noclick="1">
+						<image texture="/ui/fe2/newui/res/common/line.png" width="110%" height="2" align="center" noclick="1"/>
+					</panel>
+					
+					<label width="100%" height="32i" font="dyn_12" textvalign="center" color="#ffaf02" shadow="1" content="globby_purchase_txt1" noclick="1"/>
+					<label width="100%" font="dyn_11" noclick="1" vpadding="20i" color="#ac9180" shadow="1" wrap="1" fity="true" fitypadding="0.8h" content="globby_purchase_txt2"/>
+					<panel width="100%" height="2" noclick="1">
+						<image texture="/ui/fe2/newui/res/common/line.png" width="110%" height="2" align="center" noclick="1"/>
+					</panel>
+				</panel>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="lobby_popup_purchase_success_template">
+		<panel width="100%" height="180i" noclick="1">
+			<label content="mstore_buyitem_success_body" width="-60i" height="120i" align="center" textvalign="center" font="dyn_14" color="#efd4c1" outline="1" outlinecolor="#230000" wrap="1" noclick="1"/>
+		</panel>
+		<instance name="newui_common_button_2_template" y="-10i" width="105i" height="32i" align="center" valign="bottom" label="general_ok"
+				  onclicklua="GetWidget('lobby_popup_purchase_success'):FadeOut(150)"
+		/>
+	</template>
+
+	<template name="lobby_popup_purchase_error_template">
+		<panel width="100%" height="180i" noclick="1">
+			<label name="lobby_popup_purchase_error_desc" width="-60i" height="120i" align="center" textvalign="center" font="dyn_14" color="#efd4c1" outline="1" outlinecolor="#230000" wrap="1" noclick="1"/>
+		</panel>
+		<instance name="newui_common_button_2_template" y="-10i" width="105i" height="32i" align="center" valign="bottom" label="general_ok"
+				  onclicklua="GetWidget('lobby_popup_purchase_error'):FadeOut(150)"
+		/>
+	</template>
+
+	<panel name="lobby" color="0 0 0 .7" noclick="0" visible="0"
+		onshowlua="GetWidget('sysbar_replay_button'):SetVisible(false)"
+		onhidelua="GetWidget('sysbar_replay_button'):SetVisible(true)"
+		watch="TMMLeaveGroup"
+		ontriggerlua="--if param == 'disconnected' then self:SetVisible(false) end"
+	>
+		<image texture="/ui/fe2/newui/res/common/main_bg.png" width="2048i" height="2048i" align="center" valign="center" noclick="1"/>
+		<panel name="lobby_matchinfo" width="1334i" align="center" noclick="1" visible="0" 
+				hotkey="ESC" 
+				onhotkeylua="Trigger('TriggerDialogBox', 'confirm_disconnect_title', 'general_yes', 'general_cancel', '', '', 
+										'confirm_disconnect_msg', '', 'Disconnect()', '')"
+		>
+			<panel align="center" y="60i" height="60i" noclick="1">
+				<image x="16i" texture="/ui/fe2/newui/res/lobby/title_icon.png" width="32i" height="32i" valign="center" noclick="1"/>
+				<label x="64i" textalign="left" textvalign="center" font="dyn_24" color="#a1867d" outline="1" outlinecolor="#230000" noclick="1" content="newui_lobby_title"/>
+				<instance name="newui_button_close_template" align="right" valign="center"
+							onclicklua="Trigger('TriggerDialogBox', 'confirm_disconnect_title', 'general_yes', 'general_cancel', '', '', 
+										'confirm_disconnect_msg', '', 'Disconnect()', '')"
+				/>
+			</panel>
+			<image texture="/ui/fe2/newui/res/hosted/line.png" y="123i" width="1600i" height="4i" align="center" noclick="1"/>
+
+			<panel y="146i" height="807i" align="center">
+				<image texture="/ui/fe2/newui/res/lobby/matchinfo_bg.png" y="-57i" width="2048i" height="1024i" align="center" noclick="1"/>
+
+				<panel x="21i" y="19i" width="401i" height="234i" noclick="1">
+					<image name="lobby_matchinfo_mapimage" texture="$invis" width="512i" height="256i" align="center" valign="center" noclick="1"/>
+					<panel height="70i" valign="bottom" noclick="1">
+						<instance name="newui_custom_frame_template"/>
+						<label name="lobby_matchinfo_title_mapname" textalign="center" textvalign="center" font="dyn_24" color="#c8a38e" outline="1" outlinecolor="#230000" noclick="1"/>
+					</panel>
+				</panel>
+	
+				<panel x="-128i" y="272i" width="1000i" height="34i" noclick="1" align="center">
+					<label x="-65i" width="50%" textalign="right" textvalign="center" font="dyn_16" color="#cec3a3" shadow="1" noclick="1"
+							watch="LobbyTeamInfo1" ontrigger="SetText(FtoP(param3, 0));"
+					/>
+					<label x="70i" width="50%" align="right" textalign="left" textvalign="center" font="dyn_16" color="#cec3a3" shadow="1" noclick="1"
+							watch="LobbyTeamInfo2" ontrigger="SetText(FtoP(param3, 0));"
+					/>
+
+					<instance name="newui_checkbox_template" widget_name="lobby_matchinfo_firstban_legion" type="2" width="100i" align="center" x="-170i" height="100%" visible="0"
+							  content="game_lobby_first_ban" outline="1" outlinecolor="#230000"
+							  unselectedupcolor="#7e6459" unselectedovercolor="#f0d3c1" unselecteddisabledcolor="#7e6459" selectedupcolor="#c4a693" selectedovercolor="#f0d3c1" selecteddisabledcolor="#c4a693"
+							  watch="LobbyTeamInfo1" ontriggerlua="self:SetVisible(AtoB(param4))
+							  									   if AtoB(param5) then
+							  									       self:SetButtonState(1)
+							  									   else
+							  									   		self:SetButtonState(0)
+							  									   end
+							  									  "
+							  onclicklua="Lobby_V2:OnClickSetFirstBan(1)"
+					/>
+
+					<instance name="newui_checkbox_template" widget_name="lobby_matchinfo_firstban_hellbourne" type="2" width="100i" align="center" x="180i" height="100%" visible="0"
+							  content="game_lobby_first_ban" outline="1" outlinecolor="#230000"
+							  unselectedupcolor="#7e6459" unselectedovercolor="#f0d3c1" unselecteddisabledcolor="#7e6459" selectedupcolor="#c4a693" selectedovercolor="#f0d3c1" selecteddisabledcolor="#c4a693"
+							  watch="LobbyTeamInfo2" ontriggerlua="self:SetVisible(AtoB(param4))
+							  									   if AtoB(param5) then
+							  									       self:SetButtonState(1)
+							  									   else
+							  									   		self:SetButtonState(0)
+							  									   end
+							  									  "
+							  onclicklua="Lobby_V2:OnClickSetFirstBan(2)"
+					/>
+
+					<label textalign="left" textvalign="center" font="dyn_14" color="#a0c7cb" outline="1" outlinecolor="#03112d" content="newui_replay_legion" noclick="1"/>
+					<label textalign="right" textvalign="center" font="dyn_14" color="#f0d3c1" outline="1" outlinecolor="#2b0306" content="newui_replay_hellbourne" noclick="1"/>
+
+					<instance name="newui_common_button_2_template" width="100i" align="center" label="game_lobby_balance_btn" 
+							  watch="LobbyStatus"
+							  ontriggerlua="self:SetVisible(AtoB(param1));"
+							  onclick="RequestBalanceTeams();"
+					/>
+				</panel>
+				<panel x="20i" y="-6i" width="520i" height="496i" valign="bottom">
+					<instance name="lobby_matchinfo_player_template" index="0" team="1" slot="0" />
+					<instance name="lobby_matchinfo_player_template" index="1" team="1" slot="1" y="101i"/>
+					<instance name="lobby_matchinfo_player_template" index="2" team="1" slot="2" y="202i"/>
+					<instance name="lobby_matchinfo_player_template" index="3" team="1" slot="3" y="304i"/>
+					<instance name="lobby_matchinfo_player_template" index="4" team="1" slot="4" y="404i"/>
+				</panel>
+
+				<panel x="540i" y="-6i" width="520i" height="496i" valign="bottom">
+					<instance name="lobby_matchinfo_player_template" index="5" team="2" slot="0" hflip="1" align="right" align1="left"/>
+					<instance name="lobby_matchinfo_player_template" index="6" team="2" slot="1" hflip="1" align="right" align1="left" y="101i"/>
+					<instance name="lobby_matchinfo_player_template" index="7" team="2" slot="2" hflip="1" align="right" align1="left" y="202i"/>
+					<instance name="lobby_matchinfo_player_template" index="8" team="2" slot="3" hflip="1" align="right" align1="left" y="304i"/>
+					<instance name="lobby_matchinfo_player_template" index="9" team="2" slot="4" hflip="1" align="right" align1="left" y="404i"/>
+				</panel>
+
+				<image texture="/ui/fe2/newui/res/lobby/vs.png" x="-130i" y="150i" width="256i" height="128i" align="center" valign="center" noclick="1"/>
+
+				<panel x="434i" y="143i" width="881i" height="112i" watch="LobbyGameInfo" ontriggerlua="Lobby_V2:OnUpdateMatchInfo(...)">
+					<panel width="33.3%" height="-16i" valign="center" float="bottom">
+						<instance name="lobby_matchinfo_info_template" height="33.3%" id="matchid"/>
+						<instance name="lobby_matchinfo_info_template" height="33.3%" id="hostname"/>
+						<instance name="lobby_matchinfo_info_template" height="33.3%" id="servername"/>
+					</panel>
+					<panel width="33.3%" height="-16i" valign="center" float="bottom" align="center">
+						<instance name="lobby_matchinfo_info_template" height="33.3%" id="mapname"/>
+						<instance name="lobby_matchinfo_info_template" height="33.3%" id="gamemode"/>
+						<instance name="lobby_matchinfo_info_template" height="33.3%" id="gameoption"/>
+					</panel>
+					<panel width="33.3%" height="-16i" valign="center" float="bottom" align="right">
+						<instance name="lobby_matchinfo_info_template" height="33.3%" id="ping"/>
+						<instance name="lobby_matchinfo_info_template" height="33.3%" id="players"/>
+						<instance name="lobby_matchinfo_info_template" height="33.3%" id="version"/>
+					</panel>
+				</panel>
+
+				<label name="lobby_matchinfo_title_gamename" x="436i" y="24i" width="890i" height="60i" font="dyn_24" color="#f0d3c1" outline="1" outlinecolor="#230000" noclick="1"/>
+
+				<panel x="434i" y="68i" width="890i" height="32i" noclick="1"> 
+					<panel width="120i" watch="LobbyNoStats" ontriggerlua="self:SetVisible(not AtoB(param))" visible="0">
+						<image texture="/ui/icons/official.tga" width="32i" height="32i" align="left" valign="center" noclick="1"/>
+						<label x="38i" textalign="left" textvalign="center" font="dyn_12" color="#bd9f8d" outline="1" outlinecolor="#230000" content="newui_lobby_official" noclick="1"/>
+					</panel>
+					<panel width="120i" watch="LobbyNoStats" ontriggerlua="self:SetVisible(AtoB(param))" visible="0">
+						<image texture="/ui/icons/official_2.tga" width="32i" height="32i" align="left" valign="center" noclick="1"/>
+						<label x="38i" textalign="left" textvalign="center" font="dyn_12" color="#bd9f8d" outline="1" outlinecolor="#230000" content="newui_lobby_official2" noclick="1"/>
+					</panel>
+					<panel x="122i" width="100i" watch="LobbyNoLeavers" ontriggerlua="self:SetVisible(AtoB(param))" visible="0">
+						<image texture="/ui/icons/noleaver.tga" width="32i" height="32i" align="left" valign="center" noclick="1"/>
+						<label x="38i" textalign="left" textvalign="center" font="dyn_12" color="#bd9f8d" outline="1" outlinecolor="#230000" content="newui_lobby_noleavers" noclick="1"/>
+					</panel>
+				</panel>
+
+				<panel  x="434i" y="105i" width="890i" height="32i" noclick="1">
+					<instance name="newui_checkbox_template" widget_name="lobby_matchinfo_private" type="2" width="90i" height="100%" onclicklua="PlaySound('/shared/sounds/ui/revamp/region_click.wav') Lobby_V2:OnClickPrivateCheckbox()" 
+							content="newui_lobby_private" oversound="/shared/sounds/ui/revamp/region_hover.wav"
+							watch="LobbyPrivate" ontrigger="SetButtonState(param);"
+							watch1="LobbyStatus" ontrigger1="SetEnabled(param1);"
+					/>
+					<instance name="newui_tip_button_template" x="110i" align="left" valign="center" title="gamelobby_private_tip_header" desc="gamelobby_private_tip_text"/>
+				</panel>
+
+				<panel x="-19i" width="244i" height="385i" align="right" valign="bottom">
+					<panel height="40i">
+						<label x="12i" textalign="left" textvalign="center" font="dyn_14" color="#f0d3c1" outline="1" outlinecolor="#230000" content="newui_lobby_spectators" noclick="1"/>
+						<button x="-10i" width="32i" height="32i" align="right" valign="center" color="invisible" 
+								onmouseoverlua="PlaySound('/shared/sounds/ui/revamp/region_hover.wav') Common_V2:ShowSimpleTip(true, 'gamelobby_spectate_button', '200i')"
+								onmouseoutlua="Common_V2:ShowSimpleTip(false)"
+								onclick="Team(0);"
+								onclicklua="PlaySound('/shared/sounds/ui/revamp/region_click.wav')"
+								watch="LobbyTeamInfo0"
+								ontrigger="SetEnabled(param0);">
+							<widgetstate statename="up">
+								<image texture="/ui/fe2/newui/res/lobby/spectator_up.png"/>
+							</widgetstate>
+							<widgetstate statename="over">
+								<image texture="/ui/fe2/newui/res/lobby/spectator_over.png"/>
+							</widgetstate>
+							<widgetstate statename="down" y="1">
+								<image texture="/ui/fe2/newui/res/lobby/spectator_over.png"/>
+							</widgetstate>
+							<widgetstate statename="disabled">
+								<image texture="/ui/fe2/newui/res/lobby/spectator_up.png" rendermode="grayscale"/>
+							</widgetstate>
+						</button>
+					</panel>
+					<scrollbar  name="lobby_matchinfo_spectators_scroll"
+								x="-4i"
+								align="right"
+								width="15i"
+								height="-40i"
+								valign="bottom"
+								scrollbarsize="15i"
+								handlewidth="15i"
+								handleheight="20i"							
+								texture="/ui/fe2/newui/res/common/scroll/scroll.png"
+								scrollbarplaceholder="true"
+								minvalue="1"
+								maxvalue="1"							
+								step="1"
+								value="1"
+								vertical="true"
+								slotwidth="0.6h" slotheight="1"
+								onevent1="SetValue(GetValue+1);"
+								onevent0="SetValue(GetValue-1);"
+								onslidelua="Lobby_V2:UpdateSpectatorsList()"
+					/>
+					<panel x="12i" width="200i" height="-40i" valign="bottom" float="bottom" watch="LobbySpectators" ontriggerlua="Lobby_V2:OnUpdateMatchInfoSpectator(...)">
+						<instance name="lobby_matchinfo_spectator_template" index="1" showline="0"/>
+						<instance name="lobby_matchinfo_spectator_template" index="2"/>
+						<instance name="lobby_matchinfo_spectator_template" index="3"/>
+						<instance name="lobby_matchinfo_spectator_template" index="4"/>
+						<instance name="lobby_matchinfo_spectator_template" index="5"/>
+						<instance name="lobby_matchinfo_spectator_template" index="6"/>
+						<instance name="lobby_matchinfo_spectator_template" index="7"/>
+					</panel>
+				</panel>
+
+				<panel x="-19i" y="272i" width="244i" height="140i" align="right">
+					<panel height="34i">
+						<label x="12i" textalign="left" textvalign="center" font="dyn_14" color="#f0d3c1" outline="1" outlinecolor="#230000" content="newui_lobby_referees" noclick="1"/>
+						<button x="-10i" width="32i" height="32i" align="right" valign="center" color="invisible" visible="0"
+								onmouseoverlua="PlaySound('/shared/sounds/ui/revamp/region_hover.wav') Common_V2:ShowSimpleTip(true, 'newui_lobby_toggle_referee_control', '200i')"
+								onmouseoutlua="Common_V2:ShowSimpleTip(false)"
+								onclicklua="PlaySound('/shared/sounds/ui/revamp/region_click.wav') 
+											if GetWidget('lobby_matchinfo_referee_control'):IsVisible() then
+												Trigger('RefereeControlPage', 'false')
+											else
+												Trigger('RefereeControlPage', 'true')
+											end
+											"
+								watch="LobbyRefereeGM"
+								ontriggerlua="self:SetVisible(AtoB(param0))"
+						>
+							<widgetstate statename="up">
+								<image texture="/ui/elements/refereeGM_up.tga"/>
+							</widgetstate>
+							<widgetstate statename="over">
+								<image texture="/ui/elements/refereeGM_over.tga"/>
+							</widgetstate>
+							<widgetstate statename="down" y="1">
+								<image texture="/ui/elements/refereeGM_down.tga"/>
+							</widgetstate>
+						</button>
+					</panel>
+					<panel x="12i" width="200i" height="-34i" valign="bottom" float="bottom" watch="LobbyReferee0" ontriggerlua="Lobby_V2:OnUpdateMatchInfoReferee(0, ...)" watch1="LobbyReferee1" ontrigger1lua="Lobby_V2:OnUpdateMatchInfoReferee(1, ...)">
+						<instance name="lobby_matchinfo_spectator_template" type="referee" index="0" showline="0"/>
+						<instance name="lobby_matchinfo_spectator_template" type="referee" index="1"/>
+					</panel>
+				</panel>
+
+				<panel name="lobby_matchinfo_addbot" x="-50i" width="553i" height="336i" align="center" valign="bottom" visible="0">
+					<instance name="newui_custom_frame_template" alpha="0.9"/>
+					<image x="10i" y="5i" texture="/ui/fe2/newui/res/lobby/bar.png" width="512i" height="32i" noclick="1"/>
+					<instance name="newui_button_close_template" y="5i" align="right" valign="top" onclicklua="GetWidget('lobby_matchinfo_addbot'):SetVisible(false)"/>
+					<panel x="8i" width="518i" height="-40i" valign="bottom" float="bottom" padding="4i"
+							onmousewheeldown="CallEvent('lobby_matchinfo_addbot_scroll', 1);"
+							onmousewheelup="CallEvent('lobby_matchinfo_addbot_scroll', 0);"
+					>
+						<instance name="lobby_matchinfo_bot_row_template" row="0" />
+						<instance name="lobby_matchinfo_bot_row_template" row="1" />
+						<instance name="lobby_matchinfo_bot_row_template" row="2" />
+						<instance name="lobby_matchinfo_bot_row_template" row="3" />
+						<instance name="lobby_matchinfo_bot_row_template" row="4" />
+					</panel>
+					<scrollbar  name="lobby_matchinfo_addbot_scroll"
+								x="-8i"
+								align="right"
+								width="12i"
+								height="-40i"
+								valign="bottom"
+								scrollbarsize="12i"
+								handlewidth="12i"
+								handleheight="20i"							
+								texture="/ui/fe2/newui/res/common/scroll/scroll.png"
+								scrollbarplaceholder="true"
+								minvalue="1"
+								maxvalue="1"							
+								step="1"
+								value="1"
+								vertical="true"
+								slotwidth="0.6h" slotheight="1"
+								onevent1="SetValue(GetValue+1);"
+								onevent0="SetValue(GetValue-1);"
+								onslidelua="Lobby_V2:UpdteBotsPanel()"
+					/>
+					<instance name="newui_combobox_template" widgetname="lobby_matchinfo_addbot_difficulty" x="-35i" y="10i" width="90i" height="22i" align="right" valign="top" itemheight="22i"
+								  onloadlua="self:AddTemplateListItem('newui_combobox_item_template', '1', 'label', 'newui_mapselection_botdifficulty_easy', 'color', '#d7b6a2')
+				  					 	     self:AddTemplateListItem('newui_combobox_item_template', '2', 'label', 'newui_mapselection_botdifficulty_medium', 'color', '#d7b6a2')
+				  					 	     self:AddTemplateListItem('newui_combobox_item_template', '3', 'label', 'newui_mapselection_botdifficulty_hard', 'color', '#d7b6a2')
+				  					 	    "
+				  				onselectlua="SetBotDifficulty(self:GetValue())"
+				  	/>
+				</panel>
+			</panel>	
+
+			<instance name="newui_common_button_1_template" button_name="lobby_startgame" 
+			     	  x="543i" y="-20i" width="209i" height="47i" align="center" valign="bottom" font="dyn_16" content="newui_lobby_start"
+			     	  watch="LobbyStatus"
+					  ontrigger="SetEnabled(param1 and param4);"
+					  watch1="LobbyCountDown"
+					  ontrigger1="If(param0 == -1, SetVisible(true), SetVisible(false));"
+					  onclick="RequestMatchStart();"
+					  clicksound="/shared/sounds/ui/revamp/startgame.wav"
+			/>
+			<instance name="newui_common_button_1_template" button_name="lobby_cancelgame" 
+			     	  x="543i" y="-20i" width="209i" height="47i" align="center" valign="bottom" font="dyn_16" content="newui_lobby_cancel"
+			     	  watch="LobbyStatus"
+					  ontrigger="SetEnabled(param1);"
+					  watch1="LobbyCountDown"
+					  ontrigger1="SetVisible(param0 != -1);"
+					  onclick="RequestMatchCancel();"
+					  clicksound="/shared/sounds/ui/revamp/leave_queue.wav"
+			/>
+
+			<panel name="lobby_matchinfo_referee_control" visible="0" x="260i" y="120i" width="62h" height="40h" valign="center" align="center"
+					watch="RefereeControlPage"
+					ontriggerlua="self:SetVisible(AtoB(param))"
+			>
+				<panel 
+					watch="RefereeControlPage"
+					ontriggerlua="if AtoB(param) then UIManager.GetInterface('webpanel'):HoNWebPanelF('ShowRefereeWebPage', self) end"
+				/>
+			</panel>
+		</panel>
+
+		<panel name="lobby_picker" noclick="1" visible="0">
+			<panel watch="PlayerCanBan" noclick="1"
+				ontriggerlua="if AtoB(param) then Lobby_V2:PlayNotification(self, 'ban') end"
+				watch1="PlayerCanPick"
+				ontrigger1lua="if AtoB(param) then Lobby_V2:PlayNotification(self, 'pick') end"
+			/>
+
+			<panel name="lobby_picker_avatars" visible="0" noclick="1">
+				<panel name="lobby_picker_avatars_area" width="1098i" align="center"
+						onmousewheeldownlua="Lobby_V2:OnSlideAvatar(true)"
+						onmousewheeluplua="Lobby_V2:OnSlideAvatar(false)"
+						hotkey="ESC" onhotkeylua="Lobby_V2:CloseAvatars()"
+				>
+					
+	
+					<panel name="lobby_picker_avatars_parent" y="-70i" height="853i" valign="center" noclick="1"/>
+
+					<panel y="73i" height="128i" align="center" noclick="1">
+						<image texture="/ui/fe2/newui/res/lobby/avatar_title.png" width="512i" height="128i" align="center" valign="center" noclick="1"/>
+						<panel x="-210i" width="72i" height="72i" align="center" valign="center">
+							<image name="lobby_picker_avatars_icon" texture="$invis" usealphamask="true" alphamaskfile="/ui/fe2/elements/store2/mask.png" />
+							<image texture="/ui/fe2/elements/store2/head_border.png" width="160i" height="160i" align="center" valign="center" noclick="1" />
+						</panel>
+						<panel align="center" width="300i" noclick="1">
+							<label name="lobby_picker_avatars_name" y="-10i" textalign="center" textvalign="center" font="dyn_18" color="#f0d3c1" outline="1" outlinecolor="#230000" noclick="1"
+									autofont="1" autofontmax="18" autofontmin="12"
+							/>
+							<instance name="newui_checkbox_template" widget_name="lobby_picker_avatars_default" type="2" y="15i" width="150i" height="20i" align="center" valign="center" 
+									  outline="1" outlinecolor="#230000" unselectedupcolor="#7e6459" unselectedovercolor="#f0d3c1" unselecteddisabledcolor="#7e6459" selectedupcolor="#c4a693" 
+							  		  selectedovercolor="#f0d3c1" selecteddisabledcolor="#c4a693" content="general_set_default"
+									  onclicklua="Lobby_V2:OnClickSetDefaultAvatar()"/>
+						</panel>
+						<instance name="newui_button_close_template" x="180i" align="center" valign="center" onclicklua="Lobby_V2:CloseAvatars()"/>
+					</panel>
+				</panel>
+
+				<panel name="lobby_picker_avatars_buttons" y="-20i" width="209i" height="47i" align="center" valign="bottom">
+					<instance name="newui_common_button_1_template" button_name="lobby_select_avatar" width="100%" height="100%" visible="0" font="dyn_16" content="newui_lobby_button_use" onclicklua="Lobby_V2:SelectAvatar()"/>
+					<instance name="newui_common_button_1_template" button_name="lobby_purchase_avatar" width="100%" height="100%" visible="0" font="dyn_16" content="newui_lobby_purchase" onclicklua="Lobby_V2:PurchaseAvatar()"/>
+					<instance name="newui_common_button_1_template" button_name="lobby_nocointobuy_avatar" width="100%" height="100%" visible="0" font="dyn_16" content="newui_lobby_nocoin" enabled="1"
+						onclick="CallEvent('store_open_purchase_helper', 2);"
+					/>
+					<instance name="newui_common_button_1_template" button_name="lobby_unavailable_avatar" width="100%" height="100%" visible="0" font="dyn_16" content="newui_lobby_unavailable" enabled="0"/>
+					<panel y="-40i" height="40i" noclick="1">
+						<panel name="lobby_picker_avatars_gca" noclick="1" visible="0">
+							<image texture="/ui/fe2/newui/res/lobby/gca.png" x="110i" y="52i" width="128i" height="128i" align="center" valign="center" noclick="1"/>
+						</panel>
+						<panel name="lobby_picker_avatars_trial" noclick="1" visible="0" align="center" valign="bottom" width="110%" grow="1" regrow="1">
+							<label name="lobby_picker_avatars_trial_text" font="dyn_10" valign="bottom" width="100%" color="#efd4c1" textalign="center" textvalign="center" noclick="1" wrap="1" vpadding="20i" fity="1" fitypadding=".5h"/>
+						</panel>
+						<panel name="lobby_picker_avatars_coupon" noclick="1" visible="0">
+							<image texture="/ui/fe2/elements/store2/coupon.png" x="110i" y="52i" width="128i" height="128i" align="center" valign="center" noclick="1"/>
+						</panel>
+					</panel>
+					<panel name="lobby_picker_avatars_buttons_coins" height="40i" y="-40i" noclick="1">
+						<panel align="center" grow="1" regrow="1" height="100%" noclick="1" float="right" padding="5i" growinvis="0">
+							<panel name="lobby_picker_avatars_buttons_coins_gold_icon" width="20i" height="100%" noclick="1" stickytoinvis="0">
+								<image texture="/ui/fe2/store/gold_coins.tga" height="20i" valign="center" noclick="1"/>
+							</panel>
+							<label name="lobby_picker_avatars_buttons_coins_gold_text" width="10i" height="100%" textvalign="center" font="dyn_10" color="#FFCC00" noclick="1" stickytoinvis="0"/>
+							<panel name="lobby_picker_avatars_buttons_coins_silver_icon" width="20i" height="100%" noclick="1" stickytoinvis="0">
+								<image texture="/ui/fe2/store/silver_coins.tga" height="20i" valign="center" noclick="1"/>
+							</panel>
+							<label name="lobby_picker_avatars_buttons_coins_silver_text" width="10i" height="100%" textvalign="center" font="dyn_10" color="#c0d5ed" noclick="1" stickytoinvis="0"/>
+						</panel>
+					</panel>
+				</panel>
+			</panel> 
+
+			<panel name="lobby_picker_large" noclick="1">
+				<panel name="lobby_large_heroes" noclick="1">
+					<panel name="lobby_large_ap_list" width="1098i" align="center" visible="0" noclick="1">
+						<panel y="68i" height="64i" noclick="1">
+							<image texture="/ui/fe2/newui/res/lobby/title_large.png" width="2048i" align="center" valign="center" noclick="1" />
+							<panel width="-20i" noclick="1" align="center">
+								<label textalign="left" textvalign="center" font="dyn_16" color="#a0c7cb" outline="1" outlinecolor="#03112d" content="newui_replay_legion" noclick="1"/>
+								<label textalign="right" textvalign="center" font="dyn_16" color="#f0d3c1" outline="1" outlinecolor="#2b0306" content="newui_replay_hellbourne" noclick="1"/>
+							</panel>
+						</panel>
+						<panel y="119i" width="547i" noclick="1" float="bottom" padding="6i">
+							<instance name="lobby_large_group_template" mode="ap" align="left" grouplabel="agility" color="#29cc4d" group="0" team="0"/>
+							<instance name="lobby_large_group_template" mode="ap" align="left" grouplabel="intelligence" color="#2fbcea" group="1" team="0"/>
+							<instance name="lobby_large_group_template" mode="ap" align="left" grouplabel="strength" color="#d73f2a" group="2" team="0"/>
+						</panel>
+
+						<panel y="119i" width="547i" align="right" noclick="1" float="bottom" padding="6i">
+							<instance name="lobby_large_group_template" mode="ap" teamlabel="hellbourne" grouplabel="agility" color="#29cc4d" group="0" team="1"/>
+							<instance name="lobby_large_group_template" mode="ap" teamlabel="hellbourne" grouplabel="intelligence" color="#2fbcea" group="1" team="1"/>
+							<instance name="lobby_large_group_template" mode="ap" teamlabel="hellbourne" grouplabel="strength" color="#d73f2a" group="2" team="1"/>
+						</panel>
+
+						<panel name="lobby_large_ap_list_lock" y="60i" width="750i" height="60i" align="center" visible="0">
+							<panel height="100%" grow="1" align="left" float="right" padding="10i">
+								<instance name="lobby_hero_template" type="large" mode="lp" team="0" group="0" row="0" id="1"/>
+								<instance name="lobby_hero_template" type="large" mode="lp" team="0" group="0" row="0" id="2"/>
+								<instance name="lobby_hero_template" type="large" mode="lp" team="0" group="0" row="0" id="3"/>
+							</panel>
+							<panel height="100%" grow="1" align="right" float="right" padding="10i">
+								<instance name="lobby_hero_template" type="large" mode="lp" team="0" group="0" row="0" id="4"/>
+								<instance name="lobby_hero_template" type="large" mode="lp" team="0" group="0" row="0" id="5"/>
+								<instance name="lobby_hero_template" type="large" mode="lp" team="0" group="0" row="0" id="6"/>
+							</panel>
+						</panel>
+					</panel>
+
+					<panel name="lobby_large_sm_list" width="1098i" align="center" visible="0" noclick="1">
+						<panel y="68i" height="64i" noclick="1">
+							<image texture="/ui/fe2/newui/res/lobby/title_large.png" width="2048i" align="center" valign="center" noclick="1" />
+						</panel>
+						<panel y="119i" width="546i" noclick="1" float="bottom" padding="6i">
+							<instance name="lobby_large_group_template" mode="sm" align="left" grouplabel="agility" color="#259bc3" group="0" team="0"/>
+							<instance name="lobby_large_group_template" mode="sm" align="left" grouplabel="intelligence" color="#259bc3" group="1" team="0"/>
+							<instance name="lobby_large_group_template" mode="sm" align="left" grouplabel="strength" color="#259bc3" group="2" team="0"/>
+						</panel>
+
+						<panel y="119i" width="546i" align="right" noclick="1" float="bottom" padding="6i">
+							<instance name="lobby_large_group_template" mode="sm" teamlabel="hellbourne" grouplabel="agility" color="#ffac01" group="0" team="1"/>
+							<instance name="lobby_large_group_template" mode="sm" teamlabel="hellbourne" grouplabel="intelligence" color="#ffac01" group="1" team="1"/>
+							<instance name="lobby_large_group_template" mode="sm" teamlabel="hellbourne" grouplabel="strength" color="#ffac01" group="2" team="1"/>
+						</panel>
+
+						<panel x="-660i" y="318i" width="90i" height="310" align="center" float="bottom" padding="25i" noclick="1">
+							<instance name="lobby_solo_candidate_template" type="large" width="100%" height="100@" index="1"/>
+							<instance name="lobby_solo_candidate_template" type="large" width="100%" height="100@" index="2"/>
+							<instance name="lobby_solo_candidate_template" type="large" width="100%" height="100@" index="3"/>
+						</panel>
+
+						<panel x="660i" y="318i" width="90i" height="310" align="center" float="bottom" padding="25i" noclick="1">
+							<instance name="lobby_solo_candidate_template" type="large" width="100%" height="100@" index="4"/>
+							<instance name="lobby_solo_candidate_template" type="large" width="100%" height="100@" index="5"/>
+							<instance name="lobby_solo_candidate_template" type="large" width="100%" height="100@" index="6"/>
+						</panel>
+					</panel>	
+
+					<panel name="lobby_large_sp_list" y="118i" width="980i" height="640i" align="center" visible="0" noclick="1">
+						<instance name="newui_custom_frame_template"/>
+						<panel width="30i" height="-20i" align="center" valign="center" float="bottom" padding="6i">
+							<instance name="lobby_sp_row_template" height="90i" type="large" row="0" />
+							<instance name="lobby_sp_row_template" height="90i" type="large" row="1" />
+							<instance name="lobby_sp_row_template" height="90i" type="large" row="2" />
+						</panel>
+					</panel>
+
+					<panel name="lobby_large_sd_list" y="118i" width="950i" height="640i" align="center" visible="0" noclick="1">
+						<panel float="bottom" padding="6i" noclick="1">
+							<instance name="lobby_sd_row_template" type="large" height="122i" iconheight="85i" padding="120i" row="0"/>
+							<instance name="lobby_sd_row_template" type="large" height="122i" iconheight="85i" padding="120i" row="1"/>
+							<instance name="lobby_sd_row_template" type="large" height="122i" iconheight="85i" padding="120i" row="2"/>
+							<instance name="lobby_sd_row_template" type="large" height="122i" iconheight="85i" padding="120i" row="3"/>
+							<instance name="lobby_sd_row_template" type="large" height="122i" iconheight="85i" padding="120i" row="4"/>
+						</panel>	
+					</panel>
+
+					<panel name="lobby_large_bd_list" y="118i" width="950i" height="640i" align="center" visible="0" noclick="1">
+						<panel float="bottom" padding="12i" noclick="1">
+							<instance name="lobby_bd_large_group_template" group="0"/>
+							<instance name="lobby_bd_large_group_template" group="1"/>
+							<instance name="lobby_bd_large_group_template" group="2"/>
+						</panel>	
+					</panel>
+
+					<panel name="lobby_large_rd_list" y="118i" width="950i" height="640i" align="center" visible="0" noclick="1">
+						<instance name="newui_custom_frame_template"/>
+						<image texture="/ui/fe2/newui/res/lobby/decoration.png" x="-32i" width="64i" height="64i" valign="center" noclick="1"/>
+						<image texture="/ui/fe2/newui/res/lobby/decoration.png" x="-32i" y="-25%" width="64i" height="64i" valign="center" noclick="1"/>
+						<image texture="/ui/fe2/newui/res/lobby/decoration.png" x="-32i" y="25%" width="64i" height="64i" valign="center" noclick="1"/>
+						<image texture="/ui/fe2/newui/res/lobby/decoration.png" x="32i" width="64i" height="64i" align="right" valign="center" hflip="1" noclick="1"/>
+						<image texture="/ui/fe2/newui/res/lobby/decoration.png" x="32i" y="-25%" width="64i" height="64i" align="right" valign="center" hflip="1" noclick="1"/>
+						<image texture="/ui/fe2/newui/res/lobby/decoration.png" x="32i" y="25%" width="64i" height="64i" align="right" valign="center" hflip="1" noclick="1"/>
+						<panel float="bottom" padding="6i" noclick="1">
+							<instance name="lobby_rd_row_template" type="large" height="122i" iconheight="85i" padding="120i" row="0"/>
+							<instance name="lobby_rd_row_template" type="large" height="122i" iconheight="85i" padding="120i" row="1"/>
+							<instance name="lobby_rd_row_template" type="large" height="122i" iconheight="85i" padding="120i" row="2"/>
+							<instance name="lobby_rd_row_template" type="large" height="122i" iconheight="85i" padding="120i" row="3"/>
+							<instance name="lobby_rd_row_template" type="large" height="122i" iconheight="85i" padding="120i" row="4"/>
+						</panel>	
+					</panel>
+				</panel>
+
+				<panel x="-690i" y="116i" width="256i" grow="1" align="center" float="bottom" padding="34i" noclick="1">
+					<instance name="lobby_large_player_template" align1="left" index="0"/>
+					<instance name="lobby_large_player_template" align1="left" index="1"/>
+					<instance name="lobby_large_player_template" align1="left" index="2"/>
+					<instance name="lobby_large_player_template" align1="left" index="3"/>
+					<instance name="lobby_large_player_template" align1="left" index="4"/>
+				</panel>
+
+
+				<panel x="690i" y="116i" width="256i" grow="1" align="center" float="bottom" padding="34i" noclick="1">
+					<instance name="lobby_large_player_template" hflip="1" align2="left" index="5"/>
+					<instance name="lobby_large_player_template" hflip="1" align2="left" index="6"/>
+					<instance name="lobby_large_player_template" hflip="1" align2="left" index="7"/>
+					<instance name="lobby_large_player_template" hflip="1" align2="left" index="8"/>
+					<instance name="lobby_large_player_template" hflip="1" align2="left" index="9"/>
+				</panel>
+			</panel>
+
+			<panel name="lobby_picker_small" noclick="1">
+				<panel name="lobby_small_heroes" noclick="1">
+					<panel name="lobby_small_ap_list" width="775i" align="center" visible="1" noclick="1">
+						<panel y="123i" height="64i" noclick="1">
+							<image texture="/ui/fe2/newui/res/lobby/title_small.png" width="1024i" align="center" valign="center" noclick="1" />
+							<panel width="-20i" noclick="1" align="center">
+								<label textalign="left" textvalign="center" font="dyn_16" color="#a0c7cb" outline="1" outlinecolor="#03112d" content="newui_replay_legion" noclick="1"/>
+								<label textalign="right" textvalign="center" font="dyn_16" color="#f0d3c1" outline="1" outlinecolor="#2b0306" content="newui_replay_hellbourne" noclick="1"/>
+							</panel>
+						</panel>
+						<panel y="178i" width="386i" height="632i"  align="left" float="bottom" padding="4i">
+							<instance name="lobby_small_group_template" mode="ap" align="left" grouplabel="agility" color="#29cc4d" group="0" team="0"/>
+							<instance name="lobby_small_group_template" mode="ap" align="left" grouplabel="intelligence" color="#2fbcea" group="1" team="0"/>
+							<instance name="lobby_small_group_template" mode="ap" align="left" grouplabel="strength" color="#d73f2a" group="2" team="0"/>
+						</panel>
+
+						<panel y="178i" width="386i" height="632i" align="right" float="bottom" padding="4i">
+							<instance name="lobby_small_group_template" mode="ap" teamlabel="hellbourne" grouplabel="agility" color="#29cc4d" group="0" team="1"/>
+							<instance name="lobby_small_group_template" mode="ap" teamlabel="hellbourne" grouplabel="intelligence" color="#2fbcea" group="1" team="1"/>
+							<instance name="lobby_small_group_template" mode="ap" teamlabel="hellbourne" grouplabel="strength" color="#d73f2a" group="2" team="1"/>
+						</panel>
+
+						<panel name="lobby_small_ap_list_lock" y="75i" width="780i" height="60i" align="center" visible="0">
+							<panel height="100%" grow="1" align="left" float="right" padding="10i">
+								<instance name="lobby_hero_template" type="small" mode="lp" team="0" group="0" row="0" id="1"/>
+								<instance name="lobby_hero_template" type="small" mode="lp" team="0" group="0" row="0" id="2"/>
+								<instance name="lobby_hero_template" type="small" mode="lp" team="0" group="0" row="0" id="3"/>
+							</panel>
+							<panel height="100%" grow="1" align="right" float="right" padding="10i">
+								<instance name="lobby_hero_template" type="small" mode="lp" team="0" group="0" row="0" id="4"/>
+								<instance name="lobby_hero_template" type="small" mode="lp" team="0" group="0" row="0" id="5"/>
+								<instance name="lobby_hero_template" type="small" mode="lp" team="0" group="0" row="0" id="6"/>
+							</panel>
+						</panel>
+					</panel>
+
+					<panel name="lobby_small_sm_list" width="775i" align="center" visible="1" noclick="1">
+						<panel y="160i" height="64i" noclick="1">
+							<image texture="/ui/fe2/newui/res/lobby/title_small.png" width="1024i" align="center" valign="center" noclick="1" />
+						</panel>
+						<panel y="215i" width="386i" height="632i"  align="left" float="bottom" padding="4i">
+							<instance name="lobby_small_group_template" mode="sm" align="left" grouplabel="agility" color="#259bc3" group="0" team="0"/>
+							<instance name="lobby_small_group_template" mode="sm" align="left" grouplabel="intelligence" color="#259bc3" group="1" team="0"/>
+							<instance name="lobby_small_group_template" mode="sm" align="left" grouplabel="strength" color="#259bc3" group="2" team="0"/>
+						</panel>
+
+						<panel y="215i" width="386i" height="632i" align="right" float="bottom" padding="4i">
+							<instance name="lobby_small_group_template" mode="sm" teamlabel="hellbourne" grouplabel="agility" color="#ffac01" group="0" team="1"/>
+							<instance name="lobby_small_group_template" mode="sm" teamlabel="hellbourne" grouplabel="intelligence" color="#ffac01" group="1" team="1"/>
+							<instance name="lobby_small_group_template" mode="sm" teamlabel="hellbourne" grouplabel="strength" color="#ffac01" group="2" team="1"/>
+						</panel>
+
+						<panel x="-490i" y="370i" width="80i" height="310" align="center" float="bottom" padding="25i" noclick="1">
+							<instance name="lobby_solo_candidate_template" type="small" width="100%" height="100@" index="1"/>
+							<instance name="lobby_solo_candidate_template" type="small" width="100%" height="100@" index="2"/>
+							<instance name="lobby_solo_candidate_template" type="small" width="100%" height="100@" index="3"/>
+						</panel>
+
+						<panel x="490i" y="370i" width="80i" height="310" align="center" float="bottom" padding="25i" noclick="1">
+							<instance name="lobby_solo_candidate_template" type="small" width="100%" height="100@" index="4"/>
+							<instance name="lobby_solo_candidate_template" type="small" width="100%" height="100@" index="5"/>
+							<instance name="lobby_solo_candidate_template" type="small" width="100%" height="100@" index="6"/>
+						</panel>
+					</panel>
+
+					<panel name="lobby_small_sp_list" y="170i" width="790i" height="680i" align="center" visible="1" noclick="1">
+						<instance name="newui_custom_frame_template"/>
+						<panel width="30i" height="-20i" align="center" valign="center" float="bottom" padding="6i">
+							<instance name="lobby_sp_row_template" height="72i" type="small" row="0" padding="4i"/>
+							<instance name="lobby_sp_row_template" height="72i" type="small" row="1" padding="4i"/>
+							<instance name="lobby_sp_row_template" height="72i" type="small" row="2" padding="4i"/>
+						</panel>
+					</panel>
+
+					<panel name="lobby_small_sd_list" y="133i" width="760i" height="561i" align="center" visible="0" noclick="1">
+						<panel float="bottom" padding="6i" noclick="1">
+							<instance name="lobby_sd_row_template" type="small" height="115i" iconheight="80i" padding="100i" row="0"/>
+							<instance name="lobby_sd_row_template" type="small" height="115i" iconheight="80i" padding="100i" row="1"/>
+							<instance name="lobby_sd_row_template" type="small" height="115i" iconheight="80i" padding="100i" row="2"/>
+							<instance name="lobby_sd_row_template" type="small" height="115i" iconheight="80i" padding="100i" row="3"/>
+							<instance name="lobby_sd_row_template" type="small" height="115i" iconheight="80i" padding="100i" row="4"/>
+						</panel>	
+					</panel>
+
+					<panel name="lobby_small_bd_list" y="133i" width="760i" height="561i" align="center" visible="0" noclick="1">
+						<panel float="bottom" padding="10i" noclick="1">
+							<instance name="lobby_bd_small_group_template" group="0"/>
+							<instance name="lobby_bd_small_group_template" group="1"/>
+							<instance name="lobby_bd_small_group_template" group="2"/>
+						</panel>	
+					</panel>
+
+					<panel name="lobby_small_rd_list" y="133i" width="760i" height="600i" align="center" visible="0" noclick="1">
+						<instance name="newui_custom_frame_template"/>
+						<image texture="/ui/fe2/newui/res/lobby/decoration.png" x="-32i" width="64i" height="64i" valign="center" noclick="1"/>
+						<image texture="/ui/fe2/newui/res/lobby/decoration.png" x="-32i" y="-25%" width="64i" height="64i" valign="center" noclick="1"/>
+						<image texture="/ui/fe2/newui/res/lobby/decoration.png" x="-32i" y="25%" width="64i" height="64i" valign="center" noclick="1"/>
+						<image texture="/ui/fe2/newui/res/lobby/decoration.png" x="32i" width="64i" height="64i" align="right" valign="center" hflip="1" noclick="1"/>
+						<image texture="/ui/fe2/newui/res/lobby/decoration.png" x="32i" y="-25%" width="64i" height="64i" align="right" valign="center" hflip="1" noclick="1"/>
+						<image texture="/ui/fe2/newui/res/lobby/decoration.png" x="32i" y="25%" width="64i" height="64i" align="right" valign="center" hflip="1" noclick="1"/>
+						<panel float="bottom" padding="6i" noclick="1">
+							<instance name="lobby_rd_row_template" type="small" height="115i" iconheight="80i" padding="100i" row="0"/>
+							<instance name="lobby_rd_row_template" type="small" height="115i" iconheight="80i" padding="100i" row="1"/>
+							<instance name="lobby_rd_row_template" type="small" height="115i" iconheight="80i" padding="100i" row="2"/>
+							<instance name="lobby_rd_row_template" type="small" height="115i" iconheight="80i" padding="100i" row="3"/>
+							<instance name="lobby_rd_row_template" type="small" height="115i" iconheight="80i" padding="100i" row="4"/>
+						</panel>
+
+					</panel>
+				</panel>
+				
+				<panel x="-516i" y="170i" width="256i" grow="1" align="center" float="bottom" padding="24i" noclick="1">
+					<instance name="lobby_small_player_template" align1="left" color="#5473cb" index="0"/>
+					<instance name="lobby_small_player_template" align1="left" color="#63c8b1" index="1"/>
+					<instance name="lobby_small_player_template" align1="left" color="#844cac" index="2"/>
+					<instance name="lobby_small_player_template" align1="left" color="#ccc954" index="3"/>
+					<instance name="lobby_small_player_template" align1="left" color="#d0985c" index="4"/>
+				</panel>
+
+
+				<panel x="516i" y="170i" width="256i" grow="1" align="center" float="bottom" padding="24i" noclick="1">
+					<instance name="lobby_small_player_template" hflip="1" align2="left" color="#ce8ab3" index="5"/>
+					<instance name="lobby_small_player_template" hflip="1" align2="left" color="#a1a1a2" index="6"/>
+					<instance name="lobby_small_player_template" hflip="1" align2="left" color="#a3c4dd" index="7"/>
+					<instance name="lobby_small_player_template" hflip="1" align2="left" color="#4a7465" index="8"/>
+					<instance name="lobby_small_player_template" hflip="1" align2="left" color="#8f6b51" index="9"/>
+				</panel>
+			</panel>
+
+			<panel noclick="1"
+				watch="GamePhase"
+				ontrigger="SetVisible(param0 == 3 || param0 == 2)"
+			>
+				<panel y="-100i" width="80h" height="30h" align="center" valign="center" noclick="1"
+					watch="HeroSelectTimer"
+					ontrigger="If(param2 and param3 and (param0 le 5000), PlaySound('/shared/sounds/ui/hero_select/button_clock.wav'));"
+				>
+					<modelpanel 
+						visible="0"
+						noclick="1"
+						anim="idle"
+						camerapos="0 350 0"
+						cameraangles="0 0 180"
+						camerafov="50"
+						cameranear="1"
+						carmerafar="5000"
+						depthclear="false"
+						depthcompress="true"
+						sunazimuth="-90"
+						sunaltitude="180"
+						suncolor="4 1 1"
+						onshow="SetModel('/ui/common/models/arcade_text/countdown.mdf'); SetEffect('/ui/common/models/arcade_text/countdown.effect'); SetAnim('idle'); "
+						watch="HeroSelectTimer"
+						ontrigger="
+							If(!param2 or param0 gt 6000, SetVisible(false));
+							If(param2 and param3 and (param0 le 6000), SetVisible(true));
+							If(param2 and param3 and (param0 le 1000), PlaySound('/shared/sounds/announcer/startgame.wav'));
+						"
+					/>
+				</panel>
+			</panel>
+
+			<panel name="lobby_picker_herobuttons" noclick="1">
+				<panel noclick="1" watch="HeroSelectInfo" ontriggerlua="self:SetVisible(param2 ~= 'ar' and param13 ~= '0')">
+					<button name="lobby_ready" y="-168i" width="100i" height="32i" align="center" valign="bottom" color="invisible"
+			    			onmouseoverlua="PlaySound('/shared/sounds/ui/revamp/region_hover.wav')" onclick="Ready();"
+			    			watch="LobbyGameInfo" ontriggerlua="self:SetVisible(param8 == '-1')"
+					>
+						<widgetstate statename="up">
+							<image texture="/ui/fe2/newui/res/lobby/ready_up.png" width="128i" height="32i" align="center" valign="center" noclick="1"/>
+							<label textalign="center" textvalign="center" font="dyn_12" content="general_ready" noclick="1" color="#fffdf6" outline="1" outlinecolor="#7a3404"/>
+						</widgetstate>
+						<widgetstate statename="over">
+							<image texture="/ui/fe2/newui/res/lobby/ready_over.png" width="128i" height="32i" align="center" valign="center" noclick="1"/>
+							<label textalign="center" textvalign="center" font="dyn_12" content="general_ready" noclick="1" color="white" outline="1" outlinecolor="#b35810"/>
+						</widgetstate>
+						<widgetstate statename="down" x="1" y="1">
+							<image texture="/ui/fe2/newui/res/lobby/ready_over.png" width="128i" height="32i" align="center" valign="center" noclick="1"/>
+							<label textalign="center" textvalign="center" font="dyn_12" content="general_ready" noclick="1" color="white" outline="1" outlinecolor="#b35810"/>
+						</widgetstate>
+						<widgetstate statename="disabled">
+							<image texture="/ui/fe2/newui/res/lobby/ready_up.png" width="128i" height="32i" align="center" valign="center" noclick="1" rendermode="grayscale"/>
+							<label textalign="center" textvalign="center" font="dyn_12" content="general_ready" noclick="1" color="#b7aaa6" outline="1" outlinecolor="#49423f"/>
+						</widgetstate>
+					</button>
+
+			    	<button name="lobby_selecthero" y="-20i" width="209i" height="47i" align="center" valign="bottom" color="invisible"
+			    			onmouseoverlua="PlaySound('/shared/sounds/ui/revamp/region_hover.wav')"
+					>
+						<widgetstate statename="up">
+							<panel float="right">
+								<image texture="/ui/fe2/newui/res/common/b1_l_up.png" width="50@" height="100%" valign="center" noclick="1"/>
+								<image texture="/ui/fe2/newui/res/common/b1_c_up.png" width="-100@" height="100%" valign="center" noclick="1"/>
+								<image texture="/ui/fe2/newui/res/common/b1_r_up.png" width="50@" height="100%" valign="center" noclick="1"/>
+							</panel>
+							<label name="lobby_selecthero_text1" textalign="center" textvalign="center" font="dyn_16" content="newui_lobby_select" noclick="1" color="#fffdf6" outline="1" outlinecolor="#7a3404"/>
+						</widgetstate>
+						<widgetstate statename="over">
+							<panel float="right">
+								<image texture="/ui/fe2/newui/res/common/b1_l_over.png" width="50@" height="100%" valign="center" noclick="1"/>
+								<image texture="/ui/fe2/newui/res/common/b1_c_over.png" width="-100@" height="100%" valign="center" noclick="1"/>
+								<image texture="/ui/fe2/newui/res/common/b1_r_over.png" width="50@" height="100%" valign="center" noclick="1"/>
+							</panel>
+							<label name="lobby_selecthero_text2" x="1" y="1" textalign="center" textvalign="center" font="dyn_16" content="newui_lobby_select" noclick="1" color="white" outline="1" outlinecolor="#b35810"/>
+						</widgetstate>
+						<widgetstate statename="down" x="1" y="1">
+							<panel float="right">
+								<image texture="/ui/fe2/newui/res/common/b1_l_over.png" width="50@" height="100%" valign="center" noclick="1"/>
+								<image texture="/ui/fe2/newui/res/common/b1_c_over.png" width="-100@" height="100%" valign="center" noclick="1"/>
+								<image texture="/ui/fe2/newui/res/common/b1_r_over.png" width="50@" height="100%" valign="center" noclick="1"/>
+							</panel>
+							<label name="lobby_selecthero_text3" x="1" y="1" textalign="center" textvalign="center" font="dyn_16" content="newui_lobby_select" noclick="1" color="white" outline="1" outlinecolor="#b35810"/>
+						</widgetstate>
+						<widgetstate statename="disabled">
+							<panel float="right">
+								<image texture="/ui/fe2/newui/res/common/b1_l_disabled.png" width="50@" height="100%" valign="center" noclick="1"/>
+								<image texture="/ui/fe2/newui/res/common/b1_c_disabled.png" width="-100@" height="100%" valign="center" noclick="1"/>
+								<image texture="/ui/fe2/newui/res/common/b1_r_disabled.png" width="50@" height="100%" valign="center" noclick="1"/>
+							</panel>
+							<label name="lobby_selecthero_text4" textalign="center" textvalign="center" font="dyn_16" content="newui_lobby_select" noclick="1" color="#b7aaa6" outline="1" outlinecolor="#49423f"/>
+						</widgetstate>
+					</button>
+
+					<instance name="newui_common_button_1_template" button_name="lobby_buyhero" 
+			     		 	 y="-74i" width="209i" height="47i" align="center" valign="bottom" font="dyn_16" content="newui_lobby_buyhero" visible="0"
+			     	/>
+
+			   		<panel name="lobby_picker_herobuttons_coins" width="209i" align="center" valign="bottom" height="40i" y="-120i" noclick="1" visible="0">
+						<panel align="center" grow="1" regrow="1" height="100%" noclick="1" float="right" padding="5i" growinvis="0">
+							<panel name="lobby_picker_herobuttons_coins_gold" grow="1" regrow="1" height="100%" noclick="1" float="right" padding="5i" stickytoinvis="0">
+								<panel width="20i" height="100%" noclick="1">
+									<image texture="/ui/fe2/store/gold_coins.tga" height="20i" valign="center" noclick="1"/>
+								</panel>
+								<label name="lobby_picker_herobuttons_coins_gold_text" width="10i" height="100%" textvalign="center" font="dyn_10" color="#FFCC00" noclick="1"/>
+							</panel>
+							<panel name="lobby_picker_herobuttons_coins_silver" grow="1" regrow="1" height="100%" noclick="1" float="right" padding="5i">
+								<panel width="20i" height="100%" noclick="1">
+									<image texture="/ui/fe2/store/silver_coins.tga" height="20i" valign="center" noclick="1"/>
+								</panel>
+								<label name="lobby_picker_herobuttons_coins_silver_text" width="10i" height="100%" textvalign="center" font="dyn_10" color="#c0d5ed" noclick="1"/>
+							</panel>
+						</panel>
+					</panel>
+
+					<panel noclick="1" watch="HeroSelectInfo" ontriggerlua="self:SetVisible(not AtoB(param7))">
+						<button name="lobby_random" color="invisible" x="-230i" y="-25i" width="36i" height="36i" align="center" valign="bottom" onclick="RandomHero();" visible="0"
+								onmouseoverlua="Common_V2:ShowSimpleTip(true, 'newui_lobby_random_tip', '140i')"
+								onmouseoutlua="Common_V2:ShowSimpleTip(false)"
+						>
+							<widgetstate statename="up">
+								<image texture="/ui/fe2/newui/res/lobby/random_up.png" width="64i" height="64i" align="center" valign="center" noclick="1"/>
+							</widgetstate>
+							<widgetstate statename="over">
+								<image texture="/ui/fe2/newui/res/lobby/random_over.png" width="64i" height="64i" align="center" valign="center" noclick="1"/>
+							</widgetstate>
+							<widgetstate statename="down" y="1">
+								<image texture="/ui/fe2/newui/res/lobby/random_over.png" width="64i" height="64i" align="center" valign="center" noclick="1"/>
+							</widgetstate>
+						</button>
+					</panel>
+				</panel>
+
+				<panel noclick="1" watch="HeroSelectInfo" ontriggerlua="self:SetVisible(param13 ~= '0')">
+					<panel noclick="1" watch="LobbyGameInfo" ontriggerlua="self:SetVisible(param15 ~= 'devowars')">
+						<button name="lobby_repick" color="invisible" x="640i" y="-25i" width="36i" height="36i" align="center" valign="bottom" onclick="RepickHero();" visible="0"
+								onmouseoverlua="Common_V2:ShowSimpleTip(true, 'newui_lobby_repick_tip', '140i')"
+								onmouseoutlua="Common_V2:ShowSimpleTip(false)"
+						>
+							<widgetstate statename="up">
+								<image texture="/ui/fe2/newui/res/lobby/repick_up.png" width="64i" height="64i" align="center" valign="center" noclick="1"/>
+							</widgetstate>
+							<widgetstate statename="over">
+								<image texture="/ui/fe2/newui/res/lobby/repick_over.png" width="64i" height="64i" align="center" valign="center" noclick="1"/>
+							</widgetstate>
+							<widgetstate statename="down" y="1">
+								<image texture="/ui/fe2/newui/res/lobby/repick_over.png" width="64i" height="64i" align="center" valign="center" noclick="1"/>
+							</widgetstate>
+						</button>
+					</panel>
+				</panel>
+			</panel>
+
+			<panel name="lobby_picker_filter_root" noclick="1">
+				<panel name="lobby_picker_filter" y="46i" width="1096i" height="32i" align="center" noclick="1">
+					<!-- Role selection -->
+					<panel width="130i" noclick="1">
+							<instance name="newui_combobox_template" widgetname="lobby_picker_filter_type" maxlistheight="8"
+								  onloadlua="self:AddTemplateListItem('newui_combobox_item_template', '0', 'label', 'newui_lobby_filter_all', 'color', '#85695e', 'font', 'dyn_12')
+								  			 self:AddTemplateListItem('newui_combobox_item_template', '1', 'label', 'newui_lobby_filter_solo', 'color', '#85695e', 'font', 'dyn_12')
+				  					 	     self:AddTemplateListItem('newui_combobox_item_template', '2', 'label', 'newui_lobby_filter_jungle', 'color', '#85695e', 'font', 'dyn_12')
+				  					 	     self:AddTemplateListItem('newui_combobox_item_template', '3', 'label', 'newui_lobby_filter_carry', 'color', '#85695e', 'font', 'dyn_12')
+				  					 	     self:AddTemplateListItem('newui_combobox_item_template', '4', 'label', 'newui_lobby_filter_support', 'color', '#85695e', 'font', 'dyn_12')
+				  					 	     self:AddTemplateListItem('newui_combobox_item_template', '5', 'label', 'newui_lobby_filter_initiator', 'color', '#85695e', 'font', 'dyn_12')
+				  					 	     self:AddTemplateListItem('newui_combobox_item_template', '6', 'label', 'newui_lobby_filter_ganker', 'color', '#85695e', 'font', 'dyn_12')
+				  					 	     self:AddTemplateListItem('newui_combobox_item_template', '7', 'label', 'newui_lobby_filter_pusher', 'color', '#85695e', 'font', 'dyn_12')
+				  					 	    "
+				  				  onselectlua="Lobby_V2:UpdateFilters()"
+				  		/>
+					</panel>
+
+					<!-- Melee / Ranged -->
+					<instance name="newui_checkbox_template" widget_name="lobby_picker_filter_melee" x="140i" width="90i" font="dyn_12" type="2"
+							  content="newui_lobby_filter_melee" onclicklua="Lobby_V2:OnClickFilterButton('melee')" outline="1" outlinecolor="#230000"
+							  unselectedupcolor="#7e6459" unselectedovercolor="#f0d3c1" unselecteddisabledcolor="#7e6459" selectedupcolor="#c4a693" selectedovercolor="#f0d3c1" selecteddisabledcolor="#c4a693"
+					/>
+					<instance name="newui_checkbox_template" widget_name="lobby_picker_filter_ranged" x="225i" width="90i" font="dyn_12" type="2"
+							  content="newui_lobby_filter_ranged" onclicklua="Lobby_V2:OnClickFilterButton('ranged')" outline="1" outlinecolor="#230000"
+							  unselectedupcolor="#7e6459" unselectedovercolor="#f0d3c1" unselecteddisabledcolor="#7e6459" selectedupcolor="#c4a693" selectedovercolor="#f0d3c1" selecteddisabledcolor="#c4a693"
+					/>
+					
+					<!-- Favorite -->
+					<button name="lobby_picker_filter_favorite" width="25i" height="25i" x="325i" valign="center" color="invisible" numstates="2"
+						onclicklua="Lobby_V2:UpdateFilters()"
+						onmouseoverlua="Common_V2:ShowSimpleTip(true, 'filter_category_favorites', '140i')"
+						onmouseoutlua="Common_V2:ShowSimpleTip(false)"
+					>
+						<widgetstate statename="up1">
+							<image texture="/ui/fe2/newui/res/lobby/favorite_up.png" width="64i" height="64i" align="center" valign="center" noclick="1"/>
+						</widgetstate>
+						<widgetstate statename="over1">
+							<image texture="/ui/fe2/newui/res/lobby/favorite_over.png" width="64i" height="64i" align="center" valign="center" noclick="1"/>
+						</widgetstate>
+						<widgetstate statename="down1" x="1" y="1">
+							<image texture="/ui/fe2/newui/res/lobby/favorite_over.png" width="64i" height="64i" align="center" valign="center" noclick="1"/>
+						</widgetstate>
+						<widgetstate statename="up2">
+							<image texture="/ui/fe2/newui/res/lobby/favorite_selected_up.png" width="64i" height="64i" align="center" valign="center" noclick="1"/>
+						</widgetstate>
+						<widgetstate statename="over2">
+							<image texture="/ui/fe2/newui/res/lobby/favorite_selected_over.png" width="64i" height="64i" align="center" valign="center" noclick="1"/>
+						</widgetstate>
+						<widgetstate statename="down2" x="1" y="1">
+							<image texture="/ui/fe2/newui/res/lobby/favorite_selected_over.png" width="64i" height="64i" align="center" valign="center" noclick="1"/>
+						</widgetstate>
+					</button>
+					
+					<!-- Leanatorium -->
+					<button x="-190i" width="25i" height="25i" align="right" valign="center" color="invisible"
+						onclicklua="UIManager.GetInterface('main'):HoNMainF('MainMenuPanelToggle', 'compendium', nil, false)"
+						onmouseoverlua="Common_V2:ShowSimpleTip(true, 'main_menu_leanatorium', '140i')"
+						onmouseoutlua="Common_V2:ShowSimpleTip(false)"
+					>
+						<widgetstate statename="up">
+							<image texture="/ui/fe2/newui/res/lobby/lobby_learnatorium_up.png" width="64i" height="64i" align="center" valign="center" noclick="1"/>
+						</widgetstate>
+						<widgetstate statename="over">
+							<image texture="/ui/fe2/newui/res/lobby/lobby_learnatorium_over.png" width="64i" height="64i" align="center" valign="center" noclick="1"/>
+						</widgetstate>
+						<widgetstate statename="down" x="1" y="1">
+							<image texture="/ui/fe2/newui/res/lobby/lobby_learnatorium_over.png" width="64i" height="64i" align="center" valign="center" noclick="1"/>
+						</widgetstate>
+					</button>
+					
+					<!-- Reset button -->
+					<button x="-160i" width="25i" height="25i" align="right" valign="center" color="invisible"
+						onclicklua="Lobby_V2:OnClickResetFilter()"
+						onmouseoverlua="Common_V2:ShowSimpleTip(true, 'filter_category_reset', '140i')"
+						onmouseoutlua="Common_V2:ShowSimpleTip(false)"
+					>
+						<widgetstate statename="up">
+							<image texture="/ui/fe2/newui/res/lobby/reset_up.png" width="64i" height="64i" align="center" valign="center" noclick="1"/>
+						</widgetstate>
+						<widgetstate statename="over">
+							<image texture="/ui/fe2/newui/res/lobby/reset_over.png" width="64i" height="64i" align="center" valign="center" noclick="1"/>
+						</widgetstate>
+						<widgetstate statename="down" x="1" y="1">
+							<image texture="/ui/fe2/newui/res/lobby/reset_over.png" width="64i" height="64i" align="center" valign="center" noclick="1"/>
+						</widgetstate>
+					</button>
+					
+					<!-- Search box -->
+					<panel width="152i" align="right" noclick="1">
+						<frame texture="/ui/fe2/newui/res/common/frames/frame_n.png" borderthickness="4i" noclick="1"/>
+						<image texture="/ui/fe2/newui/res/lobby/search_icon.png" width="32i" height="32i" align="right" valign="center" noclick="1"/>
+						<textbox name="lobby_picker_filter_text" x="10i" y="5i" width="-37i" align="left" color="invisible" font="dyn_12" textcolor="#f0d3c1" outline="1" outlinecolor="#230000"
+								 onesc="SetInputLine(''); SetFocus(false);"
+								 onfocuslua="GetWidget('lobby_picker_filter_searchtext'):SetVisible(false)"
+								 onlosefocuslua="GetWidget('lobby_picker_filter_searchtext'):SetVisible(Empty(self:GetValue()))"
+								 maxlength="30"
+							 	onchangelua="Lobby_V2:UpdateFilters()"
+						/>
+						<label name="lobby_picker_filter_searchtext" x="10i" width="-37i" align="left" textalign="left" textvalign="center" font="dyn_10" color="#8f6c59" outline="1" outlinecolor="#230000" content="newui_lobby_search" noclick="1"/>
+					</panel>
+				</panel>
+			</panel>
+			
+			<panel name="lobby_picker_herotip" noclick="1" visible="0">
+				<panel name="lobby_picker_herotip_large" x="-160i" width="1419i" height="320i" align="center" valign="bottom">
+					<frame texture="/ui/fe2/newui/res/common/frames/communicator/input.png" borderthickness="8" noclick="1"/>
+					<panel width="1099i" align="right" float="right">
+						<instance name="lobby_picker_herotip_ability_template" type="large" width="25%" id="1" />
+						<instance name="lobby_picker_herotip_ability_template" type="large" width="25%" id="2" />
+						<instance name="lobby_picker_herotip_ability_template" type="large" width="25%" id="3" />
+						<instance name="lobby_picker_herotip_ability_template" type="large" width="25%" id="4" />
+					</panel>
+					<panel width="320i" noclick="1">
+						<panel x="12i" y="10i" width="72i" height="72i">
+							<image name="lobby_picker_herotip_large_heroicon" texture="$invis" usealphamask="true" alphamaskfile="/ui/fe2/elements/store2/mask.png" />
+							<image texture="/ui/fe2/elements/store2/head_border.png" width="160i" height="160i" align="center" valign="center" noclick="1" />
+							<panel width="26i" height="26i" align="left" x="-5i" valign="bottom" y="5i" noclick="1">
+								<image texture="/ui/fe2/elements/store2/head_border2.png"/>
+								<image name="lobby_picker_herotip_large_primattr" texture="/ui/fe2/elements/store2/primary_none.png" noclick="1" />
+							</panel>		
+						</panel>
+						<label name="lobby_picker_herotip_large_heroname" x="96i" y="12i" font="dyn_14" color="#f0d3c1" noclick="1"/>
+						<panel x="94i" y="40i" height="24i" float="right" padding="5i">
+							<image name="lobby_picker_herotip_large_attacktype" texture="/ui/fe2/elements/store2/melee.png" valign="center" width="24i" height="24i" noclick="1" />
+							<label name="lobby_picker_herotip_large_category" textalign="left" textvalign="center" font="dyn_11" color="#fdb229" noclick="1"/>
+						</panel>
+
+						<panel x="94i" y="62i" height="32i" noclick="1">
+							<panel width="32i" height="32i" valign="center" noclick="1">
+								<image name="lobby_picker_herotip_large_mastery_badge" texture="$invis" noclick="1"/>
+								<label name="lobby_picker_herotip_large_mastery_level" color="white" textalign="center" textvalign="center" font="dyn_6" noclick="1"/>
+								<panel x="34i" width="160i" height="14i" valign="center" noclick="1">
+									<instance name="newui_custom_frame_template" alpha="0"/>
+									<panel x="1" y="1" width="-2" height="-2" noclick="1">
+										<panel name="lobby_picker_herotip_large_mastery_exp" color="1 1 1 1" width="50%" noclick="1"/>
+									</panel>
+								</panel>
+							</panel>
+						</panel>
+						<panel name="lobby_picker_herotip_large_difficulty_parent" x="94i" y="60i" height="32i" float="right">
+							<panel width="65i">
+								<label textalign="left" textvalign="center" width="300i" font="dyn_11" color="#d5bbae" content="mstore_difficulty" noclick="1"/>
+							</panel>
+							<panel width="20i" height="18i" valign="center" noclick="1">
+								<image name="lobby_picker_herotip_large_difficulty1" texture="/ui/fe2/elements/store2/Di.png" width="26i" height="26i" align="center" valign="center" noclick="1"/>
+							</panel>
+							<panel width="20i" height="18i" valign="center" noclick="1">
+								<image name="lobby_picker_herotip_large_difficulty2" texture="/ui/fe2/elements/store2/Di.png" width="26i" height="26i" align="center" valign="center" noclick="1"/>
+							</panel>
+							<panel width="20i" height="18i" valign="center" noclick="1">
+								<image name="lobby_picker_herotip_large_difficulty3" texture="/ui/fe2/elements/store2/Di.png" width="26i" height="26i" align="center" valign="center" noclick="1"/>
+							</panel>
+							<panel width="20i" height="18i" valign="center" noclick="1">
+								<image name="lobby_picker_herotip_large_difficulty4" texture="/ui/fe2/elements/store2/Di.png" width="26i" height="26i" align="center" valign="center" noclick="1"/>
+							</panel>
+							<panel width="20i" height="18i" valign="center" noclick="1">
+								<image name="lobby_picker_herotip_large_difficulty5" texture="/ui/fe2/elements/store2/Di.png" width="26i" height="26i" align="center" valign="center" noclick="1"/>
+							</panel>
+						</panel>
+						
+						<panel color="#4a3429" y="95i" align="center" width="-12i" height="1" noclick="1"/>
+						<panel y="95i" noclick="1" height="60i">
+							<panel color="#4a3429" align="center" valign="center" width="1" height="-8i" noclick="1"/>
+							<panel width="50%" valign="center" height="-10i" float="bottom" noclick="1">
+								<instance name="lobby_picker_herotip_attributes_template" type="large" height="33.3%" id="1" icon="/ui/fe2/newui/res/lobby/icon_atkrange.png"/>
+								<instance name="lobby_picker_herotip_attributes_template" type="large" height="33.3%" id="2" icon="/ui/fe2/newui/res/lobby/icon_damage.png"/>
+								<instance name="lobby_picker_herotip_attributes_template" type="large" height="33.3%" id="3" icon="/ui/fe2/newui/res/lobby/icon_atkspeed.png"/>
+							</panel>
+							<panel width="50%" align="right" valign="center" height="-10i" float="bottom" noclick="1">
+								<instance name="lobby_picker_herotip_attributes_template" type="large" height="33.3%" id="4" icon="/ui/fe2/newui/res/lobby/icon_armor.png"/>
+								<instance name="lobby_picker_herotip_attributes_template" type="large" height="33.3%" id="5" icon="/ui/fe2/newui/res/lobby/icon_movespeed.png"/>
+								<instance name="lobby_picker_herotip_attributes_template" type="large" height="33.3%" id="6" icon="/ui/fe2/newui/res/lobby/icon_magicarmor.png"/>
+							</panel>
+						</panel>
+						<panel noclick="1" y="155i">
+							<panel color="#4a3429" align="center" width="-12i" height="1" noclick="1"/>
+
+							<panel width="100%" height="32i" align="center" float="right">
+								<panel width="33.3%">
+									<panel color="#4a3429"  align="right" valign="center" width="1" height="-8i" noclick="1"/>
+									<panel x="8i" width="20i" valign="center">
+										<image texture="/ui/fe2/elements/store2/head_border2.png" width="100%" height="100@" align="center" valign="center" noclick="1"/>
+										<image texture="/ui/fe2/elements/store2/primary_strength.png" width="100%" height="100@" align="center" valign="center" noclick="1"/>
+									</panel>
+									<label name="lobby_picker_herotip_large_strength" x="33i" textvalign="center" font="dyn_10" color="#d3bbac" noclick="1"/>
+								</panel>
+								<panel width="33.3%">
+									<panel color="#4a3429"  align="right" valign="center" width="1" height="-8i" noclick="1"/>
+									<panel x="8i" width="20i" valign="center">
+										<image texture="/ui/fe2/elements/store2/head_border2.png" width="100%" height="100@" align="center" valign="center" noclick="1"/>
+										<image texture="/ui/fe2/elements/store2/primary_agility.png" width="100%" height="100@" align="center" valign="center" noclick="1"/>
+									</panel>
+									<label name="lobby_picker_herotip_large_agility" x="33i" textvalign="center" font="dyn_10" color="#d3bbac" noclick="1"/>
+								</panel>
+								<panel width="33.3%">
+									<panel x="8i" width="20i" valign="center">
+										<image texture="/ui/fe2/elements/store2/head_border2.png" width="100%" height="100@" align="center" valign="center" noclick="1"/>
+										<image texture="/ui/fe2/elements/store2/primary_intelligence.png" width="100%" height="100@" align="center" valign="center" noclick="1"/>
+									</panel>
+									<label name="lobby_picker_herotip_large_intelligence" x="33i" textvalign="center" font="dyn_10" color="#d3bbac" noclick="1"/>
+								</panel>
+							</panel>
+							<panel color="#4a3429" y="32i" align="center" width="-12i" height="1" noclick="1"/>
+						</panel>
+
+						<panel width="-10i" height="-190i" align="center" valign="bottom" noclick="1" clip="1">
+							<label name="lobby_picker_herotip_large_role"  wrap="1" color="#ac9181" font="dyn_8"/>
+						</panel>
+					</panel>
+				</panel>
+
+				<panel name="lobby_picker_herotip_small" y="-74i" width="1334i" height="270i" align="center" valign="bottom">
+					<frame texture="/ui/fe2/newui/res/common/frames/communicator/input.png" borderthickness="8" noclick="1"/>
+					<panel width="-314i" align="right" float="right">
+						<instance name="lobby_picker_herotip_ability_template" type="small" width="25%" id="1" />
+						<instance name="lobby_picker_herotip_ability_template" type="small" width="25%" id="2" />
+						<instance name="lobby_picker_herotip_ability_template" type="small" width="25%" id="3" />
+						<instance name="lobby_picker_herotip_ability_template" type="small" width="25%" id="4" showline="0"/>
+					</panel>
+					<panel width="314i">
+						<panel x="12i" y="10i" width="72i" height="72i">
+							<image name="lobby_picker_herotip_small_heroicon" texture="$invis" usealphamask="true" alphamaskfile="/ui/fe2/elements/store2/mask.png" />
+							<image texture="/ui/fe2/elements/store2/head_border.png" width="160i" height="160i" align="center" valign="center" noclick="1" />
+							<panel width="26i" height="26i" align="left" x="-5i" valign="bottom" y="5i" noclick="1">
+								<image texture="/ui/fe2/elements/store2/head_border2.png"/>
+								<image name="lobby_picker_herotip_small_primattr" texture="/ui/fe2/elements/store2/primary_none.png" noclick="1" />
+							</panel>		
+						</panel>
+						<label name="lobby_picker_herotip_small_heroname" x="96i" y="12i" font="dyn_14" color="#f0d3c1" noclick="1"/>
+						<panel x="94i" y="40i" height="24i" float="right" padding="5i">
+							<image name="lobby_picker_herotip_small_attacktype" texture="/ui/fe2/elements/store2/melee.png" valign="center" width="24i" height="24i" noclick="1" />
+							<label name="lobby_picker_herotip_small_category" textalign="left" textvalign="center" font="dyn_11" color="#fdb229" noclick="1"/>
+						</panel>
+						<panel x="94i" y="62i" height="32i" noclick="1">
+							<panel width="32i" height="32i" valign="center" noclick="1">
+								<image name="lobby_picker_herotip_small_mastery_badge" texture="$invis" noclick="1"/>
+								<label name="lobby_picker_herotip_small_mastery_level" color="white" textalign="center" textvalign="center" font="dyn_6" noclick="1"/>
+								<panel x="34i" width="160i" height="14i" valign="center" noclick="1">
+									<instance name="newui_custom_frame_template" alpha="0"/>
+									<panel x="1" y="1" width="-2" height="-2" noclick="1">
+										<panel name="lobby_picker_herotip_small_mastery_exp" color="1 1 1 1" width="50%" noclick="1"/>
+									</panel>
+								</panel>
+							</panel>
+						</panel>
+						<panel name="lobby_picker_herotip_small_difficulty_parent" x="94i" y="60i" height="32i" float="right">
+							<panel width="65i">
+								<label textalign="left" textvalign="center" width="300i" font="dyn_11" color="#d5bbae" content="mstore_difficulty" noclick="1"/>
+							</panel>
+							<panel width="20i" height="18i" valign="center" noclick="1">
+								<image name="lobby_picker_herotip_small_difficulty1" texture="/ui/fe2/elements/store2/Di.png" width="26i" height="26i" align="center" valign="center" noclick="1"/>
+							</panel>
+							<panel width="20i" height="18i" valign="center" noclick="1">
+								<image name="lobby_picker_herotip_small_difficulty2" texture="/ui/fe2/elements/store2/Di.png" width="26i" height="26i" align="center" valign="center" noclick="1"/>
+							</panel>
+							<panel width="20i" height="18i" valign="center" noclick="1">
+								<image name="lobby_picker_herotip_small_difficulty3" texture="/ui/fe2/elements/store2/Di.png" width="26i" height="26i" align="center" valign="center" noclick="1"/>
+							</panel>
+							<panel width="20i" height="18i" valign="center" noclick="1">
+								<image name="lobby_picker_herotip_small_difficulty4" texture="/ui/fe2/elements/store2/Di.png" width="26i" height="26i" align="center" valign="center" noclick="1"/>
+							</panel>
+							<panel width="20i" height="18i" valign="center" noclick="1">
+								<image name="lobby_picker_herotip_small_difficulty5" texture="/ui/fe2/elements/store2/Di.png" width="26i" height="26i" align="center" valign="center" noclick="1"/>
+							</panel>
+						</panel>
+
+						<panel color="#4a3429" y="95i" align="center" width="-12i" height="1" noclick="1"/>
+						<panel y="95i" noclick="1" height="60i">
+							<panel color="#4a3429" align="center" valign="center" width="1" height="-8i" noclick="1"/>
+							<panel width="50%" valign="center" height="-10i" float="bottom" noclick="1">
+								<instance name="lobby_picker_herotip_attributes_template" type="small" height="33.3%" id="1" icon="/ui/fe2/newui/res/lobby/icon_atkrange.png"/>
+								<instance name="lobby_picker_herotip_attributes_template" type="small" height="33.3%" id="2" icon="/ui/fe2/newui/res/lobby/icon_damage.png"/>
+								<instance name="lobby_picker_herotip_attributes_template" type="small" height="33.3%" id="3" icon="/ui/fe2/newui/res/lobby/icon_atkspeed.png"/>
+							</panel>
+							<panel width="50%" align="right" valign="center" height="-10i" float="bottom" noclick="1">
+								<instance name="lobby_picker_herotip_attributes_template" type="small" height="33.3%" id="4" icon="/ui/fe2/newui/res/lobby/icon_armor.png"/>
+								<instance name="lobby_picker_herotip_attributes_template" type="small" height="33.3%" id="5" icon="/ui/fe2/newui/res/lobby/icon_movespeed.png"/>
+								<instance name="lobby_picker_herotip_attributes_template" type="small" height="33.3%" id="6" icon="/ui/fe2/newui/res/lobby/icon_magicarmor.png"/>
+							</panel>
+						</panel>
+
+						<panel noclick="1" y="155i">
+							<panel color="#4a3429" align="center" width="-12i" height="1" noclick="1"/>
+
+							<panel width="100%" height="32i" align="center" float="right">
+								<panel width="33.3%">
+									<panel color="#4a3429"  align="right" valign="center" width="1" height="-8i" noclick="1"/>
+									<panel x="8i" width="20i" valign="center">
+										<image texture="/ui/fe2/elements/store2/head_border2.png" width="100%" height="100@" align="center" valign="center" noclick="1"/>
+										<image texture="/ui/fe2/elements/store2/primary_strength.png" width="100%" height="100@" align="center" valign="center" noclick="1"/>
+									</panel>
+									<label name="lobby_picker_herotip_small_strength" x="33i" textvalign="center" font="dyn_10" color="#d3bbac" noclick="1"/>
+								</panel>
+								<panel width="33.3%">
+									<panel color="#4a3429"  align="right" valign="center" width="1" height="-8i" noclick="1"/>
+									<panel x="8i" width="20i" valign="center">
+										<image texture="/ui/fe2/elements/store2/head_border2.png" width="100%" height="100@" align="center" valign="center" noclick="1"/>
+										<image texture="/ui/fe2/elements/store2/primary_agility.png" width="100%" height="100@" align="center" valign="center" noclick="1"/>
+									</panel>
+									<label name="lobby_picker_herotip_small_agility" x="33i" textvalign="center" font="dyn_10" color="#d3bbac" noclick="1"/>
+								</panel>
+								<panel width="33.3%">
+									<panel x="8i" width="20i" valign="center">
+										<image texture="/ui/fe2/elements/store2/head_border2.png" width="100%" height="100@" align="center" valign="center" noclick="1"/>
+										<image texture="/ui/fe2/elements/store2/primary_intelligence.png" width="100%" height="100@" align="center" valign="center" noclick="1"/>
+									</panel>
+									<label name="lobby_picker_herotip_small_intelligence" x="33i" textvalign="center" font="dyn_10" color="#d3bbac" noclick="1"/>
+								</panel>
+							</panel>
+							<panel color="#4a3429" y="32i" align="center" width="-12i" height="1" noclick="1"/>
+						</panel>
+
+						<label name="lobby_picker_herotip_small_role" width="-10i" height="-190i" align="center" valign="bottom" wrap="1" color="#ac9181" font="dyn_8"/>
+					</panel>
+				</panel>
+			</panel>
+
+			<panel width="512i" height="256i" align="center" noclick="1">
+				<image texture="/ui/fe2/newui/res/lobby/clock_bg.png" align="center" valign="center" noclick="1"/>
+				<label y="10i" textalign="center" textvalign="top" font="dyn_18" color="white" noclick="1" watch="LobbyCountDown" ontrigger="SetText(FtoT(param0, 1, 0, '-'));"/>
+				<panel y="15i" height="25i" width="190i" align="center" watch="HeroSelectHasExtraTime" ontrigger="SetVisible(param);" visible="0">
+					<label x="-20i" width="50%" textalign="center" textvalign="center" font="dyn_16" 
+							watch0="HeroSelectExtraTime0"
+							ontrigger0="SetText(Round(param));"
+							watch1="HeroSelectUsingExtraTime0"
+							ontrigger1="If(param, SetColor(0, 1, 0.2), SetColor(0, 0.5, 0.1));"
+					/>
+					<label x="20i" width="50%" align="right" textalign="center" textvalign="center" font="dyn_16" 
+							watch0="HeroSelectExtraTime1"
+							ontrigger0="SetText(Round(param));"
+							watch1="HeroSelectUsingExtraTime1"
+							ontrigger1="If(param, SetColor(1, 0.2, 0), SetColor(0.5, 0.1, 0));"
+					/>
+				</panel>
+				<label name="lobby_picker_gamephase" y="40i" textalign="center" textvalign="top" font="dyn_12" color="white" noclick="1" content="-"
+						watch="GamePhaseExtended" ontriggerlua="Lobby_V2:UpdateGamePhase(self, tonumber(param))"
+				/>
+			</panel>
+		</panel>
+
+		<panel name="lobby_loading" noclick="1" visible="1" float="bottom"
+				onshowlua="GetWidget('systembar'):SetVisible(false) Social_V2:CloseSocialPopups()"
+				onhidelua="GetWidget('systembar'):SetVisible(true)"
+		>
+			<panel>
+				<image name="lobby_loading_bg" texture="$invis" width="2048i" height="2048i" align="center" valign="center" noclick="1"/>
+				<image name="lobby_loading_bg_logo" texture="$invis" width="512i" height="256i" align="right" noclick="1"/>
+			</panel>
+			<anchor y="320i" />
+			<panel height="44i" align="center" noclick="1">
+				<image texture="/ui/fe2/newui/res/lobby/title_large.png" width="2048i" height="64i" align="center" valign="center" noclick="1" />
+				<panel width="1078i" noclick="1" align="center">
+					<label textalign="left" textvalign="center" font="dyn_16" color="#a0c7cb" outline="1" outlinecolor="#03112d" content="newui_replay_legion" noclick="1"/>
+					<label textalign="right" textvalign="center" font="dyn_16" color="#f0d3c1" outline="1" outlinecolor="#2b0306" content="newui_replay_hellbourne" noclick="1"/>
+				</panel>
+			</panel>
+			<panel width="1098i" height="430i" align="center">
+				<panel width="547i" align="left" float="bottom">
+					<frame texture="/ui/fe2/newui/res/lobby/frame_legion.png" borderthickness="8i" noclick="1"/>
+					<anchor y="0"/>
+					<instance name="lobby_loading_player_template" hflip="0" index="0"/>
+					<instance name="lobby_loading_player_template" hflip="0" index="1"/>
+					<instance name="lobby_loading_player_template" hflip="0" index="2"/>
+					<instance name="lobby_loading_player_template" hflip="0" index="3"/>
+					<instance name="lobby_loading_player_template" hflip="0" index="4"/>
+				</panel>
+				<panel width="547i" align="right" float="bottom">
+					<frame texture="/ui/fe2/newui/res/lobby/frame_hellbourne.png" borderthickness="8i" noclick="1"/>
+					<anchor y="0"/>
+					<instance name="lobby_loading_player_template" align="right" index="5"/>
+					<instance name="lobby_loading_player_template" align="right" index="6"/>
+					<instance name="lobby_loading_player_template" align="right" index="7"/>
+					<instance name="lobby_loading_player_template" align="right" index="8"/>
+					<instance name="lobby_loading_player_template" align="right" index="9"/>
+				</panel>
+			</panel>
+		</panel>
+	</panel>
+	<panel name="lobby_trigger_help" width="1" height="1" noclick="1" onloadlua="Lobby_V2:Init()" />
+</package>

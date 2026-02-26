@@ -1,0 +1,996 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+	<panel onloadlua="RegisterScript2('Codex_Interface', '1')" color="invisible" noclick="1"/>
+
+	<!-- Lua -->
+	<lua file="/ui/scripts/codex.lua" />
+
+	<!-- forms -->
+	<trigger name="GraffitiWallMsg" />
+
+	<trigger name="GraffitiWallsStatus" />
+	<trigger name="GraffitiWallsResult" />
+	<form
+		name="FormGraffitiWalls"
+		host="!masterserver"
+		target="/master/eventgraffiti/getgraffitiwalllist"
+		statustrigger="GraffitiWallsStatus"
+		resulttrigger="GraffitiWallsResult"
+		resultparam0=""
+		ssl="false"
+		php="false"
+	/> 
+
+	<trigger name="GraffitiEditStatus" />
+	<trigger name="GraffitiEditResult" />
+	<form
+		name="FormGraffitiEdit"
+		host="!masterserver"
+		target="/master/eventgraffiti/updategraffitiinfo "
+		statustrigger="GraffitiEditStatus"
+		resulttrigger="GraffitiEditResult"
+		resultparam0=""
+		ssl="false"
+		php="false"
+	/> 
+
+	<trigger name="GetLotteryListStatus" />
+	<trigger name="GetLotteryListResult" />
+	<form
+		name="FormLotteryList"
+		host="!masterserver"
+		target="/master/eventgraffiti/getlotterylist"
+		statustrigger="GetLotteryListStatus"
+		resulttrigger="GetLotteryListResult"
+		resultparam0=""
+		ssl="false"
+		php="false"
+	/> 
+
+	<trigger name="LotteryStatus" />
+	<trigger name="LotteryResult" />
+	<form
+		name="FormLottery"
+		host="!masterserver"
+		target="/master/eventgraffiti/lottery"
+		statustrigger="LotteryStatus"
+		resulttrigger="LotteryResult"
+		resultparam0=""
+		ssl="false"
+		php="false"
+	/> 
+
+	<trigger name="GetLotteryHistoryStatus" />
+	<trigger name="GetLotteryHistoryResult" />
+	<form
+		name="FormGetLotteryHistory"
+		host="!masterserver"
+		target="/master/eventgraffiti/getlotteryhistory"
+		statustrigger="GetLotteryHistoryStatus"
+		resulttrigger="GetLotteryHistoryResult"
+		resultparam0=""
+		ssl="false"
+		php="false"
+	/> 
+
+	<trigger name="GetLadderStatus" />
+	<trigger name="GetLadderResult" />
+	<form
+		name="FormGetLadder"
+		host="!masterserver"
+		target="/master/eventgraffiti/getladder"
+		statustrigger="GetLadderStatus"
+		resulttrigger="GetLadderResult"
+		resultparam0=""
+		ssl="false"
+		php="false"
+	/> 
+
+	<trigger name="BuyWallStatus" />
+	<trigger name="BuyWallResult" />
+	<form
+		name="FormBuyWall"
+		host="!masterserver"
+		target="/master/eventgraffiti/buy"
+		statustrigger="BuyWallStatus"
+		resulttrigger="BuyWallResult"
+		resultparam0=""
+		ssl="false"
+		php="false"
+	/> 
+
+
+	<trigger name="ShareGraffitiStatus" />
+	<trigger name="ShareGraffitiResult" />
+	<form
+		name="FormShareGraffiti"
+		host="!masterserver"
+		target="/master/eventgraffiti/share"
+		statustrigger="ShareGraffitiStatus"
+		resulttrigger="ShareGraffitiResult"
+		resultparam0=""
+		ssl="false"
+		php="false"
+	/> 
+
+	<trigger name="GetCommunityGoalStatus" />
+	<trigger name="GetCommunityGoalResult" />
+	<form
+		name="FormGetCommunityGoal"
+		host="!masterserver"
+		target="/master/eventgraffiti/getgraffitistats"
+		statustrigger="GetCommunityGoalStatus"
+		resulttrigger="GetCommunityGoalResult"
+		resultparam0=""
+		ssl="false"
+		php="false"
+	/> 
+	<!-- end forms -->
+
+	<panel name="codex_entrance_help" noclick="1" onframelua="HoN_Codex:UpdateEntrance()" visible="0"/>
+
+	<template name="codex_ok_button_template">
+		<button name="{button_name}" width="{width=128i}" height="{height=50i}" color="invisible" align="{align=center}" valign="{valign=center}" x="{x}" y="{y}" onclicklua="{onclicklua}"
+				onclick="PlaySound('/ui/fe2/codex/sounds/ok.ogg')" onmouseover="PlaySound('/shared/sounds/ui/button_over_01.wav')">
+			<widgetstate statename="up">
+				<image texture="/ui/fe2/codex/r_btn.png" width="100%" height="100@" align="center" valign="center" noclick="1"/>
+				<label font="keny_26" x="-4i" y="-4i" textvalign="center" textalign="center" color="white" outline="1" outlinecolor="#8b031e" content="graffiti_ok" noclick="1"/>
+			</widgetstate>
+			<widgetstate statename="over">
+				<image texture="/ui/fe2/codex/r_btn_over.png" width="100%" height="100@" align="center" valign="center" noclick="1"/>
+				<label font="keny_26" x="-4i" y="-4i" textvalign="center" textalign="center" color="white" outline="1" outlinecolor="#8b031e" content="graffiti_ok" noclick="1"/>
+			</widgetstate>
+			<widgetstate statename="down" x="1" y="1">
+				<image texture="/ui/fe2/codex/r_btn_over.png" width="100%" height="100@" align="center" valign="center" noclick="1"/>
+				<label font="keny_26" x="-4i" y="-4i" textvalign="center" textalign="center" color="white" outline="1" outlinecolor="#8b031e" content="graffiti_ok" noclick="1"/>
+			</widgetstate>
+		</button>
+	</template>
+
+	<template name="codex_graffiti_editor_btn_template">
+		<button name="codex_graffiti_editor{id}_btn{index}" width="32i" height="32i" color="invisible" 
+			onmouseoverlua="HoN_Codex:SetSliderVisible({id}, true)" 
+			onmouseoutlua="HoN_Codex:SetSliderVisible({id}, false)"
+			onclicklua="HoN_Codex:RecordAnimChange({id}, {index}) HoN_Codex:UpdateOneItem({id})"
+			onclick="PlaySound('/ui/fe2/codex/sounds/ok.ogg')"
+			onmouseover="PlaySound('/shared/sounds/ui/button_over_01.wav')">
+			<widgetstate statename="up">
+				<image texture="/ui/fe2/codex/anim_btn.png" noclick="1"/>
+				<image texture="/ui/fe2/codex/anim_btn{index}.png" width="16i" height="16i" align="center" valign="center" noclick="1"/>
+			</widgetstate>
+			<widgetstate statename="over">
+				<image texture="/ui/fe2/codex/anim_btn_over.png" noclick="1"/>
+				<image texture="/ui/fe2/codex/anim_btn{index}.png" width="16i" height="16i" align="center" valign="center" noclick="1"/>
+				<panel y="-30i" width="180i" height="30i" align="center" color="0 0 0 .9">
+					<label align="center" textalign="center" textvalign="center" width="-20i" content="graffiti_pose_{index}" font="dyn_12" color="white" noclick="1"/>
+				</panel>
+			</widgetstate>
+			<widgetstate statename="down" x="1" y="1">
+				<image texture="/ui/fe2/codex/anim_btn_over.png" noclick="1"/>
+				<image texture="/ui/fe2/codex/anim_btn{index}.png" width="16i" height="16i" align="center" valign="center" noclick="1"/>
+			</widgetstate>
+			<widgetstate statename="disabled">
+				<image texture="/ui/fe2/codex/anim_btn_selected.png" noclick="1"/>
+				<image texture="/ui/fe2/codex/anim_btn{index}.png" width="16i" height="16i" align="center" valign="center" noclick="1"/>
+			</widgetstate>
+		</button>
+	</template>
+
+	<template name="codex_graffiti_item_back_template">
+		<panel name="codex_graffiti_item_back_{id}" width="192i" height="100%">
+			<dynamicimage name="codex_graffiti_item_back_{id}_graffiti" y="-40i" width="256i" height="256i" align="center" valign="center" noclick="1" texture="$invis"/>
+			<image texture="/ui/fe2/codex/shadow.png" width="256i" height="128i" align="center" valign="center" y="280i"/>
+		</panel>
+	</template>
+
+	<template name="codex_graffiti_item_middle_template">
+		<panel name="codex_graffiti_item_middle_{id}" width="192i" height="100%" >
+			<panel y="170i" height="280i" valign="center">
+				<modelpanel name="codex_graffiti_item_middle_{id}_avatar" y="-620i" width="600%" height="600%" align="center" valign="center"
+							sunazimuth="120"
+							sunaltitude="50"
+							suncolor="0.9 0.9 0.9"
+							ambientcolor="0.6 0.7 0.7"
+							cameranear="0.0"
+							lookat="false"
+							camerafar="5000.0"
+							camerapos="0 450 50"
+							cameraangles="0 0 180"
+							camerafov="10"
+							depthclear="true"
+							depthcompress="false"
+							cull="false"
+							resourcecontext="model"
+							scenebuffer="true"
+							outline="1"
+							outlinecolor="0 0 0"
+							posteffects="true"
+							postoutline="/core/post/outline.posteffect"
+				/>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="codex_graffiti_item_front_template">
+		<panel name="codex_graffiti_item_front_{id}" width="192i" height="100%">		
+			<panel name="codex_graffiti_item_front_{id}_avatar" y="155i" height="320i" valign="center" 
+				   onmouseoverlua="HoN_Codex:SetSliderVisible({id}, true)"
+				   onmouseoutlua="HoN_Codex:SetSliderVisible({id}, false)"
+				   onmouseldownlua="self:DoEventN(1)"
+				   onmouseluplua="self:DoEventN(2)"
+				   onmouserdownlua="HoN_Codex:OpenEditor({id})"
+				   onhidelua="self:DoEventN(2)"
+				   onevent1lua="HoN_Codex:StartRotation({id})"
+				   onevent2lua="HoN_Codex:EndRotation({id})"
+				   ontriggerlua="HoN_Codex:UpdateRotation({id})">
+				
+				<slider name="codex_graffiti_item_front_{id}_avatar_editor" y="-40i" width="-40i" height="15i" align="center" valign="bottom" sticky="1" slotwidth="-1%" slotheight="15i" slotcolor="white" 
+						handlewidth="25i" handleheight="25i" handlecolor="white" 
+						value="0" minvalue="0" maxvalue="1" step="0.01" 
+						texture="/ui/fe2/codex/slider_white.tga" visible="0"
+						onmouseoverlua="HoN_Codex:SetSliderVisible({id}, true)
+										self:GetChildWidget('codex_graffiti_item_front_{id}_avatar_editor_handle'):SetVisible(true)"
+						onchangelua="HoN_Codex:SetModelPos({id}, nil, tonumber(self:GetValue()), false)"
+				/>
+				<panel name="codex_graffiti_item_front_{id}_avatar_editor2" width="-40i" height="32i" noclick="1" align="center" valign="bottom" visible="0" float="right">
+					<instance name="codex_graffiti_editor_btn_template" id="{id}" index="1"/>
+					<instance name="codex_graffiti_editor_btn_template" id="{id}" index="2"/>
+					<instance name="codex_graffiti_editor_btn_template" id="{id}" index="3"/>
+					<instance name="codex_graffiti_editor_btn_template" id="{id}" index="4"/>
+					<instance name="codex_graffiti_editor_btn_template" id="{id}" index="5"/>
+					<anchor x="0"/>
+					<panel name="codex_graffiti_editor{id}_disablebtn1" width="32i" height="32i" onmouseoverlua="HoN_Codex:SetSliderVisible({id}, true)" onmouseoutlua="HoN_Codex:SetSliderVisible({id}, false)" visible="0"/>
+					<panel name="codex_graffiti_editor{id}_disablebtn2" width="32i" height="32i" onmouseoverlua="HoN_Codex:SetSliderVisible({id}, true)" onmouseoutlua="HoN_Codex:SetSliderVisible({id}, false)" visible="0"/>
+					<panel name="codex_graffiti_editor{id}_disablebtn3" width="32i" height="32i" onmouseoverlua="HoN_Codex:SetSliderVisible({id}, true)" onmouseoutlua="HoN_Codex:SetSliderVisible({id}, false)" visible="0"/>
+					<panel name="codex_graffiti_editor{id}_disablebtn4" width="32i" height="32i" onmouseoverlua="HoN_Codex:SetSliderVisible({id}, true)" onmouseoutlua="HoN_Codex:SetSliderVisible({id}, false)" visible="0"/>
+					<panel name="codex_graffiti_editor{id}_disablebtn5" width="32i" height="32i" onmouseoverlua="HoN_Codex:SetSliderVisible({id}, true)" onmouseoutlua="HoN_Codex:SetSliderVisible({id}, false)" visible="0"/>
+				</panel>
+			</panel>
+			<panel name="codex_graffiti_item_front_{id}_friend" height="32i" valign="bottom" y="-190i">
+				<image texture="/ui/fe2/codex/player_name.png" width="256i" noclick="1" />
+				<panel x="40i" width="80i">
+					<label name="codex_graffiti_item_front_{id}_friend_name" textalign="center" textvalign="center" font="keny_26" color="#2fbff5"/>
+				</panel>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="codex_page_index_template">
+		<button name="codex_page_index_{id}" width="24i" color="invisible" visible="0" stickytoinvis="false" onclicklua="HoN_Codex:SelectPage({id})" onclick="PlaySound('/ui/fe2/codex/sounds/ok.ogg')" onmouseover="PlaySound('/shared/sounds/ui/button_over_01.wav')">
+			<widgetstate statename="up">
+				<label name="codex_page_index_{id}_label1" textalign="center" textvalign="center" font="square_22" color="#827474" outline="1" outlinecolor="#1c1111" content="{id}"/>
+			</widgetstate>
+			<widgetstate statename="over">
+				<label name="codex_page_index_{id}_label2" textalign="center" textvalign="center" font="square_22" color="#C2B4B4" outline="1" outlinecolor="#1c1111" content="{id}"/>
+			</widgetstate>
+			<widgetstate statename="down">
+				<label name="codex_page_index_{id}_label3" textalign="center" textvalign="center" font="square_22" color="#C2B4B4" outline="1" outlinecolor="#1c1111" content="{id}"/>
+			</widgetstate>
+		</button>
+	</template>
+
+	<template name="codex_rank_item_template">
+		<panel name="codex_rank_item_{id}" height="47i" float="right" visible="0">
+			<anchor x="30i"/>
+			<panel width="80i">
+				<label name="codex_rank_item_{id}_rank_text" font="{font=square_18}" textalign="center" textvalign="center" color="#7f7f7f" noclick="1"/>
+				<image name="codex_rank_item_{id}_rank_image" width="64i" height="64i" align="center" valign="center" noclick="1"/>
+			</panel>
+			<panel width="170i">
+				<label name="codex_rank_item_{id}_name" font="{font=square_18}" textalign="center" textvalign="center" color="#7f7f7f" noclick="1"/>
+			</panel>
+			<panel width="165i">
+				<label name="codex_rank_item_{id}_completed" font="{font=square_18}" textalign="center" textvalign="center" color="#7f7f7f" noclick="1"/>
+			</panel>
+			<panel width="65">
+				<label name="codex_rank_item_{id}_reward_text" font="{font=square_18}" textalign="center" textvalign="center" color="#7f7f7f" noclick="1"/>
+				<image name="codex_rank_item_{id}_reward_image" width="42i" height="42i" align="center" valign="center" noclick="1"/>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="codex_share_item_template">
+		<button name="codex_share_item_{id}" x="{x}" y="{y}" width="{width=160i}" height="{height=50i}" align="{align=left}" valign="{valign=top}" color="invisible" numstates="2"
+				onloadlua="self:SetButtonState({startstate=0})" onclicklua="HoN_Codex:OnClickChooseSignature({id})" onclick="PlaySound('/ui/fe2/codex/sounds/ok.ogg')"
+				onmouseover="PlaySound('/shared/sounds/ui/button_over_01.wav')">
+			<widgetstate statename="up">
+				<image width="16i" height="16i" align="left" valign="center" texture="/ui/fe2/codex/c1.png" noclick="1"/>
+				<label x="25i" y="5i" font="square_20" width="+40i" textalign="left" textvalign="center" color="#7f7f7f" content="graffiti_share_signature{id}" noclick="1"/>
+			</widgetstate>
+			<widgetstate statename="over">
+				<image width="16i" height="16i" align="left" valign="center" texture="/ui/fe2/codex/c2.png" noclick="1"/>
+				<label x="25i" y="5i" font="square_20" width="+40i" textalign="left" textvalign="center" color="#7f7f7f" content="graffiti_share_signature{id}" noclick="1"/>
+			</widgetstate>
+			<widgetstate statename="down">
+				<image width="16i" height="16i" align="left" valign="center" texture="/ui/fe2/codex/c2.png" noclick="1"/>
+				<label x="25i" y="5i" font="square_20" width="+40i" textalign="left" textvalign="center" color="#7f7f7f" content="graffiti_share_signature{id}" noclick="1"/>
+			</widgetstate>
+			<widgetstate statename="up2">
+				<image width="16i" height="16i" align="left" valign="center" texture="/ui/fe2/codex/c2.png" noclick="1"/>
+				<label x="25i" y="5i" font="square_20" width="+40i" textalign="left" textvalign="center" color="#dfdfdf" content="graffiti_share_signature{id}" noclick="1"/>
+			</widgetstate>
+			<widgetstate statename="over2">
+				<image width="16i" height="16i" align="left" valign="center" texture="/ui/fe2/codex/c2.png" noclick="1"/>
+				<label x="25i" y="5i" font="square_20" width="+40i" textalign="left" textvalign="center" color="#dfdfdf" content="graffiti_share_signature{id}" noclick="1"/>
+			</widgetstate>
+			<widgetstate statename="down2">
+				<image width="16i" height="16i" align="left" valign="center" texture="/ui/fe2/codex/c2.png" noclick="1"/>
+				<label x="25i" y="5i" font="square_20" width="+40i" textalign="left" textvalign="center" color="#dfdfdf" content="graffiti_share_signature{id}" noclick="1"/>
+			</widgetstate>
+		</button>
+	</template>
+
+	<panel name="codex" visible="0" onloadlua="HoN_Codex:Init()" onframelua="HoN_Codex:OnFrame()"
+			onshowlua="self:Sleep(500, function()
+							PlayMusic('/ui/fe2/codex/sounds/bg.ogg', true)
+						end)"
+			onhidelua=" playBgMusic()"
+	>
+		<!-- background image -->
+		<image name="codex_bg" noclick="1" width="1920i" height="1080i" align="center" valign="center" texture="/ui/fe2/codex/bg/1.png"/>
+		<panel x="450i" y="-200i" width="128i" height="128i" align="center" valign="center" noclick="1">
+			<dynamicimage name="codex_wall_index1" x="-38i" align="center" texture="$invis" height="128i" noclick="1" />
+			<dynamicimage name="codex_wall_index2" x="38i" align="center" texture="$invis" height="128i" noclick="1" />
+			<dynamicimage name="codex_wall_index3" x="-114i" align="center" texture="$invis" height="128i" noclick="1" />
+			<dynamicimage name="codex_wall_index4" x="-190i" align="center" texture="$invis" height="128i" noclick="1" />
+			<panel name="codex_rank_number" x="128i" width="128i" height="32i">
+				<dynamicimage name="codex_rank_number_rank" texture="/ui/fe2/codex/rank.png" width="128i" height="32i" noclick="1"/>
+				<dynamicimage name="codex_rank_number_1" x="108i" texture="$invis" width="32i" noclick="1"/>
+				<dynamicimage name="codex_rank_number_2" x="122i" texture="$invis" width="32i" noclick="1"/>
+				<dynamicimage name="codex_rank_number_3" x="136i" texture="$invis" width="32i" noclick="1"/>
+			</panel>
+
+			<dynamicimage name="codex_signature" x="90i" y="64i" width="256i" height="64i" texture="$invis" visible="1"/>
+		</panel>
+
+		<panel noclick="1" width="512i" height="512i" x="0" y="-30i" align="center" >
+			<image y="16i" align="center" valign="center" texture="/ui/fe2/codex/logo_bg.png" noclick="1" />
+			<modelpanel
+		 			align="center"
+		 			valign="center"
+		 			width="200%"
+		 			height="200%"
+					noclick="true"
+					model="/ui/fe2/elements/graffiti_logo/model.mdf"
+					cameradistance="0"
+					lookat="false"
+					camerapos="-10 200 5"
+					cameraangles="0 0 180"
+					camerafov="50"
+					cameranear="1"
+					carmerafar="5000"
+					ambientcolor="1 1 1"
+					suncolor="0 0 0"
+					onshow="
+						SetAnim('idle');
+						SetEffect('/ui/fe2/elements/graffiti_logo/body.effect');
+					"
+			/>
+		</panel>
+
+		<panel width="1350i" align="center" float="right" padding="1">	
+			<instance name="codex_graffiti_item_back_template" id="1"/>
+			<instance name="codex_graffiti_item_back_template" id="2"/>
+			<instance name="codex_graffiti_item_back_template" id="3"/>
+			<instance name="codex_graffiti_item_back_template" id="4"/>
+			<instance name="codex_graffiti_item_back_template" id="5"/>
+			<instance name="codex_graffiti_item_back_template" id="6"/>
+			<instance name="codex_graffiti_item_back_template" id="7"/>
+			<anchor x="0"/>
+			<instance name="codex_graffiti_item_middle_template" id="1"/>
+			<instance name="codex_graffiti_item_middle_template" id="2"/>
+			<instance name="codex_graffiti_item_middle_template" id="3"/>
+			<instance name="codex_graffiti_item_middle_template" id="4"/>
+			<instance name="codex_graffiti_item_middle_template" id="5"/>
+			<instance name="codex_graffiti_item_middle_template" id="6"/>
+			<instance name="codex_graffiti_item_middle_template" id="7"/>
+			<anchor x="0"/>
+			<instance name="codex_graffiti_item_front_template" id="1"/>
+			<instance name="codex_graffiti_item_front_template" id="2"/>
+			<instance name="codex_graffiti_item_front_template" id="3"/>
+			<instance name="codex_graffiti_item_front_template" id="4"/>
+			<instance name="codex_graffiti_item_front_template" id="5"/>
+			<instance name="codex_graffiti_item_front_template" id="6"/>
+			<instance name="codex_graffiti_item_front_template" id="7"/>
+		</panel>
+
+		<panel height="32i" float="right" grow="1" regrow="1" align="center" valign="bottom" y="-120i" padding="1" >
+			<button name="codex_lastpage" width="32i" color="invisible" onclicklua="HoN_Codex:TurningPage(false)" onclick="PlaySound('/ui/fe2/codex/sounds/ok.ogg')" onmouseover="PlaySound('/shared/sounds/ui/button_over_01.wav')" visible="0">
+				<widgetstate statename="up">
+						<image y="-3i" texture="/ui/fe2/codex/turning_btn.png" noclick="1" hflip="1"/>
+					</widgetstate>
+					<widgetstate statename="over">
+						<image y="-3i" texture="/ui/fe2/codex/turning_btn_over.png" noclick="1" hflip="1"/>
+					</widgetstate>
+					<widgetstate statename="down" x="1" y="1">
+						<image y="-3i" texture="/ui/fe2/codex/turning_btn_over.png" noclick="1" hflip="1"/>
+					</widgetstate>
+					<widgetstate statename="disabled">
+						<image y="-3i" texture="/ui/fe2/codex/turning_btn_disabled.png" noclick="1" hflip="1"/>
+					</widgetstate>
+			</button>
+			<instance name="codex_page_index_template" id="1"/>
+			<instance name="codex_page_index_template" id="2"/>
+			<instance name="codex_page_index_template" id="3"/>
+			<instance name="codex_page_index_template" id="4"/>
+			<instance name="codex_page_index_template" id="5"/>
+			<instance name="codex_page_index_template" id="6"/>
+			<instance name="codex_page_index_template" id="7"/>
+			<instance name="codex_page_index_template" id="8"/>
+			<instance name="codex_page_index_template" id="9"/>
+			<button name="codex_nextpage" width="32i" color="invisible" onclicklua="HoN_Codex:TurningPage(true)" onclick="PlaySound('/ui/fe2/codex/sounds/ok.ogg')" onmouseover="PlaySound('/shared/sounds/ui/button_over_01.wav')" visible="0">
+				<widgetstate statename="up">
+						<image y="-3i" texture="/ui/fe2/codex/turning_btn.png" noclick="1"/>
+					</widgetstate>
+					<widgetstate statename="over">
+						<image y="-3i" texture="/ui/fe2/codex/turning_btn_over.png" noclick="1"/>
+					</widgetstate>
+					<widgetstate statename="down" x="1" y="1">
+						<image y="-3i" texture="/ui/fe2/codex/turning_btn_over.png" noclick="1"/>
+					</widgetstate>
+					<widgetstate statename="disabled">
+						<image y="-3i" texture="/ui/fe2/codex/turning_btn_disabled.png" noclick="1"/>
+					</widgetstate>
+			</button>
+		</panel>
+
+		<panel noclick="1">
+			<panel x="10i" y="16i" width="512i" height="256i" >		
+				<avatar name="codex_player_icon" width="108i" height="108i" x="20i" y="25i" usealphamask="true" alphamaskfile="/ui/fe2/codex/mask.tga" />
+				<image width="512i" height="256i" texture="/ui/fe2/codex/name_back.png"/>
+				<label name="codex_player_name" font="keny_36" x="140i" y="42i" color="#2fbff5" content=""/>
+				<label name="codex_painted" font="keny_26" x="132i" y="80i" color="white" content=""/>
+				<button x="-8i" y="-35i" align="center" valign="center" width="32i" height="32i" color="invisible" onmouseover="PlaySound('/shared/sounds/ui/button_over_01.wav')">
+					<widgetstate statename="up">
+						<image texture="/ui/fe2/codex/info.png" noclick="1"/>
+					</widgetstate>
+					<widgetstate statename="over">
+						<image texture="/ui/fe2/codex/info_over.png" noclick="1"/>
+						<panel x="32i" y="16i" width="306i" height="123i" color="0 0 0 .8" noclick="1">
+							<label font="square_16" width="-30i" align="center" textalign="left" textvalign="center" color="white" wrap="1" outline="1" outlinecolor="black" noclick="1" content="graffiti_statement"/>
+						</panel>
+					</widgetstate>
+					<widgetstate statename="down">
+						<image texture="/ui/fe2/codex/info_over.png" noclick="1"/>
+						<panel x="32i" y="16i" width="306i" height="123i" color="0 0 0 .8" noclick="1">
+							<label font="square_16" width="-30i" align="center" textalign="left" textvalign="center" color="white" wrap="1" outline="1" outlinecolor="black" noclick="1" content="graffiti_statement"/>
+						</panel>
+					</widgetstate>
+				</button>
+			</panel>
+
+			<button width="64i" height="64i" x="-20i" y="25i" align="right" valign="top" color="invisible" onclicklua="HoN_Codex:Close()" onclick="PlaySound('/ui/fe2/codex/sounds/cancel.ogg')"
+					onmouseover="PlaySound('/shared/sounds/ui/button_over_01.wav')">
+				<widgetstate statename="up">
+					<image width="128i" height="128i" align="center" valign="center" texture="/ui/fe2/codex/close_up.png" noclick="1" y="8i"/>
+				</widgetstate>
+				<widgetstate statename="over">
+					<image width="128i" height="128i" align="center" valign="center" texture="/ui/fe2/codex/close_over.png" noclick="1" y="8i"/>
+				</widgetstate>
+				<widgetstate statename="down" x="1" y="1">
+					<image width="128i" height="128i" align="center" valign="center" texture="/ui/fe2/codex/close_over.png" noclick="1" y="8i"/>
+				</widgetstate>
+			</button>
+
+			<button width="310i" height="64i" x="-200i" y="-20i" align="center" valign="bottom" color="invisible" onclicklua="HoN_Codex:OpenRoulette('normal')" onclick="PlaySound('/ui/fe2/codex/sounds/ok.ogg')" onmouseover="PlaySound('/shared/sounds/ui/button_over_01.wav')">
+				<widgetstate statename="up">
+					<image width="512i" height="128i" align="center" valign="center" texture="/ui/fe2/codex/lottery.png" noclick="1" x="15i" y="20i"/>
+					<label font="keny_36" x="115i" textvalign="center" color="white" content="graffiti_lottery" shadow="1" shadowcolor="#0081b2"/>
+				</widgetstate>
+				<widgetstate statename="over">
+					<image width="512i" height="128i" align="center" valign="center" texture="/ui/fe2/codex/lottery_over.png" noclick="1" x="15i" y="20i"/>
+					<label font="keny_36" x="115i" textvalign="center" color="white" content="graffiti_lottery" shadow="1" shadowcolor="#0081b2"/>
+				</widgetstate>
+				<widgetstate statename="down" x="1" y="1">
+					<image width="512i" height="128i" align="center" valign="center" texture="/ui/fe2/codex/lottery_over.png" noclick="1" x="15i" y="20i"/>
+					<label font="keny_36" x="115i" textvalign="center" color="white" content="graffiti_lottery" shadow="1" shadowcolor="#0081b2"/>
+				</widgetstate>
+			</button>
+
+			<button width="310i" height="64i" x="150i" y="-20i" align="center" valign="bottom" color="invisible" onclicklua="HoN_Codex:OnClickBoost()" onclick="PlaySound('/ui/fe2/codex/sounds/ok.ogg')" onmouseover="PlaySound('/shared/sounds/ui/button_over_01.wav')" enabled="false">
+				<widgetstate statename="up">
+					<image width="512i" height="128i" align="center" valign="center" texture="/ui/fe2/codex/boost.png" noclick="1" x="15i" y="20i"/>
+					<label font="keny_36" x="130i" textvalign="center" color="white" content="graffiti_boost" shadow="1" shadowcolor="#c8144d"/>
+				</widgetstate>
+				<widgetstate statename="over">
+					<image width="512i" height="128i" align="center" valign="center" texture="/ui/fe2/codex/boost_over.png" noclick="1" x="15i" y="20i"/>
+					<label font="keny_36" x="130i" textvalign="center" color="white" content="graffiti_boost" shadow="1" shadowcolor="#c8144d"/>
+				</widgetstate>
+				<widgetstate statename="down" x="1" y="1">
+					<image width="512i" height="128i" align="center" valign="center" texture="/ui/fe2/codex/boost_over.png" noclick="1" x="15i" y="20i"/>
+					<label font="keny_36" x="130i" textvalign="center" color="white" content="graffiti_boost" shadow="1" shadowcolor="#c8144d"/>
+				</widgetstate>
+				<widgetstate statename="disabled">
+					<image width="512i" height="128i" align="center" valign="center" texture="/ui/fe2/codex/boost.png" noclick="1" x="15i" y="20i" rendermode="grayscale"/>
+					<label font="keny_36" x="130i" textvalign="center" color="#AAAAAA" content="graffiti_boost" shadow="1" shadowcolor="black"/>
+				</widgetstate>
+			</button>
+
+			<button name="codex_ladder_enterance" x="-30i" y="-40i" align="right" valign="bottom" width="64i" height="64i" color="invisible"
+					onclicklua="GetWidget('codex_rank'):FadeIn(250)
+								SubmitForm('FormGetLadder',  'account_id', Client.GetAccountID(), 'cookie', Client.GetCookie())"
+					onclick="PlaySound('/ui/fe2/codex/sounds/ok.ogg')"
+					onmouseover="PlaySound('/shared/sounds/ui/button_over_01.wav')"
+			>
+				<widgetstate statename="up">
+					<image texture="/ui/fe2/codex/ladder.png" noclick="1"/>
+				</widgetstate>
+				<widgetstate statename="over">
+					<image texture="/ui/fe2/codex/ladder_over.png" noclick="1"/>
+				</widgetstate>
+				<widgetstate statename="down" x="1" y="1">
+					<image texture="/ui/fe2/codex/ladder_over.png" noclick="1"/>
+				</widgetstate>
+			</button>
+			<label name="codex_ladder_enterance_text" x="-30i" y="-20i" align="right" valign="bottom" width="64i" height="10i" textalign="center" textvalign="center" font="square_20" color="#ca8f43" content="graffiti_ladder"/>
+
+			<button name="codex_community_enterance" x="-110i" y="-40i" align="right" valign="bottom" width="64i" height="64i" color="invisible"
+					onclicklua="GetWidget('codex_community'):FadeIn(250)
+								SubmitForm('FormGetCommunityGoal',  'account_id', Client.GetAccountID(), 'cookie', Client.GetCookie())"
+					onclick="PlaySound('/ui/fe2/codex/sounds/ok.ogg')"
+					onmouseover="PlaySound('/shared/sounds/ui/button_over_01.wav')">
+				<widgetstate statename="up">
+					<image texture="/ui/fe2/codex/goal.png" noclick="1"/>
+				</widgetstate>
+				<widgetstate statename="over">
+					<image texture="/ui/fe2/codex/goal_over.png" noclick="1"/>
+				</widgetstate>
+				<widgetstate statename="down" x="1" y="1">
+					<image texture="/ui/fe2/codex/goal_over.png" noclick="1"/>
+				</widgetstate>
+			</button>
+			<label name="codex_community_enterance_text" x="-110i" y="-20i" align="right" valign="bottom" width="64i" height="10i" textalign="center" textvalign="center" font="square_20" color="#d24c80" content="graffiti_goal"/>
+		</panel>
+
+		<panel name="codex_rank" color="0 0 0 .8" visible="0">
+			<image texture="/ui/fe2/codex/list_back.png" width="1024i" height="1024i" y="10i" align="center" valign="center" noclick="1" />
+			<button width="40i" height="40i" x="230i" y="-310i" align="center" valign="center" color="invisible" onclicklua="GetWidget('codex_rank'):FadeOut(250)" onclick="PlaySound('/ui/fe2/codex/sounds/cancel.ogg')" onmouseover="PlaySound('/shared/sounds/ui/button_over_01.wav')">
+				<widgetstate statename="up">
+					<image width="80i" height="80i" align="center" valign="center" texture="/ui/fe2/codex/close_up.png" noclick="1" y="8i"/>
+				</widgetstate>
+				<widgetstate statename="over">
+					<image width="80i" height="80i" align="center" valign="center" texture="/ui/fe2/codex/close_over.png" noclick="1" y="8i"/>
+				</widgetstate>
+				<widgetstate statename="down" x="1" y="1">
+					<image width="80i" height="80i" align="center" valign="center" texture="/ui/fe2/codex/close_over.png" noclick="1" y="8i"/>
+				</widgetstate>
+			</button>
+
+			<image x="-200i" y="220i" texture="/ui/fe2/codex/icon_rank.png" width="64i" height="64i" noclick="1" align="center"/>
+			<panel y="220i" height="64i" noclick="1">
+				<label x="10i" y="2i" font="keny_58" textalign="center" textvalign="center" color="#2fbff5" content="graffiti_rank_title" noclick="1"/>
+			</panel>
+
+			<panel x="-30i" y="302i" width="528i" height="580i" float="bottom" padding="1" align="center">
+				<instance name="codex_rank_item_template" id="1"/>
+				<instance name="codex_rank_item_template" id="2"/>
+				<instance name="codex_rank_item_template" id="3"/>
+				<instance name="codex_rank_item_template" id="4"/>
+				<instance name="codex_rank_item_template" id="5"/>
+				<instance name="codex_rank_item_template" id="6"/>
+				<instance name="codex_rank_item_template" id="7"/>
+				<instance name="codex_rank_item_template" id="8"/>
+				<instance name="codex_rank_item_template" id="9"/>
+				<instance name="codex_rank_item_template" id="10"/>
+				<instance name="codex_rank_item_template" id="11"/>
+				<instance name="codex_rank_item_template" id="12"/>
+			</panel>
+			<panel x="-30i" y="302i" width="528i" height="580i" float="bottom" processonlyscroll="1"  hover="false"
+					onmousewheeldown="CallEvent('codex_rank_scrollbar', 1);"
+					onmousewheelup="CallEvent('codex_rank_scrollbar', 0);" align="center"/>
+				
+			<scrollbar  name="codex_rank_scrollbar"
+						align="center"
+						x="260i" y="288i"
+						width="1.2h" height="590i"
+						scrollbarsize="1.2h"
+						handlewidth="1.2h"
+						handleheight="10h"							
+						texture="/ui/fe2/codex/scroll/scroll.png"
+						scrollbarplaceholder="true"
+						minvalue="1"
+						maxvalue="10"							
+						step="1"
+						value="1"
+						vertical="true"
+						slotwidth="0.6h" slotheight="1"
+						onevent1="SetValue(GetValue+1);"
+						onevent0="SetValue(GetValue-1);"
+						onslidelua="HoN_Codex:RefreshRankInfo()"
+			/>
+		</panel>
+
+		<panel name="codex_share" color="0 0 0 .8" visible="0">
+			<image y="-30i" texture="/ui/fe2/codex/share_back.png" width="1024i" height="512i" align="center" valign="center" noclick="1" />
+			<button width="40i" height="40i" x="240i" y="-220i" align="center" valign="center" color="invisible" onclicklua="GetWidget('codex_share'):FadeOut(250)" onclick="PlaySound('/ui/fe2/codex/sounds/cancel.ogg')" onmouseover="PlaySound('/shared/sounds/ui/button_over_01.wav')">
+				<widgetstate statename="up">
+					<image width="80i" height="80i" align="center" valign="center" texture="/ui/fe2/codex/close_up.png" noclick="1" y="8i"/>
+				</widgetstate>
+				<widgetstate statename="over">
+					<image width="80i" height="80i" align="center" valign="center" texture="/ui/fe2/codex/close_over.png" noclick="1" y="8i"/>
+				</widgetstate>
+				<widgetstate statename="down" x="1" y="1">
+					<image width="80i" height="80i" align="center" valign="center" texture="/ui/fe2/codex/close_over.png" noclick="1" y="8i"/>
+				</widgetstate>
+			</button>
+
+			<image x="-200i" y="315i" texture="/ui/fe2/codex/icon_share.png" width="64i" height="64i" noclick="1" align="center"/>
+			<panel y="320i" height="64i" noclick="1">
+				<label x="20i" font="keny_58" textalign="center" textvalign="center" color="#2fbff5" content="graffiti_share_title" noclick="1"/>
+			</panel>
+
+			<panel x="0" y="395i" width="550i" height="150i" noclick="1" align="center">
+				<instance name="codex_share_item_template" x="50i" id="1" startstate="2"/>
+				<instance name="codex_share_item_template" x="310i" id="2" />
+				<instance name="codex_share_item_template" x="50i" y="50i" id="3" />
+				<instance name="codex_share_item_template" x="310i" y="50i" id="4" />
+				<instance name="codex_share_item_template" x="50i" y="95i" id="5" />
+			</panel>
+
+			<panel x="20i" y="560i" width="490i" height="60i" noclick="1" align="center">
+				<label name="codex_share_text" font="square_18" textalign="left" textvalign="center" color="#7f7f7f" wrap="1" content="" noclick="1"/>
+			</panel>
+			<instance name="codex_ok_button_template" align="center" valign="center" y="140i" onclicklua="GetWidget('codex_share'):SetVisible(false) HoN_Codex:OnClickShareMainUI()"/>
+		</panel>
+
+		<panel name="codex_community" color="0 0 0 .8" visible="0">
+			<image y="-65i" texture="/ui/fe2/codex/goal_back.png" width="1024i" height="1024i" align="center" valign="center" noclick="1" />
+			<button width="40i" height="40i" x="440i" y="-350i" align="center" valign="center" color="invisible" onclicklua="GetWidget('codex_community'):FadeOut(250)" onclick="PlaySound('/ui/fe2/codex/sounds/cancel.ogg')" onmouseover="PlaySound('/shared/sounds/ui/button_over_01.wav')">
+				<widgetstate statename="up">
+					<image width="80i" height="80i" align="center" valign="center" texture="/ui/fe2/codex/close_up.png" noclick="1" y="8i"/>
+				</widgetstate>
+				<widgetstate statename="over">
+					<image width="80i" height="80i" align="center" valign="center" texture="/ui/fe2/codex/close_over.png" noclick="1" y="8i"/>
+				</widgetstate>
+				<widgetstate statename="down" x="1" y="1">
+					<image width="80i" height="80i" align="center" valign="center" texture="/ui/fe2/codex/close_over.png" noclick="1" y="8i"/>
+				</widgetstate>
+			</button>
+
+			<image x="-150i" y="182i" texture="/ui/fe2/codex/icon_goal.png" width="64i" height="64i" noclick="1" align="center"/>
+			<panel y="185i" height="64i" noclick="1">
+				<label x="20i" font="keny_58" textalign="center" textvalign="center" color="#2fbff5" content="graffiti_community_title" noclick="1"/>
+			</panel>
+
+			<panel x="15i" y="-40i" width="840i" height="396i" align="center" valign="center" clip="1">
+				<image name="codex_community_back_img" texture="/ui/fe2/codex/community_goal.png" width="1024i" height="512i" noclick="1" rendermode="grayscale"/>
+				<panel color="0 0 0 0.7" />
+				<dynamicimage name="codex_community_front_img" texture="$invis" width="1024i" height="512i" noclick="1"/>
+			</panel>
+
+			<panel x="15i" y="-265i" width="840i" height="30i" align="center" valign="center">
+				<label name="codex_community_goal" font="square_22" textalign="left" textvalign="center" color="#7f7f7f" content="" noclick="1"/>
+			</panel>
+
+			<panel x="15i" y="220i" width="840i" height="30i" align="center" valign="center">
+				<label name="codex_community_text" font="square_22" textalign="left" textvalign="center" color="white" content="" noclick="1"/>
+			</panel>
+		</panel>
+	</panel>
+
+	<panel name="codex_editor" noclick="0" width="80h" height="20h" align="center" valign="center" color="0.1 0.1 0.1 0.5" visible="0" cangrab="true" >
+		<instance name="button2" button_name="codex_editor_close" width="2h" height="1.5h" x="-2h" y="0.9h" align="right" label="X" onclicklua="GetWidget('codex_editor'):SetVisible(false)" />
+		<label name="codex_editor_avatarName" x=".5h" y="2h" height="2h" textvalign="center" color="white" noclick="1" />
+		<label name="codex_editor_model" x=".5h" y="5h" height="2h" textvalign="center" color="white" noclick="1" />
+		<label name="codex_editor_effect" x=".5h" y="12h" height="2h" textvalign="center" color="white" noclick="1" />
+		<instance name="test_suite_checkbox" x=".5h" y="9h" width="2h" height="2h" checkbox="codex_editor_effectEnabled" content="EffectEnabled" startenabled="0" onclicklua="HoN_Codex:Editor_ChangeEffectEnabled()"/>
+		<instance name="button2" button_name="codex_editor_save" width="12h" height="2h" x=".5h" y="15h" label="Save To File" onclicklua="HoN_Codex:Editor_Save()" />
+		<label name="codex_editor_savepath" x="13h" y="15h" height="2h" textvalign="center" color="white" noclick="1" content="d:\\specialavatar.txt" />
+	</panel>
+
+	<template name="codex_roulette_item_template">
+		<panel name="codex_roulette_item_{id}" x="{x}" y="{y}" width="{width=128i}" height="{height=128i}" align="center" valign="center">
+			<image name="codex_roulette_item_{id}_icon" texture="$invis" usealphamask="true" alphamaskfile="/ui/fe2/codex/roulette_item_mask.tga" noclick="1"/>
+			<dynamicimage name="codex_roulette_item_{id}_highlight" color="1 1 1 1" visible="0" usealphamask="true" alphamaskfile="/ui/fe2/codex/roulette_item_mask.tga"/>
+			<image name="codex_roulette_item_{id}_owned" x="20i" y="20i" width="128i" height="128i" texture="/ui/fe2/codex/owned1.png" noclick="1" align="center" valign="center" visible="0"/>
+			<panel onmouseoverlua="HoN_Codex:OnMouseOverRoulette({id})" onmouseoutlua="GetWidget('codex_roulette_tip'):SetVisible(false)"/>
+		</panel>
+	</template>
+
+	<template name="codex_roulette_history_item_template">
+		<panel name="codex_roulette_history_item_{id}" height="47i" float="right" visible="0">
+			<anchor x="30i"/>
+			<panel width="100i">
+				<label name="codex_roulette_history_item_{id}_date" font="square_18" textvalign="center" color="#7f7f7f"/>
+			</panel>
+			<panel width="100i">
+				<label name="codex_roulette_history_item_{id}_time" font="square_18" textalign="center" textvalign="center" color="#7f7f7f"/>
+			</panel>
+			<panel width="42i">
+				<image name="codex_roulette_history_item_{id}_icon" width="40i" height="40i" align="center" valign="center" texture="$invis" noclick="1" />
+			</panel>
+			<panel width="260i">
+				<label name="codex_roulette_history_item_{id}_name" x="10i" font="square_18" textvalign="center" color="#7f7f7f"/>
+			</panel>
+		</panel>
+	</template>
+
+	<panel name="codex_roulette" visible="0" color="0 0 0 .7" onshowlua="HoN_Codex:InitRoulette()">
+		<button width="64i" height="64i" x="-20i" y="25i" align="right" valign="top" color="invisible" onclicklua="HoN_Codex:CloseRoulette()" onclick="PlaySound('/ui/fe2/codex/sounds/cancel.ogg')" onmouseover="PlaySound('/shared/sounds/ui/button_over_01.wav')">
+			<widgetstate statename="up">
+				<image width="128i" height="128i" align="center" valign="center" texture="/ui/fe2/codex/close_up.png" noclick="1" y="8i"/>
+			</widgetstate>
+			<widgetstate statename="over">
+				<image width="128i" height="128i" align="center" valign="center" texture="/ui/fe2/codex/close_over.png" noclick="1" y="8i"/>
+			</widgetstate>
+			<widgetstate statename="down" x="1" y="1">
+				<image width="128i" height="128i" align="center" valign="center" texture="/ui/fe2/codex/close_over.png" noclick="1" y="8i"/>
+			</widgetstate>
+		</button>
+		<panel name="codex_roulette_item_root" noclick="1" onframelua="HoN_Codex:UpdateRoulette()">
+			<panel name="codex_roulette_item_capture" width="120h" height="80h" align="center" valign="center" color="invisible" noclick="1"/>
+		</panel>
+		<button name="codex_roulette_start"
+			align="center" valign="center"
+			width="256i"
+			height="256i"
+			color="invisible"
+			onclicklua="HoN_Codex:OnClickFreeRoulette()"
+			usebitmask="1"
+			bitmaskfile="/ui/fe2/codex/start_btn.png"
+			onclick="PlaySound('/ui/fe2/codex/sounds/startrolling.ogg')"
+			onmouseover="PlaySound('/shared/sounds/ui/button_over_01.wav')"
+			visible="0"
+		>
+			<widgetstate statename="up">
+				<image texture="/ui/fe2/codex/start_btn.png" noclick="1"/>
+				<image texture="/ui/fe2/codex/arrow.png" x="50i" y="22i" width="64i" height="64i" align="center" valign="center" noclick="1"/>
+				<label font="keny_52" x="-18i" y="24i" textvalign="center" textalign="center" color="white" content="graffiti_roulette_start" outline="1" outlinecolor="#0c547e" noclick="1"/>
+				<label name="codex_roulette_freetimes1" font="square_22" y="65i" textvalign="center" textalign="center" color="white" outline="1" outlinecolor="#0c547e" noclick="1"/>
+			</widgetstate>
+			<widgetstate statename="over">
+				<image texture="/ui/fe2/codex/start_btn_over.png" noclick="1"/>
+				<image texture="/ui/fe2/codex/arrow.png" x="50i" y="22i" width="64i" height="64i" align="center" valign="center" noclick="1"/>
+				<label font="keny_52" x="-18i" y="24i" textvalign="center" textalign="center" color="white" content="graffiti_roulette_start" outline="1" outlinecolor="#0c547e" noclick="1"/>
+				<label name="codex_roulette_freetimes2" font="square_22" y="65i" textvalign="center" textalign="center" color="white" outline="1" outlinecolor="#0c547e" noclick="1"/>
+			</widgetstate>
+			<widgetstate statename="down" x="1" y="1">
+				<image texture="/ui/fe2/codex/start_btn_over.png" noclick="1"/>
+				<image texture="/ui/fe2/codex/arrow.png" x="50i" y="22i" width="64i" height="64i" align="center" valign="center" noclick="1"/>
+				<label font="keny_52" x="-18i" y="24i" textvalign="center" textalign="center" color="white" content="graffiti_roulette_start" outline="1" outlinecolor="#0c547e" noclick="1"/>
+				<label name="codex_roulette_freetimes3" font="square_22" y="65i" textvalign="center" textalign="center" color="white" outline="1" outlinecolor="#0c547e" noclick="1"/>
+			</widgetstate>
+			<!-- <modelpanel
+					width="-100i" 
+					height="-100i"
+					align="center" 
+					valign="center"
+					noclick="1"
+					model="/ui/fe2/codex/effects/hexagon.mdf"
+					cameradistance="0"
+					lookat="false"
+					camerapos="0 200 0"
+					cameraangles="0 0 180"
+					camerafov="50"
+					cameranear="0"
+					camerafar="190"
+					ambientcolor="1 1 1"
+					suncolor="1 1 1"
+					onshow="
+						SetEffect('/ui/fe2/codex/effects/hexagon.effect');
+					"
+			/> -->
+		</button>
+
+		<button name="codex_roulette_boost"
+			align="center" valign="center"
+			width="256i" 
+			height="256i"
+			color="invisible"
+			onclicklua="HoN_Codex:OnClickBoost()"
+			usebitmask="1"
+			bitmaskfile="/ui/fe2/codex/start_btn.png"
+			onclick="PlaySound('/ui/fe2/codex/sounds/ok.ogg')"
+			onmouseover="PlaySound('/shared/sounds/ui/button_over_01.wav')"
+			visible="0"
+		>
+			<widgetstate statename="up">
+				<image texture="/ui/fe2/codex/boost_btn.png" noclick="1"/>
+				<image texture="/ui/fe2/codex/arrow2.png" x="50i" y="22i" width="64i" height="64i" align="center" valign="center" noclick="1"/>
+				<image texture="/ui/fe2/codex/gold1.png" x="-25i" y="60i" width="32i" height="32i" align="center" valign="center" noclick="1"/>
+				<label font="keny_52" x="-18i" y="24i" textvalign="center" textalign="center" color="white" content="graffiti_roulette_boost" outline="1" outlinecolor="#8b031e" noclick="1"/>
+				<label name="codex_roulette_price1" x="14i" font="square_22" y="63i" textvalign="center" textalign="center" color="white" outline="1" outlinecolor="#8b031e" noclick="1"/>
+			</widgetstate>
+			<widgetstate statename="over">
+				<image texture="/ui/fe2/codex/boost_btn_over.png" noclick="1"/>
+				<image texture="/ui/fe2/codex/arrow2.png" x="50i" y="22i" width="64i" height="64i" align="center" valign="center" noclick="1"/>
+				<image texture="/ui/fe2/codex/gold1.png" x="-25i" y="60i" width="32i" height="32i" align="center" valign="center" noclick="1"/>
+				<label font="keny_52" x="-18i" y="24i" textvalign="center" textalign="center" color="white" content="graffiti_roulette_boost" outline="1" outlinecolor="#8b031e" noclick="1"/>
+				<label name="codex_roulette_price2" x="14i" font="square_22" y="63i" textvalign="center" textalign="center" color="white" outline="1" outlinecolor="#8b031e" noclick="1"/>
+			</widgetstate>
+			<widgetstate statename="down" x="1" y="1">
+				<image texture="/ui/fe2/codex/boost_btn_over.png" noclick="1"/>
+				<image texture="/ui/fe2/codex/arrow2.png" x="50i" y="22i" width="64i" height="64i" align="center" valign="center" noclick="1"/>
+				<image texture="/ui/fe2/codex/gold1.png" x="-25i" y="60i" width="32i" height="32i" align="center" valign="center" noclick="1"/>
+				<label font="keny_52" x="-18i" y="24i" textvalign="center" textalign="center" color="white" content="graffiti_roulette_boost" outline="1" outlinecolor="#8b031e" noclick="1"/>
+				<label name="codex_roulette_price3" x="14i" font="square_22" y="63i" textvalign="center" textalign="center" color="white" outline="1" outlinecolor="#8b031e" noclick="1"/>
+			</widgetstate>
+			<!-- <modelpanel
+					width="-100i" 
+					height="-100i"
+					align="center" 
+					valign="center"
+					noclick="1"
+					model="/ui/fe2/codex/effects/hexagon.mdf"
+					cameradistance="0"
+					lookat="false"
+					camerapos="0 100 0"
+					cameraangles="0 0 180"
+					camerafov="50"
+					cameranear="0"
+					camerafar="190"
+					ambientcolor="1 1 1"
+					suncolor="1 1 1"
+					onshow="
+						SetEffect('/ui/fe2/codex/effects/hexagon.effect');
+					"
+			/> -->
+		</button>
+
+
+		<image name="codex_roulette_noroulette" align="center" valign="center" width="256i" height="256i" texture="/ui/fe2/codex/noroulette.png" />
+
+		<image texture="/ui/fe2/codex/item_mask.png" align="right" valign="center" width="1024i" height="1024i" x="-50%" noclick="1"/>
+		<image texture="/ui/fe2/codex/item_mask.png" align="left" valign="center" x="50%" width="1024i" height="1024i" noclick="1" hflip="1"/>
+
+		<button width="256i" height="70i" y="-40i" align="center" valign="bottom" color="invisible" 
+				onclicklua="GetWidget('codex_roulette_history'):FadeIn(250)
+							SubmitForm('FormGetLotteryHistory',  'account_id', Client.GetAccountID(), 'cookie', Client.GetCookie())"
+				onclick="PlaySound('/ui/fe2/codex/sounds/ok.ogg')"
+				onmouseover="PlaySound('/shared/sounds/ui/button_over_01.wav')"
+		>
+			<widgetstate statename="up">
+				<image y="8i" width="256i" height="128i" align="center" valign="center" texture="/ui/fe2/codex/history_btn.png" noclick="1"/>
+				<label font="keny_36" x="95i" y="5i" textvalign="center" color="white" content="graffiti_roulette_history" shadow="1" shadowcolor="#0081b2"/>
+			</widgetstate>
+			<widgetstate statename="over">
+				<image y="8i" width="256i" height="128i" align="center" valign="center" texture="/ui/fe2/codex/history_btn_over.png" noclick="1"/>
+				<label font="keny_36" x="95i" y="5i" textvalign="center" color="white" content="graffiti_roulette_history" shadow="1" shadowcolor="#0081b2"/>
+			</widgetstate>
+			<widgetstate statename="down" x="1" y="1">
+				<image y="8i" width="256i" height="128i" align="center" valign="center" texture="/ui/fe2/codex/history_btn_over.png" noclick="1"/>
+				<label font="keny_36" x="95i" y="5i" textvalign="center" color="white" content="graffiti_roulette_history" shadow="1" shadowcolor="#0081b2"/>
+			</widgetstate>
+		</button>
+
+		<panel name="codex_roulette_mask" visible="0"/>
+
+		<panel name="codex_roulette_result" noclick="1" width="512i" height="512i" onframelua="" align="center" valign="center" visible="0">
+			<image texture="/ui/fe2/codex/win_back.png" y="2%" align="center" valign="center" noclick="1" />
+			<modelpanel
+					width="-100i" 
+					height="-100i"
+					align="center" 
+					valign="center"
+					noclick="1"
+					model="/shared/models/invis.mdf"
+					cameradistance="0"
+					lookat="false"
+					camerapos="0 200 0"
+					cameraangles="0 0 180"
+					camerafov="50"
+					cameranear="0"
+					camerafar="190"
+					ambientcolor="1 1 1"
+					suncolor="1 1 1"
+					onshow="
+						SetEffect('/ui/fe2/codex/effects/win.effect');
+					"
+			/>
+			<instance name="codex_roulette_item_template" id="100" width="29%" height="29%"/>
+			<image texture="/ui/fe2/codex/win_center.png" width="50%" height="50%" align="center" valign="center" noclick="1" />
+			<instance name="codex_ok_button_template" width="25%" height="10%" align="center" valign="bottom" y="-15%" onclicklua="HoN_Codex:OnClickRouletteResultOK()"/>
+		
+			<panel align="center" valign="center" height="8%" y="18%">
+				<label name="codex_roulette_result_rewardname" font="square_18" textvalign="center" textalign="center" color="#7f7f7f" outline="1" outlinecolor="black" noclick="1" content=""/>
+			</panel>
+
+			<panel align="center" valign="center" width="60%" height="8%" y="18.5%">
+				<label name="codex_roulette_result_rewardname2" font="square_18" textvalign="center" textalign="center" color="white" outline="1" wrap="1" outlinecolor="black" noclick="1" content=""/>
+			</panel>
+			<image name="codex_roulette_result_duplicated" y="51i" align="center" valign="center" width="256i" height="64i" texture="/ui/fe2/codex/duplicated.png" noclick="1" visible="0"/>
+
+		</panel>
+
+		<panel name="codex_roulette_history" color="0 0 0 .8" visible="0">
+			<image texture="/ui/fe2/codex/list_back.png" width="1024i" height="1024i" align="center" valign="center" noclick="1" />
+			<button width="40i" height="40i" x="230i" y="-320i" align="center" valign="center" color="invisible" onclicklua="GetWidget('codex_roulette_history'):FadeOut(250)" onclick="PlaySound('/ui/fe2/codex/sounds/cancel.ogg')" onmouseover="PlaySound('/shared/sounds/ui/button_over_01.wav')">
+				<widgetstate statename="up">
+					<image width="80i" height="80i" align="center" valign="center" texture="/ui/fe2/codex/close_up.png" noclick="1" y="8i"/>
+				</widgetstate>
+				<widgetstate statename="over">
+					<image width="80i" height="80i" align="center" valign="center" texture="/ui/fe2/codex/close_over.png" noclick="1" y="8i"/>
+				</widgetstate>
+				<widgetstate statename="down" x="1" y="1">
+					<image width="80i" height="80i" align="center" valign="center" texture="/ui/fe2/codex/close_over.png" noclick="1" y="8i"/>
+				</widgetstate>
+			</button>
+
+			<image x="-200i" y="205i" texture="/ui/fe2/codex/icon_history.png" width="64i" height="64i" noclick="1" align="center"/>
+			<panel y="210i" height="64i" noclick="1">
+				<label font="keny_58" textalign="center" textvalign="center" color="#2fbff5" content="graffiti_roulette_history_title" noclick="1"/>
+			</panel>
+
+			<panel x="-30i" y="292i" width="528i" height="580i" float="bottom" padding="1" align="center">
+				<instance name="codex_roulette_history_item_template" id="1"/>
+				<instance name="codex_roulette_history_item_template" id="2"/>
+				<instance name="codex_roulette_history_item_template" id="3"/>
+				<instance name="codex_roulette_history_item_template" id="4"/>
+				<instance name="codex_roulette_history_item_template" id="5"/>
+				<instance name="codex_roulette_history_item_template" id="6"/>
+				<instance name="codex_roulette_history_item_template" id="7"/>
+				<instance name="codex_roulette_history_item_template" id="8"/>
+				<instance name="codex_roulette_history_item_template" id="9"/>
+				<instance name="codex_roulette_history_item_template" id="10"/>
+				<instance name="codex_roulette_history_item_template" id="11"/>
+				<instance name="codex_roulette_history_item_template" id="12"/>
+			</panel>
+			<panel x="-30i" y="292i" width="528i" height="580i" float="bottom" processonlyscroll="1"  hover="false" align="center"
+					onmousewheeldown="CallEvent('codex_roulette_history_scrollbar', 1);"
+					onmousewheelup="CallEvent('codex_roulette_history_scrollbar', 0);" />
+				
+			<scrollbar  name="codex_roulette_history_scrollbar"
+						align="center"
+						x="262i" y="278i"
+						width="1.2h" height="590i"
+						scrollbarsize="1.2h"
+						handlewidth="1.2h"
+						handleheight="10h"							
+						texture="/ui/fe2/codex/scroll/scroll.png"
+						scrollbarplaceholder="true"
+						minvalue="1"
+						maxvalue="10"							
+						step="1"
+						value="1"
+						vertical="true"
+						slotwidth="0.6h" slotheight="1"
+						onevent1="SetValue(GetValue+1);"
+						onevent0="SetValue(GetValue-1);"
+						onslidelua="HoN_Codex:RefreshRouletteHistory()"
+			/>
+		</panel>
+	</panel>
+
+	<panel name="codex_roulette_tip" width="200i" height="60i" color="0 0 0 .8" visible="0" noclick="1" onframelua="HoN_Codex:OnTipMouseMove()">
+		<label name="codex_roulette_tip_text" font="square_18" width="-10i" align="center" textalign="center" textvalign="center" color="#7f7f7f" wrap="1" content="" noclick="1"/>
+	</panel>
+
+	<panel name="codex_popup" color="0 0 0 .8" visible="0">
+		<image y="-60i" width="1024i" height="512i" align="center" valign="center" texture="/ui/fe2/codex/popup_back.png" noclick="1" />
+		<image x="-80i" y="-170i" width="64i" height="64i" align="center" valign="center" texture="/ui/fe2/codex/icon_confirm.png" noclick="1"/>
+		<panel y="-170i" valign="center" height="64i" noclick="1">
+			<label x="20i" y="2i" font="keny_58" textalign="center" textvalign="center" color="#2fbff5" content="graffiti_confirm"/>
+		</panel>
+		<button width="40i" height="40i" x="255i" y="-185i" align="center" valign="center" color="invisible" onclicklua="GetWidget('codex_popup'):FadeOut(250)" onclick="PlaySound('/ui/fe2/codex/sounds/cancel.ogg')" onmouseover="PlaySound('/shared/sounds/ui/button_over_01.wav')">
+			<widgetstate statename="up">
+				<image width="80i" height="80i" align="center" valign="center" texture="/ui/fe2/codex/close_up.png" noclick="1" y="8i"/>
+			</widgetstate>
+			<widgetstate statename="over">
+				<image width="80i" height="80i" align="center" valign="center" texture="/ui/fe2/codex/close_over.png" noclick="1" y="8i"/>
+			</widgetstate>
+			<widgetstate statename="down" x="1" y="1">
+				<image width="80i" height="80i" align="center" valign="center" texture="/ui/fe2/codex/close_over.png" noclick="1" y="8i"/>
+			</widgetstate>
+		</button>
+
+		<panel y="-85i" align="center" valign="center" width="430i" height="100i" >
+			<label name="codex_popup_text" font="square_22" textalign="center" textvalign="center" color="#7f7f7f" wrap="1" content="" noclick="1"/>
+		</panel>
+		<instance name="codex_ok_button_template" button_name="codex_popup_confirm_btn" y="30i" width="128i" height="50i" align="center" valign="center"/>
+		
+		<panel name="codex_popup_price_root" x="-120i" y="25i" width="100i" height="50i" align="center" valign="center" noclick="1">
+			<image width="32i" height="32i" valign="center" noclick="1" texture="/ui/fe2/codex/gold2.png"/>
+			<label name="codex_popup_price" x="35i" y="3i" font="square_20" textalign="left" textvalign="center" color="white" content="" noclick="1"/>
+		</panel>
+	</panel>
+
+	<panel name="codex_mask" color="0 0 0 .8" visible="0" onshowlua="HoN_Codex:OnMaskShow()" onframelua="HoN_Codex:OnMaskFrame()"
+		watch="GraffitiWallsStatus" ontriggerlua="if tonumber(param) == 3 then HoN_Codex:OnTimeOut() end"
+		watch1="GetLotteryListStatus" ontrigger1lua="if tonumber(param) == 3 then HoN_Codex:OnTimeOut() end"
+		watch2="LotteryStatus" ontrigger2lua="if tonumber(param) == 3 then HoN_Codex:OnTimeOut() end"
+		watch4="BuyWallStatus" ontrigger4lua="if tonumber(param) == 3 then HoN_Codex:OnTimeOut() end"
+	>
+		<animatedimage texture="/ui/fe2/elements/store2/loading/loading_.png" width="512i" height="128i" align="center" valign="center"
+				fps="25" loop="true" loopbackframe="0" startframe="0" onshow="StartAnim();" />
+	</panel>
+</package>

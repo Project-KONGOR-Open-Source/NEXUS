@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+	<!-- current tabs
+		0 - 
+		1 - Overview
+		2 - GP/M
+		3 - XP/M
+		4 - Stats
+		5 - Damage
+		Not a thing - 6 - Kills
+		Not a thing - 7 - Creepscore
+		8 - Options
+	-->
+
+	<!-- templates for all these tables are in spec_info_tabs.package -->
+
+	<!-- 'bottom' section -->
+	<panel x="0" y="-2" width="75h" height="20h" valign="bottom" align="center" name="spec_bottom_parent" visible="1" noclick="true" color="0 0 0 0.0" >
+	
+		<panel noclick="1" valign="top" height="-2.9h" y="21.5h" name="spec_bottom_tabs" visible="0">
+			<instance id="1" name="specui_bottom_tab" />
+			<instance id="2" name="specui_bottom_tab" />
+			<instance id="3" name="specui_bottom_tab" />
+			<instance id="4" name="specui_bottom_tab" />
+			<instance id="5" name="specui_bottom_tab" />
+			<instance id="6" name="specui_bottom_tab" />
+			<instance id="7" name="specui_bottom_tab" />
+			<instance id="8" name="specui_bottom_tab" />
+		</panel>	
+	
+		<panel y="1.0h" noclick="1" valign="bottom" height="3.8h" float="right">
+			<instance name="specui_bottom_header_tab" id="1" lbl="specui_tab_players" fittoplayers="true" />
+			<instance name="specui_bottom_header_tab" id="2" lbl="specui_tab_stats" fittoplayers="true" />
+			<instance name="specui_bottom_header_tab" id="3" lbl="specui_tab_gpm" />
+			<instance name="specui_bottom_header_tab" id="4" lbl="specui_tab_xpm" />
+			<!--
+				<instance name="specui_bottom_header_tab" id="5" lbl="Creeps" />
+			-->
+			<instance name="specui_bottom_header_tab" id="5" lbl="specui_tab_damage" />
+			<!--
+				<instance name="specui_bottom_header_tab" id="6" lbl="Kills" width="11.66h" />
+			-->
+			<instance name="specui_bottom_header_tab_options" id="8" lbl="" parentheight="24.5h" />
+		</panel>
+	</panel>
+</package>

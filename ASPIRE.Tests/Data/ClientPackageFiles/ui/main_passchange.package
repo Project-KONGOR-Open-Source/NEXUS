@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+
+	<trigger name="PasswordSubmit"/>
+
+	<panel name="handle_logout_fade_dummy" color="invisible" visible="false" />
+
+	<template name="passwordchange_field">
+		<panel height="2.4h" color="invisible" align="center" width="-2.0h" noclick="1">
+			<label name="{fieldname}_label" width="100%" height="100%" textvalign="center" valign="center" align="center" font="dyn_10" color="white" shadow="true" shadowcolor="black" noclick="true" content="{label}" watch="UpdateCreateAccountForm" ontrigger="{ontrigger}"/>
+			<image x="-45%" width="70@" height="50%" valign="center" align="right" texture="/ui/info/arrow.tga" />
+			<panel width="45%" align="right">
+				<panel width="{fieldwidth=100%}" height="100%" valign="center" align="left" color="0 0 0 1">
+					<instance name="field" widgetname="{fieldname}" order="{order}" passchar="{passchar=}" maxlength="{maxlength=-1}" form="{form=}" data="{data=}" onchange="{onchange=}" onlosefocus="{onlosefocus=}"/>
+				</panel>
+			</panel>
+		</panel>
+	</template>
+
+	<panel name="change_expired_password" color="0 0 0 .7" visible="true" 
+		onload="HideWidget('change_expired_password');"
+		watch="LoginStatus" 
+		ontrigger="
+				   If(!VarExists('_cancel_change_password'), CreateInt('_cancel_change_password', 0));
+				   If(_cancel_change_password != 1 and param3 > 0, Call('change_expired_password', 'FadeIn(1500);'));
+				   "
+		watch1="ClientLoginExpired" 
+		ontrigger1="If(param0 == 0, Call('change_expired_password', 'FadeIn(1500);'))" 
+		watch2="ChangePasswordStatus"
+		ontrigger2="
+			If(StringEquals(param0, 'success'), 
+			Split(
+				Call('change_expired_password', 'SleepWidget(3000, \'FadeOut(1500);\');'),
+				Set('login_password', ''),
+				Call('main_login_password', 'Clear();'),
+				Call('handle_logout_fade_dummy', 'SleepWidget(5250, \'Logout();\');')
+				),
+			Split(
+				Call('new_password', 'SetInputLine(\'\');'),
+				Call('confirm_password', 'SetInputLine(\'\');')
+				)
+			);"
+		watch3="ClientLoginError"
+		ontrigger3="If(param0 == 1, FadeOut('1500'));"
+			
+	>
+
+		<panel grow="true" width="50.0h" align="center" valign="center" noclick="true" color="1 1 1 .1">
+
+			<instance name="header_bar" align="center" height="2.7h" lbl="Password Update Required" show_close="1" onclick="HideWidget('change_expired_password');"/>
+
+			<panel grow="true" y="2.7h" width="100%" color="0 0 0 1" align="center" noclick="1">
+				<frame color=".05 .07 .1 .5" bordercolor="#455166" borderthickness="1" noclick="1" />
+
+				<panel grow="true" width="100%" color="invisible" float="bottom" padding="1.0h" noclick="true">
+
+					<panel y="0.6h" grow="true" width="-1.0h" color="invisible" align="center" noclick="1">
+						<frame texture="/ui/info/backdrop.tga" borderthickness="2.0h" color="1 1 1 .5" noclick="1" />
+						<frame color="invisible" bordercolor="#455166" borderthickness="1" noclick="1" />
+						<panel grow="true" width="100%" float="bottom" noclick="true">
+							<label y="0.6h" fity="true" fitypadding="0.6h" width="-1.2h" align="center" textalign="center" color="red" wrap="true" font="dyn_14" shadow="true" content="Your password is expired or is set to expire soon!"/>
+							<label fity="true" fitypadding="0.6h" width="-1.2h" align="center" textalign="left" color="white" wrap="true" font="dyn_10" shadow="true" content="Once your password has expired you will no longer be able to play Heroes of Newerth until you change it.  Please choose a new password now to avoid any gameplay interruptions."/>
+						</panel>
+					</panel>
+
+					<panel grow="true" width="-1.0h" color="invisible" align="center" noclick="1">
+						<frame color="invisible" bordercolor="#455166" borderthickness="1" noclick="1" />
+						<panel grow="true" width="100%" float="bottom" noclick="true">
+							<label y="0.6h" fity="true" fitypadding="0.6h" width="-1.2h" align="center" textalign="left" color="white" wrap="true" font="dyn_9" shadow="true" content="^yNote:^* You can not reuse your old password, and your new password must be at least six characters long."/>
+						</panel>
+					</panel>
+
+					<instance
+						name="passwordchange_field"
+						label="New Password"
+						order="50"
+						passchar="*"
+						fieldname="new_password"
+						form=""
+						data=""
+						onchange="Trigger('PasswordSubmit', true, '');"
+					/>
+
+					<instance
+						name="passwordchange_field"
+						label="Confirm Password"
+						order="51"
+						passchar="*"
+						fieldname="confirm_password"
+						form=""
+						data=""
+						onchange="Trigger('PasswordSubmit', true, '');"
+					/>
+
+					<panel width="-1.0h" height="1" color="invisible" align="center" noclick="1"/>
+
+					<instance
+						grow="true"
+						name="button2" button_name="unnamedButton45"
+						width="55%" height="2.4h"
+						align="center"
+						label="Set New Password"
+						enabled="false"
+						valign="bottom"
+						watch="PasswordSubmit"
+						ontrigger="
+							SetEnabled(
+								!StringEmpty(new_password) and
+								!StringEmpty(confirm_password) and
+								StringLength(new_password) > 5 and
+								StringLength(confirm_password) > 5 and
+								!StringEquals(login_password, MD5(new_password)) and
+								StringEquals(new_password, confirm_password)
+								);						
+							"
+						onclick="ChangePassword(MD5(new_password), MD5(confirm_password));CreateInt('_cancel_change_password', 1);ShowWidget('change_expired_password_status');"
+					/>
+
+					<instance
+						grow="true"
+						name="button2" button_name="unnamedButton46"
+						width="55%" height="2.4h"
+						align="center"
+						label="Cancel, Not Now"
+						enabled="false"
+						valign="bottom"
+						watch="LoginStatus"
+						ontrigger="
+							If(param3 == 0,
+								SetEnabled(false),
+								SetEnabled(true)
+							);
+							"
+						onclick="HideWidget('change_expired_password');CreateInt('_cancel_change_password', 1);"
+					/>
+
+					<panel width="-1.0h" height="1h" color="invisible" align="center" noclick="1"/>
+
+
+				</panel>
+
+			</panel>
+
+
+			<panel
+				name="change_expired_password_status" 
+				y="-1"
+				height="-3.0h" width="-2"
+				color="0 0 0 .8"
+				align="center" valign="bottom"
+				noclick="1"
+				watch="ChangePasswordStatus"
+				ontrigger="
+					If(StringEquals(param0, 'unused'), 
+						SetVisible(false), 
+						SetVisible(true)
+					);
+					
+					If(StringEquals(param0, 'failure'), 
+						Call('change_expired_password_status', 'SleepWidget(3000, \'FadeOut(1500);\');')
+					);
+					"
+				watch1="ClientLoginError"
+				ontrigger1="If(param0 == 1, FadeOut('1500'));"
+			>
+				<panel grow="true" width="100%" valign="center" noclick="true">
+					<label name="change_expired_pass_status_text" y="0.6h" fity="true" fitypadding="0.4h" 
+						width="-3.0h" align="center" textalign="center" 
+						color="0 1 0 1" wrap="true" font="dyn_12" 
+						shadow="true" content="" grow="true" 
+						watch="ChangePasswordStatus"
+						ontrigger="If(!StringEquals(param0, 'unused'), SetText(param1));"
+					/>
+				</panel>
+			</panel>
+		
+		</panel>
+
+	</panel>
+	
+	
+
+	
+	
+</package>

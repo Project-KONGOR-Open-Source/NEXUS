@@ -1,0 +1,949 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+
+	<trigger name="SPClearUserEntries" />
+	<trigger name="SPToggleUserEntries" />
+	<trigger name="ShowCreateGroupPanel" />
+
+	<template name="social_panel_group_creation" >
+		<panel name="social_panel_create_group" height="24.0h" width="22h.0h" y="0.6h" color="invisible" visible="0" noclick="0" >
+
+			<frame texture="/ui/frames/rounded_bg_doubleedge.tga" borderthickness="0.8h" color=".1 .1 .1 1" noclick="true"/>
+			<frame texture="/ui/frames/roundframe.tga" borderthickness="0.8h" color=".2 .2 .2 1" noclick="true" />
+
+			<panel y="0.4h" width="-1.2h" align="center" height="3.0h" valign="top" noclick="true" >
+				<frame texture="/ui/frames/rounded_bg_flat.tga" borderthickness="0.6h" color="#192130" blockinput="false" noclick="true"/>
+				<frame texture="/ui/frames/roundframe.tga" color="#30405d" borderthickness="0.6h" blockinput="false" noclick="true"/>
+				<label textalign="center" height="100%" textvalign="center" font="dyn_14" color="1 1 1 1" shadow="true" content="social_assign_a_group" noclick="true"  />
+				<!-- Close -->
+				<button
+					x="-0.4h"
+					width="2.0h" height="2.0h"
+					align="right"
+					valign="center"
+					color="invisible"
+					onclick="PlaySound('/shared/sounds/ui/ccpanel/button_close_02.wav'); Call('social_panel_create_group', 'FadeOut(50);'); Call('generic_are_you_sure_no', 'DoEvent();');"
+					onmouseover="PlaySound('/shared/sounds/ui/ccpanel/button_over_01.wav');"
+				>
+					<widgetstate statename="up">
+						<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.5h" color="#910000" blockinput="false" noclick="true"/>
+						<frame texture="/ui/frames/roundframe.tga" color="0 0 0 1" borderthickness="0.5h" blockinput="false" noclick="true"/>
+						<image width="1.3h" height="1.3h" align="center" valign="center" color=".75 .75 .75 1" texture="/ui/elements/closex.tga" noclick="true" />
+					</widgetstate>
+					<widgetstate statename="over">
+						<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.5h" color="#dc0000" blockinput="false" noclick="true"/>
+						<frame texture="/ui/frames/roundframe.tga" color="0 0 0 1" borderthickness="0.5h" blockinput="false" noclick="true"/>
+						<image width="1.3h" height="1.3h" align="center" valign="center" color="1 1 1 1" texture="/ui/elements/closex.tga" noclick="true" />
+					</widgetstate>
+					<widgetstate statename="down" x="1" y="1">
+						<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.5h" color="#910000" blockinput="false" noclick="true"/>
+						<frame texture="/ui/frames/roundframe.tga" color="0 0 0 1" borderthickness="0.5h" blockinput="false" noclick="true"/>
+						<image width="1.3h" height="1.3h" align="center" valign="center" color="1 1 1 1" texture="/ui/elements/closex.tga" noclick="true" />
+					</widgetstate>
+				</button>
+			</panel>
+
+			<panel name="sp_group_listbox_panel" y="4.0h" x="0" width="-1.6h" height="12.6h" align="center" valign="top">
+				<listbox
+					name="sp_group_listbox"
+					x="0.3h"
+					width="-2.7h" height="-0.6h"
+					valign="center"
+					color="invisible"
+					font="dyn_10"
+					itemwidth="100%"
+					itemheight="2.5h"
+					select="true"
+					clearselection="true"
+					hoverselect="true"
+					hoverhighlight="true"
+					highlight="under"
+					highlightcolor="#46adff42"
+					highlightbordercolor="invisible"
+					selectedcolor="#346dff52"
+					selectedbordercolor="invisible"
+					backgroundimage="/ui/fe2/elements/comm_item_bg.tga"
+					backgroundimagecolor="#1d2f3b"
+					colortransition="true"
+					colortransitiontime="250"
+					exteriorscrollbars="true"
+					scrollbarplaceholder="true"
+					scrollbarsize="2.0h"
+					scrolltexture="/ui/info/combobox.tga"
+					handleheight="2.0h"
+					onclick=""
+					ondoubleclick=""
+					onselectlua="UIManager.GetInterface('main'):HoNSocialPanelF('GroupListSelectInput', self:GetValue() )"
+				/>
+				<frame color="invisible" borderthickness="1" bordercolor="#2c3a53" noclick="true" />
+			</panel>
+
+			<panel visible="1" valign="bottom" y="-3.8h" width="-1.8h" height="2.4h" align="center" noclick="1" sticky="0" stickytoinvis="0" >
+				<panel name="sp_group_dyn_button" noclick="0" align="center" onclick="" onmouseover="Call('sp_group_dyn_button_frame', 'SetVisible(1);');" onmouseout="Call('sp_group_dyn_button_frame', 'SetVisible(0);');" >
+					<frame name="sp_group_dyn_button_frame" visible="0" texture="/ui/frames/rounded_bg_solid.tga" borderthickness="0.4h" color="#39c6ff44" blockinput="false" noclick="true"/>
+					<frame texture="/ui/frames/roundframe.tga" valign="center" color="#39c6ff77" borderthickness="0.4h" blockinput="false" noclick="true"/>
+					<label name="sp_group_dyn_label" width="100%" fity="1" valign="center" textalign="center" textvalign="center" font="dyn_10" color="#39c6ff" shadow="true" content="social_select_a_group" noclick="1" underline="1" />
+				</panel>
+			</panel>
+
+			<panel x="1h" y="-0.8h" height="2.4h" valign="bottom" width="-1.8h" noclick="true">
+				<frame texture="/ui/frames/rounded_bg_solid.tga" borderthickness="0.4h" color="0 0 0 0.6" blockinput="false" noclick="true"/>
+				<frame texture="/ui/frames/roundframe.tga" color=".3 .3 .3 1" borderthickness="0.4h" blockinput="false" noclick="true"/>
+				<textbox
+					name="sp_textbox_group_input"
+					hmargin="0.5h" vmargin="0.4h"
+					maxlength="250"
+					textalign="left" textvalign="center"
+					font="dyn_10"
+					textcolor="white"
+					shadow="false"
+					color="invisible"
+					onenter="SetFocus(false);"
+					onshow="EraseInputLine(); SetFocus(false);"
+					onhide="EraseInputLine(); SetFocus(false); Call('sp_group_input_cover', 'SetVisible(1)');"
+					onesc="EraseInputLine(); SetFocus(false);"
+					onchangelua="
+						UIManager.GetInterface('main'):HoNSocialPanelF('GroupInputBoxUpdate', self:GetValue() )"
+					onfocus="
+						Call('sp_group_input_cover', 'SetVisible(0)');
+					"
+					onlosefocus="
+						if(StringEmpty(''#this),
+							Call('sp_group_input_cover', 'SetVisible(1)')
+						);
+					"
+					onlosefocuslua="UIManager.GetInterface('main'):HoNSocialPanelF('GroupInputBoxUpdate', nil )"
+				/>
+				<label name="sp_group_input_cover" x="1h" y="0" width="-0.5h" height="-0.4h" valign="center" align="center" textvalign="center" font="dyn_10" color="white" shadow="true" content="social_panel_enter_group" noclick="1" />
+
+			</panel>
+
+		</panel>
+	</template>
+
+	<template name="user_left_menu_item">
+		<panel height="2.8h" width="98%" align="center"
+			name="user_left_menu_item_{index}"
+			onevent="SetVisible({condition=true});"
+			oneventlua="if ({conditionlua=nil} ~= nil) then self:SetVisible({conditionlua=1}) end"
+			visible="0"
+			group="{group_name}"
+			sticky="0" stickytoinvis="0"
+			onclick="{command}; Call('{parent}', 'DoEvent(1);');"
+			onclicklua="{commandlua}"
+			onrightclick="Call('{parent}', 'DoEvent(1);');"
+			onmouseover="PlaySound('/shared/sounds/ui/ccpanel/button_over_02.wav'); Call('user_left_menu_item_{index}_highlight', 'FadeIn(75);');"
+			onmouseout="Call('user_left_menu_item_{index}_highlight', 'FadeOut(75);');"
+			noclick="0"
+		>
+			<panel width="-0.4h" height="100%" x="-0.1h" align="center" valign="top" name="user_left_menu_item_{index}_highlight" visible="0" noclick="1">
+				<frame texture="/ui/frames/togglebox.tga" borderthickness="0.8h" color="1 1 1 1" noclick="1"/>
+				<frame texture="/ui/frames/roundframe.tga" color="#0a4880" borderthickness="0.6h" noclick="1"/>
+			</panel>
+			<label x="1.0h" color="{textcolor=white}" font="dyn_10" outline="true" textvalign="center" noclick="1">{label}</label>
+		</panel>
+	</template>
+
+	<template name="user_left_menu">
+		<panel name="{panel_name}"
+			x="{x=0}" y="{y=0}"
+			width="{width}"
+			align="{align}"
+			valign="top"
+			onevent="GroupCall('{group_name}', 'DoEvent();');"
+			onevent1="SlideX(0, 200); FadeOut(200);"
+			onevent3="SlideX(0, 200); FadeOut(200);"
+			onevent1lua="UIManager.GetInterface('main'):HoNSocialPanelF('ClosedLeftMenu')"
+			onevent2="SetX(0); SlideX('-100%', 200); FadeIn(200);"
+			visible="0"
+			noclick="0"
+			color="invisible"
+			grow="1" regrow="1" growinvis="0"
+		>
+ 	 		<frame texture="/ui/frames/togglebox.tga" borderthickness="1.4h" color="1 1 1 1" noclick="1"/>
+
+			<panel y="0.5h" float="bottom" grow="1" regrow="1" growinvis="0" width="100%">
+				<!-- New Header -->
+				<panel name="user_left_menu_header_new" height="2.8h" width="98%" align="center" float="right" padding="0.2h" noclick="true" visible="0" sticky="0" stickytoinvis="0"
+					oneventlua="self:SetVisible(HoN_Social_Panel:IsPlayerNew(GetCvarString('ui_lastSelectedUser')))"
+					group="{group_name}"
+				>
+					<panel x="0.2h" width="100@" height="100%" noclick="true">
+						<image width="74@" height="74%" valign="center" align="center" texture="/ui/fe2/elements/social_marker_new.tga" color=".8 .8 .8 1" noclick="true" />
+					</panel>
+					<label font="dyn_11" color="#0cef57" outline="true" textvalign="center" content="sp_listlabel_newplayer" noclick="true" />
+					<panel x="0" height="1" width="-1.0h" align="center" valign="bottom" color=".9 .9 1 .1"  noclick="true" />
+				</panel>
+				<instance name="user_left_menu_item" parent="{panel_name}" index="1" group_name="{group_name}" command="PlaySound('/shared/sounds/ui/ccpanel/button_click_01.wav'); ChatOpenMessage(ui_lastSelectedUser);" label="ui_items_cc_right_click_send_message" condition="(!StringEquals(StripClanTag(GetAccountName()), ui_lastSelectedUser) and ChatUserOnline(ui_lastSelectedUser))" />
+				<instance name="user_left_menu_item" parent="{panel_name}" index="2" group_name="{group_name}" command="PlaySound('/shared/sounds/ui/ccpanel/button_click_01.wav'); Follow(StripClanTag(ui_lastSelectedUser)); Cmd('UICall * ChatRefresh()');" label="ui_items_cc_right_click_follow" condition="(!StringEquals(StripClanTag(GetAccountName()), ui_lastSelectedUser) and !IsFollowing(ui_lastSelectedUser))" />
+				<instance name="user_left_menu_item" parent="{panel_name}" index="3" group_name="{group_name}" command="PlaySound('/shared/sounds/ui/ccpanel/button_click_01.wav'); UnFollow(StripClanTag(ui_lastSelectedUser)); Cmd('UICall * ChatRefresh()');" label="ui_items_cc_right_click_unfollow" condition="(!StringEquals(StripClanTag(GetAccountName()), ui_lastSelectedUser) and IsFollowing(ui_lastSelectedUser))" />
+				<instance name="user_left_menu_item" parent="{panel_name}" index="4" group_name="{group_name}" command="PlaySound('/shared/sounds/ui/ccpanel/button_click_01.wav'); ChatJoinGame(ui_lastSelectedUser);" label="ui_items_cc_right_click_joing_game" condition="(!ChatInGame() and ChatUserInGame(ui_lastSelectedUser) and ChatHasServerInfo(ui_lastSelectedUser) and !StringEquals(StripClanTag(GetAccountName()), ui_lastSelectedUser))" />
+				<instance name="user_left_menu_item" parent="{panel_name}" index="5" group_name="{group_name}" command="PlaySound('/shared/sounds/ui/ccpanel/button_click_01.wav'); ChatOpenClanMessage();" label="ui_items_cc_right_click_message_clan" condition="(0 and IsInClan() and IsClanMember(ui_lastSelectedUser))" />
+				<instance name="user_left_menu_item" parent="{panel_name}" index="6" group_name="{group_name}" command="PlaySound('/shared/sounds/ui/ccpanel/button_click_01.wav'); Set('_player_stats_searchname', ui_lastSelectedUser); CallEvent('player_stats_submit'); Set('_mainmenu_currentpanel', 'player_stats'); If(!IsVisible('player_stats'), CallEvent('MainMenuPanelSwitcher'));" label="ui_items_cc_right_click_view_stats" />
+				<instance name="user_left_menu_item" parent="{panel_name}" index="7" group_name="{group_name}" command="PlaySound('/shared/sounds/ui/ccpanel/button_click_01.wav'); ChatAddBuddy(ui_lastSelectedUser);" label="ui_items_cc_right_click_add_buddy" condition="(!IsBuddy(ui_lastSelectedUser) and !StringEquals(StripClanTag(GetAccountName()), ui_lastSelectedUser))" />
+				<instance name="user_left_menu_item" parent="{panel_name}" index="8" group_name="{group_name}" command="PlaySound('/shared/sounds/ui/ccpanel/button_click_01.wav'); Trigger('ShowRemoveBuddyPanel');" label="ui_items_cc_right_click_remove_buddy" condition="(IsBuddy(ui_lastSelectedUser) and !StringEquals(StripClanTag(GetAccountName()), ui_lastSelectedUser))" />
+				<instance name="user_left_menu_item" parent="{panel_name}" index="9" group_name="{group_name}" command="PlaySound('/shared/sounds/ui/ccpanel/button_click_01.wav'); GameInvite(ui_lastSelectedUser);" label="ui_items_cc_right_click_invite_to_game" condition="(((IsPrivateGame() and IsHost()) or !IsPrivateGame()) and !StringEquals(StripClanTag(GetAccountName()), ui_lastSelectedUser) and ChatUserOnline(ui_lastSelectedUser) and ChatInGame() and !ChatUserInGame(ui_lastSelectedUser))" />
+				<instance name="user_left_menu_item" parent="{panel_name}" index="10" group_name="{group_name}" command="PlaySound('/shared/sounds/ui/ccpanel/button_click_01.wav'); GetUserInfo(ui_lastSelectedUser);" label="ui_items_cc_right_click_user_info" condition="(!StringEquals(StripClanTag(GetAccountName()), ui_lastSelectedUser))" />
+				<instance name="user_left_menu_item" parent="{panel_name}" index="11" group_name="{group_name}" command="PlaySound('/shared/sounds/ui/ccpanel/button_click_01.wav'); ChatChannelKick(ui_lastSelectedUser, ui_currentChannel);" label="ui_items_cc_right_click_channel_kick" condition="(!StringEquals(StripClanTag(GetAccountName()), ui_lastSelectedUser) and ChatGetAdminLevel(GetAccountName(), ui_currentChannel) gt ChatGetAdminLevel(ui_lastSelectedUser, ui_currentChannel))" />
+				<instance name="user_left_menu_item" parent="{panel_name}" index="12" group_name="{group_name}" command="PlaySound('/shared/sounds/ui/ccpanel/button_click_01.wav'); ChatChannelBan(ui_lastSelectedUser, ui_currentChannel);" label="ui_items_cc_right_click_channel_ban" condition="(!StringEquals(StripClanTag(GetAccountName()), ui_lastSelectedUser) and ChatGetAdminLevel(GetAccountName(), ui_currentChannel) gt ChatGetAdminLevel(ui_lastSelectedUser, ui_currentChannel))" />
+				<instance name="user_left_menu_item" parent="{panel_name}" index="13" group_name="{group_name}" command="PlaySound('/shared/sounds/ui/ccpanel/button_click_01.wav'); ChatChannelSilence(ui_lastSelectedUser, ui_currentChannel, 5);" label="ui_items_cc_right_click_channel_silence" condition="(!StringEquals(StripClanTag(GetAccountName()), ui_lastSelectedUser) and ChatGetAdminLevel(GetAccountName(), ui_currentChannel) gt ChatGetAdminLevel(ui_lastSelectedUser, ui_currentChannel))" />
+				<instance name="user_left_menu_item" parent="{panel_name}" index="14" group_name="{group_name}" command="PlaySound('/shared/sounds/ui/ccpanel/button_click_01.wav'); Trigger('ShowIgnorePanel');" label="ui_items_cc_right_click_ignore" condition="(!StringEquals(StripClanTag(GetAccountName()), ui_lastSelectedUser) and !ChatIsIgnored(ui_lastSelectedUser))" />
+				<instance name="user_left_menu_item" parent="{panel_name}" index="15" group_name="{group_name}" command="PlaySound('/shared/sounds/ui/ccpanel/button_click_01.wav'); ChatUnignore(ui_lastSelectedUser);" label="ui_items_cc_right_click_unignore" condition="(!StringEquals(StripClanTag(GetAccountName()), ui_lastSelectedUser) and ChatIsIgnored(ui_lastSelectedUser))" />
+				<instance name="user_left_menu_item" parent="{panel_name}" index="16" group_name="{group_name}" command="PlaySound('/shared/sounds/ui/ccpanel/button_click_01.wav'); Trigger('ShowAddBanPanel');" label="ui_items_cc_right_click_addban" condition="(!StringEquals(StripClanTag(GetAccountName()), ui_lastSelectedUser) and !ChatIsBanned(ui_lastSelectedUser))" />
+				<instance name="user_left_menu_item" parent="{panel_name}" index="17" group_name="{group_name}" command="PlaySound('/shared/sounds/ui/ccpanel/button_click_01.wav'); ChatRemoveBanlist(ui_lastSelectedUser);" label="ui_items_cc_right_click_remban" condition="(!StringEquals(StripClanTag(GetAccountName()), ui_lastSelectedUser) and ChatIsBanned(ui_lastSelectedUser))" />
+				<instance name="user_left_menu_item" parent="{panel_name}" index="18" group_name="{group_name}" command="PlaySound('/shared/sounds/ui/ccpanel/button_click_01.wav'); ChatChannelPromote(ui_lastSelectedUser, ui_currentChannel);" label="ui_items_cc_right_click_channel_promote" condition="(!StringEquals(StripClanTag(GetAccountName()), ui_lastSelectedUser) and ChatGetAdminLevel(GetAccountName(), ui_currentChannel) gt (ChatGetAdminLevel(ui_lastSelectedUser, ui_currentChannel) + 1))" />
+				<instance name="user_left_menu_item" parent="{panel_name}" index="19" group_name="{group_name}" command="PlaySound('/shared/sounds/ui/ccpanel/button_click_01.wav'); ChatChannelDemote(ui_lastSelectedUser, ui_currentChannel);" label="ui_items_cc_right_click_channel_demote" condition="(!StringEquals(StripClanTag(GetAccountName()), ui_lastSelectedUser) and ChatGetAdminLevel(GetAccountName(), ui_currentChannel) gt ChatGetAdminLevel(ui_lastSelectedUser, ui_currentChannel) and ChatIsAdmin(ui_lastSelectedUser, ui_currentChannel))" />
+				<instance name="user_left_menu_item" parent="{panel_name}" index="20" group_name="{group_name}" command="PlaySound('/shared/sounds/ui/ccpanel/button_click_01.wav'); ChatPromoteClanMember(ui_lastSelectedUser);" label="ui_items_cc_right_click_clan_promote" condition="(!StringEquals(StripClanTag(GetAccountName()), ui_lastSelectedUser) and IsClanMember(ui_lastSelectedUser) and ChatIsClanLeader(GetAccountName()) and !ChatIsClanLeader(ui_lastSelectedUser) and !ChatIsClanOfficer(ui_lastSelectedUser))" />
+				<instance name="user_left_menu_item" parent="{panel_name}" index="21" group_name="{group_name}" command="PlaySound('/shared/sounds/ui/ccpanel/button_click_01.wav'); ChatDemoteClanMember(ui_lastSelectedUser);" label="ui_items_cc_right_click_clan_demote" condition="(!StringEquals(StripClanTag(GetAccountName()), ui_lastSelectedUser) and IsClanMember(ui_lastSelectedUser) and ChatIsClanLeader(GetAccountName()) and !ChatIsClanLeader(ui_lastSelectedUser) and ChatIsClanOfficer(ui_lastSelectedUser))" />
+				<instance name="user_left_menu_item" parent="{panel_name}" index="22" group_name="{group_name}" command="PlaySound('/shared/sounds/ui/ccpanel/button_click_01.wav'); Trigger('ShowRemoveFromClanPanel');" label="ui_items_cc_right_click_clan_remove" condition="(!StringEquals(StripClanTag(GetAccountName()), ui_lastSelectedUser) and IsClanMember(ui_lastSelectedUser) and (ChatIsClanLeader(GetAccountName()) or ChatIsClanOfficer(GetAccountName())) and !ChatIsClanLeader(ui_lastSelectedUser) and !ChatIsClanOfficer(ui_lastSelectedUser))" />
+				<instance name="user_left_menu_item" parent="{panel_name}" index="23" group_name="{group_name}" command="PlaySound('/shared/sounds/ui/ccpanel/button_click_01.wav'); ChatInviteUserToClan(ui_lastSelectedUser);" label="ui_items_cc_right_click_clan_invite" condition="(!StringEquals(StripClanTag(GetAccountName()), ui_lastSelectedUser) and !ChatUserIsInClan(ui_lastSelectedUser) and (ChatIsClanLeader(GetAccountName()) or ChatIsClanOfficer(GetAccountName())))" />
+				<instance name="user_left_menu_item" parent="{panel_name}" index="24" group_name="{group_name}" command="PlaySound('/shared/sounds/ui/ccpanel/button_click_01.wav'); Trigger('ShowLeaveClanPanel');" label="ui_items_cc_right_click_clan_leave" condition="(StringEquals(StripClanTag(GetAccountName()), ui_lastSelectedUser) and IsInClan(ui_lastSelectedUser))"/>
+				<instance name="user_left_menu_item" parent="{panel_name}" index="25" group_name="{group_name}" command="PlaySound('/shared/sounds/ui/ccpanel/button_click_01.wav');" commandlua="HoN_Matchmaking:InvitePlayerName(self, GetCvarString('ui_lastSelectedUser'))" label="ui_items_cc_right_click_invite_to_tmm" condition="(!StringEquals(StripClanTag(GetAccountName()), ui_lastSelectedUser) and ChatUserOnline(ui_lastSelectedUser) and !ChatInGame() and (IsInGroup() or IsVisible('matchmaking')) and !IsInQueue() and !ChatUserInGame(ui_lastSelectedUser))" />
+				<instance name="user_left_menu_item" parent="{panel_name}" index="26" group_name="{group_name}" command="PlaySound('/shared/sounds/ui/ccpanel/button_click_01.wav'); If(!WidgetExists('watch_user_box_' # StripClanTag(ui_lastSelectedUser)) and (watch_user_activeWatches lt 3), Call('watch_user_main', 'Instantiate( \'watch_user_box\', \'user\', \'' # StripClanTag(ui_lastSelectedUser) # '\' );' )); " label="ui_items_cc_right_click_watch_game" condition="((IsBuddy(ui_lastSelectedUser) or IsClanMember(ui_lastSelectedUser) or IsStaff()) and ChatUserInGame(ui_lastSelectedUser) and !StringEquals(StripClanTag(GetAccountName()), ui_lastSelectedUser))" />
+				<instance name="user_left_menu_item" parent="{panel_name}" index="27" group_name="{group_name}" command="PlaySound('/shared/sounds/ui/ccpanel/button_click_01.wav'); ChatSpectatePlayer(ui_lastSelectedUser, false);" label="ui_items_cc_right_click_spectate_player" condition="(!ChatInGame() and ChatUserInGame(ui_lastSelectedUser) and ChatHasServerInfo(ui_lastSelectedUser) and !StringEquals(StripClanTag(GetAccountName()), ui_lastSelectedUser))" />
+				<instance name="user_left_menu_item" parent="{panel_name}" index="28" group_name="{group_name}" command="PlaySound('/shared/sounds/ui/ccpanel/button_click_01.wav'); ChatSpectatePlayer(ui_lastSelectedUser, true);" label="ui_items_cc_right_click_mentor_player" condition="(!ChatInGame() and ChatUserInGame(ui_lastSelectedUser) and ChatHasServerInfo(ui_lastSelectedUser) and !StringEquals(StripClanTag(GetAccountName()), ui_lastSelectedUser))" />
+				<instance name="user_left_menu_item" parent="{panel_name}" index="29" group_name="{group_name}" command="PlaySound('/shared/sounds/ui/ccpanel/button_click_01.wav'); Trigger('ShowCreateGroupPanel');" label="sp_group_rclick" condition="(IsBuddy(ui_lastSelectedUser) and !StringEquals(StripClanTag(GetAccountName()), ui_lastSelectedUser))" />
+				<instance name="user_left_menu_item" parent="{panel_name}" index="30" group_name="{group_name}" command="PlaySound('/shared/sounds/ui/ccpanel/button_click_01.wav'); ChatJoinGameAsStaff(ui_lastSelectedUser);" label="ui_items_cc_right_click_staff_spectate" condition="((IsStaff() or IsCaster()) and !ChatInGame() and ChatUserInGame(ui_lastSelectedUser) and ChatHasServerInfo(ui_lastSelectedUser) and !StringEquals(StripClanTag(GetAccountName()), ui_lastSelectedUser))" />
+				<panel height="0.5h" noclick="1"/>
+			</panel>
+
+			<button
+				x="-0.7h" y="0.8h"
+				width="1.7h" height="1.7h"
+				align="right"
+				valign="top"
+				color="invisible"
+				onclicklua="PlaySound('/shared/sounds/ui/ccpanel/button_close_02.wav') self:GetParent():DoEventN(1)"
+				onmouseoverlua="PlaySound('/shared/sounds/ui/ccpanel/button_over_01.wav')"
+			>
+				<widgetstate statename="up">
+					<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.5h" color="#910000" blockinput="false" noclick="true"/>
+					<frame texture="/ui/frames/roundframe.tga" color="0 0 0 1" borderthickness="0.5h" blockinput="false" noclick="true"/>
+					<image width="1.3h" height="1.3h" align="center" valign="center" color=".75 .75 .75 1" texture="/ui/elements/closex.tga" noclick="true" />
+				</widgetstate>
+				<widgetstate statename="over">
+					<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.5h" color="#dc0000" blockinput="false" noclick="true"/>
+					<frame texture="/ui/frames/roundframe.tga" color="0 0 0 1" borderthickness="0.5h" blockinput="false" noclick="true"/>
+					<image width="1.3h" height="1.3h" align="center" valign="center" color="1 1 1 1" texture="/ui/elements/closex.tga" noclick="true" />
+				</widgetstate>
+				<widgetstate statename="down" x="1" y="1">
+					<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.5h" color="#910000" blockinput="false" noclick="true"/>
+					<frame texture="/ui/frames/roundframe.tga" color="0 0 0 1" borderthickness="0.5h" blockinput="false" noclick="true"/>
+					<image width="1.3h" height="1.3h" align="center" valign="center" color="1 1 1 1" texture="/ui/elements/closex.tga" noclick="true" />
+				</widgetstate>
+			</button>
+
+		</panel>
+	</template>
+
+	<!-- <template name="rightclick_menu_item3">
+		<listitem value="{index=0}" condition="{condition=}" onmouseover="PlaySound('/shared/sounds/ui/ccpanel/button_over_02.wav');" onselect="{command=}" command="true">
+			<label x="0.5h" color="white" font="dyn_10" textvalign="center">{label}</label>
+		</listitem>
+	</template>
+
+	<template name="cc_rightclick_menu3">
+		<menu
+			name="{menu_name}"
+			width="0" height="0"
+			color="red"
+			listwidth="16.0h"
+			listpaddingy="1.0h"
+			itemoffsetx="0.5h"
+			itemoffsety="0.5h"
+			itemheight="2.2h"
+			itemwidth="94%"
+			highlight="under"
+			exteriorscrollbars="false"
+			onfocus="" onlosefocus=""
+			onevent="OpenMenu(true); MoveToCursor(); UpdateMenuConditions();"
+			onmouseover="PlaySound('/shared/sounds/ui/ccpanel/button_over_02.wav');"
+			luatable="1"
+		>
+			<widgetstate statename="listbg">
+				<frame texture="/ui/frames/glass_header_big.tga" color="#233749" />
+				<frame color="invisible" bordercolor="#455166" borderthickness="3" />
+				<frame color="invisible" bordercolor="black" borderthickness="2" />
+			</widgetstate>
+			<widgetstate statename="itemhighlight">
+				<panel color="#263e51" />
+			</widgetstate>
+
+			<instance name="rightclick_menu_item3" index="0" command="PlaySound('/shared/sounds/ui/ccpanel/button_click_01.wav'); ChatOpenMessage(ui_lastSelectedUser);" label="ui_items_cc_right_click_send_message" condition="(!StringEquals(GetAccountName(), ui_lastSelectedUser) and ChatUserOnline(ui_lastSelectedUser))" />
+			<instance name="rightclick_menu_item3" index="1" command="PlaySound('/shared/sounds/ui/ccpanel/button_click_01.wav'); Follow(StripClanTag(ui_lastSelectedUser)); Cmd('UICall * ChatRefresh()');" label="ui_items_cc_right_click_follow" condition="(!StringEquals(GetAccountName(), ui_lastSelectedUser) and !IsFollowing(ui_lastSelectedUser))" />
+			<instance name="rightclick_menu_item3" index="2" command="PlaySound('/shared/sounds/ui/ccpanel/button_click_01.wav'); UnFollow(StripClanTag(ui_lastSelectedUser)); Cmd('UICall * ChatRefresh()');" label="ui_items_cc_right_click_unfollow" condition="(!StringEquals(GetAccountName(), ui_lastSelectedUser) and IsFollowing(ui_lastSelectedUser))" />
+			<instance name="rightclick_menu_item3" index="3" command="PlaySound('/shared/sounds/ui/ccpanel/button_click_01.wav'); ChatJoinGame(ui_lastSelectedUser);" label="ui_items_cc_right_click_joing_game" condition="(!ChatInGame() and ChatUserInGame(ui_lastSelectedUser) and ChatHasServerInfo(ui_lastSelectedUser) and !StringEquals(GetAccountName(), ui_lastSelectedUser))" />
+			<instance name="rightclick_menu_item3" index="4" command="PlaySound('/shared/sounds/ui/ccpanel/button_click_01.wav'); ChatOpenClanMessage();" label="ui_items_cc_right_click_message_clan" condition="(0 and IsInClan() and IsClanMember(ui_lastSelectedUser))" />
+			<instance name="rightclick_menu_item3" index="5" command="PlaySound('/shared/sounds/ui/ccpanel/button_click_01.wav'); Set('_player_stats_searchname', ui_lastSelectedUser); CallEvent('player_stats_submit'); Set('_mainmenu_currentpanel', 'player_stats'); If(!IsVisible('player_stats'), CallEvent('MainMenuPanelSwitcher'));" label="ui_items_cc_right_click_view_stats" condition="" />
+			<instance name="rightclick_menu_item3" index="6" command="PlaySound('/shared/sounds/ui/ccpanel/button_click_01.wav'); ChatAddBuddy(ui_lastSelectedUser);" label="ui_items_cc_right_click_add_buddy" condition="(!IsBuddy(ui_lastSelectedUser) and !StringEquals(GetAccountName(), ui_lastSelectedUser))" />
+			<instance name="rightclick_menu_item3" index="7" command="PlaySound('/shared/sounds/ui/ccpanel/button_click_01.wav'); Trigger('ShowRemoveBuddyPanel');" label="ui_items_cc_right_click_remove_buddy" condition="(IsBuddy(ui_lastSelectedUser) and !StringEquals(GetAccountName(), ui_lastSelectedUser))" />
+			<instance name="rightclick_menu_item3" index="8" command="PlaySound('/shared/sounds/ui/ccpanel/button_click_01.wav'); GameInvite(ui_lastSelectedUser);" label="ui_items_cc_right_click_invite_to_game" condition="(((IsPrivateGame() and IsHost()) or !IsPrivateGame()) and !StringEquals(GetAccountName(), ui_lastSelectedUser) and ChatUserOnline(ui_lastSelectedUser) and ChatInGame() and !ChatUserInGame(ui_lastSelectedUser))" />
+			<instance name="rightclick_menu_item3" index="9" command="PlaySound('/shared/sounds/ui/ccpanel/button_click_01.wav'); GetUserInfo(ui_lastSelectedUser);" label="ui_items_cc_right_click_user_info" condition="(!StringEquals(GetAccountName(), ui_lastSelectedUser))" />
+			<instance name="rightclick_menu_item3" index="10" command="PlaySound('/shared/sounds/ui/ccpanel/button_click_01.wav'); ChatChannelKick(ui_lastSelectedUser, ui_currentChannel);" label="ui_items_cc_right_click_channel_kick" condition="(!StringEquals(GetAccountName(), ui_lastSelectedUser) and ChatGetAdminLevel(GetAccountName(), ui_currentChannel) gt ChatGetAdminLevel(ui_lastSelectedUser, ui_currentChannel))" />
+			<instance name="rightclick_menu_item3" index="11" command="PlaySound('/shared/sounds/ui/ccpanel/button_click_01.wav'); ChatChannelBan(ui_lastSelectedUser, ui_currentChannel);" label="ui_items_cc_right_click_channel_ban" condition="(!StringEquals(GetAccountName(), ui_lastSelectedUser) and ChatGetAdminLevel(GetAccountName(), ui_currentChannel) gt ChatGetAdminLevel(ui_lastSelectedUser, ui_currentChannel))" />
+			<instance name="rightclick_menu_item3" index="12" command="PlaySound('/shared/sounds/ui/ccpanel/button_click_01.wav'); ChatChannelSilence(ui_lastSelectedUser, ui_currentChannel, 5);" label="ui_items_cc_right_click_channel_silence" condition="(!StringEquals(GetAccountName(), ui_lastSelectedUser) and ChatGetAdminLevel(GetAccountName(), ui_currentChannel) gt ChatGetAdminLevel(ui_lastSelectedUser, ui_currentChannel))" />
+			<instance name="rightclick_menu_item3" index="13" command="PlaySound('/shared/sounds/ui/ccpanel/button_click_01.wav'); Trigger('ShowIgnorePanel');" label="ui_items_cc_right_click_ignore" condition="(!StringEquals(GetAccountName(), ui_lastSelectedUser) and !ChatIsIgnored(ui_lastSelectedUser))" />
+			<instance name="rightclick_menu_item3" index="14" command="PlaySound('/shared/sounds/ui/ccpanel/button_click_01.wav'); ChatUnignore(ui_lastSelectedUser);" label="ui_items_cc_right_click_unignore" condition="(!StringEquals(GetAccountName(), ui_lastSelectedUser) and ChatIsIgnored(ui_lastSelectedUser))" />
+			<instance name="rightclick_menu_item3" index="15" command="PlaySound('/shared/sounds/ui/ccpanel/button_click_01.wav'); Trigger('ShowAddBanPanel');" label="ui_items_cc_right_click_addban" condition="(!StringEquals(GetAccountName(), ui_lastSelectedUser) and !ChatIsBanned(ui_lastSelectedUser))" />
+			<instance name="rightclick_menu_item3" index="16" command="PlaySound('/shared/sounds/ui/ccpanel/button_click_01.wav'); ChatRemoveBanlist(ui_lastSelectedUser);" label="ui_items_cc_right_click_remban" condition="(!StringEquals(GetAccountName(), ui_lastSelectedUser) and ChatIsBanned(ui_lastSelectedUser))" />
+			<instance name="rightclick_menu_item3" index="17" command="PlaySound('/shared/sounds/ui/ccpanel/button_click_01.wav'); ChatChannelPromote(ui_lastSelectedUser, ui_currentChannel);" label="ui_items_cc_right_click_channel_promote" condition="(!StringEquals(GetAccountName(), ui_lastSelectedUser) and ChatGetAdminLevel(GetAccountName(), ui_currentChannel) gt (ChatGetAdminLevel(ui_lastSelectedUser, ui_currentChannel) + 1))" />
+			<instance name="rightclick_menu_item3" index="18" command="PlaySound('/shared/sounds/ui/ccpanel/button_click_01.wav'); ChatChannelDemote(ui_lastSelectedUser, ui_currentChannel);" label="ui_items_cc_right_click_channel_demote" condition="(!StringEquals(GetAccountName(), ui_lastSelectedUser) and ChatGetAdminLevel(GetAccountName(), ui_currentChannel) gt ChatGetAdminLevel(ui_lastSelectedUser, ui_currentChannel) and ChatIsAdmin(ui_lastSelectedUser, ui_currentChannel))" />
+			<instance name="rightclick_menu_item3" index="19" command="PlaySound('/shared/sounds/ui/ccpanel/button_click_01.wav'); ChatPromoteClanMember(ui_lastSelectedUser);" label="ui_items_cc_right_click_clan_promote" condition="(!StringEquals(GetAccountName(), ui_lastSelectedUser) and IsClanMember(ui_lastSelectedUser) and ChatIsClanLeader(GetAccountName()) and !ChatIsClanLeader(ui_lastSelectedUser) and !ChatIsClanOfficer(ui_lastSelectedUser))" />
+			<instance name="rightclick_menu_item3" index="20" command="PlaySound('/shared/sounds/ui/ccpanel/button_click_01.wav'); ChatDemoteClanMember(ui_lastSelectedUser);" label="ui_items_cc_right_click_clan_demote" condition="(!StringEquals(GetAccountName(), ui_lastSelectedUser) and IsClanMember(ui_lastSelectedUser) and ChatIsClanLeader(GetAccountName()) and !ChatIsClanLeader(ui_lastSelectedUser) and ChatIsClanOfficer(ui_lastSelectedUser))" />
+			<instance name="rightclick_menu_item3" index="21" command="PlaySound('/shared/sounds/ui/ccpanel/button_click_01.wav'); Trigger('ShowRemoveFromClanPanel');" label="ui_items_cc_right_click_clan_remove" condition="(!StringEquals(GetAccountName(), ui_lastSelectedUser) and IsClanMember(ui_lastSelectedUser) and (ChatIsClanLeader(GetAccountName()) or ChatIsClanOfficer(GetAccountName())) and !ChatIsClanLeader(ui_lastSelectedUser) and !ChatIsClanOfficer(ui_lastSelectedUser))" />
+			<instance name="rightclick_menu_item3" index="22" command="PlaySound('/shared/sounds/ui/ccpanel/button_click_01.wav'); ChatInviteUserToClan(ui_lastSelectedUser);" label="ui_items_cc_right_click_clan_invite" condition="(!StringEquals(GetAccountName(), ui_lastSelectedUser) and !ChatUserIsInClan(ui_lastSelectedUser) and (ChatIsClanLeader(GetAccountName()) or ChatIsClanOfficer(GetAccountName())))" />
+			<instance name="rightclick_menu_item3" index="23" command="PlaySound('/shared/sounds/ui/ccpanel/button_click_01.wav'); Trigger('ShowLeaveClanPanel');" label="ui_items_cc_right_click_clan_leave" condition="(StringEquals(GetAccountName(), ui_lastSelectedUser) and IsInClan(ui_lastSelectedUser))"/>
+			<instance name="rightclick_menu_item3" index="24" command="PlaySound('/shared/sounds/ui/ccpanel/button_click_01.wav'); InviteToTMMGroup(ui_lastSelectedUser);" label="ui_items_cc_right_click_invite_to_tmm" condition="(!StringEquals(GetAccountName(), ui_lastSelectedUser) and ChatUserOnline(ui_lastSelectedUser) and !ChatInGame() and IsInGroup() and !IsInQueue() and !ChatUserInGame(ui_lastSelectedUser))" />
+			<instance name="rightclick_menu_item3" index="25" command="PlaySound('/shared/sounds/ui/ccpanel/button_click_01.wav'); If(!WidgetExists('watch_user_box_' # StripClanTag(ui_lastSelectedUser)) and (watch_user_activeWatches lt 3), Call('watch_user_main', 'Instantiate( \'watch_user_box\', \'user\', \'' # StripClanTag(ui_lastSelectedUser) # '\' );' )); " label="ui_items_cc_right_click_watch_game" condition="((IsBuddy(ui_lastSelectedUser) or IsClanMember(ui_lastSelectedUser) or IsStaff()) and ChatUserInGame(ui_lastSelectedUser) and !StringEquals(GetAccountName(), ui_lastSelectedUser))" />
+			<instance name="rightclick_menu_item3" index="26" command="PlaySound('/shared/sounds/ui/ccpanel/button_click_01.wav'); ChatSpectatePlayer(ui_lastSelectedUser, false);" label="ui_items_cc_right_click_spectate_player" condition="(!ChatInGame() and ChatUserInGame(ui_lastSelectedUser) and ChatHasServerInfo(ui_lastSelectedUser) and !StringEquals(GetAccountName(), ui_lastSelectedUser))" />
+			<instance name="rightclick_menu_item3" index="27" command="PlaySound('/shared/sounds/ui/ccpanel/button_click_01.wav'); ChatSpectatePlayer(ui_lastSelectedUser, true);" label="ui_items_cc_right_click_mentor_player" condition="(!ChatInGame() and ChatUserInGame(ui_lastSelectedUser) and ChatHasServerInfo(ui_lastSelectedUser) and !StringEquals(GetAccountName(), ui_lastSelectedUser))" />
+			<instance name="rightclick_menu_item3" index="28" command="PlaySound('/shared/sounds/ui/ccpanel/button_click_01.wav'); Trigger('ShowCreateGroupPanel');" label="sp_group_rclick" condition="(IsBuddy(ui_lastSelectedUser) and !StringEquals(GetAccountName(), ui_lastSelectedUser))" />
+			<instance name="rightclick_menu_item3" index="29" command="PlaySound('/shared/sounds/ui/ccpanel/button_click_01.wav'); ChatJoinGameAsStaff(ui_lastSelectedUser);" label="ui_items_cc_right_click_staff_spectate" condition="(IsStaff() and !ChatInGame() and ChatUserInGame(ui_lastSelectedUser) and ChatHasServerInfo(ui_lastSelectedUser) and !StringEquals(GetAccountName(), ui_lastSelectedUser))" />
+		</menu>
+	</template> -->
+
+	<template name="IM_Button">
+		<button
+			name="sp_im_btn_{id}_{btn_id}"
+			width="100@" height="100%"
+			sticky="true" stickytoinvis="false"
+			visible="{visible=false}"
+			color="invisible"
+			onmouseover="PlaySound('/shared/sounds/ui/button_over_02.wav'); {onmouseover}"
+			onmouseout=""
+			onclick="{onclick}"
+			onmouseoutlua="UIManager.GetInterface('main'):HoNSocialPanelF('UserEntryMouseover', {id}, false, self:GetName(), true ) "
+			onmouseoverlua="UIManager.GetInterface('main'):HoNSocialPanelF('UserEntryMouseover', {id}, true, self:GetName(), true ) "
+			onclicklua="UIManager.GetInterface('main'):HoNSocialPanelF('UserEntryMiniButtonClicked', {id}, false, {btn_id} ) "
+			onrightclicklua="UIManager.GetInterface('main'):HoNSocialPanelF('UserEntryMiniButtonClicked', {id}, true, {btn_id}) "
+		>
+			<widgetstate statename="up">
+				<frame texture="/ui/frames/rounded_bg_solid.tga" borderthickness="0.4h" color=".2 .2 .2 1" blockinput="false" noclick="true"/>
+				<frame texture="/ui/frames/roundframe.tga" color=".4 .4 .4 1" borderthickness="0.4h" blockinput="false" noclick="true"/>
+				<image width="76%" height="76%" align="center" valign="center" texture="/ui/fe2/systembar/icons/{icon}.tga" color="1 1 1 .9" noclick="true"/>
+			</widgetstate>
+			<widgetstate statename="over">
+				<frame texture="/ui/frames/rounded_bg_solid.tga" borderthickness="0.4h" color="0 0 0 1" blockinput="false" noclick="true"/>
+				<frame texture="/ui/frames/roundframe.tga" color=".8 .8 .8 1" borderthickness="0.4h" blockinput="false" noclick="true"/>
+				<image width="76%" height="76%" align="center" valign="center" texture="/ui/fe2/systembar/icons/{icon}.tga" color="1 1 1 1" noclick="true"/>
+			</widgetstate>
+			<widgetstate statename="down" x="1" y="1">
+				<frame texture="/ui/frames/rounded_bg_solid.tga" borderthickness="0.4h" color=".4 .4 .4 1" blockinput="false" noclick="true"/>
+				<frame texture="/ui/frames/roundframe.tga" color=".8 .8 .8 1" borderthickness="0.4h" blockinput="false" noclick="true"/>
+				<image width="76%" height="76%" align="center" valign="center" texture="/ui/fe2/systembar/icons/{icon}.tga" color="1 1 1 1" noclick="true"/>
+			</widgetstate>
+		</button>
+	</template>
+
+	<template name="sp_friendslist_entry_template">
+		<panel
+			name="sp_player_item_{id}" height="2.8h"
+			width="19.7h"  visible="0"
+			sticky="1" stickytoinvis="0"
+			group="sp_player_items"
+			onmouseoutlua="UIManager.GetInterface('main'):HoNSocialPanelF('UserEntryMouseover', {id}, false, self:GetName(), false ) "
+			onmouseoverlua="UIManager.GetInterface('main'):HoNSocialPanelF('UserEntryMouseover', {id}, true, self:GetName(), false ) "
+			onclicklua="UIManager.GetInterface('main'):HoNSocialPanelF('UserEntryButtonClicked', {id}, false, false) "
+			ondoubleclicklua="UIManager.GetInterface('main'):HoNSocialPanelF('UserEntryButtonClicked', {id}, false, true) "
+			onrightclicklua="UIManager.GetInterface('main'):HoNSocialPanelF('UserEntryButtonClicked', {id}, true, false) "
+			onrightclick="
+				PlaySound('/shared/sounds/ui/ccpanel/button_rightclick_01.wav');
+			"
+		>
+			<panel noclick="1" valign="top" height="-1" >
+				<frame name="sp_player_item_{id}_bg_green" texture="/ui/frames/rounded_bg_green.tga" borderthickness="0.6h" color=".6 .6 .6 .9" blockinput="0" noclick="1" visible="0" />
+				<frame name="sp_player_item_{id}_bg_blue" texture="/ui/frames/rounded_bg_blue.tga" borderthickness="0.6h" color=".6 .6 .6 .9" blockinput="0" noclick="1" visible="0" />
+
+				<frame name="sp_player_item_{id}_border" texture="/ui/frames/roundframe.tga" color=".2 .2 .2 1" borderthickness="0.6h" blockinput="false" noclick="true"/>
+				<!-- Hover  -->
+				<panel name="sp_player_item_{id}_hover" noclick="true" visible="0">
+					<frame name="sp_player_item_{id}_hover_bg_green" texture="/ui/frames/rounded_bg_green.tga" borderthickness="0.6h" color="1 1 1 1" blockinput="0" noclick="1" visible="0" />
+					<frame name="sp_player_item_{id}_hover_bg_blue" texture="/ui/frames/rounded_bg_blue.tga" borderthickness="0.6h" color="1 1 1 1" blockinput="0" noclick="1" visible="0" />
+					<frame name="sp_player_item_{id}_hover_border" texture="/ui/frames/roundframe.tga" color="#00ed43" borderthickness="0.6h" blockinput="false" noclick="true"/>
+				</panel>
+				<panel height="-0.8h" width="-0.8h" align="center" valign="center" noclick="true">
+					<!-- Icon -->
+					<panel x="0.1h" name="sp_player_item_{id}_iconframe" width="100@" height="100%" noclick="true">
+						<image name="sp_player_item_{id}_icon" texture="$invis" noclick="0"
+							onmouseover="
+								If(StringEquals(GetTexture(), '/ui/fe2/elements/social_addfriend.tga'),
+									Trigger('genericMainFloatingTip', true, '13h', '/ui/fe2/elements/social_addfriend.tga', 'sp_add_friend', '', '', '', '3h', '-2h'),
+									If(!StringEquals(GetTexture(), '/ui/fe2/store/icons/account_icons/default.tga'), Split(
+											Trigger(
+												'StoreImagePreviewInit',
+												GetWidth(),
+												GetHeight(),
+												GetAbsoluteX(),
+												GetAbsoluteY(),
+												false,
+												GetTexture()
+											),
+											Trigger('StoreImagePreviewVis', true, '250%')
+										)
+									)
+								);
+							"
+							onmouseoverlua="UIManager.GetInterface('main'):HoNSocialPanelF('UserEntryMouseover', {id}, true, self:GetName(), false ) "
+							onmouseoutlua="UIManager.GetInterface('main'):HoNSocialPanelF('UserEntryMouseover', {id}, false, self:GetName(), false ) "
+							onmouseout="
+								DoEvent(1);
+							"
+							onevent1="
+								Trigger('StoreImagePreviewVis', false, '100%');
+								Trigger('genericMainFloatingTip', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '');
+							"
+							onclicklua="UIManager.GetInterface('main'):HoNSocialPanelF('UserEntryButtonFriendIconClicked', {id}, false, false) "
+							ondoubleclicklua="UIManager.GetInterface('main'):HoNSocialPanelF('UserEntryButtonIconClicked', {id}, false, true) "
+						/>
+					</panel>
+
+					<!-- User Info -->
+					<panel name="sp_player_item_{id}_userinfo" x="110@" width="-5h" noclick="true">
+						<!-- Name -->
+						<label x="1%" name="sp_player_item_{id}_name" width="-52@" valign="top" textvalign="top" font="dyn_11" color="white" shadow="true" content="" noclick="true" />
+						<!-- Full or Simple -->
+						<panel name="sp_player_item_{id}_full" visible="1" noclick="1" group="sp_im_category_full" >
+							<!-- Focus Icon -->
+							<panel x="-25.0%" width="90@" height="90%" align="right" valign="center" noclick="true" >
+								<image name="sp_player_item_{id}_focus_bg" texture="$invis" noclick="true" color="1 1 1 1" visible="0" />
+								<animatedimage name="sp_player_item_{id}_focus" texture="" onshow="StartAnim();" fps="13" loop="true" noclick="true" visible="0" />
+							</panel>
+						</panel>
+					</panel>
+
+					<!-- Ascension Level -->
+					<panel name="sp_player_item_{id}_ascension" x="-0.5h" width="100@" height="100%" align="right" valign="center" noclick="1">
+
+						<image name="sp_player_item_{id}_ascension_img_0" texture="/ui/fe2/codex/s1.tga" width="3h" height="3h" align="center" valign="center" visible="1" noclick="1"/>
+						<image name="sp_player_item_{id}_ascension_img_1" texture="/ui/fe2/codex/s2.tga" width="3h" height="3h" align="center" valign="center" visible="0" noclick="1"/>
+						<image name="sp_player_item_{id}_ascension_img_2" texture="/ui/fe2/codex/s3.tga" width="3h" height="3h" align="center" valign="center" visible="0" noclick="1"/>
+
+						<label name="sp_player_item_{id}_ascension_label" width="150%" align="center" valign="center" textalign="center" textvalign="bottom" font="dyn_8" color="white" outline="1" noclick="1"/>
+					</panel>
+
+					<!-- New ALert Icons-->
+					<panel name="sp_player_item_{id}_alert_iconframe" height="158%" width="134@" valign="center" x="-0.5h" y="-0.15h" noclick="true" visible="0" >
+						<!-- New -->
+						<panel name="sp_player_item_{id}_alert_icon_new" noclick="true" visible="0">
+							<image texture="/ui/fe2/elements/social_marker.tga" noclick="true" color="#0cef57" />
+							<image width="62%" height="62@" x="-6%" y="-1.5%" valign="center" align="center" texture="/ui/fe2/elements/social_marker_new.tga" noclick="true" color="0 0 0 1" />
+						</panel>
+						<!-- Inactive -->
+						<panel name="sp_player_item_{id}_alert_icon_inactive" noclick="true" visible="1">
+							<image texture="/ui/fe2/elements/social_marker.tga" noclick="true" color="#c81818" />
+							<image width="56%" height="56@" x="-6%" y="0" valign="center" align="center" texture="/ui/fe2/elements/social_marker_inactive.tga" noclick="true" color="0 0 0 1" />
+						</panel>
+					</panel>
+
+				</panel>
+			</panel>
+		</panel>
+		<panel name="sp_add_friend_item_{id}" height="2.8h"  width="19.7h"  visible="0" sticky="1" stickytoinvis="0" group="sp_player_items"
+			onclick="SleepWidget(101, 'ShowWidget(\'sp_add_friend_{id}_input\');');"
+			onmouseoutlua="UIManager.GetInterface('main'):HoNSocialPanelF('UserEntryMouseover', 'add_friend_{id}', false, self:GetName(), false ) "
+			onmouseoverlua="UIManager.GetInterface('main'):HoNSocialPanelF('UserEntryMouseover', 'add_friend_{id}', true, self:GetName(), false ) "
+			onmouseover="Call('sp_player_item_add_friend_{id}_name', 'SetColor(\'1 1 1 1\')'); Call('sp_player_item_add_friend_{id}_img', 'SetRenderMode(\'normal\');');"
+			onmouseout="Call('sp_player_item_add_friend_{id}_name', 'SetColor(\'.6 .6 .6 .9\')'); Call('sp_player_item_add_friend_{id}_img', 'SetRenderMode(\'grayscale\');');"
+		>
+			<panel noclick="1" valign="top" height="-1" >
+				<frame name="sp_player_item_add_friend_{id}_bg_blue" texture="/ui/frames/rounded_bg_blue.tga" borderthickness="0.6h" color=".6 .6 .6 .9" blockinput="0" noclick="1" visible="1" rendermode="grayscale" />
+				<frame name="sp_player_item_add_friend_{id}_border" texture="/ui/frames/roundframe.tga" color="0 0 0 1" borderthickness="0.6h" blockinput="false" noclick="true"/>
+				<!-- Hover  -->
+				<panel name="sp_player_item_add_friend_{id}_hover" noclick="true" visible="0">
+					<frame name="sp_player_item_add_friend_{id}_hover_bg_blue" texture="/ui/frames/rounded_bg_blue.tga" borderthickness="0.6h" color="1 1 1 1" blockinput="0" noclick="1" visible="1" />
+					<frame name="sp_player_item_add_friend_{id}_hover_border" texture="/ui/frames/roundframe.tga" color=".2 .2 .2 1" borderthickness="0.6h" blockinput="false" noclick="true"/>
+				</panel>
+				<panel valign="top" align="left" noclick="true" float="right">
+					<!-- User Info -->
+					<panel x="0" y="0" name="sp_player_item_add_friend_{id}_userinfo" align="left" noclick="true" >
+						<panel x="0.3h" height="100%" width="100@" noclick="1">
+							<image name="sp_player_item_add_friend_{id}_img" rendermode="grayscale" texture="/ui/fe2/elements/social_addfriend.tga" noclick="1" valign="center" align="center" width="80%" height="80%" />
+						</panel>
+						<label x="15%" name="sp_player_item_add_friend_{id}_name" width="-52@" valign="top" textvalign="center" font="dyn_11" color=".6 .6 .6 .9" shadow="true" content="sp_click_add_friend" noclick="1" />
+
+						<panel name="sp_add_friend_{id}_input" height="2.8h" valign="top" noclick="1" visible="0" >
+							<!-- Add Friend -->
+							<panel x="0h" height="100%" width="100%" valign="center" y="0" noclick="true">
+								<panel width="100%" align="left" noclick="true">
+									<frame texture="/ui/frames/rounded_bg_solid.tga" borderthickness="0.4h" color="0 0 0 1" blockinput="false" noclick="true"/>
+									<frame texture="/ui/frames/roundframe.tga" color="#30405d" borderthickness="0.6h" blockinput="false" noclick="true"/>
+
+									<textbox
+										name="sp_add_friend_{id}_input_textbox"
+										hmargin="1.0h" vmargin="0.4h"
+										maxlength="15"
+										textalign="center" textvalign="center"
+										font="dyn_14"
+										textcolor="white"
+										shadow="true"
+										color="invisible"
+										onload=""
+										onshow="SetFocus(true);"
+										onenter="
+											ChatAddBuddy(this);
+											SetFocus(false);
+										"
+										onesc="
+											SetFocus(false);
+										"
+										onchange="
+											if(!StringEmpty(''#this),
+												Call('sp_footer_input_{id}_cover_2', 'SetVisible(0)'),
+												Call('sp_footer_input_{id}_cover_2', 'SetVisible(1)')
+											);"
+										onfocus="
+											if(!StringEmpty(''#this),
+												Call('sp_footer_input_{id}_cover_2', 'SetVisible(0)'),
+												Call('sp_footer_input_{id}_cover_2', 'SetVisible(1)')
+											);
+										"
+										onlosefocus="
+											EraseInputLine();
+											If(IsVisible(), HideWidget('sp_add_friend_{id}_input'));
+										"
+									/>
+									<label name="sp_footer_input_{id}_cover_2" x="1h" y="0" width="-0.5h" height="-0.4h" valign="center" align="center" textvalign="center" font="dyn_10" color="white" shadow="true" content="social_panel_enter_name" noclick="1" />
+								</panel>
+							</panel>
+
+							<button
+								x="-0.4h"
+								width="2.0h" height="2.0h"
+								align="right"
+								valign="center"
+								color="invisible"
+								onclick="
+									PlaySound('/shared/sounds/ui/ccpanel/button_close_02.wav');
+								"
+								onmouseover="PlaySound('/shared/sounds/ui/ccpanel/button_over_01.wav');"
+							>
+								<widgetstate statename="up">
+									<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.5h" color="#910000" blockinput="false" noclick="true"/>
+									<frame texture="/ui/frames/roundframe.tga" color="0 0 0 1" borderthickness="0.5h" blockinput="false" noclick="true"/>
+									<image width="1.3h" height="1.3h" align="center" valign="center" color=".75 .75 .75 1" texture="/ui/elements/closex.tga" noclick="true" />
+								</widgetstate>
+								<widgetstate statename="over">
+									<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.5h" color="#dc0000" blockinput="false" noclick="true"/>
+									<frame texture="/ui/frames/roundframe.tga" color="0 0 0 1" borderthickness="0.5h" blockinput="false" noclick="true"/>
+									<image width="1.3h" height="1.3h" align="center" valign="center" color="1 1 1 1" texture="/ui/elements/closex.tga" noclick="true" />
+								</widgetstate>
+								<widgetstate statename="down" x="1" y="1">
+									<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.5h" color="#910000" blockinput="false" noclick="true"/>
+									<frame texture="/ui/frames/roundframe.tga" color="0 0 0 1" borderthickness="0.5h" blockinput="false" noclick="true"/>
+									<image width="1.3h" height="1.3h" align="center" valign="center" color="1 1 1 1" texture="/ui/elements/closex.tga" noclick="true" />
+								</widgetstate>
+							</button>
+
+						</panel>
+
+					</panel>
+				</panel>
+			</panel>
+		</panel>
+		<panel name="sp_im_category_header_{id}" width="100%" height="2.2h" noclick="true"
+			sticky="1" stickytoinvis="0" visible="0"
+			group="sp_im_category_headers"
+		>
+			<panel height="1" valign="center" color=".3 .3 .3 1" noclick="true"/>
+			<!-- Name -->
+			<panel x="0.5h" grow="true" height="1.8h" valign="center" noclick="true">
+				<frame texture="/ui/frames/rounded_bg_solid.tga" borderthickness="0.4h" color=".1 .1 .1 1" blockinput="false" noclick="true"/>
+				<frame texture="/ui/frames/roundframe.tga" color=".3 .3 .3 1" borderthickness="0.4h" blockinput="false" noclick="true"/>
+				<label name="sp_im_category_header_{id}_name" x="0.4h" fitx="true" fitxpadding="0.4h" height="100%" textvalign="center" font="dyn_10" color="1 1 1 1" shadow="true" content="" noclick="true" />
+			</panel>
+			<!-- Collapse -->
+			<button
+				name="sp_im_category_header_{id}_button"
+				color="invisible"
+				onmouseover="PlaySound('/shared/sounds/ui/button_over_02.wav');"
+				onmouseout=""
+				onmouseoverlua="--Trigger('genericMainFloatingTip', 'true', '18h', '', 'sp_toggle_group_visiblity', 'sp_toggle_group_visiblity_desc', '', '', '-18.6h', '1h')"
+				onmouseoutlua="--Trigger('genericMainFloatingTip', 'false', '', '', '', '', '', '', '', '')"
+				onclicklua=" UIManager.GetInterface('main'):HoNSocialPanelF('GroupButtonClicked', {id}) "
+			>
+				<widgetstate statename="up">
+					<panel x="-0.5h" align="right" valign="center" width="1.8h" height="1.8h" color="invisible">
+						<frame texture="/ui/frames/rounded_bg_solid.tga" borderthickness="0.4h" color=".1 .1 .1 1" blockinput="false" noclick="true"/>
+						<frame texture="/ui/frames/roundframe.tga" color=".4 .4 .4 1" borderthickness="0.4h" blockinput="false" noclick="true"/>
+					</panel>
+				</widgetstate>
+				<widgetstate statename="over">
+					<panel x="-0.5h" align="right" valign="center" width="1.8h" height="1.8h" color="invisible">
+						<frame texture="/ui/frames/rounded_bg_solid.tga" borderthickness="0.4h" color=".2 .2 .2 1" blockinput="false" noclick="true"/>
+						<frame texture="/ui/frames/roundframe.tga" color=".8 .8 .8 1" borderthickness="0.4h" blockinput="false" noclick="true"/>
+					</panel>
+				</widgetstate>
+				<widgetstate statename="down" x="1" y="1">
+					<panel x="-0.5h" align="right" valign="center" width="1.8h" height="1.8h" color="invisible">
+						<frame texture="/ui/frames/rounded_bg_solid.tga" borderthickness="0.4h" color=".1 .1 .1 1" blockinput="false" noclick="true"/>
+						<frame texture="/ui/frames/roundframe.tga" color=".8 .8 .8 1" borderthickness="0.4h" blockinput="false" noclick="true"/>
+					</panel>
+				</widgetstate>
+				<panel x="-0.5h" align="right" valign="center" width="1.8h" height="1.8h" color="invisible">
+					<image name="sp_im_category_header_{id}_arrow" width="1.0h" height="1.0h" align="center" valign="center" texture="/ui/elements/arrow_down.tga" color="1 1 1 .9" noclick="true" />
+					<!-- <label height="100%" textvalign="center" font="dyn_14" color="1 1 1 1" shadow="true" content="{id}" noclick="true" /> -->
+				</panel>
+			</button>
+		</panel>
+	</template>
+
+	<template name="social_panel_clan_creation" >
+		<!-- Create New Clan - Step 1 (General Info / Charter Members) -->
+		<panel name="create_new_clan" width="36.0h" y="0.6h" color="invisible" visible="false" grow="1" noclick="1" group="clan_create_group" onload="CreateString('cc_new_clan_name'); CreateString('cc_new_clan_tag'); CreateString('cc_new_clan_member1'); CreateString('cc_new_clan_member2'); CreateString('cc_new_clan_member3'); CreateString('cc_new_clan_member4'); CreateBool('cc_create_clan_1_auto', false); CreateBool('cc_create_clan_2_auto', false); CreateBool('cc_create_clan_3_auto', false); CreateBool('cc_create_clan_4_auto', false);">
+			<frame color="0 0 0 1" bordercolor="#455166" borderthickness="1" noclick="1" />
+			<instance name="header_bar" y="1" width="-2" height="2.8h" align="center" lbl="cc_com_newclan_header" show_close="1" onclick="HideWidget('create_new_clan_tip'); Call('create_new_clan', 'FadeOut(250);');" />
+			<panel width="100%" float="bottom" grow="1" noclick="1" color="invisible">
+
+				<panel y="3.2h" x="-0.4h" width="-2.0h" align="center" grow="1">
+					<frame texture="/ui/info/backdrop.tga" borderthickness="2.0h" color="1 1 1 .5" noclick="1" />
+					<frame color=".05 .07 .1 .5" bordercolor="#455166" borderthickness="1" noclick="1" />
+
+					<panel y="0.5h" width="-1.6h" align="center" noclick="1" color="invisible" float="bottom" grow="1">
+
+						<panel height="3.0h" align="center" color="invisible" noclick="1">
+							<label width="100%" height="100%" textvalign="center" textalign="left" valign="center" align="center" font="dyn_10" color="white" shadow="true" shadowcolor="black" noclick="1" content="cc_com_newclan_leader"/>
+							<image x="-46%" width="1.1h" height="0.8h" valign="center" align="right" texture="/ui/info/arrow.tga" />
+							<panel width="44%" align="right">
+								<label height="100%" textvalign="center" font="dyn_10" color="white" shadow="1" onshow="SetText(GetAccountName());"/>
+							</panel>
+						</panel>
+
+						<panel height="3.0h" align="center" color="invisible" noclick="1">
+							<label width="100%" height="100%" textvalign="center" textalign="left" valign="center" align="center" font="dyn_10" color="white" shadow="true" shadowcolor="black" noclick="1" content="cc_com_newclan_clanname"/>
+							<image x="-46%" width="1.1h" height="0.8h" valign="center" align="right" texture="/ui/info/arrow.tga" />
+							<panel width="44%" align="right">
+								<panel width="100%" height="74%" valign="center" align="left" color="0 0 0 1">
+									<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.5h" color="#171a28"/>
+									<frame texture="/ui/frames/roundframe.tga" color="#bbdefa" borderthickness="0.5h"/>
+									<textbox
+										name=""
+										y="0.3h"
+										width="-1.0h"
+										align="center"
+										color="invisible"
+										font="dyn_9"
+										textcolor="white"
+										shadow="true"
+										onchange="Set('cc_new_clan_name', this);"
+										maxlength="32"
+										taborder="1"
+									/>
+								</panel>
+							</panel>
+						</panel>
+
+						<panel height="3.0h" align="center" color="invisible" noclick="1">
+							<label width="100%" height="100%" textvalign="center" textalign="left" valign="center" align="center" font="dyn_10" color="white" shadow="true" shadowcolor="black" noclick="1" content="cc_com_newclan_clantag"/>
+							<image x="-46%" width="1.1h" height="0.8h" valign="center" align="right" texture="/ui/info/arrow.tga" />
+							<panel width="44%" align="right">
+								<panel width="100%" height="74%" valign="center" align="left" color="0 0 0 1">
+									<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.5h" color="#171a28"/>
+									<frame texture="/ui/frames/roundframe.tga" color="#bbdefa" borderthickness="0.5h"/>
+									<textbox
+										name=""
+										y="0.3h"
+										width="-1.0h"
+										align="center"
+										color="invisible"
+										font="dyn_9"
+										textcolor="white"
+										shadow="true"
+										maxlength="4"
+										onchange="Set('cc_new_clan_tag', this);"
+										taborder="2"
+									/>
+								</panel>
+							</panel>
+						</panel>
+
+						<panel height="3.0h" align="center" noclick="true">
+							<instance
+								width="75%" height="2.5h"
+								align="center" valign="bottom"
+								name="button2" button_name="unnamedButton245"
+								font="dyn_10"
+								label="cc_com_newclan_check_name"
+								onclick="ChatCheckClanName(cc_new_clan_name, cc_new_clan_tag);"
+							/>
+						</panel>
+
+						<panel height="2.0h" noclick="1">
+							<panel width="100%" height="1" align="center" valign="center" color="#414653" noclick="1" />
+						</panel>
+
+						<panel width="100%" color="invisible" noclick="1" grow="1">
+							<label fity="true" fitypadding="1.0h" align="center" font="dyn_10" color="white" shadow="true" wrap="1" noclick="1" content="cc_com_newclan_memberinfo"/>
+						</panel>
+
+						<panel height="3.0h" align="center" color="invisible" noclick="1">
+							<label width="100%" height="100%" textvalign="center" textalign="left" valign="center" align="center" font="dyn_10" color="white" shadow="true" shadowcolor="black" noclick="1" content="cc_com_newclan_founding1"/>
+							<image x="-46%" width="1.1h" height="0.8h" valign="center" align="right" texture="/ui/info/arrow.tga" />
+							<panel width="44%" align="right">
+								<panel width="100%" height="74%" valign="center" align="left" color="0 0 0 1">
+									<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.5h" color="#171a28"/>
+									<frame texture="/ui/frames/roundframe.tga" color="#bbdefa" borderthickness="0.5h"/>
+									<textbox
+										name="clan_invite_textbox_member1"
+										y="0.3h"
+										width="-1.0h"
+										align="center"
+										color="invisible"
+										font="dyn_9"
+										textcolor="white"
+										shadow="true"
+										taborder="3"
+										onchange="Set('cc_new_clan_member1', this); CreateString('ui_autocompleteTextBox', name); ChatAutoCompleteNick(this);"
+										onlosefocus="Set(cc_create_clan_1_auto, false);"
+										onfocus="Set(cc_create_clan_1_auto, true);"
+									/>
+								</panel>
+							</panel>
+						</panel>
+
+						<panel height="3.0h" align="center" color="invisible" noclick="1">
+							<label width="100%" height="100%" textvalign="center" textalign="left" valign="center" align="center" font="dyn_10" color="white" shadow="true" shadowcolor="black" noclick="1" content="cc_com_newclan_founding2"/>
+							<image x="-46%" width="1.1h" height="0.8h" valign="center" align="right" texture="/ui/info/arrow.tga" />
+							<panel width="44%" align="right">
+								<panel width="100%" height="74%" valign="center" align="left" color="0 0 0 1">
+									<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.5h" color="#171a28"/>
+									<frame texture="/ui/frames/roundframe.tga" color="#bbdefa" borderthickness="0.5h"/>
+									<textbox
+										name="clan_invite_textbox_member2"
+										y="0.3h"
+										width="-1.0h"
+										align="center"
+										color="invisible"
+										font="dyn_9"
+										textcolor="white"
+										shadow="true"
+										taborder="4"
+										onchange="Set('cc_new_clan_member2', this); CreateString('ui_autocompleteTextBox', name); ChatAutoCompleteNick(this);"
+										onlosefocus="Set(cc_create_clan_2_auto, false);"
+										onfocus="Set(cc_create_clan_2_auto, true);"
+									/>
+								</panel>
+							</panel>
+						</panel>
+
+						<panel height="3.0h" align="center" color="invisible" noclick="1">
+							<label width="100%" height="100%" textvalign="center" textalign="left" valign="center" align="center" font="dyn_10" color="white" shadow="true" shadowcolor="black" noclick="1" content="cc_com_newclan_founding3"/>
+							<image x="-46%" width="1.1h" height="0.8h" valign="center" align="right" texture="/ui/info/arrow.tga" />
+							<panel width="44%" align="right">
+								<panel width="100%" height="74%" valign="center" align="left" color="0 0 0 1">
+									<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.5h" color="#171a28"/>
+									<frame texture="/ui/frames/roundframe.tga" color="#bbdefa" borderthickness="0.5h"/>
+									<textbox
+										name="clan_invite_textbox_member3"
+										y="0.3h"
+										width="-1.0h"
+										align="center"
+										color="invisible"
+										font="dyn_9"
+										textcolor="white"
+										shadow="true"
+										taborder="5"
+										onchange="Set('cc_new_clan_member3', this); CreateString('ui_autocompleteTextBox', name); ChatAutoCompleteNick(this);"
+										onlosefocus="Set(cc_create_clan_3_auto, false);"
+										onfocus="Set(cc_create_clan_3_auto, true);"
+									/>
+								</panel>
+							</panel>
+						</panel>
+
+						<panel height="3.0h" align="center" color="invisible" noclick="1">
+							<label width="100%" height="100%" textvalign="center" textalign="left" valign="center" align="center" font="dyn_10" color="white" shadow="true" shadowcolor="black" noclick="1" content="cc_com_newclan_founding4"/>
+							<image x="-46%" width="1.1h" height="0.8h" valign="center" align="right" texture="/ui/info/arrow.tga" />
+							<panel width="44%" align="right">
+								<panel width="100%" height="74%" valign="center" align="left" color="0 0 0 1">
+									<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.5h" color="#171a28"/>
+									<frame texture="/ui/frames/roundframe.tga" color="#bbdefa" borderthickness="0.5h"/>
+									<textbox
+										name="clan_invite_textbox_member4"
+										y="0.3h"
+										width="-1.0h"
+										align="center"
+										color="invisible"
+										font="dyn_9"
+										textcolor="white"
+										shadow="true"
+										taborder="6"
+										onchange="Set('cc_new_clan_member4', this); CreateString('ui_autocompleteTextBox', name); ChatAutoCompleteNick(this);"
+										onlosefocus="Set(cc_create_clan_4_auto, false);"
+										onfocus="Set(cc_create_clan_4_auto, true);"
+									/>
+								</panel>
+							</panel>
+						</panel>
+						<panel height="1.0h" noclick="1"/>
+					</panel>
+				</panel>
+				<panel width="100%" height="4.2h" color="invisible" noclick="1" grow="1">
+					<instance
+						x="-1.5h"
+						height="2.2h" width="49%"
+						align="right"
+						valign="center"
+						name="button2" button_name="unnamedButton246"
+						font="dyn_10"
+						label="cc_com_newclan_invite_button"
+						onclick="ShowOnly('create_new_clan_waiting'); ChatCreateClan(cc_new_clan_name, cc_new_clan_tag, cc_new_clan_member1, cc_new_clan_member2, cc_new_clan_member3, cc_new_clan_member4);"
+					/>
+					<instance
+						height="2.2h" width="37%"
+						align="left"
+						valign="center"
+						name="button2" button_name="unnamedButton247"
+						font="dyn_10"
+						label="general_cancel"
+						onclick="Call('cc_community_blocker', 'FadeOut(250);'); Call('create_new_clan', 'FadeOut(250);');"
+					/>
+				</panel>
+			</panel>
+		</panel>
+
+		<!-- Clan Creation Tip -->
+		<panel name="create_new_clan_tip" x="-40.5h" width="34.0h" y="9.0h" height="14.0h" color="invisible" visible="false" watch="ChatClanCreateTip" ontrigger="SetVisible(true);" grow="1" noclick="1" group="clan_create_group">
+			<frame  color="0 0 0 1" bordercolor="#455166" borderthickness="1" noclick="1" />
+			<instance name="header_bar" Y="1" width="-2" height="2.8h" align="center" lbl="cc_com_newclan_tip_header" show_close="1" onclick="Call('create_new_clan_tip', 'FadeOut(250);');" />
+				<panel y="3.2h" width="-1.0h" align="center" grow="1">
+					<label width="100%" height="100%" textvalign="top" textalign="center" valign="top" align="center" font="dyn_10" color="white" shadow="true" shadowcolor="black" wrap="true" fity="true" noclick="1" watch="ChatClanCreateTip" ontrigger="SetText(Translate(param));"/>
+				</panel>
+		</panel>
+
+		<!-- AutoCompletes -->
+		<panel x="20h" width="20.0h" y="41.5h" valign="bottom" noclick="true" height="15.0h">
+			<panel width="-1.0h" height="15.0h" align="left" visible="false" color="invisible" watch="ChatAutoCompleteClear" ontrigger="SetVisible(false);" watch2="ChatAutoCompleteAdd" ontrigger2="if(cc_create_clan_1_auto, SetVisible(true));">
+				<instance name="autocomplete_list" listbox_name="autocomplete_create_list_1" width="14.5h" height="12.6h" align="left" valign="top" />
+			</panel>
+
+			<panel y="3h" width="-1.0h" height="15.0h" align="left" visible="false" color="invisible" watch="ChatAutoCompleteClear" ontrigger="SetVisible(false);" watch2="ChatAutoCompleteAdd" ontrigger2="if(cc_create_clan_2_auto, SetVisible(true));">
+				<instance name="autocomplete_list" listbox_name="autocomplete_create_list_2" width="14.5h" height="12.6h" align="left" valign="top" />
+			</panel>
+
+			<panel y="6h" width="-1.0h" height="15.0h" align="left" visible="false" color="invisible" watch="ChatAutoCompleteClear" ontrigger="SetVisible(false);" watch2="ChatAutoCompleteAdd" ontrigger2="if(cc_create_clan_3_auto, SetVisible(true));">
+				<instance name="autocomplete_list" listbox_name="autocomplete_create_list_3" width="14.5h" height="12.6h" align="left" valign="top" />
+			</panel>
+
+			<panel y="9h" width="-1.0h" height="15.0h" align="left" visible="false" color="invisible" watch="ChatAutoCompleteClear" ontrigger="SetVisible(false);" watch2="ChatAutoCompleteAdd" ontrigger2="if(cc_create_clan_4_auto, SetVisible(true));">
+				<instance name="autocomplete_list" listbox_name="autocomplete_create_list_4" width="14.5h" height="12.6h" align="left" valign="top" />
+			</panel>
+		</panel>
+
+		<!-- Create New Clan - Step 2 (Waiting for invites) -->
+		<panel name="create_new_clan_waiting" x="-40.5h" width="34.0h" y="9.0h" color="invisible" visible="false" grow="1" noclick="1" group="clan_create_group">
+			<frame color="0 0 0 1" bordercolor="#455166" borderthickness="1" noclick="1" />
+			<instance name="header_bar" y="1" width="-2" height="2.8h" align="center" lbl="cc_com_newclan_header" show_close="1" onclick="Call('create_new_clan_waiting', 'FadeOut(250);');" />
+			<panel width="100%" float="bottom" grow="1" noclick="1" color="invisible">
+
+				<panel y="3.2h" width="-1.0h" align="center" grow="1">
+					<frame texture="/ui/info/backdrop.tga" borderthickness="2.0h" color="1 1 1 .5" noclick="1" />
+					<frame color=".05 .07 .1 .5" bordercolor="#455166" borderthickness="1" noclick="1" />
+
+					<panel y="0.5h" width="-1.6h" align="center" noclick="1" color="invisible" float="bottom" grow="1">
+
+						<panel width="100%" color="invisible" noclick="1" grow="1">
+							<label fity="true" fitypadding="1.0h" align="center" font="dyn_10" color="white" shadow="true" wrap="1" noclick="1" content="cc_com_newclan_waitinginfo"/>
+						</panel>
+
+						<panel height="3.2h" width="100%" color="0 0 0 .8" noclick="1" grow="1">
+							<frame color=".05 .07 .1 .5" bordercolor="#455166" borderthickness="1" noclick="1" />
+							<label height="100%" valign="center" align="center" textalign="center" textvalign="center" font="dyn_10" color="yellow" shadow="true" wrap="1" noclick="1" watch="ChatClanCreateTime" ontrigger="SetText(Translate('cc_com_newclan_waitingtime') # FtoT(param));"/>
+						</panel>
+
+						<panel color="invisible" height="2.0h" noclick="1">
+							<panel width="100%" height="1" align="center" valign="center" color="#414653" noclick="1" />
+						</panel>
+
+						<panel height="3.0h" align="center" color="invisible" noclick="1">
+							<panel width="-4.0h" align="center" noclick="1">
+								<label width="100%" height="100%" textvalign="center" textalign="left" valign="center" align="center" font="dyn_10" color="white" shadow="true" shadowcolor="black" noclick="1" onshow="SetText(cc_new_clan_member1);"/>
+								<image x="-6.3h" width="1.1h" height="0.8h" valign="center" align="right" texture="/ui/info/arrow.tga" />
+								<panel width="6.0h" align="right" float="right" padding="0.4h">
+									<image width="2.6h" height="2.6h" valign="center" texture="/ui/icons/thumbs_up_disabled.tga" watch="ChatClanCreateAccept" ontrigger="If(StringEquals(cc_new_clan_member1, param), SetTexture('/ui/icons/thumbs_up.tga'));" watch1="ChatClanCreateSuccess ChatClanCreateFail" ontrigger1="SetTexture('/ui/icons/thumbs_up_disabled.tga');"/>
+									<image width="2.6h" height="2.6h" valign="center" texture="/ui/icons/thumbs_down_disabled.tga"/>
+								</panel>
+							</panel>
+						</panel>
+
+						<panel height="3.0h" align="center" color="invisible" noclick="1">
+							<panel width="-4.0h" align="center" noclick="1">
+								<label width="100%" height="100%" textvalign="center" textalign="left" valign="center" align="center" font="dyn_10" color="white" shadow="true" shadowcolor="black" noclick="1" onshow="SetText(cc_new_clan_member2);"/>
+								<image x="-6.3h" width="1.1h" height="0.8h" valign="center" align="right" texture="/ui/info/arrow.tga" />
+								<panel width="6.0h" align="right" float="right" padding="0.4h">
+									<image width="2.6h" height="2.6h" valign="center" texture="/ui/icons/thumbs_up_disabled.tga" watch="ChatClanCreateAccept" ontrigger="If(StringEquals(cc_new_clan_member2, param), SetTexture('/ui/icons/thumbs_up.tga'));" watch1="ChatClanCreateSuccess ChatClanCreateFail" ontrigger1="SetTexture('/ui/icons/thumbs_up_disabled.tga');"/>
+									<image width="2.6h" height="2.6h" valign="center" texture="/ui/icons/thumbs_down_disabled.tga"/>
+								</panel>
+							</panel>
+						</panel>
+
+						<panel height="3.0h" align="center" color="invisible" noclick="1">
+							<panel width="-4.0h" align="center" noclick="1">
+								<label width="100%" height="100%" textvalign="center" textalign="left" valign="center" align="center" font="dyn_10" color="white" shadow="true" shadowcolor="black" noclick="1" onshow="SetText(cc_new_clan_member3);"/>
+								<image x="-6.3h" width="1.1h" height="0.8h" valign="center" align="right" texture="/ui/info/arrow.tga" />
+								<panel width="6.0h" align="right" float="right" padding="0.4h">
+									<image width="2.6h" height="2.6h" valign="center" texture="/ui/icons/thumbs_up_disabled.tga" watch="ChatClanCreateAccept" ontrigger="If(StringEquals(cc_new_clan_member3, param), SetTexture('/ui/icons/thumbs_up.tga'));" watch1="ChatClanCreateSuccess ChatClanCreateFail" ontrigger1="SetTexture('/ui/icons/thumbs_up_disabled.tga');"/>
+									<image width="2.6h" height="2.6h" valign="center" texture="/ui/icons/thumbs_down_disabled.tga"/>
+								</panel>
+							</panel>
+						</panel>
+
+						<panel height="3.0h" align="center" color="invisible" noclick="1">
+							<panel width="-4.0h" align="center" noclick="1">
+								<label width="100%" height="100%" textvalign="center" textalign="left" valign="center" align="center" font="dyn_10" color="white" shadow="true" shadowcolor="black" noclick="1" onshow="SetText(cc_new_clan_member4);"/>
+								<image x="-6.3h" width="1.1h" height="0.8h" valign="center" align="right" texture="/ui/info/arrow.tga" />
+								<panel width="6.0h" align="right" float="right" padding="0.4h">
+									<image width="2.6h" height="2.6h" valign="center" texture="/ui/icons/thumbs_up_disabled.tga" watch="ChatClanCreateAccept" ontrigger="If(StringEquals(cc_new_clan_member4, param), SetTexture('/ui/icons/thumbs_up.tga'));" watch1="ChatClanCreateSuccess ChatClanCreateFail" ontrigger1="SetTexture('/ui/icons/thumbs_up_disabled.tga');"/>
+									<image width="2.6h" height="2.6h" valign="center" texture="/ui/icons/thumbs_down_disabled.tga"/>
+								</panel>
+							</panel>
+						</panel>
+
+						<panel height="0.8h" noclick="1"/>
+					</panel>
+
+				</panel>
+
+				<panel height="0.5h" noclick="1"/>
+
+			</panel>
+		</panel>
+
+		<!-- Create New Clan - Step 3 (Result) -->
+		<panel name="create_new_clan_result" x="-40.5h" width="34.0h" y="9.0h" color="invisible" visible="false" grow="1" noclick="1" group="clan_create_group" watch="ChatClanCreateSuccess ChatClanCreateFail" ontrigger="ShowOnly(name);">
+			<frame color="0 0 0 1" bordercolor="#455166" borderthickness="1" noclick="1" />
+			<instance name="header_bar" y="1" width="-2" height="2.8h" align="center" lbl="cc_com_newclan_header" show_close="1" onclick="Call('create_new_clan_result', 'FadeOut(250);');" />
+			<panel align="center" width="100%" float="bottom" grow="1" noclick="1" color="invisible">
+
+				<panel y="3.2h" width="-1.6h" align="center" grow="1" >
+					<frame texture="/ui/info/backdrop.tga" borderthickness="2.0h" color="1 1 1 1" noclick="1" />
+					<frame color=".05 .07 .1 .5" bordercolor="#455166" borderthickness="1" noclick="1" />
+
+					<panel y="0.5h" width="-1.6h" align="center" noclick="1" color="invisible" float="bottom" grow="1">
+
+						<panel width="100%" color="invisible" noclick="1" grow="1">
+							<label fity="true" fitypadding="0.6h" align="center" font="dyn_10" color="white" shadow="true" wrap="1" noclick="1" watch="ChatClanCreateSuccess ChatClanCreateFail" ontrigger="SetText(param);"/>
+						</panel>
+
+					</panel>
+				</panel>
+
+				<panel width="100%" height="4.2h" color="invisible" noclick="1" grow="1">
+					<instance
+						x="-6%"
+						height="2.2h" width="49%"
+						align="right"
+						valign="center"
+						name="button2" button_name="unnamedButton250"
+						font="dyn_10"
+						label="cc_com_newclan_finished_button"
+						onclick="HideWidget('create_new_clan_result'); HideWidget('cc_community_blocker');"
+					/>
+				</panel>
+
+			</panel>
+		</panel>
+
+		<!-- END Create New Clan Panels -->
+	</template>
+
+</package>

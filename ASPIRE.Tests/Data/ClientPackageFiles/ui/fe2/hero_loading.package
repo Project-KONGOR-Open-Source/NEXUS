@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+	<template name="progress_bar">
+		<panel			
+			width="85h" height="7h"
+			align="center"			
+			color="invisible"
+			watch="HeroSelectPlayerInfo{player}"
+			ontrigger="SetVisible(param2 != -1);"
+		>	
+			
+			<panel x="25%" y="" width="77%" height="100%" color="invisible">
+				<panel
+					y="-.1h"
+					texture="/ui/elements/hero_track.tga"	
+					color="white"
+					height="6h"
+					valign="center"
+					width="100%"
+				/>
+				
+				<panel
+					watch="HeroSelectPlayerInfo{player}"					
+					color=".24 .24 .24 1"
+					height="3.3h"
+					valign="center"
+					width="100%"
+				/>
+				
+				<image
+					width="100%"
+					watch="HeroSelectPlayerInfo{player}"
+					ontrigger="SetColor(param4);"
+					height="3.3h"
+					valign="center"
+					texture="/ui/elements/hero_bar.tga"	
+					rendermode="overlay"					
+				>
+				</image>				
+				
+				
+				<image
+					align="right"
+					x="1.8h"
+					width="2.7h"					
+					height="4.5h"
+					valign="center"
+					texture="/ui/elements/hero_track_cap.tga"	
+					
+				/>
+				
+				
+				
+				<panel
+					watch="HeroSelectPlayerInfo{player}"
+					ontrigger="SetWidth(FtoP(param18));"
+					color="white"
+					height="3.3h"
+					valign="center"
+					width="50%"
+				/>
+				
+				<image
+					width="50%"
+					watch="HeroSelectPlayerInfo{player}"
+					ontrigger="SetWidth(FtoP(param18)); SetColor(param4);"
+					height="3.3h"
+					valign="center"
+					texture="/ui/elements/hero_bar.tga"	
+					rendermode="overlay"					
+				>
+				</image>	
+			
+			</panel>
+			
+			<panel
+				x="-5.5h"
+				width="400@"
+				height="100%"
+				texture="/ui/elements/hero_name.tga"			
+			>				
+				<panel
+					x="1.5h"
+					y="0.25h"
+					color="invisible"
+					width="75%"
+					height="50%"
+					valign="center"
+					align="center"
+				>
+					<label					
+						font="dyn_16"
+						textalign="center" textvalign="center"
+						color="white" shadow="true"
+						watch="HeroSelectPlayerInfo{player}"
+						ontrigger="SetText(param3); SetColor(param4);"
+					/>
+				</panel>
+			</panel>
+			
+			
+			<panel x="25%"  width="75%" height="100%" color="invisible">
+
+				
+				<panel 
+					name="hero_loading_end"
+					height="120%"
+					valign="center"
+					width="120@" 
+					color="invisible"	
+					watch="HeroSelectPlayerInfo{player}"
+					ontrigger="SetX(FtoP(param18));"
+					x="50%"		
+					
+				>
+
+					<panel
+						name="loading_score_slideout{player}"
+				
+						valign="center"
+						
+						align="center"
+						width="100%"
+						height="50%"
+						color="white"
+						visible="0"
+						watch="HeroSelectPlayerInfo{player}"
+						ontrigger="if(!IsVisible and param18 ge 1, Split(SlideX('70.0%', 200), Call('loading_score_slideout_place{player}', 'SetText(_loading_place);'), Set('_loading_place', _loading_place + 1))); SetVisible(param18 ge 1);"
+						texture="/ui/elements/place_slider.tga"
+					>
+						<panel							
+							x="2%"
+							width="100%"
+							align="center"
+							valign="center"						
+						>
+							<label
+							name="loading_score_slideout_place{player}"
+							textalign="center"
+							textvalign="center"
+							font="dyn_16"
+							color="yellow"
+							
+							/>
+						</panel>				
+					
+					</panel>
+				
+					<image
+						name="hero_loading_icon"
+						align="center"
+						valign="center"
+						x="4%"
+						width="63%"
+						height="63%"	
+						texture="/heroes/hunter/icon.tga"
+						watch="HeroSelectPlayerInfo{player}"
+						ontrigger="SetTexture(param6);"			
+					/>
+					
+					<!-- Select effect -->
+					<panel
+						visible="1" noclick="1" y="0%" x="2%" valign="center" color="invisible" align="center"
+						watch="HeroSelectPlayerInfo{player}"
+						ontrigger="SetVisible(param18 ge 1);"
+					>
+						<modelpanel	
+							onshow="PlaySound('/shared/sounds/ui/hero_select/button_ready3.wav'); SetEffect('/ui/common/models/hero_select/loaded.effect'));"
+							noclick="1" 						
+							visible="1"					
+							model="common/models/hero_select/select.mdf"
+							anim="idle"
+							camerapos="0 1700 0"
+							cameraangles="0 0 180"
+							camerafov="3.0"
+							cameranear="1"
+							carmerafar="7000"
+							depthclear="false"
+							depthcompress="true"			
+							sunazimuth="140"
+							sunaltitude="10"
+							suncolor="1.4 1.3 1"
+							
+						/>	
+					</panel>					
+					
+					
+					<image
+						name="hero_loading_gloss"
+						align="center"
+						valign="center"
+						x="4%"
+						width="63%"
+						height="63%"
+						texture="/ui/common/portrait_gloss_up.tga"
+						rendermode="additive"
+					/>						
+					<image
+						name="hero_loading_frame"
+						align="center"
+						valign="center"
+						texture="/ui/elements/hero_frame.tga"		
+					/>											
+				</panel>				
+			</panel>
+			
+		</panel>
+	</template>
+
+	<template name="hero_loading">
+		<panel noclick="true" watch="GamePhase" ontrigger="SetVisible(param == 4);">
+			<panel onshow="_loading_place = 1;" onhide="_loading_place = 1;" height="90h" align="center" valign="center" float="bottom" padding="2.22h">
+				<instance name="progress_bar" player="0"/>
+				<instance name="progress_bar" player="1"/>
+				<instance name="progress_bar" player="2"/>
+				<instance name="progress_bar" player="3"/>
+				<instance name="progress_bar" player="4"/>
+				<instance name="progress_bar" player="5"/>
+				<instance name="progress_bar" player="6"/>
+				<instance name="progress_bar" player="7"/>
+				<instance name="progress_bar" player="8"/>
+				<instance name="progress_bar" player="9"/>
+			</panel>
+		</panel>
+	</template>	
+</package>

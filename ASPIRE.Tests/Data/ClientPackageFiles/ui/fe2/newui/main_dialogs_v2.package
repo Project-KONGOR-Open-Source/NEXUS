@@ -1,0 +1,292 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+	<trigger name="gmessagebox_popup"/>
+	<panel width="1" height="1" noclick="1"
+		watch="gmessagebox_popup"
+		ontriggerlua="
+			Trigger('TriggerDialogBox', param0, '', 'general_ok', '', '', '', param1, '', '')
+		"
+	/>
+
+	<template name="mm_asset_loading_progressbar">
+		<panel sticky="1" stickytoinvis="0" height="{height=1.8h}" width="100%" visible="{visible=0}" noclick="1"
+			watch="TMMPlayerStatus{id}"
+			ontrigger="SetVisible(!StringEmpty(param0));"
+		>
+			<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.3h" color="#171a28"/>
+			<panel x="0.2h" y="0.2h" width="-0.4h" height="-0.35h">
+				<panel width="{testwidth=0%}" color="green"	watch="TMMPlayerStatus{id}"	ontrigger="SetWidth(param4 # '%');"/>
+			</panel>
+			<frame texture="/ui/frames/roundframe.tga" color="#bbdefa" borderthickness="0.3h"/>
+			<label y="-0.1h" width="100%" height="100%" textalign="center" textvalign="center" font="dyn_10" color="white" shadow="1" watch="TMMPlayerStatus{id}" ontrigger="SetText(param1);"/>
+
+			<!-- Darken -->
+			<panel visible="{darken=0}">
+				<frame texture="/ui/fe2/newui/res/common/frames/custom/frame.png" borderthickness="4" noclick="1"/>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="mm_popup_template">
+		<panel name="{pannelname}" color="0 0 0 0.5" visible="{visible=0}"
+			onevent0="{onevent0=FadeIn(150);}"
+			onevent1="{onevent1=FadeOut(150);}"
+			watch="{watch}" ontrigger="{ontrigger}"
+			hotkey="ESC" onhotkey="CallEvent('{pannelname}', 1); {oncloseclick}"
+		>
+			<panel y="-15h" width="{width=30h}" grow="1" align="center" valign="center" noclick="1">
+				<instance name="newui_popup_caption_frame" show_close="{show_close=1}" title="{title}" onclick="CallEvent('{pannelname}', 1); {oncloseclick}"/>
+
+				<panel y="3.5h" width="-1.0h" align="center" grow="1" float="bottom" padding="1h" noclick="1">
+					<panel width="-1.0h" align="center" grow="1" noclick="1">
+						<instance name="newui_custom_frame_template" height="+.5h" alpha="0.9"/>
+						<label name="{pannelname}_label" wrap="1" y=".5h" fity="1" style="newui_font_style_10" textalign="center" content="{content}" watch="{labelwatch}" ontrigger="{labelontrigger}"/>
+					</panel>
+					<panel width="100%" height="3.5h" noclick="1">
+						<instance name="newui_common_button_2_template" button_name="{buttonname}"
+							label="general_ok" align="center" width="12h" height="2.5h"
+							onclick="PlaySound('/shared/sounds/ui/lobby/button_jointeam.wav'); CallEvent('{pannelname}', 1); {onbuttonclick}"
+						/>
+					</panel>
+				</panel>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="mm_popup_animating">
+		<panel name="{pannelname}" y="-20h" width="30h" grow="1" align="center" valign="center" visible="{visible=0}" noclick="1"
+			onshowlua="{onshowlua}"
+			watch="MatchMakerStatus" ontrigger="If(param0 == 6 and param1, SetVisible(0));"
+			watch1="GamePhase" ontrigger1="If(param gt 0, SetVisible(false));"
+			onevent0="SetVisible(true);"
+			onevent1="SetVisible(false);"
+		>
+			<instance name="newui_popup_caption_frame" title="{title}" show_close="0"/>
+			<panel y="3.6h" width="-1.0h" align="center" grow="1" noclick="1">
+				<instance name="newui_custom_frame_template" height="-.5h" alpha="0.98"/>
+				<panel y="1h" width="-1.0h" height="4h" align="center" float="right" noclick="1">
+					<label width="-4h" wrap="1" fity="1" style="newui_font_style_10" textalign="center" textvalign="center" content="{content}"/>
+					<animatedimage width="3.5h" height="3.5h" valign="center" texture="/ui/elements/throb/throb.tga" loop="1" fps="30" onshow="StartAnim(1);" noclick="1"/>
+				</panel>
+			</panel>
+		</panel>
+	</template>
+
+	<!-- Popup space for MM confirmations -->
+	<instance name="mm_popup_template" pannelname="mainLoginHolidayMessage" buttonname="mainLoginHolidayMessageOK" title="main_login_holiday_sale" content="main_login_holiday_sale_body" show_close="0"/>
+	<instance name="mm_popup_template" pannelname="mm_popup_init" buttonname="mm_popup_init_cancel" title="mm_init" content="mm_init_body" visible="0"
+		oncloseclick="LeaveTMMQueue(); LeaveTMMGroup(); Set('_TMM_GroupTeamSize', 1);"
+		onbuttonclick="LeaveTMMQueue(); LeaveTMMGroup(); Set('_TMM_GroupTeamSize', 1);"
+	/>
+	<instance name="mm_popup_template" pannelname="mm_popup_kicked" buttonname="mm_popup_kicked_ok" title="mm_kicked" content="mm_kicked_body"/>
+	<instance name="mm_popup_template" pannelname="mm_popup_servernotidle" buttonname="mm_popup_servernotidle_ok" title="mm_servernotidle" content="mm_servernotidle_body"/>
+	<instance name="mm_popup_template" pannelname="mm_popup_badstats" buttonname="mm_popup_badstats_ok" title="mm_badstats" content="mm_badstats_body"/>
+	<instance name="mm_popup_template" pannelname="mm_popup_groupqueued" buttonname="mm_popup_groupqueued_ok" title="mm_groupqueued" content="mm_groupqueued_body"/>
+	<instance name="mm_popup_template" pannelname="mm_popup_unknown" buttonname="mm_popup_unknown_ok" title="mm_unknown" content="mm_unknown_body"/>
+	<instance name="mm_popup_template" pannelname="mm_popup_joiningqueue" buttonname="mm_popup_joiningqueue_ok" title="mm_joiningqueue" content="mm_joiningqueue_body"/>
+	<instance name="mm_popup_template" pannelname="mm_popup_disconnected" buttonname="mm_popup_disconnected_ok" title="mm_disconnected" content="mm_disconnected_body"/>
+	<instance name="mm_popup_template" pannelname="mm_popup_left" buttonname="mm_popup_left_ok" title="mm_left" content="mm_left_body"/>
+	<instance name="mm_popup_template" pannelname="mm_popup_optionsunavailable" buttonname="mm_popup_optionsunavailable_ok" title="mm_optionsunavailable" content="mm_optionsunavailable_body"/>
+	<instance name="mm_popup_template" pannelname="mm_popup_noregionselected" buttonname="mm_popup_noregionselected_ok" title="mm_noregionselected" content="mm_noregionselected_body"/>
+	<instance name="mm_popup_template" pannelname="mm_popup_tmmbusy" buttonname="mm_popup_tmmbusy_ok" title="mm_tmmbusy" content="mm_tmmbusy_body"/>
+	<instance name="mm_popup_template" pannelname="mm_popup_tmmdisabled" buttonname="mm_popup_tmmdisabled_ok" title="mm_tmmdisabled" content="mm_tmmdisabled_body"/>
+	<instance name="mm_popup_template" pannelname="mm_popup_noteligible" buttonname="mm_popup_noteligible_ok" title="mm_noteligible" content="mm_noteligible_body"/>
+	<instance name="mm_popup_template" pannelname="mm_popup_disabled" buttonname="mm_popup_disabled_ok" title="mm_disabled" content="mm_disabled_tip"/>
+	<instance name="mm_popup_template" pannelname="mm_popup_disbanded" buttonname="mm_popup_disbanded_ok" title="mm_disbanded" content="mm_disbanded_body"/>
+	<instance name="mm_popup_template" pannelname="mm_popup_timeout" buttonname="mm_popup_timeout_ok" title="mm_timeout" content="mm_timeout_body"/>
+	<instance name="mm_popup_template" pannelname="mm_popup_nomatchesfound" buttonname="mm_popup_nomatchesfound_ok" title="mm_nomatchesfound" content="mm_nomatchesfound_body"/>
+	<instance name="mm_popup_template" pannelname="mm_popup_invalid_version" buttonname="mm_popup_invalid_version_ok" title="mm_popup_invalid_version" content="mm_popup_invalid_version_body"/>
+	<instance name="mm_popup_template" pannelname="mm_popup_group_full" buttonname="mm_popup_group_full_ok" title="mm_popup_group_full" content="mm_popup_group_full_body"/>
+	<instance name="mm_popup_template" pannelname="mm_popup_banned" buttonname="mm_popup_banned_ok" title="mm_popup_banned"
+		labelwatch="TMMBanTime" labelontrigger="SetText(Translate('mm_popup_banned_body', 'minutesseconds', param0));"
+	/>
+	<instance name="mm_popup_template" pannelname="mm_popup_leavestrike_warning" buttonname="mm_popup_leavestrike_warning_ok" title="mm_popup_leavestrike_warning" content="mm_popup_leavestrike_warning_body" watch="LeaveStrikeWarning" ontrigger="DoEvent(0);"/>
+
+	<!-- Loading Assets...  -->
+	<panel name="mm_loading_1" visible="0">
+		<panel y="-15h" width="25.0h" height="22.0h" align="center" valign="center" color="0 0 0 1">
+			<instance name="newui_custom_frame_template" height="+.5h" alpha="0.95"/>
+
+			<panel y="0.8h" width="-2.0h" align="center" noclick="1">
+				<label fity="1" fitypadding="0.4h" textalign="center" font="dyn_14" color="#ffaa00" shadow="true" content="mm_loading_assets" />
+
+				<panel y="3h" width="100%" grow="1" growinvis="0" float="bottom" padding="0.5h" noclick="1">
+					<instance name="mm_asset_loading_progressbar" id="0" />
+					<instance name="mm_asset_loading_progressbar" id="1" />
+					<instance name="mm_asset_loading_progressbar" id="2" />
+					<instance name="mm_asset_loading_progressbar" id="3" />
+					<instance name="mm_asset_loading_progressbar" id="4" />
+				</panel>
+
+				<label fity="1" y="-1.25h" valign="bottom" textalign="center" wrap="1" style="newui_font_style_9" content="mm_preloadworld_groupwait"/>
+			</panel>
+		</panel>
+	</panel>
+
+	<panel name="remote_loading" watch="RemoteLoading" ontrigger="SetVisible(param);" visible="0">
+		<panel y="33%" width="24.0h" height="11h" align="center" noclick="1">
+			<instance name="newui_popup_caption_frame" title="mainlobby_server_header" onclick="PlaySound('/shared/sounds/ui/button_click.mp3'); Disconnect(); HideWidget('remote_loading');"/>
+
+			<panel y="2.5h" height="4.0h" width="-1.8h" align="center" noclick="1">
+				<animatedimage x="1.0h" width="3.0h" height="3.0h" valign="center" texture="/ui/elements/throb/throb.tga" noclick="true" loop="1"  fps="30"  onshow="StartAnim(1);" />
+				<label x="4.0h" width="-5.0h" textvalign="center" textalign="center" valign="center" style="newui_font_style_10" noclick="1" content="mainlobby_create_game_remote"/>
+			</panel>
+			<instance name="newui_common_button_2_template" button_name="remote_loading_disconnect"
+				label="general_disconnect" y="7.0h" align="center" width="12h" height="2.2h"
+				onclicklua="
+					Disconnect()
+					Trigger('RemoteLoading', '0')
+					UIManager.GetInterface('main'):HoNNewsF('ReopenNews')
+					PlaySound('/shared/sounds/ui/button_click_03.wav')
+				"
+			/>
+		</panel>
+	</panel>
+
+	<!-- Reconnect dialog -->
+	<panel name="reconnect_dialog" color="0 0 0 0.75" visible="0" watch="ReconnectShow" ontrigger="If(_game_phase lt 1, SetVisible(param));" >
+		<panel y="33%" width="40.0h" height="11h" align="center" noclick="1">
+			<instance name="newui_popup_caption_frame" title="main_reconnect_header" onclick="Call('reconnect_dialog', 'FadeOut(250);'); ClearReconnectInfo();"/>
+
+			<panel y="4h" grow="1" regrow="0" growinvis="0" width="-1.8h" align="center" noclick="1">
+				<label x=".5h" width="70%" height="4.5h" wrap="1" style="newui_font_style_10" content="main_reconnect_text"/>
+
+				<label x=".5h" y="4h" width="-1h" height="4.5h" align="center" textalign="center" wrap="1" style="newui_font_style_10"
+					watch="ReconnectTimer"
+					ontrigger="SetText(Translate('main_reconnect_body', 'time', Round(param / 1000))); If(Round(param / 1000) le 0, HideWidget('reconnect_dialog'));"
+				/>
+			</panel>
+			<instance name="newui_common_button_2_template" button_name="reconnectPromptOK"
+				label="main_reconnect_ok" x="-0.75h" y="4h" align="right" width="11h" height="2.2h"
+				watch="ReconnectAddress"
+				ontrigger="SetOnclick('HideWidget(\'reconnect_dialog\'); Connect(\'' # param # '\'); Cmd(\'set _loading_tip_shown false\'); Call(\'LoginBuyAccountPromo\', \'FadeOut(250);\');');"
+			/>
+		</panel>
+	</panel>
+
+	<!-- Game lobby ack timeout dialog -->
+	<panel name="lobby_ack_timeout_dialog" y="30h" width="40h" height="10h" align="center" noclick="1" visible="0"
+		watch="LobbyAckTimeout"
+		ontriggerlua="self:SetVisible(AtoB(param0))"
+		watch0="GamePhase"
+		ontrigger0lua="self:SetVisible(false)"
+	>
+		<instance name="newui_popup_caption_frame" title="game_lobby_ack_timeout_title" show_close="0"/>
+		<label x=".5h" y="4h" height="4.5h" wrap="1" style="newui_font_style_10" content="game_lobby_ack_timeout_body"/>
+	</panel>
+
+	<panel name="lobby_ack_disconnect_dialog" y="30h" width="40h" height="11h" align="center" noclick="1" visible="0"
+		watch="LobbyAckTimeoutDisconnect"
+		ontriggerlua="self:UICmd('Disconnect') self:SetVisible(true)"
+	>
+		<instance name="newui_popup_caption_frame" title="game_lobby_ack_disconnect_title" show_close="0"/>
+		<label y="4h" height="4.5h" textalign="center" wrap="1" style="newui_font_style_10" content="game_lobby_ack_disconnect_body"/>
+
+		<instance name="newui_common_button_2_template" label="general_ok" y="7.0h" align="center" width="12h" height="2.2h"
+			onclicklua="GetWidget('lobby_ack_disconnect_dialog'):FadeOut(250)"
+		/>
+	</panel>
+
+	<instance name="mm_popup_animating" pannelname="mm_popup_serverfound" title="mm_serverfound" content="mm_serverfound_body"
+		onshowlua="GetWidget('midbar_button_hontour'):SetEnabled(false) PlaySound('/shared/sounds/ui/revamp/match_found.wav') --[[GetWidget('midbar_button_publicgames'):SetEnabled(false)--]]"
+	/>
+	<instance name="mm_popup_animating" pannelname="mm_popup_joinmatch" title="mm_joinmatch" content="mm_joinmatch_body"/>
+	<instance name="mm_popup_animating" pannelname="mm_popup_foundmatch" title="mm_foundmatch" content="mm_foundmatch_body"/>
+
+	<instance name="mm_popup_template" pannelname="mm_popup_noserversfound" buttonname="popupServerNotFoundClose" title="No servers found." content="Unable to find a server."
+		watch="GamePhase" ontrigger="If(param0 gt 0, SetVisible(false));"
+		onbuttonclick="If(!IsVisible('matchmaking'), Split(Set('_mainmenu_currentpanel', 'matchmaking'), CallEvent('MainMenuPanelSwitcher')));"
+	/>
+
+	<!-- MM Accept Game Prompt-->
+	<panel name="matchmaker_accept_game_dialog" visible="0" color="0 0 0 .7"
+		watch="TMMMatchPendingAccept" ontriggerlua="self:SetVisible(tonumber(param0) > 0)"
+		onshowlua="
+			GetWidget('matchmaker_accept_button'):SetVisible(1)
+			GetWidget('matchmaker_accepted_label'):SetVisible(0)
+			local SoundFunction = function(wakeFunction)
+				PlaySound('/shared/sounds/ui/lobby/persistent_group_2.ogg')
+				self:Sleep((GetCvarInt('_accept_prompt_sound_replay_time', true) or 15000), wakeFunction)
+			end
+			SoundFunction(SoundFunction)
+		"
+		oneventlua="self:FadeOut(1000)"
+	>
+		<panel y="-20h" width="30.0h" align="center" valign="center" color="0 0 0 1" grow="1" >
+			<frame texture="/ui/fe2/newui/res/common/frames/custom/frame.png" borderthickness="4" noclick="1"/>
+			<panel grow="1" y="0.8h" width="-2.0h" align="center" float="bottom" padding="1.5h" noclick="1">
+				<label fity="1" textalign="center" font="dyn_14" color="#ffaa00" shadow="1" content="mm_game_found" />
+				<label textalign="center" fity="1" style="newui_font_style_12" content="mm_timeout_desc" wrap="1" />
+				<panel height="2.5h" >
+					<panel width="-1h" align="center">
+						<panel color="black" />
+						<panel color="green" align="right" watch="TMMMatchPendingAccept" ontriggerlua="self:SetWidth(tonumber(param1) ~= 0 and FtoP((param0 / param1)) or 0)"/>
+
+						<frame texture="/ui/fe2/newui/res/common/frames/custom/frame.png" borderthickness="4" noclick="1"/>
+						<label y="0.25h" textalign="center" textvalign="center" fity="1" style="newui_font_style_12" watch="TMMMatchPendingAccept" ontriggerlua="self:SetText(Translate('mm_timeout_time', 'seconds', round(param0, 1))) self:SetColor('1 '..(param0 / param1)..' '..(param0 / param1))" />
+					</panel>
+				</panel>
+				<label textalign="center" fity="1" style="newui_font_style_12" watch="TMMMatchPendingAccept" ontriggerlua="self:SetText(Translate('mm_players_accepted', 'total', param2, 'accepted', param3))" />
+
+				<panel height="4h" >
+					<instance name="newui_common_button_2_template" button_name="matchmaker_accept_button"
+						label="mm_accept_button" align="center" width="15h" height="2.5h"
+						onclicklua="AcceptPendingMatch()
+							GetWidget('matchmaker_accepted_label'):SetVisible(1)
+							GetWidget('matchmaker_accept_game_dialog'):DoEvent()
+							self:SetVisible(0)
+						"
+					/>
+					<label y="0.2h" name="matchmaker_accepted_label" fity="1" textalign="center" font="dyn_16" color="#ffaa00" shadow="1" content="mm_accepted" visible="0" />
+				</panel>
+			</panel>
+		</panel>
+	</panel>
+
+	<panel name="matchmaking_blocker_leaver" color="0 0 0 0.5" visible="0" hotkey="ESC" onhotkeylua="self:FadeOut(150)"
+		onclick="
+			PlaySound('/shared/sounds/ui/error.wav');
+			CallEvent('matchmaking_blocker_leaver_highlight', 0);
+		"
+		onshow="
+			Trigger('TMMUpdateTooltipTrigger', '', '', '', '', '');
+			HideWidget('mm_option_disabled_unverified_tip');
+		"
+	>
+		<panel y="-5h" align="center" valign="center" width="40h" grow="1" regrow="1" noclick="1">
+			<instance name="newui_custom_frame_template" alpha="0.9"/>
+			<panel width="-1.0h" align="center" grow="1" regrow="1" float="bottom" padding="0.75h" noclick="1">
+				<label name="matchmaking_leaver_label" wrap="1" fity="1" y=".75h" style="newui_font_style_10" textalign="center" content="-"/>
+				<label wrap="1" fity="1" font="dyn_10" color="#FFCC00" shadow="1" textalign="center" content="mm_leaver_resetstats"/>
+
+				<panel width="100%" height="3.5h" noclick="1">
+					<instance name="newui_common_button_2_template"
+						label="general_close" align="center" width="10h" height="2.5h"
+						onclick="PlaySound('/shared/sounds/ui/lobby/button_jointeam.wav'); HideWidget('matchmaking_blocker_leaver');"
+					/>
+				</panel>
+			</panel>
+			<frame name="matchmaking_blocker_leaver_highlight" texture="/ui/frames/roundframe.tga" color="#FFCC00" borderthickness="0.6h" visible="0"
+				onevent0="
+					FadeIn(80);
+					SleepWidget(80, 'DoEvent(1);');
+				"
+				onevent1="
+					FadeOut(80);
+					SleepWidget(80, 'DoEvent(2);');
+				"
+				onevent2="
+					FadeIn(80);
+					SleepWidget(80, 'DoEvent(3);');
+				"
+				onevent3="
+					FadeOut(80);
+				"
+			/>
+		</panel>
+	</panel>
+
+	<panel name="mm_popup_helper" width="1" height="1" noclick="1"/>
+
+	<lua file="/ui/scripts/newui/main_dialogs_v2.lua" />
+</package>

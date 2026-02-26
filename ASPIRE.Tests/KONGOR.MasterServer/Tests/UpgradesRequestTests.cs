@@ -163,6 +163,7 @@ public sealed class UpgradesRequestTests
             using IServiceScope testScope = factory.Services.CreateScope();
             MerrickContext dbContextScope = testScope.ServiceProvider.GetRequiredService<MerrickContext>();
             IPlayerStatisticsService statsService = testScope.ServiceProvider.GetRequiredService<IPlayerStatisticsService>();
+            IHeroDefinitionService heroDefinitions = testScope.ServiceProvider.GetRequiredService<IHeroDefinitionService>();
 
             // Fetch account and stats from DB
             Account account = await dbContextScope.Accounts
@@ -172,7 +173,7 @@ public sealed class UpgradesRequestTests
 
             PlayerStatisticsAggregatedDTO stats = await statsService.GetAggregatedStatisticsAsync(account.ID);
 
-            ShowSimpleStatsResponse fullStats = ClientRequestHelper.CreateShowSimpleStatsResponse(account, stats, 12);
+            ShowSimpleStatsResponse fullStats = ClientRequestHelper.CreateShowSimpleStatsResponse(account, stats, 12, heroDefinitions);
 
             // Assert Response matches Helper Logic for Level
             await Assert.That(body).Contains($"\"level\";s:{fullStats.Level.ToString().Length}:\"{fullStats.Level}\";");

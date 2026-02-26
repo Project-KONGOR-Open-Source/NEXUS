@@ -1,0 +1,426 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+
+	<!-- Create new account -->
+	<trigger name="UpdateCreatePaidAccountForm"/>
+	<trigger name="CreatePaidAccountStatus"/>
+	<trigger name="CreatePaidAccountResult"/>
+	<form
+		name="CreatePaidAccount"
+		host="!hon"
+		target="/client_require_account.php"
+		statustrigger="CreatePaidAccountStatus"
+		resulttrigger="CreatePaidAccountResult"
+		resultparam0="success"
+		resultparam1="error"
+		resultparam2="sea"
+		resultparam3="errors"
+		ssl="true"
+		bb="true"
+	/>
+
+	<template name="form_create_paid_account_tos" >
+		<textbuffer
+			name="form_create_paid_account_tos"
+			scrolltexture="/ui/fe2/newui/res/common/scroll/scroll.png"
+			handleheight="3h"
+			scrollbarsize="1.2h"
+			exteriorscrollbars="0"
+			textalign="left"
+			font="dyn_10"
+			textcolor="#f0d3c1"
+			color="invisible"
+			shadow="1"
+			wrap="true"
+			noclick="0"
+			file=":/{filename=tos}.txt"
+			width="-1.0h" height="-2.1h"
+			align="center" valign="center"
+		/>
+	</template>
+
+	<template name="form_create_paid_account">
+		<panel name="form_create_paid_account" y="-110%" align="center" width="96h" height="48.25h" visible="{visible=0}" noclick="1">
+			<instance name="newui_popup_caption_frame" title="web_form_create_acct_title" onclick="{close_cmd}"/>
+
+			<!-- Create Paid Acct Form -->
+			<panel name="CreatePaidAccount1" y="3.6h" width="-2h" height="-5h" align="center" group="CreatePaidAccountSteps" noclick="1">
+				<panel float="right" padding="0.5h" width="100%" grow="1" noclick="1">
+					<!-- Left -->
+					<panel width="50%" float="bottom" padding="0.5h" reverse="1" noclick="1">
+
+						<!-- Nickname -->
+						<panel width="100%" height="6.4h" noclick="1">
+							<frame texture="/ui/fe2/newui/res/common/frames/custom/frame.png" borderthickness="4" noclick="1"/>
+							<panel y="1h" align="center" width="-1h" height="2.4h" float="right" onload="CreateBool('_nick_valid', false);" noclick="1">
+								<instance name="fieldwithlabel" label="create_acc_nickname" watch="UpdateCreatePaidAccountForm" ontrigger="If(_nick_valid, SetColor('white'), SetColor('red'));" fieldname="create_paid_account_nickname" fieldorder="930" fieldmaxlength="12" fieldform="CreatePaidAccount" fielddata="nickname" fieldonshow="SetFocus(true);" fieldonlosefocus="HideWidget('create_paid_account_nick_notice');" fieldonchange="
+									Set(_nick_check_field, name);
+									If(StringEmpty(this),
+										Set('_nick_valid', false),
+										If(ui_region_accountCreationType != 1, SleepWidget(500, 'SubmitForm(\'UserNameCheck\', \'nickname\', create_paid_account_nickname);'), Set('_nick_valid', true))
+										);
+									Trigger('UpdateCreatePaidAccountForm');
+									If(ui_region_accountCreationType != 1, Trigger('UserNameCheckStatus', 2));
+								"
+								/>
+							</panel>
+
+							<label y="4.0h" font="dyn_9" wrap="1" width="-1.4h" align="center" color="#ffaa00" fity="true">create_acc_label_nick_name_tip</label>
+
+							<panel name="create_paid_account_nick_notice" x="-6%" y="3h" align="right" width="45%" height="5.2h" color="0 0 0 .8" visible="0"
+								onclick="HideWidget('create_paid_account_nick_notice');"
+								watch="UserNameCheckStatus"
+								ontrigger="SetVisible(!StringEmpty(create_paid_account_nickname));"
+							>
+								<frame texture="/ui/fe2/newui/res/common/frames/custom/frame.png" borderthickness="4" noclick="1"/>
+								<label
+									fity="1"
+									width="-1.4h"
+									align="center" valign="center"
+									textalign="center" textvalign="center"
+									font="dyn_10" wrap="1"
+									color="#48ee48" shadow="1" shadowcolor="black"
+									noclick="1"
+									watch="UserNameCheckResult"
+									ontrigger="
+										if (StringEquals(_nick_check_field, 'create_paid_account_nickname'),
+											Split(
+												Set(_nick_valid, param0 and !StringEmpty(create_paid_account_nickname)),
+												If(param0, SetColor('#48ee48'), SetColor('#eb3535')),
+												If(param0, SetText(Translate('main_create_account_nickname_available')), SetText(param1)),
+												Trigger('UpdateCreatePaidAccountForm')
+											)
+										);
+
+									"
+									watch0="UserNameCheckStatus"
+									ontrigger0="
+										if (StringEquals(_nick_check_field, 'create_paid_account_nickname'),
+											Split(
+												If(param == 2 or param == 3, SetText(Translate('main_create_account_nickname_check'))),
+												If(param == 2 or param == 3, SetColor('#ebee48'))
+											)
+										);
+									"
+								/>
+							</panel>
+						</panel>
+
+						<!-- First name -->
+						<panel width="100%" height="3.5h" noclick="1">
+							<frame texture="/ui/fe2/newui/res/common/frames/custom/frame.png" borderthickness="4" noclick="1"/>
+							<instance name="fieldwithlabel" width="-1h" align="center" valign="center" label="create_acc_first_name" watch="UpdateCreatePaidAccountForm" ontrigger="If(StringEmpty(create_paid_account_firstname), SetColor('red'), SetColor('white'));" fieldname="create_paid_account_firstname" fieldorder="931" fieldform="CreatePaidAccount" fielddata="first_name"/>
+						</panel>
+
+						<!-- Last name -->
+						<panel width="100%" height="3.5h" noclick="1">
+							<frame texture="/ui/fe2/newui/res/common/frames/custom/frame.png" borderthickness="4" noclick="1"/>
+							<instance name="fieldwithlabel" width="-1h" align="center" valign="center" label="create_acc_last_name" watch="UpdateCreatePaidAccountForm" ontrigger="If(StringEmpty(create_paid_account_lastname), SetColor('red'), SetColor('white'));" fieldname="create_paid_account_lastname" fieldorder="932" fieldform="CreatePaidAccount" fielddata="last_name"/>
+						</panel>
+
+						<!-- Email address -->
+						<panel width="100%" height="3.5h" noclick="1">
+							<frame texture="/ui/fe2/newui/res/common/frames/custom/frame.png" borderthickness="4" noclick="1"/>
+							<instance name="fieldwithlabel" width="-1h" align="center" valign="center" label="create_acc_email" watch="UpdateCreatePaidAccountForm" ontrigger="If(!IsEmailAddress(create_paid_account_email), SetColor('red'), SetColor('white'));" fieldname="create_paid_account_email" fieldorder="933"/>
+						</panel>
+
+						<!-- Confirm email -->
+						<panel width="100%" height="3.5h" noclick="1">
+							<frame texture="/ui/fe2/newui/res/common/frames/custom/frame.png" borderthickness="4" noclick="1"/>
+							<instance name="fieldwithlabel" width="-1h" align="center" valign="center" label="create_acc_confirm_email" watch="UpdateCreatePaidAccountForm" ontrigger="If(!IsEmailAddress(create_paid_account_email2) or !StringEquals(create_paid_account_email, create_paid_account_email2), SetColor('red'), SetColor('white'));" fieldname="create_paid_account_email2" fieldorder="934" fieldform="CreatePaidAccount" fielddata="email"/>
+						</panel>
+
+						<!-- Password -->
+						<panel width="100%" height="3.5h" noclick="1">
+							<frame texture="/ui/fe2/newui/res/common/frames/custom/frame.png" borderthickness="4" noclick="1"/>
+							<instance name="fieldwithlabel" width="-1h" align="center" valign="center" label="create_acc_password" watch="UpdateCreatePaidAccountForm" ontrigger="If(StringEmpty(create_paid_account_pass) or !StringContainsOnly(create_paid_account_pass, '#$@!.,`\'~_-]', 'Aa0'), SetColor('red'), SetColor('white'));" fieldname="create_paid_account_pass" fieldorder="935" fieldform="CreatePaidAccount" fielddata="password1" fieldpasschar="*"/>
+						</panel>
+
+						<!-- Confirm password -->
+						<panel width="100%" height="3.5h" noclick="1">
+							<frame texture="/ui/fe2/newui/res/common/frames/custom/frame.png" borderthickness="4" noclick="1"/>
+							<instance name="fieldwithlabel" width="-1h" align="center" valign="center" label="create_acc_confirm_password" watch="UpdateCreatePaidAccountForm" ontrigger="If(StringEmpty(create_paid_account_pass2) or !StringEquals(create_paid_account_pass, create_paid_account_pass2) or !StringContainsOnly(create_paid_account_pass, '#$@!.,`\'~_-]', 'Aa0'), SetColor('red'), SetColor('white'));" fieldname="create_paid_account_pass2" fieldorder="936" fieldform="CreatePaidAccount" fielddata="password2" fieldpasschar="*"/>
+						</panel>
+
+						<panel width="100%" height="4h" visible="0" noclick="1" sticky="1" stickytoinvis="0" onload="CreateInt('create_paid_account_countryid', -1); SetVisible(ui_region_accountCreationType == 1);" >
+							<frame texture="/ui/fe2/newui/res/common/frames/custom/frame.png" borderthickness="4" noclick="1"/>
+							<label x="0.5h" height="3h" valign="center" textvalign="center" content="create_acc_input_country" style="newui_font_style_12" noclick="1"/>
+							<instance name="newui_combobox_template" widgetname="form_create_paid_account_country_id_dd"  x="-1.5h"
+								align="right" valign="center" width="50%" height="2.5h" maxlistheight="4"
+								onselect="Set(create_paid_account_countryid, this); Trigger('UpdateCreatePaidAccountForm');"
+								populate="
+									AddTemplateListItem('Ncombobox_item', '26', 'label', 'create_acc_country_other');
+									AddTemplateListItem('Ncombobox_item', '1',  'label', 'create_acc_country_argentina');
+									AddTemplateListItem('Ncombobox_item', '4',  'label', 'create_acc_country_bolivia');
+									AddTemplateListItem('Ncombobox_item', '28', 'label', 'create_acc_country_brazil');
+									AddTemplateListItem('Ncombobox_item', '5',  'label', 'create_acc_country_chile');
+									AddTemplateListItem('Ncombobox_item', '6',  'label', 'create_acc_country_colombia');
+									AddTemplateListItem('Ncombobox_item', '7',  'label', 'create_acc_country_costarica');
+									AddTemplateListItem('Ncombobox_item', '8',  'label', 'create_acc_country_cuba');
+									AddTemplateListItem('Ncombobox_item', '10', 'label', 'create_acc_country_ecuador');
+									AddTemplateListItem('Ncombobox_item', '11', 'label', 'create_acc_country_elsalvador');
+									AddTemplateListItem('Ncombobox_item', '13', 'label', 'create_acc_country_guatemala');
+									AddTemplateListItem('Ncombobox_item', '16', 'label', 'create_acc_country_honduras');
+									AddTemplateListItem('Ncombobox_item', '18', 'label', 'create_acc_country_mexico');
+									AddTemplateListItem('Ncombobox_item', '19', 'label', 'create_acc_country_nicaragua');
+									AddTemplateListItem('Ncombobox_item', '20', 'label', 'create_acc_country_panama');
+									AddTemplateListItem('Ncombobox_item', '21', 'label', 'create_acc_country_paraguay');
+									AddTemplateListItem('Ncombobox_item', '22', 'label', 'create_acc_country_peru');
+									AddTemplateListItem('Ncombobox_item', '27', 'label', 'create_acc_country_puerto_rico');
+									AddTemplateListItem('Ncombobox_item', '23', 'label', 'create_acc_country_dominican_rep');
+									AddTemplateListItem('Ncombobox_item', '24', 'label', 'create_acc_country_uruguay');
+									AddTemplateListItem('Ncombobox_item', '25', 'label', 'create_acc_country_venezuela');
+								"
+							/>
+						</panel>
+
+						<!-- Gender -->
+						<panel width="100%" height="3h" padding="1h" visible="0" sticky="1" stickytoinvis="0" noclick="1"
+							onload="CreateString('_form_create_paid_account_gender', '1'); SetVisible(ui_region_accountCreationType == 1);"
+						>
+							<frame texture="/ui/fe2/newui/res/common/frames/custom/frame.png" borderthickness="4" noclick="1"/>
+							<instance name="newui_checkbox_template" widget_name="form_create_account_gender_1"
+								type="2" x="-8h" width="15h" align="center" valign="center" font="dyn_10" content="create_acc_gender_male"
+								onclick="
+									If(_form_create_paid_account_gender == '2',
+										Split(
+											Set('_form_create_paid_account_gender', '1'),
+											SetButtonState(1)
+										)
+									);
+									Trigger('UpdateCreatePaidAccountForm');
+								"
+								watch="UpdateCreatePaidAccountForm"
+								ontrigger="DoEvent();"
+								onload="DoEvent();"
+								onevent="
+									If(_form_create_paid_account_gender == '1',
+										SetButtonState(1),
+										SetButtonState(0)
+									);
+								"
+							/>
+							<instance name="newui_checkbox_template" widget_name="form_create_account_gender_2"
+								type="2" x="8h" width="15h" align="center" valign="center" font="dyn_10" content="create_acc_gender_female"
+								onclick="
+									If(_form_create_paid_account_gender == '1',
+										Split(
+											Set('_form_create_paid_account_gender', '2'),
+											SetButtonState(1)
+										)
+									);
+									Trigger('UpdateCreatePaidAccountForm');
+								"
+								watch="UpdateCreatePaidAccountForm"
+								ontrigger="DoEvent();"
+								onload="DoEvent();"
+								onevent="
+									If(_form_create_paid_account_gender == '2',
+										SetButtonState(1),
+										SetButtonState(0)
+									);
+								"
+							/>
+						</panel>
+
+						<!-- Secure Info -->
+						<panel width="100%" height="6h" sticky="1" stickytoinvis="0" noclick="1" onload="SetVisible(ui_region_accountCreationType != 1);" >
+							<frame texture="/ui/fe2/newui/res/common/frames/custom/frame.png" borderthickness="4" noclick="1"/>
+							<image width="4.5h" height="4.5h" x="1.0h" valign="center" texture="/ui/elements/thawte.tga" />
+							<label x="-1.0h" width="-7.0h" height="100%" align="right" valign="center" textalign="center" textvalign="center" wrap="1" style="newui_font_style_10" content="create_acc_secure_transfer" noclick="1"/>
+						</panel>
+					</panel>
+
+					<!-- Right -->
+					<panel width="49%" align="right" float="bottom" padding="1h" noclick="1">
+
+						<!-- ToS -->
+						<panel width="100%" height="35h" noclick="1">
+							<instance name="newui_caption" title="tos_header"/>
+							<panel valign="bottom" height="-35i" noclick="1"
+								onload="
+									If(StringEquals(host_language, 'br'),
+										Instantiate('form_create_paid_account_tos', 'filename', 'tos_br'),
+										If(StringEquals(host_language, 'es'),
+											Instantiate('form_create_paid_account_tos', 'filename', 'tos_es'),
+											Instantiate('form_create_paid_account_tos', 'filename', 'tos')
+										)
+									);
+								"
+							>
+								<frame texture="/ui/fe2/newui/res/common/frames/custom/frame.png" borderthickness="4" height="+1h" noclick="1"/>
+							</panel>
+						</panel>
+
+						<!-- Button -->
+						<panel width="100%" valign="bottom" grow="1" noclick="1">
+
+							<panel name="form_create_account_button_glowbg" visible="0" stickytoinvis="0" noclick="1"
+							>
+								<frame texture="/ui/fe2/newui/res/common/frames/custom/frame.png" borderthickness="4" noclick="1"/>
+							</panel>
+
+							<panel y="0.5h" width="-1h" height="7.25h" align="center" noclick="1">
+								<frame texture="/ui/fe2/newui/res/common/frames/custom/frame.png" borderthickness="4" noclick="1"/>
+								<label y="0.5h" width="-3h" height="3h" align="center" textalign="center" style="newui_font_style_10" fity="1" wrap="1" content="web_form_create_account_continue" noclick="1"/>
+
+								<instance name="newui_common_button_2_template" label="general_create_account" y="4.25h" width="20h" height="2.5h" align="center" enabled="0"
+									watch="UpdateCreatePaidAccountForm"
+									ontrigger="
+										if(
+											_nick_valid and
+											!StringEmpty(create_paid_account_firstname) and
+											!StringEmpty(create_paid_account_lastname) and
+											!StringEmpty(create_paid_account_pass) and
+											StringEquals(create_paid_account_pass, create_paid_account_pass2) and
+											!StringEmpty(create_paid_account_email) and
+											StringEquals(create_paid_account_email, create_paid_account_email2) and
+											((create_paid_account_countryid ge 0) or (ui_region_accountCreationType != 1))
+											,
+											Split(
+												ShowWidget('form_create_account_button_glowbg'),
+												SetEnabled(true)
+											),
+											Split(
+												SetEnabled(false),
+												HideWidget('form_create_account_button_glowbg')
+											)
+										);
+									"
+									onclick="If(ui_region_accountCreationType != 1, SubmitForm('CreatePaidAccount', 'formData', 'submit'));"
+									onclicklua="
+										if (GetCvarInt('ui_region_accountCreationType') == 1) then
+											UIManager.GetInterface('main'):HoNRegionF('CreateAccount')
+										end
+									"
+								/>
+
+								<panel name="CreatePaidAccountStatusIndicator" visible="0" color="0 0 0 1" stickytoinvis="0" noclick="1"
+									watch="CreatePaidAccountStatus LATCreateAccountStatus"
+									ontrigger="SetVisible(param == 1);"
+								>
+									<frame texture="/ui/fe2/newui/res/common/frames/custom/frame.png" borderthickness="4" noclick="1"/>
+									<label width="-1h" height="-1h" textvalign="center" textalign="center" align="center" valign="center" shadow="1" color="#12ff00" font="dyn_11" content="create_acc_wait"/>
+								</panel>
+							</panel>
+						</panel>
+					</panel>
+				</panel>
+
+				<!-- Account already created and purchased -->
+				<panel name="CreatePaidAccountPurchasedNotice" color="0 0 0 .5" watch="AccountInfo" ontrigger="SetVisible(GetAccountID() gt -1);" noclick="1">
+					<panel align="center" valign="center" width="38h" grow="1" noclick="1">
+						<instance name="newui_popup_caption_frame" show_close="0" title="create_acc_already_loggedin"/>
+
+						<panel y="3.5h" width="-1.0h" align="center" grow="1" float="bottom" padding="1h" noclick="1">
+							<label width="-1.0h" align="center" textalign="center" style="newui_font_style_10" wrap="1" fity="1" content="create_acc_mustlogout" noclick="1"/>
+							<panel height="3.5h" grow="1" align="center" float="right" padding="1h" noclick="1">
+								<instance name="newui_common_button_2_template"
+									label="main_button_logout" width="12h" height="2.5h"
+									onclick="Logout();"
+									onclicklua="UIManager.GetInterface('main'):HoNMainF('MainMenuPanelToggle', 'form_create_paid_account', nil, false)"
+								/>
+								<instance name="newui_common_button_2_template"
+									label="general_close" width="12h" height="2.5h"
+									onclicklua="UIManager.GetInterface('main'):HoNMainF('MainMenuPanelToggle', 'form_create_paid_account', nil, false)"
+								/>
+							</panel>
+						</panel>
+					</panel>
+				</panel>
+			</panel>
+
+			<!-- Successful account creation -->
+			<panel name="CreatePaidAccountSuccessIndicator" color="0 0 0 .5" visible="0" onload="CreateInt('create_account_last_error', -1);"
+				watch="CreatePaidAccountResult LATCreateAccountResult"
+				ontrigger="
+					If(param0 == 1, SetVisible(true), SetVisible(false));
+
+					If(param0 == 1 or param3 == 54,
+						Split(
+							Call('create_paid_account_firstname', 'EraseInputLine();'),
+							Call('create_paid_account_lastname', 'EraseInputLine();'),
+							Call('create_paid_account_pass', 'EraseInputLine();'),
+							Call('create_paid_account_pass2', 'EraseInputLine();'),
+							Call('create_paid_account_email', 'EraseInputLine();'),
+							Call('create_paid_account_email2', 'EraseInputLine();')
+						)
+					);
+				"
+			>
+				<panel align="center" valign="center" width="38h" color="0 0 0 1" grow="1" noclick="1">
+					<instance name="newui_popup_caption_frame" show_close="0" title="create_acc_label_account_success"/>
+
+					<panel y="3.5h" width="-1.0h" align="center" grow="1" float="bottom" padding="1h" noclick="1">
+						<label width="-1.0h" align="center" textalign="center" style="newui_font_style_10" wrap="1" fity="1" content="create_acc_success" noclick="1"/>
+						<panel height="3.5h" grow="1" align="center" noclick="1">
+							<instance name="newui_common_button_2_template"
+								label="main_button_login" width="12h" height="2.5h"
+								onclick="ShowOnly('CreatePaidAccount1'); Call('CreatePaidAccountSuccessIndicator', 'FadeOut(250);');"
+								onclicklua="UIManager.GetInterface('main'):HoNMainF('MainMenuPanelToggle', 'form_create_paid_account', nil, false)"
+							/>
+						</panel>
+					</panel>
+				</panel>
+			</panel>
+
+			<!-- Failed account purchase -->
+			<panel name="CreatePaidAccountFailureIndicator" color="0 0 0 .5" visible="0"
+				watch="CreatePaidAccountResult LATCreateAccountResult"
+				ontrigger="SetVisible(param1);"
+			>
+				<panel align="center" valign="center" width="38h" color="0 0 0 1" grow="1" noclick="1">
+					<instance name="newui_popup_caption_frame" show_close="0" title="credit_card_notice_plain"/>
+
+					<panel y="3.5h" width="-1.0h" align="center" grow="1" float="bottom" padding="1h" noclick="1">
+						<label width="-1.0h" align="center" textalign="center" style="newui_font_style_10" wrap="1" fity="1" noclick="1"
+							watch="CreatePaidAccountResult LATCreateAccountResult"
+							ontrigger="
+								Set('web_resetstats_error_concat', '');
+								If(
+									param1,
+									ExplodeTrigger('ConcatResetStatsError', param3, '|', ':')
+								);
+								SetText(
+									If(
+										!StringEmpty(web_resetstats_error_concat),
+										FormatStringNewLine(web_resetstats_error_concat),
+										''
+									)
+								);
+							"
+						/>
+						<panel height="3.5h" grow="1" align="center" noclick="1">
+							<instance name="newui_common_button_2_template"
+								label="general_ok" width="12h" height="2.5h"
+								onclick="HideWidget('CreatePaidAccountFailureIndicator');"
+								onclicklua="
+									if GetCvarNumber('create_account_last_error') == 54 then
+										UIManager.GetInterface('main'):HoNMainF('MainMenuPanelToggle', 'form_create_paid_account', nil, false)
+									end
+								"
+							/>
+						</panel>
+					</panel>
+				</panel>
+			</panel>
+
+			<!-- Feature unavailable (for now) -->
+			<panel color="0 0 0 .5" visible="0" onload="If(ui_disableAccountCreation, ShowWidget());">
+				<panel align="center" valign="center" width="38h" color="0 0 0 1" grow="1" noclick="1">
+					<instance name="newui_popup_caption_frame" show_close="0" title="web_form_feature_unavailable_title"/>
+
+					<panel y="3.5h" width="-1.0h" align="center" grow="1" float="bottom" padding="1h" noclick="1">
+						<label width="-1.0h" align="center" textalign="center" style="newui_font_style_10" wrap="1" fity="1" content="web_form_feature_unavailable" noclick="1"/>
+						<panel height="3.5h" grow="1" align="center" noclick="1">
+							<instance name="newui_common_button_2_template"
+								label="general_ok" width="12h" height="2.5h"
+								onclicklua="UIManager.GetInterface('main'):HoNMainF('MainMenuPanelToggle', 'form_create_paid_account', nil, false)"
+							/>
+						</panel>
+					</panel>
+				</panel>
+			</panel>
+		</panel>
+	</template>
+</package>

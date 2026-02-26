@@ -1,0 +1,1001 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Movable Frames v1.50 -->
+<!-- Changes:
+	-the options button is now greyed out if game.interface is not open
+-->
+<!-- Made by AsiaPingPong -->
+<!-- The purpose of this mod is to allow the user to easily and intuitively move and resize UI objects. It does nothing by itself, and is intended to be integrated into other mods. -->
+<!-- Here is a template. The values listed here are the defaults
+<instance
+	name="movf_frame"			
+	id="exampleframe"			Name of the ui element that you wish to move/resize
+	textid="Example Frame"		Name that the user sees
+	visible="true"				Default visibility
+	resizable="false"			Whether the frame is visible by default
+	maintainratio="false"		Whether to maintain the aspect ratio
+	minwidth="0"				Specified as a float. This is the minimum width the frame can be, relative to the original size.
+	minheight="0"				Specified as a float. This is the minimum height the frame can be, relative to the original size.
+	maxwidth="0"				Specified as a float. This is the maximum width the frame can be, relative to the original size.
+	maxheight="0"				Specified as a float. This is the maximum height the frame can be, relative to the original size.
+	snap="false"				Whether the frame can snap to other frames.
+	snapto="false"				Whether other frames can snap to this frame.
+	margin="0h"					Margin for use with snapping.
+	collapsemargins="false"		If true, the greatest margin between two frames will be used. Otherwise, the sum of the margins is used.
+	overridepos="false"			If true, use this <instance> to specify the default position of the frame, rather than the ui element itself.
+	x=""						*
+	y=""						*
+	width=""					*
+	height=""					*
+	align=""					*
+	valign=""					*
+	onupdate=""					**
+/>
+-->
+<package>
+<!-- FONTS -->
+	<fontface file="/core/fonts/game.ttf">
+		<fontmap name="dyn_1" size="1" dynamic_fontsize="true" baseresolution="768" axis="y" gamma="1.5" />
+		<fontmap name="dyn_2" size="2" dynamic_fontsize="true" baseresolution="768" axis="y" gamma="1.5" />
+		<fontmap name="dyn_3" size="3" dynamic_fontsize="true" baseresolution="768" axis="y" gamma="1.5" />
+		<fontmap name="dyn_4" size="4" dynamic_fontsize="true" baseresolution="768" axis="y" gamma="1.5" />
+		<fontmap name="dyn_5" size="5" dynamic_fontsize="true" baseresolution="768" axis="y" gamma="1.5" />
+		<fontmap name="dyn_6" size="6" dynamic_fontsize="true" baseresolution="768" axis="y" gamma="1.5" />
+		<fontmap name="dyn_7" size="7" dynamic_fontsize="true" baseresolution="768" axis="y" gamma="1.5" />		
+		<fontmap name="dyn_8" size="8" dynamic_fontsize="true" baseresolution="768" axis="y" gamma="1.5" />
+		<fontmap name="dyn_9" size="9" dynamic_fontsize="true" baseresolution="768" axis="y" gamma="1.5" />
+		<fontmap name="dyn_10" size="10" dynamic_fontsize="true" baseresolution="768" axis="y" gamma="1.5" />
+		<fontmap name="dyn_11" size="11" dynamic_fontsize="true" baseresolution="768" axis="y" gamma="1.5" />
+		<fontmap name="dyn_12" size="12" dynamic_fontsize="true" baseresolution="768" axis="y" gamma="1.5" />
+		<fontmap name="dyn_13" size="13" dynamic_fontsize="true" baseresolution="768" axis="y" gamma="1.5" />
+		<fontmap name="dyn_14" size="14" dynamic_fontsize="true" baseresolution="768" axis="y" gamma="1.5" />
+		<fontmap name="dyn_15" size="15" dynamic_fontsize="true" baseresolution="768" axis="y" gamma="1.5" />
+		<fontmap name="dyn_16" size="16" dynamic_fontsize="true" baseresolution="768" axis="y" gamma="1.5" />
+		<fontmap name="dyn_17" size="17" dynamic_fontsize="true" baseresolution="768" axis="y" gamma="1.5" />
+		<fontmap name="dyn_18" size="18" dynamic_fontsize="true" baseresolution="768" axis="y" gamma="1.5" />
+		<fontmap name="dyn_19" size="19" dynamic_fontsize="true" baseresolution="768" axis="y" gamma="1.5" />
+		<fontmap name="dyn_20" size="20" dynamic_fontsize="true" baseresolution="768" axis="y" gamma="1.5" />
+		<fontmap name="dyn_21" size="21" dynamic_fontsize="true" baseresolution="768" axis="y" gamma="1.5" />
+		<fontmap name="dyn_22" size="22" dynamic_fontsize="true" baseresolution="768" axis="y" gamma="1.5" />
+		<fontmap name="dyn_23" size="23" dynamic_fontsize="true" baseresolution="768" axis="y" gamma="1.5" />
+		<fontmap name="dyn_24" size="24" dynamic_fontsize="true" baseresolution="768" axis="y" gamma="1.5" />
+	</fontface>
+	<panel visible="false"
+		onload="
+			CreateFloat('movf_fonttemp', 0);
+			CreateInt('movf_fontmin', 1);
+			CreateInt('movf_fontmax', 24);
+			"
+	/>
+<!-- /FONTS -->
+
+<!-- TRIGGERS -->
+	<!-- all indented triggers are private and should only be called from within this package -->
+	<trigger name="movf_show"/> <!--
+		Shows/hides the overlays
+			param0: bool - show the dragboxes
+		-->
+	<trigger name="movf_collect"/> <!--
+		Adds or removes a frame from the collection. Once collected, the frame will be dragged/moved when the dragbox is dragged/moved.
+			param0: string - id of the frame to focus.
+			param1: bool - whether or not to select
+		-->
+		<trigger name="movf_collectcall"/> <!--
+			This is run after movf_collect. This is what the frames watch.
+				param0: string - id of the frame to focus. An empty string will apply to all.
+				param1: bool - whether or not to select
+			-->
+	<trigger name="movf_collectionclear"/> <!--
+		Clears all frames from the focus.
+		-->
+	<trigger name="movf_reset"/> <!--
+		Resets a frame to defauls.
+			param0: string - id of the frame to reset to defaults. An empty string will reset all frames.
+		-->
+		<trigger name="movf_resetcall"/> <!-- 
+			This is a trigger that must be called to set a frame to defaults. This should only be called by this package.
+				param0: string - id of the frame to reset to defaults. An empty string will reset all frames.
+			-->
+	<trigger name="movf_visible"/> <!--
+		This trigger shows/hides a frame and the corresponding overlay.
+			param0: string - id of the frame to show/hide. Note, an empty string will show/hide all frames.
+			param1: bool - Show is true. Hide is false.
+		-->
+	<trigger name="movf_precision"/> <!-- 
+		Turn the panels red when the user begins to use precision control.
+			param0: bool - turn on/off fine tuning
+		-->
+		<trigger name="movf_InitRetrieveAll"/> <!--
+			Sets all the default variables for all of the frames. This is used after the interface is loaded.
+			-->
+		<trigger name="movf_InitUpdateAll"/> <!--
+			Sets the intial position of all of the frames. This is used after the interface is loaded.
+			-->
+		<trigger name="movf_evaluate"/> <!--
+			This trigger performs the necessary calculations before setting a frame's position and size.
+				param0: string - name of the widget that this will output to.
+									This takes the form of CallEventParams(param0, x, y, w, h)
+				param1: float - x value.
+				param2: float - y value.
+				param3: float - width
+				param4: float - height
+				param5: bool - anchor x. A value of true anchors the right side. A value of false anchors the left.
+				param6: bool - anchor y. A value of true anchors the bottom. A value of false anchors the top.
+				param7: float - minw
+				param8: float - maxw
+				param9: float - minh
+				param10: float - maxh
+				param11: float - force width:height ratio. If this is 0, it will have no effect.
+				param12: bool - constrain to screen
+				param13: bool - snap
+				param14: int - margin
+				param15: bool - collapse margin
+			-->
+			
+		<trigger name="movf_dragindex"/> <!--
+			This trigger starts or stops the mouse dragging of a handle.
+				param0: int - Index of the handle to be a dragged. A value of -1 will stop dragging.
+			-->
+		<trigger name="movf_snaploop"/> <!-- The purpose of this trigger is to loop through all the frames to determine if snapping should occur. This should only be called by this package. -->
+		
+		<trigger name="movf_collectionrefresh"/> <!-- This will initiate the process of updating the dragbox and the associated attributes. -->
+		<trigger name="movf_collectionpos"/> <!-- This will loop through all of the frames in the collection and position the dragbox accordingly. -->
+		<trigger name="movf_collectionvars"/> <!-- This will loop through all of the frames in the collection and set the dragbox variables accordingly. -->
+		<trigger name="movf_collectionupdate"/> <!--
+			This will loop through all of the frames in the collection and set their positions/sizes in accordance with the dragbox.
+				param0: float - x of the dragbox
+				param1: float - y of the dragbox
+				param2: float - w of the dragbox
+				param3: float - h of the dragbox
+			-->
+			<!-- In order to set to position/size of a specific frame, use
+				
+				CallEventParams('movf_{id}_update', x, y, width, height);
+			
+			-->
+<!-- /TRIGGERS -->
+
+<!-- FUNCTIONS -->
+	<panel
+		name="movf_loadupdate"
+		onframe="
+			##
+			Echo('^399movf: ^933Initializing');
+			Echo('^399movf: ^933=====================================================================================');
+			##
+			CreateInt('movf_list_num', 0);
+			Trigger('movf_InitRetrieveAll');
+			Trigger('movf_InitUpdateAll');
+			Call('movf_list', 'SortListboxValue()');
+			
+			if(
+				(VarExists('movf_version') and Evaluate('movf_version') lt 1.6) or 
+				(VarExists('movf_gameinterface') and (!StringEquals(Evaluate('movf_gameinterface'), Evaluate('options_defaultInterface')))),
+				Trigger('movf_reset', '')
+			);
+			SetSave('movf_version', '1.60');
+			SetSave('movf_gameinterface', Evaluate('options_defaultInterface'));
+
+			##Echo('^399movf: ^933=====================================================================================');##
+			CallEvent('movf_func_save');
+			DestroyWidget();
+			"
+	/>
+	
+	<panel
+		name="movf_func_save"
+		visible="false"
+		onevent="
+			##Echo('^399movf: ^999Saving settings...');##
+			Cmd('WriteConfigScript ' # host_startupCfg);
+			Cmd('Exec ' # host_startupCfg);
+			"
+	/>
+	
+	<!-- Scales a frame to a new position/size when the user changes the resolution
+		0: frame name
+		1: old res
+	-->
+	<panel
+		name="movf_func_scaleframe"
+		visible="false"
+		onevent="
+			CreateString('movf_align', Evaluate('movf_'#param0#'_align'));
+
+			CreateFloat('movf_dst_screen_w', SubString(vid_resolution, 0, SearchString(vid_resolution, ',', 0)));
+			CreateFloat('movf_dst_screen_h', SubString(vid_resolution, SearchString(vid_resolution, ',', 0)+1, -1));
+			CreateFloat('movf_src_screen_w', SubString(param1, 0, SearchString(param1, ',', 0)));
+			CreateFloat('movf_src_screen_h', SubString(param1, SearchString(param1, ',', 0)+1, -1));
+
+			CreateFloat('movf_src_x', Evaluate('movf_'#param0#'_x'));
+			CreateFloat('movf_src_y', Evaluate('movf_'#param0#'_y'));
+			CreateFloat('movf_src_w', Evaluate('movf_'#param0#'_w'));
+			CreateFloat('movf_src_h', Evaluate('movf_'#param0#'_h'));
+
+			CreateFloat('movf_dst_w', (movf_src_w * movf_dst_screen_h) / movf_src_screen_h);
+			If(StringEquals(movf_align,'left'),
+				CreateFloat('movf_dst_x', (movf_src_x * movf_dst_screen_h) / movf_src_screen_h));
+			If(StringEquals(movf_align,'center'),
+				CreateFloat('movf_dst_x', movf_dst_screen_w/2 + (movf_dst_screen_h * (movf_src_x - movf_src_screen_w/2)) / movf_src_screen_h));
+			If(StringEquals(movf_align,'right'),
+				CreateFloat('movf_dst_x', movf_dst_screen_w - movf_dst_w + (movf_dst_screen_h * (movf_src_x - movf_src_screen_w + movf_src_w) / movf_src_screen_h)));
+
+			CreateFloat('movf_dst_h', (movf_src_h * movf_dst_screen_h) / movf_src_screen_h);
+			CreateFloat('movf_dst_y', (movf_src_y * movf_dst_screen_h) / movf_src_screen_h);
+
+			Set('movf_'#param0#'_x', Round(movf_dst_x));
+			Set('movf_'#param0#'_y', Round(movf_dst_y));
+			Set('movf_'#param0#'_w', Round(movf_dst_w));
+			Set('movf_'#param0#'_h', Round(movf_dst_h));
+			"
+	/>
+	
+	<panel
+		name="movf_functions"
+		visible="false"
+		noclick="true"
+		passivechildren="true"
+		
+		onload="
+			CreateInt('movf_refx', 0);
+			CreateInt('movf_refy', 0);
+			CreateFloat('movf_refratio', 0);
+			
+			CreateFloat('movf_tempx', 0);
+			CreateFloat('movf_tempy', 0);
+			CreateFloat('movf_tempw', 0);
+			CreateFloat('movf_temph', 0);
+			CreateInt('movf_tempmargin', 0);
+			CreateFloat('movf_tempdist', 0);
+			
+			CreateInt('movf_xchange', 0);
+			CreateInt('movf_ychange', 0);
+			
+			CreateFloat('movf_lastx', 0);
+			CreateFloat('movf_lasty', 0);
+			CreateFloat('movf_lastw', 0);
+			CreateFloat('movf_lasth', 0);
+			
+			CreateFloat('movf_dbx', 0);
+			CreateFloat('movf_dby', 0);
+			CreateFloat('movf_dbw', 0);
+			CreateFloat('movf_dbh', 0);
+			CreateFloat('movf_dbminw', 0);
+			CreateFloat('movf_dbmaxw', 0);
+			CreateFloat('movf_dbminh', 0);
+			CreateFloat('movf_dbmaxh', 0);
+			CreateBool('movf_dbresizable', 0);
+			CreateBool('movf_dbmaintainratio', 0);
+			CreateFloat('movf_dbratio', 0);
+			CreateString('movf_dblabel', '');
+			CreateBool('movf_dbsnap', 0);
+			CreateInt('movf_dbmargin', 0);
+			CreateBool('movf_dbcollapse', 0);
+			
+			CreateFloat('movf_dbl', 0);
+			CreateFloat('movf_dbr', 0);
+			CreateFloat('movf_dbt', 0);
+			CreateFloat('movf_dbb', 0);
+			
+			CreateInt('movf_collectioncount', 0);
+			
+			CreateInt('movf_margin', 0);
+			CreateBool('movf_collapse', 0);
+			
+			CreateFloat('movf_precisioncoef', 0.2);
+			CreateBool('movf_snapon', 1);
+			
+			CreateFloat('movf_snapl', 0);
+			CreateFloat('movf_snapr', 0);
+			CreateFloat('movf_snapt', 0);
+			CreateFloat('movf_snapb', 0);
+			CreateFloat('movf_snapl2', 0);
+			CreateFloat('movf_snapr2', 0);
+			CreateFloat('movf_snapt2', 0);
+			CreateFloat('movf_snapb2', 0);
+			
+			CreateInt('movf_updatex', 0);
+			CreateInt('movf_updatey', 0);
+			CreateInt('movf_updatew', 0);
+			CreateInt('movf_updateh', 0);
+			CreateFloat('movf_updateratio', 0);
+			"
+			
+		watch="movf_show"
+		ontrigger="SetVisible(param); CallEvent('movf_func_save');"
+		
+		watch3="movf_reset"
+		ontrigger3="
+			If(StringEquals(param, ''), HideGroup('movf_frames'));
+			Trigger('movf_resetcall', param);
+			"
+	>
+	
+		<panel
+			name="movf_dragfunctions"
+			visible="false"
+			noclick="true"
+			
+			watch0="movf_dragindex"
+			ontrigger0="
+				movf_refx = GetCursorPosX();
+				movf_refy = GetCursorPosY();
+				movf_lastx = movf_dbx;
+				movf_lasty = movf_dby;
+				movf_lastw = movf_dbw;
+				movf_lasth = movf_dbh;
+				SetVisible(param gt -1);
+				Cmd('Trigger movf_precision ' # (param gt -1 and GetModifier2()) );
+				"
+			
+			onframe="
+				movf_xchange = GetCursorPosX() - movf_refx;
+				movf_ychange = GetCursorPosY() - movf_refy;
+				If(movf_precision, Split(
+					Set(movf_xchange, movf_xchange*movf_precisioncoef),
+					Set(movf_ychange, movf_ychange*movf_precisioncoef)
+				)):
+				Set(movf_tempx, 0);
+				Set(movf_tempy, 0);
+				Set(movf_tempw, 0);
+				Set(movf_temph, 0);
+				CallEvent('movf_dragfunctions', movf_dragindex);
+				Trigger('movf_evaluate',
+					'movf_dragbox',
+					movf_tempx,
+					movf_tempy,
+					movf_tempw,
+					movf_temph,
+					movf_dragindex == 1 or movf_dragindex == 4 or movf_dragindex == 8,
+					movf_dragindex == 1 or movf_dragindex == 2 or movf_dragindex == 5,
+					movf_dbminw,
+					movf_dbmaxw,
+					movf_dbminh,
+					movf_dbmaxh,
+					If(movf_dragindex != 0,
+						If(movf_dbmaintainratio or GetModifier1(),
+							If(movf_dbmaintainratio,
+								movf_dbratio,
+								movf_lastw/movf_lasth
+							)
+						)
+					),
+					movf_constraintoscreen,
+					movf_dbsnap and movf_dragindex == 0 and movf_collectioncount == 1,
+					movf_dbmargin,
+					movf_dbcollapse
+				);
+				"
+			
+			onevent0="	movf_tempx = movf_lastx + movf_xchange; 	movf_tempy = movf_lasty + movf_ychange; 		movf_tempw = movf_lastw; 						movf_temph = movf_lasth;					"
+			onevent1="	movf_tempx = movf_lastx + movf_xchange; 	movf_tempy = movf_lasty + movf_ychange; 		movf_tempw = movf_lastw - movf_xchange; 		movf_temph = movf_lasth - movf_ychange;		"
+			onevent2="	movf_tempx = movf_lastx; 					movf_tempy = movf_lasty + movf_ychange; 		movf_tempw = movf_lastw + movf_xchange; 		movf_temph = movf_lasth - movf_ychange;		"
+			onevent3="	movf_tempx = movf_lastx; 					movf_tempy = movf_lasty;				 		movf_tempw = movf_lastw + movf_xchange; 		movf_temph = movf_lasth + movf_ychange;		"
+			onevent4="	movf_tempx = movf_lastx + movf_xchange; 	movf_tempy = movf_lasty;				 		movf_tempw = movf_lastw - movf_xchange; 		movf_temph = movf_lasth + movf_ychange;		"
+			onevent5="	movf_tempx = movf_lastx; 					movf_tempy = movf_lasty + movf_ychange; 		movf_tempw = movf_lastw;				 		movf_temph = movf_lasth - movf_ychange;		"
+			onevent6="	movf_tempx = movf_lastx; 					movf_tempy = movf_lasty; 						movf_tempw = movf_lastw + movf_xchange;			movf_temph = movf_lasth;					"
+			onevent7="	movf_tempx = movf_lastx; 					movf_tempy = movf_lasty; 						movf_tempw = movf_lastw;						movf_temph = movf_lasth + movf_ychange;		"
+			onevent8="	movf_tempx = movf_lastx + movf_xchange;		movf_tempy = movf_lasty; 						movf_tempw = movf_lastw - movf_xchange;			movf_temph = movf_lasth;					"
+			
+			watch1="movf_evaluate"
+			ontrigger1="
+				movf_tempx = param1;
+				movf_tempy = param2;
+				movf_tempw = param3;
+				movf_temph = param4;
+				
+				Set(movf_tempw, max(movf_tempw, 0));
+				Set(movf_temph, max(movf_temph, 0));
+				
+				If(param11 gt 0,
+					If(movf_tempw/movf_temph gt param11 or movf_temph == 0,
+						Set(movf_tempw, movf_temph*param11),
+						Set(movf_temph, movf_tempw/param11)
+					)
+				);
+				
+				If(movf_tempw lt param7, Set(movf_tempw, param7));
+				If(movf_tempw gt param8 and param8 gt 0, Set(movf_tempw, param8));
+				If(param11 gt 0, Set(movf_temph, movf_tempw/param11));
+				If(movf_temph lt param9, Set(movf_temph, param9));
+				If(movf_temph gt param10 and param10 gt 0, Set(movf_temph, param10));
+				If(param11 gt 0, Set(movf_tempw, movf_temph*param11));
+				
+				If(param5, Set(movf_tempx, param1 + param3 - movf_tempw));
+				If(param6, Set(movf_tempy, param2 + param4 - movf_temph));
+				
+				If(param13 and movf_snapon and !movf_precision, Split(
+					Set(movf_collapse, param15),
+					Set(movf_margin, param14),
+					Set(movf_snapl, movf_tempx),
+					Set(movf_snapr, movf_tempx + movf_tempw),
+					Set(movf_snapt, movf_tempy),
+					Set(movf_snapb, movf_tempy + movf_temph),
+					Trigger('movf_snaploop')
+				));
+				
+				If(param12, Split(
+					If(movf_tempx + movf_tempw gt GetScreenWidth(), Set(movf_tempx, GetScreenWidth() - movf_tempw)),
+					If(movf_tempy + movf_temph gt GetScreenHeight(), Set(movf_tempy, GetScreenHeight() - movf_temph)),
+					If(movf_tempx lt 0, Set(movf_tempx, 0)),
+					If(movf_tempy lt 0, Set(movf_tempy, 0))
+				));
+				
+				CallEventParams(param0, movf_tempx, movf_tempy, movf_tempw, movf_temph);
+				"
+		/>
+		
+		<!--
+				CallEvent('movf_dragindicator', movf_dragindex);
+				If(movf_tempx gt movf_lastx + movf_lastw, Set(movf_tempx, movf_lastx + movf_lastw));
+				If(movf_tempy gt movf_lasty + movf_lasth, Set(movf_tempy, movf_lasty + movf_lasth));
+				If(movf_tempw lt 0, Set(movf_tempw, 0));
+				If(movf_temph lt 0, Set(movf_temph, 0));
+				CallEvent('movf_dragindicator', 9);
+		<frame
+			name="movf_dragindicator"
+			visible="false"
+			noclick="true"
+			color="0 0 0 0"
+			borderthickness="0.1h"
+			bordercolor="orange"
+			watch="movf_dragindex"
+			ontrigger="
+				SetVisible(param gt 0);
+				"
+			onevent0="movf_tempx = 0; movf_tempy = 0; movf_tempw = 0; movf_temph = 0;"
+			onevent1="movf_tempx = movf_lastx + movf_xchange; movf_tempy = movf_lasty + movf_ychange; movf_tempw = movf_lastw - movf_xchange; movf_temph = movf_lasth - movf_ychange;"
+			onevent2="movf_tempx = movf_lastx; movf_tempy = movf_lasty + movf_ychange; movf_tempw = movf_lastw + movf_xchange; movf_temph = movf_lasth - movf_ychange;"
+			onevent3="movf_tempx = movf_lastx; movf_tempy = movf_lasty; movf_tempw = movf_lastw + movf_xchange; movf_temph = movf_lasth + movf_ychange;"
+			onevent4="movf_tempx = movf_lastx + movf_xchange; movf_tempy = movf_lasty; movf_tempw = movf_lastw - movf_xchange; movf_temph = movf_lasth + movf_ychange;"
+			onevent5="movf_tempx = movf_lastx; movf_tempy = movf_lasty + movf_ychange; movf_tempw = movf_lastw; movf_temph = movf_lasth - movf_ychange;"
+			onevent6="movf_tempx = movf_lastx; movf_tempy = movf_lasty; movf_tempw = movf_lastw + movf_xchange; movf_temph = movf_lasth;"
+			onevent7="movf_tempx = movf_lastx; movf_tempy = movf_lasty; movf_tempw = movf_lastw; movf_temph = movf_lasth + movf_ychange;"
+			onevent8="movf_tempx = movf_lastx + movf_xchange; movf_tempy = movf_lasty; movf_tempw = movf_lastw - movf_xchange; movf_temph = movf_lasth;"
+			onevent9="SetX(movf_tempx); SetY(movf_tempy); SetWidth(movf_tempw); SetHeight(movf_temph);"
+		/>
+		-->
+	</panel>
+	
+	<panel
+		name="movf_snapfunctions"
+		visible="false"
+		
+		onevent="
+			Set(movf_tempdist, movf_snapl - movf_snapr2 - movf_tempmargin);
+			If(movf_tempdist lt 0, Set(movf_tempdist, -movf_tempdist));
+			If( (movf_tempdist le 5) and (movf_snapb ge movf_snapt2) and (movf_snapt le movf_snapb2),
+				Set(movf_tempx, movf_snapr2 + movf_tempmargin)
+			);
+			Set(movf_tempdist, movf_snapl2 - movf_snapr - movf_tempmargin);
+			If(movf_tempdist lt 0, Set(movf_tempdist, -movf_tempdist));
+			If( (movf_tempdist le 5) and (movf_snapb ge movf_snapt2) and (movf_snapt le movf_snapb2),
+				Set(movf_tempx, movf_snapl2 - movf_tempw - movf_tempmargin)
+			);
+			Set(movf_tempdist, movf_snapt - movf_snapb2 - movf_tempmargin);
+			If(movf_tempdist lt 0, Set(movf_tempdist, -movf_tempdist));
+			If( (movf_tempdist le 5) and (movf_snapr ge movf_snapl2) and (movf_snapl le movf_snapr2),
+				Set(movf_tempy, movf_snapb2 + movf_tempmargin)
+			);
+			Set(movf_tempdist, movf_snapt2 - movf_snapb - movf_tempmargin);
+			If(movf_tempdist lt 0, Set(movf_tempdist, -movf_tempdist));
+			If( (movf_tempdist le 5) and (movf_snapr ge movf_snapl2) and (movf_snapl le movf_snapr2),
+				Set(movf_tempy, movf_snapt2 - movf_temph - movf_tempmargin)
+			);
+		"
+	/>
+<!-- /FUNCTIONS -->
+	
+<!-- TEMPLATES -->
+	<template name="movf_frame">
+		<panel
+			name="movf_{id}_frame"
+			group="movf_frames"
+			width="{width=}" height="{height=}"
+			x="{x=}" y="{y=}"
+			align="{align=left}" valign="{valign=top}"
+			visible="false"
+			noclick="true"
+			passivechildren="true"
+			
+			watch="movf_InitRetrieveAll"
+			ontrigger="
+				If(!{overridepos=false},
+					Split(
+						CreateFloat('movf_{id}_defaultx', Call('{id}', 'GetAbsoluteX()')),
+						CreateFloat('movf_{id}_defaulty', Call('{id}', 'GetAbsoluteY()')),
+						CreateFloat('movf_{id}_defaultw', Call('{id}', 'GetWidth()')),
+						CreateFloat('movf_{id}_defaulth', Call('{id}', 'GetHeight()'))
+					), Split(
+						CreateFloat('movf_{id}_defaultx', GetAbsoluteX()),
+						CreateFloat('movf_{id}_defaulty', GetAbsoluteY()),
+						CreateFloat('movf_{id}_defaultw', GetWidth()),
+						CreateFloat('movf_{id}_defaulth', GetHeight())
+					)
+				);
+				CreateBool('movf_{id}_collected', 0);
+				CreateFloat('movf_{id}_relx', 0);
+				CreateFloat('movf_{id}_rely', 0);
+				CreateFloat('movf_{id}_relw', 1);
+				CreateFloat('movf_{id}_relh', 1);
+				Set(movf_list_num, movf_list_num + 1);
+
+				If(!VarExists('movf_{id}_lastres'),
+					Split(
+						CreateString('movf_{id}_lastres', vid_resolution),
+						SetSave('movf_{id}_lastres')));
+				"
+			
+			watch0="movf_InitUpdateAll"
+			ontrigger0="
+				Call('movf_overlays', 'Instantiate(\'movf_overlay\', \'id\', \'{id}\', \'textid\', \'{textid}\', \'resizable\', \'{resizable=false}\', \'maintainratio\', \'{maintainratio=false}\')');
+				Set(movf_list_num, movf_list_num - 1);
+				CreateInt('movf_{id}_index', movf_list_num);
+				CreateString('movf_{id}_align', '{align=left}');
+				Call('movf_list', 'AddTemplateListItem(\'movf_listitem\', If(movf_list_num lt 10, \'0\' # movf_list_num, movf_list_num), \'id\', \'{id}\', \'textid\', \'{textid}\')');
+				If(VarExists('movf_{id}_v'), DoEvent(1), DoEvent(0));
+				"
+				onevent0="
+					CreateFloat('movf_{id}_x', movf_{id}_defaultx);
+					CreateFloat('movf_{id}_y', movf_{id}_defaulty);
+					CreateFloat('movf_{id}_w', movf_{id}_defaultw);
+					CreateFloat('movf_{id}_h', movf_{id}_defaulth);
+					CreateBool('movf_{id}_v', {visible=true});
+					SetSave('movf_{id}_x');
+					SetSave('movf_{id}_y');
+					SetSave('movf_{id}_w');
+					SetSave('movf_{id}_h');
+					SetSave('movf_{id}_v');
+					##Echo('^399movf:     ^999{id} ^900does not ^933exist, setting to defaults of ^999' # movf_{id}_x # ' ^933/ ^999' # movf_{id}_y # ' ^933/ ^999' # movf_{id}_w # ' ^933/ ^999' # movf_{id}_h);##
+					Trigger('movf_evaluate',
+						'movf_{id}_update',
+						movf_{id}_defaultx, movf_{id}_defaulty,
+						movf_{id}_defaultw, movf_{id}_defaulth,
+						false,
+						false,
+						{minwidth=0}*movf_{id}_defaultw,
+						{maxwidth=0}*movf_{id}_defaultw,
+						{minheight=0}*movf_{id}_defaulth,
+						{maxheight=0}*movf_{id}_defaulth,
+						0,
+						0,
+						{snap=false},
+						GetYFromString('{margin=0}'),
+						{collapsemargins=false}
+					);
+					Trigger('movf_visible', '{id}', movf_{id}_v);
+					"
+				onevent1="
+					If(!StringEquals(vid_resolution, Evaluate('movf_{id}_lastres')),
+						If({reset_on_res=false},
+							Trigger('movf_reset', '{id}'),
+							CallEventParams('movf_func_scaleframe', '{id}', Evaluate('movf_{id}_lastres'))
+						)
+					);
+					Set('movf_{id}_lastres', vid_resolution);
+					##Echo('^399movf:     ^999{id} ^090does ^933exist, setting to ^999' # movf_{id}_x # ' ^933/ ^999' # movf_{id}_y # ' ^933/ ^999' # movf_{id}_w # ' ^933/ ^999' # movf_{id}_h);##
+					CallEventParams('movf_{id}_update', movf_{id}_x, movf_{id}_y, movf_{id}_w, movf_{id}_h);
+					Trigger('movf_visible', '{id}', movf_{id}_v);
+					"
+			
+			watch1="movf_visible"
+			ontrigger1="
+				If(StringEquals(param, '{id}') or StringEquals(param, ''), Split(
+					Set('movf_{id}_v', param1),
+					SetVisible(param1),
+					Call('{id}', 'SetVisible(' # param1 # ')'),
+					Call('movf_{id}_overlay', 'SetVisible(' # param1 # ')'),
+					Call('movf_{id}_listcheck', 'SetVisible(' # param1 # ')')
+				));
+				"
+				
+			watch2="movf_resetcall"
+			ontrigger2="
+				If(StringEquals(param, '{id}') or StringEquals(param, ''), Split(
+					Trigger('movf_evaluate',
+						'movf_{id}_update',
+						movf_{id}_defaultx, movf_{id}_defaulty,
+						movf_{id}_defaultw, movf_{id}_defaulth,
+						false,
+						false,
+						{minwidth=0}*movf_{id}_defaultw,
+						{maxwidth=0}*movf_{id}_defaultw,
+						{minheight=0}*movf_{id}_defaulth,
+						{maxheight=0}*movf_{id}_defaulth,
+						0,
+						0,
+						{snap=false},
+						GetYFromString('{margin=0}'),
+						{collapsemargins=false}
+					),
+					Trigger('movf_visible', '{id}', {visible=true}),
+					Trigger('movf_collect', '{id}', movf_{id}_collected and movf_collectioncount == 1)
+				));
+				"
+			
+			onevent9="{onset=} {onupdate=}"
+		>
+			<panel
+				name="movf_{id}_update"
+				
+				watch="movf_collectionupdate"
+				ontrigger="
+					If(movf_{id}_collected,
+						CallEventParams('movf_{id}_update', param0 + movf_{id}_relx*param2, param1 + movf_{id}_rely*param3, movf_{id}_relw*param2, movf_{id}_relh*param3)
+					);
+					"
+					onevent="
+						Set('movf_{id}_x', param0);
+						Set('movf_{id}_y', param1);
+						Set('movf_{id}_w', param2);
+						Set('movf_{id}_h', param3);
+						
+						Set(movf_updatex, round(param0) );
+						Set(movf_updatey, round(param1) );
+						Set(movf_updatew, round(param0 + param2) - round(param0) );
+						Set(movf_updateh, round(param1 + param3) - round(param1) );
+						Set(movf_updateratio, movf_updatew/movf_updateh);
+						
+						Call('{id}', 'SetWidth(' # movf_updatew # ')');
+						Call('{id}', 'SetHeight(' # movf_updateh # ')');
+						Call('{id}', 'SetAbsoluteX(' # movf_updatex # ')');
+						Call('{id}', 'SetAbsoluteY(' # movf_updatey # ')');
+						
+						Call('movf_{id}_frame', 'SetWidth(' # movf_updatew # ')');
+						Call('movf_{id}_frame', 'SetHeight(' # movf_updateh # ')');
+						Call('movf_{id}_frame', 'SetAbsoluteX(' # movf_updatex # ')');
+						Call('movf_{id}_frame', 'SetAbsoluteY(' # movf_updatey # ')');
+						
+						Call('movf_{id}_overlay', 'SetWidth(' # movf_updatew # ')');
+						Call('movf_{id}_overlay', 'SetHeight(' # movf_updateh # ')');
+						Call('movf_{id}_overlay', 'SetAbsoluteX(' # movf_updatex # ')');
+						Call('movf_{id}_overlay', 'SetAbsoluteY(' # movf_updatey # ')');
+						
+						CallEvent('movf_{id}_frame', 9);
+						RefreshWidget('{id}');
+						"
+			/>
+			
+			<panel
+				name="movf_{id}_collectionfunctions"
+				
+				watch0="movf_collectcall"
+				ontrigger0="
+					If(StringEquals(param, '{id}') or StringEquals(param, ''), Split(
+						Set(movf_{id}_collected, param1),
+						RefreshWidget('movf_{id}_overlay'),
+						RefreshWidget('movf_{id}_listitem')
+					));
+					"
+					
+				watch1="movf_collectionpos"
+				ontrigger1="
+					If(movf_{id}_collected, Split(
+						If(movf_collectioncount == 0, Split(
+							Set(movf_dbl, movf_{id}_x),
+							Set(movf_dbt, movf_{id}_y),
+							Set(movf_dbr, movf_{id}_x + movf_{id}_w),
+							Set(movf_dbb, movf_{id}_y + movf_{id}_h)
+						), Split(
+							Set(movf_dbl, min(movf_dbl, movf_{id}_x)),
+							Set(movf_dbt, min(movf_dbt, movf_{id}_y)),
+							Set(movf_dbr, max(movf_dbr, movf_{id}_x + movf_{id}_w)),
+							Set(movf_dbb, max(movf_dbb, movf_{id}_y + movf_{id}_h))
+						)),
+						Set(movf_collectioncount, movf_collectioncount + 1)
+					));
+					"
+				
+				watch2="movf_collectionvars"
+				ontrigger2="
+					If(movf_{id}_collected, 
+						CallEvent('movf_{id}_collectionfunctions', 0)
+					);
+					"
+					onevent0="
+						Set(movf_{id}_relx, (movf_{id}_x - movf_dbx)/movf_dbw);
+						Set(movf_{id}_rely, (movf_{id}_y - movf_dby)/movf_dbh);
+						Set(movf_{id}_relw, movf_{id}_w/movf_dbw);
+						Set(movf_{id}_relh, movf_{id}_h/movf_dbh);
+						
+												Set(movf_dbminw, max(movf_dbminw, {minwidth=0}*movf_{id}_defaultw / movf_{id}_relw));
+						If({maxwidth=0} gt 0,	Set(movf_dbmaxw, min(movf_dbmaxw, {maxwidth=0}*movf_{id}_defaultw / movf_{id}_relw)));
+												Set(movf_dbminh, max(movf_dbminh, {minheight=0}*movf_{id}_defaulth / movf_{id}_relh));
+						If({maxheight=0} gt 0,	Set(movf_dbmaxh, min(movf_dbmaxh, {maxheight=0}*movf_{id}_defaulth / movf_{id}_relh)));
+						
+						If(!{resizable=false}, Set(movf_dbresizable, false));
+						If({maintainratio=false}, Set(movf_dbmaintainratio, true));
+						If(StringEmpty(movf_dblabel), Set(movf_dblabel, '{textid}'), Set(movf_dblabel, movf_dblabel # '&#10;{textid}'));
+						
+						Set(movf_dbsnap, {snap=false});
+						Set(movf_dbmargin, GetYFromString('{margin=0}'));
+						Set(movf_dbcollapse, {collapsemargins=false});
+						"
+					
+			/>
+			<panel
+				name="movf_{id}_snapfunctions"
+				
+				watch="movf_snaploop"
+				ontrigger="
+					If({snapto=false} and IsVisible() and !movf_{id}_collected,
+						CallEvent('movf_{id}_snapfunctions')
+					);
+					"			
+					onevent="
+						Set(movf_snapl2, movf_{id}_x);
+						Set(movf_snapr2, movf_{id}_x + movf_{id}_w);
+						Set(movf_snapt2, movf_{id}_y);
+						Set(movf_snapb2, movf_{id}_y + movf_{id}_h);
+						If(movf_collapse or {collapsemargins=false},
+							Set(movf_tempmargin, Max(movf_margin, GetYFromString('{margin=0}'))),
+							Set(movf_tempmargin, movf_margin + GetYFromString('{margin=0}'))
+						);
+						CallEvent('movf_snapfunctions');
+						"
+				
+			/>
+		</panel>
+	</template>
+	
+	<panel
+		width="0"
+		height="0"
+		onmouselup="If(IsVisible('movf_control'), Cmd('Trigger movf_dragindex -1'));"
+	/>
+	
+	<!-- &#10; is line break -->
+	<!-- &#160; is no-break space -->
+	<template name="movf_overlay">
+		<panel
+			name="movf_{id}_overlay"
+			
+			onrefresh="
+				If(movf_{id}_collected, BringToFront());
+				"
+				
+			onclick="
+				If(GetModifier1(),
+					Trigger('movf_collect', '{id}', !movf_{id}_collected),
+					If(!movf_{id}_collected, Split(
+						Trigger('movf_collectionclear'),
+						Trigger('movf_collect', '{id}', 1)
+					))
+				);
+				Call('movf_list', 'SetVerticalListScroll(Max(0, movf_{id}_index - 5))');
+				If(movf_{id}_collected,
+					Cmd('Trigger movf_dragindex 0')
+				);
+				"
+			
+			watch="movf_dragcollectfinish"
+			ontrigger="
+				If(	movf_{id}_v and
+					GetX() ge param0 and GetX() le param1 and
+					GetX() + GetWidth() ge param0 and GetX() + GetWidth() le param1 and
+					GetY() ge param2 and GetY() le param3 and
+					GetY() + GetHeight() ge param2 and GetY() + GetHeight() le param3,
+						Trigger('movf_collect', '{id}', 1)
+				);
+				"
+			
+			onmouseover="ShowWidget('movf_{id}_overlayover');"
+			onmouseout="HideWidget('movf_{id}_overlayover');"
+		>
+			<frame color="0 0 0 .5" borderthickness="0.1h" bordercolor=".8 .8 .8 1" noclick="true"/>
+			<frame name="movf_{id}_overlayover" color="0 0 0 0" borderthickness="0.2h" bordercolor="white" noclick="1" visible="false"
+				onrefresh="
+					If(movf_{id}_collected,
+						SetBorderColor('yellow'),
+						SetBorderColor('white')
+					);
+					"
+			/>
+			<frame color="0 0 0 0" borderthickness="0.1h" bordercolor="yellow" noclick="true" onrefresh="SetVisible(movf_{id}_collected);"/>
+			<label noclick="true" content="{textid}" font="dyn_10" x="0.4h" y="0.0h" shadow="1" textalign="left" textvalign="top" color="yellow"/>
+		</panel>
+	</template>
+	
+	<template name="movf_dragbox">
+		<panel
+			name="movf_dragbox"
+			visible="false"
+			noclick="1"
+			
+			onrefresh="
+				SetWidth( round(movf_dbx + movf_dbw) - round(movf_dbx) );
+				SetHeight( round(movf_dby + movf_dbh) - round(movf_dby) );
+				SetAbsoluteX( round(movf_dbx) );
+				SetAbsoluteY( round(movf_dby) );
+				"
+			
+			watch0="movf_collect"
+			ontrigger0="
+				Trigger('movf_collectcall', param0, param1);
+				Trigger('movf_collectionrefresh');
+				"
+			watch1="movf_collectionclear"
+			ontrigger1="
+				Trigger('movf_collectcall', '', 0);
+				Trigger('movf_collectionrefresh');
+				"
+			
+			watch2="movf_collectionrefresh"
+			ontrigger2="
+				Set(movf_collectioncount, 0);
+				Trigger('movf_collectionpos');
+				Set(movf_dbx, movf_dbl);
+				Set(movf_dby, movf_dbt);
+				Set(movf_dbw, movf_dbr - movf_dbl);
+				Set(movf_dbh, movf_dbb - movf_dbt);
+				SetVisible(movf_collectioncount gt 0);
+				Set(movf_dbratio, movf_dbw/movf_dbh);
+				
+				Set(movf_dblabel, '');
+				Set(movf_dbresizable, true);
+				Set(movf_dbmaintainratio, false);
+				Set(movf_dbminw, 0);
+				Set(movf_dbmaxw, GetScreenWidth());
+				Set(movf_dbminh, 0);
+				Set(movf_dbmaxh, GetScreenHeight());
+				Trigger('movf_collectionvars');
+				
+				RefreshWidget();
+				"
+			
+			onevent="
+				Set(movf_dbx, param0);
+				Set(movf_dby, param1);
+				Set(movf_dbw, param2);
+				Set(movf_dbh, param3);
+				
+				Trigger('movf_collectionupdate', param0, param1, param2, param3);
+				
+				RefreshWidget();
+				"
+		>
+			<panel
+				onmouseldown="
+					Cmd('Trigger movf_dragindex 0');
+				"
+				color="0 0 0 .4"
+				watch="KeyModifier1"
+				ontrigger="SetVisible(!param);"
+			/>
+			<frame color="0 0 0 0" borderthickness="0.2h" bordercolor="yellow" noclick="true" >
+				<frame color="0 0 0 0" borderthickness="0.2h" bordercolor="red" noclick="true" visible="false" watch="movf_precision" ontrigger="SetVisible(param);"/>
+			</frame>
+			<label noclick="true" content="" font="dyn_10" x="0.4h" y="0.0h" color="yellow" shadow="1" textalign="left" textvalign="top" onrefresh="SetText('');"/>
+			<panel visible="false" width="+0.6h" height="+0.6h" align="center" valign="center" noclick="true" onrefresh="SetVisible(movf_dbresizable);">
+				<!-- The following instances are the corner handles -->
+				<instance name="movf_handle" index="1" valign="top" align="left" />
+				<instance name="movf_handle" index="2" valign="top" align="right" />
+				<instance name="movf_handle" index="3" valign="bottom" align="right" />
+				<instance name="movf_handle" index="4" valign="bottom" align="left" />
+				<!-- The following set of handles are separated into their own panel so they will not be visible unless maintainratio is false. -->
+				<panel noclick="true" onrefresh="SetVisible(!movf_dbmaintainratio);">
+					<instance name="movf_handle" index="5" valign="top" align="center" />
+					<instance name="movf_handle" index="6" valign="center" align="right" />
+					<instance name="movf_handle" index="7" valign="bottom" align="center" />
+					<instance name="movf_handle" index="8" valign="center" align="left" />
+				</panel>
+			</panel>
+		</panel>
+	</template>
+	
+	<trigger name="movf_dragcollect"/>
+	<trigger name="movf_dragcollectfinish"/>
+		<!-- Collects all of the frames that are inside the dragbox and are visible
+				param0 - int - left bound
+				param1 - int - right bound
+				param2 - int - top bound
+				param3 - int - bot bound
+		-->
+	<template name="movf_dragcollect">
+		<panel onmouseldown="Cmd('Trigger movf_dragcollect 1');" onmouselup="If(movf_dragcollect, Cmd('Trigger movf_dragcollect 0'));"/>
+		<panel
+			visible="false"
+			noclick="1"
+			onload="
+				CreateInt('movf_dragcollectx', 0);
+				CreateInt('movf_dragcollecty', 0);
+				CreateInt('movf_dragcollectcx', 0);
+				CreateInt('movf_dragcollectcy', 0);
+				"
+			watch="movf_dragcollect"
+			ontrigger="
+				SetVisible(param);
+				If(param, Split(
+					Set(movf_dragcollectx, GetCursorPosX()),
+					Set(movf_dragcollecty, GetCursorPosY())
+				));
+				If(!param, Split(
+					If(!GetModifier1(), Trigger('movf_collectionclear')),
+					Trigger('movf_dragcollectfinish', GetX() - 1, GetX() + GetWidth() + 1, GetY() - 1, GetY() + GetHeight() + 1)
+				));
+				"
+			onframe="
+				Set(movf_dragcollectcx, GetCursorPosX() - movf_dragcollectx);
+				Set(movf_dragcollectcy, GetCursorPosY() - movf_dragcollecty);
+				SetWidth(if(movf_dragcollectcx ge 0, movf_dragcollectcx, -movf_dragcollectcx));
+				SetHeight(if(movf_dragcollectcy ge 0, movf_dragcollectcy, -movf_dragcollectcy));
+				SetX(movf_dragcollectx + min(0, movf_dragcollectcx));
+				SetY(movf_dragcollecty + min(0, movf_dragcollectcy));
+				"
+		>
+			<frame color="0 0 0 0" bordercolor="orange" borderthickness="0.1h" noclick="1"/>
+		</panel>
+	</template>
+	
+	<template name="movf_handle">
+		<panel
+			align="{align}" valign="{valign}"
+			width="0.8h"
+			height="0.8h"
+			color="yellow"
+			onmouseldown="
+				Cmd('Trigger movf_dragindex {index}');
+				"
+			watch="movf_precision"
+			ontrigger="If(param, SetColor('red'), SetColor('yellow'));"
+		/>
+	</template>
+	
+	<template name="movf_label">
+		<label
+			name="{id}"
+			noclick="1"
+			visible="{visible=true}"
+			x="{x=}"
+			y="{y=}"
+			width="{width=100%}"
+			height="{height=100%}"
+			align="{align=left}"
+			valign="{valign=top}"
+			textalign="{textalign=}"
+			textvalign="center"
+			color="{color=white}"
+			shadow="{shadow=false}"
+			shadowcolor="{shadowcolor=black}"
+			shadowoffset="{shadowoffset=1}"
+			content="{content=}"
+			onload="{onload=} SleepWidget(0);"
+			onshow="{onshow=} SleepWidget(0);"
+			onhide="{onhide=}"
+			watch="{watch=}"
+			ontrigger="{ontrigger=} SleepWidget(0);"
+			ontriggerlua="{ontriggerlua=}"
+			watch0="{watch0=}"
+			ontrigger0="{ontrigger0=} SleepWidget(0);"
+			ontrigger0lua="{ontrigger0lua=}"
+			watch1="{watch1=}"
+			ontrigger1="{ontrigger1=} SleepWidget(0);"
+			ontrigger1lua="{ontrigger1lua=}"
+			watch2="{watch2=}"
+			ontrigger2="{ontrigger2=} SleepWidget(0);"
+			ontrigger2lua="{ontrigger2lua=}"
+			watch3="{watch3=}"
+			ontrigger3="{ontrigger3=} SleepWidget(0);"
+			ontrigger3lua="{ontrigger3lua=}"
+			watch4="{watch4=}"
+			ontrigger4="{ontrigger4=} SleepWidget(0);"
+			ontrigger4lua="{ontrigger4lua=}"
+			watch5="{watch5=}"
+			ontrigger5="{ontrigger5=} SleepWidget(0);"
+			ontrigger5lua="{ontrigger5lua=}"
+			onrefresh="{onrefresh=} SleepWidget(0);"
+			onrefreshlua="{onrefreshlua=}"
+			onwake="
+				Set(movf_fonttemp, 1000*GetHeight()/GetScreenHeight());
+				Set(movf_fonttemp, Min(movf_fonttemp, Min(movf_fontmax, {fontmax=100})));
+				Set(movf_fonttemp, Max(movf_fonttemp, Max(movf_fontmin, {fontmin=0})));
+				SetFont('dyn_' # Floor(movf_fonttemp));
+				If(GetTextWidth() gt 0.9*GetWidth(), Set(movf_fonttemp, movf_fonttemp * 0.9 * GetWidth() / GetTextWidth() ));
+				Set(movf_fonttemp, Min(movf_fonttemp, Min(movf_fontmax, {fontmax=100}))));
+				Set(movf_fonttemp, Max(movf_fonttemp, Max(movf_fontmin, {fontmin=0})));
+				SetFont('dyn_' # Floor(movf_fonttemp));
+				"
+		/>
+	</template>
+<!-- /TEMPLATES -->
+
+</package>

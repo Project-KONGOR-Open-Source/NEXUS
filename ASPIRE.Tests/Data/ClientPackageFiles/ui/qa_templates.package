@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+		
+	<template name="qa_type_sep">
+		<panel height="{height=100%}" width="{width=8.0h}" noclick="true">
+			<panel width="1" height="100%" align="center" color=".3 .3 .3 1" noclick="true"/>
+			<panel color="0 0 0 1" height="3.6h" width="-1.0h" align="center" valign="center" noclick="true">
+				<label height="100%" textvalign="center" textalign="center" font="dyn_12" color=".7 .7 .7 1" shadow="true" content="OR" noclick="true" />
+			</panel>
+		</panel>
+	</template>	
+	
+	<template name="qa_type_btn_padder">
+		<panel height="100%" width="2h" noclick="true" 
+			group="{group=qa_type_btn_padder_group}"
+		/>
+	</template>
+	
+	<template name="qa_text_btn">
+		<button
+			name="{id}"
+			width="{width=100%}" height="{height=100%}" x="{x}"
+			color="invisible"
+			enabled="{enabled=false}"
+			onmouseover="PlaySound('/shared/sounds/ui/button_over_01.wav');"
+			onmouseout=""
+			onclick="{onclick}"
+			onclicklua="{onclicklua}"
+			group="{group=qa_type_button_default_group}"
+			watch="QAClearButtons" ontrigger=" If(StringEquals('{group=qa_type_button_default_group}', param0), DestroyWidget()); "
+		>
+			<widgetstate statename="up">
+				<panel noclick="1" watch="QAClearButtons" ontrigger=" If(StringEquals('{group=qa_type_button_default_group}', param0), DestroyWidget()); " >
+				<frame texture="/ui/frames/rounded_bg_blue.tga" borderthickness="1.4h" color=".5 .5 .5 1" blockinput="false" />
+				<frame texture="/ui/frames/roundframe.tga" color="#074880" borderthickness="1.4h" blockinput="false" />				
+				<label fity="true" width="96%" align="center" valign="center" textalign="center" textvalign="center" wrap="true" font="{font=dyn_14}" color=".7 .7 .7 1" shadow="true" content="{AbuseType}" />
+				</panel>
+			</widgetstate>
+			<widgetstate statename="over">
+				<panel noclick="1" watch="QAClearButtons" ontrigger=" If(StringEquals('{group=qa_type_button_default_group}', param0), DestroyWidget()); " >
+				<frame texture="/ui/frames/rounded_bg_blue.tga" borderthickness="1.4h" color=".9 .9 .9 1" blockinput="false" />
+				<frame texture="/ui/frames/roundframe.tga" color="#0375d5" borderthickness="1.4h" blockinput="false" />
+				<label fity="true" width="96%" align="center" valign="center" textalign="center" textvalign="center" wrap="true" font="{font=dyn_14}" color="1 1 1 1" shadow="true" content="{AbuseType}" />
+				</panel>
+			</widgetstate>
+			<widgetstate statename="down" x="1" y="1">
+				<panel noclick="1" watch="QAClearButtons" ontrigger=" If(StringEquals('{group=qa_type_button_default_group}', param0), DestroyWidget()); " >
+				<frame texture="/ui/frames/rounded_bg_blue.tga" borderthickness="1.4h" color=".5 .5 .5 1" blockinput="false" />
+				<frame texture="/ui/frames/roundframe.tga" color="#0375d5" borderthickness="1.4h" blockinput="false" />
+				<label fity="true" width="96%" align="center" valign="center" textalign="center" textvalign="center" wrap="true" font="{font=dyn_14}" color="1 1 1 1" shadow="true" content="{AbuseType}" />
+				</panel>
+			</widgetstate>
+			<widgetstate statename="disabled">
+				<panel noclick="1" watch="QAClearButtons" ontrigger=" If(StringEquals('{group=qa_type_button_default_group}', param0), DestroyWidget()); " >
+				<frame texture="/ui/frames/rounded_bg_blue.tga" borderthickness="1.4h" color=".3 .3 .3 1" rendermode="grayscale" blockinput="false" />
+				<frame texture="/ui/frames/roundframe.tga" color=".1 .1 .1 1" borderthickness="1.4h" blockinput="false" />
+				<label fity="true" width="96%" align="center" valign="center" textalign="center" textvalign="center" wrap="true" font="{font=dyn_14}" color=".25 .25 .25g 1" shadow="true" content="{AbuseType}" />
+				</panel>
+			</widgetstate>				
+		</button>
+	</template>		
+	
+	<template name="qa_type_btn">
+		<button
+			name="{id}"
+			width="{width=100%}" height="{height=100%}" x="{x}"
+			color="invisible"
+			enabled="{enabled=false}"
+			onmouseover="PlaySound('/shared/sounds/ui/button_over_01.wav');"
+			onmouseout=""
+			onclick="{onclick}"
+			onclicklua="{onclicklua}"
+			group="{group=qa_type_button_default_group}"
+			watch="QAClearButtons" ontrigger=" If(StringEquals('{group=qa_type_button_default_group}', param0), DestroyWidget()); "
+		>
+			<widgetstate statename="up">
+				<panel noclick="1" watch="QAClearButtons" ontrigger=" If(StringEquals('{group=qa_type_button_default_group}', param0), DestroyWidget()); " >
+				<frame texture="/ui/frames/rounded_bg_blue.tga" borderthickness="1.4h" color=".5 .5 .5 1" blockinput="false" />
+				<frame texture="/ui/frames/roundframe.tga" color="#074880" borderthickness="1.4h" blockinput="false" />				
+				<frame width="90%" height="90@" align="center" valign="center" texture="/ui/frames/rounded_bg_flat.tga" borderthickness="0.8h" color="0 0 0 .2" blockinput="false" />
+				<frame width="90%" height="90@" align="center" valign="center" texture="/ui/frames/roundframe.tga" color="0 0 0 .4" borderthickness="0.8h" blockinput="false" />
+				<panel y="13%" width="{size=62}%" height="{size2=62}@" align="center" valign="top">
+					<image  texture="{icon}" />
+					<frame color="invisible" borderthickness="1" bordercolor="#074880" visible="{icon_border=true}" />
+					<label y="-2%" fity="true" width="96%" align="center" valign="bottom" textalign="center" textvalign="bottom" wrap="true" font="{font=dyn_14}" color="1 1 1 0.9" shadow="true" content="{complete}{total}" outline="1" />
+				</panel>
+				<label y="-8%" fity="true" width="96%" align="center" valign="bottom" textalign="center" textvalign="bottom" wrap="true" font="{font=dyn_14}" color=".5 .5 .5 1" shadow="true" content="{AbuseType}" />
+				</panel>
+			</widgetstate>
+			<widgetstate statename="over">
+				<panel noclick="1" watch="QAClearButtons" ontrigger=" If(StringEquals('{group=qa_type_button_default_group}', param0), DestroyWidget()); " >
+				<frame texture="/ui/frames/rounded_bg_blue.tga" borderthickness="1.4h" color=".9 .9 .9 1" blockinput="false" />
+				<frame texture="/ui/frames/roundframe.tga" color="#0375d5" borderthickness="1.4h" blockinput="false" />
+				<frame width="90%" height="90@" align="center" valign="center" texture="/ui/frames/rounded_bg_flat.tga" borderthickness="0.8h" color="0 0 0 .2" blockinput="false" />
+				<frame width="90%" height="90@" align="center" valign="center" texture="/ui/frames/roundframe.tga" color="0 0 0 .4" borderthickness="0.8h" blockinput="false" />
+				<panel y="13%" width="{size=62}%" height="{size2=62}@" align="center" valign="top">
+					<image  texture="{icon}" />
+					<frame color="invisible" borderthickness="1" bordercolor="#0375d5" visible="{icon_border=true}" />
+					<label y="-2%" fity="true" width="96%" align="center" valign="bottom" textalign="center" textvalign="bottom" wrap="true" font="{font=dyn_14}" color="1 1 1 0.9" shadow="true" content="{complete}{total}" outline="1" />
+				</panel>
+				<label y="-8%" fity="true" width="96%" align="center" valign="bottom" textalign="center" textvalign="bottom" wrap="true" font="{font=dyn_14}" color="1 1 1 1" shadow="true" content="{AbuseType}" />
+				</panel>
+			</widgetstate>
+			<widgetstate statename="down" x="1" y="1">
+				<panel noclick="1" watch="QAClearButtons" ontrigger=" If(StringEquals('{group=qa_type_button_default_group}', param0), DestroyWidget()); " >
+				<frame texture="/ui/frames/rounded_bg_blue.tga" borderthickness="1.4h" color=".5 .5 .5 1" blockinput="false" />
+				<frame texture="/ui/frames/roundframe.tga" color="#0375d5" borderthickness="1.4h" blockinput="false" />
+				<frame width="90%" height="90@" align="center" valign="center" texture="/ui/frames/rounded_bg_flat.tga" borderthickness="0.8h" color="0 0 0 .2" blockinput="false" />
+				<frame width="90%" height="90@" align="center" valign="center" texture="/ui/frames/roundframe.tga" color="0 0 0 .4" borderthickness="0.8h" blockinput="false" />
+				<panel y="13%" width="{size=62}%" height="{size2=62}@" align="center" valign="top">
+					<image  texture="{icon}" />
+					<frame color="invisible" borderthickness="1" bordercolor="#0375d5" visible="{icon_border=true}" />
+					<label y="-2%" fity="true" width="96%" align="center" valign="bottom" textalign="center" textvalign="bottom" wrap="true" font="{font=dyn_14}" color="1 1 1 0.9" shadow="true" content="{complete}{total}" outline="1" />
+				</panel>
+				<label y="-8%" fity="true" width="96%" align="center" valign="bottom" textalign="center" textvalign="bottom" wrap="true" font="{font=dyn_14}" color="1 1 1 1" shadow="true" content="{AbuseType}" />
+				</panel>
+			</widgetstate>
+			<widgetstate statename="disabled">
+				<panel noclick="1" watch="QAClearButtons" ontrigger=" If(StringEquals('{group=qa_type_button_default_group}', param0), DestroyWidget()); " >
+				<frame texture="/ui/frames/rounded_bg_blue.tga" borderthickness="1.4h" color=".3 .3 .3 1" rendermode="grayscale" blockinput="false" />
+				<frame texture="/ui/frames/roundframe.tga" color=".1 .1 .1 1" borderthickness="1.4h" blockinput="false" />
+				<frame width="90%" height="90@" align="center" valign="center" texture="/ui/frames/rounded_bg_flat.tga" rendermode="grayscale" borderthickness="0.8h" color="0 0 0 .6" blockinput="false" />
+				<frame width="90%" height="90@" align="center" valign="center" texture="/ui/frames/roundframe.tga" color=".1 .1 .1 1" borderthickness="0.8h" blockinput="false" />
+				<panel y="13%" width="{size=62}%" height="{size2=62}@" align="center" valign="top">
+					<image  texture="{icon}" rendermode="grayscale" color=".4 .4 .4 1"/>
+					<frame color="invisible" borderthickness="1" bordercolor=".1 .1 .1 1" visible="{icon_border=true}" />
+					<label visible="!{isComplete=false}" y="-2%" fity="true" width="96%" align="center" valign="bottom" textalign="center" textvalign="bottom" wrap="true" font="{font=dyn_14}" color="1 1 1 0.9" shadow="true" content="{complete}{total}" outline="1" />
+				</panel>
+				<label y="-8%" fity="true" width="96%" align="center" valign="bottom" textalign="center" textvalign="bottom" wrap="true" font="{font=dyn_14}" color=".25 .25 .25g 1" shadow="true" content="{AbuseType}" />
+				</panel>
+			</widgetstate>	
+			<panel color="0 0 0 0.0" visible="{isSubmitted=false}" watch="QAClearButtons" ontrigger=" If(StringEquals('{group=qa_type_button_default_group}', param0), DestroyWidget()); ">
+				<label fity="true" width="96%" align="center" valign="center" textalign="center" textvalign="center" wrap="true" font="{font=dyn_14}" color="0.3 1.0 0 1" shadow="true" y="-2h"
+					content="Submitted" 
+				/>
+			</panel>
+			<panel color="0 0 0 0.0" visible="{isComplete=false}" watch="QAClearButtons" ontrigger=" If(StringEquals('{group=qa_type_button_default_group}', param0), DestroyWidget()); ">
+				<label fity="true" width="96%" align="center" valign="center" textalign="center" textvalign="center" wrap="true" font="{font=dyn_14}" color="1.0 0.8 0 1" shadow="true" 
+					content="Complete" 
+				/>
+			</panel>			
+		</button>
+	</template>			
+		
+</package>

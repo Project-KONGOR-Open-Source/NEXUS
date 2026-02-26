@@ -118,6 +118,7 @@ public class SeedMatchHistoryTests
             int baseMatchId = 9000000 + random.Next(1, 100000);
             int midwarsId = baseMatchId + 1;
             int rankedId = baseMatchId + 2;
+            int riftwarsId = baseMatchId + 3;
 
             List<Account> guestAccounts = new();
 
@@ -227,7 +228,45 @@ public class SeedMatchHistoryTests
                 AwardHighestCreepScore = 0
             };
 
-            context.MatchStatistics.AddRange(midwarsMatch, rankedMatch);
+            MatchStatistics riftwarsMatch = new()
+            {
+                MatchID = riftwarsId,
+                ServerID = 1,
+                HostAccountName = "System",
+                Map = "riftwars",
+                MapVersion = "1.0",
+                TimePlayed = 1500,
+                FileSize = 1100,
+                FileName = $"M{riftwarsId}.honreplay",
+                ConnectionState = 0,
+                Version = "4.10.0",
+                AveragePSR = 1550,
+                AveragePSRTeamOne = 1550,
+                AveragePSRTeamTwo = 1550,
+                GameMode = "riftwars",
+                ScoreTeam1 = 45,
+                ScoreTeam2 = 40,
+                TeamScoreGoal = 0,
+                PlayerScoreGoal = 0,
+                NumberOfRounds = 1,
+                ReleaseStage = "Live",
+                BannedHeroes = "",
+                TimestampRecorded = DateTimeOffset.UtcNow.AddHours(-3),
+                AwardMostAnnihilations = 0,
+                 // Omitted other Award zeroes for brevity, assuming DB default handles it or just keep them
+                AwardMostQuadKills = 0,
+                AwardLargestKillStreak = 0,
+                AwardMostSmackdowns = 0,
+                AwardMostKills = 0,
+                AwardMostAssists = 0,
+                AwardLeastDeaths = 0,
+                AwardMostBuildingDamage = 0,
+                AwardMostWardsKilled = 0,
+                AwardMostHeroDamageDealt = 0,
+                AwardHighestCreepScore = 0
+            };
+
+            context.MatchStatistics.AddRange(midwarsMatch, rankedMatch, riftwarsMatch);
 
             // List of valid heroes confirmed to exist in HeroDefinitions.cs
             // 114: Armadon, 115: Behemoth, 116: Hammerstorm, 120: Predator, 121: Jeraziah
@@ -460,11 +499,101 @@ public class SeedMatchHistoryTests
                     GameplayStat9 = 0,
                     TimeEarningExperience = 1600
                 });
+
+                // Riftwars Player
+                context.PlayerStatistics.Add(new PlayerStatistics
+                {
+                    MatchID = riftwarsId,
+                    AccountID = account.ID,
+                    AccountName = account.Name,
+                    Team = team,
+                    LobbyPosition = guestNum - 1,
+                    GroupNumber = 0,
+                    ClanID = null,
+                    ClanTag = null,
+                    Benefit = 0,
+                    HeroProductID = rankedHeroId,
+                    MVP = 0,
+                    Inventory = [.. inventory],
+                    Win = team == 1 ? 1 : 0,
+                    Loss = team == 1 ? 0 : 1,
+                    HeroKills = random.Next(0, 20),
+                    HeroDeaths = random.Next(0, 15),
+                    HeroAssists = random.Next(0, 25),
+                    HeroLevel = 25,
+                    Gold = 12000,
+                    SecondsPlayed = 1500,
+                    Disconnected = 0,
+                    Conceded = 0,
+                    Kicked = 0,
+                    PublicMatch = 1,
+                    PublicSkillRatingChange = 2.0,
+                    RankedMatch = 0,
+                    RankedSkillRatingChange = 0,
+                    SocialBonus = 0,
+                    UsedToken = 0,
+                    ConcedeVotes = 0,
+                    HeroDamage = 15000,
+                    GoldFromHeroKills = 2200,
+                    HeroExperience = 16000,
+                    Buybacks = 0,
+                    GoldLostToDeath = 600,
+                    SecondsDead = 80,
+                    TeamCreepKills = 100,
+                    TeamCreepDamage = 4000,
+                    TeamCreepGold = 4000,
+                    TeamCreepExperience = 4000,
+                    NeutralCreepKills = 5,
+                    NeutralCreepDamage = 200,
+                    NeutralCreepGold = 200,
+                    NeutralCreepExperience = 300,
+                    BuildingDamage = 1500,
+                    BuildingsRazed = 2,
+                    ExperienceFromBuildings = 500,
+                    GoldFromBuildings = 600,
+                    Denies = 10,
+                    ExperienceDenied = 400,
+                    GoldSpent = 11000,
+                    Experience = 22000,
+                    Actions = 5500,
+                    ConsumablesPurchased = 3,
+                    WardsPlaced = 0,
+                    FirstBlood = 0,
+                    DoubleKill = 0,
+                    TripleKill = 0,
+                    QuadKill = 0,
+                    Annihilation = 0,
+                    KillStreak03 = 0,
+                    KillStreak04 = 0,
+                    KillStreak05 = 0,
+                    KillStreak06 = 0,
+                    KillStreak07 = 0,
+                    KillStreak08 = 0,
+                    KillStreak09 = 0,
+                    KillStreak10 = 0,
+                    KillStreak15 = 0,
+                    Smackdown = 0,
+                    Humiliation = 0,
+                    Nemesis = 0,
+                    Retribution = 0,
+                    Score = 0,
+                    GameplayStat0 = 0,
+                    GameplayStat1 = 0,
+                    GameplayStat2 = 0,
+                    GameplayStat3 = 0,
+                    GameplayStat4 = 0,
+                    GameplayStat5 = 0,
+                    GameplayStat6 = 0,
+                    GameplayStat7 = 0,
+                    GameplayStat8 = 0,
+                    GameplayStat9 = 0,
+                    TimeEarningExperience = 1300
+                });
             }
 
             await context.SaveChangesAsync();
             Console.WriteLine(
-                $"Seeded 5v5 matches for {guestAccounts.Count} accounts. Midwars ({midwarsId}), Ranked ({rankedId})");
+                $"Seeded 5v5 matches for {guestAccounts.Count} accounts. Midwars ({midwarsId}), Ranked ({rankedId}), Riftwars ({riftwarsId})");
         }
     }
 
@@ -512,8 +641,9 @@ public class SeedMatchHistoryTests
             //            await context.Database.ExecuteSqlRawAsync("DELETE FROM stat.MatchStatistics");
         }
 
+        int maxMatchId = await context.MatchStatistics.MaxAsync(m => (int?)m.MatchID) ?? 20000000;
+        int baseMatchId = maxMatchId + 1;
         Random random = new();
-        int baseMatchId = 20000000 + random.Next(1, 100000);
 
         List<Account> guestAccounts = new();
         for (int i = 1; i <= 10; i++)
@@ -553,7 +683,9 @@ public class SeedMatchHistoryTests
                 new { Mode = "picking", Map = "caldavar", Type = "Casual" }, // Renamed from Normal
                 new { Mode = "midwars", Map = "midwars", Type = "Public" },
                 new { Mode = "sd", Map = "caldavar", Type = "Casual" }, // Single Draft -> Casual
-                new { Mode = "ar", Map = "caldavar", Type = "Casual" } // All Random -> Casual
+                new { Mode = "ar", Map = "caldavar", Type = "Casual" }, // All Random -> Casual
+                new { Mode = "riftwars", Map = "riftwars", Type = "Public" }, // Riftwars Public
+                new { Mode = "midwars", Map = "midwars", Type = "Casual" } // Midwars Casual (Alternative scenario)
             };
 
         Console.WriteLine(

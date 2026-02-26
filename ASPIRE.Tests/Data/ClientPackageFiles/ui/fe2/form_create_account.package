@@ -1,0 +1,486 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+
+	<!-- Create new account (the free one) -->
+	<trigger name="UpdateCreateAccountForm"/>
+	<trigger name="CreateAccountStatus"/>
+	<trigger name="CreateAccountResult"/>
+	<form
+		name="CreateAccount"
+		host="!hon"
+		target="/signup/test_create_account.php"
+		statustrigger="CreateAccountStatus"
+		resulttrigger="CreateAccountResult"
+		resultparam0="success"
+		resultparam1="maintenance"
+		resultparam2="errors"
+		resultparam3="sea"
+		ssl="true"
+	/>
+	
+	<template name="form_create_account">
+		
+		<panel y="-110%" align="center" width="100.0h" name="form_create_account" visible="{visible=0}" noclick="true" valign="center">
+			
+			<panel x="0" y="-100%" height="203.6%" width="90%"  align="center" texture="mainmenu/upper_frame_center.tga"/>
+			<panel x="18h" y="-100%" height="203.6%" width="50@"  align="right" texture="mainmenu/upper_frame_right.tga"/>
+			<panel x="-18h" y="-100%" height="203.6%" width="50@"  align="left" texture="mainmenu/upper_frame_left.tga"/>
+			
+			<panel y="1.0h" width="-6.0h" height="-3.0h" align="center" visible="true" noclick="true">			
+			
+				<panel float="bottom" padding="0.5h">
+				
+					<panel width="100%" height="2.8h" noclick="1">
+						<instance name="header_bar" lbl="web_form_create_acct_title" lbl_font="dyn_12" show_close="1" onclick="{close_cmd}" />
+					</panel>
+					
+					<panel width="100%" height="44.0h" grow="true">
+						
+						<!-- Left -->
+						<panel width="50%" float="bottom" padding="0.5h" align="left" reverse="true">
+
+							<!-- Nickname -->							
+							<panel width="100%" grow="true">
+								
+								<panel align="center" height="6.4h">
+									<frame color="invisible" bordercolor="#455166" borderthickness="1" noclick="1" />									
+									<panel align="center" y="1h" width="-1h" height="2.4h" float="right" onload="CreateBool('_nick_valid', false);">
+										<label width="45%" height="100%" textvalign="center" font="dyn_11" color="white" shadow="true" content="create_acc_nickname"
+											watch="UpdateCreateAccountForm"
+											ontrigger="If(_nick_valid, SetColor('white'), SetColor('red'));"/>
+										<panel width="5%" height="100%">
+											<image align="right" width="1.2h" height="1.0h" valign="center" texture="/ui/info/arrow.tga" />
+										</panel>
+										<panel width="45%" height="100%">
+											<instance
+												name="field"
+												widgetname="create_account_nickname"
+												order="10"
+												maxlength="12"
+												form="CreateAccount"
+												data="nickname"
+												onshow="SetFocus(true);"
+												onlosefocus="HideWidget('create_account_nick_notice');"
+												onchange="
+													Set(_nick_check_field, name);
+													If(StringEmpty(this),
+														Set('_nick_valid', false),
+														SleepWidget(500, 'SubmitForm(\'UserNameCheck\', \'nickname\', create_account_nickname);')
+														);
+													Trigger('UpdateCreateAccountForm');
+													Trigger('UserNameCheckStatus', 2);
+													"
+											/>
+										</panel>
+									</panel>									
+
+									<label y="4.0h" font="dyn_9" wrap="true" width="-1.4h" align="center" color="#ffaa00" fity="true">create_acc_label_nick_name_tip</label>
+
+									<panel name="create_account_nick_notice" y="4h" x="-5.0%" align="right" height="5.2h" width="45%" visible="false" onclick="HideWidget('create_account_nick_notice');" watch="UserNameCheckStatus" ontrigger="SetVisible(!StringEmpty(create_account_nickname));">
+										<frame texture="/ui/frames/tooltip_bg.tga" color="0 0 0 .8" borderthickness=".6h" align="left" valign="top" noclick="1">
+										<frame texture="/ui/frames/roundframe.tga" color="#A0A0A0" borderthickness=".6h" noclick="1"/>
+										
+											<label
+												fity="true"
+												width="-1.4h"
+												align="center" valign="center"
+												textalign="center" textvalign="center"
+												font="dyn_10" wrap="1"
+												color="#48ee48" shadow="true" shadowcolor="black"
+												noclick="1"
+												watch="UserNameCheckResult"
+												ontrigger="
+													if (StringEquals(_nick_check_field, 'create_account_nickname'),
+														Split(
+															Set('_nick_valid', param0 and !StringEmpty(create_account_nickname)),
+															If(param0, SetColor('#48ee48'), SetColor('#eb3535')),
+															If(param0, SetText(Translate('main_create_account_nickname_available')), SetText(param1)),
+															Trigger('UpdateCreateAccountForm')
+														)
+													);
+
+													"
+												watch0="UserNameCheckStatus"
+												ontrigger0="
+													if (StringEquals(_nick_check_field, 'create_account_nickname'),
+														Split(
+															If(param == 2 or param == 3, SetText(Translate('main_create_account_nickname_check'))),
+															If(param == 2 or param == 3, SetColor('#ebee48'))
+														)
+													);
+
+													"
+											/>
+										</frame>
+									</panel>
+								</panel>
+							</panel>
+							
+							<!-- First name -->
+							<panel width="100%" grow="true">								
+								<panel height="4h">
+									<frame color="invisible" bordercolor="#455166" borderthickness="1" noclick="1" />									
+									<instance
+										name="web_form_field"
+										label="create_acc_first_name"
+										hastip="0"
+										order="11"
+										fieldname="create_account_firstname"
+										ontrigger="If(StringEmpty(create_account_firstname), SetColor('red'), SetColor('white'));"
+										tip_id="firstname_tip" tip_title="main_create_account_first_name" tip_text="main_create_account_first_name_tip"
+										form="CreateAccount" data="first_name"
+										updatetrigger="UpdateCreateAccountForm"
+									/>
+								</panel>
+							</panel>
+							
+							<!-- Last name -->
+							<panel width="100%" grow="true">
+								<panel height="4h">
+									<frame color="invisible" bordercolor="#455166" borderthickness="1" noclick="1" />									
+									<instance
+										name="web_form_field"
+										label="create_acc_last_name"
+										hastip="0"
+										order="12"
+										fieldname="create_account_lastname"
+										ontrigger="If(StringEmpty(create_account_lastname), SetColor('red'), SetColor('white'));"
+										tip_id="lastname_tip" tip_title="main_create_account_last_name" tip_text=""
+										form="CreateAccount" data="last_name"
+										updatetrigger="UpdateCreateAccountForm"
+									/>
+								</panel>
+							</panel>
+
+							<!-- Email address -->
+							<panel width="100%" grow="true">
+								<panel height="4h">
+									<frame color="invisible" bordercolor="#455166" borderthickness="1" noclick="1" />
+									
+									<instance
+										name="web_form_field"
+										label="create_acc_email"
+										hastip="0"
+										order="13"
+										fieldname="create_account_email"
+										ontrigger="If(!IsEmailAddress(create_account_email), SetColor('red'), SetColor('white'));"
+										tip_id="email_tip" tip_title="main_create_account_email" tip_text="main_create_account_email_tip"
+										updatetrigger="UpdateCreateAccountForm"
+									/>
+								</panel>
+							</panel>
+
+							<!-- Confirm email -->
+							<panel width="100%" grow="true">
+								<panel height="4h">
+									<frame color="invisible" bordercolor="#455166" borderthickness="1" noclick="1" />
+									
+									<instance
+										name="web_form_field"
+										label="create_acc_confirm_email"
+										hastip="0"
+										order="14"
+										fieldname="create_account_email2"
+										ontrigger="If(!IsEmailAddress(create_account_email2) or !StringEquals(create_account_email, create_account_email2), SetColor('red'), SetColor('white'));"
+										tip_id="confirmemail_tip" tip_title="main_create_account_confirm_email" tip_text="main_create_account_confirm_email_tip"
+										form="CreateAccount" data="email"
+										updatetrigger="UpdateCreateAccountForm"
+									/>
+								</panel>
+							</panel>
+							
+							<!-- Password -->
+							<panel width="100%" grow="true">
+								<panel height="4h">
+									<frame color="invisible" bordercolor="#455166" borderthickness="1" noclick="1" />
+									
+									<instance
+										name="web_form_field"
+										label="create_acc_password"
+										hastip="0"
+										order="15"
+										passchar="*"
+										fieldname="create_account_pass"
+										ontrigger="If(StringEmpty(create_account_pass) or !StringContainsOnly(create_account_pass, '#$@!.,`\'~_-]', 'Aa0'), SetColor('red'), SetColor('white'));"
+										tip_id="password_tip" tip_title="main_create_account_password" tip_text="main_create_account_password_tip"
+										form="CreateAccount" data="password1"
+										updatetrigger="UpdateCreateAccountForm"
+									/>
+								</panel>
+							</panel>
+							
+							<!-- Confirm password -->
+							<panel width="100%" grow="true">
+								<panel height="4h">
+									<frame color="invisible" bordercolor="#455166" borderthickness="1" noclick="1" />									
+									<instance
+										name="web_form_field"
+										label="create_acc_confirm_password"
+										hastip="0"
+										order="16"
+										passchar="*"
+										fieldname="create_account_pass2"
+										ontrigger="
+											If(
+												StringEmpty(create_account_pass2) or
+													!StringEquals(create_account_pass, create_account_pass2) or
+													!StringContainsOnly(create_account_pass, '#$@!.,`\'~_-]',
+												'Aa0'), SetColor('red'), SetColor('white')
+											);"
+										tip_id="confirmpassword_tip" tip_title="main_create_account_confirm_password" tip_text="main_create_account_confirm_password_tip"
+										form="CreateAccount" data="password2"
+										updatetrigger="UpdateCreateAccountForm"
+									/>
+								</panel>
+							</panel>
+
+							<!-- Secure Info -->
+							<panel width="100%" height="6.0h">
+								<frame color="invisible" bordercolor="#455166" borderthickness="1" noclick="1" />
+								<image width="4.5h" height="4.5h" x="1.0h" valign="center" texture="/ui/elements/thawte.tga" />			
+								<label x="-1.0h" width="-7.0h" height="100%" align="right" valign="center" textalign="center" textvalign="center" wrap="1" font="dyn_10" color="white" noclick="1">create_acc_secure_transfer</label>
+							</panel>
+							
+						</panel>
+						
+						<!-- Right -->
+						<panel width="49.0%" align="right">
+						
+							<!-- ToS -->
+							<panel width="100%" height="31.5h">
+								<instance height="2.5h" name="header_bar" color=".7 .7 .7 1" lbl="tos_header" lbl_font="dyn_10" show_close="0" />
+								<panel valign="bottom" height="-2.7h">
+									<frame color="invisible" bordercolor="#455166" borderthickness="1" noclick="1" />
+									<frame texture="/ui/info/backdrop.tga" borderthickness="2.0h" color="1 1 1 .5" noclick="1" />
+									<textbuffer
+										scrolltexture="/ui/info/combobox.tga"
+										handleheight="2.0h"
+										scrollbarsize="2.0h"				
+										exteriorscrollbars="false"
+										textalign="left"
+										font="dyn_10"
+										textcolor="white"
+										color="invisible"
+										shadow="1"
+										wrap="true"
+										noclick="0"				
+										file=":/tos.txt"
+										width="-1.0h" height="-2.1h"
+										align="center" valign="center"
+									/>
+								</panel>
+							</panel>
+
+	
+							<!-- Button -->
+							<panel width="100%" valign="bottom" grow="true">
+								<panel height="8.6h">
+								
+									<frame color="invisible" bordercolor="#455166" borderthickness="1" noclick="1" />
+									
+									<panel
+										visible="false" 
+										watch="UpdateCreateAccountForm" ontrigger="
+											if (
+												(_nick_valid) and
+												!StringEmpty(create_account_firstname) and
+												!StringEmpty(create_account_lastname) and
+												!StringEmpty(create_account_pass) and
+												StringEquals(create_account_pass, create_account_pass2) and
+												!StringEmpty(create_account_email) and
+												StringEquals(create_account_email, create_account_email2)
+											, SetVisible(true), SetVisible(false));
+										"
+									>
+										<frame texture="/ui/info/backdrop.tga" borderthickness="2.0h" color="1 1 1 1" noclick="1"/>
+										<frame color="invisible" bordercolor="#4b628b" borderthickness="1" noclick="1" />
+									</panel>
+									
+									<panel y="0.5h" float="bottom" padding=".5h" grow="true" width="-1h">
+									
+										<panel height="0" />									
+										
+										<label wrap="true" align="center" textalign="center" font="dyn_10" color="white" shadow="true" fity="true" width="-6.0h">create_acc_agreement</label>										
+									
+										<panel grow="true" width="100%">
+										
+											<instance
+												name="button2" button_name="unnamedButton95"
+												align="center"
+												width="24.0h" height="2.5h"
+												enabled="false"
+												label="main_create_account_header"
+												font="dyn_10"
+												watch="UpdateCreateAccountForm" ontrigger="
+													if (
+														(_nick_valid) and
+														!StringEmpty(create_account_firstname) and
+														!StringEmpty(create_account_lastname) and
+														!StringEmpty(create_account_pass) and
+														StringEquals(create_account_pass, create_account_pass2) and
+														!StringEmpty(create_account_email) and
+														StringEquals(create_account_email, create_account_email2)
+													, SetEnabled(true), SetEnabled(false));
+												"
+												onclick="SubmitForm('CreateAccount');"
+											/>
+											
+											<panel align="center" valign="bottom" width="36.0h" height="2.5h" visible="false" name="CreateAccountStatusIndicator" color="0 0 0 1" watch="CreateAccountStatus" ontrigger="SetVisible(param == 1);">
+												<frame texture="/ui/info/backdrop.tga" borderthickness="2.0h" color="1 1 1 .5" noclick="1" />
+												<frame color="invisible" bordercolor="#455166" borderthickness="1" noclick="1" />
+												<label width="-1h" height="-1h" textvalign="center" textalign="center" align="center" valign="center" shadow="true" color="white" font="dyn_11">create_acc_wait</label>
+											</panel>
+										
+										</panel>
+									
+									</panel>
+
+								</panel>
+							</panel>
+							
+						</panel>
+						
+					</panel>
+				
+				</panel>
+				
+				<!-- Successful account creation -->
+				<panel color="0 0 0 .5" name="CreateAccountSuccessIndicator" watch="CreateAccountResult" visible="false" ontrigger="
+				If(
+					StringEquals(param0,'YES'),
+					Split(
+						SetVisible(true),
+						Call('create_account_firstname', 'EraseInputLine();'),
+						Call('create_account_lastname', 'EraseInputLine();'),
+						Call('create_account_pass', 'EraseInputLine();'),
+						Call('create_account_pass2', 'EraseInputLine();'),
+						Call('create_account_email', 'EraseInputLine();'),
+						Call('create_account_email2', 'EraseInputLine();'),
+						Call('create_account_nickname', 'EraseInputLine();')
+					),
+					SetVisible(false)
+				);
+				">
+					<panel align="center" valign="center" width="38.0h" grow="true" color="0 0 0 1">						
+						<frame color="invisible" bordercolor="#455166" borderthickness="1" noclick="1" />						
+						<panel width="100%" height="2.5h" noclick="1">
+							<instance name="header_bar" lbl="create_acc_label_account_success" lbl_font="dyn_10" show_close="0" />
+						</panel>						
+						<panel y="3.0h" align="center" grow="true" width="-1h" float="bottom">							
+							<panel width="100%" grow="true">
+								<label color="white" shadow="true" font="dyn_10" width="-1.0h" align="center" wrap="true" fity="true" content="create_acc_success" />
+							</panel>							
+							<panel width="100%" height="4.0h">							
+								<instance
+									name="button2" button_name="unnamedButton96"
+									y="-1.0h"
+									align="center" valign="bottom"
+									width="9h" height="2.5h"
+									label="general_ok"
+									font="dyn_10"
+									onclick="Call('CreateAccountSuccessIndicator', 'FadeOut(250);');"
+									onclicklua="UIManager.GetInterface('main'):HoNMainF('MainMenuPanelToggle', 'form_create_account', nil, false)"
+								/>						
+							</panel>							
+						</panel>
+					</panel>
+				</panel>
+				
+				<!-- Account already created -->				
+				<panel color="0 0 0 .5" name="CreateAccountPurchasedNotice" watch="AccountInfo" ontrigger="SetVisible(GetAccountID() gt -1);">					
+					<panel align="center" valign="center" width="38.0h" grow="true" color="0 0 0 1">						
+						<frame color="invisible" bordercolor="#455166" borderthickness="1" noclick="1" />						
+						<panel width="100%" height="2.5h" noclick="1">
+							<instance name="header_bar" lbl="create_acc_already_loggedin" lbl_font="dyn_10" show_close="0" />
+						</panel>						
+						<panel y="3.0h" align="center" grow="true" width="-1h" float="bottom">							
+							<panel width="100%" grow="true">
+								<label color="white" shadow="true" font="dyn_10" width="-1.0h" align="center" wrap="true" fity="true">create_acc_mustlogout</label>
+							</panel>							
+							<panel width="100%" height="4.0h">							
+								<instance
+									name="button2" button_name="unnamedButton97"
+									x="1h" y="-1.0h"
+									valign="bottom"
+									width="9h" height="2.5h"
+									label="main_button_logout"
+									font="dyn_10"
+									onclick="Logout();"
+									onclicklua="UIManager.GetInterface('main'):HoNMainF('MainMenuPanelToggle', 'form_create_account', nil, false)"
+								/>
+								<instance
+									name="button2" button_name="unnamedButton98"
+									x="-1h" y="-1.0h"
+									valign="bottom"
+									align="right"
+									width="9h" height="2.5h"
+									label="general_close"
+									font="dyn_10"
+									onclicklua="UIManager.GetInterface('main'):HoNMainF('MainMenuPanelToggle', 'form_create_account', nil, false)"
+								/>							
+							</panel>							
+						</panel>
+					</panel>
+				</panel>
+				
+				<!-- Failed account upgrade -->
+				<panel color="0 0 0 .5" name="CreateAccountFailureIndicator" watch="CreateAccountResult" visible="false" ontrigger="SetVisible(StringEquals(param0, 'NO'));">				
+					<panel align="center" valign="center" width="38.0h" grow="true" color="0 0 0 1">						
+						<frame color="invisible" bordercolor="#455166" borderthickness="1" noclick="1" />						
+						<panel width="100%" height="2.5h" noclick="1">
+							<instance name="header_bar" lbl="web_form_create_account_error" lbl_font="dyn_10" show_close="0" />
+						</panel>						
+						<panel y="3.0h" align="center" grow="true" width="-1h" float="bottom">							
+							<panel width="100%" grow="true">
+								<label color="white" shadow="true" font="dyn_10" width="-1.0h" align="center" wrap="true" fity="true" watch="CreateAccountResult" ontrigger="SetText(param1 # '  ' # param2);" />
+							</panel>							
+							<panel width="100%" height="4.0h">							
+								<instance
+									name="button2" button_name="unnamedButton99"
+									y="-1.0h"
+									align="center" valign="bottom"
+									width="9h" height="2.5h"
+									label="general_ok"
+									font="dyn_10"
+									onclick="HideWidget('CreateAccountFailureIndicator');"
+								/>						
+							</panel>							
+						</panel>
+					</panel>
+				</panel>
+				
+				<!-- Feature unavailable (for now) -->				
+				<panel color="0 0 0 .5" visible="false" onload="If(ui_disableAccountCreation, ShowWidget());">
+					<panel align="center" valign="center" width="38.0h" grow="true" color="0 0 0 1">						
+						<frame color="invisible" bordercolor="#455166" borderthickness="1" noclick="1" />						
+						<panel width="100%" height="2.5h" noclick="1">
+							<instance name="header_bar" lbl="web_form_feature_unavailable_title" lbl_font="dyn_10" show_close="0" />
+						</panel>						
+						<panel y="3.0h" align="center" grow="true" width="-1h" float="bottom">							
+							<panel width="100%" grow="true">
+								<label color="white" shadow="true" font="dyn_10" width="-1.0h" align="center" wrap="true" fity="true" content="web_form_feature_unavailable" />
+							</panel>							
+							<panel width="100%" height="4.0h">							
+								<instance
+									name="button2" button_name="unnamedButton100"
+									y="-1.0h"
+									align="center" valign="bottom"
+									width="9h" height="2.5h"
+									label="general_ok"
+									font="dyn_10"
+									onclicklua="UIManager.GetInterface('main'):HoNMainF('MainMenuPanelToggle', 'form_create_account', nil, false)"
+								/>						
+							</panel>							
+						</panel>
+					</panel>
+				</panel>
+
+
+			</panel>
+
+			
+		</panel>
+		
+	</template>
+
+</package>

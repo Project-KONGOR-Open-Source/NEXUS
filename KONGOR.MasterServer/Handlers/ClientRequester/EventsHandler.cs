@@ -22,6 +22,6 @@ public partial class EventsHandler(ILogger<EventsHandler> logger) : IClientReque
             // Empty events info or messages
         };
 
-        return Task.FromResult<IActionResult>(new OkObjectResult(PhpSerialization.Serialize(response)));
+        return Task.FromResult<IActionResult>(new OkObjectResult(System.Text.Json.JsonSerializer.Serialize(response)));
     }
 }

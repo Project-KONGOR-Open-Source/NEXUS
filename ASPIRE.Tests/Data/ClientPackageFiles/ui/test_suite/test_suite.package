@@ -1,0 +1,3218 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package >
+	<!-- Templates -->
+	<template name="test_suite_tab" >
+		<button name="{tab}_tab" grow="1" regrow="1" growinvis="0" height="100%" width="{width=}" color="invisible"
+			onclicklua="PlaySound('/ui/test_suite/sounds/button_click_01.ogg') self:DoEvent()"
+			oneventlua="{onclicklua}"
+			onrightclicklua="PlaySound('/ui/test_suite/sounds/button_click_01.ogg') {onrightclicklua}"
+			onmouseoverlua="PlaySound('/ui/test_suite/sounds/button_over_01.ogg') {onmouseoverlua}"
+			onbuttonlua="
+				local interfaceName = self:GetInterface():GetName()
+				local background = TestSuite.GetWidget('{tab}_tab_bg', true, interfaceName)
+				local frame = TestSuite.GetWidget('{tab}_tab_frame', true, interfaceName)
+				local icon = TestSuite.GetWidget('{tab}_tab_icon', true, interfaceName)
+				local text = TestSuite.GetWidget('{tab}_tab_text', true, interfaceName)
+				if (background and frame and icon and text) then
+					if ((param0 == 'up') or (param0 == 'downoff') or (param0 == 'downrightoff')) then
+						background:SetColor('{upColor=#065294}')
+						background:SetBorderColor('{upColor=#065294}')
+						frame:SetBorderColor('{upColor=#065294}')
+						icon:SetX(0) icon:SetY(0)
+						text:SetX(0) text:SetY(0)
+					elseif ((param0 == 'down') or (param0 == 'downright')) then
+						background:SetColor('{downColor=#06447A}')
+						background:SetBorderColor('{downColor=#06447A}')
+						frame:SetBorderColor('{downColor=#06447A}')
+						icon:SetX(1) icon:SetY(1)
+						text:SetX(1) text:SetY(1)
+					elseif (param0 == 'over') then
+						background:SetColor('{overColor=#3A87C9}')
+						background:SetBorderColor('{overColor=#3A87C9}')
+						frame:SetBorderColor('{overColor=#3A87C9}')
+						icon:SetX(0) icon:SetY(0)
+						text:SetX(0) text:SetY(0)
+					elseif (param0 == 'disabled') then
+						background:SetColor('{disabledColor=#737373}')
+						background:SetBorderColor('{disabledColor=#737373}')
+						frame:SetBorderColor('{disabledColor=#737373}')
+						icon:SetX(0) icon:SetY(0)
+						text:SetX(0) text:SetY(0)
+					end
+				end
+			"
+		>
+			<panel height="100%" clip="1" >
+				<frame name="{tab}_tab_bg" texture="/ui/test_suite/images/rounded_bg_white.tga" height="+0.8h" borderthickness="0.8h" color="{upColor=#065294}" />
+				<frame name="{tab}_tab_frame" texture="/ui/test_suite/images/roundframe.tga" height="+0.8h" borderthickness="0.8h" bordercolor="{upColor=#065294}" />
+			</panel>
+
+			<panel float="right" grow="1" regrow="1" growinvis="0" height="100%" >
+				<panel width="{iconWidth=100@}" oninstantiatelua="self:SetVisible('{icon}' ~= '')" sticky="1" stickytoinvis="0" clip="1" >
+					<image name="{tab}_tab_icon" width="80%" height="90%" align="center" valign="bottom" texture="{icon}" />
+				</panel>
+
+				<panel grow="1" regrow="1" growinvis="0" height="100%" sticky="1" stickytoinvis="0"
+					oninstantiatelua="self:SetVisible(Translate('{content}') ~= '')"
+				>
+					<label name="{tab}_tab_text" font="dyn_10" color="white" textvalign="center" textalign="center" fitxpadding="1h" fitx="1" shadow="1" content="{content}" />
+				</panel>
+			</panel>
+		</button>
+	</template>
+
+	<template name="test_suite_button" >
+		<button name="{button}_button" x="{x=}" y="{y=}" grow="1" regrow="1" growinvis="0" height="{height=100%}" width="{width=}" color="invisible" align="{align=left}" valign="{valign=top}"
+			onclicklua="PlaySound('/ui/test_suite/sounds/button_click_01.ogg') self:DoEvent()"
+			oneventlua="{onclicklua}"
+			onrightclicklua="PlaySound('/ui/test_suite/sounds/button_click_01.ogg') {onrightclicklua}"
+			onmouseoutlua="{onmouseoutlua}"
+			onmouseoverlua="PlaySound('/ui/test_suite/sounds/button_over_01.ogg') {onmouseoverlua}"
+			onbuttonlua="
+				local interfaceName = self:GetInterface():GetName()
+				local background = TestSuite.GetWidget('{button}_button_bg', true, interfaceName)
+				local frame = TestSuite.GetWidget('{button}_button_frame', true, interfaceName)
+				local icon = TestSuite.GetWidget('{button}_button_icon', true, interfaceName)
+				local text = TestSuite.GetWidget('{button}_button_text', true, interfaceName)
+				if (background and frame and icon and text) then
+					if ((param0 == 'up') or (param0 == 'downoff') or (param0 == 'downrightoff')) then
+						background:SetColor('{upColor=#065294}')
+						background:SetBorderColor('{upColor=#065294}')
+						frame:SetBorderColor('{upColor=#065294}')
+						icon:SetX(0) icon:SetY(0)
+						text:SetX(0) text:SetY(0)
+					elseif ((param0 == 'down') or (param0 == 'downright')) then
+						background:SetColor('{downColor=#06447A}')
+						background:SetBorderColor('{downColor=#06447A}')
+						frame:SetBorderColor('{downColor=#06447A}')
+						icon:SetX(1) icon:SetY(1)
+						text:SetX(1) text:SetY(1)
+					elseif (param0 == 'over') then
+						background:SetColor('{overColor=#3A87C9}')
+						background:SetBorderColor('{overColor=#3A87C9}')
+						frame:SetBorderColor('{overColor=#3A87C9}')
+						icon:SetX(0) icon:SetY(0)
+						text:SetX(0) text:SetY(0)
+					elseif (param0 == 'disabled') then
+						background:SetColor('{disabledColor=#737373}')
+						background:SetBorderColor('{disabledColor=#737373}')
+						frame:SetBorderColor('{disabledColor=#737373}')
+						icon:SetX(0) icon:SetY(0)
+						text:SetX(0) text:SetY(0)
+					end
+				end
+			"
+		>
+			<frame name="{button}_button_bg" texture="/ui/test_suite/images/rounded_bg_white.tga" borderthickness="0.6h" color="{upColor=#065294}" />
+			<frame name="{button}_button_frame" texture="/ui/test_suite/images/roundframe.tga" borderthickness="0.6h" bordercolor="{upColor=#065294}" />
+
+			<panel float="right" grow="1" regrow="1" growinvis="0" height="100%" align="center" >
+				<panel width="{iconWidth=100@}" oninstantiatelua="self:SetVisible('{icon}' ~= '')" sticky="1" stickytoinvis="0" clip="1" >
+					<image name="{button}_button_icon" width="80%" height="80%" align="center" valign="center" texture="{icon}" />
+				</panel>
+
+				<panel grow="1" regrow="1" growinvis="0" height="100%" sticky="1" stickytoinvis="0"
+					oninstantiatelua="self:SetVisible(Translate('{content}') ~= '')"
+				>
+					<label name="{button}_button_text" font="{font=dyn_10}" shadow="1" color="white" align="center" textvalign="center" textalign="center" fitxpadding="1h" fitx="1" content="{content}" />
+				</panel>
+			</panel>
+		</button>
+	</template>
+
+	<template name="test_suite_tip" >
+		<button x="{x=}" y="{y=}" width="{width=100%}" height="{height=100%}" valign="{valign=top}" align="{align=left}" color="invisible"
+			onbuttonlua="
+				local interfaceName = self:GetInterface():GetName()
+				local background = TestSuite.GetWidget('{tip}_tip_bg', true, interfaceName)
+				local frame = TestSuite.GetWidget('{tip}_tip_frame', true, interfaceName)
+				if (background and frame) then
+					if ((param0 == 'up') or (param0 == 'downoff') or (param0 == 'downrightoff')) then
+						background:SetColor('{upColor=#065294}')
+						background:SetBorderColor('{upColor=#065294}')
+						frame:SetBorderColor('{upColor=#065294}')
+						TestSuite.GetWidget('test_suite_tip_floater', false, interfaceName):SetVisible(0)
+					elseif (param0 == 'over') then
+						background:SetColor('{overColor=#3A87C9}')
+						background:SetBorderColor('{overColor=#3A87C9}')
+						frame:SetBorderColor('{overColor=#3A87C9}')
+						TestSuite.GetWidget('test_suite_tip_floater_text', false, interfaceName):SetText(Translate('{content}'))
+						TestSuite.GetWidget('test_suite_tip_floater', false, interfaceName):BringToFront()
+						TestSuite.GetWidget('test_suite_tip_floater', false, interfaceName):SetVisible(1)
+					elseif (param0 == 'disabled') then
+						background:SetColor('{disabledColor=#737373}')
+						background:SetBorderColor('{disabledColor=#737373}')
+						frame:SetBorderColor('{disabledColor=#737373}')
+						TestSuite.GetWidget('test_suite_tip_floater', false, interfaceName):SetVisible(0)
+					end
+				end
+			"
+
+			onmouseoverlua="
+				PlaySound('/ui/test_suite/sounds/button_over_01.ogg')
+			"
+		>
+			<frame name="{tip}_tip_bg" texture="/ui/test_suite/images/rounded_bg_white.tga" borderthickness="0.6h" color="{upColor=#065294}" />
+			<frame name="{tip}_tip_frame" texture="/ui/test_suite/images/roundframe.tga" borderthickness="0.6h" bordercolor="{upColor=#065294}" />
+
+			<image texture="/ui/test_suite/images/question_mark.tga" noclick="1" width="90%" height="90%" align="center" valign="center" />
+		</button>
+	</template>
+
+	<template name="test_suite_listitem_simple" >
+		<label font="{font=dyn_12}" x="0.5h" width="-0.5h" color="white" shadow="1" textvalign="center" content="{content=}" />
+	</template>
+
+	<template name="test_suite_listitem_simple_oversized" >
+		<panel width="100%" height="100%" clip="1" noclick="1" >
+			<panel noclick="1" width="100%" height="100%" grow="1" regrow="1" align="right" >
+				<label font="{font=dyn_12}" x="0.5h" width="-0.5h" color="white" shadow="1" textvalign="center" fitx="1" content="{content=}" />
+			</panel>
+		</panel>
+	</template>
+
+	<template name="test_suite_listitem_entity" >
+		<image x="10@" width="80@" height="80%" valign="center" texture="{icon=$invis}" />
+		<label font="{font=dyn_12}" x="110@" width="-110@" color="white" shadow="1" textvalign="center" content="{content=}" />
+	</template>
+
+	<template name="test_suite_combobox_state" >
+		<widgetstate statename="{state}">
+			<panel color="invisible">
+				<frame texture="/ui/test_suite/images/rounded_bg_white.tga" borderthickness="0.6h" color="{color}" rendermode="{rendermode=normal}" />
+				<frame texture="/ui/test_suite/images/roundframe.tga" borderthickness="0.6h" bordercolor="{bordercolor}" rendermode="{rendermode=normal}"/>
+
+				<image x="-0.5h" width="65@" height="65%" rotation="90" align="right" valign="bottom" color="{arrowColor}" texture="/ui/test_suite/images/arrow.tga" rendermode="{rendermode=normal}" />
+			</panel>
+		</widgetstate>
+	</template>
+
+	<template name="test_suite_combobox" >
+		<combobox name="{combobox}" x="{x=}" y="{y=}" height="{height=100%}" width="{width=100%}" align="{align=left}" valign="{valign=top}" exteriorscrollbars="false" color="invisible" itemheight="2h" handleheight="100@" handlewidth="100%" scrollbarsize="2h" scrolltexture="/ui/test_suite/images/im.tga" maxlistheight="{maxlistheight=8}"
+			onclicklua="PlaySound('/ui/test_suite/sounds/button_click_01.ogg') {onclicklua}"
+			onrightclicklua="PlaySound('/ui/test_suite/sounds/button_click_01.ogg') {onrightclicklua}"
+			onmouseoverlua="PlaySound('/ui/test_suite/sounds/button_over_01.ogg') {onmouseoverlua}"
+			onselectlua="{onselectlua=}"
+			oninstantiatelua="{populate=}"
+			onopenlua="{onopenlua=}"
+			oncloselua="{oncloselua=}"
+			onshowlua="{onshowlua=}"
+			onhidelua="{onhidelua=}"
+			taborder="{taborder=-1}"
+			watch="{watch=}"
+			ontriggerlua="{ontriggerlua=}"
+			oneventlua="{oneventlua=}"
+
+		>
+			<instance name="test_suite_combobox_state" state="up" color="#065294" bordercolor="#065294" arrowColor="0.8 0.8 0.8" />
+			<instance name="test_suite_combobox_state" state="over" color="#3A87C9" bordercolor="#065294" arrowColor="1 1 1" />
+			<instance name="test_suite_combobox_state" state="down" color="#06447A" bordercolor="#065294" arrowColor="1 1 1" />
+			<instance name="test_suite_combobox_state" state="disabled" color="#737373" bordercolor="#065294" arrowColor="0.8 0.8 0.8" />
+
+			<widgetstate statename="listbg">
+				<panel height="+{bgoffset=2h}" y="-{bgoffset=2h}" >
+					<frame texture="/ui/test_suite/images/rounded_bg_white.tga" borderthickness="0.6h" color="#06447A" />
+					<frame texture="/ui/test_suite/images/roundframe.tga" borderthickness="0.6h" bordercolor="#06447A" />
+				</panel>
+			</widgetstate>
+		</combobox>
+	</template>
+
+	<template name="test_suite_product_type_combobox" >
+		<combobox name="{comboboxName=}" height="{height=100%}" width="{width=}" itemheight="{itemheight=1.5h}" color="invisible" maxlistheight="{maxlistheight=8}" scrolltexture="/ui/test_suite/images/im.tga" taborder="{taborder=-1}" >
+
+			<instance name="test_suite_combobox_state" state="up" color="0 0 0 .5" bordercolor="#A0A0A060" arrowColor="0.8 0.8 0.8" />
+			<instance name="test_suite_combobox_state" state="over" color="0 0 0 .5" bordercolor="#A0A0A060" arrowColor="1 1 1" />
+			<instance name="test_suite_combobox_state" state="down" color="0 0 0 .5" bordercolor="#A0A0A060" arrowColor="1 1 1" />
+			<instance name="test_suite_combobox_state" state="disabled" color="0 0 0 .5" bordercolor="#A0A0A060" arrowColor="0.8 0.8 0.8" />
+
+			<widgetstate statename="listbg">
+				<panel height="+{bgoffset=2h}" y="-{bgoffset=2h}" >
+					<frame texture="/ui/test_suite/images/rounded_bg_white.tga" borderthickness="0.6h" color="0 0 0 .95" />
+					<frame texture="/ui/test_suite/images/roundframe.tga" borderthickness="0.6h" bordercolor="#A0A0A060" />
+				</panel>
+			</widgetstate>
+			
+			<listitem value="Bundle" ><instance name="test_suite_listitem_simple" font="{font=dyn_12}" content="test_client_type_bundle" /></listitem>
+			<listitem value="Chat Color" ><instance name="test_suite_listitem_simple" font="{font=dyn_12}" content="test_client_type_cc" /></listitem>
+			<listitem value="Chat Symbol" ><instance name="test_suite_listitem_simple" font="{font=dyn_12}" content="test_client_type_cs" /></listitem>
+			<listitem value="Account Icon" ><instance name="test_suite_listitem_simple" font="{font=dyn_12}" content="test_client_type_ai" /></listitem>
+			<listitem value="Alt Avatar" ><instance name="test_suite_listitem_simple" font="{font=dyn_12}" content="test_client_type_aa" /></listitem>
+			<listitem value="Alt Announcement" ><instance name="test_suite_listitem_simple" font="{font=dyn_12}" content="test_client_type_av" /></listitem>
+			<listitem value="Taunt" ><instance name="test_suite_listitem_simple" font="{font=dyn_12}" content="test_client_type_t" /></listitem>
+			<listitem value="Couriers" ><instance name="test_suite_listitem_simple" font="{font=dyn_12}" content="test_client_type_c" /></listitem>
+			<listitem value="Hero" ><instance name="test_suite_listitem_simple" font="{font=dyn_12}" content="test_client_type_h" /></listitem>
+			<listitem value="EAP" ><instance name="test_suite_listitem_simple" font="{font=dyn_12}" content="test_client_type_eap" /></listitem>
+			<listitem value="Status" ><instance name="test_suite_listitem_simple" font="{font=dyn_12}" content="test_client_type_s" /></listitem>
+			<listitem value="Ward" ><instance name="test_suite_listitem_simple" font="{font=dyn_12}" content="test_client_type_w" /></listitem>
+			<listitem value="Misc" ><instance name="test_suite_listitem_simple" font="{font=dyn_12}" content="test_client_type_misc" /></listitem>
+			<listitem value="Enhancement" ><instance name="test_suite_listitem_simple" font="{font=dyn_12}" content="test_client_type_en" /></listitem>
+		</combobox>
+	</template>
+
+	<template name="test_suite_checkbox" >
+		<button name="{checkbox}" x="{x=}" y="{y=}" grow="1" regrow="1" growinvis="0" height="{height=100%}" width="{width=}" color="invisible" align="{align=left}" valign="{valign=top}" numstates="2" cvar="{cvar=}" state="{startenabled=0}" group="{radiogroup=}"
+			onclicklua="PlaySound('/ui/test_suite/sounds/button_click_01.ogg') {onclicklua=}
+				self:DoEventN(9)
+			"
+			onevent7lua="{ondisablelua=}"
+			onevent9lua="
+				local state = self:GetButtonState()
+
+				if (string.len('{radiogroup=}') ~= 0) then
+					if ((state == 0) and (not AtoB('{allowradiodisable=false}'))) then
+						self:SetButtonState(1)
+						return
+					end
+				end
+
+				if (state == 0) then
+					{ondisablelua=}
+				else
+					if (string.len('{radiogroup=}') ~= 0) then
+						local group = self:GetGroup('{radiogroup=}')
+						for k,v in ipairs(group) do
+							if (v ~= self) then
+								if (v:GetButtonState() ~= 0) then
+									v:SetButtonState(0)
+									v:DoEventN(7)
+								end
+							end
+						end
+					end
+
+					{onenablelua=}
+				end
+			"
+			oneventlua="self:DoEventN(8) self:DoEventN(9)"
+			onrightclicklua="PlaySound('/ui/test_suite/sounds/button_click_01.ogg') {onrightclicklua=}"
+			onmouseoverlua="PlaySound('/ui/test_suite/sounds/button_over_01.ogg') {onmouseoverlua=}"
+			onshowlua="self:DoEventN(8) {onshowlua=}"
+			onbuttonlua="
+				local interfaceName = self:GetInterface():GetName()
+				local background = TestSuite.GetWidget('{checkbox}_checkbox_bg', true, interfaceName)
+				local frame = TestSuite.GetWidget('{checkbox}_checkbox_frame', true, interfaceName)
+				local body = TestSuite.GetWidget('{checkbox}_checkbox_body', true, interfaceName)
+				local text = TestSuite.GetWidget('{checkbox}_checkbox_text', true, interfaceName)
+				
+				if (background and frame and body and text) then
+					if ((param0 == 'up') or (param0 == 'downoff') or (param0 == 'downrightoff')) then
+						background:SetColor('{upColor=#065294}')
+						background:SetBorderColor('{upColor=#065294}')
+						frame:SetBorderColor('{upColor=#065294}')
+						body:SetX(0) body:SetY(0)
+					elseif ((param0 == 'down') or (param0 == 'downright')) then
+						background:SetColor('{downColor=#06447A}')
+						background:SetBorderColor('{downColor=#06447A}')
+						frame:SetBorderColor('{downColor=#06447A}')
+						body:SetX(1) body:SetY(1)
+					elseif (param0 == 'over') then
+						background:SetColor('{overColor=#3A87C9}')
+						background:SetBorderColor('{overColor=#3A87C9}')
+						frame:SetBorderColor('{overColor=#3A87C9}')
+						body:SetX(0) body:SetY(0)
+					elseif (param0 == 'disabled') then
+						background:SetColor('{disabledColor=#737373}')
+						background:SetBorderColor('{disabledColor=#737373}')
+						frame:SetBorderColor('{disabledColor=#737373}')
+						body:SetX(0) body:SetY(0)
+					end
+				end
+				self:DoEventN(8)
+			"
+			onevent8lua="
+				local interfaceName = self:GetInterface():GetName()
+				local state = self:GetButtonState()
+				local checkmark = TestSuite.GetWidget('{checkbox}_checkbox_checkmark', true, interfaceName)
+				local text = TestSuite.GetWidget('{checkbox}_checkbox_text', true, interfaceName)
+
+				if (text and checkmark) then
+					checkmark:SetVisible(state == 1)
+					if (state == 0) then
+						text:SetColor('white')
+					else
+						text:SetColor('lime')
+					end
+				end
+			"
+		>
+			<frame name="{checkbox}_checkbox_bg" texture="/ui/test_suite/images/rounded_bg_white.tga" borderthickness="0.6h" color="{upColor=#065294}" />
+			<frame name="{checkbox}_checkbox_frame" texture="/ui/test_suite/images/roundframe.tga" borderthickness="0.6h" bordercolor="{upColor=#065294}" />
+
+			<panel name="{checkbox}_checkbox_body" float="right" grow="1" regrow="1" growinvis="0" height="100%" align="center" >
+				<panel width="{iconWidth=100@}" oninstantiatelua="self:SetVisible({showcheck=true})" sticky="1" stickytoinvis="0" clip="1" >
+					<panel width="80%" height="80%" align="center" valign="center" noclick="1" >
+						<frame texture="/ui/test_suite/images/rounded_bg_white.tga" borderthickness="0.6h" color="white" />
+						<frame texture="/ui/test_suite/images/roundframe.tga" borderthickness="0.6h" bordercolor=".5 .5 .5" />
+						<image name="{checkbox}_checkbox_checkmark" y="-1" width="120%" height="120%" align="center" valign="center" color="lime" texture="/ui/test_suite/images/check_mark_white.tga" visible="{startenabled=0}" />
+					</panel>
+				</panel>
+
+				<panel grow="1" regrow="1" growinvis="0" height="100%" sticky="1" stickytoinvis="0"
+					oninstantiatelua="self:SetVisible(Translate('{content}') ~= '')"
+				>
+					<label name="{checkbox}_checkbox_text" font="{font=dyn_10}" color="white" align="center" textvalign="center" textalign="center" fitxpadding="1h" fitx="1" shadow="1" content="{content}"
+						oninstantiatelua="if ({startenabled=0} == 0) then self:SetColor('white') else self:SetColor('lime') end"
+					/>
+				</panel>
+			</panel>
+		</button>
+	</template>
+
+	<template name="test_suite_basic_checkbox" >
+		<button name="{checkbox}" x="{x=}" y="{y=}" height="{height=100%}" width="{width=100%}" color="invisible" align="{align=left}" valign="{valign=top}" numstates="2" cvar="{cvar=}" state="{startenabled=0}"
+			onclicklua="PlaySound('/ui/test_suite/sounds/button_click_01.ogg') {onclicklua=}
+				local state = self:GetButtonState()
+				if (state == 0) then
+					{ondisablelua=}
+				else
+					{onenablelua=}
+				end
+			"
+			onrightclicklua="PlaySound('/ui/test_suite/sounds/button_click_01.ogg') {onrightclicklua=}"
+			onmouseoverlua="PlaySound('/ui/test_suite/sounds/button_over_01.ogg') {onmouseoverlua=}"
+			onshowlua="self:DoEvent()"
+			onbuttonlua="
+				local interfaceName = self:GetInterface():GetName()
+				local body = TestSuite.GetWidget('{checkbox}_checkbox_body', true, interfaceName)
+				local background = TestSuite.GetWidget('{checkbox}_checkbox_bg', true, interfaceName)
+				
+				if (body and background) then
+					if ((param0 == 'up') or (param0 == 'downoff') or (param0 == 'downrightoff')) then
+						background:SetBorderColor('.85 .85 .85')
+						background:SetColor('.85 .85 .85')
+						body:SetX(0) body:SetY(0)
+					elseif ((param0 == 'down') or (param0 == 'downright')) then
+						background:SetBorderColor('white')
+						background:SetColor('white')
+						body:SetX(1) body:SetY(1)
+					elseif (param0 == 'over') then
+						background:SetBorderColor('white')
+						background:SetColor('white')
+						body:SetX(0) body:SetY(0)
+					elseif (param0 == 'disabled') then
+						background:SetBorderColor('white')
+						background:SetColor('white')
+						body:SetX(0) body:SetY(0)
+					end
+				end
+				self:DoEvent()
+			"
+			oneventlua="
+				local interfaceName = self:GetInterface():GetName()
+				local state = self:GetButtonState()
+				local checkmark = TestSuite.GetWidget('{checkbox}_checkbox_checkmark', true, interfaceName)
+				if (checkmark) then
+					checkmark:SetVisible(state == 1)
+				end
+			"
+		>
+			<panel name="{checkbox}_checkbox_body" align="center" valign="center" noclick="1" >
+				<frame name="{checkbox}_checkbox_bg" texture="/ui/test_suite/images/rounded_bg_white.tga" borderthickness="0.6h" color=".85 .85 .85" />
+				<frame name="{checkbox}_checkbox_frame" texture="/ui/test_suite/images/roundframe.tga" borderthickness="0.6h" bordercolor=".5 .5 .5" />
+				<image name="{checkbox}_checkbox_checkmark" y="-1" width="+20%" height="+20%" align="center" valign="center" color="lime" texture="/ui/test_suite/images/check_mark_white.tga" visible="{startenabled=0}" />
+			</panel>
+		</button>
+	</template>
+
+	<template name="test_suite_input" >
+		<panel x="{x=}" y="{y=}" width="{width=100%}" height="{height=100%}" align="{align=}" valign="{valign=}" >
+			<frame texture="/ui/test_suite/images/tooltip_bg.tga" color="0 0 0 0.5" borderthickness=".6h" />
+			<frame texture="/ui/test_suite/images/roundframe.tga" color="#A0A0A060" borderthickness=".6h" />
+			<textbox name="{textbox}" font="{font=dyn_12}" width="-0.5h" align="center" color="invisible" textcolor="white" onenter="DoEvent();" inputline="{inputline=}"
+				oneventlua="{onenterlua=}"
+				onshowlua="{onshowlua=}"
+				watch="{watch=}"
+				ontriggerlua="{ontriggerlua=}"
+				onchangelua="{onchangelua=}"
+				taborder="{taborder=-1}"
+			/>
+		</panel>
+	</template>
+
+	<template name="test_suite_slider" >
+		<panel width="{width=100%}" height="{height=100%}" align="{align=}" valign="{valign=}" noclick="1" >
+			<panel width="100%" noclick="1"
+				oninstantiatelua="
+					if (AtoB('{showvalue}')) then
+						self:SetWidth('-{valuewidth=17.5%}')
+					end
+				"
+			>
+				<frame texture="/ui/test_suite/images/tooltip_bg.tga" color="0 0 0 0.5" borderthickness=".6h" />
+				<frame texture="/ui/test_suite/images/roundframe.tga" color="#A0A0A060" borderthickness=".6h" />
+
+				<panel float="right" noclick="1" width="97%" height="97%" valign="center" align="center">
+					<label name="{slider}_min_label" font="{font=dyn_10}" shadow="1" color="white" textvalign="center" fitx="1" content="{minlabel=}" sticky="1" />
+					<slider name="{slider}" slotwidth="-1%" slotheight="0.6h" slotcolor="{color=#065294}" handlewidth="90@" handleheight="-10%" handlecolor="{color=#1672B4}" cvar="{cvar=}" minvalue="{minvalue=0}" maxvalue="{maxvalue=100}" step="{step=1}" texture="/ui/test_suite/images/slider_white.tga" sticky="1"
+						onshowlua="
+							local interfaceName = self:GetInterface():GetName()
+							local width = TestSuite.GetWidget('{slider}_min_label', true, interfaceName):GetWidth() + TestSuite.GetWidget('{slider}_max_label', true, interfaceName):GetWidth()
+							self:SetWidth(self:GetParent():GetWidth() - width)
+							TestSuite.GetWidget('{slider}_value_label', true, interfaceName):SetText(string.format('%.{decimals=0}f', self:GetValue())..'{valueappend=}')
+							{onshowlua=}
+						"
+						onselectlua="PlaySound('/ui/test_suite/sounds/button_over_02.ogg') {onselectlua=}"
+						onchangelua="PlaySound('/ui/test_suite/sounds/button_over_02.ogg') TestSuite.GetWidget('{slider}_value_label', true, self:GetInterface():GetName()):SetText(string.format('%.{decimals=0}f', self:GetValue())..'{valueappend=}') {onchangelua=}"
+						onhidelua="{onhidelua=}"
+					/>
+					<label name="{slider}_max_label" font="{font=dyn_10}" shadow="1" color="white" textvalign="center" fitx="1" content="{maxlabel=}" sticky="1" />
+				</panel>
+			</panel>
+
+			<panel width="{valuewidth=17.5%}" align="right" noclick="1" visible="{showvalue=false}" >
+				<frame texture="/ui/test_suite/images/tooltip_bg.tga" color="0 0 0 0.5" borderthickness=".6h" />
+				<frame texture="/ui/test_suite/images/roundframe.tga" color="#A0A0A060" borderthickness=".6h" />
+
+				<label name="{slider}_value_label" width="95%" height="95%" align="center" valign="center" textvalign="center" textalign="center" shadow="1" font="{font=dyn_10}" color="white" noclick="1" />
+			</panel>	
+		</panel>
+	</template>
+
+	<template name="test_suite_listbox" >
+		<listbox name="{listbox}" x="{x=}" y="{y=}" width="{width=100%}" height="{height=100%}" align="{align=}" valign="{valign=}" color="0 0 0 0.5" itemheight="{itemheight=1.5h}" hoverselect="false" hoverhighlight="true" highlight="under" interactive="false" scrollbarsize="{scrollbarsize=1.75h}"
+			onshowlua="{onshowlua=}"
+			onhidelua="{onhidelua=}"
+			scrolltexture="/ui/test_suite/images/im.tga"
+			selectedcolor="#00437533"
+			onselect="DoEvent();"
+			oneventlua="{onselectlua=}"
+			onclicklua="{onclicklua=}"
+		/>
+	</template>
+
+	<template name="test_suite_keybind" >
+		<button name="{keybind}_keybind" group="test_suite_keybinds" x="{x=}" y="{y=}" grow="1" regrow="1" growinvis="0" height="{height=100%}" width="{width=}" color="invisible" align="{align=left}" valign="{valign=top}"
+			onclicklua="PlaySound('/ui/test_suite/sounds/button_click_01.ogg') self:DoEvent()"
+			oneventlua="{onclicklua}
+				TestSuite.BeginBind('{bindtable=}', '{action=}', '{param=}', self)
+			"
+			onrightclicklua="
+				PlaySound('/ui/test_suite/sounds/button_click_01.ogg')
+				TestSuite.Unbind('{bindtable=}', '{action=}', '{param=}')
+				self:DoEventN(9)
+				{onrightclicklua}
+			"
+			onmouseoutlua="{onmouseoutlua}"
+			onmouseoverlua="PlaySound('/ui/test_suite/sounds/button_over_01.ogg') {onmouseoverlua}"
+			onshowlua="self:DoEventN(9)"
+			onrefreshlua="self:DoEventN(9)"
+			onevent9lua="
+				local interfaceName = self:GetInterface():GetName()
+				local text = TestSuite.GetWidget('{keybind}_keybind_text', true, interfaceName)
+
+				if (text) then
+					text:SetText(GetKeybindButton('{bindtable=}', '{action=}', '{param=}', 0))
+					text:RecalculateSize()
+				end
+			"
+			onbuttonlua="
+				local interfaceName = self:GetInterface():GetName()
+				local frame = TestSuite.GetWidget('{keybind}_keybind_frame', true, interfaceName)
+				local text = TestSuite.GetWidget('{keybind}_keybind_text', true, interfaceName)
+				if (frame and text) then
+					if ((param0 == 'up') or (param0 == 'downoff') or (param0 == 'downrightoff')) then
+						frame:SetBorderColor('0.8 0.8 0.8')
+						frame:SetColor('0.8 0.8 0.8')
+						text:SetX(0) text:SetY(0)
+					elseif ((param0 == 'down') or (param0 == 'downright')) then
+						frame:SetBorderColor('0.8 0.8 0.8')
+						frame:SetColor('0.8 0.8 0.8')
+						text:SetX(1) text:SetY(1)
+					elseif (param0 == 'over') then
+						frame:SetBorderColor('1.0 1.0 1.0')
+						frame:SetColor('1.0 1.0 1.0')
+						text:SetX(0) text:SetY(0)
+					elseif (param0 == 'disabled') then
+						frame:SetBorderColor('0.2 0.2 0.2')
+						frame:SetColor('0.2 0.2 0.2')
+						text:SetX(0) text:SetY(0)
+					end
+				end
+
+				self:DoEventN(9)
+			"
+		>
+			<frame name="{keybind}_keybind_frame" texture="/ui/test_suite/images/key.tga" borderthickness="0.6h" color="0.8 0.8 0.8" />
+
+			<panel float="right" grow="{fitbind=0}" regrow="{fitbind=0}" growinvis="0" width="100%" height="100%" align="center" >
+				<label name="{keybind}_keybind_text" font="{font=dyn_10}" shadow="1" color="white" align="center" textvalign="center" textalign="center" fitxpadding="1h" fitx="{fitbind=0}" />
+			</panel>
+		</button>
+	</template>
+
+	<!-- The floater for the tip, as a template so it can be included in the templates meant for different interfaces -->
+	<template name="test_suite_tip_floater" >
+		<floater name="test_suite_tip_floater" x="22" y="-22" grow="1" regrow="1" width="20h" visible="0"
+			onshowlua="self:BringToFront()"
+		>
+			<frame texture="/ui/test_suite/images/tooltip_bg.tga" color="0 0 0 .95" borderthickness=".6h" />
+			<frame texture="/ui/test_suite/images/roundframe.tga" color="#A0A0A0" borderthickness=".6h" />
+
+			<label name="test_suite_tip_floater_text" textalign="center" shadow="1" textvalign="center" wrap="1" fity="1" fitypadding="1h" font="dyn_10" color="white" />
+		</floater>
+	</template>
+
+	<!-- The prompt for keybinds, as a template so it can be included in the templates meant for different interfaces -->
+	<template name="test_suite_keybind_prompt" >
+		<panel name="test_suite_keybind_prompt" align="center" valign="center" width="35h" height="10h" visible="0"
+			onshowlua="self:BringToFront()"
+		>
+			<frame texture="/ui/test_suite/images/tooltip_bg.tga" color="0 0 0 .85" borderthickness=".6h" />
+			<frame texture="/ui/test_suite/images/roundframe.tga" color="#A0A0A0" borderthickness=".6h" />
+
+			<label textalign="center" textvalign="center" height="8h" wrap="1" font="dyn_16" color="white" content="test_suite_keybind" />
+
+			<panel height="2h" width="-2h" align="center" valign="bottom" y="-1h" noclick="1" >
+				<instance name="test_suite_button" button="test_suite_cancel_keybind" width="49%" content="test_suite_cancel_keybind"
+					onclicklua="TestSuite.GetWidget('test_suite_keybind_prompt', true, self:GetInterface():GetName()):SetVisible(0)"
+				/>
+				<instance name="test_suite_button" button="test_suite_clear_keybind" align="right" width="49%" content="test_suite_clear_keybind"
+					onclicklua="TestSuite.FinalizeUnbind()"
+				/>
+			</panel>
+
+			<buttoncatcher name="test_suite_catcher" color="invisible" noclick="1"
+				onbuttonlua="TestSuite.FinalizeBind(param0)"
+			/>
+		</panel>
+	</template>
+	<!-- End Templates -->
+
+
+	<!-- Client Test Functionality -->
+	<template name="test_suite_client" >
+		<panel name="test_suite_client" width="90h" height="60h" align="center" valign="center" cangrab="1" visible="0"
+			onclicklua="self:BringToFront()"
+			onshowlua="self:BringToFront()"
+		>
+			<frame texture="/ui/test_suite/images/rounded_bg_white.tga" borderthickness="0.6h" color="0.2 0.2 0.2 0.9" noclick="1" />
+			<frame texture="/ui/test_suite/images/roundframe.tga" borderthickness="0.6h" bordercolor="0 0 0 0.9" noclick="1" />
+
+			<!-- Tab Bodies -->
+			<panel height="95%" valign="bottom" >
+				<panel name="test_suite_client_audit" group="test_suite_client_tabs" visible="1" noclick="1" >
+					<!-- Audit Buttons -->
+					<panel valign="center" x="1.0h" y="1.0h" width="13h" float="bottom" padding="0.5h" >
+						<instance name="test_suite_button" button="audit_product_list" width="100%" height="2.5h" content="test_client_audit_product_list"
+							onclicklua="TestSuite.AuditLog('') TestSuite.AuditProductList()"
+						/>
+						<instance name="test_suite_button" button="audit_entity_existance" width="100%" height="2.5h" content="test_client_audit_entity_existance"
+							onclicklua="TestSuite.AuditLog('') TestSuite.AuditEntityExistance()"
+						/>
+						<!-- <instance name="test_suite_button" button="audit_entity_usage" width="100%" height="2.5h" content="test_client_audit_entity_usage"
+							onclicklua="TestSuite.AuditLog('') TestSuite.AuditEntityUsage()"
+						/> -->
+						<instance name="test_suite_button" button="audit_heroes_alts" width="100%" height="2.5h" content="test_client_audit_heroes_alts"
+							onclicklua="TestSuite.AuditLog('') TestSuite.AuditHerosAndAlts()"
+						/>
+						<instance name="test_suite_button" button="audit_couriers" width="100%" height="2.5h" content="test_client_audit_couriers"
+							onclicklua="TestSuite.AuditLog('') TestSuite.AuditCouriers()"
+						/>
+						<instance name="test_suite_button" button="audit_account_icons" width="100%" height="2.5h" content="test_client_audit_account_icons"
+							onclicklua="TestSuite.AuditLog('') TestSuite.AuditAccountIcons()"
+						/>
+						<instance name="test_suite_button" button="audit_name_colors" width="100%" height="2.5h" content="test_client_audit_name_colors"
+							onclicklua="TestSuite.AuditLog('') TestSuite.AuditNameColors()"
+						/>
+						<instance name="test_suite_button" button="audit_chat_symbols" width="100%" height="2.5h" content="test_client_audit_chat_symbols"
+							onclicklua="TestSuite.AuditLog('') TestSuite.AuditChatSymbols()"
+						/>
+						<instance name="test_suite_button" button="audit_announcers" width="100%" height="2.5h" content="test_client_audit_announcers"
+							onclicklua="TestSuite.AuditLog('') TestSuite.AuditAnnouncers()"
+						/>
+						<instance name="test_suite_button" button="audit_taunts" width="100%" height="2.5h" content="test_client_audit_taunts"
+							onclicklua="TestSuite.AuditLog('') TestSuite.AuditTaunts()"
+						/>
+						<instance name="test_suite_button" button="audit_wards" width="100%" height="2.5h" content="test_client_audit_wards"
+							onclicklua="TestSuite.AuditLog('') TestSuite.AuditWards()"
+						/>
+						<instance name="test_suite_button" button="audit_all" width="100%" height="2.5h" content="test_client_audit_all"
+							onclicklua="TestSuite.AuditLog('') TestSuite.AuditAll()"
+						/>
+					</panel>
+					<!-- Matching tips for the audit buttons -->
+					<panel valign="center" x="14.5h" y="1.0h" width="2.0h" float="bottom" padding="0.5h" >
+						<instance name="test_suite_tip" tip="audit_product_list" width="2.5h" height="2.5h" content="test_client_audit_product_list_tip" />
+						<instance name="test_suite_tip" tip="audit_entity_existance" width="2.5h" height="2.5h" content="test_client_audit_entity_existance_tip" />
+						<!-- <instance name="test_suite_tip" tip="audit_entity_usage" width="2.5h" height="2.5h" content="test_client_audit_entity_usage_tip" /> -->
+						<instance name="test_suite_tip" tip="audit_heroes_alts" width="2.5h" height="2.5h" content="test_client_audit_heroes_alts_tip" />
+						<instance name="test_suite_tip" tip="audit_couriers" width="2.5h" height="2.5h" content="test_client_audit_couriers_tip" />
+						<instance name="test_suite_tip" tip="audit_account_icons" width="2.5h" height="2.5h" content="test_client_audit_account_icons_tip" />
+						<instance name="test_suite_tip" tip="audit_name_colors" width="2.5h" height="2.5h" content="test_client_audit_name_colors_tip" />
+						<instance name="test_suite_tip" tip="audit_chat_symbols" width="2.5h" height="2.5h" content="test_client_audit_chat_symbols_tip" />
+						<instance name="test_suite_tip" tip="audit_announcers" width="2.5h" height="2.5h" content="test_client_audit_announcers_tip" />
+						<instance name="test_suite_tip" tip="audit_taunts" width="2.5h" height="2.5h" content="test_client_audit_taunts_tip" />
+						<instance name="test_suite_tip" tip="audit_wards" width="2.5h" height="2.5h" content="test_client_audit_wards_tip" />
+						<instance name="test_suite_tip" tip="audit_all" width="2.5h" height="2.5h" content="test_client_audit_all_tip" />
+					</panel>
+
+					<!-- Audit Log -->
+					<label align="right" y="0.25h" width="70h" height="2h" font="dyn_12" color="white" textalign="center" content="test_client_audit_log" />
+					<textbuffer name="test_client_audit_log" x="-1h" y="2.5h" align="right" width="70h" height="40.5h" font="dyn_10" textcolor="white" shadow="1" anchorbottom="1" color="0 0 0 0.4" scrolltexture="/ui/test_suite/images/im.tga" />
+
+					<panel height="12h" y="-1h" width="-2h" align="center" valign="bottom" >
+						<instance name="test_suite_button" button="audit_clear" width="15.0h" height="2.5h" align="right" content="test_client_audit_clear"
+							onclicklua="TestSuite.ClearAuditLog()"
+						/>
+						<instance name="test_suite_button" x="-15.5h" button="audit_save" width="15.0h" height="2.5h" align="right" content="test_client_audit_save"
+							onclicklua="TestSuite.AuditLog('') TestSuite.SaveAuditLog()"
+						/>
+
+						<instance name="test_suite_button" y="-4.0h" button="audit_load_entities" width="15.0h" height="2.5h" content="test_client_audit_load_entities"
+							onclicklua="TestSuite.AuditLog('') TestSuite.LoadEntities()"
+						/>
+
+						<panel height="2.5h" y="-8.65h" valign="bottom" noclick="1" float="right" padding="0.5h" >
+							<instance name="test_suite_button" button="audit_hero_resource" height="2.5h" valign="bottom" content="test_client_audit_resource"
+								onclicklua="TestSuite.AuditLog('') TestSuite.AuditResource(TestSuite.GetWidget('test_client_audit_resource'):GetValue(), true, false)"
+							/>
+							<instance name="test_suite_input" textbox="test_client_audit_resource" width="22h" taborder="9029"
+								onenterlua="TestSuite.AuditLog('') TestSuite.AuditResource(self:GetValue(), true, false)"
+							/>
+							<panel height="2.5h" grow="1" noclick="1" >
+								<instance name="test_suite_checkbox" checkbox="audit_resources_display_chains" height="2h" valign="center" font="dyn_8" content="test_client_audit_resources_chains" />
+							</panel>
+							<instance name="test_suite_tip" tip="audit_resource" width="100@" content="test_client_audit_resource_tip" />
+						</panel>
+
+						<panel height="2.5h" y="-5.8h" valign="bottom" noclick="1" float="right" padding="0.5h" >
+							<label font="dyn_12" color="white" content="test_client_audit_resources" fitx="1" fitxpadding="0.5h" />
+							<instance name="test_suite_tip" tip="audit_resources" width="100@" content="test_client_audit_resources_tip" />
+
+							<panel width="1h" noclick="1" />
+
+							<instance name="test_suite_button" button="audit_hero_resources" height="2.5h" valign="bottom" content="test_client_hero"
+								onclicklua="TestSuite.AuditLog('') TestSuite.AuditEntitiyResources(1)"
+							/>
+							<!-- <instance name="test_suite_button" button="audit_pet_resources" height="2.5h" valign="bottom" content="test_client_pet"
+								onclicklua="TestSuite.AuditLog('') TestSuite.AuditEntitiyResources(2)"
+							/> -->
+							<instance name="test_suite_button" button="audit_creep_resources" height="2.5h" valign="bottom" content="test_client_creep"
+								onclicklua="TestSuite.AuditLog('') TestSuite.AuditEntitiyResources(3)"
+							/>
+							<!-- <instance name="test_suite_button" button="audit_gadget_resources" height="2.5h" valign="bottom" content="test_client_gadget"
+								onclicklua="TestSuite.AuditLog('') TestSuite.AuditEntitiyResources(4)"
+							/> -->
+							<instance name="test_suite_button" button="audit_building_resources" height="2.5h" valign="bottom" content="test_client_building"
+								onclicklua="TestSuite.AuditLog('') TestSuite.AuditEntitiyResources(5)"
+							/>
+							<instance name="test_suite_button" button="audit_powerup_resources" height="2.5h" valign="bottom" content="test_client_powerup"
+								onclicklua="TestSuite.AuditLog('') TestSuite.AuditEntitiyResources(6)"
+							/>
+							<instance name="test_suite_button" button="audit_neutral_resources" height="2.5h" valign="bottom" content="test_client_neutral"
+								onclicklua="TestSuite.AuditLog('') TestSuite.AuditEntitiyResources(7)"
+							/>
+							<instance name="test_suite_button" button="audit_critter_resources" height="2.5h" valign="bottom" content="test_client_critter"
+								onclicklua="TestSuite.AuditLog('') TestSuite.AuditEntitiyResources(8)"
+							/>
+							<!-- <instance name="test_suite_button" button="audit_tool_resources" height="2.5h" valign="bottom" content="test_client_tool"
+								onclicklua="TestSuite.AuditLog('') TestSuite.AuditEntitiyResources(9)"
+							/> -->
+							<!-- <instance name="test_suite_button" button="audit_state_resources" height="2.5h" valign="bottom" content="test_client_state"
+								onclicklua="TestSuite.AuditLog('') TestSuite.AuditEntitiyResources(10)"
+							/> -->
+							<instance name="test_suite_button" button="audit_complete_resources" height="2.5h" valign="bottom" content="test_client_complete"
+								onclicklua="TestSuite.AuditLog('') TestSuite.AuditEntitiyResources()"
+							/>
+						</panel>
+
+						<panel height="2.5h" y="-2.85h" valign="bottom" noclick="1" float="right" padding="0.5h" >
+							<instance name="test_suite_button" button="audit_hero_usage" height="2.5h" valign="bottom" content="test_client_audit_usage"
+								onclicklua="TestSuite.AuditLog('') TestSuite.AuditUsage(TestSuite.GetWidget('test_client_audit_usage'):GetValue(), true, false)"
+							/>
+							<instance name="test_suite_input" textbox="test_client_audit_usage" width="22h"  taborder="9030"
+								onenterlua="TestSuite.AuditLog('') TestSuite.AuditUsage(self:GetValue(), true, false)"
+							/>
+							<panel height="2.5h" grow="1" noclick="1" >
+								<instance name="test_suite_checkbox" checkbox="audit_usage_show_resources" height="2h" valign="center" font="dyn_8" content="test_client_audit_usage_resources" />
+							</panel>
+							<instance name="test_suite_tip" tip="audit_usage" width="100@" content="test_client_audit_usage_tip" />
+						</panel>
+
+						<panel height="2.5h" valign="bottom" noclick="1" float="right" padding="0.5h" >
+							<label font="dyn_12" color="white" content="test_client_generate_usage_report" fitx="1" fitxpadding="0.5h" />
+							<instance name="test_suite_tip" tip="usage_report" width="100@" content="test_client_usage_report_tip" />
+
+							<panel width="1h" noclick="1" />
+
+							<instance name="test_suite_button" button="generate_hero_usage_report" height="2.5h" valign="bottom" content="test_client_hero"
+								onclicklua="TestSuite.AuditLog('') TestSuite.GenerateUnitUsageReport(1)"
+							/>
+							<!-- <instance name="test_suite_button" button="generate_pet_usage_report" height="2.5h" valign="bottom" content="test_client_pet"
+								onclicklua="TestSuite.AuditLog('') TestSuite.GenerateUnitUsageReport(2)"
+							/> -->
+							<instance name="test_suite_button" button="generate_creep_usage_report" height="2.5h" valign="bottom" content="test_client_creep"
+								onclicklua="TestSuite.AuditLog('') TestSuite.GenerateUnitUsageReport(3)"
+							/>
+							<!-- <instance name="test_suite_button" button="generate_gadget_usage_report" height="2.5h" valign="bottom" content="test_client_gadget"
+								onclicklua="TestSuite.AuditLog('') TestSuite.GenerateUnitUsageReport(4)"
+							/> -->
+							<instance name="test_suite_button" button="generate_building_usage_report" height="2.5h" valign="bottom" content="test_client_building"
+								onclicklua="TestSuite.AuditLog('') TestSuite.GenerateUnitUsageReport(5)"
+							/>
+							<instance name="test_suite_button" button="generate_powerup_usage_report" height="2.5h" valign="bottom" content="test_client_powerup"
+								onclicklua="TestSuite.AuditLog('') TestSuite.GenerateUnitUsageReport(6)"
+							/>
+							<instance name="test_suite_button" button="generate_neutral_usage_report" height="2.5h" valign="bottom" content="test_client_neutral"
+								onclicklua="TestSuite.AuditLog('') TestSuite.GenerateUnitUsageReport(7)"
+							/>
+							<instance name="test_suite_button" button="generate_critter_usage_report" height="2.5h" valign="bottom" content="test_client_critter"
+								onclicklua="TestSuite.AuditLog('') TestSuite.GenerateUnitUsageReport(8)"
+							/>
+							<!-- <instance name="test_suite_button" button="generate_tool_usage_report" height="2.5h" valign="bottom" content="test_client_tool"
+								onclicklua="TestSuite.AuditLog('') TestSuite.GenerateUnitUsageReport(9)"
+							/> -->
+							<!-- <instance name="test_suite_button" button="generate_state_usage_report" height="2.5h" valign="bottom" content="test_client_state"
+								onclicklua="TestSuite.AuditLog('') TestSuite.GenerateUnitUsageReport(10)"
+							/> -->
+							<instance name="test_suite_button" button="generate_complete_usage_report" height="2.5h" valign="bottom" content="test_client_complete"
+								onclicklua="TestSuite.AuditLog('') TestSuite.GenerateUnitUsageReport()"
+							/>
+						</panel>
+
+						<panel align="right" valign="bottom" grow="1" float="bottom" padding="0.5h" >
+							<panel grow="1" noclick="1" float="right" padding="0.5h" >
+								<label font="dyn_12" color="white" content="test_client_mount_world" fity="1" fitx="1" />
+								<instance name="test_suite_tip" tip="mount_world" width="100@" content="test_client_mount_world_tip" />
+							</panel>
+
+							<instance name="test_suite_combobox" combobox="test_client_world" height="2h"
+								populate="
+									self:AddTemplateListItem('test_suite_listitem_simple', 'NONE', 'font', 'dyn_10', 'content', Translate('test_client_none'))
+									local maps = GetMaps()
+									for _,map in ipairs(maps) do
+										self:AddTemplateListItem('test_suite_listitem_simple', map, 'font', 'dyn_10', 'content', map)
+									end
+									self:SetSelectedItemByValue('NONE', false)
+								"
+								onshowlua="self:DoEvent()"
+								watch="GamePhase"
+								ontriggerlua="self:DoEvent()"
+								oneventlua="
+									local currentMap = Testing.GetMountedWorld()
+									if (string.len(currentMap) == 0) then
+										self:SetSelectedItemByValue('NONE', false)
+									else
+										self:SetSelectedItemByValue(currentMap, false)
+									end
+								"
+								onselectlua="TestSuite.AuditLog('') TestSuite.MountWorld(self:GetValue())"
+							/>
+						</panel>
+					</panel>
+
+				</panel>
+
+				<panel name="test_suite_client_general" group="test_suite_client_tabs" visible="0" noclick="1" >
+					<panel y="1h" width="-2h" align="center" noclick="1" float="bottom" padding="0.5h" reverse="1" >
+						<instance name="test_suite_button" button="open_eap" width="100%" height="2.5h" content="test_client_open_eap"
+							onclicklua="TestSuite.OpenStoreCategory(58)"
+						/>
+						<instance name="test_suite_button" button="open_heroes" width="100%" height="2.5h" content="test_client_open_heroes"
+							onclicklua="TestSuite.OpenStoreCategory(71)"
+						/>
+						<instance name="test_suite_button" button="open_featured" width="100%" height="2.5h" content="test_client_open_featured"
+							onclicklua="TestSuite.OpenStoreCategory(68)"
+						/>
+
+						<panel height="2" noclick="1" float="bottom">
+							<panel height="1" width="+0.75h" align="center" color="0.6 0.6 0.6 0.8" noclick="1" />
+							<panel height="1" width="+0.75h" align="center" color="0.4 0.4 0.4 0.8" noclick="1" />
+						</panel>
+
+						<panel height="2.5h" noclick="1" float="right" padding="0.5h" >
+							<instance name="test_suite_button" button="set_time_offset" width="10h" content="test_client_time_offset"
+								onclicklua="Cmd('ForceSetLocalServerTimeOffset '..TestSuite.GetWidget('test_client_time'):GetValue())"
+							/>
+							<instance name="test_suite_tip" tip="time_offset" width="2.5h" height="2.5h" content="test_client_time_offset_tip" />
+							<instance name="test_suite_input" textbox="test_client_time" width="15h" taborder="9000"
+								onenterlua="Cmd('ForceSetLocalServerTimeOffset '..self:GetValue())"
+							/>
+							<label font="dyn_12" color="white" shadow="1" textvalign="center"
+								onshowlua="local this = self self:RegisterWatch('HostTime', function() this:DoEvent() end)"
+								onhidelua="self:UnregisterWatch('HostTime')"
+								oneventlua="
+									local currTime = PreciseIntAdd(GetLocalServerTime(), -18000)
+									local seconds, minutes, hours, days, months, years = TestSuite.UnixTimestampToNumeralTime(currTime)
+									self:SetText(Translate('test_client_time_string')..' '..string.format('%02d/%02d/%04d - %02d:%02d:%02d', months, days, years, hours, minutes, seconds))
+								"
+							/>
+						</panel>
+
+						<panel height="2" noclick="1" float="bottom">
+							<panel height="1" width="+0.75h" align="center" color="0.6 0.6 0.6 0.8" noclick="1" />
+							<panel height="1" width="+0.75h" align="center" color="0.4 0.4 0.4 0.8" noclick="1" />
+						</panel>
+
+						<panel height="2.5h" noclick="1" float="right" >
+							<label fitx="1" fitxpadding="0.25h" font="dyn_12" color="white" shadow="1" noclick="1" content="test_client_plinko_tier" />
+							<instance name="test_suite_input" textbox="test_client_plinko_tier" width="5%" taborder="9001" />
+							<panel width="0.5h" noclick="1" />
+							<label fitx="1" fitxpadding="0.25h" font="dyn_12" color="white" shadow="1" noclick="1" content="test_client_plinko_tickets" />
+							<instance name="test_suite_input" textbox="test_client_plinko_tickets" width="21.3%" taborder="9002" />
+							<panel width="0.5h" noclick="1" />
+							<label fitx="1" fitxpadding="0.25h" font="dyn_12" color="white" shadow="1" noclick="1" content="test_client_plinko_product" />
+							<instance name="test_suite_input" textbox="test_client_plinko_product" width="21.3%" taborder="9003" />
+							<panel width="0.5h" noclick="1" />
+
+							<instance name="test_suite_tip" tip="plinko_fake_drop" width="2.5h" height="2.5h" content="test_client_fake_plinko_tip" />
+						</panel>
+						<panel height="2.5h" noclick="1" float="right" >
+							<label fitx="1" fitxpadding="0.25h" font="dyn_12" color="white" shadow="1" noclick="1" content="test_client_plinko_icon" />
+							<instance name="test_suite_input" textbox="test_client_plinko_icon" width="20%" taborder="9004" />
+							<panel width="0.5h" noclick="1" />
+							<label fitx="1" fitxpadding="0.25h" font="dyn_12" color="white" shadow="1" noclick="1" content="test_client_plinko_id" />
+							<instance name="test_suite_input" textbox="test_client_plinko_id" width="20%" taborder="9005" />
+							<panel width="0.5h" noclick="1" />
+							<label fitx="1" fitxpadding="0.25h" font="dyn_12" color="white" shadow="1" noclick="1" content="test_client_plinko_type" />
+							<instance name="test_suite_product_type_combobox" comboboxName="test_client_plinko_type" width="20%" bgoffset="2.6h" taborder="9006" />
+							<panel width="0.5h" noclick="1" />
+						</panel>
+
+						<instance name="test_suite_button" button="fake_plinko" width="100%" height="2.5h" content="test_client_fake_plinko"
+							onclicklua="
+								local tier = TestSuite.GetWidget('test_client_plinko_tier'):GetValue()
+								local product = TestSuite.GetWidget('test_client_plinko_product'):GetValue()
+								local tickets = TestSuite.GetWidget('test_client_plinko_tickets'):GetValue()
+
+								local icon = TestSuite.GetWidget('test_client_plinko_icon'):GetValue()
+								local id = TestSuite.GetWidget('test_client_plinko_id'):GetValue()
+								local type = TestSuite.GetWidget('test_client_plinko_type'):GetValue()
+
+								TestSuite.FakePlinko(tier, product, id, icon, type, tickets)
+							"
+						/>
+
+						<panel height="2" noclick="1" float="bottom">
+							<panel height="1" width="+0.75h" align="center" color="0.6 0.6 0.6 0.8" noclick="1" />
+							<panel height="1" width="+0.75h" align="center" color="0.4 0.4 0.4 0.8" noclick="1" />
+						</panel>
+
+						<panel height="8.5h" noclick="1" float="right" >
+							<panel width="20%" noclick="1" float="bottom" padding=".1h" >
+								<panel height="2h" noclick="1" float="right" >
+									<label width="20%" font="dyn_8" textvalign="center'" color="white" shadow="1" noclick="1" content="test_client_bag_product" />
+									<instance name="test_suite_input" textbox="test_client_bag_product_1" font="dyn_10" width="80%" taborder="9007" />
+								</panel>
+								<panel height="2h" noclick="1" float="right" >
+									<label width="20%" font="dyn_8" textvalign="center'" color="white" shadow="1" noclick="1" content="test_client_bag_id" />
+									<instance name="test_suite_input" textbox="test_client_bag_id_1" font="dyn_10" width="80%" taborder="9008" />
+								</panel>
+								<panel height="2h" noclick="1" float="right" >
+									<label width="20%" font="dyn_8" textvalign="center'" color="white" shadow="1" noclick="1" content="test_client_bag_icon" />
+									<instance name="test_suite_input" textbox="test_client_bag_icon_1" font="dyn_10" width="80%" taborder="9009" />
+								</panel>
+								<panel height="2h" noclick="1" float="right" >
+									<label width="20%" font="dyn_8" textvalign="center'" color="white" shadow="1" noclick="1" content="test_client_bag_type" />
+									<instance name="test_suite_product_type_combobox" comboboxName="test_client_bag_type_1" font="dyn_10" width="80%" taborder="9010" />
+								</panel>
+							</panel>
+							<panel width="20%" noclick="1" float="bottom" padding=".1h" >
+								<panel height="2h" noclick="1" float="right" >
+									<label width="20%" font="dyn_8" textvalign="center'" color="white" shadow="1" noclick="1" content="test_client_bag_product" />
+									<instance name="test_suite_input" textbox="test_client_bag_product_2" font="dyn_10" width="80%" taborder="9011" />
+								</panel>
+								<panel height="2h" noclick="1" float="right" >
+									<label width="20%" font="dyn_8" textvalign="center'" color="white" shadow="1" noclick="1" content="test_client_bag_id" />
+									<instance name="test_suite_input" textbox="test_client_bag_id_2" font="dyn_10" width="80%" taborder="9012" />
+								</panel>
+								<panel height="2h" noclick="1" float="right" >
+									<label width="20%" font="dyn_8" textvalign="center'" color="white" shadow="1" noclick="1" content="test_client_bag_icon" />
+									<instance name="test_suite_input" textbox="test_client_bag_icon_2" font="dyn_10" width="80%" taborder="9013" />
+								</panel>
+								<panel height="2h" noclick="1" float="right" >
+									<label width="20%" font="dyn_8" textvalign="center'" color="white" shadow="1" noclick="1" content="test_client_bag_type" />
+									<instance name="test_suite_product_type_combobox" comboboxName="test_client_bag_type_2" font="dyn_10" width="80%" taborder="9014" />
+								</panel>
+							</panel>
+							<panel width="20%" noclick="1" float="bottom" padding=".1h" >
+								<panel height="2h" noclick="1" float="right" >
+									<label width="20%" font="dyn_8" textvalign="center'" color="white" shadow="1" noclick="1" content="test_client_bag_product" />
+									<instance name="test_suite_input" textbox="test_client_bag_product_3" font="dyn_10" width="80%" taborder="9015" />
+								</panel>
+								<panel height="2h" noclick="1" float="right" >
+									<label width="20%" font="dyn_8" textvalign="center'" color="white" shadow="1" noclick="1" content="test_client_bag_id" />
+									<instance name="test_suite_input" textbox="test_client_bag_id_3" font="dyn_10" width="80%" taborder="9016" />
+								</panel>
+								<panel height="2h" noclick="1" float="right" >
+									<label width="20%" font="dyn_8" textvalign="center'" color="white" shadow="1" noclick="1" content="test_client_bag_icon" />
+									<instance name="test_suite_input" textbox="test_client_bag_icon_3" font="dyn_10" width="80%" taborder="9017" />
+								</panel>
+								<panel height="2h" noclick="1" float="right" >
+									<label width="20%" font="dyn_8" textvalign="center'" color="white" shadow="1" noclick="1" content="test_client_bag_type" />
+									<instance name="test_suite_product_type_combobox" comboboxName="test_client_bag_type_3" font="dyn_10" width="80%" taborder="9018" />
+								</panel>
+							</panel>
+							<panel width="20%" noclick="1" float="bottom" padding=".1h" >
+								<panel height="2h" noclick="1" float="right" >
+									<label width="20%" font="dyn_8" textvalign="center'" color="white" shadow="1" noclick="1" content="test_client_bag_product" />
+									<instance name="test_suite_input" textbox="test_client_bag_product_4" font="dyn_10" width="80%" taborder="9019" />
+								</panel>
+								<panel height="2h" noclick="1" float="right" >
+									<label width="20%" font="dyn_8" textvalign="center'" color="white" shadow="1" noclick="1" content="test_client_bag_id" />
+									<instance name="test_suite_input" textbox="test_client_bag_id_4" font="dyn_10" width="80%" taborder="9020" />
+								</panel>
+								<panel height="2h" noclick="1" float="right" >
+									<label width="20%" font="dyn_8" textvalign="center'" color="white" shadow="1" noclick="1" content="test_client_bag_icon" />
+									<instance name="test_suite_input" textbox="test_client_bag_icon_4" font="dyn_10" width="80%" taborder="9021" />
+								</panel>
+								<panel height="2h" noclick="1" float="right" >
+									<label width="20%" font="dyn_8" textvalign="center'" color="white" shadow="1" noclick="1" content="test_client_bag_type" />
+									<instance name="test_suite_product_type_combobox" comboboxName="test_client_bag_type_4" font="dyn_10" width="80%" taborder="9022" />
+								</panel>
+							</panel>
+							<panel width="20%" noclick="1" float="bottom" padding=".1h" >
+								<panel height="2h" noclick="1" float="right" >
+									<label width="20%" font="dyn_8" textvalign="center'" color="white" shadow="1" noclick="1" content="test_client_bag_product" />
+									<instance name="test_suite_input" textbox="test_client_bag_product_5" font="dyn_10" width="80%" taborder="9023" />
+								</panel>
+								<panel height="2h" noclick="1" float="right" >
+									<label width="20%" font="dyn_8" textvalign="center'" color="white" shadow="1" noclick="1" content="test_client_bag_id" />
+									<instance name="test_suite_input" textbox="test_client_bag_id_5" font="dyn_10" width="80%" taborder="9024" />
+								</panel>
+								<panel height="2h" noclick="1" float="right" >
+									<label width="20%" font="dyn_8" textvalign="center'" color="white" shadow="1" noclick="1" content="test_client_bag_icon" />
+									<instance name="test_suite_input" textbox="test_client_bag_icon_5" font="dyn_10" width="80%" taborder="9025" />
+								</panel>
+								<panel height="2h" noclick="1" float="right" >
+									<label width="20%" font="dyn_8" textvalign="center'" color="white" shadow="1" noclick="1" content="test_client_bag_type" />
+									<instance name="test_suite_product_type_combobox" comboboxName="test_client_bag_type_5" font="dyn_10" width="80%" taborder="9026" />
+								</panel>
+							</panel>
+						</panel>
+
+						<panel height="2.5h" noclick="1" >
+							<label font="dyn_12" color="white" shadow="1" content="test_client_bag_theme" width="6h" />
+							<instance name="test_suite_input" textbox="test_client_bag_theme" width="10h" x="7h" taborder="9027" />
+							<instance x="18h" name="test_suite_button" button="fake_grab_bag" width="-21.0h" content="test_client_fake_grab_bag"
+								onclicklua="
+									local theme = TestSuite.GetWidget('test_client_bag_theme'):GetValue()
+									local names = ''
+									local ids = ''
+									local icons = ''
+									local types = ''
+									for i=1,5 do
+										local name = TestSuite.GetWidget('test_client_bag_product_'..i):GetValue()
+										if (NotEmpty(name)) then
+											if (NotEmpty(names)) then
+												names = names..'|'
+												ids = ids..'|'
+												icons = icons..'|'
+												types = types..'|'
+											end
+
+											names = names..name
+											ids = ids..TestSuite.GetWidget('test_client_bag_id_'..i):GetValue()
+											icons = icons..TestSuite.GetWidget('test_client_bag_icon_'..i):GetValue()
+											types = types..TestSuite.GetWidget('test_client_bag_type_'..i):GetValue()
+										end
+									end
+
+									TestSuite.FakeGrabBag(theme, names, ids, icons, types)
+								"
+							/>
+							<instance name="test_suite_tip" tip="fake_grab_bag" align="right" width="2.5h" height="2.5h" content="test_client_fake_bag_tip" />
+						</panel>
+
+						<panel height="2" noclick="1" float="bottom">
+							<panel height="1" width="+0.75h" align="center" color="0.6 0.6 0.6 0.8" noclick="1" />
+							<panel height="1" width="+0.75h" align="center" color="0.4 0.4 0.4 0.8" noclick="1" />
+						</panel>
+
+						<panel height="18h" noclick="1" >
+							<panel height="2.5h" align="center" grow="1" float="right" padding="0.5h" >
+								<label font="dyn_14" height="2.5h" fitx="1" color="white" shadow="1" content="test_client_product_list" />
+								<instance name="test_suite_tip" tip="product_list_tip" width="2h" height="2h" content="test_client_product_list_tip" />
+							</panel>
+
+							<instance name="test_suite_listbox" listbox="client_test_product_list" width="40%" itemheight="1.25h"
+								onselectlua="TestSuite.SelectProductList(self:GetValue())"
+							/>
+							<instance name="test_suite_input" textbox="client_test_product_list_search" x="-21%" width="38%" height="2.5h" align="right" valign="bottom" taborder="9028"
+								onshowlua="self:DoEvent()"
+								onchangelua="self:Sleep(250, function(self) self:DoEvent() end)"
+								watch="ProductListLoaded"
+								ontriggerlua="self:DoEvent()"
+								onenterlua="TestSuite.PopulateProductList(self:GetValue())"
+							/>
+							<instance name="test_suite_button" button="refresh_product_list" height="2.5h" width="20%" align="right" valign="bottom" content="test_client_force_product_list"
+								onclicklua="Client.ForceProductListReload()"
+							/>
+							
+							<panel align="right" height="-5.5h" width="59%" y="2.5h" float="right" padding="0.5h" noclick="1" >
+								<panel width="59.5%" noclick="1" float="bottom" padding="1" >
+									<panel height="2.0h" float="right" noclick="1" >
+										<label font="dyn_10" height="2.0h" width="9.5h" shadow="1" color="white" textvalign="center" content="test_client_list_name" />
+										<instance name="test_suite_input" textbox="test_client_product_list_name" font="dyn_10" width="-9.5h" />
+									</panel>
+									<panel height="2.0h" float="right" noclick="1" >
+										<label font="dyn_10" height="2.0h" width="9.5h" shadow="1" color="white" textvalign="center" content="test_client_list_cname" />
+										<instance name="test_suite_input" textbox="test_client_product_list_cname" font="dyn_10" width="-9.5h" />
+									</panel>
+									<panel height="2.0h" float="right" noclick="1" >
+										<label font="dyn_10" height="2.0h" width="9.5h" shadow="1" color="white" textvalign="center" content="test_client_list_path" />
+										<instance name="test_suite_input" textbox="test_client_product_list_path" font="dyn_10" width="-9.5h" />
+									</panel>
+									<panel height="2.0h" float="right" noclick="1" >
+										<label font="dyn_10" height="2.0h" width="9.5h" shadow="1" color="white" textvalign="center" content="test_client_list_type" />
+										<instance name="test_suite_input" textbox="test_client_product_list_type" font="dyn_10" width="-9.5h" />
+									</panel>
+									<panel height="2.0h" float="right" noclick="1" >
+										<label font="dyn_10" height="2.0h" width="9.5h" shadow="1" color="white" textvalign="center" content="test_client_list_type_string" />
+										<instance name="test_suite_input" textbox="test_client_product_list_type_string" font="dyn_10" width="-9.5h" />
+									</panel>
+									<panel height="2.0h" float="right" noclick="1" >
+										<label font="dyn_10" height="2.0h" width="9.5h" shadow="1" color="white" textvalign="center" content="test_client_list_type_desc" />
+										<instance name="test_suite_input" textbox="test_client_product_list_type_desc" font="dyn_10" width="-9.5h" />
+									</panel>
+								</panel>
+								<panel width="39.5%" noclick="1" float="bottom" padding="1" >
+									<panel height="2.0h" float="right" noclick="1" >
+										<label font="dyn_10" height="2.0h" width="9.5h" shadow="1" color="white" textvalign="center" content="test_client_list_product_id" />
+										<instance name="test_suite_input" textbox="test_client_product_list_id" font="dyn_10" width="-9.5h" />
+									</panel>
+									<panel height="2.0h" float="right" noclick="1" >
+										<label font="dyn_10" height="2.0h" width="9.5h" shadow="1" color="white" textvalign="center" content="test_client_list_purchasable" />
+										<instance name="test_suite_input" textbox="test_client_product_list_purchasable" font="dyn_10" width="-9.5h" />
+									</panel>
+									<panel height="2.0h" float="right" noclick="1" >
+										<label font="dyn_10" height="2.0h" width="9.5h" shadow="1" color="white" textvalign="center" content="test_client_list_premium" />
+										<instance name="test_suite_input" textbox="test_client_product_list_premium" font="dyn_10" width="-9.5h" />
+									</panel>
+									<panel height="2.0h" float="right" noclick="1" >
+										<label font="dyn_10" height="2.0h" width="9.5h" shadow="1" color="white" textvalign="center" content="test_client_list_cost" />
+										<instance name="test_suite_input" textbox="test_client_product_list_cost" font="dyn_10" width="-9.5h" />
+									</panel>
+									<panel height="2.0h" float="right" noclick="1" >
+										<label font="dyn_10" height="2.0h" width="9.5h" shadow="1" color="white" textvalign="center" content="test_client_list_premium_cost" />
+										<instance name="test_suite_input" textbox="test_client_product_list_premium_cost" font="dyn_10" width="-9.5h" />
+									</panel>
+									<panel height="2.0h" float="right" noclick="1" >
+										<label font="dyn_10" height="2.0h" width="9.5h" shadow="1" color="white" textvalign="center" content="test_client_list_dynamic" />
+										<instance name="test_suite_input" textbox="test_client_product_list_dynamic" font="dyn_10" width="-9.5h" />
+									</panel>
+								</panel>
+							</panel>
+						</panel>
+					</panel>
+				</panel>
+
+				<!-- <panel name="test_suite_client_models" group="test_suite_client_tabs" visible="0" noclick="1" >
+				</panel> -->
+			</panel>
+
+			<!-- Tabs -->
+			<panel height="5%" noclick="1" >
+				<!-- Grab/Drag using this -->
+				<panel name="test_client_title_bar" clip="1" noclick="1" >
+					<frame texture="/ui/test_suite/images/rounded_bg_white.tga" height="+0.6h" borderthickness="0.6h" color="0.1 0.1 0.1 0.5" noclick="1" />
+				</panel>
+
+				<panel x="0.25h" float="right" valign="bottom" height="75%" noclick="1" padding="0.25h" >
+					<instance name="test_suite_tab" tab="audit" content="test_client_audit" icon="/ui/test_suite/images/audit.tga"
+						onclicklua="self:ShowOnly('test_suite_client_audit')"
+					/>
+					<instance name="test_suite_tab" tab="general" content="test_client_general"
+						onclicklua="self:ShowOnly('test_suite_client_general')"
+					/>
+					<!-- <instance name="test_suite_tab" tab="test3" content="test_client_models"
+						onclicklua="self:ShowOnly('test_suite_client_models')"
+					/> -->
+				</panel>
+
+				<label font="dyn_16" content="test_suite_title" color="white" shadow="1" noclick="1" fitx="1" align="right" textvalign="center" fitxpadding="125@" />
+
+				<panel align="right" x="-12.5@" grow="1" height="75%" valign="center" noclick="1" >
+					<instance name="test_suite_button" button="close" icon="/ui/test_suite/images/close_button.tga" upColor="#E81A1A" overColor="#FF5757" downColor="#BA1111"
+						onclicklua="TestSuite.GetWidget('test_suite_client'):SetVisible(0)"
+					/>
+				</panel>
+
+				<panel height="1" valign="bottom" color="0 0 0 0.5" />
+			</panel>
+
+			<panel name="test_suite_client_progress_cover" visible="0" >
+				<frame texture="/ui/test_suite/images/rounded_bg_white.tga" borderthickness="0.6h" color="0 0 0 0.5" noclick="1" />
+				<frame texture="/ui/test_suite/images/roundframe.tga" borderthickness="0.6h" bordercolor="0 0 0 0.9" noclick="1" />
+
+				<label name="test_suite_client_progress_title" font="dyn_18" height="10h" valign="center" textalign="center" color="white" shadow="1" noclick="1" />
+				<panel noclick="1" width="75%" align="center" height="3h" valign="center" color="0 0 0 0.75" >
+					<panel name="test_suite_client_progress_bar" width="0%" texture="/ui/test_suite/images/grad_vert.tga" color=".7 .7 .7 .5" noclick="1" />
+					<label name="test_suite_client_progress_percent" font="dyn_16" textvalign="center" textalign="center" color="white" shadow="1" noclick="1" />
+					<label name="test_suite_client_progress_count" x="-1h" font="dyn_10" textvalign="center" textalign="right" color="white" shadow="1" noclick="1" />
+				</panel>
+
+				<instance name="test_suite_button" button="cancel_progress" valign="center" align="center" y="4h" height="2.5h" content="test_client_cancel"
+					onclicklua="TestSuite.CancelClientOperation()"
+				/>
+			</panel>
+		</panel>
+	</template>
+	<!-- End Client Test Functionality -->
+
+	<!-- Server (Basic- meant to be like the original Test++) Test Functionality -->
+	<template name="test_suite_server_basic" >
+		<panel name="test_suite_server_basic_auto_refresh" noclick="1" />
+
+		<panel name="test_suite_server_basic" width="27h" x="3h" y="-5h" valign="center" cangrab="1" visible="0" grow="1" regrow="1"
+			onclicklua="self:BringToFront()"
+			onshowlua="self:BringToFront()"
+		>
+			<frame texture="/ui/test_suite/images/rounded_bg_white.tga" borderthickness="0.6h" color="0.2 0.2 0.2 0.9" noclick="1" />
+			<frame texture="/ui/test_suite/images/roundframe.tga" borderthickness="0.6h" bordercolor="0 0 0 0.9" noclick="1" />
+
+			<panel float="bottom" grow="1" regrow="1" width="100%" noclick="1" >
+				<!-- Title -->
+				<panel height="3.0h" noclick="1" >
+					<!-- Grab/Drag using this -->
+					<panel name="test_server_basic_title_bar" clip="1" noclick="1" >
+						<frame texture="/ui/test_suite/images/rounded_bg_white.tga" height="+0.6h" borderthickness="0.6h" color="0.1 0.1 0.1 0.5" noclick="1" />
+					</panel>
+
+					<label font="dyn_16" color="white" textvalign="center" x="0.5h" shadow="1" content="test_suite_title" noclick="1" />
+
+					<panel width="25%" align="right" valign="center" x="-125@" height="60%" grow="1"
+						watch="EventEnterGame GamePhase"
+						ontriggerlua="self:SetVisible(TestSuite.ServerAdvancedAccessible())"
+					>
+						<instance name="test_suite_button" button="server_go_advanced"  content="test_server_go_advanced" font="dyn_8"
+							onclicklua="TestSuite.GetWidget('test_suite_server_advanced'):SetVisible(1)"
+						/>
+					</panel>
+
+					<panel align="right" x="-12.5@" grow="1" height="75%" valign="center" noclick="1" >
+						<instance name="test_suite_button" button="close_server_basic" icon="/ui/test_suite/images/close_button.tga" upColor="#E81A1A" overColor="#FF5757" downColor="#BA1111"
+							onclicklua="TestSuite.GetWidget('test_suite_server_basic'):SetVisible(0)"
+						/>
+					</panel>
+
+					<panel height="1" valign="bottom" color="0 0 0 0.5" />
+				</panel>
+
+				<!-- padding -->
+				<panel height="2" noclick="1" />
+
+				<!-- Body -->
+				<panel valign="bottom" width="100%" grow="1" regrow="1" >
+					<panel height="-0.8h" grow="1" regrow="1" valign="center" width="95%" align="center" float="bottom" padding="0.35h" >
+						<panel height="2h" noclick="1" >
+							<label font="dyn_12" color="white" height="2h" shadow="1" content="test_server_units" noclick="1" />
+							<instance name="test_suite_checkbox" checkbox="test_server_all_units" align="right" x="-2.25h" height="2h" content="test_server_all_units" startenabled="0" />
+							<instance name="test_suite_tip" tip="selected_units" width="2.0h" height="2.0h" align="right" content="test_server_units_tip" />
+						</panel>
+
+						<panel height="2.0h" noclick="1" >
+							<instance name="test_suite_button" button="server_refresh" width="49%" content="test_server_refresh"
+								onclicklua="TestSuite.DoSelectedUnits(function(unit) Testing.Refresh(unit) end)"
+							/>
+							<instance name="test_suite_checkbox" checkbox="test_server_auto_refresh" width="49%" align="right" content="test_server_auto_refresh"
+								onclicklua="TestSuite.SetAutoRefresh(self:GetButtonState() == 1)"
+							/>
+						</panel>
+
+						<panel height="2.0h" noclick="1" >
+							<instance name="test_suite_button" button="server_kill" width="49%" content="test_server_kill"
+								onclicklua="TestSuite.DoSelectedUnits(function(unit) Testing.Kill(unit) end)"
+							/>
+							<instance name="test_suite_button" button="server_delete" align="right" width="49%" content="test_server_delete"
+								onclicklua="TestSuite.DoSelectedUnits(function(unit) Testing.Delete(unit) end)"
+							/>
+						</panel>
+
+						<panel height="2.0h" noclick="1" >
+							<label font="dyn_10" color="white" shadow="1" noclick="1" textvalign="center" content="test_server_exp" />
+							<instance name="test_suite_input" textbox="test_server_exp_amount" x="-3.25h" width="-10h" align="right" inputline="2000"
+								onenterlua="TestSuite.DoSelectedUnits(function(unit) Testing.GiveExperience(unit, self:GetValue()) end)"
+							/>
+							<instance name="test_suite_button" button="server_exp" align="right" width="100@" content="+"
+								onclicklua="TestSuite.DoSelectedUnits(function(unit) Testing.GiveExperience(unit, TestSuite.GetWidget('test_server_exp_amount'):GetValue()) end)"
+							/>
+						</panel>
+
+						<panel height="2.0h" noclick="1" >
+							<label font="dyn_10" color="white" shadow="1" noclick="1" textvalign="center" content="test_server_level" />
+							<panel grow="1" regrow="1" float="right" align="right" height="100%" padding="0.25h" >
+								<instance name="test_suite_button" button="server_level_up" width="100@" content="+"
+									onclicklua="TestSuite.DoSelectedUnits(function(unit) Testing.LevelUp(unit) end)"
+								/>
+								<instance name="test_suite_button" button="server_level_reset" width="100@" content="test_server_reset"
+									onclicklua="TestSuite.DoSelectedUnits(function(unit) Testing.ResetExperience(unit) end)"
+								/>
+								<instance name="test_suite_button" button="server_level_max" width="100@" content="test_server_max"
+									onclicklua="TestSuite.DoSelectedUnits(function(unit) Testing.LevelMax(unit) end)"
+								/>
+							</panel>
+						</panel>
+
+						<panel height="2.0h" noclick="1" >
+							<instance name="test_suite_button" button="server_clear_charges" width="49%" content="test_server_clear_charges"
+								onclicklua="TestSuite.DoSelectedUnits(function(unit) Testing.ClearToolCharges(unit) end)"
+							/>
+							<instance name="test_suite_button" button="server_max_charges" width="49%" align="right" content="test_server_max_charges"
+								onclicklua="TestSuite.DoSelectedUnits(function(unit) Testing.MaxToolCharges(unit) end)"
+							/>
+						</panel>
+
+						<panel height="2" noclick="1" float="bottom">
+							<panel height="1" width="+0.75h" align="center" color="0.6 0.6 0.6 0.8" noclick="1" />
+							<panel height="1" width="+0.75h" align="center" color="0.4 0.4 0.4 0.8" noclick="1" />
+						</panel>
+
+						<panel height="2.0h" noclick="1" >
+							<label font="dyn_10" color="white" shadow="1" noclick="1" textvalign="center" content="test_server_gold" />
+							
+							<panel align="right" noclick="1" float="right" height="100%" grow="1" padding="0.25h" >
+								<instance name="test_suite_input" textbox="test_server_gold_amount" width="10h" inputline="15000"
+									onenterlua="Testing.GiveGold(GetLocalClientNumber(), self:GetValue())"
+								/>
+								<instance name="test_suite_button" button="server_gold" width="100@" content="+"
+									onclicklua="Testing.GiveGold(GetLocalClientNumber(), TestSuite.GetWidget('test_server_gold_amount'):GetValue())"
+								/>
+								<instance name="test_suite_button" button="server_gold_603" width="100@" content="603"
+									onclicklua="Testing.TakeGold(GetLocalClientNumber(), 65535) Testing.GiveGold(GetLocalClientNumber(), 603)"
+								/>
+								<instance name="test_suite_button" button="server_gold_853" width="100@" content="853"
+									onclicklua="Testing.TakeGold(GetLocalClientNumber(), 65535) Testing.GiveGold(GetLocalClientNumber(), 853)"
+								/>
+							</panel>
+						</panel>
+
+						<label height="1.5h" font="dyn_10" shadow="1" color="white" textalign="center" textvalign="center" content="test_server_join_team" noclick="1" />
+						<panel height="2h" noclick="1" >
+							<panel grow="1" float="right" height="100%" align="center" padding=".25h" >
+								<instance name="test_suite_button" button="test_server_team1" font="dyn_10" content="test_server_team1"
+									onclicklua="Testing.SetClientTeam(GetLocalClientNumber(), 1)"
+								/>
+								<instance name="test_suite_button" button="test_server_team2" font="dyn_10" content="test_server_team2"
+									onclicklua="Testing.SetClientTeam(GetLocalClientNumber(), 2)"
+								/>
+								<!-- <instance name="test_suite_button" button="test_server_team_neutral" font="dyn_8" content="test_server_team_neutral"
+									onclicklua="Testing.SetClientTeam(GetLocalClientNumber(), -2)"
+								/> -->
+								<instance name="test_suite_button" button="test_server_team0" font="dyn_10" content="test_server_team0"
+									onclicklua="
+										local teamsWillBeEmpty = true
+										local players = Testing.GetPlayers()
+										for _,player in ipairs(players) do
+											if (((player.teamID == 1) or (player.teamID == 2)) and (player.clientNumber ~= GetLocalClientNumber())) then
+												teamsWillBeEmpty = false
+												break
+											end
+										end
+
+										if (teamsWillBeEmpty) then
+											Testing.AddFakePlayer(1)
+										end
+										Testing.SetClientTeam(GetLocalClientNumber(), 0)
+									"
+								/>
+							</panel>
+						</panel>
+
+						<panel height="2h" noclick="1" >
+							<instance name="test_suite_button" button="server_respawn_hero" content="test_server_respawn_hero" width="49%" font="dyn_8"
+								onclicklua="Testing.RespawnPlayerHero(GetLocalClientNumber())"
+							/>
+
+							<instance name="test_suite_button" button="server_respawn_set_hero" content="test_server_set_hero" align="right" width="49%" font="dyn_8"
+								onclicklua="Testing.SetPlayerHero(GetLocalClientNumber(), Testing.GetSelectedEntity())"
+							/>
+						</panel>
+
+						<instance name="test_suite_button" button="server_respawn_all_heroes" content="test_server_respawn_heroes" height="2h" font="dyn_10" width="100%"
+							onclicklua="Testing.RespawnAllHeroes()"
+						/>
+
+						<panel height="2" noclick="1" float="bottom">
+							<panel height="1" width="+0.75h" align="center" color="0.6 0.6 0.6 0.8" noclick="1" />
+							<panel height="1" width="+0.75h" align="center" color="0.4 0.4 0.4 0.8" noclick="1" />
+						</panel>
+
+						<panel height="2.0h" noclick="1" float="right" padding="2" >
+							<label font="dyn_10" color="white" width="40%" shadow="1" noclick="1" textvalign="center" content="test_server_creeps" />
+							<instance name="test_suite_basic_checkbox" checkbox="test_server_creeps" width="100@" cvar="sv_spawnCreeps" />
+							<instance name="test_suite_button" button="server_spawn_creeps" align="right" width="24.5%" content="test_server_spawn"
+								onclicklua="Testing.SpawnCreeps()"
+							/>
+							<instance name="test_suite_button" button="server_kill_creeps" align="right" width="24.5%" content="test_server_kill"
+								onclicklua="Testing.KillCreeps()"
+							/>
+						</panel>
+						<panel height="2.0h" noclick="1" float="right" padding="2" >
+							<label font="dyn_10" color="white" width="40%" shadow="1" noclick="1" textvalign="center" content="test_server_powerups" />
+							<instance name="test_suite_basic_checkbox" checkbox="test_server_powerups" width="100@" cvar="sv_spawnPowerups" />
+							<instance name="test_suite_button" button="test_server_powerups" align="right" width="24.5%" content="test_server_spawn"
+								onclicklua="Testing.SpawnPowerups()"
+							/>
+							<instance name="test_suite_button" button="server_remove_powerups" align="right" width="24.5%" content="test_server_remove"
+								onclicklua="Testing.RemovePowerups()"
+							/>
+						</panel>
+						<panel height="2.0h" noclick="1" float="right" padding="2" >
+							<label font="dyn_10" color="white" width="40%" shadow="1" noclick="1" textvalign="center" content="test_server_trees" />
+							<instance name="test_suite_basic_checkbox" checkbox="test_server_trees" width="100@" cvar="sv_spawnTrees" />
+							<instance name="test_suite_button" button="server_spawn_trees" align="right" width="24.5%" content="test_server_spawn"
+								onclicklua="Testing.SpawnTrees()"
+							/>
+							<instance name="test_suite_button" button="server_kill_trees" align="right" width="24.5%" content="test_server_kill"
+								onclicklua="Testing.KillTrees()"
+							/>
+						</panel>
+						<panel height="2.0h" noclick="1" float="right" padding="2" >
+							<label font="dyn_10" color="white" width="40%" shadow="1" noclick="1" textvalign="center" content="test_server_critters" />
+							<instance name="test_suite_basic_checkbox" checkbox="test_server_critters" width="100@" cvar="sv_spawnCritters" />
+							<instance name="test_suite_button" button="test_server_critters" align="right" width="24.5%" content="test_server_spawn"
+								onclicklua="Testing.SpawnCritters()"
+							/>
+							<instance name="test_suite_button" button="server_kill_critters" align="right" width="24.5%" content="test_server_kill"
+								onclicklua="Testing.KillCritters()"
+							/>
+						</panel>
+						<panel height="2.0h" noclick="1" float="right" padding="2" >
+							<label font="dyn_10" color="white" width="40%" shadow="1" noclick="1" textvalign="center" content="test_server_neutrals" />
+							<instance name="test_suite_basic_checkbox" checkbox="test_server_neutrals" width="100@" cvar="g_spawnNeutrals" />
+							<instance name="test_suite_button" button="test_server_neutrals" align="right" width="24.5%" content="test_server_spawn"
+								onclicklua="
+									local neutralCvar = Cvar.GetCvar('g_spawnNeutrals')
+									local old = neutralCvar:GetString()
+									neutralCvar:Set('true')
+
+									Testing.SpawnNeutrals()
+
+									neutralCvar:Set(old)
+								"
+							/>
+							<instance name="test_suite_button" button="server_kill_neutrals" align="right" width="24.5%" content="test_server_kill"
+								onclicklua="Testing.KillNeutrals()" height="4.35h"
+							/>
+						</panel>
+						<panel height="2.0h" noclick="1" float="right" padding="2" >
+							<label font="dyn_10" color="white" width="40%" shadow="1" noclick="1" textvalign="center" content="test_server_bosses" />
+							<instance name="test_suite_basic_checkbox" checkbox="test_server_bosses" width="100@" cvar="g_spawnBosses" />
+							<instance name="test_suite_button" button="test_server_bosses" align="right" width="24.5%" content="test_server_spawn"
+								onclicklua="
+									local bossCvar = Cvar.GetCvar('g_spawnBosses')
+									local old = bossCvar:GetString()
+									bossCvar:Set('true')
+
+									Testing.SpawnBosses()
+
+									bossCvar:Set(old)
+								"
+							/>
+						</panel>
+						<!-- <instance name="test_suite_button" button="server_kill_neutrals" content="test_server_kill_neutrals" width="100%" height="2h"
+							onclicklua="Testing.KillNeutrals()"
+						/> -->
+
+						<panel height="2" noclick="1" float="bottom">
+							<panel height="1" width="+0.75h" align="center" color="0.6 0.6 0.6 0.8" noclick="1" />
+							<panel height="1" width="+0.75h" align="center" color="0.4 0.4 0.4 0.8" noclick="1" />
+						</panel>
+
+						<instance name="test_suite_checkbox" checkbox="test_server_fog_of_war" content="test_server_fow" width="100%" height="2h" cvar="g_disableFogOfWar" />
+						<instance name="test_suite_checkbox" checkbox="test_server_cam_distance" content="test_server_cam_distance" width="100%" height="2h"
+							ondisablelua="Cvar.GetCvar('g_camDistanceMax'):Reset() Cvar.GetCvar('g_camDistanceMin'):Reset() Cvar.GetCvar('g_camDistanceMaxSpectator'):Reset()"
+							onenablelua="Cvar.GetCvar('g_camDistanceMax'):Set('5000.0') Cvar.GetCvar('g_camDistanceMin'):Set('250.0') Cvar.GetCvar('g_camDistanceMaxSpectator'):Set('5000.0')"
+						/>
+
+						<panel height="2.0h" noclick="1" >
+							<instance name="test_suite_checkbox" font="dyn_8" checkbox="test_server_max_hpmp" width="39%" content="test_server_max_hpmp"
+								onenablelua="
+									Cvar.GetCvar('hero_hpPerStr'):Set('250')
+									Cvar.GetCvar('hero_mpPerInt'):Set('250')
+								"
+								ondisablelua="
+									Cvar.GetCvar('hero_hpPerStr'):Reset()
+									Cvar.GetCvar('hero_mpPerInt'):Reset()
+								"
+							/>
+							<instance name="test_suite_checkbox" font="dyn_8" checkbox="test_server_max_attackspeed" width="59%" align="right" content="test_server_max_attackspeed"
+								onenablelua="Cvar.GetCvar('hero_attackSpeedPerAgi'):Set('250')"
+								ondisablelua="Cvar.GetCvar('hero_attackSpeedPerAgi'):Reset()"
+							/>
+						</panel>
+
+						<panel height="2.0h" noclick="1" >
+							<instance name="test_suite_checkbox" font="dyn_8" checkbox="test_server_max_regen" width="44%" content="test_server_max_regen"
+								onenablelua="
+									Cvar.GetCvar('hero_hpRegenPerStr'):Set('250')
+									Cvar.GetCvar('hero_mpRegenPerInt'):Set('250')
+								"
+								ondisablelua="
+									Cvar.GetCvar('hero_hpRegenPerStr'):Reset()
+									Cvar.GetCvar('hero_mpRegenPerInt'):Reset()
+								"
+							/>
+							<instance name="test_suite_checkbox" font="dyn_8" checkbox="test_server_max_movespeed" width="54%" align="right" content="test_server_max_movespeed"
+								onenablelua="Cvar.GetCvar('g_unitMoveSpeedMin'):Set('2500')"
+								ondisablelua="Cvar.GetCvar('g_unitMoveSpeedMin'):Reset()"
+							/>
+						</panel>
+
+						<panel height="2" noclick="1" float="bottom">
+							<panel height="1" width="+0.75h" align="center" color="0.6 0.6 0.6 0.8" noclick="1" />
+							<panel height="1" width="+0.75h" align="center" color="0.4 0.4 0.4 0.8" noclick="1" />
+						</panel>
+
+						<label height="1.5h" font="dyn_10" shadow="1" color="white" textalign="center" textvalign="center" content="test_server_game_speed" noclick="1" />
+
+						<panel height="2.0h" noclick="1" >
+							<panel grow="1" float="right" height="100%" align="center" padding="1" >
+								<instance name="test_suite_button" button="server_speed_10" font="dyn_7" content="10%"
+									onclicklua="Cvar.GetCvar('host_timeScale'):Set('0.1')"
+								/>
+								<instance name="test_suite_button" button="server_speed_25" font="dyn_7" content="25%"
+									onclicklua="Cvar.GetCvar('host_timeScale'):Set('0.25')"
+								/>
+								<instance name="test_suite_button" button="server_speed_50" font="dyn_7" content="50%"
+									onclicklua="Cvar.GetCvar('host_timeScale'):Set('0.5')"
+								/>
+								<instance name="test_suite_button" button="server_speed_100" font="dyn_7" content="100%"
+									onclicklua="Cvar.GetCvar('host_timeScale'):Set('1.0')"
+								/>
+								<instance name="test_suite_button" button="server_speed_200" font="dyn_7" content="200%"
+									onclicklua="Cvar.GetCvar('host_timeScale'):Set('2.0')"
+								/>
+								<instance name="test_suite_button" button="server_speed_500" font="dyn_7" content="500%"
+									onclicklua="Cvar.GetCvar('host_timeScale'):Set('5.0')"
+								/>
+								<instance name="test_suite_button" button="server_speed_MAX" font="dyn_7" content="test_server_max"
+									onclicklua="Cvar.GetCvar('host_timeScale'):Set('100.0')"
+								/>
+							</panel>
+						</panel>
+
+						<label height="1.5h" font="dyn_10" shadow="1" color="white" textalign="center" textvalign="center" content="test_server_time" noclick="1" />
+
+						<panel height="2.0h" noclick="1" >
+							<panel grow="1" float="right" height="100%" align="center" padding="1" >
+								<instance name="test_suite_button" button="server_time_5s" font="dyn_9" content="+5s"
+									onclicklua="Testing.AdjustServerTime(5000)"
+								/>
+								<instance name="test_suite_button" button="server_time_10s" font="dyn_9" content="+10s"
+									onclicklua="Testing.AdjustServerTime(10000)"
+								/>
+								<instance name="test_suite_button" button="server_time_30s" font="dyn_9" content="+30s"
+									onclicklua="Testing.AdjustServerTime(30000)"
+								/>
+								<instance name="test_suite_button" button="server_time_1m" font="dyn_9" content="+1m"
+									onclicklua="Testing.AdjustServerTime(60000)"
+								/>
+								<instance name="test_suite_button" button="server_time_5m" font="dyn_9" content="+5m"
+									onclicklua="Testing.AdjustServerTime(300000)"
+								/>
+								<instance name="test_suite_button" button="server_time10m" font="dyn_9" content="+10m"
+									onclicklua="Testing.AdjustServerTime(600000)"
+								/>
+							</panel>
+						</panel>
+
+						<panel height="2.0h" noclick="1" >
+							<instance name="test_suite_checkbox" checkbox="test_server_game_pause" showcheck="false" width="49%" content="test_server_pause"
+								onenablelua="Testing.SetServerPause(true)"
+								ondisablelua="Testing.SetServerPause(false)"
+							/>
+							<instance name="test_suite_checkbox" checkbox="test_server_day_freeze" showcheck="false" width="49%" align="right" content="test_server_day_freeze"
+								onenablelua="Testing.PauseDayNightCycle(true)"
+								ondisablelua="Testing.PauseDayNightCycle(false)"
+							/>
+						</panel>
+
+						<panel height="2.0h" noclick="1" >
+							<instance name="test_suite_button" button="server_push_daynight" width="49%" content="test_server_advanced_dawn" font="dyn_8"
+								onclicklua="Testing.SetTimeOfDawn(Testing.GetTimeOfDawn() + (Cvar.GetCvar('g_dayLength'):GetNumber() / 25.0))"
+							/>
+							<instance name="test_suite_button" button="server_toggle_daynight" width="49%" align="right" content="test_server_day_toggle" font="dyn_8"
+								onclicklua="Testing.ToggleDayNight()"
+							/>
+						</panel>
+						
+						<panel height="2" noclick="1" float="bottom">
+							<panel height="1" width="+0.75h" align="center" color="0.6 0.6 0.6 0.8" noclick="1" />
+							<panel height="1" width="+0.75h" align="center" color="0.4 0.4 0.4 0.8" noclick="1" />
+						</panel>
+
+						<instance name="test_suite_input" textbox="test_server_replay_name" height="2h" inputline="unnamedReplay"
+							onenterlua="
+								local recordButton = TestSuite.GetWidget('test_server_replay_record')
+								local state = recordButton:GetButtonState()
+								if (state == 0) then
+									recordButton:SetButtonState(1)
+									recordButton:DoEvent()
+								end
+							"
+						/>
+						<instance name="test_suite_checkbox" checkbox="test_server_replay_record" height="2h" width="100%" content="test_server_replay_record" showcheck="0"
+							onenablelua="
+								GameMessage(Translate('test_server_record_start'))
+								Cvar.CreateCvar('cg_replayPrecacheAll', 'bool', 'true')
+								Testing.ReplayRecordStart(TestSuite.AppendDateTime(TestSuite.GetWidget('test_server_replay_name'):GetValue(), '.honreplay'))
+							"
+							ondisablelua="
+								GameMessage(Translate('test_server_record_end'))
+								Testing.ReplayRecordStop()
+							"
+						/>
+
+						<panel height="2" noclick="1" float="bottom">
+							<panel height="1" width="+0.75h" align="center" color="0.6 0.6 0.6 0.8" noclick="1" />
+							<panel height="1" width="+0.75h" align="center" color="0.4 0.4 0.4 0.8" noclick="1" />
+						</panel>
+
+						<panel height="2.0h" noclick="1" >
+							<instance name="test_suite_button" button="server_entity_spawner" width="49%" content="test_server_entities"
+								onclicklua="TestSuite.GetWidget('test_suite_basic_spawner'):ToggleVisible()"
+							/>
+							<instance name="test_suite_button" button="server_item_spawner" width="49%" align="right" content="test_server_items"
+								onclicklua="TestSuite.GetWidget('test_suite_basic_items'):ToggleVisible()"
+							/>
+						</panel>
+					</panel>
+				</panel>
+
+				<!-- padding -->
+				<panel height="0.5h" width="100%" noclick="1" />
+			</panel>
+		</panel>
+	</template>
+
+	<template name="test_suite_basic_items" >
+		<panel name="test_suite_basic_items" width="30h" x="35h" valign="center" cangrab="1" visible="0" grow="1" regrow="1"
+			onclicklua="self:BringToFront()"
+			onshowlua="self:BringToFront()"
+		>
+			<frame texture="/ui/test_suite/images/rounded_bg_white.tga" borderthickness="0.6h" color="0.2 0.2 0.2 0.9" noclick="1" />
+			<frame texture="/ui/test_suite/images/roundframe.tga" borderthickness="0.6h" bordercolor="0 0 0 0.9" noclick="1" />
+
+			<panel float="bottom" width="100%" grow="1" regrow="1" noclick="1" >
+				<!-- Title -->
+				<panel height="3h" noclick="1" >
+					<!-- Grab/Drag using this -->
+					<panel name="test_server_basic_items_title_bar" clip="1" noclick="1" >
+						<frame texture="/ui/test_suite/images/rounded_bg_white.tga" height="+0.6h" borderthickness="0.6h" color="0.1 0.1 0.1 0.5" noclick="1" />
+					</panel>
+
+					<label font="dyn_16" color="white" textvalign="center" x="0.5h" shadow="1" content="test_suite_title_items" noclick="1" />
+
+					<panel align="right" x="-12.5@" grow="1" height="75%" valign="center" noclick="1" >
+						<instance name="test_suite_button" button="close_server_basic_items" icon="/ui/test_suite/images/close_button.tga" upColor="#E81A1A" overColor="#FF5757" downColor="#BA1111"
+							onclicklua="TestSuite.GetWidget('test_suite_basic_items'):SetVisible(0)"
+						/>
+					</panel>
+
+					<panel height="1" valign="bottom" color="0 0 0 0.5" />
+				</panel>
+
+				<!-- padding -->
+				<panel height="2" noclick="1" />
+
+				<!-- Body -->
+				<panel width="100%" valign="bottom" grow="1" regrow="1" >
+					<panel width="96%" align="center" float="bottom" padding="0.4h" grow="1" regrow="1" >
+						<instance name="test_suite_input" textbox="test_server_basic_item_search" height="2h"
+							onshowlua="self:DoEvent() self:SetFocus(true)"
+							onchangelua="self:Sleep(250, function(self) self:DoEvent() end)"
+							onenterlua="TestSuite.PopulateBasicItemList(self:GetValue())"
+						/>
+						<panel height="2h" noclick="1" >
+							<instance name="test_suite_checkbox" checkbox="test_server_items_replace_names" width="49%" content="test_server_replace_names" cvar="ui_testSuiteReplaceItemNames"
+								onclicklua="TestSuite.PopulateBasicItemList(TestSuite.GetWidget('test_server_basic_item_search'):GetValue())"
+							/>
+							<instance name="test_suite_button" button="server_refresh_items" align="right" width="49%" content="test_server_refresh_items"
+								onclicklua="
+									TestSuite.ForceItemCacheRebuild()
+									TestSuite.PopulateBasicItemList(TestSuite.GetWidget('test_server_basic_item_search'):GetValue())
+								"
+							/>
+						</panel>
+						<instance name="test_suite_listbox" listbox="client_server_basic_item_list" height="27.5h" itemheight="3h"
+							onclicklua="
+								local item = self:GetValue()
+								TestSuite.GetWidget('test_server_basic_item_search'):SetFocus(false)
+								TestSuite.DoSelectedUnits(function(unit) Testing.GiveItem(unit, item) end)
+							"
+						/>
+						<instance name="test_suite_button" button="server_item_sell" width="100%" content="test_server_sell_items" height="2.5h"
+							onclicklua="for i=0,5 do Sell(GetInventoryStartBackpack() + i) end"
+						/>
+					</panel>
+				</panel>
+
+				<!-- padding -->
+				<panel height="0.5h" width="100%" noclick="1" />
+			</panel>
+		</panel>
+	</template>
+
+	<template name="test_suite_basic_spawner" >
+		<panel name="test_suite_basic_spawner" width="55h" x="35h" valign="center" cangrab="1" visible="0" grow="1" regrow="1"
+			onclicklua="self:BringToFront()"
+			onshowlua="self:BringToFront()"
+		>
+			<frame texture="/ui/test_suite/images/rounded_bg_white.tga" borderthickness="0.6h" color="0.2 0.2 0.2 0.9" noclick="1" />
+			<frame texture="/ui/test_suite/images/roundframe.tga" borderthickness="0.6h" bordercolor="0 0 0 0.9" noclick="1" />
+
+			<panel width="100%" noclick="1" grow="1" regrow="1" float="bottom" >
+				<!-- Title -->
+				<panel height="3h" noclick="1" >
+					<!-- Grab/Drag using this -->
+					<panel name="test_server_basic_spawner_title_bar" clip="1" noclick="1" >
+						<frame texture="/ui/test_suite/images/rounded_bg_white.tga" height="+0.6h" borderthickness="0.6h" color="0.1 0.1 0.1 0.5" noclick="1" />
+					</panel>
+
+					<label font="dyn_16" color="white" textvalign="center" x="0.5h" shadow="1" content="test_suite_title_spawner" noclick="1" />
+
+					<panel align="right" x="-12.5@" grow="1" height="75%" valign="center" noclick="1" >
+						<instance name="test_suite_button" button="close_server_basic_spawner" icon="/ui/test_suite/images/close_button.tga" upColor="#E81A1A" overColor="#FF5757" downColor="#BA1111"
+							onclicklua="TestSuite.GetWidget('test_suite_basic_spawner'):SetVisible(0)"
+						/>
+					</panel>
+
+					<panel height="1" valign="bottom" color="0 0 0 0.5" />
+				</panel>
+
+				<!-- padding -->
+				<panel height="2" width="100%" noclick="1" />
+
+				<!-- Body -->
+				<panel width="100%" valign="bottom" grow="1" regrow="1" >
+					<panel width="98%" align="center" float="bottom" padding="0.35h" grow="1" regrow="1" >
+						<panel height="2h" noclick="1" >
+							<instance name="test_suite_input" textbox="test_server_basic_spawner_search" width="50.5%"
+								onshowlua="self:DoEvent() self:SetFocus(true)"
+								onchangelua="self:Sleep(250, function(self) self:DoEvent() end)"
+								onenterlua="TestSuite.PopulateSpawnerList(self:GetValue())"
+							/>
+
+							<instance name="test_suite_checkbox" checkbox="test_server_spawner_replace_names" x="-24.5%" width="24%" align="right" content="test_server_replace_names" cvar="ui_testSuiteReplaceEntityNames"
+								onclicklua="TestSuite.PopulateSpawnerList(TestSuite.GetWidget('test_server_basic_spawner_search'):GetValue())"
+							/>
+
+							<instance name="test_suite_button" button="server_spawner_refresh" width="24%" align="right" content="test_server_refresh_entities"
+								onclicklua="
+									TestSuite.ForceEntityCacheRebuild()
+									TestSuite.PopulateSpawnerList(TestSuite.GetWidget('test_server_basic_spawner_search'):GetValue())
+								"
+							/>
+						</panel>
+
+						<instance name="test_suite_listbox" listbox="client_server_basic_spawner_list" height="30.5h" itemheight="3h"
+							onclicklua="
+								TestSuite.GetWidget('test_server_basic_spawner_search'):SetFocus(false)
+								if (string.len(TestSuite.GetWidget('client_server_basic_spawner_list'):GetValue()) > 0) then
+									StartClickPosCallback(function(posX, posY) TestSuite.BasicSpawnerSpawn(posX, posY) end)
+								end
+							"
+						/>
+
+						<panel height="2.0h" float="right" padding="0.25h" >
+							<label font="dyn_10" color="white" shadow="1" fitx="1" fitxpadding="1.0h" textvalign="center" content="test_server_team" noclick="1" />
+							<instance name="test_suite_checkbox" checkbox="test_server_spawn_team1" content="test_server_team1" startenabled="1" radiogroup="test_server_basic_spawner_team"
+								onclicklua="
+									TestSuite.GetWidget('test_server_basic_spawner_search'):SetFocus(false)
+									if (string.len(TestSuite.GetWidget('client_server_basic_spawner_list'):GetValue()) > 0) then
+										StartClickPosCallback(function(posX, posY) TestSuite.BasicSpawnerSpawn(posX, posY) end)
+									end
+								"
+							/>
+							<instance name="test_suite_checkbox" checkbox="test_server_spawn_team2" content="test_server_team2" radiogroup="test_server_basic_spawner_team"
+								onclicklua="
+									TestSuite.GetWidget('test_server_basic_spawner_search'):SetFocus(false)
+									if (string.len(TestSuite.GetWidget('client_server_basic_spawner_list'):GetValue()) > 0) then
+										StartClickPosCallback(function(posX, posY) TestSuite.BasicSpawnerSpawn(posX, posY) end)
+									end
+								"
+							/>
+							<instance name="test_suite_checkbox" checkbox="test_server_spawn_team_passive" content="test_server_team_passive" radiogroup="test_server_basic_spawner_team"
+								onclicklua="
+									TestSuite.GetWidget('test_server_basic_spawner_search'):SetFocus(false)
+									if (string.len(TestSuite.GetWidget('client_server_basic_spawner_list'):GetValue()) > 0) then
+										StartClickPosCallback(function(posX, posY) TestSuite.BasicSpawnerSpawn(posX, posY) end)
+									end
+								"
+							/>
+							<instance name="test_suite_checkbox" checkbox="test_server_spawn_team_neutral" content="test_server_team_neutral" radiogroup="test_server_basic_spawner_team"
+								onclicklua="
+									TestSuite.GetWidget('test_server_basic_spawner_search'):SetFocus(false)
+									if (string.len(TestSuite.GetWidget('client_server_basic_spawner_list'):GetValue()) > 0) then
+										StartClickPosCallback(function(posX, posY) TestSuite.BasicSpawnerSpawn(posX, posY) end)
+									end
+								"
+							/>
+						</panel>
+
+						<panel height="2.0h" float="right" padding="0.25h" >
+							<label font="dyn_10" color="white" shadow="1" fitx="1" fitxpadding="1.0h" textvalign="center" content="test_server_owner" noclick="1" />
+							<instance name="test_suite_checkbox" checkbox="test_server_spawner_self_own" content="test_server_spawner_self_own" startenabled="1" radiogroup="test_server_spanwer_ownership"
+								onclicklua="
+									if (string.len(TestSuite.GetWidget('client_server_basic_spawner_list'):GetValue()) > 0) then
+										StartClickPosCallback(function(posX, posY) TestSuite.BasicSpawnerSpawn(posX, posY) end)
+									end
+								"
+							/>
+							<instance name="test_suite_checkbox" checkbox="test_server_spawner_ally_own" content="test_server_spawner_ally_own" radiogroup="test_server_spanwer_ownership"
+								onclicklua="
+									if (string.len(TestSuite.GetWidget('client_server_basic_spawner_list'):GetValue()) > 0) then
+										StartClickPosCallback(function(posX, posY) TestSuite.BasicSpawnerSpawn(posX, posY) end)
+									end
+								"
+							/>
+							<instance name="test_suite_checkbox" checkbox="test_server_spawner_enemy_own" content="test_server_spawner_enemy_own" radiogroup="test_server_spanwer_ownership"
+								onclicklua="
+									if (string.len(TestSuite.GetWidget('client_server_basic_spawner_list'):GetValue()) > 0) then
+										StartClickPosCallback(function(posX, posY) TestSuite.BasicSpawnerSpawn(posX, posY) end)
+									end
+								"
+							/>
+							<instance name="test_suite_checkbox" checkbox="test_server_spawner_unowned" content="test_server_spawner_unowned" radiogroup="test_server_spanwer_ownership"
+								onclicklua="
+									if (string.len(TestSuite.GetWidget('client_server_basic_spawner_list'):GetValue()) > 0) then
+										StartClickPosCallback(function(posX, posY) TestSuite.BasicSpawnerSpawn(posX, posY) end)
+									end
+								"
+							/>
+						</panel>
+
+						<panel height="2.0h" noclick="1" >
+							<panel float="right" noclick="1" padding="0.25h" >
+								<instance name="test_suite_checkbox" checkbox="test_server_spawner_hold" content="test_server_spawner_hold" font="dyn_8" startenabled="1"
+									onclicklua="
+										if (string.len(TestSuite.GetWidget('client_server_basic_spawner_list'):GetValue()) > 0) then
+											StartClickPosCallback(function(posX, posY) TestSuite.BasicSpawnerSpawn(posX, posY) end)
+										end
+									"
+								/>
+								<instance name="test_suite_checkbox" checkbox="test_server_spawner_alts" content="test_server_spawner_alts" font="dyn_8"
+									onclicklua="
+										if (string.len(TestSuite.GetWidget('client_server_basic_spawner_list'):GetValue()) > 0) then
+											StartClickPosCallback(function(posX, posY) TestSuite.BasicSpawnerSpawn(posX, posY) end)
+										end
+									"
+								/>
+							</panel>
+
+							<instance name="test_suite_button" button="server_spawner_spawn" align="right" width="35%" content="test_server_spawn"
+								onclicklua="
+									if (string.len(TestSuite.GetWidget('client_server_basic_spawner_list'):GetValue()) > 0) then
+										StartClickPosCallback(function(posX, posY) TestSuite.BasicSpawnerSpawn(posX, posY) end)
+									end
+								"
+							/>
+						</panel>
+					</panel>
+				</panel>
+
+				<!-- padding -->
+				<panel height="0.5h" width="100%" noclick="1" />
+			</panel>
+		</panel>
+	</template>
+	<!-- End Server (Basic) Test Functionality -->
+
+	<!-- Server (Advanced) Test Functionality -->
+	<template name="test_suite_server_advanced" >
+		<panel name="test_suite_server_advanced_auto_refresh" noclick="1" />
+		<panel name="test_suite_server_advanced_track_modifiers" noclick="1" />
+		<panel name="test_suite_server_advanced_track_possible_modifiers" noclick="1" />
+		<panel name="test_suite_server_advanced_track_global_modifiers" noclick="1" />
+		<panel name="test_suite_server_advanced_track_states" noclick="1" />
+
+		<panel name="test_suite_server_advanced" width="75h" height="45h" align="center" valign="center" cangrab="1" visible="0"
+			onclicklua="self:BringToFront()"
+			onshowlua="self:BringToFront()"
+		>
+			<frame texture="/ui/test_suite/images/rounded_bg_white.tga" borderthickness="0.6h" color="0.2 0.2 0.2 0.9" noclick="1" />
+			<frame texture="/ui/test_suite/images/roundframe.tga" borderthickness="0.6h" bordercolor="0 0 0 0.9" noclick="1" />
+
+			<!-- Tab Bodies -->
+			<panel height="93.58%" valign="bottom" >
+				<panel name="test_suite_server_entities" group="test_suite_server_advanced_tabs" visible="1" noclick="1" >
+					<panel width="-1.5h" height="-1.5h" align="center" valign="center" >
+						<panel width="31.5%" noclick="1" float="bottom" padding="0.35h" >
+							<panel height="2h" noclick="1" >
+								<label font="dyn_14" color="white" shadow="1" fitx="1" textvalign="center" content="test_server_units_title" />
+								<instance name="test_suite_tip" tip="server_entity_units" align="right" width="100@" content="test_server_entity_tip" />
+
+								<instance name="test_suite_checkbox" checkbox="test_server_adv_all_units" align="right" x="-110@" content="test_server_all_units" startenabled="0" />
+							</panel>
+
+							<panel height="2h" noclick="1" >
+								<instance name="test_suite_keybind" keybind="server_refresh" fitbind="1" bindtable="game" font="dyn_6" action="Cmd" param="Refresh #GetSelectedEntity()#" />
+								<instance name="test_suite_button" button="server_refresh_adv" height="2h" width="-5h" align="right" content="test_server_refresh"
+									onclicklua="TestSuite.DoSelectedUnitsAdvanced(function(unit) Testing.Refresh(unit) end)"
+								/>
+							</panel>
+
+							<panel height="2.0h" noclick="1" >
+								<panel width="49%" noclick="1" >
+									<instance name="test_suite_keybind" keybind="server_kill" fitbind="1" font="dyn_6" bindtable="game" action="Cmd" param="Kill #GetSelectedEntity()#" />
+									<instance name="test_suite_button" button="server_adv_kill" width="-5h" align="right" content="test_server_kill"
+										onclicklua="TestSuite.DoSelectedUnitsAdvanced(function(unit) Testing.Kill(unit) end)"
+									/>
+								</panel>
+								<instance name="test_suite_button" button="server_adv_delete" align="right" width="49%" content="test_server_delete"
+									onclicklua="TestSuite.DoSelectedUnitsAdvanced(function(unit) Testing.Delete(unit) end)"
+								/>
+							</panel>
+
+							<panel height="2.0h" noclick="1" >
+								<instance name="test_suite_button" button="server_adv_clear_charges" width="49%" content="test_server_clear_charges"
+									onclicklua="TestSuite.DoSelectedUnitsAdvanced(function(unit) Testing.ClearToolCharges(unit) end)"
+								/>
+								<instance name="test_suite_button" button="server_adv_max_charges" width="49%" align="right" content="test_server_max_charges"
+									onclicklua="TestSuite.DoSelectedUnitsAdvanced(function(unit) Testing.MaxToolCharges(unit) end)"
+								/>
+							</panel>
+
+							<panel height="2.0h" noclick="1" >
+								<label font="dyn_10" color="white" shadow="1" noclick="1" textvalign="center" content="test_server_level" />
+								<panel grow="1" regrow="1" float="right" align="right" height="100%" padding="0.25h" >
+									<instance name="test_suite_button" button="server_adv_level_up" width="100@" content="+"
+										onclicklua="TestSuite.DoSelectedUnitsAdvanced(function(unit) Testing.LevelUp(unit) end)"
+									/>
+									<instance name="test_suite_button" button="server_adv_level_reset" width="100@" content="test_server_reset"
+										onclicklua="TestSuite.DoSelectedUnitsAdvanced(function(unit) Testing.ResetExperience(unit) end)"
+									/>
+									<instance name="test_suite_button" button="server_adv_level_max" width="100@" content="test_server_max"
+										onclicklua="TestSuite.DoSelectedUnitsAdvanced(function(unit) Testing.LevelMax(unit) end)"
+									/>
+								</panel>
+							</panel>
+
+							<panel height="2.0h" noclick="1" >
+								<label font="dyn_10" color="white" shadow="1" noclick="1" textvalign="center" content="test_server_exp" />
+								<instance name="test_suite_input" textbox="test_server_adv_exp_amount" x="-3.25h" width="-10h" align="right" inputline="150" taborder="9031"
+									onenterlua="TestSuite.DoSelectedUnitsAdvanced(function(unit) Testing.GiveExperience(unit, self:GetValue()) end)"
+								/>
+								<instance name="test_suite_button" button="server_adv_exp" align="right" width="100@" content="+"
+									onclicklua="TestSuite.DoSelectedUnitsAdvanced(function(unit) Testing.GiveExperience(unit, TestSuite.GetWidget('test_server_adv_exp_amount'):GetValue()) end)"
+								/>
+							</panel>
+
+							<panel height="2.0h" noclick="1" >
+								<label font="dyn_10" color="white" shadow="1" noclick="1" textvalign="center" content="test_server_add_lifetime" />
+								<instance name="test_suite_input" textbox="test_server_adv_lifetime_amount" x="-3.25h" width="-12h" align="right" inputline="5000" taborder="9032"
+									onenterlua="TestSuite.DoSelectedUnitsAdvanced(function(unit) Testing.AddLifetime(unit, self:GetValue()) end)"
+								/>
+								<instance name="test_suite_button" button="server_adv_lifetime" align="right" width="100@" content="+"
+									onclicklua="TestSuite.DoSelectedUnitsAdvanced(function(unit) Testing.AddLifetime(unit, TestSuite.GetWidget('test_server_adv_lifetime_amount'):GetValue()) end)"
+								/>
+							</panel>
+
+							<label font="dyn_11" height="1.5h" color="white" shadow="1" textvalign="center" textalign="center" content="test_server_set_team" noclick="1" />
+							<panel height="2h" noclick="1" >
+								<panel grow="1" height="100%" float="right" padding="0.25h" noclick="1" align="center" >
+									<instance name="test_suite_button" button="server_set_team1" content="test_server_team1" font="dyn_8"
+										onclicklua="TestSuite.DoSelectedUnitsAdvanced(function(unit) Testing.SetEntityTeam(unit, 1) end)"
+									/>
+									<instance name="test_suite_button" button="server_set_team2" content="test_server_team2" font="dyn_8"
+										onclicklua="TestSuite.DoSelectedUnitsAdvanced(function(unit) Testing.SetEntityTeam(unit, 2) end)"
+									/>
+									<instance name="test_suite_button" button="server_set_team_passive" content="test_server_team_passive" font="dyn_8"
+										onclicklua="TestSuite.DoSelectedUnitsAdvanced(function(unit) Testing.SetEntityTeam(unit, -1) end)"
+									/>
+									<instance name="test_suite_button" button="server_set_team_neutral" content="test_server_team_neutral" font="dyn_8"
+										onclicklua="TestSuite.DoSelectedUnitsAdvanced(function(unit) Testing.SetEntityTeam(unit, -2) end)"
+									/>
+								</panel>
+							</panel>
+
+							<panel height="2.0h" noclick="1" >
+								<instance name="test_suite_button" button="server_adv_set_owner" align="left" content="test_server_set_owner"
+									onclicklua="TestSuite.DoSelectedUnitsAdvanced(function(unit) Testing.SetEntityOwner(unit, TestSuite.GetWidget('test_server_adv_owner'):GetValue()) end)"
+								/>
+
+								<instance name="test_suite_input" textbox="test_server_adv_owner" width="14h" align="right" inputline="-1" taborder="9033"
+									onenterlua="TestSuite.DoSelectedUnitsAdvanced(function(unit) Testing.SetEntityOwner(unit, self:GetValue()) end)"
+								/>
+							</panel>
+
+							<panel height="2.0h" noclick="1" >
+								<instance name="test_suite_button" button="server_adv_damage" align="left" content="test_server_damage"
+									onclicklua="TestSuite.DoSelectedUnitsAdvanced(function(unit) Testing.DamageEntity(unit, TestSuite.GetWidget('test_server_adv_damage'):GetValue()) end)"
+								/>
+
+								<instance name="test_suite_input" textbox="test_server_adv_damage" width="14h" align="right" inputline="100" taborder="9034"
+									onenterlua="TestSuite.DoSelectedUnitsAdvanced(function(unit) Testing.DamageEntity(unit, self:GetValue()) end)"
+								/>
+							</panel>
+
+							<panel height="2.0h" noclick="1" >
+								<instance name="test_suite_button" button="server_adv_stun" align="left" content="test_server_stun"
+									onclicklua="TestSuite.DoSelectedUnitsAdvanced(function(unit) Testing.Stun(unit, TestSuite.GetWidget('test_server_adv_stun'):GetValue()) end)"
+								/>
+
+								<instance name="test_suite_input" textbox="test_server_adv_stun" width="14h" align="right" inputline="5000" taborder="9035"
+									onenterlua="TestSuite.DoSelectedUnitsAdvanced(function(unit) Testing.Stun(unit, self:GetValue()) end)"
+								/>
+							</panel>
+
+							<panel height="2.0h" noclick="1" >
+								<instance name="test_suite_button" button="server_adv_silence" align="left" content="test_server_silence"
+									onclicklua="TestSuite.DoSelectedUnitsAdvanced(function(unit) Testing.Silence(unit, TestSuite.GetWidget('test_server_adv_silence'):GetValue()) end)"
+								/>
+
+								<instance name="test_suite_input" textbox="test_server_adv_silence" width="14h" align="right" inputline="5000" taborder="9036"
+									onenterlua="TestSuite.DoSelectedUnitsAdvanced(function(unit) Testing.Silence(unit, self:GetValue()) end)"
+								/>
+							</panel>
+
+							<panel height="2.0h" noclick="1" >
+								<instance name="test_suite_button" button="server_adv_fear" align="left" content="test_server_fear"
+									onclicklua="TestSuite.DoSelectedUnitsAdvanced(function(unit) Testing.Fear(unit, TestSuite.GetWidget('test_server_adv_fear'):GetValue()) end)"
+								/>
+
+								<instance name="test_suite_input" textbox="test_server_adv_fear" width="14h" align="right" inputline="5000" taborder="9037"
+									onenterlua="TestSuite.DoSelectedUnitsAdvanced(function(unit) Testing.Fear(unit, self:GetValue()) end)"
+								/>
+							</panel>
+						</panel>
+
+						<panel width="2" x="32.25%" height="80%" noclick="1" float="right">
+							<panel width="1" height="98%" valign="center" color="0.6 0.6 0.6 0.8" noclick="1" />
+							<panel width="1" height="98%" valign="center" color="0.4 0.4 0.4 0.8" noclick="1" />
+						</panel>
+
+						<panel x="-34%" width="33%" align="right" float="bottom" padding="0.35h" grow="1" >
+							<panel height="2h" noclick="1" >
+								<panel align="center" height="100%" noclick="1" grow="1" float="right" padding="0.5h" >
+									<label font="dyn_12" color="white" shadow="1" fitx="1" textvalign="center" content="test_server_auto_refresh_list" />
+									<instance name="test_suite_tip" tip="server_entity_refresh_list" width="100@" content="test_server_refresh_list_tip" />
+								</panel>
+							</panel>
+
+							<instance name="test_suite_listbox" listbox="test_server_auto_refresh_list" height="25h" valign="center" itemheight="2.75h" />
+
+							<panel height="2h" noclick="1" valign="bottom" >
+								<instance name="test_suite_button" button="server_add_auto_refresh" width="49%" content="test_server_add_entity" font="dyn_10"
+									onclicklua="TestSuite.AddRefreshListEntities(Testing.GetSelectedEntities())"
+								/>
+								<instance name="test_suite_button" button="server_clear_auto_refresh" width="49%" align="right" content="test_server_clear_list" font="dyn_10"
+									onclicklua="TestSuite.ClearRefreshList()"
+								/>
+							</panel>
+
+							<panel height="2h" noclick="1" valign="bottom" >
+								<instance name="test_suite_button" button="server_remove_list_auto_refresh" width="49%" content="test_server_remove_entity" font="dyn_10"
+									onclicklua="TestSuite.RemoveRefreshListEntities(tonumber(TestSuite.GetWidget('test_server_auto_refresh_list'):GetValue()))"
+								/>
+								<instance name="test_suite_button" button="server_remove_game_auto_refresh" width="49%" align="right" content="test_server_remove_selected" font="dyn_10"
+									onclicklua="TestSuite.RemoveRefreshListEntities(Testing.GetSelectedEntities())"
+								/>
+							</panel>
+						</panel>
+
+						<panel width="33%" align="right" float="bottom" padding="0.35h" grow="1" >
+							<panel height="2h" noclick="1" >
+								<panel align="center" height="100%" noclick="1" grow="1" float="right" padding="0.5h" >
+									<label font="dyn_12" color="white" shadow="1" fitx="1" textvalign="center" content="test_server_entity_action_list" />
+									<instance name="test_suite_tip" tip="server_entity_action_list" width="100@" content="test_server_action_list_tip" />
+								</panel>
+							</panel>
+
+							<instance name="test_suite_listbox" listbox="test_server_entity_action_list" height="25h" valign="center" itemheight="2.75h" />
+
+							<panel height="2h" noclick="1" valign="bottom" >
+								<instance name="test_suite_button" button="server_add_entity_action" width="49%" content="test_server_add_entity" font="dyn_10"
+									onclicklua="TestSuite.AddActionListEntities(Testing.GetSelectedEntities())"
+								/>
+								<instance name="test_suite_button" button="server_clear_entity_action" width="49%" align="right" content="test_server_clear_list" font="dyn_10"
+									onclicklua="TestSuite.ClearActionList()"
+								/>
+							</panel>
+
+							<panel height="2h" noclick="1" valign="bottom" >
+								<instance name="test_suite_button" button="server_remove_list_entity_action" width="49%" content="test_server_remove_entity" font="dyn_10"
+									onclicklua="TestSuite.RemoveActionListEntities(tonumber(TestSuite.GetWidget('test_server_entity_action_list'):GetValue()))"
+								/>
+								<instance name="test_suite_button" button="server_remove_game_entity_action" width="49%" align="right" content="test_server_remove_selected" font="dyn_10"
+									onclicklua="TestSuite.RemoveActionListEntities(Testing.GetSelectedEntities())"
+								/>
+							</panel>
+						</panel>
+
+						<panel width="100%" valign="bottom" align="right" height="20%" noclick="1" float="bottom" padding="0.25h" >
+							<panel height="0.3h" noclick="1" float="bottom">
+								<panel height="1" color="0.6 0.6 0.6 0.8" noclick="1" />
+								<panel height="1" color="0.4 0.4 0.4 0.8" noclick="1" />
+							</panel>
+
+							<panel height="5h" noclick="1" >
+								<panel width="50%" noclick="1" float="bottom" padding="0.5h"  >
+									<panel height="2.0h" noclick="1" float="right" padding="1h" >
+										<panel float="right" padding="0.35h" noclick="1" height="100%" grow="1" >
+											<instance name="test_suite_button" button="server_adv_set_pos" content="test_server_set_position"
+												onclicklua="
+													TestSuite.DoSelectedUnitsAdvanced(function(unit)
+														Testing.SetPosition(
+															unit,
+															TestSuite.GetWidget('test_server_pos_x'):GetValue(),
+															TestSuite.GetWidget('test_server_pos_y'):GetValue()
+														)
+													end)
+												"
+											/>
+											<instance name="test_suite_tip" tip="server_adv_set_pos" width="100@" content="test_server_set_position_tip" />
+										</panel>
+
+										<panel float="right" padding="0.35h" noclick="1" height="100%" grow="1" >
+											<instance name="test_suite_button" button="server_adv_move" width="27%" content="test_server_order_move"
+												onclicklua="
+													TestSuite.DoSelectedUnitsAdvanced(function(unit)
+														Testing.OrderMove(
+															unit,
+															TestSuite.GetWidget('test_server_pos_x'):GetValue(),
+															TestSuite.GetWidget('test_server_pos_y'):GetValue(),
+															TestSuite.CheckboxEnabled('test_server_direct_path')
+														)
+													end)
+												"
+											/>
+											<instance name="test_suite_tip" tip="server_adv_move" width="100@" content="test_server_order_move_tip" />
+										</panel>
+
+										<panel float="right" padding="0.35h" noclick="1" height="100%" grow="1" >
+											<instance name="test_suite_button" button="server_adv_attack" width="27%" content="test_server_order_attack"
+												onclicklua="
+													TestSuite.DoSelectedUnitsAdvanced(function(unit)
+														Testing.OrderAttack(
+															unit,
+															TestSuite.GetWidget('test_server_target_id'):GetValue(),
+															TestSuite.CheckboxEnabled('test_server_direct_path')
+														)
+													end)
+												"
+											/>
+											<instance name="test_suite_tip" tip="server_adv_attack" width="100@" content="test_server_order_attack_tip" />
+										</panel>
+									</panel>
+
+									<panel height="2.0h" noclick="1" float="right" padding="1h" >
+										<panel float="right" padding="0.35h" noclick="1" height="100%" grow="1" >
+											<instance name="test_suite_button" button="server_adv_hold" content="test_server_order_hold"
+												onclicklua="
+													TestSuite.DoSelectedUnitsAdvanced(function(unit)
+														Testing.OrderHold(
+															unit
+														)
+													end)
+												"
+											/>
+											<instance name="test_suite_tip" tip="server_adv_hold" width="100@" content="test_server_order_hold_tip" />
+										</panel>
+
+										<panel float="right" padding="0.35h" noclick="1" height="100%" grow="1" >
+											<instance name="test_suite_button" button="server_adv_tool" content="test_server_order_tool"
+												onclicklua="
+													TestSuite.DoSelectedUnitsAdvanced(function(unit)
+														Testing.OrderTool(
+															unit,
+															TestSuite.GetWidget('test_server_tool_index'):GetValue(),
+															TestSuite.GetWidget('test_server_target_id'):GetValue(),
+															TestSuite.GetWidget('test_server_pos_x'):GetValue(),
+															TestSuite.GetWidget('test_server_pos_y'):GetValue(),
+															TestSuite.CheckboxEnabled('test_server_secondary')
+														)
+													end)
+												"
+											/>
+											<instance name="test_suite_tip" tip="server_adv_tool" width="100@" content="test_server_order_tool_tip" />
+										</panel>
+									</panel>
+								</panel>
+
+								<panel width="47.5%" align="right" noclick="1" float="bottom" padding="0.25h" >
+									<panel height="1.4h" noclick="1" float="right" padding="0.4h" >
+										<label font="dyn_10" color="white" shadow="1" textvalign="center" content="test_server_target_id" noclick="1" fitx="1" />
+										<instance name="test_suite_input" font="dyn_10" textbox="test_server_target_id" width="8h" taborder="9038" />
+										<instance name="test_suite_button" button="server_target_id_use_selected" content="test_server_use_selected" font="dyn_8"
+											onclicklua="TestSuite.GetWidget('test_server_target_id'):SetInputLine(Testing.GetSelectedEntity())"
+										/>
+
+										<instance name="test_suite_checkbox" checkbox="test_server_secondary" content="test_server_secondary" font="dyn_8" />
+									</panel>
+									<panel height="1.4h" noclick="1" float="right" padding="0.5h" >
+										<label font="dyn_10" color="white" shadow="1" textvalign="center" content="test_server_pos_x" noclick="1" fitx="1" />
+										<instance name="test_suite_input" font="dyn_10" textbox="test_server_pos_x" width="8.4h" inputline="0" taborder="9039" />
+
+										<label font="dyn_10" color="white" shadow="1" textvalign="center" content="test_server_pos_y" noclick="1" fitx="1" />
+										<instance name="test_suite_input" font="dyn_10" textbox="test_server_pos_y" width="8.4h" inputline="0" taborder="9040" />
+
+										<instance name="test_suite_button" button="server_pos_click_pos" content="test_server_get_pos_click" font="dyn_8"
+											onclicklua="
+												StartClickPosCallback(function(posX, posY)
+													TestSuite.GetWidget('test_server_pos_x'):SetInputLine(string.format('%.2f', posX))
+													TestSuite.GetWidget('test_server_pos_y'):SetInputLine(string.format('%.2f', posY))
+												end)
+											"
+										/>
+									</panel>
+									<panel height="1.4h" noclick="1" >
+										<panel noclick="1" float="right" padding="0.5h" >
+											<label font="dyn_10" color="white" shadow="1" textvalign="center" content="test_server_tool_index" noclick="1" fitx="1" />
+											<instance name="test_suite_input" font="dyn_10" textbox="test_server_tool_index" width="5.5h" inputline="0" taborder="9041" />
+
+											<instance name="test_suite_checkbox" checkbox="test_server_direct_path" content="test_server_direct" font="dyn_8" />
+										</panel>
+
+										<instance name="test_suite_tip" tip="server_entity_options" width="100@" align="right" content="test_server_entity_options_tip" />
+									</panel>
+								</panel>
+							</panel>
+
+							<panel height="0.3h" noclick="1" float="bottom">
+								<panel height="1" color="0.6 0.6 0.6 0.8" noclick="1" />
+								<panel height="1" color="0.4 0.4 0.4 0.8" noclick="1" />
+							</panel>
+
+							<panel height="1.8h" noclick="1" >
+								<instance name="test_suite_button" button="server_effect_player" width="49.5%" content="test_server_effect_player"
+									onclicklua="TestSuite.GetWidget('test_suite_effect_player'):ToggleVisible()"
+								/>
+								<instance name="test_suite_button" button="server_animation_viewer" width="49.5%" align="right" content="test_server_animation_viewer"
+									onclicklua="TestSuite.GetWidget('test_suite_animation_viewer'):ToggleVisible()"
+								/>
+							</panel>
+						</panel>
+					</panel>
+				</panel>
+
+				<panel name="test_suite_server_modifiers_states" group="test_suite_server_advanced_tabs" visible="0" noclick="1" >
+					<panel width="48.5%" x="0.5h" height="-1h" valign="center" noclick="1" float="bottom" padding="0.35h" >
+						<panel height="2h" noclick="1" >
+							<panel align="center" height="100%" noclick="1" grow="1" float="right" padding="0.5h" >
+								<label font="dyn_12" color="white" shadow="1" fitx="1" textvalign="center" content="test_server_modifiers" />
+								<instance name="test_suite_tip" tip="server_modifiers" width="100@" content="test_server_modifiers_tip" />
+							</panel>
+						</panel>
+
+						<instance name="test_suite_listbox" listbox="test_server_modifiers_list" height="15h" itemheight="2h"
+							onshowlua="TestSuite.TrackModifiers(true)"
+							onhidelua="TestSuite.TrackModifiers(false)"
+						/>
+
+						<!-- This is brought to front so the input's auto complete is above the buttons below -->
+						<panel height="2h" noclick="1" onshowlua="self:BringToFront()" >
+							<instance name="test_suite_input" width="-125@" textbox="test_server_modifier" />  <!-- taborder="9042" -->
+							<!-- <instance name="test_suite_combobox" combobox="test_server_modifier" width="-125@"
+								onopenlua="TestSuite.TrackPossibleModifiers(false)"
+								oncloselua="TestSuite.TrackPossibleModifiers(true)"
+								onshowlua="TestSuite.TrackPossibleModifiers(true)"
+								onhidelua="TestSuite.TrackPossibleModifiers(false)"
+							/> -->
+
+							<instance name="test_suite_tip" tip="server_modifiers_lower" align="right" width="100@" content="test_server_modifiers2_tip" />
+						</panel>
+
+						<panel height="2h" noclick="1" >
+							<instance name="test_suite_button" button="server_set_active_modifier" width="49%" content="test_server_set_active" font="dyn_10"
+								onclicklua="Testing.SetActiveModifier(Testing.GetSelectedEntity(), TestSuite.GetWidget('test_server_modifier'):GetValue())"
+							/>
+							<instance name="test_suite_button" button="server_add_persistent_modifier" width="49%" align="right" content="test_server_add_persistent" font="dyn_10"
+								onclicklua="Testing.SetPersistentModifier(Testing.GetSelectedEntity(), TestSuite.GetWidget('test_server_modifier'):GetValue())"
+							/>
+						</panel>
+
+						<panel height="2h" noclick="1" >
+							<instance name="test_suite_button" button="server_remove_modifier" width="49%" content="test_server_remove_modifier" font="dyn_10"
+								onclicklua="Testing.RemoveModifier(Testing.GetSelectedEntity(), TestSuite.GetWidget('test_server_modifiers_list'):GetValue())"
+							/>
+							<instance name="test_suite_button" button="server_clear_modifiers" width="49%" align="right" content="test_server_clear_modifiers" font="dyn_10"
+								onclicklua="Testing.ClearModifiers(Testing.GetSelectedEntity())"
+							/>
+						</panel>
+
+						<panel height="2h" noclick="1" >
+							<panel align="center" height="100%" noclick="1" grow="1" float="right" padding="0.5h" >
+								<label font="dyn_12" color="white" shadow="1" fitx="1" textvalign="center" content="test_server_global_modifiers" />
+								<instance name="test_suite_tip" tip="server_global_modifiers" width="100@" content="test_server_global_mods_tip" />
+							</panel>
+						</panel>
+
+						<instance name="test_suite_listbox" listbox="test_server_global_modifiers_list" height="9h" itemheight="2h"
+							onshowlua="TestSuite.TrackGlobalModifiers(true)"
+							onhidelua="TestSuite.TrackGlobalModifiers(false)"
+						/>
+
+						<instance name="test_suite_input" height="2h" textbox="test_server_global_modifier" />  <!-- taborder="9043" -->
+
+						<panel height="2h" noclick="1" >
+							<instance name="test_suite_button" button="server_add_global_modifier" width="49%" content="test_server_add_global" font="dyn_10"
+								onclicklua="Testing.AddGlobalModifier(TestSuite.GetWidget('test_server_global_modifier'):GetValue())"
+							/>
+							<instance name="test_suite_button" button="server_remove_global_modifier" width="49%" align="right" content="test_server_remove_modifier" font="dyn_10"
+								onclicklua="Testing.RemoveGlobalModifier(TestSuite.GetWidget('test_server_global_modifiers_list'):GetValue())"
+							/>
+						</panel>
+					</panel>
+
+					<panel width="2" x="50%" noclick="1" float="right">
+						<panel width="1" height="98%" valign="center" color="0.6 0.6 0.6 0.8" noclick="1" />
+						<panel width="1" height="98%" valign="center" color="0.4 0.4 0.4 0.8" noclick="1" />
+					</panel>
+
+					<panel width="50%" height="-1h" valign="center" align="right" noclick="1" float="bottom" padding="0.35h" >
+						<panel height="2h" noclick="1" >
+							<panel align="center" height="100%" noclick="1" grow="1" float="right" padding="0.5h" >
+								<label font="dyn_12" color="white" shadow="1" fitx="1" textvalign="center" content="test_server_states" />
+								<instance name="test_suite_tip" tip="server_states" width="100@" content="test_server_states_tip" />
+							</panel>
+						</panel>
+
+						<panel grow="1" width="100%" noclick="1" >
+							<panel width="-1.5h" align="center" noclick="1" float="bottom" padding="0.35h">
+								<instance name="test_suite_listbox" listbox="test_server_state_list" height="24.35h" itemheight="2h"
+									onshowlua="TestSuite.TrackStates(true)"
+									onhidelua="TestSuite.TrackStates(false)"
+								/>
+
+								<panel height="2h" noclick="1" >
+									<label name="test_server_state_level" width="49%" font="dyn_10" shadow="1" color="white" />
+									<label name="test_server_state_hidden" width="49%" font="dyn_10" shadow="1" color="white" align="right" />
+								</panel>
+
+								<panel height="2h" noclick="1" >
+									<label name="test_server_state_liferemaining" width="49%" font="dyn_10" shadow="1" color="white" />
+									<label name="test_server_state_charges" width="49%" align="right" font="dyn_10" shadow="1" color="white" />
+								</panel>
+
+								<panel height="2h" noclick="1" >
+									<label font="dyn_10" color="white" textvalign="center" shadow="1" content="test_server_state_name" />
+									<instance name="test_suite_input" x="275@" width="-400@" textbox="test_server_state_name" inputline="State_Stunned" taborder="9044" />
+									<instance name="test_suite_tip" tip="server_states_lower" align="right" width="100@" content="test_server_states2_tip" />
+								</panel>
+
+								<panel height="2h" noclick="1" float="right" padding="0.5h" >
+									<label font="dyn_10" width="9h" color="white" textvalign="center" shadow="1" content="test_server_state_duration" />
+									<instance name="test_suite_input" width="7h" textbox="test_server_state_duration" inputline="-1" taborder="9045" />
+									<label font="dyn_10" color="white" width="7h" textvalign="center" shadow="1" content="test_server_state_avatar" />
+									<instance name="test_suite_input" width="11.5h" textbox="test_server_state_avatar" taborder="9046" />
+								</panel>
+
+								<instance name="test_suite_button" button="server_apply_state" width="100%" height="2h" content="test_server_apply_state" font="dyn_10"
+									onclicklua="
+										Testing.ApplyState(
+											Testing.GetSelectedEntity(),
+											TestSuite.GetWidget('test_server_state_name'):GetValue(),
+											TestSuite.GetWidget('test_server_state_duration'):GetValue(),
+											TestSuite.GetWidget('test_server_state_avatar'):GetValue()
+										)"
+								/>
+
+								<panel height="2h" noclick="1" >
+									<instance name="test_suite_button" button="server_remove_state" width="49%" content="test_server_remove_state" font="dyn_10"
+										onclicklua="Testing.RemoveState(
+											Testing.GetSelectedEntity(),
+											TestSuite.GetWidget('test_server_state_list'):GetValue()
+										)"
+									/>
+									<instance name="test_suite_button" button="server_clear_states" width="49%" align="right" content="test_server_clear_states" font="dyn_10"
+										onclicklua="Testing.ClearStates(Testing.GetSelectedEntity())"
+									/>
+								</panel>
+								
+							</panel>
+						</panel>
+					</panel>
+				</panel>
+
+				<panel name="test_suite_server_products" group="test_suite_server_advanced_tabs" visible="0" noclick="1" >
+					<panel width="-1h" height="-1h" align="center" valign="center" noclick="1" float="right" padding="1%" >
+						<panel width="28%" float="bottom" noclick="1" padding="0.5h" >
+							<panel height="2h" noclick="1" >
+								<panel align="center" height="100%" noclick="1" grow="1" float="right" padding="0.5h" >
+									<label font="dyn_12" textalign="center" textvalign="center" color="white" shadow="1" fitx="1" content="test_server_taunts" />
+									<instance name="test_suite_tip" tip="server_taunts" width="100@" content="test_server_taunts_tip" />
+								</panel>
+							</panel>
+							
+							<instance name="test_suite_listbox" listbox="test_server_taunts_list" height="-5.5h" itemheight="1.75h"
+								onshowlua="
+									local selected = self:GetValue()
+									if (selected == '') then
+										selected = 'standard_taunt'
+									end
+
+									self:ClearItems()
+									local taunts = Testing.GetTaunts()
+									for _,taunt in ipairs(taunts) do
+										if (Testing.EntityExists('Ability_Taunt.'..taunt.modifier)) then
+											self:AddTemplateListItem('test_suite_listitem_simple', taunt.modifier, 'font', 'dyn_10', 'content', taunt.name)
+										else
+											self:AddTemplateListItem('test_suite_listitem_simple', taunt.modifier, 'font', 'dyn_10', 'content', '^r'..taunt.name)
+										end
+									end
+
+									self:SetSelectedItemByValue(selected, false)
+								"
+							/>
+
+							<panel height="2h" noclick="1" >
+								<instance name="test_suite_button" button="server_taunt" width="69%" content="test_server_do_taunt" font="dyn_10"
+									onclicklua="
+										Testing.Taunt(
+											Testing.GetSelectedEntity(),
+											TestSuite.GetWidget('test_server_taunts_list'):GetValue(),
+											TestSuite.CheckboxEnabled('test_server_taunt_kill')
+										)
+									"
+								/>
+								<instance name="test_suite_checkbox" checkbox="test_server_taunt_kill" align="right" widht="30%" content="test_server_do_taunt_kill" startenabled="1" />
+							</panel>
+						</panel>
+
+						<panel width="2" noclick="1" float="right">
+							<panel width="1" color="0.6 0.6 0.6 0.8" noclick="1" />
+							<panel width="1" color="0.4 0.4 0.4 0.8" noclick="1" />
+						</panel>
+
+						<panel width="69.5%" float="bottom" noclick="1" padding="0.5h" >
+							<panel height="2h" noclick="1" >
+								<panel align="center" height="100%" noclick="1" grow="1" float="right" padding="0.5h" >
+									<label font="dyn_12" textalign="center" textvalign="center" color="white" shadow="1" fitx="1" content="test_server_announcers" />
+									<instance name="test_suite_tip" tip="server_announcers" width="100@" content="test_server_announcers_tip" />
+								</panel>
+							</panel>
+
+							<panel height="-5.5h" noclick="1" >
+								<panel width="55%" noclick="1" >
+									<instance name="test_suite_listbox" listbox="test_server_announcers_list" itemheight="1.75h"
+										onshowlua="
+											local selected = self:GetValue()
+											if (selected == '') then
+												selected = '_default'
+											end
+
+											self:ClearItems()
+											self:AddTemplateListItem('test_suite_listitem_simple', '_default', 'font', 'dyn_10', 'content', 'Default')
+
+											local announcers = Testing.GetAnnouncers()
+											for _,announcer in ipairs(announcers) do
+												self:AddTemplateListItem('test_suite_listitem_simple', announcer.name, 'font', 'dyn_10', 'content', announcer.name)
+											end
+
+											self:SetSelectedItemByValue(selected, false)
+										"
+									/>
+								</panel>
+
+								<panel width="43%" align="right" noclick="1" >
+									<listbox name="test_server_announcer_events" color="0 0 0 0.5" itemheight="1.75h" hoverselect="false" hoverhighlight="true" interactive="false"
+										scrolltexture="/ui/test_suite/images/im.tga"
+										selectedcolor="#00437533"
+									>
+										<listitem value="start_game" ><instance name="test_suite_listitem_simple" font="dyn_10" content="start_game" /></listitem>
+										<listitem value="first_blood" ><instance name="test_suite_listitem_simple" font="dyn_10" content="first_blood" /></listitem>
+										<listitem value="killstreak0" ><instance name="test_suite_listitem_simple" font="dyn_10" content="killstreak0" /></listitem>
+										<listitem value="killstreak1" ><instance name="test_suite_listitem_simple" font="dyn_10" content="killstreak1" /></listitem>
+										<listitem value="killstreak2" ><instance name="test_suite_listitem_simple" font="dyn_10" content="killstreak2" /></listitem>
+										<listitem value="killstreak3" ><instance name="test_suite_listitem_simple" font="dyn_10" content="killstreak3" /></listitem>
+										<listitem value="killstreak4" ><instance name="test_suite_listitem_simple" font="dyn_10" content="killstreak4" /></listitem>
+										<listitem value="killstreak5" ><instance name="test_suite_listitem_simple" font="dyn_10" content="killstreak5" /></listitem>
+										<listitem value="killstreak6" ><instance name="test_suite_listitem_simple" font="dyn_10" content="killstreak6" /></listitem>
+										<listitem value="killstreak7" ><instance name="test_suite_listitem_simple" font="dyn_10" content="killstreak7" /></listitem>
+										<listitem value="killstreak8" ><instance name="test_suite_listitem_simple" font="dyn_10" content="killstreak8" /></listitem>
+										<listitem value="multikill0" ><instance name="test_suite_listitem_simple" font="dyn_10" content="multikill0" /></listitem>
+										<listitem value="multikill1" ><instance name="test_suite_listitem_simple" font="dyn_10" content="multikill1" /></listitem>
+										<listitem value="multikill2" ><instance name="test_suite_listitem_simple" font="dyn_10" content="multikill2" /></listitem>
+										<listitem value="multikill3" ><instance name="test_suite_listitem_simple" font="dyn_10" content="multikill3" /></listitem>
+										<listitem value="team_killstreak" ><instance name="test_suite_listitem_simple" font="dyn_10" content="team_killstreak" /></listitem>
+										<listitem value="team_wipe" ><instance name="test_suite_listitem_simple" font="dyn_10" content="team_wipe" /></listitem>
+										<listitem value="denied" ><instance name="test_suite_listitem_simple" font="dyn_10" content="denied" /></listitem>
+										<listitem value="get_it_on" ><instance name="test_suite_listitem_simple" font="dyn_10" content="get_it_on" /></listitem>
+										<listitem value="hellbourne_wins" ><instance name="test_suite_listitem_simple" font="dyn_10" content="hellbourne_wins" /></listitem>
+										<listitem value="legion_wins" ><instance name="test_suite_listitem_simple" font="dyn_10" content="legion_wins" /></listitem>
+										<listitem value="victory" ><instance name="test_suite_listitem_simple" font="dyn_10" content="victory" /></listitem>
+										<listitem value="defeat" ><instance name="test_suite_listitem_simple" font="dyn_10" content="defeat" /></listitem>
+										<listitem value="rival" ><instance name="test_suite_listitem_simple" font="dyn_10" content="rival" /></listitem>
+										<listitem value="payback" ><instance name="test_suite_listitem_simple" font="dyn_10" content="payback" /></listitem>
+										<listitem value="smackdown" ><instance name="test_suite_listitem_simple" font="dyn_10" content="smackdown" /></listitem>
+										<listitem value="humiliation" ><instance name="test_suite_listitem_simple" font="dyn_10" content="humiliation" /></listitem>
+										<listitem value="immortal" ><instance name="test_suite_listitem_simple" font="dyn_10" content="immortal" /></listitem>
+										<listitem value="rage_quit" ><instance name="test_suite_listitem_simple" font="dyn_10" content="rage_quit" /></listitem>
+										<listitem value="hellbourne_destroyed_tower" ><instance name="test_suite_listitem_simple" font="dyn_10" content="hellbourne_destroyed_tower" /></listitem>
+										<listitem value="legion_destroyed_tower" ><instance name="test_suite_listitem_simple" font="dyn_10" content="legion_destroyed_tower" /></listitem>
+										<listitem value="hellbourne_barracks_destroyed" ><instance name="test_suite_listitem_simple" font="dyn_10" content="hellbourne_barracks_destroyed" /></listitem>
+										<listitem value="legion_barracks_destroyed" ><instance name="test_suite_listitem_simple" font="dyn_10" content="legion_barracks_destroyed" /></listitem>
+										<listitem value="base_under_attack" ><instance name="test_suite_listitem_simple" font="dyn_10" content="base_under_attack" /></listitem>
+										<listitem value="ally_hero_under_attack" ><instance name="test_suite_listitem_simple" font="dyn_10" content="ally_hero_under_attack" /></listitem>
+										<listitem value="our_hero_under_attack" ><instance name="test_suite_listitem_simple" font="dyn_10" content="our_hero_under_attack" /></listitem>
+										<listitem value="unpausing" ><instance name="test_suite_listitem_simple" font="dyn_10" content="unpausing" /></listitem>
+										<listitem value="kongor_slain" ><instance name="test_suite_listitem_simple" font="dyn_10" content="kongor_slain" /></listitem>
+										<listitem value="zorgath_slain" ><instance name="test_suite_listitem_simple" font="dyn_10" content="zorgath_slain" /></listitem>
+										<listitem value="transmutantstein_slain" ><instance name="test_suite_listitem_simple" font="dyn_10" content="transmutantstein_slain" /></listitem>
+									</listbox>
+								</panel>
+							</panel>
+
+							<instance name="test_suite_button" button="server_announcer" height="2h" width="100%" content="test_server_do_announcer" font="dyn_10"
+								onclicklua="
+									local announcer = TestSuite.GetWidget('test_server_announcers_list'):GetValue()
+									if (announcer == '_default') then
+										announcer = ''
+									end
+
+									Testing.AnnouncerEvent(
+										announcer,
+										TestSuite.GetWidget('test_server_announcer_events'):GetValue()
+									)
+								"
+							/>
+						</panel>
+					</panel>
+				</panel>
+
+				<panel name="test_suite_server_more" group="test_suite_server_advanced_tabs" visible="0" noclick="1" >
+					<panel width="-1h" height="-1h" align="center" valign="center" noclick="1" float="right" padding="1%" >
+						<panel width="25%" noclick="1" float="bottom" padding="0.4h" >
+							<label height="2h" font="dyn_12" color="white" shadow="1" noclick="1" textalign="center" textvalign="center" content="test_server_camera_options" />
+							<instance name="test_suite_checkbox" checkbox="test_server_camera_mode" content="test_server_free_flight_cam" width="100%" height="2h"
+								cvar="cam_mode"
+							/>
+							<instance name="test_suite_checkbox" checkbox="test_server_camera_smoothing" content="test_server_cam_smoothing" width="100%" height="2h"
+								cvar="cg_cameraSmoothing"
+							/>
+
+							<panel height="3.5h" noclick="1" float="bottom" padding="1" >
+								<panel height="1.5h" noclick="1" >
+									<label font="dyn_10" color="white" shadow="1" noclick="1" textvalign="center" content="test_server_pos_smoothing" />
+									<instance name="test_suite_button" button="server_reset_pos_smoothing" align="right" content="test_server_reset" font="dyn_8"
+										onclicklua="Cvar.GetCvar('cam_smoothPositionHalfLife'):Reset()"
+									/>
+								</panel>
+								<instance name="test_suite_slider" slider="test_server_position_smoothing" height="2h" minvalue="0.00" maxvalue="1.50" step="0.01" showvalue="1" decimals="2" valuewidth="20%" cvar="cam_smoothPositionHalfLife" />
+							</panel>
+
+							<panel height="3.5h" noclick="1" float="bottom" padding="1" >
+								<panel height="1.5h" noclick="1" >
+									<label font="dyn_10" color="white" shadow="1" noclick="1" textvalign="center" content="test_server_angle_smoothing" />
+									<instance name="test_suite_button" button="server_reset_angle_smoothing" align="right" content="test_server_reset" font="dyn_8"
+										onclicklua="Cvar.GetCvar('cam_smoothAnglesHalfLife'):Reset()"
+									/>
+								</panel>
+								<instance name="test_suite_slider" slider="test_server_angle_smoothing" height="2h" minvalue="0.00" maxvalue="1.50" step="0.01" showvalue="1" decimals="2" valuewidth="20%" cvar="cam_smoothAnglesHalfLife" />
+							</panel>
+
+							<panel height="3.5h" noclick="1" float="bottom" padding="1" >
+								<panel height="1.5h" noclick="1" >
+									<label font="dyn_10" color="white" shadow="1" noclick="1" textvalign="center" content="test_server_fly_speed" />
+									<instance name="test_suite_button" button="server_reset_fly_speed" align="right" content="test_server_reset" font="dyn_8"
+										onclicklua="Cvar.GetCvar('cam_flySpeed'):Reset()"
+									/>
+								</panel>
+								<instance name="test_suite_slider" slider="test_server_fly_speed" height="2h" minvalue="150" maxvalue="9950" step="50" showvalue="1" valuewidth="21%" cvar="cam_flySpeed" />
+							</panel>
+
+							<panel height="3.5h" noclick="1" float="bottom" padding="1" >
+								<panel height="1.5h" noclick="1" >
+									<label font="dyn_10" color="white" shadow="1" noclick="1" textvalign="center" content="test_server_scroll_speed" />
+									<instance name="test_suite_button" button="server_reset_scroll_speed" align="right" content="test_server_reset" font="dyn_8"
+										onclicklua="Cvar.GetCvar('cam_scrollSpeed'):Reset()"
+									/>
+								</panel>
+								<instance name="test_suite_slider" slider="test_server_scroll_speed" height="2h" minvalue="150" maxvalue="9950" step="50" showvalue="1" valuewidth="21%" cvar="cam_scrollSpeed" />
+							</panel>
+
+							<panel height="3.5h" noclick="1" float="bottom" padding="1" >
+								<panel height="1.5h" noclick="1" >
+									<label font="dyn_10" color="white" shadow="1" noclick="1" textvalign="center" content="test_server_cam_fov" />
+									<instance name="test_suite_button" button="server_reset_fov" align="right" content="test_server_reset" font="dyn_8"
+										onclicklua="Cvar.GetCvar('g_camfov'):Reset()"
+									/>
+								</panel>
+								<instance name="test_suite_slider" slider="test_server_fov" height="2h" minvalue="20" maxvalue="150" step=".01" showvalue="1" decimals="2" valuewidth="25%" cvar="g_camfov" />
+							</panel>
+
+							<panel height="3.5h" noclick="1" float="bottom" padding="1" >
+								<panel height="1.5h" noclick="1" >
+									<label font="dyn_10" color="white" shadow="1" noclick="1" textvalign="center" content="test_server_entity_cull_range" />
+									<instance name="test_suite_button" button="server_reset_cull_range" align="right" content="test_server_reset" font="dyn_8"
+										onclicklua="Cvar.GetCvar('cg_entityCullRange'):Reset()"
+									/>
+								</panel>
+								<instance name="test_suite_slider" slider="test_server_cull_range" height="2h" minvalue="500" maxvalue="50000" step="250" showvalue="1" valuewidth="25%" cvar="cg_entityCullRange" />
+							</panel>
+
+							<panel height="3.5h" noclick="1" float="bottom" padding="1" >
+								<panel height="1.5h" noclick="1" >
+									<label font="dyn_10" color="white" shadow="1" noclick="1" textvalign="center" content="test_server_cam_foliage_dis" />
+									<instance name="test_suite_button" button="server_reset_foliage_distance" align="right" content="test_server_reset" font="dyn_8"
+										onclicklua="Cvar.GetCvar('scene_foliageDrawDistance'):Reset()"
+									/>
+								</panel>
+								<instance name="test_suite_slider" slider="test_server_foliage_distance" height="2h" minvalue="500" maxvalue="50000" step="250" showvalue="1" valuewidth="25%" cvar="scene_foliageDrawDistance" />
+							</panel>
+
+							<instance name="test_suite_checkbox" checkbox="test_server_camera_map_constraint" content="test_server_cam_map_constrain" width="100%" height="2h"
+								cvar="cam_mapConstraints"
+							/>
+
+							<instance name="test_suite_button" button="server_cinema" height="3.25h" width="100%" content="test_server_cinema_mode" font="dyn_10"
+								onclicklua="TestSuite.ToggleCinemaMode()"
+							/>
+						</panel>
+
+						<panel width="2" noclick="1" float="right">
+							<panel width="1" color="0.6 0.6 0.6 0.8" noclick="1" />
+							<panel width="1" color="0.4 0.4 0.4 0.8" noclick="1" />
+						</panel>
+
+						<panel width="35%" noclick="1" float="bottom" padding="0.4h" >
+							<label height="2h" font="dyn_12" color="white" shadow="1" noclick="1" textalign="center" textvalign="center" content="test_server_graphics" />
+							<instance name="test_suite_checkbox" checkbox="test_server_fps" content="test_server_fps" width="100%" height="2h"
+								cvar="host_drawFPS"
+							/>
+
+							<panel height="2" noclick="1" float="bottom">
+								<panel height="1" color="0.6 0.6 0.6 0.8" noclick="1" />
+								<panel height="1" color="0.4 0.4 0.4 0.8" noclick="1" />
+							</panel>
+
+							<panel height="2h" noclick="1" >
+								<instance name="test_suite_checkbox" checkbox="test_server_skybox1" width="49%" content="test_server_skybox1" radiogroup="test_server_skyboxes" allowradiodisable="true" showcheck="false"
+									onshowlua="if ((Cvar.GetCvar('scene_skyboxMaterial'):GetString() == '/world/sky/legion/legion.material') and (Cvar.GetCvar('scene_drawSkybox'):GetBoolean() == true)) then self:SetButtonState(1) end"
+									onenablelua="Cvar.GetCvar('scene_skyboxMaterial'):Set('/world/sky/legion/legion.material') Cvar.GetCvar('scene_drawSkybox'):Set('true')"
+									ondisablelua="Cvar.GetCvar('scene_skyboxMaterial'):Reset() Cvar.GetCvar('scene_drawSkybox'):Reset()"
+								/>
+								<instance name="test_suite_checkbox" checkbox="test_server_skybox2" width="49%" align="right" content="test_server_skybox2" radiogroup="test_server_skyboxes" allowradiodisable="true" showcheck="false"
+									onshowlua="if ((Cvar.GetCvar('scene_skyboxMaterial'):GetString() == '/world/sky/deadlock/deadlock.material') and (Cvar.GetCvar('scene_drawSkybox'):GetBoolean() == true)) then self:SetButtonState(1) end"
+									onenablelua="Cvar.GetCvar('scene_skyboxMaterial'):Set('/world/sky/deadlock/deadlock.material') Cvar.GetCvar('scene_drawSkybox'):Set('true')"
+									ondisablelua="Cvar.GetCvar('scene_skyboxMaterial'):Reset() Cvar.GetCvar('scene_drawSkybox'):Reset()"
+								/>
+							</panel>
+							<panel height="2h" noclick="1" >
+								<instance name="test_suite_checkbox" checkbox="test_server_skybox3" height="2h" width="49%" content="test_server_skybox3" radiogroup="test_server_skyboxes" allowradiodisable="true" showcheck="false"
+									onshowlua="if ((Cvar.GetCvar('scene_skyboxMaterial'):GetString() == '/world/sky/hell/hell.material') and (Cvar.GetCvar('scene_drawSkybox'):GetBoolean() == true)) then self:SetButtonState(1) end"
+									onenablelua="Cvar.GetCvar('scene_skyboxMaterial'):Set('/world/sky/hell/hell.material') Cvar.GetCvar('scene_drawSkybox'):Set('true')"
+									ondisablelua="Cvar.GetCvar('scene_skyboxMaterial'):Reset() Cvar.GetCvar('scene_drawSkybox'):Reset()"
+								/>
+								<instance name="test_suite_checkbox" checkbox="test_server_skybox4" height="2h" width="49%" align="right" content="test_server_skybox4" radiogroup="test_server_skyboxes" allowradiodisable="true" showcheck="false"
+									onshowlua="if ((Cvar.GetCvar('scene_skyboxMaterial'):GetString() == '/world/sky/silver/silver.material') and (Cvar.GetCvar('scene_drawSkybox'):GetBoolean() == true)) then self:SetButtonState(1) end"
+									onenablelua="Cvar.GetCvar('scene_skyboxMaterial'):Set('/world/sky/silver/silver.material') Cvar.GetCvar('scene_drawSkybox'):Set('true')"
+									ondisablelua="Cvar.GetCvar('scene_skyboxMaterial'):Reset() Cvar.GetCvar('scene_drawSkybox'):Reset()"
+								/>
+							</panel>
+
+							<panel height="2" noclick="1" float="bottom">
+								<panel height="1" color="0.6 0.6 0.6 0.8" noclick="1" />
+								<panel height="1" color="0.4 0.4 0.4 0.8" noclick="1" />
+							</panel>
+
+							<panel height="2h" noclick="1" >
+								<instance name="test_suite_checkbox" checkbox="test_server_wireframe" content="test_server_wireframe" width="49%"
+									radiogroup="test_server_wireframing" allowradiodisable="1"
+									cvar="gfx_wireframe"
+									onenablelua="Cvar.GetCvar('vid_foliageWireframe'):Set('true')"
+									ondisablelua="Cvar.GetCvar('vid_foliageWireframe'):Reset()"
+								/>
+								<instance name="test_suite_checkbox" checkbox="test_server_points" content="test_server_points" width="49%" align="right"
+									radiogroup="test_server_wireframing" allowradiodisable="1"
+									cvar="gfx_points"
+								/>
+							</panel>
+
+							<panel height="2h" noclick="1" >
+								<instance name="test_suite_checkbox" checkbox="test_server_draw_bones" content="test_server_draw_bones" width="49%"
+									cvar="vid_drawBones"
+								/>
+								<instance name="test_suite_checkbox" checkbox="test_server_draw_bone_names" content="test_server_draw_bone_names" width="49%" align="right"
+									cvar="vid_drawBoneNames"
+								/>
+							</panel>
+
+							<panel height="2h" noclick="1" >
+								<instance name="test_suite_checkbox" checkbox="test_server_hide_terrain" content="test_server_hide_terrain" width="49%"
+									cvar="vid_hideTerrain"
+								/>
+								<instance name="test_suite_checkbox" checkbox="test_server_hide_water" content="test_server_hide_water" width="49%" align="right"
+									cvar="vid_hideWater"
+								/>
+							</panel>
+
+							<panel height="2h" noclick="1" >
+								<instance name="test_suite_checkbox" checkbox="test_server_terrain_normals" content="test_server_terrain_normals" width="49%" font="dyn_8"
+									cvar="vid_terrainShowNormals"
+								/>
+								<instance name="test_suite_checkbox" checkbox="test_server_terrain_cliffs" content="test_server_terrain_cliffs" width="49%" align="right"
+									cvar="vid_terrainCliffs"
+								/>
+							</panel>
+
+							<panel height="2h" noclick="1" >
+								<instance name="test_suite_checkbox" checkbox="test_server_terrain_layer1" content="test_server_terrain_layer1" width="49%"
+									cvar="vid_terrainLayer1"
+								/>
+								<instance name="test_suite_checkbox" checkbox="test_server_terrain_layer2" content="test_server_terrain_layer2" width="49%" align="right"
+									cvar="vid_terrainLayer2"
+								/>
+							</panel>
+
+							<instance name="test_suite_checkbox" checkbox="test_server_particle_systems" content="test_server_particle_systems" width="100%" height="2h"
+								cvar="vid_drawParticleSystems"
+							/>
+							<instance name="test_suite_checkbox" checkbox="test_server_lighting" content="test_server_lighting" width="100%" height="2h"
+								cvar="gfx_lighting"
+							/>
+							<instance name="test_suite_checkbox" checkbox="test_server_normals" content="test_server_normals" width="100%" height="2h"
+								cvar="gfx_normals"
+							/>
+							<instance name="test_suite_checkbox" checkbox="test_server_mesh_names" content="test_server_mesh_names" width="100%" height="2h"
+								cvar="vid_drawMeshNames"
+							/>
+							<instance name="test_suite_checkbox" checkbox="test_server_model_bounds" content="test_server_model_bounds" width="100%" height="2h"
+								cvar="vid_drawModelBounds"
+							/>
+
+							<panel height="2" noclick="1" float="bottom">
+								<panel height="1" color="0.6 0.6 0.6 0.8" noclick="1" />
+								<panel height="1" color="0.4 0.4 0.4 0.8" noclick="1" />
+							</panel>
+
+							<panel height="2h" noclick="1" >
+								<instance name="test_suite_checkbox" checkbox="test_server_model_textures1" content="test_server_model_textures_1" width="49%" radiogroup="test_server_gfx_textures" allowradiodisable="1"
+									onenablelua="Cvar.GetCvar('gfx_textures'):Set(1)"
+									ondisablelua="Cvar.GetCvar('gfx_textures'):Reset()"
+								/>
+								<instance name="test_suite_checkbox" checkbox="test_server_model_textures2" content="test_server_model_textures_2" width="49%" align="right" radiogroup="test_server_gfx_textures" allowradiodisable="1"
+									onenablelua="Cvar.GetCvar('gfx_textures'):Set(2)"
+									ondisablelua="Cvar.GetCvar('gfx_textures'):Reset()"
+								/>
+							</panel>
+
+							<panel height="2h" noclick="1" >
+								<instance name="test_suite_checkbox" checkbox="test_server_model_textures3" content="test_server_model_textures_3" width="57%" font="dyn_8" radiogroup="test_server_gfx_textures" allowradiodisable="1"
+									onenablelua="Cvar.GetCvar('gfx_textures'):Set(3)"
+									ondisablelua="Cvar.GetCvar('gfx_textures'):Reset()"
+								/>
+								<instance name="test_suite_checkbox" checkbox="test_server_model_textures4" content="test_server_model_textures_4" width="41%" align="right" radiogroup="test_server_gfx_textures" allowradiodisable="1"
+									onenablelua="Cvar.GetCvar('gfx_textures'):Set(4) Cmd('SizeHint')"
+									ondisablelua="Cvar.GetCvar('gfx_textures'):Reset()"
+								/>
+							</panel>
+						</panel>
+
+						<panel width="2" noclick="1" float="right">
+							<panel width="1" color="0.6 0.6 0.6 0.8" noclick="1" />
+							<panel width="1" color="0.4 0.4 0.4 0.8" noclick="1" />
+						</panel>
+
+						<panel width="35%" noclick="1" float="bottom" padding="0.4h" >
+							<label height="2h" font="dyn_12" color="white" shadow="1" noclick="1" textalign="center" textvalign="center" content="test_server_debugging" />
+
+							<instance name="test_suite_checkbox" checkbox="test_server_dynamic_reload" content="test_server_dynamic_reload" width="100%" height="2h"
+								cvar="host_dynamicResReload"
+							/>
+							<instance name="test_suite_checkbox" checkbox="test_server_unlock_taunt" content="test_server_unlock_taunt" width="100%" height="2h"
+								cvar="g_perks"
+							/>
+
+							<panel height="2" noclick="1" float="bottom">
+								<panel height="1" color="0.6 0.6 0.6 0.8" noclick="1" />
+								<panel height="1" color="0.4 0.4 0.4 0.8" noclick="1" />
+							</panel>
+
+							
+							<panel height="2h" noclick="1" >
+								<instance name="test_suite_button" button="server_reload_textures" height="2h" width="49%" content="test_server_reload_textures" font="dyn_9"
+									onclicklua="Cmd('ReloadTextures')"
+								/>
+								<instance name="test_suite_button" button="server_reload_models" height="2h" width="49%" align="right" content="test_server_reload_models" font="dyn_9"
+									onclicklua="Cmd('ReloadModels')"
+								/>
+							</panel>
+							
+							<panel height="2h" noclick="1" >
+								<instance name="test_suite_button" button="server_reload_samples" height="2h" width="49%" content="test_server_reload_samples" font="dyn_9"
+									onclicklua="Cmd('ReloadSamples')"
+								/>
+								<instance name="test_suite_button" button="server_reload_materials" height="2h" width="49%" align="right" content="test_server_reload_materials" font="dyn_9"
+									onclicklua="Cmd('ReloadMaterials')"
+								/>
+							</panel>
+
+							<panel height="2" noclick="1" float="bottom">
+								<panel height="1" color="0.6 0.6 0.6 0.8" noclick="1" />
+								<panel height="1" color="0.4 0.4 0.4 0.8" noclick="1" />
+							</panel>
+
+							<instance name="test_suite_checkbox" checkbox="test_server_draw_sounds" content="test_server_draw_sounds" width="100%" height="2h"
+								cvar="sound_drawSounds"
+							/>
+							<instance name="test_suite_checkbox" checkbox="test_server_area_affectprs" content="test_server_area_affectprs" width="100%" height="2h"
+								cvar="d_drawAreaAffectors"
+							/>
+							<instance name="test_suite_checkbox" checkbox="test_server_projectile_radius" content="test_server_projectile_radius" width="100%" height="2h"
+								cvar="d_drawProjectileRadiuses"
+							/>
+							<instance name="test_suite_checkbox" checkbox="test_server_terrain_grid" content="test_server_terrain_grid" width="100%" height="2h"
+									cvar="vid_terrainShowGrid"
+								/>
+							<instance name="test_suite_checkbox" checkbox="test_server_unit_bounds" content="test_server_unit_bounds" width="100%" height="2h"
+								cvar="d_drawUnitBounds"
+							/>
+							<instance name="test_suite_checkbox" checkbox="test_server_tree_bounds" content="test_server_tree_bounds" width="100%" height="2h"
+								cvar="d_drawTreeBounds"
+							/>
+							<instance name="test_suite_checkbox" checkbox="test_server_cursor_world_pos" content="test_server_cursor_world_pos" width="100%" height="2h"
+								cvar="cg_drawCursorWorldPos"
+							/>
+							<instance name="test_suite_checkbox" checkbox="test_server_entity_type_names" content="test_server_entity_type_names" width="100%" height="2h"
+								cvar="cg_drawEntityTypeNames"
+							/>
+							<instance name="test_suite_checkbox" checkbox="test_server_selected_stats" content="test_server_selected_stats" width="100%" height="2h"
+								cvar="cg_drawSelectedStats"
+							/>
+							<instance name="test_suite_checkbox" checkbox="test_server_selected_inventory" content="test_server_selected_inventory" width="100%" height="2h"
+								cvar="cg_drawSelectedInventory"
+							/>
+							<instance name="test_suite_checkbox" checkbox="test_server_nav_grid" content="test_server_nav_grid" width="100%" height="2h"
+								cvar="cg_drawNavGrid"
+							/>
+							<instance name="test_suite_checkbox" checkbox="test_server_selected_path" content="test_server_selected_path" width="100%" height="2h"
+								cvar="cg_drawSelectedPath"
+								onenablelua="Cvar.GetCvar('g_PathDetail'):Set('1')"
+								ondisablelua="Cvar.GetCvar('g_PathDetail'):Reset()"
+							/>
+						</panel>
+					</panel>
+				</panel>
+
+				<panel name="test_suite_server_evenmore" group="test_suite_server_advanced_tabs" visible="0" noclick="1" >
+					<panel width="-1h" height="-1h" align="center" valign="center" noclick="1" float="right" padding="1%" >
+						<panel width="25%" noclick="1" float="bottom" padding="0.4h" >
+							<!-- smoothline -->
+							<instance name="test_suite_checkbox" checkbox="test_server_smoothline_enable" content="test_server_smoothline_enable" width="100%" height="2h"
+								cvar="vid_SmoothLineEnable"
+							/>
+							<panel height="2h" noclick="1" float="right" padding="5">
+								<instance name="test_suite_button" button="test_server_smoothline_type_None" content="test_server_smoothline_type_none" 
+										onclicklua="Cmd('vid_x0 0')"
+								/>
+								<instance name="test_suite_button" button="test_server_smoothline_type_h" content="test_server_smoothline_type_h"
+										onclicklua="Cmd('vid_x0 100;vid_x1 300; vid_y0 100; vid_y1 100')"
+								/>
+								<instance name="test_suite_button" button="test_server_smoothline_type_v" content="test_server_smoothline_type_v"
+										onclicklua="Cmd('vid_x0 100;vid_x1 100; vid_y0 100; vid_y1 300')"
+								/>
+								<instance name="test_suite_button" button="test_server_smoothline_type_square" content="test_server_smoothline_type_square"
+										onclicklua="Cmd('vid_x0 100;vid_x1 300; vid_y0 100; vid_y1 300')"
+								/>
+							</panel>
+							<panel height="3.5h" noclick="1" float="bottom" padding="1" >
+								<panel height="1.5h" noclick="1" >
+									<label font="dyn_10" color="white" shadow="1" noclick="1" textvalign="center" content="test_server_smoothline_r" />
+									<instance name="test_suite_button" button="test_server_smoothline_r" align="right" content="test_server_reset" font="dyn_8"
+										onclicklua="Cvar.GetCvar('vid_smoothLineR'):Reset()"
+									/>
+								</panel>
+								<instance name="test_suite_slider" slider="test_server_smoothline_r" height="2h" minvalue="0.0" maxvalue="6.0" step="0.1" decimals="2" showvalue="1" valuewidth="21%" cvar="vid_smoothLineR" />
+							</panel>
+							<panel height="3.5h" noclick="1" float="bottom" padding="1" >
+								<panel height="1.5h" noclick="1" >
+									<label font="dyn_10" color="white" shadow="1" noclick="1" textvalign="center" content="test_server_smoothline_w" />
+									<instance name="test_suite_button" button="test_server_smoothline_w" align="right" content="test_server_reset" font="dyn_8"
+										onclicklua="Cvar.GetCvar('vid_smoothLineW'):Reset()"
+									/>
+								</panel>
+								<instance name="test_suite_slider" slider="test_server_smoothline_w" height="2h" minvalue="0.0" maxvalue="6.0" step="0.1" decimals="2" showvalue="1" valuewidth="21%" cvar="vid_smoothLineW" />
+							</panel>
+							<panel height="3.5h" noclick="1" float="bottom" padding="1" >
+								<panel height="1.5h" noclick="1" >
+									<label font="dyn_10" color="white" shadow="1" noclick="1" textvalign="center" content="test_server_smoothline_e" />
+									<instance name="test_suite_button" button="test_server_smoothline_e" align="right" content="test_server_reset" font="dyn_8"
+										onclicklua="Cvar.GetCvar('vid_smoothLineExtent'):Reset()"
+									/>
+								</panel>
+								<instance name="test_suite_slider" slider="test_server_smoothline_e" height="2h" minvalue="0.0" maxvalue="6.0" step="0.1" decimals="2" showvalue="1" valuewidth="21%" cvar="vid_smoothLineExtent" />
+							</panel>
+
+							<!-- Foliage -->
+							<label height="2h" font="dyn_12" color="white" shadow="1" noclick="1" textalign="center" textvalign="center" content="foliage" />
+							<panel height="2h" noclick="1" float="right" padding="5">
+								<instance name="test_suite_checkbox" checkbox="test_server_foliage_alphatest" content="AT" width="25%" height="2h" radiogroup="foliageType"
+								onenablelua="Cvar.GetCvar('vid_foliageRenderType'):Set('0')" onshowlua="self:SetButtonState(GetCvarInt('vid_foliageRenderType') == 0 and '1' or '0')"/>
+								<instance name="test_suite_checkbox" checkbox="test_server_foliage_alphablending" content="Blend" width="25%" height="2h" radiogroup="foliageType"
+								onenablelua="Cvar.GetCvar('vid_foliageRenderType'):Set('1')" onshowlua="self:SetButtonState(GetCvarInt('vid_foliageRenderType') == 1 and '1' or '0')"/>
+								<instance name="test_suite_checkbox" checkbox="test_server_foliage_mixed" content="Mix" width="25%" height="2h" radiogroup="foliageType"
+								onenablelua="Cvar.GetCvar('vid_foliageRenderType'):Set('2')" onshowlua="self:SetButtonState(GetCvarInt('vid_foliageRenderType') == 2 and '1' or '0')"/>
+							</panel>
+							<panel height="3.5h" noclick="1" float="bottom" padding="1" >
+								<panel height="1.5h" noclick="1" >
+									<label font="dyn_10" color="white" shadow="1" noclick="1" textvalign="center" content="AlphaTestRef" />
+									<instance name="test_suite_button" button="test_server_foliage_alphatest_ref" align="right" content="test_server_reset" font="dyn_8"
+										onclicklua="Cvar.GetCvar('vid_foliageAlphaTestRef'):Reset()"
+									/>
+								</panel>
+								<instance name="test_suite_slider" slider="test_server_foliage_alphatest_ref" height="2h" minvalue="1" maxvalue="255" step="1" decimals="0" showvalue="1" valuewidth="21%" cvar="vid_foliageAlphaTestRef" />
+							</panel>
+							<panel height="3.5h" noclick="1" float="bottom" padding="1" >
+								<panel height="1.5h" noclick="1" >
+									<label font="dyn_10" color="white" shadow="1" noclick="1" textvalign="center" content="AlphaTestRef2" />
+									<instance name="test_suite_button" button="test_server_foliage_alphatest_ref2" align="right" content="test_server_reset" font="dyn_8"
+										onclicklua="Cvar.GetCvar('vid_foliageAlphaTestRef2'):Reset()"
+									/>
+								</panel>
+								<instance name="test_suite_slider" slider="test_server_foliage_alphatest_ref2" height="2h" minvalue="1" maxvalue="255" step="1" decimals="0" showvalue="1" valuewidth="21%" cvar="vid_foliageAlphaTestRef2" />
+							</panel>
+							<instance name="test_suite_checkbox" checkbox="test_server_foliage_light_optimization" content="OptLight" width="100%" height="2h"
+								cvar="vid_foliageOptLight"/>
+						</panel>
+
+						<panel width="2" noclick="1" float="right">
+							<panel width="1" color="0.6 0.6 0.6 0.8" noclick="1" />
+							<panel width="1" color="0.4 0.4 0.4 0.8" noclick="1" />
+						</panel>
+					</panel>
+				</panel>
+			</panel>
+
+			<!-- Tabs -->
+			<panel height="6.5%" noclick="1" >
+				<!-- Grab/Drag using this -->
+				<panel name="test_server_advanced_title_bar" clip="1" noclick="1" >
+					<frame texture="/ui/test_suite/images/rounded_bg_white.tga" height="+0.6h" borderthickness="0.6h" color="0.1 0.1 0.1 0.5" noclick="1" />
+				</panel>
+
+				<panel x="0.25h" float="right" valign="bottom" height="75%" noclick="1" padding="0.25h" >
+					<instance name="test_suite_tab" tab="server_entities" content="test_server_units"
+						onclicklua="self:ShowOnly('test_suite_server_entities')"
+					/>
+					<instance name="test_suite_tab" tab="server_modifiers_states" content="test_server_modifiers_states"
+						onclicklua="self:ShowOnly('test_suite_server_modifiers_states')"
+					/>
+					<instance name="test_suite_tab" tab="server_products" content="test_server_products"
+						onclicklua="self:ShowOnly('test_suite_server_products')"
+					/>
+					<instance name="test_suite_tab" tab="server_more" content="test_suite_more"
+						onclicklua="self:ShowOnly('test_suite_server_more')"
+					/>
+					<instance name="test_suite_tab" tab="server_evenmore" content="test_suite_evenmore"
+						onclicklua="self:ShowOnly('test_suite_server_evenmore')"
+					/>
+				</panel>
+
+				<label font="dyn_14" content="test_suite_title_advanced" color="white" shadow="1" noclick="1" fitx="1" align="right" textvalign="center" fitxpadding="125@" />
+
+				<panel align="right" x="-12.5@" grow="1" height="75%" valign="center" noclick="1" >
+					<instance name="test_suite_button" button="close_server_advanced" icon="/ui/test_suite/images/close_button.tga" upColor="#E81A1A" overColor="#FF5757" downColor="#BA1111"
+						onclicklua="TestSuite.GetWidget('test_suite_server_advanced'):SetVisible(0)"
+					/>
+				</panel>
+
+				<panel height="1" valign="bottom" color="0 0 0 0.5" />
+			</panel>
+		</panel>
+	</template>
+
+	<template name="test_suite_animation_viewer" >
+		<panel name="test_suite_animation_viewer" width="25h" align="center" valign="center" cangrab="1" visible="0" grow="1" regrow="1"
+			onclicklua="self:BringToFront()"
+			onshowlua="self:BringToFront()"
+		>
+			<frame texture="/ui/test_suite/images/rounded_bg_white.tga" borderthickness="0.6h" color="0.2 0.2 0.2 0.9" noclick="1" />
+			<frame texture="/ui/test_suite/images/roundframe.tga" borderthickness="0.6h" bordercolor="0 0 0 0.9" noclick="1" />
+
+			<panel float="bottom" width="100%" grow="1" regrow="1" noclick="1" >
+				<!-- Title -->
+				<panel height="3h" noclick="1" >
+					<!-- Grab/Drag using this -->
+					<panel name="test_server_animation_viewer_title_bar" clip="1" noclick="1" >
+						<frame texture="/ui/test_suite/images/rounded_bg_white.tga" height="+0.6h" borderthickness="0.6h" color="0.1 0.1 0.1 0.5" noclick="1" />
+					</panel>
+
+					<label font="dyn_16" color="white" textvalign="center" x="0.5h" shadow="1" content="test_server_animation_viewer" noclick="1" />
+
+					<panel align="right" x="-12.5@" grow="1" height="75%" valign="center" noclick="1" >
+						<instance name="test_suite_button" button="close_server_animation_viewer" icon="/ui/test_suite/images/close_button.tga" upColor="#E81A1A" overColor="#FF5757" downColor="#BA1111"
+							onclicklua="TestSuite.GetWidget('test_suite_animation_viewer'):SetVisible(0)"
+						/>
+					</panel>
+
+					<panel height="1" valign="bottom" color="0 0 0 0.5" />
+				</panel>
+
+				<!-- padding -->
+				<panel height="2" noclick="1" />
+
+				<!-- Body -->
+				<panel width="100%" valign="bottom" grow="1" regrow="1" >
+					<panel width="96%" align="center" float="bottom" padding="0.4h" grow="1" regrow="1"	>
+						<instance name="test_suite_listbox" listbox="server_anim_list" height="25.5h" itemheight="1.5h"
+							onshowlua="
+								self:SetCallback('onframe', function(self)
+									local anims = Testing.GetAnimationsFromEntity(Testing.GetSelectedEntity())
+									local listItems = self:GetListItems()
+
+									for i,value in ipairs(listItems) do
+										local found = false
+										for k,anim in ipairs(anims) do
+											if (anim.name == value) then
+												found = true
+											end
+										end
+
+										if (not found) then
+											self:EraseListItemByValue(value)
+										end
+									end
+
+									if (table.getn(anims) == 0) then
+										self:ClearItems()
+										self:AddTemplateListItem('test_suite_listitem_simple', '-1', 'font', 'dyn_10', 'content', Translate('test_server_no_anims'))
+									else
+										for _,v in ipairs(anims) do
+											if (not self:HasListItem(v.name)) then
+												self:AddTemplateListItem('test_suite_listitem_simple', v.name, 'font', 'dyn_12', 'content', v.name)
+											end
+										end
+									end
+								end)
+							"
+							onhidelua="self:ClearCallback('onframe')"
+						/>
+						<instance name="test_suite_button" button="server_play_anim" width="100%" content="test_server_play_anim" height="2.5h"
+							onclicklua="Testing.PlayAnimation(Testing.GetSelectedEntity(), TestSuite.GetWidget('server_anim_list'):GetValue())"
+						/>
+					</panel>
+				</panel>
+
+				<!-- padding -->
+				<panel height="0.5h" width="100%" noclick="1" />
+			</panel>
+		</panel>
+	</template>
+
+	<template name="test_suite_effect_player" >
+		<panel name="test_suite_effect_player" width="65h" align="center" valign="center" cangrab="1" visible="0" grow="1" regrow="1"
+			onclicklua="self:BringToFront()"
+			onshowlua="self:BringToFront()"
+		>
+			<frame texture="/ui/test_suite/images/rounded_bg_white.tga" borderthickness="0.6h" color="0.2 0.2 0.2 0.9" noclick="1" />
+			<frame texture="/ui/test_suite/images/roundframe.tga" borderthickness="0.6h" bordercolor="0 0 0 0.9" noclick="1" />
+
+			<panel float="bottom" width="100%" grow="1" regrow="1" noclick="1" >
+				<!-- Title -->
+				<panel height="3h" noclick="1" >
+					<!-- Grab/Drag using this -->
+					<panel name="test_server_effect_player_title_bar" clip="1" noclick="1" >
+						<frame texture="/ui/test_suite/images/rounded_bg_white.tga" height="+0.6h" borderthickness="0.6h" color="0.1 0.1 0.1 0.5" noclick="1" />
+					</panel>
+
+					<label font="dyn_16" color="white" textvalign="center" x="0.5h" shadow="1" content="test_server_effect_player" noclick="1" />
+
+					<panel align="right" x="-12.5@" grow="1" height="75%" valign="center" noclick="1" >
+						<instance name="test_suite_button" button="close_server_effect_player" icon="/ui/test_suite/images/close_button.tga" upColor="#E81A1A" overColor="#FF5757" downColor="#BA1111"
+							onclicklua="TestSuite.GetWidget('test_suite_effect_player'):SetVisible(0)"
+						/>
+					</panel>
+
+					<panel height="1" valign="bottom" color="0 0 0 0.5" />
+				</panel>
+
+				<!-- padding -->
+				<panel height="2" noclick="1" />
+
+				<!-- Body -->
+				<panel width="100%" valign="bottom" grow="1" regrow="1" >
+					<panel width="98%" align="center" float="bottom" padding="0.4h" grow="1" regrow="1"	>
+						<panel height="2h" noclick="1" >
+							<instance name="test_suite_input" textbox="test_server_effect_search" width="75%"
+								onshowlua="self:DoEvent()"
+								onchangelua="self:Sleep(250, function(self) self:DoEvent() end)"
+								onenterlua="TestSuite.PopulateEffectList(self:GetValue())"
+							/>
+
+							<instance name="test_suite_button" button="server_refresh_effects" width="24%" align="right" content="test_server_refresh_effects"
+								onclicklua="TestSuite.ForceEffectCacheRebuild() TestSuite.GetWidget('test_server_effect_search'):DoEvent()"
+							/>
+						</panel>
+
+						<instance name="test_suite_listbox" listbox="server_effect_list" height="20.5h" itemheight="1.5h" />
+
+						<panel height="2h" noclick="1" >
+							<panel noclick="1" float="right" padding="0.5h" >
+								<label font="dyn_10" color="white" shadow="1" textvalign="center" content="test_server_effect_target" noclick="1" fitx="1" />
+								<instance name="test_suite_input" textbox="test_server_effect_target" width="10h" />
+								<instance name="test_suite_button" button="server_effect_target_use_selected" content="test_server_use_selected"
+									onclicklua="TestSuite.GetWidget('test_server_effect_target'):SetInputLine(Testing.GetSelectedEntity())"
+								/>
+							</panel>
+
+							<instance name="test_suite_tip" tip="effect_player_options" width="100@" align="right" content="test_server_effect_player_tip" />
+						</panel>
+
+						<panel height="2h" noclick="1" >
+							<panel noclick="1" float="right" padding="0.5h" >
+								<label font="dyn_10" color="white" shadow="1" textvalign="center" content="test_server_effect_source" noclick="1" fitx="1" />
+								<instance name="test_suite_input" textbox="test_server_effect_source" width="10h" />
+								<instance name="test_suite_button" button="server_effect_source_use_selected" content="test_server_use_selected"
+									onclicklua="TestSuite.GetWidget('test_server_effect_source'):SetInputLine(Testing.GetSelectedEntity())"
+								/>
+							</panel>
+
+							<panel float="right" padding="0.5h" height="2h" grow="1" align="right" >
+								<label font="dyn_10" color="white" shadow="1" textvalign="center" content="test_server_effet_lifetime" noclick="1" fitx="1" />
+								<instance name="test_suite_input" textbox="test_server_effect_lifetime" inputline="10000" width="10h" />
+
+								<panel width="2h" noclick="1" /> <!-- Padding -->
+
+								<instance name="test_suite_checkbox" checkbox="test_server_effect_ignore_cull" align="right" content="test_server_ignore_culling" />
+							</panel>
+						</panel>
+
+						<instance name="test_suite_button" button="server_play_effect" width="100%" content="test_server_play_effect" height="2.5h"
+							onclicklua="
+								local lifetime = TestSuite.GetWidget('test_server_effect_lifetime'):GetValue()
+								if (string.len(lifetime) == 0) then lifetime = -1 end
+
+								local target = TestSuite.GetWidget('test_server_effect_target'):GetValue()
+								if (string.len(target) == 0) then target = 0 end
+
+								local source = TestSuite.GetWidget('test_server_effect_source'):GetValue()
+								if (string.len(source) == 0) then source = 0 end
+
+								Testing.PlayEffect(
+									TestSuite.GetWidget('server_effect_list'):GetValue(),
+									target,
+									source,
+									lifetime,
+									TestSuite.CheckboxEnabled('test_server_effect_ignore_cull')
+								)
+							"
+						/>
+					</panel>
+				</panel>
+
+				<!-- padding -->
+				<panel height="0.5h" width="100%" noclick="1" />
+			</panel>
+		</panel>
+	</template>
+	<!-- End Server (Advanced) Test Functionality -->
+
+	<!-- Cinema Mode Extra Functionality -->
+	<template name="test_suite_cinema_mode_replay_panel" >
+		<panel name="test_suite_cinema_mode_replay_panel" width="25h" align="center" valign="center" cangrab="1" visible="0" grow="1" regrow="1"
+			onclicklua="self:BringToFront()"
+			onshowlua="self:BringToFront()"
+		>
+			<frame texture="/ui/test_suite/images/rounded_bg_white.tga" borderthickness="0.6h" color="0.2 0.2 0.2 0.9" noclick="1" />
+			<frame texture="/ui/test_suite/images/roundframe.tga" borderthickness="0.6h" bordercolor="0 0 0 0.9" noclick="1" />
+
+			<panel float="bottom" width="100%" grow="1" regrow="1" noclick="1" >
+				<!-- Title -->
+				<panel height="3h" noclick="1" >
+					<!-- Grab/Drag using this -->
+					<panel name="test_cinema_mode_replay_panel_title_bar" clip="1" noclick="1" >
+						<frame texture="/ui/test_suite/images/rounded_bg_white.tga" height="+0.6h" borderthickness="0.6h" color="0.1 0.1 0.1 0.5" noclick="1" />
+					</panel>
+
+					<label font="dyn_16" color="white" textvalign="center" x="0.5h" shadow="1" content="test_server_camera_options" noclick="1" />
+
+					<panel align="right" x="-12.5@" grow="1" height="75%" valign="center" noclick="1" >
+						<instance name="test_suite_button" button="close_cinema_replay_options" icon="/ui/test_suite/images/close_button.tga" upColor="#E81A1A" overColor="#FF5757" downColor="#BA1111"
+							onclicklua="TestSuite.GetWidget('test_suite_cinema_mode_replay_panel'):SetVisible(0)"
+						/>
+					</panel>
+
+					<panel height="1" valign="bottom" color="0 0 0 0.5" />
+				</panel>
+
+				<!-- padding -->
+				<panel height="2" noclick="1" />
+
+				<!-- Body -->
+				<panel width="95%" align="center" float="bottom" padding="0.4h" grow="1" regrow="1" >
+					<instance name="test_suite_checkbox" checkbox="test_cinema_camera_mode" content="test_server_free_flight_cam" width="100%" height="2h"
+						cvar="cam_mode"
+					/>
+					<instance name="test_suite_checkbox" checkbox="test_cinema_camera_smoothing" content="test_server_cam_smoothing" width="100%" height="2h"
+						cvar="cg_cameraSmoothing"
+					/>
+
+					<panel height="3.5h" noclick="1" float="bottom" padding="1" >
+						<panel height="1.5h" noclick="1" >
+							<label font="dyn_10" color="white" shadow="1" noclick="1" textvalign="center" content="test_server_pos_smoothing" />
+							<instance name="test_suite_button" button="cinema_reset_pos_smoothing" align="right" content="test_server_reset" font="dyn_8"
+								onclicklua="Cvar.GetCvar('cam_smoothPositionHalfLife'):Reset()"
+							/>
+						</panel>
+						<instance name="test_suite_slider" slider="test_cinema_position_smoothing" height="2h" minvalue="0.00" maxvalue="1.50" step="0.01" showvalue="1" decimals="2" valuewidth="20%" cvar="cam_smoothPositionHalfLife" />
+					</panel>
+
+					<panel height="3.5h" noclick="1" float="bottom" padding="1" >
+						<panel height="1.5h" noclick="1" >
+							<label font="dyn_10" color="white" shadow="1" noclick="1" textvalign="center" content="test_server_angle_smoothing" />
+							<instance name="test_suite_button" button="cinema_reset_angle_smoothing" align="right" content="test_server_reset" font="dyn_8"
+								onclicklua="Cvar.GetCvar('cam_smoothAnglesHalfLife'):Reset()"
+							/>
+						</panel>
+						<instance name="test_suite_slider" slider="test_cinema_angle_smoothing" height="2h" minvalue="0.00" maxvalue="1.50" step="0.01" showvalue="1" decimals="2" valuewidth="20%" cvar="cam_smoothAnglesHalfLife" />
+					</panel>
+
+					<panel height="3.5h" noclick="1" float="bottom" padding="1" >
+						<panel height="1.5h" noclick="1" >
+							<label font="dyn_10" color="white" shadow="1" noclick="1" textvalign="center" content="test_server_fly_speed" />
+							<instance name="test_suite_button" button="cinema_reset_fly_speed" align="right" content="test_server_reset" font="dyn_8"
+								onclicklua="Cvar.GetCvar('cam_flySpeed'):Reset()"
+							/>
+						</panel>
+						<instance name="test_suite_slider" slider="test_cinema_fly_speed" height="2h" minvalue="150" maxvalue="9950" step="50" showvalue="1" valuewidth="21%" cvar="cam_flySpeed" />
+					</panel>
+
+					<panel height="3.5h" noclick="1" float="bottom" padding="1" >
+						<panel height="1.5h" noclick="1" >
+							<label font="dyn_10" color="white" shadow="1" noclick="1" textvalign="center" content="test_server_scroll_speed" />
+							<instance name="test_suite_button" button="cinema_reset_scroll_speed" align="right" content="test_server_reset" font="dyn_8"
+								onclicklua="Cvar.GetCvar('cam_scrollSpeed'):Reset()"
+							/>
+						</panel>
+						<instance name="test_suite_slider" slider="test_cinema_scroll_speed" height="2h" minvalue="150" maxvalue="9950" step="50" showvalue="1" valuewidth="21%" cvar="cam_scrollSpeed" />
+					</panel>
+
+					<panel height="3.5h" noclick="1" float="bottom" padding="1" >
+						<panel height="1.5h" noclick="1" >
+							<label font="dyn_10" color="white" shadow="1" noclick="1" textvalign="center" content="test_server_cam_fov" />
+							<instance name="test_suite_button" button="cinema_reset_fov" align="right" content="test_server_reset" font="dyn_8"
+								onclicklua="Cvar.GetCvar('g_camfov'):Reset()"
+							/>
+						</panel>
+						<instance name="test_suite_slider" slider="test_cinema_fov" height="2h" minvalue="20" maxvalue="150" step=".01" showvalue="1" decimals="2" valuewidth="25%" cvar="g_camfov" />
+					</panel>
+
+					<panel height="3.5h" noclick="1" float="bottom" padding="1" >
+						<panel height="1.5h" noclick="1" >
+							<label font="dyn_10" color="white" shadow="1" noclick="1" textvalign="center" content="test_server_entity_cull_range" />
+							<instance name="test_suite_button" button="cinema_reset_cull_range" align="right" content="test_server_reset" font="dyn_8"
+								onclicklua="Cvar.GetCvar('cg_entityCullRange'):Reset()"
+							/>
+						</panel>
+						<instance name="test_suite_slider" slider="test_cinema_cull_range" height="2h" minvalue="500" maxvalue="50000" step="250" showvalue="1" valuewidth="25%" cvar="cg_entityCullRange" />
+					</panel>
+
+					<panel height="3.5h" noclick="1" float="bottom" padding="1" >
+						<panel height="1.5h" noclick="1" >
+							<label font="dyn_10" color="white" shadow="1" noclick="1" textvalign="center" content="test_server_cam_foliage_dis" />
+							<instance name="test_suite_button" button="cinema_reset_foliage_distance" align="right" content="test_server_reset" font="dyn_8"
+								onclicklua="Cvar.GetCvar('scene_foliageDrawDistance'):Reset()"
+							/>
+						</panel>
+						<instance name="test_suite_slider" slider="test_cinema_foliage_distance" height="2h" minvalue="500" maxvalue="50000" step="250" showvalue="1" valuewidth="25%" cvar="scene_foliageDrawDistance" />
+					</panel>
+
+					<instance name="test_suite_checkbox" checkbox="test_cinema_camera_map_constraint" content="test_server_cam_map_constrain" width="100%" height="2h"
+						cvar="cam_mapConstraints"
+					/>
+
+					<!-- padding -->
+					<panel height="0.2h" width="100%" noclick="1" />
+				</panel>
+			</panel>
+		</panel>
+	</template>
+
+	<!-- End Cinema Mode Extra Functionality -->
+
+</package>

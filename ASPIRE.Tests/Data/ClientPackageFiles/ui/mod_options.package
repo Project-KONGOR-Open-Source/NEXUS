@@ -1,0 +1,1138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+	<!-- Triggers -->
+	<trigger name="mod_options_reset" />
+	<trigger name="mod_options_group" />
+	<!-- END Triggers -->
+
+ 	<panel name="mod_increment" visible="0" noclick="1"
+		onevent="mod_options_i = mod_options_i + 1;"
+	/> 
+	<!-- END Functions -->
+	
+	<!-- Manage CVar -->
+	<template name="mod_manage_cvar">
+		<panel visible="0" noclick="1" width="0" height="0"
+			onload="
+				if({increment=0}, CallEvent('mod_increment'));
+				if(!VarExists('mod_options_debug'), CreateBool('mod_options_debug', 0));
+				if(mod_options_debug,
+					Split(
+						echo('===== START: {cvar} ====='),
+						echo('CVar: {cvar}'),
+						echo('CVarType: {cvartype}'),
+						echo('Default: {default}')
+					)
+				);
+				if(!VarExists('{cvar}'),
+					Split(
+						if(StringEquals('bool', '{cvartype}'),
+							Split(
+								if(StringEmpty('{default}'), CreateBool('{cvar}', false), CreateBool('{cvar}', '{default}')),
+								if(StringEmpty('{default}'), SetSave('{cvar}', false), SetSave('{cvar}', '{default}'))
+							)
+						),
+						if(StringEquals('int', '{cvartype}'),
+							Split(
+								if(StringEmpty('{default}'), CreateInt('{cvar}', 0), CreateInt('{cvar}', '{default}')),
+								if(StringEmpty('{default}'), SetSave('{cvar}', 0), SetSave('{cvar}', '{default}'))
+							)
+						),
+						if(StringEquals('float', '{cvartype}'),
+							Split(
+								if(StringEmpty('{default}'), CreateFloat('{cvar}', 0), CreateFloat('{cvar}', '{default}')),
+								if(StringEmpty('{default}'), SetSave('{cvar}', 0), SetSave('{cvar}', '{default}'))
+							)
+						),
+						if(StringEquals('string', '{cvartype}'),
+							Split(
+								if(StringEmpty('{default}'), CreateString('{cvar}', ''), CreateString('{cvar}', '{default}')),
+								if(StringEmpty('{default}'), SetSave('{cvar}', ''), SetSave('{cvar}', '{default}'))
+							)
+						)
+					),
+					if(mod_options_debug, echo('CVar: \'{cvar}\'=' # {cvar} # ' already exist!'))
+				);
+				if(mod_options_debug, echo('===== END: {cvar} ======='));
+			"
+		/>
+	</template>
+	<!-- END Manage CVar -->
+
+	<!-- Styles -->
+	<style name="mod_layout_params" 
+		mod_id="{mod_id}"
+		inline="{inline=false}"
+		inline_padding="{inline_padding=1h}"
+		margin_left="{margin_left=1h}"
+		margin_right="{margin_right=0.5h}"
+		
+		container_height="{container_height=2.5h}"
+		container_width="{container_width=100%}"
+		
+		label="{label}"
+		label_height="{label_height=100%}"
+		label_width="{label_width=40%}"
+		label_offset="{label_offset=0}"
+		label_wrap="{label_wrap=true}"
+		label_textalign="{label_textalign=left}"
+		label_font="{label_font=dyn_10}"
+		label_color="{label_color=white}"
+		label_shadow="{label_shadow=true}"
+		label_shadowoffset="{label_shadowoffset=1}"
+		label_watch="{label_watch}"
+		label_ontrigger="{label_ontrigger}"
+		label_onevent="{label_onevent}"
+		
+		separator_height="{separator_height=2@}"
+		separator_width="{separator_width=3%}"
+		separator_texture="{separator_texture=/ui/info/arrow.tga}"
+		separator_color="{separator_color=white}"
+		
+		option_height="{option_height=100%}"
+		option_width="{option_width=50%}"
+		option_borderthickness="{borderthickness=0}"
+		option_bordercolor="{bordercolor=white}"
+		
+		tooltip="{tooltip}"
+		tooltip_width="{tooltip_width=25h}"
+	/>
+	
+	<!-- TODO: Call enable/disable on nested groups if their leader is enabled/disabled -->
+	<style name="group_code"
+		onevent="
+			if({group_leader},
+				Split(
+					if({cvar} == {group_disable_value}, 
+						Trigger('mod_options_group', '{mod_id}', '{group_id}', 0)
+					),
+					if({cvar} == {group_enable_value}, 
+						Trigger('mod_options_group', '{mod_id}', '{group_id}', 1)
+					)
+				)
+			);
+			if({group_leader1},
+				Split(
+					if({cvar} == {group_disable_value}, 
+						Trigger('mod_options_group', '{mod_id}', '{group_id1}', 0)
+					),
+					if({cvar} == {group_enable_value}, 
+						Trigger('mod_options_group', '{mod_id}', '{group_id1}', 1)
+					)
+				)
+			);
+			if({group_leader2},
+				Split(
+					if({cvar} == {group_disable_value}, 
+						Trigger('mod_options_group', '{mod_id}', '{group_id2}', 0)
+					),
+					if({cvar} == {group_enable_value}, 
+						Trigger('mod_options_group', '{mod_id}', '{group_id2}', 1)
+					)
+				)
+			);
+		"
+		onevent0="SetEnabled(false);"
+		onevent1="SetEnabled(true);"
+		watch1="mod_options_group"
+		ontrigger1="
+			if(StringEquals(param0, '{mod_id}'),			
+				if(StringEquals(param1, '{group_id}') and !{group_leader},
+					DoEvent(param2),
+					if(StringEquals(param1, '{group_id1}') and !{group_leader1},
+						DoEvent(param2),
+						if(StringEquals(param1, '{group_id2}') and !{group_leader2},
+							DoEvent(param2)
+						)
+					)
+				)
+			);
+		"
+	/>
+	<!-- END Styles -->
+
+	<!-- Checkbox -->
+	<template name="mod_checkbox">
+		<instance name="mod_manage_cvar" cvar="{cvar}" cvartype="{cvartype=bool}" default="{default=true}" />
+		<instance name="mod_layout" layout="{layout=empty}" style="mod_layout_params" option_width="{option_width=100%}" />
+		<panel visible="0" noclick="1" width="0" height="0"
+			onload="
+				Call('{mod_id}' # mod_options_i # '_option', 
+					'Instantiate(
+						\'mod_checkbox_item\'		,
+						\'cvar\'					,	\'{cvar}\'						,
+						\'default\'					,	\'{default=true}\'				,
+						\'option_id\'				,	mod_options_i					,
+						\'mod_id\'					,	\'{mod_id}\'					,
+						\'width\'					, 	\'{width}\'						,
+						\'label\'					, 	\'{label}\'						,
+						\'trigger\'					,	\'{trigger}\'					,
+						\'call_event\'				,	\'{call_event}\'				,
+						\'onchange\'				, 	\'{onchange}\'					,
+						\'group_leader\'			, 	\'{group_leader=false}\'		,
+						\'group_id\'				, 	\'{group_id}\'					,
+						\'group_leader1\'			, 	\'{group_leader1=false}\'		,
+						\'group_id1\'				, 	\'{group_id1}\'					,
+						\'group_leader2\'			, 	\'{group_leader2=false}\'		,
+						\'group_id2\'				, 	\'{group_id2}\'					,
+						\'group_disable_value\'		, 	\'{group_disable_value=0}\'		,
+						\'group_enable_value\'		, 	\'{group_enable_value=1}\'		,
+						\'tooltip\'					,	\'{tooltip}\'					,
+						\'tooltip_width\'			, 	\'{tooltip_width=25h}\'			,
+						\'font\'					, 	\'{font=dyn_10}\'				,
+						\'height\'					, 	\'{height=80%}\'
+					);'
+				);
+			" 
+		/>
+	</template>
+	
+	<template name="mod_checkbox_state">
+		<widgetstate statename="{state}" float="right" padding="1h">
+			<panel width="80@" height="80%" color="invisible">
+				<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.5h" color="white"/>
+				<frame texture="/ui/frames/roundframe.tga" color="#3abde7" borderthickness="0.5h"/>
+				<image hmargin="0.15h" vmargin="0.15h" texture="/ui/elements/check.tga" visible="{checked}" />
+			</panel>
+			<label width="-80@" height="100%" textvalign="center" font="{font}" color="{color}" shadow="true">{label}</label>
+		</widgetstate>
+	</template>
+	
+	<template name="mod_checkbox_item">	
+		<button
+			valign="center"
+			height="{height}"
+			width="{width}"
+			color="invisible"
+			numstates="2"
+			cvar="{cvar}"
+			onclick="
+				PlaySound('/shared/sounds/ui/button_click_06.wav');
+				DoEvent();
+				if(!StringEmpty('{trigger}'), Trigger('{trigger}'));
+				if(!StringEmpty('{call_event}'), Cmd('UICall {call_event} DoEvent()'));
+				{onchange}
+			"
+			oninstantiate="
+				if(StringEmpty('{width}'),
+					SetWidth(GetStringWidth('{font}', '{label}') + GetXFromString('1h') + GetXFromString('80@'))
+				);
+				if(!StringEmpty('{tooltip}'), Instantiate('generic_tooltip_resizey', 'x', '1h', 'y', '-5h', 'width', '{tooltip_width}', 'tip_id', '{mod_id}{option_id}', 'title', '{label}', 'label', '{tooltip}'));
+			"
+			style="group_code"
+			onshow="DoEvent();"
+			onmouseover="If(!StringEmpty('{tooltip}'), ShowWidget('{mod_id}{option_id}')); PlaySound('/shared/sounds/ui/ccpanel/button_over_01.wav');"
+			onmouseout="If(!StringEmpty('{tooltip}'), HideWidget('{mod_id}{option_id}'));"
+			watch0="mod_options_reset"
+			ontrigger0="
+				if(StringEquals(param0, '{mod_id}'),
+					Split(
+						Set('{cvar}', {default}),
+						DoEvent()
+					)
+				);
+			"
+		>
+			<instance name="mod_checkbox_state" state="up" size="{height}" label="{label}" font="{font}" color="white" checked="false" />
+			<instance name="mod_checkbox_state" state="over" size="{height}" label="{label}" font="{font}" color="#3abde7" checked="false" />
+			<instance name="mod_checkbox_state" state="down" size="{height}" label="{label}" font="{font}" color="#3abde7" checked="false" />
+			<instance name="mod_checkbox_state" state="up2" size="{height}" label="{label}" font="{font}" color="#ffaa00" checked="true" />
+			<instance name="mod_checkbox_state" state="over2" size="{height}" label="{label}" font="{font}" color="#3abde7" checked="true" />
+			<instance name="mod_checkbox_state" state="down2" size="{height}" label="{label}" font="{font}" color="#3abde7" checked="true" />
+			
+			<instance name="mod_checkbox_state" state="disabled" size="{height}" label="{label}" font="{font}" color="#888888" checked="false" />
+			<instance name="mod_checkbox_state" state="disabled2" size="{height}" label="{label}" font="{font}" color="#888888" checked="true" />				
+		</button>
+	</template>
+	<!-- END Checkbox -->
+
+	<!-- 3.0 Mod Insertion Panel -->
+	<template name="mod_insertion_panel">
+		<panel y="3.0h" name="{name}" noclick="true" float="bottom" width="100%" grow="1" regrow="1" growinvis="0" visible="0" onshow="BringToFront();"/>
+		<panel height="2.5h" noclick="1" color="invisible"/> <!-- padding -->
+	</template>
+	
+	<!-- Header -->
+	<!-- 3.0 New Header -->
+	<template name="mod_header">
+		<panel grow="1" width="100%" color="invisible"
+			oninstantiate="
+					Call('mod_increment', 'DoEvent();');
+					Instantiate('mod_header_contents',
+						'mod_id', '{mod_id}',
+						'label', '{label}',
+						'name', '{mod_id}'#mod_options_i # '');"
+		>
+		</panel>
+	</template>
+
+	<template name="mod_header_contents">
+		<panel name="{name}_header_panel" visible="{visible=true}" align="left" width="100%" grow="1" regrow="1" growinvis="0"
+			oninstantiatelua="HoN_Options:CreateModInsertionPoint(self)"
+			onclicklua="HoN_Options:ExpandCollapseMod(self)"
+			ondoubleclicklua="HoN_Options:ExpandCollapseMod(self)"
+			onmouseover="Call('{name}_header_label', 'SetColor(\'orange\')');"
+			onmouseout="Call('{name}_header_label', 'SetColor(\'.8 .8 .8 1\')');"
+		>
+			<panel y="1.6h" color=".2 .2 .2 1" height="1" noclick="true" />
+			<panel x="3.4h" grow="true" height="100%" color="0 0 0 1" noclick="1">
+				<label name="{name}_header_label" x="0.6h" y="0.5h" fitx="true" fitxpadding="0.6h" font="dyn_10" color=".8 .8 .8 1" shadow="true" noclick="1" content="{label}" />
+			</panel>
+
+		</panel>
+	</template>
+	<!-- end new header -->
+	
+	<!-- Slider -->
+	<template name="mod_slider">
+		<instance name="mod_manage_cvar" cvar="{cvar}" cvartype="{cvartype=float}" default="{default=0}" />
+		<instance name="mod_layout" layout="{layout=default}" style="mod_layout_params" />
+		<panel visible="0" noclick="1" width="0" height="0" 
+			onload="
+				Call('{mod_id}' # mod_options_i # '_option', 
+					'Instantiate(
+						\'mod_slider_item\'			,
+						\'cvar\'					,	\'{cvar}\'						,
+						\'default\'					,	\'{default=0.0}\'				,
+						\'mod_id\'					,	\'{mod_id}\'					,
+						\'option_id\'				,	mod_options_i					,
+						\'trigger\'					,	\'{trigger}\'					,
+						\'call_event\'				,	\'{call_event}\'				,
+						\'onchange\'				, 	\'{onchange}\'					,
+						\'group_leader\'			, 	\'{group_leader=false}\'		,
+						\'group_id\'				, 	\'{group_id}\'					,
+						\'group_leader1\'			, 	\'{group_leader1=false}\'		,
+						\'group_id1\'				, 	\'{group_id1}\'					,
+						\'group_leader2\'			, 	\'{group_leader2=false}\'		,
+						\'group_id2\'				, 	\'{group_id2}\'					,
+						\'group_disable_value\'		, 	\'{group_disable_value=0}\'		,
+						\'group_enable_value\'		, 	\'{group_enable_value=1}\'		,
+						\'decimal\'					,	\'{decimal=0}\'					,
+						\'showpercent\'				,	\'{showpercent=1}\'				,
+						\'showstep\'				,	\'{showstep=1}\'				,
+						\'showvalue\'				,	\'{showvalue=1}\'				,
+						\'minvalue\'				,	\'{minvalue=0}\'				,
+						\'maxvalue\'				,	\'{maxvalue=1}\'				,
+						\'minlabel\'				,	\'{minlabel=Low}\'				,
+						\'maxlabel\'				,	\'{maxlabel=High}\'				,
+						\'slider_step\'				,	\'{slider_step=0.1}\'			,
+						\'button_step\'				,	\'{button_step=0.1}\'			,
+						\'font\'					, 	\'{font=dyn_10}\'
+					);'
+				);
+			"
+		/>
+	</template>
+	
+	<!-- TODO: Make +/- buttons rounder -->
+	<template name="mod_pmbutton">
+		<panel  x="{x=}" y="{y=}" width="{width=100%}" height="{height=100%}" align="{align=}" valign="{valign=}" noclick="true">
+			<button
+				group="{group}"
+				name="{button_name}"
+				color="invisible"
+				visible="{visible=true}"
+				watch="{watch=}"
+				onmouseover="PlaySound('/shared/sounds/ui/ccpanel/button_over_02.wav'); PlaySound('/shared/sounds/ui/ccpanel/button_over_01.wav'); {onmouseover}"
+				onmouseout="{onmouseout}"
+				onclick="PlaySound('{sound=/shared/sounds/ui/ccpanel/button_click_02.wav}'); {onclick}"
+				onenter="PlaySound('{sound='/shared/sounds/ui/ccpanel/button_click_02.wav}'); {onenter}"
+				onshow="{onshow}"
+				interactive="{interactive=true}"
+				onevent0="{onevent0=}"
+				onevent1="{onevent1=}"
+			>
+				<widgetstate statename="up">
+					<frame texture="/ui/info/button.tga" borderthickness="{borderthickness=0.8h}" color="1 1 1 1"/>				
+					<label width="100%" height="100%" textvalign="center" textalign="center" valign="center" align="center" font="{font=dyn_9}" color="{color=white}" shadow="true" shadowcolor="black" watch="{labelwatch}" ontrigger="{labelontrigger}">{label}</label>
+				</widgetstate>			
+			
+				<widgetstate statename="over">
+					<frame texture="/ui/info/button_over.tga" borderthickness="{borderthickness=0.8h}" />				
+					<label width="100%" height="100%" textvalign="center" textalign="center" valign="center" align="center" font="{font=dyn_9}" color="{color=white}" shadow="true" shadowcolor="#7F6E00" watch="{labelwatch}" ontrigger="{labelontrigger}">{label}</label>
+				</widgetstate>		
+				
+				<widgetstate statename="down" x="1" y="1">
+					<frame texture="/ui/info/button_down.tga" borderthickness="{borderthickness=0.8h}" color="white"/>					
+					<label width="100%" height="100%" textvalign="center" textalign="center" valign="center" align="center" font="{font=dyn_9}" color="#3f0001" shadow="true" shadowcolor="#7F6E00" watch="{labelwatch}" ontrigger="{labelontrigger}">{label}</label>
+				</widgetstate>
+				<widgetstate statename="disabled">
+					<frame texture="/ui/info/button.tga" borderthickness="{borderthickness=0.8h}" color="1 1 1 1"/>	
+					<frame texture="/ui/frames/rounded_button_bg_white.tga" borderthickness="0.8h" color=".3 .3 .3 .7"/>
+					<label width="100%" height="100%" textvalign="center" textalign="center" valign="center" align="center" font="{font=dyn_9}" color="#494c5f" shadow="true" shadowcolor="black" watch="{labelwatch}" ontrigger="{labelontrigger}">{label}</label>
+				</widgetstate>
+			</button>
+		</panel>
+	</template>
+	
+	<template name="mod_slider_item">
+		<!-- Cvar label -->
+		<!-- TODO: unlazy this!!! Adjust x and width properly -->
+		<panel x="-320@" width="160@" visible="{showvalue}">
+			<cvarlabel cvar="{cvar}_temp" oninstantiate="CreateString('{cvar}_temp', '');" textvalign="center" textalign="center" font="{font=dyn_10}" color="#3abde7" shadow="true" 
+				group="{mod_id}{option_id}_group" 
+				onevent0="SetColor('#222222');"
+				onevent1="SetColor('#3abde7');"
+			/>
+			<image texture="/shared/icons/frame.tga" width="100%" height="100%" noclick="true" />
+		</panel>
+		<!-- +/- buttons -->
+		<panel width="200@" noclick="1">
+			<instance name="mod_pmbutton" label="-" font="{font}" width="90@" height="90%" valign="center"
+					onclick="
+						if({cvar} - {button_step} ge {minvalue},
+							Set('{cvar}', {cvar} - {button_step}),
+							Set('{cvar}', {minvalue})
+						);
+					"					
+					group="{mod_id}{option_id}_group" 
+					onevent0="SetEnabled(false);"
+					onevent1="SetEnabled(true);"
+			/>
+			<instance name="mod_pmbutton" label="+" font="{font}" width="90@" height="90%" x="50%" valign="center"
+					onclick="
+						if({cvar} + {button_step} le {maxvalue},
+							Set('{cvar}', {cvar} + {button_step}),
+							Set('{cvar}', {maxvalue})
+						);
+					" 
+					group="{mod_id}{option_id}_group" 
+					onevent0="SetEnabled(false);"
+					onevent1="SetEnabled(true);"
+			/>
+		</panel>
+		<!-- Slider Container -->
+		<panel align="right" oninstantiate="if(!{showstep}, SetWidth('100%'), SetWidth((GetXFromString('100%') - GetXFromString('200@')) / GetXFromString('100%') * 100 # '%'));">
+			<image texture="/ui/info/slider_backdrop_c.tga" align="center" width="90%" group="{mod_id}{option_id}_group" onevent0="SetRenderMode('grayscale');" onevent1="SetRenderMode('normal');" />
+			<image texture="/ui/info/slider_backdrop_l.tga" align="left" width="100@" group="{mod_id}{option_id}_group" onevent0="SetRenderMode('grayscale');" onevent1="SetRenderMode('normal');" />
+			<image texture="/ui/info/slider_backdrop_r.tga" align="right" width="100@" group="{mod_id}{option_id}_group" onevent0="SetRenderMode('grayscale');" onevent1="SetRenderMode('normal');" />
+			<!-- Min Label -->
+			<label width="20%" height="100%" textalign="center" textvalign="center" align="left" font="{font}" color="white" shadow="true">{minlabel}</label>
+			<!-- Slider -->
+			<slider
+				width="60%" 
+				align="center"
+				slotwidth="-1" slotheight="0.6h"
+				slotcolor="1 1 1 1"
+				handlewidth="100@" handleheight="100%"
+				handlecolor="1 1 1 1"
+				cvar="{cvar}"
+				minvalue="{minvalue}" maxvalue="{maxvalue}"
+				step="{slider_step}"
+				texture="/ui/info/slider.tga"
+				onselect="PlaySound('/shared/sounds/ui/button_over_02.wav');"
+				oninstantiate="
+					if({showpercent},
+						Set('{cvar}_temp', FtoA(FtoP({cvar}/{maxvalue}), {decimal}) # '%'),
+						Set('{cvar}_temp', FtoA({cvar}, {decimal}))
+					);
+				"
+				onchange="
+					PlaySound('/shared/sounds/ui/button_slide_01.wav'); 
+					if({showpercent},
+						Set('{cvar}_temp', FtoA(FtoP({cvar}/{maxvalue}), {decimal}) # '%'),
+						Set('{cvar}_temp', FtoA({cvar}, {decimal}))
+					);
+					CallEvent('{mod_id}{option_id}_label');
+					if(!StringEmpty('{trigger}'), Trigger('{trigger}'));
+					if(!StringEmpty('{call_event}'), Cmd('UICall {call_event} DoEvent()'));
+					DoEvent();
+					{onchange}
+				"
+				onshow="CallEvent('{mod_id}{option_id}_label'); DoEvent();"
+				watch0="mod_options_reset"
+				ontrigger0="
+					if(StringEquals(param0, '{mod_id}'), 
+						Set('{cvar}', {default})
+					);
+				"
+				style="group_code"
+				onevent0="SetEnabled(false); GroupCall('{mod_id}{option_id}_group', 'DoEvent(0);');"
+				onevent1="SetEnabled(true); GroupCall('{mod_id}{option_id}_group', 'DoEvent(1);');"
+			/>
+			<!-- Max Label -->
+			<label width="20%" height="100%" textalign="center" textvalign="center" align="right" font="{font}" color="white" shadow="true">{maxlabel}</label>
+		</panel>
+	</template>
+	<!-- END Slider -->
+	
+	<!-- Button -->
+	<template name="mod_button">
+		<instance name="mod_layout" layout="{layout=empty}" style="mod_layout_params" option_width="{option_width=100%}" />
+		<panel visible="0" noclick="1" width="0" height="0" 
+			onload="
+				Call('{mod_id}' # mod_options_i # '_option', 
+					'Instantiate(
+						\'mod_button_item\'		,
+						\'option_id\'					,	mod_options_i			,
+						\'mod_id\'				,	\'{mod_id}\'			,
+						\'cmd\'					,	\'{cmd}\'				,
+						\'label\'				, 	\'{label}\'				,
+						\'trigger\'				,	\'{trigger}\'			,
+						\'call_event\'			,	\'{call_event}\'		,
+						\'group_leader\'			, 	\'false\'		,
+						\'group_id\'			, 	\'{group_id}\'			,
+						\'group_leader1\'			, 	\'false\'		,
+						\'group_id1\'				, 	\'{group_id1}\'					,
+						\'group_leader2\'			, 	\'false\'		,
+						\'group_id2\'				, 	\'{group_id2}\'					,
+						\'tooltip\'				,	\'{tooltip}\'			,
+						\'tooltip_width\'		, 	\'{tooltip_width=25h}\'	,
+						\'font\'				, 	\'{font=dyn_10}\'		,
+						\'align\'				, 	\'{align=left}\'		
+					);'
+				);
+			"
+		/>
+	</template>
+	
+	<template name="mod_button_item">
+		<panel noclick="true" oninstantiate="if(!StringEmpty('{tooltip}'), Instantiate('generic_tooltip_resizey', 'x', '1h', 'y', '-5h', 'width', '{tooltip_width}', 'tip_id', '{mod_id}{option_id}', 'title', '{label}', 'label', '{tooltip}'));">	
+			<button 
+				color="invisible"
+				numstates="1"
+				onclick="
+					PlaySound('{sound=/shared/sounds/ui/ccpanel/button_click_02.wav}');
+					if(!StringEmpty('{trigger}'), Trigger('{trigger}'));
+					if(!StringEmpty('{call_event}'), Cmd('UICall {call_event} DoEvent()'));
+					{cmd}
+				"
+				onmouseover="If(!StringEmpty('{tooltip}'), ShowWidget('{mod_id}{option_id}')); PlaySound('/shared/sounds/ui/ccpanel/button_over_02.wav'); PlaySound('/shared/sounds/ui/ccpanel/button_over_01.wav');"
+				onmouseout="If(!StringEmpty('{tooltip}'), HideWidget('{mod_id}{option_id}'));"
+				style="group_code"
+				onevent=""
+			>
+				<widgetstate statename="up">
+					<frame texture="/ui/info/button.tga" borderthickness="{borderthickness=0.8h}" color="1 1 1 1" />				
+					<label width="100%" height="100%" textvalign="center" textalign="center" valign="center" align="center" font="{font}" color="white" shadow="true" shadowcolor="black" watch="{labelwatch}" ontrigger="{labelontrigger}">{label}</label>
+				</widgetstate>			
+			
+				<widgetstate statename="over">
+					<frame texture="/ui/info/button_over.tga" borderthickness="{borderthickness=0.8h}" />				
+					<label width="100%" height="100%" textvalign="center" textalign="center" valign="center" align="center" font="{font}" color="white" shadow="true" shadowcolor="#7F6E00" watch="{labelwatch}" ontrigger="{labelontrigger}">{label}</label>
+				</widgetstate>		
+				
+				<widgetstate statename="down" x="1" y="1">
+					<frame texture="/ui/info/button_down.tga" borderthickness="{borderthickness=0.8h}" color="white"/>					
+					<label width="100%" height="100%" textvalign="center" textalign="center" valign="center" align="center" font="{font}" color="#3f0001" shadow="true" shadowcolor="#7F6E00" watch="{labelwatch}" ontrigger="{labelontrigger}">{label}</label>
+				</widgetstate>
+				<widgetstate statename="disabled">
+					<frame texture="/ui/info/button.tga" borderthickness="{borderthickness=0.8h}" color="1 1 1 1"/>	
+					<frame texture="/ui/frames/rounded_button_bg_white.tga" borderthickness="0.8h" color=".3 .3 .3 .7"/>
+					<label width="100%" height="100%" textvalign="center" textalign="center" valign="center" align="center" font="{font}" color="#494c5f" shadow="true" shadowcolor="black" watch="{labelwatch}" ontrigger="{labelontrigger}">{label}</label>
+				</widgetstate>
+			</button>
+		</panel>
+	</template>
+	<!-- END Button -->
+	
+	<!-- Dropdown -->
+	<template name="mod_dropdown">
+		<instance name="mod_manage_cvar" cvar="{cvar}" cvartype="{cvartype=int}" default="{default}" />
+		<instance name="mod_layout" layout="{layout=default}" style="mod_layout_params" />
+		<panel visible="0" noclick="1" width="0" height="0" 
+			onload="
+				Call('{mod_id}' # mod_options_i # '_option', 
+					'Instantiate(
+						\'mod_dropdown_item\'		,
+						\'cvar\'					,	\'{cvar}\'						,
+						\'default\'					,	\'{default}\'					,
+						\'option_id\'				,	mod_options_i					,
+						\'mod_id\'					,	\'{mod_id}\'					,
+						\'trigger\'					,	\'{trigger}\'					,
+						\'call_event\'				,	\'{call_event}\'				,
+						\'onchange\'				, 	\'{onchange}\'					,
+						\'group_leader\'			, 	\'{group_leader=false}\'		,
+						\'group_id\'				, 	\'{group_id}\'					,
+						\'group_leader1\'			, 	\'{group_leader1=false}\'		,
+						\'group_id1\'				, 	\'{group_id1}\'					,
+						\'group_leader2\'			, 	\'{group_leader2=false}\'		,
+						\'group_id2\'				, 	\'{group_id2}\'					,
+						\'group_disable_value\'		, 	\'{group_disable_value}\'		,
+						\'group_enable_value\'		, 	\'{group_enable_value}\'		,
+						\'maxlistheight\'			, 	\'{maxlistheight=5}\'			
+					);'
+				);
+			" 
+		/>
+	</template>
+	
+	<template name="dropdown_item_icon">
+		<image valign="center" width="{texture_width}" height="70%" x="35@" texture="{texture}"/>
+		<label height="100%" x="160@" onload="SetX(GetXFromString('{texture_width}') + GetXFromString('60@'));" font="dyn_10" color="{color=white}" textvalign="center" shadow="true" shadowoffset="1" content="{label}"/>
+	</template>
+	
+	<template name="mod_dropdown_additem">
+		<panel visible="0" noclick="1" width="0" height="0" 
+			onload="
+				if(StringEmpty('{texture}'),
+					Call('{mod_id}' # mod_options_i # '_combobox', 'AddTemplateListItem(\'Ncombobox_item\', \'{value}\', \'label\', \'{label}\');'),
+					Call('{mod_id}' # mod_options_i # '_combobox', 'AddTemplateListItem(\'dropdown_item_icon\', \'{value}\', \'label\', \'{label}\', \'texture\', \'{texture}\', \'texture_width\', \'{texture_width=70@}\');')
+				);
+			"
+		/>
+	</template>
+		
+	<template name="mod_dropdown_state">
+		<widgetstate statename="{state}">
+			<panel color="invisible">
+				<image height="100%" oninstantiate="SetWidth(GetXFromString('100%') - GetXFromString('200@'));" align="center" texture="/ui/info/combobox_background_c.tga" color="{color}" group="{group}" onevent0="{onevent0}" onevent1="{onevent1}" />
+				<image height="100%" width="100@" align="left" texture="/ui/info/combobox_background_l.tga" color="{color}" group="{group}" onevent0="{onevent0}" onevent1="{onevent1}" />
+				<image height="100%" width="100@" align="right" texture="/ui/info/combobox_background_r.tga" color="{color}" group="{group}" onevent0="{onevent0}" onevent1="{onevent1}" />
+				<image x="-1" width="100@" height="100%" align="right" valign="center" texture="/ui/info/combobox_button_{image}.tga" group="{group}" onevent0="{onevent0}" onevent1="{onevent1}" />
+			</panel>
+		</widgetstate>
+	</template> 
+	
+	<template name="mod_dropdown_item">
+		<combobox
+			name="{mod_id}{option_id}_combobox"
+			color="invisible"
+			itemwidth="100%"
+			itemheight="2h"
+			maxlistheight="{maxlistheight}"
+			cvar="{cvar}"
+			exteriorscrollbars="false"
+			scrolltexture="/ui/info/combobox.tga"
+			handleheight="100@" handlewidth="100%"
+			scrollbarsize="2h"
+			scrollbaroffset="0"
+			highlight="under"
+			highlightbordercolor="white"
+			oninstantiate="Clear();"
+			onselect="
+				if(!StringEmpty('{trigger}'), Trigger('{trigger}'));
+				if(!StringEmpty('{call_event}'), Cmd('UICall {call_event} DoEvent()'));
+				DoEvent();
+				{onchange}
+				SetSave('{cvar}', this);
+			"
+			onshow="
+				SetSelectedItemByValue({cvar}); 
+				if(StringEmpty(this), SetSelectedItemByIndex(0)); 
+				DoEvent();
+			"
+			onmouseover="PlaySound('/shared/sounds/ui/button_over_02.wav');"
+			watch0="mod_options_reset"
+			ontrigger0="
+				if(StringEquals(param0, '{mod_id}'), 
+					if(StringEmpty('{default}'),
+						SetSelectedItemByIndex(0),
+						Set('{cvar}', '{default}')
+					)
+				);
+			"
+			style="group_code"
+			onevent=""
+			onevent0="SetEnabled(false); GroupCall('{mod_id}{option_id}_group', 'DoEvent(0);');"
+			onevent1="SetEnabled(true); GroupCall('{mod_id}{option_id}_group', 'DoEvent(1);');"
+		>
+			<instance name="mod_dropdown_state" state="up" color="1 1 1 1" image="up" group="{mod_id}{option_id}_group" onevent0="SetRenderMode('grayscale');" onevent1="SetRenderMode('normal');" />
+			<instance name="mod_dropdown_state" state="over" color="#69ccff" image="over" group="{mod_id}{option_id}_group" onevent0="SetRenderMode('grayscale');" onevent1="SetRenderMode('normal');" />
+			<instance name="mod_dropdown_state" state="down" color="#69ccff" image="over" group="{mod_id}{option_id}_group" onevent0="SetRenderMode('grayscale');" onevent1="SetRenderMode('normal');" />
+			
+			<widgetstate statename="listbg">
+				<frame height="+2.7h" y="-1.9h" texture="/ui/info/combobox_dropdown.tga" borderthickness="3h" color="white" />
+			</widgetstate>
+			<widgetstate statename="itembg">
+				<panel width="100%" />
+			</widgetstate>
+			<widgetstate statename="itemhighlight">
+				<panel width="100%" texture="/ui/info/header_bar_c.tga">
+					<panel width="100%" height="100%" >
+						<image height="50%" width="32" align="left" valign="top" texture="/ui/info/header_bar_tl.tga" noclick="1"/>
+						<image height="50%" width="32" align="left" valign="bottom" texture="/ui/info/header_bar_bl.tga" noclick="1"/>
+						<image height="50%" width="32" align="right" valign="top" texture="/ui/info/header_bar_tr.tga" noclick="1"/>
+						<image height="50%" width="32" align="right" valign="bottom" texture="/ui/info/header_bar_br.tga" noclick="1"/>		
+					</panel>
+				</panel>
+			</widgetstate>
+		</combobox>
+	</template>
+	<!-- END Dropdown -->
+	
+	<!-- Textbox -->
+	<template name="mod_textbox">
+		<panel color="invisible" noclick="1" width="0" height="0"/>
+		<instance name="mod_manage_cvar" cvar="{cvar}" cvartype="{cvartype=string}" default="{default}" />
+		<instance name="mod_layout" layout="{layout=default}" style="mod_layout_params" option_bordercolor="{option_bordercolor=white}" option_borderthickness="{option_borderthickness=1}" />
+		<panel visible="0" noclick="1" width="0" height="0" 
+			onload="
+				Call('{mod_id}' # mod_options_i # '_option', 
+					'Instantiate(
+						\'mod_textbox_item\'		,
+						\'cvar\'					,	\'{cvar}\'						,
+						\'default\'					,	\'{default}\'					,
+						\'option_id\'				,	mod_options_i					,
+						\'mod_id\'					,	\'{mod_id}\'					,
+						\'trigger\'					,	\'{trigger}\'					,
+						\'call_event\'				,	\'{call_event}\'				,
+						\'onchange\'				, 	\'{onchange}\'					,
+						\'group_leader\'			, 	\'{group_leader=false}\'		,
+						\'group_id\'				, 	\'{group_id}\'					,
+						\'group_leader1\'			, 	\'{group_leader1=false}\'		,
+						\'group_id1\'				, 	\'{group_id1}\'					,
+						\'group_leader2\'			, 	\'{group_leader2=false}\'		,
+						\'group_id2\'				, 	\'{group_id2}\'					,
+						\'group_disable_value\'		, 	\'{group_disable_value}\'		,
+						\'group_enable_value\'		, 	\'{group_enable_value}\'		,
+						\'maxlength\'				, 	\'{maxlength=150}\'				,
+						\'align\'					, 	\'{textalign=left}\'			,
+						\'font\'					, 	\'{font=dyn_10}\'
+					);'
+				);
+			" 
+		/>
+	</template>
+	
+	<template name="mod_textbox_item">
+		<textbox
+			x="0.3h"
+			width="-0.6h"
+			height="90%"
+			valign="center"
+			maxlength="{maxlength}"
+			textalign="{textalign}" textvalign="center"
+			font="{font}"
+			textcolor="white"
+			shadow="false"
+			color="invisible"
+			oninstantiate="SetInputLine({cvar});"
+			onenter="SetFocus(false);"
+			onesc="SetInputLine({mod_id}{option_id}_temp);"
+			onchange="Set('{cvar}', this);"
+			onfocus="CreateString('{mod_id}{option_id}_temp', this);"
+			onlosefocus="
+				Set('{cvar}', this);
+				DoEvent();
+				if(!StringEmpty('{trigger}'), Trigger('{trigger}'));
+				if(!StringEmpty('{call_event}'), Cmd('UICall {call_event} DoEvent()'));
+			"
+			watch0="mod_options_reset"
+			ontrigger0="
+				if(StringEquals(param0, '{mod_id}'), 
+					Split(
+						Set('{cvar}', '{default}'),
+						SetInputLine('{default}'),
+						DoEvent()
+					)
+				);
+			"
+			style="group_code"
+			onevent=""
+			onevent0="SetEnabled(false); SetColor('#222222'); GroupCall('{mod_id}{option_id}_group', 'DoEvent(0);');"
+			onevent1="SetEnabled(true); SetColor('invisible'); GroupCall('{mod_id}{option_id}_group', 'DoEvent(1);');"
+		/>
+	</template>
+	<!-- END Textbox -->
+	
+	<!-- Keybind Header -->
+	<!-- TODO: adjust to be above the bind buttons -->
+	<template name="mod_keybind_header">
+		<instance name="mod_layout" layout="{layout=default}" style="mod_layout_params" separator_texture="" label_color="yellow" label="Action" />
+		<panel visible="0" noclick="1" width="0" height="0"
+			onload="
+				Call('{mod_id}' # mod_options_i # '_option', 
+					'Instantiate(
+						\'mod_keybind_header_item\',
+						\'label_font\'			, \'{label_font=dyn_10}\'			,
+						\'label_color\'			, \'{label_color=yellow}\'
+					);'
+				);
+			" 
+		/>
+	</template>
+	
+	<template name="mod_keybind_header_item">
+		<panel>
+			<label width="45%" textalign="center" textvalign="bottom" font="{label_font}" color="{label_color}" shadow="true">Primary</label>
+			<label width="45%" textalign="center" textvalign="bottom" align="right" font="{label_font}" color="{label_color}" shadow="true">Secondary</label>
+		</panel>
+	</template>
+	<!-- END Keybind Header -->
+	
+	<!-- Keybind -->
+	<!-- 3.0 Keybind -->
+	<template name="mod_keybind">
+		<instance name="mod_layout" layout="{layout=default}" style="mod_layout_params" />
+		<panel visible="0" noclick="1" width="0" height="0"
+			onload="
+				if(StringEmpty('{trigger}'),
+					Call('{mod_id}' # mod_options_i # '_option', 
+						'Instantiate(
+							\'mod_keybind_item\'	,
+							\'mod_id\'				,	\'{mod_id}\'				,
+							\'table\'				,	\'{table=game}\'			,
+							\'action\'				,	\'{action=Cmd}\'			,
+							\'param\'				,	\'{param}\'
+						);'
+					),
+					Call('{mod_id}' # mod_options_i # '_option', 
+						'Instantiate(
+							\'mod_keybind_item\'	,
+							\'mod_id\'				,	\'{mod_id}\'				,
+							\'table\'				,	\'{table=game}\'			,
+							\'action\'				,	\'{action=Cmd}\'			,
+							\'param\'				,	\'Trigger {trigger} {param}\'
+						);'
+					)
+				);
+			" 
+		/>
+	</template>
+	
+	<template name="mod_keybind_button">
+		<button
+			x="{x=0.5h}"
+			width="45%" 
+			height="90%" 
+			align="{align=left}"
+			valign="center" 
+			color="invisible"
+			onmouseover="PlaySound('/shared/sounds/ui/button_over_01.wav');"
+			onclick="
+				PlaySound('/shared/sounds/ui/button_click_01.wav');
+				_keybind_table = '{table}';
+				_keybind_action = '{action}';
+				_keybind_param = '{param}';
+				_keybind_old_button = GetKeybindButton('{table}', '{action}', '{param}', {num});
+				_keybind_num = {num};
+				ShowWidget('keybind_impulse_binder');
+			"
+		>
+			<instance name="keybind_button_state" state="up" frame="false" color="white" shadowcolor="black" table="{table}" action="{action}" param="{param}" num="{num}" />
+			<instance name="keybind_button_state" state="over" table="{table}" action="{action}" param="{param}" num="{num}" />
+			<instance name="keybind_button_state" state="down" x="1" y="1" table="{table}" action="{action}" param="{param}" num="{num}" />
+		</button>
+	</template>
+	
+	<template name="mod_keybind_item">
+		<instance name="mod_keybind_button" num="0" table="{table}" action="{action}" param="{param=}" trigger="{trigger}" />
+		<instance name="mod_keybind_button" num="1" table="{table}" action="{action}" param="{param=}" trigger="{trigger}" x="-0.5h" align="right" />
+	</template>
+	<!-- END Keybind -->
+	
+	<!-- Line -->
+	<template name="mod_line">
+		<instance name="mod_layout" layout="{layout=empty}" style="mod_layout_params" option_width="{option_width=100%}" />
+		<panel visible="0" noclick="1" width="0" height="0" 
+			onload="
+				Call('{mod_id}' # mod_options_i # '_option', 
+					'Instantiate(
+						\'mod_line_item\'
+					);'
+				);
+			"
+		/>
+	</template>
+
+	<template name="mod_line_item">
+		<panel height="1" valign="center" color="#414653" />
+	</template>
+	<!-- END Line -->
+	
+	<!-- Empty -->
+	<template name="mod_empty">
+		<instance name="mod_layout" layout="{layout=empty}" style="mod_layout_params" option_width="{option_width=100%}" />
+		<panel visible="0" noclick="1" width="0" height="0" 
+			onload="
+				Call('{mod_id}' # mod_options_i # '_option', 
+					'Instantiate(
+						\'mod_empty_item\'			,
+						\'label\'					, 	\'{label}\'						,
+						\'label_height\'			, 	\'{label_height=100%}\'			,
+						\'label_width\'				, 	\'{label_width=100%}\'			,
+						\'label_offset\'			, 	\'{label_offset=0}\'			,
+						\'label_wrap\'				, 	\'{label_wrap=true}\'			,
+						\'label_textalign\'			, 	\'{label_textalign=left}\'		,
+						\'label_font\'				, 	\'{label_font=dyn_10}\'			,
+						\'label_color\'				, 	\'{label_color=white}\'			,
+						\'label_shadow\'			, 	\'{label_shadow=true}\'			,
+						\'label_shadowoffset\'		, 	\'{label_shadowoffset=1}\'		,
+						\'label_watch\'				, 	\'{label_watch}\'				,
+						\'label_ontrigger\'			, 	\'{label_ontrigger}\'			,
+						\'label_onevent\'			, 	\'{label_onevent}\'
+					);'
+				);
+			"
+		/>
+	</template>
+	
+	<template name="mod_empty_item">
+		<!-- Label -->
+		<label 
+			x="{label_offset}" 
+			width="{label_width}"
+			height="{label_height}"
+			wrap="{label_wrap}"
+			textvalign="center" 
+			textalign="label_textalign" 
+			font="{label_font}" 
+			color="{label_color}" 
+			shadow="{label_shadow}"
+			shadowoffset="{label_shadowoffset}"
+			content="{label}"
+			watch="{label_watch}" 
+			ontrigger="{label_ontrigger}"
+			onevent="{label_onevent}"
+			valign="center"
+		/>
+	</template>
+	<!-- END Empty -->
+	
+	<!-- Layout -->
+	<!-- 3.0 Mod layout -->
+	<template name="mod_layout">
+		<panel
+			grow="1" regrow="1" growinvis="0" width="100%"
+			onload="Call('mod_increment', 'DoEvent();');
+					Instantiate(
+						'mod_layout_{layout}',
+						'mod_id'					,	'{mod_id}'					,
+						'option_id'				,	mod_options_i					,
+						
+						'container_height'		, 	'{container_height}'			,
+						'container_width'			, 	'{container_width}'			,
+						
+						'label'					, 	'{label}'						,
+						'label_height'			, 	'{label_height}'				,
+						'label_width'				, 	'{label_width}'				,
+						'label_offset'			, 	'{label_offset}'				,
+						'label_wrap'				, 	'{label_wrap}'				,
+						'label_textalign'			, 	'{label_textalign}'			,
+						'label_font'				, 	'{label_font}'				,
+						'label_color'				, 	'{label_color}'				,
+						'label_shadow'			, 	'{label_shadow}'				,
+						'label_shadowoffset'		, 	'{label_shadowoffset}'		,
+						'label_watch'				, 	'{label_watch}'				,
+						'label_ontrigger'			, 	'{label_ontrigger}'			,
+						'label_onevent'			, 	'{label_onevent}'				,
+						
+						'separator_height'		, 	'{separator_height}'			,
+						'separator_width'			, 	'{separator_width}'			,
+						'separator_texture'		, 	'{separator_texture}'			,
+						'separator_color'			,	'{separator_color}'			,
+						
+						'option_height'			, 	'{option_height}'				,
+						'option_width'			, 	'{option_width}'				,
+						'option_borderthickness'	, 	'{option_borderthickness}'	,
+						'option_bordercolor'		, 	'{option_bordercolor}'		,
+						
+						'tooltip'					,	'{tooltip}'					,
+						'tooltip_width'			, 	'{tooltip_width}'
+					);"
+			oninstantiatelua="HoN_Options:InsertToCurrentMod(self)"
+			noclick="1"
+		/>
+	</template>
+
+	<!--
+		Note: width must be a % else it does not resize correctly when parent resize
+		like when the listbox resize to fit in the scrollbar
+	-->
+	<template name="mod_listitem_container">
+		<panel
+			name="{mod_id}{row_num}_listitem_container"
+			x="{margin_left}"
+			color="invisible"
+			noclick="true"
+			float="right"
+			padding="{inline_padding}"
+			group="{mod_id}{collapse_group_id}_collapse"
+			onevent0="Call('{mod_id}_list', 'HideItemByValue({row_num}); DoEvent();');"
+			onevent1="Call('{mod_id}_list', 'ShowItemByValue({row_num}); DoEvent();');"
+			oninstantiate="SetWidth((GetXFromString('100%') - GetXFromString('{margin_left}') - GetXFromString('{margin_right}')) / GetXFromString('100%') * 100 # '%');"
+		/>
+	</template>
+	
+	<!-- more old mod layout -->
+	<template name="mod_layout_empty">
+		<panel height="{container_height}" width="{container_width}" noclick="1" valign="center">
+			<!-- Option frame -->
+			<frame
+				name="{mod_id}{option_id}_option"
+				height="{option_height}" 
+				width="{option_width}" 
+				noclick="1" 
+				borderthickness="{option_borderthickness}" 
+				bordercolor="{option_bordercolor}" 
+				color="invisible"
+				valign="center"
+			/>
+		</panel>
+	</template>
+	
+	
+	<!-- Mod layout old, not existing for now... -->
+	<!-- TODO: simplify -->
+	<template name="mod_layout_default">
+		<!-- Container -->
+		<panel height="{container_height}" width="{container_width}" noclick="0" valign="center">
+			<!-- Label -->
+			<label
+				name="{mod_id}{option_id}_label" 
+				x="{label_offset}" 
+				width="{label_width}"
+				height="{label_height}"
+				wrap="{label_wrap}"
+				textvalign="center" 
+				textalign="label_textalign" 
+				font="{label_font}" 
+				color="{label_color}" 
+				shadow="{label_shadow}"
+				shadowoffset="{label_shadowoffset}"
+				content="{label}"
+				watch="{label_watch}" 
+				ontrigger="{label_ontrigger}"
+				onevent="{label_onevent}"
+				valign="center"
+				onevent0="SetColor('#222222');"
+				onevent1="SetColor('{label_color}');"
+			/>
+			<!-- Arrow separator -->
+			<image 
+				width="{separator_width}" 
+				height="{separator_height}" 
+				texture="{separator_texture}"
+				color="{separator_color}"
+				align="right"
+				valign="center"
+				oninstantiate="
+					if(StringEmpty('{separator_texture}'), SetVisible(0));
+					SetX('-' # GetXFromString('{option_width}'));
+				"
+				onevent0="SetColor('#222222');"
+				onevent1="SetColor('{separator_color}');"
+			/>	
+			<!-- Option frame -->
+			<frame
+				name="{mod_id}{option_id}_option" 
+				height="{option_height}" 
+				width="{option_width}" 
+				noclick="0" 
+				borderthickness="{option_borderthickness}" 
+				bordercolor="{option_bordercolor}" 
+				color="invisible"
+				align="right"
+				valign="center"
+				oninstantiate="
+					if(!StringEmpty('{tooltip}'), 
+						Split(
+							SetX('-100@'),
+							SetWidth((GetXFromString('{option_width}') - GetXFromString('100@')) / GetXFromString('100%') * 100 # '%')
+						)
+					);
+				"
+			/>
+			
+			<!-- Tooltip -->
+			<panel width="90@" height="90%" valign="center" noclick="1" align="right"
+				oninstantiate="
+					if(!StringEmpty('{tooltip}'), 
+						Instantiate('mod_tip', 'id', '{mod_id}{option_id}', 'title', '{label}', 'label', '{tooltip}', 'width', '{tooltip_width}'),
+						SetVisible(0)
+					);
+				"
+			/>
+		</panel>
+	</template>
+	<!-- END Layout -->
+	
+	<!-- Custom -->
+	<!-- OLD Something -->
+	<template name="mod_custom">
+		<instance name="mod_layout" style="mod_layout_default_params" layout="empty" />
+		<panel visible="0" noclick="1" width="0" height="0" 
+			onload="
+				Call('{mod_id}' # mod_options_row # '_listitem_container', 
+					'Instantiate(
+						\'{template}\'			,
+						\'option_id\'			,	mod_options_i	,
+						\'mod_id\'				,	\'{mod_id}\'
+					);'
+				);
+			"
+		/>
+	</template>
+	<!-- END Custom -->
+	
+	<!-- Tooltip -->
+	<template name="mod_tip">
+		<instance name="tip_mark" tip_id="{id}" width="100%" height="100%" />
+		<instance name="generic_tooltip_resizey" x="-3h" y="-5h" width="25h" align="right" tip_id="{id}" title="{title}" label="{label}" />
+	</template>
+	<!-- END Tooltip -->
+	
+	<!-- Container -->
+	<!-- 3.0 new container -->
+	<template name="mod_options">
+		<panel height="2.4h" noclick="true" visible="{visible=true}" align="left"
+			oninstantiatelua="HoN_Options:BumpModOffset()"
+		>
+			<panel y="1.6h" color=".2 .2 .2 1" height="1" noclick="true" />
+			<panel x="2.2h" grow="true" height="100%" color="0 0 0 1" noclick="1">
+				<label x="0.6h" y="0.2h" fitx="true" fitxpadding="0.6h" font="dyn_12" color=".8 .8 .8 1" shadow="true" content="{mod_name}" noclick="1"/>
+			</panel>
+		</panel>
+	</template>
+	<!-- END Container -->
+	
+	<!-- Lobby Button -->
+	<template name="mod_lobby_button_item">
+		<panel noclick="1" texture="/ui/fe2/elements/comm_item_bg.tga" color="#1d2f3b">
+			<label x="1h" textvalign="center" font="dyn_12" color="white">{label}</label>
+			<instance name="button2" button_name="unnamedButton48" x="-0.5h" height="70%" width="15h" align="right" valign="center" font="dyn_10" label="Configure" borderthickness=".8h" onclick="ShowOnly('{mod_id}');" onmouseover="PlaySound('/shared/sounds/ui/button_over_01.wav');" />
+		</panel>
+	</template>
+	<!-- END Lobby Button -->
+	
+	<!-- Lobby -->
+	<template name="mod_lobby">
+		<panel group="options_screens" name="mod_options_lobby" float="bottom" width="100%" grow="1" growinvis="0" padding="0.2h" noclick="1"
+			oninstantiate="
+				CreateInt('mod_options_i', 0);
+				CreateInt('mod_options_collapse_group', 0);
+				CreateInt('mod_options_row', 0);"
+		>
+					<panel noclick="1" float="bottom" width="100%" grow="1" regrow="1" growinvis="0">
+					<instance name="mod_options" mod_name="Movable Frames" />
+					<!-- moveable frames configure button -->
+					<panel width="100%" height="2.4h">
+						<instance
+							name="button2" button_name="unnamedButton49"
+							width="20%" height="2.4h"
+							align="center"
+							label="Configure"
+							onclick="	Cmd('UICall movf_control_button ShowWidget(\'movf_control\')');
+										Cmd('UICall movf_control_button_spec ShowWidget(\'movf_control\')');
+										If(GetCurrentGamePhase() ge 5,
+											HideLobby(),
+											Trigger('gmessagebox_popup', 'Movable Frames', Translate('movf_ingame_only'))
+										);"
+							onmouseoverlua="UIManager.GetInterface('main'):HoNOptionsF('HoverScroller')"
+							onmouseout="Call('options_scrollbox_scroller_down', 'FadeOut(150)');
+										Call('options_scrollbox_scroller_up', 'FadeOut(150)');"
+						/>
+					</panel>
+					<!-- stuff from all other mods -->
+					<include file="/ui/mod_options_elements.package" />
+				</panel>
+		</panel>
+	</template>
+	<!-- END Lobby -->
+	
+	<!-- Version Check -->
+	<!--
+	<trigger name="ModOptionsFormResult" />
+	<form 
+		name="mod_options_form"
+		host="dl.dropbox.com"
+		target="/u/3367086/HoN%20Mods/Mod%20Options%20Framework/version2"
+		ssl="false"
+		method="post"
+		resulttrigger="ModOptionsFormResult"
+		resultparam0="v"
+	/>
+	-->
+	<!-- END Version Check -->
+</package>

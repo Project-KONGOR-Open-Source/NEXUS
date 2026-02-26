@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+	<trigger name="sharing_update"/>
+	
+	<template name="fastshare">
+		<panel x="0h" y="5.1h" width="1.86h" height="1.86h" color="invisible">
+			<image color="{framecolor}" texture="/ui/elements/share_frame.tga"/>
+			<image
+				width="55%" height="55@"
+				align="center" valign="center"
+				noclick="1"
+				onload="SetTexture('/shared/icons/minimap_courier.tga');"
+				watch="sharing_update"
+				ontrigger="
+					If(sharing_on,
+						SetRenderMode('normal'),
+						SetRenderMode('grayscale')
+					);"
+				onshow="
+					Set('sharing_on', 0);
+					SetTexture('/shared/icons/minimap_courier.tga');
+				"
+				rendermode="grayscale"
+			/>
+			<panel name="sharing_init" watch="MatchTime" ontrigger="Set('sharing_on', '0'); Trigger('sharing_update'); DestroyWidget('sharing_init')"/>
+			<button color="invisible" interactive="false" onload="CreateString('sharing_ally0'); CreateString('sharing_ally1'); CreateString('sharing_ally2'); CreateString('sharing_ally3'); CreateBool('sharing_on');"
+				watch="AllyPlayerInfo0" ontrigger="Set('sharing_ally0', param2);"
+				watch1="AllyPlayerInfo1" ontrigger1="Set('sharing_ally1', param2);"
+				watch2="AllyPlayerInfo2" ontrigger2="Set('sharing_ally2', param2);"
+				watch3="AllyPlayerInfo3" ontrigger3="Set('sharing_ally3', param2);"
+				onmouseover="ShowWidget('teamshare_tooltip');"	
+				onmouseout="HideWidget('teamshare_tooltip');"
+				onclick="
+						If(sharing_on,
+							Split(
+								UnsharePartialControl(sharing_ally0),
+								UnsharePartialControl(sharing_ally1),
+								UnsharePartialControl(sharing_ally2),
+								UnsharePartialControl(sharing_ally3),
+								Set('sharing_on', 0),
+								Trigger('sharing_update')
+							),
+							Split(
+								SharePartialControl(sharing_ally0),
+								SharePartialControl(sharing_ally1),
+								SharePartialControl(sharing_ally2),
+								SharePartialControl(sharing_ally3),
+								Set('sharing_on', 1),
+								Trigger('sharing_update')
+							)
+						);"
+			/>
+		</panel>	
+	</template>
+</package>

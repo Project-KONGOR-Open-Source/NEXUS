@@ -1,0 +1,794 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+	<include file="credit_card.package"/>
+	
+	<trigger name="UpdateCreateAccountForm"/>
+	
+	<trigger name="UserNameCheckStatus"/>
+	<trigger name="UserNameCheckResult"/>
+	<form
+		name="UserNameCheck"
+		host="!hon"
+		target="/signup/nick_check.php"
+		statustrigger="UserNameCheckStatus"
+		resulttrigger="UserNameCheckResult"
+		resultparam0="valid"
+		resultparam1="nickname"
+		resultparam2="connect"
+		resultparam3="POST"
+	/>
+
+	<trigger name="CreateAccountStatus"/>
+	<trigger name="CreateAccountResult"/>
+	<form
+		name="CreateAccount"
+		host="!hon"
+		target="/signup/client_create_account.php"
+		statustrigger="CreateAccountStatus"
+		resulttrigger="CreateAccountResult"
+		resultparam0="complete"
+		resultparam1="account_id"
+		resultparam2="nickname"
+		resultparam3="account_type"
+		resultparam4="connect"
+		resultparam5="email"
+		resultparam6="password1"
+		resultparam7="password2"
+		resultparam8="maintenance"
+	/>
+
+	<template name="create_account_field">
+		<panel y="{y}" height="3.0h" color="invisible" align="center" width="-2.0h" noclick="1">
+			<label name="{fieldname}_label" width="100%" height="100%" textvalign="center" valign="center" align="center" font="dyn_10" color="white" shadow="true" shadowcolor="black" noclick="true" content="{label}" watch="UpdateCreateAccountForm" ontrigger="{ontrigger}"/>
+			<image x="-52%" width="3%" height="2@" valign="center" align="right" texture="/ui/info/arrow.tga" />
+			<panel width="50%" align="right">
+				<panel width="{fieldwidth=100%}" height="74%" valign="center" align="left" color="0 0 0 1">
+					<instance name="field" widgetname="{fieldname}" order="{order}" onchange="Trigger('UpdateCreateAccountForm'); {onchange}" passchar="{passchar=}" maxlength="{maxlength=-1}" form="{form=}" data="{data=}"/>
+				</panel>
+				<panel visible="{hastip=0}" noclick="1">
+					<instance name="tip_mark" tip_id="{tip_id}" width="1.8h" height="1.8h" valign="center" align="right" />
+					<instance name="generic_tooltip_resizey" x="-2.0h" y="0" width="19.8h" align="right" valign="center" tip_id="{tip_id}" title="{tip_title}" label="{tip_text}" />
+				</panel>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="create_account_window">
+		<!-- Account creation form -->
+		<panel name="create_account" color="invisible" visible="false" onshow="Trigger('UpdateCreateAccountForm');">
+			<instance
+				name="header_bar"
+				lbl="main_create_account_header"
+				height="2.5h"
+				show_close="true"
+				onclick="
+					PlaySound('/shared/sounds/ui/menu/slide_off.wav');
+					HideWidget('prime_upgrade_window');
+					Call('main_create_account_button', 'SetEnabled(true);');
+					Call('left_widgets', 'SlideX(\'-72%\', 500);');
+					Call('right_widgets', 'SlideX(\'72%\', 500);');
+					_main_create_open = 0;
+					HideGroup('main_button_effects');
+					
+				"
+			/>
+
+			<panel y="3.0h" height="9.0h" align="center" width="-2%">
+				<frame texture="/ui/info/backdrop.tga" borderthickness="2.0h" color="1 1 1 .5" noclick="1" />
+				<frame color="invisible" bordercolor="#455166" borderthickness="1" noclick="1" />
+				
+				<label width="-1.4h" height="-1.4h" align="center" valign="center" textalign="left" textvalign="top" font="dyn_10" wrap="1" color="white" shadow="true" shadowcolor="black" noclick="1">maincacct_label_beta_upgrade</label>
+			</panel>
+			
+			<!-- Account info -->
+			<instance y="13.0h" name="header_bar" align="center" width="-2%" height="2.5h" lbl="main_create_account_details_header" show_close="0"/>
+			<panel y="15.7h" width="-2%" height="27.1h" color="invisible" align="center" noclick="1">
+				<frame color=".05 .07 .1 .5" bordercolor="#455166" borderthickness="1" noclick="1" />
+				
+				<!-- Nickname -->
+				<panel y="0.6h" height="7.4h" color="invisible" align="center" width="-2.0h" noclick="1" onload="CreateBool('_nick_valid', false);">
+					<frame texture="/ui/info/backdrop.tga" borderthickness="2.0h" color="1 1 1 .5" noclick="1" />
+					<frame color="invisible" bordercolor="#455166" borderthickness="1" noclick="1" />
+
+					<label y="3.6h" width="-1.4h" height="3.0h" align="center" textalign="left" font="dyn_9" wrap="1" color="#ffaa00" shadow="true" shadowcolor="black" noclick="1">maincacct_tip_nickname</label>
+
+					<panel y="0.4h" width="-1.4h" height="3.0h" align="center">
+						<label
+							width="100%" height="100%"
+							align="center" valign="center"
+							textalign="left" textvalign="center"
+							font="dyn_10" color="white" shadow="true" shadowcolor="black"
+							noclick="true"
+							content="maincacct_label_c_nickname"
+							watch="UpdateCreateAccountForm"
+							ontrigger="If(_nick_valid, SetColor('white'), SetColor('red'));"
+						/>
+						<image x="-52%" width="3%" height="2@" valign="center" align="right" texture="/ui/info/arrow.tga" />
+						<panel width="50%" align="right">
+
+							
+							<panel name="nick_1" y="2.6h" color="invisible" height="4.0h" width="100%" align="center" visible="false" onclick="HideWidget('nick_1');" watch="UserNameCheckStatus" ontrigger="SetVisible(!StringEmpty(field_nickname));">
+								<frame texture="/ui/frames/tooltip_bg.tga" color="0 0 0 .8" borderthickness=".6h" align="left" valign="top" noclick="1">
+								<frame texture="/ui/frames/roundframe.tga" color="#A0A0A0" borderthickness=".6h" noclick="1"/>
+								
+									<label
+										y="0.6h"
+										width="-1.4h" height="100%"
+										align="center" valign="center"
+										textalign="center" textvalign="top"
+										font="dyn_9" wrap="1"
+										color="#48ee48" shadow="true" shadowcolor="black"
+										noclick="1"
+										watch="UserNameCheckResult"
+										ontrigger="
+											_nick_valid = param0 and !StringEmpty(field_nickname);
+											If(param0, SetColor('#48ee48'), SetColor('#eb3535'));
+											If(param0, SetText(Translate('main_create_account_nickname_available')), SetText(param1));
+											Trigger('UpdateCreateAccountForm');
+											"
+										watch0="UserNameCheckStatus"
+										ontrigger0="
+											If(param == 2 or param == 3, SetText(Translate('main_create_account_nickname_check')));
+											If(param == 2 or param == 3, SetColor('#ebee48'));
+											"
+									/>
+								</frame>
+							</panel>
+
+							<panel height="74%" valign="center" align="left" color="0 0 0 1">
+								<instance
+									name="field"
+									widgetname="field_nickname"
+									order="3"
+									maxlength="12"
+									form="CreateAccount"
+									data="nickname"
+									onshow="SetFocus(true);"
+									ontrigger=""
+									onchange="
+										If(StringEmpty(this),
+											Set('_nick_valid', false),
+											SleepWidget(500, 'SubmitForm(\'UserNameCheck\', \'nickname\', field_nickname);')
+											);
+										Trigger('UpdateCreateAccountForm');
+										Trigger('UserNameCheckStatus', 2);
+										"
+								/>
+							</panel>
+						</panel>
+					</panel>
+				</panel>
+
+				<!-- First name -->
+				<instance
+					name="create_account_field"
+					y="8.4h"
+					label="maincacct_label_first_name"
+					hastip="0"
+					order="4"
+					fieldname="field_firstname"
+					ontrigger="If(StringEmpty(field_firstname), SetColor('red'), SetColor('white'));"
+					tip_id="firstname_tip" tip_title="main_create_account_first_name" tip_text="main_create_account_first_name_tip"
+					form="CreateAccount" data="first_name"
+				/>
+				
+				<!-- Last name -->
+				<instance
+					name="create_account_field"
+					y="11.4h"
+					label="maincacct_label_last_name"
+					hastip="0"
+					order="5"
+					fieldname="field_lastname"
+					ontrigger="If(StringEmpty(field_lastname), SetColor('red'), SetColor('white'));"
+					tip_id="lastname_tip" tip_title="main_create_account_last_name" tip_text=""
+					form="CreateAccount" data="last_name"
+				/>
+				
+				<!-- Email address -->
+				<instance
+					name="create_account_field"
+					y="14.4h"
+					label="maincacct_label_email"
+					hastip="0"
+					order="6"
+					fieldname="field_email"
+					ontrigger="If(!IsEmailAddress(field_email), SetColor('red'), SetColor('white'));"
+					tip_id="email_tip" tip_title="main_create_account_email" tip_text="main_create_account_email_tip"
+				/>
+				
+				<!-- Confirm email -->
+				<instance
+					name="create_account_field"
+					y="17.4h"
+					label="maincacct_label_confirm_email"
+					hastip="0"
+					order="7"
+					fieldname="field_email2"
+					ontrigger="If(!IsEmailAddress(field_email2) or !StringEquals(field_email, field_email2), SetColor('red'), SetColor('white'));"
+					tip_id="confirmemail_tip" tip_title="main_create_account_confirm_email" tip_text="main_create_account_confirm_email_tip"
+					form="CreateAccount" data="email"
+				/>
+				
+				<!-- Password -->
+				<instance
+					name="create_account_field"
+					y="20.4h"
+					label="maincacct_label_password"
+					hastip="0"
+					order="8"
+					passchar="*"
+					fieldname="field_password"
+					ontrigger="If(StringEmpty(field_password) or !StringContainsOnly(field_password, '#$@!.,`\'~_-]', 'Aa0'), SetColor('red'), SetColor('white'));"
+					tip_id="password_tip" tip_title="main_create_account_password" tip_text="main_create_account_password_tip"
+					form="CreateAccount" data="password1"
+				/>
+
+				<!-- Confirm password -->
+				<instance
+					name="create_account_field"
+					y="23.4h"
+					label="maincacct_label_confirm_password"
+					hastip="0"
+					order="9"
+					passchar="*"
+					fieldname="field_password2"
+					ontrigger="
+						If(
+							StringEmpty(field_password2) or
+								!StringEquals(field_password, field_password2) or
+								!StringContainsOnly(field_password, '#$@!.,`\'~_-]',
+							'Aa0'), SetColor('red'), SetColor('white')
+						);"
+					tip_id="confirmpassword_tip" tip_title="main_create_account_confirm_password" tip_text="main_create_account_confirm_password_tip"
+					form="CreateAccount" data="password2"
+				/>
+			</panel>
+			
+			<!-- Referral -->
+			<instance y="43.6h" name="header_bar" align="center" width="-2%" height="2.5h" lbl="main_create_account_referral_header" show_close="0"/>
+			<panel y="46.3h" width="-2%" height="4.0h" color="invisible" align="center" noclick="1">
+				<frame color=".05 .07 .1 .5" bordercolor="#455166" borderthickness="1" noclick="1" />
+
+				<instance
+					name="create_account_field"
+					y="0.4h"
+					label="maincacct_label_refering_account"
+					hastip="1"
+					fieldwidth="-1.8h"
+					order="10"
+					maxlength="12"
+					fieldname="field_referral"
+					tip_id="referral_tip" tip_title="main_create_account_referer" tip_text="main_create_account_referer_tip"
+					form="CreateAccount" data="referrer"
+				/>
+			</panel>
+
+			<!-- Terms of service / Create account button-->
+			<instance y="51.3h" name="header_bar" align="center" width="-2%" height="2.5h" lbl="main_create_account_tos_header" show_close="0"/>
+			<panel y="54.0h" width="-2%" height="12.2h" color="invisible" align="center" noclick="1">
+				<frame color=".05 .07 .1 .5" bordercolor="#455166" borderthickness="1" noclick="1" />
+
+				<!-- Terms of service -->
+				<panel
+					y="0.6h"
+					width="-6.0h" height="3.1h"
+					align="center"
+					color="invisible"
+					onclick="
+						ShowWidget('tos');
+						HideWidget('Noptions');
+						HideWidget('replay_viewer');
+						PlaySound('/shared/sounds/ui/menu/slide_on.wav');
+						Call('main_options_button', 'SetEnabled(true);');
+						Call('right_widgets', 'SlideX(\'26.8%\', 500);');
+					"
+				>
+					<label textalign="center" wrap="1" font="dyn_10" color="white" noclick="1">maincacct_label_tos</label>
+				</panel>
+
+				<!-- Create account button -->
+				<instance
+					name="button2" button_name="unnamedButton40"
+					y="5.0h"
+					width="26.0h" height="2.4h"
+					align="center"
+					label="maincacct_button_create_new_acct"
+					enabled="false"
+					watch="UpdateCreateAccountForm"
+					ontrigger="
+						SetEnabled(
+							(_nick_valid) and
+							!StringEmpty(field_firstname) and
+							!StringEmpty(field_lastname) and
+							!StringEmpty(field_email) and
+							!StringEmpty(field_email2) and
+							StringEquals(field_email, field_email2) and
+							!StringEmpty(field_password) and
+							!StringEmpty(field_password2) and
+							StringEquals(field_password, field_password2)
+							);
+						"
+					onclick="SubmitForm('CreateAccount');"
+				/>
+
+				<label y="8.4h" width="-6.0h" height="3.0h" align="center" textalign="center" wrap="1" font="dyn_9" color="white">maincacct_label_customer_service</label>
+			</panel>
+			
+			<!-- Create account status -->
+			<panel
+				name="create_problem"
+				color="0 0 0 .75"
+				align="center"
+				noclick="true" visible="false"
+				watch="CreateAccountStatus"
+				ontrigger="If(param != 0, SetVisible(true));"
+				>
+				<panel width="-12.0h" height="12.0h" align="center" valign="center">
+					<frame texture="/ui/frames/tooltip_bg.tga" color="#0c1b3bc9" borderthickness=".6h" align="left" valign="top">
+						<frame texture="/ui/frames/roundframe.tga" color="#A0A0A0" borderthickness=".6h"/>
+						<instance
+							name="header_bar"
+							buttonsize="1.8h"
+							height="2.4h"
+							lbl="main_create_account_processing_header"
+							show_close="false"
+						/>
+
+						<instance
+							name="button2" button_name="unnamedButton41"
+							y="-1.0h"
+							width="18.0h" height="2.4h"
+							align="center" valign="bottom"
+							label="maincacct_label_correct_an_error"
+							onclick="PlaySound('/shared/sounds/ui/button_click.mp3'); Call('create_problem', 'FadeOut(250);');"
+							visible="0"
+							watch="CreateAccountResult"
+							ontrigger="
+								If(StringEquals(param0, 'NO'), SetVisible(true));
+								"							
+						/>
+						
+						<label
+							y="4.0h"
+							width="-5.0h" height="100%"
+							align="center"
+							textalign="center" wrap="1"
+							font="dyn_10" color="white" noclick="true"
+							watch="CreateAccountResult"
+							ontrigger="
+								If(StringEquals(param0, 'NO') and !StringEmpty(param8), SetText(param8));
+								If(StringEquals(param0, 'NO') and !StringEmpty(param4), SetText(param4));
+								If(StringEquals(param0, 'NO') and !StringEmpty(param2), SetText(param2));
+								If(StringEquals(param0, 'NO') and !StringEmpty(param5), SetText(Translate('main_create_account_result_email', 'email', param5)));
+								If(StringEquals(param0, 'NO') and !StringEmpty(param6), SetText(Translate('main_create_account_result_password', 'password', param6)));
+								If(StringEquals(param0, 'NO') and !StringEmpty(param7), SetText(Translate('main_create_account_result_password', 'password', param7)));
+								If(StringEquals(param0, 'NO'), SetColor('#eb3535'), SetColor('#48ee48'));
+
+								If(StringEquals(param0, 'NO') and (!StringEmpty(param6) or !StringEmpty(param7)), Call('field_password2', 'Clear();'));
+								If(StringEquals(param0, 'NO') and (!StringEmpty(param6) or !StringEmpty(param7)), Call('field_password1', 'Clear(); SetFocus(true);'));
+								If(StringEquals(param0, 'NO') and !StringEmpty(param5), Call('field_email2', 'Clear();'));
+								If(StringEquals(param0, 'NO') and !StringEmpty(param5), Call('field_email', 'Clear(); SetFocus(true);'));
+								If(StringEquals(param0, 'NO') and !StringEmpty(param2), Call('field_nickname', 'Clear(); SetFocus(true);'));
+
+								If(StringEquals(param0, 'YES'), Call('main_login_user', 'SetInputLine(\'' # field_nickname # '\');'));
+								If(StringEquals(param0, 'YES'), Call('main_login_password', 'SetInputLine(\'' # field_password # '\');'));
+								If(StringEquals(param0, 'YES'), Login(main_login_user, main_login_password));
+
+								If(StringEquals(param0, 'YES'), Call('field_nickname', 'Clear();'));
+								If(StringEquals(param0, 'YES'), Call('field_firstname', 'Clear();'));
+								If(StringEquals(param0, 'YES'), Call('field_lastname', 'Clear();'));
+								If(StringEquals(param0, 'YES'), Call('field_email', 'Clear();'));
+								If(StringEquals(param0, 'YES'), Call('field_email2', 'Clear();'));
+								If(StringEquals(param0, 'YES'), Call('field_password', 'Clear();'));
+								If(StringEquals(param0, 'YES'), Call('field_password2', 'Clear();'));
+								If(StringEquals(param0, 'YES'), Call('field_referral', 'Clear();'));
+								If(StringEquals(param0, 'YES'), HideWidget('create_problem'));
+								"
+							watch0="CreateAccountStatus"
+							ontrigger0="
+								If(param == 2 or param == 3, SetText(Translate('main_create_account_creating_account')));
+								If(param == 2 or param == 3, SetColor('#ebee48'));
+								"
+						/>
+					</frame>
+				</panel>
+			</panel>
+		</panel>
+
+		<!-- Create account success / Prime upgrade -->
+		<panel
+			name="prime_upgrade_window"
+			color="0 0 0 1"
+			visible="0" blockinput="true"
+			watch="CreateAccountResult"
+			ontrigger="SetVisible(StringEquals(param0, 'YES'));"
+		>
+			<instance
+				name="header_bar"
+				height="2.5h"
+				lbl="main_create_account_upgrade_header"
+				show_close="true"
+				onclick="
+						PlaySound('/shared/sounds/ui/menu/slide_off.wav');
+						HideWidget('prime_upgrade_window');
+						HideWidget('preorder_features');
+						Call('left_widgets', 'SlideX(\'-72%\', 500);');
+						Call('right_widgets', 'SlideX(\'72%\', 500);');
+						
+						HideGroup('main_button_effects');
+						_main_upgrade_open = 0;
+				"
+			/>
+
+
+
+			
+			
+			
+			
+			
+			<panel y="3.5h" float="bottom" padding="0.9h" reverse="true">
+			
+			
+			
+			
+			
+				<panel width="100%" grow="true">
+					<panel align="center" width="-2h" height="4h">
+						<frame color="invisible" bordercolor="#455166" borderthickness="1" noclick="1" />
+						<!-- First name -->
+						<instance
+							name="upgrade_account_field"
+							y="4.2h"
+							label="creditcard_label_first_name"
+							hastip="true"
+							order="11"
+							fieldwidth="-1.8h"
+							fieldname="field_ccfirstname"
+							ontrigger="If(StringEmpty(field_ccfirstname), SetColor('red'), SetColor('white'));"
+							tip_id="ccfname_tip" tip_title="creditcard_label_first_name" tip_text="credit_card_first_name_tip"
+							form="AccountUpgrade" data="bill_first_name"
+						/>
+					</panel>
+				</panel>
+
+
+				<panel width="100%" grow="true">
+					<panel align="center" width="-2h" height="4h">
+						<frame color="invisible" bordercolor="#455166" borderthickness="1" noclick="1" />
+						<!-- Last name -->
+						<instance
+							name="upgrade_account_field"
+							y="7.2h"
+							label="creditcard_label_last_name"
+							hastip="true"
+							order="12"
+							fieldwidth="-1.8h"
+							fieldname="field_cclastname"
+							ontrigger="If(StringEmpty(field_cclastname), SetColor('red'), SetColor('white'));"
+							tip_id="cclname_tip" tip_title="creditcard_label_last_name" tip_text="credit_card_last_name_tip"
+							form="AccountUpgrade" data="bill_last_name"
+						/>
+					</panel>
+				</panel>
+
+				<panel width="100%" grow="true">
+					<panel align="center" width="-2h" height="4h">
+						<frame color="invisible" bordercolor="#455166" borderthickness="1" noclick="1" />
+						<!-- Zip code -->
+						<instance
+							name="upgrade_account_field"
+							y="10.2h"
+							label="creditcard_label_billing_zip"
+							hastip="true"
+							order="13"
+							fieldwidth="-1.8h"
+							fieldname="field_cczip"
+							ontrigger="If(StringEmpty(field_cczip), SetColor('red'), SetColor('white'));"
+							tip_id="cczip_tip" tip_title="creditcard_label_billing_zip" tip_text="credit_card_billing_zip_tip"
+							form="AccountUpgrade" data="zip"
+						/>
+					</panel>
+				</panel>
+
+				<panel width="100%" grow="true">
+					<panel align="center" width="-2h" height="6h">
+						<frame color="invisible" bordercolor="#455166" borderthickness="1" noclick="1" />
+						<!-- CC Number -->
+						<image texture="/ui/elements/cc.tga" width="8.0h" height="2.0h" x="1h" y="3h" />
+						<instance
+							name="upgrade_account_field"
+							y="10.2h"
+							label="creditcard_label_prime_card_number"
+							hastip="false"
+							order="14"
+							fieldwidth="-1.8h"
+							fieldname="field_ccnum"
+							ontrigger="If(!IsValidCCNumber(field_ccnum), SetColor('red'), SetColor('white'));"
+							tip_id="ccnum_tip" tip_title="" tip_text=""
+							form="AccountUpgrade" data="card_number"
+						/>
+					</panel>
+				</panel>
+				
+				
+				<panel width="100%" grow="true">
+					<panel align="center" width="-2h" height="4h">
+						<frame color="invisible" bordercolor="#455166" borderthickness="1" noclick="1" />
+						<!-- CVV Number -->
+						<instance
+							name="upgrade_account_field"
+							y="10.2h"
+							label="creditcard_label_prime_cvv_number"
+							hastip="true"
+							order="15"
+							fieldwidth="-1.8h"
+							fieldname="field_cccvv"
+							ontrigger="If(StringLength(field_cccvv) lt 3 or !StringContainsOnly(field_cccvv, '', '0'),
+								SetColor('red'),
+								SetColor('white')
+								);"
+							tip_id="cccvv_tip" tip_title="creditcard_label_prime_cvv_number" tip_text="creditcard_label_cvv_number"
+							form="AccountUpgrade" data="cvv"
+							onfocus="ShowWidget('cccvv_img');" onlosefocus="HideWidget('cccvv_img');"
+						/>
+						<panel name="cccvv_img" width="21.3h" height="10.65h" x="0" y="3.0h" visible="0">
+							<image texture="/ui/elements/cvv.tga"/>
+						</panel>
+					</panel>
+				</panel>
+			
+			
+				<!-- exp date container -->
+				<panel width="100%" grow="true">
+					<panel align="center" width="-2h" height="4h">
+						<frame color="invisible" bordercolor="#455166" borderthickness="1" noclick="1" />
+						<!-- Expiration Date -->
+						
+						
+						
+						<panel align="center" y="1h" width="-1h" height="2h" float="right">
+							<label name="field_exp_label" width="28%" height="2h" font="dyn_11" color="white" shadow="true" content="creditcard_label_prime_expiration" watch="UpdateAccountUpgradeForm" ontrigger="If(
+							field_ccmonth lt 1 or
+							field_ccmonth gt 12 or
+							field_ccyear lt GetYear() or
+							(field_ccyear == GetYear() and field_ccmonth lt GetMonth()),
+								SetColor('red'),
+								SetColor('white')
+							);"/>
+							<panel width="5%" height="2h">
+								<image align="right" width="70@" height="60%" valign="center" texture="/ui/info/arrow.tga" />
+							</panel>
+							<panel width="57%" height="2h">
+
+								<!-- field data -->
+									
+								<label
+									width="100%" height="100%"
+									align="center" valign="center"
+									textalign="left" textvalign="center"
+									font="dyn_10" color="white" shadow="true" shadowcolor="black" noclick="1"
+									content="creditcard_label_prime_month"
+									watch="UpdateAccountUpgradeForm"
+									ontrigger="
+										If(
+											field_ccmonth lt 1 or
+											field_ccmonth gt 12 or
+											field_ccyear lt GetYear() or
+											(field_ccyear == GetYear() and field_ccmonth lt GetMonth()),
+												SetColor('red'),
+												SetColor('white')
+											);
+										"
+								/>
+								
+								<panel width="8h" height="2h" x="5h">
+									<instance
+										name="Noptions_combobox"
+										id="field_ccmonth"
+										align="right" width="8.0h" itemwidth="100%" maxlistheight="5"
+										onload="CreateString('_purchase_month', '01');"
+										onshow="ListBoxCmd('Select 0');"
+										onselect="Trigger('UpdateAccountUpgradeForm');"
+										populate="
+											AddTemplateListItem('Ncombobox_item', '01', 'label', '01');
+											AddTemplateListItem('Ncombobox_item', '02', 'label', '02');
+											AddTemplateListItem('Ncombobox_item', '03', 'label', '03');
+											AddTemplateListItem('Ncombobox_item', '04', 'label', '04');								
+											AddTemplateListItem('Ncombobox_item', '05', 'label', '05');
+											AddTemplateListItem('Ncombobox_item', '06', 'label', '06');
+											AddTemplateListItem('Ncombobox_item', '07', 'label', '07');
+											AddTemplateListItem('Ncombobox_item', '08', 'label', '08');
+											AddTemplateListItem('Ncombobox_item', '09', 'label', '09');
+											AddTemplateListItem('Ncombobox_item', '10', 'label', '10');
+											AddTemplateListItem('Ncombobox_item', '11', 'label', '11');								
+											AddTemplateListItem('Ncombobox_item', '12', 'label', '12');
+											"
+										form="AccountUpgrade" formdata="month"
+									/>
+									
+								</panel>
+								
+								<label
+									width="100%" height="100%"
+									textvalign="center" textalign="left"
+									valign="center" x="13.5h"
+									font="dyn_9" color="white" shadow="true" shadowcolor="black" noclick="1"
+									content="creditcard_label_prime_year"
+									watch="UpdateAccountUpgradeForm"
+									ontrigger="If(field_ccyear lt GetYear(), SetColor('red'), SetColor('white'));"
+								/>
+								
+								<panel width="8h" height="2h" x="17h">
+									<instance
+										name="Noptions_combobox"
+										id="field_ccyear"
+										align="right" width="8.0h" itemwidth="100%" maxlistheight="5"
+										onload="CreateString('_purchase_month', '01');"
+										onshow="ListBoxCmd('Select 0');"
+										onselect="Trigger('UpdateAccountUpgradeForm');"
+										populate="
+											AddTemplateListItem('Ncombobox_item', '2009', 'label', '2009');
+											AddTemplateListItem('Ncombobox_item', '2010', 'label', '2010');
+											AddTemplateListItem('Ncombobox_item', '2011', 'label', '2011');								
+											AddTemplateListItem('Ncombobox_item', '2012', 'label', '2012');
+											AddTemplateListItem('Ncombobox_item', '2013', 'label', '2013');
+											AddTemplateListItem('Ncombobox_item', '2014', 'label', '2014');
+											AddTemplateListItem('Ncombobox_item', '2015', 'label', '2015');
+											AddTemplateListItem('Ncombobox_item', '2016', 'label', '2016');
+											AddTemplateListItem('Ncombobox_item', '2017', 'label', '2017');
+											AddTemplateListItem('Ncombobox_item', '2018', 'label', '2018');								
+											AddTemplateListItem('Ncombobox_item', '2019', 'label', '2019');
+											AddTemplateListItem('Ncombobox_item', '2020', 'label', '2020');
+											"
+										form="AccountUpgrade" formdata="year"
+									/>
+								</panel>
+									
+								<!-- end field data -->
+							
+							</panel>
+							<panel width="9.75%" height="2h" align="right">
+								<instance name="tip_mark" tip_id="ccexp_tip" width="100@" height="100%" valign="center" align="right" />
+								<instance name="generic_tooltip_resizey" x="20.8h" y="-2.0h" width="19.8h" align="right" valign="center" tip_id="ccexp_tip" title="creditcard_label_prime_expiration" label="creditcard_label_expiration_date" />
+							</panel>
+						</panel>
+						
+						
+						
+					</panel>
+				</panel>
+				
+				<!-- end exp date container -->
+				
+				<panel width="100%" grow="true">
+					<panel align="center" width="-2h" height="6h">
+						<frame texture="/ui/info/backdrop.tga" borderthickness="2.0h" color="1 1 1 .5" noclick="1" />
+						<frame color="invisible" bordercolor="#455166" borderthickness="1" noclick="1" />
+						<image width="4.5h" height="4.5h" x=".5h" valign="center" texture="/ui/elements/thawte.tga" />			
+						<label width="-5h" height="5h" x="5h" valign="center" textalign="center" textvalign="center" wrap="1" font="dyn_10" color="white" noclick="1">creditcard_label_secure_card</label>
+					</panel>
+				</panel>
+				
+				<panel width="-2h" height="3.5h" align="center">
+					<frame texture="/ui/info/backdrop.tga" borderthickness="2.0h" color="1 1 1 .5" noclick="1" />
+					<frame color="invisible" bordercolor="#455166" borderthickness="1" noclick="1" />
+					<instance
+						name="button2" button_name="unnamedButton42"
+						width="24.0h" height="2.5h"
+						label="creditcard_label_upgrade_prime"
+						align="center"
+						valign="center"
+						enabled="false"
+						watch="UpdateAccountUpgradeForm"
+						font="dyn_12"
+						ontrigger="
+							SetEnabled(
+								!StringEmpty(field_ccfirstname) and
+								!StringEmpty(field_cclastname) and
+								!StringEmpty(field_cczip) and
+								IsValidCCNumber(field_ccnum) and
+								StringLength(field_cccvv) ge 3 and
+								StringLength(field_cccvv) le 4 and
+								StringContainsOnly(field_cccvv, '', '0') and
+								field_ccmonth ge 1 and
+								field_ccmonth le 12 and
+								field_ccyear ge GetYear() and
+								(field_ccyear gt GetYear() or field_ccmonth ge GetMonth()) and
+								GetAccountID() != -1
+								);
+							"
+						onclick="SubmitForm('AccountUpgrade', 'account_id', GetAccountID(), 'nickname', GetAccountName(), 'email', GetAccountEmail());"
+					/>
+					
+					<panel visible="false" name="AccountUpgradeStatusIndicator" color="0 0 0 1" watch="AccountUpgradeStatus" ontrigger="SetVisible(param == 2 or param == 1);">
+						<frame texture="/ui/info/backdrop.tga" borderthickness="2.0h" color="1 1 1 .5" noclick="1" />
+						<frame color="invisible" bordercolor="#455166" borderthickness="1" noclick="1" />
+						<label width="-1h" height="-1h" textvalign="center" textalign="center" align="center" valign="center" shadow="true" color="white" font="dyn_11">credit_card_processing</label>
+					</panel>
+					
+				</panel>
+			
+			<!-- End floating form fields -->
+			</panel>
+			
+			<!-- TOS -->
+					
+			<panel align="center" width="-2h" valign="bottom" height="20h">
+				<frame texture="/ui/info/backdrop.tga" borderthickness="2.0h" color="1 1 1 1" noclick="1" />
+				<frame color="invisible" bordercolor="#455166" borderthickness="1" noclick="1" />
+				<panel x=".5h" y=".5h" width="-1h" height="-1h">
+					<textbuffer
+						scrolltexture="/ui/info/combobox.tga"
+						handleheight="2.0h"
+						scrollbarsize="2.0h"				
+						exteriorscrollbars="false"
+						textalign="left"
+						font="dyn_10"
+						textcolor="white"
+						color="invisible"
+						shadow="1"
+						wrap="true"
+						noclick="0"				
+						file=":/tos.txt"
+						height="-.25h"
+						width="100%"
+					/>
+				</panel>
+			</panel>
+			
+		</panel>
+		
+		<!-- Successful account upgrade -->
+		<panel color="0 0 0 .5" name="AccountUpgradeSuccessIndicator" watch="AccountUpgradeResult" visible="false" ontrigger="SetVisible(StringEquals(param0, 'YES'));">
+			<panel align="center" valign="center" width="25h" height="16h" color="0 0 0 1">
+				<frame color="invisible" bordercolor="#455166" borderthickness="1" noclick="1" />
+				<panel width="100%" height="2.5h" noclick="1">
+					<instance name="header_bar" lbl="creditcard_label_upgrade_prime" lbl_font="dyn_10" show_close="0" />
+				</panel>
+				<panel valign="bottom" height="-3.5h" y="-.5h" width="-1h" x=".5h">
+					<frame color="invisible" bordercolor="#455166" borderthickness="1" noclick="1" />
+					<panel align="center" valign="center" width="-1h" height="-1h">
+						<label color="white" shadow="true" font="dyn_10" width="100%" wrap="true" fity="true">credit_card_upgrade_success</label>
+					</panel>
+					<instance
+						name="button2" button_name="unnamedButton43"
+						y="-.5h"
+						valign="bottom" align="center"
+						width="12.0h" height="3h"
+						label="Continue"
+						font="dyn_10"
+						onclick="Login(main_login_user, md5(main_login_password)); HideWidget('AccountUpgradeSuccessIndicator');"
+					/>
+				</panel>
+			</panel>
+		</panel>
+		
+		<!-- Failed account upgrade -->
+		<panel color="0 0 0 .5" name="AccountUpgradeFailureIndicator" watch="AccountUpgradeResult" visible="false" ontrigger="SetVisible(StringEquals(param0, 'NO'));">
+			<panel align="center" valign="center" width="30h" height="20h" color="0 0 0 1">
+				<frame color="invisible" bordercolor="#455166" borderthickness="1" noclick="1" />
+				<panel width="100%" height="2.5h" noclick="1">
+					<instance name="header_bar" lbl="credit_card_error_plain" lbl_font="dyn_10" show_close="0" />
+				</panel>
+				<panel valign="bottom" height="-3.5h" y="-.5h" width="-1h" x=".5h">
+					<frame color="invisible" bordercolor="#455166" borderthickness="1" noclick="1" />
+					<panel align="center" valign="center" width="-1h" height="-1h" float="bottom" padding=".5h">
+						<label color="white" shadow="true" font="dyn_10" width="100%" wrap="true" fity="true" watch="AccountUpgradeResult" ontrigger="SetText(param1 # '  ' # param2);" />
+					</panel>
+					<instance
+						name="button2" button_name="unnamedButton44"
+						y="-.5h"
+						valign="bottom" align="center"
+						width="12.0h" height="3h"
+						label="general_ok"
+						font="dyn_10"
+						onclick="HideWidget('AccountUpgradeFailureIndicator');"
+					/>
+				</panel>
+			</panel>
+		</panel>
+		
+	</template>
+</package>

@@ -159,6 +159,11 @@ public class KONGOR
         builder.Services.AddKeyedScoped<IClientRequestHandler, HeroStatsHandler>("get_account_all_hero_stats");
         builder.Services.AddKeyedScoped<IClientRequestHandler, HeroStatsHandler>("get_campaign_hero_stats");
         builder.Services.AddKeyedScoped<IClientRequestHandler, HeroStatsHandler>("get_account_mastery");
+        builder.Services.AddKeyedScoped<IClientRequestHandler, GetPlayerAwardSummHandler>("get_player_award_summ");
+        builder.Services.AddKeyedScoped<IClientRequestHandler, GetSeasonsHandler>("get_seasons");
+
+        // ECHO TEST (Debug)
+        builder.Services.AddKeyedScoped<IClientRequestHandler, EchoHandler>("echotest");
 
         // Register Game Handlers
         builder.Services.AddKeyedScoped<IClientRequestHandler, GameHandler>("create_game");
@@ -170,6 +175,7 @@ public class KONGOR
         builder.Services.AddKeyedScoped<IClientRequestHandler, ProductsHandler>("get_products");
         builder.Services.AddKeyedScoped<IClientRequestHandler, DailySpecialHandler>("get_daily_special");
         builder.Services.AddKeyedScoped<IClientRequestHandler, RewardsHandler>("claim_season_rewards");
+        builder.Services.AddKeyedScoped<IClientRequestHandler, ClaimMasteryRewardHandler>("claim_mastery_reward");
 
         // Register Misc Handlers
         builder.Services.AddKeyedScoped<IClientRequestHandler, ReplayHandler>("upload_replay");

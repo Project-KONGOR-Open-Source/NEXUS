@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+	<lua file="/ui/scripts/store2_grabbag.lua" />
+
+	<template name="grabBag2PrizeModel">
+		<panel name="grab_bag2_prize_model_{id}" noclick="0" color="invisible" visible="0" >
+			<!-- the actual model panel -->
+			<modelpanel
+				align="center"
+				valign="center"
+				width="100h"
+				height="100h"
+				name="grab_bag2_prize_model_{id}_model"
+				noclick="true"
+				model="/shared/models/invis.mdf"
+				model0="/shared/models/invis.mdf"
+				onhidelua="
+					self:SetEffect('')
+					self:SetModel('/shared/models/invis.mdf')
+					self:SetModel(0, '/shared/models/invis.mdf')
+				"
+				anim="idle"
+				cameranear="0"
+				camerafar="20000.0"
+				depthclear="true"
+				depthcompress="false"
+				lookat="false"
+				cameradistance="30"
+				camerapos="30 2500 80"
+				cameraangles="0 0 180"
+				camerafov="7"
+				modelpos="0 0 0"
+				modelangles="-15.0 0 0.0"
+				modelscale="1.0"
+				sunazimuth="120"
+				sunaltitude="20"
+				suncolor="0.9 0.9 0.9"
+				ambientcolor="0.6 0.7 0.7"
+				scenebuffer="true"
+				resourcecontext="grabbag"
+			/>
+
+		</panel>
+	</template>
+
+	<template name="grabBag2PrizeIcon">
+		<panel name="grab_bag2_prize_icon_{id}" noclick="0" color="invisible" visible="0"
+			width="512i" height="512i" align="center" valign="center">
+			<image texture="/ui/fe2/elements/store2/border_s_back.png" align="center" valign="center" x="-1i" y="-28i" width="240i" height="240i" noclick="0"/>
+			<image name="grab_bag2_prize_icon_{id}_icon" align="center" valign="center" x="1i" y="-32i" width="110" height="110" noclick="0" />
+			<image texture="/ui/fe2/elements/store2/vanityboothframe.png" align="center" valign="center" width="450i" height="450i" />
+			<label name="grab_bag2_prize_icon_{id}_nameColor" content="Name Color" align="center" valign="center" textalign="center" textvalign="center" height="32i" noclick="0" font="dyn_14" y="45i" />
+		</panel>
+	</template>
+
+	<template name="grabBag2Chest">
+		<panel name="grab_bag2_prize_chest_{id}" color="invisible" align="center" y="-250i"
+			onclicklua="UIManager.GetInterface('main'):HoNGrabbag2F('ClickGrabBagChest', '{id}')"
+			onmouseoverlua="UIManager.GetInterface('main'):HoNGrabbag2F('HoverGrabBagChest', '{id}')"
+			onmouseoutlua="UIManager.GetInterface('main'):HoNGrabbag2F('UnhoverGrabBagChest', '{id}')"
+		>
+			<modelpanel
+				name="grab_bag2_prize_chest_{id}_model"
+				align="center"
+				valign="center"
+				width="50h"
+				height="50h"
+				resourcecontext="grabbag"
+				onhidelua="self:SetEffect('')"
+				noclick="true"
+				anim="idle"
+				modelangles="0 0 180"
+				camerafov="25"
+				cameranear="1"
+				carmerafar="100"
+				depthclear="true"
+				depthcompress="true"
+				sunazimuth="165"
+				sunaltitude="180"
+				suncolor="0.6 0.6 0.6"
+				ambientcolor="0.8 0.8 0.8"
+				posteffects="true"
+				outline="false"
+				postoutline="/core/post/outline.posteffect"
+
+			/>
+			<panel name="grab_bag2_prize_chest_{id}_sleeper" noclick="1" />
+			<panel name="grab_bag2_prize_chest_{id}_shaker" noclick="1" />
+		</panel>
+	</template>
+
+	<template name="grabBag2Prize">
+		<panel name="grab_bag2_prize_{id}_master" noclick="1" visible="1">
+			<panel name="grab_bag2_prize_{id}" noclick="0" visible="0">
+				<panel name="grab_bag2_prize_{id}_clipper" noclick="1" clip="1" align="center" width="100w" height="100h">
+					<panel name="grab_bag2_prize_{id}_slider" height="38h" y="5h" width="20h" noclick="1" align="center" >
+						<instance name="grabBag2PrizeModel" id="{id}" />
+						<instance name="grabBag2PrizeIcon" id="{id}" />
+						<panel valign="bottom" height="20i" noclick="0" >
+							<label name="grab_bag2_prize_{id}_name" font="dyn_14" textalign="center" outline="1" noclick="0" color="#8e6b5b" />
+						</panel>
+					</panel>
+				</panel>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="grabBag2">
+		<panel name="grabBag2" height="100h" width="180h" align="center" valign="center" visible="false" color="0 0 0 0.85"
+			onhidelua="	GetWidget('grab_bag2_theme_modelpanel_fore'):DoEventN(9)
+						GetWidget('grab_bag2_theme_modelpanel_back'):DoEventN(9)"
+			onevent1lua="
+				self:FadeOut(150)
+				self:UICmd('ChatRefreshUpgrades(); ClientRefreshUpgrades();')
+				if (UIGamePhase() >= 1) then
+					self:UICmd('ServerRefreshUpgrades()')
+				end
+			">
+			<panel name="grab_bag2_sleeper_1" noclick="1" />
+			<panel name="grab_bag2_sleeper_2" noclick="1" />
+			<panel name="grab_bag2_theme_sleeper" noclick="1" />
+
+			<!-- overlay for themes -->
+			<image name="grab_bag2_theme_back" noclick="1" resourcecontext="grabbag" visible="0" />
+			<modelpanel name="grab_bag2_theme_modelpanel_back" noclick="1" resourcecontext="grabbag" visible="0"
+				anim="idle"
+				model=""
+				effect=""
+				onevent9lua="self:SetModel('') self:SetEffect('')"
+				camerapos="0 100 -60"
+				cameraangles="0 0 180"
+				camerafov="125"
+				modelangles="0 0 180"
+				modelpos="-20 0 0"
+				sunaltitude="10"
+				sunazimuth="120"
+				fog="true"
+				fogcolor="0 0 0" fognear="0" fogfar="100" fogscale="1"
+				lookat="false"
+			/>
+
+			<panel align="center" noclick="1" width="25h" valign="center">
+				<instance name="grabBag2Prize" id="1" />
+				<instance name="grabBag2Prize" id="2" />
+				<instance name="grabBag2Prize" id="3" />
+				<instance name="grabBag2Prize" id="4" />
+				<instance name="grabBag2Prize" id="5" />
+			</panel>
+
+			<panel width="25h" valign="bottom" height="30%" y="-12h" align="center" noclick="1" >
+				<instance name="grabBag2Chest" id="1" />
+
+				<instance name="store2_buy_button" btname="store2_grabbag_comfirm"
+					label="general_confirm" valign="bottom" align="center" y="2h"
+					onclicklua="GetWidget('grabBag2'):DoEventN(1)" visible="false"/>
+			</panel>
+
+			<!-- overlay for themes -->
+			<modelpanel name="grab_bag2_theme_modelpanel_fore" noclick="1" resourcecontext="grabbag" visible="0"
+				anim="idle"
+				model=""
+				effect=""
+				onevent9lua="self:SetModel('') self:SetEffect('')"
+				camerapos="0 100 -60"
+				cameraangles="0 0 180"
+				camerafov="125"
+				modelangles="0 0 180"
+				modelpos="-20 0 0"
+				sunaltitude="10"
+				sunazimuth="120"
+				fog="true"
+				fogcolor="0 0 0" fognear="0" fogfar="100" fogscale="1"
+				lookat="false"
+			/>
+			<image name="grab_bag2_theme_fore" noclick="1" resourcecontext="grabbag" visible="0"/>
+
+			<!-- exit button -->
+			<panel width="125h" noclick="1" align="center" visible="0">
+				<button width="32i" height="32i" align="right" x="-1h" y="10h" color="invisible"
+					onclicklua="GetWidget('grabBag2'):DoEventN(1)"
+				>
+					<widgetstate statename="up">
+						<image texture="/ui/fe2/elements/store2/close2.png" />
+					</widgetstate>
+					<widgetstate statename="over">
+						<image texture="/ui/fe2/elements/store2/close2_over.png" />
+					</widgetstate>
+					<widgetstate statename="down">
+						<image texture="/ui/fe2/elements/store2/close2_over.png" />
+					</widgetstate>
+				</button>
+			</panel>
+		</panel>
+	</template>
+</package>

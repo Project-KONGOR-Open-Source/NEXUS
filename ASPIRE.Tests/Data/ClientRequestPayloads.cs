@@ -161,8 +161,7 @@ public static class ClientRequestPayloads
         {
             { "f", "show_simple_stats" },
             { "cookie", cookie },
-            { "nickname", nickname },
-            { "table", "mastery" } // Optional?
+            { "nickname", nickname }
         };
     }
 

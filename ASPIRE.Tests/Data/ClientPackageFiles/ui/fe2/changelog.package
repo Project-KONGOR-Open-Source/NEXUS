@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+
+	<template name="change_log">
+	
+		<panel y="-110%" width="70.0h" align="center" name="change_log" color=".1 .1 .1 1" visible="{visible=0}" noclick="true">
+			<panel x="0" y="-100%" height="203.6%" width="90%"  align="center" texture="mainmenu/upper_frame_center.tga"/>			
+			<panel x="18h" y="-100%" height="203.6%" width="50@"  align="right" texture="mainmenu/upper_frame_right.tga"/>
+			<panel x="-18h" y="-100%" height="203.6%" width="50@"  align="left" texture="mainmenu/upper_frame_left.tga"/>
+			
+			<!-- Header -->
+			<panel y="1.0h" height="2.8h" width="-6.0h" align="center" noclick="true">
+				<instance name="header_bar" show_close="true" onclicklua="UIManager.GetInterface('main'):HoNMainF('MainMenuPanelToggle', 'change_log', nil, false)" />
+				<panel width="-1.0h" align="center" noclick="true" passivechildren="true">							
+					<label height="100%" valign="center" textalign="left" textvalign="center" color="white" shadow="true" font="dyn_12" noclick="true" content="patchnotes_title"/>
+				</panel>
+			</panel>
+			
+
+			<panel y="4.0h" width="-6.0h" height="-5.5h" align="center" noclick="1">
+
+				<panel height="-3.6h" name="patchnotes_latest" group="patchnotes_buffers">
+
+					<if condition="!cl_GarenaEnable">
+						<textbuffer
+							scrolltexture="/ui/info/combobox.tga"
+							handleheight="2.0h"
+							scrollbarsize="2.2h"
+							exteriorscrollbars="false"
+							textalign="left"
+							font="dyn_10"
+							textcolor="white"
+							color="invisible"
+							shadow="1"
+							noclick="0"
+							file=":/change_log_header.txt"
+							file1=":/change_log_color.txt"
+							name="change_log_buffer"
+						/>
+					</if>
+					<if condition="cl_GarenaEnable">
+						<textbuffer
+							scrolltexture="/ui/info/combobox.tga"
+							handleheight="2.0h"
+							scrollbarsize="2.2h"
+							exteriorscrollbars="false"
+							textalign="left"
+							font="dyn_10"
+							textcolor="white"
+							color="invisible"
+							shadow="1"
+							noclick="0"
+							file=":/change_log_header_garena.txt"
+							file1=":/change_log_color.txt"
+							name="change_log_buffer"
+						/>
+					</if>
+				</panel>
+				
+				<panel height="-3.6h" name="patchnotes_history" visible="false" group="patchnotes_buffers">
+					<if condition="!cl_GarenaEnable">
+						<textbuffer
+							scrolltexture="/ui/info/combobox.tga"
+							handleheight="2.0h"
+							scrollbarsize="2.2h"
+							exteriorscrollbars="false"
+							textalign="left"
+							font="dyn_10"
+							textcolor="white"
+							color="invisible"
+							shadow="1"
+							noclick="0"
+							file=":/change_log_header.txt"
+							file1=":/change_log_color_history.txt"
+							name="change_log_buffer_history"
+						/>					
+					</if>
+					<if condition="cl_GarenaEnable">
+						<textbuffer
+							scrolltexture="/ui/info/combobox.tga"
+							handleheight="2.0h"
+							scrollbarsize="2.2h"
+							exteriorscrollbars="false"
+							textalign="left"
+							font="dyn_10"
+							textcolor="white"
+							color="invisible"
+							shadow="1"
+							noclick="0"
+							file=":/change_log_header_garena.txt"
+							file1=":/change_log_color_history.txt"
+							name="change_log_buffer_history"
+						/>					
+					</if>
+
+				</panel>
+
+				<instance
+					name="button2"
+					label="patchnotes_history_button"
+					height="2.6h"
+					width="10.0h"
+					font="dyn_10"
+					align="left"
+					valign="bottom"
+					button_name="patchnotes_history_button"
+					group="patchnotes_history_buttons"
+					onclick="ShowOnly('patchnotes_history'); ShowOnly('patchnotes_latest_button');"
+				/>
+				
+				<instance
+					name="button2"
+					label="patchnotes_latest_button"
+					height="2.6h"
+					width="10.0h"
+					font="dyn_10"
+					align="left"
+					valign="bottom"
+					button_name="patchnotes_latest_button"
+					group="patchnotes_history_buttons"
+					visible="false"
+					onclick="ShowOnly('patchnotes_latest'); ShowOnly('patchnotes_history_button');"
+				/>
+				
+				<instance
+					name="button2" button_name="unnamedButton70"
+					label="patchnotes_close_btn"
+					height="2.6h"
+					width="10.0h"
+					font="dyn_10"
+					align="right"
+					valign="bottom"
+					onclicklua="UIManager.GetInterface('main'):HoNMainF('MainMenuPanelToggle', 'change_log', nil, false)"
+				/>
+
+			</panel>
+		</panel>
+	
+	</template>
+	
+</package>

@@ -1,0 +1,240 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+	<!-- delete me when we remove the old copy of ebuffs -->
+	<!-- also delete the ebuff_buffmanage.package file -->
+	<panel onloadlua="Set('ui_useOldBuffs', false, 'bool', true)" noclick="1" color="invisible"/>
+	
+	<lua file="/ui/scripts/ebuff.lua" />
+
+	<!-- State Icons -->
+	<template name="ebuff_stateicon">
+		<panel
+			name="ebuff_stateicon{group}{slot}"
+			oninstantiatelua="HoN_Ebuffs:RegisterBuff(self, '{group}', '{slot}')"
+			noclick="true"
+		>
+			<panel name="ebuff_{group}{slot}_sleeper" width="-0.4h" height="-0.4h" align="center" valign="center" noclick="true">
+				<panel name="ebuff_{group}{slot}_labelpos" width="100%" height="100@" noclick="1">
+					<panel
+						noclick="true"
+						visible="false"
+						watch="movf_show"
+						ontriggerlua="self:SetVisible(AtoB(param))"
+						color="white"
+					>
+						<piegraph
+							start="270" end="-90"
+							texture="/ui/elements/state_pie.tga"
+							square="true"
+							color="0 .6 0"
+							noclick="true"
+						/>
+					</panel>
+					
+					<!-- Clickable frame -->
+					<panel
+						name="ebuff_iconframe{group}{slot}"
+						passivechildren="true"
+						onmouseoverlua="GetWidget('{tooltip}{slot}', 'game'):SetVisible(1)"
+						onmouseoutlua="GetWidget('{tooltip}{slot}', 'game'):SetVisible(0)"
+						onhidelua="GetWidget('{tooltip}{slot}', 'game'):SetVisible(0)"
+						visible="false"
+						canclick="false"
+					>
+						<panel
+							name="ebuff_iconframe{group}{slot}_border1"
+							align="center"
+							valign="center"
+						>
+						
+							<!-- Fade frame -->
+							<panel
+								name="ebuff_iconframe{group}{slot}_fadeframe"
+								color="black"
+							>
+							
+								<!-- black border -->
+								<panel name="ebuff_{group}{slot}_borderblack" align="center" valign="center" >
+									
+									<piegraph
+										name="ebuff_iconframe{group}{slot}_pie1"
+										texture="/ui/ebuff_durationpie.png"
+										square="true"
+										start="270" end="-90"
+									/>
+									<piegraph
+										name="ebuff_iconframe{group}{slot}_pie2"
+										texture="/ui/ebuff_durationpie.png"
+										square="true"
+										start="270" end="-90"
+									/>
+									
+									<!-- Colored border -->
+									<panel name="ebuff_{group}{slot}_bordercolor" align="center" valign="center" >
+									
+										<!-- Square icon -->
+										<panel name="ebuff_{group}{slot}_square" align="center">
+											<image
+												name="ebuff_texture{group}{slot}"
+											/>
+											<image texture="/ui/ebuff_iconfade.png"/>
+											<panel
+												name="ebuff_iconcharges{group}{slot}"
+												noclick="true"
+												passivechildren="true"
+												height="40%"
+												color="0 0 0 .7"
+												valign="bottom"
+											>
+												<instance name="movf_label"
+													id="ebuff_iconframe{group}{slot}_charges"
+													y="5%" height="70%" textalign="center" color="white" shadow="true"
+												/>
+											</panel>
+										</panel>
+										<!-- / Square icon -->
+										
+										<!-- Timer bar -->
+										<panel
+											name="ebuff_iconframe{group}{slot}_timebarmaster"
+											valign="bottom"
+											color="black"
+										>
+											<panel
+												name="ebuff_iconframe{group}{slot}_timebarparent"
+												align="center" valign="bottom"
+											>
+												<panel
+													name="ebuff_iconframe{group}{slot}_timebar"
+													color="0 0 0 0"
+												/>
+											</panel>
+										</panel>
+										<!-- / Timer bar -->
+										
+									</panel>
+									<!-- / Colored border -->
+									
+								</panel>
+								<!-- / black border -->
+								
+							</panel>
+							<!-- /Fade frame -->
+							
+							<instance name="movf_label"
+								id="ebuff_iconframe{group}{slot}_time"
+								width="200%"
+								align="center"
+								height="35@"
+								textalign="center"
+								textvalign="center"
+								color="white"
+								shadow="true"
+							/>
+							
+						</panel>
+						<!-- /Scale frame -->
+						
+					</panel>
+					<!-- /Clickable frame -->
+					
+				</panel>
+			</panel>
+		</panel>
+	</template>
+	
+	
+	<template name="ebuff_group">
+	
+		<instance
+			name="movf_frame"
+			id="ebuff_{group}"
+			textid="Enhanced Buffs ({group})"
+			resizable="true"
+			margin="0.2h"
+			snap="true"
+			minwidth="1/20"
+			minheight="1/20"
+			maxwidth="22"
+			maxheight="22"
+			align="{align=left}" valign="{valign=top}"
+			reset_on_res="true"
+		/>
+		
+		<panel name="ebuff_{group}" noclick="true"
+			oninstantiatelua="HoN_Ebuffs:RegisterBuffGroup('{group}')"
+			onrefreshlua="HoN_Ebuffs:UpdateBuffGroup('{group}')"			
+			overridepos="true"
+			x="{x}"
+			y="{y}"
+			width="{width}"
+			height="{height}"
+			align="{align=left}" valign="{valign=top}"
+		>
+			<panel name="ebuff_{group}_wrap" noclick="true" align="center" valign="center">
+				<instance name="ebuff_stateicon" slot="13" group="{group}" tooltip="{tooltip}" />
+				<instance name="ebuff_stateicon" slot="14" group="{group}" tooltip="{tooltip}" />
+				<instance name="ebuff_stateicon" slot="15" group="{group}" tooltip="{tooltip}" />
+				<instance name="ebuff_stateicon" slot="16" group="{group}" tooltip="{tooltip}" />
+				<instance name="ebuff_stateicon" slot="17" group="{group}" tooltip="{tooltip}" />
+				<instance name="ebuff_stateicon" slot="18" group="{group}" tooltip="{tooltip}" />
+				<instance name="ebuff_stateicon" slot="19" group="{group}" tooltip="{tooltip}" />
+				<instance name="ebuff_stateicon" slot="20" group="{group}" tooltip="{tooltip}"/>
+				<instance name="ebuff_stateicon" slot="21" group="{group}" tooltip="{tooltip}" />
+				<instance name="ebuff_stateicon" slot="22" group="{group}" tooltip="{tooltip}" />
+				<instance name="ebuff_stateicon" slot="23" group="{group}" tooltip="{tooltip}" />
+			</panel>
+		</panel>
+	</template>
+	
+	<instance name="ebuff_group" group="Active" tooltip="state_tooltip"
+		x="-12.6h"
+		y="-14.4h"
+		width="51.6h"
+		height="6.6h"
+		align="center" valign="bottom"
+	/>
+	<panel noclick="1" visible="false" watch0="SelectedVisible0 SelectedVisible1 movf_show" ontrigger0="SetVisible(SelectedVisible0 and !SelectedVisible1 or movf_show);"
+		onload="CreateInt('minimap_last_position', ui_minimap_rightside);"
+		watch1="MiniMapPosition"
+		ontrigger1="
+			If(
+				minimap_last_position != ui_minimap_rightside,
+				Split(
+					Set('movf_ebuff_Selected_x', GetScreenWidth() - movf_ebuff_Selected_x),
+					Call('movf_ebuff_Selected_frame', 'SetAbsoluteX(movf_ebuff_Selected_x - GetWidth());'),
+					Call('movf_ebuff_Selected_overlay', 'SetAbsoluteX(movf_ebuff_Selected_x - GetWidth());'),
+					Call('ebuff_Selected', 'SetAbsoluteX(movf_ebuff_Selected_x - GetWidth());'),
+					Call('movf_ebuff_Selected_frame', 'Set(\'movf_ebuff_Selected_x\', GetAbsoluteX());'),
+					Set('minimap_last_position', ui_minimap_rightside)
+				)
+			);
+
+		"
+	>
+		<instance name="ebuff_group" group="Selected" tooltip="state_info_tooltip"
+			x="-1h"
+			y="-17.2h"
+			width="37.0h"
+			height="5h"
+			align="right" valign="bottom"
+		/>
+	</panel>
+	<!-- Disabled until Frostburn cleans up their triggers -->
+	<!--<instance name="ebuff_group" group="Hero" tooltip="state_tooltip"
+		x="-12.6h"
+		y="-14.4h"
+		width="51.6h"
+		height="6.6h"
+		align="center" valign="bottom"
+	/>-->
+	
+	<!-- Don't forget to include the following tooltips in the mod.xml -->
+	<!--
+	<instance name="ability_info_tooltip" id="state_info_tooltip15" slot="15" help="false" />
+	<instance name="ability_info_tooltip" id="state_info_tooltip16" slot="16" help="false" />
+	<instance name="ability_info_tooltip" id="state_info_tooltip17" slot="17" help="false" />
+	<instance name="ability_info_tooltip" id="state_info_tooltip18" slot="18" help="false" />
+	<instance name="ability_info_tooltip" id="state_info_tooltip19" slot="19" help="false" />
+	-->
+</package>

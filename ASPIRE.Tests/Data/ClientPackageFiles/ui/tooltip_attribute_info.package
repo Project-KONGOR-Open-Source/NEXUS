@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+	<template name="attribute_tooltip_info">
+		<frame
+			name="attribute_tooltip_info"
+			texture="/ui/frames/rounded_bg_white.tga"
+			borderthickness="0.6h"
+			color="0 0 0 .75"
+			visible="false"
+			align="right"
+			valign="bottom"
+			width="27h"
+			height="5.0h"
+			float="bottom"
+			grow="1" regrow="1" growinvis="0"
+		>
+			<frame texture="/ui/frames/roundframe.tga" borderthickness="0.6h" bordercolor="#434d50"/>
+			<anchor x="1.0h" y="0.6h" />
+
+			<label width="-2.0h" height="1.8h" textalign="left" font="dyn_10" color="white" content="tooltip_attribute_info" />
+
+			<panel width="-2.0h" height="1.8h" />
+
+			<label
+				width="-2.0h"
+				height="1.8h"
+				textalign="left"
+				font="dyn_10"
+				color="white"
+				watch="SelectedAttributeInfo0"
+				ontriggerlua="self:SetText(Translate('tooltip_combat_type') .. param0)"
+			/>
+
+			<label
+				width="-2.0h"
+				height="1.8h"
+				textalign="left"
+				font="dyn_10"
+				color="white"
+				watch="SelectedMoveSpeed"
+				ontriggerlua="
+					local diff = (tonumber(param1) - tonumber(param0))
+					if (diff == 0.0) then
+						self:SetText(Translate('tooltip_move_speed') .. round(param0))
+					elseif (diff > 0.0) then
+						self:SetText(Translate('tooltip_move_speed') .. round(param0) .. ' ^g+' .. round(diff) .. '^* = ^y' .. round(param1))
+					else
+						self:SetText(Translate('tooltip_move_speed') .. round(param0) .. ' ^r' .. round(diff) .. '^* = ^y' .. round(param1))
+					end
+				"
+			/>
+
+			<panel width="-2.0h" height="1.8h" />
+
+			<label
+				width="-2.0h"
+				height="1.8h"
+				textalign="left"
+				font="dyn_10"
+				color="yellow"
+				watch="SelectedAttributeInfo0"
+				ontriggerlua="self:SetText(Translate('tooltip_primary_attribute') .. param1)"
+			/>
+			<label
+				width="-2.0h"
+				height="1.8h"
+				textalign="left"
+				font="dyn_10"
+				color="white"
+				watch="SelectedAttributeInfo0"
+				ontriggerlua="self:SetText(Translate('tooltip_strength_per_level') .. FtoA2(tonumber(param2), 0, 2))"
+			/>
+			<label
+				width="-2.0h"
+				height="1.8h"
+				textalign="left"
+				font="dyn_10"
+				color="white"
+				watch="SelectedAttributeInfo0"
+				ontriggerlua="self:SetText(Translate('tooltip_agility_per_level') .. FtoA2(tonumber(param3), 0, 2))"
+			/>
+			<label
+				width="-2.0h"
+				height="1.8h"
+				textalign="left"
+				font="dyn_10"
+				color="white"
+				watch="SelectedAttributeInfo0"
+				ontriggerlua="self:SetText(Translate('tooltip_intelligence_per_level') .. FtoA2(tonumber(param4), 0, 2))"
+			/>
+
+			<panel width="-2.0h" height="0.55h" sticky="true" stickytoinvis="false" />
+		</frame>
+	</template>
+</package>

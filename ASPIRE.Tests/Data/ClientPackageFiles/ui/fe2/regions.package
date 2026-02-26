@@ -1,0 +1,350 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+	<!-- Region Change Point -->
+
+	<trigger name="SetActiveRegion" />
+	<trigger name="UIUpdateRegion" />
+	<trigger name="UpdateRegionCreateAccountForm"/>
+
+	<trigger name="APICreateAccountStatus"/>
+	<trigger name="APICreateAccountResult"/>
+	<trigger name="APICreateAccountError"/>
+
+	<form
+		name="APICreateAccount"
+		host="!api"
+		target="/account/"
+		statustrigger="APICreateAccountStatus"
+		resulttrigger="APICreateAccountResult"
+		resultparam0="success"
+		resultparam1="error"
+		resultparam2="sea"
+		resultparam3="errors"
+		ssl="true"
+	/>
+
+	<trigger name="GarenaCreateAccountStatus"/>
+	<trigger name="GarenaCreateAccountResult"/>
+	<form
+		name="GarenaCreateAccount"
+		host="!masterserver"
+		target="/client_requester.php"
+		statustrigger="GarenaCreateAccountStatus"
+		resulttrigger="GarenaCreateAccountResult"
+		resultparam0="0"
+		resultparam1="garena_auth"
+	/>
+
+	<!-- API Username Check-->
+	<trigger name="APIUserNameCheckStatus"/>
+	<trigger name="APIUserNameCheckResult"/>
+	<form
+		name="APIUserNameCheck"
+		host="!api"
+		target="/account/"
+		statustrigger="APIUserNameCheckStatus"
+		resulttrigger="APIUserNameCheckResult"
+		resultparam0="valid"
+		resultparam1="nickname"
+		resultparam2="connect"
+	/>
+
+	<!-- Garena Username Check -->
+	<trigger name="GarenaUserNameCheckStatus"/>
+	<trigger name="GarenaUserNameCheckResult"/>
+	<panel noclick="1" name="UserNameCheckHelper" oneventlua="UIManager.GetInterface('main'):HoNRegionF('CheckNickname')" />
+	<form
+		name="GarenaUserNameCheck"
+		host="!hon"
+		target="/signup/garena_nick_check.php"
+		statustrigger="GarenaUserNameCheckStatus"
+		resulttrigger="GarenaUserNameCheckResult"
+		resultparam0="valid"
+		resultparam1="nickname"
+		resultparam2="connect"
+	/>
+
+	<!-- Lat create account form -->
+	<trigger name="LATCreateAccountStatus"/>
+	<trigger name="LATCreateAccountResult"/>
+	<trigger name="LATCreateAccountError"/>
+
+	<form
+		name="LATCreateAccount"
+		host="!hon"
+		target="/axeso_create.php"
+		statustrigger="LATCreateAccountStatus"
+		resulttrigger="LATCreateAccountResult"
+		resultparam0="success"
+		resultparam1="error"
+		resultparam2="sea"
+		resultparam3="errors"
+		ssl="true"
+	/>
+
+	<!-- Garena Nick Popup -->
+	<panel align="center" valign="center" width="50h" grow="1" noclick="true" >
+
+		<panel grow="true" width="50h" name="RegionCreateAccountPrompt" visible="false" watch="GarenaClientLoginResponse" ontrigger="If(StringEquals(param, '#GA002000') or StringEquals(param, 'name'), DoEvent());" watch1="ClientLoginResponse" ontrigger1="If(StringEquals(param, '#GA002000') or StringEquals(param, 'name'), DoEvent());" onevent="SetVisible(true); If(cl_GarenaEnable, ShowWidget('login_iris')); PlaySound('/shared/sounds/ui/menu/iris_close.wav'); HideWidget('prelogin_options_panel'); HideWidget('prelogin_options_panel_warning');">
+			<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.6h" color="#000000" noclick="1"/>
+			<frame texture="/ui/frames/roundframe.tga" borderthickness="0.6h" color="#FCA400" noclick="1" />
+
+			<panel float="bottom" width="-1h" align="center" grow="true">
+				<panel height="1h" />
+				<panel width="100%" grow="true" align="center" float="bottom" padding="0.4h" >
+					<label height="2.5h" color="#FFCC00" font="dyn_14" shadow="true" noclick="true" textalign="center" content="region_create_account_title" />
+					<label y="2.5h" color="white" font="dyn_11" wrap="true" noclick="true" fity="true" fitypadding=".5h" shadow="true" content="garena_create_account_body" onload="SetText(Translate('region_create_account_body', 'region', ui_regionalPartner));" />
+
+					<!-- Referrer -->
+					<panel width="100%" grow="true" y="15.7h">
+
+						<panel align="center" height="6.4h">
+							<frame color="invisible" bordercolor="#455166" borderthickness="1" noclick="1" />
+							<panel align="center" y="1h" width="-1h" height="2.4h" float="right" >
+								<label width="45%" height="100%" textvalign="center" font="dyn_11" color="white" shadow="true" content="create_acc_referrer" />
+								<panel width="5%" height="100%">
+									<image align="right" width="1.2h" height="1.0h" valign="center" texture="/ui/info/arrow.tga" />
+								</panel>
+								<panel width="45%" height="100%">
+									<instance
+										name="field"
+										widgetname="region_create_account_referrer"
+										order="10"
+										maxlength="12"
+										x="-1h"
+										align="right"
+										width="-4h"
+										onshow="SetFocus(false);"
+										onlosefocus=""
+										onchange=""
+									/>
+								</panel>
+							</panel>
+
+							<label y="4.0h" font="dyn_9" wrap="true" width="-1.4h" align="center" color="#ffaa00" fity="true">create_acc_label_ref_name_tip</label>
+
+						</panel>
+					</panel>					
+					
+					<!-- Nickname -->
+					<panel width="100%" grow="true" y="8.9h" >
+
+						<panel align="center" height="6.4h">
+							<frame color="invisible" bordercolor="#455166" borderthickness="1" noclick="1" />
+							<panel align="center" y="1h" width="-1h" height="2.4h" float="right" onload="CreateBool('_nick_valid', false);">
+								<label width="45%" height="100%" textvalign="center" font="dyn_11" color="white" shadow="true" content="create_acc_nickname"
+									watch="UpdateRegionCreateAccountForm"
+									ontrigger="If(_nick_valid, SetColor('white'), SetColor('red'));"/>
+								<panel width="5%" height="100%">
+									<image align="right" width="1.2h" height="1.0h" valign="center" texture="/ui/info/arrow.tga" />
+								</panel>
+								<panel width="45%" height="100%">
+									<instance
+										name="field"
+										widgetname="region_create_account_nickname"
+										order="10"
+										maxlength="12"
+										x="-1h"
+										align="right"
+										width="-4h"
+										onshow="SetFocus(true);"
+										onlosefocus="HideWidget('garena_create_account_nick_notice');"
+										onchange="
+											Set(_nick_check_field, name);
+											If(StringEmpty(this),
+												Set('_nick_valid', false),
+												SleepWidget(500, 'CallEvent(\'UserNameCheckHelper\')')
+												);
+											Trigger('UpdateRegionCreateAccountForm');
+											Trigger('GarenaUserNameCheckStatus', 2);
+											"
+									/>
+								</panel>
+								<instance name="tip_mark" tip_id="region_create_account_nickname_tip" width="2.3h" height="2.3h" valign="center" align="right" />
+							</panel>
+
+							<label y="4.0h" font="dyn_9" wrap="true" width="-1.4h" align="center" color="#ffaa00" fity="true">create_acc_label_nick_name_tip</label>
+
+							<panel name="garena_create_account_nick_notice" y="4h" x="-5.0%" align="right" height="5.2h" width="45%" visible="false" onshow="BringToFront();" onclick="HideWidget('garena_create_account_nick_notice');" watch="GarenaUserNameCheckStatus APIUserNameCheckStatus" ontrigger="SetVisible(!StringEmpty(region_create_account_nickname));">
+								<frame texture="/ui/frames/tooltip_bg.tga" color="0 0 0 .8" borderthickness=".6h" align="left" valign="top" noclick="1">
+								<frame texture="/ui/frames/roundframe.tga" color="#A0A0A0" borderthickness=".6h" noclick="1"/>
+
+									<label
+										fity="true"
+										width="-1.4h"
+										align="center" valign="center"
+										textalign="center" textvalign="center"
+										font="dyn_10" wrap="1"
+										color="#48ee48" shadow="true" shadowcolor="black"
+										noclick="1"
+										watch="GarenaUserNameCheckResult APIUserNameCheckResult"
+										ontrigger="
+											if (StringEquals(_nick_check_field, 'region_create_account_nickname'),
+												Split(
+													Set('_nick_valid', param0 and !StringEmpty(region_create_account_nickname)),
+													If(param0, SetColor('#48ee48'), SetColor('#eb3535')),
+													If(param0, SetText(Translate('main_create_account_nickname_available')), SetText(param1)),
+													Trigger('UpdateRegionCreateAccountForm')
+												)
+											);
+
+											"
+										watch0="GarenaUserNameCheckStatus APIUserNameCheckStatus"
+										ontrigger0="
+											if (StringEquals(_nick_check_field, 'region_create_account_nickname'),
+												Split(
+													If(param == 2 or param == 3, SetText(Translate('main_create_account_nickname_check'))),
+													If(param == 2 or param == 3, SetColor('#ebee48'))
+												)
+											);
+
+											"
+									/>
+								</frame>
+
+
+
+							</panel>
+						</panel>
+					</panel>
+
+					<panel grow="true" width="100%"  y="23.6h">
+						<instance
+							name="button2" button_name="region_submit_create_account"
+							width="16h" height="2.2h"
+							x="1h"
+							font="dyn_10" label="main_create_account_header"
+							enabled="false"
+							onclicklua="UIManager.GetInterface('main'):HoNRegionF('CreateAccount')"
+							watch="UpdateRegionCreateAccountForm"
+							ontrigger="SetEnabled(_nick_valid and StringEquals(_nick_check_field, 'region_create_account_nickname'));"
+						/>
+					</panel>
+
+				</panel>
+
+				<panel height="1.5h" />
+			</panel>
+
+
+			<!-- Garena Account creation status -->
+			<panel visible="false" name="RegionCreateAccountStatusIndicator" watch="GarenaCreateAccountStatus" ontrigger="SetVisible(param == 1);" watch1="APICreateAccountStatus" ontrigger1="SetVisible(param0 == 1);" >
+				<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.6h" color="#000000AA" noclick="1"/>
+				<frame texture="/ui/frames/roundframe.tga" borderthickness="0.6h" color="#FCA400" noclick="1" />
+				<panel align="center" width="36.0h" height="2.5h" valign="center" color="0 0 0 1">
+					<frame texture="/ui/info/backdrop.tga" borderthickness="2.0h" color="1 1 1 .5" noclick="1" />
+					<frame color="invisible" bordercolor="#455166" borderthickness="1" noclick="1" />
+					<label width="-1h" height="-1h" textvalign="center" textalign="center" align="center" valign="center" shadow="true" color="white" font="dyn_11">create_acc_wait</label>
+				</panel>
+			</panel>
+
+			<!-- Successful Garena account creation -->
+			<panel color="0 0 0 .5" name="RegionCreateAccountSuccessIndicator" visible="false" watch="GarenaCreateAccountResult" ontrigger="SetVisible(param0);" watch1="APICreateAccountResult" ontrigger1="SetVisible(param0);">
+				<panel align="center" valign="center" width="38.0h" regrow="true" grow="true" color="0 0 0 1">
+					<frame color="invisible" bordercolor="#455166" borderthickness="1" noclick="1" />
+					<panel width="100%" height="2.5h" noclick="1">
+						<instance name="header_bar" lbl="create_acc_label_account_success" lbl_font="dyn_10" show_close="0" />
+					</panel>
+					<panel y="3.0h" align="center" grow="true" regrow="true" width="-1h" float="bottom">
+						<panel width="100%" regrow="true" grow="true">
+							<label color="white" shadow="true" font="dyn_10" width="-1.0h" align="center" wrap="true" fity="true" content="create_acc_success" />
+						</panel>
+						<panel width="100%" height="4.0h">
+							<instance
+								name="button2" button_name="unnamedButton217"
+								y="-1.0h"
+								align="center" valign="bottom"
+								width="9h" height="2.5h"
+								label="main_button_login"
+								font="dyn_10"
+								onclick="Call('RegionCreateAccountPrompt', 'FadeOut(250);'); Call('RegionCreateAccountSuccessIndicator', 'FadeOut(250);'); Login();"
+							/>
+						</panel>
+					</panel>
+				</panel>
+			</panel>
+
+		</panel>
+
+		<!-- Garena Create Account errors -->
+		<panel color="0 0 0 .5" name="RegionCreateAccountErrors" width="50h" visible="false" watch="GarenaCreateAccountResult" ontrigger="SetVisible(!param0 and !StringEquals(param1, '#GA002000'));" watch1="APICreateAccountResult" ontrigger1="SetVisible(!param0 and !StringEquals(param1, '#GA002000'));">
+			<panel align="center" valign="center" width="38.0h" regrow="true" grow="true" color="0 0 0 1">
+				<frame color="invisible" bordercolor="#455166" borderthickness="1" noclick="1" />
+				<panel width="100%" height="2.5h" noclick="1">
+					<instance name="header_bar" lbl="web_form_create_account_error" lbl_font="dyn_10" show_close="0" />
+				</panel>
+				<panel y="3.0h" align="center" regrow="true" grow="true" width="-1h" float="bottom">
+					<panel width="100%" regrow="true" grow="true" onload="CreateString('region_error_concat', '');" >
+						<label color="white" shadow="true" font="dyn_10" width="-1.0h" align="center" wrap="true" fity="true"
+							watch="GarenaCreateAccountResult" ontrigger="If(!param0, SetText(Translate(param1)));"
+							watch1="APICreateAccountResult" ontrigger1="
+									Set('region_error_concat', '');
+									If(param1,
+										ExplodeTrigger('APICreateAccountError', param3, '|', ':')
+									);
+									SetText(
+										If(!StringEmpty(region_error_concat),
+											FormatStringNewLine(region_error_concat),
+											''
+										)
+									);
+								"
+							watch2="APICreateAccountError"
+							ontrigger2="
+								Set('region_error_concat',
+									region_error_concat #
+									If(!StringEmpty(region_error_concat),
+										'\\n',
+										''
+									) #
+									Translate('web_form_resetstats_error' # param1)
+								);
+							"
+						/>
+					</panel>
+					<panel width="100%" height="4.0h">
+						<instance
+							name="button2" button_name="unnamedButton218"
+							y="-1.0h"
+							align="center" valign="bottom"
+							width="9h" height="2.5h"
+							label="general_ok"
+							font="dyn_10"
+							onclick="Call('RegionCreateAccountErrors', 'FadeOut(250);');"
+						/>
+					</panel>
+				</panel>
+			</panel>
+		</panel>
+
+		<!-- Garena Login errors -->
+		<!--
+		<panel color="0 0 0 .5" name="GarenaLoginErrors" visible="false" watch="GarenaClientLoginResponse ClientLoginResponse" ontrigger="SetVisible(!StringEquals(param, '#GA002000'));">
+			<panel align="center" valign="center" width="38.0h" grow="true" color="0 0 0 1">
+				<frame color="invisible" bordercolor="#455166" borderthickness="1" noclick="1" />
+				<panel width="100%" height="2.5h" noclick="1">
+					<instance name="header_bar" lbl="general_error_login" lbl_font="dyn_10" show_close="0" />
+				</panel>
+				<panel y="3.0h" align="center" grow="true" width="-1h" float="bottom">
+					<panel width="100%" grow="true">
+						<label color="white" shadow="true" font="dyn_10" width="-1.0h" align="center" wrap="true" fity="true" watch="GarenaClientLoginResponse ClientLoginResponse" ontrigger="SetText(Translate(param));" />
+					</panel>
+					<panel width="100%" height="4.0h">
+						<instance
+							name="button2" button_name="unnamedButton219"
+							y="-1.0h"
+							align="center" valign="bottom"
+							width="9h" height="2.5h"
+							label="general_ok"
+							font="dyn_10"
+							onclick="Call('GarenaLoginErrors', 'FadeOut(250);');"
+						/>
+					</panel>
+				</panel>
+			</panel>
+		</panel>
+		-->
+
+	</panel>
+
+</package>

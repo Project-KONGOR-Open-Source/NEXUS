@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+	<!-- Reset Stats -->
+	<trigger name="UpdateStoreResetStatsForm"/>
+	<trigger name="StoreResetStatsStatus"/>
+	<trigger name="StoreResetStatsResult"/>
+	<form
+		name="StoreResetStats"
+		host="!hon"
+		target="/client_require_resets.php"
+		ssl="false"
+		statustrigger="StoreResetStatsStatus"
+		resulttrigger="StoreResetStatsResult"
+		resultparam0="success"
+		resultparam1="errors"
+	/>
+	<template name="storePopupResetStatsForm">
+		<panel width="100%" grow="true" float="bottom" padding="1h"
+		
+			watch="StoreResetStatsResult"
+			ontrigger="
+				If(
+					param0 == 1,
+					Split(
+						CallEvent('store_popup_resetstats_success', 0),
+						Call('store_resetstats_checkbox_pubstats', 'SetButtonState(0);'),
+						Call('store_resetstats_checkbox_psr', 'SetButtonState(0);'),
+						Call('store_resetstats_checkbox_smr', 'SetButtonState(0);'),
+						Call('store_resetstats_checkbox_normalmm_stats', 'SetButtonState(0);'),
+						Call('store_resetstats_checkbox_casualmm_stats', 'SetButtonState(0);'),
+						Call('store_resetstats_checkbox_casual_mmr', 'SetButtonState(0);'),
+						Call('store_resetstats_checkbox_midwars_stats', 'SetButtonState(0);'),
+						Call('store_resetstats_confirmpass', 'EraseInputLine();'),
+						Set('_microStore_resetStats_pubstats', 0),
+						Set('_microStore_resetStats_psr', 0),
+						Set('_microStore_resetStats_smr', 0),
+						Set('_microStore_resetStats_normalmm_stats', 0),
+						Set('_microStore_resetStats_casualmm_stats', 0),
+						Set('_microStore_resetStats_casual_mmr', 0),
+						Set('_microStore_resetStats_midwars_mmr', 0),
+						Set('_microStore_resetStats_midwars_stats', 0),
+						Set('_store_resetstats_confirm_pass', ''),
+						CallEvent('store_popup_reset_stats', 1)
+					),
+					CallEvent('store_popup_form_error', 0)
+				);
+			"
+		>
+			<panel width="100%" height="0.5h">
+				<panel width="-1h" valign="center" align="center" height="0.1h" style="microStorePaperText"/>
+			</panel>
+			<panel width="100%" grow="true">
+				<label width="100%" align="center" wrap="true" fity="true" textalign="center" textvalign="center" font="dyn_10" style="microStorePaperText" content="mstore_resetstats_form_body_sea"
+					onload="SetText(FormatStringNewLine(Translate('mstore_resetstats_form_body_sea')));"
+				/>
+				<panel width="100%" height="0.5h" />
+			</panel>
+			<instance name="form_checkbox2" checkbox_name="store_resetstats_checkbox_pubstats" cvar="_microStore_resetStats_pubstats" value="1" label="web_form_resetstats_pubstats" font="dyn_10" updatetrigger="UpdateStoreResetStatsForm" />
+			<instance name="form_checkbox2" checkbox_name="store_resetstats_checkbox_psr" cvar="_microStore_resetStats_psr" value="1" label="web_form_resetstats_psr" color="white" font="dyn_10" updatetrigger="UpdateStoreResetStatsForm" />
+			<instance name="form_checkbox2" checkbox_name="store_resetstats_checkbox_smr" cvar="_microStore_resetStats_smr" value="1" label="web_form_resetstats_smr" color="white" font="dyn_10" updatetrigger="UpdateStoreResetStatsForm" />
+			<instance name="form_checkbox2" checkbox_name="store_resetstats_checkbox_normalmm_stats" cvar="_microStore_resetStats_normalmm_stats" value="1" label="web_form_resetstats_rankedstats" color="white" font="dyn_10" updatetrigger="UpdateStoreResetStatsForm" />
+			<instance name="form_checkbox2" checkbox_name="store_resetstats_checkbox_casualmm_stats" cvar="_microStore_resetStats_casualmm_stats" value="1" label="web_form_resetstats_casualstats" color="white" font="dyn_10" updatetrigger="UpdateStoreResetStatsForm" />
+			<instance name="form_checkbox2" checkbox_name="store_resetstats_checkbox_casual_mmr" cvar="_microStore_resetStats_casual_mmr" value="1" label="web_form_resetstats_casual_mmr" color="white" font="dyn_10" updatetrigger="UpdateStoreResetStatsForm" />
+			
+			<!--
+			<instance visible="0" name="form_checkbox2" checkbox_name="store_resetstats_checkbox_midwars_mmr" cvar="_microStore_resetStats_midwars_mmr" value="1" label="web_form_resetstats_midwars_mmr" color="white" font="dyn_10" updatetrigger="UpdateStoreResetStatsForm" />	
+			-->
+			<instance name="form_checkbox2" checkbox_name="store_resetstats_checkbox_midwars_stats" cvar="_microStore_resetStats_midwars_stats" value="1" label="web_form_resetstats_midwars" color="white" font="dyn_10" updatetrigger="UpdateStoreResetStatsForm" />
+			<panel height="2.5h" width="100%">
+			
+			
+			
+				<panel height="100%" grow="true" align="center">
+					<panel grow="true"  float="right" padding="1h" height="100%">
+					<instance name="storeButton" enabled="false" width="12h" height="2.5h" label="web_form_resetstats_button"
+						watch="UpdateStoreResetStatsForm MicroStoreProcessing"
+						ontrigger="
+							If(
+								(
+									_microStore_resetStats_psr or
+									_microStore_resetStats_pubstats or
+									_microStore_resetStats_smr or
+									_microStore_resetStats_normalmm_stats or
+									_microStore_resetStats_casualmm_stats or
+									_microStore_resetStats_casual_mmr or
+									_microStore_resetStats_midwars_mmr or
+									_microStore_resetStats_midwars_stats
+								)
+								and !_microStore_processing,
+								SetEnabled(true),
+								SetEnabled(false)
+							);
+						"
+						onclick="
+							Trigger('MicroStoreSetProcTrig', 'StoreResetStatsStatus');
+							SubmitForm(
+								'StoreResetStats',
+								'account_id', GetAccountID(),
+								'psr', If(_microStore_resetStats_psr, 1, 0),
+								'smr', If(_microStore_resetStats_smr, 1, 0),
+								'public', If(_microStore_resetStats_pubstats, 1, 0),
+								'mmnormal', If(_microStore_resetStats_normalmm_stats, 1, 0),
+								'mmcasual', If(_microStore_resetStats_casualmm_stats, 1, 0),
+								'casual', If(_microStore_resetStats_casual_mmr, 1, 0),
+								'mmmidwars', If(_microStore_resetStats_midwars_mmr, 1, 0),
+								'midwars', If(_microStore_resetStats_midwars_stats, 1, 0),
+								'cookie', GetCookie()
+							);
+						"
+					/>
+					<instance name="storeButton" enabled="true" width="10h" height="2.5h" label="general_cancel" onclick="CallEvent('store_popup_reset_stats', 1);" watch="MicroStoreProcessing" ontrigger="SetEnabled(!param0);"/>
+					</panel>
+					<panel align="center" watch="MicroStoreProcessing" ontrigger="
+						If(
+							_microStore_processing,
+							SetVisible(1),
+							FadeOut(350)
+						);
+						">
+						<panel color="0 0 0 0.5">
+							<frame color="invisible" bordercolor="0.75 0.5 0 0.5" borderthickness="0.15h" noclick="true" />
+							<label color="white" shadow="true" font="dyn_11" textvalign="center" textalign="center" width="-3h" content="mstore_processing_elipses" />
+							<animatedimage texture="/ui/elements/throb/throb.tga" noclick="true" loop="1" fps="30" onshow="StartAnim(1);" align="right" width="3h" height="3h" valign="center" x="-0.25h" />
+						</panel>
+					</panel>
+
+				</panel>
+			</panel>
+		</panel>
+	</template>
+</package>

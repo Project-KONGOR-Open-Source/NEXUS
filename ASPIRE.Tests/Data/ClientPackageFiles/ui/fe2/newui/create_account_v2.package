@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+
+	<include file="/ui/fe2/newui/form_create_paid_account_v2.package"/>
+	<include file="/ui/fe2/newui/form_create_subaccount_v2.package"/>
+
+	<!-- Username check - used in both of the create account forms -->
+	<trigger name="UserNameCheckStatus"/>
+	<trigger name="UserNameCheckResult"/>
+	<form
+		name="UserNameCheck"
+		host="!hon"
+		target="/signup/nick_check.php"
+		statustrigger="UserNameCheckStatus"
+		resulttrigger="UserNameCheckResult"
+		resultparam0="valid"
+		resultparam1="nickname"
+		resultparam2="connect"
+	/>
+
+	<!-- Username check for the nick change form (allows KS-ing) -->
+	<trigger name="KSUserNameCheckStatus"/>
+	<trigger name="KSUserNameCheckResult"/>
+	<form
+		name="KSUserNameCheck"
+		host="!hon"
+		target="/signup/ks_nick_check.php"
+		statustrigger="KSUserNameCheckStatus"
+		resulttrigger="KSUserNameCheckResult"
+		resultparam0="valid"
+		resultparam1="nickname"
+		resultparam2="connect"
+	/>
+
+	<!-- Friend username check - checks that they exist and are valid for upgrade.  I'm having this be separate just in case there's a point where there's a check for both your own and friend's usernames (probably never, but almost zero performance difference) -->
+	<trigger name="FriendNameCheckStatus"/>
+	<trigger name="FriendNameCheckResult"/>
+	<form
+		name="FriendNameCheck"
+		host="!hon"
+		target="/signup/nick_check.php"
+		statustrigger="FriendNameCheckStatus"
+		resulttrigger="FriendNameCheckResult"
+		resultparam0="valid"
+		resultparam1="nickname"
+		resultparam2="connect"
+		resultparam3="canupgrade"
+	/><!-- Yea, same form - just need the frontend to treat it separately -->
+
+	<!-- Promo Code Check -->
+	<trigger name="PromoCodeCheckStatus"/>
+	<trigger name="PromoCodeCheckResult"/>
+	<form
+		name="PromoCodeCheck"
+		host="!hon"
+		target="/signup/test_promocode_check.php"
+		statustrigger="PromoCodeCheckStatus"
+		resulttrigger="PromoCodeCheckResult"
+		ssl="true"
+		resultparam0="success"
+		resultparam1="price"
+		resultparam2="errors"
+	/>
+
+	<panel onload="CreateString('_promocode_form', ''); CreateFloat('_promocode_price', 30.00); CreateString('_promocode_code', ''); CreateString('_nick_check_field', '');" noclick="1"/>
+
+	<template name="web_form_field">
+		<panel y="{y=0}" align="center" valign="{valign=center}" width="-1h" height="{height=2.4h}" float="right">
+			<label name="{fieldname}_label" width="45%" height="100%" textvalign="center" font="dyn_11" color="white" shadow="true" content="{label}" watch="{updatetrigger}" ontrigger="{ontrigger}"/>
+			<panel width="5%" height="100%" valign="center">
+				<image align="right" width="1.2h" height="1.0h" valign="center" texture="/ui/info/arrow.tga" />
+			</panel>
+			<panel width="45%" height="100%" valign="center">
+				<instance name="field" wrap="{wrap=}" font="{font=dyn_10}" align="{field_align=center}" x="{field_xoffset=0}" width="{field_width=-1h}" widgetname="{fieldname}" order="{order}" onchange="Trigger('{updatetrigger}'); {onchange}" passchar="{passchar=}" maxlength="{maxlength=-1}" form="{form=}" data="{data=}" onfocus="{onfocus}" onlosefocus="{onlosefocus}"/>
+			</panel>
+			<panel width="2.4h" height="100%" valign="center" visible="{hastip}">
+				<instance name="tip_mark" tip_id="{tip_id}" width="2.3h" height="2.3h" valign="center" align="right" />
+			</panel>
+		</panel>
+	</template>
+
+	<template name="web_form_combobox">
+		<panel y="{y=0}" align="center" valign="{valign=center}" width="-1h" height="{height=2.4h}" float="right" onload="{onload}">
+			<label name="{fieldname}_label" width="45%" height="100%" textvalign="center" font="dyn_11" color="white" shadow="true" content="{label}" watch="{updatetrigger}" ontrigger="{ontrigger}"/>
+			<panel width="5%" height="100%" valign="center">
+				<image align="right" width="1.2h" height="1.0h" valign="center" texture="/ui/info/arrow.tga" />
+			</panel>
+			<panel width="45%" height="100%" valign="center">
+				<instance name="Moptions_combobox" onshow="{onshow}" onevent="{onevent}" id="{id}" x="0" width="100%" itemwidth="100%" maxlistheight="{maxlistheight=10}" cvar="{cvar}" data="{data}" onselect="Trigger('{updatetrigger}'); {onselect}" populate="{populate}" />
+			</panel>
+			<panel width="2.4h" height="100%" valign="center" visible="{hastip}">
+				<instance name="tip_mark" tip_id="{tip_id}" width="2.3h" height="2.3h" valign="center" align="right" />
+			</panel>
+		</panel>
+	</template>
+
+</package>

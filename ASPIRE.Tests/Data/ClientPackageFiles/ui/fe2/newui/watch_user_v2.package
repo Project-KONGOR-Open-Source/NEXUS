@@ -1,0 +1,445 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+	<template name="watch_user_playertitle">
+		<panel noclick="true" height="1.7h" >
+			<panel width="-130@" align="right" float="right" noclick="1">
+				<!-- Player Name -->
+				<label width="55%" height="100%" font="dyn_10" color="1 1 1 1" shadow="true" content="game_scores_label_player_name" textvalign="center" textalign="left" noclick="1" />
+				<!-- Level -->
+				<label width="12%" font="dyn_10" color="1 1 1 1" shadow="true" content="game_scores_label_lvl" height="100%" textvalign="center" textalign="center" noclick="1" />
+				<!-- K -->
+				<label width="11%" font="dyn_10" color="0 1 0 1" shadow="true" content="game_scores_label_k" height="100%" textvalign="center" textalign="center" noclick="1"	/>
+				<!-- D -->
+				<label width="11%" font="dyn_10" color="1 0 0 1" shadow="true" content="game_scores_label_d" height="100%" textvalign="center" textalign="center" noclick="1"	/>
+				<!-- A -->
+				<label width="11%" font="dyn_10" color="1 1 0 1" shadow="true" content="game_scores_label_a" height="100%" textvalign="center" textalign="center" noclick="1"	/>
+			</panel>
+			<panel x="-5@" y="0.1h" width="-140@" height="1" align="right" noclick="true" color=".2 .2 .2 1" valign="bottom"/>
+		</panel>
+	</template>
+
+	<!-- User watch player listitem template
+		AccountID|Username|HeroIndex|PlayerLevel|PlayerKills|PlayerDeaths|PlayerAssists
+	-->
+	<template name="watch_user_playerTemplate">
+		<panel noclick="1" height="1.7h" watch="Watch_PlayerInfoTrigger{player}" ontrigger="If(param0 == 3 and StringEquals(watch_user_activeUser, '{user}'), If(StringEmpty(param1), HideWidget(), ShowWidget()));">
+
+			<!-- Monitor Target -->
+			<panel
+				width="-112@" align="right"
+				noclick="true"
+				visible="false"
+				watch="Watch_PlayerInfoTrigger{player}"
+				ontrigger="
+						if(
+							param0 == 2 and StringEquals(watch_user_activeUser, '{user}'),
+							SetVisible(
+								StringEquals(stripclantag(param1), '{user}')
+							)
+						);
+					"
+			>
+				<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.4h" color="#042329" blockinput="false" noclick="true"/>
+				<frame texture="/ui/frames/roundframe.tga" color="#08515f" borderthickness="0.4h" blockinput="false" noclick="true"/>
+			</panel>
+
+			<panel width="100@" height="100%" valign="center" noclick="1">
+				<!-- Hero Icon -->
+				<image
+					texture="/ui/icons/invis.tga"
+					color="1 1 1 1"
+					watch="Watch_PlayerInfoTrigger{player}"
+					ontrigger="If(param0 == 3 and StringEquals(watch_user_activeUser, '{user}'), SetTexture(param1));"
+
+					onmouseover="
+						Split(
+							Trigger(
+								'StoreImagePreviewInit',
+								GetWidth(),
+								GetHeight(),
+								GetAbsoluteX(),
+								GetAbsoluteY(),
+								false,
+								GetTexture()
+							),
+							Trigger('StoreImagePreviewVis', true, '250%')
+						);
+					"
+					onmouseout="
+						DoEvent(1);
+					"
+					onhide="
+						DoEvent(1);
+					"
+					onevent1="
+						Trigger('StoreImagePreviewVis', false, '100%');
+					"
+				/>
+			</panel>
+
+			<panel width="-130@" align="right" float="right" noclick="1">
+				<!-- Player Name -->
+				<label width="55%" height="100%" font="dyn_9" color="1 1 1 1" shadow="true" content="" textvalign="center" textalign="left" noclick="1"
+					watch="Watch_PlayerInfoTrigger{player}" ontrigger="If(param0 == 2 and StringEquals(watch_user_activeUser, '{user}'), SetText(param1));"
+				/>
+				<!-- Level -->
+				<label width="12%" font="dyn_9" color="1 1 1 1" shadow="true" content="" height="100%" textvalign="center" textalign="center" noclick="1"
+					watch="Watch_PlayerInfoTrigger{player}" ontrigger="If(param0 == 4 and StringEquals(watch_user_activeUser, '{user}'), SetText(param1));"
+				/>
+				<!-- K -->
+				<label width="11%" font="dyn_9" color="0 1 0 1" shadow="true" content="" height="100%" textvalign="center" textalign="center" noclick="1"
+					watch="Watch_PlayerInfoTrigger{player}" ontrigger="If(param0 == 5 and StringEquals(watch_user_activeUser, '{user}'), SetText(param1));"
+				/>
+				<!-- D -->
+				<label width="11%" font="dyn_9" color="1 0 0 1" shadow="true" content="" height="100%" textvalign="center" textalign="center" noclick="1"
+					watch="Watch_PlayerInfoTrigger{player}" ontrigger="If(param0 == 6 and StringEquals(watch_user_activeUser, '{user}'), SetText(param1));"
+				/>
+				<!-- A -->
+				<label width="11%" font="dyn_9" color="1 1 0 1" shadow="true" content="" height="100%" textvalign="center" textalign="center" noclick="1"
+					watch="Watch_PlayerInfoTrigger{player}" ontrigger="If(param0 == 7 and StringEquals(watch_user_activeUser, '{user}'), SetText(param1));"
+				/>
+			</panel>
+		</panel>
+	</template>
+
+	<!-- User watch team listitem template
+		Team|WinChance|StartingTowerCount|CurrentTowerCount|CurrentMeleeRaxCount|CurrentRangedRaxCount|BaseHealthPercent|Kills|Deaths|Assists
+	-->
+	<template name="watch_user_teamTemplate">
+		<panel passivechildren="true" height="100%" valign="top" align="center" width="100%" noclick="1" >
+
+			<frame
+				texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.5h" blockinput="false" noclick="true"
+				color=".15 .15 .15 1"
+			/>
+			<frame
+				texture="/ui/frames/roundframe.tga" borderthickness="0.5h" blockinput="false" noclick="true"
+				color=".3 .3 .3 1"
+			/>
+
+			<image
+				x="5@"
+				width="80@" height="80%"
+				valign="center"
+				texture="/ui/elements/crest_legion.tga"
+				noclick="true"
+				watch="Watch_TeamInfoTrigger{team}"
+				ontrigger="If(param0 == 1 and StringEquals(watch_user_activeUser, '{user}'), If(param1 == 1, SetTexture('/ui/elements/crest_legion.tga'), SetTexture('/ui/elements/crest_hellbourne.tga') ) );"
+			/>
+
+			<panel x="-8@" width="-106@" align="right" noclick="true" float="bottom" padding="0.2h">
+
+				<!-- Base Health -->
+				<panel y="0.5h" height="1.7h" color="0 0 0 1">
+
+					<panel x="1" y="1" height="-2" width="-2">
+						<panel
+							color="0 1 0 1"
+							watch="Watch_TeamInfoTrigger{team}"
+							ontrigger="
+								If(param0 == 7 and StringEquals(watch_user_activeUser, '{user}'), SetWidth(FtoP(param1)));
+							"
+						/>
+						<label font="dyn_9" color="1 1 1 1" outline="true"  content="" align="left" height="100%" textvalign="center" textalign="center" noclick="1"
+							watch="Watch_TeamInfoTrigger{team}" ontrigger="If(param0 == 7 and StringEquals(watch_user_activeUser, '{user}'), SetText(Translate('watch_user_base_health') # ' ' # FtoA(param1 * 100, 0) # '%'));"
+						/>
+					</panel>
+					<frame color="invisible" borderthickness="1" bordercolor=".3 .3 .3 1"/>
+
+				</panel>
+				<panel height="1.5h" width="100%" float="right">
+					<!-- 6 Ranged Rax -->
+					<label width="50%" height="100%" font="dyn_9" color=".8 .8 .8 1" shadow="true" content="" textvalign="bottom" textalign="left" noclick="1"
+						watch="Watch_TeamInfoTrigger{team}" ontrigger="If(param0 == 6 and StringEquals(watch_user_activeUser, '{user}'), SetText(Translate('watch_user_ranged') # ' ' # param1));"
+					/>
+					<!-- 5 Melee Rax -->
+					<label width="50%" height="100%" align="right" font="dyn_9" color=".8 .8 .8 1" shadow="true" content="" textvalign="bottom" textalign="left" noclick="1"
+						watch="Watch_TeamInfoTrigger{team}" ontrigger="If(param0 == 5 and StringEquals(watch_user_activeUser, '{user}'), SetText(Translate('watch_user_melee') # ' ' # param1));"
+					/>
+				</panel>
+				<!-- 4 Current Towers -->
+				<panel height="1.5h" width="100%">
+					<label width="100%" height="100%" font="dyn_9" color=".8 .8 .8 1" shadow="true" content="" textvalign="bottom" textalign="left" noclick="1"
+						watch="Watch_TeamInfoTrigger{team}" ontrigger="If(param0 == 4 and StringEquals(watch_user_activeUser, '{user}'), SetText(Translate('watch_user_towers') # '   ' # param1));"
+					/>
+				</panel>
+			</panel>
+
+		</panel>
+	</template>
+
+
+	<!-- visible user watch box -->
+	<template name="watch_user_box" >
+		<panel name="watch_user_box_{user}" group="watch_user_boxes" visible="{visible=1}" width="54.0h" height="23.5h" align="left" valign="top" color="invisible" noclick="0" cangrab="1"
+				oninstantiate="
+					Set(watch_user_activeWatches, watch_user_activeWatches+1);
+					If(!WidgetExists('watch_user_main_throttle'),
+						Call('watch_user_main',
+						'Instantiate(\'watch_user_main_throttleTemplate\');'));
+					Set(watch_user_refreshThrottle, 0);
+				"
+				onrefresh="RequestGameInfo('{user}');"
+		>
+
+			<!-- Border and background -->
+			<frame hmargin="-0.8h" vmargin="-0.8h" texture="/ui/frames/shadow.tga" color="invisible" bordercolor="0 0 0 0.8" borderthickness="1.0h" noclick="1" />
+			<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.5h" color="0 0 0 .85" blockinput="false" noclick="true"/>
+			<frame texture="/ui/frames/roundframe.tga" color="#455166" borderthickness="0.5h" blockinput="false" noclick="true"/>
+
+			<!-- Top Section (watched user name and game name) -->
+			<panel y="0.5h" height="2.9h" width="-1.0h" align="center" valign="top" noclick="1">
+
+				<panel height="100%" width="100%" passivechildren="1" noclick="true">
+					<!-- 0 Watched user name -->
+					<label y="-10%" width="50%" height="100%" font="dyn_11" color="#00c6ff" shadow="true" content="" textvalign="center" textalign="left" noclick="1" align="left"
+						watch="ChatRequestGameInfo" ontrigger="If(StringEquals(param0, '{user}'), SetText(param0));" oninstantiate="SetText('{user}');"
+					/>
+					<!-- 13 Game name -->
+					<label x="3%" width="100%" height="100%" font="dyn_10" color="1 1 1 1" shadow="true" content="" textvalign="top" textalign="center" noclick="1"  align="center"
+						watch="ChatRequestGameInfo" ontrigger="If(StringEquals(param0, '{user}'), SetText('^o' # SubString(param13, 0, 40)));"
+					/>
+					<!-- 16 Current Game Time -->
+					<label x="3%" y="-2%" width="50%" height="100%" font="dyn_9" color=".8 .8 .8 1" shadow="true" content="" textvalign="bottom" textalign="center" noclick="1"  align="center"
+						watch="ChatRequestGameInfo" ontrigger="If(StringEquals(param0, '{user}'), SetText(SubString(param16, 0, 14)));"
+					/>
+				</panel>
+
+				<!-- Game Icons -->
+				<panel height="100%" width="100%" x="-2.0h" align="right" valign="top" noclick="true" >
+					<!-- 14 Map Icon -->
+					<panel x="0" y="0" width="2.4h" valign="top" align="right" height="2.3h" noclick="1">
+						<image y="0.1h" width="2.2h" height="2.2h" texture="/ui/icons/invis.tga" noclick="1"
+							watch="ChatRequestGameInfo"
+							ontrigger="
+							If(StringEquals(param0, '{user}'),
+								If(!StringEmpty(param14),
+									SetTexture('/maps/'#param14#'/icon.tga'),
+									SetTexture('$invis')
+								)
+							);
+							"
+						/>
+					</panel>
+					<!-- 15 Game Mode Icon -->
+					<panel x="-2.4h" y="0" width="2.4h" valign="top" align="right" height="2.3h" noclick="1">
+						<image y="0.1h" width="2.2h" height="2.2h" texture="/ui/icons/invis.tga" noclick="1"
+							watch="ChatRequestGameInfo"
+							ontrigger="
+							If(StringEquals(param0, '{user}'),
+								If(!StringEmpty(param15),
+									SetTexture('/ui/icons/'#param15#'.tga'),
+									SetTexture('/ui/icons/invis.tga')
+								)
+							);"
+						/>
+					</panel>
+					<!-- Hardcore/Casual Icon -->
+					<panel x="-4.8h" y="0" width="2.4h" valign="top" align="right" height="2.3h" noclick="1">
+						<image y="0.1h" width="2.2h" height="2.2h" texture="/ui/icons/invis.tga" noclick="1" visible="1"
+							watch="ChatRequestGameInfo"
+							ontrigger="
+							If(StringEquals(param0, '{user}'),
+								If(StringEquals(param17, '1'),
+									Split(SetVisible(1), SetTexture('/ui/icons/casual.tga')),
+									If(StringEquals(param18, 'normal'),
+										Split(SetVisible(1), SetTexture('/ui/icons/hardcore.tga')),
+										SetVisible(0)
+									)
+								)
+							);
+							"
+						/>
+					</panel>
+					<!-- Gated Icon -->
+					<panel x="-7.2h" y="0" width="2.4h" valign="top" align="right" height="2.3h" noclick="1">
+						<image y="0.1h" width="2.2h" height="2.2h" texture="/ui/icons/invis.tga" noclick="1" visible="1"
+							watch="ChatRequestGameInfo"
+							ontrigger="
+							If(StringEquals(param0, '{user}'),
+								If(StringEquals(param19, '1'),
+									Split(SetVisible(1), SetTexture('/ui/icons/gated.tga')),
+									SetVisible(0)
+								)
+							);
+							"
+						/>
+					</panel>
+				</panel>
+
+				<!-- Close Button -->
+				<button y="0.2h" width="2.0h" height="2.0h" align="right" valign="top" color="invisible" onmouseover="PlaySound('/shared/sounds/ui/ccpanel/button_over_01.wav');" noclick="0" onclick="PlaySound('/shared/sounds/ui/ccpanel/button_close_02.wav'); Set(watch_user_activeWatches, watch_user_activeWatches-1); Call('watch_user_box_{user}', 'DestroyWidget();');" >
+					<widgetstate statename="up">
+						<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.5h" color="#910000" blockinput="false" noclick="true"/>
+						<frame texture="/ui/frames/roundframe.tga" color="0 0 0 1" borderthickness="0.5h" blockinput="false" noclick="true"/>
+						<image width="1.3h" height="1.3h" align="center" valign="center" color=".75 .75 .75 1" texture="/ui/elements/closex.tga" noclick="true" />
+					</widgetstate>
+					<widgetstate statename="over">
+						<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.5h" color="#dc0000" blockinput="false" noclick="true"/>
+						<frame texture="/ui/frames/roundframe.tga" color="0 0 0 1" borderthickness="0.5h" blockinput="false" noclick="true"/>
+						<image width="1.3h" height="1.3h" align="center" valign="center" color="1 1 1 1" texture="/ui/elements/closex.tga" noclick="true" />
+					</widgetstate>
+					<widgetstate statename="down" x="1" y="1">
+						<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.5h" color="#910000" blockinput="false" noclick="true"/>
+						<frame texture="/ui/frames/roundframe.tga" color="0 0 0 1" borderthickness="0.5h" blockinput="false" noclick="true"/>
+						<image width="1.3h" height="1.3h" align="center" valign="center" color="1 1 1 1" texture="/ui/elements/closex.tga" noclick="true" />
+					</widgetstate>
+				</button>
+
+				<panel valign="bottom" height="1" color=".15 .15 .15 1" noclick="true" />
+
+			</panel>
+
+			<!-- Mid Section (Teams) -->
+			<panel y="3.8h" height="5.8h" width="-1.0h" align="center" valign="top" noclick="1" passivechildren="1" >
+				<!-- Team 1 -->
+				<panel noclick="1" y="0" align="left" width="49%" >
+					<instance name="watch_user_teamTemplate" team="1" user="{user}" />
+				</panel>
+				<!-- Team 2 -->
+				<panel noclick="1" x="0" y="0" align="right" width="49%" >
+					<instance name="watch_user_teamTemplate" team="2" user="{user}" />
+				</panel>
+			</panel>
+
+			<!-- Bottom Section (Players) -->
+			<panel grow="true" y="-0.5h" width="-1.0h" align="center" valign="bottom" noclick="1">
+				<!-- Team 1 -->
+				<panel grow="true" noclick="1" align="left" width="49%" valign="top" float="bottom" padding="0.25h" >
+					<instance name="watch_user_playertitle" />
+					<instance name="watch_user_playerTemplate" player="0" user="{user}" team="1" />
+					<instance name="watch_user_playerTemplate" player="1" user="{user}" team="1" />
+					<instance name="watch_user_playerTemplate" player="2" user="{user}" team="1" />
+					<instance name="watch_user_playerTemplate" player="3" user="{user}" team="1" />
+					<instance name="watch_user_playerTemplate" player="4" user="{user}" team="1" />
+
+					<panel noclick="1" height="1.7h">
+						<panel width="-130@" align="right" float="right" noclick="1">
+							<!-- Player Name -->
+							<label width="55%" height="100%" font="dyn_9" color="1 1 1 1" shadow="true" oninstantiate="SetText(Translate('watch_user_totals'));" textvalign="center" textalign="right" noclick="1"	/>
+							<!-- Level -->
+							<label width="12%" font="dyn_9" color="1 1 1 1" shadow="true" content="" height="100%" textvalign="center" textalign="center" noclick="1" />
+
+							<!-- Total Kills -->
+							<label width="11%" font="dyn_9" color="0 1 0 1" shadow="true" content="" height="100%" textvalign="center" textalign="center" noclick="1"
+								watch="Watch_TeamInfoTrigger1" ontrigger="If(param0 == 8 and StringEquals(watch_user_activeUser, '{user}'), SetText(param1));"
+							/>
+							<!-- Total Deaths -->
+							<label width="11%" font="dyn_9" color="1 0 0 1" shadow="true" content="" height="100%" textvalign="center" textalign="center" noclick="1"
+								watch="Watch_TeamInfoTrigger1" ontrigger="If(param0 == 9 and StringEquals(watch_user_activeUser, '{user}'), SetText(param1));"
+							/>
+							<!-- Total Assists -->
+							<label width="11%" font="dyn_9" color="1 1 0 1" shadow="true" content="" height="100%" textvalign="center" textalign="center" noclick="1"
+								watch="Watch_TeamInfoTrigger1" ontrigger="If(param0 == 10 and StringEquals(watch_user_activeUser, '{user}'), SetText(param1));"
+							/>
+						</panel>
+					</panel>
+				</panel>
+
+				<!-- Team 2 -->
+				<panel grow="true" noclick="1" align="right" width="49%" valign="top" float="bottom" padding="0.25h" >
+					<instance name="watch_user_playertitle" />
+					<instance name="watch_user_playerTemplate" player="5" user="{user}" team="2" />
+					<instance name="watch_user_playerTemplate" player="6" user="{user}" team="2" />
+					<instance name="watch_user_playerTemplate" player="7" user="{user}" team="2" />
+					<instance name="watch_user_playerTemplate" player="8" user="{user}" team="2" />
+					<instance name="watch_user_playerTemplate" player="9" user="{user}" team="2" />
+
+					<panel noclick="1" height="1.7h">
+						<panel width="-130@" align="right" float="right" noclick="1">
+							<!-- Player Name -->
+							<label width="55%" height="100%" font="dyn_9" color="1 1 1 1" shadow="true" oninstantiate="SetText(Translate('watch_user_totals'));" textvalign="center" textalign="right" noclick="1"	/>
+							<!-- Level -->
+							<label width="12%" font="dyn_9" color="1 1 1 1" shadow="true" content="" height="100%" textvalign="center" textalign="center" noclick="1" />
+
+							<!-- Total Kills -->
+							<label width="11%" font="dyn_9" color="0 1 0 1" shadow="true" content="" height="100%" textvalign="center" textalign="center" noclick="1"
+								watch="Watch_TeamInfoTrigger2" ontrigger="If(param0 == 8 and StringEquals(watch_user_activeUser, '{user}'), SetText(param1));"
+							/>
+							<!-- Total Deaths -->
+							<label width="11%" font="dyn_9" color="1 0 0 1" shadow="true" content="" height="100%" textvalign="center" textalign="center" noclick="1"
+								watch="Watch_TeamInfoTrigger2" ontrigger="If(param0 == 9 and StringEquals(watch_user_activeUser, '{user}'), SetText(param1));"
+							/>
+							<!-- Total Assists -->
+							<label width="11%" font="dyn_9" color="1 1 0 1" shadow="true" content="" height="100%" textvalign="center" textalign="center" noclick="1"
+								watch="Watch_TeamInfoTrigger2" ontrigger="If(param0 == 10 and StringEquals(watch_user_activeUser, '{user}'), SetText(param1));"
+							/>
+						</panel>
+					</panel>
+				</panel>
+			</panel>
+
+			<!-- Coverup that goes away on first update -->
+			<panel align="center" valign="bottom" y="-0.4h" width="-0.8h" height="-4.1h" noclick="true" visible="1"
+				watch="ChatRequestGameInfo"
+				ontrigger="
+					If(
+						StringEquals(param0, '{user}'),
+						SetVisible(false)
+					);
+				"
+			>
+				<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.5h" color="0 0 0 1" blockinput="false" noclick="true"/>
+				<frame texture="/ui/frames/roundframe.tga" color=".15 .15 .15 1" borderthickness="0.5h" blockinput="false" noclick="true"/>
+
+				<panel grow="true" height="3.8h" align="center" valign="center" float="right" padding="0.5h" >
+					<animatedimage width="100@" height="100%" texture="/ui/elements/throb/throb.tga" noclick="true" loop="1" fps="30" onshow="StartAnim(1);" />
+					<label fitx="true" noclick="true" textvalign="center" textalign="center" color="white" font="dyn_10" content="watch_user_waiting_for_update"/>
+				</panel>
+
+			</panel>
+
+		</panel>
+	</template>
+
+
+	<!-- User Watch Manager (instance in main.interface) -->
+	<template name="watch_user" >
+		<panel name="watch_user_main" x="0" y="5.25h" width="54h" height="0"
+			align="center" float="bottom" padding="0.5h" visible="{visible=1}" noclick="1"
+			onload="
+				CreateInt('watch_user_refreshDelay', 60000);
+				CreateString('watch_user_activeUser', '');
+				CreateInt('watch_user_activeWatches', 0);
+			"
+			watch="ChatRequestGameInfo"
+			ontrigger="
+				Set(watch_user_activeUser, param0);
+				ExplodeTrigger('Watch_TeamInfoTrigger1', param1);
+				ExplodeTrigger('Watch_TeamInfoTrigger2', param2);
+				ExplodeTrigger('Watch_PlayerInfoTrigger0', param3);
+				ExplodeTrigger('Watch_PlayerInfoTrigger1', param4);
+				ExplodeTrigger('Watch_PlayerInfoTrigger2', param5);
+				ExplodeTrigger('Watch_PlayerInfoTrigger3', param6);
+				ExplodeTrigger('Watch_PlayerInfoTrigger4', param7);
+				ExplodeTrigger('Watch_PlayerInfoTrigger5', param8);
+				ExplodeTrigger('Watch_PlayerInfoTrigger6', param9);
+				ExplodeTrigger('Watch_PlayerInfoTrigger7', param10);
+				ExplodeTrigger('Watch_PlayerInfoTrigger8', param11);
+				ExplodeTrigger('Watch_PlayerInfoTrigger9', param12);
+			"
+		/>
+	</template>
+
+	<!-- Refresh all active watchers while at least 1 is active every 30 seconds -->
+	<template name="watch_user_main_throttleTemplate">
+		<panel name="watch_user_main_throttle" noclick="1" watch="HostTime" oninstantiate="CreateInt('watch_user_refreshThrottle', 0);"
+			ontrigger="If(HostTime ge watch_user_refreshThrottle, If(watch_user_activeWatches ge 1, Split(Set(watch_user_refreshThrottle, (HostTime + watch_user_refreshDelay)), GroupCall('watch_user_boxes', 'RefreshWidget();') ), DestroyWidget()));"
+		/>
+	</template>
+
+	<!-- Triggers [Consolidate - Replace these with 2 step explode or var] -->
+	<trigger name="Watch_TeamInfoTrigger1" />
+	<trigger name="Watch_TeamInfoTrigger2" />
+	<trigger name="Watch_PlayerInfoTrigger0" />
+	<trigger name="Watch_PlayerInfoTrigger1" />
+	<trigger name="Watch_PlayerInfoTrigger2" />
+	<trigger name="Watch_PlayerInfoTrigger3" />
+	<trigger name="Watch_PlayerInfoTrigger4" />
+	<trigger name="Watch_PlayerInfoTrigger5" />
+	<trigger name="Watch_PlayerInfoTrigger6" />
+	<trigger name="Watch_PlayerInfoTrigger7" />
+	<trigger name="Watch_PlayerInfoTrigger8" />
+	<trigger name="Watch_PlayerInfoTrigger9" />
+
+</package>

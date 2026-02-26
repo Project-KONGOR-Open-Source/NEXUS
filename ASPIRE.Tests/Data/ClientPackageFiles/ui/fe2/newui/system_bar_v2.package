@@ -1,0 +1,797 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+	<style name="sysbar_btn_up" color="#36435c" />
+	<style name="sysbar_btn_overdn" color="#0745b7" />
+
+	<include file="social_v2.package"/>
+
+	<!-- Language Combobox -->
+	<template name="sysbar_combobox_lang_item">
+		<image width="100@" height="100%" x="35@" y="14%" noclick="true" texture="{texture=$invis}"/>
+		<label height="100%" y="-4%" x="160@" font="dyn_10" color="{color=white}" textvalign="center" noclick="true" shadow="true" shadowoffset="1" content="{label}"/>
+	</template>
+
+	<trigger name="HoNEventSystemButton" />
+
+	<!-- Points Changed -->
+	<trigger name="PointsChangedStatus" />
+	<trigger name="PointsChangedResult" />
+	<form
+		name="PointsChanged"
+		host="!masterserver"
+		method="POST"
+		target="/client_requester.php"
+		statustrigger="PointsChangedStatus"
+		resulttrigger="PointsChangedResult"
+		resultparam0="error_code"
+		resultparam1="error_msg"
+		resultparam2="super_id"
+		resultparam3="points"
+		resultparam4="mmpoints"
+		resultparam5="last_update"
+		resultparam6="hasViewedStore"
+		resultparam7="patched"
+		resultparam8="vaultHighlight"
+		resultparam9="santas"
+		resultparam10="vested_threshold"
+		resultparam11="0"
+		ssl="off"
+	/>
+
+	<!-- User online count MKII -->
+	<trigger name="ChatUserOnlineExplode" />
+	<template name="sysbar_user_online_item_simple">
+		<panel width="94%" passivechildren="true" float="right" >
+			<panel noclick="1" valign="center" >
+				<label width="-7h" fitypadding="1h" fity="1" textvalign="center" textalign="left" align="left" valign="center"
+					font="dyn_10" color="white" shadow="1" wrap="0" content="{region}:  {value}"
+					oninstantiate="SetText( Translate('ccu_region_{region}') #':');"
+				/>
+				<label width="7h" fitypadding="1h" fity="1" textvalign="center" textalign="right" align="right" valign="center"
+					font="dyn_10" color="white" shadow="1" wrap="0" content="{region}:  {value}"
+					oninstantiate="SetText(FtoA({value}, 0, 0, ',') );"
+				/>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="sysbar_user_online_item">
+		<panel passivechildren="true" float="right" >
+			<image x="0.5h" height="80%" width="80@" noclick="1" align="left" valign="center"
+				texture="/ui/fe2/store/icons/account_icons/derp.tga" visible="1"
+				oninstantiate="SetTexture('/ui/icons/flags/' # If(StringEquals('{region}', 'EU'), 'eu', 'unitedstates') # '.tga');"
+			/>
+			<panel x="155@" noclick="1" valign="center" width="-155@" >
+				<label textvalign="center" textalign="left" align="left" valign="center" width="50%"
+					font="dyn_12" color="white" shadow="1" wrap="0" content="{region}:  {value}"
+					oninstantiate="SetText( Translate('{region}') #':');"
+				/>
+				<label textvalign="center" textalign="right" align="right" valign="center" width="48%" x="-2%"
+					font="dyn_12" color="white" shadow="1" wrap="0" content="{region}:  {value}"
+					oninstantiate="SetText(FtoA({value}, 0, 0, ',') );"
+				/>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="sysbar_notifications_button_state">
+		<widgetstate statename="{statename}" x="{x}" y="{y}">
+			<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.4h" color="{color=#0745b7}" blockinput="0" noclick="1"/>
+			<frame texture="/ui/frames/roundframe.tga" color="0 0 0 1" borderthickness="0.4h" blockinput="0" noclick="1"/>
+			<panel width="-1.0h" align="center" height="100%" float="right" padding="0.5h" noclick="true">
+				<panel grow="true" height="100%" noclick="true">
+					<image width="70@" height="70%" valign="center" texture="/ui/fe2/systembar/icons/notifications.tga" noclick="1" />
+				</panel>
+				<label width="2.9h" height="100%" textvalign="center" textalign="center" font="dyn_10" color="white" shadow="true" noclick="true" content="0" group="sysbar_notification_count_labels" watch="ChatNotificationCount" ontrigger="SetText(param);"/>
+				<panel width="1" height="100%" valign="center" noclick="true">
+					<panel height="95%" color="0 0 0 1" valign="center" noclick="true" />
+				</panel>
+				<panel grow="true" height="100%" noclick="true">
+					<image width="40@" height="40%" valign="center" texture="/ui/elements/arrow_down.tga" noclick="true" watch="SocialGroupVisiblePanel" ontrigger="SetVisible(!StringEquals(param0, 'notification_history'));" />
+					<image width="40@" height="40%" valign="center" texture="/ui/elements/arrow_up.tga" visible="false" noclick="true" watch="SocialGroupVisiblePanel" ontrigger="SetVisible(StringEquals(param0, 'notification_history'));" />
+				</panel>
+			</panel>
+		</widgetstate>
+	</template>
+
+	<if condition="releaseStage_dev or releaseStage_test">
+		<template name="bg_errors_label_template">
+			<label fitx="1" fity="1" fitypadding="0.8h" fitxpadding="0.8h" name="bg_errors_label_template_{id}" font="dyn_14" color="red" shadow="1" content="{error}" noclick="1" />
+		</template>
+	</if>
+
+	<!-- Dev Region Combobox -->
+	<if condition="releaseStage_dev or releaseStage_test or releaseStage_rc" >
+		<template name="sysbar_combobox_state">
+			<widgetstate statename="{state}" noclick="1">
+				<panel color="invisible" noclick="1">
+					<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.4h" color="{color}" blockinput="false" noclick="true"/>
+					<frame texture="/ui/frames/roundframe.tga" color="0 0 0 1" borderthickness="0.4h" blockinput="false" noclick="true"/>
+
+					<panel grow="true" height="100%" align="right" float="right" padding="0.5h" noclick="true">
+						<panel width="1" height="100%" valign="center" noclick="true">
+							<panel height="95%" color="0 0 0 1" valign="center" noclick="true" />
+						</panel>
+						<panel grow="true" height="100%" noclick="true">
+							<image width="40@" height="40%" valign="center" texture="/ui/elements/arrow_down.tga" noclick="true" />
+						</panel>
+						<panel width="1" height="100%" color="invisible"/>
+					</panel>
+				</panel>
+			</widgetstate>
+		</template>
+		<template name="sysbar_region_combobox">
+			<combobox
+				name="region_selector_combobox_{index}"
+				width="100%"
+				height="100%"
+				align="left"
+				valign="center"
+				color="invisible"
+				itemwidth="100%"
+				itemheight="2.2h"
+				cvar=""
+				maxlistheight="90h"
+				exteriorscrollbars="false"
+				scrolltexture="/ui/info/combobox.tga"
+				handleheight="100@" handlewidth="100%"
+				highlight="under"
+				highlightbordercolor="white"
+				onselect="If(!StringEmpty(this), Trigger('SetActiveRegion', this));"
+				watch9="UIUpdateRegion"
+				ontrigger9="DoEvent(9);"
+				onevent9lua="UIManager.GetInterface('main'):HoNRegionF('PopulateRegionSelector', self, self:GetValue())"
+				onmouseover="PlaySound('/shared/sounds/ui/button_over_02.wav');"
+			>
+				<instance name="sysbar_combobox_state" state="up" style="sysbar_btn_up" />
+				<instance name="sysbar_combobox_state" state="over" style="sysbar_btn_overdn" />
+				<instance name="sysbar_combobox_state" state="down" style="sysbar_btn_overdn" />
+				<widgetstate statename="listbg">
+					<frame height="+2.7h" y="-1.9h" texture="/ui/info/combobox_dropdown.tga" borderthickness="1.0h" color="white"  noclick="1" />
+				</widgetstate>
+				<widgetstate statename="itembg">
+					<panel width="100%"  noclick="1" />
+				</widgetstate>
+				<widgetstate statename="itemhighlight">
+					<panel width="100%" texture="/ui/info/header_bar_c.tga"  noclick="1" >
+						<panel width="100%" height="100%"  noclick="1" >
+							<image height="50%" width="32" align="left" valign="top" texture="/ui/info/header_bar_tl.tga" noclick="1"/>
+							<image height="50%" width="32" align="left" valign="bottom" texture="/ui/info/header_bar_bl.tga" noclick="1"/>
+							<image height="50%" width="32" align="right" valign="top" texture="/ui/info/header_bar_tr.tga" noclick="1"/>
+							<image height="50%" width="32" align="right" valign="bottom" texture="/ui/info/header_bar_br.tga" noclick="1"/>
+						</panel>
+					</panel>
+				</widgetstate>
+			</combobox>
+		</template>
+	</if>
+
+	<trigger name="SocialGroupVisiblePanel"/>
+
+	<!-- Under Nickname Panel Controls (figured I'd just set it up to be group-ready now rather than later, also easier to code -->
+	<template name="NickMenuToggleHelper">
+		<panel noclick="true" color="invisible"
+			watch="NickMenuPanelToggle" ontrigger="
+				If((!IsVisible('{panel}') and StringEquals(_nickmenu_currentpanel,'{panel}')), Split(ShowWidget('{panel}'), SleepWidget(500,'Trigger(\'NickMenuVisiblePanel\',\'{panel}\');'), Call('{panel}', 'SleepWidget(200, \'SlideY(\\\'2.2h\\\', 300)\');')), If(IsVisible('{panel}'), Call('{panel}', 'SlideY(\'-20h\', 300); SleepWidget(200, \'HideWidget(\\\'{panel}\\\');\');')));
+			"/>
+	</template>
+
+	<trigger name="NickMenuVisiblePanel"/>
+	<trigger name="NickMenuPanelToggle"/>
+
+	<panel name="NickMenuPanelSwitcher" noclick="true"
+		onload="CreateString('_nickmenu_currentpanel', '');"
+		onevent="
+			If(StringEquals(_nickmenu_currentpanel,'') or (IsVisible(_nickmenu_currentpanel) and !StringEquals(_nickmenu_currentpanel,'')), SleepWidget(200,'Trigger(\'NickMenuVisiblePanel\',\'\');'));
+			Trigger('NickMenuPanelToggle');
+		"/>
+
+	<instance name="NickMenuToggleHelper" panel="account_extras_shop" />
+
+	<!-- IM/Etc. group fade controls -->
+	<trigger name="InstantMessagePanelToggle"/>
+
+	<template name="InstantMessageToggleHelper">
+		<panel
+			noclick="true"
+			color="invisible"
+			watch="InstantMessagePanelToggle"
+			ontrigger="
+				If((!IsVisible('{panel}') and StringEquals(_instantmessages_currentpanel,'{panel}')),
+					Split(
+						Call('{panel}', 'FadeIn(250);'),
+						Cmd('script trackedUserFocus:openPrivateMessages()')
+					),
+					If(IsVisible('{panel}'),
+						Split(
+							Call('{panel}', 'FadeOut(250);'),
+							Cmd('script trackedUserFocus:closePrivateMessages()')
+						)
+					)
+				);
+			"
+		/>
+	</template>
+
+	<panel name="InstantMessagePanelSwitcher" noclick="true" color="invisible"
+		onload="CreateString('_instantmessages_currentpanel', '');"
+		onevent="Trigger('InstantMessagePanelToggle');"
+	/>
+
+	<instance name="InstantMessageToggleHelper" panel="ccwidget_whisper" />
+
+	<template name="newui_system_button">
+		<button
+			name="{btnname}"
+			x="{x=}" y="{y=}"
+			width="{width=32i}"
+			height="{height=32i}"
+			align="{align=center}"
+			valign="{valign=center}"
+			visible="{visible=1}"
+			color="invisible"
+			onload="{onload}"
+			watch="{watch}"
+			ontrigger="{ontrigger}"
+			ontriggerlua="{ontriggerlua}"
+			onmouseoverlua="PlaySound('/shared/sounds/ui/button_over_01.wav') {onmouseoverlua}"
+			onmouseoutlua="{onmouseoutlua}"
+			onclick="{onclick}"
+			onclicklua="PlaySound('/shared/sounds/ui/button_click_01.wav') {onclicklua}"
+		>
+			<widgetstate statename="up">
+				<image texture="/ui/fe2/newui/res/system_button/{img}.png" width="{imgwidth=32i}" height="{imgheight=32i}" align="center" valign="center" color="{imgcolor=}" rendermode="{rendermode=normal}" noclick="1" nocompress="1"/>
+			</widgetstate>
+			<widgetstate statename="over">
+				<image texture="/ui/fe2/newui/res/system_button/{img}_over.png" width="{imgwidth=32i}" height="{imgheight=32i}" align="center" valign="center" color="{imgovercolor=}" rendermode="{rendermode=normal}" noclick="1" nocompress="1"/>
+			</widgetstate>
+			<widgetstate statename="down" x="1" y="1">
+				<image texture="/ui/fe2/newui/res/system_button/{img}.png" width="{imgwidth=32i}" height="{imgheight=32i}" align="center" valign="center" color="{imgcolor=}" rendermode="{rendermode=normal}" noclick="1" nocompress="1"/>
+			</widgetstate>
+			<widgetstate statename="disabled">
+				<image texture="/ui/fe2/newui/res/system_button/{img}.png" width="{imgwidth=32i}" height="{imgheight=32i}" align="center" valign="center" rendermode="grayscale" noclick="1" nocompress="1"/>
+			</widgetstate>
+		</button>
+	</template>
+
+	<panel name="systembar" y="1h" visible="1" width="1340i" height="3h" align="center" noclick="1"
+		onloadlua="
+		--[[
+			local ratio = GetScreenWidth() / GetScreenHeight()
+			if ratio >= 16/9 then
+				self:SetWidth('-52h')
+			elseif ratio >= 16/10 then
+				self:SetWidth('-36h')
+			elseif ratio >= 16/10.24 then
+				self:SetWidth('-32h')
+			elseif ratio >= 16/12 then
+				self:SetWidth('-6h')
+			elseif ratio >= 16/12.8 then
+				self:SetWidth('-2h')
+			end
+		--]]
+		"
+	>
+		<!-- Update Notification	Display if logged in - and update is available -->
+		<panel name="update_available" grow="1" y="1.0h" height="3.0h" align="center" visible="0" noclick="1"
+			watch="UpdaterStatus"
+			ontriggerlua="self:SetVisible(param == '4' or param == '8')"
+		>
+			<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.4h" color="#b30a0ae9" blockinput="0" noclick="1"/>
+			<frame texture="/ui/frames/roundframe.tga" color="0 0 0 1" borderthickness="0.4h" blockinput="0" noclick="1"/>
+			<panel x="0.8h" y="-0.1h" height="2.2h" valign="bottom" grow="1" float="right" noclick="1">
+				<label fitx="1" fitxpadding="0.8h" height="100%" textvalign="center" font="dyn_10" color="white" shadow="1" content="client_outofdate" noclick="1"/>
+				<panel height="100%" width="0.8h"/>
+			</panel>
+		</panel>
+
+		<!-- Mute Notification -->
+		<panel name="sysbar_mute_notification" y="4.0h" width="60h" height="6.2h" align="center" valign="top" visible="0" noclick="1">
+			<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.4h" color="#b30a0ae9" blockinput="false" noclick="1"/>
+			<frame texture="/ui/frames/roundframe.tga" color="0 0 0 1" borderthickness="0.4h" blockinput="false" noclick="1"/>
+			<panel x="1.2h" y="-0.1h" height="4.2h" valign="center" float="right" noclick="1">
+				<label name="sysbar_mute_notification_label" width="-3.8h" align="right" height="100%" textvalign="center" font="dyn_10" color="white" wrap="1" shadow="1" content="sysbar_muted_notice" noclick="1"/>
+			</panel>
+
+			<image x="0.8h" width="3.2h" height="3.2h" valign="center" texture="/ui/fe2/systembar/icons/report.tga" noclick="1" />
+
+			<instance name="newui_button_close_template" x="-0.2h" y="0.2h" align="right" width="1.75h" height="1.75h"
+				onclicklua="GetWidget('sysbar_mute_notification'):SetVisible(false)"
+			/>
+		</panel>
+
+		<!-- Left -->
+		<panel height="100%" align="left" grow="1" regrow="1" growinvis="0" float="right" padding="0.5h" group="system_bar_panels" noclick="1">
+			<!-- Date Display -->
+			<panel height="100%" grow="1" regrow="1" growinvis="0" stickytoinvis="0" float="right" padding="0" noclick="1">
+				<instance name="newui_system_button" align="left" img="time" onclicklua="Set('cg_24hourClock', not GetCvarBool('cg_24hourClock'))"/>
+				<panel height="100%" grow="1" regrow="1" noclick="1">
+					<label fitx="1" textvalign="center" style="newui_font_style_10" noclick="1" watch="SystemTime" ontriggerlua="self:SetText(param)"/>
+				</panel>
+			</panel>
+
+			<!-- Options -->
+			<panel name="sysbar_options_button" width="32i" height="32i" stickytoinvis="0" noclick="1">
+				<instance name="newui_system_button" img="setting"
+					onclicklua="Set('_mainmenu_currentpanel', 'game_options') GetWidget('MainMenuPanelSwitcher'):DoEvent()"
+					onmouseoverlua="Common_V2:ShowSimpleTip(true, 'tooltip_options', '8h')"
+					onmouseoutlua="Common_V2:ShowSimpleTip(false)"
+				/>
+			</panel>
+
+			<!-- Replays -->
+			<panel name="sysbar_replay_button" width="32i" height="32i" stickytoinvis="0" noclick="1"
+				watch="LoginStatus"
+				ontriggerlua="self:SetVisible(AtoB(param2))"
+			>
+				<instance name="newui_system_button" img="replay"
+					onclicklua="Watch_System.Clicked(true) Watch_System.SelectTab('replay')"
+					onmouseoverlua="Common_V2:ShowSimpleTip(true, 'tooltip_offlinereplays', '15h')"
+					onmouseoutlua="Common_V2:ShowSimpleTip(false)"
+				/>
+			</panel>
+
+			<!-- Facebook stream -->
+			<!--
+			<panel name="sysbar_facebook_stream_button" width="3h" stickytoinvis="0" noclick="1" visible="0">
+				<instance name="newui_system_button" img="stream"
+					onload="SetEnabled(IsWindowsGreaterThanXP() and StringEquals(host_vidDriver,'vid_d3d9'));"
+					onclicklua="FacebookStream:TogglePanel()"
+					onmouseoverlua="Common_V2:ShowSimpleTip(true, 'facebook_stream', '18h')"
+					onmouseoutlua="Common_V2:ShowSimpleTip(false)"
+				/>
+				<image width="50@" height="50%" align="right" valign="bottom" texture="/ui/fe2/facebookstream/livenow.tga" visible="0" noclick="1"
+					watch="FacebookStreamStatus"
+					ontriggerlua="self:SetVisible(AtoB(param))"
+				/>
+				<button color="invisible"
+					onload="SetVisible(!IsWindowsGreaterThanXP() or !StringEquals(host_vidDriver,'vid_d3d9'));"
+					onmouseoverlua="Common_V2:ShowSimpleTip(true, 'facebook_stream_windows_support', '22h')"
+					onmouseoutlua="Common_V2:ShowSimpleTip(false)"
+				>
+					<widgetstate statename="up"></widgetstate>
+					<widgetstate statename="over"></widgetstate>
+					<widgetstate statename="down" x="1" y="1"></widgetstate>
+				</button>
+			</panel>
+			-->
+
+			<!-- GCA -->
+			<panel name="sysbar_GCA_button" width="64i" stickytoinvis="0" noclick="1"
+				watch="CafeID"
+				ontriggerlua="self:SetVisible(AtoB(param))"
+			>
+				<instance name="newui_system_button" img="gca" width="64i" imgwidth="64i"
+					onmouseoverlua="Common_V2:ShowSimpleTip(true, 'tooltip_viewgca', '10h')"
+					onmouseoutlua="Common_V2:ShowSimpleTip(false)"
+					onclicklua="UIManager.GetInterface('webpanel'):HoNWebPanelF('ShowGCAWebPage')"
+				/>
+			</panel>
+
+			<!-- Changelog Btn -->
+			<panel name="sysbar_changelog_button" width="32i" stickytoinvis="0" noclick="1">
+				<instance name="newui_system_button" img="changelog"
+					onmouseoverlua="Common_V2:ShowSimpleTip(true, 'tooltip_changelog', '12h')"
+					onmouseoutlua="Common_V2:ShowSimpleTip(false)"
+					onclicklua="Set('_mainmenu_currentpanel', 'change_log') GetWidget('MainMenuPanelSwitcher'):DoEvent()"
+				/>
+			</panel>
+			
+			<!-- HoN TV (only show if quests is enabled ) -->
+			<panel name="sysbar_hontv_button" width="32i" stickytoinvis="0" noclick="1"
+				visible="0"
+				watch="LoginStatus"
+				ontriggerlua="if HoN_Region.regionTable[HoN_Region.activeRegion].questSystem then self:SetVisible(AtoB(param2)) end">
+				<instance name="newui_system_button" img="hontv"
+					onmouseoverlua="Common_V2:ShowSimpleTip(true, 'main_menu_watchsystem', '12h')"
+					onmouseoutlua="Common_V2:ShowSimpleTip(false)"
+					onclicklua="Watch_System.Clicked(true)"
+				/>
+			</panel>
+
+			<!-- New Language -->
+			<panel width="15.4h" height="100%" visible="1" stickytoinvis="0"
+				onshowlua="--[[Trigger('language_chosen')]]"
+				watch="LoginStatus"
+				ontrigger="SetVisible(!StringEquals(param0, 'success'));"
+			>
+				<instance name="newui_combobox_template" widgetname="language_selector_combobox"
+					onselectlua="
+						if NotEmpty(self:GetValue()) then
+							Trigger('TriggerDialogBox', 'confirm_lang_header_new', 'confirm_lang_restart_new', 'confirm_lang_later_new', 'Set(host_language, \''..self:GetValue()..'\'); Cmd(\'Restart\');', 'Call(\'language_selector_combobox\', \'SetSelectedItemByValue(host_language, false)\');', 'confirm_lang_title_new', 'confirm_lang_desc_new', '', '')
+						end
+					"
+					watch9="UIUpdateRegion"
+					ontrigger9="DoEvent(9);"
+					onevent9lua="UIManager.GetInterface('main'):HoNRegionF('PopulateLanguageSelector', self)"
+					onshow="If(!StringEmpty(host_language) and StringEmpty(this), SetSelectedItemByValue(host_language, false));"
+				/>
+			</panel>
+
+			<!-- staff Btn -->
+			<panel name="sysbar_staff_button" width="32i" stickytoinvis="0" visible="1" noclick="1"
+				watch="LoginStatus"
+				ontriggerlua="self:SetVisible((Client.IsStaff() or Client.IsCaster()) and GetCvarBool('ui_dev_button') and AtoB(param2))"
+			>
+				<instance name="newui_system_button" img="staff"
+					onclicklua="local widget = GetWidget('sysbar_staff_button_spec_frame') widget:SetVisible(not widget:IsVisible())"
+				/>
+				<panel name="sysbar_staff_button_spec_frame" visible="0" x="0h" y="4.4h" height="2.4h" width="100%" valign="bottom" noclick="1">
+					<panel width="20h" align="center" noclick="1">
+						<frame texture="/ui/frames/rounded_bg_solid.tga" borderthickness="0.4h" color="0 0 0 0.6" blockinput="0" noclick="1"/>
+						<frame texture="/ui/frames/roundframe.tga" color=".3 .3 .3 1" borderthickness="0.4h" blockinput="0" noclick="1"/>
+						<textbox
+							name="sysbar_staff_textbox_spec_input"
+							hmargin="0.5h" vmargin="0.4h"
+							maxlength="250"
+							textalign="left" textvalign="center"
+							font="dyn_10"
+							textcolor="white"
+							shadow="0"
+							color="invisible"
+							onenter="
+								SetFocus(false);
+								If(!StringEmpty(''#this) and (!ChatInGame() and !StringEquals(GetAccountName(), this)),ChatJoinGameAsStaff(this));
+								EraseInputLine();
+								Call('sysbar_staff_button_spec_frame', 'SetVisible(!IsVisible())');
+								Call('sysbar_staff_textbox_spec_input_cover', 'SetVisible(1)');
+							"
+							onesc="
+								EraseInputLine();
+								SetFocus(false);
+							"
+							onfocus="Call('sysbar_staff_textbox_spec_input_cover', 'SetVisible(0)');"
+							onlosefocus="If(StringEmpty(''#this),Call('sysbar_staff_textbox_spec_input_cover', 'SetVisible(1)'));"
+						/>
+						<label name="sysbar_staff_textbox_spec_input_cover" x="1h" width="-0.5h" height="-0.4h" valign="center" align="center" textvalign="center" font="dyn_10" color="white" shadow="1" content="Spectate player name..." noclick="1" />
+					</panel>
+				</panel>
+			</panel>
+
+			<!-- Modded Files -->
+			<panel name="sysbar_ui_mods" width="2.8h" stickytoinvis="0" visible="1" noclick="1"
+				watch="ModdedFiles"
+				ontriggerlua="
+					self:SetVisible(AtoB(param))
+					trackedUserFocus:logFocus('hasModdedFiles', AtoB(param) and 1 or nil)
+				"
+			>
+				<instance name="newui_system_button" img="mod_warn"
+					onmouseoverlua="Common_V2:ShowSimpleTip(true, 'sysbar_mods_desc', '20h')"
+					onmouseoutlua="Common_V2:ShowSimpleTip(false)"
+					onclicklua="UIManager.GetInterface('main'):HoNMainF('ListModdedFiles', self)"
+				/>
+			</panel>
+
+			<!-- Test +++ -->
+			<panel name="sysbar_testsuite" width="32i" stickytoinvis="0" visible="1" noclick="1"
+				watch="LoginStatus GamePhase"
+				ontriggerlua="self:SetVisible(TestSuite.ClientAccessible() and IsStaff())"
+			>
+				<instance name="newui_system_button" img="testpp"
+					onclicklua="UIManager.GetInterface('test_suite_client'):GetWidget('test_suite_client'):ToggleVisible()"
+					onmouseoverlua="Common_V2:ShowSimpleTip(true, 'Test++', '10h')"
+					onmouseoutlua="Common_V2:ShowSimpleTip(false)"
+				/>
+			</panel>
+
+			<!-- HoN Event -->
+			<panel name="sysbar_honevent" width="32i" stickytoinvis="0" visible="0"
+				watch="HoNEventSystemButton"
+				ontriggerlua="self:SetVisible(AtoB(param))"
+			>
+				<instance name="newui_system_button" btnname="sysbar_honevent_button" img="event"
+					onclicklua="HoNEvent:ToggleEventPanel()"
+					onmouseoverlua="Common_V2:ShowSimpleTip(true, 'tooltip_honevent', '12h')"
+					onmouseoutlua="Common_V2:ShowSimpleTip(false)"
+				/>
+			</panel>
+		</panel>
+
+		<!-- Right -->
+		<panel height="100%" align="right" grow="1" regrow="1" growinvis="0" float="right" padding="0.5h" group="system_bar_panels" noclick="1">
+			<panel height="100%" grow="1" regrow="1" growinvis="0" float="right" padding="1h" noclick="1"
+				watch="LoginStatus"
+				ontriggerlua="self:SetVisible(AtoB(param2))"
+			>
+				<if condition="cl_Rap2Enable">
+					<panel name="sysbar_rap_button" width="32i" stickytoinvis="0" visible="0" noclick="1">
+						<instance name="newui_system_button" img="rap"
+							onmouseoverlua="Common_V2:ShowSimpleTip(true, 'tooltip_rap', '15h')"
+							onmouseoutlua="Common_V2:ShowSimpleTip(false)"
+							onclicklua="Set('_mainmenu_currentpanel', 'rap_status') GetWidget('MainMenuPanelSwitcher'):DoEvent()"
+						/>
+						<modelpanel
+							model="/ui/fe2/rap/effects/model.mdf"
+							anim="idle"
+							camerapos="0 -1500 0"
+							cameraangles="0 0 0"
+							camerafov="4.42"
+							carmerafar="7000"
+							depthclear="false"
+							depthcompress="true"
+							onshowlua="self:SetEffect('/ui/fe2/rap/effects/rap.effect')"
+							noclick="1"
+						/>
+					</panel>
+				</if>
+
+				<!-- Version Validator -->
+				<panel name="sysbar_ui_version_valid_btn" width="32i" stickytoinvis="0" visible="0" noclick="1">
+					<instance name="newui_system_button" img="thumbdown"
+						onmouseoverlua="Common_V2:ShowSimpleTip(true, 'sysbar_uivalid_desc', '20h')"
+						onmouseoutlua="Common_V2:ShowSimpleTip(false)"
+					/>
+				</panel>
+
+				<!-- QA Checklist -->
+				<if condition="(releaseStage_dev or releaseStage_test) and !releaseStage_stable and !ui_disableQAChecklist" >
+					<panel name="sysbar_qa_checklist_button" width="2.8h" stickytoinvis="0" visible="0" noclick="1">
+						<instance name="newui_system_button" img="tech_support"
+							onmouseoverlua="Common_V2:ShowSimpleTip(true, 'QA Checklist', '12h')"
+							onmouseoutlua="Common_V2:ShowSimpleTip(false)"
+							onclicklua="local widget = GetWidget('game_qa_mini_panel_parent') widget:SetVisible(not widget:IsVisible())"
+						/>
+					</panel>
+				</if>
+
+				<!-- UI Dev Button -->
+				<if condition="releaseStage_dev or releaseStage_test" >
+					<panel name="sysbar_ui_dev_btn" width="3h" stickytoinvis="0" visible="0"
+						onloadlua="self:SetVisible(GetCvarBool('ui_dev_button'))"
+						watch="LoginStatus"
+						ontriggerlua="self:SetVisible(param0 == 'success' and GetCvarBool('ui_dev_button'))"
+						watch1="UIDevTrigger"
+						ontrigger1lua="self:SetVisible(not GetCvarBool('_loggedin') and GetCvarBool('ui_dev_button'))"
+					>
+						<button color="invisible"
+							onclick="SetSave('ui_dev', !ui_dev); CallEvent('sysbar_ui_dev_img'); Trigger('UIDevTrigger', ui_dev);"
+							onmouseoverlua="Common_V2:ShowSimpleTip(true, 'Enable UI Dev Options', '18h')"
+							onmouseoutlua="Common_V2:ShowSimpleTip(false)"
+						>
+							<image name="sysbar_ui_dev_img" width="22i" height="22i" texture="/ui/icons/allNighter.tga" align="center" valign="center" noclick="1"
+								onload="DoEvent();"
+								onevent="If(ui_dev, SetColor('0 1 0 1'), SetColor('1 1 1 1'));" />
+						</button>
+						<panel name="bg_main_error_display" float="bottom" y="4h" x="-15h" grow="1" regrow="1" width="30h" height="5h" visible="0" passivechildren="1" noclick="1"/>
+					</panel>
+				</if>
+
+				<!-- QuickStart -->
+				<if condition="releaseStage_dev or releaseStage_test or ui_showQuickStart" >
+					<panel name="sysbar_quickStart" width="3h" stickytoinvis="0" visible="1" noclick="1">
+						<instance name="newui_system_button" img="quick_start"
+							onload="CreateBool('ui_quickStart', false); Set('cg_menuTransitions', 'true');"
+							onclicklua="UIManager.GetInterface('main'):HoNMainF('MainMenuPanelToggle', 'news', nil, nil, true, nil, 3)"
+							onclick="
+								If(GetCurrentGamePhase() == 0,
+									Split(
+										Cmd('StartGame practice GameName map:caldavar allheroes:true'),
+										Set('ui_quickStart', true),
+										##Set('cg_menuTransitions','false'),##
+										Set('sv_gameStartCountdown',0),
+										Set('sv_gameCountdownLength',0),
+										Cmd('script trackedUserFocus:incrementActionCount(\'quickPracticeClicked\')')
+									)
+								);
+							"
+							watch="GamePhase"
+							ontrigger="
+								If(ui_quickStart and param0 == 1, Split(Team(1, 0), SleepWidget(1, 'RequestMatchStart()')));
+								If(ui_quickStart and param0 == 3, Set(ui_quickStart, false));
+							"
+							onmouseoverlua="Common_V2:ShowSimpleTip(true, 'Quickly start a practice game. Speeds up UI animations and skips over timers etc.', '20h')"
+							onmouseoutlua="Common_V2:ShowSimpleTip(false)"
+						/>
+					</panel>
+				</if>
+
+				<!-- UI Region Selector -->
+				<if condition="releaseStage_dev or releaseStage_test or releaseStage_rc" >
+					<panel width="15.0h" height="100%" visible="0" stickytoinvis="0" noclick="1"
+						onloadlua="self:SetVisible(GetCvarBool('ui_dev'))"
+						watch="LoginStatus"
+						ontriggerlua="self:SetVisible(param0 == 'success' and GetCvarBool('ui_dev'))"
+						watch1="UIDevTrigger"
+						ontrigger1lua="self:SetVisible(not GetCvarBool('_loggedin') and GetCvarBool('ui_dev'))"
+					>
+						<instance name="sysbar_region_combobox" index="1"/>
+					</panel>
+				</if>
+
+				<!-- ChatServer Selector -->
+				<if condition="releaseStage_dev or releaseStage_test or releaseStage_rc" >
+					<panel width="15.0h" height="100%" visible="0" stickytoinvis="0" noclick="1"
+						onloadlua="self:SetVisible(GetCvarBool('ui_dev'))"
+						watch="LoginStatus"
+						ontriggerlua="self:SetVisible(param0 == 'success' and GetCvarBool('ui_dev'))"
+						watch1="UIDevTrigger"
+						ontrigger1lua="self:SetVisible(not GetCvarBool('_loggedin') and GetCvarBool('ui_dev'))"
+					>
+						<instance
+							name="Noptions_combobox"
+							id="chatserver_ips"
+							align="right" width="100%" itemwidth="100%" maxlistheight="5"
+							onselectlua="
+								local val, hasVal = self:GetValue(), NotEmpty(val)
+								Set('chat_serverAddrOverride', hasVal and '96.127.149.202' or '')
+								Set('chat_serverPortOverride', hasVal and val or '')
+							"
+							populate="
+								AddTemplateListItem('Ncombobox_item', '', 'label', 'Chat Server Def.');
+								AddTemplateListItem('Ncombobox_item', '11037', 'label', 'Dev');
+								AddTemplateListItem('Ncombobox_item', '11032', 'label', 'SBT');
+								AddTemplateListItem('Ncombobox_item', '11038', 'label', 'RCT');
+								AddTemplateListItem('Ncombobox_item', '11031', 'label', 'Live');
+							"
+						/>
+					</panel>
+				</if>
+			</panel>
+
+			<!-- Gold -->
+			<panel name="sysbar_coins_gold" visible="0" height="100%" noclick="0"
+				grow="1" regrow="1" growinvis="0" stickytoinvis="0"
+				onmouseoverlua="Common_V2:ShowSimpleTip(true, 'sysbar_gold_tip_msg', '28h')"
+				onmouseoutlua="Common_V2:ShowSimpleTip(false)"
+				onclick="CallEvent('store_open_purchase_helper', 2);"
+				onshow="DoEvent(1);"
+				watch="LoginStatus"
+				ontriggerlua="self:SetVisible(AtoB(param2))"
+				watch1="GoldCoins"
+				ontrigger1="DoEvent(1);"
+				onevent1="SetWidth(GetStringWidth('dyn_10', (FtoA(GoldCoins, 0, 0, ','))) + GetWidthFromString('3.2h'));"
+			>
+				<image width="2.5h" height="2.5h" valign="center" texture="/ui/fe2/elements/store2/gold_right.png" noclick="1"/>
+				<label x="2.2h" name="sysbar_gold_label" fitx="1" fity="1" height="80%" valign="center" textvalign="center" font="dyn_10" color="#ffae00" outline="1" outlinecolor="#241410" content="0" noclick="1"
+					watch="GoldCoins"
+					ontrigger="DoEvent(1);"
+					onshow="DoEvent(1);"
+					onevent1="SetText(FtoA(GoldCoins, 0, 0, ',')); SetWidth( GetStringWidth('dyn_10', (FtoA(GoldCoins, 0, 0, ',')) ) );"
+					watch1="PointsChangedResult"
+					ontrigger1="If(PointsChangedStatus == 2, SetText(FtoA(param3, 0, 0, ',')));"
+				/>
+			</panel>
+			<!-- Silver -->
+			<panel name="sysbar_coins_silver" visible="0" height="100%" noclick="0"
+				grow="1" regrow="1" growinvis="0" stickytoinvis="0"
+				onmouseoverlua="Common_V2:ShowSimpleTip(true, 'sysbar_silver_tip_msg', '28h')"
+				onmouseoutlua="Common_V2:ShowSimpleTip(false)"
+				onclick="CallEvent('store_open_purchase_helper', 1);"
+				watch="LoginStatus"
+				ontriggerlua="self:SetVisible(AtoB(param2))"
+				watch1="SilverCoins"
+				ontrigger1="SetWidth( GetStringWidth('dyn_10', (FtoA(SilverCoins, 0, 0, ',')) ) + GetWidthFromString('3.2h') );"
+			>
+				<image width="2.5h" height="2.5h" valign="center" texture="/ui/fe2/elements/store2/silver_right.png" noclick="1"/>
+				<label x="2.2h" name="sysbar_silver_label" fitx="1" fity="1" height="80%" valign="center" textvalign="center" font="dyn_10" color="#c3c3c2" outline="1" outlinecolor="#241410" content="0" noclick="1"
+					watch="SilverCoins"
+					ontrigger="SetText(FtoA(SilverCoins, 0, 0, ',')); SetWidth( GetStringWidth('dyn_10', (FtoA(SilverCoins, 0, 0, ',')) ) );"
+					watch1="PointsChangedResult"
+					ontrigger1="If(PointsChangedStatus == 2, SetText(FtoA(param4, 0, 0, ',')));"
+				/>
+			</panel>
+
+			<!-- Friends -->
+			<panel name="sysbar_friends" width="32i" stickytoinvis="0" visible="1"
+				watch="LoginStatus"
+				ontriggerlua="
+					local isLoggedin = AtoB(param2)
+					self:SetVisible(isLoggedin)
+					if not isLoggedin then
+						GetWidget('social_friends', 'main'):SetVisible(false)
+					end
+				"
+			>
+				<instance name="newui_system_button" btnname="sysbar_friendsonline_button" img="friends"
+					onclicklua="Social_V2:OnToggleFriendPanel()"
+					onmouseoverlua="Common_V2:ShowSimpleTip(true, 'tooltip_friends', '8h')"
+					onmouseoutlua="Common_V2:ShowSimpleTip(false)"
+				/>
+			</panel>
+
+			<!-- Clan -->
+			<panel name="sysbar_clan" width="32i" stickytoinvis="0" visible="1"
+				watch="LoginStatus"
+				ontriggerlua="
+					local isLoggedin = AtoB(param2)
+					self:SetVisible(isLoggedin)
+					if not isLoggedin then
+						GetWidget('social_clan', 'main'):SetVisible(false)
+					end
+				"
+			>
+				<instance name="newui_system_button" img="clan"
+					onclicklua="Social_V2:OnToggleClanPanel()"
+					onmouseoverlua="Common_V2:ShowSimpleTip(true, 'tooltip_clan', '6.5h')"
+					onmouseoutlua="Common_V2:ShowSimpleTip(false)"
+				/>
+			</panel>
+
+			<!-- System Messages -->
+			<panel name="sysbar_notifications" width="32i" stickytoinvis="0" visible="0" noclick="1"
+				watch="LoginStatus"
+				ontriggerlua="self:SetVisible(AtoB(param2))"
+			>
+				<instance name="newui_system_button" img="email"
+					btnname="sysbar_system_notifications_button"
+					onmouseoverlua="Common_V2:ShowSimpleTip(true, 'sysmessage_tip', '18h')"
+					onmouseoutlua="Common_V2:ShowSimpleTip(false)"
+					onclicklua="
+						local wdgMessages = GetWidget('system_message_container', 'main')
+						if wdgMessages then
+							local visible = wdgMessages:IsVisible()
+							if not visible then
+								systemMessages:showNewMessageMark(false)
+							end
+							wdgMessages:SetVisible(not visible)
+						end
+					"
+				/>
+				<image name="sysbar_system_messages_new" x="0.1h" y="0.1h" align="right" width="16i" height="16i" visible="0" texture="/ui/fe2/NewUI/Res/system_message/new.png" noclick="1"/>
+			</panel>
+
+			<!-- Logout Button -->
+			<panel width="32i" stickytoinvis="0" noclick="1"
+				watch="GamePhase LoginStatus"
+				ontrigger="SetVisible(GamePhase or ((ui_useClientLoginSystem or ui_dev) and IsLoggedIn()));"
+			>
+				<!-- Disconnect Icon -->
+				<panel stickytoinvis="0" visible="0" noclick="1"
+					watch="GamePhase"
+					ontriggerlua="self:SetVisible(tonumber(param) > 0)"
+				>
+					<instance name="newui_system_button" img="disconnect"
+						onclicklua="
+							if GetCurrentGamePhase() >= 2 and IsValidLeaverGame() then
+								GetWidget('disconnect_confirm_leaver'):FadeIn(250)
+							else
+								GetWidget('disconnect_confirm'):FadeIn(250)
+							end
+							Trigger('RefereeControlPage', 0)
+						"
+						onmouseoverlua="Common_V2:ShowSimpleTip(true, 'general_disconnect', '11h')"
+						onmouseoutlua="Common_V2:ShowSimpleTip(false)"
+					/>
+				</panel>
+
+				<!-- Logout Button -->
+				<panel stickytoinvis="0" visible="0" noclick="1"
+					watch="GamePhase LoginStatus"
+					ontrigger="SetVisible(!GamePhase and (ui_useClientLoginSystem or ui_dev) and IsLoggedIn());"
+				>
+					<instance name="newui_system_button" img="logout"
+						onclicklua="
+							self:UICmd('LogOut()')
+							Exec('~/login.cfg')
+							GetWidget('main_login_button'):SetEnabled(NotEmpty(GetCvarString('login_name')) and NotEmpty(GetCvarString('login_password')))
+							if GetCvarBool('cl_Rap2Enable') then
+								GetWidget('sysbar_rap_button'):SetVisible(false)
+							end
+						"
+						onmouseoverlua="Common_V2:ShowSimpleTip(true, 'tooltip_logout', '9h')"
+						onmouseoutlua="Common_V2:ShowSimpleTip(false)"
+					/>
+				</panel>
+			</panel>
+
+			<!-- Quit Button -->
+			<panel name="sysbar_quit" width="32i" stickytoinvis="0" noclick="1">
+				<instance name="newui_system_button" x="-.5h" y="-.15h" img="close"
+					onclicklua="
+						if GetCurrentGamePhase() >= 5 then
+							HideMenu()
+						else
+							GetWidget('quit_confirm'):FadeIn(250)
+						end
+					"
+					onmouseoverlua="
+						local gaming = GetCurrentGamePhase() >= 5
+						Common_V2:ShowSimpleTip(true, gaming and 'general_back' or 'game_menu_quit_button', gaming and '6.5h' or '10h')
+					"
+					onmouseoutlua="Common_V2:ShowSimpleTip(false)"
+				/>
+			</panel>
+		</panel>
+	</panel>
+</package>

@@ -1,0 +1,995 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+	
+	<panel name="specui_first_time" visible="0" color="invisible" onshowlua="self:BringToFront()" noclick="1"
+		onloadlua="	if (not GetCvarBool('specui_first_time_viewed3')) then
+						self:SetVisible(1)
+						SetSave('specui_first_time_viewed3', true, 'bool')
+					end"
+	>
+		<panel width="73.0h" height="50h" align="center" valign="bottom" y="-25h" >
+			<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.6h" color="0 0 0 .9" noclick="true"/>
+			<frame texture="/ui/frames/roundframe.tga" borderthickness="0.6h" color=".2 .2 .2 1" noclick="true" />
+			
+			<panel width="100%" float="bottom" padding="1.2h">
+			
+				<panel height="10h" y="1.0h" width="-3.0h" align="center" >
+					<panel x="1.0h" width="9.6h" height="9.6h">
+						<image width="60%" height="60@" align="left" valign="bottom" color="1 1 1 .8" 
+							ontrigger9lua="ResourceManager.RegisterTexture('/ui/elements/crest_hellbourne.tga', 'specui', self)" resourcecontext="specui" watch9="SpecRegisterTextures"
+						/>
+						<image width="86%" height="86@" align="right" valign="top"
+							ontrigger9lua="ResourceManager.RegisterTexture('/ui/elements/crest_legion.tga', 'specui', self)" resourcecontext="specui" watch9="SpecRegisterTextures"
+						/>
+					</panel>					
+					<label x="-3.0h" y="0.6h" fity="true" width="-14.0h" align="right" textalign="center" font="dyn_14" wrap="true" outline="true" color=".8 .8 .8 1" content="specui_help_1" />
+					<label x="-3.0h" y="3.4h" fity="true" width="-14.0h" align="right" textalign="center" font="dyn_18" wrap="true" outline="true" color="#3abde7" content="specui_help_2" />
+				</panel>
+				
+				<panel noclick="1" float="right" height="29.5h" >
+					<!-- Hotkeys-->
+					<panel height="100%" align="left" width="50%" float="bottom" padding="1.0h" color="0 1 0 0.0">
+						<anchor x="0.5h" />
+						<label height="2.0h" width="100%" textalign="left" textvalign="center" font="dyn_14" shadow="true" color="#FFCC00" content="specui_help_3"/>				
+
+						<panel noclick="1" height="2.0h" align="left" valign="center" float="right" >	
+							<label width="19h" align="left" textalign="left" font="dyn_12" wrap="0" outline="true" color="#58bef0" content="specui_help_4" />
+							<label width="8.6h" textalign="left" textvalign="center" font="dyn_10" shadow="true" color="white" content="specui_help_5"/>
+							<panel grow="true" regrow="true" height="100%" align="left" noclick="1" >					
+								<frame texture="/ui/frames/key.tga" width="100%" height="100%" borderthickness="33@" align="right" color="1 1 1 1.0" noclick="1" />
+								<label align="right" y="-1" fitx="true" fitxpadding="0.8h" font="dyn_11" textalign="center" textvalign="center" color=".1 .1 .1 1" shadow="true" shadowcolor=".8 .8 .8 1"
+									onload="SetText(GetKeybindButton('spectator', 'TriggerToggle', 'SpecUIShowAll'));" onshow="SetText(GetKeybindButton('spectator', 'TriggerToggle', 'SpecUIShowAll'));" noclick="1" 
+								/>
+							</panel>						
+						</panel>	
+
+						<panel noclick="1" height="2.0h" align="left" valign="center" float="right" >	
+							<label width="19h" align="left" textalign="left" font="dyn_12" wrap="0" outline="true" color="#58bef0" content="specui_help_quickHide" />
+							<label width="8.6h" textalign="left" textvalign="center" font="dyn_10" shadow="true" color="white" content="specui_help_5"/>
+							<panel grow="true" regrow="true" height="100%" align="left" noclick="1" >					
+								<frame texture="/ui/frames/key.tga" width="100%" height="100%" borderthickness="33@" align="right" color="1 1 1 1.0" noclick="1" />
+								<label align="right" y="-1" fitx="true" fitxpadding="0.8h" font="dyn_11" textalign="center" textvalign="center" color=".1 .1 .1 1" shadow="true" shadowcolor=".8 .8 .8 1"
+									onload="SetText(GetKeybindButton('spectator', 'TriggerToggle', 'SpecUIHideAll'));" onshow="SetText(GetKeybindButton('spectator', 'TriggerToggle', 'SpecUIHideAll'));" noclick="1" 
+								/>
+							</panel>						
+						</panel>							
+						
+						<panel noclick="1" height="2.0h" align="left" valign="center" float="right" >	
+							<label width="19h" align="left" textalign="left" font="dyn_12" wrap="0" outline="true" color="#58bef0" content="specui_help_6" />
+							<label width="8.6h" textalign="left" textvalign="center" font="dyn_10" shadow="true" color="white" content="specui_help_7"/>
+							<panel grow="true" regrow="true" height="100%" align="left" noclick="1" >					
+								<frame texture="/ui/frames/key.tga" width="100%" height="100%" borderthickness="33@" align="right" color="1 1 1 1.0" noclick="1" />
+								<label align="right" y="-1" fitx="true" fitxpadding="0.8h" font="dyn_11" textalign="center" textvalign="center" color=".1 .1 .1 1" shadow="true" shadowcolor=".8 .8 .8 1"
+									onload="SetText(GetKeybindButton('spectator', 'Cmd', 'SpecUITab1'));" onshow="SetText(GetKeybindButton('spectator', 'Cmd', 'SpecUITab1'));" noclick="1" 
+								/>
+							</panel>
+							<panel noclick="1" width="1.3h" />
+							<label width="1.9h" textalign="center" textvalign="center" font="dyn_10" shadow="true" color="white" content="-"/>
+							<panel grow="true" regrow="true" height="100%" align="left" noclick="1" >					
+								<frame texture="/ui/frames/key.tga" width="100%" height="100%" borderthickness="33@" align="right" color="1 1 1 1.0" noclick="1" />
+								<label align="right" y="-1" fitx="true" fitxpadding="0.8h" font="dyn_11" textalign="center" textvalign="center" color=".1 .1 .1 1" shadow="true" shadowcolor=".8 .8 .8 1"
+									onload="SetText(GetKeybindButton('spectator', 'Cmd', 'SpecUITab5'));" onshow="SetText(GetKeybindButton('spectator', 'Cmd', 'SpecUITab5'));" noclick="1" 
+								/>
+							</panel>						
+						</panel>
+						
+						<panel noclick="1" height="2.0h" align="left" valign="center" float="right" >	
+							<label width="19h" align="left" textalign="left" font="dyn_12" wrap="0" outline="true" color="#58bef0" content="specui_help_16" />
+							<label width="8.6h" textalign="left" textvalign="center" font="dyn_10" shadow="true" color="white" content="specui_help_7"/>
+							<panel grow="true" regrow="true" height="100%" align="left" noclick="1" >					
+								<frame texture="/ui/frames/key.tga" width="100%" height="100%" borderthickness="33@" align="right" color="1 1 1 1.0" noclick="1" />
+								<label align="right" y="-1" fitx="true" fitxpadding="0.8h" font="dyn_11" textalign="center" textvalign="center" color=".1 .1 .1 1" shadow="true" shadowcolor=".8 .8 .8 1"
+									onload="SetText(GetKeybindButton('spectator', 'Cmd', 'SpecUIToggleUF'));" onshow="SetText(GetKeybindButton('spectator', 'Cmd', 'SpecUIToggleUF'));" noclick="1" 
+								/>
+							</panel>
+							<panel noclick="1" width="1.3h" />
+							<label width="1.9h" textalign="center" textvalign="center" font="dyn_10" shadow="true" color="white" content="-"/>
+							<panel grow="true" regrow="true" height="100%" align="left" noclick="1" >					
+								<frame texture="/ui/frames/key.tga" width="100%" height="100%" borderthickness="33@" align="right" color="1 1 1 1.0" noclick="1" />
+								<label align="right" y="-1" fitx="true" fitxpadding="0.8h" font="dyn_11" textalign="center" textvalign="center" color=".1 .1 .1 1" shadow="true" shadowcolor=".8 .8 .8 1"
+									onload="SetText(GetKeybindButton('spectator', 'Cmd', 'SpecUIToggleReplay'));" onshow="SetText(GetKeybindButton('spectator', 'Cmd', 'SpecUIToggleReplay'));" noclick="1" 
+								/>
+							</panel>						
+						</panel>	
+
+						<panel noclick="1" height="2.0h" align="left" valign="center" float="right" >	
+							<label width="19h" align="left" textalign="left" font="dyn_12" wrap="0" outline="true" color="#58bef0" content="specui_help_jumpToPOV" />
+							<label width="8.6h" textalign="left" textvalign="center" font="dyn_10" shadow="true" color="white" content="specui_help_holdOrTap"/>
+							<panel grow="true" regrow="true" height="100%" align="left" noclick="1" >					
+								<frame texture="/ui/frames/key.tga" width="100%" height="100%" borderthickness="33@" align="right" color="1 1 1 1.0" noclick="1" />
+								<label align="right" y="-1" fitx="true" fitxpadding="0.8h" font="dyn_11" textalign="center" textvalign="center" color=".1 .1 .1 1" shadow="true" shadowcolor=".8 .8 .8 1"
+									onload="SetText(GetKeybindButton('spectator', 'TriggerToggle', 'SpecUIJumpIn'));" onshow="SetText(GetKeybindButton('spectator', 'TriggerToggle', 'SpecUIJumpIn'));" noclick="1" 
+								/>
+							</panel>
+						</panel>					
+
+						<panel noclick="1" height="2.0h" align="left" valign="center" float="right" >	
+							<label width="19h" align="left" textalign="left" font="dyn_12" wrap="0" outline="true" color="#58bef0" content="game_replay_control_lockcam" />
+							<label width="8.6h" textalign="left" textvalign="center" font="dyn_10" shadow="true" color="white" content="specui_help_holdOrTap"/>
+							<panel grow="true" regrow="true" height="100%" align="left" noclick="1" >					
+								<frame texture="/ui/frames/key.tga" width="100%" height="100%" borderthickness="33@" align="right" color="1 1 1 1.0" noclick="1" />
+								<label align="right" y="-1" fitx="true" fitxpadding="0.8h" font="dyn_11" textalign="center" textvalign="center" color=".1 .1 .1 1" shadow="true" shadowcolor=".8 .8 .8 1"
+									onload="SetText(GetKeybindButton('replay', 'TriggerToggle', 'ReplayLockToggle'));" onshow="SetText(GetKeybindButton('replay', 'TriggerToggle', 'ReplayLockToggle'));" noclick="1" 
+								/>
+							</panel>
+						</panel>
+
+						<panel noclick="1" height="2.0h" align="left" valign="center" float="right" >	
+							<label width="19h" align="left" textalign="left" font="dyn_12" wrap="0" outline="true" color="#58bef0" content="specui_help_quickFF" />
+							<label width="8.6h" textalign="left" textvalign="center" font="dyn_10" shadow="true" color="white" content="specui_help_5"/>
+							<panel grow="true" regrow="true" height="100%" align="left" noclick="1" >					
+								<frame texture="/ui/frames/key.tga" width="100%" height="100%" borderthickness="33@" align="right" color="1 1 1 1.0" noclick="1" />
+								<label align="right" y="-1" fitx="true" fitxpadding="0.8h" font="dyn_11" textalign="center" textvalign="center" color=".1 .1 .1 1" shadow="true" shadowcolor=".8 .8 .8 1"
+									onload="SetText(GetKeybindButton('replay', 'TriggerToggle', 'ReplayFFToggle'));" onshow="SetText(GetKeybindButton('replay', 'TriggerToggle', 'ReplayFFToggle'));" noclick="1" 
+								/>
+							</panel>
+						</panel>
+					
+						<panel noclick="1" height="2.0h" align="left" valign="center" float="right" padding="0.2h" >	
+							<label width="19h" align="left" textalign="left" font="dyn_12" wrap="0" outline="true" color="#58bef0" content="specui_help_jumpToCombat" />
+							<label width="8.6h" textalign="left" textvalign="center" font="dyn_10" shadow="true" color="white" content="specui_help_7"/>
+							<anchor x="27.6h" />
+							<panel grow="true" regrow="true" height="100%" align="left" noclick="1" >					
+								<frame texture="/ui/frames/key.tga" width="100%" height="100%" borderthickness="33@" align="right" color="1 1 1 1.0" noclick="1" />
+								<label align="right" y="-1" fitx="true" fitxpadding="0.8h" font="dyn_11" textalign="center" textvalign="center" color=".1 .1 .1 1" shadow="true" shadowcolor=".8 .8 .8 1"
+									onload="SetText(GetKeybindButton('spectator', 'TriggerToggle', 'SpecUICombat1'));" onshow="SetText(GetKeybindButton('spectator', 'TriggerToggle', 'SpecUICombat1'));" noclick="1" 
+								/>
+							</panel>
+							<panel grow="true" regrow="true" height="100%" align="left" noclick="1" >					
+								<frame texture="/ui/frames/key.tga" width="100%" height="100%" borderthickness="33@" align="right" color="1 1 1 1.0" noclick="1" />
+								<label align="right" y="-1" fitx="true" fitxpadding="0.8h" font="dyn_11" textalign="center" textvalign="center" color=".1 .1 .1 1" shadow="true" shadowcolor=".8 .8 .8 1"
+									onload="SetText(GetKeybindButton('spectator', 'TriggerToggle', 'SpecUICombat2'));" onshow="SetText(GetKeybindButton('spectator', 'TriggerToggle', 'SpecUICombat2'));" noclick="1" 
+								/>
+							</panel>	
+							<panel grow="true" regrow="true" height="100%" align="left" noclick="1" >					
+								<frame texture="/ui/frames/key.tga" width="100%" height="100%" borderthickness="33@" align="right" color="1 1 1 1.0" noclick="1" />
+								<label align="right" y="-1" fitx="true" fitxpadding="0.8h" font="dyn_11" textalign="center" textvalign="center" color=".1 .1 .1 1" shadow="true" shadowcolor=".8 .8 .8 1"
+									onload="SetText(GetKeybindButton('spectator', 'TriggerToggle', 'SpecUICombat3'));" onshow="SetText(GetKeybindButton('spectator', 'TriggerToggle', 'SpecUICombat3'));" noclick="1" 
+								/>
+							</panel>							
+						</panel>						
+					
+					</panel>	
+					
+					<!-- Clicky Clicky -->
+					<panel height="100%"  align="left" width="50%" float="bottom" padding="1.0h" color="1 0 0 0.0">
+						<panel x="4.5h" noclick="1" height="80%" width="1" y="13%" valign="top" color="#58bef0" />
+						<label x="7.0h" height="2.0h" width="100%" textalign="left" textvalign="center" font="dyn_14" shadow="true" color="#FFCC00" content="specui_help_8"/>
+						
+						<!-- Jump to hero -->
+						<panel height="4.5h">
+							<label fity="true" width="100%" textalign="left" textvalign="center" font="dyn_10" shadow="true" color="#58bef0" content="specui_help_9"/>							
+							<panel y="2.1h" grow="true" regrow="true" height="1.8h" float="right">								
+								<panel grow="true" regrow="true" height="100%" float="right" padding="0">								
+									<panel width="2.0h" height="100%" noclick="true">
+										<image texture="/ui/common/new_shop_interface/lmb.tga" width="100%" height="100@" valign="center" noclick="true" />
+									</panel>	
+									<label fitx="true" height="100%" textalign="center" textvalign="center" font="dyn_10" shadow="true" color="white" content="game_shop_key_seperator"/>
+									<panel width="2.0h" height="100%" noclick="true">
+										<image texture="/ui/common/new_shop_interface/lmb.tga" width="100%" height="100@" valign="center" noclick="true" />
+									</panel>								
+									<label x="6.3h" fitx="true" height="100%" textalign="center" textvalign="center" font="dyn_10" shadow="true" color="white" content="specui_help_10"/>										
+								</panel>							
+							</panel>		 					
+						</panel>
+
+						<!-- Lock on hero -->
+						<panel height="4.5h">
+							<label fity="true" width="100%" textalign="left" textvalign="center" font="dyn_10" shadow="true" color="#58bef0" content="specui_help_15"/>							
+							<panel y="2.1h" grow="true" regrow="true" height="1.8h" float="right">								
+								<panel grow="true" regrow="true" height="100%" float="right" padding="0">								
+									<panel width="2.0h" height="100%" noclick="true">
+										<image texture="/ui/common/new_shop_interface/rmb.tga" width="100%" height="100@" valign="center" noclick="true" />
+									</panel>									
+									<label x="2.9h" fitx="true" height="100%" textalign="center" textvalign="center" font="dyn_10" shadow="true" color="white" content="specui_help_10"/>										
+								</panel>						
+							</panel>							
+						</panel>
+		
+						<!-- Labels -->
+						<panel height="4.5h">
+							<label fity="true" width="100%" textalign="left" textvalign="center" font="dyn_10" shadow="true" color="#58bef0" content="specui_help_14"/>							
+							<panel y="2.1h" grow="true" regrow="true" height="1.8h" float="right">								
+								<panel grow="true" regrow="true" height="100%" float="right" padding="0">								
+									<panel width="2.0h" height="100%" noclick="true">
+										<image texture="/ui/common/new_shop_interface/lmb.tga" width="100%" height="100@" valign="center" noclick="true" />
+									</panel>									
+									<label x="2.9h" fitx="1" height="100%" textalign="center" textvalign="center" font="dyn_10" shadow="true" color="white" content="specui_help_11"/>										
+								</panel>						
+							</panel>							
+						</panel>
+						
+						<!-- Towers -->
+						<panel height="4.5h">
+							<label fity="true" width="100%" textalign="left" textvalign="center" font="dyn_10" shadow="true" color="#58bef0" content="specui_help_teamInfo"/>							
+							<panel y="2.1h" grow="true" regrow="true" height="1.8h" float="right">								
+								<panel grow="true" regrow="true" height="100%" float="right" padding="0">								
+									<panel width="2.0h" height="100%" noclick="true">
+										<image texture="/ui/common/new_shop_interface/lmb.tga" width="100%" height="100@" valign="center" noclick="true" />
+									</panel>		
+									<label width="2.0h" height="100%" textalign="center" textvalign="center" font="dyn_10" shadow="true" color="white" content="general_or"/>
+									<panel width="2.0h" height="100%" noclick="true">
+										<image texture="/ui/common/new_shop_interface/rmb.tga" width="100%" height="100@" valign="center" noclick="true" />
+									</panel>										
+									<label x="6.5h" fitx="1" height="100%" textalign="center" textvalign="center" font="dyn_10" shadow="true" color="white" content="specui_help_teamCrests"/>										
+								</panel>						
+							</panel>							
+						</panel>						
+	
+						<!-- Transparency -->
+						<panel height="4.5h">
+							<label fity="true" width="100%" textalign="left" textvalign="center" font="dyn_10" shadow="true" color="#58bef0" content="specui_help_transparentInfo"/>							
+							<panel y="2.1h" grow="true" regrow="true" height="1.8h" >								
+								<label width="50%" height="100%" textalign="left" textvalign="center" font="dyn_10" shadow="true" color="white" content="specui_help_minimalist"/>							
+							</panel>							
+						</panel>
+	
+					</panel>				
+				</panel>
+				
+				<!-- More -->
+				<panel height="4h" color="invisible" align="center" width="30%" >
+					<panel height="4h" x="10%" noclick="true" align="center" float="right" padding="0.4h" >
+						<label width="3.3h" height="2.0h"  textalign="left" textvalign="center" font="dyn_10" shadow="true" color="#58bef0" content="specui_help_12"/>	
+						<image width="2.0h" height="2.0h" texture="/ui/fe2/systembar/icons/options.tga" valign="center" noclick="true" />
+						<label width="15h" height="2.0h"  textalign="left" textvalign="center" font="dyn_10" shadow="true" color="#58bef0" content="specui_help_13"/>	
+					</panel>		
+				</panel>					
+				
+				<anchor y="46.5h" />
+				<panel height="4.4h" align="center" width="100%" color="invisible">
+					<instance
+						name="button2" button_name="unnamedButton262"
+						width="12.0h" height="2.4h"
+						align="center"
+						valign="top"
+						label="general_ok" font="dyn_10"
+						onmouseoverlua="PlaySound('/shared/sounds/ui/button_over_01.wav')"
+						onclicklua="GetWidget('specui_first_time', 'game_spectator'):FadeOut(250)"
+					/>
+				</panel>
+			
+			</panel>
+			
+			<!-- Close X -->
+			<button
+				x="-1.5h" y="1.5h"		
+				width="1.9h" height="1.9h"
+				align="right"
+				color="invisible"
+				onclicklua="PlaySound('/shared/sounds/ui/ccpanel/button_close_02.wav') GetWidget('specui_first_time', 'game_spectator'):FadeOut(250)"
+				onmouseoverlua="PlaySound('/shared/sounds/ui/ccpanel/button_over_01.wav')"
+			>
+				<widgetstate statename="up">
+					<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.5h" color="#910000" blockinput="false" noclick="true"/>
+					<frame texture="/ui/frames/roundframe.tga" color="0 0 0 1" borderthickness="0.5h" blockinput="false" noclick="true"/>
+					<image width="1.3h" height="1.3h" align="center" valign="center" color=".75 .75 .75 1" texture="/ui/elements/closex.tga" noclick="true" />
+				</widgetstate>
+				<widgetstate statename="over">
+					<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.5h" color="#dc0000" blockinput="false" noclick="true"/>
+					<frame texture="/ui/frames/roundframe.tga" color="0 0 0 1" borderthickness="0.5h" blockinput="false" noclick="true"/>
+					<image width="1.3h" height="1.3h" align="center" valign="center" color="1 1 1 1" texture="/ui/elements/closex.tga" noclick="true" />			
+				</widgetstate>
+				<widgetstate statename="down" x="1" y="1">
+					<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.5h" color="#910000" blockinput="false" noclick="true"/>
+					<frame texture="/ui/frames/roundframe.tga" color="0 0 0 1" borderthickness="0.5h" blockinput="false" noclick="true"/>
+					<image width="1.3h" height="1.3h" align="center" valign="center" color="1 1 1 1" texture="/ui/elements/closex.tga" noclick="true" />
+				</widgetstate>
+			</button>
+			
+
+		</panel>
+	
+	</panel>
+
+	<include file="/ui/tooltip_ability_levelup_simple.package"/>
+	
+	<template name="endgame_item_tooltip">
+		<frame
+			name="{id}"
+			texture="/ui/frames/rounded_bg_white.tga"
+			borderthickness="0.6h"
+			color="0 0 0 .75"
+			visible="false"
+			align="right"
+			valign="bottom"
+			width="27h"
+			grow="1"
+			regrow="1"
+			growinvis="0"
+			float="bottom"
+			onshowlua="self:BringToFront()"
+		>
+			<frame texture="/ui/frames/roundframe.tga" borderthickness="0.6h" bordercolor="#434d50"/>
+			<anchor x="1.0h" y="0.6h" />
+			
+			<panel width="-2.0h" height="3.6h">
+			
+				<!-- Icon -->
+				<panel width="100@" height="100%">
+					<image texture=""
+						watch="MSPlayerInventoryTipIcon"
+						ontriggerlua="
+							if (NotEmpty(param0)) then
+								self:SetTexture(param0)
+								self:SetVisible(1)
+							else
+								self:SetVisible(0)
+							end"
+					/>
+					<frame color="invisible" borderthickness="1" bordercolor=".3 .3 .3 1"/>
+				</panel>
+				
+				<panel width="-120@" align="right">
+				
+					<!-- Name -->
+					<label
+						height="1.8h"
+						valign="top"
+						textalign="left"
+						font="dyn_12" color="#ffab01" shadow="true"
+						watch="{watch}"
+						ontriggerlua="self:SetText(param0)"
+					/>
+					
+					<!-- Value -->
+					<label
+						height="1.8h"
+						valign="bottom"
+						textalign="left" textvalign="bottom"
+						font="dyn_10"
+						color=".9 .9 .9 1"
+						watch="{watch}"
+						ontriggerlua="	if NotEmpty(param1) and (tonumber(param1) > 0) then
+											self:SetText(Translate('tooltip_value') .. param1)
+										else
+											self:ClearText()
+										end"
+					/>
+					
+					<!-- Level-->
+					<label
+						height="1.8h"
+						valign="bottom"
+						textalign="left"
+						textvalign="bottom"
+						font="dyn_10" color=".9 .9 .9 1" shadow="true"
+						watch="{watch}"
+						ontriggerlua="
+							if (NotEmpty(param2) and (tonumber(param2) ~= 0) and NotEmpty(param3) and (tonumber(param3) ~= 0)) then
+								self:SetText(Translate('toolitp_level', 'level', param2))
+								self:SetVisible(1)
+							else
+								self:SetVisible(0)
+							end
+						"
+						sticky="true"
+						stickytoinvis="false"
+						visible="false"
+					/>				
+				
+				</panel>
+			
+			</panel>
+						
+			<panel
+				width="-2.0h"
+				height="1.8h"
+				watch="{watch}"
+				ontriggerlua="self:SetVisible(NotEmpty(param4))"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			/>
+
+			<!-- Description text -->
+			<label
+				width="-2.0h"
+				height="0.0h"
+				font="dyn_9"
+				wrap="true"
+				color="white"
+				watch="{watch}"
+				ontriggerlua="self:SetText(param4) self:SetVisible(NotEmpty(param4))"
+				fity="1"
+				fitypadding="0.2h"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			/>
+			
+			<panel
+				width="-2.0h"
+				height="1.8h"
+				watch="{watch}"
+				ontriggerlua="self:SetVisible(NotEmpty(param34))"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			/>
+
+			<!-- Description text2 -->
+			<label
+				width="-2.0h"
+				height="0.0h"
+				font="dyn_9"
+				wrap="true"
+				color="white"
+				watch="{watch}"
+				ontriggerlua="self:SetText(param34) self:SetVisible(NotEmpty(param34))"
+				fity="1"
+				fitypadding="0.2h"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			/>
+
+			<!-- Passive block -->
+			<panel
+				width="-2.0h"
+				height="1.8h"
+				watch="{watch}"
+				ontriggerlua="self:SetVisible(NotEmpty(param6) and (tonumber(param6) > 0))"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			/>
+
+			<panel
+				width="-2.0h"
+				height="2.4h"
+				watch="{watch}"
+				ontriggerlua="self:SetVisible(NotEmpty(param6) and (tonumber(param6) > 0))"
+				float="bottom"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			>
+				<label
+					height="1.8h"
+					font="dyn_10"
+					color="white"
+					content="tooltip_passive_bonuses"
+				/>
+
+				<panel width="10.5h" height="0.2h" color="gray" />
+				<panel height="0.4h" sticky="true" />
+			</panel>
+
+			<!-- Passive bonuses -->
+			<label
+				width="-2.0h"
+				height="0.0h"
+				font="dyn_10"
+				wrap="true"
+				color="white"
+				watch="{watch}"
+				ontriggerlua="self:SetText(param5) self:SetVisible(NotEmpty(param6) and (tonumber(param6) > 0))"
+				fity="1"
+				fitypadding="0.4h"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			/>
+
+			<!-- Activation block -->
+			<panel
+				width="-2.0h"
+				height="1.8h"
+				watch="{watch}"
+				ontriggerlua="self:SetVisible(AtoB(param7))"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			/>
+
+			<panel
+				width="-2.0h"
+				height="2.4h"
+				watch="{watch}"
+				ontriggerlua="self:SetVisible(AtoB(param7))"
+				float="bottom"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			>
+				<label
+					width="-2.0h"
+					height="1.8h"
+					font="dyn_10"
+					color="white"
+					content="tooltip_activation"
+				/>
+
+				<panel width="10.5h" height="0.2h" color="gray" sticky="true" />
+				<panel width="-2.0h" height="0.4h" sticky="true" />
+			</panel>
+
+			<!-- Action type and Target scheme -->
+			<panel
+				width="-2.0h"
+				height="1.8h"
+				watch="{watch}"
+				ontriggerlua="self:SetVisible(NotEmpty(param8) and AtoB(param7))"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			>
+				<label
+					textalign="left"
+					font="dyn_10"
+					color="white"
+					watch="{watch}"
+					ontriggerlua="self:SetText(param8)"
+				/>
+				<label
+					textalign="right"
+					font="dyn_10"
+					color="white"
+					watch="{watch}"
+					ontriggerlua="self:SetText(param9)"
+				/>
+			</panel>
+
+			<!-- Cast effect type -->
+			<label
+				width="-2.0h"
+				height="1.8h"
+				font="dyn_10"
+				color="white"
+				watch="{watch}"
+				ontriggerlua="self:SetText(Translate('tooltip_type') .. param10) self:SetVisible(NotEmpty(param10) and AtoB(param7))"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			/>
+
+			<!-- Range -->
+			<label
+				width="-2.0h"
+				height="1.8h"
+				font="dyn_10"
+				color="white"
+				watch="{watch}"
+				ontriggerlua="self:SetText(Translate('tooltip_range') .. param11) self:SetVisible(NotEmpty(param11) and AtoB(param7))"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			/>
+
+			<!-- Radius -->
+			<label
+				width="-2.0h"
+				height="1.8h"
+				font="dyn_10"
+				color="white"
+				watch="{watch}"
+				ontriggerlua="self:SetText(Translate('tooltip_radius') .. param12) self:SetVisible(NotEmpty(param12) and AtoB(param7))"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			/>
+			
+			<!-- Channeling time -->
+			<label
+				width="-2.0h"
+				height="1.8h"
+				font="dyn_10"
+				color="green"
+				watch="{watch}"
+				ontriggerlua="	if (NotEmpty(param35)) then
+									self:SetText(Translate('tooltip_channeling_time', 'time', param35))
+									self:SetVisible(1)
+								else
+									self:SetVisible(0)
+								end"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			/>
+
+			<!-- Mana cost -->
+			<label
+				width="-2.0h"
+				height="1.8h"
+				font="dyn_10"
+				color="aqua"
+				watch="{watch}"
+				ontriggerlua="self:SetText(Translate('tooltip_mana_cost') .. param13) self:SetVisible(NotEmpty(param13) and AtoB(param7))"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			/>
+			
+			<!-- Mana Upkeep -->
+			<label
+				width="-2.0h"
+				height="1.8h"
+				font="dyn_10"
+				color="yellow"
+				watch="{watch}"
+				ontriggerlua="self:SetText(Translate('tooltip_mana_upkeep', 'value', param36)) self:SetVisible(NotEmpty(param36) and AtoB(param7))"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			/>
+
+			<!-- Cooldown -->
+			<label
+				width="-2.0h"
+				height="1.8h"
+				font="dyn_10"
+				color="#F0E68C"
+				watch="{watch}"
+				ontriggerlua="self:SetText(Translate('tooltip_cooldown', 'time', param14)) self:SetVisible(NotEmpty(param14))"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			/>
+
+			<panel
+				width="-2.0h"
+				height="1.8h"
+				watch="{watch}"
+				ontriggerlua="self:SetVisible(NotEmpty(param15) and AtoB(param7))"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			/>
+
+			<!-- Effect -->
+			<label
+				width="-2.0h"
+				height="0.0h"
+				font="dyn_9"
+				wrap="true"
+				color="white"
+				watch="{watch}"
+				ontriggerlua="self:SetText(param15) self:SetVisible(NotEmpty(param15) and AtoB(param7))"
+				fity="1"
+				fitypadding="0.2h"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			/>
+
+			<!-- Triggered effect -->
+			<panel
+				width="-2.0h"
+				height="1.8h"
+				watch="{watch}"
+				ontriggerlua="self:SetVisible(AtoB(param16))"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			/>
+
+			<panel
+				width="-2.0h"
+				height="2.4h"
+				watch="{watch}"
+				ontriggerlua="self:SetVisible(AtoB(param16))"
+				float="bottom"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			>
+				<label
+					width="-2.0h"
+					height="1.8h"
+					font="dyn_10"
+					color="white"
+					watch="{watch}"
+					ontriggerlua="self:SetText(param17)"
+				/>
+
+				<panel width="10.5h" height="0.2h" color="gray" sticky="true" />
+				<panel width="-2.0h" height="0.4h" sticky="true" />
+			</panel>
+
+			<label
+				width="-2.0h"
+				height="0.0h"
+				font="dyn_9"
+				wrap="true"
+				color="white"
+				watch="{watch}"
+				ontriggerlua="self:SetText(param18) self:SetVisible(NotEmpty(param18) and AtoB(param16))"
+				fity="1"
+				fitypadding="0.2h"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			/>
+
+			<!-- Status effect -->
+			<panel
+				width="-2.0h"
+				height="1.8h"
+				watch="{watch}"
+				ontriggerlua="self:SetVisible(NotEmpty(param19))"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			/>
+
+			<panel
+				width="-2.0h"
+				height="2.4h"
+				watch="{watch}"
+				ontriggerlua="self:SetVisible(NotEmpty(param19))"
+				float="bottom"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			>
+				<label
+					height="1.8h"
+					font="dyn_10"
+					color="white"
+					watch="{watch}"
+					ontriggerlua="self:SetText(param19)"
+				/>
+
+				<panel width="10.5h" height="0.2h" color="gray" />
+				<panel height="0.4h" sticky="true" />
+			</panel>
+
+			<label
+				width="-2.0h"
+				height="1.8h"
+				font="dyn_10"
+				wrap="true"
+				color="white"
+				watch="{watch}"
+				ontriggerlua="self:SetText(param20) self:SetVisible(NotEmpty(param21) and (tonumber(param21) > 0) and NotEmpty(param19))"
+				fity="1"
+				fitypadding="0.4h"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			/>
+			
+			<!-- Status effect 2 -->
+			<panel
+				width="-2.0h"
+				height="1.8h"
+				watch="{watch}"
+				ontriggerlua="self:SetVisible(NotEmpty(param31))"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			/>
+
+			<panel
+				width="-2.0h"
+				height="2.4h"
+				watch="{watch}"
+				ontriggerlua="self:SetVisible(NotEmpty(param31))"
+				float="bottom"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			>
+				<label
+					height="1.8h"
+					font="dyn_10"
+					color="white"
+					watch="{watch}"
+					ontriggerlua="self:SetText(param19)"
+				/>
+
+				<panel width="10.5h" height="0.2h" color="gray" />
+				<panel height="0.4h" sticky="true" />
+			</panel>
+
+			<label
+				width="-2.0h"
+				height="1.8h"
+				font="dyn_10"
+				wrap="true"
+				color="white"
+				watch="{watch}"
+				ontriggerlua="self:SetText(param32) self:SetVisible(NotEmpty(param33) and (tonumber(param33) > 0) and NotEmpty(param31))"
+				fity="1"
+				fitypadding="0.4h"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			/>
+
+			<!-- Aura block -->
+			<panel
+				width="-2.0h"
+				height="1.8h"
+				watch="{watch}"
+				ontriggerlua="self:SetVisible(AtoB(param22))"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			/>
+
+			<panel
+				width="-2.0h"
+				height="2.4h"
+				watch="{watch}"
+				ontriggerlua="self:SetVisible(AtoB(param22))"
+				float="bottom"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			>
+				<label
+					width="-2.0h"
+					height="1.8h"
+					font="dyn_10"
+					color="white"
+					content="tooltip_aura"
+				/>
+
+				<panel width="10.5h" height="0.2h" color="gray" sticky="true" />
+				<panel width="-2.0h" height="0.4h" sticky="true" />
+			</panel>
+
+			<!-- Radius and Target scheme -->
+			<panel
+				width="-2.0h"
+				height="1.8h"
+				watch="{watch}"
+				ontriggerlua="self:SetVisible(AtoB(param22))"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			>
+				<label
+					textalign="left"
+					font="dyn_10"
+					color="white"
+					watch="{watch}"
+					ontriggerlua="self:SetText(Translate('tooltip_radius') .. param28) self:SetVisible(AtoB(param22))"
+				/>
+				<label
+					textalign="right"
+					font="dyn_10"
+					color="white"
+					watch="{watch}"
+					ontriggerlua="self:SetText(param26)"
+				/>
+			</panel>
+
+			<!-- Aura effect type -->
+			<label
+				width="-2.0h"
+				height="1.8h"
+				font="dyn_10"
+				color="white"
+				watch="{watch}"
+				ontriggerlua="self:SetText(Translate('tooltip_type') .. param27) self:SetVisible(NotEmpty(param27) and AtoB(param22))"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			/>
+
+			<panel
+				width="-2.0h"
+				height="1.8h"
+				watch="{watch}"
+				ontriggerlua="self:SetVisible(AtoB(param22))"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			/>
+
+			<!-- Aura bonuses -->
+			<panel
+				width="-2.0h"
+				height="2.4h"
+				watch="{watch}"
+				ontriggerlua="self:SetVisible(AtoB(param22))"
+				float="bottom"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			>
+				<label
+					height="1.8h"
+					font="dyn_10"
+					color="white"
+					content="tooltip_aura_effects"
+				/>
+
+				<panel width="10.5h" height="0.2h" color="gray" />
+				<panel height="0.4h" sticky="true" />
+			</panel>
+
+			<label
+				width="-2.0h"
+				height="1.8h"
+				font="dyn_10"
+				wrap="true"
+				color="white"
+				watch="{watch}"
+				ontriggerlua="self:SetText(param23) self:SetVisible(NotEmpty(param24) and (tonumber(param24) > 0))"
+				fity="1"
+				fitypadding="0.4h"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			/>
+
+			<!-- Flavor text -->
+			<panel
+				width="-2.0h"
+				height="1.8h"
+				watch="{watch}"
+				ontriggerlua="self:SetVisible(NotEmpty(param29))"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			/>
+
+			<label
+				width="-2.0h"
+				height="1.8h"
+				font="dyn_9"
+				wrap="true"
+				color=".5 .5 .5 1"
+				watch="{watch}"
+				ontriggerlua="self:SetText(param29) self:SetVisible(NotEmpty(param29))"
+				fity="1"
+				fitypadding="0.2h"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			/>
+
+			<panel
+				width="-2.0h"
+				height="1.5h"
+				watch="{watch}"
+				ontriggerlua="self:SetVisible({help} and NotEmpty(param30))"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			/>
+
+			<!-- Help -->
+			<label
+				width="-2.0h"
+				height="1.8h"
+				font="dyn_10"
+				wrap="true"
+				color="yellow"
+				watch="{watch}"
+				ontriggerlua="self:SetText(param30) self:SetVisible({help} and NotEmpty(param30))"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			/>
+
+			<!-- padding, like what the below did before just using grow -->
+			<panel noclick="1" color="invisible" height="0.55h" />
+
+			<!-- This is a bunch of nope, put a grow/regrow/etc on the parent -->
+			<!-- <panel width="-2.0h" height="0.0h"
+				onframe="If(IsVisible(), Call('{id}', 'SetHeight(' # GetY() # ' + GetYFromString(\'0.55h\'));'));"
+				sticky="true"
+				stickytoinvis="false"
+			/> -->
+		</frame>
+	</template>		
+	
+	<panel noclick="1" y="-4.0h" >
+		<instance name="ability_levelup_tooltip_simple" id="specui_ability_tooltip_simple0" slot="0" help="true"/>
+		<instance name="ability_levelup_tooltip_simple" id="specui_ability_tooltip_simple1" slot="1" help="true"/>
+		<instance name="ability_levelup_tooltip_simple" id="specui_ability_tooltip_simple2" slot="2" help="true"/>
+		<instance name="ability_levelup_tooltip_simple" id="specui_ability_tooltip_simple3" slot="3" help="true"/>
+	</panel> 
+	
+	<trigger name="MSPlayerInventoryTip" />
+	<trigger name="MSPlayerInventoryTipIcon" />
+	<trigger name="MSPlayerHeroName" />
+	<instance name="endgame_item_tooltip" id="endgameItemTooltip" watch="MSPlayerInventoryTip" help="true" />	
+	<instance name="generic_tooltip_floater" width="10h" align="right" valign="bottom" tip_id="endgame_hero_tooltip" title="" label="" title_watch="MSPlayerHeroName" title_ontrigger="SetText(GetEntityDisplayName(param0));" label_watch="MSPlayerHeroName" label_ontrigger="DestroyWidget();" />	
+
+</package>

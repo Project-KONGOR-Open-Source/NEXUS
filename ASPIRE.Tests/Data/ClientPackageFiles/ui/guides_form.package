@@ -1,0 +1,582 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+	
+	<!-- Guides -->	
+	<trigger name="GuideLoadFeatured" />
+	<trigger name="GuideHeroName" />	
+	<trigger name="GuideLoadCache" />
+	<trigger name="GuideInfoFormResultCache" />
+	<trigger name="GuideInfoFormResultCache2" />	
+	<trigger name="GuideLabelEvent" />
+	<trigger name="GuideButtonUpdate" />	
+	<trigger name="GuideAbilityEvent" />
+	<trigger name="GuideAbilityClear" />	
+	<trigger name="GuideTextClear" />	
+	<trigger name="GuideRecommendedEvent" />
+	<trigger name="GuideRecommendedClear" />	
+	<trigger name="GuideRecommendedBorder" />
+	<trigger name="GuideListFormStatus"/>
+	<trigger name="GuideListFormResult"/>
+	<trigger name="GuideListFormResultExplode"/>	
+	<trigger name="GuideInfoFormStatus"/>
+	<trigger name="GuideInfoFormResult"/>
+	<trigger name="GuideInfoFormResultSave"/>
+	<trigger name="GuideInfoFormResultExplodeAbilities"/>
+	<trigger name="GuideInfoFormResultExplodeItemsStart"/>
+	<trigger name="GuideInfoFormResultExplodeItemsLaning"/>
+	<trigger name="GuideInfoFormResultExplodeItemsCore"/>
+	<trigger name="GuideInfoFormResultExplodeItemsLux"/>
+	<trigger name="GuideVoteFormStatus" />
+	<trigger name="GuideVoteFormResult" />
+	<trigger name="GuideDefaultFormStatus" />
+	<trigger name="GuideDefaultFormResult" />
+	<trigger name="GuideSetAsDefault"   />	
+	<trigger name="GuideFavoriteFormStatus" />
+	<trigger name="GuideFavoriteFormResult" />
+	<trigger name="GuideAddToFavorites" />		
+	<trigger name="GuideLoadGuide" />
+	<trigger name="GuideChangedGuide" />
+	<trigger name="GuideUpdateButtons" />
+	<trigger name="GuideMasterQuery" />
+	<trigger name="GuideMasterStatus" />
+	<trigger name="AutoLevelClear" />
+
+	<!--
+	<trigger name="GuideClickReport" />	
+	<trigger name="GuideClearReport" />
+	<trigger name="GuideReportFormStatus" />
+	<trigger name="GuideReportFormResult" />
+	<trigger name="UpdateGuideAbuseForm"/>
+	-->
+	
+	<!-- event handler  -->
+	<panel noclick="1"
+		onload="
+			CreateString('guide_currentGuideString', '');
+			CreateString('guide_selectedGuideString', '');
+			CreateString('guide_currentIntroString', '');
+			CreateString('guide_currentHero', '');
+			CreateString('guide_reportReason', ''); 
+			CreateString('guide_recommendedString', '');
+			
+			CreateInt('guide_masterQueryTime', -1);
+			CreateInt('guide_masterQueryTimeSent', -1);
+			CreateInt('guide_selectedGuide', 99999);
+			CreateInt('guide_lastGuide', -1);
+			CreateInt('guide_defaultGuide', 0);
+			CreateInt('guide_favoriteGuide', 0);
+			
+			CreateInt('guide_lerptime', 1000);
+			
+			##CreateBool('guide_useReport', 1);##
+			CreateBool('guide_useCache', 1);
+			CreateBool('guide_newRound', 0);
+		"	
+	
+		watch=""
+		ontrigger="
+			If(param != 1, SleepWidget(500, 'Trigger(\'GuideMasterStatus\', param)'));
+		"
+		
+		watch1="GuideSetAsDefault"
+		ontrigger1="
+			Set(guide_lastGuide, guide_selectedGuide);
+			Set(guide_auto_selection, 1);
+			If(param == 1,
+				Split(Set(guide_defaultGuide, guide_selectedGuide), Trigger('GuideMasterQuery', 'GuideDefaultForm', HostTime), SubmitForm('GuideDefaultForm', 'f', 'guide_default_set', 'account', GetAccountID(), 'cookie', GetCookie(), 'hosttime', HostTime, 'gid', guide_selectedGuide)),
+				Split(Set(guide_defaultGuide, -1), 					Trigger('GuideMasterQuery', 'GuideDefaultForm', HostTime), SubmitForm('GuideDefaultForm', 'f', 'guide_default_remove', 'account', GetAccountID(), 'cookie', GetCookie(), 'hosttime', HostTime, 'gid', guide_selectedGuide))
+			);
+		"
+		
+		watch2="GuideAddToFavorites"
+		ontrigger2="
+			Set(guide_lastGuide, guide_selectedGuide);
+			Set(guide_auto_selection, 1);
+			If(param == 1,
+				Split(Set(guide_favoriteGuide, guide_selectedGuide), Trigger('GuideMasterQuery', 'GuideFavoriteForm', HostTime), SubmitForm('GuideFavoriteForm', 'f', 'guide_favorite_set', 'account', GetAccountID(), 'cookie', GetCookie(), 'hosttime', HostTime, 'gid', guide_selectedGuide)),
+				Split(Set(guide_favoriteGuide, -1), 				Trigger('GuideMasterQuery', 'GuideFavoriteForm', HostTime), SubmitForm('GuideFavoriteForm', 'f', 'guide_favorite_remove', 'account', GetAccountID(), 'cookie', GetCookie(), 'hosttime', HostTime, 'gid', guide_selectedGuide))
+			);
+		"
+
+		watch3="GuideMasterQuery"
+		ontrigger3="
+			SetWatch(''#param0#'Status');
+			Set(guide_masterQueryTime, param1);
+			Set(guide_masterQueryTimeSent, param1);
+			Trigger('GuideMasterStatus', 1);
+		"		
+					
+		watch4="GuideReportFormResult GuideVoteFormResult GuideListFormResult GuideInfoFormResult GuideFavoriteFormResult GuideDefaultFormResult"
+		ontrigger4="
+			## Error param0 ##
+		"
+					
+		watch5="GuideLoadCache"
+		ontrigger5="
+			Trigger('GuideInfoFormResult', 
+				*('guide_info_cache_0_'#guide_selectedGuide),
+				*('guide_info_cache_1_'#guide_selectedGuide),
+				*('guide_info_cache_2_'#guide_selectedGuide),
+				*('guide_info_cache_3_'#guide_selectedGuide),
+				*('guide_info_cache_4_'#guide_selectedGuide),
+				*('guide_info_cache_5_'#guide_selectedGuide),
+				*('guide_info_cache_6_'#guide_selectedGuide),
+				*('guide_info_cache_7_'#guide_selectedGuide),
+				*('guide_info_cache_8_'#guide_selectedGuide),
+				*('guide_info_cache_9_'#guide_selectedGuide),
+				*('guide_info_cache_10_'#guide_selectedGuide),
+				*('guide_info_cache_11_'#guide_selectedGuide),
+				*('guide_info_cache_12_'#guide_selectedGuide),
+				*('guide_info_cache_13_'#guide_selectedGuide),
+				*('guide_info_cache_14_'#guide_selectedGuide),
+				*('guide_info_cache_15_'#guide_selectedGuide),
+				*('guide_info_cache_16_'#guide_selectedGuide),
+				*('guide_info_cache_17_'#guide_selectedGuide),
+				*('guide_info_cache_18_'#guide_selectedGuide),
+				1,
+				1,
+				*('guide_info_cache_21_'#guide_selectedGuide)
+			);	
+		"		
+		
+		watch7="GuideInfoFormResult"
+		ontrigger7="
+			If(StringEmpty(param0) and !StringEmpty(param1),
+			If(!VarExists('guide_info_cache_0_'#guide_selectedGuide),
+				Split(
+					CreateString('guide_info_cache_0_'#guide_selectedGuide, ''#param0#''),
+					CreateString('guide_info_cache_1_'#guide_selectedGuide, ''#param1#''),
+					CreateString('guide_info_cache_2_'#guide_selectedGuide, ''#param2#''),
+					CreateString('guide_info_cache_3_'#guide_selectedGuide, ''#param3#''),
+					CreateString('guide_info_cache_4_'#guide_selectedGuide, ''#param4#''),
+					CreateString('guide_info_cache_5_'#guide_selectedGuide, ''#param5#''),
+					CreateString('guide_info_cache_6_'#guide_selectedGuide, ''#param6#''),
+					CreateString('guide_info_cache_7_'#guide_selectedGuide, ''#param7#''),
+					CreateString('guide_info_cache_8_'#guide_selectedGuide, ''#param8#''),
+					CreateString('guide_info_cache_9_'#guide_selectedGuide, ''#param9#''),				
+					CreateString('guide_info_cache_10_'#guide_selectedGuide, ''#param10#''),
+					CreateString('guide_info_cache_11_'#guide_selectedGuide, ''#param11#''),
+					CreateString('guide_info_cache_12_'#guide_selectedGuide, ''#param12#''),
+					CreateString('guide_info_cache_13_'#guide_selectedGuide, ''#param13#''),
+					CreateString('guide_info_cache_14_'#guide_selectedGuide, ''#param14#''),
+					CreateString('guide_info_cache_15_'#guide_selectedGuide, ''#param15#''),
+					CreateString('guide_info_cache_16_'#guide_selectedGuide, ''#param16#''),
+					CreateString('guide_info_cache_17_'#guide_selectedGuide, ''#param17#''),
+					CreateString('guide_info_cache_18_'#guide_selectedGuide, ''#param18#''),
+					CreateString('guide_info_cache_21_'#guide_selectedGuide, ''#param21#'')
+				),
+				Split(
+					Set('guide_info_cache_0_'#guide_selectedGuide, ''#param0#''),
+					Set('guide_info_cache_1_'#guide_selectedGuide, ''#param1#''),
+					Set('guide_info_cache_2_'#guide_selectedGuide, ''#param2#''),
+					Set('guide_info_cache_3_'#guide_selectedGuide, ''#param3#''),
+					Set('guide_info_cache_4_'#guide_selectedGuide, ''#param4#''),
+					Set('guide_info_cache_5_'#guide_selectedGuide, ''#param5#''),
+					Set('guide_info_cache_6_'#guide_selectedGuide, ''#param6#''),
+					Set('guide_info_cache_7_'#guide_selectedGuide, ''#param7#''),
+					Set('guide_info_cache_8_'#guide_selectedGuide, ''#param8#''),
+					Set('guide_info_cache_9_'#guide_selectedGuide, ''#param9#''),		
+					Set('guide_info_cache_10_'#guide_selectedGuide, ''#param10#''),
+					Set('guide_info_cache_11_'#guide_selectedGuide, ''#param11#''),
+					Set('guide_info_cache_12_'#guide_selectedGuide, ''#param12#''),
+					Set('guide_info_cache_13_'#guide_selectedGuide, ''#param13#''),
+					Set('guide_info_cache_14_'#guide_selectedGuide, ''#param14#''),
+					Set('guide_info_cache_15_'#guide_selectedGuide, ''#param15#''),
+					Set('guide_info_cache_16_'#guide_selectedGuide, ''#param16#''),
+					Set('guide_info_cache_17_'#guide_selectedGuide, ''#param17#''),
+					Set('guide_info_cache_18_'#guide_selectedGuide, ''#param18#''),
+					Set('guide_info_cache_21_'#guide_selectedGuide, ''#param21#'')
+				)				
+			));
+		"		
+	/>
+
+	<panel noclick="1"
+		watch7="GuideChangedGuide"
+		ontrigger7="	
+			##Echo('^c Clearing Guide Data 5');##
+			HideWidget('shopGlobalItemTooltip');
+			SetAutoLevelup(' ');
+			##
+			Trigger('GuideRecommendedEvent');
+			Trigger('GuideAbilityEvent');
+			Trigger('GuideLabelEvent');
+			##
+			Set(guide_usingLocal, 0);
+		"
+		
+		watch8="GuideLoadGuide"
+		ontrigger8="
+			##Echo('^c Clearing Guide Data 2');##
+			HideWidget('shopGlobalItemTooltip');
+			Trigger('GuideRecommendedClear');
+			Trigger('GuideAbilityClear');	
+			Trigger('GuideTextClear');
+			SetAutoLevelup(' ');	
+			SleepWidget(50, 'DoEvent();');
+			"
+		onevent="
+			Call('guide_usingLocalPanel', 'SetVisible(0);');
+			If(!VarExists('guide_info_cache_0_'#guide_selectedGuide) or !guide_useCache,
+				Split(##Echo('Load from ^cweb'),## Set(guide_useCache, 1), Trigger('GuideMasterQuery', 'GuideInfoForm', HostTime), SubmitForm('GuideInfoForm', 'f', 'get_guide', 'account', GetAccountID(), 'cookie', GetCookie(), 'hero', GetViewHeroName(), 'hosttime', HostTime, 'gid', guide_selectedGuide)),
+				##Split(Echo('Load from ^gcache'),## Trigger('GuideLoadCache')##)##
+			);
+			
+			If(WidgetExists('guidelist_item_'#guide_selectedGuide),
+				Call('guidelist_item_'#guide_selectedGuide, 
+					'Call(\'guide_pop_display_label\', \'SetText(\\\'\'#this#\'\\\'); SetColor(Saturate(1 - ((this/100) - 0.50) / 0.50), ((this/100) + ((((this/100) - 0.05) / 1.0)*0.2)) / 0.45, 	0, 1); \')'
+				)
+			);
+			Trigger('GuideChangedGuide');
+		"
+
+		watch9="HeroName GuideHeroName"
+		ontrigger9="
+			If(!StringEmpty(GetViewHeroName()),
+				If(!StringEquals(param0, guide_currentHero) or guide_newRound,
+					Split(
+						##Echo('^g guide_auto_selection? 1: ' # param0 #' | '# guide_currentHero #' | '# guide_newRound),##
+						Set(guide_newRound, 0),
+						Set(guide_currentHero, param0),
+						Trigger('GuideMasterQuery', 'GuideListForm', HostTime),
+						SubmitForm('GuideListForm', 'f', 'get_guide_list_filtered', 'account', GetAccountID(), 'cookie', GetCookie(), 'hero', GetViewHeroName(), 'hosttime', HostTime)##,##
+						##Trigger('GuideLoadGuide')##
+					)
+				)
+			);
+		"
+		
+	/>	
+	
+	<trigger name="GuideLoadFeaturedExplode" />
+	<trigger name="GuideLoadFeaturedInstantiate" />		
+	<trigger name="GuideInfoFormResultLocal" />
+	<panel noclick="1"
+		watch2="GuideLoadFeatured"
+		ontrigger2="
+			Set(guide_useCache, 0);
+			SleepWidget(50, '
+				If(!WidgetExists(\'guide_reader_textbuffer_\'#GetViewHeroName()),
+					Split(
+						##Echo(\'^y 1 - GuideLoadFeatured Triggered - Instantiating\'),##
+						Instantiate(\'guide_reader_textbuffer\', \'hero\', GetViewHeroName()),
+						SleepWidget(1, \'Trigger(\\\'GuideLoadFeaturedInstantiate\\\');\')
+					),
+					SleepWidget(1, \'Trigger(\\\'GuideLoadFeaturedInstantiate\\\');\')
+				);'
+			);
+		"
+		
+		watch1="GuideLoadFeaturedExplode"
+		ontrigger1="		
+			##Echo('^c Clearing Guide Data 1');##
+			Call('guide_usingLocalPanel', 'SetVisible(1);');
+			Trigger('GuideInfoFormResultLocal', 
+				'', ## ##
+				'',
+				'',
+				'',
+				'',
+				param7, ## Items ##
+				param8, ## Items ##
+				param9, ## Items ##
+				param10, ## Items ##
+				param11, ## Abilities ##
+				param12, ## Intro ##
+				param13, ## Desc ##
+				'', ## Date Modified ##
+				0, ## Fav ##
+				0, ## Def ##
+				1, ##  ##
+				1, ## Vote result ##
+				1, ##  ##
+				1, ##  ##
+				1, ##  ##
+				1, ##  ##
+				1, ## Featured ##
+				1
+			);	
+			"	
+	/>	
+	<template name="guide_reader_textbuffer" >
+		<textbuffer name="guide_reader_textbuffer_{hero}" visible="0" group="guide_reader_textbuffers" scrolltexture="/ui/info/combobox.tga" handleheight="2.0h" scrollbarsize="2.2h" wrap="0" exteriorscrollbars="false" textalign="left" font="dyn_10" textcolor="white" color="invisible" shadow="1" noclick="1"
+			file="/guides/{hero}_guide.txt"
+			watch1="GuideLoadFeaturedInstantiate" ontrigger1="
+			Trigger('GuideRecommendedClear');
+			Trigger('GuideAbilityClear');	
+			Trigger('GuideTextClear');
+			SetAutoLevelup(' ');				
+			SleepWidget(50, 'ExplodeTrigger(\'GuideLoadFeaturedExplode\', NormalizeLineBreaks(this), \'$#$#\', \'`\', 0, 0);');
+			"
+			watch="GuideLoadFeatured" ontrigger="DestroyWidget();"
+		/>
+	</template>
+	
+	<!-- report
+	<form		
+		name="GuideReportForm"
+		host="!masterserver"
+		method="POST"
+		target="/client_requester.php"
+		statustrigger="GuideReportFormStatus"
+		resulttrigger="GuideReportFormResult"
+		resultparam0="success"
+		resultparam1="errors"
+		ssl="false"
+	/>		
+	<panel noclick="1" visible="1"
+		watch0="GuideReportFormResult"
+		ontrigger0="
+			## Echo('Report Result: '#' '#param0#' -^g '#param1#' ^*-^y '#param2#' ^*- '#param3); ##
+		"		
+		
+		watch2="GuideReportFormStatus"
+		ontrigger2=""
+	/>		
+	 -->
+	 
+	<!-- vote -->
+	<form		
+		name="GuideVoteForm"
+		host="!masterserver"
+		method="POST"
+		target="/client_requester.php"
+		statustrigger="GuideVoteFormStatus"
+		resulttrigger="GuideVoteFormResult"
+		resultparam0="errors"
+		resultparam1="vote"
+		resultparam2="guide_vote"
+		resultparam3="success"
+		resultparam4="hosttime"
+		ssl="false"
+	/>		
+	<panel noclick="1" visible="1"
+		watch0="GuideVoteFormResult"
+		ontrigger0="
+			If(param3 and GuideVoteFormStatus == 2 and (guide_masterQueryTime == param4),
+				Set('guide_info_cache_16_'#guide_selectedGuide, ''#param1#'')
+			);
+			## Echo('Vote Result: '#Evaluate('guide_info_cache_13_'#guide_selectedGuide)#' - '#param0#' -^g '#param1#' ^*-^y '#param2#' ^*- '#param3); ##
+		"		
+		
+		watch2="GuideVoteFormStatus"
+		ontrigger2=""
+	/>	
+	
+	<!-- default -->
+	<form		
+		name="GuideDefaultForm"
+		host="!masterserver"
+		method="POST"
+		target="/client_requester.php"
+		statustrigger="GuideDefaultFormStatus"
+		resulttrigger="GuideDefaultFormResult"
+		resultparam0="errors"
+		resultparam1="set"
+		resultparam2="success"
+		resultparam3="guide_default"
+		resultparam4="hosttime"
+		ssl="false"
+	/>		
+	<panel noclick="1" visible="1"
+		watch0="GuideDefaultFormResult"
+		ontrigger0="
+			## Echo('Default Result: '#Evaluate('guide_info_cache_13_'#guide_selectedGuide)#' - '#param0#' - '#param1#' - ^gS?:'#param2#'^* - '#param3#'  ('#param4#'/'#guide_masterQueryTime#')  GuideDefaultFormStatus:'#GuideDefaultFormStatus); ## 
+			If(param2 and GuideDefaultFormStatus == 2 and (guide_masterQueryTime == param4),
+				Split(				
+					Trigger('GuideMasterQuery', 'GuideListForm', HostTime),
+					SubmitForm('GuideListForm', 'f', 'get_guide_list_filtered', 'account', GetAccountID(), 'cookie', GetCookie(), 'hero', GetViewHeroName(), 'hosttime', HostTime),
+					Set('guide_info_cache_14_'#guide_selectedGuide, ''#param1#'')
+				)
+			);
+		"				
+		watch2="GuideDefaultFormStatus"
+		ontrigger2=""
+	/>		
+
+	<!-- Favorite -->
+	<form		
+		name="GuideFavoriteForm"
+		host="!masterserver"
+		method="POST"
+		target="/client_requester.php"
+		statustrigger="GuideFavoriteFormStatus"
+		resulttrigger="GuideFavoriteFormResult"
+		resultparam0="errors"
+		resultparam1="set"
+		resultparam2="success"
+		resultparam3="guide_favorite"
+		resultparam4="hosttime"
+		ssl="false"
+	/>		
+	<panel noclick="1" visible="1"
+		watch0="GuideFavoriteFormResult"
+		ontrigger0="
+			If(param2 and GuideFavoriteFormStatus == 2 and (guide_masterQueryTime == param4),
+				Split(			
+					Set('guide_info_cache_13_'#guide_selectedGuide, ''#param1#''),
+					Trigger('GuideMasterQuery', 'GuideListForm', HostTime),
+					SubmitForm('GuideListForm', 'f', 'get_guide_list_filtered', 'account', GetAccountID(), 'cookie', GetCookie(), 'hero', GetViewHeroName(), 'hosttime', HostTime)
+				)
+			);
+			## Echo('Favorite Result: '#Evaluate('guide_info_cache_13_'#guide_selectedGuide)#' - '#param0#' -^g '#param1#' ^*-^y '#param2#' ^*- '#param3); ##
+		"			
+		watch2="GuideFavoriteFormStatus"
+		ontrigger2=""
+	/>	
+	
+	<!-- guide list -->
+	<form		
+		name="GuideListForm"
+		host="!masterserver"
+		method="POST"
+		target="/client_requester.php"
+		statustrigger="GuideListFormStatus"
+		resulttrigger="GuideListFormResult"
+		resultparam0="errors"
+		resultparam1="guide_list"
+		resultparam2="hosttime"
+		ssl="false"
+	/>	
+	<panel noclick="1" visible="1"
+		onload="CreateBool('guide_auto_selection', 0); CreateBool('guide_usingLocal', 0);"
+		watch0="GuideListFormResult"
+		ontrigger0="
+			## Echo('guide_masterQueryTime:' # guide_masterQueryTime #'  hosttime: '# param2); ##
+			If(GuideListFormStatus == 2 and (guide_masterQueryTime == param2),
+				Split(
+					Call('guidelist_combobox', 'ClearItems();'),
+					ExplodeTrigger('GuideListFormResultExplode', param1, '`', '|')
+				)
+			);
+		"		
+		watch1="GuideListFormResultExplode"
+		ontrigger1="
+			If(GuideListFormStatus == 2,				
+				Call('guidelist_combobox', '
+					AddTemplateListItem(\'guidelist_item\', '#param1#',
+						\'index\', '#param0#',
+						\'guideindex\', '#param1#',
+						\'timestamp\',  \''#param2#'\',
+						\'author\', \''#param3#'\',
+						\'guidename\', \''#param4#'\',
+						\'isdef\', '#StringEquals(param5, 'is_def')#',
+						\'isfav\', '#StringEquals(param6, 'is_fav')#',				
+						\'pop\', '#Round(param7*100)#',
+						\'is_yours\', '#StringEquals(param8, 'is_yours')#',
+						\'is_premium\', '#param9#'	
+					);	
+					##Echo(
+						\'GuideListFormResultExplode: \' # 
+						guide_auto_selection # \' | \' #
+						'#param0#'
+					);
+					##
+					If(!guide_auto_selection,
+						If('#param0#' == 1, SetSelectedItemByIndex(0)),
+						SetSelectedItemByValue(guide_lastGuide)
+					);				
+				')			
+			);
+		"	
+		
+		watch2="GuideListFormStatus"
+		ontrigger2="If(param != 1, SleepWidget(250, 'Set(guide_auto_selection, 0)'));"
+	/>	
+	
+	<!-- Guide main info -->
+	<form
+		name="GuideInfoForm"
+		host="!masterserver"
+		target="/client_requester.php"
+		statustrigger="GuideInfoFormStatus"
+		resulttrigger="GuideInfoFormResult"
+		resultparam0="errors"
+		resultparam1="author_name"
+		resultparam2="hero_cli_name"
+		resultparam3="guide_name"
+		resultparam4="hero_name"
+		resultparam5="i_start"
+		resultparam6="i_laning"
+		resultparam7="i_core"
+		resultparam8="i_luxury"
+		resultparam9="abilQ"
+		resultparam10="txt_guide"
+		resultparam11="txt_intro"
+		resultparam12="datetime"
+		resultparam13="favorite"
+		resultparam14="default"
+		resultparam15="rating"
+		resultparam16="vote"
+		resultparam17="hosttime"
+		resultparam18="thumb"	
+		resultparam19=""
+		resultparam20="success"
+		resultparam21="premium"
+		ssl="false"
+	/>	
+	<!-- Abilities -->
+	<panel noclick="1" visible="1"
+		onload="CreateString('guide_autolevel_abilities', '');"
+		watch2="GuideInfoFormStatus"
+		ontrigger2=""	
+		watch0="GuideInfoFormResult GuideInfoFormResultLocal"
+		ontrigger0="						
+			If((GuideInfoFormStatus == 2 and (guide_masterQueryTime == param17) and param20) or param19,
+				Split(			
+					##Echo('^yload abliities '#param9),##
+					Set(guide_autolevel_abilities, param9),		
+					ExplodeTrigger('GuideInfoFormResultExplodeAbilities', param9, '|'),
+					Trigger('GuideAbilityEvent')
+				)
+			);
+		"		
+	/>	
+	<!-- Items -->	
+	<panel noclick="1" visible="1"
+		watch0="GuideInfoFormResult GuideInfoFormResultLocal"
+		ontrigger0="				
+			If((GuideInfoFormStatus == 2 and (guide_masterQueryTime == param17) and param20) or param19,
+				Split(								
+					Set(guide_recommendedString, EscapeString(param5) # '|' # EscapeString(param6) # '|' # EscapeString(param7) # '|' # EscapeString(param8)),
+					##Echo('Load Items: '#param5),##
+					ExplodeTrigger('GuideInfoFormResultExplodeItemsStart', EscapeString(param5), '|'),
+					ExplodeTrigger('GuideInfoFormResultExplodeItemsLaning', EscapeString(param6), '|'),
+					ExplodeTrigger('GuideInfoFormResultExplodeItemsCore', EscapeString(param7), '|'),
+					ExplodeTrigger('GuideInfoFormResultExplodeItemsLux', EscapeString(param8), '|'),
+					Trigger('GuideRecommendedEvent'),
+					CallEvent('shop_v4_listbox', 5)
+				)
+			);
+		"		
+	/>	
+	
+	<!-- Guide reset -->
+	<panel noclick="1" 
+		onload="If(!VarExists('guide_newRound'), DoEvent()); CreateBool('guide_queuedClear', 0);" 
+		onevent0="CreateBool('guide_newRound', 0);" onevent1="CreateBool('guide_usingLocal', 0);" onevent3="CreateString('guide_currentHero', '');"	
+		watch3="EventLeaveGame EventJoinGame" ontrigger3="If(!StringEmpty(guide_currentHero), DoEvent(2));"
+		watch2="LoadingProgress" ontrigger2="If(!StringEmpty(guide_currentHero) and param0 lt 1, DoEvent(2));"
+		watch1="Disconnected" ontrigger1="DoEvent(2);"		
+		watch0="GamePhase" 
+		ontrigger0="
+			If(!VarExists('guide_currentHero'), DoEvent(3)); 
+			If(!VarExists('guide_usingLocal'), DoEvent(1)); 
+			If(!VarExists('guide_newRound'), DoEvent(0)); 
+			If(param0 == 1, DoEvent(2));
+			"
+		onevent2="
+			##Echo('^c Clearing Guide Data 3');##
+			Set(guide_currentHero, '');
+			Set(guide_newRound, 0);
+			Set(guide_useCache, 0);		
+			SetAutoLevelup(' ');
+			Cmd('Trigger GuideRecommendedClear');
+			Cmd('Trigger GuideAbilityClear');
+			Cmd('Trigger GuideTextClear');
+			Cmd('Trigger AutoLevelClear');
+			Set(guide_usingLocal, 0);				
+		"
+	/>	
+	
+</package>

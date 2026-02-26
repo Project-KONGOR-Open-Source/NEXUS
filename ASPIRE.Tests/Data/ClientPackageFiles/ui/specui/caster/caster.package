@@ -1,0 +1,186 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<package name="caster" >
+	
+	<lua file="/ui/scripts/caster.lua" />
+	<trigger name="CasterOverlayDelayReport" />
+	<trigger name="CasterOverlayReport" />
+	<trigger name="CasterOverlayReportFont" />
+	<trigger name="CasterOverlayPosition" />
+	<trigger name="CasterOverlayLoad" />
+	<trigger name="CasterOverlayReset" />
+	<trigger name="CasterOverlayClear" />
+	<trigger name="BangBBPUpdateSelectedTexture" />
+	
+	
+	<panel name="co_logo" group="co_overlay" onrefresh="SetVisible(bang_bbp_ShowOverlay); SetNoClick(!bang_bbp_ShowOverlay);" noclick="1" width="450" height="127" cangrab="1" x="0%" y="2%" align="center" visible="0"
+		texture="$invis" 
+		watch2="CasterOverlayDelayReport" ontrigger2="SleepWidget(200, 'Trigger(\'CasterOverlayReport\')');"
+		onmouselup="if(HasFocus(), Trigger('CasterOverlayReport'));"
+		watch="CasterOverlayReport"
+		ontrigger="
+			SetAbsoluteX(GetAbsoluteX());
+			SetAbsoluteY(GetAbsoluteY());
+			SleepWidget(21, '
+				Cmd(\'Trigger CasterOverlayPosition ' # name # ' ' # GetAbsoluteX() # ' ' # GetAbsoluteY() # ' ' # GetWidth() # ' ' # GetHeight() # ' ' # '_' # ' &#34;' # GetTexture() # '&#34;\');
+			');
+			" 		
+		watch1="BangBBPUpdateSelectedTexture" ontrigger1="SetTexture(bang_bbp_selectedTexture);"
+	/>
+	
+	<template name="co_label_template" >
+		<panel name="co_label_{id}" group="co_overlay" onrefresh="SetVisible(bang_bbp_ShowOverlay); SetNoClick(!bang_bbp_ShowOverlay);" visible="0" noclick="1" passivechildren="1" cangrab="1" grow="1" x="{x}" y="2%" align="center" 
+			onmouselup="if(HasFocus(), Trigger('CasterOverlayReport'));"
+			watch="CasterOverlayReport"
+			ontrigger="
+				SetAbsoluteX(GetAbsoluteX());
+				SetAbsoluteY(GetAbsoluteY());
+				SleepWidget(21, '
+					Call(\'co_label_{id}_text\', \'
+						Cmd(\\\'Trigger CasterOverlayPosition '# name #' '# GetAbsoluteX() #' '# GetAbsoluteY() #' '# GetWidth() #' '# GetHeight() #' &#34;\\\'#this#\\\'&#34;  _ \\\');
+					\')
+				');
+				" 		
+		>
+			<label name="co_label_{id}_text" fitx="1" height="127" textvalign="center" font="dyn_20" color="1 1 1 1" shadow="true" content="" noclick="1" />		
+		</panel>
+	</template>
+	
+	<instance name="co_label_template" id="1" x="-20%" />
+	<instance name="co_label_template" id="2" x="-10%" />
+	<instance name="co_label_template" id="3" x="10%" />
+	<instance name="co_label_template" id="4" x="20%" />	
+	
+	<template name="co_label_cfg_template" >
+		<panel height="2.0h" noclick="1" >
+			<frame width="65%" bordercolor="white" borderthickness="1" color="invisible" noclick="1" align="left" valign="top"  >
+				<textbox name="co_label_{id}_input_t"
+					onchange=""
+					onenter="
+						SetFocus(0); 
+						Call('co_label_{id}_text', 'SetText(\''#this#'\')');
+						SleepWidget(21, 'Trigger(\'CasterOverlayReport\');');
+						"
+					height="-2" width="-2" textvalign="center" align="center" valign="center" editable="1" font="dyn_9" color="invisible" x="5%"  textcolor="white"
+				 />
+				 <label color="white" shadow="true" textalign="left" wrap="true" y="-2.0h" font="dyn_11" content="Label {id} Text   (^ RGB for color)" noclick="1" ></label>
+			 </frame>				
+			<frame width="30%" bordercolor="white" borderthickness="1" color="invisible" noclick="1" align="right" valign="top"  >
+				<textbox name="co_label_{id}_input_f"
+					onenter="SetFocus(0); 
+						If(Round(this + 0) ge 1 and Round(this + 0) le 24,
+							Call('co_label_{id}_text', 'SetFont(\'dyn_' # Round(this) # '\'); SetText(this);')
+						);
+						Trigger('CasterOverlayReportFont', 'co_label_{id}_text', Round(this));
+						SleepWidget(21, 'Trigger(\'CasterOverlayReport\');'); 
+						"
+					height="-2" width="-2" textvalign="center" align="center" valign="center" editable="1" font="dyn_9" color="invisible" x="5%"  textcolor="white"
+				 />
+				 <label color="white" shadow="true" textalign="left" wrap="0" y="-2.0h" font="dyn_11" content="Font Size (1-24)" noclick="1" ></label>
+			 </frame>									
+		</panel>	
+	</template>
+	
+	<!-- Floating Config Menu -->
+	<panel name="bang_bbp_panelConfig" visible="0" y="30h" x="35%" noclick="0" cangrab="1" width="45h" height="42h" 
+		onshow="Trigger('CasterOverlayLoad'); Trigger('CasterOverlayLoad');"
+		onload="GroupCall('co_overlay', 'RefreshWidget();');"
+	>
+		<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.5h" color="black" noclick="1"/>
+		<frame texture="/ui/frames/roundframe.tga" color="#73869c" borderthickness="0.5h" noclick="1"/>
+		<!-- Header -->
+		<panel height="2.4h" noclick="true">
+			<instance name="header_bar" lbl="BB Panels Config" lbl_font="dyn_10" show_close="1" onclick="Cmd('UICall bang_bbp_panelConfig HideWidget(\'bang_bbp_panelConfig\');');" />
+			<panel x="-4.0h" height="100%" width="13.0h" align="right" noclick="true" visible="1">
+				<instance name="Noptions_checkbox" width="130%" align="right" valign="center" label="Show Overlay"  
+					onclick="Set(bang_bbp_ShowOverlay, !bang_bbp_ShowOverlay); If(bang_bbp_ShowOverlay, SetButtonState(1), SetButtonState(0)); GroupCall('co_overlay', 'RefreshWidget();');" 
+					onload="If(!VarExists('bang_bbp_ShowOverlay'), Split(CreateBool('bang_bbp_ShowOverlay', 0), SetSave('bang_bbp_ShowOverlay'))); If(bang_bbp_ShowOverlay, SetButtonState(1), SetButtonState(0));" font="dyn_9" 
+					watch="CasterOverlayLoad" ontrigger="If(bang_bbp_ShowOverlay, SetButtonState(1), SetButtonState(0));"
+				/>
+			</panel>				
+		</panel>			
+		<!-- Texture Picker -->
+		<label color="white" shadow="true" wrap="true" x="60%" y="2.5h" font="dyn_11" content="Select Texture" noclick="1" ></label>
+		<panel noclick="1" visible="1" color="invisible" x="-0.5h" y="-8.5h" width="70@" height="70%" valign="top" align="right" onshow="BringToFront();" >
+			<instance name="Noptions_combobox" id="bang_bbp_dropdown" width="25h" valign="center" itemwidth="100%"  noclick="0" onshow="BringToFront();"
+				color="1 .3 .3 1" overcolor="1 .4 .4" downcolor="1 .4 .4"
+				maxlistheight="6" onload="CreateString('bang_bbp_selectedTexture');" onselect="Set(bang_bbp_selectedTexture, this); Trigger('BangBBPUpdateSelectedTexture'); SleepWidget(151, 'Trigger(\'CasterOverlayReport\');'); "
+			/>
+		</panel>
+		<panel visible="0" noclick="1" onload="DoEvent();"
+			onevent="
+				ForEachFile('*', '/ui/specui/caster/logos/', '*.jpg', true,  'Call(\'bang_bbp_dropdown\', \'AddTemplateListItem(\\\'Ncombobox_item\\\', file_filepath, \\\'label\\\', file_file);\')');
+				ForEachFile('*', '/ui/specui/caster/logos/', '*.jpeg', true, 'Call(\'bang_bbp_dropdown\', \'AddTemplateListItem(\\\'Ncombobox_item\\\', file_filepath, \\\'label\\\', file_file);\')');
+				ForEachFile('*', '/ui/specui/caster/logos/', '*.png', true,  'Call(\'bang_bbp_dropdown\', \'AddTemplateListItem(\\\'Ncombobox_item\\\', file_filepath, \\\'label\\\', file_file);\')');
+				ForEachFile('*', '/ui/specui/caster/logos/', '*.tga', true,  'Call(\'bang_bbp_dropdown\', \'AddTemplateListItem(\\\'Ncombobox_item\\\', file_filepath, \\\'label\\\', file_file);\')');
+				ForEachFile('*', '/ui/specui/caster/logos/', '*.dds', true,  'Call(\'bang_bbp_dropdown\', \'AddTemplateListItem(\\\'Ncombobox_item\\\', file_filepath, \\\'label\\\', file_file);\')');
+			"
+		/>
+		<panel noclick="1" height="10@" width="35%" visible="0" y="4h" x="4%" valign="top" align="left" texture="$white" passivechildren="1"
+			watch="BangBBPUpdateSelectedTexture" ontrigger="SetVisible(1); SetTexture(bang_bbp_selectedTexture);"
+		/>				
+
+
+		<panel x="4%" y="28%" float="bottom" valign="top" align="left" noclick="1" padding="3h" color="0 1 0 0" height="10h" width="92%"  >		
+					
+			<panel height="2.0h" noclick="1" >
+				<frame width="45%" bordercolor="white" borderthickness="1" color="invisible" noclick="1" align="left" valign="top"  >
+					<textbox name="co_logo_input_w"
+						onload="SetInputLine('');"
+						onchange=""
+						onenter="
+							SetFocus(0); 
+							Call('co_logo', 'SetWidth('#this#')');
+							SleepWidget(21, 'Trigger(\'CasterOverlayReport\');'); 
+							"
+						height="-2" width="-2" textvalign="center" align="center" valign="center" editable="1" font="dyn_9" color="invisible" x="5%"  textcolor="white"
+					 />
+					 <label color="white" shadow="true" textalign="left" wrap="true" y="-2.0h" font="dyn_11" content="Logo Width" noclick="1" ></label>
+				 </frame>				
+				<frame width="45%" bordercolor="white" borderthickness="1" color="invisible" noclick="1" align="right" valign="top"  >
+					<textbox name="co_logo_input_h"
+						onchange=""
+						onenter="
+							SetFocus(0); 
+							Call('co_logo', 'SetHeight('#this#')');
+							SleepWidget(21, 'Trigger(\'CasterOverlayReport\');'); 
+							"
+						height="-2" width="-2" textvalign="center" align="center" valign="center" editable="1" font="dyn_9" color="invisible" x="5%"  textcolor="white"
+					 />
+					 <label color="white" shadow="true" textalign="left" wrap="true" y="-2.0h" font="dyn_11" content="Logo Height" noclick="1" ></label>
+				 </frame>									
+			</panel>	
+		
+			<instance name="co_label_cfg_template" id="1" />
+			<instance name="co_label_cfg_template" id="2" />
+			<instance name="co_label_cfg_template" id="3" />
+			<instance name="co_label_cfg_template" id="4" />
+		
+		</panel>	
+		
+		<!-- Bottom Buttons -->
+		<panel y="2.6h" height="-2.6h" noclick="1" >
+			<panel width="-4%" valign="bottom" y="-0.5h" align="center" height="5.5h" noclick="1" visible="1" > 
+				<!-- Reset -->
+				<panel y="3h" height="2.5h" enabled="1" align="right" x="-23.0h" width="9.5h" font="dyn_10"
+					onclick="Trigger('CasterOverlayReset');"
+					onmouseover="PlaySound('/shared/sounds/ui/button_over_01.wav');" 
+				>	
+					<frame texture="/ui/info/button.tga" borderthickness="0.8h" color="1 1 1 1" noclick="1" />				
+					<label name="oc_reset_label" width="100%" height="100%" textvalign="center" textalign="center" valign="center" align="center" font="dyn_9" color="white" shadow="true" shadowcolor="black" content="Reset"  noclick="1" />				
+				</panel>
+				
+				<!-- Clear -->
+				<panel y="3h" height="2.5h" enabled="1" align="right" x="-13.0h" width="9.5h" font="dyn_10"
+					onclick="Trigger('CasterOverlayClear');"
+					onmouseover="PlaySound('/shared/sounds/ui/button_over_01.wav');" 
+				>	
+					<frame texture="/ui/info/button.tga" borderthickness="0.8h" color="1 1 1 1" noclick="1" />				
+					<label name="oc_reset_label2" width="100%" height="100%" textvalign="center" textalign="center" valign="center" align="center" font="dyn_9" color="white" shadow="true" shadowcolor="black" content="Clear"  noclick="1" />				
+				</panel>
+			</panel>
+		</panel>
+	
+	</panel>
+	
+	
+</package>

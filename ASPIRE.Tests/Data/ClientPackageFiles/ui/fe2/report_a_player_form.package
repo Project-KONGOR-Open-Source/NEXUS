@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+
+	<!-- Report Abuse -->
+	<trigger name="ReportAbuseStatus"/>
+	<trigger name="ReportAbuseResult"/>
+	<form
+		name="ReportAbuse"
+		host="!hon"
+		target="/rap/report.php"
+		ssl="true"
+		method="post"
+		statustrigger="ReportAbuseStatus"
+		resulttrigger="ReportAbuseResult"
+		resultparam0="0"
+		resultparam1="1"
+	/>
+	
+	<trigger name="ReportAbuseStatus2"/>
+	<trigger name="ReportAbuseResult2"/>
+	<form
+		name="ReportAbuse2"
+		host="!hon"
+		target="/rap/report2.php"
+		ssl="false"
+		method="post"
+		statustrigger="ReportAbuseStatus2"
+		resulttrigger="ReportAbuseResult2"
+		resultparam0="0"
+		resultparam1="1"
+	/>
+
+	<trigger name="RapReportStatus"/>
+	<trigger name="RapReportResult"/>
+	<form
+			name="RapReport"
+			host="!masterserver"
+			target="/master/report/report"
+			ssl="false"
+			method="post"
+			statustrigger="RapReportStatus"
+			resulttrigger="RapReportResult"
+			resultparam0="success"
+			resultparam1="report_success"
+			resultparam2="report_enabled"
+	/>
+	
+	<!-- Match List for Account 
+		 Param0 is success/error.  The rest are matches
+	-->
+	<trigger name="RAPGetRecentMatchesStatus"/>
+	<trigger name="RAPGetRecentMatchesResult"/>	
+	<form
+		name="RAPGetRecentMatches"
+		host="!hon"
+		target="/rap/match_list2.php"
+		ssl="true"
+		method="post"
+		statustrigger="RAPGetRecentMatchesStatus"
+		resulttrigger="RAPGetRecentMatchesResult"
+		resultparam0="0"
+		resultparam1="1"
+		resultparam2="2"
+		resultparam3="3"
+		resultparam4="4"
+		resultparam5="5"
+		resultparam6="6"
+		resultparam7="7"
+		resultparam8="8"
+		resultparam9="9"
+		resultparam10="10"
+		resultparam11="11"
+		resultparam12="12"
+		resultparam13="13"
+		resultparam14="14"
+		resultparam15="15"
+		resultparam16="16"
+		resultparam17="17"
+		resultparam18="18"
+		resultparam19="19"
+		resultparam20="20"
+		resultparam21="21"
+		resultparam22="22"
+		resultparam23="23"
+		resultparam24="24"
+		resultparam25="25"
+		resultparam26="26"
+		resultparam27="27"
+		resultparam28="28"
+		resultparam29="29"
+		resultparam30="30"
+		resultparam31="31"
+		resultparam32="32"
+		resultparam33="33"
+		resultparam34="34"
+		resultparam35="35"
+		resultparam36="36"
+		resultparam37="37"
+		resultparam38="38"
+		resultparam39="39"
+		resultparam40="40"
+	/>
+	
+	<!-- Query for player list from match
+		[0] Boolean for success (0 or 1)
+		[1-10] Nicknames of players in match.  If slot is not taken, that value will be missing from
+		[11-20] Slot id for players respectively.  Slot id is 0-9, 0 being blue, and 5 being pink
+	-->
+	<trigger name="RAPGetPlayersFromMatchIDStatus"/>
+	<trigger name="RAPGetPlayersFromMatchIDResult"/>
+	<form
+		name="GetPlayersFromMatchID"
+		host="!hon"
+		target="/rap/player_list.php"
+		ssl="true"
+		method="post"
+		statustrigger="RAPGetPlayersFromMatchIDStatus"
+		resulttrigger="RAPGetPlayersFromMatchIDResult"
+		resultparam0="0"
+		resultparam1="1"
+		resultparam2="2"
+		resultparam3="3"
+		resultparam4="4"
+		resultparam5="5"
+		resultparam6="6"
+		resultparam7="7"
+		resultparam8="8"
+		resultparam9="9"
+		resultparam10="10"
+		resultparam11="11"
+		resultparam12="12"
+		resultparam13="13"
+		resultparam14="14"
+		resultparam15="15"
+		resultparam16="16"
+		resultparam17="17"
+		resultparam18="18"
+		resultparam19="19"
+		resultparam20="20"
+		resultparam21="21"
+		resultparam22="22"
+		resultparam23="23"
+		resultparam24="24"
+		resultparam25="25"
+		resultparam26="26"
+		resultparam27="27"
+		resultparam28="28"
+		resultparam29="29"
+		resultparam30="30"
+	/>
+	
+</package>

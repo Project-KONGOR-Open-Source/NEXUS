@@ -35,7 +35,19 @@ public class AccountStatistics
 
     [Column("performance_score")] public double PerformanceScore { get; set; }
 
-    [Column("placement_matches_data")] public string? PlacementMatchesData { get; set; }
+    [Column("placement_matches_data")]
+    public string? PlacementMatchesData { get; set; }
+
+    [Column("award_most_annihilations")] public int? AwardMostAnnihilations { get; set; }
+    [Column("award_most_quad_kills")] public int? AwardMostQuadKills { get; set; }
+    [Column("award_most_smackdowns")] public int? AwardMostSmackdowns { get; set; }
+    [Column("award_most_kills")] public int? AwardMostKills { get; set; }
+    [Column("award_most_assists")] public int? AwardMostAssists { get; set; }
+    [Column("award_least_deaths")] public int? AwardLeastDeaths { get; set; } // Check DB if exists
+    [Column("award_most_building_damage")] public int? AwardMostBuildingDamage { get; set; }
+    [Column("award_most_wards_killed")] public int? AwardMostWardsKilled { get; set; }
+    [Column("award_most_hero_damage_dealt")] public int? AwardMostHeroDamageDealt { get; set; }
+    [Column("award_most_creep_kills")] public int? AwardMostCreepKills { get; set; } // Check DB if exists
 
     [NotMapped] public Rank Rank => RankExtensions.GetRank(SkillRating);
 }

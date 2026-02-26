@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+
+	<trigger name="InviteBackStatus" />
+	<trigger name="InviteBackResult" />
+	<form
+		name="invite_player_back"
+		host="!hon"
+		target="/client_request_email.php"
+		statustrigger="InviteBackStatus"
+		resulttrigger="InviteBackResult"
+		resultparam0="error"
+		resultparam1="success"
+		ssl="off"
+	/>
+	
+	<trigger name="SetAsReferrerStatus" />
+	<trigger name="SetAsReferrerResult" />
+	<form
+		name="SetAsReferrer"
+		host="!masterserver"
+		target="/client_requester.php"
+		statustrigger="SetAsReferrerStatus"
+		resulttrigger="SetAsReferrerResult"
+		resultparam0="error"
+		resultparam1="success"
+		resultparam2="errors"
+		ssl="off"
+	/>	
+	
+</package>

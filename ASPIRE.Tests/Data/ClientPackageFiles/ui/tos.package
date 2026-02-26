@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+	
+	<panel name="tos" visible="0">
+		<instance
+			name="header_bar"
+			height="3.0h"
+			lbl="tos_header"
+			show_close="1"
+			onclick="
+				PlaySound('/shared/sounds/ui/menu/slide_top.wav');
+				Call('right_widgets', 'SlideX(\'72%\', 500);');
+			"
+		/> 
+		
+		<panel name="tos_content" y="3.4h" width="-0.6h" height="-8.0h" align="right" color="invisible">		
+			<textbuffer
+				scrolltexture="/ui/info/combobox.tga"
+				handleheight="2.0h"
+				scrollbarsize="2.0h"				
+				exteriorscrollbars="false"
+				textalign="left"
+				font="dyn_10"
+				textcolor="white"
+				color="invisible"
+				shadow="1"
+				wrap="true"
+				noclick="0"				
+				file=":/tos.txt"
+			/>			
+		</panel>
+		
+		<instance
+			name="button2" button_name="unnamedButton63"
+			label="tos_close_window"
+			height="2.4h"
+			width="50%"
+			font="dyn_10"
+			align="center"
+			valign="bottom"
+			onclick="
+				PlaySound('/shared/sounds/ui/menu/slide_top.wav');
+				Call('right_widgets', 'SlideX(\'72%\', 500);');
+			"
+		/>
+	</panel>
+
+</package>

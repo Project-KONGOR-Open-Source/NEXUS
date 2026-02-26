@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+	<!-- Reset Stats -->
+	<trigger name="UpdateStoreResetStatsForm"/>
+	<trigger name="StoreResetStatsStatus"/>
+	<trigger name="StoreResetStatsResult"/>
+	<form
+		name="StoreResetStats"
+		host="!masterserver"
+		target="/client_requester.php?f=reset_stats"
+		ssl="false"
+		php="false"
+		statustrigger="StoreResetStatsStatus"
+		resulttrigger="StoreResetStatsResult"
+		resultparam0="success"
+		resultparam1="errors"
+	/>
+	<template name="storePopupResetStatsForm">
+		<panel name="storePopupResetStatsForm_{id=}" width="100%" grow="1" float="bottom" padding="1h" visible="{visible=1}" noclick="1"
+			watch="StoreResetStatsResult"
+			ontriggerlua="HoN_Store:ProcessResetStatsForm(param)"
+		>
+			<panel width="100%" grow="true">
+				<label align="center" wrap="1" fity="1" textvalign="center" style="microStoreDetailDesc" content="mstore_resetstats_form_body_sea" onload="SetText(FormatStringNewLine(Translate('mstore_resetstats_form_body_sea')));"
+				/>
+				<panel width="100%" height="0.5h" />
+			</panel>
+
+			<instance name="store2_line2" align="center" width="100%" height="1h"/>
+
+			<listbox
+				height="260i"
+				name="store2ResetStatsFormListbox"
+				visible="true"
+				color="invisible"
+				itemwidth="100%"
+				itemheight="42i"
+				select="false"
+				clearselection="true"
+				hoverselect="false"
+				selectedcolor="invisible"
+				selectedbordercolor="invisible"
+				exteriorscrollbars="false"
+				scrollbarplaceholder="false"
+				handleheight="90i"
+				scrollbarsize="27i"
+				scrolltexture="/ui/fe2/elements/store2/combobox/combobox.png"
+				scrollinterval="500"
+				scrollintervalfast="60"
+				onloadlua="
+					local w = self:GetWidget('store2ResetStatsFormListbox'..'_vscroll_slider')
+					w:SetHeight('-48i')
+					w:SetY('24i')
+					self:GetWidget('store2ResetStatsFormListbox'..'_vscroll_button_min'):BringToFront()
+				"
+			>
+				<!-- <listitem>
+					<instance name="form_checkbox2" checkbox_name="store_resetstats_checkbox_smr" cvar="_microStore_resetStats_smr" value="1" label="web_form_resetstats_smr" color="#d7b6a2" outline="1" outlinecolor="#241410" updatetrigger="UpdateStoreResetStatsForm" onhidelua="Set('_microStore_resetStats_smr', false) self:SetButtonState(0)"/>
+				</listitem>
+				<listitem>
+					<instance name="form_checkbox2" checkbox_name="store_resetstats_checkbox_casual_mmr" cvar="_microStore_resetStats_casual_mmr" value="1" label="web_form_resetstats_casual_mmr" color="#d7b6a2" outline="1" outlinecolor="#241410" updatetrigger="UpdateStoreResetStatsForm" onhidelua="Set('_microStore_resetStats_casual_mmr', false) self:SetButtonState(0)"/>
+				</listitem>
+				<listitem>
+					<instance name="form_checkbox2" checkbox_name="store_resetstats_checkbox_normalmm_stats" cvar="_microStore_resetStats_normalmm_stats" value="1" label="web_form_resetstats_rankedstats" color="#d7b6a2" outline="1" outlinecolor="#241410" updatetrigger="UpdateStoreResetStatsForm" onhidelua="Set('_microStore_resetStats_normalmm_stats', false) self:SetButtonState(0)"/>
+				</listitem>
+				<listitem>
+					<instance name="form_checkbox2" checkbox_name="store_resetstats_checkbox_casualmm_stats" cvar="_microStore_resetStats_casualmm_stats" value="1" label="web_form_resetstats_casualstats" color="#d7b6a2" outline="1" outlinecolor="#241410" updatetrigger="UpdateStoreResetStatsForm" onhidelua="Set('_microStore_resetStats_casualmm_stats', false) self:SetButtonState(0)"/>
+				</listitem> -->
+				<listitem>
+					<instance name="form_checkbox2" checkbox_name="store_resetstats_checkbox_midwars_stats" cvar="_microStore_resetStats_midwars_stats" value="1" label="web_form_resetstats_midwars" color="#d7b6a2" outline="1" outlinecolor="#241410" updatetrigger="UpdateStoreResetStatsForm" onhidelua="Set('_microStore_resetStats_midwars_stats', false) self:SetButtonState(0)"/>
+				</listitem>
+				<listitem>
+					<instance name="form_checkbox2" checkbox_name="store_resetstats_checkbox_con_normal_stats" cvar="_microStore_resetStats_con_normal_stats" value="1" label="web_form_resetstats_connormalstats" color="#d7b6a2" outline="1" outlinecolor="#241410" updatetrigger="UpdateStoreResetStatsForm" onhidelua="Set('_microStore_resetStats_con_normal_stats', false) self:SetButtonState(0)" enabled="1"/>
+				</listitem>
+				<listitem>
+					<instance name="form_checkbox2" checkbox_name="store_resetstats_checkbox_con_casual_stats" cvar="_microStore_resetStats_con_casual_stats" value="1" label="web_form_resetstats_concasualstats" color="#d7b6a2" outline="1" outlinecolor="#241410" updatetrigger="UpdateStoreResetStatsForm" onhidelua="Set('_microStore_resetStats_con_casual_stats', false) self:SetButtonState(0)" enabled="1"/>
+				</listitem>
+				<listitem>
+					<instance name="form_checkbox2" checkbox_name="store_resetstats_checkbox_psr" cvar="_microStore_resetStats_psr" value="1" label="web_form_resetstats_psr" color="#d7b6a2" outline="1" outlinecolor="#241410" updatetrigger="UpdateStoreResetStatsForm" onhidelua="Set('_microStore_resetStats_psr', false) self:SetButtonState(0)"/>
+				</listitem>
+				<listitem>
+					<instance name="form_checkbox2" checkbox_name="store_resetstats_checkbox_pubstats" cvar="_microStore_resetStats_pubstats" value="1" label="web_form_resetstats_pubstats" color="#d7b6a2" outline="1" outlinecolor="#241410" updatetrigger="UpdateStoreResetStatsForm" onhidelua="Set('_microStore_resetStats_pubstats', false) self:SetButtonState(0)"/>
+				</listitem>
+			</listbox>
+
+			<panel width="100%" height="1.5h" noclick="1"/>
+		</panel>
+	</template>
+</package>

@@ -1,0 +1,691 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+	<lua file="/ui/scripts/newui/social_v2.lua"/>
+
+	<template name="social_create_group" >
+		<panel name="social_create_group" y="0.6h" width="22h" height="24h" visible="0" noclick="1">
+
+			<instance name="newui_custom_frame_template" alpha="0.95"/>
+
+			<panel y="0.4h" width="-1.2h" align="center" height="3.0h" valign="top" noclick="1" >
+				<label textalign="center" height="100%" textvalign="center" style="newui_font_style_14" content="social_assign_a_group" noclick="1"/>
+				<!-- Close -->
+				<instance name="newui_button_close_template" x="0h" y="0h" align="right"
+					onclicklua="
+						GetWidget('social_create_group'):FadeOut(50)
+						GetWidget('generic_are_you_sure_no'):DoEvent()
+					"
+				/>
+			</panel>
+
+			<panel name="sp_group_listbox_panel" x="0" y="4.0h" width="-1.6h" height="12.6h" align="center" noclick="1">
+				<frame texture="/ui/fe2/newui/res/common/frames/custom/frame.png" borderthickness="4" noclick="1"/>
+				<listbox
+					name="sp_group_listbox"
+					x="0.3h"
+					width="-2.7h" height="-0.6h"
+					valign="center"
+					color="invisible"
+					font="dyn_10"
+					itemwidth="100%"
+					itemheight="2.5h"
+					select="true"
+					clearselection="true"
+					hoverselect="true"
+					hoverhighlight="true"
+					highlight="under"
+					highlightcolor="#cda5963b"
+					highlightbordercolor="invisible"
+					selectedcolor="#cda5963b"
+					selectedbordercolor="invisible"
+					colortransition="true"
+					colortransitiontime="250"
+					usescrollbars="true"
+					scrollbarsize="2.0h"
+					scrolltexture="/ui/fe2/newui/res/common/scroll/scroll.png"
+					handleheight="2.0h"
+					onselectlua="Social_V2:GroupListSelectInput(self:GetValue())"
+				/>
+			</panel>
+
+			<panel y="-3.8h" width="-1.8h" height="2.4h" align="center" valign="bottom" sticky="0" stickytoinvis="0" noclick="1">
+				<panel name="sp_group_dyn_button" align="center" noclick="0" onmouseover="Call('sp_group_dyn_button_frame', 'SetVisible(1);');" onmouseout="Call('sp_group_dyn_button_frame', 'SetVisible(0);');" >
+					<frame name="sp_group_dyn_button_frame" visible="0" texture="/ui/fe2/newui/res/common/frames/custom/frame.png" borderthickness="4" noclick="1"/>
+					<label name="sp_group_dyn_label" width="100%" fity="1" valign="center" textalign="center" textvalign="center" style="newui_font_style_10" underline="1" content="social_select_a_group" noclick="1"/>
+				</panel>
+			</panel>
+
+			<panel x="1h" y="-0.8h" width="-1.8h" height="2.4h" valign="bottom" noclick="1">
+				<frame texture="/ui/fe2/newui/res/common/frames/custom/frame.png" borderthickness="4" noclick="1"/>
+				<textbox
+					name="sp_textbox_group_input"
+					hmargin="0.5h" vmargin="0.4h"
+					maxlength="250"
+					textalign="left" textvalign="center"
+					font="dyn_10"
+					textcolor="white"
+					shadow="false"
+					color="invisible"
+					onenter="SetFocus(false);"
+					onshow="EraseInputLine(); SetFocus(false);"
+					onhide="EraseInputLine(); SetFocus(false); Call('sp_group_input_cover', 'SetVisible(1)');"
+					onesc="EraseInputLine(); SetFocus(false);"
+					onchangelua="
+						Social_V2:GroupInputBoxUpdate(self:GetValue())"
+					onfocus="
+						Call('sp_group_input_cover', 'SetVisible(0)');
+					"
+					onlosefocus="
+						if(StringEmpty(''#this),
+							Call('sp_group_input_cover', 'SetVisible(1)')
+						);
+					"
+					onlosefocuslua="--Social_V2:GroupInputBoxUpdate(nil)"
+				/>
+				<label name="sp_group_input_cover" x="1h" width="-0.5h" height="-0.4h" valign="center" align="center" textvalign="center" style="newui_font_style_10" content="social_panel_enter_group" noclick="1"/>
+			</panel>
+		</panel>
+	</template>
+
+	<!-- Leave Clan Confirm Content -->
+	<template name="social_clan_leave_panel_content">
+		<panel width="100%" float="bottom" padding="1h" grow="1" noclick="1">
+			<label fity="1" fitypadding="0.8h" width="-1.6h" align="center" font="dyn_12" color="#d7b6a2" outline="1" outlinecolor="#230000" wrap="1" content="cc_panel_leaveclantxt" noclick="1"/>
+			<panel width="-1.6h" align="center" height="3.8h" noclick="1">
+				<instance name="newui_common_button_2_template" label="general_cancel" x="-10h" y="0.25h" width="15.0h" align="center"
+					onclicklua="
+						GetWidget('social_clan_leave_panel'):DoEventN(1)
+					"
+				/>
+				<instance name="newui_common_button_2_template" label="cc_panel_leave_button" x="10h" y="0.25h" width="15.0h" align="center"
+					onclicklua="
+						ChatRemoveClanMember(GetAccountName())
+						GetWidget('social_clan_leave_panel'):DoEventN(1)
+					"
+				/>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="social_create_clan_autocomplete_player">
+		<label width="-2h" align="center" valign="center" textvalign="center" font="dyn_10" color="#8e6b5b" outline="1" outlinecolor="#230000" content="{username}" wrap="0" noclick="1"/>
+	</template>
+
+	<template name="social_create_clan_invited_member">
+		<panel width="-6h" height="3.0h" align="center" float="right" padding="1h" noclick="1">
+			<label width="45%" textvalign="center" valign="center" font="dyn_12" color="#f0d3c1" outline="1" outlinecolor="#230000" content="cc_com_newclan_founding{id}" noclick="1"/>
+			<panel valign="center" width="45%" height="75%" noclick="1">
+				<frame texture="/ui/fe2/newui/res/common/frames/frame_n.png" borderthickness="4i" noclick="1"/>
+				<textbox name="clan_invite_textbox_member{id}" y="0.3h" width="-1.0h" align="center" color="invisible" font="dyn_10" textcolor="#f0d3c1" outline="1" outlinecolor="#230000" taborder="{taborder}"
+					onchangelua="
+						if not GetCvarBool('cc_create_clan_member_selected') then
+							local nickname = self:GetInputLine()
+							Set('cc_new_clan_member'..'{id}', nickname)
+							Set('ui_autocompleteTextBox', 'clan_invite_textbox_member{id}', 'string')
+							ChatAutoCompleteNick(nickname)
+						elseif GetCvarString('ui_autocompleteTextBox') == 'clan_invite_textbox_member{id}' then
+							self:Sleep(200, function() Set('cc_create_clan_member_selected', false) end)
+						end
+					"
+					onfocuslua="
+						Set('cc_create_clan_{id}_auto', true)
+						Set('cc_create_clan_auto', true)
+
+						local wdgList = GetWidget('social_create_clan_autocomplete_list')
+						wdgList:RegisterWatch('ChatAutoCompleteAdd',
+							function(widget, name)
+								widget:AddTemplateListItem('social_create_clan_autocomplete_player', name, 'username', name)
+							end
+						)
+						wdgList:RegisterWatch('ChatAutoCompleteClear',
+							function(widget)
+								widget:ClearItems()
+							end
+						)
+					"
+					onlosefocuslua="
+						Set('cc_create_clan_{id}_auto', false)
+						Set('cc_create_clan_auto', false)
+
+						local wdgList = GetWidget('social_create_clan_autocomplete_list')
+						wdgList:UnregisterWatch('ChatAutoCompleteAdd')
+						wdgList:UnregisterWatch('ChatAutoCompleteClear')
+					"
+				/>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="social_create_clan_content">
+		<panel name="create_new_clan" width="100%" color="invisible" grow="1" float="bottom" noclick="1"
+			oninstantiatelua="
+				Set('cc_new_clan_name', '', 'string')
+				Set('cc_new_clan_tag', '', 'string')
+				Set('cc_new_clan_member1', '', 'string')
+				Set('cc_new_clan_member2', '', 'string')
+				Set('cc_new_clan_member3', '', 'string')
+				Set('cc_new_clan_member4', '', 'string')
+				Set('cc_create_clan_auto', false, 'bool')
+				Set('cc_create_clan_1_auto', false, 'bool')
+				Set('cc_create_clan_2_auto', false, 'bool')
+				Set('cc_create_clan_3_auto', false, 'bool')
+				Set('cc_create_clan_4_auto', false, 'bool')
+				Set('cc_create_clan_member_selected', false, 'bool')
+			"
+		>
+			<panel y="0.5h" width="100%" float="bottom" padding="1h" grow="1" noclick="1">
+				<panel width="-6h" height="3.0h" align="center" float="right" padding="1h" noclick="1">
+					<label width="45%" textvalign="center" font="dyn_12" color="#f0d3c1" outline="1" outlinecolor="#230000" content="cc_com_newclan_leader" noclick="1"/>
+					<label width="45%" textvalign="center" font="dyn_12" color="#c2b0a3" outline="1" outlinecolor="#230000" onshowlua="self:SetText(GetAccountName())"/>
+				</panel>
+
+				<panel width="-6h" height="3.0h" align="center" float="right" padding="1h" noclick="1">
+					<label width="45%" textvalign="center" valign="center" font="dyn_12" color="#f0d3c1" outline="1" outlinecolor="#230000" content="cc_com_newclan_clanname" noclick="1"/>
+					<panel valign="center" width="45%" height="75%" noclick="1">
+						<frame texture="/ui/fe2/newui/res/common/frames/frame_n.png" borderthickness="4i" noclick="1"/>
+						<textbox y="0.3h" width="-1.0h" align="center" color="invisible" font="dyn_10" textcolor="#f0d3c1" outline="1" outlinecolor="#230000" maxlength="32" taborder="1"
+							onchange="Set('cc_new_clan_name', this);"
+						/>
+					</panel>
+					<!-- <instance name="social_create_clan_verified" id="clan_name"/> -->
+				</panel>
+
+				<panel width="-6h" height="3.0h" align="center" float="right" padding="1h" noclick="1">
+					<label width="45%" textvalign="center" font="dyn_12" color="#f0d3c1" outline="1" outlinecolor="#230000" content="cc_com_newclan_clantag" noclick="1"/>
+					<panel valign="center" width="45%" height="75%" noclick="1">
+						<frame texture="/ui/fe2/newui/res/common/frames/frame_n.png" borderthickness="4i" noclick="1"/>
+						<textbox y="0.3h" width="-1.0h" align="center" color="invisible" font="dyn_10" textcolor="#f0d3c1" outline="1" outlinecolor="#230000" maxlength="4" taborder="2"
+							onchange="Set('cc_new_clan_tag', this);"
+						/>
+					</panel>
+					<!-- <instance name="social_create_clan_verified" id="clan_tag"/> -->
+				</panel>
+
+				<panel width="-6h" grow="1" regrow="1" growinvis="0" stickytoinvis="0" float="bottom" padding="0.5h" noclick="1">
+					<image width="-1h" texture="/ui/fe2/newui/res/common/hline.png" height="1" align="center" noclick="1"/>
+					<panel name="social_create_clan_tip_container" width="-6.0h" align="center" grow="1" visible="0" noclick="1"
+						watch="ChatClanCreateTip"
+						ontriggerlua="self:SetVisible(true)"
+					>
+						<label name="social_create_clan_tip" textalign="center" textvalign="center" font="dyn_10" color="#f0d3c1" outline="1" outlinecolor="#230000" wrap="1" fity="1" noclick="1"
+							watch="ChatClanCreateTip"
+							ontriggerlua="self:SetText(param)"
+						/>
+					</panel>
+					<panel width="30h" height="2.5h" align="center" noclick="1">
+						<instance name="newui_common_button_2_template" label="cc_com_newclan_check_name"
+							onclicklua="
+								local name, tag = GetCvarString('cc_new_clan_name'), GetCvarString('cc_new_clan_tag')
+								if Empty(name) or Empty(tag) then
+									Trigger('ChatClanCreateTip', Translate('chat_empty_clan_name_tag'))
+									return
+								end
+								ChatCheckClanName(name, tag)
+								GetWidget('social_create_clan_tip'):SetText('')
+								GetWidget('social_create_clan_tip_container'):SetVisible(false)
+								GetWidget('social_create_clan_verifying'):SetVisible(true)
+							"
+						/>
+						<panel name="social_create_clan_verifying" color=".1 .1 .1 .5" visible="0"
+							watch="ChatClanCreateTip"
+							ontriggerlua="self:SetVisible(false)"
+						>
+							<animatedimage width="3h" height="3h" align="center" valign="center" texture="/ui/elements/throb/throb.tga" loop="1" fps="30" noclick="1" onshowlua="self:StartAnim()"/>
+						</panel>
+					</panel>
+					<panel width="-6h" height="0.35h" align="center" noclick="1"/>
+					<image width="-1h" texture="/ui/fe2/newui/res/common/hline.png" height="1" align="center" noclick="1"/>
+				</panel>
+
+				<panel width="-6h" align="center" color="invisible" grow="1" noclick="1">
+					<label fity="1" fitypadding="1.0h" font="dyn_10" color="#8e6b5b" outline="1" outlinecolor="#230000" wrap="1" content="cc_com_newclan_memberinfo" noclick="1"/>
+				</panel>
+
+				<instance name="social_create_clan_invited_member" id="1" taborder="3"/>
+				<instance name="social_create_clan_invited_member" id="2" taborder="4"/>
+				<instance name="social_create_clan_invited_member" id="3" taborder="5"/>
+				<instance name="social_create_clan_invited_member" id="4" taborder="6"/>
+
+				<panel width="-6h" align="center" height="0" noclick="1"/>
+			</panel>
+			<panel width="100%" height="4.2h" noclick="1">
+				<instance name="newui_common_button_2_template" x="-11h" y="0.6h" width="18h" height="2.5h" align="center" label="cc_com_newclan_invite_button"
+					onclicklua="
+						Trigger('ChatAutoCompleteClear')
+						GetWidget('social_create_new_clan_waiting'):DoEventN(0)
+						GetWidget('social_create_new_clan'):DoEventN(1)
+
+						local clan, tag = GetCvarString('cc_new_clan_name'), GetCvarString('cc_new_clan_tag')
+						local m1,m2 = GetCvarString('cc_new_clan_member1'), GetCvarString('cc_new_clan_member2')
+						local m3,m4 = GetCvarString('cc_new_clan_member3'), GetCvarString('cc_new_clan_member4')
+						self:UICmd('ChatCreateClan(\''..clan..'\', \''..tag..'\',\''..m1..'\',\''..m2..'\',\''..m3..'\',\''..m4..'\');')
+					"
+				/>
+				<instance name="newui_common_button_2_template" x="11h" y="0.6h" width="18h" height="2.5h" align="center" label="general_cancel"
+					onclicklua="Trigger('ChatAutoCompleteClear') GetWidget('social_create_new_clan'):DoEventN(1)"
+				/>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="social_create_clan_waiting_member_state">
+		<panel width="-6h" height="3.2h" align="center" noclick="1">
+			<label x="8h" width="35%" textvalign="center" font="dyn_14" color="#f0d3c1" outline="1" outlinecolor="#230000" noclick="1"
+				onshowlua="self:SetText(GetCvarString('cc_new_clan_member{id}'))"
+			/>
+			<image x="7.5h" width="1.5h" height="1.1h" align="center" valign="center" texture="/ui/info/arrow.tga" color="#ecc2a0" noclick="1"/>
+			<panel x="-8h" align="right" valign="center" float="right" padding="0.4h" grow="1" noclick="1">
+				<image width="3h" height="3h" valign="center" texture="/ui/icons/thumbs_up_disabled.tga"
+					watch="ChatClanCreateAccept"
+					ontriggerlua="if GetCvarString('cc_new_clan_member{id}') == param then self:SetTexture('/ui/icons/thumbs_up.tga') end"
+					watch1="ChatClanCreateSuccess ChatClanCreateFail"
+					ontrigger1lua="self:SetTexture('/ui/icons/thumbs_up_disabled.tga')"
+				/>
+				<image width="3h" height="3h" valign="center" texture="/ui/icons/thumbs_down_disabled.tga"/>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="social_create_clan_waiting_content">
+		<panel name="social_create_clan_waiting_content" width="100%" grow="1" float="bottom" padding=".5h" noclick="1">
+			<panel width="-6h" align="center" grow="1" noclick="1">
+				<label fity="1" fitypadding="1.0h" align="center" font="dyn_12" color="#8e6b5b" outline="1" outlinecolor="#230000" wrap="1" content="cc_com_newclan_waitinginfo" noclick="1"/>
+			</panel>
+
+			<panel width="-6h" align="center" float="bottom" padding=".5h" grow="1" noclick="1">
+				<image height="1" align="center" texture="/ui/fe2/newui/res/common/hline.png" noclick="1"/>
+				<label height="3h" align="center" valign="center" textalign="center" textvalign="center" font="dyn_16" color="#fead00" wrap="1" noclick="1"
+					watch="ChatClanCreateTime"
+					ontriggerlua="self:SetText(Translate('cc_com_newclan_waitingtime')..'^987'..FtoT(param)..'^*')"
+				/>
+				<image height="1" align="center" texture="/ui/fe2/newui/res/common/hline.png" noclick="1"/>
+			</panel>
+
+			<instance name="social_create_clan_waiting_member_state" id="1"/>
+			<instance name="social_create_clan_waiting_member_state" id="2"/>
+			<instance name="social_create_clan_waiting_member_state" id="3"/>
+			<instance name="social_create_clan_waiting_member_state" id="4"/>
+
+			<panel width="-6h" height="4.25h" align="center" noclick="1"/>
+		</panel>
+	</template>
+
+	<template name="social_create_clan_result_content">
+		<panel name="social_create_clan_result_content" width="100%" color="invisible" grow="1" float="bottom" padding="1.5h" noclick="1"
+			watch="ChatClanCreateSuccess ChatClanCreateFail"
+			ontriggerlua="GetWidget('social_create_new_clan_result'):DoEventN(0)"
+		>
+			<panel width="-6h" align="center" grow="1" noclick="1">
+				<label fity="1" fitypadding="0.6h" textvalign="center" font="dyn_14" color="#f0d3c1" outline="1" outlinecolor="#230000" wrap="1" noclick="1"
+					watch="ChatClanCreateSuccess ChatClanCreateFail"
+					ontriggerlua="
+						self:SetText(param)
+						GetWidget('social_create_new_clan_waiting'):DoEventN(1)
+					"
+				/>
+			</panel>
+			<panel width="-6h" height="4.5h" align="center" noclick="1">
+				<instance name="newui_common_button_2_template" y="0.15h" width="15h" height="2.5h" align="center" valign="center" label="cc_com_newclan_finished_button"
+				onclicklua="GetWidget('social_create_new_clan_result'):DoEventN(1)"/>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="social_create_clan">
+		<!-- Create New Clan - Step 1 (General Info / Charter Members) -->
+		<instance name="newui_common_popup" y="-12h" width="565i" id="social_create_new_clan" title="cc_com_newclan_header" content="social_create_clan_content" show_close="1" debug="0" oncloselua="Trigger('ChatAutoCompleteClear') GetWidget('social_create_new_clan'):DoEventN(1)"/>
+		<!-- AutoCompletes -->
+		<panel name="social_auto_completes" width="15h" height="15h" align="left" valign="top" visible="0" noclick="1"
+			watch="ChatAutoCompleteClear"
+			ontriggerlua="self:SetVisible(false)"
+			watch1="ChatAutoCompleteAdd"
+			ontrigger1lua="
+				if GetCvarBool('cc_create_clan_auto') then
+					self:SetVisible(true)
+					for i=1,4 do
+						if GetCvarBool('cc_create_clan_'..i..'_auto') then
+							local wdgTextbox = GetWidget('clan_invite_textbox_member'..i)
+							self:SetX(tonumber(wdgTextbox:GetAbsoluteX())-4)
+							self:SetY(tonumber(wdgTextbox:GetAbsoluteY())+18)
+							break
+						end
+					end
+				end
+			"
+		>
+			<frame texture="/ui/fe2/newui/res/common/frames/frame_n.png" width="+2i" align="center" borderthickness="4i" noclick="1"/>
+			<listbox
+				name="social_create_clan_autocomplete_list"
+				width="100%"
+				color="invisible"
+				font="dyn_10"
+				itemwidth="100%"
+				itemheight="3h"
+				select="true"
+				clearselection="true"
+				hoverselect="true"
+				hoverhighlight="true"
+				highlight="under"
+				highlightcolor="#cda5963b"
+				highlightbordercolor="invisible"
+				selectedcolor="#cda5963b"
+				selectedbordercolor="invisible"
+				colortransition="true"
+				colortransitiontime="250"
+				usescrollbars="true"
+				exteriorscrollbars="false"
+				scrollbarplaceholder="false"
+				scrollbarsize="2.0h"
+				scrolltexture="/ui/fe2/newui/res/common/scroll/scroll.png"
+				handleheight="2.0h"
+				itemoffsetx="0i"
+				onselectlua="
+					Set('cc_create_clan_member_selected', true)
+					GetWidget(GetCvarString('ui_autocompleteTextBox')):SetInputLine(self:GetValue())
+					Trigger('ChatAutoCompleteClear')
+				"
+			/>
+		</panel>
+
+		<!-- Create New Clan - Step 2 (Waiting for invites) -->
+		<instance name="newui_common_popup" y="-12h" width="555i" id="social_create_new_clan_waiting" title="cc_com_newclan_header" content="social_create_clan_waiting_content" show_close="1" debug="1" fadein="50" fadeout="200"
+			oncloselua="GetWidget('social_create_new_clan_waiting'):DoEventN(1)"
+			watch="ChatClanCreateFail"
+			ontriggerlua="self:DoEventN(1)"
+		/>
+
+		<!-- Create New Clan - Step 3 (Result) -->
+		<instance name="newui_common_popup" y="-12h" width="555i" id="social_create_new_clan_result" title="cc_com_newclan_header" content="social_create_clan_result_content" show_close="1" debug="0" oncloselua="GetWidget('social_create_new_clan_result'):DoEventN(1)"/>
+
+		<!-- Leave clan warning -->
+		<instance name="newui_common_popup" id="social_clan_leave_panel" y="-12h" width="555i" title="cc_panel_leaveclan" content="social_clan_leave_panel_content" show_close="1" debug="0" oncloselua="GetWidget('social_clan_leave_panel'):DoEventN(1)"/>
+	</template>
+
+	<template name="social_player_template">
+		<panel
+			name="social_player_item_{id}" width="{width=100%}" height="50i" visible="0" sticky="1" stickytoinvis="0"
+			onmouseoverlua="PlaySound('/shared/sounds/ui/button_over_02.wav') GetWidget('social_player_item_{id}_hover'):FadeIn(150)"
+			onmouseoutlua="GetWidget('social_player_item_{id}_hover'):FadeOut(150)"
+			onrightclicklua="PlaySound('/shared/sounds/ui/ccpanel/button_rightclick_01.wav') Social_V2:UserEntryClicked({id})"
+			ondoubleclicklua="PlaySound('/shared/sounds/ui/button_click_01.ogg') Social_V2:UserEntryDoubleClicked({id})"
+		>
+			<image texture="/ui/fe2/newui/res/common/hline.png" width="110%" height="1" align="center" valign="bottom" noclick="1"/>
+			<image texture="/ui/fe2/newui/res/common/list_item_bg.png" y="-1" height="16i" align="center" valign="bottom" noclick="1"/>
+
+			<!-- Hover  -->
+			<image name="social_player_item_{id}_hover" valign="center" width="256i" height="64i" visible="0" texture="/ui/fe2/newui/res/social/highlight.png" noclick="1"/>
+
+			<!-- Icon -->
+			<panel width="36i" height="36i" x="10i" valign="center" noclick="1">
+				<frame texture="/ui/fe2/newui/res/common/frames/frame_h.png" align="center" valign="center" borderthickness="1i" noclick="1"/>
+				<image name="social_player_item_{id}_icon" width="-2" height="-2" align="center" valign="center" noclick="1"/>
+			</panel>
+
+			<!-- Name -->
+			<label name="social_player_item_{id}_name" x="56i" y="-10i" textvalign="center" font="dyn_10" color="#f0d3c1" outline="1" outlinecolor="#230000" noclick="1"/>
+
+			<!-- Status -->
+			<panel x="56i" y="10i" height="20i" valign="center" noclick="1">
+				<image name="social_player_item_{id}_status_icon" texture="/ui/fe2/newui/res/social/online.png" width="16i" height="16i" noclick="1"/>
+				<label name="social_player_item_{id}_status_text" x="18i" font="dyn_9" color="#7e604e" outline="1" outlinecolor="#230000" noclick="1"/>
+			</panel>
+
+			<panel x="-10i" align="right" height="-6i" valign="center" grow="1" regrow="1" growinvis="0" float="right" padding=".1h" noclick="1">
+				<!-- Ascension Level -->
+				<panel name="social_player_item_{id}_ascension" visible="0" width="3h" height="3h" valign="center" stickytoinvis="0" noclick="1"
+				>
+					<image name="social_player_item_{id}_ascension_img_0" texture="/ui/fe2/codex/s1.tga" align="center" valign="center" visible="0" noclick="1"/>
+					<image name="social_player_item_{id}_ascension_img_1" texture="/ui/fe2/codex/s2.tga" align="center" valign="center" visible="0" noclick="1"/>
+					<image name="social_player_item_{id}_ascension_img_2" texture="/ui/fe2/codex/s3.tga" align="center" valign="center" visible="0" noclick="1"/>
+					<label name="social_player_item_{id}_ascension_label" width="150%" align="center" valign="center" textalign="center" textvalign="bottom" font="dyn_8" outline="1" noclick="1"/>
+				</panel>
+
+				<!-- Add Friend -->
+				<button name="social_player_item_{id}_addfriend" visible="0" valign="center" width="2.25h" height="2.25h" color="invisible" stickytoinvis="0"
+					onmouseoverlua="Common_V2:ShowSimpleTip(true, Translate('general_add_friend'), '120i')"
+					onmouseoutlua="Common_V2:ShowSimpleTip(false)"
+				>
+					<widgetstate statename="up"><image texture="/ui/fe2/newui/res/playerstats/add_friend_up.png" width="64i" height="64i" align="center" valign="center" noclick="1"/></widgetstate>
+					<widgetstate statename="over"><image texture="/ui/fe2/newui/res/playerstats/add_friend_hover.png" width="64i" height="64i" align="center" valign="center" noclick="1"/></widgetstate>
+					<widgetstate statename="down" x="1" y="1"><image texture="/ui/fe2/newui/res/playerstats/add_friend_up.png" width="64i" height="64i" align="center" valign="center" noclick="1"/></widgetstate>
+					<widgetstate statename="disabled"><image texture="/ui/fe2/newui/res/playerstats/add_friend_up.png" width="64i" height="64i" align="center" valign="center" rendermode="grayscale" noclick="1"/></widgetstate>
+				</button>
+			</panel>
+		</panel>
+
+		<panel name="social_player_category_{id}" width="{width=100%}" height="32i" sticky="1" stickytoinvis="0" visible="0" noclick="0"
+			onclicklua="Social_V2:GroupButtonClicked({id})"
+		>
+			<!-- Background -->
+			<panel align="center" valign="top" clip="1" noclick="1">
+				<image texture="/ui/fe2/newui/res/social/bg.png" align="center" valign="top" noclick="1"/>
+				<image texture="/ui/fe2/newui/res/social/b_01.png" width="16i" align="left" valign="top" noclick="1"/>
+				<image texture="/ui/fe2/newui/res/social/b_02.png" width="-32i" align="center" valign="top" noclick="1"/>
+				<image texture="/ui/fe2/newui/res/social/b_03.png" width="16i" align="right" valign="top" noclick="1"/>
+			</panel>
+			<!-- Collapse -->
+			<image name="social_player_category_{id}_arrow" x="10i" width="16i" height="16i" valign="center" texture="/ui/fe2/newui/res/social/arrow_up.png" noclick="1"/>
+			<!-- Label -->
+			<label name="social_player_category_{id}_name" x="32i" fitx="1" fitxpadding="0.4h" textvalign="center" font="dyn_12" color="#f0d3c1" outline="1" outlinecolor="#230000" noclick="1"/>
+		</panel>
+	</template>
+
+	<template name="social_friends_template">
+		<panel name="social_friends" x="0" y="0" align="right" width="288i" height="587i" visible="0" cangrab="1" noclick="0" hotkey="ESC" onhotkeylua="Social_V2:OnToggleFriendPanel()"
+			onloadlua="Social_V2:InitFriends()"
+			onshowlua="
+				Common_V2:RestrictTRSafeArea(self, 'sysbar_quit')
+				GetWidget('social_clan'):SetVisible(false)
+				GetWidget('system_message_container'):SetVisible(false)
+			"
+		>
+			<instance name="newui_popup_caption_frame" uppercase="1" title="sp_listlabel_friends" onclicklua="Social_V2:OnToggleFriendPanel()"/>
+
+			<panel y="35i" width="-30i" height="33i" align="center" noclick="1">
+				<textbox
+					name="social_panel_search"
+					hpadding="0"
+					vpadding="5i"
+					maxlength="250"
+					font="dyn_12"
+					textcolor="#f0d3c1"
+					shadow="false"
+					color="invisible"
+					onshow="SetFocus(false);"
+					onenter="SetFocus(false);"
+					onesc="EraseInputLine(); SetFocus(false);"
+					onfocuslua="Social_V2:SearchFriendsBegin(self)"
+					onlosefocuslua="Social_V2:SearchFriendsEnd(self)"
+					onchangelua="Social_V2:UpdateAutoCompleteInput(self:GetValue())"
+				/>
+				<label name="social_panel_search_idletext" textvalign="center" content="Enter Player Name" font="dyn_12" color="#65554b" noclick="1"/>
+			</panel>
+			<image texture="/ui/fe2/newui/res/social/searchbox_border.png" y="68i" width="-2" height="16i" align="center" valign="top" noclick="1"/>
+			<panel name="social_panel_friends" height="-70i" align="center" valign="bottom" clip="1">
+				<panel name="social_panel_friends_container" x="3i" width="-20i" regrow="1" grow="1" growinvis="0" float="bottom" noclick="1">
+					<instance name="social_player_template" id="1"/>
+					<instance name="social_player_template" id="2"/>
+					<instance name="social_player_template" id="3"/>
+					<instance name="social_player_template" id="4"/>
+					<instance name="social_player_template" id="5"/>
+					<instance name="social_player_template" id="6"/>
+					<instance name="social_player_template" id="7"/>
+					<instance name="social_player_template" id="8"/>
+					<instance name="social_player_template" id="9"/>
+					<instance name="social_player_template" id="10"/>
+					<instance name="social_player_template" id="11"/>
+				</panel>
+				<panel name="social_panel_friends_scrollpanel" height="100%" processonlyscroll="1" hover="0"
+					onmousewheeldown="CallEvent('social_panel_friends_scrollbar', 1);"
+					onmousewheelup="CallEvent('social_panel_friends_scrollbar', 0);"
+				/>
+				<scrollbar name="social_panel_friends_scrollbar"
+					x="-3i"
+					visible="0"
+					align="right"
+					valign="bottom"
+					width="1.2h"
+					height="100%"
+					scrollbarsize="1.2h"
+					handlewidth="1.2h"
+					handleheight="10h"
+					texture="/ui/fe2/newui/res/common/scroll/scroll.png"
+					scrollbarplaceholder="0"
+					minvalue="0"
+					maxvalue="0"
+					step="1"
+					value="0"
+					vertical="1"
+					slotwidth="0.6h" slotheight="1"
+					onevent1="SetValue(GetValue+1);"
+					onevent0="SetValue(GetValue-1);"
+					onslidelua="Social_V2:ScrollFriendList(tonumber(self:GetValue()))"
+				/>
+			</panel>
+			<image texture="/ui/fe2/newui/res/playerstats/mastery_all_row_mask.png" y="-1" width="-1.6h" height="40i" align="left" valign="bottom" noclick="1"/>
+		</panel>
+	</template>
+
+	<template name="social_clan_list_item">
+		<panel name="social_clan_list_item_{id}" sticky="1" stickytoinvis="0" width="100%" height="50i" visible="0" noclick="0"
+			onmouseoverlua="PlaySound('/shared/sounds/ui/button_over_02.wav') GetWidget('social_clan_list_item_{id}_hover'):FadeIn(150)"
+			onmouseoutlua="GetWidget('social_clan_list_item_{id}_hover'):FadeOut(150)"
+			onrightclicklua="PlaySound('/shared/sounds/ui/ccpanel/button_rightclick_01.wav') Social_V2:ClanEntryClicked({id})"
+			ondoubleclicklua="PlaySound('/shared/sounds/ui/button_click_01.ogg') Social_V2:ClanEntryDoubleClicked({id})"
+		>
+			<image texture="/ui/fe2/newui/res/common/hline.png" width="110%" height="1" align="center" valign="bottom" noclick="1"/>
+			<image texture="/ui/fe2/newui/res/common/list_item_bg.png" y="-1" height="16i" align="center" valign="bottom" noclick="1"/>
+			<image name="social_clan_list_item_{id}_hover" valign="center" width="256i" height="64i" visible="0" texture="/ui/fe2/NewUI/Res/social/highlight.png" noclick="1"/>
+			<panel width="36i" height="36i" color="1 1 1 .3" x="10i" align="left" valign="center" noclick="1">
+				<frame texture="/ui/fe2/newui/res/common/frames/frame_h.png" align="center" valign="center" borderthickness="1i" noclick="1"/>
+				<image name="social_clan_list_item_{id}_icon" texture="$invis" width="-2" height="-2" align="center" valign="center" noclick="1"/>
+				<image name="social_clan_list_item_{id}_officer" texture="/ui/fe2/newui/res/social/clanofficer.png" x="5" y="-3" width="12" height="12" align="right" visible="0" noclick="1"/>
+				<image name="social_clan_list_item_{id}_leader" texture="/ui/fe2/newui/res/social/clanleader.png" x="5" y="-3" width="12" height="12" align="right" visible="0" noclick="1"/>
+			</panel>
+			<!-- onlinecolor:#39c6ff gamecolor:#f3c113 offlinecolor:#80878d -->
+			<label name="social_clan_list_item_{id}_name" x="56i" y="-10i" width="-1.5h" textvalign="center" font="dyn_10" color="{color=#a99081}" outline="1" outlinecolor="#230000" noclick="1"/>
+			<panel x="56i" y="10i" height="20i" valign="center" noclick="1">
+				<image name="social_clan_list_item_{id}_status_icon" texture="/ui/fe2/newui/res/social/online.png" width="16i" height="16i" noclick="1"/>
+				<label name="social_clan_list_item_{id}_status_text" x="18i" textalign="left" textvalign="top" font="dyn_9" color="{statuscolor=#7e604e}" outline="true" outlinecolor="#230000" noclick="1"/>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="social_clan_template">
+		<panel name="social_clan" x="0" y="0" align="right" width="288i" height="587i" visible="0" cangrab="1" noclick="0" hotkey="ESC" onhotkeylua="self:FadeOut(150)"
+			onloadlua="Social_V2:InitClan()"
+			onshowlua="
+				GetWidget('social_clan_settings_btn'):SetVisible(IsInClan())
+				Common_V2:RestrictTRSafeArea(self, 'sysbar_quit')
+
+				GetWidget('social_friends'):SetVisible(false)
+				GetWidget('system_message_container'):SetVisible(false)
+			"
+			onhidelua="GetWidget('social_clan_settings'):SetVisible(false)"
+		>
+			<instance name="newui_popup_caption_frame" uppercase="1" title="sp_listlabel_clan" onclicklua="GetWidget('social_clan'):FadeOut(200)"/>
+
+			<panel name="social_panel_clan" y="36i" width="-5i" height="-15i" noclick="1"
+				watch="ChatClanEvent"
+				ontriggerlua="
+					if param == 'ClanLeft' then
+						self:SetVisible(true)
+					end
+				"
+			>
+				<!-- Clan List -->
+				<panel name="social_clan_list_container" clip="1">
+					<panel name="social_clan_list" x="3i" width="-18i" regrow="1" grow="1" growinvis="0" float="bottom" noclick="1">
+						<instance name="social_clan_list_item" id="1"/>
+						<instance name="social_clan_list_item" id="2"/>
+						<instance name="social_clan_list_item" id="3"/>
+						<instance name="social_clan_list_item" id="4"/>
+						<instance name="social_clan_list_item" id="5"/>
+						<instance name="social_clan_list_item" id="6"/>
+						<instance name="social_clan_list_item" id="7"/>
+						<instance name="social_clan_list_item" id="8"/>
+						<instance name="social_clan_list_item" id="9"/>
+						<instance name="social_clan_list_item" id="10"/>
+						<instance name="social_clan_list_item" id="11"/>
+					</panel>
+					<panel name="social_clan_list_scrollpanel" processonlyscroll="1" hover="0"
+						onmousewheeldown="CallEvent('social_clan_list_scrollbar', 1);"
+						onmousewheelup="CallEvent('social_clan_list_scrollbar', 0);"
+					/>
+					<scrollbar name="social_clan_list_scrollbar"
+						align="right"
+						width="1.2h"
+						height="-2h"
+						scrollbarsize="1.2h"
+						handlewidth="1.2h"
+						handleheight="10h"
+						texture="/ui/fe2/newui/res/common/scroll/scroll.png"
+						minvalue="0"
+						maxvalue="0"
+						step="1"
+						value="0"
+						vertical="1"
+						slotwidth="0.6h"
+						slotheight="1"
+						onevent1lua="self:SetValue(self:GetValue()+1)"
+						onevent0lua="self:SetValue(self:GetValue()-1)"
+						onslidelua="Social_V2:ScrollClanList(tonumber(self:GetValue()))"
+					/>
+				</panel>
+
+				<!-- Create Clan Button -->
+				<instance name="newui_common_button_2_template" button_name="social_create_new_clan_btn" label="cc_com_create_button" visible="0"
+					y="-10h" align="center" valign="center" width="15h" height="32i"
+					onclicklua="GetWidget('social_create_new_clan'):DoEventN(0)"
+					watch="ChatNotificationClan"
+					ontriggerlua="self:SetVisible(not IsInClan())"
+					watch1="LoginStatus"
+					ontrigger1lua="if AtoB(param2) then self:SetVisible(not IsInClan()) end"
+				/>
+			</panel>
+
+			<panel name="social_clan_settings" x="-12h" width="12h" visible="0" grow="1" noclick="1">
+				<instance name="newui_custom_frame_template" alpha="0.98"/>
+				<button width="100%" height="3h" color="invisible" align="center" valign="top"
+					onclicklua="
+						GetWidget('social_clan_settings'):SetVisible(false)
+						GetWidget('social_clan_leave_panel'):DoEventN(0)
+					"
+				>
+					<widgetstate statename="up">
+						<label width="-1h" align="center" valign="center" textalign="center" textvalign="center" content="ui_items_cc_right_click_clan_leave" font="dyn_12" color="#7e6459" outline="1" outlinecolor="#241410" noclick="1"/>
+					</widgetstate>
+					<widgetstate statename="over">
+						<label width="-1h" align="center" valign="center" textalign="center" textvalign="center" content="ui_items_cc_right_click_clan_leave" font="dyn_12" color="#d6b19d" outline="1" outlinecolor="#241410" noclick="1"/>
+					</widgetstate>
+					<widgetstate statename="down">
+						<label x="+1" y="+1" width="-1h" align="center" valign="center" textalign="center" textvalign="center" content="ui_items_cc_right_click_clan_leave" font="dyn_12" color="#d6b19d" outline="1" outlinecolor="#241410" noclick="1"/>
+					</widgetstate>
+				</button>
+			</panel>
+
+			<button
+				name="social_clan_settings_btn"
+				x="2i" y="2i" width="32i" height="32i"
+				align="left" valign="top"
+				visible="0" color="invisible"
+				onmouseoverlua="PlaySound('/shared/sounds/ui/button_over_01.wav')"
+				onclicklua="PlaySound('/shared/sounds/ui/button_click_01.wav') local wdg = GetWidget('social_clan_settings') wdg:SetVisible(not wdg:IsVisible())"
+			>
+				<widgetstate statename="up">
+					<image texture="/ui/fe2/newui/res/social/clan_config.png" align="center" valign="center" rendermode="normal" noclick="1"/>
+				</widgetstate>
+				<widgetstate statename="over">
+					<image texture="/ui/fe2/newui/res/social/clan_config_over.png" align="center" valign="center" rendermode="normal" noclick="1"/>
+				</widgetstate>
+				<widgetstate statename="down" x="1" y="1">
+					<image texture="/ui/fe2/newui/res/social/clan_config.png" align="center" valign="center" rendermode="normal" noclick="1"/>
+				</widgetstate>
+				<widgetstate statename="disabled">
+					<image texture="/ui/fe2/newui/res/social/clan_config.png" align="center" valign="center" rendermode="grayscale" noclick="1"/>
+				</widgetstate>
+			</button>
+			<image texture="/ui/fe2/newui/res/playerstats/mastery_all_row_mask.png" y="-1" width="-1.6h" height="40i" align="left" valign="bottom" noclick="1"/>
+		</panel>
+	</template>
+</package>

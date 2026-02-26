@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+	<panel name="motd_trigger_helper" noclick="1" color="invisible"/>
+
+	<!-- sorry about the frankenstein that this file has become -->
+
+	<lua file="/ui/scripts/news.lua"/>
+
+	<trigger name="RequestMessageOfTheDay"/>
+
+	<template name="motd_browser_button_template">
+		<button
+			name="{id}"
+			x="{x}"
+			valign="center"
+			width="{width=1.8h}" height="{height=1.8h}"
+			align="{align=right}"
+			color="invisible"
+			enabled="{enabled=true}"
+			onclicklua="{onclicklua}"
+			onclick="
+				{onclick}
+				PlaySound('/shared/sounds/ui/button_click_03.wav');
+			"
+			onmouseover="
+				PlaySound('/shared/sounds/ui/ccpanel/button_over_01.wav');
+			"
+			visible="{visible=true}"
+		>
+			<widgetstate statename="up">
+				<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.5h" color="{color=#1b4c76}" blockinput="false" noclick="true"/>
+				<frame texture="/ui/frames/roundframe.tga" color="0 0 0 1" borderthickness="0.5h" blockinput="false" noclick="true"/>
+				<image width="16" height="16" align="center" valign="center" color=".75 .75 .75 1" texture="{texture}" noclick="true" />
+			</widgetstate>
+			<widgetstate statename="over">
+				<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.5h" color="{hovercolor=#0d6ebf}" blockinput="false" noclick="true"/>
+				<frame texture="/ui/frames/roundframe.tga" color="0 0 0 1" borderthickness="0.5h" blockinput="false" noclick="true"/>
+				<image width="16" height="16" align="center" valign="center" color="1 1 1 1" texture="{texture}" noclick="true" />
+			</widgetstate>
+			<widgetstate statename="down" x="1" y="1">
+				<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.5h" color="{color=#1b4c76}" blockinput="false" noclick="true"/>
+				<frame texture="/ui/frames/roundframe.tga" color="0 0 0 1" borderthickness="0.5h" blockinput="false" noclick="true"/>
+			</widgetstate> 
+			<widgetstate statename="disabled">
+				<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.5h" color="{color=.2 .2 .2 1}" blockinput="false" noclick="true"/>
+				<frame texture="/ui/frames/roundframe.tga" color="0 0 0 1" borderthickness="0.5h" blockinput="false" noclick="true"/>
+				<image width="16" height="16" align="center" valign="center" color=".4 .4 .4 .5" texture="{texture}" noclick="true" />
+			</widgetstate>
+		</button>	
+	</template>
+
+	<template name="motd_ui_frame">
+		<panel x="-2.5@" y="-3.25%" grow="true" align="center" height="85%" noclick="true" passivechildren="true">
+			<panel height="12.5%" float="right" noclick="true" grow="true">
+				<image texture="/ui/fe2/frames/motd_frame_t1.tga" width="400@" height="100%"/>
+				<image texture="/ui/fe2/frames/motd_frame_t2.tga" width="800@" height="100%"/>
+				<image texture="/ui/fe2/frames/motd_frame_t3.tga" width="400@" height="100%"/>
+				<image texture="/ui/fe2/frames/motd_frame_t4.tga" width="100@" height="100%"/>
+				<image texture="/ui/fe2/frames/motd_frame_t5.tga" width="400@" height="100%"/>
+			</panel>
+			<panel y="12.5%" width="25@" float="bottom">
+				<image texture="/ui/fe2/frames/motd_frame_l1.tga" width="100%" height="200@"/>
+				<image texture="/ui/fe2/frames/motd_frame_l2.tga" width="100%" height="100@"/>
+			</panel>
+			<panel y="12.5%" width="25@" float="bottom" noclick="true" align="right">
+				<image texture="/ui/fe2/frames/motd_frame_r1.tga" width="100%" height="200@"/>
+				<image texture="/ui/fe2/frames/motd_frame_r2.tga" width="100%" height="100@"/>
+			</panel>
+			<panel height="12.5%" grow="true" float="right" noclick="true" valign="bottom">
+				<image texture="/ui/fe2/frames/motd_frame_b1.tga" width="400@" height="100%"/>
+				<image texture="/ui/fe2/frames/motd_frame_b2.tga" width="800@" height="100%"/>
+				<image texture="/ui/fe2/frames/motd_frame_b3.tga" width="400@" height="100%"/>
+				<image texture="/ui/fe2/frames/motd_frame_b4.tga" width="100@" height="100%"/>
+				<image texture="/ui/fe2/frames/motd_frame_b5.tga" width="400@" height="100%"/>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="news">
+		<panel name="news" color="0 0 0 0" height="100h" width="100w" align="left" valign="top" visible="0" noclick="1"
+			onevent2="CreateBool('_motd_dev', false);"
+			onevent4lua="
+				self:Sleep(750, function(...)
+					if 0 >= UIGamePhase() then
+						UIManager.GetInterface('main'):HoNMainF('MainMenuPanelToggle', 'news', nil, nil, nil, true, 2)
+					end
+				end)
+			"
+			onload="
+				CreateInt('motd_ad_target', 58);
+				If(
+					!VarExists('_motd_dev'),
+					DoEvent(2)
+				);
+				CreateBool('news_auto_displayed', 1);
+				CreateInt('_lastNewsRefresh', 0);
+			"
+			onshowlua="
+				if (UIGamePhase() > 0) then
+					UIManager.GetInterface('main'):HoNMainF('MainMenuPanelToggle', 'news', nil, nil, true, nil, 6)
+				else
+					UIManager.GetInterface('main'):HoNNewsF('RefreshMainWindow') 
+				end
+			"
+			watch0="EventStartLoading" ontrigger0="SetVisible(false);"
+			watch="GamePhase"
+			ontriggerlua="
+				if UIGamePhase() &gt; 0 then
+					UIManager.GetInterface('main'):HoNNewsF('ReopenNews')
+				end
+			"
+			onhidelua="UIManager.GetInterface('webpanel'):HoNWebPanelF('UnloadPage')"
+		>
+			<!-- background -->
+			<panel name="motd_background" height="1024" width="2048" visible="0" align="center">
+				<image name="motd_background_image" color="1 1 1 0.6" utile="1" vtile="1" uscale=".25" vscale=".5" texture="/ui/fe2/mainmenu/v3/bg.tga" />
+			</panel>
+			
+			<panel name="motd_master" y="4.0h" width="123h" height="47.0h" align="center" visible="0">
+				
+				<!-- Center Solid -->
+				<panel y="-3.0h" width="-54.6h" height="+6h" align="center" noclick="true" color="#121212">
+					<image x="-6.0h" width="6.0h" align="left" texture="/ui/fe2/news/feature_grad.tga" color="#121212" hflip="true" noclick="true" />
+					<image x="6.0h" width="6.0h" align="right" texture="/ui/fe2/news/feature_grad.tga" color="#121212" noclick="true" />
+				</panel>
+				
+				<!-- MOTD News - Web panel -->
+				<panel name="motd_center_panel" width="124.8h" y="-1.4h" height="+3h" align="center" noclick="true" color="0 0 0 1"
+					onshowlua="GetWidget('motd_ui_frame'):FadeIn(150)"
+					onhidelua="GetWidget('motd_ui_frame'):FadeOut(150)"
+				/>
+
+			</panel>
+
+			<!-- new 'not a' web panel -->
+			<panel name="motd_frameless_web_popup" y="25%" align="center" color="0 0 0 1" width="5" regrow="1" height="5" visible="0" noclick="1" clip="1"
+				onhide="SetVisible(0); SetWidth(5); SetHeight(5); SetY('25%'); SetX(0);"
+				onevent2lua="UIManager.GetInterface('webpanel'):HoNWebPanelF('MoveWebPanel', GetWidget('motd_frameless_browser_panel'))"
+			>
+				<label content="main_label_login_status_prewaiting" height="2.0h" textalign="center" y="50%" font="dyn_18"/>
+				<panel name="motd_frameless_browser_panel" noclick="1"/>
+				<panel name="motd_frameless_headerbar" noclick="true" height="2.0h" y="0.2h" x="0" color="invisible">
+					<!-- Maximize -->
+					<instance name="motd_browser_button_template" id="motdf_max" x="-2.2h" texture="/ui/elements/maximize_btn.tga" onclicklua="UIManager.GetInterface('webpanel'):HoNWebPanelF('MoveWebPanel', GetWidget('motd_web_fullscreen_browser')) GetWidget('motd_web_fullscreen'):SetVisible(1)" />
+					<!-- <panel color="yellow" width="25%" /> -->
+					<instance
+						name="closex_btn" x="-0.2h"
+						width="1.8h" height="1.8h"
+						align="right" valign="center"
+						onclick="PlaySound('/shared/sounds/ui/ccpanel/button_click_02.wav'); Call('motd_frameless_web_popup', 'DoEvent(1)');"
+					/>
+					<panel name="motdf_buttonset" x="0" y="0" height="100%" width="100%" visible="0" noclick="1">
+						<!-- Home -->
+						<instance name="motd_browser_button_template" align="left" id="motd_home" x="0.2h" texture="/ui/fe2/elements/web_home.tga" onclick="Call('web_browser', 'WebBrowserLoadURL(\'!hon/streams/\')');" />
+						<!-- Refresh -->
+						<instance name="motd_browser_button_template" align="left" id="motd_refresh" x="2.2h" texture="/ui/fe2/elements/web_refresh.tga" onclicklua="UIManager.GetInterface('webpanel'):HoNWebPanelF('InputButton', 3)" />
+						<!-- Back -->
+						<instance name="motd_browser_button_template" align="left" id="motd_back" x="4.2h" texture="/ui/fe2/elements/web_back.tga" onclicklua="UIManager.GetInterface('webpanel'):HoNWebPanelF('InputButton', 1)" />
+						<!-- Forward -->
+						<instance name="motd_browser_button_template" align="left" id="motd_forward" x="6.2h" texture="/ui/fe2/elements/web_forward.tga" onclicklua="UIManager.GetInterface('webpanel'):HoNWebPanelF('InputButton', 2)" />
+					</panel>
+				</panel>
+			</panel>
+
+			<panel name="motd_ui_frame" y="4.0h" width="123h" height="47.0h" align="center" noclick="true" passivechildren="true" visible="false">
+				<panel width="124.8h" y="-1.4h" height="+3h" align="center" noclick="true">
+					<!--
+					<if condition="!_ui_motd_hide">
+						<instance name="motd_ui_frame"/>
+					</if>
+					-->
+				</panel>
+			</panel>
+
+
+		</panel>
+		
+	</template>
+	
+	
+</package>

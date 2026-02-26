@@ -1,0 +1,1250 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+	<lua file="/ui/scripts/newui/player_hosted_v2.lua"/>
+
+	<template name="hosted_game_checkbox_template">
+		<button name="{widget_name}" x="{x}" y="{y}" width="{width=100%}" height="{height=100%}" align="{align}" valign="{valign}" color="invisible" numstates="2" 
+				onclicklua="PlaySound('/shared/sounds/ui/revamp/region_click.wav') {onclicklua}" 
+				watch="{watch}" 
+				ontrigger="{ontrigger}"
+				watch1="{watch1}"
+				ontrigger1="{ontrigger1}"
+				onmouseoverlua="PlaySound('/shared/sounds/ui/revamp/region_hover.wav')"
+		>
+			<widgetstate statename="up1">
+				<panel width="16i" height="16i" valign="center">
+					<image texture="/ui/fe2/newui/res/common/unselected_up.png" width="32i" height="32i" align="center" valign="center" noclick="1"/>
+				</panel>
+				<label x="24i" textalign="left" textvalign="center" font="dyn_12" color="#f0d3c1" outline="1" outlinecolor="#230000" noclick="1" content="{content}"/>
+			</widgetstate>
+			<widgetstate statename="over1">
+				<panel width="16i" height="16i" valign="center">
+					<image texture="/ui/fe2/newui/res/common/unselected_over.png" width="32i" height="32i" align="center" valign="center" noclick="1"/>
+				</panel>
+				<label x="24i" textalign="left" textvalign="center" font="dyn_12" color="#f3e8e2" outline="1" outlinecolor="#230000" noclick="1" content="{content}"/>
+			</widgetstate>
+			<widgetstate statename="down1">
+				<panel width="16i" height="16i" valign="center">
+					<image texture="/ui/fe2/newui/res/common/unselected_over.png" width="32i" height="32i" align="center" valign="center" noclick="1"/>
+				</panel>
+				<label x="24i" textalign="left" textvalign="center" font="dyn_12" color="#f3e8e2" outline="1" outlinecolor="#230000" noclick="1" content="{content}"/>
+			</widgetstate>
+			<widgetstate statename="up2">
+				<panel width="16i" height="16i" valign="center">
+					<image texture="/ui/fe2/newui/res/common/selected_up.png" width="32i" height="32i" align="center" valign="center" noclick="1"/>
+				</panel>
+				<label x="24i" textalign="left" textvalign="center" font="dyn_12" color="#f0d3c1" outline="1" outlinecolor="#230000" noclick="1" content="{content}"/>
+			</widgetstate>
+			<widgetstate statename="over2">
+				<panel width="16i" height="16i" valign="center">
+					<image texture="/ui/fe2/newui/res/common/selected_over.png" width="32i" height="32i" align="center" valign="center" noclick="1"/>
+				</panel>
+				<label x="24i" textalign="left" textvalign="center" font="dyn_12" color="#f3e8e2" outline="1" outlinecolor="#230000" noclick="1" content="{content}"/>
+			</widgetstate>
+			<widgetstate statename="down2">
+				<panel width="16i" height="16i" valign="center">
+					<image texture="/ui/fe2/newui/res/common/selected_over.png" width="32i" height="32i" align="center" valign="center" noclick="1"/>
+				</panel>
+				<label x="24i" textalign="left" textvalign="center" font="dyn_12" color="#f3e8e2" outline="1" outlinecolor="#230000" noclick="1" content="{content}"/>
+			</widgetstate>
+		</button>
+	</template>
+
+	<template name="hosted_game_title_template">
+		<panel width="{width=100%}" height="{height=100%}" 
+			onclicklua="{onclicklua} PlaySound('/shared/sounds/ui/revamp/region_click.wav')"
+			onmouseoverlua="GetWidget('hosted_game_title_{id}_uparrow'):SetTexture('/ui/fe2/newui/res/hosted/arrow_over.png')
+							GetWidget('hosted_game_title_{id}_downarrow'):SetTexture('/ui/fe2/newui/res/hosted/arrow_over.png')
+							PlaySound('/shared/sounds/ui/revamp/region_hover.wav')
+							"
+			onmouseoutlua="GetWidget('hosted_game_title_{id}_uparrow'):SetTexture('/ui/fe2/newui/res/hosted/arrow.png')
+							GetWidget('hosted_game_title_{id}_downarrow'):SetTexture('/ui/fe2/newui/res/hosted/arrow.png')
+							"
+		>
+			<panel grow="1" regrow="1" height="100%" align="center" float="right" noclick="1">
+				<label font="dyn_12" color="#f7d3d3" outline="1" textalign="center" textvalign="center" outlinecolor="#3f0c0c" noclick="1" content="{content}"
+					   onloadlua="local width = self:GetStringWidth(Translate('{content}'))
+					   			  self:SetWidth(width)
+					   			 "
+				/>
+				<panel width="5i" noclick="1"/>
+				<panel noclick="1" width="16i" height="16i" valign="center">
+					<image name="hosted_game_title_{id}_uparrow" texture="/ui/fe2/newui/res/hosted/arrow.png" noclick="1" vflip="1" visible="0"/>
+					<image name="hosted_game_title_{id}_downarrow" texture="/ui/fe2/newui/res/hosted/arrow_over.png" noclick="1" visible="0"/>
+				</panel>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="hosted_game_gamelist_item_template">
+		<panel width="{width=100%}" height="{height=54i}" align="center">
+			<instance name="newui_custom_frame_template" alpha="0.5"/>
+			<panel name="hosted_game_gamelist_item_{index}" visible="0" float="right"
+					onmousewheeldown="CallEvent('hosted_game_gamelist_scroll', 1);"
+					onmousewheelup="CallEvent('hosted_game_gamelist_scroll', 0);"
+					onclicklua="Player_Hosted_V2:OnClickGame({index})"
+					ondoubleclicklua="Player_Hosted_V2:OnClickGame({index}) Player_Hosted_V2:OnClickJoin()"
+			>
+				<panel name="hosted_game_gamelist_item_{index}_selected" align="center" valign="center" noclick="1" visible="0">
+					<frame borderthickness="2i" color="invisible" bordercolor="yellow" noclick="1" />
+				</panel>
+				<anchor x="18i"/>
+				<panel width="200i" noclick="1">
+					<instance name="newui_longtext_label_template" label_name="hosted_game_gamelist_item_{index}_gamename" 
+						      width="-10i" textvalign="center" font="dyn_12" color="#ac9282" outline="0" outlinecolor="#230000" tipx="-18i"
+						      onmousewheeldown="CallEvent('hosted_game_gamelist_scroll', 1);"
+							  onmousewheelup="CallEvent('hosted_game_gamelist_scroll', 0);"
+							  onclicklua="Player_Hosted_V2:OnClickGame({index})"
+							  ondoubleclicklua="Player_Hosted_V2:OnClickGame({index}) Player_Hosted_V2:OnClickJoin()"
+					/>
+				</panel>
+				<panel name="hosted_game_gamelist_item_{index}_map" width="230i"
+						onmouseoutlua="Common_V2:ShowGenericTip(false)"
+						onmousewheeldown="CallEvent('hosted_game_gamelist_scroll', 1);"
+						onmousewheelup="CallEvent('hosted_game_gamelist_scroll', 0);"
+						onclicklua="Player_Hosted_V2:OnClickGame({index})"
+						ondoubleclicklua="Player_Hosted_V2:OnClickGame({index}) Player_Hosted_V2:OnClickJoin()"
+				>
+					<image name="hosted_game_gamelist_item_{index}_map_icon" x="10i" texture="$invis" width="26i" height="26i" valign="center" noclick="1"/>
+					<label name="hosted_game_gamelist_item_{index}_map_text" x="45i" width="-45i" textalign="left" textvalign="center" font="dyn_12" color="#ac9282" outline="0" outlinecolor="#230000" noclick="1" autofont="1" autofontmax="12"/>
+				</panel>
+				<panel name="hosted_game_gamelist_item_{index}_gamemode" width="205i"
+						onmouseoutlua="Common_V2:ShowGenericTip(false)"
+						onmousewheeldown="CallEvent('hosted_game_gamelist_scroll', 1);"
+						onmousewheelup="CallEvent('hosted_game_gamelist_scroll', 0);"
+						onclicklua="Player_Hosted_V2:OnClickGame({index})"
+						ondoubleclicklua="Player_Hosted_V2:OnClickGame({index}) Player_Hosted_V2:OnClickJoin()"
+				>
+					<image name="hosted_game_gamelist_item_{index}_gamemode_icon" x="10i" texture="$invis" width="26i" height="26i" valign="center" noclick="1"/>
+					<label name="hosted_game_gamelist_item_{index}_gamemode_text" x="45i" textalign="left" textvalign="center" font="dyn_12" color="#ac9282" outline="0" outlinecolor="#230000" noclick="1"/>
+				</panel>
+				<panel width="85i" noclick="1">
+					<label name="hosted_game_gamelist_item_{index}_teamsize" width="-20i" textalign="center" textvalign="center" font="dyn_12" color="#ac9282" outline="0" outlinecolor="#230000" noclick="1"/>
+				</panel>
+				<panel width="85i" noclick="1">
+					<label name="hosted_game_gamelist_item_{index}_ping" width="-20i" textalign="center" textvalign="center" font="dyn_12" color="#ac9282" outline="0" outlinecolor="#230000" noclick="1"/>
+				</panel>
+				<panel width="90i" noclick="1">
+					<label name="hosted_game_gamelist_item_{index}_slots" width="-20i" textalign="center" textvalign="center" font="dyn_12" color="#ac9282" outline="0" outlinecolor="#230000" noclick="1"/>
+				</panel>
+				<panel width="105i" noclick="1">
+					<label name="hosted_game_gamelist_item_{index}_minpsr" width="-20i" textalign="center" textvalign="center" font="dyn_12" color="#ac9282" outline="0" outlinecolor="#230000" noclick="1"/>
+				</panel>
+				<panel width="110i" noclick="1">
+					<label name="hosted_game_gamelist_item_{index}_maxpsr" width="-20i" textalign="center" textvalign="center" font="dyn_12" color="#ac9282" outline="0" outlinecolor="#230000" noclick="1"/>
+				</panel>
+				<panel width="197i" noclick="1">
+					<panel grow="1" regrow="1" growinvis="0" align="center" height="100%" noclick="1" float="right" padding="2i">
+						<image name="hosted_game_gamelist_item_{index}_options1" texture="$invis" width="26i" height="26i" valign="center" stickytoinvis="false"/>
+						<image name="hosted_game_gamelist_item_{index}_options2" texture="$invis" width="26i" height="26i" valign="center" stickytoinvis="false"/>
+						<image name="hosted_game_gamelist_item_{index}_options3" texture="$invis" width="26i" height="26i" valign="center" stickytoinvis="false"/>
+						<image name="hosted_game_gamelist_item_{index}_options4" texture="$invis" width="26i" height="26i" valign="center" stickytoinvis="false"/>
+						<image name="hosted_game_gamelist_item_{index}_options5" texture="$invis" width="26i" height="26i" valign="center" stickytoinvis="false"/>
+						<image name="hosted_game_gamelist_item_{index}_options6" texture="$invis" width="26i" height="26i" valign="center" stickytoinvis="false"/>
+					</panel>
+				</panel>
+				<anchor x="0"/>
+				<panel name="hosted_game_gamelist_item_{index}_invalid" color="0 0 0 .7"/>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="hosted_game_filter_gamemode_template">
+		<button name="hosted_game_filter_gamemode_{id}" width="{width=100%}" height="{height=100%}" color="invisible" numstates="2"
+				onclicklua="PlaySound('/shared/sounds/ui/revamp/region_click.wav')"
+				onmouseoverlua="PlaySound('/shared/sounds/ui/revamp/region_hover.wav')"
+		>
+			<widgetstate statename="up1">
+				<panel height="32i" valign="center" float="right">
+					<panel width="100@" height="100%">
+						<image align="center" valign="center" noclick="1" texture="/ui/fe2/newui/res/icons/{icon}"/>
+					</panel>
+					<image texture="/ui/fe2/newui/res/hosted/state1.png" color="#22c10d" width="100@" height="100%"/>
+					<panel width="100%" noclick="1">
+						<label textalign="left" textvalign="center" font="dyn_10" color="#22c10d" noclick="1" content="{content}"/>
+					</panel>
+				</panel>
+			</widgetstate>
+			<widgetstate statename="over1">
+				<panel height="32i" valign="center" float="right">
+					<panel width="100@" height="100%">
+						<image align="center" valign="center" noclick="1" texture="/ui/fe2/newui/res/icons/{icon}"/>
+					</panel>
+					<image texture="/ui/fe2/newui/res/hosted/state1.png" color="#03ed03" width="100@" height="100%"/>
+					<panel width="100%" noclick="1">
+						<label textalign="left" textvalign="center" font="dyn_10" color="#03ed03" noclick="1" content="{content}"/>
+					</panel>
+				</panel>
+			</widgetstate>
+			<widgetstate statename="down1" y="1">
+				<panel height="32i" valign="center" float="right">
+					<panel width="100@" height="100%">
+						<image align="center" valign="center" noclick="1" texture="/ui/fe2/newui/res/icons/{icon}"/>
+					</panel>
+					<image texture="/ui/fe2/newui/res/hosted/state1.png" color="#03ed03" width="100@" height="100%"/>
+					<panel width="100%" noclick="1">
+						<label textalign="left" textvalign="center" font="dyn_10" color="#03ed03" noclick="1" content="{content}"/>
+					</panel>
+				</panel>
+			</widgetstate>
+			<widgetstate statename="up2">
+				<panel height="32i" valign="center" float="right">
+					<panel width="100@" height="100%">
+						<image align="center" valign="center" noclick="1" texture="/ui/fe2/newui/res/icons/{icon}"/>
+					</panel>
+					<image texture="/ui/fe2/newui/res/hosted/state2.png" color="#d9001a" width="100@" height="100%"/>
+					<panel width="100%" noclick="1">
+						<label textalign="left" textvalign="center" font="dyn_10" color="#d9001a" noclick="1" content="{content}"/>
+					</panel>
+				</panel>
+			</widgetstate>
+			<widgetstate statename="over2">
+				<panel height="32i" valign="center" float="right">
+					<panel width="100@" height="100%">
+						<image align="center" valign="center" noclick="1" texture="/ui/fe2/newui/res/icons/{icon}"/>
+					</panel>
+					<image texture="/ui/fe2/newui/res/hosted/state2.png" color="#ff0422" width="100@" height="100%"/>
+					<panel width="100%" noclick="1">
+						<label textalign="left" textvalign="center" font="dyn_10" color="#ff0422" noclick="1" content="{content}"/>
+					</panel>
+				</panel>
+			</widgetstate>
+			<widgetstate statename="down2" y="1">
+				<panel height="32i" valign="center" float="right">
+					<panel width="100@" height="100%">
+						<image align="center" valign="center" noclick="1" texture="/ui/fe2/newui/res/icons/{icon}"/>
+					</panel>
+					<image texture="/ui/fe2/newui/res/hosted/state2.png" color="#ff0422" width="100@" height="100%"/>
+					<panel width="100%" noclick="1">
+						<label textalign="left" textvalign="center" font="dyn_10" color="#ff0422" noclick="1" content="{content}"/>
+					</panel>
+				</panel>
+			</widgetstate>
+		</button>
+	</template>
+
+	<template name="hosted_game_filter_option_template">
+		<button name="hosted_game_filter_option_{id}" width="{width=100%}" height="{height=100%}" color="invisible" numstates="3"
+				onclicklua="PlaySound('/shared/sounds/ui/revamp/region_click.wav')"
+				onmouseoverlua="PlaySound('/shared/sounds/ui/revamp/region_hover.wav')"
+		>
+			<widgetstate statename="up1">
+				<panel height="32i" valign="center" float="right" grow="1">
+					<panel width="100@" height="100%" stickytoinvis="0" visible="{hasicon=false}">
+						<image align="center" valign="center" noclick="1" texture="/ui/fe2/newui/res/icons/{icon}"/>
+					</panel>
+					<image texture="/ui/fe2/newui/res/hosted/state0.png" color="#02b5ff" width="100@" height="100%"/>
+					<panel width="100%" noclick="1">
+						<label width="500i" textalign="left" textvalign="center" font="dyn_10" color="#02b5ff" noclick="1" content="{content}"/>
+					</panel>
+				</panel>
+			</widgetstate>
+			<widgetstate statename="over1">
+				<panel height="32i" valign="center" float="right" grow="1">
+					<panel width="100@" height="100%" stickytoinvis="0" visible="{hasicon=false}">
+						<image align="center" valign="center" noclick="1" texture="/ui/fe2/newui/res/icons/{icon}"/>
+					</panel>
+					<image texture="/ui/fe2/newui/res/hosted/state0.png" color="#1ccbfe" width="100@" height="100%"/>
+					<panel width="100%" noclick="1">
+						<label width="500i" textalign="left" textvalign="center" font="dyn_10" color="#1ccbfe" noclick="1" content="{content}"/>
+					</panel>
+				</panel>
+			</widgetstate>
+			<widgetstate statename="down1" y="1">
+				<panel height="32i" valign="center" float="right" grow="1">
+					<panel width="100@" height="100%" stickytoinvis="0" visible="{hasicon=false}">
+						<image align="center" valign="center" noclick="1" texture="/ui/fe2/newui/res/icons/{icon}"/>
+					</panel>
+					<image texture="/ui/fe2/newui/res/hosted/state0.png" color="#1ccbfe" width="100@" height="100%"/>
+					<panel width="100%" noclick="1">
+						<label width="500i" textalign="left" textvalign="center" font="dyn_10" color="#1ccbfe" noclick="1" content="{content}"/>
+					</panel>
+				</panel>
+			</widgetstate>
+			<widgetstate statename="up2">
+				<panel height="32i" valign="center" float="right" grow="1">
+					<panel width="100@" height="100%" stickytoinvis="0" visible="{hasicon=false}">
+						<image align="center" valign="center" noclick="1" texture="/ui/fe2/newui/res/icons/{icon}"/>
+					</panel>
+					<image texture="/ui/fe2/newui/res/hosted/state1.png" color="#22c10d" width="100@" height="100%"/>
+					<panel width="100%" noclick="1">
+						<label width="500i" textalign="left" textvalign="center" font="dyn_10" color="#22c10d" noclick="1" content="{content}"/>
+					</panel>
+				</panel>
+			</widgetstate>
+			<widgetstate statename="over2">
+				<panel height="32i" valign="center" float="right" grow="1">
+					<panel width="100@" height="100%" stickytoinvis="0" visible="{hasicon=false}">
+						<image align="center" valign="center"  noclick="1" texture="/ui/fe2/newui/res/icons/{icon}"/>
+					</panel>
+					<image texture="/ui/fe2/newui/res/hosted/state1.png" color="#03ed03" width="100@" height="100%"/>
+					<panel width="100%" noclick="1">
+						<label width="500i" textalign="left" textvalign="center" font="dyn_10" color="#03ed03" noclick="1" content="{content}"/>
+					</panel>
+				</panel>
+			</widgetstate>
+			<widgetstate statename="down2" y="1">
+				<panel height="32i" valign="center" float="right" grow="1">
+					<panel width="100@" height="100%" stickytoinvis="0" visible="{hasicon=false}">
+						<image align="center" valign="center" noclick="1" texture="/ui/fe2/newui/res/icons/{icon}"/>
+					</panel>
+					<image texture="/ui/fe2/newui/res/hosted/state1.png" color="#03ed03" width="100@" height="100%"/>
+					<panel width="100%" noclick="1">
+						<label width="500i" textalign="left" textvalign="center" font="dyn_10" color="#03ed03" noclick="1" content="{content}"/>
+					</panel>
+				</panel>
+			</widgetstate>
+			<widgetstate statename="up3">
+				<panel height="32i" valign="center" float="right" grow="1">
+					<panel width="100@" height="100%" stickytoinvis="0" visible="{hasicon=false}">
+						<image align="center" valign="center" noclick="1" texture="/ui/fe2/newui/res/icons/{icon}"/>
+					</panel>
+					<image texture="/ui/fe2/newui/res/hosted/state2.png" color="#d9001a" width="100@" height="100%"/>
+					<panel width="100%" noclick="1">
+						<label width="500i" textalign="left" textvalign="center" font="dyn_10" color="#d9001a" noclick="1" content="{content}"/>
+					</panel>
+				</panel>
+			</widgetstate>
+			<widgetstate statename="over3">
+				<panel height="32i" valign="center" float="right" grow="1">
+					<panel width="100@" height="100%" stickytoinvis="0" visible="{hasicon=false}">
+						<image align="center" valign="center" noclick="1" texture="/ui/fe2/newui/res/icons/{icon}"/>
+					</panel>
+					<image texture="/ui/fe2/newui/res/hosted/state2.png" color="#ff0422" width="100@" height="100%"/>
+					<panel width="100%" noclick="1">
+						<label width="500i" textalign="left" textvalign="center" font="dyn_10" color="#ff0422" noclick="1" content="{content}"/>
+					</panel>
+				</panel>
+			</widgetstate>
+			<widgetstate statename="down3" y="1">
+				<panel height="32i" valign="center" float="right" grow="1">
+					<panel width="100@" height="100%" stickytoinvis="0" visible="{hasicon=false}">
+						<image align="center" valign="center" noclick="1" texture="/ui/fe2/newui/res/icons/{icon}"/>
+					</panel>
+					<image texture="/ui/fe2/newui/res/hosted/state2.png" color="#ff0422" width="100@" height="100%"/>
+					<panel width="100%" noclick="1">
+						<label width="500i" textalign="left" textvalign="center" font="dyn_10" color="#ff0422" noclick="1" content="{content}"/>
+					</panel>
+				</panel>
+			</widgetstate>
+		</button>
+	</template>
+
+	<template name="hosted_game_create_setting_template">
+		<button name="hosted_game_create_setting_{id}" width="{width=100%}" height="{height=100%}" color="invisible" numstates="2" 
+				onclicklua="PlaySound('/shared/sounds/ui/revamp/region_click.wav') {onclicklua}"
+				onmouseoverlua="PlaySound('/shared/sounds/ui/revamp/region_hover.wav')"
+		>
+			<widgetstate statename="up1">
+				<panel height="32i" valign="center" float="right" grow="1">
+					<panel width="100@" height="100%" stickytoinvis="0" visible="{hasicon=false}">
+						<image align="center" valign="center" noclick="1" texture="/ui/fe2/newui/res/icons/{icon}"/>
+					</panel>
+					<image texture="/ui/fe2/newui/res/hosted/state0.png" color="#02b5ff" width="100@" height="100%"/>
+					<panel width="100%" noclick="1">
+						<label width="500i" textalign="left" textvalign="center" font="dyn_10" color="#02b5ff" noclick="1" content="{content}"/>
+					</panel>
+				</panel>
+			</widgetstate>
+			<widgetstate statename="over1">
+				<panel height="32i" valign="center" float="right" grow="1">
+					<panel width="100@" height="100%" stickytoinvis="0" visible="{hasicon=false}">
+						<image align="center" valign="center" noclick="1" texture="/ui/fe2/newui/res/icons/{icon}"/>
+					</panel>
+					<image texture="/ui/fe2/newui/res/hosted/state0.png" color="#1ccbfe" width="100@" height="100%"/>
+					<panel width="100%" noclick="1">
+						<label width="500i" textalign="left" textvalign="center" font="dyn_10" color="#1ccbfe" noclick="1" content="{content}"/>
+					</panel>
+				</panel>
+			</widgetstate>
+			<widgetstate statename="down1" y="1">
+				<panel height="32i" valign="center" float="right" grow="1">
+					<panel width="100@" height="100%" stickytoinvis="0" visible="{hasicon=false}">
+						<image align="center" valign="center" noclick="1" texture="/ui/fe2/newui/res/icons/{icon}"/>
+					</panel>
+					<image texture="/ui/fe2/newui/res/hosted/state0.png" color="#1ccbfe" width="100@" height="100%"/>
+					<panel width="100%" noclick="1">
+						<label width="500i" textalign="left" textvalign="center" font="dyn_10" color="#1ccbfe" noclick="1" content="{content}"/>
+					</panel>
+				</panel>
+			</widgetstate>
+			<widgetstate statename="disabled1">
+				<panel height="32i" valign="center" float="right" grow="1">
+					<panel width="100@" height="100%" stickytoinvis="0" visible="{hasicon=false}">
+						<image align="center" valign="center" noclick="1" texture="/ui/fe2/newui/res/icons/{icon}"/>
+					</panel>
+					<image texture="/ui/fe2/newui/res/hosted/state2.png" color="#d9001a" width="100@" height="100%"/>
+					<panel width="100%" noclick="1">
+						<label width="500i" textalign="left" textvalign="center" font="dyn_10" color="#d9001a" noclick="1" content="{content}"/>
+					</panel>
+				</panel>
+			</widgetstate>
+			<widgetstate statename="up2">
+				<panel height="32i" valign="center" float="right" grow="1">
+					<panel width="100@" height="100%" stickytoinvis="0" visible="{hasicon=false}">
+						<image align="center" valign="center" noclick="1" texture="/ui/fe2/newui/res/icons/{icon}"/>
+					</panel>
+					<image texture="/ui/fe2/newui/res/hosted/state1.png" color="#22c10d" width="100@" height="100%"/>
+					<panel width="100%" noclick="1">
+						<label width="500i" textalign="left" textvalign="center" font="dyn_10" color="#22c10d" noclick="1" content="{content}"/>
+					</panel>
+				</panel>
+			</widgetstate>
+			<widgetstate statename="over2">
+				<panel height="32i" valign="center" float="right" grow="1">
+					<panel width="100@" height="100%" stickytoinvis="0" visible="{hasicon=false}">
+						<image align="center" valign="center" noclick="1" texture="/ui/fe2/newui/res/icons/{icon}"/>
+					</panel>
+					<image texture="/ui/fe2/newui/res/hosted/state1.png" color="#03ed03" width="100@" height="100%"/>
+					<panel width="100%" noclick="1">
+						<label width="500i" textalign="left" textvalign="center" font="dyn_10" color="#03ed03" noclick="1" content="{content}"/>
+					</panel>
+				</panel>
+			</widgetstate>
+			<widgetstate statename="down2" y="1">
+				<panel height="32i" valign="center" float="right" grow="1">
+					<panel width="100@" height="100%" stickytoinvis="0" visible="{hasicon=false}">
+						<image align="center" valign="center" noclick="1" texture="/ui/fe2/newui/res/icons/{icon}"/>
+					</panel>
+					<image texture="/ui/fe2/newui/res/hosted/state1.png" color="#03ed03" width="100@" height="100%"/>
+					<panel width="100%" noclick="1">
+						<label width="500i" textalign="left" textvalign="center" font="dyn_10" color="#03ed03" noclick="1" content="{content}"/>
+					</panel>
+				</panel>
+			</widgetstate>
+			<widgetstate statename="disabled2">
+				<panel height="32i" valign="center" float="right" grow="1">
+					<panel width="100@" height="100%" stickytoinvis="0" visible="{hasicon=false}">
+						<image align="center" valign="center" noclick="1" texture="/ui/fe2/newui/res/icons/{icon}"/>
+					</panel>
+					<image texture="/ui/fe2/newui/res/hosted/state2.png" color="#d9001a" width="100@" height="100%"/>
+					<panel width="100%" noclick="1">
+						<label width="500i" textalign="left" textvalign="center" font="dyn_10" color="#d9001a" noclick="1" content="{content}"/>
+					</panel>
+				</panel>
+			</widgetstate>
+		</button>
+	</template>
+
+	<template name="hosted_game_serverlist_item_template">
+		<panel name="hosted_game_serverlist_item_{index}" width="{width=100%}" height="{height=11.1%}" float="right" visible="0"
+			onmousewheeldown="CallEvent('hosted_game_create_serverlist_scroll', 1);"
+			onmousewheelup="CallEvent('hosted_game_create_serverlist_scroll', 0);"
+			onclicklua="Player_Hosted_V2:OnClickServer({index})"
+			ondoubleclicklua="Player_Hosted_V2:OnClickServer({index}) Player_Hosted_V2:OnClickSelectServer()"
+		>
+			<panel width="43i" noclick="1">
+				<image name="hosted_game_serverlist_item_{index}_official" texture="/ui/icons/official.tga" width="80@" height="80%" align="center" valign="center" noclick="1"/>
+			</panel>
+			<panel width="206i" noclick="1">
+				<label name="hosted_game_serverlist_item_{index}_region" x="10i" textalign="left" textvalign="center" font="dyn_12" color="#897766" outline="1" outlinecolor="#230000" noclick="1"/>
+			</panel>
+			<panel width="206i" noclick="1">
+				<label name="hosted_game_serverlist_item_{index}_ping" x="10i" textalign="left" textvalign="center" font="dyn_12" color="#897766" outline="1" outlinecolor="#230000" noclick="1"/>
+			</panel>
+			<panel width="206i" noclick="1">
+				<label name="hosted_game_serverlist_item_{index}_name" x="10i" textalign="left" textvalign="center" font="dyn_12" color="#897766" outline="1" outlinecolor="#230000" noclick="1"/>
+			</panel>
+			<anchor x="0"/>
+			<panel name="hosted_game_serverlist_item_{index}_selected" align="center" valign="center" noclick="1">
+				<frame borderthickness="2i" color="invisible" bordercolor="yellow" noclick="1" />
+			</panel>
+		</panel>
+	</template>
+
+	<panel name="hosted_game" onloadlua="Player_Hosted_V2:Init()" visible="0" hotkey="ESC" onhotkeylua="Player_Hosted_V2:Hide()"
+		onload="CreateInt('_prev_button_state', 0);"
+	>
+		<image texture="/ui/fe2/newui/res/common/bg.png" width="2048i" height="2048i" align="center" valign="center" noclick="1"/>
+		<image texture="/ui/fe2/newui/res/hosted/line.png" y="118i" width="1600i" height="4i" align="center" noclick="1"/>
+
+		<panel width="1327i" align="center" noclick="1">
+			<panel y="60i" height="60i" noclick="1">
+				<image texture="/ui/fe2/newui/res/hosted/title_icon.png" x="16i" width="32i" height="32i" valign="center" noclick="1"/>
+				<panel x="70i" float="right" grow="1" regrow="1" height="100%">
+					<label textalign="left" textvalign="center" font="dyn_24" color="#a1867d" outline="1" outlinecolor="#230000" noclick="1"
+							onshowlua="local str = Translate('newui_hosted_title') 
+									   self:SetWidth(tostring(self:GetStringWidth(str))) 
+									   self:SetText(str)" />
+				</panel>
+
+				<button x="-60i" width="156i" height="32i" valign="center" align="right" color="invisible" onclicklua="Player_Hosted_V2:OpenCreate()">
+					<widgetstate statename="up">
+						<image texture="/ui/fe2/newui/res/mapselection/hg_up.png" width="256i" height="32i" align="center" valign="center" noclick="1"/>
+						<image texture="/ui/fe2/newui/res/hosted/hammer_up.png" x="3i" width="32i" height="32i" valign="center" noclick="1"/>
+						<label textalign="center" textvalign="center" font="dyn_11" x="13i" color="#ecf9fa" outline="1" outlinecolor="#215d64" content="newui_hosted_create_title" noclick="1"/>
+					</widgetstate>
+					<widgetstate statename="over">
+						<image texture="/ui/fe2/newui/res/mapselection/hg_over.png" width="256i" height="32i" align="center" valign="center" noclick="1"/>
+						<image texture="/ui/fe2/newui/res/hosted/hammer_over.png" x="3i" width="32i" height="32i" valign="center" noclick="1"/>
+						<label textalign="center" textvalign="center" font="dyn_11" x="13i" color="#ecf9fa" outline="1" outlinecolor="#215d64" content="newui_hosted_create_title" noclick="1"/>
+					</widgetstate>
+					<widgetstate statename="down" x="1" y="1">
+						<image texture="/ui/fe2/newui/res/mapselection/hg_over.png" width="256i" height="32i" align="center" valign="center" noclick="1"/>
+						<image texture="/ui/fe2/newui/res/hosted/hammer_over.png" x="3i" width="32i" height="32i" valign="center" noclick="1"/>
+						<label textalign="center" textvalign="center" font="dyn_11" x="13i" color="#ecf9fa" outline="1" outlinecolor="#215d64" content="newui_hosted_create_title" noclick="1"/>
+					</widgetstate>
+				</button>
+				<instance name="newui_button_close_template" align="right" valign="center" type="2" onclicklua="Player_Hosted_V2:Hide()"/>
+			</panel>
+			
+			<panel float="bottom" padding="8i" noclick="1"
+					onmousewheeldown="CallEvent('hosted_game_gamelist_scroll', 1);"
+					onmousewheelup="CallEvent('hosted_game_gamelist_scroll', 0);"
+			>
+				<anchor y="134i"/>
+				<panel height="40i" noclick="1">
+					<image texture="/ui/fe2/newui/res/hosted/title_bg.png" width="1024i" height="64i" valign="center" noclick="1"/>
+					<panel float="right">
+						<anchor x="18i"/>
+						<instance name="hosted_game_title_template" width="200i" id="1" content="newui_hosted_list_title_name" onclicklua="Player_Hosted_V2:OnClickSortGameList('name')"/>
+						<instance name="hosted_game_title_template" width="230i" id="2" content="newui_hosted_list_title_map" onclicklua="Player_Hosted_V2:OnClickSortGameList('map')"/>
+						<instance name="hosted_game_title_template" width="205i" id="3" content="newui_hosted_list_title_mode" onclicklua="Player_Hosted_V2:OnClickSortGameList('gameMode')"/>
+						<instance name="hosted_game_title_template" width="85i" id="4" content="newui_hosted_list_title_size" onclicklua="Player_Hosted_V2:OnClickSortGameList('teamSize')"/>
+						<instance name="hosted_game_title_template" width="85i" id="5" content="newui_hosted_list_title_ping" onclicklua="Player_Hosted_V2:OnClickSortGameList('ping')"/>
+						<instance name="hosted_game_title_template" width="90i" id="6" content="newui_hosted_list_title_slots" onclicklua="Player_Hosted_V2:OnClickSortGameList('emptySlots')"/>
+						<instance name="hosted_game_title_template" width="105i" id="7" content="newui_hosted_list_title_minpsr" onclicklua="Player_Hosted_V2:OnClickSortGameList('minPsr')"/>
+						<instance name="hosted_game_title_template" width="110i" id="8" content="newui_hosted_list_title_maxpsr" onclicklua="Player_Hosted_V2:OnClickSortGameList('maxPsr')"/>
+						<instance name="hosted_game_title_template" width="197i" id="9" content="newui_hosted_list_title_options"/>
+					</panel>
+				</panel>
+				<instance name="hosted_game_gamelist_item_template" index="1"/>
+				<instance name="hosted_game_gamelist_item_template" index="2"/>
+				<instance name="hosted_game_gamelist_item_template" index="3"/>
+				<instance name="hosted_game_gamelist_item_template" index="4"/>
+				<instance name="hosted_game_gamelist_item_template" index="5"/>
+				<instance name="hosted_game_gamelist_item_template" index="6"/>
+				<instance name="hosted_game_gamelist_item_template" index="7"/>
+				<instance name="hosted_game_gamelist_item_template" index="8"/>
+				<instance name="hosted_game_gamelist_item_template" index="9"/>
+				<instance name="hosted_game_gamelist_item_template" index="10"/>
+				<instance name="hosted_game_gamelist_item_template" index="11"/>
+				<instance name="hosted_game_gamelist_item_template" index="12"/>
+				<instance name="hosted_game_gamelist_item_template" index="13"/>
+			</panel>
+
+			<scrollbar  name="hosted_game_gamelist_scroll"
+						x="675i"
+						y="170i"
+						align="center"
+						width="12i"
+						height="800i"
+						valign="top"
+						scrollbarsize="12i"
+						handlewidth="12i"
+						handleheight="25i"							
+						texture="/ui/fe2/newui/res/common/scroll/scroll.png"
+						scrollbarplaceholder="true"
+						minvalue="1"
+						maxvalue="1"							
+						step="1"
+						value="1"
+						vertical="true"
+						slotwidth="0.6h" slotheight="1"
+						onevent1="SetValue(GetValue+1);"
+						onevent0="SetValue(GetValue-1);"
+						onslidelua="Player_Hosted_V2:UpdateGameList()"
+						visible="0"
+			/>
+			
+			<instance name="newui_common_button_1_template" button_name="hosted_game_join" y="-20i"
+			     	  width="209i" height="47i" align="right" valign="bottom" font="dyn_16" content="newui_hosted_join"
+			     	  onclicklua="Player_Hosted_V2:OnClickJoin()"
+			     	  clicksound="/shared/sounds/ui/revamp/startgame.wav"
+			/>
+
+			<button x="-210i" y="-11i" width="64i" height="64i" align="right" valign="bottom" color="invisible" 
+					onclicklua="PlaySound('/shared/sounds/ui/revamp/refresh.wav') Player_Hosted_V2:OnClickRefreshGameList()"
+					onmouseoverlua="PlaySound('/shared/sounds/ui/revamp/region_hover.wav') Common_V2:ShowSimpleTip(true, 'general_refresh', '150i')"
+					onmouseoutlua="Common_V2:ShowSimpleTip(false)"
+			>
+				<widgetstate statename="up">
+					<image texture="/ui/fe2/newui/res/hosted/refresh_up.png"/>
+				</widgetstate>
+				<widgetstate statename="over">
+					<image texture="/ui/fe2/newui/res/hosted/refresh_over.png"/>
+				</widgetstate>
+				<widgetstate statename="down" y="1">
+					<image texture="/ui/fe2/newui/res/hosted/refresh_over.png"/>
+				</widgetstate>
+			</button>
+
+			<button x="-260i" y="-11i" width="64i" height="64i" align="right" valign="bottom" color="invisible" 
+					onclicklua="PlaySound('/shared/sounds/ui/revamp/region_click.wav') Player_Hosted_V2:OpenFilter()"
+					onmouseoverlua="PlaySound('/shared/sounds/ui/revamp/region_hover.wav') Common_V2:ShowSimpleTip(true, 'newui_hosted_filter', '150i')"
+					onmouseoutlua="Common_V2:ShowSimpleTip(false)"
+			>
+				<widgetstate statename="up">
+					<image texture="/ui/fe2/newui/res/hosted/filter_up.png"/>
+				</widgetstate>
+				<widgetstate statename="over">
+					<image texture="/ui/fe2/newui/res/hosted/filter_over.png"/>
+				</widgetstate>
+				<widgetstate statename="down" y="1">
+					<image texture="/ui/fe2/newui/res/hosted/filter_over.png"/>
+				</widgetstate>
+			</button>
+		</panel>
+
+		<panel name="hosted_game_filter" color="0 0 0 .6" visible="0" hotkey="ESC" onhotkeylua="self:FadeOut(150)">
+			<panel width="700i" height="720i" align="center" valign="center">
+				<image texture="/ui/fe2/newui/res/hosted/bg.png" width="1024i" height="1024i" align="center" valign="center" noclick="1"/>
+				<instance name="newui_button_close_template" x="-10i" y="10i" align="right" valign="top" onclicklua="GetWidget('hosted_game_filter'):FadeOut(150)"/>
+
+				<panel y="10i" height="32i" noclick="1">
+					<label textalign="center" textvalign="center" font="dyn_16" color="#f0d3c1" outline="1" outlinecolor="#230000" content="newui_hosted_search_title" noclick="1"/>
+				</panel>
+
+				<instance name="newui_common_button_1_template" button_name="hosted_game_filter_apply"
+					  x="-30i" y="-15i" 
+			     	  width="125i" height="36i" align="right" valign="bottom" font="dyn_16" content="newui_hosted_apply"
+			     	  onclicklua="Player_Hosted_V2:OnClickApplyFilter()"
+			    />
+
+			    <image texture="/ui/fe2/newui/res/hosted/line2.png" y="105i" width="110%" height="2i" align="center" noclick="1" />
+
+			    <panel y="60i" height="40i">
+			    	<panel x="40i" width="180i" height="32i" valign="center" >
+			    		<instance name="hosted_game_checkbox_template" widget_name="hosted_game_filter_prequery" content="newui_hosted_prequery"/>
+			    	</panel>
+			    	<panel x="270ii" width="230i" height="32i" valign="center" >
+			    		<instance name="hosted_game_checkbox_template" widget_name="hosted_game_filter_hiderestrictedgame" content="newui_hosted_hiderestrictedgame"/>
+			    	</panel>
+			    </panel>
+
+				<panel y="360i" width="-86i" height="130i" float="bottom" align="center">
+					<panel height="27i">
+						<label textalign="left" textvalign="center" font="dyn_12" color="#f0d3c1" outline="1" outlinecolor="#230000" noclick="1" content="newui_hosted_gamemode"/>
+						<instance name="newui_common_button_3_template" width="178i" align="right" valign="center" label="newui_hosted_showadvanced"
+								onclicklua="GetWidget('hosted_game_filter_advance_options'):FadeOut(150)
+											local widget = GetWidget('hosted_game_filter_advance_gamemode')
+											if widget:IsVisible() then
+												widget:FadeOut(150)
+											else
+												widget:FadeIn(150)
+											end"
+						/>
+						<image texture="/ui/fe2/newui/res/hosted/line2.png" x="-20i" width="50%" height="2i" align="center" valign="center" noclick="1" />
+					</panel>
+					<panel height="-27i">
+						<panel width="-64i" height="32i" y="-20i" align="center" valign="center">
+							<panel width="33%" align="left">
+								<instance name="hosted_game_filter_gamemode_template" id="normal" icon="normal.tga" content="mainlobby_label_normal"/>
+							</panel>
+							<panel width="33%" align="center">
+								<instance name="hosted_game_filter_gamemode_template" id="blindban" icon="blindban.tga" content="mainlobby_label_blind_ban"/>
+							</panel>
+							<panel width="33%" align="right">
+								<instance name="hosted_game_filter_gamemode_template" id="singledraft" icon="singledraft.tga" content="mainlobby_label_single_draft"/>
+							</panel>
+						</panel>
+						<panel width="-64i"  height="32i" y="20i" align="center" valign="center">
+							<panel width="33%" align="left">
+								<instance name="hosted_game_filter_gamemode_template" id="botmatch" icon="botmatch.tga" content="general_mode_bots"/>
+							</panel>
+							<panel width="33%" align="center">
+								<instance name="hosted_game_filter_gamemode_template" id="allrandom" icon="allrandom.tga" content="mainlobby_label_all_random"/>
+							</panel>
+							<panel width="33%" align="right">
+								<instance name="hosted_game_filter_gamemode_template" id="captainsmode" icon="captainsmode.tga" content="mainlobby_label_captainsmode"/>
+							</panel>
+						</panel>
+					</panel>
+				</panel>
+
+				<panel y="510i" width="-86i" height="130i" float="bottom" align="center">
+					<panel height="27i">
+						<label textalign="left" textvalign="center" font="dyn_12" color="#f0d3c1" outline="1" outlinecolor="#230000" noclick="1" content="newui_hosted_gameoptions"/>
+						<instance name="newui_common_button_3_template" width="178i" align="right" valign="center" label="newui_hosted_showadvanced"
+								onclicklua="GetWidget('hosted_game_filter_advance_gamemode'):FadeOut(150)
+											local widget =GetWidget('hosted_game_filter_advance_options')
+											if widget:IsVisible() then
+												widget:FadeOut(150)
+											else
+												widget:FadeIn(150)
+											end"
+						/>
+						<image texture="/ui/fe2/newui/res/hosted/line2.png" x="-20i" width="50%" height="2i" align="center" valign="center" noclick="1" />
+					</panel>
+					<panel height="-27i">
+						<panel width="-64i" height="32i" y="-20i" align="center" valign="center">
+							<panel width="33%" align="left">
+								<instance name="hosted_game_filter_option_template" id="noleaver" icon="noleaver.tga" content="general_mode_no_leavers" hasicon="1"/>
+							</panel>
+							<panel width="33%" align="center">
+								<instance name="hosted_game_filter_option_template" id="rapidfire" icon="blitz.tga" content="general_mode_blitz" hasicon="1"/>
+							</panel>
+							<panel width="33%" align="right">
+								<instance name="hosted_game_filter_option_template" id="verifiedonly" icon="verified.tga" content="general_mode_verified" hasicon="1"/>
+							</panel>
+						</panel>
+						<panel width="-64i"  height="32i" y="20i" align="center" valign="center">
+							<panel width="33%" align="left">
+								<instance name="hosted_game_filter_option_template" id="casual" icon="casual.tga" content="general_mode_casual_mode" hasicon="1"/>
+							</panel>
+							<panel width="33%" align="center">
+								<instance name="hosted_game_filter_option_template" id="nostats" icon="official_2.tga" content="general_mode_no_stats" hasicon="1"/>
+							</panel>
+							<panel width="33%" align="right">
+								<instance name="hosted_game_filter_option_template" id="private" icon="private.tga" content="general_private_game" hasicon="1"/>
+							</panel>
+						</panel>
+					</panel>
+				</panel>
+
+				<panel y="120i" width="540i" height="230i" float="bottom" align="center" >
+					<panel height="38i">
+						<label textalign="left" textvalign="center" font="dyn_12" color="#f0d3c1" outline="1" outlinecolor="#230000" noclick="1" content="newui_hosted_gamename"/>
+						<panel x="100i" width="274i" height="32i" align="center" valign="center">
+							<frame texture="/ui/fe2/newui/res/common/frames/frame_n.png" borderthickness="4i" noclick="1"/>
+							<textbox name="hosted_game_filter_gamename" y="5i" width="-20i" align="center" color="invisible" font="dyn_12" textcolor="#d7b6a2"
+									onesc="SetInputLine(''); SetFocus(false);"
+									onenter="SetFocus(false);"
+									maxlength="30"
+							/>
+						</panel>
+						<instance name="newui_tip_button_template" x="260i" align="center" valign="center" title="mainlobby_label_custom_game_name" desc="main_lobby_game_name_desc"/>
+					</panel>
+					<panel height="38i" onloadlua="self:PushToBack()">
+						<label textalign="left" textvalign="center" font="dyn_12" color="#f0d3c1" outline="1" outlinecolor="#230000" noclick="1" content="newui_hosted_teamsize"/>
+						<panel x="100i" width="274i" height="32i" align="center" valign="center">
+							<instance name="newui_combobox_template" widgetname="hosted_game_filter_teamsize"
+								  onloadlua="self:AddTemplateListItem('newui_combobox_item_template', '0', 'label', 'main_lobby_filter_any', 'color', '#d7b6a2')
+				  					 	     self:AddTemplateListItem('newui_combobox_item_template', '1', 'label', 'main_lobby_filter_team_size_one_v_one', 'color', '#d7b6a2')
+				  					 	     self:AddTemplateListItem('newui_combobox_item_template', '2', 'label', 'main_lobby_filter_team_size_two_v_two', 'color', '#d7b6a2')
+				  					 	     self:AddTemplateListItem('newui_combobox_item_template', '3', 'label', 'main_lobby_filter_team_size_three_v_three', 'color', '#d7b6a2')
+				  					 	     self:AddTemplateListItem('newui_combobox_item_template', '4', 'label', 'main_lobby_filter_team_size_four_v_four', 'color', '#d7b6a2')
+				  					 	     self:AddTemplateListItem('newui_combobox_item_template', '5', 'label', 'main_lobby_filter_team_size_five_v_five', 'color', '#d7b6a2')
+				  					 	    "
+				  			/>
+						</panel>
+						<instance name="newui_tip_button_template" x="260i" align="center" valign="center" title="mainlobby_label_custom_team_size" desc="mainlobby_label_custom_team_size_desc"/>
+					</panel>
+					<panel height="38i" onloadlua="self:PushToBack()">
+						<label textalign="left" textvalign="center" font="dyn_12" color="#f0d3c1" outline="1" outlinecolor="#230000" noclick="1" content="newui_hosted_map"/>
+						<panel x="100i" width="274i" height="32i" align="center" valign="center">
+							<instance name="newui_combobox_template" widgetname="hosted_game_filter_map"/>
+						</panel>
+						<instance name="newui_tip_button_template" x="260i" align="center" valign="center" title="mainlobby_label_custom_map" desc="mainlobby_label_custom_map_desc"/>
+					</panel>
+
+					<panel height="38i" onloadlua="self:PushToBack()">
+						<label textalign="left" textvalign="center" font="dyn_12" color="#f0d3c1" outline="1" outlinecolor="#230000" noclick="1" content="newui_hosted_minmaxpsr"/>
+						<panel x="100i" width="274i" height="32i" align="center" valign="center">
+							<panel width="134i" align="left">
+								<instance name="newui_combobox_template" widgetname="hosted_game_filter_minpsr"
+								 	 onloadlua="self:AddTemplateListItem('newui_combobox_item_template', '0', 'label', 'general_any', 'color', '#d7b6a2')
+				  					 	     	self:AddTemplateListItem('newui_combobox_item_template', '1200', 'label', '&gt;1200', 'color', '#d7b6a2')
+				  					 	    	self:AddTemplateListItem('newui_combobox_item_template', '1300', 'label', '&gt;1300', 'color', '#d7b6a2')
+				  					 	    	self:AddTemplateListItem('newui_combobox_item_template', '1400', 'label', '&gt;1400', 'color', '#d7b6a2')
+				  					 	     	self:AddTemplateListItem('newui_combobox_item_template', '1500', 'label', '&gt;1500', 'color', '#d7b6a2')
+				  					 	    	self:AddTemplateListItem('newui_combobox_item_template', '1550', 'label', '&gt;1550', 'color', '#d7b6a2')
+				  					 	    	self:AddTemplateListItem('newui_combobox_item_template', '1600', 'label', '&gt;1600', 'color', '#d7b6a2')
+				  					 	     	self:AddTemplateListItem('newui_combobox_item_template', '1650', 'label', '&gt;1650', 'color', '#d7b6a2')
+				  					 	    	self:AddTemplateListItem('newui_combobox_item_template', '1700', 'label', '&gt;1700', 'color', '#d7b6a2')
+				  					 	    	self:AddTemplateListItem('newui_combobox_item_template', '1750', 'label', '&gt;1750', 'color', '#d7b6a2')
+				  					 	     	self:AddTemplateListItem('newui_combobox_item_template', '1800', 'label', '&gt;1800', 'color', '#d7b6a2')
+				  					 	    	self:AddTemplateListItem('newui_combobox_item_template', '1850', 'label', '&gt;1850', 'color', '#d7b6a2')
+				  					 	    	self:AddTemplateListItem('newui_combobox_item_template', '1900', 'label', '&gt;1900', 'color', '#d7b6a2')
+				  					 	    	self:AddTemplateListItem('newui_combobox_item_template', '1950', 'label', '&gt;1950', 'color', '#d7b6a2')"
+				  				/>
+							</panel>
+							<panel width="134i" align="right">
+								<instance name="newui_combobox_template" widgetname="hosted_game_filter_maxpsr"
+								 	 onloadlua="self:AddTemplateListItem('newui_combobox_item_template', '0', 'label', 'general_any', 'color', '#d7b6a2')
+				  					 	     	self:AddTemplateListItem('newui_combobox_item_template', '1200', 'label', '&lt;1200', 'color', '#d7b6a2')
+				  					 	    	self:AddTemplateListItem('newui_combobox_item_template', '1300', 'label', '&lt;1300', 'color', '#d7b6a2')
+				  					 	    	self:AddTemplateListItem('newui_combobox_item_template', '1400', 'label', '&lt;1400', 'color', '#d7b6a2')
+				  					 	     	self:AddTemplateListItem('newui_combobox_item_template', '1500', 'label', '&lt;1500', 'color', '#d7b6a2')
+				  					 	    	self:AddTemplateListItem('newui_combobox_item_template', '1550', 'label', '&lt;1550', 'color', '#d7b6a2')
+				  					 	    	self:AddTemplateListItem('newui_combobox_item_template', '1600', 'label', '&lt;1600', 'color', '#d7b6a2')
+				  					 	     	self:AddTemplateListItem('newui_combobox_item_template', '1650', 'label', '&lt;1650', 'color', '#d7b6a2')
+				  					 	    	self:AddTemplateListItem('newui_combobox_item_template', '1700', 'label', '&lt;1700', 'color', '#d7b6a2')
+				  					 	    	self:AddTemplateListItem('newui_combobox_item_template', '1750', 'label', '&lt;1750', 'color', '#d7b6a2')
+				  					 	     	self:AddTemplateListItem('newui_combobox_item_template', '1800', 'label', '&lt;1800', 'color', '#d7b6a2')
+				  					 	    	self:AddTemplateListItem('newui_combobox_item_template', '1850', 'label', '&lt;1850', 'color', '#d7b6a2')
+				  					 	    	self:AddTemplateListItem('newui_combobox_item_template', '1900', 'label', '&lt;1900', 'color', '#d7b6a2')
+				  					 	    	self:AddTemplateListItem('newui_combobox_item_template', '1950', 'label', '&lt;1950', 'color', '#d7b6a2')"
+				  				/>
+							</panel>
+						</panel>
+						<instance name="newui_tip_button_template" x="260i" align="center" valign="center" title="mainlobby_label_min_max_psr" desc="mainlobby_label_min_max_psr_tip"/>
+					</panel>
+					<panel height="38i" onloadlua="self:PushToBack()">
+						<label textalign="left" textvalign="center" font="dyn_12" color="#f0d3c1" outline="1" outlinecolor="#230000" noclick="1" content="newui_hosted_region"/>
+						<panel x="100i" width="274i" height="32i" align="center" valign="center">
+							<instance name="newui_combobox_template" widgetname="hosted_game_filter_region" />
+						</panel>
+						<instance name="newui_tip_button_template" x="260i" align="center" valign="center" title="mainlobby_label_custom_game_region" desc="mainlobby_label_custom_game_region_desc"/>
+					</panel>
+					<panel height="38i" onloadlua="self:PushToBack()">
+						<label textalign="left" textvalign="center" font="dyn_12" color="#f0d3c1" outline="1" outlinecolor="#230000" noclick="1" content="newui_hosted_ping"/>
+						<panel x="100i" width="274i" height="32i" align="center" valign="center">
+							<panel width="134i" align="left">
+								<instance name="newui_combobox_template" widgetname="hosted_game_filter_ping"
+								 	 onloadlua="self:AddTemplateListItem('newui_combobox_item_template', '0', 'label', 'general_any', 'color', '#d7b6a2')
+				  					 	     	self:AddTemplateListItem('newui_combobox_item_template', '30', 'label', '&lt; 30', 'color', '#d7b6a2')
+				  					 	    	self:AddTemplateListItem('newui_combobox_item_template', '60', 'label', '&lt; 60', 'color', '#d7b6a2')
+				  					 	    	self:AddTemplateListItem('newui_combobox_item_template', '90', 'label', '&lt; 90', 'color', '#d7b6a2')
+				  					 	     	self:AddTemplateListItem('newui_combobox_item_template', '120', 'label', '&lt; 120', 'color', '#d7b6a2')
+				  					 	    	self:AddTemplateListItem('newui_combobox_item_template', '150', 'label', '&lt; 150', 'color', '#d7b6a2')
+				  					 	    	self:AddTemplateListItem('newui_combobox_item_template', '180', 'label', '&lt; 180', 'color', '#d7b6a2')
+				  					 	     	self:AddTemplateListItem('newui_combobox_item_template', '210', 'label', '&lt; 210', 'color', '#d7b6a2')
+				  					 	    	self:AddTemplateListItem('newui_combobox_item_template', '240', 'label', '&lt; 240', 'color', '#d7b6a2')
+				  					 	    	self:AddTemplateListItem('newui_combobox_item_template', '270', 'label', '&lt; 270', 'color', '#d7b6a2')
+				  					 	     	self:AddTemplateListItem('newui_combobox_item_template', '300', 'label', '&lt; 300', 'color', '#d7b6a2')
+				  					 	    	self:AddTemplateListItem('newui_combobox_item_template', '330', 'label', '&lt; 330', 'color', '#d7b6a2')
+				  					 	    	self:AddTemplateListItem('newui_combobox_item_template', '360', 'label', '&lt; 360', 'color', '#d7b6a2')"
+				  				/>
+							</panel>
+
+							<panel width="134i" align="right">
+								<instance name="hosted_game_filter_option_template" height="32i" id="full" content="general_full_games"/>
+							</panel>
+						</panel>
+					</panel>
+				</panel>
+			</panel>
+
+			<panel name="hosted_game_filter_advance_gamemode" x="475i" align="center" valign="center" width="250i" height="432i" visible="0" hotkey="ESC" onhotkeylua="self:FadeOut(150)">
+				<instance name="newui_custom_frame_template"/>
+				<instance name="newui_button_close_template" x="-5i" y="5i" align="right" valign="top" onclicklua="GetWidget('hosted_game_filter_advance_gamemode'):FadeOut(150)"/>	
+
+				<panel x="10i" y="40i" width="-10i" float="bottom" padding="5i">
+					<instance name="hosted_game_filter_gamemode_template" height="32i" id="randomdraft" icon="randomdraft.tga" content="mainlobby_label_random_draft"/>
+					<instance name="hosted_game_filter_gamemode_template" height="32i" id="banningdraft" icon="banningdraft.tga" content="mainlobby_label_banning_draft"/>
+					<instance name="hosted_game_filter_gamemode_template" height="32i" id="lockpick" icon="lockpick.tga" content="mainlobby_label_lockpick"/>
+					<instance name="hosted_game_filter_gamemode_template" height="32i" id="krosmode" icon="krosmode.tga" content="mainlobby_label_krosmode"/>
+					<instance name="hosted_game_filter_gamemode_template" height="32i" id="banningpick" icon="banningpick.tga" content="mainlobby_label_banning_pick"/>
+					<instance name="hosted_game_filter_gamemode_template" height="32i" id="midwars_beta" icon="midwarsbeta.tga" content="mainlobby_label_midwars_beta"/>
+					<instance name="hosted_game_filter_gamemode_template" height="32i" id="heroban" icon="heroban.tga" content="mainlobby_label_heroban"/>
+					<instance name="hosted_game_filter_gamemode_template" height="32i" id="solosame" icon="solosame.tga" content="mainlobby_label_solo_same_playerhosted"/>
+					<instance name="hosted_game_filter_gamemode_template" height="32i" id="solodiff" icon="solodiff.tga" content="mainlobby_label_solo_diff_playerhosted"/>
+					<instance name="hosted_game_filter_gamemode_template" height="32i" id="reborn" icon="banningdraft.tga" content="mainlobby_label_reborn_playerhosted"/>	
+				</panel>
+			</panel>
+
+			<panel name="hosted_game_filter_advance_options" x="475i" align="center" valign="center" width="250i" height="700i" visible="0" hotkey="ESC" onhotkeylua="self:FadeOut(150)">
+				<instance name="newui_custom_frame_template"/>
+				<instance name="newui_button_close_template" x="-5i" y="5i" align="right" valign="top" onclicklua="GetWidget('hosted_game_filter_advance_options'):FadeOut(150)"/>
+
+				<panel x="5i" y="40i" width="-10i" float="bottom" padding="5i">
+					<!--<instance name="hosted_game_filter_option_template" height="32i" id="balancedrandom" content="general_mode_balancedrandom"/>-->
+					<instance name="hosted_game_filter_option_template" height="32i" id="shuffleteams" content="general_mode_shuffle"/>
+					<instance name="hosted_game_filter_option_template" height="32i" id="norepick" content="general_mode_no_hero_repick"/>
+					<instance name="hosted_game_filter_option_template" height="32i" id="noswap" content="general_mode_no_hero_swap"/>
+					<instance name="hosted_game_filter_option_template" height="32i" id="noagility" content="general_mode_no_agi_heroes"/>
+					<instance name="hosted_game_filter_option_template" height="32i" id="nointelligence" content="general_mode_no_intel_heroes"/>
+					<instance name="hosted_game_filter_option_template" height="32i" id="nostrength" content="general_mode_no_str_heroes"/>
+					<instance name="hosted_game_filter_option_template" height="32i" id="dropitems" content="general_mode_drop_items"/>
+					<instance name="hosted_game_filter_option_template" height="32i" id="nopowerups" content="general_mode_no_runes"/>
+					<instance name="hosted_game_filter_option_template" height="32i" id="norespawntimer" content="general_mode_no_respawn_timer"/>
+					<instance name="hosted_game_filter_option_template" height="32i" id="alternatepicks" content="general_mode_alt_hero_pick"/>
+					<instance name="hosted_game_filter_option_template" height="32i" id="allowduplicate" content="general_mode_duplicate_heroes"/>
+					<instance name="hosted_game_filter_option_template" height="32i" id="reverseselect" content="general_mode_reverse_hero_select"/>
+					<instance name="hosted_game_filter_option_template" height="32i" id="hardcore" content="general_mode_hardcore"/>
+					<instance name="hosted_game_filter_option_template" height="32i" id="autobalance" content="general_mode_autobalance"/>
+					<instance name="hosted_game_filter_option_template" height="32i" id="tournamentrules" content="general_mode_tournament_rules"/>
+					<instance name="hosted_game_filter_option_template" height="32i" id="gated" content="general_mode_gated"/>
+				</panel>
+			</panel>
+		</panel>
+
+		<panel name="hosted_game_create" color="0 0 0 .6" visible="0" hotkey="ESC" onhotkeylua="Player_Hosted_V2:CloseCreate(true)">
+			<panel name="hosted_game_create_detail" width="700i" height="720i" align="center" valign="center" visible="0">
+				<image texture="/ui/fe2/newui/res/hosted/bg.png" width="1024i" height="1024i" align="center" valign="center" noclick="1"/>
+				<instance name="newui_button_close_template"  x="-10i" y="10i" align="right" valign="top" onclicklua="Player_Hosted_V2:CloseCreate(true)"/>
+				
+				<panel y="10i" height="32i" noclick="1">
+					<label textalign="center" textvalign="center" font="dyn_16" color="#f0d3c1" outline="1" outlinecolor="#230000" content="newui_hosted_create_title" noclick="1"/>
+				</panel>
+
+				<instance name="newui_common_button_1_template" button_name="hosted_game_create_detail_create"
+					  x="-40i" y="-15i" 
+			     	  width="125i" height="36i" align="right" valign="bottom" font="dyn_16" content="newui_hosted_create"
+			     	  onclicklua="Player_Hosted_V2:OnClickCreateGame()"
+			     	  clicksound="/shared/sounds/ui/revamp/startgame.wav"
+			    />
+
+			    <instance name="newui_common_button_2_template" x="20i" y="-15i" width="110i" valign="bottom" label="newui_hosted_simple" onclicklua="Player_Hosted_V2:SwitchCreatePanel(true)"/>
+
+				<panel y="360i" width="-86i" height="130i" float="bottom" align="center">
+					<panel height="27i">
+						<label textalign="left" textvalign="center" font="dyn_12" color="#f1d2bd" noclick="1" content="newui_hosted_gamemode"/>
+						<instance name="newui_common_button_3_template" width="178i" align="right" valign="center" color="invisible" label="newui_hosted_showadvanced"
+								onclicklua="GetWidget('hosted_game_create_advance_options'):FadeOut(150)
+											local widget =GetWidget('hosted_game_create_advance_gamemode')
+											if widget:IsVisible() then
+												widget:FadeOut(150)
+											else
+												widget:FadeIn(150)
+											end"
+						/>
+						<image texture="/ui/fe2/newui/res/hosted/line2.png" x="-20i" width="50%" height="2i" align="center" valign="center" noclick="1" />
+					</panel>
+					<panel height="-27i">
+						<panel width="-64i" height="32i" y="-20i" align="center" valign="center">
+							<panel width="33%" align="left">
+								<instance name="hosted_game_create_setting_template" id="normal" icon="normal.tga" content="mainlobby_label_normal" hasicon="1" onclicklua="Player_Hosted_V2:OnClickCreateGameMode('normal')"/>
+							</panel>
+							<panel width="33%" align="center">
+								<instance name="hosted_game_create_setting_template" id="blindban" icon="blindban.tga" content="mainlobby_label_blind_ban" hasicon="1" onclicklua="Player_Hosted_V2:OnClickCreateGameMode('blindban')"/>
+							</panel>
+							<panel width="33%" align="right">
+								<instance name="hosted_game_create_setting_template" id="singledraft" icon="singledraft.tga" content="mainlobby_label_single_draft" hasicon="1" onclicklua="Player_Hosted_V2:OnClickCreateGameMode('singledraft')"/>
+							</panel>
+						</panel>
+						<panel width="-64i"  height="32i" y="20i" align="center" valign="center">
+							<panel width="33%" align="left">
+								<instance name="hosted_game_create_setting_template" id="botmatch" icon="botmatch.tga" content="general_mode_bots" hasicon="1" onclicklua="Player_Hosted_V2:OnClickCreateGameMode('botmatch')"/>
+							</panel>
+							<panel width="33%" align="center">
+								<instance name="hosted_game_create_setting_template" id="allrandom" icon="allrandom.tga" content="mainlobby_label_all_random" hasicon="1" onclicklua="Player_Hosted_V2:OnClickCreateGameMode('allrandom')"/>
+							</panel>
+							<panel width="33%" align="right">
+								<instance name="hosted_game_create_setting_template" id="captainsmode" icon="captainsmode.tga" content="mainlobby_label_captainsmode" hasicon="1" onclicklua="Player_Hosted_V2:OnClickCreateGameMode('captainsmode')"/>
+							</panel>
+						</panel>
+					</panel>
+				</panel>
+
+				<panel y="510i" width="-86i" height="130i" float="bottom" align="center">
+					<panel height="27i">
+						<label textalign="left" textvalign="center" font="dyn_12" color="#f1d2bd" noclick="1" content="newui_hosted_gameoptions"/>
+						<instance name="newui_common_button_3_template" width="178i" align="right" valign="center" label="newui_hosted_showadvanced"
+								onclicklua="GetWidget('hosted_game_create_advance_gamemode'):FadeOut(150)
+											local widget =GetWidget('hosted_game_create_advance_options')
+											if widget:IsVisible() then
+												widget:FadeOut(150)
+											else
+												widget:FadeIn(150)
+											end"
+						/>
+						<image texture="/ui/fe2/newui/res/hosted/line2.png" x="-20i" width="50%" height="2i" align="center" valign="center" noclick="1" />
+					</panel>
+					<panel height="-27i">
+						<panel width="-64i" height="32i" y="-20i" align="center" valign="center">
+							<panel width="33%" align="left">
+								<instance name="hosted_game_create_setting_template" id="noleaver" icon="noleaver.tga" content="general_mode_no_leavers" hasicon="1"/>
+							</panel>
+							<panel width="33%" align="center">
+								<instance name="hosted_game_create_setting_template" id="rapidfire" icon="blitz.tga" content="general_mode_blitz" hasicon="1"/>
+							</panel>
+							<panel width="33%" align="right">
+								<instance name="hosted_game_create_setting_template" id="verifiedonly" icon="verified.tga" content="general_mode_verified" hasicon="1"/>
+							</panel>
+						</panel>
+						<panel width="-64i"  height="32i" y="20i" align="center" valign="center">
+							<panel width="33%" align="left">
+								<instance name="hosted_game_create_setting_template" id="casual" icon="casual.tga" content="general_mode_casual_mode" hasicon="1"/>
+							</panel>
+							<panel width="33%" align="center">
+								<instance name="hosted_game_create_setting_template" id="nostats" icon="official_2.tga" content="general_mode_no_stats" hasicon="1"/>
+							</panel>
+							<panel width="33%" align="right">
+								<instance name="hosted_game_create_setting_template" id="private" icon="private.tga" content="general_private_game" hasicon="1"/>
+							</panel>
+						</panel>
+					</panel>
+				</panel>
+
+				<panel y="80i" width="540i" height="268i" float="bottom" align="center" >
+					<panel height="38i">
+						<label textalign="left" textvalign="center" font="dyn_12" color="#f0d3c1" outline="1" outlinecolor="#230000" noclick="1" content="newui_hosted_gamename"/>
+						<panel x="100i" width="274i" height="32i" align="center" valign="center">
+							<frame texture="/ui/fe2/newui/res/common/frames/frame_n.png" borderthickness="4i" noclick="1"/>
+							<textbox name="hosted_game_create_detail_gamename" y="5i" width="-20i" align="center" color="invisible" font="dyn_12" textcolor="#d7b6a2"
+									onesc="SetInputLine(''); SetFocus(false);"
+									onenter="SetFocus(false);"
+									maxlength="30"
+							/>
+						</panel>
+						<instance name="newui_tip_button_template" x="260i" align="center" valign="center" title="mainlobby_label_custom_game_name" desc="main_lobby_game_name_desc"/>
+					</panel>
+					<panel height="38i" onloadlua="self:PushToBack()">
+						<label textalign="left" textvalign="center" font="dyn_12" color="#f0d3c1" outline="1" outlinecolor="#230000" noclick="1" content="newui_hosted_teamsize"/>
+						<panel x="100i" width="274i" height="32i" align="center" valign="center">
+							<instance name="newui_combobox_template" widgetname="hosted_game_create_detail_teamsize"
+								  onloadlua="self:AddTemplateListItem('newui_combobox_item_template', '1', 'label', 'main_lobby_filter_team_size_one_v_one', 'color', '#d7b6a2')
+				  					 	     self:AddTemplateListItem('newui_combobox_item_template', '2', 'label', 'main_lobby_filter_team_size_two_v_two', 'color', '#d7b6a2')
+				  					 	     self:AddTemplateListItem('newui_combobox_item_template', '3', 'label', 'main_lobby_filter_team_size_three_v_three', 'color', '#d7b6a2')
+				  					 	     self:AddTemplateListItem('newui_combobox_item_template', '4', 'label', 'main_lobby_filter_team_size_four_v_four', 'color', '#d7b6a2')
+				  					 	     self:AddTemplateListItem('newui_combobox_item_template', '5', 'label', 'main_lobby_filter_team_size_five_v_five', 'color', '#d7b6a2')
+				  					 	    "
+				  			/>
+						</panel>
+						<instance name="newui_tip_button_template" x="260i" align="center" valign="center" title="mainlobby_label_custom_team_size" desc="mainlobby_label_custom_team_size_desc"/>
+					</panel>
+					<panel height="38i" onloadlua="self:PushToBack()">
+						<label textalign="left" textvalign="center" font="dyn_12" color="#f0d3c1" outline="1" outlinecolor="#230000" noclick="1" content="newui_hosted_map"/>
+						<panel x="100i" width="274i" height="32i" align="center" valign="center">
+							<instance name="newui_combobox_template" widgetname="hosted_game_create_detail_map" onselectlua="Player_Hosted_V2:OnSelectMap()" />
+						</panel>
+						<instance name="newui_tip_button_template" x="260i" align="center" valign="center" title="mainlobby_label_custom_map" desc="mainlobby_label_custom_map_desc"/>
+					</panel>
+					<panel height="38i" onloadlua="self:PushToBack()">
+						<label textalign="left" textvalign="center" font="dyn_12" color="#f0d3c1" outline="1" outlinecolor="#230000" noclick="1" content="newui_hosted_minmaxpsr"/>
+						<panel x="100i" width="274i" height="32i" align="center" valign="center">
+							<panel width="134i" align="left">
+								<instance name="newui_combobox_template" widgetname="hosted_game_create_detail_minpsr"
+								 	 onloadlua="self:AddTemplateListItem('newui_combobox_item_template', '0', 'label', 'general_any', 'color', '#d7b6a2')
+				  					 	     	self:AddTemplateListItem('newui_combobox_item_template', '1200', 'label', '&gt;1200', 'color', '#d7b6a2')
+				  					 	    	self:AddTemplateListItem('newui_combobox_item_template', '1300', 'label', '&gt;1300', 'color', '#d7b6a2')
+				  					 	    	self:AddTemplateListItem('newui_combobox_item_template', '1400', 'label', '&gt;1400', 'color', '#d7b6a2')
+				  					 	     	self:AddTemplateListItem('newui_combobox_item_template', '1500', 'label', '&gt;1500', 'color', '#d7b6a2')
+				  					 	    	self:AddTemplateListItem('newui_combobox_item_template', '1550', 'label', '&gt;1550', 'color', '#d7b6a2')
+				  					 	    	self:AddTemplateListItem('newui_combobox_item_template', '1600', 'label', '&gt;1600', 'color', '#d7b6a2')
+				  					 	     	self:AddTemplateListItem('newui_combobox_item_template', '1650', 'label', '&gt;1650', 'color', '#d7b6a2')
+				  					 	    	self:AddTemplateListItem('newui_combobox_item_template', '1700', 'label', '&gt;1700', 'color', '#d7b6a2')
+				  					 	    	self:AddTemplateListItem('newui_combobox_item_template', '1750', 'label', '&gt;1750', 'color', '#d7b6a2')
+				  					 	     	self:AddTemplateListItem('newui_combobox_item_template', '1800', 'label', '&gt;1800', 'color', '#d7b6a2')
+				  					 	    	self:AddTemplateListItem('newui_combobox_item_template', '1850', 'label', '&gt;1850', 'color', '#d7b6a2')
+				  					 	    	self:AddTemplateListItem('newui_combobox_item_template', '1900', 'label', '&gt;1900', 'color', '#d7b6a2')
+				  					 	    	self:AddTemplateListItem('newui_combobox_item_template', '1950', 'label', '&gt;1950', 'color', '#d7b6a2')"
+				  				/>
+							</panel>
+							<panel width="134i" align="right">
+								<instance name="newui_combobox_template" widgetname="hosted_game_create_detail_maxpsr"
+								 	 onloadlua="self:AddTemplateListItem('newui_combobox_item_template', '0', 'label', 'general_any', 'color', '#d7b6a2')
+				  					 	     	self:AddTemplateListItem('newui_combobox_item_template', '1200', 'label', '&lt;1200', 'color', '#d7b6a2')
+				  					 	    	self:AddTemplateListItem('newui_combobox_item_template', '1300', 'label', '&lt;1300', 'color', '#d7b6a2')
+				  					 	    	self:AddTemplateListItem('newui_combobox_item_template', '1400', 'label', '&lt;1400', 'color', '#d7b6a2')
+				  					 	     	self:AddTemplateListItem('newui_combobox_item_template', '1500', 'label', '&lt;1500', 'color', '#d7b6a2')
+				  					 	    	self:AddTemplateListItem('newui_combobox_item_template', '1550', 'label', '&lt;1550', 'color', '#d7b6a2')
+				  					 	    	self:AddTemplateListItem('newui_combobox_item_template', '1600', 'label', '&lt;1600', 'color', '#d7b6a2')
+				  					 	     	self:AddTemplateListItem('newui_combobox_item_template', '1650', 'label', '&lt;1650', 'color', '#d7b6a2')
+				  					 	    	self:AddTemplateListItem('newui_combobox_item_template', '1700', 'label', '&lt;1700', 'color', '#d7b6a2')
+				  					 	    	self:AddTemplateListItem('newui_combobox_item_template', '1750', 'label', '&lt;1750', 'color', '#d7b6a2')
+				  					 	     	self:AddTemplateListItem('newui_combobox_item_template', '1800', 'label', '&lt;1800', 'color', '#d7b6a2')
+				  					 	    	self:AddTemplateListItem('newui_combobox_item_template', '1850', 'label', '&lt;1850', 'color', '#d7b6a2')
+				  					 	    	self:AddTemplateListItem('newui_combobox_item_template', '1900', 'label', '&lt;1900', 'color', '#d7b6a2')
+				  					 	    	self:AddTemplateListItem('newui_combobox_item_template', '1950', 'label', '&lt;1950', 'color', '#d7b6a2')"
+				  				/>
+							</panel>
+						</panel>
+						<instance name="newui_tip_button_template" x="260i" align="center" valign="center" title="mainlobby_label_min_max_psr" desc="mainlobby_label_min_max_psr_tip"/>
+					</panel>
+					<panel height="38i" onloadlua="self:PushToBack()">
+						<label textalign="left" textvalign="center" font="dyn_12" color="#f0d3c1" outline="1" outlinecolor="#230000" noclick="1" content="newui_hosted_selectserver"/>
+						<panel x="100i" width="274i" height="32i" align="center" valign="center">
+							<instance name="newui_combobox_template" widgetname="hosted_game_create_detail_server" onselectlua="Player_Hosted_V2:OnSelectServerType()"/>
+						</panel>
+						<instance name="newui_tip_button_template" x="260i" align="center" valign="center" title="game_setup_select_server_label" desc="game_setup_select_server_tip"/>
+					</panel>
+					<panel height="38i" onloadlua="self:PushToBack()">
+						<label textalign="left" textvalign="center" font="dyn_12" color="#f0d3c1" outline="1" outlinecolor="#230000" noclick="1" content="newui_hosted_spectators"/>
+						<panel x="100i" width="274i" height="32i" align="center" valign="center">
+							<panel width="50%">
+								<instance name="newui_combobox_template" widgetname="hosted_game_create_detail_spectators"
+								 	 onloadlua="self:AddTemplateListItem('newui_combobox_item_template', '0', 'label', '0', 'color', '#d7b6a2')
+				  					 	   		self:AddTemplateListItem('newui_combobox_item_template', '1', 'label', '1', 'color', '#d7b6a2')
+				  					 	     	self:AddTemplateListItem('newui_combobox_item_template', '2', 'label', '2', 'color', '#d7b6a2')
+				  					 	    	self:AddTemplateListItem('newui_combobox_item_template', '3', 'label', '3', 'color', '#d7b6a2')
+				  					 	     	self:AddTemplateListItem('newui_combobox_item_template', '4', 'label', '4', 'color', '#d7b6a2')
+				  					 	     	self:AddTemplateListItem('newui_combobox_item_template', '5', 'label', '5', 'color', '#d7b6a2')
+				  					 	     	self:AddTemplateListItem('newui_combobox_item_template', '6', 'label', '6', 'color', '#d7b6a2')
+				  					 	     	self:AddTemplateListItem('newui_combobox_item_template', '7', 'label', '7', 'color', '#d7b6a2')
+				  					 	     	self:AddTemplateListItem('newui_combobox_item_template', '8', 'label', '8', 'color', '#d7b6a2')
+				  					 	     	self:AddTemplateListItem('newui_combobox_item_template', '9', 'label', '9', 'color', '#d7b6a2')
+				  					 	     	self:AddTemplateListItem('newui_combobox_item_template', '10', 'label', '10', 'color', '#d7b6a2')
+				  					 	    	"
+				  				/>
+							</panel>
+						</panel>
+						<instance name="newui_tip_button_template" x="260i" align="center" valign="center" title="game_setup_spcectators_label" desc="game_setup_spectators_tip"/>
+					</panel>
+					<panel height="38i" onloadlua="self:PushToBack()">
+						<label textalign="left" textvalign="center" font="dyn_12" color="#f0d3c1" outline="1" outlinecolor="#230000" noclick="1" content="newui_hosted_referees"/>
+						<panel x="100i" width="274i" height="32i" align="center" valign="center">
+							<panel width="50%">
+								<instance name="newui_combobox_template" widgetname="hosted_game_create_detail_referees"
+								 	 onloadlua="self:AddTemplateListItem('newui_combobox_item_template', '0', 'label', '0', 'color', '#d7b6a2')
+				  					 	   	  self:AddTemplateListItem('newui_combobox_item_template', '1', 'label', '1', 'color', '#d7b6a2')
+				  					 	   	  self:AddTemplateListItem('newui_combobox_item_template', '2', 'label', '2', 'color', '#d7b6a2')
+				  					 	   	 "
+				  				/>
+				  			</panel>
+				  		</panel>
+				  		<instance name="newui_tip_button_template" x="260i" align="center" valign="center" title="game_setup_referees_label" desc="game_setup_referees_tip"/>
+					</panel>
+				</panel>
+
+				<panel name="hosted_game_create_advance_gamemode" x="475i" align="center" valign="center" width="250i" height="432i" visible="0" hotkey="ESC" onhotkeylua="self:FadeOut(150)">
+					<instance name="newui_custom_frame_template"/>
+					<instance name="newui_button_close_template" x="-5i" y="5i" align="right" valign="top" onclicklua="GetWidget('hosted_game_create_advance_gamemode'):FadeOut(150)"/>
+
+					<panel x="10i" y="40i" width="-10i" float="bottom" padding="5i">
+						<instance name="hosted_game_create_setting_template" height="32i" id="randomdraft" icon="randomdraft.tga" content="mainlobby_label_random_draft" hasicon="1" onclicklua="Player_Hosted_V2:OnClickCreateGameMode('randomdraft')"/>
+						<instance name="hosted_game_create_setting_template" height="32i" id="banningdraft" icon="banningdraft.tga" content="mainlobby_label_banning_draft" hasicon="1" onclicklua="Player_Hosted_V2:OnClickCreateGameMode('banningdraft')"/>
+						<instance name="hosted_game_create_setting_template" height="32i" id="lockpick" icon="lockpick.tga" content="mainlobby_label_lockpick" hasicon="1" onclicklua="Player_Hosted_V2:OnClickCreateGameMode('lockpick')"/>
+						<instance name="hosted_game_create_setting_template" height="32i" id="krosmode" icon="krosmode.tga" content="mainlobby_label_krosmode" hasicon="1" onclicklua="Player_Hosted_V2:OnClickCreateGameMode('krosmode')"/>
+						<instance name="hosted_game_create_setting_template" height="32i" id="banningpick" icon="banningpick.tga" content="mainlobby_label_banning_pick" hasicon="1" onclicklua="Player_Hosted_V2:OnClickCreateGameMode('banningpick')"/>
+						<instance name="hosted_game_create_setting_template" height="32i" id="midwars_beta" icon="midwarsbeta.tga" content="mainlobby_label_midwars_beta" hasicon="1" onclicklua="Player_Hosted_V2:OnClickCreateGameMode('midwars_beta')"/>
+						<instance name="hosted_game_create_setting_template" height="32i" id="heroban" icon="heroban.tga" content="mainlobby_label_heroban" hasicon="1" onclicklua="Player_Hosted_V2:OnClickCreateGameMode('heroban')"/>
+						<instance name="hosted_game_create_setting_template" height="32i" id="solosame" icon="solosame.tga" content="mainlobby_label_solo_same_playerhosted" hasicon="1" onclicklua="Player_Hosted_V2:OnClickCreateGameMode('solosame')"/>
+						<instance name="hosted_game_create_setting_template" height="32i" id="solodiff" icon="solodiff.tga" content="mainlobby_label_solo_diff_playerhosted" hasicon="1" onclicklua="Player_Hosted_V2:OnClickCreateGameMode('solodiff')"/>
+						<instance name="hosted_game_create_setting_template" height="32i" id="reborn" icon="banningdraft.tga" content="mainlobby_label_reborn_playerhosted" hasicon="1" onclicklua="Player_Hosted_V2:OnClickCreateGameMode('reborn')"/>
+					</panel>
+				</panel>
+
+				<panel name="hosted_game_create_advance_options" x="475i" align="center" valign="center" width="250i" height="700i" visible="0" hotkey="ESC" onhotkeylua="self:FadeOut(150)">
+					<instance name="newui_custom_frame_template"/>
+					<instance name="newui_button_close_template"  x="-5i" y="5i" align="right" valign="top" onclicklua="GetWidget('hosted_game_create_advance_options'):FadeOut(150)"/>
+
+					<panel x="5i" y="40i" width="-10i" float="bottom" padding="5i">
+						<!--<instance name="hosted_game_create_setting_template" height="32i" id="balancedrandom" content="general_mode_balancedrandom"/>-->
+						<instance name="hosted_game_create_setting_template" height="32i" id="shuffleteams" content="general_mode_shuffle"/>
+						<instance name="hosted_game_create_setting_template" height="32i" id="norepick" content="general_mode_no_hero_repick"/>
+						<instance name="hosted_game_create_setting_template" height="32i" id="noswap" content="general_mode_no_hero_swap"/>
+						<instance name="hosted_game_create_setting_template" height="32i" id="noagility" content="general_mode_no_agi_heroes" onclicklua="Player_Hosted_V2:OnClickCreateGameOption()"/>
+						<instance name="hosted_game_create_setting_template" height="32i" id="nointelligence" content="general_mode_no_intel_heroes" onclicklua="Player_Hosted_V2:OnClickCreateGameOption()"/>
+						<instance name="hosted_game_create_setting_template" height="32i" id="nostrength" content="general_mode_no_str_heroes" onclicklua="Player_Hosted_V2:OnClickCreateGameOption()"/>
+						<instance name="hosted_game_create_setting_template" height="32i" id="dropitems" content="general_mode_drop_items"/>
+						<instance name="hosted_game_create_setting_template" height="32i" id="nopowerups" content="general_mode_no_runes"/>
+						<instance name="hosted_game_create_setting_template" height="32i" id="norespawntimer" content="general_mode_no_respawn_timer"/>
+						<instance name="hosted_game_create_setting_template" height="32i" id="alternatepicks" content="general_mode_alt_hero_pick"/>
+						<instance name="hosted_game_create_setting_template" height="32i" id="allowduplicate" content="general_mode_duplicate_heroes"/>
+						<instance name="hosted_game_create_setting_template" height="32i" id="reverseselect" content="general_mode_reverse_hero_select"/>
+						<instance name="hosted_game_create_setting_template" height="32i" id="hardcore" content="general_mode_hardcore"/>
+						<instance name="hosted_game_create_setting_template" height="32i" id="autobalance" content="general_mode_autobalance"/>
+						<instance name="hosted_game_create_setting_template" height="32i" id="tournamentrules" content="general_mode_tournament_rules"/>
+						<instance name="hosted_game_create_setting_template" height="32i" id="gated" content="general_mode_gated"/>
+					</panel>
+				</panel>
+
+				<panel name="hosted_game_create_serverlist" visible="0" width="+4i" align="center" color="0 0 0 .8" hotkey="ESC" onhotkeylua="self:FadeOut(150)">
+					<panel width="700i" height="674i" align="center" valign="center">
+						<image texture="/ui/fe2/newui/res/hosted/bg3.png" width="1024i" height="1024i" align="center" valign="center" noclick="1"/>
+						<instance name="newui_button_close_template" x="-5i" y="10i" align="right" valign="top" onclicklua="Player_Hosted_V2:CloseServerList()"/>
+					
+						<panel y="10i" height="32i" noclick="1">
+							<label textalign="center" textvalign="center" font="dyn_16" color="#f0d3c1" outline="1" outlinecolor="#230000" content="newui_hosted_selectserver_title" noclick="1"/>
+						</panel>
+
+						<panel y="130i" width="-20i" height="40i" align="center" noclick="1" float="right">
+							<panel width="42i" />
+							<panel width="205i" onclicklua="Player_Hosted_V2:OnClickSortServerList('region')">
+								<label x="10i" textalign="left" textvalign="center" font="dyn_12" color="#f0d3c1" outline="1" outlinecolor="#230000" content="newui_hosted_region" noclick="1"/>
+							</panel>
+							<panel width="205i" onclicklua="Player_Hosted_V2:OnClickSortServerList('ping')">
+								<label x="10i" textalign="left" textvalign="center" font="dyn_12" color="#f0d3c1" outline="1" outlinecolor="#230000" content="newui_hosted_ping" noclick="1"/>
+							</panel>
+							<panel width="205i" onclicklua="Player_Hosted_V2:OnClickSortServerList('name')">
+								<label x="10i" textalign="left" textvalign="center" font="dyn_12" color="#f0d3c1" outline="1" outlinecolor="#230000" content="newui_hosted_name" noclick="1"/>
+							</panel>
+
+						</panel>
+						<panel y="171i" width="-18i" height="373i" align="center">
+							<panel width="-20i" float="bottom"
+								onmousewheeldown="CallEvent('hosted_game_create_serverlist_scroll', 1);"
+								onmousewheelup="CallEvent('hosted_game_create_serverlist_scroll', 0);"
+							>
+								<instance name="hosted_game_serverlist_item_template" index="1"/>
+								<instance name="hosted_game_serverlist_item_template" index="2"/>
+								<instance name="hosted_game_serverlist_item_template" index="3"/>
+								<instance name="hosted_game_serverlist_item_template" index="4"/>
+								<instance name="hosted_game_serverlist_item_template" index="5"/>
+								<instance name="hosted_game_serverlist_item_template" index="6"/>
+								<instance name="hosted_game_serverlist_item_template" index="7"/>
+								<instance name="hosted_game_serverlist_item_template" index="8"/>
+								<instance name="hosted_game_serverlist_item_template" index="9"/>
+							</panel>
+							<scrollbar  name="hosted_game_create_serverlist_scroll"
+										align="right"
+										width="20i"
+										valign="center"
+										scrollbarsize="20i"
+										handlewidth="20i"
+										handleheight="30i"							
+										texture="/ui/fe2/newui/res/common/scroll/scroll.png"
+										scrollbarplaceholder="true"
+										minvalue="1"
+										maxvalue="1"							
+										step="1"
+										value="1"
+										vertical="true"
+										slotwidth="0.6h" slotheight="1"
+										onevent1="SetValue(GetValue+1);"
+										onevent0="SetValue(GetValue-1);"
+										onslidelua="Player_Hosted_V2:UpdateServerList()"
+							/>
+						</panel>
+
+						<panel y="70i" width="-120i" height="50i" align="center">
+							<label textalign="left" textvalign="center" font="dyn_12" color="#f0d3c1" outline="1" outlinecolor="#230000" noclick="1" content="newui_hosted_region"/>
+							<panel x="100i" width="274i" height="32i" align="center" valign="center">
+								<instance name="newui_combobox_template" widgetname="hosted_game_create_serverlist_region" onselectlua="Player_Hosted_V2:OnSelectServerRegion()"/>
+							</panel>
+						</panel>
+
+						<panel y="-80i" height="40i" align="center" valign="bottom">
+							<panel x="0" width="35%" align="center" watch="GameListStatus" ontrigger="SetVisible(param0);">
+								<instance name="newui_custom_frame_template"/>
+								<panel x="0.4h" y="0.4h" width="-0.8h" height="-0.8h">
+									<panel width="0" color="green" watch="GameListStatus" ontrigger="SetWidth(FtoP(param2 / param3));" />
+								</panel>
+								<label width="100%" height="100%" textalign="center" textvalign="center" font="dyn_10" color="#f0d3c1" outline="1" outlinecolor="#230000" content="mainlobby_label_custom_retrieving_list" watch="GameListStatus" ontrigger="SetVisible(!param1);" />
+								<label width="100%" height="100%" textalign="center" textvalign="center" font="dyn_10" color="#f0d3c1" outline="1" outlinecolor="#230000" watch="GameListStatus" ontrigger="SetVisible(param1); SetText(param2 # '/' # param3);" />
+							</panel>
+							<panel x="0" width="35%" align="center" watch="GameListStatus" ontrigger="SetVisible(!param0);">
+								<label width="100%" height="100%" textalign="center" textvalign="center" font="dyn_10" color="#f0d3c1" outline="1" outlinecolor="#230000" watch="GameListStatus" ontrigger="If(param4 != 1, SetText(Translate('main_lobby_responses', 'visible', param5, 'count', param4)), SetText(Translate('main_lobby_response', 'visible', param5, 'count', param4)));" />
+							</panel>
+						</panel>
+						<panel y="-10i" height="40i" align="center" valign="bottom">
+							<instance name="newui_common_button_2_template" x="-70i" width="110i" align="center" valign="center" label="newui_hosted_refresh" onclicklua="Player_Hosted_V2:OnClickRefreshServerList()"/>
+
+							<instance name="newui_common_button_2_template" button_name="hosted_game_create_serverlist_select_btn" x="70i" width="110i" align="center" valign="center" label="newui_hosted_select" onclicklua="Player_Hosted_V2:OnClickSelectServer()"/>
+						</panel>
+
+						<panel name="hosted_game_create_serverlist_mask" visible="0" height="-40i" valign="bottom">
+							<animatedimage texture="/ui/fe2/elements/store2/loading/loading_.png" width="512i" height="128i" align="center" valign="center" fps="25" loop="true" loopbackframe="0" startframe="0" onshow="StartAnim();" />
+						</panel>
+					</panel>
+				</panel>
+			</panel>
+
+			<panel name="hosted_game_create_simple" width="535i" height="250i" align="center" valign="center" visible="0" hotkey="ESC" onhotkeylua="Player_Hosted_V2:CloseCreate(true)">
+				<image texture="/ui/fe2/newui/res/hosted/bg2.png" width="1024i" height="512i" align="center" valign="center" noclick="1"/>
+				<instance name="newui_button_close_template" x="-10i" y="10i" align="right" valign="top" onclicklua="Player_Hosted_V2:CloseCreate(true)"/>
+			
+				<panel y="10i" height="32i" noclick="1">
+					<label textalign="center" textvalign="center" font="dyn_16" color="#f0d3c1" outline="1" outlinecolor="#230000" content="newui_hosted_create_title" noclick="1"/>
+				</panel>
+
+				<instance name="newui_common_button_1_template" button_name="hosted_game_create_simple_create"
+					  x="-35i" y="-10i" 
+			     	  width="125i" height="36i" align="right" valign="bottom" font="dyn_16" content="newui_hosted_create"
+			     	  onclicklua="Player_Hosted_V2:CreateGame()"
+			     	  clicksound="/shared/sounds/ui/revamp/startgame.wav"
+			    />
+
+			    <instance name="newui_common_button_2_template" x="20i" y="-10i" width="110i" valign="bottom" label="newui_hosted_detail" onclicklua="Player_Hosted_V2:SwitchCreatePanel(false)"/>
+
+				<panel y="70i" width="-70i" height="268i" float="bottom" align="center" noclick="1">
+					<panel height="50i">
+						<label textalign="left" textvalign="center" font="dyn_12" color="#f0d3c1" outline="1" outlinecolor="#230000" noclick="1" content="newui_hosted_gamename"/>
+						<panel x="50i" width="274i" height="32i" align="center" valign="center">
+							<instance name="newui_custom_frame_template"/>
+							<textbox name="hosted_game_create_simple_gamename" y="5i" width="-20i" align="center" color="invisible" font="dyn_12" textcolor="#f0d3c1" outline="1" outlinecolor="#230000"
+									onesc="SetInputLine(''); SetFocus(false);"
+									onenter="SetFocus(false);"
+									maxlength="30"
+							/>
+						</panel>
+						<instance name="newui_tip_button_template" x="210i" align="center" valign="center" title="mainlobby_label_custom_game_name" desc="main_lobby_game_name_desc"/>
+					</panel>
+				
+					<panel height="50i">
+						<label textalign="left" textvalign="center" font="dyn_12" color="#f0d3c1" outline="1" outlinecolor="#230000" noclick="1" content="newui_hosted_map"/>
+						<panel x="50i" width="274i" height="32i" align="center" valign="center">
+							<instance name="newui_combobox_template" widgetname="hosted_game_create_simple_map"/>
+						</panel>
+						<instance name="newui_tip_button_template" x="210i" align="center" valign="center" title="mainlobby_label_custom_map" desc="mainlobby_label_custom_map_desc"/>
+					</panel>
+				</panel>
+			</panel>
+		</panel>
+
+		<panel name="hosted_game_helper" width="1" height="1" noclick="1"/>
+	</panel>
+</package>

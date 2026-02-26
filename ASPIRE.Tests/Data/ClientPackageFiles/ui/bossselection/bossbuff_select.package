@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+
+	<trigger name="bossbuff_choice"/>
+	<trigger name="bossbuff_choice_open" />
+	<trigger name="bossbuff_choice_close" />
+	<trigger name="bossbuff_choice_over" />
+
+	<style name="bossbuffSelectCover" width="23.7h" height="47.4h" noclick="true" visible="false"/>
+	<style name="bossbuffSelectChoice" width="23.7h" height="23.7h" noclick="true"/>
+	<style name="bossbuffSelectChoiceGlow" style="bossbuffSelectChoice" rendermode="additive" color="#74f2ff" visible="false"/>
+
+	<template name="bossbuffSelectCloseButton">
+		<button
+			name="{id}"
+			visible="{visible=true}"
+			x="{x}" y="{y}"
+			width="{width=1.9h}" height="{height=1.9h}"
+			align="{align}"
+			valign="{valign}"
+			color="invisible"
+			onclick="{onclick}"
+			onclicklua="{onclicklua}"
+			onmouseover="{onmouseover}"
+			interactive="{interactive=false}"
+			watch="{btn_watch}" ontrigger="{btn_ontrigger}"
+		>
+			<widgetstate statename="up">
+				<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.5h" color="#910000" blockinput="false" noclick="true"/>
+				<frame texture="/ui/frames/roundframe.tga" color="0 0 0 1" borderthickness="0.5h" blockinput="false" noclick="true"/>
+				<image width="70%" height="70@" align="center" valign="center" color=".75 .75 .75 1" texture="/ui/elements/closex.tga" noclick="true" />
+			</widgetstate>
+			<widgetstate statename="over">
+				<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.5h" color="#dc0000" blockinput="false" noclick="true"/>
+				<frame texture="/ui/frames/roundframe.tga" color="0 0 0 1" borderthickness="0.5h" blockinput="false" noclick="true"/>
+				<image width="70%" height="70@" align="center" valign="center" color="1 1 1 1" texture="/ui/elements/closex.tga" noclick="true" />
+			</widgetstate>
+			<widgetstate statename="down" x="1" y="1">
+				<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.5h" color="#910000" blockinput="false" noclick="true"/>
+				<frame texture="/ui/frames/roundframe.tga" color="0 0 0 1" borderthickness="0.5h" blockinput="false" noclick="true"/>
+				<image width="70%" height="70@" align="center" valign="center" color="1 1 1 1" texture="/ui/elements/closex.tga" noclick="true" />
+			</widgetstate>
+		</button>
+	</template>
+
+
+	<template name="bossbuffSelectChoiceGlowEffect">
+		<panel
+			name="{id}" color="1 1 1 0"
+			x="{x}" y="{y}" width="{width=100%}" height="{height=100%}" align="{align}" valign="{valign}" noclick="true"
+			visible="{visible=false}"
+		>
+			<modelpanel
+				noclick="true"
+				model="{modelPath=/ui/common/models/toggle/toggle.mdf}"
+				anim="idle"
+				effect="{effectPath=/ui/common/models/toggle/toggle.effect}"
+				camerapos="0 1 0"
+				cameraangles="0 0 180"
+				camerafov="45"
+				cameranear="1"
+				carmerafar="100"
+				depthclear="false"
+				depthcompress="true"
+				onshow="SetAnim('idle'); SetEffect('{effectPath=/ui/common/models/toggle/toggle.effect}');"
+			/>
+		</panel>
+	</template>
+
+	<panel name="bossbuffSelect" align="right" valign="bottom" x="0h" y="-20h" width="47.4h" height="47.4h" visible="false" noclick="true">
+		<image name="bossbuff_Background" texture="/ui/bossselection/elements/bossbuff_base.tga" y="5h" noclick="true"/>
+		<image name="bossbuff_Minimized" texture="/ui/bossselection/elements/bossbuff_minimized.tga" align="right" valign="bottom" width="6h" height="6h" x="-5h" noclick="true"/>
+
+		<instance name="bossbuffSelectCloseButton" id="bossbuffSelectClose" width="1.57h" height="1.57h" x="45.3h" y="7.85h"/>
+
+		<image name="bossbuffSelectChoice0Glow" texture="/ui/common/button_gloss_over.tga" align="right" valign="bottom" width="6h" height="6h" x="-5h" style="bossbuffSelectChoiceGlow"/>
+		<image name="bossbuffSelectChoice1Glow" texture="/ui/common/button_gloss_over.tga" height="9h" width="9h" y="13.7h" x="37.2h" style="bossbuffSelectChoiceGlow"/>
+		<image name="bossbuffSelectChoice2Glow" texture="/ui/common/button_gloss_over.tga" height="9h" width="9h" y="25.5h" x="37.2h" style="bossbuffSelectChoiceGlow"/>
+		<image name="bossbuffSelectChoice3Glow" texture="/ui/common/button_gloss_over.tga" height="9h" width="9h" y="37.8h" x="37.2h" style="bossbuffSelectChoiceGlow"/>
+
+		<instance name="bossbuffSelectChoiceGlowEffect" id="bossbuffSelectChoice0GlowEffect" effectPath="/ui/bossselection/elements/highlight_generic.effect" height="8h" width="8h" align="right" valign="bottom" x="-4.1h" y="1h" visible="false"/>
+		<instance name="bossbuffSelectChoiceGlowEffect" id="bossbuffSelectChoice1GlowEffect" effectPath="/ui/bossselection/elements/highlight_generic.effect" width="9h" height="9h" y="13.7h" x="37.2h" visible="false"/>
+		<instance name="bossbuffSelectChoiceGlowEffect" id="bossbuffSelectChoice2GlowEffect" effectPath="/ui/bossselection/elements/highlight_generic.effect" width="9h" height="9h" y="25.5h" x="37.2h" visible="false"/>
+		<instance name="bossbuffSelectChoiceGlowEffect" id="bossbuffSelectChoice3GlowEffect" effectPath="/ui/bossselection/elements/highlight_generic.effect" width="9h" height="9h" y="37.8h" x="37.2h" visible="false"/>
+
+		<button name="bossbuffSelectChoice0Button" width="7h" height="7h" x="-5h" align="right" valign="bottom" color="invisible" />
+		<button name="bossbuffSelectChoice1Button" width="9h" height="9h" y="13.7h" x="37.2h" color="invisible" />
+		<button name="bossbuffSelectChoice2Button" width="9h" height="9h" y="25.5h" x="37.2h" color="invisible"/>
+		<button name="bossbuffSelectChoice3Button" width="9h" height="9h" y="37.8h" x="37.2h" color="invisible" />
+
+		<panel name="bossbuffSelectChoice0Text" grow="true" align="right" valign="bottom" x="-12.5h" y="2h" noclick="true" passivechildren="true">
+			<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.6h" color="0 0 0 .75"/>
+			<frame texture="/ui/frames/roundframe.tga" borderthickness="0.6h" bordercolor="#434d50"/>
+			<label textalign="center" textvalign="top" font="dyn_12" color="white" outline="true" wrap="true" width="25h" y="1h">custom_ui_button_BossBuff0_title</label>
+			<label textalign="left" textvalign="top" font="dyn_9" color="white" outline="true" wrap="true" width="23h" fity="true" fitypadding="1h" x="1h" y="4h">custom_ui_button_BossBuff0_body</label>
+		</panel>
+		
+		<panel name="bossbuffSelectChoice1Text" grow="true" align="center" valign="top" x="-4h" y="13h" noclick="true" passivechildren="true">
+			<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.6h" color="0 0 0 .75"/>
+			<frame texture="/ui/frames/roundframe.tga" borderthickness="0.6h" bordercolor="#434d50"/>
+			<label textalign="center" textvalign="top" font="dyn_12" color="white" outline="true" wrap="true" width="25h" y="1h">custom_ui_button_BossBuff1_title</label>
+			<label textalign="left" textvalign="top" font="dyn_9" color="white" outline="true" wrap="true" width="23h" fity="true" fitypadding="1h" x="1h" y="4h">custom_ui_button_BossBuff1_body</label>
+		</panel>
+		
+		<panel name="bossbuffSelectChoice2Text" grow="true" align="center" valign="top" x="-4h" y="24.5h" noclick="true" passivechildren="true">
+			<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.6h" color="0 0 0 .75"/>
+			<frame texture="/ui/frames/roundframe.tga" borderthickness="0.6h" bordercolor="#434d50"/>
+			<label textalign="center" textvalign="top" font="dyn_12" color="white" outline="true" wrap="true" width="25h" y="1h">custom_ui_button_BossBuff2_title</label>
+			<label textalign="left" textvalign="top" font="dyn_9" color="white" outline="true" wrap="true" width="23h" fity="true" fitypadding="1h" x="1h" y="4h">custom_ui_button_BossBuff2_body</label>
+		</panel>
+		
+		<panel name="bossbuffSelectChoice3Text" grow="true" align="center" valign="top" x="-4h" y="37h" noclick="true" passivechildren="true">
+			<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.6h" color="0 0 0 .75"/>
+			<frame texture="/ui/frames/roundframe.tga" borderthickness="0.6h" bordercolor="#434d50"/>
+			<label textalign="center" textvalign="top" font="dyn_12" color="white" outline="true" wrap="true" width="25h" y="1h">custom_ui_button_BossBuff3_title</label>
+			<label textalign="left" textvalign="top" font="dyn_9" color="white" outline="true" wrap="true" width="23h" fity="true" fitypadding="1h" x="1h" y="4h">custom_ui_button_BossBuff3_body</label>
+		</panel>
+	</panel>
+
+</package>

@@ -1,0 +1,1490 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+
+	<trigger name="instantiateEAPAvatarData"/>
+	<trigger name="getEAPAvatarData"/>
+	<trigger name="EAPAvatarSelected"/>
+	<trigger name="getEAPHeroInfo"/>
+
+	<trigger name="NewEAPTimerCountdownDigit1"/>
+	<trigger name="ClearEAPTimerCountdownDigit1"/>
+	<trigger name="NewEAPTimerCountdownDigit2"/>
+	<trigger name="ClearEAPTimerCountdownDigit2"/>
+	<trigger name="EAPModelAngles"/>
+	<trigger name="splitEAPTimes"/>
+
+	<trigger name="populateEAPItem"/>
+	<!--
+		0 - slot ID
+		1 - product id
+		2 - hero_name
+		3 - expiration hosttime
+		4 - price
+		5 - silver price
+	-->
+	
+	<template name="heroDifficultyStarEAP">
+		<panel width="100@" height="100%" sticky="true" stickytoinvis="false" visible="false" noclick="true"
+			watch="populateEAPItem"
+			ontrigger="
+				If(
+					param0 == {id=1},
+					If(
+						param1 ge 1,
+						SetVisible(GetHeroDifficulty(param2) ge {difficulty=1} - 0.5),
+						SetVisible(false)
+					)
+				);
+			"
+		>
+			<panel width="50%" clip="true" noclick="true">
+				<image width="100@" height="100%" ontrigger9lua="ResourceManager.RegisterTexture('/ui/fe2/elements/hero_popularity_pip.tga', 'store', self)" resourcecontext="store" watch9="MainRegisterTextures" color="1 1 1 1" visible="false"
+					watch="populateEAPItem"
+					ontrigger="
+						If(
+							param0 == {id=1},
+							If(
+								param1 ge 1,
+								SetVisible(GetHeroDifficulty(param2) lt {difficulty=1}),
+								SetVisible(false)
+							)
+						);
+					"
+				/>
+			</panel>
+			<image ontrigger9lua="ResourceManager.RegisterTexture('/ui/fe2/elements/hero_popularity_pip.tga', 'store', self)" resourcecontext="store" watch9="MainRegisterTextures" color="1 1 1 1" visible="false"
+				watch="populateEAPItem"
+				ontrigger="
+					If(
+						param0 == {id=1},
+						If(
+							param1 ge 1,
+							SetVisible(GetHeroDifficulty(param2) ge {difficulty=1}),
+							SetVisible(false)
+						)
+					);
+					
+				"
+			/>
+		</panel>
+	</template>
+
+	<template name="EAPVoiceButtonState">
+		<widgetstate statename="{statename}" x="{x}" y="{y}">
+			<frame texture="/ui/frames/circle.tga" color="1 .9 .9 .1" bordercolor="1 .9 .9 .1" borderthickness="33%" visible="{over=false}" />
+			<frame texture="/ui/frames/circle.tga" color="0 0 0 .2" bordercolor="0 0 0 .2" borderthickness="33%" visible="{down=false}" />
+		</widgetstate>
+	</template>
+	<template name="EAPVoiceButton">
+		<button
+			color="invisible"
+			onmouseover="{onmouseover}"
+			onmouseout="{onmouseout}"
+			watch="{watch}"
+			ontrigger="{ontrigger}"
+			watch1="{watch1}"
+			ontrigger1="{ontrigger1}"
+			onclick="{onclick}"
+		>
+			<instance name="EAPVoiceButtonState" statename="up"/>
+			<instance name="EAPVoiceButtonState" statename="over" over="true"/>
+			<instance name="EAPVoiceButtonState" statename="down" down="true"/>
+			<instance name="EAPVoiceButtonState" statename="disabled"/>
+		</button>
+	</template>
+	
+	<template name="eapHeroInfo">
+		<panel noclick="true" color="invisible"
+			name="eapHeroInfo{product_id}"
+			onevent0="
+				Trigger('getEAPHeroInfo', param0, '{definition}', '{exclusivealt}', '{standardalt}');
+			"
+		>
+		</panel>
+	</template>
+
+	<template name="eapAvatarIconState">
+		<widgetstate statename="{statename}" x="{x}" y="{y}">
+			<!-- Avatar Type Tag -->
+			<panel x="100@" y="0" grow="true" height="100%" noclick="true">
+				<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.4h" color=".15 .15 .15 1" blockinput="false" noclick="true"/>				
+				<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.4h" color=".4 0 0 1" blockinput="false" noclick="true" visible="{selected=false}" watch="EAPAvatarSelected" ontrigger="If(param0 == {slotID=1}, SetVisible(StringEquals(param1, '{product_id}')));"/>				
+				<frame texture="/ui/frames/roundframe.tga" color="{frameBorderColor=#000000}" borderthickness="0.4h" blockinput="false" noclick="true"/>
+				<label x="1.0h" fitx="true" fitxpadding="0.8h" textvalign="center" font="dyn_10" color="1 1 1 1" shadow="true" content="{avatarLabel}" noclick="true"/>
+			</panel>
+			<image width="210@" height="210%" noclick="true" ontrigger9lua="ResourceManager.RegisterTexture('/ui/fe2/store/avatars_display/subheader_icon.tga', 'store', self)" resourcecontext="store" watch9="MainRegisterTextures" align="center" valign="center" group="featureIconBackers"/>
+			<image oninstantiate="SetTexture('{icon_path}');" noclick="true"/>
+			<frame color="invisible" bordercolor="{frameBorderColor=#455166}" borderthickness="1" noclick="true" />
+			<frame color="invisible" bordercolor="{frameBorderColor=#FFCC00}" borderthickness="2" noclick="true" align="center" valign="center" width="+2" height="+2" visible="{selected=false}" watch="EAPAvatarSelected" ontrigger="If(param0 == {slotID=1}, SetVisible(StringEquals(param1, '{product_id}')));" />
+		</widgetstate>
+	</template>
+
+	<template name="eapAvatarIcon">
+		<panel width="100@" height="100%">
+			<button
+				name="eapAvatarIcon{product_id}"
+				onmouseover="ShowWidget('mstore_tip_eap_altavatar');"
+				onmouseout="HideWidget('mstore_tip_eap_altavatar');"
+				onclick="
+					DoEvent(0);
+				"
+				onevent0="
+					Trigger('EAPAvatarSelected', {slotID=1}, '{product_id}');
+					Set('_lastEAPSoundProduct{slotID=1}', '{product}');
+					##
+					CallEventParams(
+						'eap_model_gears', {product_id}
+					);
+					##
+				"
+			>
+				<instance name="eapAvatarIconState" avatarLabel="{avatarLabel}" product_id="{product_id}" icon_path="{icon_path}" slotID="{slotID=1}" selected="{selected=false}" statename="up"/>
+				<instance name="eapAvatarIconState" avatarLabel="{avatarLabel}" product_id="{product_id}" icon_path="{icon_path}" slotID="{slotID=1}" selected="{selected=false}" frameBorderColor="#cccccc" statename="over"/>
+				<instance name="eapAvatarIconState" avatarLabel="{avatarLabel}" product_id="{product_id}" icon_path="{icon_path}" slotID="{slotID=1}" selected="{selected=false}" statename="down" x="1" y="1"/>
+			</button>
+		</panel>
+	</template>
+
+	<template name="EARotationButton">
+		<button
+			color="invisible"
+			width="{width}" height="{height}"
+			align="{align}" valign="{valign}"
+			x="{x}" y="{y}"
+			onevent="{onevent}" onevent1="{onevent1}" onevent2="{onevent2}"
+			watch="{watch}" ontrigger="{ontrigger}" watch1="{watch1}" ontrigger1="{ontrigger1}"
+			onmouselup="{onmouselup}" onmouseldown="{onmouseldown}"
+			onmouseover="{onmouseover}"
+			onmouseout="{onmouseout}"
+			
+		>
+			<widgetstate statename="up">
+				<image texture="/ui/fe2/elements/rotation_up.tga" hflip="{hflip=false}" align="center" valign="center" width="-1h" height="-1h"/>
+			</widgetstate>		
+			<widgetstate statename="over">
+				<image texture="/ui/fe2/elements/rotation_over.tga" hflip="{hflip=false}" align="center" valign="center" width="-1h" height="-1h"/>
+			</widgetstate>			
+			<widgetstate statename="down" x="1" y="1">				
+				<image texture="/ui/fe2/elements/rotation_over.tga" hflip="{hflip=false}" align="center" valign="center" width="-1h" height="-1h"/>
+			</widgetstate>
+		</button>
+	</template>
+	
+	<template name="EAPPurchaseButtonState">
+		<widgetstate statename="{statename}" x="{x}" y="{y}">
+			<image width="132%" height="33@" align="center" valign="center" texture="/ui/fe2/store/promo/storebtn_blank_{stateimage}.tga" noclick="true" />
+			<label y="-0.2h" height="100%" textvalign="center" textalign="center" font="dyn_14" color="{labelcolor}" shadow="true" content="{label}" />
+		</widgetstate>
+	</template>
+
+	<template name="EAPPurchaseButton">
+		<button
+			color="invisible"
+			onmouseover="PlaySound('/shared/sounds/ui/ccpanel/button_over_02.wav'); {onmouseover}"
+			onmouseout="{onmouseout}"
+			watch="{watch}"
+			ontrigger="{ontrigger}"
+			watch1="{watch1}"
+			ontrigger1="{ontrigger1}"
+			enabled="{enabled=true}"
+			oneventlua="{oneventlua}"
+			visible="{visible}"
+		>
+			<instance name="EAPPurchaseButtonState" label="{label}" statename="up" stateimage="normal" labelcolor="#efa234" />
+			<instance name="EAPPurchaseButtonState" label="{label}" statename="over" stateimage="over" labelcolor="#ffd08d" />
+			<instance name="EAPPurchaseButtonState" label="{label}" statename="down" stateimage="down" labelcolor="#864f00" x="1" y="1" />
+			<instance name="EAPPurchaseButtonState" label="{label}" statename="disabled" stateimage="normal" labelcolor="#414141" />
+		</button>
+	</template>
+
+	<template name="storeEAPAbility">
+		<panel width="100@" height="100%" noclick="true">
+			<image noclick="true" watch="populateEAPItem" ontrigger="
+					If(
+						param0 == {slotID=1},
+						If(
+							param1 ge 1,
+							SetTexture(GetEntityIconPath('Ability_' # SubString(param2, 5, -1) # '{id=1}'))
+						)
+					);
+				"
+			/>
+		</panel>
+	</template>
+
+	<template name="storeEAPDisplay">
+		<panel name="storeEAPDisplay" height="50h" width="178h" align="center" visible="false" color="black" onmouseldown="HideWidget('ms_eap_bundleselect_dropup');"
+			onevent0="
+				Call('store_cover', 'FadeIn(250);');
+				SleepWidget(250, 'DoEvent(2);');
+				PlayHeroPreviewSoundFromProduct('');
+			"
+			onevent1="
+				Call('store_cover', 'FadeIn(250);');
+				SleepWidget(250, 'DoEvent(3);');
+			"
+
+			onevent2="
+				SetVisible(true);
+				HideWidget('shopkeeperContainer');
+				Call('store_cover', 'FadeOut(250);');
+			"
+
+			onevent3="
+				SetVisible(false);
+				ShowWidget('shopkeeperContainer');
+				Call('store_cover', 'FadeOut(250);');
+			"
+			
+			onevent4="
+				## Populate with data ##
+				ExplodeTrigger('splitEAPTimes', '-1,-1|-1,-1', '|', ',');
+				ExplodeTrigger('splitEAPTimes', microStoreTimes, '|', ',');
+				CallEventParamsX(name, 5, 1);
+			"
+			onevent5="
+				
+				If(
+					*('microStoreID' # param0) ge 1,
+					ExplodeTrigger('mstoreSplitAvatarProductCode', 'hero.' # *('microStoreCode' # param0), '|', '.')
+				);
+
+				If(
+					*('microStoreID' # param0) ge 1,
+					If(
+						true, ##IsEarlyAccessHero(mstoreAvatarsHeroName) - allow non EAP ## 
+						If(
+							WidgetExists('eapHeroInfo' # *('microStoreID' # param0)),
+							Split(
+								CallEventParamsX('eapHeroInfo'  # *('microStoreID' # param0), 0, param0),
+								GroupCall('eap_models_hero', 'SetVisible(1);'), ## show heroes ##
+								HideWidget('eapHeroUpdateNotice' # param0),
+								HideWidget('eapNotAvailable')
+							),
+							Split(
+								HideWidget('store_eap_header_left'),
+								HideWidget('store_eap_header_center'),
+								HideWidget('store_eap_header_right'),
+								HideWidget('store_eap_footer_center'),
+								HideWidget('eapNotAvailable'),
+								GroupCall('eap_models_hero', 'SetVisible(0);'),  ## hide heroes ##
+								ShowWidget('eapHeroUpdateNotice' # param0)		## This is going to have to be a woops case in the even that the hero gets set up fully and yet isnt properly patched in ##
+							)
+						),
+						Split(
+							HideWidget('store_eap_header_left'),
+							HideWidget('store_eap_header_center'),
+							HideWidget('store_eap_header_right'),
+							HideWidget('store_eap_footer_center'),
+							GroupCall('eap_models_hero', 'SetVisible(0);'),  ## hide heroes ##
+							ShowWidget('eapHeroUpdateNotice' # param0),
+							HideWidget('eapNotAvailable')
+						)
+					),
+					Split(
+						HideWidget('store_eap_header_left'),
+						HideWidget('store_eap_header_center'),
+						HideWidget('store_eap_header_right'),
+						HideWidget('store_eap_footer_center'),
+						HideWidget('eapHeroUpdateNotice' # param0),
+						GroupCall('eap_models_hero', 'SetVisible(0);'),   ## hide heroes ##
+						DoEvent(6)
+					)
+				);
+
+
+			"
+			onevent6="
+				## Show the NA if the button will be saying EA- else redir to heroes ##
+				If(!HasAllHeroes(),
+					ShowWidget('eapNotAvailable'),
+					ShowWidget('eapNotAvailable')
+				);
+			"
+			watch5="mstoreSplitAvatarProductCode2"
+			ontrigger5="
+				Set('mstoreEAPAvatarName2', param1);
+				Set('mstoreEAPHeroName2', param0);
+			"	
+			watch6="mstoreSplitAvatarProductCode3"
+			ontrigger6="
+				Set('mstoreEAPAvatarName3', param1);
+				Set('mstoreEAPHeroName3', param0);			
+			"				
+			watch0="getEAPHeroInfo"
+			ontrigger0="
+				LoadGameMechanics();
+				If(!_entityDefinitionsLoaded, LoadEntityDefinitionsFromFolder(param1));
+				ShowWidget('store_eap_header_left');
+				ShowWidget('store_eap_header_center');
+				ShowWidget('store_eap_header_right');
+				ShowWidget('store_eap_footer_center');		
+				ExplodeTrigger('mstoreSplitAvatarProductCode3', microStoreCode3, '.', '.');
+				ExplodeTrigger('mstoreSplitAvatarProductCode2', microStoreCode2, '.', '.');
+				ExplodeTrigger('mstoreSplitAvatarProductCode', 'hero.' # *('microStoreCode' # param0), '|', '.');		##Not really used as intended, just to grab out the middle portion ##
+				Echo('mstoreAvatarsHeroName = ' # mstoreAvatarsHeroName);
+				
+				If(!StringEmpty(mstoreAvatarsHeroName),
+					Trigger(
+						'populateEAPItem',
+						param0,
+						*('microStoreID' # param0),
+						mstoreAvatarsHeroName,
+						-1,		## timestamp for expiration [ended up unused] ##
+						*('microStorePrice' # param0),
+						*('microStoreSilverPrice' # param0),
+						mstoreEAPAvatarName2,
+						mstoreEAPAvatarName3,
+						*('microStoreID2'),
+						Translate('mstore_product'#*('microStoreID2')#'_name'),
+						*('microStorePrice2'),
+						*('microStoreSilverPrice2'),
+						*('microStoreID3'),
+						Translate('mstore_product'#*('microStoreID3')#'_name'),
+						*('microStorePrice3'),
+						*('microStoreSilverPrice3')				
+					)
+				);
+				
+			"
+			onshow="
+				## CallEvent('EAPTestHelper', 0); ##
+				SetWatch('HostTime');
+			"
+			onhide="
+				SetWatch('');
+			"
+			onload="
+				CreateFloat('eapModelAngleXPercent', 0);
+				CreateFloat('eapModelAngleYPercent', 0);
+				CreateFloat('eapModelTargXAngle', 0);
+				CreateFloat('eapModelTargYAngle', 0);
+				CreateFloat('eapModelAngleXCurPercent', 0);
+				CreateFloat('eapModelAngleYCurPercent', 0);
+				CreateString('mstoreEAPAvatarName2');
+				CreateString('mstoreEAPHeroName2');
+				CreateString('mstoreEAPAvatarName3');
+				CreateString('mstoreEAPHeroName3');						
+			"
+
+			ontrigger="
+				Set(
+					'eapModelAngleXPercent',
+					(
+						Max(
+							GetAbsoluteX(),
+							Min(
+								GetAbsoluteX() + GetWidth(),
+								GetMouseX()
+							)
+						) - GetAbsoluteX()
+					) / GetWidth()
+				);
+
+				Set(
+					'eapModelAngleYPercent',
+					(
+						Max(
+							GetAbsoluteY(),
+							Min(
+								GetAbsoluteY() + GetHeight(),
+								GetMouseY()
+							)
+						) - GetAbsoluteY()
+					) / GetHeight()
+				);
+
+				Set(
+					'eapModelAngleXCurPercent',
+					eapModelAngleXCurPercent + ((eapModelAngleXPercent - eapModelAngleXCurPercent) * (Frametime / 500))
+				);
+
+
+				Set(
+					'eapModelAngleYCurPercent',
+					eapModelAngleYCurPercent + ((eapModelAngleYPercent - eapModelAngleYCurPercent) * (Frametime / 500))
+				);
+
+				Set('eapModelTargYAngle', ((eapModelAngleYCurPercent * -6) + 8));
+				Set('eapModelTargXAngle', ((eapModelAngleXCurPercent * -16) + 8));
+
+				Trigger('EAPModelAngles', eapModelTargYAngle # ' 0 ' # eapModelTargXAngle);
+			"
+		>
+			
+			<!-- background with side gears etc -->
+			<modelpanel
+				ontrigger9lua="ResourceManager.RegisterModel('/ui/fe2/store/eap/gears/gears.mdf', 'store', self)" resourcecontext="store" watch9="MainRegisterModels"
+				name="eap_model_center_background"
+				group="eap_models"
+				visible="1"
+				noclick="true"
+				anim="idle"
+				cameradistance="0"
+				lookat="false"
+				camerapos="0 660 157"
+				cameraangles="-3 0  180"
+				camerafov="41"
+				cameranear="1"
+				carmerafar="5000"
+				depthclear="true"
+				depthcompress="true"
+				sunazimuth="-85"
+				sunaltitude="150"
+				suncolor="1 1 1"
+				effect="/ui/fe2/store/eap/gears/lights.effect"
+				watch="EAPModelAngles"
+				ontrigger="SetModelAngles(param);"
+				onshow="
+					GroupCall(
+						'eap_models',
+						'
+							SetModelPos(\'0 -400 -25\');
+						'
+					);
+					GroupCall(
+						'eap_models_hero',
+						'
+							SetModelPos(\'0 -400 -25\');
+						'
+					);					
+				"
+			/>
+			
+			<panel noclick="true" color="invisible" name="storeEAPRotation"
+				onload="
+					CreateBool('eapRotationDirection', true);	## Clockwise ##
+					CreateFloat('eapRotationPosition', 0);
+				"
+				onhide="DoEvent(5);"
+				watch=""
+				ontrigger="
+					## Rotation calc ##
+					Set(
+						'eapRotationPosition',
+						If(
+							eapRotationDirection,
+							(eapRotationPosition + (Frametime / 4000)),
+							(eapRotationPosition - (Frametime / 4000))
+						)
+					);
+					
+					If(
+						eapRotationPosition gt 1,
+						Set('eapRotationPosition', eapRotationPosition % 1)
+					);
+					
+					If(
+						eapRotationPosition lt 0,
+						Set('eapRotationPosition', 1 + eapRotationPosition)
+					);
+					
+					DoEvent(6);
+				"
+				onevent3="
+					## Start rotation clockwise ##
+					GroupCall('eap_models', 'SetAnimSpeed(0);');
+					Set('eapRotationDirection', true);
+					##Call('eap_model_gears', 'Set(\'eapRotationPosition\', GetAnimOffsetTime());');##
+					
+					SetWatch('HostTime');
+					SleepWidget(0, '');		## Clear existing sleepwidget ##
+					Call('storeEAPRotation_heroes', 'DoEvent(3)');
+				"
+				onevent4="
+					## Start rotation counterclockwise ##
+					GroupCall('eap_models', 'SetAnimSpeed(0);');
+					Set('eapRotationDirection', false);
+					##Call('eap_model_gears', 'Set(\'eapRotationPosition\', GetAnimOffsetTime());');##
+					SetWatch('HostTime');
+					SleepWidget(0, '');		## Clear existing sleepwidget ##
+					Call('storeEAPRotation_heroes', 'DoEvent(4)');
+				"
+				onevent5="
+					## Disable ##
+					SetWatch('');
+					SleepWidget('2000', 'GroupCall(\'eap_models\', \'SetAnimSpeed(1);\');');
+					Call('storeEAPRotation_heroes', 'DoEvent(5)');
+				"
+				onevent6="
+					## Apply ##
+					GroupCall('eap_models', 'SetAnimOffsetTime(eapRotationPosition);');
+				"
+				onevent7="
+					## Reset (selecting a different model generally) ##
+					Set('eapRotationPosition', 0);
+					DoEvent(6);
+					SleepWidget(0, '');		## Clear existing sleepwidget ##
+					Call('storeEAPRotation_heroes', 'DoEvent(7)');
+				"
+			/>
+					
+			<panel name="storeEAPRotation_heroes" noclick="1"
+				onload="
+					CreateBool('heroPedestalDirection', true);	## Clockwise ##
+					CreateFloat('heroPedestalPosition', 0);
+					CreateFloat('heroPedestalSpeed', 0.1);
+					GroupCall('eap_models_hero', 'SetAnimSpeed(0);');
+				"
+				onshow="GroupCall('eap_models_hero', 'SetAnimSpeed(0);'); SetWatch('HostTime');"
+				onhide="DoEvent(5); SetWatch('');"
+				watch=""
+				ontrigger="
+					## Rotation calc ##
+					Set(
+						'heroPedestalPosition',
+						If(
+							heroPedestalDirection,
+							(heroPedestalPosition + (Frametime * heroPedestalSpeed / 2000)),
+							(heroPedestalPosition - (Frametime * heroPedestalSpeed / 2000))
+						)
+					);
+					
+					If(
+						heroPedestalPosition gt 1,
+						Set('heroPedestalPosition', heroPedestalPosition % 1)
+					);
+					
+					If(
+						heroPedestalPosition lt 0,
+						Set('heroPedestalPosition', 1 + heroPedestalPosition)
+					);
+					
+					DoEvent(6);
+				"
+				onevent3="
+					## Start rotation clockwise ##
+					Set(heroPedestalSpeed, 1.0);
+					Set('heroPedestalDirection', true);
+					##SetWatch('HostTime');##
+				"
+				onevent4="
+					## Start rotation counterclockwise ##
+					Set(heroPedestalSpeed, 1.0);
+					Set('heroPedestalDirection', false);
+					##SetWatch('HostTime');##
+				"
+				onevent5="
+					## Disable ##
+					##SetWatch('');##
+					Set(heroPedestalSpeed, 0.1);
+				"
+				onevent6="
+					## Apply ##
+					##SetAnimOffsetTime(heroPedestalPosition);##
+					GroupCall('eap_models_hero', 'SetModelAngles(\'0 0 \' # (heroPedestalPosition * -360));');
+				"
+				onevent7="
+					## Reset (selecting a different model generally) ##
+					Set('heroPedestalPosition', 0);
+					DoEvent(6);
+				"
+			/>			
+					
+			<!-- 3x Gears Single Model
+			<modelpanel
+				ontrigger9lua="ResourceManager.RegisterModel('/ui/fe2/store/eap/gears/gears_{side=left}.mdf', 'store', self)" resourcecontext="store" watch9="MainRegisterModels"
+				name="eap_model_gears"
+				group="eap_models"
+				visible="1"
+				noclick="true"
+				anim="idle"
+				cameradistance="0"
+				lookat="false"
+				camerapos="0 660 157"
+				cameraangles="-3 0  180"
+				camerafov="41"
+				cameranear="1"
+				carmerafar="5000"
+				depthclear="true"
+				depthcompress="true"
+				sunazimuth="-85"
+				sunaltitude="150"
+				suncolor="1 1 1"
+				effect=""
+				watch="EAPModelAngles"
+				ontrigger="SetModelAngles(param);"
+			/>
+			 -->
+			 
+			<!-- Hero Center Model -->
+			<panel noclick="1" y="-17%" width="50%" height="200%" valign="center" align="center">
+				<modelpanel name="store_eap_center_hero_model" group="eap_models_hero" resourcecontext="store"
+					noclick="1"
+					model="/shared/models/invis.mdf"
+					scenebuffer="true"
+					anim="idle_eap"
+					cameranear="100.0"
+					camerafar="10000.0"
+					depthclear="true"
+					depthcompress="false"
+					lookat="false"
+					cameradistance="30"
+					camerapos="0 3000 80"
+					cameraangles="0 0 180"
+					camerafov="7"
+					modelpos="0 0 0"
+					modelangles="-15.0 0 0.0"
+					modelscale="1.0"
+					visible="0"
+					cull="false"
+					watch="populateEAPItem"
+					ontrigger="
+						SetVisible(1);
+						
+						SetTeamColor('1 0 0');									
+						SetModel(GetHeroPreviewModelPathFromProduct(param2));
+						##SetModelPos(GetHeroPreviewPosFromProduct(param2));##
+						SetModelAngles(GetHeroPreviewAnglesFromProduct(param2));
+						
+						SetModelScale(GetHeroPreviewScaleFromProduct(param2));						
+						
+						SetEffect('/ui/fe2/store/eap/gears/gear_middle.effect');
+						SetEffectIndexed('/shared/effects/glow.effect', 0);
+						SetEffectIndexed(GetHeroPreviewPassiveEffectPathFromProduct(param2), 1);
+					"
+					watch1=""
+					ontrigger1="SetModelAngles(param);"	
+					sunazimuth="120"
+					sunaltitude="50"
+					suncolor="0.0 0.0 0.0"
+					ambientcolor="0.65 0.65 0.65"
+					posteffects="true"
+					posteffect=""
+					outline="false"
+					postoutline="/core/post/outline.posteffect"
+					outlinecolor=".25 .25 .25 1"	
+					onevent1="
+						## Highlight ##
+						SetSunColor('1 1 1');
+						SetAmbientColor('0.65 0.65 0.65');
+						SetEffectIndexed('/shared/effects/glow.effect', 0);
+						SetPostEffects(true);
+						SetPostEffect('');
+						SetPostEffectOutline('/core/post/outline.posteffect');
+						SetModelPanelOutline(false);
+						SetOutlineColor('.25 .25 .25 1');
+					"
+					onevent0="
+						## Darken ##
+						SetSunColor('0.0 0.0 0.0');
+						SetAmbientColor('0.35 0.35 0.35');
+						SetEffectIndexed('', 0);
+						SetPostEffects(false);
+						SetPostEffect('');
+						SetPostEffectOutline('/core/post/outline.posteffect');
+						SetModelPanelOutline(false);
+						SetOutlineColor('.25 .25 .25 1');
+					"										
+					onevent2="
+						## Hover ##
+						SetModelPanelOutline(true);
+						SetOutlineColor('.25 .25 .25 1');
+					"
+					onevent3="
+						## Un-Hover ##
+						SetModelPanelOutline(false);
+						SetOutlineColor('.25 .25 .25 1');
+					"		
+				/>
+			</panel>			
+			
+			<!-- Hero Left Model -->
+			<panel noclick="1" x="-24%" y="-23%" width="50%" height="200%" valign="center" align="center">
+				<modelpanel name="store_eap_left_hero_model" group="eap_models_hero" resourcecontext="store"
+					noclick="1"
+					scenebuffer="true"
+					model=""
+					anim="idle_eap"
+					cameranear="100.0"
+					camerafar="10000.0"
+					depthclear="true"
+					depthcompress="false"
+					lookat="false"
+					cameradistance="30"
+					camerapos="0 3000 80"
+					cameraangles="0 0 180"
+					camerafov="7"
+					modelpos="0 0 0"
+					modelangles="-15.0 0 0.0"
+					modelscale="1.0"
+					visible="0"
+					cull="false"
+					watch="populateEAPItem"
+					ontrigger="
+						SetVisible(1);
+						
+						SetTeamColor('1 0 0');					
+						SetModel(GetHeroPreviewModelPathFromProduct(param2 # '.' # param7));
+						##SetModelPos(GetHeroPreviewPosFromProduct(param2 # '.' # param7));##
+						SetModelAngles(GetHeroPreviewAnglesFromProduct(param2 # '.' # param7));
+						SetModelScale(GetHeroPreviewScaleFromProduct(param2 # '.' # param7));
+						
+						SetEffect('/ui/fe2/store/eap/gears/gear_side.effect');
+						SetEffectIndexed('/shared/effects/glow.effect', 0);
+						SetEffectIndexed(GetHeroPreviewPassiveEffectPathFromProduct(param2 # '.' # param7), 1);
+					"
+					watch1=""
+					ontrigger1="SetModelAngles(param);"	
+				
+					sunazimuth="120"
+					sunaltitude="50"
+					suncolor="1.0 1.0 1.0"
+					ambientcolor="0.65 0.65 0.65"
+					posteffects="true"
+					posteffect=""
+					outline="false"
+					postoutline="/core/post/outline.posteffect"
+					outlinecolor=".25 .25 .25 1"	
+
+					onevent1="
+						## Highlight ##
+						SetSunColor('1 1 1');
+						SetAmbientColor('0.65 0.65 0.65');
+						SetEffectIndexed('/shared/effects/glow.effect', 0);
+						SetPostEffects(true);
+						SetPostEffect('');
+						SetPostEffectOutline('/core/post/outline.posteffect');
+						SetModelPanelOutline(false);
+						SetOutlineColor('.25 .25 .25 1');
+					"
+
+					onevent0="
+						## Darken ##
+						SetSunColor('0.0 0.0 0.0');
+						SetAmbientColor('0.35 0.35 0.35');
+						SetEffectIndexed('', 0);
+						SetPostEffects(false);
+						SetPostEffect('');
+						SetPostEffectOutline('/core/post/outline.posteffect');
+						SetModelPanelOutline(false);
+						SetOutlineColor('.25 .25 .25 1');
+					"				
+					onevent2="
+						## Hover ##
+						SetModelPanelOutline(true);
+						SetOutlineColor('.25 .25 .25 1');
+					"
+					onevent3="
+						## Un-Hover ##
+						SetModelPanelOutline(false);
+						SetOutlineColor('.25 .25 .25 1');
+					"						
+				/>						
+			</panel>
+			
+			<!-- Hero Right Model -->
+			<panel noclick="1" x="24%" y="-23%" width="50%" height="200%" valign="center" align="center">
+				<modelpanel name="store_eap_right_hero_model" group="eap_models_hero" resourcecontext="store"
+					noclick="1"
+					model=""
+					scenebuffer="true"
+					anim="idle_eap"
+					cameranear="100.0"
+					camerafar="10000.0"
+					depthclear="true"
+					depthcompress="false"
+					lookat="false"
+					cameradistance="30"
+					camerapos="0 3000 80"
+					cameraangles="0 0 180"
+					camerafov="7"
+					modelpos="0 0 0"
+					modelangles="-15.0 0 0.0"
+					modelscale="1.0"
+					visible="0"
+					watch="populateEAPItem"
+					ontrigger="
+					
+						SetVisible(1);
+					
+						SetTeamColor('1 0 0');
+						SetModel(GetHeroPreviewModelPathFromProduct(param2 # '.' # param6));
+						##SetModelPos(GetHeroPreviewPosFromProduct(param2 # '.' # param6));##
+						SetModelAngles(GetHeroPreviewAnglesFromProduct(param2 # '.' # param6));
+						SetModelScale(GetHeroPreviewScaleFromProduct(param2 # '.' # param6));
+						
+						SetEffect('/ui/fe2/store/eap/gears/gear_side.effect');
+						SetEffectIndexed('/shared/effects/glow.effect', 0);
+						SetEffectIndexed(GetHeroPreviewPassiveEffectPathFromProduct(param2 # '.' # param6), 1);
+					"
+					watch1=""
+					ontrigger1="SetModelAngles(param);"	
+
+					sunazimuth="120"
+					sunaltitude="50"
+					suncolor="1.0 1.0 1.0"
+					ambientcolor="0.65 0.65 0.65"
+					posteffects="true"
+					posteffect=""
+					outline="false"
+					postoutline="/core/post/outline.posteffect"
+					outlinecolor=".25 .25 .25 1"
+					cull="false"
+
+					onevent1="
+						## Highlight ##
+						SetSunColor('1 1 1');
+						SetAmbientColor('0.65 0.65 0.65');
+						SetEffectIndexed('/shared/effects/glow.effect', 0);
+						SetPostEffects(true);
+						SetPostEffect('');
+						SetPostEffectOutline('/core/post/outline.posteffect');
+						SetModelPanelOutline(false);
+						SetOutlineColor('.25 .25 .25 1');
+					"
+
+					onevent0="
+						## Darken ##
+						SetSunColor('0.0 0.0 0.0');
+						SetAmbientColor('0.35 0.35 0.35');
+						SetEffectIndexed('', 0);
+						SetPostEffects(false);
+						SetPostEffect('');
+						SetPostEffectOutline('/core/post/outline.posteffect');
+						SetModelPanelOutline(false);
+						SetOutlineColor('.25 .25 .25 1');
+					"
+					onevent2="
+						## Hover ##
+						SetModelPanelOutline(true);
+						SetOutlineColor('.25 .25 .25 1');
+					"
+					onevent3="
+						## Un-Hover ##
+						SetModelPanelOutline(false);
+						SetOutlineColor('.25 .25 .25 1');
+					"						
+				/>					
+			</panel>			
+			
+			<panel align="{side=center}" width="50%" noclick="true" x="{xoffset}" name="eapHeroUpdateNotice{id=1}" visible="false">
+				<panel align="center" valign="center" color="black" width="25h" grow="true">
+					<frame color="invisible" bordercolor="{framecolor=#455166}" borderthickness="1" noclick="true" />
+					<panel width="100%" float="bottom" noclick="true" padding="0.5h" grow="true">
+						<instance name="header_bar" width="100%" height="2.8h" lbl="mstore_eapupdate" color="white" lbl_font="dyn_11" />
+						<panel width="100%" grow="true">
+							<panel width="-1h" align="center" grow="true">
+								<frame texture="/ui/info/backdrop.tga" borderthickness="2.0h" color="{fetchbgcolor=1 1 1 .5}" noclick="1" />
+								<frame color="invisible" bordercolor="{framecolor=#455166}" borderthickness="1" noclick="true" />
+								<panel grow="true" width="-1h" align="center" float="bottom">
+									<panel height="0.25h"/>
+									<label color="white" shadow="true" width="100%" font="dyn_10" content="mstore_eapupdate_body" wrap="true" textalign="center" fity="true" />
+									<panel height="0.5h"/>
+								</panel>
+							</panel>
+						</panel>
+						<panel height="0"/>
+					</panel>
+				</panel>
+			</panel>
+
+			<panel align="center" width="50%" noclick="true" x="{xoffset}" name="eapNotAvailable" visible="false">
+				<panel align="center" valign="center" color="black" width="25h" grow="true">
+					<frame color="invisible" bordercolor="#455166" borderthickness="1" noclick="true" />
+					<panel width="100%" float="bottom" noclick="true" padding="0.5h" grow="true">
+						<instance name="header_bar" width="100%" height="2.8h" lbl="mstore_eapnone" color="white" lbl_font="dyn_11" />
+						<panel width="100%" grow="true">
+							<panel width="-1h" align="center" grow="true">
+								<frame texture="/ui/info/backdrop.tga" borderthickness="2.0h" color="1 1 1 .5" noclick="1" />
+								<frame color="invisible" bordercolor="#455166" borderthickness="1" noclick="true" />
+								<panel grow="true" width="-1h" align="center" float="bottom">
+									<panel height="0.75h"/>
+									<label color="white" shadow="true" width="100%" font="dyn_10" content="mstore_eapnone_body" wrap="true" textalign="center" fity="true" fitypadding="0.5h" />
+									<panel height="0.5h"/>
+								</panel>
+							</panel>
+						</panel>
+						<panel height="0"/>
+					</panel>
+				</panel>
+			</panel>
+						
+			<!-- Center Header -->
+			<panel y="-0.5h" width="52.0h" height="7.0h" align="center" valign="top" noclick="true" name="store_eap_header_center" visible="false">			
+				<frame texture="/ui/frames/rounded_bg_red.tga" borderthickness="0.6h" color=".1 .1 .1 .9" blockinput="false" noclick="true"/>
+				<frame texture="/ui/frames/roundframe.tga" color="#e28e1b" borderthickness="0.6h" blockinput="false" noclick="true"/>
+				
+					<panel y="-0.7h" width="-1.4h" height="-1.9h" align="center" valign="bottom" float="right" padding="0.6h" noclick="true">
+					
+						<!-- Icon -->
+						<panel width="100@" height="100%">
+							<image watch="populateEAPItem" ontrigger="
+								##Echo(GetEntityIconPath(param2));##
+								If(
+									param0 == {id=1},
+									If(
+										param1 ge 1,
+										Split(
+											SetTexture(GetEntityIconPath(param2)),
+											SetOnMouseOver(
+												'
+													GetHeroInfo(\''#param2#'\'); ShowWidget(\'hero_info\');
+												'
+											)
+										),
+										SetOnMouseOver('')
+									)
+								);
+							"
+							onmouseover=""
+							onmouseoutlua="GetWidget('hero_info', 'main'):SetVisible(false)"
+							onhide="
+								##Call('eap_model_gears', 'SetEffect(\'\');');##
+							"
+							onhidelua="GetWidget('hero_info', 'main'):SetVisible(false)"
+							/>							
+							<frame color="invisible" bordercolor="#e28e1b" borderthickness="1" noclick="true" />
+						</panel>
+						
+						<panel width="0.2h" height="100%" noclick="true">
+							<panel width="50%" color="0 0 0 1" align="left" noclick="true" />
+							<panel width="50%" color="1 1 1 .1" align="right" noclick="true" />
+						</panel>
+						
+						<panel width="20.0h" height="100%" noclick="true" float="bottom" padding="0.1h">
+							<!-- Hero Name -->
+							<label y="-0.4h" fity="true" font="dyn_14" textvalign="center" color="1 1 1 1" outline="true" content="-" noclick="true" watch="populateEAPItem" ontrigger="If(param0 == {id=1}, If(param1 ge 1, SetText(GetEntityDisplayName(param2))));"/>
+							<!-- Difficulty -->
+							<panel height="1.7h" width="100%" float="right" padding="0.2h">
+								<label fitx="true" fitxpadding="0.5h" textvalign="center" font="dyn_11" color=".6 .6 .6 1" content="mstore_difficulty" shadow="true" />						
+								<panel grow="true" height="100%" noclick="true">
+									<panel grow="true" growinvis="false" regrow="true" height="100%" float="right" padding="0.2h" noclick="true">
+										<image width="100@" height="100%" ontrigger9lua="ResourceManager.RegisterTexture('/ui/fe2/elements/hero_popularity_pip.tga', 'store', self)" resourcecontext="store" watch9="MainRegisterTextures" rendermode="grayscale" color="1 1 1 .6" sticky="true" stickytoinvis="false"/>
+										<image width="100@" height="100%" ontrigger9lua="ResourceManager.RegisterTexture('/ui/fe2/elements/hero_popularity_pip.tga', 'store', self)" resourcecontext="store" watch9="MainRegisterTextures" rendermode="grayscale" color="1 1 1 .6" sticky="true" stickytoinvis="false"/>
+										<image width="100@" height="100%" ontrigger9lua="ResourceManager.RegisterTexture('/ui/fe2/elements/hero_popularity_pip.tga', 'store', self)" resourcecontext="store" watch9="MainRegisterTextures" rendermode="grayscale" color="1 1 1 .6" sticky="true" stickytoinvis="false"/>
+										<image width="100@" height="100%" ontrigger9lua="ResourceManager.RegisterTexture('/ui/fe2/elements/hero_popularity_pip.tga', 'store', self)" resourcecontext="store" watch9="MainRegisterTextures" rendermode="grayscale" color="1 1 1 .6" sticky="true" stickytoinvis="false"/>
+										<image width="100@" height="100%" ontrigger9lua="ResourceManager.RegisterTexture('/ui/fe2/elements/hero_popularity_pip.tga', 'store', self)" resourcecontext="store" watch9="MainRegisterTextures" rendermode="grayscale" color="1 1 1 .6" sticky="true" stickytoinvis="false"/>
+									</panel>
+									<panel grow="true" growinvis="false" regrow="true" height="100%" float="right" padding="0.2h" noclick="true">
+										<instance name="heroDifficultyStarEAP" difficulty="1" id="{id=1}"/>
+										<instance name="heroDifficultyStarEAP" difficulty="2" id="{id=1}"/>
+										<instance name="heroDifficultyStarEAP" difficulty="3" id="{id=1}"/>
+										<instance name="heroDifficultyStarEAP" difficulty="4" id="{id=1}"/>
+										<instance name="heroDifficultyStarEAP" difficulty="5" id="{id=1}"/>
+									</panel>
+								</panel>						
+								<panel width="0" noclick="true"/>
+							</panel>
+							<!-- Categories -->
+							<label fity="true" width="100%" font="dyn_8" color="#00FF00" content="-" shadow="true" watch="populateEAPItem" ontrigger="If(param0 == {id=1}, If(param1 ge 1, SetText(GetHeroCategories(param2, 1)), SetText('')));" />							
+						</panel>
+						
+						<panel width="0.2h" height="100%" noclick="true">
+							<panel width="50%" color="0 0 0 1" align="left" noclick="true" />
+							<panel width="50%" color="1 1 1 .1" align="right" noclick="true" />
+						</panel>
+						
+						<!-- Abils -->
+						<panel width="-34.0h" height="100%" noclick="true" float="bottom" padding="0.2h">
+							<label y="-0.4h" fity="true" textalign="left" width="100%" font="dyn_11" color=".6 .6 .6 1" content="Hero Abilities" shadow="true" />
+						
+							<panel height="3.5h" float="right" padding="0.8h"
+								watch="populateEAPItem"
+								ontrigger="
+									If(
+										param0 == {id=1},
+										If(
+											param1 ge 1,
+											SetOnMouseOver(
+												'
+													GetHeroInfo(\''#param2#'\'); Cmd(\'ShowWidget hero_info\');
+												'
+											),
+											SetOnMouseOver('')
+										)
+									);
+								"
+								onmouseoutlua="GetWidget('hero_info', 'main'):SetVisible(false)"
+								onhidelua="GetWidget('hero_info', 'main'):SetVisible(false)"
+							>
+								<instance name="storeEAPAbility" entity_path="{entity_path}" entity_name="{entity_name}" id="1" slotID="{id=1}" abilityPathPrefix="{abilityPathPrefix=ability_0}"/>
+								<instance name="storeEAPAbility" entity_path="{entity_path}" entity_name="{entity_name}" id="2" slotID="{id=1}" abilityPathPrefix="{abilityPathPrefix=ability_0}"/>
+								<instance name="storeEAPAbility" entity_path="{entity_path}" entity_name="{entity_name}" id="3" slotID="{id=1}" abilityPathPrefix="{abilityPathPrefix=ability_0}"/>
+								<instance name="storeEAPAbility" entity_path="{entity_path}" entity_name="{entity_name}" id="4" slotID="{id=1}" abilityPathPrefix="{abilityPathPrefix=ability_0}"/>
+							</panel>
+						
+						
+						
+							
+						</panel>
+						
+						<panel width="0.2h" height="100%" noclick="true">
+							<panel width="50%" color="0 0 0 1" align="left" noclick="true" />
+							<panel width="50%" color="1 1 1 .1" align="right" noclick="true" />
+						</panel>						
+						
+						<!-- Voices -->
+						<panel width="90@" height="100%"
+							onload="CreateString('_lastEAPSoundProduct{id=1}', '');"
+						>
+							<image width="100%" height="100@" valign="center" texture="/ui/elements/gamefeature_voip.tga" />							
+							<instance name="EAPVoiceButton"
+								onmouseover=""
+								onmouseout=""
+								watch="MicroStoreProcessing"
+								ontrigger="SetEnabled(!param0);"
+								watch1="populateEAPItem"
+								ontrigger1="
+									If(
+										param0 == {id=1},
+										If(
+											param1 ge 1,
+											Set('_lastEAPSoundProduct{id=1}', param2),
+											Set('_lastEAPSoundProduct{id=1}', '')
+										)
+									);
+								"
+								onclick="
+									If(
+										!StringEmpty(_lastEAPSoundProduct{id=1}),
+										PlayHeroPreviewSoundFromProduct(_lastEAPSoundProduct{id=1})
+									);
+								"
+							/>
+						</panel>
+						
+					
+					</panel>
+			</panel>
+			
+			<!-- Left Alt Header (swapped to right) -->
+			<panel y="-0.5h" x="-42.5h" width="26.0h" height="5.5h" align="center" valign="top" noclick="true" name="store_eap_header_right" visible="0">
+				<frame y="0" texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.6h" color="0 0 0 .7" blockinput="false" noclick="true"/>
+				<frame y="0" texture="/ui/frames/roundframe.tga" color="#4c4c4c" borderthickness="0.6h" blockinput="false" noclick="true"/>
+				<label y="1.0h" name="store_eap_header_right_label_1" fity="true" wrap="true" textalign="center" font="dyn_14" color=".9 .9 .9 1" outline="true" content="" noclick="true" />
+				<label name="eap_right_avatar_subheader" y="3.0h" fity="true" textalign="center" font="dyn_12" color=".6 .6 .6 1" outline="true" content="mstore_eap_right_aa_1" noclick="true" />
+			</panel>
+			
+			<!-- Right Alt Header (swapped to left) -->
+			<panel y="-0.5h" x="42.5h" width="26.0h" height="5.5h" align="center" valign="top" noclick="true" name="store_eap_header_left" visible="0">
+				<frame y="0" texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.6h" color="0 0 0 .7" blockinput="false" noclick="true"/>
+				<frame y="0" texture="/ui/frames/roundframe.tga" color="#4c4c4c" borderthickness="0.6h" blockinput="false" noclick="true"/>
+				<label y="1.0h" name="store_eap_header_left_label_1" fity="true" wrap="true" textalign="center" font="dyn_14" color=".9 .9 .9 1" outline="true" content="" noclick="true" />
+				<label name="eap_left_avatar_subheader" y="3.0h" fity="true" textalign="center" font="dyn_12" color=".6 .6 .6 1" outline="true" content="mstore_eap_left_aa_1" noclick="true" />
+			</panel>
+			
+			<!-- Footer -->
+			<panel width="61.0h" height="6.4h" align="center" valign="bottom" noclick="true" name="store_eap_footer_center" visible="0">			
+				<frame y="-0.2h" height="7.0h" texture="/ui/frames/rounded_bg_red.tga" borderthickness="0.6h" color=".1 .1 .1 .9" blockinput="false" noclick="true"/>
+				<frame y="-0.2h" height="7.0h" texture="/ui/frames/roundframe.tga" color="#e28e1b" borderthickness="0.6h" blockinput="false" noclick="true"/>
+				
+				<!-- Bundle Price -->
+				<panel name="eap_footer_left_bundle" x="7.0h" y="0.4h" width="16.5h" noclick="true">
+					<label textalign="center" font="dyn_10" color=".7 .7 .7 1" shadow="true" content="mstore_eap_bundle_selected" noclick="true" />
+					<!-- Selected -->
+					<panel y="2.2h" height="3.0h" align="center" name="ms_eap_bundleselect_box"
+						onclick="ShowWidget('ms_eap_bundleselect_dropup'); HideWidget('ms_eap_bundleselect_box');"
+					>
+						<frame texture="/ui/frames/rounded_bg_green.tga" borderthickness="0.6h" color="1 1 1 .8" blockinput="false" noclick="true"/>
+						<frame texture="/ui/frames/roundframe.tga" color="#e28e1b" borderthickness="0.6h" blockinput="false" noclick="true"/>						
+						
+						<label name="mstore_eap_selected_bundle_label" x="1.0h" y="-0.2h" height="100%" textvalign="center" font="dyn_16" color="#FFFFFF" shadow="true" content="mstore_eap_bundle_3" noclick="true" />
+												
+						<panel grow="true" height="100%" align="right" float="right" padding="0.5h" noclick="true">
+							<panel width="1" height="100%" valign="center" noclick="true">
+								<panel height="95%" color="0 0 0 1" valign="center" noclick="true" />
+							</panel>
+							<panel grow="true" height="100%" noclick="true">
+								<image width="40@" height="40%" valign="center" texture="/ui/elements/arrow_down.tga" noclick="true" />
+							</panel>
+							<panel width="1" height="100%" color="invisible"/>
+						</panel>						
+					</panel>
+					
+					<!-- Fake Combobox -->
+					<panel y="-3.8h" height="9.0h" align="center" name="ms_eap_bundleselect_dropup" visible="0" onhide="ShowWidget('ms_eap_bundleselect_box');" >
+					
+						<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0" color="0 0 0 .8" blockinput="false" noclick="true"/>
+						
+
+						<button color="invisible"
+							onmouseover=""
+							onmouseout=""
+							onclick="HideWidget('ms_eap_bundleselect_dropup');"	
+							onclicklua="Store.SelectBundle(self, 1)"
+							onmouseoverlua="Store.HoverBundle(self, 1)"
+							onmouseoutlua="Store.RestoreHoverBundle(self, 1)"
+							y="0" height="3.0h" align="center"
+						>
+
+							<widgetstate statename="up">
+								<frame texture="/ui/frames/rounded_bg_green.tga" borderthickness="0" color="1 1 1 1" blockinput="false" noclick="true"/>					
+							</widgetstate>
+							<widgetstate statename="over">							
+								<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0" color="0 0.8 0 1" blockinput="false" noclick="true"/>							
+							</widgetstate>
+							<widgetstate statename="down" x="1" y="1">
+								<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0" color="0 0.8 0 1" blockinput="false" noclick="true"/>							
+							</widgetstate>
+							<label name="eap_bundle_name_label_1" x="1.0h" y="-0.1h" height="100%" textvalign="center" font="dyn_16" color="#FFFFFF" shadow="true" content="mstore_eap_bundle_1" noclick="true" />
+						</button>
+				
+						<button color="invisible"
+							onmouseover=""
+							onmouseout=""
+							onclick="HideWidget('ms_eap_bundleselect_dropup');"
+							onclicklua="Store.SelectBundle(self, 2)"
+							onmouseoverlua="Store.HoverBundle(self, 2)"
+							onmouseoutlua="Store.RestoreHoverBundle(self, 2)"							
+							y="3.0h" height="3.0h" align="center"
+						>
+
+							<widgetstate statename="up">
+								<frame texture="/ui/frames/rounded_bg_green.tga" borderthickness="0" color="1 1 1 1" blockinput="false" noclick="true"/>					
+							</widgetstate>
+							<widgetstate statename="over">							
+								<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0" color="0 0.8 0 1" blockinput="false" noclick="true"/>							
+							</widgetstate>
+							<widgetstate statename="down" x="1" y="1">
+								<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0" color="0 0.8 0 1" blockinput="false" noclick="true"/>							
+							</widgetstate>
+							<label name="eap_bundle_name_label_2" x="1.0h" y="-0.1h" height="100%" textvalign="center" font="dyn_16" color="#FFFFFF" shadow="true" content="mstore_eap_bundle_2" noclick="true" />
+						</button>	
+
+						<button color="invisible"
+							onmouseover=""
+							onmouseout=""
+							onclick="HideWidget('ms_eap_bundleselect_dropup');"
+							onclicklua="Store.SelectBundle(self, 3)"
+							onmouseoverlua="Store.HoverBundle(self, 3)"
+							onmouseoutlua="Store.RestoreHoverBundle(self, 3)"
+							y="6.0h" height="3.0h" align="center"
+						>
+
+							<widgetstate statename="up">
+								<frame texture="/ui/frames/rounded_bg_green.tga" borderthickness="0" color="1 1 1 1" blockinput="false" noclick="true"/>					
+							</widgetstate>
+							<widgetstate statename="over">							
+								<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0" color="0 0.8 0 1" blockinput="false" noclick="true"/>							
+							</widgetstate>
+							<widgetstate statename="down" x="1" y="1">
+								<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0" color="0 0.8 0 1" blockinput="false" noclick="true"/>							
+							</widgetstate>
+							<label name="eap_bundle_name_label_3" x="1.0h" y="-0.1h" height="100%" textvalign="center" font="dyn_16" color="#FFFFFF" shadow="true" content="mstore_eap_bundle_3" noclick="true" />
+						</button>	
+						
+						<frame color="invisible" borderthickness="1" bordercolor="#e28e1b" blockinput="false" noclick="true"/>
+						
+					</panel>
+				</panel>
+				
+				<!-- Purchase Buttons -->
+				<panel name="eap_footer_right_price" x="-7.0h" y="0.4h" width="16.5h" align="right" noclick="true"
+					onload="CreateString('ui_eapSelectedBundleID', '-1');"
+				>
+					<panel name="mstore_eap_purchase_cost" height="1.6h" valign="top" align="center" x="35%" noclick="1" >
+						<label name="mstore_eap_purchase_cost_label" x="2.0h" fitx="true" height="100%" textvalign="center" font="dyn_14" color="#FFCC00" shadow="true" content="---" noclick="true" />
+						<image height="100%" width="100@" texture="/ui/fe2/store/gold_coins.tga" noclick="true"/>
+					</panel>
+					<panel y="1.8h" height="3.8h" align="center" noclick="true">
+
+						<instance name="EAPPurchaseButton" label="mstore_purchased" enabled="false" visible="false"
+							watch="populateEAPItem"
+							ontrigger="
+								If(
+									param0 == {id=1},
+									SetVisible(param1 ge 1 and microStoreAlreadyOwned{id=1})
+								);
+							"
+						/>
+
+						<instance name="EAPPurchaseButton" id="{id=1}" label="mstore_purchase"
+							watch="MicroStoreProcessing"
+							ontrigger="SetEnabled(!param0);"
+							oneventlua="UIManager.GetInterface('main'):HoNStoreF('PurchaseEAP')"
+							watch1="populateEAPItem"
+							ontrigger1="
+								If(
+									param0 == {id=1},
+									If(
+										param1 ge 1 and !microStoreAlreadyOwned{id=1},
+										Split(
+											SetVisible(true),
+											SetOnClick(
+												'
+													DoEvent();
+												'
+											)
+										),
+										Split(
+											SetVisible(false),
+											SetOnClick('')
+										)
+									)
+								);
+							"
+						/>
+
+
+					</panel>					
+				</panel>				
+				
+				<!-- Release Date -->
+				<panel x="-0.2h" y="0.4h" width="12.0h" align="center" float="bottom" padding="0.3h" noclick="true"
+					onload="
+						CreateInt('eapStartTime{id=1}', 0);
+						CreateInt('eapEndTime{id=1}', 0);
+					"		
+					watch="splitEAPTimes"
+					ontrigger="
+						If(
+							param0 == {id=1},
+							Split(
+								Set('eapStartTime{id=1}', param1),
+								Set('eapEndTime{id=1}', param2)
+							)
+						);
+					"					
+				>
+					<label fity="true" textalign="center" font="dyn_10" color=".7 .7 .7 1" shadow="true" content="mstore_releasedate" 
+						watch1="populateEAPItem" ontrigger1="If(eapStartTime{id=1} gt 0,  SetText(Translate('mstore_releasedate')), SetText(Translate('mstore_playable')) );"			
+					/>
+					<label fity="true" textalign="center" font="dyn_14" color="white" shadow="true" content="--/--/----"
+						onhide="SetWatch('');"
+						watch=""
+						ontrigger="
+							If(
+								microStoreID{id=1} ge 1,
+								If(eapStartTime{id=1} gt 0, 
+									SetText(
+										GetDayFromTime(GetTimeDifference(eapEndTime{id=1}, GetLocalServerTime())) # ':' #
+										GetHourFromTime(GetTimeDifference(eapEndTime{id=1}, GetLocalServerTime())) # ' - ' #
+										GetMinuteFromTime(GetTimeDifference(eapEndTime{id=1}, GetLocalServerTime())) # ':' #
+										GetSecondFromTime(GetTimeDifference(eapEndTime{id=1}, GetLocalServerTime()))
+										
+									),
+									SetText(Translate('mstore_outnow'))
+								)
+							);
+						"
+						watch1="populateEAPItem"
+						ontrigger1="
+							If(
+								param0 == {id=1},
+								If(
+									eapStartTime{id=1} gt 0,
+									SetText(FormatDateTime(eapEndTime{id=1}, '%m/%d/%Y', true)),
+									SetText(Translate('mstore_outnow'))
+								)
+							);
+						"
+					/>
+				</panel>
+				
+
+				<!-- Left Rotation -->
+				<panel x="-1.5h" y="-0.8h" width="120@" height="120%" align="left" noclick="true">
+					<image width="100@" height="100%" texture="/ui/fe2/store/promo/store_sales.tga" hflip="true" noclick="true" />					
+					<instance name="EARotationButton" width="5.2h" height="5.4h" align="center" x="-0.1h" y="1.3h"
+						watch="MicroStoreProcessing"
+						ontrigger="SetEnabled(!param0);"
+						onmouseldown="
+							CallEvent('storeEAPRotation', 4);
+						"
+						onmouselup="
+							CallEvent('storeEAPRotation', 5);
+						"
+						onmouseout="
+							CallEvent('storeEAPRotation', 5);
+						"
+					/>	
+				</panel>
+				
+				<!-- Right Rotation -->
+				<panel x="1.5h" y="-0.8h" width="120@" height="120%" align="right" noclick="true">
+					<image width="100@" height="100%" texture="/ui/fe2/store/promo/store_sales.tga" noclick="true" />
+					<instance name="EARotationButton" width="5.2h" height="5.4h" align="center" x="0.1h" y="1.3h" hflip="true"
+						watch="MicroStoreProcessing"
+						ontrigger="SetEnabled(!param0);"
+						onmouseldown="
+							CallEvent('storeEAPRotation', 3);
+						"
+						onmouselup="
+							CallEvent('storeEAPRotation', 5);
+						"
+						onmouseout="
+							CallEvent('storeEAPRotation', 5);
+						"
+					/>
+				</panel>
+
+			</panel>
+			
+			
+			<!-- Left Alt Star (EA Exclusive Alt Av) -->
+			<panel align="center" width="14h" height="14h" valign="bottom" x="-52.0h" y="-1h" noclick="true" name="store_eap_star_left">
+				<panel name="ms_eap_left_star_1" noclick="true" visible="0">
+					<image texture="/ui/fe2/elements/price_star.tga" noclick="true"/>	
+					<panel width="100%" float="bottom" noclick="true" valign="center" grow="true">
+						<label name="eap_right_star_1_1" fity="true" textalign="center" textvalign="center" font="dyn_12" color="white" shadow="true" content="mstore_noeap_includes" noclick="true" />
+						<label name="eap_right_star_1_2" fity="true" textalign="center" textvalign="center" font="dyn_14" color="#ffe400" shadow="true" content="mstore_noeap_bonus" noclick="true" />
+						<label name="eap_right_star_1_3" fity="true" textalign="center" textvalign="center" font="dyn_12" color="white" shadow="true" content="mstore_noeap_alt_avatar" noclick="true" />
+					</panel>
+				</panel>
+				<panel name="ms_eap_left_star_2" noclick="true" visible="0">
+					<image texture="/ui/fe2/elements/price_star.tga" rendermode="grayscale" noclick="true"/>
+					<panel width="100%" float="bottom" noclick="true" valign="center" grow="true">
+						<label name="eap_left_star_2_1" fity="true" textalign="center" textvalign="center" font="dyn_12" color="white" shadow="true" content="mstore_noeap_select" noclick="true" />
+						<label name="eap_left_star_2_2" fity="true" textalign="center" textvalign="center" font="dyn_12" color="white" shadow="true" content="mstore_eap_bundle_2" noclick="true" />
+						<label name="eap_left_star_2_3" fity="true" textalign="center" textvalign="center" font="dyn_12" color="white" shadow="true" content="mstore_noeap_to_unlock" noclick="true" />
+					</panel>
+				</panel>
+			</panel>
+			
+			<!-- Right Alt Star (Regular Alt Av) -->
+			<panel align="center" width="14h" height="14h" valign="bottom" x="52.0h" y="-1h" noclick="true"  name="store_eap_star_right">
+				<panel name="ms_eap_right_star_1" noclick="true" visible="0">
+					<image texture="/ui/fe2/elements/price_star.tga" noclick="true"/>	
+					<panel width="100%" float="bottom" noclick="true" valign="center" grow="true">
+						<label name="eap_left_star_1_1" fity="true" textalign="center" textvalign="center" font="dyn_12" color="white" shadow="true" content="mstore_noeap_includes" noclick="true" />
+						<label name="eap_left_star_1_2" fity="true" textalign="center" textvalign="center" font="dyn_14" color="#ffe400" shadow="true" content="mstore_noeap_exclusive" noclick="true" />
+						<label name="eap_left_star_1_3" fity="true" textalign="center" textvalign="center" font="dyn_12" color="white" shadow="true" content="mstore_eap_only" noclick="true" />
+						<label name="eap_left_star_1_4" fity="true" textalign="center" textvalign="center" font="dyn_12" color="white" shadow="true" content="mstore_noeap_alt_avatar" noclick="true" />
+					</panel>
+				</panel>
+				<panel name="ms_eap_right_star_2" noclick="true" visible="0">
+					<image texture="/ui/fe2/elements/price_star.tga" rendermode="grayscale" noclick="true"/>
+					<panel width="100%" float="bottom" noclick="true" valign="center" grow="true">
+						<label name="eap_right_star_2_1" fity="true" textalign="center" textvalign="center" font="dyn_12" color="white" shadow="true" content="mstore_noeap_select" noclick="true" />
+						<label name="eap_right_star_2_2" fity="true" textalign="center" textvalign="center" font="dyn_12" color="white" shadow="true" content="mstore_eap_bundle_3" noclick="true" />
+						<label name="eap_right_star_2_3" fity="true" textalign="center" textvalign="center" font="dyn_12" color="white" shadow="true" content="mstore_noeap_to_unlock" noclick="true" />
+					</panel>
+				</panel>
+
+			</panel>
+
+			<!-- Non-Legacy Center Txt -->
+			<panel align="center" valign="center" width="100%" height="100%" visible="false" color="0 0 0 .7" name="eap_text_non_legacy"
+				onload="
+					If(
+						!VarExists('FeaturedHeroInfoDisplayed'),
+						CreateBool('FeaturedHeroInfoDisplayed', false)
+					);
+				"
+				watch="AccountInfo"
+				ontrigger="
+					If(
+						!HasAllHeroes() and !FeaturedHeroInfoDisplayed,
+						Split(
+							SetVisible(true),
+							SetSave('FeaturedHeroInfoDisplayed', true)
+						),
+						SetVisible(false)
+					);
+				"
+			>
+			
+				<panel align="center" valign="center" width="32.0h" grow="true">
+					<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.6h" color="0 0 0 1" blockinput="false" noclick="true"/>
+					<frame texture="/ui/frames/roundframe.tga" color=".4 .4 .4 1" borderthickness="0.6h" blockinput="false" noclick="true"/>			
+					<panel width="-3.0h" grow="true" align="center" float="bottom">
+						<panel height="1.0h"/>
+						<panel width="100%" grow="true" float="bottom">
+							<label color="#FFCC00" shadow="true" font="dyn_14" textvalign="center" height="1.75h" content="mstore_latestheroes"/>
+							<panel height="1.0h"/>
+							<label color="white" shadow="true" font="dyn_11" textvalign="center" wrap="true" fity="true" content="mstore_eapdesc_f2p"/>
+							<panel height="1.0h"/>
+						</panel>
+						<panel width="100%" height="2.4h">
+							<instance
+								name="button2" button_name="unnamedButton251"
+								label="general_close"
+								font="dyn_10"
+								width="12.0h"
+								align="center"
+								onclick="Call('eap_text_non_legacy', 'FadeOut(250);');"
+							/>
+						</panel>
+						<panel height="1.5h"/>
+					</panel>					
+				</panel>				
+			</panel>
+			
+			<!-- Legacy Center Txt -->
+			<panel align="center" valign="center" width="100%" height="100%" visible="false" color="0 0 0 .7" name="eap_text_legacy"
+				onload="
+					If(
+						!VarExists('EAPInfoDisplayed'),
+						CreateBool('EAPInfoDisplayed', false)
+					);
+				"
+				watch="AccountInfo"
+				ontrigger="
+					If(
+						HasAllHeroes() and !EAPInfoDisplayed,
+						Split(
+							SetVisible(true),
+							SetSave('EAPInfoDisplayed', true)
+						),
+						SetVisible(false)
+					);
+				"
+			>
+				<panel align="center" valign="center" width="32.0h" grow="true">
+					<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.6h" color="0 0 0 1" blockinput="false" noclick="true"/>
+					<frame texture="/ui/frames/roundframe.tga" color=".4 .4 .4 1" borderthickness="0.6h" blockinput="false" noclick="true"/>			
+					<panel width="-3.0h" grow="true" align="center" float="bottom">
+						<panel height="1.0h"/>
+						<panel width="100%" grow="true" float="bottom">
+							<label color="#FFCC00" shadow="true" font="dyn_14" textvalign="center" height="1.75h" content="mstore_eap"/>
+							<panel height="1.0h"/>
+							<if condition="!cl_garenaEnable">
+								<label color="white" shadow="true" font="dyn_11" textvalign="center" wrap="true" fity="true" content="mstore_eapdesc_legacy"/>
+							</if>
+							<if condition="cl_garenaEnable">
+								<label color="white" shadow="true" font="dyn_11" textvalign="center" wrap="true" fity="true" content="mstore_eapdesc_garena"/>
+							</if>
+							<panel height="1.0h"/>
+						</panel>
+						<panel width="100%" height="2.4h">
+							<instance
+								name="button2" button_name="unnamedButton252"
+								label="general_close"
+								font="dyn_10"
+								width="12.0h"
+								align="center"
+								onclick="Call('eap_text_legacy', 'FadeOut(250);');"
+							/>
+						</panel>
+						<panel height="1.5h"/>
+					</panel>					
+				</panel>
+			</panel>
+
+			<panel color="black" width="20h"/>
+			<panel color="black" width="20h" align="right"/>
+
+			<image width="12h" height="100%" x="20h" texture="/ui/fe2/elements/shadow_hgradient.tga" noclick="true"/>
+			<image width="12h" height="100%" x="-20h" texture="/ui/fe2/elements/shadow_hgradient.tga" noclick="true" align="right" hflip="true"/>
+			
+			
+			<!-- View All / Back to Store Buttons -->
+			<panel noclick="1" name="mstore_eap_back_to_store_holder" >
+				<panel noclick="true" watch="AccountInfo" ontrigger="SetVisible(!HasAllHeroes());" visible="false">
+					<instance button_name="store_button_ea_allheroes" onclicklua="UIManager.GetInterface('main'):HoNGMainF('UserAction', 17, true)" name="button2" align="center" valign="bottom" x="39.0h" y="-1.5h" width="12h" height="2.8h" 
+						label="mstore_viewallheroes" onclick="Set('_microStore_Category', 71); Set('_microStore_RequestCode', 1); CallEvent('MicroStoreAction', 0);" luatable="1"
+						watch1="MicroStoreProcessing" ontrigger1="SetEnabled(!param0);"
+					/>
+					<instance name="button2" button_name="unnamedButton253" valign="bottom" align="center" x="-39.0h" y="-1.5h" width="12h" height="2.8h" label="mstore_backtostore" onclick="Set('_microStore_Category', 0); Set('_microStore_RequestCode', 0); CallEvent('MicroStoreAction', 0);" watch1="MicroStoreProcessing" ontrigger1="SetEnabled(!param0);"/>
+				</panel>			
+
+				<instance name="button2" button_name="unnamedButton254" align="center" valign="bottom" x="-39.0h" y="-1.5h" width="12h" height="2.8h" label="mstore_backtostore" onclick="Set('_microStore_Category', 0); Set('_microStore_RequestCode', 0); CallEvent('MicroStoreAction', 0);" watch1="MicroStoreProcessing" ontrigger1="SetEnabled(!param0);" watch="AccountInfo" ontrigger="SetVisible(HasAllHeroes());"/>
+			</panel>
+		
+			<panel width="124.8h" noclick="true" align="center">
+				<instance name="mstore_btn_closex" width="2h" height="2h" align="right" x="-1h" y="1h"
+					watch="MicroStoreProcessing"
+					ontrigger="SetEnabled(!param0);"
+					onclick="
+						Set('_microStore_Category', If(HasAllHeroes(), 0, 71));
+						Set('_microStore_RequestCode', If(HasAllHeroes(), 0, 1));
+						CallEvent('MicroStoreAction', 0);
+					"
+				/>
+			</panel>
+
+		</panel>
+	</template>
+
+</package>

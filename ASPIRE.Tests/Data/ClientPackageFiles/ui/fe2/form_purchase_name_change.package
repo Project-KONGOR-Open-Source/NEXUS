@@ -1,0 +1,744 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+
+	<!-- Nickname Change -->
+	<trigger name="UpdateNameChangeForm"/>
+	<trigger name="NameChangeStatus"/>
+	<trigger name="NameChangeResult"/>
+	<form
+		name="NameChange"
+		host="!hon"
+		target="/client_require_nickchange.php"
+		ssl="true"
+		statustrigger="NameChangeStatus"
+		resulttrigger="NameChangeResult"
+		resultparam0="success"
+		resultparam1="error"
+		resultparam2="nickname"
+		resultparam3="errors"
+	/>
+
+	<template name="form_name_change">
+	
+	
+		<panel y="-110%" width="100.0h" align="center" name="form_name_change" visible="{visible=0}" noclick="true" valign="center">
+			
+			<panel x="0" y="-100%" height="203.6%" width="90%"  align="center" texture="mainmenu/upper_frame_center.tga"/>
+			<panel x="18h" y="-100%" height="203.6%" width="50@"  align="right" texture="mainmenu/upper_frame_right.tga"/>
+			<panel x="-18h" y="-100%" height="203.6%" width="50@"  align="left" texture="mainmenu/upper_frame_left.tga"/>
+			
+			<panel y="1.0h" width="-6.0h" height="-3.0h" align="center">
+			
+				<panel float="bottom" padding="0.5h">
+				
+					<panel width="100%" height="2.8h" noclick="1">
+						<instance name="header_bar" lbl="web_form_nickchange_title" lbl_font="dyn_12" show_close="1" onclick="{close_cmd}" />
+					</panel>
+	
+					<panel width="100%" height="44.0h" grow="true">
+					
+						<!-- Left -->
+						<panel width="50%" float="bottom" padding="1h" align="left" grow="true" reverse="true">
+		
+							<!-- First Name -->
+							<panel width="100%" grow="true">
+								<panel height="4h">
+									<frame color="invisible" bordercolor="#455166" borderthickness="1" noclick="1" />
+									<instance
+										name="web_form_field"
+										label="creditcard_label_first_name"
+										hastip="true"
+										order="701"
+										fieldwidth="-1.8h"
+										fieldname="name_change_ccfirstname"
+										ontrigger="If(StringEmpty(name_change_ccfirstname), SetColor('red'), SetColor('white'));"
+										tip_id="web_form_tip_cc_first_name"
+										form="NameChange" data="bill_first_name"
+										updatetrigger="UpdateNameChangeForm"
+									/>
+								</panel>
+							</panel>
+
+							<!-- Last Name -->
+							<panel width="100%" grow="true">
+								<panel height="4h">
+									<frame color="invisible" bordercolor="#455166" borderthickness="1" noclick="1" />
+									<instance
+										name="web_form_field"
+										label="creditcard_label_last_name"
+										hastip="true"
+										order="702"
+										fieldwidth="-1.8h"
+										fieldname="name_change_cclastname"
+										ontrigger="If(StringEmpty(name_change_cclastname), SetColor('red'), SetColor('white'));"
+										tip_id="web_form_tip_cc_last_name"
+										form="NameChange" data="bill_last_name"
+										updatetrigger="UpdateNameChangeForm"
+									/>
+								</panel>
+							</panel>
+
+							<!-- Zip Code -->
+							<panel width="100%" grow="true">
+								<panel height="4h">
+									<frame color="invisible" bordercolor="#455166" borderthickness="1" noclick="1" />
+									<instance
+										name="web_form_field"
+										label="creditcard_label_billing_zip"
+										hastip="true"
+										order="703"
+										fieldwidth="-1.8h"
+										fieldname="name_change_cczip"
+										ontrigger="If(StringEmpty(name_change_cczip), SetColor('red'), SetColor('white'));"
+										tip_id="web_form_tip_cc_zip"
+										form="NameChange" data="zip"
+										updatetrigger="UpdateNameChangeForm"
+									/>
+								</panel>
+							</panel>
+
+							<!-- CC Number -->
+							<panel width="100%" grow="true">
+								<panel height="6h">
+									<frame color="invisible" bordercolor="#455166" borderthickness="1" noclick="1" />
+									<image texture="/ui/elements/cc.tga" width="8.0h" height="2.0h" valign="bottom" x="1h" y="-0.8h" />
+									<instance
+										name="web_form_field"
+										y="0.8h"
+										valign="top"
+										label="creditcard_label_prime_card_number"
+										hastip="false"
+										order="704"
+										fieldwidth="-1.8h"
+										fieldname="name_change_ccnum"
+										ontrigger="If(!IsValidCCNumber(name_change_ccnum), SetColor('red'), SetColor('white'));"
+										tip_id="web_form_tip_cc_num"
+										form="NameChange" data="card_number"
+										updatetrigger="UpdateNameChangeForm"
+									/>
+								</panel>
+							</panel>
+
+							<!-- Expiration Date -->
+							<panel width="100%" grow="true">
+								<panel height="4h">
+									<frame color="invisible" bordercolor="#455166" borderthickness="1" noclick="1" />
+									
+									<panel align="center" width="-1h" height="2.4h" valign="center" float="right">
+										<label name="name_change_exp_label" width="33%" height="2h" font="dyn_11" color="white" shadow="true" content="creditcard_label_prime_expiration" watch="UpdateNameChangeForm" ontrigger="
+										If(
+											(
+											name_change_ccmonth lt 1 or
+											name_change_ccmonth gt 12 or
+											name_change_ccyear lt GetYear() or
+											(name_change_ccyear == GetYear() and name_change_ccmonth lt GetMonth())
+											),
+											SetColor('red'),
+											SetColor('white')
+										);
+										"/>									
+										<panel width="5%">
+											<image align="right" width="1.2h" height="1.0h" valign="center" texture="/ui/info/arrow.tga" />
+										</panel>
+										
+										<panel width="57%">
+											<label
+												width="100%" height="100%"
+												align="center" valign="center"
+												textalign="left" textvalign="center"
+												font="dyn_10" color="white" shadow="true" shadowcolor="black" noclick="1"
+												content="creditcard_label_prime_month"
+												watch="UpdateNameChangeForm"
+												ontrigger="
+													If(
+														(
+														name_change_ccmonth lt 1 or
+														name_change_ccmonth gt 12 or
+														name_change_ccyear lt GetYear() or
+														(name_change_ccyear == GetYear() and name_change_ccmonth lt GetMonth())
+														),
+															SetColor('red'),
+															SetColor('white')
+														);
+													"
+											/>
+											
+											<panel width="8h" x="5h" height="2.2h" valign="center" reverse="true">
+												<instance
+													name="Moptions_combobox"
+													id="name_change_ccmonth"
+													align="right" width="8.0h" itemwidth="100%" maxlistheight="5"
+													onload="CreateString('_purchase_month', '01');"
+													onshow="ListBoxCmd('Select 0');"
+													onselect="Trigger('UpdateNameChangeForm');"
+													populate="
+														AddTemplateListItem('Ncombobox_item', '01', 'label', '01');
+														AddTemplateListItem('Ncombobox_item', '02', 'label', '02');
+														AddTemplateListItem('Ncombobox_item', '03', 'label', '03');
+														AddTemplateListItem('Ncombobox_item', '04', 'label', '04');								
+														AddTemplateListItem('Ncombobox_item', '05', 'label', '05');
+														AddTemplateListItem('Ncombobox_item', '06', 'label', '06');
+														AddTemplateListItem('Ncombobox_item', '07', 'label', '07');
+														AddTemplateListItem('Ncombobox_item', '08', 'label', '08');
+														AddTemplateListItem('Ncombobox_item', '09', 'label', '09');
+														AddTemplateListItem('Ncombobox_item', '10', 'label', '10');
+														AddTemplateListItem('Ncombobox_item', '11', 'label', '11');								
+														AddTemplateListItem('Ncombobox_item', '12', 'label', '12');
+														"
+													form="NameChange" formdata="month"
+												/>
+												
+											</panel>
+											
+											<label
+												width="100%" height="100%"
+												textvalign="center" textalign="left"
+												valign="center" x="13.5h"
+												font="dyn_9" color="white" shadow="true" shadowcolor="black" noclick="1"
+												content="creditcard_label_prime_year"
+												watch="UpdateNameChangeForm"
+												ontrigger="If(name_change_ccyear lt GetYear(), SetColor('red'), SetColor('white'));"
+											/>
+											
+											<panel width="8h" x="17h" height="2.2h" valign="center" reverse="true">
+												<instance
+													name="Moptions_combobox"
+													id="name_change_ccyear"
+													align="right" width="8.0h" itemwidth="100%" maxlistheight="5"
+													onload="CreateString('_purchase_month', '01');"
+													onshow="ListBoxCmd('Select 0');"
+													onselect="Trigger('UpdateNameChangeForm');"
+													populate="
+														for(
+															GetYear(),GetYear() + 25,1,
+															'
+																AddTemplateListItem(\'Ncombobox_item\', iParam, \'label\', iParam);
+															'
+														);
+													"
+													form="NameChange" formdata="year"
+												/>
+											</panel>										
+										</panel>
+												
+										<panel width="5%">
+											<instance name="tip_mark" tip_id="web_form_tip_cc_exp" width="100@" height="100%" valign="center" align="right" />
+										</panel>
+										
+									</panel>
+								</panel>
+							</panel>
+							
+							<!-- CVV Number -->
+							<panel width="100%" grow="true">
+								<panel height="4h">
+									<frame color="invisible" bordercolor="#455166" borderthickness="1" noclick="1" />
+									<instance
+										name="web_form_field"
+										label="creditcard_label_prime_cvv_number"
+										hastip="true"
+										order="705"
+										fieldwidth="-1.8h"
+										fieldname="name_change_cccvv"
+										ontrigger="If(StringLength(name_change_cccvv) lt 3 or !StringContainsOnly(name_change_cccvv, '', '0'),
+											SetColor('red'),
+											SetColor('white')
+											);"
+										tip_id="web_form_tip_cc_cvv2"
+										form="NameChange" data="cvv"
+										updatetrigger="UpdateNameChangeForm"
+										onfocus="ShowWidget('name_change_cccvv_img');" onlosefocus="HideWidget('name_change_cccvv_img');"
+									/>
+
+								</panel>
+							</panel>
+
+							<!-- Confirm Password -->
+							<panel width="100%" grow="true">
+								<panel height="4h" onload="CreateString('_NameChange_confirm_pass', '');">
+									<frame color="invisible" bordercolor="#455166" borderthickness="1" noclick="1" />
+									<instance
+										name="web_form_field"
+										label="create_acc_confirm_password"
+										hastip="false"
+										order="706"
+										fieldwidth="-1.8h"
+										fieldname="name_change_confirm_password"
+										ontrigger="
+											If(
+												StringEmpty(name_change_confirm_password),
+												Split(SetColor('red'), Set('_NameChange_confirm_pass', '')),
+												Split(SetColor('white'), Set('_NameChange_confirm_pass', MD5(name_change_confirm_password)))
+											);
+										"
+										passchar="*"
+										tip_id=""
+										form="" data=""
+										updatetrigger="UpdateNameChangeForm"
+									/>
+								</panel>
+							</panel>
+							
+							<!-- Secure Info -->
+							<panel width="100%" height="6.0h">
+								<frame color="invisible" bordercolor="#455166" borderthickness="1" noclick="1" />
+								<image width="4.5h" height="4.5h" x="1.0h" valign="center" texture="/ui/elements/thawte.tga" />			
+								<label x="-1.0h" width="-7.0h" height="100%" align="right" valign="center" textalign="center" textvalign="center" wrap="1" font="dyn_10" color="white" noclick="1">create_acc_secure_transfer</label>
+							</panel>
+	
+						</panel>
+						
+						<!-- Right -->
+						<panel width="49.0%" align="right" float="bottom" padding="1h" reverse="true">
+						
+						
+						
+						
+							<!-- Nickname -->							
+							<panel width="100%" grow="true">
+								
+								<panel align="center" height="6.4h">
+									<frame color="invisible" bordercolor="#455166" borderthickness="1" noclick="1" />									
+									<panel align="center" y="1h" width="-1h" height="2.4h" float="right" onload="CreateBool('_nick_valid', false);">
+										<label width="45%" height="100%" textvalign="center" font="dyn_11" color="white" shadow="true" content="web_form_nickchange_newnick"
+											watch="UpdateNameChangeForm"
+											ontrigger="If(_nick_valid, SetColor('white'), SetColor('red'));"/>
+										<panel width="5%" height="100%">
+											<image align="right" width="1.2h" height="1.0h" valign="center" texture="/ui/info/arrow.tga" />
+										</panel>
+										<panel width="45%" height="100%">
+											<instance
+												name="field"
+												widgetname="name_change_nickname"
+												order="707"
+												maxlength="12"
+												form="NameChange"
+												data="nickname"
+												onshow="SetFocus(true);"
+												onlosefocus="HideWidget('name_change_nick_notice');"
+												onchange="
+													Set(_nick_check_field, name);
+													If(StringEmpty(this),
+														Set('_nick_valid', false),
+														SleepWidget(500, 'SubmitForm(\'KSUserNameCheck\', \'nickname\', name_change_nickname);')
+														);
+													Trigger('UpdateNameChangeForm');
+													Trigger('KSUserNameCheckStatus', 2);
+													"
+											/>
+										</panel>
+									</panel>									
+
+									<label y="4.0h" font="dyn_9" wrap="true" width="-1.4h" align="center" color="#ffaa00" fity="true">create_acc_label_nick_name_tip</label>
+
+									<panel name="name_change_nick_notice" y="4h" x="-5.0%" align="right" height="5.2h" width="45%" visible="false" onclick="HideWidget('name_change_nick_notice');" watch="KSUserNameCheckStatus" ontrigger="SetVisible(!StringEmpty(name_change_nickname));">
+										<frame texture="/ui/frames/tooltip_bg.tga" color="0 0 0 .8" borderthickness=".6h" align="left" valign="top" noclick="1">
+										<frame texture="/ui/frames/roundframe.tga" color="#A0A0A0" borderthickness=".6h" noclick="1"/>
+										
+											<label
+												fity="true"
+												width="-1.4h"
+												align="center" valign="center"
+												textalign="center" textvalign="center"
+												font="dyn_10" wrap="1"
+												color="#48ee48" shadow="true" shadowcolor="black"
+												noclick="1"
+												watch="KSUserNameCheckResult"
+												ontrigger="
+													if (StringEquals(_nick_check_field, 'name_change_nickname'),
+														Split(
+															Set('_nick_valid', param0 and !StringEmpty(name_change_nickname)),
+															If(param0, SetColor('#48ee48'), SetColor('#eb3535')),
+															If(param0, SetText(Translate('main_create_account_nickname_available')), SetText(param1)),
+															Trigger('UpdateNameChangeForm')
+														)
+													);
+
+													"
+												watch0="KSUserNameCheckStatus"
+												ontrigger0="
+													if (StringEquals(_nick_check_field, 'name_change_nickname'),
+														Split(
+															If(param == 2 or param == 3, SetText(Translate('main_create_account_nickname_check'))),
+															If(param == 2 or param == 3, SetColor('#ebee48'))
+														)
+													);
+
+													"
+											/>
+										</frame>
+									</panel>
+								</panel>
+							</panel>
+							
+							<!-- Confirm Nickname -->
+							<panel width="100%" grow="true">
+								<panel height="4h">
+									<frame color="invisible" bordercolor="#455166" borderthickness="1" noclick="1" />
+									<instance
+										name="web_form_field"
+										label="web_form_nickchange_confirmnick"
+										hastip="false"
+										order="708"
+										fieldwidth="-1.8h"
+										fieldname="name_change_confirm_nickname"
+										ontrigger="
+											If(
+												_nick_valid and StringEquals(name_change_nickname, name_change_confirm_nickname),
+												SetColor('white'),
+												SetColor('red')
+											);
+										"
+										tip_id=""
+										form="NameChange" data="confirmNickname"
+										updatetrigger="UpdateNameChangeForm"
+									/>
+								</panel>
+							</panel>
+							
+							<!-- Basic notice -->
+							<panel width="100%" grow="true">
+								<frame color="invisible" bordercolor="#455166" borderthickness="1" noclick="1" />
+								<panel height="9h">
+									<label textvalign="center" textalign="center" shadow="true" width="-1h" align="center" color="#FFCC00" font="dyn_11" valign="center" wrap="true">web_form_nickchange_notice</label>
+								</panel>
+							</panel>
+
+						
+						</panel>
+						
+						
+						<!-- Price / Button -->
+						<panel width="49%" align="right" grow="true" valign="bottom">
+						
+							<!-- PayPal Info -->
+							<panel width="100%" grow="true" y="-7h">
+								<panel height="6h">
+									<frame color="invisible" bordercolor="#455166" borderthickness="1" noclick="1" />
+									<panel height="5h" valign="center" align="center" width="-1h">
+										<image height="6h" width="6h" y=".5h" x="1h" texture="/ui/elements/paypal_icon.tga" />
+										<label x="3h" width="-10.0h" height="100%" align="center" valign="center" textvalign="center" textalign="center" wrap="1" font="dyn_10" color="white" noclick="1">web_form_paypal_notice</label>
+										<!--<image height="6h" width="6h" y=".5h" x="-1h" texture="/ui/elements/paypal_icon.tga" align="right" />-->
+									</panel>
+								</panel>
+							</panel>
+						
+							<!-- Price -->
+							<panel height="10h" width="10.0h" align="left">
+								<instance height="2.5h" name="header_bar" color=".7 .7 .7 1" lbl="create_acc_total_price" lbl_font="dyn_10" show_close="0" />
+								
+								<panel height="-2.7h" valign="bottom">
+									<frame color="invisible" bordercolor="#455166" borderthickness="1" noclick="1" />
+									
+									<panel width="100%" valign="center" grow="true" float="bottom">
+										<label fity="true" width="100%" textalign="center" textvalign="center" font="dyn_14" color="#3abde7" content="$10.00"/>
+										<label fity="true" width="-0.8h" align="center" valign="bottom" textalign="center" textvalign="center" font="dyn_8" color=".8 .8 .8 1" wrap="true" content="create_acc_price_usd"/>
+									</panel>
+									
+								</panel>
+							
+							</panel>
+							
+							<!-- Button -->
+							<panel height="10h" width="-11.0h" align="right">
+								<frame color="invisible" bordercolor="#455166" borderthickness="1" noclick="1" />									
+								<panel
+									visible="false"
+									watch="UpdateNameChangeForm" ontrigger="
+										if (
+											_nick_valid and
+											StringEquals(name_change_nickname, name_change_confirm_nickname) and
+											!StringEmpty(_NameChange_confirm_pass) and
+											!StringEmpty(name_change_ccfirstname) and
+											!StringEmpty(name_change_cclastname) and
+											!StringEmpty(name_change_cczip) and
+											IsValidCCNumber(name_change_ccnum) and
+											StringLength(name_change_cccvv) ge 3 and
+											StringLength(name_change_cccvv) le 4 and
+											StringContainsOnly(name_change_cccvv, '', '0') and
+											name_change_ccmonth ge 1 and
+											name_change_ccmonth le 12 and
+											name_change_ccyear ge GetYear() and
+											(name_change_ccyear gt GetYear() or name_change_ccmonth ge GetMonth()) and
+											GetAccountID() != -1
+											
+										, SetVisible(true), SetVisible(false));
+									"
+								>
+									<frame texture="/ui/info/backdrop.tga" borderthickness="2.0h" color="1 1 1 1" noclick="1"/>
+									<frame color="invisible" bordercolor="#4b628b" borderthickness="1" noclick="1" />
+								</panel>
+								
+								<panel y="1.0h" float="bottom" padding=".5h" grow="true" width="-1h">
+								
+									<panel height="0" />
+									
+									<label wrap="true" align="center" textalign="center" font="dyn_10" color="white" shadow="true" fity="true" width="-1.0h">web_form_nickchange_tos</label>										
+								
+									<panel grow="true" width="-2.0h" align="center">
+									
+										<instance
+											name="button2" button_name="unnamedButton118"
+											width="9.0h" height="2.4h"
+											x="1h"
+											borderthickness="0.6h"
+											align="left"
+											label="purchase_promo_view_tos"
+											onclick="Call('name_change_tos_button', 'FadeOut(250);'); Call('name_change_tos', 'FadeIn(250);');"
+										/>
+									
+										<instance
+											name="button2" button_name="unnamedButton119"
+											width="18h" height="2.5h"
+											align="center"
+											x="5h"
+											enabled="false"
+											label="web_form_nickchange_title"
+											font="dyn_10"
+											watch="UpdateNameChangeForm" ontrigger="
+												If(
+													_nick_valid and
+													StringEquals(name_change_nickname, name_change_confirm_nickname) and
+													!StringEmpty(_NameChange_confirm_pass) and
+													!StringEmpty(name_change_ccfirstname) and
+													!StringEmpty(name_change_cclastname) and
+													!StringEmpty(name_change_cczip) and
+													IsValidCCNumber(name_change_ccnum) and
+													StringLength(name_change_cccvv) ge 3 and
+													StringLength(name_change_cccvv) le 4 and
+													StringContainsOnly(name_change_cccvv, '', '0') and
+													name_change_ccmonth ge 1 and
+													name_change_ccmonth le 12 and
+													name_change_ccyear ge GetYear() and
+													(name_change_ccyear gt GetYear() or name_change_ccmonth ge GetMonth()) and
+													GetAccountID() != -1
+												, SetEnabled(true), SetEnabled(false));
+											"
+											onclick="SubmitForm('NameChange', 'account_id', GetAccountID(), 'password', _NameChange_confirm_pass);"
+										/>
+																				
+										
+										<panel align="center" valign="bottom" width="100%" height="2.5h" visible="false" name="NameChangeStatusIndicator" color="0 0 0 1" watch="NameChangeStatus" ontrigger="SetVisible(param == 1);">
+											<frame texture="/ui/info/backdrop.tga" borderthickness="2.0h" color="1 1 1 .5" noclick="1" />
+											<frame color="invisible" bordercolor="#455166" borderthickness="1" noclick="1" />
+											<label width="-1h" height="-1h" textvalign="center" textalign="center" align="center" valign="center" shadow="true" color="#12ff00" font="dyn_11">credit_card_processing</label>
+										</panel>
+										
+									
+									</panel>
+								
+								</panel>
+
+							</panel>
+						
+						</panel>
+						
+						
+						<panel align="right" width="49%" noclick="true">
+							<panel color="invisible" height="24h" width="100%" valign="bottom" align="center" noclick="true">								
+								<!-- ToS -->
+								<panel width="100%" height="100%" visible="false" color="0 0 0 .75" name="name_change_tos">
+									<instance height="2.5h" name="header_bar" color=".7 .7 .7 1" lbl="tos_header" lbl_font="dyn_10" show_close="1" onclick="Call('name_change_tos_button', 'FadeIn(250);'); Call('name_change_tos', 'FadeOut(250);');" />
+									<panel valign="bottom" height="-2.7h">
+										<frame color="invisible" bordercolor="#455166" borderthickness="1" noclick="1" />
+										<frame texture="/ui/info/backdrop.tga" borderthickness="2.0h" color="1 1 1 .5" noclick="1" />
+										<textbuffer
+											scrolltexture="/ui/info/combobox.tga"
+											handleheight="2.0h"
+											scrollbarsize="2.0h"				
+											exteriorscrollbars="false"
+											textalign="left"
+											font="dyn_10"
+											textcolor="white"
+											color="invisible"
+											shadow="1"
+											wrap="true"
+											noclick="0"				
+											file=":/tos.txt"
+											width="-1.0h" height="-2.4h"
+											align="center" valign="center"
+										/>
+									</panel>
+								</panel>
+							</panel>
+						</panel>
+						
+						<!-- Successful nickname change -->
+						<panel color="0 0 0 .5" name="NameChangeSuccessIndicator" watch="NameChangeResult" visible="false" ontrigger="
+						If(
+							param0 == 1,
+							Split(
+								SetVisible(true),
+								Call('name_change_nickname', 'EraseInputLine();'),
+								Call('name_change_confirm_nickname', 'EraseInputLine();'),
+								Call('name_change_confirm_password', 'EraseInputLine();'),
+								Call('name_change_ccfirstname', 'EraseInputLine();'),
+								Call('name_change_cclastname', 'EraseInputLine();'),
+								Call('name_change_cczip', 'EraseInputLine();'),
+								Call('name_change_ccnum', 'EraseInputLine();'),
+								Call('name_change_cccvv', 'EraseInputLine();'),
+								Call('name_change_ccmonth', 'SetSelectedItemByIndex(-1);'),
+								Call('name_change_ccyear', 'SetSelectedItemByIndex(-1);')
+							),
+							SetVisible(false)
+						);
+						">
+							<panel align="center" valign="center" width="38.0h" grow="true" color="0 0 0 1">						
+								<frame color="invisible" bordercolor="#455166" borderthickness="1" noclick="1" />						
+								<panel width="100%" height="2.5h" noclick="1">
+									<instance name="header_bar" lbl="web_form_nickchange_success_title" lbl_font="dyn_10" show_close="0" />
+								</panel>						
+								<panel y="3.0h" align="center" grow="true" width="-1h" float="bottom">							
+									<panel width="100%" grow="true">
+										<label color="white" shadow="true" font="dyn_10" width="-1.0h" align="center" wrap="true" height="6h" content="web_form_nickchange_success" watch="NameChangeResult" ontrigger="SetText(Translate('web_form_nickchange_success', 'nickname', param2));" />
+									</panel>							
+									<panel width="100%" height="4.0h">							
+										<instance
+											name="button2" button_name="unnamedButton120"
+											y="-1.0h"
+											align="center" valign="bottom"
+											width="9h" height="2.5h"
+											label="main_button_logout"
+											font="dyn_10"
+											onclick="Call('NameChangeSuccessIndicator', 'FadeOut(250);'); Logout();"
+											onclicklua="UIManager.GetInterface('main'):HoNMainF('MainMenuPanelToggle', 'form_name_change', nil, false)"
+										/>						
+									</panel>							
+								</panel>
+							</panel>
+						</panel>
+						
+						<!-- Need to log in first -->				
+						<panel color="0 0 0 .5" name="NameChangePurchasedNotice" watch="AccountInfo" visible="false" ontrigger="setvisible(GetAccountID() == -1));">
+							<panel align="center" valign="center" width="38.0h" grow="true" color="0 0 0 1">						
+								<frame color="invisible" bordercolor="#455166" borderthickness="1" noclick="1" />						
+								<panel width="100%" height="2.5h" noclick="1">
+									<instance name="header_bar" lbl="web_form_must_login" lbl_font="dyn_10" show_close="0" />
+								</panel>						
+								<panel y="3.0h" align="center" grow="true" width="-1h" float="bottom">							
+									<panel width="100%" grow="true">
+										<label color="white" shadow="true" font="dyn_10" width="-1.0h" align="center" wrap="true" fity="true" content="web_form_must_login_text" />
+									</panel>							
+									<panel width="100%" height="4.0h">							
+										<instance
+											name="button2" button_name="unnamedButton121"
+											y="-1.0h"
+											align="center" valign="bottom"
+											width="9h" height="2.5h"
+											label="general_ok"
+											font="dyn_10"
+											onclicklua="UIManager.GetInterface('main'):HoNMainF('MainMenuPanelToggle', 'form_name_change', nil, false)"
+										/>						
+									</panel>							
+								</panel>
+							</panel>
+						</panel>
+						
+						<!-- Failed name change purchase -->
+						<panel color="0 0 0 .5" name="NameChangeFailureIndicator" watch="NameChangeResult" visible="false" ontrigger="SetVisible(param0 == 0);">
+							<panel align="center" valign="center" width="38.0h" grow="true" regrow="true" color="0 0 0 1">						
+								<frame color="invisible" bordercolor="#455166" borderthickness="1" noclick="1" />						
+								<panel width="100%" height="2.5h" noclick="1">
+									<instance name="header_bar" lbl="credit_card_error_plain" lbl_font="dyn_10" show_close="0" />
+								</panel>						
+								<panel y="3.0h" align="center" grow="true" regrow="true" width="-1h" float="bottom">							
+									<panel width="100%" grow="true" regrow="true">
+										<label color="white" shadow="true" font="dyn_10" width="100%" wrap="true" fity="true" 
+										watch="NameChangeResult"
+										ontrigger="
+											Set('web_resetstats_error_concat', '');
+											If(
+												param1,
+												ExplodeTrigger('ConcatResetStatsError', param3, '|', ':')
+											);
+											SetText(
+												If(
+													!StringEmpty(web_resetstats_error_concat),
+													FormatStringNewLine(web_resetstats_error_concat),
+													''
+												)
+											);
+										"
+										/>
+									</panel>							
+									<panel width="100%" height="4.0h">							
+										<instance
+											name="button2" button_name="unnamedButton122"
+											y="-1.0h"
+											align="center" valign="bottom"
+											width="9h" height="2.5h"
+											label="general_ok"
+											font="dyn_10"
+											onclick="HideWidget('NameChangeFailureIndicator');"
+										/>						
+									</panel>							
+								</panel>
+							</panel>
+						</panel>
+
+						
+						<!-- Feature unavailable while playing -->				
+						<panel color="0 0 0 .5" visible="false" watch="GamePhase" ontrigger="SetVisible(param != 0);">
+							<panel align="center" valign="center" width="38.0h" grow="true" color="0 0 0 1">						
+								<frame color="invisible" bordercolor="#455166" borderthickness="1" noclick="1" />						
+								<panel width="100%" height="2.5h" noclick="1">
+									<instance name="header_bar" lbl="web_form_feature_unavailable_title" lbl_font="dyn_10" show_close="0" />
+								</panel>						
+								<panel y="3.0h" align="center" grow="true" width="-1h" float="bottom">							
+									<panel width="100%" grow="true">
+										<label color="white" shadow="true" font="dyn_10" width="-1.0h" align="center" wrap="true" fity="true" content="web_form_feature_unavailable_inmatch" />
+									</panel>							
+									<panel width="100%" height="4.0h">							
+										<instance
+											name="button2" button_name="unnamedButton123"
+											y="-1.0h"
+											align="center" valign="bottom"
+											width="9h" height="2.5h"
+											label="general_ok"
+											font="dyn_10"
+											onclicklua="UIManager.GetInterface('main'):HoNMainF('MainMenuPanelToggle', 'form_name_change', nil, false)"
+										/>						
+									</panel>							
+								</panel>
+							</panel>
+						</panel>
+						
+						<!-- Feature unavailable (for now) -->				
+						<panel color="0 0 0 .5" visible="false" onload="If(ui_disableAccountCreation or ui_disableAccountForms, ShowWidget());">
+							<panel align="center" valign="center" width="38.0h" grow="true" color="0 0 0 1">						
+								<frame color="invisible" bordercolor="#455166" borderthickness="1" noclick="1" />						
+								<panel width="100%" height="2.5h" noclick="1">
+									<instance name="header_bar" lbl="web_form_feature_unavailable_title" lbl_font="dyn_10" show_close="0" />
+								</panel>						
+								<panel y="3.0h" align="center" grow="true" width="-1h" float="bottom">							
+									<panel width="100%" grow="true">
+										<label color="white" shadow="true" font="dyn_10" width="-1.0h" align="center" wrap="true" fity="true" content="web_form_feature_unavailable" />
+									</panel>							
+									<panel width="100%" height="4.0h">							
+										<instance
+											name="button2" button_name="unnamedButton124"
+											y="-1.0h"
+											align="center" valign="bottom"
+											width="9h" height="2.5h"
+											label="general_ok"
+											font="dyn_10"
+											onclicklua="UIManager.GetInterface('main'):HoNMainF('MainMenuPanelToggle', 'form_name_change', nil, false)"
+										/>						
+									</panel>							
+								</panel>
+							</panel>
+						</panel>
+						
+					
+					
+					</panel>
+					
+				</panel>
+				
+			</panel>
+			
+			
+		</panel>
+	
+	</template>
+</package>

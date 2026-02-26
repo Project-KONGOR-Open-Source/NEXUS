@@ -1,0 +1,805 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+	<lua file="/ui/scripts/communicator.lua"/>
+
+	<!-- trigger for watching bot kicks in the lobby -->
+	<trigger name="LobbyKicked" />
+
+	<panel noclick="true" color="invisible"
+		onload="
+			CreateString('ui_currentChannel', '');
+			CreateInt('ui_lastSelectedClientNumber', -1);
+			CreateString('ui_lastSelectedChannel', '');
+		"
+	/>
+	
+	<template name="autocomplete_channel_list">
+		<panel name="{listbox_name}_panel" y="{y=0}" x="{x=0}" width="{width=-1.0h}" height="{height=-1.0h}" align="{align=center}" valign="{valign=center}">
+			<frame texture="/ui/info/backdrop.tga" borderthickness="1.6h" color="1 1 1 1" noclick="1" />
+			<listbox
+				name="{listbox_name}_listbox"
+				width="-2.25h"
+				color="invisible"
+				font="dyn_10"
+				itemwidth="100%"
+				itemheight="2.5h"
+				select="true"
+				clearselection="true"
+				hoverselect="true"
+				hoverhighlight="true"
+				highlight="under"
+				highlightcolor="#46adff42"
+				highlightbordercolor="invisible"
+				selectedcolor="#346dff52"
+				selectedbordercolor="invisible"
+				backgroundimage="/ui/fe2/elements/comm_item_bg.tga"
+				backgroundimagecolor="#1d2f3b"
+				colortransition="true"
+				colortransitiontime="250"
+				exteriorscrollbars="true"
+				scrollbarplaceholder="true"
+				scrollbarsize="2.0h"
+				scrolltexture="/ui/info/combobox.tga"
+				handleheight="2.0h"
+				onclick="{onclick}"
+				ondoubleclick="{ondoubleclick}"
+				watch1="ChatAutoCompleteClear"
+				ontrigger1="ClearItems();"
+				watch2="ChatAutoCompleteAdd"
+				ontrigger2="AddTemplateListItem('autocomplete_channel', param0, 'channel', param0); SortListboxValue();"
+				onselect="Set('ui_lastSelectedChannel', this); Call(ui_autocompleteTextBox, 'SetInputLine(ui_lastSelectedChannel);'); ChatAutoCompleteClear();"
+			/>
+		</panel>
+	</template>
+
+	<template name="autocomplete_channel">
+		<label width="-1.6h" textvalign="center" textalign="left" align="center" valign="center" font="dyn_9" color="1 1 1 1" shadow="1" wrap="1">{channel}</label>
+	</template>
+
+	<template name="communicator_channelplate">
+		<panel name="communicator_channelplate_{id}" height="3.7h" visible="0">
+			<panel
+				valign="center"
+				color="invisible"
+				noclick="false"
+				onmouseover="Call('communicator_channelplate_{id}_highlight', 'FadeIn(250)')"
+				onmouseout="Call('communicator_channelplate_{id}_highlight', 'FadeOut(250)')"
+				onclick="Call('communicator_send_box', 'SetFocus(true);');"
+				onclicklua="UIManager.GetInterface('main'):HoNCommunicatorF('ChannelClick', self, {id})"
+				onrightclicklua="UIManager.GetInterface('main'):HoNCommunicatorF('ChannelClick', self, {id}) UIManager.GetInterface('main'):HoNCommunicatorF('RightClickChannel', self, {id})"
+			>
+
+			<panel
+				name="communicator_channelplate_{id}_normal"
+				color="#1d2f3b"
+				texture="/ui/fe2/elements/comm_item_bg.tga"
+				width="100%"
+				height="100%"
+				align="left"
+				valign="top"
+				noclick="true"
+				visible="1"
+			/>
+			<panel
+				name="communicator_channelplate_{id}_highlight"
+				onload="FadeOut(0)"
+				color="#46adff42"
+				texture="/ui/fe2/elements/comm_item_bg.tga"
+				width="100%"
+				height="100%"
+				align="left"
+				valign="top"
+				noclick="true"
+				visible="1"
+			/>
+			<panel
+				name="communicator_channelplate_{id}_selected"
+				onload="FadeOut(0)"
+				color="#346dff52"
+				texture="/ui/fe2/elements/comm_item_bg.tga"
+				width="100%"
+				height="100%"
+				align="left"
+				valign="top"
+				noclick="true"
+				visible="1"
+			/>
+
+			<image
+				name="communicator_channelplate_{id}_icon"
+				texture="{texture=/ui/elements/chat_icon.tga}"
+				x="15@"
+				width="65@"
+				height="65%"
+				align="left"
+				valign="center"
+				noclick="true"
+			/>
+			</panel>
+			<label name="communicator_channelplate_{id}_roomname" x="3.5h" width="60%" height="100%" textvalign="center" font="dyn_9" color="white" shadow="true" noclick="true"/>
+			<panel name="communicator_channelplate_{id}_usercount" x="-.5h" width="92@" height="55%" align="right" valign="center" noclick="1">
+				<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.4h" color=".25 .25 .25 1" blockinput="false" noclick="true"/>
+				<frame texture="/ui/frames/roundframe.tga" color="0 0 0 1" borderthickness="0.4h" blockinput="false" noclick="true"/>
+				<label name="communicator_channelplate_{id}_numusers" height="100%" textalign="center" textvalign="center" font="dyn_9" color="white" shadow="true" noclick="true" />
+			</panel>
+		</panel>
+	</template>
+
+	<template name="communicator_nameplate">
+		<panel
+			name="communicator_nameplate_{id}"
+			height="2.875h"
+			width="100%"
+			visible="0"
+			onmouseover="Call('communicator_nameplate_{id}_highlight', 'FadeIn(250)')"
+			onmouseout="Call('communicator_nameplate_{id}_highlight', 'FadeOut(250)')"
+			onrightclicklua="UIManager.GetInterface('main'):HoNCommunicatorF('RightClickUser', self, 'lobby', {id})"
+			onclicklua="UIManager.GetInterface('main'):HoNCommunicatorF('SelectUser', self, 'lobby', {id})"
+			ondoubleclicklua="UIManager.GetInterface('main'):HoNCommunicatorF('DoubleClickUser', self, 'lobby', {id})"
+		>
+			<panel
+				name="communicator_nameplate_{id}_normal"
+				color="#1d2f3b"
+				texture="/ui/fe2/elements/comm_item_bg.tga"
+				width="100%"
+				height="100%"
+				align="left"
+				valign="top"
+				noclick="true"
+				visible="1"
+			/>
+			<panel
+				name="communicator_nameplate_{id}_highlight"
+				onload="FadeOut(0)"
+				color="#46adff42"
+				texture="/ui/fe2/elements/comm_item_bg.tga"
+				width="100%"
+				height="100%"
+				align="left"
+				valign="top"
+				noclick="true"
+				visible="1"
+			/>
+			<panel
+				name="communicator_nameplate_{id}_selected"
+				onload="FadeOut(0)"
+				color="#346dff52"
+				texture="/ui/fe2/elements/comm_item_bg.tga"
+				width="100%"
+				height="100%"
+				align="left"
+				valign="top"
+				noclick="true"
+				visible="1"
+			/>
+			<!-- Symbol -->
+			<image
+				name="communicator_nameplate_{id}_symbol"
+				x="0.5h"
+				width="2.2h"
+				height="2.2h"
+				valign="center"
+				noclick="false"
+				onmouseover="
+					If(
+						!StringEquals(GetTexture(), '/ui/icons/ingame_2.tga'),
+						Split(
+							Trigger(
+								'StoreImagePreviewInit',
+								GetWidth(),
+								GetHeight(),
+								GetAbsoluteX(),
+								GetAbsoluteY(),
+								false,
+								GetTexture()
+							),
+							Trigger('StoreImagePreviewVis', true, '250%')
+						)
+					);
+				"
+				onmouseout="
+					DoEvent(1);
+				"
+				onhide="
+					DoEvent(1);
+				"
+				onevent1="
+					Trigger('StoreImagePreviewVis', false, '100%');
+				"
+			/>
+			<label
+				name="communicator_nameplate_{id}_label"
+				x="3.4h"
+				y="-0.15h"
+				height="100%"
+				width="-6.0h"
+				textvalign="center"
+				valign="center"
+				font="dyn_10"
+				color="white"
+				shadow="true"
+				noclick="true"
+			/>
+			<!-- Ascension Level -->
+			<panel name="communicator_nameplate_{id}_ascension" x="-3.5h" width="80@" height="80%" align="right" valign="center" noclick="1">
+				<image name="communicator_nameplate_{id}_ascension_img_0" texture="/ui/fe2/codex/s1.tga" width="3h" height="3h" align="center" valign="center" visible="1" noclick="1"/>
+				<image name="communicator_nameplate_{id}_ascension_img_1" texture="/ui/fe2/codex/s2.tga" width="3h" height="3h" align="center" valign="center" visible="0" noclick="1"/>
+				<image name="communicator_nameplate_{id}_ascension_img_2" texture="/ui/fe2/codex/s3.tga" width="3h" height="3h" align="center" valign="center" visible="0" noclick="1"/>
+
+				<label name="communicator_nameplate_{id}_ascension_label" width="200%" textalign="center" textvalign="bottom" align="center" valign="center" font="dyn_8" color="white" outline="true" noclick="1"/>
+			</panel>
+			<panel x="-0.4h" width="80@" height="80%" align="right" valign="center" noclick="true">
+				<!-- Avatar -->
+				<avatar
+					name="communicator_nameplate_{id}_avatar"
+					visible="true"
+					noclick="false"
+					texture="$invis"
+					onmouseover="
+						If(
+							!StringEquals(GetTexture(), '/ui/fe2/store/icons/account_icons/default.tga'),
+							Split(
+								Trigger(
+									'StoreImagePreviewInit',
+									GetWidth(),
+									GetHeight(),
+									GetAbsoluteX(),
+									GetAbsoluteY(),
+									false,
+									GetTexture()
+								),
+								Trigger('StoreImagePreviewVis', true, '250%')
+							)
+						);
+					"
+					onmouseout="
+						DoEvent(1);
+					"
+					onevent1="
+						Trigger('StoreImagePreviewVis', false, '100%');
+					"
+				/>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="communicator_lobby_nameplate">
+		<panel
+			name="communicator_lobby_nameplate_{id}"
+			height="2.875h"
+			width="100%"
+			visible="0"
+			onmouseover="Call('communicator_lobby_nameplate_{id}_highlight', 'FadeIn(250)')"
+			onmouseout="Call('communicator_lobby_nameplate_{id}_highlight', 'FadeOut(250)')"
+			onrightclicklua="UIManager.GetInterface('main'):HoNCommunicatorF('RightClickUser', self, 'game', {id})"
+			onclicklua="UIManager.GetInterface('main'):HoNCommunicatorF('SelectUser', self, 'game', {id})"
+			ondoubleclicklua="UIManager.GetInterface('main'):HoNCommunicatorF('DoubleClickUser', self, 'game', {id})"
+		>
+			<panel
+				name="communicator_lobby_nameplate_{id}_normal"
+				color="#1d2f3b"
+				texture="/ui/fe2/elements/comm_item_bg.tga"
+				width="100%"
+				height="100%"
+				align="left"
+				valign="top"
+				noclick="true"
+				visible="1"
+			/>
+			<panel
+				name="communicator_lobby_nameplate_{id}_highlight"
+				onload="FadeOut(0)"
+				color="#46adff42"
+				texture="/ui/fe2/elements/comm_item_bg.tga"
+				width="100%"
+				height="100%"
+				align="left"
+				valign="top"
+				noclick="true"
+				visible="1"
+			/>
+			<panel
+				name="communicator_lobby_nameplate_{id}_selected"
+				onload="FadeOut(0)"
+				color="#346dff52"
+				texture="/ui/fe2/elements/comm_item_bg.tga"
+				width="100%"
+				height="100%"
+				align="left"
+				valign="top"
+				noclick="true"
+				visible="1"
+			/>
+
+			<!-- loading bar -->
+			<panel
+				name="communicator_lobby_nameplate_{id}_loading"
+				visible="1"
+				color="lime"
+				texture="/ui/fe2/elements/comm_item_bg.tga"
+				align="left"
+				valign="top"
+				noclick="1"
+			/>
+
+			<!-- slot color orb thingy -->
+			<panel
+				name="communicator_lobby_nameplate_{id}_orbythingy"
+				x="0.4h"
+				width="2.0h" height="2.0h"
+				valign="center"
+				noclick="true"
+				color="white"
+			/>
+			
+			<!-- Symbol -->
+			<image
+				name="communicator_lobby_nameplate_{id}_symbol"
+				x="3.1h"
+				width="2.2h"
+				height="2.2h"
+				valign="center"
+				noclick="false"
+				onmouseover="
+					If(
+						!StringEquals(GetTexture(), '/ui/icons/ingame_2.tga'),
+						Split(
+							Trigger(
+								'StoreImagePreviewInit',
+								GetWidth(),
+								GetHeight(),
+								GetAbsoluteX(),
+								GetAbsoluteY(),
+								false,
+								GetTexture()
+							),
+							Trigger('StoreImagePreviewVis', true, '250%')
+						)
+					);
+				"
+				onmouseout="
+					DoEvent(1);
+				"
+				onhide="
+					DoEvent(1);
+				"
+				onevent1="
+					Trigger('StoreImagePreviewVis', false, '100%');
+				"
+			/>
+			<!-- name label -->
+			<label
+				name="communicator_lobby_nameplate_{id}_label"
+				x="6.0h"
+				y="-0.15h"
+				height="100%"
+				width="-6.0h"
+				textvalign="center"
+				valign="center"
+				font="dyn_10"
+				color="white"
+				shadow="true"
+				noclick="true"
+			/>
+			
+			<panel x="-0.4h" width="80@" height="80%" align="right" valign="center" noclick="true">
+				
+				<!-- Avatar -->
+				<avatar
+					name="communicator_lobby_nameplate_{id}_avatar"
+					visible="true"
+					noclick="false"
+					texture="$invis"
+					onmouseover="
+						If(
+							!StringEquals(GetTexture(), '/ui/fe2/store/icons/account_icons/default.tga'),
+							Split(
+								Trigger(
+									'StoreImagePreviewInit',
+									GetWidth(),
+									GetHeight(),
+									GetAbsoluteX(),
+									GetAbsoluteY(),
+									false,
+									GetTexture()
+								),
+								Trigger('StoreImagePreviewVis', true, '250%')
+							)
+						);
+					"
+					onmouseout="
+						DoEvent(1);
+					"
+					onevent1="
+						Trigger('StoreImagePreviewVis', false, '100%');
+					"
+				/>
+
+				<!-- Player kick button -->
+				<button
+					name="communicator_lobby_nameplate_{id}_kick"
+					width="80@" height="80%"
+					align="center" valign="center"
+					texture="/ui/elements/kick.tga"
+					onclicklua="UIManager.GetInterface('main'):HoNCommunicatorF('KickPlayer', self, {id})"
+				/>
+				
+			</panel>	
+		</panel>
+	</template>
+
+	<template name="communicator">
+		<panel name="communicator_main" group="comm_type" valign="bottom" noclick="1" color="invisible"
+			onreload="ChatRebuildChannels(); ChatRefresh();"
+			oninstantiate="DoEvent(0);"
+			onevent0lua="CommunicatorInitalize(self)"
+		>
+			<panel height="100%" valign="bottom" noclick="true" color="black">
+				<frame color="invisible" bordercolor=".1 .1 .1 1" borderthickness="3" noclick="true" />
+				<panel y="-0.5h" height="-1.0h" valign="bottom" width="24.0h" align="left" noclick="true" color="invisible">
+					<panel x="0.5h" height="-4.1h" width="-0.5h" noclick="true" color="invisible">
+						<panel float="bottom" width="-1.8h">
+							<instance name="communicator_channelplate"	id="1" />
+							<instance name="communicator_channelplate"	id="2" />
+							<instance name="communicator_channelplate"	id="3" />
+							<instance name="communicator_channelplate"	id="4" />
+							<instance name="communicator_channelplate"	id="5" />
+							<instance name="communicator_channelplate"	id="6" />
+							<instance name="communicator_channelplate"	id="7" />
+							<instance name="communicator_channelplate"	id="8" />
+							<instance name="communicator_channelplate"	id="9" />
+						</panel>
+
+						<!-- Channel Scroll bar -->
+						<panel name="communicator_channel_scroller" y="0" visible="true" color="1 0 0 0.0" clip="1" noclick="0" processonlyscroll="1"  hover="false"
+							onmousewheeldown="CallEvent('communicator_channel_scrollbar', 1);"
+							onmousewheelup="CallEvent('communicator_channel_scrollbar', 0);"
+						/>
+
+						<scrollbar
+							name="communicator_channel_scrollbar"
+							align="right"
+							width="1.8h"
+							scrollbarsize="1.7h"
+							handlewidth="1.7h"
+							handleheight="1.7h"							
+							texture="/ui/info/combobox.tga"
+							scrollbarplaceholder="true"
+							minvalue="0"
+							maxvalue="0"							
+							step="1"
+							value="0"
+							vertical="true"
+							slotwidth="0.6h" slotheight="1"
+							onevent1="SetValue(GetValue+1);"
+							onevent0="SetValue(GetValue-1);"
+							onslidelua="UIManager.GetInterface('main'):HoNCommunicatorF('ChannelListSlide', self, self:GetValue())"
+							/>
+					</panel>
+
+					<!-- Join Chan Button -->
+					<panel x="0.5h" width="-0.5h" height="3.5h" valign="bottom" noclick="true">
+						<frame texture="/ui/info/backdrop.tga" borderthickness="1h" color="1 1 1 .5" noclick="true" />
+						<frame color="invisible" bordercolor="#455166" borderthickness="1" noclick="true" />
+						
+							<panel x="0.5h" width="-9.6h" height="2.6h" valign="center" color="0 0 0 .5">
+								<frame color="invisible" bordercolor="#7b8c9b" borderthickness="1" noclick="1" />
+								<textbox
+									name="irc_channel_name"
+									y="0.3h"
+									width="-1.0h"
+									valign="center" align="center"
+									maxlength="250"
+									textalign="left" textvalign="center"
+									font="dyn_11"
+									textcolor="white"
+									shadow="false"
+									color="invisible"
+									onshow="
+										If(IsLoggedIn(), SetFocus(true));
+									"
+									onenter="
+										DoEvent();
+										EraseInputLine();
+									"
+									oneventlua="UIManager.GetInterface('main'):HoNCommunicatorF('CreateNewChannel', self)"
+									onesc="EraseInputLine(); SetFocus(true);"
+									onchange="
+										Trigger('ChatAutoCompleteClear');
+										CreateString('ui_autocompleteTextBox', name);
+										If(StringLength(this) gt 0,
+											Split(
+												EnableWidget('irc_join_create_button'),
+												If(StringLength(_irc_channel_name) ge 5, SleepWidget(750, ' If(StringLength(_irc_channel_name) ge 5, ChatAutocompleteChannel(_irc_channel_name))'))
+											),
+											Split(
+												DisableWidget('irc_join_create_button'),
+												ChatAutocompleteChannelCancel()
+											)
+										);
+										Set('_irc_channel_name', this);
+									"
+									onfocus="channel_auto = true;"
+									onlosefocus="channel_auto = false;"
+									onload="CreateString('_irc_channel_name', '');"
+								/>
+							</panel>
+							<instance
+								name="button2"
+								button_name="irc_join_create_button"
+								enabled="false"
+								x="-3.2h"
+								height="2.6h" width="5.5h"
+								align="right" valign="center"
+								font="dyn_11"
+								label="general_go"
+								onclick="CallEvent('irc_channel_name'); Call('irc_channel_name', 'EraseInputLine();');"
+							/>
+							<instance name="tip_mark" tip_id="irc_join_create_tip" width="2.4h" height="2.4h" x="-0.5h" valign="center" align="right" />
+							
+							<panel
+								x="-5.5h" y="-3.5h" width="18.0h" height="0.0h" align="right" valign="bottom"
+								visible="false"
+								color="invisible"
+								onload="CreateBool('channel_auto', false);"
+								watch="ChatAutoCompleteClear"
+								ontrigger="SetVisible(false);"
+								watch2="ChatAutoCompleteAdd"
+								ontrigger2="If(channel_auto, SetVisible(true));"
+							>
+								<instance
+									name="autocomplete_channel_list"
+									listbox_name="autocomplete_channel_list"
+									y="0.5h"
+									x="0.5h"
+									width="18.0h"
+									height="25.0h"
+									align="left"
+									valign="bottom"
+								/>
+							</panel>
+					</panel>
+					
+				</panel>				
+
+				<panel height="-0.5h" valign="bottom" width="-24.5h" align="right" color="invisible" noclick="true">
+					<!-- Channel Name -->
+					<panel height="2.8h" width="-0.5h">
+						<instance name="header_bar" show_close="true" onclicklua="UIManager.GetInterface('main'):HoNCommunicatorF('CloseChat', self)" close_name="channel_header_closebutton" />
+						<!-- game phase label -->
+						<label 	x="-4.0h" y="-0.1h"
+							name="communicator_game_header_phase"
+							width="100%"
+							height="100%"
+							align="right"
+							textalign="right"
+							textvalign="center"
+							color="1 1 1 .8"
+							shadow="true"
+							font="dyn_14"
+							noclick="true"  visible="1"
+						/>
+						<panel x="0.5h" width="-18.0h" align="left" float="right" clip="1" noclick="0"
+							onmouseoverlua="UIManager.GetInterface('main'):HoNCommunicatorF('HoverTopic', self, 1)"
+						>
+							<!-- chan name -->
+							<label name="communicator_chat_name" fitx="true" fitxpadding="0.5h" height="100%" valign="center" textalign="left" textvalign="center" color="#fce208" shadow="true" font="dyn_11" noclick="true"/>
+							<!-- chan topic -->
+							<label name="communicator_chat_topic" fitx="true" height="100%" valign="center" textalign="left" textvalign="center" color="1 1 1 .8" shadow="true" font="dyn_10" noclick="true"/>
+						</panel>
+						
+						<panel name="communicator_chat_topic_hoverer_panel" width="-18.0h" align="left" noclick="0" height="100%" grow="true" regrow="1" visible="false" onshow="BringToFront();"
+							onmouseoutlua="UIManager.GetInterface('main'):HoNCommunicatorF('HoverTopic', self, 0)"
+						>
+							<frame texture="/ui/frames/rounded_bg_white.tga" noclick="true" borderthickness="0.8h" color=".1 .1 .1 1"/>
+							<frame texture="/ui/frames/roundframe.tga" noclick="true" color="#455166" borderthickness="0.8h"/>
+							<!-- chan topic hover -->
+							<label
+								name="communicator_chat_topic_hoverer"
+								x="0.8h"
+								fitx="true"
+								fitxpadding="0.5"
+								height="100%"
+								font="dyn_9"
+								textvalign="center"
+								color="white" 
+								noclick="true"	
+							/>
+						</panel>
+
+						<panel x="-4.0h" height="100%" width="13.0h" align="right" noclick="true">
+							<instance name="Noptions_checkbox" checkbox_name="communicator_autoconnect" width="100%" align="right" valign="center" label="tooltip_autoconnect_title" onclicklua="UIManager.GetInterface('main'):HoNCommunicatorF('ClickAutoConnect', self, 0)" onrightclicklua="UIManager.GetInterface('main'):HoNCommunicatorF('ClickAutoConnect', self, 1)" font="dyn_9" onevent0lua=""/>
+							<instance name="tip_mark" tip_name="communicator_autoconnect_tip" tip_id="chan_autoconnect_tip" width="2.0h" height="2.0h" valign="center" align="right" />
+						</panel>
+					</panel>
+
+					<panel x="-0.5h" y="-0.5h" height="-3.5h" width="-0.5h" valign="bottom" align="right" noclick="true">
+						<frame color=".05 .07 .1 .5" bordercolor="#455166" borderthickness="1" noclick="true" />
+
+						<!-- Chat Buffer -->
+						<panel x="0.5h" y="0.5h" width="-28.5h" height="-5.0h" valign="top" color="invisible" noclick="true">					
+							<frame texture="/ui/info/backdrop.tga" borderthickness="1h" color="1 1 1 .5" noclick="true" />
+							<frame color="invisible" bordercolor="#455166" borderthickness="1" noclick="true" />					
+							<textbuffer
+								name="communicator_chatbuffer"
+								onclick="SetFocusName('communicator_send_box')"
+								scrolltexture="/ui/info/combobox.tga"
+								handleheight="2.25h"
+								y="-0.7h"
+								width="-1.0h" height="-1.2h"
+								align="center" valign="bottom"
+								scrollbarsize="2.25h"
+								textalign="left"
+								font="dyn_10"
+								wrap="true"
+								anchorbottom="true"
+								usesmileys="true"
+								maxlines="1000"
+								shadow="true"
+								color="invisible"
+								textcolor="white"
+							/>
+						</panel>
+
+						<!-- Text Entry -->
+						<panel x="0.5h" y="-0.5h" height="3.5h" width="-28.5h" align="left" valign="bottom">
+							<frame texture="/ui/info/backdrop.tga" borderthickness="1.0h" color="1 1 1 .5" noclick="1" />
+							<panel name="communicator_textbox_panel" x="0.5h" width="59.0h" height="2.6h" valign="center" color="0 0 0 .5">
+								<frame color="invisible" bordercolor="#7b8c9b" borderthickness="1" noclick="1" />
+								<textbox
+									name="communicator_send_box"
+									hpadding="0.5h"
+									vpadding="0.5h"
+									maxlength="250"
+									width="-1.0h"
+									font="dyn_10"
+									textcolor="white"
+									shadow="false"
+									color="invisible"
+									onshow="
+										If(IsLoggedIn(), SetFocus(true));
+										SetInputLine(GetCurrentChatMessage());
+									"
+									onkeydown="	If(param == 281, ChatPrevHistory());
+												If(param == 283, ChatNextHistory());
+												If(param == 281 or param == 283, SetInputLine(ChatGetCurHistory()));
+												If(param == chat_gameLobbyChatToggle and !_toggle_pressed,
+													Split(	DoEvent(2),
+															Set('_toggle_pressed', true)
+													)
+												);"
+									onkeyup="	If(param == chat_gameLobbyChatToggle and _toggle_pressed,
+													Split(	DoEvent(2),
+															Set('_toggle_pressed', false)
+													)
+												);"
+									onlosefocus="If(_toggle_pressed,
+													Split(	DoEvent(2),
+															Set('_toggle_pressed', false)
+													)
+												);"
+									oneventlua="UIManager.GetInterface('main'):HoNCommunicatorF('SendChat', self)"
+									onevent2lua="UIManager.GetInterface('main'):HoNCommunicatorF('ToggleChatType')"
+									onenter="DoEvent(); EraseInputLine();"
+									onesc="SetDefaultFocus(StringLength(this) gt 0); EraseInputLine();"
+									ontab="
+										CreateString('_temp_chat_message', TabChat(this));
+										If(!StringEquals(_temp_chat_message, this), SetInputLine(_temp_chat_message));
+									"
+									onchange="
+										CreateString('_temp_chat_message', SetCurrentChatMessage(this));
+										If(!StringEquals(_temp_chat_message, this), SetInputLine(_temp_chat_message));
+										If(StringLength(this) gt 0,
+											EnableWidget('communicator_send_button'),
+											DisableWidget('communicator_send_button')
+										);
+									"
+									onload="CreateBool('_toggle_pressed', false)"
+								/>
+							</panel>
+							<instance
+								name="button2"
+								button_name="game_lobby_chattype_team"
+								enabled="true"
+								visible="false"
+								x="-12.0h"
+								height="2.6h" width="8.0h"
+								align="right" valign="center"
+								font="dyn_11"
+								label="game_chat_button_team"
+								onclicklua="UIManager.GetInterface('main'):HoNCommunicatorF('ToggleChatType')"
+								onclick="Call('communicator_send_box', 'SetFocus(true);');"
+							/>
+							<instance
+								name="button2"
+								button_name="game_lobby_chattype_all"
+								enabled="true"
+								visible="false"
+								x="-12.0h"
+								height="2.6h" width="8.0h"
+								align="right" valign="center"
+								font="dyn_11"
+								label="game_chat_button_all"
+								onclicklua="UIManager.GetInterface('main'):HoNCommunicatorF('ToggleChatType')"
+								onclick="Call('communicator_send_box', 'SetFocus(true);');"
+							/>
+							<instance
+								name="button2"
+								button_name="communicator_send_button"
+								enabled="false"
+								x="-0.5h"
+								height="2.6h" width="11.0h"
+								align="right" valign="center"
+								font="dyn_11"
+								label="general_send"
+								onclick="Call('communicator_send_box', 'DoEvent()'); SetActiveWidget('communicator_send_box'); Call('communicator_send_box', 'EraseInputLine());');"
+							/>					
+						</panel>
+						
+						<!-- Userlist -->
+						<panel x="-0.5h" y="0.5h" width="27.0h" height="-1.0h" valign="top" align="right" color="invisible" noclick="true">
+							<frame texture="/ui/info/backdrop.tga" borderthickness="1h" color="1 1 1 .5" noclick="true" />
+							<!-- user plate entries go here -->
+							<panel name="communicator_normal_plateset" float="bottom" width="-1.8h">
+								<instance name="communicator_nameplate"	id="1" />
+								<instance name="communicator_nameplate"	id="2" />
+								<instance name="communicator_nameplate"	id="3" />
+								<instance name="communicator_nameplate"	id="4" />
+								<instance name="communicator_nameplate"	id="5" />
+								<instance name="communicator_nameplate"	id="6" />
+								<instance name="communicator_nameplate"	id="7" />
+								<instance name="communicator_nameplate"	id="8" />
+								<instance name="communicator_nameplate"	id="9" />
+								<instance name="communicator_nameplate"	id="10" />
+								<instance name="communicator_nameplate"	id="11" />
+								<instance name="communicator_nameplate"	id="12" />
+							</panel>
+							<panel name="communicator_lobby_plateset" float="bottom" width="-1.8h">
+								<instance name="communicator_lobby_nameplate"	id="1" />
+								<instance name="communicator_lobby_nameplate"	id="2" />
+								<instance name="communicator_lobby_nameplate"	id="3" />
+								<instance name="communicator_lobby_nameplate"	id="4" />
+								<instance name="communicator_lobby_nameplate"	id="5" />
+								<instance name="communicator_lobby_nameplate"	id="6" />
+								<instance name="communicator_lobby_nameplate"	id="7" />
+								<instance name="communicator_lobby_nameplate"	id="8" />
+								<instance name="communicator_lobby_nameplate"	id="9" />
+								<instance name="communicator_lobby_nameplate"	id="10" />
+								<instance name="communicator_lobby_nameplate"	id="11" />
+								<instance name="communicator_lobby_nameplate"	id="12" />
+							</panel>
+
+							<!-- User Scroll bar -->
+							<panel name="communicator_user_scroller" y="0" visible="true" color="1 0 0 0.0" clip="1" noclick="0" processonlyscroll="1"  hover="false"
+								onmousewheeldown="CallEvent('communicator_user_scrollbar', 1);"
+								onmousewheelup="CallEvent('communicator_user_scrollbar', 0);"
+							/>
+
+							<scrollbar
+								name="communicator_user_scrollbar"
+								align="right"
+								width="1.8h"
+								scrollbarsize="1.7h"
+								handlewidth="1.7h"
+								handleheight="1.7h"							
+								texture="/ui/info/combobox.tga"
+								scrollbarplaceholder="true"
+								minvalue="0"
+								maxvalue="0"							
+								step="1"
+								value="0"
+								vertical="true"
+								slotwidth="0.6h" slotheight="1"
+								onevent1="SetValue(GetValue+1);"
+								onevent0="SetValue(GetValue-1);"
+								onslidelua="UIManager.GetInterface('main'):HoNCommunicatorF('UserListSlide', self, self:GetValue())"
+								/>
+						</panel>
+
+					</panel>					
+				</panel>
+			</panel>
+			
+		</panel>
+	</template>
+</package>

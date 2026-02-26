@@ -1,0 +1,1924 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+
+<!-- main.interface / system_bar.package -->
+
+	<if condition="!cg_newMainInterface">
+		<instance name="simple_tooltip_nowrap" tip_id="sysbar_playersonline_tip" x="3h" y="-4h" label="tooltip_players_online" />
+		<instance name="simple_tooltip_nowrap" tip_id="sysbar_purchase_tip" x="3h" y="-4h" label="tooltip_purchase" />
+		<instance name="simple_tooltip_nowrap" tip_id="sysbar_stats_tip" x="3h" y="-4h" label="tooltip_viewstats" />
+		<instance name="simple_tooltip_nowrap" tip_id="sysbar_language_tip" x="3h" y="-4h" label="tooltip_lang" />
+		<instance name="simple_tooltip_nowrap" tip_id="sysbar_rap_tip" x="3h" y="-4h" label="tooltip_rap" />
+		<instance name="simple_tooltip_nowrap" tip_id="sysbar_replays_tip"  x="3h" y="-4h" label="tooltip_offlinereplays" />
+		<instance name="simple_tooltip_nowrap" tip_id="sysbar_options_tip" x="3h" y="-4h" label="tooltip_options" />
+		<instance name="simple_tooltip_nowrap" tip_id="sysbar_gca_tip" x="3h" y="-4h" label="tooltip_viewgca" />
+		<instance name="simple_tooltip_nowrap" tip_id="sysbar_changelog_tip" x="3h" y="-4h" label="tooltip_changelog" />
+		<instance name="simple_tooltip_nowrap" tip_id="sysbar_logout_tip" x="3h" y="-4h" label="tooltip_logout" />
+		<instance name="simple_tooltip_nowrap" tip_id="sysbar_disconnect_tip" x="3h" y="-4h" label="general_disconnect" />
+		<instance name="simple_tooltip_nowrap" tip_id="sysbar_friendslist_tip" x="3h" y="-4h" label="tooltip_friends" />
+		<instance name="simple_tooltip_nowrap" tip_id="sysbar_globalmessages_tip" x="3h" y="-4h" label="sysmessage_tip" />
+		<instance name="simple_tooltip_nowrap" tip_id="sysbar_clanlist_tip" x="3h" y="-4h" label="tooltip_clan" />
+		<instance name="simple_tooltip_nowrap" tip_id="sysbar_notifications_tip" x="3h" y="-4h" label="tooltip_notifications" />
+		<instance name="simple_tooltip_nowrap" tip_id="sysbar_im_tip" x="3h" y="-4h" label="tooltip_ims" />
+		<instance name="simple_tooltip_floater" tip_id="sysbar_accextras_tip" width="17.0h" label="tooltip_extras" />
+		<instance name="simple_tooltip_floater" tip_id="sysbar_no_lang" width="23.0h" textalign="left" label="lang_notnow" />
+		<instance name="generic_tooltip_floater" tip_id="chan_autoconnect_tip" width="20.0h" title="tooltip_autoconnect_title" label="tooltip_autoconnect" />
+		<instance name="generic_tooltip_floater" tip_id="irc_join_create_tip" width="24.0h" title="irc_join_create_tip_title" label="irc_join_create_tip" />
+
+		<instance name="simple_tooltip_floater" tip_id="main_login_auto_auth_tip" width="23.0h" textalign="left" label="main_login_auto_auth_tip" />
+		<instance name="simple_tooltip_floater" tip_id="main_login_invis_mode_tip" width="23.0h" textalign="left" label="main_login_invis_mode_tip" />
+		<instance name="simple_tooltip_floater" tip_id="main_login_save_username_tip" width="23.0h" textalign="left" label="main_login_save_username_tip" />
+		<instance name="simple_tooltip_nowrap" tip_id="sysbar_report_tip" x="3h" y="-4h" label="tooltip_report" />
+		<instance name="generic_tooltip_floater" icony="0.4h" iconheight="1.8h" iconwidth="1.8h" tip_id="sysbar_gold_tip" title="sysbar_gold_tip_title" label="sysbar_gold_tip_msg" icon="/ui/fe2/store/gold_coins.tga" />
+		<instance name="generic_tooltip_floater" icony="0.4h" iconheight="1.8h" iconwidth="1.8h" tip_id="sysbar_silver_tip" title="sysbar_silver_tip_title" label="sysbar_silver_tip_msg" icon="/ui/fe2/store/silver_coins.tga" />
+	</if>
+	<instance name="simple_tooltip_floater" tip_id="amm_status_player_discoed" width="18.0h" textalign="left" label="matchmaker_alert_discoed_tip" />
+
+	<instance name="simple_tooltip_floater" tip_id="sysbar_account_extras_tip_" width="17.0h" label="tooltip_extras" />
+	<instance name="generic_tooltip_floater" tip_id="sysbar_account_extras_tip_form_create_subaccount" title="web_form_subaccount_title" label="web_form_subaccount_description_short" />
+	<instance name="generic_tooltip_floater" tip_id="sysbar_account_extras_tip_form_name_change" title="web_form_nickchange_title" label="web_form_nickchange_description_short" />
+	<instance name="tokens_tooltip_floater" icony="0.4h" iconheight="1.8h" iconwidth="1.8h" tip_id="sysbar_token_tip" title="sysbar_token_tip_title" label="sysbar_token_tip_msg" icon="/ui/fe2/store/icons/hero_token.tga" />
+
+	<if condition="!cl_garenaEnable">
+		<instance name="generic_tooltip_floater" icony="0.4h" iconheight="1.8h" iconwidth="1.8h" tip_id="sysbar_token_tip_verified" title="sysbar_token_tip_title_legacy" label="sysbar_token_tip_msg_legacy" icon="/ui/fe2/store/icons/hero_token.tga" />
+	</if>
+
+	<if condition="cl_garenaEnable">
+		<instance name="generic_tooltip_floater" icony="0.4h" iconheight="1.8h" iconwidth="1.8h" tip_id="sysbar_token_tip_verified" title="sysbar_token_tip_title_legacy" label="sysbar_token_tip_msg_garena" icon="/ui/fe2/store/icons/hero_token.tga" />
+	</if>
+
+	<instance name="generic_tooltip_floater" tip_id="sysbar_report_tip_disabled" title="tooltip_report_disabled_title" label="tooltip_report_disabled_msg" icon="/ui/icons/verified.tga" />
+
+	<instance name="generic_tooltip_floater" icony="0.4h" iconheight="1.8h" iconwidth="1.8h" x="2.8h" y="0.8h" tip_id="general_friend" title="tooltip_general_friend_title" label="tooltip_general_friend_msg" icon="/ui/fe2/systembar/icons/friends.tga" color="0 0.7 1 1" />
+	<instance name="generic_tooltip_floater" icony="0.4h" iconheight="1.8h" iconwidth="1.8h" x="2.8h" y="0.8h" tip_id="general_nofriend" title="tooltip_general_nofriend_title" label="tooltip_general_nofriend_msg" icon="/ui/fe2/systembar/icons/friends.tga" color="1 1 1 0.6" />
+
+	<instance name="generic_tooltip_floater" icony="0.4h" x="2.8h" y="0.8h" tip_id="general_verified" title="tooltip_general_verified_title" label="tooltip_general_verified_msg" icon="/ui/icons/verified.tga" />
+	<instance name="generic_tooltip_floater" icony="0.4h" x="2.8h" y="0.8h" tip_id="general_basic" title="tooltip_general_basic_title" label="tooltip_general_basic_msg" icon="/ui/icons/basic.tga" />
+
+	<instance name="generic_tooltip_floater" icony="0.4h" x="-28.8h" y="0.8h" tip_id="general_verified_l" title="tooltip_general_verified_title" label="tooltip_general_verified_msg" icon="/ui/icons/verified.tga" />
+	<instance name="generic_tooltip_floater" icony="0.4h" x="-28.8h" y="0.8h" tip_id="general_basic_l" title="tooltip_general_basic_title" label="tooltip_general_basic_msg" icon="/ui/icons/basic.tga" />
+
+	<instance name="generic_tooltip_floater" tip_id="mainmenu_peelbutton_tip" title="main_peel_tip" label="main_peel_tip_body" />
+	<instance name="generic_tooltip_floater" tip_id="mainmenu_peelbutton_2_tip" title="main_peel_2_tip" label="main_peel_2_tip_body" x="-25.8h" />
+	<instance name="generic_tooltip_floater" tip_id="mainmenu_acheivements_tip" title="main_achievements_tip" label="main_achievements_tip_body" />
+
+
+<!-- game_options.package -->
+	<instance name="generic_tooltip_float_resizey" tip_id="camerascroll_tip" title="options_label_scroll_speed" label="options_camera_scroll_speed_tip" />
+	<instance name="generic_tooltip_float_resizey" tip_id="edgescroll_tip" title="options_checkbox_screen_edge_scroll" label="options_screen_edge_scroll_tip" />
+	<instance name="generic_tooltip_float_resizey" tip_id="constraincursor_tip" title="options_checkbox_constrain_cursor" label="options_constrain_cursor_tip" />
+	<instance name="generic_tooltip_float_resizey" tip_id="lockcamera_tip" title="options_checkbox_camera_lock" label="options_screen_camera_lock_tip" />
+	<instance name="generic_tooltip_float_resizey" tip_id="mvolume_tip" title="options_label_master_volume" label="options_master_volume_tip" />
+	<instance name="generic_tooltip_float_resizey" tip_id="soundfx_tip" title="options_label_sound_effects" label="options_sound_effects_tip" />
+	<instance name="generic_tooltip_float_resizey" tip_id="options_unit_voice_reaction_tip" title="options_unit_voice_reaction" label="options_unit_voice_reaction_tip" />
+	<instance name="generic_tooltip_float_resizey" tip_id="interface_tip" title="options_label_interface_volume" label="options_interface_volume_tip" />
+	<instance name="generic_tooltip_float_resizey" tip_id="music_tip" title="options_label_music_volume" label="options_label_music_volume_tip" />
+	<instance name="generic_tooltip_float_resizey" tip_id="modelvertexes_tip" title="options_label_model_quality" label="options_model_quality_tip" />
+	<instance name="generic_tooltip_float_resizey" tip_id="texturesize_tip" title="options_label_texture_size" label="options_texture_size_tip" />
+	<instance name="generic_tooltip_float_resizey" width="28h" tip_id="shaderwaterquality_tip" title="options_shader_water_quality" label="options_shader_water_quality_tip" />
+	<instance name="generic_tooltip_float_resizey" width="28h" tip_id="shaderquality_tip" title="options_shader_quality" label="options_shader_quality_tip" />
+	<instance name="generic_tooltip_float_resizey" width="34h" tip_id="shadowclarity_tip" title="options_shadow_quality" label="options_shadow_quality_tip" />
+	<instance name="generic_tooltip_float_resizey" width="46h" tip_id="specialeffects_tip" title="options_special_effects" label="options_special_effects_tip" />
+	<instance name="generic_tooltip_float_resizey" tip_id="fullscreen_tip" title="options_checkbox_full_screen_mode" label="options_full_screen_tip" />
+	<instance name="generic_tooltip_float_resizey" tip_id="exclusive_tip" title="options_checkbox_exclusive_mode" label="options_exclusive_mode_tip" />
+	<instance name="generic_tooltip_float_resizey" tip_id="frameque_tip" title="options_checkbox_frame_queuing" label="options_frame_queuing_tip" />
+	<instance name="generic_tooltip_float_resizey" tip_id="display_tip" title="options_label_display" label="options_display_tip" />
+	<instance name="generic_tooltip_float_resizey" tip_id="video_driver_tip" title="options_label_vid_quality" label="options_video_drivers_tip" />
+	<instance name="generic_tooltip_float_resizey" tip_id="resolution_tip" title="options_label_resolution" label="options_resolution_tip" />
+	<instance name="generic_tooltip_float_resizey" tip_id="colordepth_tip" title="options_label_color_depth" label="options_color_depth_tip" />
+	<instance name="generic_tooltip_float_resizey" tip_id="refreshrate_tip" title="options_label_refresh_rate" label="options_tip_refresh_rate" />
+	<instance name="generic_tooltip_float_resizey" tip_id="aa_tip" title="options_label_anti_aliasing" label="options_label_anti_aliasing_tip" />
+	<instance name="generic_tooltip_float_resizey" tip_id="aspect_tip" title="options_label_aspect_ratio" label="options_label_aspect_ratio_tip" />
+	<instance name="generic_tooltip_float_resizey" tip_id="tfilter_tip" title="options_label_texture_filtering" label="options_label_texture_filtering_tip" />
+	<instance name="generic_tooltip_float_resizey" tip_id="brightness_tip" title="options_label_brightness" label="options_brightness_tip" />
+	<instance name="generic_tooltip_float_resizey" tip_id="foliage_tip" title="options_display_foliage" label="options_foliage_tip_text" />
+	<instance name="generic_tooltip_float_resizey" tip_id="skybox_tip" title="options_display_skybox" label="options_skybox_tip_text" />
+	<instance name="generic_tooltip_float_resizey" tip_id="vsync_tip" title="options_vsync" label="options_vsync_tip_text" />
+	<instance name="generic_tooltip_float_resizey" tip_id="d3dex_tip" title="options_d3dex" label="options_d3dex_tip_text" />
+	<instance name="generic_tooltip_float_resizey" tip_id="alienfx_tip" title="options_alienfx" label="options_alienfx_tip" />
+	<instance name="generic_tooltip_float_resizey" tip_id="lights_tip" title="options_dynamic_lights" label="options_dynamic_lights_tip" />
+	<instance name="generic_tooltip_float_resizey" tip_id="reflection_tip" title="options_reflections" label="options_reflections_tip" />
+	<instance name="generic_tooltip_float_resizey" tip_id="refraction_tip" title="options_refraction" label="options_refraction_tip" />
+	<instance name="generic_tooltip_float_resizey" tip_id="postproc_tip" title="options_post_processing" label="options_post_processing_tip" />
+	<instance name="generic_tooltip_float_resizey" tip_id="rim_lighting_tip" title="options_rim_lighting" label="options_rim_lighting_tip" />
+	<instance name="generic_tooltip_float_resizey" tip_id="spectator_fog_tip" title="options_spec_fog" label="options_spec_fog_tip" />
+	<instance name="generic_tooltip_float_resizey" tip_id="spectator_skybox_tip" title="options_spec_skybox" label="options_spec_skybox_tip" />
+	<instance name="generic_tooltip_float_resizey" tip_id="sound_output_tip" title="options_label_sound_output" label="options_sound_output_tip" />
+	<instance name="generic_tooltip_float_resizey" tip_id="playback_tip" title="options_label_playback_driver" label="options_playback_driver_tip" />
+	<instance name="generic_tooltip_float_resizey" tip_id="recording_tip" title="options_label_recording_driver" label="options_recording_drive_tip" />
+	<instance name="generic_tooltip_float_resizey" tip_id="quality_tip" title="options_label_sound_quality" label="options_sound_quality_tip" />
+	<instance name="generic_tooltip_float_resizey" tip_id="channels_tip" title="options_label_sound_channels" label="options_sound_channels_tip" />
+	<instance name="generic_tooltip_float_resizey" tip_id="nosound_tip" title="options_checkbox_disable_all_sounds" label="options_disable_all_sounds_tip" />
+	<instance name="generic_tooltip_float_resizey" tip_id="reactions_tip" title="options_checkbox_unit_reactions" label="options_unit_reactions_tip" />
+	<instance name="generic_tooltip_float_resizey" tip_id="announcer_tip" title="options_checkbox_mute_announcer" label="options_checkbox_mute_announcer_tip" />
+	<instance name="generic_tooltip_float_resizey" tip_id="sound_mute_tip" title="options_checkbox_sound_mute" label="options_checkbox_sound_mute_tip" />
+	<instance name="generic_tooltip_float_resizey" tip_id="sound_muteMusic_tip" title="options_checkbox_sound_muteMusic" label="options_checkbox_sound_muteMusic_tip" />
+	<instance name="generic_tooltip_float_resizey" tip_id="testlevel_tip" title="options_label_test_mic_level" label="options_test_mic_level_tip" />
+	<instance name="generic_tooltip_float_resizey" tip_id="voicevol_tip" title="options_label_voice_chat_volume" label="options_voice_chat_volume_tip" />
+	<instance name="generic_tooltip_float_resizey" tip_id="linein_tip" title="options_label_microphone_volume" label="options_mic_volume_tip" />
+	<instance name="generic_tooltip_float_resizey" tip_id="micgain_tip" title="options_label_microphone_gain" label="options_mic_gain_tip" />
+	<instance name="generic_tooltip_float_resizey" tip_id="audiodampen_tip" title="options_label_auto_sound_dampen" label="options_auto_dampen_tip" />
+	<instance name="generic_tooltip_float_resizey" tip_id="micboost_tip" title="options_checkbox_mic_boost" label="options_mic_boost_tip" />
+	<instance name="generic_tooltip_float_resizey" tip_id="novoice_tip" title="options_checkbox_disable_voice_chat" label="options_disable_voice_chat_tip" />
+	<instance name="generic_tooltip_float_resizey" tip_id="ptt_tip" title="options_checkbox_push_to_talk" label="options_push_to_talk_enable_tip" />
+	<instance name="generic_tooltip_float_resizey" tip_id="onsensitivity_tip" title="options_label_mic_on_sensitivity" label="options_mic_on_sensitivity_tip" />
+	<instance name="generic_tooltip_float_resizey" tip_id="silence_tip" title="options_label_mic_off_time" label="options_mic_off_time_tip" />
+	<instance name="generic_tooltip_float_resizey" tip_id="pttbutton_tip" title="options_label_push_to_talk_keybind" label="options_push_to_talk_tip" />
+	<instance name="generic_tooltip_float_resizey" tip_id="pttlanebutton_tip" title="options_label_lane_talk_keybind" label="options_push_to_lane_talk_tip" />
+	<instance name="generic_tooltip_float_resizey" tip_id="pttmentorbutton_tip" title="options_label_mentor_talk_keybind" label="options_push_to_mentor_talk_tip" />
+	<instance name="generic_tooltip_float_resizey" tip_id="options_checkbox_healthbar_size_tip" title="options_checkbox_healthbar_size" label="options_checkbox_healthbar_size_tip" />
+	<instance name="generic_tooltip_float_resizey" tip_id="health_always_on" title="options_checkbox_health_always_on" label="options_screen_health_always_on_tip" />
+	<instance name="generic_tooltip_float_resizey" tip_id="ground_sprite" title="options_checkbox_ground_sprite" label="options_screen_ground_sprite_tip" />
+	<instance name="generic_tooltip_float_resizey" tip_id="death_tips" title="options_checkbox_death_tips" label="options_screen_death_tip" />
+	<instance name="generic_tooltip_float_resizey" tip_id="show_exp" title="options_checkbox_show_exp" label="options_screen_show_exp_tip" />
+	<instance name="generic_tooltip_float_resizey" tip_id="show_crit" title="options_checkbox_show_crit" label="options_screen_show_crit_tip" />
+	<instance name="generic_tooltip_float_resizey" tip_id="show_deny" title="options_checkbox_show_deny" label="options_screen_show_deny_tip" />
+	<instance name="generic_tooltip_float_resizey" tip_id="show_menu_transitions" title="options_checkbox_show_menu_transitions" label="options_screen_show_menu_transitions_tip" />
+	<instance name="generic_tooltip_float_resizey" tip_id="hover_hero_inf" title="options_checkbox_hover_hero_info" label="options_screen_hover_hero_info_tip" />
+	<instance name="generic_tooltip_float_resizey" tip_id="team_or_player_color" title="options_checkbox_team_or_player_color" label="options_screen_team_or_player_color_tip" />
+	<instance name="generic_tooltip_float_resizey" tip_id="show_gold" title="options_checkbox_show_gold" label="options_screen_show_gold_tip" />
+	<instance name="generic_tooltip_float_resizey" tip_id="censor_chat_tip" title="options_checkbox_censor_chat" label="options_screen_censor_chat_tip" />
+	<instance name="generic_tooltip_float_resizey" tip_id="show_magic" title="options_checkbox_show_magic" label="options_screen_show_magic_tip" />
+	<instance name="generic_tooltip_float_resizey" tip_id="show_cooldowns" title="options_checkbox_show_cooldowns" label="options_screen_show_cooldowns_tip" />
+	<instance name="generic_tooltip_float_resizey" tip_id="show_experience_range" title="options_checkbox_show_experience_range" label="options_screen_show_experience_range_tip" />
+	<instance name="generic_tooltip_float_resizey" tip_id="co_primarybtn_tip" title="options_label_primary_keybind" label="options_label_primary_keybind_tooltip" />
+	<instance name="generic_tooltip_float_resizey" tip_id="co_secondarybtn_tip" title="options_label_secondary_keybind" label="options_label_secondary_keybind_tooltip" />
+	<instance name="generic_tooltip_float_resizey" tip_id="co_shiftmod_tip" title="options_label_shift_keybind" label="options_label_shiftmod_keybind_tooltip" />
+	<instance name="generic_tooltip_float_resizey" tip_id="co_ctrlmod_tip" title="options_label_ctrl_keybind" label="options_label_ctrlmod_keybind_tooltip" />
+	<instance name="generic_tooltip_float_resizey" tip_id="co_mod3_tip" title="options_label_mod3_keybind" label="options_label_mod3_keybind_tooltip" />
+	<instance name="generic_tooltip_float_resizey" tip_id="co_center_tip" title="options_label_center_screen_keybind" label="options_label_center_screen_keybind_tooltip" />
+	<instance name="generic_tooltip_float_resizey" tip_id="co_centerinfo_tip" title="options_label_center_info_keybind" label="options_label_center_info_keybind_tooltip" />
+	<instance name="generic_tooltip_float_resizey" tip_id="selection_highlight_checkbox_tip" title="options_checkbox_selection_highlight" label="options_checkbox_selection_highlight_tip" />
+
+	<instance name="generic_tooltip_float_resizey" tip_id="options_checkbox_showselectionring_tip" title="options_checkbox_showselectionring" label="options_checkbox_showselectionring_tip" />
+	<instance name="generic_tooltip_float_resizey" tip_id="options_checkbox_hovershowselectionring_tip" title="options_checkbox_hovershowselectionring" label="options_checkbox_hovershowselectionring_tip" />
+	<instance name="generic_tooltip_float_resizey" tip_id="options_checkbox_showplayerring_tip" title="options_checkbox_showplayerring" label="options_checkbox_showplayerring_tip" />
+
+	<instance name="generic_tooltip_float_resizey" tip_id="enable_minimap_rightclick" title="options_enable_minimap_rightclick" label="options_enable_minimap_rightclick_tip" />
+	<instance name="generic_tooltip_float_resizey" tip_id="options_checkbox_show_timestamps_tip" title="options_checkbox_show_timestamps" label="options_checkbox_show_timestamps_tip" />
+	<instance name="generic_tooltip_float_resizey" tip_id="options_checkboxreverse_minimap_tip" title="options_checkbox_reverse_minimap" label="options_checkbox_reverse_minimap_tip" />
+	<instance name="generic_tooltip_float_resizey" tip_id="options_checkbox_camera_center_on_respawn_tip" title="options_checkbox_camera_center_on_respawn" label="options_checkbox_camera_center_on_respawn_tip" />
+	<instance name="generic_tooltip_float_resizey" tip_id="options_checkbox_disable_background_effects_tip" title="options_checkbox_disable_background_effects" label="options_checkbox_disable_background_effects_tip" />
+	<instance name="generic_tooltip_float_resizey" tip_id="options_checkbox_cast_indicators_tip" title="options_checkbox_cast_indicators" label="options_checkbox_cast_indicators_tip" />
+	<instance name="generic_tooltip_float_resizey" tip_id="options_current_weather_tip" title="options_current_weather" label="options_current_weather_tip" />
+	<instance name="generic_tooltip_float_resizey" tip_id="options_slider_notification_duration_tip" title="options_slider_notification_duration" label="options_slider_notification_duration_tip" />
+	<instance name="generic_tooltip_float_resizey" tip_id="options_checkbox_disable_notifications_tip" title="options_checkbox_disable_notifications" label="options_checkbox_disable_notifications_tip" />
+	<instance name="generic_tooltip_float_resizey" tip_id="options_checkbox_disable_notifications_ingame_tip" title="options_checkbox_disable_notifications_ingame" label="options_checkbox_disable_notifications_ingame_tip" />
+	<instance name="generic_tooltip_float_resizey" tip_id="options_enable_move_on_disconnect_tip" title="options_enable_move_on_disconnect" label="options_enable_move_on_disconnect_tip" />
+	<instance name="generic_tooltip_float_resizey" tip_id="options_double_activate_abilities_tip" title="options_double_activate_abilities" label="options_double_activate_abilities_tip" />
+	<instance name="generic_tooltip_float_resizey" tip_id="options_display_advanced_ability_tooltips_tip" title="options_display_advanced_ability_tooltips" label="options_display_advanced_ability_tooltips_tip" />
+
+	<instance name="generic_tooltip_float_resizey" tip_id="options_healthbar_shadows_hero_tip" title="options_healthbar_shadows_hero" label="options_healthbar_shadows_hero_tip" />
+	<instance name="generic_tooltip_float_resizey" tip_id="options_toonshading_hero_tip" title="options_toonshading_hero" label="options_toonshading_hero_tip" />
+	<instance name="generic_tooltip_float_resizey" tip_id="options_toonshading_misc_tip" title="options_toonshading_misc" label="options_toonshading_misc_tip" />
+	<!--
+	<instance name="generic_tooltip_float_resizey" tip_id="options_healthbar_shadows_creep_tip" title="options_healthbar_shadows_creep" label="options_healthbar_shadows_creep_tip" />
+	<instance name="generic_tooltip_float_resizey" tip_id="options_healthbar_shadows_building_tip" title="options_healthbar_shadows_buildings" label="options_healthbar_shadows_buildings_tip" />
+	<instance name="generic_tooltip_float_resizey" tip_id="options_healthbar_shadows_misc_tip" title="options_healthbar_shadows_misc" label="options_healthbar_shadows_misc_tip" />
+	-->
+
+	<instance name="generic_tooltip_float_resizey" tip_id="options_checkbox_goldlerp_tip" title="options_checkbox_goldlerp" label="options_checkbox_goldlerp_tip" />
+	<instance name="generic_tooltip_float_resizey" tip_id="options_shop_confirm_buyall_tip" title="options_checkbox_shop_confirm_buyall" label="options_checkbox_shop_confirm_buyall_tip" />
+
+<!-- notifications.package -->
+	<instance name="generic_tooltip_float_resizey" tip_id="notification_optip_frequest" title="" label="" />
+	<instance name="generic_tooltip_float_resizey" tip_id="notification_optip_fremove" title="" label="" />
+	<instance name="generic_tooltip_float_resizey" tip_id="notification_optip_fsignon" title="" label="" />
+	<instance name="generic_tooltip_float_resizey" tip_id="notification_optip_fsignoff" title="" label="" />
+	<instance name="generic_tooltip_float_resizey" tip_id="notification_optip_fjoingame" title="" label="" />
+	<instance name="generic_tooltip_float_resizey" tip_id="notification_optip_fleavegame" title="" label="" />
+	<instance name="generic_tooltip_float_resizey" tip_id="notification_optip_fimreceived" title="" label="" />
+	<instance name="generic_tooltip_float_resizey" tip_id="notification_optip_fpmreceived" title="" label="" />
+	<instance name="generic_tooltip_float_resizey" tip_id="notification_optip_fscored" title="" label="" />
+	<instance name="generic_tooltip_float_resizey" tip_id="notification_optip_cpromote" title="" label="" />
+	<instance name="generic_tooltip_float_resizey" tip_id="notification_optip_cdemote" title="" label="" />
+	<instance name="generic_tooltip_float_resizey" tip_id="notification_optip_cremove" title="" label="" />
+	<instance name="generic_tooltip_float_resizey" tip_id="notification_optip_cadd" title="" label="" />
+	<instance name="generic_tooltip_float_resizey" tip_id="notification_optip_cevent" title="" label="" />
+	<instance name="generic_tooltip_float_resizey" tip_id="notification_optip_tnew" title="" label="" />
+	<instance name="generic_tooltip_float_resizey" tip_id="notification_optip_tupmatch" title="" label="" />
+	<instance name="generic_tooltip_float_resizey" tip_id="notification_optip_tregistered" title="" label="" />
+	<instance name="generic_tooltip_float_resizey" tip_id="notification_optip_tresults" title="" label="" />
+	<instance name="generic_tooltip_float_resizey" tip_id="notification_optip_igame" title="" label="" />
+	<instance name="generic_tooltip_float_resizey" tip_id="notification_optip_ichannel" title="" label="" />
+	<instance name="generic_tooltip_float_resizey" tip_id="notification_optip_iclan" title="" label="" />
+	<instance name="generic_tooltip_float_resizey" tip_id="notification_optip_imatchmaking" title="" label="" />
+	<instance name="generic_tooltip_float_resizey" tip_id="notification_optip_" title="" label="" />
+
+	<!--<instance name="simple_tooltip_nowrap" tip_id="notification_join_allheroes" label="mainlobby_gamelist_allheroes_title" />-->
+	<instance name="simple_tooltip_nowrap" tip_id="notification_join_allrandom" label="mainlobby_gamelist_randomdraft_title" />
+	<instance name="simple_tooltip_nowrap" tip_id="notification_join_casual" label="mainlobby_gamelist_casual_title" />
+	<instance name="simple_tooltip_nowrap" tip_id="notification_join_gated" label="mainlobby_gamelist_gated_title" />
+	<!--<instance name="simple_tooltip_nowrap" tip_id="notification_join_easymode" label="mainlobby_gamelist_easymode_title" />-->
+	<instance name="simple_tooltip_nowrap" tip_id="notification_join_advanced" label="mainlobby_gamelist_more_title" />
+	<instance name="simple_tooltip_nowrap" tip_id="notification_join_autobalance" label="mainlobby_gamelist_autobalance_title" />
+	<instance name="simple_tooltip_nowrap" tip_id="notification_join_official" label="mainlobby_gamelist_official_title" />
+	<instance name="simple_tooltip_nowrap" tip_id="notification_join_official2" label="mainlobby_gamelist_official_2_title" />
+	<instance name="simple_tooltip_nowrap" tip_id="notification_join_noleaver" label="mainlobby_gamelist_noleaver_title" />
+	<instance name="simple_tooltip_nowrap" tip_id="notification_join_verifiedonly" label="mainlobby_gamelist_verifiedonly_title" />
+	<instance name="simple_tooltip_nowrap" tip_id="notification_join_private" label="gamelobby_private_button" />
+	<instance name="simple_tooltip_nowrap" tip_id="notification_join_dev_heroes" label="general_mode_dev_heroes" />
+	<instance name="simple_tooltip_nowrap" tip_id="notification_join_hardcore" label="general_mode_hardcore" />
+	<instance name="simple_tooltip_nowrap" tip_id="notification_join_beginner" label="mainlobby_gamelist_beginner_title" />
+	<instance name="simple_tooltip_nowrap" tip_id="notification_join_general" label="mainlobby_gamelist_general_title" />
+	<instance name="simple_tooltip_nowrap" tip_id="notification_join_veteran" label="mainlobby_gamelist_veteran_title" />
+
+	<instance name="simple_tooltip_nowrap" tip_id="notification_join_mode" label="-" labelwatch="NotificationGameMode" labelontrigger="SetText(Translate('mainlobby_gamelist_' # param # '_title'));" />
+	<instance name="simple_tooltip_nowrap" tip_id="notification_join_map" label="-" labelwatch="NotificationMapName" labelontrigger="SetText(Translate('mainlobby_gamelist_' # param # '_title'));" />
+
+
+<!-- compendium.package -->
+	<instance name="generic_tooltip_float_resizey" tip_id="compendium_tip_atktype" title="tooltip_attack_type" label="tooltip_attack_msg" />
+	<instance name="generic_tooltip_float_resizey" tip_id="compendium_tip_movespeed" title="tooltip_movespeed" label="tooltip_movespeed_msg" />
+	<instance name="generic_tooltip_float_resizey" tip_id="compendium_tip_armor" title="tooltip_armor" label="tooltip_armor_msg" />
+	<instance name="generic_tooltip_float_resizey" tip_id="compendium_tip_magicarmor" title="tooltip_magic_armor" label="tooltip_magic_armor_msg" />
+	<instance name="generic_tooltip_float_resizey" tip_id="compendium_tip_strength" title="tooltip_strength" label="tooltip_strenght_msg" />
+	<instance name="generic_tooltip_float_resizey" tip_id="compendium_tip_agility" title="tooltip_agility" label="tooltip_agility_msg" />
+	<instance name="generic_tooltip_float_resizey" tip_id="compendium_tip_intelligence" title="tooltip_intelligence" label="tooltip_intelligence_msg" />
+	<instance name="generic_tooltip_float_resizey" tip_id="compendium_tip_recitems" title="tooltip_recitems" label="tooltip_recitems_msg" />
+	<instance name="generic_tooltip_float_resizey" tip_id="compendium_tip_primary_attr" title="tooltip_prim_attrib" label="tooltip_prim_attrib_msg" />
+	<instance name="generic_tooltip_float_resizey" tip_id="compendium_tip_dps" title="tooltip_dps" label="tooltip_dps_msg" />
+	<instance name="generic_tooltip_float_resizey" tip_id="compendium_tip_atkdmg" title="tooltip_attack_dmg" label="tooltip_attack_dmg_msg" />
+	<instance name="generic_tooltip_float_resizey" tip_id="compendium_tip_health" title="tooltip_total_health" label="tooltip_total_health_msg" />
+	<instance name="generic_tooltip_float_resizey" tip_id="compendium_tip_mana" title="tooltip_total_mana" label="tooltip_total_mana_msg" />
+	<instance name="generic_tooltip_float_resizey" tip_id="compendium_tip_atkspeed" title="tooltip_attack_speed" label="tooltip_attack_speed_msg" />
+	<instance name="generic_tooltip_float_resizey" tip_id="compendium_tip_atkrange" title="tooltip_attack_range" label="tooltip_attack_range_msg" />
+	<instance name="generic_tooltip_float_resizey" tip_id="compendium_tip_herocontrols" title="tooltip_lvl_controls" label="tooltip_lvl_controls_msg" />
+	<instance name="generic_tooltip_float_resizey" tip_id="compendium_tip_totalinvcost" title="tooltip_total_cost" label="tooltip_total_cost_msg" />
+	<instance name="generic_tooltip_float_resizey" tip_id="compendium_tip_announcersound" title="tooltip_hero_announcement" label="tooltip_hero_announcement_msg" />
+	<instance name="generic_tooltip_float_resizey" tip_id="compendium_tip_currentlevel" title="tooltip_hero_lvl" label="tooltip_hero_lvl_msg" />
+	<instance name="generic_tooltip_float_resizey" tip_id="compendium_tip_levelincrease" title="tooltip_increase_lvl" label="tooltip_increase_lvl_msg" />
+	<instance name="generic_tooltip_float_resizey" tip_id="compendium_tip_leveldecrease" title="tooltip_decrease_lvl" label="tooltip_decrease_lvl_msg" />
+	<instance name="generic_tooltip_float_resizey" tip_id="compendium_tip_levelreset" title="tooltip_reset_lvl" label="tooltip_reset_lvl_msg" />
+	<instance name="generic_tooltip_float_resizey" tip_id="compendium_tip_shop" title="tooltip_open_shop" label="tooltip_open_shop_msg" />
+	<instance name="generic_tooltip_float_resizey" tip_id="compendium_tip_resetinv" title="tooltip_reset_inv" label="tooltip_reset_inv_msg" />
+	<instance name="generic_tooltip_float_resizey" tip_id="compendium_tip_listdetailedfree" title="tooltip_detailedfree_hero_info" label="tooltip_detailedfree_hero_info_msg" />
+	<instance name="generic_tooltip_float_resizey" tip_id="compendium_tip_listdetailed" title="tooltip_detailed_hero_list" label="tooltip_detailed_hero_list_msg" />
+	<instance name="generic_tooltip_float_resizey" tip_id="compendium_tip_listsimple" title="tooltip_simple_hero_list" label="tooltip_simple_hero_list_msg" />
+	<instance name="generic_tooltip_float_resizey" tip_id="compendium_tip_guides" title="tooltip_compendium_guide" label="tooltip_compendium_guide_msg" />
+	<instance name="generic_tooltip_float_resizey" tip_id="compendium_tip_createguide" title="tooltip_compendium_createguide" label="tooltip_compendium_createguide_msg" />
+	<instance name="generic_tooltip_float_resizey" tip_id="compendium_tip_herodetails" title="tooltip_detailed_hero_info" label="tooltip_detailed_hero_info_msg" />
+	<instance name="generic_tooltip_float_resizey" tip_id="compendium_tip_usage" title="tooltip_compendium_usage" label="tooltip_compendium_usage_msg" />
+	<instance name="generic_tooltip_float_resizey" tip_id="compendium_tip_altavatars" title="tooltip_compendium_altavatars" label="tooltip_compendium_altavatars_msg" />
+	<instance name="generic_tooltip_float_resizey" tip_id="compendium_tip_sort_name" title="tooltip_sort_name" label="tooltip_sort_name_msg" />
+	<instance name="generic_tooltip_float_resizey" tip_id="compendium_tip_sort_primary" title="tooltip_sort_primary" label="tooltip_sort_primary_msg" />
+	<instance name="generic_tooltip_float_resizey" tip_id="compendium_tip_sort_atktype" title="tooltip_sort_attack" label="tooltip_sort_attack_msg" />
+	<instance name="generic_tooltip_float_resizey" tip_id="compendium_tip_sort_strength" title="tooltip_sort_str" label="tooltip_sort_str_msg" />
+	<instance name="generic_tooltip_float_resizey" tip_id="compendium_tip_sort_agility" title="tooltip_sort_agi" label="tooltip_sort_agi_msg" />
+	<instance name="generic_tooltip_float_resizey" tip_id="compendium_tip_sort_intelligence" title="tooltip_sort_int" label="tooltip_sort_int_msg" />
+	<instance name="generic_tooltip_float_resizey" tip_id="compendium_tip_sort_armor" title="tooltip_sort_armor" label="tooltip_sort_armor_msg" />
+	<instance name="generic_tooltip_float_resizey" tip_id="compendium_tip_sort_magarmor" title="tooltip_sort_magi_armor" label="tooltip_sort_magi_armor_msg" />
+	<instance name="generic_tooltip_float_resizey" tip_id="compendium_tip_sort_movespeed" title="tooltip_sort_movement" label="tooltip_sort_movement_msg" />
+	<instance name="generic_tooltip_float_resizey" tip_id="compendium_tip_sort_dps" title="tooltip_sort_dps" label="tooltip_sort_dps_msg" />
+	<instance name="generic_tooltip_float_resizey" tip_id="compendium_tip_abilities" title="tooltip_hero_abils" label="tooltip_hero_abils_msg" />
+	<instance name="generic_tooltip_float_resizey" tip_id="compendium_tip_faction" title="tooltip_faction" label="tooltip_faction_msg" />
+	<instance name="generic_tooltip_float_resizey" tip_id="compendium_tip_attribute_strength" title="tooltip_primary_attribute" label="tooltip_primary_attribute_strength" />
+	<instance name="generic_tooltip_float_resizey" tip_id="compendium_tip_attribute_agility" title="tooltip_primary_attribute" label="tooltip_primary_attribute_agility" />
+	<instance name="generic_tooltip_float_resizey" tip_id="compendium_tip_attribute_intelligence" title="tooltip_primary_attribute" label="tooltip_primary_attribute_intelligence" />
+	<instance name="generic_tooltip_float_resizey" tip_id="compendium_tip_sort_dmg" title="tooltip_sort_dmg" label="tooltip_sort_dmg_msg" />
+
+	<instance name="generic_tooltip_float_resizey" tip_id="compendium_tip_sort_win" title="tooltip_sort_win" label="tooltip_sort_win_msg" />
+	<instance name="generic_tooltip_float_resizey" tip_id="compendium_tip_sort_lose" title="tooltip_sort_lose" label="tooltip_sort_lose_msg" />
+	<instance name="generic_tooltip_float_resizey" tip_id="compendium_tip_sort_winrate" title="tooltip_sort_winrate" label="tooltip_sort_winrate_msg" />
+	<instance name="generic_tooltip_float_resizey" tip_id="compendium_tip_sort_kills" title="tooltip_sort_kills" label="tooltip_sort_kills_msg" />
+	<instance name="generic_tooltip_float_resizey" tip_id="compendium_tip_sort_deaths" title="tooltip_sort_deaths" label="tooltip_sort_deaths_msg" />
+	<instance name="generic_tooltip_float_resizey" tip_id="compendium_tip_sort_assists" title="tooltip_sort_assists" label="tooltip_sort_assists_msg" />
+	<instance name="generic_tooltip_float_resizey" tip_id="compendium_tip_sort_ck" title="tooltip_sort_ck" label="tooltip_sort_ck_msg" />
+	<instance name="generic_tooltip_float_resizey" tip_id="compendium_tip_sort_cd" title="tooltip_sort_cd" label="tooltip_sort_cd_msg" />
+	<instance name="generic_tooltip_float_resizey" tip_id="compendium_tip_sort_xpm" title="tooltip_sort_xpm" label="tooltip_sort_xpm_msg" />
+	<instance name="generic_tooltip_float_resizey" tip_id="compendium_tip_sort_gpm" title="tooltip_sort_gpm" label="tooltip_sort_gpm_msg" />
+	<instance name="generic_tooltip_float_resizey" tip_id="compendium_tip_sort_apm" title="tooltip_sort_apm" label="tooltip_sort_apm_msg" />
+	<instance name="generic_tooltip_float_resizey" tip_id="compendium_tip_sort_mastery" title="tooltip_sort_mastery" label="tooltip_sort_mastery_msg" />
+
+	<!--
+	<instance name="generic_tooltip_float_resizey" tip_id="compendium_tip_" title="" label="" />
+	-->
+
+<!-- player_stats.package -->
+	<instance name="generic_tooltip_floater" tip_id="stat_tip_pubgames" title="player_stats_public_games" label="player_stats_public_games_msg" />
+	<instance name="generic_tooltip_floater" tip_id="stat_tip_rankedgames" title="player_stats_ranked_games" label="player_stats_ranked_games_msg" />
+	<instance name="generic_tooltip_floater" tip_id="stat_tip_fetch" title="player_stats_fetch" label="player_stats_fetch_msg" />
+	<floater width="20h" x="22" y="-22" grow="true" name="stats_tip_matches_played" color="invisible" visible="false">
+		<frame texture="/ui/frames/tooltip_bg.tga" color="0 0 0 .8" borderthickness=".6h" />
+		<frame texture="/ui/frames/roundframe.tga" color="#A0A0A0" borderthickness=".6h" />
+			<panel width="-1.5h" align="center" grow="true" float="bottom">
+					<panel height=".5h" />
+					<label textvalign="top" textalign="left" font="dyn_10" noclick="1" color="#ffab01" shadow="1" wrap="1" width="100%" fity="true" fitypadding="0.8h">stats_tip_matches_played</label>
+					<!--<label textvalign="top"	textalign="left" font="dyn_10" noclick="1" color="white" shadow="1" wrap="1" fity="true" fitxpadding="0" fitypadding="1.0h">player_stats_matches_played_msg</label>-->
+					<label textvalign="top"	textalign="left" font="dyn_10" noclick="1" color="white" shadow="1" wrap="1" fity="1" fitxpadding="0"
+						   watch1="PlayerStatsResultRanked"
+						   watch2="PlayerStatsResult"
+						   watch3="PlayerStatsResultCasual"
+						   watch4="PlayerStatsResultSeasonNormal"
+						   watch5="PlayerStatsResultSeasonCasual"
+
+					ontrigger1lua="
+						local public = param89
+						local rank_normal = param5
+						local rank_casual = param90
+						local campaign_normal = param139
+						local campaign_casual = param140
+						local pre_season_normal = param143
+						local pre_season_casual = param144
+						local midwars = param123
+
+						if Empty(public) then public = '0' end
+						if Empty(rank_normal) then rank_normal = '0' end
+						if Empty(rank_casual) then rank_casual = '0' end
+						if Empty(campaign_normal) then campaign_normal = '0' end
+						if Empty(campaign_casual) then campaign_casual = '0' end
+						if Empty(pre_season_normal) then pre_season_normal = '0' end
+						if Empty(pre_season_casual) then pre_season_casual = '0' end
+						if Empty(midwars) then midwars = '0' end
+
+						local displayText = '^w'..Translate('player_stats_public')..': '..public..'\n'..
+											'^w'..Translate('player_stats_campaign_normal')..': '..campaign_normal..'\n'
+
+						if GetCvarBool('cl_GarenaEnable') then
+							displayText = displayText..'^w'..Translate('player_stats_campaign_casual')..': '..campaign_casual..'\n'
+						end
+
+						displayText = displayText..
+											'^w'..Translate('player_stats_pre_campaign_normal')..': '..pre_season_normal..'\n'
+
+						if GetCvarBool('cl_GarenaEnable') then
+							displayText = displayText..'^w'..Translate('player_stats_pre_campaign_casual')..': '..pre_season_casual..'\n'
+						end
+
+						displayText = displayText..
+											'^r'..Translate('player_stats_ranked_normal')..': ' ..rank_normal..'\n'..
+											'^w'..Translate('player_stats_ranked_casual')..': '..rank_casual..'\n'..
+											'^w'..Translate('player_stats_midwars')..': '..midwars..'\n'
+
+						self:SetText(displayText)
+						"
+					ontrigger2lua="
+						local public = param5
+						local rank_normal = param90
+						local rank_casual = param89
+						local campaign_normal = param139
+						local campaign_casual = param140
+						local pre_season_normal = param143
+						local pre_season_casual = param144
+						local midwars = param123
+
+						if Empty(public) then public = '0' end
+						if Empty(rank_normal) then rank_normal = '0' end
+						if Empty(rank_casual) then rank_casual = '0' end
+						if Empty(campaign_normal) then campaign_normal = '0' end
+						if Empty(campaign_casual) then campaign_casual = '0' end
+						if Empty(pre_season_normal) then pre_season_normal = '0' end
+						if Empty(pre_season_casual) then pre_season_casual = '0' end
+						if Empty(midwars) then midwars = '0' end
+
+						local displayText = '^r'..Translate('player_stats_public')..': '..public..'\n'..
+											'^w'..Translate('player_stats_campaign_normal')..': '..campaign_normal..'\n'
+
+						if GetCvarBool('cl_GarenaEnable') then
+							displayText = displayText..'^w'..Translate('player_stats_campaign_casual')..': '..campaign_casual..'\n'
+						end
+
+						displayText = displayText..
+											'^w'..Translate('player_stats_pre_campaign_normal')..': '..pre_season_normal..'\n'
+
+						if GetCvarBool('cl_GarenaEnable') then
+							displayText = displayText..'^w'..Translate('player_stats_pre_campaign_casual')..': '..pre_season_casual..'\n'
+						end
+
+						displayText = displayText..
+											'^w'..Translate('player_stats_ranked_normal')..': ' ..rank_normal..'\n'..
+											'^w'..Translate('player_stats_ranked_casual')..': '..rank_casual..'\n'..
+											'^w'..Translate('player_stats_midwars')..': '..midwars..'\n'
+
+						self:SetText(displayText)
+						"
+					ontrigger3lua="
+						local public = param89
+						local rank_normal = param90
+						local rank_casual = param5
+						local campaign_normal = param139
+						local campaign_casual = param140
+						local pre_season_normal = param143
+						local pre_season_casual = param144
+						local midwars = param123
+
+						if Empty(public) then public = '0' end
+						if Empty(rank_normal) then rank_normal = '0' end
+						if Empty(rank_casual) then rank_casual = '0' end
+						if Empty(campaign_normal) then campaign_normal = '0' end
+						if Empty(campaign_casual) then campaign_casual = '0' end
+						if Empty(pre_season_normal) then pre_season_normal = '0' end
+						if Empty(pre_season_casual) then pre_season_casual = '0' end
+						if Empty(midwars) then midwars = '0' end
+
+						local displayText = '^w'..Translate('player_stats_public')..': '..public..'\n'..
+											'^w'..Translate('player_stats_campaign_normal')..': '..campaign_normal..'\n'
+
+						if GetCvarBool('cl_GarenaEnable') then
+							displayText = displayText..'^w'..Translate('player_stats_campaign_casual')..': '..campaign_casual..'\n'
+						end
+
+						displayText = displayText..
+											'^w'..Translate('player_stats_pre_campaign_normal')..': '..pre_season_normal..'\n'
+
+						if GetCvarBool('cl_GarenaEnable') then
+							displayText = displayText..'^w'..Translate('player_stats_pre_campaign_casual')..': '..pre_season_casual..'\n'
+						end
+
+						displayText = displayText..
+											'^w'..Translate('player_stats_ranked_normal')..': ' ..rank_normal..'\n'..
+											'^r'..Translate('player_stats_ranked_casual')..': '..rank_casual..'\n'..
+											'^w'..Translate('player_stats_midwars')..': '..midwars
+
+						self:SetText(displayText)
+						"
+					ontrigger4lua="
+						local public = param89
+						local rank_normal = param139
+						local rank_casual = param90
+						local campaign_normal = param5
+						local campaign_casual = param140
+						local pre_season_normal = param143
+						local pre_season_casual = param144
+						local midwars = param123
+
+						if Empty(public) then public = '0' end
+						if Empty(rank_normal) then rank_normal = '0' end
+						if Empty(rank_casual) then rank_casual = '0' end
+						if Empty(campaign_normal) then campaign_normal = '0' end
+						if Empty(campaign_casual) then campaign_casual = '0' end
+						if Empty(pre_season_normal) then pre_season_normal = '0' end
+						if Empty(pre_season_casual) then pre_season_casual = '0' end
+						if Empty(midwars) then midwars = '0' end
+
+						local displayText = '^w'..Translate('player_stats_public')..': '..public..'\n'..
+											'^r'..Translate('player_stats_campaign_normal')..': '..campaign_normal..'\n'
+
+						if GetCvarBool('cl_GarenaEnable') then
+							displayText = displayText..'^w'..Translate('player_stats_campaign_casual')..': '..campaign_casual..'\n'
+						end
+
+						displayText = displayText..
+											'^w'..Translate('player_stats_pre_campaign_normal')..': '..pre_season_normal..'\n'
+
+						if GetCvarBool('cl_GarenaEnable') then
+							displayText = displayText..'^w'..Translate('player_stats_pre_campaign_casual')..': '..pre_season_casual..'\n'
+						end
+
+						displayText = displayText..
+											'^w'..Translate('player_stats_ranked_normal')..': ' ..rank_normal..'\n'..
+											'^w'..Translate('player_stats_ranked_casual')..': '..rank_casual..'\n'..
+											'^w'..Translate('player_stats_midwars')..': '..midwars..'\n'
+
+						self:SetText(displayText)
+						"
+					ontrigger5lua="
+						local public = param89
+						local rank_normal = param140
+						local rank_casual = param90
+						local campaign_normal = param139
+						local campaign_casual = param5
+						local pre_season_normal = param143
+						local pre_season_casual = param144
+						local midwars = param123
+
+						if Empty(public) then public = '0' end
+						if Empty(rank_normal) then rank_normal = '0' end
+						if Empty(rank_casual) then rank_casual = '0' end
+						if Empty(campaign_normal) then campaign_normal = '0' end
+						if Empty(campaign_casual) then campaign_casual = '0' end
+						if Empty(pre_season_normal) then pre_season_normal = '0' end
+						if Empty(pre_season_casual) then pre_season_casual = '0' end
+						if Empty(midwars) then midwars = '0' end
+
+						local displayText = '^w'..Translate('player_stats_public')..': '..public..'\n'..
+											'^w'..Translate('player_stats_campaign_normal')..': '..campaign_normal..'\n'..
+											'^r'..Translate('player_stats_campaign_casual')..': '..campaign_casual..'\n'..
+											'^w'..Translate('player_stats_pre_campaign_normal')..': '..pre_season_normal..'\n'..
+											'^w'..Translate('player_stats_pre_campaign_casual')..': '..pre_season_casual..'\n'..
+											'^w'..Translate('player_stats_ranked_normal')..': ' ..rank_normal..'\n'..
+											'^w'..Translate('player_stats_ranked_casual')..': '..rank_casual..'\n'..
+											'^w'..Translate('player_stats_midwars')..': '..midwars..'\n'
+
+						self:SetText(displayText)
+						"
+					/>
+					<panel height=".5h" />
+			</panel>
+	</floater>
+	<floater width="20h" x="22" y="-22" grow="true" name="stats_tip_disconnects" color="invisible" visible="false">
+		<frame texture="/ui/frames/tooltip_bg.tga" color="0 0 0 .8" borderthickness=".6h" />
+		<frame texture="/ui/frames/roundframe.tga" color="#A0A0A0" borderthickness=".6h" />
+			<panel width="-1.5h" align="center" grow="true" float="bottom">
+					<panel height=".5h" />
+					<label textvalign="top" textalign="left" font="dyn_10" noclick="1" color="#ffab01" shadow="1" wrap="1" width="100%" fity="true" fitypadding="0.8h">stats_tip_disconnects</label>
+					<!--<label textvalign="top"	textalign="left" font="dyn_10" noclick="1" color="white" shadow="1" wrap="1" fity="true" fitxpadding="0" fitypadding="1.0h">player_stats_matches_played_msg</label>-->
+					<label textvalign="top"	textalign="left" font="dyn_10" noclick="1" color="white" shadow="1" wrap="1" fity="1" fitxpadding="0"
+						   watch1="PlayerStatsResultRanked"
+						   watch2="PlayerStatsResult"
+						   watch3="PlayerStatsResultCasual"
+						   watch4="PlayerStatsResultSeasonNormal"
+						   watch5="PlayerStatsResultSeasonCasual"
+
+					ontrigger1lua="
+						local public = param92
+						local rank_normal = param11
+						local rank_casual = param91
+						local campaign_normal = param141
+						local campaign_casual = param142
+						local pre_season_normal = param145
+						local pre_season_casual = param146
+						local midwars = param124
+
+						if Empty(public) then public = '0' end
+						if Empty(rank_normal) then rank_normal = '0' end
+						if Empty(rank_casual) then rank_casual = '0' end
+						if Empty(campaign_normal) then campaign_normal = '0' end
+						if Empty(campaign_casual) then campaign_casual = '0' end
+						if Empty(pre_season_normal) then pre_season_normal = '0' end
+						if Empty(pre_season_casual) then pre_season_casual = '0' end
+						if Empty(midwars) then midwars = '0' end
+
+						local displayText = '^w'..Translate('player_stats_public')..': '..public..'\n'..
+											'^w'..Translate('player_stats_campaign_normal')..': '..campaign_normal..'\n'
+
+						if GetCvarBool('cl_GarenaEnable') then
+							displayText = displayText..'^w'..Translate('player_stats_campaign_casual')..': '..campaign_casual..'\n'
+						end
+
+						displayText = displayText..
+											'^w'..Translate('player_stats_pre_campaign_normal')..': '..pre_season_normal..'\n'
+
+						if GetCvarBool('cl_GarenaEnable') then
+							displayText = displayText..'^w'..Translate('player_stats_pre_campaign_casual')..': '..pre_season_casual..'\n'
+						end
+
+						displayText = displayText..
+											'^r'..Translate('player_stats_ranked_normal')..': ' ..rank_normal..'\n'..
+											'^w'..Translate('player_stats_ranked_casual')..': '..rank_casual..'\n'..
+											'^w'..Translate('player_stats_midwars')..': '..midwars..'\n'
+
+						self:SetText(displayText)
+						"
+					ontrigger2lua="
+						local public = param11
+						local rank_normal = param92
+						local rank_casual = param91
+						local campaign_normal = param141
+						local campaign_casual = param142
+						local pre_season_normal = param145
+						local pre_season_casual = param146
+						local midwars = param124
+
+						if Empty(public) then public = '0' end
+						if Empty(rank_normal) then rank_normal = '0' end
+						if Empty(rank_casual) then rank_casual = '0' end
+						if Empty(campaign_normal) then campaign_normal = '0' end
+						if Empty(campaign_casual) then campaign_casual = '0' end
+						if Empty(pre_season_normal) then pre_season_normal = '0' end
+						if Empty(pre_season_casual) then pre_season_casual = '0' end
+						if Empty(midwars) then midwars = '0' end
+
+						local displayText = '^r'..Translate('player_stats_public')..': '..public..'\n'..
+											'^w'..Translate('player_stats_campaign_normal')..': '..campaign_normal..'\n'
+
+						if GetCvarBool('cl_GarenaEnable') then
+							displayText = displayText..'^w'..Translate('player_stats_campaign_casual')..': '..campaign_casual..'\n'
+						end
+
+						displayText = displayText..
+											'^w'..Translate('player_stats_pre_campaign_normal')..': '..pre_season_normal..'\n'
+
+						if GetCvarBool('cl_GarenaEnable') then
+							displayText = displayText..'^w'..Translate('player_stats_pre_campaign_casual')..': '..pre_season_casual..'\n'
+						end
+
+						displayText = displayText..
+											'^w'..Translate('player_stats_ranked_normal')..': ' ..rank_normal..'\n'..
+											'^w'..Translate('player_stats_ranked_casual')..': '..rank_casual..'\n'..
+											'^w'..Translate('player_stats_midwars')..': '..midwars..'\n'
+
+						self:SetText(displayText)
+						"
+					ontrigger3lua="
+						local public = param91
+						local rank_normal = param92
+						local rank_casual = param11
+						local campaign_normal = param141
+						local campaign_casual = param142
+						local pre_season_normal = param145
+						local pre_season_casual = param146
+						local midwars = param124
+
+						if Empty(public) then public = '0' end
+						if Empty(rank_normal) then rank_normal = '0' end
+						if Empty(rank_casual) then rank_casual = '0' end
+						if Empty(campaign_normal) then campaign_normal = '0' end
+						if Empty(campaign_casual) then campaign_casual = '0' end
+						if Empty(pre_season_normal) then pre_season_normal = '0' end
+						if Empty(pre_season_casual) then pre_season_casual = '0' end
+						if Empty(midwars) then midwars = '0' end
+
+						local displayText = '^w'..Translate('player_stats_public')..': '..public..'\n'..
+											'^w'..Translate('player_stats_campaign_normal')..': '..campaign_normal..'\n'
+
+						if GetCvarBool('cl_GarenaEnable') then
+							displayText = displayText..'^w'..Translate('player_stats_campaign_casual')..': '..campaign_casual..'\n'
+						end
+
+						displayText = displayText..
+											'^w'..Translate('player_stats_pre_campaign_normal')..': '..pre_season_normal..'\n'
+
+						if GetCvarBool('cl_GarenaEnable') then
+							displayText = displayText..'^w'..Translate('player_stats_pre_campaign_casual')..': '..pre_season_casual..'\n'
+						end
+
+						displayText = displayText..
+											'^w'..Translate('player_stats_ranked_normal')..': ' ..rank_normal..'\n'..
+											'^r'..Translate('player_stats_ranked_casual')..': '..rank_casual..'\n'..
+											'^w'..Translate('player_stats_midwars')..': '..midwars..'\n'
+
+						self:SetText(displayText)
+						"
+
+					ontrigger4lua="
+						local public = param92
+						local rank_normal = param141
+						local rank_casual = param91
+						local campaign_normal = param11
+						local campaign_casual = param142
+						local pre_season_normal = param145
+						local pre_season_casual = param146
+						local midwars = param124
+
+						if Empty(public) then public = '0' end
+						if Empty(rank_normal) then rank_normal = '0' end
+						if Empty(rank_casual) then rank_casual = '0' end
+						if Empty(campaign_normal) then campaign_normal = '0' end
+						if Empty(campaign_casual) then campaign_casual = '0' end
+						if Empty(pre_season_normal) then pre_season_normal = '0' end
+						if Empty(pre_season_casual) then pre_season_casual = '0' end
+						if Empty(midwars) then midwars = '0' end
+
+						local displayText = '^w'..Translate('player_stats_public')..': '..public..'\n'..
+											'^r'..Translate('player_stats_campaign_normal')..': '..campaign_normal..'\n'
+
+						if GetCvarBool('cl_GarenaEnable') then
+							displayText = displayText..'^w'..Translate('player_stats_campaign_casual')..': '..campaign_casual..'\n'
+						end
+
+						displayText = displayText..
+											'^w'..Translate('player_stats_pre_campaign_normal')..': '..pre_season_normal..'\n'
+
+						if GetCvarBool('cl_GarenaEnable') then
+							displayText = displayText..'^w'..Translate('player_stats_pre_campaign_casual')..': '..pre_season_casual..'\n'
+						end
+
+						displayText = displayText..
+											'^w'..Translate('player_stats_ranked_normal')..': ' ..rank_normal..'\n'..
+											'^w'..Translate('player_stats_ranked_casual')..': '..rank_casual..'\n'..
+											'^w'..Translate('player_stats_midwars')..': '..midwars..'\n'
+
+						self:SetText(displayText)
+						"
+					ontrigger5lua="
+						local public = param91
+						local rank_normal = param142
+						local rank_casual = param92
+						local campaign_normal = param141
+						local campaign_casual = param11
+						local pre_season_normal = param145
+						local pre_season_casual = param146
+						local midwars = param124
+
+						if Empty(public) then public = '0' end
+						if Empty(rank_normal) then rank_normal = '0' end
+						if Empty(rank_casual) then rank_casual = '0' end
+						if Empty(campaign_normal) then campaign_normal = '0' end
+						if Empty(campaign_casual) then campaign_casual = '0' end
+						if Empty(pre_season_normal) then pre_season_normal = '0' end
+						if Empty(pre_season_casual) then pre_season_casual = '0' end
+						if Empty(midwars) then midwars = '0' end
+
+						local displayText = '^w'..Translate('player_stats_public')..': '..public..'\n'..
+											'^w'..Translate('player_stats_campaign_normal')..': '..campaign_normal..'\n'..
+											'^r'..Translate('player_stats_campaign_casual')..': '..campaign_casual..'\n'..
+											'^w'..Translate('player_stats_pre_campaign_normal')..': '..pre_season_normal..'\n'..
+											'^w'..Translate('player_stats_pre_campaign_casual')..': '..pre_season_casual..'\n'..
+											'^w'..Translate('player_stats_ranked_normal')..': ' ..rank_normal..'\n'..
+											'^w'..Translate('player_stats_ranked_casual')..': '..rank_casual..'\n'..
+											'^w'..Translate('player_stats_midwars')..': '..midwars..'\n'
+
+						self:SetText(displayText)
+						"
+					/>
+					<panel height=".5h" />
+			</panel>
+	</floater>
+	<!--<instance name="generic_tooltip_floater" tip_id="stats_tip_matches_played" title="player_stats_matches_played" label="player_stats_matches_played_msg" />-->
+<!-- creategame.package -->
+	<instance name="generic_tooltip_floater" tip_id="spec_tip" title="game_setup_spcectators_label" label="game_setup_spectators_tip" />
+	<instance name="generic_tooltip_floater" tip_id="ref_tip" title="game_setup_referees_label" label="game_setup_referees_tip" />
+	<instance name="generic_tooltip_floater" tip_id="teamsize_tip" title="game_setup_team_size_label" label="game_setup_team_size_tip" />
+	<!--<instance name="generic_tooltip_floater" tip_id="Lmap_tip" width="35.0h" title="game_setup_tier_label" label="game_setup_tier_tip" />-->
+	<instance name="generic_tooltip_floater" tip_id="gamemap_tip" title="game_setup_map_label" label="game_setup_map_tip" />
+	<instance name="generic_tooltip_floater" tip_id="Lgametype_tip" width="35.0h" title="game_setup_type_label" label="game_setup_type_tip" />
+	<instance name="generic_tooltip_floater" tip_id="Lserver_tip" title="game_setup_select_server_label" label="game_setup_select_server_tip" />
+
+<!-- public_games.package -->
+	<instance name="generic_tooltip_floater" tip_id="Rgamename_tip" title="mainlobby_label_custom_game_name" label="main_lobby_game_name_desc" />
+	<instance name="generic_tooltip_floater" tip_id="Rregion_tip" title="mainlobby_label_custom_game_region" label="mainlobby_label_custom_game_region_desc" />
+	<instance name="generic_tooltip_floater" tip_id="Rgametype_tip" width="35.0h" title="mainlobby_label_custom_game_type" label="mainlobby_label_custom_game_type_desc" />
+	<instance name="generic_tooltip_floater" tip_id="Rteamsize_tip" title="mainlobby_label_custom_team_size" label="mainlobby_label_custom_team_size_desc" />
+	<instance name="generic_tooltip_floater" tip_id="Rmap_tip" title="mainlobby_label_custom_map" label="mainlobby_label_custom_map_desc" />
+	<instance name="generic_tooltip_floater" tip_id="Lservertype_tip" title="mainlobby_label_custom_server_type" label="mainlobby_label_custom_server_type_desc" />
+	<!--<instance name="generic_tooltip_floater" tip_id="Laccess_tip" width="30.0h" title="mainlobby_label_tier" label="mainlobby_label_tier_tip" />-->
+	<instance name="generic_tooltip_floater" tip_id="Lmin_max_psr_tip" width="30.0h" title="mainlobby_label_min_max_psr" label="mainlobby_label_min_max_psr_tip" />
+	<instance name="simple_tooltip_floater" tip_id="main_filter_prequery_tip" align="left" width="28.0h" textalign="left" label="main_filter_prequery_tip" />
+	<instance name="simple_tooltip_floater" tip_id="main_filter_hide_restricted_tip" align="left" width="28.0h" textalign="left" label="main_filter_hide_restricted_tip" />
+
+
+<!-- game_lobby.package -->
+	<instance name="simple_tooltip_floater" tip_id="ModSpectatorTip" label="-" labelwatch="ModSpectatorTipTrigger" labelontrigger="SetText(param);" floaterwatch="GamePhase" floaterontrigger="SetVisible(0);" />
+	<instance name="simple_tooltip_nowrap" tip_id="globby_viewstats_tip" label="tooltip_viewstats" />
+	<instance name="simple_tooltip_floater" tip_id="globby_voice_tip" x="3.2h" width="18.0h" label="game_menu_voice_tip" />
+	<instance name="simple_tooltip_nowrap" tip_id="globby_addfriend_tip" label="gamelobby_add_as_friend_tip" />
+	<instance name="simple_tooltip_nowrap" tip_id="globby_lock_tip" label="globby_lock_tip" />
+	<instance name="simple_tooltip_nowrap" tip_id="globby_unlock_tip" label="globby_unlock_tip" />
+	<instance name="simple_tooltip_nowrap" tip_id="globby_disabled_tip" label="globby_disabled_tip" />
+	<instance name="simple_tooltip_nowrap" tip_id="globby_become_spec_tip" label="gamelobby_spectate_button" />
+	<instance name="simple_tooltip_nowrap" tip_id="globby_leave_team_tip" label="game_lobby_leave_team_tip" />
+	<instance name="simple_tooltip_nowrap" tip_id="globby_repick_hero_tip" label="game_hero_select_repick" />
+	<instance name="generic_tooltip_floater" tip_id="globby_swap_hero_tip" width="24.0h" title="hselect_swap_request_tip_header" label="hselect_swap_request_tip_text" />
+	<instance name="generic_tooltip_floater" tip_id="globby_swap_hero_noeap_tip" width="24.0h" title="hselect_swap_request_noeap_tip_header" label="hselect_swap_request_noeap_tip_text" />
+	<instance name="simple_tooltip_floater" tip_id="globby_psr1_tip" width="18.0h" label="game_lobby_psr_value_tip" />
+	<instance name="simple_tooltip_floater" tip_id="globby_rsr1_tip" width="18.0h" label="game_lobby_rsr_value_tip" />
+	<instance name="simple_tooltip_floater" tip_id="globby_psr2_tip" width="18.0h" label="game_lobby_point_value_tip" />
+
+
+<!-- match_replays.package -->
+	<instance name="generic_tooltip_floater" width="23h" tip_id="endgame_download_tip" title="game_end_stats_download_btn" label="game_end_stats_download_tootlip" />
+	<instance name="generic_tooltip_floater" width="23h" tip_id="endgame_download_waiting_tip" title="game_end_stats_download_waiting_btn" label="game_end_stats_download_waiting_tootlip" />
+	<instance name="generic_tooltip_floater" width="23h" tip_id="endgame_download_retry_tip" title="game_end_stats_download_retry_btn" label="game_end_stats_download_retry_tooltip" />
+	<instance name="generic_tooltip_floater" width="23h" tip_id="endgame_download_unav_tip" title="game_end_stats_download_unav_btn" label="game_end_stats_download_unav_tooltip" />
+	<instance name="generic_tooltip_floater" width="23h" tip_id="endgame_download_compat_tip" title="game_end_stats_compat_btn" label="game_end_stats_download_compat_tooltip" />
+	<instance name="generic_tooltip_floater" width="23h" tip_id="endgame_comment_tip" title="game_end_stats_comment_btn" label="game_end_stats_comment_tooltip" />
+	<instance name="generic_tooltip_floater" width="28h" tip_id="endgame_fetch_tip" title="game_end_stats_fetch_btn" label="game_end_stats_fetch_tooltip" />
+	<instance name="generic_tooltip_floater" width="28h" tip_id="endgame_mulligan_tip" title="game_end_stats_mulligan_btn" label="game_end_stats_mulligan_tooltip" />
+
+	<instance name="simple_tooltip_floater" tip_id="gameopt_normal" x="8.5h" y="-1.75h" width="13.0h" height="2.8h" align="center" visible="0" font="dyn_10"  label="game_setup_normal"/>
+	<instance name="simple_tooltip_floater" tip_id="gameopt_counterpick" x="8.5h" y="-1.75h" width="13.0h" height="2.8h" align="center" visible="0" font="dyn_10"  label="game_setup_counterpick"/>
+	<instance name="simple_tooltip_floater" tip_id="gameopt_randomdraft" x="8.5h" y="-1.75h" width="13.0h" height="2.8h" align="center" visible="0" font="dyn_10"  label="game_setup_random_draft"/>
+	<instance name="simple_tooltip_floater" tip_id="gameopt_shuffleteams" x="8.5h" y="-1.75h" width="13.0h" height="2.8h" align="center" visible="0" font="dyn_10"  label="general_mode_shuffle"/>
+	<instance name="simple_tooltip_floater" tip_id="gameopt_singledraft" x="8.5h" y="-1.75h" width="13.0h" height="2.8h" align="center" visible="0" font="dyn_10"  label="game_setup_single_draft"/>
+	<instance name="simple_tooltip_floater" tip_id="gameopt_deathmatch" x="8.5h" y="-1.75h" width="13.0h" height="2.8h" align="center" visible="0" font="dyn_10"  label="game_setup_deathmatch"/>
+	<instance name="simple_tooltip_floater" tip_id="gameopt_banningdraft" x="8.5h" y="-1.75h" width="13.0h" height="2.8h" align="center" visible="0" font="dyn_10"  label="game_setup_banningdraft"/>
+	<instance name="simple_tooltip_floater" tip_id="gameopt_banningpick" x="8.5h" y="-1.75h" width="13.0h" height="2.8h" align="center" visible="0" font="dyn_10"  label="game_setup_banningpick"/>
+	<instance name="simple_tooltip_floater" tip_id="gameopt_lockpick" x="8.5h" y="-1.75h" width="13.0h" height="2.8h" align="center" visible="0" font="dyn_10"  label="game_setup_lockpick"/>
+	<instance name="simple_tooltip_floater" tip_id="gameopt_blindban" x="8.5h" y="-1.75h" width="13.0h" height="2.8h" align="center" visible="0" font="dyn_10"  label="game_setup_blindban"/>
+
+	<instance name="simple_tooltip_floater" tip_id="gameopt_heroban" x="8.5h" y="-1.75h" width="13.0h" height="2.8h" align="center" visible="0" font="dyn_10"  label="game_setup_heroban"/>
+	<instance name="simple_tooltip_floater" tip_id="gameopt_midwarsbeta" x="8.5h" y="-1.75h" width="13.0h" height="2.8h" align="center" visible="0" font="dyn_10"  label="game_setup_midwarsbeta"/>
+
+	<instance name="simple_tooltip_floater" tip_id="gameopt_captainsmode" x="8.5h" y="-1.75h" width="13.0h" height="2.8h" align="center" visible="0" font="dyn_10"  label="game_setup_captainsmode"/>
+	<instance name="simple_tooltip_floater" tip_id="gameopt_krosmode" x="8.5h" y="-1.75h" width="13.0h" height="2.8h" align="center" visible="0" font="dyn_10"  label="game_setup_krosmode"/>
+	<instance name="simple_tooltip_floater" tip_id="gameopt_allrandom" x="8.5h" y="-1.75h" width="13.0h" height="2.8h" align="center" visible="0" font="dyn_10"  label="game_setup_allrandom"/>
+
+	<instance name="simple_tooltip_floater" tip_id="gameopt_allheroes" x="8.5h" y="-1.75h" width="13.0h" height="2.8h" align="center" visible="0" font="dyn_10" label="general_mode_all_heroes"/>
+	<instance name="simple_tooltip_floater" tip_id="gameopt_easymode" x="8.5h" y="-1.75h" width="13.0h" height="2.8h" align="center" visible="0" font="dyn_10"  label="general_mode_easy_mode"/>
+	<instance name="simple_tooltip_floater" tip_id="gameopt_noleaver" x="8.5h" y="-1.75h" width="13.0h" height="2.8h" align="center" visible="0" font="dyn_10"  label="general_mode_no_leavers"/>
+	<instance name="simple_tooltip_floater" tip_id="gameopt_altpicks" x="8.5h" y="-1.75h" width="13.0h" height="2.8h" align="center" visible="0" font="dyn_10"  label="general_mode_alt_hero_pick"/>
+	<instance name="simple_tooltip_floater" tip_id="gameopt_autobalance" x="8.5h" y="-1.75h" width="13.0h" height="2.8h" align="center" visible="0" font="dyn_10"  label="general_mode_autobalance"/>
+	<instance name="simple_tooltip_floater" tip_id="gameopt_casual" x="8.5h" y="-1.75h" width="13.0h" height="2.8h" align="center" visible="0" font="dyn_10"  label="general_mode_casual_mode"/>
+	<instance name="simple_tooltip_floater" tip_id="gameopt_nostats" x="8.5h" y="-1.75h" width="13.0h" height="2.8h" align="center" visible="0" font="dyn_10"  label="general_mode_no_stats"/>
+	<instance name="simple_tooltip_floater" tip_id="gameopt_balancedrandom" x="8.5h" y="-1.75h" width="13.0h" height="2.8h" align="center" visible="0" font="dyn_10"  label="general_mode_balaned_random"/>
+	<instance name="simple_tooltip_floater" tip_id="gameopt_solosame" x="8.5h" y="-1.75h" width="13.0h" height="2.8h" align="center" visible="0" font="dyn_10"  label="general_mode_solo_same"/>
+	<instance name="simple_tooltip_floater" tip_id="gameopt_solodiff" x="8.5h" y="-1.75h" width="13.0h" height="2.8h" align="center" visible="0" font="dyn_10"  label="general_mode_solo_diff"/>
+
+<!-- RAP -->
+	<instance name="generic_tooltip_floater" tip_id="0RAP_Tip"  title="rap_0_tiptitle" label="rap_0_tiptxt" />
+	<instance name="generic_tooltip_floater" tip_id="1RAP_Tip"  title="rap_1_tiptitle" label="rap_1_tiptxt" />
+	<instance name="generic_tooltip_floater" tip_id="2RAP_Tip"  title="rap_2_tiptitle" label="rap_2_tiptxt" />
+	<instance name="generic_tooltip_floater" tip_id="3RAP_Tip"  title="rap_3_tiptitle" label="rap_3_tiptxt" />
+	<instance name="generic_tooltip_floater" tip_id="4RAP_Tip"  title="rap_4_tiptitle" label="rap_4_tiptxt" />
+	<instance name="generic_tooltip_floater" tip_id="5RAP_Tip"  title="rap_5_tiptitle" label="rap_5_tiptxt" />
+	<instance name="generic_tooltip_floater" tip_id="6RAP_Tip"  title="rap_6_tiptitle" label="rap_6_tiptxt" />
+	<instance name="generic_tooltip_floater" tip_id="7RAP_Tip"  title="rap_7_tiptitle" label="rap_7_tiptxt" />
+	<instance name="generic_tooltip_floater" tip_id="8RAP_Tip"  title="rap_8_tiptitle" label="rap_8_tiptxt" />
+	<instance name="generic_tooltip_floater" tip_id="9RAP_Tip"  title="rap_9_tiptitle" label="rap_9_tiptxt" />
+	<instance name="generic_tooltip_floater" tip_id="10RAP_Tip" title="rap_10_tiptitle" label="rap_10_tiptxt" />
+	<instance name="generic_tooltip_floater" tip_id="11RAP_Tip" title="rap_11_tiptitle" label="rap_11_tiptxt" />
+	<instance name="generic_tooltip_floater" tip_id="12RAP_Tip" title="rap_12_tiptitle" label="rap_12_tiptxt" />
+	<instance name="generic_tooltip_floater" tip_id="13RAP_Tip" title="rap_13_tiptitle" label="rap_13_tiptxt" />
+	<instance name="generic_tooltip_floater" tip_id="14RAP_Tip" title="rap_14_tiptitle" label="rap_14_tiptxt" />
+	<instance name="simple_tooltip_floater" tip_id="backRAP_Tip" label="rap_non_goback_tip" />
+	<instance name="generic_tooltip_floater" tip_id="rap_deposit_tip" title="rap_deposit_title" label="rap_deposit_desc" />
+
+<!-- social_groups.package -->
+	<instance name="generic_tooltip_floater" tip_id="new_im_tip" width="20.0h" title="social_groups_newIM" label="social_groups_newIM_msg" />
+
+<!-- match_replays.package -->
+	<instance name="simple_tooltip_floater" tip_id="match_replay_add_friend" align="left" y="-1.2h" x="1.4h" width="12.0h" label="general_add_friend" />
+	<instance name="simple_tooltip_floater" tip_id="match_replay_remove_friend" align="left" y="-1.2h" x="1.4h" width="14.0h" label="general_remove_friend" />
+
+	<instance name="simple_tooltip_floater" tip_id="match_replay_RAP" align="left" y="-1.2h" x="1.4h" width="12.0h" label="web_form_reportabuse_title" />
+
+	<instance name="generic_tooltip_floater" tip_id="progstats_tip_firstofday" title="progstats_firstofday" width="14.0h" label="progstats_firstofday_tip" />
+	<instance name="generic_tooltip_floater" tip_id="progstats_tip_socialbonus" title="progstats_socialbonus" width="24.0h" label="progstats_socialbonus_tip" />
+	<instance name="generic_tooltip_floater" tip_id="progstats_tip_consecutive" title="progstats_consecutive_plain" width="18.0h" label="progstats_consecutive_tip" />
+
+
+	<template name="progstats_key_item">
+		<panel width="100%" height="2.0h">
+			<panel width="100%" height="-0.2h" valign="center" color="1 1 1 .05" visible="{evenrow=false}" />
+			<panel width="-0.4h" align="center" float="right">
+				<label width="70%" height="100%" font="dyn_10" textvalign="center" color=".7 .7 .7 1" shadow="true" content="{cat}" />
+				<label width="15%" height="100%" font="dyn_10" textalign="center" textvalign="center" color="#8e00ec" shadow="true" content="{exp}" />
+				<label width="15%" height="100%" font="dyn_10" textalign="center" textvalign="center" color="#c0d5ed" shadow="true" content="{coins}" />
+			</panel>
+		</panel>
+	</template>
+
+	<floater
+		name="progstats_key"
+		x="22" y="-22"
+		width="72.0h"
+		align="right"
+		valign="top"
+		color="invisible"
+		visible="false"
+		passivechildren="true"
+		grow="true"
+		keeponscreen="true"
+	>
+		<frame texture="/ui/frames/tooltip_bg.tga" color="0 0 0 9" borderthickness=".6h" />
+		<frame texture="/ui/frames/roundframe.tga" color="#A0A0A0" borderthickness=".6h" />
+
+		<panel grow="true" y="1.0h" width="-2.0h" align="center" noclick="true" float="bottom">
+			<label fity="true" fitypadding="0.5h" font="dyn_14" color="#ffaa00" shadow="true" content="mm_progression_key_title" />
+			<label fity="true" fitypadding="0.8h" font="dyn_10" color="1 1 1 1" shadow="true" wrap="true" content="mm_pregression_key_explanation" />
+
+			<panel grow="true" width="100%" float="right">
+
+				<!-- Performance -->
+				<panel grow="true" width="39.0%">
+					<panel grow="true" width="-1.0h" align="center" noclick="true" float="bottom">
+						<label fity="true" fitypadding="0.4h" font="dyn_12" color="#3abce6" shadow="true" content="mm_pregression_gameperformance" />
+						<panel width="100%" height="2.0h">
+							<panel width="-0.4h" align="center" float="right">
+								<label width="70%" height="100%" font="dyn_10" color="1 1 1 1" shadow="true" content="mm_pregression_condition" />
+								<panel width="15%" height="100%">
+									<image y="-5%" width="90@" height="90%" align="center" valign="center" texture="/ui/fe2/elements/diamond.tga"/>
+								</panel>
+								<panel width="15%" height="100%">
+									<image y="-70%" width="160@" height="320%" align="center" valign="center" texture="/ui/common/gold/gold0000.tga" rendermode="grayscale" noclick="true"/>
+								</panel>
+							</panel>
+						</panel>
+						<panel width="100%" height="0.6h">
+							<panel width="100%" height="1" valign="center" align="center" color="1 1 1 .1" />
+						</panel>
+						<instance name="progstats_key_item" cat="mm_pregression_victory" exp="30" coins="6" />
+						<instance name="progstats_key_item" cat="mm_pregression_loss" exp="10" coins="4" evenrow="true" />
+						<instance name="progstats_key_item" cat="mm_pregression_fotd" exp="20" coins="4" />
+						<instance name="progstats_key_item" cat="mm_pregression_socialbonus" exp="0" coins="4-10" evenrow="true" />
+						<instance name="progstats_key_item" cat="mm_pregression_consecbonus" exp="0" coins="2-6" />
+						<instance name="progstats_key_item" cat="mm_pregression_bloodlust_you" exp="10" coins="2" evenrow="true" />
+						<!--<instance name="progstats_key_item" cat="mm_pregression_bloodlust_team" exp="1" coins="1" />-->
+						<instance name="progstats_key_item" cat="mm_pregression_immortal_you" exp="50" coins="10" />
+						<instance name="progstats_key_item" cat="mm_pregression_immortal_team" exp="15" coins="3" evenrow="true" />
+						<instance name="progstats_key_item" cat="mm_pregression_annihilation_you" exp="75" coins="15" />
+						<instance name="progstats_key_item" cat="mm_pregression_annihilation_team" exp="25" coins="5" evenrow="true" />
+					</panel>
+				</panel>
+
+				<!-- Aggregate -->
+				<panel grow="true" width="32.0%">
+					<panel grow="true" width="-1.0h" align="center" noclick="true" float="bottom">
+						<label fity="true" fitypadding="0.4h" font="dyn_12" color="#3abce6" shadow="true" content="mm_pregression_key_aggregate" />
+						<panel width="100%" height="2.0h">
+							<panel width="-0.4h" align="center" float="right">
+								<label width="70%" height="100%" font="dyn_10" color="1 1 1 1" shadow="true" content="mm_pregression_condition" />
+								<panel width="15%" height="100%">
+									<image y="-5%" width="90@" height="90%" align="center" valign="center" texture="/ui/fe2/elements/diamond.tga"/>
+								</panel>
+								<panel width="15%" height="100%">
+									<image y="-70%" width="160@" height="320%" align="center" valign="center" texture="/ui/common/gold/gold0000.tga" rendermode="grayscale" noclick="true"/>
+								</panel>
+							</panel>
+						</panel>
+						<panel width="100%" height="0.6h">
+							<panel width="100%" height="1" valign="center" align="center" color="1 1 1 .1" />
+						</panel>
+						<instance name="progstats_key_item" cat="mm_pregression_50wins" exp="200" coins="10" />
+						<instance name="progstats_key_item" cat="mm_pregression_250kills" exp="100" coins="5" evenrow="true" />
+						<instance name="progstats_key_item" cat="mm_pregression_250assts" exp="100" coins="5" />
+						<instance name="progstats_key_item" cat="mm_pregression_50wards" exp="100" coins="5" evenrow="true" />
+						<instance name="progstats_key_item" cat="mm_pregression_10smacks" exp="50" coins="1" />
+					</panel>
+				</panel>
+
+				<!-- Acct Lvl -->
+				<panel grow="true" width="29.0%">
+					<panel grow="true" width="-1.0h" align="center" noclick="true" float="bottom">
+						<label fity="true" fitypadding="0.4h" font="dyn_12" color="#3abce6" shadow="true" content="mm_pregression_key_acct_level" />
+						<panel width="100%" height="2.0h">
+							<panel width="-0.4h" align="center" float="right">
+								<label width="70%" height="100%" font="dyn_10" color="1 1 1 1" shadow="true" content="mm_pregression_key_acct_levelreached" />
+								<panel width="15%" height="100%">
+
+								</panel>
+								<panel width="15%" height="100%">
+									<image y="-70%" width="160@" height="320%" align="center" valign="center" texture="/ui/common/gold/gold0000.tga" rendermode="grayscale" noclick="true"/>
+								</panel>
+							</panel>
+						</panel>
+						<panel width="100%" height="0.6h">
+							<panel width="100%" height="1" valign="center" align="center" color="1 1 1 .1" />
+						</panel>
+						<instance name="progstats_key_item" cat="mm_pregression_key_level1" coins="6" />
+						<instance name="progstats_key_item" cat="mm_pregression_key_level2" coins="12" evenrow="true" />
+						<instance name="progstats_key_item" cat="mm_pregression_key_level3" coins="18" />
+						<panel width="100%" height="2.0h">
+							<panel height="-0.2h" color="1 1 1 .05" valign="center">
+								<label y="-0.4h" width="100%" height="100%" font="dyn_10" textalign="center" textvalign="center" color=".7 .7 .7 1" shadow="true" content="..." />
+							</panel>
+						</panel>
+						<panel width="100%" height="2.0h">
+							<label width="100%" height="100%" font="dyn_10" textalign="center" textvalign="center" color=".7 .7 .7 1" shadow="true" content="mm_pregression_key_level5" />
+						</panel>
+					</panel>
+				</panel>
+
+			</panel>
+
+			<panel width="100%" height="7.0h" />
+
+		</panel>
+
+		<panel grow="true" x="-1.0h" y="-1.0h" width="41.8h" align="right" valign="bottom">
+			<frame texture="/ui/frames/roundframe.tga" color="1 1 1 .4" borderthickness="0.4h" blockinput="false" noclick="true"/>
+			<panel grow="true" width="-1.0h" y="0.5h" align="center" float="bottom">
+				<label fity="true" fitypadding="0.3h" font="dyn_9" color=".7 .7 .7 1" shadow="true" wrap="true" content="mm_pregression_key_consecbonus_exp" />
+				<label fity="true" fitypadding="0" font="dyn_9" color="1 1 1 1" shadow="true" wrap="true" content="mm_pregression_key_consecbonus_exp2" />
+				<label fity="true" fitypadding="0.5h" font="dyn_9" color=".7 .7 .7 1" shadow="true" wrap="true" content="mm_pregression_key_consecbonus_exp3" />
+			</panel>
+		</panel>
+
+	</floater>
+
+
+	<floater
+		name="progstats_tip_additional"
+		x="22" y="-22"
+		width="19.0h"
+		align="right"
+		valign="top"
+		color="invisible"
+		visible="visible=0"
+		passivechildren="true"
+		grow="true"
+	>
+		<frame texture="/ui/frames/tooltip_bg.tga" color="0 0 0 .8" borderthickness=".6h" />
+		<frame texture="/ui/frames/roundframe.tga" color="#A0A0A0" borderthickness=".6h" />
+			<label
+				x="0.8h" y="0.6h"
+				textvalign="top"
+				textalign="left"
+				align="center"
+				font="dyn_10"
+				noclick="1"
+				color="#ffab01"
+				shadow="1"
+				wrap="1"
+				fity="true"
+				fitypadding="0.8h"
+			>progstats_additional</label>
+			<panel y="2.5h" width="-1.6h" align="center" noclick="true" grow="true" float="bottom">
+				<panel height="1.5h" float="right">
+					<label width="9h" textvalign="center" font="dyn_10" noclick="true" color="#42c7ee" name="progstats_spoil_blood_lbl" content="progstats_bloodlust" />
+					<label width="4h" textalign="center" textvalign="center" font="dyn_10" noclick="true" color="#8e00ec" name="progstats_spoil_blood_xp" onevent0="SetText(FtoA(_progstats_blood_xp, 0));" />
+					<label width="4h" textalign="center" textvalign="center" font="dyn_10" noclick="true" color="#FFCC00" name="progstats_spoil_blood_gold" onevent0="SetText(FtoA(_progstats_blood_gold, 0));" />
+				</panel>
+				<panel height="1.5h" float="right">
+					<label width="9h" textvalign="center" font="dyn_10" noclick="true" color="#42c7ee" name="progstats_spoil_ann_lbl" content="progstats_annihilation" />
+					<label width="4h" textalign="center" textvalign="center" font="dyn_10" noclick="true" color="#8e00ec" name="progstats_spoil_ann_xp" onevent0="SetText(FtoA(_progstats_anni_xp, 0));" />
+					<label width="4h" textalign="center" textvalign="center" font="dyn_10" noclick="true" color="#FFCC00" name="progstats_spoil_ann_gold" onevent0="SetText(FtoA(_progstats_anni_gold, 0));" />
+				</panel>
+				<panel height="1.5h" float="right">
+					<label width="9h" textvalign="center" font="dyn_10" noclick="true" color="#42c7ee" name="progstats_spoil_imm_lbl" content="progstats_immortal" />
+					<label width="4h" textalign="center" textvalign="center" font="dyn_10" noclick="true" color="#8e00ec" name="progstats_spoil_imm_xp" onevent0="SetText(FtoA(_progstats_imm_xp, 0));" />
+					<label width="4h" textalign="center" textvalign="center" font="dyn_10" noclick="true" color="#FFCC00" name="progstats_spoil_imm_gold" onevent0="SetText(FtoA(_progstats_imm_gold, 0));" />
+				</panel>
+				<panel height="1.0h" color="invisible" noclick="true"/>
+			</panel>
+	</floater>
+
+
+
+<!-- Various create/upgrade account/extras forms (mostly shared) -->
+
+	<instance name="generic_tooltip_floater" width="23h" tip_id="web_form_tip_friend_nickname" title="web_form_friend_nickname" label="web_form_friend_nickname_tip" />
+	<instance name="generic_tooltip_floater" width="23h" tip_id="web_form_tip_promo code" title="web_form_promo_code" label="web_form_promo_code_tip" />
+	<instance name="generic_tooltip_floater" width="23h" tip_id="web_form_tip_cc_first_name" title="creditcard_label_first_name" label="credit_card_first_name_tip" />
+	<instance name="generic_tooltip_floater" width="23h" tip_id="web_form_tip_cc_last_name" title="creditcard_label_last_name" label="credit_card_last_name_tip" />
+	<instance name="generic_tooltip_floater" width="23h" tip_id="web_form_tip_cc_zip" title="creditcard_label_billing_zip" label="credit_card_billing_zip_tip" />
+	<instance name="generic_tooltip_floater" width="23h" tip_id="web_form_tip_cc_num" title="creditcard_label_prime_card_number" label="" />
+	<instance name="generic_tooltip_floater" width="23h" tip_id="web_form_tip_cc_cvv2" title="creditcard_label_prime_cvv_number" label="creditcard_label_cvv_number" />
+	<instance name="generic_tooltip_floater" width="23h" tip_id="web_form_tip_cc_exp" title="creditcard_label_prime_expiration" label="creditcard_label_expiration_date" />
+	<instance name="generic_tooltip_floater" width="23h" tip_id="web_form_tip_gift_your_name" title="web_form_gift_your_name" label="web_form_gift_your_name_tip" />
+	<instance name="generic_tooltip_floater" width="23h" tip_id="web_form_tip_friend_email" title="web_form_gift_friend_email" label="web_form_gift_friend_email_tip" />
+	<instance name="generic_tooltip_floater" width="23h" tip_id="web_form_tip_resetstats_pubstats" title="web_form_resetstats_pubstats" label="web_form_resetstats_pubstats_tip" />
+
+	<instance name="generic_tooltip_floater" width="23h" tip_id="web_form_tip_resetstats_normalmm_stats" title="web_form_resetstats_rankedstats" label="web_form_resetstats_rankedstats_tip" />
+	<instance name="generic_tooltip_floater" width="23h" tip_id="web_form_tip_resetstats_casualmm_stats" title="web_form_resetstats_casualstats" label="web_form_resetstats_casualstats_tip" />
+	<instance name="generic_tooltip_floater" width="23h" tip_id="web_form_tip_resetstats_midwars_stats" title="web_form_resetstats_midwars" label="web_form_resetstats_midwars_tip" />
+
+	<instance name="generic_tooltip_floater" width="23h" tip_id="web_form_tip_resetstats_rankedstats" title="web_form_resetstats_rankedstats" label="web_form_resetstats_rankedstats_tip" />
+	<instance name="generic_tooltip_floater" width="23h" tip_id="web_form_tip_resetstats_psr" title="web_form_resetstats_psr" label="web_form_resetstats_psr_tip" />
+	<instance name="generic_tooltip_floater" width="23h" tip_id="web_form_tip_resetstats_disconnects" title="web_form_resetstats_disconnects" label="web_form_resetstats_disconnects_tip" />
+	<instance name="generic_tooltip_floater" width="24h" tip_id="web_form_tip_resetstats_smr" title="web_form_resetstats_smr" label="web_form_resetstats_smr_tip" />
+	<instance name="generic_tooltip_floater" width="23h" tip_id="web_form_tip_resetstats_casual_mmr" title="web_form_resetstats_casual_mmr" label="web_form_resetstats_casual_tip" />
+	<instance name="generic_tooltip_floater" width="23h" tip_id="web_form_tip_resetstats_tmr" title="web_form_resetstats_tmr" label="web_form_resetstats_tmr_tip" />
+	<instance name="generic_tooltip_floater" width="23h" tip_id="web_form_tip_midwars_tmr" title="web_form_resetstats_midwars_mmr" label="web_form_resetstats_midwars_mmr_tip" />
+	<instance name="generic_tooltip_floater" width="23h" tip_id="web_form_subaccount_tip" title="web_form_subaccount_name" label="web_form_subaccount_description" />
+
+	<!--<instance name="generic_tooltip_floater" width="23h" tip_id="web_form_tip_" title="" label="" />-->
+
+
+<!-- Store.package and related packages -->
+
+	<panel noclick="true" color="invisible" visible="false"
+		width="1h" height="1h"
+		watch="StoreImagePreviewInit"
+		ontrigger="
+			SetWidth(param0);
+			SetHeight(param1);
+			SetAbsoluteX(param2);
+			SetAbsoluteY(param3);
+			BringToFront();
+		"
+		watch1="StoreImagePreviewVis"
+		ontrigger1="
+			If(
+				param0,
+				FadeIn(0),
+				FadeOut(200)
+			);
+		"
+	>
+		<webimage noclick="true" align="center" valign="center"
+			watch="StoreImagePreviewInit"
+			ontrigger="
+				If(
+					param4,
+					SetTextureURL(param5),
+					SetTexture(param5)
+				);
+			"
+			watch1="StoreImagePreviewVis"
+			ontrigger1="
+				If(
+					!IsVisible() or (param0 and IsVisible()),
+					Split(
+						SetWidth('100%'),
+						SetHeight('100%')
+					)
+				);
+				If(
+					param0,
+					Split(
+						ScaleWidth(param1, 200),
+						ScaleHeight(param1, 200)
+					),
+					If(
+						IsVisible(),
+						Split(
+							ScaleWidth('100%', 200),
+							ScaleHeight('100%', 200)
+						)
+					)
+				);
+			"
+		/>
+	</panel>
+
+	<floater width="25h" x="22" y="-22" grow="true" name="store_trial_tip" color="invisible" visible="false">
+		<frame texture="/ui/frames/tooltip_bg.tga" color="0 0 0 .8" borderthickness=".6h" />
+		<frame texture="/ui/frames/roundframe.tga" color="#A0A0A0" borderthickness=".6h" />
+			<panel width="-1.5h" align="center" grow="true" float="bottom">
+					<panel height=".5h" />
+					<label textvalign="top" textalign="left" font="dyn_12" noclick="1" color="#ffab01" shadow="1" wrap="1" width="100%" fity="true" fitypadding="0.8h">learn_trial</label>
+					<label textvalign="top" textalign="left" font="dyn_10" noclick="1" color="yellow" shadow="1" wrap="1" width="100%" fity="true" fitypadding="0.8h" watch="trial_store_info" ontrigger="SetText(Translate('compendium_trial_infohead') # param0 # Translate('compendium_trial_infotail'));">learn_trial</label>
+			</panel>
+	</floater>
+
+<!-- form_report_abuse.package -->
+
+	<instance name="generic_tooltip_floater" width="23h" tip_id="web_form_reportabuse_name_tip" title="web_form_reportabuse_accountname" label="web_form_reportabuse_accountname_tip" />
+	<instance name="generic_tooltip_floater" width="23h" tip_id="web_form_reportabuse_abuser_tip" title="web_form_reportabuse_abuser" label="web_form_reportabuse_abuser_tip" />
+	<instance name="generic_tooltip_floater" width="23h" tip_id="web_form_reportabuse_type_tip" title="web_form_reportabuse_type" label="web_form_reportabuse_type_tip" />
+	<instance name="generic_tooltip_floater" width="23h" tip_id="web_form_reportabuse_matchid_tip" title="web_form_reportabuse_matchid" label="web_form_reportabuse_matchid_tip" />
+	<instance name="generic_tooltip_floater" width="23h" tip_id="web_form_reportabuse_server_tip" title="web_form_reportabuse_server" label="web_form_reportabuse_server_tip" />
+	<instance name="generic_tooltip_floater" width="23h" tip_id="web_form_reportabuse_body_tip" title="web_form_reportabuse_body" label="web_form_reportabuse_body_tip" />
+
+
+<!-- Garena Create Account -->
+
+	<instance name="generic_tooltip_floater" width="23h" tip_id="region_create_account_nickname_tip" title="garena_create_account_title" label="region_create_account_tip" />
+
+<!-- ladder.package -->
+
+	<instance name="simple_tooltip_floater" tip_id="ladder_col_tooltip" align="left" width="12.0h" label="" label_name="ladder_col_tooltip_label" />
+
+<!-- compendium.package -->
+	<floater width="25h" x="22" y="-22" grow="true" name="simple_hero_list_tip" color="invisible" visible="false">
+		<frame texture="/ui/frames/tooltip_bg.tga" color="0 0 0 .8" borderthickness=".6h" />
+		<frame texture="/ui/frames/roundframe.tga" color="#A0A0A0" borderthickness=".6h" />
+			<panel width="-1.5h" align="center" grow="true" float="bottom">
+					<panel height=".5h" />
+					<label textvalign="top" textalign="left" font="dyn_11" noclick="1" color="#ffab01" shadow="1" wrap="1" width="100%" fity="true" fitypadding="0.8h" watch="SimpleHeroItemTooltip" ontrigger="SetText(param0);">compendium_hero_name</label>
+					<panel grow="true" width="100%" float="right" padding=".25h">
+						<label textvalign="top" textalign="left" font="dyn_10" color="yellow" shadow="true" fitx="true" fity="true">compendium_primary_atrib</label>
+						<label textvalign="top" textalign="left" font="dyn_10" color="white" shadow="true" fitx="true" fity="true" watch="SimpleHeroItemTooltip" ontrigger="SetText(param1);">compendium_attrib_types</label>
+					</panel>
+					<panel grow="true" width="100%" float="right" padding=".25h">
+						<label textvalign="top" textalign="left" font="dyn_10" color="yellow" shadow="true" fitx="true" fity="true">compendium_attack_type</label>
+						<label textvalign="top" textalign="left" font="dyn_10" color="white" shadow="true" fitx="true" fity="true" watch="SimpleHeroItemTooltip" ontrigger="If(param2 == 1, SetText(Translate('tooltip_attack_type_melee')), SetText(Translate('tooltip_attack_type_range')));">compendium_melee_range</label>
+					</panel>
+					<panel grow="true" width="100%" float="right" padding=".25h" watch="SimpleHeroItemTooltip" ontrigger="SetVisible(!StringEmpty(param3))">
+						<label textvalign="top" textalign="left" font="dyn_10" color="yellow" shadow="true" fitx="true" fity="true">compendium_trial_info</label>
+						<label textvalign="top" textalign="left" font="dyn_10" color="white" shadow="true" fitx="true" fity="true" watch="SimpleHeroItemTooltip" ontrigger="SetText(Translate('compendium_trial_infohead') # param3 # Translate('compendium_trial_infotail'));">compendium_trial_infohead</label>
+					</panel>
+					<panel height="1.0h" />
+			</panel>
+	</floater>
+
+	<floater width="25h" x="22" y="-22" grow="true" name="trial_avatar_tip" color="invisible" visible="false">
+		<frame texture="/ui/frames/tooltip_bg.tga" color="0 0 0 .8" borderthickness=".6h" />
+		<frame texture="/ui/frames/roundframe.tga" color="#A0A0A0" borderthickness=".6h" />
+			<panel width="-1.5h" align="center" grow="true" float="bottom">
+					<panel height=".5h" />
+					<label textvalign="top" textalign="left" font="dyn_12" noclick="1" color="#ffab01" shadow="1" wrap="1" width="100%" fity="true" fitypadding="0.8h">learn_trial</label>
+					<label textvalign="top" textalign="left" font="dyn_10" noclick="1" color="yellow" shadow="1" wrap="1" width="100%" fity="true" fitypadding="0.8h" watch="trial_avatar_info" ontrigger="SetText(Translate('compendium_trial_infohead') # param0 # Translate('compendium_trial_infotail'));">learn_trial</label>
+			</panel>
+	</floater>
+
+<!-- matchmaking.package -->
+	<instance name="generic_tooltip_floater" width="23h" tip_id="mm_tip_popularitymeter" title="mm_popularitymeter" label="mm_popularitymeter_body" />
+	<instance name="generic_tooltip_floater" width="23h" tip_id="mm_disabled_tip" title="mm_disabled" label="mm_disabled_tip" />
+
+	<instance name="generic_tooltip_floater" width="23h" tip_id="mm_option_disabled_tip" title="mm_option_disabled" label="mm_option_disabled_body" />
+	<instance name="generic_tooltip_floater" icony="0.4h" iconheight="2.5h" iconwidth="2.5h" width="23h" tip_id="mm_option_disabled_unverified_tip" title="mm_option_disabled_unverified" label="mm_option_disabled_unverified_body" icon="/ui/icons/verified.tga" />
+
+	<instance name="generic_tooltip_floater" icony="0.4h" iconheight="2.5h" iconwidth="2.5h" width="23h" tip_id="mm_option_disabled_havetoken_tip" title="mm_option_disabled_unverified" label="mm_option_disabled_havetoken_body" icon="/ui/icons/verified.tga" />
+	<instance name="generic_tooltip_floater" icony="0.4h" iconheight="2.5h" iconwidth="2.5h" width="23h" tip_id="mm_option_disabled_havepass_tip" title="mm_option_disabled_unverified" label="mm_option_disabled_havepass_body" icon="/ui/icons/verified.tga" />
+	<instance name="generic_tooltip_floater" icony="0.4h" iconheight="2.5h" iconwidth="2.5h" width="23h" tip_id="mm_option_disabled_tokenpass_tip" title="mm_option_disabled_unverified" label="mm_option_disabled_tokenpass_body" icon="/ui/icons/verified.tga" />
+
+
+	<instance name="generic_tooltip_floater" icony="0.4h" iconheight="2.5h" iconwidth="2.5h" width="23h" tip_id="mm_option_disabled_needtokenpass_tip" title="mm_option_disabled_needtokenpass" label="mm_option_disabled_needtokenpass_body" icon="/ui/fe2/store/icons/hero_token.tga" />
+	<instance name="generic_tooltip_floater" icony="0.4h" iconheight="2.5h" iconwidth="2.5h" width="23h" tip_id="mm_option_disabled_needtoken_tip" title="mm_option_disabled_needtoken" label="mm_option_disabled_needtoken_body" icon="/ui/fe2/store/icons/hero_token.tga" />
+
+	<trigger name="TMMUpdateTooltipTrigger" />
+	<instance name="generic_trigger_tooltip_floater" watch="TMMUpdateTooltipTrigger" y="1.5h" x="2.5h" icony="0.4h" iconheight="2.2h" iconwidth="2.2h" tip_id="tmm_gt_tooltip_floater" />
+
+
+	<!-- Modes -->
+	<instance name="generic_tooltip_floater" icony="0.4h" iconheight="2.5h" iconwidth="2.5h" width="23h" tip_id="mm_mode_ap_tip" title="general_mode_all_pick" label="general_mode_all_pick_desc" />
+	<instance name="generic_tooltip_floater" icony="0.4h" iconheight="2.5h" iconwidth="2.5h" width="23h" tip_id="mm_mode_bd_tip" title="general_mode_banningdraft" label="general_mode_banningdraft_desc" />
+	<instance name="generic_tooltip_floater" icony="0.4h" iconheight="2.5h" iconwidth="2.5h" width="23h" tip_id="mm_mode_sd_tip" title="general_mode_singledraft" label="general_mode_singledraft_desc" />
+	<instance name="generic_tooltip_floater" icony="0.4h" iconheight="2.5h" iconwidth="2.5h" width="23h" tip_id="mm_mode_bp_tip" title="general_mode_banningpick" label="general_mode_banningpick_desc" />
+	<instance name="generic_tooltip_floater" icony="0.4h" iconheight="2.5h" iconwidth="2.5h" width="23h" tip_id="mm_mode_lp_tip" title="general_mode_lockpick" label="general_mode_lockpick_desc" />
+	<instance name="generic_tooltip_floater" icony="0.4h" iconheight="2.5h" iconwidth="2.5h" width="23h" tip_id="mm_mode_ar_tip" title="general_mode_allrandom" label="general_mode_allrandom_desc" />
+	<instance name="generic_tooltip_floater" icony="0.4h" iconheight="2.5h" iconwidth="2.5h" width="23h" tip_id="mm_mode_bb_tip" title="general_mode_blindbanningpick" label="general_mode_blindbanningpick_desc" />
+
+	<!-- Create game -->
+	<instance name="generic_tooltip_floater" icony="0.4h" iconheight="2.5h" iconwidth="2.5h" tip_id="cg_disabled_tip" title="cg_disabled" label="cg_disabled_tip" icon="/ui/icons/verified.tga" />
+
+<!-- Game.interface -->
+
+	<instance name="generic_tooltip_floater" width="23h" tip_id="game_menu_tip_menu" title="game_button_menu" label="game_menu_menu_tip" />
+	<instance name="generic_tooltip_floater" width="23h" tip_id="game_menu_tip_vote" title="game_menu_vote" label="game_menu_vote_tip" />
+	<instance name="generic_tooltip_floater" width="23h" tip_id="game_menu_tip_chat" title="game_menu_chat" label="game_menu_chat_tip" />
+	<instance name="generic_tooltip_floater" width="23h" tip_id="game_menu_tip_options" title="general_options" label="game_menu_options_tip" />
+	<instance name="generic_tooltip_floater" width="23h" tip_id="game_menu_tip_disconnect" title="general_disconnect" label="game_menu_disconnect_tip" />
+	<instance name="generic_tooltip_floater" width="23h" tip_id="game_menu_tip_quit" title="main_button_quit" label="game_menu_quit_tip" />
+	<instance name="generic_tooltip_floater" width="23h" tip_id="game_menu_tip_kick" title="game_menu_kick" label="game_menu_kick_tip" />
+	<instance name="generic_tooltip_floater" width="23h" tip_id="game_menu_tip_pause" title="game_menu_pause_button" label="game_menu_pause_tip" />
+	<instance name="generic_tooltip_floater" width="23h" tip_id="game_menu_tip_sharing" title="game_menu_sharing_button" label="game_menu_sharing_tip" />
+	<instance name="generic_tooltip_floater" width="23h" tip_id="game_menu_tip_nohelp" title="game_menu_nohelp_button" label="game_menu_nohelp_tip" />
+	<instance name="generic_tooltip_floater" width="23h" tip_id="game_menu_tip_unpause" title="game_menu_unpause_button" label="game_menu_unpause_tip" />
+	<instance name="generic_tooltip_floater" width="23h" tip_id="game_menu_tip_remake" title="game_menu_remake_button" label="game_menu_remake_tip" />
+	<instance name="generic_tooltip_floater" width="23h" tip_id="game_menu_tip_concede" title="game_menu_concede_button" label="game_menu_concede_tip" />
+
+<!-- item template -->
+	<template name="endgame_item_tooltip">
+		<frame
+			name="{id}"
+			texture="/ui/frames/rounded_bg_white.tga"
+			onframelua="HoN_Learner:InventoryPopup()"
+			borderthickness="0.6h"
+			color="0 0 0 .75"
+			visible="false"
+			align="left"
+			valign="top"
+			width="27h"
+			height="5.0h"
+			float="bottom"
+			noclick="1"
+		>
+			<frame texture="/ui/frames/roundframe.tga" noclick="1" borderthickness="0.6h" bordercolor="#434d50"/>
+			<anchor x="1.0h" y="0.6h" />
+
+			<panel width="-2.0h" height="3.6h" noclick="1">
+
+				<!-- Icon -->
+				<panel width="100@" height="100%" noclick="1">
+					<image texture="" noclick="1"
+						watch="MSPlayerInventoryTipIcon"
+						ontrigger="
+							If(
+								!StringEmpty(param0),
+								Split(
+									SetVisible(true),
+									SetTexture(param0)
+								),
+								SetVisible(false)
+							);
+						"
+					/>
+					<frame color="invisible" borderthickness="1" bordercolor=".3 .3 .3 1" noclick="1"/>
+				</panel>
+
+				<panel width="-120@" align="right" noclick="1">
+
+					<!-- Name -->
+					<label noclick="1"
+						height="1.8h"
+						valign="top"
+						textalign="left"
+						font="dyn_12" color="#ffab01" shadow="true"
+						watch="{watch}"
+						ontrigger="SetText(param0);"
+					/>
+
+					<!-- Value -->
+					<label noclick="1"
+						height="1.8h"
+						valign="bottom"
+						textalign="left" textvalign="bottom"
+						font="dyn_10"
+						color=".9 .9 .9 1"
+						watch="{watch}"
+						ontrigger="If(param1 gt 0, SetText(Translate('tooltip_value') # param1), ClearText());"
+					/>
+
+					<!-- Level-->
+					<label noclick="1"
+						height="1.8h"
+						valign="bottom"
+						textalign="left"
+						textvalign="bottom"
+						font="dyn_10" color=".9 .9 .9 1" shadow="true"
+						watch="{watch}"
+						ontrigger="If(param2 != 0 and param3 != 0, SetText(Translate('toolitp_level', 'level', param2))); SetVisible(param2 != 0 and param3 != 0);"
+						sticky="true"
+						stickytoinvis="false"
+						visible="false"
+					/>
+
+				</panel>
+
+			</panel>
+
+			<panel 
+				width="-2.0h" noclick="1"
+				height="1.8h"
+				watch="{watch}"
+				ontrigger="SetVisible(!StringEmpty(param4));"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			/>
+
+			<!-- Description text -->
+			<label
+				width="-2.0h" noclick="1"
+				height="0.0h"
+				font="dyn_9"
+				wrap="true"
+				color="white"
+				watch="{watch}"
+				ontrigger="SetText(param4); SetVisible(!StringEmpty(param4)); SetHeight(GetStringWrapHeight('dyn_9', param4, GetWidthFromString('-2.0h')) + GetYFromString('0.2h'));"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			/>
+
+			<panel
+				width="-2.0h" noclick="1"
+				height="1.8h"
+				watch="{watch}"
+				ontrigger="SetVisible(!StringEmpty(param34));"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			/>
+
+			<!-- Description text2 -->
+			<label
+				width="-2.0h" noclick="1"
+				height="0.0h"
+				font="dyn_9"
+				wrap="true"
+				color="white"
+				watch="{watch}"
+				ontrigger="SetText(param34); SetVisible(!StringEmpty(param34)); SetHeight(GetStringWrapHeight('dyn_9', param34, GetWidthFromString('-2.0h')) + GetYFromString('0.2h'));"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			/>
+
+			<!-- Passive block -->
+			<panel
+				width="-2.0h" noclick="1"
+				height="1.8h"
+				watch="{watch}"
+				ontrigger="SetVisible(param6 gt 0);"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			/>
+
+			<panel
+				width="-2.0h" noclick="1"
+				height="2.4h"
+				watch="{watch}"
+				ontrigger="SetVisible(param6 gt 0);"
+				float="bottom"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			>
+				<label
+					height="1.8h" noclick="1"
+					font="dyn_10"
+					color="white"
+					content="tooltip_passive_bonuses"
+				/>
+
+				<panel width="10.5h" height="0.2h" color="gray" noclick="1" />
+				<panel height="0.4h" sticky="true" noclick="1" />
+			</panel>
+
+			<!-- Passive bonuses -->
+			<label
+				width="-2.0h" noclick="1"
+				height="0.0h"
+				font="dyn_10"
+				wrap="true"
+				color="white"
+				watch="{watch}"
+				ontrigger="SetText(param5); SetHeight(GetStringWrapHeight('dyn_10', param5, GetWidthFromString('-2.0h')) + GetYFromString('0.4h')); SetVisible(param6 gt 0);"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			/>
+
+			<!-- Activation block -->
+			<panel
+				width="-2.0h" noclick="1"
+				height="1.8h"
+				watch="{watch}"
+				ontrigger="SetVisible(param7);"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			/>
+
+			<panel
+				width="-2.0h" noclick="1"
+				height="2.4h"
+				watch="{watch}"
+				ontrigger="SetVisible(param7);"
+				float="bottom"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			>
+				<label
+					width="-2.0h"
+					height="1.8h" noclick="1"
+					font="dyn_10"
+					color="white"
+					content="tooltip_activation"
+				/>
+
+				<panel width="10.5h" height="0.2h" color="gray" sticky="true" noclick="1" />
+				<panel width="-2.0h" height="0.4h" sticky="true" noclick="1" />
+			</panel>
+
+			<!-- Action type and Target scheme -->
+			<panel
+				width="-2.0h"
+				height="1.8h"
+				watch="{watch}" noclick="1"
+				ontrigger="SetVisible(!StringEmpty(param8) and param7);"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			>
+				<label
+					textalign="left" noclick="1"
+					font="dyn_10"
+					color="white"
+					watch="{watch}"
+					ontrigger="SetText(param8);"
+				/>
+				<label
+					textalign="right" noclick="1"
+					font="dyn_10"
+					color="white"
+					watch="{watch}"
+					ontrigger="SetText(param9);"
+				/>
+			</panel>
+
+			<!-- Cast effect type -->
+			<label
+				width="-2.0h" noclick="1"
+				height="1.8h"
+				font="dyn_10"
+				color="white"
+				watch="{watch}"
+				ontrigger="SetText(Translate('tooltip_type') # param10); SetVisible(!StringEmpty(param10) and param7);"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			/>
+
+			<!-- Range -->
+			<label
+				width="-2.0h" noclick="1"
+				height="1.8h"
+				font="dyn_10"
+				color="white"
+				watch="{watch}"
+				ontrigger="SetText(Translate('tooltip_range') # param11); SetVisible(!StringEmpty(param11) and param7);"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			/>
+
+			<!-- Radius -->
+			<label
+				width="-2.0h" noclick="1"
+				height="1.8h"
+				font="dyn_10"
+				color="white"
+				watch="{watch}"
+				ontrigger="SetText(Translate('tooltip_radius') # param12); SetVisible(!StringEmpty(param12) and param7);"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			/>
+
+			<!-- Channeling time -->
+			<label
+				width="-2.0h" noclick="1"
+				height="1.8h"
+				font="dyn_10"
+				color="green"
+				watch="{watch}"
+				ontrigger="If(!StringEmpty(param35), SetText(Translate('tooltip_channeling_time', 'time', param35))); SetVisible(!StringEmpty(param35));"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			/>
+
+			<!-- Mana cost -->
+			<label
+				width="-2.0h"
+				height="1.8h"
+				font="dyn_10" noclick="1"
+				color="aqua"
+				watch="{watch}"
+				ontrigger="SetText(Translate('tooltip_mana_cost') # param13); SetVisible(!StringEmpty(param13) and param7);"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			/>
+
+			<!-- Mana Upkeep -->
+			<label
+				width="-2.0h"
+				height="1.8h" noclick="1"
+				font="dyn_10"
+				color="yellow"
+				watch="{watch}"
+				ontrigger="SetText(Translate('tooltip_mana_upkeep', 'value', param36)); SetVisible(!StringEmpty(param36) and param7);"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			/>
+
+			<!-- Cooldown -->
+			<label
+				width="-2.0h"
+				height="1.8h"
+				font="dyn_10"
+				color="#F0E68C"
+				watch="{watch}"
+				ontrigger="SetText(Translate('tooltip_cooldown', 'time', param14)); SetVisible(!StringEmpty(param14));"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			/>
+
+			<panel
+				width="-2.0h"
+				height="1.8h"
+				watch="{watch}"
+				ontrigger="SetVisible(!StringEmpty(param15) and param7);"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			/>
+
+			<!-- Effect -->
+			<label
+				width="-2.0h"
+				height="0.0h"
+				font="dyn_9"
+				wrap="true"
+				color="white"
+				watch="{watch}"
+				ontrigger="SetText(param15); SetVisible(!StringEmpty(param15) and param7); SetHeight(GetStringWrapHeight('dyn_9', param15, GetWidthFromString('-2.0h')) + GetYFromString('0.2h'));"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			/>
+
+			<!-- Triggered effect -->
+			<panel
+				width="-2.0h"
+				height="1.8h"
+				watch="{watch}"
+				ontrigger="SetVisible(param16);"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			/>
+
+			<panel
+				width="-2.0h"
+				height="2.4h"
+				watch="{watch}"
+				ontrigger="SetVisible(param16);"
+				float="bottom"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			>
+				<label
+					width="-2.0h"
+					height="1.8h"
+					font="dyn_10"
+					color="white"
+					watch="{watch}"
+					ontrigger="SetText(param17);"
+				/>
+
+				<panel width="10.5h" height="0.2h" color="gray" sticky="true" />
+				<panel width="-2.0h" height="0.4h" sticky="true" />
+			</panel>
+
+			<label
+				width="-2.0h"
+				height="0.0h"
+				font="dyn_9"
+				wrap="true"
+				color="white"
+				watch="{watch}"
+				ontrigger="SetText(param18); SetVisible(!StringEmpty(param18) and param16); SetHeight(GetStringWrapHeight('dyn_9', param18, GetWidthFromString('-2.0h')) + GetYFromString('0.2h'));"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			/>
+
+			<!-- Status effect -->
+			<panel
+				width="-2.0h"
+				height="1.8h"
+				watch="{watch}"
+				ontrigger="SetVisible(!StringEmpty(param19));"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			/>
+
+			<panel
+				width="-2.0h"
+				height="2.4h"
+				watch="{watch}"
+				ontrigger="SetVisible(!StringEmpty(param19));"
+				float="bottom"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			>
+				<label
+					height="1.8h"
+					font="dyn_10"
+					color="white"
+					watch="{watch}"
+					ontrigger="SetText(param19);"
+				/>
+
+				<panel width="10.5h" height="0.2h" color="gray" />
+				<panel height="0.4h" sticky="true" />
+			</panel>
+
+			<label
+				width="-2.0h"
+				height="1.8h"
+				font="dyn_10"
+				wrap="true"
+				color="white"
+				watch="{watch}"
+				ontrigger="SetText(param20); SetHeight(GetStringWrapHeight('dyn_10', param20, GetWidthFromString('-2.0h')) + GetYFromString('0.4h')); SetVisible(param21 gt 0 and !StringEmpty(param19));"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			/>
+
+			<!-- Status effect 2 -->
+			<panel
+				width="-2.0h"
+				height="1.8h"
+				watch="{watch}"
+				ontrigger="SetVisible(!StringEmpty(param31));"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			/>
+
+			<panel
+				width="-2.0h"
+				height="2.4h"
+				watch="{watch}"
+				ontrigger="SetVisible(!StringEmpty(param31));"
+				float="bottom"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			>
+				<label
+					height="1.8h"
+					font="dyn_10"
+					color="white"
+					watch="{watch}"
+					ontrigger="SetText(param31);"
+				/>
+
+				<panel width="10.5h" height="0.2h" color="gray" />
+				<panel height="0.4h" sticky="true" />
+			</panel>
+
+			<label
+				width="-2.0h"
+				height="1.8h"
+				font="dyn_10"
+				wrap="true"
+				color="white"
+				watch="{watch}"
+				ontrigger="SetText(param32); SetHeight(GetStringWrapHeight('dyn_10', param32, GetWidthFromString('-2.0h')) + GetYFromString('0.4h')); SetVisible(param33 gt 0 and !StringEmpty(param31));"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			/>
+
+			<!-- Aura block -->
+			<panel
+				width="-2.0h"
+				height="1.8h"
+				watch="{watch}"
+				ontrigger="SetVisible(param22);"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			/>
+
+			<panel
+				width="-2.0h"
+				height="2.4h"
+				watch="{watch}"
+				ontrigger="SetVisible(param22);"
+				float="bottom"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			>
+				<label
+					width="-2.0h"
+					height="1.8h"
+					font="dyn_10"
+					color="white"
+					content="tooltip_aura"
+				/>
+
+				<panel width="10.5h" height="0.2h" color="gray" sticky="true" />
+				<panel width="-2.0h" height="0.4h" sticky="true" />
+			</panel>
+
+			<!-- Radius and Target scheme -->
+			<panel
+				width="-2.0h"
+				height="1.8h"
+				watch="{watch}"
+				ontrigger="SetVisible(param22);"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			>
+				<label
+					textalign="left"
+					font="dyn_10"
+					color="white"
+					watch="{watch}"
+					ontrigger="SetText(Translate('tooltip_radius') # param28); SetVisible(param22);"
+				/>
+				<label
+					textalign="right"
+					font="dyn_10"
+					color="white"
+					watch="{watch}"
+					ontrigger="SetText(param26);"
+				/>
+			</panel>
+
+			<!-- Aura effect type -->
+			<label
+				width="-2.0h"
+				height="1.8h"
+				font="dyn_10"
+				color="white"
+				watch="{watch}"
+				ontrigger="SetText(Translate('tooltip_type') # param27); SetVisible(!StringEmpty(param27) and param22);"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			/>
+
+			<panel
+				width="-2.0h"
+				height="1.8h"
+				watch="{watch}"
+				ontrigger="SetVisible(param22);"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			/>
+
+			<!-- Aura bonuses -->
+			<panel
+				width="-2.0h"
+				height="2.4h"
+				watch="{watch}"
+				ontrigger="SetVisible(param22);"
+				float="bottom"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			>
+				<label
+					height="1.8h"
+					font="dyn_10"
+					color="white"
+					content="tooltip_aura_effects"
+				/>
+
+				<panel width="10.5h" height="0.2h" color="gray" />
+				<panel height="0.4h" sticky="true" />
+			</panel>
+
+			<label
+				width="-2.0h"
+				height="1.8h"
+				font="dyn_10"
+				wrap="true"
+				color="white"
+				watch="{watch}"
+				ontrigger="SetText(param23); SetHeight(GetStringWrapHeight('dyn_10', param23, GetWidthFromString('-2.0h')) + GetYFromString('0.4h')); SetVisible(param24 gt 0);"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			/>
+
+			<!-- Flavor text -->
+			<panel
+				width="-2.0h"
+				height="1.8h"
+				watch="{watch}"
+				ontrigger="SetVisible(!StringEmpty(param29));"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			/>
+
+			<label
+				width="-2.0h"
+				height="1.8h"
+				font="dyn_9"
+				wrap="true"
+				color=".5 .5 .5 1"
+				watch="{watch}"
+				ontrigger="SetText(param29); SetVisible(!StringEmpty(param29)); SetHeight(GetStringWrapHeight('dyn_9', param29, GetWidthFromString('-2.0h')) + GetYFromString('0.2h'));"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			/>
+
+			<panel
+				width="-2.0h"
+				height="1.5h"
+				watch="{watch}"
+				ontrigger="SetVisible({help} and !StringEmpty(param30));"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			/>
+
+			<!-- Help -->
+			<label
+				width="-2.0h"
+				height="1.8h"
+				font="dyn_10"
+				wrap="true"
+				color="yellow"
+				watch="{watch}"
+				ontrigger="SetText(param30); SetVisible({help} and !StringEmpty(param30));"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			/>
+
+			<panel width="-2.0h" height="0.0h"
+				onframe="If(IsVisible(), Call('{id}', 'SetHeight(' # GetY() # ' + GetYFromString(\'0.55h\'));'));"
+				sticky="true"
+				stickytoinvis="false"
+			/>
+		</frame>
+	</template>
+	<trigger name="MSPlayerInventoryTip" />
+	<trigger name="MSPlayerInventoryTipIcon" />
+	<trigger name="MSPlayerHeroName" />
+	<instance name="endgame_item_tooltip" id="endgameItemTooltip" watch="MSPlayerInventoryTip" help="true" />
+	<instance name="generic_tooltip_floater" width="10h" align="right" valign="bottom" tip_id="endgame_hero_tooltip" title="" label="" title_watch="MSPlayerHeroName" title_ontrigger="SetText(GetEntityDisplayName(param0));" label_watch="MSPlayerHeroName" label_ontrigger="DestroyWidget();" />
+
+	<!-- HoN Tour -->
+	<instance name="generic_tooltip_float_resizey" tip_id="hontour_multiple_matches" 	title="hontour_multiple_matches" 	label="hontour_multiple_matches_tip" />
+	<instance name="generic_tooltip_float_resizey" tip_id="hontour_multiple_events" 	title="hontour_multiple_events" 	label="hontour_multiple_events_tip" />
+
+	<!--
+		Generic Floating Tooltip System
+		=========================
+		Just a generally flexible tooltip with up to a title, 3 text bodies and a top-right corner image.  Can be expanded later on.
+
+		param0		General visibility (you can also just hidewidget on genericMainFloatingTip so you don't need to re-trigger)
+		param1		Width
+		param2		Icon Path (blank for none) - small square icon at top-right
+		param3		Title text
+		param4		Body text 1
+		param5		Body text 2
+		param6		Body text 3
+		param7		X
+		param8		Y
+	-->
+	<trigger name="genericMainFloatingTip"/>
+	<trigger name="genericMainFloatingTip_subtrigger"/>
+	<floater passivechildren="true" visible="false" x="22" y="-22" width="20h" grow="true" regrow="true" name="genericMainFloatingTip"
+		watch="genericMainFloatingTip" ontrigger="SetVisible(param0); If(!StringEmpty(param1), SetWidth(param1)); If(!StringEmpty(param7), SetX(param7)); If(!StringEmpty(param8), SetY(param8)); BringToFront(); Trigger('genericMainFloatingTip_subtrigger', param0, param1, param2, param3, param4, param5, param6, param7);"
+	>
+		<frame texture="/ui/frames/tooltip_bg.tga" color="0 0 0 .95" borderthickness=".6h" />
+		<frame texture="/ui/frames/roundframe.tga" color="#A0A0A0" borderthickness=".6h" />
+		<image visible="false" align="right" valign="top" width="2h" height="2h" x="-0.5h" y="0.5h" watch="genericMainFloatingTip_subtrigger" ontrigger="If(!StringEmpty(param2), Split(SetTexture(param2), SetVisible(true)), SetVisible(false));"/>
+		<panel grow="true" regrow="true" growinvis="false" float="bottom" width="-1h" align="center">
+			<panel height="2" /><!-- Spacer and to get rid of the padding issue -->
+			<panel width="100%" grow="true" regrow="true" growinvis="false" float="bottom" padding="0.5h"><!-- Actual usable space -->
+				<label align="center" color="#ffab01" font="dyn_12" shadow="true" wrap="true" fity="true" sticky="true" stickytoinvis="false" textvalign="center" watch="genericMainFloatingTip_subtrigger" ontrigger="If(!StringEmpty(param3), Split(SetVisible(true), SetText(Translate(param3))), SetVisible(false));" content="-"/>
+				<label align="center" color="white" font="dyn_10" shadow="true" wrap="true" fity="true" sticky="true" stickytoinvis="false" textvalign="center" visible="false" watch="genericMainFloatingTip_subtrigger" ontrigger="If(!StringEmpty(param4), Split(SetVisible(true), SetText(FormatStringNewLine(Translate(param4)))), SetVisible(false));" content="-"/>
+				<panel height="0.5h" width="100%" visible="false" sticky="true" stickytoinvis="false" watch="genericMainFloatingTip_subtrigger" ontrigger="SetVisible(!StringEmpty(param5));">
+					<panel align="center" valign="center" height="1" width="-1h" color="#555555" />
+				</panel>
+				<label align="center" color="white" font="dyn_10" shadow="true" wrap="true" fity="true" sticky="true" stickytoinvis="false" textvalign="center" visible="false" watch="genericMainFloatingTip_subtrigger" ontrigger="If(!StringEmpty(param5), Split(SetVisible(true), SetText(FormatStringNewLine(Translate(param5)))), SetVisible(false));" content="-"/>
+				<panel height="0.5h" width="100%" visible="false" sticky="true" stickytoinvis="false" watch="genericMainFloatingTip_subtrigger" ontrigger="SetVisible(!StringEmpty(param6));">
+					<panel align="center" valign="center" height="1" width="-1h" color="#555555" />
+				</panel>
+				<label align="center" color="white" font="dyn_10" shadow="true" wrap="true" fity="true" sticky="true" stickytoinvis="false" textvalign="center" visible="false" watch="genericMainFloatingTip_subtrigger" ontrigger="If(!StringEmpty(param6), Split(SetVisible(true), SetText(FormatStringNewLine(Translate(param6)))), SetVisible(false));" content="-"/>
+			</panel>
+			<panel height="1h"/><!-- Spacer and to get rid of the padding issue -->
+		</panel>
+
+	</floater>
+</package>

@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+
+	<!-- Also for retrieving nickname, etc. -->
+	<trigger name="PassResetStatus"/>
+	<trigger name="PassResetResults"/>
+	<trigger name="UpdatePassResetForm" />
+	<trigger name="UpdateRetrieveNickForm" />
+
+	<form
+		name="PassReset"
+		host="!hon"
+		method="post"
+		target="/clientPassRetrieve.php"
+		statustrigger="PassResetStatus"
+		resulttrigger="PassResetResults"
+		resultparam0="0"
+		resultparam1="1"
+		ssl="true"
+	/>
+
+	<panel name="PassResetSubmit" noclick="1"
+		onload="CreateInt('_account_recover_formtype', 0);"
+		onevent="SubmitForm('PassReset');"
+	/>
+
+	<!-- Retrieve Login -->
+	<template name="retrieve_password">
+		<panel name="retrieve_password" y="-130%" width="45h" height="43h" align="center" color=".5 .0 0 .5" visible="{visible=0}" noclick="1">
+			<instance name="newui_popup_caption_frame" title="account_retrieve_header" onclicklua="UIManager.GetInterface('main'):HoNMainF('MainMenuPanelToggle', 'retrieve_password', nil, false)"/>
+
+			<!-- Lost Username Form -->
+			<panel y="3.6h" height="18h" width="-2h" align="center" noclick="1">
+				<frame texture="/ui/fe2/newui/res/common/frames/custom/frame.png" borderthickness="4" noclick="1"/>
+				<instance name="newui_caption" title="account_lost_username"/>
+				<panel y="3.6h" width="-1.6h" height="15h" align="center" float="bottom" padding="0.8h" noclick="1">
+					<label fity="1" fitypadding="0.5h" align="center" font="dyn_10" color="#3abde7" shadow="1" wrap="1" content="account_lost_username_msg" noclick="1"/>
+					<!-- Email -->
+					<instance name="fieldwithlabel" label="create_acc_email" watch="UpdateRetrieveNickForm" ontrigger="If(StringEmpty(form_retrieve_nickname_email) or !IsEmailAddress(form_retrieve_nickname_email) or !StringEquals(form_retrieve_nickname_email, form_retrieve_nickname_email2), SetColor('red'), SetColor('#f0d3c1'));" fieldname="form_retrieve_nickname_email" fieldorder="801" fieldform="PassReset" fielddata="retrieve_nickname_email" fieldonchange="Trigger('UpdateRetrieveNickForm');"/>
+
+					<!-- Confirm Email -->
+					<instance name="fieldwithlabel" label="create_acc_confirm_email" watch="UpdateRetrieveNickForm" ontrigger="If(StringEmpty(form_retrieve_nickname_email2) or !IsEmailAddress(form_retrieve_nickname_email2) or !StringEquals(form_retrieve_nickname_email, form_retrieve_nickname_email2), SetColor('red'), SetColor('#f0d3c1'));" fieldname="form_retrieve_nickname_email2" fieldorder="802" fieldform="PassReset" fieldonchange="Trigger('UpdateRetrieveNickForm');"/>
+
+					<instance name="newui_common_button_2_template" label="general_submit" width="10h" height="2.2h" align="right" enabled="0"
+						onclick="Set('_account_recover_formtype', 0); CallEvent('PassResetSubmit');"
+						watch="UpdateRetrieveNickForm"
+						ontrigger="If(StringEmpty(form_retrieve_nickname_email2) or !IsEmailAddress(form_retrieve_nickname_email2) or !StringEquals(form_retrieve_nickname_email, form_retrieve_nickname_email2), SetEnabled(false), SetEnabled(true));"
+					/>
+				</panel>
+			</panel>
+
+			<!-- Lost Password Form -->
+			<panel y="22h" height="20h" width="-2h" align="center" noclick="1">
+				<frame texture="/ui/fe2/newui/res/common/frames/custom/frame.png" borderthickness="4" noclick="1"/>
+				<instance name="newui_caption" title="account_lost_password"/>
+				<panel y="3.6h" width="-1.6h" height="18h" align="center" float="bottom" padding="0.8h" noclick="1">
+					<label fity="1" fitypadding="0.5h" align="center" font="dyn_10" color="#3abde7" shadow="1" wrap="1" content="account_lost_password_msg" noclick="1"/>
+
+					<!-- Email -->
+					<instance name="fieldwithlabel" label="create_acc_email" watch="UpdatePassResetForm" ontrigger="If(StringEmpty(form_reset_pass_email) or !IsEmailAddress(form_reset_pass_email), SetColor('red'), SetColor('#f0d3c1'));" fieldname="form_reset_pass_email" fieldorder="803" fieldform="PassReset" fielddata="retrieve_email" fieldonchange="Trigger('UpdatePassResetForm');"/>
+
+					<panel height="1.0h" noclick="1">
+						<label y="-0.5h" width="50%" align="right" textalign="center" font="dyn_10" color=".5 .5 .5 1" content="account_lost_pass_sep"/>
+					</panel>
+
+					<!-- Username -->
+					<instance name="fieldwithlabel" label="main_label_username" watch="UpdatePassResetForm" ontrigger="If(StringEmpty(form_reset_pass_nickname), SetColor('red'), SetColor('#f0d3c1'));" fieldname="form_reset_pass_nickname" fieldorder="804" fieldform="PassReset" fielddata="retrieve_nickname" fieldonchange="Trigger('UpdatePassResetForm');"/>
+
+					<instance name="newui_common_button_2_template" label="general_submit" width="10h" height="2.2h" align="right" enabled="0"
+						onclick="Set('_account_recover_formtype', 1); CallEvent('PassResetSubmit');"
+						watch="UpdatePassResetForm"
+						ontrigger="If((!StringEmpty(form_reset_pass_email) and IsEmailAddress(form_reset_pass_email)) or !StringEmpty(form_reset_pass_nickname), SetEnabled(true), SetEnabled(false));"
+					/>
+				</panel>
+			</panel>
+
+			<!-- Form Feedback -->
+			<panel align="center" y="3.6h" height="-3.6h" noclick="1">
+				<!-- Processing -->
+				<panel visible="0" align="center" valign="center" color="0 0 0 .7" watch="PassResetStatus" ontrigger="SetVisible(param == 1 || param == 3);">
+					<panel y="-2h" grow="1" height="3h" align="center" valign="center" float="right" padding="1.0h" noclick="1">
+						<animatedimage width="3h" height="3h" texture="/ui/elements/throb/throb.tga" loop="1" fps="30" onshow="StartAnim(1);" noclick="1"/>
+						<label fitx="1" textvalign="center" textalign="center" font="dyn_10" color="#2faff4" shadow="1" content="account_lost_username_processing" noclick="1"/>
+					</panel>
+				</panel>
+
+				<!-- Success Messages -->
+				<panel name="lostpass_successmsg" visible="0" align="center" valign="center" color="0 0 0 .5" watch="PassResetResults" ontrigger="SetVisible(StringEquals(param0, 'success'));">
+					<panel y="-1.0h" grow="1" width="-2h" valign="center" noclick="1">
+						<label fity="1" textalign="center" font="dyn_10" color="#12ff00" shadow="1" wrap="1" noclick="1" content="account_lost_password_success" watch="PassResetResults" ontrigger="If(_account_recover_formtype, SetText(Translate('account_lost_password_success')),  SetText(Translate('account_lost_username_success')));"/>
+					</panel>
+
+					<instance name="newui_common_button_2_template" label="general_close" y="5h" width="10.0h" height="2.2h" align="center" valign="center"
+						onclick="Call('lostpass_successmsg', 'FadeOut(250);');"
+					/>
+				</panel>
+
+				<!-- Error Messages -->
+				<panel name="lostpass_errmsg" visible="0" align="center" valign="center" color="0 0 0 .5" watch="PassResetResults" ontrigger="SetVisible(StringEquals(param0, 'failure'));">
+					<panel y="-1.0h" grow="1" width="-2h" valign="center" noclick="1">
+						<label fity="1" textalign="center" font="dyn_10" color="red" shadow="1" wrap="1" noclick="1" watch="PassResetResults" ontrigger="SetText(Translate('web_form_resetpass_error' # param1));"/>
+					</panel>
+
+					<instance name="newui_common_button_2_template" label="general_close" y="5h" width="10.0h" height="2.2h" align="center" valign="center"
+						onclick="Call('lostpass_errmsg', 'FadeOut(250);');"
+					/>
+				</panel>
+			</panel>
+		</panel>
+	</template>
+</package>

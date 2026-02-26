@@ -1,0 +1,775 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+	
+	<trigger name="hide_rap_edit_entry_panel"/>
+	<trigger name="rap_slider_value_changed"/>
+	<trigger name="rap_confirm_remove_entry"/>
+	<trigger name="rap_timestamp_slider_updated" />
+	<trigger name="rap_postgame_scrolled"/>
+	<trigger name="rap_submission_processing"/>
+	
+	<cvar name="rap_edit_time_slider_value" type="float" value="0" />
+
+	<!-- Button for selecting rap type -->
+	<template name="rap_postgame_entry_rap_type_button">
+		<button
+				width="{width}"
+				height="{width}"
+				color="invisible"
+				group="rap_postgame_type_buttons"
+				numstates="2"
+				onclicklua=
+						"
+				Rap_Info.SetRapTypeForPlayer('{reportedPlayer}', {rapType})
+				self:UICmd('GroupCall(\'rap_postgame_type_buttons\', \'SetButtonState(0)\')')
+				self:SetButtonState(1)
+			"
+				onmouseover="Trigger('genericMainFloatingTip', true, '18h', '/ui/icons/{icon}', '', 'report_a_player_abuse_type{rapType}', '', '', '-20h', '-2h'); PlaySound('/shared/sounds/ui/button_over_01.wav');"
+				onmouseout="Trigger('genericMainFloatingTip', '', '', '', '', '', '', '', '', '', '', '');"
+		>
+			<widgetstate statename="up">
+				<image name="rap_postgame_entry_rap_type_icon_{rapType}_{reportedPlayer}" texture="/ui/icons/{icon}" noclick="true"/>
+				<frame color="invisible" borderthickness="1" bordercolor=".2 .2 .2 1" noclick="true" />
+			</widgetstate>
+			<widgetstate statename="over">
+				<image texture="/ui/icons/{icon}" noclick="true" />
+				<frame color="invisible" borderthickness="1" bordercolor="#cc3333" noclick="true" />
+			</widgetstate>
+			<widgetstate statename="down" x="1" y="1">
+				<image texture="/ui/icons/{icon}" noclick="true" />
+				<frame color="invisible" borderthickness="1" bordercolor="#cc3333" noclick="true" />
+			</widgetstate>
+			<widgetstate statename="disabled">
+				<image texture="/ui/icons/{icon}" noclick="true" rendermode="grayscale" />
+				<frame color="invisible" borderthickness="1" bordercolor=".2 .2 .2 1" noclick="true" />
+			</widgetstate>
+			<widgetstate statename="up2">
+				<image texture="/ui/icons/{icon}" noclick="true"/>
+				<frame color="invisible" borderthickness="1" bordercolor="#33cc33" noclick="true" />
+			</widgetstate>
+			<widgetstate statename="over2">
+				<image texture="/ui/icons/{icon}" noclick="true" />
+				<frame color="invisible" borderthickness="1" bordercolor="#55cc33" noclick="true" />
+			</widgetstate>
+			<widgetstate statename="down2" x="1" y="1">
+				<image texture="/ui/icons/{icon}" noclick="true" />
+				<frame color="invisible" borderthickness="1" bordercolor="#33cc33" noclick="true" />
+			</widgetstate>
+			<widgetstate statename="disabled2">
+				<image texture="/ui/icons/{icon}" noclick="true" rendermode="grayscale" />
+				<frame color="invisible" borderthickness="1" bordercolor=".2 .2 .2 1" noclick="true" />
+			</widgetstate>
+		</button>
+	</template>
+
+	<!-- New RAP player entry -->
+	<if condition="cl_Rap2Enable">
+	<template name="rap_postgame_entry">
+		<panel name="rap_postgame_entry_{reportedPlayer}" grow="true" regrow="true" width="50.0h" align="center" visible="true" sticky="true" stickytoinvis="false">
+			<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.8h" color="#141e27" noclick="1"/>
+			<frame texture="/ui/frames/roundframe.tga" borderthickness="0.8h" color="#455166" noclick="1" />
+
+			<panel name="rap_postgame_entry_hub_{reportedPlayer}" grow="true" regrow="true" growinvis="false" y="0.9h" width="-1.8h" align="center" float="bottom" padding="1.2h">
+
+				<!-- Player and Report Info -->
+				<panel height="5.2h" float="right" padding="0.5h" noclick="true" sticky="true" stickytoinvis="false">
+
+					<!-- Icon -->
+					<panel height="100%" width="100@" noclick="true">
+						<image texture="{playerIcon}" noclick="true" />
+						<frame color="invisible" borderthickness="1" bordercolor="#455166" noclick="true" />
+					</panel>
+
+					<!-- Name and abuse -->
+					<panel width="-115@" align="right">
+						<label height="50%" valign="top" textvalign="center" font="dyn_14" color="{playerColor}" outline="true" content="{reportedPlayer}" noclick="true" />
+						<label name="rap_postgame_abuse_type_and_timestamp_{reportedPlayer}" height="50%" valign="bottom" textvalign="center" font="dyn_11" color=".8 .8 .8 1" shadow="true" noclick="true" />
+					</panel>
+
+					<!-- Abuse icon -->
+					<panel x="0" align="right" height="100%" width="100@">
+						<image name="rap_postgame_entry_rap_icon_{reportedPlayer}" texture="{abuseIcon}" noclick="true" />
+						<frame color="invisible" borderthickness="1" bordercolor=".2 .2 .2 1" noclick="true" />
+					</panel>
+				</panel>
+
+				<!-- Detail Entry -->
+				<panel name="rap_postgame_entry_details_{reportedPlayer}" width="100%" height="0h" float="bottom" visible="false" sticky="true" stickytoinvis="false">
+					<panel width="-1.0h" align="center" grow="true" growinvis="false" float="bottom" padding="1.9h" noclick="true">
+
+						<!-- Choose rap type -->
+						<panel visible="{editableRapType}" noclick="false" height="6.0h" float="right" padding="2.0h" sticky="true" stickytoinvis="false">
+							<instance name="rap_postgame_entry_rap_type_button" rapType="1" icon="verbal.tga" width="6.0h" reportedPlayer="{reportedPlayer}"/>
+							<instance name="rap_postgame_entry_rap_type_button" rapType="2" icon="feeding.tga" width="6.0h" reportedPlayer="{reportedPlayer}"/>
+							<instance name="rap_postgame_entry_rap_type_button" rapType="3" icon="frostburnimpersonator.tga" width="6.0h" reportedPlayer="{reportedPlayer}"/>
+							<instance name="rap_postgame_entry_rap_type_button" rapType="4" icon="ability_abuse.tga" width="6.0h" reportedPlayer="{reportedPlayer}"/>
+							<instance name="rap_postgame_entry_rap_type_button" rapType="5" icon="avoiding_afk.tga" width="6.0h" reportedPlayer="{reportedPlayer}"/>
+							<instance name="rap_postgame_entry_rap_type_button" rapType="6" icon="offensivename.tga" width="6.0h" reportedPlayer="{reportedPlayer}"/>
+						</panel>
+
+						<!-- Textbox -->
+						<panel name="rap_textbox_panel_{reportedPlayer}" height="8.0h" sticky="true" stickytoinvis="false">
+							<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.6h" color="0 0 0 1" noclick="1"/>
+							<frame texture="/ui/frames/roundframe.tga" borderthickness="0.6h" color=".2 .2 .2 1" noclick="1" />
+
+							<textbox
+									name="rap_postgame_entry_description_{reportedPlayer}"
+									visible="false"
+									y=".1h"
+									width="-1.0h" height="-1.0h"
+									align="center" valign="center"
+									wrap="true"
+									font="dyn_10" fontcolor=".8 .8 .8 1"
+									color="invisible"
+									maxlength="210"
+									oninstantiate="SetInputLine(Translate('rap_final_error_1'));"
+									onshow="If(StringEmpty(GetValue()), SetInputLine(Translate('rap_final_error_1')));"
+									onfocus="If(StringEquals(GetValue(), Translate('rap_final_error_1')), EraseInputLine());"
+							/>
+						</panel>
+
+						<!-- Timestamp Slider -->
+						<panel height="2.4h" sticky="true" stickytoinvis="false" visible="false">
+							<panel float="right" padding="0.6h">
+								<label fitx="true" textvalign="center" font="dyn_10" color="#ffaa00" shadow="true" content="general_time" />
+								<label name="rap_timestamp_slider_value_{reportedPlayer}" fitx="true" textvalign="center" font="dyn_10" color=".8 .8 .8 1" shadow="true" content="{minTime}" />
+							</panel>
+							<panel width="72%" align="right">
+								<image width="-200@" align="center" texture="/ui/info/slider_backdrop_c.tga" />
+								<image height="100%" width="100@" align="left" texture="/ui/info/slider_backdrop_l.tga" />
+								<image height="100%" width="100@" align="right" texture="/ui/info/slider_backdrop_r.tga" />
+
+								<panel width="-1.5h" height="100%" align="center">
+									<label color="white" height="100%" textvalign="center" shadow="true" font="dyn_9" valign="center" align="left" textalign="left" content="{minTimeFormatted=00:00:00}" />
+									<label color="white" height="100%" textvalign="center" shadow="true" font="dyn_9" valign="center" align="right" textalign="right" content="{maxTimeFormatted}" />
+								</panel>
+								<panel width="60%" height="100%" align="center">
+									<slider
+											name="rap_timestamp_slider_{reportedPlayer}"
+											slotwidth="-1%" slotheight="0.6h"
+											slotcolor="1 1 1 1"
+											handlewidth="100@" handleheight="-10%"
+											handlecolor="1 1 1 1"
+											minvalue="{minTime=0}" maxvalue="{maxTime}"
+											step="1"
+											texture="/ui/info/slider.tga"
+											onselect="PlaySound('/shared/sounds/ui/button_over_02.wav');"
+											onchange="PlaySound('/shared/sounds/ui/button_slide_01.wav'); Trigger('rap_timestamp_slider_updated', '{reportedPlayer}', this);"
+											onshow=""
+									/>
+								</panel>
+
+							</panel>
+						</panel>
+					</panel>
+
+					<panel height=".9h" />
+				</panel>
+
+				<!-- Expand / Dismiss Buttons -->
+				<panel height="2.2h" sticky="true" stickytoinvis="false">
+
+					<!-- Add Details Button - Hides when clicked -->
+					<button
+							name="rap_postgame_entry_add_details_button_{reportedPlayer}"
+							width="14.0h"
+							align="left"
+							color="invisible"
+							visible="true"
+							onclicklua="Rap_Info.ToggleEntryDetail('{reportedPlayer}')"
+					>
+						<widgetstate statename="up">
+							<panel float="right" padding="0.3h">
+								<panel height="100%" width="100@">
+									<image width="110@" height="110%" align="center" valign="center" texture="/ui/fe2/elements/btn_cplus_up.tga" />
+								</panel>
+								<label height="100%" textvalign="center" font="dyn_10" color="#37b2d9" content="rap_add_details" />
+							</panel>
+						</widgetstate>
+						<widgetstate statename="over">
+							<panel float="right" padding="0.3h">
+								<panel height="100%" width="100@">
+									<image width="110@" height="110%" align="center" valign="center" texture="/ui/fe2/elements/btn_cplus_over.tga" />
+								</panel>
+								<label height="100%" textvalign="center" font="dyn_10" color="#88e2ff" content="rap_add_details" />
+							</panel>
+						</widgetstate>
+						<widgetstate statename="down" x="1" y="1">
+							<panel float="right" padding="0.3h">
+								<panel height="100%" width="100@">
+									<image width="110@" height="110%" align="center" valign="center" texture="/ui/fe2/elements/btn_cplus_down.tga" />
+								</panel>
+								<label height="100%" textvalign="center" font="dyn_10" color="#88e2ff" content="rap_add_details" />
+							</panel>
+						</widgetstate>
+					</button>
+				</panel>
+
+				<panel height=".9h" />
+
+			</panel>
+		</panel>
+	</template>
+	</if><!-- End New RAP player entry -->
+
+	<!-- Old RAP player entry -->
+	<if condition="!cl_Rap2Enable">
+	<template name="rap_postgame_entry">
+			<panel name="rap_postgame_entry_{reportedPlayer}" grow="true" regrow="true" width="50.0h" align="center" visible="true" sticky="true" stickytoinvis="false"
+				   oninstantiatelua="Rap_Info.ResetScrollboxContents()" onshowlua="Rap_Info.ResetScrollboxContents()"
+			>
+				<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.8h" color="#141e27" noclick="1"/>
+				<frame texture="/ui/frames/roundframe.tga" borderthickness="0.8h" color="#455166" noclick="1" />
+
+				<panel name="rap_postgame_entry_hub_{reportedPlayer}" grow="true" regrow="true" growinvis="false" y="0.9h" width="-1.8h" align="center" float="bottom" padding="1.2h">
+
+					<!-- Player and Report Info -->
+					<panel height="5.2h" float="right" padding="0.5h" noclick="true" sticky="true" stickytoinvis="false">
+
+						<!-- Icon -->
+						<panel height="100%" width="100@" noclick="true">
+							<image texture="{playerIcon}" noclick="true" />
+							<frame color="invisible" borderthickness="1" bordercolor="#455166" noclick="true" />
+						</panel>
+
+						<!-- Name and abuse -->
+						<panel width="-115@" align="right">
+							<label height="50%" valign="top" textvalign="center" font="dyn_14" color="{playerColor}" outline="true" content="{reportedPlayer}" noclick="true" />
+							<label name="rap_postgame_abuse_type_and_timestamp_{reportedPlayer}" height="50%" valign="bottom" textvalign="center" font="dyn_11" color=".8 .8 .8 1" shadow="true" noclick="true" />
+						</panel>
+
+						<!-- Abuse icon -->
+						<panel x="0" align="right" height="100%" width="100@">
+							<image name="rap_postgame_entry_rap_icon_{reportedPlayer}" texture="{abuseIcon}" noclick="true" />
+							<frame color="invisible" borderthickness="1" bordercolor=".2 .2 .2 1" noclick="true" />
+						</panel>
+					</panel>
+
+					<!-- Detail Entry -->
+					<panel name="rap_postgame_entry_details_{reportedPlayer}" width="100%" height="0h" float="bottom" visible="false" sticky="true" stickytoinvis="false"
+						   onchangelua="Rap_Info.ResetScrollboxContents()"
+						   onshowlua="Rap_Info.ResetScrollboxContents()" onhidelua="Rap_Info.ResetScrollboxContents()"
+					>
+						<panel width="-1.0h" align="center" grow="true" growinvis="false" float="bottom" padding=".9h" noclick="true">
+
+							<!-- Choose rap type -->
+							<panel visible="{editableRapType}" noclick="false" height="6.0h" float="right" padding="2.0h" sticky="true" stickytoinvis="false">
+								<instance name="rap_postgame_entry_rap_type_button" rapType="1" icon="verbal.tga" width="6.0h" reportedPlayer="{reportedPlayer}"/>
+								<instance name="rap_postgame_entry_rap_type_button" rapType="2" icon="feeding.tga" width="6.0h" reportedPlayer="{reportedPlayer}"/>
+								<instance name="rap_postgame_entry_rap_type_button" rapType="3" icon="frostburnimpersonator.tga" width="6.0h" reportedPlayer="{reportedPlayer}"/>
+								<instance name="rap_postgame_entry_rap_type_button" rapType="4" icon="ability_abuse.tga" width="6.0h" reportedPlayer="{reportedPlayer}"/>
+								<instance name="rap_postgame_entry_rap_type_button" rapType="6" icon="offensivename.tga" width="6.0h" reportedPlayer="{reportedPlayer}"/>
+								<instance name="rap_postgame_entry_rap_type_button" rapType="5" icon="avoiding_afk.tga" width="6.0h" reportedPlayer="{reportedPlayer}"/>
+							</panel>
+
+							<!-- Textbox -->
+							<panel name="rap_textbox_panel_{reportedPlayer}" height="6.0h" sticky="true" stickytoinvis="false">
+								<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.6h" color="0 0 0 1" noclick="1"/>
+								<frame texture="/ui/frames/roundframe.tga" borderthickness="0.6h" color=".2 .2 .2 1" noclick="1" />
+
+								<textbox
+										name="rap_postgame_entry_description_{reportedPlayer}"
+										visible="false"
+										y=".1h"
+										width="-1.0h" height="-1.0h"
+										align="center" valign="center"
+										wrap="true"
+										font="dyn_10" fontcolor=".8 .8 .8 1"
+										color="invisible"
+										maxlength="210"
+										oninstantiate="SetInputLine(Translate('rap_final_error_1'));"
+										onshow="If(StringEmpty(GetValue()), SetInputLine(Translate('rap_final_error_1')));"
+										onfocus="If(StringEquals(GetValue(), Translate('rap_final_error_1')), EraseInputLine());"
+										watch="rap_postgame_scrolled"
+										ontriggerlua=
+												"
+									Rap_Info.HideTextboxIfOutsideScroller(self, '{reportedPlayer}')
+								"
+								/>
+							</panel>
+
+							<!-- Timestamp Slider -->
+							<panel height="2.4h" sticky="true" stickytoinvis="false">
+								<panel float="right" padding="0.6h">
+									<label fitx="true" textvalign="center" font="dyn_10" color="#ffaa00" shadow="true" content="general_time" />
+									<label name="rap_timestamp_slider_value_{reportedPlayer}" fitx="true" textvalign="center" font="dyn_10" color=".8 .8 .8 1" shadow="true" content="{minTime}" />
+								</panel>
+								<panel width="72%" align="right">
+									<image width="-200@" align="center" texture="/ui/info/slider_backdrop_c.tga" />
+									<image height="100%" width="100@" align="left" texture="/ui/info/slider_backdrop_l.tga" />
+									<image height="100%" width="100@" align="right" texture="/ui/info/slider_backdrop_r.tga" />
+
+									<panel width="-1.5h" height="100%" align="center">
+										<label color="white" height="100%" textvalign="center" shadow="true" font="dyn_9" valign="center" align="left" textalign="left" content="{minTimeFormatted=00:00:00}" />
+										<label color="white" height="100%" textvalign="center" shadow="true" font="dyn_9" valign="center" align="right" textalign="right" content="{maxTimeFormatted}" />
+									</panel>
+									<panel width="60%" height="100%" align="center">
+										<slider
+												name="rap_timestamp_slider_{reportedPlayer}"
+												slotwidth="-1%" slotheight="0.6h"
+												slotcolor="1 1 1 1"
+												handlewidth="100@" handleheight="-10%"
+												handlecolor="1 1 1 1"
+												minvalue="{minTime=0}" maxvalue="{maxTime}"
+												step="1"
+												texture="/ui/info/slider.tga"
+												onselect="PlaySound('/shared/sounds/ui/button_over_02.wav');"
+												onchange="PlaySound('/shared/sounds/ui/button_slide_01.wav'); Trigger('rap_timestamp_slider_updated', '{reportedPlayer}', this);"
+												onshow=""
+										/>
+									</panel>
+
+								</panel>
+							</panel>
+						</panel>
+
+						<panel height=".9h" />
+					</panel>
+
+					<!-- Expand / Dismiss Buttons -->
+					<panel height="2.2h" sticky="true" stickytoinvis="false">
+
+						<!-- Add Details Button - Hides when clicked -->
+						<button
+								name="rap_postgame_entry_add_details_button_{reportedPlayer}"
+								width="14.0h"
+								align="left"
+								color="invisible"
+								visible="true"
+								onclicklua="Rap_Info.ToggleEntryDetail('{reportedPlayer}')"
+						>
+							<widgetstate statename="up">
+								<panel float="right" padding="0.3h">
+									<panel height="100%" width="100@">
+										<image width="110@" height="110%" align="center" valign="center" texture="/ui/fe2/elements/btn_cplus_up.tga" />
+									</panel>
+									<label height="100%" textvalign="center" font="dyn_10" color="#37b2d9" content="rap_add_details" />
+								</panel>
+							</widgetstate>
+							<widgetstate statename="over">
+								<panel float="right" padding="0.3h">
+									<panel height="100%" width="100@">
+										<image width="110@" height="110%" align="center" valign="center" texture="/ui/fe2/elements/btn_cplus_over.tga" />
+									</panel>
+									<label height="100%" textvalign="center" font="dyn_10" color="#88e2ff" content="rap_add_details" />
+								</panel>
+							</widgetstate>
+							<widgetstate statename="down" x="1" y="1">
+								<panel float="right" padding="0.3h">
+									<panel height="100%" width="100@">
+										<image width="110@" height="110%" align="center" valign="center" texture="/ui/fe2/elements/btn_cplus_down.tga" />
+									</panel>
+									<label height="100%" textvalign="center" font="dyn_10" color="#88e2ff" content="rap_add_details" />
+								</panel>
+							</widgetstate>
+						</button>
+					</panel>
+
+					<panel height=".9h" />
+
+				</panel>
+			</panel>
+		</template>
+	</if>
+	<!-- End Old RAP player entry -->
+
+	<!-- RAP Conduct Summary -->
+	<if condition="cl_Rap2Enable">
+		<template name="rap_status">
+			<panel y="-110%" width="70.0h" align="center" name="rap_status" color=".1 .1 .1 1" visible="{visible=0}" noclick="true">
+				<panel x="0" y="-100%" height="203.6%" width="90%"  align="center" texture="mainmenu/upper_frame_center.tga"/>
+				<panel x="18h" y="-100%" height="203.6%" width="50@"  align="right" texture="mainmenu/upper_frame_right.tga"/>
+				<panel x="-18h" y="-100%" height="203.6%" width="50@"  align="left" texture="mainmenu/upper_frame_left.tga"/>
+
+				<panel y="1.0h" height="2.8h" width="-6.0h" align="center" noclick="true">
+					<instance name="header_bar" show_close="true" onclicklua="UIManager.GetInterface('main'):HoNMainF('MainMenuPanelToggle', 'rap_status', nil, false)" />
+					<panel width="-1.0h" align="center" noclick="true" passivechildren="true">
+						<label height="100%" valign="center" textalign="left" textvalign="center" color="white" shadow="true" font="dyn_12" noclick="true" content="rap_conduct_summary"/>
+					</panel>
+				</panel>
+				<panel name="rap_status_container" y="4.0h" height="45h" width="-6.0h" align="center" noclick="1" >
+					<panel y="9.5%" height="1h" align="center">
+						<label  y="0.4h" align="center" valign="center" textalign="left" textvalign="center" width="-10h" color="white" shadow="true" font="dyn_16" noclick="true" content="rap_status_title"/>
+						<label name="rap_status_name" align="center" valign="center" textalign="center" textvalign="center" color="white" font="dyn_24" noclick="true" content="need_to_define"/>
+					</panel>
+					<panel y="19%" height="6h" align="center">
+						<image align="center" valign="center" width="96h" name="rap_progress_bar"/>
+					</panel>
+					<panel y="34%" height="6h" align="center">
+						<label wrap="true" name="rap_content" align="center" valign="center" textalign="left" textvalign="center" width="-12h" color="#ffc90e" font="dyn_16" noclick="true" content="need_to_define"/>
+					</panel>
+					<panel y="50%" height="3h" align="center">
+						<label name="rap_reason_title" align="center" valign="center" textalign="left" textvalign="center" width="-12h" color="white" font="dyn_16" noclick="true" content="rap_reason_title"/>
+						<label name="rap_reason" align="center" valign="center" textalign="right" textvalign="center" width="-12h" color="#ffc90e" font="dyn_16" noclick="true" content="need_to_define"/>
+					</panel>
+					<panel y="62%" height="4h" align="center" width="-12h">
+						<instance name="tip_mark" tip_name="rap_observation_tip" width="2.2h" height="2.2h" align="left" valign="center"
+								  onmouseover="Trigger('genericMainFloatingTip', true, '30h', '', 'rap_observation_tips_title', 'rap_observation_tips_content', '', '', '3h', '-2h');"
+								  onmouseoverlua="UIManager.GetInterface('main'):HoNOptionsF('HoverScroller')"
+								  onmouseout="Call('options_scrollbox_scroller_down', 'FadeOut(150)');
+																		Call('options_scrollbox_scroller_up', 'FadeOut(150)');
+																		HideWidget('genericMainFloatingTip');"/>
+						<label wrap="true" y="-0.4h" name="rap_observation_content" align="center" valign="center" textalign="left" textvalign="center" width="-6h" color="#39c4fd" font="dyn_14" noclick="true" content="need_to_define"/>
+					</panel>
+					<panel y="74%" height="0.4h" align="center">
+						<image align="center" valign="center" width="170%" texture="/ui/fe2/rap/line.tga" />
+					</panel>
+					<panel y="78.2%" height="3h" align="center">
+						<label wrap="true" shadow="true" align="center" valign="center" textalign="left" textvalign="center" width="-12h" color="#8c8c8c" font="dyn_12" noclick="true" content="rap_contact_info" />
+					</panel>
+					<panel y="89.4%" height="3h" align="center">
+						<instance name="button2" height="2.6h" width="9.0h" align="center" valign="bottom" font="dyn_12" label="general_close" onclicklua="UIManager.GetInterface('main'):HoNMainF('MainMenuPanelToggle', 'rap_status', nil, false)"/>
+					</panel>
+				</panel>
+			</panel>
+		</template>
+	</if>
+
+	<template name="rap_report" >
+		<panel name="rap_sleeper" visible="false" noclick="1" blocksinput="0" />
+		<!-- Delete confirmation -->
+		<panel name="remove_entry_dialog_box" visible="0" color="0 0 0 .7" onshow="BringToFront();" watch="rap_confirm_remove_entry" ontrigger="If(!StringEmpty(param0), FadeIn(250), FadeOut(250));">
+		<panel align="center" valign="center" height="53h" grow="1" regrow="1" growinvis="1">
+			<panel width="33.0h" align="center" valign="center" grow="1" regrow="1" growinvis="1" noclick="1">
+				<frame color="0 0 0 .8" bordercolor="#455166" borderthickness="1" noclick="1" />			
+				<panel width="100%" float="bottom" padding="0.5h" grow="1" regrow="1" growinvis="1" color="invisible" noclick="1">
+					
+					<!-- Header -->
+					<instance
+						name="header_bar"
+						buttonsize="1.8h"
+						height="2.4h"
+						width="-2"
+						y="1"
+						lbl_font="dyn_11"
+						align="center"
+						lbl=""
+						show_close="true"
+						onclick="Call('remove_entry_dialog_box', 'FadeOut(250);');"
+						watch="rap_confirm_remove_entry" ontrigger="If(!StringEmpty(param0), SetText(Translate(param0)));"
+						btn_watch="rap_confirm_remove_entry" btn_ontrigger=""
+					/>
+
+					<!-- Body -->
+					<panel width="100%" align="center" color="invisible" grow="1" regrow="1" growinvis="1" noclick="1">					
+						<panel width="-1.0h" align="center" color="invisible" grow="1" regrow="1" growinvis="1" >
+							<frame texture="/ui/frames/tooltip_bg.tga" color="#2c4b6c" noclick="1"/>
+							<frame color="invisible" bordercolor="#455166" borderthickness="1" noclick="1" />						
+							<panel width="100%"  grow="1" regrow="1" growinvis="1" align="center" float="bottom" padding="1.0h" noclick="true">	
+
+								<!-- Title -->
+								<panel y="1.0h" grow="1" regrow="1" growinvis="1" width="100%" watch="rap_confirm_remove_entry" ontrigger="If(!StringEmpty(param3), SetVisible(1), SetVisible(0));" >
+									<label fity="true" width="-1.0h" align="center" textalign="center" textvalign="top" font="dyn_11" color="white" shadow="true" wrap="true" content="main_quit_confirm2"
+										watch="rap_confirm_remove_entry" ontrigger="If(!StringEmpty(param3), SetText(Translate(param3)));"
+									/>
+								</panel>
+								
+								<!-- Middle text -->
+								<panel  grow="1" regrow="1" growinvis="1" width="100%" noclick="true" visible="true" watch="rap_confirm_remove_entry" ontrigger="If(!StringEmpty(param4), SetVisible(1), SetVisible(0));" >
+									<panel  grow="1" regrow="1" growinvis="1" width="-2.0h" align="center">
+										<frame  texture="/ui/frames/tooltip_bg.tga" color="0 0 0 .5" borderthickness=".6h" />
+										<frame texture="/ui/frames/roundframe.tga" color="#A0A0A0" borderthickness=".6h"/>					
+										<panel y="0.5h" float="bottom" noclick="1" color="invisible"  grow="1" regrow="1" growinvis="1" width="-2.0h" align="center">						
+											
+											<label fity="1" fitypadding="2h" wrap="1" height="2h" width="100%" textalign="center" textvalign="center" font="dyn_10" color="white" shadow="1" noclick="true" watch="rap_confirm_remove_entry" ontrigger="If(!StringEmpty(param4), SetText(Translate(param4)));" />
+
+										</panel>				
+									</panel>
+								</panel>
+								
+								<!-- Ok / cancel buttons -->
+								<panel height="2.4h" noclick="true" sticky="true" stickytoinvis="false">
+									<instance
+										name="button2" button_name="unnamedButton211"
+										x="-7.0h"
+										width="12.0h" height="2.4h"
+										align="center"
+										valign="center"
+										label=""
+										onmouseover="PlaySound('/shared/sounds/ui/button_over_01.wav');"
+										onclick="Call('remove_entry_dialog_box', 'FadeOut(250);');"
+										onclicklua=
+										"
+											Rap_Info.RemoveRapEntryConfirmed()
+										"
+										labelwatch="rap_confirm_remove_entry"
+										labelontrigger="If(!StringEmpty(param1), SetText(Translate(param1)));"
+									/>
+
+									<instance
+										name="button2" button_name="unnamedButton212"
+										x="7.0h"
+										width="12.0h" height="2.4h"
+										align="center"
+										valign="center"
+										label=""
+										onmouseover="PlaySound('/shared/sounds/ui/button_over_01.wav');"
+										onclick="Call('remove_entry_dialog_box', 'FadeOut(250);');"
+										onclicklua=
+										"
+											Rap_Info.RemoveRapEntryCanceled()
+										"
+										labelwatch="rap_confirm_remove_entry"
+										labelontrigger="If(!StringEmpty(param2), SetText(Translate(param2)));"
+									/>
+								</panel>
+								<panel height="1.0h" noclick="true"/>
+							</panel>																
+						</panel>					
+					</panel>				
+					<panel height="0" noclick="1"/>
+				</panel>			
+			</panel>							
+		</panel>
+	</panel>
+	<!-- Postgame submission window -->
+	<if condition="cl_Rap2Enable">
+		<panel name="rap_postgame_player_list" color="0 0 0 .8" height="100%" width="100%" blockinput="true" visible="false" >
+		<panel name="rap_postgame_panel" height="38.5h" width="51.5h" cangrab="true" visible="true" valign="center" align="center" noclick="0">
+			<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.8h" color="#141e27" noclick="1"/>
+			<frame texture="/ui/frames/roundframe.tga" borderthickness="0.8h" color="#455166" noclick="1" />
+
+			<!-- Title and Close -->
+			<panel name="rap_postgame_title_panel" height="2h" y="1h" noclick="1">
+				<label name="rap_postgame_panel_title" color="#ffaa00" x="1h" font="dyn_12" noclick="1"/>
+				<instance name="closex_btn" onclicklua="Rap_Info.CancelRapReport()" align="right" x="-1.5h%" />
+			</panel>
+
+			<!-- This panel is used to replace previous scrollbox 'rap_postgame_scrollbox_panel' because there is a bug (HONG-3832) in widget scrollbox  -->
+			<!-- In new rap system, batch report has been removed, so there no need to use scrollbox, but relative code is reserved for stability -->
+			<frame name="rap_postgame_report_frame" align="center" y="4h" grow="true" regrow="true" width="-1.5h" style="rewards_bg_1" noclick="0" visible="true">
+				<panel name="rap_postgame_report_parent" />
+			</frame>
+
+			<!-- Submit and Cancel buttons -->
+			<panel name="rap_postgame_buttons_panel" height="4.3h" valign="bottom" noclick="0">
+				<instance name="button2" button_name="rap_postgame_submit_buton" label="general_submit" width="20%" x="-4%" height="3h" align="right"
+					labelwatch="rap_submission_processing"
+					labelontrigger="SetText(param0);"
+					onclicklua=
+					"
+						Rap_Info.SubmitRapReport()
+					"
+				/>
+				<instance name="button2" button_name="unnamedButton213" label="rap_dont_submit" width="20%" x="4%" height="3h" align="left"
+					onclicklua=
+					"
+						Rap_Info.CancelRapReport()
+					"
+				/>
+			</panel>
+		</panel>
+	</panel>
+	</if><!-- End of rap_postgame_player_list -->
+
+	<!-- Postgame submission window -->
+	<if condition="!cl_Rap2Enable">
+		<panel name="rap_postgame_player_list" color="0 0 0 .8" height="100%" width="100%" blockinput="true" visible="false" >
+			<panel name="rap_postgame_panel" height="38.5h" width="51.5h" cangrab="true" visible="true" valign="center" align="center" noclick="0">
+				<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.8h" color="#141e27" noclick="1"/>
+				<frame texture="/ui/frames/roundframe.tga" borderthickness="0.8h" color="#455166" noclick="1" />
+
+				<!-- Title and Close -->
+				<panel name="rap_postgame_title_panel" height="2h" y="1h" noclick="1">
+					<label name="rap_postgame_panel_title" color="#ffaa00" x="1h" font="dyn_12" noclick="1"/>
+					<instance name="closex_btn" onclicklua="Rap_Info.CancelRapReport()" align="right" x="-1.5h%" />
+				</panel>
+
+				<!-- Scrollbox -->
+				<frame name="rap_postgame_scrollbox_panel" align="center" y="4h" grow="true" regrow="true" width="-1.5h" style="rewards_bg_1" noclick="0" visible="true">
+					<frame style="rewards_bg_2" noclick="1" />
+					<scrollbox name="rap_scrollbox"
+							   valign="center" height="30h"
+							   align="center" noclick="1" float="bottom" padding="0"
+							   vscrollboxstep="1"
+							   scrolltexture="/ui/info/combobox.tga"
+							   handleheight="1.8h"
+							   scrollbarsize="0"
+							   exteriorscrollbars="1"
+							   vscrollbar="1"
+							   hscrollbar="0"
+							   clip="1"
+							   clipx="0"
+							   clipy="0"
+							   clipwidth="0"
+							   clipheight="0"
+							   scrollbaroffset="0.5h"
+							   clipoffsetx="0"
+							   clipoffsety="0"
+							   onloadlua="self:Sleep(1, function() Rap_Info.InitRapScroller(self) end)"
+							   onslide=""
+					>
+						<!-- reward pages instantiated here but in code -->
+					</scrollbox>
+
+					<panel noclick="0" color="invisible" visible="1" name="rap_scroll_blocker"
+						   blockinput="0" processonlyscroll="1"
+						   onmousewheeldown="
+						Call('rap_scrollbox_vscroll', 'SetScrollbarValue(GetScrollbarValue()+GetHeightFromString(\'2.0h\'))');
+						If(rap_canScrollUp, Call('rap_scrollbox_scroller_up', 'FadeIn(150)'), Call('rap_scrollbox_scroller_up', 'FadeOut(150)'));
+						If(rap_canScrollDown, Call('rap_scrollbox_scroller_down', 'FadeIn(150)'), Call('rap_scrollbox_scroller_down', 'FadeOut(150)'));
+						Trigger('rap_postgame_scrolled');
+						"
+						   onmousewheelup="
+						Call('rap_scrollbox_vscroll', 'SetScrollbarValue(GetScrollbarValue()-GetHeightFromString(\'2.0h\'))');
+						If(rap_canScrollUp, Call('rap_scrollbox_scroller_up', 'FadeIn(150)'), Call('rap_scrollbox_scroller_up', 'FadeOut(150)'));
+						If(rap_canScrollDown, Call('rap_scrollbox_scroller_down', 'FadeIn(150)'), Call('rap_scrollbox_scroller_down', 'FadeOut(150)'));
+						Trigger('rap_postgame_scrolled');
+					"
+						   onmouseover="
+						If(rap_canScrollUp, Call('rap_scrollbox_scroller_up', 'FadeIn(150)'), Call('rap_scrollbox_scroller_up', 'FadeOut(150)'));
+						If(rap_canScrollDown, Call('rap_scrollbox_scroller_down', 'FadeIn(150)'), Call('rap_scrollbox_scroller_down', 'FadeOut(150)'));
+						"
+						   onmouseout="
+						Call('rap_scrollbox_scroller_up', 'FadeOut(150)');
+						Call('rap_scrollbox_scroller_down', 'FadeOut(150)');
+					"
+						   onload="CreateBool('rap_canScrollUp', true); CreateBool('rap_canScrollDown', true);"
+					/>
+
+					<image name="rap_fade_top" texture="/ui/fe2/elements/fade_gradient.tga" valign="top" height="8.0h" color="#142129" noclick="true" visible="0" />
+					<image name="rap_fade_bottom" texture="/ui/fe2/elements/fade_gradient.tga" valign="bottom" height="8.0h" color="#0e151d" rotation="180" noclick="true" visible="0" />
+
+					<panel name="rap_scrollbox_scroller_down"
+						   noclick="0" height="2.5h" valign="bottom" visible="0"
+						   texture="/ui/fe2/elements/aftermatch/rewards_scroll.tga"
+						   onmouseover="SetTexture('/ui/fe2/elements/aftermatch/rewards_scroll_hover.tga'); FadeIn(1);"
+						   onmouseout="SetTexture('/ui/fe2/elements/aftermatch/rewards_scroll.tga'); FadeOut(250);"
+						   onmouseoverlua="Rap_Info.DoRapPostgameScrollDown()"
+						   onmouseoutlua="Rap_Info.StopRapPostgameScroll()"
+						   onclick="Call('rap_scrollbox_vscroll', 'SetScrollbarValue(GetScrollbarValue()+GetHeightFromString(\'12.5h\'))');"
+						   onclicklua="Rap_Info.StopRapPostgameScroll()"
+						   onmousewheeldownlua="Rap_Info.StopRapPostgameScroll()"
+						   onmousewheeluplua="Rap_Info.StopRapPostgameScroll()"
+						   onmousewheeldown="
+						Call('rap_scrollbox_vscroll', 'SetScrollbarValue(GetScrollbarValue()+GetHeightFromString(\'2.0h\'))');
+						If(rap_canScrollUp, Call('rap_scrollbox_scroller_up', 'FadeIn(150)'), Call('rap_scrollbox_scroller_up', 'FadeOut(150)'));
+						If(rap_canScrollDown, Call('rap_scrollbox_scroller_down', 'FadeIn(150)'), Call('rap_scrollbox_scroller_down', 'FadeOut(150)'));
+						"
+						   onmousewheelup="
+						Call('rap_scrollbox_vscroll', 'SetScrollbarValue(GetScrollbarValue()-GetHeightFromString(\'2.0h\'))');
+						If(rap_canScrollUp, Call('rap_scrollbox_scroller_up', 'FadeIn(150)'), Call('rap_scrollbox_scroller_up', 'FadeOut(150)'));
+						If(rap_canScrollDown, Call('rap_scrollbox_scroller_down', 'FadeIn(150)'), Call('rap_scrollbox_scroller_down', 'FadeOut(150)'));
+					"
+					/>
+
+					<panel name="rap_scrollbox_scroller_up" onshow="Call('rap_fade_top', 'SetVisible(rap_canScrollUp)');" onhide="Call('rap_fade_top', 'SetVisible(rap_canScrollUp)');"
+						   noclick="0" height="2.5h" valign="top" visible="0" rotation="180"
+						   texture="/ui/fe2/elements/aftermatch/rewards_scroll.tga"
+						   onmouseover="SetTexture('/ui/fe2/elements/aftermatch/rewards_scroll_hover.tga'); FadeIn(1);"
+						   onmouseout="SetTexture('/ui/fe2/elements/aftermatch/rewards_scroll.tga'); FadeOut(250);"
+						   onmouseoverlua="Rap_Info.DoRapPostgameScrollUp()"
+						   onmouseoutlua="Rap_Info.StopRapPostgameScroll()"
+						   onclick="Call('rap_scrollbox_vscroll', 'SetScrollbarValue(GetScrollbarValue()-GetHeightFromString(\'12.5h\'))');"
+						   onclicklua="Rap_Info.StopRapPostgameScroll()"
+						   onmousewheeldownlua="Rap_Info.StopRapPostgameScroll()"
+						   onmousewheeluplua="Rap_Info.StopRapPostgameScroll()"
+						   onmousewheeldown="
+						Call('rap_scrollbox_vscroll', 'SetScrollbarValue(GetScrollbarValue()+GetHeightFromString(\'2.0h\'))');
+						If(rap_canScrollUp, Call('rap_scrollbox_scroller_up', 'FadeIn(150)'), Call('rap_scrollbox_scroller_up', 'FadeOut(150)'));
+						If(rap_canScrollDown, Call('rap_scrollbox_scroller_down', 'FadeIn(150)'), Call('rap_scrollbox_scroller_down', 'FadeOut(150)'));
+						"
+						   onmousewheelup="
+						Call('rap_scrollbox_vscroll', 'SetScrollbarValue(GetScrollbarValue()-GetHeightFromString(\'2.0h\'))');
+						If(rap_canScrollUp, Call('rap_scrollbox_scroller_up', 'FadeIn(150)'), Call('rap_scrollbox_scroller_up', 'FadeOut(150)'));
+						If(rap_canScrollDown, Call('rap_scrollbox_scroller_down', 'FadeIn(150)'), Call('rap_scrollbox_scroller_down', 'FadeOut(150)'));
+					"
+					/>
+
+				</frame>
+
+				<!-- Submit and Cancel buttons -->
+				<panel name="rap_postgame_buttons_panel" height="4.3h" valign="bottom" noclick="0">
+					<instance name="button2" button_name="rap_postgame_submit_buton" label="general_submit" width="20%" x="-4%" height="3h" align="right"
+							  labelwatch="rap_submission_processing"
+							  labelontrigger="SetText(param0);"
+							  onclicklua=
+									  "
+						Rap_Info.SubmitRapReport()
+					"
+					/>
+					<instance name="button2" button_name="unnamedButton213" label="rap_dont_submit" width="20%" x="4%" height="3h" align="left"
+							  onclicklua=
+									  "
+						Rap_Info.CancelRapReport()
+					"
+					/>
+				</panel>
+			</panel>
+		</panel>
+	</if><!-- End of rap_postgame_player_list -->
+		<panel name="rap_postgame_submission_status" visible="0" color="0 0 0 .7" onshow="BringToFront();"
+		onevent1lua=
+		"
+			GetWidget('rap_postgame_submission_status_success_label'):SetText(Translate('web_form_reportabuse_success_title'))
+			self:FadeIn(250)
+		"
+		onevent2lua=
+		"
+			GetWidget('rap_postgame_submission_status_success_label'):SetText(Translate('rap_submission_failed'))
+			self:FadeIn(250)
+		"
+		onevent3lua="
+			GetWidget('rap_postgame_submission_status_success_label'):SetText(Translate('rap_submission_disabled'))
+			self:FadeIn(250)
+		"
+	>
+		<panel align="center" valign="center" height="53h" grow="1" regrow="1" growinvis="1">
+			<panel width="33.0h" align="center" valign="center" grow="1" regrow="1" growinvis="1" noclick="1">
+				<frame color="0 0 0 .8" bordercolor="#455166" borderthickness="1" noclick="1" />			
+				<panel width="100%" float="bottom" padding="0.5h" grow="1" regrow="1" growinvis="1" color="invisible" noclick="1">
+					
+					<!-- Header -->
+					<instance
+						name="header_bar"
+						buttonsize="1.8h"
+						height="2.4h"
+						width="-2"
+						y="1"
+						lbl_font="dyn_11"
+						align="center"
+						lbl=""
+						show_close="true"
+						onclick="Call('rap_postgame_submission_status', 'FadeOut(250);');"
+					/>
+
+					<!-- Body -->
+					<panel width="100%" align="center" color="invisible" grow="1" regrow="1" growinvis="1" noclick="1">					
+						<panel width="-1.0h" align="center" color="invisible" grow="1" regrow="1" growinvis="1" >
+							<frame texture="/ui/frames/tooltip_bg.tga" color="#2c4b6c" noclick="1"/>
+							<frame color="invisible" bordercolor="#455166" borderthickness="1" noclick="1" />						
+							<panel width="100%"  grow="1" regrow="1" growinvis="1" align="center" float="bottom" padding="1.0h" noclick="true">	
+
+								<!-- Title -->
+								<panel y="1.0h" grow="1" regrow="1" growinvis="1" width="100%">
+									<label name="rap_postgame_submission_status_success_label" fity="true" width="-1.0h" align="center" textalign="center" textvalign="top" font="dyn_11" color="white" shadow="true" wrap="true"
+										content=""/>
+								</panel>
+								
+								<!-- Ok button -->
+								<panel height="2.4h" noclick="true" sticky="true" stickytoinvis="false">
+									<instance
+										name="button2" button_name="unnamedButton214"
+										visible="true"
+										width="12.0h" height="2.4h"
+										align="center"
+										valign="center"
+										label="general_ok"
+										onmouseover="PlaySound('/shared/sounds/ui/button_over_01.wav');"
+										onclick="Call('rap_postgame_submission_status', 'FadeOut(250);');"
+									/>
+								</panel>
+								<panel height="1.0h" noclick="true"/>
+							</panel>																
+						</panel>					
+					</panel>				
+					<panel height="0" noclick="1"/>
+				</panel>			
+			</panel>							
+		</panel>
+	</panel>
+	</template>
+
+	<lua file="/ui/scripts/report_a_player.lua" />
+
+</package>

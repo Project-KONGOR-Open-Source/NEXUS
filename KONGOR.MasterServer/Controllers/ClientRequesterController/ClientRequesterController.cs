@@ -50,7 +50,7 @@ public partial class ClientRequesterController(
         }
 
         bool endpointRequiresCookieValidation = functionName is not "auth" and not "pre_auth" and not "srpauth"
-            and not "get_match_stats" and not "upload_replay";
+            and not "get_match_stats" and not "upload_replay" and not "show_stats";
 
         Logger.LogProcessingRequest(functionName, cookieRaw, endpointRequiresCookieValidation);
 

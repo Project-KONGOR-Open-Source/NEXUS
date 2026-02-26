@@ -1,0 +1,943 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+
+	<trigger name="avatarTargViewIndex"/>
+	<trigger name="selectAvatarIndex"/>
+	<trigger name="instantiateAvatarEntry"/>
+	<trigger name="getStoreAvatarDisplayData"/>
+	<trigger name="buildStoreAvatarDisplayData"/>
+	<trigger name="populateAvatarDisplay"/>
+	<trigger name="readAvatarIDList"/>
+
+	<template name="storeRotationButtonState">
+		<widgetstate statename="{statename}" x="{x}" y="{y}">
+			<panel color="0 0 0 0.75" x="0.25h" y="0.25h"/>
+			<image ontrigger9lua="ResourceManager.RegisterTexture('/ui/fe2/store/store_rotation_button_{state_image=up}.tga', 'store', self)" resourcecontext="store" watch9="MainRegisterTextures" hflip="{hflip=false}"/>
+		</widgetstate>
+	</template>
+	
+	<template name="storeRotationButton">
+		<button
+			color="invisible"
+			width="{width}" height="{height}"
+			align="{align}" valign="{valign}"
+			x="{x}" y="{y}"
+			onevent="{onevent}" onevent1="{onevent1}" onevent2="{onevent2}"
+			watch="{watch}" ontrigger="{ontrigger}" watch1="{watch1}" ontrigger1="{ontrigger1}"
+			onmouselup="{onmouselup}" onmouseldown="{onmouseldown}"
+			onmouseover="{onmouseover}"
+			onmouseout="{onmouseout}"
+			
+		>
+			<widgetstate statename="up">
+				<frame texture="/ui/info/button.tga" borderthickness="{borderthickness=0.8h}" color="1 1 1 1"/>
+				<image texture="/ui/fe2/elements/rotation_up.tga" hflip="{hflip=false}" align="center" valign="center" width="-1h" height="-1h"/>
+			</widgetstate>
+		
+			<widgetstate statename="over">
+				<frame texture="/ui/info/button_over.tga" borderthickness="{borderthickness=0.8h}" />
+				<image texture="/ui/fe2/elements/rotation_over.tga" hflip="{hflip=false}" align="center" valign="center" width="-1h" height="-1h"/>
+			</widgetstate>		
+			
+			<widgetstate statename="down" x="1" y="1">
+				<frame texture="/ui/info/button_down.tga" borderthickness="{borderthickness=0.8h}" color="white"/>					
+				<image texture="/ui/fe2/elements/rotation_over.tga" hflip="{hflip=false}" align="center" valign="center" width="-1h" height="-1h"/>
+			</widgetstate>
+			<widgetstate statename="disabled">
+				<frame texture="/ui/info/button.tga" borderthickness="{borderthickness=0.8h}" color="1 1 1 1"/>	
+				<frame texture="/ui/frames/rounded_button_bg_white.tga" borderthickness="0.8h" color=".3 .3 .3 .7"/>
+				<image texture="/ui/fe2/elements/rotation_up.tga" rendermode="grayscale" hflip="{hflip=false}" align="center" valign="center" width="-1h" height="-1h"/>
+			</widgetstate>
+		</button>
+	</template>
+	
+	<template name="avatarDisplayFeatureIcon">
+		<panel width="100@" height="100%" noclick="true" sticky="true" stickytoinvis="false" watch="populateAvatarDisplay" ontrigger="SetVisible({visparam});">
+			<image width="210@" height="210%" noclick="true" ontrigger9lua="ResourceManager.RegisterTexture('/ui/fe2/store/avatars_display/subheader_icon.tga', 'store', self)" resourcecontext="store" watch9="MainRegisterTextures" align="center" valign="center" group="featureIconBackers"/>
+			<image ontrigger9lua="ResourceManager.RegisterTexture('/ui/fe2/store/icons/{icon}.tga', 'store', self)" resourcecontext="store" watch9="MainRegisterTextures" onmouseover="ShowWidget('mstore_tip_aafeature_{type}');" onmouseout="HideWidget('mstore_tip_aafeature_{type}');"/>
+		</panel>
+	</template>
+
+	<template name="avatarDisplayFeatureIconVoiceState">
+		<widgetstate statename="{statename}" x="{x}" y="{y}">
+			<image ontrigger9lua="ResourceManager.RegisterTexture('/ui/fe2/store/icons/{icon}.tga', 'store', self)" resourcecontext="store" watch9="MainRegisterTextures"/>
+			<panel color="#aaaaaa" rendermode="overlay" visible="{over=false}"/>
+		</widgetstate>
+	</template>
+
+	<template name="avatarDisplayFeatureIconVoice">
+		<panel width="100@" height="100%" noclick="true" sticky="true" stickytoinvis="false" watch="populateAvatarDisplay" ontrigger="SetVisible({visparam});">
+			<image width="210@" height="210%" noclick="true" ontrigger9lua="ResourceManager.RegisterTexture('/ui/fe2/store/avatars_display/subheader_icon.tga', 'store', self)" resourcecontext="store" watch9="MainRegisterTextures" align="center" valign="center" group="featureIconBackers"/>
+			<button
+				onmouseover="ShowWidget('mstore_tip_aafeature_{type}');"
+				onmouseout="HideWidget('mstore_tip_aafeature_{type}');"
+				watch1="populateAvatarDisplay"
+				ontrigger1="
+					SetOnClick(
+						'
+							PlayHeroPreviewSoundFromProduct(\''#param2#'\' # \'.\' # \''#param3#'\');
+						'
+					);
+				"
+			>
+				<instance name="avatarDisplayFeatureIconVoiceState" icon="{icon}" statename="up"/>
+				<instance name="avatarDisplayFeatureIconVoiceState" icon="{icon}" statename="over" over="true"/>
+				<instance name="avatarDisplayFeatureIconVoiceState" icon="{icon}" statename="down" x="1" y="1"/>
+			</button>
+		</panel>
+	</template>
+
+	<template name="heroAvatarEntry">
+		<panel width="-1h" height="5.85h" align="center"
+			name="heroAvatarEntry_{id}"
+			group="heroAvatarEntries"
+			onclicklua="UIManager.GetInterface('main'):HoNStoreF('ClickAltAvatar', {id})"
+			onmousewheelup="Call('store_alt_avatar_scroller', 'DoEvent(0);');"
+			onmousewheeldown="Call('store_alt_avatar_scroller', 'DoEvent(1);');"
+			onmouseoverlua="UIManager.GetInterface('main'):HoNStoreF('HoverAltSlot', {id}) PlaySound('/shared/sounds/ui/ccpanel/button_over_01.wav') GetWidget('hero_info', 'main'):SetVisible(true)"
+			onmouseoutlua="UIManager.GetInterface('main'):HoNStoreF('LeaveAltHover', {id}) GetWidget('hero_info', 'main'):SetVisible(false)"
+			onhidelua="GetWidget('hero_info', 'main'):SetVisible(false)"
+			onrightclicklua="UIManager.GetInterface('main'):HoNStoreF('RightClickAlt', {id})"
+		>
+			<frame name="avatarShadow_{id}" texture="/ui/frames/squareglow.tga" borderthickness="1h" color="0 0 0 .5" noclick="true" visible="false"
+				onevent0="FadeIn(125);"
+				onevent1="FadeOut(125);"
+				width="+2h" height="+2h" y="0.5h" align="center" valign="center"
+			/>
+
+			<image name="avatarBacker_{id}" width="800@" height="100%" nodraw="0" resourcecontext="store" noclick="true" visible="true" 
+				texture="/ui/fe2/store/avatars_display/avatar_backer_regular.tga"
+			/>
+
+			<panel width="800@" height="100%" rendermode="overlay" color="#CCCCFF" visible="false" onevent0="FadeIn(100);" onevent1="FadeOut(100);" noclick="true" group="avatarHoverPieces{id}"/>
+
+			<!-- Price container -->
+			<panel name="heroAvatarPrice_{id}" noclick="true" align="right" valign="center" width="7.85h" height="-2.5h" x="-1.5h">
+				<panel valign="center" grow="true" regrow="true" growinvis="false" float="bottom" width="-1h" align="center" noclick="true" padding="0.15h" y="-0.15h">
+					<panel name="avatarGold_{id}" height="1.65h" noclick="true" sticky="true" stickytoinvis="false">
+						<image width="100@" height="100%" align="right" texture="/ui/fe2/store/gold_coins.tga" resourcecontext="store" noclick="true" x="5@" y="5%" color="0 0 0 0.5"/>
+						<image width="100@" height="100%" align="right" texture="/ui/fe2/store/gold_coins.tga" resourcecontext="store" noclick="true"/>
+						<label name="avatarGoldLabel_{id}" align="right" x="-110@" fitx="true" textalign="right" textvalign="center" shadow="true" color="#FFCC00" font="dyn_12" content="-" noclick="true"/>
+					</panel>
+					<panel name="avatarSilver_{id}" height="1.65h" noclick="true" sticky="true" stickytoinvis="false">
+						<image width="100@" height="100%" align="right" texture="/ui/fe2/store/silver_coins.tga" resourcecontext="store" noclick="true" x="5@" y="5%" color="0 0 0 0.5"/>
+						<image width="100@" height="100%" align="right" texture="/ui/fe2/store/silver_coins.tga" resourcecontext="store" noclick="true"/>
+						<label name="avatarSilverLabel_{id}" align="right" x="-110@" fitx="true" textalign="right" textvalign="center" shadow="true" color="#CCCCCC" font="dyn_12" content="-" noclick="true"/>
+					</panel>
+				</panel>
+			</panel>
+			
+			<!-- EAP Price Block -->
+			<panel name="avatarEAPPrice_{id}" width="800@" height="100%" noclick="true" visible="0" >
+				<image texture="/ui/fe2/store/avatars_display/hero_backer_eapOnly.tga" resourcecontext="store" noclick="true"/>
+				<label x="-24.4%" y="20%" width="16%" height="56%" align="right" textalign="center" textvalign="center" wrap="true" font="dyn_12" color="0 0 0 1" shadow="true" shadowcolor="#f7e163" content="mstore_eap_only" noclick="true" />
+			</panel>
+
+			<!-- Plinko Price Block -->
+			<panel name="avatarPlinkoPrice_{id}" width="800@" height="100%" noclick="true" visible="0" >
+				<image texture="/ui/fe2/store/avatars_display/hero_backer_eapOnly.tga" resourcecontext="store" noclick="true"/>
+				<label x="-24.4%" y="20%" width="16%" height="56%" align="right" textalign="center" textvalign="center" wrap="true" font="dyn_12" color="0 0 0 1" shadow="true" shadowcolor="#f7e163" content="mstore_plinko_only" noclick="true" />
+			</panel>
+
+			<!-- Esports Price Block -->
+			<panel name="avatarEsportsPrice_{id}" width="800@" height="100%" noclick="true" visible="0" >
+				<image texture="/ui/fe2/store/avatars_display/hero_backer_eapOnly.tga" resourcecontext="store" noclick="true"/>
+				<label x="-24.4%" y="20%" width="16%" height="56%" align="right" textalign="center" textvalign="center" wrap="true" font="dyn_11" color="0 0 0 1" shadow="true" shadowcolor="#f7e163" content="mstore_esports_only" noclick="true" />
+			</panel>
+
+			<!-- Quests Price Block -->
+			<panel name="avatarQuestsPrice_{id}" width="800@" height="100%" noclick="true" visible="0" >
+				<image texture="/ui/fe2/store/avatars_display/hero_backer_eapOnly.tga" resourcecontext="store" noclick="true"/>
+				<label x="-24.4%" y="20%" width="16%" height="56%" align="right" textalign="center" textvalign="center" wrap="true" font="dyn_11" color="0 0 0 1" shadow="true" shadowcolor="#f7e163" content="mstore_quests_only" noclick="true" />
+			</panel>
+
+			<!-- Codex Price Block -->
+			<panel name="avatarCodexPrice_{id}" width="800@" height="100%" noclick="true" visible="0" >
+				<image texture="/ui/fe2/store/avatars_display/hero_backer_CondexOnly.tga" resourcecontext="store" noclick="true"/>
+				<label x="-24.4%" y="20%" width="16%" height="56%" align="right" textalign="center" textvalign="center" wrap="true" font="dyn_11" color="#001523" shadow="true" shadowcolor="#38c8ed" content="mstore_codex_only" noclick="true" />
+			</panel>
+
+			<!-- Eligibilty Price Block (RMM Needs new icon) -->
+			<panel name="avatarEligPrice_{id}" width="800@" height="100%" noclick="1" visible="0" >
+				<image texture="/ui/fe2/store/avatars_display/hero_backer_eapOnly.tga" resourcecontext="store" noclick="true" />
+				<label name="avatarElibPriceHover_{id}" x="-22.4%" y="20%" width="18%" height="56%" align="right" textalign="center" textvalign="center" wrap="true" font="dyn_12" color="0 0 0 1" shadow="true" shadowcolor="#f7e163" content="mstore_elig_only" noclick="0" 
+					onmouseout="HideWidget('hero_info'); Trigger('genericMainFloatingTip', false, '', '', '', '', '', '', '', '');"	
+					onmouseover="ShowWidget('hero_info');"		
+				/>
+			</panel>
+
+			<frame name="avatarPurchaseGlow_{id}" color="invisible" visible="0" noclick="1" >
+				<modelpanel
+					noclick="1" align="center" valign="center"
+					model=""
+					anim="idle"
+					camerapos="0 -1000 3"
+					cameraangles="0 0 0"
+					camerafov="4.42"
+					carmerafar="5000"
+					depthclear="false"
+					depthcompress="true"
+					sunazimuth="140"
+					sunaltitude="10"
+					suncolor="1 1 1 1"
+					resourcecontext="store"
+					onshow="SetModel('/ui/common/models/main/tut_highlight.mdf'); SetEffect('/ui/common/models/main/tut_highlight.effect');"
+					onhide="SetModel(''); SetEffect('');"
+				/>													
+			</frame>			
+
+			<panel noclick="true" valign="center" width="3.83h" height="3.83h" x="1.1h" y="-0.075h">
+				<image name="avatarAvatarIcon_{id}" noclick="true" />
+				<frame color="invisible" bordercolor="black" borderthickness="1" noclick="true"/>
+				<frame color="invisible" bordercolor="black" borderthickness="1" noclick="true" group="avatarSelectedPieces{id}" onevent0="SetBorderColor('#FFCC00');" onevent1="SetBorderColor('black');"/>
+				<modelpanel
+					ontrigger9lua="ResourceManager.RegisterModel('/ui/common/models/toggle/toggle.mdf', 'store', self)" resourcecontext="store" watch9="MainRegisterModelzhs"
+					onevent0="SetVisible(true);"
+					onevent1="SetVisible(false);"
+					visible="false"
+					noclick="true"
+					anim="idle"
+					effect="/ui/common/models/toggle/toggle.effect"
+					camerapos="0 1 0"
+					cameraangles="0 0 180"
+					camerafov="45"
+					cameranear="1"
+					carmerafar="100"
+					depthclear="false"
+					depthcompress="true"
+					onshow="SetAnim('idle'); SetEffect('/ui/common/models/toggle/toggle.effect');"
+				/>
+			</panel>
+			<panel noclick="true" valign="bottom" width="1.85h" height="1.85h" x="5.85h" y="-1h">
+				<image name="avatarHeroIcon_{id}" noclick="true" />
+				<frame color="invisible" bordercolor="black" borderthickness="1" noclick="true" group="avatarSelectedPieces{id}" onevent0="SetBorderColor('#FFCC00AA');" onevent1="SetBorderColor('black');"/>
+			</panel>
+			<label name="avatarProductName_{id}" noclick="true" x="5.75h" y="0.65h" width="20.5h" height="2h" color="yellow" font="dyn_14" shadow="true" textvalign="center"/>
+			<label name="avatarHeroName_{id}" noclick="true" valign="bottom" x="8.25h" y="-0.75h" width="18h" height="1.65h" color="#ffe9ad" font="dyn_12" shadow="true" textvalign="center"/>
+			<panel height="1.5h" noclick="true" width="-10.5h" y="-0.75h" valign="bottom">
+			
+				<panel align="right" height="100%" grow="true" regrow="1" float="right" padding="0.25h" growinvis="false" noclick="true">
+					<panel name="avatarSpecialIcon_{id}" width="100@" height="100%" visible="0" sticky="true" stickytoinvis="false"
+						onmouseoverlua="UIManager.GetInterface('main'):HoNStoreF('HoverSpecial', {id})"
+						onmouseover="ShowWidget('hero_info');"
+						onmouseout="
+							HideWidget('hero_info');
+							HideWidget('genericMainFloatingTip');						
+						"
+						onclicklua="UIManager.GetInterface('main'):HoNStoreF('ClickAltAvatar', {id})"
+						onmousewheelup="Call('store_alt_avatar_scroller', 'DoEvent(0);');"
+						onmousewheeldown="Call('store_alt_avatar_scroller', 'DoEvent(1);');"
+					>
+						<image name="avatarSpecialIconImage_{id}" noclick="true" texture="$invis" resourcecontext="store"/>
+					</panel>	
+					<panel name="avatarCEIcon_{id}" width="100@" height="100%" visible="0" sticky="true" stickytoinvis="false"
+						onmouseoverlua="UIManager.GetInterface('main'):HoNStoreF('HoverCE', {id})"
+						onmouseover="ShowWidget('hero_info');"
+						onmouseout="
+							HideWidget('hero_info');
+							HideWidget('genericMainFloatingTip');						
+						"
+						onclicklua="UIManager.GetInterface('main'):HoNStoreF('ClickAltAvatar', {id})"
+						onmousewheelup="Call('store_alt_avatar_scroller', 'DoEvent(0);');"
+						onmousewheeldown="Call('store_alt_avatar_scroller', 'DoEvent(1);');"
+					>
+						<image name="avatarCEIconImage_{id}" noclick="true" texture="$invis" resourcecontext="store"/>
+					</panel>	
+					<panel name="avatarUltimate_{id}" width="100@" height="100%" sticky="true" stickytoinvis="false"
+						onmouseover="Trigger('genericMainFloatingTip', 'true', '23h', '', 'mstore_ultimateedition', 'mstore_ultimateedition_tip', '', '', '', ''); ShowWidget('hero_info');"
+						onmouseout="HideWidget('genericMainFloatingTip'); HideWidget('hero_info');"
+						onmousewheelup="Call('store_alt_avatar_scroller', 'DoEvent(0);');"
+						onmousewheeldown="Call('store_alt_avatar_scroller', 'DoEvent(1);');"
+						onclicklua="UIManager.GetInterface('main'):HoNStoreF('ClickAltAvatar', {id})"
+					>
+						<image texture="/ui/fe2/store/avatars_display/icon_ultimate_av.tga" color="0 0 0 0.6" x="0.1h" y="0.1h" noclick="true"/>
+						<image texture="/ui/fe2/store/avatars_display/icon_ultimate_av.tga" noclick="true"/>
+					</panel>
+					<panel name="avatarEnhancement_{id}" width="100@" height="100%" sticky="true" stickytoinvis="false"
+						onmouseover="Trigger('genericMainFloatingTip', 'true', '23h', '', 'mstore_enhancement', 'mstore_enhancement_tip', '', '', '', ''); ShowWidget('hero_info');"
+						onmouseout="HideWidget('genericMainFloatingTip'); HideWidget('hero_info');"
+						onmousewheelup="Call('store_alt_avatar_scroller', 'DoEvent(0);');"
+						onmousewheeldown="Call('store_alt_avatar_scroller', 'DoEvent(1);');"
+						onclicklua="UIManager.GetInterface('main'):HoNStoreF('ClickAltAvatar', {id})"
+					>
+						<image texture="/ui/fe2/store/avatars_display/icon_enhancement.tga" color="0 0 0 0.6" x="0.1h" y="0.1h" noclick="true"/>
+						<image texture="/ui/fe2/store/avatars_display/icon_enhancement.tga" noclick="true"/>
+					</panel>
+					<panel name="avatarOwned_{id}" width="100@" height="100%" noclick="true" sticky="true" stickytoinvis="false">
+						<image texture="/ui/elements/check_mark.tga" color="0 0 0 0.6" x="0.1h" y="0.1h" noclick="true"/>
+						<image texture="/ui/elements/check_mark.tga" noclick="true"/>
+					</panel>
+
+					<panel name="avatarTrial_{id}" width="100@" height="100%" visible="0" sticky="true" stickytoinvis="false"
+						onmouseoverlua="UIManager.GetInterface('main'):HoNStoreF('HoverTrial', {id})"
+						onmouseout="
+							HideWidget('store_trial_tip');						
+						"
+						onclicklua="UIManager.GetInterface('main'):HoNStoreF('ClickAltAvatar', {id})"
+						onmousewheelup="Call('store_alt_avatar_scroller', 'DoEvent(0);');"
+						onmousewheeldown="Call('store_alt_avatar_scroller', 'DoEvent(1);');"
+					>
+						<image texture="/ui/elements/trial_mark.tga" color="0 0 0 0.6" x="0.1h" y="0.1h" noclick="true"/>
+						<image texture="/ui/elements/trial_mark.tga" noclick="true"/>
+					</panel>
+
+				</panel>
+
+			</panel>
+
+			<panel name="shop_alt_loading_{id}" color="black" visible="0">
+				<label width="90%" align="right" content="Loading..." font="dyn_14" textalign="center" textvalign="center"/>
+				<animatedimage width="10%" height="10@" valign="center" texture="/ui/elements/throb/throb.tga" noclick="true" loop="1" fps="30" onshow="StartAnim(1);" visible="1" />
+			</panel>
+
+			<frame name="slot_prem_selected_{id}" color="invisible" visible="false" bordercolor="#ffd800" borderthickness="0.35h" noclick="true" onevent0="FadeIn(50); SleepWidget(50, 'DoEvent(2);');" onevent1="FadeOut(100);" onevent2="FadeOut(50); SleepWidget(50, 'DoEvent(3);');" onevent3="FadeIn(50);" rendermode="overlay"/>
+			<frame name="slot_norm_selected_{id}" color="invisible" visible="false" bordercolor="#FFCC0044" borderthickness="0.35h" noclick="true" onevent0="FadeIn(50); SleepWidget(50, 'DoEvent(2);');" onevent1="FadeOut(100);" onevent2="FadeOut(50); SleepWidget(50, 'DoEvent(3);');" onevent3="FadeIn(50);"/>
+
+			<frame bordercolor="#FFCC0055" color="invisible" borderthickness="2" visible="false" onevent0="FadeIn(100);" onevent1="FadeOut(100);" noclick="true" group="avatarHoverPieces{id}"/>
+
+			<image group="slot_normal_trim_{id}" width="1.5h" height="3h" align="right" valign="center" x="0.75h" texture="/ui/fe2/store/avatars_display/side_ornate_trim.tga" resourcecontext="store" noclick="true" visible="0"/>
+			<image group="slot_normal_trim_{id}" width="1.5h" height="3h" align="left" hflip="true" valign="center" x="-0.75h" texture="/ui/fe2/store/avatars_display/side_ornate_trim.tga" resourcecontext="store" noclick="true" visible="0"/>
+
+			<image group="slot_premium_trim_{id}" width="2.5h" height="2.5h" x="-0.45h" y="-0.45h" hflip="true" texture="/ui/fe2/store/avatars_display/premium_corner_trim.tga" resourcecontext="store" noclick="true" visible="0"/><!-- tl -->
+			<image group="slot_premium_trim_{id}" width="2.5h" height="2.5h" x="-0.45h" y="0.45h" hflip="true" vflip="true" valign="bottom" texture="/ui/fe2/store/avatars_display/premium_corner_trim.tga" resourcecontext="store" noclick="true" visible="0"/><!-- bl -->
+			<image group="slot_premium_trim_{id}" width="2.5h" height="2.5h" x="0.45h" y="-0.45h" align="right" texture="/ui/fe2/store/avatars_display/premium_corner_trim.tga" resourcecontext="store" noclick="true" visible="0"/><!-- tr -->
+			<image group="slot_premium_trim_{id}" width="2.5h" height="2.5h" x="0.45h" y="0.45h" vflip="true" align="right" valign="bottom" texture="/ui/fe2/store/avatars_display/premium_corner_trim.tga" resourcecontext="store" noclick="true" visible="0"/><!-- br -->
+
+			<panel noclick="true" align="right" valign="center" width="7.85h" height="-2.5h" x="-1.5h">
+				<image group="slot_premium_trim_{id}" width="2h" height="4h" x="0" y="-2.5h" noclick="true" texture="/ui/fe2/store/avatars_display/premium_price_holder.tga" resourcecontext="store" visible="0"/>
+				<image group="slot_premium_trim_{id}" width="2h" height="4h" x="0" y="-2.5h" align="right" noclick="true" texture="/ui/fe2/store/avatars_display/premium_price_holder.tga" resourcecontext="store" visible="0"/>
+			</panel>
+
+			<panel name="heroAvatarCards_{id}" noclick="true" align="right" valign="top" x="4.0h" width="9h" height="5.5h" >
+				<image width="100@" height="100%" texture="/ui/fe2/store/coupontag.tga" resourcecontext="store" noclick="true" color="white"/>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="storeViewAvatarsFull">
+
+		<panel align="right" width="-30h" height="-7.7h" valign="bottom" name="storeViewAvatarsFull" visible="false" reverse="true" noclick="1"
+			onevent0="
+				FadeIn(200);
+				PlayHeroPreviewSoundFromProduct('');
+				CallEvent('storeAvatarViewHeader', 0);
+				CallEvent('altAvatarBackdropControls', 0);
+				CallEvent('avatarsDisplayList', 0);
+				CallEvent('storeAvatarDisplayModel', 0);
+				CallEvent('storeAvatarDisplayPedestal', 0);
+				CallEvent('altAvatarSortControls', 0);
+				DoEvent(3);
+			"
+			onevent1="
+				CallEvent('storeAvatarViewHeader', 1);
+				CallEvent('altAvatarBackdropControls', 1);
+				CallEvent('avatarsDisplayList', 1);
+				CallEvent('storeAvatarDisplayModel', 1);
+				CallEvent('storeAvatarDisplayPedestal', 1);
+				CallEvent('altAvatarSortControls', 1);
+				CallEvent('store_heroavatar_search_bar', 1);
+				SleepWidget(600, 'FadeOut(250);');
+			"
+		>
+
+		
+			<panel height="3.1h" noclick="true" x="-0.5h" y="1.5h" visible="false" name="altAvatarSortControls" onevent0="FadeIn(200);" onevent1="FadeOut(200);" group="store_heroavatar_sort_btns">
+
+				<!-- Show - Does Not Have All Heroes -->
+				<panel height="3.1h" noclick="true" width="16.5h" watch="AccountInfo" ontrigger="SetVisible(!HasAllHeroes());" >
+					<panel width="-1h" align="center" noclick="true">
+						<instance name="paperForm_combobox_simple_container" id="avatar_filter_list" hastip="false" label="mstore_avatar_show" form="" fieldwidth="100%" labelwidth="0" labelColor="#cc7a2e" labelOutline="true" arrowShadow="true" arrowColor="white"
+							fieldname="paperForm_combobox_container_field1"
+							populate="
+								AddTemplateListItem('paperform_combobox_item', 0, 'label', 'mstore_avatar_show_allavatars');
+								AddTemplateListItem('paperform_combobox_item', 1, 'label', 'mstore_avatar_show_ownedheroes');
+								AddTemplateListItem('paperform_combobox_item', 2, 'label', 'mstore_avatar_show_unownedheroes');
+								AddTemplateListItem('paperform_combobox_item', 3, 'label', 'mstore_avatar_show_ownedavatars');
+								AddTemplateListItem('paperform_combobox_item', 4, 'label', 'mstore_avatar_show_unownedavatars');
+								SetSelectedItemByIndex(0);
+							"
+							onselectlua="if (self:IsVisible() and (not AtoB(self:UICmd('HasAllHeroes()')))) then UIManager.GetInterface('main'):HoNStoreF('UpdateAltFilter', self:GetValue()) end"
+						/>				
+					</panel>
+				</panel>
+			
+				<!-- Show - Has All Heroes -->
+				<panel height="3.1h" noclick="true" width="16.5h" watch="AccountInfo" ontrigger="SetVisible(HasAllHeroes());" >
+					<panel width="-1h" align="center" noclick="true">
+						<instance name="paperForm_combobox_simple_container" id="avatar_filter_allhero_list" hastip="false" label="mstore_avatar_show" form="" fieldwidth="100%" labelwidth="0" labelColor="#cc7a2e" labelOutline="true" arrowShadow="true" arrowColor="white"
+							fieldname="paperForm_combobox_container_field1_1"
+							populate="
+								AddTemplateListItem('paperform_combobox_item', 0, 'label', 'mstore_avatar_show_allavatars');
+								AddTemplateListItem('paperform_combobox_item', 3, 'label', 'mstore_avatar_show_ownedavatars');
+								AddTemplateListItem('paperform_combobox_item', 4, 'label', 'mstore_avatar_show_unownedavatars');
+								SetSelectedItemByIndex(0);
+							"
+							onselectlua="if (self:IsVisible() and (AtoB(self:UICmd('HasAllHeroes()')))) then UIManager.GetInterface('main'):HoNStoreF('UpdateAltFilter', self:GetValue()) end"
+						/>				
+					</panel>
+				</panel>			
+			
+				<!-- Sort Dropdown -->
+				<panel height="3.1h" noclick="true" width="23h" x="16.7h" watch="AccountInfo" ontrigger="##If(HasAllHeroes(), SetX(0), SetX('20h'));##" >
+
+					<panel width="-1h" align="center" noclick="true">
+						<instance name="paperForm_combobox_container" id="avatar_sort_list" hastip="false" label="mstore_herolist_sortby" form="" fieldwidth="68%" labelwidth="16%" labelColor="#cc7a2e" labelOutline="true" arrowShadow="true" arrowColor="#cc7a2e" labelOutlineColor="0 0 0 0.75"
+							fieldname="paperForm_combobox_container_field2"
+							populate="
+								AddTemplateListItem('paperform_combobox_item', 0, 'label', 'mstore_heroname');
+								AddTemplateListItem('paperform_combobox_item', 1, 'label', 'mstore_price_asc');
+								AddTemplateListItem('paperform_combobox_item', 2, 'label', 'mstore_price_desc');
+								AddTemplateListItem('paperform_combobox_item', 3, 'label', 'mstore_avatarname');
+								AddTemplateListItem('paperform_combobox_item', 4, 'label', 'mstore_releasedate');
+								SetSelectedItemByValue(4);
+							"
+							onselectlua="if (self:IsVisible()) then UIManager.GetInterface('main'):HoNStoreF('UpdateAltSort', self:GetValue()) end"
+						/>				
+					</panel>
+
+				</panel>
+			
+			</panel>
+			
+			<panel height="3.1h" noclick="1" x="-0.5h" y="1.5h" visible="1" width="44.5h" onload="BringToFront();" >
+				<!-- Bot -->
+				<panel name="store_heroavatar_search_bar" height="3.0h" valign="top" noclick="1" visible="0"
+					onevent1="FadeOut(200);"
+				>
+					<!-- Search Textbox -->
+					<panel x="0.5h" height="2.6h" width="100%" valign="center" y="0" noclick="true">				
+						<panel width="40.6h" align="left" noclick="true">
+							<frame texture="/ui/frames/rounded_bg_solid.tga" borderthickness="0.6h" color="#c8b997" blockinput="false" noclick="true"/>
+							<frame texture="/ui/frames/roundframe.tga" color="#9d5b1a" borderthickness="0.6h" blockinput="false" noclick="true"/>	
+							
+							<textbox
+								name="store_heroavatar_textbox_input" width="-2.0h"
+								hmargin="0.8h" vmargin="0.4h"
+								maxlength="15"
+								textalign="center" textvalign="center"
+								font="dyn_12"
+								textcolor="#7d4e1f"
+								shadow="true"
+								color="invisible"
+								onload=""
+								onshow="SetFocus(true);"
+								onenter="
+									SetFocus(false);
+								"
+								onesc="
+									EraseInputLine();
+									SetFocus(false);
+									HideWidget('store_heroavatar_search_bar');
+								"
+								onchangelua="UIManager.GetInterface('main'):HoNStoreF('InputBoxUpdateAvatar', self:GetValue() )"
+								onchange="	
+									if(!StringEmpty(''#this),
+										Call('store_heroavatar_textbox_cover', 'SetVisible(0)')
+									);"										
+								onfocus="
+									if(!StringEmpty(''#this),
+										Call('store_heroavatar_textbox_cover', 'SetVisible(0)')
+									);
+								"
+								onlosefocus="
+									if(StringEmpty(''#this),									
+										Call('store_heroavatar_textbox_cover', 'SetVisible(1)')
+									);
+								"
+								onhide="
+									EraseInputLine();
+									Call('store_heroavatar_search_button', 'SetVisible(1)');
+									GroupCall('store_heroavatar_sort_btns', 'SetVisible(1)');
+									Call('store_heroavatar_textbox_cover', 'SetVisible(1)');
+								"										
+							/>
+							<label name="store_heroavatar_textbox_cover" x="0.6h" y="0" width="-0.5h" height="-0.4h" valign="center" align="center" textvalign="center" font="dyn_12" color="#7d4e1f" content="mstore_enter_hero_or_avatar" noclick="1" />
+							
+							
+						</panel>
+					</panel>														
+					
+					<button
+						x="-4.0h"			
+						width="2.0h" height="2.0h"
+						align="right"
+						valign="center"
+						color="invisible"
+						onclick="
+							PlaySound('/shared/sounds/ui/ccpanel/button_close_02.wav');
+							HideWidget('store_heroavatar_search_bar');
+						"
+						onmouseover="PlaySound('/shared/sounds/ui/ccpanel/button_over_01.wav');"
+					>
+						<widgetstate statename="up">
+							<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.5h" color="#910000" blockinput="false" noclick="true"/>
+							<frame texture="/ui/frames/roundframe.tga" color="0 0 0 1" borderthickness="0.5h" blockinput="false" noclick="true"/>
+							<image width="1.3h" height="1.3h" align="center" valign="center" color=".75 .75 .75 1" texture="/ui/elements/closex.tga" noclick="true" />
+						</widgetstate>
+						<widgetstate statename="over">
+							<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.5h" color="#dc0000" blockinput="false" noclick="true"/>
+							<frame texture="/ui/frames/roundframe.tga" color="0 0 0 1" borderthickness="0.5h" blockinput="false" noclick="true"/>
+							<image width="1.3h" height="1.3h" align="center" valign="center" color="1 1 1 1" texture="/ui/elements/closex.tga" noclick="true" />			
+						</widgetstate>
+						<widgetstate statename="down" x="1" y="1">
+							<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.5h" color="#910000" blockinput="false" noclick="true"/>
+							<frame texture="/ui/frames/roundframe.tga" color="0 0 0 1" borderthickness="0.5h" blockinput="false" noclick="true"/>
+							<image width="1.3h" height="1.3h" align="center" valign="center" color="1 1 1 1" texture="/ui/elements/closex.tga" noclick="true" />
+						</widgetstate>
+					</button>													
+					
+				</panel>			
+			
+				<!-- Search Icon -->		
+				<panel name="store_heroavatar_search_button" noclick="0" x="-3.2h" align="right" valign="center" width="4.5h" height="3.0h"
+					onclick="
+						GroupCall('store_heroavatar_sort_btns', 'SetVisible(0)');
+						SetVisible(0);
+						ShowWidget('store_heroavatar_search_bar');
+					"		
+					ontrigger="SetX(0); SetY(0);"
+					onmouseover="
+						GroupCall('store_heroavatar_search_button_jiggle', 'SetWatch(1, \'HostTime\')');
+						Scale('5.76h', '3.6h', 250);
+					"
+					onmouseout="
+						GroupCall('store_heroavatar_search_button_jiggle', 'SetWatch(\'\'); SetWatch(1, \'\'); SetX(-4); SetY(0); SetRotation(0);');
+						Scale('4.5h', '3.0h', 250);
+					"
+					onhide="
+						GroupCall('store_heroavatar_search_button_jiggle', 'SetWatch(\'\'); SetWatch(1, \'\'); SetX(-4); SetY(0); SetRotation(0);');
+						SetWidth('4.5h'); SetHeight('3.0h');
+					"					
+				>
+					<image noclick="1" width="95@" height="95%" x="-4" align="right" valign="center" texture="/ui/fe2/elements/magnify_2.tga" 
+						watch="" ontrigger="SetRotation(Sin(((param % 300) / 300) * (3.14159265 * 2)) * 8);" group="store_heroavatar_search_button_jiggle"
+						watch1="" ontrigger1="SetRotation(Sin(((param % 300) / 300) * (3.14159265 * 2)) * 4);"							
+					/>
+				</panel>
+			
+			</panel>
+			
+			<panel width="40h" valign="bottom" height="-6h" y="45h" noclick="1"
+				name="avatarsDisplayList"
+				onevent0="
+					PlaySound('/ui/fe2/store/sounds/woodshelves_slidein.wav');
+					SlideY('-1h', 450);
+				"
+				onevent1="
+					PlaySound('/ui/fe2/store/sounds/woodshelves_slideout.wav');
+					SlideY('45h', 450);
+				"
+			>
+
+
+				<panel height="+1h" noclick="true" valign="top">
+					<image align="left" ontrigger9lua="ResourceManager.RegisterTexture('/ui/fe2/store/avatars_display/shelf_left.tga', 'store', self)" resourcecontext="store" watch9="MainRegisterTextures" x="-5.5@" width="12.5@" noclick="true" />
+					<image align="right" ontrigger9lua="ResourceManager.RegisterTexture('/ui/fe2/store/avatars_display/shelf_right.tga', 'store', self)" resourcecontext="store" watch9="MainRegisterTextures" x="6.25@" width="12.5@" noclick="true" />
+				</panel>
+				<image valign="bottom" y="1h" ontrigger9lua="ResourceManager.RegisterTexture('/ui/fe2/store/avatars_display/shelf_bottom.tga', 'store', self)" resourcecontext="store" watch9="MainRegisterTextures" width="100%" height="1h" noclick="1"/>
+				
+				<scrollbar
+					name="store_alt_avatar_scroller"
+					visible="true"
+					align="right" width="2.5h"
+					texture="/ui/fe2/store/storeslider.tga"
+					minvalue="0"
+					onslidelua="UIManager.GetInterface('main'):HoNStoreF('SlideAlts', self:GetValue())"
+					handlewidth="2.5h"
+					handleheight="10h"
+					step="1"
+					value="0"
+					vertical="true"
+					slotwidth="0.6h" slotheight="1"
+					onevent0="SetValue(GetValue() - 1);"
+					onevent1="SetValue(GetValue() + 1);"
+				/>
+
+				<panel width="-2.5h" color="#2b0600" noclick="1" >
+					<panel valign="center" clip="true" height="100%" noclick="1">
+						<!-- fixed height instead of grow because grow is broken with clipping :| -->
+						<panel name="altAvatarSleepLoader" color="invisible" noclick="1" />
+						<panel name="heroAvatarListContainer"
+							y="-5.85h"
+							height="46.8h"
+							float="bottom"
+						>
+							<instance name="heroAvatarEntry" id="0"/>
+							<instance name="heroAvatarEntry" id="1"/>
+							<instance name="heroAvatarEntry" id="2"/>
+							<instance name="heroAvatarEntry" id="3"/>
+							<instance name="heroAvatarEntry" id="4"/>
+							<instance name="heroAvatarEntry" id="5"/>
+							<instance name="heroAvatarEntry" id="6"/>
+							<instance name="heroAvatarEntry" id="7"/>
+						</panel>
+					</panel>
+
+					<image name="shop_alt_top_grad" width="100%" height="6h" texture="/ui/fe2/elements/shadow_gradient.tga" noclick="true"/>
+					<image name="shop_alt_bottom_grad" width="100%" height="6h" texture="/ui/fe2/elements/shadow_gradient.tga" valign="bottom" vflip="true" noclick="true"/>
+
+					<panel processonlyscroll="true" color="invisible" noclick="1"
+						hover="false"
+						onmousewheeldown="
+							CallEvent('heroAvatarListContainer', 3);
+							CallEvent('heroAvatarListContainer', 7);
+						"
+						onmousewheelup="
+							CallEvent('heroAvatarListContainer', 4);
+							CallEvent('heroAvatarListContainer', 7);
+						"
+						onevent0="
+							If(
+								!IsVisibleSelf(),
+								SetVisible(true)
+							);
+						"
+						onevent1="
+							If(
+								IsVisibleSelf(),
+								SetVisible(false)
+							);
+						"
+					/>
+					<!-- Processing indicator -->
+					<panel color="0 0 0 0.5"
+						watch="MicroStoreProcessing"
+						ontrigger="
+							If(
+								param0,
+								SetVisible(true),
+								FadeOut(350)
+							);
+						"
+						noclick="1"
+					>
+						<panel height="4.5h" align="center" valign="center" width="16h" noclick="1">
+							<panel color="0 0 0 0.5" noclick="1">
+								<frame color="invisible" bordercolor="0.75 0.5 0 0.5" borderthickness="0.15h" noclick="true" />
+								<label color="white" shadow="true" font="dyn_11" textvalign="center" textalign="center" width="-3h" content="mstore_processing_elipses" noclick="1"/>
+								<animatedimage texture="/ui/elements/throb/throb.tga" noclick="true" loop="1" fps="30" onshow="StartAnim(1);" align="right" width="3h" height="3h" valign="center" x="-0.25h"/>
+							</panel>
+						</panel>
+					</panel>
+				</panel>
+				
+				<panel noclick="true" height="6.0h" y="-5.1h" width="111.5%" align="center" x="0.5%">
+					<image height="100%" ontrigger9lua="ResourceManager.RegisterTexture('/ui/fe2/store/avatars_display/shelf_top.tga', 'store', self)" resourcecontext="store" watch9="MainRegisterTextures" noclick="true"/>
+				</panel>
+				
+				
+			</panel>
+
+		
+			<panel align="right" width="-40h">
+			
+		
+				<panel y="5h" width="35h" height="1h" align="center" clip="true"
+					name="altAvatarBackdropControls"
+					onevent0="
+						SleepWidget(450, 'DoEvent(2);');
+					"
+					onevent1="
+						PlaySound('/ui/fe2/store/sounds/book_close.wav');
+						ScaleHeight('1h', 350);
+						CallEvent('altAvatarBackdrop', 1);
+						CallEvent('altAvatarDropGradient', 1);
+					"
+					onevent2="
+						PlaySound('/ui/fe2/store/sounds/book_open.wav');
+						ScaleHeight('35h', 350);
+						CallEvent('altAvatarBackdrop', 0);
+						CallEvent('altAvatarDropGradient', 0);
+					"
+				>
+					<image width="-2h" height="2h" align="center" texture="/ui/fe2/elements/shadow_gradient.tga" noclick="true" name="altAvatarDropGradient" onevent0="FadeIn(75);" onevent1="SleepWidget(275, 'FadeOut(75);');" visible="false"/>
+					<image noclick="true" align="center" valign="bottom" width="35h" height="35h" ontrigger9lua="ResourceManager.RegisterTexture('/ui/fe2/store/avatars_display/backdrop.tga', 'store', self)" resourcecontext="store" watch9="MainRegisterTextures" visible="false" name="altAvatarBackdrop" onevent0="FadeIn(100);" onevent1="SleepWidget(350, 'FadeOut(100);');"/>
+				</panel>
+				
+				
+				<panel noclick="true">
+					<modelpanel
+						ontrigger9lua="ResourceManager.RegisterModel('/ui/fe2/store/alt_platform/platform.mdf', 'store', self)" resourcecontext="store" watch9="MainRegisterModels"
+						noclick="true"
+						anim="idle"
+						cameranear="1.0"
+						camerafar="30000.0"
+						depthclear="true"
+						depthcompress="false"
+						lookat="false"
+						cameradistance="30"
+						camerapos="0 2000 90"
+						cameraangles="3 0 180"
+						camerafov="7"
+						modelpos="0 0 100"
+						modelangles="-15.0 0 0.0"
+						modelscale="2.5"
+						sunazimuth="120"
+						sunaltitude="50"
+						suncolor="0.9 0.9 0.9"
+						ambientcolor="0.6 0.7 0.7"
+						name="storeAvatarDisplayPedestal"
+						visible="false"
+						onevent0="
+							SleepWidget(500, 'DoEvent(2);');
+						"
+						onevent1="
+							FadeOut(250);
+						"
+						onevent2="
+							FadeIn(250);
+						"
+						onload="
+							CreateBool('avatarPedestalDirection', true);	## Clockwise ##
+							CreateFloat('avatarPedestalPosition', 0);
+							Call('storeAvatarDisplayPedestal', 'SetAnimSpeed(0);');
+						"
+						onshow="Call('storeAvatarDisplayPedestal', 'SetAnimSpeed(0);');"
+						onhide="DoEvent(5);"
+						watch=""
+						ontrigger="
+							## Rotation calc ##
+							Set(
+								'avatarPedestalPosition',
+								If(
+									avatarPedestalDirection,
+									(avatarPedestalPosition + (Frametime / 2000)),
+									(avatarPedestalPosition - (Frametime / 2000))
+								)
+							);
+							
+							If(
+								avatarPedestalPosition gt 1,
+								Set('avatarPedestalPosition', avatarPedestalPosition % 1)
+							);
+							
+							If(
+								avatarPedestalPosition lt 0,
+								Set('avatarPedestalPosition', 1 + avatarPedestalPosition)
+							);
+							
+							DoEvent(6);
+						"
+						onevent3="
+							## Start rotation clockwise ##
+							Set('avatarPedestalDirection', true);
+							SetWatch('HostTime');
+						"
+						onevent4="
+							## Start rotation counterclockwise ##
+							Set('avatarPedestalDirection', false);
+							SetWatch('HostTime');
+						"
+						onevent5="
+							## Disable ##
+							SetWatch('');
+						"
+						onevent6="
+							## Apply ##
+							SetAnimOffsetTime(avatarPedestalPosition);
+							Call('storeAvatarDisplayModel', 'SetModelAngles(\'0 0 \' # (avatarPedestalPosition * -360));');
+						"
+						onevent7="
+							## Reset (selecting a different model generally) ##
+							Set('avatarPedestalPosition', 0);
+							DoEvent(6);
+						"
+					/>
+				
+					<modelpanel
+						resourcecontext="store"
+						scenebuffer="true"
+						noclick="true"
+						model=""
+						anim="idle"
+						cameranear="100.0"
+						camerafar="10000.0"
+						depthclear="true"
+						depthcompress="false"
+						lookat="false"
+						cameradistance="30"
+						camerapos="0 3000 80"
+						cameraangles="0 0 180"
+						camerafov="7"
+						modelpos="0 0 0"
+						modelangles="-15.0 0 0.0"
+						modelscale="1.0"
+						sunazimuth="120"
+						sunaltitude="20"
+						suncolor="0.9 0.9 0.9"
+						ambientcolor="0.6 0.7 0.7"
+						name="storeAvatarDisplayModel"
+						visible="false"
+						cull="false"
+						watch="populateAvatarDisplay"
+						ontrigger="
+							If(
+								param1 gt 0,
+								CallEventParamsX(name, 3, param2, param3, param8)
+							);
+								"
+						onevent0="
+							SleepWidget(500, 'DoEvent(2);');
+						"
+						onevent1="
+							FadeOut(250);
+						"
+						onevent2="
+							FadeIn(250);
+						"
+						onevent3="
+							CallEvent('storeAvatarDisplayPedestal', 7);
+							SetTeamColor('1 0 0');
+							SetModel(GetHeroStoreModelPathFromProduct(param0 # '.' # param1));
+							SetEffect(GetHeroStorePassiveEffectPathFromProduct(param0 # '.' # param1));
+							SetModelPos(GetHeroStorePosFromProduct(param0 # '.' # param1));
+							SetModelAngles(GetHeroStoreAnglesFromProduct(param0 # '.' # param1));
+							SetModelScale(GetHeroStoreScaleFromProduct(param0 # '.' # param1));
+							Echo('param0: ' # param0 # ' | ' # ' param1: ' # param1);
+						"
+					/>
+				</panel>
+
+				<panel width="40h" height="10h" y="-10h" align="center"
+					name="storeAvatarViewHeader"
+					onevent0="
+						SleepWidget(200, 'SlideY(\'2h\', 250);');
+					"
+					onevent1="
+						SleepWidget(350, 'DoEvent(3);');
+					"
+					onevent3="
+						SlideY('-10h', 250);
+					"
+				>
+					<panel valign="bottom" noclick="true" height="3h" x="6h" y="-0.6h" width="-21.5h" float="right" padding="1.5h">
+						<instance name="avatarDisplayFeatureIcon" visparam="param9" type="hasmodel"  icon="model"/>
+						<instance name="avatarDisplayFeatureIcon" visparam="param10" type="hastexture" icon="textures"/>
+						<instance name="avatarDisplayFeatureIcon" visparam="param11" type="haseffects" icon="effects"/>
+						<instance name="avatarDisplayFeatureIconVoice" visparam="param12" type="hassounds" icon="sounds"/>
+						<instance name="avatarDisplayFeatureIcon" visparam="param13" type="hasanimations" icon="animations"/>
+					</panel>
+					<image ontrigger9lua="ResourceManager.RegisterTexture('/ui/fe2/store/avatars_display/avatar_header.tga', 'store', self)" resourcecontext="store" watch9="MainRegisterTextures" noclick="true"/>
+					<panel x="2.25h" y="0.4h" width="4.35h" height="4.35h">
+						<panel color="0 0 0 0.6" x="0.15h" y="0.15h" noclick="true"/>
+						<panel color="black" noclick="true"/>
+						<image watch="populateAvatarDisplay" ontrigger="SetVisible(true); SetTexture(GetHeroIcon2PathFromProduct(param2#'.'#param3));" visible="false"/>
+						<frame color="invisible" bordercolor="#455166" borderthickness="1" noclick="1" />
+					</panel>
+					<label align="right" width="-8.5h" x="-1h" height="2h" y="1.5h" color="white" shadow="true" textvalign="center" font="dyn_12" watch="populateAvatarDisplay" ontrigger="SetText(Translate('mstore_product' # param1 # '_name'));"/>
+				</panel>
+
+				<instance name="storeButton" buttonName="store_avatar_preview_purchase"
+					width="16h" height="4h"
+					label="mstore_purchase"
+					align="center" valign="bottom" y="-1h"
+					onmouseover="PlaySound('/shared/sounds/ui/ccpanel/button_over_02.wav');"
+					watch="MicroStoreProcessing"
+					ontrigger="SetEnabled(!param0);"
+					watch1="populateAvatarDisplay"
+					ontrigger1="
+						If(
+							param1 ge 1 and !param7 and param14,
+							Split(
+								SetVisible(true),
+								If(
+									!CanAccessHeroProduct(param2),
+									SetOnClick(
+										'
+											Set(\'microStore_heroSelectTarget\', \''#param2#'\');
+											CallEvent(\'store_popup_buyavatar_needhero\', 0);
+										'
+									),
+									SetOnClick(
+										'
+											PlaySound(\'/shared/sounds/ui/ccpanel/button_click_02.wav\');
+											Set(\'_microStore_SelectedItem\', 999);
+											Set(\'microStoreID999\', '#param1#');
+											Set(\'_microStore_SelectedID\', microStoreID999);
+											Set(\'microStoreLocalContent999\', GetHeroIcon2PathFromProduct(\''#param2#'.'#param3#'\'));
+											Set(\'microStorePrice999\', '#param4#');
+											Set(\'microStorePremium999\', false);
+											Set(\'microStoreSilverPrice999\', '#param5#');
+											Set(\'microStoreTrialInfo\', \''#param21#'\');
+											Trigger(\'MicroStoreUpdateSelection\');
+											CallEvent(\'store_popup_confirm_purchase_choose\', 0);
+										'
+									)
+								)
+
+							),
+							Split(
+								SetVisible(false),
+								SetOnClick('')
+							)
+						);
+					"
+				/>
+
+					<instance name="storeRotationButton" width="4h" height="4h" align="center" valign="bottom" x="-12h" y="-1h"
+						watch="MicroStoreProcessing"
+						ontrigger="SetEnabled(!param0);"
+						onmouseldown="
+							CallEvent('storeAvatarDisplayPedestal', 4);
+						"
+						onmouselup="
+							CallEvent('storeAvatarDisplayPedestal', 5);
+						"
+						onmouseout="
+							CallEvent('storeAvatarDisplayPedestal', 5);
+						"
+					/>
+					<instance name="storeRotationButton" width="4h" height="4h" align="center" valign="bottom" x="12h" y="-1h" hflip="true"
+						watch="MicroStoreProcessing"
+						ontrigger="SetEnabled(!param0);"
+						onmouseldown="
+							CallEvent('storeAvatarDisplayPedestal', 3);
+						"
+						onmouselup="
+							CallEvent('storeAvatarDisplayPedestal', 5);
+						"
+						onmouseout="
+							CallEvent('storeAvatarDisplayPedestal', 5);
+						"
+					/>
+				
+				<instance name="storeButton"
+					width="16h" height="4h"
+					label="mstore_purchased"
+					enabled="false"
+					align="center" valign="bottom" y="-1h"
+					watch="populateAvatarDisplay"
+					ontrigger="SetVisible(param7);"
+				/>
+				
+				<instance name="storeButton"
+					width="16h" height="4h"
+					label="general_unavailable"
+					enabled="false"
+					align="center" valign="bottom" y="-1h"
+					watch="populateAvatarDisplay"
+					ontrigger="
+						SetVisible(!param7 and !param14);
+					"
+					mouseoverdisabled="true"
+					mouseoutdisabled="true"
+				/>
+				<panel color="invisible" width="16h" height="4h" align="center" valign="bottom" y="-1h" visible="false" name="avatarDisplayUnavCover"
+						watch="populateAvatarDisplay"
+						ontriggerlua="UIManager.GetInterface('main'):HoNStoreF('SetUnavailableConditions', param15, param16, param17, param18, param1)"
+						ontrigger="SetVisible(!param7 and !param14);"
+						onmouseoverlua="UIManager.GetInterface('main'):HoNStoreF('HoverUnavailableButton')"
+						onmouseout="HideWidget('genericMainFloatingTip');"
+						onhide="HideWidget('genericMainFloatingTip');"
+				/>
+
+				<panel name="storeAvatar_cards_panel" width="15h" height="2h" align="center" valign="bottom" y="-6h" noclick="true">
+					<image name="storeAvatar_coupon_bg" width="125%" height="300%" align="center" valign="top" noclick="true" texture="/ui/elements/gotcoupons.tga"/>
+					<label name="storeAvatar_coupon_label" y="1.5h" align="center" textalign="center" textvalign="center" shadow="true" color="#ffdf5e" outline="true" outlinecolor="#870202" font="dyn_9" content="compendium_coupon"  noclick="true" />
+				</panel>
+
+			</panel>
+		</panel>
+	</template>
+
+</package>

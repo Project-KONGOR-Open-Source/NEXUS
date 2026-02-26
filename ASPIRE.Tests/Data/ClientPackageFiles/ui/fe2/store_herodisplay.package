@@ -1,0 +1,1126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+
+	<trigger name="heroListTargViewIndex"/>
+	<trigger name="selectHeroListIndex"/>
+	<trigger name="instantiateHeroListEntry"/>
+	<trigger name="populateHeroListDisplay"/>
+	<trigger name="readHeroListIDList"/>
+	<trigger name="getStoreHeroListAvatarData"/>
+	<trigger name="retStoreHeroListAvatarData"/>
+	<trigger name="trial_store_info" />
+	
+
+	<template name="storeHeroListAvatarIconState">
+		<widgetstate statename="{statename}" x="{x}" y="{y}">
+			<image group="hero_list_alt_{id}_icon" resourcecontext="store" noclick="true"/>
+			<frame color="invisible" bordercolor="{frameBorderColor=#455166}" borderthickness="1" noclick="true" />
+			<frame group="hero_list_alt_{id}_selected" color="invisible" bordercolor="{frameBorderColor=#FFCC00}" borderthickness="2" noclick="true" align="center" valign="center" width="+2" height="+2" visible="0"/>
+		</widgetstate>
+	</template>
+
+	<template name="storeHeroListAvatarIcon">
+		<!-- replacement for padding so we can be more precise with scroller arrows -->
+		<panel width="1h" noclick="1" sticky="1" stickytoinvis="0"/>
+		<panel name="hero_list_alt_{id}" width="3h" height="3h" sticky="1" stickytoinvis="0" visible="0">
+			<image width="210@" height="210%" noclick="true" texture="/ui/fe2/store/avatars_display/subheader_icon.tga" resourcecontext="store" align="center" valign="center" group="featureIconBackers"/>
+			<button
+				name="storeHeroListAvatarIcon{id}"
+				onmouseover="ShowWidget('mstore_tip_herodisplay_hasalt');"
+				onmouseout="HideWidget('mstore_tip_herodisplay_hasalt');"
+				onclicklua="UIManager.GetInterface('main'):HoNStoreF('SelectAltFromHeroList', {id})"
+			>
+				<instance name="storeHeroListAvatarIconState" id="{id}" statename="up"/>
+				<instance name="storeHeroListAvatarIconState" id="{id}" frameBorderColor="#cccccc" statename="over"/>
+				<instance name="storeHeroListAvatarIconState" id="{id}" statename="down" x="1" y="1"/>
+			</button>
+		</panel>
+		<!-- replacement for padding so we can be more precise with scroller arrows -->
+		<panel width="1h" noclick="1" sticky="1" stickytoinvis="0"/>
+	</template>
+	
+	<template name="heroDifficultyStar">
+		<panel width="100@" height="100%" sticky="true" stickytoinvis="false" visible="false" oninstantiate="SetVisible(GetHeroDifficulty('{hero}') ge {difficulty=1} - 0.5);" noclick="true">
+			<panel width="50%" clip="true" noclick="true">
+				<image texture="/ui/fe2/elements/hero_popularity_pip.tga" width="100@" height="100%" resourcecontext="store" color="1 1 1 1" oninstantiate="SetVisible(GetHeroDifficulty('{hero}') lt {difficulty=1});" visible="false" noclick="true"/>
+			</panel>
+			<image texture="/ui/fe2/elements/hero_popularity_pip.tga" resourcecontext="store"  color="1 1 1 1" oninstantiate="SetVisible(GetHeroDifficulty('{hero}') ge {difficulty=1});" visible="false" noclick="true"/>
+		</panel>
+	</template>
+	
+	<template name="heroListHeroEntry">
+		<panel width="-1h" height="5.85h" align="center" name="heroListHeroEntry_{product_id}"  group="heroHeroEntries"
+			watch="selectHeroListIndex"
+			ontrigger="
+				If(
+					param == {index=0},
+					DoEvent(0),
+					DoEvent(1)
+				);
+			"
+			onevent0="
+				If(
+					lastHeroListIndex ge 0,
+					Trigger(
+						'populateHeroListDisplay',
+						lastHeroListIndex,
+						{product_id=0},
+						'{hero}',
+						'{product}',
+						{cost=0},
+						{silver_cost=0},
+						{premium=0},
+						'{owned=false}',
+						'{sourceItemIndex=0}',
+						'{trial}'
+					)
+				);
+
+				CallEvent('heroEntryShadow{index}', 0);
+				GroupCall('heroEntrySelectedPieces{index}', 'DoEvent(0);');
+				BringToFront();
+			"
+			onevent0lua="UIManager.GetInterface('main'):HoNStoreF('OnSelectHero', {product_id=0}, {owned=false})"
+			onevent1="
+				CallEvent('heroEntryShadow{index}', 1);
+				GroupCall('heroEntrySelectedPieces{index}', 'DoEvent(1);');
+			"
+			onclick="
+				If(
+					lastHeroListIndex != {index},
+					PlaySound('/shared/sounds/ui/ccpanel/button_click_02.wav')
+				);
+				DoEvent(2);
+			"
+			onrightclick="
+				If(
+					!{owned=false},
+					DoEvent(3)
+				);
+			"
+			onevent2="
+				If(
+					lastHeroListIndex != {index},
+					Split(
+						Set('lastHeroListIndex', {index}),
+						Trigger('selectHeroListIndex', lastHeroListIndex)
+					)
+				);
+			"
+			onevent3="
+				DoEvent(2);
+				Set('_microStoreSelectedHeroItem', '{hero}');
+				PlaySound('/shared/sounds/ui/ccpanel/button_click_02.wav');
+				Set('_microStore_SelectedItem', 999);
+				Set('microStoreID999', {product_id=0});
+				Set('_microStore_SelectedID', microStoreID999);
+				Set('microStoreLocalContent999', GetHeroIconPathFromProduct('{hero}'));
+				Set('microStorePrice999', {cost=0});
+				Set('microStorePremium999', false);
+				Set('microStoreSilverPrice999', {silver_cost=0});
+				Set('microStoreSubBundles999', microStoreSubBundles{sourceItemIndex=0});
+				Set(\'microStoreTrialInfo\', '{trial}');
+				Trigger('MicroStoreUpdateSelection');
+				CallEvent('store_popup_confirm_purchase_choose', 0);
+			"
+			onmouseover="
+				PlaySound('/shared/sounds/ui/ccpanel/button_over_01.wav');
+				GroupCall('heroEntryHoverPieces{index}', 'DoEvent(0);');
+				GetHeroInfo('{hero}');
+				if (
+					!StringEmpty('{trial}'),
+					Split(Trigger('trial_store_info', '{trial}'), ShowWidget('store_trial_tip')),
+					HideWidget('store_trial_tip')
+					);
+			"
+			onmouseout="
+				GroupCall('heroEntryHoverPieces{index}', 'DoEvent(1);');
+				HideWidget('store_trial_tip');
+			"
+			oninstantiate="
+				SetY(
+					({index=0} * GetHeight()) ##+
+					({index=0} * GetYFromString('0.5h'))##
+				);
+				SleepWidget(1, 'DoEvent();');
+			"
+			onevent7="
+				SetY(
+					({index=0} * GetHeight()) ##+
+					({index=0} * GetYFromString('0.5h'))##
+				);
+			"				
+			onmouseoverlua="GetWidget('hero_info', 'main'):SetVisible(true)"
+			onmouseoutlua="GetWidget('hero_info', 'main'):SetVisible(false)"
+			onhidelua="GetWidget('hero_info', 'main'):SetVisible(false)"
+		>
+			<frame name="heroEntryShadow{index}" texture="/ui/frames/squareglow.tga" borderthickness="1h" color="0 0 0 .5" noclick="true" visible="false"
+				onevent0="
+					FadeIn(125);
+				"
+				onevent1="
+					FadeOut(125);
+				"
+				width="+2h" height="+2h" y="0.5h" align="center" valign="center"
+			/>
+
+			<image width="800@" height="100%" nodraw="0" resourcecontext="store" noclick="true" visible="true"  texture="/ui/fe2/store/avatars_display/{backer=hero_backer_regular}.tga" />			
+			
+			<panel width="800@" height="100%" rendermode="overlay" color="#CCCCFF" visible="false" onevent0="FadeIn(100);" onevent1="FadeOut(100);" noclick="true" group="heroEntryHoverPieces{index}"/>
+
+			<!-- Price container -->
+			<panel noclick="true" align="right" valign="center" width="7.85h" height="-2.5h" x="-1.5h">
+				<panel valign="center" grow="true" float="bottom" width="-1h" align="center" noclick="true" padding="0.15h">
+					<panel height="1.65h" noclick="true">
+						<image width="100@" height="100%" align="right" texture="/ui/fe2/store/gold_coins.tga" resourcecontext="store" noclick="true" x="5@" y="5%" color="0 0 0 0.5"/>
+						<image width="100@" height="100%" align="right" texture="/ui/fe2/store/gold_coins.tga" resourcecontext="store" noclick="true"/>
+						<label align="right" x="-110@" fitx="true" textalign="right" textvalign="center" shadow="true" color="#FFCC00" font="dyn_12" oninstantiate="SetText(FtoA({cost}, 0, 0, ','));" content="-" noclick="true"/>
+					</panel>
+					<panel height="1.65h" noclick="true">
+						<image width="100@" height="100%" align="right" texture="/ui/fe2/store/silver_coins.tga" resourcecontext="store" noclick="true" x="5@" y="5%" color="0 0 0 0.5"/>
+						<image width="100@" height="100%" align="right" texture="/ui/fe2/store/silver_coins.tga" resourcecontext="store" noclick="true"/>
+						<label align="right" x="-110@" fitx="true" textalign="right" textvalign="center" shadow="true" color="#CCCCCC" font="dyn_12" oninstantiate="SetText(FtoA({silver_cost}, 0, 0, ','));" content="-" noclick="true"/>
+					</panel>
+				</panel>
+			</panel>
+
+			<panel noclick="true" valign="center" width="3.83h" height="3.83h" x="1.1h" y="-0.075h">
+				<image noclick="true" oninstantiate="SetTexture(GetHeroIconPathFromProduct('{hero}')));"/>
+				<frame color="invisible" bordercolor="black" borderthickness="1" noclick="true"/>
+				<frame color="invisible" bordercolor="black" borderthickness="1" noclick="true" group="heroEntrySelectedPieces{index}" onevent0="SetBorderColor('#FFCC00');" onevent1="SetBorderColor('black');"/>
+				<modelpanel
+					ontrigger9lua="ResourceManager.RegisterModel('/ui/common/models/toggle/toggle.mdf', 'store', self)" resourcecontext="store" watch9="MainRegisterModels"
+					group="heroEntrySelectedPieces{index}"
+					onevent0="SetVisible(true);"
+					onevent1="SetVisible(false);"
+					visible="false"
+					noclick="true"
+					anim="idle"
+					effect="/ui/common/models/toggle/toggle.effect"
+					camerapos="0 1 0"
+					cameraangles="0 0 180"
+					camerafov="45"
+					cameranear="1"
+					carmerafar="100"
+					depthclear="false"
+					depthcompress="true"
+					onshow="SetAnim('idle'); SetEffect('/ui/common/models/toggle/toggle.effect');"
+				/>
+			</panel>
+			<label noclick="true" x="5.75h" y="0.65h" width="20.5h" height="1.75h" color="yellow" font="dyn_12" shadow="true" textvalign="center" oninstantiate="If({premium=0}, SetColor('#FFCC00')); SetText(GetEntityDisplayName('{hero}'));"/>
+			<label noclick="true" x="5.75h" y="-0.6h" valign="bottom" width="20.5h" height="1.5h" color="#00FF00" font="dyn_9" shadow="true" textvalign="center" oninstantiate="SetText(GetHeroCategories('{hero}', 1));"/>
+			
+			<panel x="5.75h" y="-1.85h" valign="bottom" height="1.5h" float="right" padding="0.3h" noclick="true">
+				<label fitx="true" noclick="true" height="100%" textvalign="center" font="dyn_10" color="1 1 1 1" shadow="true" content="mstore_difficulty" />
+				<panel height="100%" noclick="true">
+					<panel width="20.5h" height="1.7h" grow="true" growinvis="false" float="right" padding="0.5h" noclick="true">
+						<image width="100@" height="100%" texture="/ui/fe2/elements/hero_popularity_pip.tga" resourcecontext="store" rendermode="grayscale" color="1 1 1 .3" sticky="true" stickytoinvis="false" noclick="true"/>
+						<image width="100@" height="100%" texture="/ui/fe2/elements/hero_popularity_pip.tga" resourcecontext="store" rendermode="grayscale" color="1 1 1 .3" sticky="true" stickytoinvis="false" noclick="true"/>
+						<image width="100@" height="100%" texture="/ui/fe2/elements/hero_popularity_pip.tga" resourcecontext="store" rendermode="grayscale" color="1 1 1 .3" sticky="true" stickytoinvis="false" noclick="true"/>
+						<image width="100@" height="100%" texture="/ui/fe2/elements/hero_popularity_pip.tga" resourcecontext="store" rendermode="grayscale" color="1 1 1 .3" sticky="true" stickytoinvis="false" noclick="true"/>
+						<image width="100@" height="100%" texture="/ui/fe2/elements/hero_popularity_pip.tga" resourcecontext="store" rendermode="grayscale" color="1 1 1 .3" sticky="true" stickytoinvis="false" noclick="true"/>
+					</panel>
+					<panel width="20.5h" height="1.7h" grow="true" growinvis="false" float="right" padding="0.5h" noclick="true">
+						<instance name="heroDifficultyStar" difficulty="1" hero="{hero}"/>
+						<instance name="heroDifficultyStar" difficulty="2" hero="{hero}"/>
+						<instance name="heroDifficultyStar" difficulty="3" hero="{hero}"/>
+						<instance name="heroDifficultyStar" difficulty="4" hero="{hero}"/>
+						<instance name="heroDifficultyStar" difficulty="5" hero="{hero}"/>
+					</panel>
+				</panel>
+			</panel>
+			
+			<panel align="right" width="1.5h" height="1.5h" x="-10h" y="-0.75h" valign="bottom" visible="{owned=false}" noclick="true">
+				<image texture="/ui/elements/check_mark.tga" color="0 0 0 0.6" x="0.1h" y="0.1h" noclick="true"/>
+				<image texture="/ui/elements/check_mark.tga" noclick="true"/>
+			</panel>
+
+			<panel name="heroTrial_{index}" align="right" width="1.5h" height="1.5h" x="-10h" y="-0.75h" valign="bottom"
+				oninstantiate="SetVisible(StringEmpty('{trial}'))"
+				onmouseover="
+					if (
+						!StringEmpty('{trial}'),
+						Split(Trigger('trial_store_info', '{trial}'), ShowWidget('store_trial_tip')),
+						HideWidget('store_trial_tip')
+						);
+				"
+				onmouseout="HideWidget('store_trial_tip');"
+			>
+				<image texture="/ui/elements/trial_mark.tga" color="0 0 0 0.6" x="0.1h" y="0.1h" noclick="true"/>
+				<image texture="/ui/elements/trial_mark.tga" noclick="true"/>
+			</panel>
+			
+			<frame color="invisible" visible="false" bordercolor="#ffd800" borderthickness="0.35h" noclick="true" group="heroEntrySelectedPieces{index}" onevent0="If({premium=0}, Split(FadeIn(50), SleepWidget(50, 'DoEvent(2);')));" onevent1="FadeOut(100);" onevent2="FadeOut(50); SleepWidget(50, 'DoEvent(3);');" onevent3="FadeIn(50);" rendermode="overlay"/>
+			<frame color="invisible" visible="false" bordercolor="#FFCC0044" borderthickness="0.35h" noclick="true" group="heroEntrySelectedPieces{index}" onevent0="If(!{premium=0}, Split(FadeIn(50), SleepWidget(50, 'DoEvent(2);')));" onevent1="FadeOut(100);" onevent2="FadeOut(50); SleepWidget(50, 'DoEvent(3);');" onevent3="FadeIn(50);"/>
+
+			<frame bordercolor="#FFCC0055" color="invisible" borderthickness="2" visible="false" onevent0="FadeIn(100);" onevent1="FadeOut(100);" noclick="true" group="heroEntryHoverPieces{index}"/>
+
+			<image width="1.5h" height="3h" align="right" valign="center" x="0.75h" texture="/ui/fe2/store/avatars_display/side_ornate_trim.tga" resourcecontext="store" oninstantiate="SetVisible(!{premium=0});"/>
+			<image width="1.5h" height="3h" align="left" hflip="true" valign="center" x="-0.75h" texture="/ui/fe2/store/avatars_display/side_ornate_trim.tga" resourcecontext="store" oninstantiate="SetVisible(!{premium=0});"/>
+
+			<image width="2.5h" height="2.5h" x="-0.45h" y="-0.45h" hflip="true" visible="{premium=0}" texture="/ui/fe2/store/avatars_display/premium_corner_trim.tga" resourcecontext="store" /><!-- tl -->
+			<image width="2.5h" height="2.5h" x="-0.45h" y="0.45h" hflip="true" vflip="true" visible="{premium=0}" valign="bottom"  texture="/ui/fe2/store/avatars_display/premium_corner_trim.tga" resourcecontext="store" /><!-- bl -->
+			<image width="2.5h" height="2.5h" x="0.45h" y="-0.45h" visible="{premium=0}" align="right"  texture="/ui/fe2/store/avatars_display/premium_corner_trim.tga" resourcecontext="store" /><!-- tr -->
+			<image width="2.5h" height="2.5h" x="0.45h" y="0.45h" vflip="true" align="right" valign="bottom" visible="{premium=0}"  texture="/ui/fe2/store/avatars_display/premium_corner_trim.tga" resourcecontext="store" /><!-- br -->
+
+			<panel noclick="true" align="right" valign="center" width="7.85h" height="-2.5h" x="-1.5h">
+				<image width="2h" height="4h" x="0" y="-2.5h" noclick="true"  texture="/ui/fe2/store/avatars_display/premium_price_holder.tga" resourcecontext="store" visible="{premium=0}"/>
+				<image width="2h" height="4h" x="0" y="-2.5h" align="right" noclick="true"  texture="/ui/fe2/store/avatars_display/premium_price_holder.tga" resourcecontext="store" visible="{premium=0}"/>
+			</panel>
+
+			<panel name="heroListHeroCards_{index}" noclick="true" align="right" valign="top" width="9h" height="5.5h" >
+				<image width="100@" height="100%" align="right" texture="/ui/fe2/store/coupontag.tga" resourcecontext="store" noclick="true" color="white"/>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="storeViewHeroes">
+
+		<panel align="right" width="-30h" height="-7.7h" valign="bottom" name="storeViewHeroes" visible="false" reverse="true"
+			onevent0="
+				FadeIn(200);
+				CallEvent('storeHeroListViewHeader', 0);
+				CallEvent('heroListBackdropControls', 0);
+				CallEvent('heroDisplayList', 0);
+				CallEvent('storeHeroListDisplayModel', 0);
+				CallEvent('storeHeroDisplayPedestal', 0);
+				CallEvent('heroDisplaySortControls', 0);
+				PlayHeroPreviewSoundFromProduct('');
+			"
+			onevent1="
+				CallEvent('storeHeroListViewHeader', 1);
+				CallEvent('heroListBackdropControls', 1);
+				CallEvent('heroDisplayList', 1);
+				CallEvent('storeHeroListDisplayModel', 1);
+				CallEvent('storeHeroDisplayPedestal', 1);
+				CallEvent('heroDisplaySortControls', 1);
+				SleepWidget(600, 'FadeOut(250);');
+			"
+			onload="CreateString('_microStoreSelectedHeroItem', '');"
+		>
+
+		
+			<panel height="3.1h" noclick="true" x="-0.5h" y="1.5h" width="28h" visible="false" name="heroDisplaySortControls" onevent0="FadeIn(200);" onevent1="FadeOut(200);"  group="store_hero_sort_btns">
+				<panel width="-1h" align="center" noclick="true">
+					<instance name="paperForm_combobox_container" hastip="false" label="mstore_herolist_sortby" form="" id="store_combobox_heroes_sort" fieldwidth="60%" labelwidth="20%" labelColor="#cc7a2e" labelOutline="true" arrowShadow="true" arrowColor="#cc7a2e"
+						fieldname="paperForm_combobox_container_field3"
+						populate="
+							AddTemplateListItem('paperform_combobox_item', 0, 'label', 'mstore_heroname');
+							AddTemplateListItem('paperform_combobox_item', 1, 'label', 'mstore_price_asc');
+							AddTemplateListItem('paperform_combobox_item', 2, 'label', 'mstore_price_desc');
+							AddTemplateListItem('paperform_combobox_item', 3, 'label', 'mstore_diff_asc');
+							AddTemplateListItem('paperform_combobox_item', 4, 'label', 'mstore_diff_desc');
+							AddTemplateListItem('paperform_combobox_item', 5, 'label', 'mstore_releasedate');
+							SetSelectedItemByValue(5);
+						"
+						onselect="
+							If(
+								mstoreHeroSortMode != this,
+								Split(
+									Set('mstoreHeroSortMode', this),
+									CallEvent('heroDisplayListContainer', 8),
+									Set('microStore_heroSelectTarget', '')
+								)
+							);
+						"
+						onshow="If(mstoreHeroSortMode != this, SetSelectedItemByValue(mstoreHeroSortMode));"
+					/>				
+				</panel>
+
+			</panel>
+
+			<panel height="3.1h" noclick="1" x="-0.5h" y="1.5h" visible="1" width="44.5h" onload="BringToFront();" >
+				<!-- Bot -->
+				<panel name="store_hero_search_bar" height="3.0h" valign="top" noclick="1" visible="0" >
+					<!-- Search Textbox -->
+					<panel x="0.5h" height="2.6h" width="100%" valign="center" y="0" noclick="true">				
+						<panel width="40.6h" align="left" noclick="true">
+							<frame texture="/ui/frames/rounded_bg_solid.tga" borderthickness="0.6h" color="#c8b997" blockinput="false" noclick="true"/>
+							<frame texture="/ui/frames/roundframe.tga" color="#9d5b1a" borderthickness="0.6h" blockinput="false" noclick="true"/>	
+							
+							<textbox
+								name="store_hero_textbox_input"
+								hmargin="0.8h" vmargin="0.4h"
+								maxlength="15"
+								textalign="center" textvalign="center"
+								font="dyn_12"
+								textcolor="#7d4e1f"
+								shadow="true"
+								color="invisible"
+								onload=""
+								onshow="SetFocus(true);"
+								onenter="
+									SetFocus(false);
+								"
+								onesc="
+									EraseInputLine();
+									SetFocus(false);
+									HideWidget('store_hero_search_button');
+								"
+								onchangelua="UIManager.GetInterface('main'):HoNStoreF('InputBoxUpdateHero', self:GetValue() )"
+								onchange="	
+									if(!StringEmpty(''#this),
+										Call('store_hero_textbox_cover', 'SetVisible(0)')
+									);"								
+								onfocus="
+									if(!StringEmpty(''#this),
+										Call('store_hero_textbox_cover', 'SetVisible(0)')
+									);
+								"
+								onlosefocus="
+									if(StringEmpty(''#this),									
+										Call('store_hero_textbox_cover', 'SetVisible(1)')
+									);
+								"
+								onhide="
+									EraseInputLine();
+									Call('store_hero_search_button', 'SetVisible(1)');
+									GroupCall('store_hero_sort_btns', 'SetVisible(1)');
+									Call('store_hero_textbox_cover', 'SetVisible(1)');
+								"										
+							/>
+							<label name="store_hero_textbox_cover" x="0.6h" y="0" width="-0.5h" height="-0.4h" valign="center" align="center" textvalign="center" font="dyn_12" color="#7d4e1f" content="mstore_enter_hero" noclick="1" />
+						</panel>
+					</panel>														
+					
+					<button
+						x="-4.0h"			
+						width="2.0h" height="2.0h"
+						align="right"
+						valign="center"
+						color="invisible"
+						onclick="
+							HideWidget('store_hero_search_bar');
+							PlaySound('/shared/sounds/ui/ccpanel/button_close_02.wav');
+						"
+						onmouseover="PlaySound('/shared/sounds/ui/ccpanel/button_over_01.wav');"
+					>
+						<widgetstate statename="up">
+							<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.5h" color="#910000" blockinput="false" noclick="true"/>
+							<frame texture="/ui/frames/roundframe.tga" color="0 0 0 1" borderthickness="0.5h" blockinput="false" noclick="true"/>
+							<image width="1.3h" height="1.3h" align="center" valign="center" color=".75 .75 .75 1" texture="/ui/elements/closex.tga" noclick="true" />
+						</widgetstate>
+						<widgetstate statename="over">
+							<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.5h" color="#dc0000" blockinput="false" noclick="true"/>
+							<frame texture="/ui/frames/roundframe.tga" color="0 0 0 1" borderthickness="0.5h" blockinput="false" noclick="true"/>
+							<image width="1.3h" height="1.3h" align="center" valign="center" color="1 1 1 1" texture="/ui/elements/closex.tga" noclick="true" />			
+						</widgetstate>
+						<widgetstate statename="down" x="1" y="1">
+							<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.5h" color="#910000" blockinput="false" noclick="true"/>
+							<frame texture="/ui/frames/roundframe.tga" color="0 0 0 1" borderthickness="0.5h" blockinput="false" noclick="true"/>
+							<image width="1.3h" height="1.3h" align="center" valign="center" color="1 1 1 1" texture="/ui/elements/closex.tga" noclick="true" />
+						</widgetstate>
+					</button>													
+					
+				</panel>			
+			
+				<!-- Search Icon -->
+				<panel name="store_hero_search_button" noclick="0" x="-3.2h" align="right" valign="center" width="4.5h" height="3.0h"
+					onclick="
+						GroupCall('store_hero_sort_btns', 'SetVisible(0)');
+						SetVisible(0);
+						SleepWidget(101, 'ShowWidget(\'store_hero_search_bar\')');
+					"		
+					ontrigger="SetX(0); SetY(0);"
+					onmouseover="
+						GroupCall('store_hero_search_button_jiggle', 'SetWatch(1, \'HostTime\')');
+						Scale('5.76h', '3.6h', 250);
+					"
+					onmouseout="
+						GroupCall('store_hero_search_button_jiggle', 'SetWatch(\'\'); SetWatch(1, \'\'); SetX(-4); SetY(0); SetRotation(0);');
+						Scale('4.5h', '3.0h', 250);
+					"
+					onhide="
+						GroupCall('store_hero_search_button_jiggle', 'SetWatch(\'\'); SetWatch(1, \'\'); SetX(-4); SetY(0); SetRotation(0);');
+						SetWidth('4.5h'); SetHeight('3.0h'); 
+					"								
+				>
+					<image noclick="1" width="95@" height="95%" x="-4" align="right" valign="center" texture="/ui/fe2/elements/magnify_2.tga" 
+						watch="" ontrigger="SetRotation(Sin(((param % 300) / 300) * (3.14159265 * 2)) * 8);" group="store_hero_search_button_jiggle"
+						watch1="" ontrigger1="SetRotation(Sin(((param % 300) / 300) * (3.14159265 * 2)) * 4);"							
+					/>
+				</panel>
+			
+			</panel>			
+			
+			<panel width="40h" valign="bottom" height="-6h" y="45h"
+				name="heroDisplayList"
+				onevent0="
+					PlaySound('/ui/fe2/store/sounds/woodshelves_slidein.wav');
+					SlideY('-1h', 450);
+				"
+				onevent1="
+					PlaySound('/ui/fe2/store/sounds/woodshelves_slideout.wav');
+					SlideY('45h', 450);
+				"
+			>
+
+
+				<panel height="+1h" noclick="true" valign="top">
+					<image align="left" ontrigger9lua="ResourceManager.RegisterTexture('/ui/fe2/store/avatars_display/shelf_left.tga', 'store', self)" resourcecontext="store" watch9="MainRegisterTextures" x="-5.5@" width="12.5@" noclick="true" />
+					<image align="right" ontrigger9lua="ResourceManager.RegisterTexture('/ui/fe2/store/avatars_display/shelf_right.tga', 'store', self)" resourcecontext="store" watch9="MainRegisterTextures" x="6.25@" width="12.5@" noclick="true" />
+				</panel>
+				<image valign="bottom" y="1h" ontrigger9lua="ResourceManager.RegisterTexture('/ui/fe2/store/avatars_display/shelf_bottom.tga', 'store', self)" resourcecontext="store" watch9="MainRegisterTextures" width="100%" height="1h"/>
+
+
+				<scrollbar
+					visible="true"
+					align="right" width="2.5h"
+					texture="/ui/fe2/store/storeslider.tga"
+					minvalue="0"
+					maxvalue="9"
+					onslide="
+						Set(
+							'heroDisplayListTargIndex',
+							this
+						);
+						CallEvent('heroDisplayListContainer', 7);
+					"
+					watch="heroListTargViewIndex"
+					ontrigger="
+						SetValue(param);
+					"
+					watch1="instantiateHeroListEntry"
+					ontrigger1="
+						SetMaxValue(instantiateHeroIndex - 1);
+					"
+					handlewidth="2.5h"
+					handleheight="10h"
+					step="1"
+					value="0"
+					vertical="true"
+					slotwidth="0.6h" slotheight="1"
+					name="store_heroes_slider"
+				/>
+
+				<panel width="-2.5h" clip="true" color="#2b0600">
+					<panel valign="center" clip="true" height="100%">
+						<panel name="heroDisplayListContainer"
+							onload="
+								CreateInt('heroDisplayListTargIndex', 0);
+								CreateInt('heroDisplayListTargY', 0);
+								CreateString('lastSelectedLetter', '');
+								CreateInt('lastHeroListIndex', -1);
+								CreateInt('instantiateHeroIndex', 0);
+								CreateString('heroIndexToProductID', '');
+								CreateInt('heroListDefaultIndex', -1);
+								CreateString('heroListSortedData', '');
+							"
+							onevent5="
+								SetY(0);
+								ClearChildren();
+								Set('heroListDefaultIndex', -1);
+								Set('instantiateHeroIndex', 0);
+
+								Set('heroIndexToProductID', '');
+								## Hero category data sort would occur here ##
+								Set('heroListSortedData', _microStoreHeroCategoryData);
+								
+								If(
+									mstoreHeroSortMode == 1,
+									Set(
+										'heroListSortedData',
+										Sort(
+											_microStoreHeroCategoryData,
+											'|',
+											true,	## Sort order (forward true) ##
+											'~',
+											2
+										)
+									)
+								);
+								
+								
+								If(
+									mstoreHeroSortMode == 2,
+									Set(
+										'heroListSortedData',
+										Sort(
+											_microStoreHeroCategoryData,
+											'|',
+											false,	## Sort order (forward true) ##
+											'~',
+											2
+										)
+									)
+								);
+								
+								If(
+									mstoreHeroSortMode == 3,
+									Set(
+										'heroListSortedData',
+										Sort(
+											_microStoreHeroCategoryData,
+											'|',
+											true,	## Sort order (forward true) ##
+											'~',
+											6
+										)
+									)
+								);
+								
+								If(
+									mstoreHeroSortMode == 4,
+									Set(
+										'heroListSortedData',
+										Sort(
+											_microStoreHeroCategoryData,
+											'|',
+											false,	## Sort order (forward true) ##
+											'~',
+											6
+										)
+									)
+								);
+
+								If(
+									mstoreHeroSortMode == 5,
+									Split(
+										Set(
+											'heroListSortedData',
+											Sort(
+												heroListSortedData,
+												'|',
+												false,	## Sort order (forward true) ##
+												'`',
+												0,
+												true	## Numeric sort ##
+											)
+										),
+										##Set(microStore_heroSelectTarget, ''),##
+										Set('lastHeroListIndex', 0)
+									)
+								);								
+								
+								ExplodeTrigger('instantiateHeroListEntry', heroListSortedData, '|', '~');
+
+								Set('microStore_heroSelectTarget', '');
+
+								##If(mstoreHeroSortMode != 5, Set('lastHeroListIndex', heroListDefaultIndex));##
+								
+								Set('lastHeroListIndex', heroListDefaultIndex);
+								
+								SleepWidget(1, 'DoEvent(9);');
+							"
+							watch4="readHeroListIDList"
+							ontrigger4="
+								If(
+									!StringEmpty(microStore_heroSelectTarget),
+									If(
+										StringEquals(param3, microStore_heroSelectTarget),
+										Set('heroListDefaultIndex', param1)
+									),
+									Set('heroListDefaultIndex', param1)
+									
+								);
+								
+							"
+
+							watch="storeHeroDisplayListLerpTrigger"
+							ontrigger="
+								Set(
+									'heroDisplayListTargY',
+									(
+									(heroDisplayListTargIndex * GetHeightFromString('5.85h')) ##+
+									(heroDisplayListTargIndex * GetYFromString('0.5h'))##
+									) * -1
+								);
+
+								Set(
+									'heroDisplayListTargY',
+									heroDisplayListTargY
+									+ (GetYFromString('100%') * 0.5) - (GetHeightFromString('5.85h') * 0.5)
+								);
+
+
+								Set(
+									'heroDisplayListTargY',
+									Min(
+										GetYFromString('2h'),
+										Min(
+											GetHeight() - GetYFromString('100%'),
+											heroDisplayListTargY + GetYFromString('3.25h')
+										)
+									)
+								);
+
+								SetY(
+									GetY() +
+									Ceil((heroDisplayListTargY - GetY()) * Frametime / 100)
+								);
+
+								If(
+									param0 == 0,
+									If(
+										heroDisplayListTargY != GetY(),
+										DoEvent(6)
+									)
+								);
+							"
+							onevent3="
+								Set(
+									'heroDisplayListTargIndex',
+									Min(
+										instantiateHeroIndex - 1,
+										heroDisplayListTargIndex + 1
+									)
+								);
+							"
+							onevent4="
+								Set(
+									'heroDisplayListTargIndex',
+									Max(
+										0,
+										heroDisplayListTargIndex - 1
+									)
+								);
+							"
+							onevent7="
+								Trigger('heroListTargViewIndex', heroDisplayListTargIndex);
+								DoEvent(6);
+							"
+							onevent6="
+								CreateLerp('storeHeroDisplayListLerp', 1000, 0, 0, -1);
+								CreateLerp('storeHeroDisplayListLerp', 0, 1000, 0, -1);
+							"
+							onevent8="
+								RegisterEntityDefinitions();
+							"
+							watch3="EntityDefinitionsLoaded"
+							ontrigger3="
+							
+								If(
+									!StringEmpty(microStoreIDList) and StringEmpty(_microStoreHeroCategoryData),
+									ExplodeTrigger(
+										'mstoreBuildHeroListString',
+										microStoreIDList,
+										'|', '`'
+									)
+								);
+							
+								If(
+									!StringEmpty(_microStoreHeroCategoryData),
+									DoEvent(5)
+								);
+							"
+							onevent9="
+								Trigger('selectHeroListIndex', lastHeroListIndex);
+								Trigger('heroListTargViewIndex', lastHeroListIndex);
+
+								Set('heroDisplayListTargIndex',lastHeroListIndex);
+								CallEvent('heroDisplayListContainer', 7);
+							"
+						/>
+					</panel>
+
+					<image width="100%" height="6h" texture="/ui/fe2/elements/shadow_gradient.tga" noclick="true"/>
+					<image width="100%" height="6h" texture="/ui/fe2/elements/shadow_gradient.tga" valign="bottom" vflip="true" noclick="true"/>
+
+					<panel processonlyscroll="true" color="invisible"
+						hover="false"
+						onmousewheeldown="
+							CallEvent('heroDisplayListContainer', 3);
+							CallEvent('heroDisplayListContainer', 7);
+						"
+						onmousewheelup="
+							CallEvent('heroDisplayListContainer', 4);
+							CallEvent('heroDisplayListContainer', 7);
+						"
+						onevent0="
+							If(
+								!IsVisibleSelf(),
+								SetVisible(true)
+							);
+						"
+						onevent1="
+							If(
+								IsVisibleSelf(),
+								SetVisible(false)
+							);
+						"
+					/>
+					<!-- Processing indicator -->
+					<panel color="0 0 0 0.5"
+						watch="MicroStoreProcessing"
+						ontrigger="
+							If(
+								param0,
+								SetVisible(true),
+								FadeOut(350)
+							);
+						"
+					>
+						<panel height="4.5h" align="center" valign="center" width="16h">
+							<panel color="0 0 0 0.5">
+								<frame color="invisible" bordercolor="0.75 0.5 0 0.5" borderthickness="0.15h" noclick="true" />
+								<label color="white" shadow="true" font="dyn_11" textvalign="center" textalign="center" width="-3h" content="mstore_processing_elipses" />
+								<animatedimage texture="/ui/elements/throb/throb.tga" noclick="true" loop="1" fps="30" onshow="StartAnim(1);" align="right" width="3h" height="3h" valign="center" x="-0.25h" />
+							</panel>
+						</panel>
+					</panel>
+					
+					<panel name="store_loadentityprogress" visible="1" blockinput="true" watch="EntityDefinitionsLoaded" ontrigger="SetVisible(false);">
+						<panel align="center" valign="center" width="25.0h" height="5h" y=".5h">
+							<image height="100%" texture="../mainmenu/update_bar_bg.tga" />
+
+							<panel watch="EntityDefinitionsProgress" width="1" ontrigger="If(param1 gt 0, SetWidth(((param0 / param1) * 100) # '%')); SetWidth(Max(GetWidth(), 32));">
+								<image watch="EntityDefinitionsProgress" ontrigger="If(param1 gt 0 and param0 gt 0, SetUScale(1 / (param0 / param1)));" texture="../mainmenu/update_bar_fg.tga"/>
+								<image width="32" texture="../loadingscreens/loading_bar_fg_l.tga"/>
+								<image width="32" align="right" texture="../loadingscreens/loading_bar_fg_r.tga"/>
+							</panel>
+						</panel>
+						<image align="center" valign="center" width="31.5h" height="9h" x="-.8h" color="1 1 1 1" texture="elements/loading_bar_frame.tga" />
+						<panel color="invisible" y=".5h">
+							<label width="-10.0h" height="100%" align="center" textalign="center" textvalign="center" wrap="1" font="dyn_10" color="white" shadow="1" content="game_end_stats_progress_bar" />
+						</panel>
+					</panel>
+					
+				</panel>
+				
+				<panel noclick="true" height="6.0h" y="-5.1h" width="111.5%" align="center" x="0.5%">
+					<image height="100%" ontrigger9lua="ResourceManager.RegisterTexture('/ui/fe2/store/avatars_display/shelf_top.tga', 'store', self)" resourcecontext="store" watch9="MainRegisterTextures" noclick="true"/>
+				</panel>
+				
+			</panel>
+
+			<panel align="right" width="-40h">
+				<panel y="5h" width="35h" height="1h" align="center" clip="true"
+					name="heroListBackdropControls"
+					onevent0="
+						SleepWidget(450, 'DoEvent(2);');
+					"
+					onevent1="
+						PlaySound('/ui/fe2/store/sounds/book_close.wav');
+						ScaleHeight('1h', 350);
+						CallEvent('heroListBackdrop', 1);
+						CallEvent('heroListDropGradient', 1);
+					"
+					onevent2="
+						PlaySound('/ui/fe2/store/sounds/book_open.wav');
+						ScaleHeight('35h', 350);
+						CallEvent('heroListBackdrop', 0);
+						CallEvent('heroListDropGradient', 0);
+					"
+				>
+					<image width="-2h" height="2h" align="center" texture="/ui/fe2/elements/shadow_gradient.tga" noclick="true" name="heroListDropGradient" onevent0="FadeIn(75);" onevent1="SleepWidget(275, 'FadeOut(75);');" visible="false"/>
+					<image noclick="true" align="center" valign="bottom" width="35h" height="35h" ontrigger9lua="ResourceManager.RegisterTexture('/ui/fe2/store/avatars_display/backdrop.tga', 'store', self)" resourcecontext="store" watch9="MainRegisterTextures" visible="false" name="heroListBackdrop" onevent0="FadeIn(100);" onevent1="SleepWidget(350, 'FadeOut(100);');"/>
+				</panel>
+				
+				<panel noclick="true">
+					<modelpanel
+						ontrigger9lua="ResourceManager.RegisterModel('/ui/fe2/store/alt_platform/platform.mdf', 'store', self)" resourcecontext="store" watch9="MainRegisterModels"
+						noclick="true"
+						anim="idle"
+						cameranear="1.0"
+						camerafar="30000.0"
+						depthclear="true"
+						depthcompress="false"
+						lookat="false"
+						cameradistance="30"
+						camerapos="0 2000 90"
+						cameraangles="3 0 180"
+						camerafov="7"
+						modelpos="0 0 100"
+						modelangles="-15.0 0 0.0"
+						modelscale="2.5"
+						sunazimuth="120"
+						sunaltitude="50"
+						suncolor="0.9 0.9 0.9"
+						ambientcolor="0.6 0.7 0.7"
+						name="storeHeroDisplayPedestal"
+						visible="false"
+						onevent0="
+							SleepWidget(500, 'DoEvent(2);');
+						"
+						onevent1="
+							FadeOut(250);
+						"
+						onevent2="
+							FadeIn(250);
+						"
+						onload="
+							CreateBool('heroPedestalDirection', true);	## Clockwise ##
+							CreateFloat('heroPedestalPosition', 0);
+							Call('storeHeroDisplayPedestal', 'SetAnimSpeed(0);');
+						"
+						onshow="Call('storeHeroDisplayPedestal', 'SetAnimSpeed(0);');"
+						onhide="DoEvent(5);"
+						watch=""
+						ontrigger="
+							## Rotation calc ##
+							Set(
+								'heroPedestalPosition',
+								If(
+									heroPedestalDirection,
+									(heroPedestalPosition + (Frametime / 2000)),
+									(heroPedestalPosition - (Frametime / 2000))
+								)
+							);
+							
+							If(
+								heroPedestalPosition gt 1,
+								Set('heroPedestalPosition', heroPedestalPosition % 1)
+							);
+							
+							If(
+								heroPedestalPosition lt 0,
+								Set('heroPedestalPosition', 1 + heroPedestalPosition)
+							);
+							
+							DoEvent(6);
+						"
+						onevent3="
+							## Start rotation clockwise ##
+							Set('heroPedestalDirection', true);
+							SetWatch('HostTime');
+						"
+						onevent4="
+							## Start rotation counterclockwise ##
+							Set('heroPedestalDirection', false);
+							SetWatch('HostTime');
+						"
+						onevent5="
+							## Disable ##
+							SetWatch('');
+						"
+						onevent6="
+							## Apply ##
+							SetAnimOffsetTime(heroPedestalPosition);
+							Call('storeHeroListDisplayModel', 'SetModelAngles(\'0 0 \' # (heroPedestalPosition * -360));');
+						"
+						onevent7="
+							## Reset (selecting a different model generally) ##
+							Set('heroPedestalPosition', 0);
+							DoEvent(6);
+						"
+					/>
+				
+					<modelpanel
+						resourcecontext="store"
+						scenebuffer="true"
+						noclick="true"
+						model=""
+						anim="idle"
+						cameranear="1.0"
+						camerafar="30000.0"
+						depthclear="true"
+						depthcompress="false"
+						lookat="false"
+						cameradistance="30"
+						camerapos="0 3000 80"
+						cameraangles="0 0 180"
+						camerafov="7"
+						modelpos="0 0 0"
+						modelangles="-15.0 0 0.0"
+						modelscale="1.0"
+						sunazimuth="120"
+						sunaltitude="50"
+						suncolor="0.9 0.9 0.9"
+						ambientcolor="0.6 0.7 0.7"
+						cull="false"
+						name="storeHeroListDisplayModel"
+						visible="false"
+						watch="populateHeroListDisplay"
+						ontrigger="
+							If(
+								param1 gt 0,
+								CallEventParamsX(name, 3, param2, param3)
+							);
+								"
+						onevent0="
+							SleepWidget(500, 'DoEvent(2);');
+						"
+						onevent1="
+							FadeOut(250);
+						"
+						onevent2="
+							FadeIn(250);
+						"
+						onevent3="
+							CallEvent('storeHeroDisplayPedestal', 7);
+							SetTeamColor('1 0 0');
+							SetModel(GetHeroStoreModelPathFromProduct(param0 # '.' # param1));
+							SetEffect(GetHeroStorePassiveEffectPathFromProduct(param0 # '.' # param1));
+							SetModelPos(GetHeroStorePosFromProduct(param0 # '.' # param1));
+							SetModelAngles(GetHeroStoreAnglesFromProduct(param0 # '.' # param1));
+							SetModelScale(GetHeroStoreScaleFromProduct(param0 # '.' # param1));
+						"
+					/>
+				</panel>
+
+				<panel width="40h" height="10h" y="-10h" align="center" noclick="true"
+					name="storeHeroListViewHeader"
+					onevent0="
+						SleepWidget(200, 'SlideY(\'2h\', 250);');
+					"
+					onevent1="
+						SleepWidget(350, 'DoEvent(3);');
+					"
+					onevent3="
+						SlideY('-10h', 250);
+					"
+				>
+					<panel x="6.75h" y="6.75h"
+						watch="populateHeroListDisplay"
+						ontriggerlua="UIManager.GetInterface('main'):HoNStoreF('DumpHeroAlts') Trigger('getStoreHeroListAvatarData', param1, param2)"
+						watch1="retStoreHeroListAvatarData"
+						ontrigger1lua="UIManager.GetInterface('main'):HoNStoreF('RegisterAltForList', param0, param1, param2, param3, param4)"
+					>
+						<!-- alt icon stuff goes here -->
+						<!-- default -->
+						<panel noclick="1" x="-1.5h" float="right">
+							<instance name="storeHeroListAvatarIcon" id="1"/>
+
+							<!-- left scroll arrow -->
+							<panel name="hero_alt_list_left_scroller" width="2.0h" height="2.0h" sticky="1" stickytoinvis="0" visible="0" noclick="1">
+								<button name="hero_alt_list_left_scroller_button" y="0.60h"
+									onclicklua="UIManager.GetInterface('main'):HoNStoreF('ScrollHeroAltList', -1)"
+								>
+									<widgetstate statename="up">
+										<instance name="woodButtonImage" rendermode="normal"/>
+										<image width="50%" height="50%" align="left" valign="center" texture="/ui/info/arrow.tga" onloadlua="self:SetRotation(180)" noclick="1" color="#ffd200"/>
+									</widgetstate>
+									<widgetstate statename="down">
+										<instance name="woodButtonImage" rendermode="normal"/>
+										<image x="1" y="1" width="50%" height="50%" align="left" valign="center" texture="/ui/info/arrow.tga" onloadlua="self:SetRotation(180)" noclick="1" color="white"/>
+									</widgetstate>
+									<widgetstate statename="over">
+										<instance name="woodButtonImage" rendermode="normal"/>
+										<image width="50%" height="50%" align="left" valign="center" texture="/ui/info/arrow.tga" onloadlua="self:SetRotation(180)" noclick="1" color="white"/>
+									</widgetstate>
+									<widgetstate statename="disabled">
+										<instance name="woodButtonImage" rendermode="grayscale"/>
+										<image width="50%" height="50%" align="left" valign="center" texture="/ui/info/arrow.tga" onloadlua="self:SetRotation(180)" noclick="1" color="#ffd200" rendermode="grayscale"/>
+									</widgetstate>
+								</button>
+							</panel>
+
+							<!-- others -->
+							<instance name="storeHeroListAvatarIcon" id="2"/>
+							<instance name="storeHeroListAvatarIcon" id="3"/>
+							<instance name="storeHeroListAvatarIcon" id="4"/>
+							<instance name="storeHeroListAvatarIcon" id="5"/>
+							<instance name="storeHeroListAvatarIcon" id="6"/>
+							<!-- right scroll arrow -->
+							<panel name="hero_alt_list_right_scroller" width="2.0h" height="2.0h" noclick="1" sticky="1" stickytoinvis="0" visible="0">
+								<button name="hero_alt_list_right_scroller_button" y="0.60h" x="-2.0h"
+									onclicklua="UIManager.GetInterface('main'):HoNStoreF('ScrollHeroAltList', 1)"
+								>
+									<widgetstate statename="up">
+										<instance name="woodButtonImage" rendermode="normal"/>
+										<image width="50%" height="50%" align="right" valign="center" texture="/ui/info/arrow.tga" noclick="1" color="#ffd200"/>
+									</widgetstate>
+									<widgetstate statename="down">
+										<instance name="woodButtonImage" rendermode="normal"/>
+										<image x="1" y="1" width="50%" height="50%" align="right" valign="center" texture="/ui/info/arrow.tga" noclick="1" color="white"/>
+									</widgetstate>
+									<widgetstate statename="over">
+										<instance name="woodButtonImage" rendermode="normal"/>
+										<image width="50%" height="50%" align="right" valign="center" texture="/ui/info/arrow.tga" noclick="1" color="white"/>
+									</widgetstate>
+									<widgetstate statename="disabled">
+										<instance name="woodButtonImage" rendermode="grayscale"/>
+										<image width="50%" height="50%" align="right" valign="center" texture="/ui/info/arrow.tga" noclick="1" color="#ffd200" rendermode="grayscale"/>
+									</widgetstate>
+								</button>
+							</panel>
+
+						</panel>
+					</panel>
+					<image texture="/ui/fe2/store/avatars_display/avatar_header.tga" resourcecontext="store" noclick="true"/>
+					<panel x="2.25h" y="0.4h" width="4.35h" height="4.35h">
+						<panel color="black" noclick="true"/>
+						<image watch="populateHeroListDisplay" ontrigger="SetVisible(true); SetTexture(GetHeroIconPathFromProduct(param2#'.'#param3));" visible="false"/>
+						<frame color="invisible" bordercolor="#455166" borderthickness="1" noclick="1" />
+					</panel>
+					<label align="right" width="-8.5h" x="-1h" height="2h" y="1.5h" color="white" shadow="true" textvalign="center" font="dyn_12" watch="populateHeroListDisplay" ontrigger="SetText(GetEntityDisplayName(param2)));"/>
+				</panel>
+
+				<instance name="storeButton" buttonName="store_heroes_preview_purchase"
+					width="16h" height="4h"
+					label="mstore_purchase"
+					align="center" valign="bottom" y="-1h"
+					onmouseover="PlaySound('/shared/sounds/ui/ccpanel/button_over_02.wav');"
+					watch="MicroStoreProcessing"
+					ontrigger="SetEnabled(!param0);"
+					watch1="populateHeroListDisplay"
+					ontrigger1="
+						If(
+							param1 ge 1 and !param7,
+							Split(
+								SetVisible(true),
+								SetOnClick(
+									'
+										Set(\'_microStoreSelectedHeroItem\', \''#param2#'\');
+										Set(\'_microStore_SelectedItem\', 999);
+										Set(\'microStoreID999\', '#param1#');
+										Set(\'_microStore_SelectedID\', microStoreID999);
+										Set(\'microStoreLocalContent999\', GetHeroIconPathFromProduct(\''#param2#'\'));
+										Set(\'microStorePrice999\', '#param4#');
+										Set(\'microStorePremium999\', false);
+										Set(\'microStoreSilverPrice999\', '#param5#');
+										Set(\'microStoreSubBundles999\', microStoreSubBundles'#param8#');
+										Set(\'microStoreChargeRemaining999\', -1);
+										Set(\'microStoreDurations999\', *(\'microStoreDurations\' # \''#Round(param0 + 1)#'\'));
+										Set(\'microStoreTrialInfo\', \''#param9#'\');
+										Trigger(\'MicroStoreUpdateSelection\');
+										CallEvent(\'store_popup_confirm_purchase_choose\', 0);
+									'
+								)
+							),
+							Split(
+								SetVisible(false),
+								SetOnClick('')
+							)
+						);
+					"
+				/>
+
+				<instance name="storeRotationButton" width="4h" height="4h" align="center" valign="bottom" x="-12h" y="-1h"
+					watch="MicroStoreProcessing"
+					ontrigger="SetEnabled(!param0);"
+					onmouseldown="
+						CallEvent('storeHeroDisplayPedestal', 4);
+					"
+					onmouselup="
+						CallEvent('storeHeroDisplayPedestal', 5);
+					"
+					onmouseout="
+						CallEvent('storeHeroDisplayPedestal', 5);
+					"
+				/>
+				<instance name="storeRotationButton" width="4h" height="4h" align="center" valign="bottom" x="12h" y="-1h" hflip="true"
+					watch="MicroStoreProcessing"
+					ontrigger="SetEnabled(!param0);"
+					onmouseldown="
+						CallEvent('storeHeroDisplayPedestal', 3);
+					"
+					onmouselup="
+						CallEvent('storeHeroDisplayPedestal', 5);
+					"
+					onmouseout="
+						CallEvent('storeHeroDisplayPedestal', 5);
+					"
+				/>
+				
+				<instance name="storeButton"
+					width="16h" height="4h"
+					label="mstore_purchased"
+					enabled="false"
+					align="center" valign="bottom" y="-1h"
+					watch="populateHeroListDisplay"
+					ontrigger="
+						SetVisible(param7);
+					"
+				/>
+
+				<panel name="storeHero_cards_panel" width="15h" height="2h" align="center" valign="bottom" y="-6h" noclick="true">
+					<image name="storeHero_coupon_bg" width="125%" height="300%" align="center" valign="top" noclick="true" texture="/ui/elements/gotcoupons.tga"/>
+					<label name="storeHero_coupon_label" y="1.5h" align="center" textalign="center" textvalign="center" shadow="true" color="#ffdf5e" outline="true" outlinecolor="#870202" font="dyn_9" content="compendium_coupon"  noclick="true" />
+				</panel>
+				
+			</panel>
+		</panel>
+	</template>
+
+</package>

@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+	<template name="soccerLargeNumberImage">
+		<panel width="100@" height="100%" noclick="true" sticky="true" stickytoinvis="false">
+			<image width="200@" height="200%" texture="/ui/elements/number_large_Soccer_{number}.tga" noclick="true" align="center" valign="center"/>
+		</panel>
+	</template>
+
+	<template name="soccerEndSplashSidePlayerAward">
+		<panel name="{id}" width="{width=100%}" height="{height=100@}" passivechildren="true">
+			<image name="{id}Icon" texture="{icon=/items/basic/fleetfeet/icon.tga}"/>
+			<frame color="invisible" bordercolor="#6f6f7b" borderthickness="1"/>
+		</panel>
+	</template>
+
+	<template name="soccerEndSplashSidePlayer">
+		<panel name="soccerEndSplashSide{side}Player{id}" width="58.8@" sticky="true" stickytoinvis="false">
+			<frame name="soccerEndSplashSide{side}Player{id}Frame" texture="/ui/frames/thick.tga" color="{bordercolor=#516887}" borderthickness="2.25@"/>
+			<panel width="-7.5@" align="center" grow="true" float="bottom" valign="center">
+				<panel height="85@">
+					<panel align="center" width="100@" height="100%">
+						<image name="soccerEndSplashSide{side}Player{id}HeroIcon" texture="{heroIcon=/heroes/calamity/icon.tga}" />
+					</panel>
+				</panel>
+				<label name="soccerEndSplashSide{side}Player{id}Name" height="15@" textalign="center" textvalign="center" font="dyn_12" color="#c2c2c2" content="{playerName=Buro}"/>
+				<label name="soccerEndSplashSide{side}Player{id}Hero" height="9@" textalign="center" textvalign="center" font="dyn_10" color="#c2c2c2" content="{heroName=Calamity}"/>
+				<panel height="4@"/>
+				<panel height="65@">
+					<panel width="100@">
+						<panel width="50%" height="50%" align="center">
+							<image name="soccerEndSplashSide{side}Player{id}Soccer" texture="/ui/elements/soccer/match_stats/soccer_{resExt}.tga"/>
+						</panel>
+						<panel name="soccerEndSplashSide{side}Player{id}Value" align="center" valign="center" height="25%" y="25%" noclick="true" float="right" padding="0" grow="true" growinvis="false"/>
+					</panel>
+					<panel align="right" width="48@" grow="true" valign="center" float="bottom" padding="3@">
+						<instance name="soccerEndSplashSidePlayerAward" id="soccerEndSplashSide{side}Player{id}Award1" icon="{icon1Texture=/items/basic/fleetfeet/icon.tga}"/>
+						<instance name="soccerEndSplashSidePlayerAward" id="soccerEndSplashSide{side}Player{id}Award2" icon="{icon2Texture=/items/basic/fleetfeet/icon.tga}"/>
+					</panel>
+				</panel>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="soccerEndSplashSide">
+		<panel name="soccerEndSplashSide{id}" noclick="true">
+
+			<frame name="soccerSplashSide{id}WinnerGlow" width="+2.0h" height="+2.0h" align="center" valign="center" texture="/ui/frames/squareglow.tga" color="{bordercolor=#516887}" borderthickness="1.5h" bordercolor="{bordercolor=#516887}" rendermode="additive" noclick="true"/>
+
+			<frame texture="/ui/frames/rounded_bg_white.tga" color="{bgcolor=#121826}" borderthickness="0.65@"/>
+			<frame texture="/ui/frames/thick.tga" color="{bordercolor=#516887}" borderthickness="0.65@"/>
+
+			<panel hmargin="1.5@" vmargin="1.5%" noclick="true">
+				<panel height="44.75%" noclick="true">
+					<label textalign="center" textvalign="center" height="30%" color="{labelcolor}" outline="true" outlinecolor="0 0 0 0.35" font="dyn_24" content="{teamside}" noclick="true"/>
+					<panel valign="bottom" height="-30%" noclick="true">
+						<panel width="48h" height="12h" align="center" noclick="true">
+							<image name="soccerEndSplashSide{id}Goals" texture="/ui/elements/soccer/match_stats/goals_{resExt}.tga" align="center" valign="top"/>
+						</panel>
+						<panel name="soccerSplashSide{id}ValueEffect" align="center" valign="center" width="56.48h" height="34.44h" x="0@" y="-5.37h" noclick="true" visible="false">
+							<modelpanel
+								align="center" valign="center" width="100%" height="100%"
+								noclick="true"
+								model="/shared/models/invis.mdf"
+								onshowlua="self:SetEffect('/ui/elements/soccer/match_stats/win_{resExt}.effect')"
+								onhidelua="self:SetEffect('')"
+								anim="idle"
+								cameranear="100.0"
+								camerafar="20000.0"
+								depthclear="true"
+								depthcompress="false"
+								lookat="false"
+								cameradistance="30"
+								camerapos="0 850 0"
+								cameraangles="0 0 180"
+								camerafov="7"
+								modelpos="0 0 0"
+								modelangles="0 0 0"
+								modelscale="1.0"
+								sunazimuth="120"
+								sunaltitude="20"
+								suncolor="0.9 0.9 0.9"
+								ambientcolor="0.6 0.7 0.7"
+								scenebuffer="true"
+							/>
+						</panel>
+						<panel name="soccerSplashSide{id}ValueTeam" align="center" valign="center" height="25%" y="25%" noclick="true" float="right" padding="0" grow="true" growinvis="false" x="0"/>
+					</panel>
+				</panel>
+
+				<panel name="soccerEndSplashSide{id}Player1" valign="bottom" y="-30.7%" height="24%" noclick="true">
+					<frame name="soccerEndSplashSide{id}Player1Frame" texture="/ui/frames/thick.tga" color="{bordercolor=#516887}" borderthickness="2.5@" noclick="true"/>
+					<panel hmargin="5@" vmargin="5%" noclick="true">
+
+						<panel align="left" width="100@" noclick="true">
+							<panel width="40%" height="40%" y="5%" align="center">
+								<image name="soccerEndSplashSide{id}Soccer" texture="/ui/elements/soccer/match_stats/soccer_{resExt}.tga"/>
+							</panel>
+							<panel name="soccerEndSplashSide{id}Player1Value" align="center" valign="center" height="25%" y="25%" noclick="true" float="right" grow="true" growinvis="false"/>
+						</panel>
+
+						<panel width="100@" float="bottom" padding="0.85@" align="center" valign="center">
+							<panel height="80%">
+								<panel align="center" width="100@" height="100%">
+									<image name="soccerEndSplashSide{id}Player1HeroIcon" texture="{heroIcon=/heroes/calamity/alt/icon.tga}" />
+								</panel>
+							</panel>
+							<label name="soccerEndSplashSide{id}Player1Name" height="8@" textalign="center" textvalign="center" font="dyn_14" color="#c2c2c2" content="Buro"/>
+							<label name="soccerEndSplashSide{id}Player1Hero" height="7@" textalign="center" textvalign="center" font="dyn_10" color="#c2c2c2" content="Calamity"/>
+						</panel>
+						<panel align="right" width="100@" noclick="true">
+							<panel name="soccerEndSplashSide{id}Player1MVP" width="65@" height="65%" align="center" y="-7.5%" noclick="true" texture="/ui/elements/soccer/match_stats/mvp_marker.tga" visible="false"/>
+							<!--<label name="ctfEndSplashSide{id}Player1MVP" height="55%" textalign="center" textvalign="center" font="dyn_18" color="white" outline="true" noclick="true" content="ctf_end_splash_mvp"/>-->
+							<panel valign="bottom" y="-12.5%" height="35%" align="center" float="right" grow="true" padding="5@" noclick="true">
+								<instance name="soccerEndSplashSidePlayerAward" id="soccerEndSplashSide{id}Player1Award1" icon="{icon1Texture=/items/basic/fleetfeet/icon.tga}" width="100@" height="100%"/>
+								<instance name="soccerEndSplashSidePlayerAward" id="soccerEndSplashSide{id}Player1Award2" icon="{icon2Texture=/items/basic/fleetfeet/icon.tga}" width="100@" height="100%"/>
+							</panel>
+						</panel>
+					</panel>
+				</panel>
+
+				<panel valign="bottom" height="29.35%">
+					<panel height="100%" align="center" grow="true" regrow="true" growinvis="false" float="right" padding="4@" x="-4@">
+						<instance name="soccerEndSplashSidePlayer" side="{id}" id="2" resExt="{resExt}" bordercolor="{bordercolor=#2a425c}" playerName="wizfx" icon1Texture="/items/basic/scarab/icon.tga" icon2Texture="/items/basic/token_of_life/icon.tga" heroName="Wretched Hag" heroIcon="/heroes/babayaga/icon.tga"/>
+						<instance name="soccerEndSplashSidePlayer" side="{id}" id="3" resExt="{resExt}" bordercolor="{bordercolor=#2a425c}" playerName="merctest56" icon1Texture="/items/basic/shock_gauntlet/icon.tga" icon2Texture="/items/basic/ringmail/icon.tga" heroName="Behemoth" heroIcon="/heroes/behemoth/icon.tga"/>
+						<instance name="soccerEndSplashSidePlayer" side="{id}" id="4" resExt="{resExt}" bordercolor="{bordercolor=#2a425c}" playerName="Konran" icon1Texture="/items/basic/steamstaff/icon.tga" icon2Texture="/items/basic/quickblade/icon.tga" heroName="Berzerker" heroIcon="/heroes/berzerker/icon.tga"/>
+						<instance name="soccerEndSplashSidePlayer" side="{id}" id="5" resExt="{resExt}" bordercolor="{bordercolor=#2a425c}" playerName="[CM] Madfred" icon1Texture="/items/basic/sword_of_the_high/icon.tga" icon2Texture="/items/basic/minor_totem/icon.tga" heroName="Blitz" heroIcon="/heroes/blitz/icon.tga"/>
+					</panel>
+				</panel>
+			</panel>
+
+			<panel align="center" valign="center" width="115@" height="115%" noclick="true">
+
+				<modelpanel
+					name="soccerSplashSide{id}WinnerModel"
+					visible="false"
+					noclick="true"
+					model="/shared/models/invis.mdf"
+					onshowlua="self:SetEffect('/ui/elements/soccer/match_stats/winner_glow_{resExt}/soccer_winner_glow.effect')"
+					onhidelua="self:SetEffect('')"
+					anim="idle"
+					cameranear="100.0"
+					camerafar="20000.0"
+					depthclear="true"
+					depthcompress="false"
+					lookat="false"
+					cameradistance="30"
+					camerapos="0 335 0.65"
+					cameraangles="0 0 180"
+					camerafov="7"
+					modelpos="0.05 -42 0.65"
+					modelangles="0 0 -90"
+					modelscale="1.0"
+					sunazimuth="120"
+					sunaltitude="20"
+					suncolor="0.9 0.9 0.9"
+					ambientcolor="0.6 0.7 0.7"
+					scenebuffer="true"
+				/>
+
+				<modelpanel
+					name="soccerSplashSide{id}MVPModel"
+					visible="false"
+					noclick="true"
+					model="/shared/models/invis.mdf"
+					onshowlua="self:SetEffect('/ui/elements/soccer/match_stats/mvp_bar_{resExt}/soccer_mvp_glow.effect')"
+					onhidelua="self:SetEffect('')"
+					anim="idle"
+					cameranear="100.0"
+					camerafar="20000.0"
+					depthclear="true"
+					depthcompress="false"
+					lookat="false"
+					cameradistance="30"
+					camerapos="0 335 0.65"
+					cameraangles="0 0 180"
+					camerafov="7"
+					modelpos="0 -40 0"
+					modelangles="0 0 90"
+					modelscale="1.0"
+					sunazimuth="120"
+					sunaltitude="20"
+					suncolor="0.9 0.9 0.9"
+					ambientcolor="0.6 0.7 0.7"
+					scenebuffer="true"
+				/>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="soccerEndSplash">
+		<panel name="soccerEndSplash" color="0 0 0 0.75" visible="false">
+			<panel name="soccerEndSplashBody" width="116.3h" height="77.4h" align="center" valign="center">
+				<panel width="50%">
+					<panel width="-1.25@">
+						<instance name="soccerEndSplashSide" id="1" heroIcon="/heroes/calamity/icon.tga" heroName="Calamity" icon1Texture="/items/basic/beastheart/icon.tga" icon2Texture="/items/basic/confluence/icon.tga"
+							teamside="general_legion"
+							resExt="legion"
+							labelcolor="#384c42"
+							bgcolor="#0d1a19"
+						/>
+					</panel>
+				</panel>
+				<panel width="50%" align="right">
+					<panel width="-1.25@" align="right">
+						<instance name="soccerEndSplashSide" id="2" heroIcon="/heroes/calamity/icon.tga" heroName="Calamity" icon1Texture="/items/basic/health_potion/icon.tga" icon2Texture="/items/basic/glowstone/icon.tga" 
+							teamside="general_hellbourne"  
+							resExt="hellbourne"
+							labelcolor="#604b3b"
+							bgcolor="#2d2314"
+							bordercolor="#d79c34"
+						/>
+					</panel>
+				</panel>
+				<instance name="button2" button_name="soccerEndSplashClose" width="14h" height="3h" y="4.5h" align="center" valign="bottom" label="general_close" font="dyn_14"/>
+			</panel>
+		</panel>
+	</template>
+</package>

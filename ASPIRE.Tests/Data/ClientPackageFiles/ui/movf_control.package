@@ -1,0 +1,322 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+	<!-- Movable Frames Controls -->
+	
+	<!-- movf_control checkbox -->
+	<template name="movf_control_checkbox_state">
+		<widgetstate statename="{state}" float="right" padding="3%">
+			<panel width="{size}" color="invisible">
+				<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.5h" color="white"/>
+				<frame texture="/ui/frames/roundframe.tga" color="#3abde7" borderthickness="0.5h"/>
+				<image x="0.15h" y="0.15h" width="-0.3h" height="-0.3h" texture="/ui/elements/check.tga" visible="{checked}" />
+			</panel>
+			<panel noclick="1" onrefresh="SetVisible(movf_control_expand);">
+				<label width="-{size}" height="100%" textvalign="center" font="{font}" color="{color}" shadow="true">{label}</label>
+			</panel>
+		</widgetstate>
+	</template>
+	
+	<template name="movf_control_checkbox">
+		<panel width="{width=90%}" onrefresh="If(movf_control_expand, SetWidth('{width=90%}'), SetWidth(GetHeight()));" height="{height=1.5h}" align="{align=center}" valign="{valign=top}" noclick="true">
+			<button 
+				color="invisible"
+				numstates="2"
+				cvar="{cvar=}"
+				onclick="PlaySound('/shared/sounds/ui/button_click_06.wav'); {onclick=}"
+				onmouseover="If(!StringEmpty('{tip_id}'), ShowWidget('{tip_id}')); PlaySound('/shared/sounds/ui/ccpanel/button_over_01.wav');"
+				onmouseout="If(!StringEmpty('{tip_id}'), HideWidget('{tip_id}'));"
+				watch="{watch=}"
+				enabled="{enabled=true}"
+				ontrigger="{ontrigger=}"
+				onload="{onload=}"
+			>
+				<instance name="movf_control_checkbox_state" state="up" size="{height=1.5h}" label="{label}" font="{font=dyn_9}" color="white" checked="false"/>
+				<instance name="movf_control_checkbox_state" state="over" size="{height=1.5h}" label="{label}" font="{font=dyn_9}" color="#3abde7" checked="false"/>
+				<instance name="movf_control_checkbox_state" state="down" size="{height=1.5h}" label="{label}" font="{font=dyn_9}" color="#3abde7" checked="false"/>
+				<instance name="movf_control_checkbox_state" state="up2" size="{height=1.5h}" label="{label}" font="{font=dyn_9}" color="#ffaa00" checked="true"/>
+				<instance name="movf_control_checkbox_state" state="over2" size="{height=1.5h}" label="{label}" font="{font=dyn_9}" color="#3abde7" checked="true"/>
+				<instance name="movf_control_checkbox_state" state="down2" size="{height=1.5h}" label="{label}" font="{font=dyn_9}" color="#3abde7" checked="true"/>
+				
+				<instance name="movf_control_checkbox_state" state="disabled" size="{height=1.5h}" label="{label}" font="{font=dyn_9}" color="#888888" checked="false"/>
+				<instance name="movf_control_checkbox_state" state="disabled2" size="{height=1.5h}" label="{label}" font="{font=dyn_9}" color="#888888" checked="true"/>				
+			</button>
+		</panel>
+	</template>
+	
+	<template name="movf_listitem"> <!-- Takes id, textid -->
+		<panel noclick="1" name="movf_{id}_listitem">
+			<panel color="1 1 1 0" onmouseover="SetColor('1 1 1 .1');" onmouseout="SetColor('1 1 1 0');"
+				onclick="
+					If(GetModifier1(),
+						Trigger('movf_collect', '{id}', !movf_{id}_collected),
+						Split(
+							Trigger('movf_collectionclear'),
+							Trigger('movf_collect', '{id}', !movf_{id}_collected or movf_collectioncount gt 1)
+						)
+					);
+					"
+			/>
+			<frame onrefresh="If(movf_{id}_collected, SetBorderColor('yellow'), SetBorderColor('invisible'));" noclick="1" borderthickness="1" color="invisible" bordercolor="1 1 1 0"/>
+			<panel float="right" padding="0.5h" noclick="1">
+				<anchor x="0.5h"/>
+				<panel width="15.5h" noclick="1">
+					<label content="{textid=}" textvalign="center" font="dyn_10" color="white" shadow="true" noclick="1"/>
+				</panel>
+				<panel width="4.5h" noclick="1">
+					<panel
+						width="70@"
+						height="70%"
+						valign="center"
+						align="center"
+					>
+						<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.5h" color="white"/>
+						<frame texture="/ui/frames/roundframe.tga" color="#3abde7" borderthickness="0.5h"/>
+						<image name="movf_{id}_listcheck" x="0.15h" y="0.15h" width="-0.3h" height="-0.3h" texture="/ui/elements/check.tga"/>
+						<button 
+							color="invisible"
+							onclick="
+								PlaySound('/shared/sounds/ui/button_click_06.wav');
+								Trigger('movf_visible', '{id}', !movf_{id}_v);
+							"
+							onmouseover="PlaySound('/shared/sounds/ui/ccpanel/button_over_01.wav');"
+						/>
+					</panel>
+				</panel>
+				<panel width="7h" noclick="1">
+					<instance name="button2" button_name="unnamedButton50Movf{id}" width="6h" align="center" height="80%" y="8%" font="dyn_10" label="Reset" borderthickness=".8h" onclick="Trigger('movf_reset', '{id}'); PlaySound('/shared/sounds/ui/button_click_01.wav');" onmouseover="PlaySound('/shared/sounds/ui/button_over_01.wav');" />
+				</panel>
+				
+				<!-- Insert Custom Listitem Content Here -->
+				<!-- End Custon Listitem Content -->
+				
+			</panel>
+		</panel>
+	</template>
+	
+	<panel onframe="RefreshWidget('movf_control'); ##Echo('^399movf: ^933Menu initialized');## DestroyWidget();"/>
+	
+	<panel name="movf_control" visible="false" height="0" y="10h" x="10h" width="0" cangrab="true" 
+		onload="
+			CreateInt('movf_control_x', 0);
+			CreateInt('movf_control_y', 0);
+			CreateInt('movf_control_expandwidth', 0);
+			"
+		onshow="Cmd('Trigger movf_show true'); Trigger('movf_collectionclear');"
+		onhide="Cmd('Trigger movf_show false'); Trigger('movf_collectionclear');"
+		
+		onrefresh="
+			Set(movf_control_x, GetX());
+			Set(movf_control_y, GetY());
+			If(movf_control_expand, Split(
+				ShowWidget('movf_control_expanded'),
+				SetHeight(
+					GetYFromString('11.7h') + 
+					GetYFromString('2.5h')*Call('movf_list', 'Min(GetNumItems(), 12)')
+					),
+				SetWidth(movf_control_expandwidth)
+			), Split(
+				HideWidget('movf_control_expanded'),
+				SetHeight('5.6h'),
+				SetWidth('20.5h')
+			));
+			SetX(movf_control_x);
+			SetY(movf_control_y);
+			"
+	>
+	
+		<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.5h" color="black" noclick="true"/>
+		<frame texture="/ui/frames/roundframe.tga" color="#73869c" borderthickness="0.5h" noclick="true"/>
+		
+		<panel height="2.4h" noclick="true">
+			<instance name="header_bar" lbl="Movable Frames Menu" lbl_font="dyn_10" show_close="0" />
+			<panel x="-0.5h" width="70@" height="70%" valign="center" align="right" color="invisible">
+				<button color="invisible"
+					numstates="2"
+					cvar="movf_control_expand"
+					onclick="
+						RefreshWidget('movf_control');
+						"
+				>
+					<widgetstate statename="up">
+						<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.3h" color=".3 .3 .3 1" blockinput="false" noclick="true"/>
+						<frame texture="/ui/frames/roundframe.tga" color="0 0 0 1" borderthickness="0.3h" blockinput="false" noclick="true"/>
+						<image width="1.3h" height="1.3h" align="center" valign="center" color="1 1 1 .7" texture="/ui/elements/ui_downarrow.tga" noclick="true" />
+					</widgetstate>
+					<widgetstate statename="over">
+						<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.3h" color="#c50000" blockinput="false" noclick="true"/>
+						<frame texture="/ui/frames/roundframe.tga" color="0 0 0 1" borderthickness="0.3h" blockinput="false" noclick="true"/>
+						<image width="1.3h" height="1.3h" align="center" valign="center" color="1 1 1 1" texture="/ui/elements/ui_downarrow.tga" noclick="true" />			
+					</widgetstate>
+					<widgetstate statename="down" x="1" y="1">
+						<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.3h" color="#9c0000" blockinput="false" noclick="true"/>
+						<frame texture="/ui/frames/roundframe.tga" color="0 0 0 1" borderthickness="0.3h" blockinput="false" noclick="true"/>
+						<image width="1.3h" height="1.3h" align="center" valign="center" color="1 1 1 1" texture="/ui/elements/ui_downarrow.tga" noclick="true" />
+					</widgetstate>
+					<widgetstate statename="up2">
+						<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.3h" color=".3 .3 .3 1" blockinput="false" noclick="true"/>
+						<frame texture="/ui/frames/roundframe.tga" color="0 0 0 1" borderthickness="0.3h" blockinput="false" noclick="true"/>
+						<image width="1.3h" height="1.3h" align="center" valign="center" color="1 1 1 .7" texture="/ui/elements/ui_uparrow.tga" noclick="true" />
+					</widgetstate>
+					<widgetstate statename="over2">
+						<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.3h" color="#c50000" blockinput="false" noclick="true"/>
+						<frame texture="/ui/frames/roundframe.tga" color="0 0 0 1" borderthickness="0.3h" blockinput="false" noclick="true"/>
+						<image width="1.3h" height="1.3h" align="center" valign="center" color="1 1 1 1" texture="/ui/elements/ui_uparrow.tga" noclick="true" />			
+					</widgetstate>
+					<widgetstate statename="down2" x="1" y="1">
+						<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.3h" color="#9c0000" blockinput="false" noclick="true"/>
+						<frame texture="/ui/frames/roundframe.tga" color="0 0 0 1" borderthickness="0.3h" blockinput="false" noclick="true"/>
+						<image width="1.3h" height="1.3h" align="center" valign="center" color="1 1 1 1" texture="/ui/elements/ui_uparrow.tga" noclick="true" />
+					</widgetstate>
+				</button>
+			</panel>
+		</panel>		
+		
+		<panel y="2.6h" height="-2.6h">
+			<panel
+				name="movf_control_expanded"
+				y="0.0h"
+				height="-4.2h"
+				width="-1.4h"
+				x="0.5h"
+			>
+				<panel height="2.2h" float="right" padding="0.5h">
+					<anchor x="1.5h"/>
+					<panel width="15.5h">
+						<label textvalign="center" font="dyn_10" color="yellow" shadow="true" noclick="1">Name</label>
+					</panel>
+					<panel width="4.5h">
+						<label textalign="center" textvalign="center" font="dyn_10" color="yellow" shadow="true" noclick="1">Visible</label>
+					</panel>
+					<panel width="6.5h"/>
+					
+					<!-- Insert Custom List Header Here -->
+					<!-- End Custon List Header -->
+					
+					<panel width="0" onload="Set(movf_control_expandwidth, GetX() + GetXFromString('4.2h')); RefreshWidget('movf_control');" onshow="Set(movf_control_expandwidth, GetX() + GetXFromString('4.2h')); RefreshWidget('movf_control');"  />
+				</panel>
+				<panel y="2.2h" width="-2.4h" height="1" color="#414653"/>
+				<listbox
+					name="movf_list"
+					y="2.4h"
+					height="-4.7h"
+					width="-2h"
+					itemwidth="-1h"
+					itemheight="2.5h"
+					itemoffsety="0h"
+					itemoffsetx="1h"
+					color="invisible"
+					hoverselect="false"
+					select="false"
+					scrolltexture="/ui/info/combobox.tga"
+					exteriorscrollbars="true"
+					scrollbarsize="2.0h"
+					scrollbaroffset="0"
+					handleheight="100@" handlewidth="100%"
+					onload="Clear();"
+					onshow="
+						"
+					
+				/>
+				<panel valign="bottom" color="0 0 0 0" height="2.5h">
+					<panel width="-2.4h" height="1" color="#414653"/>
+					<panel height="2.5h" float="right" padding="0.5h">
+						<anchor x="1.5h"/>
+						<panel width="15.5h">
+							<panel height="2.2h">
+								<label textvalign="center" font="dyn_10" color="white" shadow="true" noclick="1">All</label>
+							</panel>
+						</panel>
+						<panel width="4.5h">
+							<panel height="70%" valign="center">
+								<panel
+									x="7%"
+									width="40%"
+								>
+									<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.5h" color="white"/>
+									<frame texture="/ui/frames/roundframe.tga" color="#3abde7" borderthickness="0.5h"/>
+									<image x="0.15h" y="0.15h" width="-0.3h" height="-0.3h" texture="/ui/elements/check.tga"/>
+									<button 
+										color="invisible"
+										onclick="
+											PlaySound('/shared/sounds/ui/button_click_06.wav');
+											Trigger('movf_visible', '', 1);
+										"
+										onmouseover="PlaySound('/shared/sounds/ui/ccpanel/button_over_01.wav');"
+									/>
+								</panel>
+								<panel
+									x="53%"
+									width="40%"
+								>
+									<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.5h" color="white"/>
+									<frame texture="/ui/frames/roundframe.tga" color="#3abde7" borderthickness="0.5h"/>
+									<!--<image x="0.15h" y="0.15h" width="-0.3h" height="-0.3h" texture="/ui/elements/check.tga"/>-->
+									<button 
+										color="invisible"
+										onclick="
+											PlaySound('/shared/sounds/ui/button_click_06.wav');
+											Trigger('movf_visible', '', 0);
+										"
+										onmouseover="PlaySound('/shared/sounds/ui/ccpanel/button_over_01.wav');"
+									/>
+								</panel>
+							</panel>
+						</panel>
+						<panel width="7h">
+							<instance name="button2" button_name="unnamedButton51" height="90%" y="8%" font="dyn_10" label="Reset All" borderthickness=".8h" onclick="ShowWidget('movf_resetall_confirm_panel'); PlaySound('/shared/sounds/ui/button_click_01.wav');" onmouseover="PlaySound('/shared/sounds/ui/button_over_01.wav');" />
+						</panel>
+						
+						<!-- Insert Custom ListAll Content Here -->
+						<!-- End Custon ListAll Content -->
+						
+					</panel>
+				</panel>
+			</panel>
+			<panel width="-4%" valign="bottom" y="-0.5h" align="center" height="5.5h" noclick="1" visible="1" >
+				<panel y="3.5h" height="1.5h" noclick="1">
+					<instance name="movf_control_checkbox" height="1.7h" width="15h" align="left" cvar="movf_constraintoscreen" label="Constrain to screen" font="dyn_9" />
+				</panel>
+				<instance name="button2" button_name="unnamedButton52" y="3h" height="2.5h" align="right" x="-6.5h" width="11h" font="dyn_10" label="Hide Overlays" borderthickness=".8h" onclick="Cmd('Trigger movf_show false'); PlaySound('/shared/sounds/ui/button_click_01.wav');" watch="movf_show" ontrigger="SetVisible(param);" onmouseover="PlaySound('/shared/sounds/ui/button_over_01.wav');" />
+				<instance name="button2" button_name="unnamedButton53" y="3h" height="2.5h" align="right" x="-6.5h" width="11h" font="dyn_10" label="Show Overlays" borderthickness=".8h" onclick="Cmd('Trigger movf_show true'); PlaySound('/shared/sounds/ui/button_click_01.wav');" watch="movf_show" ontrigger="SetVisible(!param);" onmouseover="PlaySound('/shared/sounds/ui/button_over_01.wav');" />
+				<instance name="button2" button_name="unnamedButton54" y="3h" height="2.5h" align="right" x="-0h" width="6h" font="dyn_10" label="Done" borderthickness=".8h" onclick="Cmd('UICall movf_control_button HideWidget(\'movf_control\')'); Cmd('UICall movf_control_button_spec HideWidget(\'movf_control\')'); PlaySound('/shared/sounds/ui/button_click_01.wav');" onmouseover="PlaySound('/shared/sounds/ui/button_over_01.wav');" />
+			</panel>
+		</panel>
+	</panel>
+	
+	<!-- Reset All Confirm -->
+	<template name="movf_resetall_confirm">		
+		<panel y="0.5h" width="100%" float="bottom" color="invisible" grow="1">
+			<label fity="1" fitypadding="0.8h" width="-1.6h" align="center" font="dyn_10" color="white" shadow="1" noclick="1" wrap="1" content="Are you sure you wish to reset all movable frames to default?"/>
+			<panel width="-1.6h" align="center" height="3.2h" color="invisible" noclick="1">
+				<instance
+					name="button2" button_name="unnamedButton55"
+					width="16.0h" height="2.4h"
+					align="left"
+					valign="top"
+					label="Reset All"
+					onclick="Trigger('movf_reset', ''); Call('movf_resetall_confirm_panel', 'FadeOut(250);');"
+				/>
+				<instance
+					name="button2" button_name="unnamedButton56"
+					width="10.0h" height="2.4h"
+					align="right"
+					valign="top"
+					label="general_cancel"
+					onclick="Call('movf_resetall_confirm_panel', 'FadeOut(250);');"
+				/>
+			</panel>			
+		</panel>
+	</template>
+	
+	<panel name="movf_resetall_confirm_panel" visible="0" blockinput="true" color="0 0 0 .7" onshow="BringToFront();">
+		<instance
+			name="alert_box_growable"
+			width="32.0h"
+			align="center"
+			label="Confirm Reset All"
+			show_close="true"
+			closebtn_click="Call('movf_resetall_confirm_panel', 'FadeOut(250);');"
+			body="movf_resetall_confirm"
+		/>
+	</panel>
+</package>

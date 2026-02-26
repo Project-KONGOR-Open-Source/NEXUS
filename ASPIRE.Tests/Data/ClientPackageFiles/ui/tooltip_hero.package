@@ -1,0 +1,312 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+	<template name="hero_tooltip">
+		<frame
+			name="{id}"
+			texture="/ui/frames/rounded_bg_white.tga"
+			borderthickness="0.6h"
+			color="0 0 0 .75"
+			visible="false"
+			align="right"
+			valign="bottom"
+			width="27h"
+			height="5.0h"
+			float="bottom"
+			grow="1" regrow="1" growinvis="0"
+		>
+			<frame texture="/ui/frames/roundframe.tga" borderthickness="0.6h" bordercolor="#434d50"/>
+			<anchor x="1.0h" y="0.6h" />
+			
+			<panel
+				width="-2.0h"
+				height="1.8h"
+			>
+				<label
+					textalign="left"
+					font="dyn_10"
+					color="white"
+					watch="{type}PlayerInfo{slot}"
+					ontriggerlua="self:SetText(param0) self:SetColor(param1)"
+				/>
+				
+				<label
+					textalign="right"
+					font="dyn_10"
+					color="yellow"
+					watch="{type}Gold{slot}"
+					ontriggerlua="self:SetText(Translate('tooltip_gold') .. param)"
+				/>
+			</panel>
+		
+			<label
+				width="-2.0h"
+				height="1.8h"
+				textalign="left"
+				font="dyn_10"
+				color="white"
+				watch="{type}HeroInfo{slot}"
+				ontriggerlua="self:SetText(param0)"
+			/>
+			
+			<label
+				width="-2.0h"
+				height="1.8h"
+				textalign="left"
+				font="dyn_10"
+				color="white"
+				watch="{type}HeroInfo{slot}"
+				ontriggerlua="self:SetText(Translate('tooltip_level', 'level', param2))"
+			/>
+			
+			<panel width="-2.0h" height="1.8h" />
+			
+			<panel
+				width="-2.0h"
+				height="2.4h"
+				float="bottom"
+			>
+				<label
+					height="1.8h"
+					font="dyn_10"
+					color="white"
+					content="tooltip_ally_abilities"
+				/>
+
+				<panel width="10.5h" height="0.2h" color="gray" />
+				<panel height="0.4h" sticky="true" />
+			</panel>
+			
+			<panel
+				width="-2.0h"
+				height="1.8h"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+				watch="{type}Ability0Info{slot}"
+				ontriggerlua="self:SetVisible(AtoB(param0))"
+			>
+				<label
+					width="67%"
+					textalign="left"
+					font="dyn_10"
+					color="white"
+					watch="{type}Ability0Info{slot}"
+					ontriggerlua="
+						self:SetText('['..param6..'] '..param7)
+						if (AtoB(param2)) then
+							self:SetColor('white')
+						elseif (AtoB(param5)) then
+							self:SetColor('#4444cc')
+						else
+							self:SetColor('gray')
+						end"
+				/>
+				
+				<label
+					width="33%"
+					align="right"
+					textalign="left"
+					font="dyn_10"
+					color="gray"
+					watch="{type}Ability0Cooldown{slot}"
+					ontriggerlua="self:SetText(math.ceil(param0 / 1000) .. 's') self:SetVisible(tonumber(param0) > 0)"
+				/>
+			</panel>
+			
+			<panel
+				width="-2.0h"
+				height="1.8h"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+				watch="{type}Ability1Info{slot}"
+				ontriggerlua="self:SetVisible(AtoB(param0))"
+			>
+				<label
+					width="67%"
+					textalign="left"
+					font="dyn_10"
+					color="white"
+					watch="{type}Ability1Info{slot}"
+					ontriggerlua="
+						self:SetText('['..param6..'] '..param7)
+						if (AtoB(param2)) then
+							self:SetColor('white')
+						elseif (AtoB(param5)) then
+							self:SetColor('#4444cc')
+						else
+							self:SetColor('gray')
+						end"
+				/>
+				
+				<label
+					width="33%"
+					align="right"
+					textalign="left"
+					font="dyn_10"
+					color="gray"
+					watch="{type}Ability1Cooldown{slot}"
+					ontriggerlua="self:SetText(math.ceil(param0 / 1000) .. 's') self:SetVisible(tonumber(param0) > 0)"
+				/>
+			</panel>
+			
+			<panel
+				width="-2.0h"
+				height="1.8h"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+				watch="{type}Ability2Info{slot}"
+				ontriggerlua="self:SetVisible(AtoB(param0))"
+			>
+				<label
+					width="67%"
+					textalign="left"
+					font="dyn_10"
+					color="white"
+					watch="{type}Ability2Info{slot}"
+					ontriggerlua="
+						self:SetText('['..param6..'] '..param7)
+						if (AtoB(param2)) then
+							self:SetColor('white')
+						elseif (AtoB(param5)) then
+							self:SetColor('#4444cc')
+						else
+							self:SetColor('gray')
+						end"
+				/>
+				
+				<label
+					width="33%"
+					align="right"
+					textalign="left"
+					font="dyn_10"
+					color="gray"
+					watch="{type}Ability2Cooldown{slot}"
+					ontriggerlua="self:SetText(math.ceil(param0 / 1000) .. 's') self:SetVisible(tonumber(param0) > 0)"
+				/>
+			</panel>
+			
+			<panel
+				width="-2.0h"
+				height="1.8h"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+				watch="{type}Ability3Info{slot}"
+				ontriggerlua="self:SetVisible(AtoB(param0))"
+			>
+				<label
+					width="67%"
+					textalign="left"
+					font="dyn_10"
+					color="white"
+					watch="{type}Ability3Info{slot}"
+					ontriggerlua="
+						self:SetText('['..param6..'] '..param7)
+						if (AtoB(param2)) then
+							self:SetColor('white')
+						elseif (AtoB(param5)) then
+							self:SetColor('#4444cc')
+						else
+							self:SetColor('gray')
+						end"
+				/>
+				
+				<label
+					width="33%"
+					align="right"
+					textalign="left"
+					font="dyn_10"
+					color="gray"
+					watch="{type}Ability3Cooldown{slot}"
+					ontriggerlua="self:SetText(math.ceil(param0 / 1000) .. 's') self:SetVisible(tonumber(param0) > 0)"
+				/>
+			</panel>
+			
+			<panel
+				width="-2.0h"
+				height="1.8h"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+				watch="{type}Ability4Info{slot}"
+				ontriggerlua="self:SetVisible(AtoB(param0))"
+			>
+				<label
+					width="67%"
+					textalign="left"
+					font="dyn_10"
+					color="white"
+					watch="{type}Ability4Info{slot}"
+					ontriggerlua="
+						self:SetText('['..param6..'] '..param7)
+						if (AtoB(param2)) then
+							self:SetColor('white')
+						elseif (AtoB(param5)) then
+							self:SetColor('#4444cc')
+						else
+							self:SetColor('gray')
+						end"
+				/>
+				
+				<label
+					width="33%"
+					align="right"
+					textalign="left"
+					font="dyn_10"
+					color="gray"
+					watch="{type}Ability4Cooldown{slot}"
+					ontriggerlua="self:SetText(math.ceil(param0 / 1000) .. 's') self:SetVisible(tonumber(param0) > 0)"
+				/>
+			</panel>
+			
+			<panel
+				width="-2.0h"
+				height="1.8h"
+				sticky="true"
+				stickytoinvis="false"
+			/>
+			
+			<panel
+				width="-2.0h"
+				height="2.4h"
+				float="bottom"
+				sticky="true"
+				stickytoinvis="false"
+			>
+				<label
+					height="1.8h"
+					font="dyn_10"
+					color="white"
+					content="tooltip_ally_attributes"
+				/>
+
+				<panel width="10.5h" height="0.2h" color="gray" />
+				<panel height="0.4h" sticky="true" />
+			</panel>
+			
+			<!-- Health -->
+			<label
+				width="-2.0h"
+				height="1.8h"
+				font="dyn_10"
+				color="white"
+				watch="{type}Health{slot}"
+				ontriggerlua="self:SetText(Translate('tooltip_health') .. round(param0) .. '/' .. round(param1))"
+			/>
+			
+			<!-- Mana -->
+			<label
+				width="-2.0h"
+				height="1.8h"
+				font="dyn_10"
+				color="white"
+				watch="{type}Mana{slot}"
+				ontriggerlua="self:SetText(Translate('tooltip_mana') .. round(param0) .. '/' .. round(param1));"
+			/>
+						
+			<panel width="-2.0h" height="0.55h" sticky="true" stickytoinvis="false" />
+		</frame>
+	</template>
+</package>

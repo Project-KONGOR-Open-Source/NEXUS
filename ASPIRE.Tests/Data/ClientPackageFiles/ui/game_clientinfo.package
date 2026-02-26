@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+
+	<!-- File for local player FPS & Ping -->
+	<!-- cvar is cg_enableClientInfo -->
+
+	<!-- Template -->
+	<template name="game_clientinfo">
+		<panel name="game_clientinfo_panel" noclick="1" align="right" valign="top" x="-26h" y=".2h" width="17.2h" height="2.5h"
+			onshowlua="self:SetVisible(GetCvarBool('cg_enableClientInfo'))"
+		>
+			<frame noclick="1" x="-1.4h" y=".2h" texture="/ui/frames/tooltip_bg.tga" color="0 0 0 .5" height="90%" borderthickness=".3h" />
+			<panel noclick="1" float="right" padding=".3h" >
+				<!-- Ping -->
+				<label name="clientinfo_ping" noclick="1" width="8h"
+					font="dyn_10" color="white" shadow="1" shadowcolor="0 0 0 .5"
+					align="left" valign="center" textalign="left" textvalign="center"
+					content="Ping: -"
+					watch="ScoreboardSelf" ontriggerlua="self:SetText('Ping: ' .. param2)"
+				/>
+				<!-- FPS -->
+				<label name="clientinfo_fps" noclick="1" width="8h"
+					font="dyn_10" color="white" shadow="1" shadowcolor="0 0 0 .7"
+					align="left" valign="center" textalign="left" textvalign="center"
+					content="FPS: -"
+					watch="ScoreboardSelf" ontriggerlua="self:SetText('FPS: ' .. param1)"
+				/>
+			</panel>
+		</panel>
+	</template>
+
+</package>

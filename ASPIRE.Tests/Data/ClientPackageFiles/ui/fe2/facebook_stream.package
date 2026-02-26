@@ -1,0 +1,420 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+	<lua file="/ui/scripts/facebook_stream.lua"/>
+
+	<template name="facebook_combobox_item">
+		<listitem value="{value}">
+			<label height="100%" x="50@" font="{font=dyn_10}" color="{color=white}" textvalign="center" shadow="1" shadowoffset="1" content="{label}"/>
+		</listitem>
+	</template>
+
+	<template name="facebook_dropdown">
+		<panel
+			grow="true"
+			width="{width=100%}"
+			noclick="1"
+		>
+			<frame texture="/ui/frames/togglebox.tga" borderthickness="1.3h" noclick="true" rendermode="{rendermode}" />
+			<panel grow="1" growinvis="0" width="-0.6h" y="0.7h" align="center" float="bottom" padding="0.4h" reverse="1" noclick="1">
+
+				<panel height="2.5h" sticky="1" stickytoinvis="0" noclick="1">
+					<label x="0.5h" width="-2.5h" height="100%" textvalign="center" font="dyn_14" color="#ffaa00" shadow="true" content="{title}" noclick="1" />
+					<instance name="tip_mark" tip_id="{tip_id}" x="-0.5h" width="2.2h" height="2.2h" valign="center" align="right" visible="0"
+						oninstantiatelua="self:SetVisible(NotEmpty('{tip=}'))"
+						onmouseoverlua="Trigger('genericMainFloatingTip', 'true', '30h', '{tip_image}', '{tip_name}', '{tip}', '', '', '3h', '-2h')"
+						onmouseoutlua="Trigger('genericMainFloatingTip', 'false', '', '', '', '', '', '', '', '')"
+					/>
+				</panel>
+
+				<panel height="0.75h" noclick="1"/>
+
+				<panel height="3h" noclick="1">
+					<combobox width="-0.5h" height="-0.25h" x="{x=0}" y="{y=0}" align="{align=center}"
+						name="facebook_combobox_{id}"
+						enabled="{enabled=true}"
+						color="invisible"
+						itemwidth="100%"
+						itemheight="2h"
+						highlightcolor="0.5 0.5 0.5 0"
+						highlightbordercolor="invisible"
+						scrollbarsize="0"
+						cvar="facebook_stream_{id}"
+						onmouseoverlua="PlaySound('/shared/sounds/ui/button_over_02.wav')"
+						oninstantiatelua="{oninstantiatelua}"
+						onselectlua="PlaySound('/shared/sounds/ui/button_click_05.wav') {onselectlua=}"
+					>
+						<instance name="Moptions_combobox_state" state="up" color="1 1 1 1" image="up"/>
+						<instance name="Moptions_combobox_state" state="over" color="#69ccff" image="over"/>
+						<instance name="Moptions_combobox_state" state="down" color="#69ccff" image="over"/>
+						<instance name="Moptions_combobox_state" state="disabled" color="1 1 1 1" image="up" rendermode="grayscale"/>
+						<widgetstate statename="listbg">
+							<frame height="+2.7h" y="-1.9h" texture="/ui/info/combobox_dropdown.tga" borderthickness="3h" color="white"/>
+						</widgetstate>
+						<widgetstate statename="itembg">
+							<panel width="{itemwidth}" />
+						</widgetstate>
+						<widgetstate statename="itemhighlight">
+							<panel width="{itemwidth=100%}" texture="/ui/info/header_bar_c.tga">
+								<panel width="100%" height="100%" >
+									<image height="50%" width="32" align="left" valign="top" texture="/ui/info/header_bar_tl.tga" noclick="1"/>
+									<image height="50%" width="32" align="left" valign="bottom" texture="/ui/info/header_bar_bl.tga" noclick="1"/>
+									<image height="50%" width="32" align="right" valign="top" texture="/ui/info/header_bar_tr.tga" noclick="1"/>
+									<image height="50%" width="32" align="right" valign="bottom" texture="/ui/info/header_bar_br.tga" noclick="1"/>
+								</panel>
+							</panel>
+						</widgetstate>
+					</combobox>
+				</panel>
+
+				<panel height="1h" sticky="1" stickytoinvis="0" noclick="1"/>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="facebook_stream_input">
+		<panel y="{y}" align="left" valign="{valign}" width="{width}" height="{height=6h}" float="bottom" padding=".25h" color="invisible" noclick="1">
+			<panel width="-2h" height="2.5h" noclick="1">
+				<label textvalign="center" font="{font=dyn_12}" color="{color=#ffffff}" outline="1" outlinecolor="black" content="{label}" noclick="1"/>
+			</panel>
+
+			<panel width="100%" height="2.5h" noclick="1">
+				<panel width="-3h" height="100%" valign="center" noclick="1">
+					<frame color="invisible" bordercolor="#63717d" borderthickness="1" noclick="1"/>
+					<textbox
+						name="{fieldname}"
+						inputline="{inputline}"
+						maxlength="{maxlength=-1}"
+						x="{field_xoffset=0.5h}"
+						y="{field_yoffset=0.3h}"
+						width="{field_width=-1.0h}"
+						align="{field_align}"
+						color="invisible"
+						font="{font=dyn_11}"
+						textcolor="#555657"
+						enabled="{enabled=true}"
+						shadow="true"
+						wrap="{wrap=}"
+						onenter="{onenter}"
+						oninstantiatelua="{oninstantiatelua}"
+					/>
+				</panel>
+
+				<panel width="3h" height="100%" align="right" valign="center" visible="{hastip}" noclick="1">
+					<instance name="tip_mark" tip_id="{tip_id}" width="2.2h" height="2.2h" valign="center" align="right"
+						onmouseoverlua="Trigger('genericMainFloatingTip', 'true', '30.0h', '', '', '{tip}', '', '', '22', '-22')"
+						onmouseoutlua="Trigger('genericMainFloatingTip', 'false', '', '', '', '', '', '', '', '')"
+					/>
+				</panel>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="facebook_stream_info">
+		<panel width="15h" height="100%" float="right" padding=".1h" noclick="1">
+			<panel width="6.5h" noclick="1">
+				<label textalign="right" textvalign="center" font="dyn_12" color="#00b0f0" outline="1" outlinecolor="black" content="{label}"/>
+			</panel>
+			<panel width="32i" noclick="1">
+				<image width="32i" height="32i" align="center" valign="center" texture="/ui/fe2/facebookstream/{image}.tga" noclick="1"/>
+			</panel>
+			<panel width="6h" noclick="1">
+				<label name="facebook_stream_{id}" x="0h" textvalign="center" font="dyn_10" color="#979797" outline="1" outlinecolor="black" content="-"/>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="facebook_stream_status">
+		<panel name="facebook_stream_status_{id}" width="22h" height="100%" align="center" float="right" padding=".25h" visible="{visible}" noclick="1">
+			<panel width="32i" height="32i" valign="center" noclick="1">
+				<image width="32i" height="32i" align="center" valign="center" texture="/ui/fe2/facebookstream/{image}.tga" noclick="1"/>
+			</panel>
+			<panel width="28h" height="32i" valign="center" noclick="1">
+				<label textvalign="center" font="dyn_11" color="#cdcdcd" outline="1" outlinecolor="black" content="{label}"/>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="facebook_stream">
+		<panel name="facebook_stream" width="100%" height="100%" align="center" visible="0" color="0 0 0 .5" noclick="0"
+			hotkey="ESC" onhotkeylua="PlaySound('/shared/sounds/ui/button_click_03.wav') FacebookStream:ClosePanel()"
+			oninstantiatelua="
+				Cvar.CreateCvar('facebookstream_showcapturewindow', 'bool', 'false')
+				Cvar.CreateCvar('facebookstream_report', 'bool', 'false')
+			"
+			onshowlua="InstantiateFbStream()"
+			watch="LoginStatus"
+			ontriggerlua="FacebookStream:PlayerLoginStatus(param0, param1, param2, param3, param4)"
+			watch1="DynamicCommandsExecuted"
+			ontrigger1lua="FacebookStream:CheckStatus()"
+		>
+			<panel y="12%" width="60h" height="60h" align="center" cangrab="0" color="invisible" noclick="1"
+			>
+				<image width="1024i" height="1024i" align="center" valign="center" texture="/ui/fe2/facebookstream/bg.tga" noclick="1"/>
+
+				<panel name="facebook_stream_main" x="0.35h" y="-0.1h" width="55h" height="53.25h" align="center" valign="center" float="bottom" padding="0.75h" noclick="0">
+					<panel name="facebook_stream_title" width="-1h" height="6h" noclick="1">
+						<image x="-0.5h" width="64i" height="64i" align="left" valign="center" texture="/ui/fe2/facebookstream/beta.tga" noclick="1"/>
+
+						<panel grow="1" align="center" valign="center" noclick="1">
+							<image width="64i" height="64i" valign="center" texture="/ui/fe2/facebookstream/stream.tga" noclick="1"/>
+							<label x="68i" fitx="1" textvalign="center" font="dyn_18" color="#ffaa00" outline="1" outlinecolor="black" content="facebook_stream" noclick="1"/>
+						</panel>
+					</panel>
+
+					<panel name="facebook_stream_statement" width="-3h" height="7.75h" align="center" color="invisible" noclick="1">
+						<panel width="-2h" height="-2h" align="center" valign="center" noclick="1">
+							<label textvalign="center" wrap="1" font="dyn_10" color="#909090" outline="1" outlinecolor="#111111" content="facebook_stream_statement" noclick="1"/>
+						</panel>
+					</panel>
+
+					<panel name="facebook_stream_inputs" width="-4h" height="12h" align="center" float="bottom" padding="0.1h" color="invisible" noclick="1">
+						<instance
+							name="facebook_stream_input"
+							label="facebook_stream_settings_title"
+							hastip="1"
+							width="100%"
+							fieldwidth="55%"
+							maxlength="128"
+							fieldname="facebook_stream_settings_title"
+							tip="facebook_stream_settings_title_tip"
+							oninstantiatelua=""
+						/>
+
+						<instance
+							name="facebook_stream_input"
+							label="facebook_stream_settings_description"
+							hastip="1"
+							width="100%"
+							fieldwidth="55%"
+							maxlength="128"
+							fieldname="facebook_stream_settings_description"
+							tip="facebook_stream_settings_description_tip"
+							oninstantiatelua=""
+						/>
+					</panel>
+
+					<panel width="-2h" height="14.75h" align="center" noclick="1">
+						<panel name="facebook_stream_infos" y="11.75h" width="100%" height="3h" align="center" float="right" padding="0.5h" color="invisible" noclick="1">
+							<instance name="facebook_stream_info" id="views" image="views" label="facebook_stream_views"/>
+							<instance name="facebook_stream_info" id="likes" image="likes" label="facebook_stream_likes"/>
+						</panel>
+
+						<panel name="facebook_stream_dropdowns" width="-2h" height="11h" align="center" float="right" padding="15i" color="invisible" noclick="1">
+							<instance name="facebook_dropdown"
+								enabled="false"
+								width="16h"
+								id="shareto"
+								title="facebook_stream_settings_share_to"
+								maxlistheight="2"
+								tip="facebook_stream_settings_share_to_tip"
+								oninstantiatelua="
+									Set('facebook_stream_shareto', 'timeline', 'string', true)
+									self:Instantiate('facebook_combobox_item', 'value', 'timeline', 'color', 'gray', 'label', Translate('facebook_stream_settings_share_to_timeline'))
+									self:Instantiate('facebook_combobox_item', 'value', 'page', 'color', 'gray', 'label', Translate('facebook_stream_settings_share_to_page'))
+
+									self:SetSelectedItemByIndex(0)
+								"
+							/>
+
+							<instance name="facebook_dropdown"
+								width="16h"
+								id="privacy"
+								title="facebook_stream_settings_privacy"
+								maxlistheight="3"
+								tip="facebook_stream_settings_privacy_tip"
+								oninstantiatelua="
+									Set('facebook_stream_privacy', 'ALL_FRIENDS', 'string', true)
+									self:Instantiate('facebook_combobox_item', 'value', 'ALL_FRIENDS', 'label', Translate('facebook_stream_settings_privacy_friends'))
+									self:Instantiate('facebook_combobox_item', 'value', 'SELF', 'label', Translate('facebook_stream_settings_privacy_self'))
+								"
+							/>
+
+							<instance name="facebook_dropdown"
+								width="16h"
+								id="quality"
+								title="facebook_stream_settings_quality"
+								maxlistheight="3"
+								tip_name=""
+								tip="facebook_stream_settings_quality_tip"
+								oninstantiatelua="
+									Set('facebook_stream_quality', '480', 'string', true)
+									self:Instantiate('facebook_combobox_item', 'value', '720', 'label', Translate('facebook_stream_settings_quality_high'))
+									self:Instantiate('facebook_combobox_item', 'value', '480', 'label', Translate('facebook_stream_settings_quality_medium'))
+									self:Instantiate('facebook_combobox_item', 'value', '360', 'label', Translate('facebook_stream_settings_quality_low'))
+
+									self:SetSelectedItemByIndex(1)
+								"
+							/>
+						</panel>
+					</panel>
+
+					<panel name="facebook_stream_buttons" width="-4h" height="3h" align="center" noclick="1">
+						<if condition="releaseStage_test">
+							<instance
+								name="Noptions_checkbox"
+								valign="center"
+								font="dyn_10"
+								label="Show Capturer"
+								cvar="facebookstream_showcapturewindow"
+							/>
+							<instance
+								name="Noptions_checkbox"
+								y="2.5h"
+								valign="center"
+								font="dyn_10"
+								label="Log"
+								cvar="facebookstream_report"
+							/>
+						</if>
+						<instance name="button2" button_name="facebook_startstream" width="16h" align="center" font="dyn_12" label="facebook_stream_action_start"
+							onclicklua="FacebookStream:StartStream()"
+							watch="FacebookStreamStatus"
+							ontriggerlua="
+								local streaming = AtoB(param)
+								self:SetVisible(not streaming)
+								self:SetEnabled(not streaming)
+							"
+						/>
+						<instance name="button2" button_name="facebook_stopstream" width="16h" align="center" font="dyn_12" label="facebook_stream_action_stop" visible="0"
+							onclicklua="StopFbStream()"
+							watch="FacebookStreamStatus"
+							ontriggerlua="self:SetVisible(AtoB(param))"
+						/>
+						<if condition="releaseStage_test">
+							<instance name="button2" button_name="facebook_startlocalstream" x="17h" width="16h" align="center" font="dyn_10" label="Local Stream"
+								onclicklua="StartFbStream('honstream.flv', true)"
+								watch="FacebookStreamStatus"
+								ontriggerlua="
+									local streaming = AtoB(param)
+									self:SetVisible(not streaming)
+									self:SetEnabled(not streaming)
+								"
+							/>
+						</if>
+					</panel>
+
+					<panel name="facebook_stream_status" width="-4h" height="5h" align="center" noclick="1">
+						<instance name="facebook_stream_status" id="connected" image="connected" label="facebook_stream_status_connected" visible="0"/>
+						<instance name="facebook_stream_status" id="disconnected" image="disconnected" label="facebook_stream_status_disconnected" visible="1"/>
+						<instance name="tip_mark" x="-0.5h" width="2.2h" height="2.2h" valign="center" align="right" visible="1"
+							onmouseoverlua="Trigger('genericMainFloatingTip', 'true', '30h', '', '', 'facebook_stream_status_tip', '', '', '3h', '-2h')"
+							onmouseoutlua="Trigger('genericMainFloatingTip', 'false', '', '', '', '', '', '', '', '')"
+						/>
+					</panel>
+					<panel name="facebook_stream_message_helper" height="0.1h" noclick="1"/>
+				</panel>
+
+				<panel name="facebook_stream_close_button" x="-4h" y="4.75h" width="32i" height="32i" align="right" noclick="1">
+					<button
+						color="invisible"
+						onmouseover="PlaySound('/shared/sounds/ui/ccpanel/button_over_01.wav');"
+						onclicklua="PlaySound('/shared/sounds/ui/button_click_03.wav') FacebookStream:ClosePanel()"
+					>
+						<widgetstate statename="up">
+							<image width="32i" height="32i" align="center" valign="center" color=".75 .75 .75 1" texture="/ui/fe2/facebookstream/minimize.tga" noclick="1"/>
+						</widgetstate>
+						<widgetstate statename="over">
+							<image width="32i" height="32i" align="center" valign="center" color="1 1 1 1" texture="/ui/fe2/facebookstream/minimize.tga" noclick="1"/>
+						</widgetstate>
+						<widgetstate statename="down" x="1" y="1">
+							<image width="32i" height="32i" align="center" valign="center" color="1 1 1 1" texture="/ui/fe2/facebookstream/minimize.tga" noclick="1"/>
+						</widgetstate>
+					</button>
+				</panel>
+			</panel>
+		</panel>
+
+		<panel name="facebook_stream_browser" y="12%" width="60h" height="60h" align="center" visible="0" color="0 0 0 .5" noclick="1">
+			<frame texture="/ui/frames/rounded_bg_solid.tga" borderthickness="0.6h" color="0 0 0 .85" blockinput="false" noclick="1"/>
+			<anchor x="0h" y="0h"/>
+			<frame texture="/ui/frames/roundframe.tga" color=".4 .4 .4 1" borderthickness="0.6h" blockinput="false" noclick="1"/>
+			<anchor x="0h" y="0h"/>
+
+			<panel name="facebook_stream_web_browser_container" align="center" color="invisible" noclick="1">
+				<frame texture="/ui/frames/rounded_bg_solid.tga" borderthickness="0.6h" color="0 0 0 .85" blockinput="false" noclick="1"/>
+				<frame texture="/ui/frames/roundframe.tga" color=".4 .4 .4 1" borderthickness="0.6h" blockinput="false" noclick="1"/>
+
+				<panel name="facebook_streams_web_browser_insert" onshowlua=""></panel>
+			</panel>
+
+			<panel name="facebook_stream_browser_close_button" x="-0.25h" y="0.25h" width="2h" height="2h" align="right" noclick="1">
+				<button
+					color="invisible"
+					onmouseover="PlaySound('/shared/sounds/ui/ccpanel/button_over_01.wav');"
+					onclicklua="FacebookStream:CloseBrowser()"
+				>
+					<widgetstate statename="up">
+						<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.5h" color="#520000" blockinput="false" noclick="1"/>
+						<frame texture="/ui/frames/roundframe.tga" color="0 0 0 1" borderthickness="0.5h" blockinput="false" noclick="1"/>
+						<image width="1.8h" height="1.8h" align="center" valign="center" color=".75 .75 .75 1" texture="/ui/elements/closex.tga" noclick="1"/>
+					</widgetstate>
+					<widgetstate statename="over">
+						<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.5h" color="#c50000" blockinput="false" noclick="1"/>
+						<frame texture="/ui/frames/roundframe.tga" color="0 0 0 1" borderthickness="0.5h" blockinput="false" noclick="1"/>
+						<image width="1.8h" height="1.8h" align="center" valign="center" color="1 1 1 1" texture="/ui/elements/closex.tga" noclick="1"/>
+					</widgetstate>
+					<widgetstate statename="down" x="1" y="1">
+						<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.5h" color="#9c0000" blockinput="false" noclick="1"/>
+						<frame texture="/ui/frames/roundframe.tga" color="0 0 0 1" borderthickness="0.5h" blockinput="false" noclick="1"/>
+						<image width="1.8h" height="1.8h" align="center" valign="center" color="1 1 1 1" texture="/ui/elements/closex.tga" noclick="1"/>
+					</widgetstate>
+				</button>
+			</panel>
+		</panel>
+
+		<panel name="facebook_share_cover" y="12%" width="60h" height="60h" align="center" color="black" visible="0" noclick="1"
+			watch="FacebookShareStatus"
+			ontriggerlua="self:SetVisible(AtoB(param))"
+		>
+			<animatedimage align="center" valign="center" texture="/ui/elements/throb/throb.tga" noclick="true" loop="1" fps="30" onshow="StartAnim(1);" height="15%" width="15@"/>
+			<label textalign="center" align="center" valign="center" y="15%" fity="1" font="dyn_14" content="facebook_share_inprogress"/>
+		</panel>
+
+		<panel name="facebook_stream_message" width="100%" height="100%" color="0 0 0 0.5" visible="0" noclick="0"
+			onevent0lua="self:FadeIn(150)"
+			onevent1lua="self:FadeOut(150)"
+		>
+			<panel y="-8h" width="30h" grow="true" align="center" valign="center" noclick="1">
+				<frame color="0 0 0 .8" bordercolor="#455166" borderthickness="1" noclick="1"/>
+				<panel float="bottom" width="100%" grow="true">
+					<instance
+						name="header_bar"
+						label_name="facebook_stream_message_title"
+						buttonsize="1.8h"
+						height="2.4h"
+						lbl="facebook_stream"
+						show_close="true"
+						onclicklua="FacebookStream:HideMessage()"
+					/>
+					<panel height="0.5h"/>
+					<panel width="100%" grow="true">
+						<panel width="-1.0h" align="center" grow="true" noclick="1">
+							<frame texture="/ui/frames/tooltip_bg.tga" color="#2c4b6c" noclick="1"/>
+							<frame color="invisible" bordercolor="#455166" borderthickness="1" noclick="1"/>
+							<panel width="-1.0h" align="center" color="invisible" noclick="1" grow="true" float="bottom">
+								<panel height="0.5h"/>
+								<label name="facebook_stream_message_label" font="dyn_10" wrap="true" fity="true" color="white" shadow="true" textalign="center"/>
+								<panel height="0.5h"/>
+								<panel width="100%" grow="true">
+									<instance
+										name="button2"
+										button_name="facebook_stream_message_ok"
+										width="6h" height="2.5h"
+										align="center"
+										label="general_ok"
+										onclicklua="
+											PlaySound('/shared/sounds/ui/button_click_01.wav')
+											FacebookStream:HideMessage()
+										"
+									/>
+								</panel>
+								<panel height="0.5h"/>
+							</panel>
+						</panel>
+					</panel>
+					<panel height="0.5h"/>
+				</panel>
+			</panel>
+		</panel>
+	</template>
+</package>

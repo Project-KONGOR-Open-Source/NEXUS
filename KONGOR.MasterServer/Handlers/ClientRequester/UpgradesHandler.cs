@@ -14,12 +14,14 @@ public partial class UpgradesHandler(
     MerrickContext databaseContext,
     IDatabase distributedCache,
     IPlayerStatisticsService statisticsService,
+    IHeroDefinitionService heroDefinitions,
     IOptions<OperationalConfiguration> operationalConfiguration,
     ILogger<UpgradesHandler> logger) : IClientRequestHandler
 {
     private MerrickContext MerrickContext { get; } = databaseContext;
     private IDatabase DistributedCache { get; } = distributedCache;
     private IPlayerStatisticsService StatisticsService { get; } = statisticsService;
+    private IHeroDefinitionService HeroDefinitions { get; } = heroDefinitions;
     private OperationalConfiguration OperationalConfiguration { get; } = operationalConfiguration.Value;
     private ILogger Logger { get; } = logger;
 
@@ -112,7 +114,7 @@ public partial class UpgradesHandler(
 
             // Optimized Statistics Retrieval
             PlayerStatisticsAggregatedDTO stats = await StatisticsService.GetAggregatedStatisticsAsync(account.ID);
-            ShowSimpleStatsResponse fullStats = ClientRequestHelper.CreateShowSimpleStatsResponse(account, stats, int.Parse(OperationalConfiguration.CurrentSeason));
+            ShowSimpleStatsResponse fullStats = ClientRequestHelper.CreateShowSimpleStatsResponse(account, stats, int.Parse(OperationalConfiguration.CurrentSeason), HeroDefinitions);
 
             double rnkRating = 1500.0 + stats.RankedRatingChange;
             double csRating = 1500.0 + stats.CasualRatingChange;
@@ -262,7 +264,7 @@ public partial class UpgradesHandler(
             report.AppendLine($"--- Payload Comparison Report for {sessionAccountName} ---");
 
             PlayerStatisticsAggregatedDTO stats = await StatisticsService.GetAggregatedStatisticsAsync(account.ID);
-            ShowSimpleStatsResponse fullStats = ClientRequestHelper.CreateShowSimpleStatsResponse(account, stats, int.Parse(OperationalConfiguration.CurrentSeason));
+            ShowSimpleStatsResponse fullStats = ClientRequestHelper.CreateShowSimpleStatsResponse(account, stats, int.Parse(OperationalConfiguration.CurrentSeason), HeroDefinitions);
 
             Dictionary<string, object> initStatsReference = new()
             {

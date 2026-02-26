@@ -1,0 +1,1454 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+	
+	<include file="store_promo.package"/>
+	<include file="store_templates.package"/>
+	<include file="store_earlyaccess.package"/>
+	<include file="store_featured.package"/>
+	<include file="store_heroavatardisplay.package"/>
+	<include file="store_herodisplay.package"/>
+	<include file="store_form_buycoins.package"/>
+	<include file="store_form_namechange.package"/>
+	<include file="store_form_redeemcode.package"/>
+	<include file="store_popups.package"/>
+	<include file="/content/store_avatars.package"/>
+	
+	<if condition="cl_GarenaEnable">
+		<include file="store_form_resetstats_garena.package"/>
+	</if>
+
+	<if condition="!cl_GarenaEnable">
+		<include file="store_form_resetstats.package"/>
+		<include file="store_form_subaccount.package"/>
+	</if>
+
+	<lua file="/ui/scripts/store.lua" />	
+
+	<cvar name="ui_isInWalkthrough" value="0" />
+
+	<trigger name="populateHeroAvatarBundleInfo"/>
+	<trigger name="UpdatePurchaseGiftForm" />
+	<trigger name="vaultRefreshConfigButtons"/>
+	<trigger name="vaultConfigureProduct"/>
+	<trigger name="MicroStoreAddAvatarData"/>
+	<trigger name="MicroStoreAvatarItem"/>
+	<trigger name="MicroStoreUpdateSelection"/>
+	<trigger name="MicroStoreUpdateChargeChoices"/>
+	<trigger name="MicroStoreUpdateDurationChoices"/>
+	<trigger name="MicroStoreChargeChoice"/>
+	<trigger name="MicroStoreDurationChoice"/>
+	<trigger name="MicroStoreUpdatePayStyleChoice"/>
+	<trigger name="MicroStoreUpdatePaging"/>
+	<trigger name="MicroStoreUpdateCategory"/>
+	<trigger name="MicroStoreUpdateCoins"/>
+	<trigger name="MicroStoreUpdatePackages"/>
+	<trigger name="UpdatePurchaseCoinsForm"/>
+	<trigger name="MicroStoreStatus"/>
+	<trigger name="MicroStoreResults"/>
+	<trigger name="MicroStoreErrorID"/>
+	<trigger name="MicroStoreGetCDPrice"/>
+	
+	<trigger name="MicroStoreSetProcTrig"/>
+	<trigger name="MicroStoreProcessing"/>
+	<trigger name="MicroStoreBundlePreview"/>
+	<trigger name="MicroStoreVoicePreview"/>
+	<trigger name="MicroStoreBundleItem"/>
+	<trigger name="MicroStorePopulateTokensPasses"/>
+	<trigger name="MicroStoreSaveTempChargeData"/>
+	
+	<!-- Vault-specific -->
+	
+	<trigger name="vaultPopulate"/>
+	<trigger name="vaultPopulatePage"/><!--  -->
+	<trigger name="MicroStorePageCount"/><!-- Triggered to calculate total pages for vault (param0 is total items and param1 is per page -->
+	
+	<!-- Per MicroStoreItemAgainstUpgrade, MicroStoreSelectedUpgrade is triggered for all items in the category to see if one is selected. -->
+	<trigger name="MicroStoreSelectedUpgrade"/>
+	<trigger name="MicroStoreItemAgainstUpgrade"/>
+	<trigger name="MicroStoreSelectedUpgradeListed"/>
+
+	<trigger name="MicroStoreVaultThrottle"/>
+	<trigger name="refreshVaultViewShelfCfg"/>
+	<trigger name="refreshVaultViewBookCfg"/>
+	
+	<trigger name="mStoreAppendFormErrors"/>
+	<trigger name="PreviewAnnouncerText"/>
+	<trigger name="mstoreSaveTempString"/>
+	<trigger name="mstoreBuildAvatarsString"/>
+	<trigger name="mstoreBuildHeroListString"/>
+	<trigger name="mstoreSplitAvatarProductCode"/>
+	<trigger name="mstoreSplitAvatarProductCode2"/>
+	<trigger name="mstoreSplitAvatarProductCode3"/>
+	
+	<if condition="!cl_GarenaEnable">
+		<form
+			name="MicroStore"
+			host="!masterserver"
+			method="post"
+			target="/store_requester.php"
+			statustrigger="MicroStoreStatus"
+			resulttrigger="MicroStoreResults"
+			resultparam0="responseCode"
+			resultparam1="popupCode"
+			resultparam2="productIDs"
+			resultparam3="productNames"
+			resultparam4="productPrices"
+			resultparam5="productAlreadyOwned"
+			resultparam6="productIsBundle"
+			resultparam7="productQuantity"
+			resultparam8="totalPages"
+			resultparam9="totalPoints"
+			resultparam10="productWebContent"
+			resultparam11="productDescription"
+			resultparam12="productLocalContent"
+			resultparam13="categoryID"
+			resultparam14="currentPage"
+			resultparam15="errorCode"
+			resultparam16="packagePrices"
+			resultparam17="packagePoints"
+			resultparam18="packageIDs"
+			resultparam19="packageSpecial"
+			resultparam20="productCodes"
+			resultparam21="vaultCategory2"
+			resultparam22="vaultCategory3"
+			resultparam23="vaultCategory4"
+			resultparam24="vaultCategory5"
+			resultparam25="vaultCategory6"
+			resultparam26="bundleContents"
+			resultparam27="selectedUpgrades"
+			resultparam28="vaultCategory16"
+			resultparam29="requestHostTime"
+			resultparam30="accountIconsUnlocked"
+			resultparam31="unlockAccountIconsCost"
+			resultparam32="vaultCategory27"
+			resultparam33="productPremium"
+			resultparam34="totalMMPoints"
+			resultparam35="premium_mmp_cost"
+			resultparam36="regional_currency"
+			resultparam37="promoCode"
+			resultparam38="vaultCategory56"
+			resultparam39="vaultCategory57"
+			resultparam40="vaultHighlight"
+			resultparam41="tauntUnlocked"
+			resultparam42="tauntUnlockCost"
+			resultparam43="customAccountIcon"
+			resultparam44="customAccountIconCost"
+			resultparam45="customAccountIconCostMMP"
+			resultparam46="timestamp"
+			resultparam47="productTimes"
+			resultparam48="vaultCategory72"
+			resultparam49="is_newly_verified"
+			resultparam50="purchasable"
+			resultparam51="productCharges"
+			resultparam52="productDurations"
+			resultparam53="chargesRemaining"
+			resultparam54="unlockAccountIconsCostMMP"
+			resultparam55="specialBundles"
+			resultparam56="tauntUnlockCostMMP"
+			resultparam57="specialDisplay"
+			resultparam58="santas"
+			resultparam59="productEligibility"
+			resultparam60="packageTextures"
+			resultparam61="bundleNames"
+			resultparam62="bundleCosts"
+			resultparam63="bundleLocalPaths"
+			resultparam64="bundleIncludedProducts"
+			resultparam65="bundleAlreadyOwned"
+			resultparam66="bundleIDs"
+			resultparam67="packageCurrencyToCoins"
+			resultparam68="grabBag"
+			resultparam69="grabBagTheme"
+			resultparam70="grabBagIDs"
+			resultparam71="grabBagTypes"
+			resultparam72="grabBagLocalPaths"
+			resultparam73="grabBagProductNames"
+			resultparam74="vaultCategory74"
+			resultparam75="vaultCategory75"
+			resultparam76="productEnhancements"
+			resultparam77="productEnhancementIDs"
+			resultparam78="product_id"
+			resultparam79="vaultCategory76"	
+			ssl="false"
+			bb="true"
+		/>
+		
+		<form
+			name="MicroStoreSSL"
+			host="!masterserver"
+			method="post"
+			target="/master/store/purchasecoins/"
+			statustrigger="MicroStoreStatus"
+			resulttrigger="MicroStoreResults"
+			resultparam0="responseCode"
+			resultparam1="popupCode"
+			resultparam2="productIDs"
+			resultparam3="productNames"
+			resultparam4="productPrices"
+			resultparam5="productAlreadyOwned"
+			resultparam6="productIsBundle"
+			resultparam7="productQuantity"
+			resultparam8="totalPages"
+			resultparam9="totalPoints"
+			resultparam10="productWebContent"
+			resultparam11="productDescription"
+			resultparam12="productLocalContent"
+			resultparam13="categoryID"
+			resultparam14="currentPage"
+			resultparam15="errorCode"
+			resultparam16="packagePrices"
+			resultparam17="packagePoints"
+			resultparam18="packageIDs"
+			resultparam19="packageSpecial"
+			resultparam20="productCodes"
+			resultparam21="vaultCategory2"
+			resultparam22="vaultCategory3"
+			resultparam23="vaultCategory4"
+			resultparam24="vaultCategory5"
+			resultparam25="vaultCategory6"
+			resultparam26="bundleContents"
+			resultparam27="selectedUpgrades"
+			resultparam28="vaultCategory16"
+			resultparam29="requestHostTime"
+			resultparam30="accountIconsUnlocked"
+			resultparam31="unlockAccountIconsCost"
+			resultparam32="vaultCategory27"
+			resultparam33="productPremium"
+			resultparam34="totalMMPoints"
+			resultparam35="premium_mmp_cost"
+			resultparam36="regional_currency"
+			resultparam37="promoCode"
+			resultparam38="vaultCategory56"
+			resultparam39="vaultCategory57"
+			resultparam40="vaultHighlight"
+			resultparam41="tauntUnlocked"
+			resultparam42="tauntUnlockCost"
+			resultparam43="customAccountIcon"
+			resultparam44="customAccountIconCost"
+			resultparam45="customAccountIconCostMMP"
+			resultparam46="timestamp"
+			resultparam47="productTimes"
+			resultparam48="vaultCategory72"
+			resultparam49="is_newly_verified"
+			resultparam50="purchasable"
+			resultparam51="productCharges"
+			resultparam52="productDurations"
+			resultparam53="chargesRemaining"
+			resultparam54="unlockAccountIconsCostMMP"
+			resultparam55="specialBundles"
+			resultparam56="tauntUnlockCostMMP"
+			resultparam57="specialDisplay"
+			resultparam58="santas"
+			resultparam59="productEligibility"
+			resultparam60="packageTextures"
+			resultparam61="bundleNames"
+			resultparam62="bundleCosts"
+			resultparam63="bundleLocalPaths"
+			resultparam64="bundleIncludedProducts"
+			resultparam65="bundleAlreadyOwned"
+			resultparam66="bundleIDs"
+			resultparam67="packageCurrencyToCoins"
+			resultparam68="grabBag"
+			resultparam69="grabBagTheme"
+			resultparam70="grabBagIDs"
+			resultparam71="grabBagTypes"
+			resultparam72="grabBagLocalPaths"
+			resultparam73="grabBagProductNames"
+			resultparam74="vaultCategory74"
+			resultparam75="vaultCategory75"
+			ssl="true"
+			bb="true"
+		/>
+	</if>
+
+	<if condition="(cl_GarenaEnable and (!releaseStage_stable))">
+		<form
+			name="MicroStore"
+			host="!masterserver"
+			method="post"
+			target="/store_requester.php"
+			statustrigger="MicroStoreStatus"
+			resulttrigger="MicroStoreResults"
+			resultparam0="responseCode"
+			resultparam1="popupCode"
+			resultparam2="productIDs"
+			resultparam3="productNames"
+			resultparam4="productPrices"
+			resultparam5="productAlreadyOwned"
+			resultparam6="productIsBundle"
+			resultparam7="productQuantity"
+			resultparam8="totalPages"
+			resultparam9="totalPoints"
+			resultparam10="productWebContent"
+			resultparam11="productDescription"
+			resultparam12="productLocalContent"
+			resultparam13="categoryID"
+			resultparam14="currentPage"
+			resultparam15="errorCode"
+			resultparam16="packagePrices"
+			resultparam17="packagePoints"
+			resultparam18="packageIDs"
+			resultparam19="packageSpecial"
+			resultparam20="productCodes"
+			resultparam21="vaultCategory2"
+			resultparam22="vaultCategory3"
+			resultparam23="vaultCategory4"
+			resultparam24="vaultCategory5"
+			resultparam25="vaultCategory6"
+			resultparam26="bundleContents"
+			resultparam27="selectedUpgrades"
+			resultparam28="vaultCategory16"
+			resultparam29="requestHostTime"
+			resultparam30="accountIconsUnlocked"
+			resultparam31="unlockAccountIconsCost"
+			resultparam32="vaultCategory27"
+			resultparam33="productPremium"
+			resultparam34="totalMMPoints"
+			resultparam35="premium_mmp_cost"
+			resultparam36="regional_currency"
+			resultparam37="promoCode"
+			resultparam38="vaultCategory56"
+			resultparam39="vaultCategory57"
+			resultparam40="vaultHighlight"
+			resultparam41="tauntUnlocked"
+			resultparam42="tauntUnlockCost"
+			resultparam43="customAccountIcon"
+			resultparam44="customAccountIconCost"
+			resultparam45="customAccountIconCostMMP"
+			resultparam46="timestamp"
+			resultparam47="productTimes"
+			resultparam48="vaultCategory72"
+			resultparam49="is_newly_verified"
+			resultparam50="purchasable"
+			resultparam51="productCharges"
+			resultparam52="productDurations"
+			resultparam53="chargesRemaining"
+			resultparam54="unlockAccountIconsCostMMP"
+			resultparam55="specialBundles"
+			resultparam56="tauntUnlockCostMMP"
+			resultparam57="specialDisplay"
+			resultparam58="santas"
+			resultparam59="productEligibility"
+			resultparam60="packageTextures"
+			resultparam61="bundleNames"
+			resultparam62="bundleCosts"
+			resultparam63="bundleLocalPaths"
+			resultparam64="bundleIncludedProducts"
+			resultparam65="bundleAlreadyOwned"
+			resultparam66="bundleIDs"
+			resultparam67="packageCurrencyToCoins"
+			resultparam68="grabBag"
+			resultparam69="grabBagTheme"
+			resultparam70="grabBagIDs"
+			resultparam71="grabBagTypes"
+			resultparam72="grabBagLocalPaths"
+			resultparam73="grabBagProductNames"
+			resultparam74="vaultCategory74"
+			resultparam75="vaultCategory75"
+			resultparam76="productEnhancements"
+			resultparam77="productEnhancementIDs"
+			resultparam78="product_id"
+			resultparam79="vaultCategory76"		
+			ssl="false"
+			bb="true"
+		/>false
+	</if>
+	<if condition="(cl_GarenaEnable and releaseStage_stable)">
+		<form
+			name="MicroStore"
+			host="!masterserver"
+			method="post"
+			target="/store_requester.php"
+			statustrigger="MicroStoreStatus"
+			resulttrigger="MicroStoreResults"
+			resultparam0="responseCode"
+			resultparam1="popupCode"
+			resultparam2="productIDs"
+			resultparam3="productNames"
+			resultparam4="productPrices"
+			resultparam5="productAlreadyOwned"
+			resultparam6="productIsBundle"
+			resultparam7="productQuantity"
+			resultparam8="totalPages"
+			resultparam9="totalPoints"
+			resultparam10="productWebContent"
+			resultparam11="productDescription"
+			resultparam12="productLocalContent"
+			resultparam13="categoryID"
+			resultparam14="currentPage"
+			resultparam15="errorCode"
+			resultparam16="packagePrices"
+			resultparam17="packagePoints"
+			resultparam18="packageIDs"
+			resultparam19="packageSpecial"
+			resultparam20="productCodes"
+			resultparam21="vaultCategory2"
+			resultparam22="vaultCategory3"
+			resultparam23="vaultCategory4"
+			resultparam24="vaultCategory5"
+			resultparam25="vaultCategory6"
+			resultparam26="bundleContents"
+			resultparam27="selectedUpgrades"
+			resultparam28="vaultCategory16"
+			resultparam29="requestHostTime"
+			resultparam30="accountIconsUnlocked"
+			resultparam31="unlockAccountIconsCost"
+			resultparam32="vaultCategory27"
+			resultparam33="productPremium"
+			resultparam34="totalMMPoints"
+			resultparam35="premium_mmp_cost"
+			resultparam36="regional_currency"
+			resultparam37="promoCode"
+			resultparam38="vaultCategory56"
+			resultparam39="vaultCategory57"
+			resultparam40="vaultHighlight"
+			resultparam41="tauntUnlocked"
+			resultparam42="tauntUnlockCost"
+			resultparam43="customAccountIcon"
+			resultparam44="customAccountIconCost"
+			resultparam45="customAccountIconCostMMP"
+			resultparam46="timestamp"
+			resultparam47="productTimes"
+			resultparam48="vaultCategory72"
+			resultparam49="is_newly_verified"
+			resultparam50="purchasable"
+			resultparam51="productCharges"
+			resultparam52="productDurations"
+			resultparam53="chargesRemaining"
+			resultparam54="unlockAccountIconsCostMMP"
+			resultparam55="specialBundles"
+			resultparam56="tauntUnlockCostMMP"
+			resultparam57="specialDisplay"
+			resultparam58="santas"
+			resultparam59="productEligibility"
+			resultparam60="packageTextures"
+			resultparam61="bundleNames"
+			resultparam62="bundleCosts"
+			resultparam63="bundleLocalPaths"
+			resultparam64="bundleIncludedProducts"
+			resultparam65="bundleAlreadyOwned"
+			resultparam66="bundleIDs"
+			resultparam67="packageCurrencyToCoins"
+			resultparam68="grabBag"
+			resultparam69="grabBagTheme"
+			resultparam70="grabBagIDs"
+			resultparam71="grabBagTypes"
+			resultparam72="grabBagLocalPaths"
+			resultparam73="grabBagProductNames"
+			resultparam74="vaultCategory74"
+			resultparam75="vaultCategory75"
+			resultparam76="productEnhancements"
+			resultparam77="productEnhancementIDs"
+			resultparam78="product_id"
+			resultparam79="vaultCategory76"
+			ssl="true"
+			bb="true"
+		/>
+	</if>
+	
+	<!-- Generally split between init and action -->
+
+	<panel color="invisible" noclick="true"
+		onload="
+			CreateInt('mtoreCRemainTempQuantity', -1);
+			CreateInt('mtoreCRemainTempStartTime', -1);
+			CreateInt('mtoreCRemainTempEndtime', -1);
+			CreateInt('mstoreAvatarSortMode', 4);
+			CreateInt('mstoreHeroSortMode', 5);
+			CreateInt('mstoreAvatarDisplayMode', 0);
+			CreateInt('microStoreTargetPurchaseID', -1);
+			CreateInt('microStoreGetCDPriceItem', -1);
+			CreateInt('microStoreGetCDPriceView', -1);
+			CreateInt('microStoreTempCDGold', -1);
+			CreateInt('microStoreTempCDSilver', -1);
+			CreateInt('microStoreCDPriceGold', -1);
+			CreateInt('microStoreCDPriceSilver', -1);
+			CreateString('microStoreIDList', '');
+			CreateString('microStoreTimes', '');
+			CreateInt('_microStore_itemDurationChoice', 0);
+			CreateInt('_microStore_itemExpirationChoice', 0);
+			CreateInt('_microStore_lastTimestamp', 0);
+			CreateBool('_mstore_lastVerified', UIIsVerified);
+			CreateBool('_mstore_frontpage_dev', false);
+			CreateBool('_microStore_initialResponse', false);
+			CreateInt('microStoreView', 1);
+			CreateBool('_microStore_processing', false);
+			CreateInt('_microStore_regionalBalance', 0);
+			CreateBool('_microStore_vaultHighlight', false);
+			CreateBool('_microStore_tauntUnlocked', false);
+			CreateBool('ui_showStoreWalkthrough', false);
+			CreateBool('_microStore_custAccIconUnlocked', false);
+			CreateInt('_microStore_tauntUnlockCost', -1);
+			CreateInt('_microStore_tauntUnlockSilverCost', -1);
+			CreateInt('_microStore_custAccIconCost', -1);
+			CreateInt('customAccountIconCostMMP', -1);
+			CreateInt('_microStore_accIconUnlockCost', -1);
+			CreateInt('_microStore_accIconUnlockSilverCost', -1);
+			CreateInt('_microStore_TotalCoins', -1);
+			CreateInt('_microStore_TotalSilverCoins', -1);
+			CreateInt('_microStore_PremiumCurrency', 0);
+			CreateInt('_microStore_TotalPages', 1);
+			CreateInt('_microStore_currentPage', 1);
+			CreateInt('_microStore_Category', -1);
+			CreateInt('_microStore_RequestCode', 1);
+			CreateInt('_microStore_SelectedItem', -1);
+			CreateInt('_microStore_SelectedID', -1);
+			CreateInt('_microStore_tempInt', -1);
+			CreateInt('_microStore_buyCoins_package', -1);
+			CreateInt('_microStore_nextAction', -1);
+			CreateInt('_microStoreGiftsRemaining', 0);
+			CreateString('_microStoreSantaTarget', '');
+			CreateBool('_microStore_overrideConfirmName', false);
+			CreateBool('_microStore_resetStats_psr', false);
+			CreateBool('_microStore_resetStats_pubstats', false);
+			CreateBool('_microStore_resetStats_smr', false);
+			CreateBool('_microStore_resetStats_normalmm_stats', false);
+			CreateBool('_microStore_resetStats_casualmm_stats', false);
+			CreateBool('_microStore_resetStats_casual_mmr', false);
+			CreateBool('_microStore_resetStats_midwars_mmr', false);
+			CreateBool('_microStore_resetStats_midwars_stats', false);
+			CreateInt('microStorePackageID1', -1);
+			CreateInt('microStorePackageID2', -1);
+			CreateInt('microStorePackageID3', -1);
+			CreateInt('microStorePackageID4', -1);
+			CreateInt('microStorePackageID5', -1);
+			CreateFloat('microStorePackagePrice0', -1);
+			CreateFloat('microStorePackagePrice1', -1);
+			CreateFloat('microStorePackagePrice2', -1);
+			CreateFloat('microStorePackagePrice3', -1);
+			CreateFloat('microStorePackagePrice4', -1);
+			CreateFloat('microStorePackagePrice5', -1);
+			CreateFloat('microStoreCurrencyToCoin', -1);
+			CreateInt('microStorePackageCoins1', -1);
+			CreateInt('microStorePackageCoins2', -1);
+			CreateInt('microStorePackageCoins3', -1);
+			CreateInt('microStorePackageCoins4', -1);
+			CreateInt('microStorePackageCoins5', -1);
+			CreateString('microStorePackageTextures1', '');
+			CreateString('microStorePackageTextures2', '');
+			CreateString('microStorePackageTextures3', '');
+			CreateString('microStorePackageTextures4', '');
+			CreateString('microStorePackageTextures5', '');
+			CreateBool('microStorePackageSpecial1', false);
+			CreateBool('microStorePackageSpecial2', false);
+			CreateBool('microStorePackageSpecial3', false);
+			CreateBool('microStorePackageSpecial4', false);
+			CreateBool('microStorePackageSpecial5', false);
+			CreateBool('_microStoreFirstVisit', false);
+			CreateString('microStore_vaultData3', '');
+			CreateString('microStore_vaultData4', '');
+			CreateString('microStore_vaultData5', '');
+			CreateString('microStore_vaultData6', '');
+			CreateString('microStore_vaultData16', '');
+			CreateString('microStore_vaultData27', '');
+			CreateString('microStore_vaultData57', '');
+			CreateString('microStore_vaultData72', '');		## Pass info/offshoot of misc ##
+			CreateString('microStore_vaultData74', '');		## Custom Wards ##
+			CreateString('microStore_vaultData75', '');		## Enhancements ##
+			CreateString('microStore_vaultData76', '');		## Creep ##
+			CreateInt('microStore_vaultItemsPerPage', 16);
+			CreateString('_microStore_lastSelectedUpgrades', '');
+			If(
+				!VarExists('_dancingIsForbidden'),
+				CreateBool('_dancingIsForbidden', true)
+			);
+			CreateBool('_microStore_iconsUnlocked', false);
+
+			CreateString('_microStore_TSelectedItem', -1);
+			CreateString('_microStore_bundleContents', '');
+			CreateInt('_bundleFullPriceInt', -1);
+			CreateInt('_lastRequestHostTime', -1);
+			CreateString('_mStoreFormErrors', '');
+			CreateBool('_microStoreRequestAllItems', false);
+			CreateBool('_microStoreShowNonPurchasable', false);	## For viewing gold/limited edition enabled alt avatars ##
+			CreateString('_microStoreTempString', '');			## Needs to be used for grabbing stuff from avatar product info, gonna be a bit messy ##
+			CreateString('_microStoreAvatarCategoryData', '');	## For full avatars view ##
+			CreateString('mstoreAvatarsHeroName', '');			## Prior to the period ##
+			CreateString('mstoreAvatarsAvatarName', '');		## Post-period ##
+			CreateString('_microStoreHeroCategoryData', '');	## For full heroes view ##
+			
+			## New vars for the rewrite/organization ##
+			
+			CreateInt('_microStorePopupCode', 0);
+			CreateInt('_microStoreResponseCode', 0);
+			CreateBool('_microStoreHostTimeMatch', false);
+			CreateBool('_microStoreRecievedErrors', false);
+			
+			CreateString('_msTargNavContainer', '');	## Navigation container we're gonna end up with ##
+			CreateString('_msTargCatContainer', '');	## Category container we're gonna end up with ##
+			CreateString('_msTargItemContainer', '');	## Category container we're gonna end up with ##
+			
+			## Hero and hero avatar lists ##
+			CreateString('msCodes', '');
+			CreateString('msGoldPrice', '');
+			CreateString('msSilverPrice', '');
+			CreateString('msPremium', '');
+			CreateString('msOwned', '');
+			CreateString('msBundle', '');
+			CreateString('msPurchasable', '');
+			
+			CreateString('microStore_heroSelectTarget', '');		## Target hero for the hero list, resets after using if set ##
+			CreateString('microStore_avatarSelectTarget', '');		## Target hero for the hero list, resets after using if set ##
+			CreateInt('microStore_targetCategory', -1);		## Resets to -1 after opening the store, goes to a target category rather than default ##
+			CreateInt('microStore_targetRequest', -1);		## Resets after opening the store - allows you to somewhere other than the frontpage/items display ##
+			
+			## This will allow everything to be explicitly defined for most cases in the store, with some minor exception overrides ##
+			
+			## Numeric naming category, navigation, and view containers (so they can be iterated through numerically ##
+			CreateString('_microStoreViewPanel0', '');		## Blank ##
+			CreateString('_microStoreViewPanel1', 'storeItemViewShelves');		## Store Shelf ##
+			CreateString('_microStoreViewPanel2', 'storeItemViewBook');		## Store Book ##
+			CreateString('_microStoreViewPanel3', 'storeItemViewBookAccIcons');		## Store Book (acc icons first page) ##
+			CreateString('_microStoreViewPanel4', 'storeViewHeroes');		## Store Heroes ##
+			CreateString('_microStoreViewPanel5', 'storeViewAvatarsFull');		## Store Avatars ##
+			CreateString('_microStoreViewPanel6', 'storeEAPDisplay');		## Store EAP ##
+			CreateString('_microStoreViewPanel7', 'storeFeatured');		## Store Featured ##
+			
+			CreateString('_microStoreCatPanel0', '');		## Blank ##
+			CreateString('_microStoreCatPanel1', 'storeCategoryContainer');
+			CreateString('_microStoreCatPanel2', 'vaultCategoryContainer');
+			
+			CreateString('_microStoreNavPanel0', '');		## Blank ##
+			CreateString('_microStoreNavPanel1', 'storeNavigationContainer');
+			CreateString('_microStoreNavPanel2', 'vaultNavigationContainer');
+			
+			## Which store view to show per store category ##
+			CreateInt('_microStoreItemDisplay2', 5);		## Hero avatars ##
+			CreateInt('_microStoreItemDisplay3', 2);		## Account icons ##
+			CreateInt('_microStoreItemDisplay4', 2);		## Symbols ##
+			CreateInt('_microStoreItemDisplay5', 1);		## Announcers ##
+			CreateInt('_microStoreItemDisplay6', 1);		## Other (misc) ##
+			CreateInt('_microStoreItemDisplay7', 1);		## Bundles ##
+			CreateInt('_microStoreItemDisplay16', 1);		## Name colors ##
+			CreateInt('_microStoreItemDisplay27', 1);		## Taunt ##
+			CreateInt('_microStoreItemDisplay57', 1);		## Couriers ##
+			CreateInt('_microStoreItemDisplay58', 6);		## EAP/Heroes ##
+			CreateInt('_microStoreItemDisplay59', 2);		## Flags ##
+			CreateInt('_microStoreItemDisplay60', 2);		## Hero symbols ##
+			CreateInt('_microStoreItemDisplay61', 2);		## Misc symbols, unused ##
+			CreateInt('_microStoreItemDisplay68', 7);		## Featured -- EAP REPLACEMENT ##
+			CreateInt('_microStoreItemDisplay71', 4);		## Heros ##
+			CreateInt('_microStoreItemDisplay74', 1);		## Custom Wards ##
+			CreateInt('_microStoreItemDisplay75', 1);		## Enhancements ##
+			
+			## Which category container to show per store category ##
+			CreateInt('_microStoreCategoryContainer2', 0);		## Hero avatars ##
+			CreateInt('_microStoreCategoryContainer3', 1);		## Account icons ##
+			CreateInt('_microStoreCategoryContainer4', 1);		## Symbols ##
+			CreateInt('_microStoreCategoryContainer5', 1);		## Announcers ##
+			CreateInt('_microStoreCategoryContainer6', 1);		## Other (misc) ##
+			CreateInt('_microStoreCategoryContainer16', 1);		## Name colors ##
+			CreateInt('_microStoreCategoryContainer27', 1);		## Taunt ##
+			CreateInt('_microStoreCategoryContainer57', 1);		## Couriers ##
+			CreateInt('_microStoreCategoryContainer58', 0);		## EAP/Heroes ##
+			CreateInt('_microStoreCategoryContainer59', 1);		## Flags ##
+			CreateInt('_microStoreCategoryContainer60', 1);		## Hero symbols ##
+			CreateInt('_microStoreCategoryContainer61', 1);		## Misc symbols, unused ##
+			CreateInt('_microStoreCategoryContainer68', 0);		## Featured -- EAP REPLACEMENT ##
+			CreateInt('_microStoreCategoryContainer71', 0);		## Heros ##
+			CreateInt('_microStoreCategoryContainer74', 0);		## Custom Wards ##
+			CreateInt('_microStoreCategoryContainer75', 0);		## Enhancements ##
+			
+			## Which navigation container to show per store category ##
+			CreateInt('_microStoreNavigationContainer2', 1);	## Hero avatars ##
+			CreateInt('_microStoreNavigationContainer3', 1);	## Account icons ##
+			CreateInt('_microStoreNavigationContainer4', 1);	## Symbols ##
+			CreateInt('_microStoreNavigationContainer5', 1);	## Announcers ##
+			CreateInt('_microStoreNavigationContainer6', 1);	## Other (misc) ##
+			CreateInt('_microStoreNavigationContainer16', 1);	## Name colors ##
+			CreateInt('_microStoreNavigationContainer27', 1);	## Taunt ##
+			CreateInt('_microStoreNavigationContainer57', 1);	## Couriers ##
+			CreateInt('_microStoreNavigationContainer58', 0);	## EAP/Heroes ##
+			CreateInt('_microStoreNavigationContainer59', 1);	## Flags ##
+			CreateInt('_microStoreNavigationContainer60', 1);	## Hero symbols ##
+			CreateInt('_microStoreNavigationContainer61', 1);	## Misc symbols, unused ##
+			CreateInt('_microStoreNavigationContainer68', 0);	## Featured -- EAP REPLACEMENT ##
+			CreateInt('_microStoreNavigationContainer71', 1);	## Heroes ##
+			CreateInt('_microStoreNavigationContainer74', 1);	## Custom Wards ##
+			CreateInt('_microStoreNavigationContainer75', 1);	## Enhancements ##
+			
+			## Which category container per vault category ##
+			CreateInt('_microVaultNavigationContainer3', 2);	## Account icons ##
+			CreateInt('_microvaultCategoryContainer4', 2);		## Symbols ##
+			CreateInt('_microvaultCategoryContainer5', 2);		## Announcers ##
+			CreateInt('_microvaultCategoryContainer6', 2);		## Other (misc) ##
+			CreateInt('_microvaultCategoryContainer16', 2);		## Name Colors ##
+			CreateInt('_microvaultCategoryContainer27', 2);		## Taunt ##
+			CreateInt('_microvaultCategoryContainer74', 2);		## Custom Wards ##
+			CreateInt('_microvaultCategoryContainer75', 2);		## Enhancements ##
+			
+			## Which navigation container per vault category ##
+			CreateInt('_microVaultNavigationContainer3', 2);	## Account icons ##
+			CreateInt('_microVaultNavigationContainer4', 2);	## Symbols ##
+			CreateInt('_microVaultNavigationContainer5', 2);	## Announcers ##
+			CreateInt('_microVaultNavigationContainer6', 2);	## Other (misc) ##
+			CreateInt('_microVaultNavigationContainer16', 2);	## Name Colors ##
+			CreateInt('_microVaultNavigationContainer27', 2);	## Taunt ##
+			CreateInt('_microVaultNavigationContainer74', 2);	## Custom Wards ##
+			CreateInt('_microVaultNavigationContainer75', 2);	## Enhancements ##
+			
+			CreateString('_msValidStoreCategories', '2|3|4|5|6|7|16|27|57|58|59|60|61|68|71|74|75');
+			CreateBool('_msValidStoreCategory', false);
+			CreateInt('_msDefaultStoreCategory', -1);	## This will likely end up overridden by specials or something. ##
+			
+			CreateString('_msValidVaultCategories', '3|4|5|6|16|27|74|75');
+			CreateBool('_msvalidVaultCategory', false);
+			CreateInt('_msDefaultVaultCategory', -1);
+			CreateString('microStoreTrialInfo', '');
+			CreateString('microStoreDiscountInfo', '');
+		"
+		watch1="MicroStoreSetProcTrig"
+		ontrigger1="SetWatch(param0);"
+		watch="" ontrigger="
+			## Which StatusTrigger to watch so all buttons/etc. follow the same processing display scheme ##
+			If(
+				param0 == 1,
+				Set('_microStore_processing', true)
+			);
+			If(
+				param0 != 1 and _microStore_processing,
+				Set('_microStore_processing', false)
+			);
+
+			If(
+				param0 == 3,
+				Set('_microStore_processing', false)
+			);
+
+			If(
+				param0 == 3,
+				CallEvent('store_popup_error', 0)
+			);
+
+			If(
+				_microStore_processing,
+				Trigger('MicroStoreProcessing', _microStore_processing),
+				If(
+					ui_useClientLoginSystem and _microStore_RequestCode == 3,
+					SleepWidget(5000, 'Trigger(\'MicroStoreProcessing\', _microStore_processing);'),
+					SleepWidget(500, 'Trigger(\'MicroStoreProcessing\', _microStore_processing);')
+				)
+			);
+
+		"
+		watch2="SelectUpgradesStatus"
+		ontrigger2="
+			If(
+				param0 == 2,
+				Split(
+					Set('_microStore_RequestCode', 7),
+					CallEvent('MicroStoreAction', 0),
+					CallEvent('store_popup_selectupgrade_success', 0)
+				)
+			);
+		"
+		watch3="mStoreAppendFormErrors"
+		ontrigger3="
+			Set('_mStoreFormErrors', _mStoreFormErrors # If(!StringEmpty(_mStoreFormErrors), '\\n') # Translate('mstore_formerror' # param1));
+		"
+		watch4="vaultPopulatePage"
+		ontrigger4="
+			If(
+				_microStore_Category != 2 and _microStore_Category != 56 and _microStore_Category != 57 and (_microStore_category == 3 or _microStore_category == 4),
+				Set('microStore_vaultItemsPerPage', 16),
+				Set('microStore_vaultItemsPerPage', 6)
+			);
+			Trigger(
+				'MicroStorePageCount',
+				ExplodeTriggerCount(*('microStore_vaultData' # _microStore_Category), '|', '='),
+				microStore_vaultItemsPerPage
+			);
+			If(
+				_microStore_currentPage gt _microStore_TotalPages,
+				Set('_microStore_currentPage', _microStore_TotalPages)
+			);
+
+			If(
+				_microStore_currentPage lt 1,
+				Set('_microStore_currentPage', 1)
+			);
+
+			Trigger('MicroStoreUpdatePaging');
+
+			ExplodeTrigger(
+				'vaultPopulate',
+				*('microStore_vaultData' # _microStore_Category),
+				'|', '`',
+				(_microStore_currentPage - 1) * microStore_vaultItemsPerPage,
+				microStore_vaultItemsPerPage
+			);
+		"
+		watch7="vaultPopulate"
+		ontrigger7="
+			Set(
+				'microStoreName' # Ceil( param0 - (_microStore_currentPage - 1) * microStore_vaultItemsPerPage),
+				Translate(
+					'mstore_product' #
+
+					If(
+						StringEquals(
+							SubString(param2, 0, 15),
+							'ai.custom_icon:'
+						),
+						'_custom_icon',
+						param1
+					)
+					# '_name'
+				)
+			);
+
+			Set(
+				'microStoreDescription' # Ceil( param0 - (_microStore_currentPage - 1) * microStore_vaultItemsPerPage),
+				Translate('mstore_product' # param1 # '_desc')
+			);
+			Set(
+				'microStoreID' # Ceil( param0 - (_microStore_currentPage - 1) * microStore_vaultItemsPerPage),
+				param1
+			);
+			Set(
+				'microStoreCode' # Ceil( param0 - (_microStore_currentPage - 1) * microStore_vaultItemsPerPage),
+				param2
+			);
+			Set(
+				'microStoreLocalContent' # Ceil( param0 - (_microStore_currentPage - 1) * microStore_vaultItemsPerPage),
+				param3
+			);
+		"
+		watch8="MicroStorePageCount"
+		ontrigger8="
+			Set(
+				_microStore_TotalPages,
+				(
+					(
+						Floor( param0 / param1 )
+					) +
+					If(
+						param0 % param1 gt 0,
+						1, 0
+					)
+				)
+			);
+		"
+	/>
+
+	<panel name="MicroStoreUpgCheck" color="invisible" noclick="true"
+		onevent0="
+			ExplodeTrigger(
+				'MicroStoreItemAgainstUpgrade',
+				*('microStore_vaultData' # _microStore_Category),
+				'|', '`'
+			);
+		"
+		watch0="MicroStoreItemAgainstUpgrade"
+		ontrigger0="
+			Set('_microStore_TSelectedItem', param1);
+			ExplodeTrigger(
+				'MicroStoreSelectedUpgrade',
+				_microStore_lastSelectedUpgrades,
+				'|', '`'
+			);
+		"
+		watch1="MicroStoreSelectedUpgrade"
+		ontrigger1="
+			If(
+				StringEquals(param1, _microStore_TSelectedItem),
+				Trigger('MicroStoreSelectedUpgradeListed', param1)
+			);
+		"
+	/>
+
+	<panel noclick="true" color="invisible" name="MicroStoreAction"
+			onevent0="
+			If(
+				_microStore_Category le 1,
+				If(
+					_microStore_RequestCode != 2,
+					Set('_microStore_Category', 2),
+					Set('_microStore_Category', 3)
+				)
+			);
+			Trigger('ShowHidePanelToggle', '', 'storeSubCategories');
+			Trigger('ShowHidePanelToggle', '', 'vaultSubCategories');
+			Trigger('MicroStoreSetProcTrig', 'MicroStoreStatus');
+			Set('_lastRequestHostTime', GetTime());
+
+			Set('_microStoreRequestAllItems', ((_microStore_RequestCode == 1 or _microStore_RequestCode == 3 or _microStore_RequestCode == 4) and (_microStore_Category == 2 or _microStore_Category == 71)));
+			
+			Set('_microStoreShowNonPurchasable', ((_microStore_RequestCode == 1 or _microStore_RequestCode == 3 or _microStore_RequestCode == 4) and _microStore_Category == 2));
+			
+			If(
+				_microStore_RequestCode == 1 or _microStore_RequestCode == 2 or _microStore_RequestCode == 0,
+				SubmitForm('MicroStore', 'account_id', GetAccountID(), 'category_id', _microStore_Category, 'request_code', _microStore_RequestCode, 'page', _microStore_currentPage, 'cookie', GetCookie(), 'hostTime', _lastRequestHostTime, 'displayAll', _microStoreRequestAllItems, 'notPurchasable', _microStoreShowNonPurchasable)
+			);
+			If(
+				_microStore_RequestCode == 3,
+				CallEvent('MicroStoreAction2', 0)
+			);
+			If(
+				_microStore_RequestCode == 4,
+				If(
+					_microStore_itemDurationChoice le 0 and _microStore_itemExpirationChoice le 0,
+					SubmitForm('MicroStore', 'account_id', GetAccountID(), 'request_code', _microStore_RequestCode, 'cookie', GetCookie(), 'product_id', If(microStoreOverridePurchaseID gt 0, microStoreOverridePurchaseID, _microStore_SelectedID), 'category_id', _microStore_Category, 'page', _microStore_currentPage, 'hostTime', _lastRequestHostTime, 'currency', _microStore_PremiumCurrency, 'displayAll', _microStoreRequestAllItems, 'notPurchasable', _microStoreShowNonPurchasable, 'discount', microStoreDiscountInfo),
+					Split(
+						If(
+							_microStore_itemDurationChoice gt 0,
+							SubmitForm('MicroStore', 'account_id', GetAccountID(), 'request_code', _microStore_RequestCode, 'cookie', GetCookie(), 'category_id', _microStore_Category, 'page', _microStore_currentPage, 'hostTime', _lastRequestHostTime, 'currency', _microStore_PremiumCurrency, 'displayAll', _microStoreRequestAllItems, 'notPurchasable', _microStoreShowNonPurchasable, 'charge_id', _microStore_itemDurationChoice, 'discount', microStoreDiscountInfo)
+						),
+						If(
+							_microStore_itemExpirationChoice gt 0,
+							SubmitForm('MicroStore', 'account_id', GetAccountID(), 'request_code', _microStore_RequestCode, 'cookie', GetCookie(), 'category_id', _microStore_Category, 'page', _microStore_currentPage, 'hostTime', _lastRequestHostTime, 'currency', _microStore_PremiumCurrency, 'displayAll', _microStoreRequestAllItems, 'notPurchasable', _microStoreShowNonPurchasable, 'duration_id', _microStore_itemExpirationChoice, 'discount', microStoreDiscountInfo)
+						)
+					)
+				)
+			);
+			If(
+				_microStore_RequestCode == 5 or _microStore_RequestCode == 7,
+				SubmitForm('MicroStore', 'account_id', GetAccountID(), 'request_code', _microStore_RequestCode, 'cookie', GetCookie(), 'hostTime', _lastRequestHostTime)
+			);
+			If(
+				_microStore_RequestCode == 6,
+				SubmitForm('MicroStore', 'account_id', GetAccountID(), 'request_code', _microStore_RequestCode, 'cookie', GetCookie(), 'bundle_id', _microStore_SelectedID, 'hostTime', _lastRequestHostTime)
+			);
+		"
+		onevent1="
+			If(
+				_microStore_Category le 1,
+				If(
+					_microStore_RequestCode != 2,
+					Set('_microStore_Category', 2),
+					Set('_microStore_Category', 3)
+				)
+			);
+			Trigger('ShowHidePanelToggle', '', 'storeSubCategories');
+			Trigger('ShowHidePanelToggle', '', 'vaultSubCategories');
+			Trigger('MicroStoreSetProcTrig', 'MicroStoreStatus');
+			Set('_lastRequestHostTime', GetTime());
+
+			Set('_microStoreRequestAllItems', ((_microStore_RequestCode == 1 or _microStore_RequestCode == 3 or _microStore_RequestCode == 4) and (_microStore_Category == 2 or _microStore_Category == 71)));
+			
+			Set('_microStoreShowNonPurchasable', ((_microStore_RequestCode == 1 or _microStore_RequestCode == 3 or _microStore_RequestCode == 4) and _microStore_Category == 2));
+
+			If(
+				_microStore_itemDurationChoice le 0 and _microStore_itemExpirationChoice le 0,
+				SubmitForm('MicroStore', 'account_id', GetAccountID(), 'request_code', _microStore_RequestCode, 'cookie', GetCookie(), 'product_id', If(microStoreOverridePurchaseID gt 0, microStoreOverridePurchaseID, _microStore_SelectedID), 'category_id', _microStore_Category, 'page', _microStore_currentPage, 'hostTime', _lastRequestHostTime, 'currency', _microStore_PremiumCurrency, 'displayAll', _microStoreRequestAllItems, 'notPurchasable', _microStoreShowNonPurchasable, 'santaTo', _microStoreSantaTarget, 'discount', microStoreDiscountInfo),
+				Split(
+					If(
+						_microStore_itemDurationChoice gt 0,
+						SubmitForm('MicroStore', 'account_id', GetAccountID(), 'request_code', _microStore_RequestCode, 'cookie', GetCookie(), 'category_id', _microStore_Category, 'page', _microStore_currentPage, 'hostTime', _lastRequestHostTime, 'currency', _microStore_PremiumCurrency, 'displayAll', _microStoreRequestAllItems, 'notPurchasable', _microStoreShowNonPurchasable, 'charge_id', _microStore_itemDurationChoice, 'santaTo', _microStoreSantaTarget, 'discount', microStoreDiscountInfo)
+					),
+					If(
+						_microStore_itemExpirationChoice gt 0,
+						SubmitForm('MicroStore', 'account_id', GetAccountID(), 'request_code', _microStore_RequestCode, 'cookie', GetCookie(), 'category_id', _microStore_Category, 'page', _microStore_currentPage, 'hostTime', _lastRequestHostTime, 'currency', _microStore_PremiumCurrency, 'displayAll', _microStoreRequestAllItems, 'notPurchasable', _microStoreShowNonPurchasable, 'duration_id', _microStore_itemExpirationChoice, 'santaTo', _microStoreSantaTarget, 'discount', microStoreDiscountInfo)
+					)
+				)
+			);
+
+		"		
+	/>
+
+	<!-- Region Change Point -->
+	<panel noclick="true" color="invisible" name="MicroStoreAction2"
+		onevent0="
+			If(ui_useRegionalCurrency,
+				If(cl_GarenaEnable,
+					SubmitForm(
+						'MicroStore',
+						'account_id', GetAccountID(),
+						'request_code', 'shell_exchange',
+						'cookie', GetCookie(),
+						'friend_nickname', buy_coins_friendnick,
+						'point_package', *('microStorePackageID' # _microStore_buyCoins_package),
+						'category_id', _microStore_Category,
+						'page', _microStore_currentPage,
+						'displayAll', _microStoreRequestAllItems,
+						'notPurchasable', _microStoreShowNonPurchasable,
+						'hostTime', _lastRequestHostTime
+					),
+					SubmitForm(
+						'MicroStore',
+						'account_id', GetAccountID(),
+						'request_code', _microStore_RequestCode,
+						'cookie', GetCookie(),
+						'friend_nickname', buy_coins_friendnick,
+						'point_package', *('microStorePackageID' # _microStore_buyCoins_package),
+						'category_id', _microStore_Category,
+						'page', _microStore_currentPage,
+						'displayAll', _microStoreRequestAllItems,
+						'notPurchasable', _microStoreShowNonPurchasable,
+						'hostTime', _lastRequestHostTime
+					)					
+				),
+				SubmitForm(
+					'MicroStoreSSL', 'account_id', GetAccountID(), 'request_code', _microStore_RequestCode, 'cookie', GetCookie(),
+					'bill_first_name', buy_coins_ccfirstname,
+					'bill_last_name', buy_coins_cclastname,
+					'zip', buy_coins_cczip,
+					'card_number', buy_coins_ccnum,
+					'month', buy_coins_ccmonth,
+					'year', buy_coins_ccyear,
+					'cvv', buy_coins_cccvv,
+					'point_package', *('microStorePackageID' # _microStore_buyCoins_package),
+					'category_id', _microStore_Category,
+					'page', _microStore_currentPage,
+					'displayAll', _microStoreRequestAllItems,
+					'notPurchasable', _microStoreShowNonPurchasable,
+					'friend_nickname', buy_coins_friendnick,
+					'hostTime', _lastRequestHostTime,
+					'payment_gw_debug', 'yes'
+				)
+			);
+		"
+	/>
+
+
+	<!-- Primary handler for store responses (MicroStoreResults)-->
+	<panel noclick="true" color="invisible"
+		watch1="GoldCoins"
+		ontrigger1="Set('_microStore_TotalCoins', GoldCoins);"
+		watch2="SilverCoins"
+		ontrigger2="Set('_microStore_TotalSilverCoins', SilverCoins);"
+	/>
+	
+	<!-- Basic response, and we trigger popups -->
+	<panel noclick="true" color="invisible"
+		name="microStoreResultHandler"
+		watch0="StorePromoStatus"
+		ontrigger0="
+			SleepWidget(
+				1,
+				'
+					if(
+						' # param0 # ' == 2 and !IsVisible(\'store_promo\'),
+						Split(
+							##Trigger(\'ShowHidePanelToggle\', \'noStoreCategories\', \'storeCategoryContainers\'),##
+							If(
+								!IsVisible(\'storeCategoryContainer\'),
+								Trigger(\'ShowHidePanelToggle\', \'storeCategoryContainer\', \'storeCategoryContainers\')
+							),
+							Trigger(\'ShowHidePanelToggle\', \'noStoreNavigation\', \'storeNavigationContainers\'),
+							Trigger(\'ShowHidePanelToggle\', \'store_promo\', \'storeItemViews\')
+
+						)
+					);
+				'
+			);
+		"
+		watch3="mstoreBuildAvatarsString"
+		ontrigger3="
+			ExplodeTrigger('mstoreSaveTempString', msBundle, '|', '~', (param0 - 1), 1);
+			If(
+				!StringEquals(_microStoreTempString, '1'),
+				CallEventParams(name, param0, param1)
+			);
+		"
+		onevent="
+		
+			Set(
+				'_microStoreAvatarCategoryData',
+				_microStoreAvatarCategoryData #
+				If( !StringEmpty(_microStoreAvatarCategoryData), '|', '' ) # 
+				param1
+			);
+
+			ExplodeTrigger('mstoreSaveTempString', msCodes, '|', '~', (param0 - 1), 1);
+			ExplodeTrigger('mstoreSplitAvatarProductCode', _microStoreTempString, '|', '.');
+			Set('_microStoreAvatarCategoryData', _microStoreAvatarCategoryData # '~' # mstoreAvatarsHeroName);
+			Set('_microStoreAvatarCategoryData', _microStoreAvatarCategoryData # '~' # mstoreAvatarsAvatarName);
+			
+			ExplodeTrigger('mstoreSaveTempString', msGoldPrice, '|', '~', (param0 - 1), 1);
+			Set('_microStoreAvatarCategoryData', _microStoreAvatarCategoryData # '~' # _microStoreTempString);
+			
+			ExplodeTrigger('mstoreSaveTempString', msSilverPrice, '|', '~', (param0 - 1), 1);
+			Set('_microStoreAvatarCategoryData', _microStoreAvatarCategoryData # '~' # _microStoreTempString);
+			
+			ExplodeTrigger('mstoreSaveTempString', msPremium, '|', '~', (param0 - 1), 1);
+			Set('_microStoreAvatarCategoryData', _microStoreAvatarCategoryData # '~' # _microStoreTempString);
+			
+			ExplodeTrigger('mstoreSaveTempString', msOwned, '|', '~', (param0 - 1), 1);
+			Set('_microStoreAvatarCategoryData', _microStoreAvatarCategoryData # '~' # _microStoreTempString);
+			
+			ExplodeTrigger('mstoreSaveTempString', msPurchasable, '|', '~', (param0 - 1), 1);
+			Set('_microStoreAvatarCategoryData', _microStoreAvatarCategoryData # '~' # _microStoreTempString);
+			
+			Set('_microStoreAvatarCategoryData', _microStoreAvatarCategoryData # '~' # param0);
+		"
+		
+		watch4="mstoreSaveTempString"
+		ontrigger4="
+			## Just save off a single param (unfortunately this the only way to retrieve some data in the old store format) ##
+			Set(
+				_microStoreTempString,
+				param1
+			);
+		"
+		watch5="mstoreSplitAvatarProductCode"
+		ontrigger5="
+			Set('mstoreAvatarsHeroName', param2);
+			Set('mstoreAvatarsAvatarName', param3);
+		"
+			
+		watch6="mstoreBuildHeroListString"
+		ontrigger6="
+			ExplodeTrigger('mstoreSaveTempString', msBundle, '|', '~', (param0 - 1), 1);
+			If(
+				!StringEquals(_microStoreTempString, '1'),
+				CallEventParamsX(name, 0, param0, param1)
+			);
+		"
+		onevent0="
+			Set(
+				'_microStoreHeroCategoryData',
+				_microStoreHeroCategoryData #
+				If( !StringEmpty(_microStoreHeroCategoryData), '|', '' ) # 
+				param1
+			);
+			
+			ExplodeTrigger('mstoreSaveTempString', msCodes, '|', '~', (param0 - 1), 1);
+			ExplodeTrigger('mstoreSplitAvatarProductCode', 'hero.' # _microStoreTempString, '|', '.');		##Not really used as intended, just to grab out the middle portion ##
+			Set('_microStoreHeroCategoryData', _microStoreHeroCategoryData # '~' # mstoreAvatarsHeroName);
+			
+			ExplodeTrigger('mstoreSaveTempString', msGoldPrice, '|', '~', (param0 - 1), 1);
+			Set('_microStoreHeroCategoryData', _microStoreHeroCategoryData # '~' # _microStoreTempString);
+			
+			ExplodeTrigger('mstoreSaveTempString', msSilverPrice, '|', '~', (param0 - 1), 1);
+			Set('_microStoreHeroCategoryData', _microStoreHeroCategoryData # '~' # _microStoreTempString);
+			
+			ExplodeTrigger('mstoreSaveTempString', msPremium, '|', '~', (param0 - 1), 1);
+			Set('_microStoreHeroCategoryData', _microStoreHeroCategoryData # '~' # _microStoreTempString);
+			
+			ExplodeTrigger('mstoreSaveTempString', msOwned, '|', '~', (param0 - 1), 1);
+			Set('_microStoreHeroCategoryData', _microStoreHeroCategoryData # '~' # _microStoreTempString);
+			
+			Set('_microStoreHeroCategoryData', _microStoreHeroCategoryData # '~' # GetHeroDifficulty(mstoreAvatarsHeroName));
+			Set('_microStoreHeroCategoryData', _microStoreHeroCategoryData # '~' # param0);
+			
+		"
+
+		onevent5lua="UIManager.GetInterface('main'):HoNStoreF('PopulateAltInfo', param0, param1, param2, param3, param4, param5, param6, param7)"
+		onevent6lua="UIManager.GetInterface('main'):HoNStoreF('ParseFeaturedSection', param0, param1, param2, param3, param4, param5, param6, param7, param8, param9)"
+		onevent7lua="UIManager.GetInterface('main'):HoNGrabbagF('GrabBagResults', 'store_grab_bag_container', param0, param1, param4, param3, param2)"
+	/>
+
+	<panel noclick="true" color="invisible" name="microStoreProcessResponse"
+		onevent0="
+			##CallEvent('storeMulligans', 1);##
+			Trigger('ShowHidePanelToggle', '', 'storeSubCategories');
+			Trigger('ShowHidePanelToggle', '', 'vaultSubCategories');
+			
+			If(
+				_microStore_nextAction == 2 and
+				(
+					_microStore_Category == 59 or
+					_microStore_Category == 60 or
+					_microStore_Category == 61				
+				),
+				Set('_microStore_Category', 4)
+			);
+			
+			Trigger('MicroStoreUpdateCategory');
+
+			If(
+				_microStore_nextAction == 1,
+				DoEvent(1)
+			);
+			
+			If(
+				_microStore_nextAction == 2,
+				DoEvent(2)
+			);
+
+			If(
+				_microStore_nextAction == 1 or _microStore_nextAction == 2,
+				Trigger('ShopkeeperIdleRoutine', 5, 300000),
+				CallEvent('shopkeeper_model_action', 2)
+			);
+
+			If(
+				_microStore_nextAction == 5,
+				CallEvent('store_popup_buy_coins', 0)
+			);
+
+			Set('_microStore_nextAction', -1);
+		"
+		onevent1="
+			## Store-only ##
+			
+			If(
+				_microStore_Category == 2 or _microStore_Category == 58 or _microStore_Category == 68 or _microStore_Category == 71,
+				Trigger('ShowHidePanelToggle', '', 'storeNavigationContainers'),
+				If(
+					!IsVisible('storeNavigationContainer'),
+					Trigger('ShowHidePanelToggle', 'storeNavigationContainer', 'storeNavigationContainers')
+				)
+			);
+			
+			If(
+				!IsVisible('storeCategoryContainer'),
+				If(
+					_microStore_Category == 58 or _microStore_Category == 68,
+					Trigger('ShowHidePanelToggle', '', 'storeCategoryContainers'),
+					Trigger('ShowHidePanelToggle', 'storeCategoryContainer', 'storeCategoryContainers')					
+				)
+			);
+
+			CallEventParamsX(name, 3, *('_microStoreItemDisplay' # _microStore_Category));		## Actually toggle the visibility ##
+			
+			If( *('_microStoreItemDisplay' # _microStore_Category) == 1,  CallEvent('storeItemViewShelves', 4));
+			If(
+				*('_microStoreItemDisplay' # _microStore_Category) == 2,
+				If(
+					_microStore_Category == 3 and _microStore_currentPage == 1 and ui_enableCustomAccIcons,
+					CallEvent('storeItemViewBookAccIcons', 4),
+					CallEvent('storeItemViewBook', 4)
+				)
+			);
+			
+			Set('mstoreAvatarSortMode', 4);
+			Set('mstoreHeroSortMode', 5);
+			CreateInt('mstoreAvatarDisplayMode', 0);
+			If( *('_microStoreItemDisplay' # _microStore_Category) == 4,  CallEvent('heroDisplayListContainer', 8));
+			If( *('_microStoreItemDisplay' # _microStore_Category) == 5,  CallEvent('heroAvatarListContainer', 8));
+			If( *('_microStoreItemDisplay' # _microStore_Category) == 6,  CallEvent('storeEAPDisplay', 4));
+			
+			Set('microStoreTargetPurchaseID', -1);
+			
+		"
+		onevent2="
+			## Vault-only ##
+		
+			GroupCall('storeItemDataContainers', 'DoEvent(0);');
+			Trigger('vaultPopulatePage');
+
+			If(
+				!IsVisible('vaultCategoryContainer'),
+				Trigger('ShowHidePanelToggle', 'vaultCategoryContainer', 'storeCategoryContainers')
+			);
+
+			If(
+				!IsVisible('vaultNavigationContainer'),
+				Trigger('ShowHidePanelToggle', 'vaultNavigationContainer', 'storeNavigationContainers')
+			);
+
+			If(
+				_microStore_Category != 2 and _microStore_Category != 6 and _microStore_Category != 16 and _microStore_Category != 27 and _microStore_Category != 5 and _microStore_Category != 57 and _microStore_Category != 74 and _microStore_Category != 75 and _microStore_Category != 76,
+				Split(
+					CallEvent('vaultItemViewBook', 4),
+					If(
+						!IsVisible('vaultItemViewBook'),
+						Trigger('ShowHidePanelToggle', 'vaultItemViewBook', 'storeItemViews')
+					)
+				)
+			);
+
+			If(
+				_microStore_Category == 16 or _microStore_Category == 6 or _microStore_Category == 27 or _microStore_Category == 5 or _microStore_Category == 57 or _microStore_Category == 74 or _microStore_Category == 75 or _microStore_Category == 76,
+				Split(
+					CallEvent('vaultItemViewShelves', 4),
+					If(
+						!IsVisible('vaultItemViewShelves'),
+						Trigger('ShowHidePanelToggle', 'vaultItemViewShelves', 'storeItemViews')
+					)
+				)
+			);
+		"
+		onevent3="
+			If(
+				param0 == 2 and (_microStore_Category == 3 and _microStore_currentPage == 1 and ui_enableCustomAccIcons),
+				If(
+					!IsVisible(_microStoreViewPanel3),
+					Trigger('ShowHidePanelToggle', _microStoreViewPanel3, 'storeItemViews')
+				),
+				If(
+					!IsVisible(*('_microStoreViewPanel' # param0)),
+					Trigger('ShowHidePanelToggle', *('_microStoreViewPanel' # param0), 'storeItemViews')
+				)
+			);
+
+		"
+	/>
+
+	<!-- Generally the split between a lot of the store's actions and the markup for the store -->
+
+	<panel height="50h" y="2.5h" name="store_background" visible="false">
+		<image name="store_background_image" resourcecontext="store" width="181h" height="100%" align="center" noclick="true"
+			onshowlua="
+				UIManager.GetInterface('main'):HoNStoreF('SetStoreBackground')
+			"
+		/><!-- Main store background art -->
+	</panel>
+	<panel width="124.8h" height="50h" y="2.5h" align="center" noclick="true" visible="false" name="store_container"
+		onhidelua="UIManager.GetInterface('main'):HoNStoreF('StoreClosed')"
+		onevent0="
+			Set('_microStore_initialResponse', false);
+			Call('store_cover', 'FadeIn(500);');
+			Call('store_cover', 'SleepWidget(500, \'PlaySound(\\\'/ui/fe2/store/sounds/store_open.wav\\\'); FadeOut(500);\');');
+			If(ui_background == 2,
+				Call('background_main', 'SleepWidget(500, \'SetVisible(0);\');'),
+				If(ui_background == 1,
+					Call('background_main_2', 'SleepWidget(500, \'SetVisible(0);\');')
+				)
+			);
+			Call('store_background', 'SleepWidget(500, \'SetVisible(1);\');');
+			Call('store_popup_container', 'SleepWidget(500, \'SetVisible(1);\');');
+			SleepWidget(
+				500,
+				'
+					SetVisible(1);
+					SleepWidget(500, \'DoEvent(2);\');
+				'
+			);
+			Call('storeCoinDisplayChest', 'SleepWidget(800, \'DoEvent(0);\')');
+			If(
+				!IsVisible('storeCategoryContainer'),
+				Trigger('ShowHidePanelToggle', 'storeCategoryContainer', 'storeCategoryContainers')
+			);
+		"	
+		onevent1="
+			If(
+				IsVisible('store_container'),
+				Split(
+					Set('_microStore_shopkeeper_canIdle', false),
+					Trigger('ShopkeeperAction', 3),
+					DoEvent(3)
+				)
+			);
+		"
+		onevent2lua="
+			if (UIGamePhase() &lt;= 3) then
+				PlayMusic('/ui/fe2/store/sounds/bg_music.mp3', true)
+			end
+		"
+		onevent2="
+			Echo('microStore_targetCategory: ' # microStore_targetCategory);
+			Echo('microStore_targetRequest: ' # microStore_targetRequest);
+			Echo('microStore_heroSelectTarget: ' # microStore_heroSelectTarget);
+			Echo('microStoreTargetPurchaseID: ' # microStoreTargetPurchaseID);	
+			Echo(' ');
+			
+			If(
+				microStore_targetCategory gt 0,
+				Split(
+					Set('_MicroStore_Category', microStore_targetCategory),
+					Set('_microStore_RequestCode', 1)
+				),
+				Split(
+					Set('_MicroStore_Category', 1),
+					Set('_microStore_RequestCode', 0)
+				)
+			);
+			
+			If(
+				microStore_targetRequest gt 0,
+				Set('_microStore_RequestCode', microStore_targetRequest)
+			);
+
+			Set('microStore_targetRequest', -1);
+			Set('microStore_targetCategory', -1);
+			
+			CallEvent('MicroStoreAction', 0);
+		"
+		onevent3lua="
+			local gamePhase = AtoN(self:UICmd('GetCurrentGamePhase()'))
+			if gamePhase == 1 or gamePhase == 3 then
+				playLobbyMusic()
+			else
+				StopMusic()
+			end
+		"
+		onevent3="
+			Set('_microStoreHeroCategoryData', '');
+			Trigger('ShowHidePanelToggle', '', 'storeCategoryContainers');
+			Trigger('ShowHidePanelToggle', '', 'storeNavigationContainers');
+			Trigger('ShowHidePanelToggle', '', 'storeItemViews');
+			GroupCall('storePopupWindows', 'DoEvent(2);');
+			##CallEvent('storeMulligans', 1);##
+
+			If(
+				IsVisible('storeEAPDisplay') or IsVisible('storeFeatured'),
+				CallEventParamsX(name, 4, 250),
+				Split(
+					DoEvent(5),
+					CallEventParamsX(name, 4, 500)
+				)
+			);
+		"
+		onevent4="
+			Call('store_cover', 'SleepWidget('#param0#', \'PlaySound(\\\'/ui/fe2/store/sounds/store_close.wav\\\'); FadeOut('#param0#');\');');
+			If(
+				GamePhase() lt 4,
+				If(ui_background == 2,
+					Call('background_main', 'SleepWidget('#param0#', \'SetVisible(1);\');'),
+					If(ui_background == 1,
+						Call('background_main_2', 'SleepWidget('#param0#', \'SetVisible(1);\');')
+					)
+				)
+			);
+
+			Call('store_background', 'SleepWidget('#param0#', \'SetVisible(0);\');');
+			Call('store_popup_container', 'SleepWidget('#param0#', \'SetVisible(0);\');');
+			SleepWidget(param0, 'SetVisible(0);');
+			CallEvent('storeCoinDisplayChest', 1);
+		"
+		onevent5="
+			Call('store_cover', 'FadeIn(500);');
+		"
+	>
+		<instance name="storeCoinsDisplay"/>
+		<instance name="storeMainProcessingIndicator"/>
+		<instance name="store_promo" visible="true" />
+		<instance name="storeNavigation"/>
+		<instance name="vaultNavigationContainer"/>	
+		<instance name="Acct_Icon_Page1"/>
+		<instance name="storeItemListBook"/>
+		<instance name="storeItemListBookAccIcons"/>
+		<instance name="storeItemListShelf"/>
+		
+		<instance name="storeViewAvatarsFull"/>
+		<instance name="storeViewHeroes"/>
+
+		<instance name="vaultItemListShelf"/>
+		<instance name="vaultItemListBook"/>
+		
+		
+		<instance name="storeCategoryContainer"/>
+		<instance name="vaultCategoryContainer"/>
+		
+		<!--
+		<instance name="storeMulligans"/>
+		-->
+		
+		
+		<instance name="storeMainCloseButton"/>
+		
+	</panel>
+	
+	<instance name="storeMiscOverlays"/>
+	
+	<!-- F2P systembar and herodex helper -->
+	<panel name="store_open_purchase_helper" noclick="1"
+		onevent="
+			##Echo('Opening Store: '#param0);##
+			If(!StringEquals(param0, 'token'),
+				Split(
+					Set('microStore_heroSelectTarget', param0),
+					If(IsEarlyAccessHero(param0),
+						Set('microStore_targetCategory', 58),
+						Set('microStore_targetCategory', 71)
+					)
+				),
+				Split(
+					Set('microStore_targetCategory', 6),
+					Set('microStore_heroSelectTarget', ''), 
+					Set('microStoreTargetPurchaseID', 655)
+				)
+			);		
+		"
+		oneventlua="UIManager.GetInterface('main'):HoNMainF('MainMenuPanelToggle', 'store_container', nil, true, nil, nil, 12)"
+		onevent1lua="UIManager.GetInterface('main'):HoNMainF('MainMenuPanelToggle', 'store_container', nil, true, nil, nil, 13)"
+		onevent2="Set(microStore_targetRequest, 5);"		
+		onevent2lua="UIManager.GetInterface('main'):HoNMainF('MainMenuPanelToggle', 'store_container', nil, true, nil, nil, 14)"
+	>
+	</panel>	
+	
+	<panel height="50h" y="2.5h" name="store_cover" color="0 0 0 1" visible="false"/><!-- Covers up the store during in/out transition -->
+	
+</package>

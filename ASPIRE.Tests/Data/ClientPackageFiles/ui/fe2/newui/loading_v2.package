@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+	<lua file="/ui/scripts/newui/loading_v2.lua" />
+
+	<template name="queue_loading_progress_template">
+		<panel x="{x}" y="{y}" align="{align}" valign="{valign}" width="{width=100%}" height="{height=100%}" noclick="1">
+			<panel name="queue_loading_progress_{id}_progress" width="100%" clip="1">
+				<image texture="/ui/fe2/newui/res/loading/progress.png" width="{width=100%}" height="16i" valign="center" noclick="1"/>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="queue_loading_group_template">
+		<panel name="queue_loading_progress_{id}" width="100%" height="50i" stickytoinvis="0" visible="{visible=0}">
+			<image texture="/ui/fe2/newui/res/common/line.png" width="100%" height="2i" align="center" noclick="1"/>
+			<panel x="14i" width="36i" height="36i" valign="center">
+				<instance name="newui_custom_frame_template"/>
+				<image name="queue_loading_progress_{id}_icon" texture="/ui/fe2/store/icons/account_icons/default.tga" width="-6i" height="-6i" align="center" valign="center" noclick="1"/>
+			</panel>
+			<label name="queue_loading_progress_{id}_playername" x="60i" height="50%" textvalign="center" font="dyn_11" color="#f0d3c1" outline="1" outlinecolor="#230000" noclick="1"/>
+			<instance name="queue_loading_progress_template" id="{id}" x="60i" y="-4i" width="324i" height="25i" valign="bottom"/>
+		</panel>
+	</template>
+
+	<template name="queue_loading_template">
+		<panel name="queue_loading" color="0 0 0 .9" width="100%" height="100%" align="center" visible="0" clip="1"
+			watch="TMMLeaveGroup"
+			ontriggerlua="if param == 'disconnected' and AtoB(param1) then self:SetVisible(false) end"
+		>
+			<image name="queue_loading_bg" texture="$invis" width="2048i" height="2048i" align="center" valign="center" noclick="1"/>
+			<image name="queue_loading_bg_logo" texture="$invis" width="512i" height="256i" align="right" noclick="1"/>
+
+			<panel name="queue_loading_phase1" noclick="1">
+				<panel name="queue_loading_group" x="-462i" y="-113i" grow="1" regrow="1" growinvis="false" width="399i" align="center" valign="bottom" float="bottom">
+					<instance name="newui_custom_frame_template" alpha="0.8"/>
+					<anchor y="0"/>
+					<panel height="40i">
+						<label width="-40i" align="center" textvalign="center" font="dyn_12" content="newui_loading_grouploading" color="#f0d3c1" outline="1" outlinecolor="#230000" noclick="1"/>
+					</panel>
+					<instance name="queue_loading_group_template" id="2"/>
+					<instance name="queue_loading_group_template" id="3"/>
+					<instance name="queue_loading_group_template" id="4"/>
+					<instance name="queue_loading_group_template" id="5"/>
+					<panel height="5i" noclick="1"/>
+				</panel>
+
+
+				<panel name="queue_loading_progress_1" y="-20i" width="1320i" height="84i" align="center" valign="bottom" noclick="1">
+					<instance name="newui_custom_frame_template" alpha="0.8"/>
+					<instance name="queue_loading_progress_template" id="1" width="1290i" height="16i" align="center" valign="center"/>
+					<panel height="36i">
+						<label width="-40i" align="center" textvalign="center" font="dyn_12" content="newui_loading_loadingassets" color="#f0d3c1" outline="1" outlinecolor="#230000" noclick="1"/>
+					</panel>
+					<panel height="36i" valign="bottom">
+						<label width="-40i" align="center" textvalign="center" font="dyn_11" content="newui_loading_loading_desc" color="#b09788" outline="1" outlinecolor="#230000" noclick="1"/>
+					</panel>
+				</panel>
+			</panel>
+
+			<panel name="queue_loading_phase2" y="-79i" width="425i" height="216i" align="center" valign="center" noclick="1" visible="0">
+				<instance name="newui_custom_frame_template" alpha="0.8"/>
+				<image texture="/ui/fe2/newui/res/common/line.png" y="45i" width="100%" height="2i" align="center" noclick="1"/>
+				<image texture="/ui/fe2/newui/res/common/line.png" y="-51i" width="100%" height="2i" align="center" valign="bottom" noclick="1"/>
+				<panel height="75i" noclick="1" valign="center">
+					<animatedimage x="33i" width="100@" height="100%" align="left" valign="center" texture="/ui/elements/throb/throb.tga" noclick="1" loop="1" fps="30" onshow="StartAnim(1);" />
+					<panel x="140i" y="-5i" noclick="1">
+						<label font="dyn_11" color="#b09788" outline="1" outlinecolor="#230000" content="newui_loading_timewaited" noclick="1"/>
+						<label font="dyn_11" textvalign="center" color="#b09788" outline="1" outlinecolor="#230000" content="newui_loading_averagetime" noclick="1"/>
+						<label font="dyn_11" textvalign="bottom" color="#b09788" outline="1" outlinecolor="#230000" content="newui_loading_settingspopularity" noclick="1"/>
+					</panel>
+					<panel x="300i" y="-5i" noclick="1">
+						<label font="dyn_11" color="#b09788" outline="1" outlinecolor="#230000" content=":" noclick="1"/>
+						<label font="dyn_11" textvalign="center" color="#b09788" outline="1" outlinecolor="#230000" content=":" noclick="1"/>
+						<label font="dyn_11" textvalign="bottom" color="#b09788" outline="1" outlinecolor="#230000" content=":" noclick="1"/>
+					</panel>
+					<panel x="328i" y="-5i" noclick="1">
+						<label font="dyn_11" color="#f0d3c1" outline="1" outlinecolor="#230000" noclick="1" watch="TMMTime" ontriggerlua="self:SetText(param0)"/>
+						<label font="dyn_11" textvalign="center" color="#f0d3c1" outline="1" outlinecolor="#230000" noclick="1" watch="TMMTime" ontriggerlua="self:SetText(param1)"/>
+						<label font="dyn_11" textvalign="bottom" color="#f0d3c1" outline="1" outlinecolor="#230000" content="newui_loading_high" noclick="1"/>
+					</panel>
+				</panel>
+
+				<instance name="newui_common_button_2_template" y="-12i" width="108i" align="center" valign="bottom" font="dyn_10" label="newui_loading_leavequeue" onclicklua="PlaySound('/shared/sounds/ui/revamp/leave_queue.wav') Teammaking_V2:OnClickLeaveQueue()" oversound="/shared/sounds/ui/revamp/region_hover.wav"/>
+
+				<label x="26i" y="12i" font="dyn_12" color="#f0d3c1" outline="1" outlinecolor="#230000" content="newui_loading_findingmatch" noclick="1"/>
+
+				<button x="-5i" y="5i" width="32i" height="32i" align="right" color="invisible" onclicklua="Loading_V2:CollopseQueueLoading()">
+					<widgetstate statename="up">
+						<image texture="/ui/fe2/newui/res/loading/collapse_up.png"/>
+					</widgetstate>
+					<widgetstate statename="over">
+						<image texture="/ui/fe2/newui/res/loading/collapse_over.png"/>
+					</widgetstate>
+					<widgetstate statename="down" y="1">
+						<image texture="/ui/fe2/newui/res/loading/collapse_over.png"/>
+					</widgetstate>
+				</button>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="queue_loading_small_template">
+		<panel name="queue_loading_small" y="7i" width="440i" height="42i" align="center" visible="0"
+				hotkey="ESC" onhotkeylua="Loading_V2:OnClickLeaveQueue()"
+		>
+			<frame texture="/ui/fe2/newui/res/common/frames/popupframe.png" borderthickness="4i"/>
+			<animatedimage x="5i" width="80@" height="80%" align="left" valign="center" texture="/ui/elements/throb/throb.tga" noclick="1" loop="1" fps="30" onshow="StartAnim(1);" />
+			<label name="queue_loading_small_name" x="40i" width="180i" textvalign="center" font="dyn_12" color="#f0d3c1" outline="1" outlinecolor="#230000" autofont="1" autofontmax="12" noclick="1"/>
+			<panel x="218i" width="1" noclick="1" color="#5d4a43" />
+			<panel x="-34i" width="1" align="right" noclick="1" color="#5d4a43" />
+			<!-- <panel x="-35i" width="1" height="20i" align="right" noclick="1" color="#5d4a43" valign="center" /> -->
+			<panel x="218i" width="200i" height="-10i" valign="center" noclick="1">
+				<panel x="14i" noclick="1">
+					<label font="dyn_9" color="#bd9f8d" outline="1" outlinecolor="#230000" content="newui_loading_timewaited" noclick="1"/>
+					<label font="dyn_9" textvalign="bottom" color="#bd9f8d" outline="1" outlinecolor="#230000" content="newui_loading_averagetime" noclick="1"/>
+				</panel>
+				<panel x="136i" noclick="1">
+					<label font="dyn_9" color="#bd9f8d" outline="1" outlinecolor="#230000" content=":" noclick="1"/>
+					<label font="dyn_9" textvalign="bottom" color="#bd9f8d" outline="1" outlinecolor="#230000" content=":" noclick="1"/>
+				</panel>
+				<panel x="142i" noclick="1">
+					<label font="dyn_9" color="#f0d3c1" outline="1" outlinecolor="#230000" noclick="1" watch="TMMTime" ontriggerlua="self:SetText(param0)"/>
+					<label font="dyn_9" textvalign="bottom" color="#f0d3c1" outline="1" outlinecolor="#230000" noclick="1" watch="TMMTime" ontriggerlua="self:SetText(param1)"/>
+				</panel>
+			</panel>
+
+<!-- 			<button x="-35i" width="32i" height="32i" align="right" valign="center" color="invisible" onclicklua="Loading_V2:ExpandQueueLoading()">
+				<widgetstate statename="up">
+					<image texture="/ui/fe2/newui/res/loading/expand_up.png"/>
+				</widgetstate>
+				<widgetstate statename="over">
+					<image texture="/ui/fe2/newui/res/loading/expand_over.png"/>
+				</widgetstate>
+				<widgetstate statename="down" y="1">
+					<image texture="/ui/fe2/newui/res/loading/expand_over.png"/>
+				</widgetstate>
+			</button> -->
+
+			<button x="-3i" width="32i" height="32i" align="right" valign="center" color="invisible" onclicklua="Loading_V2:OnClickLeaveQueue()">
+				<widgetstate statename="up">
+					<image texture="/ui/fe2/newui/res/loading/close.png"/>
+				</widgetstate>
+				<widgetstate statename="over">
+					<image texture="/ui/fe2/newui/res/loading/close_over.png"/>
+				</widgetstate>
+				<widgetstate statename="down" y="1">
+					<image texture="/ui/fe2/newui/res/loading/close_over.png"/>
+				</widgetstate>
+			</button>
+		</panel>
+	</template>
+
+	<template name="hosted_loading_template">
+		<panel name="hosted_loading" noclick="1" watch="LoadingProgress" ontriggerlua="GetWidget('queue_loading_progress_hosted_progress', 'loading'):SetWidth(tostring(tonumber(param)*100)..'%')">
+			<panel y="-20i" width="1320i" height="84i" align="center" valign="bottom" noclick="1">
+				<panel noclick="1">
+					<panel color="0.035 0.012 0.004 0.8" x="1" y="1" width="-2" height="-2" noclick="1"/>
+					<frame texture="/ui/fe2/newui/res/common/frames/custom/frame.png" borderthickness="4" noclick="1"/>
+				</panel>
+				<instance name="queue_loading_progress_template" id="hosted" width="1290i" height="16i" align="center" valign="center"/>
+				<panel height="36i">
+					<label width="-40i" align="center" textvalign="center" font="dyn_12" content="newui_loading_hosted_title" color="#f0d3c1" outline="1" outlinecolor="#230000" noclick="1"/>
+				</panel>
+				<panel height="36i" valign="bottom">
+					<label width="-40i" align="center" textvalign="center" font="dyn_11" content="newui_loading_hosted_desc" color="#b09788" outline="1" outlinecolor="#230000" noclick="1"/>
+				</panel>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="mm_loading_player_template">
+		<panel name="mm_loading_player_{id}" width="{width=36i}" height="{height=36i}" x="{x}" y="{y}" align="{align}" valign="{valign}" stickytoinvis="false" visible="{visible=1}" noclick="1"
+				watch="LobbyPlayerList{id}" ontriggerlua="Loading_V2:OnMMLobbyPlayerList({id},...)"
+		>
+			<instance name="newui_custom_frame_template" alpha="0.8"/>
+			<image name="mm_loading_player_{id}_icon" texture="$invis" width="-4i" height="-4i" align="center" valign="center" noclick="1"/>
+			<image name="mm_loading_player_{id}_light" texture="/ui/fe2/newui/res/loading/light_green.png" y="19i" width="16i" height="16i" align="center" valign="bottom" noclick="1" visible="{showlight=1}"/>
+		</panel>
+	</template>
+
+	<template name="mm_loading_phase1_template">
+		<panel name="mm_loading_phase1" watch="LoadingProgress" ontriggerlua="Loading_V2:OnMMLoadingProgress(param)" noclick="1">
+			<panel y="353i" width="563i" height="202i" align="center" noclick="1">
+				<panel noclick="1">
+					<panel color="0.035 0.012 0.004 0.8" x="1" y="1" width="-2" height="-2" noclick="1"/>
+					<frame texture="/ui/fe2/newui/res/common/frames/custom/frame.png" borderthickness="4" noclick="1"/>
+				</panel>
+				<image texture="/ui/fe2/newui/res/common/line.png" y="44i" width="100%" height="2i" align="center" noclick="1"/>
+				<image texture="/ui/fe2/newui/res/common/line.png" y="-58i" width="100%" height="2i" align="center" valign="bottom" noclick="1"/>
+				<panel height="100i" y="44i">
+					<panel width="117i">
+						<label height="34i" textalign="center" textvalign="center" font="dyn_11" content="newui_loading_mm_you" color="#f0d3c1" outline="1" outlinecolor="#230000" wrap="1" noclick="1"/>
+						<image texture="/ui/fe2/newui/res/common/line2.png" width="2i" height="100%" noclick="1" align="right" valign="center" />
+						<instance name="mm_loading_player_template" y="3i" align="center" valign="center" showlight="0" id="10" visible="1"/>
+						<panel y="-13i" width="32i" height="8i" align="center" valign="bottom" noclick="1">
+							<panel name="mm_loading_me_progress" width="60%" clip="1">
+								<image texture="/ui/fe2/newui/res/loading/sp.png" noclick="1"/>
+							</panel>
+						</panel>
+					</panel>
+					<panel width="-117i" align="right">
+						<label height="34i" textalign="center" textvalign="center" font="dyn_11" content="newui_loading_mm_other" color="#f0d3c1" outline="1" outlinecolor="#230000" wrap="1" noclick="1"/>
+						<animatedimage y="10i" width="50@" height="50%" align="center" valign="center" texture="/ui/elements/throb/throb.tga" noclick="1" loop="1" fps="30" onshow="StartAnim(1);" />
+					</panel>
+				</panel>
+
+				<label width="-40i" height="44i" align="center" textalign="left" textvalign="center" font="dyn_12" content="newui_loading_mm_title" color="#f0d3c1" outline="1" outlinecolor="#230000" wrap="1" noclick="1"/>
+				<label width="-40i" height="62i" align="center" valign="bottom" textalign="left" textvalign="center" font="dyn_11" content="newui_loading_mm_desc" color="#b09788" outline="1" outlinecolor="#230000" wrap="1" noclick="1"/>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="mm_loading_phase2_template">
+		<panel name="mm_loading_phase2" watch="TMMGamePhase" ontriggerlua="self:SetVisible(tonumber(param)==1)" noclick="1">
+			<panel y="353i" width="563i" height="202i" align="center" noclick="1">
+				<instance name="newui_custom_frame_template" alpha="0.8"/>
+				<image texture="/ui/fe2/newui/res/common/line.png" y="44i" width="100%" height="2i" align="center" noclick="1"/>
+				<image texture="/ui/fe2/newui/res/common/line.png" y="-58i" width="100%" height="2i" align="center" valign="bottom" noclick="1"/>
+				<panel height="100i" y="44i">
+					<panel width="117i">
+						<label height="34i" textalign="center" textvalign="center" font="dyn_11" content="newui_loading_mm_you" color="#f0d3c1" outline="1" outlinecolor="#230000" wrap="1" noclick="1"/>
+						<image texture="/ui/fe2/newui/res/common/line2.png" width="2i" height="100%" noclick="1" align="right" valign="center" />
+						<instance name="mm_loading_player_template" y="3i" align="center" valign="center" id="11" visible="1" bordercolor="green"/>
+					</panel>
+					<panel width="-117i" align="right">
+						<label height="34i" textalign="center" textvalign="center" font="dyn_11" content="newui_loading_mm_other" color="#f0d3c1" outline="1" outlinecolor="#230000" wrap="1" noclick="1"/>
+						<panel grow="1" regrow="1" growinvis="false" height="36i" y="3i" align="center" valign="center" noclick="1" float="right" padding="10i">
+							<instance name="mm_loading_player_template" valign="center" id="0"/>
+							<instance name="mm_loading_player_template" valign="center" id="1"/>
+							<instance name="mm_loading_player_template" valign="center" id="2"/>
+							<instance name="mm_loading_player_template" valign="center" id="3"/>
+							<instance name="mm_loading_player_template" valign="center" id="4"/>
+							<instance name="mm_loading_player_template" valign="center" id="5"/>
+							<instance name="mm_loading_player_template" valign="center" id="6"/>
+							<instance name="mm_loading_player_template" valign="center" id="7"/>
+							<instance name="mm_loading_player_template" valign="center" id="8"/>
+							<instance name="mm_loading_player_template" valign="center" id="9"/>
+						</panel>
+					</panel>
+				</panel>
+
+				<label width="-40i" height="44i" align="center" textalign="left" textvalign="center" font="dyn_12" content="newui_loading_mm_title" color="#f0d3c1" outline="1" outlinecolor="#230000" wrap="1" noclick="1"/>
+				<label width="-40i" height="62i" align="center" valign="bottom" textalign="left" textvalign="center" font="dyn_11" content="newui_loading_mm_desc" color="#b09788" outline="1" outlinecolor="#230000" wrap="1" noclick="1"/>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="loading_bg_template">
+		<panel name="loading_bg" color="0 0 0 .9" visible="0" onshowlua="Player_Stats_V2:Hide() Social_V2:CloseSocialPopups()">
+			<image name="loading_bg_image" texture="/ui/fe2/newui/res/loading/unknown.png" width="2048i" height="2048i" align="center" valign="center" noclick="1"/>
+			<image name="loading_bg_image_logo" texture="/ui/fe2/newui/res/loading/bglogo.png" width="512i" height="256i" align="right" noclick="1"/>
+		</panel>
+	</template>
+
+	<panel name="loading_v2_helper" width="1" height="1" noclick="1" onloadlua="Loading_V2:Init()" onframelua="Loading_V2:OnFrame()"/>
+</package>

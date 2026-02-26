@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+	<template name="dice_tooltip">
+		<frame
+			name="dice_tooltip"
+			texture="/ui/frames/rounded_bg_white.tga"
+			borderthickness="0.6h"
+			color="0 0 0 .75"
+			visible="false"
+			align="right"
+			valign="bottom"
+			width="30h"
+			height="5.0h"
+			float="bottom"
+			grow="1" regrow="1" growinvis="0"
+		>
+			<frame texture="/ui/frames/roundframe.tga" borderthickness="0.6h" bordercolor="#434d50"/>
+			<anchor x="1.0h" y="0.6h" />
+
+			<panel width="-2.0h" height="3.6h">
+				<!-- Name -->
+				<label
+					valign="top"
+					textalign="left"
+					font="dyn_12" color="#ffab01" shadow="true" textvalign="center"
+					content="dice_name"
+				/>
+			</panel>
+
+			<!-- padding -->
+			<panel
+				width="-2.0h"
+				height="0.1h"
+				sticky="true"
+				stickytoinvis="false"
+			/>
+
+			<!-- Status Description -->
+			<label
+				width="-2.0h"
+				height="0.0h"
+				font="dyn_11"
+				wrap="true"
+				color="white"
+				sticky="true"
+				fity="1"
+				fitypadding="0.2h"
+				stickytoinvis="false"
+				content="dice_tooltip_body"
+			/>
+
+			<!-- padding -->
+			<panel
+				width="-2.0h"
+				height="1.0h"
+				sticky="true"
+				stickytoinvis="false"
+			/>
+
+			<!-- Status Description Part 2 -->
+			<label
+				name="dice_tooltip_body_2"
+				width="-2.0h"
+				height="0.0h"
+				font="dyn_10"
+				wrap="true"
+				color="white"
+				sticky="true"
+				fity="1"
+				fitypadding="0.2h"
+				stickytoinvis="false"
+				content="-"
+			/>
+
+			<!-- padding -->
+			<panel
+				width="-2.0h"
+				height="1.0h"
+				sticky="true"
+				stickytoinvis="false"
+				watch="DiceInfo"
+				ontriggerlua="self:SetVisible(not AtoB(param2))"
+			/>
+
+			<!-- unusable -->
+			<label
+				width="-2.0h"
+				height="0.0h"
+				font="dyn_10"
+				wrap="true"
+				color="red"
+				sticky="true"
+				fity="1"
+				fitypadding="0.2h"
+				stickytoinvis="false"
+				watch="DiceInfo"
+				ontriggerlua="self:SetVisible(not AtoB(param2))"
+				content="dice_tooltip_unusable"
+			/>
+
+			<panel width="-2.0h" height="0.55h" sticky="true" stickytoinvis="false" />
+		</frame>
+	</template>
+</package>

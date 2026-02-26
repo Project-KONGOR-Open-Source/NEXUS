@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+	<template name="ability_levelup_tooltip_simple">
+		<!-- Simple Tooltip -->
+		<panel
+			name="{id}"
+			visible="false"
+			grow="true"
+			x="2.6h" y="-19.0h"
+			width="44.0h"
+			align="center" valign="bottom"
+			passivechildren="true"
+			group="tooltip_group"
+			onshowlua="self:BringToFront()"
+		>
+				
+			<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.6h" color="0 0 0 .75"/>
+			<frame texture="/ui/frames/roundframe.tga" borderthickness="0.6h" bordercolor="#434d50" 
+				watch="ActiveInventoryMultiLevelDescription{slot}"
+				ontriggerlua="
+					if (tonumber(param13) == 2) then
+						self:SetBorderColor('#434d50')
+					elseif (tonumber(param13) == 1) then
+						self:SetBorderColor('#434d50')
+					elseif (tonumber(param13) == 0) then
+						self:SetBorderColor('#990a0a')
+					end
+				"
+			/>
+			
+			<panel grow="true" regrow="true" growinvis="false" y="0.8h" width="-1.2h" align="center" float="bottom" padding="0.5h">
+			
+				<panel width="100%" height="3.6h">			
+					<panel float="right" sticky="true" stickytoinvisible="false" padding="0.5h">
+						
+						<!-- Icon -->
+						<panel width="100@" height="100%">
+							<image texture="" watch="ActiveInventoryMultiLevelDescription{slot}" ontriggerlua="self:SetTexture(param1)"/>
+							<frame color="invisible" borderthickness="1" bordercolor=".3 .3 .3 1"/>
+						</panel>
+						
+						<!-- Name / Lvl -->
+						<panel width="-120@" height="100%" float="bottom" padding="0">
+							<label fity="true" font="dyn_12" color="#ffab01" shadow="true" watch="ActiveInventoryMultiLevelDescription{slot}" ontriggerlua="self:SetText(param0)" />
+							<label fity="true" font="dyn_10" color=".9 .9 .9 1" shadow="true" watch="ActiveInventoryMultiLevelDescription{slot}"
+							ontriggerlua="if (NotEmpty(param23)) then
+											self:SetText(Translate('tooltip_level', 'level', param23))
+										else
+											self:ClearText()
+										end"
+							/>
+						</panel>
+						
+					</panel>
+
+					<!-- Mana -->
+					<label y="0.1h" height="100%" textvalign="bottom" textalign="right" font="dyn_10" color="cyan" shadow="true" watch="ActiveInventoryMultiLevelDescription{slot}"
+						ontriggerlua="
+							if (NotEmpty(param2)) then
+								self:SetText(Translate('tooltip_mana_cost') .. '^w' .. param2)
+								self:SetVisible(1)
+							else
+								self:SetVisible(0)
+								self:ClearText()
+							end"
+					/>
+					
+					<!-- Shortcut / Hero Name -->
+					<panel x="0" y="-0.2h" grow="true" regrow="true" growinvis="false" height="2.0h" align="right" float="right">
+						<!-- Hero Name (KrosMode) -->
+						<label fitx="true" font="dyn_10" color=".9 .9 .9 1" shadow="true" watch="ActiveInventoryMultiLevelDescription{slot}" ontriggerlua="self:SetText(param27..' ') self:SetVisible(NotEmpty(param27))" sticky="1" stickytoinvis="0" textvalign="center" fitxpadding="0.25h" visible="0" />
+
+						<!-- Shortcut -->
+						<panel noclick="1" grow="1" regrow="1" sticky="1" stickytoinvis="0" height="100%">
+							<frame texture="/ui/frames/key.tga" width="100%" height="100%" borderthickness="33@" />
+							<label y="-1" fitx="true" fitxpadding="0.7h" font="dyn_10" textalign="center" textvalign="center" color=".1 .1 .1 1" shadow="true" shadowcolor=".8 .8 .8 1" watch0="ActiveInventoryMultiLevelHotkeys{slot}" ontrigger0lua="self:SetText(param1)"
+							/>
+						</panel>
+					</panel>
+
+				</panel>				
+				
+				<panel width="100%" height="0.2h">
+					<panel width="100%" height="1" valign="bottom" color=".2 .2 .2 1" />
+				</panel>
+				
+				<panel grow="true" regrow="true" width="100%">
+					<label fity="true" font="dyn_10" wrap="true" color="1 1 1 1" shadow="true" watch="ActiveInventoryMultiLevelDescription{slot}" ontriggerlua="self:SetText(param20)" />
+				</panel>
+				
+				<panel height="2.2h" width="100%" align="center" >
+					<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.4h" color="#052d36"/>
+					<frame texture="/ui/frames/roundframe.tga" borderthickness="0.4h" bordercolor=".3 .3 .3 1"/>				
+					<panel height="1.6h" width="-1.0h" align="center" valign="center" watch="ActiveInventoryMultiLevelDescription{slot}"
+						ontriggerlua="self:SetVisible(NotEmpty(param9) or NotEmpty(param10) or NotEmpty(param25) or NotEmpty(param22) or (not AtoB(param11)))"
+					>
+						<label height="100%" textvalign="center" font="dyn_9" color="1 1 1 1" shadow="true"
+							watch="ActiveInventoryMultiLevelDescription{slot}"
+							ontriggerlua="
+								if (NotEmpty(param10) and (param10 ~= '0')) then
+									if (NotEmpty(param9) and (param9 ~= '0') and AtoB(param26)) then
+										self:SetText(Translate('tooltip_radius') .. param10 .. ' ' .. Translate('tooltip_range') .. param9)
+									else
+										self:SetText(Translate('tooltip_radius') .. param10)
+									end
+								elseif (NotEmpty(param9) and (param9 ~= '0')) then
+									self:SetText(Translate('tooltip_range') .. param9)
+								elseif (NotEmpty(param25) and (param25 ~= '0')) then
+									self:SetText(Translate('tooltip_aura') .. ' ' .. Translate('tooltip_radius') .. param25)
+								else
+									self:ClearText()
+								end
+							"
+						/>
+						<label height="100%" textvalign="center" textalign="right" font="dyn_9" color="1 1 1 1" shadow="true" watch="ActiveInventoryMultiLevelDescription{slot}"
+							ontriggerlua="
+								if (AtoB(param11) and NotEmpty(param22)) then
+									self:SetText(Translate('tooltip_cooldown', 'time', param22))
+								elseif ((not AtoB(param11)) and NotEmpty(param22)) then
+									self:SetText(Translate('tooltip_cooldown', 'time', param22) .. '. ' .. Translate('tooltip_activate_passive'))
+								elseif ((not AtoB(param11)) and Empty(param22)) then
+									self:SetText(Translate('tooltip_activate_passive'))
+								end
+							"
+						/>
+						<!--label height="100%" textvalign="center" textalign="right" font="dyn_9" color="1 1 1 1" shadow="true" watch="ActiveInventoryMultiLevelDescription{slot}" ontrigger="SetText(Translate('tooltip_cooldown', 'time', param22))); SetVisible(!StringEmpty(param22) and param22 gt 0 and param11);" />
+						<label height="100%" textvalign="center" textalign="right" font="dyn_9" color="1 1 1 1" shadow="true" watch="ActiveInventoryMultiLevelDescription{slot}" onload="SetText(Translate('tooltip_activate_passive'));" ontrigger="SetVisible(!param11);" /-->
+					</panel>			
+				</panel>				
+				
+				<panel height="2.2h" align="center" >
+					<!--<frame texture="/ui/frames/roundframe.tga" borderthickness="0.6h" bordercolor="#698088" 
+					watch="ActiveInventoryMultiLevelDescription{slot}" ontrigger="if(param13 == 2, SetBorderColor('#698088')); if(param13 == 1, SetBorderColor('#698088')); if(param13 == 0, SetBorderColor('#990a0a'));"/>-->
+					<label height="100%" textvalign="center" textalign="center" font="dyn_10" color="1 1 1 1" shadow="true" watch="ActiveInventoryMultiLevelDescription{slot}"
+						ontriggerlua="if (NotEmpty(param12)) then self:SetText(param12) else self:ClearText() end"
+					/>
+				</panel>
+				<panel height="0.3h" width="100%"/>	
+		
+			</panel>
+		</panel>
+	</template>
+</package>

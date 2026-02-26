@@ -1,0 +1,15 @@
+<package>
+		<instance
+			name="mod_options"
+			mod_id="manacosts"
+			mod_name="Show Mana Costs"
+		/>
+			<instance
+				name="mod_checkbox"
+				mod_id="manacosts"
+				cvar="manacosts_enabled"
+				default="true"
+				trigger="ManaCosts"
+				label="Show Mana Costs"
+			/>
+</package>

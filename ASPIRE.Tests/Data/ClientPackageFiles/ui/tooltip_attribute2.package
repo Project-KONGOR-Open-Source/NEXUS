@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+	<template name="attribute2_tooltip">
+		<frame
+			name="attribute2_tooltip"
+			texture="/ui/frames/rounded_bg_white.tga"
+			borderthickness="0.6h"
+			color="0 0 0 .75"
+			visible="false"
+			align="right"
+			valign="bottom"
+			width="27h"
+			height="5.0h"
+			float="bottom"
+			grow="1" regrow="1" growinvis="0"
+		>
+			<frame texture="/ui/frames/roundframe.tga" borderthickness="0.6h" bordercolor="#434d50"/>
+			<anchor x="1.0h" y="0.6h" />
+			
+			<label
+				width="-2.0h"
+				height="1.8h"
+				textalign="left"
+				font="dyn_10"
+				color="yellow"
+				watch="ActiveAttributeInfo"
+				ontriggerlua="self:SetText(Translate('tooltip_primary_attribute') .. param1)"
+			/>
+			<label
+				width="-2.0h"
+				height="1.8h"
+				textalign="left"
+				font="dyn_10"
+				color="white"
+				watch="ActiveAttributeInfo"
+				ontriggerlua="self:SetText(Translate('tooltip_strength_per_level') .. FtoA2(tonumber(param2), 0, 2))"
+			/>
+			<label
+				width="-2.0h"
+				height="1.8h"
+				textalign="left"
+				font="dyn_10"
+				color="white"
+				watch="ActiveAttributeInfo"
+				ontriggerlua="self:SetText(Translate('tooltip_agility_per_level') .. FtoA2(tonumber(param3), 0, 2))"
+			/>
+			<label
+				width="-2.0h"
+				height="1.8h"
+				textalign="left"
+				font="dyn_10"
+				color="white"
+				watch="ActiveAttributeInfo"
+				ontriggerlua="self:SetText(Translate('tooltip_intelligence_per_level') .. FtoA2(tonumber(param4), 0, 2))"
+			/>
+
+			<panel width="-2.0h" height="1.8h" />
+
+			<panel
+				width="-2.0h"
+				height="2.4h"
+				float="bottom"
+				sticky="true"
+				stickytoinvis="false"
+			>
+				<label
+					height="1.8h"
+					font="dyn_10"
+					color="white"
+					content="tooltip_strength_info"
+				/>
+
+				<panel width="10.5h" height="0.2h" color="gray" />
+				<panel height="0.4h" />
+			</panel>
+
+			<!-- Strength point  bonuses -->
+			<label
+				width="-2.0h"
+				height="0.0h"
+				font="dyn_10"
+				wrap="true"
+				color="white"
+				watch="ActiveAttributeInfo{slot}"
+				ontriggerlua="self:SetText(param5) self:SetVisible(tonumber(param6) > 0)"
+				fity="1"
+				fitypadding="0.4h"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			/>
+
+			<panel width="-2.0h" height="1.8h" sticky="true" stickytoinvis="false"/>
+
+			<panel
+				width="-2.0h"
+				height="2.4h"
+				float="bottom"
+				sticky="true"
+				stickytoinvis="false"
+			>
+				<label
+					height="1.8h"
+					font="dyn_10"
+					color="white"
+					content="tooltip_agility_info"
+				/>
+
+				<panel width="10.5h" height="0.2h" color="gray" />
+				<panel height="0.4h" sticky="true" />
+			</panel>
+
+			<!-- Agility point  bonuses -->
+			<label
+				width="-2.0h"
+				height="0.0h"
+				font="dyn_10"
+				wrap="true"
+				color="white"
+				watch="ActiveAttributeInfo{slot}"
+				ontriggerlua="self:SetText(param7) self:SetVisible(tonumber(param8) > 0)"
+				fity="1"
+				fitypadding="0.4h"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			/>
+
+			<panel width="-2.0h" height="1.8h" sticky="true" stickytoinvis="false"/>
+
+			<panel
+				width="-2.0h"
+				height="2.4h"
+				float="bottom"
+				sticky="true"
+				stickytoinvis="false"
+			>
+				<label
+					height="1.8h"
+					font="dyn_10"
+					color="white"
+					content="tooltip_intelligence_info"
+				/>
+
+				<panel width="10.5h" height="0.2h" color="gray" />
+				<panel height="0.4h" sticky="true" />
+			</panel>
+
+			<!-- Intelligence point  bonuses -->
+			<label
+				width="-2.0h"
+				height="0.0h"
+				font="dyn_10"
+				wrap="true"
+				color="white"
+				watch="ActiveAttributeInfo{slot}"
+				ontriggerlua="self:SetText(param9) self:SetVisible(tonumber(param10) > 0)"
+				fity="1"
+				fitypadding="0.4h"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			/>
+
+			<panel width="-2.0h" height="0.55h" sticky="true" stickytoinvis="false" />
+		</frame>
+	</template>
+</package>

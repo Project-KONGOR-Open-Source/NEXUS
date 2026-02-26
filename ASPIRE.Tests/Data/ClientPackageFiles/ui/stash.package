@@ -1,0 +1,268 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>	
+	<template name="stash_button">
+		<panel x="{x}" y="{y}" width="{width}" height="{height}" name="{prefix=game_stash_button_}{slot}" >
+			<!-- Background -->
+			<panel watch="StashExists{slot}" ontrigger="SetVisible(!param);">
+				<image texture="{textureoverride=/ui/legion/empty_pack.tga}"/>
+				<frame texture="/ui/common/retro/frame/retro_frame.tga" nocompress="1" noclick="1" visible="{retroinventoryframe=0}"
+					borderthickness="1.48125h" width="5h" height="5h" align="center" valign="center"
+				/>
+				<image
+					texture="$white"
+					rendermode="overlay"
+					watch="StashStatus{slot}"
+					ontrigger="SetVisible(true);
+						If(!param0, SetColor('.25 .25 .25'), SetVisible(false));"
+					noclick="true"
+				/>
+			</panel>
+
+			<panel
+				watch="StashExists{slot}"
+				ontrigger="SetVisible(param);"
+				onclicklua="
+					if Input.IsAltDown() then
+						if {courierSlot=false} then
+							SendGamePing('alt_courier_inventory_item', {slot})
+						else
+							SendGamePing('alt_stash_item', {slot})
+						end
+					else
+						self:UICmd('PrimaryActionStash({slot});')
+					end
+					"
+				onrightclick="SecondaryActionStash({slot});"
+				onmouseover="PlaySound('/shared/sounds/ui/button_over_03.wav'); ShowWidget('stash_tooltip{slot}');"
+				onmouseout="HideWidget('stash_tooltip{slot}');"
+				name="stash_slot_filled{slot}{altview}"
+			>
+				<panel name="stash_slot_tut{slot}{altview}" noclick="true">
+					<!-- Icon -->
+					<image
+						watch="StashIcon{slot}"
+						ontrigger="SetTexture(param);"
+						watch0="StashStatus{slot}"
+						ontrigger0lua="
+							if AtoB(param0) then
+								self:SetRenderMode('normal')
+							else
+								if {courierSlot=false} and param5 == 'Delivering' then
+									self:SetRenderMode('normal')
+								else
+									self:SetRenderMode('grayscale')
+								end
+							end
+						"
+						noclick="true"
+					/>
+					
+					
+
+					<!-- Recipe scroll -->
+					<panel color="black" watch="StashRecipe{slot}" ontrigger="SetVisible(param);" noclick="true" passivechildren="true" >
+						<image
+							width="55%" height="55%"
+							align="center" valign="center"
+							watch="StashIcon{slot}"
+							ontrigger="SetTexture(param);"
+						/>
+						<image texture="/ui/elements/shop/scroll_overlay.tga"/>
+					</panel>
+
+					<!-- Bevel -->
+					<image
+						texture="/ui/elements/button_bevel_up.tga"
+						noclick="true"
+					/>
+					
+					<frame texture="/ui/common/retro/frame/retro_frame.tga" nocompress="1" noclick="1" visible="{retroinventoryframe=0}"
+						borderthickness="1.48125h" width="5h" height="5h" align="center" valign="center"
+					/>
+
+					<!-- Cooldown -->
+					<piegraph start="270" end="-90" square="true" color="#000000cc" watch="StashCooldown{slot}" ontrigger="SetVisible(param1 > 0); SetValue(param2);" noclick="true"/>
+
+					<!-- Accessability Overlay -->
+					<panel
+						texture="$white"
+						rendermode="overlay"
+						watch="StashStatus{slot}"
+						ontriggerlua="
+							self:SetVisible((not AtoB(param0)) and (not {courierSlot=false}))
+						"
+						color="#404040"
+						noclick="true"
+					/>
+
+					<!-- Purchased Recently -->
+					<image
+						align="right"
+						valign="top"
+						width="40%"
+						height="40%"
+						texture="/items/icons/PurchasedRecently.tga"
+						watch="StashStatus{slot}"
+						ontriggerlua="self:SetVisible(AtoB(param3) and (not {courierSlot=false}));"
+						noclick="true"
+					/>
+
+					<!-- Charges -->
+					<panel
+						width="38.5%"
+						height="38.5%"
+						align="right"
+						valign="bottom"
+						watch="StashCharges{slot}"
+						ontrigger="SetVisible(param gt 0);"
+						noclick="true"
+						passivechildren="true"
+						color="invisible"
+					>
+						<frame color="0 0 0 .7" bordercolor="white" borderthickness="1"/>
+						<label width="100%" height="100%" textalign="center" textvalign="center" color="white" shadow="true" font="dyn_8" watch="StashCharges{slot}" ontrigger="SetText(param);"/>
+					</panel>
+
+					<!-- Level -->
+					<!--
+					<panel
+						width="38.5%"
+						height="38.5%"
+						align="top"
+						valign="right"
+						watch="StashStatus{slot}"
+						ontrigger="SetVisible((param1 gt 0) and (param2 gt 1));"
+						noclick="true"
+						passivechildren="true"
+						color="invisible"
+					>
+						<frame color="0 0 0 .7" bordercolor="white" borderthickness="1"/>
+						<label
+							width="100%"
+							height="100%"
+							textalign="center"
+							textvalign="center"
+							color="white"
+							shadow="true"
+							font="dyn_8"
+							watch="StashStatus{slot}"
+							ontrigger="SetText(param1); If(param1 lt SetFont('dyn_10'), SetFont('dyn_8'));"
+						/>
+					</panel>
+					-->
+					
+				</panel>
+			</panel>
+
+			<!-- Drop target -->
+			<panel
+				color="invisible"
+				texture="/ui/info/drop.tga"
+				watch="ItemCursorVisible"
+				ontrigger="SetVisible(ItemCursorVisible); RefreshCursor();"
+				onmouseover="SetColor('white');"
+				onmouseout="SetColor('invisible');"
+				onclick="ItemPlaceStash({slot});"
+				onrightclick="ItemPlaceStash({slot});"
+			/>
+		</panel>
+	</template>
+	
+	<template name="stash">
+		<panel name="stash_parent" visible="0" noclick="1" valign="bottom" 
+			watch="ShopActive"
+			ontrigger="
+				If(
+					param,
+					If(
+						!IsVisibleSelf(),
+						If(
+							_shopFlag_useAnims,
+							FadeIn(75 * _shopFlag_animSpeedMult),
+							SetVisible(true)
+						)
+					),
+					If(
+						IsVisibleSelf(),
+						If(
+							_shopFlag_useAnims,
+							FadeOut(75 * _shopFlag_animSpeedMult),
+							SetVisible(false)
+						)
+					)
+				);
+			"
+		>		
+			<!-- Retro Frame (only appears for retro ui) -->
+			<panel name="retro_frame_stash_tag" noclick="1" visible="{retrobgframe=0}" width="26.9h" height="17.6h" align="right" valign="bottom" y="1.5h">
+				<panel color="black" y=".3h" width="98%" align="center" />
+				<image texture="/ui/common/retro/r_pattern/r_pattern_3.tga" color="1 1 1 .11" width="512i" height="256i" />
+				<frame texture="/ui/common/retro/frame/retro_frame.tga" nocompress="1" noclick="1"
+					borderthickness="1.48125h"
+				/>
+			</panel>
+			<panel name="stash" width="24.0h" height="16.0h" align="right" valign="bottom" color="{stashbgcolor=black}" />			
+			<panel name="game_stash_buttons" noclick="1" >
+				<instance name="stash_button" x="19.73%" y="64.45%" width="15.625%" height="15.625%" slot="0" retroinventoryframe="{retroinventoryframe}" textureoverride="{textureoverride=/ui/legion/empty_pack.tga}" />
+				<instance name="stash_button" x="38.09%" y="64.45%" width="15.625%" height="15.625%" slot="1" retroinventoryframe="{retroinventoryframe}" textureoverride="{textureoverride=/ui/legion/empty_pack.tga}" />
+				<instance name="stash_button" x="56.84%" y="64.45%" width="15.625%" height="15.625%" slot="2" retroinventoryframe="{retroinventoryframe}" textureoverride="{textureoverride=/ui/legion/empty_pack.tga}" />
+				<instance name="stash_button" x="19.73%" y="83.01%" width="15.625%" height="15.625%" slot="3" retroinventoryframe="{retroinventoryframe}" textureoverride="{textureoverride=/ui/legion/empty_pack.tga}" />
+				<instance name="stash_button" x="38.09%" y="83.01%" width="15.625%" height="15.625%" slot="4" retroinventoryframe="{retroinventoryframe}" textureoverride="{textureoverride=/ui/legion/empty_pack.tga}" />
+				<instance name="stash_button" x="56.84%" y="83.01%" width="15.625%" height="15.625%" slot="5" retroinventoryframe="{retroinventoryframe}" textureoverride="{textureoverride=/ui/legion/empty_pack.tga}" />
+			</panel>
+			
+			<!-- Garena Tip Marks (Under Framing) -->
+			<button name="game_stash_tip_stash_garena"
+				x="-20.7h" y="-11.5h"
+				width="32i" height="32i"
+				align="right" valign="bottom"
+				color="invisible"
+				onmouseover="PlaySound('/shared/sounds/ui/button_over_02.wav'); showwidget('stash_tooltip');"
+				onmouseout="hidewidget('stash_tooltip');"
+				interactive="false"
+			>
+				<widgetstate statename="up">
+					<image width="100%" height="100%" valign="center" align="center" texture="/ui/huds/sentinel/tip_mark_up.tga" />
+				</widgetstate>
+				<widgetstate statename="over">
+					<image width="100%" height="100%" valign="center" align="center" texture="/ui/huds/sentinel/tip_mark_over.tga" />
+				</widgetstate>
+			</button>
+		
+			<!-- Framing -->
+			<animatedimage name="game_stash_chains_garena" x="12i" y="-30i" width="32i" height="128i" align="left" valign="bottom" texture="/ui/huds/sentinel/chain/sl002_.tga" noclick="true" loopbackframe="60" loop="1" fps="30" onshow="StartAnim();" />
+			<image name="game_stash_bg" width="{width=100%}" height="{height=100%}" valign="{valign}" texture="{texture=/ui/common/bot_right_stash_courier.tga}" noclick="1" />
+			<image name="game_stash_bg_alt" width="{width=100%}" height="{height=100%}" valign="{valign}" x="{x}" texture="{texture=/ui/common/bot_right_stash_courier.tga}" noclick="1" hflip="1" />
+			<image name="game_stash_icon" x="12.5h" y="15.0h" height="3h" width="3h" texture="{stashtexture=/ui/common/new_shop_interface/stash.tga}" noclick="1" />
+			<label name="game_stash_label" x="12.75h" y="15.0h" width="11.2h" height="3.0h" textalign="center" textvalign="center" font="{stashlabelfont=dyn_12}" outline="{labeloutline=0}" outlinecolor="{labeloutlinecolor}" color="{labelcolor=white}" noclick="1">game_label_stash</label>
+
+			<!-- Tip Marks-->
+			<button name="game_stash_tip_stash"
+				x="-19.8h" y="-11.2h"
+				width="2.6h" height="2.6h"
+				align="right" valign="bottom"
+				color="invisible"
+				onmouseover="PlaySound('/shared/sounds/ui/button_over_02.wav'); showwidget('stash_tooltip');"
+				onmouseout="hidewidget('stash_tooltip');"
+				interactive="false"
+			>
+				<widgetstate statename="up">
+					<image width="100%" height="100%" valign="center" align="center" texture="/ui/elements/tip_mark_up.tga" />
+				</widgetstate>
+				<widgetstate statename="over">
+					<image width="100%" height="100%" valign="center" align="center" texture="/ui/elements/tip_mark_over.tga" />
+				</widgetstate>
+			</button>
+			
+			<panel name="game_stash_buttons_garena" noclick="1" >
+				<instance name="stash_button" x="21.73%" y="67.2%" width="15.625%" height="15.625%" slot="0" textureoverride="{textureoverride=/ui/legion/empty_pack.tga}" />
+				<instance name="stash_button" x="38.09%" y="67.2%" width="15.625%" height="15.625%" slot="1" textureoverride="{textureoverride=/ui/legion/empty_pack.tga}" />
+				<instance name="stash_button" x="54.84%" y="67.2%" width="15.625%" height="15.625%" slot="2" textureoverride="{textureoverride=/ui/legion/empty_pack.tga}" />
+				<instance name="stash_button" x="21.73%" y="83.3%" width="15.625%" height="15.625%" slot="3" textureoverride="{textureoverride=/ui/legion/empty_pack.tga}" />
+				<instance name="stash_button" x="38.09%" y="83.3%" width="15.625%" height="15.625%" slot="4" textureoverride="{textureoverride=/ui/legion/empty_pack.tga}" />
+				<instance name="stash_button" x="54.84%" y="83.3%" width="15.625%" height="15.625%" slot="5" textureoverride="{textureoverride=/ui/legion/empty_pack.tga}" />
+			</panel>
+		</panel>
+	</template>
+	
+</package>

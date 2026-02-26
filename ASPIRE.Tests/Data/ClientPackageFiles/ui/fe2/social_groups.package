@@ -1,0 +1,665 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+
+	<trigger name="ShowRemoveBuddyPanel"/>
+
+	<!-- Leave Clan Confirmation -->
+	<template name="leave_clan_confirm">
+
+		<panel y="0.5h" width="100%" float="bottom" color="invisible" grow="1">
+			<label fity="1" fitypadding="0.8h" width="-1.6h" align="center" font="dyn_10" color="white" shadow="1" noclick="1" wrap="1" content="cc_panel_leaveclantxt"/>
+			<panel width="-1.6h" align="center" height="3.2h" color="invisible" noclick="1">
+				<instance
+					name="button2" button_name="unnamedButton224"
+					width="10.0h" height="2.4h"
+					align="left"
+					valign="top"
+					label="general_cancel"
+					onclick="Call('leave_clan_confirm_panel', 'FadeOut(250);');"
+				/>
+				<instance
+					name="button2" button_name="unnamedButton225"
+					width="16.0h" height="2.4h"
+					align="right"
+					valign="top"
+					label="cc_panel_leave_button"
+					onclick="Split(ChatRemoveClanMember(GetAccountName()), Call('leave_clan_confirm_panel', 'FadeOut(250);'));"
+				/>
+			</panel>
+		</panel>
+
+	</template>
+
+	<!-- Handlers for IM's (get rid of a lot of garbage) -->
+	<lua file="/ui/scripts/social_im.lua" />
+
+	<template name="im_nameplate">
+		<panel
+			name="im_name_{id}"
+			group="im_entries"
+			height="3.0h"
+			width="-1.8h"
+			visible="0"
+			onclicklua="UIManager.GetInterface('main'):HoNIMPanelF('ChatFocusChange', self, {id})"
+			onmouseover="Call('im_nameplate_{id}_highlight', 'FadeIn(250)')"
+			onmouseout="Call('im_nameplate_{id}_highlight', 'FadeOut(250)')"
+		>
+			<panel
+				name="im_nameplate_{id}_normal"
+				color="#1d2f3b"
+				texture="/ui/fe2/elements/comm_item_bg.tga"
+				width="100%"
+				height="100%"
+				align="left"
+				valign="top"
+				noclick="true"
+				visible="1"
+			/>
+			<panel
+				name="im_nameplate_{id}_highlight"
+				onload="FadeOut(0)"
+				color="#46adff42"
+				texture="/ui/fe2/elements/comm_item_bg.tga"
+				width="100%"
+				height="100%"
+				align="left"
+				valign="top"
+				noclick="true"
+				visible="1"
+			/>
+			<panel
+				name="im_nameplate_{id}_selected"
+				onload="FadeOut(0)"
+				color="#346dff52"
+				texture="/ui/fe2/elements/comm_item_bg.tga"
+				width="100%"
+				height="100%"
+				align="left"
+				valign="top"
+				noclick="true"
+				visible="1"
+			/>
+
+			<image
+				name="im_name_{id}_icon"
+				texture="{texture=/ui/elements/chat_icon.tga}"
+				x="10@"
+				width="80@"
+				height="80%"
+				align="left"
+				valign="center"
+				noclick="true"
+			/>
+
+			<panel color="invisible" x="110@" align="left" valign="center" height="-1.0h" noclick="1">
+				<label
+					name="im_nameplate_{id}"
+					width="100%"
+					height="100%"
+					textvalign="center"
+					textalign="left"
+					valign="center"
+					align="left"
+					font="dyn_10"
+					color="white"
+					shadow="true"
+					noclick="true"
+					blockinput="false"
+					shadowcolor="black"
+				/>
+			</panel>
+
+			<button
+				x="-0.5h"
+				width="1.7h" height="1.7h"
+				align="right"
+				valign="center"
+				color="invisible"
+				onclick="PlaySound('/shared/sounds/ui/ccpanel/button_close_01.wav');"
+				onclicklua="UIManager.GetInterface('main'):HoNIMPanelF('ChatClosed', self, {id})"
+				onmouseover="PlaySound('/shared/sounds/ui/ccpanel/button_over_01.wav');"
+			>
+				<widgetstate statename="up">
+					<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.5h" color="#910000" blockinput="false" noclick="true"/>
+					<frame texture="/ui/frames/roundframe.tga" color="0 0 0 1" borderthickness="0.5h" blockinput="false" noclick="true"/>
+					<image width="1.3h" height="1.3h" align="center" valign="center" color=".75 .75 .75 1" texture="/ui/elements/closex.tga" noclick="true" />
+				</widgetstate>
+				<widgetstate statename="over">
+					<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.5h" color="#dc0000" blockinput="false" noclick="true"/>
+					<frame texture="/ui/frames/roundframe.tga" color="0 0 0 1" borderthickness="0.5h" blockinput="false" noclick="true"/>
+					<image width="1.3h" height="1.3h" align="center" valign="center" color="1 1 1 1" texture="/ui/elements/closex.tga" noclick="true" />
+				</widgetstate>
+				<widgetstate statename="down" x="1" y="1">
+					<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.5h" color="#910000" blockinput="false" noclick="true"/>
+					<frame texture="/ui/frames/roundframe.tga" color="0 0 0 1" borderthickness="0.5h" blockinput="false" noclick="true"/>
+					<image width="1.3h" height="1.3h" align="center" valign="center" color="1 1 1 1" texture="/ui/elements/closex.tga" noclick="true" />
+				</widgetstate>
+			</button>
+		</panel>
+	</template>
+
+	<panel
+		name="ccwidget_whisper"
+		onshowlua="UIManager.GetInterface('main'):HoNIMPanelF('ChatWindowToggled', self, 1)"
+		onhidelua="UIManager.GetInterface('main'):HoNIMPanelF('ChatWindowToggled', self, 0)"
+		y="8.0h"
+		color="invisible"
+		width="70.0h"
+		height="38.0h"
+		align="center"
+		visible="false"
+		noclick="false"
+		blockinput="false"
+		cangrab="true"
+		onclick="BringToFront();"
+	>
+		<frame hmargin="-1h" vmargin="-1h" texture="/ui/frames/shadow.tga" color="invisible" bordercolor="0 0 0 0.8" borderthickness="1.4h" noclick="1" />
+
+		<frame color="0 0 0 1" bordercolor="#455166" borderthickness="2" noclick="1" />
+
+		<instance name="header_bar" y="1" width="-2" height="2.8h" align="center" lbl="ccwhisper_header_send_a_message" show_close="1" onclick="Call('ccwidget_whisper', 'FadeOut(250);');" />
+
+		<panel noclick="1" y="0.6h" width="16h" height="2.8h" valign="top" align="right" x="-2.8h" onload="If(!VarExists('ui_im_store_history'), CreateBool('ui_im_store_history', false));" >
+			<instance name="Moptions_checkbox_container" width="16h" innerwidth="100%" font="dyn_9" tip_id="" cvar="" onshow="SetButtonState(ui_im_store_history);" label="options_im_history" tip_label=""
+				onclick="If(!VarExists('ui_im_store_history'), CreateBool('ui_im_store_history', false)); Set(ui_im_store_history, !ui_im_store_history); SetSave('ui_im_store_history');"
+			/>
+		</panel>
+
+		<panel y="3.2h" height="-7.5h" width="-1.0h" align="center">
+
+			<!-- Userlist -->
+			<panel name="im_playerlist" width="22.0h" color="invisible" noclick="true" onclick="Call('ccwidget_whisper', 'BringToFront();');" clip="1">
+				<panel name="player_listbox" float="bottom">
+					<instance name="im_nameplate" id="1"/>
+					<instance name="im_nameplate" id="2"/>
+					<instance name="im_nameplate" id="3"/>
+					<instance name="im_nameplate" id="4"/>
+					<instance name="im_nameplate" id="5"/>
+					<instance name="im_nameplate" id="6"/>
+					<instance name="im_nameplate" id="7"/>
+					<instance name="im_nameplate" id="8"/>
+					<instance name="im_nameplate" id="9"/>
+					<instance name="im_nameplate" id="10"/>
+				</panel>
+
+				<!-- Scroll bar -->
+				<panel name="im_list_scroller" y="0" visible="true" color="1 0 0 0.0" clip="1" noclick="0" processonlyscroll="1"  hover="false"
+					onmousewheeldown="CallEvent('im_list_scrollbar', 1);"
+					onmousewheelup="CallEvent('im_list_scrollbar', 0);"
+				/>
+
+				<scrollbar
+					name="im_list_scrollbar"
+					align="right"
+					width="1.8h"
+					scrollbarsize="1.7h"
+					handlewidth="1.7h"
+					handleheight="1.7h"
+					texture="/ui/info/combobox.tga"
+					scrollbarplaceholder="true"
+					minvalue="0"
+					maxvalue="0"
+					step="1"
+					value="0"
+					vertical="true"
+					slotwidth="0.6h" slotheight="1"
+					onevent1="SetValue(GetValue+1);"
+					onevent0="SetValue(GetValue-1);"
+					onslidelua="UIManager.GetInterface('main'):HoNIMPanelF('ChatWindowSlide', self, self:GetValue())"
+					/>
+
+				<!-- No IMs Cover -->
+				<panel name="no_im_cover" visible="true">
+					<frame color="0 0 0 .8" bordercolor="#455166" borderthickness="1" noclick="true" />
+					<label height="100%" width="-5.0h" align="center" textalign="center" textvalign="center" wrap="true" font="dyn_10" color="white" content="no_ims"/>
+				</panel>
+
+			</panel>
+
+			<!-- Right -->
+			<panel width="-22.5h" align="right" noclick="true">
+				<frame color=".05 .07 .1 .5" bordercolor="#455166" borderthickness="1" noclick="true" />
+
+					<panel
+					name="ccwidget_whisper_box"
+					noclick="true"
+					blockinput="false"
+					visible="true"
+					>
+						<panel name="whisper_box_panel" height="-2" width="-2" align="center" valign="center" blockinput="false" noclick="true" visible="false">
+						<!-- Chat Window -->
+						<frame texture="/ui/info/backdrop.tga" borderthickness="1.0h" color="1 1 1 .5" noclick="1" />
+
+						<textbuffer
+							name="im_chatbox"
+							scrolltexture="/ui/info/combobox.tga"
+							handleheight="2.0h"
+							width="-1.0h" height="-1.0h"
+							align="center" valign="center"
+							scrollbarsize="2.0h"
+							textalign="left"
+							font="dyn_10"
+							wrap="true"
+							anchorbottom="true"
+							usesmileys="true"
+							maxlines="1000"
+							shadow="true"
+							color="invisible"
+							textcolor="white"
+							onclick="Call('ccwidget_whisper', 'BringToFront();');"
+						/>
+					</panel>
+				</panel>
+			</panel>
+
+		</panel>
+
+		<!-- Text Input -->
+		<panel x="-0.5h" y="-0.5h" height="3.5h" width="-23.5h" align="right" valign="bottom">
+			<frame texture="/ui/info/backdrop.tga" borderthickness="1.0h" color="1 1 1 .5" noclick="1" />
+
+			<panel x="0.5h" width="-10.8h" height="2.6h" valign="center" color="0 0 0 .5">
+				<frame color="invisible" bordercolor="#7b8c9b" borderthickness="1" noclick="1" />
+				<textbox
+					name="im_chat_box"
+					y="0.3h"
+					width="-1.0h"
+					valign="center" align="center"
+					maxlength="250"
+					textalign="left" textvalign="center"
+					font="dyn_10"
+					textcolor="white"
+					shadow="false"
+					color="invisible"
+					onenter="DoEvent();"
+					oneventlua="UIManager.GetInterface('main'):HoNIMPanelF('ChatSend')"
+					onesc="EraseInputLine(); SetFocus(true);"
+					onchange="PlaySound('/shared/sounds/ui/button_slide_01.wav'); if(StringLength(this) gt 0, EnableWidget('im_send_message_button'), DisableWidget('im_send_message_button'));"
+					onfocus="Call('ccwidget_whisper', 'BringToFront();');"
+					onclick="Call('ccwidget_whisper', 'BringToFront();');"
+				/>
+			</panel>
+			<instance
+				name="button2"
+				button_name="im_send_message_button"
+				enabled="false"
+				x="-0.5h"
+				height="2.6h" width="9.0h"
+				align="right" valign="center"
+				font="dyn_11"
+				label="ccwhisper_button_send_whisper"
+				onclicklua="UIManager.GetInterface('main'):HoNIMPanelF('ChatSend')"
+			/>
+		</panel>
+
+		<!-- New IM -->
+		<panel x="0.5h" y="-0.5h" height="3.5h" width="22.0h" align="left" valign="bottom">
+			<frame texture="/ui/info/backdrop.tga" borderthickness="1.0h" color="1 1 1 .5" noclick="1" />
+			<panel x="0.5h" width="-9.6h" height="2.6h" valign="center" color="0 0 0 .5">
+				<frame color="invisible" bordercolor="#7b8c9b" borderthickness="1" noclick="1" />
+				<textbox
+					name="cc_new_im_textbox"
+					onload="CreateBool('im_new_auto', false)"
+					onfocus="Set('im_new_auto', true)"
+					onlosefocus="Set('im_new_auto', false)"
+					y="0.3h"
+					width="-1.0h"
+					valign="center" align="center"
+					maxlength="250"
+					textalign="left" textvalign="center"
+					font="dyn_10"
+					textcolor="white"
+					shadow="false"
+					color="invisible"
+					onenter="DoEvent();"
+					onesc="
+						EraseInputLine();
+						SetFocus(true);
+					"
+					onchange="
+						If(StringLength(this) ge 5,
+							Split(CreateString('ui_autocompleteTextBox', name),
+								ChatAutoCompleteNick(this)),
+							Trigger('ChatAutoCompleteClear')
+						);
+						If(StringLength(this) gt 0,
+							EnableWidget('cc_open_im_button'),
+							DisableWidget('cc_open_im_button')
+						);
+					"
+					onevent="
+						If(StringLength(this) gt 0, Split(RequestUserStatus(this), SetFocusName('im_chat_box')));
+						EraseInputLine();
+						"
+				/>
+			</panel>
+
+			<!-- Autocomplete IM name box -->
+			<panel width="-1.0h" height="30.0h" y="2.4h" visible="false" color="invisible" watch="ChatAutoCompleteClear" ontrigger="SetVisible(false);" watch2="ChatAutoCompleteAdd" ontrigger2="if(im_new_auto, SetVisible(true));">
+				<instance name="autocomplete_list" listbox_name="autocomplete_open_im_list" y="0.5h" x="0.5h" width="18.0h" height="13.0h" align="left" valign="top" />
+			</panel>
+
+			<instance
+				name="button2"
+				button_name="cc_open_im_button"
+				enabled="false"
+				x="-3.2h"
+				height="2.6h" width="5.5h"
+				align="right" valign="center"
+				font="dyn_11"
+				label="general_ok"
+				onclick="CallEvent('cc_new_im_textbox');"
+			/>
+			<instance name="tip_mark" tip_id="new_im_tip" width="2.4h" height="2.4h" x="-0.5h" valign="center" align="right" />
+
+			<!-- Username not found/ offline -->
+			<panel name="im_user_error_panel" color="0 0 0 .9" visible="false">
+				<frame color="invisible" bordercolor="#720000" borderthickness="1" noclick="true" />
+				<label name="im_name_error" height="100%" width="-2.2h" textalign="center" textvalign="center" font="dyn_10" color="red" shadow="true" noclick="true" />
+				<button
+					x="-0.5h"
+					width="1.7h" height="1.7h"
+					align="right"
+					valign="center"
+					color="invisible"
+					onclick="
+						PlaySound('/shared/sounds/ui/ccpanel/button_close_02.wav');
+						Call('im_user_error_panel', 'FadeOut(250);');
+						SetFocusName('cc_new_im_textbox');
+					"
+					onmouseover="
+						PlaySound('/shared/sounds/ui/ccpanel/button_over_01.wav');
+					"
+					onshow="SetFocus(true);"
+				>
+					<widgetstate statename="up">
+						<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.5h" color="#910000" blockinput="false" noclick="true"/>
+						<frame texture="/ui/frames/roundframe.tga" color="0 0 0 1" borderthickness="0.5h" blockinput="false" noclick="true"/>
+						<image width="1.3h" height="1.3h" align="center" valign="center" color=".75 .75 .75 1" texture="/ui/elements/closex.tga" noclick="true" />
+					</widgetstate>
+					<widgetstate statename="over">
+						<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.5h" color="#dc0000" blockinput="false" noclick="true"/>
+						<frame texture="/ui/frames/roundframe.tga" color="0 0 0 1" borderthickness="0.5h" blockinput="false" noclick="true"/>
+						<image width="1.3h" height="1.3h" align="center" valign="center" color="1 1 1 1" texture="/ui/elements/closex.tga" noclick="true" />
+					</widgetstate>
+					<widgetstate statename="down" x="1" y="1">
+						<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.5h" color="#910000" blockinput="false" noclick="true"/>
+						<frame texture="/ui/frames/roundframe.tga" color="0 0 0 1" borderthickness="0.5h" blockinput="false" noclick="true"/>
+						<image width="1.3h" height="1.3h" align="center" valign="center" color="1 1 1 1" texture="/ui/elements/closex.tga" noclick="true" />
+					</widgetstate>
+				</button>
+			</panel>
+		</panel>
+	</panel>
+
+	<!-- Join Clan Confirmation -->
+	<template name="clan_invite_body">
+		<panel width="-1.0h" height="12.0h" align="center" color="invisible" noclick="1">
+			<label name="clan_invite_body_label" width="100%" height="100%" textvalign="top" textalign="left" valign="center" wrap="true" align="center" font="dyn_10" color="white" shadow="true" shadowcolor="black" noclick="1"/>
+		</panel>
+
+		<instance
+			name="button2" button_name="unnamedButton233"
+			x="0.5h" y="-0.5h"
+			width="10.0h" height="2.4h"
+			align="left"
+			valign="bottom"
+			label="general_cancel"
+			onmouseover="PlaySound('/shared/sounds/ui/button_over_02.wav');"
+			onclick="PlaySound('{sound=/shared/sounds/ui/button_click_01.wav}'); Call('clan_invite_overlay', 'FadeOut(250);'); ChatRejectClanInvite();"
+		/>
+
+		<instance
+			name="button2" button_name="unnamedButton234"
+			x="-0.5h" y="-0.5h"
+			width="10.0h" height="2.4h"
+			align="right"
+			valign="bottom"
+			label="general_accept"
+			onmouseover="PlaySound('/shared/sounds/ui/button_over_02.wav');"
+			onclick="PlaySound('{sound=/shared/sounds/ui/button_click_01.wav}'); Call('clan_invite_overlay', 'FadeOut(250);'); ChatAcceptClanInvite();"
+		/>
+	</template>
+
+	<template name="clan_invite">
+		<panel
+			name="clan_invite_overlay"
+			visible="0"
+			watch="ChatClanInvite" ontrigger="Call('clan_invite_body_label', 'SetText(Translate(\'clan_invite_body_label\', \'inviter\', \'' # param0 # '\', \'clan\', \'' # param1 # '\'));'); SetVisible(true);"
+		>
+			<panel color="0 0 0 .7"/>
+
+			<panel blockinput="true">
+				<instance
+					name="alert_box"
+					width="30.0h"
+					height="16.5h"
+					align="center"
+					label="clan_invite_header_label"
+					show_close="true"
+					closebtn_click="Call('clan_invite_overlay', 'FadeOut(250);'); ChatRejectClanInvite();"
+					body="clan_invite_body"
+				/>
+			</panel>
+		</panel>
+	</template>
+
+	<instance name="clan_invite"/>
+
+	<trigger name="ShowLeaveClanPanel"/>
+
+	<panel name="leave_clan_confirm_panel" watch="ShowLeaveClanPanel" ontrigger="SetVisible(true);" visible="0" blockinput="true" color="0 0 0 .7">
+		<instance
+			name="alert_box_growable"
+			width="32.0h"
+			align="center"
+			label="cc_panel_leaveclan"
+			show_close="true"
+			closebtn_click="Call('leave_clan_confirm_panel', 'FadeOut(250);');"
+			body="leave_clan_confirm"
+		/>
+	</panel>
+
+	<!-- Remove from Clan Confirmation -->
+	<template name="remove_from_clan_confirm">
+
+		<panel y="0.5h" width="100%" float="bottom" color="invisible" grow="1">
+			<label fity="1" fitypadding="0.8h" width="-1.6h" align="center" font="dyn_10" color="white" shadow="1" noclick="1" wrap="1" content="ui_items_cc_right_click_clan_removetxt"/>
+			<panel width="-1.6h" align="center" height="3.2h" color="invisible" noclick="1">
+				<instance
+					name="button2" button_name="unnamedButton235"
+					width="12.0h" height="2.4h"
+					align="left"
+					valign="top"
+					label="general_cancel"
+					onclick="Call('remove_from_clan_confirm_panel', 'FadeOut(250);');"
+				/>
+				<instance
+					name="button2" button_name="unnamedButton236"
+					width="12.0h" height="2.4h"
+					align="right"
+					valign="top"
+					label="general_ok"
+					onclick="Split(ChatRemoveClanMember(ui_lastSelectedUser), Call('remove_from_clan_confirm_panel', 'FadeOut(250);'));"
+				/>
+			</panel>
+		</panel>
+
+	</template>
+
+	<trigger name="ShowRemoveFromClanPanel"/>
+
+	<panel name="remove_from_clan_confirm_panel" watch="ShowRemoveFromClanPanel" ontrigger="SetVisible(true);" visible="0" blockinput="true" color="0 0 0 .7">
+		<instance
+			name="alert_box_growable"
+			width="32.0h"
+			align="center"
+			label="cc_panel_leaveclan"
+			show_close="true"
+			closebtn_click="Call('remove_from_clan_confirm_panel', 'FadeOut(250);');"
+			body="remove_from_clan_confirm"
+		/>
+	</panel>
+
+	<!-- Remove Buddy Confirmation -->
+	<template name="remove_buddy_confirm">
+
+		<panel y="0.5h" width="100%" float="bottom" color="invisible" grow="1">
+			<label fity="1" fitypadding="0.8h" width="-1.6h" align="center" font="dyn_10" color="white" shadow="1" noclick="1" wrap="1" content="ui_items_cc_right_click_remove_buddytxt"/>
+			<panel width="-1.6h" align="center" height="3.2h" color="invisible" noclick="1">
+				<instance
+					name="button2" button_name="unnamedButton237"
+					width="12.0h" height="2.4h"
+					align="left"
+					valign="top"
+					label="general_cancel"
+					onclick="Call('remove_buddy_confirm_panel', 'FadeOut(250);');"
+				/>
+				<instance
+					name="button2" button_name="unnamedButton238"
+					width="12.0h" height="2.4h"
+					align="right"
+					valign="top"
+					label="general_ok"
+					onclick="Split(ChatRemoveBuddy(ui_lastSelectedUser), Call('remove_buddy_confirm_panel', 'FadeOut(250);'),  If(!StringEquals(GetAccountName(), ui_lastSelectedUser) and IsFollowing(ui_lastSelectedUser), UnFollow(StripClanTag(ui_lastSelectedUser))));"
+				/>
+			</panel>
+		</panel>
+
+	</template>
+
+	<panel name="remove_buddy_confirm_panel" watch="ShowRemoveBuddyPanel" ontrigger="SetVisible(true);" visible="0" blockinput="true" color="0 0 0 .7">
+		<instance
+			name="alert_box_growable"
+			width="32.0h"
+			align="center"
+			label="ui_items_cc_right_click_remove_buddy"
+			show_close="true"
+			closebtn_click="Call('remove_buddy_confirm_panel', 'FadeOut(250);');"
+			body="remove_buddy_confirm"
+		/>
+	</panel>
+
+	<!-- Ignore Confirmation -->
+	<template name="ignore_confirm">
+
+		<panel y="0.5h" width="100%" float="bottom" color="invisible" grow="1">
+			<label fity="1" fitypadding="0.8h" width="-1.6h" align="center" font="dyn_10" color="white" shadow="1" noclick="1" wrap="1" content="ui_items_cc_right_click_ignoretxt"/>
+			<panel width="-1.6h" align="center" height="3.2h" color="invisible" noclick="1">
+				<instance
+					name="button2" button_name="unnamedButton239"
+					width="12.0h" height="2.4h"
+					align="left"
+					valign="top"
+					label="general_cancel"
+					onclick="Call('ignore_confirm_panel', 'FadeOut(250);');"
+				/>
+				<instance
+					name="button2" button_name="unnamedButton240"
+					width="12.0h" height="2.4h"
+					align="right"
+					valign="top"
+					label="general_ok"
+					onclick="Split(ChatIgnore(ui_lastSelectedUser), Call('ignore_confirm_panel', 'FadeOut(250);'));"
+				/>
+			</panel>
+		</panel>
+
+	</template>
+
+	<trigger name="ShowIgnorePanel"/>
+
+	<panel name="ignore_confirm_panel" watch="ShowIgnorePanel" ontrigger="SetVisible(true);" visible="0" blockinput="true" color="0 0 0 .7">
+		<instance
+			name="alert_box_growable"
+			width="32.0h"
+			align="center"
+			label="ui_items_cc_right_click_ignore"
+			show_close="true"
+			closebtn_click="Call('ignore_confirm_panel', 'FadeOut(250);');"
+			body="ignore_confirm"
+		/>
+	</panel>
+
+	<!-- Add to Banlist Confirmation -->
+	<template name="addbanlist_confirm">
+
+		<panel y="0.5h" width="100%" float="bottom" color="invisible" grow="1">
+			<label fity="1" fitypadding="0.8h" width="-1.6h" align="center" font="dyn_10" color="white" shadow="1" noclick="1" wrap="1" content="ui_items_cc_right_click_addbantxt"/>
+			<panel width="-1.6h" align="center" height="3.2h" color="invisible" noclick="1">
+				<instance
+					name="button2" button_name="unnamedButton241"
+					width="12.0h" height="2.4h"
+					align="left"
+					valign="top"
+					label="general_cancel"
+					onclick="Call('addbanlist_confirm_panel', 'FadeOut(250);');"
+				/>
+				<instance
+					name="button2" button_name="unnamedButton242"
+					width="12.0h" height="2.4h"
+					align="right"
+					valign="top"
+					label="general_ok"
+					onclick="Split(ChatAddBanlist(ui_lastSelectedUser, 'None'), Call('addbanlist_confirm_panel', 'FadeOut(250);'));"
+				/>
+			</panel>
+		</panel>
+
+	</template>
+
+	<trigger name="ShowAddBanPanel"/>
+
+	<panel name="addbanlist_confirm_panel" watch="ShowAddBanPanel" ontrigger="SetVisible(true);" visible="0" blockinput="true" color="0 0 0 .7">
+		<instance
+			name="alert_box_growable"
+			width="32.0h"
+			align="center"
+			label="ui_items_cc_right_click_addban"
+			show_close="true"
+			closebtn_click="Call('addbanlist_confirm_panel', 'FadeOut(250);');"
+			body="addbanlist_confirm"
+		/>
+	</panel>
+
+	<!-- Patch/Update Now Confirmation -->
+	<template name="update_confirm">
+
+		<panel y="0.5h" width="100%" float="bottom" color="invisible" grow="1">
+			<label fity="1" fitypadding="0.8h" width="-1.6h" align="center" font="dyn_10" color="white" shadow="1" noclick="1" wrap="1" content="ui_items_patchupdatetxt"/>
+			<panel width="-1.6h" align="center" height="3.2h" color="invisible" noclick="1">
+				<instance
+					name="button2" button_name="unnamedButton243"
+					width="13.0h" height="2.4h"
+					align="left"
+					valign="top"
+					label="general_cancel"
+					onclick="Call('update_confirm_panel', 'FadeOut(250);');"
+				/>
+				<instance
+					name="button2" button_name="unnamedButton244"
+					width="13.0h" height="2.4h"
+					align="right"
+					valign="top"
+					label="general_ok"
+					onclick="Cmd('RestartAndUpdate');"
+				/>
+			</panel>
+		</panel>
+	</template>
+
+	<trigger name="ShowUpdatePanel"/>
+
+	<panel name="update_confirm_panel" watch="ShowUpdatePanel" ontrigger="SetVisible(true);" visible="0" blockinput="true" color="0 0 0 .7">
+		<instance
+			name="alert_box_growable"
+			width="32.0h"
+			align="center"
+			label="ui_items_patchupdate"
+			show_close="true"
+			closebtn_click="Call('update_confirm_panel', 'FadeOut(250);');"
+			body="update_confirm"
+		/>
+	</panel>
+
+</package>

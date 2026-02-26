@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+	<template name="defense_tooltip">
+		<frame
+			name="defense_tooltip"
+			texture="/ui/frames/rounded_bg_white.tga"
+			borderthickness="0.6h"
+			color="0 0 0 .75"
+			visible="false"
+			align="right"
+			valign="bottom"
+			width="27h"
+			height="5.0h"
+			float="bottom"
+			grow="1" regrow="1" growinvis="0"
+		>
+			<frame texture="/ui/frames/roundframe.tga" borderthickness="0.6h" bordercolor="#434d50"/>
+			<anchor x="1.0h" y="0.6h" />
+
+			<panel
+				width="-2.0h"
+				height="1.8h"
+			>
+				<label
+					width="60%"
+					textalign="left"
+					font="dyn_10"
+					color="white"
+					watch="ActiveArmor"
+					ontriggerlua="self:SetText(Translate('tooltip_armor') .. FtoA(tonumber(param1), 2))"
+				/>
+				<label
+					width="40%"
+					align="right"
+					textalign="left"
+					font="dyn_10"
+					color="white"
+					watch="ActiveArmor"
+					ontriggerlua="
+						local diff = (tonumber(param1) - tonumber(param0))
+						if (diff == 0.0) then
+							self:ClearText()
+						elseif (diff > 0.0) then
+							self:SetText('^777(' .. FtoA(param0, 2) .. ' ^g+' .. FtoA(diff, 2) .. '^777)')
+						else
+							self:SetText('^777(' .. FtoA(param0, 2) .. ' ^r' .. FtoA(diff, 2) .. '^777)')
+						end
+					"
+				/>
+			</panel>
+			
+			<label
+				width="-2.0h"
+				height="1.8h"
+				textalign="left"
+				font="dyn_10"
+				color="white"
+				watch="ActiveArmor"
+				ontriggerlua="self:SetText(Translate('tooltip_damage_reduction') .. FtoA(tonumber(param2) * 100, 1) .. '%')"
+			/>
+
+			<panel width="-2.0h" height="1.8h" />
+
+			<panel
+				width="-2.0h"
+				height="1.8h"
+			>
+				<label
+					width="60%"
+					textalign="left"
+					font="dyn_10"
+					color="white"
+					watch="ActiveMagicArmor"
+					ontriggerlua="self:SetText(Translate('tooltip_magic_armor') .. FtoA(tonumber(param1), 2))"
+				/>
+				<label
+					width="40%"
+					align="right"
+					textalign="left"
+					font="dyn_10"
+					color="white"
+					watch="ActiveMagicArmor"
+					ontriggerlua="
+						local diff = (tonumber(param1) - tonumber(param0))
+						if (diff == 0.0) then
+							self:ClearText()
+						elseif (diff > 0.0) then
+							self:SetText('^777(' .. FtoA(param0, 2) .. ' ^g+' .. FtoA(diff, 2) .. '^777)')
+						else
+							self:SetText('^777(' .. FtoA(param0, 2) .. ' ^r' .. FtoA(diff, 2) .. '^777)')
+						end
+					"
+				/>
+			</panel>
+			
+			<label
+				width="-2.0h"
+				height="1.8h"
+				textalign="left"
+				font="dyn_10"
+				color="white"
+				watch="ActiveMagicArmor"
+				ontriggerlua="self:SetText(Translate('tooltip_magic_damage_reduction') .. FtoA(tonumber(param2) * 100, 1) .. '%')"
+			/>
+
+			<panel width="-2.0h" height="0.55h" sticky="true" stickytoinvis="false" />
+		</frame>
+	</template>
+</package>

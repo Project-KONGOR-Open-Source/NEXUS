@@ -1,0 +1,430 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+	<trigger name="UpdateAccountUpgradeForm"/>
+
+	<trigger name="AccountUpgradeStatus"/>
+	<trigger name="AccountUpgradeResult"/>
+	<form
+		name="AccountUpgrade"
+		host="!hon"
+		target="/signup/client_upgrade.php"
+		ssl="true"
+		statustrigger="AccountUpgradeStatus"
+		resulttrigger="AccountUpgradeResult"
+		resultparam0="success"
+		resultparam1="errors"
+		resultparam2="connect"
+		resultparam3="code"
+	/>
+	
+	<!-- Friend Purchasing Stuff -->
+	
+	<trigger name="UpdateFriendUpgradeForm"/>
+
+	<trigger name="FriendUpgradeStatus"/>
+	<trigger name="FriendUpgradeResult"/>
+	<form
+		name="FriendUpgrade"
+		host="!hon"
+		target="/signup/friend_upgrade.php"
+		ssl="true"
+		statustrigger="FriendUpgradeStatus"
+		resulttrigger="FriendUpgradeResult"
+		resultparam0="success"
+		resultparam1="errors"
+		resultparam2="connect"
+		resultparam3="code"
+	/>
+	
+	<template name="upgrade_account_field">
+		<panel align="center" y="1h" width="-1h" height="2h" float="right">
+			<label name="{fieldname}_label" width="45%" height="2h" font="dyn_11" color="white" shadow="true" content="{label}" watch="UpdateAccountUpgradeForm" ontrigger="{ontrigger}"/>
+			<panel width="5%" height="2h">
+				<image align="right" width="70@" height="60%" valign="center" texture="/ui/info/arrow.tga" />
+			</panel>
+			<panel width="45%" height="2h">
+				<instance name="field" widgetname="{fieldname}" order="{order}" onchange="Trigger('UpdateAccountUpgradeForm'); {onchange}" passchar="{passchar=}" maxlength="{maxlength=-1}" form="{form=}" data="{data=}" onfocus="{onfocus=}" onlosefocus="{onlosefocus=}" />
+			</panel>
+			<panel width="5%" height="2h" visible="{hastip}">
+				<instance name="tip_mark" tip_id="{tip_id}" width="100@" height="100%" valign="center" align="right" />
+				<instance name="generic_tooltip_resizey" x="20.8h" y="0" width="19.8h" align="right" valign="center" tip_id="{tip_id}" title="{tip_title}" label="{tip_text}" />
+			</panel>
+		</panel>
+	</template>
+	
+	<template name="upgrade_friend_field">
+		<panel align="center" y="1h" width="-1h" height="2h" float="right">
+			<label name="{fieldname}_label" width="45%" height="2h" font="dyn_11" color="white" shadow="true" content="{label}" watch="UpdateFriendUpgradeForm" ontrigger="{ontrigger}"/>
+			<panel width="5%" height="2h">
+				<image align="right" width="70@" height="60%" valign="center" texture="/ui/info/arrow.tga" />
+			</panel>
+			<panel width="45%" height="2h">
+				<instance name="field" widgetname="{fieldname}" order="{order}" onchange="Trigger('UpdateFriendUpgradeForm'); {onchange}" passchar="{passchar=}" maxlength="{maxlength=-1}" form="{form=}" data="{data=}" onfocus="{onfocus=}" onlosefocus="{onlosefocus=}" />
+			</panel>
+			<panel width="5%" height="2h" visible="{hastip}">
+				<instance name="tip_mark" tip_id="{tip_id}" width="100@" height="100%" valign="center" align="right" />
+				<instance name="generic_tooltip_resizey" x="20.8h" y="0" width="19.8h" align="right" valign="center" tip_id="{tip_id}" title="{tip_title}" label="{tip_text}" />
+			</panel>
+		</panel>
+	</template>
+
+	<template name="cc_form">
+		<panel y="2.7h" width="-2%" height="38.3h" color="invisible" align="center" noclick="1" reverse="true">
+			<!-- Upgrade status -->
+			<panel
+				name="prime_upgrade_status"
+				color="0 0 0 .75"
+				align="center"
+				noclick="false" visible="false"
+				watch="AccountUpgradeStatus"
+				ontrigger="If(param != 0, SetVisible(true));"
+			>
+				<panel width="-12.0h" height="12.0h" align="center" valign="center">
+					<frame texture="/ui/frames/tooltip_bg.tga" color="#0c1b3bc9" borderthickness=".6h" align="left" valign="top">
+						<frame texture="/ui/frames/roundframe.tga" color="#A0A0A0" borderthickness=".6h"/>
+						<instance
+							name="header_bar"
+							buttonsize="1.8h"
+							height="2.4h"
+							lbl="creditcard_label_processing_form"
+							show_close="false"
+						/>
+
+						<instance
+							name="button2" button_name="unnamedButton2"
+							y="-1.0h"
+							width="18.0h" height="2.4h"
+							align="center" valign="bottom"
+							label="creditcard_label_correct_error"
+							onclick="PlaySound('/shared/sounds/ui/button_click.mp3'); Call('prime_upgrade_status', 'FadeOut(250);');"
+							visible="0"
+							watch="AccountUpgradeStatus"
+							ontrigger="If(param ge 3, SetVisible(true));"
+						/>
+						
+						<label
+							y="4.0h"
+							width="-5.0h" height="100%"
+							align="center"
+							textalign="center" wrap="1"
+							font="dyn_10" color="white" noclick="true"
+							watch="AccountUpgradeResult"
+							ontrigger="
+								If(!param0, SetText(Translate('credit_card_error', 'error', param9)));
+								If(!param0 and !StringEmpty(param15), SetText(Translate('credit_card_error', 'error', param15)));
+								
+								If(!param0 and StringEquals(param15, 'E00012'), SetText(Translate('credit_card_error_duplicate_subscription')));
+								If(!param0 and (param9 == 37 or param9 == 6), SetText(Translate('credit_card_error_invalid_number')));
+								If(!param0 and param9 == 78, SetText(Translate('credit_card_error_invalid_code')));
+								If(!param0 and param9 == 127, SetText(Translate('credit_card_error_address')));
+								If(!param0 and param9 == 11, SetText(Translate('credit_card_error_duplicate_transaction')));
+								If(!param0 and param9 == 7, SetText(Translate('credit_card_error_expiration_date')));
+								If(!param0 and ((param9 ge 2 and param9 le 4) or (param9 ge 250 and param9 le 251)), SetText(Translate('credit_card_error_declined')));
+								If(!param0, SetColor('#eb3535'), SetColor('#48ee48'));
+
+								If(param0, Login(main_login_user, main_login_password));
+
+								If(param0, Call('field_ccfirstname', 'Clear();'));
+								If(param0, Call('field_cclastname', 'Clear();'));
+								If(param0, Call('field_cczip', 'Clear();'));
+								If(param0, Call('field_ccnum', 'Clear();'));
+								If(param0, Call('field_cccvv', 'Clear();'));
+								If(param0, Call('field_ccmonth', 'ComboBoxCmd(\'selectnone\');'));
+								If(param0, Call('field_ccyear', 'ComboBoxCmd(\'selectnone\');'));
+								If(param0, HideWidget('prime_upgrade_status'));
+								"
+							watch0="AccountUpgradeStatus"
+							ontrigger0="
+								If(param == 2 or param == 3, SetText(Translate('credit_card_processing')));
+								If(param == 2 or param == 3, SetColor('#ebee48'));
+								"
+						/>
+					</frame>
+				</panel>
+			</panel>
+
+			<!-- Upgrade success -->
+			<panel name="UpgradeSuccess" color="0 0 0 .8" visible="false" blockinput="true" watch="AccountUpgradeResult" ontrigger="SetVisible(param0);">
+				<panel height="38.0h" color="invisible" align="center" noclick="1">
+					<frame color="invisible" bordercolor="#455166" borderthickness="1" noclick="1" />
+
+					<panel y="1.0h" height="7.7h" width="-2.0h" align="center" valign="top" color="1 1 1 .2">
+						<frame texture="/ui/info/backdrop.tga" borderthickness="2.0h" color="1 1 1 .5" noclick="1" />
+						<frame color=".05 .07 .1 .5" bordercolor="#455166" borderthickness="1" noclick="1" />
+
+						<label y="0.5h" width="-1.0h" height="2.0h" wrap="1" align="center" textalign="center" font="dyn_12" color="#ffaa00" shadow="true" shadowcolor="black" noclick="1" content="creditcard_label_prime_up_successful"/>
+						<label y="2.5h" width="-1.0h" height="4.0h" wrap="1" align="center" textalign="left" font="dyn_9" color="white" shadow="true" shadowcolor="black" noclick="1" content="creditcard_label_prime_up_ty"/>
+					</panel>
+
+					<label y="10.0h" width="-2.0h" height="3.0h" wrap="1" align="center" textalign="left" font="dyn_10" color="white" shadow="true" shadowcolor="black" noclick="1" content="creditcard_label_prime_benefits"/>
+
+					<!-- Transaction details -->
+					<panel y="14.0h" width="-4.0h" align="center">
+						<label y="0" height="2.0h" wrap="1" align="center" textalign="left" font="dyn_10" color="#ffaa00" shadow="true" shadowcolor="black" noclick="1" watch="AccountUpgradeResult" ontrigger="SetText(Translate('credit_card_result_charge', 'charge', FtoA(param14, 2)));"/>
+						<label y="2.0h" height="2.0h" wrap="1" align="center" textalign="left" font="dyn_10" color="#ffaa00" shadow="true" shadowcolor="black" noclick="1" watch="AccountUpgradeResult" ontrigger="SetText(Translate('credit_card_result_first_name', 'name', param10));"/>
+						<label y="4.0h" height="2.0h" wrap="1" align="center" textalign="left" font="dyn_10" color="#ffaa00" shadow="true" shadowcolor="black" noclick="1" watch="AccountUpgradeResult" ontrigger="SetText(Translate('credit_card_result_last_name', 'name', param11));"/>
+						<label y="6.0h" height="2.0h" wrap="1" align="center" textalign="left" font="dyn_10" color="#ffaa00" shadow="true" shadowcolor="black" noclick="1" watch="AccountUpgradeResult" ontrigger="SetText(Translate('credit_card_result_transaction_number', 'id', param13));"/>
+						<label y="8.0h" height="2.0h" wrap="1" align="center" textalign="left" font="dyn_10" color="#ffaa00" shadow="true" shadowcolor="black" noclick="1" watch="AccountUpgradeResult" ontrigger="SetText(Translate('credit_card_result_subscription_number', 'id', param1));"/>
+						<label y="10.0h" height="2.0h" wrap="1" align="center" textalign="left" font="dyn_10" color="#ffaa00" shadow="true" shadowcolor="black" noclick="1" watch="AccountUpgradeResult" ontrigger="SetText(Translate('credit_card_result_next_bill_date', 'date', param12));"/>
+						<label y="12.0h" height="2.0h" wrap="1" align="center" textalign="left" font="dyn_10" color="#ffaa00" shadow="true" shadowcolor="black" noclick="1" watch="AccountUpgradeResult" ontrigger="SetText(Translate('credit_card_result_email', 'email', GetAccountEmail()));"/>
+					</panel>
+
+					<label y="29.0h" width="-2.0h" height="10.0h" wrap="1" align="center" textalign="left" font="dyn_9" color="white" shadow="true" shadowcolor="black" noclick="1" content="creditcard_label_transaction_email"/>
+					
+					<instance
+						name="button2" button_name="unnamedButton3"
+						y="34.5h"
+						width="30.0h" height="2.4h"
+						align="center" valign="top"
+						label="creditcard_button_close_window" font="dyn_10"
+						onclick="HideWidget('UpgradeSuccess'); {close_cmd}"
+					/>
+				</panel>
+			</panel>
+			
+			<label y="0.6h" width="-2.0h" height="4.0h" wrap="1" align="center" textalign="left" font="dyn_10" color="white" shadow="true" shadowcolor="black" noclick="1" content="creditcard_label_match_content"/>
+
+			<!-- First name -->
+			<instance
+				name="upgrade_account_field"
+				y="4.2h"
+				label="creditcard_label_first_name"
+				hastip="true"
+				order="11"
+				fieldwidth="-1.8h"
+				fieldname="field_ccfirstname"
+				ontrigger="If(StringEmpty(field_ccfirstname), SetColor('red'), SetColor('white'));"
+				tip_id="ccfname_tip" tip_title="creditcard_label_first_name" tip_text="credit_card_first_name_tip"
+				form="AccountUpgrade" data="first_name"
+			/>
+
+			<!-- Last name -->
+			<instance
+				name="upgrade_account_field"
+				y="7.2h"
+				label="creditcard_label_last_name"
+				hastip="true"
+				order="12"
+				fieldwidth="-1.8h"
+				fieldname="field_cclastname"
+				ontrigger="If(StringEmpty(field_cclastname), SetColor('red'), SetColor('white'));"
+				tip_id="cclname_tip" tip_title="creditcard_label_last_name" tip_text="credit_card_last_name_tip"
+				form="AccountUpgrade" data="last_name"
+			/>
+
+			<!-- Zip code -->
+			<instance
+				name="upgrade_account_field"
+				y="10.2h"
+				label="creditcard_label_billing_zip"
+				hastip="true"
+				order="13"
+				fieldwidth="-1.8h"
+				fieldname="field_cczip"
+				ontrigger="If(StringEmpty(field_cczip), SetColor('red'), SetColor('white'));"
+				tip_id="cczip_tip" tip_title="creditcard_label_billing_zip" tip_text="credit_card_billing_zip_tip"
+				form="AccountUpgrade" data="zip"
+			/>
+
+			<!-- Card number -->
+			<panel y="13.2h" height="3.0h" color="invisible" align="center" width="-2.0h" noclick="1">
+				<label
+					name="field_ccnum_label"
+					width="100%" height="100%"
+					align="center" valign="center"
+					textvalign="center"
+					font="dyn_10" color="white" shadow="true" shadowcolor="black"
+					noclick="true"
+					content="creditcard_label_prime_card_number"
+					watch="UpdateAccountUpgradeForm"
+					ontrigger="If(!IsValidCCNumber(field_ccnum), SetColor('red'), SetColor('white'));"
+				/>
+				<image texture="/ui/elements/cc.tga" width="8.0h" height="2.0h" x="33%" valign="center"/>
+				<image x="-42%" width="3%" height="2@" valign="center" align="right" texture="/ui/info/arrow.tga"/>
+				<panel width="40%" align="right">
+					<panel width="{fieldwidth=100%}" height="74%" valign="center" align="left" color="0 0 0 1">
+						<instance name="field" widgetname="field_ccnum" order="14" onchange="Trigger('UpdateAccountUpgradeForm');" maxlength="16" form="AccountUpgrade" data="card_number"/>
+					</panel>
+				</panel>
+			</panel>
+
+			<!-- CVV2 -->
+			<panel y="16.2h" height="3.0h" color="invisible" align="center" width="-2.0h" noclick="1">
+				<label
+					name="field_cccvv_label"
+					width="100%" height="100%"
+					textalign="left" textvalign="center"
+					align="center" valign="center"
+					font="dyn_10" color="white" shadow="true" shadowcolor="black"
+					noclick="1"
+					content="creditcard_label_prime_cvv_number"
+					watch="UpdateAccountUpgradeForm"
+					ontrigger="
+						If(StringLength(field_cccvv) lt 3 or !StringContainsOnly(field_cccvv, '', '0'),
+							SetColor('red'),
+							SetColor('white')
+							);"
+				/>
+				<image x="-42%" width="3%" height="2@" valign="center" align="right" texture="/ui/info/arrow.tga" />
+				<panel width="40%" align="right">
+					<panel width="-1.8h" height="74%" valign="center" align="left" color="0 0 0 1">
+						<instance name="field" widgetname="field_cccvv" order="15" onchange="Trigger('UpdateAccountUpgradeForm');" onfocus="ShowWidget('cccvv_img');" onlosefocus="HideWidget('cccvv_img');" maxlength="4" form="AccountUpgrade" data="cvv"/>
+					</panel>
+					<instance name="tip_mark" tip_id="cccvv_tip" width="1.8h" height="1.8h" valign="center" align="right" />
+					<instance name="generic_tooltip_resizey" x="20.8h" y="0" width="19.8h" align="right" valign="center" tip_id="cccvv_tip" title="creditcard_label_prime_cvv_number" label="creditcard_label_cvv_number" />					
+
+					<panel name="cccvv_img" width="21.3h" height="10.65h" x="0" y="3.0h" visible="0">
+						<image texture="/ui/elements/cvv.tga"/>
+					</panel>
+				</panel>
+			</panel>
+
+			<!-- Expiration date -->
+			<panel y="19.2h" height="3.0h" color="invisible" align="center" width="-2.0h" noclick="1">
+				<label
+					width="100%" height="100%"
+					textalign="left" textvalign="center"
+					align="center" valign="center"
+					font="dyn_10" color="white" shadow="true" shadowcolor="black" noclick="1"
+					content="creditcard_label_prime_expiration"
+					watch="UpdateAccountUpgradeForm"
+					ontrigger="
+						If(
+							field_ccmonth lt 1 or
+							field_ccmonth gt 12 or
+							field_ccyear lt GetYear() or
+							(field_ccyear == GetYear() and field_ccmonth lt GetMonth()),
+								SetColor('red'),
+								SetColor('white')
+							);
+						"
+				/>
+				<image x="-67%" width="3%" height="2@" valign="center" align="right" texture="/ui/info/arrow.tga" />
+				<panel width="65%" align="right">
+					<panel width="12.6h" color="invisible" align="right" x="-13.8h">
+						<label
+							width="100%" height="100%"
+							align="center" valign="center"
+							textalign="left" textvalign="center"
+							font="dyn_9" color="white" shadow="true" shadowcolor="black" noclick="1"
+							content="creditcard_label_prime_month"
+							watch="UpdateAccountUpgradeForm"
+							ontrigger="
+								If(
+									field_ccmonth lt 1 or
+									field_ccmonth gt 12 or
+									field_ccyear lt GetYear() or
+									(field_ccyear == GetYear() and field_ccmonth lt GetMonth()),
+										SetColor('red'),
+										SetColor('white')
+									);
+								"
+						/>
+						<instance
+							name="Noptions_combobox"
+							id="field_ccmonth"
+							align="right" width="8.0h" itemwidth="100%" maxlistheight="5"
+							onload="CreateString('_purchase_month', '01');"
+							onshow="ListBoxCmd('Select 0');"
+							onselect="Trigger('UpdateAccountUpgradeForm');"
+							populate="
+								AddTemplateListItem('Ncombobox_item', '01', 'label', '01');
+								AddTemplateListItem('Ncombobox_item', '02', 'label', '02');
+								AddTemplateListItem('Ncombobox_item', '03', 'label', '03');
+								AddTemplateListItem('Ncombobox_item', '04', 'label', '04');								
+								AddTemplateListItem('Ncombobox_item', '05', 'label', '05');
+								AddTemplateListItem('Ncombobox_item', '06', 'label', '06');
+								AddTemplateListItem('Ncombobox_item', '07', 'label', '07');
+								AddTemplateListItem('Ncombobox_item', '08', 'label', '08');
+								AddTemplateListItem('Ncombobox_item', '09', 'label', '09');
+								AddTemplateListItem('Ncombobox_item', '10', 'label', '10');
+								AddTemplateListItem('Ncombobox_item', '11', 'label', '11');								
+								AddTemplateListItem('Ncombobox_item', '12', 'label', '12');
+								"
+							form="AccountUpgrade" formdata="month"
+						/>
+					</panel>					
+					<panel width="11.3h" color="invisible" align="right" x="-1.8h">
+						<label
+							width="100%" height="100%"
+							textvalign="center" textalign="left"
+							valign="center" align="center"
+							font="dyn_9" color="white" shadow="true" shadowcolor="black" noclick="1"
+							content="creditcard_label_prime_year
+"
+							watch="UpdateAccountUpgradeForm"
+							ontrigger="If(field_ccyear lt GetYear(), SetColor('red'), SetColor('white'));"
+							/>
+						<instance
+							name="Noptions_combobox"
+							id="field_ccyear"
+							align="right" width="8.0h" itemwidth="100%" maxlistheight="5"
+							onload="CreateString('_purchase_month', '01');"
+							onshow="ListBoxCmd('Select 0');"
+							onselect="Trigger('UpdateAccountUpgradeForm');"
+							populate="
+								AddTemplateListItem('Ncombobox_item', '2009', 'label', '2009');
+								AddTemplateListItem('Ncombobox_item', '2010', 'label', '2010');
+								AddTemplateListItem('Ncombobox_item', '2011', 'label', '2011');								
+								AddTemplateListItem('Ncombobox_item', '2012', 'label', '2012');
+								AddTemplateListItem('Ncombobox_item', '2013', 'label', '2013');
+								AddTemplateListItem('Ncombobox_item', '2014', 'label', '2014');
+								AddTemplateListItem('Ncombobox_item', '2015', 'label', '2015');
+								AddTemplateListItem('Ncombobox_item', '2016', 'label', '2016');
+								AddTemplateListItem('Ncombobox_item', '2017', 'label', '2017');
+								AddTemplateListItem('Ncombobox_item', '2018', 'label', '2018');								
+								AddTemplateListItem('Ncombobox_item', '2019', 'label', '2019');
+								AddTemplateListItem('Ncombobox_item', '2020', 'label', '2020');
+								"
+							form="AccountUpgrade" formdata="year"
+						/>
+					</panel>					
+					<instance name="tip_mark" tip_id="ccexp_tip" width="1.8h" height="1.8h" valign="center" align="right" />
+					<instance name="generic_tooltip_resizey" x="20.8h" y="-2.0h" width="19.8h" align="right" valign="center" tip_id="ccexp_tip" title="creditcard_label_prime_expiration" label="creditcard_label_expiration_date" />
+				</panel>
+			</panel>
+
+			<!-- Upgrade button -->
+			<panel y="22.5h" width="-2%" height="12.4h" color="invisible" align="center" noclick="1">
+				<panel y="0.6h" width="-6.0h" height="3.1h" align="center" color="invisible" onclick="{tos_link}">
+					<label textalign="center" wrap="1" font="dyn_10" color="white" noclick="1">creditcard_label_upgrade_agreement</label>
+				</panel>
+
+				<instance
+					name="button2" button_name="unnamedButton4"
+					y="4.4h"
+					width="30.0h" height="2.4h"
+					label="creditcard_label_upgrade_prime"
+					align="center"
+					enabled="false"
+					watch="UpdateAccountUpgradeForm"
+					font="dyn_12"
+					ontrigger="
+						SetEnabled(
+							!StringEmpty(field_ccfirstname) and
+							!StringEmpty(field_cclastname) and
+							!StringEmpty(field_cczip) and
+							IsValidCCNumber(field_ccnum) and
+							StringLength(field_cccvv) ge 3 and
+							StringLength(field_cccvv) le 4 and
+							StringContainsOnly(field_cccvv, '', '0') and
+							field_ccmonth ge 1 and
+							field_ccmonth le 12 and
+							field_ccyear ge GetYear() and
+							(field_ccyear gt GetYear() or field_ccmonth ge GetMonth()) and
+							GetAccountID() != -1
+							);
+						"
+					onclick="SubmitForm('AccountUpgrade', 'account_id', GetAccountID(), 'nickname', GetAccountName(), 'email', GetAccountEmail());"
+				/>
+				<image x="-10.6h" y="-1.4h" width="3.5h" height="3.5h" align="center" valign="bottom" texture="/ui/elements/thawte.tga" />			
+				<label x="2.4h" y="-2.9h" width="21.0h" height="3.0h" align="center" valign="bottom" textalign="center" textvalign="center" wrap="1" font="dyn_8" color="white" noclick="1">creditcard_label_secure_card</label>
+			</panel>
+		
+			<frame color=".05 .07 .1 .5" bordercolor="#455166" borderthickness="1" noclick="1" />
+		</panel>
+
+		<instance y="0" name="header_bar" align="center" width="-2%" height="2.5h" lbl="creditcard_header_upgrade_prime" show_close="0" />
+	</template>
+
+</package>

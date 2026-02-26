@@ -1,0 +1,486 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+	<lua file="/ui/scripts/newui/communicator_v2.lua"/>
+
+	<template name="communicator_chat_template">
+		<panel name="communicator_chat_{id}" x="{x}" y="{y}" width="{width=100%}" height="{height=100%}" visible="0">
+			<button name="communicator_chat_{id}_button_selected" color="invisible" visible="0"
+					onclicklua=""
+					onrightclicklua="Communicator_V2:ChatOnRightClickTab({id})"
+					onmouseoverlua="GetWidget('communicator_chat_{id}_tip'):FadeIn(150)"
+					onmouseoutlua="GetWidget('communicator_chat_{id}_tip'):FadeOut(150)"
+			>
+				<widgetstate statename="up">
+					<image texture="/ui/fe2/newui/res/communicator/tab_selected_l.png" width="16i" height="64i" valign="bottom" noclick="1" />
+					<image name="communicator_chat_{id}_button_selected_c1" texture="/ui/fe2/newui/res/communicator/tab_selected_c.png" width="-32i" height="64i" valign="bottom" align="center" noclick="1" />
+					<image texture="/ui/fe2/newui/res/communicator/tab_selected_r.png" width="16i" height="64i" valign="bottom" align="right" noclick="1" />
+					<image name="communicator_chat_{id}_button_selected_icon1" y="3i" texture="$invis" x="5i" width="32i" height="32i" valign="center" noclick="1"/>
+					<panel width="-40i" x="-10i" y="3i" align="right" clip="1" noclick="1">
+						<label name="communicator_chat_{id}_button_selected_name1" textalign="center" textvalign="center" font="dyn_12" color="#eaccba" outline="1" outlinecolor="#230000" />
+					</panel>
+				</widgetstate> 
+				<widgetstate statename="over">
+					<image texture="/ui/fe2/newui/res/communicator/tab_selected_l.png" width="16i" height="64i" valign="bottom" noclick="1" />
+					<image name="communicator_chat_{id}_button_selected_c2" texture="/ui/fe2/newui/res/communicator/tab_selected_c.png" width="-32i" height="64i" valign="bottom" align="center" noclick="1" />
+					<image texture="/ui/fe2/newui/res/communicator/tab_selected_r.png" width="16i" height="64i" valign="bottom" align="right" noclick="1" />
+					<image name="communicator_chat_{id}_button_selected_icon2" y="3i" texture="$invis" x="5i" width="32i" height="32i" valign="center" noclick="1"/>
+					<panel width="-40i" x="-10i" y="3i" align="right" clip="1" noclick="1">
+						<label name="communicator_chat_{id}_button_selected_name2" textalign="center" textvalign="center" font="dyn_12" color="#eaccba" outline="1" outlinecolor="#230000" />
+					</panel>
+				</widgetstate>
+				<widgetstate statename="down" >
+					<image texture="/ui/fe2/newui/res/communicator/tab_selected_l.png" width="16i" height="64i" valign="bottom" noclick="1" />
+					<image name="communicator_chat_{id}_button_selected_c3" texture="/ui/fe2/newui/res/communicator/tab_selected_c.png" width="-32i" height="64i" valign="bottom" align="center" noclick="1" />
+					<image texture="/ui/fe2/newui/res/communicator/tab_selected_r.png" width="16i" height="64i" valign="bottom" align="right" noclick="1" />
+					<image name="communicator_chat_{id}_button_selected_icon3" y="3i" texture="$invis" x="5i" width="32i" height="32i" valign="center" noclick="1"/>
+					<panel width="-40i" x="-10i" y="3i" align="right" clip="1" noclick="1">
+						<label name="communicator_chat_{id}_button_selected_name3" textalign="center" textvalign="center" font="dyn_12" color="#eaccba" outline="1" outlinecolor="#230000" />
+					</panel>
+				</widgetstate>
+			</button>
+			<button name="communicator_chat_{id}_button_notselected" color="invisible" visible="1"
+					onclicklua="Communicator_V2:ChatOnClickTab({id})"
+					onrightclicklua="Communicator_V2:ChatOnRightClickTab({id})"
+					onmouseoverlua="GetWidget('communicator_chat_{id}_tip'):FadeIn(150)"
+					onmouseoutlua="GetWidget('communicator_chat_{id}_tip'):FadeOut(150)"
+			>
+				<widgetstate statename="up">
+					<image texture="/ui/fe2/newui/res/communicator/tab_up_l.png" width="16i" height="64i" valign="bottom" noclick="1" />
+					<image name="communicator_chat_{id}_button_notselected_c1" texture="/ui/fe2/newui/res/communicator/tab_up_c.png" width="-32i" height="64i" valign="bottom" align="center" noclick="1" />
+					<image texture="/ui/fe2/newui/res/communicator/tab_up_r.png" width="16i" height="64i" valign="bottom" align="right" noclick="1" />
+					<image name="communicator_chat_{id}_button_notselected_icon1" y="3i" texture="$invis" x="5i" width="32i" height="32i" valign="center" noclick="1"/>
+					<panel width="-40i" x="-10i" y="3i" align="right" clip="1" noclick="1">
+						<label name="communicator_chat_{id}_button_notselected_name1" textalign="center" textvalign="center" font="dyn_12" color="#7a5f51" outline="1" outlinecolor="#230000"/>
+					</panel>
+				</widgetstate> 
+				<widgetstate statename="over">
+					<image texture="/ui/fe2/newui/res/communicator/tab_over_l.png" width="16i" height="64i" valign="bottom" noclick="1" />
+					<image name="communicator_chat_{id}_button_notselected_c2" texture="/ui/fe2/newui/res/communicator/tab_over_c.png" width="-32i" height="64i" valign="bottom" align="center" noclick="1" />
+					<image texture="/ui/fe2/newui/res/communicator/tab_over_r.png" width="16i" height="64i" valign="bottom" align="right" noclick="1" />
+					<image name="communicator_chat_{id}_button_notselected_icon2" y="3i" texture="$invis" x="5i" width="32i" height="32i" valign="center" noclick="1"/>
+					<panel width="-40i" x="-10i" y="3i" align="right" clip="1" noclick="1">
+						<label name="communicator_chat_{id}_button_notselected_name2" textalign="center" textvalign="center" font="dyn_12" color="#7a5f51" outline="1" outlinecolor="#230000"/>
+					</panel>
+				</widgetstate>
+				<widgetstate statename="down" >
+					<image texture="/ui/fe2/newui/res/communicator/tab_over_l.png" width="16i" height="64i" valign="bottom" noclick="1" />
+					<image name="communicator_chat_{id}_button_notselected_c3" texture="/ui/fe2/newui/res/communicator/tab_over_c.png" width="-32i" height="64i" valign="bottom" align="center" noclick="1" />
+					<image texture="/ui/fe2/newui/res/communicator/tab_over_r.png" width="16i" height="64i" valign="bottom" align="right" noclick="1" />
+					<image name="communicator_chat_{id}_button_notselected_icon3" y="3i" texture="$invis" x="5i" width="32i" height="32i" valign="center" noclick="1"/>
+					<panel width="-40i" x="-10i" y="3i" align="right" clip="1" noclick="1">
+						<label name="communicator_chat_{id}_button_notselected_name3" textalign="center" textvalign="center" font="dyn_12" color="#7a5f51" outline="1" outlinecolor="#230000"/>
+					</panel>
+				</widgetstate>
+			</button>
+			<image name="communicator_chat_{id}_notification" texture="/ui/fe2/newui/res/communicator/point.png" x="4i" y="-4i" width="16i" height="16i" align="right" noclick="1" visible="0"
+					onframelua="local value = (GetTime() % 800) /800 * math.pi
+								local alpha = math.abs(math.sin(value))
+								self:SetColor('1 1 1 '..alpha)
+								"
+			/>
+
+			<panel name="communicator_chat_{id}_tip" y="-36i" x="20i" align="center" valign="bttom" width="200i" height="32i" grow="1" regrow="1" noclick="1" visible="0">
+				<panel name="communicator_chat_{id}_tip_root" grow="1" regrow="1" width="100%" float="bottom" noclick="1">
+					<instance name="newui_custom_frame_template" alpha="0.8"/>
+					<anchor y="0"/>
+					<panel width="100%" height="5i" noclick="1"/>
+					<label name="communicator_chat_{id}_tip_value" font="dyn_12" width="-10i" align="center" textalign="center" textvalign="center" noclick="1" vpadding="20i" color="#eaccba" outline="1" outlinecolor="#230000" wrap="1" fity="true" fitypadding="0.8h"/>
+					<panel width="100%" height="5i" noclick="1"/>
+				</panel>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="communicator_user_template">
+		<panel name="communicator_user_{id}" x="{x}" y="{y}" width="{width=100%}" height="{height=36i}" noclick="0" visible="0" align="center"
+			onmouseoverlua="GetWidget('communicator_user_{id}_highlight'):FadeIn(150)"
+			onmouseoutlua="GetWidget('communicator_user_{id}_highlight'):FadeOut(150)"
+			onmousewheeldown="CallEvent('communicator_user_scrollbar', 1);"
+			onmousewheelup="CallEvent('communicator_user_scrollbar', 0);"
+			onrightclicklua="Communicator_V2:UserOnRightClick({id})"
+			ondoubleclicklua="Communicator_V2:UserOnDoubleClick({id})"
+		>
+			<image name="communicator_user_{id}_line" x="-3%" texture="/ui/fe2/newui/res/common/hline.png" width="110%" height="1" align="center" valign="bottom" noclick="1"/>
+			<image name="communicator_user_{id}_highlight" width="128%" height="142%" align="center" valign="center" noclick="1" texture="/ui/fe2/newui/res/communicator/highlight.png" visible="0"/>
+			<panel name="communicator_user_{id}_progress" color="green" noclick="1" visible="0">
+			</panel>
+			<label name="communicator_user_{id}_label" x="45i" textalign="left" textvalign="center" font="dyn_10" color="#d7b6a2" noclick="1"/>
+			<panel name="communicator_user_{id}_ascension" x="-40i" width="80@" height="80%" align="right" valign="center" noclick="1" visible="0">
+				<image name="communicator_user_{id}_ascension_img_0" texture="/ui/fe2/codex/s1.tga" width="3h" height="3h" align="center" valign="center" visible="1" noclick="1"/>
+				<image name="communicator_user_{id}_ascension_img_1" texture="/ui/fe2/codex/s2.tga" width="3h" height="3h" align="center" valign="center" visible="0" noclick="1"/>
+				<image name="communicator_user_{id}_ascension_img_2" texture="/ui/fe2/codex/s3.tga" width="3h" height="3h" align="center" valign="center" visible="0" noclick="1"/>
+
+				<label name="communicator_user_{id}_ascension_label" width="200%" textalign="center" textvalign="bottom" align="center" valign="center" font="dyn_8" color="white" outline="true" noclick="1"/>
+			</panel>
+			<panel x="10i" width="78@" height="78%" valign="center" noclick="1">
+				<panel onmouseoverlua="GetWidget('communicator_user_{id}_symbol'):ScaleWidth('200%', 150)
+										GetWidget('communicator_user_{id}_symbol'):ScaleHeight('200%', 150)
+										GetWidget('communicator_user_{id}'):BringToFront()"
+				   		onmouseoutlua="GetWidget('communicator_user_{id}_symbol'):ScaleWidth('100%', 150)
+										GetWidget('communicator_user_{id}_symbol'):ScaleHeight('100%', 150)"
+				>
+						<image name="communicator_user_{id}_symbol" noclick="1" align="center" valign="center"/>
+				</panel>	
+				<panel name="communicator_user_{id}_symbolmask" visible="0"/>
+			</panel>
+			<panel width="78@" height="78%" x="-10i" align="right" valign="center" noclick="1">
+				<panel onmouseoverlua="GetWidget('communicator_user_{id}_avatar'):ScaleWidth('200%', 150)
+										GetWidget('communicator_user_{id}_avatar'):ScaleHeight('200%', 150)
+										GetWidget('communicator_user_{id}'):BringToFront()"
+				   		onmouseoutlua="GetWidget('communicator_user_{id}_avatar'):ScaleWidth('100%', 150)
+										GetWidget('communicator_user_{id}_avatar'):ScaleHeight('100%', 150)"
+				>
+					<avatar name="communicator_user_{id}_avatar" noclick="1" align="center" valign="center"/>
+				</panel>
+				<panel name="communicator_user_{id}_avatarmask" visible="0"/>
+				<image name="communicator_user_{id}_kick" texture="/ui/fe2/newui/res/communicator/kick.png" visible="0"
+							onmouseoverlua="Common_V2:ShowSimpleTip(true, 'game_lobby_kick_tip', '200i')"
+							onmouseoutlua="Common_V2:ShowSimpleTip(false)"
+					/>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="communicator_joinchannel_body_template">
+		<panel height="175i" noclick="1">
+			<panel y="-25i" height="40i" valign="center">
+				<label x="30i" textalign="left" textvalign="center" font="dyn_11" color="#f0d3c1" outline="1" outlinecolor="#230000" noclick="1" content="newui_communicator_channelname"/>
+				<panel x="60i" width="230i" height="32i" align="center" valign="center">
+					<frame texture="/ui/fe2/newui/res/common/frames/frame_n.png" borderthickness="4" noclick="1"/>
+					<textbox name="communicator_main_popup_joinchannel_name" y="5i" width="-20i" align="center" color="invisible" font="dyn_12" textcolor="#f0d3c1" outline="1" outlinecolor="#230000"
+									onesc="SetFocus(true); SetInputLine('');"
+									onenter="DoEvent();"
+									oneventlua="Communicator_V2:ChatOnClickJoinChannel()"
+									maxlength="30"
+									onchangelua="local text = self:GetValue()
+												 GetWidget('communicator_joinchannel_body_ok'):SetEnabled(string.len(text) > 0)
+												"
+					/>
+				</panel>
+			</panel>
+
+			<instance name="newui_common_button_2_template" button_name="communicator_joinchannel_body_ok" y="-10i" width="105i" height="32i" align="center" valign="bottom" label="newui_communicator_join"
+						onclicklua="Communicator_V2:ChatOnClickJoinChannel()" enabled="0"
+			/>
+		</panel>
+	</template>
+
+	<template name="communicator_template">
+		<panel name="communicator_main" x="{x=226i}" y="{y=-20i}" width="{width=866i}" height="47i" align="{align=center}" valign="{valign=bottom}" noclick="1">
+			<panel name="communicator_main_input">
+				<frame texture="/ui/fe2/newui/res/common/frames/communicator/input.png" borderthickness="8" noclick="1"/>
+				<textbox
+						name="communicator_send_box"
+						width="-60i"
+						hpadding="1h"
+						vpadding="1h"
+						maxlength="250"
+						font="dyn_14"
+						textcolor="#d7b6a2"
+						outline="1"
+						outlinecolor="#230000"
+						shadow="false"
+						color="invisible"
+						
+						onkeydown="	If(param == 281, ChatPrevHistory());
+									If(param == 283, ChatNextHistory());
+									If(param == 281 or param == 283, SetInputLine(ChatGetCurHistory()));
+									"
+						onkeydownlua="if tonumber(param) == GetCvarInt('chat_gameLobbyChatToggle') then
+										 Communicator_V2:ChatOnAltToggle(true)
+									  end
+									 "
+						onkeyuplua="if tonumber(param) == GetCvarInt('chat_gameLobbyChatToggle') then
+									     Communicator_V2:ChatOnAltToggle(false)
+									end
+									"
+						onfocuslua="Communicator_V2:ChatOnInputGetFocus()"
+
+						onlosefocuslua="Communicator_V2:ChatOnAltToggle(false)"
+						oneventlua="Communicator_V2:ChatOnClickSendText()"
+						onevent2lua=""
+						onenter="DoEvent(); EraseInputLine();"
+						onesc="SetDefaultFocus(StringLength(this) gt 0); EraseInputLine();"
+						ontab="
+							CreateString('_temp_chat_message', TabChat(this));
+							If(!StringEquals(_temp_chat_message, this), SetInputLine(_temp_chat_message));
+						"
+						onchange="
+							CreateString('_temp_chat_message', SetCurrentChatMessage(this));
+							If(!StringEquals(_temp_chat_message, this), SetInputLine(_temp_chat_message));
+							If(StringLength(this) gt 0,
+								EnableWidget('communicator_send_button'),
+								DisableWidget('communicator_send_button')
+							);
+						"
+						onload="CreateBool('_toggle_pressed', false)"
+				/>
+
+				<button name="communicator_main_input_chattype" width="36i" height="36i" x="-55i" align="right" valign="center" color="invisible" numstates="2" visible="0"
+						onclicklua="PlaySound('/shared/sounds/ui/revamp/region_click.wav')
+									Common_V2:ShowSimpleTip(false)"
+						onmouseoverlua="PlaySound('/shared/sounds/ui/revamp/region_hover.wav')"
+						onmouseoutlua="Common_V2:ShowSimpleTip(false)"
+				>
+					<image texture="/ui/fe2/newui/res/common/line2.png" width="2i" height="32i" x="25i" align="center" valign="center"/>
+					<widgetstate statename="up1">
+						<image texture="/ui/fe2/newui/res/communicator/chattype_up.png" y="-1" width="64i" height="64i" align="center" valign="center"/>
+						<label textalign="center" textvalign="center" content="newui_communicator_allchat" font="dyn_10" color="#d4baab" outline="1" outlinecolor="#3b1e15" noclick="1"/>
+					</widgetstate>
+					<widgetstate statename="over1">
+						<image texture="/ui/fe2/newui/res/communicator/chattype_over.png" y="-1" width="64i" height="64i" align="center" valign="center"/>
+						<label textalign="center" textvalign="center" content="newui_communicator_allchat" font="dyn_10" color="#ffecdf" outline="1" outlinecolor="#3b1e15" noclick="1"/>
+					</widgetstate>
+					<widgetstate statename="down1" y="1">
+						<image texture="/ui/fe2/newui/res/communicator/chattype_up.png" y="-1" width="64i" height="64i" align="center" valign="center"/>
+						<label textalign="center" textvalign="center" content="newui_communicator_allchat" font="dyn_10" color="#d4baab" outline="1" outlinecolor="#3b1e15" noclick="1"/>
+					</widgetstate>
+					<widgetstate statename="up2">
+						<image texture="/ui/fe2/newui/res/communicator/chattype_up.png" y="-1" width="64i" height="64i" align="center" valign="center"/>
+						<label textalign="center" textvalign="center" content="newui_communicator_teamchat" font="dyn_10" color="#d4baab" outline="1" outlinecolor="#3b1e15" noclick="1"/>
+					</widgetstate>
+					<widgetstate statename="over2">
+						<image texture="/ui/fe2/newui/res/communicator/chattype_over.png" y="-1" width="64i" height="64i" align="center" valign="center"/>
+						<label textalign="center" textvalign="center" content="newui_communicator_teamchat" font="dyn_10" color="#ffecdf" outline="1" outlinecolor="#3b1e15" noclick="1"/>
+					</widgetstate>
+					<widgetstate statename="down2" y="1">
+						<image texture="/ui/fe2/newui/res/communicator/chattype_up.png" y="-1" width="64i" height="64i" align="center" valign="center"/>
+						<label textalign="center" textvalign="center" content="newui_communicator_teamchat" font="dyn_10" color="#d4baab" outline="1" outlinecolor="#3b1e15" noclick="1"/>
+					</widgetstate>
+				</button>
+
+				<button name="communicator_send_button"
+						width="50i"
+						height="50i"
+						align="right"
+						valign="center"
+						color="invisible"
+						onmouseoverlua="PlaySound('/shared/sounds/ui/revamp/region_hover.wav')"
+						enabled="false"
+						onclick="Call('communicator_send_box', 'DoEvent()'); SetActiveWidget('communicator_send_box'); Call('communicator_send_box', 'EraseInputLine());');"
+				>
+					<widgetstate statename="up">
+						<image texture="/ui/fe2/newui/res/communicator/send.png" width="64i" height="64i" align="center" valign="center" noclick="1" />
+					</widgetstate>
+					<widgetstate statename="over">
+						<image texture="/ui/fe2/newui/res/communicator/send_over.png" width="64i" height="64i" align="center" valign="center" noclick="1" />
+					</widgetstate>
+					<widgetstate statename="down" x="1" y="1">
+						<image texture="/ui/fe2/newui/res/communicator/send_over.png" width="64i" height="64i" align="center" valign="center" noclick="1" />
+					</widgetstate>
+					<widgetstate statename="disabled">	
+						<image texture="/ui/fe2/newui/res/communicator/send_disabled.png" width="64i" height="64i" align="center" valign="center" noclick="1" />
+					</widgetstate>
+				</button>
+
+				<button name="communicator_expand"
+						x="8i"
+						width="32i"
+						height="32i"
+						valign="center"
+						color="invisible"
+						onmouseover="PlaySound('/shared/sounds/ui/button_over_01.wav');"
+						onclick="PlaySound('{sound=/shared/sounds/ui/button_click_01.wav}');"
+						onclicklua="Communicator_V2:ChatOnSwitchBigAndSmallText()"
+						visible="0"
+				>
+					<widgetstate statename="up">
+						<image texture="/ui/fe2/newui/res/communicator/expand_up.png" noclick="1" />
+					</widgetstate>
+					<widgetstate statename="over">
+						<image texture="/ui/fe2/newui/res/communicator/expand_over.png" noclick="1" />
+					</widgetstate>
+					<widgetstate statename="down" x="1" y="1">
+						<image texture="/ui/fe2/newui/res/communicator/expand_over.png" noclick="1" />
+					</widgetstate>
+					<image name="communicator_expand_notification" texture="/ui/fe2/newui/res/communicator/point.png" x="15i" y="-2i" width="16i" height="16i" align="left" noclick="1" visible="0"
+						onframelua="local value = (GetTime() % 800) /800 * math.pi
+									local alpha = math.abs(math.sin(value))
+									self:SetColor('1 1 1 '..alpha)
+									"
+					/>
+				</button>
+				
+
+				<button name="communicator_collapse"
+						x="8i"
+						width="32i"
+						height="32i"
+						valign="center"
+						color="invisible"
+						onmouseover="PlaySound('/shared/sounds/ui/button_over_01.wav');"
+						onclick="PlaySound('{sound=/shared/sounds/ui/button_click_01.wav}');"
+						onclicklua="Communicator_V2:ChatOnSwitchBigAndSmallText()"
+						visible="0"
+				>
+					<widgetstate statename="up">
+						<image texture="/ui/fe2/newui/res/communicator/collapse_up.png" noclick="1" />
+					</widgetstate>
+					<widgetstate statename="over">
+						<image texture="/ui/fe2/newui/res/communicator/collapse_over.png" noclick="1" />
+					</widgetstate>
+					<widgetstate statename="down" x="1" y="1">
+						<image texture="/ui/fe2/newui/res/communicator/collapse_over.png" noclick="1" />
+					</widgetstate>
+				</button>
+			</panel>
+
+			<panel align="center" valign="bottom" width="+70" height="432i" noclick="1"> <!--297i-->
+				<panel name="communicator_main_large_scale" width="100%" height="100%" valign="bottom" noclick="1" clip="1">
+					<panel name="communicator_main_large" x="35" width="866i" height="287i" y="-62i" valign="bottom" float="bottom">
+						<panel name="communicator_main_large_bg" float="right" width="+2" align="center" visible="0">
+							<image texture="/ui/fe2/newui/res/communicator/bg_l.png" width="4" height="512i" noclick="1"/>
+							<image texture="/ui/fe2/newui/res/communicator/bg_c.png" width="-8" height="512i" noclick="1"/>
+							<image texture="/ui/fe2/newui/res/communicator/bg_r.png" width="4" height="512i" noclick="1"/>
+						</panel>
+						<anchor y="0"/>
+						<panel height="38i" noclick="1">
+							<panel name="communicator_main_large_tabroot" width="-60i" noclick="1">
+								<instance name="communicator_chat_template" width="140i" id="1"/>
+								<instance name="communicator_chat_template" width="140i" id="2"/>
+								<instance name="communicator_chat_template" width="140i" id="3"/>
+								<instance name="communicator_chat_template" width="140i" id="4"/>
+								<instance name="communicator_chat_template" width="140i" id="5"/>
+								<instance name="communicator_chat_template" width="140i" id="6"/>
+								<instance name="communicator_chat_template" width="140i" id="7"/>
+								<instance name="communicator_chat_template" width="140i" id="8"/>
+								<instance name="communicator_chat_template" width="140i" id="9"/>
+								<instance name="communicator_chat_template" width="140i" id="10"/>
+								<instance name="communicator_chat_template" width="140i" id="11"/>
+								<instance name="communicator_chat_template" width="140i" id="12"/>
+								<instance name="communicator_chat_template" width="140i" id="13"/>
+								<instance name="communicator_chat_template" width="140i" id="14"/>
+								<instance name="communicator_chat_template" width="140i" id="15"/>
+								<instance name="communicator_chat_template" width="140i" id="16"/>
+								<instance name="communicator_chat_template" width="140i" id="17"/>
+								<instance name="communicator_chat_template" width="140i" id="18"/>
+								<instance name="communicator_chat_template" width="140i" id="19"/>
+								<instance name="communicator_chat_template" width="140i" id="20"/>
+								<instance name="communicator_chat_template" width="140i" id="21"/>
+								<instance name="communicator_chat_template" width="140i" id="22"/>
+								<instance name="communicator_chat_template" width="140i" id="23"/>
+								<instance name="communicator_chat_template" width="140i" id="24"/>
+							</panel>
+							<panel width="60i" noclick="1" align="right">
+								<button name="communicator_main_large_chat_lastpage" x="-42i" align="right"  width="12i" color="invisible" visible="1" onclicklua="Communicator_V2:ChatOnClickChangePage(false)">
+									<widgetstate statename="up">
+										<image texture="/ui/fe2/newui/res/communicator/arrow.png" width="32i" height="32i" align="center" valign="center" noclick="1" />
+									</widgetstate> 
+									<widgetstate statename="over">
+										<image texture="/ui/fe2/newui/res/communicator/arrow_over.png" width="32i" height="32i" align="center" valign="center" noclick="1" />
+									</widgetstate>
+									<widgetstate statename="down" x="1" y="1">
+										<image texture="/ui/fe2/newui/res/communicator/arrow_over.png" width="32i" height="32i" align="center" valign="center" noclick="1" />
+									</widgetstate>
+									<widgetstate statename="disabled">
+										<image texture="/ui/fe2/newui/res/communicator/arrow.png" width="32i" height="32i" align="center" valign="center" rendermode="grayscale" noclick="1" />
+									</widgetstate> 
+								</button>
+								<button name="communicator_main_large_chat_nextpage" x="-30i" align="right" width="12i" color="invisible" visible="1" onclicklua="Communicator_V2:ChatOnClickChangePage(true)">
+									<widgetstate statename="up">
+										<image texture="/ui/fe2/newui/res/communicator/arrow.png" width="32i" height="32i" align="center" valign="center" noclick="1" hflip="1"/>
+									</widgetstate> 
+									<widgetstate statename="over">
+										<image texture="/ui/fe2/newui/res/communicator/arrow_over.png" width="32i" height="32i" align="center" valign="center" noclick="1" hflip="1"/>
+									</widgetstate>
+									<widgetstate statename="down" x="1" y="1">
+										<image texture="/ui/fe2/newui/res/communicator/arrow_over.png" width="32i" height="32i" align="center" valign="center" noclick="1" hflip="1"/>
+									</widgetstate>
+									<widgetstate statename="disabled">
+										<image texture="/ui/fe2/newui/res/communicator/arrow_over.png" width="32i" height="32i" align="center" valign="center" rendermode="grayscale" hflip="1" noclick="1" />
+									</widgetstate> 
+								</button>
+								<image texture="/ui/fe2/newui/res/communicator/line3.png" x="-25i" align="right" valign="center" width="1" height="16i" noclick="1" visible="1"/>
+								
+								<button x="-5i" width="16i" height="16i" align="right" valign="center" color="invisible"
+										onclicklua="PlaySound('/shared/sounds/ui/revamp/region_click.wav') Communicator_V2:ChatOnClickShowJoinChannelPanel()"
+										onmouseoverlua="Common_V2:ShowGenericTip(true, 'irc_join_create_tip_title', 'irc_join_create_tip')"
+										onmouseoutlua="Common_V2:ShowGenericTip(false)"
+								>
+									<widgetstate statename="up">
+										<image texture="/ui/fe2/newui/res/communicator/add.png" align="center" valign="center" noclick="1"/>
+									</widgetstate>
+									<widgetstate statename="over">
+										<image texture="/ui/fe2/newui/res/communicator/add_over.png" align="center" valign="center" noclick="1"/>
+									</widgetstate>
+									<widgetstate statename="down" x="1" y="1">
+										<image texture="/ui/fe2/newui/res/communicator/add_over.png" align="center" valign="center" noclick="1"/>
+									</widgetstate>
+								</button>
+							</panel>
+							<image name="communicator_chat_tab_line1" texture="/ui/fe2/newui/res/communicator/tab_line.png" height="64i" valign="bottom" noclick="1" visible="0"/>
+							<image name="communicator_chat_tab_line2" texture="/ui/fe2/newui/res/communicator/tab_line.png" height="64i" align="right" valign="bottom" noclick="1"/>
+						</panel>
+
+						<panel height="-38i" noclick="1">
+							<frame texture="/ui/fe2/newui/res/common/frames/communicator/frame.png" borderthickness="16" noclick="1"/>
+							<panel width="-267i" noclick="1">
+								<panel width="-30i" height="-16i" align="center" valign="center" noclick="1">
+									<textbuffer name="communicator_chatbuffer"
+												onclick="SetFocusName('communicator_send_box')"
+												scrolltexture="/ui/fe2/newui/res/common/scroll/scroll.png"
+												handleheight="25i"
+												scrollbarsize="12i"
+												textalign="left"
+												font="dyn_10"
+												wrap="true"
+												anchorbottom="true"
+												usesmileys="true"
+												maxlines="1000"
+												shadow="true"
+												color="invisible"
+												textcolor="#d7b6a2"
+												outline="1"
+												outlinecolor="#230000"
+									/>
+								</panel>
+							</panel>
+							<panel name="communicator_main_large_users" width="275i" noclick="1" align="right">
+								<image texture="/ui/fe2/newui/res/common/vline.png" y="-1%" width="1" height="100%" valign="center" noclick="1"/>
+								<panel width="-20i" height="32i" align="center" noclick="1">
+									<image texture="/ui/fe2/newui/res/common/hline.png" x="-2%" width="115%" height="1" align="center" valign="bottom" noclick="1"/>
+									<image texture="/ui/fe2/newui/res/communicator/icon02.png" x="-5i" width="32i" height="32i" valign="center" noclick="1"/>
+									<instance name="newui_longtext_label_template" label_name="communicator_main_large_channelname" x="30i" width="120i" textvalign="center" font="dyn_10" color="#c1afa3" outline="1" outlinecolor="#230000"/>
+								</panel>
+								<panel width="-20i" height="-32i" align="center" valign="bottom" noclick="1">
+									<scrollbar  name="communicator_user_scrollbar"
+										align="right"
+										width="12i"
+										height="-10i"
+										valign="center"
+										scrollbarsize="12i"
+										handlewidth="12i"
+										handleheight="25i"							
+										texture="/ui/fe2/newui/res/common/scroll/scroll.png"
+										scrollbarplaceholder="true"
+										minvalue="1"
+										maxvalue="1"							
+										step="1"
+										value="1"
+										vertical="true"
+										slotwidth="0.6h" slotheight="1"
+										onevent1="SetValue(GetValue+1);"
+										onevent0="SetValue(GetValue-1);"
+										onslidelua="Communicator_V2:UserPopulate()"
+									/>
+									<panel width="-3i" x="-10i" noclick="1">
+										<instance name="communicator_user_template" y="0" id="1" />
+										<instance name="communicator_user_template" y="36i" id="2" />
+										<instance name="communicator_user_template" y="72i" id="3" />
+										<instance name="communicator_user_template" y="108i" id="4" />
+										<instance name="communicator_user_template" y="144i" id="5" />
+										<instance name="communicator_user_template" y="180i" id="6" />
+									</panel>		
+								</panel>
+							</panel>
+						</panel>
+					</panel>
+				</panel>
+			</panel>
+
+			<instance name="newui_common_popup" id="communicator_main_popup_joinchannel" width="425i" y="-460i" align="right" show_close="1" title="newui_communicator_channelname" content="communicator_joinchannel_body_template" oncloselua="GetWidget('communicator_main_popup_joinchannel'):FadeOut(150)"/>
+		</panel>
+
+		<panel name="communicator_main_helper" width="1" height="1" noclick="1" onframelua="Communicator_V2:ChatOnFrame()" onloadlua="Communicator_V2:Init()"/>
+	</template>
+</package>

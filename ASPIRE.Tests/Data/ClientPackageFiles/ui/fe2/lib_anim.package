@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+	
+	<template name="stats_progress_bar_template_dev" >
+		<panel name="progbar_{id}" noclick="1" height="{height=100%}" width="{width=100%}" x="{x=0}" y="{y=0}" valign="{valign=top}" align="{align=left}" visible="1" >			
+			<frame texture="/ui/frames/tooltip_bg.tga" color="#2c4b6c" noclick="1"/>
+			<frame color="invisible" bordercolor="#455166" borderthickness="1" noclick="1" />
+			<panel width="-0.5h" align="center" height="-0.5h" valign="center" color="#000000">
+				<panel name="progbar_{id}_new_bg"  width="60%" color="{newbgcolor=#FF9C00}" visible="1" >	
+					<panel name="progbar_{id}_new_fog" width="100%" visible="1" watch="" ontrigger="DoEvent();" onload="DoEvent();" onevent="SetUScale(GetHeight() * 32 # 'p'); SetVScale(GetHeight() # 'p');" utile="true" vtile="true" texture="/ui/fe2/elements/bar_fog_megacontrast.tga" rendermode="additive" color="{newfogcolor=#FFCC00}" noclick="1" uspeed="-.5" uscale="64p" vscale="64p" />	
+					<image name="progbar_{id}_new_glow" visible="0" width="170@" height="210%" texture="/ui/fe2/elements/bar_glow_grayscale.tga" rendermode="additive" color="{newglowcolor=#FFCC00}" align="right" valign="center" x="50@"/>
+				</panel>
+				<panel name="progbar_{id}_cur_bg"  width="50%" color="{curbgcolor=#68007B}" visible="1" >
+					<panel name="progbar_{id}_cur_fog" width="100%" visible="1" watch="" ontrigger="DoEvent();" onload="DoEvent();" onevent="SetUScale(GetHeight() * 32 # 'p'); SetVScale(GetHeight() # 'p');" utile="true" vtile="true" texture="/ui/fe2/elements/bar_fog_megacontrast.tga" rendermode="additive" color="{curfogcolor=#ff1cd7}" noclick="1" uspeed="-.5" uscale="64p" vscale="64p" />
+					<image name="progbar_{id}_cur_glow" visible="0" width="170@" height="210%" texture="/ui/fe2/elements/bar_glow_grayscale.tga" rendermode="additive" color="{curglowcolor=#ff1cd7}" align="right" valign="center" x="50@"/>
+				</panel>	
+				<image texture="/ui/legion/behind_bar.tga" rendermode="overlay"/>
+				<image width="-2" align="center" texture="/ui/elements/bar_highlight.tga" color="1 1 1 0.6" />
+				<frame bordercolor="#455166" color="invisible" borderthickness="1" noclick="1" />
+				<label name="progbar_{id}_label_left"  x="0.8h" font="dyn_10" textalign="left"  textvalign="center" noclick="true" color="0 0 0 1" content="0" valign="center" />
+				<label name="progbar_{id}_label_right" x="0.8h" font="dyn_10" textalign="right" textvalign="center" noclick="true" color="1 1 1 1" content="0" valign="center" />				
+			</panel>
+		</panel>
+	</template>
+	
+	<template name="stats_numeric_label_template_dev" >
+		<panel name="proglabel_{id}" noclick="1" height="{height=5h}" width="{width=5h}" x="{x=0}" y="{y=0}" valign="{valign=center}" align="{align=center}" visible="1" >
+			<frame texture="/ui/frames/tooltip_bg.tga" color="#2c4b6c" noclick="1"/>
+			<frame color="invisible" bordercolor="#455166" borderthickness="1" noclick="1" />		
+			<label name="proglabel_{id}_label" visible="1" font="dyn_18" textvalign="center" textalign="center" color="#8e00ec" />
+		</panel>
+	</template>
+	
+	<template name="stats_icon_pulse_template_dev" >
+		<panel name="progiconpulse_{id}" noclick="1" height="{height=5h}" width="{width=5h}" x="{x}" y="{y}" valign="{valign=center}" align="{align=center}" visible="0" >
+			<image name="progiconpulse_{id}_icon" width="100%" height="100%" visible="1" align="center" valign="center" texture="{icon}" />
+		</panel>
+	</template>
+	
+</package>

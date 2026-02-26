@@ -1,0 +1,509 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+	<lua file="/ui/scripts/newui/common_v2.lua"/>
+
+	<style name="newui_font_style_18" font="dyn_18" color="#f0d3c1" outline="1" outlinecolor="#230000"/>
+	<style name="newui_font_style_14" font="dyn_14" color="#f0d3c1" outline="1" outlinecolor="#230000"/>
+	<style name="newui_font_style_12" font="dyn_12" color="#f0d3c1" outline="1" outlinecolor="#230000"/>
+	<style name="newui_font_style_11" font="dyn_11" color="#f0d3c1" outline="1" outlinecolor="#230000"/>
+	<style name="newui_font_style_10" font="dyn_10" color="#f0d3c1" outline="1" outlinecolor="#230000"/>
+	<style name="newui_font_style_9" font="dyn_9" color="#f0d3c1" outline="1" outlinecolor="#230000"/>
+
+	<trigger name="NewUIPopupMenu"/>
+
+	<!-- Custom Frame -->
+	<template name="newui_custom_frame_template">
+		<panel name="{widget_name}" x="{x}" y="{y}" width="{width=100%}" height="{height=100%}" align="{align}" valign="{valign}" visible="{visible=1}" noclick="1">
+			<panel color="{rgb=0.035 0.012 0.004} {alpha=0.4}" x="1" y="1" width="-2" height="-2" noclick="1"/>
+			<frame texture="/ui/fe2/newui/res/common/frames/custom/frame.png" borderthickness="4" noclick="1"/>
+		</panel>
+	</template>
+
+	<!-- Common Button -->
+	<template name="newui_common_button_1_template">
+		<button name="{button_name}"
+				x="{x}"
+				y="{y}"
+				width="{width=128i}"
+				height="{height=64i}"
+				align="{align}"
+				valign="{valign}"
+				color="invisible"
+				onclicklua="PlaySound('{clicksound=/shared/sounds/ui/revamp/region_click.wav}') {onclicklua}"
+				onclick="{onclick}"
+				visible="{visible=1}"
+				watch="{watch}"
+				ontrigger="{ontrigger}"
+				ontriggerlua="{ontriggerlua}"
+				watch1="{watch1}"
+				ontrigger1="{ontrigger1}"
+				ontrigger1lua="{ontrigger1lua}"
+				enabled="{enabled=1}"
+				onmouseoverlua="PlaySound('{oversound=/shared/sounds/ui/revamp/region_hover.wav}') {onmouseoverlua}"
+		>
+			<widgetstate statename="up">
+				<panel float="right">
+					<image texture="/ui/fe2/newui/res/common/{type=b1}_l_up.png" width="50@" height="100%" valign="center" noclick="1"/>
+					<image texture="/ui/fe2/newui/res/common/{type=b1}_c_up.png" width="-100@" height="100%" valign="center" noclick="1"/>
+					<image texture="/ui/fe2/newui/res/common/{type=b1}_r_up.png" width="50@" height="100%" valign="center" noclick="1"/>
+				</panel>
+				<label textalign="center" textvalign="center" font="{font=dyn_12}" content="{content}" noclick="1" color="{upcolor=#fffdf6}" outline="{outline=1}" outlinecolor="{upoutlinecolor=#7a3404}"/>
+			</widgetstate>
+			<widgetstate statename="over">
+				<panel float="right">
+					<image texture="/ui/fe2/newui/res/common/{type=b1}_l_over.png" width="50@" height="100%" valign="center" noclick="1"/>
+					<image texture="/ui/fe2/newui/res/common/{type=b1}_c_over.png" width="-100@" height="100%" valign="center" noclick="1"/>
+					<image texture="/ui/fe2/newui/res/common/{type=b1}_r_over.png" width="50@" height="100%" valign="center" noclick="1"/>
+				</panel>
+				<label x="1" y="1" textalign="center" textvalign="center" font="{font=dyn_12}" content="{content}" noclick="1" color="{overcolor=white}" outline="{outline=1}" outlinecolor="{overoutlinecolor=#b35810}"/>
+			</widgetstate>
+			<widgetstate statename="down" x="1" y="1">
+				<panel float="right">
+					<image texture="/ui/fe2/newui/res/common/{type=b1}_l_over.png" width="50@" height="100%" valign="center" noclick="1"/>
+					<image texture="/ui/fe2/newui/res/common/{type=b1}_c_over.png" width="-100@" height="100%" valign="center" noclick="1"/>
+					<image texture="/ui/fe2/newui/res/common/{type=b1}_r_over.png" width="50@" height="100%" valign="center" noclick="1" />
+				</panel>
+				<label x="1" y="1" textalign="center" textvalign="center" font="{font=dyn_12}" content="{content}" noclick="1" color="{overcolor=white}" outline="{outline=1}" outlinecolor="{overoutlinecolor=#b35810}"/>
+			</widgetstate>
+			<widgetstate statename="disabled">
+				<panel float="right">
+					<image texture="/ui/fe2/newui/res/common/{type=b1}_l_disabled.png" width="50@" height="100%" valign="center" noclick="1"/>
+					<image texture="/ui/fe2/newui/res/common/{type=b1}_c_disabled.png" width="-100@" height="100%" valign="center" noclick="1"/>
+					<image texture="/ui/fe2/newui/res/common/{type=b1}_r_disabled.png" width="50@" height="100%" valign="center" noclick="1"/>
+				</panel>
+				<label textalign="center" textvalign="center" font="{font=dyn_12}" content="{content}" noclick="1" color="{disabledcolor=#b7aaa6}" outline="{outline=1}" outlinecolor="{disabledoutlinecolor=#49423f}"/>
+			</widgetstate>
+		</button>
+	</template>
+
+	<template name="newui_common_button_2_template">
+		<button name="{button_name}" x="{x}" y="{y}" width="{width=100%}" height="{height=32i}" align="{align}" valign="{valign}" color="invisible" stickytoinvis="{stickytoinvis}" visible="{visible=1}"
+			    watch="{watch}" ontrigger="{ontrigger}" ontriggerlua="{ontriggerlua}"
+			    watch1="{watch1}" ontrigger1="{ontrigger1}" ontrigger1lua="{ontrigger1lua}"
+			    onmouseoverlua="PlaySound('{oversound=/shared/sounds/ui/revamp/region_hover.wav}') {onmouseoverlua}"
+			    onclick="{onclick}" onclicklua="PlaySound('{clicksound=/shared/sounds/ui/revamp/region_click.wav}') {onclicklua}"
+			    onrightclick="{onrightclick=}"
+			    onshow="{onshow}"
+			    enabled="{enabled=1}"
+			    group="{group}"
+		>
+			<widgetstate statename="up">
+				<panel float="right">
+					<image texture="/ui/fe2/newui/res/common/button2_l.png" width="8i" noclick="1"/>
+					<image texture="/ui/fe2/newui/res/common/button2_c.png" width="-16i" noclick="1"/>
+					<image texture="/ui/fe2/newui/res/common/button2_r.png" width="8i" noclick="1"/>
+				</panel>
+				<label x="{labelx}" textalign="center" textvalign="center" font="{font=dyn_12}" content="{label=''}" noclick="1" color="#e7cec3" outline="1" outlinecolor="#3d150f" watch="{labelwatch}" ontrigger="{labelontrigger}" ontriggerlua="{labelontriggerlua}" watch2="{labelwatch2}" ontrigger2="{labelontrigger2}" ontrigger2lua="{labelontrigger2lua}" group="{labelgroup}"/>
+				<image texture="{icon=$invis}" width="{imgwidth=32i}" height="{imgheight=32i}" valign="center" align="center" x="{imgx}" noclick="1"/>
+			</widgetstate>
+			<widgetstate statename="over">
+				<panel float="right">
+					<image texture="/ui/fe2/newui/res/common/button2_l_over.png" width="8i" noclick="1"/>
+					<image texture="/ui/fe2/newui/res/common/button2_c_over.png" width="-16i" noclick="1"/>
+					<image texture="/ui/fe2/newui/res/common/button2_r_over.png" width="8i" noclick="1"/>
+				</panel>
+				<label x="{labelx}" textalign="center" textvalign="center" font="{font=dyn_12}" content="{label=''}" noclick="1" color="#ffece4" outline="1" outlinecolor="#3d150f" watch="{labelwatch}" ontrigger="{labelontrigger}" ontriggerlua="{labelontriggerlua}" watch2="{labelwatch2}" ontrigger2="{labelontrigger2}" ontrigger2lua="{labelontrigger2lua}" group="{labelgroup}"/>
+				<image texture="{overicon=$invis}" width="{imgwidth=32i}" height="{imgheight=32i}" valign="center" align="center" x="{imgx}" noclick="1"/>
+			</widgetstate>
+			<widgetstate statename="down" x="1" y="1">
+				<panel float="right">
+					<image texture="/ui/fe2/newui/res/common/button2_l_over.png" width="8i" noclick="1"/>
+					<image texture="/ui/fe2/newui/res/common/button2_c_over.png" width="-16i" noclick="1"/>
+					<image texture="/ui/fe2/newui/res/common/button2_r_over.png" width="8i" noclick="1"/>
+				</panel>
+				<label x="{labelx}" textalign="center" textvalign="center" font="{font=dyn_12}" content="{label=''}" noclick="1" color="#ffece4" outline="1" outlinecolor="#3d150f" watch="{labelwatch}" ontrigger="{labelontrigger}" ontriggerlua="{labelontriggerlua}" watch2="{labelwatch2}" ontrigger2="{labelontrigger2}" ontrigger2lua="{labelontrigger2lua}" group="{labelgroup}"/>
+				<image texture="{overicon=$invis}" width="{imgwidth=32i}" height="{imgheight=32i}" valign="center" align="center" x="{imgx}" noclick="1"/>
+			</widgetstate>
+			<widgetstate statename="disabled">
+				<panel float="right">
+					<image texture="/ui/fe2/newui/res/common/button2_l_disabled.png" width="8i" noclick="1"/>
+					<image texture="/ui/fe2/newui/res/common/button2_c_disabled.png" width="-16i" noclick="1"/>
+					<image texture="/ui/fe2/newui/res/common/button2_r_disabled.png" width="8i" noclick="1"/>
+				</panel>
+				<label x="{labelx}" textalign="center" textvalign="center" font="{font=dyn_12}" content="{label=''}" noclick="1" color="#b09e9b" outline="1" outlinecolor="#210f0c" watch="{labelwatch}" ontrigger="{labelontrigger}" ontriggerlua="{labelontriggerlua}" watch2="{labelwatch2}" ontrigger2="{labelontrigger2}" ontrigger2lua="{labelontrigger2lua}" group="{labelgroup}"/>
+				<image texture="{disabledicon=$invis}" width="{imgwidth=32i}" height="{imgheight=32i}" valign="center" align="center" x="{imgx}" noclick="1"/>
+			</widgetstate>
+		</button>
+	</template>
+
+	<template name="newui_common_button_3_template">
+		<button name="{button_name}" x="{x}" y="{y}" width="{width=100%}" height="{height=100%}" align="{align}" valign="{valign}" color="invisible" 
+				onclicklua="PlaySound('{clicksound=/shared/sounds/ui/revamp/region_click.wav}') {onclicklua}"
+				onmouseoverlua="PlaySound('{oversound=/shared/sounds/ui/revamp/region_hover.wav}')"
+		>
+			<widgetstate statename="up">
+				<frame texture="/ui/fe2/newui/res/common/frames/frame_n.png" borderthickness="4i" noclick="1"/>
+				<label width="-20i" align="center" textalign="{textalign=center}" textvalign="{textvalign=center}" font="{font=dyn_10}" color="{normalcolor=#654636}" noclick="1" content="{label=''}"/>
+				<image texture="{img=$invis}" x="{imgx}" y="{imgy}" width="{imgwidth=16i}" height="{imgheight=16i}" align="{imgalign=center}" valign="{imgvalign=center}" noclick="1"/>
+			</widgetstate>
+			<widgetstate statename="over">
+				<frame texture="/ui/fe2/newui/res/common/frames/frame_h.png" borderthickness="4i" noclick="1"/>
+				<label width="-20i" align="center" textalign="{textalign=center}" textvalign="{textvalign=center}" font="{font=dyn_10}" color="{hovercolor=#8f6a58}" noclick="1" content="{label=''}"/>
+				<image texture="{hoverimg=$invis}" x="{imgx}" y="{imgy}" width="{imgwidth=16i}" height="{imgheight=16i}" align="{imgalign=center}" valign="{imgvalign=center}" noclick="1"/>
+			</widgetstate>
+			<widgetstate statename="down" y="1">
+				<frame texture="/ui/fe2/newui/res/common/frames/frame_h.png" borderthickness="4i" noclick="1"/>
+				<label width="-20i" align="center" textalign="{textalign=center}" textvalign="{textvalign=center}" font="{font=dyn_10}" color="{hovercolor=#8f6a58}" noclick="1" content="{label=''}"/>
+				<image texture="{hoverimg=$invis}" x="{imgx}" y="{imgy}" width="{imgwidth=16i}" height="{imgheight=16i}" align="{imgalign=center}" valign="{imgvalign=center}" noclick="1"/>
+			</widgetstate>
+		</button>
+	</template>
+
+	<!-- Popup Menu -->
+	<template name="newui_popup_menu_item_template">
+		<panel width="{width=200i}" height="32i">
+			<button color="invisible" width="-10i" align="center" 
+					onclicklua="PlaySound('/shared/sounds/ui/revamp/region_click.wav') GetWidget('newui_popup_menu'):SetVisible(false) {onclicklua}" 
+					onrightclicklua="PlaySound('/shared/sounds/ui/revamp/region_click.wav') GetWidget('newui_popup_menu'):SetVisible(false) {onclicklua}"
+					onmouseoverlua="PlaySound('/shared/sounds/ui/revamp/region_hover.wav')"
+			>
+				<widgetstate statename="up">
+				</widgetstate>
+				<widgetstate statename="over">
+					<frame color="#cda5963b"/>
+				</widgetstate>
+				<widgetstate statename="down">
+					<frame color="#cda5963b"/>
+				</widgetstate>
+			</button>
+			<label textalign="center" textvalign="center" content="{content}" font="dyn_12" color="#8e6b5b" outline="true" outlinecolor="#241410" noclick="1"/>
+			<image texture="/ui/fe2/elements/store2/line.png" align="center" valign="top" y="-37i" height="64i" width="148%" noclick="1" visible="{showline=1}"/>
+		</panel>
+	</template>
+
+	<template name="newui_popup_menu_item2_template">
+		<panel width="{width=200i}" height="32i">
+			<button color="invisible" width="-10i" align="center" 
+					onmouseoverlua="PlaySound('/shared/sounds/ui/revamp/region_hover.wav') GetWidget('newui_popup_menu_item2_{id}_submenu'):SetVisible(true)"
+					onmouseoutlua="GetWidget('newui_popup_menu_item2_{id}_submenu'):SetVisible(false)"
+			>
+				<widgetstate statename="up">
+				</widgetstate>
+				<widgetstate statename="over">
+					<frame color="#cda5963b"/>
+				</widgetstate>
+				<widgetstate statename="down">
+					<frame color="#cda5963b"/>
+				</widgetstate>
+			</button>
+			<label textalign="center" textvalign="center" content="{content}" font="dyn_12" color="#8e6b5b" outline="true" outlinecolor="#241410" noclick="1"/>
+			<image texture="/ui/fe2/elements/store2/line.png" align="center" valign="top" y="-37i" height="64i" width="148%" noclick="1" visible="{showline=1}"/>
+			<panel name="newui_popup_menu_item2_{id}_submenu" x="100%" width="10i" visible="0" noclick="1">
+				<panel width="+10i" align="center"
+					onmouseoverlua="GetWidget('newui_popup_menu_item2_{id}_submenu'):SetVisible(true)"
+					onmouseoutlua="GetWidget('newui_popup_menu_item2_{id}_submenu'):SetVisible(false)"
+				>
+					<instance name="{menu}" />
+				</panel>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="newui_popup_menu_template">
+		<panel name="newui_popup_menu" visible="0" grow="true" regrow="true" onloadlua="self:SetClickThru(true)" hotkey="ESC" onhotkeylua="self:SetVisible(false)"
+				onmouseldownlua="self:BreakExclusive() self:SetVisible(false)"
+				onmouserdownlua="self:BreakExclusive() self:SetVisible(false)"
+				onmouseluplua="self:BreakExclusive() self:SetVisible(false)"
+		>
+			<panel grow="true" regrow="true">
+				<frame texture="/ui/fe2/newui/res/common/combobox/list.png" borderthickness="4i" />
+				<panel grow="true" regrow="true" float="bottom">
+					<panel width="100%" height="5i"/>
+					<panel name="newui_popup_menu_menuroot" grow="true" regrow="true" float="bottom"/>
+					<label name="newui_popup_menu_stringwidth" width="100%" height="5i" textalign="center" textvalign="center" font="dyn_12" color="#8e6b5b" outline="true" outlinecolor="#241410"/>
+				</panel>
+			</panel>
+		</panel>
+	</template>
+
+	<!-- Checkbox -->
+	<template name="newui_checkbox_template">
+		<button name="{widget_name}" x="{x}" y="{y}" width="{width=100%}" height="{height=100%}" align="{align}" valign="{valign}" color="invisible" numstates="2"
+				onclick="{onclick}"
+				onclicklua="{onclicklua}"
+				onmouseoverlua="PlaySound('{oversound=/shared/sounds/ui/ccpanel/button_over_01.wav}') {onmouseoverlua}"
+				onmouseoutlua="{onmouseoutlua}"
+				watch="{watch}"
+				ontrigger="{ontrigger}"
+				ontriggerlua="{ontriggerlua}"
+				watch1="{watch1}"
+				ontrigger1="{ontrigger1}"
+				ontrigger1lua="{ontrigger1lua}"
+				visible="{visible=1}"
+				stickytoinvis="{stickytoinvis=1}"
+				cvar="{cvar=}"
+				onload="{onload}"
+				onloadlua="{onloadlua}"
+				onevent="{onevent}"
+		>
+			<widgetstate statename="up1">
+				<panel width="16i" height="16i" valign="center">
+					<image texture="/ui/fe2/newui/res/common/unselected{type}_up.png" width="32i" height="32i" align="center" valign="center" noclick="1"/>
+				</panel>
+				<label name="{widget_name}_text1" x="24i" textalign="left" textvalign="center" font="{font=dyn_12}" color="{unselectedupcolor=#8a6e62}" outline="{outline}" outlinecolor="{outlinecolor}" noclick="1" content="{content}"/>
+			</widgetstate>
+			<widgetstate statename="over1">
+				<panel width="16i" height="16i" valign="center">
+					<image texture="/ui/fe2/newui/res/common/unselected{type}_over.png" width="32i" height="32i" align="center" valign="center" noclick="1"/>
+				</panel>
+				<label name="{widget_name}_text2" x="24i" textalign="left" textvalign="center" font="{font=dyn_12}" color="{unselectedovercolor=#b78f82}" outline="{outline}" outlinecolor="{outlinecolor}" noclick="1" content="{content}"/>
+			</widgetstate>
+			<widgetstate statename="down1">
+				<panel width="16i" height="16i" valign="center">
+					<image texture="/ui/fe2/newui/res/common/unselected{type}_over.png" width="32i" height="32i" align="center" valign="center" noclick="1"/>
+				</panel>
+				<label name="{widget_name}_text3" x="24i" textalign="left" textvalign="center" font="{font=dyn_12}" color="{unselectedovercolor=#b78f82}" outline="{outline}" outlinecolor="{outlinecolor}" noclick="1" content="{content}"/>
+			</widgetstate>
+			<widgetstate statename="disabled1">
+				<panel width="16i" height="16i" valign="center">
+					<image texture="/ui/fe2/newui/res/common/unselected{type}_up.png" width="32i" height="32i" align="center" valign="center" noclick="1" rendermode="grayscale"/>
+				</panel>
+				<label name="{widget_name}_text4" x="24i" textalign="left" textvalign="center" font="{font=dyn_12}" color="{unselecteddisabledcolor=#8a6e62}" outline="{outline}" outlinecolor="{outlinecolor}" noclick="1" content="{content}"/>
+			</widgetstate>
+			<widgetstate statename="up2">
+				<panel width="16i" height="16i" valign="center">
+					<image texture="/ui/fe2/newui/res/common/selected{type}_up.png" width="32i" height="32i" align="center" valign="center" noclick="1"/>
+				</panel>
+				<label name="{widget_name}_text5" x="24i" textalign="left" textvalign="center" font="{font=dyn_12}" color="{selectedupcolor=#8a6e62}" outline="{outline}" outlinecolor="{outlinecolor}" noclick="1" content="{content}"/>
+			</widgetstate>
+			<widgetstate statename="over2">
+				<panel width="16i" height="16i" valign="center">
+					<image texture="/ui/fe2/newui/res/common/selected{type}_over.png" width="32i" height="32i" align="center" valign="center" noclick="1"/>
+				</panel>
+				<label name="{widget_name}_text6" x="24i" textalign="left" textvalign="center" font="{font=dyn_12}" color="{selectedovercolor=#b78f82}" outline="{outline}" outlinecolor="{outlinecolor}" noclick="1" content="{content}"/>
+			</widgetstate>
+			<widgetstate statename="down2">
+				<panel width="16i" height="16i" valign="center">
+					<image texture="/ui/fe2/newui/res/common/selected{type}_over.png" width="32i" height="32i" align="center" valign="center" noclick="1"/>
+				</panel>
+				<label name="{widget_name}_text7" x="24i" textalign="left" textvalign="center" font="{font=dyn_12}" color="{selectedovercolor=#b78f82}" outline="{outline}" outlinecolor="{outlinecolor}" noclick="1" content="{content}"/>
+			</widgetstate>
+			<widgetstate statename="disabled2">
+				<panel width="16i" height="16i" valign="center">
+					<image texture="/ui/fe2/newui/res/common/selected{type}_up.png" width="32i" height="32i" align="center" valign="center" noclick="1" rendermode="grayscale"/>
+				</panel>
+				<label name="{widget_name}_text8" x="24i" textalign="left" textvalign="center" font="{font=dyn_12}" color="{selecteddisabledcolor=#8a6e62}" outline="{outline}" outlinecolor="{outlinecolor}" noclick="1" content="{content}"/>
+			</widgetstate>
+		</button>
+	</template>
+
+	<!-- Combobox -->
+	<template name="newui_combobox_item_template">
+		<label x="{x=10i}" y="{y}" textalign="{textalign=left}" textvalign="{textvalign=center}" content="{label=''}" font="{font=dyn_10}" 
+			   outline="{outline=0}" outlinecolor="{outlinecolor=#230000}" color="{color=#f0d3c1}" noclick="1"/>
+	</template>
+
+	<template name="newui_combobox_template">
+		<combobox name="{widgetname}"
+			x="{x=0i}"
+			y="{y=0i}"
+			cvar="{cvar=}"
+			width="{width=100%}"
+			height="{height=100%}"
+			align="{align=center}"
+			valign="{valign=center}"
+			populate="{populate}"
+			maxlistheight="{maxlistheight=6}"
+			handlewidth="{handlewidth=100%}"
+			handleheight="{handleheight=100@}"
+			highlightbordercolor="{highlightbordercolor=#654636}"
+			highlight="{highlight=under}"
+			itemwidth="{itemwidth=100%}"
+			itemheight="{itemheight=32i}"
+			color="invisible"
+			onload="{populate=}; {data=}('{itemtemplate=newui_combobox_item_template}','{font=dyn_10}'); {onload=}"
+			onloadlua="{onloadlua}"
+			onselect="{onselect}"
+			onselectlua="{onselectlua}"
+			scrolltexture="/ui/fe2/newui/res/common/scroll/scroll.png"
+			exteriorscrollbars="false"
+			scrollbarsize="15i"
+			onfocuslua="{onfocuslua}"
+			onmouseoverlua="PlaySound('/shared/sounds/ui/revamp/region_hover.wav')"
+			watch9="{watch9}"
+			ontrigger9="{ontrigger9}"
+			onevent9lua="{onevent9lua}"
+			onshow="{onshow}"
+		>
+			<widgetstate statename="up" noclick="1">
+				<frame texture="/ui/fe2/newui/res/common/combobox/n.png" borderthickness="4i" />
+				<image texture="/ui/fe2/newui/res/common/combobox/arrow_up.png" width="32i" height="16i" align="right" valign="center" noclick="1"/>
+			</widgetstate>
+			<widgetstate statename="over" noclick="1">
+				<frame texture="/ui/fe2/newui/res/common/combobox/h.png" borderthickness="4i" />
+				<image texture="/ui/fe2/newui/res/common/combobox/arrow_over.png" width="32i" height="16i" align="right" valign="center" noclick="1"/>
+			</widgetstate>
+			<widgetstate statename="down" noclick="1">
+				<frame texture="/ui/fe2/newui/res/common/combobox/n.png" borderthickness="4i" />
+				<image texture="/ui/fe2/newui/res/common/combobox/arrow_up.png" width="32i" height="16i" align="right" valign="center" noclick="1"/>
+			</widgetstate>
+			<widgetstate statename="disabled" noclick="1">
+				<frame texture="/ui/fe2/newui/res/common/combobox/d.png" borderthickness="4i" />
+				<image texture="/ui/fe2/newui/res/common/combobox/arrow_disabled.png" width="32i" height="16i" align="right" valign="center" noclick="1"/>
+			</widgetstate>
+			<widgetstate statename="listbg">
+				<frame texture="/ui/fe2/newui/res/common/combobox/list.png" borderthickness="4i" />
+			</widgetstate>
+			<widgetstate statename="itemhighlight">
+				<panel color="#211711" width="-4i" height="-4i" align="center" valign="center" noclick="1"/>
+			</widgetstate>
+		</combobox>
+	</template>
+
+	<!-- Tip Button -->
+	<template name="newui_tip_button_template">
+		<button name="{widget_name}" width="{width=16i}" height="{height=16i}" x="{x}" y="{y}" align="{align=left}" valign="{valign=top}" color="invisible"
+			onmouseoverlua="Common_V2:ShowGenericTip(true, '{title}', '{desc}', '{tip_width=300i}')"
+			onmouseoutlua="Common_V2:ShowGenericTip(false)"
+		>
+			<widgetstate statename="up">
+				<image texture="/ui/fe2/newui/res/common/tip_up.png" width="16i" height="16i" align="center" valign="center" noclick="1"/>
+			</widgetstate>
+			<widgetstate statename="over">
+				<image texture="/ui/fe2/newui/res/common/tip_over.png" width="16i" height="16i" align="center" valign="center" noclick="1"/>
+			</widgetstate>
+			<widgetstate statename="down">
+				<image texture="/ui/fe2/newui/res/common/tip_over.png" width="16i" height="16i" align="center" valign="center" noclick="1"/>
+			</widgetstate>
+		</button>
+	</template>
+
+	<!-- Generic Float Tip -->
+	<template name="newui_generic_tip_template">
+		<floater name="newui_generic_tip"
+			x="22" y="-22"
+			width="300i"
+			visible="0"
+			grow="1"
+			regrow="1"
+			noclick="1"
+		>
+			<instance name="newui_custom_frame_template" alpha="0.9"/>
+			<panel width="-16i" align="center" grow="1" regrow="1" growinvis="0" stickytoinvis="0" float="bottom" padding=".5h">
+				<panel name="newui_generic_tip_title_container" vmargin="5" width="100%" grow="1" regrow="1" growinvis="0" stickytoinvis="0" noclick="1">
+					<label name="newui_generic_tip_title" vpadding="20i" fity="1" fitypadding="0h" font="dyn_12" color="#f1dbcb" shadow="1" wrap="1" noclick="1"/>
+				</panel>
+				<panel name="newui_generic_tip_line" width="100%" height="2" noclick="1">
+					<image texture="/ui/fe2/newui/res/common/line.png" x="-2h" width="110%" align="center" noclick="1"/>
+				</panel>
+				<label name="newui_generic_tip_desc" font="dyn_10" color="#ad9181" shadow="1" wrap="1" vpadding="20i" fity="1" fitypadding=".5h" noclick="1"/>
+			</panel>
+		</floater>
+	</template>
+
+	<template name="newui_simple_tip_template">
+		<floater name="newui_simple_tip" x="22" y="-22" width="300i" visible="0" grow="1" regrow="1" noclick="1">
+			<instance name="newui_custom_frame_template" alpha="0.9"/>
+			<panel width="-16i" align="center" grow="1" regrow="1" noclick="1">
+				<!-- <panel height="5i"/> -->
+				<label name="newui_simple_tip_text" font="dyn_12" textalign="center" textvalign="center" noclick="1" vpadding="20i" color="#ad9181" shadow="1" wrap="1" fity="1" fitypadding="0.8h"/>
+				<label name="newui_simple_tip_text_left" font="dyn_12" textalign="left" textvalign="center" noclick="1" vpadding="20i" color="#ad9181" shadow="1" wrap="1" fity="1" fitypadding="0.8h"/>
+				<!-- <panel height="5i"/> -->
+			</panel>
+		</floater>
+	</template>
+
+	<template name="newui_button_close_template">
+		<button
+			name="{button_name}"
+			x="{x}" y="{y}"
+			align="{align=center}" valign="{valign=top}"
+			width="{width=32i}" height="{height=32i}"
+			visible="{visible=1}"
+			color="invisible"
+			watch="{watch}"
+			ontrigger="{ontrigger}"
+			ontriggerlua="{ontriggerlua}"
+			onclick="{onclick}"
+			onclicklua="PlaySound('/shared/sounds/ui/button_click_03.wav') {onclicklua}"
+			onmouseoverlua="PlaySound('/shared/sounds/ui/button_over_03.wav')"
+		>
+			<widgetstate statename="up">
+				<image align="center" valign="center" texture="/ui/fe2/NewUI/res/common/close{type}.png" noclick="1"/>
+			</widgetstate>
+			<widgetstate statename="over">
+				<image align="center" valign="center" texture="/ui/fe2/NewUI/res/common/close{type}_over.png" noclick="1"/>
+			</widgetstate>
+			<widgetstate statename="down" x="1" y="1">
+				<image align="center" valign="center" texture="/ui/fe2/NewUI/res/common/close{type}_over.png" noclick="1"/>
+			</widgetstate>
+			<widgetstate statename="disabled">
+				<image align="center" valign="center" texture="/ui/fe2/NewUI/res/common/close{type}.png" rendermode="grayscale" noclick="1"/>
+			</widgetstate>
+		</button>
+	</template>
+
+	<!-- common popup -->
+	<template name="newui_common_popup">
+		<panel name="{id}" x="{x}" y="{y}" align="{align=center}" valign="{valign=center}" width="{width=100%}" grow="1" regrow="{regrow=0}" visible="{visible=0}" cangrab="{cangrab=1}" noclick="{noclick=0}"
+		 	float="bottom"
+			onevent0lua="
+				self:FadeIn({fadein=200}, function(_) {onshowlua} end)
+			"
+			onevent1lua="
+				self:FadeOut({fadeout=200}, function(_) {onhidelua} end)
+			"
+			oninstantiatelua="{oninstantiatelua}"
+			watch="{watch}"
+			ontriggerlua="{ontriggerlua}"
+			hotkey="ESC" onhotkeylua="{oncloselua}"
+		>
+			<frame width="+10i" height="+10i" align="center" valign="center" texture="/ui/fe2/NewUI/Res/common/frames/system_message/frame.png" borderthickness="64i" noclick="1"/>
+			<anchor y="0"/>
+
+			<panel width="100%" height="45i" noclick="1">
+				<label name="{id}_title" width="-10i" align="center" uppercase="{uppercase=0}" content="{title}" textalign="{titlealign=center}" textvalign="center" font="dyn_16" color="#f0d3c1" outline="1" outlinecolor="#230000" watch="{titlewatch}" ontriggerlua="{titleontriggerlua}" noclick="1"/>
+				<instance name="newui_button_close_template" button_name="{id}_close" x="-5i" align="right" valign="center" visible="{show_close=0}" onclicklua="{oncloselua}"/>
+			</panel>
+			<panel name="{id}_content" width="100%" grow="1" regrow="{regrow=0}" noclick="1">
+				<instance name="{content}"/>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="newui_longtext_label_template">
+		<panel x="{x}" y="{y}" width="{width=100%}" height="{height=100%}" align="{align}" valign="{valign}" onloadlua="Common_V2:SetLongTextLabel('{label_name}', '{content}')"
+			onmouseoverlua="GetWidget('{label_name}_tip'):FadeIn(150) {onmouseoverlua}"
+			onmouseoutlua="GetWidget('{label_name}_tip'):FadeOut(150) {onmouseoutlua}"
+			onmousewheeldown="{onmousewheeldown}"
+			onmousewheelup="{onmousewheelup}"
+			ondoubleclicklua="{ondoubleclicklua}"
+			onclicklua="{onclicklua}"
+		>
+			<label name="{label_name}" textalign="{textalign}" textvalign="{textvalign}" font="{font=dyn_12}" color="{color=white}" outline="{outline=0}" outlinecolor="{outlinecolor}" noclick="1"
+				watch="{watch}"
+				ontrigger="{ontrigger}"
+				ontriggerlua="{ontriggerlua}"
+			/>
+			<panel name="{label_name}_tip" x="{tipx}" y="{tipy=-100%}" align="{tipalign}" valign="bttom" width="{tipwidth=+60i}" grow="1" regrow="1" noclick="1" visible="0">
+				<panel name="{label_name}_tip_root" grow="1" regrow="1" width="100%" float="bottom" noclick="1" visible="1">
+					<instance name="newui_custom_frame_template" alpha="0.95"/>
+					<anchor y="0"/>
+					<panel width="100%" height="5i" noclick="1"/>
+					<label name="{label_name}_tip_value" width="-10i" align="center" textalign="center" textvalign="center" noclick="1" vpadding="20i" font="{font=dyn_12}" color="{color=white}" outline="{outline=0}" outlinecolor="{outlinecolor}" wrap="1" fity="true" fitypadding="0.8h"/>
+					<panel width="100%" height="5i" noclick="1"/>
+				</panel>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="newui_popup_caption_frame">
+		<frame texture="/ui/fe2/newui/res/common/frames/popupframe.png" align="center" valign="center" borderthickness="4i" noclick="1"/>
+		<panel width="100%" height="35i" align="center" valign="top" clip="1" noclick="1">
+			<image texture="/ui/fe2/newui/res/common/caption_bg_c.png" width="-8" height="64i" align="center" valign="top" noclick="1"/>
+			<image texture="/ui/fe2/newui/res/common/caption_bg_l.png" width="4" height="64i" align="left" valign="top" noclick="1"/>
+			<image texture="/ui/fe2/newui/res/common/caption_bg_r.png" width="4" height="64i" align="right" valign="top" noclick="1"/>
+			<label textalign="center" textvalign="center" width="100%" height="100%" align="center" valign="center" uppercase="{uppercase=0}" font="{font=dyn_12}" color="{color=#f1dbcb}" content="{title}" watch="{watch}" ontrigger="{ontrigger}" ontriggerlua="{ontriggerlua}" noclick="1"/>
+		</panel>
+		<instance name="newui_button_close_template" x="-3i" y="3i" align="right" valign="top" visible="{show_close=1}" onclick="{onclick}" onclicklua="{onclicklua}" watch="{btn_watch}" ontrigger="{btn_ontrigger}"/>
+	</template>
+
+	<template name="newui_caption">
+		<panel width="100%" height="35i" align="center" valign="top" clip="1" noclick="1">
+			<image texture="/ui/fe2/newui/res/common/caption_bg_c.png" width="-8" height="64i" align="center" valign="top" noclick="1"/>
+			<image texture="/ui/fe2/newui/res/common/caption_bg_l.png" width="4" height="64i" align="left" valign="top" noclick="1"/>
+			<image texture="/ui/fe2/newui/res/common/caption_bg_r.png" width="4" height="64i" align="right" valign="top" noclick="1"/>
+			<label textalign="center" textvalign="center" width="100%" height="100%" align="center" valign="center" uppercase="{uppercase=0}" font="{font=dyn_12}" color="{color=#f1dbcb}" content="{title}" watch="{watch}" ontrigger="{ontrigger}" ontriggerlua="{ontriggerlua}" noclick="1"/>
+		</panel>
+	</template>
+</package>

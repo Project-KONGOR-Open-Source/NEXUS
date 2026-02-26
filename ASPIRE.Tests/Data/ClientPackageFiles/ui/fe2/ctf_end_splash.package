@@ -1,0 +1,268 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+	<template name="largeNumberImage">
+		<panel width="100@" height="100%" noclick="true" sticky="true" stickytoinvis="false">
+			<image width="150@" height="150%" texture="/ui/elements/number_large_{number}.tga" noclick="true" align="center" valign="center"/>
+		</panel>
+	</template>
+
+	<template name="ctfEndSplashSidePlayerAward">
+		<panel name="{id}" width="{width=100%}" height="{height=100@}" passivechildren="true">
+			<image name="{id}Icon" texture="{icon=/items/basic/fleetfeet/icon.tga}"/>
+			<frame color="invisible" bordercolor="#6f6f7b" borderthickness="1"/>
+		</panel>
+	</template>
+
+	<template name="ctfEndSplashSidePlayer">
+		<panel name="ctfEndSplashSide{side}Player{id}" width="58.8@" sticky="true" stickytoinvis="false">
+			<frame name="ctfEndSplashSide{side}Player{id}Frame" texture="/ui/frames/thick.tga" color="{bordercolor=#516887}" borderthickness="2.25@"/>
+			<panel width="-7.5@" align="center" grow="true" float="bottom" valign="center">
+				<panel height="85@">
+					<panel align="center" width="100@" height="100%">
+						<image name="ctfEndSplashSide{side}Player{id}HeroIcon" texture="{heroIcon=/heroes/calamity/icon.tga}" />
+					</panel>
+				</panel>
+				<label name="ctfEndSplashSide{side}Player{id}Name" height="15@" textalign="center" textvalign="center" font="dyn_12" color="#c2c2c2" content="{playerName=Buro}"/>
+				<label name="ctfEndSplashSide{side}Player{id}Hero" height="9@" textalign="center" textvalign="center" font="dyn_10" color="#c2c2c2" content="{heroName=Calamity}"/>
+				<panel height="4@"/>
+				<panel height="65@">
+					<panel width="100@" y="-8%">
+						<modelpanel
+							name="ctfEndSplashSide{side}Player{id}Flag"
+							model="/ui/elements/ctf/flag/geo_cloth.mdf"
+							anim="idle"
+							depthclear="true"
+							cameradistance="70"
+							camerapos="5 0 -0"
+							depthcompress="true"
+							cameranear="1"
+							camerafar="5000"
+							noclick="true"
+							onshowlua="
+								self:SetTeamColor('{flagcolor=#6fbdff}')
+								self:SetAnimSpeed(0)
+								self:SetAnimOffsetTime(math.random(0, 1000) / 1000)
+								self:Sleep(1, function() self:SetAnimSpeed(1) end)
+							"
+
+							width="125@" height="125%"
+							align="center" valign="top"
+						/>
+						<!--<label textalign="center" textvalign="center" color="#cccbc9" font="dyn_16" content="0"/>-->
+						<panel name="ctfEndSplashSide{side}Player{id}Value" align="center" valign="center" height="25%" y="0" noclick="true" float="right" padding="0" grow="true" growinvis="false" x="0"/>
+					</panel>
+					<panel align="right" width="48@" grow="true" valign="center" float="bottom" padding="3@">
+						<instance name="ctfEndSplashSidePlayerAward" id="ctfEndSplashSide{side}Player{id}Award1" icon="{icon1Texture=/items/basic/fleetfeet/icon.tga}"/>
+						<instance name="ctfEndSplashSidePlayerAward" id="ctfEndSplashSide{side}Player{id}Award2" icon="{icon2Texture=/items/basic/fleetfeet/icon.tga}"/>
+					</panel>
+				</panel>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="ctfEndSplashSide">
+		<panel name="ctfEndSplashSide{id}" noclick="true">
+
+			<frame name="ctfSplashSide{id}WinnerGlow" width="+2.0h" height="+2.0h" align="center" valign="center" texture="/ui/frames/squareglow.tga" color="{bordercolor=#516887}" borderthickness="1.5h" bordercolor="{bordercolor=#516887}" rendermode="additive" noclick="true"/>
+
+			<frame texture="/ui/frames/rounded_bg_white.tga" color="{bgcolor=#121826}" borderthickness="0.65@"/>
+			<frame texture="/ui/frames/thick.tga" color="{bordercolor=#516887}" borderthickness="0.65@"/>
+
+			<panel hmargin="1.5@" vmargin="1.5%" noclick="true">
+				<panel height="44.75%" noclick="true">
+					<panel width="112@" height="28%" align="center" noclick="true" texture="/ui/elements/ctf/title_{sidecolor}.tga"/>
+					<!--<label textalign="center" textvalign="center" height="28%" color="white" outline="true" outlinecolor="0 0 0 0.35" font="dyn_18" content="{team=ctf_end_splash_team_blue}" noclick="true"/>-->
+					<panel valign="bottom" height="-28%" noclick="true">
+						<panel width="110@" align="center" noclick="true">
+							<modelpanel
+								name="ctfEndSplashSide{id}Flag"
+								model="/ui/elements/ctf/flag/geo_cloth.mdf"
+								anim="idle"
+								depthclear="true"
+								cameradistance="70"
+								camerapos="5 0 -0"
+								depthcompress="true"
+								cameranear="1"
+								camerafar="5000"
+								noclick="true"
+								onshowlua="
+									self:SetTeamColor('{flagcolor=#6fbdff}')
+									self:SetAnimSpeed(0)
+									self:SetAnimOffsetTime(math.random(0, 1000) / 1000)
+									self:Sleep(1, function() self:SetAnimSpeed(1) end)
+								"
+
+								align="center" valign="top"
+							/>
+						</panel>
+						<panel name="ctfSplashSide{id}ValueEffect" align="center" valign="center" width="25@" height="25%" y="-10%" noclick="true" visible="false">
+							<modelpanel
+								align="center" valign="center" width="550@" height="550%"
+								noclick="true"
+								model="/shared/models/invis.mdf"
+								onshowlua="self:SetEffect('/ui/elements/ctf/win_{sidecolor}.effect')"
+								onhidelua="self:SetEffect('')"
+								anim="idle"
+								cameranear="100.0"
+								camerafar="20000.0"
+								depthclear="true"
+								depthcompress="false"
+								lookat="false"
+								cameradistance="30"
+								camerapos="0 850 0"
+								cameraangles="0 0 180"
+								camerafov="7"
+								modelpos="0 0 0"
+								modelangles="0 0 0"
+								modelscale="1.0"
+								sunazimuth="120"
+								sunaltitude="20"
+								suncolor="0.9 0.9 0.9"
+								ambientcolor="0.6 0.7 0.7"
+								scenebuffer="true"
+							/>
+						</panel>
+						<panel name="ctfSplashSide{id}ValueTeam" align="center" valign="center" height="25%" y="-10%" noclick="true" float="right" padding="0" grow="true" growinvis="false" x="0"/>
+					</panel>
+				</panel>
+
+				<panel name="ctfEndSplashSide{id}Player1" valign="bottom" y="-30.7%" height="24%" noclick="true">
+					<frame name="ctfEndSplashSide{id}Player1Frame" texture="/ui/frames/thick.tga" color="{bordercolor=#516887}" borderthickness="2.5@" noclick="true"/>
+					<panel hmargin="5@" vmargin="5%" noclick="true">
+
+						<panel width="85@" noclick="true">
+								<modelpanel
+									name="ctfEndSplashSide{id}Player1Flag"
+									model="/ui/elements/ctf/flag/geo_cloth.mdf"
+									anim="idle"
+									depthclear="true"
+									cameradistance="70"
+									camerapos="5 0 -0"
+									depthcompress="true"
+									cameranear="1"
+									camerafar="5000"
+									noclick="true"
+									onshowlua="
+										self:SetTeamColor('{flagcolor=#6fbdff}')
+										self:SetAnimSpeed(0)
+										self:SetAnimOffsetTime(math.random(0, 1000) / 1000)
+										self:Sleep(1, function() self:SetAnimSpeed(1) end)
+									"
+
+									width="110@" valign="top"
+								/>
+							<panel name="ctfEndSplashSide{id}Player1Value" align="center" valign="center" height="20%" y="-10%" noclick="true" float="right" grow="true" growinvis="false" x="13@"/>
+						</panel>
+
+						<panel width="100@" float="bottom" padding="0.85@" align="center" valign="center">
+							<panel height="80%">
+								<panel align="center" width="100@" height="100%">
+									<image name="ctfEndSplashSide{id}Player1HeroIcon" texture="{heroIcon=/heroes/calamity/alt/icon.tga}" />
+								</panel>
+							</panel>
+							<label name="ctfEndSplashSide{id}Player1Name" height="8@" textalign="center" textvalign="center" font="dyn_14" color="#c2c2c2" content="Buro"/>
+							<label name="ctfEndSplashSide{id}Player1Hero" height="7@" textalign="center" textvalign="center" font="dyn_10" color="#c2c2c2" content="Calamity"/>
+						</panel>
+						<panel align="right" width="100@" noclick="true">
+							<panel name="ctfEndSplashSide{id}Player1MVP" width="65@" height="65%" align="center" y="-7.5%" noclick="true" texture="/ui/elements/ctf/mvp_marker.tga" visible="false"/>
+							<!--<label name="ctfEndSplashSide{id}Player1MVP" height="55%" textalign="center" textvalign="center" font="dyn_18" color="white" outline="true" noclick="true" content="ctf_end_splash_mvp"/>-->
+							<panel valign="bottom" y="-12.5%" height="35%" align="center" float="right" grow="true" padding="5@" noclick="true">
+								<instance name="ctfEndSplashSidePlayerAward" id="ctfEndSplashSide{id}Player1Award1" icon="{icon1Texture=/items/basic/fleetfeet/icon.tga}" width="100@" height="100%"/>
+								<instance name="ctfEndSplashSidePlayerAward" id="ctfEndSplashSide{id}Player1Award2" icon="{icon2Texture=/items/basic/fleetfeet/icon.tga}" width="100@" height="100%"/>
+							</panel>
+						</panel>
+					</panel>
+				</panel>
+
+				<panel valign="bottom" height="29.35%">
+					<panel height="100%" align="center" grow="true" regrow="true" growinvis="false" float="right" padding="4@" x="-4@">
+						<instance name="ctfEndSplashSidePlayer" side="{id}" id="2" flagcolor="{flagcolor=#6fbdff}" bordercolor="{bordercolor=#2a425c}" playerName="wizfx" icon1Texture="/items/basic/scarab/icon.tga" icon2Texture="/items/basic/token_of_life/icon.tga" heroName="Wretched Hag" heroIcon="/heroes/babayaga/icon.tga"/>
+						<instance name="ctfEndSplashSidePlayer" side="{id}" id="3" flagcolor="{flagcolor=#6fbdff}" bordercolor="{bordercolor=#2a425c}" playerName="merctest56" icon1Texture="/items/basic/shock_gauntlet/icon.tga" icon2Texture="/items/basic/ringmail/icon.tga" heroName="Behemoth" heroIcon="/heroes/behemoth/icon.tga"/>
+						<instance name="ctfEndSplashSidePlayer" side="{id}" id="4" flagcolor="{flagcolor=#6fbdff}" bordercolor="{bordercolor=#2a425c}" playerName="Konran" icon1Texture="/items/basic/steamstaff/icon.tga" icon2Texture="/items/basic/quickblade/icon.tga" heroName="Berzerker" heroIcon="/heroes/berzerker/icon.tga"/>
+						<instance name="ctfEndSplashSidePlayer" side="{id}" id="5" flagcolor="{flagcolor=#6fbdff}" bordercolor="{bordercolor=#2a425c}" playerName="[CM] Madfred" icon1Texture="/items/basic/sword_of_the_high/icon.tga" icon2Texture="/items/basic/minor_totem/icon.tga" heroName="Blitz" heroIcon="/heroes/blitz/icon.tga"/>
+					</panel>
+				</panel>
+			</panel>
+
+			<panel align="center" valign="center" width="115@" height="115%" noclick="true">
+
+				<modelpanel
+					name="ctfSplashSide{id}WinnerModel"
+					visible="false"
+					noclick="true"
+					model="/shared/models/invis.mdf"
+					onshowlua="self:SetEffect('/ui/elements/ctf/winner_glow_{sidecolor}/ctf_winner_glow.effect')"
+					onhidelua="self:SetEffect('')"
+					anim="idle"
+					cameranear="100.0"
+					camerafar="20000.0"
+					depthclear="true"
+					depthcompress="false"
+					lookat="false"
+					cameradistance="30"
+					camerapos="0 335 0.65"
+					cameraangles="0 0 180"
+					camerafov="7"
+					modelpos="0.05 -42 0.65"
+					modelangles="0 0 -90"
+					modelscale="1.0"
+					sunazimuth="120"
+					sunaltitude="20"
+					suncolor="0.9 0.9 0.9"
+					ambientcolor="0.6 0.7 0.7"
+					scenebuffer="true"
+				/>
+
+				<modelpanel
+					name="ctfSplashSide{id}MVPModel"
+					visible="false"
+					noclick="true"
+					model="/shared/models/invis.mdf"
+					onshowlua="self:SetEffect('/ui/elements/ctf/mvp_bar_{sidecolor}/ctf_mvp_glow.effect')"
+					onhidelua="self:SetEffect('')"
+					anim="idle"
+					cameranear="100.0"
+					camerafar="20000.0"
+					depthclear="true"
+					depthcompress="false"
+					lookat="false"
+					cameradistance="30"
+					camerapos="0 335 0.65"
+					cameraangles="0 0 180"
+					camerafov="7"
+					modelpos="0 -40 0"
+					modelangles="0 0 90"
+					modelscale="1.0"
+					sunazimuth="120"
+					sunaltitude="20"
+					suncolor="0.9 0.9 0.9"
+					ambientcolor="0.6 0.7 0.7"
+					scenebuffer="true"
+				/>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="ctfEndSplash">
+		<panel name="ctfEndSplash" color="0 0 0 0.75" visible="false">
+			<panel name="ctfEndSplashBody" width="116.3h" height="77.4h" align="center" valign="center">
+				<panel width="50%">
+					<panel width="-1.25@">
+						<instance name="ctfEndSplashSide" id="1" heroIcon="/heroes/calamity/icon.tga" heroName="Calamity" icon1Texture="/items/basic/beastheart/icon.tga" icon2Texture="/items/basic/confluence/icon.tga" sidecolor="blue"/>
+					</panel>
+				</panel>
+				<panel width="50%" align="right">
+					<panel width="-1.25@" align="right">
+						<instance name="ctfEndSplashSide" id="2" heroIcon="/heroes/calamity/icon.tga" heroName="Calamity" icon1Texture="/items/basic/health_potion/icon.tga" icon2Texture="/items/basic/glowstone/icon.tga" sidecolor="gold"
+							bgcolor="#2d2314"
+							bordercolor="#d79c34"
+							flagcolor="#ffd84f"
+							team="ctf_end_splash_team_gold"
+						/>
+					</panel>
+				</panel>
+				<instance name="button2" button_name="ctfEndSplashClose" width="14h" height="3h" y="4.5h" align="center" valign="bottom" label="general_close" font="dyn_14"/>
+			</panel>
+		</panel>
+	</template>
+</package>

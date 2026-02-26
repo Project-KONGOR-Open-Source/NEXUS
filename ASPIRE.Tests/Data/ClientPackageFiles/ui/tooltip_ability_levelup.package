@@ -1,0 +1,746 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+	<template name="ability_levelup_tooltip">
+		<frame
+			name="{id}"
+			texture="/ui/frames/rounded_bg_white.tga"
+			borderthickness="0.6h"
+			color="0 0 0 .75"
+			visible="false"
+			align="right"
+			valign="bottom"
+			width="27h"
+			height="5.0h"
+			float="bottom"
+			group="tooltip_group"
+			grow="1" regrow="1" growinvis="0"
+		>
+			<frame texture="/ui/frames/roundframe.tga" borderthickness="0.6h" bordercolor="#434d50" />
+			<anchor x="1.0h" y="0.6h" />
+			
+			<panel width="-2.0h" height="3.6h">
+			
+				<!-- Icon -->
+				<panel width="100@" height="100%">
+					<image texture="" watch="ActiveInventoryMultiLevelDescription{slot}" ontriggerlua="self:SetTexture(param1)"/>
+					<frame color="invisible" borderthickness="1" bordercolor=".3 .3 .3 1"/>
+				</panel>
+				
+				<panel width="-120@" align="right">
+				
+					<!-- Name and value -->
+					<panel
+						width="-2.0h"
+						height="1.8h"
+						valign="top"
+					>
+						<label
+							textalign="left"
+							font="dyn_12" color="#ffab01" shadow="true"
+							watch="ActiveInventoryMultiLevelDescription{slot}"
+							ontriggerlua="self:SetText(param0)"
+						/>
+						<label
+							textalign="right"
+							font="dyn_10"
+							color="yellow"
+							watch="ActiveInventoryMultiLevelDescription{slot}"
+							ontriggerlua="
+								if (NotEmpty(param3) and tonumber(param3) > 0) then
+									self:SetText(Translate('tooltip_value') .. param3)
+								else
+									self:ClearText()
+								end"
+						/>
+					</panel>
+					
+					<!-- Level-->
+					<label
+						height="1.8h"
+						valign="bottom"
+						textalign="left"
+						textvalign="bottom"
+						font="dyn_10" color=".9 .9 .9 1" shadow="true"
+						watch="ActiveInventoryMultiLevelStatus{slot}"
+						ontriggerlua="
+							if (tonumber(param5) ~= 0) then
+								self:SetText(Translate('tooltip_level', 'level', param5))
+							else
+								self:SetText(Translate('tooltip_unleveled'))
+							end
+							self:SetVisible(tonumber(param7) ~= 0)"
+						sticky="true"
+						stickytoinvis="false"
+						visible="false"
+					/>
+					<!-- Hero Name (KrosMode) -->
+					<label
+						height="1.8h"
+						valign="bottom"
+						textalign="right"
+						textvalign="bottom"
+						font="dyn_10" color=".9 .9 .9 1" shadow="true"
+						watch="ActiveInventoryMultiLevelDescription{slot}"
+						ontriggerlua="self:SetText(param27)"
+						sticky="true"
+						stickytoinvis="false"
+					/>
+					
+				</panel>
+			
+			</panel>
+
+			<panel
+				width="-2.0h"
+				height="1.8h"
+				watch="ActiveInventoryMultiLevelDescriptionA{slot}"
+				ontriggerlua="self:SetVisible(NotEmpty(param))"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			/>
+
+			<!-- Description text -->
+			<label
+				width="-2.0h"
+				height="0.0h"
+				font="dyn_9"
+				wrap="true"
+				color="white"
+				shadow="true"
+				watch="ActiveInventoryMultiLevelDescriptionA{slot}"
+				ontriggerlua="self:SetText(param) self:SetVisible(NotEmpty(param))"
+				fity="1"
+				fitypadding="0.2h"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			/>
+			
+			<panel
+				width="-2.0h"
+				height="1.8h"
+				watch="ActiveInventoryMultiLevelDescriptionB{slot}"
+				ontriggerlua="self:SetVisible(NotEmpty(param))"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			/>
+
+			<!-- Description text 2 -->
+			<label
+				width="-2.0h"
+				height="0.0h"
+				font="dyn_9"
+				wrap="true"
+				color="white"
+				shadow="true"
+				watch="ActiveInventoryMultiLevelDescriptionB{slot}"
+				ontriggerlua="self:SetText(param) self:SetVisible(NotEmpty(param))"
+				fity="1"
+				fitypadding="0.2h"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			/>
+
+			<!-- Passive block -->
+			<panel
+				width="-2.0h"
+				height="1.8h"
+				watch="ActiveInventoryMultiLevelDescription{slot}"
+				ontriggerlua="self:SetVisible(NotEmpty(param5) and (tonumber(param5) > 0))"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			/>
+
+			<panel
+				width="-2.0h"
+				height="2.4h"
+				watch="ActiveInventoryMultiLevelDescription{slot}"
+				ontriggerlua="self:SetVisible(NotEmpty(param5) and (tonumber(param5) > 0))"
+				float="bottom"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			>
+				<label
+					height="1.8h"
+					font="dyn_10"
+					color="white"
+					shadow="true"
+					content="tooltip_passive_bonuses"
+				/>
+
+				<panel width="10.5h" height="0.2h" color="gray" />
+				<panel height="0.4h" sticky="true" />
+			</panel>
+
+			<!-- Passive bonuses -->
+			<label
+				width="-2.0h"
+				height="0.0h"
+				font="dyn_10"
+				wrap="true"
+				color="white"
+				watch="ActiveInventoryMultiLevelDescription{slot}"
+				ontriggerlua="self:SetText(param4) self:SetVisible(NotEmpty(param5) and (tonumber(param5) > 0))"
+				fity="1"
+				fitypadding="0.4h"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			/>
+
+			<!-- Activation block -->
+			<panel
+				width="-2.0h"
+				height="1.8h"
+				watch="ActiveInventoryMultiLevelCanActivate{slot}"
+				ontriggerlua="self:SetVisible(AtoB(param))"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			/>
+
+			<panel
+				width="-2.0h"
+				height="2.4h"
+				watch="ActiveInventoryMultiLevelCanActivate{slot}"
+				ontriggerlua="self:SetVisible(AtoB(param))"
+				float="bottom"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			>
+				<label
+					width="-2.0h"
+					height="1.8h"
+					font="dyn_10"
+					color="white"
+					shadow="true"
+					watch="ActiveInventoryHotkeys{slot}"
+					ontriggerlua="
+						if (tonumber(param0) == 2) then
+							self:SetText(Translate('tooltip_activation1', 'key1', param1, 'key2', param2))
+						elseif (tonumber(param0) == 1) then
+							self:SetText(Translate('tooltip_activation1', 'key1', param1))
+						else
+							self:SetText(Translate('tooltip_activation'))
+						end"
+				/>
+
+				<panel width="10.5h" height="0.2h" color="gray" sticky="true" />
+				<panel width="-2.0h" height="0.4h" sticky="true" />
+			</panel>
+
+			<!-- Action type and Target scheme -->
+			<panel
+				width="-2.0h"
+				height="1.8h"
+				watch="ActiveInventoryMultiLevelDescription{slot}"
+				ontriggerlua="self:SetVisible(NotEmpty(param6) and AtoB(param11))"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			>
+				<label
+					textalign="left"
+					font="dyn_10"
+					color="white"
+					watch="ActiveInventoryMultiLevelDescription{slot}"
+					ontriggerlua="self:SetText(param6)"
+				/>
+				<label
+					textalign="right"
+					font="dyn_10"
+					color="white"
+					watch="ActiveInventoryMultiLevelDescription{slot}"
+					ontriggerlua="self:SetText(param7)"
+				/>
+			</panel>
+
+			<!-- Cast effect type -->
+			<label
+				width="-2.0h"
+				height="1.8h"
+				font="dyn_10"
+				color="white"
+				watch="ActiveInventoryMultiLevelDescription{slot}"
+				ontriggerlua="self:SetText(Translate('tooltip_type') .. param8) self:SetVisible(NotEmpty(param8) and AtoB(param11))"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			/>
+
+			<!-- Range -->
+			<label
+				width="-2.0h"
+				height="1.8h"
+				font="dyn_10"
+				color="white"
+				watch="ActiveInventoryMultiLevelDescription{slot}"
+				ontriggerlua="self:SetText(Translate('tooltip_range') .. param9) self:SetVisible(NotEmpty(param9) and AtoB(param11))"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			/>
+
+			<!-- Radius -->
+			<label
+				width="-2.0h"
+				height="1.8h"
+				font="dyn_10"
+				color="white"
+				watch="ActiveInventoryMultiLevelDescription{slot}"
+				ontriggerlua="self:SetText(Translate('tooltip_radius') .. param10) self:SetVisible(NotEmpty(param10) and AtoB(param11))"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			/>
+			
+			<!-- Channeling time -->
+			<label
+				width="-2.0h"
+				height="1.8h"
+				font="dyn_10"
+				color="green"
+				watch="ActiveInventoryMultiLevelDescription{slot}"
+				ontriggerlua="
+					if (NotEmpty(param16)) then
+						self:SetText(Translate('tooltip_channeling_time', 'time', param16))
+						self:SetVisible(1)
+					else
+						self:SetVisible(0)
+					end
+				"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			/>
+
+			<!-- Mana cost -->
+			<label
+				width="-2.0h"
+				height="1.8h"
+				font="dyn_10"
+				color="aqua"
+				watch="ActiveInventoryMultiLevelDescription{slot}"
+				ontriggerlua="self:SetText(Translate('tooltip_mana_cost') .. param2) self:SetVisible(NotEmpty(param2) and AtoB(param11))"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			/>
+			
+			<!-- Mana Upkeep -->
+			<label
+				width="-2.0h"
+				height="1.8h"
+				font="dyn_10"
+				color="yellow"
+				watch="ActiveInventoryMultiLevelDescription{slot}"
+				ontriggerlua="self:SetText(Translate('tooltip_mana_upkeep', 'value', param17)) self:SetVisible(NotEmpty(param17) and AtoB(param11))"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			/>
+			
+			<!-- Triggered mana cost -->
+			<label
+				width="-2.0h"
+				height="1.8h"
+				font="dyn_10"
+				color="aqua"
+				watch="ActiveInventoryMultiLevelDescription{slot}"
+				ontriggerlua="self:SetText(Translate('tooltip_triggered_mana_cost') .. param18) self:SetVisible(NotEmpty(param18) and AtoB(param11))"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			/>
+
+			<!-- Cooldown -->
+			<label
+				width="-2.0h"
+				height="1.8h"
+				font="dyn_10"
+				color="#F0E68C"
+				watch="ActiveInventoryMultiLevelCooldown{slot}"
+				ontriggerlua="self:SetText(Translate('tooltip_cooldown', 'time', param)) self:SetVisible(NotEmpty(param))"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			/>
+
+			<panel
+				width="-2.0h"
+				height="1.8h"
+				watch="ActiveInventoryMultiLevelEffectDescription{slot}"
+				ontriggerlua="self:SetVisible(NotEmpty(param))"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			/>
+
+			<!-- Effect -->
+			<label
+				width="-2.0h"
+				height="0.0h"
+				font="dyn_9"
+				wrap="true"
+				color="white"
+				watch="ActiveInventoryMultiLevelEffectDescription{slot}"
+				ontriggerlua="self:SetText(param) self:SetVisible(NotEmpty(param))"
+				fity="1"
+				fitypadding="0.2h"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			/>
+
+			<!-- Triggered effect -->
+			<panel
+				width="-2.0h"
+				height="1.8h"
+				watch="ActiveInventoryMultiLevelTriggeredEffect{slot}"
+				ontriggerlua="self:SetVisible(AtoB(param0))"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			/>
+
+			<panel
+				width="-2.0h"
+				height="2.4h"
+				watch="ActiveInventoryMultiLevelTriggeredEffect{slot}"
+				ontriggerlua="self:SetVisible(AtoB(param0))"
+				float="bottom"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			>
+				<label
+					width="-2.0h"
+					height="1.8h"
+					font="dyn_10"
+					color="white"
+					watch="ActiveInventoryMultiLevelTriggeredEffect{slot}"
+					ontriggerlua="self:SetText(param1)"
+				/>
+
+				<panel width="10.5h" height="0.2h" color="gray" sticky="true" />
+				<panel width="-2.0h" height="0.4h" sticky="true" />
+			</panel>
+
+			<label
+				width="-2.0h"
+				height="0.0h"
+				font="dyn_9"
+				wrap="true"
+				color="white"
+				watch="ActiveInventoryMultiLevelTriggeredEffectDescription{slot}"
+				ontriggerlua="self:SetText(param) self:SetVisible(NotEmpty(param))"
+				fity="1"
+				fitypadding="0.2h"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			/>
+
+			<!-- Status effect -->
+			<panel
+				width="-2.0h"
+				height="1.8h"
+				watch="ActiveInventoryMultiLevelStatusEffect{slot}"
+				ontriggerlua="self:SetVisible(NotEmpty(param0))"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			/>
+
+			<panel
+				width="-2.0h"
+				height="2.4h"
+				watch="ActiveInventoryMultiLevelStatusEffect{slot}"
+				ontriggerlua="self:SetVisible(NotEmpty(param0))"
+				float="bottom"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			>
+				<label
+					height="1.8h"
+					font="dyn_10"
+					color="white"
+					watch="ActiveInventoryMultiLevelStatusEffect{slot}"
+					ontriggerlua="self:SetText(param0)"
+				/>
+
+				<panel width="10.5h" height="0.2h" color="gray" />
+				<panel height="0.4h" sticky="true" />
+			</panel>
+
+			<label
+				width="-2.0h"
+				height="1.8h"
+				font="dyn_10"
+				wrap="true"
+				color="white"
+				watch="ActiveInventoryMultiLevelStatusEffect{slot}"
+				ontriggerlua="self:SetText(param1) self:SetVisible(NotEmpty(param2) and (tonumber(param2) > 0) and NotEmpty(param0))"
+				fity="1"
+				fitypadding="0.4h"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			/>
+			
+			<!-- Status Effect 2 -->
+			<panel
+				width="-2.0h"
+				height="1.8h"
+				watch="ActiveInventoryMultiLevelStatusEffectB{slot}"
+				ontriggerlua="self:SetVisible(NotEmpty(param0))"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			/>
+
+			<panel
+				width="-2.0h"
+				height="2.4h"
+				watch="ActiveInventoryMultiLevelStatusEffectB{slot}"
+				ontriggerlua="self:SetVisible(NotEmpty(param0))"
+				float="bottom"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			>
+				<label
+					height="1.8h"
+					font="dyn_10"
+					color="white"
+					watch="ActiveInventoryMultiLevelStatusEffectB{slot}"
+					ontriggerlua="self:SetText(param0)"
+				/>
+
+				<panel width="10.5h" height="0.2h" color="gray" />
+				<panel height="0.4h" sticky="true" />
+			</panel>
+
+			<label
+				width="-2.0h"
+				height="1.8h"
+				font="dyn_10"
+				wrap="true"
+				color="white"
+				watch="ActiveInventoryMultiLevelStatusEffectB{slot}"
+				ontriggerlua="self:SetText(param1) self:SetVisible(NotEmpty(param2) and (tonumber(param2) > 0) and NotEmpty(param0))"
+				fity="1"
+				fitypadding="0.4h"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			/>
+
+			<!-- Aura block -->
+			<panel
+				width="-2.0h"
+				height="1.8h"
+				watch="ActiveInventoryMultiLevelAura{slot}"
+				ontriggerlua="self:SetVisible(AtoB(param0))"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			/>
+
+			<panel
+				width="-2.0h"
+				height="2.4h"
+				watch="ActiveInventoryMultiLevelAura{slot}"
+				ontriggerlua="self:SetVisible(AtoB(param0))"
+				float="bottom"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			>
+				<label
+					width="-2.0h"
+					height="1.8h"
+					font="dyn_10"
+					color="white"
+					content="tooltip_aura"
+				/>
+
+				<panel width="10.5h" height="0.2h" color="gray" sticky="true" />
+				<panel width="-2.0h" height="0.4h" sticky="true" />
+			</panel>
+
+			<!-- Radius and Target scheme -->
+			<!--
+			<panel
+				width="-2.0h"
+				height="1.8h"
+				watch="ActiveInventoryMultiLevelAura{slot}"
+				ontriggerlua="self:SetVisible(AtoB(param0))"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			>
+				<label
+					textalign="left"
+					font="dyn_10"
+					color="white"
+					watch="ActiveInventoryMultiLevelAura{slot}"
+					ontriggerlua="self:SetText(Translate('tooltip_radius') .. param6) self:SetVisible(AtoB(param0))"
+				/>
+				<label
+					textalign="right"
+					font="dyn_10"
+					color="white"
+					watch="ActiveInventoryMultiLevelAura{slot}"
+					ontriggerlua="self:SetText(param4)"
+				/>
+			</panel>
+			-->
+			
+			<!-- Aura Radius, own line -->
+			<label
+				width="-2.0h"
+				height="1.8h"
+				font="dyn_10"
+				color="white"
+				watch="ActiveInventoryMultiLevelAura{slot}"
+				ontriggerlua="self:SetText(Translate('tooltip_radius') .. param6) self:SetVisible(AtoB(param0))"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			/>
+			
+			<!-- Aura Target Scheme, own line -->
+			<label
+				width="-2.0h"
+				height="1.8h"
+				font="dyn_10"
+				color="white"
+				watch="ActiveInventoryMultiLevelAura{slot}"
+				ontriggerlua="self:SetText(param4) self:SetVisible(AtoB(param0))"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			/>
+
+			<!-- Aura effect type -->
+			<label
+				width="-2.0h"
+				height="1.8h"
+				font="dyn_10"
+				color="white"
+				watch="ActiveInventoryMultiLevelAura{slot}"
+				ontriggerlua="self:SetText(Translate('tooltip_type') .. param5) self:SetVisible(NotEmpty(param5) and AtoB(param0))"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			/>
+
+			<panel
+				width="-2.0h"
+				height="1.8h"
+				watch="ActiveInventoryMultiLevelAura{slot}"
+				ontriggerlua="self:SetVisible(AtoB(param0))"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			/>
+
+			<!-- Aura bonuses -->
+			<panel
+				width="-2.0h"
+				height="2.4h"
+				watch="ActiveInventoryMultiLevelAura{slot}"
+				ontriggerlua="self:SetVisible(AtoB(param0))"
+				float="bottom"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			>
+				<label
+					height="1.8h"
+					font="dyn_10"
+					color="white"
+					content="tooltip_aura_effects"
+				/>
+
+				<panel width="10.5h" height="0.2h" color="gray" />
+				<panel height="0.4h" sticky="true" />
+			</panel>
+
+			<label
+				width="-2.0h"
+				height="1.8h"
+				font="dyn_10"
+				wrap="true"
+				color="white"
+				watch="ActiveInventoryMultiLevelAura{slot}"
+				ontriggerlua="self:SetText(param1) self:SetVisible(NotEmpty(param2) and (tonumber(param2) > 0) and AtoB(param0))"
+				fity="1"
+				fitypadding="0.4h"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			/>
+
+			<!-- Flavor text -->
+			<panel
+				width="-2.0h"
+				height="1.8h"
+				watch="ActiveInventoryMultiLevelDescription{slot}"
+				ontriggerlua="self:SetVisible(NotEmpty(param14))"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			/>
+
+			<label
+				width="-2.0h"
+				height="1.8h"
+				font="dyn_9"
+				wrap="true"
+				color=".5 .5 .5 1"
+				watch="ActiveInventoryMultiLevelDescription{slot}"
+				ontriggerlua="self:SetText(param14) self:SetVisible(NotEmpty(param14))"
+				fity="1"
+				fitypadding="0.2h"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			/>
+
+			<panel
+				width="-2.0h"
+				height="1.5h"
+				watch="ActiveInventoryMultiLevelDescription{slot}"
+				ontriggerlua="self:SetVisible({help} and NotEmpty(param12))"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			/>
+
+			<!-- Help -->
+			<label
+				width="-2.0h"
+				height="1.8h"
+				font="dyn_10"
+				wrap="true"
+				color="yellow"
+				watch="ActiveInventoryMultiLevelDescription{slot}"
+				ontriggerlua="self:SetText(param12) self:SetVisible({help} and NotEmpty(param12))"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			/>
+
+			<panel width="-2.0h" height="0.55h" sticky="true" stickytoinvis="false" />
+		</frame>
+	</template>
+</package>

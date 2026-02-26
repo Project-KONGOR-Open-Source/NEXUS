@@ -1,0 +1,400 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+	<lua file="/ui/scripts/newui/homepage_v2.lua"/>
+
+	<!-- Midbar -->
+	<template name="homepage_button_template">
+		<panel name="{button_name}_parent" x="{x}" y="{y}" width="{width=512i}" height="{height=128i}" noclick="1" visible="{visible=1}" align="{align=center}" valign="{valign=center}"
+			onloadlua="{onloadlua}">
+			<animatedimage texture="/ui/fe2/newui/res/homepage/anims/{anim}.png" noclick="1" loop="1" fps="24" onshowlua="self:StartAnim(1)" visible="{hasanim=0}" />
+			<button
+				color="invisible"
+				onmouseover="PlaySound('/shared/sounds/ui/button_over_01.wav'); {onmouseover}"
+				onmouseout="{onmouseout}"
+				onmouseoverlua="{onmouseoverlua}"
+				onmouseoutlua="{onmouseoutlua}"
+				enabled="{enabled=true}"
+				onclick="PlaySound('{sound=/shared/sounds/ui/button_click_01.wav}'); {onclick}"
+				onclicklua="{onclicklua}"
+				name="{button_name}"
+				usebitmask="{usebitmask=1}"
+				bitmaskfile="/ui/fe2/newui/Res/homepage/midbutton_{img}.png"
+				onloadlua="Homepage_V2:AdjustMidButtonText('{button_name}', '{content}', '{img}')"
+			>
+				<widgetstate statename="up">
+					<image texture="/ui/fe2/newui/Res/homepage/midbutton_{img}.png" noclick="1" visible="{nothasanim=1}"/>
+					<panel width="240i" y="-10i" noclick="1" align="center" >
+						<panel grow="1" regrow="1" height="128i" align="center" noclick="1" float="right" >
+							<panel width="40i" height="64i" valign="center" noclick="1">
+								<image width="64i" height="64i" texture="/ui/fe2/newui/Res/homepage/icon_{logo}.png" align="center" valign="center" noclick="1"/>
+							</panel>
+							<panel width="8i" height="64i" valign="center" noclick="1"/>
+							<label name="{button_name}_btntext_1" width="100i" height="64i" valign="center" textalign="left" textvalign="center" font="dyn_12" content="{content}" outline="1" noclick="1" />
+						</panel>
+					</panel>
+				</widgetstate>
+				<widgetstate statename="over">
+					<image texture="/ui/fe2/newui/Res/homepage/midbutton_{img}_over.png" noclick="1"/>
+					<panel width="240i" y="-10i" noclick="1" align="center" >
+						<panel grow="1" regrow="1" height="128i" align="center" noclick="1" float="right" >
+							<panel width="40i" height="64i" valign="center" noclick="1">
+								<image width="64i" height="64i" texture="/ui/fe2/newui/Res/homepage/icon_{logo}_over.png" align="center" valign="center" noclick="1"/>
+							</panel>
+							<panel width="8i" height="64i" valign="center" noclick="1"/>
+							<label name="{button_name}_btntext_2" width="100i" height="64i" valign="center" textalign="left" textvalign="center" font="dyn_12" content="{content}" outline="1" noclick="1" />
+						</panel>
+					</panel>
+				</widgetstate>
+				<widgetstate statename="down" x="{downx=1}" y="1">
+					<image texture="/ui/fe2/newui/Res/homepage/midbutton_{img}_over.png" noclick="1"/>
+					<panel width="240i" y="-10i" noclick="1" align="center" >
+						<panel grow="1" regrow="1" height="128i" align="center" noclick="1" float="right" >
+							<panel width="40i" height="64i" valign="center" noclick="1">
+								<image width="64i" height="64i" texture="/ui/fe2/newui/Res/homepage/icon_{logo}_over.png" align="center" valign="center" noclick="1"/>
+							</panel>
+							<panel width="8i" height="64i" valign="center" noclick="1"/>
+							<label name="{button_name}_btntext_3" width="100i" height="64i" valign="center" textalign="left" textvalign="center" font="dyn_12" content="{content}" outline="1" noclick="1" />
+						</panel>
+					</panel>
+				</widgetstate>
+				<widgetstate statename="disabled">
+					<image texture="/ui/fe2/newui/Res/homepage/midbutton_{img}_disabled.png" noclick="1"/>
+					<panel width="240i" y="-10i" noclick="1" align="center" >
+						<panel grow="1" regrow="1" height="128i" align="center" noclick="1" float="right" >
+							<panel width="40i" height="64i" valign="center" noclick="1">
+								<image width="64i" height="64i" texture="/ui/fe2/newui/Res/homepage/icon_{logo}_disabled.png" align="center" valign="center" noclick="1"/>
+							</panel>
+							<panel width="8i" height="64i" valign="center" noclick="1"/>
+							<label name="{button_name}_btntext_4" width="100i" height="64i" valign="center" textalign="left" textvalign="center" font="dyn_12" content="{content}" outline="1" noclick="1" />
+						</panel>
+					</panel>		
+				</widgetstate>
+			</button>
+
+			
+		</panel>
+	</template>
+
+	<template name="main_midbar_template">
+		<panel name="main_midbar" x="{x}" y="{y}" width="100%" height="128i" noclick="1" align="center" valign="center">
+			<panel name="main_midbar_left" x="-50%" width="50%" align="left">
+				<image texture="/ui/fe2/newui/Res/homepage/logoback.png" align="right" x="87i" width="1024i" noclick="1"/>
+				<instance name="homepage_button_template" button_name="midbar_button_matchmaking" x="-313i" y="9i" align="right" img="left1" logo="play" content="newui_midbutton_play"
+							onclicklua="Teammaking_V2:OnClickPlay()" hasanim="1" nothasanim="0" anim="a"
+				/>
+				<instance name="homepage_button_template" button_name="midbar_button_ladder" x="-121i" y="9i" align="right" img="left2" logo="ladder" content="newui_midbutton_ladder"
+							onclicklua="Trigger('matchstats_viewuser', '') Homepage_V2:ClickedLadder(true)"
+				/>
+				<instance name="homepage_button_template" button_name="midbar_button_compendium" x="68i" y="9i" align="right" img="left3" logo="learnatorium" content="newui_midbutton_learnator"
+							onclicklua="UIManager.GetInterface('main'):HoNMainF('MainMenuPanelToggle', 'compendium', nil, false)" 
+				/>
+			</panel>
+			<panel name="main_midbar_right" x="100%" width="50%" align="left">
+				<image texture="/ui/fe2/newui/Res/homepage/logoback.png" x="-87i" width="1024i" hflip="1" noclick="1"/>
+				
+				<!-- War Effort Button if Quests is Enabled in regions.lua otherwise HoN Live -->
+				<instance name="homepage_button_template" button_name="midbar_button_wareffort" x="-69i" y="9i" align="left" img="right1"
+							logo="war_effort" content="newui_midbutton_wareffort" downx="-1" visible="0"
+							onclicklua="UIManager.GetInterface('main'):HoNMainF('MainMenuPanelToggle', 'wareffort_new', nil, false)" 
+							onloadlua="self:SetVisible(HoN_Region.regionTable[HoN_Region.activeRegion].questSystem)"
+				/>
+				
+				<instance name="homepage_button_template" button_name="midbar_button_hontour" x="-69i" y="9i" align="left" img="right1"
+							logo="live" content="newui_midbutton_live" downx="-1" visible="0"
+							onclicklua="Watch_System.Clicked(true)" 
+							onloadlua="self:SetVisible(not HoN_Region.regionTable[HoN_Region.activeRegion].questSystem)"
+				/>
+				
+				<instance name="homepage_button_template" button_name="midbar_button_plinko" x="120i" y="9i" align="left" img="right2" logo="plinko" content="newui_midbutton_plinko" downx="-1"
+							onclicklua="UIManager.GetInterface('main'):HoNMainF('MainMenuPanelToggle', 'plinko', nil, false)"
+				/>
+				<instance name="homepage_button_template" button_name="midbar_button_store" x="312i" y="9i" align="left" img="right3" logo="store" content="newui_midbutton_store" downx="-1"
+							onclicklua="local store = GetCvarBool('cg_store2_') and 'store_container2' or 'store_container'
+										UIManager.GetInterface('main'):HoNMainF('MainMenuPanelToggle', store, nil, false)" hasanim="1" nothasanim="0" anim="b"
+				/>
+			</panel>
+			<panel name="main_midbar_logo" x="102%" y="-18i" width="256i" height="256i" align="center" valign="center" noclick="1">
+				<panel  width="300%" height="300%" align="center" valign="center" noclick="1">
+					<modelpanel align="center" valign="center" noclick="true"
+						model="/shared/models/invis.mdf"
+						onloadlua="self:SetEffect('/ui/fe2/NewUI/res/effects/logo_hon.effect')"
+						modelpos="0 0 0"
+						modelscale="0.3"
+						modelangles="0 90 0"
+						cameradistance="30"
+						camerapos="-9 550 0"
+						cameraangles="0 90 180"
+						camerafov="7"
+						cameranear="100.0"
+						camerafar="20000.0"
+						depthclear="true"
+						depthcompress="false"
+						sunazimuth="120"
+						sunaltitude="20"
+						suncolor="1 1 1"
+						ambientcolor="1 1 1"
+						scenebuffer="true"
+						lookat="false"
+						visible="true"
+					/>
+					<image width="256i" height="256i" texture="/ui/fe2/newui/res/homepage/logo.tga" align="center" valign="center" noclick="1"/>
+					<modelpanel align="center" valign="center" noclick="true"
+						model="/shared/models/invis.mdf"
+						onloadlua="self:SetEffect('/ui/fe2/NewUI/res/effects/logo_hon_glow.effect')"
+						modelpos="0 0 0"
+						modelscale="0.3"
+						modelangles="0 90 0"
+						cameradistance="30"
+						camerapos="-9 550 0"
+						cameraangles="0 90 180"
+						camerafov="7"
+						cameranear="100.0"
+						camerafar="20000.0"
+						depthclear="true"
+						depthcompress="false"
+						sunazimuth="120"
+						sunaltitude="20"
+						suncolor="1 1 1"
+						ambientcolor="1 1 1"
+						scenebuffer="true"
+						lookat="false"
+						visible="true"
+					/>
+				</panel>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="homepage_seleInfo_mvp_template">
+		<panel name="homepage_seleInfo_mvp_{id}" width="{width=100%}" height="{height=100%}" onmouseoutlua="Common_V2:ShowSimpleTip(false)">
+			<image name="homepage_seleInfo_mvp_{id}_icon" y="-12i" texture="$invis" width="90i" height="90i" align="center" noclick="1" />
+			<label name="homepage_seleInfo_mvp_{id}_text" y="-2i" textalign="center" textvalign="bottom" font="dyn_12" color="#d7b6a2" outline="1" outlinecolor="#230000" noclick="1"/>
+		</panel>
+	</template>
+
+	<template name="homepage_seleInfo_bottom_template">
+		<panel width="{width=100%}" height="{height=100%}" align="{align}" valign="{valign}">
+			<panel grow="1" regrow="1" y="-6i" height="32i" noclick="1" align="center" valign="center" float="right">
+				<image texture="/ui/fe2/newui/res/homepage/{icon}.png" width="32i" height="32i" valign="center" noclick="1"/>
+				<label name="homepage_seleInfo_bottom_{icon}_title" width="100i" height="32i" valign="center" textalign="left" textvalign="center" font="dyn_11" content="{content}" 
+					   color="#f1dbcb" outline="1" outlinecolor="#230000" noclick="1" 
+					   onloadlua="  local text = Translate('{content}')
+									local stringWidth = self:GetStringWidth(text)
+									self:SetWidth(stringWidth)
+					              "
+				/>
+			</panel>
+			<label name="homepage_seleInfo_bottom_{icon}_value" y="12i" textalign="center" textvalign="center" font="dyn_11" content="-" color="#d7b6a2" outline="1" outlinecolor="#230000" noclick="1" />
+		</panel>
+	</template>
+
+	<template name="homepage_selfInfo_template">
+		<panel x="-440i" y="-82i" width="449i" height="287i" align="center" valign="bottom" watch="PlayerSimpleStats" ontriggerlua="Homepage_V2:OnPlayerSimpleStats(...)"
+				watch1="SelectUpgradesStatus" ontrigger1lua="Homepage_V2:OnSelectUpgradesStatus(...)"
+				watch2="UpgradesRefreshed" ontrigger2lua="Homepage_V2:OnInfoChanged()"
+		>
+			<frame texture="/ui/fe2/newui/res/common/frames/communicator/input.png" borderthickness="8" noclick="1"/>
+			<panel height="70i" y="26i">
+				<panel x="26i" width="100@" height="100%" noclick="1">
+					<image name="homepage_selfInfo_playericon" texture="$invis" width="-6i" height="-6i" align="center" valign="center" noclick="1"/>
+					<button width="+4i" height="+4i" align="center" valign="center" color="invisible" onclicklua="Player_Stats_V2:Show()">
+						<widgetstate statename="up">
+							<image texture="/ui/fe2/newui/res/playerstats/border.png" width="+4i" height="+4i" align="center" valign="center" noclick="1"/>
+						</widgetstate>
+						<widgetstate statename="over">
+							<image texture="/ui/fe2/newui/res/playerstats/border_over.png" width="+4i" height="+4i" align="center" valign="center" noclick="1"/>
+						</widgetstate>
+						<widgetstate statename="down">
+							<image texture="/ui/fe2/newui/res/playerstats/border_over.png" width="+4i" height="+4i" align="center" valign="center" noclick="1"/>
+						</widgetstate>
+					</button>
+				</panel>
+				<label name="homepage_selfInfo_playername" x="112i" y="-25i" textalign="left" textvalign="center" font="dyn_12" color="#f0d3c1" outline="1" outlinecolor="#230000" content="-" noclick="1"/>
+				<label name="homepage_selfInfo_playerlevel" x="112i" y="0i" textalign="left" textvalign="center" font="dyn_10" color="#c2b0a3" outline="1" outlinecolor="#230000" content="-" noclick="1"/>
+				<panel name="homepage_selfInfo_playername_btn" width="250i" height="25i" x="112i" y="0" onclicklua="Player_Stats_V2:Show()"/>
+				<panel x="109i" width="512i" height="16i" valign="bottom" noclick="1">
+					<image texture="/ui/fe2/newui/res/homepage/exp_bg.png" noclick="1"/>
+					<panel width="311i" x="1i" noclick="1">
+						<panel name="homepage_selfInfo_levelpercent" width="50%" noclick="1" clip="1">
+							<image texture="/ui/fe2/newui/res/homepage/exp.png" width="311i" noclick="1"/>
+						</panel>
+						<label name="homepage_selfInfo_levelexp" textalign="center" textvalign="center" font="dyn_9" color="#e4ffff" outline="1" outlinecolor="#0d5a68" noclick="1"/>
+					</panel>
+				</panel>
+				<panel x="-27i" width="40i" height="40i" align="right"
+						onmouseoverlua="GetWidget('homepage_selfInfo_chatsymbol'):ScaleWidth('150%', 150)
+										GetWidget('homepage_selfInfo_chatsymbol'):ScaleHeight('150%', 150)"
+				   		onmouseoutlua="GetWidget('homepage_selfInfo_chatsymbol'):ScaleWidth('100%', 150)
+										GetWidget('homepage_selfInfo_chatsymbol'):ScaleHeight('100%', 150)"
+				>
+					<image name="homepage_selfInfo_chatsymbol" texture="$invis" width="100%" height="100%" align="center" valign="center" noclick="1"/>
+				</panel>
+			</panel>
+
+			<panel y="115i" width="100%" height="90i" noclick="1">
+				<panel width="-40i" height="100%" align="center" float="right">
+					<instance name="homepage_seleInfo_mvp_template" width="20%" id="1"/>
+					<instance name="homepage_seleInfo_mvp_template" width="20%" id="2"/>
+					<instance name="homepage_seleInfo_mvp_template" width="20%" id="3"/>
+					<instance name="homepage_seleInfo_mvp_template" width="20%" id="4"/>
+					<instance name="homepage_seleInfo_mvp_template" width="20%" id="5"/>
+				</panel>
+			</panel>
+
+			<panel y="205i" width="435i" height="83i" noclick="1" align="center" float="right">
+				<if condition="!cl_GarenaEnable">
+					<panel width="-40i" align="center">
+						<image texture="/ui/fe2/newui/res/common/line2.png" height="90%" width="2i" noclick="1" align="center" valign="center"/>
+						<instance name="homepage_seleInfo_bottom_template" width="50%" icon="matches" content="newui_general_matches"/>
+						<instance name="homepage_seleInfo_bottom_template" width="50%" align="right" icon="avatars" content="newui_general_avatars"/>
+					</panel>
+				</if>
+
+				<if condition="cl_GarenaEnable">
+					<panel width="-40i" align="center" float="right">
+						<instance name="homepage_seleInfo_bottom_template" width="33.3%" icon="matches" content="newui_general_matches"/>
+						<image texture="/ui/fe2/newui/res/common/line2.png" width="2i" noclick="1" valign="center"/>
+						<instance name="homepage_seleInfo_bottom_template" width="33.3%" align="right" icon="heroes" content="newui_general_heroes"/>
+						<image texture="/ui/fe2/newui/res/common/line2.png" width="2i" noclick="1" valign="center"/>
+						<instance name="homepage_seleInfo_bottom_template" width="33.3%" align="right" icon="avatars" content="newui_general_avatars"/>
+					</panel>
+				</if>
+			</panel>
+			
+			<image texture="/ui/fe2/newui/res/common/line.png" width="105%" height="2i" y="112i" align="center" noclick="1"/>
+			<image texture="/ui/fe2/newui/res/common/line.png" width="105%" height="2i" y="204i" align="center" noclick="1"/>
+
+			<panel name="homepage_selfInfo_mask" color="0 0 0 .7" visible="0">
+				<animatedimage texture="/ui/fe2/elements/store2/loading/loading_.png" width="512i" height="128i" align="center" valign="center" fps="25" loop="true" loopbackframe="0" startframe="0" onshow="StartAnim();" />
+			</panel>
+		</panel>
+	</template>
+
+	<template name="motd_template">
+		<panel noclick="1" watch="GamePhase" ontriggerlua="self:SetVisible(param == '0')">
+			<panel name="motd" width="1330i" height="527i" y="58i" align="center" visible="0" onshowlua="Homepage_V2:InitMotd()"/>
+		</panel>
+	</template>
+
+	<template name="homepage_hero_info_attributes_template">
+		<panel width="{width=100%}" height="{height=100%}" >
+			<panel x="10i" noclick="1" float="right">
+				<panel noclick="1" width="24i">
+					<image texture="{icon}" width="16i" height="16i" align="center" valign="center" noclick="1"/>
+				</panel>
+				<label name="homepage_hero_info_attributes_{id}" width="300i" color="#fffad3" font="dyn_9" textvalign="center" noclick="1"/>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="homepage_hero_info_ability_template">
+		<panel width="{width=100%}" height="100%">
+			<panel y="4i" width="-6i" height="52i" align="center">
+				<panel x="2i" width="48i" height="48i" valign="center">
+					<frame borderthickness="1" color="black" bordercolor="#774c45" noclick="1" />
+					<image name="homepage_hero_info_ability_{id}_icon" width="-4i" height="-4i" align="center" valign="center" texture="$invis" noclick="1"/>
+				</panel>
+				<label name="homepage_hero_info_ability_{id}_name" x="60i" height="50%" textvalign="center" font="dyn_11" color="#f0d3c1" noclick="1"/>
+				<label name="homepage_hero_info_ability_{id}_manacost" x="60i" height="50%" valign="bottom" textvalign="center" font="dyn_10" color="#d3bbac" noclick="1"/>
+				<panel width="100i" align="right">
+					<label name="homepage_hero_info_ability_{id}_range" x="5i" height="50%" textvalign="center" font="dyn_10" color="#d3bbac" noclick="1"/>
+					<label name="homepage_hero_info_ability_{id}_cd" x="5i" height="50%" valign="bottom" textvalign="center" font="dyn_10" color="#d3bbac" noclick="1"/>
+				</panel>
+				<panel color="#4a3429" y="5i" width="-6i" align="center" valign="bottom" height="1" noclick="1"/>
+			</panel>
+
+			<panel name="homepage_hero_info_ability_{id}_descmax" width="-10i" height="-65i" align="center" valign="bottom" float="bottom" clip="0">
+				<label name="homepage_hero_info_ability_{id}_desc" font="dyn_10" color="#ac9181" wrap="1" fity="true" fitypadding="0.8h"/>
+			</panel>
+			
+			<panel color="#4a3429" align="right" valign="bottom" width="1" height="-4i" noclick="1" visible="{showline=1}"/>
+		</panel>
+	</template>
+
+	<template name="homepage_hero_info_template">
+		<panel name="homepage_hero_info" width="1350i" height="387i" noclick="1" align="center" valign="bottom" visible="0">
+			<instance name="newui_custom_frame_template" alpha="0.9"/>
+			<panel width="-314i" align="right" float="right">
+				<instance name="homepage_hero_info_ability_template" width="25%" id="1" />
+				<instance name="homepage_hero_info_ability_template" width="25%" id="2" />
+				<instance name="homepage_hero_info_ability_template" width="25%" id="3" />
+				<instance name="homepage_hero_info_ability_template" width="25%" id="4" showline="0"/>
+			</panel>
+			<panel width="314i">
+				<panel color="#4a3429" align="right" valign="bottom" width="1" height="-4i" noclick="1"/>
+				<panel x="12i" y="10i" width="72i" height="72i">
+					<image name="homepage_hero_info_heroicon" texture="$invis" usealphamask="true" alphamaskfile="/ui/fe2/elements/store2/mask.png" />
+					<image texture="/ui/fe2/elements/store2/head_border.png" width="160i" height="160i" align="center" valign="center" noclick="1" />
+					<panel width="26i" height="26i" align="left" x="-5i" valign="bottom" y="5i" noclick="1">
+						<image texture="/ui/fe2/elements/store2/head_border2.png"/>
+						<image name="homepage_hero_info_primattr" texture="/ui/fe2/elements/store2/primary_none.png" noclick="1" />
+					</panel>		
+				</panel>
+				<label name="homepage_hero_info_heroname" x="96i" y="12i" font="dyn_14" color="#f0d3c1" noclick="1"/>
+				<panel x="94i" y="40i" height="24i" float="right" padding="5i">
+					<image name="homepage_hero_info_attacktype" texture="/ui/fe2/elements/store2/melee.png" valign="center" width="24i" height="24i" noclick="1" />
+					<label name="homepage_hero_info_category" textalign="left" textvalign="center" font="dyn_11" color="#fdb229" noclick="1"/>
+				</panel>
+
+				<panel x="94i" y="62i" height="32i" noclick="1">
+					<panel width="32i" height="32i" valign="center" noclick="1">
+						<image name="homepage_hero_info_mastery_badge" texture="$invis" noclick="1"/>
+						<label name="homepage_hero_info_mastery_level" color="white" textalign="center" textvalign="center" font="dyn_6" noclick="1"/>
+						<panel x="34i" width="160i" height="14i" valign="center" noclick="1">
+							<instance name="newui_custom_frame_template" alpha="0"/>
+							<panel x="1" y="1" width="-2" height="-2" noclick="1">
+								<panel name="homepage_hero_info_mastery_exp" color="1 1 1 1" width="50%" noclick="1"/>
+							</panel>
+						</panel>
+					</panel>
+				</panel>
+
+				<panel color="#4a3429" y="95i" align="center" width="-12i" height="1" noclick="1"/>
+				<panel y="95i" noclick="1" height="60i">
+					<panel color="#4a3429" align="center" valign="center" width="1" height="-8i" noclick="1"/>
+					<panel width="50%" valign="center" height="-10i" float="bottom" noclick="1">
+						<instance name="homepage_hero_info_attributes_template" height="33.3%" id="1" icon="/ui/fe2/newui/res/lobby/icon_atkrange.png"/>
+						<instance name="homepage_hero_info_attributes_template" height="33.3%" id="2" icon="/ui/fe2/newui/res/lobby/icon_damage.png"/>
+						<instance name="homepage_hero_info_attributes_template" height="33.3%" id="3" icon="/ui/fe2/newui/res/lobby/icon_atkspeed.png"/>
+					</panel>
+					<panel width="50%" align="right" valign="center" height="-10i" float="bottom" noclick="1">
+						<instance name="homepage_hero_info_attributes_template" height="33.3%" id="4" icon="/ui/fe2/newui/res/lobby/icon_armor.png"/>
+						<instance name="homepage_hero_info_attributes_template" height="33.3%" id="5" icon="/ui/fe2/newui/res/lobby/icon_movespeed.png"/>
+						<instance name="homepage_hero_info_attributes_template" height="33.3%" id="6" icon="/ui/fe2/newui/res/lobby/icon_magicarmor.png"/>
+					</panel>
+				</panel>
+				<panel noclick="1" y="155i">
+					<panel color="#4a3429" align="center" width="-12i" height="1" noclick="1"/>
+					<panel width="100%" height="32i" align="center" float="right">
+						<panel width="33.3%">
+							<panel color="#4a3429"  align="right" valign="center" width="1" height="-8i" noclick="1"/>
+							<panel x="8i" width="20i" valign="center">
+								<image texture="/ui/fe2/elements/store2/head_border2.png" width="100%" height="100@" align="center" valign="center" noclick="1"/>
+								<image texture="/ui/fe2/elements/store2/primary_strength.png" width="100%" height="100@" align="center" valign="center" noclick="1"/>
+							</panel>
+							<label name="homepage_hero_info_strength" x="33i" textvalign="center" font="dyn_10" color="#d3bbac" noclick="1"/>
+						</panel>
+						<panel width="33.3%">
+							<panel color="#4a3429"  align="right" valign="center" width="1" height="-8i" noclick="1"/>
+							<panel x="8i" width="20i" valign="center">
+								<image texture="/ui/fe2/elements/store2/head_border2.png" width="100%" height="100@" align="center" valign="center" noclick="1"/>
+								<image texture="/ui/fe2/elements/store2/primary_agility.png" width="100%" height="100@" align="center" valign="center" noclick="1"/>
+							</panel>
+							<label name="homepage_hero_info_agility" x="33i" textvalign="center" font="dyn_10" color="#d3bbac" noclick="1"/>
+						</panel>
+						<panel width="33.3%">
+							<panel x="8i" width="20i" valign="center">
+								<image texture="/ui/fe2/elements/store2/head_border2.png" width="100%" height="100@" align="center" valign="center" noclick="1"/>
+								<image texture="/ui/fe2/elements/store2/primary_intelligence.png" width="100%" height="100@" align="center" valign="center" noclick="1"/>
+							</panel>
+							<label name="homepage_hero_info_intelligence" x="33i" textvalign="center" font="dyn_10" color="#d3bbac" noclick="1"/>
+						</panel>
+					</panel>
+					<panel color="#4a3429" y="32i" align="center" width="-12i" height="1" noclick="1"/>
+				</panel>
+
+				<label name="homepage_hero_info_role" width="-20i" height="-190i" align="center" valign="bottom" wrap="1" color="#ac9181" font="dyn_10"/>
+			</panel>
+		</panel>
+	</template>
+</package>

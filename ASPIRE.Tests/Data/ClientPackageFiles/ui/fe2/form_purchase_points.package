@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+
+	<!-- Purchase Points -->
+	<trigger name="UpdatePurchasePointsForm"/>
+	<trigger name="PurchasePointsStatus"/>
+	<trigger name="PurchasePointsResult"/>
+	<form
+		name="PurchasePoints"
+		host="!hon"
+		target="/signup/client_purchase_points.php"
+		ssl="true"
+		statustrigger="PurchasePointsStatus"
+		resulttrigger="PurchasePointsResult"
+		resultparam0="success"
+		resultparam1="errors"
+		resultparam2="sea"
+	/>
+	
+	<!-- Get List of Point Packages -->
+	<trigger name="UpdatePointPackageForm"/>
+	<trigger name="PointPackageStatus"/>
+	<trigger name="PointPackageResult"/>
+	<form
+		name="PointPackage"
+		host="!hon"
+		target="/signup/hon_store_get_pointpackages.php"
+		ssl="true"
+		statustrigger="PointPackageStatus"
+		resulttrigger="PointPackageResult"
+		resultparam0="success"
+		resultparam1="error"
+		resultparam2="packageIDs"
+		resultparam3="packagePoints"
+		resultparam4="packagePrices"
+	/>
+	
+	<panel noclick="true" color="invisible"
+	name="PointPackageHelper"
+	onload="CreateBool('_MicroStorePackageListSuccess', false);"
+	watch="PointPackageResult"
+	ontrigger="
+		Set('_MicroStorePackageListSuccess', param0);
+		Call('PointPackageList', 'ClearItems();');
+		Set('_form_PurchasePoints_choice', -1);
+		ExplodeInt('|', param3, '_MicroStorePoints');
+		ExplodeFloat('|', param4, '_MicroStorePrice');
+		ExplodeInt('|', param2, '_MicroStoreID');
+	"/>
+	
+	<template name="PointPackageUpdateHelper">
+		<panel noclick="true" color="invisible"
+		onload="
+			CreateInt('_MicroStoreID{index}', -1);
+			CreateInt('_MicroStorePoints{index}', -1);
+			CreateFloat('_MicroStorePrice{index}', -1);
+		"
+		watch="PointPackageResult"
+		ontrigger="
+			If(
+				_MicroStorePoints{index} ge 1,
+				Call(
+					'PointPackageList',
+					'
+						AddTemplateListItem(\'PointPackageItem\', _MicroStoreID{index}, \'price\', _MicroStorePrice{index}, \'points\', _MicroStorePoints{index}, \'id\', _MicroStoreID{index});
+					'
+				)
+			);
+		"/>
+	</template>
+	
+	<instance name="PointPackageUpdateHelper" index="1"/>
+	<instance name="PointPackageUpdateHelper" index="2"/>
+	<instance name="PointPackageUpdateHelper" index="3"/>
+	<instance name="PointPackageUpdateHelper" index="4"/>
+	<instance name="PointPackageUpdateHelper" index="5"/>
+	
+	<template name="PointPackageItem">
+		<panel>
+			<frame color="invisible" bordercolor="#455166" borderthickness="1" noclick="1" vmargin="0.25h" />
+			<panel vmargin="0.5h" hmargin="0.5h">
+				<!-- Radio Button Start! -->
+				<instance
+					name="Noptions_radiobutton"
+					watch="UpdatePurchasePointsForm"
+					ontrigger="SetButtonState(_form_PurchasePoints_choice == {id});"
+					radiobutton_name=""
+					align="left"
+					width="100%"
+					font="dyn_10" label=""
+					labeloninstantiate="SetText(Translate('web_form_PurchasePoints_button_label', 'points', '{points}', 'price', FtoA({price}, 2)));"
+					tip_id=""
+					cvar="_form_PurchasePoints_choice"
+					value="{id}"
+					group="purchase_points_choice"
+					onclick="Trigger('UpdatePurchasePointsForm'); Call('web_form_purchasepoints_price_label', 'SetText(\'$\' # FtoA({price}, 2));');"
+				/>
+			</panel>
+		</panel>
+	</template>
+	
+	
+
+	<template name="form_purchase_points">
+	
+		
+	</template>
+	
+</package>

@@ -1,0 +1,1234 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+	<!-- usage list -->
+	<trigger name="HeroUsageListFormStatus"/>
+	<trigger name="HeroUsageListFormResult"/>
+	<trigger name="HeroUsageListFormResultExplode"/>		
+	<trigger name="HeroUsageListFormLoadCache"/>
+	
+	<form		
+		name="HeroUsageListForm"
+		host="!masterserver"
+		method="POST"
+		target="/client_requester.php"
+		statustrigger="HeroUsageListFormStatus"
+		resulttrigger="HeroUsageListFormResult"
+		resultparam0="errors"
+		resultparam1="success"
+		resultparam2="data"
+		resultparam3="total_use"
+		ssl="false"
+	/>	
+	<panel  name="submit_herousagelistform" noclick="1" group="compendium_hero_usage_list_boxes"
+		    onevent="
+				If(!VarExists('compendium_usage_list_cache_'#compendium_hero_usage_list_sort#'_0_') or !compendium_usage_useCache,
+					Split(Set(compendium_usage_useCache, 1), Set(compendium_usage_usingCache, 0), SubmitForm('HeroUsageListForm', 'f', 'get_hero_usage_list', 'cookie', GetCookie(), 'sort', compendium_hero_usage_list_sort)),
+					Split(Set(compendium_usage_usingCache, 1), Trigger('HeroUsageListFormLoadCache'))
+				);			
+				"  
+		    onload="CreateString('compendium_hero_usage_list_sort', 'use');"
+		    watch="HeroUsageListFormStatus" ontrigger="If(param0 == 2, GroupCall('compendium_hero_usage_list_boxes', 'DoEvent(1);'), GroupCall('compendium_hero_usage_list_boxes', 'DoEvent(2);'));"		
+		   
+	/>
+	
+	<!-- usage graph -->
+	<trigger name="HeroUsageGraphAxisUpdate"/>	
+	<trigger name="HeroUsageGraphTooltipUpdate"/>		
+	<trigger name="HeroUsageGraphFormStatus"/>
+	<trigger name="HeroUsageGraphFormResult"/>
+	<trigger name="HeroUsageGraphFormResultExplode"/>		
+	<trigger name="HeroUsageGraphFormLoadCache"/>
+	
+	<form		
+		name="HeroUsageGraphForm"
+		host="!masterserver"
+		method="POST"
+		target="/client_requester.php"
+		statustrigger="HeroUsageGraphFormStatus"
+		resulttrigger="HeroUsageGraphFormResult"
+		resultparam0="errors"
+		resultparam1="success"
+		resultparam2="data"
+		resultparam3="count"
+		resultparam4="high_total"
+		resultparam5="high"
+		ssl="false"
+	/>	
+	<panel  name="submit_herousagegraphform" noclick="1"  
+		    onevent="
+				If(!VarExists('compendium_usage_cache_0_'#compendium_heroLastViewed#'_'#compendium_usage_retrieveDays) or !compendium_usage_useCache,
+					Split(Set(compendium_usage_useCache, 1), Set(compendium_usage_usingCache, 0), SubmitForm('HeroUsageGraphForm', 'f', 'get_hero_usage_graph', 'cookie', GetCookie(), 'hero', compendium_heroLastViewed, 'limit', 45, 'days', compendium_usage_retrieveDays)),
+					Split(Set(compendium_usage_usingCache, 1), Trigger('HeroUsageGraphFormLoadCache'))
+				);			
+				"  
+		    onload="CreateInt('compendium_usage_retrieveDays', 90); CreateBool('compendium_usage_useCache', 0); CreateBool('compendium_usage_usingCache', 0);"
+		    watch="HeroUsageGraphFormStatus" ontrigger="If(param0 == 2, GroupCall('compendium_hero_usage_graph_bars', 'DoEvent(1);'), GroupCall('compendium_hero_usage_graph_bars', 'DoEvent(2);'));"
+		   
+			watch1="HeroUsageGraphFormLoadCache"
+			ontrigger1="
+				GroupCall('compendium_hero_usage_graph_bars', 'DoEvent(3);');
+				
+				SleepWidget(250, ' 
+					GroupCall(\'compendium_hero_usage_graph_bars\', \'DoEvent(1);\' );
+					Trigger(\'HeroUsageGraphFormResult\', 
+						*(\'compendium_usage_cache_0_\'#compendium_heroLastViewed#\'_\'#compendium_usage_retrieveDays),
+						*(\'compendium_usage_cache_1_\'#compendium_heroLastViewed#\'_\'#compendium_usage_retrieveDays),
+						*(\'compendium_usage_cache_2_\'#compendium_heroLastViewed#\'_\'#compendium_usage_retrieveDays),
+						*(\'compendium_usage_cache_3_\'#compendium_heroLastViewed#\'_\'#compendium_usage_retrieveDays),
+						*(\'compendium_usage_cache_4_\'#compendium_heroLastViewed#\'_\'#compendium_usage_retrieveDays),
+						*(\'compendium_usage_cache_5_\'#compendium_heroLastViewed#\'_\'#compendium_usage_retrieveDays)
+					);	
+					'
+				);
+
+			"		
+
+			watch7="HeroUsageGraphFormResult"
+			ontrigger7="
+				If(StringEmpty(param0) and !StringEmpty(param1),
+				If(!VarExists('compendium_usage_cache_0_'#compendium_heroLastViewed#'_'#compendium_usage_retrieveDays),
+					Split(
+						CreateString('compendium_usage_cache_0_'#compendium_heroLastViewed#'_'#compendium_usage_retrieveDays, ''#param0#''),
+						CreateString('compendium_usage_cache_1_'#compendium_heroLastViewed#'_'#compendium_usage_retrieveDays, ''#param1#''),
+						CreateString('compendium_usage_cache_2_'#compendium_heroLastViewed#'_'#compendium_usage_retrieveDays, ''#param2#''),
+						CreateString('compendium_usage_cache_3_'#compendium_heroLastViewed#'_'#compendium_usage_retrieveDays, ''#param3#''),
+						CreateString('compendium_usage_cache_4_'#compendium_heroLastViewed#'_'#compendium_usage_retrieveDays, ''#param4#''),
+						CreateString('compendium_usage_cache_5_'#compendium_heroLastViewed#'_'#compendium_usage_retrieveDays, ''#param5#'')
+					),
+					Split(
+						Set('compendium_usage_cache_0_'#compendium_heroLastViewed#'_'#compendium_usage_retrieveDays, ''#param0#''),
+						Set('compendium_usage_cache_1_'#compendium_heroLastViewed#'_'#compendium_usage_retrieveDays, ''#param1#''),
+						Set('compendium_usage_cache_2_'#compendium_heroLastViewed#'_'#compendium_usage_retrieveDays, ''#param2#''),
+						Set('compendium_usage_cache_3_'#compendium_heroLastViewed#'_'#compendium_usage_retrieveDays, ''#param3#''),
+						Set('compendium_usage_cache_4_'#compendium_heroLastViewed#'_'#compendium_usage_retrieveDays, ''#param4#''),
+						Set('compendium_usage_cache_5_'#compendium_heroLastViewed#'_'#compendium_usage_retrieveDays, ''#param5#'')
+					)				
+				));
+			"		
+		   
+	/>	
+	
+	<!-- Styles -->
+	<style name="modeNormal_bg" color="#FFFFFF" />
+	<style name="modeCasual_bg" color="#00ff36" />
+	<style name="modePublic_bg" color="#ff0000" />
+	
+	<style name="modeNormal_txt" color="#3abde7" />
+	<style name="modeCasual_txt" color="#3ae77b" />
+	<style name="modePublic_txt" color="#c02e2e" />
+
+	<!-- Guides -->	
+	<trigger name="compendium_guideLoadFeatured" />
+	<trigger name="compendium_guideHeroName" />	
+	<trigger name="compendium_guideLoadCache" />
+	<trigger name="compendium_guideInfoFormResultCache" />
+	<trigger name="compendium_guideInfoFormResultCache2" />	
+	<trigger name="compendium_guideLabelEvent" />
+	<trigger name="compendium_guideButtonUpdate" />	
+	<trigger name="compendium_guideAbilityEvent" />
+	<trigger name="compendium_guideAbilityClear" />	
+	<trigger name="compendium_guideTextClear" />
+	<trigger name="compendium_guideRecommendedEvent" />
+	<trigger name="compendium_guideRecommendedClear" />	
+	<trigger name="compendium_guideRecommendedBorder" />
+	<trigger name="compendium_guideListFormStatus"/>
+	<trigger name="compendium_guideListFormResult"/>
+	<trigger name="compendium_guideListFormResultExplode"/>	
+	<trigger name="compendium_guideListFormLoadCache" />
+	<trigger name="compendium_guideInfoFormStatus"/>
+	<trigger name="compendium_guideInfoFormResult"/>
+	<trigger name="compendium_guideInfoFormResultSave"/>
+	<trigger name="compendium_guideInfoFormResultExplodeAbilities"/>
+	<trigger name="compendium_guideInfoFormResultExplodeItemsStart"/>
+	<trigger name="compendium_guideInfoFormResultExplodeItemsLaning"/>
+	<trigger name="compendium_guideInfoFormResultExplodeItemsCore"/>
+	<trigger name="compendium_guideInfoFormResultExplodeItemsLux"/>
+	<trigger name="compendium_guideVoteFormStatus" />
+	<trigger name="compendium_guideVoteFormResult" />
+	<trigger name="compendium_guideDefaultFormStatus" />
+	<trigger name="compendium_guideDefaultFormResult" />
+	<trigger name="compendium_guideSetAsDefault"   />	
+	<trigger name="compendium_guideFavoriteFormStatus" />
+	<trigger name="compendium_guideFavoriteFormResult" />
+	<trigger name="compendium_guideAddToFavorites" />		
+	<trigger name="compendium_guideLoadcompendium_guide" />
+	<trigger name="compendium_guideChangedcompendium_guide" />
+	<trigger name="compendium_guideUpdateButtons" />
+	<trigger name="compendium_guideMasterQuery" />
+	<trigger name="compendium_guideMasterStatus" />
+	<trigger name="buildcompendium_guideErrorString" />
+	
+	<!-- event handler  -->
+	<panel noclick="1"
+		onload="
+			CreateString('compendium_guide_currentcompendium_guideString', '');
+			CreateString('compendium_guide_selectedcompendium_guideString', '');
+			CreateString('compendium_guide_currentIntroString', '');
+			CreateString('compendium_guide_currentHero', '');
+			CreateString('compendium_guide_reportReason', ''); 
+			CreateString('compendium_guide_recommendedString', '');
+			
+			CreateInt('compendium_guide_masterQueryTime', -1);
+			CreateInt('compendium_guide_masterQueryTimeSent', -1);
+			CreateInt('compendium_guide_selectedcompendium_guide', 99999);
+			CreateInt('compendium_guide_lastcompendium_guide', -1);
+			CreateInt('compendium_guide_defaultcompendium_guide', 0);
+			CreateInt('compendium_guide_favoritecompendium_guide', 0);
+			CreateInt('compendium_animSpeedMult', 1);
+			CreateInt('compendium_guide_fadein', 125);
+			CreateInt('compendium_guide_lerptime', 1000);
+			
+			##CreateBool('compendium_guide_useReport', 1);##
+			CreateBool('compendium_guide_useCache', 1);			
+			CreateBool('compendium_guide_newRound', 0);
+			CreateInt('compendium_guide_goToTab', 2);
+		"	
+
+		watch0="Disconnected"
+		ontrigger0="Set(compendium_guide_useCache, 0);"		
+	
+		watch=""
+		ontrigger="
+			If(param != 1, SleepWidget(500, 'Trigger(\'compendium_guideMasterStatus\', param)'));
+		"
+		
+		watch1="compendium_guideSetAsDefault"
+		ontrigger1="
+			Set(compendium_guide_lastcompendium_guide, compendium_guide_selectedcompendium_guide);
+			Set(compendium_guide_auto_selection, 1);
+			If(param == 1,
+				Split(Set(compendium_guide_defaultcompendium_guide, compendium_guide_selectedcompendium_guide), Trigger('compendium_guideMasterQuery', 'compendium_guideDefaultForm', HostTime), SubmitForm('compendium_guideDefaultForm', 'f', 'guide_default_set', 'account', GetAccountID(), 'cookie', GetCookie(), 'hosttime', HostTime, 'gid', compendium_guide_selectedcompendium_guide)),
+				Split(Set(compendium_guide_defaultcompendium_guide, -1), 										Trigger('compendium_guideMasterQuery', 'compendium_guideDefaultForm', HostTime), SubmitForm('compendium_guideDefaultForm', 'f', 'guide_default_remove', 'account', GetAccountID(), 'cookie', GetCookie(), 'hosttime', HostTime, 'gid', compendium_guide_selectedcompendium_guide))
+			);
+		"
+		
+		watch2="compendium_guideAddToFavorites"
+		ontrigger2="
+			Set(compendium_guide_lastcompendium_guide, compendium_guide_selectedcompendium_guide);
+			Set(compendium_guide_auto_selection, 1);
+			If(param == 1,
+				Split(Set(compendium_guide_favoritecompendium_guide, compendium_guide_selectedcompendium_guide), Trigger('compendium_guideMasterQuery', 'compendium_guideFavoriteForm', HostTime), SubmitForm('compendium_guideFavoriteForm', 'f', 'guide_favorite_set', 'account', GetAccountID(), 'cookie', GetCookie(), 'hosttime', HostTime, 'gid', compendium_guide_selectedcompendium_guide)),
+				Split(Set(compendium_guide_favoritecompendium_guide, -1), 										 Trigger('compendium_guideMasterQuery', 'compendium_guideFavoriteForm', HostTime), SubmitForm('compendium_guideFavoriteForm', 'f', 'guide_favorite_remove', 'account', GetAccountID(), 'cookie', GetCookie(), 'hosttime', HostTime, 'gid', compendium_guide_selectedcompendium_guide))
+			);
+		"
+
+		watch3="compendium_guideMasterQuery"
+		ontrigger3="
+			SetWatch(''#param0#'Status');
+			Set(compendium_guide_masterQueryTime, param1);
+			Set(compendium_guide_masterQueryTimeSent, param1);
+			Trigger('compendium_guideMasterStatus', 1);
+		"		
+					
+		watch4="compendium_guideReportFormResult compendium_guideVoteFormResult compendium_guideListFormResult compendium_guideInfoFormResult compendium_guideFavoriteFormResult compendium_guideDefaultFormResult"
+		ontrigger4="
+			## Error param0 ##
+		"
+					
+		watch5="compendium_guideLoadCache"
+		ontrigger5="
+			Trigger('compendium_guideInfoFormResult', 
+				*('guide_info_cache_0_'#compendium_guide_selectedcompendium_guide),
+				*('guide_info_cache_1_'#compendium_guide_selectedcompendium_guide),
+				*('guide_info_cache_2_'#compendium_guide_selectedcompendium_guide),
+				*('guide_info_cache_3_'#compendium_guide_selectedcompendium_guide),
+				*('guide_info_cache_4_'#compendium_guide_selectedcompendium_guide),
+				*('guide_info_cache_5_'#compendium_guide_selectedcompendium_guide),
+				*('guide_info_cache_6_'#compendium_guide_selectedcompendium_guide),
+				*('guide_info_cache_7_'#compendium_guide_selectedcompendium_guide),
+				*('guide_info_cache_8_'#compendium_guide_selectedcompendium_guide),
+				*('guide_info_cache_9_'#compendium_guide_selectedcompendium_guide),
+				*('guide_info_cache_10_'#compendium_guide_selectedcompendium_guide),
+				*('guide_info_cache_11_'#compendium_guide_selectedcompendium_guide),
+				*('guide_info_cache_12_'#compendium_guide_selectedcompendium_guide),
+				*('guide_info_cache_13_'#compendium_guide_selectedcompendium_guide),
+				*('guide_info_cache_14_'#compendium_guide_selectedcompendium_guide),
+				*('guide_info_cache_15_'#compendium_guide_selectedcompendium_guide),
+				*('guide_info_cache_16_'#compendium_guide_selectedcompendium_guide),
+				*('guide_info_cache_17_'#compendium_guide_selectedcompendium_guide),
+				*('guide_info_cache_18_'#compendium_guide_selectedcompendium_guide),
+				1,
+				1,
+				*('guide_info_cache_21_'#compendium_guide_selectedcompendium_guide)
+			);	
+		"		
+		
+		watch7="compendium_guideInfoFormResult"
+		ontrigger7="
+			If(StringEmpty(param0) and !StringEmpty(param1),
+			If(!VarExists('guide_info_cache_0_'#compendium_guide_selectedcompendium_guide),
+				Split(
+					CreateString('guide_info_cache_0_'#compendium_guide_selectedcompendium_guide, ''#param0#''),
+					CreateString('guide_info_cache_1_'#compendium_guide_selectedcompendium_guide, ''#param1#''),
+					CreateString('guide_info_cache_2_'#compendium_guide_selectedcompendium_guide, ''#param2#''),
+					CreateString('guide_info_cache_3_'#compendium_guide_selectedcompendium_guide, ''#param3#''),
+					CreateString('guide_info_cache_4_'#compendium_guide_selectedcompendium_guide, ''#param4#''),
+					CreateString('guide_info_cache_5_'#compendium_guide_selectedcompendium_guide, ''#param5#''),
+					CreateString('guide_info_cache_6_'#compendium_guide_selectedcompendium_guide, ''#param6#''),
+					CreateString('guide_info_cache_7_'#compendium_guide_selectedcompendium_guide, ''#param7#''),
+					CreateString('guide_info_cache_8_'#compendium_guide_selectedcompendium_guide, ''#param8#''),
+					CreateString('guide_info_cache_9_'#compendium_guide_selectedcompendium_guide, ''#param9#''),				
+					CreateString('guide_info_cache_10_'#compendium_guide_selectedcompendium_guide, ''#param10#''),
+					CreateString('guide_info_cache_11_'#compendium_guide_selectedcompendium_guide, ''#param11#''),
+					CreateString('guide_info_cache_12_'#compendium_guide_selectedcompendium_guide, ''#param12#''),
+					CreateString('guide_info_cache_13_'#compendium_guide_selectedcompendium_guide, ''#param13#''),
+					CreateString('guide_info_cache_14_'#compendium_guide_selectedcompendium_guide, ''#param14#''),
+					CreateString('guide_info_cache_15_'#compendium_guide_selectedcompendium_guide, ''#param15#''),
+					CreateString('guide_info_cache_16_'#compendium_guide_selectedcompendium_guide, ''#param16#''),
+					CreateString('guide_info_cache_17_'#compendium_guide_selectedcompendium_guide, ''#param17#''),
+					CreateString('guide_info_cache_18_'#compendium_guide_selectedcompendium_guide, ''#param18#''),
+					CreateString('guide_info_cache_21_'#compendium_guide_selectedcompendium_guide, ''#param21#'')
+				),
+				Split(
+					Set('guide_info_cache_0_'#compendium_guide_selectedcompendium_guide, ''#param0#''),
+					Set('guide_info_cache_1_'#compendium_guide_selectedcompendium_guide, ''#param1#''),
+					Set('guide_info_cache_2_'#compendium_guide_selectedcompendium_guide, ''#param2#''),
+					Set('guide_info_cache_3_'#compendium_guide_selectedcompendium_guide, ''#param3#''),
+					Set('guide_info_cache_4_'#compendium_guide_selectedcompendium_guide, ''#param4#''),
+					Set('guide_info_cache_5_'#compendium_guide_selectedcompendium_guide, ''#param5#''),
+					Set('guide_info_cache_6_'#compendium_guide_selectedcompendium_guide, ''#param6#''),
+					Set('guide_info_cache_7_'#compendium_guide_selectedcompendium_guide, ''#param7#''),
+					Set('guide_info_cache_8_'#compendium_guide_selectedcompendium_guide, ''#param8#''),
+					Set('guide_info_cache_9_'#compendium_guide_selectedcompendium_guide, ''#param9#''),		
+					Set('guide_info_cache_10_'#compendium_guide_selectedcompendium_guide, ''#param10#''),
+					Set('guide_info_cache_11_'#compendium_guide_selectedcompendium_guide, ''#param11#''),
+					Set('guide_info_cache_12_'#compendium_guide_selectedcompendium_guide, ''#param12#''),
+					Set('guide_info_cache_13_'#compendium_guide_selectedcompendium_guide, ''#param13#''),
+					Set('guide_info_cache_14_'#compendium_guide_selectedcompendium_guide, ''#param14#''),
+					Set('guide_info_cache_15_'#compendium_guide_selectedcompendium_guide, ''#param15#''),
+					Set('guide_info_cache_16_'#compendium_guide_selectedcompendium_guide, ''#param16#''),
+					Set('guide_info_cache_17_'#compendium_guide_selectedcompendium_guide, ''#param17#''),
+					Set('guide_info_cache_18_'#compendium_guide_selectedcompendium_guide, ''#param18#''),
+					Set('guide_info_cache_21_'#compendium_guide_selectedcompendium_guide, ''#param21#'')
+				)				
+			));
+		"		
+	/>
+
+	<panel noclick="1"
+		watch7="compendium_guideChangedcompendium_guide"
+		ontrigger7="	
+			##SetAutoLevelup(' ');##
+			##
+			Trigger('compendium_guideRecommendedEvent');
+			Trigger('compendium_guideAbilityEvent');
+			Trigger('compendium_guideLabelEvent');
+			##
+			Set(compendium_guide_usingLocal, 0);
+		"
+		
+		watch8="compendium_guideLoadcompendium_guide"
+		ontrigger8="
+			Trigger('compendium_guideRecommendedClear');
+			Trigger('compendium_guideAbilityClear');	
+			Trigger('compendium_guideTextClear');
+			##SetAutoLevelup(' ');##
+			##Echo('compendium_guideLoadcompendium_guide');##
+			Call('compendium_guide_usingLocalPanel', 'SetVisible(0);');
+			If(!VarExists('guide_info_cache_0_'#compendium_guide_selectedcompendium_guide) or !compendium_guide_useCache,
+				Split(Set(compendium_guide_useCache, 1), Trigger('compendium_guideMasterQuery', 'compendium_guideInfoForm', HostTime), SubmitForm('compendium_guideInfoForm', 'f', 'get_guide', 'account', GetAccountID(), 'cookie', GetCookie(), 'hero', compendium_guide_currentHero, 'hosttime', HostTime, 'gid', compendium_guide_selectedcompendium_guide)),
+				##Split(Echo('Load from ^gcache'),## Trigger('compendium_guideLoadCache')##)##
+			);
+			
+			If(WidgetExists('compendium_guidelist_item_'#compendium_guide_selectedcompendium_guide),
+				Call('compendium_guidelist_item_'#compendium_guide_selectedcompendium_guide, 
+					'Call(\'compendium_guide_pop_display_label\', \'SetText(\\\'\'#this#\'\\\'); SetColor(Saturate(1 - ((this/100) - 0.50) / 0.50), ((this/100) + ((((this/100) - 0.05) / 1.0)*0.2)) / 0.45, 	0, 1); \')'
+				)
+			);
+			##Trigger('compendium_guideChangedcompendium_guide');##
+		"
+
+		watch9="compendium_guideHeroName"
+		ontrigger9="
+			If(!StringEmpty(param0),
+				If(!StringEquals(param0, compendium_guide_currentHero) or compendium_guide_newRound,
+					Split(
+						Set(compendium_guide_newRound, 0),
+						Set(compendium_guide_currentHero, param0),
+						Call('compendium_guide_list', 'ClearItems();'),
+						If(!VarExists('guide_list_cache__0_'#compendium_heroLastViewed) or !compendium_usage_useCache,
+							Split(Set(compendium_usage_useCache, 1), Set(compendium_usage_usingCache, 0), Trigger('compendium_guideMasterQuery', 'compendium_guideListForm', HostTime), SubmitForm('compendium_guideListForm', 'f', 'get_guide_list_filtered', 'account', GetAccountID(), 'cookie', GetCookie(), 'hero', param0, 'hosttime', HostTime)),
+							Split(Set(compendium_usage_usingCache, 1), Trigger('compendium_guideListFormLoadCache'))
+						),						
+						Trigger('compendium_guideLoadcompendium_guide')	
+					)
+				)
+			);
+		"
+		
+		watch1="compendium_guideListFormLoadCache"
+		ontrigger1="
+			Trigger('compendium_guideListFormResult', 
+				*('guide_list_cache__0_'#compendium_heroLastViewed),
+				*('guide_list_cache__1_'#compendium_heroLastViewed),
+				*('guide_list_cache__2_'#compendium_heroLastViewed)
+			);	
+		"		
+
+		watch2="compendium_guideListFormResult"
+		ontrigger2="
+			If(StringEmpty(param0) and !StringEmpty(param1),
+			If(!VarExists('guide_list_cache__0_'#compendium_heroLastViewed),
+				Split(
+					CreateString('guide_list_cache__0_'#compendium_heroLastViewed, ''#param0#''),
+					CreateString('guide_list_cache__1_'#compendium_heroLastViewed, ''#param1#''),
+					CreateString('guide_list_cache__2_'#compendium_heroLastViewed, ''#param2#'')
+				),
+				Split(
+					Set('guide_list_cache__0_'#compendium_heroLastViewed, ''#param0#''),
+					Set('guide_list_cache__1_'#compendium_heroLastViewed, ''#param1#''),
+					Set('guide_list_cache__2_'#compendium_heroLastViewed, ''#param2#'')
+				)				
+			));
+		"			
+		
+	/>	
+	
+	<trigger name="compendium_guideLoadFeaturedExplode" />
+	<trigger name="compendium_guideLoadFeaturedInstantiate" />		
+	<trigger name="compendium_guideInfoFormResultLocal" />
+	<panel noclick="1"
+		watch2="compendium_guideLoadFeatured"
+		ontrigger2="
+			Set(compendium_guide_useCache, 0);
+			Trigger('compendium_guideInfoFormStatus', 1);
+			SleepWidget(50, '
+				If(!WidgetExists(\'compendium_guide_reader_textbuffer_\'#compendium_guide_currentHero),
+					Split(
+						##Echo(\'^y 1 - compendium_guideLoadFeatured Triggered - Instantiating\'),##
+						Instantiate(\'compendium_guide_reader_textbuffer\', \'hero\', compendium_guide_currentHero),
+						SleepWidget(1, \'Trigger(\\\'compendium_guideLoadFeaturedInstantiate\\\');\')
+					),
+					SleepWidget(1, \'Trigger(\\\'compendium_guideLoadFeaturedInstantiate\\\');\')
+				);'
+			);
+		"
+		
+		watch1="compendium_guideLoadFeaturedExplode"
+		ontrigger1="		
+			Trigger('compendium_guideRecommendedClear');
+			Trigger('compendium_guideAbilityClear');	
+			Trigger('compendium_guideTextClear');
+			##SetAutoLevelup(' ');	##	
+			Call('compendium_guide_usingLocalPanel', 'SetVisible(1);');			
+			Trigger('compendium_guideInfoFormResultLocal', 
+				'', ## ##
+				'',
+				'',
+				'',
+				'',
+				param7, ## Items ##
+				param8, ## Items ##
+				param9, ## Items ##
+				param10, ## Items ##
+				param11, ## Abilities ##
+				param12, ## Intro ##
+				param13, ## Desc ##
+				'', ## Date Modified ##
+				0, ## Fav ##
+				0, ## Def ##
+				1, ##  ##
+				1, ## Vote result ##
+				1, ##  ##
+				1, ##  ##
+				1, ##  ##
+				1, ##  ##
+				1, ## Featured ##
+				1
+			);	
+			##
+			Call('compendium_guide_list', '
+				ClearItems();
+				Set(compendium_guide_usingLocal, 1);
+				AddTemplateListItem(\'compendium_guidelist_item\', 0,
+					\'index\', 0,
+					\'compendium_guideindex\', 0,
+					\'timestamp\',  \''#param1#'\',
+					\'author\', \''#param2#'\',
+					\'compendium_guidename\', \''#param4#'\',
+					\'isdef\', 0,
+					\'isfav\', 0,				
+					\'pop\', 1,
+					\'is_yours\', 0,
+					\'is_premium\', 1	
+				);	
+			');			
+			##
+			Trigger('compendium_guideChangedcompendium_guide');
+			"	
+	/>	
+	<template name="compendium_guide_reader_textbuffer" >
+		<textbuffer name="compendium_guide_reader_textbuffer_{hero}" visible="0" group="compendium_guide_reader_textbuffers" scrolltexture="/ui/info/combobox.tga" handleheight="2.0h" scrollbarsize="2.2h" wrap="0" exteriorscrollbars="false" textalign="left" font="dyn_10" textcolor="white" color="invisible" shadow="1" noclick="1"
+			file="/guides/{hero}_guide.txt"
+			watch1="compendium_guideLoadFeaturedInstantiate" ontrigger1="
+			Trigger('compendium_guideRecommendedClear');
+			Trigger('compendium_guideAbilityClear');	
+			Trigger('compendium_guideTextClear');
+			##SetAutoLevelup(' ');##		
+			SleepWidget(50, 'ExplodeTrigger(\'compendium_guideLoadFeaturedExplode\', NormalizeLineBreaks(this), \'$#$#\', \'`\', 0, 0);');
+			"
+			watch="compendium_guideLoadFeatured" ontrigger="DestroyWidget();"
+		/>
+	</template>
+	 
+	<!-- vote -->
+	<form		
+		name="compendium_guideVoteForm"
+		host="!masterserver"
+		method="POST"
+		target="/client_requester.php"
+		statustrigger="compendium_guideVoteFormStatus"
+		resulttrigger="compendium_guideVoteFormResult"
+		resultparam0="errors"
+		resultparam1="vote"
+		resultparam2="guide_vote"
+		resultparam3="success"
+		resultparam4="hosttime"
+		ssl="false"
+	/>		
+	<panel noclick="1" visible="1"
+		watch0="compendium_guideVoteFormResult"
+		ontrigger0="
+			If(param3 and compendium_guideVoteFormStatus == 2 and (compendium_guide_masterQueryTime == param4),
+				Set('guide_info_cache_16_'#compendium_guide_selectedcompendium_guide, ''#param1#'')
+			);
+			## Echo('Vote Result: '#Evaluate('guide_info_cache_13_'#compendium_guide_selectedcompendium_guide)#' - '#param0#' -^g '#param1#' ^*-^y '#param2#' ^*- '#param3); ##
+		"		
+		
+		watch2="compendium_guideVoteFormStatus"
+		ontrigger2=""
+	/>	
+	
+	<!-- default -->
+	<form		
+		name="compendium_guideDefaultForm"
+		host="!masterserver"
+		method="POST"
+		target="/client_requester.php"
+		statustrigger="compendium_guideDefaultFormStatus"
+		resulttrigger="compendium_guideDefaultFormResult"
+		resultparam0="errors"
+		resultparam1="set"
+		resultparam2="success"
+		resultparam3="guide_default"
+		resultparam4="hosttime"
+		ssl="false"
+	/>		
+	<panel noclick="1" visible="1"
+		watch0="compendium_guideDefaultFormResult"
+		ontrigger0="
+			## Echo('Default Result: '#Evaluate('guide_info_cache_13_'#compendium_guide_selectedcompendium_guide)#' - '#param0#' - '#param1#' - ^gS?:'#param2#'^* - '#param3#'  ('#param4#'/'#compendium_guide_masterQueryTime#')  compendium_guideDefaultFormStatus:'#compendium_guideDefaultFormStatus);  ##
+			If(param2 and compendium_guideDefaultFormStatus == 2 and (compendium_guide_masterQueryTime == param4),
+				Split(				
+					Trigger('compendium_guideMasterQuery', 'compendium_guideListForm', HostTime),
+					SubmitForm('compendium_guideListForm', 'f', 'get_guide_list_filtered', 'account', GetAccountID(), 'cookie', GetCookie(), 'hero', compendium_guide_currentHero, 'hosttime', HostTime),
+					Set('guide_info_cache_14_'#compendium_guide_selectedcompendium_guide, ''#param1#'')
+				)
+			);
+		"				
+		watch2="compendium_guideDefaultFormStatus"
+		ontrigger2=""
+	/>		
+
+	<!-- Favorite -->
+	<form		
+		name="compendium_guideFavoriteForm"
+		host="!masterserver"
+		method="POST"
+		target="/client_requester.php"
+		statustrigger="compendium_guideFavoriteFormStatus"
+		resulttrigger="compendium_guideFavoriteFormResult"
+		resultparam0="errors"
+		resultparam1="set"
+		resultparam2="success"
+		resultparam3="guide_favorite"
+		resultparam4="hosttime"
+		ssl="false"
+	/>		
+	<panel noclick="1" visible="1"
+		watch0="compendium_guideFavoriteFormResult"
+		ontrigger0="
+			If(param2 and compendium_guideFavoriteFormStatus == 2 and (compendium_guide_masterQueryTime == param4),
+				Split(			
+					Set('guide_info_cache_13_'#compendium_guide_selectedcompendium_guide, ''#param1#''),
+					Trigger('compendium_guideMasterQuery', 'compendium_guideListForm', HostTime),
+					SubmitForm('compendium_guideListForm', 'f', 'get_guide_list_filtered', 'account', GetAccountID(), 'cookie', GetCookie(), 'hero', compendium_guide_currentHero, 'hosttime', HostTime)
+				)
+			);
+			 ##Echo('Favorite Result: '#Evaluate('guide_info_cache_13_'#compendium_guide_selectedcompendium_guide)#' - '#param0#' -^g '#param1#' ^*-^y '#param2#' ^*- '#param3);## 
+		"			
+		watch2="compendium_guideFavoriteFormStatus"
+		ontrigger2=""
+	/>	
+	
+	<!-- compendium_guide list -->
+	<form		
+		name="compendium_guideListForm"
+		host="!masterserver"
+		method="POST"
+		target="/client_requester.php"
+		statustrigger="compendium_guideListFormStatus"
+		resulttrigger="compendium_guideListFormResult"
+		resultparam0="errors"
+		resultparam1="guide_list"
+		resultparam2="hosttime"
+		ssl="false"
+	/>	
+	<panel noclick="1" visible="1"
+		onload="CreateBool('compendium_guide_auto_selection', 0); CreateBool('compendium_guide_usingLocal', 0);"
+		watch0="compendium_guideListFormResult"
+		ontrigger0="
+			If(((compendium_guideListFormStatus == 2) and (compendium_guide_masterQueryTime == param2)) or compendium_usage_usingCache,
+				Split(
+					Call('compendium_guide_list', 'ClearItems();'),
+					ExplodeTrigger('compendium_guideListFormResultExplode', param1, '`', '|')
+				)
+			);
+		"		
+		watch1="compendium_guideListFormResultExplode"
+		ontrigger1="
+			If((compendium_guideListFormStatus == 2 or compendium_usage_usingCache),				
+				Call('compendium_guide_list', '
+					AddTemplateListItem(\'compendium_guidelist_item\', '#param1#',
+						\'index\', '#param0#',
+						\'compendium_guideindex\', '#param1#',
+						\'timestamp\',  \''#param2#'\',
+						\'author\', \''#param3#'\',
+						\'compendium_guidename\', \''#param4#'\',
+						\'isdef\', '#StringEquals(param5, 'is_def')#',
+						\'isfav\', '#StringEquals(param6, 'is_fav')#',				
+						\'pop\', '#Round(param7*100)#',
+						\'is_yours\', '#StringEquals(param8, 'is_yours')#',
+						\'is_premium\', '#param9#'	
+					);	
+					If(StringEmpty(\'\'#this#\'\') and !compendium_guide_auto_selection and !compendium_guide_usingLocal,
+						If(compendium_guide_selectedcompendium_guide != 99999 and 0 ## always 0 guide ##, 
+							Trigger(\'compendium_guideLoadcompendium_guide\'),
+							Split(
+								SetSelectedItemByIndex(0),
+								SleepWidget(10, \'									
+									Set(compendium_guide_selectedcompendium_guide, this);
+									Trigger(\\\'compendium_guideLoadcompendium_guide\\\');
+									\'
+								)
+							)
+						)
+					);
+				')			
+			);
+		"	
+		
+		watch2="compendium_guideListFormStatus"
+		ontrigger2="If(param != 1, SleepWidget(250, 'Set(compendium_guide_auto_selection, 0)'));"
+	/>	
+	
+	<!-- compendium_guide main info -->
+	<form
+		name="compendium_guideInfoForm"
+		host="!masterserver"
+		target="/client_requester.php"
+		statustrigger="compendium_guideInfoFormStatus"
+		resulttrigger="compendium_guideInfoFormResult"
+		resultparam0="errors"
+		resultparam1="author_name"
+		resultparam2="hero_cli_name"
+		resultparam3="guide_name"
+		resultparam4="hero_name"
+		resultparam5="i_start"
+		resultparam6="i_laning"
+		resultparam7="i_core"
+		resultparam8="i_luxury"
+		resultparam9="abilQ"
+		resultparam10="txt_intro"
+		resultparam11="txt_guide"
+		resultparam12="datetime"
+		resultparam13="favorite"
+		resultparam14="default"
+		resultparam15="rating"
+		resultparam16="vote"
+		resultparam17="hosttime"
+		resultparam18="thumb"	
+		resultparam19=""
+		resultparam20="success"
+		resultparam21="premium"
+		ssl="false"
+	/>	
+	<!-- Abilities -->
+	<panel noclick="1" visible="1"
+		onload="CreateString('compendium_guide_ability_hoverName', '');"
+		watch2="compendium_guideInfoFormStatus"
+		ontrigger2=""	
+		watch0="compendium_guideInfoFormResult compendium_guideInfoFormResultLocal"
+		ontrigger0="						
+			If((compendium_guideInfoFormStatus == 2 and (compendium_guide_masterQueryTime == param17) and param20) or param19,
+				Split(
+					ExplodeTrigger('compendium_guideInfoFormResultExplodeAbilities', param9, '|'),
+					Trigger('compendium_guideAbilityEvent')
+				)
+			);
+		"	
+		watch1="##compendium_guideInfoFormResultExplodeAbilities##"
+		ontrigger1="			
+			## Disabled in favor of using set instances
+			If(compendium_guideInfoFormStatus == 2 or IsVisible('compendium_guide_usingLocalPanel'),
+				If(param0 le 13,
+					Call('compendium_guide_ability_panel_1', '
+						Instantiate(\'compendium_guide_ability_lvl\',
+							\'id\', '#param0#',
+							\'abilityname\', \''#param1#'\',
+							\'icon\', \''#GetEntityIconPath(param1)#'\' 
+						);
+						
+					'),
+					Call('compendium_guide_ability_panel_2', '
+						Instantiate(\'compendium_guide_ability_lvl\',
+							\'id\', '#param0#',
+							\'abilityname\', \''#param1#'\',
+							\'icon\', \''#GetEntityIconPath(param1)#'\' 
+						);
+						
+					')
+				)
+			);	
+			##
+		"		
+	/>	
+	<!-- Items -->	
+	<panel noclick="1" visible="1"
+		watch0="compendium_guideInfoFormResult compendium_guideInfoFormResultLocal"
+		ontrigger0="	
+			##Echo('compendium_guideInfoFormResult');##
+			Trigger('compendium_guideRecommendedClear');
+			If((compendium_guideInfoFormStatus == 2 and (compendium_guide_masterQueryTime == param17) and param20) or param19,
+				Split(				
+					Set(compendium_guide_recommendedString, EscapeString(param5) # '|' # EscapeString(param6) # '|' # EscapeString(param7) # '|' # EscapeString(param8)),
+					ExplodeTrigger('compendium_guideInfoFormResultExplodeItemsStart', EscapeString(param5), '|'),
+					ExplodeTrigger('compendium_guideInfoFormResultExplodeItemsLaning', EscapeString(param6), '|'),
+					ExplodeTrigger('compendium_guideInfoFormResultExplodeItemsCore', EscapeString(param7), '|'),
+					ExplodeTrigger('compendium_guideInfoFormResultExplodeItemsLux', EscapeString(param8), '|'),
+					Trigger('compendium_guideRecommendedEvent')
+				)
+			);
+		"	
+		watch1="##compendium_guideInfoFormResultExplodeItemsStart##"
+		ontrigger1="	
+			##
+			If((compendium_guideInfoFormStatus == 2 or IsVisible('compendium_guide_usingLocalPanel')) and StringLength(param1) ge 5 and !StringEmpty(GetEntityIconPath(param1)),
+				If(param le 4,
+					Call('compendium_guide_recommended_panel_1_1', '
+						Instantiate(\'compendium_guide_recommended_item\', 
+							\'panel\', \'1\',
+							\'id\', '#param0#',
+							\'item\', \''#param1#'\',
+							\'icon\', \''#GetEntityIconPath(param1)#'\'	
+						);
+						
+					'),
+					Call('compendium_guide_recommended_panel_1_2', '
+						Instantiate(\'compendium_guide_recommended_item\',
+							\'panel\', \'1\',
+							\'id\', '#param0#',
+							\'item\', \''#param1#'\',
+							\'icon\', \''#GetEntityIconPath(param1)#'\'	
+						);
+						
+					')
+				)
+			);	
+			##
+		"
+		watch2="##compendium_guideInfoFormResultExplodeItemsLaning##"
+		ontrigger2="			
+			##
+			If((compendium_guideInfoFormStatus == 2 or IsVisible('compendium_guide_usingLocalPanel'))  and StringLength(param1) ge 5 and !StringEmpty(GetEntityIconPath(param1)),
+				If(param le 4,
+					Call('compendium_guide_recommended_panel_2_1', '
+						Instantiate(\'compendium_guide_recommended_item\', 
+							\'panel\', \'2\',
+							\'id\', '#param0#',
+							\'item\', \''#param1#'\',
+							\'icon\', \''#GetEntityIconPath(param1)#'\'	
+						);
+						
+					'),
+					Call('compendium_guide_recommended_panel_2_2', '
+						Instantiate(\'compendium_guide_recommended_item\',
+							\'panel\', \'2\',
+							\'id\', '#param0#',
+							\'item\', \''#param1#'\',
+							\'icon\', \''#GetEntityIconPath(param1)#'\'	
+						);
+						
+					')
+				)
+			);
+			##
+		"	
+		watch3="##compendium_guideInfoFormResultExplodeItemsCore##"
+		ontrigger3="			
+			##
+			If((compendium_guideInfoFormStatus == 2 or IsVisible('compendium_guide_usingLocalPanel')) and StringLength(param1) ge 5 and !StringEmpty(GetEntityIconPath(param1)),
+				If(param le 4,
+					Call('compendium_guide_recommended_panel_3_1', '
+						Instantiate(\'compendium_guide_recommended_item\', 
+							\'panel\', \'3\',
+							\'id\', '#param0#',
+							\'item\', \''#param1#'\',
+							\'icon\', \''#GetEntityIconPath(param1)#'\'	
+						);
+						
+					'),
+					Call('compendium_guide_recommended_panel_3_2', '
+						Instantiate(\'compendium_guide_recommended_item\',
+							\'panel\', \'3\',
+							\'id\', '#param0#',
+							\'item\', \''#param1#'\',
+							\'icon\', \''#GetEntityIconPath(param1)#'\'	
+						);
+						
+					')
+				)
+			);
+			##
+		"
+		watch4="##compendium_guideInfoFormResultExplodeItemsLux##"
+		ontrigger4="		
+			##
+			If((compendium_guideInfoFormStatus == 2 or IsVisible('compendium_guide_usingLocalPanel')) and StringLength(param1) ge 5 and !StringEmpty(GetEntityIconPath(param1)),
+				If(param le 4,
+					Call('compendium_guide_recommended_panel_4_1', '
+						Instantiate(\'compendium_guide_recommended_item\', 
+							\'panel\', \'4\',
+							\'id\', '#param0#',
+							\'item\', \''#param1#'\',
+							\'icon\', \''#GetEntityIconPath(param1)#'\'	
+						);
+						
+					'),
+					Call('compendium_guide_recommended_panel_4_2', '
+						Instantiate(\'compendium_guide_recommended_item\',
+							\'panel\', \'4\',
+							\'id\', '#param0#',
+							\'item\', \''#param1#'\',
+							\'icon\', \''#GetEntityIconPath(param1)#'\'	
+						);
+						
+					')
+				)
+			);
+			##
+		"		
+	/>	
+
+	
+	<trigger name="HeroStatsStatus" />
+	<trigger name="HeroStatsResult" />
+	<trigger name="CoNNormalHeroStatsStatus" />
+	<trigger name="CoNNormalHeroStatsResult" />
+	<trigger name="CoNCasualHeroStatsStatus" />
+	<trigger name="CoNCasualHeroStatsResult" />
+	<trigger name="HeroStatsLoadCache" />
+	
+	<panel name="hero_stats_submit_compendium" noclick="1" color="invisible"
+		onload="CreateString('hero_stats_cache_string', ''); CreateString('compendium_hero_stats_playerLookupName', StripClanTag(GetAccountName()));"
+		onevent="
+			If(!VarExists('hero_stats_cache_0_'#compendium_heroLastViewed) or !compendium_usage_useCache,
+				Split(Set(compendium_usage_useCache, 1), Set(compendium_usage_usingCache, 0), Trigger('compendium_guideMasterQuery', 'HeroStats', HostTime), SubmitForm('HeroStats', 'f', 'get_hero_stats', 'hosttime', HostTime, 'nickname', compendium_hero_stats_playerLookupName, 'account_id', GetAccountID(), 'cookie', GetCookie(), 'hero', compendium_heroLastViewed)),
+				Split(Set(compendium_usage_usingCache, 1), Trigger('HeroStatsLoadCache'))
+			);	
+
+			SubmitForm('CoN_HeroStats_Normal', 'f', 'get_campaign_hero_stats', 'cookie', GetCookie(), 'nickname', compendium_hero_stats_playerLookupName, 'hero_name', compendium_heroLastViewed, 'is_casual', '0');
+			SubmitForm('CoN_HeroStats_Casual', 'f', 'get_campaign_hero_stats', 'cookie', GetCookie(), 'nickname', compendium_hero_stats_playerLookupName, 'hero_name', compendium_heroLastViewed, 'is_casual', '1');
+		"
+		watch5="HeroStatsLoadCache"
+		ontrigger5="	
+			Set(hero_stats_cache_string, 'Trigger(\'HeroStatsResult\', ');
+			For(0, 190, 1, '
+					Set(hero_stats_cache_string, hero_stats_cache_string # *(\'hero_stats_cache_\'#iParam#\'_\'#compendium_heroLastViewed) # \', \' ),
+				');
+			Set(hero_stats_cache_string, SubString(hero_stats_cache_string, 0, (StringLength(hero_stats_cache_string) - 5) ) # ');');
+			Evaluate(hero_stats_cache_string);
+		"		
+		watch7="HeroStatsResult"
+		ontrigger7="
+			If(StringEmpty(param0) and !StringEmpty(param1),
+			If(!VarExists('hero_stats_cache_0_'#compendium_heroLastViewed),								
+				For(0, 190, 1, '
+					If(!StringEmpty(*(\'param\'#iParam)),
+						CreateString(\'hero_stats_cache_\'#iParam#\'_\'#compendium_heroLastViewed, *(\'param\'#iParam) ),
+						CreateString(\'hero_stats_cache_\'#iParam#\'_\'#compendium_heroLastViewed, 0 )
+					)
+				'),
+				For(0, 190, 1, '
+					If(!StringEmpty(*(\'param\'#iParam)),
+						Set(\'hero_stats_cache_\'#iParam#\'_\'#compendium_heroLastViewed, *(\'param\'#iParam) ),
+						Set(\'hero_stats_cache_\'#iParam#\'_\'#compendium_heroLastViewed, 0 )
+					)
+				')				
+			));
+		"
+		watch8="LoginStatus"
+		ontrigger8="
+			If(param2 and StringEquals(param0, 'success') and !StringEquals(StripClanTag(GetAccountName()), compendium_hero_stats_playerLookupName),
+				Split(
+					Set(compendium_usage_useCache, 0),
+					Set(compendium_hero_stats_playerLookupName, StripClanTag(GetAccountName()))
+				)
+			);"
+	/>	
+	
+	<form
+		name="HeroStats"
+		host="!masterserver"
+		method="post"
+		target="/client_requester.php"
+		statustrigger="HeroStatsStatus"
+		resulttrigger="HeroStatsResult"
+		resultparam0="errors"
+		resultparam1="success"
+		
+		resultparam2="rnk_ph_used"
+		resultparam3="rnk_ph_wins"
+		resultparam4="rnk_ph_losses"
+		resultparam5="rnk_ph_concedes"
+		resultparam6="rnk_ph_concedevotes"
+		resultparam7="rnk_ph_buybacks"
+		resultparam8="rnk_ph_discos"
+		resultparam9="rnk_ph_kicked"
+		resultparam10="rnk_ph_pub_skill"
+		resultparam11="rnk_ph_pub_count"
+		resultparam12="rnk_ph_amm_solo_rating"
+		resultparam13="rnk_ph_amm_solo_count"
+		resultparam14="rnk_ph_amm_team_rating"
+		resultparam15="rnk_ph_amm_team_count"
+		resultparam16="rnk_ph_avg_score"
+		resultparam17="rnk_ph_herokills"
+		resultparam18="rnk_ph_herodmg"
+		resultparam19="rnk_ph_heroexp"
+		resultparam20="rnk_ph_herokillsgold"
+		resultparam21="rnk_ph_heroassists"
+		resultparam22="rnk_ph_deaths"
+		resultparam23="rnk_ph_goldlost2death"
+		resultparam24="rnk_ph_secs_dead"
+		resultparam25="rnk_ph_teamcreepkills"
+		resultparam26="rnk_ph_teamcreepdmg"
+		resultparam27="rnk_ph_teamcreepexp"
+		resultparam28="rnk_ph_teamcreepgold"
+		resultparam29="rnk_ph_neutralcreepkills"
+		resultparam30="rnk_ph_neutralcreepdmg"
+		resultparam31="rnk_ph_neutralcreepexp"
+		resultparam32="rnk_ph_neutralcreepgold"
+		resultparam33="rnk_ph_bdmg"
+		resultparam34="rnk_ph_bdmgexp"
+		resultparam35="rnk_ph_razed"
+		resultparam36="rnk_ph_bgold"
+		resultparam37="rnk_ph_denies"
+		resultparam38="rnk_ph_exp_denied"
+		resultparam39="rnk_ph_gold"
+		resultparam40="rnk_ph_gold_spent"
+		resultparam41="rnk_ph_exp"
+		resultparam42="rnk_ph_actions"
+		resultparam43="rnk_ph_secs"
+		resultparam44="rnk_ph_consumables"
+		resultparam45="rnk_ph_wards"
+		resultparam46="rnk_ph_time_earning_exp"
+		resultparam47="rnk_ph_bloodlust"
+		resultparam48="rnk_ph_doublekill"
+		resultparam49="rnk_ph_triplekill"
+		resultparam50="rnk_ph_quadkill"
+		resultparam51="rnk_ph_annihilation"
+		resultparam52="rnk_ph_ks3"
+		resultparam53="rnk_ph_ks4"
+		resultparam54="rnk_ph_ks5"
+		resultparam55="rnk_ph_ks6"
+		resultparam56="rnk_ph_ks7"
+		resultparam57="rnk_ph_ks8"
+		resultparam58="rnk_ph_ks9"
+		resultparam59="rnk_ph_ks10"
+		resultparam60="rnk_ph_ks15"
+		resultparam61="rnk_ph_smackdown"
+		resultparam62="rnk_ph_humiliation"
+		resultparam63="rnk_ph_nemesis"
+		resultparam64="rnk_ph_retribution"
+
+		resultparam65="cs_ph_used"
+		resultparam66="cs_ph_wins"
+		resultparam67="cs_ph_losses"
+		resultparam68="cs_ph_concedes"
+		resultparam69="cs_ph_concedevotes"
+		resultparam70="cs_ph_buybacks"
+		resultparam71="cs_ph_discos"
+		resultparam72="cs_ph_kicked"
+		resultparam73="cs_ph_pub_skill"
+		resultparam74="cs_ph_pub_count"
+		resultparam75="cs_ph_amm_solo_rating"
+		resultparam76="cs_ph_amm_solo_count"
+		resultparam77="cs_ph_amm_team_rating"
+		resultparam78="cs_ph_amm_team_count"
+		resultparam79="cs_ph_avg_score"
+		resultparam80="cs_ph_herokills"
+		resultparam81="cs_ph_herodmg"
+		resultparam82="cs_ph_heroexp"
+		resultparam83="cs_ph_herokillsgold"
+		resultparam84="cs_ph_heroassists"
+		resultparam85="cs_ph_deaths"
+		resultparam86="cs_ph_goldlost2death"
+		resultparam87="cs_ph_secs_dead"
+		resultparam88="cs_ph_teamcreepkills"
+		resultparam89="cs_ph_teamcreepdmg"
+		resultparam90="cs_ph_teamcreepexp"
+		resultparam91="cs_ph_teamcreepgold"
+		resultparam92="cs_ph_neutralcreepkills"
+		resultparam93="cs_ph_neutralcreepdmg"
+		resultparam94="cs_ph_neutralcreepexp"
+		resultparam95="cs_ph_neutralcreepgold"
+		resultparam96="cs_ph_bdmg"
+		resultparam97="cs_ph_bdmgexp"
+		resultparam98="cs_ph_razed"
+		resultparam99="cs_ph_bgold"
+		resultparam100="cs_ph_denies"
+		resultparam101="cs_ph_exp_denied"
+		resultparam102="cs_ph_gold"
+		resultparam103="cs_ph_gold_spent"
+		resultparam104="cs_ph_exp"
+		resultparam105="cs_ph_actions"
+		resultparam106="cs_ph_secs"
+		resultparam107="cs_ph_consumables"
+		resultparam108="cs_ph_wards"
+		resultparam109="cs_ph_time_earning_exp"
+		resultparam110="cs_ph_bloodlust"
+		resultparam111="cs_ph_doublekill"
+		resultparam112="cs_ph_triplekill"
+		resultparam113="cs_ph_quadkill"
+		resultparam114="cs_ph_annihilation"
+		resultparam115="cs_ph_ks3"
+		resultparam116="cs_ph_ks4"
+		resultparam117="cs_ph_ks5"
+		resultparam118="cs_ph_ks6"
+		resultparam119="cs_ph_ks7"
+		resultparam120="cs_ph_ks8"
+		resultparam121="cs_ph_ks9"
+		resultparam122="cs_ph_ks10"
+		resultparam123="cs_ph_ks15"
+		resultparam124="cs_ph_smackdown"
+		resultparam125="cs_ph_humiliation"
+		resultparam126="cs_ph_nemesis"
+		resultparam127="cs_ph_retribution"		
+		
+		resultparam128="ph_used"
+		resultparam129="ph_wins"
+		resultparam130="ph_losses"
+		resultparam131="ph_concedes"
+		resultparam132="ph_concedevotes"
+		resultparam133="ph_buybacks"
+		resultparam134="ph_discos"
+		resultparam135="ph_kicked"
+		resultparam136="ph_pub_skill"
+		resultparam137="ph_pub_count"
+		resultparam138="ph_amm_solo_rating"
+		resultparam139="ph_amm_solo_count"
+		resultparam140="ph_amm_team_rating"
+		resultparam141="ph_amm_team_count"
+		resultparam142="ph_avg_score"
+		resultparam143="ph_herokills"
+		resultparam144="ph_herodmg"
+		resultparam145="ph_heroexp"
+		resultparam146="ph_herokillsgold"
+		resultparam147="ph_heroassists"
+		resultparam148="ph_deaths"
+		resultparam149="ph_goldlost2death"
+		resultparam150="ph_sedead"
+		resultparam151="ph_teamcreepkills"
+		resultparam152="ph_teamcreepdmg"
+		resultparam153="ph_teamcreepexp"
+		resultparam154="ph_teamcreepgold"
+		resultparam155="ph_neutralcreepkills"
+		resultparam156="ph_neutralcreepdmg"
+		resultparam157="ph_neutralcreepexp"
+		resultparam158="ph_neutralcreepgold"
+		resultparam159="ph_bdmg"
+		resultparam160="ph_bdmgexp"
+		resultparam161="ph_razed"
+		resultparam162="ph_bgold"
+		resultparam163="ph_denies"
+		resultparam164="ph_exp_denied"
+		resultparam165="ph_gold"
+		resultparam166="ph_gold_spent"
+		resultparam167="ph_exp"
+		resultparam168="ph_actions"
+		resultparam169="ph_secs"
+		resultparam170="ph_consumables"
+		resultparam171="ph_wards"
+		resultparam172="ph_time_earning_exp"
+		resultparam173="ph_bloodlust"
+		resultparam174="ph_doublekill"
+		resultparam175="ph_triplekill"
+		resultparam176="ph_quadkill"
+		resultparam177="ph_annihilation"
+		resultparam178="ph_ks3"
+		resultparam179="ph_ks4"
+		resultparam180="ph_ks5"
+		resultparam181="ph_ks6"
+		resultparam182="ph_ks7"
+		resultparam183="ph_ks8"
+		resultparam184="ph_ks9"
+		resultparam185="ph_ks10"
+		resultparam186="ph_ks15"
+		resultparam187="ph_smackdown"
+		resultparam188="ph_humiliation"
+		resultparam189="ph_nemesis"
+		resultparam190="ph_retribution"		
+		
+		
+	/>
+	
+	<form
+		name="CoN_HeroStats_Normal"
+		host="!masterserver"
+		method="post"
+		target="/client_requester.php"
+		statustrigger="CoNNormalHeroStatsStatus"
+		resulttrigger="CoNNormalHeroStatsResult"
+		resultparam0="errors"
+		resultparam1="success"
+		
+		resultparam2="cam_ph_used"
+		resultparam3="cam_ph_wins"
+		resultparam4="cam_ph_losses"
+		resultparam5="cam_ph_concedes"
+		resultparam6="cam_ph_concedevotes"
+		resultparam7="cam_ph_buybacks"
+		resultparam8="cam_ph_discos"
+		resultparam9="cam_ph_kicked"
+		resultparam10="cam_ph_pub_skill"
+		resultparam11="cam_ph_pub_count"
+		resultparam12="cam_ph_amm_solo_rating"
+		resultparam13="cam_ph_amm_solo_count"
+		resultparam14="cam_ph_amm_team_rating"
+		resultparam15="cam_ph_amm_team_count"
+		resultparam16="cam_ph_avg_score"
+		resultparam17="cam_ph_herokills"
+		resultparam18="cam_ph_herodmg"
+		resultparam19="cam_ph_heroexp"
+		resultparam20="cam_ph_herokillsgold"
+		resultparam21="cam_ph_heroassists"
+		resultparam22="cam_ph_deaths"
+		resultparam23="cam_ph_goldlost2death"
+		resultparam24="cam_ph_secs_dead"
+		resultparam25="cam_ph_teamcreepkills"
+		resultparam26="cam_ph_teamcreepdmg"
+		resultparam27="cam_ph_teamcreepexp"
+		resultparam28="cam_ph_teamcreepgold"
+		resultparam29="cam_ph_neutralcreepkills"
+		resultparam30="cam_ph_neutralcreepdmg"
+		resultparam31="cam_ph_neutralcreepexp"
+		resultparam32="cam_ph_neutralcreepgold"
+		resultparam33="cam_ph_bdmg"
+		resultparam34="cam_ph_bdmgexp"
+		resultparam35="cam_ph_razed"
+		resultparam36="cam_ph_bgold"
+		resultparam37="cam_ph_denies"
+		resultparam38="cam_ph_exp_denied"
+		resultparam39="cam_ph_gold"
+		resultparam40="cam_ph_gold_spent"
+		resultparam41="cam_ph_exp"
+		resultparam42="cam_ph_actions"
+		resultparam43="cam_ph_secs"
+		resultparam44="cam_ph_consumables"
+		resultparam45="cam_ph_wards"
+		resultparam46="cam_ph_time_earning_exp"
+		resultparam47="cam_ph_bloodlust"
+		resultparam48="cam_ph_doublekill"
+		resultparam49="cam_ph_triplekill"
+		resultparam50="cam_ph_quadkill"
+		resultparam51="cam_ph_annihilation"
+		resultparam52="cam_ph_ks3"
+		resultparam53="cam_ph_ks4"
+		resultparam54="cam_ph_ks5"
+		resultparam55="cam_ph_ks6"
+		resultparam56="cam_ph_ks7"
+		resultparam57="cam_ph_ks8"
+		resultparam58="cam_ph_ks9"
+		resultparam59="cam_ph_ks10"
+		resultparam60="cam_ph_ks15"
+		resultparam61="cam_ph_smackdown"
+		resultparam62="cam_ph_humiliation"
+		resultparam63="cam_ph_nemesis"
+		resultparam64="cam_ph_retribution"	
+	/>
+	
+	<form
+		name="CoN_HeroStats_Casual"
+		host="!masterserver"
+		method="post"
+		target="/client_requester.php"
+		statustrigger="CoNCasualHeroStatsStatus"
+		resulttrigger="CoNCasualHeroStatsResult"
+		resultparam0="errors"
+		resultparam1="success"
+		
+		resultparam2="cam_cs_ph_used"
+		resultparam3="cam_cs_ph_wins"
+		resultparam4="cam_cs_ph_losses"
+		resultparam5="cam_cs_ph_concedes"
+		resultparam6="cam_cs_ph_concedevotes"
+		resultparam7="cam_cs_ph_buybacks"
+		resultparam8="cam_cs_ph_discos"
+		resultparam9="cam_cs_ph_kicked"
+		resultparam10="cam_cs_ph_pub_skill"
+		resultparam11="cam_cs_ph_pub_count"
+		resultparam12="cam_cs_ph_amm_solo_rating"
+		resultparam13="cam_cs_ph_amm_solo_count"
+		resultparam14="cam_cs_ph_amm_team_rating"
+		resultparam15="cam_cs_ph_amm_team_count"
+		resultparam16="cam_cs_ph_avg_score"
+		resultparam17="cam_cs_ph_herokills"
+		resultparam18="cam_cs_ph_herodmg"
+		resultparam19="cam_cs_ph_heroexp"
+		resultparam20="cam_cs_ph_herokillsgold"
+		resultparam21="cam_cs_ph_heroassists"
+		resultparam22="cam_cs_ph_deaths"
+		resultparam23="cam_cs_ph_goldlost2death"
+		resultparam24="cam_cs_ph_secs_dead"
+		resultparam25="cam_cs_ph_teamcreepkills"
+		resultparam26="cam_cs_ph_teamcreepdmg"
+		resultparam27="cam_cs_ph_teamcreepexp"
+		resultparam28="cam_cs_ph_teamcreepgold"
+		resultparam29="cam_cs_ph_neutralcreepkills"
+		resultparam30="cam_cs_ph_neutralcreepdmg"
+		resultparam31="cam_cs_ph_neutralcreepexp"
+		resultparam32="cam_cs_ph_neutralcreepgold"
+		resultparam33="cam_cs_ph_bdmg"
+		resultparam34="cam_cs_ph_bdmgexp"
+		resultparam35="cam_cs_ph_razed"
+		resultparam36="cam_cs_ph_bgold"
+		resultparam37="cam_cs_ph_denies"
+		resultparam38="cam_cs_ph_exp_denied"
+		resultparam39="cam_cs_ph_gold"
+		resultparam40="cam_cs_ph_gold_spent"
+		resultparam41="cam_cs_ph_exp"
+		resultparam42="cam_cs_ph_actions"
+		resultparam43="cam_cs_ph_secs"
+		resultparam44="cam_cs_ph_consumables"
+		resultparam45="cam_cs_ph_wards"
+		resultparam46="cam_cs_ph_time_earning_exp"
+		resultparam47="cam_cs_ph_bloodlust"
+		resultparam48="cam_cs_ph_doublekill"
+		resultparam49="cam_cs_ph_triplekill"
+		resultparam50="cam_cs_ph_quadkill"
+		resultparam51="cam_cs_ph_annihilation"
+		resultparam52="cam_cs_ph_ks3"
+		resultparam53="cam_cs_ph_ks4"
+		resultparam54="cam_cs_ph_ks5"
+		resultparam55="cam_cs_ph_ks6"
+		resultparam56="cam_cs_ph_ks7"
+		resultparam57="cam_cs_ph_ks8"
+		resultparam58="cam_cs_ph_ks9"
+		resultparam59="cam_cs_ph_ks10"
+		resultparam60="cam_cs_ph_ks15"
+		resultparam61="cam_cs_ph_smackdown"
+		resultparam62="cam_cs_ph_humiliation"
+		resultparam63="cam_cs_ph_nemesis"
+		resultparam64="cam_cs_ph_retribution"
+	/>
+</package>

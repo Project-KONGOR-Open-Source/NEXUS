@@ -1,0 +1,443 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+
+<template name="TMP_infopicker">
+	<panel name="TMP_infopicker{id}" width="100@" height="100%" color=".8 .3 .3 .8"
+		onclick="ShowOnly('current{id}'); ShowOnly('detailed_info_{target}_wrapper');"
+	>
+	
+		<panel name="current{id}" group="TMP_pickerCurrent" color="1 .1 .1 .8" visible="false" />
+		<frame color="invisible" borderthickness="2" bordercolor="0 0 0 1" noclick="true" />
+		<frame color="invisible" borderthickness="1" bordercolor="1 1 1 1" noclick="true" />
+		<label textalign="center" textvalign="center" font="dyn_10" color="1 1 1 1" shadow="true" noclick="true" content="{id}" />
+	</panel>
+</template>
+
+<template name="closex_btn">
+	<button
+		name="{id}"
+		x="{x}" y="{y}"		
+		width="{width=1.9h}" height="{height=1.9h}"
+		align="{align}"
+		valign="{valign}"
+		color="invisible"
+		onclick="PlaySound('/shared/sounds/ui/ccpanel/button_close_02.wav'); {onclick}"
+		onclicklua="{onclicklua}"
+		onmouseover="PlaySound('/shared/sounds/ui/ccpanel/button_over_01.wav'); {onmouseover}"
+		interactive="true"
+		watch="{btn_watch}" ontrigger="{btn_ontrigger}"
+		noclick="{noclick=false}"
+	>
+		<widgetstate statename="up">
+			<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.5h" color="#910000" blockinput="false" noclick="true"/>
+			<frame texture="/ui/frames/roundframe.tga" color="0 0 0 1" borderthickness="0.5h" blockinput="false" noclick="true"/>
+			<image width="70%" height="70@" align="center" valign="center" color=".75 .75 .75 1" texture="/ui/elements/closex.tga" noclick="true" />
+		</widgetstate>
+		<widgetstate statename="over">
+			<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.5h" color="#dc0000" blockinput="false" noclick="true"/>
+			<frame texture="/ui/frames/roundframe.tga" color="0 0 0 1" borderthickness="0.5h" blockinput="false" noclick="true"/>
+			<image width="70%" height="70@" align="center" valign="center" color="1 1 1 1" texture="/ui/elements/closex.tga" noclick="true" />			
+		</widgetstate>
+		<widgetstate statename="down" x="1" y="1">
+			<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.5h" color="#910000" blockinput="false" noclick="true"/>
+			<frame texture="/ui/frames/roundframe.tga" color="0 0 0 1" borderthickness="0.5h" blockinput="false" noclick="true"/>
+			<image width="70%" height="70@" align="center" valign="center" color="1 1 1 1" texture="/ui/elements/closex.tga" noclick="true" />
+		</widgetstate>
+	</button>
+</template>
+
+<template name="detailed_info_wrapper">
+	<panel name="detailed_info_{id}_wrapper" group="detailed_infos" color="0 0 0 .7" onclicklua="Game_Walkthrough.ResumeGame(self)" visible="{visible=false}">
+		<panel grow="true" width="{width=74.0h}" align="center" valign="center" noclick="true" >
+			<frame texture="/ui/frames/rounded_bg_doubleedge.tga" borderthickness="1.0h" color=".08 .08 .08 .9" noclick="true"/>
+			<frame texture="/ui/frames/roundframe.tga" borderthickness="1.0h" color=".25 .25 .25 1" noclick="true" />		
+			<panel grow="true" y="1.8h" width="-3.6h" align="center" float="bottom" noclick="true">		
+				<!-- Title -->
+				<panel height="2.4h" noclick="true">
+					<label height="100%" textvalign="center" font="dyn_18" color="#ffaa00" outline="true" content="{title}" noclick="true" />
+					<instance name="closex_btn" noclick="true" align="right" valign="center" />
+				</panel>
+				<panel height="1.6h" noclick="true" />		
+				<!-- Content -->
+				<instance name="{id}" noclick="true" />			
+				<panel height="1.8h" noclick="true" />
+			</panel>	
+		</panel>
+	</panel>
+</template>
+
+<template name="detailed_screenshot">
+	<panel x="{x}" y="{y=0.4h}" width="{width}" height="{height}" noclick="true">
+		<image resourcecontext="walkthroughScreenshots{texture}"
+			onshowlua="Game_Walkthrough.LoadTextureForMoreInfoWidget(self, 'walkthroughScreenshots{texture}', '/ui/tutorial/screenshots/{texture}')"
+			onhidelua="Game_Walkthrough.UnloadTextureForMoreInfoWidget(self, 'walkthroughScreenshots{texture}')"
+			onloadlua="Game_Walkthrough.InitMoreInfoWidget(self, 'walkthroughScreenshots{texture}', '/ui/tutorial/screenshots/{texture}')"
+		/>
+		<frame color="invisible" bordercolor="0 0 0 1" borderthickness="2" noclick="true" />
+		<frame color="invisible" bordercolor=".25 .25 .25 1" borderthickness="1" noclick="true" />
+	</panel>
+</template>
+
+<!-- Rght click To Move -->
+<template name="pregame1">
+	<panel grow="true" width="100%" noclick="true">	
+		<instance name="detailed_screenshot" width="36.0h" height="36.0h" texture="pregame1.tga" />		
+		<panel grow="true" width="-38.0h" align="right" noclick="true">
+			<label fity="true" wrap="true" font="dyn_14" color="1 1 1 1" shadow="true" noclick="true" 
+				onshow="SetText(Translate('walkthrough_pregame_quest1_detail_desc', 'attackKey', GetKeybindButton('game', 'OrderAttack', ''), 'stopKey', GetKeybindButton('game', 'OrderStop', ''), 'holdKey', GetKeybindButton('game', 'OrderHold', ''), 'moveKey', GetKeybindButton('game', 'OrderMove', '')))"
+			/>
+		</panel>
+	</panel>
+</template>
+<!-- Levling -->
+<template name="pregame2">
+	<panel grow="true" width="100%" noclick="true">	
+		<instance name="detailed_screenshot" width="36.0h" height="36.0h" texture="pregame2.tga" />		
+		<panel grow="true" width="-38.0h" align="right" noclick="true">
+			<label fity="true" wrap="true" font="dyn_14" color="1 1 1 1" shadow="true" content="walkthrough_pregame_quest2_detail_desc" noclick="true" />
+		</panel>	
+	</panel>
+</template>
+<!-- Shoping -->
+<template name="pregame3">
+	<panel grow="true" width="100%" noclick="true">	
+		<instance name="detailed_screenshot" width="36.0h" height="18.0h" texture="pregame3.tga" />
+		<instance name="detailed_screenshot" y="22h" width="36.0h" height="36.0h" texture="pregame3b.tga" />
+		<panel grow="true" width="-38.0h" align="right" noclick="true">
+			<label fity="true" wrap="true" font="dyn_14" color="1 1 1 1" shadow="true" content="walkthrough_pregame_quest3_detail_desc" noclick="true" />
+		</panel>	
+	</panel>
+</template>
+<!-- Defend your base tower -->
+<template name="pregame4">
+	<panel grow="true" width="100%" noclick="true">	
+		<instance name="detailed_screenshot" width="36.0h" height="36.0h" texture="pregame4.tga" />		
+		<panel grow="true" width="-38.0h" align="right" noclick="true">
+			<label fity="true" wrap="true" font="dyn_14" color="1 1 1 1" shadow="true" content="walkthrough_pregame_quest4_detail_desc" noclick="true" />
+		</panel>	
+	</panel>
+</template>
+<!-- Use Ability -->
+<template name="pregame_sidequest1">
+	<panel grow="true" width="100%" noclick="true">	
+		<instance name="detailed_screenshot" width="36.0h" height="36.0h" texture="pregame_sidequest1.tga" />		
+		<panel grow="true" width="-38.0h" align="right" noclick="true">
+			<label fity="true" wrap="true" font="dyn_14" color="1 1 1 1" shadow="true" content="walkthrough_pregame_sidequest1_detail_desc" noclick="true" />
+		</panel>	
+	</panel>
+</template>
+
+<!-- Goto Lane -->
+<template name="game1">
+	<panel grow="true" width="100%" noclick="true">	
+		<instance name="detailed_screenshot" width="20.0h" height="20.0h" texture="game1.tga" />		
+		<panel grow="true" width="-22.0h" align="right" noclick="true">
+			<label fity="true" wrap="true" font="dyn_14" color="1 1 1 1" shadow="true" content="walkthrough_game_quest1_detail_desc" noclick="true" />
+		</panel>	
+	</panel>
+</template>
+<!-- Destroy Tower -->
+<template name="game2">
+	<panel grow="true" width="100%" noclick="true">	
+		<instance name="detailed_screenshot" width="36.0h" height="36.0h" texture="game2.tga" />		
+		<panel grow="true" width="-38.0h" align="right" noclick="true">
+			<label fity="true" wrap="true" font="dyn_14" color="1 1 1 1" shadow="true" content="walkthrough_game_quest2_detail_desc" noclick="true" />
+		</panel>	
+	</panel>
+</template>
+<!-- Last Hits -->
+<template name="game_sidequest1">
+	<panel grow="true" width="100%" noclick="true">	
+		<instance name="detailed_screenshot" width="36.0h" height="36.0h" texture="game_sidequest1.tga" />		
+		<panel grow="true" width="-38.0h" align="right" noclick="true">
+			<label fity="true" wrap="true" font="dyn_14" color="1 1 1 1" shadow="true" content="walkthrough_game_sidequest1_detail_desc" noclick="true" />
+		</panel>	
+	</panel>
+</template>
+<!-- Purchase Marchers -->
+<template name="game_sidequest2">
+	<panel grow="true" width="100%" noclick="true">	
+		<instance name="detailed_screenshot" width="40.0h" height="20.0h" texture="game_sidequest2.tga" />	
+		<instance name="detailed_screenshot" y="24h" width="40.0h" height="20.0h" texture="game_sidequest2b.tga" />
+		<panel grow="true" width="-42.0h" align="right" noclick="true">
+			<label fity="true" wrap="true" font="dyn_14" color="1 1 1 1" shadow="true" content="walkthrough_game_sidequest2_detail_desc" noclick="true" />
+		</panel>	
+	</panel>
+</template>
+<!-- Destroy Barracks -->
+<template name="game5">
+	<panel grow="true" width="100%" noclick="true">	
+		<instance name="detailed_screenshot" width="36.0h" height="36.0h" texture="game5.tga" />		
+		<panel grow="true" width="-38.0h" align="right" noclick="true">
+			<label fity="true" wrap="true" font="dyn_14" color="1 1 1 1" shadow="true" content="walkthrough_game_quest5_detail_desc" noclick="true" />
+		</panel>	
+	</panel>
+</template>
+<!-- Destroy Shrine Towers -->
+<template name="game6">
+	<panel grow="true" width="100%" noclick="true">	
+		<instance name="detailed_screenshot" width="36.0h" height="36.0h" texture="game6.tga" />		
+		<panel grow="true" width="-38.0h" align="right" noclick="true">
+			<label fity="true" wrap="true" font="dyn_14" color="1 1 1 1" shadow="true" content="walkthrough_game_quest6_detail_desc" noclick="true" />
+		</panel>	
+	</panel>
+</template>
+<!-- Destroy Shine -->
+<template name="game7">
+	<panel grow="true" width="100%" noclick="true">	
+		<instance name="detailed_screenshot" width="32.0h" height="32.0h" texture="game7.tga" />		
+		<panel grow="true" width="-34.0h" align="right" noclick="true">
+			<label fity="true" wrap="true" font="dyn_14" color="1 1 1 1" shadow="true" content="walkthrough_game_quest7_detail_desc" noclick="true" />
+		</panel>	
+	</panel>
+</template>
+
+<!-- Taken Damage -->
+<template name="tip1">
+	<panel grow="true" width="100%" noclick="true">	
+		<instance name="detailed_screenshot" width="36.0h" height="36.0h" texture="tip1.tga" />		
+		<panel grow="true" width="-38.0h" align="right" noclick="true">
+			<label fity="true" wrap="true" font="dyn_14" color="1 1 1 1" shadow="true" content="walkthrough_tip1_moreInfoWidget_detail_desc" noclick="true" />			
+		</panel>	
+	</panel>
+</template>
+<!-- Close To Death -->
+<template name="tip2">
+	<panel grow="true" width="100%" noclick="true">	
+		<instance name="detailed_screenshot" width="36.0h" height="36.0h" texture="tip2.tga" />		
+		<panel grow="true" width="-38.0h" align="right" noclick="true">
+			<label fity="true" wrap="true" font="dyn_14" color="1 1 1 1" shadow="true" content="walkthrough_tip2_moreInfoWidget_detail_desc" noclick="true" />
+			
+			<panel y="7.0h" grow="true" width="100%" valign="bottom" float="bottom" padding="1.0h" noclick="true">
+				<label fity="true" font="dyn_14" color="1 1 1 1" shadow="true" content="walkthrough_tip2_moreInfoWidget_detail_rest_items" noclick="true" />				
+				<panel height="6.8h" noclick="true" float="right" padding="1.4h">
+					<panel width="100@" height="100%" noclick="true">
+						<image texture="/items/basic/health_potion/icon.tga"  noclick="true"/>
+						<frame color="invisible" bordercolor="0 0 0 1" borderthickness="2" noclick="true" />
+						<frame color="invisible" bordercolor=".25 .25 .25 1" borderthickness="1" noclick="true" />
+					</panel>
+					<panel width="100@" height="100%" noclick="true">
+						<image texture="/items/basic/runes_of_the_blight/icon.tga"  noclick="true"/>
+						<frame color="invisible" bordercolor="0 0 0 1" borderthickness="2" noclick="true" />
+						<frame color="invisible" bordercolor=".25 .25 .25 1" borderthickness="1" noclick="true" />
+					</panel>
+					<panel width="100@" height="100%" noclick="true">
+						<image texture="/items/basic/bottle/icon_2.tga"  noclick="true"/>
+						<frame color="invisible" bordercolor="0 0 0 1" borderthickness="2" noclick="true" />
+						<frame color="invisible" bordercolor=".25 .25 .25 1" borderthickness="1" noclick="true" />
+					</panel>
+				</panel>
+			</panel>
+			
+		</panel>	
+	</panel>
+</template>
+<!-- Careful of Towers -->
+<template name="tip3">
+	<panel grow="true" width="100%" noclick="true">	
+		<instance name="detailed_screenshot" width="36.0h" height="36.0h" texture="tip3.tga" />		
+		<panel grow="true" width="-38.0h" align="right" noclick="true">
+			<label fity="true" wrap="true" font="dyn_14" color="1 1 1 1" shadow="true" content="walkthrough_tip3_moreInfoWidget_detail_desc" noclick="true" />
+		</panel>	
+	</panel>
+</template>
+<!-- You Died -->
+<template name="tip4">
+	<panel grow="true" width="100%" noclick="true">	
+		<instance name="detailed_screenshot" width="36.0h" height="36.0h" texture="tip4.tga" />		
+		<panel grow="true" width="-38.0h" align="right" noclick="true">
+			<label fity="true" wrap="true" font="dyn_14" color="1 1 1 1" shadow="true" content="walkthrough_tip4_moreInfoWidget_detail_desc" noclick="true" />
+		</panel>	
+	</panel>
+</template>
+<!-- Fountain Scary -->
+<template name="tip5">
+	<panel grow="true" width="100%" noclick="true">	
+		<instance name="detailed_screenshot" width="36.0h" height="36.0h" texture="tip5.tga" />		
+		<panel grow="true" width="-38.0h" align="right" noclick="true">
+			<label fity="true" wrap="true" font="dyn_14" color="1 1 1 1" shadow="true" content="walkthrough_tip5_moreInfoWidget_detail_desc" noclick="true" />
+		</panel>	
+	</panel>
+</template>
+<!-- Observatory -->
+<template name="tip6">
+	<panel grow="true" width="100%" noclick="true">	
+		<instance name="detailed_screenshot" width="36.0h" height="36.0h" texture="tip6.tga" />		
+		<panel grow="true" width="-38.0h" align="right" noclick="true">
+			<label fity="true" wrap="true" font="dyn_14" color="1 1 1 1" shadow="true" content="walkthrough_tip6_moreInfoWidget_detail_desc" noclick="true" />
+		</panel>	
+	</panel>
+</template>
+<!-- Side Shop -->
+<template name="tip7">
+	<panel grow="true" width="100%" noclick="true">	
+		<instance name="detailed_screenshot" width="36.0h" height="36.0h" texture="tip7.tga" />		
+		<panel grow="true" width="-38.0h" align="right" noclick="true">
+			<label fity="true" wrap="true" font="dyn_14" color="1 1 1 1" shadow="true" content="walkthrough_tip7_moreInfoWidget_detail_desc" noclick="true" />
+		</panel>	
+	</panel>
+</template>
+<!-- Hoemcomeing Stone -->
+<template name="tip8">
+	<panel grow="true" width="100%" noclick="true">	
+		<instance name="detailed_screenshot" width="36.0h" height="36.0h" texture="tip8.tga" />		
+		<panel grow="true" width="-38.0h" align="right" noclick="true">
+			<label fity="true" wrap="true" font="dyn_14" color="1 1 1 1" shadow="true" content="walkthrough_tip8_moreInfoWidget_detail_desc" noclick="true" />
+		</panel>	
+	</panel>
+</template>
+<!-- Ultimate -->
+<template name="tip9">
+	<panel grow="true" width="100%" noclick="true">	
+		<instance name="detailed_screenshot" width="36.0h" height="18.0h" texture="tip9b.tga" />
+		<instance name="detailed_screenshot" y="22h" width="36.0h" height="32.0h" texture="tip9.tga" />		
+		<panel grow="true" width="-38.0h" align="right" noclick="true">
+			<label fity="true" wrap="true" font="dyn_14" color="1 1 1 1" shadow="true" content="walkthrough_tip9_moreInfoWidget_detail_desc" noclick="true" />
+		</panel>	
+	</panel>
+</template>
+<!-- Rune -->
+<template name="tip10">
+	<panel grow="true" width="100%" noclick="true">	
+		<instance name="detailed_screenshot" width="36.0h" height="36.0h" texture="tip10.tga" />		
+		<panel grow="true" width="-38.0h" align="right" noclick="true">
+			<label fity="true" wrap="true" font="dyn_14" color="1 1 1 1" shadow="true" content="walkthrough_tip10_moreInfoWidget_detail_desc" noclick="true" />
+		</panel>	
+	</panel>
+</template>
+<!-- Neutral Camp -->
+<template name="tip11">
+	<panel grow="true" width="100%" noclick="true">	
+		<instance name="detailed_screenshot" width="36.0h" height="36.0h" texture="tip11.tga" />		
+		<panel grow="true" width="-38.0h" align="right" noclick="true">
+			<label fity="true" wrap="true" font="dyn_14" color="1 1 1 1" shadow="true" content="walkthrough_tip11_moreInfoWidget_detail_desc" noclick="true" />
+		</panel>	
+	</panel>
+</template>
+<!-- Killed a Hero -->
+<template name="tip12">
+	<panel grow="true" width="100%" noclick="true">	
+		<instance name="detailed_screenshot" width="38.0h" height="38.0h" texture="tip12.tga" />		
+		<panel grow="true" width="-40.0h" align="right" noclick="true">
+			<label fity="true" wrap="true" font="dyn_14" color="1 1 1 1" shadow="true" content="walkthrough_tip12_moreInfoWidget_detail_desc" noclick="true" />
+		</panel>	
+	</panel>
+</template>
+<!-- Kongor -->
+<template name="tip13">
+	<panel grow="true" width="100%" noclick="true">	
+		<instance name="detailed_screenshot" width="36.0h" height="36.0h" texture="tip13.tga" />		
+		<panel grow="true" width="-38.0h" align="right" noclick="true">
+			<label fity="true" wrap="true" font="dyn_14" color="1 1 1 1" shadow="true" content="walkthrough_tip13_moreInfoWidget_detail_desc" noclick="true" />
+		</panel>	
+	</panel>
+</template>
+<!-- Denies -->
+<template name="tip14">
+	<panel grow="true" width="100%" noclick="true">	
+		<instance name="detailed_screenshot" width="38.0h" height="38.0h" texture="tip14.tga" />		
+		<panel grow="true" width="-40.0h" align="right" noclick="true">
+			<label fity="true" wrap="true" font="dyn_14" color="1 1 1 1" shadow="true" content="walkthrough_tip14_moreInfoWidget_detail_desc" noclick="true" />
+		</panel>	
+	</panel>
+</template>
+<!-- Stash -->
+<template name="tip15">
+	<panel grow="true" width="100%" noclick="true">	
+		<instance name="detailed_screenshot" width="36.0h" height="18.0h" texture="tip15.tga" />		
+		<panel grow="true" width="-38.0h" align="right" noclick="true">
+			<label fity="true" wrap="true" font="dyn_14" color="1 1 1 1" shadow="true" content="walkthrough_tip15_moreInfoWidget_detail_desc" noclick="true" />
+		</panel>	
+	</panel>
+</template>
+<!-- Camera Control -->
+<template name="tip16">
+	<panel grow="true" width="100%" noclick="true">	
+		<instance name="detailed_screenshot" width="20.0h" height="20.0h" texture="tip16.tga" />		
+		<panel grow="true" width="-22.0h" align="right" float="bottom" noclick="true" padding="2.5h">
+			<label fity="true" wrap="true" font="dyn_14" color="1 1 1 1" shadow="true" content="walkthrough_tip16_moreInfoWidget_detail_desc" noclick="true" />
+			<!-- Toggle center hero checkbox -->
+			<panel grow="true" float="right" padding="1.0h"
+				onclick=
+				"
+					Set('cg_lockCameraGame', !cg_lockCameraGame));
+					Call('tip16_keybind_checkmark', 'If(cg_lockCameraGame, FadeIn(250), FadeOut(250));');
+				"
+				onshow="Call('tip16_keybind_checkmark', 'If(cg_lockCameraGame, FadeIn(250), FadeOut(250));');"
+			>
+				<panel width="1.8h" height="1.8h" noclick="true">
+					<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.5h" color="white" noclick="1" />
+					<frame texture="/ui/frames/roundframe.tga" color="#3abde7" borderthickness="0.5h" noclick="1"/>
+					<panel name="tip16_keybind_checkmark" x="0.2h" y="-0.1h" valign="bottom" align="center" width="140@" height="140%" nolclick="true" visible="true" noclick="1">
+						<image x="1" y="1" texture="/ui/elements/check_mark_white.tga" color="0 0 0 1" noclick="1" />
+						<image texture="/ui/elements/check_mark_white.tga" color="#40cd3c" noclick="1" />
+					</panel>
+				</panel>
+				<label content="tip16_keybind_label" font="dyn_12" fitx="true" noclick="true"/>
+			</panel>
+			<!-- Button to catch the setting's cvar changes -->
+			<button height="0" width="0" visible="false" cvar="cg_lockCameraGame" numstates="2" onbutton="Call('tip16_keybind_checkmark', 'If(cg_lockCameraGame, FadeIn(250), FadeOut(250));');" />
+		</panel>
+	</panel>
+</template>
+<!-- Slow leveling abilities -->
+<template name="tip17">
+	<panel grow="true" width="100%" noclick="true">	
+		<instance name="detailed_screenshot" width="36.0h" height="36.0h" texture="tip17.tga" />		
+		<panel grow="true" width="-38.0h" align="right" noclick="true">
+			<label fity="true" wrap="true" font="dyn_14" color="1 1 1 1" shadow="true" content="walkthrough_tip17_moreInfoWidget_detail_desc" noclick="true" />
+		</panel>	
+	</panel>
+</template>
+<!-- Spend your gold -->
+<template name="tip18">
+	<panel grow="true" width="100%" noclick="true">	
+		<instance name="detailed_screenshot" width="36.0h" height="36.0h" texture="tip18.tga" />		
+		<panel grow="true" width="-38.0h" align="right" noclick="true">
+			<label fity="true" wrap="true" font="dyn_14" color="1 1 1 1" shadow="true" content="walkthrough_tip18_moreInfoWidget_detail_desc" noclick="true" />
+		</panel>	
+	</panel>
+</template>
+
+<!-- TMP Detailed View Switcher 
+<panel grow="true" y="-2.0h" height="2.6h" align="center" valign="bottom" float="right" padding="0.5h" noclick="true" color="0 0 0 1">
+	<label x="0.6h" fitx="true" fitxpadding="0.5h" textvalign="center" font="dyn_12" color="1 1 1 1" outline="true" content="Temp Detailed Tip Viewer:" noclick="true" />
+	<instance name="TMP_infopicker" id="1" target="pregame1" />
+	<instance name="TMP_infopicker" id="2" target="pregame2" />
+	<instance name="TMP_infopicker" id="3" target="pregame3" />
+	<instance name="TMP_infopicker" id="4" target="pregame4" />
+	<instance name="TMP_infopicker" id="5" target="pregame_sidequest1" />
+	<instance name="TMP_infopicker" id="6" target="game1" />
+	<instance name="TMP_infopicker" id="7" target="game2" />
+	<instance name="TMP_infopicker" id="8" target="game_sidequest1" />
+	<instance name="TMP_infopicker" id="9" target="game_sidequest2" />
+	<instance name="TMP_infopicker" id="10" target="game5" />
+	<instance name="TMP_infopicker" id="11" target="game7" />
+	
+	<instance name="TMP_infopicker" id="A" target="tip1" />
+	<instance name="TMP_infopicker" id="B" target="tip2" />
+	<instance name="TMP_infopicker" id="C" target="tip3" />
+	<instance name="TMP_infopicker" id="D" target="tip4" />
+	<instance name="TMP_infopicker" id="E" target="tip5" />
+	<instance name="TMP_infopicker" id="F" target="tip6" />
+	<instance name="TMP_infopicker" id="G" target="tip7" />
+	<instance name="TMP_infopicker" id="H" target="tip8" />
+	<instance name="TMP_infopicker" id="I" target="tip9" />
+	<instance name="TMP_infopicker" id="J" target="tip10" />
+	<instance name="TMP_infopicker" id="K" target="tip11" />
+	<instance name="TMP_infopicker" id="L" target="tip12" />
+	<instance name="TMP_infopicker" id="M" target="tip13" />
+	<instance name="TMP_infopicker" id="N" target="tip14" />
+	<instance name="TMP_infopicker" id="O" target="tip15" />
+	<instance name="TMP_infopicker" id="P" target="tip16" />
+	<instance name="TMP_infopicker" id="Q" target="tip17" />
+	<instance name="TMP_infopicker" id="R" target="tip18" />
+	
+	<panel width="0.6h" />
+</panel>
+-->
+
+	
+</package>
+
+

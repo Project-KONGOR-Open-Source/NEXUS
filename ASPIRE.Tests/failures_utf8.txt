@@ -1,0 +1,39 @@
+﻿
+bin\Debug\net10.0\TestResults\ayaza_AYAZ-ROG-2024_2026-02-16_04_54_02.4961731.trx:1009:    
+<UnitTestResult executionId="18d90a19-f2d3-4aa0-b7e1-3bbca4e492b9" 
+testId="14b4c276-dbae-4df7-85fe-dfd6f469acff" 
+testName="Profile_Stats_Overview_Should_Populate_From_Legacy_List" computerName="AYAZ-ROG-2024" 
+duration="00:00:00.0384889" startTime="2026-02-16T04:53:39.7146892+00:00" 
+endTime="2026-02-16T04:53:39.7531781+00:00" testType="13CDC9D9-DDB5-4fa4-A97D-D965CCFC6D4B" 
+outcome="Failed" testListId="8C84FA94-04C1-424b-9868-57A2D4851A1D" 
+relativeResultsDirectory="18d90a19-f2d3-4aa0-b7e1-3bbca4e492b9">
+bin\Debug\net10.0\TestResults\ayaza_AYAZ-ROG-2024_2026-02-16_04_54_02.4961731.trx:15276:    
+<UnitTestResult executionId="4d3838ff-3467-49f3-b5de-cc651fadeb40" 
+testId="a1c958cd-241e-f7ad-a383-2ba3beb51474" 
+testName="OnPlayerStatsMasteryResult_With0BasedList_ParsesCorrectly" 
+computerName="AYAZ-ROG-2024" duration="00:00:00.1723607" 
+startTime="2026-02-16T04:53:48.9839429+00:00" endTime="2026-02-16T04:53:49.1563036+00:00" 
+testType="13CDC9D9-DDB5-4fa4-A97D-D965CCFC6D4B" outcome="Failed" 
+testListId="8C84FA94-04C1-424b-9868-57A2D4851A1D" 
+relativeResultsDirectory="4d3838ff-3467-49f3-b5de-cc651fadeb40">
+bin\Debug\net10.0\TestResults\ayaza_AYAZ-ROG-2024_2026-02-16_04_54_02.4961731.trx:37381:    
+<UnitTestResult executionId="247f7a51-602c-4c24-af45-73bb52877171" 
+testId="3dfed81c-9924-1c92-3e2c-f80ac26547dc" 
+testName="OnPlayerStatsMasteryResult_With1BasedDictionary_ParsesCorrectly" 
+computerName="AYAZ-ROG-2024" duration="00:00:00.0282551" 
+startTime="2026-02-16T04:53:54.6126532+00:00" endTime="2026-02-16T04:53:54.6409083+00:00" 
+testType="13CDC9D9-DDB5-4fa4-A97D-D965CCFC6D4B" outcome="Failed" 
+testListId="8C84FA94-04C1-424b-9868-57A2D4851A1D" 
+relativeResultsDirectory="247f7a51-602c-4c24-af45-73bb52877171">
+bin\Debug\net10.0\TestResults\ayaza_AYAZ-ROG-2024_2026-02-16_04_54_02.4961731.trx:39570:    
+<UnitTestResult executionId="118b2534-74e4-4106-b3a9-3714f32f5c8b" 
+testId="06c6e6fd-c0e0-508e-14f3-5a8d229de4ec" 
+testName="UpdateMySimpleStats_SetsCorrectMatchesPlayed" computerName="AYAZ-ROG-2024" 
+duration="00:00:00.0430665" startTime="2026-02-16T04:53:55.5807067+00:00" 
+endTime="2026-02-16T04:53:55.6237732+00:00" testType="13CDC9D9-DDB5-4fa4-A97D-D965CCFC6D4B" 
+outcome="Failed" testListId="8C84FA94-04C1-424b-9868-57A2D4851A1D" 
+relativeResultsDirectory="118b2534-74e4-4106-b3a9-3714f32f5c8b">
+bin\Debug\net10.0\TestResults\ayaza_AYAZ-ROG-2024_2026-02-16_04_54_02.4961731.trx:54227:  
+<ResultSummary outcome="Failed">
+
+

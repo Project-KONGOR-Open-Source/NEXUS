@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+	<template name="sys_chat_message_item">
+		<panel name="sys_chat_message{id}{fromInterface}" width="26h" grow="1" regrow="1" growinvis="0" stickytoinvis="0" visible="0" float="bottom" padding="4i" color="black" noclick="1">
+			<frame texture="/ui/fe2/newui/res/common/frames/custom/frame.png" borderthickness="4" noclick="1"/>
+			<label name="sys_chat_message{id}{fromInterface}_value" visible="0" stickytoinvis="0" noclick="1"/>
+			<instance name="newui_button_close_template" x="-2i" y="3i" align="right" width="2.2h" height="2.2h"
+				onclicklua="systemMessages:closeMessageToast(self:GetParent(), GetWidget('sys_chat_message{id}{fromInterface}_value'):GetText(), '{fromInterface}')"
+			/>
+			<anchor x="6i" y="1i"/>
+			<panel align="center" width="-1h" grow="1" regrow="1" growinvis="0" float="right" padding=".5h" noclick="1">
+				<image name="sys_chat_message{id}{fromInterface}_icon" width="48i" height="48i" valign="center" texture="/ui/fe2/store/icons/account_icons/default.tga" noclick="1"/>
+				<panel width="20h" grow="1" regrow="1" growinvis="0" float="bottom" padding="2i" noclick="1">
+					<label name="sys_chat_message{id}{fromInterface}_label_1" fity="1" font="dyn_10" color="#f0d3c1" outline="1" outlinecolor="#230000" noclick="1"/>
+					<label name="sys_chat_message{id}{fromInterface}_label_2" fity="1" font="dyn_8" color="#c2b0a3" outline="1" outlinecolor="#230000" wrap="1" noclick="1"/>
+					<label name="sys_chat_message{id}{fromInterface}_label_3" fity="1" font="dyn_9" color="#c2b0a3" outline="1" outlinecolor="#230000" noclick="1"/>
+				</panel>
+			</panel>
+
+			<image name="sys_chat_message{id}{fromInterface}_line" visible="0" texture="/ui/fe2/newui/res/common/hline.png" height="1" align="center" stickytoinvis="0" noclick="1"/>
+
+			<panel name="sys_chat_message{id}{fromInterface}_gameinfo" visible="0" align="center" width="-8h" grow="1" growinvis="0" float="bottom" padding=".25h" stickytoinvis="0" noclick="1">
+				<panel height="2h" float="right" padding="0.2h" color="invisible" noclick="1">
+					<label width="25%" textvalign="center" font="dyn_10" color="#8e6b5b" outline="1" outlinecolor="#230000" content="newui_invitation_room" noclick="1"/>
+					<label width="2h" textalign="center" textvalign="center" font="dyn_10" color="#8e6b5b" outline="1" outlinecolor="#230000" content=" : " noclick="1"/>
+					<label name="sys_chat_message{id}{fromInterface}_label_4" width="75%" textvalign="center" autofont="1" autofontmax="10" autofontmin="6" font="dyn_10" color="#8e6b5b" outline="1" outlinecolor="#230000" noclick="1"/>
+				</panel>
+
+				<panel height="2h" float="right" padding="0.2h" noclick="1">
+					<label width="25%" textvalign="center" font="dyn_10" color="#8e6b5b" outline="1" outlinecolor="#230000" content="newui_invitation_server" noclick="1"/>
+					<label width="2h" textalign="center" textvalign="center" font="dyn_10" color="#8e6b5b" outline="1" outlinecolor="#230000" content=" : " noclick="1"/>
+					<label name="sys_chat_message{id}{fromInterface}_label_5" width="50%" textvalign="center" font="dyn_10" color="#8e6b5b" outline="1" outlinecolor="#230000" content="bbb" noclick="1"/>
+				</panel>
+
+				<panel height="2h" float="right" padding="0.2h" color="invisible" noclick="1">
+					<label width="25%" textvalign="center" font="dyn_10" color="#8e6b5b" outline="1" outlinecolor="#230000" content="newui_invitation_map" noclick="1"/>
+					<label width="2h" textalign="center" textvalign="center" font="dyn_10" color="#8e6b5b" outline="1" outlinecolor="#230000" content=" : " noclick="1"/>
+					<panel height="100%" grow="1" regrow="1" growinvis="0" float="right" padding="0.2h" noclick="1">
+						<image name="sys_chat_message{id}{fromInterface}_icon_1" texture="$flat" width="2.2h" height="2.2h" noclick="0"/>
+						<image name="sys_chat_message{id}{fromInterface}_icon_2" texture="$flat" width="2.2h" height="2.2h" noclick="0"/>
+						<image name="sys_chat_message{id}{fromInterface}_icon_3" visible="1" texture="/ui/icons/verified.tga" width="2.2h" height="2.2h" noclick="0"/>
+						<image name="sys_chat_message{id}{fromInterface}_icon_4" visible="1" texture="/ui/icons/casual.tga" width="2.2h" height="2.2h" noclick="0"/>
+						<image name="sys_chat_message{id}{fromInterface}_icon_5" visible="1" texture="/ui/icons/hardcore.tga" width="2.2h" height="2.2h" noclick="0"/>
+						<image name="sys_chat_message{id}{fromInterface}_icon_6" visible="1" texture="/ui/icons/gated.tga" width="2.2h" height="2.2h" noclick="0"/>
+						<image name="sys_chat_message{id}{fromInterface}_icon_7" visible="1" texture="/ui/icons/more.tga" width="2.2h" height="2.2h" noclick="0"/>
+						<image name="sys_chat_message{id}{fromInterface}_icon_8" visible="1" texture="/ui/icons/autobalance.tga" width="2.2h" height="2.2h" noclick="0"/>
+						<image name="sys_chat_message{id}{fromInterface}_icon_9" visible="1" texture="/ui/icons/official.tga" width="2.2h" height="2.2h" noclick="0"/>
+						<image name="sys_chat_message{id}{fromInterface}_icon_10" visible="1" texture="/ui/icons/official_2.tga" width="2.2h" height="2.2h" noclick="0"/>
+						<image name="sys_chat_message{id}{fromInterface}_icon_11" visible="1" texture="/ui/icons/noleaver.tga" width="2.2h" height="2.2h" noclick="0"/>
+						<image name="sys_chat_message{id}{fromInterface}_icon_12" visible="1" texture="/ui/icons/private.tga" width="2.2h" height="2.2h" noclick="0"/>
+						<image name="sys_chat_message{id}{fromInterface}_icon_13" visible="1" texture="/ui/icons/devheroes.tga" width="2.2h" height="2.2h" noclick="0"/>
+						<image name="sys_chat_message{id}{fromInterface}_icon_14" visible="1" texture="/ui/icons/botmatch.tga" width="2.2h" height="2.2h" noclick="0"/>
+					</panel>
+				</panel>
+			</panel>
+
+			<panel name="sys_chat_message{id}{fromInterface}_buttons" visible="0" height="2.5h" grow="1" align="center" float="right" padding=".5h" stickytoinvis="0" noclick="1"
+			>
+				<instance name="newui_common_button_2_template" button_name="sys_chat_message{id}{fromInterface}_button_2" stickytoinvis="0" width="12h" height="2h" font="dyn_8" label="general_approve"/>
+				<instance name="newui_common_button_2_template" button_name="sys_chat_message{id}{fromInterface}_button_1" stickytoinvis="0" width="12h" height="2h" font="dyn_8" label="general_ignore"/>
+			</panel>
+		</panel>
+	</template>
+</package>

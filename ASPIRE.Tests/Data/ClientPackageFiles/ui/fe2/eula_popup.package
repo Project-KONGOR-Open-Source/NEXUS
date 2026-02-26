@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+
+	<template name="eula_popup_tos" >
+		<textbuffer
+			name="eula_popup_tos"
+			scrolltexture="/ui/info/combobox.tga"
+			handleheight="1.75h"
+			scrollbarsize="1.75h"
+			exteriorscrollbars="true"
+			textalign="left"
+			font="dyn_10"
+			textcolor="#888888"
+			color="invisible"
+			shadow="1"
+			wrap="true"
+			noclick="0"
+			file=":/{filename=tos}.txt"
+			width="+1.15h" height="-1.5h"
+		/>
+	</template>
+
+	<panel name="eula_popup" color="0 0 0 0.85" noclick="true" visible="false">
+		<panel name="eula_popup_panel" width="65h" align="center" noclick="true"><!-- 47.4h -->
+			<panel name="eula_popup_body" float="bottom" noclick="true" y="-100%">
+				<panel height="12.5@" noclick="true">
+					<image width="100@" height="100%" x="50@" noclick="true" texture="/ui/fe2/elements/eula_frame_tl.tga"/>
+					<image width="100@" height="100%" x="-50@" noclick="true" texture="/ui/fe2/elements/eula_frame_tr.tga" align="right"/>
+				</panel>
+				<panel height="25@" texture="/ui/fe2/elements/eula_frame_t.tga" noclick="true">
+					<label width="135@" align="center" y="28%" height="29%" x="-1.5@" textalign="center" textvalign="center" color="#999999" font="dyn_14" shadow="true" noclick="true" content="main_hon_eula"/>
+
+					<button
+						align="right" width="17@" height="16%" x="-3@" y="34%"
+						color="invisible"
+						onclick="PlaySound('/shared/sounds/ui/ccpanel/button_close_02.wav')"
+						onclicklua="
+							local eulaBody =
+
+							self:GetWidget('eula_popup_body'):SlideY('-100%', 250)
+							self:GetWidget('eula_popup'):FadeOut(250)
+						"
+						onmouseover="PlaySound('/shared/sounds/ui/ccpanel/button_over_01.wav');"
+					>
+						<widgetstate statename="up">
+							<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.5h" color="#910000" blockinput="false" noclick="true"/>
+							<frame texture="/ui/frames/roundframe.tga" color="0 0 0 1" borderthickness="0.5h" blockinput="false" noclick="true"/>
+							<image width="1.3h" height="1.3h" align="center" valign="center" color=".75 .75 .75 1" texture="/ui/elements/closex.tga" noclick="true" />
+						</widgetstate>
+						<widgetstate statename="over">
+							<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.5h" color="#dc0000" blockinput="false" noclick="true"/>
+							<frame texture="/ui/frames/roundframe.tga" color="0 0 0 1" borderthickness="0.5h" blockinput="false" noclick="true"/>
+							<image width="1.3h" height="1.3h" align="center" valign="center" color="1 1 1 1" texture="/ui/elements/closex.tga" noclick="true" />
+						</widgetstate>
+						<widgetstate statename="down" x="1" y="1">
+							<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.5h" color="#910000" blockinput="false" noclick="true"/>
+							<frame texture="/ui/frames/roundframe.tga" color="0 0 0 1" borderthickness="0.5h" blockinput="false" noclick="true"/>
+							<image width="1.3h" height="1.3h" align="center" valign="center" color="1 1 1 1" texture="/ui/elements/closex.tga" noclick="true" />
+						</widgetstate>
+					</button>
+				</panel>
+				<panel height="111.13@" noclick="true">
+					<panel height="12.5@" texture="/ui/fe2/elements/eula_frame_b.tga" valign="bottom" noclick="true"/>
+					<panel height="-12.5@" noclick="true">
+						<panel width="3.125@" vtile="true" texture="/ui/fe2/elements/eula_frame_l.tga" noclick="true" onshowlua="self:SetVScale((self:GetWidth() * 4)..'p')"/>
+						<panel width="6.3@" vtile="true" texture="/ui/fe2/elements/eula_frame_r.tga" noclick="true" onshowlua="self:SetVScale((self:GetWidth() * 2)..'p')" align="right"/>
+						<panel x="3.125@" width="-9.725@" color="black" noclick="true"/>
+						<panel x="3.125@" width="-10.25@" y="-6.5@" height="+14@"
+							onload="
+								##
+								If(StringEquals(host_language, 'br'),
+									Instantiate('eula_popup_tos', 'filename', 'tos_br'),
+									If(StringEquals(host_language, 'es'),
+										Instantiate('eula_popup_tos', 'filename', 'tos_es'),
+										Instantiate('eula_popup_tos', 'filename', 'tos')
+									)
+								);
+								##
+							"
+							onloadlua="
+								local regionTos = HoN_Region.regionTable[HoN_Region.activeRegion].tos_paths
+								local useTos
+
+								if regionTos and type(regionTos) == 'table' then
+									local hostLang = GetCvarString('host_language')
+									if regionTos[hostLang] then
+										useTos = regionTos[hostLang]
+									elseif regionTos.en then
+										useTos = regionTos.en
+									end
+								end
+
+								if useTos == nil or useTos == 'string' and string.len(useTos) == 0 then
+									useTos = 'tos'
+								end
+
+								self:Instantiate('eula_popup_tos', 'filename', useTos)
+							"
+						>
+						</panel>
+					</panel>
+				</panel>
+			</panel>
+		</panel>
+	</panel>
+
+	<panel height="3h" grow="true" valign="bottom" noclick="true"
+		watch="LoginStatus"
+		ontrigger="
+			SetVisible(!IsLoggedIn())
+		"
+	>
+		<frame texture="/ui/frames/squareglow.tga" color="0 0 0 0.85" borderthickness="1h" noclick="true"/>
+		<panel height="100%" grow="true" float="right" noclick="true">
+			<label fitx="true" textalign="right" textvalign="center" fitxpadding="0.75h" color="white" font="dyn_12" content="main_hon_eula_notice"/>
+			<panel height="100%" grow="true" passivechildren="true"
+				onclicklua="
+					local eulaBody = self:GetWidget('eula_popup_body')
+					local eulaPanel = self:GetWidget('eula_popup')
+
+					if (eulaBody:IsVisible()) then
+						eulaBody:SlideY('-100%', 250)
+						eulaPanel:FadeOut(250)
+					else
+						eulaPanel:FadeIn(250)
+						eulaBody:SlideY(0, 250)
+					end
+				">
+				<label fitx="true" textalign="center" textvalign="center" fitxpadding="0.5h" color="#f2d262" font="dyn_12" underline="true" content="general_eula"/>
+				<panel height="0.125h" valign="bottom" align="center" width="-0.5h" y="-0.5h" color="#f2d262"/>
+			</panel>
+		</panel>
+	</panel>
+
+</package>

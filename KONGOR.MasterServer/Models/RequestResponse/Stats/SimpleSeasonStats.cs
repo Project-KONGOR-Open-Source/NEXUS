@@ -2,35 +2,83 @@ namespace KONGOR.MasterServer.Models.RequestResponse.Stats;
 
 public class SimpleSeasonStats
 {
-    /// <summary>
-    ///     The number of ranked matches won.
-    /// </summary>
     [PHPProperty("wins")]
     public required int RankedMatchesWon { get; set; }
 
-    /// <summary>
-    ///     The number of ranked matches lost.
-    /// </summary>
     [PHPProperty("losses")]
     public required int RankedMatchesLost { get; set; }
+    
+    [PHPProperty("h_wins")]
+    public int HardcoreWins { get; set; }
+    
+    [PHPProperty("h_losses")]
+    public int HardcoreLosses { get; set; }
 
-    /// <summary>
-    ///     The current number of consecutive ranked matches won.
-    /// </summary>
+    [PHPProperty("con_wins")]
+    public int CasualWins { get; set; }
+    
+    [PHPProperty("con_losses")]
+    public int CasualLosses { get; set; }
+
     [PHPProperty("win_streak")]
     public required int WinStreak { get; set; }
 
-    /// <summary>
-    ///     Whether the account needs to play placement matches or not.
-    ///     A value of "1" means TRUE, and a value of "0" means FALSE.
-    /// </summary>
-    [PHPProperty("is_placement")]
-    public required int InPlacementPhase { get; set; }
+    [PHPProperty("rank")]
+    public required string CurrentRank { get; set; }
+
+    [PHPProperty("current_level")]
+    public string LegacyLevel => CurrentRank;
 
     /// <summary>
-    ///     Unknown.
-    ///     Potentially, the number of account levels gained during the season.
+    ///     The current matchmaking rating (MMR).
+    ///     References `playerstats_mmr` in Lua (Index 14).
     /// </summary>
-    [PHPProperty("current_level")]
-    public required int LevelsGainedThisSeason { get; set; }
+    [PHPProperty("smr")]
+    public required string RankedRating { get; set; }
+
+    /// <summary>
+    ///     The highest rank achieved in the season.
+    /// </summary>
+    [PHPProperty("highest_level_current")]
+    public string? HighestRank { get; set; }
+
+    [PHPProperty("is_placement")]
+    public required int InPlacementPhase { get; set; }
+    
+    [PHPProperty("pub_skill")]
+    public string PublicRating { get; set; } = "1500.000";
+
+    [PHPProperty("kam_rating")]
+    public string CasualRating { get; set; } = "1500.000";
+
+    // Logan (2025-02-13): Legacy Alias Mappings for Lua
+    // Lua expects 'rnk_' prefix for Normal mode and 'cs_' for Casual.
+    
+    [PHPProperty("rnk_wins")]
+    public int RnkWins => RankedMatchesWon;
+    
+    [PHPProperty("rnk_losses")]
+    public int RnkLosses => RankedMatchesLost;
+    
+    [PHPProperty("rnk_games_played")]
+    public int RnkGamesPlayed => RankedMatchesWon + RankedMatchesLost;
+    
+    [PHPProperty("cs_wins")]
+    public int CsWins => CasualWins;
+    
+    [PHPProperty("cs_losses")]
+    public int CsLosses => CasualLosses;
+    
+    [PHPProperty("cs_games_played")]
+    public int CsGamesPlayed => CasualWins + CasualLosses; // Sum of wins and losses
+    
+    [PHPProperty("acc_wins")] // For Public/Summary tab mapping if used
+    public int AccWins => RankedMatchesWon; 
+    
+    [PHPProperty("acc_games_played")]
+    public int AccGamesPlayed => RankedMatchesWon + RankedMatchesLost; // Fallback
+
+    // Helper to hold raw stats for legacy mapping
+    // Internal to avoid PHP serialization
+    internal PlayerStatisticsAggregatedDTO? GenericStats { get; set; }
 }

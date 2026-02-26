@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+
+	<style name="txtReady" color="#008f00" />
+	<style name="txtNotReady" color=".5 .5 .5 1" />	
+	<style name="teamName" color="#e6c652" shadow="1" shadowcolor="#803922" />	
+	
+	<trigger name="ScheduledMatchCommand" />
+	<trigger name="HoNTourReadyUp0" />
+	<trigger name="HoNTourReadyUp1" />
+		
+	<template name="hontour_teamlist_item">
+		<panel height="2.4h" float="right" padding="0.5h" noclick="1">
+			<frame name="hontour_player_load_bg_{team}_{id}" x="0" y="0" bordercolor="0 0.8 0 0.8" borderthickness="1" color="invisible" noclick="1" width="+6" height="+2" align="center" valign="center" visible="0" >
+				<panel name="hontour_player_load_{team}_{id}" noclick="1" color="0 1 0 0.3" width="0" />
+			</frame>
+			<panel x="0" width="100@" height="100%" noclick="1">
+				<image name="hontour_player_dot_{team}_{id}" width="100@" height="100%" align="center" valign="center"
+					ontrigger9lua="ResourceManager.RegisterTexture('/ui/fe2/lobby/matchmaking_server_dot_gray.tga', 'hontour', self)" resourcecontext="hontour" watch9="MainRegisterTextures"
+				/>
+			</panel>
+			<label name="hontour_player_name_{team}_{id}" height="100%" textvalign="center" font="dyn_12" content="-" color=".5 .5 .5 1" />		
+		</panel>
+	</template>
+
+	<template name="hontour_teamlist">
+		<panel name="{id}" height="44.5h" width="44.5h" x="{x}" align="center" valign="bottom" noclick="1">
+			<image noclick="1" 
+				ontrigger9lua="ResourceManager.RegisterTexture('/ui/fe2/hontour/teamlist_panel.tga', 'hontour', self)" resourcecontext="hontour" watch9="MainRegisterTextures"
+			/>
+			<label name="{id}_ready_label" fity="1" y="10.2h" textalign="center" font="dyn_11" content="ht_team_not_ready" noclick="1" color=".5 .5 .5 1" />
+			<label name="{id}_teamname_label" fity="1" y="13.8h" textalign="center" font="dyn_14" content="-" noclick="1" color="#e6c652" shadow="1" shadowcolor="#803922" />
+			<panel y="18.6h" x="0.2h" width="24.8h" align="center" float="bottom" padding="0.6h" noclick="1">
+				<instance name="hontour_teamlist_item" team="{team}" id="0" />
+				<instance name="hontour_teamlist_item" team="{team}" id="1" />
+				<instance name="hontour_teamlist_item" team="{team}" id="2" />
+				<instance name="hontour_teamlist_item" team="{team}" id="3" />
+				<instance name="hontour_teamlist_item" team="{team}" id="4" />
+			</panel>
+
+			<instance
+				name="button2" button_name="{id}_readyup_btn" visible="1"
+				y="34.3h" x="0.2h"
+				align="center"
+				height="2.6h" width="20.0h"
+				label="ht_readyBtn_ready"
+				font="dyn_12"
+				enabled="0"
+				labelwatch="HoNTourReadyUp{team}"
+				labelontrigger="SetText(Translate(param0));"
+			/>
+			
+			<instance
+				name="button2" button_name="{id}_leave_btn" visible="1" color="1 .2 .2 1"
+				y="37.8h" x="0.2h"
+				align="center"
+				height="2.0h" width="14.0h"
+				label="hontour_leave_team"
+				font="dyn_10"
+				enabled="true"
+				onclicklua="HonTour.PromptLeaveLobby()"
+			/>
+			
+		</panel>
+	</template>
+
+	<template name="hontour_lobby">
+		<panel name="hontour" y="0" height="50.4h" visible="{visible=0}" color="0 0 0 0">
+		
+			<image texture="/ui/fe2/mainmenu/3/bg/bg3.tga" width="187.0h" align="center" height="59.0h" noclick="1" />
+		
+			<panel color="0 0 0 .5" width="187.0h" align="center" height="59.0h" noclick="1" />
+		
+			
+			<panel height="89.0h" width="178.0h" align="center" valign="top">
+				<image noclick="1" 
+					ontrigger9lua="ResourceManager.RegisterTexture('/ui/fe2/hontour/background_hontour.tga', 'hontour', self)" resourcecontext="hontour" watch9="MainRegisterTextures"
+				/>				
+				<image name="hontour_bg_glow_0" height="100%" width="50@" x="-25@" noclick="1" visible="0" align="center" 
+					ontrigger9lua="ResourceManager.RegisterTexture('/ui/fe2/hontour/bgglow_left.tga', 'hontour', self)" resourcecontext="hontour" watch9="MainRegisterTextures"
+				/>
+				<image name="hontour_bg_glow_1" height="100%" width="50@" x="25@" noclick="1" visible="0" align="center"
+					ontrigger9lua="ResourceManager.RegisterTexture('/ui/fe2/hontour/bgglow_right.tga', 'hontour', self)" resourcecontext="hontour" watch9="MainRegisterTextures"
+				/>
+				<panel name="hontour_spec_eye_box" noclick="1" visible="0" >
+					<animatedimage name="hontour_spec_eye" y="6.6h" width="5.0h" height="5.0h" align="center" valign="top" texture="/ui/fe2/hontour/eye/spec_eye.tga" noclick="0" loop="1" fps="8" onshow="StartAnim(1);" 
+						onmouseoverlua="Trigger('genericMainFloatingTip', 'true', '25h', '', '', '', '', '', '3h', '-2h')"
+						onmouseoutlua="Trigger('genericMainFloatingTip', 'false', '', '', '', '', '', '', '', '')"					
+					/>	
+				</panel>
+			</panel>
+			
+			<instance name="hontour_teamlist" id="hontour_teamlist_0" x="-37.0h" team="0" />
+			<instance name="hontour_teamlist" id="hontour_teamlist_1" x="37.0h" team="1" />
+			<panel y="35.0h" width="20.0h" align="center" noclick="1">
+				<label name="hontour_startsin_label" fity="1" textalign="center" font="dyn_14" color="1 1 1 1" shadow="1" shadowcolor="0 0 0 .5" shadowoffset="4" content="ht_startsin" />
+				<panel x="0.1h" y="2.7h" height="4.8h" width="12.0h" align="center" noclick="1">
+					<label name="hontour_min_label" fity="1" width="48%" align="left" textalign="right" valign="bottom" font="dyn_12" color="1 1 1 1" content="general_min" shadow="1" shadowcolor="0 0 0 .5" shadowoffset="3" />					
+					<label name="hontour_sec_label" fity="1" width="48%" align="right" textalign="left" valign="bottom" font="dyn_12" color="1 1 1 1" content="general_sec" shadow="1" shadowcolor="0 0 0 .5" shadowoffset="3" />									
+					<label name="hontour_countdown_label" fity="1" textalign="center" font="dyn_18" color="#e6c652" shadow="1" shadowcolor="0 0 0 .5" shadowoffset="4" content="00:00"  />
+					<animatedimage name="hontour_shield_throbber" visible="0" y="0.6h" align="center" valign="center" height="6.6h" width="6.6h" texture="/ui/elements/throb/throb.tga" noclick="true" loop="1" fps="30" onshow="StartAnim(1);" />
+				</panel>
+			</panel>
+			
+			<panel name="hontour_throbber" y="0.0h" noclick="1" visible="0" width="100w" height="100%" color="0 0 0 .7" align="center"
+				onshow="Call('hontour_throbber_retry',  'SetVisible(0); SleepWidget(0, \'\'); SleepWidget(7000, \'SetVisible(1);\');');"
+			>
+				<panel noclick="1" y="0" >
+					<label name="hontour_throbber_label" width="-10.0h" y="4h" height="100%" align="center" textalign="center" textvalign="center" wrap="1" font="dyn_10" color="white" shadow="1" content="hontour_waiting_for_update" noclick="1" />
+					<animatedimage width="4.5h" height="4.5h" texture="/ui/elements/throb/throb.tga" noclick="true" loop="1" fps="30" onshow="StartAnim(1);" visible="1" align="center" valign="center" />	
+					<instance valign="center" y="7.6h" button_name="hontour_throbber_retry"
+						name="button2" x="0"
+						width="12.0h" height="2.5h"
+						align="center"
+						label="general_close"
+						font="dyn_10"
+						onclick="Call('hontour_throbber', 'FadeOut(150);');"
+						onclicklua="UIManager.GetInterface('main'):HoNMainF('MainMenuPanelToggle', 'hontour', nil, nil, true, nil, 727)"
+					/>						
+				</panel>
+			</panel>			
+			
+			<panel name="hontour_error" y="0.0h" noclick="0" visible="0" width="100%" height="100%" color="0 0 0 .7" blockinput="1" >
+				<panel noclick="1" >
+					<label name="hontour_error_label" width="-10.0h" y="4h" height="100%" align="center" textalign="center" textvalign="center" wrap="1" font="dyn_10" color="white" shadow="1" content="" noclick="1" />								
+					<instance valign="center" y="7.6h" button_name="hontour_error_ok"
+						name="button2" x="0"
+						width="12.0h" height="2.5h"
+						align="center"
+						label="general_ok"
+						font="dyn_10"
+						onclick="Call('hontour_error', 'FadeOut(150);');"
+						onclicklua=""
+					/>					
+				</panel>
+			</panel>			
+			
+			<button
+				name="hontour_widget_close" visible="1"
+				x="-1" y="1h"		
+				width="2.5h" height="2.5h"
+				align="right"
+				color="invisible"
+				onclick="PlaySound('/shared/sounds/ui/ccpanel/button_close_02.wav');"
+				onclicklua="HonTour.ClickCloseWindowBtn()"
+				onmouseover="PlaySound('/shared/sounds/ui/ccpanel/button_over_01.wav');"
+			>
+				<widgetstate statename="up">
+					<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.5h" color="#dc0000" blockinput="false" noclick="true"/>
+					<frame texture="/ui/frames/roundframe.tga" color="0 0 0 1" borderthickness="0.5h" blockinput="false" noclick="true"/>
+					<image width="1.4h" height="1.4h" align="center" valign="center" color="1 1 1 1" texture="/ui/elements/closex.tga" noclick="true" />				
+				</widgetstate>
+				<widgetstate statename="over">
+					<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.5h" color="#910000" blockinput="false" noclick="true"/>
+					<frame texture="/ui/frames/roundframe.tga" color="0 0 0 1" borderthickness="0.5h" blockinput="false" noclick="true"/>
+					<image width="1.4h" height="1.4h" align="center" valign="center" color=".75 .75 .75 1" texture="/ui/elements/closex.tga" noclick="true" />		
+				</widgetstate>
+				<widgetstate statename="down" x="1" y="1">
+					<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.5h" color="#910000" blockinput="false" noclick="true"/>
+					<frame texture="/ui/frames/roundframe.tga" color="0 0 0 1" borderthickness="0.5h" blockinput="false" noclick="true"/>
+					<image width="1.4h" height="1.4h" align="center" valign="center" color="1 1 1 1" texture="/ui/elements/closex.tga" noclick="true" />
+				</widgetstate>
+			</button>			
+		</panel>		
+	</template>
+	
+</package>
+

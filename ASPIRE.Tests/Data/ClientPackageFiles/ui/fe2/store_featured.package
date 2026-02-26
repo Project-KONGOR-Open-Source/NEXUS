@@ -1,0 +1,448 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+
+	<template name="FeaturedVoiceButtonState">
+		<widgetstate statename="{statename}" x="{x}" y="{y}">
+			<frame texture="/ui/frames/circle.tga" color="1 .9 .9 .1" bordercolor="1 .9 .9 .1" borderthickness="33%" visible="{over=false}" />
+			<frame texture="/ui/frames/circle.tga" color="0 0 0 .2" bordercolor="0 0 0 .2" borderthickness="33%" visible="{down=false}" />
+		</widgetstate>
+	</template>
+	<template name="FeaturedVoiceButton">
+		<button
+			color="invisible"
+			onclicklua="{onclicklua}"
+			onmouseoverlua="{onmouseoverlua}"
+			onmouseoutlua="{onmouseoutlua}"
+		>
+			<instance name="FeaturedVoiceButtonState" statename="up"/>
+			<instance name="FeaturedVoiceButtonState" statename="over" over="true"/>
+			<instance name="FeaturedVoiceButtonState" statename="down" down="true"/>
+			<instance name="FeaturedVoiceButtonState" statename="disabled"/>
+		</button>
+	</template>
+
+	<template name="FeaturedDifficultyPip">
+		<panel width="100@" height="100%" noclick="true">
+			<image width="100@" height="100%" texture="/ui/fe2/elements/hero_popularity_pip.tga" rendermode="grayscale" noclick="true"/>
+			<panel name="featured_model_panel_{id}_hero_difficulty_{subid}" clip="1" noclick="1">
+				<image width="100@" height="100%" texture="/ui/fe2/elements/hero_popularity_pip.tga" noclick="true"/>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="FeaturedRotationButton">
+		<button
+			color="invisible"
+			width="{width}" height="{height}"
+			align="{align}" valign="{valign}"
+			x="{x}" y="{y}"
+			onevent="{onevent}" onevent1="{onevent1}" onevent2="{onevent2}"
+			watch="{watch}" ontrigger="{ontrigger}" ontriggerlua="{ontriggerlua}" watch1="{watch1}" ontrigger1="{ontrigger1}"
+			onmouselup="{onmouselup}" onmouseldown="{onmouseldown}"
+			onmouseover="{onmouseover}"
+			onmouseout="{onmouseout}"
+			onmouseluplua="{onmouseluplua}" onmouseldownlua="{onmouseldownlua}"
+			onmouseoverlua="{onmouseoverlua}"
+			onmouseoutlua="{onmouseoutlua}"
+			
+		>
+			<widgetstate statename="up">
+				<image texture="/ui/fe2/elements/rotation_up.tga" hflip="{hflip=false}" align="center" valign="center" width="-1h" height="-1h"/>
+			</widgetstate>		
+			<widgetstate statename="over">
+				<image texture="/ui/fe2/elements/rotation_over.tga" hflip="{hflip=false}" align="center" valign="center" width="-1h" height="-1h"/>
+			</widgetstate>			
+			<widgetstate statename="down" x="1" y="1">				
+				<image texture="/ui/fe2/elements/rotation_over.tga" hflip="{hflip=false}" align="center" valign="center" width="-1h" height="-1h"/>
+			</widgetstate>
+		</button>
+	</template>
+	
+	<template name="FeaturedPurchaseButtonState">
+		<widgetstate statename="{statename}" x="{x}" y="{y}">
+			<image width="132%" height="25@" align="center" valign="center" texture="/ui/fe2/store/promo/storebtn_blank_{stateimage}.tga" noclick="true" />
+			<label y="-0.2h" height="100%" textvalign="center" textalign="center" font="dyn_14" color="{labelcolor}" shadow="true" content="{label}" />
+		</widgetstate>
+	</template>
+
+	<template name="FeaturedPurchaseButton">
+		<button
+			name="mstore_featured_purchase_{id}"
+			color="invisible"
+			onmouseover="PlaySound('/shared/sounds/ui/ccpanel/button_over_02.wav'); {onmouseover}"
+			onmouseout="{onmouseout}"
+			watch="{watch}"
+			ontrigger="{ontrigger}"
+			ontriggerlua="{ontriggerlua}"
+			watch1="{watch1}"
+			ontrigger1="{ontrigger1}"
+			ontrigger1lua="{ontrigger1lua}"
+			enabled="{enabled=true}"
+			oneventlua="{oneventlua}"
+			visible="{visible=true}"
+			onclicklua="{onclicklua}"
+		>
+			<instance name="FeaturedPurchaseButtonState" label="{label}" statename="up" stateimage="normal" labelcolor="#efa234" />
+			<instance name="FeaturedPurchaseButtonState" label="{label}" statename="over" stateimage="over" labelcolor="#ffd08d" />
+			<instance name="FeaturedPurchaseButtonState" label="{label}" statename="down" stateimage="down" labelcolor="#864f00" x="1" y="1" />
+			<instance name="FeaturedPurchaseButtonState" label="{label}" statename="disabled" stateimage="normal" labelcolor="#414141" />
+		</button>
+	</template>
+
+	<template name="featuredModelPanel">
+		<panel name="featured_model_panel_{id}" noclick="1" color="invisible" visible="0">
+			<!-- model panel first so it appears below the names and stuff -->
+			<modelpanel name="featured_model_panel_{id}_model" group="featured_model_panels" resourcecontext="store"
+				noclick="1"
+				scenebuffer="true"
+				model="/shared/models/invis.mdf"
+				anim="idle_Featured"
+				cameranear="1000.0"
+				camerafar="10000.0"
+				depthclear="true"
+				depthcompress="false"
+				lookat="false"
+				cameradistance="30"
+				camerapos="0 3000 120"
+				cameraangles="0 0 180"
+				camerafov="7"
+				modelpos="0 0 0"
+				modelangles="-15.0 0 0.0"
+				modelscale="1.0"
+				visible="1"
+				sunazimuth="120"
+				sunaltitude="50"
+				suncolor="0.0 0.0 0.0"
+				ambientcolor="0.65 0.65 0.65"
+				posteffects="true"
+				posteffect=""
+				outline="false"
+				postoutline="/core/post/outline.posteffect"
+				outlinecolor=".25 .25 .25 1"
+				cull="false"
+				onevent1="
+					## Highlight ##
+					SetSunColor('1 1 1');
+					SetAmbientColor('0.65 0.65 0.65');
+					SetEffectIndexed('/shared/effects/glow.effect', 0);
+					SetPostEffects(true);
+					SetPostEffect('');
+					SetPostEffectOutline('/core/post/outline.posteffect');
+					SetModelPanelOutline(false);
+					SetOutlineColor('.25 .25 .25 1');
+				"
+				onevent0="
+					## Darken ##
+					SetSunColor('0.0 0.0 0.0');
+					SetAmbientColor('0.35 0.35 0.35');
+					SetEffectIndexed('', 0);
+					SetPostEffects(false);
+					SetPostEffect('');
+					SetPostEffectOutline('/core/post/outline.posteffect');
+					SetModelPanelOutline(false);
+					SetOutlineColor('.25 .25 .25 1');
+				"
+			/>
+			<!-- owned portion, above so it's below the name and icon portion visibly -->
+			<panel name="featured_model_panel_{id}_owned_section" width="15.0%" height="3.0h" y="5.0h" align="center" valign="top" noclick="true" visible="1" clip="1">
+				<!-- this causes the top portion to be clipped off, so it looks like it connects to the above panels -->
+				<panel height="110%" valign="bottom" noclick="1">
+					<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.6h" color="0 0 0 .7" blockinput="false" noclick="true"/>
+					<frame texture="/ui/frames/roundframe.tga" color="#4c4c4c" borderthickness="0.6h" blockinput="false" noclick="true"/>
+					<frame name="featured_model_panel_{id}_owned_highlight" visible="0" texture="/ui/frames/roundframe.tga" color="#feaa0080" borderthickness="0.6h" blockinput="false" noclick="true"/>
+				</panel>
+				<panel x="0.5h" y="0.8h" width="1.5h" height="1.5h" align="left" noclick="1">
+					<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.5h" color="white" noclick="1"/>
+					<frame texture="/ui/frames/roundframe.tga" color="#3abde7" borderthickness="0.5h" noclick="1"/>
+					<panel name="featured_model_panel_{id}_owned_checkbox" x="0.1h" y="-0.2h" valign="bottom" align="center" width="125@" height="125%" visible="1" noclick="1">
+						<image x="1" y="1" texture="/ui/elements/check_mark_white.tga" color="0 0 0 1" noclick="1"/>
+						<image texture="/ui/elements/check_mark_white.tga" color="#40cd3c" noclick="1"/>
+					</panel>
+				</panel>
+				<label x="2.4h" name="featured_model_panel_{id}_owned_label" content="general_owned" width="-2.7h" textalign="center" textvalign="center" wrap="1" font="dyn_14" color="#feaa00" outline="true" noclick="false" />
+			</panel>
+			<!-- name and icon portion (alt avatar) -->
+			<panel name="featured_model_panel_{id}_alt_section" width="24.0%" height="5h" y="0.1h" align="center" valign="top" visible="0"
+				onmouseoverlua="UIManager.GetInterface('main'):HoNStoreF('HoverFeatured', '{id}')"
+				onmouseoutlua="GetWidget('hero_info'):SetVisible(0)"
+			>
+				<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.6h" color="0 0 0 .7" blockinput="false" noclick="true"/>
+				<frame texture="/ui/frames/roundframe.tga" color="#4c4c4c" borderthickness="0.6h" blockinput="false" noclick="true"/>
+				<frame name="featured_model_panel_{id}_highlight" visible="0" texture="/ui/frames/roundframe.tga" color="#feaa0080" borderthickness="0.6h" blockinput="false" noclick="true"/>
+				<panel noclick="1" color="invisible" float="right" padding="0.2h" >
+					<image name="featured_model_panel_{id}_icon" x="0.25h" height="4.2h" width="4.2h" valign="center" noclick="1" />
+					<label name="featured_model_panel_{id}_name" height="4.2h" width="-5.0h" textalign="center" textvalign="center" wrap="1" font="dyn_14" color="#feaa00" outline="true" noclick="1" />
+				</panel>
+			</panel>
+
+			<!-- name and icon portion (Hero/EAP) -->
+			<panel name="featured_model_panel_{id}_hero_section" width="32%" height="6.25h" y="0.1h" align="center" valign="top" visible="0"
+				onmouseoverlua="UIManager.GetInterface('main'):HoNStoreF('HoverFeatured', '{id}')"
+				onmouseoutlua="GetWidget('hero_info'):SetVisible(0)"
+			>
+				<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.6h" color="0 0 0 .7" blockinput="false" noclick="true"/>
+				<frame texture="/ui/frames/roundframe.tga" color="#4c4c4c" borderthickness="0.6h" blockinput="false" noclick="true"/>
+				<frame name="featured_model_panel_{id}_hero_highlight" visible="0" texture="/ui/frames/roundframe.tga" color="#feaa0080" borderthickness="0.6h" blockinput="false" noclick="true"/>
+				<panel noclick="1" color="invisible" >
+					<!-- hero icon -->
+					<image name="featured_model_panel_{id}_hero_icon" x="0.25h" valign="center" height="5.55h" width="5.55h" noclick="1" />
+					<!-- hero name -->
+					<label name="featured_model_panel_{id}_hero_name" x="6.15h" height="4.2h" width="-6.5h" font="dyn_14" color="#feaa00" outline="true" noclick="1" />
+					<!-- hero difficulty -->
+					<panel x="6.15h" width="-9.75h" height="2.25h" y="2.3h" float="right" padding="0.2h" noclick="1">
+						<label fitx="true" fitxpadding="0.5h" textvalign="center" font="dyn_11" color=".6 .6 .6 1" content="mstore_difficulty" shadow="true" noclick="1" />
+						<!-- difficulty pips -->
+						<panel float="right" padding="0.2h" height="70%" valign="center" noclick="1">
+							<instance name="FeaturedDifficultyPip" id="{id}" subid="1" />
+							<instance name="FeaturedDifficultyPip" id="{id}" subid="2" />
+							<instance name="FeaturedDifficultyPip" id="{id}" subid="3" />
+							<instance name="FeaturedDifficultyPip" id="{id}" subid="4" />
+							<instance name="FeaturedDifficultyPip" id="{id}" subid="5" />
+						</panel>
+					</panel>
+					<!-- hero categories -->
+					<label name="featured_model_panel_{id}_hero_categories" x="6.15h" width="-9.75h" y="-0.25h" textvalign="bottom" font="dyn_8" color="#00FF00" content="-" shadow="true" noclick="1" />
+					<!-- voice preview -->
+					<panel width="3.7h" height="3.7h" align="right" y="-0.25h" x="-.25h" valign="bottom" >
+						<image width="100%" height="100@" valign="center" texture="/ui/elements/gamefeature_voip.tga" />							
+						<instance name="FeaturedVoiceButton"
+							onclicklua="UIManager.GetInterface('main'):HoNStoreF('FeaturedVoicePreview', '{id}')"
+							onmouseoverlua="UIManager.GetInterface('main'):HoNStoreF('HoverFeatured', '{id}')"
+							onmouseoutlua="GetWidget('hero_info'):SetVisible(0)"
+						/>
+					</panel>
+				</panel>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="bundleListItem">
+		<button color="invisible"
+			name="mstore_featured_bundle{id}"
+			onclicklua="UIManager.GetInterface('main'):HoNStoreF('SelectFeaturedBundle', {id})"
+			onmouseoverlua="UIManager.GetInterface('main'):HoNStoreF('HoverFeaturedBundle', {id})"
+			onmouseoutlua="UIManager.GetInterface('main'):HoNStoreF('RestoreBundle')"
+			height="3.0h" align="center" visible="0" sticky="1" stickytoinvis="0"
+		>
+			<widgetstate statename="up">
+				<frame texture="/ui/frames/rounded_bg_green.tga" borderthickness="0" color="1 1 1 1" blockinput="false" noclick="true"/>
+			</widgetstate>
+			<widgetstate statename="over">							
+				<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0" color="0 0.8 0 1" blockinput="false" noclick="true"/>	
+			</widgetstate>
+			<widgetstate statename="down" x="1" y="1">
+				<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0" color="0 0.8 0 1" blockinput="false" noclick="true"/>
+			</widgetstate>
+			<label name="mstore_featured_bundle{id}_name" x="1.0h" y="-0.1h" height="100%" textvalign="center" font="dyn_16" color="#FFFFFF" shadow="true" noclick="true" />
+		</button>
+	</template>
+
+	<template name="storeFeatured">
+		<!-- event0 = onshow, event1 = onhide -->
+		<panel name="storeFeatured" height="50h" width="178h" align="center" visible="false" color="black" onmouseldown="HideWidget('mstore_featured_bundleselect_dropup');"
+			onevent0="
+				Call('store_cover', 'FadeIn(250);');
+				SleepWidget(250, 'DoEvent(2);');
+			"
+			onevent1="
+				Call('store_cover', 'FadeIn(250);');
+				SleepWidget(250, 'DoEvent(3);');
+			"
+			onevent2="
+				SetVisible(true);
+				HideWidget('shopkeeperContainer');
+				Call('store_cover', 'FadeOut(250);');
+			"
+			onevent3="
+				SetVisible(false);
+				ShowWidget('shopkeeperContainer');
+				Call('store_cover', 'FadeOut(250);');
+			"
+			onshowlua="UIManager.GetInterface('main'):HoNStoreF('SetupFeaturedSection')"
+			onhidelua="UIManager.GetInterface('main'):HoNStoreF('CloseFeaturedSection')"
+		>
+			
+			<!-- background with side gears etc -->
+			<modelpanel
+				ontrigger9lua="ResourceManager.RegisterModel('/ui/fe2/store/eap/gears/gears.mdf', 'store', self)" resourcecontext="store" watch9="MainRegisterModels"
+				name="featured_model_center_background"
+				visible="1"
+				noclick="true"
+				anim="idle"
+				cameradistance="0"
+				lookat="false"
+				camerapos="0 660 157"
+				cameraangles="-3 0  180"
+				modelpos="0 -400 -25"
+				camerafov="41"
+				cameranear="1"
+				carmerafar="5000"
+				depthclear="true"
+				depthcompress="true"
+				sunazimuth="-85"
+				sunaltitude="150"
+				suncolor="1 1 1"
+				effect="/ui/fe2/store/eap/gears/lights.effect"
+			/>
+			
+			<panel noclick="true" color="invisible" name="storeFeaturedRotation"/>
+
+			<!-- Model Panels -->
+			<!-- parent panel so that we can depth sort the models without pulling them in front of everything -->
+			<panel color="invisible" noclick="1">
+				<instance name="featuredModelPanel" id="1" />
+				<instance name="featuredModelPanel" id="2" />
+				<instance name="featuredModelPanel" id="3" />
+				<instance name="featuredModelPanel" id="4" />
+				<instance name="featuredModelPanel" id="5" />
+			</panel>
+			
+			<!-- Footer -->
+			<panel width="61.0h" height="6.4h" align="center" valign="bottom" noclick="true" name="store_featured_footer_center" visible="1">			
+				<frame y="-0.2h" height="7.0h" texture="/ui/frames/rounded_bg_red.tga" borderthickness="0.6h" color=".1 .1 .1 .9" blockinput="false" noclick="true"/>
+				<frame y="-0.2h" height="7.0h" texture="/ui/frames/roundframe.tga" color="#e28e1b" borderthickness="0.6h" blockinput="false" noclick="true"/>
+				
+				<!-- Bundle Price -->
+				<panel name="mstore_featured_footer_left_bundle" x="6.0h" y="0.4h" width="22.0h" noclick="true">
+					<label textalign="center" font="dyn_10" color=".7 .7 .7 1" shadow="true" content="mstore_eap_bundle_selected" noclick="true" />
+					<!-- Selected -->
+					<panel y="2.2h" height="3.0h" align="center" name="mstore_featured_bundleselect_box"
+						onclick="ShowWidget('mstore_featured_bundleselect_dropup'); HideWidget('mstore_featured_bundleselect_box');"
+					>
+						<frame texture="/ui/frames/rounded_bg_green.tga" borderthickness="0.6h" color="1 1 1 .8" blockinput="false" noclick="true"/>
+						<frame texture="/ui/frames/roundframe.tga" color="#e28e1b" borderthickness="0.6h" blockinput="false" noclick="true"/>						
+						
+						<label name="mstore_featured_selectedBundle" x="1.0h" y="-0.2h" height="100%" textvalign="center" font="dyn_16" color="#FFFFFF" shadow="true" noclick="true" />
+												
+						<panel grow="true" height="100%" align="right" float="right" padding="0.5h" noclick="true">
+							<panel width="1" height="100%" valign="center" noclick="true">
+								<panel height="95%" color="0 0 0 1" valign="center" noclick="true" />
+							</panel>
+							<panel grow="true" height="100%" noclick="true">
+								<image width="40@" height="40%" valign="center" texture="/ui/elements/arrow_down.tga" noclick="true" />
+							</panel>
+							<panel width="1" height="100%" color="invisible"/>
+						</panel>						
+					</panel>
+					
+					<!-- Fake Combobox -->
+					<panel y="-1.2h" grow="1" regrow="1" growinvis="0" width="100%" align="center" valign="bottom" name="mstore_featured_bundleselect_dropup" visible="0" onhide="ShowWidget('mstore_featured_bundleselect_box');" >					
+						<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0" color="0 0 0 .8" blockinput="false" noclick="true"/>
+						
+						<panel float="bottom" noclick="1" grow="1" regrow="1" growinvis="0" width="100%">
+							<instance name="bundleListItem" id="1" />
+							<instance name="bundleListItem" id="2" />
+							<instance name="bundleListItem" id="3" />
+							<instance name="bundleListItem" id="4" />
+							<instance name="bundleListItem" id="5" />
+							<instance name="bundleListItem" id="6" />
+							<instance name="bundleListItem" id="7" />
+							<instance name="bundleListItem" id="8" />
+							<instance name="bundleListItem" id="9" />
+							<instance name="bundleListItem" id="10" />
+						</panel>
+						
+						<frame color="invisible" borderthickness="1" bordercolor="#e28e1b" blockinput="false" noclick="true"/>
+						
+					</panel>
+				</panel>
+				
+				<!-- Purchase Buttons -->
+				<panel name="mstore_featured_footer_right_price" x="-7.0h" y="0.4h" width="21.0h" align="right" noclick="true"	>
+					<panel name="mstore_featured_purchase_cost" height="1.6h" valign="top" align="center" x="35%" noclick="1" >
+						<label name="mstore_featured_purchase_cost_label" x="2.0h" fitx="true" height="100%" textvalign="center" font="dyn_14" color="#FFCC00" shadow="true" content="---" noclick="true" />
+						<image height="100%" width="100@" texture="/ui/fe2/store/gold_coins.tga" noclick="true"/>
+					</panel>
+
+					<panel y="1.8h" height="3.8h" align="center" noclick="true">
+						<!-- already purchased button -->
+						<instance name="FeaturedPurchaseButton" label="mstore_purchased" enabled="false" visible="false" id="owned"/>
+
+						<!-- purchase Button -->
+						<instance name="FeaturedPurchaseButton" label="mstore_purchase" id="purchase"
+							watch="MicroStoreProcessing"
+							ontriggerlua="self:SetEnabled(not AtoB(param0))"
+							onclicklua="UIManager.GetInterface('main'):HoNStoreF('CheckPurchaseFeatured')"
+							oneventlua="UIManager.GetInterface('main'):HoNStoreF('PurchaseFeatured')"
+						/>
+
+
+					</panel>					
+				</panel>				
+
+				<!-- Left Rotation -->
+				<panel x="-1.5h" y="-0.8h" width="120@" height="120%" align="left" noclick="true">
+					<image width="100@" height="100%" texture="/ui/fe2/store/promo/store_sales.tga" hflip="true" noclick="true" />					
+					<instance name="FeaturedRotationButton" width="5.2h" height="5.4h" align="center" x="-0.1h" y="1.3h"
+						watch="MicroStoreProcessing"
+						ontriggerlua="self:SetEnabled(not AtoB(param0))"
+						onmouseldownlua="UIManager.GetInterface('main'):HoNStoreF('FeaturedLeftRotation')"
+						onmouseluplua="UIManager.GetInterface('main'):HoNStoreF('FeaturedNormalRotation')"
+						onmouseoutlua="UIManager.GetInterface('main'):HoNStoreF('FeaturedNormalRotation')"
+					/>	
+				</panel>
+				
+				<!-- Right Rotation -->
+				<panel x="1.5h" y="-0.8h" width="120@" height="120%" align="right" noclick="true">
+					<image width="100@" height="100%" texture="/ui/fe2/store/promo/store_sales.tga" noclick="true" />
+					<instance name="FeaturedRotationButton" width="5.2h" height="5.4h" align="center" x="0.1h" y="1.3h" hflip="true"
+						watch="MicroStoreProcessing"
+						ontriggerlua="self:SetEnabled(not AtoB(param0))"
+						onmouseldownlua="UIManager.GetInterface('main'):HoNStoreF('FeaturedRightRotation')"
+						onmouseluplua="UIManager.GetInterface('main'):HoNStoreF('FeaturedNormalRotation')"
+						onmouseoutlua="UIManager.GetInterface('main'):HoNStoreF('FeaturedNormalRotation')"
+					/>
+				</panel>
+
+			</panel>
+
+			<panel color="black" width="20h"/>
+			<panel color="black" width="20h" align="right"/>
+
+			<image width="12h" height="100%" x="20h" texture="/ui/fe2/elements/shadow_hgradient.tga" noclick="true"/>
+			<image width="12h" height="100%" x="-20h" texture="/ui/fe2/elements/shadow_hgradient.tga" noclick="true" align="right" hflip="true"/>
+			
+			
+			<!-- View All / Back to Store Buttons -->
+			<panel noclick="1" name="mstore_featured_back_to_store_holder" >
+				<instance name="button2" button_name="unnamedButton255" align="center" valign="bottom" x="-39.0h" y="-1.5h" width="12h" height="2.8h" label="mstore_backtostore" onclick="Set('_microStore_Category', 0); Set('_microStore_RequestCode', 0); CallEvent('MicroStoreAction', 0);" watch1="MicroStoreProcessing" ontrigger1="SetEnabled(!param0);"/>
+			</panel>
+		
+			<panel width="124.8h" noclick="true" align="center">
+				<instance name="mstore_btn_closex" width="1.75h" height="1.75h" align="right" x="0" y="1h"
+					watch="MicroStoreProcessing"
+					ontrigger="SetEnabled(!param0);"
+					onclick="
+						Set('_microStore_Category', 0);
+						Set('_microStore_RequestCode', 0);
+						CallEvent('MicroStoreAction', 0);
+					"
+				/>
+			</panel>
+
+			<!-- Error window -->
+			<panel align="center" width="50%" noclick="true" name="mstore_featured_error" visible="false">
+				<panel align="center" valign="center" color="black" width="25h" grow="true">
+					<frame color="invisible" bordercolor="#455166" borderthickness="1" noclick="true" />
+					<panel width="100%" float="bottom" noclick="true" padding="0.5h" grow="true">
+						<instance name="header_bar" width="100%" height="2.8h" lbl="mstore_featured_error_header" color="white" lbl_font="dyn_11" />
+						<panel width="100%" grow="true">
+							<panel width="-1h" align="center" grow="true">
+								<frame texture="/ui/info/backdrop.tga" borderthickness="2.0h" color="1 1 1 .5" noclick="1" />
+								<frame color="invisible" bordercolor="#455166" borderthickness="1" noclick="true" />
+								<panel grow="true" width="-1h" align="center" float="bottom">
+									<panel height="0.25h"/>
+									<label color="white" shadow="true" width="100%" font="dyn_10" content="mstore_featured_error_body" wrap="true" textalign="center" fity="true" />
+									<panel height="0.5h"/>
+								</panel>
+							</panel>
+						</panel>
+						<panel height="0"/>
+					</panel>
+				</panel>
+			</panel>
+
+		</panel>
+	</template>
+
+</package>

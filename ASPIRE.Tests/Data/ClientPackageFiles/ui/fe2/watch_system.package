@@ -1,0 +1,1485 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+
+	<lua file="/ui/scripts/watch_system.lua"/>
+
+	<trigger name="WatchSystemRequestStatus"/>
+	<trigger name="MatchBetInfoStatus"/>
+	<trigger name="LiveMatchesResult"/>
+	<trigger name="RegionMatchesResult"/>
+	<trigger name="MatchInfoResult"/>
+	<trigger name="MatchBetInfoResult"/>
+	<trigger name="MatchBetResult"/>
+	<trigger name="TodayMatchResult"/>
+	<trigger name="StartWatchResult"/>
+	<trigger name="BetHistoryResult"/>
+
+	<form
+		name="WatchSystemForm"
+		method="get"
+		host="!ascension"
+		target=""
+		statustrigger=""
+		resulttrigger=""
+		resultparam0=""
+		ssl="false"
+		php="false"
+	/>
+
+	<form
+		name="WatchSystemMatchDataForm"
+		method="get"
+		host="!ascension"
+		target=""
+		statustrigger=""
+		resulttrigger=""
+		resultparam0=""
+		ssl="false"
+		php="false"
+	/>
+
+	<form
+		name="WatchSystemRefreshTodayMatchForm"
+		method="get"
+		host="!ascension"
+		target=""
+		statustrigger=""
+		resulttrigger=""
+		resultparam0=""
+		ssl="false"
+		php="false"
+	/>
+
+	<form
+		name="WatchSystemMatchBetForm"
+		method="get"
+		host="!ascension"
+		target=""
+		statustrigger=""
+		resulttrigger=""
+		resultparam0=""
+		ssl="false"
+		php="false"
+	/>
+
+	<form
+		name="WatchSystemSpectateMatchForm"
+		method="get"
+		host="!ascension"
+		target=""
+		statustrigger=""
+		resulttrigger=""
+		resultparam0=""
+		ssl="false"
+		php="false"
+	/>
+
+	<template name="watch_system_pagebtn">
+		<panel name="watch_system_{type}_pagebtn_{id}" width="2.2h" height="2.2h" valign="center" stickytoinvis="false">
+			<button name="watch_system_{type}_pagebtn_{id}_btn" color="invisible"
+			        onclicklua="Set('_pagebar_{type}_selected', {id}, 'int')
+			   			        Watch_System.UpdatePageBar('{type}')
+			   			        {updatefunc}"
+			   		onclick="PlaySound('/shared/sounds/ui/button_click_03.wav');"
+		    >
+		    	<widgetstate statename="up">
+					<panel/>
+				</widgetstate>
+				<widgetstate statename="over">
+					<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.5h" color="#10a6d9" noclick="true"/>
+					<frame texture="/ui/frames/roundframe.tga" color="#10a6d9" borderthickness=".6h" noclick="true"/>
+				</widgetstate>
+				<widgetstate statename="down">
+					<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.5h" color="#10a6d9" noclick="true"/>
+					<frame texture="/ui/frames/roundframe.tga" color="#10a6d9" borderthickness=".6h" noclick="true"/>
+				</widgetstate>
+				<widgetstate statename="disabled">
+					<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.5h" color="#10a6d9" noclick="true"/>
+					<frame texture="/ui/frames/roundframe.tga" color="#10a6d9" borderthickness=".6h" noclick="true"/>
+				</widgetstate>
+			</button>
+
+			<label name="watch_system_{type}_pagebtn_{id}_text" color="white" font="dyn_12" textvalign="center" textalign="center" shadow="true" noclick="1"/>
+		</panel>
+	</template>
+
+	<template name="watch_system_pagechangebtn">
+		<button width="{width=2.5h}" height="2.2h" align="{align}" valign="{valign}" onclicklua="{onclicklua}" color="invisible" onclick="PlaySound('/shared/sounds/ui/button_click_05.wav');">
+			<widgetstate statename="up">
+				<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.5h" color="#313538" noclick="true"/>
+				<frame texture="/ui/frames/roundframe.tga" color="#313538" borderthickness=".6h" noclick="true"/>
+				<label align="center" valign="center" textalign="center" textvalign="center" font="dyn_10" color="#bac0c2" shadow="1" content="{content}" noclick="1"/>
+				<!-- <image width="1.5h" height="1.5h" align="center" valign="center" noclick="1" texture="{texture}" hflip="{hflip=0}"/> -->
+			</widgetstate>
+			<widgetstate statename="over">
+				<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.5h" color="#5d6063" noclick="true"/>
+				<frame texture="/ui/frames/roundframe.tga" color="#5d6063" borderthickness=".6h" noclick="true"/>
+				<label align="center" valign="center" textalign="center" textvalign="center" font="dyn_10" color="#bac0c2" shadow="1" content="{content}" noclick="1"/>
+				<!-- <image width="1.5h" height="1.5h" align="center" valign="center" noclick="1" texture="{texture}" hflip="{hflip=0}"/> -->
+			</widgetstate>
+			<widgetstate statename="down" x="1" y="1">
+				<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.5h" color="#5d6063" noclick="true"/>
+				<frame texture="/ui/frames/roundframe.tga" color="#5d6063" borderthickness=".6h" noclick="true"/>
+				<label align="center" valign="center" textalign="center" textvalign="center" font="dyn_10" color="#bac0c2" shadow="1" content="{content}" noclick="1"/>
+				<!-- <image width="1.5h" height="1.5h" align="center" valign="center" noclick="1" texture="{texture}" hflip="{hflip=0}"/> -->
+			</widgetstate>
+		</button>
+	</template>
+
+	<template name="watch_system_pagebar">
+		<panel height="4h" align="{align}" valign="{valign}"  x="{x}" y="{y}" float="right" padding="0.6h" grow="true" regrow="true"
+			   onloadlua="Cvar.CreateCvar('_pagebar_{type}_start', 'int', 0)
+			  			  Cvar.CreateCvar('_pagebar_{type}_total', 'int', 1)
+			   			  Cvar.CreateCvar('_pagebar_{type}_selected', 'int', 0)
+			   			  Cvar.CreateCvar('_pagebar_{type}_permax', 'int', {maxperpage=5})
+			   			  Watch_System.UpdatePageBar('{type}')">
+			<instance name="watch_system_pagechangebtn" texture="/ui/elements/watch_system/arrow_2.tga" valign="center"
+					  content="First" width="4h"
+					  onclicklua="local start = GetCvarInt('_pagebar_{type}_start')
+					  			  local selected = GetCvarInt('_pagebar_{type}_selected')
+
+							   if start > 0 or selected > 0 then
+							   		Set('_pagebar_{type}_start', 0, 'int')
+							   		Set('_pagebar_{type}_selected', 0, 'int')
+							   		Watch_System.UpdatePageBar('{type}')
+			   			  			{updatefunc}
+							   end
+							   "/>
+
+			<instance name="watch_system_pagechangebtn" texture="/ui/elements/watch_system/arrow_1.tga" valign="center"
+				      content="Previous" width="6.5h"
+				      onclicklua="local start = GetCvarInt('_pagebar_{type}_start')
+				     			  local selected = GetCvarInt('_pagebar_{type}_selected')
+				     			  local permax = GetCvarInt('_pagebar_{type}_permax')
+
+							   if start + selected > 0 then
+							   		if selected > 0 then
+							   			Set('_pagebar_{type}_selected', selected - 1, 'int')
+							   		elseif start >= permax then
+							   			Set('_pagebar_{type}_selected', permax - 1, 'int')
+							   			Set('_pagebar_{type}_start', start - permax, 'int')
+							   		else
+							   			Set('_pagebar_{type}_selected', start - 1, 'int')
+							   			Set('_pagebar_{type}_start', 0, 'int')
+							   		end
+
+							   		Watch_System.UpdatePageBar('{type}')
+			   			  			{updatefunc}
+							   end
+							   "/>
+
+			<instance name="watch_system_pagebtn" id="0" updatefunc="{updatefunc}" type="{type}"/>
+			<instance name="watch_system_pagebtn" id="1" updatefunc="{updatefunc}" type="{type}"/>
+			<instance name="watch_system_pagebtn" id="2" updatefunc="{updatefunc}" type="{type}"/>
+			<instance name="watch_system_pagebtn" id="3" updatefunc="{updatefunc}" type="{type}"/>
+			<instance name="watch_system_pagebtn" id="4" updatefunc="{updatefunc}" type="{type}"/>
+
+			<instance name="watch_system_pagechangebtn" texture="/ui/elements/watch_system/arrow_1.tga" valign="center" hflip="1"
+					  content="Next" width="4h"
+				      onclicklua="local start = GetCvarInt('_pagebar_{type}_start')
+				      			  local selected = GetCvarInt('_pagebar_{type}_selected')
+							      local total = GetCvarInt('_pagebar_{type}_total')
+							      local permax = GetCvarInt('_pagebar_{type}_permax')
+
+							   if total - 1 > start + selected then
+							   		if permax - 1 > selected then
+							   			Set('_pagebar_{type}_selected', selected + 1, 'int')
+							   		else
+							   			Set('_pagebar_{type}_selected', 0, 'int')
+							   			Set('_pagebar_{type}_start', start + permax, 'int')
+							   		end
+
+							   		Watch_System.UpdatePageBar('{type}')
+			   			  			{updatefunc}
+							   end
+							   "/>
+
+			<instance name="watch_system_pagechangebtn" texture="/ui/elements/watch_system/arrow_2.tga" valign="center" hflip="1"
+					  content="Last" width="4h"
+				      onclicklua="local start = GetCvarInt('_pagebar_{type}_start')
+							   local total = GetCvarInt('_pagebar_{type}_total')
+							   local permax = GetCvarInt('_pagebar_{type}_permax')
+							   local start = GetCvarInt('_pagebar_{type}_start')
+							   local selected = GetCvarInt('_pagebar_{type}_selected')
+
+							   local newselected = 0
+							   local newstart = 0
+							   if total >= permax then
+							   		newselected = permax - 1
+							   		newstart = total - permax
+							   else
+							   		newselected = total - 1
+							   end
+
+							   if newstart ~= start or newselected ~= selected then
+							   		Set('_pagebar_{type}_start', newstart, 'int')
+							   		Set('_pagebar_{type}_selected', newselected, 'int')
+							   		Watch_System.UpdatePageBar('{type}')
+			   			  			{updatefunc}
+							   end
+							   "/>
+		</panel>
+	</template>
+
+	<template name="watch_system_tab">
+		<panel name="watch_system_tab_{tabName}" x="{x}" y="{y}" width="{width=18.25h}" height="{height=3h}" align="{align=}" valign="{valign=}"
+			onloadlua="{onloadlua}"
+			onclicklua="{onclicklua}"
+		>
+			<button name="watch_system_tab_{tabName}_btn" align="center" color="invisible" onclicklua="Watch_System.SelectTab('{tabName}')" onshowlua="{btnonshowlua}">
+				<widgetstate statename="up">
+					<image width="24h" height="6h" align="center" valign="center" texture="/ui/elements/watch_system/ws_tab_up.tga" noclick="1"/>
+					<label y="0.25h" width="-3h" height="3h" align="center" valign="bottom" textalign="center" textvalign="bottom" font="dyn_14" color="#1a1b1b" shadow="1" shadowcolor="#77a2b1" content="watch_system_tab_label_{tabName}" noclick="1"/>
+				</widgetstate>
+
+				<widgetstate statename="over">
+					<image width="24h" height="6h" align="center" valign="center" texture="/ui/elements/watch_system/ws_tab_over.tga" noclick="1"/>
+					<label y="0.25h" width="-3h" height="3h" align="center" valign="bottom" textalign="center" textvalign="bottom" font="dyn_14" color="#1a1b1b" shadow="1" shadowcolor="#77a2b1" content="watch_system_tab_label_{tabName}" noclick="1"/>
+				</widgetstate>
+
+				<widgetstate statename="down">
+					<image width="24h" height="6h" align="center" valign="center" texture="/ui/elements/watch_system/ws_tab_down.tga" noclick="1"/>
+					<label y="0.25h" width="-3h" height="3h" align="center" valign="bottom" textalign="center" textvalign="bottom" font="dyn_14" color="#102736" shadow="1" shadowcolor="#12e5f6" content="watch_system_tab_label_{tabName}" noclick="1"/>
+				</widgetstate>
+
+				<widgetstate statename="disabled">
+					<image width="24h" height="6h" align="center" valign="center" texture="/ui/elements/watch_system/ws_tab_up.tga" noclick="1" color="1 1 1 .7"/>
+					<label y="0.25h" width="-3h" height="3h" align="center" valign="bottom" textalign="center" textvalign="bottom" font="dyn_14" color="#283a3f" shadow="1" shadowcolor="#5d7276" content="watch_system_tab_label_{tabName}" noclick="1"/>
+				</widgetstate>
+			</button>
+
+			<panel name="watch_system_tab_{tabName}_selected" align="center" visible="0" noclick="1">
+				<image width="24h" height="6h" align="center" valign="center" texture="/ui/elements/watch_system/ws_tab_down.tga" noclick="1"/>
+				<label width="-3h" height="3h" align="center" valign="bottom" textalign="center" textvalign="bottom" font="dyn_14" color="#102736" shadow="1" shadowcolor="#12e5f6" content="watch_system_tab_label_{tabName}" noclick="1"/>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="watch_system_date_tab">
+		<panel name="watch_system_date_tab_{category}{date}" x="{x}" y="{y}" width="{width=5.5h}" height="{height=3h}" align="{align=}" valign="{valign=}"
+			onloadlua="{onloadlua}"
+			onclicklua="{onclicklua}"
+		>
+			<button name="watch_system_date_tab_{category}{date}_btn" align="center" color="invisible"
+				onclick="PlaySound('{sound=/shared/sounds/ui/button_click_01.wav}'); {onclick}"
+				onclicklua="Watch_System.SelectRegionMatchDate('{date}')">
+				<widgetstate statename="up">
+					<image width="6h" height="3h" align="center" valign="center" texture="/ui/elements/watch_system/date_btn_up.tga" noclick="1"/>
+					<label width="-0.5h" height="3h" align="center" valign="center" textalign="center" textvalign="center" font="dyn_10" color="white" shadow="1" shadowcolor="black" content="{date}" noclick="1"/>
+				</widgetstate>
+
+				<widgetstate statename="over">
+					<image width="6h" height="3h" align="center" valign="center" texture="/ui/elements/watch_system/date_btn_over.tga" noclick="1"/>
+					<label width="-0.5h" height="3h" align="center" valign="center" textalign="center" textvalign="center" font="dyn_10" color="white" shadow="1" shadowcolor="black" content="{date}" noclick="1"/>
+				</widgetstate>
+
+				<widgetstate statename="down">
+					<image width="6h" height="3h" align="center" valign="center" texture="/ui/elements/watch_system/date_btn_down.tga" noclick="1"/>
+					<label width="-0.5h" height="3h" align="center" valign="center" textalign="center" textvalign="center" font="dyn_10" color="white" shadow="1" shadowcolor="black" content="{date}" noclick="1"/>
+				</widgetstate>
+			</button>
+
+			<panel name="watch_system_date_tab_{category}{date}_selected" align="center" visible="0" noclick="1">
+				<image width="6h" height="3h" align="center" valign="center" texture="/ui/elements/watch_system/date_btn_down.tga" noclick="1"/>
+				<label width="-0.5h" height="3h" align="center" valign="center" textalign="center" textvalign="center" font="dyn_10" color="white" shadow="1" shadowcolor="black" content="{date}" noclick="1"/>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="watch_system_button">
+		<panel name="watch_system_button_{nameid}" x="{x}" y="{y}" width="{width=21.5h}" height="{height=5h}" align="{align}" valign="{valign}" visible="{visible}" noclick="1">
+			<button align="center" color="invisible"
+				onclick="PlaySound('{sound=/shared/sounds/ui/button_click_01.wav}'); {onclick}"
+				onclicklua="{onclicklua}">
+				<widgetstate statename="up">
+					<image width="19.5h" height="5.5h" y="0.1h" align="center" valign="center" texture="/ui/elements/watch_system/frames/sb_gradient_up.tga" noclick="1" nocompress="true"/>
+					<image width="24h" height="6h" align="center" valign="center" texture="/ui/elements/watch_system/watch_system_btn_up.tga" noclick="1"/>
+					<label width="-1h" height="3h" align="center" valign="center" textalign="center" textvalign="center" font="dyn_14" color="#ffffff" outline="1" outlinecolor="#333333" content="{label}" noclick="1"/>
+				</widgetstate>
+
+				<widgetstate statename="over">
+					<image width="19.5h" height="5.5h" y="0.1h" align="center" valign="center" texture="/ui/elements/watch_system/frames/sb_gradient_over.tga" noclick="1" nocompress="true"/>
+					<image width="24h" height="6h" align="center" valign="center" texture="/ui/elements/watch_system/watch_system_btn_up.tga" noclick="1"/>
+					<label width="-1h" height="3h" align="center" valign="center" textalign="center" textvalign="center" font="dyn_14" color="#ffffff" outline="1" outlinecolor="#294a66" content="{label}" noclick="1"/>
+				</widgetstate>
+
+				<widgetstate statename="down">
+					<image width="19.5h" height="5.5h" y="0.2h" align="center" valign="center" texture="/ui/elements/watch_system/frames/sb_gradient_down.tga" noclick="1" nocompress="true"/>
+					<image width="24h" height="6h" align="center" valign="center" texture="/ui/elements/watch_system/watch_system_btn_up.tga" noclick="1"/>
+					<label width="-1h" height="3h" y="0.1h" align="center" valign="center" textalign="center" textvalign="center" font="dyn_14" color="#ffffff" outline="1" outlinecolor="#294a66" content="{label}" noclick="1"/>
+				</widgetstate>
+
+				<widgetstate statename="disabled">
+					<image width="19.5h" height="5.5h" y="0.1h" align="center" valign="center" texture="/ui/elements/watch_system/frames/sb_gradient_up.tga" rendermode="grayscale" noclick="1" nocompress="true"/>
+					<image width="24h" height="6h" align="center" valign="center" texture="/ui/elements/watch_system/watch_system_btn_up.tga" rendermode="grayscale" noclick="1"/>
+					<label width="-1h" height="3h" align="center" valign="center" textalign="center" textvalign="center" font="dyn_14" color="#2f3739" shadow="1" shadowcolor="#7e9598" content="{label}" noclick="1"/>
+				</widgetstate>
+			</button>
+		</panel>
+	</template>
+
+	<template name="watch_system_button_status">
+		<panel name="watch_system_button_status_{nameid}" x="{x}" y="{y}" width="{width=21.5h}" height="{height=5h}" align="{align}" valign="{valign}" visible="{visible=0}" noclick="1">
+			<image width="19.5h" height="5.5h" y="0.1h" align="center" valign="center" texture="/ui/elements/watch_system/frames/sb_gradient_up.tga" rendermode="grayscale" noclick="1" nocompress="true"/>
+			<image width="24h" height="6h" align="center" valign="center" texture="/ui/elements/watch_system/watch_system_btn_up.tga" rendermode="grayscale" noclick="1"/>
+			<label width="-1h" height="3h" align="center" valign="center" textalign="center" textvalign="center" font="dyn_14" color="#2f3739" shadow="1" shadowcolor="#7e9598" content="{label}" noclick="1"/>
+		</panel>
+	</template>
+
+	<template name="watch_system_region_team">
+		<panel x="{x=5h}" y="{y=4h}" width="20h" height="12h" align="{align}" noclick="1">
+			<image name="watch_system_region_header_{category}_team{team}icon" texture="$invis" align="center" width="9h" height="9h" noclick="1"/>
+			<label name="watch_system_region_header_{category}_team{team}name" width="+10h" height="3h" align="center" valign="bottom" textalign="center" textvalign="center" outline="1" outlinecolor="black" color="white" font="dyn_14" noclick="1"/>
+		</panel>
+	</template>
+
+	<template name="watch_system_region_header">
+		<panel name="watch_system_region_header_{category}" visible="0" align="right" x="-1.7h" width="60%" noclick="1">
+			<image texture="/ui/elements/watch_system/vs.tga" align="center" y="-3h" width="24h" height="24h" noclick="1"/>
+			<instance name="watch_system_region_team" category="{category}" team="1" x="0.25h" align="left"/>
+			<instance name="watch_system_region_team" category="{category}" team="2" x="-0.25h" align="right"/>
+		</panel>
+	</template>
+
+	<template name="watch_system_live_header">
+		<panel name="watch_system_live_header" x="-3h" y="3h" visible="0" align="right" width="58%" height="11%" noclick="1">
+			<panel height="50%" noclick="1">
+				<label name="watch_system_live_header_title" font="dyn_24" color="0 .7 1" align="center" textalign="center" textvalign="center" shadow="1" shadowcolor="black" shadowoffsetx="1.7h" shadowoffsety="1.7h" noclick="1"/>
+			</panel>
+			<panel width="55%" height="30%" x="-1h" y="-1.3h" align="center" valign="bottom" float="right" padding="1.5h" noclick="1">
+				<panel width="11h" valign="center" noclick="1">
+					<image name="watch_system_live_header_mode_icon" visible="1" texture="/ui/icons/normal.tga" width="2.3h" height="2.3h" x="9.3h" valign="center" noclick="1"/>
+					<label name="watch_system_live_header_mode_label" font="dyn_12" color="0 .7 1" shadow="1" shadowcolor="0 0 0 1" shadowoffsetx="1.7h" shadowoffsety="1.7h" 
+						content=""
+						valign="center"
+						align="center"
+						textvalign="center"
+						textalign="right"
+						x="-7.5h"
+						width="21h"
+						noclick="1"
+					/>
+				</panel>
+				<panel width="1" height="30%" valign="center" color="#555555" noclick="1"/>
+				<panel width="5.7h" valign="center" noclick="1">
+					<label name="watch_system_live_header_casual_label" font="dyn_12" color="0 .7 1" shadow="1" shadowcolor="0 0 0 1" shadowoffsetx="1.7h" shadowoffsety="1.7h" valign="center" textvalign="center" noclick="1"/>
+				</panel>
+				<panel width="1" height="30%" valign="center" color="#555555" noclick="1"/>
+				<panel width="16h" valign="center" noclick="1">
+					<label name="watch_system_live_header_match_id" width="+3h" font="dyn_12" color="white" shadow="1" shadowcolor="0 0 0 1" shadowoffsetx="1.7h" shadowoffsety="1.7h" valign="center" textvalign="center" noclick="1"/>
+				</panel>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="watch_system_playerdata">
+		<panel name="playerdata_entrypanel_{team}{slot}{category}" y="{y}" height="17%" noclick="1">
+			<image name="playerdata_entryimage_{team}{slot}{category}" width="6h" height="6h" align="{align}" texture="$invis" noclick="1"/>
+			<image y="-0.4h" width="6h" height="6h" align="{align}" valign="center" texture="/ui/elements/watch_system/frames/hero_frame.tga" noclick="1"/>
+			<label name="playerdata_entryname_{team}{slot}{category}" x="{x}" y="0.3h" width="-6.5h" align="{align}" textalign="{textalign}" shadow="1" outline="1" color="white" font="dyn_10" noclick="1"/>
+			<label name="playerdata_entryhero_{team}{slot}{category}" x="{x}" y="2h" align="{align}" textalign="{textalign}" shadow="1" shadowcolor="0 0 0 1" shadowoffsetx="1.4h" shadowoffsety="1.3h" color="white" font="dyn_9" noclick="1"/>
+			<label name="playerdata_entrykda_{team}{slot}{category}" x="{x}" y="4h" align="{align}" textalign="{textalign}" shadow="1" shadowcolor="0 0 0 1" shadowoffsetx="1.4h" shadowoffsety="1.3h" color="white" font="dyn_9" noclick="1"/>
+		</panel>
+	</template>
+
+	<template name="watch_system_minimap_hero">
+		<panel name="watch_system_minimap_hero_{team}{slot}{category}" align="left" valign="top" width="1" height="1" noclick="1" x="{x}" y="{y}" color="red" >
+			<image name="watch_system_minimap_hero_{team}{slot}{category}_0" align="center" valign="center" width="1.35h" height="1.35h" texture="/shared/icons/minimap_hero0.tga" color="{color}"/>
+			<image name="watch_system_minimap_hero_{team}{slot}{category}_1" align="center" valign="center" width="1.35h" height="1.35h" texture="/shared/icons/minimap_hero1.tga" color="green"/>
+		</panel>
+	</template>
+
+	<template name="watch_system_minimap_building">
+		<panel name="watch_system_minimap_building_{team}{slot}{category}{type}" width="1h" height="1h" x="{x}" y="{y}" noclick="1">
+			<image name="watch_system_minimap_building_{team}{slot}{category}{type}_img" align="center" valign="center" width="{size}" height="{size}" texture="{texture}" color="{color}" noclick="1"/>
+		</panel>
+	</template>
+
+	<template name="watch_system_minimap">
+		<!-- the size of the panel need to fit ws_map_bord.tga -->
+		<panel name="watch_system_minimap_{category}" x="{x=50h}" y="{y=30h}" width="31.1h" height="31.1h" align="{align}" valign="{valign}" noclick="1">
+			<!-- the background image -->
+			<image name="watch_system_minimap_icon_{category}" width="100%" height="100%" align="center" valign="center" texture="$invis" noclick="1"/>
+			<!-- boarder -->
+			<image width="48h" height="48h" y="-0.2h" align="center" valign="center" texture="/ui/elements/watch_system/ws_map_bord.tga" noclick="1"/>
+
+			<!-- Buildings and heroes should be spawned here -->
+			<panel name="watch_system_minimap_buildings_{category}" noclick="1"/>
+			<panel name="watch_system_minimap_heroes_{category}" noclick="1"/>
+
+			<!-- win team -->
+			<panel name="watch_system_minimap_win_team_{category}" visible="0" color="0 0 0 0.7" noclick="1">
+				<image name="watch_system_minimap_win_team_icon_{category}" y="2h" width="18h" height="18h" align="center" texture="$black" noclick="1"/>
+				<image y="18h" width="24h" height="6h" align="center" texture="/ui/elements/watch_system/win.tga" noclick="1"/>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="watch_system_team_kills">
+		<panel name="watch_system_team_kills_{category}{team}" x="{x}" y="{y}" align="{align}" width="10h" height="3.5h" noclick="1">
+			<label name="watch_system_team_kills_label_{category}{team}" align="center" valign="center" textalign="center" textvalign="center" outline="1" outlinecolor="black" color="white" font="dyn_18" content="" noclick="1"/>
+		</panel>
+	</template>
+
+	<template name="matches_selected">
+		<panel name="matches_selected_{category}" noclick="true"
+			align="right"
+			x="-1.7h"
+			width="60%"
+			onshowlua=""
+			onhidelua=""
+		>
+			<image texture="/ui/elements/watch_system/line.tga" align="left" x="-2h" y="19h" width="24h" height="6h" noclick="1"/>
+
+			<!-- Players Left -->
+			<panel x="0.75h" y="-8h" width="27%" height="40%" align="left" valign="center" noclick="1">
+				<instance name="watch_system_playerdata" y="0h" x="6.5h" align="left" textalign="left" category="{category}" team="1" slot="1"/>
+				<instance name="watch_system_playerdata" y="7h" x="6.5h" align="left" textalign="left" category="{category}" team="1" slot="2"/>
+				<instance name="watch_system_playerdata" y="14h" x="6.5h" align="left" textalign="left" category="{category}" team="1" slot="3"/>
+				<instance name="watch_system_playerdata" y="21h" x="6.5h" align="left" textalign="left" category="{category}" team="1" slot="4"/>
+				<instance name="watch_system_playerdata" y="28h" x="6.5h" align="left" textalign="left" category="{category}" team="1" slot="5"/>
+			</panel>
+
+			<image texture="/ui/elements/watch_system/line.tga" align="right" x="2h" y="19h" width="24h" height="6h"/>
+
+			<!-- Players Right -->
+			<panel x="-0.75h" y="-8h" width="27%" height="40%" align="right" valign="center" noclick="1">
+				<instance name="watch_system_playerdata" y="0h" x="-6.5h" align="right" textalign="right" category="{category}" team="2" slot="1"/>
+				<instance name="watch_system_playerdata" y="7h" x="-6.5h" align="right" textalign="right" category="{category}" team="2" slot="2"/>
+				<instance name="watch_system_playerdata" y="14h" x="-6.5h" align="right" textalign="right" category="{category}" team="2" slot="3"/>
+				<instance name="watch_system_playerdata" y="21h" x="-6.5h" align="right" textalign="right" category="{category}" team="2" slot="4"/>
+				<instance name="watch_system_playerdata" y="28h" x="-6.5h" align="right" textalign="right" category="{category}" team="2" slot="5"/>
+			</panel>
+
+			<!-- team kills -->
+			<instance name="watch_system_team_kills" x="5h" y="15h" align="left" category="{category}" team="1"/>
+			<instance name="watch_system_team_kills" x="-5h" y="15h" align="right" category="{category}" team="2"/>
+
+			<!-- elapsed time -->
+			<panel name="watch_system_elapsed_time_{category}" x="1.4h" y="12.2h" width="18h" height="3h" align="center" visible="0" noclick="1">
+				<image texture="/ui/elements/watch_system/match_clock.tga" width="3h" height="3h" noclick="1"/>
+				<label name="watch_system_elapsed_time_label_{category}" x="3h" width="-3h" valign="center" textvalign="center" font="dyn_10" color="#808080" outline="1" outlinecolor="black" content="" noclick="1"/>
+			</panel>
+
+			<!-- Minimap -->
+			<instance name="watch_system_minimap" align="center" x="0h" y="16.5h" category="{category}"/>
+
+			<!-- Start Watching -->
+			<!-- not start -->
+			<instance name="watch_system_button_status" nameid="{category}_notstart" label="watch_system_button_status_notstart" y="4.5h" align="center" valign="center" visible="false"/>
+			<!-- preparing -->
+			<instance name="watch_system_button_status" nameid="{category}_preparing" label="watch_system_button_status_preparing" y="4.5h" align="center" valign="center" visible="false"/>
+			<!-- replay -->
+			<instance name="watch_system_button" nameid="{category}_replay" visible="false" label="main_button_view_replay" y="4.5h" align="center" valign="center" onclicklua="Watch_System.StartWatch()"/>
+			<!-- live -->
+			<instance name="watch_system_button" nameid="{category}" label="watch_system_startwatch" y="4.5h" align="center" valign="center" onclicklua="Watch_System.StartWatch()"/>
+
+		</panel>
+	</template>
+
+	<template name="watch_system_bg">
+		<panel noclick="1">
+			<image x="-35.35h" y="-2.25h" width="96h" height="96h" align="left" valign="top" texture="/ui/elements/watch_system/bg.tga" hflip="true" noclick="1"/>
+			<image x="35.35h" y="-2.25h" width="96h" height="96h" align="right" valign="top" texture="/ui/elements/watch_system/bg.tga" noclick="1"/>
+		</panel>
+	</template>
+
+	<template name="watch_system_match_list_bg">
+		<panel noclick="1">
+			<frame align="center" height="100.5%" y="-0.4h" texture="/ui/elements/watch_system/frames/border_ml.tga" borderthickness="2.5h" blockinput="0" noclick="1" color="1 1 1 0.5"/>
+		</panel>
+	</template>
+
+	<template name="live_match_item_empty_bg">
+		<panel width="42.5h" height="15.15h" noclick="1">
+			<image y="-0.75h" width="48h" height="24h" align="center" valign="center" texture="/ui/elements/watch_system/live_match_item_empty_bg.tga" noclick="1"/>
+		</panel>
+	</template>
+
+	<template name="live_match_item_team_heroes">
+		<panel width="13h" align="{align}" float="right" padding="0.30h" >
+			<image name="live_match_item_team_heroes_{id}{team}0" width="100@" height="100%" texture="{hero0='/heroes/adeve/icon.tga'}" noclick="1"/>
+			<image name="live_match_item_team_heroes_{id}{team}1" width="100@" height="100%" texture="{hero1='/heroes/adeve/icon.tga'}" noclick="1"/>
+			<image name="live_match_item_team_heroes_{id}{team}2" width="100@" height="100%" texture="{hero2='/heroes/adeve/icon.tga'}" noclick="1"/>
+			<image name="live_match_item_team_heroes_{id}{team}3" width="100@" height="100%" texture="{hero3='/heroes/adeve/icon.tga'}" noclick="1"/>
+			<image name="live_match_item_team_heroes_{id}{team}4" width="100@" height="100%" texture="{hero4='/heroes/adeve/icon.tga'}" noclick="1"/>
+		</panel>
+	</template>
+
+	<template name="live_match_item">
+		<panel name="live_match_item_{id}" width="42.5h" height="15.15h" noclick="1">
+			<!-- background -->
+			<image y="-0.15h" width="48h" height="24h" align="center" valign="center" texture="/ui/elements/watch_system/live_match_item_bg.tga" noclick="1"/>
+
+			<panel x="1.25h" y="0.75h" width="15h" height="2h" noclick="1">
+				<label name="live_match_item_elapsed_time_{id}" textalign="left" textvalign="center" font="dyn_10" color="#ffffff" outline="1" outlinecolor="black" content="{elapsed_time}" noclick="1"/>
+			</panel>
+
+			<panel x="18h" y="0.5h" width="12h" height="2h" noclick="1">
+				<label name="live_match_item_view_num_{id}" textalign="left" textvalign="center" font="dyn_10" color="#b3b3b3" outline="1" outlinecolor="black" content="{view_num}" noclick="1"/>
+			</panel>
+
+			<panel x="12.5h" y="3.25h" width="29.25h" height="3h" noclick="1">
+				<label name="live_match_item_name_{id}" width="-1h" align="center" textalign="center" textvalign="center" font="dyn_16" color="#ffffff" outline="1" outlinecolor="black" content="{match_name}" noclick="1"/>
+			</panel>
+
+			<panel x="12.5h" y="7.5h" width="29.25h" height="3h" noclick="1">
+				<label name="live_match_item_team_name_{id}" width="-1h" align="center" textalign="center" textvalign="center" font="dyn_12" color="#d4d4d4" outline="1" outlinecolor="black" content="{team_name}" noclick="1"/>
+			</panel>
+
+			<panel x="12.5h" y="12h" width="29.25h" height="2.35h" noclick="1">
+				<instance name="live_match_item_team_heroes" id="{id}" team="1" align="left" hero0="{hero10}" hero1="{hero11}" hero2="{hero12}" hero3="{hero13}" hero4="{hero14}"/>
+				<instance name="live_match_item_team_heroes" id="{id}" team="2" align="right" hero0="{hero20}" hero1="{hero21}" hero2="{hero22}" hero3="{hero23}" hero4="{hero24}"/>
+			</panel>
+
+			<panel x="1.25h" y="3.75h" width="10h" height="10h" noclick="1">
+				<image name="live_match_item_map_{id}" align="center" valign="center" texture="{map}" noclick="1"/>
+
+				<panel height="1.5h" valign="bottom" noclick="1">
+					<label name="live_match_item_map_name_{id}" valign="bottom" textalign="center" textvalign="bottom" font="dyn_8" color="#929290" outline="1" outlinecolor="black" content="{mapname}" noclick="1"/>
+				</panel>
+			</panel>
+
+			<panel align="right" width="12h" height="12h" noclick="1">
+				<image name="live_match_item_flag_{id}1" texture="{tournament}" visible="{is_tournament=false}" noclick="1"/>
+				<image name="live_match_item_flag_{id}2" texture="{starplayer}" visible="{is_starplayer=false}" noclick="1"/>
+				<image name="live_match_item_flag_{id}3" texture="{newmap}" visible="{is_newmap=false}" noclick="1"/>
+			</panel>
+
+			<panel name="live_match_item_{id}_glow" visible="false" noclick="1">
+				<modelpanel
+					align="left"
+					valign="top"
+					noclick="1"
+					model="/ui/common/models/main/button3.mdf"
+					anim="idle"
+					camerapos="0 -150 0"
+					cameraangles="0 0 0"
+					camerafov="80.5"
+					carmerafar="7000"
+					depthclear="false"
+					depthcompress="true"
+					sunazimuth="140"
+					sunaltitude="10"
+					suncolor="1.4 1.3 1"
+					onshow="SetEffect('/ui/common/models/main/button.effect'));"
+				/>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="match_item_empty_bg">
+		<panel width="40.25h" height="18h" noclick="1">
+			<image width="48h" height="24h" align="center" valign="center" texture="/ui/elements/watch_system/match_item_empty_bg.tga" noclick="1"/>
+		</panel>
+	</template>
+
+	<!-- /ui/elements/watch_system/hontour.tga -->
+	<template name="watch_system_tour_button">
+		<panel name="watch_system_tour_button_{nameid}" x="{x}" y="{y}" width="{width=4h}" height="{height=6h}" align="{align=center}" valign="{valign=center}" visible="{visible=1}" noclick="0">
+			<button width="4h" height="6h" align="center" valign="center" color="invisible"
+				enabled="{enabled=1}"
+				onclick="PlaySound('{sound=/shared/sounds/ui/button_click_01.wav}'); {onclick}"
+				onclicklua="Watch_System.TourClicked('{tour_link}')">
+				<widgetstate statename="up">
+					<image width="6h" height="6h" align="center" valign="center" url="{tour_icon}" texture="$invis" noclick="1"/>
+				</widgetstate>
+
+				<widgetstate statename="over">
+					<image width="6h" height="6h" align="center" valign="center" url="{tour_icon}" texture="$invis" rendermode="additive" noclick="1"/>
+				</widgetstate>
+
+				<widgetstate statename="down" x="1" y="1">
+					<image width="6h" height="6h" align="center" valign="center" url="{tour_icon}" texture="$invis" rendermode="additive" noclick="1"/>
+				</widgetstate>
+
+				<widgetstate statename="disabled">
+					<image width="6h" height="6h" align="center" valign="center" url="{tour_icon}" texture="$invis" rendermode="normal" noclick="1"/>
+				</widgetstate>
+			</button>
+		</panel>
+	</template>
+
+	<template name="match_item_team">
+		<panel x="{x}" y="{y=3h}" width="12h" height="11h" noclick="1">
+			<panel y="0.75h" width="6.5h" height="6.5h" align="center" noclick="1">
+				<image width="6h" height="6h" align="center" valign="center" url="{team_icon}" noclick="1"/>
+			</panel>
+
+			<panel height="3h" valign="bottom" noclick="1">
+				<label name="match_item_team_name_{category}{id}{team_id}" align="center" textalign="center" textvalign="center" font="dyn_12" color="#cccccc" wrap="true" outline="1" outlinecolor="black" content="{team_name}" noclick="1"/>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="match_item">
+		<panel name="match_item_{category}{id}" width="40.25h" height="18h" noclick="1">
+				<!-- background -->
+				<image y="-0.15h" width="48h" height="24h" align="center" valign="center" texture="/ui/elements/watch_system/match_item_bg.tga" noclick="1"/>
+
+				<panel noclick="1">
+					<panel x="1.5h" y="0.75h" width="38h" height="2h" noclick="1">
+						<label name="match_item_name_{category}{id}" textalign="left" textvalign="center" font="dyn_10" color="#ffffff" shadow="1" shadowcolor="black" content="{itemName=HoN Codex Show Match 1}" noclick="1"/>
+					</panel>
+
+					<instance name="match_item_team" x="2h" category="{category}" id="{id}" team_id="1" team_icon="{team1Icon}" team_name="{team1Name}"/>
+					<instance name="match_item_team" x="26.25h" category="{category}" id="{id}" team_id="2" team_icon="{team2Icon}" team_name="{team2Name}"/>
+
+					<panel y="-0.65h" width="29.25h" height="3h" align="center" valign="bottom" noclick="1">
+						<label name="match_item_time_{category}{id}" width="-1h" align="center" textalign="center" textvalign="center" font="dyn_10" color="#808080" outline="1" outlinecolor="black" content="{matchTime=11:00 pm}" noclick="1"/>
+					</panel>
+
+					<!-- debug -->
+					<if condition="!releaseStage_stable">
+						<panel width="15h" height="3h" align="right" x="-15.5h" y="0h" valign="top" noclick="1">
+							<label name="match_item_id_{category}{id}" textalign="right" textvalign="center" font="dyn_10" color="#808080" outline="1" outlinecolor="black" content="id: {status_id}" noclick="1"/>
+						</panel>
+						<panel width="15h" height="3h" align="right" x="-15.5h" y="1.5h" valign="top" noclick="1">
+							<label name="match_item_match_id_{category}{id}" textalign="right" textvalign="center" font="dyn_10" color="#808080" outline="1" outlinecolor="black" content="match_id: {matchID}" noclick="1"/>
+						</panel>
+					</if>
+
+					<panel y="3.5h" width="6h" height="6h" align="center" noclick="0">
+						<instance name="watch_system_tour_button" nameid="match_item_tour_btn_{category}{id}" tour_icon="{tour_icon}" tour_link="{tour_link}" enabled="{enabled}" noclick="1"/>
+					</panel>
+
+					<panel width="128i" height="128i" align="right" noclick="1">
+						<image name="match_item_status_flag_img_{category}{id}" align="center" valign="center" texture="/ui/elements/watch_system/match_status/{status_img}.tga" noclick="1"/>
+					</panel>
+
+					<panel name="match_item_{category}{id}_glow" visible="false" noclick="1">
+						<modelpanel
+							align="left"
+							valign="top"
+							noclick="1"
+							model="/ui/common/models/main/button4.mdf"
+							anim="idle"
+							camerapos="0 -70 0"
+							cameraangles="0 0 0"
+							camerafov="80.5"
+							carmerafar="7000"
+							depthclear="false"
+							depthcompress="true"
+							sunazimuth="140"
+							sunaltitude="10"
+							suncolor="1.4 1.3 1"
+							onshow="SetEffect('/ui/common/models/main/button.effect'));"
+						/>
+					</panel>
+				</panel>
+			</panel>
+	</template>
+
+	<template name="watch_system_battlelog">
+		<panel name="watch_system_{category}_battlelog" x="{x=-2.3h}" y="{y=56.5h}" width="71h" height="{height=20.75h}" align="{align=right}" noclick="1">
+
+			<!-- background -->
+			<panel y="-0.6h" noclick="1">
+				<frame align="center" width="100.8%" height="102.5%" texture="/ui/elements/watch_system/frames/border_cl.tga" borderthickness="2.5h" blockinput="false" noclick="true" color="1 1 1 0.7"/>
+			</panel>
+
+			<!-- title -->
+			<panel y="0.1h" height="2.65h" noclick="1">
+				<image width="96h" height="6h" align="center" valign="center" texture="/ui/elements/watch_system/bar.tga" noclick="1"/>
+				<label x="1.0h" valign="center" textalign="left" textvalign="center" font="dyn_12" color="#686a6d" outline="1" outlinecolor="black" content="watch_system_battle_log"/>
+			</panel>
+
+			<!-- self:AddBufferText('00:08:49 ^352caipan1^* says are you share 11111 ???')
+			self:AddBufferText('00:10:19 ^621snq006^* was killed')
+			self:AddBufferText('00:11:48 ^352caipan1^* killed by neural creature')
+			self:AddBufferText('00:12:50 ^352caipan1^* says - - - - - 11111111111111111111111222223') -->
+
+			<panel x="0h" y="3h" height="{content_height=18h}" noclick="1">
+				<textbuffer
+					name="watch_system_battlelog_chatbuffer_{category}"
+					scrolltexture="/ui/elements/watch_system/info/ws.tga"
+					nocompress="true"
+					handleheight="5.6h"
+					handlewidth="2.8h"
+					x="1.0h"
+					y="0.2h"
+					width="-1.6h" height="{text_height=16.8h}"
+					scrollbarsize="1.75h"
+					textalign="left"
+					font="dyn_12"
+					wrap="true"
+					anchorbottom="false"
+					shadow="true"
+					color="invisible"
+					textcolor="#999a9a"
+					onshowlua="self:ClearBufferText()"
+					onhidelua="self:ClearBufferText()"
+				/>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="watch_system_bigbutton">
+		<panel name="bigbutton_panel_{button_name}_{category}" width="17.65h" height="12.65h" y="{y}" x="{x}" align="{align}" valign="{valign}" noclick="true" visible="{visible=1}">
+			<button
+				name="{button_name}_{category}"
+				y="0"
+				numstates="2"
+				width="90%"
+				height="90%"
+				align="center"
+				valign="center"
+				color="invisible"
+				onmouseover="PlaySound('/shared/sounds/ui/button_over_01.wav'); {onmouseover}"
+				onmouseout="{onmouseout}"
+				enabled="{enabled=true}"
+				onclick="PlaySound('{sound=/shared/sounds/ui/button_click_01.wav}'); {onclick}"
+				onclicklua="{onclicklua}"
+				onevent="{onevent}"
+				watch="{watch}"
+				ontriggerlua="{ontriggerlua}"
+				watch1="{watch1}"
+				ontrigger1lua="{ontrigger1lua}"
+				onshowlua="self:SetButtonState(1)"
+			>
+				<widgetstate statename="up">
+					<image nocompress="true" texture="/ui/elements/watch_system/frames/bb_gradient.tga" borderthickness="2.0h" align="center" valign="center"/>
+					<image y="-1.1h" width="12h" height="12h" align="center" valign="center" texture="/ui/elements/watch_system/icons/{icon}.tga" noclick="1"/>
+					<label y="7.25h" textalign="center" textvalign="top" font="{font=dyn_12}" shadow="1" color="white" outline="true" outlinecolor="black" content="{label}"/>
+				</widgetstate>
+				<widgetstate statename="over">
+					<image nocompress="true" texture="/ui/elements/watch_system/frames/bb_gradient_over.tga" borderthickness="2.0h" align="center" valign="center"/>
+					<image y="-1.1h" width="12h" height="12h" align="center" valign="center" texture="/ui/elements/watch_system/icons/{icon}_glow.tga" noclick="1"/>
+					<image y="-1.1h" width="12h" height="12h" align="center" valign="center" texture="/ui/elements/watch_system/icons/{icon}.tga" noclick="1"/>
+					<label y="7.25h" textalign="center" textvalign="top" font="{font=dyn_12}" shadow="1" color="white" outline="1" outlinecolor="black" content="{label}"/>
+				</widgetstate>
+				<widgetstate statename="down">
+					<image nocompress="true" texture="/ui/elements/watch_system/frames/bb_gradient_down.tga" borderthickness="2.0h" align="center" valign="center"/>
+					<image y="-1.1h" width="12h" height="12h" align="center" valign="center" texture="/ui/elements/watch_system/icons/{icon}_glow.tga" noclick="1"/>
+					<image y="-1.1h" width="12h" height="12h" align="center" valign="center" texture="/ui/elements/watch_system/icons/{icon}.tga" noclick="1"/>
+					<label y="7.25h" textalign="center" textvalign="top" font="{font=dyn_12}" shadow="1" color="white" outline="1" outlinecolor="black" content="{label}"/>
+				</widgetstate>
+				<widgetstate statename="disabled">
+					<image nocompress="true" texture="/ui/elements/watch_system/frames/bb_gradient_disabled.tga" borderthickness="2.0h" align="center" valign="center"/>
+					<image y="-1.1h" width="12h" height="12h" align="center" valign="center" texture="/ui/elements/watch_system/icons/{icon}.tga" rendermode="grayscale" noclick="1"/>
+					<label y="7.25h" textalign="center" textvalign="top" font="{font=dyn_12}" shadow="1" color="gray" outline="1" outlinecolor="black" content="{label}"/>
+				</widgetstate>
+
+				<widgetstate statename="up2">
+					<image width="24h" height="24h" align="center" valign="center" texture="/ui/elements/watch_system/bigbutton_grey_bg.tga" noclick="1"/>
+					<image y="-1.1h" width="12h" height="12h" align="center" valign="center" texture="/ui/elements/watch_system/icons/{icon}.tga" noclick="1"/>
+					<label y="7.25h" textalign="center" textvalign="top" font="{font=dyn_12}" shadow="1" outline="1" outlinecolor="black" content="{label}"/>
+				</widgetstate>
+				<widgetstate statename="over2">
+					<image width="24h" height="24h" align="center" valign="center" texture="/ui/elements/watch_system/bigbutton_grey_bg.tga" noclick="1"/>
+					<image y="-1.1h" width="12h" height="12h" align="center" valign="center" texture="/ui/elements/watch_system/icons/{icon}.tga" noclick="1"/>
+					<label y="7.25h" textalign="center" textvalign="top" font="{font=dyn_12}" shadow="1" outline="1" outlinecolor="black" content="{label}"/>
+				</widgetstate>
+				<widgetstate statename="down2">
+					<image width="24h" height="24h" align="center" valign="center" texture="/ui/elements/watch_system/bigbutton_grey_bg.tga" noclick="1"/>
+					<image y="-1.1h" width="12h" height="12h" align="center" valign="center" texture="/ui/elements/watch_system/icons/{icon}.tga" noclick="1"/>
+					<label y="7.25h" textalign="center" textvalign="top" font="{font=dyn_12}" shadow="1" outline="1" outlinecolor="black" content="{label}"/>
+				</widgetstate>
+				<widgetstate statename="disabled2">
+					<image width="24h" height="24h" align="center" valign="center" texture="/ui/elements/watch_system/bigbutton_grey_bg.tga" noclick="1"/>
+					<image y="-1.1h" width="12h" height="12h" align="center" valign="center" texture="/ui/elements/watch_system/icons/{icon}.tga" rendermode="grayscale" noclick="1"/>
+					<label y="7.25h" textalign="center" textvalign="top" font="{font=dyn_12}" shadow="1" color="gray" outline="1" outlinecolor="black" content="{label}"/>
+				</widgetstate>
+			</button>
+			<image nocompress="true" width="24h" height="24h" align="center" valign="center" texture="/ui/elements/watch_system/wr_bigbutton.tga" noclick="1"/>
+		</panel>
+	</template>
+
+	<template name="watch_system_live">
+		<panel name="watch_system_live" visible="0" noclick="1">
+			<!-- battle log -->
+			<instance name="watch_system_battlelog" category="live" height="34.15h" bg_y="-2.65h" bg_height="39.25h" content_height="31h" text_height="29.6h"/>
+
+			<!-- Selected Match Data -->
+			<instance name="watch_system_region_header" category="live"/>
+			<instance name="watch_system_live_header"/>
+			<instance name="matches_selected" category="live"/>
+
+			<!-- live match list -->
+			<panel x="2.25h" y="3.5h" width="44h" height="91%" noclick="1">
+				<instance name="watch_system_match_list_bg"/>
+
+				<panel align="center" valign="center" width="-1.5h" height="-1.5h" noclick="1">
+					<panel float="bottom" padding="0.75h" noclick="1">
+						<instance name="live_match_item_empty_bg"/>
+						<instance name="live_match_item_empty_bg"/>
+						<instance name="live_match_item_empty_bg"/>
+						<instance name="live_match_item_empty_bg"/>
+						<instance name="live_match_item_empty_bg"/>
+					</panel>
+
+					<listbox
+						name="watch_system_live_matches_listbox"
+						y="-0.5h"
+						align="left"
+						valign="top"
+						width="100%"
+						height="100%"
+						itemheight="15h"
+						usescrollbars="false"
+						vpadding="0.75h"
+						hoverselect="false"
+						hoverhighlight="true"
+						highlight="over"
+						highlightcolor=".3 .3 .3 .2"
+						highlightbordercolor="invisible"
+						color="invisible"
+						watch=""
+						ontriggerlua=""
+						onload=""
+						onselect="PlaySound('{sound=/shared/sounds/ui/button_click_01.wav}'); {onselect}"
+						onselectlua="Watch_System.SelectMatch(self)"
+						onshowlua="Watch_System.SubscribeLiveMatches(self, 'live')"
+						onhidelua="
+							Watch_System.UnsubscribeLiveMatches(self)
+							Watch_System.UnsubscribeMatchInfo()
+						"
+					/>
+					<instance name="watch_system_pagebar" align="center" valign="bottom" type="live" updatefunc="Watch_System.UpdateLiveList()" />
+				</panel>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="watch_system_matches">
+		<panel name="watch_system_{category}_matches" visible="0" noclick="1"
+		>
+			<!-- Selected Match Data -->
+			<instance name="watch_system_region_header" category="{category}"/>
+			<instance name="matches_selected" category="{category}"/>
+
+			<!-- Battlelog -->
+			<instance name="watch_system_battlelog" category="{category}"/>
+
+			<!-- Betting buttons -->
+			<panel name="watch_system_{category}_bigbuttons" x="-3h" y="-5.5h" align="right" valign="bottom" height="13h" width="71h" float="right" padding="0.5h" noclick="1">
+				<instance name="watch_system_bigbutton" button_name="pick_winner" category="{category}" icon="wr_winner" label="watch_system_pickwinner"/>
+				<instance name="watch_system_bigbutton" button_name="tower_crush" category="{category}" icon="wr_firsttower" label="watch_system_picktowercrushed"/>
+				<instance name="watch_system_bigbutton" button_name="first_blood" category="{category}" icon="wr_firstblood" label="watch_system_pickfirstblood"/>
+				<instance name="watch_system_bigbutton" button_name="ten_kills" category="{category}" icon="wr_firsttenkills" label="watch_system_picktenkills"/>
+			</panel>
+
+			<!-- loading panel -->
+			<frame
+				name="watch_system_loading_{category}"
+				texture="/ui/frames/rounded_bg_white.tga"
+				color="0 0 0 1"
+				x="-1.5h"
+				y="-5h"
+				align="right"
+				valign="bottom"
+				width="72.5h"
+				height="13.5h"
+				borderthickness="0.6h"
+				noclick="0"
+			>
+				<frame texture="/ui/frames/thick.tga" color="#303030" borderthickness="0.6h"/>
+				<label width="-1h" height="3h" align="center" valign="center" textalign="center" textvalign="center" font="dyn_18" color="#c0c0c0" outline="1" outlinecolor="#202020" content="watch_system_match_loading" noclick="1"/>
+			</frame>
+
+			<!-- match list -->
+			<panel x="2.25h" y="3.5h" width="44h" height="91%" noclick="1">
+				<instance name="watch_system_match_list_bg"/>
+
+				<!-- dates -->
+				<panel name="watch_system_{category}_matches_dates" x="0.75h" y="0.25h" width="-1.5h" height="3h" float="right" padding="0.5h" noclick="1">
+					<instance name="watch_system_date_tab" category="{category}" date="10/2"/>
+					<instance name="watch_system_date_tab" category="{category}" date="11/2"/>
+					<instance name="watch_system_date_tab" category="{category}" date="12/2"/>
+					<instance name="watch_system_date_tab" category="{category}" date="13/2"/>
+					<instance name="watch_system_date_tab" category="{category}" date="14/2"/>
+					<instance name="watch_system_date_tab" category="{category}" date="15/2"/>
+					<instance name="watch_system_date_tab" category="{category}" date="16/2"/>
+				</panel>
+
+				<panel y="3.5h" align="center" valign="top" width="-1.5h" height="-4h" clip="1" noclick="1">
+					<panel float="bottom" padding="0.5h" noclick="1">
+						<instance name="match_item_empty_bg"/>
+						<instance name="match_item_empty_bg"/>
+						<instance name="match_item_empty_bg"/>
+						<instance name="match_item_empty_bg"/>
+						<instance name="match_item_empty_bg"/>
+					</panel>
+
+					<listbox
+						name="watch_system_{category}_listbox"
+						height="100%"
+						itemwidth="40.25h"
+						itemheight="18h"
+						itemheightfudge="10h"
+						handleheight="5.6h"
+						scrollbarsize="1.68h"
+						shadow="true"
+						handlewidth="2.8h"
+						usescrollbars="true"
+						scrolltexture="/ui/elements/watch_system/info/ws.tga"
+						scrollinterval="0"
+						vpadding="0.5h"
+						hoverselect="false"
+						hoverhighlight="true"
+						highlight="over"
+						highlightcolor=".3 .3 .3 .2"
+						highlightbordercolor="invisible"
+						color="invisible"
+						watch=""
+						ontriggerlua=""
+						onload=""
+						onselect="PlaySound('{sound=/shared/sounds/ui/button_click_01.wav}'); {onselect}"
+						onselectlua="Watch_System.SelectMatch(self)"
+						onshowlua="Watch_System.SubscribeRegionMatches(self, '{category}')"
+						onhidelua="
+							Watch_System.UnsubscribeRegionMatches(self)
+							Watch_System.UnsubscribeMatchInfo()
+						"
+					/>
+				</panel>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="watch_system_bethistory_betret">
+		<panel width="10h" height="11h" valign="center">
+			<panel width="7h" height="2h" align="center" y="0.8h">
+				<label color="white" font="dyn_8" textvalign="center" textalign="left" shadow="true" content="{title}"/>
+			</panel>
+			<panel name="watch_system_bethistory_betret_{id}_{index}_success" visible="0">
+
+				<panel width="8h" height="3h" align="center" y="3h">
+					<label color="#ffbf01" font="dyn_12" textvalign="center" textalign="center" shadow="true" content="watch_system_betsuccess"/>
+				</panel>
+				<panel width="8h" height="3h" align="center" y="5.3h">
+					<label name="watch_system_bethistory_betret_{id}_{index}_success_wincoin" color="white" font="dyn_12" textvalign="center" textalign="center" shadow="true" content=""/>
+				</panel>
+				<panel x="3h" width="2h" height="2h" align="center" y="6h">
+					<image align="center" valign="center" texture="/ui/fe2/store/silver_coins.tga" noclick="1"/>
+				</panel>
+				<panel width="8h" height="2h" align="center" y="7.5h">
+					<label color="white" font="dyn_8" textvalign="center" textalign="center" shadow="true" content="watch_system_betearned"/>
+				</panel>
+				<image texture="/ui/elements/watch_system/succes.tga" width="12h" height="12h" align="center" valign="center" noclick="1"/>
+			</panel>
+
+			<panel name="watch_system_bethistory_betret_{id}_{index}_fail" visible="0">
+				<panel width="8h" height="3h" align="center" valign="center">
+					<label color="gray" font="dyn_14" textvalign="center" textalign="center" shadow="true" content="watch_system_betmiss"/>
+				</panel>
+			</panel>
+
+			<panel name="watch_system_bethistory_betret_{id}_{index}_nobet">
+				<panel width="6h" height="6h" align="center" valign="center" y="0.6h">
+					<image texture="/ui/elements/watch_system/honlogo.tga"/>
+				</panel>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="watch_system_bethistory_item">
+		<panel name="watch_system_bethistory_item_{id}" width="120h" height="12h" align="center" noclick="1" visible="0">
+			<image texture="/ui/elements/watch_system/bethistory_item_bg.tga" width="192h" height="12h" align="center" valign="center"/>
+			<panel valign="center" x="2.5h" width="11h" height="3h">
+				<label name="watch_system_bethistory_item_{id}_date" color=".7 .7 .7" font="dyn_12" textvalign="center" textalign="center" shadow="true" content=""/>
+			</panel>
+			<panel valign="center" x="14h" width="20h" height="6h">
+				<label name="watch_system_bethistory_item_{id}_name" color="white" font="dyn_12" textvalign="center" textalign="center" wrap="1" shadow="true" content=""/>
+			</panel>
+			<panel valign="center" x="34h" width="2h" height="3h">
+				<label color=".23 .74 .87" font="dyn_12" textvalign="center" textalign="center" shadow="true" content=""/>
+			</panel>
+			<panel x="-18.5h" width="12h" height="12h" align="center" valign="center">
+				<image name="watch_system_bethistory_item_{id}_tournament_icon" width="-4h" height="-4h" texture="$invis" align="center" valign="center"/>
+			</panel>
+
+			<panel x="-7h" width="11h" height="-2h" align="center" valign="center">
+				<panel y="-2h" width="6.5h" height="6.5h" align="center" valign="center">
+					<image name="watch_system_bethistory_item_{id}_clan1_icon" texture="$invis"/>
+				</panel>
+				<panel valign="bottom" height="4h">
+					<label name="watch_system_bethistory_item_{id}_clan1_name" color=".7 .7 .7" font="dyn_12" textvalign="center" textalign="center" shadow="true" wrap="1" content=""/>
+				</panel>
+			</panel>
+
+			<panel x="10h" width="11h" height="-2h" align="center" valign="center">
+				<panel y="-2h" width="6.5h" height="6.5h" align="center" valign="center">
+					<image name="watch_system_bethistory_item_{id}_clan2_icon" texture="$invis"/>
+				</panel>
+				<panel valign="bottom" height="4h">
+					<label name="watch_system_bethistory_item_{id}_clan2_name" color=".7 .7 .7" font="dyn_12" textvalign="center" textalign="center" shadow="true" wrap="1" content="PaiN Gaming"/>
+				</panel>
+			</panel>
+
+			<panel x="-2.1h" align="right" valign="center" width="40.5h" float="right">
+				<instance name="watch_system_bethistory_betret" id="{id}" index="1" title="watch_system_bettitle_winner"/>
+				<instance name="watch_system_bethistory_betret" id="{id}" index="2" title="watch_system_bettitle_tower"/>
+				<instance name="watch_system_bethistory_betret" id="{id}" index="3" title="watch_system_bettitle_1stblood"/>
+				<instance name="watch_system_bethistory_betret" id="{id}" index="4" title="watch_system_bettitle_10kills"/>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="watch_system_bet_history">
+		<panel name="watch_system_bet_history" visible="0" noclick="1" onshowlua="Watch_System.UpdateBetHistory() Watch_System.GetBetHistory()">
+			<frame texture="/ui/elements/watch_system/frames/border_ml.tga" align="center" y="2h" width="117.5h" height="89h" borderthickness="2.5h" blockinput="0" noclick="1" color="1 1 1 0.8"/>
+			<panel width="-3h" height="-5h" align="center" valign="center" float="bottom" noclick="1">
+				<instance name="watch_system_bethistory_item" id="0"/>
+				<instance name="watch_system_bethistory_item" id="1"/>
+				<instance name="watch_system_bethistory_item" id="2"/>
+				<instance name="watch_system_bethistory_item" id="3"/>
+				<instance name="watch_system_bethistory_item" id="4"/>
+				<instance name="watch_system_bethistory_item" id="5"/>
+				<instance name="watch_system_bethistory_item" id="6"/>
+			</panel>
+			<instance name="watch_system_pagebar" y="-5.5h" align="center" valign="bottom" type="bethistory" updatefunc="Watch_System.UpdateBetHistory()" />
+		</panel>
+	</template>
+
+	<template name="watch_system_radiobutton_state">
+		<widgetstate statename="{state}">
+			<panel width="{size}">
+				<image hmargin="0.15h" vmargin="0.15h" texture="/ui/elements/watch_system/cb_unchecked.tga"/>
+				<image hmargin="0.15h" vmargin="0.15h" texture="/ui/elements/watch_system/cb_checked.tga" visible="{checked}"/>
+			</panel>
+			<panel width="-{size}" align="right" >
+				<label x="1h" width="-3h" textalign="left" textvalign="center" font="{font}" color="{color}" shadow="1" oninstantiate="{labeloninstantiate}">{label}</label>
+				<image x="4.25h" width="2h" height="2h" valign="center" texture="/ui/fe2/store/silver_coins.tga" noclick="1"/>
+			</panel>
+		</widgetstate>
+	</template>
+
+	<template name="watch_system_radiobutton">
+		<panel width="{width=90%}" height="{height=1.75h}" align="{align=center}" valign="{valign=top}" onload="{onpreload=}" y="{y=}" noclick="1">
+			<button
+				name="{radiobutton_name=}"
+				color="invisible"
+				numstates="2"
+				onclick="PlaySound('/shared/sounds/ui/button_click_06.wav'); Set('{cvar=}', '{value=}'); Set('{cvar2=}', '{value2=}'); Set('{cvar3=}', '{value3=}'); GroupCall('{cvar=}_radio_group', 'SetButtonState(0);'); SetButtonState(1); {onclick=}"
+				onclicklua="Watch_System.RefreshBetDialog('{value}', '{ratio}')"
+				onmouseover="If(!StringEmpty('{tip_id}'), ShowWidget('{tip_id}')); PlaySound('/shared/sounds/ui/ccpanel/button_over_01.wav');"
+				onmouseout="If(!StringEmpty('{tip_id}'), HideWidget('{tip_id}'));"
+				watch="{watch=}"
+				ontrigger="{ontrigger=}"
+				enabled="{enabled=true}"
+				onload="{onload=}"
+				group="{cvar=}_radio_group"
+				oninstantiate="{oninstantiate=}"
+			>
+				<instance name="watch_system_radiobutton_state" state="up" size="{height=1.75h}" label="{label}" font="{font=dyn_12}" color="white" checked="0" watch="{labelwatch}" ontrigger="{labelontrigger}"/>
+				<instance name="watch_system_radiobutton_state" state="over" size="{height=1.75h}" label="{label}" font="{font=dyn_12}" color="#3abde7" checked="0" watch="{labelwatch}" ontrigger="{labelontrigger}"/>
+				<instance name="watch_system_radiobutton_state" state="down" size="{height=1.75h}" label="{label}" font="{font=dyn_12}" color="#3abde7" checked="0" watch="{labelwatch}" ontrigger="{labelontrigger}"/>
+				<instance name="watch_system_radiobutton_state" state="disabled" size="{height=1.75h}" label="{label}" font="{font=dyn_12}" color="#888888" checked="0" watch="{labelwatch}" ontrigger="{labelontrigger}"/>
+
+				<instance name="watch_system_radiobutton_state" state="up2" size="{height=1.75h}" label="{label}" font="{font=dyn_12}" color="#3abde7" checked="1" watch="{labelwatch}" ontrigger="{labelontrigger}"/>
+				<instance name="watch_system_radiobutton_state" state="over2" size="{height=1.75h}" label="{label}" font="{font=dyn_12}" color="#3abde7" checked="1" watch="{labelwatch}" ontrigger="{labelontrigger}"/>
+				<instance name="watch_system_radiobutton_state" state="down2" size="{height=1.75h}" label="{label}" font="{font=dyn_12}" color="#3abde7" checked="1" watch="{labelwatch}" ontrigger="{labelontrigger}"/>
+				<instance name="watch_system_radiobutton_state" state="disabled2" size="{height=1.75h}" label="{label}" font="{font=dyn_12}" color="#888888" checked="1" watch="{labelwatch}" ontrigger="{labelontrigger}"/>
+			</button>
+		</panel>
+	</template>
+
+	<template name="watch_system_bet_team">
+		<panel x="{x}" width="21.85h" height="25.5h" align="{align}" float="bottom" noclick="1">
+			<frame color="invisible" bordercolor="#455166" borderthickness="1" noclick="1"/>
+			<anchor y="0"/>
+			<panel height="1.5h" noclick="1"/>
+			<panel width="9.26h" height="9.26h" align="center" noclick="1">
+				<image name="watch_system_bet_team_icon_{team}" align="center" valign="center" texture="/ui/elements/watch_system/team/ddog.tga"/>
+			</panel>
+			<panel width="-2h" height="3h" align="center" noclick="1">
+				<label name="watch_system_bet_team_odds_{team}" font="dyn_10" textalign="center" textvalign="center" color="#8a8a8a" content="win: 1:2.5" noclick="1"/>
+			</panel>
+			<panel height="1.5h" noclick="1"/>
+			<panel name="watch_system_bet_team_container_{team}" width="-10h" height="10h" align="center" float="bottom" padding="1h" noclick="1"/>
+		</panel>
+	</template>
+
+	<template name="watch_system_bet_dialog">
+		<panel name="watch_system_bet_dialog" visible="0"
+			onhidelua="GetWidget('watch_system_bet_desc2'):SetText('')"
+		>
+			<panel width="50.9h" align="center" valign="center" float="bottom" color="black" grow="1" noclick="1">
+				<frame color="invisible" bordercolor="#455166" borderthickness="1" noclick="1"/>
+				<anchor y="0"/>
+				<instance name="header_bar" label_name="watch_system_bet_dialog_title" height="3h" lbl_font="dyn_12" show_close="1" onclicklua="GetWidget('watch_system_bet_dialog'):SetVisible(false)"/>
+				<panel height="3.5h" noclick="1">
+					<panel width="-4h" align="center" valign="center" noclick="1">
+						<label font="dyn_12" textalign="center" textvalign="center" color="white" content="watch_system_bet_dialog_desc_1" noclick="1"/>
+					</panel>
+				</panel>
+
+				<panel width="-1h" height="25.5h" align="center" noclick="1">
+					<instance name="watch_system_bet_team" x="0.25h" align="left" team="1"/>
+					<panel width="6h" height="100%" align="center" noclick="1">
+						<image texture="/ui/elements/watch_system/vs.tga" align="center" valign="center" width="16h" height="16h" noclick="1"/>
+					</panel>
+					<instance name="watch_system_bet_team" x="-0.25h" align="right" team="2"/>
+				</panel>
+
+				<panel height="3h" noclick="1">
+					<panel width="-2h" align="center" valign="center" noclick="1">
+						<label name="watch_system_bet_desc2" font="dyn_12" textalign="left" textvalign="center" color="white" content="" noclick="1"/>
+					</panel>
+				</panel>
+
+				<panel height="5h" noclick="1">
+					<instance name="button2" button_name="watch_system_bet_btn" x="-6h" width="9h" height="3h" label="general_yes" font="dyn_12" align="center" valign="center" onclicklua="GetWidget('watch_system_bet_dialog'):SetVisible(false) Watch_System.DoBet()"/>
+
+					<instance name="button2" x="6h" width="9h" height="3h" label="general_no" font="dyn_12" align="center" valign="center" onclicklua="GetWidget('watch_system_bet_dialog'):SetVisible(false)"/>
+				</panel>
+				<panel height="0.5h" noclick="1"/>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="watch_system_bet_floater">
+		<floater
+			name="{tip_id}"
+			x="{x=-24.5h}" y="{y=3h}"
+			width="{width=22.0h}"
+			align="{align=left}"
+			valign="{valign=top}"
+			visible="{visible=0}"
+			passivechildren="true"
+			grow="true"
+			noclick="1"
+		>
+			<frame texture="/ui/frames/tooltip_bg.tga" color="0 0 0 .8" borderthickness=".6h" />
+			<frame texture="/ui/frames/roundframe.tga" color="#A0A0A0" borderthickness=".6h" />
+				<label
+					name="{tip_id}_title"
+					x="0.8h" y="0.6h"
+					textvalign="top"
+					textalign="left"
+					align="center"
+					font="dyn_10"
+					noclick="1"
+					color="#ffab01"
+					shadow="1"
+					wrap="1"
+					fity="true"
+					fitypadding="0.8h"
+					watch="{title_watch}"
+					ontrigger="{title_ontrigger}"
+				>{title}</label>
+				<image x="-0.6h" y="{icony=0.6h}" noclick="1" height="{iconheight=2.5h}" width="{iconwidth=2.5h}" align="right" visible="0" color="{color=1 1 1 1}"
+					onload="If(!StringEmpty('{icon}'), Split(SetVisible(1), SetTexture('{icon}')), SetVisible(0));"
+				/>
+				<panel y="2.5h" width="-1.6h" align="center" noclick="true" grow="true" float="bottom">
+					<label
+						name="{tip_id}_label"
+						textvalign="top"
+						textalign="left"
+						align="center"
+						font="dyn_10"
+						noclick="1"
+						color="white"
+						shadow="1"
+						wrap="1"
+						fity="true"
+						fitxpadding="0"
+						watch="{label_watch}" ontrigger="{label_ontrigger}"
+					>{label}</label>
+					<panel height="1.0h" color="invisible" noclick="true"/>
+				</panel>
+		</floater>
+	</template>
+
+	<template name="watch_system_warning">
+		<panel name="watch_system_warning" color="0 0 0 0.8" visible="0" noclick="0"
+		>
+			<panel y="-10h" width="45h" height="16h" align="center" valign="center">
+				<frame color="0 0 0 .8" bordercolor="#455166" borderthickness="1" noclick="1"/>
+				<instance name="header_bar" close_name="watch_system_warning_btn_close" lbl="watch_system_warning_title" height="3h" lbl_font="dyn_12" show_close="1" onclicklua="GetWidget('watch_system_warning'):SetVisible(false)"/>
+
+				<panel y="3.25h" width="-0.5h" height="-3.5h" align="center" valign="top" noclick="1">
+					<frame texture="/ui/frames/tooltip_bg.tga" color="#2c4b6c" noclick="1"/>
+					<frame color="invisible" bordercolor="#455166" borderthickness="1" noclick="1"/>
+
+					<panel width="-3h" height="9h" y="0h" align="center">
+						<label name="watch_system_warning_label" font="dyn_12" textvalign="center" textalign="center" noclick="true" wrap="true" color="white" content=""/>
+					</panel>
+
+					<instance
+						name="button2"
+						button_name="watch_system_warning_btn_confirm"
+						x="0h"
+						y="-1.5h"
+						width="10h"
+						height="2.5h"
+						label="general_ok"
+						font="dyn_11"
+						align="center"
+						valign="bottom"
+						onclicklua="GetWidget('watch_system_warning'):SetVisible(false)"
+					/>
+				</panel>
+			</panel>
+		</panel>
+	</template>
+
+	<!-- Template of the whole watch system page -->
+	<template name="watch_system">
+		<panel name="watch_system" y="-210%" align="center" width="-2.7h" visible="{visible=0}" valign="center" noclick="1"
+			onload="CreateInt('watch_system_bet_coin', 0);CreateInt('watch_system_bet_item_id', 0);CreateInt('watch_system_bet_id', 0);"
+			watch1="ReplayPanel"
+			ontrigger1lua="
+				self:SetVisible(false)
+				local hider = GetWidget('com_hider2')
+				if hider ~= nil then hider:SetVisible(false) end
+			"
+			onshowlua="self:RegisterWatch('ChatStatus', Watch_System.ChatStatus) Watch_System.SubscribeTodayMatch()"
+			onhidelua="self:UnregisterWatch('ChatStatus') Watch_System.Reset()"
+		>
+			<panel x="0" y="-100%" height="203.6%" width="-15@" align="center" texture="mainmenu/upper_frame_center.tga"/>
+			<panel y="100%" passivechildren="true" noclick="1">
+				<panel valign="bottom" y="-2.5h" width="+2h" x="-0.75h">
+					<panel width="3.125@" texture="/ui/fe2/frames/slideout_frame_l.tga"/>
+					<panel width="3.125@" texture="/ui/fe2/frames/slideout_frame_r.tga" align="right"/>
+					<panel width="3.125@" height="3.125%" x="3.125@" valign="bottom" texture="/ui/fe2/frames/slideout_frame_bl.tga"/>
+					<panel width="3.125@" height="3.125%" x="-3.125@" valign="bottom" texture="/ui/fe2/frames/slideout_frame_br.tga" align="right"/>
+					<panel hmargin="6.25@" height="3.125%" valign="bottom" texture="/ui/fe2/frames/slideout_frame_b.tga"/>
+				</panel>
+			</panel>
+
+			<panel x="20h" y="-100%" height="203.6%" width="50@" align="right" texture="mainmenu/upper_frame_right.tga"/>
+			<panel x="-20h" y="-100%" height="203.6%" width="50@" align="left" texture="mainmenu/upper_frame_left.tga"/>
+
+			<panel color="black" y="95%" height="90%" align="center" width="-0.2h" x="0.15h"/>
+
+			<!-- content -->
+			<panel y="1h" height="192%" noclick="1">
+				<!-- tabs -->
+				<panel name="watch_system_tab_container" y="0.25h" height="3.5h" noclick="1">
+					<panel name="watch_system_tabs" x="6.5h" y="0h" float="right" padding="0.75h">
+						<if condition="cl_GarenaEnable">
+							<instance name="watch_system_tab" tabName="live"/>
+							<instance name="watch_system_tab" tabName="sea_matches" btnonshowlua="self:SetEnabled(GetRegion() == 'sea')"/>
+							<instance name="watch_system_tab" tabName="bet_history" btnonshowlua="self:SetEnabled(false)" />
+						</if>						
+					</panel>
+				</panel>
+
+				<!-- panels -->
+				<panel name="watch_system_containers" y="3.75h" width="-1h" align="center" noclick="1">
+					<!-- background -->
+					<instance name="watch_system_bg"/>
+
+					<instance name="watch_system_live"/>
+					<instance name="watch_system_matches" category="sea"/>
+					<instance name="watch_system_matches" category="naeu"/>
+					<instance name="watch_system_bet_history"/>
+				</panel>
+
+				<!-- Compatibilty warning -->
+				<panel name="watch_system_replay_compatWarning" color="0 0 0 0.8" visible="0"
+					onload="CreateString('watch_system_replay_version', '');"
+					watch="WebReplayCompatWarning"
+					ontriggerlua="
+						self:SetVisible(true)
+						Set('watch_system_replay_version', param)
+					"
+				>
+					<panel width="60h" height="21.9h" align="center" valign="center" >
+						<frame color="0 0 0 .8" bordercolor="#455166" borderthickness="1" noclick="1"/>
+						<panel width="-1h" height="-1h" align="center" valign="center">
+							<frame texture="/ui/frames/tooltip_bg.tga" color="#2c4b6c" noclick="1"/>
+							<frame color="invisible" bordercolor="#455166" borderthickness="1" noclick="1"/>
+
+							<panel width="-3h" height="9h" y="1.5h" align="center">
+								<label font="dyn_16" textvalign="center" textalign="left" noclick="true" wrap="true" color="white" content="game_end_stats_download_compat_tooltip"/>
+							</panel>
+
+							<instance
+								name="button2"
+								x="-7.5h"
+								y="-1.5h"
+								width="12h"
+								height="3h"
+								label="game_end_stats_compat_btn"
+								font="dyn_12"
+								align="center"
+								valign="bottom"
+								onclick="DownloadCompat(watch_system_replay_version);"
+								onclicklua="GetWidget('watch_system_replay_compatWarning'):SetVisible(false)"
+							/>
+
+							<instance name="button2"
+								x="7.5h"
+								y="-1.5h"
+								width="12h"
+								height="3h"
+								label="general_cancel"
+								font="dyn_12"
+								align="center"
+								valign="bottom"
+								onclicklua="
+									GetWidget('watch_system_replay_compatWarning'):SetVisible(false)
+									ResetStreamParameters()
+								"
+							/>
+						</panel>
+					</panel>
+				</panel>
+
+				<!-- Compatibilty archive calculating -->
+				<panel width="100%" height="100%" visible="false" color="0 0 0 0.66" align="center" noclick="1" watch="CompatCalculating" ontriggerlua="self:SetVisible(AtoB(param))">
+					<panel width="24h" height="9.5h" align="center" valign="center" color="invisible" noclick="1">
+						<frame texture="/ui/frames/tooltip_bg.tga" color="#2c4b6c" borderthickness=".6h" align="left" valign="top"/>
+						<frame texture="/ui/frames/roundframe.tga" color="#2c4b6c" borderthickness=".6h"/>
+
+						<panel x="0.5h" height="-1.0h" width="-1.0h" valign="center" color="invisible">
+							<label y="0.5h" height="1.3h" width="100%" textvalign="center" textalign="center" shadow="true" font="dyn_12" color="#3abde7" noclick="1" content="replay_compat_calculating"/>
+							<label y="2.4h" height="1.1h" width="100%" textvalign="center" textalign="center" align="center" shadow="true" font="dyn_9" color="1 0.7 0 1" noclick="1" watch="CompatVersion" ontrigger="SetText(Translate('replay_compat_version', 'version', param));" content="replay_compat_version"/>
+
+							<instance
+								name="button2"
+								id="replay_compat_button2"
+								y="-0.5h"
+								width="13h"
+								height="2.2h"
+								align="center"
+								valign="bottom"
+								font="dyn_9"
+								label="general_cancel"
+								onclick="CancelCompat();"
+								enabled="false"
+							/>
+						</panel>
+					</panel>
+				</panel>
+
+				<!-- Compatibilty archive downloading -->
+				<panel width="100%" height="100%" visible="false" color="0 0 0 0.66" align="center" noclick="1" watch="CompatDownloading" ontriggerlua="self:SetVisible(AtoB(param))">
+					<panel width="24h" height="22h" align="center" valign="center" color="invisible" noclick="1">
+						<frame texture="/ui/frames/tooltip_bg.tga" color="#2c4b6c" borderthickness=".6h" align="left" valign="top"/>
+						<frame texture="/ui/frames/roundframe.tga" color="#2c4b6c" borderthickness=".6h"/>
+
+						<panel x="0.5h" height="-1.0h" width="-1.0h" valign="center" color="invisible">
+							<label y="0.5h" height="1.3h" width="100%" textvalign="center" textalign="center" shadow="true" font="dyn_12" color="#3abde7" noclick="1" content="replay_compat_downloading"/>
+							<label y="2.4h" height="1.1h" width="100%" textvalign="center" textalign="center" align="center" shadow="true" font="dyn_9" color="1 0.7 0 1" noclick="1" watch="CompatVersion" ontrigger="SetText(Translate('replay_compat_version', 'version', param));"/>
+
+							<panel x="1.0h" y="5.0h" width="100%" height="0" align="right" color="invisible" noclick="true" passivechildren="true">
+								<label y="0.1h" height="1.1h" textvalign="center" shadow="true" font="dyn_9" color="1 0.7 0" watch="CompatFilesLeft" ontrigger="SetText(Translate('replay_compat_files', 'count', param0, 'total', param1));" watch1="CompatMessage" ontrigger1="SetVisible(param != 1 and param != 7);" />
+								<label y="1.9h" height="1.1h" textvalign="center" shadow="true" font="dyn_9" color="1 0.7 0" watch="CompatProgress" ontrigger="SetText(Translate('replay_compat_progress', 'count', param0, 'total', param1));" watch1="CompatMessage" ontrigger1="SetVisible(param != 1 and param != 7);"/>
+								<label y="3.8h" height="1.1h" textvalign="center" shadow="true" font="dyn_9" color="1 0.7 0" watch="CompatSpeed" ontrigger="SetText(Translate('replay_compat_speed', 'speed', param));" watch1="CompatMessage" ontrigger1="SetVisible(param != 1 and param != 7);"/>
+								<label y="5.7h" height="1.1h" textvalign="center" shadow="true" font="dyn_9" color="1 0.7 0" watch="CompatTime" ontrigger="SetText(Translate('replay_compat_time', 'time', param));" watch1="CompatMessage" ontrigger1="SetVisible(param != 1 and param != 7);"/>
+							</panel>
+
+							<frame
+								y="-4.5h"
+								width="90%" height="3h"
+								align="center" valign="bottom"
+								borderthickness="0.3h"
+								color="invisible" bordercolor="white"
+								watch="CompatPercent" ontrigger="SetVisible(param != 2);"
+							>
+								<panel x="0.7h" y="0.7h" width="-1.4h" height="-1.4h">
+									<panel
+										width="50%"
+										color="white"
+										watch="CompatPercent"
+										ontrigger="SetWidth(FtoP(param));"
+									/>
+								</panel>
+							</frame>
+
+							<instance
+								name="button2"
+								id="replay_compat_button"
+								y="-0.5h"
+								width="13h"
+								height="2.2h"
+								align="center"
+								valign="bottom"
+								font="dyn_9"
+								label="general_cancel"
+								onclick="CancelCompat();"
+								onclicklua="ResetStreamParameters()"
+							/>
+						</panel>
+					</panel>
+				</panel>
+
+				<!-- Compatibilty archive writing -->
+				<panel width="100%" height="100%" visible="false" color="0 0 0 0.66" align="center" noclick="1" watch="CompatWriting" ontrigger="SetVisible(param);">
+					<panel width="24h" height="13.5h" align="center" valign="center" color="invisible" noclick="1">
+						<frame texture="/ui/frames/tooltip_bg.tga" color="#2c4b6c" borderthickness=".6h" align="left" valign="top"/>
+						<frame texture="/ui/frames/roundframe.tga" color="#2c4b6c" borderthickness=".6h"/>
+
+						<panel x="0.5h" height="-1.0h" width="-1.0h" valign="center" color="invisible">
+							<label y="0.5h" height="1.3h" width="100%" textvalign="center" textalign="center" shadow="true" font="dyn_12" color="#3abde7" noclick="1" content="replay_compat_writing"/>
+							<label y="2.4h" height="1.1h" width="100%" textvalign="center" textalign="center" align="center" shadow="true" font="dyn_9" color="1 0.7 0 1" noclick="1" watch="CompatVersion" ontrigger="SetText(Translate('replay_compat_version', 'version', param));" content="replay_compat_version"/>
+
+							<frame
+								y="-4.5h"
+								width="90%" height="3h"
+								align="center" valign="bottom"
+								borderthickness="0.3h"
+								color="invisible" bordercolor="white"
+								watch="CompatWritePercent" ontrigger="SetVisible(param != 2);"
+							>
+								<panel x="0.7h" y="0.7h" width="-1.4h" height="-1.4h">
+									<panel
+										width="50%"
+										color="white"
+										watch="CompatWritePercent"
+										ontrigger="SetWidth(FtoP(param));"
+									/>
+								</panel>
+							</frame>
+
+							<instance
+								name="button2"
+								id="replay_compat_button2"
+								y="-0.5h"
+								width="13h"
+								height="2.2h"
+								align="center"
+								valign="bottom"
+								font="dyn_9"
+								label="general_cancel"
+								onclick="CancelCompat();"
+							/>
+						</panel>
+					</panel>
+				</panel>
+
+				<!-- bet dialog -->
+				<instance name="watch_system_bet_dialog"/>
+
+				<instance name="watch_system_warning" />
+
+				<panel name="watch_system_match_info_helper" width="1" height="1" noclick="1"/>
+				<panel name="watch_system_refresh_today_match_helper" width="1" height="1" noclick="1"/>
+				<panel name="watch_system_refresh_match_bet_info_helper" width="1" height="1" noclick="1"/>
+			</panel>
+
+			<instance name="watch_system_bet_floater" tip_id="watch_system_bet_floater" visible="0"/>
+
+			<panel name="watch_system_request_status" y="1h" height="192%" noclick="1"/>
+
+			<!-- close button -->
+			<panel x="-1h" y="1.2h" width="2.0h" height="2.0h" align="right" noclick="1">
+				<button
+					color="invisible"
+					onclick="PlaySound('/shared/sounds/ui/ccpanel/button_close_02.wav'); Set('_mainmenu_currentpanel', 'watch_system'); CallEvent('MainMenuPanelSwitcher');"
+					onmouseover="PlaySound('/shared/sounds/ui/ccpanel/button_over_01.wav');"
+				>
+					<widgetstate statename="up">
+						<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.5h" color="#520000" blockinput="false" noclick="1"/>
+						<frame texture="/ui/frames/roundframe.tga" color="0 0 0 1" borderthickness="0.5h" blockinput="false" noclick="1"/>
+						<image width="1.3h" height="1.3h" align="center" valign="center" color=".75 .75 .75 1" texture="/ui/elements/closex.tga" noclick="1"/>
+					</widgetstate>
+					<widgetstate statename="over">
+						<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.5h" color="#c50000" blockinput="false" noclick="1"/>
+						<frame texture="/ui/frames/roundframe.tga" color="0 0 0 1" borderthickness="0.5h" blockinput="false" noclick="1"/>
+						<image width="1.3h" height="1.3h" align="center" valign="center" color="1 1 1 1" texture="/ui/elements/closex.tga" noclick="1"/>
+					</widgetstate>
+					<widgetstate statename="down" x="1" y="1">
+						<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.5h" color="#9c0000" blockinput="false" noclick="1"/>
+						<frame texture="/ui/frames/roundframe.tga" color="0 0 0 1" borderthickness="0.5h" blockinput="false" noclick="1"/>
+						<image width="1.3h" height="1.3h" align="center" valign="center" color="1 1 1 1" texture="/ui/elements/closex.tga" noclick="1"/>
+					</widgetstate>
+				</button>
+			</panel>
+		</panel>
+	</template>
+</package>

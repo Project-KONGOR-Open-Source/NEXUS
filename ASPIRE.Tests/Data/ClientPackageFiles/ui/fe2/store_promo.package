@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+
+	<trigger name="NewPromoCountdownDigit"/>
+	<trigger name="ClearPromoCountdownDigit"/>
+	<trigger name="StorePromoStatus"/>
+
+	<!-- Four Horsemen Template -->
+	<template name="horsemenHolders">
+		<panel name="scaryhorse{id}" width="14.0h" noclick="true">
+
+			<label fity="true" y="1.0h" textalign="center" font="dyn_10" color="1 1 1 1" shadow="true" content="{heroName}" noclick="true" />
+			<label fity="true" y="2.9h" textalign="center" font="dyn_9" color="0 1 0 1" shadow="true" shadowcolor="#000000" content="Alt Avatar" noclick="true" />
+			<label fity="true" y="4.1h" textalign="center" font="dyn_10" color="0 1 0 1" shadow="true" shadowcolor="#000000" content="She's Super Freaky!" noclick="true" />
+
+			<!-- ModelPanel -->
+			<panel y="6.5h" width="100%" height="120@" align="center">
+				<modelpanel
+					name="modelpanel_av{id}"
+					scenebuffer="true"
+					noclick="true"
+					visible="true"
+					model="{heroModel}"
+					anim="preview"
+					camerapos="20 -190 -15"
+					cameraangles="0 0 0"
+					modelangles="0 0 200"
+					camerafov="25"
+					cameranear="1"
+					carmerafar="100"
+					depthclear="true"
+					depthcompress="true"
+					sunazimuth="180"
+					sunaltitude="50"
+					suncolor="1 1 1"
+					ambientcolor="0.8 0.8 0.8"
+				/>
+			</panel>
+
+			<!-- Prices -->
+			<panel
+				y="24.5h"
+				width="-1.3h" height="3.2h"
+				align="center"
+			>
+				<panel width="6.8h">
+					<label height="100%" textvalign="top" textalign="left" font="dyn_11" color="#ffffff" shadow="true" shadowcolor="#000000" content="Buy Now" />
+					<label height="100%" textvalign="bottom" textalign="left" font="dyn_10" color="#ffffff" shadow="true" shadowcolor="#000000" content="Premium" />
+				</panel>
+				<panel width="6.0h" x="6.8h">
+					<label height="100%" textvalign="top" textalign="right" font="dyn_11" color="#fccc00" shadow="true" shadowcolor="#000000" content="390" />
+					<label height="100%" textvalign="bottom" textalign="right" font="dyn_11" color="#d0d1e5" shadow="true" shadowcolor="#000000" content="3000" />
+				</panel>
+
+				<panel width="50%" valign="bottom"/>
+			</panel>
+
+			<!-- Button -->
+			<button
+				x="0"
+				y="92.0%"
+				width="16.0h" height="2.4h"
+				align="center"
+				color="invisible"
+				onmouseover="PlaySound('/shared/sounds/ui/ccpanel/button_over_02.wav');"
+				onclick="PlaySound('/shared/sounds/ui/ccpanel/button_click_02.wav'); Set('_microStore_RequestCode', 1); Set('_MicroStore_Category', 58); CallEvent('MicroStoreAction', 0); CallEvent('store_promo', 1);"
+				watch="MicroStoreProcessing"
+				ontrigger="SetEnabled(!param0);"
+			>
+				<widgetstate statename="up">
+					<image texture="/ui/fe2/store/promo/bigred_btn_up.tga"/>
+					<label y="-0.2h" textvalign="center" textalign="center" font="dyn_11" color=".9 .9 .9 1" shadow="true" content="Buy Now" noclick="true"/>
+				</widgetstate>
+				<widgetstate statename="over">
+					<image texture="/ui/fe2/store/promo/bigred_btn_over.tga"/>
+					<label y="-0.2h" textvalign="center" textalign="center" font="dyn_11" color="1 1 1 1" shadow="true" content="Buy Now" noclick="true" />
+				</widgetstate>
+				<widgetstate statename="down" x="1" y="1">
+					<image texture="/ui/fe2/store/promo/bigred_btn_over.tga"/>
+					<label y="-0.2h" textvalign="center" textalign="center" font="dyn_11" color="1 1 1 1" shadow="true" content="Buy Now" noclick="true" />
+				</widgetstate>
+			</button>
+
+		</panel>
+	</template>
+
+	<!-- Showdown Templates -->
+	<template name="avatar_entry_past">
+		<panel height="12%">
+			<image width="100@" height="100%" texture="{icon}" align="{iconalign=left}" />
+			<panel width="-110@" height="100%" align="{textpanel=right}" float="bottom">
+				<label textalign="{iconalign=left}" font="dyn_12" color="0 0 0 1" fity="true" content="Avatar Name" />
+				<label textalign="{iconalign=left}" font="dyn_12" color="#0c7b13" fity="true" content="WON!" />
+			</panel>
+		</panel>
+	</template>
+
+	<template name="avatar_entry_current">
+		<panel height="12%">
+			<panel color="{hlcolor=.1 .3 .1 .2}" />
+			<image valign="center" width="120@" height="120%" texture="{icon}" align="{iconalign=left}" />
+			<panel width="-126@" height="100%" align="{textpanel=right}">
+				<label textalign="{iconalign=left}" font="dyn_14" color="{teamcolor=#0f400d}" textvalign="center" content="CURRENT" />
+				<image x="{arrowx=-10@}" width="46@" height="46%" color="{teamcolor=#0f400d}" texture="/ui/fe2/elements/web_forward.tga" valign="center" align="{textpanel=right}" hflip="{hflip=false}" />
+			</panel>
+		</panel>
+	</template>
+
+	<template name="avatar_entry_upcoming">
+		<panel height="12%">
+			<image width="100@" height="100%" texture="{icon}" align="{iconalign=left}" />
+			<panel width="-110@" height="100%" align="{textpanel=right}" float="bottom">
+				<label textalign="{iconalign=left}" font="dyn_12" color="0 0 0 1" fity="true" content="Avatar Name" />
+				<label textalign="{iconalign=left}" font="dyn_10" color="0 0 0 1" fity="true" content="Begins May XXth" />
+			</panel>
+		</panel>
+	</template>
+
+	<template name="countdown_unit">
+		<panel x="{x=0}" y="{y=0}" width="3.4h" height="3.4h" valign="bottom"
+			watch="ClearPromoCountdownDigit"
+			ontrigger="
+				If(
+					param0 == {digit=1},
+					Split(
+						SlideY('2.8h', 999),
+						SleepWidget(999, 'DestroyWidget();')
+					)
+				);
+			"
+			oninstantiate="
+				SlideY(0, 999);
+			"
+		>
+			<image texture="/ui/fe2/store/promo/countdown_base.tga" />
+			<label x="0.6h" y="-0.5h" textvalign="bottom" textalign="left" font="dyn_12" color="1 1 1 1" shadow="true" noclick="true" content="{nombre}" />
+		</panel>
+	</template>
+
+	<template name="store_promo">
+		<webpanel name="StorePromo" visible="false"
+			width="-30h" align="right" noclick="true"
+			host="!hon"
+			target="/store_promo.php"
+			method="post"
+			statustrigger="StorePromoStatus"
+			watch="StorePromoStatus"
+			ontriggerlua="if ((not self:IsVisible()) and (tonumber(param) == 2)) then self:SetVisible(1) end"
+		>
+		</webpanel>
+	</template>
+
+	<trigger name="StorePromoUnitQuantityStatus" />
+	<trigger name="StorePromoUnitQuantityResult" />
+	<form
+		name="StorePromoUnitQuantity"
+		host="!masterserver"
+		method="POST"
+		target="/master/store/redeemcode/"
+		statustrigger="StorePromoUnitQuantityStatus"
+		resulttrigger="StorePromoUnitQuantityResult"
+		resultparam0="responseCode"
+		resultparam1="product_id"
+		resultparam2="errorCode"
+		resultparam3="popupCode"
+		resultparam4="requestHostTime"
+		resultparam5="quantity_remaining"
+		ssl="false"
+	/>
+	<panel noclick="1" name="store_promo_count_form"
+		onevent="CallEventParamsX(name, 0, 1283);"
+		onevent0="SubmitForm('StorePromoUnitQuantity', 'product_id', param0, 'request_code', '9', 'cookie', GetCookie(), 'account_id', GetAccountID(), 'hosttime', HostTime);"
+	/>
+
+</package>

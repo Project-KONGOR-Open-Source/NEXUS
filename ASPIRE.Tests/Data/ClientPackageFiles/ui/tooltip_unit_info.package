@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+	<template name="unit_tooltip_info">
+		<frame
+			name="unit_tooltip_info{slot}"
+			texture="/ui/frames/rounded_bg_white.tga"
+			borderthickness="0.6h"
+			color="0 0 0 .75"
+			visible="false"
+			align="right"
+			valign="bottom"
+			width="27h"
+			height="5.0h"
+			float="bottom"
+			grow="1" regrow="1" growinvis="0"
+		>		
+			<frame texture="/ui/frames/roundframe.tga" borderthickness="0.6h" bordercolor="#434d50"/>
+			<anchor x="1.0h" y="0.6h" />
+
+			<label
+				width="-2.0h"
+				height="1.8h"
+				textalign="left"
+				font="dyn_10"
+				color="white"
+				watch="SelectedPlayerInfo{slot}"
+				ontriggerlua="self:SetText(param0) self:SetColor(param1)"
+			/>
+
+			<label
+				width="-2.0h"
+				height="1.8h"
+				textalign="left"
+				font="dyn_10"
+				color="white"
+				watch="SelectedName{slot}"
+				ontriggerlua="self:SetText(param)"
+				sticky="true"
+				stickytoinvis="false"
+			/>
+			
+			<label
+				width="-2.0h"
+				height="1.8h"
+				textalign="left"
+				font="dyn_10"
+				color="white"
+				watch="SelectedLevel{slot}"
+				ontriggerlua="self:SetText(Translate('tooltip_level', 'level', param0)) self:SetVisible(AtoB(param1))"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			/>
+			
+			<label
+				width="-2.0h"
+				height="1.8h"
+				textalign="left"
+				font="dyn_10"
+				color="white"
+				watch="SelectedAttributeInfo{slot}"
+				ontriggerlua="self:SetText(Translate('tooltip_combattype') .. param0) self:SetVisible(NotEmpty(param0))"
+				visible="false"
+			/>
+			
+			<panel width="-2.0h" height="0.55h" sticky="true" stickytoinvis="false" />
+		</frame>
+	</template>
+</package>

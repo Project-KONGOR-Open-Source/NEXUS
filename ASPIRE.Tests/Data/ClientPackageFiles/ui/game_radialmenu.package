@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+
+	<lua file="/ui/scripts/radial_command.lua" />
+		
+	<template name="radial_item">
+		<button
+			name="radial_button_{id}"
+			width="100%" height="100@"
+			x="{x}" y="{y}"
+			valign="center" align="center"
+			color="invisible"
+			onmouseoverlua="PlaySound('/shared/sounds/ui/button_over_03.wav') UIManager.GetInterface('game'):RadialF('MouseOverItem', '{id}')"
+			onmouseoutlua="UIManager.GetInterface('game'):RadialF('MouseOutItem')"
+			onclicklua="UIManager.GetInterface('game'):RadialF('ClickItem')"
+			onrightclicklua="UIManager.GetInterface('game'):RadialF('RightClickItem')"
+			usebitmask="1"
+			bitmaskfile="/ui/common/radial_menu/pent1_up.tga"
+			vflip="{vflip=false}"
+		>
+			<image name="radial_button_{id}_icon" y="{iconoffset=5%}" width="{iconsize=65%}" height="{iconsize=65@}" align="center" valign="center" visible="true" />
+
+			<widgetstate statename="up">
+				<image texture="/ui/common/radial_menu/pent1_up.tga" vflip="{vflip=false}" color="1 1 1 1" />
+			</widgetstate>
+			<widgetstate statename="over">
+				<image texture="/ui/common/radial_menu/pent1_over.tga" vflip="{vflip=false}" color="1 1 1 1" />
+			</widgetstate>
+			<widgetstate statename="down">
+				<image texture="/ui/common/radial_menu/pent1_over.tga" vflip="{vflip=false}" color=".8 .8 .9 1" />
+			</widgetstate>
+		</button>
+		<instance name="radial_sub_menu_{id}"/>
+	</template>
+
+	<template name="radial_item_minimap">
+		<button
+			name="radial_button_{id}_minimap"
+			width="60@" height="60%"
+			color="invisible"
+			onmouseoverlua="PlaySound('/shared/sounds/ui/button_over_03.wav') UIManager.GetInterface('game'):RadialF('MouseOverItem', '{id}')"
+			onmouseoutlua="UIManager.GetInterface('game'):RadialF('MouseOutItem')"
+			onclicklua="UIManager.GetInterface('game'):RadialF('ClickItem')"
+			onrightclicklua="UIManager.GetInterface('game'):RadialF('RightClickItem')"
+			stickytoinvis="0"
+		>
+			<image name="radial_button_{id}_icon_minimap" y="{iconoffset=5%}" align="center" valign="center" visible="true" />
+		</button>
+	</template>
+
+	<template name="radial_sub_menu_icon">
+		<button
+			name="radial_button_sub_{parent}{id}"
+			x="{x}" y="{y}"
+			width="47%" height="47@"
+			valign="{valign}" align="{align}"
+			color="invisible"
+			onmouseoverlua="PlaySound('/shared/sounds/ui/button_over_02.wav') UIManager.GetInterface('game'):RadialF('MouseOverSubItem', '{parent}', {id})"
+			onmouseoutlua="UIManager.GetInterface('game'):RadialF('MouseOutItem')"
+			onclicklua="UIManager.GetInterface('game'):RadialF('ClickItem')"
+			onrightclicklua="UIManager.GetInterface('game'):RadialF('RightClickItem')"
+			visible="0"
+			usebitmask="1"
+			bitmaskfile="/ui/common/radial_menu/pent1_up.tga"
+		>
+			<image name="radial_button_sub_{parent}{id}_icon" y="{iconoffset}5%" width="{iconsize=63}%" height="{iconsize=63}@" align="center" valign="center" texture="{texture}" color="{iconcolor=1 1 1 1}" noclick="1"/>
+
+			<widgetstate statename="up">
+				<image texture="/ui/common/radial_menu/pent1_up.tga" vflip="{vflip=false}" color="1 1 1 1" />
+			</widgetstate>
+			<widgetstate statename="over">
+				<image texture="/ui/common/radial_menu/pent1_over.tga" vflip="{vflip=false}" color="1 1 1 1" />
+			</widgetstate>
+			<widgetstate statename="down">
+				<image texture="/ui/common/radial_menu/pent1_over.tga" vflip="{vflip=false}" color=".8 .8 .9 1" />
+			</widgetstate>
+		</button>
+	</template>
+
+	<!-- TL Sub Menu -->
+	<template name="radial_sub_menu_TL">
+		<panel
+			name="sub_menu_TL"
+			x="-88%" y="-102%"
+			width="100%" height="100@"
+			align="center" valign="center"
+			noclick="true"
+		>
+			<!-- Sub 1 -->
+			<instance name="radial_sub_menu_icon" parent="TL" id="1" valign="top" align="right" x="27%" />
+			<!-- Sub 2 -->
+			<instance name="radial_sub_menu_icon" parent="TL" id="2" valign="top" align="left" x="18%" />
+			<!-- Sub 3 -->
+			<instance name="radial_sub_menu_icon" parent="TL" id="3" valign="bottom" align="left" y="6@" />
+		</panel>
+	</template>
+
+	<!-- TR Sub Menu -->
+	<template name="radial_sub_menu_TR">
+		<panel
+			name="sub_menu_TR"
+			x="88%" y="-102%"
+			width="100%" height="100@"
+			align="center" valign="center"
+			noclick="true"
+		>
+			<!-- Sub 1 -->
+			<instance name="radial_sub_menu_icon" parent="TR" id="1" valign="top" align="left" x="-27%" />
+			<!-- Sub 2 -->
+			<instance name="radial_sub_menu_icon" parent="TR" id="2" valign="top" align="right" x="-18%" />
+			<!-- Sub 3 -->
+			<instance name="radial_sub_menu_icon" parent="TR" id="3" valign="bottom" align="right" y="6@" />
+		</panel>
+	</template>
+
+	<!-- BL Sub Menu -->
+	<template name="radial_sub_menu_BL">
+		<panel
+			name="sub_menu_BL"
+			x="-152%" y="48%"
+			width="100%" height="100@"
+			align="center" valign="center"
+			noclick="true"
+		>
+			<!-- Sub 1 -->
+			<instance name="radial_sub_menu_icon" parent="BL" id="1" valign="top" align="left" x="42%" y="-27@" />
+			<!-- Sub 2 -->
+			<instance name="radial_sub_menu_icon" parent="BL" id="2" valign="bottom" align="left" x="23%" y="-23@" />
+			<!-- Sub 3 -->
+			<instance name="radial_sub_menu_icon" parent="BL" id="3" valign="bottom" align="right" x="20%" y="12@"/>
+		</panel>
+	</template>
+
+	<!-- BR Sub Menu -->
+	<template name="radial_sub_menu_BR">
+		<panel
+			name="sub_menu_BR"
+			x="152%" y="48%"
+			width="100%" height="100@"
+			align="center" valign="center"
+			noclick="true"
+		>
+			<!-- Sub 1 -->
+			<instance name="radial_sub_menu_icon" parent="BR" id="1" valign="top" align="right" x="-42%" y="-27@"/>
+			<!-- Sub 2 -->
+			<instance name="radial_sub_menu_icon" parent="BR" id="2" valign="bottom" align="right" x="-23%" y="-23@" />
+			<!-- Sub 3 -->
+			<instance name="radial_sub_menu_icon" parent="BR" id="3" valign="bottom" align="left" x="-20%" y="12@"/>
+		</panel>
+	</template>
+
+	<!-- C Sub Menu (Should never be used, but meh, makes stuff more uniform) -->
+	<template name="radial_sub_menu_C">
+		<panel
+			name="sub_menu_C"
+			y="40%"
+			width="100%" height="100@"
+			align="center" valign="center"
+			noclick="true"
+		>
+			<!-- Sub 1 -->
+			<instance name="radial_sub_menu_icon" parent="C" id="1" valign="bottom" align="right" />
+			<!-- Sub 2 -->
+			<instance name="radial_sub_menu_icon" parent="C" id="2" valign="bottom" align="center" />
+			<!-- Sub 3 -->
+			<instance name="radial_sub_menu_icon" parent="C" id="3" valign="bottom" align="left" />
+		</panel>
+	</template>
+
+
+	<!-- this width and height is the size of the whole thing, probably should find a better way to calculate this -->
+	<template name="radial_menu">
+		<panel name="radial_menu_master" color="invisible" width="40h" height="33h" x="50%" y="50%" noclick="1" visible="0"
+			onshowlua="PlaySound('/shared/sounds/radial/sfx/radial_form.ogg')"
+			onhidelua="PlaySound('/shared/sounds/radial/sfx/radial_deform.ogg')"
+		>
+			<panel name="radial_command_root" width="11.0h" height="11.0h" align="center" valign="center" noclick="1">
+				<!-- Text -->
+				<label name="radial_command_description" y="103%" width="66%" align="center" font="dyn_12" color="1 1 1 1" outline="true" textalign="center" wrap="true" noclick="true" />
+				<!-- Center -->
+				<instance name="radial_item" id="C" />
+				<!-- TL -->
+				<instance name="radial_item" id="TL"  x="-50%" y="-58%" vflip="true" iconoffset="-5%" />	
+				<!-- TR -->
+				<instance name="radial_item" id="TR" x="50%" y="-58%" vflip="true" iconoffset="-5%" />
+				<!-- BL -->
+				<instance name="radial_item" id="BL" x="-81%" y="36%" vflip="true" iconoffset="-5%" />
+				<!-- BR -->
+				<instance name="radial_item" id="BR" x="81%" y="36%" vflip="true" iconoffset="-5%" />
+			</panel>	
+		</panel>
+	</template>
+
+	<template name="radial_minimap">
+		<!-- tooltip for minimap icons -->
+		<floater name="radial_minimap_tip" y="-2h" x="3h" grow="1" regrow="1" visible="0">
+			<frame texture="/ui/frames/tooltip_bg.tga" color="0 0 0 .95" borderthickness=".6h" />
+			<frame texture="/ui/frames/roundframe.tga" color="#A0A0A0" borderthickness=".6h" />
+			<!-- Text -->
+			<label name="radial_command_minimap_description" fitx="1" x="0.7h" y="0.3h" fitxpadding="0.7h" fity="1" fitypadding="0.3h" noclick="1" font="dyn_12" color="1 1 1 1" outline="true"/>
+		</floater>
+
+		<panel name="radial_minimap" color="invisible" y="-22.8h" width="24.2h" height="10.0h" valign="bottom" visible="0"
+			onshowlua="PlaySound('/shared/sounds/radial/sfx/radial_form.ogg')"
+			onhidelua="PlaySound('/shared/sounds/radial/sfx/radial_deform.ogg')"
+		>
+			<!-- Actual Frame -->
+			<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="2.0h" color=".8 .8 .8 1" rendermode="normal" blockinput="0" noclick="1" visible="1" />
+			<frame texture="/ui/frames/rounded_bg_blue.tga" width="-0.1w" height="-0.25h" valign="bottom" align="center" borderthickness="2.0h" color=".8 .8 .8 1" blockinput="0" noclick="1" visible="1"/>
+
+			<!-- Icons and divders -->
+			<panel float="right" padding="0.4h" y="1h" height="100%" grow="1" regrow="1" growinvis="0" align="center">
+				<instance name="radial_item_minimap" id="TL" />
+
+				<!-- divider -->
+				<panel name="radial_minimap_divider1" width="1.0h" height="6.5h" stickytoinvis="0">
+					<panel x="-1" width="1" align="center" color="0 0 0 .7" />
+					<panel x="0" width="1" align="center" color="1 1 1 .3" />
+				</panel>
+
+				<instance name="radial_item_minimap" id="TR" />
+
+				<!-- divider -->
+				<panel name="radial_minimap_divider2" width="1.0h" height="6.5h" stickytoinvis="0">
+					<panel x="-1" width="1" align="center" color="0 0 0 .7" />
+					<panel x="0" width="1" align="center" color="1 1 1 .3" />
+				</panel>
+
+				<instance name="radial_item_minimap" id="BR" />
+			</panel>
+		</panel>
+	</template>
+</package>

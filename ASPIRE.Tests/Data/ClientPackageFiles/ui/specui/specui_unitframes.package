@@ -1,0 +1,545 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+	<template name="specui_inventory_ward" >
+		<panel noclick="1" visible="0" align="{align}"
+			watch="GamePlayer{player}HeroWard"
+			ontriggerlua="self:SetVisible(AtoB(param0))"
+		>
+			<panel x="-7%" y="-5%" width="44%" height="44%" align="center" valign="center" 
+				watch1="GamePlayer{player}HeroWard"
+				ontrigger1="
+					If(!StringEmpty(GetEntityIconPath(param10)),
+						SetOnMouseOver(
+							'					
+							TriggerItemTooltip(
+								\'MSPlayerInventoryTip\',
+								\''#param10#'\',
+								false
+							);
+							Trigger(\'MSPlayerInventoryTipIcon\', GetEntityIconPath(\''#param10#'\'));
+							If(specui_show_tooltips, ShowWidget(\'endgameItemTooltip\'));					
+						'),
+						SetOnMouseOver('')
+					);
+				"
+				onmouseoutlua="GetWidget('endgameItemTooltip', 'game_spectator'):SetVisible(0)"
+				onhidelua="GetWidget('endgameItemTooltip', 'game_spectator'):SetVisible(0)"
+			>
+				<image usealphamask="true" alphamaskfile="/ui/masks/circle_mask.tga" noclick="true"
+					watch="GamePlayer{player}HeroWard"
+					ontriggerlua="self:SetTexture(param8)"
+				/>
+
+				<piegraph start="270" end="-90" color="#000000cc" noclick="true"
+					watch="GamePlayer{player}HeroWardCooldown"
+					ontriggerlua="self:SetVisible(tonumber(param0) ~= nil and tonumber(param0) > 0) self:SetValue(param2)"
+				/>
+
+				<label textalign="center" textvalign="center" color="white" font="dyn_9" outline="1" noclick="true"
+					watch="GamePlayer{player}HeroWard"
+					ontriggerlua="self:SetVisible(tonumber(param11) ~= nil and tonumber(param11) > 0) self:SetText(param11)"
+				/>
+			</panel>
+			<image texture="/ui/common/ability_toggle.tga" noclick="true" />
+		</panel>
+	</template>
+
+	<template name="specui_inventory_item">
+		<panel x="{x}" y="{y}" width="100@" height="100%" noclick="0" valign="top" align="{align}" 
+			onloadlua="--HoN_SpecUI:Register"
+			watch1="GamePlayer{player}HeroInventory{slot}"
+			ontrigger1="
+				If(!StringEmpty(GetEntityIconPath(param10)),
+					SetOnMouseOver(
+						'					
+						TriggerItemTooltip(
+							\'MSPlayerInventoryTip\',
+							\''#param10#'\',
+							false
+						);
+						Trigger(\'MSPlayerInventoryTipIcon\', GetEntityIconPath(\''#param10#'\'));
+						If(specui_show_tooltips, ShowWidget(\'endgameItemTooltip\'));					
+					'),
+					SetOnMouseOver('')
+				);
+			"
+			onmouseoutlua="GetWidget('endgameItemTooltip', 'game_spectator'):SetVisible(0)"
+			onhidelua="GetWidget('endgameItemTooltip', 'game_spectator'):SetVisible(0)"
+		>
+			<image noclick="1"
+				valign="center" align="center"			
+				texture="/ui/legion/empty_pack.tga"
+				watch1="GamePlayer{player}HeroInventory{slot}"
+				ontrigger1lua="
+					if (NotEmpty(param10)) then self:SetTexture(GetEntityIconPath(param10)) end
+					self:SetVisible(AtoB(param0))
+				"					
+			/>
+			<image noclick="1"
+				valign="center" align="center" texture="/ui/legion/empty_pack.tga"
+				watch="GamePlayer{player}HeroInventory{slot}"
+				ontriggerlua="self:SetVisible(not AtoB(param0))"
+			/>
+			<!-- Cooldown 2 -->
+			<piegraph
+				watch="GamePlayer{player}HeroInventoryCooldown{slot}"
+				ontriggerlua="
+					self:SetVisible(tonumber(param0) > 0)
+					self:SetValue(param2)
+				"
+				watch1="GamePlayer{player}HeroInventory{slot}"
+				ontrigger1lua="if (NotEmpty(param10)) then self:SetTexture(GetEntityIconPath(param10)) end if (not AtoB(param0)) then self:SetVisible(0) end"	
+				start="270" end="-90" square="1" noclick="1" align="center" valign="center" 
+				color="0 0 0 0.5"
+				rendermode="grayscale"
+			/>			
+			<label font="dyn_12" color="white" shadow="1" shadowcolor="black" visible="{text=0}" textalign="center" textvalign="center"  width="100%" height="100%" align="center" valign="center" outline="1" noclick="1"
+				watch="GamePlayer{player}HeroInventoryCooldown{slot}"
+				ontriggerlua="	if (GetStringWidth('dyn_10', param0) > (self:GetWidth()*0.8)) then
+							 		self:SetFont('dyn_8')
+							 	else
+							 		self:SetFont('dyn_10')
+							 	end
+							 	self:SetVisible(tonumber(param0) > 0)
+							 	self:SetText(math.ceil(tonumber(param0) / 1000))"
+			/>			
+			<frame color="invisible" bordercolor=".2 .2 .2 1" borderthickness="1" noclick="true" />
+		</panel>
+	</template>		
+	
+	<template name="UF_hero_icon">
+		<panel width="100%" height="100%" noclick="true">			
+			
+			<!-- Colour / Icon -->
+			<image height="96%" width="96@" noclick="0" valign="center" align="center"  texture="/heroes/{hero}/icon.tga"
+				watch="SpectatorHeroHeroInfo{player}" ontriggerlua="self:SetTexture(param1)" watch1="SpectatorHeroStatus{player}" ontrigger1lua="if (AtoB(param)) then self:SetRenderMode('normal') else self:SetRenderMode('grayscale') end"
+				onclick="SelectUnit(SpectatorHeroIndex{player});"
+				onrightclick="If(!ViewingStreaming(),
+									Split(
+											If(GetSelectedEntity() != SpectatorHeroIndex{player}, Set(cg_lockCamera, 1), Set(cg_lockCamera, !cg_lockCamera)),
+											SelectUnit(SpectatorHeroIndex{player})
+										)
+								);"
+				onmouseoverlua="HoN_SpecUI:HoverPlayer({player})"
+				onmouseoutlua="Trigger('SpecUITooltipUpdate', '', '', '', '', '', '')"
+			/>
+			<panel color="1 0 0 0.5" rendermode="normal" texture="/ui/elements/list_gradient.tga" vspeed="-0.6" vtile="1" visible="0" noclick="1"
+				watch1="SpectatorHeroStatus{player}" ontrigger1lua="if (AtoB(param0)) then self:FadeOut(250) else self:FadeIn(250) end" 
+			/>			 
+			
+			<!-- Respawn -->
+			<label y="0.2h" watch="SpectatorHeroStatus{player}" noclick="1" ontriggerlua="self:SetVisible(not AtoB(param))"  visible="0" font="dyn_14" color="white" shadow="true" outline="1" textalign="center" textvalign="center" 
+				watch1="SpectatorHeroRespawn{player}" ontrigger1lua="if (AtoB(param1) and (not AtoB(param3))) then self:SetText(math.ceil(tonumber(param0) / 1000)) else self:SetText('') end"
+			/>
+			<!-- Disconnected -->
+			<panel watch="SpectatorHeroDisconnected{player}" color="0 0 0 0.8" ontriggerlua="self:SetVisible(AtoB(param))" noclick="1" visible="0"> 
+				<image x="5%" y="0%" color="1 1 1 0.6" width="95%" height="95%" texture="/ui/elements/disconnect.tga" noclick="1" />
+				<label width="100%" height="100%" textalign="center" textvalign="center" color="yellow" noclick="1" outline="1" shadow="true" shadowcolor="black"	font="dyn_11" 
+					watch="SpectatorHeroDisconnectTime{player}" ontriggerlua="self:SetText(FtoT(param, 1, 0, '-'))" 
+				/>
+			</panel>
+			<!-- Loading In -->
+			<panel watch="SpectatorHeroLoadingPercent{player}" color="0 0 0 1" ontriggerlua="self:SetVisible(1 > tonumber(param))" noclick="1" visible="0"> 								
+				<piegraph x="5%"
+					value="360"
+					start="270" end="-90" square="1" noclick="1" align="center" valign="center" 
+					color="0.2 0.2 0.2 1.0"
+					rendermode="grayscale"
+					texture="/ui/elements/lobby/icon_loading.tga"
+				/>
+				<piegraph x="5%"
+					watch="SpectatorHeroLoadingPercent{player}"
+					ontriggerlua="self:SetValue(tonumber(param))"
+					start="270" end="-90" square="1" noclick="1" align="center" valign="center" 
+					color="1 1 1 1.0"
+					rendermode="normal"
+					texture="/ui/elements/lobby/icon_loading.tga"
+				/>	
+				<label width="100%" height="100%" textalign="center" textvalign="center" color="white" shadow="true"  noclick="1" outline="1" font="dyn_11" 
+					watch="SpectatorHeroLoadingPercent{player}" ontriggerlua="self:SetText(FtoP(param, 0))" 
+				/>				
+			</panel>					
+			<!-- Voip Icon -->
+			<panel x="" watch="SpectatorHeroVoice{player}" ontriggerlua="self:SetVisible(AtoB(param0))" noclick="1" width="100%" height="100%" color="invisible" align="center" valign="center" visible="0" > 					
+				<modelpanel visible="1" width="100%" height="100%" noclick="1" model="/ui/common/models/arcade_text/invis.mdf" anim="idle" camerapos="-5 200 25" cameraangles="0 0 180" camerafov="10" cameranear="1" carmerafar="5000" depthclear="false" depthcompress="true" sunazimuth="-90" sunaltitude="180" suncolor="2 2 2" onshow="SetAnim('idle'); SetEffect('/shared/effects/talking.effect');" />	
+			</panel>			
+			<!-- Give Items to Ally -->
+			<panel color="invisible" texture="/ui/info/drop.tga" onmouseoverlua="self:SetColor('white')" onmouseoutlua="self:SetColor('invisible')" noclick="1"
+				watch="ItemCursorVisible" ontrigger="SetVisible(ItemCursorVisible); SetNoClick(!ItemCursorVisible); RefreshCursor();"				
+				onclick="ItemPlaceEntity(AllyIndex{player});" onrightclick="ItemPlaceEntity(AllyIndex{player});"
+			/>		
+		</panel>		
+	</template>
+	
+	<template name="UF_ability_pip">
+		<frame width="100@" height="100%" color="0 1 0 1" borderthickness="1" bordercolor="0 0 0 1" noclick="true" />
+	</template>	
+	
+	<template name="UF_ability_icon">		
+		<panel width="100@" height="100%" noclick="0" 
+			onclicklua="HoN_SpecUI:ToggleAbilityCooldowns()"
+			ondoubleclicklua="HoN_SpecUI:ToggleAbilityCooldowns()"
+			watch="SpectatorHeroHeroInfo{player}" 
+			ontrigger="
+				SetOnMouseOver('
+					TriggerLevelupTooltipsIndex(SpectatorHeroIndex{player});
+					If(specui_show_tooltips, ShowWidget(\'specui_ability_tooltip_simple{ability}\'));
+				'),
+			"
+			onmouseoutlua="GetWidget('specui_ability_tooltip_simple{ability}', 'game_spectator'):SetVisible(0)"
+			onhidelua="GetWidget('specui_ability_tooltip_simple{ability}', 'game_spectator'):SetVisible(0)"		
+		>
+			<!-- Icon -->
+			<panel width="100%" height="100%" align="center" valign="center" color="invisible" noclick="1">
+				<image  noclick="1" watch0="GamePlayerAbility{ability}Info{player}"
+					ontrigger0lua="
+						self:SetTexture(param8)
+						if ((tonumber(param6) == 0) or AtoB(param1)) then
+							self:SetRenderMode('grayscale')
+							self:SetColor('1 1 1 0.3')
+						elseif (AtoB(param4) or AtoB(param5) or (not HoN_SpecUI:GetPlayerInfo({player}, 'alive'))) then
+							self:SetRenderMode('grayscale')
+							self:SetColor('1 1 1 1')
+						else
+							self:SetRenderMode('normal')
+							self:SetColor('1 1 1 1')
+						end
+					"					
+				/>
+				<image  noclick="1" rendermode="grayscale"
+					watch0="GamePlayerAbility{ability}Info{player}"  
+					ontrigger0lua="self:SetTexture(param8)"				
+					watch1="GamePlayerAbility{ability}Cooldown{player}" 
+					ontrigger1="SetVisible(GamePlayerAbility{ability}Cooldown{player} gt 0 and SpectatorHeroStatus{player});" 						
+				/>				
+			</panel>
+			
+			<!-- Overlay Colour  -->
+			<panel width="100%" height="100%" visible="1" color="invisible" rendermode="additive" noclick="1"
+				watch0="GamePlayerAbility{ability}Info{player}"  
+				ontrigger0lua="
+					if (tonumber(param6) and (tonumber(param6) ~= 0) and HoN_SpecUI:GetPlayerInfo({player}, 'alive')) then
+						self:SetVisible(1)
+					else
+						self:SetVisible(0)
+					end
+
+					if AtoB(param4) then
+						self:SetColor('.7 0 0 .4')
+					elseif AtoB(param5) then
+						self:SetColor('0 0 .7 .4')
+					else
+						self:SetColor('invisible')
+					end"
+			/>
+			
+			<!-- Cooldown 2 -->
+			<piegraph
+				watch="GamePlayerAbility{ability}Cooldown{player}" 
+				ontriggerlua="
+					self:SetVisible(tonumber(param0) > 0)
+					self:SetValue(param2)
+				"
+				watch2="GamePlayerAbility{ability}Info{player}" 
+				ontrigger2="SetTexture(param8); SetVisible(param6 != 0 and (GamePlayerAbility{ability}Cooldown{player} gt 0));"
+				start="270" end="-90" square="1" noclick="1" align="center" valign="center" 
+				color="0 0 0 0.5"
+				rendermode="grayscale"
+			/>
+			
+			<panel noclick="1" name="specui_unit{player}_ability{ability}Cooldown" visible="0" >
+				<!-- Cooldown -->
+				<label font="dyn_12" color="white" shadow="1" shadowcolor="black" visible="{text=0}" textalign="center" textvalign="center"  width="100%" height="100%" align="center" valign="center" outline="1" noclick="1"
+					watch="GamePlayerAbility{ability}Cooldown{player}"
+					ontriggerlua="	if (GetStringWidth('dyn_12', param0) > (self:GetWidth() * 0.8)) then
+										self:SetFont('dyn_10')
+									else
+										self:SetFont('dyn_12')
+									end
+									self:SetVisible(tonumber(param0) > 0)
+									self:SetText(math.ceil(tonumber(param0) / 1000))"
+				/>
+			</panel>
+			 
+			 <!-- Border 1  -->
+			<frame
+				color="invisible" borderthickness="1"
+				watch2="GamePlayerAbility{ability}Info{player}"
+				ontrigger2lua="
+					self:SetVisible(tonumber(param6) >= 1)
+					if (HoN_SpecUI:GetPlayerInfo({player}, 'alive')) then
+						if (AtoB(param1)) then
+							self:SetBorderColor('silver')
+						elseif (AtoB(param4)) then
+							self:SetBorderColor('red')
+						elseif (AtoB(param12)) then
+							self:SetBorderColor('green')
+						elseif (AtoB(param8) and AtoB(param7)) then
+							self:SetBorderColor('yellow')
+						elseif (AtoB(param5)) then
+							self:SetBorderColor('0.5 0.5 1 1')
+						elseif (AtoB(param2) or AtoB(param3)) then
+							self:SetBorderColor('lime')
+						else
+							self:SetBorderColor('orange')
+						end
+					else
+						self:SetBorderColor('0.6 0.6 0.6 1')
+					end
+				"
+				noclick="1" align="center" valign="center"
+			/>			
+			
+			<!-- Ally/Spec Level Indicator -->	
+			<panel float="right" x="4%" y="2%" padding="3%" height="55%" width="55%" align="left" valign="top" color="invisible" noclick="1" watch="SpectatorHeroExists{player}" ontriggerlua="self:SetVisible(AtoB(param0))" >						
+				<frame float="right" width="25%" height="25%" align="left" valign="top" borderthickness="1" group="specui_icon_{ability}_{player}_pips" color="0 1 0 1" bordercolor="black" noclick="1" visible="0" 
+					watch="GamePlayerAbility{ability}Info{player}"
+					ontriggerlua="
+						self:SetVisible(tonumber(param6) >= 1)
+
+						local pipColor = nil
+
+						if (HoN_SpecUI:GetPlayerInfo({player}, 'alive')) then
+							if (AtoB(param1)) then
+								pipColor = 'silver'
+							elseif (AtoB(param4)) then
+								pipColor = 'red'
+							elseif (AtoB(param12)) then
+								pipColor = 'green'
+							elseif (AtoB(param8) and AtoB(param7)) then
+								pipColor = 'yellow'
+							elseif (AtoB(param5)) then
+								pipColor = '0.5 0.5 1 1'
+							elseif (AtoB(param2) or AtoB(param3)) then
+								pipColor = 'lime'
+							else
+								pipColor = 'orange'
+							end
+						else
+							pipColor = '0.6 0.6 0.6 1'
+						end
+
+						if (pipColor) then
+							groupfcall('specui_icon_{ability}_{player}_pips', function(_, widget, _) widget:SetColor(pipColor) end, 'game_spectator')
+						end
+					"
+				/>
+				<frame float="right" width="25%" height="25%" align="left" valign="top" borderthickness="1"  group="specui_icon_{ability}_{player}_pips" color="0 1 0 1" bordercolor="black" noclick="1" visible="0" 
+					watch="GamePlayerAbility{ability}Info{player}" 
+					ontriggerlua="self:SetVisible(tonumber(param6) >= 2)"
+				/>
+				<frame float="right" width="25%" height="25%" align="left" valign="top" borderthickness="1"  group="specui_icon_{ability}_{player}_pips" color="0 1 0 1" bordercolor="black" noclick="1" visible="0" 
+					watch="GamePlayerAbility{ability}Info{player}" 
+					ontriggerlua="self:SetVisible(tonumber(param6) >= 3)"
+				/>
+				<frame float="right" width="25%" height="25%" align="left" valign="top" borderthickness="1"  group="specui_icon_{ability}_{player}_pips" color="0 1 0 1" bordercolor="black" noclick="1" visible="0" 
+					watch="GamePlayerAbility{ability}Info{player}" 
+					ontriggerlua="self:SetVisible((tonumber(param6) >= 4) and ({ability} ~= 3))"
+				/>
+			</panel>
+		</panel>
+		
+	</template>
+	
+
+	
+	<template name="UF_expanded_data">
+		<panel y="{y}" height="2.0h" noclick="true">
+			<image width="90@" height="90%" align="{oppositealign}" valign="center" texture="{icon}" noclick="true" />
+			<label fity="true" fitx="true" align="{infoalign}" valign="center" textvalign="center" font="dyn_11" color=".8 .8 .8 1" outline="true" noclick="true" content="xxx" />					
+		</panel>
+	</template>
+	
+	<if condition="!specui_mini_mode2" >
+	<template name="unit_frame">
+		<panel name="unit_frame_{player}" group="unit_frames" width="100%" height="10.7h" visible="0" sticky="1" stickytoinvis="0">
+
+			<!-- Hero Icon -->
+			<panel x="{direction}39.8%" y="9.2%" width="19.5%" height="19.5@" align="{infoalign}" noclick="true">
+				<instance name="UF_hero_icon" player="{player}" />
+			</panel>
+						
+			<!-- Unit Color Nubbin -->
+			<panel x="{direction}2.0%" y="61%" width="7%" height="7@" align="{infoalign}" noclick="0"
+				onclicklua="HoN_SpecUI:ToggledClosedFrame()"
+				onrightclicklua="HoN_SpecUI:ToggleExpandedFrame()"
+				onmouseoverlua="Trigger('SpecUITooltipUpdate', 'specui_color_dot', 'specui_color_dot_tip', '', '', '', '')"
+				onmouseoutlua="Trigger('SpecUITooltipUpdate', '', '', '', '', '', '')" 
+			>
+				<frame texture="/ui/frames/circle.tga" color="{unitcolor}" bordercolor="{unitcolor}" borderthickness="33%" noclick="1"/>
+			</panel>
+			 
+			<!-- Health Bar - Serves only fruit juice and sweet tea -->
+			<panel x="{direction}4%" y="37%" width="34.4%" height="13.0%" align="{infoalign}" noclick="0" passivechildren="1" color="invisible"
+				onclicklua="HoN_SpecUI:ToggleHealthLabels()"
+				ondoubleclicklua="HoN_SpecUI:ToggleHealthLabels()"
+			>
+				<panel align="center" valign="center" width="-0.2h" height="-0.2h" color="0.0 0.0 0.0 1">									
+					<!--  bar -->
+					<panel align="{oppositealign=left}" color="lime" watch="SpectatorHeroHealth{player}"  ontriggerlua="self:SetVisible(tonumber(param2) >= 0) self:SetWidth(FtoP(param2)) self:SetColor(Saturate(1 - (tonumber(param2) - 0.5) / 0.5), (tonumber(param2) - 0.25) / 0.25, 0, 1.0)" noclick="1"  />
+					<!-- Bar backing -->
+					<image texture="/ui/legion/behind_bar.tga" rendermode="overlay" color="1 1 1 1"/>
+					<!-- Bar max value tick -->
+					<image align="{infoalign=right}" texture="/ui/legion/behind_bar.tga" width="1"  color="1 1 1 .2"  />
+					<!-- Gloss  -->
+					<image align="{oppositealign=left}" texture="/ui/elements/bar_highlight.tga" watch="SpectatorHeroHealth{player}" ontriggerlua="if (0.25 >= tonumber(param2)) then self:SetColor(1, 0, 0, 0.36) else self:SetColor(1, 0, 0, 0.0) end" />
+					<image align="{oppositealign=left}" texture="/ui/elements/bar_highlight.tga" watch="SpectatorHeroHealth{player}" ontriggerlua="self:SetColor(1, 1, 0, (0.4*Saturate((tonumber(param2) * 2.15) - 0.25)))" />
+					<image align="{oppositealign=left}" texture="/ui/elements/bar_highlight.tga" watch="SpectatorHeroHealth{player}" ontriggerlua="self:SetColor(0, 1, 0, (0.3*Saturate((tonumber(param2) * 1.7) - 1)))" />					
+				</panel>
+			</panel>			
+			 
+			<!-- Mana Bar -->
+			<panel x="{direction}4%" y="48.0%" width="32.6%" height="13.0%" align="{infoalign}" color="invisible" noclick="0" passivechildren="1" 
+				onclicklua="HoN_SpecUI:ToggleManaLabels()"
+				ondoubleclicklua="HoN_SpecUI:ToggleManaLabels()"		
+			>
+				<panel width="-0.2h" height="-0.2h" align="center" valign="center" color="0.0 0.0 0.0 1">
+					<!-- Monochrome bar -->
+					<panel align="{oppositealign=left}" color="0 0 1 1" watch="SpectatorHeroMana{player}" ontriggerlua="self:SetVisible(tonumber(param1) > 0) self:SetWidth(FtoP(param2))"  noclick="1"  >
+						<image texture="/ui/legion/behind_bar2.tga" rendermode="overlay" color="0 .5 1 1" />
+						<image align="{infoalign=right}" texture="/ui/legion/behind_bar2.tga" width="1" color="0 1 1 .2"/>
+					</panel>
+					<!-- Cyan Gloss -->
+					<image align="{oppositealign=left}" texture="/ui/elements/bar_highlight.tga" color="0 1 1 0.4"  />
+				</panel>
+			</panel>			
+			
+			<!-- Color Ring / Frame Texture -->
+			<image width="42.0h" height="21.0h" align="{infoalign}" watch="SpectatorHeroPlayerInfo{player}" ontriggerlua="self:SetColor(param1)" noclick="true"
+				ontrigger9lua="ResourceManager.RegisterTexture('/ui/specui/elements/team_color_{side}.tga', 'specui', self)" resourcecontext="specui" watch9="SpecRegisterTextures"
+			/>
+			<image width="42.0h" height="21.0h" align="{infoalign}" noclick="true" hflip="{hflip}"
+				   texture="/ui/specui/elements/unitframe_iron.tga"
+				   watch="SpectatorPlayerMastery{player}"
+				   ontriggerlua="self:SetTexture('/ui/specui/elements/unitframe_'..param0..'.tga')"
+			/>
+			
+			<panel x="{direction}4%" y="37%" width="34.4%" height="11.0%" align="{infoalign}" noclick="1" passivechildren="1" color="invisible" >
+				<!-- Label  -->
+				<label name="specui_unit{player}_health" y="-1" align="center" valign="center" width="-0.2h" height="-0.2h" textalign="center" textvalign="center" font="dyn_9" color="1 1 1 1" outline="true" content="xxx/xxx" noclick="true" visible="0" 
+					watch="SpectatorHeroHealth{player}"  ontriggerlua="self:SetText(round(param0)..'/'..round(param1))"
+				/>
+			</panel>
+			
+			<panel x="{direction}4%" y="48.0%" width="32.6%" height="11.0%" align="{infoalign}" color="invisible" noclick="1" passivechildren="1" >
+				<!-- Label  -->
+				<label name="specui_unit{player}_mana" y="-1" width="-0.2h" height="-0.2h" align="center" valign="center"  textalign="center" textvalign="center" font="dyn_9" color="1 1 1 1" outline="true" content="xxx/xxx" noclick="true" visible="0" 
+					watch="SpectatorHeroMana{player}"  ontriggerlua="self:SetText(round(param0)..'/'..round(param1))"
+				/>				
+			</panel>
+			
+			<!-- Hero Lvl -->
+			<panel x="{direction}57.5%" y="21.0%" width="10.0%" height="10.0@" align="{infoalign}" noclick="0" onmouseoverlua="local pos = '' if ({player} >= 5) then pos = '-27h' end Trigger('SpecUITooltipUpdate', 'specui_level', 'specui_level_tip', '', '', pos, '')" onmouseoutlua="Trigger('SpecUITooltipUpdate', '', '', '', '', '', '')" color="invisible">
+				<label textalign="center" textvalign="center" font="dyn_12" color="1 1 1 1" outline="true" noclick="true" content="1" 
+					watch="SpectatorHeroHeroInfo{player}"  ontriggerlua="self:SetText(param2)"
+				/>
+			</panel>
+			
+			<!-- Gold -->
+			<panel x="{direction}10.6%" y="15%" width="18.4%" height="15.8%" align="{infoalign}" noclick="0" onmouseoverlua="local pos = '' if ({player} >= 5) then pos = '-27h' end Trigger('SpecUITooltipUpdate', 'specui_gold', 'specui_gold_tip', '', '', pos, '')" onmouseoutlua="Trigger('SpecUITooltipUpdate', '', '', '', '', '', '')">
+				<label height="100%" textvalign="center" font="dyn_11" color="1 1 1 1" noclick="true" content="0" 
+					watch="SpectatorHeroGold{player}"  ontriggerlua="self:SetText(param)" textalign="{oppositealign}"
+				/>
+			</panel>
+			
+			<!-- Abils -->
+			<panel x="{direction}10.0%" y="65.0%" grow="true" height="3.2h" align="{infoalign}" float="right" padding="2.0%" noclick="true">
+				<instance name="UF_ability_icon" ability="0" player="{player}" />
+				<instance name="UF_ability_icon" ability="1" player="{player}" />
+				<instance name="UF_ability_icon" ability="2" player="{player}" />
+				<instance name="UF_ability_icon" ability="3" player="{player}" />
+			</panel>
+			
+			<!-- Expanded Content -->
+			<panel y="3.5%" x="{direction}72.0%" width="24.8%" height="83.8%" align="{infoalign}" valign="center" noclick="true">
+				<panel height="100%" width="100%" noclick="1">
+					<panel height="32.4%" valign="top" noclick="1" > 
+						<instance name="specui_inventory_item" player="{player}" align="{infoalign}" slot="0" />
+						<instance name="specui_inventory_item" player="{player}" align="{oppositealign}" slot="1" />
+					</panel>
+					<panel height="32.4%" valign="center" noclick="1" > 
+						<instance name="specui_inventory_item" player="{player}" align="{infoalign}" slot="2" />
+						<instance name="specui_inventory_item" player="{player}" align="{oppositealign}" slot="3" />
+					</panel>
+					<panel height="32.4%" valign="bottom" noclick="1" > 
+						<instance name="specui_inventory_item" player="{player}" align="{infoalign}" slot="4" />
+						<instance name="specui_inventory_item" player="{player}" align="{oppositealign}" slot="5" />
+					</panel>
+
+					<panel y="-2.5h" x="0.3h" width="4.5h" height="4.5h" align="center" noclick="1" >
+						<instance name="specui_inventory_ward" player="{player}" align="{align}" />
+					</panel>
+				</panel>
+			</panel>
+			<instance name="specui_ItemPopout" player="{player}" infoalign="{infoalign}" oppositealign="{oppositealign}"  />			
+		</panel>		
+	</template>
+	</if>
+	
+	<!-- Left Unit Frames
+	 X Values
+		Collapsed = -7.4h
+		Expanded = 0
+	-->
+	<panel name="UnitFramesLeft" x="-7.4h" y="5.5h" grow="true" width="24.6h" align="left" float="bottom" padding="1.5h" noclick="true" visible="1" >
+		<instance
+			name="unit_frame" player="0"
+			infoalign="right" oppositealign="left" side="left" direction="-"
+			unitcolor="#0042ff"
+		/>
+		<instance
+			name="unit_frame" player="1"
+			infoalign="right" oppositealign="left" side="left" direction="-"
+			unitcolor="#1ce6b9"
+		/>
+		<instance
+			name="unit_frame" player="2"
+			infoalign="right" oppositealign="left" side="left" direction="-"
+			unitcolor="#9000c0"
+		/>
+		<instance
+			name="unit_frame" player="3"
+			infoalign="right" oppositealign="left" side="left" direction="-"
+			unitcolor="#fffc01"
+		/>
+		<instance
+			name="unit_frame" player="4"
+			infoalign="right" oppositealign="left" side="left" direction="-"
+			unitcolor="#fe8a0e"
+		/>		
+	</panel>
+	
+	<!-- Right Unit Frames
+	 X Values
+		Collapsed = 7.4h
+		Expanded = 0
+	-->
+	<panel name="UnitFramesRight" x="7.4h" y="5.5h" grow="true" width="24.6h" align="right" float="bottom" padding="1.5h" noclick="true" visible="1" >
+		<instance
+			name="unit_frame" player="5"
+			hflip="true" infoalign="left" oppositealign="right" side="right" direction=""
+			unitcolor="#e15db0"
+		/>
+		<instance
+			name="unit_frame" player="6"
+			hflip="true" infoalign="left" oppositealign="right" side="right" direction=""
+			unitcolor="#959698"
+		/>
+		<instance
+			name="unit_frame" player="7"
+			hflip="true" infoalign="left" oppositealign="right" side="right" direction=""
+			unitcolor="#7dbfef"
+		/>
+		<instance
+			name="unit_frame" player="8"
+			hflip="true" infoalign="left" oppositealign="right" side="right" direction=""
+			unitcolor="#0f6246"
+		/>
+		<instance
+			name="unit_frame" player="9"
+			hflip="true" infoalign="left" oppositealign="right" side="right" direction=""
+			unitcolor="#884614"
+		/>
+	</panel>
+	
+</package>

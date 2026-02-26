@@ -1,0 +1,657 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package name="shared_templates_global" >
+<!-- These templates exist across all interfaces (main, game, etc.) -->
+
+	<template name="button2"><!-- Most commonly used button across all interfaces -->
+		<panel x="{x}" y="{y}" width="{width=100%}" height="{height=100%}" align="{align}" valign="{valign}" noclick="true">
+			<button
+
+				group="{group}"
+				name="{button_name}"
+				color="invisible"
+				visible="{visible=true}"
+				watch="{watch}"
+				enabled="{enabled=true}"
+				ontrigger="{ontrigger}"
+				ontriggerlua="{ontriggerlua}"
+				watch1="{watch1}"
+				ontrigger1="{ontrigger1}"
+				ontrigger1lua="{ontrigger1lua}"
+				watch2="{watch2}"
+				ontrigger2="{ontrigger2}"
+				ontrigger2lua="{ontrigger2lua}"
+				onmouseover="{onmouseover}"
+				onmouseoverlua="if AtoB('{playsounds=true}') then PlaySound('/shared/sounds/ui/button_over_02.wav') end {onmouseoverlua}"
+				onmouseout="{onmouseout}"
+				onmouseoutlua="{onmouseoutlua}"
+				onclick="{onclick}"
+				onclicklua="PlaySound('{sound=/shared/sounds/ui/menu/button_click.wav}') {onclicklua}"
+				onrightclick="PlaySound('{sound=/shared/sounds/ui/ccpanel/button_click_02.wav}'); {onrightclick}"
+				onrightclicklua="{onrightclicklua}"
+				onenter="PlaySound('{sound='/shared/sounds/ui/ccpanel/button_click_02.wav}'); {onenter}"
+				onenterlua="{onenterlua}"
+				onshow="{onshow}"
+				onshowlua="{onshowlua}"
+				onframe="{onframe}"
+				onframelua="{onframelua}"
+				hotkey="{hotkey}"
+				onhotkey="{onhotkey}"
+				onhotkeylua="PlaySound('{sound=/shared/sounds/ui/ccpanel/button_click_02.wav}') {onhotkeylua}"
+				onenable="{onenable}"
+				onenablelua="{onenablelua}"
+				interactive="{interactive=true}"
+				onevent="{onevent}"
+				oneventlua="{oneventlua}"
+				luatable="{luatable=0}"
+				onloadlua="
+					if (not {inst_init=false}) then
+						if string.len('{button_name}') &gt; 0 then
+							lib_button.initializeTemplate('{button_name}', self, 'button2')
+						else
+							lib_button.initializeNamelessWidget('{button_name}', self, 'Button', 'button2', nil)
+						end
+					end
+
+					{onloadlua}
+				"
+				oninstantiatelua="
+					if {inst_init=false} then
+						self:Sleep(1, function()
+							if string.len('{button_name}') &gt; 0 then
+								lib_button.initializeTemplate('{button_name}', self, 'button2')
+							else
+								lib_button.initializeNamelessWidget('{button_name}', self, 'Button', 'button2', nil)
+							end
+						end)
+					end
+					{oninstantiatelua}
+				"
+			>
+				<panel name="{button_name}Body" onloadlua="lib_button.initializeNamelessWidget('{button_name}', self, 'Body', 'button2', nil)">
+					<frame name="{button_name}Background" onloadlua="lib_button.initializeNamelessWidget('{button_name}', self, 'Background', 'button2', nil)"  texture="/ui/info/button.tga" borderthickness="{borderthickness=0.8h}" color="1 1 1 1"/>
+					<frame name="{button_name}BackgroundCover" onloadlua="lib_button.initializeNamelessWidget('{button_name}', self, 'BackgroundCover', 'button2', nil)" texture="/ui/frames/rounded_button_bg_white.tga" borderthickness="{borderthickness=0.8h}" color=".3 .3 .3 .7" visible="false"/>
+					<label name="{button_name}Label" onloadlua="lib_button.initializeNamelessWidget('{button_name}', self, 'Label', 'button2', nil)" width="100%" height="100%" textvalign="center" textalign="center" valign="center" align="center" font="{font=dyn_9}" color="{color=white}" shadow="{shadow=true}" shadowcolor="black" outline="{outline=false}" outlinecolor="{outlinecolor=black}" watch="{labelwatch}" ontrigger="{labelontrigger}" ontriggerlua="{labelontriggerlua}" watch2="{labelwatch2}" ontrigger2="{labelontrigger2}" ontrigger2lua="{labelontrigger2lua}" group="{labelgroup}" content="{label}"/>
+				</panel>
+			</button>
+		</panel>
+	</template>
+
+	<template name="button_game">
+		<instance name="button2"
+			x="{x}" y="{y}" width="{width=100%}" height="{height=100%}" align="{align}" valign="{valign}"
+			button_name="{button_name}" group="{group}"
+			visible="{visible=true}"
+			enabled="{enabled=true}" onenable="{onenable}" onenablelua="{onenablelua}"
+			watch="{watch}" ontrigger="{ontrigger}" ontriggerlua="{ontriggerlua}"
+			watch1="{watch1}" ontrigger1="{ontrigger1}" ontrigger1lua="{ontrigger1lua}"
+			watch2="{watch2}" ontrigger2="{ontrigger2}" ontrigger2lua="{ontrigger2lua}"
+			onmouseover="{onmouseover}" onmouseoverlua="{onmouseoverlua}"
+			onmouseout="{onmouseout}" onmouseoutlua="{onmouseoutlua}"
+			playsounds="false" interactive="false" luatable="{luatable=0}"
+			onclick="{onclick}" onclicklua="{onclicklua}"
+			onrightclick="{onrightclick}" onrightclicklua="{onrightclicklua}"
+			onenter="{onenter}" onenterlua="{onenterlua}"
+			onshow="{onshow}" onshowlua="{onshowlua}"
+			onframe="{onframe}" onframelua="{onframelua}"
+			hotkey="{hotkey}" onhotkey="{onhotkey}" onhotkeylua="{onhotkeylua}"
+			onevent="{onevent}" oneventlua="{oneventlua}"
+			label="{label}"
+		/>
+	</template>
+
+	<template name="autocomplete_player">
+		<label width="-1.6h" textvalign="center" textalign="left" align="center" valign="center" font="dyn_9" color="{color=1 1 1 1}" content="{username}" shadow="1" wrap="0" />
+	</template>
+
+	<template name="cc_friend_offline">
+		<panel passivechildren="true"
+			onrightclick="
+				PlaySound('{sound=/shared/sounds/ui/ccpanel/button_rightclick_01.wav}');
+				CreateString('ui_lastSelectedUser', '{username}');
+				CreateString('ui_currentChannel', '');
+				CallEvent('{tooltip}');
+			"
+		>
+			<label width="-1.6h" x="0.5h" textvalign="center" textalign="left" align="center" valign="center" font="dyn_9" color="#80878d" shadow="1" wrap="1">{username}</label>
+		</panel>
+	</template>
+
+	<if condition="!cg_newMainInterface">
+		<template name="rightclick_menu_item2">
+			<listitem value="{index=0}" condition="{condition=}" onmouseover="PlaySound('/shared/sounds/ui/ccpanel/button_over_02.wav');" onselect="{command=}" onselectlua="{commandlua}" command="true">
+				<label x="0.5h" color="{textcolor=white}" font="dyn_10" textvalign="center">{label}</label>
+			</listitem>
+		</template>
+
+		<template name="cc_rightclick_menu2">
+			<menu
+				name="{menu_name}"
+				width="0" height="0"
+				color="red"
+				listwidth="16.0h"
+				listpaddingy="1.0h"
+				itemoffsetx="0.5h"
+				itemoffsety="0.5h"
+				itemheight="2.2h"
+				itemwidth="94%"
+				highlight="under"
+				exteriorscrollbars="false"
+				onevent="OpenMenu(true); MoveToCursor(); UpdateMenuConditions(); BringToFront();"
+				onmouseover="PlaySound('/shared/sounds/ui/ccpanel/button_over_02.wav');"
+			>
+				<widgetstate statename="listbg">
+					<frame texture="/ui/frames/glass_header_big.tga" color="#233749" />
+					<frame color="invisible" bordercolor="#455166" borderthickness="3" />
+					<frame color="invisible" bordercolor="black" borderthickness="2" />
+				</widgetstate>
+				<widgetstate statename="itemhighlight">
+					<panel color="#263e51" />
+				</widgetstate>
+
+				<instance name="rightclick_menu_item2" index="0" command="PlaySound('/shared/sounds/ui/ccpanel/button_click_01.wav'); ChatOpenMessage(ui_lastSelectedUser);" label="ui_items_cc_right_click_send_message" condition="(!StringEquals(StripClanTag(GetAccountName()), ui_lastSelectedUser) and ChatUserOnline(ui_lastSelectedUser))" />
+				<instance name="rightclick_menu_item2" index="1" commandlua="UIManager.GetInterface('main'):HoNMainF('MainMenuPanelToggle', 'news', nil, nil, true, nil, 7)" command="PlaySound('/shared/sounds/ui/ccpanel/button_click_01.wav'); Follow(StripClanTag(ui_lastSelectedUser));" label="ui_items_cc_right_click_follow" condition="(!StringEquals(StripClanTag(GetAccountName()), ui_lastSelectedUser) and !IsFollowing(ui_lastSelectedUser))" />
+				<instance name="rightclick_menu_item2" index="2" command="PlaySound('/shared/sounds/ui/ccpanel/button_click_01.wav'); UnFollow(StripClanTag(ui_lastSelectedUser));" label="ui_items_cc_right_click_unfollow" condition="(!StringEquals(StripClanTag(GetAccountName()), ui_lastSelectedUser) and IsFollowing(ui_lastSelectedUser))" />
+				<instance name="rightclick_menu_item2" index="3" command="PlaySound('/shared/sounds/ui/ccpanel/button_click_01.wav'); ChatJoinGame(ui_lastSelectedUser);" label="ui_items_cc_right_click_joing_game" condition="(!ChatInGame() and ChatUserInGame(ui_lastSelectedUser) and ChatHasServerInfo(ui_lastSelectedUser) and !StringEquals(StripClanTag(GetAccountName()), ui_lastSelectedUser))" />
+				<instance name="rightclick_menu_item2" index="4" command="PlaySound('/shared/sounds/ui/ccpanel/button_click_01.wav'); ChatOpenClanMessage();" label="ui_items_cc_right_click_message_clan" condition="(0 and IsInClan() and IsClanMember(ui_lastSelectedUser))" />
+				<instance name="rightclick_menu_item2" index="5" command="PlaySound('/shared/sounds/ui/ccpanel/button_click_01.wav'); Set('_player_stats_searchname', ui_lastSelectedUser); CallEvent('player_stats_submit'); Set('_mainmenu_currentpanel', 'player_stats'); If(!IsVisible('player_stats'), CallEvent('MainMenuPanelSwitcher'));" label="ui_items_cc_right_click_view_stats" condition="" />
+				<instance name="rightclick_menu_item2" index="6" command="PlaySound('/shared/sounds/ui/ccpanel/button_click_01.wav'); ChatAddBuddy(ui_lastSelectedUser);" label="ui_items_cc_right_click_add_buddy" condition="(!IsBuddy(ui_lastSelectedUser) and !StringEquals(StripClanTag(GetAccountName()), ui_lastSelectedUser))" />
+				<instance name="rightclick_menu_item2" index="7" command="PlaySound('/shared/sounds/ui/ccpanel/button_click_01.wav'); Trigger('ShowRemoveBuddyPanel');" label="ui_items_cc_right_click_remove_buddy" condition="(IsBuddy(ui_lastSelectedUser) and !StringEquals(StripClanTag(GetAccountName()), ui_lastSelectedUser))" />
+				<instance name="rightclick_menu_item2" index="8" command="PlaySound('/shared/sounds/ui/ccpanel/button_click_01.wav'); GameInvite(ui_lastSelectedUser);" label="ui_items_cc_right_click_invite_to_game" condition="(((IsPrivateGame() and IsHost()) or !IsPrivateGame()) and !StringEquals(StripClanTag(GetAccountName()), ui_lastSelectedUser) and ChatUserOnline(ui_lastSelectedUser) and ChatInGame() and !ChatUserInGame(ui_lastSelectedUser))" />
+				<instance name="rightclick_menu_item2" index="9" command="PlaySound('/shared/sounds/ui/ccpanel/button_click_01.wav'); GetUserInfo(ui_lastSelectedUser);" label="ui_items_cc_right_click_user_info" condition="(!StringEquals(StripClanTag(GetAccountName()), ui_lastSelectedUser))" />
+				<instance name="rightclick_menu_item2" index="10" command="PlaySound('/shared/sounds/ui/ccpanel/button_click_01.wav'); ChatChannelKick(ui_lastSelectedUser, ui_currentChannel);" label="ui_items_cc_right_click_channel_kick" condition="(!StringEquals(StripClanTag(GetAccountName()), ui_lastSelectedUser) and ChatGetAdminLevel(StripClanTag(GetAccountName()), ui_currentChannel) gt ChatGetAdminLevel(ui_lastSelectedUser, ui_currentChannel))" />
+				<instance name="rightclick_menu_item2" index="11" command="PlaySound('/shared/sounds/ui/ccpanel/button_click_01.wav'); ChatChannelBan(ui_lastSelectedUser, ui_currentChannel);" label="ui_items_cc_right_click_channel_ban" condition="(!StringEquals(StripClanTag(GetAccountName()), ui_lastSelectedUser) and ChatGetAdminLevel(StripClanTag(GetAccountName()), ui_currentChannel) gt ChatGetAdminLevel(ui_lastSelectedUser, ui_currentChannel))" />
+				<instance name="rightclick_menu_item2" index="12" command="PlaySound('/shared/sounds/ui/ccpanel/button_click_01.wav'); ChatChannelSilence(ui_lastSelectedUser, ui_currentChannel, 5);" label="ui_items_cc_right_click_channel_silence" condition="(!StringEquals(StripClanTag(GetAccountName()), ui_lastSelectedUser) and ChatGetAdminLevel(StripClanTag(GetAccountName()), ui_currentChannel) gt ChatGetAdminLevel(ui_lastSelectedUser, ui_currentChannel))" />
+				<instance name="rightclick_menu_item2" index="13" command="PlaySound('/shared/sounds/ui/ccpanel/button_click_01.wav'); Trigger('ShowIgnorePanel');" label="ui_items_cc_right_click_ignore" condition="(!StringEquals(StripClanTag(GetAccountName()), ui_lastSelectedUser) and !ChatIsIgnored(ui_lastSelectedUser))" />
+				<instance name="rightclick_menu_item2" index="14" command="PlaySound('/shared/sounds/ui/ccpanel/button_click_01.wav'); ChatUnignore(ui_lastSelectedUser);" label="ui_items_cc_right_click_unignore" condition="(!StringEquals(StripClanTag(GetAccountName()), ui_lastSelectedUser) and ChatIsIgnored(ui_lastSelectedUser))" />
+				<instance name="rightclick_menu_item2" index="15" command="PlaySound('/shared/sounds/ui/ccpanel/button_click_01.wav'); Trigger('ShowAddBanPanel');" label="ui_items_cc_right_click_addban" condition="(!StringEquals(StripClanTag(GetAccountName()), ui_lastSelectedUser) and !ChatIsBanned(ui_lastSelectedUser))" />
+				<instance name="rightclick_menu_item2" index="16" command="PlaySound('/shared/sounds/ui/ccpanel/button_click_01.wav'); ChatRemoveBanlist(ui_lastSelectedUser);" label="ui_items_cc_right_click_remban" condition="(!StringEquals(StripClanTag(GetAccountName()), ui_lastSelectedUser) and ChatIsBanned(ui_lastSelectedUser))" />
+				<instance name="rightclick_menu_item2" index="17" command="PlaySound('/shared/sounds/ui/ccpanel/button_click_01.wav'); ChatChannelPromote(ui_lastSelectedUser, ui_currentChannel);" label="ui_items_cc_right_click_channel_promote" condition="(!StringEquals(StripClanTag(GetAccountName()), ui_lastSelectedUser) and ChatGetAdminLevel(StripClanTag(GetAccountName()), ui_currentChannel) gt (ChatGetAdminLevel(ui_lastSelectedUser, ui_currentChannel) + 1))" />
+				<instance name="rightclick_menu_item2" index="18" command="PlaySound('/shared/sounds/ui/ccpanel/button_click_01.wav'); ChatChannelDemote(ui_lastSelectedUser, ui_currentChannel);" label="ui_items_cc_right_click_channel_demote" condition="(!StringEquals(StripClanTag(GetAccountName()), ui_lastSelectedUser) and ChatGetAdminLevel(StripClanTag(GetAccountName()), ui_currentChannel) gt ChatGetAdminLevel(ui_lastSelectedUser, ui_currentChannel) and ChatIsAdmin(ui_lastSelectedUser, ui_currentChannel))" />
+				<instance name="rightclick_menu_item2" index="19" command="PlaySound('/shared/sounds/ui/ccpanel/button_click_01.wav'); ChatPromoteClanMember(ui_lastSelectedUser);" label="ui_items_cc_right_click_clan_promote" condition="(!StringEquals(StripClanTag(GetAccountName()), ui_lastSelectedUser) and IsClanMember(ui_lastSelectedUser) and ChatIsClanLeader(StripClanTag(GetAccountName())) and !ChatIsClanLeader(ui_lastSelectedUser) and !ChatIsClanOfficer(ui_lastSelectedUser))" />
+				<instance name="rightclick_menu_item2" index="20" command="PlaySound('/shared/sounds/ui/ccpanel/button_click_01.wav'); ChatDemoteClanMember(ui_lastSelectedUser);" label="ui_items_cc_right_click_clan_demote" condition="(!StringEquals(StripClanTag(GetAccountName()), ui_lastSelectedUser) and IsClanMember(ui_lastSelectedUser) and ChatIsClanLeader(StripClanTag(GetAccountName())) and !ChatIsClanLeader(ui_lastSelectedUser) and ChatIsClanOfficer(ui_lastSelectedUser))" />
+				<instance name="rightclick_menu_item2" index="21" command="PlaySound('/shared/sounds/ui/ccpanel/button_click_01.wav'); Trigger('ShowRemoveFromClanPanel');" label="ui_items_cc_right_click_clan_remove" condition="(!StringEquals(StripClanTag(GetAccountName()), ui_lastSelectedUser) and IsClanMember(ui_lastSelectedUser) and (ChatIsClanLeader(StripClanTag(GetAccountName())) or ChatIsClanOfficer(StripClanTag(GetAccountName()))) and !ChatIsClanLeader(ui_lastSelectedUser) and !ChatIsClanOfficer(ui_lastSelectedUser))" />
+				<instance name="rightclick_menu_item2" index="22" command="PlaySound('/shared/sounds/ui/ccpanel/button_click_01.wav'); ChatInviteUserToClan(ui_lastSelectedUser);" label="ui_items_cc_right_click_clan_invite" condition="(!StringEquals(StripClanTag(GetAccountName()), ui_lastSelectedUser) and !ChatUserIsInClan(ui_lastSelectedUser) and (ChatIsClanLeader(StripClanTag(GetAccountName())) or ChatIsClanOfficer(StripClanTag(GetAccountName()))))" />
+				<instance name="rightclick_menu_item2" index="23" command="PlaySound('/shared/sounds/ui/ccpanel/button_click_01.wav'); Trigger('ShowLeaveClanPanel');" label="ui_items_cc_right_click_clan_leave" condition="(StringEquals(StripClanTag(GetAccountName()), ui_lastSelectedUser) and IsInClan(ui_lastSelectedUser))"/>
+				<instance name="rightclick_menu_item2" index="24" command="PlaySound('/shared/sounds/ui/ccpanel/button_click_01.wav');" commandlua="HoN_Matchmaking:InvitePlayerName(self, GetCvarString('ui_lastSelectedUser'))" label="ui_items_cc_right_click_invite_to_tmm" condition="(!StringEquals(StripClanTag(GetAccountName()), ui_lastSelectedUser) and ChatUserOnline(ui_lastSelectedUser) and !ChatInGame() and (IsInGroup() or IsVisible('matchmaking')) and !IsInQueue() and !ChatUserInGame(ui_lastSelectedUser))" />
+				<instance name="rightclick_menu_item2" index="25" command="PlaySound('/shared/sounds/ui/ccpanel/button_click_01.wav'); If(!WidgetExists('watch_user_box_' # StripClanTag(ui_lastSelectedUser)) and (watch_user_activeWatches lt 3), Call('watch_user_main', 'Instantiate( \'watch_user_box\', \'user\', \'' # StripClanTag(ui_lastSelectedUser) # '\' );' )); " label="ui_items_cc_right_click_watch_game" condition="((IsBuddy(ui_lastSelectedUser) or IsClanMember(ui_lastSelectedUser) or IsStaff()) and ChatUserInGame(ui_lastSelectedUser) and !StringEquals(StripClanTag(GetAccountName()), ui_lastSelectedUser))" />
+				<instance name="rightclick_menu_item2" index="26" command="PlaySound('/shared/sounds/ui/ccpanel/button_click_01.wav'); ChatSpectatePlayer(ui_lastSelectedUser, false);" label="ui_items_cc_right_click_spectate_player" condition="(!ChatInGame() and ChatUserInGame(ui_lastSelectedUser) and ChatHasServerInfo(ui_lastSelectedUser) and !StringEquals(StripClanTag(GetAccountName()), ui_lastSelectedUser))" />
+				<instance name="rightclick_menu_item2" index="27" command="PlaySound('/shared/sounds/ui/ccpanel/button_click_01.wav'); ChatSpectatePlayer(ui_lastSelectedUser, true);" label="ui_items_cc_right_click_mentor_player" condition="(!ChatInGame() and ChatUserInGame(ui_lastSelectedUser) and ChatHasServerInfo(ui_lastSelectedUser) and !StringEquals(StripClanTag(GetAccountName()), ui_lastSelectedUser))" />
+				<instance name="rightclick_menu_item2" index="28" command="PlaySound('/shared/sounds/ui/ccpanel/button_click_01.wav'); ChatJoinGameAsStaff(ui_lastSelectedUser);" label="ui_items_cc_right_click_staff_spectate" condition="((IsStaff() or IsCaster()) and !ChatInGame() and ChatUserInGame(ui_lastSelectedUser) and ChatHasServerInfo(ui_lastSelectedUser) and !StringEquals(StripClanTag(GetAccountName()), ui_lastSelectedUser))" />
+			</menu>
+		</template>
+	</if>
+
+	<template name="combobox_item_icon">
+		<image width="100@" height="100%" x="35@" texture="{texture}"/>
+		<label height="100%" x="160@" font="dyn_9" color="{color=white}" textvalign="center" shadow="true" shadowoffset="1" content="{label}"/>
+	</template>
+
+	<template name="Ncombobox_item">
+		<label height="100%" x="50@" font="{font=dyn_9}" color="{color=white}" textvalign="center" shadow="true" shadowoffset="1" content="{label}"/>
+	</template>
+
+	<if condition="!cg_newMainInterface">
+		<template name="field">
+			<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.5h" color="#171a28"/>
+			<frame texture="/ui/frames/roundframe.tga" color="#bbdefa" borderthickness="0.5h"/>
+			<textbox
+				name="{widgetname}"
+				taborder="{order}"
+				passwordchar="{passchar=}"
+				maxlength="{maxlength=-1}"
+				y="{y=0.3h}"
+				width="{width=-1.0h}"
+				align="{align=center}"
+				x="{x=0}"
+				color="invisible"
+				font="{font=dyn_9}"
+				textcolor="white"
+				shadow="true"
+				onchange="PlaySound('/shared/sounds/ui/button_slide_01.wav'); {onchange}"
+				onshow="{onshow}"
+				onfocus="{onfocus}"
+				onlosefocus="{onlosefocus}"
+				form="{form=}"
+				data="{data=}"
+				wrap="{wrap=}"
+			/>
+		</template>
+	</if>
+
+	<if condition="cg_newMainInterface">
+		<template name="field">
+			<frame texture="/ui/fe2/newui/res/common/frames/custom/frame.png" borderthickness="4" noclick="1"/>
+			<textbox
+				name="{widgetname}"
+				taborder="{order}"
+				passwordchar="{passchar=}"
+				maxlength="{maxlength=-1}"
+				y="{y=0.3h}"
+				width="{width=-1.0h}"
+				align="{align=center}"
+				x="{x=0}"
+				color="invisible"
+				font="{font=dyn_9}"
+				textcolor="#f0d3c1"
+				shadow="true"
+				onchange="PlaySound('/shared/sounds/ui/button_slide_01.wav'); {onchange}"
+				onshow="{onshow}"
+				onfocus="{onfocus}"
+				onlosefocus="{onlosefocus}"
+				form="{form=}"
+				data="{data=}"
+				wrap="{wrap=}"
+			/>
+		</template>
+
+		<template name="fieldwithlabel">
+			<panel width="{width=100%}" height="{height=2.2h}" align="{align}" valign="{valign}" float="right" noclick="1">
+				<label width="40%" style="newui_font_style_10" content="{label}" watch="{watch}" ontrigger="{ontrigger}"/>
+				<image width="32i" height="32i" valign="center" hflip="1" texture="/ui/fe2/newui/res/communicator/arrow.png" noclick="1"/>
+				<panel width="50%" valign="center" noclick="1">
+					<instance
+						name="field"
+						widgetname="{fieldname}"
+						order="{fieldorder}"
+						form="{fieldform}"
+						data="{fielddata}"
+						onchange="{fieldonchange}"
+						maxlength="{fieldmaxlength=-1}"
+						onshow="{fieldonshow}"
+						onfocus="{fieldonfocus}"
+						onlosefocus="{fieldonlosefocus}"
+						passchar="{fieldpasschar}"
+					/>
+				</panel>
+			</panel>
+		</template>
+	</if>
+
+	<template name="generic_tooltip">
+		<panel name="{tip_id}" y="{y}" x="{x}" width="{width=100%}" height="{height=100%}" align="{align=left}" valign="{valign=top}" color="invisible" visible="{visible=0}" noclick="1">
+			<frame  texture="/ui/frames/tooltip_bg.tga" color="0 0 0 .8" borderthickness=".6h" align="left" valign="top" noclick="1">
+				<frame texture="/ui/frames/roundframe.tga" color="#A0A0A0" borderthickness=".6h" noclick="1"/>
+				<label width="-5%" height="2.2h" textvalign="bottom" textalign="left" align="center" font="dyn_10" color="#ffab01" shadow="1" noclick="1">{title}</label>
+				<label y="2.2h" width="-5%" height="100%" textvalign="top" textalign="left" align="center" font="dyn_9" noclick="1" color="white" shadow="1" wrap="1" watch="{label_watch}" ontrigger="{label_ontrigger}">{label}</label>
+			</frame>
+		</panel>
+	</template>
+
+	<template name="generic_tooltip_floater">
+		<floater
+			name="{tip_id}"
+			x="{x=22}" y="{y=-22}"
+			width="{width=25.0h}"
+			align="{align=left}"
+			valign="{valign=top}"
+			visible="{visible=0}"
+			passivechildren="true"
+			grow="true"
+			noclick="1"
+			color="invisible"
+		>
+			<frame texture="/ui/frames/tooltip_bg.tga" color="0 0 0 .8" borderthickness=".6h" />
+			<frame texture="/ui/frames/roundframe.tga" color="#A0A0A0" borderthickness=".6h" />
+				<label
+					x="0.8h" y="0.6h"
+					textvalign="top"
+					textalign="left"
+					align="center"
+					font="dyn_10"
+					noclick="1"
+					color="#ffab01"
+					shadow="1"
+					wrap="1"
+					fity="true"
+					fitypadding="0.8h"
+					watch="{title_watch}" ontrigger="{title_ontrigger}"
+				>{title}</label>
+				<image x="-0.6h" y="{icony=0.6h}" noclick="1" height="{iconheight=2.5h}" width="{iconwidth=2.5h}" align="right" visible="0" color="{color=1 1 1 1}"
+					onload="If(!StringEmpty('{icon}'), Split(SetVisible(1), SetTexture('{icon}')), SetVisible(0));"
+				/>
+				<panel y="2.5h" width="-1.6h" align="center" noclick="true" grow="true" float="bottom">
+					<label
+						textvalign="top"
+						textalign="left"
+						align="center"
+						font="dyn_10"
+						noclick="1"
+						color="white"
+						shadow="1"
+						wrap="1"
+						fity="true"
+						fitxpadding="0"
+						watch="{label_watch}" ontrigger="{label_ontrigger}"
+					>{label}</label>
+					<panel height="1.0h" color="invisible" noclick="true"/>
+				</panel>
+		</floater>
+	</template>
+
+	<template name="generic_tooltip_resizey">
+		<panel
+			name="{tip_id}"
+			x="{x=2.2h}" y="{y=0}"
+			width="{width=100%}"
+			align="{align=left}"
+			valign="{valign=top}"
+			color="invisible"
+			visible="{visible=0}"
+			passivechildren="true"
+			grow="true"
+		>
+			<frame texture="/ui/frames/tooltip_bg.tga" color="0 0 0 .8" borderthickness=".6h" />
+			<frame texture="/ui/frames/roundframe.tga" color="#A0A0A0" borderthickness=".6h" />
+				<label
+					x="0.8h" y="0.6h"
+					textvalign="top"
+					textalign="left"
+					align="center"
+					font="dyn_10"
+					noclick="1"
+					color="#ffab01"
+					shadow="1"
+					wrap="1"
+					fity="true"
+					fitypadding="0.8h"
+				>{title}</label>
+				<panel y="2.5h" width="-1.6h" align="center" color="invisible" noclick="true" grow="true">
+					<label
+						textvalign="top"
+						textalign="left"
+						align="center"
+						font="dyn_10"
+						noclick="1"
+						color="white"
+						shadow="1"
+						wrap="1"
+						fity="true"
+						fitxpadding="0"
+						fitypadding="1.0h"
+						watch="{label_watch}" ontrigger="{label_ontrigger}"
+					>{label}</label>
+				</panel>
+		</panel>
+	</template>
+
+	<template name="leaver_info_tip"><!-- main only -->
+
+		<panel name="leaver_info_tip" x="{x=5.0h}" y="{y=3.5h}" width="{width=100%}" align="{align=center}" valign="{valign=top}" color="invisible" visible="{visible=0}" noclick="1" grow="true">
+
+			<frame  texture="/ui/frames/tooltip_bg.tga" color="0 0 0 .75" borderthickness=".6h" />
+			<frame texture="/ui/frames/roundframe.tga" color="#A0A0A0" borderthickness=".6h"/>
+
+			<panel y="0.5h" color="invisible" float="bottom" padding="0" noclick="1" width="100%" height="100%" grow="true">
+				<label fity="true" fitypadding="0.2h" width="-1.4h" textvalign="top" textalign="left" align="center" font="dyn_11" color="#ffab01" shadow="1" noclick="1">{title}</label>
+				<label fity="true" fitypadding="1.0h" width="-1.4h" textvalign="top" textalign="left" align="center" font="dyn_10" color="white" shadow="1" noclick="1" wrap="1">{label}</label>
+
+				<panel align="center" width="-1.0h" color="invisible" grow="true" noclick="true">
+					<label fity="true" fitypadding="0.5h" width="48%" textvalign="top" textalign="right" align="left" font="dyn_10" color="#3abde7" shadow="1" noclick="1">main_leaver_tip_tier1</label>
+					<label fity="true" fitypadding="0.5h" width="45%" textvalign="top" textalign="left" align="right" font="dyn_10" color="#d0d0d0" shadow="1" noclick="1">main_leaver_tip_tier1_threshold</label>
+				</panel>
+				<panel align="center" width="-1.0h" color="invisible" grow="true" noclick="true">
+					<label fity="true" fitypadding="0.5h" width="48%" textvalign="top" textalign="right" align="left" font="dyn_10" color="#3abde7" shadow="1" noclick="1">main_leaver_tip_tier2</label>
+					<label fity="true" fitypadding="0.5h" width="45%" textvalign="top" textalign="left" align="right" font="dyn_10" color="#d0d0d0" shadow="1" noclick="1">main_leaver_tip_tier2_threshold</label>
+				</panel>
+				<panel align="center" width="-1.0h" color="invisible" grow="true" noclick="true">
+					<label fity="true" fitypadding="0.5h" width="48%" textvalign="top" textalign="right" align="left" font="dyn_10" color="#3abde7" shadow="1" noclick="1">main_leaver_tip_tier3</label>
+					<label fity="true" fitypadding="0.5h" width="45%" textvalign="top" textalign="left" align="right" font="dyn_10" color="#d0d0d0" shadow="1" noclick="1">main_leaver_tip_tier3_threshold</label>
+				</panel>
+				<panel align="center" width="-1.0h" color="invisible" grow="true" noclick="true">
+					<label fity="true" fitypadding="1.2h" width="48%" textvalign="top" textalign="right" align="left" font="dyn_10" color="#3abde7" shadow="1" noclick="1">main_leaver_tip_tier4</label>
+					<label fity="true" fitypadding="1.2h" width="45%" textvalign="top" textalign="left" align="right" font="dyn_10" color="#d0d0d0" shadow="1" noclick="1">main_leaver_tip_tier4_threshold</label>
+				</panel>
+			</panel>
+			<!--
+				<panel align="center" width="-1.0h" color="invisible" grow="true" noclick="true">
+					<label fity="true" fitypadding="0.5h" width="48%" textvalign="top" textalign="right" align="left" font="dyn_10" color="#3abde7" shadow="1" noclick="1">main_leaver_tip_tier5</label>
+					<label fity="true" fitypadding="0.5h" width="45%" textvalign="top" textalign="left" align="right" font="dyn_10" color="#d0d0d0" shadow="1" noclick="1">main_leaver_tip_tier5_threshold</label>
+				</panel>
+				<panel align="center" width="-1.0h" color="invisible" grow="true" noclick="true">
+					<label fity="true" fitypadding="0.5h" width="48%" textvalign="top" textalign="right" align="left" font="dyn_10" color="#3abde7" shadow="1" noclick="1">main_leaver_tip_tier6</label>
+					<label fity="true" fitypadding="0.5h" width="45%" textvalign="top" textalign="left" align="right" font="dyn_10" color="#d0d0d0" shadow="1" noclick="1">main_leaver_tip_tier6_threshold</label>
+				</panel>
+				<panel align="center" width="-1.0h" color="invisible" grow="true" noclick="true">
+					<label fity="true" fitypadding="1.2h" width="48%" textvalign="top" textalign="right" align="left" font="dyn_10" color="#3abde7" shadow="1" noclick="1">main_leaver_tip_tier7</label>
+					<label fity="true" fitypadding="1.2h" width="45%" textvalign="top" textalign="left" align="right" font="dyn_10" color="#d0d0d0" shadow="1" noclick="1">main_leaver_tip_tier7_threshold</label>
+				</panel>
+			-->
+		</panel>
+	</template>
+
+	<template name="Noptions_checkbox_state">
+		<widgetstate statename="{state}" float="right" padding="3%">
+			<panel width="{size}" color="invisible">
+				<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.5h" color="white"/>
+				<frame texture="/ui/frames/roundframe.tga" color="#3abde7" borderthickness="0.5h"/>
+				<image hmargin="0.15h" vmargin="0.15h" texture="/ui/elements/check.tga" visible="{checked}" />
+			</panel>
+			<label width="-{size}" height="100%" textvalign="center" font="{font}" color="{color}" shadow="true" watch="{watch}" ontrigger="{ontrigger}" >{label}</label>
+		</widgetstate>
+	</template>
+
+	<template name="Noptions_combobox_state">
+		<widgetstate statename="{state}">
+			<panel color="invisible">
+				<image height="100%" width="-198@" align="center" texture="/ui/info/combobox_background_c.tga" color="{color}" rendermode="{rendermode=normal}"/>
+				<image height="100%" width="100@" align="left" texture="/ui/info/combobox_background_l.tga" color="{color}" rendermode="{rendermode=normal}"/>
+				<image height="100%" width="100@" align="right" texture="/ui/info/combobox_background_r.tga" color="{color}" rendermode="{rendermode=normal}"/>
+				<image x="-1" width="100@" height="100%" align="right" valign="center" texture="/ui/info/combobox_button_{image}.tga" rendermode="{rendermode=normal}" />
+			</panel>
+		</widgetstate>
+	</template>
+
+	<template name="simple_tooltip">
+		<panel name="{tip_id}" group="{group}" y="{y}" x="{x}" width="{width}" height="{height}" align="{align=left}" valign="{valign=top}" color="invisible" visible="{visible=0}" noclick="1" watch="{panelwatch=}" ontrigger="{panelontrigger=}">
+			<frame  texture="/ui/frames/tooltip_bg.tga" color="0 0 0 .75" borderthickness=".6h" align="left" valign="top">
+				<frame texture="/ui/frames/roundframe.tga" color="#A0A0A0" borderthickness=".6h"/>
+				<label y="{textvoffset=0}" width="-6%" height="-6%" textvalign="{textvalign=center}" textalign="center" align="center" valign="center" font="{font=dyn_9}" color="white" shadow="1" wrap="1" watch="{watch=}" ontrigger="{ontrigger=}" onshow="{onlabelshow=}">{label}</label>
+			</frame>
+		</panel>
+	</template>
+
+	<template name="simple_tooltip_floater">
+		<floater
+			name="{tip_id}"
+			x="{x=2.2h}" y="{y=-0.5h}"
+			width="{width=25.0h}"
+			align="{align=left}"
+			valign="{valign=top}"
+			color="invisible"
+			visible="{visible=0}"
+			passivechildren="true"
+			grow="true"
+			watch="{floaterwatch}"
+			ontrigger="{floaterontrigger}"
+		>
+			<frame texture="/ui/frames/tooltip_bg.tga" color="0 0 0 .8" borderthickness=".6h" />
+			<frame texture="/ui/frames/roundframe.tga" color="#A0A0A0" borderthickness=".6h" />
+				<label
+					y="0.6h"
+					width="-1.6h"
+					textvalign="top"
+					textalign="{textalign=center}"
+					align="center"
+					font="dyn_10"
+					noclick="1"
+					color="white"
+					shadow="1"
+					wrap="1"
+					fity="true"
+					fitypadding="0.6h"
+					onshow="{onlabelshow=}"
+					watch="{labelwatch=}"
+					ontrigger="{labelontrigger=}"
+					name="{label_name=}"
+				>{label}</label>
+		</floater>
+	</template>
+
+	<template name="simple_tooltip_nowrap">
+		<floater name="{tip_id}" grow="true" x="{x=0.5h}" y="{y=0}" height="{height=2.6h}" align="{align=left}" valign="{valign=bottom}" color="invisible" visible="{visible=0}" noclick="1">
+			<frame texture="/ui/frames/tooltip_bg.tga" color="0 0 0 .8" borderthickness=".6h" />
+			<frame texture="/ui/frames/roundframe.tga" color="#A0A0A0" borderthickness=".6h" />
+			<label x="1.0h" fitx="true" fitxpadding="1.0h" height="100%" textvalign="center" font="dyn_10" color="white" shadow="true" content="{label}" watch="{labelwatch}" ontrigger="{labelontrigger=}"/>
+		</floater>
+	</template>
+
+	<template name="tip_mark" >
+		<panel name="{tip_name}" color="invisible" x="{x}" y="{y}" width="{width}" height="{height}" valign="{valign}" align="{align}" noclick="true" onevent0="{onevent0}" onevent1="{onevent1}" watch="{watch}" ontrigger="{ontrigger}" visible="{tip_visible=true}">
+			<button
+				name="{button_name}"
+				color="invisible"
+				visible="{visible=true}"
+				onmouseover="If(!StringEmpty('{tip_id}'), Cmd('UICall {tip_id} SetVisible(1)')); PlaySound('/shared/sounds/ui/button_over_01.wav'); {onmouseover=}"
+				onmouseout=" If(!StringEmpty('{tip_id}'), Cmd('UICall {tip_id} SetVisible(0)')); {onmouseout=}"
+				oninstantiatelua="{oninstantiatelua}"
+				onmousewheeluplua="{onmousewheeluplua}"
+				onmousewheeldownlua="{onmousewheeldownlua}"
+				onmouseoverlua="{onmouseoverlua}"
+				onmouseoutlua="{onmouseoutlua}"
+			>
+				<widgetstate statename="up">
+					<image width="100%" height="100%" valign="center" align="center" texture="/ui/elements/tip_mark_up.tga" />
+				</widgetstate>
+
+				<widgetstate statename="over">
+					<image width="100%" height="100%" valign="center" align="center" texture="/ui/elements/tip_mark_over.tga" />
+				</widgetstate>
+			</button>
+		</panel>
+	</template>
+
+	<template name="cc_friend_header">
+		<instance name="header_bar" color=".53 .53 .55 .85" />
+		<frame color="invisible" bordercolor="#3e474f" borderthickness="2" noclick="1" />
+		<frame color="invisible" bordercolor="0 0 0 .8" borderthickness="1" noclick="1" />
+
+		<label width="-1.0h" height="-6%" textvalign="center" textalign="left" align="center" valign="center" font="dyn_10" color="white"  shadow="1" wrap="1">{label}</label>
+	</template>
+
+	<template name="testpp_Template_StoneFrame">
+		<panel name="{window_name}" x="{x}" y="{y}" width="{width=100%}" height="{height=100%}" align="{align}" valign="{valign}" cangrab="{cangrab=false}" noclick="{noclick=true}">
+			<panel y="2.5h" width="-5.0h" height="-4.0h" align="center" valign="top" color="{backercolor=0 0 0 0.8}" onclick="{onclick}" noclick="true" />
+
+			<image height="-5.0h" width="5.3h" vscale="{vscale=1}" vtile="1" align="left" valign="center" texture="/ui/frames/stone_l.tga" noclick="1"/>
+			<image height="-5.0h" width="5.3h" vscale="{vscale=1}" vtile="1" align="right" valign="center" texture="/ui/frames/stone_r.tga" noclick="1"/>
+
+			<image height="5.3h" width="-5.0h" uscale="{uscale=1}" utile="1" align="center" valign="top" texture="/ui/frames/stone_t.tga" noclick="1"/>
+			<image height="5.3h" width="-5.0h" uscale="{uscale=1}" utile="1" align="center" valign="bottom" texture="/ui/frames/stone_b.tga" noclick="1"/>
+
+			<image y="1" height="10.6h" width="5.3h" align="left" valign="top" texture="/ui/frames/stone_tl.tga" noclick="1"/>
+			<image y="1" height="10.6h" width="5.3h" align="right" valign="top" texture="/ui/frames/stone_tr.tga" noclick="1"/>
+
+			<image height="10.6h" width="21.2h" align="left" valign="bottom" texture="/ui/frames/stone_bl.tga" noclick="1"/>
+			<image height="10.6h" width="21.2h" align="right" valign="bottom" texture="/ui/frames/stone_br.tga" noclick="1"/>
+
+			<panel y="0.6h" align="center" valign="center" width="-8h" height="-7.0h" color="invisible" visible="1" noclick="1" >
+				<instance name="{body}" onclose="{onclose}" />
+			</panel>
+
+		</panel>
+	</template>
+
+	<template name="simple_loading_dialog" >
+		<panel noclick="1" height="7h" width="25h" align="center" valign="center" watch="Loading" ontrigger="SetVisible(param);" onshowlua="self:BringToFront()" visible="0" >
+			<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.8h" color=".1 .1 .1 1"/>
+			<frame texture="/ui/frames/roundframe.tga" color=".2 .2 .2 1" borderthickness="0.8h"/>
+
+			<animatedimage texture="/ui/elements/throb/throb.tga" noclick="1" loop="1" fps="30" onshow="StartAnim(1);" width="80@" height="80%" valign="center" x="1.0h" />
+
+			<label font="dyn_18" width="-80@" align="right" textalign="center" textvalign="center" content="general_loading" outline="1" color=".9 .9 .9" />
+		</panel>
+	</template>
+
+	<template name="closexbuttonstate">
+		<widgetstate statename="{statename}" x="{x}" y="{y}">
+			<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.5h" color="{bgcolor=#910000}" blockinput="false" noclick="true"/>
+			<frame texture="/ui/frames/roundframe.tga" color="0 0 0 1" borderthickness="0.5h" blockinput="false" noclick="true"/>
+			<image width="1.3h" height="1.3h" align="center" valign="center" color="{xcolor=.75 .75 .75 1}" texture="/ui/elements/closex.tga" noclick="true" />
+		</widgetstate>
+	</template>
+
+	<template name="closexbutton">
+		<button
+			name="{id}"
+			x="{x}" y="{y}"
+			width="{width=100%}" height="{height=100%}"
+			align="{align}" valign="{valign}"
+			color="invisible"
+			visible="{visible=true}"
+			onclick="PlaySound('/shared/sounds/ui/ccpanel/button_close_02.wav');"
+			onclicklua="{onclicklua}"
+			onmouseover="PlaySound('/shared/sounds/ui/ccpanel/button_over_01.wav');"
+		>
+			<instance name="closexbuttonstate" statename="up"/>
+			<instance name="closexbuttonstate" statename="over" bgcolor="#dc0000" xcolor="#ffffff"/>
+			<instance name="closexbuttonstate" statename="down" bgcolor="#620e0e" x="1" y="1"/>
+			<instance name="closexbuttonstate" statename="disabled" bgcolor="#666666" xcolor="#aaaaaa"/>
+
+		</button>
+	</template>
+
+	<template name="streammessage">
+		<panel width="25%" height="7h" align="center " valign="center" watch="StreamDataLost" ontriggerlua="self:SetVisible(AtoB(param))" watch1="StreamReplayFinished" ontrigger1lua="self:SetVisible(AtoB(param));" visible="0" color="0 0 0 0.5" noclick="true" watch2="ReplayStopPlayback" ontrigger2lua="self:SetVisible(false)">
+			<label watch="StreamDataLost" ontriggerlua="self:SetText(Translate('streaming_network_busy'))" watch1="StreamReplayFinished" ontrigger1lua="self:SetText(Translate('streaming_live_finished'))" textalign="center" textvalign="center" color="0.8 0.8 0.8 1" font="dyn_24" shadow="true" noclick="1" />
+		</panel>
+	</template>
+
+	<template name="facebookstreamingame_info">
+		<panel width="8h" height="2.5h" float="right" padding=".25h" noclick="1">
+			<image width="32i" height="32i" valign="center" texture="/ui/fe2/facebookstream/{image}.tga" noclick="1"/>
+			<panel width="6h" height="2h" valign="center" noclick="1">
+				<label name="facebookstreamingame_{id}" textvalign="center" font="dyn_10" color="#dddddd" outline="1" outlinecolor="black" content="0"
+					watch="WebFacebookStream{watch}"
+					ontriggerlua="self:SetText(param1)"
+					watch1="FacebookStreamStatus"
+					ontrigger1lua="if not AtoB(param) then self:SetText('-') end"
+				/>
+			</panel>
+		</panel>
+	</template>
+	<template name="facebookstreamingame">
+		<panel name="facebookstreamingame" x="{x}" y="{y}" width="12h" height="5h" align="{align}" valign="{valign}" visible="1" noclick="1"
+			oninstantiatelua="
+				self:SetVisible(GetCvarBool('facebook_stream_ongoing'))
+			"
+			watch="FacebookStreamStatus"
+			ontriggerlua="self:SetVisible(AtoB(param))"
+		>
+			<image width="512i" height="64i" align="center" valign="center" color="red" texture="/ui/fe2/facebookstream/ingamebg.tga" noclick="1"/>
+			<panel width="64i" height="64i" valign="center" noclick="1">
+				<image width="64i" height="64i" align="center" valign="center" texture="/ui/fe2/facebookstream/stream.tga" noclick="1"/>
+				<image x="1h" y="1.2h" width="16i" height="16i" align="center" valign="center" texture="/ui/fe2/facebookstream/livenow.tga" noclick="1"/>
+			</panel>
+			<panel x="6h" width="8h" height="100%" float="bottom" padding="0.1h" noclick="1">
+				<instance name="facebookstreamingame_info" id="views" image="views" watch="Views"/>
+				<instance name="facebookstreamingame_info" id="likes" image="likes" watch="Likes"/>
+			</panel>
+		</panel>
+	</template>
+<!--
+	For reference
+
+	ui_items_1.interface	(game stuff)
+		game
+		game_qa
+		game_replay_control
+		game_shop_v3
+		game_spectator
+		main_popup
+		game_dev
+
+
+	ui_items.package		(removed, now uses ui_items_1)
+		game_tutorial1
+		game_dev
+
+	ui_items_2.interface	(primarily in main)
+		loading
+		loading_matchmaking_connecting
+		main
+		social_panel
+		web_panel
+
+-->
+
+</package>

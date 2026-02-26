@@ -1,0 +1,3005 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+
+	<trigger name="recipeCompDisplay0"/>
+	<trigger name="recipeCompDisplay1"/>
+	<trigger name="recipeCompDisplay2"/>
+	<trigger name="recipeCompDisplay3"/>
+	<trigger name="recipeCompDisplay4"/>
+	<trigger name="recipeCompDisplay5"/>
+	<trigger name="recipeCompDisplay6"/>
+	<trigger name="recipeCompDisplay7"/>
+	<trigger name="recipeCompDisplay8"/>
+	<trigger name="recipeCompDisplay9"/>
+	<trigger name="recipeCompDisplay10"/>
+	<trigger name="recipeCompDisplay11"/>
+	<trigger name="recipeCompDisplay12"/>
+	<trigger name="recipeCompDisplay13"/>
+	<trigger name="recipeCompDisplay14"/>
+	<trigger name="recipeCompDisplay15"/>
+	<trigger name="recipeCompDisplay16"/>
+	<trigger name="recipeCompDisplay17"/>
+	<trigger name="recipeCompDisplay18"/>
+	<trigger name="recipeCompDisplay19"/>
+	<trigger name="recipeCompDisplay20"/>
+	<trigger name="recipeCompDisplay21"/>
+	<trigger name="recipeCompDisplay22"/>
+	<trigger name="recipeCompDisplay23"/>
+	<trigger name="recipeCompDisplay24"/>
+	<trigger name="recipeCompDisplay25"/>
+	<trigger name="recipeCompDisplay26"/>
+	<trigger name="recipeCompDisplay27"/>
+	<trigger name="recipeCompDisplay28"/>
+	<trigger name="recipeCompDisplay29"/>
+	<trigger name="recipeCompDisplay30"/>
+	<trigger name="recipeCompDisplay31"/>
+	<trigger name="recipeCompDisplay32"/>
+	<trigger name="recipeCompDisplay33"/>
+	<trigger name="recipeCompDisplay34"/>
+	<trigger name="recipeCompDisplay35"/>
+	<trigger name="recipeCompDisplay36"/>
+	<trigger name="recipeCompDisplay37"/>
+	<trigger name="recipeCompDisplay38"/>
+	<trigger name="recipeCompDisplay39"/>
+	<trigger name="recipeCompDisplay40"/>
+	<trigger name="recipeCompDisplay41"/>
+	<trigger name="recipeCompDisplay42"/>
+	<trigger name="recipeCompDisplay43"/>
+	<trigger name="recipeCompDisplay44"/>
+	<trigger name="recipeCompDisplay45"/>
+	<trigger name="recipeCompDisplay46"/>
+	<trigger name="recipeCompDisplay47"/>
+	<trigger name="recipeCompDisplay48"/>
+	<trigger name="recipeCompDisplay49"/>
+	<trigger name="recipeCompDisplay50"/>
+	<trigger name="recipeCompDisplay51"/>
+	<trigger name="recipeCompDisplay52"/>
+	<trigger name="recipeCompDisplay53"/>
+	<trigger name="recipeCompDisplay54"/>
+	<trigger name="recipeCompDisplay55"/>
+	<trigger name="recipeCompDisplay56"/>
+	<trigger name="recipeCompDisplay57"/>
+	<trigger name="recipeCompDisplay58"/>
+	<trigger name="recipeCompDisplay59"/>
+	<trigger name="recipeCompDisplay60"/>
+	<trigger name="recipeCompDisplay61"/>
+	<trigger name="recipeCompDisplay62"/>
+	<trigger name="recipeCompDisplay63"/>
+	<trigger name="recipeCompDisplay64"/>
+	<trigger name="recipeCompDisplay65"/>
+	<trigger name="recipeCompDisplay66"/>
+	<trigger name="recipeCompDisplay67"/>
+	<trigger name="recipeCompDisplay68"/>
+	<trigger name="recipeCompDisplay69"/>
+	<trigger name="recipeCompDisplay70"/>
+	<trigger name="recipeCompDisplay71"/>
+	<trigger name="recipeCompDisplay72"/>
+	<trigger name="recipeCompDisplay73"/>
+	<trigger name="recipeCompDisplay74"/>
+	<trigger name="recipeCompDisplay75"/>
+	<trigger name="recipeCompDisplay76"/>
+	<trigger name="recipeCompDisplay77"/>
+	<trigger name="recipeCompDisplay78"/>
+	<trigger name="recipeCompDisplay79"/>
+	
+	<!-- These are used for the boot view items -->
+	<trigger name="recipeCompDisplay272"/>
+	<trigger name="recipeCompDisplay273"/>
+	<trigger name="recipeCompDisplay274"/>
+	<trigger name="recipeCompDisplay275"/>
+	<trigger name="recipeCompDisplay276"/>
+	<trigger name="recipeCompDisplay277"/>
+	<trigger name="recipeCompDisplay278"/>
+	<trigger name="recipeCompDisplay279"/>
+	
+	<trigger name="recipeCompDisplay80"/>
+	<trigger name="recipeCompDisplay81"/>
+	<trigger name="recipeCompDisplay82"/>
+	<trigger name="recipeCompDisplay83"/>
+	<trigger name="recipeCompDisplay84"/>
+	<trigger name="recipeCompDisplay85"/>
+	<trigger name="recipeCompDisplay86"/>
+	<trigger name="recipeCompDisplay87"/>
+	<trigger name="recipeCompDisplay88"/>
+	<trigger name="recipeCompDisplay89"/>
+	<trigger name="recipeCompDisplay90"/>
+	<trigger name="recipeCompDisplay91"/>
+	<trigger name="recipeCompDisplay92"/>
+	<trigger name="recipeCompDisplay93"/>
+	<trigger name="recipeCompDisplay94"/>
+	<trigger name="recipeCompDisplay95"/>
+	<trigger name="recipeCompDisplay96"/>
+	<trigger name="recipeCompDisplay97"/>
+	<trigger name="recipeCompDisplay98"/>
+	<trigger name="recipeCompDisplay99"/>
+	<trigger name="recipeCompDisplay100"/>
+	<trigger name="recipeCompDisplay101"/>
+	<trigger name="recipeCompDisplay102"/>
+	<trigger name="recipeCompDisplay103"/>
+	<trigger name="recipeCompDisplay104"/>
+	<trigger name="recipeCompDisplay105"/>
+	<trigger name="recipeCompDisplay106"/>
+	<trigger name="recipeCompDisplay107"/>
+	<trigger name="recipeCompDisplay108"/>
+	<trigger name="recipeCompDisplay109"/>
+	<trigger name="recipeCompDisplay110"/>
+	<trigger name="recipeCompDisplay111"/>
+	<trigger name="recipeCompDisplay112"/>
+	<trigger name="recipeCompDisplay113"/>
+	<trigger name="recipeCompDisplay114"/>
+	<trigger name="recipeCompDisplay115"/>
+	<trigger name="recipeCompDisplay116"/>
+	<trigger name="recipeCompDisplay117"/>
+	<trigger name="recipeCompDisplay118"/>
+	<trigger name="recipeCompDisplay119"/>
+	<trigger name="recipeCompDisplay120"/>
+	<trigger name="recipeCompDisplay121"/>
+	<trigger name="recipeCompDisplay122"/>
+	<trigger name="recipeCompDisplay123"/>
+	<trigger name="recipeCompDisplay124"/>
+	<trigger name="recipeCompDisplay125"/>
+	<trigger name="recipeCompDisplay126"/>
+	<trigger name="recipeCompDisplay127"/>
+	<trigger name="recipeCompDisplay128"/>
+	<trigger name="recipeCompDisplay129"/>
+	<trigger name="recipeCompDisplay130"/>
+	<trigger name="recipeCompDisplay131"/>
+	<trigger name="recipeCompDisplay132"/>
+	<trigger name="recipeCompDisplay133"/>
+	<trigger name="recipeCompDisplay134"/>
+	<trigger name="recipeCompDisplay135"/>
+	<trigger name="recipeCompDisplay136"/>
+	<trigger name="recipeCompDisplay137"/>
+	<trigger name="recipeCompDisplay138"/>
+	<trigger name="recipeCompDisplay139"/>
+	
+	<trigger name="updateShopItem0"/>
+	<trigger name="updateShopItem1"/>
+	<trigger name="updateShopItem2"/>
+	<trigger name="updateShopItem3"/>
+	<trigger name="updateShopItem4"/>
+	<trigger name="updateShopItem5"/>
+	<trigger name="updateShopItem6"/>
+	<trigger name="updateShopItem7"/>
+	<trigger name="updateShopItem8"/>
+	<trigger name="updateShopItem9"/>
+	<trigger name="updateShopItem10"/>
+	<trigger name="updateShopItem11"/>
+	<trigger name="updateShopItem12"/>
+	<trigger name="updateShopItem13"/>
+	<trigger name="updateShopItem14"/>
+	<trigger name="updateShopItem15"/>
+	<trigger name="updateShopItem16"/>
+	<trigger name="updateShopItem17"/>
+	<trigger name="updateShopItem18"/>
+	<trigger name="updateShopItem19"/>
+	<trigger name="updateShopItem20"/>
+	<trigger name="updateShopItem21"/>
+	<trigger name="updateShopItem22"/>
+	<trigger name="updateShopItem23"/>
+	<trigger name="updateShopItem24"/>
+	<trigger name="updateShopItem25"/>
+	<trigger name="updateShopItem26"/>
+	<trigger name="updateShopItem27"/>
+	<trigger name="updateShopItem28"/>
+	<trigger name="updateShopItem29"/>
+	<trigger name="updateShopItem30"/>
+	<trigger name="updateShopItem31"/>
+	<trigger name="updateShopItem32"/>
+	<trigger name="updateShopItem33"/>
+	<trigger name="updateShopItem34"/>
+	<trigger name="updateShopItem35"/>
+	<trigger name="updateShopItem36"/>
+	<trigger name="updateShopItem37"/>
+	<trigger name="updateShopItem38"/>
+	<trigger name="updateShopItem39"/>
+	<trigger name="updateShopItem40"/>
+	<trigger name="updateShopItem41"/>
+	<trigger name="updateShopItem42"/>
+	<trigger name="updateShopItem43"/>
+	<trigger name="updateShopItem44"/>
+	<trigger name="updateShopItem45"/>
+	<trigger name="updateShopItem46"/>
+	<trigger name="updateShopItem47"/>
+	<trigger name="updateShopItem48"/>
+	<trigger name="updateShopItem49"/>
+	<trigger name="updateShopItem50"/>
+	<trigger name="updateShopItem51"/>
+	<trigger name="updateShopItem52"/>
+	<trigger name="updateShopItem53"/>
+	<trigger name="updateShopItem54"/>
+	<trigger name="updateShopItem55"/>
+	<trigger name="updateShopItem56"/>
+	<trigger name="updateShopItem57"/>
+	<trigger name="updateShopItem58"/>
+	<trigger name="updateShopItem59"/>
+	
+	<trigger name="updateShopItemSimple0"/>
+	<trigger name="updateShopItemSimple1"/>
+	<trigger name="updateShopItemSimple2"/>
+	<trigger name="updateShopItemSimple3"/>
+	<trigger name="updateShopItemSimple4"/>
+	<trigger name="updateShopItemSimple5"/>
+	<trigger name="updateShopItemSimple6"/>
+	<trigger name="updateShopItemSimple7"/>
+	<trigger name="updateShopItemSimple8"/>
+	<trigger name="updateShopItemSimple9"/>
+	<trigger name="updateShopItemSimple10"/>
+	<trigger name="updateShopItemSimple11"/>
+	<trigger name="updateShopItemSimple12"/>
+	<trigger name="updateShopItemSimple13"/>
+	<trigger name="updateShopItemSimple14"/>
+	<trigger name="updateShopItemSimple15"/>
+	<trigger name="updateShopItemSimple16"/>
+	<trigger name="updateShopItemSimple17"/>
+	<trigger name="updateShopItemSimple18"/>
+	<trigger name="updateShopItemSimple19"/>
+	<trigger name="updateShopItemSimple20"/>
+	<trigger name="updateShopItemSimple21"/>
+	<trigger name="updateShopItemSimple22"/>
+	<trigger name="updateShopItemSimple23"/>
+	<trigger name="updateShopItemSimple24"/>
+	<trigger name="updateShopItemSimple25"/>
+	<trigger name="updateShopItemSimple26"/>
+	<trigger name="updateShopItemSimple27"/>
+	<trigger name="updateShopItemSimple28"/>
+	<trigger name="updateShopItemSimple29"/>
+	<trigger name="updateShopItemSimple30"/>
+	<trigger name="updateShopItemSimple31"/>
+	<trigger name="updateShopItemSimple32"/>
+	<trigger name="updateShopItemSimple33"/>
+	<trigger name="updateShopItemSimple34"/>
+	<trigger name="updateShopItemSimple35"/>
+	<trigger name="updateShopItemSimple36"/>
+	<trigger name="updateShopItemSimple37"/>
+	<trigger name="updateShopItemSimple38"/>
+	<trigger name="updateShopItemSimple39"/>
+	<trigger name="updateShopItemSimple40"/>
+	<trigger name="updateShopItemSimple41"/>
+	<trigger name="updateShopItemSimple42"/>
+	<trigger name="updateShopItemSimple43"/>
+	<trigger name="updateShopItemSimple44"/>
+	<trigger name="updateShopItemSimple45"/>
+	<trigger name="updateShopItemSimple46"/>
+	<trigger name="updateShopItemSimple47"/>
+	<trigger name="updateShopItemSimple48"/>
+	<trigger name="updateShopItemSimple49"/>
+	<trigger name="updateShopItemSimple50"/>
+	<trigger name="updateShopItemSimple51"/>
+	<trigger name="updateShopItemSimple52"/>
+	<trigger name="updateShopItemSimple53"/>
+	<trigger name="updateShopItemSimple54"/>
+	<trigger name="updateShopItemSimple55"/>
+	<trigger name="updateShopItemSimple56"/>
+	<trigger name="updateShopItemSimple57"/>
+	<trigger name="updateShopItemSimple58"/>
+	<trigger name="updateShopItemSimple59"/>
+	
+	<trigger name="shopComponentAnimStep0"/>
+	<trigger name="shopComponentAnimStep1"/>
+
+	<trigger name="SetShopDisplay"/>
+	<trigger name="componentReadTree"/>
+	<trigger name="componentApplyTreeAnim"/>
+	<trigger name="componentSlotVis"/>
+	<trigger name="updateRecipeDisplay"/>
+	<trigger name="componentPreMatchFound"/>
+	<trigger name="recipeFindMatch"/>
+	<trigger name="recipeCheckComponentMatch"/>
+	<trigger name="setRecipeViewStyle"/>
+	<trigger name="setExtendedRecipeTreeTexture"/>
+	<trigger name="shopGlobalItemTooltipUpdate"/>
+	<trigger name="shopGlobalItemTooltipIcon"/>
+	<trigger name="shopBuyRemainingInfo"/>
+	<trigger name="cleanRecommendedItemString"/>
+	<trigger name="buildGuideErrorString"/>
+
+	<trigger name="storeAlphaUpdate"/>
+	
+	<trigger name="tut_shopcatagoryrefresh" />
+	<trigger name="tut_shopcatagoryhighlightrefresh" />
+	<trigger name="tut_shopitemrefresh" />
+	
+	<!--
+		 The actual transition object needs both source and destination information:
+			0 - Source Index
+			1 - Source X
+			2 - Source Y
+			3 - Source Width
+			4 - Source Height
+			5 - Destination Index
+			6 - Destination X
+			7 - Destination Y			// This has to calculate its Y position based on its container and eventual (post-slide) position
+			8 - Destination Width
+			9 - Destination Height
+	-->
+	
+	<template name="shopdescription_tooltip">
+		<floater
+			name="{tip_id}"
+			x="2.2h" y="2.2h"
+			width="25.0h"
+			valign="top"
+			color="invisible"
+			visible="{visible=0}"
+			passivechildren="true"
+			grow="true"
+		>
+			<frame texture="/ui/frames/tooltip_bg.tga" color="0 0 0 .8" borderthickness=".6h" />
+			<frame texture="/ui/frames/roundframe.tga" color="#A0A0A0" borderthickness=".6h" />
+
+				<panel y="0.7h" width="-1.6h" align="center" color="invisible" noclick="true" grow="true">
+					<label
+						textvalign="top"
+						textalign="left"
+						align="center"
+						font="dyn_10"
+						noclick="1"
+						color="white"
+						shadow="1"
+						wrap="1"
+						fity="true"
+						fitxpadding="0"
+						fitypadding="0.8h"
+
+					>{label}</label>
+				</panel>
+		</floater>
+	</template>
+	
+	<if condition="!cg_useNewShop2">
+		<template name="shop_cats_button">
+			<panel height="6.5h" color="invisible" noclick="1">
+				<panel width="5.4h" height="5.4h" align="center">
+					<image texture="/items/shops/{iconfile}.tga" />
+					<button 
+						texture="/ui/elements/button_bevel_sml.tga"
+						onmouseover="PlaySound('/shared/sounds/ui/button_over_03.wav'); showWidget('shop_cat_tip{slot}');"
+						onmouseout="hideWidget('shop_cat_tip{slot}');"
+						onclick="
+							PlaySound('/shared/sounds/ui/button_click_03.wav');
+							if(
+								StringEquals(GetActiveShop(), '{shopname}'),
+								SetActiveShop(''),
+								SetActiveShop('{shopname}')
+							);
+						"
+						interactive="false"
+						name="shop_category_button_{slot}"
+					/>
+					<label x="0.5h" y="0.2h" width="100%" height="100%" textalign="left" textvalign="top" color="white" shadow="true" font="dyn_12" noclick="true" watch="ShopKey{slot}" ontrigger="SetText(Translate(param));" content="{slot}" />
+					<frame
+						borderthickness="3"
+						bordercolor="yellow"
+						color="invisible"
+						visible="true"
+						watch="ShopType"
+						interactive="false"
+						ontriggerlua="self:SetVisible(param0 == '{shopname}')"
+						noclick="true"
+						passivechildren="true"
+					>
+						<image x="3" y="3" width="-6" height="-6" color="yellow" texture="/ui/fps/selected.tga" rendermode="additive"/>
+					</frame>
+				</panel>
+			</panel>
+		</template>	
+	
+		<template name="shop_item_button">
+			<panel width="20%" color="invisible" noclick="1" watch="ShopItem{index}" ontrigger="SetVisible(param0); ">
+				<panel width="5.4h" height="5.4h" align="center" valign="top" noclick="1">
+					<image
+						watch="ShopItem{index}"
+						ontrigger="If(param6 and !(param8 and param17 and !param18) and param25, SetRenderMode('normal'), SetRenderMode('grayscale'));"
+						ontriggerlua="self:SetTexture(param3)"
+					/>
+
+					<!-- Recipe Scroll -->
+					<panel color="black" watch="ShopItem{index}" ontrigger="SetVisible(param8 and !param17 and !param18);" noclick="1">
+						<image
+							width="55%" height="55%"
+							align="center" valign="center"
+							watch="ShopItem{index}"
+							ontrigger="If(param6 or (param8 and param12), SetRenderMode('normal'), SetRenderMode('grayscale'));"
+							ontriggerlua="self:SetTexture(param3)"
+						/>
+						<image
+							texture="/ui/elements/shop/scroll_overlay.tga"
+							watch="ShopItem{index}"
+							ontrigger="If(param6 or (param8 and param12), SetRenderMode('normal'), SetRenderMode('grayscale'));"
+						/>
+					</panel>
+
+					<image
+						width="50%" height="50%"
+						align="right" valign="top"
+						texture="/ui/elements/shop/new.tga"
+						watch="ShopItem{index}"
+						ontrigger="SetVisible(param23);"
+						noclick="true"
+					/>
+
+					<image
+						width="50%" height="50%" x="0.5h" y="-0.5h"
+						align="left" valign="bottom"
+						texture="/ui/elements/shop/good.tga"
+						watch="ShopItem{index}"
+						ontrigger="SetVisible(param24);"
+						noclick="true"
+					/>
+
+					<button
+						texture="/ui/elements/button_bevel_sml.tga"
+						onmouseout="HideWidget('shop_item_tooltip{index}'); HideWidget('shop_item_tooltip_short{index}');"
+						onclick="PlaySound('/shared/sounds/ui/button_click_02.wav'); Purchase('{index}');"
+						watch="ShopItem{index}"
+						onmouseover="PlaySound('/shared/sounds/ui/button_over_03.wav');
+								ShowWidget('shop_item_tooltip{index}'); ShowWidget('shop_item_tooltip_short{index}');"
+						interactive="false"
+						name="shop_item_{index}"
+					/>
+					<image
+						texture="$white"
+						rendermode="overlay"
+						watch="ShopItem{index}"
+						ontrigger="SetVisible(true);
+							If(!(param6 and !(param8 and param17 and !param18)) or !param25,
+								SetColor('#404040'),
+								SetVisible(false)
+							);"
+						noclick="true"
+					/>
+
+					<!-- Cooldown -->
+					<piegraph start="270" end="-90" square="true" color="#000000cc" watch="ShopItem{index}" ontrigger="SetVisible(param21 gt 0); SetValue(param20);" noclick="true"/>
+
+					<!-- HotKey used to select this item -->
+					<label x="0.5h" y="0.2h" width="100%" height="100%" textalign="left" textvalign="top" color="white" shadow="true" font="dyn_12" noclick="true" watch="ShopItem{index}" ontriggerlua="self:SetText(Translate(param13));" content="{index}" />
+
+					<label x="-0.5h" y="0.2h" width="100%" height="100%" textalign="right" textvalign="top" color="white" shadow="true" font="dyn_12" noclick="true" watch="ShopItem{index}" ontriggerlua="self:SetText(param19);"/>
+
+					<frame
+						borderthickness="4"
+						bordercolor="yellow"
+						color="invisible"
+						visible="true"
+						watch="RecipeItemType ShopItemType{index}"
+						ontrigger="SetVisible(StringEquals(RecipeItemType, ShopItemType{index}));"
+						noclick="true"
+						passivechildren="true"
+					>
+						<image x="3" y="3" width="-6" height="-6" color="yellow" texture="/ui/fps/selected.tga" rendermode="additive"/>
+					</frame>
+
+					<image
+						texture="/ui/common/new_shop_interface/stash.tga"
+						x="10%"
+						y="10%"
+						height="40%"
+						width="40%"
+						align="right"
+						valign="bottom"
+						watch="ShopItem{index}"
+						ontrigger="SetVisible(param15 and !param16 and !param17 and !param18);"
+						noclick="true"
+					/>
+
+					<image
+						texture="/ui/common/new_shop_interface/magnify.tga"
+						x="10%"
+						y="10%"
+						height="40%"
+						width="40%"
+						align="right"
+						valign="bottom"
+						watch="ShopItem{index}"
+						ontrigger="SetVisible(!param16 and param18);"
+						noclick="true"
+					/>
+
+					<!-- Cooldown timer -->
+					<label noclick="1" valign="center" align="center" textvalign="center" textalign="center" color="#87CEEB" shadow="1" font="dyn_12" watch="ShopItem{index}" ontrigger="SetVisible(param21 gt 0); SetText(FtoT(param21, 1, 0, '-'));" />
+				</panel>
+				<!-- Cost -->
+				<label y="5.2h" height="1.0h" align="center" valign="top" textalign="center" textvalign="top" color="white" shadow="1" noclick="1" font="dyn_9" watch="{watch}{index}" ontriggerlua="self:SetText(param4);" />
+			</panel>
+		</template>
+		
+		<template name="shop_item_component">
+			<panel width="{width=25%}" color="invisible" noclick="1" watch="{watch}{index}" ontrigger="SetVisible(param0);">
+				<panel width="5.4h" height="5.4h" align="center" valign="top" noclick="1">
+					<image
+						watch="{watch}{index}"
+						ontrigger="If(param6 and !(param8 and param17 and !param18), SetRenderMode('normal'), SetRenderMode('grayscale'));"
+						ontriggerlua="self:SetTexture(param3)"
+					/>
+
+					<!-- Recipe Scroll -->
+					<panel color="black" watch="{watch}{index}" ontrigger="SetVisible(param8 and !param17 and !param18 and !(param12 and param18));" noclick="1">
+						<image
+							width="55%" height="55%"
+							align="center" valign="center"
+							watch="{watch}{index}"
+							ontrigger="If(param6 or (param8 and param12), SetRenderMode('normal'), SetRenderMode('grayscale'));"
+							ontriggerlua="self:SetTexture(param3)"
+						/>
+						<image texture="/ui/elements/shop/scroll_overlay.tga"/>
+					</panel>
+
+					<button
+						texture="/ui/elements/button_bevel_sml.tga"
+						onmouseoverlua="PlaySound('/shared/sounds/ui/button_over_03.wav') Trigger('shopGlobalItemTooltipIcon', Shop.recipe.cur.Texture) ShowWidget('{tooltip}{index}') ShowWidget('{tooltip}_short{index}')"
+						onmouseout="HideWidget('{tooltip}{index}'); HideWidget('{tooltip}_short{index}');"
+						onclick="PlaySound('/shared/sounds/ui/button_click_02.wav');
+							{cmd}('{index}');"
+						interactive="false"
+						name="shop_component_{usedin}{index}"
+					/><!-- The 'usedin' bit is just so that it has a unique name for things such as highlighting this exact icon in the tutorial - Merc -->
+					<image
+						texture="$white"
+						rendermode="overlay"
+						watch="{watch}{index}"
+						ontrigger="SetVisible(true);
+							If(!(param6 and !(param8 and param17 and !param18)),
+								SetColor('#404040'),
+								SetVisible(false)
+							);"
+						noclick="true"
+					/>
+
+					<!-- Cooldown -->
+					<piegraph start="270" end="-90" square="true" color="#000000cc" watch="{watch}{index}" ontrigger="SetVisible(param21 gt 0); SetValue(param20);" noclick="true"/>
+
+					<!-- Stock -->
+					<label x="-0.5h" y="0.2h" width="100%" height="100%" textalign="right" textvalign="top" color="white" shadow="true" font="dyn_12" noclick="true" watch="{watch}{index}" ontriggerlua="self:SetText(param19);"/>
+
+					<!-- Owned Item Indicator -->
+					<frame
+						borderthickness="0.2h"
+						color="invisible"
+						watch="{watch}{index}"
+						ontrigger="
+						If(
+							param11 or param26,
+							If(
+								param11,
+								SetBorderColor('#16e124'),
+								SetBorderColor('#ddbb24')
+							),
+							SetBorderColor('invisible'));
+						"
+						noclick="1"
+					/>
+
+					<image
+						texture="/ui/common/new_shop_interface/stash.tga"
+						x="10%"
+						y="10%"
+						height="40%"
+						width="40%"
+						align="right"
+						valign="bottom"
+						watch="{watch}{index}"
+						ontrigger="SetVisible(param15 and !param17 and !param18);"
+						noclick="true"
+					/>
+					<image
+						texture="/ui/common/new_shop_interface/magnify.tga"
+						x="10%"
+						y="10%"
+						height="40%"
+						width="40%"
+						align="right"
+						valign="bottom"
+						watch="{watch}{index}"
+						ontrigger="SetVisible(param18);"
+						noclick="true"
+					/>
+
+					<!-- Hot Key -->
+					<label x="0.5h" y="0.2h" width="100%" height="100%" textalign="left" textvalign="top" color="white" shadow="true" font="dyn_11" noclick="true" watch="{watch}{index}" ontrigger="SetText(Translate(param13));" />
+
+					<!-- Cooldown timer -->
+					<label noclick="1" valign="center" align="center" textvalign="center" textalign="center" color="#87CEEB" shadow="1" font="dyn_12" watch="{watch}{index}" ontrigger="SetVisible(param21 gt 0); SetText(FtoT(param21, 1, 0, '-'));" />
+				</panel>
+				<!-- Cost -->
+				<label y="5.4h" height="1.0h" align="center" valign="top" textalign="center" textvalign="top" color="white" shadow="1" font="dyn_9" watch="{watch}{index}" ontrigger="SetVisible(param8 and !param12); SetText(param4);" />
+				<label y="5.4h" height="1.0h" align="center" valign="top" textalign="center" textvalign="top" color="white" shadow="1" font="dyn_9" watch="{watch}{index}" ontrigger="SetVisible(param12); SetText(param5);" />
+			</panel>
+		</template>
+	</if>
+	
+	<!-- Newest Shop -->
+	<style name="item_header" color="#058F31" />
+	<style name="recipe_header" color="#056490" />
+
+	<!-- Menu Item -->
+
+	<template name="menu_item_widgetstate">
+		<widgetstate statename="{statename}" x="{x}" y="{y}">
+			<image texture="/ui/common/new_shop_interface/listing_bg.tga" color="{bgColor}" />
+			<frame color="invisible" borderthickness="1" bordercolor="{bordercolor}" noclick="true"/>
+			<image x="0.6h" texture="{icon}" width="76@" height="76%" valign="center" rendermode="{rendermode=normal}"/>
+			
+			<label x="110@" font="dyn_10" textvalign="center" color="{labelColor=1 1 1 1}" shadow="true" content="{label}"
+				watch="ShopKey{slot}"
+				ontrigger="
+					##If(
+						!StringEmpty(param),
+						SetText(Translate('{label}') # ' (^960' # Translate(param) # '^*)'),##
+						SetText(Translate('{label}'));
+					##);##
+				"
+			/>
+			<panel x="-0.5h" y="0" width="1.9h" height="1.9h" valign="center" align="right" visible="0" watch="ShopKey{slot}" ontrigger="SetVisible(!StringEmpty(param));" >
+				<frame texture="/ui/frames/key.tga" width="100%" height="100%" borderthickness="33@" align="center" />
+				<label y="-1" width="100%" height="100%" font="dyn_10" align="center" textalign="center" textvalign="center" color=".1 .1 .1 1" shadow="true" shadowcolor=".8 .8 .8 1"
+					content="{slot}" watch0="ShopKey{slot}" ontrigger0="SetText(Translate(param));"
+				/>
+			</panel>				
+			<panel noclick="true" x="-.5h" width="1.7h" height="1.7h" align="right"	valign="center" visible="{showClose=false}">
+				<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.5h" color="{closeColor=#910000}" blockinput="false" noclick="true"/>
+				<frame texture="/ui/frames/roundframe.tga" color="0 0 0 1" borderthickness="0.5h" blockinput="false" noclick="true"/>
+				<image width="1.3h" height="1.3h" align="center" valign="center" color=".75 .75 .75 1" texture="/ui/elements/closex.tga" noclick="true" />
+			</panel>
+		</widgetstate>
+	</template>
+
+	<template name="menu_item">
+		<panel
+			width="100%" height="{height=3.0h}"
+			align="center"
+			name="menu_item_{shopname}{filterName}"
+		>
+			<!-- The additional panel makes facilitating the animations and whatnot much easier without interfering with grow/etc. -->
+			<panel noclick="true"
+				group="{group}"
+				onevent0="
+					SleepWidget(
+						25 * {slideIndex=0} * _shopFlag_animSpeedMult,
+						'
+							SlideX(0, 125 * _shopFlag_animSpeedMult);
+							FadeIn(125 * _shopFlag_animSpeedMult);
+						'
+					);
+				"
+				onevent1="
+					SleepWidget(
+						25 * {slideIndex=0} * _shopFlag_animSpeedMult,
+						'
+							SlideX(\'110%\', 125 * _shopFlag_animSpeedMult);
+							FadeOut(125 * _shopFlag_animSpeedMult);
+						'
+					);
+				"
+				onevent2="
+					SetX(0);
+					SetVisible(true);
+				"
+				onevent3="
+					SetX('110%');
+					SetVisible(false);
+				"
+				visible="{visible=true}"
+				x="{x}"
+			>
+				<!-- Menu Button -->
+				<button
+					width="100%"
+					height="100%"
+					color="invisible"
+					numstates="2"
+					group="menu_item_group"
+					interactive="false"
+					name="menu_button_{shopname}{filterName}"
+					onclick="
+						PlaySound('/shared/sounds/ui/button_click_03.wav');
+
+						
+						Set('_executeShopSearch', true);
+						Call(
+							'shop_search_entry',
+							'
+								If(
+									!StringEmpty(this),
+									EraseInputLine()									
+								);
+								Set(\'_lastShopSearch\', \'\');
+								CallEvent(\'shop_search_label\', 0);
+								
+							'
+						);
+						
+						If(
+							!{filter=false},
+							Set('_activeShopFilters', '')
+						);
+						
+						If(
+							{filter=false},
+							DoEvent(0),
+							If(
+								StringEquals(_lastActiveShop, '{shopname}'),
+								Trigger('SetShopDisplay', '', ''),
+								Trigger('SetShopDisplay', '{shopname}', '{shopnamereborn}')
+							)
+						);
+					"
+					onrightclick="
+						If(
+							{filter=false},
+							Split(
+								Set('_executeShopSearch', false),
+								Call(
+									'shop_search_entry',
+									'
+										If(
+											!StringEmpty(this),
+											EraseInputLine()									
+										);
+										Set(\'_lastShopSearch\', \'\');
+										CallEvent(\'shop_search_label\', 0);
+										
+									'
+								),
+								GroupCall(
+									'menu_item_group',
+									'DoEvent(3);'
+								),
+								SetButtonState(1),
+								Set('_lastActiveShop', ''),
+								PlaySound('/shared/sounds/ui/button_click_03.wav')
+							)
+						);
+						
+						Set('_activeShopFilters', '');
+						
+						If(
+							{filter=false},
+							GroupCall(
+								'menu_item_group',
+								'DoEvent(1);'
+							)
+						);
+						
+						If(
+							{filter=false},
+							Trigger('SetShopDisplay', '', '')
+						);
+					"
+					onevent="
+						If(
+							!StringEmpty('{shopname}'),
+							If(
+								StringEquals(_lastActiveShop, '{shopname}'),
+								SetButtonState(1),
+								SetButtonState(0)
+							),
+							SetButtonState(0)
+						);
+					"
+					onmouseover="
+						If(
+							!StringEmpty('{tip_id}'),
+							If(
+								WidgetExists('{tip_id}'),
+								ShowWidget('{tip_id}')
+							)
+						);
+					"
+					onmouseout="
+						If(
+							!StringEmpty('{tip_id}'),
+							If(
+								WidgetExists('{tip_id}'),
+								HideWidget('{tip_id}')
+							)
+						);
+					"
+					onevent0="
+						Set('_activeShopFilters', '');
+						GroupCall(
+							'menu_item_group',
+							'DoEvent(1);'
+						);
+						Trigger('SetShopDisplay', '', '');						
+					"
+					onevent1="
+						If(
+							!StringEmpty('{filterName}'),
+							If(
+								GetButtonState(),
+								Set('_activeShopFilters', _activeShopFilters # If(!StringEmpty(_activeShopFilters), ',', '') # '{filterName}')
+							)
+						);
+					"
+					onevent3="
+						SetButtonState(0);
+					"
+					watch="GameInfo" watch2="tut_shopcatagoryrefresh"
+					ontriggerlua="Shop:CatagoryEnable(self, param, '{shopname}', '{filterName}')"
+					ontrigger2lua="Shop:CatagoryEnable(self, param, '{shopname}', '{filterName}')"
+
+				>
+					<instance name="menu_item_widgetstate" icon="{icon}" label="{label}" slot="{slot}" statename="up" bgColor="{bgColor=.15 .15 .15 1}" bordercolor="{bordercolor=.2 .2 .2 1}"/>
+					<instance name="menu_item_widgetstate" icon="{icon}" label="{label}" slot="{slot}" statename="over" closeColor="#dc0000" bgColor="{bgHover=.25 .25 .25 1}" bordercolor="{bordercolor=.2 .2 .2 1}"/>
+					<instance name="menu_item_widgetstate" icon="{icon}" label="{label}" slot="{slot}" statename="down" x="1" y="1" bgColor="{bgHover=.25 .25 .25 1}" bordercolor="{bordercolor=.2 .2 .2 1}" />
+					<instance name="menu_item_widgetstate" icon="{icon}" label="{label}" slot="{slot}" statename="disabled" rendermode="grayscale" bgColor="0.1 0.1 0.1 1" bordercolor="0.05 0.05 .005 1" labelColor="0.3 0.3 0.3 1"/>
+					
+					<instance name="menu_item_widgetstate" icon="{icon}" label="{label}" slot="{slot}" statename="up2" showClose="{showClose=false}" bgColor="{bgHover=.25 .25 .25 1}" bordercolor="{bordercolor2=.3 .3 .3 1}"/>
+					<instance name="menu_item_widgetstate" icon="{icon}" label="{label}" slot="{slot}" statename="over2" showClose="{showClose=false}" closeColor="#dc0000" bgColor="{bgHover=.25 .25 .25 1}" bordercolor="{bordercolor2=.3 .3 .3 1}"/>
+					<instance name="menu_item_widgetstate" icon="{icon}" label="{label}" slot="{slot}" statename="down2" showClose="{showClose=false}" x="1" y="1" bgColor="{bgHover=.25 .25 .25 1}" bordercolor="{bordercolor2=.3 .3 .3 1}"/>
+					<instance name="menu_item_widgetstate" icon="{icon}" label="{label}" slot="{slot}" statename="disabled2" showClose="{showClose=false}" rendermode="grayscale" bgColor="0.1 0.1 0.1 1" bordercolor="0.05 0.05 .005 1" labelColor="0.3 0.3 0.3 1"/>
+					<!-- Highlight for tutorial -->
+					<modelpanel
+						name="menu_button_highlight_{shopname}"
+						visible="0"
+						noclick="1"
+						model="/ui/common/models/main/button.mdf"
+						modelscale="2.1"
+						anim="idle"
+						camerapos="0 -150 0"
+						cameraangles="0 0 0"
+						camerafov="80.5"
+						carmerafar="7000"
+						depthclear="false"
+						depthcompress="true"
+						sunazimuth="140"
+						sunaltitude="10"
+						suncolor="1.4 1.3 1"
+						onshow="SetEffect('/ui/common/models/main/custom.effect'));"
+						align="center" valign="center"
+						width="130%"
+					/>
+				</button>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="tree_component_base">
+		<panel y="{y}" width="26.0h" height="4.06h" align="right" noclick="true" group="tree_component_bases" luatable="1" name="tree_component_base_instance_{slotInit}"
+			onload="If(!VarExists('component_branch_height'), CreateInt('component_branch_height', GetHeight()));"
+			
+			onloadlua="Shop:RegisterTreeComponentBase(self, '{rowIndex}', '{slotInit}', '{slotSubA}', '{slotSubB}', '{slotSubC}', '{slotSubD}', '{itemY1=0}', '{itemY2=0}', '{itemY3=0}', '{itemY4=0}')" 
+		>
+
+			<!-- Sub-component -->
+			<panel x="-4.0h" width="19.14h" height="100%" valign="center" align="right" noclick="true">
+
+				<!-- 4 -->
+				<panel x="-13.8h" width="6.16h" height="100%" align="right" noclick="true">
+					<panel x="-2.24h" width="3.7h" height="3.7h" align="right" valign="center" noclick="true">
+						<instance name="recipe_component_item_icon" index="{slotSubD}"/>
+					</panel>
+					<image width="10.8h" height="5.4h" align="right" valign="center" texture="/ui/common/new_shop_interface/sub_base_left.tga" noclick="true" 					
+						onloadlua="Shop:RegisterTreeComponentImage(self, '{rowIndex}', '{slotSubD}', '19.85h', true, 0)" 
+					/>
+				</panel>
+				
+				<!-- 3 -->
+				<panel x="-9.2h" width="6.16h" height="100%" align="right" noclick="true">
+					<image width="10.8h" height="5.4h" align="right" valign="center" texture="/ui/common/new_shop_interface/sub_base_left.tga" noclick="true"					
+						onloadlua="Shop:RegisterTreeComponentImage(self, '{rowIndex}', '{slotSubC}', '15.28h', true, 0)" 
+					/>
+					<panel x="-2.24h" width="3.7h" height="3.7h" align="right" valign="center" noclick="true">
+						<instance name="recipe_component_item_icon" index="{slotSubC}"/>
+					</panel>
+				</panel>
+				
+				<!-- 2 -->
+				<panel x="-4.6h" width="6.16h" height="100%" align="right" noclick="true">
+					<image width="10.8h" height="5.4h" align="right" valign="center" texture="/ui/common/new_shop_interface/sub_base_left.tga" noclick="true"		
+						onloadlua="Shop:RegisterTreeComponentImage(self, '{rowIndex}', '{slotSubB}', '10.99h', true, 0)" 
+					/>
+					<panel x="-2.24h" width="3.7h" height="3.7h" align="right" valign="center" noclick="true">
+						<instance name="recipe_component_item_icon" index="{slotSubB}"/>
+					</panel>
+				</panel>
+
+				<!-- 1 -->
+				<panel x="0" width="6.16h" height="100%" align="right" noclick="true">
+					<image width="10.8h" height="5.4h" align="right" valign="center" texture="/ui/common/new_shop_interface/sub_base_left.tga" noclick="true"	
+						onloadlua="Shop:RegisterTreeComponentImage(self, '{rowIndex}', '{slotSubA}', '6.24h', true, 0)" 
+					/>
+					<panel x="-2.24h" width="3.7h" height="3.7h" align="right" valign="center" noclick="true">
+						<instance name="recipe_component_item_icon" index="{slotSubA}"/>
+					</panel>
+				</panel>		
+			</panel>			
+			
+			<!-- Initial Component -->
+			<panel width="3.6h" height="3.6h" valign="center" align="right" noclick="true">
+				<image noclick="true" texture="/ui/common/new_shop_interface/left_circle_frame.tga" x="0" y="0" width="6.0h" height="6.0h" valign="center" align="center"				
+					onloadlua="Shop:RegisterTreeComponentImage(self, '{rowIndex}', '{slotInit}', '0', false, 0)" 
+				/>
+				<instance name="recipe_component_item_icon" index="{slotInit}"/>
+			</panel>			
+			
+		</panel>
+	</template>
+
+	<template name="tree_buildup_base">
+		<panel y="{y}" width="26.0h" height="4.06h" align="left" noclick="true" group="tree_buildup_bases" luatable="1"
+			
+			onloadlua="Shop:RegisterTreeComponentBuildup(self, '{rowIndex}', '{slotInit}', '{slotSubA}', '{slotSubB}', '{slotSubC}', '{slotSubD}', '{itemY1=0}', '{itemY2=0}', '{itemY3=0}', '{itemY4=0}')" 		
+		>
+
+			<!-- Second Tier Buildups -->
+			<panel x="4.0h" width="19.14h" height="100%" valign="center" align="left" noclick="true">
+
+				<!-- 4 -->
+				<panel x="13.8h" width="6.16h" height="100%" align="left" noclick="true">
+					<image width="10.8h" height="5.4h" align="left" valign="center" texture="/ui/common/new_shop_interface/sub_base_right.tga" noclick="true"
+						
+						onloadlua="Shop:RegisterTreeComponentImage(self, '{rowIndex}', '{slotSubD}', '-19.85h', true, 1)" 
+					/>
+					<panel x="2.24h" width="3.7h" height="3.7h" align="left" valign="center" noclick="true">
+						<instance name="recipe_component_item_icon" index="{slotSubD}"/>
+					</panel>
+				</panel>
+
+				<!-- 3 -->
+				<panel x="9.2h" width="6.16h" height="100%" align="left" noclick="true">
+					<image width="10.8h" height="5.4h" align="left" valign="center" texture="/ui/common/new_shop_interface/sub_base_right.tga" noclick="true"
+						
+						onloadlua="Shop:RegisterTreeComponentImage(self, '{rowIndex}', '{slotSubC}', '-15.28h', true, 1)" 
+					/>
+					<panel x="2.24h" width="3.7h" height="3.7h" align="left" valign="center" noclick="true">
+						<instance name="recipe_component_item_icon" index="{slotSubC}"/>
+					</panel>
+				</panel>
+	
+				<!-- 2 -->
+				<panel x="4.6h" width="6.16h" height="100%" align="left" noclick="true">
+					<image width="10.8h" height="5.4h" align="left" valign="center" texture="/ui/common/new_shop_interface/sub_base_right.tga" noclick="true"
+						
+						onloadlua="Shop:RegisterTreeComponentImage(self, '{rowIndex}', '{slotSubB}', '-10.99h', true, 1)" 
+					/>
+					<panel x="2.24h" width="3.7h" height="3.7h" align="left" valign="center" noclick="true">
+						<instance name="recipe_component_item_icon" index="{slotSubB}"/>
+					</panel>
+				</panel>
+	
+				<!-- 1 -->
+				<panel x="0" width="4.57h" height="100%" align="left" noclick="true">
+					<image width="10.8h" height="5.4h" align="left" valign="center" texture="/ui/common/new_shop_interface/sub_base_right.tga" noclick="true"
+						
+						onloadlua="Shop:RegisterTreeComponentImage(self, '{rowIndex}', '{slotSubA}', '-6.24h', true, 1)" 
+					/>
+					<panel x="2.24h" width="3.7h" height="3.7h" align="left" valign="center" noclick="true">
+						<instance name="recipe_component_item_icon" index="{slotSubA}"/>
+					</panel>
+				</panel>
+			</panel>
+
+			<!-- Initial Buildup -->
+			<panel width="3.6h" height="3.6h" valign="center" align="left" noclick="true">
+				<image noclick="true" texture="/ui/common/new_shop_interface/right_circle_frame.tga" x="0" y="0" width="6.0h" height="6.0h" valign="center" align="center"
+					
+					onloadlua="Shop:RegisterTreeComponentImage(self, '{rowIndex}', '{slotInit}', '0', false, 1)" 
+				/>
+				<instance name="recipe_component_item_icon" index="{slotInit}"/>
+			</panel>
+
+		</panel>
+	</template>
+	
+	<template name="componentIconPlaceholder">
+		<panel noclick="true" color="invisible" visible="false" width="1" height="1"
+			watch1="instantiateRecipeTransition{id}"
+			ontrigger1lua="
+				self:SetWidth(param3)
+				self:SetHeight(param4)			
+				self:SetX(param1 - self:GetWidget('shop_base_tree_transition_parent'):GetAbsoluteX())
+				self:SetY(param2 - self:GetWidget('shop_base_tree_transition_parent'):GetAbsoluteY())								
+												
+				self:FadeIn(200 * Shop.shopFlag_animSpeedMult)
+				local yloc
+				local yIndex = Shop.rows._storeCompCurRowIndex[tonumber(param0)]
+				if (tonumber(param0) &#62; 71) then 
+					yloc = Shop.buildup.GroupTargY[yIndex]
+				else
+					yloc = Shop.component.GroupTargY[yIndex]
+				end				
+				
+				self:SlideY(
+					(
+						self:GetYFromString(
+							(yloc)
+						) +
+						(
+							(  GetCvarInt('component_branch_height') - self:GetHeight() ) / 2
+						)
+					), 200 * Shop.shopFlag_animSpeedMult
+				);
+				local param6 = param6
+				local param7 = param7
+				if (param6) and (param7) then				
+					self:Sleep(200 * Shop.shopFlag_animSpeedMult, function()
+						self:SlideX(param6 -  self:GetWidget('shop_base_tree_transition_parent'):GetAbsoluteX(), 200 * Shop.shopFlag_animSpeedMult)
+						self:SlideY(param7 -  self:GetWidget('shop_base_tree_transition_parent'):GetAbsoluteY(), 200 * Shop.shopFlag_animSpeedMult)
+						self:Sleep(200 * Shop.shopFlag_animSpeedMult, function()
+							self:FadeOut(200 * Shop.shopFlag_animSpeedMult)									
+						end)									
+					end)
+				end
+			"
+			watch="RecipeItem"
+			ontriggerlua="self:SetVisible(false)"
+		>									
+			<panel color="invisible" noclick="1"	
+				watch1="instantiateRecipeTransition{id}" ontrigger1lua="
+				local param8 = param8
+				local param9 = param9
+				if (param8) and (param9) then					
+					self:Sleep(200 * Shop.shopFlag_animSpeedMult, function()
+						self:Scale(param8, param9, 200 * Shop.shopFlag_animSpeedMult)
+					end)
+				end
+				"																	
+			>						
+				<image  noclick="true" 
+						watch1="instantiateRecipeTransition{id}" ontrigger1lua="
+						self:SetTexture(Shop.rCompVarHolders.cur[tonumber(param5)].Texture)
+						if (Shop.rCompVarHolders.cur[tonumber(param5)].Available) then
+							self:UICmd([[SetRenderMode('normal')]])
+						else
+							self:UICmd([[SetRenderMode('grayscale')]])
+						end
+					"
+				/>
+				<piegraph start="270" visible="false" end="-90" square="true" color="#000000cc" noclick="true"
+					watch="" ontrigger="SetVisible(param21 gt 0); SetValue(param20);" 
+					watch1="instantiateRecipeTransition{id}" ontrigger1="SetWatch('RecipeExpandedComponents'#param5);"
+				/> 
+				<frame color="invisible" borderthickness="1" bordercolor="0 0 0 1" noclick="true"/>
+				<!-- Owned Item Indicator -->
+				<frame
+					width="-2" height="-2" x="1" y="1"	noclick="1"
+					borderthickness="0.2h"
+					color="invisible"
+					watch1="instantiateRecipeTransition{id}" ontrigger1lua="
+						if (Shop.rCompVarHolders.cur[tonumber(param5)].OwnLocal) then 
+							self:SetBorderColor('#16e124')
+						elseif (Shop.rCompVarHolders.cur[tonumber(param5)].OwnRemote) then
+							self:SetBorderColor('#ddbb24')
+						else
+							self:SetBorderColor('invisible')
+						end
+					"									
+				/>
+				<panel color="0 0 0 0.6" visible="false" noclick="true"
+					watch1="instantiateRecipeTransition{id}" ontrigger1lua="				
+						self:SetVisible(not Shop.rCompVarHolders.cur[tonumber(param5)].Available)
+					"									
+				/>
+
+				<panel watch1="instantiateRecipeTransition{id}" ontrigger1lua="	
+						self:SetVisible(Shop.rCompVarHolders.cur[tonumber(param5)].RecipeOverlay)
+					"
+				>
+					<image align="center" valign="center" width="-45%" height="-45%" 
+						watch1="instantiateRecipeTransition{id}" ontrigger1lua="	
+							self:SetTexture(Shop.rCompVarHolders.cur[tonumber(param5)].Texture)
+						"	
+					/>
+					<image texture="/ui/elements/shop/scroll_overlay.tga"/>
+					<frame color="invisible" borderthickness="1" bordercolor=".5 .5 .5 1" />
+				</panel>
+
+				<image texture="/ui/common/new_shop_interface/stash.tga" x="0.5h" y="0.5h" width="2.2h" height="2.2h" align="right" valign="bottom" noclick="true" visible="false" 
+					watch1="instantiateRecipeTransition{id}" 
+					ontrigger1lua="Shop:CompareCurrentItemWithStash(self, param5)" 
+				/>
+				<image texture="/ui/elements/star.tga" x="-10%" y="-10%" width="15%" height="15%" align="left" valign="top" noclick="true" visible="true" color="1 1 0 1" />
+			</panel>
+		</panel>		
+	</template>
+	
+	<!-- This one handles to/from the central icon -->
+	<template name="recipeIconPlaceholder">
+		<panel noclick="true" color="invisible" visible="false" width="1" height="1"
+			watch1="InstantiateRecipeIconTrans{id}"
+			ontrigger1lua="
+				self:SetWidth(param4)
+				self:SetHeight(param5)
+				self:SetX(param2 - self:GetWidget('shop_base_tree_transition_parent'):GetAbsoluteX())
+				self:SetY(param3 - self:GetWidget('shop_base_tree_transition_parent'):GetAbsoluteY())								
+												
+				self:FadeIn(200 * Shop.shopFlag_animSpeedMult)
+				
+				if (param0 == 'RecipeExpandedComponents') then
+					local yloc
+					local yIndex = Shop.rows._storeCompCurRowIndex[tonumber(param1)]
+					if (tonumber(param1) &#62; 71) then 
+						yloc = Shop.buildup.GroupTargY[yIndex]
+					else
+						yloc = Shop.component.GroupTargY[yIndex]
+					end							
+					self:SlideY(
+						(
+							self:GetYFromString(
+								(yloc)
+							) +
+							(
+								(  GetCvarInt('component_branch_height') - self:GetHeight() ) / 2
+							)
+						), 200 * Shop.shopFlag_animSpeedMult
+					)
+				end
+				local param8 = param8
+				local param9 = param9
+				if (param8) and (param9) then
+					self:Sleep(200 * Shop.shopFlag_animSpeedMult, function()
+						self:SlideX(param8 -  self:GetWidget('shop_base_tree_transition_parent'):GetAbsoluteX(), 200 * Shop.shopFlag_animSpeedMult)
+						self:SlideY(param9 -  self:GetWidget('shop_base_tree_transition_parent'):GetAbsoluteY(), 200 * Shop.shopFlag_animSpeedMult)
+						self:Sleep(200 * Shop.shopFlag_animSpeedMult, function()
+							self:FadeOut(200 * Shop.shopFlag_animSpeedMult)									
+						end)									
+					end)
+				end
+			"
+			watch="RecipeItem"
+			ontriggerlua="self:SetVisible(false)"			
+		>
+			<panel color="invisible" noclick="1"	
+				watch1="InstantiateRecipeIconTrans{id}" ontrigger1lua="
+					self:SetWidth(param4)
+					self:SetHeight(param5)					
+					local param10 = param10
+					local param11 = param11				
+					if (param10) and (param11) then
+						self:Sleep(200 * Shop.shopFlag_animSpeedMult, function()
+							self:Scale(param10, param11, 200 * Shop.shopFlag_animSpeedMult)
+						end)
+					end
+				"																	
+			>					
+				<image  noclick="true" 
+						watch1="InstantiateRecipeIconTrans{id}" ontrigger1lua="
+						if (param6 == 'RecipeItem') then
+							self:SetTexture(Shop.recipe.cur.Texture)
+							if (Shop.recipe.cur.Available) then
+								self:UICmd([[SetRenderMode('normal')]])
+							else
+								self:UICmd([[SetRenderMode('grayscale')]])
+							end
+						elseif (Shop.rCompVarHolders.cur[tonumber(param7)]) then						
+							self:SetTexture(Shop.rCompVarHolders.cur[tonumber(param7)].Texture)
+							if (Shop.rCompVarHolders.cur[tonumber(param7)].Available) then
+								self:UICmd([[SetRenderMode('normal')]])
+							else
+								self:UICmd([[SetRenderMode('grayscale')]])
+							end						
+						end
+					"
+				/>
+				<piegraph start="270" visible="false" end="-90" square="true" color="#000000cc" noclick="true"
+					watch="" ontrigger="SetVisible(param21 gt 0); SetValue(param20);" 
+					watch1="InstantiateRecipeIconTrans{id}" ontrigger1="SetWatch(param6#param7);"
+				/> 
+				<frame color="invisible" borderthickness="1" bordercolor="0 0 0 1" noclick="true"/>
+				<!-- Owned Item Indicator -->
+				<frame
+					width="-2" height="-2" x="1" y="1"	noclick="1"
+					borderthickness="0.2h"
+					color="invisible"
+					watch1="InstantiateRecipeIconTrans{id}" ontrigger1lua="
+						if (param6 == 'RecipeItem') then	
+							if (Shop.recipe.cur.OwnLocal) then
+								self:SetBorderColor('#16e124')
+							elseif (Shop.recipe.cur.OwnRemote) then
+								self:SetBorderColor('#ddbb24')
+							else
+								self:SetBorderColor('invisible')
+							end						
+						elseif (Shop.rCompVarHolders.cur[tonumber(param7)]) then
+							if (Shop.rCompVarHolders.cur[tonumber(param7)].OwnLocal) then 
+								self:SetBorderColor('#16e124')
+							elseif (Shop.rCompVarHolders.cur[tonumber(param7)].OwnRemote) then
+								self:SetBorderColor('#ddbb24')
+							else
+								self:SetBorderColor('invisible')
+							end
+						end
+					"									
+				/>				
+				<panel color="0 0 0 0.6"
+					watch1="InstantiateRecipeIconTrans{id}" ontrigger1lua="
+						if (param6 == 'RecipeItem') then
+							self:SetVisible(not Shop.recipe.cur.Available)
+						elseif (Shop.rCompVarHolders.cur[tonumber(param7)]) then
+							self:SetVisible(not Shop.rCompVarHolders.cur[tonumber(param7)].Available)
+						end		
+					"
+					visible="false" noclick="true"
+				/>	
+				<panel
+					watch1="InstantiateRecipeIconTrans{id}" ontrigger1lua="
+						if (param6 == 'RecipeItem') then
+							self:SetVisible(false)
+						elseif (Shop.rCompVarHolders.cur[tonumber(param7)]) then
+							self:SetVisible(Shop.rCompVarHolders.cur[tonumber(param7)].RecipeOverlay)
+						end
+						"
+					visible="false"
+				>
+					<image align="center" valign="center" width="-45%" height="-45%"
+						watch1="InstantiateRecipeIconTrans{id}" ontrigger1lua="
+							if (param6 == 'RecipeItem') then
+								self:SetTexture(Shop.recipe.cur.Texture)
+							elseif (Shop.rCompVarHolders.cur[tonumber(param7)]) then
+								self:SetTexture(Shop.rCompVarHolders.cur[tonumber(param7)].Texture)
+							end
+						"
+					/>
+					<image texture="/ui/elements/shop/scroll_overlay.tga"/>
+					<frame color="invisible" borderthickness="1" bordercolor=".5 .5 .5 1" />
+				</panel>
+
+				<frame color="invisible" borderthickness="2" bordercolor="yellow" noclick="true" visible="false"
+					watch1="InstantiateRecipeIconTrans{id}" ontrigger1lua="
+						if (param6 == 'RecipeItem') then
+							self:Sleep(200 * Shop.shopFlag_animSpeedMult, function()
+								self:FadeIn(200 * Shop.shopFlag_animSpeedMult)									
+							end)							
+						end
+
+						if (param0 == 'RecipeItem') then
+							self:SetVisible(true)
+							self:Sleep(200 * Shop.shopFlag_animSpeedMult, function()
+								self:FadeOut(200 * Shop.shopFlag_animSpeedMult)									
+							end)							
+						end
+					"
+				 />
+				
+				<image texture="/ui/common/new_shop_interface/stash.tga" x="0.5h" y="0.5h" width="2.2h" height="2.2h" align="right" valign="bottom" noclick="true" visible="false"
+					watch1="InstantiateRecipeIconTrans{id}" ontrigger1lua="
+						if (param6 == 'RecipeItem') then
+							self:SetVisible(Shop.recipe.cur.ToStash)
+						else
+							Shop:CompareCurrentItemWithStash(self, param7)
+						end
+					"
+				/>
+				<image texture="/ui/elements/star.tga" x="-0.7h" y="-0.7h" width="1.4h" height="1.4h" align="left" valign="top" noclick="true" visible="false"
+					watch1="InstantiateRecipeIconTrans{id}" ontrigger1lua="
+						if (param6 == 'RecipeItem') then
+							self:SetVisible(Shop.recipe.cur.Recommended)
+						elseif (Shop.rCompVarHolders.cur[tonumber(param7)]) then
+							self:SetVisible(Shop.rCompVarHolders.cur[tonumber(param7)].Recommended)
+						end
+					"					
+					color="1 1 0 1"
+				/>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="boot_tree_item">
+	  <panel x="{slideX8=0}" width="8.0h" align="center" noclick="true" visible="false" luatable="1"
+		group="boot_tree_items"
+		
+		onloadlua="Shop:RegisterBootTreeItem(self, '{itemIndex}', '{slideX8=0}', '{slideX7=0}', '{slideX6=0}', '{slideX5=0}')" 		
+	  >
+	  
+		<!-- Icon / Button -->
+		<panel x="-0.1h" y="1.6h" width="5.0h" height="5.0h" align="center" valign="top" noclick="true">			
+			<instance name="recipe_component_item_icon" index="{itemIndex=0}" groupSuffix="2" bootViewInfo="true"/>
+		</panel>
+		
+		<!-- Frame -->
+		<image width="7.0h" height="7.0h" align="center" valign="top" texture="/ui/common/new_shop_interface/boot_frame.tga" noclick="true"/>
+
+		<!-- Cost -->
+		<panel grow="true" x="-0.7h" y="6.9h" height="1.75h" align="center" float="right" padding="0.2h" noclick="true" regrow="true" visible="false"
+			
+			onloadlua="Shop:RegisterBootTreeItemCost(self, '{itemIndex=0}')" 		
+		>
+		  <label fitx="true" height="1.75h" color="#FFCC00" shadow="true" font="dyn_10" align="center" noclick="true"
+			
+			onloadlua="Shop:RegisterBootTreeItemLabel(self, '{itemIndex=0}')" 		  
+		  />
+		  <panel height="1.75h" width="1.4h" noclick="true">
+			  <image texture="/ui/fe2/store/gold_coins.tga" width="100%" height="100@" valign="center" noclick="true"
+			/>
+		  </panel>
+		</panel>
+		<!-- Name -->
+		<label y="8.4h" fity="true" width="100%" wrap="true" textalign="center" font="dyn_10" color="1 1 1 1" shadow="true" noclick="true"
+			
+			onloadlua="Shop:RegisterBootTreeItemName(self, '{itemIndex=0}')" 		
+		/>
+
+	  </panel>
+	</template> 
+	
+	<template name="recipe_component_item_icon">
+		<button
+			visible="false" luatable="1"
+			name="RecipeComponentItemIcon{groupSuffix}{index}"
+			group="recipeComponentItemIcons{groupSuffix}"
+			color="invisible"
+			interactive="false"
+			onmouseover="
+				PlaySound('/shared/sounds/ui/button_over_03.wav');
+				ShowWidget('shopGlobalItemTooltip');
+				##GroupCall('recipe_component_item_icon_group_{groupSuffix}{index}', 'DoEvent(0)')##
+			"
+			onmouseoverlua="
+				if string.len(Shop.rCompVarHolders.cur[tonumber({index})].Entity) &gt; 5 then
+					self:UICmd([[TriggerItemTooltip(
+						'shopGlobalItemTooltipUpdate',
+						']]..Shop.rCompVarHolders.cur[tonumber({index})].Entity..[[',
+						']]..tostring(Shop.rCompVarHolders.cur[tonumber({index})].RecipeOverlay)..[['
+					)]])
+					Trigger('shopGlobalItemTooltipIcon', GetEntityIconPath(Shop.rCompVarHolders.cur[tonumber({index})].Entity))
+				end
+			"
+			onmouseout="
+				HideWidget('shopGlobalItemTooltip');
+				##GroupCall('recipe_component_item_icon_group_{groupSuffix}{index}', 'DoEvent(1)')##
+			"
+			onhide="
+				HideWidget('shopGlobalItemTooltip');
+			"
+			 onloadlua="Shop:RegisterRecipeComponentItemIcon(self, '{index}', '{groupSuffix}')" 
+			onclick="
+				PlaySound('/shared/sounds/ui/button_click_03.wav');
+			"
+			onclicklua="
+				if Input.IsAltDown() then
+					local item = Shop.rCompVarHolders.cur[tonumber({index})].Entity
+					Shop:AltClickShopItem(item)
+				end
+			"
+			onrightclick="
+				PlaySound('/shared/sounds/ui/button_click_03.wav');
+			"
+			onmouseldown="SetX(1); SetY(1);"
+			onmouselup="SetX(-1); SetY(-1);"
+			onmouserdown="SetX(1); SetY(1);"
+			onmouserup="SetX(-1); SetY(-1);"				
+		>
+			<image noclick="true" 
+				watch="recipeCompDisplay{groupSuffix}{index}" 
+				ontriggerlua="
+					self:SetTexture(Shop.rCompVarHolders.cur[tonumber({index})].Texture)
+				" 
+				watch1="RecipeExpandedComponents{index}" 
+				ontrigger1="If(param25, SetRenderMode('normal'), SetRenderMode('grayscale'));"
+			/>
+			<!--<piegraph visible="false" start="270" end="-90" square="true" color="#000000cc" watch="RecipeExpandedComponents{index}" ontrigger="SetVisible(param21 gt 0); SetValue(param20);" noclick="true"/>-->
+			<frame color="invisible" borderthickness="1" bordercolor="0 0 0 1" noclick="true"/>
+
+			<panel color="0 0 0 0.6" visible="false" watch="RecipeExpandedComponents{index}" ontrigger="SetVisible(!param25);" noclick="true"/>
+
+			<panel watch="recipeCompDisplay{groupSuffix}{index}" color="0 0 0 1"
+				ontriggerlua="
+					self:SetVisible(Shop.rCompVarHolders.cur[tonumber({index})].RecipeOverlay)
+				"
+			>
+				<image watch="recipeCompDisplay{groupSuffix}{index}" align="center" valign="center" width="-45%" height="-45%" ontriggerlua="self:SetTexture(Shop.rCompVarHolders.cur[tonumber({index})].Texture)"	/>
+				<image texture="/ui/elements/shop/scroll_overlay.tga"/>
+				<frame color="invisible" borderthickness="1" bordercolor=".5 .5 .5 1" />
+			</panel>
+			<!-- Owned Item Indicator -->
+			<frame
+				width="-2" height="-2" x="1" y="1"
+				borderthickness="0.2h"
+				color="invisible"
+				watch="RecipeExpandedComponents{index}"
+				ontrigger="
+				If(
+					param11 or param26,
+					If(
+						param11,
+						SetBorderColor('#16e124'),
+						SetBorderColor('#ddbb24')
+					),
+					SetBorderColor('invisible'));
+				"
+				noclick="1"
+			/>
+			<image texture="/ui/common/new_shop_interface/stash.tga" x="0.5h" y="0.5h" width="2.2h" height="2.2h" align="right" valign="bottom" noclick="true" visible="false" watch="RecipeExpandedComponents{index}" ontriggerlua="Shop:CompareCurrentItemWithStash(self, '{index}')"  />
+			<image texture="/ui/elements/star.tga" x="-0.7h" y="-0.7h" width="1.4h" height="1.4h" align="left" valign="top" noclick="true" visible="false" watch="recipeCompDisplay{groupSuffix}{index}" ontriggerlua="self:SetVisible(Shop.rCompVarHolders.cur[tonumber({index})].Recommended)" color="1 1 0 1" />
+			<label textalign="center" textvalign="center" width="1.5h" height="1.5h" align="right" font="dyn_10" shadow="true" color="white" watch="RecipeExpandedComponents{index}" ontriggerlua="self:SetText(param19);" noclick="true" />
+			<label noclick="1" valign="center" align="center" textvalign="center" textalign="center" color="#87CEEB" shadow="1" font="dyn_11" watch="RecipeExpandedComponents{index}" ontrigger="SetVisible(param21 gt 0); SetText(FtoT(param21, 1, 0, '-'));"/>
+			<!-- HotKey used to select this item -->
+			<label x="0.5h" y="0.2h" width="100%" height="100%" textalign="left" textvalign="top" color="white" outline="true" font="dyn_12" noclick="true" watch="RecipeExpandedComponents{index}" ontrigger="SetText(Translate(param13));" />					
+		</button>
+	</template>
+
+	<template name="shop_btn_closex">
+		<button
+			x="{x}" y="{y}" width="{width}" height="{height}" align="{align}" valign="{valign}"
+			color="invisible" visible="true"
+			name="{button_name}"
+			onmouseover="PlaySound('/shared/sounds/ui/button_over_03.wav'); ShowWidget('{tip_id=shop_close_shop}');"
+			onmouseout="HideWidget('{tip_id=shop_close_shop}');"
+			interactive="false"
+			onclick="
+				PlaySound('/shared/sounds/ui/button_click_03.wav');
+				{onclick}
+			"
+		>
+			<instance name="shop_btn_closex_state" statename="up" color="#910000"/>
+			<instance name="shop_btn_closex_state" statename="over" color="#dc0000" xcolor="1 1 1 1" />
+			<instance name="shop_btn_closex_state" statename="down" x="1" y="1" xcolor="1 1 1 1" />
+			<instance name="shop_btn_closex_state" statename="disabled" color="#777777"/>
+		</button>
+	</template>
+
+	<template name="shop_btn_closex_state">
+		<widgetstate statename="{statename}" x="{x}" y="{y}">
+		<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.5h" color="{color=#910000}" blockinput="false" noclick="true"/>
+		<frame texture="/ui/frames/roundframe.tga" color="0 0 0 1" borderthickness="0.5h" blockinput="false" noclick="true"/>
+		<image width="1.3h" height="1.3h" align="center" valign="center" color="{xcolor=.75 .75 .75 1}" texture="/ui/elements/closex.tga" noclick="true" />
+	</widgetstate>
+	</template>
+	
+	<!-- Item quickslots -->
+	<template name="menu_items_quickslot">
+		<panel x="0" y="0" noclick="1" height="6.5h" width="100%" align="left" valign="top" color="red" >
+			<panel noclick="true" height="3.5h" float="bottom" visible="false" watch="GameInfo" ontriggerlua="self:SetVisible(param0 == 'devowars')">
+				<panel height="100%" width="100@" noclick="1" float="right">
+					<frame bordercolor="black" borderthickness="1" height="100%" width="100@" noclick="1" color="black" valign="center" >
+						<panel texture="/ui/common/empty_pack.tga"/>
+					</frame>
+					<frame bordercolor="black" borderthickness="1" height="100%" width="100@" noclick="1" color="black" valign="center" >
+						<panel texture="/ui/common/empty_pack.tga"/>
+					</frame>
+					<frame bordercolor="black" borderthickness="1" height="100%" width="100@" noclick="1" color="black" valign="center" >
+						<panel texture="/ui/common/empty_pack.tga"/>
+					</frame>
+					<frame bordercolor="black" borderthickness="1" height="100%" width="100@" noclick="1" color="black" valign="center" >
+						<panel texture="/ui/common/empty_pack.tga"/>
+					</frame>
+					<frame bordercolor="black" borderthickness="1" height="100%" width="100@" noclick="1" color="black" valign="center" >
+						<panel texture="/ui/common/empty_pack.tga"/>
+					</frame>			
+				</panel>
+				<panel height="100%" width="100@" noclick="1" float="right">
+					<frame bordercolor="black" borderthickness="1" height="100%" width="100@" noclick="1" color="black" valign="center" >
+						<panel texture="/ui/common/empty_pack.tga"/>
+					</frame> 
+					<frame bordercolor="black" borderthickness="1" height="100%" width="100@" noclick="1" color="black" valign="center" >
+						<panel texture="/ui/common/empty_pack.tga"/>
+					</frame>
+					<frame bordercolor="black" borderthickness="1" height="100%" width="100@" noclick="1" color="black" valign="center" >
+						<panel texture="/ui/common/empty_pack.tga"/>
+					</frame>
+					<frame bordercolor="black" borderthickness="1" height="100%" width="100@" noclick="1" color="black" valign="center" >
+						<panel texture="/ui/common/empty_pack.tga"/>
+					</frame>
+					<frame bordercolor="black" borderthickness="1" height="100%" width="100@" noclick="1" color="black" valign="center" >
+						<panel texture="/ui/common/empty_pack.tga"/>
+					</frame>			
+				</panel>
+			</panel>
+			<panel noclick="true" height="3.5h" float="bottom" watch="GameInfo" ontriggerlua="self:SetVisible(param0 ~= 'devowars')">
+				<panel height="100%" width="100@" noclick="1" float="right">
+					<frame bordercolor="black" borderthickness="1" height="100%" width="100@" noclick="1" color="black" valign="center" >
+						<instance name="shop_quickslot" item="Item_RunesOfTheBlight" panel="5" id="1" /> 
+					</frame>
+					<frame bordercolor="black" borderthickness="1" height="100%" width="100@" noclick="1" color="black" valign="center" >
+						<instance name="shop_quickslot" item="Item_HomecomingStone" panel="5" id="2" /> 
+					</frame>
+					<frame bordercolor="black" borderthickness="1" height="100%" width="100@" noclick="1" color="black" valign="center" >
+						<instance name="shop_quickslot" item="Item_ManaPotion" panel="5" id="3" /> 
+					</frame>
+					<frame bordercolor="black" borderthickness="1" height="100%" width="100@" noclick="1" color="black" valign="center" >
+						<instance name="shop_quickslot" item="Item_HealthPotion" panel="5" id="4" /> 
+					</frame>
+					<frame bordercolor="black" borderthickness="1" height="100%" width="100@" noclick="1" color="black" valign="center" >
+						<instance name="shop_quickslot" item="Item_FlamingEye" panel="5" id="5" /> 
+					</frame>			
+				</panel>
+				<panel height="100%" width="100@" noclick="1" float="right">
+					<frame bordercolor="black" borderthickness="1" height="100%" width="100@" noclick="1" color="black" valign="center" >
+						<instance name="shop_quickslot" item="Item_ManaEye" panel="5" id="6" /> 
+					</frame>
+					<frame bordercolor="black" borderthickness="1" height="100%" width="100@" noclick="1" color="black" valign="center" >
+						<instance name="shop_quickslot" item="Item_DustOfRevelation" panel="5" id="7" /> 
+					</frame>
+					<frame bordercolor="black" borderthickness="1" height="100%" width="100@" noclick="1" color="black" valign="center" >
+						<instance name="shop_quickslot" item="Item_VeiledRot" panel="5" id="8" /> 
+					</frame>
+					<frame bordercolor="black" borderthickness="1" height="100%" width="100@" noclick="1" color="black" valign="center" >
+						<instance name="shop_quickslot" item="Item_PowerSupply" panel="5" id="9" /> 
+					</frame>
+					<frame bordercolor="black" borderthickness="1" height="100%" width="100@" noclick="1" color="black" valign="center" >
+						<instance name="shop_quickslot" item="Item_Marchers" panel="5" id="10" /> 
+					</frame>			
+				</panel>
+			</panel>
+		</panel>
+	</template>
+
+	<!-- Item quickslots 2 -->
+	<template name="menu_items_quickslot2">
+		<panel x="0" y="0" noclick="1" height="3.5h" width="100%" align="left" valign="top" >
+			<panel noclick="true" float="right" visible="false" watch="GameInfo" ontriggerlua="self:SetVisible(param0 == 'devowars')">
+				<frame bordercolor="black" borderthickness="1" height="100%" width="100@" noclick="1" color="black" valign="center" >
+					<panel texture="/ui/common/empty_pack.tga"/>
+				</frame>
+				<frame bordercolor="black" borderthickness="1" height="100%" width="100@" noclick="1" color="black" valign="center" >
+					<panel texture="/ui/common/empty_pack.tga"/>
+				</frame>
+				<frame bordercolor="black" borderthickness="1" height="100%" width="100@" noclick="1" color="black" valign="center" >
+					<panel texture="/ui/common/empty_pack.tga"/>
+				</frame>
+				<frame bordercolor="black" borderthickness="1" height="100%" width="100@" noclick="1" color="black" valign="center" >
+					<panel texture="/ui/common/empty_pack.tga"/>
+				</frame>
+				<frame bordercolor="black" borderthickness="1" height="100%" width="100@" noclick="1" color="black" valign="center" >
+					<panel texture="/ui/common/empty_pack.tga"/>
+				</frame>			
+			</panel>
+			<panel noclick="true" float="right" watch="GameInfo" ontriggerlua="self:SetVisible(param0 ~= 'devowars')">
+				<frame bordercolor="black" borderthickness="1" height="100%" width="100@" noclick="1" color="black" valign="center" >
+					<instance name="shop_quickslot" item="Item_IronBuckler" panel="5" id="6" /> 
+				</frame>
+				<frame bordercolor="black" borderthickness="1" height="100%" width="100@" noclick="1" color="black" valign="center" >
+					<instance name="shop_quickslot" item="Item_LoggersHatchet" panel="5" id="7" /> 
+				</frame>
+				<frame bordercolor="black" borderthickness="1" height="100%" width="100@" noclick="1" color="black" valign="center" >
+					<instance name="shop_quickslot" item="Item_MarkOfTheNovice" panel="5" id="8" /> 
+				</frame>
+				<frame bordercolor="black" borderthickness="1" height="100%" width="100@" noclick="1" color="black" valign="center" >
+					<instance name="shop_quickslot" item="Item_HealthPotion" panel="5" id="9" /> 
+				</frame>
+					<instance name="shop_quickslot" item="Item_FlamingEye" panel="5" id="10" /> 
+				<frame bordercolor="black" borderthickness="1" height="100%" width="100@" noclick="1" color="black" valign="center" >
+				</frame>			
+			</panel>
+		</panel>
+	</template>
+	
+	<template name="menu_items_primary">
+		<instance name="menu_item" icon="/items/shops/shop_recommended.tga" bgColor="#2e180d" bgHover="#402212" bordercolor2="#74341b" slot="11" showClose="true" shopname="Shop_Recommended" label="game_shop_label_recommended" tip_id="shop_cat_tip11" group="menuItemCategories" slideIndex="0" />
+	</template>
+
+	<template name="menu_items_basic">
+		<instance name="menu_item" icon="/items/shops/shop_supplies.tga" bgColor="#112016" bgHover="#1d3826" bordercolor2="#265f3a" slot="3" showClose="true"    shopname="Shop_Supplies"		shopnamereborn="Reborn_Shop_Supplies"	 	label="game_shop_label_supplies" tip_id="shop_cat_tip3" group="menuItemCategories" slideIndex="1" />
+		<instance name="menu_item" icon="/items/shops/shop_accessories.tga" bgColor="#112016" bgHover="#1d3826" bordercolor2="#265f3a" slot="0" showClose="true" shopname="Shop_Accessories"	shopnamereborn="Reborn_Shop_Accessories"		label="game_shop_label_accessories" tip_id="shop_cat_tip0" group="menuItemCategories" slideIndex="2" />
+		<instance name="menu_item" icon="/items/shops/shop_weapons.tga" bgColor="#112016" bgHover="#1d3826" bordercolor2="#265f3a" slot="1" showClose="true"     shopname="Shop_Weapons"		shopnamereborn="Reborn_Shop_Weapons"			label="game_shop_label_weapons" tip_id="shop_cat_tip1" group="menuItemCategories" slideIndex="3" />
+		<instance name="menu_item" icon="/items/shops/shop_relics.tga" bgColor="#112016" bgHover="#1d3826" bordercolor2="#265f3a" slot="2" showClose="true"      shopname="Shop_Relics"			shopnamereborn="Reborn_Shop_Relics"			label="game_shop_label_relics" tip_id="shop_cat_tip2" group="menuItemCategories" slideIndex="4" />		
+		<instance name="menu_item" icon="/items/shops/shop_secret.tga" bgColor="#112016" bgHover="#1d3826" bordercolor2="#265f3a" slot="4" showClose="true"      shopname="Shop_Secret"			shopnamereborn="Reborn_Shop_Secret"			label="game_shop_label_legendary" tip_id="shop_cat_tip4" group="menuItemCategories" slideIndex="5" />	
+	</template>
+
+	<template name="menu_items_recipes">
+		<instance name="menu_item" icon="/items/shops/shop_recipes1.tga" bgColor="#101d23" bgHover="#192e37" bordercolor2="#25586f" slot="5" showClose="true" shopname="Shop_Recipes1"	shopnamereborn="Reborn_Shop_Recipes1" label="game_shop_label_recipe_one" tip_id="shop_cat_tip5" group="menuItemCategories" slideIndex="6" />
+		<instance name="menu_item" icon="/items/shops/shop_recipes2.tga" bgColor="#101d23" bgHover="#192e37" bordercolor2="#25586f" slot="6" showClose="true" shopname="Shop_Recipes2"	shopnamereborn="Reborn_Shop_Recipes2" label="game_shop_label_recipe_two" tip_id="shop_cat_tip6" group="menuItemCategories" slideIndex="7" />
+		<instance name="menu_item" icon="/items/shops/shop_recipes3.tga" bgColor="#101d23" bgHover="#192e37" bordercolor2="#25586f" slot="7" showClose="true" shopname="Shop_Recipes3"	shopnamereborn="Reborn_Shop_Recipes3" label="game_shop_label_recipe_three" tip_id="shop_cat_tip7" group="menuItemCategories" slideIndex="8" />
+		<instance name="menu_item" icon="/items/shops/shop_recipes4.tga" bgColor="#101d23" bgHover="#192e37" bordercolor2="#25586f" slot="8" showClose="true" shopname="Shop_Recipes4"	shopnamereborn="Reborn_Shop_Recipes4" label="game_shop_label_recipe_four" tip_id="shop_cat_tip8" group="menuItemCategories" slideIndex="9" />
+		<instance name="menu_item" icon="/items/shops/shop_recipes5.tga" bgColor="#101d23" bgHover="#192e37" bordercolor2="#25586f" slot="9" showClose="true" shopname="Shop_Recipes5"	shopnamereborn="Reborn_Shop_Recipes5" label="game_shop_label_recipe_five" tip_id="shop_cat_tip9" group="menuItemCategories" slideIndex="10" />
+	</template>
+
+	<template name="menu_items_extra">
+		<instance name="menu_item" icon="/items/shops/shop_outpost.tga" slot="10" showClose="true" shopname="Shop_Outpost" shopnamereborn="Reborn_Shop_Outpost" label="game_shop_label_recipe_outpost" tip_id="shop_cat_tip10" group="menuItemCategories" slideIndex="12" />
+	</template>
+	
+	<template name="menu_items_devowars">
+		<instance name="menu_item" icon="/heroes/devourer/icon.tga" slot="11" showClose="true" shopname="Shop_Devo" label="Devourer Wars" tip_id="shop_cat_tip10" group="menuItemCategories" slideIndex="13" devoButton="true" />
+	</template>	
+	
+	<template name="menu_filters_0">
+		<instance name="menu_item" icon="/items/shops/shop_recommended.tga" bgColor="#2e180d" bgHover="#402212" bordercolor2="#74341b" slot="" showClose="true" shopname="" height="2.9h" label="game_shop_label_recommended" tip_id="shop_cat_tip11" group="menuItemFilters" slideIndex="0" visible="false" x="110%" filterName="Filter_Recommended" filter="true" />
+	</template>
+
+	<template name="menu_filters_1">
+		<instance name="menu_item" icon="/items/shops/filter_consumables.tga" slot="" showClose="true" shopname="" height="2.9h" label="game_shop_label_consumables" tip_id="shop_cat_tip12" group="menuItemFilters" slideIndex="1" visible="false" x="110%" filterName="Filter_Consumable" filter="true" />
+	</template>
+
+	<template name="menu_filters_2">
+		<instance name="menu_item" icon="/items/shops/filter_mobility.tga" slot="" showClose="true" shopname="" height="2.9h" label="game_shop_label_mobility" tip_id="shop_cat_tip13" group="menuItemFilters" slideIndex="2" visible="false" x="110%" filterName="Filter_Mobility" filter="true" />
+		<instance name="menu_item" icon="/items/shops/filter_attackspeed.tga" slot="" showClose="true" shopname="" height="2.9h" label="game_shop_label_attack_speed" tip_id="shop_cat_tip14" group="menuItemFilters" slideIndex="3" visible="false" x="110%" filterName="Filter_AttackSpeed" filter="true" />
+		<instance name="menu_item" icon="/items/shops/filter_damage.tga" slot="" showClose="true" shopname="" height="2.9h" label="game_shop_label_damage" tip_id="shop_cat_tip15" group="menuItemFilters" slideIndex="4" visible="false" x="110%" filterName="Filter_Damage" filter="true" />
+		<instance name="menu_item" icon="/items/shops/filter_armor.tga" slot="" showClose="true" shopname="" height="2.9h" label="game_shop_label_armor" tip_id="shop_cat_tip16" group="menuItemFilters" slideIndex="5" visible="false" x="110%" filterName="Filter_Armor" filter="true" />
+	</template>
+
+	<template name="menu_filters_3">
+		<instance name="menu_item" icon="/items/shops/filter_regen.tga" slot="" showClose="true" shopname="" height="2.9h" label="game_shop_label_regeneration" tip_id="shop_cat_tip17" group="menuItemFilters" slideIndex="6" visible="false" x="110%" filterName="Filter_Regeneration" filter="true" />
+		<instance name="menu_item" icon="/items/shops/filter_agi.tga" slot="" showClose="true" shopname="" height="2.9h" label="game_shop_label_agi" tip_id="shop_cat_tip18" group="menuItemFilters" slideIndex="7" visible="false" x="110%" filterName="Filter_Agility" filter="true" />
+		<instance name="menu_item" icon="/items/shops/filter_str.tga" slot="" showClose="true" shopname="" height="2.9h" label="game_shop_label_str" tip_id="shop_cat_tip19" group="menuItemFilters" slideIndex="8" visible="false" x="110%" filterName="Filter_Strength" filter="true" />
+		<instance name="menu_item" icon="/items/shops/filter_int.tga" slot="" showClose="true" shopname="" height="2.9h" label="game_shop_label_int" tip_id="shop_cat_tip20" group="menuItemFilters" slideIndex="9" visible="false" x="110%" filterName="Filter_Intelligence" filter="true" />
+	</template>
+
+	<template name="menu_filters_4">
+		<instance name="menu_item" icon="/items/shops/filter_booster.tga" slot="" showClose="true" shopname="" height="2.9h" label="game_shop_label_booster" tip_id="shop_cat_tip21" group="menuItemFilters" slideIndex="10" visible="false" x="110%" filterName="Filter_Booster" filter="true" />
+		<instance name="menu_item" icon="/items/shops/filter_activate.tga" slot="" showClose="true" shopname="" height="2.9h" label="game_shop_label_activatable" tip_id="shop_cat_tip22" group="menuItemFilters" slideIndex="11" visible="false" x="110%" filterName="Filter_Activatable" filter="true" />
+		<instance name="menu_item" icon="/items/shops/filter_modifier.tga" slot="" showClose="true" shopname="" height="2.9h" label="game_shop_label_modifier" tip_id="shop_cat_tip23" group="menuItemFilters" slideIndex="12" visible="false" x="110%" filterName="Filter_Modifier" filter="true" />
+	</template>
+	
+	<!-- Category Holder -->
+	<template name="category_holder">
+		<panel
+			grow="true"
+			width="100%"
+			noclick="true"
+			watch="{watch}"
+			ontriggerlua="{ontriggerlua}"
+			stickytoinvis="0"
+		>
+			<panel x="-0.5h" grow="true" width="19.0h" align="right" noclick="true">
+				<panel width="-0.6h" height="-0.6h" align="center" valign="center" color="#181b19" noclick="true"
+					watch="storeAlphaUpdate"
+					ontrigger="
+						SetColor('0.093 0.105 0.097 ' # (0.35 + (param * 0.0065)));
+					"
+				/>
+				<panel name="{menu_items}_containing_panel" y="{y=0.7h}" grow="true" width="-1.4h" align="center" float="bottom" padding="0.2h">
+					<instance name="{menu_items}"/>
+					<panel width="100%" height="0.5h" noclick="true" />
+				</panel>
+				<frame texture="/ui/common/new_shop_interface/cat_holder2.tga" borderthickness="1.8h" color="#52646e" blockinput="false" noclick="true"
+					watch="storeAlphaUpdate"
+					ontrigger="
+						SetColor('0.32 0.39 0.43 ' # (param / 100));
+						SetBorderColor('0.32 0.39 0.43 ' # (param / 100));
+					"
+				/>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="shop_recipe_item_button">	
+		<button
+			interactive="false"
+			color="invisible"
+			name="shopActiveRecipeButton_{id}"
+			watch="RecipeItem"
+			ontrigger="
+				SetOnRightClick(
+					'DoEvent(1);' #
+					If(
+						param8,
+						'
+							
+							Set(\'_lastSelectedItemEntity\', \'' # param28 # '\');
+							Trigger(
+								\'shopBuyRemainingInfo\',
+								\'' # EscapeString(param1) # '\',
+								\'' # EscapeString(param2) # '\',
+								\'' # param3 # '\'
+							);
+							CallEvent(\'purchase_components_popup\', 0);
+							
+							##PurchaseRemainingComponents(\'' # param28 # '\')##
+						',
+						'PurchaseByName(\'' # param28 # '\');'
+					)
+				);
+			"
+			ontriggerlua="
+				local item = param28
+				self:SetCallback('onclick', function(...)
+					if Input.IsAltDown() then
+						Shop:AltClickShopItem(item)
+					end
+				end)
+			"
+			watch1="{watch1}"
+			ontrigger1lua="
+				local index = tonumber(param0)
+				if  (Shop.rCompVarHolders.old[index]) and
+					((Shop.rCompVarHolders.old[index].Entity) == (Shop.recipe.cur.Entity)) and
+					(not Shop.rCompVarHolders.cur[index].FoundMatch) and
+					(not Shop.rCompVarHolders.old[index].RecipeOverlay) 
+				then
+						Shop.rCompVarHolders.cur[index].FoundMatch = true
+						Trigger('InstantiateRecipeIconTrans1',
+							'RecipeExpandedComponents',
+							param0,
+							param1,
+							param2,
+							param3,
+							param4,
+							'RecipeItem',
+							'',
+							self:GetAbsoluteX(),
+							self:GetAbsoluteY(),
+							self:GetWidth(),
+							self:GetHeight()
+						)
+				end
+			"
+			onmouseoverlua="
+				PlaySound('/shared/sounds/ui/button_over_02.wav')
+				Trigger('shopGlobalItemTooltipIcon', Shop.recipe.cur.Texture)
+				self:GetWidget('recipe_item_tooltip'):SetVisible(true)
+			"
+			onmouseoutlua="
+				self:GetWidget('recipe_item_tooltip'):SetVisible(false)
+			"
+			onevent1="
+				PlaySound('/shared/sounds/ui/button_click_03.wav');
+			"
+			onevent2lua="			
+				if (self:IsVisible()) then
+					Shop.recipe.cur.FoundMatch = false			
+					Trigger(
+						'recipeFindMatch',
+						self:GetAbsoluteX(),
+						self:GetAbsoluteY(),
+						self:GetWidth(),
+						self:GetHeight()
+					)
+				end
+			"
+			group="activeRecipeGroup" 
+			onevent4lua="
+				if (not Shop.recipe.old) or (Shop.recipe.cur.Entity ~= Shop.recipe.old.Entity) then
+					self:FadeOut(200 * Shop.shopFlag_animSpeedMult)
+				end
+			" 
+			onevent5lua="self:FadeIn(200 * Shop.shopFlag_animSpeedMult)"
+			onmouserdown="SetX(1); SetY(1);"
+			onmouserup="SetX(-1); SetY(-1);"			
+		>
+			<image watch="updateRecipeDisplay" ontriggerlua="self:SetTexture(Shop.recipe.cur.Texture)" watch1="RecipeItem" ontrigger1="If(!param25, SetRenderMode('grayscale'), SetRenderMode('normal'));" />
+			<!--<piegraph start="270" end="-90" square="true" color="#000000cc" watch="RecipeItem" ontrigger="SetVisible(param21 gt 0); SetValue(param20);" noclick="true"/>-->
+			<panel color="#404040" rendermode="overlay" watch="updateRecipeDisplay" ontriggerlua="self:SetVisible(not Shop.recipe.cur.Available)" noclick="true" watch1="RecipeItem" ontrigger1="SetVisible(!param25);"/>
+			<frame color="invisible" borderthickness="2" bordercolor="yellow" noclick="true" />
+			<image texture="/ui/common/new_shop_interface/stash.tga" x="0.3h" y="0.3h" width="2.2h" height="2.2h" align="right" valign="bottom" noclick="true" visible="false" watch="RecipeItem" ontriggerlua="self:SetVisible(Shop.recipe.cur.ToStash)" />
+			<image texture="/ui/elements/star.tga" x="-1.1h" y="-1.1h" width="2.2h" height="2.2h" align="left" valign="top" noclick="true" visible="false" watch="RecipeItem" ontriggerlua="self:SetVisible(Shop.recipe.cur.Recommended)" color="1 1 0 1" />
+			<label textalign="center" textvalign="center" width="1.5h" height="1.5h" align="right" font="dyn_10" shadow="true" color="white" watch="RecipeItem" ontriggerlua="self:SetText(param19);" noclick="true" />
+			<label noclick="1" valign="center" align="center" textvalign="center" textalign="center" color="#87CEEB" shadow="1" font="dyn_11" watch="RecipeItem" ontrigger="SetVisible(param21 gt 0); SetText(FtoT(param21, 1, 0, '-'));"/>
+		</button>
+	</template>
+	
+	<template name="shop_v4_item2">
+		<panel name="shop_v4_item2{index}" group="shop_v4_items" noclick="1" color="invisible" visible="0" width="24.4h" height="7.82h"	
+			 oninstantiatelua="Shop:RegisterItemV2Panel(self, '{index}', '{reportRowY}')" 
+		>
+			<panel width="100%" height="7.8h" color="invisible" passivechildren="1"
+				onevent1="
+					PlaySound('/shared/sounds/ui/button_click_03.wav');
+				"
+				oninstantiatelua="Shop:RegisterItemV2Button(self, '{index}', '{reportRowY}', 0, '7.82h', '24h')" 
+				onevent0lua="
+					self:GetWidget('shopGlobalItemTooltip'):SetVisible(true)
+				"
+				onmouseoutlua=" 
+					self:GetWidget('shopGlobalItemTooltip'):SetVisible(false)
+					groupcall('shop_v4_item2_group_{index=0}', 'DoEvent(0)', 'game_shop_v3')
+				"
+				onmouseldown="SetX(1); SetY(1);"
+				onmouselup="SetX(-1); SetY(-1);"
+				onmouserdown="SetX(1); SetY(1);"
+				onmouserup="SetX(-1); SetY(-1);"
+				watch2="tut_shopitemrefresh"
+				ontrigger2lua="local shopItemIndex = tonumber(Shop.ItemCur[tonumber({index})].SlotWatch)"
+			>
+				
+				<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.4h" color="{item_bgcolor=0 0 .03 .7}" blockinput="false" noclick="true" 
+						group="shop_v4_item2_group_{index=0}" onevent1lua="self:SetColor('#014216') self:DoEventN(2)" onevent0lua="self:SetColor('0 0 .03 .7') self:DoEventN(3)"
+						onevent2lua="
+							local shopAlphaValue = tonumber(Cvar.GetCvar('shopAlphaValue'):GetString())
+							local color = '0 0.25 0.086 ' .. (0.1 + (shopAlphaValue * 0.006))
+							self:SetColor(color)
+							self:SetBorderColor(color)
+						"
+						onevent3lua="
+							local shopAlphaValue = tonumber(Cvar.GetCvar('shopAlphaValue'):GetString())
+							local color = '0 0 0.03 ' .. (0.1 + (shopAlphaValue * 0.006))
+							self:SetColor(color)
+							self:SetBorderColor(color)
+						"
+						watch="updateShopItem{index}" 
+						ontriggerlua="
+							local shopItemIndex = tonumber(Shop.ItemCur[tonumber({index})].SlotWatch)
+							self:SetVisible(not Shop.ItemCur[shopItemIndex].IsRecipe)							
+						"
+					/>
+					<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.4h" color="{recipe_bgcolor=.03 0 0 .7}" visible="false" 
+						watch="updateShopItem{index}" 
+						ontriggerlua="
+							local shopItemIndex = tonumber(Shop.ItemCur[tonumber({index})].SlotWatch)
+							self:SetVisible(Shop.ItemCur[shopItemIndex].IsRecipe)							
+						"
+						blockinput="false" noclick="true"
+						group="shop_v4_item2_group_{index=0}" onevent1lua="self:SetColor('#002e45') self:DoEventN(2)" onevent0lua="self:SetColor('.03 0 0 .7') self:DoEventN(3)"
+						onevent2lua="
+							local shopAlphaValue = tonumber(Cvar.GetCvar('shopAlphaValue'):GetString())
+							local color = '0 0.18 0.27 ' .. (0.1 + (shopAlphaValue * 0.006))
+							self:SetColor(color)
+							self:SetBorderColor(color)
+						"
+						onevent3lua="
+							local shopAlphaValue = tonumber(Cvar.GetCvar('shopAlphaValue'):GetString())
+							local color = '0.03 0 0 ' .. (0.1 + (shopAlphaValue * 0.006))
+							self:SetColor(color)
+							self:SetBorderColor(color)
+						"						
+					/>			
+					<frame texture="/ui/frames/roundframe.tga" color="{item_bordercolor=0 0 0 1}" borderthickness="0.4h" blockinput="false" noclick="true" 
+						watch="updateShopItem{index}" 
+						ontriggerlua="
+							local shopItemIndex = tonumber(Shop.ItemCur[tonumber({index})].SlotWatch)
+							self:SetVisible(not Shop.ItemCur[shopItemIndex].IsRecipe)							
+						"
+						group="shop_v4_item2_group_{index=0}" onevent1lua="self:SetColor('#00ff8a') self:DoEventN(2)" onevent0lua="self:SetColor('0 0 0 1') self:DoEventN(3)"
+						onevent2lua="
+							local shopAlphaValue = tonumber(Cvar.GetCvar('shopAlphaValue'):GetString())
+							local color = '0 0.1 0.054  ' .. (0.1 + (shopAlphaValue * 0.006))
+							self:SetColor(color)
+							self:SetBorderColor(color)
+						"
+						onevent3lua="
+							local shopAlphaValue = tonumber(Cvar.GetCvar('shopAlphaValue'):GetString())
+							local color = '0 0 0 ' .. (0.1 + (shopAlphaValue * 0.006))
+							self:SetColor(color)
+							self:SetBorderColor(color)
+						"											
+					/>
+					<frame texture="/ui/frames/roundframe.tga" color="{recipe_bordercolor=0 0 0 1}" borderthickness="0.4h" blockinput="false" noclick="true" visible="false" 
+						watch="updateShopItem{index}" 
+						ontriggerlua="
+							local shopItemIndex = tonumber(Shop.ItemCur[tonumber({index})].SlotWatch)
+							self:SetVisible(Shop.ItemCur[shopItemIndex].IsRecipe)							
+						"
+						group="shop_v4_item2_group_{index=0}" onevent1lua="self:SetColor('#00acff') self:DoEventN(2)" onevent0lua="self:SetColor('0 0 0 1') self:DoEventN(3)"
+						onevent2lua="
+							local shopAlphaValue = tonumber(Cvar.GetCvar('shopAlphaValue'):GetString())
+							local color = '0 0.67 1.0 ' .. (0.1 + (shopAlphaValue * 0.006))
+							self:SetColor(color)
+							self:SetBorderColor(color)
+						"
+						onevent3lua="
+							local shopAlphaValue = tonumber(Cvar.GetCvar('shopAlphaValue'):GetString())
+							local color = '0 0 0 ' .. (0.1 + (shopAlphaValue * 0.006))
+							self:SetColor(color)
+							self:SetBorderColor(color)
+						"												
+					/>			
+					<panel y="0.4h" width="-0.8h" height="-0.4h" align="center" float="bottom" padding="0.4h" noclick="true">
+						<!-- Name/Cost -->
+						<panel height="1.9h" noclick="true">
+							<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.3h" style="item_header" blockinput="false" noclick="true" group="shop_v4_item2_group2_{index=0}"
+								watch="updateShopItem{index}" 
+								ontriggerlua="
+									local shopItemIndex = tonumber(Shop.ItemCur[tonumber({index})].SlotWatch)
+									self:SetVisible(not Shop.ItemCur[shopItemIndex].IsRecipe)							
+								"
+								onevent3lua="
+									local shopAlphaValue = tonumber(Cvar.GetCvar('shopAlphaValue'):GetString())
+									local color = '0.01 0.56 0.19 ' .. (0.25 + (shopAlphaValue * 0.0075))
+									self:SetColor(color)
+									self:SetBorderColor(color)								
+								"
+							/>
+							<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.3h" style="recipe_header" visible="false" group="shop_v4_item2_group2_{index=0}" 
+								watch="updateShopItem{index}" 
+								ontriggerlua="
+									local shopItemIndex = tonumber(Shop.ItemCur[tonumber({index})].SlotWatch)
+									self:SetVisible(Shop.ItemCur[shopItemIndex].IsRecipe)							
+								"
+								blockinput="false" noclick="true"
+								onevent3lua="
+									local shopAlphaValue = tonumber(Cvar.GetCvar('shopAlphaValue'):GetString())
+									local color = '0.01 0.39 0.56 ' .. (0.25 + (shopAlphaValue * 0.0075))
+									self:SetColor(color)
+									self:SetBorderColor(color)								
+								"								
+							/>
+							<frame texture="/ui/frames/roundframe.tga" color="0 0 0 1" borderthickness="0.3h" blockinput="false" noclick="true"/>
+							<image texture="/ui/elements/star.tga" x="-0.7h" y="-0.7h" width="1.4h" height="1.4h" align="left" valign="top" noclick="true" visible="false" watch1="ShopItemSlotDEprec{index}" ontrigger1="SetWatch('updateShopItem' # param);" 
+								watch="updateShopItem{index}" 
+								ontriggerlua="
+									local shopItemIndex = tonumber(Shop.ItemCur[tonumber({index})].SlotWatch)
+									self:SetVisible(Shop.ItemCur[shopItemIndex].Recommended)							
+								"									
+								color="1 1 0 1" 
+								/>
+							<label x="0.3h" font="dyn_10" color="1 1 1 1" shadow="true" textvalign="center" noclick="true" watch1="ShopItemSlotDEprec{index}" ontrigger1="SetWatch('updateShopItem' # param);" 
+								watch="updateShopItem{index}" 
+								ontriggerlua="
+									local shopItemIndex = tonumber(Shop.ItemCur[tonumber({index})].SlotWatch)
+									self:SetText(Shop.ItemCur[shopItemIndex].Name)							
+								"									
+							/>
+							<label x="-1.5h" font="dyn_10" color="1 1 0 1" shadow="true" textvalign="center" textalign="right" noclick="true" watch="ShopItem{index}" ontriggerlua="self:SetText(param4)" />
+							<image texture="/ui/fe2/store/gold_coins.tga" x="-0.2h" y="-0.1h" width="1.2h" height="1.2h" valign="center" align="right" />
+						</panel>
+						<panel height="4.6h" noclick="true" >
+							<!-- Icon -->
+							<panel width="4.2h" height="4.2h" valign="center" noclick="true" x="-1"
+								watch="ShopItem{index}" ontrigger="If(param6 and !(param8 and param17 and !param18) and param25, SetRenderMode('normal'), SetRenderMode('grayscale'));" 
+							>						
+								<image noclick="true" watch1="updateShopItem{index}" name="ShopItemIcon{index}"
+										ontrigger1lua="
+											local shopItemIndex = tonumber(Shop.ItemCur[tonumber({index})].SlotWatch)
+											self:SetTexture(Shop.ItemCur[shopItemIndex].Texture)
+										"  
+										group="shop_item_jiggler_{index}" 
+										ontrigger="
+										  SetRotation(Sin(((param % 300) / 300) * (3.14159265 * 2)) * 8);
+										  "						
+								/>
+								<piegraph start="270" end="-90" square="true" color="#000000cc" watch="ShopItem{index}" ontrigger="SetVisible(param21 gt 0); SetValue(param20);" noclick="true"/>
+								<frame color="invisible" borderthickness="1" bordercolor="0 0 0 1" noclick="true"/>
+								<panel color="0 0 0 0.6" watch1="ShopItemSlotDEprec{index}" ontrigger1="SetWatch('ShopItem' # param);" watch="ShopItem{index}" ontrigger="SetVisible(!(param6 and !(param8 and param17 and !param18)) or !param25);" noclick="true"/>
+								<frame
+									borderthickness="4"
+									bordercolor="yellow"
+									color="invisible"
+									visible="false"
+									watch1="ShopItemSlotDEprec{index}" ontrigger1="SetWatch('RecipeItemType ShopItem' # param);"
+									watch="RecipeItemType ShopItemType{index}"
+									ontrigger="SetVisible(StringEquals(RecipeItemType, ShopItemType{index}));"
+									noclick="true"
+									passivechildren="true"
+								>
+									<image x="3" y="3" width="-6" height="-6" color="yellow" texture="/ui/fps/selected.tga" rendermode="additive"/>
+								</frame>
+								<!-- Recipe Scroll -->
+								<panel color="black" watch1="ShopItemSlotDEprec{index}" ontrigger1="SetWatch('ShopItem' # param);" watch="ShopItem{index}" ontriggerlua="self:SetVisible(AtoB(param8) and (not AtoB(param17)) and (not AtoB(param18)))" noclick="1">
+									<image
+										width="55%" height="55%"
+										align="center" valign="center"
+										 watch1="ShopItemSlotDEprec{index}" ontrigger1="SetWatch('ShopItem' # param);"
+										watch="ShopItem{index}"
+										ontrigger="If(param6 or (param8 and param12), SetRenderMode('normal'), SetRenderMode('grayscale'));"
+										ontriggerlua="self:SetTexture(param3)"
+									/>
+									<image
+										texture="/ui/elements/shop/scroll_overlay.tga"
+										watch1="ShopItemSlotDEprec{index}" ontrigger1="SetWatch('ShopItem' # param);"
+										watch="ShopItem{index}"
+										ontrigger="If(param6 or (param8 and param12), SetRenderMode('normal'), SetRenderMode('grayscale'));"
+									/>
+								</panel>
+								<image texture="/ui/common/new_shop_interface/stash.tga" x="0.3h" y="0.3h" width="2.2h" height="2.2h" align="right" valign="bottom" noclick="true" watch1="ShopItemSlotDEprec{index}" ontrigger1="SetWatch('ShopItem' # param);" watch="ShopItem{index}" ontriggerlua="self:SetVisible(AtoB(param15) and (not AtoB(param16)) and (not AtoB(param17)) and (not AtoB(param18)))" />
+								<label textalign="center" textvalign="center" width="1.5h" height="1.5h" color="white" shadow="true" font="dyn_11" noclick="true" watch1="ShopItemSlotDEprec{index}" ontrigger1="SetWatch('ShopItem' # param);" watch="ShopItem{index}" ontriggerlua="self:SetText(Translate(param13))" />
+								<label noclick="1" valign="center" align="center" textvalign="center" textalign="center" color="#87CEEB" shadow="1" font="dyn_11" watch1="ShopItemSlotDEprec{index}" ontrigger1="SetWatch('ShopItem' # param);" watch="ShopItem{index}" ontrigger="SetVisible(param21 gt 0); SetText(FtoT(param21, 1, 0, '-'));"/>
+								<image
+									width="50%" height="50%"
+									align="right" valign="top"
+									texture="/ui/elements/shop/new.tga"
+									watch1="ShopItemSlotDEprec{index}" ontrigger1="SetWatch('updateShopItem' # param);"
+									watch="updateShopItem{index}"
+									ontriggerlua="
+										local shopItemIndex = tonumber(Shop.ItemCur[tonumber({index})].SlotWatch)
+										self:SetVisible(Shop.ItemCur[shopItemIndex].IsNew)							
+									"
+									noclick="true"
+								/>
+								<!-- Charges -->
+								<label textalign="center" textvalign="center" width="1.5h" height="1.5h" align="right" font="dyn_10" shadow="true" color="white" watch1="ShopItemSlotDEprec{index}" ontrigger1="SetWatch('ShopItem' # param);" watch="ShopItem{index}" ontriggerlua="self:SetText(param19)" noclick="true" />
+								<frame width="+2" height="+2" noclick="1" color="invisible" bordercolor="yellow" borderthickness="2" visible="0" 
+									 oninstantiatelua="Shop:RegisterQuickItemBorder(self, '{panel}', '{id}')" 
+								/>							
+							</panel>
+							<!-- Description -->
+							<panel width="-4.5h" align="right" noclick="true">
+								<label font="dyn_9" color="1 1 1 1" shadow="true" wrap="true" content="{descrip}" noclick="true" watch1="ShopItemSlotDEprec{index}" ontrigger1="SetWatch('updateShopItem' # param);" 
+									watch="updateShopItem{index}" 
+									ontriggerlua="
+										local shopItemIndex = tonumber(Shop.ItemCur[tonumber({index})].SlotWatch)
+										self:SetText(Shop.ItemCur[shopItemIndex].Desc)	
+									"
+									height="-3"
+								/>
+							</panel>					
+						</panel>
+					</panel>				
+				
+			</panel>
+
+		</panel>
+
+	</template>  
+	
+	<trigger name="QuickItemDummyUpdate" />
+	<trigger name="QuickItemPositionUpdate" />
+	<panel name="quickslot_dummy_item" noclick="0" height="7.82h" width="24h" color="invisible" align="left" valign="top" 
+		onload="CreateInt('quickitem_shakeStateIndex', 0); CreateBool('quickitem_dummy_shiftDown', 0); CreateBool('quickitem_dummy_draggingItem', 0); CreateString('quickitem_dummy_entity', ''); CreateString('quickitem_dummy_icon', ''); CreateString('quickitem_ItemCursorEntity', ''); CreateString('quickitem_ItemCursorIcon', '');" cangrab="1"
+		watch="QuickItemDummyUpdate" 
+		ontrigger="
+			If(!IsVisibleSelf('item_cursor') and !StringEmpty(param0),
+				Split(
+					##Echo('Dragging: '#quickitem_dummy_draggingItem),##
+					##Echo('Set quickitem_dummy_entity: ^r'#quickitem_dummy_entity#' ^g'#param0),##
+					Set(quickitem_dummy_entity, param0),
+					Set(quickitem_dummy_icon, param1)
+				)
+			);
+			SetX(param2);
+			SetY(param3);	
+			SetHeight(param4);
+			SetWidth(param5);
+			Set(quickitem_shakeStateIndex, param6);
+			"
+		onevent="Call('quickslot_onframe', 'SetVisible(1); DoEvent(1);');"
+		onevent2="Call('quickslot_onframe', 'DoEvent(0); SetVisible(0);');"
+		onevent1="
+			If(quickitem_dummy_draggingItem, Cmd('Action CommanderSecondary'));
+			BreakDrag();
+			If(IsVisible('quickslot_onframe'), DoEvent(2));		
+			Cmd('Trigger ItemCursorVisible 0 0');
+			DoEvent(4);
+			SetVisible(0);			
+			"
+		onevent4="
+			Trigger('ItemCursorEntity', quickitem_ItemCursorEntity);
+			Trigger('ItemCursorIcon', quickitem_ItemCursorIcon);
+			Set(quickitem_dummy_entity, '');
+			Set(quickitem_dummy_icon, '');		
+		"
+		onclick="
+			If(!StringEmpty(quickitem_dummy_entity) and !StringEmpty(quickitem_dummy_icon),
+				Split(
+					If(!IsVisible('quickslot_onframe'), DoEvent()),
+					Call('item_cursor_icon', 'SetTexture(quickitem_dummy_icon);'),
+					Cmd('Trigger ItemCursorVisible 1 0')
+				)
+			);
+			" 
+		onmouseover="
+			ShowWidget('shopGlobalItemTooltip');
+			Trigger('QuickItemBorder', quickitem_shakeStateIndex, -2);
+			If(!StringEmpty(quickitem_shakeStateIndex), GroupCall('shop_item_jiggler_'#quickitem_shakeStateIndex, 'SetWatch(\'HostTime\');'));
+		"
+		onmouseout="
+			HideWidget('shopGlobalItemTooltip');
+			Trigger('QuickItemBorder', 0, 0);
+			If(!StringEmpty(quickitem_shakeStateIndex), GroupCall('shop_item_jiggler_'#quickitem_shakeStateIndex, 'SetWatch(\'\'); SetX(0); SetY(0); SetRotation(0);'));
+		"
+		onshow="
+			BringToFront();
+			"	
+		onhide="
+			BreakDrag(); 
+			HideWidget('shopGlobalItemTooltip');
+			Trigger('QuickItemBorder', 0, 0);
+			If(!StringEmpty(quickitem_shakeStateIndex), GroupCall('shop_item_jiggler_'#quickitem_shakeStateIndex, 'SetWatch(\'\'); SetX(0); SetY(0); SetRotation(0);'));
+			"
+		onmouselup="Trigger('QuickItemPositionUpdate', GetCursorPosX(), GetCursorPosY());"
+		watch3="KeyModifier1"
+		ontrigger3="
+			If(!param or !IsVisible('newStore'), 
+				Split(DoEvent(1), Call('quickslot_dummy_item', 'SetVisible(0);')),
+				Split(SetVisible(1), Call('quickslot_dummy_item', 'SetVisible(1);'))
+			);
+			"
+		watch4="ItemCursorVisible"
+		ontrigger4="If(!param0, DoEvent(4)); Set(quickitem_dummy_draggingItem, param1);"		
+				
+		watch5="ItemCursorEntity"
+		ontrigger5="Set(quickitem_ItemCursorEntity, ItemCursorEntity);"		
+
+		watch6="ItemCursorIcon"
+		ontrigger6="Set(quickitem_ItemCursorIcon, ItemCursorIcon);"
+		onevent5="Split(DoEvent(1), Call('quickslot_dummy_item', 'SetVisible(0);'))"	
+	
+	>
+	</panel>
+	<panel noclick="1" name="quickslot_onframe" height="2h" width="100%" valign="top" color="invisible"
+		onevent1="SetOnFrame('Call(\'item_cursor\', \'MoveToCursor();\');');" onevent0="SetOnFrame('');"
+	/>
+	
+	<template name="shop_v4_item_simple">
+		<panel noclick="true" x="{x=0}" y="{y=0}" width="16.27h" height="7.82h" name="shop_v4_item_simple{index}" group="shop_v4_items_simple" visible="false"
+			 oninstantiatelua="Shop:RegisterItemV2SimplePanel(self, '{index}', '{reportRowY}')" 
+		>
+			<button
+				interactive="false"
+				width="100%"
+				height="100%"
+				color="invisible"
+				onevent1="
+					PlaySound('/shared/sounds/ui/button_click_03.wav');
+				"
+				oninstantiatelua="Shop:RegisterItemV2Button(self, '{index}', '{reportRowY}', 1, '7.82h', '16.3h')" 
+				onevent0="
+					ShowWidget('shopGlobalItemTooltip');
+				"
+				onmouseout="
+					HideWidget('shopGlobalItemTooltip');
+					GroupCall('shop_v4_item2_simple_group_{index=0}', 'DoEvent(0)')
+				"
+				onmouseldown="SetX(1); SetY(1);"
+				onmouselup="SetX(-1); SetY(-1);"
+				onmouserdown="SetX(1); SetY(1);"
+				onmouserup="SetX(-1); SetY(-1);"					
+			>
+				
+				<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.4h" color="{item_bgcolor=0 0 .03 .7}" blockinput="false" noclick="true" 
+					group="shop_v4_item2_simple_group_{index=0}" onevent1lua="self:SetColor('#014216') self:DoEventN(2)" onevent0lua="self:SetColor('0 0 .03 .7') self:DoEventN(3)"
+					onevent2lua="
+						local shopAlphaValue = tonumber(Cvar.GetCvar('shopAlphaValue'):GetString())
+						local color = '0 0.25 0.086 ' .. (0.1 + (shopAlphaValue * 0.006))
+						self:SetColor(color)
+						self:SetBorderColor(color)
+					"
+					onevent3lua="
+						local shopAlphaValue = tonumber(Cvar.GetCvar('shopAlphaValue'):GetString())
+						local color = '0 0 0.03 ' .. (0.1 + (shopAlphaValue * 0.006))
+						self:SetColor(color)
+						self:SetBorderColor(color)
+					"
+					watch="updateShopItemSimple{index}" 
+					ontriggerlua="
+						local shopItemIndex = tonumber(Shop.ItemCur[tonumber({index})].SlotWatch)
+						self:SetVisible(not Shop.ItemCur[shopItemIndex].IsRecipe)							
+					"				
+				/>
+				<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.4h" color="{recipe_bgcolor=.03 0 0 .7}" visible="false"
+						watch="updateShopItemSimple{index}" 
+						ontriggerlua="
+							local shopItemIndex = tonumber(Shop.ItemCur[tonumber({index})].SlotWatch)
+							self:SetVisible(Shop.ItemCur[shopItemIndex].IsRecipe)							
+						"
+						blockinput="false" noclick="true"
+						group="shop_v4_item2_simple_group_{index=0}" onevent1lua="self:SetColor('#002e45') self:DoEventN(2)" onevent0lua="self:SetColor('.03 0 0 .7') self:DoEventN(3)"
+						onevent2lua="
+							local shopAlphaValue = tonumber(Cvar.GetCvar('shopAlphaValue'):GetString())
+							local color = '0 0.18 0.27 ' .. (0.1 + (shopAlphaValue * 0.006))
+							self:SetColor(color)
+							self:SetBorderColor(color)
+						"
+						onevent3lua="
+							local shopAlphaValue = tonumber(Cvar.GetCvar('shopAlphaValue'):GetString())
+							local color = '0.03 0 0 ' .. (0.1 + (shopAlphaValue * 0.006))
+							self:SetColor(color)
+							self:SetBorderColor(color)
+						"						
+				/>			
+				<frame texture="/ui/frames/roundframe.tga" color="{item_bordercolor=0 0 0 1}" borderthickness="0.4h" blockinput="false" noclick="true"
+						watch="updateShopItemSimple{index}" 
+						ontriggerlua="
+							local shopItemIndex = tonumber(Shop.ItemCur[tonumber({index})].SlotWatch)
+							self:SetVisible(not Shop.ItemCur[shopItemIndex].IsRecipe)							
+						"
+						group="shop_v4_item2_simple_group_{index=0}" onevent1lua="self:SetColor('#00ff8a') self:DoEventN(2)" onevent0lua="self:SetColor('0 0 0 1') self:DoEventN(3)"
+						onevent2lua="
+							local shopAlphaValue = tonumber(Cvar.GetCvar('shopAlphaValue'):GetString())
+							local color = '0 0.1 0.054  ' .. (0.1 + (shopAlphaValue * 0.006))
+							self:SetColor(color)
+							self:SetBorderColor(color)
+						"
+						onevent3lua="
+							local shopAlphaValue = tonumber(Cvar.GetCvar('shopAlphaValue'):GetString())
+							local color = '0 0 0 ' .. (0.1 + (shopAlphaValue * 0.006))
+							self:SetColor(color)
+							self:SetBorderColor(color)
+						"						
+				/>
+				<frame texture="/ui/frames/roundframe.tga" color="{recipe_bordercolor=0 0 0 1}" borderthickness="0.4h" blockinput="false" noclick="true" visible="false"
+						ontriggerlua="
+							local shopItemIndex = tonumber(Shop.ItemCur[tonumber({index})].SlotWatch)
+							self:SetVisible(Shop.ItemCur[shopItemIndex].IsRecipe)							
+						"
+						group="shop_v4_item2_simple_group_{index=0}" onevent1lua="self:SetColor('#00acff') self:DoEventN(2)" onevent0lua="self:SetColor('0 0 0 1') self:DoEventN(3)"
+						onevent2lua="
+							local shopAlphaValue = tonumber(Cvar.GetCvar('shopAlphaValue'):GetString())
+							local color = '0 0.67 1.0 ' .. (0.1 + (shopAlphaValue * 0.006))
+							self:SetColor(color)
+							self:SetBorderColor(color)
+						"
+						onevent3lua="
+							local shopAlphaValue = tonumber(Cvar.GetCvar('shopAlphaValue'):GetString())
+							local color = '0 0 0 ' .. (0.1 + (shopAlphaValue * 0.006))
+							self:SetColor(color)
+							self:SetBorderColor(color)
+						"						
+				/>
+				<panel width="-0.8h" height="-0.4h" align="center" valign="center" noclick="true">
+					
+					<panel width="7.0h" noclick="true">					
+						<!-- Icon -->
+						<panel width="100%" height="100@" align="center" valign="center" noclick="true">
+							<image noclick="true" watch1="updateShopItemSimple{index}" 
+								ontrigger1lua="self:SetTexture(Shop.ItemCur[tonumber({index})].Texture)"
+								watch2="ShopItem{index}" ontrigger2="If(param6 and !(param8 and param17 and !param18) and param25, SetRenderMode('normal'), SetRenderMode('grayscale'));" 
+									group="shop_item_jiggler_{index}" 
+									ontrigger="
+									  SetRotation(Sin(((param % 300) / 300) * (3.14159265 * 2)) * 8);
+									  "															
+								/>
+							<piegraph start="270" end="-90" square="true" color="#000000cc" watch1="ShopItemSlotDEprec{index}" ontrigger1="SetWatch('ShopItem' # param);" watch="ShopItem{index}" ontrigger="SetVisible(param21 gt 0); SetValue(param20);" noclick="true"/>
+							<frame color="invisible" borderthickness="1" bordercolor="0 0 0 1" noclick="true"/>
+							<panel color="0 0 0 0.6" watch="ShopItem{index}" ontrigger="SetVisible(!(param6 and !(param8 and param17 and !param18)) or !param25);" noclick="true"/>
+							<frame
+								borderthickness="4"
+								bordercolor="yellow"
+								color="invisible"
+								visible="false"
+								watch1="ShopItemSlotDEprec{index}" ontrigger1="SetWatch('RecipeItemType ShopItem' # param);"
+								watch="RecipeItemType ShopItemType{index}"
+								ontrigger="SetVisible(StringEquals(RecipeItemType, ShopItemType{index}));"
+								noclick="true"
+								passivechildren="true"
+							>
+								<image x="3" y="3" width="-6" height="-6" color="yellow" texture="/ui/fps/selected.tga" rendermode="additive"/>
+							</frame>
+							<!-- Recipe Scroll -->
+							<panel color="black" watch1="ShopItemSlotDEprec{index}" ontrigger1="SetWatch('ShopItem' # param);" watch="ShopItem{index}" ontrigger="SetVisible(param8 and !param17 and !param18);" noclick="1">
+								<image
+									width="55%" height="55%"
+									align="center" valign="center"
+									watch1="ShopItemSlotDEprec{index}" ontrigger1="SetWatch('ShopItem' # param);"
+									watch="ShopItem{index}"
+									ontrigger="If(param6 or (param8 and param12), SetRenderMode('normal'), SetRenderMode('grayscale'));"
+									ontriggerlua="self:SetTexture(param3)"
+								/>
+								<image
+									texture="/ui/elements/shop/scroll_overlay.tga"
+									watch1="ShopItemSlotDEprec{index}" ontrigger1="SetWatch('ShopItem' # param);"
+									watch="ShopItem{index}"
+									ontrigger="If(param6 or (param8 and param12), SetRenderMode('normal'), SetRenderMode('grayscale'));"
+								/>
+							</panel>
+							<image texture="/ui/common/new_shop_interface/stash.tga" x="0.3h" y="0.3h" width="2.2h" height="2.2h" align="right" valign="bottom" noclick="true" watch1="ShopItemSlotDEprec{index}" ontrigger1="SetWatch('ShopItem' # param);" watch="ShopItem{index}" ontrigger="SetVisible(param15 and !param16 and !param17 and !param18);" />
+							<label textalign="center" textvalign="center" width="1.5h" height="1.5h" color="white" shadow="true" font="dyn_11" noclick="true" watch1="ShopItemSlotDEprec{index}" ontrigger1="SetWatch('ShopItem' # param);" watch="ShopItem{index}" ontriggerlua="self:SetText(Translate(param13));" />
+							<label textalign="center" textvalign="center" width="1.5h" height="1.5h" align="right" font="dyn_10" shadow="true" color="white" watch1="ShopItemSlotDEprec{index}" ontrigger1="SetWatch('ShopItem' # param);" watch="ShopItem{index}" ontriggerlua="self:SetText(param19);" noclick="true" />
+							<label noclick="1" valign="center" align="center" textvalign="center" textalign="center" color="#87CEEB" shadow="1" font="dyn_11" watch1="ShopItemSlotDEprec{index}" ontrigger1="SetWatch('ShopItem' # param);" watch="ShopItem{index}" ontrigger="SetVisible(param21 gt 0); SetText(FtoT(param21, 1, 0, '-'));"/>
+							<image
+								width="50%" height="50%"
+								align="right" valign="top"
+								texture="/ui/elements/shop/new.tga"
+								watch1="ShopItemSlotDEprec{index}" ontrigger1="SetWatch('updateShopItem' # param);"
+								watch="updateShopItemSimple{index}"
+								ontriggerlua="
+									local shopItemIndex = tonumber(Shop.ItemCur[tonumber({index})].SlotWatch)
+									self:SetVisible(Shop.ItemCur[shopItemIndex].IsNew)							
+								"									
+								noclick="true"
+							/>
+							<frame width="+2" height="+2" noclick="1" color="invisible" bordercolor="yellow" borderthickness="2" visible="0" 
+								 oninstantiatelua="Shop:RegisterQuickItemBorder(self, '{panel}', '{id}')" 
+							/>							
+						</panel>
+						
+					</panel>
+					
+					<!-- Cost -->
+					<panel width="-7.4h" align="right" noclick="true">				
+						<panel y="-0.8h" height="1.9h" valign="center" noclick="true">
+							<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.3h" style="item_header" blockinput="false" noclick="true" group="shop_v4_item2_simple_group2_{index=0}"
+								watch="updateShopItemSimple{index}" 
+								ontriggerlua="
+									local shopItemIndex = tonumber(Shop.ItemCur[tonumber({index})].SlotWatch)
+									self:SetVisible(not Shop.ItemCur[shopItemIndex].IsRecipe)									
+								"
+								onevent3lua="
+									local shopAlphaValue = tonumber(Cvar.GetCvar('shopAlphaValue'):GetString())
+									local color = '0.01 0.56 0.19 ' .. (0.25 + (shopAlphaValue * 0.0075))
+									self:SetColor(color)
+									self:SetBorderColor(color)
+								"									
+							/>
+							<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.3h" style="recipe_header" visible="false" group="shop_v4_item2_simple_group2_{index=0}"
+								watch="updateShopItemSimple{index}" 
+								ontriggerlua="
+									local shopItemIndex = tonumber(Shop.ItemCur[tonumber({index})].SlotWatch)
+									self:SetVisible(Shop.ItemCur[shopItemIndex].IsRecipe)								
+								" 					
+								blockinput="false" noclick="true"
+								onevent3lua="
+									local shopAlphaValue = tonumber(Cvar.GetCvar('shopAlphaValue'):GetString())
+									local color = '0.01 0.39 0.56 ' .. (0.25 + (shopAlphaValue * 0.0075))
+									self:SetColor(color)
+									self:SetBorderColor(color)
+								"								
+							/>
+							<frame texture="/ui/frames/roundframe.tga" color="0 0 0 1" borderthickness="0.3h" blockinput="false" noclick="true"/>
+							<label height="100%" font="dyn_10" color="1 1 1 1" shadow="true" textvalign="center" textalign="center" content="game_shop_label_cost" noclick="true" />
+						</panel>					
+						<label y="1.0h" x="-1.5h" font="dyn_10" color="1 1 0 1" shadow="true" textvalign="center" textalign="right" noclick="true" watch="ShopItem{index}" ontriggerlua="self:SetText(param4);" />
+						<image texture="/ui/fe2/store/gold_coins.tga" x="-0.2h" y="0.9h" width="1.2h" height="1.2h" valign="center" align="right" />					
+					</panel>
+					
+				</panel>
+				<image texture="/ui/elements/star.tga" x="-0.7h" y="-0.7h" width="1.6h" height="1.6h" align="left" valign="top" noclick="true" visible="false" watch1="ShopItemSlotDEprec{index}" ontrigger1="SetWatch('updateShopItem' # param);" 
+					watch="updateShopItemSimple{index}" 
+					ontriggerlua="
+						local shopItemIndex = tonumber(Shop.ItemCur[tonumber({index})].SlotWatch)
+						self:SetVisible(Shop.ItemCur[shopItemIndex].Recommended)							
+					"						
+					color="1 1 0 1" 
+				/>	
+			</button>
+		</panel>
+	</template>
+
+	<template name="shopGuideRecommendedSectionBody">
+		<panel height="50%" align="center">
+			<panel float="right" height="-0.1h" padding="0.1h" grow="true" align="center">
+				<image texture="/ui/common/empty_pack.tga" width="100@" height="100%"/>
+				<image texture="/ui/common/empty_pack.tga" width="100@" height="100%"/>
+				<image texture="/ui/common/empty_pack.tga" width="100@" height="100%"/>
+				<image texture="/ui/common/empty_pack.tga" width="100@" height="100%"/>
+			</panel>
+			<panel name="guide_recommended_panel_{panel}_1" float="right" height="-0.1h" padding="0.1h" grow="true" align="center">
+				<instance name="guide_recommended_item" id="1" watch="{watch}" watch1="GuideRecommendedItemUpdate" panel="{panel}" />
+				<instance name="guide_recommended_item" id="2" watch="{watch}" watch1="GuideRecommendedItemUpdate" panel="{panel}" />
+				<instance name="guide_recommended_item" id="3" watch="{watch}" watch1="GuideRecommendedItemUpdate" panel="{panel}" />
+				<instance name="guide_recommended_item" id="4" watch="{watch}" watch1="GuideRecommendedItemUpdate" panel="{panel}" />
+			</panel>
+		</panel>
+		<panel height="50%" align="center" valign="bottom">
+			<panel float="right" height="-0.1h" padding="0.1h" valign="bottom" grow="true" align="center">
+				<image texture="/ui/common/empty_pack.tga" width="100@" height="100%"/>
+				<image texture="/ui/common/empty_pack.tga" width="100@" height="100%"/>
+				<image texture="/ui/common/empty_pack.tga" width="100@" height="100%"/>
+				<image texture="/ui/common/empty_pack.tga" width="100@" height="100%"/>
+			</panel>
+			<panel name="guide_recommended_panel_{panel}_2" float="right" height="-0.1h" valign="bottom" padding="0.1h" grow="true" align="center">
+				<instance name="guide_recommended_item" id="5" watch="{watch}" watch1="GuideRecommendedItemUpdate" panel="{panel}" />
+				<instance name="guide_recommended_item" id="6" watch="{watch}" watch1="GuideRecommendedItemUpdate" panel="{panel}" />
+				<instance name="guide_recommended_item" id="7" watch="{watch}" watch1="GuideRecommendedItemUpdate" panel="{panel}" />
+				<instance name="guide_recommended_item" id="8" watch="{watch}" watch1="GuideRecommendedItemUpdate" panel="{panel}" />
+			</panel>
+		</panel>
+	</template>
+
+	<template name="storeGuideItemSectionGroup">
+		<panel width="24.6h" height="9.5h" align="center" y="{y}" noclick="true">
+			<panel height="2.75h" grow="true" align="center" valign="bottom" y="-100%" float="right" noclick="true">
+				<label textvalign="center" fitx="true" color="#ffcd16" font="dyn_12" fitxpadding="0.25h" content="{title}"/>
+				<panel width="100@" height="100%" noclick="true">
+					<instance name="tip_mark" width="75@" height="75%" align="center" valign="center"
+						onmouseoverlua="
+							Trigger('genericGameFloatingTip', 'true', '26h', '', '{title}', '{title}_tip', '', '')
+						"
+						onmouseoutlua="
+							Trigger('genericGameFloatingTip', 'false', '', '', '', '', '', '')
+						"
+					/>
+				</panel>
+			</panel>
+			<frame texture="/ui/frames/thick.tga" color="#555459" borderthickness="0.5h" width="-6.5h" align="center"/>
+			<panel hmargin="0.25h" vmargin="0.25h" name="guide_recommended_panel_{panel}">
+				<instance name="{body}" panel="{panel}" watch="{watch}"/>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="storeGuideItemSection">
+		<panel width="50%" noclick="true" align="{align=left}">
+			<panel width="-0.25h" align="{align=left}">
+				<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.4h" color="0 0 .07 .8"  noclick="1" />
+				<frame texture="/ui/frames/roundframe.tga" color="#667788" borderthickness="0.4h"  noclick="1" />
+				<panel hmargin="0.5h" vmargin="0.5h" noclick="true">
+					<label x="1h" y="0.25h" font="dyn_16" color="#aa81ff" noclick="true" content="{title=game_guide_reco_3}"/>
+
+					<instance name="storeGuideItemSectionGroup" title="{titleA=game_guide_reco_1}" y="6.5h" body="{bodyA}" watch="{watch1}" panel="{panel1}"/>
+					<instance name="storeGuideItemSectionGroup" title="{titleB=game_guide_reco_6}" y="20.5h" body="{bodyB}" watch="{watch2}" panel="{panel2}"/>
+				</panel>
+			</panel>
+		</panel>
+	</template>
+
+	<trigger name="GuideRecommendedItemUpdate" />
+	<template name="guide_recommended_item">
+		<panel visible="0" width="100@" height="100%" group="guide_recommended_items" noclick="1" luatable="1"
+			oninstantiate="DoEvent(); If(!VarExists('guide_recommendeditem_isscroll{panel}{id}'), DoEvent(1));" 
+			onevent1="CreateBool('guide_recommendeditem_isscroll{panel}{id}', 0);" watch3="GuideRecommendedEvent"
+			 onloadlua="Shop:RegisterGuidePanel(self, '{panel}', '{id}', '{watch}', '{watch1}')" 
+		>
+			<button noclick="0" passivechildren="1" luatable="1"
+				color="invisible"
+				interactive="false"
+				watch1="shopGlobalItemTooltipUpdate"
+				watch2="{watch1}"
+				 onloadlua="Shop:RegisterGuideButton(self, '{panel}', '{id}', '{watch}', '{watch1}')"
+			>
+				
+				<panel noclick="1" visible="0" passivechildren="true"
+					 onloadlua="Shop:RegisterCtrlHoldWidget(self)" 
+				>
+					<panel color="black" watch="{watch1}" noclick="1" visible="0" luatable="1"
+						 onloadlua="Shop:RegisterGuideIconBG(self, '{panel}', '{id}', '{watch}', '{watch1}')"
+					>
+						<image align="center" valign="center" luatable="1"
+							width="55%" height="55%" watch2="{watch1}"
+							group="shop_item_jiggler_{panel}{id}" 
+							ontrigger="SetRotation(Sin(((param % 300) / 300) * (3.14159265 * 2)) * 8);"
+							 onloadlua="Shop:RegisterGuideIcon(self, '{panel}', '{id}', '{watch}', '{watch1}')"
+						/>								
+						<image texture="/ui/elements/shop/scroll_overlay.tga"/>					
+					</panel>
+					<frame width="+2" height="+2" noclick="1" color="invisible" bordercolor="yellow" borderthickness="2" visible="0" 
+						 onloadlua="Shop:RegisterQuickItemBorder(self, '{panel}', '{id}')" 
+					/>					
+				</panel>			
+				<frame width="+2" height="+2" noclick="1" color="invisible" bordercolor="yellow" borderthickness="2" visible="0" 
+					 onloadlua="Shop:RegisterGuideRecommendedBorder(self, '{panel}', '{id}')" 
+				/>
+				<widgetstate statename="up">
+					<image 
+						group="shop_item_jiggler_{panel}{id}" 
+						ontrigger="  SetRotation(Sin(((param % 300) / 300) * (3.14159265 * 2)) * 8); "
+						 onloadlua="Shop:RegisterGuideIconState(self, '{panel}', '{id}', '{watch}', '{watch1}')"
+					/>					
+					<frame color="invisible" borderthickness="1" bordercolor=".2 .2 .2 1" noclick="true"/>
+					<frame width="+2" height="+2" noclick="1" color="invisible" bordercolor="yellow" borderthickness="2" visible="0" 
+						 onloadlua="Shop:RegisterQuickItemBorder(self, '{panel}', '{id}')" 
+					/>							
+				</widgetstate>
+				<widgetstate statename="over">
+					<image  onloadlua="Shop:RegisterGuideIconState(self, '{panel}', '{id}', '{watch}', '{watch1}')" />
+					<frame color="invisible" borderthickness="1" bordercolor=".2 .2 .2 1" noclick="true"/>
+				</widgetstate>
+				<widgetstate statename="down" x="1" y="1">
+					<image  onloadlua="Shop:RegisterGuideIconState(self, '{panel}', '{id}', '{watch}', '{watch1}')" />
+					<frame color="invisible" borderthickness="1" bordercolor=".2 .2 .2 1" noclick="true"/>
+				</widgetstate>
+			</button>
+		</panel>
+	</template>
+	
+	<trigger name="QuickSlotItemUpdate" />
+	<trigger name="QuickItemBorder" />
+	<template name="shop_quickslot">
+		<panel visible="1" width="95@" height="95%" align="center" valign="center" group="shop_quick_items" oninstantiate="If(!VarExists('shop_quickslot_isscroll{id}'), DoEvent());" 
+			noclick="1" onload="If(!VarExists('shop_quickslot_saved{id}'), DoEvent(2)); DoEvent(1);" 
+			onevent="CreateBool('shop_quickslot_isscroll{id}', 0);"	
+			onevent1="SleepWidget(50, 'TriggerShopItem(\'QuickSlotItemUpdate\', \''#shop_quickslot_saved{id}#'\', 0);');"
+			onevent2="CreateString('shop_quickslot_saved{id}', '{item}'); SetSave('shop_quickslot_saved{id}', '{item}');" 
+		>
+			<button noclick="0" passivechildren="1"
+				color="invisible"
+				interactive="false"
+				onevent="
+					##Echo('Click update fail');##
+					If(!StringEquals(GetActiveRecipe(), ''#shop_quickslot_saved{id}#''),
+						SetActiveRecipe(''#shop_quickslot_saved{id}#''),
+						SetActiveRecipe('')
+					);
+					Call('shop_v4_listbox', 'SetVisible(0)');
+					"
+				onclicklua="
+					if Input.IsAltDown() then
+						Shop:AltClickShopItem(GetCvarString('shop_quickslot_saved{id}'))
+					else
+						self:DoEvent()
+					end
+				"
+				onrightclick=""
+				onmouseover="
+					TriggerItemTooltip(
+						'shopGlobalItemTooltipUpdate',
+						''#shop_quickslot_saved{id}#'',
+						false
+					);
+					Trigger('shopGlobalItemTooltipIcon', GetEntityIconPath(''#shop_quickslot_saved{id}#'') );
+					Trigger('QuickItemBorder', '{panel}', '{id}');
+					ShowWidget('shopGlobalItemTooltip');
+				"
+				onmouseout="
+					Trigger('QuickItemBorder', '', '');
+					HideWidget('shopGlobalItemTooltip');
+				"
+				onhide="
+					Trigger('QuickItemBorder', '', '');
+					HideWidget('shopGlobalItemTooltip');
+				"
+
+				watch1="shopGlobalItemTooltipUpdate"
+				ontrigger1="
+				If(param39 gt 0, 
+					SetOnRightClick('						
+						If(!ShopControlDown or !shop_quickslot_isscroll{id},
+							Split(
+								Set(\'_lastSelectedItemEntity\', \''#shop_quickslot_saved{id}#'\'),				
+								Trigger(
+									\'shopBuyRemainingInfo\',
+									\''#EscapeString(param0)#'\',
+									\''#EscapeString(param4)#'\',
+									\''#GetEntityIconPath(''#shop_quickslot_saved{id})#'\'
+								),
+								CallEvent(\'purchase_components_popup\', 0),		
+								Call(\'shop_v4_listbox\', \'SetVisible(0)\')
+							),
+							Split(
+								Purchase2(\''#shop_quickslot_saved{id}#'\'),		
+								Call(\'shop_v4_listbox\', \'SetVisible(0)\')						
+							)
+						)
+					'),
+					SetOnRightClick('	
+							PurchaseByName(\''#shop_quickslot_saved{id}#'\');		
+							Call(\'shop_v4_listbox\', \'SetVisible(0)\');
+					')
+				);				
+				"			
+				watch2="QuickSlotItemUpdate"
+				ontrigger2lua="
+					local savedItem = 'shop_quickslot_saved{id}'
+					local param9 = tostring(param9)
+					local param10 = tostring(param10)
+					if param28 == savedItem then
+						self:SetCallback('onclick', function(...)
+							if Input.IsAltDown() then
+								Shop:AltClickShopItem(GetCvarString('shop_quickslot_saved{id}'))
+							else
+								local t = self:UICmd('GetActiveRecipe()')
+								if t ~= savedItem then
+									Set('_lastShopSearch', '')
+									Set('_activeShopFilters', '')
+									if string.find(param9, 'recipe') ~= nil then
+										Trigger('SetShopDisplay',  'Shop_Recipes'..string.sub(param9, -5, -5) )
+										Trigger('SetShopDisplay', 'Shop_'..param10)
+										Set('_shopNewRecipeTarget', savedItem)
+										Set('_recipeTransitionMode', 0)
+										Trigger('shopComponentAnimStep0')
+										self:UICmd('SetActiveRecipe(\''..savedItem..'\')')
+									else
+										self:UICmd('SetActiveRecipe(\'\')')
+									end
+								end
+								local w = GetWidget('shop_v4_listbox')
+								if w then
+									w:SetVisible(false)
+								end
+							end
+						end)
+						Set('shop_quickslot_isscroll{id}', (AtoB(param8) and (not AtoB(param17)) and (not AtoB(param18)) ))
+					end
+				"
+			>
+				<!-- ctrl recipes  -->
+				<panel noclick="1" visible="0" passivechildren="true"
+					 onloadlua="Shop:RegisterCtrlHoldWidget(self)" 
+				>
+					<panel color="black" watch="QuickSlotItemUpdate" noclick="1" visible="0"
+						ontriggerlua="
+							if (param28 == GetCvarString('shop_quickslot_saved{id}')) then							
+								self:SetVisible(AtoB(param8) and (not AtoB(param17)) and (not AtoB(param18)) )
+							end	
+						"					
+					>
+						<image align="center" valign="center" watch="QuickSlotItemUpdate"
+							width="55%" height="55%"
+							ontriggerlua="
+								if (param28 == GetCvarString('shop_quickslot_saved{id}')) then							
+									self:SetTexture(param3)
+									if AtoB(param6) or (AtoB(param8) and AtoB(param12)) then
+										self:UICmd([[SetRenderMode('normal')]])
+									else
+										self:UICmd([[SetRenderMode('grayscale')]])
+									end
+								end
+								"
+						/>	
+						<image texture="/ui/elements/shop/scroll_overlay.tga"/>					
+					</panel>
+				</panel>			
+				<frame width="+2" height="+2" noclick="1" color="invisible" bordercolor="yellow" borderthickness="2" visible="0" 
+					 onloadlua="Shop:RegisterQuickSlotItemBorder(self, '{panel}', '{id}')"
+				/>
+				<widgetstate statename="up">
+					<image group="shop_quickslot_item_icons{id}" onload="SetTexture(GetEntityIconPath(''#shop_quickslot_saved{id}#''));" />
+					<frame color="invisible" borderthickness="1" bordercolor=".2 .2 .2 1" noclick="true"/>
+				</widgetstate>
+				<widgetstate statename="over">
+					<image group="shop_quickslot_item_icons{id}" onload="SetTexture(GetEntityIconPath(''#shop_quickslot_saved{id}#''));" />
+					<frame color="invisible" borderthickness="1" bordercolor=".2 .2 .2 1" noclick="true"/>
+				</widgetstate>
+				<widgetstate statename="down" x="1" y="1">
+					<image group="shop_quickslot_item_icons{id}" onload="SetTexture(GetEntityIconPath(''#shop_quickslot_saved{id}#''));" />
+					<frame color="invisible" borderthickness="1" bordercolor=".2 .2 .2 1" noclick="true"/>
+				</widgetstate>
+			</button>			
+		</panel>
+		<!-- Drag n Drop Item catcher -->
+		<panel width="95@" height="95%" align="center" valign="center" color="invisible"
+			texture="/ui/common/new_shop_interface/sellback_drop.tga"
+			watch="ItemCursorVisible PlayerCanShop"
+			ontrigger="SetVisible(ItemCursorVisible); RefreshCursor();"
+			rendermode="overlay"					
+			onmouseover="
+				SetColor('1 1 1 1');
+				"
+			onmouseout="
+				SetColor('invisible');						
+			"
+			onclick="DoEvent();"
+			onevent="			
+				##Echo('^cDrop quickitem_dummy_draggingItem: '#quickitem_dummy_draggingItem);##
+				##Echo('^gDrop quickitem_dummy_entity: '#quickitem_dummy_entity#' '#quickitem_dummy_icon);##
+				##Echo('^yDrop ItemCursorEntity: '#ItemCursorEntity#' '#ItemCursorIcon);##
+				If(!StringEmpty(quickitem_dummy_entity) and !StringEmpty(quickitem_dummy_icon) and !quickitem_dummy_draggingItem,
+					Split(						
+						SetSave('shop_quickslot_saved{id}', ''#quickitem_dummy_entity#''),
+						TriggerShopItem('QuickSlotItemUpdate', ''#quickitem_dummy_entity#'', 0),
+						GroupCall('shop_quickslot_item_icons{id}', 'SetTexture(\''#quickitem_dummy_icon#'\');'),
+						Call('quickslot_dummy_item', 'DoEvent(1);')
+					),
+					If(!StringEmpty(ItemCursorEntity) and !StringEmpty(ItemCursorIcon),
+						Split(
+							SetSave('shop_quickslot_saved{id}', ''#ItemCursorEntity#''),
+							TriggerShopItem('QuickSlotItemUpdate', ''#ItemCursorEntity#'', 0),
+							GroupCall('shop_quickslot_item_icons{id}', 'SetTexture(\''#ItemCursorIcon#'\');'),
+							Call('quickslot_dummy_item', 'DoEvent(1);')
+						)
+					)
+				);
+			"
+			watch2="QuickItemPositionUpdate"
+			ontrigger2="
+				If( (param0 ge (GetAbsoluteX())) and (param0 le (GetAbsoluteX() + GetWidth())) and IsVisible() and
+					(param1 ge (GetAbsoluteY()  - (GetHeight()/4))) and (param1 le (GetAbsoluteY()  + (GetHeight()))),	
+						DoEvent()
+				);			
+			"
+			/>			
+	</template>	
+
+	<template name="guide_ability_lvl">
+		<panel group="guide_ability_lvl_group" height="3.5h" visible="0" noclick="0" passivechildren="1"
+			 onloadlua="Shop:RegisterGuideAbilityLevel(self, '{id}')" 
+			oneventlua="
+				self:SetVisible(0); 
+				self:Sleep(
+					(tonumber(Cvar.GetCvar('guide_fadein'):GetString())*tonumber({id})/10 * tonumber(Cvar.GetCvar('_shopFlag_animSpeedMult'):GetString())),
+					function() self:FadeIn(150 * tonumber(Cvar.GetCvar('_shopFlag_animSpeedMult'):GetString())) end
+					)
+			" 
+			watch3="GuideAbilityEvent" ontrigger3lua="self:DoEvent()" 
+			watch4="GuideAbilityClear" ontrigger4="SetOnMouseOver(''); SetOnMouseOut('');" ontrigger4lua="self:SetVisible(false)"				
+		>
+			<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.4h" color="0 0 0 .5"/>
+			<frame texture="/ui/frames/roundframe.tga" color="#667788" borderthickness="0.4h"/>
+			
+			<label width="-92@" textvalign="center" textalign="center" font="dyn_14" color="1 1 1 1" content="{id}" outline="1"  />
+			
+			<panel x="-0.2h" width="88@" height="88%" valign="center" align="right">
+				<image texture="$invis"
+					 onloadlua="Shop:RegisterGuideAbilityIcon(self, '{id}')"
+				/>
+				<frame color="invisible" borderthickness="1" bordercolor=".2 .2 .2 1" noclick="true"/>
+			</panel>
+		
+		</panel>
+	</template>
+
+	<template name="guidelist_item">
+		<panel height="100%" float="right" padding="1.0h" >
+	
+			<!-- If featured, replace popularity with this --> 
+			<panel x="0.8h" width="3.0h" height="100%" visible="0" oninstantiate="SetVisible({is_premium=0} and !{is_yours=0} and !{isfav=0} and !{isdef=0});" >
+				<image width="1.6h" height="1.6h" valign="center" align="center" color="0.8 0 1 1" texture="/ui/elements/star.tga" />
+			</panel>	
+	
+			<!-- If yours --> 
+			<panel x="0.8h" width="3.0h" height="100%" visible="0" oninstantiate="SetVisible({is_yours=0} and !{isfav=0} and !{isdef=0});" >
+				<image width="1.6h" height="1.6h" valign="center" align="center" color="green" texture="/ui/elements/star.tga" />
+			</panel>		
+		
+			<!-- If favorite, replace popularity with this --> 
+			<panel x="0.8h" width="3.0h" height="100%" visible="0" oninstantiate="SetVisible({isfav=0} and !{isdef=0});" >
+				<image width="1.6h" height="1.6h" valign="center" align="center" texture="/ui/elements/star.tga" />
+			</panel>
+			
+			<!-- If default, replace popularity with this --> 
+			<panel x="0.8h" width="3.0h" height="100%" visible="0" oninstantiate="SetVisible({isdef=0});" >
+				<image width="1.6h" height="1.6h" valign="center" align="center" color="yellow" texture="/ui/elements/star.tga" />
+			</panel>			
+
+			<!-- If Regular Guide -->
+			<label name="guidelist_item_{guideindex}" visible="1" x="0.8h" width="3.0h" height="100%" font="dyn_9" color="0 1 0 1" textvalign="center" textalign="right" shadow="true" 
+				content="N/A" 
+				oninstantiate="SetVisible(!{isfav=0} and !{isdef=0} and !{is_premium=0} and !{is_yours=0}); 
+					If({pop} gt 0,
+						Split(
+							SetText('{pop=78}%'),
+							SetColor(Saturate(1 - (({pop}/100) - 0.50) / 0.50), (({pop}/100) + (((({pop}/100) - 0.05) / 1.0)*0.2)) / 0.45, 	0, 1)
+						), 
+						Split(
+							SetText('N/A'),
+							SetColor('0.7 0.7 0.7 1')
+						)
+					);"
+			/>			
+			
+			<label fitx="true" height="100%" font="dyn_9" color="1 1 1 1" textvalign="center" shadow="true" content="{guidename=Guide Name}" />
+			<label fitx="true" height="100%" font="dyn_9" color=".7 .7 .7 1" textvalign="center" shadow="true" content="{author=Author}"
+				oninstantiatelua="
+					self:SetVisible(HoN_Region.regionTable[HoN_Region.activeRegion].guideDetails)
+				"
+			/>
+		</panel>
+	</template>
+		
+	<template name="guidelist_combobox_state">
+		<widgetstate statename="{state}">
+			<panel color="invisible">
+				<image height="100%" width="-200@" align="center" texture="/ui/info/combobox_background_c.tga" color="{color}"/>
+				<image height="100%" width="100@" align="left" texture="/ui/info/combobox_background_l.tga" color="{color}"/>
+				<image height="100%" width="100@" align="right" texture="/ui/info/combobox_background_r.tga" color="{color}"/>
+				<image x="-1" width="100@" height="100%" align="right" valign="center" texture="/ui/info/combobox_button_{image}.tga" />
+			</panel>
+		</widgetstate>
+	</template> 
+	
+	<template name="guidelist_combobox">
+		<combobox
+			name="guidelist_combobox"
+			interactive="false"
+			x="1.0h"
+			width="38.0h"
+			height="2h"
+			align="left"
+			valign="center"
+			color="invisible"
+			itemwidth="100%"
+			itemheight="2h"
+			maxlistheight="25"
+			cvar="{cvar}"
+			exteriorscrollbars="false"
+			scrolltexture="/ui/info/combobox.tga"
+			handleheight="100@" handlewidth="100%"
+			scrollbarsize="2h"
+			scrollbaroffset="0"
+			highlight="under"
+			highlightbordercolor="{highlightbordercolor=white}"
+			onload="ComboBoxCmd('clear'); {populate=}; {data}('{itemtemplate=guidelist_item}'); {onload=}"
+			onselect="{onselect=}"
+			onshow="{onshow=}"
+			onmouseover="PlaySound('/shared/sounds/ui/button_over_02.wav');"
+			watch="{watch=}"
+			ontrigger="{ontrigger=}"
+			onevent="{onevent=}"
+			visible="{visible=true}"
+			form="{form=}" data="{formdata=}"
+		>
+			<instance name="guidelist_combobox_state" state="up" color="{color=1 1 1 1}" image="up"/>
+			<instance name="guidelist_combobox_state" state="over" color="{overcolor=#69ccff}" image="over"/>
+			<instance name="guidelist_combobox_state" state="down" color="{downcolor=#69ccff}" image="over"/>
+			<widgetstate statename="listbg">
+				<frame height="+2.7h" y="-1.9h" texture="/ui/info/combobox_dropdown.tga" borderthickness="3h" color="{color=1 1 1 1}" />
+			</widgetstate>
+			<widgetstate statename="itembg">
+				<panel width="{itemwidth}" />
+			</widgetstate>
+			<widgetstate statename="itemhighlight">
+				<panel width="{itemwidth=100%}" texture="/ui/info/header_bar_c.tga" color="{color=1 1 1 1}">
+					<panel width="100%" height="100%" >
+						<image height="50%" width="32" align="left" valign="top" color="{color=1 1 1 1}" texture="/ui/info/header_bar_tl.tga" noclick="1"/>
+						<image height="50%" width="32" align="left" valign="bottom" color="{color=1 1 1 1}" texture="/ui/info/header_bar_bl.tga" noclick="1"/>
+						<image height="50%" width="32" align="right" valign="top" color="{color=1 1 1 1}" texture="/ui/info/header_bar_tr.tga" noclick="1"/>
+						<image height="50%" width="32" align="right" valign="bottom" color="{color=1 1 1 1}" texture="/ui/info/header_bar_br.tga" noclick="1"/>		
+					</panel>
+				</panel>
+			</widgetstate>
+		</combobox>
+	</template>
+	
+	<template name="guide_vote_btn">
+		<button 
+			name="guide_vote_thumbs_{thumbs}_button"
+			x="{x}"
+			width="116@" height="100%"
+			align="{align}"
+			color="invisible"
+			onmouseover=""
+			onmouseout=""
+			onclick="{onclick}"
+			interactive="false"
+			watch="{watch}"
+			ontrigger="{ontrigger}"
+			watch1="{watch1}"
+			ontrigger1="{ontrigger1}"
+			watch2="{watch2}"
+			ontrigger2="{ontrigger2}"			
+		>
+			<widgetstate statename="up">
+				<label y="-0.2h" textvalign="bottom" textalign="center" font="dyn_7" color=".8 .8 .8 1" content="{label}" />
+				<image group="guide_vote_thumbs_{thumbs}" y="-0.3h" width="90%" height="90%" align="center" color=".9 .9 .9 1" texture="/ui/fe2/elements/{texture}" />				
+			</widgetstate>
+			<widgetstate statename="over">
+				<label y="-0.2h" textvalign="bottom" textalign="center" font="dyn_7" color="1 1 1 1" content="{label}" />
+				<image group="guide_vote_thumbs_{thumbs}"  y="-0.3h" width="90%" height="90%" align="center" texture="/ui/fe2/elements/{texture}" />
+			</widgetstate>
+			<widgetstate statename="down" x="1" y="1">
+				<label y="-0.2h" textvalign="bottom" textalign="center" font="dyn_7" color="1 1 1 1" content="{label}" />
+				<image group="guide_vote_thumbs_{thumbs}"  y="-0.3h" width="90%" height="90%" align="center" texture="/ui/fe2/elements/{texture}" />
+			</widgetstate>
+		</button>
+	</template>
+	
+	<template name="buyall_item">
+		<panel height="3.6h" align="center" visible="{visible=false}" sticky="true" stickytoinvis="false" noclick="true" >
+			<!-- Icon -->
+			<panel x="0.5h" width="100@" height="100%" noclick="true">
+				<image texture="{item}" noclick="true" />
+				<frame borderthickness="1" bordercolor=".2 .2 .2 1" color="invisible" noclick="true" />
+			</panel>
+			<!-- Name -->
+			<label x="5.0h" height="100%" textvalign="center" font="dyn_10" color="1 1 1 1" shadow="true" content="{itemname}" noclick="true"/>
+			<!-- Cost -->
+			<image texture="/ui/fe2/store/gold_coins.tga" x="-0.5h" width="1.6h" height="1.6h" valign="center" align="right" />
+			<label x="-3.0h" height="100%" textalign="right" textvalign="center" font="dyn_10" color="1 1 0 1" shadow="true" content="{itemcost}" noclick="true"/>
+		</panel>
+	</template>
+
+	<template name="buyall_list_item">
+		<panel visible="false" height="3.6h" noclick="true"
+			watch="RemainingComponents{index}"
+			ontrigger="SetVisible(param0);" sticky="true" stickytoinvis="false" group="buyall_list_items">
+			<panel noclick="true">
+				<!-- Icon -->
+				<panel x="0.5h" width="100@" height="100%"
+					watch="RemainingComponents{index}"
+					ontrigger="
+						SetOnMouseOver(
+							'
+								TriggerItemTooltip(
+									\'shopGlobalItemTooltipUpdate\',
+									\''# param28 #'\',
+									' # param29 # '
+								);
+								Trigger(\'shopGlobalItemTooltipIcon\', GetEntityIconPath(\''# param28 #'\'));
+								DoEvent(0);
+							'
+						);
+					"
+					onevent0="
+						ShowWidget('shopGlobalItemTooltip');
+					"
+					onmouseout="
+						HideWidget('shopGlobalItemTooltip');
+					"
+				>
+					<image watch="RemainingComponents{index}" ontrigger="If(param25, SetRenderMode('normal'), SetRenderMode('grayscale'));" ontriggerlua="self:SetTexture(param3)"  texture="{item}" noclick="true" />
+					<panel color="0 0 0 0.5" visible="false" watch="RemainingComponents{index}" ontrigger="SetVisible(!param25);" noclick="true"/>
+					<panel watch="RemainingComponents{index}" color="0 0 0 1"
+						ontrigger="
+							SetVisible(param29);
+						"
+						noclick="true"
+
+					>
+						<image watch="RemainingComponents{index}" align="center" valign="center" width="-45%" height="-45%" ontriggerlua="self:SetTexture(param3)" noclick="true"	/>
+						<image texture="/ui/elements/shop/scroll_overlay.tga" noclick="true"/>
+						<frame color="invisible" borderthickness="1" bordercolor=".5 .5 .5 1" noclick="true" />
+					</panel>
+					<frame borderthickness="1" bordercolor=".2 .2 .2 1" color="invisible" noclick="true" />
+				</panel>
+				<!-- Name -->
+				<label x="5.0h" height="100%" textvalign="center" font="dyn_10" color="1 1 1 1" shadow="true" noclick="true" watch="RemainingComponents{index}" ontriggerlua="self:SetText(param1);"/>
+				<!-- Cost -->
+				<image texture="/ui/fe2/store/gold_coins.tga" x="-0.5h" width="1.6h" height="1.6h" valign="center" align="right" noclick="true" />
+				<label x="-3.0h" height="100%" textalign="right" textvalign="center" font="dyn_10" color="1 1 0 1" shadow="true" noclick="true" watch="RemainingComponents{index}" ontrigger="SetText(If(param29, param4, param5)); Set('_recipeRemainingCost', _recipeRemainingCost + If(param29, param4, param5)); CallEvent('recipeRemainingCostTotal');"/>
+			</panel>
+		</panel>
+
+	</template>	
+	
+	<template name="shop_v4_item_panel_template" >
+		<panel name="shop_v4_item_panel" noclick="1" >	
+			<instance name="shop_v4_item2" index="0" reportRowY="0"/>
+			<instance name="shop_v4_item2" index="1"/>
+			<instance name="shop_v4_item2" index="2"/>
+			<instance name="shop_v4_item2" index="3"/>
+			<instance name="shop_v4_item2" index="4" reportRowY="1"/>
+			<instance name="shop_v4_item2" index="5"/>
+			<instance name="shop_v4_item2" index="6"/>
+			<instance name="shop_v4_item2" index="7"/>
+			<instance name="shop_v4_item2" index="8" reportRowY="2"/>
+			<instance name="shop_v4_item2" index="9"/>
+			<instance name="shop_v4_item2" index="10"/>
+			<instance name="shop_v4_item2" index="11"/>
+			<instance name="shop_v4_item2" index="12" reportRowY="3"/>
+			<instance name="shop_v4_item2" index="13"/>
+			<instance name="shop_v4_item2" index="14"/>
+			<instance name="shop_v4_item2" index="15"/>
+			<instance name="shop_v4_item2" index="16" reportRowY="4"/>
+			<instance name="shop_v4_item2" index="17"/>
+			<instance name="shop_v4_item2" index="18"/>
+			<instance name="shop_v4_item2" index="19"/>
+			<instance name="shop_v4_item2" index="20" reportRowY="5"/>
+			<instance name="shop_v4_item2" index="21"/>
+			<instance name="shop_v4_item2" index="22"/>
+			<instance name="shop_v4_item2" index="23"/>
+			<instance name="shop_v4_item2" index="24" reportRowY="6"/>
+			<instance name="shop_v4_item2" index="25"/>
+			<instance name="shop_v4_item2" index="26"/>
+			<instance name="shop_v4_item2" index="27"/>
+			<instance name="shop_v4_item2" index="28"/>
+			<instance name="shop_v4_item2" index="29"/>
+			<instance name="shop_v4_item2" index="30"/>
+			<instance name="shop_v4_item2" index="31"/>
+			<instance name="shop_v4_item2" index="32"/>
+			<instance name="shop_v4_item2" index="33"/>
+			<instance name="shop_v4_item2" index="34"/>
+			<instance name="shop_v4_item2" index="35"/>
+			<instance name="shop_v4_item2" index="36"/>
+			<instance name="shop_v4_item2" index="37"/>
+			<instance name="shop_v4_item2" index="38"/>
+			<instance name="shop_v4_item2" index="39"/>
+			<instance name="shop_v4_item2" index="40"/>
+			<instance name="shop_v4_item2" index="41"/>
+			<instance name="shop_v4_item2" index="42"/>
+			<instance name="shop_v4_item2" index="43"/>
+			<instance name="shop_v4_item2" index="44"/>
+			<instance name="shop_v4_item2" index="45"/>
+			<instance name="shop_v4_item2" index="46"/>
+			<instance name="shop_v4_item2" index="47"/>
+			<instance name="shop_v4_item2" index="48"/>
+			<instance name="shop_v4_item2" index="49"/>
+			<instance name="shop_v4_item2" index="50"/>
+			<instance name="shop_v4_item2" index="51"/>
+			<instance name="shop_v4_item2" index="52"/>
+			<instance name="shop_v4_item2" index="53"/>
+			<instance name="shop_v4_item2" index="54"/>
+			<instance name="shop_v4_item2" index="55"/>
+			<instance name="shop_v4_item2" index="56"/>
+			<instance name="shop_v4_item2" index="57"/>
+			<instance name="shop_v4_item2" index="58"/>
+			<instance name="shop_v4_item2" index="59"/>	
+		</panel>
+	</template>
+	
+	<template name="shop_v4_item_simple_panel_template" >
+		<panel name="shop_v4_item_simple_panel" noclick="1" >
+			<instance name="shop_v4_item_simple" index="0" reportRowY="0"/>
+			<instance name="shop_v4_item_simple" index="1"/>
+			<instance name="shop_v4_item_simple" index="2"/>
+			<instance name="shop_v4_item_simple" index="3"/>
+			<instance name="shop_v4_item_simple" index="4"/>
+			<instance name="shop_v4_item_simple" index="5"/>
+			<instance name="shop_v4_item_simple" index="6" reportRowY="1"/>
+			<instance name="shop_v4_item_simple" index="7"/>
+			<instance name="shop_v4_item_simple" index="8"/>
+			<instance name="shop_v4_item_simple" index="9"/>
+			<instance name="shop_v4_item_simple" index="10"/>
+			<instance name="shop_v4_item_simple" index="11"/>
+			<instance name="shop_v4_item_simple" index="12" reportRowY="2"/>
+			<instance name="shop_v4_item_simple" index="13"/>
+			<instance name="shop_v4_item_simple" index="14"/>
+			<instance name="shop_v4_item_simple" index="15"/>
+			<instance name="shop_v4_item_simple" index="16"/>
+			<instance name="shop_v4_item_simple" index="17"/>
+			<instance name="shop_v4_item_simple" index="18" reportRowY="3"/>
+			<instance name="shop_v4_item_simple" index="19"/>
+			<instance name="shop_v4_item_simple" index="20"/>
+			<instance name="shop_v4_item_simple" index="21"/>
+			<instance name="shop_v4_item_simple" index="22"/>
+			<instance name="shop_v4_item_simple" index="23"/>
+			<instance name="shop_v4_item_simple" index="24" reportRowY="4"/>
+			<instance name="shop_v4_item_simple" index="25"/>
+			<instance name="shop_v4_item_simple" index="26"/>
+			<instance name="shop_v4_item_simple" index="27"/>
+			<instance name="shop_v4_item_simple" index="28"/>
+			<instance name="shop_v4_item_simple" index="29"/>
+			<instance name="shop_v4_item_simple" index="30" reportRowY="5"/>
+			<instance name="shop_v4_item_simple" index="31"/>
+			<instance name="shop_v4_item_simple" index="32"/>
+			<instance name="shop_v4_item_simple" index="33"/>
+			<instance name="shop_v4_item_simple" index="34"/>
+			<instance name="shop_v4_item_simple" index="35"/>
+			<instance name="shop_v4_item_simple" index="36" reportRowY="6"/>
+			<instance name="shop_v4_item_simple" index="37"/>
+			<instance name="shop_v4_item_simple" index="38"/>
+			<instance name="shop_v4_item_simple" index="39"/>
+			<instance name="shop_v4_item_simple" index="40"/>
+			<instance name="shop_v4_item_simple" index="41"/>
+			<instance name="shop_v4_item_simple" index="42"/>
+			<instance name="shop_v4_item_simple" index="43"/>
+			<instance name="shop_v4_item_simple" index="44"/>
+			<instance name="shop_v4_item_simple" index="45"/>
+			<instance name="shop_v4_item_simple" index="46"/>
+			<instance name="shop_v4_item_simple" index="47"/>
+			<instance name="shop_v4_item_simple" index="48"/>
+			<instance name="shop_v4_item_simple" index="49"/>
+			<instance name="shop_v4_item_simple" index="50"/>
+			<instance name="shop_v4_item_simple" index="51"/>
+			<instance name="shop_v4_item_simple" index="52"/>
+			<instance name="shop_v4_item_simple" index="53"/>
+			<instance name="shop_v4_item_simple" index="54"/>
+			<instance name="shop_v4_item_simple" index="55"/>
+			<instance name="shop_v4_item_simple" index="56"/>
+			<instance name="shop_v4_item_simple" index="57"/>
+			<instance name="shop_v4_item_simple" index="58"/>
+			<instance name="shop_v4_item_simple" index="59"/>	
+		</panel>
+	</template>	
+	
+</package>

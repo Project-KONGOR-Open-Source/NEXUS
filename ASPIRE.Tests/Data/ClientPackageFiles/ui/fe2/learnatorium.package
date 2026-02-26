@@ -1,0 +1,1239 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+
+	<trigger name="SimpleHeroItemTooltip" />
+	<trigger name="matchstats_hero_helper" />
+	<trigger name="trial_avatar_info" />
+	<trigger name="LearnaItemsClearList" />
+	<include file="learnatorium_forms.package" />
+	<include file="learnatorium_templates.package" />
+	
+	<trigger name="compendium_detailed_component_1_trigger" />
+	<trigger name="compendium_detailed_component_2_trigger" />
+	<trigger name="compendium_detailed_component_3_trigger" />
+	<trigger name="compendium_detailed_component_4_trigger" />
+	<trigger name="compendium_detailed_component_5_trigger" />
+	<trigger name="compendium_detailed_component_6_trigger" />
+
+	<panel name="Learnatorium_TriggerHelper" color="invisible" noclick="true"/>
+
+	<lua file="/ui/scripts/learnatorium.lua" />
+
+	<floater width="10h" x="-23.0h" y="2.9h" grow="true" regrow="1" name="graph_bar_tooltip" color="invisible" visible="0" align="left">
+		<frame texture="/ui/frames/tooltip_bg.tga" color="0 0 0 1.0" borderthickness=".6h" />
+		<frame texture="/ui/frames/roundframe.tga" color="#A0A0A0" borderthickness=".6h" />
+		<panel width="-1.5h" align="center" grow="true"  regrow="1" float="bottom">
+				<panel height=".5h" />
+				<label y="0.5h" x="0.5h" watch="HeroUsageGraphTooltipUpdate" ontrigger="SetWidth(GetStringWidth('dyn_10', '^w'#param1#'%  ^444-^*   '#param0)+GetXFromString('1h')); SetText('^w'#FtoA(param1, 2, 2)#'%  ^444-^*   '#param0);" textvalign="top" textalign="left" font="dyn_10" noclick="1" color="#ffab01" shadow="1" wrap="0" width="100%" fity="true" fitypadding="0.8h"></label>
+		</panel>
+	</floater>
+
+	<template name="sidetab_v3">
+		<panel width="100%" height="{height=100@}" y="{y}"
+			onmouseover="PlaySound('/shared/sounds/ui/ccpanel/button_over_02.wav');"
+			onclick="{onclick}"
+			onclicklua="{onclicklua}"
+			mouseoverdisabled="{mouseoverdisabled}"
+			disabledmouseover="{disabledmouseover}"
+			mouseoutdisabled="{mouseoutdisabled}"
+			disabledmouseout="{disabledmouseout}"
+			onmouseoverdisabled="{onmouseoverdisabled}"
+			onmouseoutdisabled="{onmouseoutdisabled}"
+			visible="{visible=1}"
+		>
+			<button
+				name="{id}"
+				color="invisible"
+				noclick="1"
+				numstates="2"
+				onshow="{onshow}"
+			>
+				<widgetstate statename="up">
+					<frame texture="/ui/frames/tabbox.tga" borderthickness="33%" noclick="true">
+						<panel width="-6%" height="-6@" align="center" valign="center" noclick="true">
+							<panel y="3%" width="100%" height="{iconsize=60}%">
+								<image width="100@" height="100%" align="center" texture="{icon}" />
+							</panel>
+							<panel y="-2%" grow="true" width="100%" float="bottom" valign="bottom">
+								<label fity="true" font="{labelfont=dyn_18}" textalign="center" color="#ffaa00" outline="true" content="{cat_label}" noclick="true" />
+								<label fity="true" font="dyn_12" textalign="center" color="1 1 1 1" shadow="true" content="{cat_sub_label}" noclick="true" />
+							</panel>
+						</panel>
+						<panel x="1.0h" width="1.9h" height="100%" align="right" color="#183042">
+							<image x="90%" y="10%" align="right" width="106%" height="212@" texture="/ui/frames/tabbox_arrow.tga" noclick="true" />
+						</panel>
+					</frame>
+				</widgetstate>
+				<widgetstate statename="over">
+					<frame texture="/ui/frames/tabbox.tga" borderthickness="33%" noclick="true">
+						<panel width="-6%" height="-6@" align="center" valign="center" noclick="true">
+							<panel y="3%" width="100%" height="{iconsize=60}%">
+								<image width="100@" height="100%" align="center" texture="{icon}" />
+							</panel>
+							<panel y="-2%" grow="true" width="100%" float="bottom" valign="bottom">
+								<label fity="true" font="{labelfont=dyn_18}" textalign="center" color="#ffaa00" outline="true" content="{cat_label}" noclick="true" />
+								<label fity="true" font="dyn_12" textalign="center" color="1 1 1 1" shadow="true" content="{cat_sub_label}" noclick="true" />
+							</panel>
+						</panel>
+						<panel x="1.0h" width="1.9h" height="100%" align="right" color="#183042">
+							<image x="90%" y="10%" align="right" width="106%" height="212@" texture="/ui/frames/tabbox_arrow.tga" noclick="true" />
+						</panel>
+					</frame>
+				</widgetstate>
+				<widgetstate statename="down">
+					<frame texture="/ui/frames/tabbox.tga" borderthickness="33%" noclick="true">
+						<panel width="-6%" height="-6@" align="center" valign="center" noclick="true">
+							<panel y="3%" width="100%" height="{iconsize=60}%">
+								<image width="100@" height="100%" align="center" texture="{icon}" />
+							</panel>
+							<panel y="-2%" grow="true" width="100%" float="bottom" valign="bottom">
+								<label fity="true" font="{labelfont=dyn_18}" textalign="center" color="#ffaa00" outline="true" content="{cat_label}" noclick="true" />
+								<label fity="true" font="dyn_12" textalign="center" color="1 1 1 1" shadow="true" content="{cat_sub_label}" noclick="true" />
+							</panel>
+						</panel>
+						<panel x="1.0h" width="1.9h" height="100%" align="right" color="#183042">
+							<image x="90%" y="10%" align="right" width="106%" height="212@" texture="/ui/frames/tabbox_arrow.tga" noclick="true" />
+						</panel>
+					</frame>
+				</widgetstate>
+				<widgetstate statename="disabled">
+					<frame texture="/ui/frames/tabbox.tga" borderthickness="33%" rendermode="grayscale" noclick="true">
+						<panel width="-6%" height="-6@" align="center" valign="center" noclick="true">
+							<panel y="3%" width="100%" height="{iconsize=60}%">
+								<image width="100@" height="100%" align="center" texture="{icon}" rendermode="grayscale" />
+							</panel>
+							<panel y="-2%" grow="true" width="100%" float="bottom" valign="bottom">
+								<label fity="true" font="{labelfont=dyn_18}" textalign="center" color=".5 .5 .5 1" outline="true" content="{cat_label}" noclick="true" />
+								<label fity="true" font="dyn_12" textalign="center" color=".4 .4 .4 1" shadow="true" content="{cat_sub_label}" noclick="true" />
+							</panel>
+						</panel>
+					</frame>
+				</widgetstate>
+
+				<widgetstate statename="up2">
+					<frame texture="/ui/frames/tabbox.tga" borderthickness="33%" rendermode="grayscale" noclick="true">
+						<panel width="-6%" height="-6@" align="center" valign="center" noclick="true">
+							<panel y="3%" width="100%" height="{iconsize=60}%">
+								<image width="100@" height="100%" align="center" texture="{icon}" rendermode="grayscale" />
+							</panel>
+							<panel y="-2%" grow="true" width="100%" float="bottom" valign="bottom">
+								<label fity="true" font="{labelfont=dyn_18}" textalign="center" color=".5 .5 .5 1" outline="true" content="{cat_label}" noclick="true" />
+								<label fity="true" font="dyn_12" textalign="center" color=".4 .4 .4 1" shadow="true" content="{cat_sub_label}" noclick="true" />
+							</panel>
+						</panel>
+					</frame>
+				</widgetstate>
+				<widgetstate statename="over2">
+					<frame texture="/ui/frames/tabbox.tga" borderthickness="33%" noclick="true">
+						<panel width="-6%" height="-6@" align="center" valign="center" noclick="true">
+							<panel y="3%" width="100%" height="{iconsize=60}%">
+								<image width="100@" height="100%" align="center" texture="{icon}" />
+							</panel>
+							<panel y="-2%" grow="true" width="100%" float="bottom" valign="bottom">
+								<label fity="true" font="{labelfont=dyn_18}" textalign="center" color="#ffaa00" outline="true" content="{cat_label}" noclick="true" />
+								<label fity="true" font="dyn_12" textalign="center" color="1 1 1 1" shadow="true" content="{cat_sub_label}" noclick="true" />
+							</panel>
+						</panel>
+					</frame>
+				</widgetstate>
+				<widgetstate statename="down2">
+					<frame texture="/ui/frames/tabbox.tga" borderthickness="33%" noclick="true">
+						<panel width="-6%" height="-6@" align="center" valign="center" noclick="true">
+							<panel y="3%" width="100%" height="{iconsize=60}%">
+								<image x="1" y="1" width="100@" height="100%" align="center" texture="{icon}" />
+							</panel>
+							<panel y="-2%" grow="true" width="100%" float="bottom" valign="bottom">
+								<label fity="true" font="{labelfont=dyn_18}" textalign="center" color="#ffaa00" outline="true" content="{cat_label}" noclick="true" />
+								<label fity="true" font="dyn_12" textalign="center" color="1 1 1 1" shadow="true" content="{cat_sub_label}" noclick="true" />
+							</panel>
+						</panel>
+					</frame>
+				</widgetstate>
+			</button>
+		</panel>
+	</template>
+
+	<!-- <template name="learner_breadcrumb">
+		<panel name="learner_breadcrumb_{id}" grow="1" regrow="1" growinvis="0" sticky="1" stickytoinvis="0"
+			onclicklua="UIManager.GetInterface('main'):HoNLearnerF('ClickBreadCrumb', {id})"
+		>
+			<label name="learner_breadcrumb_{id}_text" sticky="0" fity="1" fitx="true" font="dyn_12" color="#37b2d9" shadow="true" noclick="1"/>
+		</panel>
+	</template> -->
+
+	<template name="top_sub_tab">
+		<panel grow="true" height="100%">
+			<panel name="top_sub_tab{id}" grow="true" regrow="1" growinvis="false" height="100%" float="right" color="#282828">
+				<panel width="2.2h" height="100%" />
+				<label fitx="true" fitxpadding="2.2h" textvalign="center" font="dyn_14" color=".7 .7 .7 1" outline="true" outlinecolor=".1 .1 .1 1" content="{label}" />
+				<panel name="top_sub_tab_arrow_{id}" width="3.0h" visible="0">
+					<image x="-34@" y="-3%" width="80%" height="80@" valign="center" align="center" texture="/ui/elements/vote_remake.tga" hflip="true" />
+				</panel>
+				<panel x="0" height="1" color="0 0 0 1" valign="bottom" sticky="false" stickytoinvis="false" />
+			</panel>
+			<!-- Over/Current State -->
+			<panel name="top_sub_tab_current{id}" group="top_sub_tab_current" grow="true" growinvis="false" regrow="1" height="100%" float="right" color="#1f3f57" visible="{current=false}">
+				<panel width="2.2h" height="100%" />
+				<label fitx="true" fitxpadding="2.2h" textvalign="center" font="dyn_14" color="#ffaa00" outline="true" outlinecolor="0 0 0 1" content="{label}" />
+				<panel name="top_sub_tab_arrow2_{id}" width="3.0h" visible="0">
+					<image x="-34@" y="-3%" width="80%" height="80@" valign="center" align="center" texture="/ui/elements/vote_remake.tga" hflip="true" />
+				</panel>
+			</panel>
+			<!-- Hover / Click Action -->
+			<panel
+				onclick="{onclick}"
+				onclicklua="{onclicklua}
+							if GetWidget('top_sub_tab_arrow2_{id}'):IsVisible() then
+								Trigger('genericMainFloatingTip', 'true', '8h', '', 'general_goback', '', '', '', '3h', '-2h')
+							else
+								GetWidget('genericMainFloatingTip'):SetVisible(0)
+							end"
+				onmouseover="Call('top_sub_tab{id}', 'SetColor(\'#1c3345\');');"
+				onmouseoverlua="if GetWidget('top_sub_tab_arrow2_{id}'):IsVisible() then
+									Trigger('genericMainFloatingTip', 'true', '8h', '', 'general_goback', '', '', '', '3h', '-2h')
+								end"
+				onmouseout="Call('top_sub_tab{id}', 'SetColor(\'#282828\');'); HideWidget('genericMainFloatingTip');"
+			/>
+			<panel width="1" color="0 0 0 1" align="right" />
+		</panel>
+	</template>
+
+	<template name="heroDifficultyStarLEARN">
+		<panel sticky="true" stickytoinvis="false" noclick="true" width="100@" height="100%">
+			<panel width="100@" height="100%" sticky="false" stickytoinvis="false" visible="true" noclick="true">
+				<image texture="/ui/fe2/elements/hero_popularity_pip.tga" color="1 1 1 1" rendermode="grayscale" visible="true" />
+			</panel>
+			<panel name="compendium_hero_difficulty_{difficulty}" width="100@" height="100%" sticky="false" stickytoinvis="false" visible="false" noclick="true" clip="1">
+				<image width="100@" texture="/ui/fe2/elements/hero_popularity_pip.tga" color="1 1 1 1" visible="true" />
+			</panel>
+		</panel>
+	</template>
+
+	<template name="LEARNVoiceButtonState">
+		<widgetstate statename="{statename}" x="{x}" y="{y}">
+			<frame texture="/ui/frames/circle.tga" color="1 .9 .9 .1" bordercolor="1 .9 .9 .1" borderthickness="33%" visible="{over=false}" />
+			<frame texture="/ui/frames/circle.tga" color="0 0 0 .2" bordercolor="0 0 0 .2" borderthickness="33%" visible="{down=false}" />
+		</widgetstate>
+	</template>
+	<template name="LEARNVoiceButton">
+		<button
+			color="invisible"
+			onclicklua="{onclicklua}"
+		>
+			<instance name="LEARNVoiceButtonState" statename="up"/>
+			<instance name="LEARNVoiceButtonState" statename="over" over="true"/>
+			<instance name="LEARNVoiceButtonState" statename="down" down="true"/>
+			<instance name="LEARNVoiceButtonState" statename="disabled"/>
+		</button>
+	</template>
+
+	<template name="hero_alt_button">
+		<panel width="100%" height="5.6h" name="hero_alt_button_{id}" visible="0"
+			onclicklua="UIManager.GetInterface('main'):HoNLearnerF('ClickAltAvatar', {id})"
+			onmouseldown="Call('hero_alt_button_{id}_helper', 'SetX(1); SetY(1);');"
+			onmouselup="Call('hero_alt_button_{id}_helper', 'SetX(0); SetY(0);');"
+		>
+			<panel name="hero_alt_button_{id}_helper" color="invisible" noclick="1">
+				<frame texture="/ui/frames/togglebox.tga" borderthickness="1.3h" noclick="true" rendermode="grayscale" />
+				<frame name="hero_alt_button_{id}_selected" texture="/ui/frames/togglebox.tga" borderthickness="1.3h" noclick="true" visible="0"/>
+				<panel width="-1.2h" height="-1.2h" align="center" valign="center" noclick="true">
+					<panel height="100%" width="100@" noclick="true">
+						<image name="hero_alt_button_{id}_icon" noclick="true"/>
+						<frame color="invisible" borderthickness="1" bordercolor="0 0 0 1" noclick="true"/>
+					</panel>
+					<panel width="-110@" align="right" float="bottom" noclick="true">
+						<label name="hero_alt_button_{id}_name" fity="true" font="dyn_10" color="1 1 1 1" shadow="true" content="-" noclick="true" />
+					</panel>
+				</panel>
+				<!-- Checkbox -->
+				<panel name="hero_alt_button_{id}_default" x="25%" y="-16%" width="52%" height="36%" valign="bottom" noclick="true">
+					<instance name="Noptions_checkbox2" checkbox_name="hero_alt_button_{id}_check" font="dyn_9" valign="center" cvar="" label="general_set_default" enabled="true"
+						onclicklua="UIManager.GetInterface('main'):HoNLearnerF('ClickDefaultAvatar', {id})"
+					/>
+				</panel>
+				<panel y="55%" width="20%" height="30%" noclick="false" align="right">
+					<label name="hero_alt_button_{id}_trial" fity="true" font="dyn_12" color="red" content="learn_trial" noclick="false" textalign="center"
+						onmouseoverlua="HoN_Learner:MouseOverTrial({id})"
+						onmouseout="HideWidget('trial_avatar_tip')"/>
+				</panel>
+				<panel name="hero_alt_button_{id}_label" visible="0" x="25%" y="-16%" grow="1" regrpw="1" height="36%" valign="bottom" noclick="1"
+					onshow="##Call('hero_alt_button_{id}_label_text', 'SetX(0); SetY(0);'); Call('hero_alt_button_{id}_label_text', 'Setcolor(\'white\');');##"
+					onmouseover="##Call('hero_alt_button_{id}_label_text', 'SetColor(\'#3abde7\');');##"
+					onmouseout="##Call('hero_alt_button_{id}_label_text', 'Setcolor(\'white\');');##"
+					onmouseldown="##Call('hero_alt_button_{id}_label_text', 'SetX(1); SetY(1);');##"
+					onmouselup="##Call('hero_alt_button_{id}_label_text', 'SetX(0); SetY(0);');##"
+					onclicklua="--UIManager.GetInterface('main'):HoNLearnerF('ClickAltGotoStore', {id})"
+				>
+					<label name="hero_alt_button_{id}_label_text" font="dyn_10" color="0.7 0.7 0.7 1" valign="center" content="learn_unowned" fitx="1" noclick="1" />
+				</panel>
+				<panel name="hero_alt_button_{id}_gcaicon" x="-0.5h" y="-1h" width="8.4h" height="2.1h" align="right" valign="bottom" visible="0">
+					<image texture="/ui/fe2/elements/gca/icon_1.tga" />
+				</panel>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="hero_alt_scroll_btn">
+		<panel name="hero_alt_scroll_{dir}" valign="{valign}" height="1.5h" width="100%" visible="{visible}">
+			<image y="-0.8h" height="5.5h" width="100%" valign="bottom" texture="/ui/info/grad_vert.tga" color="0 0 0 1" noclick="true" vflip="true" visible="{blockfade=false}"/>
+			<button
+				color="invisible"
+				visible="{visible}"
+				onclicklua="UIManager.GetInterface('main'):HoNLearnerF('ScrollAltAvatars', '{dir}')"
+			>
+				<widgetstate statename="up">
+					<image width="200@" height="100%" texture="/ui/fe2/elements/scroll_arrow.tga" align="center" color=".6 .6 .6 1" vflip="{vflip}" />
+				</widgetstate>
+				<widgetstate statename="over">
+					<image width="200@" height="100%" texture="/ui/fe2/elements/scroll_arrow.tga" align="center" color="1 1 1 1" vflip="{vflip}" />
+				</widgetstate>
+				<widgetstate statename="down" x="1" y="1">
+					<image width="200@" height="100%" texture="/ui/fe2/elements/scroll_arrow.tga" align="center" color="1 1 1 1" vflip="{vflip}" />
+				</widgetstate>
+			</button>
+		</panel>
+	</template>
+
+	<template name="learnatorium">
+
+		<panel y="-110%" width="129.0h" align="center" name="compendium" visible="{visible=false}" noclick="true" hotkey="ESC" onhotkey="Set('_mainmenu_currentpanel', 'compendium'); CallEvent('MainMenuPanelSwitcher');"
+			onshow="If(_entityDefinitionsLoaded, DoEvent(2), CallEvent('RegisterEntityDefinitionsHelper')); SubmitForm('PlayerStatsMastery', 'f', 'show_stats', 'nickname', StripClanTag(GetAccountName()), 'cookie', GetCookie(), 'table', 'mastery');"
+			onshowlua="GetWidget('compendium_content'):SetY(isNewUI() and '2h' or '0')"
+			watch="EntityDefinitionsLoaded" ontrigger="Call('learnatorium_main', 'SetVisible(1);'); DoEvent(2);"
+			onevent2lua="if (self:IsVisible()) then UIManager.GetInterface('main'):HoNLearnerF('OnShow') end"
+			onhidelua="UIManager.GetInterface('main'):HoNLearnerF('OnHide')"
+		>
+			<panel name="compendium_content" noclick="1">
+				<panel x="0" y="-100%" height="203.6%" width="90%" align="center" texture="mainmenu/upper_frame_center.tga"/>
+				<panel x="18h" y="-100%" height="203.6%" width="50@" align="right" texture="mainmenu/upper_frame_right.tga"/>
+				<panel x="-18h" y="-100%" height="203.6%" width="50@" align="left" texture="mainmenu/upper_frame_left.tga"/>
+
+				<panel name="learnatorium_main" visible="0" y="1.2h" height="-2.0h" width="-6.0h" align="center" noclick="true">
+
+					<panel x="14.6h" width="-15.0h" noclick="true">
+						<panel color="#183042" noclick="true"/>
+						<panel width="-0.8h" height="-0.8h" align="center" valign="center" color="0 0 0 1" noclick="true">
+							<panel y="1" width="-2" align="center" float="bottom" noclick="true">
+								<!-- Tab Header -->
+								<panel width="100%" height="3.6h" float="right" color="#1f3f57">
+									<panel name="learner_top_tabs" grow="true" height="100%" float="right">
+										<instance name="top_sub_tab" id="1" group="learntabs" label="compendium_list_simple" current="false" onclick="ShowOnly('top_sub_tab_current1');"
+											onclicklua="UIManager.GetInterface('main'):HoNLearnerF('ClickTopTab', 1)"
+										/>
+										<instance name="top_sub_tab" id="2" group="learntabs" label="compendium_list_detailed" current="false" onclick="ShowOnly('top_sub_tab_current2');"
+											onclicklua="UIManager.GetInterface('main'):HoNLearnerF('ClickTopTab', 2)"
+										/>
+										<!-- vvvTemporary, needs proper implementationvvv -->
+										<instance name="top_sub_tab" id="8" group="learntabs" label="learn_tabs_mastery_list" current="false" onclick="ShowOnly('top_sub_tab_current8');"
+											onclicklua="UIManager.GetInterface('main'):HoNLearnerF('ClickTopTab', 8)"
+										/>
+										<!-- ^^^Temporary, needs proper implementation^^^ -->
+										<instance name="top_sub_tab" id="3" group="learntabs" label="learn_tabs_usage_list" current="false" onclick="ShowOnly('top_sub_tab_current3');"
+											onclicklua="UIManager.GetInterface('main'):HoNLearnerF('ClickTopTab', 3)"
+										/>
+										<instance name="top_sub_tab" id="4" group="learntabs" label="learn_tabs_hero_info" current="false" onclick="ShowOnly('top_sub_tab_current4');"
+											onclicklua="UIManager.GetInterface('main'):HoNLearnerF('ClickTopTab', 4)"
+										/>
+										<image width="40@" height="100%" align="center" valign="center" texture="/ui/info/grad_horiz.tga" color="0 0 0 .15" />
+									</panel>
+									<instance
+										name="closex_btn"
+										x="-0.5h" y="0.5h"
+										width="2.1h" height="2.1h"
+										align="right"
+										onclick="Set('_mainmenu_currentpanel', 'compendium'); CallEvent('MainMenuPanelSwitcher');"
+									/>
+								</panel>
+								<image height="36%" width="100%" align="center" texture="/ui/info/grad_vert.tga" color="#1f3f57" noclick="true" />
+							</panel>
+
+							<!-- Content -->
+							<!-- Hero Info -->
+							<panel name="learner_heroinfo" y="-1.0h" width="-1.0h" height="-5.0h" align="center" valign="bottom" noclick="true" visible="0">
+
+								<panel width="-25.0h" noclick="true">
+
+									<panel height="-1.8h" valign="bottom">
+
+										<panel x="1.0h" width="-32.0h" align="left" noclick="true">
+
+											<panel height="-10.0h" valign="bottom" noclick="true">
+												<!-- Model -->
+												<panel width="-23.0h" align="right" noclick="true">
+													<modelpanel
+														name="learner_hero_model"
+														scenebuffer="true"
+														noclick="1"
+														model=""
+														anim="idle"
+														cameranear="3000.0"
+														camerafar="5000.0"
+														depthclear="true"
+														depthcompress="false"
+														lookat="false"
+														cameradistance="30"
+														camerapos="0 3600 80"
+														cameraangles="0 0 180"
+														camerafov="7"
+														modelpos="0 0 0"
+														modelangles="-15.0 0 0.0"
+														modelscale="1.0"
+														sunazimuth="120"
+														sunaltitude="50"
+														suncolor="0.9 0.9 0.9"
+														ambientcolor="0.6 0.7 0.7"
+														height="143.5%"
+														y="-40%"
+														width="288%"
+														x="-94%"
+														visible="true"
+														luatable="1"
+														cull="false"
+													/>
+													<instance name="learner_rotator" width="4h" height="4h" align="center" valign="bottom" x="-10h" y="-1h"
+														onmouseldownlua="UIManager.GetInterface('main'):HoNLearnerF('RotateButtonDown', 'left')"
+														onmouserdownlua="UIManager.GetInterface('main'):HoNLearnerF('RotateButtonDown', 'left')"
+														ondoubleclicklua="UIManager.GetInterface('main'):HoNLearnerF('RotateButtonDown', 'left')"
+														onmouseluplua="UIManager.GetInterface('main'):HoNLearnerF('RotateButtonUp')"
+														onmouseruplua="UIManager.GetInterface('main'):HoNLearnerF('RotateButtonUp')"
+													/>
+													<instance name="learner_rotator" width="4h" height="4h" align="center" valign="bottom" x="10h" y="-1h" hflip="true"
+														onmouseldownlua="UIManager.GetInterface('main'):HoNLearnerF('RotateButtonDown', 'right')"
+														ondoubleclicklua="UIManager.GetInterface('main'):HoNLearnerF('RotateButtonDown', 'right')"
+														onmouserdownlua="UIManager.GetInterface('main'):HoNLearnerF('RotateButtonDown', 'right')"
+														onmouseluplua="UIManager.GetInterface('main'):HoNLearnerF('RotateButtonUp')"
+														onmouseruplua="UIManager.GetInterface('main'):HoNLearnerF('RotateButtonUp')"
+													/>
+
+													<button name="learnatorium_go_to_store_btn_rotate" noclick="0" color="invisible"
+														width="14.5h" height="3.2h" align="center" valign="bottom" x="0" y="0.8h"
+														onclicklua="UIManager.GetInterface('main'):HoNLearnerF('ClickAltGotoStore', HoN_Learner.selectedAlt)"
+													>
+														<widgetstate statename="up">
+															<frame texture="/ui/info/button.tga" borderthickness="{borderthickness=0.8h}" color="1 1 1 1"/>
+															<image x="0.4h" height="85%" width="85@" valign="center" texture="/ui/fe2/mainmenu/icons/N_store.tga" noclick="1" />
+														</widgetstate>
+
+														<widgetstate statename="over">
+															<frame texture="/ui/info/button_over.tga" borderthickness="{borderthickness=0.8h}" />
+															<image x="0.4h" height="85%" width="85@" valign="center" texture="/ui/fe2/mainmenu/icons/N_store.tga" noclick="1" />
+														</widgetstate>
+
+														<widgetstate statename="down" x="1" y="1">
+															<frame texture="/ui/info/button_down.tga" borderthickness="{borderthickness=0.8h}" color="white"/>
+															<image x="0.4h" height="85%" width="85@" valign="center" texture="/ui/fe2/mainmenu/icons/N_store.tga" noclick="1" />
+														</widgetstate>
+														<widgetstate statename="disabled">
+															<frame texture="/ui/info/button.tga" borderthickness="{borderthickness=0.8h}" color="1 1 1 1"/>
+															<frame texture="/ui/frames/rounded_button_bg_white.tga" borderthickness="0.8h" color=".3 .3 .3 .7"/>
+															<image x="0.4h" height="85%" width="85@" valign="center" texture="/ui/fe2/mainmenu/icons/N_store.tga" noclick="1" />
+														</widgetstate>
+
+														<label x="125@" width="-110@" font="dyn_12" color="white" content="learn_goto_store" noclick="1" valign="top" textvalign="center" />
+
+													</button>
+
+												</panel>
+											</panel>
+
+											<!-- Hero Name/Diff/Roles -->
+											<panel height="9.2h" noclick="true">
+												<panel height="100%" width="100@"
+													onmouseoverlua="if isNewUI() then
+																		GetWidget('homepage_hero_info'):FadeIn(150)
+																	else
+																		GetWidget('hero_info'):SetVisible(true)
+																	end"
+													onmouseoutlua="if isNewUI() then
+																		GetWidget('homepage_hero_info'):FadeOut(150)
+																	else
+																		GetWidget('hero_info'):SetVisible(false)
+																	end"
+												>
+													<image name="learner_heroicon" texture="" noclick="1" />
+													<frame color="invisible" borderthickness="1" bordercolor="#455166" noclick="1" />
+													<instance name="learner_mastery_heroinfo" y="3.9h" width="23.7h" height="5.9h" font="dyn_14"
+														barwidth="17h" barheight="1.5h" barx="3.4h" bary="-1.82h" valign="bottom" id_debug="id_hero_info" type="0" />
+													<!-- Favorite Button -->
+													<button name="learner_hero_favorite_button"
+														x="3%" y="3%" visible="1"
+														height="20%" width="20@"
+														valign="top" align="left"
+														numstates="2"
+														color="0 0 0 .8"
+														onclick="PlaySound('/shared/sounds/ui/ccpanel/button_click_02.wav');"
+														onmouseover="PlaySound('/shared/sounds/ui/ccpanel/button_over_02.wav');"
+													>
+														<widgetstate statename="up">
+															<image texture="/ui/elements/button_bevel_sml_up.tga" color="1 1 1 1" noclick="true"/>
+															<image x="1" width="125@" height="125%" align="center" valign="center" texture="/ui/fe2/lobby/filter_favorites.tga" color="yellow"/>
+														</widgetstate>
+														<widgetstate statename="over">
+															<image texture="/ui/elements/button_bevel_sml_up.tga" color="red" noclick="true"/>
+															<image x="1" width="125@" height="125%" align="center" valign="center" texture="/ui/fe2/lobby/filter_favorites.tga" color="yellow" />
+														</widgetstate>
+														<widgetstate statename="down">
+															<image texture="/ui/elements/button_bevel_sml_up.tga" color="red" noclick="true"/>
+															<image x="2" y="1" width="125@" height="125%" align="center" valign="center" texture="/ui/fe2/lobby/filter_favorites.tga" />
+														</widgetstate>
+
+														<widgetstate statename="up2">
+															<image texture="/ui/elements/button_bevel_sml_up.tga" color="1 1 1 1" noclick="true"/>
+															<image x="1" width="125@" height="125%" align="center" valign="center" texture="/ui/fe2/lobby/filter_favorites.tga"/>
+														</widgetstate>
+														<widgetstate statename="over2">
+															<image texture="/ui/elements/button_bevel_sml_up.tga" color="red" noclick="true"/>
+															<image x="1" width="125@" height="125%" align="center" valign="center" texture="/ui/fe2/lobby/filter_favorites.tga" />
+														</widgetstate>
+														<widgetstate statename="down2">
+															<image texture="/ui/elements/button_bevel_sml_up.tga" color="red" noclick="true"/>
+															<image x="2" y="1" width="125@" height="125%" align="center" valign="center" texture="/ui/fe2/lobby/filter_favorites.tga" color="yellow" />
+														</widgetstate>
+													</button>
+												</panel>
+												<panel width="-110@" align="right" float="bottom" padding="1.0h" noclick="true">
+													<!-- Hero Name -->
+													<label name="learner_heroname" fity="true" font="dyn_18" color="#ffaa00" outline="true" noclick="true" />
+
+													<!-- Difficulty -->
+													<panel height="2.0h" width="100%" float="right" padding="0.2h">
+														<label fitx="true" fitxpadding="0.5h" textvalign="center" font="dyn_12" color=".6 .6 .6 1" content="mstore_difficulty" shadow="true" />
+														<panel grow="true" height="100%" noclick="true">
+															<panel grow="true" growinvis="false" regrow="true" height="100%" float="right" padding="0.2h" noclick="true">
+																<instance name="heroDifficultyStarLEARN" difficulty="1"/>
+																<instance name="heroDifficultyStarLEARN" difficulty="2"/>
+																<instance name="heroDifficultyStarLEARN" difficulty="3"/>
+																<instance name="heroDifficultyStarLEARN" difficulty="4"/>
+																<instance name="heroDifficultyStarLEARN" difficulty="5"/>
+															</panel>
+														</panel>
+														<panel width="0" noclick="true"/>
+													</panel>
+
+													<!-- Categories -->
+													<label name="learner_role" fity="true" width="100%" font="dyn_11" color="#00FF00" content="-" shadow="true" />
+
+													<!-- Voices -->
+													<panel y="0" width="5.4h" height="5.4h" align="right"
+														onload="CreateString('_lastEAPSoundProduct{id=1}', '');"
+													>
+														<image width="100%" height="100@" valign="center" texture="/ui/elements/gamefeature_voip.tga" />
+														<instance name="LEARNVoiceButton"
+															onclicklua="UIManager.GetInterface('main'):HoNLearnerF('PlayVoiceSample')"
+														/>
+													</panel>
+
+												</panel>
+											</panel>
+
+											<panel height="-12h" valign="bottom" noclick="true">
+												<panel width="22.0h" noclick="true">
+													<panel grow="true" width="100%" float="bottom" padding="0.5h">
+														<label fity="true" font="dyn_16" color="1 1 1 1" shadow="true" content="learn_alt_previews" noclick="true" />
+														<label fity="true" fitypadding="1.0h" wrap="true" font="dyn_12" color=".8 .8 .8 1" shadow="true" content="learn_alt_previews_long" noclick="true" />
+													</panel>
+
+													<panel y="6.6h" height="21.5h" width="100%">
+														<instance name="hero_alt_scroll_btn" dir="up" valign="top" vflip="true" blockfade="true" visible="true" />
+														<panel y="2.0h" grow="true" width="100%" float="bottom" padding="0.5h">
+															<instance name="hero_alt_button" id="1" />
+															<instance name="hero_alt_button" id="2" />
+															<instance name="hero_alt_button" id="3" />
+														</panel>
+														<instance name="hero_alt_scroll_btn" dir="down" valign="bottom" vflip="false" visible="true" />
+														<panel processonlyscroll="1" hover="0"
+															onmousewheeldownlua="UIManager.GetInterface('main'):HoNLearnerF('ScrollAltAvatars', 'down')"
+															onmousewheeluplua="UIManager.GetInterface('main'):HoNLearnerF('ScrollAltAvatars', 'up')"
+														/>
+													</panel>
+
+												</panel>
+											</panel>
+
+										</panel>
+
+										<panel width="30.0h" align="right" noclick="1">
+
+											<!-- Hero Abilities -->
+											<panel height="9.6h"
+													onmouseoverlua="if isNewUI() then
+																		GetWidget('homepage_hero_info'):FadeIn(150)
+																	else
+																		GetWidget('hero_info'):SetVisible(true)
+																	end"
+													onmouseoutlua="if isNewUI() then
+																		GetWidget('homepage_hero_info'):FadeOut(150)
+																	else
+																		GetWidget('hero_info'):SetVisible(false)
+																	end"
+											>
+												<label height="2.4h" textvalign="bottom" font="dyn_16" color="1 1 1 1" shadow="true" content="learn_hero_abils" noclick="true" />
+												<label height="2.4h" textvalign="bottom" textalign="right" font="dyn_12" color=".7 .7 .7 1" shadow="true" content="learn_hover" noclick="true" />
+												<panel height="-2.8h" valign="bottom" float="right" padding="0.9h" noclick="true">
+													<panel height="100%" width="100@" noclick="1">
+														<image name="learner_hero_ability_1" texture="/heroes/treant/ability_01/icon.tga" noclick="1"/>
+														<frame color="invisible" borderthickness="1" bordercolor="#455166" noclick="1"/>
+													</panel>
+													<panel height="100%" width="100@" noclick="1">
+														<image name="learner_hero_ability_2" texture="/heroes/treant/ability_02/icon.tga" noclick="1"/>
+														<frame color="invisible" borderthickness="1" bordercolor="#455166" noclick="1"/>
+													</panel>
+													<panel height="100%" width="100@" noclick="1">
+														<image name="learner_hero_ability_3" texture="/heroes/treant/ability_03/icon.tga" noclick="1"/>
+														<frame color="invisible" borderthickness="1" bordercolor="#455166" noclick="1"/>
+													</panel>
+													<panel height="100%" width="100@" noclick="1">
+														<image name="learner_hero_ability_4" texture="/heroes/treant/ability_04/icon.tga" noclick="1"/>
+														<frame color="invisible" borderthickness="1" bordercolor="#455166" noclick="1"/>
+													</panel>
+												</panel>
+											</panel>
+
+											<!-- Usage Stats -->
+											<panel y="12.0h" height="15.0h" noclick="true" color="invisible">
+												<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.6h" color="black" noclick="1"/>
+												<frame texture="/ui/frames/roundframe.tga" color="invisible" borderthickness="0.6h" bordercolor="#455166" noclick="true"/>
+												<image width="-1.0h" height="-0.6h" align="center" valign="center" texture="/ui/fe2/elements/learnatorium_stats_bg.tga" noclick="true" />
+												<panel width="-1.4h" height="-1.4h" align="center" valign="center" noclick="true">
+													<label height="2.4h" textvalign="bottom" font="dyn_16" color="1 1 1 1" shadow="true" content="compendium_list_usage" noclick="true" />
+													<label height="2.4h" textvalign="bottom" textalign="right" font="dyn_12" color=".7 .7 .7 1" shadow="true" content="learn_last7days" noclick="true" />
+													<panel height="-2.8h" valign="bottom" noclick="true">
+														<panel y="-10%" x="-15%" width="1" height="60%" valign="center" color=".2 .2 .2 1" align="center" />
+														<panel y="-10%" x="15%" width="1" height="60%" valign="center" color=".2 .2 .2 1" align="center" />
+														<panel y="-10%" grow="true" width="33.3%" align="left" valign="center" float="bottom">
+															<label fity="true" textalign="center" font="dyn_14" color="#ffaa00" shadow="true" content="general_used" noclick="true" />
+															<label name="learner_used" fity="true" textalign="center" font="dyn_12" color="1 1 1 1" shadow="true" content="13,370" noclick="true" />
+															<label name="learner_used_percent" fity="true" textalign="center" font="dyn_12" color=".8 .8 .8 1" shadow="true" content="(0.6%)" noclick="true" />
+														</panel>
+														<panel y="-10%" grow="true" width="33.3%" align="center" valign="center" float="bottom">
+															<label fity="true" textalign="center" font="dyn_14" color="#ffaa00" shadow="true" content="player_stats_wins" noclick="true" />
+															<label name="learner_wins" fity="true" textalign="center" font="dyn_12" color="1 1 1 1" shadow="true" content="6,892" noclick="true" />
+															<label name="learner_wins_percent" fity="true" textalign="center" font="dyn_12" color=".8 .8 .8 1" shadow="true" content="(50%)" noclick="true" />
+														</panel>
+														<panel y="-10%" grow="true" width="33.3%" align="right" valign="center" float="bottom">
+															<label fity="true" textalign="center" font="dyn_14" color="#ffaa00" shadow="true" content="player_stats_losses" noclick="true" />
+															<label name="learner_loss" fity="true" textalign="center" font="dyn_12" color="1 1 1 1" shadow="true" content="6,517" noclick="true" />
+															<label name="learner_loss_percent" fity="true" textalign="center" font="dyn_12" color=".8 .8 .8 1" shadow="true" content="(47.3%)" noclick="true" />
+														</panel>
+													</panel>
+													<panel x="-0.4h" grow="1" regrow="1" growinvis="0" valign="bottom" align="right"
+														onclicklua="UIManager.GetInterface('main'):HoNLearnerF('ClickUsageGraph')"
+													>
+														<label sticky="0" fity="1" fitx="true" font="dyn_12" color="#37b2d9" shadow="true" content="learn_usage_history" noclick="1"/>
+													</panel>
+												</panel>
+
+												<panel name="learner_loading_usage" color="invisible" visible="1">
+													<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.6h" color="0 0 0 0.95" blockinput="true" noclick="false"/>
+													<label name="learner_usage_loading_wait" width="-10.0h" y="2h" height="100%" align="center" textalign="center" textvalign="center" wrap="1" font="dyn_10" color="white" shadow="1" content="learn_loading_usage" noclick="1" />
+													<label name="learner_usage_loading_error" width="-10.0h" y="-1.0h" height="100%" align="center" textalign="center" textvalign="center" wrap="1" font="dyn_12" color="white" shadow="1" content="mstore_error_connect" noclick="1" visible="0" />
+													<animatedimage name="learner_usage_loading_throb" y="-3.0h" width="5.8h" height="5.8h" texture="/ui/elements/throb/throb.tga" noclick="true" loop="1" fps="30" onshow="StartAnim(1);" visible="1" align="center" valign="center" />
+													<instance valign="center" y="5.0h" button_name="learner_retry_usage"
+														name="button2"
+														width="12.0h" height="2.5h"
+														align="center"
+														label="main_stats_retry"
+														font="dyn_10"
+														onclicklua="UIManager.GetInterface('main'):HoNLearnerF('GetUsageStats', 1)"
+													/>
+												</panel>
+											</panel>
+
+											<!-- Hero Guides -->
+											<panel height="11.0h" valign="bottom" noclick="true" color="invisible" >
+												<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.6h" color="black" noclick="1"/>
+												<frame texture="/ui/frames/roundframe.tga" color="invisible" borderthickness="0.6h" bordercolor="#455166" noclick="true"/>
+												<panel width="-1.4h" height="-1.4h" align="center" valign="center" noclick="true">
+													<label height="2.4h" textvalign="bottom" font="dyn_16" color="1 1 1 1" shadow="true" content="tooltip_compendium_guide" noclick="true" />
+													<label y="30%" width="60%" wrap="true" font="dyn_12" color=".8 .8 .8 1" shadow="true" content="learn_guides2" noclick="true" />
+													<image x="-10@" y="-6%" width="36%" height="22@" align="right" texture="/ui/elements/open_book.tga" noclick="true" />
+													<panel x="-0.4h" grow="1" regrow="1" growinvis="0" valign="bottom" align="right"
+														onclicklua="UIManager.GetInterface('main'):HoNLearnerF('ClickOpenGuides')"
+													>
+														<label sticky="0" fity="1" fitx="true" font="dyn_12" color="#37b2d9" shadow="true" content="learn_open_guides" noclick="1"/>
+													</panel>
+												</panel>
+												<panel name="compendium_guides_cover" color="invisible">
+													<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.6h" color="0 0 0 0.95" blockinput="true" noclick="false"/>
+													<label font="dyn_12" fity="1" wrap="1" color="white" content="learn_guides_disabled" textalign="center" valign="center" align="center"/>
+												</panel>
+											</panel>
+
+										</panel>
+
+									</panel>
+
+								</panel>
+
+								<!-- Avg Game -->
+								<panel width="23.0h" align="right" noclick="true">
+									<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.6h" color="0 0 0 1" blockinput="false" noclick="true"/>
+									<frame texture="/ui/frames/roundframe.tga" color="invisible" borderthickness="0.6h" bordercolor="#455166" blockinput="false" noclick="true"/>
+
+									<label y="0.8h" width="-1.8h" align="center" fity="true" font="dyn_14" color="#ffab01" shadow="true" content="learn_hero_avg_game" />
+
+									<panel noclick="1" y="6.5h" width="-1.4h" align="center" >
+										<instance name="compendium_herostats_rnk_template" color="#3abde7" visible="1" style="modeNormal_txt" bg="modeNormal_bg" />
+										<instance name="compendium_herostats_cs_template" color="#456645" visible="0" style="modeCasual_txt" bg="modeCasual_bg" />
+										<instance name="compendium_herostats_ph_template" color="#664545" visible="0" style="modePublic_txt" bg="modePublic_bg" />
+										<instance name="compendium_herostats_con_normal_template" color="#3abde7" visible="0" style="modeNormal_txt" bg="modeNormal_bg" />
+										<instance name="compendium_herostats_con_casual_template" color="#456645" visible="0" style="modeCasual_txt" bg="modeCasual_bg" />
+									</panel>
+
+									<panel y="3.5h" width="-1.4h" align="center" reverse="0" padding="0.1h" noclick="1" color="invisible"
+											onload=" If(!VarExists('compendium_herostats_lastViewed'), DoEvent(0), DoEvent(1)); "
+											onevent0="CreateString('compendium_herostats_lastViewed', 'compendium_herostats_rnk'); SetSave('compendium_herostats_lastViewed');  ShowOnly(compendium_herostats_lastViewed);  "
+											onevent1="ShowOnly(compendium_herostats_lastViewed);"
+									>
+										<panel width="20h" height="2.6h" noclick="1" visible="1" color="invisible" >
+											<if condition="!cl_GarenaEnable">
+												<instance
+													name="Noptions_combobox"
+													width="100%"
+													itemwidth="100%"
+													maxlistheight="4"
+													populate="
+															AddTemplateListItem('Ncombobox_item', 'compendium_herostats_rnk', 'label', 'general_normal_mode');
+															AddTemplateListItem('Ncombobox_item', 'compendium_herostats_cs', 'label', 'general_casual_mode');
+															AddTemplateListItem('Ncombobox_item', 'compendium_herostats_ph', 'label', 'general_public_mode');
+															AddTemplateListItem('Ncombobox_item', 'compendium_herostats_con_normal', 'label', 'general_con_normal_mode');
+															SetSelectedItemByValue(compendium_herostats_lastViewed);
+															"
+													onselect="
+															ShowOnly(this); cmd('setsave compendium_herostats_lastViewed ' # this);
+															##ShowOnly(this#'_bg');##
+														"
+												/>
+											</if>
+											<if condition="cl_GarenaEnable">
+												<instance
+													name="Noptions_combobox"
+													width="100%"
+													itemwidth="100%"
+													maxlistheight="5"
+													populate="
+															AddTemplateListItem('Ncombobox_item', 'compendium_herostats_rnk', 'label', 'general_normal_mode');
+															AddTemplateListItem('Ncombobox_item', 'compendium_herostats_cs', 'label', 'general_casual_mode');
+															AddTemplateListItem('Ncombobox_item', 'compendium_herostats_ph', 'label', 'general_public_mode');
+															AddTemplateListItem('Ncombobox_item', 'compendium_herostats_con_normal', 'label', 'general_con_normal_mode');
+															AddTemplateListItem('Ncombobox_item', 'compendium_herostats_con_casual', 'label', 'general_con_casual_mode');
+															SetSelectedItemByValue(compendium_herostats_lastViewed);
+															"
+													onselect="
+															ShowOnly(this); cmd('setsave compendium_herostats_lastViewed ' # this);
+															##ShowOnly(this#'_bg');##
+														"
+												/>
+											</if>
+										</panel>
+									</panel>
+
+									<panel y="0.0h" noclick="1" watch="HeroStatsStatus" ontrigger="SetVisible(param0 == 1);"  visible="1" width="100%" height="100%"
+										onshow="Call('compendium_herostats_retry1', 'SetVisible(0); SleepWidget(0, \'\'); SleepWidget(1500, \'SetVisible(1);\');');"
+									>
+										<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.6h" color="0 0 0 .8" blockinput="false" noclick="true"/>
+										<label width="-10.0h" y="4h" height="100%" align="center" textalign="center" textvalign="center" wrap="1" font="dyn_10" color="white" shadow="1" content="main_stats_retrieving_match" noclick="1" />
+										<animatedimage y="-1.5h" width="5.8h" height="5.8h" texture="/ui/elements/throb/throb.tga" noclick="true" loop="1" fps="30" onshow="StartAnim(1);" visible="1" align="center" valign="center" />
+										<instance valign="center" y="8.6h" button_name="compendium_herostats_retry1"
+											name="button2"
+											width="12.0h" height="2.5h"
+											align="center"
+											label="main_stats_retry"
+											font="dyn_10"
+											onclick="Call('hero_stats_submit_compendium', 'DoEvent();'); Set(compendium_usage_useCache, 0); Set(compendium_guide_useCache, 0); Call('compendium_hero_stats_error', 'FadeOut(50);');"
+										/>
+									</panel>
+									<panel y="0.0h" name="compendium_hero_stats_error" noclick="1" watch="HeroStatsResult" ontrigger="SetVisible(!StringEmpty(param0) and param0 != 0);"  visible="0" width="100%" height="44.0h" color="0 0 0 .7"
+										onshow="Call('compendium_herostats_retry2', 'SetVisible(0); SleepWidget(0, \'\'); SleepWidget(1500, \'SetVisible(1);\');');"
+									>
+										<label width="-10.0h" height="100%" align="center" textalign="center" textvalign="center" wrap="1" font="dyn_10" color="white" shadow="1" content="general_error" noclick="1" />
+										<instance valign="center" y="2.6h" button_name="compendium_herostats_retry2"
+											name="button2"
+											width="12.0h" height="2.5h"
+											align="center"
+											label="main_stats_retry"
+											font="dyn_10"
+											onclick="Call('hero_stats_submit_compendium', 'DoEvent();'); Set(compendium_usage_useCache, 0); Set(compendium_guide_useCache, 0); Call('compendium_hero_stats_error', 'FadeOut(50);');"
+										/>
+									</panel>
+
+								</panel>
+
+
+							</panel>
+							<!-- Guides -->
+							<panel name="learner_guides" y="-0.2h" width="-1.0h" height="-4.4h" align="center" valign="bottom" noclick="true" visible="0">
+								<panel name="compendium_guide_info_panel" noclick="1" height="100%" width="-31.5h">
+									<panel noclick="1" >
+										<instance name="compendium_guide_top_template" />
+									</panel>
+									<panel noclick="1" valign="bottom" height="6.0h" y="0.2" x="19h">
+										<instance name="compendium_guide_bottom_template" />
+									</panel>
+								</panel>
+
+								<panel name="compendium_guide_listbox" noclick="1" align="right" height="100%" width="100%">
+									<!-- Guide List -->
+									<panel y="0.0h" width="30.6h" grow="true" float="bottom" align="right" noclick="1" >
+										<listbox name="compendium_guide_list"
+											x="-0.2h"
+											width="-2.0h" height="41.7h"
+											itemheight="2.58h"
+											itemwidth="-0.1h"
+											color="invisible"
+											hoverhighlight="true"
+											highlight="under"
+											highlightcolor="#46adff42"
+											highlightbordercolor="invisible"
+											selectedcolor="#346dff52"
+											selectedbordercolor="invisible"
+											backgroundimage="/ui/fe2/elements/comm_item_bg.tga"
+											backgroundimagecolor="#1d2f3b"
+											colortransition="true"
+											colortransitiontime="250"
+											exteriorscrollbars="true"
+											scrollbarplaceholder="false"
+											scrollbarsize="2.0h"
+											scrolltexture="/ui/info/combobox.tga"
+											handleheight="2.0h"
+											watch="compendium_guideListFormResultExplode"
+											ontrigger="
+												Call('compendium_no_guides', 'SetVisible('#GetNumListItems()#' == 0);');
+												"
+											onload=""
+											onselect="If(this gt 0, Set(compendium_guide_selectedcompendium_guide, this)); If(!compendium_guide_auto_selection and !compendium_guide_usingLocal, Trigger('compendium_guideLoadcompendium_guide'));"
+										>
+										</listbox>
+									</panel>
+
+									<panel y="0.0h" width="100%" grow="true" float="bottom" align="left" noclick="1">
+										<panel y="0.0h" name="compendium_no_guides" visible="1" width="100%" height="45.0h" color="0 0 0 1.0" noclick="1" >
+											<panel noclick="1" watch="compendium_guideListFormStatus" ontrigger="SetVisible(param0 != 1);"
+												onshow="Call('compendium_guide_error_retry', 'SetVisible(0); SleepWidget(0, \'\'); SleepWidget(1500, \'SetVisible(1);\');');"
+											>
+												<label width="-10.0h" height="100%" y="-1h" align="center" textalign="center" textvalign="center" wrap="1" font="dyn_10" color="white" shadow="1" content="guides_not_found" noclick="1" />
+												<panel noclick="1" name="compendium_guide_error_retry">
+													<instance valign="center" y="2.9h"
+														name="button2" button_name="unnamedButton151" x="-7h"
+														width="12.0h" height="2.5h"
+														align="center"
+														label="main_stats_retry"
+														font="dyn_10"
+														onclick=" CallEvent('shopcompendium_guideError', 1); Call('compendium_no_guides', 'FadeOut(250);'); Set(compendium_usage_useCache, 0); Set(compendium_guide_useCache, 0); Set(compendium_guide_newRound, 1); Trigger('compendium_guideHeroName', compendium_heroLastViewed); "
+													/>
+													<instance valign="center" y="2.9h"
+														name="button2" button_name="unnamedButton152" x="7h"
+														align="center"
+														label="game_guide_label_getFeatured"
+														onclick="
+															Set(compendium_guide_newRound, 1);
+															Set(compendium_guide_currentHero, compendium_heroLastViewed);
+															Trigger('compendium_guideLoadFeatured');
+															CallEvent('shopcompendium_guideError', 1);
+															Call('compendium_no_guides', 'FadeOut(250);');
+														"
+														enabled="true"
+														width="14h" height="2.5h"
+													/>
+												</panel>
+											</panel>
+										</panel>
+										<panel y="0.0h" width="-31.0h" align="left" height="-2.2h" color="0 0 0 1.0" noclick="1" watch="compendium_guideListFormStatus" ontrigger="SetVisible(param0 == 1);" watch2="compendium_guideInfoFormStatus" ontrigger2="SetVisible(param0 == 1 and compendium_guideListFormStatus == 2);"
+											onshow="Call('compendium_guide_error_retry1', 'SetVisible(0); SleepWidget(0, \'\'); SleepWidget(1500, \'SetVisible(1);\');');"
+										>
+											<label y="5h" width="-10.0h" height="100%" align="center" textalign="center" textvalign="center" wrap="1" font="dyn_10" color="white" shadow="1" content="compendium_get_guide" noclick="1" />
+											<animatedimage width="4.5h" height="4.5h" texture="/ui/elements/throb/throb.tga" noclick="true" loop="1" fps="30" onshow="StartAnim(1);" visible="1" align="center" valign="center" />
+											<instance valign="center" y="9.9h" button_name="compendium_guide_error_retry1"
+												name="button2" x="0"
+												width="12.0h" height="2.5h"
+												align="center"
+												label="main_stats_retry"
+												font="dyn_10"
+												onclick=" CallEvent('shopcompendium_guideError', 1); Call('compendium_no_guides', 'FadeOut(250);'); Set(compendium_usage_useCache, 0); Set(compendium_guide_useCache, 0); Set(compendium_guide_newRound, 1); Trigger('compendium_guideHeroName', compendium_heroLastViewed); "
+											/>
+										</panel>
+										<panel y="0.0h" width="100%" height="-2.2h" color="0 0 0 1.0" noclick="1" watch="compendium_guideListFormStatus" ontrigger="SetVisible(param0 == 1);"
+											onshow="Call('compendium_guide_error_retry2', 'SetVisible(0); SleepWidget(0, \'\'); SleepWidget(1500, \'SetVisible(1);\');');"
+										>
+											<label y="5h" width="-10.0h" height="100%" align="center" textalign="center" textvalign="center" wrap="1" font="dyn_10" color="white" shadow="1" content="compendium_get_guide_list" noclick="1" />
+											<animatedimage width="4.5h" height="4.5h" texture="/ui/elements/throb/throb.tga" noclick="true" loop="1" fps="30" onshow="StartAnim(1);" visible="1" align="center" valign="center" />
+											<instance valign="center" y="9.9h" button_name="compendium_guide_error_retry2"
+												name="button2" x="0"
+												width="12.0h" height="2.5h"
+												align="center"
+												label="main_stats_retry"
+												font="dyn_10"
+												onclick=" CallEvent('shopcompendium_guideError', 1); Call('compendium_no_guides', 'FadeOut(250);'); Set(compendium_usage_useCache, 0); Set(compendium_guide_useCache, 0); Set(compendium_guide_newRound, 1); Trigger('compendium_guideHeroName', compendium_heroLastViewed); "
+											/>
+										</panel>
+									</panel>
+
+								</panel>
+							</panel>
+							<!-- create a guide -->
+							<panel name="learner_createAGuide" y="-1.0h" width="-1.0h" height="-5.0h" align="center" valign="bottom" noclick="true" visible="0">
+								<!-- <label x="0.5h" y="-3.4h" font="dyn_18" fitx="1" fity="1" color="#ffaa00" outline="true" content="tooltip_compendium_createguide" /> -->
+								<panel name="learner_createAGuide_browser" color="black"
+									onshow="DoEvent();"
+									oneventlua="UIManager.GetInterface('main'):HoNLearnerF('RefreshCreateGuide')"
+								/>
+							</panel>
+
+							<!-- Usage Graph -->
+							<panel name="learner_usageGraph" y="-1.0h" width="-1.0h" height="-5.0h" align="center" valign="bottom" noclick="true" visible="0">
+								<instance name="compendium_usage_graph" />
+							</panel>
+							<!-- Simple Hero List -->
+							<panel name="learner_simpleList" y="-1.0h" width="-1.0h" height="-5.0h" align="center" valign="bottom" noclick="true" visible="0">
+								<panel width="100%" group="compendium_page" visible="true" name="compendium_page_heroes_simple" noclick="true">
+
+									<panel y="0.8h" height="42.0h" noclick="true">
+
+										<!-- Row 1 -->
+										<panel height="33.3%" valign="top" noclick="true">
+
+											<!-- Legion Agility Heroes-->
+											<panel x="3.0h" width="40.0%" height="100%" align="left" noclick="true">
+												<instance name="empty_slots" align="left" side="legion"/>
+												<listbox
+													group="compendium_listboxes"
+													noclick="0"
+													name="compendium_simple_list_legion_agi"
+													onload="Call(name#'_vscroll', 'SetNoClick(0);');"
+													align="left"
+													valign="center"
+													width="44.4h"
+													itemwidth="4.4h"
+													itemheight="4.4h"
+													select="true"
+													hoverselect="true"
+													color="invisible"
+													highlightcolor="invisible"
+													highlightbordercolor="invisible"
+													selectedcolor="invisible"
+													selectedbordercolor="invisible"
+													exteriorscrollbars="false"
+													scrollbarsize="2h"
+													scrolltexture="/ui/info/combobox.tga"
+													handleheight="2h"
+													wrap="row"
+													passivechildren="false"
+													watch1="CompendiumHeroInfo"
+													ontrigger1="If(StringEquals(param34, 'agility') and StringEquals(param25, 'Legion') and !HasListItem(param0), AddTemplateListItem('simple_compendium_hero_item', param0, 'icon', param14, 'heroentity', param0, 'attribute_icon', param19, 'attribute', param2, 'faction', param25, 'description', param26, 'attack_type', param24, 'name', param1, 'ownership', param29, 'cost', param30, 'purchasable', param31, 'premium', param32, 'premiumsilvercost', param33, 'eap', IsEarlyAccessHero(param0), 'free', IsFreeHero(param0), 'haseap', CanAccessEarlyAccessProduct(param0), 'magicarmor', param10, 'trial', param35));"
+													watch2="CompendiumClearInfo"
+													ontrigger2="ClearItems();"
+													onselect="PlaySound('/shared/sounds/ui/button_click_01.wav');  ShowHeroCompendiumInfo(this); Set(compendium_heroLastViewed, this);  SetSave('compendium_heroLastViewed'); HideWidget('simple_hero_list_tip'); ##HideGroup('type_cover');##"
+												>
+												</listbox>
+											</panel>
+
+											<!-- Hellbourne Agility Heroes-->
+											<panel x="-3.0h" width="40.0%" height="100%" align="right" noclick="true">
+												<instance name="empty_slots" align="right" side="hellbourne"/>
+												<listbox
+													group="compendium_listboxes"
+													noclick="0"
+													name="compendium_simple_list_hellbourne_agi"
+													onload="Call(name#'_vscroll', 'SetNoClick(0);');"
+													align="right"
+													valign="center"
+													width="44.4h"
+													itemwidth="4.4h"
+													itemheight="4.4h"
+													select="true"
+													hoverselect="true"
+													color="invisible"
+													highlightcolor="invisible"
+													highlightbordercolor="invisible"
+													selectedcolor="invisible"
+													selectedbordercolor="invisible"
+													exteriorscrollbars="false"
+													scrollbarsize="2h"
+													scrolltexture="/ui/info/combobox.tga"
+													handleheight="2h"
+													wrap="row"
+													passivechildren="false"
+													watch1="CompendiumHeroInfo"
+													ontrigger1="If(StringEquals(param34, 'agility') and StringEquals(param25, 'Hellbourne') and !HasListItem(param0), AddTemplateListItem('simple_compendium_hero_item', param0, 'icon', param14, 'heroentity', param0, 'attribute_icon', param19, 'attribute', param2, 'faction', param25, 'description', param26, 'attack_type', param24, 'name', param1, 'ownership', param29, 'cost', param30, 'purchasable', param31, 'premium', param32, 'premiumsilvercost', param33, 'eap', IsEarlyAccessHero(param0), 'free', IsFreeHero(param0), 'haseap', CanAccessEarlyAccessProduct(param0), 'magicarmor', param10, 'trial', param35));"
+													watch2="CompendiumClearInfo"
+													ontrigger2="ClearItems();"
+													onselect="PlaySound('/shared/sounds/ui/button_click_01.wav');  ShowHeroCompendiumInfo(this); Set(compendium_heroLastViewed, this);  SetSave('compendium_heroLastViewed'); HideWidget('simple_hero_list_tip'); ##HideGroup('type_cover');##"
+												>
+												</listbox>
+											</panel>
+										</panel>
+
+										<!-- Row 2 -->
+										<panel height="33.3%" valign="center" noclick="true">
+
+											<!-- Legion Intelligence Heroes-->
+											<panel x="3.0h" width="40.0%" height="100%" align="left" noclick="true">
+												<instance name="empty_slots" align="left" side="legion"/>
+												<listbox
+													group="compendium_listboxes"
+													noclick="0"
+													name="compendium_simple_list_legion_int"
+													onload="Call(name#'_vscroll', 'SetNoClick(0);');"
+													align="left"
+													valign="center"
+													width="44.4h"
+													itemwidth="4.4h"
+													itemheight="4.4h"
+													select="true"
+													hoverselect="true"
+													color="invisible"
+													highlightcolor="invisible"
+													highlightbordercolor="invisible"
+													selectedcolor="invisible"
+													selectedbordercolor="invisible"
+													exteriorscrollbars="false"
+													scrollbarsize="2h"
+													scrolltexture="/ui/info/combobox.tga"
+													handleheight="2h"
+													wrap="row"
+													passivechildren="false"
+													watch1="CompendiumHeroInfo"
+													ontrigger1="If(StringEquals(param34, 'intelligence') and StringEquals(param25, 'Legion') and !HasListItem(param0), AddTemplateListItem('simple_compendium_hero_item', param0, 'icon', param14, 'heroentity', param0, 'attribute_icon', param19, 'attribute', param2, 'faction', param25, 'description', param26, 'attack_type', param24, 'name', param1, 'ownership', param29, 'cost', param30, 'purchasable', param31, 'premium', param32, 'premiumsilvercost', param33, 'eap', IsEarlyAccessHero(param0), 'free', IsFreeHero(param0), 'haseap', CanAccessEarlyAccessProduct(param0), 'magicarmor', param10, 'trial', param35));"
+													watch2="CompendiumClearInfo"
+													ontrigger2="ClearItems();"
+													onselect="PlaySound('/shared/sounds/ui/button_click_01.wav');  ShowHeroCompendiumInfo(this); Set(compendium_heroLastViewed, this);  SetSave('compendium_heroLastViewed'); HideWidget('simple_hero_list_tip'); ##HideGroup('type_cover');##"
+												>
+												</listbox>
+											</panel>
+
+											<!-- Hellbourne Intelligence Heroes-->
+											<panel x="-3.0h" width="40.0%" height="100%" align="right" noclick="true">
+												<instance name="empty_slots" align="right" side="hellbourne"/>
+												<listbox
+													group="compendium_listboxes"
+													noclick="0"
+													name="compendium_simple_list_hellbourne_int"
+													onload="Call(name#'_vscroll', 'SetNoClick(0);');"
+													align="right"
+													valign="center"
+													width="44.4h"
+													itemwidth="4.4h"
+													itemheight="4.4h"
+													select="true"
+													hoverselect="true"
+													color="invisible"
+													highlightcolor="invisible"
+													highlightbordercolor="invisible"
+													selectedcolor="invisible"
+													selectedbordercolor="invisible"
+													exteriorscrollbars="false"
+													scrollbarsize="2h"
+													scrolltexture="/ui/info/combobox.tga"
+													handleheight="2h"
+													wrap="row"
+													passivechildren="false"
+													watch1="CompendiumHeroInfo"
+													ontrigger1="If(StringEquals(param34, 'intelligence') and StringEquals(param25, 'Hellbourne') and !HasListItem(param0), AddTemplateListItem('simple_compendium_hero_item', param0, 'icon', param14, 'heroentity', param0, 'attribute_icon', param19, 'attribute', param2, 'faction', param25, 'description', param26, 'attack_type', param24, 'name', param1, 'ownership', param29, 'cost', param30, 'purchasable', param31, 'premium', param32, 'premiumsilvercost', param33, 'eap', IsEarlyAccessHero(param0), 'free', IsFreeHero(param0), 'haseap', CanAccessEarlyAccessProduct(param0), 'magicarmor', param10, 'trial', param35));"
+													watch2="CompendiumClearInfo"
+													ontrigger2="ClearItems();"
+													onselect="PlaySound('/shared/sounds/ui/button_click_01.wav');  ShowHeroCompendiumInfo(this); Set(compendium_heroLastViewed, this);  SetSave('compendium_heroLastViewed'); HideWidget('simple_hero_list_tip'); ##HideGroup('type_cover');##"
+												>
+												</listbox>
+											</panel>
+										</panel>
+
+										<!-- Row 3 -->
+										<panel height="33.3%" valign="bottom" noclick="true">
+
+											<!-- Legion Strength Heroes-->
+											<panel x="3.0h" width="40.0%" height="100%" align="left" noclick="true">
+												<instance name="empty_slots" align="left" side="legion"/>
+												<listbox
+													group="compendium_listboxes"
+													noclick="0"
+													name="compendium_simple_list_legion_str"
+													onload="Call(name#'_vscroll', 'SetNoClick(0);');"
+													align="left"
+													valign="center"
+													width="44.4h"
+													itemwidth="4.4h"
+													itemheight="4.4h"
+													select="true"
+													hoverselect="true"
+													color="invisible"
+													highlightcolor="invisible"
+													highlightbordercolor="invisible"
+													selectedcolor="invisible"
+													selectedbordercolor="invisible"
+													exteriorscrollbars="false"
+													scrollbarsize="2h"
+													scrolltexture="/ui/info/combobox.tga"
+													handleheight="2h"
+													wrap="row"
+													passivechildren="false"
+													watch1="CompendiumHeroInfo"
+													ontrigger1="If(StringEquals(param34, 'strength') and StringEquals(param25, 'Legion') and !HasListItem(param0), AddTemplateListItem('simple_compendium_hero_item', param0, 'icon', param14, 'heroentity', param0, 'attribute_icon', param19, 'attribute', param2, 'faction', param25, 'description', param26, 'attack_type', param24, 'name', param1, 'ownership', param29, 'cost', param30, 'purchasable', param31, 'premium', param32, 'premiumsilvercost', param33, 'eap', IsEarlyAccessHero(param0), 'free', IsFreeHero(param0), 'haseap', CanAccessEarlyAccessProduct(param0), 'magicarmor', param10, 'trial', param35));"
+													watch2="CompendiumClearInfo"
+													ontrigger2="ClearItems();"
+													onselect="PlaySound('/shared/sounds/ui/button_click_01.wav');  ShowHeroCompendiumInfo(this); Set(compendium_heroLastViewed, this);  SetSave('compendium_heroLastViewed'); HideWidget('simple_hero_list_tip'); ##HideGroup('type_cover');##"
+												>
+												</listbox>
+											</panel>
+
+											<!-- Hellbourne Strength Heroes-->
+											<panel x="-3.0h" width="40.0%" height="100%" align="right" noclick="true">
+												<instance name="empty_slots" align="right" side="hellbourne"/>
+												<listbox
+													group="compendium_listboxes"
+													noclick="0"
+													name="compendium_simple_list_hellbourne_str"
+													onload="Call(name#'_vscroll', 'SetNoClick(0);');"
+													align="right"
+													valign="center"
+													width="44.4h"
+													itemwidth="4.4h"
+													itemheight="4.4h"
+													select="true"
+													hoverselect="true"
+													color="invisible"
+													highlightcolor="invisible"
+													highlightbordercolor="invisible"
+													selectedcolor="invisible"
+													selectedbordercolor="invisible"
+													exteriorscrollbars="false"
+													scrollbarsize="2h"
+													scrolltexture="/ui/info/combobox.tga"
+													handleheight="2h"
+													wrap="row"
+													passivechildren="false"
+													watch1="CompendiumHeroInfo"
+													ontrigger1="If(StringEquals(param34, 'strength') and StringEquals(param25, 'Hellbourne') and !HasListItem(param0), AddTemplateListItem('simple_compendium_hero_item', param0, 'icon', param14, 'heroentity', param0, 'attribute_icon', param19, 'attribute', param2, 'faction', param25, 'description', param26, 'attack_type', param24, 'name', param1, 'ownership', param29, 'cost', param30, 'purchasable', param31, 'premium', param32, 'premiumsilvercost', param33, 'eap', IsEarlyAccessHero(param0), 'free', IsFreeHero(param0), 'haseap', CanAccessEarlyAccessProduct(param0), 'magicarmor', param10, 'trial', param35));"
+													watch2="CompendiumClearInfo"
+													ontrigger2="ClearItems();"
+													onselect="PlaySound('/shared/sounds/ui/button_click_01.wav');  ShowHeroCompendiumInfo(this); Set(compendium_heroLastViewed, this);  SetSave('compendium_heroLastViewed'); HideWidget('simple_hero_list_tip'); ##HideGroup('type_cover');##"
+												>
+												</listbox>
+											</panel>
+										</panel>
+
+									</panel>
+
+									<image color="white" y="0.4%" align="center" valign="center" width="13.0h" height="52.2h" ontrigger9lua="ResourceManager.RegisterTexture('/ui/fe2/lobby/center_post.tga', 'compendium', self)" resourcecontext="compendium" watch9="MainRegisterTextures" noclick="true" />
+
+								</panel>
+							</panel>
+							<!-- Detailed Hero List -->
+							<panel name="learner_detailedList" y="-1.0h" width="-1.0h" height="-6.4h" align="center" valign="bottom" noclick="true" visible="0">
+								<instance name="herodex_herolist_template" allheroes="1" />
+							</panel>
+							<!-- Mastery Hero List -->
+							<panel name="learner_masteryList" y="-1.0h" width="-1.0h" height="-6.4h" align="center" valign="bottom" noclick="true" visible="0">
+								<instance name="herodex_masterylist_template" allheroes="1" />
+							</panel>
+							<!-- Hero Usage List -->
+							<panel name="learner_usageList" y="-1.0h" width="-1.0h" height="-5.0h" align="center" valign="bottom" noclick="true" visible="0">
+								<instance name="compendium_usage_list_template" />
+							</panel>
+							<!-- Video Center! -->
+							<panel name="learner_videoCenter" y="-1.0h" width="-1.0h" height="-5.0h" align="center" valign="bottom" noclick="true" visible="0"
+								onhidelua="UIManager.GetInterface('webpanel'):HoNWebPanelF('UnloadPage')"
+							>
+								<label x="0.5h" y="-3.4h" font="dyn_18" fitx="1" fity="1" color="#ffaa00" outline="true" content="learn_video_center_title" />
+
+								<panel name="learner_videocenter_browser" color="black"
+									onshow="DoEvent();"
+									oneventlua="UIManager.GetInterface('main'):HoNLearnerF('RefreshLearningCenter')"
+								/>
+							</panel>
+							<!-- Items -->
+							<panel name="learner_items" y="-1.0h" width="-1.0h" height="-5.0h" align="center" valign="bottom" noclick="true" visible="0">
+								<instance name="compendium_items_template" />
+							</panel>
+							<!-- Walkthrough -->
+							<panel name="learner_walkthrough" y="-1.0h" width="-1.0h" height="-5.0h" align="center" valign="bottom" noclick="true" visible="0">
+								<label x="0.5h" y="-3.4h" font="dyn_18" fitx="1" fity="1" color="#ffaa00" outline="true" content="learn_walkthrough_title" />
+								<instance name="button2" button_name="unnamedButton153" height="2.4h" width="14.0h" align="center" valign="bottom" label="prompt_tutorial_play" font="dyn_10"
+									onclicklua="
+										Main.walkthroughPrompted = GetDBEntry('walkthroughPrompted', 1, true, false, true)
+										UIManager.GetInterface('main'):HoNMainF('MainMenuPanelToggle', 'main_splash_new_player', nil, nil, nil, nil, 63)
+									"
+								/>
+							</panel>
+
+						</panel>
+
+
+					</panel>
+
+					<!-- Tabs -->
+					<panel width="14.0h" float="bottom" padding="1.0h" noclick="true">
+
+						<!-- Heroes -->
+						<instance
+							name="sidetab_v3"
+							y="0"
+							icon="/ui/fe2/elements/learnatorium_icon_heroes.tga" iconsize="58"
+							cat_label="learn_tab_hero"
+							cat_sub_label="learn_tab_hero_2"
+							onclicklua="UIManager.GetInterface('main'):HoNLearnerF('ClickSideTab', 1)"
+							id="learner_left_hero"
+						/>
+						
+						<!-- Items -->
+						<instance
+							name="sidetab_v3"
+							icon="/ui/fe2/elements/learnatorium_icon_notatut.tga"  iconsize="56"
+							cat_label="learn_tab_items"
+							cat_sub_label="learn_tab_items_2"
+							onclicklua="UIManager.GetInterface('main'):HoNLearnerF('ClickSideTab', 4)"
+							id="learner_left_items"
+						/>
+						
+						<!-- Not a Tutorial -->
+						<if condition="cg_newMainInterface">
+							<instance
+								name="sidetab_v3"
+								icon="/ui/fe2/elements/learnatorium_icon_notatut.tga"  iconsize="64"
+								cat_label="learn_tab_walk" labelfont="dyn_14"
+								cat_sub_label="learn_tab_walk_2"
+								onclicklua="UIManager.GetInterface('main'):HoNLearnerF('ClickSideTab', 3)"
+								id="learner_left_walkthrough"
+								visible="0"
+							/>
+						</if>
+						<if condition="!cg_newMainInterface">
+							<instance
+								name="sidetab_v3"
+								icon="/ui/fe2/elements/learnatorium_icon_notatut.tga"  iconsize="64"
+								cat_label="learn_tab_walk" labelfont="dyn_14"
+								cat_sub_label="learn_tab_walk_2"
+								onclicklua="UIManager.GetInterface('main'):HoNLearnerF('ClickSideTab', 3)"
+								id="learner_left_walkthrough"
+							/>
+						</if>
+					</panel>
+				</panel>
+
+				<!-- Load Progress -->
+				<panel width="-2.0h" align="center" name="learnatorim_loading_progress" visible="1" blockinput="true" watch="EntityDefinitionsLoaded" ontrigger="SetVisible(false);" color="0 0 0 .7">
+					<panel align="center" valign="center" width="25.0h" height="5h" y=".5h">
+						<image height="100%" texture="../mainmenu/update_bar_bg.tga" />
+
+						<panel watch="EntityDefinitionsProgress" width="1" ontrigger="If(param1 gt 0, SetWidth(((param0 / param1) * 100) # '%')); SetWidth(Max(GetWidth(), 32));">
+							<image watch="EntityDefinitionsProgress" ontrigger="If(param1 gt 0 and param0 gt 0, SetUScale(1 / (param0 / param1)));" texture="../mainmenu/update_bar_fg.tga"/>
+							<image width="32" texture="../loadingscreens/loading_bar_fg_l.tga"/>
+							<image width="32" align="right" texture="../loadingscreens/loading_bar_fg_r.tga"/>
+						</panel>
+					</panel>
+					<image align="center" valign="center" width="31.5h" height="9h" x="-.8h" color="1 1 1 1" texture="elements/loading_bar_frame.tga" />
+					<panel color="invisible" y=".5h">
+						<label width="-10.0h" height="100%" align="center" textalign="center" textvalign="center" wrap="1" font="dyn_10" color="white" shadow="1" content="general_wait" />
+					</panel>
+				</panel>
+			</panel>
+		</panel>
+
+		<instance name="generic_tooltip_floater" tip_id="shop_compendium_guide_reco_1_tip" title="game_guide_reco_1" label="game_guide_reco_1_tip" align="left" valign="top" y="1.4h" x="-23.7h" />
+		<instance name="generic_tooltip_floater" tip_id="shop_compendium_guide_reco_2_tip" title="game_guide_reco_2" label="game_guide_reco_2_tip" align="left" valign="top" y="1.4h" x="-23.7h" />
+		<instance name="generic_tooltip_floater" tip_id="shop_compendium_guide_reco_3_tip" title="game_guide_reco_3" label="game_guide_reco_3_tip" align="left" valign="top" y="1.4h" x="-23.7h" />
+		<instance name="generic_tooltip_floater" tip_id="shop_compendium_guide_reco_4_tip" title="game_guide_reco_4" label="game_guide_reco_4_tip" align="left" valign="top" y="1.4h" x="-23.7h" />
+
+	</template>
+
+
+</package>

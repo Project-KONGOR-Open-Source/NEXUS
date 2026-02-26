@@ -1,0 +1,455 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+
+	<template name="hero_ability_icon">
+		<image x="{x}" y="{y}" width="6.4h" height="6.4h" color="1 1 1 1" texture="$checker" watch="HeroSelectHeroAbilityInfo{index}" ontriggerlua="self:SetVisible(AtoB(param0)) self:SetTexture(param1)" />
+	</template>
+
+	<template name="hero_ability_info">
+		<panel x="{x}" y="{y}" width="50.0%" align="left" noclick="true" watch="HeroSelectHeroAbilityInfo{index}" ontriggerlua="self:SetVisible(AtoB(param0))">
+			<panel x="0h" height="17.2h" valign="top" >
+				<panel x="-1.0h" y="0.8h" width="16.0h" height="2.2h" align="right">				
+					<label height="100%" color="#ffab01" shadow="1" font="dyn_10" textalign="center" textvalign="center" noclick="true" watch="HeroSelectHeroAbilityInfo{index}" ontriggerlua="self:SetText(param2)" />
+				</panel>				
+				<panel x="-0.4h" y="8.0h" width="-2.0h" height="50%" align="center">
+					<label color="white" shadow="1" font="dyn_8" textvalign="top" wrap="1" watch="HeroSelectHeroAbilityInfo{index}" ontriggerlua="self:SetText(param3)"/>
+				</panel>
+			</panel>			
+		</panel>
+	</template>	
+
+	<template name="ability_box">
+		<panel
+			name="{id}"
+			width="100%" height="{height=18.4h}"
+			passivechildren="0"
+			noclick="1"
+		>
+				
+			<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.6h" color="{boxBG=0 0 0 .55}"  noclick="1"/>
+			<frame texture="/ui/frames/roundframe.tga" borderthickness="0.6h" bordercolor="#434d50"  noclick="1" />
+			
+			<panel grow="true" regrow="true" growinvis="false" y="0.8h" width="-1.2h" align="center" float="bottom" padding="0.4h"  noclick="1">
+			
+				<panel width="100%" height="3.6h"  noclick="1">			
+					<panel float="right" sticky="true" stickytoinvisible="false" padding="0.5h" noclick="1">
+						
+						<!-- Icon -->
+						<panel width="100@" height="100%">
+							<image texture="$checker" watch="HeroSelectHeroAbilityInfo{index}" ontriggerlua="self:SetVisible(AtoB(param0)) self:SetTexture(param1)" />
+							<frame color="invisible" borderthickness="1" bordercolor=".3 .3 .3 1"/>
+						</panel>
+						
+						<!-- Name -->
+						<panel width="-120@" height="100%" float="bottom" padding="0">
+							<label fity="true" font="dyn_12" color="#ffab01" shadow="true" watch="HeroSelectHeroAbilityInfo{index}" ontriggerlua="self:SetText(param2)" />
+						</panel>
+						
+					</panel>
+
+					<!-- Mana -->
+					<label x="116@" y="0.1h" height="100%" textvalign="bottom" textalign="left" font="dyn_10" color="white" shadow="true" watch="HeroSelectHeroAbilityInfo{index}"
+						ontriggerlua="
+							if (NotEmpty(param5)) then
+								self:SetText(Translate('heroinfo_mana_cost') .. '^w' .. param5)
+								self:SetVisible(1)
+							else
+								self:ClearText()
+								self:SetVisible(0)
+							end"
+					/>
+					
+					
+					<!-- Range / Radius / CD / Passive-->
+					<panel watch="HeroSelectHeroAbilityInfo{index}" noclick="1"
+						ontriggerlua="self:SetVisible((tonumber(param7) > 0) or (tonumber(param11) > 0) or (tonumber(param12) > 0) or (tonumber(param6) > 0) or (not AtoB(param10)))"
+					>
+						<label height="100%" textalign="right" textvalign="top" font="dyn_10" color="1 1 1 1" shadow="true"
+							watch="HeroSelectHeroAbilityInfo{index}"
+							ontriggerlua="
+								if (NotEmpty(param7) and (tonumber(param7) > 0)) then
+									self:SetText(Translate('heroinfo_range') .. param7))
+								elseif (NotEmpty(param11) and (tonumber(param11) > 0)) then
+									self:SetText(Translate('heroinfo_radius') .. param11))
+								elseif (NotEmpty(param12) and (tonumber(param12) > 0)) then
+									self:SetText(Translate('heroinfo_aura') .. ' ' .. Translate('heroinfo_radius') .. param12)
+								else
+									self:SetText('')
+								end
+							"
+						/>
+						<label height="100%" textvalign="bottom" textalign="right" font="dyn_10" color="1 1 1 1" shadow="true" watch="HeroSelectHeroAbilityInfo{index}"
+							ontriggerlua="self:SetText(Translate('heroinfo_cooldown', 'time', param6))) self:SetVisible(NotEmpty(param6) and (tonumber(param6) > 0) and AtoB(param10))"
+						/>
+						<label height="100%" textvalign="bottom" textalign="right" font="dyn_10" color=".9 .9 .9 1" shadow="true" watch="HeroSelectHeroAbilityInfo{index}" content="tooltip_activate_passive" ontriggerlua="self:SetVisible(not AtoB(param10))" />
+					</panel>
+					
+					
+
+				</panel>				
+				
+				<panel width="100%" height="0.2h" noclick="1">
+					<panel width="100%" height="1" valign="bottom" color=".2 .2 .2 1" />
+				</panel>
+				
+				<panel height="16.4h" width="100%" noclick="1" clip="1" >
+
+					<!--<label fity="true" font="dyn_9" wrap="true" color=".9 .9 .9 1" shadow="true" content="" watch="HeroSelectHeroAbilityInfo{index}" ontrigger="SetText(param8);"/>-->
+					<textbuffer 
+						watch="HeroSelectHeroAbilityInfo{index}" ontrigger="SetBufferText(NormalizeLineBreaks(param8));"
+						noclick="0" valign="top" align="center" font="dyn_9" wrap="true" shadow="1" shadowcolor="black"		
+						fity="true" color="invisible" content="hero role string" 							
+						scrollbarplaceholder="false"
+						scrolltexture="/ui/info/combobox.tga"
+						handleheight="1.8h"
+						scrollbarsize="1.5h"
+						exteriorscrollbars="false"
+						textalign="left"
+						textcolor="white"					
+					/>											
+				</panel>	
+			</panel>
+		</panel>
+	</template>
+
+	<template name="ability_boxv3">
+		<panel
+			name="{id}"
+			width="23.8%" height="100%"
+			watch="HeroSelectHeroAbilityInfo{index}"
+		>
+			<panel noclick="1" visible="1" >
+				<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.6h" color="0 0 0 .55"/>
+				<frame texture="/ui/frames/roundframe.tga" borderthickness="0.6h" bordercolor="#434d50" />
+			</panel>
+			<panel noclick="1" visible="0" group="ability_boxv3_ability_highlight"
+				onshow="If(VarExists('compendium_guide_ability_hoverName'), DoEvent(1), SetVisible(0));"
+				watch="HeroSelectHeroAbilityInfo{index}"
+				ontriggerlua="
+					local name = param2
+					local e = function()
+						local hName = GetCvarString('compendium_guide_ability_hoverName')
+						if (NotEmpty(hName) and (self:UICmd('GetEntityDisplayName(\''..hName..'\')') == name)) then
+							self:SetVisible(1)
+						else
+							self:SetVisible(0)
+						end
+					end
+					self:SetCallback('onevent1', e)
+					self:RefreshCallbacks()
+				"
+			>
+				<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.6h" color="1 0.5 0 .05"/>
+				<frame texture="/ui/frames/roundframe.tga" borderthickness="0.6h" bordercolor="1 0.5 0 1.0" />
+			</panel>
+			
+			<panel y="0.8h" width="-1.2h" align="center" float="bottom" padding="0.4h">			
+				<panel width="100%" height="3.6h">			
+					<panel float="right" sticky="true" stickytoinvisible="false" padding="0.5h">
+						
+						<!-- Icon -->
+						<panel width="100@" height="100%">
+							<image texture="$checker" watch="HeroSelectHeroAbilityInfo{index}" ontriggerlua="self:SetVisible(AtoB(param0)) self:SetTexture(param1)" context="lobby" />
+							<frame color="invisible" borderthickness="1" bordercolor=".3 .3 .3 1"/>
+						</panel>
+						
+						<!-- Name -->
+						<panel width="-120@" height="100%" float="bottom" padding="0">
+							<label fity="true" font="dyn_12" color="#ffab01" shadow="true" watch="HeroSelectHeroAbilityInfo{index}" ontriggerlua="self:SetText(param2)"  />
+						</panel>
+						
+					</panel>
+					<!-- Mana -->
+					<label x="116@" y="0.1h" height="100%" textvalign="bottom" textalign="left" font="dyn_10" color="white" shadow="true" watch="HeroSelectHeroAbilityInfo{index}"
+						ontriggerlua="
+							if (NotEmpty(param5)) then
+								self:SetText(Translate('heroinfo_mana_cost') .. '^w' .. param5)
+								self:SetVisible(1)
+							else
+								self:SetVisible(0)
+								self:ClearText()
+							end
+						"
+					/>	
+
+				</panel>				
+				
+				<panel width="100%" height="0.2h">
+					<panel width="100%" height="1" valign="bottom" color=".2 .2 .2 1" />
+				</panel>
+				
+				<panel grow="true" regrow="true" width="100%">
+					<label fity="true" font="dyn_9" wrap="true" color=".9 .9 .9 1" shadow="true" content="" watch="HeroSelectHeroAbilityInfo{index}" ontriggerlua="self:SetText(param13)"/>
+				</panel>
+						
+			</panel>
+			
+			<!-- Range / Radius / CD / Passive-->
+			<panel grow="true" regrow="true" y="-0.6h" width="-1.8h" align="center" valign="bottom" watch="HeroSelectHeroAbilityInfo{index}" ontriggerlua="self:SetVisible(NotEmpty(param7) or NotEmpty(param6) or NotEmpty(param11) or NotEmpty(param12) or (not AtoB(param10)))">
+				<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.4h" color="#052d36"/>
+				<frame texture="/ui/frames/roundframe.tga" borderthickness="0.4h" bordercolor=".3 .3 .3 1"/>
+				
+					<panel x="0.5h" y="0.5h" grow="true" growinvis="false" regrow="true" width="100%" float="bottom">
+						
+						<panel 
+							width="100%" align="center" sticky="true" stickytoinvis="false"
+							height="1.8h"
+							visible="false"
+							watch="HeroSelectHeroAbilityInfo{index}"
+							ontriggerlua="
+								self:SetVisible(NotEmpty(param7) or NotEmpty(param11) or NotEmpty(param12))
+							"
+						>
+						
+							<label height="100%" font="dyn_10" color="1 1 1 1" shadow="true"
+								watch="HeroSelectHeroAbilityInfo{index}"
+								ontriggerlua="
+									if (NotEmpty(param7)) then
+										self:SetText(Translate('heroinfo_range') .. param7)
+									elseif (NotEmpty(param11)) then
+										self:SetText(Translate('heroinfo_radius') .. param11)
+									elseif (NotEmpty(param12)) then
+										self:SetText(Translate('heroinfo_aura') .. ' ' .. Translate('heroinfo_radius') .. param12)
+									else
+										self:ClearText()
+									end
+								"
+							/>
+						
+						</panel>
+						
+						<label fity="true" sticky="true" stickytoinvis="false" width="100%" textalign="left" font="dyn_10" color="1 1 1 1" shadow="true" watch="HeroSelectHeroAbilityInfo{index}"
+							ontriggerlua="self:SetText(Translate('heroinfo_cooldown', 'time', param6)) self:SetVisible(NotEmpty(param6) and AtoB(param10))"
+						/>
+						<label fity="true" sticky="true" stickytoinvis="false" width="100%" textalign="left" font="dyn_10" color=".9 .9 .9 1" shadow="true" watch="HeroSelectHeroAbilityInfo{index}" content="tooltip_activate_passive" ontriggerlua="self:SetVisible(not AtoB(param10))" />
+						<panel width="100%" sticky="true" stickytoinvis="false" height="0.4h" />
+					</panel>
+
+			</panel>
+		</panel>
+	</template>
+
+	<!-- This isn't used currently... (so I'm not gonna bother doing UIScript conversion on it - 4/18/13)-->
+	<template name="hero_info_panelV2"> 
+		<panel name="{id=hero_info}" y="{y}" x="{x}" color="0 0 0 0" noclick="true" visible="false">
+
+			<panel x="0" y="-0.5h" width="{width=124.0h}" height="{height=38.5h}" align="{align=center}" valign="{valign=bottom}">				
+				<frame color="0 0 0 .9" borderthickness="1" bordercolor="#445064" />				
+				
+				<panel width="-2.4h" height="-1.2h" align="center" valign="center">
+				
+					<!-- Hero Info -->
+					<panel x="0.5h" width="31.0h" float="bottom" padding="1.0h">
+					
+						<panel y="0.3h" width="100%" height="9.2h">					
+							<!-- Hero Icon -->
+							<panel y="0.6h" width="100@" height="100%">
+								<image texture="$checker" watch="HeroSelectHeroInfo" ontrigger="SetTexture(param1);" />
+								<frame color="invisible" borderthickness="1" bordercolor=".3 .3 .3 1"/>
+								<image x="-0.6h" y="0.8h" width="3.0h" height="3.0h" align="left" valign="bottom" texture="$white" watch="HeroSelectHeroInfo" ontrigger="SetTexture('/ui/fe2/lobby/' # param23 # '.tga')" />
+							</panel>
+							<!-- Dmg/Attk/Mov -->
+							<panel width="-107@" align="right" float="bottom" padding="0.2h">
+								<label fity="true" width="100%" font="dyn_14" color="#ffab01" shadow="true" watch="HeroSelectHeroInfo" ontrigger="SetText(param2);" />
+								<panel width="100%" height="0.2h">
+									<panel width="100%" height="1" valign="bottom" color=".2 .2 .2 1" />
+								</panel>
+								<panel width="100%" height="1.8h" float="right" padding="0.5h">
+									<image width="94@" height="94%" valign="center" texture="/ui/common/damage_icon.tga" />
+									<label height="100%" textvalign="center" font="dyn_11" color="white" shadow="true" watch="HeroSelectHeroInfo" ontrigger="SetText(Translate('game_hero_select_label_damage', 'damage', Round(param15) # ' - ' # Round(param16)));" />
+								</panel>								
+								<panel width="100%" height="1.8h" float="right" padding="0.5h">
+									<panel width="94@" height="94%" valign="center" />
+									<label height="100%" textvalign="center" font="dyn_11" color="white" shadow="true" watch="HeroSelectHeroInfo" ontrigger="SetText(Translate('game_hero_select_label_attack_range', 'range', Round(param13)));" />
+								</panel>
+								<panel width="100%" height="1.8h" float="right" padding="0.5h">
+									<panel width="94@" height="94%" valign="center" />
+									<label height="100%" textvalign="center" font="dyn_11" color="white" shadow="true" watch="HeroSelectHeroInfo" ontrigger="SetText(Translate('game_hero_select_label_attack_speed', 'speed', FtoA(1000 / param14, 2)));" />
+								</panel>								
+								<panel width="100%" height="1.8h" float="right" padding="0.5h">
+									<image width="94@" height="94%" valign="center" texture="/ui/common/move_speed_icon.tga" />
+									<label height="100%" textvalign="center" font="dyn_11" color="white" shadow="true" watch="HeroSelectHeroInfo" ontrigger="SetText(Translate('game_hero_select_label_mvspeed', 'mvspeed', Round(param11)));" />
+								</panel>								
+							</panel>						
+						</panel>
+						
+						<panel width="100%" height="0.2h" />
+						
+						<!-- Armor -->
+						<panel width="100%" height="2.2h">
+							<panel width="45%" align="left" float="right" padding="0.5h">
+								<image width="100@" height="100%" texture="/ui/common/armor_icon.tga" />
+								<label height="100%" textvalign="center" font="dyn_11" color="white" shadow="true" watch="HeroSelectHeroInfo" ontrigger="SetText(Translate('game_hero_select_label_armor', 'armor', FtoA(param17, 2)));" />
+							</panel>
+							<panel width="55%" align="right" float="right" padding="0.5h">
+								<image width="100@" height="100%" texture="/ui/common/magic_armor_icon.tga" />
+								<label height="100%" textvalign="center" font="dyn_11" color="white" shadow="true" watch="HeroSelectHeroInfo" ontrigger="SetText(Translate('game_hero_select_label_magicarmor', 'armor', FtoA(param18, 2)));" />
+							</panel>
+						</panel>						
+						
+						<!-- STR/AGI/INT -->
+						<panel height="4.3h" width="100%">
+							<panel width="32.5%" height="100%" align="left">
+								<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.6h" color="#320000"/>
+								<frame texture="/ui/frames/roundframe.tga" borderthickness="0.6h" bordercolor="#4e0000" />								
+								<panel y="0.1h" height="4.0h">
+									<image y="0.1h" width="92@" height="92%" valign="center" texture="/ui/fe2/lobby/strength.tga" />
+									<label width="-72@" height="60%" align="right" textvalign="center" textalign="center" font="dyn_12" color="white" shadow="true" watch="HeroSelectHeroInfo" ontrigger="If(StringEquals(param4, 'strength'), SetColor('yellow'), SetColor('white')); SetText(Round(param5));" />
+									<label width="-80@" height="60%" align="right" valign="bottom" textvalign="center" textalign="center" font="dyn_10" color="white" shadow="true" watch="HeroSelectHeroInfo" ontrigger="If(StringEquals(param4, 'strength'), SetColor('yellow'), SetColor('white')); SetText('(+'#FtoA(param6, 1) # ')');" />
+								</panel>
+							</panel>
+							
+							<panel width="32.5%" height="100%" align="center">
+								<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.6h" color="#0b3200"/>
+								<frame texture="/ui/frames/roundframe.tga" borderthickness="0.6h" bordercolor="#104b00" />
+								<panel y="0.1h" height="4.0h">
+									<image y="0.1h" width="92@" height="92%" valign="center" texture="/ui/fe2/lobby/agility.tga" />
+									<label width="-72@" height="60%" align="right" textvalign="center" textalign="center" font="dyn_12" color="white" shadow="true" watch="HeroSelectHeroInfo" ontrigger="If(StringEquals(param4, 'agility'), SetColor('yellow'), SetColor('white')); SetText(Round(param7));" />
+									<label width="-80@" height="60%" align="right" valign="bottom" textvalign="center" textalign="center" font="dyn_10" color="white" shadow="true" watch="HeroSelectHeroInfo" ontrigger="If(StringEquals(param4, 'agility'), SetColor('yellow'), SetColor('white')); SetText('(+'#FtoA(param8, 1) # ')');" />
+								</panel>
+							</panel>
+							
+							<panel width="32.5%" height="100%" align="right">
+								<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.6h" color="#002b39"/>
+								<frame texture="/ui/frames/roundframe.tga" borderthickness="0.6h" bordercolor="#003f54" />
+								<panel y="0.1h" height="4.0h">
+									<image y="0.1h" width="92@" height="92%" valign="center" texture="/ui/fe2/lobby/intelligence.tga" />
+									<label width="-72@" height="60%" align="right" textvalign="center" textalign="center" font="dyn_12" color="yellow" shadow="true" watch="HeroSelectHeroInfo" ontrigger="If(StringEquals(param4, 'intelligence'), SetColor('yellow'), SetColor('white')); SetText(Round(param9));" />
+									<label width="-80@" height="60%" align="right" valign="bottom" textvalign="center" textalign="center" font="dyn_10" color="yellow" shadow="true" watch="HeroSelectHeroInfo" ontrigger="If(StringEquals(param4, 'intelligence'), SetColor('yellow'), SetColor('white')); SetText('(+'#FtoA(param10, 1) # ')');" />
+								</panel>
+							</panel>
+						</panel>
+						
+						<panel grow="true" width="100%">
+							<label fity="true" wrap="true" font="dyn_11" color=".9 .9 .9 1" shadow="true" content="hero role string" watch="HeroSelectHeroInfo" ontrigger="SetText(param24);"/>
+						</panel>
+					
+					</panel>					
+					
+					<!-- Abilities -->
+					<panel width="-33.0h" align="right">				
+						<panel width="49.5%" align="left" float="bottom" padding="0.5h">				
+							<instance name="ability_box" index="0" paramindex="24" />
+							<instance name="ability_box" index="1" paramindex="25" />
+						</panel>					
+						<panel width="49.5%" align="right" float="bottom" padding="0.5h">				
+							<instance name="ability_box" index="2" paramindex="26" />
+							<instance name="ability_box" index="3" paramindex="27" />
+						</panel>				
+					</panel>
+				
+				</panel>
+				
+			
+			</panel>
+		
+		</panel>
+	</template>
+	<!-- End of unused -->
+
+	<template name="hero_info_panel">
+		<panel name="hero_info" color="0 0 0 0" noclick="true" visible="false">
+
+			<panel x="0" y="-0.5h" width="124.0h" height="38.5h" align="center" valign="bottom">				
+				<frame color="0 0 0 .9" borderthickness="1" bordercolor="#445064" />				
+				
+				<panel width="-1.2h" height="-1.2h" align="center" valign="center">
+				
+					<!-- Hero Info -->
+					<panel x="0.5h" width="29.0h" float="bottom" padding="1.0h">
+					
+						<panel y="0.3h" width="100%" height="9.2h">					
+							<!-- Hero Icon -->
+							<panel y="0.6h" width="100@" height="100%">
+								<image texture="$checker" watch="HeroSelectHeroInfo" ontrigger="SetTexture(param1);" />
+								<frame color="invisible" borderthickness="1" bordercolor=".3 .3 .3 1"/>
+								<image x="-0.6h" y="0.8h" width="3.0h" height="3.0h" align="left" valign="bottom" texture="$white" watch="HeroSelectHeroInfo" ontriggerlua="self:SetTexture('/ui/fe2/lobby/' .. param23 .. '.tga')" context="lobby" />
+							</panel>
+							<!-- Dmg/Attk/Mov -->
+							<panel width="-107@" align="right" float="bottom" padding="0.2h">
+								<label fity="true" width="100%" font="dyn_14" color="#ffab01" shadow="true" watch="HeroSelectHeroInfo" ontriggerlua="self:SetText(param2)" />
+								<panel width="100%" height="0.2h">
+									<panel width="100%" height="1" valign="bottom" color=".2 .2 .2 1" />
+								</panel>
+								<panel width="100%" height="1.8h" float="right" padding="0.5h">
+									<image width="94@" height="94%" valign="center" texture="/ui/common/damage_icon.tga" />
+									<label height="100%" textvalign="center" font="dyn_11" color="white" shadow="true" watch="HeroSelectHeroInfo" ontriggerlua="self:SetText(Translate('game_hero_select_label_damage', 'damage', round(param15) .. ' - ' .. round(param16)))" />
+								</panel>								
+								<panel width="100%" height="1.8h" float="right" padding="0.5h">
+									<panel width="94@" height="94%" valign="center" />
+									<label height="100%" textvalign="center" font="dyn_11" color="white" shadow="true" watch="HeroSelectHeroInfo" ontriggerlua="self:SetText(Translate('game_hero_select_label_attack_range', 'range', round(param13)))" />
+								</panel>
+								<panel width="100%" height="1.8h" float="right" padding="0.5h">
+									<panel width="94@" height="94%" valign="center" />
+									<label height="100%" textvalign="center" font="dyn_11" color="white" shadow="true" watch="HeroSelectHeroInfo" ontriggerlua="self:SetText(Translate('game_hero_select_label_attack_speed', 'speed', FtoA(1000 / tonumber(param14), 2)))" />
+								</panel>								
+								<panel width="100%" height="1.8h" float="right" padding="0.5h">
+									<image width="94@" height="94%" valign="center" texture="/ui/common/move_speed_icon.tga" />
+									<label height="100%" textvalign="center" font="dyn_11" color="white" shadow="true" watch="HeroSelectHeroInfo" ontriggerlua="self:SetText(Translate('game_hero_select_label_mvspeed', 'mvspeed', round(param11)))" />
+								</panel>								
+							</panel>						
+						</panel>
+						
+						<panel width="100%" height="0.2h" />
+						
+						<!-- Mastery -->
+						<panel width="100%" height="2.38h" watch="HeroSelectHeroInfo" ontriggerlua="HoN_Learner:SetMasteryInfo(param34)">
+							<instance name="learner_mastery_heroinfo" y="0.0h" font="dyn_9" valign="center" width="11.85h" height="2.95h" id_debug="id_hero_tooltip"
+								barwidth="7.42h" barheight="1.2h" barx="3.0h" bary="-1.12h" type="1" 
+							/>
+						</panel>
+
+
+						
+						<!-- STR/AGI/INT -->
+						<panel height="4.3h" width="100%">
+							<panel width="32.5%" height="100%" align="left">
+								<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.6h" color="#320000"/>
+								<frame texture="/ui/frames/roundframe.tga" borderthickness="0.6h" bordercolor="#4e0000" />								
+								<panel y="0.1h" height="4.0h">
+									<image y="0.1h" width="92@" height="92%" valign="center" texture="/ui/fe2/lobby/strength.tga" />
+									<label width="-72@" height="60%" align="right" textvalign="center" textalign="center" font="dyn_12" color="white" shadow="true" watch="HeroSelectHeroInfo" ontriggerlua="if (param4 == 'strength') then self:SetColor('yellow') else self:SetColor('white') end self:SetText(round(param5))" />
+									<label width="-80@" height="60%" align="right" valign="bottom" textvalign="center" textalign="center" font="dyn_10" color="white" shadow="true" watch="HeroSelectHeroInfo" ontriggerlua="if (param4 == 'strength') then self:SetColor('yellow') else self:SetColor('white') end self:SetText('(+'..FtoA(param6, 1)..')')" />
+								</panel>
+							</panel>
+							
+							<panel width="32.5%" height="100%" align="center">
+								<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.6h" color="#0b3200"/>
+								<frame texture="/ui/frames/roundframe.tga" borderthickness="0.6h" bordercolor="#104b00" />
+								<panel y="0.1h" height="4.0h">
+									<image y="0.1h" width="92@" height="92%" valign="center" texture="/ui/fe2/lobby/agility.tga" />
+									<label width="-72@" height="60%" align="right" textvalign="center" textalign="center" font="dyn_12" color="white" shadow="true" watch="HeroSelectHeroInfo" ontriggerlua="if (param4 == 'agility') then self:SetColor('yellow') else self:SetColor('white') end self:SetText(round(param7))" />
+									<label width="-80@" height="60%" align="right" valign="bottom" textvalign="center" textalign="center" font="dyn_10" color="white" shadow="true" watch="HeroSelectHeroInfo" ontriggerlua="if (param4 == 'agility') then self:SetColor('yellow') else self:SetColor('white') end self:SetText('(+'..FtoA(param8, 1)..')');" />
+								</panel>
+							</panel>
+							
+							<panel width="32.5%" height="100%" align="right">
+								<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.6h" color="#002b39"/>
+								<frame texture="/ui/frames/roundframe.tga" borderthickness="0.6h" bordercolor="#003f54" />
+								<panel y="0.1h" height="4.0h">
+									<image y="0.1h" width="92@" height="92%" valign="center" texture="/ui/fe2/lobby/intelligence.tga" />
+									<label width="-72@" height="60%" align="right" textvalign="center" textalign="center" font="dyn_12" color="yellow" shadow="true" watch="HeroSelectHeroInfo" ontriggerlua="if (param4 == 'intelligence') then self:SetColor('yellow') else self:SetColor('white') end self:SetText(round(param9))" />
+									<label width="-80@" height="60%" align="right" valign="bottom" textvalign="center" textalign="center" font="dyn_10" color="yellow" shadow="true" watch="HeroSelectHeroInfo" ontriggerlua="if (param4 == 'intelligence') then self:SetColor('yellow') else self:SetColor('white') end self:SetText('(+'..FtoA(param10, 1)..')')" />
+								</panel>
+							</panel>
+						</panel>
+						
+						<panel grow="true" width="100%">
+							<label fity="true" wrap="true" font="dyn_10" color=".9 .9 .9 1" shadow="true" content="hero role string" watch="HeroSelectHeroInfo" ontriggerlua="self:SetText(param24)"/>
+						</panel>
+					
+					</panel>					
+					
+					<!-- Abilities -->
+					<panel width="-31.0h" align="right" float="right" padding="1.0%">				
+						<instance name="ability_boxv3" id="ability_boxv3_0" index="0" paramindex="24" />
+						<instance name="ability_boxv3" id="ability_boxv3_1" index="1" paramindex="25" />
+						<instance name="ability_boxv3" id="ability_boxv3_2" index="2" paramindex="26" />
+						<instance name="ability_boxv3" id="ability_boxv3_3" index="3" paramindex="27" />			
+					</panel>
+				</panel>
+			</panel>
+		</panel>
+	</template>
+	
+</package>

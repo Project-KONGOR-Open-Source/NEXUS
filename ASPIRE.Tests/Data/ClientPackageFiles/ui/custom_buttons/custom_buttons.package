@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+
+	<!-- Include 2 triggers for each button, 1 normal and 1 for hiding -->
+	<trigger name="custom_button_Rally"/>
+	<trigger name="custom_button_Rally_hide" />
+	
+	<trigger name="custom_button_Shellshock"/>
+	<trigger name="custom_button_Shellshock_hide" />
+	
+	<trigger name="custom_button_Armadon"/>
+	<trigger name="custom_button_Armadon_hide" />
+	
+	<trigger name="custom_button_OpheliaQuest1"/>
+	<trigger name="custom_button_OpheliaQuest2"/>
+	<trigger name="custom_button_OpheliaQuest3"/>
+	<trigger name="custom_button_OpheliaQuest1_hide"/>
+	<trigger name="custom_button_OpheliaQuest2_hide"/>
+	<trigger name="custom_button_OpheliaQuest3_hide"/>
+	
+	<style name="custom_button_Cover" width="23.7h" height="47.4h" noclick="true" visible="false"/>
+	<style name="custom_button_SelectChoice" width="23.7h" height="23.7h" noclick="true"/>
+	<style name="custom_button_SelectChoiceGlow" style="custom_button_SelectChoice" rendermode="additive" color="#74f2ff" visible="false"/>
+
+	<template name="custom_button_SelectChoiceGlowEffect">
+		<panel
+			name="{id}" color="1 1 1 0"
+			x="{x}" y="{y}" width="{width=100%}" height="{height=100%}" align="{align}" valign="{valign}" noclick="true"
+			visible="{visible=false}"
+		>
+			<modelpanel
+				noclick="true"
+				model="{modelPath=/ui/common/models/toggle/toggle.mdf}"
+				anim="idle"
+				effect="{effectPath=/ui/common/models/toggle/toggle.effect}"
+				camerapos="0 1 0"
+				cameraangles="0 0 180"
+				camerafov="45"
+				cameranear="1"
+				carmerafar="100"
+				depthclear="false"
+				depthcompress="true"
+				onshow="SetAnim('idle'); SetEffect('{effectPath=/ui/common/models/toggle/toggle.effect}');"
+			/>
+		</panel>
+	</template>
+
+	<!-- Each custom button needs its own panel. Changing coordinates is not necessary. -->
+	<panel name="custom_button_Rally_Panel" align="right" valign="bottom" x="-5h" y="-30h" width="15h" height="15h" visible="false" noclick="true">
+		<image name="custom_button_Rally_Background" texture="/ui/custom_buttons/elements/custom_button_Rally.tga" align="right" valign="bottom" width="6h" height="6h" noclick="true"/>
+
+		<image name="custom_button_Rally_SelectChoice1Glow" texture="/ui/common/button_gloss_over.tga" align="right" valign="bottom" width="6h" height="6h" style="custom_button_SelectChoiceGlow"/>
+
+		<instance id="custom_button_Rally_SelectChoice1GlowEffect" name="custom_button_SelectChoiceGlowEffect" effectPath="/ui/bossselection/elements/highlight_generic.effect" height="8h" width="8h" align="right" valign="bottom" x="0.9h" y="1h" visible="false"/>
+
+		<button name="custom_button_Rally_Button1" width="7h" height="7h" align="right" valign="bottom" color="invisible" />
+
+		<panel name="custom_button_Rally_SelectChoice1Text" grow="true" align="right" valign="bottom" x="-7.5h" y="2h" noclick="true" passivechildren="true">
+			<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.6h" color="0 0 0 .75"/>
+			<frame texture="/ui/frames/roundframe.tga" borderthickness="0.6h" bordercolor="#434d50"/>
+			<label textalign="center" textvalign="top" font="dyn_12" color="white" outline="true" wrap="true" width="25h" y="1h">custom_ui_button_Rally_title</label>
+			<label textalign="left" textvalign="top" font="dyn_9" color="white" outline="true" wrap="true" width="23h" fity="true" fitypadding="1h" x="1h" y="4h">custom_ui_button_Rally_body</label>
+		</panel>
+	</panel>
+	
+	<!-- Shellshock button -->
+	<panel name="custom_button_Shellshock_Panel" align="right" valign="bottom" x="-5h" y="-30h" width="15h" height="15h" visible="false" noclick="true">
+		<image name="custom_button_Shellshock_Background" texture="/ui/custom_buttons/elements/custom_button_Shellshock.tga" align="right" valign="bottom" width="6h" height="6h" noclick="true"/>
+
+		<image name="custom_button_Shellshock_SelectChoice1Glow" texture="/ui/common/button_gloss_over.tga" align="right" valign="bottom" width="6h" height="6h" style="custom_button_SelectChoiceGlow"/>
+
+		<instance id="custom_button_Shellshock_SelectChoice1GlowEffect" name="custom_button_SelectChoiceGlowEffect" effectPath="/ui/bossselection/elements/highlight_generic.effect" height="8h" width="8h" align="right" valign="bottom" x="0.9h" y="1h" visible="false"/>
+
+		<button name="custom_button_Shellshock_Button1" width="7h" height="7h" align="right" valign="bottom" color="invisible" />
+
+		<panel name="custom_button_Shellshock_SelectChoice1Text" grow="true" align="right" valign="bottom" x="-7.5h" y="2h" noclick="true" passivechildren="true">
+			<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.6h" color="0 0 0 .75"/>
+			<frame texture="/ui/frames/roundframe.tga" borderthickness="0.6h" bordercolor="#434d50"/>
+			<label textalign="center" textvalign="top" font="dyn_12" color="white" outline="true" wrap="true" width="25h" y="1h">custom_ui_button_Shellshock_title</label>
+			<label textalign="left" textvalign="top" font="dyn_9" color="white" outline="true" wrap="true" width="23h" fity="true" fitypadding="1h" x="1h" y="4h">custom_ui_button_Shellshock_body</label>
+		</panel>
+	</panel>
+	
+	<!-- Armadon button -->
+	<panel name="custom_button_Armadon_Panel" align="right" valign="bottom" x="-5h" y="-30h" width="15h" height="15h" visible="false" noclick="true">
+		<image name="custom_button_Armadon_Background" texture="/ui/custom_buttons/elements/custom_button_Armadon.tga" align="right" valign="bottom" width="6h" height="6h" noclick="true"/>
+
+		<image name="custom_button_Armadon_SelectChoice1Glow" texture="/ui/common/button_gloss_over.tga" align="right" valign="bottom" width="6h" height="6h" style="custom_button_SelectChoiceGlow"/>
+
+		<instance id="custom_button_Armadon_SelectChoice1GlowEffect" name="custom_button_SelectChoiceGlowEffect" effectPath="/ui/bossselection/elements/highlight_generic.effect" height="8h" width="8h" align="right" valign="bottom" x="0.9h" y="1h" visible="false"/>
+
+		<button name="custom_button_Armadon_Button1" width="7h" height="7h" align="right" valign="bottom" color="invisible" />
+
+		<panel name="custom_button_Armadon_SelectChoice1Text" grow="true" align="right" valign="bottom" x="-7.5h" y="2h" noclick="true" passivechildren="true">
+			<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.6h" color="0 0 0 .75"/>
+			<frame texture="/ui/frames/roundframe.tga" borderthickness="0.6h" bordercolor="#434d50"/>
+			<label textalign="center" textvalign="top" font="dyn_12" color="white" outline="true" wrap="true" width="25h" y="1h">custom_ui_button_Armadon_title</label>
+			<label textalign="left" textvalign="top" font="dyn_9" color="white" outline="true" wrap="true" width="23h" fity="true" fitypadding="1h" x="1h" y="4h">custom_ui_button_Armadon_body</label>
+		</panel>
+	</panel>
+	
+	<!-- Ophelia's Pact quest reward button 1 -->
+	<panel name="custom_button_OpheliaQuest1_Panel" align="right" valign="bottom" x="-5h" y="-30h" width="15h" height="15h" visible="false" noclick="true">
+		<image name="custom_button_OpheliaQuest1_Background" texture="/ui/custom_buttons/elements/custom_button_OpheliaQuest1.tga" align="right" valign="bottom" width="6h" height="6h" noclick="true"/>
+
+		<image name="custom_button_OpheliaQuest1_SelectChoice1Glow" texture="/ui/common/button_gloss_over.tga" align="right" valign="bottom" width="6h" height="6h" style="custom_button_SelectChoiceGlow"/>
+
+		<instance id="custom_button_OpheliaQuest1_SelectChoice1GlowEffect" name="custom_button_SelectChoiceGlowEffect" effectPath="/ui/bossselection/elements/highlight_generic.effect" height="8h" width="8h" align="right" valign="bottom" x="0.9h" y="1h" visible="false"/>
+
+		<button name="custom_button_OpheliaQuest1_Button1" width="7h" height="7h" align="right" valign="bottom" color="invisible" />
+
+		<panel name="custom_button_OpheliaQuest1_SelectChoice1Text" grow="true" align="right" valign="bottom" x="-7.5h" y="2h" noclick="true" passivechildren="true">
+			<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.6h" color="0 0 0 .75"/>
+			<frame texture="/ui/frames/roundframe.tga" borderthickness="0.6h" bordercolor="#434d50"/>
+			<label textalign="center" textvalign="top" font="dyn_12" color="white" outline="true" wrap="true" width="25h" y="1h">custom_ui_button_OpheliaQuest1_title</label>
+			<label textalign="left" textvalign="top" font="dyn_9" color="white" outline="true" wrap="true" width="23h" fity="true" fitypadding="1h" x="1h" y="4h">custom_ui_button_OpheliaQuest1_body</label>
+		</panel>
+	</panel>
+	
+	<!-- Ophelia's Pact quest reward button 2 -->
+	<panel name="custom_button_OpheliaQuest2_Panel" align="right" valign="bottom" x="-5h" y="-30h" width="15h" height="15h" visible="false" noclick="true">
+		<image name="custom_button_OpheliaQuest2_Background" texture="/ui/custom_buttons/elements/custom_button_OpheliaQuest2.tga" align="right" valign="bottom" width="6h" height="6h" noclick="true"/>
+
+		<image name="custom_button_OpheliaQuest2_SelectChoice1Glow" texture="/ui/common/button_gloss_over.tga" align="right" valign="bottom" width="6h" height="6h" style="custom_button_SelectChoiceGlow"/>
+
+		<instance id="custom_button_OpheliaQuest2_SelectChoice1GlowEffect" name="custom_button_SelectChoiceGlowEffect" effectPath="/ui/bossselection/elements/highlight_generic.effect" height="8h" width="8h" align="right" valign="bottom" x="0.9h" y="1h" visible="false"/>
+
+		<button name="custom_button_OpheliaQuest2_Button1" width="7h" height="7h" align="right" valign="bottom" color="invisible" />
+
+		<panel name="custom_button_OpheliaQuest2_SelectChoice1Text" grow="true" align="right" valign="bottom" x="-7.5h" y="2h" noclick="true" passivechildren="true">
+			<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.6h" color="0 0 0 .75"/>
+			<frame texture="/ui/frames/roundframe.tga" borderthickness="0.6h" bordercolor="#434d50"/>
+			<label textalign="center" textvalign="top" font="dyn_12" color="white" outline="true" wrap="true" width="25h" y="1h">custom_ui_button_OpheliaQuest2_title</label>
+			<label textalign="left" textvalign="top" font="dyn_9" color="white" outline="true" wrap="true" width="23h" fity="true" fitypadding="1h" x="1h" y="4h">custom_ui_button_OpheliaQuest2_body</label>
+		</panel>
+	</panel>
+	
+	<!-- Ophelia's Pact quest reward button 3 -->
+	<panel name="custom_button_OpheliaQuest3_Panel" align="right" valign="bottom" x="-5h" y="-30h" width="15h" height="15h" visible="false" noclick="true">
+		<image name="custom_button_OpheliaQuest3_Background" texture="/ui/custom_buttons/elements/custom_button_OpheliaQuest3.tga" align="right" valign="bottom" width="6h" height="6h" noclick="true"/>
+
+		<image name="custom_button_OpheliaQuest3_SelectChoice1Glow" texture="/ui/common/button_gloss_over.tga" align="right" valign="bottom" width="6h" height="6h" style="custom_button_SelectChoiceGlow"/>
+
+		<instance id="custom_button_OpheliaQuest3_SelectChoice1GlowEffect" name="custom_button_SelectChoiceGlowEffect" effectPath="/ui/bossselection/elements/highlight_generic.effect" height="8h" width="8h" align="right" valign="bottom" x="0.9h" y="1h" visible="false"/>
+
+		<button name="custom_button_OpheliaQuest3_Button1" width="7h" height="7h" align="right" valign="bottom" color="invisible" />
+
+		<panel name="custom_button_OpheliaQuest3_SelectChoice1Text" grow="true" align="right" valign="bottom" x="-7.5h" y="2h" noclick="true" passivechildren="true">
+			<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.6h" color="0 0 0 .75"/>
+			<frame texture="/ui/frames/roundframe.tga" borderthickness="0.6h" bordercolor="#434d50"/>
+			<label textalign="center" textvalign="top" font="dyn_12" color="white" outline="true" wrap="true" width="25h" y="1h">custom_ui_button_OpheliaQuest3_title</label>
+			<label textalign="left" textvalign="top" font="dyn_9" color="white" outline="true" wrap="true" width="23h" fity="true" fitypadding="1h" x="1h" y="4h">custom_ui_button_OpheliaQuest3_body</label>
+		</panel>
+	</panel>
+
+</package>

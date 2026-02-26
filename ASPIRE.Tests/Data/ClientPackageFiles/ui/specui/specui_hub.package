@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+	
+	<trigger name="SpecUIGraphTooltipUpdate" />
+	<trigger name="SpecUIShowAll" />
+	<trigger name="SpecUIHideAll" />
+	<trigger name="SpecUIJumpIn" />
+	<trigger name="SpecUICombatUpdate" /> 
+	<trigger name="SpecUICombatJump" /> 
+	<trigger name="SpecUICombat1" /> 
+	<trigger name="SpecUICombat2" />
+	<trigger name="SpecUICombat3" /> 
+	<trigger name="ReplayFFToggle" /> 	
+	<trigger name="ReplayLockToggle" />
+	<trigger name="ReplayToggle1" /> 
+	
+	<!-- Early Load -->
+	<include file="/ui/specui/specui_pop_outs.package"/>
+	<include file="/ui/specui/specui_notifications.package"/>
+	<include file="/ui/specui/specui_push_bar.package"/>
+	<include file="/ui/specui/specui_unitframes.package"/>	
+	<include file="/ui/specui/specui_base_interface.package"/>
+
+	<panel name="spectator_update_sleeper" noclick="1" color="invisible"
+		onshowlua="UIManager.GetInterface('game_spectator'):HoNSpecUIF('StartInterface')"
+		onhidelua="UIManager.GetInterface('game_spectator'):HoNSpecUIF('StopInterface')"
+	/>
+	
+	<floater width="10h" x="1.0h" y="3.5h" grow="true" regrow="1" name="specui_graph_tooltips" color="invisible" visible="0" align="left">
+		<frame texture="/ui/frames/tooltip_bg.tga" color="0 0 0 1.0" borderthickness=".6h" />
+		<frame texture="/ui/frames/roundframe.tga" color="#A0A0A0" borderthickness=".6h" />
+		<panel width="-1.5h" align="center" grow="true" regrow="1" float="right">
+				<label y="1.0h" x="0.6h" textvalign="top" textalign="left" font="dyn_10" noclick="1" color="#ffab01" shadow="1" wrap="0" width="100%" fity="true" fitypadding="0.8h" fitx="1" fitxpadding="1.0h"
+					watch="SpecUIGraphTooltipUpdate"
+					ontriggerlua="self:SetText(param0) self:SetColor(param1)"
+				/>
+				<label textvalign="top" textalign="left" font="dyn_10" noclick="1" color="#ffab01" shadow="1" wrap="0" width="100%" fity="true" fitypadding="0.8h" fitx="1" fitxpadding="1.0h"
+					watch="SpecUIGraphTooltipUpdate"
+					ontrigger="
+							If(Evaluate(param4) gt 0,
+								If(Round((Evaluate(param2)/Evaluate(param4))*100) lt 101, SetText(Round((Evaluate(param2)/Evaluate(param4))*100) #'% '# param3 ), SetText('-')),
+								SetText(Evaluate(param2) #' '# param3 )
+							);
+						" 
+				/>
+		</panel>
+	</floater>
+	
+	<!-- these guys use to be on the below and were pretty much responsible for resetting the spec ui, might need to do something with these again -->
+	<!-- watch0="EventEnterGame EventLeaveGame" ontrigger0="DoEvent(1);"
+	watch1="GamePhase" ontrigger1="If(GamePhase le 4, DoEvent(1));" -->
+
+	<!-- Mostly has init stuff, such as creating options- used to have almost all the logic for the specui -->
+	<panel noclick="1" name="specui_brain_bug"		
+		onloadlua="
+			Set('specui_replay_locked_time', 0, 'int', true) 
+			Set('specui_was_locked', false, 'bool', true)
+
+			SetSave('specui_show_tooltips', true, 'bool',true)
+			SetSave('specui_show_popup_ability_use', true, 'bool',true)
+			SetSave('specui_show_popup_item', true, 'bool',true)
+			SetSave('specui_show_popup_gank', true, 'bool',true)
+			SetSave('specui_show_popup_ability_learn', true, 'bool',true)
+			SetSave('specui_show_hotkeys', true, 'bool',true)
+			SetSave('specui_itempop_gold_threshold', 700, 'float', true)
+			SetSave('specui_combatpop_cooldown', 10, 'float', true)
+			SetSave('specui_combatpop_display', 5, 'float', true)
+			SetSave('specui_mini_mode', false, 'bool', true)
+			SetSave('specui_mini_mode1', false, 'bool', true)
+			SetSave('specui_mini_mode2', false, 'bool', true)
+			
+			Cmd('UnAlias SpecUIToggleUF; Alias SpecUIToggleUF Script HoN_SpecUI:ToggleUnitFrames()')
+			Cmd('UnAlias SpecUIToggleInfo; Alias SpecUIToggleInfo Script HoN_SpecUI:ToggleTabsVisible()')
+			Cmd('UnAlias SpecUITogglePush; Alias SpecUITogglePush Script HoN_SpecUI:TogglePushBarVisible()')
+
+			Cmd('UnAlias SpecUIToggleReplay; Alias SpecUIToggleReplay Script HoN_SpecUI:ToggleReplayControlUI()')
+			
+			Cmd('UnAlias SpecUITab1; Alias SpecUITab1 Script HoN_SpecUI:SetActiveTab(1)')
+			Cmd('UnAlias SpecUITab2; Alias SpecUITab2 Script HoN_SpecUI:SetActiveTab(2)')
+			Cmd('UnAlias SpecUITab3; Alias SpecUITab3 Script HoN_SpecUI:SetActiveTab(3)')
+			Cmd('UnAlias SpecUITab4; Alias SpecUITab4 Script HoN_SpecUI:SetActiveTab(4)')
+			Cmd('UnAlias SpecUITab5; Alias SpecUITab5 Script HoN_SpecUI:SetActiveTab(5)')
+			Cmd('UnAlias SpecUITab6; Alias SpecUITab6 Script HoN_SpecUI:SetActiveTab(6)')
+			Cmd('UnAlias SpecUITab7; Alias SpecUITab7 Script HoN_SpecUI:SetActiveTab(7)')
+			Cmd('UnAlias SpecUITab8; Alias SpecUITab8 Script HoN_SpecUI:SetActiveTab(8)')
+			
+			Cmd('UnAlias ReplayFFStep; Alias ReplayFFStep ReplayIncPlaybackSpeed 1')
+			Cmd('UnAlias ReplayRWStep; Alias ReplayRWStep ReplayIncPlaybackSpeed -1')
+			Cmd('UnAlias ReplayPause; Alias ReplayPause UICall * If(ReplayPaused, Cmd(\'ReplaySetPaused 0\'), Cmd(\'ReplaySetPaused 1\'));');
+		"
+	/>
+	 
+	<template name="specui_tooltip_floater">
+		<floater name="{tip_id}"
+			x="{x=2.2h}" y="{y=-0.5h}"
+			width="{width=25.0h}"
+			align="{align=left}"
+			valign="{valign=top}"
+			visible="{visible=0}"
+			passivechildren="true" grow="true" regrow="true" 
+			watch="SpecUITooltipUpdate"
+			ontriggerlua="
+				self:SetVisible(NotEmpty(param0) and GetCvarBool('specui_show_tooltips'))
+				if (NotEmpty(param4)) then
+					self:SetX(param4)
+				else
+					self:SetX('2.2h')
+				end
+
+				if (NotEmpty(param5)) then
+					self:SetY(param5)
+				else
+					self:SetY('-0.5h')
+				end"
+		>
+			<frame texture="/ui/frames/tooltip_bg.tga" color="0 0 0 .8" borderthickness=".6h" />
+			<frame texture="/ui/frames/roundframe.tga" color="#A0A0A0" borderthickness=".6h" />			
+				<label
+					x="0.8h" y="0.6h"
+					textvalign="top"
+					textalign="left"
+					align="center"
+					font="dyn_10"
+					noclick="1"
+					color="#ffab01"
+					shadow="1"					
+					wrap="1"
+					fity="true"					
+					fitypadding="0.8h"
+					watch="SpecUITooltipUpdate"
+					ontriggerlua="
+						self:SetText(Translate(param0))
+						if (NotEmpty(param3)) then
+							self:SetColor(param3)
+						else
+							self:SetColor('#ffab01')
+						end"
+				/>		
+				<image x="-0.6h" y="{icony=0.6h}" noclick="1" height="{iconheight=2.5h}" width="{iconwidth=2.5h}" align="right" visible="0" color="{color=1 1 1 1}" stickytoinvis="0"
+					watch="SpecUITooltipUpdate"
+					ontriggerlua="self:SetTexture(param2) self:SetVisible(NotEmpty(param2))"
+				/>
+				<panel y="2.5h" width="-1.6h" align="center" noclick="true" grow="true" regrow="true" float="bottom">
+					<label						
+						textvalign="top"
+						textalign="left"
+						align="center"
+						font="dyn_10"
+						noclick="1"
+						color="white"
+						shadow="1"					
+						wrap="1"
+						fity="true"
+						fitxpadding="0"
+						watch="SpecUITooltipUpdate"
+						ontriggerlua="self:SetText(Translate(param1)) self:SetVisible(NotEmpty(param1))"
+					/>
+					<panel height="1.0h" color="invisible" noclick="true"/>
+				</panel>			
+		</floater>
+	</template>	
+	<trigger name="SpecUITooltipUpdate" />
+	<instance name="specui_tooltip_floater" y="1.5h" x="2.5h" icony="0.4h" iconheight="1.8h" iconwidth="1.8h" tip_id="specui_tooltip_floater" />
+	
+	<!-- Late Load -->
+	<include file="/ui/specui/specui_info_tabs.package"/>
+	<include file="/ui/specui/specui_info_panel.package"/>
+	
+	<include file="/ui/specui/caster/caster.package"/>
+	
+</package>

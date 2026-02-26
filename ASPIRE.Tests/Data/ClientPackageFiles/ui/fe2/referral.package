@@ -1,0 +1,375 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+
+	<!-- Report Abuse -->
+	<trigger name="MentorReferralFormStatus"/>
+	<trigger name="MentorReferralFormResult"/>
+	<form
+		name="MentorReferralForm"
+		host="!masterserver"
+		target="/client_requester.php"
+		ssl="false"
+		method="post"
+		statustrigger="MentorReferralFormStatus"
+		resulttrigger="MentorReferralFormResult"
+		resultparam0="0"
+		resultparam1="referral_status"
+		resultparam2="referral_milestones"
+		resultparam3="curtime"
+		resultparam4="vested_threshold"
+		resultparam5="referral_code"
+	/>
+
+	<lua file="/ui/scripts/mentor_referral.lua" /> 
+
+	<include file="referral_templates.package"/>
+		
+	<panel noclick="1" name="referral_helper" onevent="SleepWidget(500, 'DoEvent(1)');" onevent1lua="UIManager.GetInterface('main'):HoNMentorReferralF('ReferralShown')" />
+
+	<template name="referral">		
+		<panel y="-110%" width="102.0h" align="center" name="referral" visible="{visible=0}" noclick="true" valign="center"
+			onshow="CallEvent('referral_helper');"					
+		>		
+			<panel x="0" y="-100%" height="203.6%" width="90%"  align="center" texture="mainmenu/upper_frame_center.tga"/>
+			<panel x="18h" y="-100%" height="203.6%" width="50@"  align="right" texture="mainmenu/upper_frame_right.tga"/>
+			<panel x="-18h" y="-100%" height="203.6%" width="50@"  align="left" texture="mainmenu/upper_frame_left.tga"/>
+			
+			<!-- Header -->
+			<panel y="1.0h" height="2.8h" width="-6.0h" align="center" noclick="true">
+				<instance name="header_bar" show_close="true" onclick="Set('_mainmenu_currentpanel', 'referral'); CallEvent('MainMenuPanelSwitcher');" />
+				<panel width="-1.0h" align="center" noclick="true" passivechildren="true">							
+					<label height="100%" valign="center" textalign="left" textvalign="center" color="white" shadow="true" font="dyn_12" noclick="true" content="referral_title"/>
+				</panel>
+			</panel>
+			
+			<panel y="4.5h" width="-7.0h" height="-6.0h" align="center" >
+			
+				<!-- Left - Referral Info -->
+				<panel width="-34.4h" float="bottom" padding="1.5h" noclick="true">
+					<label fity="true" wrap="true" font="dyn_12" color=".8 .8 .8 1" content="referral_longtxt" noclick="true" />
+					
+					<!-- Rewards -->
+					<panel height="7.0h" float="right" padding="2.0h">
+						<instance name="ref_reward" label="referral_lvl2" texture="/ui/fe2/store/silver_coins.tga" reward_amt="referral_lvl2_reward" />
+						<instance name="ref_reward" label="referral_verified" texture="/ui/fe2/store/silver_coins.tga" reward_amt="referral_verified_reward" />
+						<instance name="ref_reward" label="referral_coins" texture="/ui/fe2/store/gold_coins.tga" reward_amt="referral_coins_reward" />						
+						<!-- Limited Time Level 3 Reward Will be Removed After Its Over -->
+						<panel width="13.4h" height="100%" noclick="true">
+							<frame texture="/ui/frames/rounded_bg_green.tga" borderthickness="0.6h" color=".5 .5 .5 1" blockinput="false" />
+							<frame texture="/ui/frames/roundframe.tga" color="#078043" borderthickness="0.6h" blockinput="false" />			
+							<panel width="-1.0h" height="-1.0h" align="center" valign="center">
+								<label fity="true" fitypadding="0.7h" textalign="center" font="dyn_14" color="#3ae763" shadow="true" content="referral_lvl3" noclick="true"/>
+								<panel x="0.5h" y="2.5h" width="3.2h" height="3.2h">
+									<image width="100@" height="100%" texture="/heroes/doctor_repulsor/alt/icon.tga" />
+									<frame color="invisible" borderthickness="1" bordercolor=".4 .4 .4 1" />									
+								</panel>
+								<panel x="-0.5h" y="2.5h" width="-5.0h" height="3.2h" align="right">
+									<label y="-0.1h" textalign="center" textvalign="center" wrap="true" font="dyn_10" color=".8 .8 .8 1" content="mstore_product641_name" noclick="true" />
+								</panel>								
+							</panel>
+							<label y="-0.8h" textalign="center" wrap="true" font="dyn_10" color="1 1 0 1" shadow="true" content="referral_limited" noclick="true" />							
+						</panel>
+						
+					</panel>
+					
+					<!-- Ref URL -->
+					<panel grow="true" width="100%" noclick="1">
+						<frame texture="/ui/frames/roundframe.tga" color=".3 .3 .3 1" borderthickness="0.6h" blockinput="false" />
+						<panel x="1.4h" y="-1.1h" height="2.2h" grow="true" color="0 0 0 1" noclick="1"> 
+							<label x="0.5h" fitx="true" textvalign="center" fitxpadding="0.5h" font="dyn_14" color="#ffaa00" content="referral_yourURL" noclick="true" />
+						</panel>						
+						<panel y="1.2h" grow="true" width="-1.6h" align="center" noclick="true" float="bottom">
+							<label fity="true" fitypadding="0.8h" wrap="true" font="dyn_12" color=".8 .8 .8 1" content="referral_URL_txt" noclick="true" />
+							<panel name="referral_link_box" height="2.8h" noclick="0" >
+								<frame texture="/ui/frames/rounded_bg_solid.tga" borderthickness="0.6h" color=".1 .1 .1 1" blockinput="false" noclick="1" />
+								<frame name="referral_link_bg" texture="/ui/frames/roundframe.tga" color=".3 .3 .3 1" borderthickness="0.6h" blockinput="false" noclick="1" />
+								<label name="referral_link_label" x="0.8h" height="100%" textvalign="center" font="dyn_12" color=".8 .8 .8 1" content="" noclick="true" />
+							</panel>
+							<panel height="0.8h"/>
+							<label fity="true" fitypadding="0.8h" wrap="true" font="dyn_10" color=".5 .5 .5 1" content="referral_URL_moreinfo" noclick="true" />							
+						</panel>					
+					</panel>
+					
+					<!-- Friends Status -->
+					<panel grow="true" width="100%" noclick="0" processonlyscroll="1" name="referral_friends_status"
+						onmousewheeldown="CallEvent('referral_scroller', 1);"
+						onmousewheelup="CallEvent('referral_scroller', 0);"						
+					>
+						<frame texture="/ui/frames/roundframe.tga" color=".3 .3 .3 1" borderthickness="0.6h" blockinput="false" noclick="1" />
+						<panel x="1.4h" y="-1.1h" height="2.2h" grow="true" color="0 0 0 1" noclick="1"> 
+							<label x="0.5h" fitx="true" textvalign="center" fitxpadding="0.5h" font="dyn_14" color="#ffaa00" content="referral_your_refs" noclick="true" />
+						</panel>						
+						<panel name="referral_has_referral" y="1.2h" grow="true" width="-1.6h" align="center" float="bottom" visible="0" noclick="1">
+							<panel width="100%" height="2.0h" float="right" noclick="1">
+								<label height="100%" width="28%" textvalign="center" textalign="center" font="dyn_11" color="1 1 1 1" content="main_label_username" noclick="1" />
+								<label height="100%" width="18%" textvalign="center" textalign="center" font="dyn_11" color="1 1 1 1" content="referral_lvl2" noclick="1" />
+								<label height="100%" width="18%" textvalign="center" textalign="center" font="dyn_11" color="1 1 1 1" content="referral_verified" noclick="1" />
+								<label height="100%" width="18%" textvalign="center" textalign="center" font="dyn_11" color="1 1 1 1" content="referral_coins" noclick="1" />
+								<label height="100%" width="18%" textvalign="center" textalign="center" font="dyn_11" color="1 1 1 1" content="referral_lvl3" noclick="1" />
+							</panel>
+							<panel height="0.4h" noclick="1"/>
+							
+							<!-- User Display - Needs Scroll -->
+							<panel height="11h" width="100%" float="bottom" noclick="1">
+								<instance name="referral_user" index="1" />
+								<instance name="referral_user" index="2" />
+								<instance name="referral_user" index="3" />
+								<instance name="referral_user" index="4" />
+								
+								<scrollbar noclick="0" x="2.9h" name="referral_scroller" visible="1"
+									align="right" width="2.0h"
+									scrollbarsize="1.8h"
+									handlewidth="1.8h"
+									handleheight="1.8h"							
+									texture="/ui/info/combobox.tga"
+									scrollbarplaceholder="true"
+									minvalue="1"
+									maxvalue="1"
+									onslide="##Echo(GetValue());## If(GetValue() gt 1, DoEvent());"
+									oneventlua="UIManager.GetActiveInterface():HoNMentorReferralF('PopulateRefList', self:GetValue())"
+									step="1"
+									value="1"
+									vertical="true"
+									slotwidth="0.6h" slotheight="1"
+									onevent1="SetValue(GetValue+1);"
+									onevent0="SetValue(GetValue-1);"
+								/>								
+								
+							</panel>							
+							
+							<panel height="0.8h"/>
+						</panel>	
+						<panel name="referral_has_no_referral" y="1.2h" grow="true" width="-1.6h" align="center" noclick="true" float="bottom" visible="0">
+							<panel width="100%" height="2.0h" float="right">
+								<label height="100%" width="100%" textvalign="center" textalign="center" font="dyn_11" color=".5 .5 .5 1" content="referral_norefs" />
+							</panel>
+						</panel>
+					</panel>
+
+				</panel>
+							
+				<!-- Prof Repulsor Countdown -->
+				<panel y="-0.3h" width="33.4h" align="right" noclick="true" >								
+					   
+					<panel x="5.4h" y="14.9h" width="22.6h" height="3.2h" name="promo_countdown_controller_0" luatable="1" color="1 0 0 0.0"
+						onshowlua=" self:DoEventN(0) " onhidelua=" self:DoEventN(1) " noclick="1" clip="1"
+					> 
+
+						<!-- Days -->
+						<instance name="tourn_countdown_unit" index="0" pos="1" x="0" y="0" nombre="0" />
+						<instance name="tourn_countdown_unit" index="0" pos="2" x="2.5h" y="0" nombre="0" />				
+						<!-- Hours -->
+						<instance name="tourn_countdown_unit" index="0" pos="3" x="5.8h" y="0" nombre="0" />
+						<instance name="tourn_countdown_unit" index="0" pos="4" x="8.3h" y="0" nombre="0" />		
+						<!-- Min -->
+						<instance name="tourn_countdown_unit" index="0" pos="5" x="11.7h" y="0" nombre="0" />
+						<instance name="tourn_countdown_unit" index="0" pos="6" x="14.2h" y="0" nombre="0" />				
+						<!-- Sec -->
+						<instance name="tourn_countdown_unit" index="0" pos="7" x="17.5h" y="0" nombre="0" />
+						<instance name="tourn_countdown_unit" index="0" pos="8" x="20.0h" y="0" nombre="0" />								
+							
+					</panel>										
+					
+					<!-- BG Image -->
+					<image width="59.4h" height="59.4h" texture="/ui/fe2/elements/mentor_avatar_bg.tga" noclick="true" />
+					
+					<!-- Model -->
+					<panel y="21.0h" width="-10.0h" height="19.5h" align="center">					
+						<modelpanel
+							name="promo_modelpanel2"
+							noclick="true"
+							model="/heroes/doctor_repulsor/alt/model_store.mdf"
+							anim="idle"
+							camerapos="-5 -520 -5"
+							cameraangles="0 0 0"
+							modelangles="0 0 165"
+							camerafov="25"
+							cameranear="1"
+							carmerafar="100"
+							depthclear="true"
+							depthcompress="true"
+							sunazimuth="180"
+							sunaltitude="50"
+							suncolor="1 1 1"
+							ambientcolor="0.8 0.8 0.8"
+						/>					
+					</panel>
+					
+					<label fity="true" y="8.1h" textalign="center" font="dyn_14" color="1 1 1 1" shadow="true" content="referral_mentor_alt" noclick="true" />
+					
+					<label fity="true" y="13.0h" textalign="center" font="dyn_12" color="1 0 0 1" shadow="true" content="mentor_time_left" noclick="true" />
+					<panel y="17.5h" width="100%" height="2.0h" >
+						<label x="17%" height="100%" textvalign="bottom" fitx="true" font="dyn_9" wrap="true" color="1 1 1 1" shadow="true" content="general_days" noclick="true" />
+						<label x="35%" height="100%" textvalign="bottom" fitx="true" font="dyn_9" wrap="true" color="1 1 1 1" shadow="true" content="general_hours" noclick="true" />
+						<label x="51%" height="100%" textvalign="bottom" fitx="true" font="dyn_9" wrap="true" color="1 1 1 1" shadow="true" content="general_min" noclick="true" />	
+						<label x="69%" height="100%" textvalign="bottom" fitx="true" font="dyn_9" wrap="true" color="1 1 1 1" shadow="true" content="general_sec" noclick="true" />	
+					</panel>
+					
+				</panel>
+			
+			</panel>
+
+			<panel name="referral_throbber" y="0.0h" noclick="1" visible="0" width="100%" height="100%" color="0 0 0 .7"  
+				onshow="Call('referral_throbber_retry',  'SetVisible(0); SleepWidget(0, \'\'); SleepWidget(5000, \'SetVisible(1);\');');"
+			>
+				<panel noclick="1" y="-17h" >
+					<label name="referral_throbber_label" width="-10.0h" y="4h" height="100%" align="center" textalign="center" textvalign="center" wreferral="1" font="dyn_10" color="white" shadow="1" content="mstore_processing_elipses" noclick="1" />
+					<animatedimage width="4.5h" height="4.5h" texture="/ui/elements/throb/throb.tga" noclick="true" loop="1" fps="30" onshow="StartAnim(1);" visible="1" align="center" valign="center" />	
+					<instance valign="center" y="7.6h" button_name="referral_throbber_retry"
+						name="button2" x="0"
+						width="12.0h" height="2.5h"
+						align="center"
+						label="main_stats_retry"
+						font="dyn_10"
+						onclick="Call('referral_throbber', 'FadeOut(150);');"
+						onclicklua="UIManager.GetInterface('main'):HoNMentorReferralF('RetryButtonClicked')"
+					/>					
+				</panel>
+			</panel>			
+			
+			<panel name="referral_error" y="0.0h" noclick="0" visible="0" width="100%" height="100%" color="0 0 0 .7" blockinput="1" >
+				<panel noclick="1" >
+					<label name="referral_error_label" width="-10.0h" y="4h" height="100%" align="center" textalign="center" textvalign="center" wreferral="1" font="dyn_10" color="white" shadow="1" content="" noclick="1" />								
+					<instance valign="center" y="7.6h" button_name="referral_error_ok"
+						name="button2" x="0"
+						width="12.0h" height="2.5h"
+						align="center"
+						label="general_ok"
+						font="dyn_10"
+						onclick="Call('referral_error', 'FadeOut(150);');"
+						onclicklua="UIManager.GetInterface('main'):HoNMentorReferralF('ErrorButtonClicked')"
+					/>					
+				</panel>
+			</panel>				
+			
+		</panel>
+		
+	</template>
+	
+	<!-- Mentoring Promotion Pop-Up -->
+	<panel name="mentor_promo_pop" y="2.5h" width="100%" height="50.0h" align="center" color="0 0 0 .8" visible="false" onload="BringToFront(); If(!VarExists('ui_mentor_promo'), DoEvent());"
+		watch="LoginStatus"
+		ontrigger="If(StringEquals(param0, 'success') and !cl_GarenaEnable, DoEvent(1));"
+		onevent="CreateBool('ui_mentor_promo', false);"
+		onevent1="If(!ui_mentor_promo, FadeIn(250)); SetSave('ui_mentor_promo', true);"
+	>
+		
+		<panel height="48.0h" width="108.0h" valign="center" align="center">
+			<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.6h" color="0 0 0 .8" noclick="true"/>
+			<frame texture="/ui/frames/roundframe.tga" borderthickness="0.6h" color=".3 .3 .3 1" noclick="true" />
+			
+			<panel x="1.5h" width="-34.4h" height="-3.0h" valign="center" float="bottom">
+				<label fity="true" fitypadding="0.3h" wrap="true" font="dyn_14" color="#ffaa00" shadow="true" content="mentor_promo_title1" noclick="true"/>
+				<label fity="true" fitypadding="1.0h" wrap="true" font="dyn_11" color=".8 .8 .8 1" shadow="true" content="mentor_promo_txt1" noclick="true"/>
+				
+				<label fity="true" fitypadding="0.3h" wrap="true" font="dyn_14" color="#3abde7" shadow="true" content="mentor_promo_ul_title" noclick="true"/>
+				
+				<panel grow="true" width="100%" float="bottom" padding="0.5h" >
+					<panel grow="true" sticky="true" stickytoinvis="false" width="-2.0h" align="right">
+						<image width="1.8h" height="1.8h" texture="/ui/elements/cc_config_circhl.tga" />
+						<label fity="true" wrap="true" width="-2.5h" align="right" font="dyn_12" color=".8 .8 .8 1" shadow="true" content="mentor_promo_li1" noclick="true" />
+					</panel>
+					<panel grow="true" sticky="true" stickytoinvis="false" width="-2.0h" align="right">
+						<image width="1.8h" height="1.8h" texture="/ui/elements/cc_config_circhl.tga" />
+						<label fity="true" wrap="true" width="-2.5h" align="right" font="dyn_12" color=".8 .8 .8 1" shadow="true" content="mentor_promo_li2" noclick="true" />
+					</panel>
+					<panel grow="true" sticky="true" stickytoinvis="false" width="-2.0h" align="right">
+						<image width="1.8h" height="1.8h" texture="/ui/elements/cc_config_circhl.tga" />
+						<label fity="true" wrap="true" width="-2.5h" align="right" font="dyn_12" color=".8 .8 .8 1" shadow="true" content="mentor_promo_li3" noclick="true" />
+					</panel>
+				</panel>				
+				<panel height="1.8h" noclick="true"/>				
+				<label fity="true" fitypadding="0.8h" wrap="true" font="dyn_11" color=".8 .8 .8 1" shadow="true" content="mentor_promo_txt2" noclick="true"/>
+				<label fity="true" fitypadding="1.0h" wrap="true" font="dyn_11" color=".8 .8 .8 1" shadow="true" content="mentor_promo_txt3" noclick="true"/>
+				<label fity="true" fitypadding="0.3h" wrap="true" font="dyn_14" color="#ffaa00" shadow="true" content="mentor_promo_prof_title" noclick="true"/>
+				<label fity="true" fitypadding="1.5h" wrap="true" font="dyn_11" color=".8 .8 .8 1" shadow="true" content="mentor_promo_prof_txt" noclick="true"/>				
+				<panel height="2.6h">
+					<instance
+						name="button2" button_name="unnamedButton215"
+						width="25.0h"
+						align="center"
+						font="dyn_12"
+						label="mentor_promo_refs_btn"
+						onclick="Call('mentor_promo_pop', 'FadeOut(250);'); Set('_mainmenu_currentpanel', 'referral'); CallEvent('MainMenuPanelSwitcher');"
+					/>
+				</panel>
+				<panel height="0.8h" noclick="true" />
+				
+				<panel y="0" grow="true" height="1.5h" align="center" onclick="Call('mentor_promo_pop', 'FadeOut(250);');" valign="bottom">
+					<label fitx="true" fitxpadding="0.2h" font="dyn_10" color=".5 .5 .5 1" shadow="true" content="mentor_promo_close_txt" noclick="true" />
+					<panel height="1" color=".5 .5 .5 1" valign="bottom" noclick="true" />
+				</panel>
+				
+			</panel>
+			
+		
+			<!-- Prof Repulsor Static Date Display -->
+			<panel y="1.4h" width="33.4h" align="right" noclick="true">
+				<!-- BG Image -->
+				<image width="59.4h" height="59.4h" texture="/ui/fe2/elements/mentor_avatar_bg.tga" noclick="true" />				
+				<image width="59.4h" height="59.4h" texture="/ui/fe2/elements/mentor_avatar_digitcover.tga" noclick="true" />
+				
+				<!-- Model -->
+				<panel y="21.0h" width="-10.0h" height="19.5h" align="center">					
+					<modelpanel
+						name="promo_modelpanel2"
+						noclick="true"
+						model="/heroes/doctor_repulsor/alt/model_store.mdf"
+						anim="idle"
+						camerapos="-5 -520 -5"
+						cameraangles="0 0 0"
+						modelangles="0 0 165"
+						camerafov="25"
+						cameranear="1"
+						carmerafar="100"
+						depthclear="true"
+						depthcompress="true"
+						sunazimuth="180"
+						sunaltitude="50"
+						suncolor="1 1 1"
+						ambientcolor="0.8 0.8 0.8"
+					/>					
+				</panel>					
+				<label fity="true" y="8.1h" textalign="center" font="dyn_14" color="1 1 1 1" shadow="true" content="referral_mentor_alt" noclick="true" />					
+				<label fity="true" x="6.0h" y="12.0h" textalign="left" font="dyn_12" color="#efce5c" shadow="true" content="mentor_promo_ends" noclick="true" />
+				<instance
+					name="button2" button_name="unnamedButton216"
+					y="17.5h"
+					width="12.0h" height="2.2h"
+					align="center"
+					label="mentor_promo_details_btn"
+					onclick="Call('mentor_promo_pop', 'FadeOut(250);'); Set('_mainmenu_currentpanel', 'referral'); CallEvent('MainMenuPanelSwitcher');"
+				/>
+			</panel>
+
+			<!-- Close -->
+			<button
+				x="-0.4h" y="0.4h"		
+				width="1.8h" height="1.8h"
+				align="right"
+				color="invisible"
+				onclick="PlaySound('/shared/sounds/ui/ccpanel/button_close_02.wav'); Call('mentor_promo_pop', 'FadeOut(250);');"
+				onmouseover="PlaySound('/shared/sounds/ui/ccpanel/button_over_01.wav');"
+			>
+				<widgetstate statename="up">
+					<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.5h" color="#910000" blockinput="false" noclick="true"/>
+					<frame texture="/ui/frames/roundframe.tga" color="0 0 0 1" borderthickness="0.5h" blockinput="false" noclick="true"/>
+					<image width="1.4h" height="1.4h" align="center" valign="center" color=".75 .75 .75 1" texture="/ui/elements/closex.tga" noclick="true" />
+				</widgetstate>
+				<widgetstate statename="over">
+					<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.5h" color="#dc0000" blockinput="false" noclick="true"/>
+					<frame texture="/ui/frames/roundframe.tga" color="0 0 0 1" borderthickness="0.5h" blockinput="false" noclick="true"/>
+					<image width="1.4h" height="1.4h" align="center" valign="center" color="1 1 1 1" texture="/ui/elements/closex.tga" noclick="true" />			
+				</widgetstate>
+				<widgetstate statename="down" x="1" y="1">
+					<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.5h" color="#910000" blockinput="false" noclick="true"/>
+					<frame texture="/ui/frames/roundframe.tga" color="0 0 0 1" borderthickness="0.5h" blockinput="false" noclick="true"/>
+					<image width="1.4h" height="1.4h" align="center" valign="center" color="1 1 1 1" texture="/ui/elements/closex.tga" noclick="true" />
+				</widgetstate>
+			</button>
+			
+		</panel>
+		
+	</panel>	
+	
+</package>

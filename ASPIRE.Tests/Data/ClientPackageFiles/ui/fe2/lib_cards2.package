@@ -1,0 +1,340 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+
+	<lua file="/ui/scripts/lib_cards.lua"/>
+
+	<panel name="main_card_parent" noclick="0" oneventlua="lib_Card:DisplayCardception()" y="0" visible="0" blockinput="1"
+		onshow="Call('main_card_background', 'SetNoClick(1)'); Call('lib_card_continue_button', 'SetVisible(0)'); SleepWidget(1500, ' Call(\'main_card_background\', \'SetNoClick(0)\');  Call(\'lib_card_continue_button\', \'SetVisible(1)\'); ');"
+	>
+		<panel name="main_card_background" noclick="0" color="0 0 0 0.6" visible="1"
+			blockinput="1"
+			onmousewheeldownlua="lib_Card:NextViewedCard()"
+			onmousewheeluplua="lib_Card:PrevViewedCard()"
+			onclicklua="--lib_Card:HideCardception()"
+			onrightclicklua="--lib_Card:HideCardception()"
+		/>
+
+		<panel name="main_card_spawn_target" y="-16h" visible="1" noclick="1">
+			<panel valign="center" width="20.0h" height="17.8h" x="18h" y="0" noclick="0" color="1 0 0 0"
+				onclicklua="lib_Card:PrevViewedCard()"
+				onrightclicklua="lib_Card:NextViewedCard()"
+				onmousewheeldownlua="lib_Card:NextViewedCard()"
+				onmousewheeluplua="lib_Card:PrevViewedCard()"
+				onmouseover="GroupCall('main_card_left_arrow', 'DoEvent(0)'); PlaySound('/shared/sounds/ui/button_over_01.wav');"
+				onmouseout="GroupCall('main_card_left_arrow', 'DoEvent(1)');"
+			/>
+
+			<panel valign="center" align="right" width="20.0h" height="17.8h" x="-18h" y="0" noclick="0" color="0 1 0 0"
+				onclicklua="lib_Card:NextViewedCard()"
+				onrightclicklua="lib_Card:PrevViewedCard()"
+				onmousewheeldownlua="lib_Card:NextViewedCard()"
+				onmousewheeluplua="lib_Card:PrevViewedCard()"
+				onmouseover="GroupCall('main_card_right_arrow', 'DoEvent(0)'); PlaySound('/shared/sounds/ui/button_over_01.wav');"
+				onmouseout="GroupCall('main_card_right_arrow', 'DoEvent(1)');"
+			/>
+
+			<panel name="main_card_next_btn" align="right" valign="center" width="5h" height="10h" x="-13%" y="0" color="1 1 0 0" noclick="0"
+				onclicklua="lib_Card:NextViewedCard()"
+				onrightclicklua="lib_Card:PrevViewedCard()"
+				onmousewheeldownlua="lib_Card:NextViewedCard()"
+				onmousewheeluplua="lib_Card:PrevViewedCard()"
+				onmouseover="GroupCall('main_card_right_arrow', 'DoEvent(0)'); PlaySound('/shared/sounds/ui/button_over_01.wav');"
+				onmouseout="GroupCall('main_card_right_arrow', 'DoEvent(1)');"
+			>
+				<panel group="main_card_right_arrow" width="10h" height="5h" align="center" valign="center" rotation="270" texture="/ui/fe2/elements/scroll_arrow.tga" color="0.6 0.6 0.6 1" noclick="1"
+					onevent0="SetColor('1 1 1 1');"
+					onevent1="SetColor('0.6 0.6 0.6 1');"
+				/>
+			</panel>
+
+			<panel name="main_card_prev_btn" valign="center" width="5h" height="10h" x="13%" y="0" noclick="0"
+				onclicklua="lib_Card:PrevViewedCard()"
+				onrightclicklua="lib_Card:NextViewedCard()"
+				onmousewheeldownlua="lib_Card:NextViewedCard()"
+				onmousewheeluplua="lib_Card:PrevViewedCard()"
+				onmouseover="GroupCall('main_card_left_arrow', 'DoEvent(0)'); PlaySound('/shared/sounds/ui/button_over_01.wav');"
+				onmouseout="GroupCall('main_card_left_arrow', 'DoEvent(1)');"
+			>
+				<panel group="main_card_left_arrow" width="10h" height="5h" align="center" valign="center" rotation="90" texture="/ui/fe2/elements/scroll_arrow.tga" color="0.6 0.6 0.6 1" noclick="1"
+					onevent0="SetColor('1 1 1 1');"
+					onevent1="SetColor('0.6 0.6 0.6 1');"
+				/>
+			</panel>
+
+			<panel name="lib_card_continue_button" align="center" valign="center" width="20h" height="3h" x="0" y="15h" noclick="0" color="0 1 0 0" visible="0"
+				onclicklua="lib_Card:HideCardception()"
+				onrightclicklua="lib_Card:HideCardception()"
+				onmousewheeldownlua="lib_Card:NextViewedCard()"
+				onmousewheeluplua="lib_Card:PrevViewedCard()"
+			>
+				<instance name="store2Button" texture="button5" align="center" valign="center" width="160i" height="37i" label="general_continue"
+					onclicklua="lib_Card:HideCardception()"
+					onrightclicklua="lib_Card:HideCardception()"
+				/>
+			</panel>
+		</panel>
+	</panel>
+
+	<template name="generic_card_template" >
+		<panel name="generic_card_parent_{index}" group="main_card_widgets" valign="{valign=center}" align="{valign=center}" width="{width=60h}" height="{height=40h}" x="{x=0}" y="{y=0}" noclick="1" passivechildren="1" oninstantiatelua="lib_Card:RegisterCard(self)"
+		>
+			<frame name="generic_card_parent_{index}_bg" group="main_card_widgets" texture="/ui/frames/rounded_bg_solid.tga" borderthickness="2.1h" color="{color=1 1 1 1}" blockinput="false" noclick="true"/>
+			<frame texture="/ui/frames/roundframe.tga" group="main_card_widgets" color="0 1 0 1" borderthickness="2.1h" blockinput="false" noclick="true"/>
+			<label textalign="center" height="100%" group="main_card_widgets" textvalign="center" font="dyn_14" color="1 1 1 1" shadow="true" content="{header}" noclick="true" />
+			<image name="generic_card_parent_{index}_icon" group="main_card_widgets" texture="{icon}" noclick="0" height="20%" width="20@" x="2.1h" y="2.1h"
+				onmouseover="
+					If(!StringEquals(GetTexture(), '/ui/fe2/store/icons/account_icons/default.tga'), Split(
+							Trigger(
+								'StoreImagePreviewInit',
+								GetWidth(),
+								GetHeight(),
+								GetAbsoluteX(),
+								GetAbsoluteY(),
+								false,
+								GetTexture()
+							),
+							Trigger('StoreImagePreviewVis', true, '250%')
+						)
+					);
+				"
+				onmouseout="DoEvent(1);"
+				onevent1="Trigger('StoreImagePreviewVis', false, '100%');"
+			/>
+		</panel>
+	</template>
+
+	<template name="ms_rewards_reward_page_earning" >
+		<panel x="{x=0}" y="{y=0}" width="{width=100%}" height="20%" noclick="1">
+			<label x="2.0h" y="0.5h" width="-6h" font="dyn_16" style="rewards_page_header_earning" content="{header}" noclick="1"/>
+			<label x="2.2h" y="3.0h" width="-6.2h" font="dyn_10" style="rewards_page_subheader_earning" content="{subheader}" noclick="1"/>
+			<label x="-6.2h" y="1.4h" width="18%" font="dyn_8" align="right" style="rewards_page_subheader_earning" content="{startdate}" noclick="1"/>
+		</panel>
+	</template>
+
+	<template name="ms_rewards_reward_page_earned" >
+		<panel x="{x=0}" y="{y=0}" width="{width=100%}" height="20%" noclick="1">
+			<label x="2.0h" y="0.5h" width="-6h" font="dyn_16" style="microStorePaperTitle" content="{header}" noclick="1"/>
+			<label x="2.2h" y="3.0h" width="-6.2h" font="dyn_10" style="microStorePaperTitle" content="{subheader}" noclick="1"/>
+			<label x="-6.2h" y="1.4h" width="18%" font="dyn_8" align="right" style="microStorePaperTitle" content="{startdate}" noclick="1"/>
+			<image x="0.65h" y="-0.2h" width="50@" height="50%" align="right" valign="center" texture="/ui/fe2/elements/aftermatch/rewards_check.png" visible="{checkmark=false}" noclick="1"/>
+		</panel>
+	</template>
+
+	<template name="ms_rewards_reward_page_normal" >
+		<panel x="{x=0}" y="{y=0}" width="{width=100%}" height="20%" noclick="1">
+			<label x="2.0h" y="0.5h" width="-6h" font="dyn_16" style="rewards_page_header_normal" content="{header}" noclick="1"/>
+			<label x="2.2h" y="3.0h" width="-6.2h" font="dyn_10" style="rewards_page_subheader_normal" content="{subheader}" noclick="1"/>
+			<label x="-6.2h" y="1.4h" width="18%" font="dyn_8" align="right" style="rewards_page_subheader_normal" content="{startdate}" noclick="1"/>
+			<image x="0.65h" y="-0.2h" width="50@" height="50%" align="right" valign="center" texture="/ui/fe2/elements/aftermatch/rewards_check.png" visible="{checkmark=false}" noclick="1"/>
+		</panel>
+	</template>
+
+	<template name="ms_rewards_reward_page_card_template" >
+		<panel name="ms_rewards_reward_page_card_template_parent_{index}"
+			group1="main_card_widgets" valign="{valign=center}" align="{align=center}" width="77.6h" height="24h"
+			noclick="1" passivechildren="1" group="ms_reward_temporary_widgets"
+			oninstantiatelua="lib_Card:RegisterCard(self)"
+		>
+			<panel y="20%" height="75.7396%" noclick="1">
+				<instance name="store2_frame"/>
+			</panel>
+			<image height="6.25@" texture="/ui/fe2/elements/aftermatch/rewards_header_{type}.png" noclick="1"/>
+			<instance name="ms_rewards_reward_page_{type}" width="-2.8%" x="0" y="0" header="{header}" subheader="{subheader}" startdate="{startdate}" checkmark="{checkmark}"/>
+			<panel x="7.4%" y="35.0%" width="40@" height="40%" noclick="1" >
+				<image texture="{icon=/heroes/forsaken_archer/alt2/icon.tga}" width="-2" height="-2" valign="center" align="center" noclick="1"/>
+			</panel>
+			<panel x="20%" y="30.0%" width="75%" height="43.786%" noclick="1">
+				<label x="0.2h" y="14%" font="dyn_12" style="microStorePaperText" content="{rewardinfo1}" noclick="1"/>
+				<label x="0.2h" y="36.6%" font="dyn_16" style="microStorePaperText" content="{rewardinfo2}" wrap="1" noclick="1"/>
+				<label x="0.2h" y="75.6%" font="dyn_10" style="microStorePaperText" content="{rewardinfo3}" wrap="1" noclick="1"/>
+			</panel>
+			<panel name="ms_rewards_reward_page_card_template_parent_{index}_bg" color="{color}" width="-1%" height="-1%" noclick="1"/>
+		</panel>
+	</template>
+
+	<template name="altavatar_card_template_1" >
+		<panel name="altavatar_card_template_1_parent_{index}" group="game_lobby_card_widgets"
+			width="30h" height="44.4h"
+			valign="{valign=center}" align="{align=center}" noclick="1"
+			oninstantiatelua="Game_Lobby:RegisterCard(self)"
+		>
+			<panel width="20h" height="44.4h"
+				valign="{valign=center}" align="{align=center}" noclick="0"
+				onmouseover="Call('altavatar_card_template_1_model_{index}', 'DoEvent(2);');"
+				onmouseout="Call('altavatar_card_template_1_model_{index}', 'DoEvent(3);');"
+				onrightclicklua="Game_Lobby:HideCardception()"
+				onclicklua="Game_Lobby:SetCurrentCard({index})"
+				ondoubleclicklua="Game_Lobby:QuickSelectAvatar({index})"
+				onmousewheeldownlua="Game_Lobby:NextViewedCard()"
+				onmousewheeluplua="Game_Lobby:PrevViewedCard()"
+			/>
+
+			<modelpanel name="altavatar_card_template_1_model_{index}" resourcecontext="libcards"
+				valign="center" height="200%"
+				align="center" width="320%"
+				scenebuffer="true"
+				noclick="1"
+				model="/shared/models/invis.mdf"
+				anim="idle_eap"
+				cameranear="100.0"
+				camerafar="10000.0"
+				depthclear="true"
+				depthcompress="false"
+				lookat="false"
+				cameradistance="40"
+				camerapos="0 3140 59"
+				cameraangles="0 0 180"
+				camerafov="7"
+				modelpos="0 0 0"
+				modelangles="-15.0 0 0.0"
+				modelscale="1.0"
+				visible="1"
+				cull="false"
+				onshow="
+					SetVisible(1);
+
+					SetTeamColor('1 0 0');
+					SetModel(GetHeroPreviewModelPathFromProduct('{heroEntity}{altCode}'));
+
+					SetModelPos(GetHeroStorePosFromProduct('{heroEntity}{altCode}'));
+					SetModelAngles(GetHeroStoreAnglesFromProduct('{heroEntity}{altCode}'));
+					SetModelScale(GetHeroStoreScaleFromProduct('{heroEntity}{altCode}'));
+
+					If(({ultimateAvatar=false}) and {new=false}, SetEffect('/shared/effects/glow_gold_high.effect'), If({new=false}, SetEffect('/shared/effects/glow_blue.effect'), SetEffect('')));
+
+					If({usestorefx=true}, SetEffectIndexed(GetHeroStorePassiveEffectPathFromProduct('{heroEntity}{altCode}'), 0), SetEffectIndexed(GetHeroPassiveEffectPathFromProduct('{heroEntity}{altCode}'), 0));
+					DoEvent(1);
+				"
+				sunazimuth="120"
+				sunaltitude="50"
+				suncolor="0.0 0.0 0.0"
+				ambientcolor="0.65 0.65 0.65"
+				posteffects="true"
+				posteffect=""
+				outline="false"
+				postoutline="/core/post/outline.posteffect"
+				outlinecolor=".25 .25 .25 1"
+				onevent1="
+					## Highlight ##
+					SetSunColor('1 1 1');
+					SetAmbientColor('0.65 0.65 0.65');
+					SetPostEffects(true);
+					SetPostEffect('');
+					SetPostEffectOutline('/core/post/outline.posteffect');
+					If(WidgetExists('altavatar_card_template_1_overlay_{index}'), Call('altavatar_card_template_1_overlay_{index}', 'SetVisible(0)'));
+				"
+				onevent0="
+					## Darken ##
+					SetSunColor('0.5 0.5 0.5');
+					SetAmbientColor('0.35 0.35 0.35');
+					SetPostEffects(false);
+					SetPostEffect('');
+					SetPostEffectOutline('/core/post/outline.posteffect');
+					If(WidgetExists('altavatar_card_template_1_overlay_{index}'), Call('altavatar_card_template_1_overlay_{index}', 'SetVisible(1)'));
+				"
+				onevent2="
+					## Hover ##
+					SetEffect('/shared/effects/glow.effect');
+				"
+				onevent3="
+					## Un-Hover ##
+					If(({ultimateAvatar=false}) and {new=false}, SetEffect('/shared/effects/glow_gold_high.effect'), If({new=false}, SetEffect('/shared/effects/glow_blue.effect'), SetEffect('')));
+				"
+			/>
+			<panel name="altavatar_card_template_1_overlay_{index}" noclick="1" passivechildren="1" >
+				<panel align="center" valign="bottom" y="20%" height="40@" width="80%" blockinput="false" noclick="true">
+					<image texture="$invis" noclick="1" color="#29c0ff" oninstantiate="If({new=false}, SetTexture('/ui/fe2/elements/new_banner.tga')); If(({ultimateAvatar=false}) and {new=false}, SetColor('red'));"/>
+					<label y="22.5%" textalign="center" font="dyn_12" color="1 1 1 1" outline="true" content="general_new" blockinput="false" noclick="true" visible="false" oninstantiate="If({new=false}, SetVisible(1)); If(({ultimateAvatar=false}) and {new=false}, SetText(Translate('general_ultimate')));"/>
+				</panel>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="altavatar_card_template_2" >
+		<panel name="altavatar_card_template_2_parent_{index}" group="game_lobby_card_widgets"
+			width="30h" height="44.4h"
+			valign="{valign=center}" align="{align=center}" noclick="1"
+			oninstantiatelua="Game_Lobby:RegisterCard(self)"
+		>
+			<panel width="20h" height="44.4h"
+				valign="{valign=center}" align="{align=center}" noclick="0"
+				onmouseover="Call('altavatar_card_template_2_model_{index}', 'DoEvent(2);');"
+				onmouseout="Call('altavatar_card_template_2_model_{index}', 'DoEvent(3);');"
+				onrightclicklua="Game_Lobby:HideCardception()"
+				onclicklua="--Game_Lobby:SetCurrentCard({index})"
+				ondoubleclicklua="--Game_Lobby:QuickSelectAvatar({index})"
+				onmousewheeldownlua="--Game_Lobby:NextViewedCard()"
+				onmousewheeluplua="--Game_Lobby:PrevViewedCard()"
+			/>
+
+			<modelpanel name="altavatar_card_template_2_model_{index}" resourcecontext="libcards"
+				valign="center" height="200%"
+				align="center" width="320%"
+				scenebuffer="true"
+				noclick="1"
+				model="/shared/models/invis.mdf"
+				anim="idle_eap"
+				cameranear="100.0"
+				camerafar="10000.0"
+				depthclear="true"
+				depthcompress="false"
+				lookat="false"
+				cameradistance="40"
+				camerapos="0 3140 59"
+				cameraangles="0 0 180"
+				camerafov="7"
+				modelpos="0 0 0"
+				modelangles="-15.0 0 0.0"
+				modelscale="1.0"
+				visible="1"
+				cull="false"
+				onshow="
+					Echo('Instantiated product |{heroEntity}{altCode}|');
+					SetVisible(1);
+
+					SetTeamColor('1 0 0');
+					SetModel(GetHeroPreviewModelPathFromProduct('{heroEntity}{altCode}'));
+
+					SetModelPos(GetHeroStorePosFromProduct('{heroEntity}{altCode}'));
+					SetModelAngles(GetHeroStoreAnglesFromProduct('{heroEntity}{altCode}'));
+					SetModelScale(GetHeroStoreScaleFromProduct('{heroEntity}{altCode}'));
+
+					If({usestorefx=true}, SetEffectIndexed(GetHeroStorePassiveEffectPathFromProduct('{heroEntity}{altCode}'), 0), SetEffectIndexed(GetHeroPassiveEffectPathFromProduct('{heroEntity}{altCode}'), 0));
+					DoEvent(4);
+				"
+				sunazimuth="120"
+				sunaltitude="50"
+				suncolor="0.0 0.0 0.0"
+				ambientcolor="0.65 0.65 0.65"
+				posteffects="true"
+				posteffect=""
+				outline="false"
+				postoutline="/core/post/outline.posteffect"
+				outlinecolor=".25 .25 .25 1"
+				onevent4="
+					## Highlight ##
+					SetSunColor('1 1 1');
+					SetAmbientColor('0.65 0.65 0.65');
+					SetPostEffects(true);
+					SetPostEffect('');
+					SetPostEffectOutline('/core/post/outline.posteffect');
+				"
+				onevent5="
+					## Darken ##
+					SetSunColor('0.5 0.5 0.5');
+					SetAmbientColor('0.35 0.35 0.35');
+					SetPostEffects(false);
+					SetPostEffect('');
+					SetPostEffectOutline('/core/post/outline.posteffect');
+				"
+				onevent2="
+					## Hover ##
+				"
+				onevent3="
+					## Un-Hover ##
+				"
+			/>
+		</panel>
+	</template>
+
+</package>

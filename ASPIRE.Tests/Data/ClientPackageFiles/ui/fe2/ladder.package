@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+
+	<template name="ladder">
+
+		<panel y="-110%" align="center" width="96h" name="ladder" visible="{visible=0}" noclick="true" > 
+		
+			<panel x="0" y="-100%" height="203.6%" width="-15@"  align="center" texture="mainmenu/upper_frame_center.tga"/>
+			<panel x="20h" y="-100%" height="203.6%" width="50@"  align="right" texture="mainmenu/upper_frame_right.tga"/>
+			<panel x="-20h" y="-100%" height="203.6%" width="50@"  align="left" texture="mainmenu/upper_frame_left.tga"/>
+			
+			<!-- onclick="Set('_mainmenu_currentpanel', 'ladder'); CallEvent('MainMenuPanelSwitcher');" -->
+
+			
+			
+		</panel>
+	
+	</template>
+	
+</package>

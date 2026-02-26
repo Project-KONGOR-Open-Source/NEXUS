@@ -1,0 +1,3590 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+
+	<style name="playerStatsDetailedStatHeader" width="52%" height="100%" align="left" textalign="right" textvalign="center" font="dyn_11"/>
+	<style name="playerStatsDetailedStatDivider" x="5%" width="100%" height="100%" textalign="center" textvalign="center" font="dyn_11"/>
+	<style name="playerStatsDetailedStatValue" width="42%" height="100%" align="right" textalign="left" textvalign="center" font="dyn_11" color="white" shadow="1" noclick="1" content="-"/>
+
+	<lua file="/ui/scripts/player_stats.lua" />
+
+	<trigger name="PlayerStatsResultRankedMList"/>
+	<trigger name="PlayerStatsResultCasualMList"/>
+	<trigger name="PlayerStatsResultMList"/>
+	<trigger name="PlayerStatsResultEventMList"/>
+
+	<trigger name="PlayerStatsStatus"/>
+	<trigger name="PlayerStatsResult"/>
+
+	<trigger name="openstatstrigger" />
+
+
+	<trigger name="PlayerStatsResultQuests"/>
+
+	<trigger name="PlayerStatsResultRankedQuests"/>
+	<trigger name="PlayerStatsResultCasualQuests"/>
+	<trigger name="PlayerStatsResultEventQuests"/>'
+
+	<trigger name="ReceivedMatchInfos" />
+
+	<!-- show_stats -->
+	<form
+		name="PlayerStats"
+		host="!masterserver"
+		method="post"
+		target="/client_requester.php"
+		statustrigger="PlayerStatsStatus"
+		resulttrigger="PlayerStatsResult"
+		resultparam0="nickname"
+		resultparam1="name"
+		resultparam2="rank"
+		resultparam3="level"
+		resultparam4="account_id"
+		resultparam5="acc_games_played"
+		resultparam6="acc_wins"
+		resultparam7="acc_losses"
+		resultparam8="acc_concedes"
+		resultparam9="acc_concedevotes"
+		resultparam10="acc_buybacks"
+		resultparam11="acc_discos"
+		resultparam12="acc_kicked"
+		resultparam13="acc_pub_skill"
+		resultparam14="acc_pub_count"
+		resultparam15="acc_amm_solo_rating"
+		resultparam16="acc_amm_solo_count"
+		resultparam17="acc_amm_team_rating"
+		resultparam18="acc_amm_team_count"
+		resultparam19="acc_avg_score"
+		resultparam20="acc_herokills"
+		resultparam21="acc_herodmg"
+		resultparam22="acc_heroexp"
+		resultparam23="acc_herokillsgold"
+		resultparam24="acc_heroassists"
+		resultparam25="acc_deaths"
+		resultparam26="acc_goldlost2death"
+		resultparam27="acc_secs_dead"
+		resultparam28="acc_teamcreepkills"
+		resultparam29="acc_teamcreepdmg"
+		resultparam30="acc_teamcreepexp"
+		resultparam31="acc_teamcreepgold"
+		resultparam32="acc_neutralcreepkills"
+		resultparam33="acc_neutralcreepdmg"
+		resultparam34="acc_neutralcreepexp"
+		resultparam35="acc_neutralcreepgold"
+		resultparam36="acc_bdmg"
+		resultparam37="acc_bdmgexp"
+		resultparam38="acc_razed"
+		resultparam39="acc_bgold"
+		resultparam40="acc_denies"
+		resultparam41="acc_exp_denied"
+		resultparam42="acc_gold"
+		resultparam43="acc_gold_spend"
+		resultparam44="acc_exp"
+		resultparam45="acc_actions"
+		resultparam46="acc_secs"
+		resultparam47="acc_consumables"
+		resultparam48="acc_wards"
+		resultparam49="acc_em_played"
+		resultparam50="maxXP"
+		resultparam51="last_activity"
+		resultparam52="matchIds"
+		resultparam53="matchDates"
+		resultparam54="favHero1"
+		resultparam55="favHero2"
+		resultparam56="favHero3"
+		resultparam57="favHero4"
+		resultparam58="favHero5"
+		resultparam59="favHero1Time"
+		resultparam60="favHero2Time"
+		resultparam61="favHero3Time"
+		resultparam62="favHero4Time"
+		resultparam63="favHero5Time"
+		resultparam64="xp2nextLevel"
+		resultparam65="xpPercent"
+		resultparam66="percentEM"
+		resultparam67="k_d_a"
+		resultparam68="avgGameLength"
+		resultparam69="avgXP_min"
+		resultparam70="avgDenies"
+		resultparam71="avgCreepKills"
+		resultparam72="avgNeutralKills"
+		resultparam73="avgActions_min"
+		resultparam74="avgWardsUsed"
+		resultparam75="create_date"
+		resultparam76="favHero1name"
+		resultparam77="favHero2name"
+		resultparam78="favHero3name"
+		resultparam79="favHero4name"
+		resultparam80="favHero5name"
+		resultparam81="favHero1id"
+		resultparam82="favHero2id"
+		resultparam83="favHero3id"
+		resultparam84="favHero4id"
+		resultparam85="favHero5id"
+		resultparam86="error"
+		resultparam87="acc_level"
+		resultparam88="selected_upgrades"
+		resultparam89="cs_games_played"
+		resultparam90="rnk_games_played"
+		resultparam91="cs_discos"
+		resultparam92="rnk_discos"
+		resultparam93="acc_bloodlust"
+		resultparam94="acc_doublekill"
+		resultparam95="acc_triplekill"
+		resultparam96="acc_quadkill"
+		resultparam97="acc_annihilation"
+		resultparam98="acc_ks3"
+		resultparam99="acc_ks4"
+		resultparam100="acc_ks5"
+		resultparam101="acc_ks6"
+		resultparam102="acc_ks7"
+		resultparam103="acc_ks8"
+		resultparam104="acc_ks9"
+		resultparam105="acc_ks10"
+		resultparam106="acc_ks15"
+		resultparam107="acc_smackdown"
+		resultparam108="acc_humiliation"
+		resultparam109="acc_nemesis"
+		resultparam110="acc_retribution"
+		resultparam111="total_level_exp"
+		resultparam112="acc_time_earning_exp"
+		resultparam113="level"
+		resultparam114="level_exp"
+		resultparam115="discos"
+		resultparam116="possible_discos"
+		resultparam117="games_played"
+		resultparam118="account_type"
+		resultparam119="standing"
+		resultparam120="level_percent"
+		resultparam121="max_exp"
+		resultparam122="min_exp"
+		resultparam123="mid_games_played"
+		resultparam124="mid_discos"
+		resultparam125="total_games_played"
+		resultparam126="total_discos"
+		resultparam127="event_id"
+		resultparam128="events"
+		resultparam129="uncs_discos"
+		resultparam130="unrnk_discos"
+		resultparam131="uncs_games_played"
+		resultparam132="unrnk_games_played"
+		resultparam133="rift_games_played"
+		resultparam134="rift_discos"
+		resultparam135="current_level"
+		resultparam136="highest_level_current"
+		resultparam137="season_id"
+		resultparam138="current_ranking"
+		resultparam139="curr_season_cam_games_played"
+		resultparam140="curr_season_cam_cs_games_played"
+		resultparam141="curr_season_cam_discos"
+		resultparam142="curr_season_cam_cs_discos"
+		resultparam143="prev_seasons_cam_games_played"
+		resultparam144="prev_seasons_cam_cs_games_played"
+		resultparam145="prev_seasons_cam_discos"
+		resultparam146="prev_seasons_cam_cs_discos"
+	/>
+
+	<trigger name="PlayerStatsStatusRanked"/>
+	<trigger name="PlayerStatsResultRanked"/>
+
+	<form
+		name="PlayerStatsRanked"
+		host="!masterserver"
+		method="post"
+		target="/client_requester.php"
+		statustrigger="PlayerStatsStatusRanked"
+		resulttrigger="PlayerStatsResultRanked"
+		resultparam0="nickname"
+		resultparam1="name"
+		resultparam2="rank"
+		resultparam3="rnk_level"
+		resultparam4="account_id"
+		resultparam5="rnk_games_played"
+		resultparam6="rnk_wins"
+		resultparam7="rnk_losses"
+		resultparam8="rnk_concedes"
+		resultparam9="rnk_concedevotes"
+		resultparam10="rnk_buybacks"
+		resultparam11="rnk_discos"
+		resultparam12="rnk_kicked"
+		resultparam13="smr"
+		resultparam14="rnk_pub_count"
+		resultparam15="rnk_amm_solo_rating"
+		resultparam16="rnk_amm_solo_count"
+		resultparam17="rnk_amm_team_rating"
+		resultparam18="rnk_amm_team_count"
+		resultparam19="rnk_avg_score"
+		resultparam20="rnk_herokills"
+		resultparam21="rnk_herodmg"
+		resultparam22="rnk_heroexp"
+		resultparam23="rnk_herokillsgold"
+		resultparam24="rnk_heroassists"
+		resultparam25="rnk_deaths"
+		resultparam26="rnk_goldlost2death"
+		resultparam27="rnk_secs_dead"
+		resultparam28="rnk_teamcreepkills"
+		resultparam29="rnk_teamcreepdmg"
+		resultparam30="rnk_teamcreepexp"
+		resultparam31="rnk_teamcreepgold"
+		resultparam32="rnk_neutralcreepkills"
+		resultparam33="rnk_neutralcreepdmg"
+		resultparam34="rnk_neutralcreepexp"
+		resultparam35="rnk_neutralcreepgold"
+		resultparam36="rnk_bdmg"
+		resultparam37="rnk_bdmgexp"
+		resultparam38="rnk_razed"
+		resultparam39="rnk_bgold"
+		resultparam40="rnk_denies"
+		resultparam41="rnk_exp_denied"
+		resultparam42="rnk_gold"
+		resultparam43="rnk_gold_spend"
+		resultparam44="rnk_exp"
+		resultparam45="rnk_actions"
+		resultparam46="rnk_secs"
+		resultparam47="rnk_consumables"
+		resultparam48="rnk_wards"
+		resultparam49="rnk_em_played"
+		resultparam50="maxXP"
+		resultparam51="last_activity"
+		resultparam52="matchIds"
+		resultparam53="matchDates"
+		resultparam54="favHero1"
+		resultparam55="favHero2"
+		resultparam56="favHero3"
+		resultparam57="favHero4"
+		resultparam58="favHero5"
+		resultparam59="favHero1Time"
+		resultparam60="favHero2Time"
+		resultparam61="favHero3Time"
+		resultparam62="favHero4Time"
+		resultparam63="favHero5Time"
+		resultparam64="xp2nextLevel"
+		resultparam65="xpPercent"
+		resultparam66="percentEM"
+		resultparam67="k_d_a"
+		resultparam68="avgGameLength"
+		resultparam69="avgXP_min"
+		resultparam70="avgDenies"
+		resultparam71="avgCreepKills"
+		resultparam72="avgNeutralKills"
+		resultparam73="avgActions_min"
+		resultparam74="avgWardsUsed"
+		resultparam75="create_date"
+		resultparam76="favHero1name"
+		resultparam77="favHero2name"
+		resultparam78="favHero3name"
+		resultparam79="favHero4name"
+		resultparam80="favHero5name"
+		resultparam81="favHero1id"
+		resultparam82="favHero2id"
+		resultparam83="favHero3id"
+		resultparam84="favHero4id"
+		resultparam85="favHero5id"
+		resultparam86="error"
+		resultparam87="rnk_level"
+		resultparam88="selected_upgrades"
+		resultparam89="acc_games_played"
+		resultparam90="cs_games_played"
+		resultparam91="cs_discos"
+		resultparam92="acc_discos"
+		resultparam93="rnk_bloodlust"
+		resultparam94="rnk_doublekill"
+		resultparam95="rnk_triplekill"
+		resultparam96="rnk_quadkill"
+		resultparam97="rnk_annihilation"
+		resultparam98="rnk_ks3"
+		resultparam99="rnk_ks4"
+		resultparam100="rnk_ks5"
+		resultparam101="rnk_ks6"
+		resultparam102="rnk_ks7"
+		resultparam103="rnk_ks8"
+		resultparam104="rnk_ks9"
+		resultparam105="rnk_ks10"
+		resultparam106="rnk_ks15"
+		resultparam107="rnk_smackdown"
+		resultparam108="rnk_humiliation"
+		resultparam109="rnk_nemesis"
+		resultparam110="rnk_retribution"
+		resultparam111="total_level_exp"
+		resultparam112="rnk_time_earning_exp"
+		resultparam113="level"
+		resultparam114="level_exp"
+		resultparam115="discos"
+		resultparam116="possible_discos"
+		resultparam117="games_played"
+		resultparam118="account_type"
+		resultparam119="standing"
+		resultparam120="level_percent"
+		resultparam121="max_exp"
+		resultparam122="min_exp"
+		resultparam123="mid_games_played"
+		resultparam124="mid_discos"
+		resultparam125="total_games_played"
+		resultparam126="total_discos"
+		resultparam127="event_id"
+		resultparam128="events"
+		resultparam129="uncs_discos"
+		resultparam130="unrnk_discos"
+		resultparam131="uncs_games_played"
+		resultparam132="unrnk_games_played"
+		resultparam133="rift_games_played"
+		resultparam134="rift_discos"
+		resultparam135="current_level"
+		resultparam136="highest_level_current"
+		resultparam137="season_id"
+		resultparam138="current_ranking"
+		resultparam139="curr_season_cam_games_played"
+		resultparam140="curr_season_cam_cs_games_played"
+		resultparam141="curr_season_cam_discos"
+		resultparam142="curr_season_cam_cs_discos"
+		resultparam143="prev_seasons_cam_games_played"
+		resultparam144="prev_seasons_cam_cs_games_played"
+		resultparam145="prev_seasons_cam_discos"
+		resultparam146="prev_seasons_cam_cs_discos"
+		resultparam147="highest_ranking"
+	/>
+
+
+	<trigger name="PlayerStatsStatusCasual"/>
+	<trigger name="PlayerStatsResultCasual"/>
+
+	<form
+		name="PlayerStatsCasual"
+		host="!masterserver"
+		method="post"
+		target="/client_requester.php"
+		statustrigger="PlayerStatsStatusCasual"
+		resulttrigger="PlayerStatsResultCasual"
+		resultparam0="nickname"
+		resultparam1="name"
+		resultparam2="rank"
+		resultparam3="cs_level"
+		resultparam4="account_id"
+		resultparam5="cs_games_played"
+		resultparam6="cs_wins"
+		resultparam7="cs_losses"
+		resultparam8="cs_concedes"
+		resultparam9="cs_concedevotes"
+		resultparam10="cs_buybacks"
+		resultparam11="cs_discos"
+		resultparam12="cs_kicked"
+		resultparam13="cs_amm_team_rating"
+		resultparam14="cs_pub_count"
+		resultparam15="cs_amm_solo_rating"
+		resultparam16="cs_amm_solo_count"
+		resultparam17="cs_amm_team_rating"
+		resultparam18="cs_amm_team_count"
+		resultparam19="cs_avg_score"
+		resultparam20="cs_herokills"
+		resultparam21="cs_herodmg"
+		resultparam22="cs_heroexp"
+		resultparam23="cs_herokillsgold"
+		resultparam24="cs_heroassists"
+		resultparam25="cs_deaths"
+		resultparam26="cs_goldlost2death"
+		resultparam27="cs_secs_dead"
+		resultparam28="cs_teamcreepkills"
+		resultparam29="cs_teamcreepdmg"
+		resultparam30="cs_teamcreepexp"
+		resultparam31="cs_teamcreepgold"
+		resultparam32="cs_neutralcreepkills"
+		resultparam33="cs_neutralcreepdmg"
+		resultparam34="cs_neutralcreepexp"
+		resultparam35="cs_neutralcreepgold"
+		resultparam36="cs_bdmg"
+		resultparam37="cs_bdmgexp"
+		resultparam38="cs_razed"
+		resultparam39="cs_bgold"
+		resultparam40="cs_denies"
+		resultparam41="cs_exp_denied"
+		resultparam42="cs_gold"
+		resultparam43="cs_gold_spend"
+		resultparam44="cs_exp"
+		resultparam45="cs_actions"
+		resultparam46="cs_secs"
+		resultparam47="cs_consumables"
+		resultparam48="cs_wards"
+		resultparam49="cs_em_played"
+		resultparam50="maxXP"
+		resultparam51="last_activity"
+		resultparam52="matchIds"
+		resultparam53="matchDates"
+		resultparam54="favHero1"
+		resultparam55="favHero2"
+		resultparam56="favHero3"
+		resultparam57="favHero4"
+		resultparam58="favHero5"
+		resultparam59="favHero1Time"
+		resultparam60="favHero2Time"
+		resultparam61="favHero3Time"
+		resultparam62="favHero4Time"
+		resultparam63="favHero5Time"
+		resultparam64="xp2nextLevel"
+		resultparam65="xpPercent"
+		resultparam66="percentEM"
+		resultparam67="k_d_a"
+		resultparam68="avgGameLength"
+		resultparam69="avgXP_min"
+		resultparam70="avgDenies"
+		resultparam71="avgCreepKills"
+		resultparam72="avgNeutralKills"
+		resultparam73="avgActions_min"
+		resultparam74="avgWardsUsed"
+		resultparam75="create_date"
+		resultparam76="favHero1name"
+		resultparam77="favHero2name"
+		resultparam78="favHero3name"
+		resultparam79="favHero4name"
+		resultparam80="favHero5name"
+		resultparam81="favHero1id"
+		resultparam82="favHero2id"
+		resultparam83="favHero3id"
+		resultparam84="favHero4id"
+		resultparam85="favHero5id"
+		resultparam86="error"
+		resultparam87="cs_level"
+		resultparam88="selected_upgrades"
+		resultparam89="acc_games_played"
+		resultparam90="rnk_games_played"
+		resultparam91="acc_discos"
+		resultparam92="rnk_discos"
+		resultparam93="cs_bloodlust"
+		resultparam94="cs_doublekill"
+		resultparam95="cs_triplekill"
+		resultparam96="cs_quadkill"
+		resultparam97="cs_annihilation"
+		resultparam98="cs_ks3"
+		resultparam99="cs_ks4"
+		resultparam100="cs_ks5"
+		resultparam101="cs_ks6"
+		resultparam102="cs_ks7"
+		resultparam103="cs_ks8"
+		resultparam104="cs_ks9"
+		resultparam105="cs_ks10"
+		resultparam106="cs_ks15"
+		resultparam107="cs_smackdown"
+		resultparam108="cs_humiliation"
+		resultparam109="cs_nemesis"
+		resultparam110="cs_retribution"
+		resultparam111="total_level_exp"
+		resultparam112="cs_time_earning_exp"
+		resultparam113="level"
+		resultparam114="level_exp"
+		resultparam115="discos"
+		resultparam116="possible_discos"
+		resultparam117="games_played"
+		resultparam118="account_type"
+		resultparam119="standing"
+		resultparam120="level_percent"
+		resultparam121="max_exp"
+		resultparam122="min_exp"
+		resultparam123="mid_games_played"
+		resultparam124="mid_discos"
+		resultparam125="total_games_played"
+		resultparam126="total_discos"
+		resultparam127="event_id"
+		resultparam128="events"
+		resultparam129="uncs_discos"
+		resultparam130="unrnk_discos"
+		resultparam131="uncs_games_played"
+		resultparam132="unrnk_games_played"
+		resultparam133="rift_games_played"
+		resultparam134="rift_discos"
+		resultparam135="current_level"
+		resultparam136="highest_level_current"
+		resultparam137="season_id"
+		resultparam138="current_ranking"
+		resultparam139="curr_season_cam_games_played"
+		resultparam140="curr_season_cam_cs_games_played"
+		resultparam141="curr_season_cam_discos"
+		resultparam142="curr_season_cam_cs_discos"
+		resultparam143="prev_seasons_cam_games_played"
+		resultparam144="prev_seasons_cam_cs_games_played"
+		resultparam145="prev_seasons_cam_discos"
+		resultparam146="prev_seasons_cam_cs_discos"
+		resultparam147="highest_ranking"
+	/>
+
+	<trigger name="PlayerStatsStatusEvent"/>
+	<trigger name="PlayerStatsResultEvent"/>
+
+	<form
+		name="PlayerStatsEvent"
+		host="!masterserver"
+		method="post"
+		target="/client_requester.php"
+		statustrigger="PlayerStatsStatusEvent"
+		resulttrigger="PlayerStatsResultEvent"
+		resultparam0="nickname"
+		resultparam1="name"
+		resultparam2="rank"
+		resultparam3="event_level"
+		resultparam4="account_id"
+		resultparam5="event_games_played"
+		resultparam6="event_wins"
+		resultparam7="event_losses"
+		resultparam8="event_concedes"
+		resultparam9="event_concedevotes"
+		resultparam10="event_buybacks"
+		resultparam11="event_discos"
+		resultparam12="event_kicked"
+		resultparam13="event_amm_team_rating"
+		resultparam14="event_pub_count"
+		resultparam15="event_amm_solo_rating"
+		resultparam16="event_amm_solo_count"
+		resultparam17="event_amm_team_rating"
+		resultparam18="event_amm_team_count"
+		resultparam19="event_avg_score"
+		resultparam20="event_herokills"
+		resultparam21="event_herodmg"
+		resultparam22="event_heroexp"
+		resultparam23="event_herokillsgold"
+		resultparam24="event_heroassists"
+		resultparam25="event_deaths"
+		resultparam26="event_goldlost2death"
+		resultparam27="event_secs_dead"
+		resultparam28="event_teamcreepkills"
+		resultparam29="event_teamcreepdmg"
+		resultparam30="event_teamcreepexp"
+		resultparam31="event_teamcreepgold"
+		resultparam32="event_neutralcreepkills"
+		resultparam33="event_neutralcreepdmg"
+		resultparam34="event_neutralcreepexp"
+		resultparam35="event_neutralcreepgold"
+		resultparam36="event_bdmg"
+		resultparam37="event_bdmgexp"
+		resultparam38="event_razed"
+		resultparam39="event_bgold"
+		resultparam40="event_denies"
+		resultparam41="event_exp_denied"
+		resultparam42="event_gold"
+		resultparam43="event_gold_spend"
+		resultparam44="event_exp"
+		resultparam45="event_actions"
+		resultparam46="event_secs"
+		resultparam47="event_consumables"
+		resultparam48="event_wards"
+		resultparam49="event_em_played"
+		resultparam50="maxXP"
+		resultparam51="last_activity"
+		resultparam52="matchIds"
+		resultparam53="matchDates"
+		resultparam54="favHero1"
+		resultparam55="favHero2"
+		resultparam56="favHero3"
+		resultparam57="favHero4"
+		resultparam58="favHero5"
+		resultparam59="favHero1Time"
+		resultparam60="favHero2Time"
+		resultparam61="favHero3Time"
+		resultparam62="favHero4Time"
+		resultparam63="favHero5Time"
+		resultparam64="xp2nextLevel"
+		resultparam65="xpPercent"
+		resultparam66="percentEM"
+		resultparam67="k_d_a"
+		resultparam68="avgGameLength"
+		resultparam69="avgXP_min"
+		resultparam70="avgDenies"
+		resultparam71="avgCreepKills"
+		resultparam72="avgNeutralKills"
+		resultparam73="avgActions_min"
+		resultparam74="avgWardsUsed"
+		resultparam75="create_date"
+		resultparam76="favHero1name"
+		resultparam77="favHero2name"
+		resultparam78="favHero3name"
+		resultparam79="favHero4name"
+		resultparam80="favHero5name"
+		resultparam81="favHero1id"
+		resultparam82="favHero2id"
+		resultparam83="favHero3id"
+		resultparam84="favHero4id"
+		resultparam85="favHero5id"
+		resultparam86="error"
+		resultparam87="event_level"
+		resultparam88="selected_upgrades"
+		resultparam89="acc_games_played"
+		resultparam90="rnk_games_played"
+		resultparam91="acc_discos"
+		resultparam92="rnk_discos"
+		resultparam93="event_bloodlust"
+		resultparam94="event_doublekill"
+		resultparam95="event_triplekill"
+		resultparam96="event_quadkill"
+		resultparam97="event_annihilation"
+		resultparam98="event_ks3"
+		resultparam99="event_ks4"
+		resultparam100="event_ks5"
+		resultparam101="event_ks6"
+		resultparam102="event_ks7"
+		resultparam103="event_ks8"
+		resultparam104="event_ks9"
+		resultparam105="event_ks10"
+		resultparam106="event_ks15"
+		resultparam107="event_smackdown"
+		resultparam108="event_humiliation"
+		resultparam109="event_nemesis"
+		resultparam110="event_retribution"
+		resultparam111="total_level_exp"
+		resultparam112="event_time_earning_exp"
+		resultparam113="level"
+		resultparam114="level_exp"
+		resultparam115="discos"
+		resultparam116="possible_discos"
+		resultparam117="games_played"
+		resultparam118="account_type"
+		resultparam119="standing"
+		resultparam120="level_percent"
+		resultparam121="max_exp"
+		resultparam122="min_exp"
+		resultparam123="mid_games_played"
+		resultparam124="mid_discos"
+		resultparam125="total_games_played"
+		resultparam126="total_discos"
+		resultparam127="event_id"
+		resultparam128="events"
+		resultparam129="uncs_discos"
+		resultparam130="unrnk_discos"
+		resultparam131="uncs_games_played"
+		resultparam132="unrnk_games_played"
+		resultparam133="rift_games_played"
+		resultparam134="rift_discos"
+		resultparam135="current_level"
+		resultparam136="highest_level_current"
+		resultparam137="season_id"
+		resultparam138="current_ranking"
+		resultparam139="curr_season_cam_games_played"
+		resultparam140="curr_season_cam_cs_games_played"
+		resultparam141="curr_season_cam_discos"
+		resultparam142="curr_season_cam_cs_discos"
+		resultparam143="prev_seasons_cam_games_played"
+		resultparam144="prev_seasons_cam_cs_games_played"
+		resultparam145="prev_seasons_cam_discos"
+		resultparam146="prev_seasons_cam_cs_discos"
+		resultparam147="highest_ranking"
+	/>
+
+	<trigger name="PlayerStatsStatusSeasonNormal"/>
+	<trigger name="PlayerStatsResultSeasonNormal"/>
+
+	<form
+		name="PlayerStatsSeasonNormal"
+		host="!masterserver"
+		method="post"
+		target="/client_requester.php"
+		statustrigger="PlayerStatsStatusSeasonNormal"
+		resulttrigger="PlayerStatsResultSeasonNormal"
+		resultparam0="nickname"
+		resultparam1="name"
+		resultparam2="rank"
+		resultparam3="cam_level"
+		resultparam4="account_id"
+		resultparam5="curr_season_cam_games_played"
+		resultparam6="cam_wins"
+		resultparam7="cam_losses"
+		resultparam8="cam_concedes"
+		resultparam9="cam_concedevotes"
+		resultparam10="cam_buybacks"
+		resultparam11="curr_season_cam_discos"
+		resultparam12="cam_kicked"
+		resultparam13="smr"
+		resultparam14="cam_pub_count"
+		resultparam15="cam_amm_solo_rating"
+		resultparam16="cam_amm_solo_count"
+		resultparam17="cam_amm_team_rating"
+		resultparam18="cam_amm_team_count"
+		resultparam19="rnk_avg_score"
+		resultparam20="cam_herokills"
+		resultparam21="cam_herodmg"
+		resultparam22="cam_heroexp"
+		resultparam23="cam_herokillsgold"
+		resultparam24="cam_heroassists"
+		resultparam25="cam_deaths"
+		resultparam26="cam_goldlost2death"
+		resultparam27="cam_secs_dead"
+		resultparam28="cam_teamcreepkills"
+		resultparam29="cam_teamcreepdmg"
+		resultparam30="cam_teamcreepexp"
+		resultparam31="cam_teamcreepgold"
+		resultparam32="cam_neutralcreepkills"
+		resultparam33="cam_neutralcreepdmg"
+		resultparam34="cam_neutralcreepexp"
+		resultparam35="cam_neutralcreepgold"
+		resultparam36="cam_bdmg"
+		resultparam37="cam_bdmgexp"
+		resultparam38="cam_razed"
+		resultparam39="cam_bgold"
+		resultparam40="cam_denies"
+		resultparam41="cam_exp_denied"
+		resultparam42="cam_gold"
+		resultparam43="cam_gold_spend"
+		resultparam44="cam_exp"
+		resultparam45="cam_actions"
+		resultparam46="cam_secs"
+		resultparam47="cam_consumables"
+		resultparam48="cam_wards"
+		resultparam49="cam_em_played"
+		resultparam50="maxXP"
+		resultparam51="last_activity"
+		resultparam52="matchIds"
+		resultparam53="matchDates"
+		resultparam54="favHero1"
+		resultparam55="favHero2"
+		resultparam56="favHero3"
+		resultparam57="favHero4"
+		resultparam58="favHero5"
+		resultparam59="favHero1Time"
+		resultparam60="favHero2Time"
+		resultparam61="favHero3Time"
+		resultparam62="favHero4Time"
+		resultparam63="favHero5Time"
+		resultparam64="xp2nextLevel"
+		resultparam65="xpPercent"
+		resultparam66="percentEM"
+		resultparam67="k_d_a"
+		resultparam68="avgGameLength"
+		resultparam69="avgXP_min"
+		resultparam70="avgDenies"
+		resultparam71="avgCreepKills"
+		resultparam72="avgNeutralKills"
+		resultparam73="avgActions_min"
+		resultparam74="avgWardsUsed"
+		resultparam75="create_date"
+		resultparam76="favHero1name"
+		resultparam77="favHero2name"
+		resultparam78="favHero3name"
+		resultparam79="favHero4name"
+		resultparam80="favHero5name"
+		resultparam81="favHero1id"
+		resultparam82="favHero2id"
+		resultparam83="favHero3id"
+		resultparam84="favHero4id"
+		resultparam85="favHero5id"
+		resultparam86="error"
+		resultparam87="cam_level"
+		resultparam88="selected_upgrades"
+		resultparam89="acc_games_played"
+		resultparam90="cs_games_played"
+		resultparam91="cs_discos"
+		resultparam92="acc_discos"
+		resultparam93="cam_bloodlust"
+		resultparam94="cam_doublekill"
+		resultparam95="cam_triplekill"
+		resultparam96="cam_quadkill"
+		resultparam97="cam_annihilation"
+		resultparam98="cam_ks3"
+		resultparam99="cam_ks4"
+		resultparam100="cam_ks5"
+		resultparam101="cam_ks6"
+		resultparam102="cam_ks7"
+		resultparam103="cam_ks8"
+		resultparam104="cam_ks9"
+		resultparam105="cam_ks10"
+		resultparam106="cam_ks15"
+		resultparam107="cam_smackdown"
+		resultparam108="cam_humiliation"
+		resultparam109="cam_nemesis"
+		resultparam110="cam_retribution"
+		resultparam111="total_level_exp"
+		resultparam112="cam_time_earning_exp"
+		resultparam113="level"
+		resultparam114="level_exp"
+		resultparam115="discos"
+		resultparam116="possible_discos"
+		resultparam117="games_played"
+		resultparam118="account_type"
+		resultparam119="standing"
+		resultparam120="level_percent"
+		resultparam121="max_exp"
+		resultparam122="min_exp"
+		resultparam123="mid_games_played"
+		resultparam124="mid_discos"
+		resultparam125="total_games_played"
+		resultparam126="total_discos"
+		resultparam127="event_id"
+		resultparam128="events"
+		resultparam129="uncs_discos"
+		resultparam130="unrnk_discos"
+		resultparam131="uncs_games_played"
+		resultparam132="unrnk_games_played"
+		resultparam133="rift_games_played"
+		resultparam134="rift_discos"
+		resultparam135="current_level"
+		resultparam136="highest_level_current"
+		resultparam137="season_id"
+		resultparam138="current_ranking"
+		resultparam139="rnk_games_played"
+		resultparam140="curr_season_cam_cs_games_played"
+		resultparam141="rnk_discos"
+		resultparam142="curr_season_cam_cs_discos"
+		resultparam143="prev_seasons_cam_games_played"
+		resultparam144="prev_seasons_cam_cs_games_played"
+		resultparam145="prev_seasons_cam_discos"
+		resultparam146="prev_seasons_cam_cs_discos"
+		resultparam147="highest_ranking"
+	/>
+
+	<trigger name="PlayerStatsStatusSeasonCasual"/>
+	<trigger name="PlayerStatsResultSeasonCasual"/>
+
+	<form
+		name="PlayerStatsSeasonCasual"
+		host="!masterserver"
+		method="post"
+		target="/client_requester.php"
+		statustrigger="PlayerStatsStatusSeasonCasual"
+		resulttrigger="PlayerStatsResultSeasonCasual"
+		resultparam0="nickname"
+		resultparam1="name"
+		resultparam2="rank"
+		resultparam3="cam_cs_level"
+		resultparam4="account_id"
+		resultparam5="curr_season_cam_cs_games_played"
+		resultparam6="cam_cs_wins"
+		resultparam7="cam_cs_losses"
+		resultparam8="cam_cs_concedes"
+		resultparam9="cam_cs_concedevotes"
+		resultparam10="cam_cs_buybacks"
+		resultparam11="curr_season_cam_cs_discos"
+		resultparam12="cam_cs_kicked"
+		resultparam13="cam_cs_amm_team_rating"
+		resultparam14="cam_cs_pub_count"
+		resultparam15="cam_cs_amm_solo_rating"
+		resultparam16="cam_cs_amm_solo_count"
+		resultparam17="cam_cs_amm_team_rating"
+		resultparam18="cam_cs_amm_team_count"
+		resultparam19="cam_cs_avg_score"
+		resultparam20="cam_cs_herokills"
+		resultparam21="cam_cs_herodmg"
+		resultparam22="cam_cs_heroexp"
+		resultparam23="cam_cs_herokillsgold"
+		resultparam24="cam_cs_heroassists"
+		resultparam25="cam_cs_deaths"
+		resultparam26="cam_cs_goldlost2death"
+		resultparam27="cam_cs_secs_dead"
+		resultparam28="cam_cs_teamcreepkills"
+		resultparam29="cam_cs_teamcreepdmg"
+		resultparam30="cam_cs_teamcreepexp"
+		resultparam31="cam_cs_teamcreepgold"
+		resultparam32="cam_cs_neutralcreepkills"
+		resultparam33="cam_cs_neutralcreepdmg"
+		resultparam34="cam_cs_neutralcreepexp"
+		resultparam35="cam_cs_neutralcreepgold"
+		resultparam36="cam_cs_bdmg"
+		resultparam37="cam_cs_bdmgexp"
+		resultparam38="cam_cs_razed"
+		resultparam39="cam_cs_bgold"
+		resultparam40="cam_cs_denies"
+		resultparam41="cam_cs_exp_denied"
+		resultparam42="cam_cs_gold"
+		resultparam43="cam_cs_gold_spend"
+		resultparam44="cam_cs_exp"
+		resultparam45="cam_cs_actions"
+		resultparam46="cam_cs_secs"
+		resultparam47="cam_cs_consumables"
+		resultparam48="cam_cs_wards"
+		resultparam49="cam_cs_em_played"
+		resultparam50="maxXP"
+		resultparam51="last_activity"
+		resultparam52="matchIds"
+		resultparam53="matchDates"
+		resultparam54="favHero1"
+		resultparam55="favHero2"
+		resultparam56="favHero3"
+		resultparam57="favHero4"
+		resultparam58="favHero5"
+		resultparam59="favHero1Time"
+		resultparam60="favHero2Time"
+		resultparam61="favHero3Time"
+		resultparam62="favHero4Time"
+		resultparam63="favHero5Time"
+		resultparam64="xp2nextLevel"
+		resultparam65="xpPercent"
+		resultparam66="percentEM"
+		resultparam67="k_d_a"
+		resultparam68="avgGameLength"
+		resultparam69="avgXP_min"
+		resultparam70="avgDenies"
+		resultparam71="avgCreepKills"
+		resultparam72="avgNeutralKills"
+		resultparam73="avgActions_min"
+		resultparam74="avgWardsUsed"
+		resultparam75="create_date"
+		resultparam76="favHero1name"
+		resultparam77="favHero2name"
+		resultparam78="favHero3name"
+		resultparam79="favHero4name"
+		resultparam80="favHero5name"
+		resultparam81="favHero1id"
+		resultparam82="favHero2id"
+		resultparam83="favHero3id"
+		resultparam84="favHero4id"
+		resultparam85="favHero5id"
+		resultparam86="error"
+		resultparam87="cam_cs_level"
+		resultparam88="selected_upgrades"
+		resultparam89="acc_games_played"
+		resultparam90="cs_games_played"
+		resultparam91="acc_discos"
+		resultparam92="cam_cs_discos"
+		resultparam93="cam_cs_bloodlust"
+		resultparam94="cam_cs_doublekill"
+		resultparam95="cam_cs_triplekill"
+		resultparam96="cam_cs_quadkill"
+		resultparam97="cam_cs_annihilation"
+		resultparam98="cam_cs_ks3"
+		resultparam99="cam_cs_ks4"
+		resultparam100="cam_cs_ks5"
+		resultparam101="cam_cs_ks6"
+		resultparam102="cam_cs_ks7"
+		resultparam103="cam_cs_ks8"
+		resultparam104="cam_cs_ks9"
+		resultparam105="cam_cs_ks10"
+		resultparam106="cam_cs_ks15"
+		resultparam107="cam_cs_smackdown"
+		resultparam108="cam_cs_humiliation"
+		resultparam109="cam_cs_nemesis"
+		resultparam110="cam_cs_retribution"
+		resultparam111="total_level_exp"
+		resultparam112="cam_cs_time_earning_exp"
+		resultparam113="level"
+		resultparam114="level_exp"
+		resultparam115="discos"
+		resultparam116="possible_discos"
+		resultparam117="games_played"
+		resultparam118="account_type"
+		resultparam119="standing"
+		resultparam120="level_percent"
+		resultparam121="max_exp"
+		resultparam122="min_exp"
+		resultparam123="mid_games_played"
+		resultparam124="mid_discos"
+		resultparam125="total_games_played"
+		resultparam126="total_discos"
+		resultparam127="event_id"
+		resultparam128="events"
+		resultparam129="uncs_discos"
+		resultparam130="unrnk_discos"
+		resultparam131="uncs_games_played"
+		resultparam132="unrnk_games_played"
+		resultparam133="rift_games_played"
+		resultparam134="rift_discos"
+		resultparam135="current_level"
+		resultparam136="highest_level_current"
+		resultparam137="season_id"
+		resultparam138="current_ranking"
+		resultparam139="curr_season_cam_games_played"
+		resultparam140="rnk_games_played"
+		resultparam141="curr_season_cam_discos"
+		resultparam142="rnk_discos"
+		resultparam143="prev_seasons_cam_games_played"
+		resultparam144="prev_seasons_cam_cs_games_played"
+		resultparam145="prev_seasons_cam_discos"
+		resultparam146="prev_seasons_cam_cs_discos"
+		resultparam147="highest_ranking"
+	/>
+
+	<trigger name="PlayerStatsStatusHistoryNormal"/>
+	<trigger name="PlayerStatsResultHistoryNormal"/>
+
+	<form
+		name="PlayerStatsHistoryNormal"
+		host="!masterserver"
+		method="post"
+		target="/client_requester.php"
+		statustrigger="PlayerStatsStatusHistoryNormal"
+		resulttrigger="PlayerStatsResultHistoryNormal"
+		resultparam0="nickname"
+		resultparam1="name"
+		resultparam2="rank"
+		resultparam3="cam_level"
+		resultparam4="account_id"
+		resultparam5="cam_games_played"
+		resultparam6="cam_wins"
+		resultparam7="cam_losses"
+		resultparam8="cam_concedes"
+		resultparam9="cam_concedevotes"
+		resultparam10="cam_buybacks"
+		resultparam11="cam_discos"
+		resultparam12="cam_kicked"
+		resultparam13="smr"
+		resultparam14="cam_pub_count"
+		resultparam15="cam_amm_solo_rating"
+		resultparam16="cam_amm_solo_count"
+		resultparam17="cam_amm_team_rating"
+		resultparam18="cam_amm_team_count"
+		resultparam19="rnk_avg_score"
+		resultparam20="cam_herokills"
+		resultparam21="cam_herodmg"
+		resultparam22="cam_heroexp"
+		resultparam23="cam_herokillsgold"
+		resultparam24="cam_heroassists"
+		resultparam25="cam_deaths"
+		resultparam26="cam_goldlost2death"
+		resultparam27="cam_secs_dead"
+		resultparam28="cam_teamcreepkills"
+		resultparam29="cam_teamcreepdmg"
+		resultparam30="cam_teamcreepexp"
+		resultparam31="cam_teamcreepgold"
+		resultparam32="cam_neutralcreepkills"
+		resultparam33="cam_neutralcreepdmg"
+		resultparam34="cam_neutralcreepexp"
+		resultparam35="cam_neutralcreepgold"
+		resultparam36="cam_bdmg"
+		resultparam37="cam_bdmgexp"
+		resultparam38="cam_razed"
+		resultparam39="cam_bgold"
+		resultparam40="cam_denies"
+		resultparam41="cam_exp_denied"
+		resultparam42="cam_gold"
+		resultparam43="cam_gold_spend"
+		resultparam44="cam_exp"
+		resultparam45="cam_actions"
+		resultparam46="cam_secs"
+		resultparam47="cam_consumables"
+		resultparam48="cam_wards"
+		resultparam49="cam_em_played"
+		resultparam50="maxXP"
+		resultparam51="last_activity"
+		resultparam52="matchIds"
+		resultparam53="matchDates"
+		resultparam54="favHero1"
+		resultparam55="favHero2"
+		resultparam56="favHero3"
+		resultparam57="favHero4"
+		resultparam58="favHero5"
+		resultparam59="favHero1Time"
+		resultparam60="favHero2Time"
+		resultparam61="favHero3Time"
+		resultparam62="favHero4Time"
+		resultparam63="favHero5Time"
+		resultparam64="xp2nextLevel"
+		resultparam65="xpPercent"
+		resultparam66="percentEM"
+		resultparam67="k_d_a"
+		resultparam68="avgGameLength"
+		resultparam69="avgXP_min"
+		resultparam70="avgDenies"
+		resultparam71="avgCreepKills"
+		resultparam72="avgNeutralKills"
+		resultparam73="avgActions_min"
+		resultparam74="avgWardsUsed"
+		resultparam75="create_date"
+		resultparam76="favHero1name"
+		resultparam77="favHero2name"
+		resultparam78="favHero3name"
+		resultparam79="favHero4name"
+		resultparam80="favHero5name"
+		resultparam81="favHero1id"
+		resultparam82="favHero2id"
+		resultparam83="favHero3id"
+		resultparam84="favHero4id"
+		resultparam85="favHero5id"
+		resultparam86="error"
+		resultparam87="cam_level"
+		resultparam88="selected_upgrades"
+		resultparam89="acc_games_played"
+		resultparam90="cs_games_played"
+		resultparam91="cs_discos"
+		resultparam92="acc_discos"
+		resultparam93="cam_bloodlust"
+		resultparam94="cam_doublekill"
+		resultparam95="cam_triplekill"
+		resultparam96="cam_quadkill"
+		resultparam97="cam_annihilation"
+		resultparam98="cam_ks3"
+		resultparam99="cam_ks4"
+		resultparam100="cam_ks5"
+		resultparam101="cam_ks6"
+		resultparam102="cam_ks7"
+		resultparam103="cam_ks8"
+		resultparam104="cam_ks9"
+		resultparam105="cam_ks10"
+		resultparam106="cam_ks15"
+		resultparam107="cam_smackdown"
+		resultparam108="cam_humiliation"
+		resultparam109="cam_nemesis"
+		resultparam110="cam_retribution"
+		resultparam111="total_level_exp"
+		resultparam112="cam_time_earning_exp"
+		resultparam113="level"
+		resultparam114="level_exp"
+		resultparam115="discos"
+		resultparam116="possible_discos"
+		resultparam117="games_played"
+		resultparam118="account_type"
+		resultparam119="standing"
+		resultparam120="level_percent"
+		resultparam121="max_exp"
+		resultparam122="min_exp"
+		resultparam123="mid_games_played"
+		resultparam124="mid_discos"
+		resultparam125="total_games_played"
+		resultparam126="total_discos"
+		resultparam127="event_id"
+		resultparam128="events"
+		resultparam129="uncs_discos"
+		resultparam130="unrnk_discos"
+		resultparam131="uncs_games_played"
+		resultparam132="unrnk_games_played"
+		resultparam133="rift_games_played"
+		resultparam134="rift_discos"
+		resultparam135="highest_level"
+		resultparam136="highest_level_current"
+		resultparam137="season"
+		resultparam138="current_ranking"
+		resultparam139="curr_season_cam_games_played"
+		resultparam140="curr_season_cam_cs_games_played"
+		resultparam141="curr_season_cam_discos"
+		resultparam142="curr_season_cam_cs_discos"
+		resultparam143="prev_seasons_cam_games_played"
+		resultparam144="prev_seasons_cam_cs_games_played"
+		resultparam145="prev_seasons_cam_discos"
+		resultparam146="prev_seasons_cam_cs_discos"
+		resultparam147="highest_ranking"
+	/>
+
+	<trigger name="PlayerStatsStatusHistoryCasual"/>
+	<trigger name="PlayerStatsResultHistoryCasual"/>
+
+	<form
+		name="PlayerStatsHistoryCasual"
+		host="!masterserver"
+		method="post"
+		target="/client_requester.php"
+		statustrigger="PlayerStatsStatusHistoryCasual"
+		resulttrigger="PlayerStatsResultHistoryCasual"
+		resultparam0="nickname"
+		resultparam1="name"
+		resultparam2="rank"
+		resultparam3="cam_cs_level"
+		resultparam4="account_id"
+		resultparam5="cam_cs_games_played"
+		resultparam6="cam_cs_wins"
+		resultparam7="cam_cs_losses"
+		resultparam8="cam_cs_concedes"
+		resultparam9="cam_cs_concedevotes"
+		resultparam10="cam_cs_buybacks"
+		resultparam11="cam_cs_discos"
+		resultparam12="cam_cs_kicked"
+		resultparam13="cam_cs_amm_team_rating"
+		resultparam14="cam_cs_pub_count"
+		resultparam15="cam_cs_amm_solo_rating"
+		resultparam16="cam_cs_amm_solo_count"
+		resultparam17="cam_cs_amm_team_rating"
+		resultparam18="cam_cs_amm_team_count"
+		resultparam19="cam_cs_avg_score"
+		resultparam20="cam_cs_herokills"
+		resultparam21="cam_cs_herodmg"
+		resultparam22="cam_cs_heroexp"
+		resultparam23="cam_cs_herokillsgold"
+		resultparam24="cam_cs_heroassists"
+		resultparam25="cam_cs_deaths"
+		resultparam26="cam_cs_goldlost2death"
+		resultparam27="cam_cs_secs_dead"
+		resultparam28="cam_cs_teamcreepkills"
+		resultparam29="cam_cs_teamcreepdmg"
+		resultparam30="cam_cs_teamcreepexp"
+		resultparam31="cam_cs_teamcreepgold"
+		resultparam32="cam_cs_neutralcreepkills"
+		resultparam33="cam_cs_neutralcreepdmg"
+		resultparam34="cam_cs_neutralcreepexp"
+		resultparam35="cam_cs_neutralcreepgold"
+		resultparam36="cam_cs_bdmg"
+		resultparam37="cam_cs_bdmgexp"
+		resultparam38="cam_cs_razed"
+		resultparam39="cam_cs_bgold"
+		resultparam40="cam_cs_denies"
+		resultparam41="cam_cs_exp_denied"
+		resultparam42="cam_cs_gold"
+		resultparam43="cam_cs_gold_spend"
+		resultparam44="cam_cs_exp"
+		resultparam45="cam_cs_actions"
+		resultparam46="cam_cs_secs"
+		resultparam47="cam_cs_consumables"
+		resultparam48="cam_cs_wards"
+		resultparam49="cam_cs_em_played"
+		resultparam50="maxXP"
+		resultparam51="last_activity"
+		resultparam52="matchIds"
+		resultparam53="matchDates"
+		resultparam54="favHero1"
+		resultparam55="favHero2"
+		resultparam56="favHero3"
+		resultparam57="favHero4"
+		resultparam58="favHero5"
+		resultparam59="favHero1Time"
+		resultparam60="favHero2Time"
+		resultparam61="favHero3Time"
+		resultparam62="favHero4Time"
+		resultparam63="favHero5Time"
+		resultparam64="xp2nextLevel"
+		resultparam65="xpPercent"
+		resultparam66="percentEM"
+		resultparam67="k_d_a"
+		resultparam68="avgGameLength"
+		resultparam69="avgXP_min"
+		resultparam70="avgDenies"
+		resultparam71="avgCreepKills"
+		resultparam72="avgNeutralKills"
+		resultparam73="avgActions_min"
+		resultparam74="avgWardsUsed"
+		resultparam75="create_date"
+		resultparam76="favHero1name"
+		resultparam77="favHero2name"
+		resultparam78="favHero3name"
+		resultparam79="favHero4name"
+		resultparam80="favHero5name"
+		resultparam81="favHero1id"
+		resultparam82="favHero2id"
+		resultparam83="favHero3id"
+		resultparam84="favHero4id"
+		resultparam85="favHero5id"
+		resultparam86="error"
+		resultparam87="cam_cs_level"
+		resultparam88="selected_upgrades"
+		resultparam89="acc_games_played"
+		resultparam90="cam_cs_games_played"
+		resultparam91="acc_discos"
+		resultparam92="cam_cs_discos"
+		resultparam93="cam_cs_bloodlust"
+		resultparam94="cam_cs_doublekill"
+		resultparam95="cam_cs_triplekill"
+		resultparam96="cam_cs_quadkill"
+		resultparam97="cam_cs_annihilation"
+		resultparam98="cam_cs_ks3"
+		resultparam99="cam_cs_ks4"
+		resultparam100="cam_cs_ks5"
+		resultparam101="cam_cs_ks6"
+		resultparam102="cam_cs_ks7"
+		resultparam103="cam_cs_ks8"
+		resultparam104="cam_cs_ks9"
+		resultparam105="cam_cs_ks10"
+		resultparam106="cam_cs_ks15"
+		resultparam107="cam_cs_smackdown"
+		resultparam108="cam_cs_humiliation"
+		resultparam109="cam_cs_nemesis"
+		resultparam110="cam_cs_retribution"
+		resultparam111="total_level_exp"
+		resultparam112="cam_cs_time_earning_exp"
+		resultparam113="level"
+		resultparam114="level_exp"
+		resultparam115="discos"
+		resultparam116="possible_discos"
+		resultparam117="games_played"
+		resultparam118="account_type"
+		resultparam119="standing"
+		resultparam120="level_percent"
+		resultparam121="max_exp"
+		resultparam122="min_exp"
+		resultparam123="mid_games_played"
+		resultparam124="mid_discos"
+		resultparam125="total_games_played"
+		resultparam126="total_discos"
+		resultparam127="event_id"
+		resultparam128="events"
+		resultparam129="uncs_discos"
+		resultparam130="unrnk_discos"
+		resultparam131="uncs_games_played"
+		resultparam132="unrnk_games_played"
+		resultparam133="rift_games_played"
+		resultparam134="rift_discos"
+		resultparam135="highest_level"
+		resultparam136="highest_level_current"
+		resultparam137="season"
+		resultparam138="current_ranking"
+		resultparam139="curr_season_cam_cs_games_played"
+		resultparam140="curr_season_cam_games_played"
+		resultparam141="curr_season_cam_cs_discos"
+		resultparam142="curr_season_cam_discos"
+		resultparam143="prev_seasons_cam_games_played"
+		resultparam144="prev_seasons_cam_cs_games_played"
+		resultparam145="prev_seasons_cam_discos"
+		resultparam146="prev_seasons_cam_cs_discos"
+		resultparam147="highest_ranking"
+	/>
+
+    <trigger name="PlayerStatsStatusMastery"/>
+    <trigger name="PlayerStatsResultMastery"/>
+    <form
+		name="PlayerStatsMastery"
+		host="!masterserver"
+		method="post"
+		target="/client_requester.php"
+		statustrigger="PlayerStatsStatusMastery"
+		resulttrigger="PlayerStatsResultMastery"
+		resultparam0="nickname"
+		resultparam1="name"
+		resultparam2="rank"
+		resultparam3="account_id"
+		resultparam4="last_activity"
+		resultparam5="create_date"
+		resultparam6="selected_upgrades"
+		resultparam7="level"
+		resultparam8="level_exp"
+		resultparam9="standing"
+		resultparam10="mastery_info"
+		resultparam11="mastery_rewards"
+	/>
+
+	<trigger name="GetSeasonsStatus"/>
+	<trigger name="GetSeasonsResult"/>
+	<form
+		name="GetSeasons"
+		host="!masterserver"
+		method="post"
+		target="/client_requester.php"
+		statustrigger="GetSeasonsStatus"
+		resulttrigger="GetSeasonsResult"
+		resultparam0="all_seasons"
+	/>
+
+	<trigger name="PlayerStatsMasteryError"/>
+	<trigger name="HasValidMasteryReward"/>
+
+	<trigger name="ChangeComboboxBgColor" />
+
+	<!-- Favorite Heroes -->
+	<panel name="playerstats_parse_icon" width="0" height="0" noclick="true" color="invisible" onload="CreateString('_playerstats_hero_icon_temp'); CreateString('_playerstats_hero_icon_output');"
+	onevent="
+		if(StringEquals(_playerstats_hero_icon_temp,'forsakenarcher'), Set('_playerstats_hero_icon_temp', 'forsaken_archer'));
+		if(StringEquals(_playerstats_hero_icon_temp,'corrupteddisciple'), Set('_playerstats_hero_icon_temp', 'corrupted_disciple'));
+		if(StringEquals(_playerstats_hero_icon_temp,'sandwraith'), Set('_playerstats_hero_icon_temp', 'sand_wraith'));
+		if(StringEquals(_playerstats_hero_icon_temp,'witchslayer'), Set('_playerstats_hero_icon_temp', 'witch_slayer'));
+		if(StringEquals(_playerstats_hero_icon_temp,'dwarfmagi'), Set('_playerstats_hero_icon_temp', 'dwarf_magi'));
+		if(StringEquals(_playerstats_hero_icon_temp,'flintbeastwood'), Set('_playerstats_hero_icon_temp', 'flint_beastwood'));
+		if(StringEquals(_playerstats_hero_icon_temp,'doctorrepulsor'), Set('_playerstats_hero_icon_temp', 'doctor_repulsor'));
+		if(StringEquals(_playerstats_hero_icon_temp,'bombardier'), Set('_playerstats_hero_icon_temp', 'bomb'));
+		if(StringEquals(_playerstats_hero_icon_temp,'emeraldwarden'), Set('_playerstats_hero_icon_temp', 'emerald_warden'));
+		if(StringEquals(_playerstats_hero_icon_temp,'monkeyking'), Set('_playerstats_hero_icon_temp', 'monkey_king'));
+		if(StringEquals(_playerstats_hero_icon_temp,'masterofarms'), Set('_playerstats_hero_icon_temp', 'master_of_arms'));
+		if(StringEquals(_playerstats_hero_icon_temp,'sirbenzington'), Set('_playerstats_hero_icon_temp', 'sir_benzington'));
+		if(StringEquals(_playerstats_hero_icon_temp,'kingklout'), Set('_playerstats_hero_icon_temp', 'king_klout'));
+
+		If(!StringEmpty(_playerstats_hero_icon_temp), Set('_playerstats_hero_icon_output', '/heroes/' # _playerstats_hero_icon_temp # '/icon.tga'), Set('_playerstats_hero_icon_output', '/ui/common/ability_coverup.tga'));
+		if(StringEquals(_playerstats_hero_icon_temp,'pollywogpriest'), Set('_playerstats_hero_icon_output', '/heroes/pollywogpriest/icons/hero.tga'));
+		if(StringEquals(_playerstats_hero_icon_temp,'electrician'), Set('_playerstats_hero_icon_output', '/heroes/electrician/icons/hero.tga'));
+		if(StringEquals(_playerstats_hero_icon_temp,'yogi'), Set('_playerstats_hero_icon_output', '/heroes/yogi/icons/hero.tga'));
+		if(StringEquals(_playerstats_hero_icon_temp,'cthulhuphant'), Set('_playerstats_hero_icon_output', '/heroes/cthulhuphant/alt/icon.tga'));
+		if(StringEquals(_playerstats_hero_icon_temp,'artillery'), Set('_playerstats_hero_icon_output', '/heroes/artillery/alt/icon.tga'));
+		if(StringEquals(_playerstats_hero_icon_temp,'geomancer'), Set('_playerstats_hero_icon_output', '/heroes/geomancer/hd_geomancer/icon.tga'));
+		if(StringEquals(_playerstats_hero_icon_temp,'sand_wraith'), Set('_playerstats_hero_icon_output', '/heroes/sand_wraith/hd_sandwraith2/icon.tga'));
+		if(StringEquals(_playerstats_hero_icon_temp,'tremble'), Set('_playerstats_hero_icon_output', '/heroes/tremble/hd_tremble/icon.tga'));
+		if(StringEquals(_playerstats_hero_icon_temp,'tarot'), Set('_playerstats_hero_icon_output', '/heroes/tarot/hd_tarot/icon.tga'));
+		if(StringEquals(_playerstats_hero_icon_temp,'bushwack'), Set('_playerstats_hero_icon_output', '/heroes/bushwack/bushwack_hd/icon.tga'));
+		if(StringEquals(_playerstats_hero_icon_temp,'chronos'), Set('_playerstats_hero_icon_output', '/heroes/chronos/hd_chronos/icon.tga'));
+	"
+	/>
+
+	<panel
+		name="player_stats_submit"
+		noclick="true"
+		color="invisible"
+		onload="CreateString('_player_stats_searchname'); CreateString('_player_stats_eventid', '-1');"
+		onevent="
+			If(
+				StringEquals(_playerstats_show_panel, 'stats_panel_ranked'),
+				SubmitForm('PlayerStatsRanked', 'f', 'show_stats', 'nickname', StripClanTag(_player_stats_searchname), 'cookie', GetCookie(), 'table', 'ranked'),
+				If(
+					StringEquals(_playerstats_show_panel, 'stats_panel_public'),
+					SubmitForm('PlayerStats', 'f', 'show_stats', 'nickname', StripClanTag(_player_stats_searchname), 'cookie', GetCookie(), 'table', 'player'),
+					If(
+						StringEquals(_playerstats_show_panel, 'stats_panel_casual'),
+						SubmitForm('PlayerStatsCasual', 'f', 'show_stats', 'nickname', StripClanTag(_player_stats_searchname), 'cookie', GetCookie(), 'table', 'casual'),
+						If(
+							StringEquals(_playerstats_show_panel, 'stats_panel_mastery'),
+							SubmitForm('PlayerStatsMastery', 'f', 'show_stats', 'nickname', StripClanTag(_player_stats_searchname), 'cookie', GetCookie(), 'table', 'mastery'),
+							If(
+								StringEquals(_playerstats_show_panel, 'stats_panel_season_normal'),
+								SubmitForm('PlayerStatsSeasonNormal', 'f', 'show_stats', 'nickname', StripClanTag(_player_stats_searchname), 'cookie', GetCookie(), 'table', 'campaign'),
+								If(
+									StringEquals(_playerstats_show_panel, 'stats_panel_season_casual'),
+									SubmitForm('PlayerStatsSeasonCasual', 'f', 'show_stats', 'nickname', StripClanTag(_player_stats_searchname), 'cookie', GetCookie(), 'table', 'campaign_casual'),
+									If(
+										StringEquals(_playerstats_show_panel, 'stats_panel_history_normal'),
+										SubmitForm('GetSeasons', 'f', 'get_seasons', 'nickname', StripClanTag(_player_stats_searchname), 'cookie', GetCookie()),
+										If(
+											StringEquals(_playerstats_show_panel, 'stats_panel_history_casual'),
+											SubmitForm('GetSeasons', 'f', 'get_seasons', 'nickname', StripClanTag(_player_stats_searchname), 'cookie', GetCookie()),
+											If(
+												StringEquals(_playerstats_show_panel, 'stats_panel_event'),
+												If(!StringEquals(_player_stats_eventid, '-1'),
+													SubmitForm('PlayerStatsEvent', 'f', 'show_stats', 'nickname', StripClanTag(_player_stats_searchname), 'cookie', GetCookie(), 'table', 'event', 'event_id', _player_stats_eventid),
+													SubmitForm('PlayerStatsEvent', 'f', 'show_stats', 'nickname', StripClanTag(_player_stats_searchname), 'cookie', GetCookie(), 'table', 'event')
+												)
+											)
+										)
+									)
+								)
+							)
+						)
+					)
+				)
+			);
+		"
+	/>
+
+	<template name="stats_lastmatches_match">
+		<panel float="right" x=".5h" noclick="true">
+			<label textvalign="center" font="dyn_9" width="8.0h" shadow="true" color=".8 .8 .8 1" noclick="true" watch="{resulttrigger=PlayerStatsResult}" ontrigger="SetText(_playerstats_matchlist_match{matchnum}_date);">{match_date}</label>
+			<label textvalign="center" font="dyn_9" width="8.0h" shadow="true" color="white" noclick="true" watch="{resulttrigger=PlayerStatsResult}" ontrigger="SetText(_playerstats_matchlist_match{matchnum}_id);">{match_id}</label>
+			<instance
+				name="button2" button_name="unnamedButton207_{match_id}_{match_listbox}"
+				inst_init="true"
+				width="4.0h"
+				height="2.0h"
+				borderthickness="0.6h"
+				align="center" valign="center"
+				font="dyn_9"
+				label="general_view"
+				onclick="
+					Trigger('matchstats_viewuser', _player_stats_searchname);
+					_stats_last_replay_id = _playerstats_matchlist_match{matchnum}_id;
+					_stats_last_match_id = _playerstats_matchlist_match{matchnum}_id;
+					Set('_stats_nav_to_match_stats', true);
+					Set('_mainmenu_currentpanel', 'match_stats');
+					CallEvent('MainMenuPanelSwitcher');
+				"
+			/>
+		</panel>
+	</template>
+
+	<template name="stats_season_history_normal">
+		<panel float="right" x=".5h" noclick="true">
+			<label textvalign="center" font="dyn_9" width="16.0h" shadow="true" color=".8 .8 .8 1" noclick="true" content="{season_name}"/>
+			<instance
+				name="button2" button_name="unnamedButton208_{season_id}_{panel}"
+				inst_init="true"
+				width="4.0h"
+				height="2.0h"
+				borderthickness="0.6h"
+				align="center" valign="center"
+				font="dyn_9"
+				label="general_view"
+				onclick="cmd('setsave _playerstats_show_panel ' # 'stats_panel_history_normal'); ShowOnly('stats_panel_history_normal'); SubmitForm('PlayerStatsHistoryNormal', 'f', 'show_stats', 'nickname', StripClanTag(_player_stats_searchname), 'cookie', GetCookie(), 'table', 'campaign_history', 'season_id', '{season_id}', 'is_casual', '0'); Trigger('ChangeComboboxBgColor', 'normal', '1 1 1 1');"
+				onevent="cmd('setsave _playerstats_show_panel ' # 'stats_panel_history_normal'); ShowOnly('stats_panel_history_normal'); SubmitForm('PlayerStatsHistoryNormal', 'f', 'show_stats', 'nickname', StripClanTag(_player_stats_searchname), 'cookie', GetCookie(), 'table', 'campaign_history', 'season_id', '{season_id}', 'is_casual', '0'); Trigger('ChangeComboboxBgColor', 'normal', '1 1 1 1');"
+			/>
+		</panel>
+	</template>
+
+	<template name="stats_season_history_casual">
+		<panel float="right" x=".5h" noclick="true">
+			<label textvalign="center" font="dyn_9" width="16.0h" shadow="true" color=".8 .8 .8 1" noclick="true" content="{season_name}"/>
+			<instance
+				name="button2" button_name="unnamedButton209_{season_id}_{panel}"
+				inst_init="true"
+				width="4.0h"
+				height="2.0h"
+				borderthickness="0.6h"
+				align="center" valign="center"
+				font="dyn_9"
+				label="general_view"
+				onclick="cmd('setsave _playerstats_show_panel ' # 'stats_panel_history_casual'); ShowOnly('stats_panel_history_casual'); SubmitForm('PlayerStatsHistoryCasual', 'f', 'show_stats', 'nickname', StripClanTag(_player_stats_searchname), 'cookie', GetCookie(), 'table', 'campaign_history', 'season_id', '{season_id}', 'is_casual', '1'); Trigger('ChangeComboboxBgColor', 'casual', '.4 1 .4 1');"
+				onevent="cmd('setsave _playerstats_show_panel ' # 'stats_panel_history_casual'); ShowOnly('stats_panel_history_casual'); SubmitForm('PlayerStatsHistoryCasual', 'f', 'show_stats', 'nickname', StripClanTag(_player_stats_searchname), 'cookie', GetCookie(), 'table', 'campaign_history', 'season_id', '{season_id}', 'is_casual', '1'); Trigger('ChangeComboboxBgColor', 'casual', '.4 1 .4 1');"
+			/>
+		</panel>
+	</template>
+
+	<template name="stats_lastmatches_matchhelper">
+		<panel
+			color="invisible"
+			noclick="true"
+			onload="
+				CreateString('_playerstats_matchlist_match{matchnum}_id');
+				CreateString('_playerstats_matchlist_match{matchnum}_date');
+			"
+			watch="{resulttrigger=PlayerStatsResult}"
+			ontrigger="
+				Set('_playerstats_matchlist_match{matchnum}_id', Trim(SubString(param52, ({matchnum} * 10), 10)));
+				Set('_playerstats_matchlist_match{matchnum}_date', SubString(param53, ({matchnum} * 10), 10));
+				Trigger('ReceivedMatchInfos');
+			"
+		/>
+	</template>
+
+	<template name="statistic">
+		<panel height="50" width="99%" color="invisible">
+			<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="4" color="#560001"/>
+			<frame texture="/ui/frames/roundframe.tga" color="#662222" borderthickness="4"/>
+			<panel width="50" align="left" color="invisible">
+				<panel x="3" width="44" height="44" color="red" valign="center"/>
+				<image x="4" valign="center" width="42" height="42" texture="{icon}"/>
+			</panel>
+			<panel width="-53" align="right" color="invisible">
+				<label width="100%" height="60%" valign="top" textvalign="center" align="left" font="chat_14" color="white" shadow="true">{label}</label> <!-- header label -->
+				<label width="100%" height="60%" valign="bottom" textvalign="center" align="center" font="chat_14" color="yellow" shadow="true" watch1="{triggername1}" ontrigger1="{triggereffect1}" watch2="{triggername2}" ontrigger2="{triggereffect2}" watch3="{triggername3}" ontrigger3="{triggereffect3}">{stat}</label> <!-- header label -->
+			</panel>
+		</panel>
+	</template>
+
+	<template name="flavorkills">
+		<panel height="2.0h" noclick="1">
+			<label width="65%" height="100%" align="left" textalign="right" textvalign="center" font="dyn_10" color="{labeltextcolor}" shadow="1" content="{id}" noclick="1" />
+			<label x="19%" width="100%" height="100%" textalign="center" textvalign="center" font="dyn_10" color="{labeltextcolor}" shadow="1" content=":" noclick="1" />
+			<label width="27%" height="100%" align="right" textalign="left" textvalign="center" font="dyn_10" color="white" shadow="1" noclick="1" content="0" watch="{resulttrigger}" ontrigger="{ontrigger}" />
+		</panel>
+	</template>
+
+	<template name="player_stats_panel">
+
+		<instance name="stats_lastmatches_matchhelper" matchnum="0" match_listbox="{match_listbox}" resulttrigger="{resulttrigger=PlayerStatsResult}" />
+		<instance name="stats_lastmatches_matchhelper" matchnum="1" match_listbox="{match_listbox}" resulttrigger="{resulttrigger=PlayerStatsResult}" />
+		<instance name="stats_lastmatches_matchhelper" matchnum="2" match_listbox="{match_listbox}" resulttrigger="{resulttrigger=PlayerStatsResult}" />
+		<instance name="stats_lastmatches_matchhelper" matchnum="3" match_listbox="{match_listbox}" resulttrigger="{resulttrigger=PlayerStatsResult}" />
+		<instance name="stats_lastmatches_matchhelper" matchnum="4" match_listbox="{match_listbox}" resulttrigger="{resulttrigger=PlayerStatsResult}" />
+		<instance name="stats_lastmatches_matchhelper" matchnum="5" match_listbox="{match_listbox}" resulttrigger="{resulttrigger=PlayerStatsResult}" />
+		<instance name="stats_lastmatches_matchhelper" matchnum="6" match_listbox="{match_listbox}" resulttrigger="{resulttrigger=PlayerStatsResult}" />
+		<instance name="stats_lastmatches_matchhelper" matchnum="7" match_listbox="{match_listbox}" resulttrigger="{resulttrigger=PlayerStatsResult}" />
+		<instance name="stats_lastmatches_matchhelper" matchnum="8" match_listbox="{match_listbox}" resulttrigger="{resulttrigger=PlayerStatsResult}" />
+		<instance name="stats_lastmatches_matchhelper" matchnum="9" match_listbox="{match_listbox}" resulttrigger="{resulttrigger=PlayerStatsResult}" />
+		<instance name="stats_lastmatches_matchhelper" matchnum="10" match_listbox="{match_listbox}" resulttrigger="{resulttrigger=PlayerStatsResult}" />
+		<instance name="stats_lastmatches_matchhelper" matchnum="11" match_listbox="{match_listbox}" resulttrigger="{resulttrigger=PlayerStatsResult}" />
+		<instance name="stats_lastmatches_matchhelper" matchnum="12" match_listbox="{match_listbox}" resulttrigger="{resulttrigger=PlayerStatsResult}" />
+		<instance name="stats_lastmatches_matchhelper" matchnum="13" match_listbox="{match_listbox}" resulttrigger="{resulttrigger=PlayerStatsResult}" />
+		<instance name="stats_lastmatches_matchhelper" matchnum="14" match_listbox="{match_listbox}" resulttrigger="{resulttrigger=PlayerStatsResult}" />
+		<instance name="stats_lastmatches_matchhelper" matchnum="15" match_listbox="{match_listbox}" resulttrigger="{resulttrigger=PlayerStatsResult}" />
+		<instance name="stats_lastmatches_matchhelper" matchnum="16" match_listbox="{match_listbox}" resulttrigger="{resulttrigger=PlayerStatsResult}" />
+		<instance name="stats_lastmatches_matchhelper" matchnum="17" match_listbox="{match_listbox}" resulttrigger="{resulttrigger=PlayerStatsResult}" />
+		<instance name="stats_lastmatches_matchhelper" matchnum="18" match_listbox="{match_listbox}" resulttrigger="{resulttrigger=PlayerStatsResult}" />
+		<instance name="stats_lastmatches_matchhelper" matchnum="19" match_listbox="{match_listbox}" resulttrigger="{resulttrigger=PlayerStatsResult}" />
+		<instance name="stats_lastmatches_matchhelper" matchnum="20" match_listbox="{match_listbox}" resulttrigger="{resulttrigger=PlayerStatsResult}" />
+
+		<panel y="1.0h" width="-2.0h" height="-2.5h" align="center" noclick="true" visible="{visible=false}" group="PlayerStatsPanels" name="{panel_name}">
+
+			<!-- Right -->
+			<panel align="right" width="23.6h" float="bottom" padding="0.2h" onloadlua="self:SetVisible('{panel_name}' ~= 'stats_panel_history_normal' and '{panel_name}' ~= 'stats_panel_history_casual')">
+				<instance name="header_bar" height="2.8h" lbl="player_stats_last_20_matches" color="{barcolor=1 1 1 1}" lbl_font="dyn_11" show_close="1" onclick="Set('_mainmenu_currentpanel', 'player_stats'); CallEvent('MainMenuPanelSwitcher');" />
+
+				<panel width="100%" align="center" height="2.4h" noclick="1">
+					<instance name="header_bar" color="{darkbarcolor=.7 .7 .7 1}" height="2.4h" show_close="0"/>
+					<panel float="right" x="1.0h" noclick="true">
+						<label textvalign="center" font="dyn_11" width="8.0h" shadow="true" color="white" noclick="true" content="general_date" />
+						<label textvalign="center" font="dyn_11" width="8.0h" shadow="true" color="white" noclick="true" content="player_stats_matchid" />
+					</panel>
+				</panel>
+
+				<panel height="-5.6h" noclick="true">
+					<frame color="invisible" bordercolor="{framecolor=#455166}" borderthickness="1" noclick="true" />
+
+					<listbox
+						name="{match_listbox}"
+						height="-0.9h" width="-0.6h"
+						align="center" valign="center"
+						color="invisible"
+						font="dyn_10"
+						itemwidth="100%"
+						itemheight="2.9h"
+						select="false"
+						clearselection="true"
+						hoverselect="false"
+						hoverhighlight="true"
+						highlight="under"
+						highlightcolor="{itemhighlight=#46adff42}"
+						highlightbordercolor="invisible"
+						selectedcolor="#346dff52"
+						selectedbordercolor="invisible"
+						backgroundimage="/ui/fe2/elements/comm_item_bg.tga"
+						backgroundimagecolor="{itembgcolor=#1d2f3b}"
+						colortransition="true"
+						colortransitiontime="250"
+						exteriorscrollbars="false"
+						scrollbarplaceholder="true"
+						scrollbarsize="2.0h"
+						scrolltexture="/ui/info/combobox.tga"
+						handleheight="2.0h"
+						watch="{resulttrigger=PlayerStatsResult}"
+						ontriggerlua=""
+					/>
+
+					<!-- No History -->
+					<panel name="{match_listbox}_no_history" visible="true">
+						<frame color="0 0 0 .8" bordercolor="{framecolor=#455166}" borderthickness="1" noclick="true" />
+						<label height="100%" width="-8.0h" align="center" textalign="center" textvalign="center" wrap="true" font="dyn_10" color="white" content="player_stats_nohistory"/>
+					</panel>
+				</panel>
+			</panel>
+
+			<panel align="right" width="23.6h" float="bottom" padding="0.2h" onloadlua="self:SetVisible('{panel_name}' == 'stats_panel_history_normal' or '{panel_name}' == 'stats_panel_history_casual')">
+				<instance name="header_bar" height="2.8h" lbl="player_stats_season_history" color="{barcolor=1 1 1 1}" lbl_font="dyn_11" show_close="1" onclick="Set('_mainmenu_currentpanel', 'player_stats'); CallEvent('MainMenuPanelSwitcher');" />
+
+				<panel height="-3h" noclick="true">
+					<frame color="invisible" bordercolor="{framecolor=#455166}" borderthickness="1" noclick="true" />
+
+					<listbox
+						name="{match_listbox}_season"
+						height="-1.0h" width="-0.6h"
+						align="center" valign="center"
+						color="invisible"
+						font="dyn_10"
+						itemwidth="100%"
+						itemheight="2.9h"
+						select="false"
+						clearselection="true"
+						hoverselect="false"
+						hoverhighlight="true"
+						highlight="under"
+						highlightcolor="{itemhighlight=#46adff42}"
+						highlightbordercolor="invisible"
+						selectedcolor="#346dff52"
+						selectedbordercolor="invisible"
+						backgroundimage="/ui/fe2/elements/comm_item_bg.tga"
+						backgroundimagecolor="{itembgcolor=#1d2f3b}"
+						colortransition="true"
+						colortransitiontime="250"
+						exteriorscrollbars="false"
+						scrollbarplaceholder="true"
+						scrollbarsize="2.0h"
+						scrolltexture="/ui/info/combobox.tga"
+						handleheight="2.0h"
+						watch="{resulttrigger=PlayerStatsResult}"
+						ontriggerlua=""
+					/>
+
+					<!-- No Season -->
+					<panel name="{match_listbox}_no_season" visible="true">
+						<frame color="0 0 0 .8" bordercolor="{framecolor=#455166}" borderthickness="1" noclick="true" />
+						<label height="100%" width="-8.0h" align="center" textalign="center" textvalign="center" wrap="true" font="dyn_10" color="white" content="player_stats_noseason"/>
+					</panel>
+				</panel>
+			</panel>
+
+			<!-- Left -->
+			<panel align="left" width="-24.1h" noclick="true" reverse="true">
+
+				<panel width="-4.3h" x="4.3h" height="2.5h" noclick="true">
+					<instance name="header_bar" height="2.8h" lbl="{title}" onshowtitlelua="{onshowtitlelua}" color="{barcolor=1 1 1 1}" lbl_font="dyn_11" show_close="0" />
+				</panel>
+
+				<!-- Player Overview (Left) -->
+				<panel x="4.3h" width="-52.0h" height="-3.0h" align="left" valign="bottom" noclick="true">
+
+					<!-- User Details -->
+					<panel width="-4.0h" height="9.0h" y="12.5h" align="center">
+						<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.6h" color="#1f1f1f" noclick="1"/>
+						<frame texture="/ui/frames/roundframe.tga" borderthickness="0.6h" color="#666666" noclick="1" />
+
+						<panel width="110%" height="12.5h" y="-8.5h" align="center" color="0 0 0 1">
+							<frame color="invisible" bordercolor=".4 .4 .4 1" borderthickness="1" noclick="1" />
+
+							<panel width="-1h" height="-1h" x=".5h" y=".5h">
+								<panel width="9.5h" height="9.5h">
+									<avatar
+										texture="/ui/common/ability_coverup.tga"
+										watch="{resulttrigger=PlayerStatsResult}"
+										ontrigger=
+										"
+											SetTexture('/ui/common/ability_coverup.tga');
+											If(StringEmpty(GetAccountIconTexturePathFromUpgrades(param88, param4)),
+												SetAvatar('http://www.heroesofnewerth.com/getAvatar.php?id=' # param4),
+												SetTexture(GetAccountIconTexturePathFromUpgrades(param88, param4))
+											);
+										"
+									/>
+								</panel>
+
+								<panel align="right" width="-10.5h" valign="center" float="bottom">
+									<panel width="100%" height="2.6h">
+										<label
+											height="2.6h"
+											font="dyn_16"
+											color="#ffab01"
+											textvalign="center"
+											watch="{resulttrigger=PlayerStatsResult}"
+											ontriggerlua="
+												local nameColor, nameColorFont = GetChatNameColorStringFromUpgrades(param88), GetChatNameColorFontFromUpgrades(param88)
+
+												self:SetFont(NotEmpty(nameColorFont) and nameColorFont..'_16' or 'dyn_16')
+												self:SetColor(NotEmpty(nameColor) and nameColor or '#FFAB01')
+												self:SetGlow(GetChatNameGlowFromUpgrades(param88))
+												self:SetGlowColor(GetChatNameGlowColorStringFromUpgrades(param88))
+												if nameColorFont == '8bit' then
+													self:SetText(string.upper(param0))
+													self:SetY('.2h')
+												else
+													self:SetText(param0)
+													self:SetY('0h')
+												end
+												
+											"
+											contents="-"
+										/>
+
+										<image
+											x="-3.5h"
+											width="2.6h"
+											height="2.6h"
+											align="right"
+											valign="center"
+											watch="{resulttrigger=PlayerStatsResult}"
+											ontrigger=
+											"
+												If(StringEmpty(GetChatSymbolTexturePathFromUpgrades(param88)),
+													If(StringEmpty(GetChatNameColorTexturePathFromUpgrades(param88)),
+														SetVisible(false),
+														Split(SetVisible(true), SetTexture(GetChatNameColorTexturePathFromUpgrades(param88)))
+													),
+													Split(SetVisible(true), SetTexture(GetChatSymbolTexturePathFromUpgrades(param88)))
+												);
+											"
+											onmouseover="
+												Trigger(
+													'StoreImagePreviewInit',
+													GetWidth(),
+													GetHeight(),
+													GetAbsoluteX(),
+													GetAbsoluteY(),
+													false,
+													GetTexture()
+												);
+												Trigger('StoreImagePreviewVis', true, '250%');
+											"
+											onmouseout="DoEvent(1);"
+											onhide="DoEvent(1);"
+											onevent1="Trigger('StoreImagePreviewVis', false, '100%');"
+										/>
+
+										<button
+											name="{button_name}"
+											width="3h"
+											height="3h"
+											align="right"
+											valign="center"
+											color="invisible"
+											onmouseoverlua="PlaySound('/shared/sounds/ui/button_over_01.wav')"
+											onmouseoutlua=""
+											onclicklua="Player_Stats.OpenTourStats()"
+										>
+											<widgetstate statename="up">
+												<image align="center" valign="center" texture="/ui/elements/player_tour_stats_up.tga" noclick="1"/>
+											</widgetstate>
+											<widgetstate statename="over">
+												<image align="center" valign="center" texture="/ui/elements/player_tour_stats_over.tga" noclick="1"/>
+											</widgetstate>
+											<widgetstate statename="down" x="1" y="1">
+												<image align="center" valign="center" texture="/ui/elements/player_tour_stats_over.tga" noclick="1"/>
+											</widgetstate>
+										</button>
+									</panel>
+
+									<panel height="1.8h" align="center">
+										<label width="100%" height="100%" textalign="left" textvalign="top" font="dyn_9" color="1 1 1 1" shadow="1" noclick="1" watch="{resulttrigger=PlayerStatsResult}" ontrigger="SetText(param1);" />
+										<label width="100%" height="100%" textalign="right" textvalign="top" font="dyn_9" color="1 1 1 1" shadow="1" noclick="1" watch="{resulttrigger=PlayerStatsResult}" ontrigger="SetText(param2);" />
+									</panel>
+
+									<panel height="5h" width="100%" onmouseover="##ShowWidget('accountstats_tip');##" onmouseout="##HideWidget('accountstats_tip');##" noclick="1"	>
+
+										<frame texture="/ui/info/backdrop.tga" borderthickness="1.0h" color=".6 .6 .6 1" rendermode="grayscale" noclick="1" />
+										<frame color=".05 .07 .1 .5" bordercolor="#666666" borderthickness="1" noclick="1" />
+										<if condition="!cl_GarenaEnable">
+
+											<!-- F2P -->
+											<label y="0.5h" x="6.0h" width="-4.0h" height="1.8h" align="center" textalign="left" textvalign="top" font="dyn_10" color="1 1 1 1" shadow="1" noclick="1" content="general_basic"
+												 watch="{resulttrigger=PlayerStatsResult}"
+												 ontrigger="
+												 If(param119 ge accountStanding_verifiedThreshold or param119 == 0,
+													SetText(Translate('general_verified')),
+													SetText(Translate('general_basic'))
+												);"
+											/>
+
+											<image color="1 1 1 1" y="0.1h" x="5h" width="2.4h" height="2.4h" valign="top" align="left" visible="1" texture="/ui/icons/basic.tga" noclick="0"
+												 watch="{resulttrigger=PlayerStatsResult}"
+												 ontrigger="
+												 If(param119 ge accountStanding_verifiedThreshold or param119 == 0,
+													Split(SetOnMouseover('ShowWidget(\'general_verified\');'), SetTexture('/ui/icons/verified.tga')),
+													Split(SetOnMouseover('ShowWidget(\'general_basic\');'), SetTexture('/ui/icons/basic.tga'))
+												); "
+												onmouseout="HideWidget('general_verified'); HideWidget('general_basic');" onhide="HideWidget('general_verified'); HideWidget('general_basic');"
+											/>
+										</if>
+
+										<panel height="-1h" width="100@" align="right" color="0 0 0 .5" x="-.5h" valign="center">
+											<frame color="invisible" bordercolor="#666666" borderthickness="1" noclick="1" />
+											<label height="100%" width="100%" textalign="center" textvalign="center" font="dyn_14" color="1 1 1 1" shadow="1" noclick="1" watch="{resulttrigger=PlayerStatsResult}" ontrigger="SetText(param113);" />
+										</panel>
+
+										<panel valign="bottom" height="2h" y="-.5h" x=".5h" width="-6.5h" align="left" color="invisible" noclick="1">
+											<image texture="/ui/legion/behind_bar.tga" color="#170045" noclick="1" />
+
+											<panel width="0" watch="{resulttrigger=PlayerStatsResult}" ontrigger="If(param114 gt 0, SetWidth(FtoP(GetAccountPercentNextLevel(param114))), SetWidth(0));"  noclick="1">
+												<image texture="/ui/legion/behind_bar.tga" color="#ac00f5" noclick="1" />
+												<image align="right" texture="/ui/legion/behind_bar.tga" color="1 1 1 .5" noclick="1"/>
+											</panel>
+
+											<image width="-0.6h" align="center" texture="/ui/elements/bar_highlight.tga" noclick="1"/>
+											<frame color="invisible" bordercolor="#666666" borderthickness="1" noclick="1" />
+										</panel>
+									</panel>
+								</panel>
+							</panel>
+
+							<!-- Created / Login Dates -->
+							<panel y="-0.5h" width="-1.0h" height="1.5h" align="center" valign="bottom" grow="true">
+								<label color="white" font="dyn_9" align="left" watch="{resulttrigger=PlayerStatsResult}" ontrigger="SetText(Translate('player_stats_account_age', 'age', param75));" />
+								<label color="white" font="dyn_9" align="right" textalign="right" watch="{resulttrigger=PlayerStatsResult}" ontrigger="SetText(Translate('player_stats_last_match', 'last', param51));" />
+							</panel>
+						</panel>
+
+						<panel width="100%" align="center" grow="true">
+							<panel height="4.5h" />
+							<panel width="100%" y="4.5h" height="2h" float="right">
+								<label width="33.3%" color="#ffab01" shadow="1" font="dyn_11" textvalign="top" textalign="center" noclick="1">player_stats_matches</label>
+								<label width="33.3%" color="#ffab01" shadow="1" font="dyn_11" textvalign="top" textalign="center" noclick="1">player_stats_disconnects</label>
+								<label width="33.3%" color="#ffab01" shadow="1" font="dyn_11" textvalign="top" textalign="center" noclick="1">player_stats_leave_percent</label>
+							</panel>
+							<panel width="100%" height="2h" y="6.5h" float="right" onloadlua="self:SetVisible('{panel_name}' ~= 'stats_panel_history_normal' and '{panel_name}' ~= 'stats_panel_history_casual')">
+
+								<!-- Matches Played -->
+								<label width="33.3%" color="white" shadow="1" font="dyn_11" textvalign="center" textalign="center" onmouseover="ShowWidget('stats_tip_matches_played');" onmouseout="HideWidget('stats_tip_matches_played');" watch="{resulttrigger=PlayerStatsResult}" ontrigger="
+									If(!StringEmpty(param5),
+										SetText(Round(param125) # ' (' # param5 # ')'),
+										SetText(Round(param125) # ' (0)')
+									);
+								" />
+
+								<!-- Discos -->
+								<label width="33.3%" color="white" shadow="1" font="dyn_11" textvalign="center" textalign="center" onmouseover="ShowWidget('stats_tip_disconnects');" onmouseout="HideWidget('stats_tip_disconnects');" watch="{resulttrigger=PlayerStatsResult}" ontrigger="
+									If(!StringEmpty(param11),
+										SetText(Round(param126) # ' (' # param11 # ')'),
+										SetText(Round(param126) # ' (0)')
+									);"
+								/>
+
+								<!-- Leave % -->
+								<label width="33.3%" color="white" shadow="1" font="dyn_11" textvalign="center" textalign="center" watch="{resulttrigger=PlayerStatsResult}" ontrigger="
+									If(
+										param126 gt 0,
+										SetText(FtoA(FtoP(param126 / param125), 1) # '%'),
+										SetText('0%')
+									);
+								" />
+
+							</panel>
+
+							<panel width="100%" height="2h" y="6.5h" float="right" onloadlua="self:SetVisible('{panel_name}' == 'stats_panel_history_normal' or '{panel_name}' == 'stats_panel_history_casual')">
+
+								<!-- Matches Played -->
+								<label width="33.3%" color="white" shadow="1" font="dyn_11" textvalign="center" textalign="center" onmouseover="" onmouseout="" watch="{resulttrigger=PlayerStatsResult}" 
+									ontrigger="
+										If(!StringEmpty(param139),
+											SetText(Round(param139)),
+											SetText('-')
+										);"
+								 />
+
+								<!-- Discos -->
+								<!-- <label width="33.3%" color="white" shadow="1" font="dyn_11" textvalign="center" textalign="center" onmouseover="" onmouseout="" watch="{resulttrigger=PlayerStatsResult}" ontrigger="SetText(Round(param141));"
+								/> -->
+								<label width="33.3%" color="white" shadow="1" font="dyn_11" textvalign="center" textalign="center" onmouseover="" onmouseout="" content="-"/>
+								<label width="33.3%" color="white" shadow="1" font="dyn_11" textvalign="center" textalign="center" content="-"/>
+							</panel>
+						</panel>
+
+					</panel>
+
+					<panel y="-11.0h" width="100%" height="12h" valign="bottom" noclick="1"
+						onloadlua="self:SetVisible('{panel_name}' == 'stats_panel_history_normal' or '{panel_name}' == 'stats_panel_history_casual')"
+					>
+						<!-- Normal Season-->
+						<panel watch="{resulttrigger=PlayerStatsResult}"
+								ontriggerlua="  if NotEmpty(param137) and tonumber(param137) >= 1000 then
+													self:SetVisible(false)
+												else
+													self:SetVisible(true)
+												end">
+							<panel x="8h" y="-4.5h" width="50%" height="1.8h" noclick="true" align="center" valign="center" >
+								<label textalign="center" textvalign="center" font="dyn_12" color="white" shadow="1" noclick="1"
+								watch="{resulttrigger=PlayerStatsResult}"
+								ontriggerlua="  if NotEmpty(param137) then
+													local season_name = ''
+													local is_casual = '{panel_name}' == 'stats_panel_history_casual'
+													if tonumber(param137) >= 1000 then
+														if is_casual then
+															season_name = Translate('player_stats_preseason_name_casual')
+														else
+															season_name = Translate('player_stats_preseason_name_normal')
+														end
+													else
+														if is_casual then
+															season_name = Translate('player_stats_season_name_casual', 'season_id', param137)
+														else
+															season_name = Translate('player_stats_season_name_normal', 'season_id', param137)
+														end
+													end
+													self:SetText(season_name)
+												end"/>
+							</panel>
+
+							<!-- Wins -->
+							<panel x="8h" y="-2h" width="50%" height="1.8h" noclick="true" align="center" valign="center" >
+								<label width="47%" height="100%" align="left" textalign="right" textvalign="center" font="dyn_12" color="{labeltextcolor=#3abde7}" shadow="1" content="player_stats_wins" noclick="1" />
+								<label width="100%" height="100%" textalign="center" textvalign="center" font="dyn_12" color="{labeltextcolor=#3abde7}" shadow="1" content=":" noclick="1" />
+								<label width="47%" height="100%" align="right" textalign="left" textvalign="center" font="dyn_12" color="white" shadow="1" noclick="1" watch="{resulttrigger=PlayerStatsResult}" ontrigger="SetText(param6);" />
+							</panel>
+
+							<!-- Losses -->
+							<panel x="8h" y="1h" width="50%" height="1.8h" noclick="true" align="center" valign="center" >
+								<label width="47%" height="100%" align="left" textalign="right" textvalign="center" font="dyn_12" color="{labeltextcolor=#3abde7}" shadow="1" content="player_stats_losses" noclick="1" />
+								<label width="100%" height="100%" textalign="center" textvalign="center" font="dyn_12" color="{labeltextcolor=#3abde7}" shadow="1" content=":" noclick="1" />
+								<label width="47%" height="100%" align="right" textalign="left" textvalign="center" font="dyn_12" color="white" shadow="1" noclick="1" watch="{resulttrigger=PlayerStatsResult}" ontrigger="SetText(param7);" />
+							</panel>
+
+							<!-- Win % -->
+							<panel x="8h" y="4h" width="50%" height="1.8h" noclick="true" align="center" valign="center" >
+								<label width="47%" height="100%" align="left" textalign="right" textvalign="center" font="dyn_12" color="{labeltextcolor=#3abde7}" shadow="1" content="player_stats_winning_percentage" noclick="1" />
+								<label width="100%" height="100%" textalign="center" textvalign="center" font="dyn_12" color="{labeltextcolor=#3abde7}" shadow="1" content=":" noclick="1" />
+								<label width="47%" height="100%" align="right" textalign="left" textvalign="center" font="dyn_12" color="white" shadow="1" noclick="1" watch="{resulttrigger=PlayerStatsResult}" ontrigger="SetText(Translate('player_stats_win_percent', 'percent', FtoP(param6 / (param6 + param7), 0)));" />
+							</panel>
+						</panel>
+
+						<!-- Pre Season-->
+						<panel watch="{resulttrigger=PlayerStatsResult}" x="-5h"
+								ontriggerlua="  if NotEmpty(param137) and tonumber(param137) >= 1000 then
+													self:SetVisible(true)
+												else
+													self:SetVisible(false)
+												end" visible="0">
+							<panel x="8h" y="-4.5h" width="50%" height="1.8h" noclick="true" align="center" valign="center" >
+								<label textalign="center" textvalign="center" font="dyn_12" color="white" shadow="1" noclick="1"
+								watch="{resulttrigger=PlayerStatsResult}"
+								ontriggerlua="  if NotEmpty(param137) then
+													local season_name = ''
+													local is_casual = '{panel_name}' == 'stats_panel_history_casual'
+													if tonumber(param137) >= 1000 then
+														if is_casual then
+															season_name = Translate('player_stats_preseason_name_casual')
+														else
+															season_name = Translate('player_stats_preseason_name_normal')
+														end
+													else
+														if is_casual then
+															season_name = Translate('player_stats_season_name_casual', 'season_id', param137)
+														else
+															season_name = Translate('player_stats_season_name_normal', 'season_id', param137)
+														end
+													end
+													self:SetText(season_name)
+												end"/>
+							</panel>
+
+							<!-- MMR -->
+							<panel x="8h" y="-2h" width="50%" height="1.8h" noclick="true" align="center" valign="center" >
+								<label width="47%" height="100%" align="left" textalign="right" textvalign="center" font="dyn_12" color="{labeltextcolor=#3abde7}" shadow="1" content="player_stats_mmr" noclick="1" />
+								<label width="100%" height="100%" textalign="center" textvalign="center" font="dyn_12" color="{labeltextcolor=#3abde7}" shadow="1" content=":" noclick="1" />
+								<label width="47%" height="100%" align="right" textalign="left" textvalign="center" font="dyn_12" color="white" shadow="1" noclick="1" watch="{resulttrigger=PlayerStatsResult}" ontrigger="
+										If(!StringEmpty(param17),
+											SetText(ClampRank(param17, 2)),
+											SetText('0')
+										);
+									" />
+							</panel>
+
+							<!-- Wins -->
+							<panel x="8h" y="0.3h" width="50%" height="1.8h" noclick="true" align="center" valign="center" >
+								<label width="47%" height="100%" align="left" textalign="right" textvalign="center" font="dyn_12" color="{labeltextcolor=#3abde7}" shadow="1" content="player_stats_wins" noclick="1" />
+								<label width="100%" height="100%" textalign="center" textvalign="center" font="dyn_12" color="{labeltextcolor=#3abde7}" shadow="1" content=":" noclick="1" />
+								<label width="47%" height="100%" align="right" textalign="left" textvalign="center" font="dyn_12" color="white" shadow="1" noclick="1" watch="{resulttrigger=PlayerStatsResult}" ontrigger="SetText(param6);" />
+							</panel>
+
+							<!-- Losses -->
+							<panel x="8h" y="2.3h" width="50%" height="1.8h" noclick="true" align="center" valign="center" >
+								<label width="47%" height="100%" align="left" textalign="right" textvalign="center" font="dyn_12" color="{labeltextcolor=#3abde7}" shadow="1" content="player_stats_losses" noclick="1" />
+								<label width="100%" height="100%" textalign="center" textvalign="center" font="dyn_12" color="{labeltextcolor=#3abde7}" shadow="1" content=":" noclick="1" />
+								<label width="47%" height="100%" align="right" textalign="left" textvalign="center" font="dyn_12" color="white" shadow="1" noclick="1" watch="{resulttrigger=PlayerStatsResult}" ontrigger="SetText(param7);" />
+							</panel>
+
+							<!-- Win % -->
+							<panel x="8h" y="4.5h" width="50%" height="1.8h" noclick="true" align="center" valign="center" >
+								<label width="47%" height="100%" align="left" textalign="right" textvalign="center" font="dyn_12" color="{labeltextcolor=#3abde7}" shadow="1" content="player_stats_winning_percentage" noclick="1" />
+								<label width="100%" height="100%" textalign="center" textvalign="center" font="dyn_12" color="{labeltextcolor=#3abde7}" shadow="1" content=":" noclick="1" />
+								<label width="47%" height="100%" align="right" textalign="left" textvalign="center" font="dyn_12" color="white" shadow="1" noclick="1" watch="{resulttrigger=PlayerStatsResult}" ontrigger="SetText(Translate('player_stats_win_percent', 'percent', FtoP(param6 / (param6 + param7), 0)));" />
+							</panel>
+						</panel>
+
+						<!-- Highest Rank of that season -->
+						<panel x="6h" width="25%" align="left" watch="{resulttrigger=PlayerStatsResult}"
+								ontriggerlua="  if NotEmpty(param137) and tonumber(param137) >= 1000 then
+													self:SetVisible(false)
+												else
+													self:SetVisible(true)
+												end">
+							<panel align="center" valign="top" y="0.5h" height="2h" width="150%">
+								<label textalign="center" textvalign="center" font="dyn_12" color="white" shadow="1" noclick="1" content="player_stats_history_highest"/>
+							</panel>
+							<panel y="0.5h" align="center" valign="center" width="8h" height="8h">
+								<image watch="{resulttrigger=PlayerStatsResult}"  texture="$invis"
+										ontriggerlua="  if NotEmpty(param135) and tonumber(param135) > 0 then
+															self:SetTexture('/ui/fe2/season/icon_l/'..GetRankIconNameRankLevelAfterS6(tonumber(param135)))
+															self:SetRenderMode('normal')
+														else
+															self:SetTexture('/ui/fe2/season/nolevel.tga')
+															self:SetRenderMode('grayscale')
+														end"/>
+							</panel>
+							<panel align="center" valign="bottom" height="2h" width="150%">
+								<label textalign="center" textvalign="center" font="dyn_10" color="white" shadow="1" noclick="1"
+									watch="{resulttrigger=PlayerStatsResult}"
+									ontriggerlua="  if NotEmpty(param135) and tonumber(param135) > 0 then
+														if IsMaxRankLevel(tonumber(param135)) and NotEmpty(param147) and tonumber(param147) > 0 then
+															self:SetText(Translate('player_compaign_level_name_S7_'..param135)..' '..param147)
+														else
+															self:SetText(Translate('player_compaign_level_name_S7_'..param135))
+														end
+													else
+														self:SetText(Translate('player_compaign_level_name_0'))
+													end"/>
+							</panel>
+						</panel>
+					</panel>
+
+					<panel y="-11.0h" width="100%" height="12h" valign="bottom" noclick="1"
+						onloadlua="self:SetVisible('{panel_name}' == 'stats_panel_season_normal' or
+													'{panel_name}' == 'stats_panel_season_casual')"
+					>
+						<panel x="2h" y="-4.5h" width="50%" height="1.8h" noclick="true" align="center" valign="center" >
+							<label textalign="center" textvalign="center" font="dyn_12" color="white" shadow="1" noclick="1"
+								watch="{resulttrigger=PlayerStatsResult}"
+								ontriggerlua="  if NotEmpty(param137) then
+													local season_name = ''
+													local is_casual = '{panel_name}' == 'stats_panel_season_casual'
+													if tonumber(param137) >= 1000 then
+														if is_casual then
+															season_name = Translate('player_stats_preseason_name_casual')
+														else
+															season_name = Translate('player_stats_preseason_name_normal')
+														end
+													else
+														if is_casual then
+															season_name = Translate('player_stats_season_name_casual', 'season_id', param137)
+														else
+															season_name = Translate('player_stats_season_name_normal', 'season_id', param137)
+														end
+													end
+													self:SetText(season_name)
+												end"/>
+						</panel>
+
+						<!-- Wins -->
+						<panel x="2h" y="-2h" width="50%" height="1.8h" noclick="true" align="center" valign="center" >
+							<label width="47%" height="100%" align="left" textalign="right" textvalign="center" font="dyn_12" color="{labeltextcolor=#3abde7}" shadow="1" content="player_stats_wins" noclick="1" />
+							<label width="100%" height="100%" textalign="center" textvalign="center" font="dyn_12" color="{labeltextcolor=#3abde7}" shadow="1" content=":" noclick="1" />
+							<label width="47%" height="100%" align="right" textalign="left" textvalign="center" font="dyn_12" color="white" shadow="1" noclick="1" watch="{resulttrigger=PlayerStatsResult}" ontrigger="SetText(param6);" />
+						</panel>
+
+						<!-- Losses -->
+						<panel x="2h" y="1h" width="50%" height="1.8h" noclick="true" align="center" valign="center" >
+							<label width="47%" height="100%" align="left" textalign="right" textvalign="center" font="dyn_12" color="{labeltextcolor=#3abde7}" shadow="1" content="player_stats_losses" noclick="1" />
+							<label width="100%" height="100%" textalign="center" textvalign="center" font="dyn_12" color="{labeltextcolor=#3abde7}" shadow="1" content=":" noclick="1" />
+							<label width="47%" height="100%" align="right" textalign="left" textvalign="center" font="dyn_12" color="white" shadow="1" noclick="1" watch="{resulttrigger=PlayerStatsResult}" ontrigger="SetText(param7);" />
+						</panel>
+
+						<!-- Win % -->
+						<panel x="2h" y="4h" width="50%" height="1.8h" noclick="true" align="center" valign="center" >
+							<label width="47%" height="100%" align="left" textalign="right" textvalign="center" font="dyn_12" color="{labeltextcolor=#3abde7}" shadow="1" content="player_stats_winning_percentage" noclick="1" />
+							<label width="100%" height="100%" textalign="center" textvalign="center" font="dyn_12" color="{labeltextcolor=#3abde7}" shadow="1" content=":" noclick="1" />
+							<label width="47%" height="100%" align="right" textalign="left" textvalign="center" font="dyn_12" color="white" shadow="1" noclick="1" watch="{resulttrigger=PlayerStatsResult}" ontrigger="SetText(Translate('player_stats_win_percent', 'percent', FtoP(param6 / (param6 + param7), 0)));" />
+						</panel>
+
+						<!-- Current Rank -->
+						<panel x="2h" width="25%" align="left" noclick="1">
+							<panel align="center" valign="top" y="0.5h" height="2h" width="150%" noclick="1">
+								<label textalign="center" textvalign="center" font="dyn_12" color="white" shadow="1" noclick="1" content="player_stats_season_highest"
+									onshowlua="self:SetText(Translate(IsPreseason() and 'player_stats_preseason_highest' or 'player_stats_season_highest'))"
+								/>
+							</panel>
+							<panel y="0.5h" align="center" valign="center" width="8h" height="8h" noclick="1">
+								<image watch="{resulttrigger=PlayerStatsResult}"  texture="$invis" noclick="1"
+										ontriggerlua="  if NotEmpty(param135) and tonumber(param135) > 0 then
+															self:SetTexture('/ui/fe2/season/icon_l/'..GetRankIconNameRankLevelAfterS6(tonumber(param135)))
+															self:SetRenderMode('normal')
+														else
+															self:SetTexture('/ui/fe2/season/nolevel.tga')
+															self:SetRenderMode('grayscale')
+														end" />
+							</panel>
+							<panel align="center" valign="bottom" height="2h" width="150%">
+								<label textalign="center" textvalign="center" font="dyn_10" color="white" shadow="1" noclick="1"
+									watch="{resulttrigger=PlayerStatsResult}"
+									ontriggerlua="  if NotEmpty(param135) and tonumber(param135) > 0 then
+														if IsMaxRankLevel(tonumber(param135)) and NotEmpty(param138) and tonumber(param138) > 0 then
+															self:SetText(Translate('player_compaign_level_name_S7_'..param135)..' '..param138)
+														else
+															self:SetText(Translate('player_compaign_level_name_S7_'..param135))
+														end
+													else
+														self:SetText(Translate('player_compaign_level_name_0'))
+													end"/>
+							</panel>
+						</panel>
+
+						<!-- Highest Rank -->
+						<panel x="-2h" width="25%" align="right" noclick="1">
+							<panel align="center" valign="top" y="0.5h" height="2h" width="150%" noclick="1">
+								<label textalign="center" textvalign="center" font="dyn_12" color="white" shadow="1" noclick="1" content="player_stats_history_highest"/>
+							</panel>
+							<panel y="0.5h" align="center" valign="center" width="8h" height="8h" noclick="1">
+								<image watch="{resulttrigger=PlayerStatsResult}"  texture="$invis" noclick="1"
+										ontriggerlua="  if NotEmpty(param136) and tonumber(param136) > 0 then
+															self:SetTexture('/ui/fe2/season/icon_l/'..GetRankIconNameRankLevelAfterS6(tonumber(param136)))
+															self:SetRenderMode('normal')
+														else
+															self:SetTexture('/ui/fe2/season/nolevel.tga')
+															self:SetRenderMode('grayscale')
+														end"/>
+							</panel>
+							<panel align="center" valign="bottom" height="2h" width="150%">
+								<label textalign="center" textvalign="center" font="dyn_10" color="white" shadow="1" noclick="1"
+									watch="{resulttrigger=PlayerStatsResult}"
+									ontriggerlua="  if NotEmpty(param136) and tonumber(param136) > 0 then
+														if IsMaxRankLevel(tonumber(param136)) and NotEmpty(param147) and tonumber(param147) > 0 then
+															self:SetText(Translate('player_compaign_level_name_S7_'..param136)..' '..param147)
+														else
+															self:SetText(Translate('player_compaign_level_name_S7_'..param136))
+														end
+													else
+														self:SetText(Translate('player_compaign_level_name_0'))
+													end"/>
+							</panel>
+						</panel>
+
+						<panel x="-14h" y="1.5h" width="1" height="7h" align="right" valign="center">
+							<frame color="0 0 0 .8" bordercolor="{framecolor=#455166}" borderthickness="1" noclick="true" />
+						</panel>
+					</panel>
+					<!-- Acct Overview Stats -->
+					<panel y="-11.0h" grow="true" width="100%" valign="bottom" noclick="1" float="bottom" reverse="1" padding="0.7h"
+						onshow="If(StringEquals('{panel_name}', 'stats_panel_event'), SetX('-9h'), SetX('0.0h'));"
+						onloadlua="self:SetVisible('{panel_name}' ~= 'stats_panel_season_normal' and
+													'{panel_name}' ~= 'stats_panel_season_casual' and
+													'{panel_name}' ~= 'stats_panel_history_normal' and
+													'{panel_name}' ~= 'stats_panel_history_casual')"
+					>
+						<!-- MMR / PSR (for non-event tabs) -->
+						<panel height="1.8h" noclick="true" sticky="1" stickytoinvis="0"
+							onshow="SetVisible(!StringEquals('{panel_name}', 'stats_panel_event'))"
+						>
+							<label width="47%" height="100%" align="left" textalign="right" textvalign="center" font="dyn_11" color="{labeltextcolor=#3abde7}" shadow="1" content="" onshow="
+								If(
+									StringEquals('{panel_name}', 'stats_panel_ranked'),
+									SetText(Translate('player_stats_mmr'))
+								);
+								If(
+									StringEquals('{panel_name}', 'stats_panel_casual'),
+									SetText(Translate('player_stats_mmr'))
+								);
+								If(
+									StringEquals('{panel_name}', 'stats_panel_public'),
+									SetText(Translate('player_stats_psr'))
+								);
+								If(
+									StringEquals('{panel_name}', 'stats_panel_event'),
+									SetText(Translate('player_stats_mmr'))
+								);
+							" noclick="1" />
+							<label width="100%" height="100%" textalign="center" textvalign="center" font="dyn_11" color="{labeltextcolor=#3abde7}" shadow="1" content=":" noclick="1" />
+							<label width="47%" height="100%" align="right" textalign="left" textvalign="center" font="dyn_11" color="white" shadow="1" noclick="1" content="-" watch="{resulttrigger=PlayerStatsResult}"
+							ontrigger="
+								SetText(
+									If(
+										StringEquals('{panel_name}', 'stats_panel_public'),
+										ClampRank(param13, 0),
+										ClampRank(param17, 2)
+									)
+								);
+							"
+							/>
+						</panel>
+
+						<!-- Event Selection (only for event tab) -->
+						<panel height="1.8h" noclick="true"  sticky="1" stickytoinvis="0"
+							onshow="SetVisible(StringEquals('{panel_name}', 'stats_panel_event'))"
+						>
+							<label width="47%" height="100%" align="left" textalign="right" textvalign="center" font="dyn_11" color="{labeltextcolor=#3abde7}" shadow="1" content="player_stats_event_selection" noclick="1" />
+							<label width="100%" height="100%" textalign="center" textvalign="center" font="dyn_11" color="{labeltextcolor=#3abde7}" shadow="1" content=":" noclick="1" />
+							<!-- combobox for events -->
+							<combobox
+								x="8.4h"
+								width="68%"
+								height="2h"
+								align="right"
+								valign="center"
+								color="invisible"
+								itemwidth="100%"
+								itemheight="2h"
+								maxlistheight="4"
+								exteriorscrollbars="false"
+								scrolltexture="/ui/info/combobox.tga"
+								handleheight="100@" handlewidth="100%"
+								scrollbarsize="2h"
+								scrollbaroffset="0"
+								highlight="under"
+								highlightbordercolor="{framecolor=#455166}"
+								highlightcolor="{panelbgcolor=#141e27}"
+								onmouseover="PlaySound('/shared/sounds/ui/button_over_02.wav');"
+								onselect="	If(this != _player_stats_eventid,
+												Split(
+													Set('_player_stats_eventid', this),
+													CallEvent('player_stats_submit')
+												)
+											);"
+								watch="{resulttrigger=PlayerStatsResult}"
+								ontriggerlua="
+									if (NotEmpty(param128)) then
+										local events = explode('`', param128)
+										local eventInfos = explode('`', '')
+
+										self:ClearItems()
+										for i, e in ipairs(events) do
+											if (NotEmpty(e)) then
+												eventInfos[i] = explode('~', e)
+											end
+										end
+										if (eventInfos) then
+											local sF = function(a,b) return tonumber(a[1]) > tonumber(b[1]) end
+											table.sort(eventInfos, sF)
+
+											for i,e in pairs(eventInfos) do
+												self:AddTemplateListItem('Ncombobox_item', e[1], 'label', e[2])
+											end
+										end
+
+										self:SetSelectedItemByValue(param127)
+									end
+								"
+							>
+								<instance name="Noptions_combobox_state" state="up" color="{labeltextcolor=#3abde7}" image="up"/>
+								<instance name="Noptions_combobox_state" state="over" color="{itemhighlight=#46adff42}" image="over"/>
+								<instance name="Noptions_combobox_state" state="down" color="{itemhighlight=#46adff42}" image="over"/>
+								<widgetstate statename="listbg">
+									<frame height="+2.7h" y="-1.9h" texture="/ui/info/combobox_dropdown.tga" borderthickness="3h" color="{itembgcolor}" />
+								</widgetstate>
+								<widgetstate statename="itembg">
+									<panel width="100%" />
+								</widgetstate>
+								<widgetstate statename="itemhighlight=#46adff42">
+									<panel width="100%" texture="/ui/info/header_bar_c.tga" color="{itemhighlight=#46adff42}">
+										<panel width="100%" height="100%" >
+											<image height="50%" width="32" align="left" valign="top" color="{itemhighlight=#46adff42}" texture="/ui/info/header_bar_tl.tga" noclick="1"/>
+											<image height="50%" width="32" align="left" valign="bottom" color="{itemhighlight=#46adff42}" texture="/ui/info/header_bar_bl.tga" noclick="1"/>
+											<image height="50%" width="32" align="right" valign="top" color="{itemhighlight=#46adff42}" texture="/ui/info/header_bar_tr.tga" noclick="1"/>
+											<image height="50%" width="32" align="right" valign="bottom" color="{itemhighlight=#46adff42}" texture="/ui/info/header_bar_br.tga" noclick="1"/>
+										</panel>
+									</panel>
+								</widgetstate>
+							</combobox>
+						</panel>
+
+						<!-- Wins -->
+						<panel height="1.8h" noclick="true" sticky="1" stickytoinvis="0" >
+							<label width="47%" height="100%" align="left" textalign="right" textvalign="center" font="dyn_11" color="{labeltextcolor=#3abde7}" shadow="1" content="player_stats_wins" noclick="1" />
+							<label width="100%" height="100%" textalign="center" textvalign="center" font="dyn_11" color="{labeltextcolor=#3abde7}" shadow="1" content=":" noclick="1" />
+							<label width="47%" height="100%" align="right" textalign="left" textvalign="center" font="dyn_11" color="white" shadow="1" noclick="1" watch="{resulttrigger=PlayerStatsResult}" ontrigger="SetText(param6);" />
+						</panel>
+
+						<!-- Losses -->
+						<panel height="1.8h" noclick="true" sticky="1" stickytoinvis="0">
+							<label width="47%" height="100%" align="left" textalign="right" textvalign="center" font="dyn_11" color="{labeltextcolor=#3abde7}" shadow="1" content="player_stats_losses" noclick="1" />
+							<label width="100%" height="100%" textalign="center" textvalign="center" font="dyn_11" color="{labeltextcolor=#3abde7}" shadow="1" content=":" noclick="1" />
+							<label width="47%" height="100%" align="right" textalign="left" textvalign="center" font="dyn_11" color="white" shadow="1" noclick="1" watch="{resulttrigger=PlayerStatsResult}" ontrigger="SetText(param7);" />
+						</panel>
+
+						<!-- Win % -->
+						<panel height="1.8h" noclick="true" sticky="1" stickytoinvis="0">
+							<label width="47%" height="100%" align="left" textalign="right" textvalign="center" font="dyn_11" color="{labeltextcolor=#3abde7}" shadow="1" content="player_stats_winning_percentage" noclick="1" />
+							<label width="100%" height="100%" textalign="center" textvalign="center" font="dyn_11" color="{labeltextcolor=#3abde7}" shadow="1" content=":" noclick="1" />
+							<label width="47%" height="100%" align="right" textalign="left" textvalign="center" font="dyn_11" color="white" shadow="1" noclick="1" watch="{resulttrigger=PlayerStatsResult}" ontrigger="SetText(Translate('player_stats_win_percent', 'percent', FtoP(param6 / (param6 + param7), 0)));" />
+						</panel>
+
+					</panel>
+
+					<!-- Most Played Heroes -->
+					<panel y="0" width="-2.0h" height="11.0h" align="center" valign="bottom" noclick="bottom">
+						<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.6h" color="{panelbgcolor=#141e27}" noclick="1"/>
+						<frame texture="/ui/frames/roundframe.tga" borderthickness="0.6h" color="{framecolor=#455166}" noclick="1" />
+						<panel grow="true" width="100%" float="bottom" padding=".2h">
+							<label y="0.2h" textalign="center" height="2.2h" textvalign="center" color="{labeltextcolor=#3abde7}" shadow="true" font="dyn_12">player_stats_mostplayed</label>
+							<panel height="8h" width="100%" align="center" float="right">
+								<panel width="20%" float="bottom" padding=".5h">
+									<panel align="center" width="75@" height="75%">
+										<image texture="/ui/common/ability_coverup.tga" watch="{resulttrigger=PlayerStatsResult}" ontrigger="Set('_playerstats_hero_icon_temp', param54); CallEvent('playerstats_parse_icon'); SetTexture(_playerstats_hero_icon_output);" />
+										<frame color="invisible" bordercolor=".2 .2 .2 1" borderthickness="1" noclick="true" />
+									</panel>
+									<label textalign="center" align="center" font="dyn_11" color="white" watch="{resulttrigger=PlayerStatsResult}" ontrigger="SetText(Round(param59) # '%');">-</label>
+								</panel>
+								<panel width="20%" float="bottom" padding=".5h">
+									<panel align="center" width="75@" height="75%">
+										<image texture="/ui/common/ability_coverup.tga" watch="{resulttrigger=PlayerStatsResult}" ontrigger="Set('_playerstats_hero_icon_temp', param55); CallEvent('playerstats_parse_icon'); SetTexture(_playerstats_hero_icon_output);" />
+										<frame color="invisible" bordercolor=".2 .2 .2 1" borderthickness="1" noclick="true" />
+									</panel>
+									<label textalign="center" align="center" font="dyn_11" color="white" watch="{resulttrigger=PlayerStatsResult}" ontrigger="SetText(Round(param60) # '%');">-</label>
+								</panel>
+								<panel width="20%" float="bottom" padding=".5h">
+									<panel align="center" width="75@" height="75%">
+										<image texture="/ui/common/ability_coverup.tga" watch="{resulttrigger=PlayerStatsResult}" ontrigger="Set('_playerstats_hero_icon_temp', param56); CallEvent('playerstats_parse_icon'); SetTexture(_playerstats_hero_icon_output);" />
+										<frame color="invisible" bordercolor=".2 .2 .2 1" borderthickness="1" noclick="true" />
+									</panel>
+									<label textalign="center" align="center" font="dyn_11" color="white" watch="{resulttrigger=PlayerStatsResult}" ontrigger="SetText(Round(param61) # '%');">-</label>
+								</panel>
+								<panel width="20%" float="bottom" padding=".5h">
+									<panel align="center" width="75@" height="75%">
+										<image texture="/ui/common/ability_coverup.tga" watch="{resulttrigger=PlayerStatsResult}" ontrigger="Set('_playerstats_hero_icon_temp', param57); CallEvent('playerstats_parse_icon'); SetTexture(_playerstats_hero_icon_output);" />
+										<frame color="invisible" bordercolor=".2 .2 .2 1" borderthickness="1" noclick="true" />
+									</panel>
+									<label textalign="center" align="center" font="dyn_11" color="white" watch="{resulttrigger=PlayerStatsResult}" ontrigger="SetText(Round(param62) # '%');">-</label>
+								</panel>
+								<panel width="20%" float="bottom" padding=".5h">
+									<panel align="center" width="75@" height="75%">
+										<image texture="/ui/common/ability_coverup.tga" watch="{resulttrigger=PlayerStatsResult}" ontrigger="Set('_playerstats_hero_icon_temp', param58); CallEvent('playerstats_parse_icon'); SetTexture(_playerstats_hero_icon_output);" />
+										<frame color="invisible" bordercolor=".2 .2 .2 1" borderthickness="1" noclick="true" />
+									</panel>
+									<label textalign="center" align="center" font="dyn_11" color="white" watch="{resulttrigger=PlayerStatsResult}" ontrigger="SetText(Round(param63) # '%');">-</label>
+								</panel>
+							</panel>
+						</panel>
+					</panel>
+
+					<!-- here so that we can cover the MMR/wins/most played heroes/ etc. -->
+					<panel align="center" valign="bottom" y="0.1h" height="-22.0h" width="-1h" visible="0"
+						watch="ReceivedMatchInfos"
+						ontrigger="SetVisible(StringEmpty(_playerstats_matchlist_match0_id) and {eventcoverifnone=false});"
+					>
+						<frame color="0 0 0 .85" bordercolor="{framecolor=#455166}" borderthickness="1" noclick="true" />
+						<label textalign="center" textvalign="center" wrap="1" font="dyn_16" color="{labeltextcolor=#3abde7}" content="player_stats_event_player" />
+					</panel>
+
+					<!-- Fetch -->
+					<panel y="0" height="3.5h">
+						<frame texture="/ui/info/backdrop.tga" borderthickness="2.0h" color="{fetchbgcolor=1 1 1 .5}" noclick="1" />
+						<frame color=".05 .07 .1 .5" bordercolor="{framecolor=#455166}" borderthickness="1" noclick="1" />
+
+						<panel x="0.5h" height="100%" float="right">
+							<label fitx="true" fitxpadding="0.5h" height="100%" textvalign="center" font="dyn_10" color="white" shadow="true" content="player_stats_player_name"/>
+							<panel height="2.5h" width="14.0h" valign="center" color="0 0 0 1" noclick="true">
+								<frame color="invisible" bordercolor="#7b8c9b" borderthickness="1" noclick="1" />
+								<textbox
+									name="{panel_name}_textbox"
+									y="0.4h"
+									width="-1.0h"
+									valign="center" align="center"
+									maxlength="40"
+									textalign="left" textvalign="center"
+									font="dyn_10"
+									textcolor="white"
+									shadow="false"
+									color="invisible"
+									onshow="SetFocus(true);"
+									onenter="Set('_player_stats_searchname', this); Set('_player_stats_eventid', '-1'); If(IsVisible(), CallEvent('player_stats_submit')); EraseInputLine();"
+									onesc="EraseInputLine();"
+									onchange="CreateString('ui_autocompleteTextBox', name); ChatAutoCompleteNick(this);"
+									onlosefocus="Set(stats_add_friend_auto, false);"
+								/>
+							</panel>
+						</panel>
+						<instance
+							name="button2" button_name="unnamedButton208{panel_name}"
+							x="-3.0h"
+							height="2.5h" width="9.0h"
+							align="right" valign="center"
+							font="dyn_11"
+							label="ccstats_button_fetch"
+							onclick="Call(ui_autocompleteTextBox, 'Set(\'_player_stats_searchname\', this); Set(\'_player_stats_eventid\', \'-1\'); CallEvent(\'player_stats_submit\'); EraseInputLine();');"
+						/>
+						<instance name="tip_mark" tip_id="stat_tip_fetch" x="-0.5h" width="2.3h" height="2.3h" align="right" valign="center" />
+
+						<panel onload="CreateBool('stats_add_friend_auto', false);" x="-15.6h" y="-2.9h" width="17.0h" height="15.0h" align="right" valign="top" visible="false" color="invisible" watch="ChatAutoCompleteClear" ontrigger="SetVisible(false);" watch2="ChatAutoCompleteAdd" ontrigger2="if(stats_add_friend_auto, SetVisible(true));">
+							<instance name="autocomplete_list" listbox_name="autocomplete_stats_list_{stattype}" height="10.3h" align="right" valign="bottom" />
+						</panel>
+
+					</panel>
+				</panel>
+
+				<!-- Player Stats (Mid) -->
+				<panel x="-20h" width="27.5h" height="-3.0h" align="right" valign="bottom" noclick="true">
+
+					<!-- Lifetime Stats -->
+					<panel height="17.5h" noclick="true">
+						<instance name="header_bar" lbl="player_stats_lifetime_header" color="{darkbarcolor=.7 .7 .7 1}" height="2.4h" />
+
+						<panel height="-2.6h" valign="bottom" noclick="true">
+							<frame color="0 0 0 .8" bordercolor="{framecolor=#455166}" borderthickness="1" noclick="true" />
+
+							<panel x="1.0h" y="0.6h" grow="true" width="100%" noclick="1" float="bottom" padding="0.1h">
+								<panel height="2.2h" color="invisible" noclick="1">
+									<label style="playerStatsDetailedStatHeader" color="{labeltextcolor=#3abde7}" shadow="1" content="player_stats_kills" noclick="1" />
+									<label style="playerStatsDetailedStatDivider" color="{labeltextcolor=#3abde7}" shadow="1" content=":" noclick="1" />
+									<label style="playerStatsDetailedStatValue" watch="{resulttrigger=PlayerStatsResult}" ontrigger="SetText(param20);" />
+								</panel>
+								<panel height="2.2h" color="invisible" noclick="1">
+									<label style="playerStatsDetailedStatHeader" color="{labeltextcolor=#3abde7}" shadow="1" content="player_stats_deaths" noclick="1" />
+									<label style="playerStatsDetailedStatDivider" color="{labeltextcolor=#3abde7}" shadow="1" content=":" noclick="1" />
+									<label style="playerStatsDetailedStatValue" watch="{resulttrigger=PlayerStatsResult}" ontrigger="SetText(param25);" />
+								</panel>
+								<panel height="2.2h" color="invisible" noclick="1">
+									<label style="playerStatsDetailedStatHeader" color="{labeltextcolor=#3abde7}" shadow="1" content="player_stats_assists" noclick="1" />
+									<label style="playerStatsDetailedStatDivider" color="{labeltextcolor=#3abde7}" shadow="1" content=":" noclick="1" />
+									<label style="playerStatsDetailedStatValue" watch="{resulttrigger=PlayerStatsResult}" ontrigger="SetText(param24);" />
+								</panel>
+								<panel height="2.2h" color="invisible" noclick="1">
+									<label style="playerStatsDetailedStatHeader" color="{labeltextcolor=#3abde7}" shadow="1" content="player_stats_kd_ratio" noclick="1" />
+									<label style="playerStatsDetailedStatDivider" color="{labeltextcolor=#3abde7}" shadow="1" content=":" noclick="1" />
+									<label style="playerStatsDetailedStatValue" watch="{resulttrigger=PlayerStatsResult}" ontrigger="if(param25 gt 0, SetText(FtoA(param20 / param25, 2) # ':1'), If(param20 gt 0, SetText(20 # ':0'), SetText('0:0')));" />
+								</panel>
+								<panel height="2.2h" color="invisible" noclick="1">
+									<label style="playerStatsDetailedStatHeader" color="{labeltextcolor=#3abde7}" shadow="1" content="player_stats_kad_ratio" noclick="1" />
+									<label style="playerStatsDetailedStatDivider" color="{labeltextcolor=#3abde7}" shadow="1" content=":" noclick="1" />
+									<label style="playerStatsDetailedStatValue" watch="{resulttrigger=PlayerStatsResult}" ontrigger="if(param25 gt 0, SetText(FtoA((param20 + param24) / param25, 2) # ':1'), If((param20 + param24) gt 0, SetText(20 # ':0'), SetText('0:0')));" />
+								</panel>
+
+								<panel height="2.2h" color="invisible" noclick="1" visible="{showQuestsCompleted=true}">
+									<label style="playerStatsDetailedStatHeader" color="{labeltextcolor=#3abde7}" shadow="1" content="player_stats_total_quests" noclick="1" />
+									<label style="playerStatsDetailedStatDivider" color="{labeltextcolor=#3abde7}" shadow="1" content=":" noclick="1" />
+									<label style="playerStatsDetailedStatValue" watch="{resulttrigger=PlayerStatsResult}Quests" ontrigger="SetText(FtoA(param0, 0, 0));" />
+								</panel>
+							</panel>
+
+						</panel>
+
+					</panel>
+
+					<panel height="-18h" valign="bottom" noclick="true">
+						<instance name="header_bar" lbl="player_stats_averages_header" color="{darkbarcolor=.7 .7 .7 1}" height="2.4h" />
+
+						<panel height="-2.6h" valign="bottom" noclick="true">
+							<frame color="0 0 0 .8" bordercolor="{framecolor=#455166}" borderthickness="1" noclick="true" />
+
+							<panel x="1.0h" y="0.6h" grow="true" width="100%" noclick="1" float="bottom" padding="0">
+								<panel height="2.2h" noclick="true">
+									<label style="playerStatsDetailedStatHeader" color="{labeltextcolor=#3abde7}" shadow="1" content="player_avg_game_length" noclick="1" />
+									<label style="playerStatsDetailedStatDivider" color="{labeltextcolor=#3abde7}" shadow="1" content=":" noclick="1" />
+									<label style="playerStatsDetailedStatValue" watch="{resulttrigger=PlayerStatsResult}" ontrigger="if((param68) gt 0, SetText(FtoT((param68) * 1000, 1, 0, '0')), SetText('00:00'));" />
+								</panel>
+								<panel height="2.2h" noclick="true">
+									<label width="44%" height="100%" align="left" textalign="right" textvalign="center" font="dyn_11" color="{labeltextcolor=#3abde7}" shadow="1" content="player_avg_kda" noclick="1" />
+									<label style="playerStatsDetailedStatDivider" color="{labeltextcolor=#3abde7}" shadow="1" content=":" noclick="1" />
+									<label style="playerStatsDetailedStatValue" watch="{resulttrigger=PlayerStatsResult}" ontrigger="
+										If(!StringEmpty(param67),
+											SetText(param67),
+											SetText('0/0/0')
+										);
+										" />
+								</panel>
+								<panel height="2.2h" noclick="true">
+									<label width="44%" height="100%" align="left" textalign="right" textvalign="center" font="dyn_11" color="{labeltextcolor=#3abde7}" shadow="1" content="player_avg_creep_kills" noclick="1" />
+									<label style="playerStatsDetailedStatDivider" color="{labeltextcolor=#3abde7}" shadow="1" content=":" noclick="1" />
+									<label style="playerStatsDetailedStatValue" watch="{resulttrigger=PlayerStatsResult}" ontrigger="SetText(FtoA(param71, 1));" />
+								</panel>
+								<panel height="2.2h" noclick="true">
+									<label width="44%" height="100%" align="left" textalign="right" textvalign="center" font="dyn_11" color="{labeltextcolor=#3abde7}" shadow="1" content="player_avg_creep_denies" noclick="1" />
+									<label style="playerStatsDetailedStatDivider" color="{labeltextcolor=#3abde7}" shadow="1" content=":" noclick="1" />
+									<label style="playerStatsDetailedStatValue" watch="{resulttrigger=PlayerStatsResult}" ontrigger="SetText(FtoA(param70, 1));" />
+								</panel>
+								<panel height="2.2h" noclick="true">
+									<label width="44%" height="100%" align="left" textalign="right" textvalign="center" font="dyn_11" color="{labeltextcolor=#3abde7}" shadow="1" content="player_stats_experience_earned" noclick="1" />
+									<label style="playerStatsDetailedStatDivider" color="{labeltextcolor=#3abde7}" shadow="1" content=":" noclick="1" />
+									<label style="playerStatsDetailedStatValue" watch="{resulttrigger=PlayerStatsResult}" ontrigger="SetText(FtoA(param44 / param5, 1, 3, ','));" />
+								</panel>
+								<panel height="2.2h" noclick="true">
+									<label width="44%" height="100%" align="left" textalign="right" textvalign="center" font="dyn_11" color="{labeltextcolor=#3abde7}" shadow="1" content="player_stats_experience_per_minute" noclick="1" />
+									<label style="playerStatsDetailedStatDivider" color="{labeltextcolor=#3abde7}" shadow="1" content=":" noclick="1" />
+									<label style="playerStatsDetailedStatValue" watch="{resulttrigger=PlayerStatsResult}" ontrigger="SetText(FtoA(param69, 1));" />
+								</panel>
+								<panel height="2.2h" noclick="true">
+									<label width="44%" height="100%" align="left" textalign="right" textvalign="center" font="dyn_11" color="{labeltextcolor=#3abde7}" shadow="1" content="player_stats_gold_per_minute" noclick="1" />
+									<label style="playerStatsDetailedStatDivider" color="{labeltextcolor=#3abde7}" shadow="1" content=":" noclick="1" />
+									<label style="playerStatsDetailedStatValue" watch="{resulttrigger=PlayerStatsResult}" ontrigger="if(param46 gt 0, SetText(FtoA(param42 / (param46/60), 1)), SetText('0'));" />
+								</panel>
+								<panel height="2.2h" noclick="true">
+									<label width="44%" height="100%" align="left" textalign="right" textvalign="center" font="dyn_11" color="{labeltextcolor=#3abde7}" shadow="1" content="player_stats_wards" noclick="1" />
+									<label style="playerStatsDetailedStatDivider" color="{labeltextcolor=#3abde7}" shadow="1" content=":" noclick="1" />
+									<label style="playerStatsDetailedStatValue" watch="{resulttrigger=PlayerStatsResult}" ontrigger="SetText(FtoA(param74, 1));" />
+								</panel>
+								<panel height="2.2h" noclick="true">
+									<label width="44%" height="100%" align="left" textalign="right" textvalign="center" font="dyn_11" color="{labeltextcolor=#3abde7}" shadow="1" content="player_stats_apm" noclick="1" />
+									<label style="playerStatsDetailedStatDivider" color="{labeltextcolor=#3abde7}" shadow="1" content=":" noclick="1" />
+									<label style="playerStatsDetailedStatValue" watch="{resulttrigger=PlayerStatsResult}" ontrigger="SetText(FtoA(param73, 1));" />
+								</panel>
+								<panel height="2.2h" noclick="true">
+									<label width="44%" height="100%" align="left" textalign="right" textvalign="center" font="dyn_11" color="{labeltextcolor=#3abde7}" shadow="1" content="player_stats_neutral_creeps" noclick="1" />
+									<label style="playerStatsDetailedStatDivider" color="{labeltextcolor=#3abde7}" shadow="1" content=":" noclick="1" />
+									<label style="playerStatsDetailedStatValue" watch="{resulttrigger=PlayerStatsResult}" ontrigger="SetText(FtoA(param72, 1));" />
+								</panel>
+							</panel>
+
+						</panel>
+
+					</panel>
+
+				</panel>
+
+				<!-- Moar Stats (Right) -->
+				<panel width="20h" height="-3.0h" align="right" valign="bottom" noclick="true">
+
+					<panel width="15.0h" height="12.4h" align="center" noclick="true">
+						<panel y="-1.5h" width="15.6h" height="13.5h" noclick="true" color="1 1 1 .3">
+							<image noclick="true"
+								ontrigger9lua="ResourceManager.RegisterTexture('/ui/icons/bronze_smackdown.tga', 'playerstats', self)" resourcecontext="playerstats" watch9="MainRegisterTextures"
+							/>
+							<label fity="true" y="-3%" valign="center" textalign="center" font="dyn_12" color="1 1 1 1" noclick="true" content="0" watch="{resulttrigger=PlayerStatsResult}" ontrigger="SetText(param107);"  />
+						</panel>
+						<label y="-0.1h" fity="true" valign="bottom" textalign="center" font="dyn_14" color="#f8ebc6" noclick="true" content="player_stats_smackdowns" />
+					</panel>
+
+					<panel height="-12.2h" valign="bottom" noclick="true" float="bottom">
+						<instance name="flavorkills" id="player_stats_humiliated" labeltextcolor="{labeltextcolor=#3abde7}" resulttrigger="{resulttrigger}" ontrigger="SetText(param108);"/>
+						<panel width="100%" height="5">
+							<panel width="80%" align="center" valign="center" height="1" color=".3 .3 .3 1" />
+						</panel>
+						<instance name="flavorkills" id="player_stats_serialkiller" labeltextcolor="{labeltextcolor=#3abde7}" resulttrigger="{resulttrigger=PlayerStatsResult}" ontrigger="SetText(param98);"/>
+						<instance name="flavorkills" id="player_stats_ultimatewarrior" labeltextcolor="{labeltextcolor=#3abde7}" resulttrigger="{resulttrigger=PlayerStatsResult}" ontrigger="SetText(param99);"/>
+						<instance name="flavorkills" id="player_stats_legndary" labeltextcolor="{labeltextcolor=#3abde7}" resulttrigger="{resulttrigger=PlayerStatsResult}" ontrigger="SetText(param100);"/>
+						<instance name="flavorkills" id="player_stats_onslaught" labeltextcolor="{labeltextcolor=#3abde7}" resulttrigger="{resulttrigger=PlayerStatsResult}" ontrigger="SetText(param101);"/>
+						<instance name="flavorkills" id="player_stats_savagesick" labeltextcolor="{labeltextcolor=#3abde7}" resulttrigger="{resulttrigger=PlayerStatsResult}" ontrigger="SetText(param102);"/>
+						<instance name="flavorkills" id="player_stats_dominating" labeltextcolor="{labeltextcolor=#3abde7}" resulttrigger="{resulttrigger=PlayerStatsResult}" ontrigger="SetText(param103);"/>
+						<instance name="flavorkills" id="player_stats_champion" labeltextcolor="{labeltextcolor=#3abde7}" resulttrigger="{resulttrigger=PlayerStatsResult}" ontrigger="SetText(param104);"/>
+						<instance name="flavorkills" id="player_stats_bloodbath" labeltextcolor="{labeltextcolor=#3abde7}" resulttrigger="{resulttrigger=PlayerStatsResult}" ontrigger="SetText(param105);"/>
+						<instance name="flavorkills" id="player_stats_immortal" labeltextcolor="{labeltextcolor=#3abde7}" resulttrigger="{resulttrigger=PlayerStatsResult}" ontrigger="SetText(param106);"/>
+						<panel width="100%" height="5">
+							<panel width="80%" align="center" valign="center" height="1" color=".3 .3 .3 1" />
+						</panel>
+						<instance name="flavorkills" id="player_stats_doubletap" labeltextcolor="{labeltextcolor=#3abde7}" resulttrigger="{resulttrigger=PlayerStatsResult}" ontrigger="SetText(param94);"/>
+						<instance name="flavorkills" id="player_stats_hattrick" labeltextcolor="{labeltextcolor=#3abde7}" resulttrigger="{resulttrigger=PlayerStatsResult}" ontrigger="SetText(param95);"/>
+						<instance name="flavorkills" id="player_stats_quadkill" labeltextcolor="{labeltextcolor=#3abde7}" resulttrigger="{resulttrigger=PlayerStatsResult}" ontrigger="SetText(param96);"/>
+						<instance name="flavorkills" id="player_stats_annihilated" labeltextcolor="{labeltextcolor=#3abde7}" resulttrigger="{resulttrigger=PlayerStatsResult}" ontrigger="SetText(param97);"/>
+						<panel width="100%" height="5">
+							<panel width="80%" align="center" valign="center" height="1" color=".3 .3 .3 1" />
+						</panel>
+						<instance name="flavorkills" id="player_stats_bloodlust" labeltextcolor="{labeltextcolor=#3abde7}" resulttrigger="{resulttrigger=PlayerStatsResult}" ontrigger="SetText(param93);"/>
+					</panel>
+
+					<!-- Public Games No Stats -->
+					<panel visible="{pubgameblock=false}">
+						<frame color="0 0 0 .8" bordercolor="{framecolor=#455166}" borderthickness="1" noclick="true" />
+						<label height="100%" width="-8.0h" align="center" textalign="center" textvalign="center" wrap="true" font="dyn_10" color="white" content="player_stats_nostreakstats"/>
+					</panel>
+				</panel>
+			</panel>
+
+			<panel name="{panel_name}_nodata_mask" align="right" valign="bottom" width="-4.3h" height="-3h" visible="0"
+				  watch="{resulttrigger=PlayerStatsResult}"
+				  ontriggerlua="if (NotEmpty(param137) and param137 == '-1') and
+				  					('{panel_name}' == 'stats_panel_season_normal' or
+				  					 '{panel_name}' == 'stats_panel_season_casual'
+				  					) then
+				  					self:SetVisible(true)
+				  				else
+				  					self:SetVisible(false)
+				  				end"
+			>
+				<frame color="0 0 0 .85" bordercolor="{framecolor=#455166}" borderthickness="1" noclick="true" />
+				<label textalign="center" textvalign="center" wrap="1" font="dyn_18" color="{labeltextcolor=#3abde7}" content="player_stats_nodata_mask_text"
+						watch="{resulttrigger=PlayerStatsResult}"
+				  		ontriggerlua="  if Empty(param137) then
+				  							self:SetText(Translate('player_stats_nodata_mask_text'))
+				  						else
+				  							self:SetText(Translate('player_stats_seasonend_mask_text'))
+				  						end"/>
+			</panel>
+
+			<panel x="-24h" align="right" valign="bottom" width="-28.3h" height="-3h" visible="0"
+				  watch="{resulttrigger=PlayerStatsResult}"
+				  ontriggerlua="if (NotEmpty(param137) and param137 == '-1') and
+				  					('{panel_name}' == 'stats_panel_history_normal' or
+				  					 '{panel_name}' == 'stats_panel_history_casual'
+				  					) then
+				  					self:SetVisible(true)
+				  				else
+				  					self:SetVisible(false)
+				  				end"
+			>
+				<frame color="0 0 0 .85" bordercolor="{framecolor=#455166}" borderthickness="1" noclick="true" />
+				<label textalign="center" textvalign="center" wrap="1" font="dyn_18" color="{labeltextcolor=#3abde7}" content="player_stats_nodata_mask_text"
+						watch="{resulttrigger=PlayerStatsResult}"
+				  		ontriggerlua="  if Empty(param137) then
+				  							self:SetText(Translate('player_stats_nodata_mask_text'))
+				  						else
+				  							self:SetText(Translate('player_stats_seasonend_mask_text'))
+				  						end"/>
+			</panel>
+
+			<!-- down here so it covers the right and left/middle. Blurb for hontour stuff -->
+			<panel align="right" valign="bottom" y="0.1h" height="-2.9h" width="71.8h" visible="0"
+				watch="ReceivedMatchInfos"
+				ontrigger="SetVisible(StringEmpty(_playerstats_matchlist_match0_id) and {eventcoverifnone=false});"
+			>
+				<frame color="0 0 0 .85" bordercolor="{framecolor=#455166}" borderthickness="1" noclick="true" />
+				<label textalign="center" textvalign="center" wrap="1" font="dyn_18" color="{labeltextcolor=#3abde7}" content="player_Stats_event_main" />
+			</panel>
+
+		</panel>
+
+		<!-- Request status -->
+		<panel name="stats_status_box_{panel_name}" color="0 0 0 .7" blockinput="true" visible="false" watch="{statustrigger=PlayerStatsStatus}" ontrigger="SetVisible(param == 1 || param == 3);">
+			<panel width="28.0h" height="10.0h" align="center" valign="center" noclick="0" cangrab="1">
+			<frame color="0 0 0 .8" bordercolor="{framecolor=#455166}" borderthickness="1" noclick="1" />
+				<panel y="-0.5h" width="-1.0h" height="-3.4h" align="center" valign="bottom" noclick="1">
+					<frame texture="/ui/frames/tooltip_bg.tga" color="{popupbgcolor=#2c4b6c}" noclick="1"/>
+					<frame color="invisible" bordercolor="{framecolor=#455166}" borderthickness="1" noclick="1" />
+					<panel width="-1.0h" height="-1.0h" align="center" valign="center" color="invisible" noclick="1">
+
+						<panel height="3.0h" align="center" float="right" padding=".5h" grow="true">
+							<animatedimage width="100@" height="100%" texture="/ui/elements/throb/throb.tga" noclick="true" loop="1" fps="30" onshow="StartAnim(1);" />
+							<label height="-1.0h" fitx="true" valign="center" textalign="left" font="dyn_10" textcolor="white" shadow="false" color="white">main_stats_retrieving_stats</label>
+						</panel>
+
+						<panel height="2.4h" valign="bottom" color="invisible" noclick="1" watch="{statustrigger=PlayerStatsStatus}" ontrigger="SetVisible(param == 1 || param == 3);">
+							<instance
+								name="button2" button_name="unnamedButton209{panel_name}"
+								width="10.0h" height="2.4h"
+								align="left"
+								valign="center"
+								label="main_stats_cancel"
+								onclick="Call('stats_status_box_{panel_name}', 'FadeOut(250);');"
+							/>
+
+							<instance
+								name="button2" button_name="unnamedButton210{panel_name}"
+								width="10.0h" height="2.4h"
+								align="right"
+								valign="center"
+								label="main_stats_retry"
+								onclick="If(IsVisible(), CallEvent('player_stats_submit'));"
+								enabled="false"
+							/>
+						</panel>
+
+
+					</panel>
+				</panel>
+				<instance
+					name="header_bar"
+					color="{barcolor=1 1 1 1}"
+					buttonsize="1.8h"
+					height="2.4h"
+					width="-2"
+					y="1"
+					align="center"
+					lbl=""
+					show_close="1"
+					onclick="Call('main_stats_info_box', 'FadeOut(250);');"
+				/>
+			</panel>
+		</panel>
+
+		<!-- General Error -->
+		<panel name="stats_error_{panel_name}" valign="bottom" height="-4.0h" color="0 0 0 .7" blockinput="true" visible="false" watch="{resulttrigger=PlayerStatsResult}" ontrigger="SetVisible(param86 == 1 or param86 == 2);">
+			<panel width="38.0h" grow="true" align="center" valign="center" noclick="0">
+			<frame color="0 0 0 .8" bordercolor="{framecolor=#455166}" borderthickness="1" noclick="1" />
+				<panel grow="true" width="100%" float="bottom" padding="0.5h">
+					<instance
+						name="header_bar"
+						color="{barcolor=1 1 1 1}"
+						buttonsize="1.8h"
+						height="2.6h"
+						width="-2"
+						align="center"
+						lbl="general_error"
+						show_close="1"
+						onclick="Call('stats_error_{panel_name}', 'FadeOut(250);');"
+					/>
+					<panel width="100%" grow="true">
+						<label fity="true" fitypadding="0.5h" width="-1.0h" align="center" textalign="left" font="dyn_10" wrap="true" textcolor="white" shadow="true" color="white" content="main_stats_error_message"/>
+					</panel>
+				</panel>
+			</panel>
+		</panel>
+
+	</template>
+
+	<template name="stats_head_tab_button">
+		<panel width="{width}" height="100%" noclick="true" name="{id}" stickytoinvis="0">
+			<button
+				width="100%" height="100%"
+				group="{group}"
+				name="{button_name}"
+				color="invisible"
+				visible="{visible=true}"
+				watch="{watch}"
+				enabled="{enabled=true}"
+				ontrigger="{ontrigger}"
+				onmouseover="PlaySound('/shared/sounds/ui/button_over_01.wav'); If(!StringEmpty('{id}'), Call('{id}', 'SetAnim(0, \'start\');'));   If(!StringEmpty('{id}'), Call('{id}',  'SetEffect(0, \'/ui/effects/nebula/button_smoke.effect\');')); {onmouseover}"
+				onmouseout="{onmouseout}"
+				onclick="PlaySound('{sound=/shared/sounds/ui/button_click_01.wav}'); {onclick}"
+				onenter="PlaySound('{sound='/shared/sounds/ui/button_click_01.wav}'); {onenter}"
+				onshow="{onshow}"
+				hotkey="{hotkey}"
+				onhotkey="PlaySound('{sound=/shared/sounds/ui/button_click_01.wav'}'); {onhotkey}"
+			>
+				<widgetstate statename="up">
+					<label font="{font=dyn_11}" shadow="true" color="white" textalign="center" textvalign="center">{label}</label>
+				</widgetstate>
+				<widgetstate statename="over">
+					<frame texture="/ui/frames/rounded_button_bg_white.tga" borderthickness="0.5h" rendermode="additive" color="0.2 0.2 0.2 1"/>
+					<label font="{font=dyn_11}" shadow="true" color="white" textalign="center" textvalign="center">{label}</label>
+				</widgetstate>
+				<widgetstate statename="down" x="1" y="1">
+					<label font="{font=dyn_11}" shadow="true" color="white" textalign="center" textvalign="center">{label}</label>
+				</widgetstate>
+				<widgetstate statename="disabled">
+					<frame texture="/ui/frames/rounded_button_bg_white.tga" borderthickness="0.5h" color=".3 .3 .3 .7"/>
+					<label font="{font=dyn_11}" shadow="true" color="white" textalign="center" textvalign="center">{label}</label>
+				</widgetstate>
+			</button>
+
+			<panel name="{type}_cover" group="stats_tab_cover" visible="{cover_isvis=false}">
+				<frame texture="/ui/info/button_down.tga" borderthickness="0.4h" color="0 0 0 0.6"/>
+				<label font="dyn_11" shadow="true" color="white" textalign="center" textvalign="center">{label}</label>
+			</panel>
+		</panel>
+	</template>
+
+
+	<template name="stats_mastery_hero_proficiency_single">
+		<panel color="1 1 1 0" height="2.9h" noclick="1">
+			<panel color=".5 .5 .5 1" height="1" noclick="1" />
+			<panel width="9h" noclick="1">
+				<label font="dyn_14" textvalign="center" textalign="center" noclick="true" color="white" content="{index}"/>
+			</panel>
+			<panel color="0 0 0 .5" width="24i" height="24i" align="cetner" valign="center" clickthru="true"
+				   onmouseover="ShowWidget('stats_mastery_hero_proficiency_tip_{index}')"
+				   onmouseout="HideWidget('stats_mastery_hero_proficiency_tip_{index}')">
+				<image texture="/ui/fe2/mastery/reward_level_{index}.tga" align="center" valign="center" noclick="1" />
+			</panel>
+			<panel width="9h" align="right" noclick="1">
+				<label name="stats_mastery_hero_proficiency_single_heronumber_{index}" font="dyn_14" textvalign="center" textalign="center" noclick="true" color="gray" content="" />
+			</panel>
+		</panel>
+	</template>
+
+	<template name="stats_mastery_reward_single">
+		<panel name="stats_mastery_reward_single_{index}" width="48h" height="10h" sticky="true" stickytoinvis="false"
+			   onmousewheeldown="CallEvent('stats_mastery_reward_scroll', 1);"
+               onmousewheelup="CallEvent('stats_mastery_reward_scroll', 0);" visible="{visible=false}">
+			<image name="stats_mastery_reward_single_{index}_bg" align="center" valign="center" width="48h" height="12h" texture="$invis" noclick="true"/>
+			<panel x="13h" width="23h" height="4h" align="left" valign="center" noclick="true">
+				<label name="stats_mastery_reward_single_{index}_text" font="dyn_18" wrap="1" textvalign="center" textalign="left" noclick="true" color="white" content="-"/>
+			</panel>
+			<panel x="3h" y="2.1h" width="5.8h" height="5.8h" noclick="true">
+				<image name="stats_mastery_reward_single_{index}_icon" texture="/ui/fe2/mastery/reward_bg_3.tga" noclick="true"/>
+			</panel>
+			<panel name="stats_mastery_reward_single_{index}_showbtn" x="-3h" align="right" width="8h" visible="0" noclick="true">
+				<button name="stats_mastery_reward_single_{index}_btn"
+					    align="center"
+					    valign="center"
+						x="0"
+						y="1h"
+						width="8h"
+						height="3h"
+						color="invisible"
+						onclicklua="Player_Stats.ClickReceiveMasteryTotalLevelReward({index})" >
+					<widgetstate statename="up">
+						<image texture="/ui/fe2/mastery/receive_reward_up.tga" align="center" valign="center" width="12h" height="6h" />
+						<label font="dyn_11" textvalign="center" textalign="center" noclick="true" color="#2b1a00" content="mastery_stats_claim"/>
+					</widgetstate>
+					<widgetstate statename="over">
+						<image texture="/ui/fe2/mastery/receive_reward_over.tga" align="center" valign="center" width="12h" height="6h" />
+						<label font="dyn_11" textvalign="center" textalign="center" noclick="true" color="#efc843" content="mastery_stats_claim"/>
+					</widgetstate>
+					<widgetstate statename="down">
+						<image texture="/ui/fe2/mastery/receive_reward_down.tga" align="center" valign="center" width="12h" height="6h" />
+						<label font="dyn_11" textvalign="center" textalign="center" noclick="true" color="#2b1a00" content="mastery_stats_claim"/>
+					</widgetstate>
+					<widgetstate statename="disabled">
+						<image texture="/ui/fe2/mastery/receive_reward_disable.tga" align="center" valign="center" width="12h" height="6h" />
+						<label font="dyn_11" textvalign="center" textalign="center" noclick="true" color="#222222" content="mastery_stats_claimed"/>
+					</widgetstate>
+				</button>
+
+				<panel width="8h" height="3h" y="-2h" align="center" valign="center" noclick="true">
+					<label name="stats_mastery_reward_single_{index}_btntext" font="dyn_16" textvalign="center" textalign="center" noclick="true" color="#222222" content="-"/>
+				</panel>
+			</panel>
+
+			<panel name="stats_mastery_reward_single_{index}_hidebtn" x="-3h" align="right" width="8h" noclick="true">
+				<label name="stats_mastery_reward_single_{index}_hidebtn_text" font="dyn_16" textvalign="center" textalign="center" noclick="true" color="#b9b9b9" content="-"/>
+			</panel>
+			<panel name="stats_mastery_reward_single_{index}_effect" noclick="true" x="1h" width="-2h">
+				<modelpanel align="center" valign="center" visible="1"
+							noclick="1"
+							model="/ui/fe2/mastery/models/tut_highlight.mdf"
+							anim="idle"
+							camerapos="0 -1000 3"
+							cameraangles="0 0 0"
+							camerafov="4.42"
+							carmerafar="5000"
+							depthclear="false"
+							depthcompress="true"
+							sunazimuth="140"
+							sunaltitude="10"
+							suncolor="1 1 1 1"
+							onload="SetEffect('/ui/fe2/mastery/models/tut_highlight.effect');"
+								/>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="stats_mastery_levelup_single">
+		<panel name="stats_mastery_levelup_single_{index}" height="8.5h" visible="0">
+			<frame width="6h" height="6h" valign="center" borderthickness="1" bordercolor="#373737" color="invisible">
+				<image name="stats_mastery_levelup_single_{index}_heroicon" texture="$invis" width="-4" height="-4" align="center" valign="center" />
+			</frame>
+
+			<panel width="15h" height="2h" align="right" valign="center" y="-2h" >
+				<label name="stats_mastery_levelup_single_{index}_heroname" font="dyn_12" textvalign="center" textalign="left" noclick="true" color="#fca518" content="-"/>
+			</panel>
+
+			<panel width="15h" height="1.5h" align="right" valign="center" y="0.7h">
+				<label name="stats_mastery_levelup_single_{index}_percenttext" font="dyn_11" textvalign="center" textalign="right" noclick="true" color="white" content="-"/>
+			</panel>
+
+			<panel width="6h" height="2h" align="left" valign="center" x="6.5h" y="0.5h">
+				<label name="stats_mastery_levelup_single_{index}_level" font="dyn_14" textvalign="center" textalign="left" noclick="true" color="#f0e210" content="-"/>
+			</panel>
+
+			<panel width="15h" height="1h" align="right" valign="center" y="2.5h" >
+				<frame texture="frames/rounded_bg_white.tga" borderthickness="1" color="#181818" bordercolor="#373737" noclick="true"/>
+				<panel width="-2" height="-2" x="1" y="1" >
+					<panel name="stats_mastery_levelup_single_{index}_percent" width="0%" color="#9f0ba9" />
+				</panel>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="stats_combobox_item">
+		<label textalign="center" textvalign="center" content="{label}" font="dyn_11" shadow="true" color="white" noclick="1"
+			onshowlua="{onshowlua}"
+		/>
+	</template>
+
+	<template name="stats_combobox_state">
+		<widgetstate statename="{state}" noclick="1">
+			<panel color="invisible" noclick="1">
+				<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.4h" color="{color}" blockinput="false" noclick="true"/>
+
+				<panel grow="true" height="100%" align="right" float="right" padding="0.5h" noclick="true">
+					<!-- <panel width="1" height="100%" valign="center" noclick="true">
+						<panel height="95%" color="0 0 0 1" valign="center" noclick="true" />
+					</panel> -->
+					<panel grow="true" height="100%" noclick="true">
+						<image width="40@" height="40%" valign="center" texture="/ui/elements/arrow_down.tga" noclick="true" />
+					</panel>
+					<panel width="1" height="100%" color="invisible"/>
+				</panel>
+			</panel>
+		</widgetstate>
+	</template>
+
+	<template name="player_stats">
+
+		<panel name="player_stats" y="-110%" align="center" width="-2.7h" visible="{visible=0}" noclick="true" valign="center"
+			   onshowlua="GetWidget('player_stats_mastery'):SetVisible(0)
+			              Player_Stats.OnShowPlayerStats()"><!-- onload="CreateInt('player_stats_current_panel', 0);" -->
+
+			<panel x="0" y="-100%" height="203.6%" width="-15@"  align="center" texture="mainmenu/upper_frame_center.tga"/>
+			<panel x="20h" y="-100%" height="203.6%" width="50@"  align="right" texture="mainmenu/upper_frame_right.tga"/>
+			<panel x="-20h" y="-100%" height="203.6%" width="50@"  align="left" texture="mainmenu/upper_frame_left.tga"/>
+
+			<panel name="player_stats_mystats_parent" x="0h" align="right" noclick="1" visible="1">
+				<!--
+					width="-4.3h"
+					onshow="Call('player_stats_mystats_tab', 'SetButtonState(1); SetNoClick(1);'); Set(player_stats_current_panel, 0);"
+					onhide="Call('player_stats_mystats_tab', 'SetButtonState(0); SetNoClick(0);');"
+				-->
+
+				<instance name="player_stats_panel" panel_name="stats_panel_event" stattype="event" match_listbox="stats_matches_list_event" resulttrigger="PlayerStatsResultEvent" statustrigger="PlayerStatsStatusEvent" labeltextcolor="#9A66AD" framecolor="#6A5373" barcolor=".8 .6 .8 1" darkbarcolor=".9 .8 .9 1" panelbgcolor="#221427" itemhighlight="#A646FF" itembgcolor="#381D3B" fetchbgcolor=".8 .6 1 .5" levelgroupcolor=".7 .5 1 1" popupbgcolor="#532C6C" visible="false" eventcoverifnone="true" title="player_stats_event_tab"/>
+				<instance name="player_stats_panel" panel_name="stats_panel_ranked" stattype="ranked" match_listbox="stats_matches_list_ranked" resulttrigger="PlayerStatsResultRanked" statustrigger="PlayerStatsStatusRanked" visible="true" title="player_stats_ranked_tab"/>
+				<instance name="player_stats_panel" panel_name="stats_panel_casual" stattype="casual" match_listbox="stats_matches_list_casual" resulttrigger="PlayerStatsResultCasual" statustrigger="PlayerStatsStatusCasual" labeltextcolor="#3AE77B" framecolor="#456645" barcolor=".4 1 .4 1" darkbarcolor=".7 1 .7 1" panelbgcolor="#162714" itemhighlight="#46FF6442" itembgcolor="#213B1D" fetchbgcolor=".6 1 .6 .5" levelgroupcolor=".5 1 .5 1" popupbgcolor="#2C6C2C" visible="false" title="player_stats_casual_tab"/>
+				<instance name="player_stats_panel" panel_name="stats_panel_public" stattype="public" match_listbox="stats_matches_list_public" resulttrigger="PlayerStatsResult" statustrigger="PlayerStatsStatus" labeltextcolor="#c22e2e" framecolor="#664545" barcolor=".6 .4 .4 1" darkbarcolor=".5 .3 .3 1" panelbgcolor="#271414" itemhighlight="#46FF6442" itembgcolor="#3b1d1d" fetchbgcolor=".6 .4 .4 1" levelgroupcolor=".5 .3 .3 1 1" popupbgcolor="#6c2c2c" pubgameblock="true" visible="false" title="player_stats_public_tab"/>
+
+				<instance name="player_stats_panel" panel_name="stats_panel_season_normal" stattype="season_normal" match_listbox="stats_matches_list_season_normal" resulttrigger="PlayerStatsResultSeasonNormal" statustrigger="PlayerStatsStatusSeasonNormal"  visible="false" title="player_stats_season_normal_tab" onshowtitlelua="self:SetText(Translate(IsPreseason() and 'player_stats_preseason_normal_tab' or 'player_stats_season_normal_tab'))"/>
+
+				<instance name="player_stats_panel" panel_name="stats_panel_season_casual" stattype="season_casual" match_listbox="stats_matches_list_season_casual" resulttrigger="PlayerStatsResultSeasonCasual" statustrigger="PlayerStatsStatusSeasonCasual" labeltextcolor="#3AE77B" framecolor="#456645" barcolor=".4 1 .4 1" darkbarcolor=".7 1 .7 1" panelbgcolor="#162714" itemhighlight="#46FF6442" itembgcolor="#213B1D" fetchbgcolor=".6 1 .6 .5" levelgroupcolor=".5 1 .5 1" popupbgcolor="#2C6C2C" visible="false" title="player_stats_season_casual_tab" onshowtitlelua="self:SetText(Translate(IsPreseason() and 'player_stats_preseason_casual_tab' or 'player_stats_season_casual_tab'))"/>
+
+				<instance name="player_stats_panel" panel_name="stats_panel_history_normal" stattype="history" match_listbox="stats_matches_list_history_normal" resulttrigger="PlayerStatsResultHistoryNormal" statustrigger="PlayerStatsStatusHistoryNormal" visible="false" title="player_stats_history_tab"/>
+				<instance name="player_stats_panel" panel_name="stats_panel_history_casual" stattype="history" match_listbox="stats_matches_list_history_casual" resulttrigger="PlayerStatsResultHistoryCasual" statustrigger="PlayerStatsStatusHistoryCasual" labeltextcolor="#3AE77B" framecolor="#456645" barcolor=".4 1 .4 1" darkbarcolor=".7 1 .7 1" panelbgcolor="#162714" itemhighlight="#46FF6442" itembgcolor="#213B1D" fetchbgcolor=".6 1 .6 .5" levelgroupcolor=".5 1 .5 1" popupbgcolor="#2C6C2C" visible="false" title="player_stats_history_tab"/>
+
+				<panel name="stats_cover_controller" x="-25.0h" y="1.2h" height="2.5h" width="0" align="right" grow="true" regrow="1" growinvis="false" float="right" padding="0.5h" 
+					onload="ShowOnly('season_cover'); cmd('setsave _playerstats_show_panel ' # 'stats_panel_season_normal'); ShowOnly('stats_panel_season_normal'); If(IsVisible(), CallEvent('player_stats_submit')); Trigger('ChangeComboboxBgColor', 'normal', '1 1 1 1')"
+					watch0="PlayerStatsResult" ontrigger0="DoEvent()"
+					watch1="PlayerStatsResultRanked" ontrigger1="DoEvent()"
+					watch2="PlayerStatsResultCasual" ontrigger2="DoEvent()"
+					watch3="PlayerStatsResultEvent" ontrigger3="DoEvent()"
+					onshow="Call('stats_event', 'SetVisible(ui_stats_eventStats);');
+							Call('stats_event_divider', 'SetVisible(ui_stats_eventStats);');"
+				>
+
+					<panel name="stats_event_divider" width="1.0h" height="100%" stickytoinvis="0">
+						<panel x="-1" height="100%" width="1" align="center" color="0 0 0 .7" />
+						<panel x="0" height="100%" width="1" align="center" color="1 1 1 .3" />
+					</panel>
+
+					<instance name="stats_head_tab_button" id="stats_event" width="15h" label="player_stats_event_tab" type="event" cover_isvis="false" onclick="ShowOnly('event_cover'); cmd('setsave _playerstats_show_panel ' # 'stats_panel_event'); ShowOnly('stats_panel_event'); If(IsVisible(), CallEvent('player_stats_submit')); Trigger('ChangeComboboxBgColor', 'event', '.8 .6 .8 1');" onmouseover="" onmouseout="" />
+
+					<panel width="1.0h" height="100%" stickytoinvis="0">
+						<panel x="-1" height="100%" width="1" align="center" color="0 0 0 .7" />
+						<panel x="0" height="100%" width="1" align="center" color="1 1 1 .3" />
+					</panel>
+
+					<!-- <instance name="stats_head_tab_button" id="stats_normal" width="15h" label="player_stats_ranked_tab" type="ranked" cover_isvis="false" onclick="ShowOnly('ranked_cover'); cmd('setsave _playerstats_show_panel ' # 'stats_panel_ranked'); ShowOnly('stats_panel_ranked'); If(IsVisible(), CallEvent('player_stats_submit'));" onmouseover="" onmouseout="" /> -->
+					<panel height="2.5h" width="15h">
+						<panel name="season_cover" group="stats_tab_cover" visible="true">
+							<frame texture="/ui/info/button_down.tga" borderthickness="0.4h" color="0 0 0 0.6"/>
+						</panel>
+
+						<combobox
+							color="invisible"
+							itemwidth="100%"
+							itemheight="2.2h"
+							maxlistheight="20h"
+							exteriorscrollbars="true"
+							scrolltexture="/ui/info/combobox.tga"
+							handleheight="100@" handlewidth="100%"
+							highlight="under"
+							highlightbordercolor="white"
+							onselect="PlaySound('/shared/sounds/ui/button_click_05.wav'); ShowOnly('season_cover'); "
+							onselectlua="local select = self:GetSelectedItemIndex()
+										 self:DoEventN(select)
+										 if (select == 0) then
+										 	Trigger('ChangeComboboxBgColor', 'normal', '1 1 1 1')
+										 elseif (select == 1) then
+										 	Trigger('ChangeComboboxBgColor', 'casual', '.4 1 .4 1')
+										 end
+										 self:SetSelectedItemByIndex('-1', false)"
+							onloadlua=" self:AddTemplateListItem('stats_combobox_item', '0', 'label', IsPreseason() and 'player_stats_preseason_normal_tab' or 'player_stats_season_normal_tab')
+										if GetCvarBool('cl_GarenaEnable') then
+									    	self:AddTemplateListItem('stats_combobox_item', '1', 'label', IsPreseason() and 'player_stats_preseason_casual_tab' or 'player_stats_season_casual_tab')
+									    end"
+							onevent0="ShowOnly('season_cover'); cmd('setsave _playerstats_show_panel ' # 'stats_panel_season_normal'); ShowOnly('stats_panel_season_normal'); If(IsVisible(), CallEvent('player_stats_submit'));"
+							onevent1="ShowOnly('season_cover'); cmd('setsave _playerstats_show_panel ' # 'stats_panel_season_casual'); ShowOnly('stats_panel_season_casual'); If(IsVisible(), CallEvent('player_stats_submit'));"
+						>
+							<instance name="stats_combobox_state" state="up" color="invisible"/>
+							<instance name="stats_combobox_state" state="over" color="1 1 1 .3"/>
+							<instance name="stats_combobox_state" state="down" color="1 1 1 .3"/>
+							<instance name="stats_combobox_item" label="player_stats_season_title"
+								onshowlua="self:SetText(Translate(IsPreseason() and 'player_stats_preseason_title' or 'player_stats_season_title'))"/>
+
+							<widgetstate statename="listbg">
+								<frame height="+2.7h" y="-1.9h" texture="/ui/info/combobox_dropdown.tga" borderthickness="1.0h" color="#6A5373" watch="ChangeComboboxBgColor" ontriggerlua="self:SetVisible(param=='event')" visible="0"/>
+								<frame height="+2.7h" y="-1.9h" texture="/ui/info/combobox_dropdown.tga" borderthickness="1.0h" color="white" watch="ChangeComboboxBgColor" ontriggerlua="self:SetVisible(param=='normal')" visible="1"/>
+								<frame height="+2.7h" y="-1.9h" texture="/ui/info/combobox_dropdown.tga" borderthickness="1.0h" color="#456645" watch="ChangeComboboxBgColor" ontriggerlua="self:SetVisible(param=='casual')" visible="0"/>
+								<frame height="+2.7h" y="-1.9h" texture="/ui/info/combobox_dropdown.tga" borderthickness="1.0h" color="#664545" watch="ChangeComboboxBgColor" ontriggerlua="self:SetVisible(param=='public')" visible="0"/>
+							</widgetstate>
+							<widgetstate statename="itembg">
+								<panel width="100%" />
+							</widgetstate>
+							<widgetstate statename="itemhighlight">
+								<panel width="100%" texture="/ui/info/header_bar_c.tga" watch="ChangeComboboxBgColor" ontriggerlua="self:SetColor(param1)">
+									<panel width="100%" height="100%" >
+										<image height="50%" width="32" align="left" valign="top" texture="/ui/info/header_bar_tl.tga" noclick="1" watch="ChangeComboboxBgColor" ontriggerlua="self:SetColor(param1)"/>
+										<image height="50%" width="32" align="left" valign="bottom" texture="/ui/info/header_bar_bl.tga" noclick="1" watch="ChangeComboboxBgColor" ontriggerlua="self:SetColor(param1)"/>
+										<image height="50%" width="32" align="right" valign="top" texture="/ui/info/header_bar_tr.tga" noclick="1" watch="ChangeComboboxBgColor" ontriggerlua="self:SetColor(param1)"/>
+										<image height="50%" width="32" align="right" valign="bottom" texture="/ui/info/header_bar_br.tga" noclick="1" watch="ChangeComboboxBgColor" ontriggerlua="self:SetColor(param1)"/>
+									</panel>
+								</panel>
+							</widgetstate>
+						</combobox>
+
+					</panel>
+
+					<panel name="stats_tab_seperator" width="1.0h" height="100%" stickytoinvis="0">
+						<panel x="-1" height="100%" width="1" align="center" color="0 0 0 .7" />
+						<panel x="0" height="100%" width="1" align="center" color="1 1 1 .3" />
+					</panel>
+
+					<!-- <instance name="stats_head_tab_button" id="stats_casual" width="15h" label="player_stats_casual_tab" type="casual" cover_isvis="false" visible="1" onclick="ShowOnly('casual_cover'); cmd('setsave _playerstats_show_panel ' # 'stats_panel_casual'); ShowOnly('stats_panel_casual'); If(IsVisible(), CallEvent('player_stats_submit'));" onmouseover="" onmouseout=""/> -->
+
+
+					<if condition="!cl_GarenaEnable" >
+						<instance name="stats_head_tab_button" id="stats_public" width="15h" label="player_stats_public_tab" type="pvp" cover_isvis="false" onclick="ShowOnly('pvp_cover'); cmd('setsave _playerstats_show_panel ' # 'stats_panel_public'); ShowOnly('stats_panel_public'); If(IsVisible(), CallEvent('player_stats_submit')); Trigger('ChangeComboboxBgColor', 'public', '.6 .4 .4 1');" onmouseover="" onmouseout="" />
+					</if>
+
+					<if condition="cl_GarenaEnable" >
+						<panel height="2.5h" width="15h">
+							<panel name="pvp_cover" group="stats_tab_cover" visible="false">
+								<frame texture="/ui/info/button_down.tga" borderthickness="0.4h" color="0 0 0 0.6"/>
+							</panel>
+
+							<combobox
+								color="invisible"
+								itemwidth="100%"
+								itemheight="2.2h"
+								maxlistheight="20h"
+								exteriorscrollbars="true"
+								scrolltexture="/ui/info/combobox.tga"
+								handleheight="100@" handlewidth="100%"
+								highlight="under"
+								highlightbordercolor="white"
+								onselect="PlaySound('/shared/sounds/ui/button_click_05.wav'); ShowOnly('pvp_cover'); "
+								onselectlua="local select = self:GetSelectedItemIndex()
+											 self:DoEventN(select)
+											 if (select == 0) then
+										 		Trigger('ChangeComboboxBgColor', 'public', '.6 .4 .4 1')
+											 elseif (select == 1) then
+											 	Trigger('ChangeComboboxBgColor', 'normal', 'white')
+											 elseif (select == 2) then
+											 	Trigger('ChangeComboboxBgColor', 'casual', '.4 1 .4 1')
+											 end
+											 self:SetSelectedItemByIndex('-1', false)"
+								onloadlua=" self:AddTemplateListItem('stats_combobox_item', '0', 'label', 'player_stats_public_tab')
+											if true or GetCvarBool('cl_GarenaEnable') then
+												self:AddTemplateListItem('stats_combobox_item', '1', 'label', 'player_stats_ranked_tab')
+									   			self:AddTemplateListItem('stats_combobox_item', '2', 'label', 'player_stats_casual_tab')
+									  	 	end"
+
+								onevent0="ShowOnly('pvp_cover'); cmd('setsave _playerstats_show_panel ' # 'stats_panel_public'); ShowOnly('stats_panel_public'); If(IsVisible(), CallEvent('player_stats_submit'));"
+								onevent1="ShowOnly('pvp_cover'); cmd('setsave _playerstats_show_panel ' # 'stats_panel_ranked'); ShowOnly('stats_panel_ranked'); If(IsVisible(), CallEvent('player_stats_submit'));"
+								onevent2="ShowOnly('pvp_cover'); cmd('setsave _playerstats_show_panel ' # 'stats_panel_casual'); ShowOnly('stats_panel_casual'); If(IsVisible(), CallEvent('player_stats_submit'));"
+							>
+								<instance name="stats_combobox_state" state="up" color="invisible"/>
+								<instance name="stats_combobox_state" state="over" color="1 1 1 .3"/>
+								<instance name="stats_combobox_state" state="down" color="1 1 1 .3"/>
+								<instance name="stats_combobox_item" label="player_stats_pvp_title" />
+
+								<widgetstate statename="listbg">
+									<frame height="+2.7h" y="-1.9h" texture="/ui/info/combobox_dropdown.tga" borderthickness="1.0h" color="#6A5373" watch="ChangeComboboxBgColor" ontriggerlua="self:SetVisible(param=='event')" visible="0"/>
+									<frame height="+2.7h" y="-1.9h" texture="/ui/info/combobox_dropdown.tga" borderthickness="1.0h" color="white" watch="ChangeComboboxBgColor" ontriggerlua="self:SetVisible(param=='normal')" visible="1"/>
+									<frame height="+2.7h" y="-1.9h" texture="/ui/info/combobox_dropdown.tga" borderthickness="1.0h" color="#456645" watch="ChangeComboboxBgColor" ontriggerlua="self:SetVisible(param=='casual')" visible="0"/>
+									<frame height="+2.7h" y="-1.9h" texture="/ui/info/combobox_dropdown.tga" borderthickness="1.0h" color="#664545" watch="ChangeComboboxBgColor" ontriggerlua="self:SetVisible(param=='public')" visible="0"/>
+								</widgetstate>
+								<widgetstate statename="itembg">
+									<panel width="100%" />
+								</widgetstate>
+								<widgetstate statename="itemhighlight">
+									<panel width="100%" texture="/ui/info/header_bar_c.tga" watch="ChangeComboboxBgColor" ontriggerlua="self:SetColor(param1)">
+										<panel width="100%" height="100%" >
+											<image height="50%" width="32" align="left" valign="top" texture="/ui/info/header_bar_tl.tga" noclick="1" watch="ChangeComboboxBgColor" ontriggerlua="self:SetColor(param1)"/>
+											<image height="50%" width="32" align="left" valign="bottom" texture="/ui/info/header_bar_bl.tga" noclick="1" watch="ChangeComboboxBgColor" ontriggerlua="self:SetColor(param1)"/>
+											<image height="50%" width="32" align="right" valign="top" texture="/ui/info/header_bar_tr.tga" noclick="1" watch="ChangeComboboxBgColor" ontriggerlua="self:SetColor(param1)"/>
+											<image height="50%" width="32" align="right" valign="bottom" texture="/ui/info/header_bar_br.tga" noclick="1" watch="ChangeComboboxBgColor" ontriggerlua="self:SetColor(param1)"/>
+										</panel>
+									</panel>
+								</widgetstate>
+							</combobox>
+						</panel>
+					</if>
+
+
+					<panel width="1.0h" height="100%" stickytoinvis="0">
+						<panel x="-1" height="100%" width="1" align="center" color="0 0 0 .7" />
+						<panel x="0" height="100%" width="1" align="center" color="1 1 1 .3" />
+					</panel>
+
+					<!-- <instance name="stats_head_tab_button" id="stats_public" width="15h" label="player_stats_public_tab" type="public" cover_isvis="false" onclick="ShowOnly('public_cover'); cmd('setsave _playerstats_show_panel ' # 'stats_panel_public'); ShowOnly('stats_panel_public'); If(IsVisible(), CallEvent('player_stats_submit'));" onmouseover="" onmouseout="" /> -->
+					<instance name="stats_head_tab_button" id="stats_history" width="15h" label="player_stats_history_tab" type="history" cover_isvis="false" onclick="ShowOnly('history_cover'); cmd('setsave _playerstats_show_panel ' # 'stats_panel_history_normal'); ShowOnly('stats_panel_history_normal'); If(IsVisible(), CallEvent('player_stats_submit')); Trigger('ChangeComboboxBgColor', 'normal', '1 1 1 1');" onmouseover="" onmouseout="" />
+					<panel width="1h"/>
+				</panel>
+			</panel>
+
+
+		    <panel name="player_stats_mastery" color="0 0 0 1" x="-1h" align="right" valign="center" width="-6.2h" height="-2h" visible="0"
+		    	   onshow="cmd('setsave _playerstats_show_panel ' # 'stats_panel_mastery'); CallEvent('player_stats_submit'));"
+		    	   onhide="ShowOnly('pvp_cover'); cmd('setsave _playerstats_show_panel ' # 'stats_panel_public'); ShowOnly('stats_panel_public'); If(IsVisible(), CallEvent('player_stats_submit')); Trigger('ChangeComboboxBgColor', 'public', '.6 .4 .4 1')"
+		    	   onshowlua="GetWidget('playstats_mastery_tab_stats_up'):SetTexture('/ui/fe2/elements/aftermatch/matchtab_unselected.tga')
+						      GetWidget('playstats_mastery_tab_mastery_up'):SetTexture('/ui/fe2/elements/aftermatch/matchtab_selected.tga')"
+				   onhidelua="GetWidget('playstats_mastery_tab_stats_up'):SetTexture('/ui/fe2/elements/aftermatch/matchtab_selected.tga')
+						      GetWidget('playstats_mastery_tab_mastery_up'):SetTexture('/ui/fe2/elements/aftermatch/matchtab_unselected.tga')"
+				   watch="PlayerStatsResultMastery" ontriggerlua="if NotEmpty(param3) then
+				                                                     Player_Stats.SetMasteryInfo(param10, param11, param0)
+				                                                  else
+				                                                     Trigger('PlayerStatsMasteryError', Translate('mastery_error_popup_noinfo'))
+				                                                  end"
+				   watch1="UpdateMasteryInfo"
+				   ontrigger1lua="if tonumber(param0) == 0 then
+				                      Cmd('SetSave _playerstats_show_panel stats_panel_mastery')
+				                      Cmd('ClientRefreshUpgrades')
+				                      GetWidget('player_stats_submit'):DoEvent()
+				                  else
+				                      Trigger('PlayerStatsMasteryError', Translate('mastery_error_popup_getreward', 'value', param0))
+				                  end"
+				   onframelua="Player_Stats.OnMasteryFrame()">
+		    	<panel width="40h">
+		    		<instance name="header_bar" height="2.8h" lbl="mastery_stats_head1" lbl_font="dyn_11" show_close="0" />
+		    	</panel>
+		    	<panel x="40.5h" width="51.5h">
+		    		<instance name="header_bar" height="2.8h" lbl="mastery_stats_head2" lbl_font="dyn_11" show_close="0" />
+		    	</panel>
+		    	<panel x="92.5h" width="23.5h">
+		    		<instance name="header_bar" height="2.8h" lbl="mastery_stats_head3" lbl_font="dyn_11" show_close="1" onclick="Set('_mainmenu_currentpanel', 'player_stats'); CallEvent('MainMenuPanelSwitcher');"/>
+		    	</panel>
+
+                <panel y="3h" width="40h" height="16.5h">
+                	<!-- Fetch -->
+					<panel y="0" height="3.5h">
+						<frame texture="/ui/info/backdrop.tga" borderthickness="2.0h" color="{fetchbgcolor=1 1 1 .5}" noclick="1" />
+						<frame color=".05 .07 .1 .5" bordercolor="{framecolor=#455166}" borderthickness="1" noclick="1" />
+
+						<panel x="0.5h" height="100%" float="right">
+							<label fitx="true" fitxpadding="0.5h" height="100%" textvalign="center" font="dyn_10" color="white" shadow="true" content="player_stats_player_name"/>
+							<panel height="2.5h" width="14.0h" valign="center" color="0 0 0 1" noclick="true">
+								<frame color="invisible" bordercolor="#7b8c9b" borderthickness="1" noclick="1" />
+								<textbox
+									y="0.4h"
+									width="-1.0h"
+									valign="center" align="center"
+									maxlength="40"
+									textalign="left" textvalign="center"
+									font="dyn_10"
+									textcolor="white"
+									shadow="false"
+									color="invisible"
+									onshow="SetFocus(true);"
+									onenter="Set('_player_stats_searchname', this); Set('_player_stats_eventid', '-1'); If(IsVisible(), CallEvent('player_stats_submit')); EraseInputLine();"
+									onesc="EraseInputLine();"
+									onchange="CreateString('ui_autocompleteTextBox', name); ChatAutoCompleteNick(this);"
+									onlosefocus="Set(stats_add_friend_auto, false);"
+								/>
+							</panel>
+						</panel>
+						<instance
+							name="button2"
+							x="-3.0h"
+							height="2.5h" width="9.0h"
+							align="right" valign="center"
+							font="dyn_11"
+							label="ccstats_button_fetch"
+							onclick="Call(ui_autocompleteTextBox, 'Set(\'_player_stats_searchname\', this); Set(\'_player_stats_eventid\', \'-1\'); CallEvent(\'player_stats_submit\'); EraseInputLine();');"
+						/>
+						<instance name="tip_mark" tip_id="stat_tip_fetch" x="-0.5h" width="2.3h" height="2.3h" align="right" valign="center" />
+
+						<panel onload="CreateBool('stats_add_friend_auto', false);" x="-15.6h" y="-2.9h" width="17.0h" height="15.0h" align="right" valign="top" visible="false" color="invisible" watch="ChatAutoCompleteClear" ontrigger="SetVisible(false);" watch2="ChatAutoCompleteAdd" ontrigger2="if(stats_add_friend_auto, SetVisible(true));">
+							<instance name="autocomplete_list" height="10.3h" align="right" valign="bottom" />
+						</panel>
+
+					</panel>
+					<panel height="12.5h" align="center" valign="bottom" color="0 0 0 1">
+						<frame color="invisible" bordercolor=".4 .4 .4 1" borderthickness="1" noclick="1" />
+
+						<panel width="-1h" height="-1h" x=".5h" y=".5h">
+							<panel width="9.5h" height="9.5h">
+								<avatar
+									texture="/ui/common/ability_coverup.tga"
+									watch="PlayerStatsResultMastery"
+									ontrigger=
+									"
+										SetTexture('/ui/common/ability_coverup.tga');
+										If(StringEmpty(GetAccountIconTexturePathFromUpgrades(param6, param3)),
+											SetAvatar('http://www.heroesofnewerth.com/getAvatar.php?id=' # param3),
+											SetTexture(GetAccountIconTexturePathFromUpgrades(param6, param3))
+										);
+									"
+								/>
+							</panel>
+
+							<panel align="right" width="-10.5h" valign="center" float="bottom">
+								<panel width="100%" height="2.6h">
+									<label
+										height="2.6h"
+										font="dyn_16"
+										color="#ffab01"
+										textvalign="center"
+										watch="PlayerStatsResultMastery"
+										ontriggerlua="
+											local nameColor, nameColorFont = GetChatNameColorStringFromUpgrades(param6), GetChatNameColorFontFromUpgrades(param6)
+
+											self:SetFont(NotEmpty(nameColorFont) and nameColorFont..'_16' or 'dyn_16')
+											self:SetColor(NotEmpty(nameColor) and nameColor or '#FFAB01')
+											self:SetGlow(GetChatNameGlowFromUpgrades(param6))
+											self:SetGlowColor(GetChatNameGlowColorStringFromUpgrades(param6))
+											if nameColorFont == '8bit' then
+												self:SetText(string.upper(param0))
+												self:SetY('.2h')
+											else
+												self:SetText(param0)
+												self:SetY('0h')
+											end
+										"
+										contents="-"
+									/>
+
+									<image
+										width="2.6h"
+										height="2.6h"
+										align="right"
+										valign="center"
+										watch="PlayerStatsResultMastery"
+										ontrigger=
+										"
+											If(StringEmpty(GetChatSymbolTexturePathFromUpgrades(param6)),
+												If(StringEmpty(GetChatNameColorTexturePathFromUpgrades(param6)),
+													SetVisible(false),
+													Split(SetVisible(true), SetTexture(GetChatNameColorTexturePathFromUpgrades(param6)))
+												),
+												Split(SetVisible(true), SetTexture(GetChatSymbolTexturePathFromUpgrades(param6)))
+											);
+										"
+										onmouseover="
+											Trigger(
+												'StoreImagePreviewInit',
+												GetWidth(),
+												GetHeight(),
+												GetAbsoluteX(),
+												GetAbsoluteY(),
+												false,
+												GetTexture()
+											);
+											Trigger('StoreImagePreviewVis', true, '250%');
+										"
+										onmouseout="
+											DoEvent(1);
+
+										"
+										onhide="
+											DoEvent(1);
+										"
+										onevent1="
+											Trigger('StoreImagePreviewVis', false, '100%');
+										"
+									/>
+								</panel>
+
+								<panel height="1.8h" align="center">
+									<label width="100%" height="100%" textalign="left" textvalign="top" font="dyn_9" color="1 1 1 1" shadow="1" noclick="1" watch="PlayerStatsResultMastery" ontrigger="SetText(param1);" />
+									<label width="100%" height="100%" textalign="right" textvalign="top" font="dyn_9" color="1 1 1 1" shadow="1" noclick="1" watch="PlayerStatsResultMastery" ontrigger="SetText(param2);" />
+								</panel>
+
+								<panel height="5h" width="100%" onmouseover="##ShowWidget('accountstats_tip');##" onmouseout="##HideWidget('accountstats_tip');##" noclick="1"	>
+
+									<frame texture="/ui/info/backdrop.tga" borderthickness="1.0h" color=".6 .6 .6 1" rendermode="grayscale" noclick="1" />
+									<frame color=".05 .07 .1 .5" bordercolor="#666666" borderthickness="1" noclick="1" />
+									<if condition="!cl_GarenaEnable">
+
+										<!-- F2P -->
+										<label y="0.5h" x="6.0h" width="-4.0h" height="1.8h" align="center" textalign="left" textvalign="top" font="dyn_10" color="1 1 1 1" shadow="1" noclick="1" content="general_basic"
+											   watch="PlayerStatsResultMastery"
+											   ontrigger="
+												If(param9 ge accountStanding_verifiedThreshold or param9 == 0,
+													SetText(Translate('general_verified')),
+													SetText(Translate('general_basic'))
+												);"
+										/>
+
+										<image color="1 1 1 1" y="0.1h" x="5h" width="2.4h" height="2.4h" valign="top" align="left" visible="1" texture="/ui/icons/basic.tga" noclick="0"
+											   watch="PlayerStatsResultMastery"
+											   ontrigger="
+												 If(param9 ge accountStanding_verifiedThreshold or param9 == 0,
+													Split(SetOnMouseover('ShowWidget(\'general_verified\');'), SetTexture('/ui/icons/verified.tga')),
+													Split(SetOnMouseover('ShowWidget(\'general_basic\');'), SetTexture('/ui/icons/basic.tga'))
+												); "
+											   onmouseout="HideWidget('general_verified'); HideWidget('general_basic');" onhide="HideWidget('general_verified'); HideWidget('general_basic');"
+										/>
+									</if>
+
+									<panel height="-1h" width="100@" align="right" color="0 0 0 .5" x="-.5h" valign="center">
+										<frame color="invisible" bordercolor="#666666" borderthickness="1" noclick="1" />
+										<label height="100%" width="100%" textalign="center" textvalign="center" font="dyn_14" color="1 1 1 1" shadow="1" noclick="1" watch="PlayerStatsResultMastery" ontrigger="SetText(param7);" />
+									</panel>
+
+									<panel valign="bottom" height="2h" y="-.5h" x=".5h" width="-6.5h" align="left" color="invisible" noclick="1">
+										<image texture="/ui/legion/behind_bar.tga" color="#170045" noclick="1" />
+
+										<panel width="0" watch="PlayerStatsResultMastery" ontrigger="If(param8 gt 0, SetWidth(FtoP(GetAccountPercentNextLevel(param8))), SetWidth(0));"  noclick="1">
+											<image texture="/ui/legion/behind_bar.tga" color="#ac00f5" noclick="1" />
+											<image align="right" texture="/ui/legion/behind_bar.tga" color="1 1 1 .5" noclick="1"/>
+										</panel>
+
+										<image width="-0.6h" align="center" texture="/ui/elements/bar_highlight.tga" noclick="1"/>
+										<frame color="invisible" bordercolor="#666666" borderthickness="1" noclick="1" />
+									</panel>
+
+
+								</panel>
+
+							</panel>
+						</panel>
+
+						<!-- Created / Login Dates -->
+						<panel y="-0.5h" width="-1.0h" height="1.5h" align="center" valign="bottom" grow="true">
+							<label color="white" font="dyn_9" align="left" watch="PlayerStatsResultMastery" ontrigger="SetText(Translate('player_stats_account_age', 'age', param5));" />
+							<label color="white" font="dyn_9" align="right" textalign="right" watch="PlayerStatsResultMastery" ontrigger="SetText(Translate('player_stats_last_match', 'last', param4));" />
+						</panel>
+					</panel>
+
+				</panel>
+		    	<panel y="21h" width="40h" height="27h" >
+		    		<frame texture="frames/rounded_bg_white.tga" borderthickness="1" color="0 0 0 .9" bordercolor=".5 .5 .5 1" noclick="true"/>
+		    		<panel x="-1h" height="3h" color="1 1 1 0">
+		    			<label font="dyn_16" textvalign="center" textalign="center" noclick="true" color="#0fbaf0" content="mastery_stats_heroproficiency_title"/>
+		    		</panel>
+		    		<panel x="-1h" y="3h" height="3h" color="1 1 1 0">
+		    			<panel width="8h" x="3h">
+		    				<label font="dyn_12" textvalign="center" textalign="center" noclick="true" color="#5d7b93" content="mastery_stats_heroproficiency_level"/>
+		    			</panel>
+		    			<panel width="8h" align="center">
+		    				<label font="dyn_12" textvalign="center" textalign="center" noclick="true" color="#5d7b93" content="mastery_stats_heroproficiency_reward"/>
+		    			</panel>
+		    			<panel width="8h" x="-3h" y="-1h" height="+1h" align="right" >
+		    				<label font="dyn_12" textvalign="center" textalign="center" noclick="true" color="#5d7b93"  wrap="1" content="mastery_stats_heroproficiency_heroes"/>
+		    			</panel>
+		    		</panel>
+		    		<panel align="center" valign="bottom" y="-0.2h" width="-5h" x="-1h" height="21h" clip="true"
+		    			onmousewheelup="CallEvent('stats_mastery_hero_proficiency_scroll', 0);"
+			    		onmousewheeldown="CallEvent('stats_mastery_hero_proficiency_scroll', 1);" 
+			    		>
+			    		<panel name="stats_mastery_hero_proficiencies" float="bottom" padding="1" noclick="1">
+			    			<instance name="stats_mastery_hero_proficiency_single" index="15"/>
+			    			<instance name="stats_mastery_hero_proficiency_single" index="13"/>
+			    			<instance name="stats_mastery_hero_proficiency_single" index="11"/>
+			    			<instance name="stats_mastery_hero_proficiency_single" index="10"/>
+			    			<instance name="stats_mastery_hero_proficiency_single" index="7"/>
+			    			<instance name="stats_mastery_hero_proficiency_single" index="5"/>
+			    			<instance name="stats_mastery_hero_proficiency_single" index="3"/>
+			    			<instance name="stats_mastery_hero_proficiency_single" index="2"/>
+			    			<instance name="stats_mastery_hero_proficiency_single" index="1"/>
+			    		</panel>
+		    		</panel>
+
+	    			<scrollbar name="stats_mastery_hero_proficiency_scroll"
+						x="-0.8h" y="-0.5h" align="right" valign="bottom" width="2h" height="-3.5h"
+						texture="/ui/info/combobox.tga"
+						minvalue="1"
+						maxvalue="3"
+						handlewidth="2h"
+						handleheight="2h"
+						step="0.01"
+						value="1"
+						vertical="true"
+						slotwidth="0.6h" 
+						slotheight="1"
+						visible="true"
+					    onslidelua="
+					    	local y = (1.0 - self:GetValue()) * 3
+					   		GetWidget('stats_mastery_hero_proficiencies'):SetY(y..'h')
+					   	"
+						onevent0lua="self:SetValue(math.max(1, self:GetValue() - 1))"
+						onevent1lua="self:SetValue(math.min(3, self:GetValue() + 1))"
+					   	/>
+		    	</panel>
+
+		    	<panel x="38.3h" y="0.5h" width="56h" height="45h">
+		    		<panel y="0.3" width="48h" height="12h" align="center" valign="top">
+		    			<image texture="/ui/fe2/mastery/statistics_totallevel_bg.tga" />
+		    		</panel>
+		    		<panel y="6.5h" width="20h" height="3h" align="center">
+                        <label font="dyn_11" textvalign="center" textalign="center" noclick="true" color="#fecd7e" content="mastery_stats_title"/>
+		    		</panel>
+		    		<panel y="3.5h" width="6h" height="4h" align="center">
+		    			<label name="player_stats_mastery_totallevel" font="dyn_14" textvalign="center" textalign="center" noclick="true" color="#fefa99" content="-"/>
+		    		</panel>
+		    		<panel y="10.5h" width="51h" height="37h" align="center" valign="top">
+		    			<frame texture="frames/rounded_bg_white.tga" borderthickness="2" color="0 0 0 .9" bordercolor="#cd9e5a" noclick="true"/>
+		    			<panel width="-2" height="2.8h" align="center">
+		    				<image y="-1.7h" texture="/ui/fe2/mastery/rewardbar.tga" height="6h"/>
+		    				<label font="dyn_16" textvalign="center" textalign="center" noclick="true" color="white" content="mastery_stats_overallreward_title"/>
+		    			</panel>
+		    			<panel x="2" y="4h" width="-3h" height="-5h" clip="1">
+		    				<panel name="player_stats_mastery_rewards_root" float="bottom" padding="0.8h" grow="1" regrow="1">
+		    					<instance name="stats_mastery_reward_single" index="1"/>
+		    					<instance name="stats_mastery_reward_single" index="2"/>
+		    					<instance name="stats_mastery_reward_single" index="3"/>
+		    					<instance name="stats_mastery_reward_single" index="4"/>
+		    					<instance name="stats_mastery_reward_single" index="5"/>
+		    					<instance name="stats_mastery_reward_single" index="6"/>
+		    					<instance name="stats_mastery_reward_single" index="7"/>
+		    					<instance name="stats_mastery_reward_single" index="8"/>
+		    					<instance name="stats_mastery_reward_single" index="9"/>
+		    					<instance name="stats_mastery_reward_single" index="10"/>
+		    					<instance name="stats_mastery_reward_single" index="11"/>
+		    					<instance name="stats_mastery_reward_single" index="12"/>
+		    					<instance name="stats_mastery_reward_single" index="13"/>
+		    					<instance name="stats_mastery_reward_single" index="14"/>
+		    					<instance name="stats_mastery_reward_single" index="15"/>
+		    					<instance name="stats_mastery_reward_single" index="16"/>
+		    					<instance name="stats_mastery_reward_single" index="17"/>
+		    					<instance name="stats_mastery_reward_single" index="18"/>
+		    					<instance name="stats_mastery_reward_single" index="19"/>
+		    					<instance name="stats_mastery_reward_single" index="20"/>
+		    					<instance name="stats_mastery_reward_single" index="21"/>
+		    					<instance name="stats_mastery_reward_single" index="22"/>
+		    					<instance name="stats_mastery_reward_single" index="23"/>
+		    					<instance name="stats_mastery_reward_single" index="24"/>
+		    					<instance name="stats_mastery_reward_single" index="25"/>
+		    					<instance name="stats_mastery_reward_single" index="26"/>
+		    					<instance name="stats_mastery_reward_single" index="27"/>
+		    					<instance name="stats_mastery_reward_single" index="28"/>
+		    					<instance name="stats_mastery_reward_single" index="29"/>
+		    					<instance name="stats_mastery_reward_single" index="30"/>
+		    					<instance name="stats_mastery_reward_single" index="31"/>
+		    					<instance name="stats_mastery_reward_single" index="32"/>
+		    					<instance name="stats_mastery_reward_single" index="33"/>
+		    					<instance name="stats_mastery_reward_single" index="34"/>
+		    					<instance name="stats_mastery_reward_single" index="35"/>
+		    					<instance name="stats_mastery_reward_single" index="36"/>
+		    					<instance name="stats_mastery_reward_single" index="37"/>
+		    					<instance name="stats_mastery_reward_single" index="38"/>
+		    					<instance name="stats_mastery_reward_single" index="39"/>
+		    					<instance name="stats_mastery_reward_single" index="40"/>
+		    				</panel>
+		    			</panel>
+
+		    			<scrollbar name="stats_mastery_reward_scroll"
+							x="-0.8h" y="-0.5h" align="right" valign="bottom" width="2h" height="-3.5h"
+							texture="/ui/info/combobox.tga"
+							minvalue="1"
+							maxvalue="1"
+							onslidelua="Player_Stats.UpdateMasteryReward()"
+							handlewidth="2h"
+							handleheight="2h"
+							step="1"
+							value="1"
+							vertical="true"
+							slotwidth="0.6h" slotheight="1"
+							visible="true"
+
+							onevent0lua="Player_Stats.WheelMasteryReward(true)"
+							onevent1lua="Player_Stats.WheelMasteryReward(false)"
+						/>
+						<button name="stats_mastery_autoslip_up"
+							    x="-1.7h" y="3h"
+		    				    align="center"
+				    			width="-4h"
+								height="2.5h"
+								color="invisible"
+								onmouseoverlua="Player_Stats.autoSlip = 'up'"
+								onmouseoutlua="Player_Stats.autoSlip = 'stop'"
+								onclicklua=""
+						>
+							<widgetstate statename="up">
+				   				<image texture="/ui/fe2/mastery/arrow_up.tga" x="1.3h" y="0.5h" width="96h" height="6h" noclick="true" align="center" valign="center"/>
+							</widgetstate>
+							<widgetstate statename="over">
+								<image texture="/ui/fe2/mastery/arrow_over.tga" x="1.3h" y="0.5h"  width="96h" height="6h" noclick="true" align="center" valign="center"/>
+							</widgetstate>
+							<widgetstate statename="down">
+								<image texture="/ui/fe2/mastery/arrow_over.tga" x="1.3h" y="0.5h"  width="96h" height="6h" noclick="true" align="center" valign="center"/>
+							</widgetstate>
+		   				 </button>
+
+		   				 <button name="stats_mastery_autoslip_down"
+		   				 	    x="-1.7h" y="-0.5h"
+		    				    align="center"
+		    				    valign="bottom"
+				    			width="-4h"
+								height="2.5h"
+								color="invisible"
+								onmouseoverlua="Player_Stats.autoSlip = 'down'"
+								onmouseoutlua="Player_Stats.autoSlip = 'stop'"
+								onclicklua=""
+						>
+							<widgetstate statename="up">
+				   				<image texture="/ui/fe2/mastery/arrow_up.tga" x="1.3h" y="-0.5h" width="96h" height="6h" noclick="true" align="center" valign="center" vflip="1"/>
+							</widgetstate>
+							<widgetstate statename="over">
+								<image texture="/ui/fe2/mastery/arrow_over.tga" x="1.3h" y="-0.5h"  width="96h" height="6h" noclick="true" align="center" valign="center" vflip="1"/>
+							</widgetstate>
+							<widgetstate statename="down">
+								<image texture="/ui/fe2/mastery/arrow_over.tga" x="1.3h" y="-0.5h"  width="96h" height="6h" noclick="true" align="center" valign="center" vflip="1"/>
+							</widgetstate>
+		   				 </button>
+		    		</panel>
+		    	</panel>
+
+		    	<panel y="3.5h" width="23.5h" height="44.5h" align="right">
+		    		<frame texture="frames/rounded_bg_white.tga" borderthickness="2" color="0 0 0 .9" bordercolor="#4b6071" noclick="true"/>
+		    		<panel align="center" valign="center" y="-1.5h" width="-2h" height="-4h" float="bottom">
+		    			<instance name="stats_mastery_levelup_single" index="1"/>
+		    			<panel height="1" color="#16252c"/>
+		    			<instance name="stats_mastery_levelup_single" index="2"/>
+		    			<panel height="1" color="#16252c"/>
+		    			<instance name="stats_mastery_levelup_single" index="3"/>
+		    			<panel height="1" color="#16252c"/>
+		    			<instance name="stats_mastery_levelup_single" index="4"/>
+		    			<panel height="1" color="#16252c"/>
+		    			<instance name="stats_mastery_levelup_single" index="5"/>
+		    		</panel>
+		    	</panel>
+
+                	<panel name="stats_mastery_error_popup" y="4h" width="30h" height="20h" align="center" valign="center" visible="0"
+                	   watch="PlayerStatsMasteryError" ontriggerlua="self:SetVisible(true)">
+                 		<frame color="0 0 0 .8" bordercolor="#455166" borderthickness="1" noclick="1" />
+		    		<instance name="header_bar" height="2.4h" lbl="mastery_error_popup_title" lbl_font="dyn_11" show_close="1" onclicklua="GetWidget('stats_mastery_error_popup'):SetVisible(false)"/>
+		    		<panel width="-1h" height="-3.5h" y="-0.5h" align="center" valign="bottom">
+		    			<frame texture="/ui/frames/tooltip_bg.tga" color="#2c4b6c" noclick="1"/>
+						<frame color="invisible" bordercolor="#455166" borderthickness="1" noclick="1" />
+
+						<panel width="-1h" height="-6h" y="1h" color="1 1 1 .5" align="center" >
+							<frame color="0 0 0 .8" bordercolor="#455166" borderthickness="1" noclick="1" />
+							<panel width="-2h" height="-2h" align="center" valign="center">
+								<label font="dyn_12" textvalign="center" textalign="center" noclick="true" color="white" content="" wrap="1"
+									   watch="PlayerStatsMasteryError" ontriggerlua="self:SetText(param)"/>
+							</panel>
+						</panel>
+
+						<instance name="button2" y="-1.5h" width="7h" height="2.5h" label="mastery_error_popup_confirm" align="center" valign="bottom" onclicklua="GetWidget('stats_mastery_error_popup'):SetVisible(false)"/>
+		    		</panel>
+       			</panel>
+		    </panel>
+
+			<button y="3h"
+				    width="6.2h"
+					height="22.0h"
+					color="invisible"
+					onmouseover="PlaySound('/shared/sounds/ui/ccpanel/button_over_02.wav');"
+					onclicklua="GetWidget('player_stats_mastery'):SetVisible(0)"
+			>
+				<widgetstate statename="up">
+				    <image name="playstats_mastery_tab_stats_up" texture="/ui/fe2/elements/aftermatch/matchtab_selected.tga" rotation="180" />
+				</widgetstate>
+				<widgetstate statename="over">
+					<image texture="/ui/fe2/elements/aftermatch/matchtab_hover.tga" rotation="180" />
+				</widgetstate>
+				<widgetstate statename="down" x="1" y="1">
+					<image texture="/ui/fe2/elements/aftermatch/matchtab_unselected.tga" rotation="180" />
+				</widgetstate>
+				<image y="2h" texture="/ui/fe2/mastery/tab_stats.tga" width="6h" height="6h" noclick="1" />
+				<label x="0.2h" y="3.5h" font="dyn_12" textvalign="center" textalign="center" noclick="true" color="1 1 1 1" content="" onload="SetText(FormatStringNewLine(Translate('mastery_stats_tabs_stats')));" />
+		    </button>
+
+			<button y="25h"
+					width="6.2h"
+					height="22.0h"
+					color="invisible"
+					onmouseover="PlaySound('/shared/sounds/ui/ccpanel/button_over_02.wav');"
+					onclicklua="GetWidget('player_stats_mastery'):SetVisible(1)"
+			>
+				<widgetstate statename="up">
+					<image name="playstats_mastery_tab_mastery_up" texture="/ui/fe2/elements/aftermatch/matchtab_unselected.tga" rotation="180" />
+				</widgetstate>
+				<widgetstate statename="over">
+					<image texture="/ui/fe2/elements/aftermatch/matchtab_hover.tga" rotation="180" />
+				</widgetstate>
+				<widgetstate statename="down" x="1" y="1">
+					<image texture="/ui/fe2/elements/aftermatch/matchtab_unselected.tga" rotation="180" />
+				</widgetstate>
+				<image y="2h" texture="/ui/fe2/mastery/tab_mastery.tga" width="4h" height="4h" noclick="1" align="center"/>
+				<label x="0.2h" y="3h" font="dyn_12" textvalign="center" textalign="center" noclick="true" color="1 1 1 1" content="" onload="SetText(FormatStringNewLine(Translate('mastery_stats_tabs_mastery')));" />
+			</button>
+
+			<!-- Load Progress -->
+			<panel width="-2.0h" align="center" visible="1" blockinput="true" watch="EntityDefinitionsLoaded" ontrigger="SetVisible(false);" color="0 0 0 .7">
+				<panel align="center" valign="center" width="25.0h" height="5h" y=".5h">
+					<image height="100%" texture="../mainmenu/update_bar_bg.tga" />
+
+					<panel watch="EntityDefinitionsProgress" width="1" ontrigger="If(param1 gt 0, SetWidth(((param0 / param1) * 100) # '%')); SetWidth(Max(GetWidth(), 32));">
+						<image watch="EntityDefinitionsProgress" ontrigger="If(param1 gt 0 and param0 gt 0, SetUScale(1 / (param0 / param1)));" texture="../mainmenu/update_bar_fg.tga"/>
+						<image width="32" texture="../loadingscreens/loading_bar_fg_l.tga"/>
+						<image width="32" align="right" texture="../loadingscreens/loading_bar_fg_r.tga"/>
+					</panel>
+				</panel>
+				<image align="center" valign="center" width="31.5h" height="9h" x="-.8h" color="1 1 1 1" texture="elements/loading_bar_frame.tga" />
+				<panel color="invisible" y=".5h">
+					<label width="-10.0h" height="100%" align="center" textalign="center" textvalign="center" wrap="1" font="dyn_10" color="white" shadow="1" content="general_wait" />
+				</panel>
+			</panel>
+
+		</panel>
+
+	</template>
+
+	<instance name="generic_tooltip_floater" icony="0.4h" iconheight="1.8h" iconwidth="1.8h" tip_id="stats_mastery_hero_proficiency_tip_1" title="mastery_levelreward_1" label="mastery_levelreward_desc_1" />
+	<instance name="generic_tooltip_floater" icony="0.4h" iconheight="1.8h" iconwidth="1.8h" tip_id="stats_mastery_hero_proficiency_tip_2" title="mastery_levelreward_2" label="mastery_levelreward_desc_2" />
+	<instance name="generic_tooltip_floater" icony="0.4h" iconheight="1.8h" iconwidth="1.8h" tip_id="stats_mastery_hero_proficiency_tip_3" title="mastery_levelreward_3" label="mastery_levelreward_desc_3" />
+	<instance name="generic_tooltip_floater" icony="0.4h" iconheight="1.8h" iconwidth="1.8h" tip_id="stats_mastery_hero_proficiency_tip_5" title="mastery_levelreward_5" label="mastery_levelreward_desc_5" />
+	<instance name="generic_tooltip_floater" icony="0.4h" iconheight="1.8h" iconwidth="1.8h" tip_id="stats_mastery_hero_proficiency_tip_7" title="mastery_levelreward_7" label="mastery_levelreward_desc_7" />
+	<instance name="generic_tooltip_floater" icony="0.4h" iconheight="1.8h" iconwidth="1.8h" tip_id="stats_mastery_hero_proficiency_tip_10" title="mastery_levelreward_10" label="mastery_levelreward_desc_10" />
+	<instance name="generic_tooltip_floater" icony="0.4h" iconheight="1.8h" iconwidth="1.8h" tip_id="stats_mastery_hero_proficiency_tip_11" title="mastery_levelreward_11" label="mastery_levelreward_desc_11" />
+	<instance name="generic_tooltip_floater" icony="0.4h" iconheight="1.8h" iconwidth="1.8h" tip_id="stats_mastery_hero_proficiency_tip_13" title="mastery_levelreward_13" label="mastery_levelreward_desc_13" />
+	<instance name="generic_tooltip_floater" icony="0.4h" iconheight="1.8h" iconwidth="1.8h" tip_id="stats_mastery_hero_proficiency_tip_15" title="mastery_levelreward_15" label="mastery_levelreward_desc_15" />
+	<instance name="generic_tooltip_floater" icony="0.4h" iconheight="1.8h" iconwidth="1.8h" tip_id="stats_mastery_superboost_tip" title="mastery_reward_superboost_title" label="mastery_reward_superboost_desc" />
+
+
+	<panel watch="PlayerStatsResultMastery" ontriggerlua="if IsMe(param0) then SetMyMasteryExp(param10) end" />
+</package>

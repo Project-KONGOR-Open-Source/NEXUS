@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+	<panel y="8h"
+		height="3h"
+		align="center"
+		float="right"
+		padding="1h"
+		grow="1"
+		noclick="1"
+		watch="StatsStatus"
+		ontriggerlua="
+			self:SetVisible(not ((param == 'submitting') or (param == 'recording'))) 
+			if not ((param == 'submitting') or (param == 'recording')) then
+				self:Sleep(1, function() Trigger('AfterMatchStatsTrigger') end)
+			end
+			"
+	>
+		<instance
+			name="button2" button_name="game_disconnect"
+			label="game_disconnect"
+			height="3h"
+			width="15h"
+			interactive="false"
+			borderthickness="0.6h"
+			onclick="Disconnect(); ClearReconnectInfo();"
+			onclicklua="
+				Set('cg_enableAutoDisconnect', true)
+				Set('cl_manuallyDisconnect', false)
+			"
+			font="dyn_12"
+			watch="EndGame"
+			ontriggerlua="
+				local isPlayingStreaming = GetCvarBool('replay_isPlaying') and GetCvarBool('replay_v2')
+				if (AtoB(param)) and not isPlayingStreaming then
+					self:Sleep(750, function() self:SetVisible(1) end)
+				else
+					self:SetVisible(0)
+				end
+			"
+			watch1="AutoDisconnect"
+			ontrigger1="Disconnect(); ClearReconnectInfo();"
+		/>
+	</panel>
+</package>

@@ -1,0 +1,366 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+	<template name="item_tooltip_short">
+		<floater
+			name="{id}"
+			x="24" y="24"
+			width="0"
+			height="0"
+			color="invisible"
+			visible="false"
+			grow="1" regrow="1" growinvis="0" passivechildren="1"
+		>
+		
+		<frame
+			name="{id}_frame"
+			texture="/ui/frames/tooltip_bg.tga"
+			color="#000000C0"
+			borderthickness="0.5h"
+			x="0.0h" y="0.0h"
+			width="27h"
+			height="5.0h"
+			float="bottom"
+			grow="1" regrow="1" growinvis="0"
+		>
+			<frame texture="/ui/frames/roundframe.tga" color="#A0A0A0" borderthickness="0.5h"/>
+			<anchor x="1.0h" y="0.6h" />
+
+			<!-- Name and value -->
+			<panel
+				width="-2.0h"
+				height="1.8h"
+			>
+				<label
+					textalign="left"
+					font="dyn_10"
+					color="#87CEEB"
+					watch="{watch}"
+					ontriggerlua="self:SetText(param0)"
+				/>
+				<label
+					textalign="right"
+					font="dyn_10"
+					color="yellow"
+					watch="{watch}"
+					ontriggerlua="
+						if (param1 ~= '0') then
+							self:SetText(param1)
+						else
+							self:ClearText()
+						end"
+				/>
+			</panel>
+			
+			<panel
+				width="-2.0h"
+				height="1.8h"
+				watch="{watch}"
+				ontriggerlua="self:SetVisible(NotEmpty(param4))"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			/>
+
+			<!-- Description text -->
+			<label
+				width="-2.0h"
+				height="0.0h"
+				font="dyn_9"
+				wrap="true"
+				color="white"
+				watch="{watch}"
+				ontriggerlua="self:SetText(param4) self:SetVisible(NotEmpty(param4))"
+				fity="1"
+				fitypadding="0.2h"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			/>
+			
+			<!-- Passive block -->
+			<panel
+				width="-2.0h"
+				height="1.8h"
+				watch="{watch}"
+				ontriggerlua="self:SetVisible(NotEmpty(param6) and (tonumber(param6) > 0))"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			/>
+
+			<panel
+				width="-2.0h"
+				height="2.4h"
+				watch="{watch}"
+				ontriggerlua="self:SetVisible(NotEmpty(param6) and (tonumber(param6) > 0))"
+				float="bottom"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			>
+				<label
+					height="1.8h"
+					font="dyn_10"
+					color="white"
+					content="tooltip_passive_bonuses"
+				/>
+
+				<panel width="10.5h" height="0.2h" color="gray" />
+				<panel height="0.4h" sticky="true" />
+			</panel>
+
+			<!-- Passive bonuses -->
+			<label
+				width="-2.0h"
+				height="0.0h"
+				font="dyn_10"
+				wrap="true"
+				color="white"
+				watch="{watch}"
+				ontriggerlua="self:SetText(param5) self:SetVisible(NotEmpty(param6) and (tonumber(param6) > 0))"
+				fity="1"
+				fitypadding="0.4h"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			/>
+
+			<panel
+				width="-2.0h"
+				height="1.8h"
+				watch="{watch}"
+				ontriggerlua="self:SetVisible(AtoB(param22))"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			/>
+
+			<!-- Aura bonuses -->
+			<panel
+				width="-2.0h"
+				height="2.4h"
+				watch="{watch}"
+				ontriggerlua="self:SetVisible(AtoB(param22))"
+				float="bottom"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			>
+				<label
+					height="1.8h"
+					font="dyn_10"
+					color="white"
+					content="tooltip_aura_effects"
+				/>
+
+				<panel width="10.5h" height="0.2h" color="gray" />
+				<panel height="0.4h" sticky="true" />
+			</panel>
+
+			<label
+				width="-2.0h"
+				height="1.8h"
+				font="dyn_10"
+				wrap="true"
+				color="white"
+				watch="{watch}"
+				ontriggerlua="self:SetText(param23) self:SetVisible(NotEmpty(param24) and (tonumber(param24) > 0))"
+				fity="1"
+				fitypadding="0.4h"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			/>
+
+			<!-- Flavor text -->
+			<panel
+				width="-2.0h"
+				height="1.8h"
+				watch="{watch}"
+				ontriggerlua="self:SetVisible(NotEmpty(param29))"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			/>
+
+			<label
+				width="-2.0h"
+				height="1.8h"
+				font="dyn_9"
+				wrap="true"
+				color=".5 .5 .5 1"
+				watch="{watch}"
+				ontriggerlua="self:SetText(param29) self:SetVisible(NotEmpty(param29))"
+				fity="1"
+				fitypadding="0.2h"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			/>
+
+			<panel
+				width="-2.0h"
+				height="1.5h"
+				watch="{watch}"
+				ontriggerlua="self:SetVisible({help} and NotEmpty(param37))"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			/>
+			
+			<!-- Components -->
+			<panel
+				width="-2.0h"
+				height="2.4h"
+				watch="{watch}"
+				ontriggerlua="self:SetVisible(NotEmpty(param39) and tonumber(param39) > 0)"
+				float="bottom"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			>
+				<label
+					height="1.8h"
+					font="dyn_10"
+					color="white"
+					content="Components"
+				/>
+
+				<panel width="10.5h" height="0.2h" color="gray" />
+				<panel height="0.4h" sticky="true" />
+			</panel>
+			
+			<!-- Component 1 -->
+			<panel
+				width="-2.0h"
+				height="1.8h"
+				watch="{watch}"
+				ontriggerlua="self:SetVisible(NotEmpty(param39) and tonumber(param39) >= 1);"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			>
+				<label
+					textalign="left"
+					font="dyn_10"
+					color="white"
+					watch="{watch}"
+					ontriggerlua="self:SetText(param40)"
+				/>
+				<label
+					textalign="right"
+					font="dyn_10"
+					color="yellow"
+					watch="{watch}"
+					ontriggerlua="self:SetText(param41)"
+				/>
+			</panel>
+			
+			<!-- Component 2 -->
+			<panel
+				width="-2.0h"
+				height="1.8h"
+				watch="{watch}"
+				ontriggerlua="self:SetVisible(NotEmpty(param39) and tonumber(param39) >= 2)"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			>
+				<label
+					textalign="left"
+					font="dyn_10"
+					color="white"
+					watch="{watch}"
+					ontriggerlua="self:SetText(param42)"
+				/>
+				<label
+					textalign="right"
+					font="dyn_10"
+					color="yellow"
+					watch="{watch}"
+					ontriggerlua="self:SetText(param43)"
+				/>
+			</panel>
+			
+			<!-- Component 3 -->
+			<panel
+				width="-2.0h"
+				height="1.8h"
+				watch="{watch}"
+				ontriggerlua="self:SetVisible(NotEmpty(param39) and tonumber(param39) >= 3)"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			>
+				<label
+					textalign="left"
+					font="dyn_10"
+					color="white"
+					watch="{watch}"
+					ontriggerlua="self:SetText(param44)"
+				/>
+				<label
+					textalign="right"
+					font="dyn_10"
+					color="yellow"
+					watch="{watch}"
+					ontriggerlua="self:SetText(param45)"
+				/>
+			</panel>
+			
+			<!-- Component 4 -->
+			<panel
+				width="-2.0h"
+				height="1.8h"
+				watch="{watch}"
+				ontriggerlua="self:SetVisible(NotEmpty(param39) and tonumber(param39) >= 4)"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			>
+				<label
+					textalign="left"
+					font="dyn_10"
+					color="white"
+					watch="{watch}"
+					ontriggerlua="self:SetText(param46)"
+				/>
+				<label
+					textalign="right"
+					font="dyn_10"
+					color="yellow"
+					watch="{watch}"
+					ontriggerlua="self:SetText(param47)"
+				/>
+			</panel>
+			
+			<panel
+				width="-2.0h"
+				height="1.8h"
+				watch="{watch}"
+				ontriggerlua="self:SetVisible(NotEmpty(param39) and tonumber(param39) > 0)"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			/>
+
+			<!-- Help -->
+			<label
+				width="-2.0h"
+				height="1.8h"
+				font="dyn_10"
+				wrap="true"
+				color="yellow"
+				watch="{watch}"
+				ontriggerlua="self:SetText(param37) self:SetVisible({help} and NotEmpty(param37))"
+				sticky="true"
+				stickytoinvis="false"
+				visible="false"
+			/>
+
+			<panel width="-2.0h" height="0.55h" sticky="true" stickytoinvis="false" />
+		</frame>
+		
+		</floater>
+	</template>
+</package>

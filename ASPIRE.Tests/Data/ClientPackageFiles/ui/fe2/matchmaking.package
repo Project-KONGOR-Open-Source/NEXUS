@@ -1,0 +1,3434 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+	<panel name="TMM_TriggerHelper" color="invisible" noclick="true"
+		onloadlua="MatchmakingInitialize(self)"
+	/>
+	<lua file="/ui/scripts/matchmaking.lua" />
+
+	<!-- ======================================= -->
+
+	<template name="mapLoadGuideLoadProgress">
+		<panel
+			name="mapLoadGuideLoadProgress{id}"
+			sticky="true"
+			stickytoinvis="false"
+			height="{height=1.8h}"
+			width="100%"
+			noclick="true"
+			visible="{visible=false}"
+		>
+		<!--
+			watch="TMMPlayerStatus{id}"
+			ontrigger="SetVisible(!StringEmpty(param0));"
+		-->
+			<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.3h" color="#171a28"/>
+			<panel x="0.2h" y="0.2h" width="-0.4h" height="-0.35h">
+				<panel
+					name="mapLoadGuideLoadProgress{id}Bar"
+					width="{testwidth=0%}"
+					color="green"
+				/>
+				<!--
+					watch="TMMPlayerStatus{id}"
+					ontrigger="SetWidth(param4 # '%');"
+				-->
+			</panel>
+			<frame texture="/ui/frames/roundframe.tga" color="#bbdefa" borderthickness="0.3h"/>
+			<label
+				name="mapLoadGuideLoadProgress{id}Name"
+				y="-0.1h"
+				width="100%"
+				height="100%"
+				textalign="center"
+				textvalign="center"
+				font="dyn_10"
+				color="white"
+				shadow="true"
+			/>
+			<!--
+				watch="TMMPlayerStatus{id}"
+				ontrigger="SetText(param1);"
+			-->
+
+			<!-- Darken -->
+			<panel visible="{darken=false}">
+				<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.3h" color="0 0 0 .8"/>
+				<frame texture="/ui/frames/roundframe.tga" color="#678095" borderthickness="0.3h"/>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="mapLoadGuideLegendMarker">
+		<panel height="2.75h" noclick="true" passivechildren="true">
+			<label align="right" x="-140@" textalign="right" textvalign="center" shadow="true" font="dyn_12" color="#619483" content="{label}"/>
+			<panel width="100@" height="100%" align="right">
+				<image texture="{icon}" align="center" valign="center"/>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="mapLoadGuideInfo">
+		<panel width="100%" grow="true">
+			<panel width="{width=100%}" grow="true">
+				<label wrap="true" fity="true" fitypadding="{fitypadding=1h}" font="dyn_10" color="#91e0c3" content="{label}"/>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="mapLoadGuideMarker">
+		<panel noclick="true" width="1" height="1" x="{x}" y="{y}" align="{align}" valign="{valign}">
+			<panel width="3h" height="3h" align="center" valign="center" passivechildren="true">
+				<image texture="{icon}"/>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="mapLoadGuideInfos_capturetheflag_flagdrop">
+		<panel height="3h" width="24h">
+			<panel align="center" grow="true" height="100%" float="right" padding="0.75h">
+				<panel width="100@" height="100%">
+					<image texture="/triggers/custom_maps/capturetheflag/flag/flagdrop.tga"/>
+					<frame color="invisible" bordercolor="#666666" borderthickness="1"/>
+				</panel>
+				<label fitx="true" font="dyn_9" color="#91e0c3" textvalign="center" content="map_loading_capturetheflag_dropicon"/>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="mapLoadGuideInfos_devowars_abilities">
+		<panel height="4h" float="right" padding="1.75h">
+			<panel width="100@" height="100%">
+				<image texture="/triggers/custom_maps/herowars/heroes/devx/ability_01_chain/icon.tga" y="0.1h"/>
+				<image y="0.1h" width="6.2h" height="6.2h" align="center" valign="center" texture="/ui/common/ability_frame.tga" noclick="1" />
+			</panel>
+
+			<panel width="75@" height="100%">
+				<image texture="/ui/elements/devowars/loading/arrow.tga" height="2h" width="2h" align="center" valign="center" />
+			</panel>
+
+			<panel width="100@" height="100%"><!-- 1 -->
+				<image texture="/triggers/custom_maps/herowars/heroes/devx/hook_levelups/damage.tga"/>
+				<modelpanel
+					visible="1"
+					noclick="true"
+					model="/ui/common/models/toggle/toggle.mdf"
+					anim="idle"
+					effect="/ui/common/models/toggle/toggle.effect"
+					camerapos="0 1 0"
+					cameraangles="0 0 180"
+					camerafov="45"
+					cameranear="1"
+					carmerafar="100"
+					depthclear="false"
+					depthcompress="true"
+					onshow="SetAnim('idle'); SetEffect('/ui/elements/devowars/loading/toggle.effect'); SetAnimSpeed(0.7)"
+				/>
+			</panel>
+
+			<panel width="100@" height="100%"><!-- 2 -->
+				<image texture="/triggers/custom_maps/herowars/heroes/devx/hook_levelups/range.tga" />
+				<modelpanel
+					visible="1"
+					noclick="true"
+					model="/ui/common/models/toggle/toggle.mdf"
+					anim="idle"
+					effect="/ui/common/models/toggle/toggle.effect"
+					camerapos="0 1 0"
+					cameraangles="0 0 180"
+					camerafov="45"
+					cameranear="1"
+					carmerafar="100"
+					depthclear="false"
+					depthcompress="true"
+					onshow="SetAnim('idle'); SetEffect('/ui/elements/devowars/loading/toggle.effect'); SetAnimSpeed(0.7)"
+				/>
+			</panel>
+
+			<panel width="100@" height="100%"><!-- 3 -->
+				<image texture="/triggers/custom_maps/herowars/heroes/devx/hook_levelups/speed.tga"/>
+				<modelpanel
+					visible="1"
+					noclick="true"
+					model="/ui/common/models/toggle/toggle.mdf"
+					anim="idle"
+					effect="/ui/common/models/toggle/toggle.effect"
+					camerapos="0 1 0"
+					cameraangles="0 0 180"
+					camerafov="45"
+					cameranear="1"
+					carmerafar="100"
+					depthclear="false"
+					depthcompress="true"
+					onshow="SetAnim('idle'); SetEffect('/ui/elements/devowars/loading/toggle.effect'); SetAnimSpeed(0.7)"
+				/>
+			</panel>
+
+			<panel width="100@" height="100%"><!-- 4 -->
+				<image texture="/triggers/custom_maps/herowars/heroes/devx/hook_levelups/width.tga" />
+				<modelpanel
+					visible="1"
+					noclick="true"
+					model="/ui/common/models/toggle/toggle.mdf"
+					anim="idle"
+					effect="/ui/common/models/toggle/toggle.effect"
+					camerapos="0 1 0"
+					cameraangles="0 0 180"
+					camerafov="45"
+					cameranear="1"
+					carmerafar="100"
+					depthclear="false"
+					depthcompress="true"
+					onshow="SetAnim('idle'); SetEffect('/ui/elements/devowars/loading/toggle.effect'); SetAnimSpeed(0.7)"
+				/>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="mapLoadGuideInfos_soccer_ability">
+		<panel width="12h">
+			<panel x="0.5h" width="5h" height="5h" valign="center">
+				<frame color="invisible" bordercolor="#666666" borderthickness="1"/>
+				<image width="-2" height="-2" align="center" valign="center" texture="/ui/elements/soccer/loading/icon_{type}.tga" />
+			</panel>
+			<panel x="6h" width="6h">
+				<label textvalign="center" font="dyn_10" color="#91e0c3" content="map_loading_soccer_tip01_{type}"/>
+			</panel>
+		</panel>
+	</template>
+	<template name="mapLoadGuideInfos_soccer_abilities">
+		<panel height="4h" width="40h">
+			<panel y="-1h" float="right" padding="1" width="40h" height="5h" >
+				<instance name="mapLoadGuideInfos_soccer_ability" type="kick"/>
+				<instance name="mapLoadGuideInfos_soccer_ability" type="slide"/>
+				<instance name="mapLoadGuideInfos_soccer_ability" type="sprint"/>
+			</panel>
+		</panel>
+	</template>
+
+	<!-- ======================================= -->
+
+	<template name="mapLoadGuide">
+
+		<panel name="mapLoadGuide" color="0 0 0" height="45h" y="4.5h" align="center" width="112h" visible="false">
+			<frame borderthickness="1" color="invisible" bordercolor="1 1 1 0.1"/>
+
+			<panel height="2.5h" color="1 1 1 0.1" align="center" width="-1h">
+				<image width="-64" align="center" texture="/ui/info/header_bar_c.tga" color="white" noclick="1" blockinput="0"/>
+				<image height="50.1%" width="32" align="left" valign="top" texture="/ui/info/header_bar_tl.tga" color="white" noclick="1" blockinput="0"/>
+				<image height="49.9%" width="32" align="left" valign="bottom" texture="/ui/info/header_bar_bl.tga" color="white" noclick="1" blockinput="0"/>
+				<image height="50.1%" width="32" align="right" valign="top" texture="/ui/info/header_bar_tr.tga" color="white" noclick="1" blockinput="0"/>
+				<image height="49.9%" width="32" align="right" valign="bottom" texture="/ui/info/header_bar_br.tga" color="white" noclick="1" blockinput="0"/>
+
+				<label name="mapLoadGuideHeaderGlow" textalign="center" textvalign="center" content="map_capturetheflag" font="dyn_12" color="#5cdae5" glow="true" rendermode="additive" />
+				<label name="mapLoadGuideHeaderText" textalign="center" textvalign="center" content="map_capturetheflag" font="dyn_12" color="white" />
+			</panel>
+
+			<panel height="36.75h" y="3.1h" align="center" width="-1h">
+				<frame texture="/ui/frames/tooltip_bg.tga" color="#2c4b6c" noclick="1"/>
+				<frame color="invisible" bordercolor="#455166" borderthickness="1" noclick="1" />
+			</panel>
+
+
+			<!-- Loading Space -->
+			<panel noclick="true" height="3.8h" valign="bottom" align="center" width="-1h" y="-0.5h">
+				<frame texture="/ui/info/button.tga" borderthickness="borderthickness=0.6h" color="1 1 1 1" noclick="true"/>
+				<panel
+					watch="TMMGamePhase"
+					ontrigger="SetVisible(param == 1);"
+					visible="true"
+					noclick="true" passivechildren="true"
+				>
+					<instance name="mm_loading_progressbar" index="0"
+						barwatch0="LoadingProgress" barontrigger0="SetWidth(FtoP(param0));"
+						label="mm_you"
+						font="dyn_12"
+						height="100%"
+						visible="true"
+						labelwatch="AccountInfo" labelontrigger="SetText(param1)"
+					/>
+				</panel>
+				<panel
+					watch="TMMReadyStatus"
+					ontrigger="SetVisible(param2 and !param4);"
+					noclick="true" passivechildren="true"
+				>
+					<instance name="mapLoadGuideLoadProgress" id="0"
+						label="mm_you"
+						font="dyn_12"
+						height="100%"
+						visible="true"
+					/>
+				</panel>
+				<instance
+					name="button2" button_name="unnamedButton167b"
+					label="mm_queue_leave_btn"
+					watch="TMMReset TMMTime TMMLeftQueue" ontrigger="SetVisible(IsInQueue());"
+					onclicklua="UIManager.GetInterface('main'):HoNMatchmakingF('matchmaking_button_leave_queue_OnClick')"
+				/>
+			</panel>
+
+			<panel name="mapLoadGuideMap" width="48h" height="48h" align="center" y="-2h" noclick="true" visible="false" passivechildren="true">
+				<panel name="mapLoadGuideMarkers"/>
+			</panel>
+
+			<panel name="mapLoadGuideInfos" float="bottom" padding="1.85h" x="3.25h" y="6.5h" noclick="true" passivechildren="true"/>
+			<panel name="mapLoadGuideLegend" valign="bottom" align="right" width="27h" y="-6.25h" grow="true" regrow="true" float="bottom" x="-2h" noclick="true" visible="false"/>
+
+			<panel align="right" valign="bottom" width="25h" height="18.75h" x="-0.5h" y="-5.25h">
+				<frame texture="/ui/frames/thick.tga" color="#43695c" borderthickness="0.5h"/>
+				<label font="dyn_12" color="#619483" content="map_loading_legend" x="1h" y="1h"/>
+			</panel>
+
+			<panel align="right" width="26h" height="18h" y="3h" x="-0.5h">
+				<!-- ==================================== -->
+				<!-- ==================================== -->
+
+				<!-- Loading Assets...  -->
+				<panel name="mapLoadGuide_mm_loading_1"
+					visible="false"
+				>
+
+					<label fity="true" fitypadding="0.4h" textalign="center" font="dyn_14" color="#ffaa00" shadow="true" content="mm_loading_assets" />
+
+					<label fity="true" y="-1.4h" textalign="left" valign="bottom" wrap="true" font="dyn_9" color="1 1 1 1" shadow="true" content="mm_preloadworld_groupwait" />
+					<panel y="4h" width="100%" height="10.0h" valign="top" noclick="true">
+						<panel grow="true" growinvis="false" width="-1h" align="center" valign="top" float="bottom" padding="0.2h" noclick="true">
+							<!--<instance name="mapLoadGuideLoadProgress" id="0" />-->
+							<instance name="mapLoadGuideLoadProgress" id="1" height="1.5h" />
+							<instance name="mapLoadGuideLoadProgress" id="2" height="1.5h" />
+							<instance name="mapLoadGuideLoadProgress" id="3" height="1.5h" />
+							<instance name="mapLoadGuideLoadProgress" id="4" height="1.5h" />
+						</panel>
+					</panel>
+
+				</panel>
+
+				<!-- ==================================== -->
+				<!-- ==================================== -->
+
+				<!-- MM Game Loading - Team Loading-->
+				<panel
+					name="mapLoadGuide_mm_loading_3"
+
+					watch="TMMGamePhase"
+					ontrigger="SetVisible(param == 1);"
+					visible="false"
+					watch0="GamePhase" ontrigger0="If(param0 ge 3, SetVisible(0));"
+				>
+
+					<panel y="0.8h" width="-2.0h" align="center" noclick="true">
+						<label fity="true" textalign="center" font="dyn_14" color="#ffaa00" shadow="true" content="mm_loading_game" />
+
+						<!-- Player Loading (replaced by bar in center) -->
+						<panel y="3.8h" width="100%" height="2.0h" valign="top" noclick="true" visible="fasle">
+							<instance name="mm_loading_progressbar" index="0"
+								barwatch0="LoadingProgress" barontrigger0="SetWidth(FtoP(param0));"
+								label="mm_you"
+								font="dyn_10"
+								height="2.0h"
+								visible="true"
+							/>
+						</panel>
+
+						<!-- Team Loading Lights -->
+						<label y="3h" fity="true" width="100%" textalign="center" font="dyn_12" color="1 1 1 1" shadow="true" noclick="true" content="mm_otherplayers" />
+						<panel grow="true" growinvis="false" y="5h" height="3.7h" float="right" noclick="true" regrow="true">
+							<instance name="mm_loading_status_light" index="0" />
+							<instance name="mm_loading_status_light" index="1" />
+							<instance name="mm_loading_status_light" index="2" />
+							<instance name="mm_loading_status_light" index="3" />
+							<instance name="mm_loading_status_light" index="4" />
+							<instance name="mm_loading_status_light" index="5" />
+							<instance name="mm_loading_status_light" index="6" />
+							<instance name="mm_loading_status_light" index="7" />
+							<instance name="mm_loading_status_light" index="8" />
+							<instance name="mm_loading_status_light" index="9" />
+						</panel>
+
+						<label fity="true" y="-1.5h" textalign="left" valign="bottom" wrap="true" font="dyn_10" color="1 1 1 1" shadow="true" content="mm_gameloading_msg" />
+					</panel>
+
+				</panel>
+
+				<!-- ==================================== -->
+				<!-- ==================================== -->
+
+				<panel visible="false"><!-- I believe this is probably never used, but we're making it look alright regardless. -->
+					<label fity="true" fitypadding="0.4h" textalign="center" font="dyn_14" color="#ffaa00" shadow="true" content="mm_loading_game" />
+
+					<!-- Player Loading -->
+					<panel y="3.8h" width="100%" height="1.7h" valign="top" noclick="true">
+						<instance name="mm_loading_progressbar" index="0"
+							barwatch0="LoadingProgress" barontrigger0="SetWidth(FtoP(param0));"
+							label="mm_you"
+							font="dyn_10"
+							height="2.0h"
+							visible="true"
+						/>
+					</panel>
+
+					<!-- Team Loading Lights
+					<label y="7.3h" fity="true" width="100%" textalign="center" font="dyn_11" color=".7 .7 .7 1" shadow="true" noclick="true" content="mm_otherplayers" />
+					<panel grow="true" growinvis="false" y="9.1h" height="4.0h" float="right" noclick="true" regrow="true">
+						<instance name="mm_loading_status_light" index="0" />
+						<instance name="mm_loading_status_light" index="1" />
+						<instance name="mm_loading_status_light" index="2" />
+						<instance name="mm_loading_status_light" index="3" />
+						<instance name="mm_loading_status_light" index="4" />
+						<instance name="mm_loading_status_light" index="5" />
+						<instance name="mm_loading_status_light" index="6" />
+						<instance name="mm_loading_status_light" index="7" />
+						<instance name="mm_loading_status_light" index="8" />
+						<instance name="mm_loading_status_light" index="9" />
+					</panel>
+					 -->
+
+					 <!-- Team Loading Msg -->
+					 <label y="2.75h" fity="true" width="100%" textalign="center" font="dyn_11" color=".7 .7 .7 1" shadow="true" noclick="true" content="mm_otherplayers" />
+					 <panel y="7.75h" width="100%" height="3.5h" align="center" noclick="true">
+							<panel width="36%" height="100%" noclick="true">
+								<animatedimage width="100@" height="100%" align="right" valign="center" texture="/ui/elements/throb/throb.tga" noclick="true" loop="1" fps="30" onshow="StartAnim(1);" />
+							</panel>
+							<label width="60%" height="100%" textalign="left" textvalign="center" align="right" font="dyn_10" color=".7 .7 .7 1" shadow="true" noclick="true" content="general_wait" />
+					 </panel>
+
+					<label fity="true" textalign="left" valign="bottom" wrap="true" font="dyn_10" color="1 1 1 1" shadow="true" content="mm_gameloading_msg" />
+
+				</panel>
+
+				<!-- ==================================== -->
+				<!-- ==================================== -->
+
+				<!-- Solo Queue Display -->
+				<panel
+					name="mapLoadGuideQueueDisplay"
+					visible="false"
+					watch1="GamePhase" ontrigger1="If(param ge 3, SetVisible(0));"
+					watch="TMMReset TMMTime TMMLeftQueue" ontrigger="SetVisible(IsInQueue());"
+					onshow="##PlayMusic('/music/lobby.mp3', true);##"
+					width="100%" height="100%"
+				>
+
+					<panel width="100%" height="100%" float="bottom" noclick="true">
+						<label height="4h" textalign="center" textvalign="center" font="dyn_14" color="#ffaa00" shadow="true" content="mm_queue_finding" />
+						<panel height="0.5h" noclick="true"/>
+						<panel grow="1" regrow="1" growinvis="0" width="100%" float="right" padding="1.2h">
+							<panel x="1.2h" height="6.6h" width="6.6h">
+								<animatedimage y="0.9h" width="100@" height="100%" align="center" valign="center" texture="/ui/elements/throb/throb.tga" noclick="true" loop="1" fps="30" onshow="StartAnim(1);" />
+							</panel>
+							<panel grow="1" regrow="1" growinvis="0" width="-6.6h" float="bottom">
+								<label fity="true" fitypadding="0.1h" textalign="left" font="dyn_10" color="#3abde7" shadow="true" content="mm_queue_past" />
+								<label name="matchmaking_queue_past" fity="true" fitypadding="0.5h" textalign="left" font="dyn_10" color="1 1 1 1" shadow="true" watch="TMMTime" ontrigger="SetText(param0);" />
+								<label fity="true" fitypadding="0.1h" textalign="left" font="dyn_10" color="#3abde7" shadow="true" content="mm_queue_eta" />
+								<label name="matchmaking_queue_eta" fity="true" fitypadding="0.5h" textalign="left" font="dyn_10" color="1 1 1 1" shadow="true" watch="TMMTime" ontrigger="SetText(param1);" />
+								<label name="matchmaking_queue_popularity_1b" fity="true" fitypadding="0.1h" textalign="left" font="dyn_11" color="#3abde7" shadow="true" content="mm_queue_popularity" />
+								<label name="matchmaking_queue_popularity_2b" fity="true" fitypadding="0.5h" textalign="left" font="dyn_10" color="1 1 1 1" shadow="true" />
+								<label name="matchmaking_queue_popularity_3b" fity="true" fitypadding="0.1h" textalign="left" font="dyn_11" color="#3abde7" shadow="true" content="mm_queue_extra" visible="0"/>
+								<label name="matchmaking_queue_popularity_4b" fity="true" fitypadding="0.5h" textalign="left" font="dyn_10" color="1 1 1 1" shadow="true"  visible="0" />
+							</panel>
+							<button name="matchmaking_hover_question_btn_1b"
+								x="7.2h" y="8.2h" height="1.4h" width="1.4h" align="left" color="invisible"
+								onmouseover=""
+								onmouseout="Trigger('genericMainFloatingTip', false, '', '', '', '', '', '', '', '');"
+							>
+								<widgetstate statename="up">
+									<image texture="/ui/elements/tip_mark_up.tga"/>
+								</widgetstate>
+								<widgetstate statename="over">
+									<image texture="/ui/elements/tip_mark_over.tga"/>
+								</widgetstate>
+								<widgetstate statename="down" x="1" y="1">
+									<image texture="/ui/elements/tip_mark_up.tga"/>
+								</widgetstate>
+							</button>
+						</panel>
+					</panel>
+
+				</panel>
+
+				<!-- ==================================== -->
+				<!-- ==================================== -->
+
+			</panel>
+
+		</panel>
+	</template>
+
+	<!-- ======================================= -->
+
+	<template name="mm_category_tab">
+		<button
+			name="mm_category_tab_{mode}"
+			width="100%" height="103.3@"
+			y="{y}"
+			color="invisible"
+			onmouseover="PlaySound('/shared/sounds/ui/ccpanel/button_over_02.wav');"
+			onclicklua="UIManager.GetInterface('main'):HoNMatchmakingF('SelectTab', '{mode}')
+						HoN_Matchmaking.TabClickTime = GetTime()"
+			mouseoverdisabled=""
+			disabledmouseover=""
+			mouseoutdisabled=""
+			disabledmouseout=""
+			onmouseoverdisabled=""
+			onmouseoutdisabled=""
+			numstates="2"
+			enabled="{enabled=true}"
+
+			onframelua="local curTime = GetTime()
+						if (curTime - HoN_Matchmaking.TabClickTime) > HoN_Matchmaking.TabClickInteval then
+							GetWidget('mm_category_tab_mask'):SetVisible(false)
+						else
+							GetWidget('mm_category_tab_mask'):SetVisible(true)
+						end"
+		>
+			<widgetstate statename="up">
+				<frame texture="/ui/frames/{frameimg}.tga" borderthickness="33%" noclick="true">
+					<panel width="-6%" height="-6@" align="center" valign="center" noclick="true">
+						<panel y="3%" width="100%" height="{iconsize=60}%">
+							<image width="100@" height="100%" align="center" texture="{icon}" />
+						</panel>
+						<panel y="-2%" grow="true" width="100%" float="bottom" valign="bottom">
+							<label fity="true" font="{labelfont=dyn_18}" textalign="center" color="#ffaa00" outline="true" content="{cat_label}" noclick="true" />
+							<label fity="true" font="dyn_12" textalign="center" color="1 1 1 1" shadow="true" content="{cat_sub_label}" onshowlua="{onsetsublabellua}" noclick="true" />
+						</panel>
+					</panel>
+					<panel x="1.0h" width="1.9h" height="100%" align="right" color="{arrowcolor}">
+						<image x="90%" y="10%" align="right" width="106%" height="212@" texture="/ui/frames/{tabboxarrow}.tga" noclick="true" />
+					</panel>
+				</frame>
+			</widgetstate>
+			<widgetstate statename="over">
+				<frame texture="/ui/frames/{frameimg}.tga" borderthickness="33%" noclick="true">
+					<panel width="-6%" height="-6@" align="center" valign="center" noclick="true">
+						<panel y="3%" width="100%" height="{iconsize=60}%">
+							<image width="100@" height="100%" align="center" texture="{icon}" />
+						</panel>
+						<panel y="-2%" grow="true" width="100%" float="bottom" valign="bottom">
+							<label fity="true" font="{labelfont=dyn_18}" textalign="center" color="#ffaa00" outline="true" content="{cat_label}" noclick="true" />
+							<label fity="true" font="dyn_12" textalign="center" color="1 1 1 1" shadow="true" content="{cat_sub_label}" onshowlua="{onsetsublabellua}" noclick="true" />
+						</panel>
+					</panel>
+					<panel x="1.0h" width="1.9h" height="100%" align="right" color="{arrowcolor}">
+						<image x="90%" y="10%" align="right" width="106%" height="212@" texture="/ui/frames/{tabboxarrow}.tga" noclick="true" />
+					</panel>
+				</frame>
+			</widgetstate>
+			<widgetstate statename="down">
+				<frame texture="/ui/frames/{frameimg}.tga" borderthickness="33%" noclick="true">
+					<panel width="-6%" height="-6@" align="center" valign="center" noclick="true">
+						<panel y="3%" width="100%" height="{iconsize=60}%">
+							<image width="100@" height="100%" align="center" texture="{icon}" />
+						</panel>
+						<panel y="-2%" grow="true" width="100%" float="bottom" valign="bottom">
+							<label fity="true" font="{labelfont=dyn_18}" textalign="center" color="#ffaa00" outline="true" content="{cat_label}" noclick="true" />
+							<label fity="true" font="dyn_12" textalign="center" color="1 1 1 1" shadow="true" content="{cat_sub_label}" onshowlua="{onsetsublabellua}" noclick="true" />
+						</panel>
+					</panel>
+					<panel x="1.0h" width="1.9h" height="100%" align="right" color="{arrowcolor}">
+						<image x="90%" y="10%" align="right" width="106%" height="212@" texture="/ui/frames/{tabboxarrow}.tga" noclick="true" />
+					</panel>
+				</frame>
+			</widgetstate>
+			<widgetstate statename="disabled">
+				<frame texture="/ui/frames/{frameimg}.tga" borderthickness="33%" rendermode="grayscale" noclick="true">
+					<panel width="-6%" height="-6@" align="center" valign="center" noclick="true">
+						<panel y="3%" width="100%" height="{iconsize=60}%">
+							<image width="100@" height="100%" align="center" texture="{icon}" rendermode="grayscale" />
+						</panel>
+						<panel y="-2%" grow="true" width="100%" float="bottom" valign="bottom">
+							<label fity="true" font="{labelfont=dyn_18}" textalign="center" color=".5 .5 .5 1" outline="true" content="{cat_label}" noclick="true" />
+							<label fity="true" font="dyn_12" textalign="center" color=".4 .4 .4 1" shadow="true" content="{cat_sub_label}" onshowlua="{onsetsublabellua}" noclick="true" />
+						</panel>
+					</panel>
+				</frame>
+			</widgetstate>
+
+			<widgetstate statename="up2">
+				<frame texture="/ui/frames/{frameimg}.tga" borderthickness="33%" rendermode="grayscale" noclick="true">
+					<panel width="-6%" height="-6@" align="center" valign="center" noclick="true">
+						<panel y="3%" width="100%" height="{iconsize=60}%">
+							<image width="100@" height="100%" align="center" texture="{icon}" rendermode="grayscale" />
+						</panel>
+						<panel y="-2%" grow="true" width="100%" float="bottom" valign="bottom">
+							<label fity="true" font="{labelfont=dyn_18}" textalign="center" color=".5 .5 .5 1" outline="true" content="{cat_label}" noclick="true" />
+							<label fity="true" font="dyn_12" textalign="center" color=".4 .4 .4 1" shadow="true" content="{cat_sub_label}" onshowlua="{onsetsublabellua}" noclick="true" />
+						</panel>
+					</panel>
+				</frame>
+			</widgetstate>
+			<widgetstate statename="over2">
+				<frame texture="/ui/frames/{frameimg}.tga" borderthickness="33%" noclick="true">
+					<panel width="-6%" height="-6@" align="center" valign="center" noclick="true">
+						<panel y="3%" width="100%" height="{iconsize=60}%">
+							<image width="100@" height="100%" align="center" texture="{icon}" />
+						</panel>
+						<panel y="-2%" grow="true" width="100%" float="bottom" valign="bottom">
+							<label fity="true" font="{labelfont=dyn_18}" textalign="center" color="#ffaa00" outline="true" content="{cat_label}" noclick="true" />
+							<label fity="true" font="dyn_12" textalign="center" color="1 1 1 1" shadow="true" content="{cat_sub_label}" onshowlua="{onsetsublabellua}" noclick="true" />
+						</panel>
+					</panel>
+				</frame>
+			</widgetstate>
+			<widgetstate statename="down2">
+				<frame texture="/ui/frames/{frameimg}.tga" borderthickness="33%" noclick="true">
+					<panel width="-6%" height="-6@" align="center" valign="center" noclick="true">
+						<panel y="3%" width="100%" height="{iconsize=60}%">
+							<image x="1" y="1" width="100@" height="100%" align="center" texture="{icon}" />
+						</panel>
+						<panel y="-2%" grow="true" width="100%" float="bottom" valign="bottom">
+							<label fity="true" font="{labelfont=dyn_18}" textalign="center" color="#ffaa00" outline="true" content="{cat_label}" noclick="true" />
+							<label fity="true" font="dyn_12" textalign="center" color="1 1 1 1" shadow="true" content="{cat_sub_label}" onshowlua="{onsetsublabellua}" noclick="true" />
+						</panel>
+					</panel>
+				</frame>
+			</widgetstate>
+			<widgetstate statename="disabled2">
+				<frame texture="/ui/frames/{frameimg}.tga" borderthickness="33%" noclick="true">
+					<panel width="-6%" height="-6@" align="center" valign="center" noclick="true">
+						<panel y="3%" width="100%" height="{iconsize=60}%">
+							<image width="100@" height="100%" align="center" texture="{icon}" />
+						</panel>
+						<panel y="-2%" grow="true" width="100%" float="bottom" valign="bottom">
+							<label fity="true" font="{labelfont=dyn_18}" textalign="center" color="#ffaa00" outline="true" content="{cat_label}" noclick="true" />
+							<label fity="true" font="dyn_12" textalign="center" color="1 1 1 1" shadow="true" content="{cat_sub_label}" onshowlua="{onsetsublabellua}" noclick="true" />
+						</panel>
+					</panel>
+					<panel x="1.0h" width="1.9h" height="100%" align="right" color="{arrowcolor}">
+						<image x="90%" y="10%" align="right" width="106%" height="212@" texture="/ui/frames/{tabboxarrow}.tga" noclick="true" />
+					</panel>
+				</frame>
+			</widgetstate>
+		</button>
+	</template>
+
+	<template name="team_type">
+		<frame name="{id}" group="{group=customgames_optionstab}" onshow="{onshow}" color=".1 .1 .1 1" bordercolor=".2 .2 .2 1" borderthickness="1" noclick="1" visible="{visible}" />
+		<label name="{id}_label" height="100%" textvalign="center" textalign="center" font="dyn_12" color="{fontcolor}" shadow="true" content="{label}" />
+		<!-- Click Controls -->
+		<panel
+			onclick="{onclick}"
+			onevent="{onevent}"
+			onload="{onload}"
+			oneventlua="{oneventlua}"
+		/>
+	</template>
+
+	<template name="mm_team_slot_bot_2">
+		<panel name="mm_team_slot{slot}_bot" height="6.75h" noclick="0" sticky="1" stickytoinvis="0"
+			onmouseoverlua="UIManager.GetInterface('main'):HoNMatchmakingF('HoverTeamSlot', self, {slot})"
+			onmouseout="HideWidget('matchmaking_group_error_tooltip');"
+		>
+			<frame texture="/ui/frames/roundframe.tga" color="#183042" borderthickness="0.6h" noclick="1"/>
+			<panel align="center" valign="center" width="-0.25h" height="-0.25h" noclick="1" color="invisible"/>
+
+			<!-- Slot Number / Account Status -->
+			<panel height="100%" width="3.0h" noclick="true">
+				<frame texture="/ui/frames/rounded_bg_solid.tga" borderthickness="0.6h" color="#183042" noclick="1"/>
+				<panel width="50%" align="right" color="#183042" noclick="true" />
+				<label y="0.2h" textalign="center" font="dyn_16" color="1 1 1 1" shadow="true" content="{slot}" noclick="true" />
+				<image name="mm_botslot{slot}_subicon" y="-0.6h" valign="bottom" align="center" width="76%" height="76@" texture="/ui/elements/verified.tga" noclick="1"/>
+			</panel>
+
+			<panel x="-0.5h" width="-4.0h" height="-1.0h" align="right" valign="center" noclick="1">
+				<!-- Account Icon -->
+				<image name="mm_botslot{slot}_icon" height="100%" width="100@" texture="/ui/fe2/store/icons/account_icons/stupid.tga" noclick="true" />
+
+				<panel width="-108@" align="right" noclick="1">
+					<label name="mm_botslot{slot}_name" fity="true" font="dyn_14" color="#ffaa00" content="Player Name" noclick="true" />
+					<label name="mm_botslot{slot}_botver" y="0.4h" fity="true" textalign="right" font="dyn_10" color=".6 .6 .6 1" content="v1.0" noclick="true" />
+
+					<panel height="50%" valign="bottom" noclick="true">
+						<!-- Invite Person -->
+						<button
+							name="mm_botslot{slot}_invite"
+							width="50%"	height="100%"
+							color="invisible"
+							visible="1"
+							onmouseover="PlaySound('/shared/sounds/ui/ccpanel/button_over_02.wav');"
+							onclick="showwidget('mm_invite_person'); EnableWidget('mm_invite_person_button'); DisableWidget('mm_invite_person_button');"
+							onclicklua="UIManager.GetInterface('main'):HoNMatchmakingF('ClickInvitePerson', {slot})"
+						>
+							<widgetstate statename="up">
+								<panel float="right">
+									<panel height="100%" width="100@">
+										<image width="50@" height="50%" valign="center" align="center" texture="/ui/elements/addfriend_up.tga" />
+									</panel>
+									<label fitx="true" height="100%" textvalign="center" font="dyn_10" color="#37b2d9" content="mm3_coop_invitetoteam" />
+								</panel>
+							</widgetstate>
+							<widgetstate statename="over">
+								<panel float="right">
+									<panel height="100%" width="100@">
+										<image width="50@" height="50%" valign="center" align="center" texture="/ui/elements/addfriend_over.tga" />
+									</panel>
+									<label fitx="true" height="100%" textvalign="center" font="dyn_10" color="1 1 1 1" content="mm3_coop_invitetoteam" />
+								</panel>
+							</widgetstate>
+							<widgetstate statename="down" x="1" y="1">
+								<panel float="right">
+									<panel height="100%" width="100@">
+										<image width="50@" height="50%" valign="center" align="center" texture="/ui/elements/addfriend_over.tga" />
+									</panel>
+									<label fitx="true" height="100%" textvalign="center" font="dyn_10" color="1 1 1 1" content="mm3_coop_invitetoteam" />
+								</panel>
+							</widgetstate>
+							<widgetstate statename="disabled">
+								<panel float="right">
+									<panel height="100%" width="100@">
+										<image width="50@" height="50%" valign="center" align="center" texture="/ui/elements/addfriend_up.tga" rendermode="grayscalse" />
+									</panel>
+									<label fitx="true" height="100%" textvalign="center" font="dyn_10" color=".5 .5 .5 1" content="mm3_coop_invitetoteam" />
+								</panel>
+							</widgetstate>
+						</button>
+
+
+						<!-- Invite Bot -->
+						<button
+							name="mm_botslot{slot}_invitebot"
+							width="50%"	height="100%"
+							align="right"
+							color="invisible"
+							visible="1"
+							onclick="Call('mm_invite_bot', 'FadeIn(100);');"
+							onclicklua="UIManager.GetInterface('main'):HoNMatchmakingF('RepickBot', self, {slot}, 'left')"
+						>
+							<widgetstate statename="up">
+								<panel float="right">
+									<panel height="100%" width="100@">
+										<image width="50@" height="50%" valign="center" align="center" texture="/ui/fe2/lobby/swap_hero_up.tga" />
+									</panel>
+									<label fitx="true" height="100%" textvalign="center" font="dyn_10" color="#37b2d9" content="mm3_coop_repickbot" />
+								</panel>
+							</widgetstate>
+							<widgetstate statename="over">
+								<panel float="right">
+									<panel height="100%" width="100@">
+										<image width="50@" height="50%" valign="center" align="center" texture="/ui/fe2/lobby/swap_hero_over.tga" />
+									</panel>
+									<label fitx="true" height="100%" textvalign="center" font="dyn_10" color="1 1 1 1" content="mm3_coop_repickbot" />
+								</panel>
+							</widgetstate>
+							<widgetstate statename="down" x="1" y="1">
+								<panel float="right">
+									<panel height="100%" width="100@">
+										<image width="50@" height="50%" valign="center" align="center" texture="/ui/fe2/lobby/swap_hero_over.tga" />
+									</panel>
+									<label fitx="true" height="100%" textvalign="center" font="dyn_10" color="1 1 1 1" content="mm3_coop_repickbot" />
+								</panel>
+							</widgetstate>
+							<widgetstate statename="disabled">
+								<panel float="right">
+									<panel height="100%" width="100@">
+										<image width="50@" height="50%" valign="center" align="center" texture="/ui/fe2/lobby/swap_hero_up.tga" rendermode="grayscale" />
+									</panel>
+									<label fitx="true" height="100%" textvalign="center" font="dyn_10" color=".5 .5 .5 1" content="mm3_coop_repickbot" />
+								</panel>
+							</widgetstate>
+						</button>
+					</panel>
+
+					<button
+						name="mm_botslot{slot}_kick"
+						x="-4@" y="-4%"
+						color="invisible"
+						width="44@" height="44%" align="right" valign="bottom"
+						onmouseover="
+								PlaySound('/shared/sounds/ui/ccpanel/button_over_02.wav');
+								PlaySound('/shared/sounds/ui/ccpanel/button_over_01.wav');
+								Trigger('genericMainFloatingTip', 'true', '28.0h', '', 'mm3_kickbots', 'mm3_kickbots_desc', '', '', '3.0h', '-2.0h')
+								"
+						onmouseout="HideWidget('genericMainFloatingTip');"
+						onclicklua="UIManager.GetInterface('main'):HoNMatchmakingF('KickBots')"
+					>
+						<widgetstate statename="up">
+							<image texture="/ui/elements/kick_up.tga"/>
+						</widgetstate>
+
+						<widgetstate statename="over">
+							<image texture="/ui/elements/kick_over.tga"/>
+						</widgetstate>
+
+						<widgetstate statename="down" x="1" y="1">
+							<image texture="/ui/elements/kick_down.tga"/>
+						</widgetstate>
+						<widgetstate statename="disabled">
+							<image texture="/ui/elements/kick_disabled.tga"/>
+						</widgetstate>
+					</button>
+				</panel>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="mm_team_slot_occupied_2">
+		<panel name="mm_team_slot{slot}_occupied" height="6.75h" noclick="0" sticky="1" stickytoinvis="0"
+			onmouseoverlua="UIManager.GetInterface('main'):HoNMatchmakingF('HoverTeamSlot', self, {slot})"
+			onmouseout="HideWidget('matchmaking_group_error_tooltip');"
+			onrightclicklua="UIManager.GetInterface('main'):HoNMatchmakingF('RightClickPlayer', {slot})"
+		>
+			<frame name="mm_slot{slot}_frame1" texture="/ui/frames/roundframe.tga" color="#183042" borderthickness="0.6h" noclick="1"/>
+			<panel name="mm_slot{slot}_background" align="center" valign="center" width="-0.25h" height="-0.25h" noclick="1" color="invisible"/>
+
+				<!-- Slot Number / Account Status -->
+				<panel height="100%" width="3.0h" noclick="true">
+					<frame name="mm_slot{slot}_frame2" texture="/ui/frames/rounded_bg_solid.tga" borderthickness="0.6h" color="#183042" noclick="1"/>
+					<panel name="mm_slot{slot}_cpanel" width="50%" align="right" color="#183042" noclick="true" />
+					<label y="0.2h" textalign="center" font="dyn_16" color="1 1 1 1" shadow="true" content="{slot}" noclick="true" />
+					<image name="mm_teamslot{slot}_subicon" y="-0.6h" valign="bottom" align="center" width="76%" height="76@" texture="/ui/elements/verified.tga" noclick="1"/>
+				</panel>
+
+				<panel x="-0.5h" width="-4.0h" height="-1.0h" align="right" valign="center" noclick="1">
+					<!-- Account Icon -->
+					<image name="mm_teamslot{slot}_icon" height="100%" width="100@" texture="/ui/fe2/store/icons/account_icons/stupid.tga" noclick="true" />
+
+					<panel width="-108@" align="right" noclick="1">
+						<label name="mm_teamslot{slot}_name" fity="true" font="dyn_14" color="#ffaa00" content="Player Name" noclick="true" />
+						<label name="mm_teamslot{slot}_botver" y="0.4h" fity="true" textalign="right" font="dyn_10" color=".6 .6 .6 1" content="v1.0" noclick="true" />
+						<label name="mm_teamslot{slot}_namesub" y="54%" fity="true" font="dyn_12" color="#37b2d9" content="MMR: 1500" noclick="true" />
+						<panel name="mm_teamslot{slot}_ranklevel_root" y="54%" height="50%">
+							<image name="mm_teamslot{slot}_ranklevel_icon" x="-40@" width="200@" height="200%" align="left" valign="center" texture="$invis" noclick="1" />
+							<label name="mm_teamslot{slot}_ranklevel_text" x="140@" textalign="left" textvalign="center" font="dyn_12" color="white" content="-" noclick="1"/>
+						</panel>
+						<button
+							name="mm_teamslot{slot}_kick"
+							x="-4@" y="-4%"
+							color="invisible"
+							width="44@" height="44%" align="right" valign="bottom"
+							onmouseover="PlaySound('/shared/sounds/ui/ccpanel/button_over_02.wav'); PlaySound('/shared/sounds/ui/ccpanel/button_over_01.wav');
+										Trigger('genericMainFloatingTip', true, '25h', '', 'game_menu_kick', 'game_lobby_kick_tip', '', '', '3h', '-2h');"
+							onmouseout="HideWidget('genericMainFloatingTip');"
+							onclicklua="UIManager.GetInterface('main'):HoNMatchmakingF('KickTeamMember', self, {slot})"
+
+						>
+							<widgetstate statename="up">
+								<image texture="/ui/elements/kick_up.tga"/>
+							</widgetstate>
+
+							<widgetstate statename="over">
+								<image texture="/ui/elements/kick_over.tga"/>
+							</widgetstate>
+
+							<widgetstate statename="down" x="1" y="1">
+								<image texture="/ui/elements/kick_down.tga"/>
+							</widgetstate>
+							<widgetstate statename="disabled">
+								<image texture="/ui/elements/kick_disabled.tga"/>
+							</widgetstate>
+						</button>
+					</panel>
+				</panel>
+
+		</panel>
+	</template>
+
+	<template name="mm_team_slot_empty_2">
+		<panel name="mm_team_slot{slot}_empty" height="6.75h" noclick="true" sticky="1" stickytoinvis="0">
+			<frame texture="/ui/frames/roundframe.tga" color=".3 .3 .3 1" borderthickness="0.6h" />
+
+				<!-- Slot Number -->
+				<panel height="100%" width="3.0h" noclick="true">
+					<frame texture="/ui/frames/rounded_bg_solid.tga" borderthickness="0.6h" color=".3 .3 .3 1" />
+					<panel width="50%" align="right" color=".3 .3 .3 1" noclick="true" />
+					<label y="0.2h" textalign="center" font="dyn_16" color="1 1 1 1" shadow="true" content="{slot}" noclick="true" />
+				</panel>
+
+				<panel x="-0.5h" width="-4.0h" height="-1.0h" align="right" valign="center">
+					<!-- Account Icon -->
+					<image name="mm_teamslot{slot}_icon_dis" height="100%" width="100@" texture="/ui/fe2/store/icons/account_icons/default.tga" noclick="true" />
+
+					<panel width="-108@" align="right" noclick="true">
+						<label name="mm_teamslot{slot}_text" font="dyn_12" color=".5 .5 .5 1" textalign="center" content="mm3_coop_emptyslot" noclick="true" />
+						<panel height="60%" valign="bottom" noclick="true">
+
+							<!-- Invite Person -->
+							<button
+								name="mm_teamslot{slot}_invite"
+								width="55%"	height="100%"
+								color="invisible"
+								visible="1"
+								onmouseover="PlaySound('/shared/sounds/ui/ccpanel/button_over_02.wav');"
+								onclick="showwidget('mm_invite_person'); EnableWidget('mm_invite_person_button'); DisableWidget('mm_invite_person_button');"
+								onclicklua="UIManager.GetInterface('main'):HoNMatchmakingF('ClickInvitePerson', {slot})"
+							>
+								<widgetstate statename="up">
+									<panel float="right">
+										<panel height="100%" width="100@">
+											<image width="50@" height="50%" valign="center" align="center" texture="/ui/elements/addfriend_up.tga" />
+										</panel>
+										<label fitx="true" height="100%" textvalign="center" font="dyn_10" color="#37b2d9" content="mm3_coop_invitetoteam" />
+									</panel>
+								</widgetstate>
+								<widgetstate statename="over">
+									<panel float="right">
+										<panel height="100%" width="100@">
+											<image width="50@" height="50%" valign="center" align="center" texture="/ui/elements/addfriend_over.tga" />
+										</panel>
+										<label fitx="true" height="100%" textvalign="center" font="dyn_10" color="1 1 1 1" content="mm3_coop_invitetoteam" />
+									</panel>
+								</widgetstate>
+								<widgetstate statename="down" x="1" y="1">
+									<panel float="right">
+										<panel height="100%" width="100@">
+											<image width="50@" height="50%" valign="center" align="center" texture="/ui/elements/addfriend_over.tga" />
+										</panel>
+										<label fitx="true" height="100%" textvalign="center" font="dyn_10" color="1 1 1 1" content="mm3_coop_invitetoteam" />
+									</panel>
+								</widgetstate>
+								<widgetstate statename="disabled">
+									<panel float="right">
+										<panel height="100%" width="100@">
+											<image width="50@" height="50%" valign="center" align="center" texture="/ui/elements/addfriend_up.tga" rendermode="grayscalse" />
+										</panel>
+										<label fitx="true" height="100%" textvalign="center" font="dyn_10" color=".5 .5 .5 1" content="mm3_coop_invitetoteam" />
+									</panel>
+								</widgetstate>
+							</button>
+
+
+							<!-- Invite Bot -->
+							<button
+								name="mm_teamslot{slot}_invitebot"
+								width="45%"	height="100%"
+								align="right"
+								color="invisible"
+								visible="1"
+								onmouseover="PlaySound('/shared/sounds/ui/ccpanel/button_over_02.wav');"
+								onclicklua="UIManager.GetInterface('main'):HoNMatchmakingF('FillTeamWithBots')"
+							>
+								<!-- onclick="Call('mm_invite_bot', 'FadeIn(100);');" -->
+								<!-- onclicklua="UIManager.GetInterface('main'):HoNMatchmakingF('RepickBot', self, {slot}, 'left')" -->
+								<widgetstate statename="up">
+									<panel float="right">
+										<panel height="100%" width="100@">
+											<image width="50@" height="50%" valign="center" align="center" texture="/ui/elements/addfriend_up.tga" />
+										</panel>
+										<label fitx="true" height="100%" textvalign="center" font="dyn_10" color="#37b2d9" content="mm3_coop_invitebottoteam" />
+									</panel>
+								</widgetstate>
+								<widgetstate statename="over">
+									<panel float="right">
+										<panel height="100%" width="100@">
+											<image width="50@" height="50%" valign="center" align="center" texture="/ui/elements/addfriend_over.tga" />
+										</panel>
+										<label fitx="true" height="100%" textvalign="center" font="dyn_10" color="1 1 1 1" content="mm3_coop_invitebottoteam" />
+									</panel>
+								</widgetstate>
+								<widgetstate statename="down" x="1" y="1">
+									<panel float="right">
+										<panel height="100%" width="100@">
+											<image width="50@" height="50%" valign="center" align="center" texture="/ui/elements/addfriend_over.tga" />
+										</panel>
+										<label fitx="true" height="100%" textvalign="center" font="dyn_10" color="1 1 1 1" content="mm3_coop_invitebottoteam" />
+									</panel>
+								</widgetstate>
+								<widgetstate statename="disabled">
+									<panel float="right">
+										<panel height="100%" width="100@">
+											<image width="50@" height="50%" valign="center" align="center" texture="/ui/elements/addfriend_up.tga" rendermode="grayscale" />
+										</panel>
+										<label fitx="true" height="100%" textvalign="center" font="dyn_10" color=".5 .5 .5 1" content="mm3_coop_invitebottoteam" />
+									</panel>
+								</widgetstate>
+							</button>
+
+						</panel>
+					</panel>
+				</panel>
+		</panel>
+	</template>
+
+	<template name="mm_team_slot_occupied">
+		<panel name="mm_team_slot{slot}_occupied" height="5.2h" noclick="0" sticky="1" stickytoinvis="0"
+			onmouseoverlua="UIManager.GetInterface('main'):HoNMatchmakingF('HoverTeamSlot', self, {slot})"
+			onmouseout="HideWidget('matchmaking_group_error_tooltip');"
+		>
+			<frame name="mm_slot{slot}_frame1" texture="/ui/frames/roundframe.tga" color="#183042" borderthickness="0.6h" noclick="1"/>
+			<panel name="mm_slot{slot}_background" align="center" valign="center" width="-0.25h" height="-0.25h" noclick="1" color="invisible"/>
+
+			<!-- Slot Number / Account Status -->
+			<panel height="100%" width="3.0h" noclick="true">
+				<frame name="mm_slot{slot}_frame2" texture="/ui/frames/rounded_bg_solid.tga" borderthickness="0.6h" color="#183042" noclick="1"/>
+				<panel name="mm_slot{slot}_cpanel" width="50%" align="right" color="#183042" noclick="true" />
+				<label y="0.2h" textalign="center" font="dyn_16" color="1 1 1 1" shadow="true" content="{slot}" noclick="true" />
+				<image name="mm_teamslot{slot}_subicon" y="-0.6h" valign="bottom" align="center" width="62%" height="62@" texture="/ui/elements/verified.tga" noclick="1"/>
+			</panel>
+
+			<panel x="-0.5h" width="-4.0h" height="-1.0h" align="right" valign="center" noclick="1">
+				<!-- Account Icon -->
+				<image name="mm_teamslot{slot}_icon" height="100%" width="100@" texture="/ui/fe2/store/icons/account_icons/stupid.tga" noclick="true" />
+
+				<panel width="-108@" align="right" noclick="1">
+					<label name="mm_teamslot{slot}_name" fity="true" font="dyn_14" color="#ffaa00" content="Player Name" noclick="true" />
+					<label name="mm_teamslot{slot}_botver" y="0.4h" fity="true" textalign="right" font="dyn_10" color=".6 .6 .6 1" content="v1.0" noclick="true" />
+					<label name="mm_teamslot{slot}_namesub" y="54%" fity="true" font="dyn_12" color="#37b2d9" content="MMR: 1500" noclick="true" />
+					<button
+						name="mm_teamslot{slot}_kick"
+						x="-4@" y="-4%"
+						color="invisible"
+						width="44@" height="44%" align="right" valign="bottom"
+						onmouseover="PlaySound('/shared/sounds/ui/ccpanel/button_over_02.wav'); PlaySound('/shared/sounds/ui/ccpanel/button_over_01.wav');"
+						onclicklua="UIManager.GetInterface('main'):HoNMatchmakingF('KickTeamMember', self, {slot})"
+
+					>
+						<widgetstate statename="up">
+							<image texture="/ui/elements/kick_up.tga"/>
+						</widgetstate>
+
+						<widgetstate statename="over">
+							<image texture="/ui/elements/kick_over.tga"/>
+						</widgetstate>
+
+						<widgetstate statename="down" x="1" y="1">
+							<image texture="/ui/elements/kick_down.tga"/>
+						</widgetstate>
+						<widgetstate statename="disabled">
+							<image texture="/ui/elements/kick_disabled.tga"/>
+						</widgetstate>
+					</button>
+				</panel>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="mm_team_slot_empty">
+		<panel name="mm_team_slot{slot}_empty" height="5.2h" noclick="true" sticky="1" stickytoinvis="0">
+			<frame texture="/ui/frames/roundframe.tga" color=".3 .3 .3 1" borderthickness="0.6h" />
+
+				<!-- Slot Number -->
+				<panel height="100%" width="3.0h" noclick="true">
+					<frame texture="/ui/frames/rounded_bg_solid.tga" borderthickness="0.6h" color=".3 .3 .3 1" />
+					<panel width="50%" align="right" color=".3 .3 .3 1" noclick="true" />
+					<label y="0.2h" textalign="center" font="dyn_16" color="1 1 1 1" shadow="true" content="{slot}" noclick="true" />
+				</panel>
+
+				<panel x="-0.5h" width="-4.0h" height="-1.0h" align="right" valign="center">
+					<!-- Account Icon -->
+					<image name="mm_teamslot{slot}_icon_dis" height="100%" width="100@" texture="/ui/fe2/store/icons/account_icons/default.tga" noclick="true" />
+
+					<panel width="-108@" align="right" noclick="true">
+						<label name="mm_teamslot{slot}_text" font="dyn_12" color=".5 .5 .5 1" textalign="center" content="mm3_coop_emptyslot" noclick="true" />
+						<panel height="50%" valign="bottom" noclick="true">
+
+							<!-- Invite Person -->
+							<button
+								name="mm_teamslot{slot}_invite"
+								width="55%"	height="100%"
+								color="invisible"
+								visible="0"
+								onmouseover="PlaySound('/shared/sounds/ui/ccpanel/button_over_02.wav');"
+								onclick="showwidget('mm_invite_person'); EnableWidget('mm_invite_person_button'); DisableWidget('mm_invite_person_button');"
+								onclicklua="UIManager.GetInterface('main'):HoNMatchmakingF('ClickInvitePerson', {slot})"
+							>
+								<widgetstate statename="up">
+									<panel float="right">
+										<panel height="100%" width="100@">
+											<image width="74@" height="74%" valign="center" align="center" texture="/ui/elements/addfriend_up.tga" />
+										</panel>
+										<label fitx="true" height="100%" textvalign="center" font="dyn_10" color="#37b2d9" content="mm3_coop_invitetoteam" />
+									</panel>
+								</widgetstate>
+								<widgetstate statename="over">
+									<panel float="right">
+										<panel height="100%" width="100@">
+											<image width="74@" height="74%" valign="center" align="center" texture="/ui/elements/addfriend_over.tga" />
+										</panel>
+										<label fitx="true" height="100%" textvalign="center" font="dyn_10" color="1 1 1 1" content="mm3_coop_invitetoteam" />
+									</panel>
+								</widgetstate>
+								<widgetstate statename="down" x="1" y="1">
+									<panel float="right">
+										<panel height="100%" width="100@">
+											<image width="74@" height="74%" valign="center" align="center" texture="/ui/elements/addfriend_over.tga" />
+										</panel>
+										<label fitx="true" height="100%" textvalign="center" font="dyn_10" color="1 1 1 1" content="mm3_coop_invitetoteam" />
+									</panel>
+								</widgetstate>
+								<widgetstate statename="disabled">
+									<panel float="right">
+										<panel height="100%" width="100@">
+											<image width="74@" height="74%" valign="center" align="center" texture="/ui/elements/addfriend_up.tga" rendermode="grayscalse" />
+										</panel>
+										<label fitx="true" height="100%" textvalign="center" font="dyn_10" color=".5 .5 .5 1" content="mm3_coop_invitetoteam" />
+									</panel>
+								</widgetstate>
+							</button>
+
+
+							<!-- Invite Bot -->
+							<button
+								name="mm_teamslot{slot}_invitebot"
+								width="45%"	height="100%"
+								align="right"
+								color="invisible"
+								visible="0"
+								onmouseover="PlaySound('/shared/sounds/ui/ccpanel/button_over_02.wav');"
+								onclick="Call('mm_invite_bot', 'FadeIn(100);');"
+								onclicklua="UIManager.GetInterface('main'):HoNMatchmakingF('RepickBot', self, {slot}, 'left')"
+							>
+								<widgetstate statename="up">
+									<panel float="right">
+										<panel height="100%" width="100@">
+											<image width="74@" height="74%" valign="center" align="center" texture="/ui/elements/addfriend_up.tga" />
+										</panel>
+										<label fitx="true" height="100%" textvalign="center" font="dyn_10" color="#37b2d9" content="mm3_coop_invitebottoteam" />
+									</panel>
+								</widgetstate>
+								<widgetstate statename="over">
+									<panel float="right">
+										<panel height="100%" width="100@">
+											<image width="74@" height="74%" valign="center" align="center" texture="/ui/elements/addfriend_over.tga" />
+										</panel>
+										<label fitx="true" height="100%" textvalign="center" font="dyn_10" color="1 1 1 1" content="mm3_coop_invitebottoteam" />
+									</panel>
+								</widgetstate>
+								<widgetstate statename="down" x="1" y="1">
+									<panel float="right">
+										<panel height="100%" width="100@">
+											<image width="74@" height="74%" valign="center" align="center" texture="/ui/elements/addfriend_over.tga" />
+										</panel>
+										<label fitx="true" height="100%" textvalign="center" font="dyn_10" color="1 1 1 1" content="mm3_coop_invitebottoteam" />
+									</panel>
+								</widgetstate>
+								<widgetstate statename="disabled">
+									<panel float="right">
+										<panel height="100%" width="100@">
+											<image width="74@" height="74%" valign="center" align="center" texture="/ui/elements/addfriend_up.tga" rendermode="grayscale" />
+										</panel>
+										<label fitx="true" height="100%" textvalign="center" font="dyn_10" color=".5 .5 .5 1" content="mm3_coop_invitebottoteam" />
+									</panel>
+								</widgetstate>
+							</button>
+
+						</panel>
+					</panel>
+				</panel>
+		</panel>
+	</template>
+
+	<template name="mm_loading_progressbar">
+		<panel watch="{watch}" ontrigger="{ontrigger}" sticky="true" stickytoinvis="false" height="{height=1.5h}" width="100%" noclick="true" visible="{visible=false}">
+			<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.3h" color="#171a28"/>
+			<panel x="0.2h" y="0.2h" width="-0.4h" height="-0.35h">
+				<panel width="1%" color="green"
+					watch="{barwatch}" ontrigger="{barontrigger}"
+					watch0="{barwatch0}" ontrigger0="{barontrigger0}"
+					watch1="{barwatch1}" ontrigger1="{barontrigger1}"
+					watch2="{barwatch2}" ontrigger2="{barontrigger2}"
+					watch3="{barwatch3}" ontrigger3="{barontrigger3}"
+					watch4="{barwatch4}" ontrigger4="{barontrigger4}"
+					watch5="{barwatch5}" ontrigger5="{barontrigger5}"
+					watch6="{barwatch6}" ontrigger6="{barontrigger6}"
+					watch7="{barwatch7}" ontrigger7="{barontrigger7}"
+					watch8="{barwatch8}" ontrigger8="{barontrigger8}"
+					watch9="{barwatch9}" ontrigger9="{barontrigger9}"
+				/>
+			</panel>
+			<frame texture="/ui/frames/roundframe.tga" color="#bbdefa" borderthickness="0.3h"/>
+			<label y="-0.1h" width="100%" height="100%" textalign="center" textvalign="center" font="{font=dyn_9}" color="white" shadow="true" content="{label}" watch="{labelwatch}" ontrigger="{labelontrigger}" />
+
+			<!-- Darken -->
+			<panel visible="{darken=false}">
+				<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.3h" color="0 0 0 .8"/>
+				<frame texture="/ui/frames/roundframe.tga" color="#678095" borderthickness="0.3h"/>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="mm_loading_status_light">
+		<panel
+			sticky="true"
+			stickytoinvis="false"
+			width="2.3h"
+			height="4.0h"
+			noclick="true"
+			passivechildren="true"
+			visible="false"
+			watch="LobbyPlayerList{index}"
+			ontrigger="SetVisible(!param17 and param18);"
+		>
+			<!-- Not yet connected -->
+			<image
+				visible="false"
+				texture="/ui/fe2/lobby/matchmaking_server_dot_gray.tga"
+				width="136%"
+				height="136@"
+				align="center"
+				valign="top"
+				watch="LobbyPlayerList{index}"
+				ontrigger="SetVisible(param19 == 0);"
+			/>
+
+			<!-- Loading -->
+			<image
+				visible="false"
+				texture="/ui/fe2/lobby/matchmaking_server_dot_yellow.tga"
+				width="136%"
+				height="136@"
+				align="center"
+				valign="top"
+				watch="LobbyPlayerList{index}"
+				ontrigger="SetVisible(param19 == 1);"
+			/>
+
+			<!-- Loaded -->
+			<image
+				visible="false"
+				texture="/ui/fe2/lobby/matchmaking_server_dot_green.tga"
+				width="136%"
+				height="136@"
+				align="center"
+				valign="top"
+				watch="LobbyPlayerList{index}"
+				ontrigger="SetVisible(param19 == 2);"
+			/>
+		</panel>
+	</template>
+
+	<template name="matchmaking_option_botteam">
+		<panel name="matchmaking_option_botteam" group="mm3_botteam" width="-1.0h" height="-1.0h" align="center" valign="center">
+			<panel float="right" padding="0.8h">
+				<panel width="100@" height="100%" valign="center" color="invisible">
+					<frame name="matchmaking_option_bots_thumb_background" texture="/ui/frames/rounded_bg_white.tga" color=".7 .7 .7 1" borderthickness="0.4h" />
+					<frame name="matchmaking_option_bots_thumb_border" texture="/ui/frames/roundframe.tga" color="#0c3405" borderthickness="0.4h" />
+					<image name="matchmaking_option_bots_thumb_icon" texture="/ui/fe2/elements/vote_up.tga" color=".8 .8 .8 1" visible="false"/>
+				</panel>
+				<panel width="-110@">
+					<panel float="right" padding="0.5h">
+						<image name="matchmaking_option_bots_icon" width="100@" height="100%" valign="center" texture="/ui/icons/botmatch.tga" rendermode="" />
+						<label name="matchmaking_option_bots_text" width="-100@" height="100%" textvalign="center" font="dyn_11" color="#888888" shadow="true">Fill Empty Slots with Bots</label>
+					</panel>
+				</panel>
+			</panel>
+			<panel name="matchmaking_option_botteam_disabled_panel" group="mm3_botteam" visible="false">
+				<frame width="102%" height="115%" align="center" valign="center" texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.4h" color="0 0 0 .7" noclick="true"/>
+				<frame width="102%" height="115%" align="center" valign="center" texture="/ui/frames/roundframe.tga" color=".5 .5 .5 1" borderthickness="0.4h" noclick="true" />
+				<panel width="100@" height="100%" valign="center" color="invisible">
+					<image width="80@" height="80%" align="center" valign="center" color="1 1 1 .8" texture="/ui/elements/kick_disabled.tga" />
+				</panel>
+				<label name="matchmaking_option_botteam_disabled_text" height="100%" width="-100@" align="right" textalign="center" textvalign="center" font="dyn_11" color=".7 .7 .7 1" shadow="true" wrap="true" content="mm_option_disabled" />
+			</panel>
+			<panel
+				onmouseoverlua=""
+				onmouseoutlua=""
+				onclicklua=""
+			/>
+		</panel>
+	</template>
+
+	<template name="matchmaking_option_popularity_dot">
+		<panel name="{basename}_{id}" width="9.0%" visible="{visible=false}">
+			<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.2h" color="{color}"/>
+			<frame texture="/ui/frames/roundframe.tga" color="1 1 1 1" borderthickness="0.2h"/>
+		</panel>
+	</template>
+
+	<template name="matchmaking_option_popularity_marker">
+		<instance name="matchmaking_option_popularity_dot" id="1" color="1 .4 0 .1" basename="{basename}" visible="false" />
+		<instance name="matchmaking_option_popularity_dot" id="2" color="1 .4 0 .2" basename="{basename}" visible="false" />
+		<instance name="matchmaking_option_popularity_dot" id="3" color="1 .4 0 .3" basename="{basename}" visible="false" />
+		<instance name="matchmaking_option_popularity_dot" id="4" color="1 .4 0 .4" basename="{basename}" visible="false" />
+		<instance name="matchmaking_option_popularity_dot" id="5" color="1 .4 0 .5" basename="{basename}" visible="false" />
+		<instance name="matchmaking_option_popularity_dot" id="6" color="1 .4 0 .6" basename="{basename}" visible="false" />
+		<instance name="matchmaking_option_popularity_dot" id="7" color="1 .4 0 .7" basename="{basename}" visible="false" />
+		<instance name="matchmaking_option_popularity_dot" id="8" color="1 .4 0 .8" basename="{basename}" visible="false" />
+		<instance name="matchmaking_option_popularity_dot" id="9" color="1 .4 0 .9" basename="{basename}" visible="false" />
+		<instance name="matchmaking_option_popularity_dot" id="10" color="1 .4 0 1" basename="{basename}" visible="false" />
+	</template>
+
+	<template name="matchmaking_option_region">
+		<panel name="matchmaking_option_region_{regionid}" height="3.6h" group="matchmaking_option_regions" sticky="1" stickytoinvis="0">
+			<panel float="right" padding="0.8h" x="0.9h">
+				<panel width="100@" height="100%" valign="center" color="invisible">
+					<frame name="matchmaking_option_region_{regionid}_thumb_background" texture="/ui/frames/rounded_bg_white.tga" color=".7 .7 .7 1" borderthickness="0.4h" />
+					<frame name="matchmaking_option_region_{regionid}_thumb_border" texture="/ui/frames/roundframe.tga" color="#0c3405" borderthickness="0.4h" />
+					<image name="matchmaking_option_region_{regionid}_thumb_icon" texture="/ui/fe2/elements/vote_up.tga" color=".8 .8 .8 1" visible="false"/>
+				</panel>
+				<panel width="-110@">
+					<panel height="2.4h" float="right" padding="0.5h">
+						<image name="matchmaking_option_region_{regionid}_icon" width="100@" height="100%" valign="center" texture="{icon}" rendermode="grayscale" />
+						<label name="matchmaking_option_region_{regionid}_text" width="-100@" height="100%" textvalign="center" font="dyn_11" color="#888888" shadow="true">{label}</label>
+					</panel>
+					<panel y="-0.2h" height="-3.0h" valign="bottom" float="right" padding="0.5%">
+						<instance name="matchmaking_option_popularity_marker" basename="matchmaking_option_region_{regionid}_popularity" />
+					</panel>
+				</panel>
+			</panel>
+			<panel name="matchmaking_option_region_{regionid}_disabled_panel" visible="false" x="0.9h">
+				<frame width="104%" height="115%" align="center" valign="center" texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.4h" color="0 0 0 .7" noclick="true"/>
+				<frame width="104%" height="115%" align="center" valign="center" texture="/ui/frames/roundframe.tga" color=".5 .5 .5 1" borderthickness="0.4h"  noclick="true" />
+				<panel width="100@" height="100%" valign="center" color="invisible">
+					<image width="80@" height="80%" align="center" valign="center" color="1 1 1 .8" texture="/ui/elements/kick_disabled.tga" />
+				</panel>
+				<label name="matchmaking_option_region_{regionid}_disabled_text" height="100%" width="-100@" align="right" textalign="center" textvalign="center" font="dyn_11" color=".7 .7 .7 1" shadow="true" wrap="true" content="mm_option_disabled" />
+			</panel>
+			<panel
+				onmouseoverlua="UIManager.GetInterface('main'):HoNMatchmakingF('matchmaking_option_region_OnMouseOver', '{regionid}')"
+				onmouseoutlua="UIManager.GetInterface('main'):HoNMatchmakingF('matchmaking_option_region_OnMouseOut', '{regionid}')"
+				onclicklua="UIManager.GetInterface('main'):HoNMatchmakingF('matchmaking_option_region_OnClick', '{regionid}')"
+			/>
+		</panel>
+	</template>
+
+	<template name="matchmaking_enemy_team_slot">
+		<panel name="mm_enemy_team_slot_{id}" height="5.6h"
+			onmouseoverlua="UIManager.GetInterface('main'):HoNMatchmakingF('HoverEnemyTeamSlot', self, {id})"
+			onmouseout="HideWidget('hero_info');"
+		>
+			<frame texture="/ui/frames/roundframe.tga" color="#183042" borderthickness="0.6h" noclick="true" />
+			<panel width="-0.8h" height="-0.8h" valign="center" align="center" noclick="true">
+
+				<!-- Icon -->
+				<panel width="100@" height="100%" noclick="true">
+					<image name="mm_enemyteam_{id}_icon" texture="/heroes/armadon/icon.tga" noclick="true" />
+					<frame color="invisible" borderthickness="1" bordercolor=".2 .2 .2 1" noclick="true"/>
+				</panel>
+
+				<!-- Hero Details -->
+				<panel x="110@" width="45%" height="100%" noclick="true">
+					<label name="mm_enemyteam_{id}_name" font="dyn_14" color="#ffaa00" content="Keeper of the Forest" noclick="true" />
+					<panel height="50%" valign="bottom" float="right" padding="0.5h" noclick="true">
+						<image name="mm_enemyteam_{id}_attacktype" width="100@" height="100%" texture="/ui/fe2/lobby/ranged.tga" noclick="true" />
+						<panel width="100@" height="100%" noclick="true">
+							<image name="mm_enemyteam_{id}_type" y="-2@" width="118@" height="118%" texture="/ui/fe2/lobby/intelligence.tga" noclick="true" />
+						</panel>
+
+						<!-- Repick -->
+						<button
+							x="0"
+							width="42%"	height="100%"
+							align="right"
+							color="invisible"
+							onmouseover="PlaySound('/shared/sounds/ui/ccpanel/button_over_02.wav'); ShowWidget('hero_info');"
+							onmouseout="HideWidget('hero_info');"
+							onclick="Call('mm_repick_enemy_bot', 'FadeIn(100)');"
+							onclicklua="UIManager.GetInterface('main'):HoNMatchmakingF('RepickBot', self, {id}, 'right')"
+						>
+							<widgetstate statename="up">
+								<panel float="right">
+									<panel height="100%" width="100@">
+										<image width="82@" height="82%" valign="center" align="center" texture="/ui/fe2/lobby/swap_hero_up.tga" />
+									</panel>
+									<label fitx="true" height="100%" textvalign="center" font="dyn_10" color="#37b2d9" content="mm3_coop_repickbot" />
+								</panel>
+							</widgetstate>
+							<widgetstate statename="over">
+								<panel float="right">
+									<panel height="100%" width="100@">
+										<image width="82@" height="82%" valign="center" align="center" texture="/ui/fe2/lobby/swap_hero_over.tga" />
+									</panel>
+									<label fitx="true" height="100%" textvalign="center" font="dyn_10" color="1 1 1 1" content="mm3_coop_repickbot" />
+								</panel>
+							</widgetstate>
+							<widgetstate statename="down" x="1" y="1">
+								<panel float="right">
+									<panel height="100%" width="100@">
+										<image width="82@" height="82%" valign="center" align="center" texture="/ui/fe2/lobby/swap_hero_down.tga" />
+									</panel>
+									<label fitx="true" height="100%" textvalign="center" font="dyn_10" color="1 1 1 1" content="mm3_coop_repickbot" />
+								</panel>
+							</widgetstate>
+							<widgetstate statename="disabled">
+								<panel float="right">
+									<panel height="100%" width="100@">
+										<image width="82@" height="82%" valign="center" align="center" texture="/ui/fe2/lobby/swap_hero_up.tga" rendermode="grayscalse" />
+									</panel>
+									<label fitx="true" height="100%" textvalign="center" font="dyn_10" color=".5 .5 .5 1" content="mm3_coop_repickbot" />
+								</panel>
+							</widgetstate>
+						</button>
+
+					</panel>
+				</panel>
+
+				<!-- Abils -->
+				<panel grow="true" height="88%" align="right" valign="center" float="right" padding="0.3h" noclick="true">
+					<panel width="100@" height="100%" noclick="true">
+						<image name="mm_enemyteam_{id}_ability1" texture="/heroes/armadon/ability_01/icon.tga" noclick="true" />
+						<frame color="invisible" borderthickness="1" bordercolor=".2 .2 .2 1" noclick="true"/>
+					</panel>
+					<panel width="100@" height="100%" noclick="true">
+						<image name="mm_enemyteam_{id}_ability2" texture="/heroes/armadon/ability_02/icon.tga" noclick="true" />
+						<frame color="invisible" borderthickness="1" bordercolor=".2 .2 .2 1" noclick="true"/>
+					</panel>
+					<panel width="100@" height="100%" noclick="true">
+						<image name="mm_enemyteam_{id}_ability3" texture="/heroes/armadon/ability_03/icon.tga" noclick="true" />
+						<frame color="invisible" borderthickness="1" bordercolor=".2 .2 .2 1" noclick="true" />
+					</panel>
+					<panel width="100@" height="100%" noclick="true">
+						<image name="mm_enemyteam_{id}_ability4" texture="/heroes/armadon/ability_04/icon.tga" noclick="true" />
+						<frame color="invisible" borderthickness="1" bordercolor=".2 .2 .2 1" noclick="true"/>
+					</panel>
+				</panel>
+
+			</panel>
+		</panel>
+	</template>
+
+	<template name="season_gm_allpick_button">
+		<panel name="season_gm_allpick_button_{id}" x="{x}" y="{y}"  width="255i" height="37i" color="invisible" >
+			<image name="season_gm_allpick_button_{id}_default" texture="/ui/fe2/season/bb3.tga" width="512i" height="64i" align="center" valign="center" />
+			<image name="season_gm_allpick_button_{id}_normal" texture="/ui/fe2/season/{image}.tga" width="512i" height="64i" align="center" valign="center" visible="0" />
+			<image name="season_gm_allpick_button_{id}_casual" texture="/ui/fe2/season/{image}.tga" width="512i" height="64i" align="center" valign="center" visible="0" />
+			<label name="season_gm_allpick_button_{id}_label" fity="true" x="45i" y="0.7h" width="100%" textalign="left" textvalign="center" font="dyn_14" color=".5 .5 .5 1" shadow="true" content="{label}" noclick="true" />
+
+			<image name="season_gm_allpick_button_{id}_up_thumb" x="10i" width="32i" height="32i" align="left" valign="center" rendermode="grayscale" texture="/ui/fe2/elements/vote_up.tga" />
+			<image name="season_gm_allpick_button_{id}_down_thumb" x="10i" width="32i" height="32i" align="left" valign="center" rendermode="grayscale" texture="/ui/fe2/elements/vote_down.tga" />
+
+			<panel align="right" width="110i" float="right">
+				<panel width="16i">
+					<image name="season_gm_allpick_button_{id}_pickmode_icon" height="16i" align="center" valign="center" texture="/ui/icons/normal.tga" />
+				</panel>
+				<panel width="94i">
+					<label name="season_gm_allpick_button_{id}_pickmode_text" textalign="center" textvalign="center" font="dyn_10" color="#81817f" noclick="1" autofont="1" autofontmax="10"/>
+					<label name="season_gm_allpick_button_{id}_pickmode_text_1" x="0.5h" textalign="left" textvalign="top" font="dyn_10" color="#81817f" noclick="1" autofont="1" autofontmax="10"/>
+					<label name="season_gm_allpick_button_{id}_pickmode_text_2" x="0.5h" textalign="left" textvalign="bottom" font="dyn_10" color="#81817f" noclick="1" autofont="1" autofontmax="10"/>
+				</panel>
+			</panel>
+			<panel align="right" width="110i"
+				onmouseoverlua="UIManager.GetInterface('main'):HoNMatchmakingF('season_gm_allpick_button_OnMouseOver', '{id}')
+								local rankInfo = GetRankedPlayInfo('{id}'=='normal' and 0 or 1)
+								Trigger('genericMainFloatingTip', 'true', '20h', '', '', 'rank_pickmode_tips_{id}2', '', '', '3.0h', '-2.0h')"
+				onmouseoutlua=" UIManager.GetInterface('main'):HoNMatchmakingF('season_gm_allpick_button_OnMouseOut', '{id}')
+								Trigger('genericMainFloatingTip', 'false', '', '', '', '', '', '', '', '')"
+				onclicklua="UIManager.GetInterface('main'):HoNMatchmakingF('season_gm_allpick_button_OnClick', '{id}')"
+			/>
+
+			<panel width="-110i" align="left"
+				onmouseoverlua="UIManager.GetInterface('main'):HoNMatchmakingF('season_gm_allpick_button_OnMouseOver', '{id}')"
+				onmouseoutlua="UIManager.GetInterface('main'):HoNMatchmakingF('season_gm_allpick_button_OnMouseOut', '{id}')"
+				onclicklua="UIManager.GetInterface('main'):HoNMatchmakingF('season_gm_allpick_button_OnClick', '{id}')"
+			/>
+		</panel>
+	</template>
+	
+	<!-- old/orig map size -->
+	<template name="matchmaking_option_map">
+		<panel name="matchmaking_option_map_{mapid}_{index=1}" height="34.5%" valign="{valign}" visible="0" sticky="1" stickytoinvis="0">
+			<frame name="matchmaking_option_map_{mapid}_{index=1}_backdrop" texture="/ui/info/backdrop.tga" borderthickness="3.0h" color="1 1 1 .3" noclick="1" />
+			<frame name="matchmaking_option_map_{mapid}_{index=1}_border" color=".05 .07 .1 .5" bordercolor=".2 .2 .2 1" borderthickness="1" noclick="1" />
+			<image name="matchmaking_option_map_{mapid}_{index=1}_cornerarrow" x="-0.2h" y="0.2h" width="1.8h" height="1.8h" align="right" valign="top" color="1 1 1 .5" texture="/ui/fe2/elements/corner_arrow.tga" />
+			<label name="matchmaking_option_map_{mapid}_{index=1}_name" fity="true" x="0.8h" y="0.7h" width="100%" textalign="left" font="dyn_14" color=".5 .5 .5 1" shadow="true" content="{mapname}" noclick="true" />
+			<panel x="0.8h" y="-0.8h" width="7.0h" height="7.0h" valign="bottom">
+				<image name="matchmaking_option_map_{mapid}_{index=1}_minimap"
+					resourcecontext="matchmaking" watch9="MainRegisterTextures"
+					ontrigger9lua="
+						if string.len('{minimapOverride2}') &gt; 0 then
+							ResourceManager.RegisterTexture('{minimapOverride}', 'matchmaking', self)
+						else
+							ResourceManager.RegisterTexture('/maps/{mapid}/{minimapOverride=minimap.tga}', 'matchmaking', self)
+						end
+					"
+				/>
+				<frame name="matchmaking_option_map_{mapid}_{index=1}_minimap_border" color="invisible" bordercolor=".2 .2 .2 1" borderthickness="1" noclick="1" />
+				<image name="matchmaking_option_map_{mapid}_{index=1}_minimap_thumb" width="4.0h" height="4.0h" align="center" valign="center" texture="/ui/fe2/elements/vote_up.tga" />
+			</panel>
+			<panel x="-0.8h" y="-0.8h" width="10h" height="7.0h" align="right" valign="bottom">
+				<label name="matchmaking_option_map_{mapid}_{index=1}_teamsize_text" fity="true" width="100%" textalign="center" font="dyn_10" color=".5 .5 .5 1" shadow="true" content="{teamsize}" />
+				<image name="matchmaking_option_map_{mapid}_{index=1}_icon" y="-0.2h" width="4.8h" height="4.8h" align="center" valign="bottom" color="1 1 1 .5"
+					resourcecontext="matchmaking" watch9="MainRegisterTextures"
+					ontrigger9lua="
+						if string.len('{iconOverride2}') &gt; 0 then
+							ResourceManager.RegisterTexture('{iconOverride}', 'matchmaking', self)
+						else
+							ResourceManager.RegisterTexture('/maps/{mapid}/{iconOverride=icon.tga}', 'matchmaking', self)
+						end
+					"
+				/>
+			</panel>
+			<image name="matchmaking_option_map_{mapid}_{index=1}_beta" visible="{isBeta=0}" align="right" x="-1" y="1" width="135@" height="135%" noclick="1"
+				resourcecontext="matchmaking" watch9="MainRegisterTextures"
+				ontrigger9lua="ResourceManager.RegisterTexture('/ui/fe2/elements/beta_banner.tga', 'matchmaking', self)"
+			/>
+			<image name="matchmaking_option_map_{mapid}_{index=1}_other_banner" visible="{hasBanner=0}" align="right" x="-1" y="1" width="135@" height="135%" noclick="1"
+				resourcecontext="matchmaking" watch9="MainRegisterTextures"
+				ontrigger9lua="ResourceManager.RegisterTexture('/ui/fe2/elements/other_banner.tga', 'matchmaking', self)"
+			/>
+			<panel name="matchmaking_option_map_{mapid}_{index=1}_disabled" color="0 0 0 .5">
+				<image width="80@" height="80%" align="center" valign="center" color=".3 .3 .3 1" texture="/ui/elements/kick_disabled.tga" />
+				<label name="matchmaking_option_map_{mapid}_{index=1}_disabled_text" height="100%" width="14.0h" align="center" textalign="center" textvalign="center" font="dyn_11" color=".6 .6 .6 1" shadow="true" wrap="true" content="mm_map_locked" />
+			</panel>
+			<panel
+				onmouseoverlua="UIManager.GetInterface('main'):HoNMatchmakingF('matchmaking_option_map_OnMouseOver', '{mapid}')"
+				onmouseoutlua="UIManager.GetInterface('main'):HoNMatchmakingF('matchmaking_option_map_OnMouseOut', '{mapid}')"
+				onclicklua="UIManager.GetInterface('main'):HoNMatchmakingF('matchmaking_option_map_OnClick', '{mapid}')"
+			/>
+		</panel>
+	</template>
+
+	<!-- new maps size for 2 maps -->
+	<template name="matchmaking_option_map_new">
+		<panel name="matchmaking_option_map_{mapid}_{index=1}" height="52%" valign="{valign}" visible="0" sticky="1" stickytoinvis="0">
+			<frame name="matchmaking_option_map_{mapid}_{index=1}_backdrop" texture="/ui/info/backdrop.tga" borderthickness="3.0h" color="1 1 1 .3" noclick="1" />
+			<frame name="matchmaking_option_map_{mapid}_{index=1}_border" color=".05 .07 .1 .5" bordercolor=".2 .2 .2 1" borderthickness="1" noclick="1" />
+			<image name="matchmaking_option_map_{mapid}_{index=1}_cornerarrow" x="-0.2h" y="0.2h" width="1.8h" height="1.8h" align="right" valign="top" color="1 1 1 .5" texture="/ui/fe2/elements/corner_arrow.tga" />
+			<label name="matchmaking_option_map_{mapid}_{index=1}_name" fity="true" wrap="1" x="0.8h" y="0.7h" width="100%" textalign="left" font="dyn_14" color=".5 .5 .5 1" shadow="true" content="{mapname}" noclick="true" />
+			<panel x="0.8h" y="-0.8h" width="13.0h" height="13.0h" valign="bottom">
+				<image name="matchmaking_option_map_{mapid}_{index=1}_minimap"
+					resourcecontext="matchmaking" watch9="MainRegisterTextures"
+					ontrigger9lua="ResourceManager.RegisterTexture('/maps/{mapid}/{minimapOverride=minimap.tga}', 'matchmaking', self)"
+				/>
+				<frame name="matchmaking_option_map_{mapid}_{index=1}_minimap_border" color="invisible" bordercolor=".2 .2 .2 1" borderthickness="1" noclick="1" />
+				<image name="matchmaking_option_map_{mapid}_{index=1}_minimap_thumb" width="4.0h" height="4.0h" align="center" valign="center" texture="/ui/fe2/elements/vote_up.tga" />
+			</panel>
+			<panel x="-0.8h" y="1.0h" width="4h" height="7.0h" align="right" valign="center">
+				<label name="matchmaking_option_map_{mapid}_{index=1}_teamsize_text" fity="true" width="100%" textalign="center" font="dyn_10" color=".5 .5 .5 1" shadow="true" content="{teamsize}" />
+				<image name="matchmaking_option_map_{mapid}_{index=1}_icon" y="-0.2h" width="4.8h" height="4.8h" align="center" valign="bottom" color="1 1 1 .5"
+					resourcecontext="matchmaking" watch9="MainRegisterTextures"
+					ontrigger9lua="ResourceManager.RegisterTexture('/maps/{mapid}/icon.tga', 'matchmaking', self)"
+				/>
+			</panel>
+			<panel name="matchmaking_option_map_{mapid}_{index=1}_disabled" color="0 0 0 .5">
+				<image width="80@" height="80%" align="center" valign="center" color=".3 .3 .3 1" texture="/ui/elements/kick_disabled.tga" />
+				<label name="matchmaking_option_map_{mapid}_{index=1}_disabled_text" height="100%" width="14.0h" align="center" textalign="center" textvalign="center" font="dyn_11" color=".6 .6 .6 1" shadow="true" wrap="true" content="mm_map_locked" />
+			</panel>
+			<panel
+				onmouseoverlua="UIManager.GetInterface('main'):HoNMatchmakingF('matchmaking_option_map_OnMouseOver', '{mapid}')"
+				onmouseoutlua="UIManager.GetInterface('main'):HoNMatchmakingF('matchmaking_option_map_OnMouseOut', '{mapid}')"
+				onclicklua="UIManager.GetInterface('main'):HoNMatchmakingF('matchmaking_option_map_OnClick', '{mapid}')"
+			/>
+		</panel>
+	</template>
+
+	<template name="matchmaking_option_gametype">
+		<panel name="matchmaking_option_gametype_{typeid}_{index=1}" color="#183042">
+			<frame width="-2" height="-2" align="center" valign="center" name="matchmaking_option_gametype_{typeid}_{index=1}_frame" color=".1 .1 .1 1" bordercolor="#183042" borderthickness="0" noclick="1" />
+			<frame width="-2" height="-2" align="center" valign="center" name="matchmaking_option_gametype_{typeid}_{index=1}_frame_color" texture="/ui/info/backdrop.tga" color=".1 .1 .1 1" borderthickness="0" noclick="1" />
+			<panel height="2.4h" align="center" valign="center" >
+				<panel width="2.4h" height="2.4h" x="1.0h" valign="center" color="invisible">
+					<frame name="matchmaking_option_gametype_{typeid}_{index=1}_thumb_background" texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.4h" color=".6 .6 .6 1"/>
+					<frame name="matchmaking_option_gametype_{typeid}_{index=1}_thumb_border" texture="/ui/frames/roundframe.tga" color=".3 .3 .3 1" borderthickness="0.4h"/>
+					<image name="matchmaking_option_gametype_{typeid}_{index=1}_thumb_icon" texture="/ui/fe2/elements/vote_down.tga" color=".8 .8 .8 1" rendermode="grayscale" />
+				</panel>
+				<panel x="3.4h" width="-3.4h" height="100%">
+					<label name="matchmaking_option_gametype_{typeid}_{index=1}_label" height="100%" textalign="center" textvalign="center" font="dyn_11" color=".6 .6 .6 1" shadow="true">{label}</label>
+				</panel>
+			</panel>
+			<image name="matchmaking_option_gametype_{typeid}_{index=1}_disabled" width="80@" height="80%" align="center" valign="center" color="1 1 1 .8" texture="/ui/elements/kick_disabled.tga" />
+			<panel
+				onmouseoverlua="UIManager.GetInterface('main'):HoNMatchmakingF('matchmaking_option_gametype_OnMouseOver', '{typeid}')"
+				onmouseoutlua="UIManager.GetInterface('main'):HoNMatchmakingF('matchmaking_option_gametype_OnMouseOut', '{typeid}')"
+				onclicklua="UIManager.GetInterface('main'):HoNMatchmakingF('matchmaking_option_gametype_OnClick', '{typeid}')"
+			/>
+		</panel>
+	</template>
+
+	<template name="matchmaking_option_gamemode">
+		<panel name="matchmaking_option_gamemode_{modeid}" height="{height=3.6h}" visible="{visible=true}" sticky="1" stickytoinvis="0" >
+			<panel float="right" padding="0.8h">
+				<panel width="100@" height="100%" valign="center" color="invisible">
+					<frame name="matchmaking_option_gamemode_{modeid}_thumb_background" texture="/ui/frames/rounded_bg_white.tga" color=".7 .7 .7 1" borderthickness="0.4h" />
+					<frame name="matchmaking_option_gamemode_{modeid}_thumb_border" texture="/ui/frames/roundframe.tga" color="#0c3405" borderthickness="0.4h" />
+					<image name="matchmaking_option_gamemode_{modeid}_thumb_icon" texture="/ui/fe2/elements/vote_up.tga" color=".8 .8 .8 1" visible="false"/>
+				</panel>
+				<panel width="-110@">
+					<panel height="2.4h" float="right" padding="0.5h">
+						<image name="matchmaking_option_gamemode_{modeid}_icon" width="100@" height="100%" valign="center" texture="/ui/icons/{icon}" rendermode="grayscale" />
+						<label name="matchmaking_option_gamemode_{modeid}_text" width="-100@" height="100%" textvalign="center" font="dyn_11" color="#888888" shadow="true">{label}</label>
+					</panel>
+					<panel y="-0.2h" height="-3.0h" valign="bottom" float="right" padding="0.5%">
+						<instance name="matchmaking_option_popularity_marker" basename="matchmaking_option_gamemode_{modeid}_popularity" />
+					</panel>
+				</panel>
+			</panel>
+			<panel name="matchmaking_option_gamemode_{modeid}_disabled_panel" visible="false">
+				<frame width="104%" height="115%" align="center" valign="center" texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.4h" color="0 0 0 .7" noclick="true"/>
+				<frame width="104%" height="115%" align="center" valign="center" texture="/ui/frames/roundframe.tga" color=".5 .5 .5 1" borderthickness="0.4h" noclick="true" />
+				<panel width="100@" height="100%" valign="center" color="invisible">
+					<image width="80@" height="80%" align="center" valign="center" color="1 1 1 .8" texture="/ui/elements/kick_disabled.tga" />
+				</panel>
+				<label name="matchmaking_option_gamemode_{modeid}_disabled_text" height="100%" width="-100@" align="right" textalign="center" textvalign="center" font="dyn_11" color=".7 .7 .7 1" shadow="true" wrap="true" content="mm_option_disabled" />
+			</panel>
+			<panel name="matchmaking_option_gamemode_{modeid}_buytokens" visible="false">
+				<frame width="104%" height="115%" align="center" valign="center" texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.4h" color="0 0 0 .7" noclick="true"/>
+				<frame width="104%" height="115%" align="center" valign="center" texture="/ui/frames/roundframe.tga" color=".5 .5 .5 1" borderthickness="0.4h" noclick="true" />
+				<panel width="100@" height="100%" valign="center" color="invisible">
+					<image width="80@" height="80%" align="center" valign="center" color="1 1 1 .8" texture="/ui/fe2/store/icons/hero_token.tga" />
+				</panel>
+				<label height="100%" width="-100@" align="right" textalign="center" textvalign="center" font="dyn_11" color="#ffab01" shadow="true" wrap="true" content="mm_option_disabled_buytoken" />
+			</panel>
+			<panel
+				onmouseoverlua="UIManager.GetInterface('main'):HoNMatchmakingF('matchmaking_option_gamemode_OnMouseOver', '{modeid}')"
+				onmouseoutlua="UIManager.GetInterface('main'):HoNMatchmakingF('matchmaking_option_gamemode_OnMouseOut', '{modeid}')"
+				onclicklua="UIManager.GetInterface('main'):HoNMatchmakingF('matchmaking_option_gamemode_OnClick', '{modeid}')"
+			/>
+		</panel>
+	</template>
+
+	<template name="mm_botpickplate">
+		<panel name="mm_botpickplate_{side}_{id}" width="100@" height="100%" visible="1"
+			onclicklua="UIManager.GetInterface('main'):HoNMatchmakingF('SelectBot', self, {id}, '{side}')"
+			onmouseover="Call('mm_botpickplate_border_{side}_{id}_hover', 'FadeIn(150);'); ShowWidget('hero_info');"
+			onmouseoverlua="UIManager.GetInterface('main'):HoNMatchmakingF('HoverBot', self, {id}, '{side}')"
+			onmouseout="Call('mm_botpickplate_border_{side}_{id}_hover', 'FadeOut(150);'); HideWidget('hero_info');"
+			onmouseoutlua="UIManager.GetInterface('main'):HoNMatchmakingF('LeaveBotHover', '{side}')"
+		>
+			<image name="mm_botpickplate_icon_{side}_{id}" texture="/ui/fe2/store/icons/account_icons/derp.tga" noclick="1"/>
+			<frame name="mm_botpickplate_border_{side}_{id}" color="invisible" borderthickness="1" bordercolor=".2 .2 .2 1" noclick="1"/>
+			<frame name="mm_botpickplate_border_{side}_{id}_hover" color="invisible" visible="0" borderthickness="1" bordercolor=".8 .2 .2 1" noclick="1"/>
+			<label name="mm_botpickplate_index_{side}_{id}" visible="0" noclick="1" />
+		</panel>
+	</template>
+
+	<!-- Enemy Bot Version -->
+	<template name="mm_multibotplate">
+		<panel name="mm_multibotplate_{side}_{id}" height="{height=7.2h}"
+			onmouseover="Call('mm_mb_frame_{side}_{id}', 'FadeIn(150)'); ShowWidget('hero_info');"
+			onmouseoverlua=""
+			onmouseout="Call('mm_mb_frame_{side}_{id}', 'FadeOut(150)'); HideWidget('hero_info');"
+			onclicklua="UIManager.GetInterface('main'):HoNMatchmakingF('SelectMultiBot', self, {id}, '{side}')"
+		>
+			<frame texture="/ui/frames/rounded_bg_solid.tga" borderthickness="0.6h" color="0 0 0 1" noclick="true"/>
+			<frame texture="/ui/frames/roundframe.tga" color="#183042" borderthickness="0.6h" noclick="true" />
+			<frame name="mm_mb_frame_{side}_{id}" visible="0" texture="/ui/frames/roundframe.tga" color=".8 .2 .2 1" borderthickness="0.6h" noclick="true" />
+			<label name="mm_multibotpickplate_index_{side}_{id}" visible="0" noclick="1" />
+
+			<panel width="-1.0h" height="-1.0h" valign="center" align="center" noclick="true">
+				<panel width="100@" height="100%" noclick="true">
+					<image name="mm_multibotplate_{side}_{id}_icon" texture="/heroes/empath/icon.tga" noclick="true"/>
+					<frame color="invisible" borderthickness="1" bordercolor=".2 .2 .2 1" noclick="true"/>
+				</panel>
+				<panel width="-110@" align="right" noclick="true">
+					<panel height="2.0h" noclick="true">
+						<label name="mm_multibotplate_{side}_{id}_name" textalign="left" font="dyn_12" color="#37b2d9" noclick="true"/>
+						<label name="mm_multibotplate_{side}_{id}_version" textalign="right" font="dyn_10" color=".6 .6 .6 1" noclick="true"/>
+					</panel>
+					<panel height="-2.4h" valign="bottom" noclick="true">
+						<label name="mm_multibotplate_{side}_{id}_desc" font="{font=dyn_10}" wrap="true" color="1 1 1 1" noclick="true"/>
+					</panel>
+				</panel>
+			</panel>
+		</panel>
+	</template>
+
+	<!-- autocomplete entry for 'invite a person' -->
+	<template name="mm_autocomplete_plate">
+		<panel
+			name="mm_autocomplete_plate_{id}" height="3.0h"
+			width="100%"  visible="0"
+			align="center"
+			sticky="1"
+			onclicklua="UIManager.GetInterface('main'):HoNMatchmakingF('ClickAutocomplete', self, {id})"
+			ondoubleclicklua="UIManager.GetInterface('main'):HoNMatchmakingF('DoubleClickAutoComplete', self, {id})"
+			onmouseover="ShowWidget('mm_autocomplete_plate_{id}_bg_blue'); Call('mm_autocomplete_plate_{id}_hover', 'FadeIn(75)');"
+			onmouseout="HideWidget('mm_autocomplete_plate_{id}_bg_blue'); Call('mm_autocomplete_plate_{id}_hover', 'FadeOut(75)');"
+			onmousewheeldown="CallEvent('mm_invite_scrollbar', 1);"
+			onmousewheelup="CallEvent('mm_invite_scrollbar', 0);"
+		>
+			<panel noclick="1" valign="top" height="-1" >
+				<frame name="mm_autocomplete_plate_{id}_bg_blue" texture="/ui/frames/rounded_bg_blue.tga" borderthickness="0.6h" color=".6 .6 .6 .9" blockinput="0" noclick="1" visible="0" />
+
+				<frame name="mm_autocomplete_plate_{id}_border" texture="/ui/frames/roundframe.tga" color=".2 .2 .2 1" borderthickness="0.6h" blockinput="false" noclick="true"/>
+				<!-- Hover  -->
+				<panel name="mm_autocomplete_plate_{id}_hover" noclick="true" visible="0">
+					<frame name="mm_autocomplete_plate_{id}_hover_bg_blue" texture="/ui/frames/rounded_bg_blue.tga" borderthickness="0.6h" color="1 1 1 1" blockinput="0" noclick="1" />
+					<frame name="mm_autocomplete_plate_{id}_hover_border" texture="/ui/frames/roundframe.tga" color="#0081ed" borderthickness="0.6h" blockinput="false" noclick="true"/>
+				</panel>
+				<panel height="-0.8h" width="-0.8h" valign="center" align="center" noclick="true" float="right">
+					<!-- Icon -->
+					<panel x="0.3h" name="mm_autocomplete_plate_{id}_iconframe" height="100%" width="100@" noclick="true">
+						<!-- this guy would have an on double click, but they don't appear to exist on images :x -->
+						<image name="mm_autocomplete_plate_{id}_icon" texture="$invis" noclick="0"
+							onclicklua="UIManager.GetInterface('main'):HoNMatchmakingF('ClickAutocomplete', self, {id})"
+							onmouseover="
+								If(!StringEquals(GetTexture(), '/ui/fe2/store/icons/account_icons/default.tga'), Split(
+										Trigger(
+											'StoreImagePreviewInit',
+											GetWidth(),
+											GetHeight(),
+											GetAbsoluteX(),
+											GetAbsoluteY(),
+											false,
+											GetTexture()
+										),
+										Trigger('StoreImagePreviewVis', true, '250%')
+									)
+								);
+							"
+							onmouseout="
+								DoEvent(1);
+							"
+							onevent1="
+								Trigger('StoreImagePreviewVis', false, '100%');
+							"
+						/>
+					</panel>
+
+					<!-- User Info -->
+					<panel name="mm_autocomplete_plate_{id}_userinfo" width="-0.5h" align="right" noclick="true">
+						<!-- Name -->
+						<label x="1%" name="mm_autocomplete_plate_{id}_name" width="-52@" valign="top" textvalign="top" font="dyn_11" color="white" shadow="true" content="" noclick="true" />
+						<!-- Focus Icon -->
+						<panel name="mm_autocomplete_plate_{id}_invited" x="-8%" width="90@" height="90%" align="right" valign="center" noclick="true" visible="0" color="invisible">
+							<image texture="/ui/fe2/lobby/matchmaking_server_dot_green.tga" noclick="true" color="#FFD52E" />
+						</panel>
+					</panel>\
+				</panel>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="matchmaking_group_error_floater">
+		<floater
+			name="matchmaking_group_error_tooltip"
+			x="{x=2.2h}" y="{y=-0.5h}"
+			width="{width=25.0h}"
+			align="{align=left}"
+			valign="{valign=top}"
+			visible="{visible=0}"
+			passivechildren="true"
+			grow="true" regrow="1"
+			watch="MatchmakingGroupErrorUpdate"
+			ontrigger="SetVisible(!StringEmpty(param0));"
+		>
+			<frame texture="/ui/frames/tooltip_bg.tga" color="0 0 0 .8" borderthickness=".6h" />
+			<frame texture="/ui/frames/roundframe.tga" color="#A0A0A0" borderthickness=".6h" />
+				<label
+					x="0.8h" y="0.6h"
+					textvalign="top"
+					textalign="left"
+					align="center"
+					font="dyn_10"
+					noclick="1"
+					color="#ffab01"
+					shadow="1"
+					wrap="1"
+					fity="true"
+					fitypadding="0.8h"
+					watch="MatchmakingGroupErrorUpdate" ontrigger="SetText(param0);"
+				></label>
+				<image x="-0.6h" y="0.6h" noclick="1" height="2.5h" width="2.5h" align="right" visible="0" texture="/ui/icons/basic.tga" watch="MatchmakingGroupErrorUpdate" ontrigger="SetVisible(param2 == 1);" />
+				<image x="-0.6h" y="0.6h" noclick="1" height="2.5h" width="2.5h" align="right" visible="0" texture="/ui/fe2/elements/vote_down.tga" watch="MatchmakingGroupErrorUpdate" ontrigger="SetVisible(param2 == 2);" />
+				<image x="-0.6h" y="0.6h" noclick="1" height="2.5h" width="2.5h" align="right" visible="0" texture="/ui/icons/goldcoin.tga" watch="MatchmakingGroupErrorUpdate" ontrigger="SetVisible(param2 == 3);" />
+				<image x="-0.6h" y="0.6h" noclick="1" height="2.5h" width="2.5h" align="right" visible="0" texture="/ui/fe2/elements/vote_up.tga" watch="MatchmakingGroupErrorUpdate" ontrigger="SetVisible(param2 == 4);" />
+				<image x="-0.6h" y="0.6h" noclick="1" height="2.5h" width="2.5h" align="right" visible="0" texture="/ui/icons/botmatch.tga" watch="MatchmakingGroupErrorUpdate" ontrigger="SetVisible(param2 == 5);" />
+				<image x="-0.6h" y="0.6h" noclick="1" height="2.5h" width="2.5h" align="right" visible="0" texture="/ui/elements/lobby/icon_host.tga" watch="MatchmakingGroupErrorUpdate" ontrigger="SetVisible(param2 == 6);" />
+				<image x="-0.6h" y="0.6h" noclick="1" height="2.5h" width="2.5h" align="right" visible="0" texture="/ui/fe2/elements/vote_down.tga" watch="MatchmakingGroupErrorUpdate" ontrigger="SetVisible(param2 == 7);" />
+				<panel y="2.5h" width="-1.6h" align="center" noclick="true" grow="true" float="bottom">
+					<label
+						textvalign="top"
+						textalign="left"
+						align="center"
+						font="dyn_10"
+						noclick="1"
+						color="white"
+						shadow="1"
+						wrap="1"
+						fity="true"
+						fitxpadding="0"
+						content="Get"
+						watch="MatchmakingGroupErrorUpdate" ontrigger="SetText(param1);"
+					></label>
+					<panel height="1.0h" color="invisible" noclick="true"/>
+				</panel>
+		</floater>
+	</template>
+	<trigger name="MatchmakingGroupErrorUpdate" />
+	<instance name="matchmaking_group_error_floater" />
+
+	<template name="mm_start_match_btn">
+		<panel name="{btnname}" y="-0.8h" width="310i" height="30i" x="-80i" align="center" valign="bottom" noclick="true" visible="{visible}">
+			<button
+				width="100%" height="3.8h"
+				valign="bottom"
+				color="invisible"
+				onmouseover="PlaySound('/shared/sounds/ui/ccpanel/button_over_02.wav'); PlaySound('/shared/sounds/ui/ccpanel/button_over_01.wav');"
+				onclick="PlaySound('{sound=/shared/sounds/ui/ccpanel/button_click_02.wav}');"
+				onclicklua="UIManager.GetInterface('main'):HoNMatchmakingF('EnterQueue')"
+			>
+				<widgetstate statename="up">
+					<frame texture="/ui/info/button.tga" borderthickness="0.6h" color="1 1 1 1"/>
+					<label name="{labelname}_1" width="100%" height="100%" textvalign="center" textalign="center" font="dyn_14" color="#ffc600" outline="true" content="{buttonlabel}" autofont="1" autofontmax="14"/>
+				</widgetstate>
+				<widgetstate statename="over">
+					<frame texture="/ui/info/button_over.tga" borderthickness="0.6h" />
+					<label name="{labelname}_2" width="100%" height="100%" textvalign="center" textalign="center" font="dyn_14" color="#ffc600" outline="true" content="{buttonlabel}" autofont="1" autofontmax="14"/>
+				</widgetstate>
+				<widgetstate statename="down">
+					<frame texture="/ui/info/button_down.tga" borderthickness="0.6h" color="white"/>
+					<label name="{labelname}_3" width="100%" height="100%" textvalign="center" textalign="center" font="dyn_14" color="#ffc600" outline="true" content="{buttonlabel}" autofont="1" autofontmax="14"/>
+				</widgetstate>
+				<widgetstate statename="disabled">
+					<frame texture="/ui/info/button.tga" borderthickness="0.6h" color=".3 .3 .3 1"/>
+					<frame texture="/ui/frames/rounded_button_bg_white.tga" borderthickness="0.8h" color=".3 .3 .3 .7"/>
+					<label name="{labelname}_4" width="100%" height="100%" textvalign="center" textalign="center" font="dyn_14" color=".4 .4 .4 1" outline="true" content="{buttonlabel}" autofont="1" autofontmax="14"/>
+				</widgetstate>
+			</button>
+			<panel name="{btnname}_seasonend" width="100%" height="3.8h" valign="bottom" color="0 0 0 .6"
+					onmouseoverlua="Trigger('genericMainFloatingTip', 'true', '20h', '', '', 'season_is_end', '', '', '3h', '-2h')" onmouseoutlua="Trigger('genericMainFloatingTip', 'false', '', '', '', '', '', '', '', '')" visible="0"/>
+			<modelpanel
+				name="{btnname}_effect"
+				width="100%" height="3.8h"
+				valign="bottom"
+				noclick="true"
+				model="/ui/common/models/main/button.mdf"
+				anim="idle"
+				camerapos="0 -1500 2"
+				cameraangles="0 0 0"
+				camerafov="4.42"
+				carmerafar="7000"
+				depthclear="false"
+				depthcompress="true"
+				sunazimuth="140"
+				sunaltitude="10"
+				suncolor="1.4 1.3 1"
+				onshow="SetEffect('/ui/common/models/main/button.effect'));"
+			/>
+			<frame width="100%" height="3.8h" valign="bottom" texture="/ui/frames/black_corners.tga" color="invisible" borderthickness="0.6h" bordercolor="red" noclick="true" />
+		</panel>
+	</template>
+
+	<template name="placement_match">
+		<panel width="64i" height="16i" noclick="1">
+			<image name="placement_match_{id}_line" texture="/ui/fe2/season/finishmatch.tga" noclick="1"/>
+			<panel x="27i" y="-60i" align="right" valign="top" width="64i" height="64i" noclick="1">
+				<image name="placement_match_{id}_icon" x="5i" y="8i" width="-8i" height="-8i" texture="/ui/fe2/season/dag.tga" noclick="1"/>
+				<panel name="placement_match_{id}_text">
+					<panel width="50%" height="75%" align="left" valign="top">
+						<label textalign="right" textvalign="bottom" color="#6a777e" font="dyn_24" noclick="true" content="{id}"/>
+					</panel>
+					<panel width="45%" height="65%" align="right" valign="top">
+						<label textalign="left" textvalign="bottom" color="#6a777e" font="dyn_9" noclick="true" content="{suffix}"/>
+					</panel>
+					<panel width="100%" height="35%" align="center" valign="bottom">
+						<label textalign="center" textvalign="top" color="#6a777e" font="dyn_9" noclick="true" content="Match"/>
+					</panel>
+				</panel>
+		 	</panel>
+		</panel>
+	</template>
+
+	<template name="matchmaking">
+
+		<panel y="-110%" width="117.5h" align="center" name="matchmaking" visible="false" noclick="true"
+			onshow="DoEvent(2)"
+			onshowlua="RequestRankedPlayInfo() GetWidget('season_not_eligible_mask'):SetVisible(false)
+						if HoN_Matchmaking.selectedTab == 'season' then
+							Cmd('GetCampaignSeasonRewards')
+						end"
+			watch="EntityDefinitionsLoaded" ontrigger="Call('matchmaking_panels', 'SetVisible(1);'); DoEvent(2);"
+			onevent2lua="if (self:IsVisible()) then UIManager.GetInterface('main'):HoNMatchmakingF('matchmaking_OnShow') end"
+			onhidelua="UIManager.GetInterface('main'):HoNMatchmakingF('OnHide')"
+		>
+			<panel x="0" y="-100%" height="203.6%" width="90%" align="center" texture="mainmenu/upper_frame_center.tga"/>
+			<panel x="18h" y="-100%" height="203.6%" width="50@" align="right" texture="mainmenu/upper_frame_right.tga"/>
+			<panel x="-18h" y="-100%" height="203.6%" width="50@" align="left" texture="mainmenu/upper_frame_left.tga"/>
+
+			<!-- Header -->
+			<panel name="matchmaking_header" y="1.0h" height="2.8h" width="-6.0h" align="center" noclick="true">
+				<instance name="header_bar" show_close="true" onclick="Set('_mainmenu_currentpanel', 'matchmaking'); CallEvent('MainMenuPanelSwitcher');" />
+				<panel width="-1.0h" align="center" noclick="true" passivechildren="true">
+					<label height="100%" valign="center" textalign="left" textvalign="center" color="white" shadow="true" font="dyn_12" noclick="true" content="mm_title"/>
+				</panel>
+
+			</panel>
+
+			<panel name="matchmaking_panels" y="4.0h" height="-4.5h" width="-6.0h" align="center" noclick="true" visible="1">
+
+
+				<panel x="14.6h" width="-14.5h" noclick="true" clip="1">
+
+					<panel color="#183042" noclick="true"/>
+					<panel width="-0.8h" height="-0.8h" align="center" valign="center" color="0 0 0 1" noclick="true">
+						<!--<image y="1" width="-2" height="36%" align="center" texture="/ui/info/grad_vert.tga" color="#1f3f57" noclick="true" />-->
+					</panel>
+
+					<panel y="0.8h" width="-1.6h" height="-6.0h" align="center" valign="top" float="right" padding="0.5h" noclick="true">
+
+						<!-- Team Builder -->
+						<panel width="31.0h" noclick="true" onshow="BringToFront();">
+							<panel width="102%" color="black" />
+							<instance name="header_bar" color=".7 .7 .7 1" height="2.5h" lbl="mm3_coop_team" show_close="false"/>
+
+							<panel height="-2.8h" valign="bottom" float="bottom" padding="0.2h" noclick="true">
+								<!-- Team Slot 1 (Host) -->
+								<panel height="8.5h"
+									onmouseoverlua="UIManager.GetInterface('main'):HoNMatchmakingF('HoverTeamSlot', self, 1)"
+									onmouseout="HideWidget('matchmaking_group_error_tooltip');"
+								>
+									<frame name="mm_topslot_frame1" texture="/ui/frames/roundframe.tga" color="#183042" borderthickness="0.6h" noclick="1"/>
+									<panel name="mm_topslot_background" align="center" valign="center" width="-0.25h" height="-0.25h" noclick="1" color="invisible"/>
+
+									<!-- Slot Number / Account Status -->
+									<panel height="100%" width="3.0h" noclick="true">
+										<frame name="mm_topslot_frame2" texture="/ui/frames/rounded_bg_solid.tga" borderthickness="0.6h" color="#183042" noclick="1"/>
+										<panel name="mm_topslot_cpanel" width="50%" align="right" color="#183042" noclick="true"/>
+										<label y="0.2h" textalign="center" font="dyn_16" color="1 1 1 1" shadow="true" content="1" noclick="true" />
+										<image name="mm_player_verified" y="-0.6h" valign="bottom" align="center" width="76%" height="76@" texture="/ui/elements/verified.tga" noclick="1" visible="0"/>
+									</panel>
+
+									<panel x="-0.5h" width="-4.0h" height="-1.0h" align="right" valign="center" noclick="1">
+										<!-- Account Icon -->
+										<image name="mm_player_icon" height="100%" width="100@" texture="/ui/fe2/store/icons/account_icons/default.tga" noclick="true" />
+
+										<panel width="-108@" align="right" noclick="true">
+											<label name="mm_player_name" fity="true" font="dyn_14" color="#ffaa00" content="[S2]Pillowpants2" noclick="true" />
+											<label name="mm_player_title" y="1.8h" fity="true" textalign="right" font="dyn_10" color=".6 .6 .6 1" noclick="true" />
+											<button
+												name="mm_selfleave"
+												align="right"
+												color="invisible"
+												width="30@" height="30%"
+												onmouseover="
+														PlaySound('/shared/sounds/ui/ccpanel/button_over_02.wav');
+														PlaySound('/shared/sounds/ui/ccpanel/button_over_01.wav');
+														Trigger('genericMainFloatingTip', 'true', '28.0h', '', 'tmm_leavegroup', 'tmm_leavegroup_tip', '', '', '3.0h', '-2.0h');
+														"
+												onmouseout="HideWidget('genericMainFloatingTip');"
+												onclicklua="UIManager.GetInterface('main'):HoNMatchmakingF('LeaveGroup')"
+											>
+												<widgetstate statename="up">
+													<image texture="/ui/elements/kick_up.tga"/>
+												</widgetstate>
+
+												<widgetstate statename="over">
+													<image texture="/ui/elements/kick_over.tga"/>
+												</widgetstate>
+
+												<widgetstate statename="down" x="1" y="1">
+													<image texture="/ui/elements/kick_down.tga"/>
+												</widgetstate>
+												<widgetstate statename="disabled">
+													<image texture="/ui/elements/kick_disabled.tga"/>
+												</widgetstate>
+											</button>
+											<label name="mm_player_mmr" y="32%" fity="true" font="dyn_12" color="#37b2d9" content="MMR: 1500" noclick="true" />
+											<panel name="mm_player_ranklevel_root" y="32%" height="30%" width="80%" noclick="1">
+												<image name="mm_player_ranklevel_icon" x="-45@" width="230@" height="230%" align="left" valign="center" texture="$invis" noclick="1" />
+												<label name="mm_player_ranklevel_text" x="145@" textalign="left" textvalign="center" font="dyn_10" color="white" content="-" noclick="1"/>
+											</panel>
+											<panel height="48%" valign="bottom" noclick="true">
+
+												<!-- Account Progress Lvl Bar -->
+												<panel width="-130@" noclick="true">
+													<!-- Lvl Bar -->
+													<panel valign="bottom" height="-1.0h" color="invisible" noclick="true">
+														<image texture="/ui/legion/behind_bar.tga" color="#170045" noclick="true" />
+														<panel name="tmm_infopanel_stats_progress_1" width="50%" noclick="true">
+															<image texture="/ui/legion/behind_bar.tga" color="#ac00f5" noclick="true" />
+															<image align="right" texture="/ui/legion/behind_bar.tga" color="1 1 1 .5" noclick="true" />
+														</panel>
+														<image width="-0.6h" align="center" texture="/ui/elements/bar_highlight.tga" noclick="true" />
+														<frame color="invisible" bordercolor=".2 .2 .2 1" borderthickness="1" noclick="true" />
+													</panel>
+												</panel>
+
+												<!-- Account Level-->
+												<panel height="100%" width="120@" align="right" noclick="true">
+													<frame texture="/ui/info/backdrop.tga" color="1 1 1 .2" noclick="true" />
+													<frame color="invisible" borderthickness="1" bordercolor=".2 .2 .2 1" noclick="true" />
+													<label name="mm_player_level" textalign="center" textvalign="center" font="dyn_14" color="1 1 1 1" shadow="true" content="15" noclick="true" />
+												</panel>
+
+											</panel>
+										</panel>
+									</panel>
+								</panel>
+
+								<!-- Player Slots / Invite Windows -->
+								<panel height="27.5h" float="bottom" padding="0.2h" noclick="true">
+									<!-- Team Slots 2-5 -->
+									<instance name="mm_team_slot_occupied_2" slot="2" />
+									<instance name="mm_team_slot_empty_2" slot="2" />
+									<instance name="mm_team_slot_bot_2" slot="2" />
+
+									<instance name="mm_team_slot_occupied_2" slot="3" />
+									<instance name="mm_team_slot_empty_2" slot="3" />
+									<instance name="mm_team_slot_bot_2" slot="3" />
+
+									<instance name="mm_team_slot_occupied_2" slot="4" />
+									<instance name="mm_team_slot_empty_2" slot="4" />
+									<instance name="mm_team_slot_bot_2" slot="4" />
+
+									<instance name="mm_team_slot_occupied_2" slot="5" />
+									<instance name="mm_team_slot_empty_2" slot="5" />
+									<instance name="mm_team_slot_bot_2" slot="5" />
+
+									<!-- Invite Person -->
+									<panel name="mm_invite_person" y="0" width="100%" height="+.5h" noclick="true" visible="false"
+										watch="LoginStatus"
+										ontrigger="If(!param2, SetVisible(0));"
+										onshowlua="HoN_Matchmaking:StartSavingInvites()"
+										onhidelua="HoN_Matchmaking:DumpInvitedList()"
+									>
+										<frame texture="/ui/frames/rounded_bg_solid.tga" borderthickness="0.6h" color="0 0 0 1" />
+										<frame texture="/ui/frames/roundframe.tga" color="#183042" borderthickness="0.6h" />
+
+										<panel y="0.7h" width="-1.2h" height="2.2h" align="center" noclick="true">
+											<label x="0.4h" width="-0.4h" height="100%" font="dyn_14" color="#ffaa00" content="mm3_coop_inviteperson" />
+											<instance name="closex_btn" align="right" valign="center" onclick="Call('mm_invite_person', 'FadeOut(100);');" />
+										</panel>
+
+										<!-- search bar -->
+										<panel name="mm_invite_person_search" y="3.3h" x="0h" height="2.8h" width="-1.2h" align="center" noclick="true">
+											<panel width="75%" align="left" onclick="Call('mm_autocomplete_textbox', 'SetFocus(true);');">
+												<frame texture="/ui/frames/rounded_bg_solid.tga" borderthickness="0.4h" color="0 0 0 0.6" blockinput="false" noclick="true"/>
+												<frame texture="/ui/frames/roundframe.tga" color="#30405d" borderthickness="0.6h" blockinput="false" noclick="true"/>
+												<image valign="center" x="2%" y="1%" height="80%" width="80@" align="left" texture="/ui/common/new_shop_interface/magnify.tga" noclick="1"/>
+												<textbox
+													name="mm_autocomplete_textbox"
+													x="2.0h"
+													y="-0.125h"
+													hmargin="1.0h" vmargin="0.4h"
+													maxlength="15"
+													textalign="center" textvalign="center"
+													font="dyn_14"
+													textcolor="white"
+													shadow="true"
+													color="invisible"
+													onshow="SetFocus(true);"
+													onesc="
+														EraseInputLine();
+														Call('mm_invite_person', 'FadeOut(100);');
+													"
+													onevent1lua="UIManager.GetInterface('main'):HoNMatchmakingF('InvitePlayer', self)"
+													onenter="DoEvent(1);"
+													onchange="If(StringLength(this) ge 5,
+																ChatAutoCompleteNick(StripClanTag(this)),
+																Trigger('ChatAutoCompleteClear')
+															  );
+															  If(StringLength(this) gt 0,
+															  	Split(
+																	If(!StringEquals(this, StripClanTag(GetAccountName())),
+																		EnableWidget('mm_invite_person_button'),
+																		DisableWidget('mm_invite_person_button')
+																	),
+																	Call('mm_enter_name', 'SetVisible(0);')
+																),
+																DisableWidget('mm_invite_person_button')
+															  );"
+													onhide="EraseInputLine(); Call('mm_enter_name', 'SetVisible(1);');"
+													onhidelua="self:Sleep(1, function() end)"
+													onmousewheeldown="CallEvent('mm_invite_scrollbar', 1);"
+													onmousewheelup="CallEvent('mm_invite_scrollbar', 0);"
+												/>
+												<label name="mm_enter_name" x="3.8h" width="-0.5h" height="-0.4h" valign="center" align="left" textvalign="center" font="dyn_10" color="white" shadow="true" content="social_panel_enter_name" noclick="1" />
+												<panel noclick="0" blockinput="0" processonlyscroll="1" hover="false"
+													onmousewheeldown="CallEvent('mm_invite_scrollbar', 1);"
+													onmousewheelup="CallEvent('mm_invite_scrollbar', 0);"
+												/>
+											</panel>
+
+											<instance
+												name="button2"
+												enabled="false"
+												height="2.8h" width="24%"
+												align="right" valign="center"
+												font="dyn_10"
+												label="cc_com_button_findoptions_invite"
+												onclicklua="UIManager.GetInterface('main'):HoNMatchmakingF('InvitePlayer', GetWidget('mm_autocomplete_textbox'))"
+												button_name="mm_invite_person_button"
+											/>
+										</panel>
+
+										<panel name="mm_invite_person_plates" x="0.7h" y="-0.5h" height="-7.3h" width="-3.8h" valign="bottom" align="left" float="bottom" >
+											<instance name="mm_autocomplete_plate" id ="1" />
+											<instance name="mm_autocomplete_plate" id ="2" />
+											<instance name="mm_autocomplete_plate" id ="3" />
+											<instance name="mm_autocomplete_plate" id ="4" />
+											<instance name="mm_autocomplete_plate" id ="5" />
+											<instance name="mm_autocomplete_plate" id ="6" />
+											<instance name="mm_autocomplete_plate" id ="7" />
+										</panel>
+										<scrollbar y="-0.5h" x="-0.6h" noclick="0" valign="bottom" name="mm_invite_scrollbar"
+											visible="1"
+											align="right"
+											height="-7.3h"
+											width="2.0h"
+											scrollbarsize="1.8h"
+											handlewidth="1.8h"
+											handleheight="5.2h"
+											texture="/ui/info/im.tga"
+											scrollbarplaceholder="true"
+											minvalue="0"
+											maxvalue="0"
+											step="1"
+											value="0"
+											vertical="true"
+											slotwidth="0.6h" slotheight="1"
+											onevent1="SetValue(GetValue+1);"
+											onevent0="SetValue(GetValue-1);"
+											onslide="DoEvent();"
+											oneventlua="UIManager.GetInterface('main'):HoNMatchmakingF('SlideInvite', self, self:GetValue())"
+										/>
+
+										<label name="mm_noauto_cover" wrap="true" x="-0.75h" width="-6.0h" height="-6.0h" align="center" valign="bottom" textalign="center" textvalign="center" font="dyn_12" content="mm3_coop_inviteperson_desc" noclick="1" visible="1"/>
+									</panel>
+
+									<!-- Invite Bot -->
+									<panel name="mm_invite_bot" y="-8.8h" width="100%" height="137%" noclick="true" visible="false">
+										<frame texture="/ui/frames/rounded_bg_solid.tga" borderthickness="0.6h" color="0 0 0 1" />
+										<frame texture="/ui/frames/roundframe.tga" color="#183042" borderthickness="0.6h" />
+
+										<panel y="0.7h" width="-1.4h" height="2.2h" align="center" noclick="true">
+											<label name="mm_left_title" height="100%" font="dyn_14" color="#ffaa00" content="mm3_coop_invitebot" />
+											<label name="mm_left_heroname" height="100%" visible="0" font="dyn_14" color="#ffaa00" content="Hero Name" />
+											<instance name="closex_btn" align="right" valign="center" onclick="Call('mm_invite_bot', 'FadeOut(100)');" />
+										</panel>
+
+										<panel name="mm_botpicker_left" y="2.9h" width="-1.4h" height="-4.0h" align="center" float="bottom" padding="1.0h"  noclick="true">
+											<panel height="6.0h" visible="1" align="center" clip="1">
+												<label y="0.3h" name="mm_left_generic" wrap="true" font="dyn_12" color="1 1 1 1" content="mm3_coop_repickbot_desc" />
+												<label name="mm_left_botname" x="0.5h" wrap="true" font="dyn_11" color="#37b2d9" visible="0" content="Bot Name" />
+												<label name="mm_left_version" textalign="right" wrap="true" font="dyn_10" color=".6 .6 .6 1" visible="0" content="v1.0" />
+												<label name="mm_left_desc" x="0.5h" wrap="true" y="2.3h" font="dyn_11" color="1 1 1 1" visible="0" content="Bot Desc" />
+											</panel>
+
+											<!-- left side bot hero icons -->
+											<panel grow="1" align="center" width="100%" noclick="1">
+												<panel y="1.5h" float="bottom" noclick="1" grow="1" growinvis="1" width="100%" padding="0.5h">
+													<panel height="5.0h" float="right" padding="0.5h" sticky="1" stickytoinvis="0">
+														<instance name="mm_botpickplate" id="1" side="left"/>
+														<instance name="mm_botpickplate" id="2" side="left"/>
+														<instance name="mm_botpickplate" id="3" side="left"/>
+														<instance name="mm_botpickplate" id="4" side="left"/>
+														<instance name="mm_botpickplate" id="5" side="left"/>
+													</panel>
+													<panel height="5.0h" float="right" padding="0.5h" sticky="1" stickytoinvis="0">
+														<instance name="mm_botpickplate" id="6" side="left"/>
+														<instance name="mm_botpickplate" id="7" side="left"/>
+														<instance name="mm_botpickplate" id="8" side="left"/>
+														<instance name="mm_botpickplate" id="9" side="left"/>
+														<instance name="mm_botpickplate" id="10" side="left"/>
+													</panel>
+													<panel height="5.0h" float="right" padding="0.5h" sticky="1" stickytoinvis="0">
+														<instance name="mm_botpickplate" id="11" side="left"/>
+														<instance name="mm_botpickplate" id="12" side="left"/>
+														<instance name="mm_botpickplate" id="13" side="left"/>
+														<instance name="mm_botpickplate" id="14" side="left"/>
+														<instance name="mm_botpickplate" id="15" side="left"/>
+													</panel>
+												</panel>
+
+												<scrollbar
+													name="mm_left_bot_scrollbar"
+													y="1.5h"
+													height="102%"
+													align="right"
+													width="1.6h"
+													scrollbarsize="1.5h"
+													handlewidth="1.5h"
+													handleheight="1.5h"
+													texture="/ui/info/combobox.tga"
+													scrollbarplaceholder="true"
+													minvalue="0"
+													maxvalue="1"
+													step="1"
+													value="0"
+													vertical="true"
+													slotwidth="0.6h" slotheight="1"
+													onevent1="SetValue(GetValue+1);"
+													onevent0="SetValue(GetValue-1);"
+													onslidelua="UIManager.GetInterface('main'):HoNMatchmakingF('BotListSlide', self, self:GetValue(), 'left')"
+													/>
+												<panel processonlyscroll="1" hover="false"
+													onmousewheelup="Call('mm_left_bot_scrollbar', 'DoEvent(0);');"
+													onmousewheeldown="Call('mm_left_bot_scrollbar', 'DoEvent(1);');"
+												/>
+											</panel>
+										</panel>
+									</panel>
+
+									<!-- Repick - Multibot panel -->
+									<panel name="mm_repick_multibot_left" y="-8.8h" width="100%" height="137%" noclick="true" visible="false">
+										<frame texture="/ui/frames/rounded_bg_solid.tga" borderthickness="0.6h" color="0 0 0 1" />
+										<frame texture="/ui/frames/roundframe.tga" color="#183042" borderthickness="0.6h" />
+
+										<panel y="0.7h" width="-1.4h" height="2.2h" align="center" noclick="true">
+											<label name="mm_left_mp_hero" height="100%" font="dyn_14" color="#ffaa00" content="mm3_coop_repickbot_title" />
+											<instance name="closex_btn" align="right" valign="center" onclick="Call('mm_repick_multibot_left', 'FadeOut(100)'); HideWidget('hero_info');" />
+										</panel>
+
+										<panel name="mm_multibotpicker_left" y="2.9h" width="-1.4h" height="-4.0h" align="center" float="bottom" padding="1.0h"  noclick="true">
+											<panel height="3.0h" visible="1" align="center" clip="1">
+												<label y="0.3h" wrap="true" font="dyn_12" color="1 1 1 1" content="mm3_coop_multiplebots_pick" />
+											</panel>
+
+											<!-- left side bot list -->
+											<panel width="100%" noclick="1">
+												<panel width="-1.6h" float="bottom" name="mm_multibotlist_left">
+													<instance name="mm_multibotplate" id="1" height="6.1h" font="dyn_9" side="left"/>
+													<instance name="mm_multibotplate" id="2" height="6.1h" font="dyn_9" side="left"/>
+													<instance name="mm_multibotplate" id="3" height="6.1h" font="dyn_9" side="left"/>
+													<instance name="mm_multibotplate" id="4" height="6.1h" font="dyn_9" side="left"/>
+												</panel>
+												<scrollbar
+													name="mm_left_multibot_scrollbar"
+													height="24.4h"
+													align="right"
+													width="1.5h"
+													scrollbarsize="1.4h"
+													handlewidth="1.4h"
+													handleheight="1.4h"
+													texture="/ui/info/combobox.tga"
+													scrollbarplaceholder="true"
+													minvalue="0"
+													maxvalue="1"
+													step="1"
+													value="0"
+													vertical="true"
+													slotwidth="0.6h" slotheight="1"
+													onevent1="SetValue(GetValue+1);"
+													onevent0="SetValue(GetValue-1);"
+													onslidelua="UIManager.GetInterface('main'):HoNMatchmakingF('MultiBotListSlide', self, self:GetValue(), 'left')"
+													/>
+												<panel processonlyscroll="1" hover="false"
+													onmousewheelup="Call('mm_left_multibot_scrollbar', 'DoEvent(0);');"
+													onmousewheeldown="Call('mm_left_multibot_scrollbar', 'DoEvent(1);');"
+												/>
+											</panel>
+										</panel>
+									</panel>
+
+								</panel>
+							</panel>
+						</panel>
+
+						<!-- Region Selector -->
+						<panel width="20.5h" noclick="true" onshow="BringToFront();" color="black">
+							<instance name="header_bar" color=".7 .7 .7 1" height="2.5h" lbl="mm3_coop_region" show_close="false"/>
+
+							<panel height="-2.8h" valign="bottom" noclick="true" float="bottom">
+								<frame texture="/ui/frames/roundframe.tga" color="#183042" borderthickness="0.6h" noclick="true" />
+
+								<!-- INTL Maps -->
+								<panel name="matchmaking_maps" y="0.5h" width="100%" grow="true" regrow="true" visible="true" stickytoinvis="false">
+									<panel name="matchmaking_map_international" width="-1.0h" height="60.0@" align="center" noclick="true" visible="true" stickytoinvis="false" sticky="1">
+										<image width="100%" height="100@" noclick="true"
+											resourcecontext="matchmaking" onshow="SetTexture('/ui/fe2/elements/matchmaking_map.tga');"
+										/>
+										<image name="matchmaking_map_region_eu" width="100%" height="100@" noclick="true" visible="true"
+											resourcecontext="matchmaking" onshow="SetTexture('/ui/fe2/elements/matchmaking_map_eu.tga');"
+										/>
+										<image name="matchmaking_map_region_usw" width="100%" height="100@" noclick="true" visible="true"
+											resourcecontext="matchmaking" onshow="SetTexture('/ui/fe2/elements/matchmaking_map_west.tga');"
+										/>
+										<image name="matchmaking_map_region_use" width="100%" height="100@" noclick="true" visible="true"
+											resourcecontext="matchmaking" onshow="SetTexture('/ui/fe2/elements/matchmaking_map_east.tga');"
+										/>
+										<frame height="59.5@" color="invisible" bordercolor=".2 .2 .2 1" borderthickness="1" noclick="true" />
+									</panel>
+									<panel name="matchmaking_map_korea" width="-1.0h" height="60.0@" align="center" noclick="true" visible="false" stickytoinvis="false" sticky="1">
+										<image width="100%" height="100@" noclick="true"
+											resourcecontext="matchmaking" onshow="SetTexture('/ui/fe2/elements/matchmaking_map_korea.tga');"
+										/>
+										<image name="matchmaking_map_region_kr" width="100%" height="100@" noclick="true" visible="true"
+											resourcecontext="matchmaking" onshow="SetTexture('/ui/fe2/elements/matchmaking_map_korea_southkorea.tga');"
+										/>
+										<frame height="59.5@" color="invisible" bordercolor=".2 .2 .2 1" borderthickness="1" noclick="true" />
+									</panel>
+									<panel name="matchmaking_map_lat" width="-1.0h" height="60.0@" align="center" noclick="true" visible="false" stickytoinvis="false" sticky="1">
+										<image width="100%" height="100@" noclick="true"
+											resourcecontext="matchmaking" onshow="SetTexture('/ui/fe2/elements/matchmaking_map_lat.tga');"
+										/>
+										<image name="matchmaking_map_region_lat" width="100%" height="100@" noclick="true" visible="true"
+											resourcecontext="matchmaking" onshow="SetTexture('/ui/fe2/elements/matchmaking_map_lat_region.tga');"
+										/>
+										<image name="matchmaking_map_region_br" width="100%" height="100@" noclick="true" visible="true"
+											resourcecontext="matchmaking" onshow="SetTexture('/ui/fe2/elements/matchmaking_map_lat_br.tga');"
+										/>
+										<frame height="59.5@" color="invisible" bordercolor=".2 .2 .2 1" borderthickness="1" noclick="true" />
+									</panel>
+								</panel>
+
+								<panel name="matchmaking_option_regions_panel" sticky="1" stickytoinvis="0" width="-1.8h" align="center" float="bottom" padding="1.5h" noclick="true">
+									<!-- <instance name="matchmaking_option_region" regionid="usw" label="mm_usw_region" icon="/ui/icons/flags/unitedstates.tga" />
+									<instance name="matchmaking_option_region" regionid="use" label="mm_use_region" icon="/ui/icons/flags/unitedstates.tga" />
+									<instance name="matchmaking_option_region" regionid="eu" label="mm_eu_region" icon="/ui/icons/flags/eu.tga" /> -->
+								</panel>
+							</panel>
+							<!-- local bot game cover -->
+							<panel name="mm_region_cover" height="-2.8h" align="center" valign="bottom" color="0 0 0 0.85" visible="0">
+								<frame height="100%" width="100%" color="invisible" bordercolor=".2 .2 .2 1" borderthickness="1" noclick="true" />
+								<label fity="true" width="-1.0h" valign="center" align="center" wrap="true" textalign="center" font="dyn_12" color=".8 .8 .8 1" content="mm3_coop_localgamepanel" onload="SetText(Translate('mm3_coop_localgamepanel'));" />
+							</panel>
+						</panel>
+
+						<!-- Co-Op Enemy Team Builder -->
+						<panel name="mm_botteam_builder" x="0" align="right" width="43.1h" visible="true" noclick="true">
+							<instance name="header_bar" color=".7 .7 .7 1" height="2.5h" lbl="mm3_coop_enemyteam" show_close="false"/>
+							<panel height="-2.8h" valign="bottom" noclick="true" clip="1">
+								<!-- This goes up top so that the cover will slide under the difficulty and stuff -->
+								<!-- enemy team slots -->
+								<panel y="6.7h" height="-6.7h" float="bottom" padding="0.5h" >
+									<instance name="matchmaking_enemy_team_slot" id="1"/>
+									<instance name="matchmaking_enemy_team_slot" id="2"/>
+									<instance name="matchmaking_enemy_team_slot" id="3"/>
+									<instance name="matchmaking_enemy_team_slot" id="4"/>
+									<instance name="matchmaking_enemy_team_slot" id="5"/>
+								</panel>
+								<panel name="mm_enemy_bot_cover" y="-30.0h" height="-5.0h" color ="0 0 0 0.85">
+									<frame texture="/ui/frames/roundframe.tga" color=".2 .2 .2 1" borderthickness="0.6h" noclick="true" />
+									<label textalign="center" textvalign="center" wrap="1" color=".8 .8 .8" font="dyn_16" content="mm3_random_enemy_bots_desc" />
+								</panel>
+
+								<!-- bot difficulty slider -->
+								<!-- 1 = easy, 2 = medium, 3 = hard -->
+								<panel name="mm_bot_difficulty" width="100%" height="6.2h" color="black">
+									<frame texture="/ui/frames/roundframe.tga" color="#183042" borderthickness="0.6h" noclick="true"/>
+									<!-- <image name="mm_bot_difficulty_image" valign="center" height="80%" width="80@" x="0.6h"
+										onevent1="SetTexture('/ui/fe2/elements/matchmaking_bot_easy.tga');"
+										onevent2="SetTexture('/ui/fe2/elements/matchmaking_bot_med.tga');"
+										onevent3="SetTexture('/ui/fe2/elements/matchmaking_bot_hard.tga');"/> -->
+									<label name="mm_bot_difficulty_label" x="0.6h" textalign="center" textvalign="bottom" width="30%" y="-0.6h" font="dyn_12" color=".8 .8 .8 1" shadow="1"
+										onevent1="SetText(Translate('general_easy')); SetColor('#00FF2F');"
+										onevent2="SetText(Translate('general_medium')); SetColor('#FF9D00');"
+										onevent3="SetText(Translate('general_hard')); SetColor('#FF0000');"/>
+									<label y="0.8h" font="dyn_14" x="0.6h" color="1 1 1 1" width="30%" textalign="center" content="mm3_bot_difficulty" />
+									<!-- old y on the slider, -1.15h -->
+									<slider
+										name="mm_bot_difficulty_slider"
+										width="60%" y="-0.25h" x="35%" align="left"
+										slotwidth="-1%" slotheight="0.8h"
+										slotcolor="#00FF2F"
+										handlewidth="40@" handleheight="40%"
+										handlecolor="1 1 1 1"
+										minvalue="1" maxvalue="3"
+										step="1"
+										cvar="g_botDifficulty"
+										texture="/ui/info/slider_white.tga"
+										onselect="PlaySound('/shared/sounds/ui/button_over_02.wav');"
+										onchangelua="HoN_Matchmaking:ChangeBotDifficulty(self:GetValue())"
+									/>
+									<panel align="center" valign="bottom" grow="1" regrow="1" float="right"
+										onmouseoutlua="GetWidget('mm_bot_advanced'):SetColor('#37b2d9') GetWidget('mm_bot_advanced_arrow'):SetColor('#37b2d9')"
+										onmouseoverlua="GetWidget('mm_bot_advanced'):SetColor('1 1 1 1') GetWidget('mm_bot_advanced_arrow'):SetColor('1 1 1 1')"
+										onclicklua="UIManager.GetInterface('main'):HoNMatchmakingF('Random_enemy_bots_click')"
+										ondoubleclicklua="UIManager.GetInterface('main'):HoNMatchmakingF('Random_enemy_bots_click')"
+									>
+										<image name="mm_bot_advanced_arrow" color="#37b2d9" width="1.0h" height="1.0h" valign="center" texture="/ui/elements/arrow_down.tga" noclick="1"/>
+										<!-- padding -->
+										<panel width="0.2h" height="1.0h" noclick="1" color="invisible" />
+										<label name="mm_bot_advanced" valign="center" fitx="1" fity="1" font="dyn_12" color="#37b2d9" shadow="1" content="mm3_bot_custom" noclick="1" />
+									</panel>
+								</panel>
+								<!-- <panel width="100%" noclick="true">
+									<label fity="true" width="-1.0h" align="center" wrap="true" color="1 1 1 1" font="dyn_12" noclick="true" onload="SetText(Translate('mm3_coop_botinfo'));"/>
+								</panel> -->
+
+								<!-- Repick Bot Picker -->
+								<panel name="mm_repick_enemy_bot" y="0" width="100%" height="100%" noclick="true" visible="false">
+									<frame texture="/ui/frames/rounded_bg_solid.tga" borderthickness="0.6h" color="0 0 0 1" />
+									<frame texture="/ui/frames/roundframe.tga" color="#183042" borderthickness="0.6h" />
+
+									<panel y="0.7h" width="-1.4h" height="2.2h" align="center" noclick="true">
+										<label name="mm_right_title" height="100%" font="dyn_14" color="#ffaa00" content="mm3_coop_repickbot_title" />
+										<label name="mm_right_heroname" height="100%" visible="0" font="dyn_14" color="#ffaa00" content="Hero Name" />
+										<instance name="closex_btn" align="right" valign="center" onclick="Call('mm_repick_enemy_bot', 'FadeOut(100)');" />
+									</panel>
+
+									<panel name="mm_botpicker_right" y="2.9h" width="-1.4h" height="-4.0h" align="center" float="bottom" padding="1.0h"  noclick="true">
+										<panel height="6.0h" visible="1" align="center" clip="1">
+											<label y="0.3h" name="mm_right_generic" wrap="true" font="dyn_12" color="1 1 1 1" content="mm3_coop_repickbot_desc" />
+											<label name="mm_right_botname" x="0.5h" wrap="true" font="dyn_11" color="#37b2d9" visible="0" content="Bot Name" />
+											<label name="mm_right_version" textalign="right" wrap="true" font="dyn_10" color=".6 .6 .6 1" visible="0" content="v1.0" />
+											<label name="mm_right_desc" x="0.5h" wrap="true" y="2.3h" font="dyn_11" color="1 1 1 1" visible="0" content="Bot Desc" />
+										</panel>
+
+										<!-- Right side bot hero icons -->
+										<panel grow="1" align="center" width="100%" noclick="1">
+											<panel y="1.0h" float="bottom" noclick="1" grow="1" growinvis="1" width="100%" padding="1.0h">
+												<panel height="6.8h" float="right" padding="1.3h" sticky="1" stickytoinvis="0">
+													<instance name="mm_botpickplate" id="1" side="right"/>
+													<instance name="mm_botpickplate" id="2" side="right"/>
+													<instance name="mm_botpickplate" id="3" side="right"/>
+													<instance name="mm_botpickplate" id="4" side="right"/>
+													<instance name="mm_botpickplate" id="5" side="right"/>
+												</panel>
+												<panel height="6.8h" float="right" padding="1.3h" sticky="1" stickytoinvis="0">
+													<instance name="mm_botpickplate" id="6" side="right"/>
+													<instance name="mm_botpickplate" id="7" side="right"/>
+													<instance name="mm_botpickplate" id="8" side="right"/>
+													<instance name="mm_botpickplate" id="9" side="right"/>
+													<instance name="mm_botpickplate" id="10" side="right"/>
+												</panel>
+												<panel height="6.8h" float="right" padding="1.3h" sticky="1" stickytoinvis="0">
+													<instance name="mm_botpickplate" id="11" side="right"/>
+													<instance name="mm_botpickplate" id="12" side="right"/>
+													<instance name="mm_botpickplate" id="13" side="right"/>
+													<instance name="mm_botpickplate" id="14" side="right"/>
+													<instance name="mm_botpickplate" id="15" side="right"/>
+												</panel>
+											</panel>
+
+											<scrollbar
+												name="mm_right_bot_scrollbar"
+												y="1.0h"
+												height="102%"
+												align="right"
+												width="1.8h"
+												scrollbarsize="1.7h"
+												handlewidth="1.7h"
+												handleheight="1.7h"
+												texture="/ui/info/combobox.tga"
+												scrollbarplaceholder="true"
+												minvalue="0"
+												maxvalue="1"
+												step="1"
+												value="0"
+												vertical="true"
+												slotwidth="0.6h" slotheight="1"
+												onevent1="SetValue(GetValue+1);"
+												onevent0="SetValue(GetValue-1);"
+												onslidelua="UIManager.GetInterface('main'):HoNMatchmakingF('BotListSlide', self, self:GetValue(), 'right')"
+												/>
+											<panel processonlyscroll="1" hover="false"
+												onmousewheelup="Call('mm_right_bot_scrollbar', 'DoEvent(0);');"
+												onmousewheeldown="Call('mm_right_bot_scrollbar', 'DoEvent(1);');"
+											/>
+										</panel>
+									</panel>
+								</panel>
+
+								<!-- Repick - Multibot panel -->
+								<panel name="mm_repick_multibot_right" y="0" width="100%" height="100%" noclick="true" visible="false">
+									<frame texture="/ui/frames/rounded_bg_solid.tga" borderthickness="0.6h" color="0 0 0 1" />
+									<frame texture="/ui/frames/roundframe.tga" color="#183042" borderthickness="0.6h" />
+
+									<panel y="0.7h" width="-1.4h" height="2.2h" align="center" noclick="true">
+										<label name="mm_right_mp_hero" height="100%" font="dyn_14" color="#ffaa00" content="mm3_coop_repickbot_title" />
+										<instance name="closex_btn" align="right" valign="center" onclick="Call('mm_repick_multibot_right', 'FadeOut(100)'); HideWidget('hero_info');" />
+									</panel>
+
+									<panel name="mm_multibotpicker_right" y="2.9h" width="-1.4h" height="-4.0h" align="center" float="bottom" padding="1.0h"  noclick="true">
+										<panel height="3.0h" visible="1" align="center" clip="1">
+											<label y="0.3h" wrap="true" font="dyn_12" color="1 1 1 1" content="mm3_coop_multiplebots_pick" />
+										</panel>
+
+										<!-- Right side bot list -->
+										<panel width="100%" noclick="1">
+											<panel width="95%" float="bottom" name="mm_multibotlist_right">
+												<instance name="mm_multibotplate" id="1" side="right"/>
+												<instance name="mm_multibotplate" id="2" side="right"/>
+												<instance name="mm_multibotplate" id="3" side="right"/>
+												<instance name="mm_multibotplate" id="4" side="right"/>
+											</panel>
+											<scrollbar
+												name="mm_right_multibot_scrollbar"
+												height="28.8h"
+												align="right"
+												width="1.6h"
+												scrollbarsize="1.5h"
+												handlewidth="1.5h"
+												handleheight="1.5h"
+												texture="/ui/info/combobox.tga"
+												scrollbarplaceholder="true"
+												minvalue="0"
+												maxvalue="1"
+												step="1"
+												value="0"
+												vertical="true"
+												slotwidth="0.6h" slotheight="1"
+												onevent1="SetValue(GetValue+1);"
+												onevent0="SetValue(GetValue-1);"
+												onslidelua="UIManager.GetInterface('main'):HoNMatchmakingF('MultiBotListSlide', self, self:GetValue(), 'right')"
+												/>
+											<panel processonlyscroll="1" hover="false"
+												onmousewheelup="Call('mm_right_multibot_scrollbar', 'DoEvent(0);');"
+												onmousewheeldown="Call('mm_right_multibot_scrollbar', 'DoEvent(1);');"
+											/>
+										</panel>
+									</panel>
+								</panel>
+							</panel>
+						</panel>
+
+						<!-- PvP Map and Options -->
+						<panel name="mm_pvp_options" x="0" align="right" width="43.1h" float="right" padding="0.5h" visible="false" noclick="true" clip="1">
+
+							<!-- Map -->
+							<panel width="20.5h" noclick="true">
+								<instance name="header_bar" color=".7 .7 .7 1" height="2.5h" lbl="mm3_pvp_map" show_close="false"/>
+
+								<panel height="-2.8h" valign="bottom" noclick="true" clip="1">
+									<frame texture="/ui/frames/roundframe.tga" color="#183042" borderthickness="0.6h" noclick="true" />
+									<panel y="0.5h" width="-1.0h" height="-3.0h" align="center" noclick="true" float="bottom" padding="0.25h">
+										<!-- 3 maps size -->
+										<instance name="matchmaking_option_map" index="1" mapid="midwars" mapname="mainlobby_gamelist_midwars_title" teamsize="mm_5v5" hasBanner="0" />
+										<instance name="matchmaking_option_map" index="1" mapid="caldavar" mapname="mainlobby_gamelist_caldavar_title" teamsize="mm_5v5" />
+										<instance name="matchmaking_option_map" index="1" mapid="riftwars" mapname="mainlobby_gamelist_riftwars_title" teamsize="mm_5v5" />
+										<instance name="matchmaking_option_map" index="1" mapid="grimmscrossing" mapname="mainlobby_gamelist_grimmscrossing_title" teamsize="mm_5v5" />
+										<instance name="matchmaking_option_map" index="1" mapid="prophets" mapname="mainlobby_gamelist_prophets_title" teamsize="mm_ffa" isBeta="1" />
+										<instance name="matchmaking_option_map" index="1" mapid="thegrimmhunt" mapname="mainlobby_gamelist_thegrimmhunt_title" teamsize="mm_5v5" />
+										<instance name="matchmaking_option_map" index="1" mapid="capturetheflag" mapname="mainlobby_gamelist_capturetheflag_title" teamsize="mm_5v5" />
+										<instance name="matchmaking_option_map" index="1" mapid="devowars" mapname="mainlobby_gamelist_devowars_title" teamsize="mm_5v5" minimapOverride="minimap_large.tga" />
+										<instance name="matchmaking_option_map" index="1" mapid="random" mapname="mainlobby_gamelist_random_title" teamsize="mm_5v5" minimapOverride2="/ui/fe2/lobby/random_up.tga" />
+										<instance name="matchmaking_option_map" index="1" mapid="soccer" mapname="mainlobby_gamelist_soccer_title" teamsize="mm_5v5" />
+										<instance name="matchmaking_option_map" index="1" mapid="solomap" mapname="mainlobby_gamelist_solo_title" teamsize="mm_1v1" minimapOverride="/maps/caldavar/minimap.tga" minimapOverride2="true" iconOverride="/maps/caldavar/icon.tga" iconOverride2="true" />
+										<instance name="matchmaking_option_map" index="1" mapid="midwarsbeta" mapname="mainlobby_gamelist_midwars_beta_title" teamsize="mm_5v5" minimapOverride="/maps/midwars/minimap.tga" minimapOverride2="true" iconOverride="/ui/icons/midwars_beta.tga" iconOverride2="true" />
+										<instance name="matchmaking_option_map" index="1" mapid="team_deathmatch" mapname="mainlobby_gamelist_team_deathmatch_title" teamsize="mm_5v5" minimapOverride="minimap_large.tga" />
+										
+										<!-- 2 maps size -->
+										<!-- <instance name="matchmaking_option_map_new" index="1" mapid="caldavar" mapname="mainlobby_gamelist_caldavar_title" teamsize="mm_5v5" />
+										<instance name="matchmaking_option_map_new" index="1" mapid="midwars" mapname="mainlobby_gamelist_midwars_title" teamsize="mm_5v5" /> -->
+									</panel>
+									<!--
+									<panel name="mm_map_advanced_button" valign="bottom" height="3.0h" visible="0"
+										onclick="Call('mm_map_advanced_options', 'SlideY(\'-0.3h\', 100)'); SleepWidget(100, 'DoEvent(1)');"
+										onevent1lua="UIManager.GetInterface('main'):HoNMatchmakingF('ClickMapAdvanced', 1)"
+										onmouseover="Call('mm_map_simple', 'SetColor(\'1 1 1 1\');');"
+										onmouseout="Call('mm_map_simple', 'SetColor(\'#37b2d9\');');"
+									>
+										<label name="mm_map_simple" x="-0.7h" textvalign="center" textalign="right" font="dyn_12" color="#37b2d9" content="mm3_pvp_simplemode" noclick="true" />
+									</panel> -->
+									<!-- Advanced Map Options -->
+									<!-- <panel name="mm_map_advanced_options" y="-0.3h" width="-0.6h" align="center" height="13.3h" valign="bottom" visible="0" color="0 0 0 1"
+									>
+
+										<panel y="0.5h" width="-1.0h" align="center" float="bottom" padding="0.2h" noclick="true">
+											<label fity="true" color="#ffaa00" font="dyn_12" content="mm3_pvp_simplemaps" noclick="true" />
+											<label fity="true" wrap="true" color=".8 .8 .8 1" font="dyn_11" content="mm3_pvp_simplemaps_desc" noclick="true" />
+										</panel>
+
+										<panel x="-0.5h" y="0.3h" valign="bottom"  height="3.0h"
+											onclicklua="if (not Client.IsNewAccount()) then
+															GetWidget('mm_map_advanced_options'):SlideY('13.3h', 100)
+														end
+														UIManager.GetInterface('main'):HoNMatchmakingF('ClickMapAdvanced', 0)"
+											watch="LoginStatus"
+											ontriggerlua="self:SetVisible(param2 and (not Client.IsNewAccount()));"
+											onmouseover="Call('mm_map_advanced', 'SetColor(\'1 1 1 1\');');"
+											onmouseout="Call('mm_map_advanced', 'SetColor(\'#37b2d9\');');"
+										>
+											<label name="mm_map_advanced" textvalign="center" textalign="right" font="dyn_12" color="#37b2d9" content="mm3_pvp_advancedmode" noclick="true" />
+										</panel>
+									</panel> -->
+
+								</panel>
+
+							</panel>
+
+							<!-- Game Modes -->
+							<panel width="22.0h" noclick="true" float="bottom">
+								<instance name="header_bar" color=".7 .7 .7 1" height="2.5h" lbl="mm3_pvp_gameoptions" show_close="false"/>
+
+								<!-- padding -->
+								<panel height="0.2h" noclick="1" />
+
+								<panel height="4.0h" noclick="true">
+									<panel height="4.0h">
+										<!-- Normal -->
+										<panel width="50%" align="left" >
+											<instance name="matchmaking_option_gametype" typeid="1" label="mm_gen_normal" />
+										</panel>
+										<!-- Casual -->
+										<panel width="50%" align="right" >
+											<instance name="matchmaking_option_gametype" typeid="2" label="mm_gen_casual" />
+										</panel>
+									</panel>
+								</panel>
+
+								<!-- padding -->
+								<panel height="0.5h" noclick="1" />
+
+								<instance name="header_bar" color=".7 .7 .7 1" height="2.5h" lbl="mm3_pvp_gamemodes" show_close="false"/>
+
+								<panel height="-9.7h" valign="bottom" noclick="true" color="0 0 0 1">
+									<frame texture="/ui/frames/roundframe.tga" color="#183042" borderthickness="0.6h" noclick="true" />
+
+									<panel name="matchmaking_gamemodes_normal" width="100%" noclick="true" color="0 0 0 1" >
+										<!-- <frame name="matchmaking_option_gametype_background" texture="/ui/info/backdrop.tga" borderthickness="3.0h" color=".2 1 .2 .9" noclick="1" /> -->
+										<frame color="invisible" bordercolor="#183042" borderthickness="1" noclick="1" />
+
+										<!-- Game Modes -->
+										<panel name="matchmaking_gamemodes_normal_insert" y="0.0h" height="-8.8h" width="-1.8h" align="center" float="bottom" padding="0.8h" stickytoinvis="0" >
+											<instance name="matchmaking_option_gamemode" modeid="bb" label="mainlobby_label_blindban" icon="blindban.tga" />
+											<instance name="matchmaking_option_gamemode" modeid="hb" label="mainlobby_label_heroban" icon="heroban.tga" />
+											<instance name="matchmaking_option_gamemode" modeid="ap" label="mainlobby_label_normal" icon="normal.tga" />
+											<instance name="matchmaking_option_gamemode" modeid="km" label="mainlobby_label_krosmode" icon="krosmode.tga" />
+											<instance name="matchmaking_option_gamemode" modeid="gt" label="mainlobby_label_gated" icon="gated.tga" visible="0" />
+											<instance name="matchmaking_option_gamemode" modeid="apg" label="mainlobby_label_gated" icon="gated.tga" visible="0" />
+											<instance name="matchmaking_option_gamemode" modeid="bbg" label="mainlobby_label_gated" icon="gated.tga" visible="0" />
+											<instance name="matchmaking_option_gamemode" modeid="sd" label="mainlobby_label_single_draft" icon="singledraft.tga" />
+											<instance name="matchmaking_option_gamemode" modeid="bd" label="mainlobby_label_banning_draft" icon="banningdraft.tga" />
+											<instance name="matchmaking_option_gamemode" modeid="bp" label="mainlobby_label_banning_pick" icon="banningpick.tga" />
+											<instance name="matchmaking_option_gamemode" modeid="ar" label="mainlobby_label_all_random" icon="forcerandom.tga" />
+											<instance name="matchmaking_option_gamemode" modeid="br" label="mainlobby_label_balanced_random" icon="forcerandom.tga" />
+											<instance name="matchmaking_option_gamemode" modeid="rd" label="mainlobby_label_random_draft" icon="randomdraft.tga" />
+											<instance name="matchmaking_option_gamemode" modeid="apd" label="mainlobby_label_dupe_hero" icon="dupehero.tga" />
+											<instance name="matchmaking_option_gamemode" modeid="bbr" label="mainlobby_label_blind_ban_blitz" icon="blitz.tga" />
+											<instance name="matchmaking_option_gamemode" modeid="bdr" label="mainlobby_label_banning_draft_blitz" icon="blitz.tga" />
+											<!-- <instance name="matchmaking_option_gamemode" modeid="cp" label="mainlobby_label_counter_pick" icon="normal.tga" /> -->
+											<instance name="matchmaking_option_gamemode" modeid="fp" label="mainlobby_label_force_pick" icon="forcepick.tga" />
+											<instance name="matchmaking_option_gamemode" modeid="sp" label="mainlobby_label_soccer_pick" icon="forcepick.tga" />
+											<instance name="matchmaking_option_gamemode" modeid="ss" label="mainlobby_label_solo_same" icon="solosame.tga" />
+											<instance name="matchmaking_option_gamemode" modeid="sm" label="mainlobby_label_solo_diff" icon="solodiff.tga" />
+											<instance name="matchmaking_option_gamemode" modeid="mwb" label="mainlobby_label_midwars_beta" icon="normal.tga" />
+											<instance name="matchmaking_option_gamemode" modeid="rb" label="mainlobby_label_reborn_playerhosted" icon="midwars_beta.tga" />
+											<!-- <label height="3.0h" textvalign="bottom" font="dyn_12" color=".5 .5 .5 1" content="general_mode_restrictivemode" sticky="1" stickytoinvis="0" noclick="true" /> -->
+											<instance name="matchmaking_option_gamemode" height="3.6h" modeid="lp" label="mainlobby_label_lockpick" icon="lockpick.tga" />
+											<instance name="matchmaking_option_gamemode" height="3.6h" modeid="cm" label="mainlobby_label_captainsmode" icon="captainsmode.tga" />
+										</panel>
+
+									</panel>
+
+									<!-- <panel valign="bottom" height="3.0h"
+										onclick="Call('mm_modes_advanced_options', 'SlideY(\'-0.3h\', 150)'); SleepWidget(150, 'DoEvent(1)');"
+										onevent1lua="UIManager.GetInterface('main'):HoNMatchmakingF('ClickGameModeAdvanced', 1)"
+										onmouseover="Call('mm_gamemode_simple', 'SetColor(\'1 1 1 1\');');"
+										onmouseout="Call('mm_gamemode_simple', 'SetColor(\'#37b2d9\');');"
+									>
+										<label name="mm_gamemode_simple" x="-0.7h" textvalign="center" textalign="right" font="dyn_12" color="#37b2d9" content="mm3_pvp_simplemode" noclick="true" />
+									</panel> -->
+									<!-- Advanced Game Modes -->
+									<!-- <panel name="mm_modes_advanced_options" y="-0.3h" width="-0.6h" align="center" height="27.7h" valign="bottom" visible="1" color="0 0 0 1"
+									>
+										<panel x="1.0h" >
+											<panel y="0.5h" grow="1" regrow="1" width="-1.0h" align="left" float="bottom" padding="0.2h" noclick="true" sticky="1">
+												<label name="mm_advgm_lbl1" fity="true" color="#ffaa00" font="dyn_12" content="mm3_pvp_simplemodes_ap" noclick="true" />
+												<label name="mm_advgm_lbl2" fity="true" wrap="true" color=".8 .8 .8 1" font="dyn_11" content="mm3_pvp_simplemodes_ap_desc1" noclick="true" />
+												<label name="mm_advgm_lbl3" fity="true" wrap="true" color=".8 .8 .8 1" font="dyn_11" content="mm3_pvp_simplemodes_ap_desc2" noclick="true" />
+											</panel> -->
+											<!-- <panel height="0.0h" sticky="1"/> padding -->
+											<!--<panel y="50%" grow="1" width="-1.0h" align="left" float="bottom" padding="0.2h" noclick="true" sticky="1">
+												<label name="mm_simp2_title" fity="true" color="#ffaa00" font="dyn_12" content="mm3_pvp_simplemodes_other" noclick="true" />
+												<label name="mm_simp2_desc1" fity="true" wrap="true" color=".8 .8 .8 1" font="dyn_11" content="mm3_pvp_simplemodes_other_desc1" noclick="true" />
+												<label name="mm_simp2_desc2" fity="true" wrap="true" color=".8 .8 .8 1" font="dyn_11" content="mm3_pvp_simplemodes_other_desc2" noclick="true" />
+											</panel>
+										</panel>
+
+										<panel x="-0.5h" y="0.3h" valign="bottom"  height="3.0h"
+											onclicklua="if (not Client.IsNewAccount()) then
+															GetWidget('mm_modes_advanced_options'):SlideY('27.7h', 150)
+														end
+														UIManager.GetInterface('main'):HoNMatchmakingF('ClickGameModeAdvanced', 0)"
+											watch="LoginStatus"
+											ontriggerlua="self:SetVisible(param2 and (not Client.IsNewAccount()));"
+											onmouseover="Call('mm_gamemode_advanced', 'SetColor(\'1 1 1 1\');');"
+											onmouseout="Call('mm_gamemode_advanced', 'SetColor(\'#37b2d9\');');"
+										>
+											<label name="mm_gamemode_advanced" textvalign="center" textalign="right" font="dyn_12" color="#37b2d9" content="mm3_pvp_advancedmode" noclick="true" />
+										</panel>
+									</panel> -->
+
+								</panel>
+							</panel>
+						</panel>
+
+						<!-- Season Map and Options -->
+						<panel name="mm_season_options" x="0" align="right" width="43.1h" visible="false" noclick="1"
+							watch="RankInfoUpdated" ontriggerlua="HoN_Matchmaking:RefreshButtons()">
+							<image y="1i" width="512i" height="512i" align="center" valign="center" texture="/ui/fe2/season/bgbg.tga" noclick="0" />
+							<panel name="mm_season_options_hasrank">
+								<!-- rank -->
+								<panel y="5i" align="center" valign="top" height="64i" noclick="1">
+									<label name="mm_season_options_rankname" align="center" valign="top" y="5i" height="30i" textvalign="center" textalign="center" font="dyn_18" noclick="1" color="#ffbc3cbb" />
+									<image y="-10i" width="64i" height="64i" align="left" valign="top" x='98i' texture="/ui/fe2/season/ms2.tga" noclick="0"/>
+									<image y="-10i" width="64i" height="64i" align="right" valign="top" x='-98i' hflip="1" texture="/ui/fe2/season/ms2.tga" noclick="0"/>
+									<image name="mm_season_options_rankicon" width="168i" height="168i" y="90i" align="center" valign="center" texture="$invis" noclick="1" />
+								</panel>
+
+								<!-- next rank -->
+								<panel name="mm_season_options_nextrank_root" width="64i" height="64i" align="right" valign="top" x='-21.33i' y='152.8i'>
+									<label height="15i" width="80i" align="center" valign="top" y="-10i" textvalign="center" textalign="center" content="mm3_season_next_rank" noclick="1" font="dyn_9" color="#ffbc3cbb" />
+									<image width="64i" height="64i" align="center" valign="center" texture="/ui/fe2/season/nn2.tga" noclick="0"/>
+									<image name="mm_season_options_nextrank_icon" width="52i" height="52i" align="center" valign="center" texture="$invis" noclick="1" />
+									<panel name="mm_season_options_nextrank_tips" onmouseoverlua="" onmouseoutlua="Trigger('genericMainFloatingTip', 'false', '', '', '', '', '', '', '', '')"/>
+								</panel>
+
+								<!-- progress bar -->
+								<panel name="mm_season_options_progressbar_root" width="406i" height="14i" align="center" valign="top" y="220i">
+									<panel name="mm_season_options_progressbar" align="left" color="#7e35c2" width="100%"/>
+									<image width="512i" height="64i" align="center" valign="center" texture="/ui/fe2/season/jindu002.tga" noclick="0" />
+								</panel>
+
+								<!-- win lose streak -->
+								<panel width="70%" height="20i" align="center" y="245i" noclick="0" float="right">
+									<panel width="36%">
+										<label name="mm_season_options_wins" align="left" valign="center" textvalign="center" textalign="left" font="dyn_10" content="" noclick="1" color="#f8b63a"/>
+									</panel>
+									<panel width="36%">
+										<label name="mm_season_options_losses" align="left" valign="center" textvalign="center" textalign="left" font="dyn_10" content="" noclick="1" color="#f8b63a"/>
+									</panel>
+									<if condition="cl_GarenaEnable">
+										<panel width="36%">
+											<label name="mm_season_options_winstreaks" align="left" valign="center" textvalign="center" textalign="left" font="dyn_10" content="" noclick="1" color="#f8b63a"/>
+										</panel>
+									</if>
+								</panel>
+
+								<label name="mm_season_options_debug" align="left" valign="center" x="2h" y="-1h" width="40h" height="4h" textvalign="center" textalign="left" font="dyn_12" noclick="1" color="white" content=""/>
+							</panel>
+
+							<panel name="mm_season_options_hasnorank">
+								<panel height="4h" valign="top">
+									<label textvalign="center" textalign="center" content="rank_placement_match" noclick="1" font="dyn_24" color="#ffb143" />
+								</panel>
+								<image y="-8h" align="center" valign="center" width="168i" height="168i" noclick="1" texture="/ui/fe2/season/nolevel.tga" rendermode="grayscale"/>
+								<panel y="6.7h" height="6h" width="36h" float="right" padding="0.1h" align="center" valign="center">
+									<instance name="placement_match" id="1" suffix="st"/>
+									<instance name="placement_match" id="2" suffix="nd"/>
+									<instance name="placement_match" id="3" suffix="rd"/>
+									<instance name="placement_match" id="4" suffix="th"/>
+									<instance name="placement_match" id="5" suffix="th"/>
+									<instance name="placement_match" id="6" suffix="th"/>
+								</panel>
+							</panel>
+							<!-- season info -->
+							<instance width="118i" height="22i" align="center" y="280i" name="button2" label="mm3_season_info_button"
+										onclicklua="local url = ''
+													if GetCvarBool('cl_GarenaEnable') then
+														url = 'http://www.hon.in.th/events/20161215_seasoninfo/?hongameclientcookie='..Client.GetCookie()..'|sea|'..GetCvarString('host_language')
+													else
+														url = 'http://fun.naeu.heroesofnewerth.com/events/20161215_seasoninfo/?hongameclientcookie='..Client.GetCookie()..'|naeu|'..GetCvarString('host_language')
+													end
+
+													UIManager.GetInterface('webpanel'):HoNWebPanelF('ShowPlayerTourStats', GetWidget('web_browser_player_tour_stats_insert'), url)
+													UIManager.GetInterface('main'):HoNMainF('MainMenuPanelToggle', 'player_tour_stats', nil, false)" />
+
+							<!-- match -->
+							<panel width="90%" height="100i" align="center" valign="top" y="320i" noclick="0" >
+								<image width="64i" height="64i" x='0i' y='2.67' align="left" valign="top" texture="/ui/fe2/season/mapi.tga" noclick="0"/>
+								<label height="15i" width="80i" x='75i' y='-7.35i' align="left" valign="center" textvalign="center" textalign="left" font="dyn_12" content="mm_5v5" noclick="1" color="#989a9b"/>
+								<label height="15i" width="170i" x='5i' y='32.5i' align="left" valign="center" textvalign="center" textalign="left" font="dyn_11" content="mm3_season_map_name" noclick="1" color="#e8eff2"/>
+
+								<panel align="right" width="65%" >
+									<instance name="season_gm_allpick_button" x="20i" y="8i" id="normal" label="mm_gen_normal" image="b1" />
+									<instance name="season_gm_allpick_button" x="20i" y="56i" id="casual" label="mm_gen_casual" image="b22" />
+									<if condition="!cl_GarenaEnable">
+										<panel  x="20i" y="55i" width="255i" height="38i" color="0 0 0 .7"
+											onmouseover="Trigger('genericMainFloatingTip', 'true', '20.0h', '', '', 'rank_pickmode_tips_disabled', '', '', '3.0h', '-2.0h')"
+											onmouseout="Trigger('genericMainFloatingTip', false, '', '', '', '', '', '', '', '');"/>
+									</if>
+								</panel>
+							</panel>
+						</panel>
+					</panel>
+
+					<!-- Start Button - Not Practice Match-->
+					<instance name="mm_start_match_btn" btnname="mm_start_btn" visible="false" labelname="mm_queuebutton" buttonlabel="mm3_enterqueuebutton" />
+
+					<!-- Start Button - Practice Match - Created a second button so there could be some cool transition between buttons when human is added? -->
+
+					<instance name="mm_start_match_btn" btnname="mm_start_practice_btn" visible="true" labelname="mm_localgamebutton"  buttonlabel="mm3_localgamebutton" />
+					<panel name="season_invalid_teammembers_number_mask" color="0 0 0 .8" y="-0.8h" width="310i" height="3.8h" x="-80i" align="center" valign="bottom" visible="0"
+						   onmouseover="Trigger('genericMainFloatingTip', 'true', '20.0h', '', '', 'season_invalid_temamember_number', '', '', '3.0h', '-2.0h')"
+						   onmouseout="Trigger('genericMainFloatingTip', false, '', '', '', '', '', '', '', '');"/>
+					<panel name="season_not_eligible_mask" color="0 0 0 .8" visible="0">
+						<label align="center" textvalign="center" textalign="center" wrap="1" width="80%" font="dyn_24" content="season_not_eligible_mask" noclick="1" color="white"/>
+
+					</panel>
+				</panel>
+
+
+				<!-- Tabs -->
+				<panel width="14.0h" float="bottom" padding="1.0h" noclick="true">
+					<!-- Co-Op -->
+					<instance name="mm_category_tab" y="0" icon="/ui/fe2/elements/coop_icon.tga" iconsize="66" cat_label="mm3_coop" cat_sub_label="mm3_coop_desc" enabled="true" mode="coop" frameimg="tabbox" arrowcolor="#183042" tabboxarrow="tabbox_arrow" />
+					<!-- Pvp -->
+					<instance name="mm_category_tab" icon="/ui/fe2/elements/pvp_icon.tga" iconsize="66" cat_label="mm3_pvp" cat_sub_label="mm3_pvp_desc" enabled="true" mode="pvp" frameimg="tabbox" arrowcolor="#183042" tabboxarrow="tabbox_arrow" />
+					<!-- Season -->
+					<instance name="mm_category_tab" icon="/ui/fe2/season/icon.tga" iconsize="88" cat_label="" cat_sub_label="mm3_season_desc" enabled="true" mode="season" frameimg="tabbox_d" arrowcolor="#553218"  tabboxarrow="tabbox_arrow_d"
+					onsetsublabellua="
+						if IsPreseason() then
+							self:SetText(Translate('mm3_preseason_desc'))
+						else
+							self:SetText(Translate('player_stats_season_highest', 'season', GetCurrentSeason()))
+						end
+					"/>
+				</panel>
+				<panel name="mm_category_tab_mask" width="14.0h"/>
+
+			</panel>
+
+			<!-- Load Progress -->
+			<panel width="-2.0h" align="center" name="mm_loading_progress" visible="0" blockinput="true" watch="EntityDefinitionsLoaded" ontrigger="SetVisible(false);" color="0 0 0 .7">
+				<panel align="center" valign="center" width="25.0h" height="5h" y=".5h">
+					<image height="100%" texture="../mainmenu/update_bar_bg.tga" />
+
+					<panel watch="EntityDefinitionsProgress" width="1" ontrigger="If(param1 gt 0, SetWidth(((param0 / param1) * 100) # '%')); SetWidth(Max(GetWidth(), 32));">
+						<image watch="EntityDefinitionsProgress" ontrigger="If(param1 gt 0 and param0 gt 0, SetUScale(1 / (param0 / param1)));" texture="../mainmenu/update_bar_fg.tga"/>
+						<image width="32" texture="../loadingscreens/loading_bar_fg_l.tga"/>
+						<image width="32" align="right" texture="../loadingscreens/loading_bar_fg_r.tga"/>
+					</panel>
+				</panel>
+				<image align="center" valign="center" width="31.5h" height="9h" x="-.8h" color="1 1 1 1" texture="elements/loading_bar_frame.tga" />
+				<panel color="invisible" y=".5h">
+					<label width="-10.0h" height="100%" align="center" textalign="center" textvalign="center" wrap="1" font="dyn_10" color="white" shadow="1" content="general_wait" />
+				</panel>
+			</panel>
+
+			<!-- Not Host Cover -->	<!-- hide the simple covers if they are verified so they can see if the host changes those options -->
+			<!-- <panel name="mm_tmm_cover" color="invisible" noclick="1" visible="0"
+				onevent1="FadeIn(100);
+						  Call('mm_map_advanced_options', 'SlideY(\'13.3h\', 100)');
+						  Call('mm_modes_advanced_options', 'SlideY(\'23.3h\', 150)')"
+				onevent1lua="UIManager.GetInterface('main'):HoNMatchmakingF('ClickMapAdvanced', 0)
+							UIManager.GetInterface('main'):HoNMatchmakingF('ClickGameModeAdvanced', 0)"
+				onevent0="FadeOut(100);"
+				onevent0lua="if (Client.IsNewAccount()) then
+								UIManager.GetInterface('main'):HoNMatchmakingF('ClickMapAdvanced', 1)
+								UIManager.GetInterface('main'):HoNMatchmakingF('ClickGameModeAdvanced', 1)
+								GetWidget('mm_map_advanced_options'):SlideY('-0.3h', 100)
+								GetWidget('mm_modes_advanced_options'):SlideY('-0.3h', 150)
+							end"
+			> -->
+			<panel name="mm_tmm_cover" color="invisible" noclick="1" visible="0"
+				onevent1="FadeIn(100);"
+				onevent0="FadeOut(100);"
+			>
+				<panel name="mm3_tmml" x="3.0h" y="3.8h" align="left" width="14.7h" height="-1h" color="0 0 0 .5" blockinput="1"
+					onclick="Call('matchmaking_options_blocker_highlight', 'DoEvent(0);');">
+				</panel>
+
+				<!-- <panel name="mm3_tmmm" y="-5.5h" x="18.2h" align="left" valign="bottom" width="31.1h" height="3.8h" color="0 0 0 .5" blockinput="1"
+					onclick="Call('matchmaking_options_blocker_highlight', 'DoEvent(0);');">
+				</panel> -->
+
+				<panel name="mm3_tmmr" align="right" x="-3.0h" y="3.8h" width="65.0h" height="-9.5h" color="0 0 0 .5" blockinput="1"
+					onclick="Call('matchmaking_options_blocker_highlight', 'DoEvent(0);');">
+					<panel valign="top" align="left" height="3h" width="-1.0h" y="0"
+					onclick="Call('matchmaking_options_blocker_highlight', 'DoEvent(0);');"
+					>
+						<frame texture="/ui/info/backdrop.tga" borderthickness="3.0h" color="1 1 1 .3" noclick="1" />
+						<frame color=".05 .07 .1 .5" bordercolor=".2 .2 .2 1" borderthickness="1" noclick="1" />
+						<label color="white" shadow="true" font="dyn_10" textalign="center" textvalign="center" wrap="true" content="mm_settings_locked"/>
+						<frame name="matchmaking_options_blocker_highlight" color="invisible" bordercolor="#FFCC00" borderthickness="1" noclick="true" visible="false"
+							onevent0="
+								FadeIn(80);
+								SleepWidget(80, 'DoEvent(1);');
+							"
+							onevent1="
+								FadeOut(80);
+								SleepWidget(80, 'DoEvent(2);');
+							"
+							onevent2="
+								FadeIn(80);
+								SleepWidget(80, 'DoEvent(3);');
+							"
+							onevent3="
+								FadeOut(80);
+							"
+						/>
+					</panel>
+				</panel>
+			</panel>
+
+			<panel name="matchmaking_blocker_leaver" width="100%" color="0 0 0 0.5" visible="true"
+				onclick="
+					PlaySound('/shared/sounds/ui/error.wav');
+					CallEvent('matchmaking_blocker_leaver_highlight', 0);
+				"
+				onshow="
+					Trigger('TMMUpdateTooltipTrigger', '', '', '', '', '');
+					HideWidget('mm_option_disabled_unverified_tip');
+				"
+			>
+				<panel valign="center" align="center" width="40h" grow="true" regrow="true">
+					<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.6h" color=".05 .07 .1 .8"/>
+					<frame texture="/ui/frames/roundframe.tga" color="#678095" borderthickness="0.6h"/>
+					<panel width="-1.0h" align="center" color="invisible" noclick="1" grow="true" regrow="true" float="bottom">
+						<panel height="0.5h"/>
+						<label name="matchmaking_leaver_label" font="dyn_10" wrap="true" fity="true" color="white" shadow="true" textalign="center" content="-" />
+						<panel height="0.5h"/>
+						<label font="dyn_10" wrap="true" fity="true" color="#FFCC00" shadow="true" textalign="center" content="mm_leaver_resetstats" />
+						<panel height="0.5h"/>
+
+						<panel width="100%" height="2.5h">
+							<panel height="100%" grow="true" align="center" float="right" padding="0.5h">
+								<instance
+									width="6h" height="2.5h"
+									name="button2" button_name="unnamedButton166"
+									label="general_close"
+									onclick="PlaySound('/shared/sounds/ui/lobby/button_jointeam.wav'); Set('_mainmenu_currentpanel', ''); CallEvent('MainMenuPanelSwitcher');"
+								/>
+							</panel>
+						</panel>
+						<panel height="0.5h"/>
+					</panel>
+					<frame name="matchmaking_blocker_leaver_highlight" texture="/ui/frames/roundframe.tga" color="#FFCC00" borderthickness="0.6h" visible="false"
+						onevent0="
+							FadeIn(80);
+							SleepWidget(80, 'DoEvent(1);');
+						"
+						onevent1="
+							FadeOut(80);
+							SleepWidget(80, 'DoEvent(2);');
+						"
+						onevent2="
+							FadeIn(80);
+							SleepWidget(80, 'DoEvent(3);');
+						"
+						onevent3="
+							FadeOut(80);
+						"
+					/>
+				</panel>
+			</panel>
+
+			<panel name="matchmaking_queue_blocker" width="100%" color="0 0 0 0.5" visible="false" watch="TMMReset TMMTime TMMLeftQueue" ontrigger="SetVisible(IsInQueue());" />
+
+			<instance name="mapLoadGuide"/>
+			<!-- Solo Queue Display -->
+			<panel
+				name="matchmaking_queue_display"
+				y="2.0h"
+				width="28.5h"
+				height="28.2h"
+				align="center"
+				valign="center"
+				color="0 0 0 .9"
+				visible="false"
+				watch1="GamePhase" ontrigger1="If(param ge 3, SetVisible(0));"
+				onshow="##PlayMusic('/music/lobby.mp3', true);##"
+				grow="1" regrow="1" growinvis="0"
+			>
+				<frame texture="/ui/info/backdrop.tga" borderthickness="3.0h" color="1 1 1 .5" noclick="1" />
+				<frame color="invisible" bordercolor=".2 .2 .2 1" borderthickness="1" noclick="1" />
+
+				<panel grow="1" regrow="1" growinvis="0" y="0.8h" width="-2.0h" align="center" float="bottom" noclick="true">
+					<label fity="true" fitypadding="3.0h" textalign="center" font="dyn_14" color="#ffaa00" shadow="true" content="mm_queue_finding" />
+					<panel grow="1" regrow="1" growinvis="0" width="100%" float="right" padding="1.2h">
+						<panel x="1.2h" height="6.6h" width="6.6h">
+							<animatedimage y="0.9h" width="100@" height="100%" align="center" valign="center" texture="/ui/elements/throb/throb.tga" noclick="true" loop="1" fps="30" onshow="StartAnim(1);" />
+						</panel>
+						<panel grow="1" regrow="1" growinvis="0" width="-6.6h" float="bottom">
+							<label fity="true" fitypadding="0.1h" textalign="left" font="dyn_11" color="#3abde7" shadow="true" content="mm_queue_past" />
+							<label name="matchmaking_queue_past" fity="true" fitypadding="0.5h" textalign="left" font="dyn_10" color="1 1 1 1" shadow="true" watch="TMMTime" ontrigger="SetText(param0);" />
+							<label fity="true" fitypadding="0.1h" textalign="left" font="dyn_11" color="#3abde7" shadow="true" content="mm_queue_eta" />
+							<label name="matchmaking_queue_eta" fity="true" fitypadding="0.5h" textalign="left" font="dyn_10" color="1 1 1 1" shadow="true" watch="TMMTime" ontrigger="SetText(param1);" />
+							<label name="matchmaking_queue_popularity_1" fity="true" fitypadding="0.1h" textalign="left" font="dyn_11" color="#3abde7" shadow="true" content="mm_queue_popularity" />
+							<label name="matchmaking_queue_popularity_2" fity="true" fitypadding="0.5h" textalign="left" font="dyn_10" color="1 1 1 1" shadow="true" />
+							<label name="matchmaking_queue_popularity_3" fity="true" fitypadding="0.1h" textalign="left" font="dyn_11" color="#3abde7" shadow="true" content="mm_queue_extra" visible="0"/>
+							<label name="matchmaking_queue_popularity_4" fity="true" fitypadding="0.5h" textalign="left" font="dyn_10" color="1 1 1 1" shadow="true"  visible="0" />
+						</panel>
+						<button name="matchmaking_hover_question_btn_1"
+							x="7.2h" y="8.2h" height="1.4h" width="1.4h" align="left" color="invisible"
+							onmouseover=""
+							onmouseout="Trigger('genericMainFloatingTip', false, '', '', '', '', '', '', '', '');"
+						>
+							<widgetstate statename="up">
+								<image texture="/ui/elements/tip_mark_up.tga"/>
+							</widgetstate>
+							<widgetstate statename="over">
+								<image texture="/ui/elements/tip_mark_over.tga"/>
+							</widgetstate>
+							<widgetstate statename="down" x="1" y="1">
+								<image texture="/ui/elements/tip_mark_up.tga"/>
+							</widgetstate>
+						</button>
+					</panel>
+				</panel>
+
+				<!-- <panel name="matchmaking_queue_fidelity" y="-7h" width="-2.0h" height="5h" align="center" valign="bottom" noclick="1" color="1 1 0 0" float="bottom" visible="1"
+					watch="TMMTime" ontrigger="SetVisible(!ShouldHideTMMStats());"
+				>
+					<panel height="2h" noclick="1" align="center">
+						<label color="white" font="dyn_10" textalign="center" textvalign="center" shadow="true" content="mm_queue_fidelity1" noclick="1" />
+					</panel>
+					<panel align="center" height="2.5h" noclick="1">
+						<panel width="14h" align="center" noclick="1">
+							<instance name="Moptions_slider_bg" />
+							<slider width="-3h" align="center" enabled="1"
+								name="matchmaking_queue_fidelity_slider"
+								slotwidth="-1%" slotheight="0.6h"
+								slotcolor="1 1 1 1"
+								handlewidth="100@" handleheight="-10%"
+								handlecolor="1 1 1 1"
+								cvar="cc_TMMMatchFidelity"
+								minvalue="0" maxvalue="1"
+								step="1"
+								texture="/ui/info/slider.tga"
+								onshowlua="UIManager.GetInterface('main'):HoNMatchmakingF('matchmaking_queue_fidelity_slider_OnShow')"
+								onselect="PlaySound('/shared/sounds/ui/button_over_02.wav');"
+								onchangelua="UIManager.GetInterface('main'):HoNMatchmakingF('matchmaking_queue_fidelity_slider_OnChange')"
+								watch="TMMTime"
+								ontrigger="
+									SetValue(Round(param2));
+								"
+								onmouseoverlua="UIManager.GetInterface('main'):HoNMatchmakingF('matchmaking_queue_fidelity_slider_OnMouseOver')"
+								onmouseoutlua="UIManager.GetInterface('main'):HoNMatchmakingF('matchmaking_queue_fidelity_slider_OnMouseOut')"
+							/>
+						</panel>
+						<panel width="-0.8h" height="100%" align="center" noclick="1">
+							<label width="5.5h" wrap="1" color="white" height="100%" textvalign="center" shadow="true" font="dyn_9" valign="center" align="left"  textalign="left"  content="mm_queue_fidelity2" noclick="1" />
+							<label width="5.5h" wrap="1" color="white" height="100%" textvalign="center" shadow="true" font="dyn_9" valign="center" align="right" textalign="right" content="mm_queue_fidelity3" noclick="1" />
+						</panel>
+					</panel>
+				</panel> -->
+
+				<instance
+					name="button2" button_name="unnamedButton167"
+					y="-1.6h"
+					width="16.0h"
+					height="2.4h"
+					align="center"
+					valign="bottom"
+					label="mm_queue_leave_btn"
+					onclicklua="UIManager.GetInterface('main'):HoNMatchmakingF('matchmaking_button_leave_queue_OnClick')"
+				/>
+			</panel>
+
+		</panel>
+	</template>
+
+	<trigger name="MMBuySingleTokenStatus"/>
+	<trigger name="MMBuySingleTokenResults"/>
+
+	<form
+		name="MMBuySingleToken"
+		host="!masterserver"
+		method="post"
+		target="/store_requester.php"
+		statustrigger="MMBuySingleTokenStatus"
+		resulttrigger="MMBuySingleTokenResults"
+		resultparam0="responseCode"
+		resultparam1="popupCode"
+		resultparam2="errorCode"
+		resultparam3="requestHostTime"
+		ssl="false"
+	/>
+
+	<template name="tmm_purchase_tokens_template" >
+		<!-- Popup space -->
+		<panel y="0" height="100%" width="100%" align="center" noclick="true">
+
+			<!-- Buy token prompt -->
+			<panel width="100%" height="100%" color="0 0 0 0.5" name="mm_popup_buytoken" onevent0="FadeIn(150);" onevent1="FadeOut(150);" visible="false">
+				<panel y="-10h" width="46h" grow="true" regrow="true" align="center" valign="center" noclick="1">
+				<frame color="0 0 0 .8" bordercolor="#455166" borderthickness="1" noclick="1" />
+					<panel float="bottom" width="100%" grow="true" regrow="true">
+						<instance
+							name="header_bar"
+							buttonsize="1.8h"
+							height="2.4h"
+							lbl="mm_buytoken_title"
+							show_close="true"
+							onclick="PlaySound('/shared/sounds/ui/button_click.mp3'); CallEvent('mm_popup_buytoken', 1);"
+						/>
+						<panel height="0.5h"/>
+						<panel width="100%" grow="true" regrow="true">
+							<panel width="-1.0h" align="center" grow="true" regrow="true" noclick="1">
+								<frame texture="/ui/frames/tooltip_bg.tga" color="#2c4b6c" noclick="1"/>
+								<frame color="invisible" bordercolor="#455166" borderthickness="1" noclick="1" />
+								<panel width="-1.0h" align="center" color="invisible" noclick="1" grow="true" regrow="true" float="bottom">
+									<panel height="0.5h"/>
+									<label font="dyn_10" wrap="true" fity="true" color="white" shadow="true" textalign="center" content="mm_buytoken_body"/>
+									<panel height="0.5h"/>
+									<panel height="0.5h">
+										<panel height="1" width="-1h" align="center" valign="center" color="0 0 0 0.5"/>
+										<panel height="1" width="-1h" align="center" valign="center" color="1 1 1 0.25" x="1" y="1"/>
+									</panel>
+									<panel height="0.5h"/>
+
+									<panel width="100%" height="5h">
+										<panel align="left" width="-10h">
+											<panel height="100%" align="center" grow="true" float="right" padding="1h">
+												<panel width="10h" height="100%">
+													<image x="1.0h" width="3.0h" valign="bottom" height="3.0h" texture="/ui/fe2/store/icons/hero_token.tga" noclick="true"/>
+													<label font="dyn_10" wrap="true" fity="true" color="white" shadow="true" textalign="center" content="Buy 1 Token"/>
+												</panel>
+												<panel width="10h" height="100%">
+													<panel height="2h" width="-1h" color="black" align="center">
+														<frame color="0 0 0 .8" bordercolor="#455166" borderthickness="1" noclick="1" />
+														<panel hmargin="0.25h" vmargin="0.25h">
+															<label font="dyn_10" color="#FFCC00" width="-110@" height="100%" textalign="center" textvalign="center" content="25"/>
+															<image align="right" width="100@" height="100%" texture="/ui/fe2/store/gold_coins.tga"/>
+														</panel>
+													</panel>
+													<instance
+														width="10h" height="2.5h"
+														name="button2" button_name="unnamedButton168"
+														label="mstore_purchase_gold"
+														onclick="
+															PlaySound('/shared/sounds/ui/lobby/button_jointeam.wav');
+															Set('_lastRequestHostTime', GetTime());
+															SubmitForm(
+																'MMBuySingleToken',
+																'account_id', GetAccountID(),
+																'request_code', 4, 'cookie', GetCookie(),
+																'category_id', 6, 'page', 1,
+																'hostTime', _lastRequestHostTime,
+																'currency', 0,
+																'displayAll', false,
+																'notPurchasable', false,
+																'charge_id', 10
+															);
+														"
+														valign="bottom"
+														watch="GoldCoins"
+														ontrigger="SetVisible(param ge 25);"
+													/>
+													<instance
+														width="10h" height="2.5h"
+														name="button2" button_name="unnamedButton169"
+														label="mstore_needcoins"
+														onclick="PlaySound('/shared/sounds/ui/lobby/button_jointeam.wav'); CallEvent('store_open_purchase_helper', 2); CallEvent('mm_popup_buytoken', 1);"
+														valign="bottom"
+														enabled="true"
+														watch="GoldCoins"
+														ontrigger="SetVisible(param lt 25);"
+													/>
+												</panel>
+
+												<panel width="10h" height="100%">
+													<panel height="2h" width="-1h" color="black" align="center">
+														<frame color="0 0 0 .8" bordercolor="#455166" borderthickness="1" noclick="1" />
+														<panel hmargin="0.25h" vmargin="0.25h">
+															<label font="dyn_10" color="#c0d5ed" width="-110@" height="100%" textalign="center" textvalign="center" content="35"/>
+															<image align="right" width="100@" height="100%" texture="/ui/fe2/store/silver_coins.tga"/>
+														</panel>
+													</panel>
+													<instance
+														width="10h" height="2.5h"
+														name="button2" button_name="unnamedButton170"
+														label="mstore_purchase_silver"
+														onclick="
+															PlaySound('/shared/sounds/ui/lobby/button_jointeam.wav');
+															SubmitForm(
+																'MMBuySingleToken',
+																'account_id', GetAccountID(),
+																'request_code', 4, 'cookie', GetCookie(),
+																'category_id', 6, 'page', 1,
+																'hostTime', _lastRequestHostTime,
+																'currency', 1,
+																'displayAll', false,
+																'notPurchasable', false,
+																'charge_id', 10
+															);
+														"
+														valign="bottom"
+														watch="SilverCoins"
+														ontrigger="SetVisible(param ge 35);"
+													/>
+													<instance
+														width="10h" height="2.5h"
+														name="button2" button_name="unnamedButton171"
+														label="mstore_needcoins"
+														onclick="PlaySound('/shared/sounds/ui/lobby/button_jointeam.wav');"
+														valign="bottom"
+														enabled="false"
+														watch="SilverCoins"
+														ontrigger="SetVisible(param lt 35);"
+													/>
+												</panel>
+
+											</panel>
+										</panel>
+										<panel align="right" width="10h">
+											<instance
+												width="9h" height="2.5h"
+												name="button2" button_name="unnamedButton172"
+												label="general_cancel"
+												onclick="PlaySound('/shared/sounds/ui/lobby/button_jointeam.wav'); CallEvent('mm_popup_buytoken', 1);"
+												align="center" valign="center"
+											/>
+
+										</panel>
+									</panel>
+									<panel height="0.5h"/>
+								</panel>
+							</panel>
+						</panel>
+						<panel height="0.5h"/>
+						<panel width="100%" grow="true" regrow="true">
+							<panel width="-1.0h" align="center" grow="true" regrow="true" noclick="1">
+								<frame texture="/ui/frames/tooltip_bg.tga" color="#2c4b6c" noclick="1"/>
+								<frame color="invisible" bordercolor="#455166" borderthickness="1" noclick="1" />
+								<panel width="-1.0h" align="center" color="invisible" noclick="1" grow="true" regrow="true" float="bottom">
+									<panel height="0.5h"/>
+									<label font="dyn_10" wrap="true" fity="true" color="white" shadow="true" textalign="center" content="Purchase a token 10 pack?"/>
+									<panel height="0.5h"/>
+									<panel height="0.5h">
+										<panel height="1" width="-1h" align="center" valign="center" color="0 0 0 0.5"/>
+										<panel height="1" width="-1h" align="center" valign="center" color="1 1 1 0.25" x="1" y="1"/>
+									</panel>
+									<panel height="0.5h"/>
+
+									<panel width="100%" height="5h">
+										<panel align="left" width="-10h">
+											<panel height="100%" align="center" grow="true" float="right" padding="1h">
+												<panel width="10h" height="100%">
+													<image x="1.0h" width="3.0h" valign="bottom" height="3.0h" texture="/ui/fe2/store/icons/hero_token.tga" noclick="true"/>
+													<image x="2.0h" width="3.0h" valign="bottom" height="3.0h" texture="/ui/fe2/store/icons/hero_token.tga" noclick="true"/>
+													<image x="3.0h" width="3.0h" valign="bottom" height="3.0h" texture="/ui/fe2/store/icons/hero_token.tga" noclick="true"/>
+													<image x="4.0h" width="3.0h" valign="bottom" height="3.0h" texture="/ui/fe2/store/icons/hero_token.tga" noclick="true"/>
+													<label font="dyn_10" wrap="true" fity="true" color="white" shadow="true" textalign="center" content="Buy 10 Tokens"/>
+												</panel>
+												<panel width="10h" height="100%">
+													<panel height="2h" width="-1h" color="black" align="center">
+														<frame color="0 0 0 .8" bordercolor="#455166" borderthickness="1" noclick="1" />
+														<panel hmargin="0.25h" vmargin="0.25h">
+															<label font="dyn_10" color="#FFCC00" width="-110@" height="100%" textalign="center" textvalign="center" content="250"/>
+															<image align="right" width="100@" height="100%" texture="/ui/fe2/store/gold_coins.tga"/>
+														</panel>
+													</panel>
+													<instance
+														width="10h" height="2.5h"
+														name="button2" button_name="unnamedButton173"
+														label="mstore_purchase_gold"
+														onclick="
+															PlaySound('/shared/sounds/ui/lobby/button_jointeam.wav');
+															Set('_lastRequestHostTime', GetTime());
+															SubmitForm(
+																'MMBuySingleToken',
+																'account_id', GetAccountID(),
+																'request_code', 4, 'cookie', GetCookie(),
+																'category_id', 6, 'page', 1,
+																'hostTime', _lastRequestHostTime,
+																'currency', 0,
+																'displayAll', false,
+																'notPurchasable', false,
+																'charge_id', 1
+															);
+														"
+														valign="bottom"
+														watch="GoldCoins"
+														ontrigger="SetVisible(param ge 25);"
+													/>
+													<instance
+														width="10h" height="2.5h"
+														name="button2" button_name="unnamedButton174"
+														label="mstore_needcoins"
+														onclick="PlaySound('/shared/sounds/ui/lobby/button_jointeam.wav'); CallEvent('store_open_purchase_helper', 2); CallEvent('mm_popup_buytoken', 1);"
+														valign="bottom"
+														enabled="true"
+														watch="GoldCoins"
+														ontrigger="SetVisible(param lt 25);"
+													/>
+												</panel>
+
+												<panel width="10h" height="100%">
+													<panel height="2h" width="-1h" color="black" align="center">
+														<frame color="0 0 0 .8" bordercolor="#455166" borderthickness="1" noclick="1" />
+														<panel hmargin="0.25h" vmargin="0.25h">
+															<label font="dyn_10" color="#c0d5ed" width="-110@" height="100%" textalign="center" textvalign="center" content="350"/>
+															<image align="right" width="100@" height="100%" texture="/ui/fe2/store/silver_coins.tga"/>
+														</panel>
+													</panel>
+													<instance
+														width="10h" height="2.5h"
+														name="button2" button_name="unnamedButton175"
+														label="mstore_purchase_silver"
+														onclick="
+															PlaySound('/shared/sounds/ui/lobby/button_jointeam.wav');
+															SubmitForm(
+																'MMBuySingleToken',
+																'account_id', GetAccountID(),
+																'request_code', 4, 'cookie', GetCookie(),
+																'category_id', 6, 'page', 1,
+																'hostTime', _lastRequestHostTime,
+																'currency', 1,
+																'displayAll', false,
+																'notPurchasable', false,
+																'charge_id', 1
+															);
+														"
+														valign="bottom"
+														watch="SilverCoins"
+														ontrigger="SetVisible(param ge 35);"
+													/>
+													<instance
+														width="10h" height="2.5h"
+														name="button2" button_name="unnamedButton176"
+														label="mstore_needcoins"
+														onclick="PlaySound('/shared/sounds/ui/lobby/button_jointeam.wav');"
+														valign="bottom"
+														enabled="false"
+														watch="SilverCoins"
+														ontrigger="SetVisible(param lt 35);"
+													/>
+												</panel>
+
+											</panel>
+										</panel>
+										<panel align="right" width="10h">
+											<instance
+												width="9h" height="2.5h"
+												name="button2" button_name="unnamedButton177"
+												label="general_cancel"
+												onclick="PlaySound('/shared/sounds/ui/lobby/button_jointeam.wav'); CallEvent('mm_popup_buytoken', 1);"
+												align="center" valign="center"
+											/>
+
+										</panel>
+									</panel>
+									<panel height="0.5h"/>
+								</panel>
+							</panel>
+						</panel>
+						<panel height="0.5h"/>
+					</panel>
+					<panel visible="false" watch="MMBuySingleTokenStatus" ontrigger="SetVisible(param == 1);" color="0 0 0 0.5">
+						<panel align="center" valign="center" width="15h" height="4h" color="black">
+							<frame color="invisible" bordercolor="#455166" borderthickness="1" noclick="true" />
+							<animatedimage valign="center" x="0.5h" width="3h" height="3h" texture="/ui/elements/throb/throb.tga" noclick="true" loop="1" fps="30" onshow="StartAnim(1);" />
+							<label align="right" x="-0.5h" width="-5h" shadow="true" color="white" font="dyn_12" textvalign="center" content="mstore_processing_elipses"/>
+						</panel>
+					</panel>
+
+				</panel>
+			</panel>
+
+			<!-- Error -->
+			<panel name="MMBuyTokenError" watch="MMBuyTokenStatus" ontrigger="If(param1 == 3, DoEvent(0));" watch1="MMBuySingleTokenResults" ontrigger1="If(param2 gt 0, DoEvent(0));" color="0 0 0 0.75" visible="false"
+				onevent0="FadeIn(200);"
+				onevent1="FadeOut(200);"
+			>
+				<panel width="35h" grow="true" regrow="true" align="center" valign="center" noclick="true" color="black">
+					<frame color="invisible" bordercolor="#455166" borderthickness="1" noclick="true" />
+					<panel float="bottom" width="35h" grow="true" regrow="true">
+						<instance
+							name="header_bar"
+							buttonsize="1.8h"
+							height="2.4h"
+							lbl="mstore_error_generic"
+							show_close="true"
+							onmouseover="PlaySound('/shared/sounds/ui/ccpanel/button_over_02.wav');"
+							onclick="PlaySound('/shared/sounds/ui/ccpanel/button_click_02.wav'); CallEvent('MMBuyTokenError', 1);"
+						/>
+						<panel height="0.5h"/>
+						<panel grow="true" regrow="true" width="100%">
+							<panel width="-1h" align="center" grow="true" regrow="true" float="bottom" padding="0.5h">
+								<label font="dyn_10" wrap="true" fity="true" color="white" shadow="true" watch0="MMBuySingleTokenResults" ontrigger0="If(param2 gt 0, SetText(Translate('mstore_error' # param2)));" watch1="MMBuyTokenStatus" ontrigger1="If(param0 == 3, SetText(Translate('mstore_error_connect')));" content="-"/>
+								<panel height="2.4h" width="100%">
+									<instance
+										width="6h" height="100%"
+										align="center"
+										name="button2" button_name="unnamedButton178"
+										label="general_ok"
+										onclick="CallEvent('MMBuyTokenError', 1);"
+									/>
+								</panel>
+							</panel>
+						</panel>
+						<panel height="0.5h"/>
+					</panel>
+				</panel>
+			</panel>
+
+			<!-- Success -->
+			<panel name="MMBuyTokenSuccess" watch="MMBuySingleTokenResults"
+				ontrigger="
+					If(
+						param1 == 3,
+						Split(
+							DoEvent(0),
+							ChatRefreshUpgrades(),
+							ClientRefreshUpgrades(),
+							CallEvent('mm_popup_buytoken', 1)
+						)
+					);
+				"
+				color="0 0 0 0.75" visible="false"
+				onevent0="FadeIn(200);"
+				onevent1="FadeOut(200);"
+			>
+				<panel width="35h" grow="true" regrow="true" align="center" valign="center" noclick="true" color="black">
+					<frame color="invisible" bordercolor="#455166" borderthickness="1" noclick="true" />
+					<panel float="bottom" width="35h" grow="true" regrow="true">
+						<instance
+							name="header_bar"
+							buttonsize="1.8h"
+							height="2.4h"
+							lbl="mstore_buyitem_success"
+							show_close="true"
+							onmouseover="PlaySound('/shared/sounds/ui/ccpanel/button_over_02.wav');"
+							onclick="PlaySound('/shared/sounds/ui/ccpanel/button_click_02.wav'); CallEvent('MMBuyTokenSuccess', 1);"
+						/>
+						<panel height="0.5h"/>
+						<panel grow="true" regrow="true" width="100%">
+							<panel width="-1h" align="center" grow="true" regrow="true" float="bottom" padding="0.5h">
+								<label font="dyn_10" wrap="true" fity="true" color="white" shadow="true" content="mstore_buyitem_success_body"/>
+								<panel height="2.4h" width="100%">
+									<instance
+										width="6h" height="100%"
+										align="center"
+										name="button2" button_name="unnamedButton179"
+										label="general_ok"
+										onclick="CallEvent('MMBuyTokenSuccess', 1);"
+									/>
+								</panel>
+							</panel>
+						</panel>
+						<panel height="0.5h"/>
+					</panel>
+				</panel>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="campaign_reward_popup_item">
+		<panel name="campaign_reward_popup_item{id}" x="{x}" y="{y}" width="50%" height="50%">
+			<image name="campaign_reward_popup_item{id}_icon" width="80@" height="80%" valign="center" texture="$invis" />
+			<panel x="100@" width="80%" align="left" valign="center" >
+				<label name="campaign_reward_popup_item{id}_text" font="dyn_12" textvalign="center" textalign="left" noclick="true" color="#dfdfdf" content="-"/>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="campaign_reward_popup">
+		<panel name="campaign_reward_popup" color="0 0 0 0.8" visible="0" onframelua="HoN_Matchmaking.OnCampaignRewardPopupFrame()">
+			<effectpanel  name="campaign_reward_popup_effect"
+						  camerawidth="100a"
+			              cameraheight="100"
+			              noclick="true"
+			              onloadlua="self:StartEffect('/ui/fe2/season/effects/popup_back_1.effect', 0.5, 0.5, '1 1 1', 1)"
+			              visible="1"
+			/>
+			<panel name="campaign_reward_popup_levelup_anim" align="center" valign="center" width="96h" height="96h">
+				<image x="1%" y="14%" align="center" width="100%" height="12.5%" texture="/ui/fe2/season/season_reward.tga" noclick="1"/>
+
+				<panel y="-5%" width="45%" height="45@" align="center" valign="center">
+					<image name="campaign_reward_popup_icon" texture="$invis" />
+				</panel>
+				<panel y="20%" width="50%" height="6%" align="center" valign="center">
+					<label name="campaign_reward_popup_tips" font="dyn_12" wrap="1" textvalign="center" textalign="left" noclick="true" color="#dfdfdf" content="-"/>
+				</panel>
+				<panel y="24%" width="50%" height="1" align="center" valign="center" color="1 1 1 .5" />
+				<panel y="26%" width="50%" height="2%" align="center" valign="center" >
+					<label font="dyn_12" textvalign="center" textalign="left" noclick="true" color="white" content="season_rewards_youwillget"/>
+				</panel>
+				<panel y="33%" width="50%" height="10%" align="center" valign="center">
+					<instance name="campaign_reward_popup_item" id="1"/>
+					<instance name="campaign_reward_popup_item" id="2" x="50%"/>
+					<instance name="campaign_reward_popup_item" id="3" y="50%"/>
+					<instance name="campaign_reward_popup_item" id="4" x="50%" y="50%"/>
+					<instance name="campaign_reward_popup_item" id="5" y="100%"/>
+					<instance name="campaign_reward_popup_item" id="6" x="50%" y="100%"/>
+				</panel>
+				<button align="right"
+						x="-19%"
+						y="16%"
+						width="3h"
+						height="3h"
+						color="invisible"
+						onclicklua="HoN_Matchmaking.popupTimer = GetTime()
+							    HoN_Matchmaking.popupShow = false
+							    GetWidget('campaign_reward_popup'):FadeOut(200)" >
+					<widgetstate statename="up">
+						<image align="center" valign="center" color=".75 .75 .75 1" texture="/ui/fe2/season/close.tga" noclick="true" />
+					</widgetstate>
+					<widgetstate statename="over">
+						<image align="center" valign="center" color="1 1 1 1" texture="/ui/fe2/season/close_over.tga" noclick="true" />
+					</widgetstate>
+					<widgetstate statename="down" x="1" y="1">
+						<image align="center" valign="center" color="1 1 1 1" texture="/ui/fe2/season/close_over.tga" noclick="true" />
+					</widgetstate>
+				</button>
+
+				<button align="center" valign="bottom"
+						y="-1.5%"
+						width="15.6%"
+						height="4%"
+						color="invisible"
+						onclicklua="HoN_Matchmaking.popupTimer = GetTime()
+							    HoN_Matchmaking.popupShow = false
+							    GetWidget('campaign_reward_popup'):FadeOut(200)" >
+					<widgetstate statename="up">
+						<image align="center" valign="center" width="160%" height="160%" texture="/ui/fe2/season/btn.tga" noclick="true" />
+						<label font="dyn_12" textvalign="center" textalign="center" noclick="true" color="white" shadow="true" shadowcolor="#d89019" content="general_close"/>
+					</widgetstate>
+					<widgetstate statename="over">
+						<image align="center" valign="center" width="160%" height="160%" texture="/ui/fe2/season/btn_over.tga" noclick="true" />
+						<label font="dyn_12" textvalign="center" textalign="center" noclick="true" color="white" shadow="true" shadowcolor="#d89019" content="general_close"/>
+					</widgetstate>
+					<widgetstate statename="down" x="1" y="1">
+						<image align="center" valign="center" width="160%" height="160%" texture="/ui/fe2/season/btn_over.tga" noclick="true" />
+						<label font="dyn_12" textvalign="center" textalign="center" noclick="true" color="white" shadow="true" shadowcolor="#d89019" content="general_close"/>
+					</widgetstate>
+				</button>
+			</panel>
+		</panel>
+	</template>
+</package>

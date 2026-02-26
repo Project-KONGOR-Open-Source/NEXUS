@@ -1,0 +1,315 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+
+	<instance name="generic_tooltip_floater" width="23h" tip_id="mstore_item_expiration_tip" title="mstore_item_expiration" label="mstore_item_expiration_tip" />
+	<instance name="generic_tooltip_floater" width="23h" tip_id="mstore_item_matches_tip" title="mstore_item_matches" label="mstore_item_matches_tip" />
+	<instance name="generic_tooltip_floater" width="23h" tip_id="mstore_item_duration_tip" title="mstore_item_duration" label="mstore_item_duration_tip" />
+	
+	<instance name="generic_tooltip_floater" width="23h" tip_id="mstore_unavailable_tip" title="general_unavailable" label="mstore_unavailable_tip" />
+	
+	<instance name="generic_tooltip_floater" width="23h" tip_id="mstore_tip_unlock_icons" title="mstore_icon_slot_locked" label="mstore_unlock_body" />
+	<instance name="generic_tooltip_floater" width="23h" tip_id="mstore_tip_unlock_taunt" title="mstore_taunt_slot_locked" label="mstore_unlock_taunt_body" />
+	
+	<instance name="generic_tooltip_floater" width="23h" tip_id="mstore_tip_view_specials" title="mstore_viewspecials" label="mstore_specials_tip" />
+	
+	<instance name="generic_tooltip_floater" width="23h" tip_id="mstore_tip_vanity" title="mstore_vanity" label="mstore_vanity_tip" />
+	<instance name="generic_tooltip_floater" width="23h" tip_id="mstore_tip_gamevanity" title="mstore_gamevanity" label="mstore_gamevanity_tip" />
+	
+	<instance name="generic_tooltip_floater" width="23h" tip_id="mstore_tip_category1" title="mstore_category1" label="mstore_category1_desc" /><!-- New -->
+	<instance name="generic_tooltip_floater" width="23h" tip_id="mstore_tip_category2" title="mstore_category2" label="mstore_category2_desc" /><!-- Hero Avatars -->
+	<instance name="generic_tooltip_floater" width="23h" tip_id="mstore_tip_category3" title="mstore_category3" label="mstore_category3_desc" /><!-- Account Icons -->
+	<instance name="generic_tooltip_floater" width="23h" tip_id="mstore_tip_category4" title="mstore_category4" label="mstore_category4_desc" /><!-- Symbols -->
+	<instance name="generic_tooltip_floater" width="23h" tip_id="mstore_tip_category5" title="mstore_category5" label="mstore_category5_desc" /><!-- Announcements -->
+	<instance name="generic_tooltip_floater" width="23h" tip_id="mstore_tip_category6" title="mstore_category6" label="mstore_category6_desc" /><!-- Misc -->
+	<instance name="generic_tooltip_floater" width="23h" tip_id="mstore_tip_category7" title="mstore_category7" label="mstore_category7_desc" /><!-- Bundles -->
+	<instance name="generic_tooltip_floater" width="23h" tip_id="mstore_tip_category16" title="mstore_category16" label="mstore_category16_desc" /><!-- Account colors -->
+	<instance name="generic_tooltip_floater" width="23h" tip_id="mstore_tip_category27" title="mstore_category27" label="mstore_category27_desc" /><!-- Taunt -->
+	<instance name="generic_tooltip_floater" width="23h" tip_id="mstore_tip_category56" title="mstore_category56" label="mstore_category56_desc" /><!-- Avatars -->
+	<instance name="generic_tooltip_floater" width="23h" tip_id="mstore_tip_category57" title="mstore_category57" label="mstore_category57_desc" /><!-- Couriers -->
+	<instance name="generic_tooltip_floater" width="23h" tip_id="mstore_tip_category58" title="mstore_category58" label="mstore_category58_desc" /><!-- EAP -->
+	<instance name="generic_tooltip_floater" width="23h" tip_id="mstore_tip_category58b" title="mstore_category58b" label="mstore_category58b_desc" /><!-- Heroes (EAP for F2P) -->
+	<instance name="generic_tooltip_floater" width="23h" tip_id="mstore_tip_category58c" title="mstore_category58c" label="mstore_category58c_desc" /><!-- Not EAP (EAP for not EAP) -->
+		
+	<instance name="generic_tooltip_floater" width="23h" tip_id="mstore_tip_category59" title="mstore_category59" label="mstore_category59_desc" /><!-- Flags -->
+	<instance name="generic_tooltip_floater" width="23h" tip_id="mstore_tip_category60" title="mstore_category60" label="mstore_category60_desc" /><!-- Hero Symbols -->
+	<instance name="generic_tooltip_floater" width="23h" tip_id="mstore_tip_category61" title="mstore_category61" label="mstore_category61_desc" />
+	<instance name="generic_tooltip_floater" width="23h" tip_id="mstore_tip_category74" title="mstore_category74" label="mstore_category74_desc" /><!-- Custom Wards -->
+	<instance name="generic_tooltip_floater" width="23h" tip_id="mstore_tip_category75" title="mstore_category75" label="mstore_category75_desc" /><!-- Enhancements -->
+	<instance name="generic_tooltip_floater" width="23h" tip_id="mstore_tip_category76" title="mstore_category76" label="mstore_category76_desc" /><!-- Creep -->
+		
+	<instance name="generic_tooltip_floater" width="23h" tip_id="mstore_tip_purchase_item" title="mstore_purchase" label="mstore_purchase_desc" />
+	<instance name="generic_tooltip_floater" width="23h" tip_id="mstore_tip_owned_item" title="mstore_purchased" label="mstore_purchased_desc" />
+	<instance name="generic_tooltip_floater" width="23h" tip_id="mstore_tip_owned_bundle" title="mstore_purchased" label="mstore_purchasedb_desc" />
+	<instance name="generic_tooltip_floater" width="23h" tip_id="mstore_tip_preview_avatar" title="mstore_preview_avatar" label="mstore_preview_avatar_desc" />
+	<instance name="generic_tooltip_floater" width="23h" tip_id="mstore_tip_preview_bundle" title="mstore_preview_bundle" label="mstore_preview_bundle_desc" />
+	<instance name="generic_tooltip_floater" width="23h" tip_id="mstore_tip_open_store" title="mstore_openstore" label="mstore_openstore_desc" />
+	<instance name="generic_tooltip_floater" width="23h" tip_id="mstore_tip_open_vault" title="mstore_openvault" label="mstore_openvault_desc" />
+	<instance name="generic_tooltip_floater" width="23h" tip_id="mstore_tip_processing" title="mstore_processing" label="mstore_processing_desc" />
+	<instance name="generic_tooltip_floater" width="23h" tip_id="mstore_tip_retry" title="mstore_retry" label="mstore_retry_desc" />
+	<instance name="generic_tooltip_floater" width="23h" tip_id="mstore_tip_preview_avatar_default" title="mstore_preview_avatar_default" label="mstore_preview_avatar_default_desc" />
+	<instance name="generic_tooltip_floater" width="23h" tip_id="mstore_tip_buy_coins" title="mstore_buycoins" label="mstore_buycoins_desc" />
+	
+	<instance name="generic_tooltip_floater" width="23h" tip_id="mstore_tip_redeem_code" title="mstore_redeem_code" label="mstore_redeem_code_desc" />
+	
+	<instance name="generic_tooltip_floater" width="23h" tip_id="mstore_tip_need_coins" title="mstore_needcoins" label="mstore_needcoins_desc" />
+	<instance name="generic_tooltip_floater" width="23h" tip_id="mstore_tip_coin_count" title="mstore_goldcount" label="mstore_goldcount_desc" />
+	<instance name="generic_tooltip_floater" width="23h" tip_id="mstore_tip_shopkeeper" title="mstore_shopkeepermodel" label="mstore_shopkeepermodel_desc" />
+	<instance name="generic_tooltip_floater" width="23h" tip_id="mstore_tip_redeemcode_self" title="mstore_redeemcode_self" label="mstore_redeemcode_self_desc" />
+	<instance name="generic_tooltip_floater" width="23h" tip_id="mstore_tip_buycoins_self" title="mstore_buycoins_self" label="mstore_buycoins_self_desc" />
+	<instance name="generic_tooltip_floater" width="23h" tip_id="mstore_tip_buycoins_other" title="mstore_buycoins_other" label="mstore_buycoins_other_desc" />
+	<instance name="generic_tooltip_floater" width="23h" tip_id="mstore_tip_buygift_other" title="mstore_buygift_other" label="mstore_buygift_other_desc" />
+	<instance name="generic_tooltip_floater" width="23h" tip_id="mstore_tip_package_worst" title="mstore_package_worst" label="mstore_package_worst_desc" />
+	<instance name="generic_tooltip_floater" width="23h" tip_id="mstore_tip_package_middle" title="mstore_package_middle" label="mstore_package_middle_desc" />
+	<instance name="generic_tooltip_floater" width="23h" tip_id="mstore_tip_package_best" title="mstore_package_best" label="mstore_package_best_desc" />
+
+	<instance name="generic_tooltip_floater" width="23h" tip_id="mstore_tip_package_1" title="mstore_package_1" label="mstore_package_1_desc" />
+	<instance name="generic_tooltip_floater" width="23h" tip_id="mstore_tip_package_2" title="mstore_package_2" label="mstore_package_2_desc" />
+	<instance name="generic_tooltip_floater" width="23h" tip_id="mstore_tip_package_3" title="mstore_package_3" label="mstore_package_3_desc" />
+	<instance name="generic_tooltip_floater" width="23h" tip_id="mstore_tip_package_4" title="mstore_package_4" label="mstore_package_4_desc" />
+	<instance name="generic_tooltip_floater" width="23h" tip_id="mstore_tip_package_5" title="mstore_package_5" label="mstore_package_5_desc" />
+	<instance name="generic_tooltip_floater" width="23h" tip_id="mstore_tip_package_6" title="mstore_package_6" label="mstore_package_6_desc" />
+	<instance name="generic_tooltip_floater" width="23h" tip_id="mstore_tip_package_7" title="mstore_package_7" label="mstore_package_7_desc" />
+	<instance name="generic_tooltip_floater" width="23h" tip_id="mstore_tip_package_8" title="mstore_package_8" label="mstore_package_8_desc" />
+
+	<instance name="generic_tooltip_floater" width="23h" tip_id="mstore_tip_buycoins_submit" title="mstore_buycoins_submit" label="mstore_buycoins_submit_desc" />
+	<instance name="generic_tooltip_floater" width="23h" tip_id="mstore_tip_vault_nextpage" title="mstore_vault_nextpage" label="mstore_vault_prevpage_desc" />
+	<instance name="generic_tooltip_floater" width="23h" tip_id="mstore_tip_vault_prevpage" title="mstore_vault_prevpage" label="mstore_vault_prevpage_desc" />
+	<instance name="generic_tooltip_floater" width="23h" tip_id="mstore_tip_nextpage" title="mstore_nextpage" label="mstore_nextpage_desc" />
+	<instance name="generic_tooltip_floater" width="23h" tip_id="mstore_tip_prevpage" title="mstore_prevpage" label="mstore_prevpage_desc" />
+	<instance name="generic_tooltip_floater" width="23h" tip_id="mstore_tip_vault_choose2" title="mstore_choosetype2" label="mstore_choosetype2_desc" />
+	<instance name="generic_tooltip_floater" width="23h" tip_id="mstore_tip_vault_choose3" title="mstore_choosetype3" label="mstore_choosetype3_desc" />
+	<instance name="generic_tooltip_floater" width="23h" tip_id="mstore_tip_vault_choose4" title="mstore_choosetype4" label="mstore_choosetype4_desc" />
+	<instance name="generic_tooltip_floater" width="23h" tip_id="mstore_tip_vault_choose5" title="mstore_choosetype5" label="mstore_choosetype5_desc" />
+	<instance name="generic_tooltip_floater" width="23h" tip_id="mstore_tip_vault_choose16" title="mstore_choosetype16" label="mstore_choosetype16_desc" />
+	
+	<instance name="generic_tooltip_floater" width="23h" tip_id="mstore_tip_vault_choose27" title="mstore_choosetype27" label="mstore_choosetype27_desc" />
+	<instance name="generic_tooltip_floater" width="23h" tip_id="mstore_tip_vault_choose56" title="mstore_choosetype56" label="mstore_choosetype56_desc" />
+	<instance name="generic_tooltip_floater" width="23h" tip_id="mstore_tip_vault_choose57" title="mstore_choosetype57" label="mstore_choosetype57_desc" />	
+	<instance name="generic_tooltip_floater" width="23h" tip_id="mstore_tip_vault_choose74" title="mstore_choosetype74" label="mstore_choosetype74_desc" />	
+	<instance name="generic_tooltip_floater" width="23h" tip_id="mstore_tip_vault_choose76" title="mstore_choosetype76" label="mstore_choosetype76_desc" />	
+	
+	<instance name="generic_tooltip_floater" width="23h" tip_id="mstore_tip_costbreakdown" title="mstore_costbreakdown" label="mstore_costbreakdown_tip" />
+	
+	<instance name="generic_tooltip_floater" width="23h" tip_id="mstore_tip_redeem_nickchange" title="mstore_redeem161" label="mstore_redeem161_desc" />
+	<instance name="generic_tooltip_floater" width="23h" tip_id="mstore_tip_redeem_subaccount" title="mstore_redeem162" label="mstore_redeem162_desc" />
+	<instance name="generic_tooltip_floater" width="23h" tip_id="mstore_tip_redeem_statreset" title="mstore_redeem163" label="mstore_redeem163_desc" />
+	<instance name="generic_tooltip_floater" width="23h" tip_id="mstore_tip_redeem_mulligan" title="mstore_redeem492" label="mstore_redeem492_desc" />
+	<!--
+		<instance name="generic_tooltip_floater" width="23h" tip_id="mstore_tip_" title="mstore_" label="mstore__desc" />
+		<instance name="generic_tooltip_floater" width="23h" tip_id="mstore_tip_" title="mstore_" label="mstore__desc" />
+		<instance name="generic_tooltip_floater" width="23h" tip_id="mstore_tip_" title="mstore_" label="mstore__desc" />
+	-->
+	
+	<instance name="generic_tooltip_floater" width="23h" tip_id="mstore_tip_aafeature_hasmodel" title="mstore_aafeature_hasmodel" label="mstore_aafeature_hasmodel_description" />
+	<instance name="generic_tooltip_floater" width="23h" tip_id="mstore_tip_aafeature_hassounds" title="mstore_aafeature_hassounds" label="mstore_aafeature_hassounds_description" />
+	<instance name="generic_tooltip_floater" width="23h" tip_id="mstore_tip_aafeature_hastexture" title="mstore_aafeature_hastexture" label="mstore_aafeature_hastexture_description" />
+	<instance name="generic_tooltip_floater" width="23h" tip_id="mstore_tip_aafeature_hasanimations" title="mstore_aafeature_hasanimations" label="mstore_aafeature_hasanimations_description" />
+	<instance name="generic_tooltip_floater" width="23h" tip_id="mstore_tip_aafeature_haseffects" title="mstore_aafeature_haseffects" label="mstore_aafeature_haseffects_description" />
+	
+	<instance name="generic_tooltip_floater" width="23h" tip_id="mstore_tip_vault_tokens" title="mstore_vault_tip_tokens_title" label="mstore_vault_tip_tokens_txt" />
+	<instance name="generic_tooltip_floater" width="23h" tip_id="mstore_tip_vault_ARpass" title="mstore_vault_tip_ARpass_title" label="mstore_vault_tip_ARpass_txt" />
+	<instance name="generic_tooltip_floater" width="23h" tip_id="mstore_tip_vault_BDpass" title="mstore_vault_tip_BDpass_title" label="mstore_vault_tip_BDpass_txt" />
+	<instance name="generic_tooltip_floater" width="23h" tip_id="mstore_tip_vault_SDpass" title="mstore_vault_tip_SDpass_title" label="mstore_vault_tip_SDpass_txt" />
+	
+	<instance name="generic_tooltip_floater" width="23h" tip_id="mstore_tip_eap_altavatar" title="mstore_eap_tip_altavetitle" label="mstore_eap_tip_altavetitle_txt" />
+	<instance name="generic_tooltip_floater" width="23h" tip_id="mstore_tip_herodisplay_hasalt" title="mstore_eap_tip_altavetitle" label="mstore_tip_herodisplay_hasalt_txt" />
+
+	<floater width="25h" grow="true" color="invisible" x="22" y="-22" visible="false" name="mstore_tip_ext_3">
+		<frame texture="/ui/frames/tooltip_bg.tga" color="0 0 0 .8" borderthickness=".6h" />
+		<frame texture="/ui/frames/roundframe.tga" color="#A0A0A0" borderthickness=".6h" />
+		<panel align="center" width="-1h" grow="true" float="bottom" padding="0.5h">
+				<panel width="100%" grow="true" float="bottom">
+					<label height="3h" textvalign="center" color="#FFCC00" font="dyn_11" content="mstore_category3"/>
+					<label fity="true" wrap="true" font="dyn_10" color="white" content="mstore_exttip_accounticons"/>
+					<panel height="0.5h"/>
+					<label height="2.5h" textvalign="center" color="#FFFF00" font="dyn_10" content="mstore_chatlist"/>
+					<panel height="2.5h">
+						<image noclick="true" height="100%" width="800@" ontrigger9lua="ResourceManager.RegisterTexture('/ui/fe2/store/examples/accounticon_chat.tga', 'store', self)" resourcecontext="store" watch9="MainRegisterTextures" />
+					</panel>
+					<label height="2.5h" textvalign="center" color="#FFFF00" font="dyn_10" content="mstore_gamelobby"/>
+					<panel height="6h" width="10h">
+						<image noclick="true" height="100@" width="100%" ontrigger9lua="ResourceManager.RegisterTexture('/ui/fe2/store/examples/accounticon_gamelobby.tga', 'store', self)" resourcecontext="store" watch9="MainRegisterTextures"/>
+					</panel>
+					<panel height="0.5h"/>
+					<label height="2.5h" textvalign="center" color="#FFFF00" font="dyn_10" content="player_stats_header"/>
+					<panel height="5h">
+						<image noclick="true" height="100%" width="400@" ontrigger9lua="ResourceManager.RegisterTexture('/ui/fe2/store/examples/preview_stats.tga', 'store', self)" resourcecontext="store" watch9="MainRegisterTextures"/>
+					</panel>
+				</panel>
+			<panel height="0"/>
+		</panel>
+	</floater>
+
+	<floater width="25h" grow="true" color="invisible" x="22" y="-22" visible="false" name="mstore_tip_ext_4">
+		<frame texture="/ui/frames/tooltip_bg.tga" color="0 0 0 .8" borderthickness=".6h" />
+		<frame texture="/ui/frames/roundframe.tga" color="#A0A0A0" borderthickness=".6h" />
+		<panel align="center" width="-1h" grow="true" float="bottom" padding="0.5h">
+				<panel width="100%" grow="true" float="bottom">
+					<label height="3h" textvalign="center" color="#FFCC00" font="dyn_11" content="mstore_category4"/>
+					<label fity="true" wrap="true" font="dyn_10" color="white" content="mstore_exttip_symbols"/>
+					<panel height="0.5h"/>
+					<label height="2.5h" textvalign="center" color="#FFFF00" font="dyn_10" content="mstore_chatlist"/>
+					<panel height="2.5h">
+						<image noclick="true" height="100%" width="400@" ontrigger9lua="ResourceManager.RegisterTexture('/ui/fe2/store/examples/symbol_preview.tga', 'store', self)" resourcecontext="store" watch9="MainRegisterTextures"/>
+					</panel>
+					<label height="2.5h" textvalign="center" color="#FFFF00" font="dyn_10" content="mstore_replacedefsymbol"/>
+					<panel width="20h" height="2.5h">
+						<image noclick="true" height="100%" width="400@" ontrigger9lua="ResourceManager.RegisterTexture('/ui/fe2/store/examples/symbol_withcolor.tga', 'store', self)" resourcecontext="store" watch9="MainRegisterTextures"/>
+					</panel>
+					<panel height="0.5h"/>
+					<label height="2.5h" textvalign="center" color="#FFFF00" font="dyn_10" content="player_stats_header"/>
+					<panel height="5h">
+						<image noclick="true" height="100%" width="400@" ontrigger9lua="ResourceManager.RegisterTexture('/ui/fe2/store/examples/stats_symbol.tga', 'store', self)" resourcecontext="store" watch9="MainRegisterTextures"/>
+					</panel>
+				</panel>
+			<panel height="0"/>
+		</panel>
+	</floater>
+
+	<floater width="35h" grow="true" color="invisible" x="22" y="-22" visible="false" name="mstore_tip_ext_5">
+		<frame texture="/ui/frames/tooltip_bg.tga" color="0 0 0 .8" borderthickness=".6h" />
+		<frame texture="/ui/frames/roundframe.tga" color="#A0A0A0" borderthickness=".6h" />
+		<panel align="center" width="-1h" grow="true" float="bottom" padding="0.5h">
+				<panel width="100%" grow="true" float="bottom">
+					<label height="3h" textvalign="center" color="#FFCC00" font="dyn_11" content="mstore_category5"/>
+					<label fity="true" wrap="true" font="dyn_10" color="white" content="mstore_exttip_announcements"/>
+					<panel height="0.5h"/>
+					<label height="2.5h" textvalign="center" color="#FFFF00" font="dyn_10" content="mstore_soundsandtext"/>
+					<panel height="5h">
+						<image noclick="true" height="25@" width="100%" ontrigger9lua="ResourceManager.RegisterTexture('/ui/fe2/store/examples/announcer_preview.tga', 'store', self)" resourcecontext="store" watch9="MainRegisterTextures"/>
+					</panel>
+				</panel>
+			<panel height="0"/>
+		</panel>
+	</floater>
+
+	<floater width="25h" grow="true" color="invisible" x="22" y="-22" visible="false" name="mstore_tip_ext_2">
+		<frame texture="/ui/frames/tooltip_bg.tga" color="0 0 0 .8" borderthickness=".6h" />
+		<frame texture="/ui/frames/roundframe.tga" color="#A0A0A0" borderthickness=".6h" />
+		<panel align="center" width="-1h" grow="true" float="bottom" padding="0.5h">
+				<panel width="100%" grow="true" float="bottom">
+					<label height="3h" textvalign="center" color="#FFCC00" font="dyn_11" content="mstore_category2"/>
+					<label fity="true" wrap="true" font="dyn_10" color="white" content="mstore_exttip_altavatars"/>
+					<panel height="0.5h"/>
+					<label height="2.5h" textvalign="center" color="#FFFF00" font="dyn_10" content="mstore_customizeeachmatch"/>
+					<panel grow="true" width="100%">
+						<panel align="left" width="49%" height="49@">
+							<image noclick="true" height="100%" width="100@" ontrigger9lua="ResourceManager.RegisterTexture('/ui/fe2/store/examples/altavatar_default.tga', 'store', self)" resourcecontext="store" watch9="MainRegisterTextures"/>
+						</panel>
+						<panel align="right" width="49%" height="49@">
+							<image noclick="true" height="100%" width="100@" ontrigger9lua="ResourceManager.RegisterTexture('/ui/fe2/store/examples/altavatar_selected.tga', 'store', self)" resourcecontext="store" watch9="MainRegisterTextures"/>
+						</panel>
+					</panel>
+				</panel>
+			<panel height="0"/>
+		</panel>
+	</floater>
+
+	<floater width="25h" grow="true" color="invisible" x="22" y="-22" visible="false" name="mstore_tip_ext_16">
+		<frame texture="/ui/frames/tooltip_bg.tga" color="0 0 0 .8" borderthickness=".6h" />
+		<frame texture="/ui/frames/roundframe.tga" color="#A0A0A0" borderthickness=".6h" />
+		<panel align="center" width="-1h" grow="true" float="bottom" padding="0.5h">
+				<panel width="100%" grow="true" float="bottom">
+					<label height="3h" textvalign="center" color="#FFCC00" font="dyn_11" content="mstore_category16"/>
+					<label fity="true" wrap="true" font="dyn_10" color="white" content="mstore_exttip_namecolor"/>
+					<panel height="0.5h"/>
+					<label height="2.5h" textvalign="center" color="#FFFF00" font="dyn_10" content="mstore_chatlist"/>
+					<panel height="2.5h">
+						<image noclick="true" height="100%" width="400@" ontrigger9lua="ResourceManager.RegisterTexture('/ui/fe2/store/examples/namecolor_chat.tga', 'store', self)" resourcecontext="store" watch9="MainRegisterTextures"/>
+					</panel>
+					<label height="2.5h" textvalign="center" color="#FFFF00" font="dyn_10" content="player_stats_header"/>
+					<panel height="5h">
+						<image noclick="true" height="100%" width="400@" ontrigger9lua="ResourceManager.RegisterTexture('/ui/fe2/store/examples/preview_stats.tga', 'store', self)" resourcecontext="store" watch9="MainRegisterTextures"/>
+					</panel>
+					<panel height="0.5h"/>
+					<label height="2.5h" textvalign="center" color="#FFFF00" font="dyn_10" content="mstore_forums"/>
+					<panel height="4h" width="11h">
+						<image noclick="true" height="125%" width="250@" ontrigger9lua="ResourceManager.RegisterTexture('/ui/fe2/store/examples/namecolor_forums.tga', 'store', self)" resourcecontext="store" watch9="MainRegisterTextures"/>
+					</panel>
+				</panel>
+			<panel height="0"/>
+		</panel>
+	</floater>
+	
+	<!-- Enhancements Tip -->	
+	<floater name="mstore_tip_enhancements" width="25h" grow="true" regrow="true" color="invisible" x="22" y="-22" visible="false">
+		<frame texture="/ui/frames/tooltip_bg.tga" color="0 0 0 .8" borderthickness=".6h" />
+		<frame texture="/ui/frames/roundframe.tga" color="#A0A0A0" borderthickness=".6h" />
+		<panel align="center" width="-1h" grow="true" float="bottom" padding="0.5h">
+				<panel width="100%" grow="true" float="bottom">
+					<label height="3h" textvalign="center" color="#FFCC00" font="dyn_11" content="mstore_category75"/>
+					<label fity="true" wrap="true" font="dyn_10" color="white" content="mstore_exttip_enhancements"/>
+					<panel height="0.5h"/>
+					<label height="2.5h" textvalign="center" color="#FFFF00" font="dyn_10" content="mstore_chatlist"/>
+					<panel height="75@">
+						<image name="mstore_tip_enhancements_image" noclick="true" height="100%" width="800@" ontrigger9lua="ResourceManager.RegisterTexture('/ui/fe2/store/examples/enhancement_ingame.tga', 'store', self)" resourcecontext="store" watch9="MainRegisterTextures" />
+					</panel>
+
+					<panel height="2.5h">
+					</panel>
+				</panel>
+			<panel height="0"/>
+		</panel>
+	</floater>
+
+	<!-- Empty CAI Slot Tooltip -->
+	<floater
+		name="empty_custom_slot_tip"
+		grow="true" x="22" y="-22" width="34.0h"
+		visible="false"
+	>
+		<frame texture="/ui/frames/tooltip_bg.tga" color="0 0 0 .85" borderthickness=".6h" />
+		<frame texture="/ui/frames/roundframe.tga" color="#A0A0A0" borderthickness=".6h" />
+
+		<panel y="0.8h" width="-1.6h" height="3.6h" align="center" float="right" padding="0.5h">
+			<!-- Icon -->
+			<panel width="100@" height="100%">
+				<image onshow="SetTexture('/ui/fe2/store/icons/custom_icon.tga');" resourcecontext="store" />
+				<frame color="invisible" borderthickness="1" bordercolor=".3 .3 .3 1"/>
+			</panel>
+			<!-- Name / Lvl -->
+			<panel width="-120@" height="100%" float="bottom" padding="0">
+				<label fity="true" font="dyn_12" color="#ffab01" shadow="true" content="mstore_custom_openslot" />
+				<label fity="true" font="dyn_10" color=".8 .8 .8 1" shadow="true" content="mstore_custom_openslot2" />
+			</panel>
+		</panel>
+
+		<panel grow="true" y="5.2h" width="-1.6h" align="center" float="bottom">
+			<label fity="true" fitypadding="0.5h" font="dyn_10" color="1 1 1 1" shadow="true" wrap="true" content="mstore_custom_openslot_inst" />
+			<label fity="true" fitypadding="0.8h" font="dyn_10" color="#3abde7" shadow="true" textalign="left" content="mstore_custom_openslot_url" />
+		</panel>
+	</floater>
+	
+	<!-- CAI Slot FAQ Tooltip -->
+	<floater
+		name="custom_slot_faq_tip"
+		grow="true" x="22" y="-22" width="40.0h"
+		visible="false"
+	>
+		<frame texture="/ui/frames/tooltip_bg.tga" color="0 0 0 .85" borderthickness=".6h" />
+		<frame texture="/ui/frames/roundframe.tga" color="#A0A0A0" borderthickness=".6h" />
+
+		<panel y="0.8h" width="-1.6h" height="3.6h" align="center" float="right" padding="0.5h">
+			<!-- Icon -->
+			<panel width="100@" height="100%">
+				<image onshow="SetTexture('/ui/fe2/store/icons/custom_icon.tga');" resourcecontext="store" />
+				<frame color="invisible" borderthickness="1" bordercolor=".3 .3 .3 1"/>
+			</panel>
+			<!-- Name / Lvl -->
+			<panel width="-120@" height="100%" float="bottom" padding="0">
+				<label fity="true" font="dyn_12" color="#ffab01" shadow="true" content="mstore_custom_faq_title" />
+				<label fity="true" font="dyn_10" color=".8 .8 .8 1" shadow="true" content="mstore_custom_faq_title2" />
+			</panel>
+		</panel>
+		<panel grow="true" y="5.2h" width="-1.6h" align="center" float="bottom">
+			<label fity="true" fitypadding="0.3h" font="dyn_10" color="#3abde7" shadow="true" textalign="left" content="mstore_custom_faq_Q1" />
+			<label fity="true" fitypadding="1.0h" font="dyn_10" color="1 1 1 1" shadow="true" wrap="true" content="mstore_custom_faq_A1" />			
+			<label fity="true" fitypadding="0.3h" font="dyn_10" color="#3abde7" shadow="true" textalign="left" content="mstore_custom_faq_Q2" />
+			<label fity="true" fitypadding="1.0h" font="dyn_10" color="1 1 1 1" shadow="true" wrap="true" content="mstore_custom_faq_A2" />			
+			<label fity="true" fitypadding="0.3h" font="dyn_10" color="#3abde7" shadow="true" textalign="left" content="mstore_custom_faq_Q3" />
+			<label fity="true" fitypadding="1.0h" font="dyn_10" color="1 1 1 1" shadow="true" wrap="true" content="mstore_custom_faq_A3" />
+		</panel>
+	</floater>
+		
+	
+</package>

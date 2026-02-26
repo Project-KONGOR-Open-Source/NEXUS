@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+
+	<template name="change_log">
+		<panel name="change_log" y="-110%" width="70h" align="center" color="black" visible="{visible=0}" noclick="1"
+				hotkey="ESC" onhotkeylua="UIManager.GetInterface('main'):HoNMainF('MainMenuPanelToggle', 'change_log', nil, false)"
+		>
+			<instance name="newui_popup_caption_frame" uppercase="0" title="patchnotes_title"
+				onclicklua="UIManager.GetInterface('main'):HoNMainF('MainMenuPanelToggle', 'change_log', nil, false)"
+			/>
+
+			<panel y="4.0h" width="-2.0h" height="-5.5h" align="center" noclick="1">
+				<panel name="patchnotes_latest" height="-3.6h" group="patchnotes_buffers">
+					<if condition="!cl_GarenaEnable">
+						<textbuffer
+							scrolltexture="/ui/fe2/newui/res/common/scroll/scroll.png"
+							handleheight="3h"
+							scrollbarsize="1.5h"
+							exteriorscrollbars="0"
+							textalign="left"
+							font="dyn_10"
+							textcolor="white"
+							color="invisible"
+							shadow="1"
+							noclick="0"
+							file=":/change_log_header.txt"
+							file1=":/change_log_color.txt"
+							name="change_log_buffer"
+						/>
+					</if>
+					<if condition="cl_GarenaEnable">
+						<textbuffer
+							scrolltexture="/ui/fe2/newui/res/common/scroll/scroll.png"
+							handleheight="3h"
+							scrollbarsize="1.5h"
+							exteriorscrollbars="0"
+							textalign="left"
+							font="dyn_10"
+							textcolor="white"
+							color="invisible"
+							shadow="1"
+							noclick="0"
+							file=":/change_log_header_garena.txt"
+							file1=":/change_log_color.txt"
+							name="change_log_buffer"
+						/>
+					</if>
+				</panel>
+
+				<panel name="patchnotes_history" height="-3.6h" visible="0" group="patchnotes_buffers">
+					<if condition="!cl_GarenaEnable">
+						<textbuffer
+							scrolltexture="/ui/fe2/newui/res/common/scroll/scroll.png"
+							handleheight="3h"
+							scrollbarsize="1.5h"
+							exteriorscrollbars="0"
+							textalign="left"
+							font="dyn_10"
+							textcolor="white"
+							color="invisible"
+							shadow="1"
+							noclick="0"
+							file=":/change_log_header.txt"
+							file1=":/change_log_color_history.txt"
+							name="change_log_buffer_history"
+						/>
+					</if>
+					<if condition="cl_GarenaEnable">
+						<textbuffer
+							scrolltexture="/ui/fe2/newui/res/common/scroll/scroll.png"
+							handleheight="3h"
+							scrollbarsize="1.5h"
+							exteriorscrollbars="0"
+							textalign="left"
+							font="dyn_10"
+							textcolor="white"
+							color="invisible"
+							shadow="1"
+							noclick="0"
+							file=":/change_log_header_garena.txt"
+							file1=":/change_log_color_history.txt"
+							name="change_log_buffer_history"
+						/>
+					</if>
+				</panel>
+
+				<instance name="newui_common_button_2_template" button_name="patchnotes_history_button" group="patchnotes_history_buttons"
+					label="patchnotes_history_button" y=".75h" width="12h" height="2.5h" valign="bottom"
+					onclick="ShowOnly('patchnotes_history'); ShowOnly('patchnotes_latest_button');"
+				/>
+
+				<instance name="newui_common_button_2_template" button_name="patchnotes_latest_button" group="patchnotes_history_buttons"
+					label="patchnotes_latest_button" y=".75h" width="12h" height="2.5h" valign="bottom" visible="0"
+					onclick="ShowOnly('patchnotes_latest'); ShowOnly('patchnotes_history_button');"
+				/>
+
+				<instance name="newui_common_button_2_template"
+					label="patchnotes_close_btn" y=".75h" width="12h" height="2.5h" align="right" valign="bottom"
+					onclicklua="UIManager.GetInterface('main'):HoNMainF('MainMenuPanelToggle', 'change_log', nil, false)"
+				/>
+			</panel>
+		</panel>
+	</template>
+</package>

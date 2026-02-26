@@ -14,12 +14,14 @@ public partial class InitStatsHandler(
     MerrickContext databaseContext,
     IDatabase distributedCache,
     IPlayerStatisticsService statisticsService,
+    IHeroDefinitionService heroDefinitions,
     IOptions<OperationalConfiguration> operationalConfiguration,
     ILogger<InitStatsHandler> logger) : IClientRequestHandler
 {
     private MerrickContext MerrickContext { get; } = databaseContext;
     private IDatabase DistributedCache { get; } = distributedCache;
     private IPlayerStatisticsService StatisticsService { get; } = statisticsService;
+    private IHeroDefinitionService HeroDefinitions { get; } = heroDefinitions;
     private OperationalConfiguration OperationalConfiguration { get; } = operationalConfiguration.Value;
     private ILogger Logger { get; } = logger;
 
@@ -86,7 +88,7 @@ public partial class InitStatsHandler(
         // Fetch aggregated player stats for the account
         PlayerStatisticsAggregatedDTO stats = await StatisticsService.GetAggregatedStatisticsAsync(account.ID);
 
-        ShowSimpleStatsResponse fullResponse = ClientRequestHelper.CreateShowSimpleStatsResponse(account, stats, int.Parse(OperationalConfiguration.CurrentSeason));
+        ShowSimpleStatsResponse fullResponse = ClientRequestHelper.CreateShowSimpleStatsResponse(account, stats, int.Parse(OperationalConfiguration.CurrentSeason), HeroDefinitions);
 
         LogConstructingResponse();
         // Restored standard keys (slot_id, tokens) as strict removal might cause client instability.
@@ -94,16 +96,50 @@ public partial class InitStatsHandler(
         {
             { "nickname", account.GetNameWithClanTag() },
             { "account_id", fullResponse.ID },
-            { "level", fullResponse.Level },
-            { "level_exp", fullResponse.LevelExperience },
+            { "level", fullResponse.Level.ToString(CultureInfo.InvariantCulture) },
+            { "level_exp", fullResponse.LevelExperience.ToString(CultureInfo.InvariantCulture) },
             { "avatar_num", fullResponse.NumberOfAvatarsOwned },
             { "hero_num", fullResponse.NumberOfHeroesOwned },
             { "total_played", fullResponse.TotalMatchesPlayed },
-            { "season_id", fullResponse.CurrentSeason },
-            { "season_level", fullResponse.SeasonLevel },
+            { "season_id", fullResponse.CurrentSeason.ToString(CultureInfo.InvariantCulture) },
+            { "season_level", fullResponse.SeasonLevel.ToString(CultureInfo.InvariantCulture) },
             { "creep_level", fullResponse.CreepLevel },
-            { "season_normal", fullResponse.SimpleSeasonStats },
-            { "season_casual", fullResponse.SimpleCasualSeasonStats },
+            { "season_normal", new Dictionary<string, string>
+                {
+                    { "wins", fullResponse.SimpleSeasonStats.RankedMatchesWon.ToString(CultureInfo.InvariantCulture) },
+                    { "losses", fullResponse.SimpleSeasonStats.RankedMatchesLost.ToString(CultureInfo.InvariantCulture) },
+                    { "rnk_wins", fullResponse.SimpleSeasonStats.RankedMatchesWon.ToString(CultureInfo.InvariantCulture) }, // Legacy Fallback
+                    { "rnk_losses", fullResponse.SimpleSeasonStats.RankedMatchesLost.ToString(CultureInfo.InvariantCulture) }, // Legacy Fallback
+                    { "ranked_matches_won", fullResponse.SimpleSeasonStats.RankedMatchesWon.ToString(CultureInfo.InvariantCulture) }, // Legacy Fallback
+                    { "ranked_matches_lost", fullResponse.SimpleSeasonStats.RankedMatchesLost.ToString(CultureInfo.InvariantCulture) }, // Legacy Fallback
+                    { "win_streak", fullResponse.SimpleSeasonStats.WinStreak.ToString(CultureInfo.InvariantCulture) },
+                    { "rank", fullResponse.SimpleSeasonStats.CurrentRank },
+                    { "current_level", fullResponse.SimpleSeasonStats.LegacyLevel },
+                    { "smr", fullResponse.SimpleSeasonStats.RankedRating },
+                    { "highest_level_current", fullResponse.SimpleSeasonStats.HighestRank ?? "0" },
+                    { "is_placement", fullResponse.SimpleSeasonStats.InPlacementPhase.ToString(CultureInfo.InvariantCulture) },
+                    { "pub_skill", fullResponse.SimpleSeasonStats.PublicRating },
+                    { "kam_rating", fullResponse.SimpleSeasonStats.CasualRating }
+                }
+            },
+            { "season_casual", new Dictionary<string, string>
+                {
+                    { "con_wins", fullResponse.SimpleCasualSeasonStats.CasualWins.ToString(CultureInfo.InvariantCulture) },
+                    { "con_losses", fullResponse.SimpleCasualSeasonStats.CasualLosses.ToString(CultureInfo.InvariantCulture) },
+                    { "cs_wins", fullResponse.SimpleCasualSeasonStats.CasualWins.ToString(CultureInfo.InvariantCulture) }, // Legacy Fallback
+                    { "cs_losses", fullResponse.SimpleCasualSeasonStats.CasualLosses.ToString(CultureInfo.InvariantCulture) }, // Legacy Fallback
+                    { "casual_matches_won", fullResponse.SimpleCasualSeasonStats.CasualWins.ToString(CultureInfo.InvariantCulture) }, // Legacy Fallback
+                    { "casual_matches_lost", fullResponse.SimpleCasualSeasonStats.CasualLosses.ToString(CultureInfo.InvariantCulture) }, // Legacy Fallback
+                    { "win_streak", fullResponse.SimpleCasualSeasonStats.WinStreak.ToString(CultureInfo.InvariantCulture) },
+                    { "rank", fullResponse.SimpleCasualSeasonStats.CurrentRank },
+                    { "current_level", fullResponse.SimpleCasualSeasonStats.LegacyLevel },
+                    { "smr", fullResponse.SimpleCasualSeasonStats.RankedRating },
+                    { "highest_level_current", fullResponse.SimpleCasualSeasonStats.HighestRank ?? "0" },
+                    { "is_placement", fullResponse.SimpleCasualSeasonStats.InPlacementPhase.ToString(CultureInfo.InvariantCulture) },
+                    { "pub_skill", fullResponse.SimpleCasualSeasonStats.PublicRating },
+                    { "kam_rating", fullResponse.SimpleCasualSeasonStats.CasualRating }
+                }
+            },
             { "mvp_num", fullResponse.MVPAwardsCount },
             { "award_top4_name", fullResponse.Top4AwardNames },
             { "award_top4_num", fullResponse.Top4AwardCounts },

@@ -1,0 +1,96 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<package>
+
+	<panel name="patchnotes" color="0 0 0 0" visible="false">
+
+		<panel align="center" valign="center" noclick="true" color="1 1 1 .1">
+
+			<instance name="header_bar" align="center" height="2.7h" lbl="patchnotes_title" show_close="1" onclick="
+						HideWidget('create_account');
+						HideWidget('prime_upgrade_window');
+						ShowWidget('patchnotes');
+						HideWidget('main_local_game_panel');
+						If(cg_menuTransitions, PlaySound('/shared/sounds/ui/menu/slide_off.wav'));
+
+						If(cg_menuTransitions, Call('right_widgets', 'SlideX(\'72%\', 500);'), Call('right_widgets', 'SetX(\'72%\');'));
+						If(cg_menuTransitions, Call('left_widgets', 'SlideX(\'-72%\', 500);'), Call('right_widgets', 'SetX(\'72%\');'));
+
+						If(cg_menuTransitions, Call('left_widgets', 'SlideX(\'-26.8%\', 500);'), Call('left_widgets', 'SetX(\'-26.8%\');'));
+						
+						HideGroup('main_button_effects');
+						If(_main_patchnotes_open, If(cg_menuTransitions, Call('left_widgets', 'SlideX(\'-72%\', 500);'), Call('left_widgets', 'SetX(\'-72%\');')));				
+
+						_main_local_open = 0;
+						_main_upgrade_open = 0;
+						_main_create_open = 0;
+						Toggle(_main_patchnotes_open);						
+						_main_options_open = 0;
+						_main_replay_open = 0;
+						_main_prepurchase_open = 0;
+					"/>
+
+			<panel y="2.7h" height="-2.7h" width="100%" color="0 0 0 1" align="center" noclick="1">
+				<frame color=".05 .07 .1 .5" bordercolor="#455166" borderthickness="1" noclick="1" />
+
+				<panel width="100%" color="invisible" padding="0.8h" noclick="true">
+
+					<panel name="patchnotes_content" y="1.5h" width="-0.6h" height="-8.0h" align="right" color="invisible">
+						<textbuffer
+							scrolltexture="/ui/info/combobox.tga"
+							handleheight="2.0h"
+							scrollbarsize="2.0h"
+							exteriorscrollbars="false"
+							textalign="left"
+							font="dyn_9"
+							textcolor="white"
+							color="invisible"
+							shadow="1"
+							noclick="0"
+							file=":/change_log.txt"
+						/>
+					</panel>
+
+					<instance
+						y="-1.5h" 
+						name="button2" button_name="unnamedButton57"
+						label="patchnotes_close_btn"
+						height="2.4h"
+						width="40%"
+						font="dyn_10"
+						align="center"
+						valign="bottom"
+						onclick="
+						HideWidget('create_account');
+						HideWidget('prime_upgrade_window');
+						ShowWidget('patchnotes');
+						HideWidget('main_local_game_panel');
+						If(cg_menuTransitions, PlaySound('/shared/sounds/ui/menu/slide_off.wav'));
+
+						If(cg_menuTransitions, Call('right_widgets', 'SlideX(\'72%\', 500);'), Call('right_widgets', 'SetX(\'72%\');'));
+						If(cg_menuTransitions, Call('left_widgets', 'SlideX(\'-72%\', 500);'), Call('right_widgets', 'SetX(\'72%\');'));
+
+						If(cg_menuTransitions, Call('left_widgets', 'SlideX(\'-26.8%\', 500);'), Call('left_widgets', 'SetX(\'-26.8%\');'));
+						
+						HideGroup('main_button_effects');
+						If(_main_patchnotes_open, If(cg_menuTransitions, Call('left_widgets', 'SlideX(\'-72%\', 500);'), Call('left_widgets', 'SetX(\'-72%\');')));				
+
+						_main_local_open = 0;
+						_main_upgrade_open = 0;
+						_main_create_open = 0;
+						Toggle(_main_patchnotes_open);						
+						_main_options_open = 0;
+						_main_replay_open = 0;
+						_main_prepurchase_open = 0;
+					"
+					/>
+
+
+				</panel>
+
+			</panel>
+
+		</panel>
+
+	</panel>
+
+</package>

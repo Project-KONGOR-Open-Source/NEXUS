@@ -1,0 +1,1573 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+
+	<!-- Warn Unverified  -->
+	<trigger name="WarnUnverifiedTrigger"/>
+	<template name="warn_unverified_body">
+		<panel width="100%" grow="1" align="center" float="bottom" padding="1.0h" noclick="1">
+			<panel grow="1" y="1.0h" width="100%">
+				<label fity="1" width="-2h" align="center" textalign="center" style="newui_font_style_11" wrap="1" content="confirm_warn_unverified_msg" watch="WarnUnverifiedTrigger" ontriggerlua="self:SetText(Translate('confirm_warn_unverified_msg', 'player', param0))"/>
+			</panel>
+			<panel height="0" noclick="1"/>
+			<panel height="3.5h" noclick="1">
+				<instance name="newui_common_button_2_template" x="-9h" width="16h" height="2.5h" align="center" label="confirm_warn_unverified_no"
+					onclicklua="self:UICmd([[Call('warn_unverified', 'FadeOut(250);');]])"
+					watch="WarnUnverifiedTrigger"
+					ontrigger="
+						SetOnClick('
+							Call(\'warn_unverified\', \'FadeOut(250);\');
+							'#param2#'
+						');
+					"
+				/>
+				<instance name="newui_common_button_2_template" x="9h" width="16h" height="2.5h" align="center" label="confirm_warn_unverified_yes"
+					onclicklua="self:UICmd([[Call('warn_unverified', 'FadeOut(250);');]])"
+					watch="WarnUnverifiedTrigger"
+					ontrigger="
+						SetOnClick('
+							Call(\'warn_unverified\', \'FadeOut(250);\');
+							'#param1#'
+						');
+					"
+				/>
+			</panel>
+		</panel>
+	</template>
+	<template name="warn_unverified">
+		<panel name="warn_unverified" visible="{visible=0}" color="0 0 0 .7" onshowlua="self:BringToFront()"
+			watch="WarnUnverifiedTrigger"
+			ontriggerlua="if NotEmpty(param0) then self:FadeIn(250) else self:FadeOut(250) end"
+		>
+			<instance name="newui_common_popup" y="20h" width="40h" valign="top" id="warn_unverified_content" visible="1" show_close="1"
+				title="confirm_warn_unverified_title"
+				content="warn_unverified_body"
+				oncloselua="self:UICmd([[Call('warn_unverified', 'FadeOut(250);');]])"
+			/>
+		</panel>
+	</template>
+
+	<!-- Warn NotEligibleForCampaign  -->
+	<trigger name="WarnNotEligibleForCampaignTrigger"/>
+	<template name="warn_noteligibleforcampaign_body">
+		<panel width="100%" grow="1" align="center" float="bottom" padding="1.0h" noclick="1">
+			<panel grow="1" y="1.0h" width="100%">
+				<label fity="1" width="-2h" align="center" textalign="center" style="newui_font_style_11" wrap="1" content="confirm_warn_noteligibleforcampaign_msg" watch="WarnNotEligibleForCampaignTrigger" ontriggerlua="self:SetText(Translate('confirm_warn_noteligibleforcampaign_msg', 'player', param0))"/>
+			</panel>
+			<panel height="0" noclick="1"/>
+			<panel height="3.5h" noclick="1">
+				<instance name="newui_common_button_2_template" width="15h" height="2.5h" align="center" label="confirm_warn_unverified_no"
+					onclicklua="self:UICmd([[Call('warn_noteligibleforcampaign', 'FadeOut(250);');]])"
+					watch="WarnNotEligibleForCampaignTrigger"
+					ontrigger="
+						SetOnClick('
+							Call(\'warn_noteligibleforcampaign\', \'FadeOut(250);\');
+							'#param1#'
+						');
+					"
+				/>
+			</panel>
+		</panel>
+	</template>
+	<template name="warn_noteligibleforcampaign">
+		<panel name="warn_noteligibleforcampaign" visible="{visible=0}" color="0 0 0 .7" onshowlua="self:BringToFront()"
+			watch="WarnNotEligibleForCampaignTrigger" ontriggerlua="if NotEmpty(param0) then self:FadeIn(250) else FadeOut(250) end"
+		>
+			<instance name="newui_common_popup" y="20h" width="40h" valign="top" id="warn_noteligibleforcampaign_content" visible="1" show_close="1"
+				title="confirm_warn_noteligibleforcampaign_title"
+				content="warn_noteligibleforcampaign_body"
+				oncloselua="self:UICmd([[Call('warn_noteligibleforcampaign', 'FadeOut(250);');]])"
+			/>
+		</panel>
+	</template>
+
+	<!-- Warn Tokens  -->
+	<trigger name="WarnTokensTrigger"/>
+	<template name="warn_tokens_body">
+		<panel width="100%" grow="1" align="center" float="bottom" padding="1.0h" noclick="1">
+			<panel grow="1" y="1.0h" width="100%">
+				<image x="1.5h" width="5.4h" height="5.4h" texture="/ui/fe2/store/icons/hero_token.tga" noclick="1"/>
+				<label x="-1.5h" fity="1" width="-9.5h" align="right" textalign="center" style="newui_font_style_11" wrap="1" content="confirm_warn_tokens_msg"/>
+			</panel>
+			<panel height="2.4h" noclick="1" align="center"
+				onload="If(!VarExists('warn_tokens_dontask'), DoEvent()); Instantiate('newui_checkbox_template', 'width', '24.0h', 'align', 'right', 'valign', 'center', 'font', 'dyn_10', 'content', 'confirm_token_warn_da', 'cvar', 'warn_tokens_dontask'); "
+				onevent="CreateBool('warn_tokens_dontask', 0); SetSave('warn_tokens_dontask');"
+			>
+			</panel>
+			<panel height="0" noclick="1"/>
+			<panel height="3.5h" noclick="1">
+				<instance name="newui_common_button_2_template" x="-7h" width="12h" height="2.5h" align="center" label="general_cancel"
+					onclicklua="self:UICmd([[Call('warn_tokens', 'FadeOut(250);');]])"
+					watch="WarnTokensTrigger"
+					ontrigger="
+						SetOnClick('
+							Call(\'warn_tokens\', \'FadeOut(250);\');
+							'#param0#'
+						');
+					"
+				/>
+				<instance name="newui_common_button_2_template" x="7h" width="12h" height="2.5h" align="center" label="general_ok"
+					onclicklua="self:UICmd([[Call('warn_tokens', 'FadeOut(250);');]])"
+					watch="WarnTokensTrigger"
+					ontrigger="
+						SetOnClick('
+							Call(\'warn_tokens\', \'FadeOut(250);\');
+							'#param1#'
+						');
+					"
+				/>
+			</panel>
+		</panel>
+	</template>
+	<template name="warn_tokens">
+		<panel name="warn_tokens" visible="{visible=0}" color="0 0 0 .7" onshowlua="self:BringToFront()"
+			watch="WarnTokensTrigger" ontrigger="If(!warn_tokens_dontask, FadeIn(250), Evaluate(param1));"
+		>
+			<instance name="newui_common_popup" y="20h" width="40h" valign="top" id="warn_tokens_content" visible="1" show_close="1"
+				title="confirm_warn_tokens_title"
+				content="warn_tokens_body"
+				oncloselua="self:UICmd([[Call('warn_tokens', 'FadeOut(250);');]])"
+			/>
+		</panel>
+	</template>
+
+	<!-- Need Tokens -->
+	<trigger name="NeedTokensTrigger"/>
+	<template name="need_tokens_body">
+		<panel width="100%" grow="1" align="center" float="bottom" padding="1.0h" noclick="1">
+			<panel grow="1" y="1.0h" width="100%">
+				<image x="1.5h" width="5.4h" height="5.4h" texture="/ui/fe2/store/icons/hero_token.tga" noclick="1"/>
+				<label x="-1.5h" y="0.8h" fity="1" width="-9.5h" align="right" textalign="center" style="newui_font_style_11" wrap="1" content="confirm_need_tokens_msg"/>
+			</panel>
+			<panel height="0" noclick="1"/>
+			<panel height="3.5h" noclick="1">
+				<instance name="newui_common_button_2_template" x="-9h" width="16h" height="2.5h" align="center" label="general_cancel"
+					onclicklua="self:UICmd([[Call('need_tokens', 'FadeOut(250);');]])"
+					watch="NeedTokensTrigger"
+					ontrigger="
+						SetOnClick('
+							Call(\'need_tokens\', \'FadeOut(250);\');
+							'#param0#'
+						');
+					"
+				/>
+				<instance name="newui_common_button_2_template" x="9h" width="16h" height="2.5h" align="center" label="general_purchase_token"
+					onclicklua="self:UICmd([[Call('need_tokens', 'FadeOut(250);');]])"
+					watch="NeedTokensTrigger"
+					ontrigger="
+						SetOnClick('
+							Call(\'need_tokens\', \'FadeOut(250);\');
+							'#param1#'
+						');
+					"
+				/>
+			</panel>
+		</panel>
+	</template>
+	<template name="need_tokens">
+		<panel name="need_tokens" visible="{visible=0}" color="0 0 0 .7" onshowlua="self:BringToFront()"
+			watch="NeedTokensTrigger" ontrigger="FadeIn(250);"
+		>
+			<instance name="newui_common_popup" y="20h" width="40h" valign="top" id="need_tokens_content" visible="1" show_close="1"
+				title="confirm_need_tokens_title"
+				content="need_tokens_body"
+				oncloselua="self:UICmd([[Call('need_tokens', 'FadeOut(250);');]])"
+			/>
+		</panel>
+	</template>
+
+	<template name="restricted_regions_body">
+		<panel width="100%" grow="1" align="center" float="bottom" padding="1.0h" noclick="1">
+			<panel grow="1" y="1.0h" width="100%">
+				<label fity="1" width="-1.0h" align="center" textalign="center" style="newui_font_style_11" wrap="1" watch="RestrictedRegions" ontrigger="SetText(Translate('mm_region_unavailable_body', 'regions', param0));"/>
+			</panel>
+			<panel height="0" noclick="1"/>
+			<panel height="3.5h" noclick="1">
+				<instance name="newui_common_button_2_template" width="12h" height="2.5h" align="center" label="general_ok"
+					onclicklua="self:UICmd([[Call('restricted_regions', 'FadeOut(250);');]])"
+				/>
+			</panel>
+		</panel>
+	</template>
+	<template name="restricted_regions">
+		<panel name="restricted_regions" visible="{visible=0}" color="0 0 0 .7" onshowlua="self:BringToFront()"
+			watch="RestrictedRegions" ontrigger="FadeIn(250);"
+		>
+			<instance name="newui_common_popup" y="20h" width="40h" valign="top" id="restricted_regions_content" visible="1" show_close="1"
+				title="mm_region_unavailable"
+				content="restricted_regions_body"
+				oncloselua="self:UICmd([[Call('restricted_regions', 'FadeOut(250);');]])"
+			/>
+		</panel>
+	</template>
+
+	<!-- Too many friends :( F2P RMM -->
+	<trigger name="TooManyFriendsTrigger"/>
+	<template name="too_many_friends_body">
+		<panel width="100%" grow="1" align="center" float="bottom" padding="1.0h" noclick="1">
+			<panel grow="1" y="1.0h" width="100%">
+				<label fity="1" width="-1.0h" align="center" textalign="center" style="newui_font_style_11" wrap="1" content="confirm_too_many_friends_msg"/>
+			</panel>
+			<panel height="0" noclick="1"/>
+			<panel height="3.5h" noclick="1">
+				<instance name="newui_common_button_2_template" width="12h" height="2.5h" align="center" label="general_ok"
+					onclicklua="self:UICmd([[Call('too_many_friends', 'FadeOut(250);');]])"
+				/>
+			</panel>
+		</panel>
+	</template>
+	<template name="too_many_friends">
+		<panel name="too_many_friends" visible="{visible=0}" color="0 0 0 .7" onshowlua="self:BringToFront()"
+			watch="TooManyFriendsTrigger" ontrigger="FadeIn(250);"
+		>
+			<instance name="newui_common_popup" y="20h" width="40h" valign="top" id="too_many_friends_content" visible="1" show_close="1"
+				title="confirm_too_many_friends_title"
+				content="too_many_friends_body"
+				oncloselua="self:UICmd([[Call('too_many_friends', 'FadeOut(250);');]])"
+			/>
+		</panel>
+	</template>
+
+	<!-- Benefits of Verified Account(Content) -->
+	<template name="verified_benefits_content">
+		<panel name="verified_benefits_content_{id}" grow="1" width="54.0h" align="{align}" valign="{valign}" noclick="1">
+			<instance name="newui_custom_frame_template" alpha="0.95"/>
+
+			<panel grow="1" growinvis="0" width="-2.0h" align="center" float="bottom" padding="1.0h" noclick="1">
+
+				<panel y="1.0h" height="10.0h" noclick="1">
+					<panel x="1.0h" width="9.6h" height="9.6h">
+						<image width="60%" height="60@" align="left" valign="bottom" texture="/ui/elements/basic.tga" color="1 1 1 .8"/>
+						<image width="86%" height="86@" align="right" valign="top" texture="/ui/elements/verified.tga"/>
+					</panel>
+					<label x="-3h" y="0.8h" fity="1" width="-14h" align="right" textalign="center" style="newui_font_style_14" wrap="1" content="confirm_verify_bene_not" noclick="1"/>
+					<label x="-3h" y="3.4h" fity="1" width="-14h" align="right" textalign="center" font="dyn_18" wrap="1" outline="1" color="#3abde7" content="confirm_verify_bene_what" noclick="1"/>
+				</panel>
+
+				<label fity="1" style="newui_font_style_12" align="center" wrap="1" content="confirm_verify_bene_txt1" noclick="1"/>
+				<label fity="1" fitypadding="1.5h" style="newui_font_style_12" align="center" wrap="1" content="confirm_verify_bene_txt2" noclick="1"/>
+				<label fity="1" fitypadding="0.5h" style="newui_font_style_12" align="center" wrap="1" content="confirm_verify_bene_txt3" noclick="1"/>
+
+				<panel grow="1" width="100%" noclick="1">
+					<panel height="100%" width="48%" align="left" noclick="1">
+						<instance name="newui_custom_frame_template" alpha="0.95"/>
+					</panel>
+					<panel height="100%" width="48%" align="right" noclick="1">
+						<instance name="newui_custom_frame_template" alpha="0.95"/>
+					</panel>
+					<panel grow="1" width="48%" align="left" noclick="1">
+						<panel grow="1" y="0.8h" width="-1.6h" align="center" float="bottom" padding="0.5h" noclick="1">
+							<label fity="1" font="dyn_16" color="#ffcc00" shadow="1" align="center" textalign="center" content="confirm_verify_bene_opt1" noclick="1"/>
+							<label fity="1" fitypadding="0.5h" style="newui_font_style_10" align="center" wrap="1" content="confirm_verify_bene_opt1_txt1" noclick="1"/>
+							<panel grow="1" width="100%" noclick="1">
+								<label fity="1" style="newui_font_style_10" align="center" wrap="1" content="confirm_verify_bene_opt1_current" noclick="1"/>
+								<label fity="1" style="newui_font_style_10" align="center" textalign="right" wrap="1" content="" noclick="1" onshow="SetText(GetAccountLevel(GetExperience()));"/>
+							</panel>
+							<panel grow="1" width="100%" noclick="1">
+								<label fity="1" fitypadding="0.8h" style="newui_font_style_10" align="center" wrap="1" content="confirm_verify_bene_opt1_target" noclick="1"/>
+								<label fity="1" style="newui_font_style_10" align="center" textalign="right" wrap="1" content="" noclick="1" onshow="SetText(VerifiedThreshold);"/>
+							</panel>
+						</panel>
+					</panel>
+					<panel grow="1" width="48%" align="right" noclick="1">
+						<panel grow="1" y="0.8h" width="-1.6h" align="center" float="bottom" padding="0.5h" noclick="1">
+							<label fity="1" font="dyn_16" color="#ffcc00" shadow="1" align="center" textalign="center" content="confirm_verify_bene_opt2" noclick="1"/>
+							<label fity="1" fitypadding="2.0h" style="newui_font_style_10" align="center" wrap="1" content="confirm_verify_bene_opt2_txt1" noclick="1"/>
+
+							<!-- Purchase Button(Modal Dialog Only) -->
+							<panel width="100%" height="2.4h" noclick="1" visible="{showClickables=false}">
+								<instance name="newui_common_button_2_template" width="16h" height="2.5h" align="center" label="confirm_verify_bene_buycoinsnow"
+									onclicklua="
+										GetWidget('store_open_purchase_helper'):DoEventN(2)
+										{closeClicklua}
+									"
+								/>
+							</panel>
+						</panel>
+					</panel>
+				</panel>
+
+				<!-- Close Button (Model Dialog Only) -->
+				<panel sticky="1" stickytoinvis="false" width="100%" height="4h" visible="{showClickables=false}" noclick="1">
+					<instance name="newui_common_button_2_template" width="16h" height="2.5h" align="center" label="confirm_verify_bene_closeWindow" onclicklua="{closeClicklua}"/>
+				</panel>
+
+				<panel height="0" visible="{morespace=false}" noclick="1"/>
+			</panel>
+
+			<!-- Close X -->
+			<instance name="newui_button_close_template" x="-1h" y="1h" align="right" visible="{showClickables=false}" onclicklua="{closeClicklua}"/>
+		</panel>
+	</template>
+
+	<!-- Benefits of Verified Account(Modal) -->
+	<template name="verified_benefits_modal">
+		<panel name="verified_benefits_modal" visible="{visible=0}" color="0 0 0 .6" onshowlua="self:BringToFront()">
+			<instance name="verified_benefits_content" id="1" align="center" valign="center" showClickables="1" closeClicklua="self:UICmd([[Call('verified_benefits_modal', 'FadeOut(250);');]])"/>
+		</panel>
+	</template>
+
+	<!-- Benefits of Verified Account(Tooltip) -->
+	<template name="verified_benefits_FloatTip">
+		<floater name="verified_benefits_FloatTip" visible="{visible=0}">
+			<instance name="verified_benefits_content" id="2" morespace="true"/>
+		</floater>
+	</template>
+
+	<!-- Account Verified -->
+	<template name="account_verified">
+		<panel name="account_verified" visible="{visible=0}" color="0 0 0 .6"
+			onload="CreateBool('waiting_on_verified', 0);"
+			onshow="BringToFront(); Call('confirmations_verified_popup_model', 'SetVisible(1);'); Set(waiting_on_verified, 0);"
+			onhide="BringToFront(); Call('confirmations_verified_popup_model', 'SetVisible(0);');"
+			watch="EventAccountLevelup" ontrigger="If(param1, FadeIn(150));"
+			watch1="MicroStoreResults" ontrigger1="If(param49, FadeIn(150));"
+			watch2="UIIsVerified" ontrigger2="If(param0 and waiting_on_verified, FadeIn(150));"
+			watch3="LoginStatus" ontrigger3="If(!param2, Set(waiting_on_verified, 0));"
+		>
+			<panel grow="1" regrow="1" growinvis="0" width="42.0h" align="center" valign="center">
+				<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.6h" color="0 0 0 .9" noclick="1"/>
+				<frame texture="/ui/frames/roundframe.tga" borderthickness="0.6h" color=".2 .2 .2 1" noclick="1"/>
+
+				<panel grow="1" regrow="1" growinvis="0" width="100%" float="bottom" padding="1.2h">
+
+					<panel y="1.0h" width="-3.0h" align="center" height="10.0h">
+						<panel x="1.0h" width="9.6h" height="9.6h">
+							<image width="60%" height="60@" align="left" valign="bottom" texture="/ui/elements/basic.tga" color="1 1 1 .8"/>
+							<image width="86%" height="86@" align="right" valign="top" texture="/ui/elements/verified.tga"/>
+						</panel>
+						<label x="-3.0h" y="0.6h" fity="1" width="-14.0h" align="right" textalign="center" font="dyn_14" wrap="1" outline="1" color=".8 .8 .8 1" content="confirm_verify_congrats"/>
+						<label x="-3.0h" y="3.4h" fity="1" width="-14.0h" align="right" textalign="center" font="dyn_18" wrap="1" outline="1" color="#3abde7" content="confirm_verify_complete"/>
+					</panel>
+
+					<label fity="1" font="dyn_12" color=".8 .8 .8 1" shadow="1" width="-3.0h" align="center" wrap="1" content="confirm_verify_text1"/>
+					<label fity="1" fitypadding="1.0h" font="dyn_12" color=".8 .8 .8 1" shadow="1" width="-3.0h" align="center" wrap="1" content="confirm_verify_text2"/>
+
+					<panel stickytoinvis="0" sticky="1" grow="1" regrow="1" growinvis="0" width="-3.0h" align="center" onshow="SetVisible(!HasAllHeroes());" visible="0" >
+						<image x="0.5h" width="6.0h" height="6.0h" texture="/ui/fe2/store/icons/hero_token.tga" noclick="1"/>
+						<label x="-1.5h" fity="1" fitypadding="2.4" width="-9.5h" align="right" textalign="left" textvalign="top" font="dyn_12" color=".8 .8 .8 1" shadow="1" wrap="1" content="confirm_verify_text3"/>
+					</panel>
+
+					<panel stickytoinvis="0" sticky="1" height="4.4h" width="-3.0h" align="center">
+						<instance name="button2" button_name="conf_account_verified_ok"
+							width="12.0h" height="2.4h"
+							align="center"
+							valign="top"
+							label="general_ok" font="dyn_10"
+							onmouseover="PlaySound('/shared/sounds/ui/button_over_01.wav');"
+							onclick="Call('account_verified', 'FadeOut(250);'); ClientRefreshInfos();"
+						/>
+					</panel>
+
+				</panel>
+
+				<!-- Close X -->
+				<instance name="newui_button_close_template" x="-1h" y="1h" align="right" onclick="PlaySound('/shared/sounds/ui/ccpanel/button_close_02.wav'); Call('account_verified', 'FadeOut(250);'); ClientRefreshInfos();"/>
+			</panel>
+			<panel width="130h" height="100h" y="0h" align="center" color="invisible" noclick="1" name="confirmations_verified_popup_model" visible="0" onshow="SleepWidget(0, ''); SleepWidget(8000, 'SetVisible(false);');" >
+				<modelpanel
+					noclick="1"
+					model="/ui/common/models/levelup/verified2.mdf"
+					anim="idle"
+					cameradistance="0"
+					lookat="false"
+					camerapos="0 1300 0"
+					cameraangles="0 0 180"
+					camerafov="50"
+					cameranear="1"
+					carmerafar="5000"
+					depthclear="1"
+					depthcompress="1"
+					sunazimuth="-90"
+					sunaltitude="180"
+					suncolor="1 1 1"
+					onshow="
+						SetAnim('idle');
+						SetEffect('/ui/common/models/levelup/verified2.effect');
+					"
+				/>
+			</panel>
+		</panel>
+	</template>
+
+	<!-- Switch to sub -->
+	<template name="switch_sub_confirm_body">
+		<panel width="100%" grow="1" align="center" float="bottom" padding="1.0h" noclick="1">
+			<panel grow="1" y="1.0h" width="100%" noclick="1">
+				<label fity="1" width="-1.0h" align="center" textalign="center" style="newui_font_style_11" wrap="1" content="confirm_switchsub_msg"/>
+			</panel>
+			<panel height="2.4h" align="center" noclick="1"
+				onload="If(!VarExists('subswitch_dontask'), DoEvent()); Instantiate('newui_checkbox_template', 'width', '24.0h', 'align', 'right', 'valign', 'center', 'font', 'dyn_10', 'content', 'confirm_switchsub_da', 'cvar', 'subswitch_dontask');"
+				onevent="CreateBool('subswitch_dontask', 0); SetSave('subswitch_dontask');"
+			/>
+			<panel height="3.5h" noclick="1">
+				<instance name="newui_common_button_2_template" x="-7h" width="12h" height="2.5h" align="center" label="general_cancel"
+					onclicklua="self:UICmd([[Call('switch_sub_confirm', 'FadeOut(250);');]])"
+				/>
+				<instance name="newui_common_button_2_template" x="7h" width="12h" height="2.5h" align="center" label="general_ok"
+					onclicklua="self:UICmd([[SwitchSubAccount(sysbar_switch_sub_name); Call('switch_sub_confirm', 'FadeOut(250);');]])"
+				/>
+			</panel>
+		</panel>
+	</template>
+	<template name="switch_sub_confirm">
+		<panel name="switch_sub_confirm" visible="{visible=0}" color="0 0 0 .7" onshowlua="self:BringToFront()">
+			<instance name="newui_common_popup" y="20h" width="40h" valign="top" id="switch_sub_confirm_content" visible="1" show_close="1"
+				title="confirm_switchsub_title"
+				content="switch_sub_confirm_body"
+				oncloselua="self:UICmd([[Call('switch_sub_confirm', 'FadeOut(250);');]])"
+			/>
+		</panel>
+	</template>
+
+	<!-- Disconnect -->
+
+	<!-- Disconnect Body - Can Leave -->
+	<template name="disconnect_confirm_body">
+		<panel width="100%" grow="1" align="center" float="bottom" padding="1.0h" noclick="1">
+			<panel grow="1" height="5.5h" width="100%">
+				<label fity="1" width="-1.0h" align="center" valign="center" textalign="center" style="newui_font_style_12" wrap="1" content="confirm_disconnect_msg"/>
+			</panel>
+			<panel height="3.5h" noclick="1">
+				<instance name="newui_common_button_2_template" x="-7h" width="12h" height="2.5h" align="center" label="general_disconnect"
+					onclicklua="self:UICmd([[Disconnect(); Call('disconnect_confirm', 'FadeOut(250);');]])
+						self:Sleep(1, function() Trigger('AfterMatchStatsTrigger') end)
+						"
+				/>
+				<instance name="newui_common_button_2_template" x="7h" width="12h" height="2.5h" align="center" label="general_cancel"
+					onclicklua="self:UICmd([[Call('disconnect_confirm', 'FadeOut(250);');]])"
+				/>
+			</panel>
+		</panel>
+	</template>
+	<template name="disconnect_confirm">
+		<panel name="disconnect_confirm" visible="{visible=0}" color="0 0 0 .7" onshowlua="self:BringToFront()">
+			<instance name="newui_common_popup" y="20h" width="40h" valign="top" id="disconnect_confirm_content" visible="1" show_close="1"
+				title="confirm_disconnect_title"
+				content="disconnect_confirm_body"
+				oncloselua="self:UICmd([[Call('disconnect_confirm', 'FadeOut(250);');]])"
+			/>
+		</panel>
+	</template>
+
+	<!-- Disconnect Body - Leaver -->
+	<template name="disconnect_confirm_leaver_body">
+		<panel width="100%" grow="1" align="center" float="bottom" padding="1.0h" noclick="1">
+
+			<panel y="1.0h" grow="1" width="100%">
+				<label fity="1" width="-1.0h" align="center" textalign="center" style="newui_font_style_12" wrap="1" content="confirm_disconnect_msg"/>
+			</panel>
+
+			<panel grow="1" width="100%" noclick="1">
+				<panel grow="1" width="-2.0h" align="center">
+					<instance name="newui_custom_frame_template"/>
+					<panel y="0.5h" float="bottom" grow="1" width="-2.0h" align="center" noclick="1">
+						<panel width="100%" height="2.0h" noclick="1">
+							<label textalign="left" textvalign="center" style="newui_font_style_11" noclick="1" content="game_menu_currentleavepercent"/>
+							<label textalign="right" textvalign="center" style="newui_font_style_11" noclick="1" watch="AccountInfo" ontrigger="SetText(FtoA(param8 * 100, 2) # '%');"/>
+						</panel>
+						<panel width="100%" height="2.0h" noclick="1">
+							<label textalign="left" textvalign="center" style="newui_font_style_11" noclick="1" content="game_menu_newleavepercent"/>
+							<label textalign="right" textvalign="center" style="newui_font_style_11" noclick="1" watch="AccountInfo" ontrigger="SetText(FtoA(param9 * 100, 2) # '%');"/>
+						</panel>
+						<panel width="100%" height="2.0h" noclick="1">
+							<label textalign="left" textvalign="center" style="newui_font_style_11" noclick="1" content="game_menu_newleavethreshold"/>
+							<label textalign="right" textvalign="center" style="newui_font_style_11" noclick="1" watch="AccountInfo" ontrigger="SetText(FtoA(param10 * 100, 2) # '%');"/>
+						</panel>
+
+						<panel width="100%" color="invisible" grow="1" noclick="1">
+							<label fity="1" fitypadding="0.5h" width="100%" textalign="left" font="dyn_10" color="#3abde7" shadow="1" wrap="1" noclick="1" watch="AccountInfo" ontrigger="SetText(Translate(If(param7, 'confirm_leaver_result_nowleaver', 'confirm_leaver_result_notleaver')));"/>
+						</panel>
+					</panel>
+				</panel>
+			</panel>
+			
+			<panel height="0" noclick="1"/>
+
+			<panel height="3.5h" sticky="1" stickytoinvis="0" noclick="1">
+				<instance name="newui_common_button_2_template" x="-7h" width="12h" height="2.5h" align="center" label="general_disconnect"
+					onclicklua="self:UICmd([[Disconnect(); Call('disconnect_confirm_leaver', 'FadeOut(250);');]])"
+				/>
+				<instance name="newui_common_button_2_template" x="7h" width="12h" height="2.5h" align="center" label="general_cancel"
+					onclicklua="self:UICmd([[Call('disconnect_confirm_leaver', 'FadeOut(250);');]])"
+				/>
+			</panel>
+		</panel>
+	</template>
+	<template name="disconnect_confirm_leaver">
+		<panel name="disconnect_confirm_leaver" visible="{visible=0}" color="0 0 0 .7" onshowlua="self:BringToFront()">
+			<instance name="newui_common_popup" y="20h" width="40h" valign="top" id="disconnect_confirm_leaver_content" visible="1" show_close="1"
+				title="confirm_disconnect_title"
+				content="disconnect_confirm_leaver_body"
+				oncloselua="self:UICmd([[Call('disconnect_confirm_leaver', 'FadeOut(250);');]])"
+			/>
+		</panel>
+	</template>
+
+	<!-- Prompt to lower settings -->
+	<template name="optimal_settings_prompt_body">
+		<panel width="100%" grow="1" align="center" float="bottom" padding="1.0h" noclick="1">
+
+			<panel y="1.0h" grow="1" width="100%" noclick="1">
+				<label fity="1" width="-1.0h" align="center" textalign="center" textvalign="top" style="newui_font_style_11" wrap="1" content="main_optimal_settings_prompt_body"/>
+			</panel>
+			<panel height="0.5h" noclick="1"/>
+			<panel height="3.5h" sticky="1" stickytoinvis="0" noclick="1">
+				<instance name="newui_common_button_2_template" x="-9h" width="15h" height="2.5h" align="center" label="main_button_change_settings_keep"
+					onclicklua="self:UICmd([[Call('optimal_settings_prompt', 'FadeOut(250);');]])"
+				/>
+				<instance name="newui_common_button_2_template" x="9h" width="15h" height="2.5h" align="center" label="main_button_change_settings_revert"
+					onclicklua="RevertLowHardwareSettings(true)"
+				/>
+			</panel>
+		</panel>
+	</template>
+	<template name="optimal_settings_prompt">
+		<panel name="optimal_settings_prompt" visible="{visible=0}" color="0 0 0 .7" onshowlua="self:BringToFront()" watch="LowEndHardware" ontriggerlua="self:FadeIn(250)">
+			<instance name="newui_common_popup" y="20h" width="38h" valign="top" id="optimal_settings_prompt_content" visible="1" show_close="1"
+				title="main_optimal_settings_prompt"
+				content="optimal_settings_prompt_body"
+				oncloselua="self:UICmd([[Call('optimal_settings_prompt', 'FadeOut(250);');]])"
+			/>
+		</panel>
+	</template>
+
+	<!-- Quit  -->
+	<!-- Quit Body - Can Leave -->
+	<template name="quit_confirm_body">
+		<panel width="100%" grow="1" align="center" float="bottom" padding="1.0h" noclick="1">
+
+			<panel grow="1" height="3.5h" width="100%">
+				<label fity="1" width="-1.0h" align="center" valign="center" textalign="center" style="newui_font_style_12" wrap="1" content="main_quit_confirm2"/>
+			</panel>
+
+			<panel height="3.5h" noclick="1">
+				<instance name="newui_common_button_2_template" x="7h" width="12h" height="2.5h" align="center" label="general_cancel"
+					onclicklua="self:UICmd([[Call('quit_confirm', 'FadeOut(250);');]])"
+				/>
+				<instance name="newui_common_button_2_template" x="-7h" width="12h" height="2.5h" align="center" label="main_button_quit"
+					onclicklua="
+						if(GetCvarBool('cg_banjo_sound')) then
+							StopMusic()
+							PlaySound('/shared/sounds/ui/quit.wav')
+							self:Sleep(1400, function() self:UICmd('Quit()') end)
+						else
+							self:UICmd('Quit()')
+						end
+					"
+				/>
+			</panel>
+		</panel>
+	</template>
+	<template name="quit_confirm">
+		<panel name="quit_confirm" visible="{visible=0}" color="0 0 0 .7" onshowlua="self:BringToFront()">
+			<instance name="newui_common_popup" y="20h" width="30h" valign="top" id="quit_confirm_content" visible="1" show_close="1"
+				title="main_quit_confirm"
+				content="quit_confirm_body"
+				oncloselua="self:UICmd([[Call('quit_confirm', 'FadeOut(250);');]])"
+			/>
+		</panel>
+	</template>
+
+	<template name="graphicsdriverold_confirm_body">
+		<panel width="100%" grow="1" align="center" float="bottom" padding="1.0h" noclick="1">
+			<panel y="1.0h" grow="1" width="100%" noclick="1">
+				<label fity="1" width="-1.0h" align="center" textalign="center" style="newui_font_style_12" wrap="1" content="main_graphicsdriverold_confirm2"/>
+			</panel>
+			<panel height="3.5h" noclick="1">
+				<instance name="newui_common_button_2_template" width="12h" height="2.5h" align="center" valign="top" label="general_confirm"
+					onclicklua="self:UICmd([[Call('graphicsdriverold_confirm', 'FadeOut(250);');]])"
+				/>
+			</panel>
+		</panel>
+	</template>
+	<template name="graphicsdriverold_confirm">
+		<panel name="graphicsdriverold_confirm" visible="{visible=0}" color="0 0 0 .7" onshowlua="self:BringToFront()" onloadlua="--self:SetVisible(GetCvarBool('host_graphicsdriverold')) Set('host_graphicsdriverold', false)">
+			<instance name="newui_common_popup" y="20h" width="35h" valign="top" id="graphicsdriverold_confirm_content" visible="1" show_close="1"
+				title="main_graphicsdriverold_confirm"
+				content="graphicsdriverold_confirm_body"
+				oncloselua="self:UICmd([[Call('graphicsdriverold_confirm', 'FadeOut(250);');]])"
+			/>
+		</panel>
+	</template>
+
+	<!-- Quit Body - Leaver -->
+	<template name="quit_confirm_leaver_body">
+		<panel width="100%" grow="1" align="center" float="bottom" padding="1.0h" noclick="1">
+
+			<panel y="1.0h" grow="1" width="100%" noclick="1">
+				<label fity="1" width="-1.0h" align="center" textalign="center" style="newui_font_style_11" wrap="1" content="main_quit_confirm2" noclick="1"/>
+			</panel>
+
+			<panel grow="1" width="100%" noclick="1" visible="1">
+				<panel grow="1" width="-2.0h" align="center">
+					<instance name="newui_custom_frame_template"/>
+					<panel y="0.5h" float="bottom" noclick="1" color="invisible" grow="1" width="-2.0h" align="center">
+						<panel width="100%" height="2.0h" noclick="1">
+							<label textalign="left" textvalign="center" style="newui_font_style_11" noclick="1" content="game_menu_currentleavepercent"/>
+							<label textalign="right" textvalign="center" style="newui_font_style_11" noclick="1" watch="AccountInfo" ontrigger="SetText(FtoA(param8 * 100, 2) # '%');"/>
+						</panel>
+						<panel width="100%" height="2.0h" noclick="1">
+							<label textalign="left" textvalign="center" style="newui_font_style_11" noclick="1" content="game_menu_newleavepercent"/>
+							<label textalign="right" textvalign="center" style="newui_font_style_11" noclick="1" watch="AccountInfo" ontrigger="SetText(FtoA(param9 * 100, 2) # '%');"/>
+						</panel>
+						<panel width="100%" height="2.0h" noclick="1">
+							<label textalign="left" textvalign="center" style="newui_font_style_11" noclick="1" content="game_menu_newleavethreshold"/>
+							<label textalign="right" textvalign="center" style="newui_font_style_11" noclick="1" watch="AccountInfo" ontrigger="SetText(FtoA(param10 * 100, 2) # '%');"/>
+						</panel>
+
+						<panel width="100%" color="invisible" grow="1" noclick="1">
+							<label fity="1" fitypadding="0.5h" width="100%" font="dyn_10" color="#3abde7" shadow="1" wrap="1" noclick="1" watch="AccountInfo" ontrigger="SetText(Translate(If(param7, 'confirm_leaver_result_nowleaver', 'confirm_leaver_result_notleaver')));"/>
+						</panel>
+					</panel>
+				</panel>
+			</panel>
+
+			<panel height="0" noclick="1"/>
+
+			<panel height="3.5h" noclick="1">
+				<instance name="newui_common_button_2_template" x="-7h" width="12h" height="2.5h" align="center" label="general_cancel"
+					onclicklua="self:UICmd([[Call('quit_confirm_leaver', 'FadeOut(250);');]])"
+				/>
+				<instance name="newui_common_button_2_template" x="7h" width="12h" height="2.5h" align="center" label="main_button_quit"
+					onclicklua="
+						if(GetCvarBool('cg_banjo_sound')) then
+							StopMusic()
+							PlaySound('/shared/sounds/ui/quit.wav')
+							self:Sleep(1400, function() self:UICmd('Quit()') end)
+						else
+							self:UICmd('Quit()')
+						end
+					"
+				/>
+			</panel>
+		</panel>
+	</template>
+	<template name="quit_confirm_leaver">
+		<panel name="quit_confirm_leaver" visible="{visible=0}" color="0 0 0 .7" onshowlua="self:BringToFront()">
+			<instance name="newui_common_popup" y="20h" width="40h" valign="top" id="quit_confirm_leaver_content" visible="1" show_close="1"
+				title="confirm_disconnect_title"
+				content="quit_confirm_leaver_body"
+				oncloselua="self:UICmd([[Call('quit_confirm_leaver', 'FadeOut(250);');]])"
+			/>
+		</panel>
+	</template>
+
+	<!-- Disband Confirm - Note this used to be a disband game confirmation, but now it's labeled as a disconnect and doesn't necessarily disband the game,
+		the server tries to assign a new host when the player disconnects, so it won't disband the game unless there are no other players in the game -->
+	<template name="disband_confirm_body">
+		<panel width="100%" grow="1" align="center" float="bottom" padding="1.0h" noclick="1">
+			<panel y="0.5h" grow="1" width="100%">
+				<label fity="1" width="-1.0h" align="center" textalign="center" style="newui_font_style_12" wrap="1" content="game_menu_disconnect_confirm"/>
+			</panel>
+
+			<panel height="3.5h" noclick="1">
+				<instance name="newui_common_button_2_template" x="-7h" width="12h" height="2.5h" align="center" label="general_cancel"
+					onclicklua="self:UICmd([[Call('disband_confirm', 'FadeOut(250);');]])"
+				/>
+				<instance name="newui_common_button_2_template" x="7h" width="12h" height="2.5h" align="center" label="gamelobby_disconnect_button"
+					onclicklua="self:UICmd([[Disconnect(); Call('disband_confirm', 'FadeOut(250);');]])"
+				/>
+			</panel>
+		</panel>
+	</template>
+	<template name="disband_confirm">
+		<panel name="disband_confirm" visible="{visible=0}" color="0 0 0 .7" onshowlua="self:BringToFront()">
+			<instance name="newui_common_popup" y="20h" width="33h" valign="top" id="disband_confirm_content" visible="1" show_close="1"
+				title="gamelobby_disconnect_button"
+				content="disband_confirm_body"
+				oncloselua="self:UICmd([[Call('disband_confirm', 'FadeOut(250);');]])"
+			/>
+		</panel>
+	</template>
+
+	<!-- Generic Dialog Box
+		TriggerDialogBox
+		0 - Header
+		1 - Left Button Label
+		2 - Right Button Label
+		3 - Left Button Onclick
+		4 - Right Button Onclick
+		5 - Text Header
+		6 - Text
+		7 - Left Button lua onclick
+		8 - Right Button lua onclick
+	-->
+	<trigger name="TriggerDialogBox"/>
+	<template name="generic_dialog_box_template">
+		<panel name="generic_dialog_box" visible="0" color="0 0 0 .7" onshowlua="self:BringToFront()" 
+				watch="TriggerDialogBox" ontriggerlua="if NotEmpty(param0) then self:FadeIn(150) else self:FadeOut(150) end"
+				hotkey="ESC"
+				onhotkeylua="GetWidget('generic_dialog_box'):FadeOut(150)"
+		>
+			<panel y="-10h" width="36h" align="center" valign="center" grow="1" regrow="1" growinvis="0" noclick="1">
+				<instance name="newui_popup_caption_frame"
+					watch="TriggerDialogBox"
+					ontriggerlua="if NotEmpty(param0) then self:SetText(Translate(param0)) end"
+					onclicklua="GetWidget('generic_dialog_box'):FadeOut(150)"
+				/>
+				<panel y="3.5h" width="36h" float="bottom" padding="1h" grow="1" regrow="1" growinvis="0" noclick="1">
+					<panel width="100%" grow="1" regrow="1" growinvis="0" stickytoinvis="0" watch="TriggerDialogBox" ontriggerlua="self:SetVisible(NotEmpty(param5))">
+						<label y=".5h" fity="1" width="-1.0h" align="center" textalign="center" textvalign="top" style="newui_font_style_11" wrap="1"
+							watch="TriggerDialogBox" ontriggerlua="if NotEmpty(param5) then self:SetText(FormatStringNewline(Translate(param5))) end"
+						/>
+					</panel>
+
+					<panel width="-1h" align="center" grow="1" regrow="1" growinvis="0" stickytoinvis="0" noclick="1" watch="TriggerDialogBox" ontriggerlua="self:SetVisible(NotEmpty(param6))">
+						<instance name="newui_custom_frame_template" rgb="0 0 0" alpha="0.5"/>
+						<label fity="1" fitypadding="1.5h" wrap="1" width="-.5h" align="center" textalign="center" textvalign="center" style="newui_font_style_10" noclick="1" watch="TriggerDialogBox" ontriggerlua="if NotEmpty(param6) then self:SetText(FormatStringNewline(Translate(param6))) end"/>
+					</panel>
+
+					<panel align="center" height="3.5h" grow="1" growinvis="0" stickytoinvis="0" float="right" padding="1h" noclick="1">
+						<instance name="newui_common_button_2_template" width="15h" height="2.5h"
+							button_name="generic_dialog_box_left_btn"
+							onclicklua="GetWidget('generic_dialog_box'):FadeOut(150)"
+							watch="TriggerDialogBox"
+							ontrigger="
+								SetOnClick('
+									Call(\'generic_dialog_box\', \'FadeOut(250);\');
+									'#param3#'
+								');
+							"
+							ontriggerlua="
+								local callback = param7
+								if NotEmpty(callback) then
+									self:SetCallback('onclick', function() GetWidget('generic_dialog_box'):FadeOut(150) loadstring(callback)() end)
+								end
+							"
+							labelwatch="TriggerDialogBox"
+							labelontriggerlua="GetWidget('generic_dialog_box_left_btn'):SetVisible(NotEmpty(param1)) if NotEmpty(param1) then self:SetText(Translate(param1)) end"
+						/>
+						<instance name="newui_common_button_2_template" width="15h" height="2.5h"
+							button_name="generic_dialog_box_right_btn"
+							onclicklua="self:UICmd([[Call('generic_dialog_box', 'FadeOut(250);');]])"
+							watch="TriggerDialogBox"
+							ontrigger="
+								SetOnClick('
+									Call(\'generic_dialog_box\', \'FadeOut(250);\');
+									'#param4#'
+								');
+							"
+							ontriggerlua="
+								local callback = param8
+								if NotEmpty(callback) then
+									self:SetCallback('onclick', function() GetWidget('generic_dialog_box'):FadeOut(150) loadstring(callback)() end)
+								end
+							"
+							labelwatch="TriggerDialogBox"
+							labelontriggerlua="GetWidget('generic_dialog_box_left_btn'):SetVisible(NotEmpty(param2)) if NotEmpty(param2) then self:SetText(Translate(param2)) end"
+						/>
+					</panel>
+				</panel>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="newui_combobox_container">
+		<panel width="{width=100%}" height="{height=2.5h}" align="center" noclick="1" onshow="{onshow}" sticky="true" stickytoinvis="false">
+			<panel width="96%" align="center">
+				<panel width="-2.6h" height="100%" valign="center" align="left" noclick="true">
+					<panel width="{labelwidth=40%}">
+						<label textvalign="center" fitx="1" fitxpadding=".5h" style="newui_font_style_10">{label}</label>
+					</panel>
+					<panel width="-{labelwidth=40%}" height="2.2h" valign="center" align="right">
+						<image x="-12%" width="32i" height="32i" valign="center" hflip="1" texture="/ui/fe2/newui/res/communicator/arrow.png" noclick="1"/>
+						<instance name="newui_combobox_template" id="{id}" font="{font=dyn_12}" x="0" maxlistheight="{maxlistheight=10}" cvar="{cvar}" data="{data}" onselect="{onselect}" populate="{populate}" />
+					</panel>
+				</panel>
+				<instance name="newui_tip_button_template" title="{tip_label}" desc="{tip_desc}" tip_width="30h" valign="center" align="right"/>
+			</panel>
+		</panel>
+	</template>
+
+	<!-- Generic Dialog Box
+		HTTriggerDialogBox
+		0 - Header
+		1 - Left Button Label
+		2 - Right Button Label
+		3 - Left Button Onclick
+		4 - Right Button Onclick
+		5 - Text Header
+		6 - Text
+		7 - Show dropdown (HoN Tour Only atm).
+		8 - Show dropdown (HoN Tour Only atm).
+		HoN Tour dropdowns need to be reworked, don't use them for anything else atm.
+	-->
+	<trigger name="HTTriggerDialogBox"/>
+	<template name="generic_ht_dialog_box_template">
+		<panel name="generic_ht_dialog_box" visible="0" color="0 0 0 .7" onshowlua="self:BringToFront()" watch="HTTriggerDialogBox" ontrigger="If(!StringEmpty(param0), FadeIn(250), FadeOut(250));">
+			<panel y="-10h" width="36h" align="center" valign="center" grow="1" regrow="1" growinvis="0" noclick="1">
+				<instance name="newui_popup_caption_frame" title=""
+					watch="HTTriggerDialogBox" ontrigger="If(!StringEmpty(param0), SetText(Translate(param0)));"
+					btn_watch="HTTriggerDialogBox" btn_ontrigger="SetVisible(!StringEmpty(''#param2));"
+					onclick="Call('generic_ht_dialog_box', 'FadeOut(250);');"
+				/>
+				<panel y="3.5h" width="36h" float="bottom" padding="1h" grow="1" regrow="1" growinvis="0" reverse="1" noclick="1">
+					<panel y="1.0h" width="100%" grow="1" regrow="1" growinvis="0" stickytoinvis="0" watch="HTTriggerDialogBox" ontrigger="If(!StringEmpty(param5), SetVisible(1), SetVisible(0));" noclick="1">
+						<label fity="1" width="-1.0h" align="center" textalign="center" textvalign="top" style="newui_font_style_11" wrap="1"
+							watch="HTTriggerDialogBox" ontrigger="If(!StringEmpty(param5), SetText(Translate(param5)));"
+						/>
+					</panel>
+
+					<panel width="100%" grow="1" regrow="1" growinvis="1" stickytoinvis="0" visible="0" watch="HTTriggerDialogBox" ontrigger="If(!StringEmpty(param8), SetVisible(param8));" noclick="1"
+					>
+						<instance name="newui_combobox_container" id="confirmations_generic_ht_dialog_dropdown_1" label="hontour_select_event" cvar="" data="" onshow="BringToFront();" tip_label="hontour_multiple_events" tip_desc="hontour_multiple_events_tip"/>
+					</panel>
+
+					<panel width="100%" grow="1" regrow="1" growinvis="1" stickytoinvis="0" visible="0" watch="HTTriggerDialogBox" ontrigger="If(!StringEmpty(param7), SetVisible(param7));" noclick="1"
+					>
+						<instance name="newui_combobox_container" id="confirmations_generic_ht_dialog_dropdown_2" label="hontour_select_match" cvar="" data="" onshow="BringToFront();" tip_label="hontour_multiple_matches" tip_desc="hontour_multiple_matches_tip"/>
+					</panel>
+
+					<panel width="-1h" align="center" grow="1" regrow="1" growinvis="0" stickytoinvis="0" watch="HTTriggerDialogBox" ontrigger="If(!StringEmpty(param6), SetVisible(1), SetVisible(0));" noclick="1">
+						<instance name="newui_custom_frame_template" rgb="0 0 0" alpha="0.5"/>
+						<label fity="1" fitypadding="1.5h" wrap="1" width="-.5h" align="center" textalign="center" textvalign="center" style="newui_font_style_10" noclick="1" watch="HTTriggerDialogBox" ontrigger="If(!StringEmpty(param6), SetText(Translate(param6)));"/>
+					</panel>
+
+					<panel width="-1h" align="center" height="3.5h" sticky="1" stickytoinvis="0" noclick="1">
+						<instance name="newui_common_button_2_template" x="-8h" y="-0.25h" width="15h" height="2.5h" align="center"
+							button_name="generic_ht_dialog_box_left_btn"
+							onclicklua="self:UICmd([[Call('generic_ht_dialog_box', 'FadeOut(250);');]])"
+							watch="HTTriggerDialogBox"
+							ontrigger="
+								SetOnClick('
+									Call(\'generic_ht_dialog_box\', \'FadeOut(250);\');
+									'#param3#'
+								');
+								SetVisible(!StringEmpty(''#param1));
+							"
+							labelwatch="HTTriggerDialogBox"
+							labelontrigger="If(!StringEmpty(param1), SetText(Translate(param1)));"
+						/>
+						<instance name="newui_common_button_2_template" x="8h" y="-0.25h" width="15h" height="2.5h" align="center"
+							button_name="generic_ht_dialog_box_right_btn"
+							onclicklua="self:UICmd([[Call('generic_ht_dialog_box', 'FadeOut(250);');]])"
+							watch="HTTriggerDialogBox"
+							ontrigger="
+								SetOnClick('
+									Call(\'generic_ht_dialog_box\', \'FadeOut(250);\');
+									'#param4#'
+								');
+								SetVisible(!StringEmpty(''#param2));
+							"
+							labelwatch="HTTriggerDialogBox"
+							labelontrigger="If(!StringEmpty(param2), SetText(Translate(param2)));"
+						/>
+					</panel>
+				</panel>
+			</panel>
+		</panel>
+	</template>
+
+	<!-- Generic Dialog Box (for web requests)
+		TriggerDialogBoxWebRequest
+		0 - Header
+		1 - Left Button Label
+		2 - Right Button Label
+		3 - Left Button Onclick
+		4 - Right Button Onclick
+		5 - Text Header
+		6 - Text
+		7 - WebForm Status Trigger 	<< added 12/10/12 >>
+		8 - WebForm Results Trigger
+		9 - On WebForm Results
+		10 - Success Text Header
+		11 - Success Text
+	-->
+	<trigger name="TriggerDialogBoxWebRequest"/>
+	<template name="generic_dialog_box_wr_template">
+		<panel name="generic_dialog_box_wr" visible="0" color="0 0 0 .7" onshowlua="self:BringToFront()" watch="TriggerDialogBoxWebRequest" ontrigger="If(!StringEmpty(param0), FadeIn(250), FadeOut(250));" onhide="ClientRefreshUpgrades(); ClientRefreshInfos();" >
+			<!-- web form helper -->
+			<panel name="generic_dialog_box_wr_webhelper" noclick="1"
+				watch1="TriggerDialogBoxWebRequest"
+				ontrigger1="
+					If(!StringEmpty(param7),
+						Split(
+							SetWatch(2, param7),
+							SetWatch(3, param8)
+						),
+						Split(
+							SetWatch(2, ''),
+							SetWatch(3, '')
+						)
+					);
+					SetOnTrigger(3,
+						'If(StringEmpty(param0),
+							Split(
+								Trigger(\'TriggerDialogBox\', Translate(\'general_success\'), \'\', Translate(\'general_ok\'), \'\', \'\', FormatStringNewline(Translate(\''#param10#'\')), FormatStringNewline(Translate(\''#param11#'\'))),
+								Call(\'generic_dialog_box_wr\', \'FadeOut(100);\')
+							),
+							Split(
+								EnableWidget(\'generic_dialog_box_wr_left_btn\'),
+								Call(\'generic_dialog_box_wr_throb\', \'SetVisible(0);\'),
+								GroupCall(\'generic_dialog_box_wr_left_group\', \'SetText(Translate(\\\'general_retry\\\'))\'),
+								GroupCall(\'generic_dialog_box_wr_right_group\', \'SetText(Translate(\\\'general_cancel\\\'))\'),
+								Call(\'generic_dialog_bodymain\', \'SetText(Translate(\\\'\'#param0#\'\\\'))\')
+							)
+						);
+						'#param9
+					);
+				"
+				ontrigger2="
+					If(param == 3,
+						Split(
+							EnableWidget('generic_dialog_box_wr_left_btn'),
+							Call('generic_dialog_box_wr_throb', 'SetVisible(0);'),
+							GroupCall('generic_dialog_box_wr_left_group', 'SetText(Translate(\'general_retry\'))'),
+							GroupCall('generic_dialog_box_wr_right_group', 'SetText(Translate(\'general_cancel\'))'),
+							Call('generic_dialog_bodymain', 'SetText(Translate(\'mstore_error_connect\'))')
+						)
+					);
+				"
+				onhide="SetWatch(2, ''); SetWatch(3, '');"
+			/>
+
+			<panel y="-10h" width="36h" align="center" valign="center" grow="1" regrow="1" growinvis="0" noclick="1">
+				<instance name="newui_popup_caption_frame" title=""
+					watch="TriggerDialogBoxWebRequest" ontrigger="If(!StringEmpty(param0), SetText(Translate(param0)));"
+					onclick="Call('generic_dialog_box_wr', 'FadeOut(250);');"
+				/>
+				<panel y="3.5h" width="36h" float="bottom" padding="1h" grow="1" regrow="1" growinvis="0" noclick="1">
+					<panel y="1.0h" grow="1" regrow="1" growinvis="0" stickytoinvis="0" width="100%" watch="TriggerDialogBoxWebRequest" ontriggerlua="self:SetVisible(NotEmpty(param5))" >
+						<label fity="1" width="-1.0h" align="center" textalign="center" style="newui_font_style_11" wrap="1" watch="TriggerDialogBoxWebRequest" ontriggerlua="if NotEmpty(param5) then self:SetText(FormatStringNewline(Translate(param5))) end"
+						/>
+					</panel>
+
+					<panel width="-1h" align="center" grow="1" regrow="1" growinvis="0" stickytoinvis="0" watch="TriggerDialogBoxWebRequest" ontrigger="If(!StringEmpty(param6), SetVisible(1), SetVisible(0));" noclick="1">
+						<instance name="newui_custom_frame_template" rgb="0 0 0" alpha="0.5"/>
+						<label name="generic_dialog_bodymain" fity="1" fitypadding="1.5h" wrap="1" width="-.5h" align="center" textalign="center" textvalign="center" style="newui_font_style_10" noclick="1" watch="TriggerDialogBoxWebRequest" ontriggerlua="if NotEmpty(param6) then self:SetText(FormatStringNewline(Translate(param6))) end"/>
+					</panel>
+
+					<panel height="3.5h" sticky="1" stickytoinvis="0" noclick="1">
+						<instance name="newui_common_button_2_template" x="-8h" y="-0.25h" width="15h" height="2.5h" align="center"
+							button_name="generic_dialog_box_wr_left_btn"
+							onclicklua="self:UICmd([[Call('generic_dialog_box_wr', 'FadeOut(250);');]])"
+							watch="TriggerDialogBoxWebRequest"
+							ontrigger="
+								EnableWidget('generic_dialog_box_wr_left_btn');
+								SetOnClick('
+									If(StringEmpty(\''#param7#'\'),
+										Call(\'generic_dialog_box_wr\', \'FadeOut(250);\'),
+										Split(
+											DisableWidget(\'generic_dialog_box_wr_left_btn\'),
+											Call(\'generic_dialog_box_wr_throb\', \'SetVisible(1)\')
+										)
+									);
+									'#param3#'
+								');
+							"
+							labelgroup="generic_dialog_box_wr_left_group"
+							labelwatch="TriggerDialogBoxWebRequest"
+							labelontrigger="If(!StringEmpty(param1), Split(SetText(Translate(param1)), Call('generic_dialog_box_wr_left_btn', 'SetVisible(1)')), Call('generic_dialog_box_wr_left_btn', 'SetVisible(0)'));"
+						/>
+
+						<!-- throb over left button -->
+						<animatedimage name="generic_dialog_box_wr_throb" x="-8h" y="-0.5h" align="center" valign="center" texture="/ui/elements/throb/throb.tga" noclick="1" loop="1" fps="30" onshow="StartAnim(1);" visible="0" height="3h" width="3h" watch="TriggerDialogBoxWebRequest" ontriggerlua="self:SetVisible(false)"/>
+
+						<instance name="newui_common_button_2_template" x="8h" y="-0.25h" width="15h" height="2.5h" align="center"
+							button_name="generic_dialog_box_wr_right_btn"
+							onclicklua="self:UICmd([[Call('generic_dialog_box_wr', 'FadeOut(250);');]])"
+							watch="TriggerDialogBoxWebRequest"
+							ontrigger="
+								SetOnClick('
+									Call(\'generic_dialog_box_wr\', \'FadeOut(250);\');
+									'#param4#'
+								');
+							"
+							labelgroup="generic_dialog_box_wr_right_group"
+							labelwatch="TriggerDialogBoxWebRequest"
+							labelontrigger="If(!StringEmpty(param2), Split(SetText(Translate(param2)), Call('generic_dialog_box_wr_right_btn', 'SetVisible(1)')), Call('generic_dialog_box_wr_right_btn', 'SetVisible(0)'));"
+						/>
+					</panel>
+				</panel>
+			</panel>
+		</panel>
+	</template>
+
+	<!-- Generic Dialog Box with Combobox
+		TriggerDialogBoxWithCombobox
+		0 - Header
+		1 - Left Button Label
+		2 - Right Button Label
+		3 - Left Button Onclick
+		4 - Right Button Onclick
+		5 - Text Header
+		6 - Text
+		7 - Combobox Text
+		8 - Combobox Variable
+	-->
+	<trigger name="TriggerDialogBoxWithCombobox"/>
+	<template name="generic_dialog_box_combo_template">
+		<panel name="generic_dialog_box_combo" visible="0" color="0 0 0 .7" onshowlua="self:BringToFront()" watch="TriggerDialogBoxWithCombobox" ontrigger="If(!StringEmpty(param0), FadeIn(250), FadeOut(250));">
+			<panel y="-10h" width="36h" align="center" valign="center" grow="1" regrow="1" growinvis="0" noclick="1">
+				<instance name="newui_popup_caption_frame" title=""
+					watch="TriggerDialogBoxWithCombobox" ontrigger="If(!StringEmpty(param0), SetText(Translate(param0)));"
+					onclick="Call('generic_dialog_box_combo', 'FadeOut(250);');"
+				/>
+				<panel y="3.5h" width="35h" align="center" float="bottom" padding="1h" grow="1" regrow="1" growinvis="0" reverse="1" noclick="1">
+					<panel y="1.0h" grow="1" regrow="1" growinvis="0" stickytoinvis="0" width="100%" watch="TriggerDialogBoxWithCombobox" ontriggerlua="self:SetVisible(NotEmpty(param5))" >
+						<label fity="1" width="-1.0h" align="center" textalign="center" style="newui_font_style_11" wrap="1" watch="TriggerDialogBoxWithCombobox" ontriggerlua="if NotEmpty(param5) then self:SetText(FormatStringNewline(Translate(param5))) end"
+						/>
+					</panel>
+
+					<panel width="100%" grow="1" regrow="1" growinvis="0" stickytoinvis="0" noclick="1" watch="TriggerDialogBoxWithCombobox" ontriggerlua="self:SetVisible(NotEmpty(param6))" >
+						<label width="-1.0h" align="center" fity="1" fitypadding="2h" wrap="1" textalign="center" textvalign="center" style="newui_font_style_10" noclick="1" watch="TriggerDialogBoxWithCombobox" ontriggerlua="if NotEmpty(param6) then self:SetText(FormatStringNewline(Translate(param6))) end"/>
+					</panel>
+
+					<panel width="-1h" align="center" height="3.5h" sticky="1" stickytoinvis="0" noclick="1">
+						<instance name="newui_common_button_2_template" x="-8h" y="-0.25h" width="15h" height="2.5h" align="center"
+							button_name="generic_dialog_box_combo_left_btn"
+							onclicklua="self:UICmd([[Call('generic_dialog_box_combo', 'FadeOut(250);');]])"
+							watch="TriggerDialogBoxWithCombobox"
+							ontrigger="
+								SetOnClick('
+									Call(\'generic_dialog_box_combo\', \'FadeOut(250);\');
+									'#param3#'
+								');
+							"
+							labelwatch="TriggerDialogBoxWithCombobox"
+							labelontrigger="If(!StringEmpty(param1), Split(SetText(Translate(param1)), Call('generic_dialog_box_combo_left_btn', 'SetVisible(1)')), Call('generic_dialog_box_combo_left_btn', 'SetVisible(0)'));"
+						/>
+						<instance name="newui_common_button_2_template" x="8h" y="-0.25h" width="15h" height="2.5h" align="center"
+							button_name="generic_dialog_box_combo_right_btn"
+							onclicklua="self:UICmd([[Call('generic_dialog_box_combo', 'FadeOut(250);');]])"
+							watch="TriggerDialogBoxWithCombobox"
+							ontrigger="
+								SetOnClick('
+									Call(\'generic_dialog_box_combo\', \'FadeOut(250);\');
+									'#param4#'
+								');
+							"
+							labelwatch="TriggerDialogBoxWithCombobox"
+							labelontrigger="If(!StringEmpty(param2), Split(SetText(Translate(param2)), Call('generic_dialog_box_combo_right_btn', 'SetVisible(1)')), Call('generic_dialog_box_combo_right_btn', 'SetVisible(0)'));"
+						/>
+					</panel>
+
+					<panel align="center" height="2.4h" grow="1" regrow="1" float="right" padding="0.5h"
+						watch="TriggerDialogBoxWithCombobox"
+						ontriggerlua="
+							self:SetVisible(NotEmpty(param7) and NotEmpty(param8))
+
+							local cvarStr = param8
+							local populateCheckbox = function(checked, mouseOver)
+								GetWidget('generic_dialog_combobox_checkmark'):SetVisible(checked)
+								local labelWidget = GetWidget('generic_dialog_combobox_label')
+								if (mouseOver) then
+									labelWidget:SetColor('#3abde7')
+								elseif (checked) then
+									labelWidget:SetColor('#ffaa00')
+								else
+									labelWidget:SetColor('white')
+								end
+							end
+							local onClickFunc = function()
+								local cvarValue = not GetCvarBool(cvarStr)
+								SetSave(cvarStr, cvarValue, 'bool')
+								populateCheckbox(cvarValue, true)
+							end
+							local onMouseOverFunc = function()
+								PlaySound('/shared/sounds/ui/ccpanel/button_over_01.wav')
+								populateCheckbox(GetCvarBool(cvarStr), true)
+							end
+							local onMouseOutFunc = function()
+								populateCheckbox(GetCvarBool(cvarStr), false)
+							end
+							self:SetCallback('onclick', onClickFunc)
+							self:SetCallback('onmouseover', onMouseOverFunc)
+							self:SetCallback('onmouseout', onMouseOutFunc)
+							self:RefreshCallbacks()
+
+							populateCheckbox(GetCvarBool(cvarStr), false)
+						"
+					>
+						<panel width="1.5h" height="1.5h" noclick="1">
+							<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.5h" color="white" noclick="1"/>
+							<frame texture="/ui/frames/roundframe.tga" color="#3abde7" borderthickness="0.5h" noclick="1"/>
+							<image name="generic_dialog_combobox_checkmark" texture="/ui/elements/check.tga" noclick="1"/>
+						</panel>
+						<label name="generic_dialog_combobox_label" fitx="1" fity="1" textvalign="center" font="dyn_10" color="white" shadow="1" watch="TriggerDialogBoxWithCombobox" ontriggerlua="self:SetText(Translate(param7))" noclick="1"/>
+					</panel>
+				</panel>
+			</panel>
+		</panel>
+	</template>
+
+	<!-- Generic Dialog Box with Combobox
+		TriggerDialogBoxWithComboboxGame
+		0 - Header
+		1 - Left Button Label
+		2 - Right Button Label
+		3 - Left Button Onclick
+		4 - Right Button Onclick
+		5 - Text Header
+		6 - Text
+		7 - Combobox Text
+		8 - Combobox Variable
+	-->
+	<trigger name="TriggerDialogBoxWithComboboxGame"/>
+	<template name="generic_dialog_box_combo_game_template">
+		<panel name="generic_dialog_box_combo_game" visible="0" color="0 0 0 .7" onshowlua="self:BringToFront()" watch="TriggerDialogBoxWithComboboxGame" ontrigger="If(!StringEmpty(param0), FadeIn(250), FadeOut(250));">
+			<panel y="-10h" width="36h" align="center" valign="center" grow="1" regrow="1" growinvis="0" noclick="1">
+				<instance name="newui_popup_caption_frame" title=""
+					watch="TriggerDialogBoxWithComboboxGame" ontrigger="If(!StringEmpty(param0), SetText(Translate(param0)));"
+					onclick="Call('generic_dialog_box_combo_game', 'FadeOut(250);');"
+				/>
+				<panel y="3.5h" width="35h" align="center" float="bottom" padding="1h" grow="1" regrow="1" growinvis="0" reverse="1" noclick="1">
+					<panel y="1.0h" grow="1" regrow="1" growinvis="0" stickytoinvis="0" width="100%" watch="TriggerDialogBoxWithComboboxGame" ontriggerlua="self:SetVisible(NotEmpty(param5))" >
+						<label fity="1" width="-1.0h" align="center" textalign="center" style="newui_font_style_11" wrap="1" watch="TriggerDialogBoxWithComboboxGame" ontriggerlua="if NotEmpty(param5) then self:SetText(FormatStringNewline(Translate(param5))) end"
+						/>
+					</panel>
+
+					<panel width="100%" grow="1" regrow="1" growinvis="0" stickytoinvis="0" watch="TriggerDialogBoxWithComboboxGame" ontriggerlua="self:SetVisible(NotEmpty(param6))" >
+						<label width="-1.0h" align="center" fity="1" fitypadding="1.5h" wrap="1" textalign="center" textvalign="center" style="newui_font_style_10" noclick="1" watch="TriggerDialogBoxWithComboboxGame" ontriggerlua="if NotEmpty(param6) then self:SetText(FormatStringNewline(Translate(param6))) end"/>
+					</panel>
+
+					<panel width="-1h" align="center" height="3.5h" sticky="1" stickytoinvis="0" noclick="1">
+						<instance name="newui_common_button_2_template" x="-8h" width="15h" height="2.5h" align="center"
+							button_name="generic_dialog_box_combo_game_left_btn"
+							onclick="Call('generic_dialog_box_combo_game', 'FadeOut(250);');"
+							watch="TriggerDialogBoxWithComboboxGame"
+							ontrigger="
+								SetOnClick('
+									Call(\'generic_dialog_box_combo_game\', \'FadeOut(250);\');
+									'#param3#'
+								');
+							"
+							labelwatch="TriggerDialogBoxWithComboboxGame"
+							labelontrigger="If(!StringEmpty(param1), Split(SetText(Translate(param1)), Call('generic_dialog_box_combo_game_left_btn', 'SetVisible(1)')), Call('generic_dialog_box_combo_game_left_btn', 'SetVisible(0)'));"
+						/>
+						<instance name="newui_common_button_2_template" x="8h" width="15h" height="2.5h" align="center"
+							button_name="generic_dialog_box_combo_game_right_btn"
+							onclick="Call('generic_dialog_box_combo_game', 'FadeOut(250);');"
+							watch="TriggerDialogBoxWithComboboxGame"
+							ontrigger="
+								SetOnClick('
+									Call(\'generic_dialog_box_combo_game\', \'FadeOut(250);\');
+									'#param4#'
+								');
+							"
+							labelwatch="TriggerDialogBoxWithComboboxGame"
+							labelontrigger="If(!StringEmpty(param2), Split(SetText(Translate(param2)), Call('generic_dialog_box_combo_game_right_btn', 'SetVisible(1)')), Call('generic_dialog_box_combo_game_right_btn', 'SetVisible(0)'));"
+						/>
+					</panel>
+
+					<panel align="center" height="2.4h" grow="1" regrow="1" float="right" padding="0.5h"
+						watch="TriggerDialogBoxWithComboboxGame"
+						ontriggerlua="
+							self:SetVisible(NotEmpty(param7) and NotEmpty(param8))
+
+							local cvarStr = param8
+							local populateCheckbox = function(checked, mouseOver)
+								GetWidget('generic_dialog_combobox_game_checkmark', 'game'):SetVisible(checked)
+								local labelWidget = GetWidget('generic_dialog_combobox_game_label', 'game')
+								if (mouseOver) then
+									labelWidget:SetColor('#3abde7')
+								elseif (checked) then
+									labelWidget:SetColor('#ffaa00')
+								else
+									labelWidget:SetColor('white')
+								end
+							end
+
+							local onClickFunc = function()
+								local cvarValue = not GetCvarBool(cvarStr)
+								SetSave(cvarStr, cvarValue, 'bool')
+								populateCheckbox(cvarValue, true)
+							end
+							local onMouseOverFunc = function()
+								PlaySound('/shared/sounds/ui/ccpanel/button_over_01.wav')
+								populateCheckbox(GetCvarBool(cvarStr), true)
+							end
+							local onMouseOutFunc = function()
+								populateCheckbox(GetCvarBool(cvarStr), false)
+							end
+							self:SetCallback('onclick', onClickFunc)
+							self:SetCallback('onmouseover', onMouseOverFunc)
+							self:SetCallback('onmouseout', onMouseOutFunc)
+							self:RefreshCallbacks()
+
+							populateCheckbox(GetCvarBool(cvarStr), false)
+						"
+					>
+						<panel width="1.5h" height="1.5h" noclick="1">
+							<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.5h" color="white" noclick="1"/>
+							<frame texture="/ui/frames/roundframe.tga" color="#3abde7" borderthickness="0.5h" noclick="1"/>
+							<image name="generic_dialog_combobox_game_checkmark" texture="/ui/elements/check.tga" noclick="1"/>
+						</panel>
+						<label name="generic_dialog_combobox_game_label" fitx="1" fity="1" textvalign="center" font="dyn_10" color="white" shadow="1" watch="TriggerDialogBoxWithComboboxGame" ontriggerlua="self:SetText(Translate(param7))" noclick="1"/>
+					</panel>
+				</panel>
+			</panel>
+		</panel>
+	</template>
+
+	<!-- Generic Dialog Box
+		TriggerDialogBoxGame
+		0 - Header
+		1 - Left Button Label
+		2 - Right Button Label
+		3 - Left Button Onclick
+		4 - Right Button Onclick
+		5 - Text Header
+		6 - Text
+	-->
+	<trigger name="TriggerDialogBoxGame"/>
+	<template name="generic_dialog_box_game_template">
+		<panel name="generic_dialog_game_box" visible="0" color="0 0 0 .1" onshowlua="self:BringToFront()" noclick="
+			1" watch="TriggerDialogBoxGame" ontrigger="If(!StringEmpty(param0), FadeIn(250), FadeOut(250));">
+			<panel y="-10h" width="36h" align="center" valign="center" grow="1" regrow="1" growinvis="0" noclick="1">
+
+				<instance name="newui_popup_caption_frame" title=""
+					watch="TriggerDialogBoxGame" ontrigger="If(!StringEmpty(param0), SetText(Translate(param0)));"
+					onclick="Call('generic_dialog_game_box', 'FadeOut(250);');"
+				/>
+				<panel y="3.5h" width="35h" align="center" float="bottom" padding="1h" grow="1" regrow="1" growinvis="0" reverse="1" noclick="1">
+					<panel y="1.0h" grow="1" regrow="1" growinvis="0" stickytoinvis="0" width="100%" watch="TriggerDialogBoxGame" ontriggerlua="self:SetVisible(NotEmpty(param5))" >
+						<label fity="1" width="-1.0h" align="center" textalign="center" style="newui_font_style_11" wrap="1" watch="TriggerDialogBoxGame" ontriggerlua="if NotEmpty(param5) then self:SetText(FormatStringNewline(Translate(param5))) end"/>
+					</panel>
+					<panel width="100%" grow="1" regrow="1" growinvis="0" stickytoinvis="0" watch="TriggerDialogBoxGame" ontriggerlua="self:SetVisible(NotEmpty(param6))" >
+						<label width="-1.0h" align="center" fity="1" fitypadding="1.5h" wrap="1" textalign="center" textvalign="center" style="newui_font_style_10" noclick="1" watch="TriggerDialogBoxGame" ontriggerlua="if NotEmpty(param6) then self:SetText(FormatStringNewline(Translate(param6))) end"/>
+					</panel>
+					<panel width="-1h" align="center" height="3.5h" sticky="1" stickytoinvis="0" noclick="1">
+						<instance name="newui_common_button_2_template" x="-8h" width="15h" height="2.5h" align="center"
+							button_name="generic_dialog_game_box_left_btn"
+							onclick="Call('generic_dialog_game_box', 'FadeOut(250);');"
+							watch="TriggerDialogBoxGame"
+							ontrigger="
+								SetOnClick('
+									Call(\'generic_dialog_game_box\', \'FadeOut(250);\');
+									'#param3#'
+								');
+							"
+							labelwatch="TriggerDialogBoxGame"
+							labelontrigger="If(!StringEmpty(param1), Split(SetText(Translate(param1)), Call('generic_dialog_game_box_left_btn', 'SetVisible(1)')), Call('generic_dialog_game_box_left_btn', 'SetVisible(0)'));"
+						/>
+						<instance name="newui_common_button_2_template" x="8h" width="15h" height="2.5h" align="center"
+							button_name="generic_dialog_game_box_right_btn"
+							onclick="Call('generic_dialog_game_box', 'FadeOut(250);');"
+							watch="TriggerDialogBoxGame"
+							ontrigger="
+								SetOnClick('
+									Call(\'generic_dialog_game_box\', \'FadeOut(250);\');
+									'#param4#'
+								');
+							"
+							labelwatch="TriggerDialogBoxGame"
+							labelontrigger="If(!StringEmpty(param2), Split(SetText(Translate(param2)), Call('generic_dialog_game_box_right_btn', 'SetVisible(1)')), Call('generic_dialog_game_box_right_btn', 'SetVisible(0)'));"
+						/>
+					</panel>
+				</panel>
+			</panel>
+		</panel>
+	</template>
+
+	<trigger name="GLIncorrectDisplay"/>
+
+	<!-- Purchase confirmation -->
+	<!-- form for purchasing (alts, couriers) -->
+	<trigger name="purchase_confirmation_status"/>
+	<trigger name="purchase_confirmation_results"/>
+	<form
+		name="purchase_confirmation_submit"
+		host="!masterserver"
+		method="post"
+		target="/store_requester.php"
+		statustrigger="purchase_confirmation_status"
+		resulttrigger="purchase_confirmation_results"
+		resultparam0="responseCode"
+		resultparam1="popupCode"
+		resultparam2="errorCode"
+		resultparam3="error"
+		ssl="false"
+	/>
+
+	<trigger name="Confirm_Purchase_AltCourier"/>
+	<!-- Confirm_Purchase_AltCourier
+		0 - Product Name (Ex: Pig Courier, mstore_product16_name)
+		1 - Product Type Text (Ex: globby_purchase_avatar, game_purchase_courier)
+		2 - Gold Cost (Ex: 300)
+		3 - Silver Cost (Ex: 400)
+		4 - Hero Name (Ex: Hero_Pearl)
+		5 - Alt Code (Ex: Alt2)
+		6 - Product Type (Ex: Alt Avatar, Couriers) -->
+	<!-- params, 0- ProductName 1- ProductType Text 2-GoldCost 3-SilverCost 4-HeroName 5-AltCode 6-ProductType -->
+	<template name="purchase_confirmation_altcoutier_body">
+		<panel width="35h" grow="1" regrow="1" align="center" valign="center" float="bottom" padding="0.75h" noclick="1">
+			<label name="altavatar_purchase_confirm_productname" content="" fity="1" textalign="center" style="newui_font_style_11" wrap="1" watch="Confirm_Purchase_AltCourier" ontriggerlua="self:SetText(Translate(param0))"/>
+
+			<label content="globby_purchase_avatar" fity="1" textalign="center" style="newui_font_style_12" wrap="1" watch="Confirm_Purchase_AltCourier" ontriggerlua="self:SetText(Translate(param1))"/>
+
+			<panel vmargin="0.75h" grow="1" align="center" width="-1h" color="0 0 0 1" noclick="1">
+				<instance name="newui_custom_frame_template" height="+1h" alpha="0.95"/>
+				<label name="altavatar_body_text" width="-.5h" align="center" wrap="1" fity="1" y="0.5h" textalign="center" textvalign="center" style="newui_font_style_10" content="mstore_purchase_choosecurrency_desc"
+					onevent0lua="
+						local slvCst, gldCst = GetCvarInt('_confirm_silvercost'), GetCvarInt('_confirm_goldcost')
+						local slvVld, gldVld = (slvCst > 0 and slvCst ~= 9002), (gldCst > 0 and gldCst ~= 9001)
+						local slvAfrd, gldAfrd = (tonumber(UISilverCoins()) >= slvCst), (tonumber(UIGoldCoins()) >= gldCst)
+						local content = ''
+						if (not (slvVld or gldVld)) then
+							content = Translate('mstore_purchase_itemisfree')
+						elseif (not slvVld) then
+							content = Translate('mstore_purchase_goldonly')..(not gldAfrd and ('\n\n'..Translate('mstore_viewcost_desc')) or '')
+						elseif (not gldVld) then
+							content = Translate('mstore_purchase_silveronly')..(not slvAfrd and ('\n\n'..Translate('mstore_viewcost_desc')) or '')
+						else
+							content = Translate(not (gldAfrd or slvAfrd) and 'mstore_purchase_choosecurrency_viewcost' or 'mstore_purchase_choosecurrency_desc')
+						end
+						self:SetText(content)
+					"
+				/>
+			</panel>
+
+			<panel vmargin="0.75h" height="6h" noclick="1">
+				<panel vmargin="0.75h" x="-6h" width="10h" align="center" float="bottom" padding="0.25h" noclick="1">
+					<panel name="altavatar_purchase_confirm_goldbox" height="2h" color="0 0 0 1" noclick="1">
+						<instance name="newui_custom_frame_template" alpha="0.95"/>
+						<panel hmargin="0.25h" vmargin="0.25h" noclick="1">
+							<label name="altavatar_purchase_confirm_goldcost" width="-120@" height="100%" textalign="center" textvalign="center" font="dyn_10" outline="1" color="#FFCC00" noclick="1" onevent0="SetText(_confirm_goldcost); SetVisible(_confirm_goldcost != 9001 and _confirm_goldcost gt 0); Call('altavatar_purchase_confirm_goldbox', 'SetVisible(_confirm_goldcost != 9001 and _confirm_goldcost gt 0)');"
+							/>
+							<image height="100%" width="100@" align="right" noclick="1" texture="/ui/fe2/store/gold_coins.tga"/>
+						</panel>
+					</panel>
+					<instance name="newui_common_button_2_template" width="10.25h" height="2h" visible="0" align="center" label="mstore_purchase_gold"
+						button_name="altavatar_purchase_confirm_goldbutton"
+						onclick="
+							PlaySound('/ui/fe2/store/sounds/purchase_avatar.wav');
+							SubmitForm('purchase_confirmation_submit', 'account_id', GetAccountID(), 'request_code', 8, 'cookie', GetCookie(), 'hero_name', _confirm_heroname, 'avatar_code', _confirm_altcode, 'currency', 0, 'type', _confirm_producttype);
+							CallEvent('altavatar_purchase_confirm_main', 1);
+						"
+					/>
+				</panel>
+				<panel vmargin="0.75h" x="6h" width="10h" align="center" float="bottom" padding="0.25h" noclick="1">
+					<panel name="altavatar_purchase_confirm_silverbox" height="2h" color="0 0 0 1" noclick="1">
+						<instance name="newui_custom_frame_template" alpha="0.95"/>
+						<panel hmargin="0.25h" vmargin="0.25h" noclick="1">
+							<label name="altavatar_purchase_confirm_silvercost" font="dyn_10" width="-120@" height="100%" textalign="center" textvalign="center" outline="1" color="#c0d5ed" noclick="1" onevent0="SetText(_confirm_silvercost); SetVisible(_confirm_silvercost != 9002 and _confirm_silvercost gt 0); Call('altavatar_purchase_confirm_silverbox', 'SetVisible(_confirm_silvercost != 9002 and _confirm_silvercost gt 0)');"/>
+							<image height="100%" width="100@" align="right" noclick="1" texture="/ui/fe2/store/silver_coins.tga"/>
+						</panel>
+					</panel>
+					<instance name="newui_common_button_2_template" width="10.25h" height="2h" visible="0" align="center" label="mstore_purchase_silver"
+						button_name="altavatar_purchase_confirm_silverbutton"
+						onclick="
+							PlaySound('/ui/fe2/store/sounds/purchase_avatar.wav');
+							SubmitForm('purchase_confirmation_submit', 'account_id', GetAccountID(), 'request_code', 8, 'cookie', GetCookie(), 'hero_name', _confirm_heroname, 'avatar_code', _confirm_altcode, 'currency', 1, 'type', _confirm_producttype);
+							CallEvent('altavatar_purchase_confirm_main', 1);
+						"
+					/>
+				</panel>
+				<panel width="50%" height="100%" align="center" noclick="1">
+					<instance name="newui_common_button_2_template" width="15h" height="5h" visible="0" align="center" valign="center" label="mstore_purchase_claimfree"
+						button_name="altavatar_purchase_confirm_free"
+						onclick="
+							PlaySound('/ui/fe2/store/sounds/purchase_avatar.wav');
+							SubmitForm('purchase_confirmation_submit', 'account_id', GetAccountID(), 'request_code', 8, 'cookie', GetCookie(), 'hero_name', _confirm_heroname, 'avatar_code', _confirm_altcode, 'currency', 0, 'type', _confirm_producttype);
+							CallEvent('altavatar_purchase_confirm_main', 1);
+						"
+					/>
+				</panel>
+			</panel>
+			<panel align="center" width="-1h" height="3h" noclick="1">
+				<instance name="newui_common_button_2_template" y="-0.75h" width="12h" height="2.5h" align="center" label="general_cancel" onclick="CallEvent('altavatar_purchase_confirm_main', 1);"/>
+			</panel>
+		</panel>
+	</template>
+	<template name="purchase_confirmation_altcoutier">
+		<panel name="altavatar_purchase_confirm_main" width="100%" height="100%" color="0 0 0 0.5" onevent0="FadeIn(150);" onevent1="FadeOut(150);" visible="0"
+			onload="CreateInt('_confirm_goldcost', 0); CreateInt('_confirm_silvercost', 0); CreateString('_confirm_heroname', ''); CreateString('_confirm_altcode', ''); CreateString('_confirm_producttype', '');"
+			watch="Confirm_Purchase_AltCourier"
+			ontrigger="Set('_confirm_goldcost', param2); Set('_confirm_silvercost', param3); Set('_confirm_heroname', param4); Set('_confirm_altcode', param5); Set('_confirm_producttype', param6);
+			CallEvent('altavatar_purchase_confirm_goldcost', 0);
+			CallEvent('altavatar_purchase_confirm_silvercost', 0);
+			CallEvent('altavatar_body_text', 0);
+			DoEvent(0);"
+			ontriggerlua="if ((tonumber(UIGoldCoins()) >= tonumber(param2)) and (tonumber(param2) ~= 9001) and (tonumber(param2) > 0)) then GetWidget('altavatar_purchase_confirm_goldbutton'):SetVisible(1) else GetWidget('altavatar_purchase_confirm_goldbutton'):SetVisible(0) end if ((tonumber(UISilverCoins()) >= tonumber(param3)) and (tonumber(param3) ~= 9002) and (tonumber(param3) > 0)) then GetWidget('altavatar_purchase_confirm_silverbutton'):SetVisible(1) else GetWidget('altavatar_purchase_confirm_silverbutton'):SetVisible(0) end if (((tonumber(param2) == 0) or (tonumber(param2) == 9001)) and ((tonumber(param3) == 0) or (tonumber(param3) == 9002))) then GetWidget('altavatar_purchase_confirm_free'):SetVisible(1) else GetWidget('altavatar_purchase_confirm_free'):SetVisible(0) end"
+		>
+			<instance name="newui_common_popup" y="20h" width="33h" valign="top" id="altavatar_purchase_confirm_main_content" visible="1" show_close="1"
+				title="globby_purchase"
+				content="purchase_confirmation_altcoutier_body"
+				oncloselua="PlaySound('/shared/sounds/ui/ccpanel/button_click_02.wav') self:UICmd([[CallEvent('altavatar_purchase_confirm_main', 1);]])"
+			/>
+		</panel>
+
+		<!-- handle form results -->
+		<panel visible="0" onload="CreateString('_purchase_confirm_err_string', '')"
+			watch="purchase_confirmation_results"
+			ontrigger=" If(param1 == 3,
+							Split(	DoEvent(0),
+									ChatRefreshUpgrades(),
+									ClientRefreshUpgrades(),
+									ServerRefreshUpgrades()
+								)
+						);
+
+						If((param1 == 0 or param1 == 1) and param2 ge 0, Set('_purchase_confirm_err_string', Translate('mstore_error' # param2)));
+						If(param2 gt 0, DoEvent(1));"
+			watch2="purchase_confirmation_status"
+			ontrigger2="If(param0 == 3, Set('_purchase_confirm_err_string', Translate('mstore_error_connect')));"
+			onevent0="Trigger('TriggerDialogBox', 'mstore_buyitem_success', '', 'general_ok', '', '', 'mstore_buyitem_success', 'mstore_buyitem_success_body');"
+			onevent1="Trigger('TriggerDialogBox', 'mstore_error_generic', '', 'general_ok', '', '', 'mstore_error_generic', _purchase_confirm_err_string);"
+		/>
+	</template>
+
+	<!-- Other Purchase confirmation -->
+	<trigger name="Confirm_Purchase_Other"/>
+	<trigger name="Confirm_Purchase_Other_Start"/>
+	<!-- Confirm_Purchase_Other
+		0 - Product Name (Ex: Fist of Sol, mstore_product481_name)
+		1 - Product Type Text (Ex: mstore_buyitem_confirm, globby_purchase_eap_is)
+		2 - Gold Cost (Ex: 300)
+		3 - Silver Cost (Ex: 400)
+		4 - Category ID (Ex: 23)
+		5 - Product ID (Ex: 3)
+		6 - Tips (Ex: Note: Purchase Mastery Boost here will use it directly.) -->
+	<!-- params, 0- ProductName 1-ProductType (label) 2-GoldCost 3-SilverCost 4-ProductID 5-CategoryID -->
+	<template name="purchase_confirmation_other_body">
+		<panel width="35h" grow="1" regrow="1" align="center" valign="center" float="bottom" padding="1.5h" noclick="1">
+			<label name="other_purchase_confirm_productname" content="" fity="1" textalign="center" style="newui_font_style_11" wrap="1" watch="Confirm_Purchase_Other" ontriggerlua="self:SetText(Translate(param0))"/>
+
+			<label content="mstore_buyitem_confirm" fity="1" textalign="center" style="newui_font_style_12" wrap="1" watch="Confirm_Purchase_Other" ontrigger="If(!StringEmpty(param1), SetText(Translate(param1)), SetText(Translate('mstore_buyitem_confirm')));"/>
+
+			<panel vmargin="0.75h" grow="1" align="center" width="-1h" color="0 0 0 1" noclick="1">
+				<instance name="newui_custom_frame_template" height="+1h" alpha="0.95"/>
+				<label name="other_body_text" y="0.5h" width="-.5h" align="center" wrap="1" fity="1" textalign="center" style="newui_font_style_10" content="mstore_purchase_choosecurrency_desc"
+					onevent0lua="
+						local slvCst, gldCst = GetCvarInt('_confirm_silvercost_other'), GetCvarInt('_confirm_goldcost_other')
+						local slvVld, gldVld = (slvCst > 0 and slvCst ~= 9002), (gldCst > 0 and gldCst ~= 9001)
+						local slvAfrd, gldAfrd = (tonumber(UISilverCoins()) >= slvCst), (tonumber(UIGoldCoins()) >= gldCst)
+						local content = ''
+						if (not (slvVld or gldVld)) then
+							content = Translate('mstore_purchase_itemisfree')
+						elseif (not slvVld) then
+							content = Translate('mstore_purchase_goldonly')..(not gldAfrd and '\n\n'..Translate('mstore_viewcost_desc') or '')
+						elseif (not gldVld) then
+							content = Translate('mstore_purchase_silveronly')..(not slvAfrd and '\n\n'..Translate('mstore_viewcost_desc') or '')
+						else
+							content = Translate(not (gldAfrd or slvAfrd) and 'mstore_purchase_choosecurrency_viewcost' or 'mstore_purchase_choosecurrency_desc')
+						end
+						self:SetText(content)
+					"
+				/>
+			</panel>
+
+			<panel height="1.5h" sticky="1" stickytoinvis="0" visible="0" watch="Confirm_Purchase_Other" ontriggerlua="self:SetVisible(NotEmpty(param6))">
+				<label content="mstore_buyitem_confirm" align="center" fity="1" textalign="center" style="newui_font_style_10" watch="Confirm_Purchase_Other" ontriggerlua="if NotEmpty(param6) then self:SetText(param6) end"/>
+			</panel>
+
+			<panel height="6h" noclick="1">
+				<panel x="0h" width="10h" align="left" float="bottom" padding="0.25h" noclick="1">
+					<panel name="other_purchase_confirm_goldbox" height="2h" color="0 0 0 1" noclick="1">
+						<instance name="newui_custom_frame_template" alpha="0.95"/>
+						<panel hmargin="0.25h" vmargin="0.25h" noclick="1">
+							<label name="other_purchase_confirm_goldcost" width="-120@" height="100%" textalign="center" textvalign="center" font="dyn_10" outline="1" color="#FFCC00" noclick="1" onevent0="SetText(_confirm_goldcost_other); SetVisible(_confirm_goldcost_other != 9001 and _confirm_goldcost_other gt 0); Call('other_purchase_confirm_goldbox', 'SetVisible(_confirm_goldcost_other != 9001 and _confirm_goldcost_other gt 0)');"
+							/>
+							<image height="100%" width="100@" align="right" noclick="1" texture="/ui/fe2/store/gold_coins.tga"/>
+						</panel>
+					</panel>
+					<instance name="newui_common_button_2_template" width="10.25h" height="2h" visible="0" align="center" label="mstore_purchase_gold"
+						button_name="other_purchase_confirm_goldbutton"
+						onclick="
+							PlaySound('/ui/fe2/store/sounds/purchase_avatar.wav');
+							Set('_confirm_submitted', true);
+							SubmitForm('MicroStore', 'account_id', GetAccountID(), 'request_code', '4', 'cookie', GetCookie(), 'product_id', _confirm_product, 'category_id', _confirm_category, 'hostTime', HostTime, 'currency', 0, 'type');
+							CallEvent('other_purchase_confirm_main', 1);
+							Trigger('Confirm_Purchase_Other_Start', _confirm_product);
+						"
+					/>
+				</panel>
+				<panel width="10h" align="center" float="bottom" padding="0.25h" noclick="1">
+					<panel name="other_purchase_confirm_silverbox" height="2h" color="0 0 0 1" noclick="1">
+						<instance name="newui_custom_frame_template" alpha="0.95"/>
+						<panel hmargin="0.25h" vmargin="0.25h" noclick="1">
+							<label name="other_purchase_confirm_silvercost" font="dyn_10" width="-120@" height="100%" textalign="center" textvalign="center" outline="1" color="#c0d5ed" noclick="1" onevent0="SetText(_confirm_silvercost_other); SetVisible(_confirm_silvercost_other != 9002 and _confirm_silvercost_other gt 0); Call('other_purchase_confirm_silverbox', 'SetVisible(_confirm_silvercost_other != 9002 and _confirm_silvercost_other gt 0)');"/>
+							<image height="100%" width="100@" align="right" noclick="1" texture="/ui/fe2/store/silver_coins.tga"/>
+						</panel>
+					</panel>
+					<instance name="newui_common_button_2_template" width="10.25h" height="2h" visible="0" align="center" label="mstore_purchase_silver"
+						button_name="other_purchase_confirm_silverbutton"
+						onclick="
+							PlaySound('/ui/fe2/store/sounds/purchase_avatar.wav');
+							Set('_confirm_submitted', true);
+							SubmitForm('MicroStore', 'account_id', GetAccountID(), 'request_code', '4', 'cookie', GetCookie(), 'product_id', _confirm_product, 'category_id', _confirm_category, 'hostTime', HostTime, 'currency', 1, 'type');
+							CallEvent('other_purchase_confirm_main', 1);
+							Trigger('Confirm_Purchase_Other_Start', _confirm_product);
+						"
+					/>
+				</panel>
+				<panel x="-1h" width="10h" align="right" float="bottom" padding="0.25h" noclick="1">
+					<panel height="2h" color="0 0 0 1" noclick="1">
+						<instance name="newui_custom_frame_template" alpha="0.95"/>
+						<panel hmargin="0.25h" vmargin="0.25h" noclick="1">
+							<label width="-120@" height="100%" textalign="center" textvalign="center" font="dyn_10" outline="1" color="#FFCC00" noclick="1"
+								watch="GoldCoins"
+								ontrigger="SetText(FtoA(GoldCoins, 0, 0, ',')); SetWidth( GetStringWidth('dyn_10', (FtoA(GoldCoins, 0, 0, ',')) ) );"
+							/>
+							<image height="100%" width="100@" align="right" noclick="1" texture="/ui/fe2/store/gold_coins.tga"/>
+						</panel>
+					</panel>
+					<panel height="2h" color="0 0 0 1" noclick="1">
+						<instance name="newui_custom_frame_template" alpha="0.95"/>
+						<panel hmargin="0.25h" vmargin="0.25h" noclick="1">
+							<label font="dyn_10" width="-120@" height="100%" textalign="center" textvalign="center" outline="1" color="#c0d5ed" noclick="1"
+								watch="SilverCoins"
+								ontrigger="SetText(FtoA(SilverCoins, 0, 0, ',')); SetWidth( GetStringWidth('dyn_10', (FtoA(SilverCoins, 0, 0, ',')) ) );"
+							/>
+							<image height="100%" width="100@" align="right" noclick="1" texture="/ui/fe2/store/silver_coins.tga"/>
+						</panel>
+					</panel>
+				</panel>
+				<panel width="50%" height="100%" align="center" noclick="1">
+					<instance name="newui_common_button_2_template" width="15h" height="5h" visible="0" align="center" valign="center" label="mstore_purchase_claimfree"
+						button_name="other_purchase_confirm_free"
+						onclick="
+							PlaySound('/ui/fe2/store/sounds/purchase_avatar.wav');
+							Set('_confirm_submitted', true);
+							SubmitForm('MicroStore', 'account_id', GetAccountID(), 'request_code', '4', 'cookie', GetCookie(), 'product_id', _confirm_product, 'category_id', _confirm_category, 'hostTime', HostTime, 'currency', 0, 'type');
+							CallEvent('other_purchase_confirm_main', 1);
+							Trigger('Confirm_Purchase_Other_Start', _confirm_product);
+						"
+					/>
+				</panel>
+			</panel>
+			<panel align="center" width="-1h" height="3h" noclick="1">
+				<instance name="newui_common_button_2_template" button_name="confirm_purchase_other_cancel" y="-0.5h" width="12h" height="2.5h" align="center" label="general_cancel" onclick="CallEvent('other_purchase_confirm_main', 1);"/>
+			</panel>
+		</panel>
+	</template>
+	<template name="purchase_confirmation_other">
+		<panel name="other_purchase_confirm_main" width="100%" height="100%" color="0 0 0 0.5" onevent0="FadeIn(150);" onevent1="FadeOut(150);" visible="0"
+			onload="CreateInt('_confirm_goldcost_other', 0); CreateInt('_confirm_silvercost_other', 0); CreateString('_confirm_product', ''); CreateString('_confirm_category', ''); CreateBool('_confirm_submitted', false);"
+			watch="Confirm_Purchase_Other"
+			ontrigger="Set('_confirm_goldcost_other', param2); Set('_confirm_silvercost_other', param3); Set('_confirm_product', param5); Set('_confirm_category', param4);
+			CallEvent('other_purchase_confirm_goldcost', 0);
+			CallEvent('other_purchase_confirm_silvercost', 0);
+			CallEvent('other_body_text', 0);
+			DoEvent(0);"
+			ontriggerlua="if ((tonumber(UIGoldCoins()) >= tonumber(param2)) and (tonumber(param2) ~= 9001) and (tonumber(param2) > 0)) then GetWidget('other_purchase_confirm_goldbutton'):SetVisible(1) else GetWidget('other_purchase_confirm_goldbutton'):SetVisible(0) end if ((tonumber(UISilverCoins()) >= tonumber(param3)) and (tonumber(param3) ~= 9002) and (tonumber(param3) > 0)) then GetWidget('other_purchase_confirm_silverbutton'):SetVisible(1) else GetWidget('other_purchase_confirm_silverbutton'):SetVisible(0) end if (((tonumber(param2) == 0) or (tonumber(param2) == 9001)) and ((tonumber(param3) == 0) or (tonumber(param3) == 9002))) then GetWidget('other_purchase_confirm_free'):SetVisible(1) else GetWidget('other_purchase_confirm_free'):SetVisible(0) end"
+			onshowlua="self:UICmd('SetActiveWidget(\'NULL\');')"
+		>
+			<instance name="newui_common_popup" y="20h" width="33h" valign="top" id="other_purchase_confirm_main_content" visible="1" show_close="1"
+				title="globby_purchase"
+				content="purchase_confirmation_other_body"
+				oncloselua="PlaySound('/shared/sounds/ui/ccpanel/button_click_02.wav') self:UICmd([[CallEvent('other_purchase_confirm_main', 1);]])"
+			/>
+		</panel>
+
+		<!-- handle form results -->
+		<panel visible="0" noclick="1" watch="MicroStoreResults" onload="CreateString('_other_confirm_err_string', '');"
+			ontrigger="	If(param15 gt 0 and _confirm_submitted,
+							Split(	Set('_other_confirm_err_string', Translate('mstore_error' # param15)),
+									DoEvent(1)
+								)
+						);
+						If(param1 == 3 and _confirm_submitted,
+							Split(	DoEvent(0),
+									ChatRefreshUpgrades(),
+									ClientRefreshUpgrades(),
+									ServerRefreshUpgrades()
+								)
+						);
+						Set('_confirm_submitted', false);"
+			onevent0="Trigger('TriggerDialogBox', 'mstore_buyitem_success', '', 'general_ok', '', '', 'mstore_buyitem_success', 'mstore_buyitem_success_body');"
+			onevent1="Trigger('TriggerDialogBox', 'mstore_error_generic', '', 'general_ok', '', '', 'mstore_error_generic', _other_confirm_err_string);"
+		/>
+	</template>
+</package>

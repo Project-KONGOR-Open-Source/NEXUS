@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+	<!-- Nickname Change -->
+	<trigger name="UpdateStoreNameChangeForm"/>
+	<trigger name="StoreNameChangeStatus"/>
+	<trigger name="StoreNameChangeResult"/>
+
+	<form
+		name="StoreNameChange"
+		host="!hon"
+		target="/client_require_nickchange.php"
+		ssl="false"
+		statustrigger="StoreNameChangeStatus"
+		resulttrigger="StoreNameChangeResult"
+		resultparam0="success"
+		resultparam1="errors"
+		resultparam2="nickname"
+	/>
+
+	<template name="storePopupNameChangeForm">
+		<panel name="storePopupNameChangeForm_{id=}" width="100%" grow="1" regrow="1" growinvis="0" float="bottom" padding="0.5h" visible="{visible=1}" noclick="1"
+			watch="StoreNameChangeResult"
+			ontrigger="
+				If(
+					param0 == 1,
+					Split(
+						CallEvent('store_popup_namechange_success', 0),
+						If(
+							!ui_disableAccountCreation,
+							Split(
+								Set('_store_namechange_confirmpass', ''),
+								Call('store_namechange_confirmpass', 'EraseInputLine();')
+							)
+						),
+						Call('store_namechange_nick', 'EraseInputLine();'),
+						Call('store_namechange_nick2', 'EraseInputLine();'),
+						CallEvent('store_popup_name_change', 1)
+					),
+					CallEvent('store_popup_form_error', 0)
+				);
+			"
+		>
+			<panel width="100%" grow="1" noclick="1">
+				<label width="100%" wrap="1" fity="1" style="microStoreDetailDesc" content="web_form_nickchange_notice" noclick="1"
+					onshowlua="ToggleOthersDetailStyle(self)"
+					onloadlua=""
+				/>
+			</panel>
+
+			<instance name="store2_line2" align="center" width="100%" height="1h"/>
+
+			<!-- New Nickname -->
+			<instance
+				name="paperForm_textbox_container"
+				label="web_form_nickchange_newnick"
+				font="dyn_12" color="#ff9600"
+				hastip="false"
+				order="201"
+				width="100%"
+				fieldname="store_namechange_nick"
+				ontrigger="If(StringEmpty(store_namechange_nick) or !StringEquals(store_namechange_nick, store_namechange_nick2), DoEvent(0), DoEvent(1));"
+				tip_id=""
+				form="StoreNameChange" data="nickname"
+				updatetrigger="UpdateStoreNameChangeForm"
+				onshowlua="ToggleOthersDetailStyle(self)"
+				onevent1lua="ToggleOthersDetailStyle(self)"
+				onhide="EraseInputLine();"
+			/>
+
+			<!-- Confirm New Nickname -->
+			<instance
+				name="paperForm_textbox_container"
+				label="web_form_nickchange_confirmnick"
+				font="dyn_12" color="#ff9600"
+				hastip="false"
+				order="202"
+				width="100%"
+				fieldname="store_namechange_nick2"
+				ontrigger="If(StringEmpty(store_namechange_nick2) or !StringEquals(store_namechange_nick, store_namechange_nick2), DoEvent(0), DoEvent(1));"
+				tip_id=""
+				form="StoreNameChange" data="confirmNickname"
+				updatetrigger="UpdateStoreNameChangeForm"
+				onshowlua="ToggleOthersDetailStyle(self)"
+				onevent1lua="ToggleOthersDetailStyle(self)"
+				onhide="EraseInputLine();"
+			/>
+
+			<panel noclick="1" onload="SetVisible(!ui_disableAccountCreation)" visible="0" height="3h" sticky="1" stickytoinvis="0" >
+				<!-- Confirm Password -->
+				<instance
+					name="paperForm_textbox_container"
+					label="create_acc_confirm_password"
+					font="dyn_12" color="#ff9600"
+					hastip="false"
+					order="203"
+					width="100%"
+					fieldname="store_namechange_confirmpass"
+					ontrigger="If(StringEmpty(store_namechange_confirmpass), DoEvent(0), DoEvent(1));"
+					tip_id=""
+					form="" data=""
+					updatetrigger="UpdateStoreNameChangeForm"
+					onload="CreateString('_store_namechange_confirmpass', '');"
+					onchange="
+						If(
+							!StringEmpty(this),
+							Set('_store_namechange_confirmpass', md5(this)),
+							Set('_store_namechange_confirmpass', '')
+						);
+
+					"
+					passchar="*"
+					onshowlua="ToggleOthersDetailStyle(self)"
+					onevent1lua="ToggleOthersDetailStyle(self)"
+					onhide="EraseInputLine();"
+				/>
+			</panel>
+			<panel width="100%" height="1.5h" noclick="1"/>
+		</panel>
+	</template>
+</package>

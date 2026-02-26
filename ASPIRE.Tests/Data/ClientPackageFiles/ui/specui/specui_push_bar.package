@@ -1,0 +1,626 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+
+	<style name="gameScoreHeaderSpecBarSpace" width="75%" height="18@" y="13@"/>
+
+	<template name="gameScoreHeaderSpec">
+		<panel name="gameScoreHeaderSpec{index}" x="{innerXMod}13.5h" y="1h" height="7.45h" width="14.9h" align="center" noclick="1" passivechildren="1">
+			<panel y="30%" width="125%" height="175@" align="center">
+				<panel width="70%" height="70@" valign="center" y="-16.5@" align="center">
+					<modelpanel
+						name="gameScoreHeaderSpec{flagIndex}Flag"
+						model="/ui/elements/ctf/flag/geo_cloth.mdf"
+						anim="upIdle"
+						depthclear="true"
+						cameradistance="70"
+						camerapos="7 0 -20"
+						depthcompress="true"
+						cameranear="1"
+						camerafar="5000"
+						noclick="true"
+					/>
+
+					<label textalign="center" textvalign="center" font="dyn_20" shadow="true" color="white" content="" height="65@"
+						watch="scoresFlagTime{flagIndex}"
+						ontriggerlua="
+							local time = ((tonumber(param0) * 1000) + tonumber(GetTrigger('GameTime'):GetLastValue()))
+							self:RegisterWatch('GameTime', function(self, gameTime)
+								gameTime = tonumber(gameTime)
+								local timeDiff = time - gameTime
+
+								if (0 >= timeDiff) then
+									self:SetText('')
+									self:UnregisterWatch('GameTime')
+								else
+									self:SetText(':'..math.ceil(timeDiff / 1000, 0)..'s')
+								end
+							end)
+						"
+					/>
+				</panel>
+
+			</panel>
+			<panel style="gameScoreHeaderSpecBarSpace" align="{innerAlign}" x="{innerXMod}16%" color="{bgColor}">
+				<panel name="gameScoreHeaderSpec{index}Bar" align="{innerAlign}" color="{barColor=lime}">
+					<panel color="#8e874d" rendermode="additive" width="2" align="{outerAlign}" x="{innerXMod}1"/>
+				</panel>
+			</panel>
+			<panel texture="/ui/common/scores_frame_gloss.tga" hflip="{hflip=false}" width="100%" height="50@"/>
+			<panel texture="/ui/common/scores_frame.tga" hflip="{hflip=false}" width="100%" height="50@"/>
+			<panel style="gameScoreHeaderSpecBarSpace" align="{innerAlign}" x="{innerXMod}16%">
+				<label name="gameScoreHeaderSpec{index}Label" textalign="center" textvalign="center" font="dyn_12" y="-6%" color="white" outline="1" content="----/----"/>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="gameTopHeader">
+		<panel name="gameTopHeaderSpec" noclick="1">
+
+			<!-- Legion Health -->
+			<panel name="game_base_health_header_1_spec" x="-10.0h" y="2.2h" height="7.45h" width="14.9h" align="center" noclick="1" color="invisible" >
+				<panel color="invisible" y="0.7h" x="0.9h" align="left" width="8.0h" height="1.5h" noclick="1">
+					<image texture="/ui/legion/behind_bar.tga" rendermode="overlay" color="white" noclick="1"/>
+					<panel name="game_base_health_backer_1_spec" color="0 0 0 0" noclick="1">
+						<panel name="game_base_health_bar_1_spec" color="0 1 0 0" noclick="1">
+							<panel color="1 1 1 .1" align="right" width=".1h" rendermode="additive" noclick="1"/>
+						</panel>
+						<instance name="statusbar_overlay"/>
+						<image width="-0.6h" align="center" texture="/ui/elements/bar_highlight.tga" noclick="1"/>
+					</panel>
+				</panel>
+				<image texture="/ui/common/legion_health.tga" noclick="1" />
+				<panel color="invisible" y="0.7h" x="0.9h" align="left" width="8.0h" height="1.5h" noclick="1">
+					<label name="game_base_health_percent_1_spec" y="0.2h" textalign="center" textvalign="center" font="dyn_8" color="white" outline="1" noclick="1"/>
+				</panel>
+			</panel>
+
+			<!-- Hellbourne Health -->
+			<panel name="game_base_health_header_2_spec" x="10.0h" y="2.2h" height="7.45h" width="14.9h" align="center" noclick="1" color="invisible" >
+				<panel color="invisible" y="0.7h" x="-0.9h" align="right" width="8.0h" height="1.5h" noclick="1">
+					<image texture="/ui/legion/behind_bar.tga" rendermode="overlay" color="white" noclick="1"/>
+					<panel name="game_base_health_backer_2_spec" color="0 0 0 0" noclick="1">
+						<panel name="game_base_health_bar_2_spec" color="0 1 0 0" noclick="1">
+							<panel color="1 1 1 .1" align="right" width=".1h" rendermode="additive" noclick="1"/>
+						</panel>
+						<instance name="statusbar_overlay"/>
+						<image width="-0.6h" align="center" texture="/ui/elements/bar_highlight.tga" noclick="1"/>
+					</panel>
+				</panel>
+				<image texture="/ui/common/hellbourne_health.tga" noclick="1" />
+				<panel color="invisible" y="0.7h" x="-0.9h" align="right" width="8.0h" height="1.5h" noclick="1">
+					<label name="game_base_health_percent_2_spec" y="0.2h" textalign="center" textvalign="center" font="dyn_8" color="white" outline="1" noclick="1"/>
+				</panel>
+			</panel>
+
+			<instance name="gameScoreHeaderSpec" index="1" flagIndex="1" innerAlign="right" outerAlign="left" innerXMod="-" outerXMod="" barColor="#388ecb" bgColor="#1e0602"/>
+			<instance name="gameScoreHeaderSpec" index="2" flagIndex="0" innerAlign="left" outerAlign="right" innerXMod="" outerXMod="-" hflip="true" barColor="#bb271f" bgColor="#1e0602"/>
+
+			<!-- Clock -->
+			<panel name="game_top_clock" width="59.6h" height="7.45h" align="center" valign="top" noclick="1">
+
+				<panel y="-7.2h" width="18.0h" height="18.0h" align="center" noclick="1">
+					<image name="game_clock_face" width="50%" height="50%" align="center" valign="center" texture="/ui/common/clockface.tga" rotation="0" canclick="false"/>
+				</panel>
+
+				<image name="game_clock_texture" texture="/ui/common/clockframe.tga" noclick="1" />
+
+				<!-- Team Scores -->
+				<panel x="1.9h" y="5.6h" width="3.5h" height="1.4h" align="center" color="1 1 0 0" noclick="1">
+					<label name="game_team_score_1" width="100%" height="100%" align="center" textalign="center" textvalign="center" font="dyn_10" color="white" noclick="1"
+						onloadlua="
+							self:RegisterWatch('ScoreboardTeam1', function(widget, _, _, totalDeaths) widget:SetText(round(totalDeaths)) end)
+						"
+					/>
+				</panel>
+				<panel x="-1.9h" y="5.6h" width="3.5h" height="1.4h" align="center" color="1 1 0 0" noclick="1">
+					<label name="game_team_score_2" width="100%" height="100%" align="center" textalign="center" textvalign="center" font="dyn_10" color="white" noclick="1"
+						onloadlua="
+							self:RegisterWatch('ScoreboardTeam2', function(widget, _, _, totalDeaths) widget:SetText(round(totalDeaths)) end)
+						"
+					/>
+				</panel>
+
+				<!-- Game Time -->
+				<label
+					name="game_match_time_label"
+					textalign="center" textvalign="top"
+					height="1.6h"
+					font="dyn_9"
+					color="white"
+					noclick="1"
+				/>
+			</panel>
+		</panel>
+	</template>
+
+	<if condition="specui_mini_mode" >
+		<template name="spec_push_bar" >
+			<!-- Hellbourne -->
+			<frame name="specui_mini_hellbourne_push{push}" width="{width=50%}" color="invisible" align="right" valign="top" bordercolor="black" height="100%" borderthickness="0" clip="0">
+				<frame noclick="1" color="invisible" align="left" width="100%" rendermode="normal" bordercolor="cyan" borderthickness="0" >
+					<frame texture="/ui/frames/rounded_button_bg_white.tga" borderthickness="1h" color="#75000088"/>
+				</frame>
+
+			</frame>
+
+			<!-- Legion -->
+			<frame name="specui_mini_legion_push{push}" width="{width=50%}" color="invisible" align="left" valign="top" bordercolor="black" height="100%" borderthickness="0" clip="0">
+				<frame noclick="1" color="invisible" align="left" width="100%" rendermode="normal" bordercolor="cyan" borderthickness="0">
+				<frame texture="/ui/frames/rounded_button_bg_white.tga" borderthickness="1h" color="#03733588"/>
+				</frame>
+				<image width="{iconWidth=100@}" height="{iconHeight=100%}" x="3%" align="right" valign="center" noclick="true"
+					ontrigger9lua="ResourceManager.RegisterTexture('{icon}', 'specui', self)" resourcecontext="specui" watch9="SpecRegisterTextures"
+				/>
+			</frame>
+			<frame valign="center" align="center" color="0 0 0 0.4" height="90%" width="1" noclick="1"/>
+		</template>
+	</if>
+
+	<if condition="!specui_mini_mode" >
+		<template name="spec_push_bar" >
+			<!-- Hellbourne -->
+			<frame name="specui_hellbourne_push{push}_parent" width="{width=50%}" color="invisible" align="right" valign="top" bordercolor="black" height="100%" borderthickness="0">
+				<frame noclick="1" color="#750000" align="right" width="100%" rendermode="normal" bordercolor="purple" borderthickness="0"/>
+				<frame name="specui_hellbourne_push{push}" noclick="1" color="1 1 1 0.3" align="right" width="100%" rendermode="normal" visible="0"  bordercolor="yellow" borderthickness="0"/>
+			</frame>
+
+			<!-- Legion -->
+			<frame name="specui_legion_push{push}_parent" width="{width=50%}" color="invisible" align="left" valign="top" bordercolor="black" height="100%" borderthickness="0"	>
+				<frame noclick="1" color="#037335" align="left" width="100%" rendermode="normal" bordercolor="cyan" borderthickness="0" />
+				<frame align="right" x="1.8h" width="86@" height="86%" color="invisible" bordercolor="yellow" borderthickness="0" >
+					<image width="{iconWidth=100@}" height="{iconHeight=100%}" x="-50%" align="center" valign="center" texture="{icon}" noclick="true"
+						ontrigger9lua="ResourceManager.RegisterTexture('{icon}', 'specui', self)" resourcecontext="specui" watch9="SpecRegisterTextures"
+					/>
+				</frame>
+				<frame name="specui_legion_push{push}" noclick="1" color="1 1 1 0.3" align="left" width="100%" rendermode="normal" visible="0"  bordercolor="yellow" borderthickness="0" />
+			</frame>
+			<frame valign="center" align="center" color="0 0 0 0.4" height="90%" width="1" noclick="1"/>
+		</template>
+	</if>
+
+	<panel name="specui_top_container" noclick="1"
+		watch="GameInfo"
+		ontriggerlua="self:SetVisible(param0 == 'capturetheflag' or param0 == 'thegrimmhunt' or param0 == 'devowars')"
+	>
+		<instance name="gameTopHeader"/>
+	</panel>
+
+	<!-- Graphic Framed Pushbar -->
+	<panel name="spec_top_parent_container" noclick="1"
+		watch="GameInfo"
+		ontriggerlua="self:SetVisible(param0 ~= 'capturetheflag' and param0 ~= 'thegrimmhunt' and param0 ~= 'devowars' and param0 ~= 'soccer')"
+	>
+		<panel width="67.2h" height="8.4h" align="center" noclick="1" name="spec_top_parent">
+			<!-- Left Tower/Raxx Drop
+				Expanded Y: 50.0%
+				Hidden Y: 22%
+			-->
+			<panel name="specui_legion_bldInfo" x="9.0%" y="20.0%" width="200@" height="50%" align="left" noclick="true" visible="0">
+				<if condition="!specui_mini_mode" >
+					<image noclick="true"
+						ontrigger9lua="ResourceManager.RegisterTexture('/ui/specui/elements/PushBarLeftDropBG.tga', 'specui', self)" resourcecontext="specui" watch9="SpecRegisterTextures"
+					/>
+				</if>
+				<panel name="specui_legion_bldInfo_section" noclick="1"
+					watch="GameMode"
+					ontriggerlua="self:SetVisible(param ~= 'krosmode')"
+				>
+					<panel x="32%" y="6%" height="30%" width="18%" noclick="0" onmouseoverlua="Trigger('SpecUITooltipUpdate', 'specui_raxx_team', 'specui_raxx_team_tip', '/ui/specui/elements/icon_castle.tga', '', '', '')" onmouseoutlua="Trigger('SpecUITooltipUpdate', '', '', '', '', '', '')" >
+						<panel width="100@" height="100%" noclick="1">
+							<image align="center" valign="center" noclick="true" color="#0bed21"
+								ontrigger9lua="ResourceManager.RegisterTexture('/ui/specui/elements/icon_castle.tga', 'specui', self)" resourcecontext="specui" watch9="SpecRegisterTextures"
+							/>
+							<image align="center" valign="center" noclick="true" color="#ed160b99"
+								ontrigger9lua="ResourceManager.RegisterTexture('/ui/specui/elements/icon_castle.tga', 'specui', self)" resourcecontext="specui" watch9="SpecRegisterTextures"
+								oneventlua="self:SetVisible(0)
+											self:FadeIn(50)
+											self:ScaleHeight('200%', 150)
+											self:ScaleWidth('200@', 150)
+											self:Sleep(150, function()
+												self:FadeOut(150)
+												self:ScaleWidth('100@', 150)
+												self:ScaleHeight('100%', 150)
+											end)"
+								name="specui_legion_raxx_bump"
+							/>
+						</panel>
+						<label height="100%" width="-110@" align="right" textalign="center" textvalign="center" font="dyn_12" shadow="true" color="white" noclick="true" content="3"
+							watch="SpectatorTeamInfo0"
+							ontriggerlua="	if (tonumber(self:GetValue()) ~= round(tonumber(param8) + tonumber(param9))) then
+												GetWidget('specui_legion_raxx_bump', 'game_spectator'):DoEvent()
+											end
+											self:SetText(round(tonumber(param8) + tonumber(param9)))"
+						/>
+					</panel>
+					<panel x="53%" y="6.5%" height="30%" width="18%" noclick="0" onmouseoverlua="Trigger('SpecUITooltipUpdate', 'specui_tower_team', 'specui_tower_team_tip', '/ui/specui/elements/icon_tower.tga', '', '', '')" onmouseoutlua="Trigger('SpecUITooltipUpdate', '', '', '', '', '', '')" >
+						<panel width="100@" height="100%" noclick="1">
+							<image align="center" valign="center" noclick="true" color="#0bed21"
+								ontrigger9lua="ResourceManager.RegisterTexture('/ui/specui/elements/icon_tower.tga', 'specui', self)" resourcecontext="specui" watch9="SpecRegisterTextures"
+							/>
+							<image align="center" valign="center" noclick="true" color="#ed160b99"
+								ontrigger9lua="ResourceManager.RegisterTexture('/ui/specui/elements/icon_tower.tga', 'specui', self)" resourcecontext="specui" watch9="SpecRegisterTextures"
+								oneventlua="self:SetVisible(0)
+											self:FadeIn(50)
+											self:ScaleHeight('200%', 150)
+											self:ScaleWidth('200@', 150)
+											self:Sleep(150, function()
+												self:FadeOut(150)
+												self:ScaleWidth('100@', 150)
+												self:ScaleHeight('100%', 150)
+											end)"
+								name="specui_legion_tower_bump"
+							/>
+						</panel>
+						<label height="100%" width="-110@" align="right" textalign="center" textvalign="center" font="dyn_12" shadow="true" color="white" noclick="true" content="1"
+							watch="SpectatorTeamInfo0"
+							ontriggerlua="	if (tonumber(self:GetValue()) ~= round(tonumber(param7))) then
+												GetWidget('specui_legion_tower_bump', 'game_spectator'):DoEvent()
+											end
+											self:SetText(round(tonumber(param7)))"
+						/>
+					</panel>
+				</panel>
+				<panel name="specui_legion_krosInfo_section" noclick="1"
+					watch="GameMode"
+					ontriggerlua="self:SetVisible(param == 'krosmode')"
+				>
+					<panel x="29%" y="6%" height="30%" width="48%" noclick="0" onmouseoverlua="Trigger('SpecUITooltipUpdate', 'specui_base_health_team', 'specui_base_health_team_tip', '/ui/specui/elements/icon_heart.tga', '', '', '')" onmouseoutlua="Trigger('SpecUITooltipUpdate', '', '', '', '', '', '')" >
+						<panel width="100@" height="100%" noclick="1" >
+							<image align="center" valign="center" noclick="true" color="#0bed21"
+								ontrigger9lua="ResourceManager.RegisterTexture('/ui/specui/elements/icon_heart.tga', 'specui', self)" resourcecontext="specui" watch9="SpecRegisterTextures"
+							/>
+							<image align="center" valign="center" noclick="true" color="#ed160b99"
+								ontrigger9lua="ResourceManager.RegisterTexture('/ui/specui/elements/icon_heart.tga', 'specui', self)" resourcecontext="specui" watch9="SpecRegisterTextures"
+								oneventlua="self:SetVisible(0)
+											self:FadeIn(50)
+											self:ScaleHeight('200%', 150)
+											self:ScaleWidth('200@', 150)
+											self:Sleep(150, function()
+												self:FadeOut(150)
+												self:ScaleWidth('100@', 150)
+												self:ScaleHeight('100%', 150)
+											end)"
+								name="specui_legion_krospts_bump"
+							/>
+						</panel>
+						<label height="100%" width="-100@" align="right" textalign="center" textvalign="center" font="dyn_11" shadow="true" color="white" noclick="true" content="3"
+							watch="BaseHealth0"
+							ontriggerlua="	if (HoN_SpecUI.lastHealth0 and (HoN_SpecUI.lastHealth0 ~= math.floor(tonumber(param0) * HoN_SpecUI.KROSMODE_BASE_HEALTH))) then
+												GetWidget('specui_legion_krospts_bump', 'game_spectator'):DoEvent()
+											end
+											HoN_SpecUI.lastHealth0 = tonumber(param)
+											self:SetText(Translate('game_krosmode_base_health', 'health', math.floor(tonumber(param0) * HoN_SpecUI.KROSMODE_BASE_HEALTH)))"
+						/>
+					</panel>
+				</panel>
+			</panel>
+
+			<!-- Right Tower/Raxx Drop
+				Expanded Y: 50.0%
+				Hidden Y: 22%
+			-->
+			<panel name="specui_hellbourne_bldInfo" x="-9.0%" y="20.0%" width="200@" height="50%" align="right" noclick="true" visible="0">
+				<if condition="!specui_mini_mode" >
+					<image noclick="true"
+						ontrigger9lua="ResourceManager.RegisterTexture('/ui/specui/elements/PushBarRightDropBG.tga', 'specui', self)" resourcecontext="specui" watch9="SpecRegisterTextures"
+					/>
+				</if>
+				<panel name="specui_hellbourn_bldInfo_section" noclick="1"
+					watch="GameMode"
+					ontriggerlua="self:SetVisible(param ~= 'krosmode')"
+				>
+					<panel x="32%" y="6%" height="30%" width="18%"  noclick="0" onmouseoverlua="Trigger('SpecUITooltipUpdate', 'specui_raxx_team', 'specui_raxx_team_tip', '/ui/specui/elements/icon_castle.tga', '', '', '')" onmouseoutlua="Trigger('SpecUITooltipUpdate', '', '', '', '', '', '')">
+						<panel width="100@" height="100%" noclick="1">
+							<image align="center" valign="center" noclick="true" color="#ed160b"
+								ontrigger9lua="ResourceManager.RegisterTexture('/ui/specui/elements/icon_castle.tga', 'specui', self)" resourcecontext="specui" watch9="SpecRegisterTextures"
+							/>
+							<image align="center" valign="center" noclick="true" color="#0bed2199"
+								ontrigger9lua="ResourceManager.RegisterTexture('/ui/specui/elements/icon_castle.tga', 'specui', self)" resourcecontext="specui" watch9="SpecRegisterTextures"
+								oneventlua="self:SetVisible(0)
+											self:FadeIn(50)
+											self:ScaleHeight('200%', 150)
+											self:ScaleWidth('200@', 150)
+											self:Sleep(150, function()
+												self:FadeOut(150)
+												self:ScaleWidth('100@', 150)
+												self:ScaleHeight('100%', 150)
+											end)"
+								name="specui_hellbourne_raxx_bump"
+							/>
+						</panel>
+						<label height="100%" width="-110@" align="right" textalign="center" textvalign="center" font="dyn_12" shadow="true" color="white" noclick="true" content="3"
+							watch="SpectatorTeamInfo1"
+							ontriggerlua="	if (tonumber(self:GetValue()) ~= round(tonumber(param8) + tonumber(param9))) then
+												GetWidget('specui_hellbourne_raxx_bump', 'game_spectator'):DoEvent()
+											end
+											self:SetText(round(tonumber(param8) + tonumber(param9)))"
+						/>
+					</panel>
+					<panel x="53%" y="6.5%" height="30%" width="18%" noclick="0" onmouseoverlua="Trigger('SpecUITooltipUpdate', 'specui_tower_team', 'specui_tower_team_tip', '/ui/specui/elements/icon_tower.tga', '', '', '')" onmouseoutlua="Trigger('SpecUITooltipUpdate', '', '', '', '', '', '')" >
+						<panel width="100@" height="100%" noclick="1">
+							<image align="center" valign="center" noclick="true" color="#ed160b"
+								ontrigger9lua="ResourceManager.RegisterTexture('/ui/specui/elements/icon_tower.tga', 'specui', self)" resourcecontext="specui" watch9="SpecRegisterTextures"
+							/>
+							<image align="center" valign="center" noclick="true" color="#0bed2199"
+								ontrigger9lua="ResourceManager.RegisterTexture('/ui/specui/elements/icon_tower.tga', 'specui', self)" resourcecontext="specui" watch9="SpecRegisterTextures"
+								oneventlua="self:SetVisible(0)
+											self:FadeIn(50)
+											self:ScaleHeight('200%', 150)
+											self:ScaleWidth('200@', 150)
+											self:Sleep(150, function()
+												self:FadeOut(150)
+												self:ScaleWidth('100@', 150)
+												self:ScaleHeight('100%', 150)
+											end)"
+								name="specui_hellbourne_tower_bump"
+							/>
+						</panel>
+						<label height="100%" width="-110@" align="right" textalign="center" textvalign="center" font="dyn_12" shadow="true" color="white" noclick="true" content="1"
+							watch="SpectatorTeamInfo1"
+							ontriggerlua="	if (tonumber(self:GetValue()) ~= round(tonumber(param7))) then
+												GetWidget('specui_hellbourne_tower_bump', 'game_spectator'):DoEvent()
+											end
+											self:SetText(round(tonumber(param7)))"
+						/>
+					</panel>
+				</panel>
+				<panel name="specui_hellbourn_krosInfo_section" noclick="1"
+					watch="GameMode"
+					ontriggerlua="self:SetVisible(param == 'krosmode')"
+				>
+					<panel x="-29%" y="6%" height="30%" width="48%" align="right" noclick="0" onmouseoverlua="Trigger('SpecUITooltipUpdate', 'specui_base_health_team', 'specui_base_health_team_tip', '/ui/specui/elements/icon_heart.tga', '', '', '')" onmouseoutlua="Trigger('SpecUITooltipUpdate', '', '', '', '', '', '')" >
+						<panel width="100@" height="100%" noclick="1" align="right">
+							<image align="center" valign="center" noclick="true" color="#ed160b"
+								ontrigger9lua="ResourceManager.RegisterTexture('/ui/specui/elements/icon_heart.tga', 'specui', self)" resourcecontext="specui" watch9="SpecRegisterTextures"
+							/>
+							<image align="center" valign="center" noclick="true" color="#ed160b99"
+								ontrigger9lua="ResourceManager.RegisterTexture('/ui/specui/elements/icon_heart.tga', 'specui', self)" resourcecontext="specui" watch9="SpecRegisterTextures"
+								oneventlua="self:SetVisible(0)
+											self:FadeIn(50)
+											self:ScaleHeight('200%', 150)
+											self:ScaleWidth('200@', 150)
+											self:Sleep(150, function()
+												self:FadeOut(150)
+												self:ScaleWidth('100@', 150)
+												self:ScaleHeight('100%', 150)
+											end)"
+								name="specui_hellbourne_krospts_bump"
+							/>
+						</panel>
+						<label height="100%" width="-100@" textalign="center" textvalign="center" font="dyn_11" shadow="true" color="white" noclick="true" content="3"
+							watch="BaseHealth1"
+							ontriggerlua="	if (HoN_SpecUI.lastHealth1 and (HoN_SpecUI.lastHealth1 ~= math.floor(tonumber(param0) * HoN_SpecUI.KROSMODE_BASE_HEALTH))) then
+												GetWidget('specui_hellbourne_krospts_bump', 'game_spectator'):DoEvent()
+											end
+											HoN_SpecUI.lastHealth1 = tonumber(param)
+											self:SetText(Translate('game_krosmode_base_health', 'health', math.floor(tonumber(param0) * HoN_SpecUI.KROSMODE_BASE_HEALTH)))"
+						/>
+					</panel>
+				</panel>
+			</panel>
+
+			<!-- Left Expanded Data SlideOut
+				Expanded X: -10.0%
+				Hidden X: 6.0%
+			-->
+			<panel name="specui_legion_info_display" x="6.0%" width="200@" height="100%" align="left" noclick="1" visible="0">
+				<if condition="!specui_mini_mode" >
+					<image noclick="1"
+						ontrigger9lua="ResourceManager.RegisterTexture('/ui/specui/elements/PushBarLeftExpanded.tga', 'specui', self)" resourcecontext="specui" watch9="SpecRegisterTextures"
+					/>
+				</if>
+
+				<panel x="7%" y="0.2h" width="50%" height="38%" noclick="1"
+					watch="GameInfo"
+					ontriggerlua="self:SetVisible(param0 == 'team_deathmatch')"
+				>
+					<label name="legion_data_score" textalign="center" textvalign="center" font="dyn_16" color="white" outline="1" content="--/--"/>
+				</panel>
+
+				<panel x="-45%" y="1%" width="50%" height="19%" align="right" noclick="1"
+					watch="GameInfo"
+					ontriggerlua="self:SetVisible(param0 ~= 'team_deathmatch')"
+				>
+					<label name="legion_data_gold" x="-130@" height="100%" align="right" textvalign="1" textalign="right" font="dyn_10" color="#00ea5e" shadow="1" content="-" noclick="1"/>
+					<image width="100@" height="100%" align="right" noclick="1"
+						ontrigger9lua="ResourceManager.RegisterTexture('/ui/specui/elements/PushMarkerGold.tga', 'specui', self)" resourcecontext="specui" watch9="SpecRegisterTextures"
+					/>
+				</panel>
+				<panel x="-44%" y="20%" width="50%" height="19%" align="right" noclick="1"
+					watch="GameInfo"
+					ontriggerlua="self:SetVisible(param0 ~= 'team_deathmatch')"
+				>
+					<label name="legion_data_exp" x="-130@" height="100%" align="right" textvalign="1" textalign="right" font="dyn_10" color="#00ea5e" shadow="1" content="-" noclick="1"/>
+					<image y="-0.1h" width="122@" height="122%" align="right" noclick="true"
+						ontrigger9lua="ResourceManager.RegisterTexture('/ui/specui/elements/PushMarkerExp.tga', 'specui', self)" resourcecontext="specui" watch9="SpecRegisterTextures"
+					/>
+				</panel>
+
+				<panel noclick="0" color="invisible" height="50%" align="right"
+					watch="GameInfo"
+					ontriggerlua="self:SetVisible(param0 ~= 'team_deathmatch')"
+					onmouseoverlua="Trigger('SpecUITooltipUpdate', 'specui_teaminfo', 'specui_teaminfo_tip', '', '', '', '')"
+					onmouseoutlua="Trigger('SpecUITooltipUpdate', '', '', '', '', '', '')"
+					onclicklua="HoN_SpecUI:ChangeInfoDisplay()"
+					ondoubleclicklua="HoN_SpecUI:ChangeInfoDisplay()"
+				/>
+			</panel>
+
+			<!-- Right Expanded Data SlideOut
+				Expanded X: 10.0%
+				Hidden X: -6.0%
+			-->
+			<panel name="specui_hellbourne_info_display" x="-6.0%" width="200@" height="100%" align="right" noclick="true" visible="0">
+				<if condition="!specui_mini_mode" >
+					<image noclick="true"
+						ontrigger9lua="ResourceManager.RegisterTexture('/ui/specui/elements/PushBarRightExpanded.tga', 'specui', self)" resourcecontext="specui" watch9="SpecRegisterTextures"
+					/>
+				</if>
+
+				<panel x="40%" y="0.2h" width="50%" height="38%" noclick="1"
+					watch="GameInfo"
+					ontriggerlua="self:SetVisible(param0 == 'team_deathmatch')"
+				>
+					<label name="hellbourne_data_score" textalign="center" textvalign="center" font="dyn_16" color="white" outline="1" content="--/--"/>
+				</panel>
+
+				<panel x="45%" y="1%" width="50%" height="19%" noclick="1"
+					watch="GameInfo"
+					ontriggerlua="self:SetVisible(param0 ~= 'team_deathmatch')"
+				>
+					<label name="hellbourne_data_gold" x="130@" height="100%" textvalign="1" font="dyn_10" color="#FF0000" shadow="1" content="-" noclick="1" />
+					<image width="100@" height="100%" noclick="1"
+						ontrigger9lua="ResourceManager.RegisterTexture('/ui/specui/elements/PushMarkerGold.tga', 'specui', self)" resourcecontext="specui" watch9="SpecRegisterTextures"
+					/>
+				</panel>
+				<panel x="45%" y="20%" width="50%" height="19%" noclick="1"
+					watch="GameInfo"
+					ontriggerlua="self:SetVisible(param0 ~= 'team_deathmatch')"
+				>
+					<label name="hellbourne_data_exp" x="130@" height="100%" textvalign="1" font="dyn_10" color="#FF0000" shadow="1" content="-" noclick="1"	/>
+					<image y="-0.1h" width="122@" height="122%" noclick="1"
+						ontrigger9lua="ResourceManager.RegisterTexture('/ui/specui/elements/PushMarkerExp.tga', 'specui', self)" resourcecontext="specui" watch9="SpecRegisterTextures"
+					/>
+				</panel>
+
+				<panel noclick="0" color="invisible" height="50%" align="left"
+					watch="GameInfo"
+					ontriggerlua="self:SetVisible(param0 ~= 'team_deathmatch')"
+					onmouseoverlua="Trigger('SpecUITooltipUpdate', 'specui_teaminfo', 'specui_teaminfo_tip', '', '', '', '')"
+					onmouseoutlua="Trigger('SpecUITooltipUpdate', '', '', '', '', '', '')"
+					onclicklua="HoN_SpecUI:ChangeInfoDisplay()"
+					ondoubleclicklua="HoN_SpecUI:ChangeInfoDisplay()"
+				/>
+			</panel>
+
+			<!-- Top Push Bar -->
+			<panel y="1%" width="71%" height="24%" align="center"  noclick="0" onmouseoverlua="Trigger('SpecUITooltipUpdate', 'specui_gm_team', 'specui_gm_team_tip', '/ui/specui/elements/PushMarkerGold.tga', '', '', '')" onmouseoutlua="Trigger('SpecUITooltipUpdate', '', '', '', '', '', '')" passivechildren="1" >
+				<instance name="spec_push_bar" push="Gold" icon="/ui/specui/elements/PushMarkerGold.tga" />
+			</panel>
+			<!-- Bottom Push Bar -->
+			<panel y="26%" width="71%" height="24%" align="center" noclick="0" onmouseoverlua="Trigger('SpecUITooltipUpdate', 'specui_xp_team', 'specui_xp_team_tip', '/ui/specui/elements/PushMarkerExp.tga', '', '', '')" onmouseoutlua="Trigger('SpecUITooltipUpdate', '', '', '', '', '', '')" passivechildren="1">
+				<instance name="spec_push_bar" push="Exp" icon="/ui/specui/elements/PushMarkerExp.tga" iconWidth="146@" iconHeight="146%" />
+			</panel>
+
+			<if condition="!specui_mini_mode" >
+				<panel align="center" noclick="true"
+					ontrigger9lua="ResourceManager.RegisterTexture('/ui/specui/elements/PushBarFrame.tga', 'specui', self)" resourcecontext="specui" watch9="SpecRegisterTextures"
+				/>
+			</if>
+
+			<!-- Clock -->
+			<label
+				y="4.25h"
+				valign="top"
+				textalign="center"
+				height="1.6h"
+				font="dyn_12"
+				color="white" shadow="true"
+				watch="MatchTime"
+				ontriggerlua="if (AtoB(param1)) then self:SetText(FtoT(param0, 1, 0, '-')) else self:SetText(FtoT(param0, 1)) end"
+				noclick="1"
+			/>
+
+			<!-- Team Scores -->
+			<panel x="4.5h" y="0.35h" width="4.5h" height="4.0h" align="left" noclick="0"
+				onmouseoverlua="Trigger('SpecUITooltipUpdate', 'specui_legion', 'specui_legion_tip', '', '', '', '')"
+				onmouseoutlua="Trigger('SpecUITooltipUpdate', '', '', '', '', '', '')"
+				onclicklua="HoN_SpecUI:ToggleBuildingInfoVisible()"
+				ondoubleclicklua="HoN_SpecUI:ToggleBuildingInfoVisible()"
+				onrightclicklua="HoN_SpecUI:ToggleDataInfoDisplayVisible()"
+			>
+
+				<panel y="-0.7h" valign="top" width="6.5h" height="5.5h" visible="0" align="center" noclick="1" color="invisible" clip="1"
+					watch="BaseHealth0"
+					ontriggerlua="self:ScaleHeight((((1-tonumber(param0))*self:GetHeightFromString('5.5h'))), 1) self:SetVisible(1 > tonumber(param0))"
+				>
+					<panel valign="top"  width="6.5h" height="5.5h" color="0.5 0.0 0 1.0" noclick="1" visible="1"
+						ontrigger9lua="ResourceManager.RegisterTexture('/ui/elements/crest_legion.tga', 'specui', self)" resourcecontext="specui" watch9="SpecRegisterTextures"
+					/>
+				</panel>
+
+				<image width="5h" height="5h" visible="0" valign="center" align="center" noclick="1" color="0 1 0 0.5"
+					ontrigger9lua="ResourceManager.RegisterTexture('/ui/elements/crest_legion.tga', 'specui', self)" resourcecontext="specui" watch9="SpecRegisterTextures"
+					oneventlua="self:SetVisible(0)
+								self:FadeIn(50)
+								self:ScaleHeight('10h', 150)
+								self:ScaleWidth('10h', 150)
+								self:Sleep(150, function()
+									self:FadeOut(150)
+									self:ScaleWidth('5h', 150)
+									self:ScaleHeight('5h', 150)
+								end)"
+					name="specui_legion_bump"
+				/>
+				<label width="100%" height="100%" align="right" textalign="center" textvalign="center" font="dyn_18" color="white" outline="1"
+					watch="ScoreboardTeam1"
+					ontriggerlua="	if (tonumber(self:GetValue()) ~= round(tonumber(param1))) then
+										GetWidget('specui_legion_bump', 'game_spectator'):DoEvent()
+									end
+									self:SetText(round(tonumber(param1)))"
+					noclick="1"
+				/>
+			</panel>
+			<panel x="-4.5h" y="0.35h" width="4.5h" height="4.0h" align="right" noclick="0"
+				onmouseoverlua="Trigger('SpecUITooltipUpdate', 'specui_hellbourne', 'specui_hellbourne_tip', '', '', '', '')"
+				onmouseoutlua="Trigger('SpecUITooltipUpdate', '', '', '', '', '', '')"
+				onclicklua="HoN_SpecUI:ToggleBuildingInfoVisible()"
+				ondoubleclicklua="HoN_SpecUI:ToggleBuildingInfoVisible()"
+				onrightclicklua="HoN_SpecUI:ToggleDataInfoDisplayVisible()"
+			>
+				<panel y="-1.2h" valign="top" width="6.5h" height="6.5h" visible="0" align="center" noclick="1" color="invisible" clip="1"
+					watch="BaseHealth1"
+					ontriggerlua="self:ScaleHeight((((1-tonumber(param0))*self:GetHeightFromString('6.5h'))), 1) self:SetVisible(1 > tonumber(param0))"
+				>
+					<panel valign="top"  width="6.5h" height="6.5h" color="0.3 0.0 0 1.0" noclick="1" visible="1"
+						ontrigger9lua="ResourceManager.RegisterTexture('/ui/elements/crest_hellbourne.tga', 'specui', self)" resourcecontext="specui" watch9="SpecRegisterTextures"
+					/>
+				</panel>
+				<image width="5h" height="5h" visible="0" valign="center" align="center" noclick="true" color="1 0 0 0.5"
+					ontrigger9lua="ResourceManager.RegisterTexture('/ui/elements/crest_hellbourne.tga', 'specui', self)" resourcecontext="specui" watch9="SpecRegisterTextures"
+					oneventlua="self:SetVisible(0)
+								self:FadeIn(50)
+								self:ScaleHeight('10h', 150)
+								self:ScaleWidth('10h', 150)
+								self:Sleep(150, function()
+									self:FadeOut(150)
+									self:ScaleWidth('5h', 150)
+									self:ScaleHeight('5h', 150)
+								end)"
+					name="specui_hellbourne_bump"
+				/>
+				<label width="100%" height="100%" align="right" textalign="center" textvalign="center" font="dyn_18" color="white" outline="true"
+					watch="ScoreboardTeam2"
+					ontriggerlua="	if (tonumber(self:GetValue()) ~= round(tonumber(param1))) then
+										GetWidget('specui_hellbourne_bump', 'game_spectator'):DoEvent()
+									end
+									self:SetText(round(tonumber(param1)))"
+					noclick="1"
+					/>
+			</panel>
+			<!-- combat detection -->
+			<instance name="specui_combat_detection_template" />
+		</panel>
+	</panel>
+
+	<!-- Soccer Scoreboard -->
+	<panel name="game_top_soccer_spec" watch="GameInfo" ontriggerlua="self:SetVisible(param0 == 'soccer')" width="48h" height="12h" align="center" valign="top" noclick="1">
+		<image name="game_soccer_texture_spec" texture="/ui/elements/soccer/in_game/scoreboard.tga" noclick="1"/>
+		<panel x="6h" width="13h" height="3h" align="left">
+			<label name="soccer_legion_spec" content="Legion" textalign="center" textvalign="center" font="dyn_16" color="#BAC8D2" shadow="1" shadowcolor="#1C1F22" shadowoffset="1" />
+		</panel>
+		<panel x="-6h" width="13h" height="3h" align="right">
+			<label name="soccer_hellbourne_spec" content="Hellbourne" textalign="center" textvalign="center" font="dyn_16" color="#BAC8D2" shadow="1" shadowcolor="#1C1F22" shadowoffset="1" />
+		</panel>
+		<panel width="12h" height="3.5h" align="center">
+			<label name="soccer_team_score1_spec" x="-2.5h" content="0" textalign="center" textvalign="center" font="dyn_24" color="#000304" shadow="1" shadowcolor="#FEE702" shadowoffset="1" watch="ScoreboardTeam1"
+				   ontriggerlua="self:SetText(round(tonumber(param6)))"/>
+			<label name="soccer_score_split_spec" content=":" textalign="center" textvalign="center" font="dyn_24" color="#000304" shadow="1" shadowcolor="#FEE702" shadowoffset="1" />
+			<label name="soccer_team_score2_spec" x="2.5h" content="0" textalign="center" textvalign="center" font="dyn_24" color="#000304" shadow="1" shadowcolor="#FEE702" shadowoffset="1" watch="ScoreboardTeam2"
+				   ontriggerlua="self:SetText(round(tonumber(param6)))"/>
+		</panel>
+		<panel y="-1h" width="12h" height="3h" align="center" valign="center">
+			<label  name="soccer_time_spec" content="15:06" textalign="center" textvalign="center" font="dyn_15" color="#717C83" shadow="1" shadowcolor="#1C1F22" shadowoffset="1" watch="MatchTime"	ontriggerlua="if (AtoB(param1)) then self:SetText(FtoT(param0, 1, 0, '-')) else self:SetText(FtoT(param0, 1)) end"/>
+		</panel>
+	</panel>
+</package>

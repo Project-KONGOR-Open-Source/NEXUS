@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+	<template name="attack_tooltip_info">
+		<frame
+			name="attack_tooltip_info"
+			texture="/ui/frames/rounded_bg_white.tga"
+			borderthickness="0.6h"
+			color="0 0 0 .75"
+			visible="false"
+			align="right"
+			valign="bottom"
+			width="27h"
+			height="5.0h"
+			float="bottom"
+			grow="1" regrow="1" growinvis="0"
+		>
+			<frame texture="/ui/frames/roundframe.tga" borderthickness="0.6h" bordercolor="#434d50"/>
+			<anchor x="1.0h" y="0.6h" />
+
+			<label width="-2.0h" height="1.8h" textalign="left" font="dyn_10" color="white" content="tooltip_attack_info" />
+
+			<panel width="-2.0h" height="1.8h" />
+
+			<label
+				width="-2.0h"
+				height="1.8h"
+				textalign="left"
+				font="dyn_10"
+				color="white"
+				watch="SelectedDamage"
+				ontriggerlua="
+					if (tonumber(param2) == 0.0) then
+						self:SetText(Translate('tooltip_damage') .. round(param0) .. ' - ' .. round(param1))
+					elseif (tonumber(param2) > 0.0) then
+						self:SetText(Translate('tooltip_damage') .. round(param0) .. ' - ' .. round(param1) .. ' ^g+' .. round(param2) .. '^* = ^y' .. round(param0 + param2) .. ' - ' .. round(tonumber(param1) + tonumber(param2)) .. '^*')
+					else
+						self:SetText(Translate('tooltip_damage') .. round(param0) .. ' - ' .. round(param1) .. ' ^r' .. round(param2) .. '^* = ^y' .. round(param0 + param2) .. ' - ' .. round(tonumber(param1) + tonumber(param2)) .. '^*')
+					end
+				"
+			/>
+			<label
+				width="-2.0h"
+				height="1.8h"
+				textalign="left"
+				font="dyn_10"
+				color="white"
+				watch="SelectedAttackSpeed"
+				ontriggerlua="
+					local diff = (tonumber(param1) - tonumber(param0))
+					if (diff == 0.0) then
+						self:SetText(Translate('tooltip_attack_speed') .. round(param0))
+					elseif (diff > 0.0) then
+						self:SetText(Translate('tooltip_attack_speed') .. round(param0) .. ' ^g+' .. round(diff) .. '^* = ^y' .. round(param1))
+					else
+						self:SetText(Translate('tooltip_attack_speed') .. round(param0) .. ' ^r' .. round(diff) .. '^* = ^y' .. round(param1))
+					end
+				"
+			/>
+			<label
+				width="-2.0h"
+				height="1.8h"
+				textalign="left"
+				font="dyn_10"
+				color="white"
+				watch="SelectedCastSpeed"
+				ontriggerlua="
+					local diff = (tonumber(param1) - tonumber(param0))
+					if (diff == 0.0) then
+						self:SetText(Translate('tooltip_cast_speed') .. round(param0))
+					elseif (diff > 0.0) then
+						self:SetText(Translate('tooltip_cast_speed') .. round(param0) .. ' ^g+' .. round(param1 - param0) .. '^* = ^y' .. round(param1))
+					else
+						self:SetText(Translate('tooltip_cast_speed') .. round(param0) .. ' ^r' .. round(param1 - param0) .. '^* = ^y' .. round(param1))
+					end
+				"
+			/>
+
+			<panel width="-2.0h" height="1.8h" />
+
+			<label
+				width="-2.0h"
+				height="1.8h"
+				textalign="left"
+				font="dyn_10"
+				color="white"
+				watch="SelectedAttackInfo"
+				ontriggerlua="self:SetText(Translate('tooltip_attack_type') .. param0)"
+			/>
+
+			<label
+				width="-2.0h"
+				height="1.8h"
+				textalign="left"
+				font="dyn_10"
+				color="white"
+				watch="SelectedAttackRange"
+				ontriggerlua="
+					local diff = (tonumber(param1) - tonumber(param0))
+					if (diff == 0.0) then
+						self:SetText(Translate('tooltip_range') .. round(param0))
+					elseif (diff > 0.0) then
+						self:SetText(Translate('tooltip_range') .. round(param0) .. ' ^g+' .. round(param1 - param0) .. '^* = ^y' .. round(param1))
+					else
+						self:SetText(Translate('tooltip_range') .. round(param0) .. ' ^r' .. round(param1 - param0) .. '^* = ^y' .. round(param1))
+					end
+				"
+			/>
+			<label
+				width="-2.0h"
+				height="1.8h"
+				textalign="left"
+				font="dyn_10"
+				color="white"
+				watch="SelectedAttackCooldown"
+				ontriggerlua="self:SetText(Translate('tooltip_base_attack_cooldown', 'time', FtoA2(tonumber(param0) / 1000, 0, 3)))"
+			/>
+
+			<panel width="-2.0h" height="1.8h" />
+
+			<label
+				width="-2.0h"
+				height="1.8h"
+				textalign="left"
+				font="dyn_10"
+				color="white"
+				watch="SelectedAttackCooldown"
+				ontriggerlua="self:SetText(Translate('tooltip_attack_cooldown', 'time', FtoA2(tonumber(param1) / 1000, 0, 3)))"
+			/>
+			<label
+				width="-2.0h"
+				height="1.8h"
+				textalign="left"
+				font="dyn_10"
+				color="white"
+				watch="SelectedAttackCooldown"
+				ontriggerlua="self:SetText(Translate('tooltip_attacks_per_second', 'value', FtoA2(1000 / tonumber(param1), 0, 3)))"
+			/>
+
+			<panel width="-2.0h" height="0.55h" sticky="true" stickytoinvis="false" />
+		</frame>
+	</template>
+</package>

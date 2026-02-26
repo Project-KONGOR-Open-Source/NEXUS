@@ -1,0 +1,677 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+	<trigger name="ConcatResetStatsError"/>
+	<!-- Create subaccount -->
+	<trigger name="UpdateBuySubAccountForm"/>
+	<trigger name="BuySubAccountStatus"/>
+	<trigger name="BuySubAccountResult"/>
+	<form
+		name="BuySubAccount"
+		host="!hon"
+		target="/client_require_identity.php"
+		statustrigger="BuySubAccountStatus"
+		resulttrigger="BuySubAccountResult"
+		resultparam0="success"
+		resultparam1="error"
+		resultparam2="sea"
+		resultparam3="errors"
+		ssl="false"
+	/>
+
+	<template name="form_create_subaccount">
+		<panel y="-110%" align="center" width="100.0h" name="form_create_subaccount" visible="{visible=0}" noclick="true" valign="center">
+			<panel x="0" y="-100%" height="203.6%" width="90%"  align="center" texture="mainmenu/upper_frame_center.tga"/>
+			<panel x="18h" y="-100%" height="203.6%" width="50@"  align="right" texture="mainmenu/upper_frame_right.tga"/>
+			<panel x="-18h" y="-100%" height="203.6%" width="50@"  align="left" texture="mainmenu/upper_frame_left.tga"/>
+
+			<panel y="1.0h" width="-6.0h" height="-3.0h" align="center" visible="true">
+
+				<panel float="bottom" padding="0.5h">
+
+					<panel width="100%" height="2.8h" noclick="1">
+						<instance name="header_bar" lbl="web_form_create_subaccount_title" lbl_font="dyn_12" show_close="1" onclick="{close_cmd}" />
+					</panel>
+
+					<panel width="100%" height="44.0h" grow="true">
+
+						<!-- Left -->
+						<panel width="50%" float="bottom" padding="0.5h" align="left" reverse="true">
+
+							<!-- Description -->
+							<panel width="100%" grow="true">
+								<panel height="4h">
+									<frame color="invisible" bordercolor="#455166" borderthickness="1" noclick="1" />
+									<label height="100%" width="-8%" textvalign="center" color="white" textalign="center" font="dyn_10" wrap="true" valign="center" shadow="true" content="web_form_subaccount_description_short" noclick="true" />
+									<panel width="5%" align="right" x="-.5h">
+										<instance name="tip_mark" tip_id="web_form_subaccount_tip" width="60@" height="60%" valign="center" align="right" />
+									</panel>
+								</panel>
+							</panel>
+
+							<!-- Nickname -->
+							<panel width="100%" grow="true">
+
+								<panel align="center" height="6.4h">
+									<frame color="invisible" bordercolor="#455166" borderthickness="1" noclick="1" />
+									<panel align="center" y="1h" width="-1h" height="2.4h" float="right" onload="CreateBool('_nick_valid', false);">
+										<label width="45%" height="100%" textvalign="center" font="dyn_11" color="white" shadow="true" content="create_acc_nickname"
+											watch="UpdateBuySubAccountForm"
+											ontrigger="If(_nick_valid, SetColor('white'), SetColor('red'));"/>
+										<panel width="5%" height="100%">
+											<image align="right" width="1.2h" height="1.0h" valign="center" texture="/ui/info/arrow.tga" />
+										</panel>
+										<panel width="45%" height="100%">
+											<instance
+												name="field"
+												widgetname="buy_subaccount_nickname"
+												order="80"
+												maxlength="12"
+												form="BuySubAccount"
+												data="nickname"
+												onshow="SetFocus(true);"
+												onlosefocus="HideWidget('buy_subaccount_nick_notice');"
+												onchange="
+													Set(_nick_check_field, name);
+													If(StringEmpty(this),
+														Set('_nick_valid', false),
+														SleepWidget(500, 'SubmitForm(\'UserNameCheck\', \'nickname\', buy_subaccount_nickname);')
+														);
+													Trigger('UpdateBuySubAccountForm');
+													Trigger('UserNameCheckStatus', 2);
+													"
+											/>
+										</panel>
+									</panel>
+
+									<label y="4.0h" font="dyn_9" wrap="true" width="-1.4h" align="center" color="#ffaa00" fity="true">create_acc_label_nick_name_tip</label>
+
+									<panel name="buy_subaccount_nick_notice" y="4h" x="-5.0%" align="right" height="5.2h" width="45%" visible="false" onclick="HideWidget('buy_subaccount_nick_notice');" watch="UserNameCheckStatus" ontrigger="SetVisible(!StringEmpty(buy_subaccount_nickname));">
+										<frame texture="/ui/frames/tooltip_bg.tga" color="0 0 0 .8" borderthickness=".6h" align="left" valign="top" noclick="1">
+										<frame texture="/ui/frames/roundframe.tga" color="#A0A0A0" borderthickness=".6h" noclick="1"/>
+
+											<label
+												fity="true"
+												width="-1.4h"
+												align="center" valign="center"
+												textalign="center" textvalign="center"
+												font="dyn_10" wrap="1"
+												color="#48ee48" shadow="true" shadowcolor="black"
+												noclick="1"
+												watch="UserNameCheckResult"
+												ontrigger="
+													if (StringEquals(_nick_check_field, 'buy_subaccount_nickname'),
+														Split(
+															Set('_nick_valid', param0 and !StringEmpty(buy_subaccount_nickname)),
+															If(param0, SetColor('#48ee48'), SetColor('#eb3535')),
+															If(param0, SetText(Translate('main_create_account_nickname_available')), SetText(param1)),
+															Trigger('UpdateBuySubAccountForm')
+														)
+													);
+												"
+												watch0="UserNameCheckStatus"
+												ontrigger0="
+													if (StringEquals(_nick_check_field, 'buy_subaccount_nickname'),
+														Split(
+															If(param == 2 or param == 3, SetText(Translate('main_create_account_nickname_check'))),
+															If(param == 2 or param == 3, SetColor('#ebee48'))
+														)
+													);
+													"
+											/>
+										</frame>
+									</panel>
+								</panel>
+							</panel>
+
+							<!-- First name -->
+							<panel width="100%" grow="true">
+								<panel height="4h">
+									<frame color="invisible" bordercolor="#455166" borderthickness="1" noclick="1" />
+									<instance
+										name="web_form_field"
+										label="creditcard_label_first_name"
+										hastip="true"
+										order="82"
+										fieldwidth="-1.8h"
+										fieldname="buy_subaccount_ccfirstname"
+										ontrigger="If(StringEmpty(buy_subaccount_ccfirstname), SetColor('red'), SetColor('white'));"
+										tip_id="web_form_tip_cc_first_name"
+										form="BuySubAccount" data="bill_first_name"
+										updatetrigger="UpdateBuySubAccountForm"
+									/>
+								</panel>
+							</panel>
+
+							<!-- Last name -->
+							<panel width="100%" grow="true">
+								<panel height="4h">
+									<frame color="invisible" bordercolor="#455166" borderthickness="1" noclick="1" />
+									<instance
+										name="web_form_field"
+										label="creditcard_label_last_name"
+										hastip="true"
+										order="83"
+										fieldwidth="-1.8h"
+										fieldname="buy_subaccount_cclastname"
+										ontrigger="If(StringEmpty(buy_subaccount_cclastname), SetColor('red'), SetColor('white'));"
+										tip_id="web_form_tip_cc_last_name"
+										form="BuySubAccount" data="bill_last_name"
+										updatetrigger="UpdateBuySubAccountForm"
+									/>
+								</panel>
+							</panel>
+
+							<!-- Zip Code -->
+							<panel width="100%" grow="true">
+								<panel height="4h">
+									<frame color="invisible" bordercolor="#455166" borderthickness="1" noclick="1" />
+									<instance
+										name="web_form_field"
+										label="creditcard_label_billing_zip"
+										hastip="true"
+										order="84"
+										fieldwidth="-1.8h"
+										fieldname="buy_subaccount_cczip"
+										ontrigger="If(StringEmpty(buy_subaccount_cczip), SetColor('red'), SetColor('white'));"
+										tip_id="web_form_tip_cc_zip"
+										form="BuySubAccount" data="zip"
+										updatetrigger="UpdateBuySubAccountForm"
+									/>
+								</panel>
+							</panel>
+
+							<!-- CC Number -->
+							<panel width="100%" grow="true">
+								<panel height="6h">
+									<frame color="invisible" bordercolor="#455166" borderthickness="1" noclick="1" />
+									<image texture="/ui/elements/cc.tga" width="8.0h" height="2.0h" valign="bottom" x="1h" y="-0.8h" />
+									<instance
+										name="web_form_field"
+										y="0.8h"
+										valign="top"
+										label="creditcard_label_prime_card_number"
+										hastip="false"
+										order="85"
+										fieldwidth="-1.8h"
+										fieldname="buy_subaccount_ccnum"
+										ontrigger="If(!IsValidCCNumber(buy_subaccount_ccnum), SetColor('red'), SetColor('white'));"
+										tip_id="ccnum_tip" tip_title="creditcard_label_billing_zip" tip_text="credit_card_billing_zip_tip"
+										form="BuySubAccount" data="card_number"
+										updatetrigger="UpdateBuySubAccountForm"
+									/>
+								</panel>
+							</panel>
+
+							<!-- Expiration Date -->
+							<panel width="100%" grow="true">
+								<panel height="4h">
+									<frame color="invisible" bordercolor="#455166" borderthickness="1" noclick="1" />
+
+									<panel align="center" width="-1h" height="2.4h" valign="center" float="right">
+										<label name="buy_subaccount_exp_label" width="33%" height="100%" textvalign="center" font="dyn_11" color="white" shadow="true" content="creditcard_label_prime_expiration" watch="UpdateBuySubAccountForm" ontrigger="If(
+										(
+										buy_subaccount_ccmonth lt 1 or
+										buy_subaccount_ccmonth gt 12 or
+										buy_subaccount_ccyear lt GetYear() or
+										(buy_subaccount_ccyear == GetYear() and buy_subaccount_ccmonth lt GetMonth())
+										),
+											SetColor('red'),
+											SetColor('white')
+										);"/>
+
+										<panel width="5%">
+											<image align="right" width="1.2h" height="1.0h" valign="center" texture="/ui/info/arrow.tga" />
+										</panel>
+
+										<panel width="57%">
+											<label
+												width="100%" height="100%"
+												align="center" valign="center"
+												textalign="left" textvalign="center"
+												font="dyn_10" color="white" shadow="true" shadowcolor="black" noclick="1"
+												content="creditcard_label_prime_month"
+												watch="UpdateBuySubAccountForm"
+												ontrigger="
+													If(
+														(
+														buy_subaccount_ccmonth lt 1 or
+														buy_subaccount_ccmonth gt 12 or
+														buy_subaccount_ccyear lt GetYear() or
+														(buy_subaccount_ccyear == GetYear() and buy_subaccount_ccmonth lt GetMonth())
+														),
+															SetColor('red'),
+															SetColor('white')
+														);
+													"
+											/>
+
+
+											<panel width="8h" x="5h" height="2.2h" valign="center" reverse="true">
+												<instance
+													name="Moptions_combobox"
+													id="buy_subaccount_ccmonth"
+													align="right" width="8.0h" itemwidth="100%" maxlistheight="5"
+													onload="CreateString('_purchase_month', '01');"
+													onshow="ListBoxCmd('Select 0');"
+													onselect="Trigger('UpdateBuySubAccountForm');"
+													populate="
+														AddTemplateListItem('Ncombobox_item', '01', 'label', '01');
+														AddTemplateListItem('Ncombobox_item', '02', 'label', '02');
+														AddTemplateListItem('Ncombobox_item', '03', 'label', '03');
+														AddTemplateListItem('Ncombobox_item', '04', 'label', '04');
+														AddTemplateListItem('Ncombobox_item', '05', 'label', '05');
+														AddTemplateListItem('Ncombobox_item', '06', 'label', '06');
+														AddTemplateListItem('Ncombobox_item', '07', 'label', '07');
+														AddTemplateListItem('Ncombobox_item', '08', 'label', '08');
+														AddTemplateListItem('Ncombobox_item', '09', 'label', '09');
+														AddTemplateListItem('Ncombobox_item', '10', 'label', '10');
+														AddTemplateListItem('Ncombobox_item', '11', 'label', '11');
+														AddTemplateListItem('Ncombobox_item', '12', 'label', '12');
+														"
+													form="BuySubAccount" formdata="month"
+												/>
+
+											</panel>
+
+											<label
+												width="100%" height="100%"
+												textvalign="center" textalign="left"
+												valign="center" x="13.5h"
+												font="dyn_10" color="white" shadow="true" shadowcolor="black" noclick="1"
+												content="creditcard_label_prime_year"
+												watch="UpdateBuySubAccountForm"
+												ontrigger="If(buy_subaccount_ccyear lt GetYear(), SetColor('red'), SetColor('white'));"
+											/>
+
+											<panel width="8h" x="17h" height="2.2h" valign="center" reverse="true">
+												<instance
+													name="Moptions_combobox"
+													id="buy_subaccount_ccyear"
+													align="right" width="8.0h" itemwidth="100%" maxlistheight="5"
+													onload="CreateString('_purchase_month', '01');"
+													onshow="ListBoxCmd('Select 0');"
+													onselect="Trigger('UpdateBuySubAccountForm');"
+													populate="
+														for(
+															GetYear(),GetYear() + 25,1,
+															'
+																AddTemplateListItem(\'Ncombobox_item\', iParam, \'label\', iParam);
+															'
+														);
+													"
+													form="BuySubAccount" formdata="year"
+												/>
+
+											</panel>
+										</panel>
+
+										<panel width="5%">
+											<instance name="tip_mark" tip_id="web_form_tip_cc_exp" width="100@" height="100%" valign="center" align="right" />
+										</panel>
+
+									</panel>
+								</panel>
+							</panel>
+
+							<!-- CVV Number -->
+							<panel width="100%" grow="true">
+								<panel height="4h">
+									<frame color="invisible" bordercolor="#455166" borderthickness="1" noclick="1" />
+									<instance
+										name="web_form_field"
+										label="creditcard_label_prime_cvv_number"
+										hastip="true"
+										order="86"
+										fieldwidth="-1.8h"
+										fieldname="buy_subaccount_cccvv"
+										ontrigger="If((StringLength(buy_subaccount_cccvv) lt 3 or !StringContainsOnly(buy_subaccount_cccvv, '', '0')),
+											SetColor('red'),
+											SetColor('white')
+											);"
+										tip_id="web_form_tip_cc_cvv2"
+										form="BuySubAccount" data="cvv"
+										updatetrigger="UpdateBuySubAccountForm"
+										onfocus="ShowWidget('subacct_cccvv_img');" onlosefocus="HideWidget('subacct_cccvv_img');"
+									/>
+
+								</panel>
+							</panel>
+
+							<!-- Confirm Password -->
+							<panel width="100%" grow="true">
+								<panel height="4h">
+									<frame color="invisible" bordercolor="#455166" borderthickness="1" noclick="1" />
+									<instance
+										name="web_form_field"
+										label="create_acc_confirm_password"
+										hastip="false"
+										order="44"
+										fieldwidth="-1.8h"
+										fieldname="buy_subaccount_pass"
+										ontrigger="
+											If(
+												StringEmpty(buy_subaccount_pass),
+												SetColor('red'),
+												SetColor('white')
+											);
+										"
+										passchar="*"
+										tip_id=""
+										form="BuySubAccount" data="password"
+										updatetrigger="UpdateBuySubAccountForm"
+									/>
+								</panel>
+							</panel>
+
+						</panel>
+
+						<!-- Promo code usage notification -->
+						<panel height="29h" y="7h" width="50%" watch="UpdateBuySubAccountForm" visible="false" ontrigger="">
+							<panel color="0 0 0 .75">
+								<frame color="invisible" bordercolor="#455166" borderthickness="1" noclick="1" />
+								<panel width="-8h" grow="true" align="center" valign="center" color="0 0 0 .75">
+									<frame color="invisible" bordercolor="#455166" borderthickness="1" noclick="1" />
+									<label color="white" shadow="true" font="dyn_10" wrap="true" fity="true" fitypadding="1h" align="center" textalign="center" textvalign="center" width="-1h" content="create_acc_nocc_xfer_subaccount" />
+								</panel>
+							</panel>
+						</panel>
+
+						<!-- Right -->
+						<panel width="49.0%" align="right">
+
+							<!-- ToS -->
+							<panel width="100%" height="26h">
+								<instance height="2.5h" name="header_bar" color=".7 .7 .7 1" lbl="tos_header" lbl_font="dyn_10" show_close="0" />
+								<panel valign="bottom" height="-2.7h">
+									<frame color="invisible" bordercolor="#455166" borderthickness="1" noclick="1" />
+									<frame texture="/ui/info/backdrop.tga" borderthickness="2.0h" color="1 1 1 .5" noclick="1" />
+									<textbuffer
+										scrolltexture="/ui/info/combobox.tga"
+										handleheight="2.0h"
+										scrollbarsize="2.0h"
+										exteriorscrollbars="false"
+										textalign="left"
+										font="dyn_10"
+										textcolor="white"
+										color="invisible"
+										shadow="1"
+										wrap="true"
+										noclick="0"
+										file=":/tos.txt"
+										width="-1.0h" height="-2.1h"
+										align="center" valign="center"
+									/>
+								</panel>
+							</panel>
+
+							<!-- Price / Button -->
+							<panel width="100%" valign="bottom" grow="true">
+
+								<!-- PayPal Info -->
+								<panel width="100%" grow="true" y="-7h">
+									<panel height="6h">
+										<frame color="invisible" bordercolor="#455166" borderthickness="1" noclick="1" />
+										<panel height="5h" valign="center" align="center" width="-1h">
+											<image height="6h" width="6h" y=".5h" x="1h" texture="/ui/elements/paypal_icon.tga" />
+											<label x="3h" width="-10.0h" height="100%" align="center" valign="center" textvalign="center" textalign="center" wrap="1" font="dyn_10" color="white" noclick="1">web_form_paypal_notice</label>
+											<!--<image height="6h" width="6h" y=".5h" x="-1h" texture="/ui/elements/paypal_icon.tga" align="right" />-->
+										</panel>
+									</panel>
+								</panel>
+
+								<!-- Price -->
+								<panel height="10h" width="10.0h" align="left">
+									<instance height="2.5h" name="header_bar" color=".7 .7 .7 1" lbl="create_acc_total_price" lbl_font="dyn_10" show_close="0" />
+
+									<panel height="-2.7h" valign="bottom">
+										<frame color="invisible" bordercolor="#455166" borderthickness="1" noclick="1" />
+
+										<panel width="100%" valign="center" grow="true" float="bottom">
+											<label fity="true" width="100%" textalign="center" textvalign="center" font="dyn_14" color="#3abde7" content="$20.00"/>
+											<label fity="true" width="-0.8h" align="center" valign="bottom" textalign="center" textvalign="center" font="dyn_8" color=".8 .8 .8 1" wrap="true" content="create_acc_price_usd"/>
+										</panel>
+
+									</panel>
+
+								</panel>
+
+								<!-- Button -->
+								<panel height="10h" width="-11.0h" align="right">
+									<frame color="invisible" bordercolor="#455166" borderthickness="1" noclick="1" />
+									<panel
+										visible="false"
+										watch="UpdateBuySubAccountForm" ontrigger="
+											if (
+												_nick_valid and
+												!StringEmpty(buy_subaccount_pass) and
+												!StringEmpty(buy_subaccount_ccfirstname) and
+												!StringEmpty(buy_subaccount_cclastname) and
+												!StringEmpty(buy_subaccount_cczip) and
+												IsValidCCNumber(buy_subaccount_ccnum) and
+												StringLength(buy_subaccount_cccvv) ge 3 and
+												StringLength(buy_subaccount_cccvv) le 4 and
+												StringContainsOnly(buy_subaccount_cccvv, '', '0') and
+												buy_subaccount_ccmonth ge 1 and
+												buy_subaccount_ccmonth le 12 and
+												buy_subaccount_ccyear ge GetYear() and
+												(buy_subaccount_ccyear gt GetYear() or buy_subaccount_ccmonth ge GetMonth()) and
+												GetAccountID() != -1
+
+											, SetVisible(true), SetVisible(false));
+										"
+									>
+										<frame texture="/ui/info/backdrop.tga" borderthickness="2.0h" color="1 1 1 1" noclick="1"/>
+										<frame color="invisible" bordercolor="#4b628b" borderthickness="1" noclick="1" />
+									</panel>
+
+									<panel y="1.0h" float="bottom" padding=".5h" grow="true" width="-1h">
+
+										<panel height="0" />
+
+										<label wrap="true" align="center" textalign="center" font="dyn_10" color="white" shadow="true" fity="true" width="-1.0h">creditcard_label_subacct_agreement</label>
+
+										<panel grow="true" width="-2.0h" align="center">
+
+											<instance
+												name="button2" button_name="unnamedButton107"
+												width="18h" height="2.5h"
+												align="center"
+												enabled="false"
+												label="web_form_create_subaccount_button"
+												font="dyn_10"
+												watch="UpdateBuySubAccountForm" ontrigger="
+													If(
+														_nick_valid and
+														!StringEmpty(buy_subaccount_pass) and
+														!StringEmpty(buy_subaccount_ccfirstname) and
+														!StringEmpty(buy_subaccount_cclastname) and
+														!StringEmpty(buy_subaccount_cczip) and
+														IsValidCCNumber(buy_subaccount_ccnum) and
+														StringLength(buy_subaccount_cccvv) ge 3 and
+														StringLength(buy_subaccount_cccvv) le 4 and
+														StringContainsOnly(buy_subaccount_cccvv, '', '0') and
+														buy_subaccount_ccmonth ge 1 and
+														buy_subaccount_ccmonth le 12 and
+														buy_subaccount_ccyear ge GetYear() and
+														(buy_subaccount_ccyear gt GetYear() or buy_subaccount_ccmonth ge GetMonth()) and
+														GetAccountID() != -1
+													, SetEnabled(true), SetEnabled(false));
+												"
+												onclick="SubmitForm('BuySubAccount', 'account_id', GetAccountID());"
+											/>
+
+											<panel align="center" valign="bottom" width="100%" height="2.5h" visible="false" name="BuySubAccountStatusIndicator" color="0 0 0 1" watch="BuySubAccountStatus" ontrigger="SetVisible(param == 1);">
+												<frame texture="/ui/info/backdrop.tga" borderthickness="2.0h" color="1 1 1 .5" noclick="1" />
+												<frame color="invisible" bordercolor="#455166" borderthickness="1" noclick="1" />
+												<label width="-1h" height="-1h" textvalign="center" textalign="center" align="center" valign="center" shadow="true" color="#12ff00" font="dyn_11">credit_card_processing</label>
+											</panel>
+										</panel>
+									</panel>
+								</panel>
+							</panel>
+						</panel>
+					</panel>
+
+					<panel name="subacct_cccvv_img" width="21.3h" height="10.65h" x="5%" y="0" align="left" valign="bottom" visible="0" noclick="true">
+						<image texture="/ui/elements/cvv.tga" noclick="true"/>
+					</panel>
+
+				</panel>
+
+				<!-- Successful sub-account creation -->
+				<panel color="0 0 0 .5" name="BuySubAccountSuccessIndicator" watch="BuySubAccountResult" visible="false" ontrigger="
+				If(
+					StringEquals(param0,'1'),
+					Split(
+						SetVisible(true),
+						Call('buy_subaccount_nickname', 'EraseInputLine();'),
+						Call('buy_subaccount_pass', 'EraseInputLine();'),
+						Call('buy_subaccount_ccfirstname', 'EraseInputLine();'),
+						Call('buy_subaccount_cclastname', 'EraseInputLine();'),
+						Call('buy_subaccount_cczip', 'EraseInputLine();'),
+						Call('buy_subaccount_ccnum', 'EraseInputLine();'),
+						Call('buy_subaccount_cccvv', 'EraseInputLine();'),
+						Call('buy_subaccount_ccmonth', 'SetSelectedItemByIndex(-1);'),
+						Call('buy_subaccount_ccyear', 'SetSelectedItemByIndex(-1);')
+					),
+					SetVisible(false)
+				);
+				">
+					<panel align="center" valign="center" width="38.0h" grow="true" color="0 0 0 1">
+						<frame color="invisible" bordercolor="#455166" borderthickness="1" noclick="1" />
+						<panel width="100%" height="2.5h" noclick="1">
+							<instance name="header_bar" lbl="web_form_subaccount_success_title" lbl_font="dyn_10" show_close="0" />
+						</panel>
+						<panel y="3.0h" align="center" grow="true" width="-1h" float="bottom">
+							<panel width="100%" grow="true">
+								<label color="white" shadow="true" font="dyn_10" width="-1.0h" align="center" wrap="true" fity="true" content="web_form_subaccount_success" />
+							</panel>
+							<panel width="100%" height="4.0h">
+								<instance
+									name="button2" button_name="unnamedButton108"
+									y="-1.0h"
+									align="center" valign="bottom"
+									width="9h" height="2.5h"
+									label="general_ok"
+									font="dyn_10"
+									onclick="Call('BuySubAccountSuccessIndicator', 'FadeOut(250);');"
+									onclicklua="UIManager.GetInterface('main'):HoNMainF('MainMenuPanelToggle', 'form_create_subaccount', nil, false)"
+								/>
+							</panel>
+						</panel>
+					</panel>
+				</panel>
+
+				<!-- Need to log in first -->
+				<panel color="0 0 0 .5" name="BuySubAccountPurchasedNotice" watch="AccountInfo" visible="false" ontrigger="setvisible(GetAccountID() == -1));">
+					<panel align="center" valign="center" width="38.0h" grow="true" color="0 0 0 1">
+						<frame color="invisible" bordercolor="#455166" borderthickness="1" noclick="1" />
+						<panel width="100%" height="2.5h" noclick="1">
+							<instance name="header_bar" lbl="web_form_must_login" lbl_font="dyn_10" show_close="0" />
+						</panel>
+						<panel y="3.0h" align="center" grow="true" width="-1h" float="bottom">
+							<panel width="100%" grow="true">
+								<label color="white" shadow="true" font="dyn_10" width="-1.0h" align="center" wrap="true" fity="true" content="web_form_must_login_text" />
+							</panel>
+							<panel width="100%" height="4.0h">
+								<instance
+									name="button2" button_name="unnamedButton109"
+									y="-1.0h"
+									align="center" valign="bottom"
+									width="9h" height="2.5h"
+									label="general_ok"
+									font="dyn_10"
+									onclicklua="UIManager.GetInterface('main'):HoNMainF('MainMenuPanelToggle', 'form_create_subaccount', nil, false)"
+								/>
+							</panel>
+						</panel>
+					</panel>
+				</panel>
+
+				<!-- Failed subaccount purchase -->
+				<panel color="0 0 0 .5" name="BuySubAccountFailureIndicator" watch="BuySubAccountResult" visible="false" ontrigger="SetVisible(StringEquals(param0, '0'));">
+					<panel align="center" valign="center" width="38.0h" grow="true" regrow="true" color="0 0 0 1">
+						<frame color="invisible" bordercolor="#455166" borderthickness="1" noclick="1" />
+						<panel width="100%" height="2.5h" noclick="1">
+							<instance name="header_bar" lbl="credit_card_error_plain" lbl_font="dyn_10" show_close="0" />
+						</panel>
+						<panel y="3.0h" align="center" grow="true" regrow="true" width="-1h" float="bottom">
+							<panel width="100%" grow="true" regrow="true" onload="CreateString('web_resetstats_error_concat', '');"
+								watch1="ConcatResetStatsError"
+								ontrigger1="
+									Set(
+										'web_resetstats_error_concat',
+										web_resetstats_error_concat #
+										If(
+											!StringEmpty(web_resetstats_error_concat),
+											'\\n',
+											''
+										) #
+										Translate('web_form_resetstats_error' # param1)
+									);
+
+									Set('create_account_last_error', param1);
+								"
+							>
+								<label color="white" shadow="true" font="dyn_10" width="100%" wrap="true" fity="true"
+									watch="BuySubAccountResult"
+									ontrigger="
+										Set('web_resetstats_error_concat', '');
+										If(
+											param1,
+											ExplodeTrigger('ConcatResetStatsError', param3, '|', ':')
+										);
+										SetText(
+											If(
+												!StringEmpty(web_resetstats_error_concat),
+												FormatStringNewLine(web_resetstats_error_concat),
+												''
+											)
+										);
+									"
+								/>
+							</panel>
+							<panel width="100%" height="4.0h">
+								<instance
+									name="button2" button_name="unnamedButton110"
+									y="-1.0h"
+									align="center" valign="bottom"
+									width="9h" height="2.5h"
+									label="general_ok"
+									font="dyn_10"
+									onclick="HideWidget('BuySubAccountFailureIndicator');"
+								/>
+							</panel>
+						</panel>
+					</panel>
+				</panel>
+
+				<!-- Feature unavailable (for now) -->
+				<panel color="0 0 0 .5" visible="false" onload="If(ui_disableAccountCreation or ui_disableAccountForms, ShowWidget());">
+					<panel align="center" valign="center" width="38.0h" grow="true" color="0 0 0 1">
+						<frame color="invisible" bordercolor="#455166" borderthickness="1" noclick="1" />
+						<panel width="100%" height="2.5h" noclick="1">
+							<instance name="header_bar" lbl="web_form_feature_unavailable_title" lbl_font="dyn_10" show_close="0" />
+						</panel>
+						<panel y="3.0h" align="center" grow="true" width="-1h" float="bottom">
+							<panel width="100%" grow="true">
+								<label color="white" shadow="true" font="dyn_10" width="-1.0h" align="center" wrap="true" fity="true" content="web_form_feature_unavailable" />
+							</panel>
+							<panel width="100%" height="4.0h">
+								<instance
+									name="button2" button_name="unnamedButton111"
+									y="-1.0h"
+									align="center" valign="bottom"
+									width="9h" height="2.5h"
+									label="general_ok"
+									font="dyn_10"
+									onclicklua="UIManager.GetInterface('main'):HoNMainF('MainMenuPanelToggle', 'form_create_subaccount', nil, false)"
+								/>
+							</panel>
+						</panel>
+					</panel>
+				</panel>
+			</panel>
+		</panel>
+	</template>
+</package>

@@ -1,0 +1,2534 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+	<lua file="/ui/scripts/newui/player_stats_v2.lua"/>
+
+	<!-- Forms -->
+	<trigger name="GetSeasonsStatus"/>
+	<trigger name="GetSeasonsResult"/>
+	<form
+		name="GetSeasons"
+		host="!masterserver"
+		method="post"
+		target="/client_requester.php"
+		statustrigger="GetSeasonsStatus"
+		resulttrigger="GetSeasonsResult"
+		resultparam0="all_seasons"
+	/>
+
+	<trigger name="PlayerStatsPublicStatus"/>
+	<trigger name="PlayerStatsPublicResult"/>
+	<form
+		name="PlayerStatsPublic"
+		host="!masterserver"
+		method="post"
+		target="/client_requester.php"
+		statustrigger="PlayerStatsPublicStatus"
+		resulttrigger="PlayerStatsPublicResult"
+		resultparam0="nickname"
+		resultparam1="name"
+		resultparam2="rank"
+		resultparam3="level"
+		resultparam4="account_id"
+		resultparam5="acc_games_played"
+		resultparam6="acc_wins"
+		resultparam7="acc_losses"
+		resultparam8="acc_concedes"
+		resultparam9="acc_concedevotes"
+		resultparam10="acc_buybacks"
+		resultparam11="acc_discos"
+		resultparam12="acc_kicked"
+		resultparam13="acc_pub_skill"
+		resultparam14="acc_pub_count"
+		resultparam15="acc_amm_solo_rating"
+		resultparam16="acc_amm_solo_count"
+		resultparam17="acc_amm_team_rating"
+		resultparam18="acc_amm_team_count"
+		resultparam19="acc_avg_score"
+		resultparam20="acc_herokills"
+		resultparam21="acc_herodmg"
+		resultparam22="acc_heroexp"
+		resultparam23="acc_herokillsgold"
+		resultparam24="acc_heroassists"
+		resultparam25="acc_deaths"
+		resultparam26="acc_goldlost2death"
+		resultparam27="acc_secs_dead"
+		resultparam28="acc_teamcreepkills"
+		resultparam29="acc_teamcreepdmg"
+		resultparam30="acc_teamcreepexp"
+		resultparam31="acc_teamcreepgold"
+		resultparam32="acc_neutralcreepkills"
+		resultparam33="acc_neutralcreepdmg"
+		resultparam34="acc_neutralcreepexp"
+		resultparam35="acc_neutralcreepgold"
+		resultparam36="acc_bdmg"
+		resultparam37="acc_bdmgexp"
+		resultparam38="acc_razed"
+		resultparam39="acc_bgold"
+		resultparam40="acc_denies"
+		resultparam41="acc_exp_denied"
+		resultparam42="acc_gold"
+		resultparam43="acc_gold_spend"
+		resultparam44="acc_exp"
+		resultparam45="acc_actions"
+		resultparam46="acc_secs"
+		resultparam47="acc_consumables"
+		resultparam48="acc_wards"
+		resultparam49="acc_em_played"
+		resultparam50="maxXP"
+		resultparam51="last_activity"
+		resultparam52="matchIds"
+		resultparam53="matchDates"
+		resultparam54="favHero1"
+		resultparam55="favHero2"
+		resultparam56="favHero3"
+		resultparam57="favHero4"
+		resultparam58="favHero5"
+		resultparam59="favHero1Time"
+		resultparam60="favHero2Time"
+		resultparam61="favHero3Time"
+		resultparam62="favHero4Time"
+		resultparam63="favHero5Time"
+		resultparam64="xp2nextLevel"
+		resultparam65="xpPercent"
+		resultparam66="percentEM"
+		resultparam67="k_d_a"
+		resultparam68="avgGameLength"
+		resultparam69="avgXP_min"
+		resultparam70="avgDenies"
+		resultparam71="avgCreepKills"
+		resultparam72="avgNeutralKills"
+		resultparam73="avgActions_min"
+		resultparam74="avgWardsUsed"
+		resultparam75="create_date"
+		resultparam76="favHero1_2"
+		resultparam77="favHero2_2"
+		resultparam78="favHero3_2"
+		resultparam79="favHero4_2"
+		resultparam80="favHero5_2"
+		resultparam81="favHero1id"
+		resultparam82="favHero2id"
+		resultparam83="favHero3id"
+		resultparam84="favHero4id"
+		resultparam85="favHero5id"
+		resultparam86="error"
+		resultparam87="acc_level"
+		resultparam88="selected_upgrades"
+		resultparam89="cs_games_played"
+		resultparam90="rnk_games_played"
+		resultparam91="cs_discos"
+		resultparam92="rnk_discos"
+		resultparam93="acc_bloodlust"
+		resultparam94="acc_doublekill"
+		resultparam95="acc_triplekill"
+		resultparam96="acc_quadkill"
+		resultparam97="acc_annihilation"
+		resultparam98="acc_ks3"
+		resultparam99="acc_ks4"
+		resultparam100="acc_ks5"
+		resultparam101="acc_ks6"
+		resultparam102="acc_ks7"
+		resultparam103="acc_ks8"
+		resultparam104="acc_ks9"
+		resultparam105="acc_ks10"
+		resultparam106="acc_ks15"
+		resultparam107="acc_smackdown"
+		resultparam108="acc_humiliation"
+		resultparam109="acc_nemesis"
+		resultparam110="acc_retribution"
+		resultparam111="total_level_exp"
+		resultparam112="acc_time_earning_exp"
+		resultparam113="level"
+		resultparam114="level_exp"
+		resultparam115="discos"
+		resultparam116="possible_discos"
+		resultparam117="games_played"
+		resultparam118="account_type"
+		resultparam119="standing"
+		resultparam120="level_percent"
+		resultparam121="max_exp"
+		resultparam122="min_exp"
+		resultparam123="mid_games_played"
+		resultparam124="mid_discos"
+		resultparam125="total_games_played"
+		resultparam126="total_discos"
+		resultparam127="event_id"
+		resultparam128="events"
+		resultparam129="uncs_discos"
+		resultparam130="unrnk_discos"
+		resultparam131="uncs_games_played"
+		resultparam132="unrnk_games_played"
+		resultparam133="rift_games_played"
+		resultparam134="rift_discos"
+		resultparam135="current_level"
+		resultparam136="highest_level_current"
+		resultparam137="season_id"
+		resultparam138="current_ranking"
+		resultparam139="curr_season_cam_games_played"
+		resultparam140="curr_season_cam_cs_games_played"
+		resultparam141="curr_season_cam_discos"
+		resultparam142="curr_season_cam_cs_discos"
+		resultparam143="prev_seasons_cam_games_played"
+		resultparam144="prev_seasons_cam_cs_games_played"
+		resultparam145="prev_seasons_cam_discos"
+		resultparam146="prev_seasons_cam_cs_discos"
+		resultparam147="quest_stats"
+	/>
+
+	<trigger name="PlayerStatsRankedStatus"/>
+	<trigger name="PlayerStatsRankedResult"/>
+	<form
+		name="PlayerStatsRanked"
+		host="!masterserver"
+		method="post"
+		target="/client_requester.php"
+		statustrigger="PlayerStatsRankedStatus"
+		resulttrigger="PlayerStatsRankedResult"
+		resultparam0="nickname"
+		resultparam1="name"
+		resultparam2="rank"
+		resultparam3="rnk_level"
+		resultparam4="account_id"
+		resultparam5="rnk_games_played"
+		resultparam6="rnk_wins"
+		resultparam7="rnk_losses"
+		resultparam8="rnk_concedes"
+		resultparam9="rnk_concedevotes"
+		resultparam10="rnk_buybacks"
+		resultparam11="rnk_discos"
+		resultparam12="rnk_kicked"
+		resultparam13="smr"
+		resultparam14="rnk_pub_count"
+		resultparam15="rnk_amm_solo_rating"
+		resultparam16="rnk_amm_solo_count"
+		resultparam17="rnk_amm_team_rating"
+		resultparam18="rnk_amm_team_count"
+		resultparam19="rnk_avg_score"
+		resultparam20="rnk_herokills"
+		resultparam21="rnk_herodmg"
+		resultparam22="rnk_heroexp"
+		resultparam23="rnk_herokillsgold"
+		resultparam24="rnk_heroassists"
+		resultparam25="rnk_deaths"
+		resultparam26="rnk_goldlost2death"
+		resultparam27="rnk_secs_dead"
+		resultparam28="rnk_teamcreepkills"
+		resultparam29="rnk_teamcreepdmg"
+		resultparam30="rnk_teamcreepexp"
+		resultparam31="rnk_teamcreepgold"
+		resultparam32="rnk_neutralcreepkills"
+		resultparam33="rnk_neutralcreepdmg"
+		resultparam34="rnk_neutralcreepexp"
+		resultparam35="rnk_neutralcreepgold"
+		resultparam36="rnk_bdmg"
+		resultparam37="rnk_bdmgexp"
+		resultparam38="rnk_razed"
+		resultparam39="rnk_bgold"
+		resultparam40="rnk_denies"
+		resultparam41="rnk_exp_denied"
+		resultparam42="rnk_gold"
+		resultparam43="rnk_gold_spend"
+		resultparam44="rnk_exp"
+		resultparam45="rnk_actions"
+		resultparam46="rnk_secs"
+		resultparam47="rnk_consumables"
+		resultparam48="rnk_wards"
+		resultparam49="rnk_em_played"
+		resultparam50="maxXP"
+		resultparam51="last_activity"
+		resultparam52="matchIds"
+		resultparam53="matchDates"
+		resultparam54="favHero1"
+		resultparam55="favHero2"
+		resultparam56="favHero3"
+		resultparam57="favHero4"
+		resultparam58="favHero5"
+		resultparam59="favHero1Time"
+		resultparam60="favHero2Time"
+		resultparam61="favHero3Time"
+		resultparam62="favHero4Time"
+		resultparam63="favHero5Time"
+		resultparam64="xp2nextLevel"
+		resultparam65="xpPercent"
+		resultparam66="percentEM"
+		resultparam67="k_d_a"
+		resultparam68="avgGameLength"
+		resultparam69="avgXP_min"
+		resultparam70="avgDenies"
+		resultparam71="avgCreepKills"
+		resultparam72="avgNeutralKills"
+		resultparam73="avgActions_min"
+		resultparam74="avgWardsUsed"
+		resultparam75="create_date"
+		resultparam76="favHero1_2"
+		resultparam77="favHero2_2"
+		resultparam78="favHero3_2"
+		resultparam79="favHero4_2"
+		resultparam80="favHero5_2"
+		resultparam81="favHero1id"
+		resultparam82="favHero2id"
+		resultparam83="favHero3id"
+		resultparam84="favHero4id"
+		resultparam85="favHero5id"
+		resultparam86="error"
+		resultparam87="rnk_level"
+		resultparam88="selected_upgrades"
+		resultparam89="acc_games_played"
+		resultparam90="cs_games_played"
+		resultparam91="acc_discos"
+		resultparam92="cs_discos"
+		resultparam93="rnk_bloodlust"
+		resultparam94="rnk_doublekill"
+		resultparam95="rnk_triplekill"
+		resultparam96="rnk_quadkill"
+		resultparam97="rnk_annihilation"
+		resultparam98="rnk_ks3"
+		resultparam99="rnk_ks4"
+		resultparam100="rnk_ks5"
+		resultparam101="rnk_ks6"
+		resultparam102="rnk_ks7"
+		resultparam103="rnk_ks8"
+		resultparam104="rnk_ks9"
+		resultparam105="rnk_ks10"
+		resultparam106="rnk_ks15"
+		resultparam107="rnk_smackdown"
+		resultparam108="rnk_humiliation"
+		resultparam109="rnk_nemesis"
+		resultparam110="rnk_retribution"
+		resultparam111="total_level_exp"
+		resultparam112="rnk_time_earning_exp"
+		resultparam113="level"
+		resultparam114="level_exp"
+		resultparam115="discos"
+		resultparam116="possible_discos"
+		resultparam117="games_played"
+		resultparam118="account_type"
+		resultparam119="standing"
+		resultparam120="level_percent"
+		resultparam121="max_exp"
+		resultparam122="min_exp"
+		resultparam123="mid_games_played"
+		resultparam124="mid_discos"
+		resultparam125="total_games_played"
+		resultparam126="total_discos"
+		resultparam127="event_id"
+		resultparam128="events"
+		resultparam129="uncs_discos"
+		resultparam130="unrnk_discos"
+		resultparam131="uncs_games_played"
+		resultparam132="unrnk_games_played"
+		resultparam133="rift_games_played"
+		resultparam134="rift_discos"
+		resultparam135="current_level"
+		resultparam136="highest_level_current"
+		resultparam137="season_id"
+		resultparam138="current_ranking"
+		resultparam139="curr_season_cam_games_played"
+		resultparam140="curr_season_cam_cs_games_played"
+		resultparam141="curr_season_cam_discos"
+		resultparam142="curr_season_cam_cs_discos"
+		resultparam143="prev_seasons_cam_games_played"
+		resultparam144="prev_seasons_cam_cs_games_played"
+		resultparam145="prev_seasons_cam_discos"
+		resultparam146="prev_seasons_cam_cs_discos"
+		resultparam147="highest_ranking"
+		resultparam148="quest_stats"		
+	/>
+
+
+	<trigger name="PlayerStatsCasualStatus"/>
+	<trigger name="PlayerStatsCasualResult"/>
+	<form
+		name="PlayerStatsCasual"
+		host="!masterserver"
+		method="post"
+		target="/client_requester.php"
+		statustrigger="PlayerStatsCasualStatus"
+		resulttrigger="PlayerStatsCasualResult"
+		resultparam0="nickname"
+		resultparam1="name"
+		resultparam2="rank"
+		resultparam3="cs_level"
+		resultparam4="account_id"
+		resultparam5="cs_games_played"
+		resultparam6="cs_wins"
+		resultparam7="cs_losses"
+		resultparam8="cs_concedes"
+		resultparam9="cs_concedevotes"
+		resultparam10="cs_buybacks"
+		resultparam11="cs_discos"
+		resultparam12="cs_kicked"
+		resultparam13="cs_amm_team_rating"
+		resultparam14="cs_pub_count"
+		resultparam15="cs_amm_solo_rating"
+		resultparam16="cs_amm_solo_count"
+		resultparam17="cs_amm_team_rating"
+		resultparam18="cs_amm_team_count"
+		resultparam19="cs_avg_score"
+		resultparam20="cs_herokills"
+		resultparam21="cs_herodmg"
+		resultparam22="cs_heroexp"
+		resultparam23="cs_herokillsgold"
+		resultparam24="cs_heroassists"
+		resultparam25="cs_deaths"
+		resultparam26="cs_goldlost2death"
+		resultparam27="cs_secs_dead"
+		resultparam28="cs_teamcreepkills"
+		resultparam29="cs_teamcreepdmg"
+		resultparam30="cs_teamcreepexp"
+		resultparam31="cs_teamcreepgold"
+		resultparam32="cs_neutralcreepkills"
+		resultparam33="cs_neutralcreepdmg"
+		resultparam34="cs_neutralcreepexp"
+		resultparam35="cs_neutralcreepgold"
+		resultparam36="cs_bdmg"
+		resultparam37="cs_bdmgexp"
+		resultparam38="cs_razed"
+		resultparam39="cs_bgold"
+		resultparam40="cs_denies"
+		resultparam41="cs_exp_denied"
+		resultparam42="cs_gold"
+		resultparam43="cs_gold_spend"
+		resultparam44="cs_exp"
+		resultparam45="cs_actions"
+		resultparam46="cs_secs"
+		resultparam47="cs_consumables"
+		resultparam48="cs_wards"
+		resultparam49="cs_em_played"
+		resultparam50="maxXP"
+		resultparam51="last_activity"
+		resultparam52="matchIds"
+		resultparam53="matchDates"
+		resultparam54="favHero1"
+		resultparam55="favHero2"
+		resultparam56="favHero3"
+		resultparam57="favHero4"
+		resultparam58="favHero5"
+		resultparam59="favHero1Time"
+		resultparam60="favHero2Time"
+		resultparam61="favHero3Time"
+		resultparam62="favHero4Time"
+		resultparam63="favHero5Time"
+		resultparam64="xp2nextLevel"
+		resultparam65="xpPercent"
+		resultparam66="percentEM"
+		resultparam67="k_d_a"
+		resultparam68="avgGameLength"
+		resultparam69="avgXP_min"
+		resultparam70="avgDenies"
+		resultparam71="avgCreepKills"
+		resultparam72="avgNeutralKills"
+		resultparam73="avgActions_min"
+		resultparam74="avgWardsUsed"
+		resultparam75="create_date"
+		resultparam76="favHero1_2"
+		resultparam77="favHero2_2"
+		resultparam78="favHero3_2"
+		resultparam79="favHero4_2"
+		resultparam80="favHero5_2"
+		resultparam81="favHero1id"
+		resultparam82="favHero2id"
+		resultparam83="favHero3id"
+		resultparam84="favHero4id"
+		resultparam85="favHero5id"
+		resultparam86="error"
+		resultparam87="cs_level"
+		resultparam88="selected_upgrades"
+		resultparam89="acc_games_played"
+		resultparam90="rnk_games_played"
+		resultparam91="acc_discos"
+		resultparam92="rnk_discos"
+		resultparam93="cs_bloodlust"
+		resultparam94="cs_doublekill"
+		resultparam95="cs_triplekill"
+		resultparam96="cs_quadkill"
+		resultparam97="cs_annihilation"
+		resultparam98="cs_ks3"
+		resultparam99="cs_ks4"
+		resultparam100="cs_ks5"
+		resultparam101="cs_ks6"
+		resultparam102="cs_ks7"
+		resultparam103="cs_ks8"
+		resultparam104="cs_ks9"
+		resultparam105="cs_ks10"
+		resultparam106="cs_ks15"
+		resultparam107="cs_smackdown"
+		resultparam108="cs_humiliation"
+		resultparam109="cs_nemesis"
+		resultparam110="cs_retribution"
+		resultparam111="total_level_exp"
+		resultparam112="cs_time_earning_exp"
+		resultparam113="level"
+		resultparam114="level_exp"
+		resultparam115="discos"
+		resultparam116="possible_discos"
+		resultparam117="games_played"
+		resultparam118="account_type"
+		resultparam119="standing"
+		resultparam120="level_percent"
+		resultparam121="max_exp"
+		resultparam122="min_exp"
+		resultparam123="mid_games_played"
+		resultparam124="mid_discos"
+		resultparam125="total_games_played"
+		resultparam126="total_discos"
+		resultparam127="event_id"
+		resultparam128="events"
+		resultparam129="uncs_discos"
+		resultparam130="unrnk_discos"
+		resultparam131="uncs_games_played"
+		resultparam132="unrnk_games_played"
+		resultparam133="rift_games_played"
+		resultparam134="rift_discos"
+		resultparam135="current_level"
+		resultparam136="highest_level_current"
+		resultparam137="season_id"
+		resultparam138="current_ranking"
+		resultparam139="curr_season_cam_games_played"
+		resultparam140="curr_season_cam_cs_games_played"
+		resultparam141="curr_season_cam_discos"
+		resultparam142="curr_season_cam_cs_discos"
+		resultparam143="prev_seasons_cam_games_played"
+		resultparam144="prev_seasons_cam_cs_games_played"
+		resultparam145="prev_seasons_cam_discos"
+		resultparam146="prev_seasons_cam_cs_discos"
+		resultparam147="highest_ranking"
+		resultparam148="quest_stats"		
+	/>
+
+	<trigger name="PlayerStatsNormalSeasonStatus"/>
+	<trigger name="PlayerStatsNormalSeasonResult"/>
+	<form
+		name="PlayerStatsNormalSeason"
+		host="!masterserver"
+		method="post"
+		target="/client_requester.php"
+		statustrigger="PlayerStatsNormalSeasonStatus"
+		resulttrigger="PlayerStatsNormalSeasonResult"
+		resultparam0="nickname"
+		resultparam1="name"
+		resultparam2="rank"
+		resultparam3="cam_level"
+		resultparam4="account_id"
+		resultparam5="curr_season_cam_games_played"
+		resultparam6="cam_wins"
+		resultparam7="cam_losses"
+		resultparam8="cam_concedes"
+		resultparam9="cam_concedevotes"
+		resultparam10="cam_buybacks"
+		resultparam11="curr_season_cam_discos"
+		resultparam12="cam_kicked"
+		resultparam13="smr"
+		resultparam14="cam_pub_count"
+		resultparam15="cam_amm_solo_rating"
+		resultparam16="cam_amm_solo_count"
+		resultparam17="cam_amm_team_rating"
+		resultparam18="cam_amm_team_count"
+		resultparam19="rnk_avg_score"
+		resultparam20="cam_herokills"
+		resultparam21="cam_herodmg"
+		resultparam22="cam_heroexp"
+		resultparam23="cam_herokillsgold"
+		resultparam24="cam_heroassists"
+		resultparam25="cam_deaths"
+		resultparam26="cam_goldlost2death"
+		resultparam27="cam_secs_dead"
+		resultparam28="cam_teamcreepkills"
+		resultparam29="cam_teamcreepdmg"
+		resultparam30="cam_teamcreepexp"
+		resultparam31="cam_teamcreepgold"
+		resultparam32="cam_neutralcreepkills"
+		resultparam33="cam_neutralcreepdmg"
+		resultparam34="cam_neutralcreepexp"
+		resultparam35="cam_neutralcreepgold"
+		resultparam36="cam_bdmg"
+		resultparam37="cam_bdmgexp"
+		resultparam38="cam_razed"
+		resultparam39="cam_bgold"
+		resultparam40="cam_denies"
+		resultparam41="cam_exp_denied"
+		resultparam42="cam_gold"
+		resultparam43="cam_gold_spend"
+		resultparam44="cam_exp"
+		resultparam45="cam_actions"
+		resultparam46="cam_secs"
+		resultparam47="cam_consumables"
+		resultparam48="cam_wards"
+		resultparam49="cam_em_played"
+		resultparam50="maxXP"
+		resultparam51="last_activity"
+		resultparam52="matchIds"
+		resultparam53="matchDates"
+		resultparam54="favHero1"
+		resultparam55="favHero2"
+		resultparam56="favHero3"
+		resultparam57="favHero4"
+		resultparam58="favHero5"
+		resultparam59="favHero1Time"
+		resultparam60="favHero2Time"
+		resultparam61="favHero3Time"
+		resultparam62="favHero4Time"
+		resultparam63="favHero5Time"
+		resultparam64="xp2nextLevel"
+		resultparam65="xpPercent"
+		resultparam66="percentEM"
+		resultparam67="k_d_a"
+		resultparam68="avgGameLength"
+		resultparam69="avgXP_min"
+		resultparam70="avgDenies"
+		resultparam71="avgCreepKills"
+		resultparam72="avgNeutralKills"
+		resultparam73="avgActions_min"
+		resultparam74="avgWardsUsed"
+		resultparam75="create_date"
+		resultparam76="favHero1_2"
+		resultparam77="favHero2_2"
+		resultparam78="favHero3_2"
+		resultparam79="favHero4_2"
+		resultparam80="favHero5_2"
+		resultparam81="favHero1id"
+		resultparam82="favHero2id"
+		resultparam83="favHero3id"
+		resultparam84="favHero4id"
+		resultparam85="favHero5id"
+		resultparam86="error"
+		resultparam87="cam_level"
+		resultparam88="selected_upgrades"
+		resultparam89="acc_games_played"
+		resultparam90="cs_games_played"
+		resultparam91="acc_discos"
+		resultparam92="cs_discos"
+		resultparam93="cam_bloodlust"
+		resultparam94="cam_doublekill"
+		resultparam95="cam_triplekill"
+		resultparam96="cam_quadkill"
+		resultparam97="cam_annihilation"
+		resultparam98="cam_ks3"
+		resultparam99="cam_ks4"
+		resultparam100="cam_ks5"
+		resultparam101="cam_ks6"
+		resultparam102="cam_ks7"
+		resultparam103="cam_ks8"
+		resultparam104="cam_ks9"
+		resultparam105="cam_ks10"
+		resultparam106="cam_ks15"
+		resultparam107="cam_smackdown"
+		resultparam108="cam_humiliation"
+		resultparam109="cam_nemesis"
+		resultparam110="cam_retribution"
+		resultparam111="total_level_exp"
+		resultparam112="cam_time_earning_exp"
+		resultparam113="level"
+		resultparam114="level_exp"
+		resultparam115="discos"
+		resultparam116="possible_discos"
+		resultparam117="games_played"
+		resultparam118="account_type"
+		resultparam119="standing"
+		resultparam120="level_percent"
+		resultparam121="max_exp"
+		resultparam122="min_exp"
+		resultparam123="mid_games_played"
+		resultparam124="mid_discos"
+		resultparam125="total_games_played"
+		resultparam126="total_discos"
+		resultparam127="event_id"
+		resultparam128="events"
+		resultparam129="uncs_discos"
+		resultparam130="unrnk_discos"
+		resultparam131="uncs_games_played"
+		resultparam132="unrnk_games_played"
+		resultparam133="rift_games_played"
+		resultparam134="rift_discos"
+		resultparam135="current_level"
+		resultparam136="highest_level_current"
+		resultparam137="season_id"
+		resultparam138="current_ranking"
+		resultparam139="rnk_games_played"
+		resultparam140="curr_season_cam_cs_games_played"
+		resultparam141="rnk_discos"
+		resultparam142="curr_season_cam_cs_discos"
+		resultparam143="prev_seasons_cam_games_played"
+		resultparam144="prev_seasons_cam_cs_games_played"
+		resultparam145="prev_seasons_cam_discos"
+		resultparam146="prev_seasons_cam_cs_discos"
+		resultparam147="highest_ranking"
+		resultparam148="con_reward"
+	/>
+
+	<trigger name="PlayerStatsCasualSeasonStatus"/>
+	<trigger name="PlayerStatsCasualSeasonResult"/>
+	<form
+		name="PlayerStatsCasualSeason"
+		host="!masterserver"
+		method="post"
+		target="/client_requester.php"
+		statustrigger="PlayerStatsCasualSeasonStatus"
+		resulttrigger="PlayerStatsCasualSeasonResult"
+		resultparam0="nickname"
+		resultparam1="name"
+		resultparam2="rank"
+		resultparam3="cam_cs_level"
+		resultparam4="account_id"
+		resultparam5="curr_season_cam_cs_games_played"
+		resultparam6="cam_cs_wins"
+		resultparam7="cam_cs_losses"
+		resultparam8="cam_cs_concedes"
+		resultparam9="cam_cs_concedevotes"
+		resultparam10="cam_cs_buybacks"
+		resultparam11="curr_season_cam_cs_discos"
+		resultparam12="cam_cs_kicked"
+		resultparam13="cam_cs_amm_team_rating"
+		resultparam14="cam_cs_pub_count"
+		resultparam15="cam_cs_amm_solo_rating"
+		resultparam16="cam_cs_amm_solo_count"
+		resultparam17="cam_cs_amm_team_rating"
+		resultparam18="cam_cs_amm_team_count"
+		resultparam19="cam_cs_avg_score"
+		resultparam20="cam_cs_herokills"
+		resultparam21="cam_cs_herodmg"
+		resultparam22="cam_cs_heroexp"
+		resultparam23="cam_cs_herokillsgold"
+		resultparam24="cam_cs_heroassists"
+		resultparam25="cam_cs_deaths"
+		resultparam26="cam_cs_goldlost2death"
+		resultparam27="cam_cs_secs_dead"
+		resultparam28="cam_cs_teamcreepkills"
+		resultparam29="cam_cs_teamcreepdmg"
+		resultparam30="cam_cs_teamcreepexp"
+		resultparam31="cam_cs_teamcreepgold"
+		resultparam32="cam_cs_neutralcreepkills"
+		resultparam33="cam_cs_neutralcreepdmg"
+		resultparam34="cam_cs_neutralcreepexp"
+		resultparam35="cam_cs_neutralcreepgold"
+		resultparam36="cam_cs_bdmg"
+		resultparam37="cam_cs_bdmgexp"
+		resultparam38="cam_cs_razed"
+		resultparam39="cam_cs_bgold"
+		resultparam40="cam_cs_denies"
+		resultparam41="cam_cs_exp_denied"
+		resultparam42="cam_cs_gold"
+		resultparam43="cam_cs_gold_spend"
+		resultparam44="cam_cs_exp"
+		resultparam45="cam_cs_actions"
+		resultparam46="cam_cs_secs"
+		resultparam47="cam_cs_consumables"
+		resultparam48="cam_cs_wards"
+		resultparam49="cam_cs_em_played"
+		resultparam50="maxXP"
+		resultparam51="last_activity"
+		resultparam52="matchIds"
+		resultparam53="matchDates"
+		resultparam54="favHero1"
+		resultparam55="favHero2"
+		resultparam56="favHero3"
+		resultparam57="favHero4"
+		resultparam58="favHero5"
+		resultparam59="favHero1Time"
+		resultparam60="favHero2Time"
+		resultparam61="favHero3Time"
+		resultparam62="favHero4Time"
+		resultparam63="favHero5Time"
+		resultparam64="xp2nextLevel"
+		resultparam65="xpPercent"
+		resultparam66="percentEM"
+		resultparam67="k_d_a"
+		resultparam68="avgGameLength"
+		resultparam69="avgXP_min"
+		resultparam70="avgDenies"
+		resultparam71="avgCreepKills"
+		resultparam72="avgNeutralKills"
+		resultparam73="avgActions_min"
+		resultparam74="avgWardsUsed"
+		resultparam75="create_date"
+		resultparam76="favHero1_2"
+		resultparam77="favHero2_2"
+		resultparam78="favHero3_2"
+		resultparam79="favHero4_2"
+		resultparam80="favHero5_2"
+		resultparam81="favHero1id"
+		resultparam82="favHero2id"
+		resultparam83="favHero3id"
+		resultparam84="favHero4id"
+		resultparam85="favHero5id"
+		resultparam86="error"
+		resultparam87="cam_cs_level"
+		resultparam88="selected_upgrades"
+		resultparam89="acc_games_played"
+		resultparam90="cs_games_played"
+		resultparam91="acc_discos"
+		resultparam92="cs_discos"
+		resultparam93="cam_cs_bloodlust"
+		resultparam94="cam_cs_doublekill"
+		resultparam95="cam_cs_triplekill"
+		resultparam96="cam_cs_quadkill"
+		resultparam97="cam_cs_annihilation"
+		resultparam98="cam_cs_ks3"
+		resultparam99="cam_cs_ks4"
+		resultparam100="cam_cs_ks5"
+		resultparam101="cam_cs_ks6"
+		resultparam102="cam_cs_ks7"
+		resultparam103="cam_cs_ks8"
+		resultparam104="cam_cs_ks9"
+		resultparam105="cam_cs_ks10"
+		resultparam106="cam_cs_ks15"
+		resultparam107="cam_cs_smackdown"
+		resultparam108="cam_cs_humiliation"
+		resultparam109="cam_cs_nemesis"
+		resultparam110="cam_cs_retribution"
+		resultparam111="total_level_exp"
+		resultparam112="cam_cs_time_earning_exp"
+		resultparam113="level"
+		resultparam114="level_exp"
+		resultparam115="discos"
+		resultparam116="possible_discos"
+		resultparam117="games_played"
+		resultparam118="account_type"
+		resultparam119="standing"
+		resultparam120="level_percent"
+		resultparam121="max_exp"
+		resultparam122="min_exp"
+		resultparam123="mid_games_played"
+		resultparam124="mid_discos"
+		resultparam125="total_games_played"
+		resultparam126="total_discos"
+		resultparam127="event_id"
+		resultparam128="events"
+		resultparam129="uncs_discos"
+		resultparam130="unrnk_discos"
+		resultparam131="uncs_games_played"
+		resultparam132="unrnk_games_played"
+		resultparam133="rift_games_played"
+		resultparam134="rift_discos"
+		resultparam135="current_level"
+		resultparam136="highest_level_current"
+		resultparam137="season_id"
+		resultparam138="current_ranking"
+		resultparam139="curr_season_cam_games_played"
+		resultparam140="rnk_games_played"
+		resultparam141="curr_season_cam_discos"
+		resultparam142="rnk_discos"
+		resultparam143="prev_seasons_cam_games_played"
+		resultparam144="prev_seasons_cam_cs_games_played"
+		resultparam145="prev_seasons_cam_discos"
+		resultparam146="prev_seasons_cam_cs_discos"
+		resultparam147="highest_ranking"
+		resultparam148="con_reward"
+	/>
+
+	<trigger name="PlayerStatsHistoryNormalStatus"/>
+	<trigger name="PlayerStatsHistoryNormalResult"/>
+	<form
+		name="PlayerStatsHistoryNormal"
+		host="!masterserver"
+		method="post"
+		target="/client_requester.php"
+		statustrigger="PlayerStatsHistoryNormalStatus"
+		resulttrigger="PlayerStatsHistoryNormalResult"
+		resultparam0="nickname"
+		resultparam1="name"
+		resultparam2="rank"
+		resultparam3="cam_level"
+		resultparam4="account_id"
+		resultparam5="curr_season_cam_games_played"
+		resultparam6="cam_wins"
+		resultparam7="cam_losses"
+		resultparam8="cam_concedes"
+		resultparam9="cam_concedevotes"
+		resultparam10="cam_buybacks"
+		resultparam11="curr_season_cam_discos"
+		resultparam12="cam_kicked"
+		resultparam13="smr"
+		resultparam14="cam_pub_count"
+		resultparam15="cam_amm_solo_rating"
+		resultparam16="cam_amm_solo_count"
+		resultparam17="cam_amm_team_rating"
+		resultparam18="cam_amm_team_count"
+		resultparam19="rnk_avg_score"
+		resultparam20="cam_herokills"
+		resultparam21="cam_herodmg"
+		resultparam22="cam_heroexp"
+		resultparam23="cam_herokillsgold"
+		resultparam24="cam_heroassists"
+		resultparam25="cam_deaths"
+		resultparam26="cam_goldlost2death"
+		resultparam27="cam_secs_dead"
+		resultparam28="cam_teamcreepkills"
+		resultparam29="cam_teamcreepdmg"
+		resultparam30="cam_teamcreepexp"
+		resultparam31="cam_teamcreepgold"
+		resultparam32="cam_neutralcreepkills"
+		resultparam33="cam_neutralcreepdmg"
+		resultparam34="cam_neutralcreepexp"
+		resultparam35="cam_neutralcreepgold"
+		resultparam36="cam_bdmg"
+		resultparam37="cam_bdmgexp"
+		resultparam38="cam_razed"
+		resultparam39="cam_bgold"
+		resultparam40="cam_denies"
+		resultparam41="cam_exp_denied"
+		resultparam42="cam_gold"
+		resultparam43="cam_gold_spend"
+		resultparam44="cam_exp"
+		resultparam45="cam_actions"
+		resultparam46="cam_secs"
+		resultparam47="cam_consumables"
+		resultparam48="cam_wards"
+		resultparam49="cam_em_played"
+		resultparam50="maxXP"
+		resultparam51="last_activity"
+		resultparam52="matchIds"
+		resultparam53="matchDates"
+		resultparam54="favHero1"
+		resultparam55="favHero2"
+		resultparam56="favHero3"
+		resultparam57="favHero4"
+		resultparam58="favHero5"
+		resultparam59="favHero1Time"
+		resultparam60="favHero2Time"
+		resultparam61="favHero3Time"
+		resultparam62="favHero4Time"
+		resultparam63="favHero5Time"
+		resultparam64="xp2nextLevel"
+		resultparam65="xpPercent"
+		resultparam66="percentEM"
+		resultparam67="k_d_a"
+		resultparam68="avgGameLength"
+		resultparam69="avgXP_min"
+		resultparam70="avgDenies"
+		resultparam71="avgCreepKills"
+		resultparam72="avgNeutralKills"
+		resultparam73="avgActions_min"
+		resultparam74="avgWardsUsed"
+		resultparam75="create_date"
+		resultparam76="favHero1_2"
+		resultparam77="favHero2_2"
+		resultparam78="favHero3_2"
+		resultparam79="favHero4_2"
+		resultparam80="favHero5_2"
+		resultparam81="favHero1id"
+		resultparam82="favHero2id"
+		resultparam83="favHero3id"
+		resultparam84="favHero4id"
+		resultparam85="favHero5id"
+		resultparam86="error"
+		resultparam87="cam_level"
+		resultparam88="selected_upgrades"
+		resultparam89="acc_games_played"
+		resultparam90="cs_games_played"
+		resultparam91="acc_discos"
+		resultparam92="cs_discos"
+		resultparam93="cam_bloodlust"
+		resultparam94="cam_doublekill"
+		resultparam95="cam_triplekill"
+		resultparam96="cam_quadkill"
+		resultparam97="cam_annihilation"
+		resultparam98="cam_ks3"
+		resultparam99="cam_ks4"
+		resultparam100="cam_ks5"
+		resultparam101="cam_ks6"
+		resultparam102="cam_ks7"
+		resultparam103="cam_ks8"
+		resultparam104="cam_ks9"
+		resultparam105="cam_ks10"
+		resultparam106="cam_ks15"
+		resultparam107="cam_smackdown"
+		resultparam108="cam_humiliation"
+		resultparam109="cam_nemesis"
+		resultparam110="cam_retribution"
+		resultparam111="total_level_exp"
+		resultparam112="cam_time_earning_exp"
+		resultparam113="level"
+		resultparam114="level_exp"
+		resultparam115="discos"
+		resultparam116="possible_discos"
+		resultparam117="games_played"
+		resultparam118="account_type"
+		resultparam119="standing"
+		resultparam120="level_percent"
+		resultparam121="max_exp"
+		resultparam122="min_exp"
+		resultparam123="mid_games_played"
+		resultparam124="mid_discos"
+		resultparam125="total_games_played"
+		resultparam126="total_discos"
+		resultparam127="event_id"
+		resultparam128="events"
+		resultparam129="uncs_discos"
+		resultparam130="unrnk_discos"
+		resultparam131="uncs_games_played"
+		resultparam132="unrnk_games_played"
+		resultparam133="rift_games_played"
+		resultparam134="rift_discos"
+		resultparam135="highest_level"
+		resultparam136="highest_level_current"
+		resultparam137="season"
+		resultparam138="current_ranking"
+		resultparam139="rnk_games_played"
+		resultparam140="curr_season_cam_cs_games_played"
+		resultparam141="rnk_discos"
+		resultparam142="curr_season_cam_cs_discos"
+		resultparam143="prev_seasons_cam_games_played"
+		resultparam144="prev_seasons_cam_cs_games_played"
+		resultparam145="prev_seasons_cam_discos"
+		resultparam146="prev_seasons_cam_cs_discos"
+		resultparam147="latest_season_cam_games_played"
+		resultparam148="latest_season_cam_cs_games_played"
+		resultparam149="latest_season_cam_discos"
+		resultparam150="latest_season_cam_cs_discos"
+		resultparam151="highest_ranking"
+	/>
+
+	<trigger name="PlayerStatsHistoryCasualStatus"/>
+	<trigger name="PlayerStatsHistoryCasualResult"/>
+	<form
+		name="PlayerStatsHistoryCasual"
+		host="!masterserver"
+		method="post"
+		target="/client_requester.php"
+		statustrigger="PlayerStatsHistoryCasualStatus"
+		resulttrigger="PlayerStatsHistoryCasualResult"
+		resultparam0="nickname"
+		resultparam1="name"
+		resultparam2="rank"
+		resultparam3="cam_cs_level"
+		resultparam4="account_id"
+		resultparam5="curr_season_cam_cs_games_played"
+		resultparam6="cam_cs_wins"
+		resultparam7="cam_cs_losses"
+		resultparam8="cam_cs_concedes"
+		resultparam9="cam_cs_concedevotes"
+		resultparam10="cam_cs_buybacks"
+		resultparam11="curr_season_cam_cs_discos"
+		resultparam12="cam_cs_kicked"
+		resultparam13="cam_cs_amm_team_rating"
+		resultparam14="cam_cs_pub_count"
+		resultparam15="cam_cs_amm_solo_rating"
+		resultparam16="cam_cs_amm_solo_count"
+		resultparam17="cam_cs_amm_team_rating"
+		resultparam18="cam_cs_amm_team_count"
+		resultparam19="cam_cs_avg_score"
+		resultparam20="cam_cs_herokills"
+		resultparam21="cam_cs_herodmg"
+		resultparam22="cam_cs_heroexp"
+		resultparam23="cam_cs_herokillsgold"
+		resultparam24="cam_cs_heroassists"
+		resultparam25="cam_cs_deaths"
+		resultparam26="cam_cs_goldlost2death"
+		resultparam27="cam_cs_secs_dead"
+		resultparam28="cam_cs_teamcreepkills"
+		resultparam29="cam_cs_teamcreepdmg"
+		resultparam30="cam_cs_teamcreepexp"
+		resultparam31="cam_cs_teamcreepgold"
+		resultparam32="cam_cs_neutralcreepkills"
+		resultparam33="cam_cs_neutralcreepdmg"
+		resultparam34="cam_cs_neutralcreepexp"
+		resultparam35="cam_cs_neutralcreepgold"
+		resultparam36="cam_cs_bdmg"
+		resultparam37="cam_cs_bdmgexp"
+		resultparam38="cam_cs_razed"
+		resultparam39="cam_cs_bgold"
+		resultparam40="cam_cs_denies"
+		resultparam41="cam_cs_exp_denied"
+		resultparam42="cam_cs_gold"
+		resultparam43="cam_cs_gold_spend"
+		resultparam44="cam_cs_exp"
+		resultparam45="cam_cs_actions"
+		resultparam46="cam_cs_secs"
+		resultparam47="cam_cs_consumables"
+		resultparam48="cam_cs_wards"
+		resultparam49="cam_cs_em_played"
+		resultparam50="maxXP"
+		resultparam51="last_activity"
+		resultparam52="matchIds"
+		resultparam53="matchDates"
+		resultparam54="favHero1"
+		resultparam55="favHero2"
+		resultparam56="favHero3"
+		resultparam57="favHero4"
+		resultparam58="favHero5"
+		resultparam59="favHero1Time"
+		resultparam60="favHero2Time"
+		resultparam61="favHero3Time"
+		resultparam62="favHero4Time"
+		resultparam63="favHero5Time"
+		resultparam64="xp2nextLevel"
+		resultparam65="xpPercent"
+		resultparam66="percentEM"
+		resultparam67="k_d_a"
+		resultparam68="avgGameLength"
+		resultparam69="avgXP_min"
+		resultparam70="avgDenies"
+		resultparam71="avgCreepKills"
+		resultparam72="avgNeutralKills"
+		resultparam73="avgActions_min"
+		resultparam74="avgWardsUsed"
+		resultparam75="create_date"
+		resultparam76="favHero1_2"
+		resultparam77="favHero2_2"
+		resultparam78="favHero3_2"
+		resultparam79="favHero4_2"
+		resultparam80="favHero5_2"
+		resultparam81="favHero1id"
+		resultparam82="favHero2id"
+		resultparam83="favHero3id"
+		resultparam84="favHero4id"
+		resultparam85="favHero5id"
+		resultparam86="error"
+		resultparam87="cam_cs_level"
+		resultparam88="selected_upgrades"
+		resultparam89="acc_games_played"
+		resultparam90="cs_games_played"
+		resultparam91="acc_discos"
+		resultparam92="cs_discos"
+		resultparam93="cam_cs_bloodlust"
+		resultparam94="cam_cs_doublekill"
+		resultparam95="cam_cs_triplekill"
+		resultparam96="cam_cs_quadkill"
+		resultparam97="cam_cs_annihilation"
+		resultparam98="cam_cs_ks3"
+		resultparam99="cam_cs_ks4"
+		resultparam100="cam_cs_ks5"
+		resultparam101="cam_cs_ks6"
+		resultparam102="cam_cs_ks7"
+		resultparam103="cam_cs_ks8"
+		resultparam104="cam_cs_ks9"
+		resultparam105="cam_cs_ks10"
+		resultparam106="cam_cs_ks15"
+		resultparam107="cam_cs_smackdown"
+		resultparam108="cam_cs_humiliation"
+		resultparam109="cam_cs_nemesis"
+		resultparam110="cam_cs_retribution"
+		resultparam111="total_level_exp"
+		resultparam112="cam_cs_time_earning_exp"
+		resultparam113="level"
+		resultparam114="level_exp"
+		resultparam115="discos"
+		resultparam116="possible_discos"
+		resultparam117="games_played"
+		resultparam118="account_type"
+		resultparam119="standing"
+		resultparam120="level_percent"
+		resultparam121="max_exp"
+		resultparam122="min_exp"
+		resultparam123="mid_games_played"
+		resultparam124="mid_discos"
+		resultparam125="total_games_played"
+		resultparam126="total_discos"
+		resultparam127="event_id"
+		resultparam128="events"
+		resultparam129="uncs_discos"
+		resultparam130="unrnk_discos"
+		resultparam131="uncs_games_played"
+		resultparam132="unrnk_games_played"
+		resultparam133="rift_games_played"
+		resultparam134="rift_discos"
+		resultparam135="highest_level"
+		resultparam136="highest_level_current"
+		resultparam137="season"
+		resultparam138="current_ranking"
+		resultparam139="curr_season_cam_games_played"
+		resultparam140="rnk_games_played"
+		resultparam141="curr_season_cam_discos"
+		resultparam142="rnk_discos"
+		resultparam143="prev_seasons_cam_games_played"
+		resultparam144="prev_seasons_cam_cs_games_played"
+		resultparam145="prev_seasons_cam_discos"
+		resultparam146="prev_seasons_cam_cs_discos"
+		resultparam147="latest_season_cam_games_played"
+		resultparam148="latest_season_cam_cs_games_played"
+		resultparam149="latest_season_cam_discos"
+		resultparam150="latest_season_cam_cs_discos"
+		resultparam151="highest_ranking"
+	/>
+
+	<trigger name="PlayerStatsMatchListStatus"/>
+    <trigger name="PlayerStatsMatchListResult"/>
+    <form
+		name="PlayerStatsMatchList"
+		host="!masterserver"
+		method="post"
+		target="/client_requester.php"
+		statustrigger="PlayerStatsMatchListStatus"
+		resulttrigger="PlayerStatsMatchListResult"
+		resultparam0="m0"
+		resultparam1="m1"
+		resultparam2="m2"
+		resultparam3="m3"
+		resultparam4="m4"
+		resultparam5="m5"
+		resultparam6="m6"
+		resultparam7="m7"
+		resultparam8="m8"
+		resultparam9="m9"
+		resultparam10="m10"
+		resultparam11="m11"
+		resultparam12="m12"
+		resultparam13="m13"
+		resultparam14="m14"
+		resultparam15="m15"
+		resultparam16="m16"
+		resultparam17="m17"
+		resultparam18="m18"
+		resultparam19="m19"
+		resultparam20="m20"
+		resultparam21="m21"
+		resultparam22="m22"
+		resultparam23="m23"
+		resultparam24="m24"
+		resultparam25="m25"
+		resultparam26="m26"
+		resultparam27="m27"
+		resultparam28="m28"
+		resultparam29="m29"
+		resultparam30="m30"
+		resultparam31="m31"
+		resultparam32="m32"
+		resultparam33="m33"
+		resultparam34="m34"
+		resultparam35="m35"
+		resultparam36="m36"
+		resultparam37="m37"
+		resultparam38="m38"
+		resultparam39="m39"
+		resultparam40="m40"
+		resultparam41="m41"
+		resultparam42="m42"
+		resultparam43="m43"
+		resultparam44="m44"
+		resultparam45="m45"
+		resultparam46="m46"
+		resultparam47="m47"
+		resultparam48="m48"
+		resultparam49="m49"
+		resultparam50="m50"
+		resultparam51="m51"
+		resultparam52="m52"
+		resultparam53="m53"
+		resultparam54="m54"
+		resultparam55="m55"
+		resultparam56="m56"
+		resultparam57="m57"
+		resultparam58="m58"
+		resultparam59="m59"
+		resultparam60="m60"
+		resultparam61="m61"
+		resultparam62="m62"
+		resultparam63="m63"
+		resultparam64="m64"
+		resultparam65="m65"
+		resultparam66="m66"
+		resultparam67="m67"
+		resultparam68="m68"
+		resultparam69="m69"
+		resultparam70="m70"
+		resultparam71="m71"
+		resultparam72="m72"
+		resultparam73="m73"
+		resultparam74="m74"
+		resultparam75="m75"
+		resultparam76="m76"
+		resultparam77="m77"
+		resultparam78="m78"
+		resultparam79="m79"
+		resultparam80="m80"
+		resultparam81="m81"
+		resultparam82="m82"
+		resultparam83="m83"
+		resultparam84="m84"
+		resultparam85="m85"
+		resultparam86="m86"
+		resultparam87="m87"
+		resultparam88="m88"
+		resultparam89="m89"
+		resultparam90="m90"
+		resultparam91="m91"
+		resultparam92="m92"
+		resultparam93="m93"
+		resultparam94="m94"
+		resultparam95="m95"
+		resultparam96="m96"
+		resultparam97="m97"
+		resultparam98="m98"
+		resultparam99="m99"
+	/>
+	
+	<trigger name="PlayerStatsMasteryStatus"/>
+    <trigger name="PlayerStatsMasteryResult"/>
+    <form
+		name="PlayerStatsMastery"
+		host="!masterserver"
+		method="post"
+		target="/client_requester.php"
+		statustrigger="PlayerStatsMasteryStatus"
+		resulttrigger="PlayerStatsMasteryResult"
+		resultparam0="nickname"
+		resultparam1="name"
+		resultparam2="rank"
+		resultparam3="account_id"
+		resultparam4="last_activity"
+		resultparam5="create_date"
+		resultparam6="selected_upgrades"
+		resultparam7="level"
+		resultparam8="level_exp"
+		resultparam9="standing"
+		resultparam10="mastery_info"
+		resultparam11="mastery_rewards"
+	/>
+
+	<trigger name="PlayerStatsMVPAwardsStatus"/>
+    <trigger name="PlayerStatsMVPAwardsResult"/>
+    <form
+		name="PlayerStatsMVPAwards"
+		host="!masterserver"
+		method="post"
+		target="/client_requester.php"
+		statustrigger="PlayerStatsMVPAwardsStatus"
+		resulttrigger="PlayerStatsMVPAwardsResult"
+		resultparam0="awd_mann"
+		resultparam1="awd_mqk"
+		resultparam2="awd_lgks"
+		resultparam3="awd_msd"
+		resultparam4="awd_mkill"
+		resultparam5="awd_masst"
+		resultparam6="awd_ledth"
+		resultparam7="awd_mbdmg"
+		resultparam8="awd_mwk"
+		resultparam9="awd_mhdd"
+		resultparam10="awd_hcs"
+		resultparam11="account_id"
+		resultparam12="mvp"
+	/>
+    <!--End of Forms-->
+
+	<template name="playerstats_tab_template">
+		<button name="playerstats_tab_{type}" width="{width=160i}" height="100%" color="invisible" onclicklua="PlaySound('/shared/sounds/ui/revamp/region_click.wav') Player_Stats_V2:OnClickTab('{type}')"
+				onmouseoverlua="PlaySound('/shared/sounds/ui/revamp/region_hover.wav')"
+		>
+			<widgetstate statename="up">
+				<image texture="/ui/fe2/newui/res/playerstats/tab_unselected.png" width="164.1%" height="64i" align="center" valign="center" noclick="1"/>
+				<panel x="{offset=15i}" noclick="1" float="right">
+					<panel width="36i" noclick="1">
+						<image texture="/ui/fe2/newui/res/playerstats/{type}_unselected.png" width="64i" height="64i" align="center" valign="center" noclick="1"/>
+					</panel>
+					<label textalign="left" textvalign="center" font="dyn_12" color="#bea693" outline="1" outlinecolor="#3a211d" content="{content}" noclick="1"/>
+				</panel>
+			</widgetstate>
+			<widgetstate statename="over">
+				<image texture="/ui/fe2/newui/res/playerstats/tab_hover.png" width="164.1%" height="64i" align="center" valign="center" noclick="1"/>
+				<panel x="{offset=15i}" noclick="1" float="right">
+					<panel width="36i" noclick="1">
+						<image texture="/ui/fe2/newui/res/playerstats/{type}_hover.png" width="64i" height="64i" align="center" valign="center" noclick="1"/>
+					</panel>
+					<label textalign="left" textvalign="center" font="dyn_12" color="#c1a695" outline="1" outlinecolor="#3a211d" content="{content}" noclick="1"/>
+				</panel>
+			</widgetstate>
+			<widgetstate statename="down">
+				<image texture="/ui/fe2/newui/res/playerstats/tab_unselected.png" width="164.1%" height="64i" align="center" valign="center" noclick="1"/>
+				<panel x="{offset=15i}" noclick="1" float="right">
+					<panel width="36i" noclick="1">
+						<image texture="/ui/fe2/newui/res/playerstats/{type}_unselected.png" width="64i" height="64i" align="center" valign="center" noclick="1"/>
+					</panel>
+					<label textalign="left" textvalign="center" font="dyn_12" color="#bea693" outline="1" outlinecolor="#3a211d" content="{content}" noclick="1"/>
+				</panel>
+			</widgetstate>
+			<widgetstate statename="disabled">
+				<image texture="/ui/fe2/newui/res/playerstats/tab_selected.png" width="164.1%" height="64i" align="center" valign="center" noclick="1"/>
+				<panel x="{offset=15i}" noclick="1" float="right">
+					<panel width="36i" noclick="1">
+						<image texture="/ui/fe2/newui/res/playerstats/{type}_selected.png" width="64i" height="64i" align="center" valign="center" noclick="1"/>
+					</panel>
+					<label textalign="left" textvalign="center" font="dyn_12" color="#daf5f0" outline="1" outlinecolor="#0d3d3f" content="{content}" noclick="1"/>
+				</panel>
+			</widgetstate>
+		</button> 
+	</template>
+
+	<template name="playerstats_hero_fav_template">
+		<panel x="{x=0i}" y="{y=0i}" width="{width=180i}" height="{height=100%}">
+			<panel width="51i" height="51i" y="10i" align="center" valign="top" >
+				<image name="playerstats_hero_fav_{index}_icon" texture="$invis" width="-6i" height="-6i" align="center" valign="center" usealphamask="true" alphamaskfile="/ui/fe2/elements/store2/mask.png" noclick="1"/>
+				<image name="playerstats_hero_fav_{index}_border" texture="/ui/fe2/newui/res/homepage/border_iron.png"/>
+			</panel>
+			<label name="playerstats_hero_fav_{index}_name" y="60i" height="25i" valign="top" textalign="center" textvalign="center" font="dyn_10" color="#ab927e" noclick="0"/>
+			<label name="playerstats_hero_fav_{index}_percent" y="85i" height="25i" valign="top" textalign="center" textvalign="center" font="dyn_10" color="#e29c08" noclick="0"/>
+		</panel>
+	</template>
+
+	<template name="playerstats_mastery_level_template">
+		<panel name="playerstats_mastery_level_{index}" width="100%" height="60i" noclick="1" visible="0">
+			<image texture="/ui/fe2/newui/res/common/line.png" width="100%" height="2i" align="center" noclick="1" visible="{showline=1}"/>
+			<panel width="51i" height="51i" valign="center">
+				<image name="playerstats_mastery_level_{index}_icon" texture="$invis" width="-6i" height="-6i" align="center" valign="center" usealphamask="true" alphamaskfile="/ui/fe2/elements/store2/mask.png" noclick="1"/>
+				<image name="playerstats_mastery_level_{index}_border" texture="/ui/fe2/newui/res/homepage/border_iron.png"/>
+			</panel>
+			<label name="playerstats_mastery_level_{index}_name" x="70i" y="-10i" textalign="left" textvalign="center" font="dyn_11" color="#efd2c0" noclick="1"/>
+			<label name="playerstats_mastery_level_{index}_level" x="70i" y="10i" textalign="left" textvalign="center" font="dyn_10" color="#ae9380" noclick="1"/>
+		</panel>
+	</template>
+
+	<template name="playerstats_mastery_all_item_template">
+		<panel name="playerstats_mastery_all_item_{row}_{id}" width="153i" height="214i"
+			onmousewheeldown="CallEvent('playerstats_mastery_scroll', 1);"
+			onmousewheelup="CallEvent('playerstats_mastery_scroll', 0);"
+		>
+			<image name="playerstats_mastery_all_item_{row}_{id}_icon" y="8i" width="130i" height="130i" align="center" noclick="1"/>
+			<image name="playerstats_mastery_all_item_{row}_{id}_border" texture="/ui/fe2/newui/res/playerstats/border_iron.png" width="256i" height="256i" align="center" valign="center" noclick="1"/>
+			<label name="playerstats_mastery_all_item_{row}_{id}_name" textalign="center" textvalign="center" y="-45i" valign="bottom" height="30i" font="dyn_10" color="#fffdf6" outline="1" outlinecolor="#803705" noclick="1"/>
+			<label name="playerstats_mastery_all_item_{row}_{id}_level" textalign="center" textvalign="center" y="-25i" valign="bottom" height="30i" font="dyn_10" color="#fffdf6" outline="1" outlinecolor="#803705" noclick="1"/>
+		</panel>
+	</template>
+
+	<template name="playerstats_mastery_all_row_template">
+		<panel name="playerstats_mastery_all_row_{row}" grow="1" height="214i" noclick="1" float="right" padding="25i" align="center" stickytoinvis="false" visible="0"
+			onmousewheeldown="CallEvent('playerstats_mastery_scroll', 1);"
+			onmousewheelup="CallEvent('playerstats_mastery_scroll', 0);"
+		>
+			<instance name="playerstats_mastery_all_item_template" row="{row}" id="0"/>
+			<instance name="playerstats_mastery_all_item_template" row="{row}" id="1"/>
+			<instance name="playerstats_mastery_all_item_template" row="{row}" id="2"/>
+			<instance name="playerstats_mastery_all_item_template" row="{row}" id="3"/>
+			<instance name="playerstats_mastery_all_item_template" row="{row}" id="4"/>
+		</panel>
+	</template>
+
+	<template name="playerstats_mastery_overall_reward_template">
+		<panel name="playerstats_mastery_overall_reward_{index}" height="64i" stickytoinvis="false"
+			onmousewheeldown="CallEvent('playerstats_mastery_overallrewards_scroll', 1);"
+			onmousewheelup="CallEvent('playerstats_mastery_overallrewards_scroll', 0);"
+		>
+			<panel name="playerstats_mastery_overall_reward_{index}_body" width="100%" height="100%" noclick="0"
+				onclicklua="Player_Stats_V2:OnClickClaimMasteryReward({index})"
+				onmouseoverlua="self:GetWidget('playerstats_mastery_overall_reward_{index}_bg'):SetTexture('/ui/fe2/newui/res/common/list_item_bg_selected16.png')"
+				onmouseldownlua="self:GetWidget('playerstats_mastery_overall_reward_{index}_bg'):SetTexture('/ui/fe2/newui/res/common/list_item_bg.png')"
+				onmouseoutlua="self:GetWidget('playerstats_mastery_overall_reward_{index}_bg'):SetTexture('/ui/fe2/newui/res/common/list_item_bg.png')"
+				onmousewheeldown="CallEvent('playerstats_mastery_overallrewards_scroll', 1);"
+				onmousewheelup="CallEvent('playerstats_mastery_overallrewards_scroll', 0);"
+			>
+				<image name="playerstats_mastery_overall_reward_{index}_bg" texture="/ui/fe2/newui/res/common/list_item_bg.png" width="100%" height="64i" align="center" valign="center" noclick="1"/>
+				<panel x="16i" width="54i" height="54i" valign="center" noclick="0"
+					onmouseoverlua="
+						self:GetWidget('playerstats_mastery_overall_reward_{index}_bg'):SetTexture('/ui/fe2/newui/res/common/list_item_bg_selected16.png')
+						self:GetWidget('playerstats_mastery_overall_reward_{index}_icon_mask'):SetVisible(0)
+						"
+					onmouseldownlua="self:GetWidget('playerstats_mastery_overall_reward_{index}_bg'):SetTexture('/ui/fe2/newui/res/common/list_item_bg.png')"
+					onmouseoutlua="
+						self:GetWidget('playerstats_mastery_overall_reward_{index}_bg'):SetTexture('/ui/fe2/newui/res/common/list_item_bg.png')
+						self:GetWidget('playerstats_mastery_overall_reward_{index}_icon_mask'):SetVisible(1)
+						"
+					onmousewheeldown="CallEvent('playerstats_mastery_overallrewards_scroll', 1);"
+					onmousewheelup="CallEvent('playerstats_mastery_overallrewards_scroll', 0);"
+				>
+					<instance name="newui_custom_frame_template"/>
+					<image name="playerstats_mastery_overall_reward_{index}_icon" texture="$invis" width="-4i" height="-4i" align="center" valign="center" noclick="1"/>
+					<panel name="playerstats_mastery_overall_reward_{index}_icon_mask" width="-4i" height="-4i" align="center" valign="center" noclick="1" color="0 0 0 .1"/>
+				</panel>
+				<label name="playerstats_mastery_overall_reward_{index}_value" x="100i" y="10i" textvalign="center" font="dyn_12" color="white" outline="1" outlinecolor="black" noclick="1" visible="0"/>
+				<label name="playerstats_mastery_overall_reward_{index}_text" x="100i" y="-10i" textvalign="center" font="dyn_12" color="white" outline="1" outlinecolor="black" noclick="1"/> 
+				<label name="playerstats_mastery_overall_reward_{index}_level" x="100i" y="10i" textvalign="center" font="dyn_12" color="white" outline="1" outlinecolor="black" noclick="1"/>
+				<panel x="-17i" width="32i" height="32i" align="right" valign="center" noclick="0">
+					<image name="playerstats_mastery_overall_reward_{index}_claim_icon" texture="$invis" align="center" valign="center" noclick="1"/>
+				</panel>
+				<image name="playerstats_mastery_overall_reward_{index}_line" texture="/ui/fe2/newui/res/common/line.png" y="2i" width="100%" height="2i" align="center" valign="bottom" noclick="1" visible="{showline=1}"/>
+			</panel>
+			<panel name="playerstats_mastery_overall_reward_{index}_mask" color="0 0 0 .5" noclick="1"/>
+		</panel> 
+	</template>
+
+	<template name="playerstats_mastery_level_reward_template">
+		<panel height="40i">                                   
+			<panel x="20i" width="100@" align="left"
+				onmouseoverlua="Common_V2:ShowGenericTip(true, 'mastery_levelreward_{index}', 'mastery_levelreward_desc_{index}')"
+				onmouseoutlua="Common_V2:ShowGenericTip(false)"
+			>
+				<instance name="newui_custom_frame_template"/>     
+				<image texture="/ui/fe2/mastery/reward_level_{index}.tga" width="30i" height="30i" align="center" valign="center" noclick="1"/>
+			</panel>
+			<panel x="85i" width="190i" align="left">
+				<instance name="newui_custom_frame_template"/>     
+				<label textalign="center" textvalign="center" align="left" x="0i" width="50i" font="dyn_12" color="#ac9180" content="{index}" noclick="1"/>
+				<image texture="/ui/fe2/newui/res/common/line2.png" x="52i" width="2i" height="100%" valign="center" />
+				<label name="playerstats_mastery_level_reward_{index}_number" x="70i" width="120i" align="left" textalign="center" textvalign="center" font="dyn_12" color="#ac9180" noclick="1"/>
+			</panel>
+		</panel>
+	</template>
+	
+	<template name="playerstats_button_template">
+		<button name="{button_name}" x="{x}" y="{y}" width="{width=100%}" height="{height=100%}" align="{align=center}" valign="{valign=center}" color="invisible" onclicklua="{onclicklua}"
+				watch="{watch}" ontriggerlua="{ontriggerlua}"
+		>
+			<widgetstate statename="up">
+				<image name="{button_name}_up" texture="{image_up=$invis}" width="{img_width=64i}" height="{img_height=64i}" align="center" valign="center" noclick="1"/>
+				<label width="-10i" align="center" textalign="center" textvalign="center" font="dyn_12" color="#fffdf6" noclick="1" content="{label}"/>
+			</widgetstate>
+			<widgetstate statename="over">
+				<image name="{button_name}_over" texture="{image_over=$invis}" width="{img_width=64i}" height="{img_height=64i}" align="center" valign="center" noclick="1"/>
+				<label width="-10i" align="center" textalign="center" textvalign="center" font="dyn_12" color="#fffdf6" noclick="1" content="{label}"/>
+			</widgetstate>
+			<widgetstate statename="down" y="1">
+				<image name="{button_name}_down" texture="{image_down=$invis}" width="{img_width=64i}" height="{img_height=64i}" align="center" valign="center" noclick="1"/>
+				<label width="-10i" align="center" textalign="center" textvalign="center" font="dyn_12" color="#fffdf6" noclick="1" content="{label}"/>
+			</widgetstate>
+			<widgetstate statename="disabled">
+				<image name="{button_name}_disabled" texture="{image_disabled=$invis}" width="{img_width=64i}" height="{img_height=64i}" align="center" valign="center" rendermode="grayscale" noclick="1"/>
+				<label width="-10i" align="center" textalign="center" textvalign="center" font="dyn_12" color="#fffdf6" noclick="1" content="{label}"/>
+			</widgetstate>
+		</button>
+	</template>
+
+	<template name="playerstats_stats_horizontal_item_template">
+		<panel name="horizontal_stats_item_{prefix}{item_name}" x="{x=0}" y="{y=0}" width="{width=100%}" height="{height=30i}" float="right" noclick="1">
+			<panel x="6%" width="{name_width=54%}" noclick="1">
+				<label textalign="left" textvalign="center" font="{font=dyn_12}" color="#bd9f8d" content="{item_name}" noclick="1" />
+			</panel>
+			<panel width="{data_width=34%}" noclick="1">
+				<label textalign="left" textvalign="center" font="{font=dyn_12}" color="#bd9f8d" content=":" noclick="1"/>
+				<label name="stats_data_{prefix}{item_name}" textalign="right" textvalign="center" font="{font=dyn_12}" color="#8e6b5b" content="-" noclick="1"/>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="playerstats_stats_vertical_item_template">
+		<panel name="vertical_stats_item_{prefix}{item_name}" x="{x=0}" y="{y=0}" width="{width=64i}" height="{height=100%}" noclick="1">
+			<image texture="/ui/fe2/newui/res/playerstats/v_stats_item_bg.png"  align="center" valign="center" width="128i" height="128i" noclick="1" />
+			<image name="stats_icon_{prefix}{item_name}" texture="{item_icon}" align="center" valign="top" width="32i" height="32i" noclick="1" />
+			<label name="stats_data_{prefix}{item_name}" textalign="center" textvalign="center" align="center" valign="center" font="dyn_12" color="#f1dbcb" content="-" noclick="0"
+				   onmouseoverlua="if {has_tip=false} then ShowWidget('{tip_name}') end"
+				   onmouseoutlua="if {has_tip=false} then HideWidget('{tip_name}') end"
+			/>
+			<label name="stats_name_{prefix}{item_name}" textalign="center" textvalign="center" y="75%" height="20i" font="dyn_10" color="#ac9a81" content="{item_name}" noclick="0"/>
+		</panel>
+	</template>
+
+	<template name="playerstats_mvpawards_template">
+		<panel name="mvpaward_{awd_code}" x="{x=0}" y="{y=0}" width="{width=100%}" height="{height=100%}" noclick="false" align="{align=center}" valign="{valign=center}">
+			<image texture="{awd_bg=/ui/fe2/newui/res/playerstats/mvpawards/item_bg.png}" align="center" valign="center" width="256i" height="512i" noclick="true" />
+			<image name="awd_icon_{awd_code}" y="-14%" texture="{awd_icon}" width="80@" height="80%" align="center" valign="center" rendermode="{rendermode}" noclick="true" />
+			<label textalign="center" textvalign="center" align="center" valign="center" y="26%" width="100%" height="13%" color="#ffde5c" outline="true" outlinecolor="#581b08" font="{font=dyn_12}" content="{awd_name}" autofont="false" noclick="true"/>
+			<panel y="42%" width="80%" height="15%" align="center" valign="center" noclick="true">
+				<image name="awd_score_icon_{awd_code}" texture="{awd_score_icon}" align="left" valign="center" x="{score_icon_offset=20%}" width="{score_icon_width=100@}" height="{score_icon_height=100%}" rendermode="{rendermode}" noclick="true" />
+				<label name="awd_score_sum_{awd_code}" textalign="center" textvalign="center" align="right" valign="center" width="80%" height="100%" color="#CFC2A6" outline="true" outlinecolor="0 0 0 0.35" font="dyn_12" content="x {awd_score_sum=-}" noclick="true"/>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="playerstats_match_row_template">
+		<panel name="playerstats_match_row_{row}" height="50i" align="center"
+			onmousewheeldown="CallEvent('playerstats_match_list_scroll', 1);"
+			onmousewheelup="CallEvent('playerstats_match_list_scroll', 0);"
+		>
+			<instance name="newui_custom_frame_template" />
+			<panel x="1i" height="100%" float="right" padding="5i" align="left" stickytoinvis="false" noclick="0"
+				onclicklua="Player_Stats_V2:OnClickMatchDetail({match_id})"
+				onmouseoverlua="
+					GetWidget('playerstats_match_row_bg_{row}'):SetTexture('/ui/fe2/newui/res/playerstats/match_list_selected.png')
+					GetWidget('playerstats_match_row_hero_name_{row}'):SetColor('#FFDCC5')
+					GetWidget('playerstats_match_row_kda_{row}'):SetColor('#FFDCC5')
+					GetWidget('playerstats_match_row_duration_{row}'):SetColor('#FFDCC5')
+					GetWidget('playerstats_match_row_map_{row}'):SetColor('#FFDCC5')
+					GetWidget('playerstats_match_row_time_{row}'):SetColor('#FFDCC5')
+					GetWidget('playerstats_match_row_id_{row}'):SetColor('#FFDCC5')
+					GetWidget('playerstats_match_row_hero_name_{row}'):SetOutlineColor('#A56E4D')
+					GetWidget('playerstats_match_row_kda_{row}'):SetOutlineColor('#A56E4D')
+					GetWidget('playerstats_match_row_duration_{row}'):SetOutlineColor('#A56E4D')
+					GetWidget('playerstats_match_row_map_{row}'):SetOutlineColor('#A56E4D')
+					GetWidget('playerstats_match_row_time_{row}'):SetOutlineColor('#A56E4D')
+					GetWidget('playerstats_match_row_id_{row}'):SetOutlineColor('#A56E4D')
+					"
+				onmouseldownlua=""
+				onmouseluplua=""
+				onmouseoutlua="
+					GetWidget('playerstats_match_row_bg_{row}'):SetTexture('$invis')
+					GetWidget('playerstats_match_row_hero_name_{row}'):SetColor('#AC9180')
+					GetWidget('playerstats_match_row_kda_{row}'):SetColor('#AC9180')
+					GetWidget('playerstats_match_row_duration_{row}'):SetColor('#AC9180')
+					GetWidget('playerstats_match_row_map_{row}'):SetColor('#AC9180')
+					GetWidget('playerstats_match_row_time_{row}'):SetColor('#AC9180')
+					GetWidget('playerstats_match_row_id_{row}'):SetColor('#AC9180')
+					GetWidget('playerstats_match_row_hero_name_{row}'):SetOutlineColor('#230000')
+					GetWidget('playerstats_match_row_kda_{row}'):SetOutlineColor('#230000')
+					GetWidget('playerstats_match_row_duration_{row}'):SetOutlineColor('#230000')
+					GetWidget('playerstats_match_row_map_{row}'):SetOutlineColor('#230000')
+					GetWidget('playerstats_match_row_time_{row}'):SetOutlineColor('#230000')
+					GetWidget('playerstats_match_row_id_{row}'):SetOutlineColor('#230000')
+					"
+				onmousewheeldown="CallEvent('playerstats_match_list_scroll', 1);"
+				onmousewheelup="CallEvent('playerstats_match_list_scroll', 0);"
+			>
+				<image name="playerstats_match_row_bg_{row}" texture="$invis" width="100%" height="100%" align="center" valign="center" noclick="1"/>
+				<image name="playerstats_match_row_hero_icon_{row}" x="2i" y="2i" width="46i" height="46i" align="left" valign="top" texture="$invis" noclick="1" />
+				<label name="playerstats_match_row_hero_name_{row}" textalign="center" textvalign="center" width="160i" align="left" font="dyn_12" color="#AC9180" outline="1" outlinecolor="#230000" content="---" noclick="1" />
+				<image name="playerstats_match_row_result_{row}" width="128i" height="32i" align="left" valign="center" texture="/ui/fe2/newui/res/playerstats/match_result_victory.png" noclick="1" />
+				<label name="playerstats_match_row_kda_{row}" textalign="center" textvalign="center"  width="100i" align="left" valign="center" font="dyn_12" color="#AC9180" outline="1" outlinecolor="#230000" content="^g00/^r00/^y00" noclick="1" />
+				<label name="playerstats_match_row_duration_{row}" textalign="center" textvalign="center" width="100i" align="left" valign="center" font="dyn_12" color="#AC9180" outline="1" outlinecolor="#230000" content="00:00" noclick="1" />
+				<label name="playerstats_match_row_map_{row}" textalign="center" textvalign="center" width="230i" align="left" valign="center" font="dyn_12" color="#AC9180" outline="1" outlinecolor="#230000" content="Forests of Caldavars" noclick="1" />
+				<label name="playerstats_match_row_time_{row}" textalign="center" textvalign="center" width="260i" align="left" valign="center" font="dyn_12" color="#AC9180" outline="1" outlinecolor="#230000" content="00/00/0000 00:00:00 PM" noclick="1" />
+				<label name="playerstats_match_row_id_{row}" textalign="center" textvalign="center" width="150i" align="left" valign="center" font="dyn_12" color="#AC9180" outline="1" outlinecolor="#230000" content="123456789" noclick="1" />
+			</panel>
+		</panel>
+	</template>
+	
+	<template name="playerstats_switch_accounts_list_item_template">
+		<panel name="playerstats_switch_accounts_list_item_{row}" height="45i" align="center"
+			onmousewheeldown="CallEvent('playerstats_switch_accounts_list_scroll', 1);"
+			onmousewheelup="CallEvent('playerstats_switch_accounts_list_scroll', 0);"
+		>
+			<panel width="100%" height="100%" noclick="0"
+				onclicklua="Player_Stats_V2:OnClickSwitchAccount({row})"
+				onmouseoverlua="GetWidget('playerstats_switch_accounts_list_item_bg_{row}'):SetTexture('/ui/fe2/newui/res/common/list_item_bg_selected16.png')"
+				onmouseldownlua=""
+				onmouseluplua=""
+				onmouseoutlua="GetWidget('playerstats_switch_accounts_list_item_bg_{row}'):SetTexture('/ui/fe2/newui/res/common/list_item_bg.png')"
+				onmousewheeldown="CallEvent('playerstats_switch_accounts_list_scroll', 1);"
+				onmousewheelup="CallEvent('playerstats_switch_accounts_list_scroll', 0);"
+			>
+				<image name="playerstats_switch_accounts_list_item_bg_{row}" texture="/ui/fe2/newui/res/common/list_item_bg.png" width="100%" height="100%" align="center" valign="center" noclick="1"/>
+				<label name="playerstats_switch_accounts_list_item_name_{row}" textalign="center" textvalign="center" font="dyn_12" color="{name_color=#CFC2A6}" content="{account_name}" noclick="1" />
+				<image name="playerstats_switch_accounts_list_item_line_{row}" texture="/ui/fe2/newui/res/common/line.png" width="100%" height="2i" align="center" valign="bottom" noclick="1" visible="{showline=1}"/>
+			</panel>
+		</panel>
+	</template>
+	
+	<template name="playerstats_switch_sub_confirm_body">
+		<panel width="100%" grow="true" align="center" float="bottom" padding="1.0h" noclick="true">
+			<panel grow="true" y="1.0h" width="100%">
+				<label fity="true" width="-1.0h" align="center" textalign="center" textvalign="top" font="dyn_11" color="white" shadow="true" wrap="true" content="confirm_switchsub_msg"/>
+			</panel>
+			<panel height="2.4h" noclick="true" align="center"
+				onload="If(!VarExists('subswitch_dontask'), DoEvent()); Instantiate('Noptions_checkbox', 'width', '22.0h', 'align', 'right', 'valign', 'center', 'font', 'dyn_10', 'label', 'confirm_switchsub_da', 'cvar', 'subswitch_dontask', 'interactive', 'false'); "
+				onevent="CreateBool('subswitch_dontask', 0); SetSave('subswitch_dontask');"
+			>
+			</panel>
+			<panel height="5h" noclick="true">
+				<instance name="newui_common_button_2_template" button_name="playerstats_conf_switch_sub_cancel"
+					x="7.0h"
+					width="12.0h"
+					align="center"
+					valign="center"
+					label="general_cancel"
+					onmouseover="PlaySound('/shared/sounds/ui/button_over_01.wav');"
+					onclicklua="Player_Stats_V2:OnClickedConfirmSwitchAccountCancel()"
+					interactive="{interactive}"
+				/>
+				<instance name="newui_common_button_2_template" button_name="playerstats_conf_switch_sub_ok"
+					x="-7.0h"
+					width="12.0h"
+					align="center"
+					valign="center"
+					label="general_ok"
+					onmouseover="PlaySound('/shared/sounds/ui/button_over_01.wav');"
+					onclicklua="Player_Stats_V2:OnClickedConfirmSwitchAccountOk()"
+					interactive="{interactive}"
+				/>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="playerstats_claim_mastery_reward_fail_body">
+		<panel width="100%" grow="true" align="center" float="bottom" padding="1.0h" noclick="true">
+			<panel grow="true" y="1.0h" width="100%">
+				<label name="playerstats_claim_mastery_reward_fail_msg" fity="true" width="-1.0h" align="center" textalign="center" textvalign="top" font="dyn_11" color="white" shadow="true" wrap="true" content="mastery_error_popup_getreward"/>
+			</panel>
+			<panel height="5h" noclick="true">
+				<instance name="newui_common_button_2_template"
+					width="12.0h"
+					align="center"
+					valign="center"
+					label="mastery_error_popup_confirm"
+					onmouseover="PlaySound('/shared/sounds/ui/button_over_01.wav');"
+					onclicklua="GetWidget('playerstats_claim_mastery_reward_fail_mask'):FadeOut(150)"
+					interactive="{interactive}"
+				/>
+			</panel>
+		</panel>
+	</template>
+
+	<!-- tips -->
+	<floater width="20h" x="22" y="-22" grow="true" name="playerstats_tip_matches_played" color="invisible" visible="false">
+		<frame texture="/ui/fe2/newui/res/common/frames/popupframe.png" borderthickness="4" />
+		<panel width="-1.5h" align="center" grow="true" float="bottom">
+			<panel height=".5h" />
+			<label textvalign="top" textalign="left" font="dyn_10" noclick="1" color="#ffab01" shadow="1" wrap="1" width="100%" fity="true" fitypadding="0.8h">stats_tip_matches_played</label>
+			<label name="playerstats_tip_matches_played_content" textvalign="top" textalign="left" font="dyn_10" noclick="1" color="white" shadow="1" wrap="1" fity="1" fitxpadding="0" />
+			<panel height=".5h" />
+		</panel>
+	</floater>
+	
+	<floater width="20h" x="22" y="-22" grow="true" name="playerstats_tip_disconnects" color="invisible" visible="false">
+		<frame texture="/ui/fe2/newui/res/common/frames/popupframe.png" borderthickness="4" />
+		<panel width="-1.5h" align="center" grow="true" float="bottom">
+			<panel height=".5h" />
+			<label textvalign="top" textalign="left" font="dyn_10" noclick="1" color="#ffab01" shadow="1" wrap="1" width="100%" fity="true" fitypadding="0.8h">stats_tip_disconnects</label>
+			<label name="playerstats_tip_disconnects_content" textvalign="top" textalign="left" font="dyn_10" noclick="1" color="white" shadow="1" wrap="1" fity="1" fitxpadding="0" />
+			<panel height=".5h" />
+		</panel>
+	</floater>
+	
+	<floater width="20h" x="22" y="-22" grow="true" name="playerstats_tip_standing_verified" color="invisible" visible="false">
+		<frame texture="/ui/fe2/newui/res/common/frames/popupframe.png" borderthickness="4" />
+		<panel width="-1.5h" align="center" grow="true" float="bottom">
+			<panel height=".5h" />
+			<label textvalign="top" textalign="left" font="dyn_10" noclick="1" color="#ffab01" shadow="1" wrap="1" width="100%" fity="true" fitypadding="0.8h">tooltip_general_verified_title</label>
+			<label textvalign="top" textalign="left" font="dyn_10" noclick="1" color="white" shadow="1" wrap="1" fity="1" fitxpadding="0">tooltip_general_verified_msg</label>
+			<panel height=".5h" />
+			<image texture="/ui/icons/verified.tga" noclick="1" y=".5h" height="2.5h" width="2.5h" align="right" valign="top" visible="1"/>
+		</panel>
+	</floater>
+
+	<floater width="20h" x="22" y="-22" grow="true" name="playerstats_tip_standing_basic" color="invisible" visible="false">
+		<frame texture="/ui/fe2/newui/res/common/frames/popupframe.png" borderthickness="4" />
+		<panel width="-1.5h" align="center" grow="true" float="bottom">
+			<panel height=".5h" />
+			<label textvalign="top" textalign="left" font="dyn_10" noclick="1" color="#ffab01" shadow="1" wrap="1" width="100%" fity="true" fitypadding="0.8h">tooltip_general_basic_title</label>
+			<label textvalign="top" textalign="left" font="dyn_10" noclick="1" color="white" shadow="1" wrap="1" fity="1" fitxpadding="0">tooltip_general_basic_msg</label>
+			<panel height=".5h" />
+			<image texture="/ui/icons/basic.tga" noclick="1" y=".5h" height="2.5h" width="2.5h" align="right" valign="top" visible="1"/>
+		</panel>
+	</floater>
+
+	<floater width="17h" x="22" y="-22" grow="true" name="playerstats_tip_addfriend" color="invisible" visible="false">
+		<frame texture="/ui/fe2/newui/res/common/frames/popupframe.png" borderthickness="4" />
+		<panel width="-1.5h" align="center" grow="true" float="bottom">
+			<panel height=".5h" />
+			<label textvalign="top" textalign="left" font="dyn_10" noclick="1" color="white" shadow="1" wrap="1" fity="1" fitxpadding="0" content="newui_playerstats_social_addfriend" />
+			<panel height=".5h" />
+		</panel>
+	</floater>
+	
+	<floater width="17h" x="22" y="-22" grow="true" name="playerstats_tip_removefriend" color="invisible" visible="false">
+		<frame texture="/ui/fe2/newui/res/common/frames/popupframe.png" borderthickness="4" />
+		<panel width="-1.5h" align="center" grow="true" float="bottom">
+			<panel height=".5h" />
+			<label textvalign="top" textalign="left" font="dyn_10" noclick="1" color="white" shadow="1" wrap="1" fity="1" fitxpadding="0" content="newui_playerstats_social_removefriend" />
+			<panel height=".5h" />
+		</panel>
+	</floater>
+
+	<floater width="17h" x="22" y="-22" grow="true" name="playerstats_tip_invitegroup" color="invisible" visible="false">
+		<frame texture="/ui/fe2/newui/res/common/frames/popupframe.png" borderthickness="4" />
+		<panel width="-1.5h" align="center" grow="true" float="bottom">
+			<panel height=".5h" />
+			<label textvalign="top" textalign="left" font="dyn_10" noclick="1" color="white" shadow="1" wrap="1" fity="1" fitxpadding="0" content="newui_playerstats_social_invitegroup" />
+			<panel height=".5h" />
+		</panel>
+	</floater>
+
+	<floater width="17h" x="22" y="-22" grow="true" name="playerstats_tip_fetchplayer" color="invisible" visible="false">
+		<frame texture="/ui/fe2/newui/res/common/frames/popupframe.png" borderthickness="4" />
+		<panel width="-1.5h" align="center" grow="true" float="bottom">
+			<panel height=".5h" />
+			<label textvalign="top" textalign="left" font="dyn_10" noclick="1" color="white" shadow="1" wrap="1" fity="1" fitxpadding="0" content="newui_playerstats_searchplayer" />
+			<panel height=".5h" />
+		</panel>
+	</floater>
+
+	<!-- entry -->
+	<template name="playerstats_template">
+		<panel name="playerstats" color="0 0 0 .7" visible="0" hotkey="ESC" onhotkeylua="Player_Stats_V2:Hide()"
+			onload="CreateString('_playerstats_match_owner', '')"
+		>
+			<panel width="1325i" height="915i" align="center" valign="center">
+				<frame texture="/ui/fe2/newui/res/playerstats/bg.png" borderthickness="16i" width="+18i" height="+18i" align="center" valign="center" noclick="1"/>
+				<image texture="/ui/fe2/newui/res/playerstats/bar.png" y="-35i" width="2048i" height="128i" align="center" noclick="1"/>
+				<image texture="/ui/fe2/newui/res/playerstats/bar2.png" y="170i" width="2048i" height="64i" align="center" noclick="1"/>
+
+				<panel height="47i" noclick="1">
+					<image texture="/ui/fe2/newui/res/playerstats/title.png" x="-60i" width="32i" height="64i" align="center" valign="center" noclick="1"/>
+					<label textalign="center" textvalign="center" font="dyn_14" color="#d0b09b" outline="1" outlinecolor="#260e0a" content="newui_playerstats_title" noclick="1"/>
+					<panel x="15i" y="-1i" align="left" valign="center" float="right" grow="1" growinvis="0" regrow="1" noclick="1">
+						<panel name="playerstats_fetch_player_container" width="150i" height="28i" align="left" valign="center" stickytoinvis="0" visible="0">
+							<instance name="newui_custom_frame_template"/>
+							<textbox name="playerstats_fetch_player"
+									color="0 0 0 .5" font="dyn_11" textcolor="#f0d3c1"
+									width="146i" height="24i" hpadding="2i"
+									textalign="left" textvalign="center" align="center" valign="center"
+									onesc="EraseInputLine();"
+									onenter="
+										Set('_playerstats_playername_fetch', this);
+										DoEvent(0);
+										Call('playerstats_fetch_player_container', 'FadeOut(150);');
+										"
+									onevent0lua="
+										if NotEmpty(GetCvarString('_playerstats_playername_fetch')) then
+											Player_Stats_V2:Hide()
+											Player_Stats_V2:Show(GetCvarString('_playerstats_playername_fetch'))
+										end
+										"
+									onchange=""
+									onload="CreateString('_playerstats_playername_fetch');"
+							/>
+						</panel>
+						<instance name="playerstats_button_template" button_name="playerstats_fetch_player_button" width="32i" height="32i" align="left" valign="center"
+								  img_width="32i" img_height="32i" stickytoinvis="0"
+								  image_up="/ui/fe2/newui/res/playerstats/fetchplayer.png"
+								  image_over="/ui/fe2/newui/res/playerstats/fetchplayer_up.png"
+								  image_down="/ui/fe2/newui/res/playerstats/fetchplayer.png"
+								  image_disabled="/ui/fe2/newui/res/playerstats/fetchplayer.png"
+								  onclicklua="Player_Stats_V2:SearchPlayer()"
+						/>
+					</panel>
+				</panel>
+
+				<instance name="newui_button_close_template" x="-10i" y="6i" align="right" valign="top" onclicklua="Player_Stats_V2:Hide()"/>
+
+				<panel x="50i" y="47i" width="1164i" height="136i" noclick="1" float="right">
+					<panel width="395i" noclick="1">
+						<panel width="110i" height="110i" x="-40i" valign="center" noclick="1">
+							<avatar name="playerstats_playericon" texture="$invis" width="-14i" height="-14i" y="-1.5i" align="center" valign="center" noclick="1"/>
+						</panel>
+						<label name="playerstats_playername" x="82i" y="-30i" textalign="left" textvalign="center" font="dyn_12" color="#efd2c0" outline="1" outlinecolor="#230000" fitx="1" noclick="1"/>
+						<image name="playerstats_playerstanding" x="250i" y="-30i" width="24i" height="24i" align="left" valign="center" texture="/ui/icons/basic.tga" visible="0" noclick="0"/>
+						<label name="playerstats_playerlevel" x="82i" y="-6i" textalign="left" textvalign="center" font="dyn_10" color="#ae9380" outline="0" outlinecolor="#6d554b" noclick="1"/>
+						<label name="playerstats_clanname" x="82i" y="11i" textalign="left" textvalign="center" font="dyn_10" color="#ad9281" outline="0" outlinecolor="#6d554b" fitx="1" noclick="1"/>
+						<image name="playerstats_clanrole" x="250i" y="11i" width="16i" height="16i" align="left" valign="center" texture="$invis" visible="1" noclick="1" />
+						<panel x="82i" y="29i" valign="center" width="300i" height="15i">
+							<frame borderthickness="1i" color="invisible" bordercolor="#36261e" noclick="1" />
+							<panel width="298i" height="13i" align="center" valign="center">
+								<panel name="playerstats_levelprogress" width="100%" noclick="1" clip="1">
+									<image texture="/ui/fe2/newui/res/homepage/exp.png" width="296i" noclick="0"/>
+								</panel>
+							</panel>
+							<label name="playerstats_levelexp" textalign="center" textvalign="center" font="dyn_9" color="#e4ffff" outline="1" outlinecolor="#0d5a68" noclick="1"/>
+						</panel>
+						<instance name="playerstats_button_template" button_name="playerstats_codex" x="350i" y="5i" width="32i" height="32i" align="left" valign="center"
+							      img_width="100%" img_height="100%"
+								  image_up="/ui/elements/player_tour_stats_up.tga"
+								  image_over="/ui/elements/player_tour_stats_over.tga"
+								  image_down="/ui/elements/player_tour_stats_up.tga"
+								  image_disabled="/ui/elements/player_tour_stats_up.tga"
+								  onclicklua="Player_Stats_V2:OpenTourStats()"
+								 
+						/>
+						<panel x="313i" y="5i" width="32i" height="32i" align="left" valign="center"
+								onmouseoverlua="GetWidget('playerstats_chatsymbol'):ScaleWidth('150%', 150)
+												GetWidget('playerstats_chatsymbol'):ScaleHeight('150%', 150)"
+				   				onmouseoutlua="GetWidget('playerstats_chatsymbol'):ScaleWidth('100%', 150)
+												GetWidget('playerstats_chatsymbol'):ScaleHeight('100%', 150)">
+							<image name="playerstats_chatsymbol" texture="$invis" width="100%" height="100%" align="center" valign="center" noclick="1"/>
+						</panel>
+					</panel>
+					<image texture="/ui/fe2/newui/res/common/line2.png" width="2i" height="100%" valign="center" />
+					<panel width="388i" noclick="1">
+						<panel x="40i" y="20i" float="bottom" noclick="1" padding="12i">
+							<panel height="20i" noclick="0" float="right" padding="12i">
+								<panel width="100@">
+									<image texture="/ui/fe2/newui/res/playerstats/icon_matches.png" width="32i" height="32i" align="center" valign="center" noclick="1"/>
+								</panel>	
+								<panel width="132i" noclick="1">
+									<label textalign="left" textvalign="center" font="dyn_12" color="#ad9281" content="newui_playerstats_matches" noclick="1" />
+								</panel>
+								<panel width="132i" noclick="1">
+									<label textalign="left" textvalign="center" font="dyn_12" color="#ad9281" content=":" noclick="1"/>
+									<label name="playerstats_matches" textalign="right" textvalign="center" font="dyn_12" color="#ad9281" content="-" noclick="1" />
+								</panel>
+							</panel>
+							<panel height="20i" noclick="0" float="right" padding="12i">
+								<panel width="100@">
+									<image texture="/ui/fe2/newui/res/playerstats/icon_disconnections.png" width="32i" height="32i" align="center" valign="center" noclick="1"/>
+								</panel>	
+								<panel width="132i" noclick="1">
+									<label textalign="left" textvalign="center" font="dyn_12" color="#ad9281" content="newui_playerstats_disconnects" noclick="1" />
+								</panel>
+								<panel width="132i" noclick="1">
+									<label textalign="left" textvalign="center" font="dyn_12" color="#ad9281" content=":" noclick="1"/>
+									<label name="playerstats_disconnects" textalign="right" textvalign="center" font="dyn_12" color="#ad9281" content="-" noclick="1" />
+								</panel>
+							</panel>
+							<panel height="20i" noclick="0" float="right" padding="12i">
+								<panel width="100@">
+									<image texture="/ui/fe2/newui/res/playerstats/icon_leaves.png" width="32i" height="32i" align="center" valign="center" noclick="1"/>
+								</panel>	
+								<panel width="132i" noclick="1">
+									<label textalign="left" textvalign="center" font="dyn_12" color="#ad9281" content="newui_playerstats_leaves" noclick="1" />
+								</panel>
+								<panel width="132i" noclick="1">
+									<label textalign="left" textvalign="center" font="dyn_12" color="#ad9281" content=":" noclick="1"/>
+									<label name="playerstats_leaves" textalign="right" textvalign="center" font="dyn_12" color="#ad9281" content="-" noclick="1"/>
+								</panel>
+							</panel>
+						</panel>
+					</panel>
+					<image texture="/ui/fe2/newui/res/common/line2.png" width="2i" height="100%" valign="center" />
+					<panel width="388i" noclick="1">
+						<panel x="40i" y="20i" float="bottom" noclick="1" padding="12i">
+							<panel height="20i" noclick="0" float="right" padding="12i">
+								<panel width="100@">
+									<image texture="/ui/fe2/newui/res/playerstats/caption_account_created.png" width="32i" height="32i" align="center" valign="center" noclick="1"/>
+								</panel>	
+								<panel width="132i" noclick="1">
+									<label textalign="left" textvalign="center" font="dyn_12" color="#ad9281" content="newui_playerstats_createdate" noclick="1" />
+								</panel>
+								<panel width="132i" noclick="1">
+									<label textalign="left" textvalign="center" font="dyn_12" color="#ad9281" content=":" noclick="1"/>
+									<label name="playerstats_createdate" textalign="right" textvalign="center" font="dyn_12" color="#ad9281" content="-" noclick="1"/>
+								</panel>
+							</panel>
+							<panel height="20i" noclick="0" float="right" padding="12i">
+								<panel width="100@">
+									<image texture="/ui/fe2/newui/res/playerstats/caption_last_activity.png" width="32i" height="32i" align="center" valign="center" noclick="1"/>
+								</panel>	
+								<panel width="132i" noclick="1">
+									<label textalign="left" textvalign="center" font="dyn_12" color="#ad9281" content="newui_playerstats_lastmatchdate" noclick="1" />
+								</panel>
+								<panel width="132i" noclick="1">
+									<label textalign="left" textvalign="center" font="dyn_12" color="#ad9281" content=":" noclick="1"/>
+									<label name="playerstats_lastmatchdate" textalign="right" textvalign="center" font="dyn_12" color="#ad9281" content="-" noclick="1"/>
+								</panel>
+							</panel>
+						</panel>
+
+						<panel name="playerstats_social_buttons" x="246i" y="8i" width="116i" height="64i" align="left" valign="bottom" noclick="1" visible="1">
+							<!--instance name="playerstats_button_template" button_name="playerstats_chat" x="-16i" width="25i" height="25i" align="left"
+									  image_up="/ui/fe2/newui/res/playerstats/chat_up.png"
+									  image_over="/ui/fe2/newui/res/playerstats/chat_hover.png"
+									  image_down="/ui/fe2/newui/res/playerstats/chat_up.png"
+									  image_disabled="$invis"
+									  onclicklua="Player_Stats_V2:OnClickStartChatWith()"
+							/-->
+							<instance name="playerstats_button_template" button_name="playerstats_friendship" x="26i" width="25i" height="25i" align="left"
+									  image_up="/ui/fe2/newui/res/playerstats/add_friend_up.png"
+									  image_over="/ui/fe2/newui/res/playerstats/add_friend_hover.png"
+									  image_down="/ui/fe2/newui/res/playerstats/add_friend_up.png"
+									  image_disabled="/ui/fe2/newui/res/playerstats/add_friend_up.png"
+									  onclicklua="Player_Stats_V2:OnClickModifyFriendship()"
+							/>
+							<instance name="playerstats_button_template" button_name="playerstats_invitegame" x="68i" width="25i" height="25i" align="left"
+									  image_up="/ui/fe2/newui/res/playerstats/invite_game_up.png"
+									  image_over="/ui/fe2/newui/res/playerstats/invite_game_hover.png"
+									  image_down="/ui/fe2/newui/res/playerstats/invite_game_up.png"
+									  image_disabled="/ui/fe2/newui/res/playerstats/invite_game_up.png"
+									  onclicklua="Player_Stats_V2:OnClickInviteToGroup()"
+							/>
+						</panel>
+						<panel name="playerstats_switch_accounts_button" x="212i" y="-8i" width="180i" height="32i" align="left" valign="bottom" noclick="1" visible="1">
+							<instance name="newui_common_button_2_template" button_name="playerstats_switch_accounts" width="100%"
+									  label="newui_playerstats_switch_accounts"
+									  onclicklua="Player_Stats_V2:OnClickSwitchAccountButton()"
+							/>
+						</panel>
+					</panel>
+				</panel>
+
+				<panel name="playerstats_switch_accounts_list" x="-10i" y="185i" width="300i" height="400i" align="right" valign="top" visible="0"
+						hotkey="ESC" onhotkeylua="GetWidget('playerstats_switch_accounts_list'):SetVisible(0)"
+				>
+					<instance name="newui_popup_caption_frame" title="newui_playerstats_switch_accounts_caption" onclicklua="GetWidget('playerstats_switch_accounts_list'):SetVisible(0)"/>
+					<panel name="playerstats_switch_accounts_list_clip" width="-15i" height="-35i" valign="bottom" clip="1">
+						<panel name="playerstats_switch_accounts_list_root" grow="1" regrow="1" growinvis="false" width="100%" float="bottom" padding="1i">
+							<!--instance name="playerstats_switch_accounts_list_item_template" row="1" account_name="AAAAAAAA"/-->
+						</panel>
+					</panel>
+					<scrollbar name="playerstats_switch_accounts_list_scroll"
+							x="-3i"
+							align="right"
+							width="12i"
+							height="-35i"
+							valign="bottom"
+							scrollbarsize="12i"
+							handlewidth="12i"
+							handleheight="25i"							
+							texture="/ui/fe2/newui/res/common/scroll/scroll.png"
+							scrollbarplaceholder="true"
+							minvalue="1"
+							maxvalue="1"							
+							step="20"
+							value="1"
+							vertical="true"
+							slotwidth="0.6h" slotheight="1"
+							onevent1="SetValue(GetValue+20);"
+							onevent0="SetValue(GetValue-20);"
+							onslidelua="Player_Stats_V2:UpdateSwitchAccountsList()"
+					/>
+				</panel>
+
+				<panel x="50i" y="182i" width="-50i" height="40i" noclick="1" float="right" padding="1i">
+					<instance name="playerstats_tab_template" offset="30i" width="200i" type="overview" content="newui_playerstats_overview"/>
+					<instance name="playerstats_tab_template" offset="35i" width="200i" type="mastery" content="newui_playerstats_mastery"/>
+					<instance name="playerstats_tab_template" offset="15i" width="200i" type="mvpawards" content="newui_playerstats_mvpawards"/>
+					<instance name="playerstats_tab_template" offset="30i" width="200i" type="stats" content="newui_playerstats_stats"/>
+					<instance name="playerstats_tab_template" offset="15i" width="225i" type="match" content="newui_playerstats_matchhistory"/>
+				</panel>
+
+				<panel name="playerstats_overview" height="-222i" valign="bottom" visible="1">
+					<panel x="215i" y="50i" width="429i" height="184i" noclick="0">
+						<instance name="newui_custom_frame_template"/>
+						<label name="playerstats_overview_season_name" textalign="center" textvalign="center" x="55i" y="10i" width="100%" height="20i" align="center" valign="top" font="dyn_12" color="#f1dbcb" content="" noclick="1"/>
+						<image texture="/ui/fe2/newui/res/common/line.png" y="40i" height="2i" noclick="1" />
+						<panel name="playerstats_overview_summary_garena" x="60i" y="45i" width="345i" height="134i" align="center" float="bottom" padding="5i" visible="0" noclick="1">
+							<panel height="30i" noclick="1">
+								<panel width="164i" noclick="1">
+									<image texture="/ui/fe2/newui/res/playerstats/icon_win.png" width="32i" height="32i" valign="center" noclick="1"/>
+									<label x="40i" textalign="left" textvalign="center" font="dyn_12" color="#c2b0a4" content="newui_playerstats_wins" noclick="1"/>
+								</panel>
+								<panel width="164i" align="right" noclick="1">
+									<label textalign="left" textvalign="center" font="dyn_12" color="#c2b0a4" content=":" noclick="1"/>
+									<label name="playerstats_overview_rankwins_garena" textalign="center" textvalign="center" font="dyn_12" color="#c2b0a4" noclick="0"/>
+								</panel>
+							</panel>
+							<panel height="30i" noclick="1">
+								<panel width="164i" noclick="1">
+									<image texture="/ui/fe2/newui/res/playerstats/icon_lose.png" width="32i" height="32i" valign="center" noclick="1"/>
+									<label x="40i" textalign="left" textvalign="center" font="dyn_12" color="#c2b0a4" content="newui_playerstats_losses" noclick="1"/>
+								</panel>
+								<panel width="164i" align="right" noclick="1">
+									<label textalign="left" textvalign="center" font="dyn_12" color="#c2b0a4" content=":" noclick="1"/>
+									<label name="playerstats_overview_ranklosses_garena" textalign="center" textvalign="center" font="dyn_12" color="#c2b0a4" noclick="0"/>
+								</panel>
+							</panel>
+							<panel height="30i" noclick="1">
+								<panel width="164i" noclick="1">
+									<image texture="/ui/fe2/newui/res/playerstats/icon_winstreak.png" width="32i" height="32i" valign="center" noclick="1"/>
+									<label x="40i" textalign="left" textvalign="center" font="dyn_12" color="#c2b0a4" content="newui_playerstats_winstreaks" noclick="1"/>
+								</panel>
+								<panel width="164i" align="right" noclick="1">
+									<label textalign="left" textvalign="center" font="dyn_12" color="#c2b0a4" content=":" noclick="1"/>
+									<label name="playerstats_overview_rankwinstreaks_garena" textalign="center" textvalign="center" font="dyn_12" color="#c2b0a4" noclick="0"/>
+								</panel>
+							</panel>
+							<panel height="30i" noclick="1">
+								<panel width="164i" noclick="1">
+									<image texture="/ui/fe2/newui/res/playerstats/icon_winpercent.png" width="32i" height="32i" valign="center" noclick="1"/>
+									<label x="40i" textalign="left" textvalign="center" font="dyn_12" color="#c2b0a4" content="newui_playerstats_winpercent" noclick="1"/>
+								</panel>
+								<panel width="164i" align="right" noclick="1">
+									<label textalign="left" textvalign="center" font="dyn_12" color="#c2b0a4" content=":" noclick="1"/>
+									<label name="playerstats_overview_rankwinpercent_garena" textalign="center" textvalign="center" font="dyn_12" color="#c2b0a4" noclick="0"/>
+								</panel>
+							</panel>
+						</panel>
+						<panel name="playerstats_overview_summary" x="60i" y="52i" width="345i" height="120i" align="center" float="bottom" padding="0i" visible="1" noclick="1">
+							<panel height="40i" noclick="1">
+								<panel width="164i" noclick="1">
+									<image texture="/ui/fe2/newui/res/playerstats/icon_win.png" width="32i" height="32i" valign="center" noclick="1"/>
+									<label x="40i" textalign="left" textvalign="center" font="dyn_12" color="#c2b0a4" content="newui_playerstats_wins" noclick="1"/>
+								</panel>
+								<panel width="164i" align="right" noclick="1">
+									<label textalign="left" textvalign="center" font="dyn_12" color="#c2b0a4" content=":" noclick="1"/>
+									<label name="playerstats_overview_rankwins" textalign="center" textvalign="center" font="dyn_12" color="#c2b0a4" noclick="0"/>
+								</panel>
+							</panel>
+							<panel height="40i" noclick="1">
+								<panel width="164i" noclick="1">
+									<image texture="/ui/fe2/newui/res/playerstats/icon_lose.png" width="32i" height="32i" valign="center" noclick="1"/>
+									<label x="40i" textalign="left" textvalign="center" font="dyn_12" color="#c2b0a4" content="newui_playerstats_losses" noclick="1"/>
+								</panel>
+								<panel width="164i" align="right" noclick="1">
+									<label textalign="left" textvalign="center" font="dyn_12" color="#c2b0a4" content=":" noclick="1"/>
+									<label name="playerstats_overview_ranklosses" textalign="center" textvalign="center" font="dyn_12" color="#c2b0a4" noclick="0"/>
+								</panel>
+							</panel>
+							<panel height="40i" noclick="1">
+								<panel width="164i" noclick="1">
+									<image texture="/ui/fe2/newui/res/playerstats/icon_winpercent.png" width="32i" height="32i" valign="center" noclick="1"/>
+									<label x="40i" textalign="left" textvalign="center" font="dyn_12" color="#c2b0a4" content="newui_playerstats_winpercent" noclick="1"/>
+								</panel>
+								<panel width="164i" align="right" noclick="1">
+									<label textalign="left" textvalign="center" font="dyn_12" color="#c2b0a4" content=":" noclick="1"/>
+									<label name="playerstats_overview_rankwinpercent" textalign="center" textvalign="center" font="dyn_12" color="#c2b0a4" noclick="0"/>
+								</panel>
+							</panel>
+						</panel>
+						<panel x="-165i" y="-15i" width="240i" height="240i" align="left" valign="center" noclick="1" >
+							<image texture="/ui/fe2/newui/res/playerstats/rank_icon_bg.png" align="center" valign="center" width="256i" height="256i" noclick="1"/>
+							<piegraph name="playerstats_overview_meter_to_next_rank" color=".11 .66 .73 1" start="-248" end="68" square="false" value="0" align="center" valign="center" width="225i" height="225i" noclick="1"/>
+							<image texture="/ui/fe2/newui/res/playerstats/rank_icon_mask.png" align="center" valign="center" width="256i" height="256i" noclick="0"/>
+							<image name="playerstats_overview_current_rank_icon" texture="$invis" align="center" valign="center" width="195i" height="195i" noclick="1"/>
+							<label name="playerstats_overview_current_rank" textalign="center" textvalign="bottom" y="-10i" height="20i" align="center" valign="bottom" font="dyn_12" color="#c2b0a4" content="" noclick="1"/>
+						</panel>
+					</panel>
+					
+					<panel x="644i" y="50i" width="180i" height="184i" noclick="1">
+						<instance name="newui_custom_frame_template"/>
+						<label textalign="center" textvalign="center" y="5i" height="20i" align="center" valign="top" font="dyn_10" color="#c2b0a4" content="newui_playerstats_con_reward" noclick="1"/>
+						<image name="playerstats_overview_con_reward_icon" texture="$invis" y="28i" width="256i" height="128i" align="center" valign="top" noclick="1"/>
+						<panel name="playerstats_overview_con_reward_progress_container" x="10i" y="159i" valign="top" width="160i" height="15i">
+							<frame borderthickness="1i" color="invisible" bordercolor="#36261e" noclick="1" />
+							<panel width="158i" height="13i" align="center" valign="center">
+								<panel name="playerstats_overview_con_reward_progress" width="100%" noclick="1" clip="1">
+									<image texture="/ui/fe2/newui/res/homepage/exp.png" width="156i" noclick="0"/>
+								</panel>
+							</panel>
+							<label name="playerstats_overview_con_reward_percent" textalign="center" textvalign="center" font="dyn_9" color="#e4ffff" outline="1" outlinecolor="#0d5a68" noclick="1"/>
+						</panel>
+					</panel>
+
+					<panel x="824i" y="50i" width="170i" height="184i" noclick="1">
+						<instance name="newui_custom_frame_template"/>
+						<label textalign="center" textvalign="center" y="5i" height="20i" align="center" font="dyn_10" color="#c2b0a4" content="newui_playerstats_highestrank" noclick="1"/>
+						<image name="playerstats_overview_highest_rank_icon" texture="$invis" y="25i" width="134i" height="134i" align="center" noclick="1"/>
+						<label name="playerstats_overview_highest_rank" textalign="center" textvalign="center" y="159i" height="20i" align="center" font="dyn_10" color="#c2b0a4" content="---" noclick="1"/>
+					</panel>
+
+					<panel x="50i" y="244i" width="944i" height="160i" float="right" noclick="1">
+						<instance name="newui_custom_frame_template"/>
+						<label textalign="left" textvalign="center" x="15i" y="10i" width="100%" height="20i" align="center" valign="top" font="dyn_12" color="#f1dbcb" content="newui_playerstats_mostplayedheroes" noclick="1"/>
+						<image texture="/ui/fe2/newui/res/common/line.png" y="40i" height="2i" noclick="1" />
+						<instance name="playerstats_hero_fav_template" index="overview_1" x="025i" y="40i" width="158i" height="110i"/>
+						<instance name="playerstats_hero_fav_template" index="overview_2" x="210i" y="40i" width="158i" height="110i"/>
+						<instance name="playerstats_hero_fav_template" index="overview_3" x="395i" y="40i" width="158i" height="110i"/>
+						<instance name="playerstats_hero_fav_template" index="overview_4" x="580i" y="40i" width="158i" height="110i" />
+						<instance name="playerstats_hero_fav_template" index="overview_5" x="765i" y="40i" width="158i" height="110i" />
+					</panel>
+
+					<panel x="50i" y="-40i" width="944i" height="236i" valign="bottom" noclick="1">
+						<instance name="newui_custom_frame_template"/>
+						<label textalign="left" textvalign="center" x="15i" y="10i" width="100%" height="20i" align="center" valign="top" font="dyn_12" color="#f1dbcb" content="newui_playerstats_mvpawards" noclick="0"/>
+						<image texture="/ui/fe2/newui/res/common/line.png" y="40i" height="2i" noclick="1"/>
+						<panel name="playerstats_overview_mvpawards" width="100%" height="100%" noclick="1">
+							<!--
+							<instance name="playerstats_mvpawards_template" x="-373i" width="174i" awd_bg="$invis" awd_code="mvp_overview" awd_name="award_mvp" 
+										awd_icon="/ui/fe2/newui/res/playerstats/mvpawards/mvp_big.png" 
+										awd_count_icon="/ui/fe2/newui/res/playerstats/mvpawards/mvp_small.png" 
+										awd_score_sum="1000" />
+							-->
+						</panel>
+					</panel>
+
+					<panel x="1004i" y="50i" width="274i" height="600i" noclick="0">
+						<instance name="newui_custom_frame_template"/>
+						<panel width="100%" y="0i" height="240i" align="center">
+							<image texture="/ui/fe2/newui/res/playerstats/mastery_bg.png" y="-20i" width="256i" height="256i" align="center" noclick="1"/>
+							<label name="playerstats_overview_mastery_score" textalign="center" textvalign="center" y="80i" height="40i" align="center" font="dyn_24" color="#ffffff" outline="1" outlinecolor="#722905" content="-" noclick="1"/>
+							<label textalign="center" textvalign="center" y="190i" height="40i" align="center" font="dyn_16" color="#f1dbcb" content="newui_playerstats_mastery" noclick="1"/>
+						</panel>
+						<image texture="/ui/fe2/newui/res/common/line.png" y="240i" height="2i" noclick="1" />
+						<panel width="-40i" y="240i" height="360i" align="center" float="bottom">
+							<instance name="playerstats_mastery_level_template" index="1" showline="0"/>
+							<instance name="playerstats_mastery_level_template" index="2"/>
+							<instance name="playerstats_mastery_level_template" index="3"/>
+							<instance name="playerstats_mastery_level_template" index="4"/>
+							<instance name="playerstats_mastery_level_template" index="5"/>
+							<instance name="playerstats_mastery_level_template" index="6"/>
+						</panel>
+					</panel>
+
+					<instance name="newui_combobox_template" widgetname="playerstats_overview_ranktype" x="1087i" y="9i" width="191i" height="32i" align="left" valign="top"
+							  onselectlua="Player_Stats_V2:OnSelectOverviewRankType()"
+					/>
+				</panel>
+
+				<panel name="playerstats_mastery" height="-222i" valign="bottom" visible="1">
+					<panel x="50i" y="20i" width="290i" height="215i" noclick="1">
+						<instance name="newui_custom_frame_template"/>
+						<label textalign="center" textvalign="center" y="5i" height="20i" align="center" font="dyn_14" color="#f1dbcb" content="newui_playerstats_total_mastery_score" noclick="0"/>
+						<image texture="/ui/fe2/newui/res/common/line.png" y="30i" width="100%" height="2i" align="center" noclick="1"/>
+						<panel width="100%" y="30i" height="180i" align="center">
+							<image texture="/ui/fe2/newui/res/playerstats/mastery_bg.png" y="-25i" width="200i" height="200i" align="center" noclick="1"/>
+							<label name="playerstats_mastery_mastery_score" textalign="center" textvalign="center" y="50i" height="40i" align="center" font="dyn_24" color="#ffffff" outline="1" outlinecolor="#722905" content="---" noclick="1"/>
+							<!--label textalign="center" textvalign="center" y="190i" height="40i" align="center" font="dyn_14" color="#f1dbcb" content="newui_playerstats_total_mastery_score" noclick="1"/-->
+						</panel>
+						<instance name="playerstats_button_template" button_name="playerstats_mastery_showoverall" y="175i" width="200i" height="30i" align="center" valign="top"
+								  label="newui_playerstats_overall_rewards"
+								  img_width="100%" img_height="100%"
+								  image_up="/ui/fe2/newui/res/playerstats/reward_button.png"
+								  image_over="/ui/fe2/newui/res/playerstats/reward_button_up.png"
+								  image_down="/ui/fe2/newui/res/playerstats/reward_button.png"
+								  image_disabled="/ui/fe2/newui/res/playerstats/reward_button.png"
+							      onclicklua="GetWidget('playerstats_mastery_overallrewards'):SetVisible(true)" />
+						<image name="playerstats_mastery_new_reward_flag" texture="/ui/fe2/newui/res/playerstats/new_rewards.png" x="-45i" y="175i" width="32i" height="32i" align="right" visible="0" noclick="1" />
+					</panel>
+					
+					<panel name="playerstats_mastery_levelrewards" x="50i" y="245i" width="290i" height="425i" noclick="1">
+						<instance name="newui_custom_frame_template"/>
+						<label textalign="center" textvalign="center" y="7i" height="15i" align="center" font="dyn_12" color="#f1dbcb" content="newui_playerstats_masterylevel_rewards_caption" noclick="1"/>
+						<image texture="/ui/fe2/newui/res/common/line.png" y="27i" width="100%" height="2i" align="center" noclick="1"/>
+						<panel y="27i" height="398i" valign="top">
+							<panel height="24i">
+								<label x="000i" width="80i" textalign="center" textvalign="center" font="dyn_10" color="#6a4f3e" content="newui_playerstats_levelreward_title_rewards" noclick="0"/>
+								<label x="85i" width="50i" textalign="center" textvalign="center" font="dyn_10" color="#6a4f3e" content="newui_playerstats_levelreward_title_level" noclick="0"/>
+								<label x="140i" width="150i" textalign="center" textvalign="center" font="dyn_10" color="#6a4f3e" content="newui_playerstats_levelreward_title_achieved" noclick="0"/>
+							</panel>
+							<panel y="24i" height="400i" valign="top" float="bottom" padding="1i">
+								<instance name="playerstats_mastery_level_reward_template" index="15"/>
+								<instance name="playerstats_mastery_level_reward_template" index="13"/>
+								<instance name="playerstats_mastery_level_reward_template" index="11"/>
+								<instance name="playerstats_mastery_level_reward_template" index="10"/>
+								<instance name="playerstats_mastery_level_reward_template" index="7"/>
+								<instance name="playerstats_mastery_level_reward_template" index="5"/>
+								<instance name="playerstats_mastery_level_reward_template" index="3"/>
+								<instance name="playerstats_mastery_level_reward_template" index="2"/>
+								<instance name="playerstats_mastery_level_reward_template" index="1"/>
+							</panel>
+						</panel>
+					</panel>
+
+					<panel x="360i" y="20i" width="918i" height="650i" noclick="1">
+						<instance name="newui_custom_frame_template"/>
+						<panel name="playerstats_mastery_allheroes_clip" height="634i" valign="center" noclick="1" clip="1">
+							<panel name="playerstats_mastery_allheroes_root" grow="1" regrow="1" growinvis="false" x="-7i" y="20i" width="100%" align="left" valign="top" float="bottom" padding="28i"
+								onmousewheeldown="CallEvent('playerstats_mastery_scroll', 1);"
+								onmousewheelup="CallEvent('playerstats_mastery_scroll', 0);"
+							>
+								<panel height="1i" noclick="1"/>
+								<instance name="playerstats_mastery_all_row_template" row="0"/>
+								<instance name="playerstats_mastery_all_row_template" row="1"/>
+								<instance name="playerstats_mastery_all_row_template" row="2"/>
+								<instance name="playerstats_mastery_all_row_template" row="3"/>
+								<instance name="playerstats_mastery_all_row_template" row="4"/>
+								<instance name="playerstats_mastery_all_row_template" row="5"/>
+								<instance name="playerstats_mastery_all_row_template" row="6"/>
+								<instance name="playerstats_mastery_all_row_template" row="7"/>
+								<instance name="playerstats_mastery_all_row_template" row="8"/>
+								<instance name="playerstats_mastery_all_row_template" row="9"/>
+								<instance name="playerstats_mastery_all_row_template" row="10"/>
+								<instance name="playerstats_mastery_all_row_template" row="11"/>
+								<instance name="playerstats_mastery_all_row_template" row="12"/>
+								<instance name="playerstats_mastery_all_row_template" row="13"/>
+								<instance name="playerstats_mastery_all_row_template" row="14"/>
+								<instance name="playerstats_mastery_all_row_template" row="15"/>
+								<instance name="playerstats_mastery_all_row_template" row="16"/>
+								<instance name="playerstats_mastery_all_row_template" row="17"/>
+								<instance name="playerstats_mastery_all_row_template" row="18"/>
+								<instance name="playerstats_mastery_all_row_template" row="19"/>
+								<instance name="playerstats_mastery_all_row_template" row="20"/>
+								<instance name="playerstats_mastery_all_row_template" row="21"/>
+								<instance name="playerstats_mastery_all_row_template" row="22"/>
+								<instance name="playerstats_mastery_all_row_template" row="23"/>
+								<instance name="playerstats_mastery_all_row_template" row="24"/>
+								<instance name="playerstats_mastery_all_row_template" row="25"/>
+								<instance name="playerstats_mastery_all_row_template" row="26"/>
+								<instance name="playerstats_mastery_all_row_template" row="27"/>
+								<instance name="playerstats_mastery_all_row_template" row="28"/>
+								<instance name="playerstats_mastery_all_row_template" row="29"/>
+								<instance name="playerstats_mastery_all_row_template" row="30"/>
+								<instance name="playerstats_mastery_all_row_template" row="31"/>
+								<instance name="playerstats_mastery_all_row_template" row="32"/>
+							</panel>
+							<image texture="/ui/fe2/newui/res/playerstats/mastery_all_row_mask.png" width="914i" height="134i" align="center" valign="bottom" noclick="1"/>
+						</panel>
+
+						<scrollbar  name="playerstats_mastery_scroll"
+									x="-5i"
+									align="right"
+									width="12i"
+									height="620i"
+									valign="center"
+									scrollbarsize="12i"
+									handlewidth="12i"
+									handleheight="25i"							
+									texture="/ui/fe2/newui/res/common/scroll/scroll.png"
+									scrollbarplaceholder="true"
+									minvalue="1"
+									maxvalue="1"							
+									step="20"
+									value="1"
+									vertical="true"
+									slotwidth="0.6h" slotheight="1"
+									onevent1="SetValue(GetValue+20);"
+									onevent0="SetValue(GetValue-20);"
+									onslidelua="Player_Stats_V2:UpdateAllHeroesMastery()"
+						/>
+					</panel>
+
+					<panel name="playerstats_mastery_overallrewards" color="0 0 0 .7" visible="0" hotkey="ESC" onhotkeylua="GetWidget('playerstats_mastery_overallrewards'):SetVisible(0)">
+						<panel width="380i" height="546i" align="center" valign="center" cangrab="1" >
+							<instance name="newui_popup_caption_frame" title="newui_playerstats_overall_rewards_caption" onclicklua="GetWidget('playerstats_mastery_overallrewards'):SetVisible(0)"/>
+							<panel name="playerstats_mastery_overallrewards_clip" x="1" y="-1" width="-16i" height="-37i" valign="bottom" clip="1">
+								<panel name="playerstats_mastery_overallrewards_root" grow="1" regrow="1" growinvis="false" width="100%" float="bottom" padding="0i"
+									onmousewheeldown="CallEvent('playerstats_mastery_overallrewards_scroll', 1);"
+									onmousewheelup="CallEvent('playerstats_mastery_overallrewards_scroll', 0);"
+								>
+									<instance name="playerstats_mastery_overall_reward_template" index="1"/>
+									<instance name="playerstats_mastery_overall_reward_template" index="2"/>
+									<instance name="playerstats_mastery_overall_reward_template" index="3"/>
+									<instance name="playerstats_mastery_overall_reward_template" index="4"/>
+									<instance name="playerstats_mastery_overall_reward_template" index="5"/>
+									<instance name="playerstats_mastery_overall_reward_template" index="6"/>
+									<instance name="playerstats_mastery_overall_reward_template" index="7"/>
+									<instance name="playerstats_mastery_overall_reward_template" index="8"/>
+									<instance name="playerstats_mastery_overall_reward_template" index="9"/>
+									<instance name="playerstats_mastery_overall_reward_template" index="10"/>
+									<instance name="playerstats_mastery_overall_reward_template" index="11"/>
+									<instance name="playerstats_mastery_overall_reward_template" index="12"/>
+									<instance name="playerstats_mastery_overall_reward_template" index="13"/>
+									<instance name="playerstats_mastery_overall_reward_template" index="14"/>
+									<instance name="playerstats_mastery_overall_reward_template" index="15"/>
+									<instance name="playerstats_mastery_overall_reward_template" index="16"/>
+									<instance name="playerstats_mastery_overall_reward_template" index="17"/>
+									<instance name="playerstats_mastery_overall_reward_template" index="18"/>
+									<instance name="playerstats_mastery_overall_reward_template" index="19"/>
+									<instance name="playerstats_mastery_overall_reward_template" index="20"/>
+									<instance name="playerstats_mastery_overall_reward_template" index="21"/>
+									<instance name="playerstats_mastery_overall_reward_template" index="22"/>
+									<instance name="playerstats_mastery_overall_reward_template" index="23"/>
+									<instance name="playerstats_mastery_overall_reward_template" index="24"/>
+									<instance name="playerstats_mastery_overall_reward_template" index="25"/>
+									<instance name="playerstats_mastery_overall_reward_template" index="26"/>
+									<instance name="playerstats_mastery_overall_reward_template" index="27"/>
+									<instance name="playerstats_mastery_overall_reward_template" index="28"/>
+									<instance name="playerstats_mastery_overall_reward_template" index="29"/>
+									<instance name="playerstats_mastery_overall_reward_template" index="30"/>
+									<instance name="playerstats_mastery_overall_reward_template" index="31"/>
+									<instance name="playerstats_mastery_overall_reward_template" index="32"/>
+									<instance name="playerstats_mastery_overall_reward_template" index="33"/>
+									<instance name="playerstats_mastery_overall_reward_template" index="34"/>
+									<instance name="playerstats_mastery_overall_reward_template" index="35"/>
+									<instance name="playerstats_mastery_overall_reward_template" index="36"/>
+									<instance name="playerstats_mastery_overall_reward_template" index="37"/>
+									<instance name="playerstats_mastery_overall_reward_template" index="38"/>
+									<instance name="playerstats_mastery_overall_reward_template" index="39"/>
+									<instance name="playerstats_mastery_overall_reward_template" index="40"/>
+								</panel>
+							</panel>
+
+							<scrollbar  name="playerstats_mastery_overallrewards_scroll"
+									x="-5i"
+									align="right"
+									width="12i"
+									height="-36i"
+									valign="bottom"
+									scrollbarsize="12i"
+									handlewidth="12i"
+									handleheight="25i"							
+									texture="/ui/fe2/newui/res/common/scroll/scroll.png"
+									scrollbarplaceholder="true"
+									minvalue="1"
+									maxvalue="1"							
+									step="20"
+									value="1"
+									vertical="true"
+									slotwidth="0.6h" slotheight="1"
+									onevent1="SetValue(GetValue+20);"
+									onevent0="SetValue(GetValue-20);"
+									onslidelua="Player_Stats_V2:UpdateMasteryOverallRewards()"
+							/>
+						</panel>
+					</panel>
+				</panel>
+
+				<panel name="playerstats_mvpawards" height="-222i" valign="bottom" visible="0" onloadlua="Player_Stats_V2:InitMVPAwardsUI()">
+					<!--instance 	name="playerstats_mvpawards_template" x="-40%" y="-25%" width="190i" height="258i" 
+								awd_code="mvp" 
+								awd_name="award_mvp" 
+								awd_icon="/ui/fe2/newui/res/playerstats/mvp.png" 
+								count_icon="/ui/fe2/newui/res/playerstats/mvp.png" 
+								awd_score_sum="1000" /-->
+					<image texture="/ui/fe2/newui/res/playerstats/mvpawards/separator.png" align="center" valign="center" width="2048i" height="128i" noclick="false" />
+					<!--instance 	name="playerstats_mvpawards_template" x="-40%" y="25%" width="190i" height="258i" 
+								awd_code="mann" 
+								awd_name="award_most_annihilation" 
+								awd_icon="/ui/mvpvoting/awards/award0.png" 
+								count_icon="/ui/mvpvoting/awards/award0.png" 
+								awd_score_sum="100" /-->
+				</panel>
+				
+				<panel name="playerstats_stats" height="-222i" valign="bottom" visible="1">
+					<panel x="50i" y="50i" width="948i" height="184i" noclick="1">
+						<panel name="playerstats_stats_public_summary" align="center" valign="center" noclick="1">
+							<instance name="newui_custom_frame_template"/>
+							<label textalign="left" textvalign="center" x="15i" y="10i" width="100%" height="20i" align="center" valign="top" font="dyn_12" color="#f1dbcb" content="newui_playerstats_statssummary" noclick="1"/>
+							<image texture="/ui/fe2/newui/res/common/line.png" y="40i" height="2i" noclick="1" />
+							<instance name="playerstats_stats_vertical_item_template" x="045i" y="62i" width="100i" height="100i" item_name="player_stats_psr" item_icon="/ui/fe2/newui/res/playerstats/summary_mmr.png"/>
+							<instance name="playerstats_stats_vertical_item_template" x="140i" y="62i" width="100i" height="100i" item_name="player_stats_wins" item_icon="/ui/fe2/newui/res/playerstats/summary_wins.png"/>
+							<instance name="playerstats_stats_vertical_item_template" x="235i" y="62i" width="100i" height="100i" item_name="player_stats_losses" item_icon="/ui/fe2/newui/res/playerstats/summary_losses.png"/>
+							<instance name="playerstats_stats_vertical_item_template" x="330i" y="62i" width="100i" height="100i" item_name="player_stats_winning_percentage" item_icon="/ui/fe2/newui/res/playerstats/summary_winning_percent.png"/>
+							<image texture="/ui/fe2/newui/res/common/line2.png" x="50%" y="62i" width="2i" height="100i" noclick="1" />
+							<instance name="playerstats_stats_vertical_item_template" x="542i" y="62i" width="110i" height="100i" item_name="player_stats_matches" item_icon="/ui/fe2/newui/res/playerstats/summary_matches.png"
+									  has_tip="true" tip_name="playerstats_tip_matches_played"
+							/>
+							<instance name="playerstats_stats_vertical_item_template" x="660i" y="62i" width="110i" height="100i" item_name="player_stats_disconnects" item_icon="/ui/fe2/newui/res/playerstats/summary_disconnects.png"
+									  has_tip="true" tip_name="playerstats_tip_disconnects"
+							/>
+							<instance name="playerstats_stats_vertical_item_template" x="778i" y="62i" width="100i" height="100i" item_name="player_stats_leave_percent" item_icon="/ui/fe2/newui/res/playerstats/summary_leaves_percent.png"/>
+						</panel>
+
+						<panel name="playerstats_stats_season_summary" align="center" valign="center" noclick="1" visible="1">
+							<panel x="165i" width="655i" height="100%" align="left" noclick="1">
+								<instance name="newui_custom_frame_template"/>
+								<label textalign="left" textvalign="center" x="100i" y="10i" height="20i" align="center" valign="top" font="dyn_12" color="#f1dbcb" content="newui_playerstats_statssummary" noclick="1"/>
+								<image texture="/ui/fe2/newui/res/common/line.png" y="40i" height="2i" noclick="1" />
+								<instance name="playerstats_stats_vertical_item_template" x="081i" y="62i" width="100i" height="100i" item_name="player_stats_matches" prefix="season_" item_icon="/ui/fe2/newui/res/playerstats/summary_matches.png"
+										  has_tip="true" tip_name="playerstats_tip_matches_played"
+								/>
+								<instance name="playerstats_stats_vertical_item_template" x="173i" y="62i" width="100i" height="100i" item_name="player_stats_disconnects" prefix="season_" item_icon="/ui/fe2/newui/res/playerstats/summary_disconnects.png"
+										  has_tip="true" tip_name="playerstats_tip_disconnects"
+								/>
+								<instance name="playerstats_stats_vertical_item_template" x="265i" y="62i" width="100i" height="100i" item_name="player_stats_leave_percent" prefix="season_" item_icon="/ui/fe2/newui/res/playerstats/summary_leaves_percent.png"/>
+								<instance name="playerstats_stats_vertical_item_template" x="357i" y="62i" width="100i" height="100i" item_name="player_stats_wins" prefix="season_" item_icon="/ui/fe2/newui/res/playerstats/summary_wins.png"/>
+								<instance name="playerstats_stats_vertical_item_template" x="449i" y="62i" width="100i" height="100i" item_name="player_stats_losses" prefix="season_" item_icon="/ui/fe2/newui/res/playerstats/summary_losses.png"/>
+								<instance name="playerstats_stats_vertical_item_template" x="541i" y="62i" width="100i" height="100i" item_name="player_stats_winning_percentage" prefix="season_" item_icon="/ui/fe2/newui/res/playerstats/summary_winning_percent.png"/>
+							</panel>
+							<panel x="0i" y="-15i" width="240i" height="240i" align="left" valign="center" noclick="1" >
+								<image texture="/ui/fe2/newui/res/playerstats/rank_icon_bg.png" align="center" valign="center" width="256i" height="256i" noclick="1"/>
+								<piegraph name="playerstats_stats_meter_to_next_rank" color=".11 .66 .73 1" start="-248" end="68" square="false" value="0" align="center" valign="center" width="225i" height="225i" noclick="1" />
+								<image texture="/ui/fe2/newui/res/playerstats/rank_icon_mask.png" align="center" valign="center" width="256i" height="256i" noclick="1"/>
+								<image name="playerstats_stats_current_rank_icon" texture="$invis" align="center" valign="center" width="195i" height="195i" noclick="1"/>
+								<label name="playerstats_stats_current_rank" textalign="center" textvalign="bottom" y="-10i" height="20i" align="center" valign="bottom" font="dyn_12" color="#c2b0a4" content="" noclick="1"/>
+							</panel>
+							<panel width="128i" height="100%" align="right" noclick="1">
+								<instance name="newui_custom_frame_template"/>
+								<label textalign="center" textvalign="center" y="10i" width="+100i" height="20i" align="center" font="dyn_11" color="#c2b0a4" content="newui_playerstats_highestrank" noclick="1"/>
+								<image name="playerstats_stats_highest_rank_icon" texture="$invis" y="43i" height="128i" noclick="1"/>
+							</panel>
+						</panel>
+					</panel>
+
+					<panel x="50i" y="244i" width="948i" height="156i" noclick="1">
+						<instance name="newui_custom_frame_template"/>
+						<label textalign="left" textvalign="center" x="15i" y="10i" width="100%" height="20i" align="center" valign="top" font="dyn_12" color="#f1dbcb" content="newui_playerstats_mostplayedheroes" noclick="1"/>
+						<image texture="/ui/fe2/newui/res/common/line.png" y="40i" height="2i" noclick="1" />
+						<instance name="playerstats_hero_fav_template" index="stats_1" x="025i" y="40i" width="158i" height="116i" />
+						<instance name="playerstats_hero_fav_template" index="stats_2" x="210i" y="40i" width="158i" height="116i" />
+						<instance name="playerstats_hero_fav_template" index="stats_3" x="395i" y="40i" width="158i" height="116i" />
+						<instance name="playerstats_hero_fav_template" index="stats_4" x="580i" y="40i" width="158i" height="116i" />
+						<instance name="playerstats_hero_fav_template" index="stats_5" x="765i" y="40i" width="158i" height="116i" />
+					</panel>
+
+					<panel x="50i" y="410i" width="310i" height="240i" noclick="1">
+						<instance name="newui_custom_frame_template"/>
+						<label textalign="left" textvalign="center" x="15i" y="10i" width="100%" height="20i" align="center" valign="top" font="dyn_12" color="#f1dbcb" content="newui_playerstats_lifetimestatistics" noclick="1"/>
+						<image texture="/ui/fe2/newui/res/common/line.png" y="40i" height="2i" noclick="1" />
+						<instance name="playerstats_stats_horizontal_item_template" y="050i" item_name="player_stats_kills"/>
+						<instance name="playerstats_stats_horizontal_item_template" y="080i" item_name="player_stats_deaths"/>
+						<instance name="playerstats_stats_horizontal_item_template" y="110i" item_name="player_stats_assists"/>
+						<instance name="playerstats_stats_horizontal_item_template" y="140i" item_name="player_stats_kd_ratio"/>
+						<instance name="playerstats_stats_horizontal_item_template" y="170i" item_name="player_stats_kad_ratio"/>
+						<instance name="playerstats_stats_horizontal_item_template" y="200i" item_name="player_stats_total_quests"/>
+					</panel>
+					
+					<panel x="370i" y="410i" width="628i" height="240i" noclick="1">
+						<instance name="newui_custom_frame_template"/>
+						<label textalign="left" textvalign="center" x="15i" y="10i" width="100%" height="20i" align="center" valign="top" font="dyn_12" color="#f1dbcb" content="newui_playerstats_averagegamestatistics" noclick="1"/>
+						<image texture="/ui/fe2/newui/res/common/line.png" y="40i" height="2i" noclick="1" />
+						<instance name="playerstats_stats_horizontal_item_template" width="50%" y="050i" item_name="player_avg_game_length"/>
+						<instance name="playerstats_stats_horizontal_item_template" width="50%" y="080i" item_name="player_avg_kda"/>
+						<instance name="playerstats_stats_horizontal_item_template" width="50%" y="110i" item_name="player_avg_creep_kills"/>
+						<instance name="playerstats_stats_horizontal_item_template" width="50%" y="140i" item_name="player_avg_creep_denies"/>
+						<instance name="playerstats_stats_horizontal_item_template" width="50%" y="170i" item_name="player_stats_experience_earned"/>
+						<instance name="playerstats_stats_horizontal_item_template" width="50%" y="200i" item_name="player_stats_experience_per_minute"/>
+						<image texture="/ui/fe2/newui/res/common/line2.png" x="50%" y="50i" width="2i" height="200i" noclick="1" />
+						<instance name="playerstats_stats_horizontal_item_template" width="50%" x="50%" y="050i" item_name="player_stats_apm"/>
+						<instance name="playerstats_stats_horizontal_item_template" width="50%" x="50%" y="080i" item_name="player_stats_neutral_creeps"/>
+						<instance name="playerstats_stats_horizontal_item_template" width="50%" x="50%" y="110i" item_name="player_stats_gold_per_minute"/>
+						<instance name="playerstats_stats_horizontal_item_template" width="50%" x="50%" y="140i" item_name="player_stats_wards"/>
+					</panel>
+					
+					<panel x="1008i" y="50i" width="270i" height="600i" noclick="1">
+						<instance name="newui_custom_frame_template"/>
+						<panel y="5i" align="center" valign="top" width="128i" height="128i">
+							<image texture="/ui/fe2/newui/res/playerstats/smackdown_bg.png" width="190i" height="190i" align="center" valign="center" />
+							<label name="stats_data_player_stats_smackdowns" textalign="center" textvalign="center" height="100%" content="-" />
+						</panel>
+						<label textalign="center" textvalign="center" y="138i" height="20i" align="center" valign="top" font="dyn_12" color="#f1dbcb" content="newui_playerstats_smackdowns" noclick="1"/>
+						<image texture="/ui/fe2/newui/res/common/line.png" y="168i" height="2i" noclick="1" />
+						<panel y="170i" width="100%" height="430i" noclick="0" >
+							<instance name="playerstats_stats_horizontal_item_template" y="005i" name_width="66%" data_width="22%" item_name="player_stats_humiliated"/>
+							<instance name="playerstats_stats_horizontal_item_template" y="033i" name_width="66%" data_width="22%" item_name="player_stats_serialkiller"/>
+							<instance name="playerstats_stats_horizontal_item_template" y="061i" name_width="66%" data_width="22%" item_name="player_stats_ultimatewarrior"/>
+							<instance name="playerstats_stats_horizontal_item_template" y="089i" name_width="66%" data_width="22%" item_name="player_stats_legndary"/>
+							<instance name="playerstats_stats_horizontal_item_template" y="117i" name_width="66%" data_width="22%" item_name="player_stats_onslaught"/>
+							<instance name="playerstats_stats_horizontal_item_template" y="145i" name_width="66%" data_width="22%" item_name="player_stats_savagesick"/>
+							<instance name="playerstats_stats_horizontal_item_template" y="173i" name_width="66%" data_width="22%" item_name="player_stats_dominating"/>
+							<instance name="playerstats_stats_horizontal_item_template" y="201i" name_width="66%" data_width="22%" item_name="player_stats_champion"/>
+							<instance name="playerstats_stats_horizontal_item_template" y="229i" name_width="66%" data_width="22%" item_name="player_stats_bloodbath"/>
+							<instance name="playerstats_stats_horizontal_item_template" y="257i" name_width="66%" data_width="22%" item_name="player_stats_immortal"/>
+							<instance name="playerstats_stats_horizontal_item_template" y="285i" name_width="66%" data_width="22%" item_name="player_stats_doubletap"/>
+							<instance name="playerstats_stats_horizontal_item_template" y="313i" name_width="66%" data_width="22%" item_name="player_stats_hattrick"/>
+							<instance name="playerstats_stats_horizontal_item_template" y="341i" name_width="66%" data_width="22%" item_name="player_stats_quadkill"/>
+							<instance name="playerstats_stats_horizontal_item_template" y="369i" name_width="66%" data_width="22%" item_name="player_stats_annihilated"/>
+							<instance name="playerstats_stats_horizontal_item_template" y="397i" name_width="66%" data_width="22%" item_name="player_stats_bloodlust"/>
+						</panel>
+						<panel name="playerstats_nostreakstats" width="264i" height="594i" align="center" valign="center" visible="1">
+							<frame color="0 0 0 .8" borderthickness="1" noclick="true" />
+							<label height="100%" width="-8.0h" align="center" textalign="center" textvalign="center" wrap="true" font="dyn_12" color="#f1dbcb" content="player_stats_nostreakstats"/>
+						</panel>
+					</panel>
+
+					<instance name="newui_combobox_template" widgetname="playerstats_stats_ranktype" x="1087i" y="9i" width="191i" height="32i" align="left" valign="top"
+							onselectlua="Player_Stats_V2:OnSelectStatsRankType()"
+					/>
+				</panel>
+
+				<panel name="playerstats_match" height="-222i" valign="bottom" visible="0">
+					<panel x="50i" y="45i" width="1210i" height="40i" noclick="0">
+						<image texture="/ui/fe2/newui/res/playerstats/match_list_title_bg.png" width="100%" height="100%" noclick="1"/>
+						<panel height="100%" float="right" padding="5i" align="center" stickytoinvis="false" noclick="1">
+							<anchor x="0" /> 
+							<label textalign="center" textvalign="center" x="55i" width="160i" align="left" font="dyn_12" color="#f1dbcb" content="newui_playerstats_match_list_header_hero" noclick="1" />
+							<label textalign="center" textvalign="center" width="128i" align="left" font="dyn_12" color="#f1dbcb" content="newui_playerstats_match_list_header_result" noclick="1" />
+							<label textalign="center" textvalign="center"  width="100i" align="left" font="dyn_12" color="#f1dbcb" content="newui_playerstats_match_list_header_kda" noclick="1" />
+							<label textalign="center" textvalign="center" width="100i" align="left" font="dyn_12" color="#f1dbcb" content="newui_playerstats_match_list_header_gametime" noclick="1" />
+							<label textalign="center" textvalign="center" width="230i" align="left" font="dyn_12" color="#f1dbcb" content="newui_playerstats_match_list_header_map" noclick="1" />
+							<label textalign="center" textvalign="center" width="260i" align="left" font="dyn_12" color="#f1dbcb" content="newui_playerstats_match_list_header_time" noclick="1" />
+							<label textalign="center" textvalign="center" width="150i" align="left" font="dyn_12" color="#f1dbcb" content="newui_playerstats_match_list_header_matchid" noclick="1" />
+						</panel>
+					</panel>
+					<panel x="50i" y="90i" width="1210i" height="560i" noclick="1">
+						<panel name="playerstats_match_list_clip" height="560i" valign="center" clip="1" noclick="1">
+							<panel name="playerstats_match_list_root" grow="1" regrow="1" growinvis="false" x="0i" y="0i" width="100%" align="left" valign="top" float="bottom" padding="10i"
+								onmousewheeldown="CallEvent('playerstats_match_list_scroll', 1);"
+								onmousewheelup="CallEvent('playerstats_match_list_scroll', 0);"
+							>
+							</panel>
+						</panel>
+						<panel name="playerstats_match_no_history" visible="0">
+							<instance name="newui_custom_frame_template"/>
+							<label height="100%" width="-8.0h" align="center" textalign="center" textvalign="center" wrap="true" font="dyn_16" color="#f1dbcb" content="player_stats_nohistory"/>
+						</panel>
+					</panel>
+
+					<scrollbar  name="playerstats_match_list_scroll"
+								x="1266i"
+								y="90i"
+								align="left"
+								width="12i"
+								height="560i"
+								valign="top"
+								scrollbarsize="12i"
+								handlewidth="12i"
+								handleheight="25i"							
+								texture="/ui/fe2/newui/res/common/scroll/scroll.png"
+								scrollbarplaceholder="true"
+								minvalue="1"
+								maxvalue="1"							
+								step="20"
+								value="1"
+								vertical="true"
+								slotwidth="0.6h" slotheight="1"
+								onevent1="SetValue(GetValue+20);"
+								onevent0="SetValue(GetValue-20);"
+								onslidelua="Player_Stats_V2:UpdateMatchList()"
+					/>
+
+					<instance name="newui_combobox_template" widgetname="playerstats_match_ranktype" x="1087i" y="9i" width="191i" height="32i" align="left" valign="top"
+							onselectlua="Player_Stats_V2:OnSelectMatchRankType()"
+					/>
+				</panel>
+
+				<panel name="playerstats_waiting_mask" visible="0" color="0 0 0 .7">
+					<animatedimage texture="/ui/fe2/elements/store2/loading/loading_.png" width="512i" height="128i" align="center" valign="center" fps="25" loop="true" loopbackframe="0" startframe="0" onshow="StartAnim();" />
+				</panel>
+
+				<panel name="playerstats_loadingentity_mask" width="100w" height="100h" align="center" valign="center" visible="0" color="0 0 0 .7">
+					<label textalign="center" textvalign="center" font="dyn_18" color="#f0d3c1" outline="1" outlinecolor="#230000" content="newui_playerstats_loading" noclick="0"/>
+					<panel width="682i" height="64i" y="40i" align="center" valign="center">
+						<image texture="/ui/fe2/newui/res/playerstats/loading_progress_bg.png" width="1024i" noclick="0"/>
+						<panel>
+							<panel width="0%" clip="1" watch="EntityDefinitionsProgress" ontriggerlua="local percent = tonumber(param0) / tonumber(param1) * 100
+																									self:SetWidth(tostring(percent)..'%')">
+								<image texture="/ui/fe2/newui/res/playerstats/loading_progress.png" width="1024i" height="64i" valign="center" noclick="0"/>
+							</panel>
+						</panel>
+					</panel>
+				</panel>
+
+				<panel name="playerstats_switch_account_confirm_mask" visible="0" color="0 0 0 .7">
+					<instance name="newui_common_popup" width="600i" id="switch_sub_confirm" visible="1" show_close="1"
+						title="newui_playerstats_switch_accounts_caption" 
+						content="playerstats_switch_sub_confirm_body"
+						oncloselua="GetWidget('playerstats_switch_account_confirm_mask'):FadeOut(250)"
+					/>
+				</panel>
+
+				<panel name="playerstats_claim_mastery_reward_fail_mask" visible="0" color="0 0 0 .7">
+					<instance name="newui_common_popup" width="300i" id="claim_mastery_reward_fail" visible="1" show_close="0"
+						title="newui_lobby_popup_error" 
+						content="playerstats_claim_mastery_reward_fail_body"
+					/>
+				</panel>
+			</panel>
+
+		</panel>
+
+		<panel name="playerstats_helper" width="1" height="1" noclick="1" onloadlua="Player_Stats_V2:Init()"/>
+	</template>
+</package>

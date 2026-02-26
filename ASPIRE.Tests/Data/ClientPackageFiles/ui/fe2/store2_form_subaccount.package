@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+	<!-- Buy Subaccount -->
+	<trigger name="UpdateStoreSubAccountForm"/>
+	<trigger name="StoreSubAccountStatus"/>
+	<trigger name="StoreSubAccountResult"/>
+
+	<form
+		name="StoreSubAccount"
+		host="!hon"
+		target="/client_require_identity.php"
+		ssl="false"
+		statustrigger="StoreSubAccountStatus"
+		resulttrigger="StoreSubAccountResult"
+		resultparam0="success"
+		resultparam1="errors"
+	/>
+
+	<template name="storePopupSubAccountForm">
+		<panel name="storePopupSubAccountForm_{id=}" width="100%" grow="1" regrow="1" float="bottom" padding="0.5h" visible="{visible=1}" noclick="1"
+			watch="StoreSubAccountResult"
+			ontrigger="
+				If(
+					param0 == 1,
+					Split(
+						CallEvent('store_popup_SubAccount_success', 0),
+						If(
+							!ui_disableAccountCreation,
+							Split(
+								Set('_store_SubAccount_confirmpass', ''),
+								Call('store_SubAccount_confirmpass', 'EraseInputLine();')
+							)
+						),
+						Call('store_SubAccount_nick', 'EraseInputLine();'),
+						Call('store_SubAccount_nick2', 'EraseInputLine();'),
+						CallEvent('store_popup_sub_account', 1)
+					),
+					CallEvent('store_popup_form_error', 0)
+				);
+			"
+		>
+			<label width="100%" height="4.5h" wrap="1" fity="1" style="microStoreDetailDesc" content="web_form_subaccount_description_short" noclick="1"
+				onshowlua="ToggleOthersDetailStyle(self)"
+			/>
+
+			<instance name="store2_line2" align="center" width="100%" height="1h"/>
+
+			<!-- New Nickname -->
+			<instance
+				name="paperForm_textbox_container"
+				label="create_acc_nickname"
+				font="dyn_12" color="#ff9600"
+				hastip="false"
+				order="241"
+				width="100%"
+				fieldwidth="50%"
+				fieldname="store_SubAccount_nick"
+				ontrigger="If(StringEmpty(store_SubAccount_nick) or !StringEquals(store_SubAccount_nick, store_SubAccount_nick2), DoEvent(0), DoEvent(1));"
+				tip_id=""
+				form="StoreSubAccount" data="nickname"
+				updatetrigger="UpdateStoreSubAccountForm"
+				onshowlua="ToggleOthersDetailStyle(self)"
+				onevent1lua="ToggleOthersDetailStyle(self)"
+				onhide="EraseInputLine();"
+			/>
+
+			<!-- Confirm Nickname -->
+			<instance
+				name="paperForm_textbox_container"
+				label="web_form_nickchange_confirmnick"
+				font="dyn_12" color="#ff9600"
+				hastip="false"
+				order="242"
+				width="100%"
+				fieldwidth="50%"
+				fieldname="store_SubAccount_nick2"
+				ontrigger="If(StringEmpty(store_SubAccount_nick2) or !StringEquals(store_SubAccount_nick, store_SubAccount_nick2), DoEvent(0), DoEvent(1));"
+				tip_id=""
+				form="StoreSubAccount" data="confirmNickname"
+				updatetrigger="UpdateStoreSubAccountForm"
+				onshowlua="ToggleOthersDetailStyle(self)"
+				onevent1lua="ToggleOthersDetailStyle(self)"
+				onhide="EraseInputLine();"
+			/>
+
+			<panel onload="SetVisible(!ui_disableAccountCreation)" visible="0" height="3h" sticky="1" stickytoinvis="0" noclick="1">
+				<!-- Confirm Password -->
+				<instance
+					name="paperForm_textbox_container"
+					label="create_acc_confirm_password"
+					font="dyn_12" color="#ff9600"
+					hastip="false"
+					order="243"
+					width="100%"
+					fieldwidth="50%"
+					fieldname="store_SubAccount_confirmpass"
+					ontrigger="If(StringEmpty(store_SubAccount_confirmpass), DoEvent(0), DoEvent(1));"
+					tip_id=""
+					form="" data=""
+					updatetrigger="UpdateStoreSubAccountForm"
+					onload="CreateString('_store_SubAccount_confirmpass', '');"
+					onchange="If(!StringEmpty(this), Set('_store_SubAccount_confirmpass', md5(this)), Set('_store_SubAccount_confirmpass', ''));"
+					passchar="*"
+					onshowlua="ToggleOthersDetailStyle(self)"
+					onevent1lua="ToggleOthersDetailStyle(self)"	
+					onhide="EraseInputLine();"
+				/>
+			</panel>
+			<panel width="100%" height="1.5h" noclick="1"/>
+		</panel>
+	</template>
+
+</package>

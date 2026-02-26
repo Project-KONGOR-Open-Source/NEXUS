@@ -1,0 +1,1033 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+	<panel onloadlua="RegisterScript2('Plinko_Interface', '2')" color="invisible" noclick="1"/>
+
+	<!-- Lua -->
+	<lua file="/ui/fe2/plinko/path_database.db" />
+	<lua file="/ui/scripts/plinko.lua" />
+
+	<!-- forms -->
+	<trigger name="PlinkoMainStatus" />
+	<trigger name="PlinkoMainResult" />
+	<form
+		name="PlinkoMain"
+		host="!masterserver"
+		target="/master/casino/"
+		statustrigger="PlinkoMainStatus"
+		resulttrigger="PlinkoMainResult"
+		resultparam0="status_code"
+		resultparam1="tiers"
+		resultparam2="user_tickets"
+		resultparam3="gold_cost"
+		resultparam4="ticket_cost"
+		resultparam5="amount_of_products"
+		resultparam6="last_update_time"
+	/>
+
+	<trigger name="TicketRedemptionMainStatus" />
+	<trigger name="TicketRedemptionMainResult" />
+	<form
+		name="TicketRedemptionMain"
+		host="!masterserver"
+		target="/master/ticketexchange/"
+		statustrigger="TicketRedemptionMainStatus"
+		resulttrigger="TicketRedemptionMainResult"
+		resultparam0="status_code"
+		resultparam1="items"
+		resultparam2="user_tickets"
+	/>
+
+	<trigger name="PlinkoDropStatus" />
+	<trigger name="PlinkoDropResult" />
+	<form
+		name="PlinkoDrop"
+		host="!masterserver"
+		target="/master/casino/drop/"
+		statustrigger="PlinkoDropStatus"
+		resulttrigger="PlinkoDropResult"
+		resultparam0="status_code"
+		resultparam1="random_tier"
+		resultparam2="product_id"
+		resultparam3="product_name"
+		resultparam4="product_path"
+		resultparam5="product_type"
+		resultparam6="ticket_amount"
+		resultparam7="user_tickets"
+		resultparam8="user_gold"
+		resultparam9="products_exhausted"
+	/>
+
+	<trigger name="RedeemTicketsStatus" />
+	<trigger name="RedeemTicketsResult" />
+	<form
+		name="RedeemTickets"
+		host="!masterserver"
+		target="/master/ticketexchange/purchase/"
+		statustrigger="RedeemTicketsStatus"
+		resulttrigger="RedeemTicketsResult"
+		resultparam0="status_code"
+		resultparam1="tickets_remaining"
+		resultparam2="grabBag"
+		resultparam3="grabBagTheme"
+		resultparam4="grabBagIDs"
+		resultparam5="grabBagTypes"
+		resultparam6="grabBagLocalPaths"
+		resultparam7="grabBagProductNames"
+	/>
+
+	<trigger name="LootListStatus" />
+	<trigger name="LootListResult" />
+	<form
+		name="LootList"
+		host="!masterserver"
+		target="/master/casino/viewchest/"
+		statustrigger="LootListStatus"
+		resulttrigger="LootListResult"
+		resultparam0="tier_id"
+		resultparam1="target_index"
+		resultparam2="first_item_index"
+		resultparam3="items_amount"
+		resultparam4="product_names"
+		resultparam5="product_types"
+		resultparam6="product_paths"
+		resultparam7="product_ids"
+	/>
+	<!-- end forms -->
+
+	<!-- templates -->
+	<template name="ticket_rain">
+		<panel name="ticket_rain_{droplet}" x="{x}" y="{y}" width="{height}" height="{height}" group="ticket_rain"
+			oninstantiatelua="
+				self:SlideY('100%', {fallTime})
+				self:Sleep({fallTime}, function() self:Destroy() end)
+			"
+		>
+			<image rotation="{rot}" color="{color=white}" texture="{ticketTexture}" resourcecontext="plinko"
+				oninstantiatelua="
+					local rock = function(func)
+						if (self:GetRotation() ~= 20) then
+							self:Rotate(20, {rotTime})
+						else
+							self:Rotate(-20, {rotTime})
+						end
+						self:Sleep({rotTime}, function() func(func) end)
+					end
+
+					rock(rock)
+				"
+			/>
+		</panel>
+	</template>
+
+	<template name="prize_stand" >
+		<panel name="prize_stand_{id}" height="10.0h" width="11.0h" visible="0"
+			onclicklua="UIManager.GetInterface('main'):HoNPlinkoF('RedeemPrize', {id})"
+			ondoubleclicklua="UIManager.GetInterface('main'):HoNPlinkoF('RedeemPrize', {id})"
+			onmouseoverlua="
+				PlaySound('/shared/sounds/ui/ccpanel/button_over_01.wav')
+				UIManager.GetInterface('main'):HoNPlinkoF('HoverPrize', {id})
+				GetWidget('prize_stand_{id}_prize_image'):SetWidth('+4')
+				GetWidget('prize_stand_{id}_prize_image'):SetHeight('+4')
+			"
+			onmouseoutlua="
+				GetWidget('genericMainFloatingTip'):SetVisible(0)
+				GetWidget('prize_stand_{id}_prize_image'):SetWidth('100%')
+				GetWidget('prize_stand_{id}_prize_image'):SetHeight('100%')
+			"
+		>
+			<panel width="105%" align="center" noclick="1">
+				<image y="0%" height="40%" valign="bottom" noclick="1"
+					name="prize_stand_{id}_stand_texture"
+					resourcecontext="plinko"
+				/>
+				<panel y="-2.5%" height="65%" width="65@" align="center" noclick="1" >
+					<image name="prize_stand_{id}_prize_image" valign="center" align="center" resourcecontext="plinko" noclick="1"/>
+				</panel>
+
+				<label name="prize_stand_{id}_type" y="-9%" height="1.0h" align="center" textvalign="center" textalign="center" font="dyn_10" outline="1" color="white" noclick="1"/>
+
+				<!-- button removed since we don't know if the bevel will look good, as some products have icons that have alpha and aren't square -->
+				<!-- <button
+					texture="/ui/elements/button_bevel.tga"
+					y="7.5%" height="55%" width="55@" align="center"
+					onclicklua="UIManager.GetInterface('main'):HoNPlinkoF('RedeemPrize', {id})"
+					onmouseoverlua="UIManager.GetInterface('main'):HoNPlinkoF('HoverPrize', {id})"
+					onmouseoutlua="GetWidget('genericMainFloatingTip'):SetVisible(0)"
+				/> -->
+
+				<panel name="prize_stand_{id}_cost_section" width="-3.5h" height="-70%" y="-0.75h" valign="bottom" align="center" noclick="1" visible="1">
+					<image width="100@" noclick="1"
+						name="prize_stand_{id}_cost_section_texture"
+						resourcecontext="plinko"
+					/>
+					<label x="75@" font="dyn_10" y="-0.25h" fitx="1" color="white" fity="1" valign="bottom" content="X" shadow="1" outline="1" noclick="1"/>
+					<label name="prize_stand_{id}_ticket_cost" x="105@" width="-105@" font="dyn_12" height="50%" textalign="center" textvalign="center" valign="center" color="white" shadow="1" outline="1" content="-" noclick="1"/>
+				</panel>
+				<panel name="prize_stand_{id}_owned_section" width="-3h" height="-70%" y="-0.75h" valign="bottom" align="center" noclick="1" visible="0">
+					<label width="-0.5h" align="center" font="dyn_14" height="50%" textalign="center" textvalign="center" valign="center" color="lime" shadow="1" outline="1" content="general_owned" noclick="1"/>
+				</panel>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="tier_info">
+		<panel name="plinko_tier_info_{bucket}" x="{x}" y="{y=0.9h}" height="40%" width="40@" visible="0">
+			<modelpanel name="plinko_tier_info_{bucket}_effect"
+				width="250%" height="250%"
+				valign="center" align="center"
+				noclick="true"
+				model="/shared/models/invis.mdf"
+				onhidelua="self:SetEffect('')"
+				camerapos="0 125 0"
+				cameraangles="0 0 180"
+				camerafov="55"
+				depthclear="false"
+				depthcompress="true"
+				resourcecontext="plinko"
+			/>
+			<image name="plinko_tier_info_{bucket}_image"
+				resourcecontext="plinko"
+				onmouseldownlua="UIManager.GetInterface('main'):HoNPlinkoF('ShowLootList', {bucket})"
+				onmouseoverlua="UIManager.GetInterface('main'):HoNPlinkoF('HoverBucket', {bucket})"
+				onmouseoutlua="GetWidget('genericMainFloatingTip'):SetVisible(0)"
+			/>
+			<image name="plinko_tier_info_{bucket}_new" x="25i" y="5i" texture="/ui/fe2/plinko/new.tga" width="64i" height="30i" noclick="1" align="right" valign="bottom" visible="0"/>
+		</panel>
+	</template>
+
+	<template name="plinko_button">
+		<button name="{button_name}" color="invisible" height="{height=4h}" width="{width=8h}"
+			onclicklua="PlaySound('/shared/sounds/ui/ccpanel/button_close_02.wav') {onclicklua}"
+			align="{align}" valign="{valign}"
+			onmouseoverlua="PlaySound('/shared/sounds/ui/ccpanel/button_over_01.wav')"
+		>
+			<widgetstate statename="up">
+				<image group="plinko_button_outside" noclick="1"/>
+				<image group="plinko_button_inside" color="{color=yellow}" noclick="1"/>
+				<label group="{label_group}" textvalign="center" textalign="center" font="{font=dyn_18}" color="{text_color=white}" shadow="true" outline="1" content="{content}" noclick="1"/>
+			</widgetstate>
+			<widgetstate statename="over">
+				<image width="+2" height="+2" align="center" valign="center" group="plinko_button_outside" noclick="1"/>
+				<image width="+2" height="+2" align="center" valign="center" group="plinko_button_inside" color="{color=yellow}" noclick="1"/>
+				<label group="{label_group}" textvalign="center" textalign="center" font="{font=dyn_18}" color="{text_color=white}" shadow="true" outline="1" content="{content}" noclick="1"/>
+			</widgetstate>
+			<widgetstate statename="down" x="1" y="1">
+				<image width="+2" height="+2" align="center" valign="center" group="plinko_button_outside" noclick="1"/>
+				<image width="+2" height="+2" align="center" valign="center" group="plinko_button_inside" color="{color=yellow}" noclick="1"/>
+				<label group="{label_group}" textvalign="center" textalign="center" font="{font=dyn_18}" color="{text_color=white}" shadow="true" outline="1" content="{content}" noclick="1"/>
+			</widgetstate>
+			<widgetstate statename="disabled">
+				<image group="plinko_button_outside" rendermode="grayscale" noclick="1"/>
+				<image group="plinko_button_inside" color="{color=yellow}" rendermode="grayscale" noclick="1"/>
+				<label group="{label_group}" textvalign="center" textalign="center" font="{font=dyn_18}" color="{text_color=white}" shadow="true" outline="1" content="{content}" noclick="1"/>
+			</widgetstate>
+		</button>
+	</template>
+
+	<template name="purchase_drops_button" >
+		<panel height="8h" grow="1" name="purchase_drops_{id}" float="bottom">
+			<!-- top portion, gold cost -->
+			<panel height="3h" grow="1" align="center" float="right">
+				<image width="100@" texture="/ui/fe2/store/gold_coins.tga"/>
+				<label name="purchase_drops_{id}_x" width="1.1h" font="dyn_14" content="x" textvalign="bottom" color="white" shadow="1" outline="1" />
+				<label name="purchase_drops_{id}_cost" fitx="1" font="dyn_16" content="0" textvalign="bottom" color="white" shadow="1" outline="1" />
+			</panel>
+			<instance name="plinko_button" color="{color=yellow}" onclicklua="{onclicklua}" label_group="purchase_drops_{id}_amount_group" align="center" content="0"/>
+		</panel>
+	</template>
+
+	<template name="ticket_redemption">
+		<panel height="50h" name="ticket_redemption_section" visible="0"
+			onshowlua="
+				UIManager.GetInterface('main'):HoNPlinkoF('ShowTicketRedemption')
+				SetPlinkoSessionRedemptionOpen(true)
+			"
+			onhidelua="
+				UIManager.GetInterface('main'):HoNPlinkoF('HideTicketRedemption')
+				SetPlinkoSessionRedemptionOpen(false)
+			"
+		>
+
+			<!-- background image -->
+			<image width="181h" height="100%" align="center" noclick="true"
+				name="ticket_redemption_background"
+				resourcecontext="plinko"
+			/>
+
+			<!-- sign (needs to be higher res to look good) -->
+			<image x="10h" y="-0.5h" width="47.5h" height="25%" align="center" noclick="true"
+				name="ticket_redemption_sign"
+				resourcecontext="plinko"
+			/>
+
+			<!-- This panel is the size that we have to work with in all screen modes (since it's the 5:4 size) -->
+			<panel width="125h" align="center" >
+				<!-- Merrick plz D: -->
+				<panel x="7h" width="105h" align="center" noclick="true" >
+					<panel width="40h" valign="bottom" height="40h" noclick="true" >
+						<!-- panel to clip the model so it doesn't actually exist behind the counter (makes the fading nicer) -->
+						<panel name="ticker_redemption_merric_clip" height="28h" x="-12h" y="-10h" noclick="1" clip="1">
+							<modelpanel
+								name="ticker_redemption_merric"
+								resourcecontext="plinko"
+								height="50h" width="40h"
+								modelscale="1.1"
+								visible="1"
+								noclick="true"
+								anim="idle"
+								camerapos="-35 -115 -0"
+								cameraangles="0 0 0"
+								modelangles="0 0 170"
+								camerafov="25"
+								cameranear="1"
+								carmerafar="100"
+								depthclear="true"
+								depthcompress="true"
+								sunazimuth="157.06"
+								sunaltitude="22.05"
+								suncolor=".49 .49 .49"
+								ambientcolor="1.34 1.34 1.34"
+								watch9="MainRegisterModels"
+								ontrigger9lua="ResourceManager.RegisterModel('/ui/fe2/store/goblin/model.mdf', 'plinko', self)"
+								scenebuffer="1"
+							/>
+						</panel>
+					</panel>
+				</panel>
+
+				<!-- prize stands -->
+				<panel align="center" valign="center" y="0h" x="13h" width="55.5h" height="25h" >
+					<panel float="right" grow="1" padding="0.75h" align="right" >
+						<instance name="prize_stand" id="1" />
+						<instance name="prize_stand" id="2" />
+						<instance name="prize_stand" id="3" />
+						<instance name="prize_stand" id="4" />
+						<instance name="prize_stand" id="5" />
+					</panel>
+					<panel y="-3.0h" valign="bottom" float="right" grow="1" padding="0.75h" align="right" >
+						<instance name="prize_stand" id="6" />
+						<instance name="prize_stand" id="7" />
+						<instance name="prize_stand" id="8" />
+						<instance name="prize_stand" id="9" />
+						<instance name="prize_stand" id="10" />
+					</panel>
+				</panel>
+
+				<!-- back button -->
+				<panel x="4.0h" y="2.0h" width="18h" height="11h" rotation="0" clip="1" noclick="1" color="white"
+					name="ticket_redemption_back"
+					resourcecontext="plinko"
+				>
+					<panel y="2.3h" x="2.0h" width="-1.0h" height="-5.0h"
+						onmouseoverlua="PlaySound('/shared/sounds/ui/ccpanel/button_over_01.wav') GetWidget('ticket_redemption_back_label'):SetColor('1 0 0')"
+						onmouseoutlua="GetWidget('ticket_redemption_back_label'):SetColor('1 1 1')"
+						onclicklua="PlaySound('/shared/sounds/ui/button_click_01.wav')
+									UIManager.GetInterface('main'):HoNPlinkoF('FadeRedemptionSection', false, 250)
+									UIManager.GetInterface('main'):HoNPlinkoF('BlockPlinkoInput', 350)
+									self:Sleep(150, function()
+										UIManager.GetInterface('main'):HoNPlinkoF('FadePlinkoSection', true, 250)
+									end)
+									"
+					>
+						<label name="ticket_redemption_back_label" font="dyn_18" color="white" outline="1" shadow="1" textalign="center" textvalign="center" noclick="1" content="general_back" />
+					</panel>
+				</panel>
+			</panel>
+
+			<!-- height in the original image is 473 (473 / 1024) -->
+			<!-- the counter sits over top everything (use to be largely to sit over merrick, but had to clip him for fading sake) -->
+			<panel x="7.0h" width="109h" height="46.191%" align="center" valign="bottom" noclick="1" >
+				<panel noclick="true" color="white"
+					name="ticket_redemption_counter"
+					resourcecontext="plinko"
+				/>
+
+				<!-- Register -->
+				<panel width="20.5h" height="16h" x="10h" y="-4h" noclick="true" color="white"
+					name="ticket_redemption_register"
+					resourcecontext="plinko"
+				>
+					<!-- ticket amount -->
+					<label x="6h" y="2.5h" font="dyn_14" color="white" outline="1" shadow="1" content="general_tickets" noclick="1"/>
+					<label name="plinko_ticket_count" x="6h" y="4.5h" height="2.0h" width="11.7h" font="dyn_18" color="#00E304" outline="1" shadow="1" textvalign="center" textalign="right" noclick="1" content="-" />
+				</panel>
+			</panel>
+
+			<!-- overlay image for themes -->
+			<image width="181h" height="100%" align="center" notexturefiltering="1" noclick="true"
+				name="ticket_theme_overlay"
+				resourcecontext="plinko"
+			/>
+		</panel>
+	</template>
+
+	<template name="plinko_lootlist_item_template">
+		<panel name="plinko_lootlist_item_{id}" width="337i" noclick="1">
+			<panel name="plinko_lootlist_item_{id}_avatar" noclick="1" visible="0">
+				<modelpanel name="plinko_lootlist_item_{id}_avatar_model" width="500%" height="100%" align="center" valign="bottom" noclick="1"
+							sunazimuth="120"
+							sunaltitude="50"
+							suncolor="0.9 0.9 0.9"
+							ambientcolor="0.6 0.7 0.7"
+							cameranear="0.0"
+							lookat="false"
+							camerafar="5000.0"
+							camerapos="0 4500 70"
+							cameraangles="0 0 180"
+							camerafov="10"
+							depthclear="true"
+							depthcompress="false"
+							cull="false"
+							resourcecontext="plinko_lootlist"
+							scenebuffer="true"
+							outline="1"
+							outlinecolor="0 0 0"
+							posteffects="true"
+							postoutline="/core/post/outline.posteffect"
+				/>
+				<panel x="40i" width="-40i" y="90i" height="64i" noclick="1">
+					<image name="plinko_lootlist_item_{id}_avatar_icon" width="100@" height="100%" noclick="1" resourcecontext="plinko_lootlist"/>
+					<label name="plinko_lootlist_item_{id}_avatar_name" x="70i" width="-70i" height="50%" textvalign="center" font="dyn_16" color="white" noclick="1" autofont="1" autofontmax="16"/>
+					<label name="plinko_lootlist_item_{id}_avatar_type" x="70i" width="-70i" height="50%" valign="bottom" textvalign="center" font="dyn_12" color="white" noclick="1"/>
+				</panel>
+				<panel name="plinko_lootlist_item_{id}_avatar_owned" y="-60i" width="256i" height="64i" align="center" valign="bottom" noclick="1" visible="0">
+					<image texture="/ui/fe2/plinko/owned.tga" noclick="1"/>
+					<label y="3i" textalign="center" textvalign="center" font="dyn_12" content="plinko_owned" color="white"/>
+				</panel>
+			</panel>
+
+			<panel name="plinko_lootlist_item_{id}_other" noclick="1" visible="0">
+				<image name="plinko_lootlist_item_{id}_other_icon" width="128i" height="128i" align="center" valign="center" noclick="1" resourcecontext="plinko_lootlist"/>
+				<label name="plinko_lootlist_item_{id}_other_name" y="-90i" height="30i" valign="center" textalign="center" textvalign="center" font="dyn_18" color="white" noclick="1" autofont="1" autofontmax="18"/>
+				<label name="plinko_lootlist_item_{id}_other_type" y="80i" height="30i" valign="center" textalign="center" textvalign="center" font="dyn_14" color="white" noclick="1"/>
+				<panel name="plinko_lootlist_item_{id}_other_owned" y="110i" width="256i" height="64i" align="center" valign="center" noclick="1" visible="0">
+					<image texture="/ui/fe2/plinko/owned.tga" noclick="1"/>
+					<label y="3i" textalign="center" textvalign="center" font="dyn_12" content="plinko_owned" color="white"/>
+				</panel>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="plinko_lootlist_page_index_template">
+		<button name="plinko_lootlist_page_index_{id}" width="24i" color="invisible" visible="0" stickytoinvis="false" onclicklua="UIManager.GetInterface('main'):HoNPlinkoF('OnClickLootListPageIndex', {id})" onclick="PlaySound('/ui/fe2/codex/sounds/ok.ogg')" onmouseover="PlaySound('/shared/sounds/ui/button_over_01.wav')">
+			<widgetstate statename="up">
+				<label name="plinko_lootlist_page_index_{id}_label1" textalign="center" textvalign="center" font="dyn_14" color="#827474" outline="1" outlinecolor="#1c1111" content="{id}"/>
+			</widgetstate>
+			<widgetstate statename="over">
+				<label name="plinko_lootlist_page_index_{id}_label2" textalign="center" textvalign="center" font="dyn_14" color="#C2B4B4" outline="1" outlinecolor="#1c1111" content="{id}"/>
+			</widgetstate>
+			<widgetstate statename="down">
+				<label name="plinko_lootlist_page_index_{id}_label3" textalign="center" textvalign="center" font="dyn_14" color="#C2B4B4" outline="1" outlinecolor="#1c1111" content="{id}"/>
+			</widgetstate>
+		</button>
+	</template>
+
+	<template name="plinko_lootlist_template">
+		<panel name="plinko_lootlist" color="0 0 0 .8" visible="0">
+			<panel width="125h" noclick="1" align="center">
+				<instance name="mstore_btn_closex" button_name="plinko_lootlist_close_button" width="2.0h" height="2.0h" align="right" x="-1h" y="1h"
+					onclicklua="GetWidget('plinko_lootlist'):SetVisible(false)"
+				/>
+			</panel>
+
+			<panel align="center" width="1350i" noclick="1" float="right" padding="1">
+				<instance name="plinko_lootlist_item_template" id="1"/>
+				<instance name="plinko_lootlist_item_template" id="2"/>
+				<instance name="plinko_lootlist_item_template" id="3"/>
+				<instance name="plinko_lootlist_item_template" id="4"/>
+			</panel>
+
+			<panel y="20i" align="center" width="1350i" height="48i" noclick="1">
+				<panel x="30i" width="100@" height="100%">
+					<modelpanel name="plinko_lootlist_chest_effect"
+								width="250%" height="250%"
+								valign="center" align="center"
+								noclick="true"
+								model="/shared/models/invis.mdf"
+								onhidelua="self:SetEffect('')"
+								camerapos="0 80 0"
+								cameraangles="0 0 180"
+								camerafov="55"
+								depthclear="false"
+								depthcompress="true"
+								resourcecontext="plinko"
+					/>
+					<image name="plinko_lootlist_chest_icon" width="+6i" height="+6i" noclick="1"/>
+				</panel>
+				<label name="plinko_lootlist_chest_name" x="95i" y="5i" height="50%" textalign="left" textvalign="center" color="#ffab01" font="dyn_14" content="" noclick="1"/>
+				<label name="plinko_lootlist_chest_desc" x="95i" y="2i" height="50%" valign="bottom" textalign="left" textvalign="center" color="white" font="dyn_12" content="" noclick="1"/>
+			</panel>
+
+			<panel align="center" width="1350i" noclick="1">
+				<button name="plinko_lootlist_lastpage" color="invisible" height="64i" width="64i" align="left" valign="center"
+						onclicklua="PlaySound('/shared/sounds/ui/ccpanel/button_close_02.wav') UIManager.GetInterface('main'):HoNPlinkoF('OnClickLootListPageLastOrNext', true)"
+						onmouseoverlua="PlaySound('/shared/sounds/ui/ccpanel/button_over_01.wav')"
+				>
+					<widgetstate statename="up">
+						<image texture="/ui/fe2/plinko/arrow.tga" noclick="1"/>
+					</widgetstate>
+					<widgetstate statename="over">
+						<image texture="/ui/fe2/plinko/arrow_over.tga" noclick="1"/>
+					</widgetstate>
+					<widgetstate statename="down" x="1" y="1">
+						<image texture="/ui/fe2/plinko/arrow_over.tga" noclick="1"/>
+					</widgetstate>
+					<widgetstate statename="disabled">
+						<image texture="/ui/fe2/plinko/arrow.tga" rendermode="grayscale" noclick="1"/>
+					</widgetstate>
+				</button>
+
+				<button name="plinko_lootlist_nextpage" color="invisible" height="64i" width="64i" align="right" valign="center"
+						onclicklua="PlaySound('/shared/sounds/ui/ccpanel/button_close_02.wav') UIManager.GetInterface('main'):HoNPlinkoF('OnClickLootListPageLastOrNext', false)"
+						onmouseoverlua="PlaySound('/shared/sounds/ui/ccpanel/button_over_01.wav')"
+				>
+					<widgetstate statename="up">
+						<image texture="/ui/fe2/plinko/arrow.tga" noclick="1" hflip="1"/>
+					</widgetstate>
+					<widgetstate statename="over">
+						<image texture="/ui/fe2/plinko/arrow_over.tga" noclick="1" hflip="1"/>
+					</widgetstate>
+					<widgetstate statename="down" x="1" y="1">
+						<image texture="/ui/fe2/plinko/arrow_over.tga" noclick="1" hflip="1"/>
+					</widgetstate>
+					<widgetstate statename="disabled">
+						<image texture="/ui/fe2/plinko/arrow.tga" rendermode="grayscale" noclick="1" hflip="1"/>
+					</widgetstate>
+				</button>
+			</panel>
+
+			<panel height="32i" float="right" grow="1" regrow="1" align="center" valign="bottom" y="-30i" padding="1" >
+				<instance name="plinko_lootlist_page_index_template" id="1"/>
+				<instance name="plinko_lootlist_page_index_template" id="2"/>
+				<instance name="plinko_lootlist_page_index_template" id="3"/>
+				<instance name="plinko_lootlist_page_index_template" id="4"/>
+				<instance name="plinko_lootlist_page_index_template" id="5"/>
+				<instance name="plinko_lootlist_page_index_template" id="6"/>
+				<instance name="plinko_lootlist_page_index_template" id="7"/>
+				<instance name="plinko_lootlist_page_index_template" id="8"/>
+				<instance name="plinko_lootlist_page_index_template" id="9"/>
+			</panel>
+			<panel name="plinko_lootlist_mask" color="0 0 0 .8" visible="0">
+				<animatedimage texture="/ui/fe2/elements/store2/loading/loading_.png" width="512i" height="128i" align="center" valign="center"
+					fps="25" loop="true" loopbackframe="0" startframe="0" onshow="StartAnim();" />
+			</panel>
+		</panel>
+	</template>
+
+
+
+	<!-- main panel templates -->
+	<template name="plinko" >
+		<panel height="50h" name="plinko_section" visible="0"
+			onshowlua="UIManager.GetInterface('main'):HoNPlinkoF('ShowPlinko')"
+			onhidelua="UIManager.GetInterface('main'):HoNPlinkoF('HidePlinko')"
+		>
+
+			<!-- background image -->
+			<image width="181h" height="100%" align="center" notexturefiltering="1" noclick="true"
+				name="plinko_background"
+				resourcecontext="plinko"
+			/>
+
+			<!-- This panel is the size that we have to work with in all screen modes (since it's the 5:4 size) -->
+			<panel width="125h" align="center" >
+				<!-- Merrick plz D: -->
+				<panel width="135h" align="center" noclick="true" >
+					<panel width="30h" valign="bottom" height="30h" noclick="true">
+						<modelpanel
+							name="plinko_merric"
+							resourcecontext="plinko"
+							modelscale="1.1"
+							visible="0"
+							noclick="true"
+							anim="idle"
+							camerapos="-10 -125 5"
+							cameraangles="0 0 0"
+							modelangles="0 0 170"
+							camerafov="25"
+							cameranear="1"
+							carmerafar="100"
+							depthclear="true"
+							depthcompress="true"
+							sunazimuth="157.06"
+							sunaltitude="22.05"
+							suncolor=".49 .49 .49"
+							ambientcolor="1.34 1.34 1.34"
+							watch9="MainRegisterModels"
+							ontrigger9lua="ResourceManager.RegisterModel('/ui/fe2/store/goblin/model.mdf', 'plinko', self)"
+							scenebuffer="1"
+						/>
+					</panel>
+				</panel>
+
+				<!-- Other buttons -->
+				<panel y="14.5h" x="17.5h" width="35h" height="35h" noclick="1" >
+					<!-- left side, gold button -->
+					<panel y="5%" x="18%" width="31.75%" height="60%" valign="center"
+						onclicklua="PlaySound('/shared/sounds/ui/button_click_01.wav') UIManager.GetInterface('main'):HoNPlinkoF('SetCurrency', 'gold')"
+						onmouseoverlua="PlaySound('/shared/sounds/ui/button_over_01.ogg') UIManager.GetInterface('main'):HoNPlinkoF('MouseOverCurrency', 'gold')"
+						onmouseoutlua="UIManager.GetInterface('main'):HoNPlinkoF('MouseOutCurrency')"
+					>
+						<frame name="plinko_drop_type_gold_frame" texture="/ui/frames/rounded_button_bg_white.tga" color="#461b07" borderthickness="0.5h" noclick="1" />
+
+						<label y="0.5h" font="dyn_18" color="white" outline="1" textalign="center" content="game_ui_label_gold" noclick="1" />
+						<label y="3.5h" font="dyn_12" color="lime" outline="1" textalign="center" content="-" watch="GoldCoins" ontriggerlua="self:SetText(param) UIManager.GetInterface('main'):HoNPlinkoF('UpdateCurrencySelection', true)" noclick="1" />
+
+						<image name="plinko_drop_type_gold_icon" y="-0.25h" width="85%" height="85@" valign="center" align="center" noclick="1"
+							resourcecontext="plinko"
+						/>
+
+						<label y="14.5h" color="white" font="dyn_16" outline="1" textalign="center" content="plinko_cost" noclick="1" />
+						<label name="plinko_gold_drop_cost" y="16.5h" textalign="center" font="dyn_18" color="white" outline="1" content="-" noclick="1" />
+					</panel>
+
+					<!-- right side, ticket button -->
+					<panel y="5%" x="-18%" align="right" valign="center" width="31.75%" height="60%"
+						onclicklua="PlaySound('/shared/sounds/ui/button_click_01.wav') UIManager.GetInterface('main'):HoNPlinkoF('SetCurrency', 'tickets')"
+						onmouseoverlua="PlaySound('/shared/sounds/ui/button_over_01.ogg') UIManager.GetInterface('main'):HoNPlinkoF('MouseOverCurrency', 'tickets')"
+						onmouseoutlua="UIManager.GetInterface('main'):HoNPlinkoF('MouseOutCurrency')"
+					>
+						<frame name="plinko_drop_type_tickets_frame" texture="/ui/frames/rounded_button_bg_white.tga" color="#461b07" borderthickness="0.5h" noclick="1" />
+
+						<label y="0.5h" font="dyn_18" color="white" outline="1" textalign="center" content="general_tickets" noclick="1" />
+						<label name="plinko_drop_ticket_count" y="3.5h" font="dyn_12" color="lime" outline="1" textalign="center" content="-" noclick="1" />
+
+						<image name="plinko_drop_type_tickets_icon" y="-0.25h" width="85%" height="85@" valign="center" align="center" noclick="1"
+							resourcecontext="plinko"
+						/>
+
+						<label y="14.5h" color="white" font="dyn_16" outline="1" textalign="center" content="plinko_cost" noclick="1" />
+						<label name="plinko_ticket_drop_cost" y="16.5h" textalign="center" font="dyn_18" color="white" outline="1" content="-" noclick="1" />
+					</panel>
+
+					<!-- actual frame -->
+					<image noclick="1"
+						name="plinko_drop_board"
+						resourcecontext="plinko"
+					 />
+
+					<!-- title -->
+					<label y="2.0h" textalign="center" content="plinko_board_header" color="white" outline="1" font="dyn_18" noclick="1" />
+
+					<!-- or -->
+					<label y="0.85h" color="white" font="dyn_14" textalign="center" textvalign="center" outline="1" content="general_or" noclick="1" />
+
+					<!-- Do It! -->
+					<panel y="-0.75h" valign="bottom" height="5.5h" width="17.5h" grow="1" align="center"
+						onshowlua="UIManager.GetInterface('main'):HoNPlinkoF('CreateDropDisabledButton', self, '#a3ff0e', '1 0 0', 'gray',
+											function()
+												UIManager.GetInterface('main'):HoNPlinkoF('DropPlinko')
+											end,
+											GetWidget('plinko_drop_label'))"
+					>
+						<frame texture="/ui/frames/rounded_button_bg_white.tga" color="lime" borderthickness="1.75h" noclick="1" />
+						<frame texture="/ui/frames/roundframe.tga" color="black" borderthickness="1.75h" noclick="1"/>
+
+						<label name="plinko_drop_label" font="dyn_18" color="#BBED6B" outline="1" shadow="1" textalign="center" textvalign="center" noclick="1" content="plinko_drop" />
+					</panel>
+				</panel>
+
+				<!-- new leave / ticket redemption button -->
+				<panel noclick="1" color="white"
+					y="-3h" width="23h" height="25h"
+					name="plinko_nav_signs"
+					resourcecontext="plinko"
+				>
+					<!-- Leave Button -->
+					<panel y="7.25h" x="2.5h" width="-5.0h" height="6.25h"
+						onshowlua="UIManager.GetInterface('main'):HoNPlinkoF('CreateDropDisabledButton', self, '1 1 1', '1 0 0', 'gray',
+											function()
+												UIManager.GetInterface('main'):HoNMainF('MainMenuPanelToggle', 'plinko', nil, false)
+											end,
+											GetWidget('plinko_back_label'))"
+					>
+						<label name="plinko_back_label" font="dyn_18" color="white" outline="1" shadow="1" textalign="center" textvalign="center" noclick="1" content="general_leave" />
+					</panel>
+
+					<!-- ticket redemption -->
+					<panel width="-5.0h" x="2.5h" height="6.25h" y="-2.5h" valign="bottom"
+						onshowlua="UIManager.GetInterface('main'):HoNPlinkoF('CreateDropDisabledButton', self, '1 1 1', '1 0 0', 'gray',
+											function()
+												UIManager.GetInterface('main'):HoNPlinkoF('BlockPlinkoInput', 350)
+												UIManager.GetInterface('main'):HoNPlinkoF('FadePlinkoSection', false, 250)
+												self:Sleep(150, function()
+													UIManager.GetInterface('main'):HoNPlinkoF('FadeRedemptionSection', true, 250)
+												end)
+											end,
+											GetWidget('plinko_redemption_label'))"
+					>
+						<label name="plinko_redemption_label" font="dyn_16" color="white" outline="1" shadow="1" textalign="center" textvalign="center" noclick="1" content="plinko_ticket_redemption" />
+					</panel>
+				</panel>
+
+				<!-- board -->
+				<panel x="22h" y="-1.0h"  width="80h" align="center" height="52.5h" noclick="1">
+					<!-- board -->
+					<!-- top of the board, everything above the bottom 88 pixels -->
+					<panel valign="top" height="-20.1171875%" clip="1" noclick="1">
+						<image height="52.5h" noclick="1"
+							name="plinko_board_main"
+							resourcecontext="plinko"
+						/>
+						<!-- lights -->
+						<!-- these widths and heights came from map, bulb widths and heights are 64, 64 where are board is 1024, 512 -->
+						<!-- left side -->
+						<image name="plinko_bulb_1" y="-3.3%" x="18.5%" width="6.25%" height="6.5625h"
+							resourcecontext="plinko"
+						/>
+						<image name="plinko_bulb_2" y="-2.9%" x="22.25%" width="6.25%" height="6.5625h"
+							resourcecontext="plinko"
+						/>
+						<image name="plinko_bulb_3" y="-2.35%" x="26%" width="6.25%" height="6.5625h"
+							resourcecontext="plinko"
+						/>
+						<image name="plinko_bulb_4" y="-3.65%" x="30%%" width="6.25%" height="6.5625h"
+							resourcecontext="plinko"
+						/>
+
+						<!-- right side -->
+						<image name="plinko_bulb_8" y="-2.35%" x="-18.75%" width="6.25%" height="6.5625h" align="right" hflip="1"
+							resourcecontext="plinko"
+						/>
+						<image name="plinko_bulb_7" y="-2%" x="-22.5%" width="6.25%" height="6.5625h" align="right" hflip="1"
+							resourcecontext="plinko"
+						/>
+						<image name="plinko_bulb_6" y="-1.75%" x="-26.25%" width="6.25%" height="6.5625h" align="right" hflip="1"
+							resourcecontext="plinko"
+						/>
+						<image name="plinko_bulb_5" y="-3.0%" x="-30.25%" width="6.25%" height="6.5625h" align="right" hflip="1"
+							resourcecontext="plinko"
+						/>
+					</panel>
+
+					<!-- puck -->
+					<panel name="plinko_puck_trail_3" color="1 1 1 0.15" width="1.825h" height="1.825h" noclick="1" visible="0"
+						resourcecontext="plinko"
+					/>
+					<panel name="plinko_puck_trail_2" color="1 1 1 0.35" width="1.825h" height="1.825h" noclick="1" visible="0"
+						resourcecontext="plinko"
+					/>
+					<panel name="plinko_puck_trail_1" color="1 1 1 0.45" width="1.825h" height="1.825h" noclick="1" visible="0"
+						resourcecontext="plinko"
+					/>
+					<panel name="plinko_puck" width="1.825h" height="1.825h" noclick="1" visible="0" color="white"
+						resourcecontext="plinko"
+					/>
+
+					<!-- board front (over puck) -->
+					<!-- this section is 103 pixels tall (in the image) -->
+					<panel valign="bottom" height="20.1171875%" clip="1" noclick="1">
+						<image height="52.5h" valign="bottom" noclick="1"
+							name="plinko_board_sub"
+							resourcecontext="plinko"
+						/>
+
+						<!-- prize 'infos', sits over top of the buckets -->
+						<instance name="tier_info" bucket="1" x="19.05h" />
+						<instance name="tier_info" bucket="2" x="26.35h" />
+						<instance name="tier_info" bucket="3" x="33.30h" />
+						<instance name="tier_info" bucket="4" x="39.30h" />
+						<instance name="tier_info" bucket="5" x="48.50h" />
+						<instance name="tier_info" bucket="6" x="58.40h" />
+					</panel>
+
+					<panel name="plinko_lootlist_tip" x="-40" y="-100i" width="256i" height="128i" align="center" valign="bottom" noclick="1" visible="0">
+						<image texture="/ui/fe2/plinko/tips.tga" noclick="1" />
+						<panel y="14i" width="160i" height="75i" align="center">
+							<label textalign="center" textvalign="center" content="plinko_lootlist_tip" color="#ffdb87" noclick="1" wrap="1" font="dyn_10"/>
+						</panel>
+					</panel>
+				</panel>
+			</panel>
+
+			<!-- Token Purchasing prompt -->
+			<!-- <panel name="plinko_token_purchase" color="0 0 0 0.5" blockinput="1" visible="0"
+				onevent0lua="GetWidget('plinko_token_purchase_panel'):SlideY('-35h', 175) self:Sleep(150, function() self:FadeOut(150) end)"
+				onevent1lua="self:FadeIn(150) self:Sleep(50, function() GetWidget('plinko_token_purchase_panel'):SlideY('0h', 175) end)"
+			>
+				<panel name="plinko_token_purchase_panel" y="-35h" width="50h" height="35h" align="center" color="white"
+					watch9="MainRegisterTextures"
+					ontrigger9lua="ResourceManager.RegisterTexture('/ui/fe2/plinko/dropdown_sign.tga', 'plinko', self)"
+					resourcecontext="plinko"
+				>
+					<panel y="15.0h" height="19h" width="-8h" align="center" >
+						<label align="center" y="1.0h" font="dyn_18" fitx="1" fity="1" content="general_how_many" color="white" outline="1" shadow="1" />
+
+						<panel y="8.0h" grow="1" align="center" float="right" padding="0h">
+							<instance name="purchase_drops_button" id="1" color="yellow"
+								onclicklua="UIManager.GetInterface('main'):HoNPlinkoF('BuyDropPackage', 1)"
+							 />
+							<instance name="purchase_drops_button" id="2" color="orange"
+								onclicklua="UIManager.GetInterface('main'):HoNPlinkoF('BuyDropPackage', 2)"
+							/>
+							<instance name="purchase_drops_button" id="3" color="red"
+								onclicklua="UIManager.GetInterface('main'):HoNPlinkoF('BuyDropPackage', 3)"
+							/>
+						</panel> -->
+
+						<!-- close button -->
+						<!-- <button width="2.5h" height="2.5h" x="-1h" y="1h" align="right" texture="/ui/info/close_button.tga"
+							onclicklua="PlaySound('/shared/sounds/ui/button_click_01.wav') GetWidget('plinko_token_purchase'):DoEventN(0)"
+							onmouseoverlua="PlaySound('/shared/sounds/ui/ccpanel/button_over_01.wav')"
+						/>
+					</panel>
+				</panel>
+			</panel> -->
+
+			<!-- overlay image for themes -->
+			<image width="181h" height="100%" align="center" notexturefiltering="1" noclick="true"
+				name="plinko_theme_overlay"
+				resourcecontext="plinko"
+			/>
+		</panel>
+	</template>
+
+	<template name="plinko_prize_popup">
+		<!-- A winner is you! (popup) -->
+		<panel name="plinko_winner_is_you" height="50h" color="0 0 0 0.8" blockinput="1" visible="0"	>
+			<modelpanel
+				name="plinko_chest"
+				resourcecontext="plinko"
+				onhidelua="self:SetEffect('')"
+				noclick="true"
+				anim="idle"
+				camerapos="0 -1650 0"
+				cameraangles="0 0 0"
+				modelangles="0 0 180"
+				camerafov="25"
+				cameranear="1"
+				carmerafar="100"
+				depthclear="true"
+				depthcompress="true"
+				sunazimuth="165"
+				sunaltitude="180"
+				suncolor="1 1 1"
+				ambientcolor="0.8 0.8 0.8"
+				scenebuffer="1"
+			/>
+
+			<panel name="plinko_clipper" height="55%" clip="1" noclick="1" >
+				<!-- For icons -->
+				<panel name="plinko_prize_info_icon" grow="1" width="100%" valign="bottom" align="center" noclick="1" visible="0">
+					<panel height="16h" >
+						<panel height="12.5h" width="12.5h" valign="center" align="center">
+							<modelpanel
+								name="plinko_prize_effect_icon"
+								width="150%" height="150%"
+								valign="center" align="center"
+								noclick="true"
+								model="/shared/models/invis.mdf"
+								onhidelua="self:SetEffect('')"
+								camerapos="0 10 0"
+								cameraangles="0 0 180"
+								camerafov="55"
+								depthclear="false"
+								depthcompress="true"
+								resourcecontext="plinko"
+							/>
+							<image name="plinko_prize_icon_icon" width="-0.5h" height="-0.5h" align="center" valign="center"/>
+						</panel>
+						<label name="plinko_prize_name_icon" font="dyn_18" textalign="center" color="white" outline="1" shadow="1"/>
+						<label name="plinko_prize_type_icon" y="-1h" textalign="center" textvalign="bottom" font="dyn_12" color=".9 .9 .9" outline="1" shadow="1"/>
+					</panel>
+				</panel>
+				<!-- For 3D Models -->
+				<panel name="plinko_prize_info_model" grow="1" width="100%" valign="bottom" align="center" noclick="1" visible="0">
+					<panel height="19h" >
+						<!-- this effect needs to be in front of the actual model panel or else it won't look correct, weird bug -->
+						<panel y="3h" height="11h">
+							<panel x="-9h" height="7.5h" width="7.5h" valign="center" align="center">
+								<modelpanel
+									name="plinko_prize_effect_model"
+									width="150%" height="150%"
+									valign="center" align="center"
+									noclick="true"
+									model="/shared/models/invis.mdf"
+									onhidelua="self:SetEffect('')"
+									camerapos="0 10 0"
+									cameraangles="0 0 180"
+									camerafov="55"
+									depthclear="false"
+									depthcompress="true"
+									resourcecontext="plinko"
+								/>
+							</panel>
+						</panel>
+
+						<!-- the actual model panel -->
+						<modelpanel
+							height="27h"
+							align="center"
+							name="plinko_prize_model"
+							noclick="true"
+							model="/shared/models/invis.mdf"
+							onhidelua="self:SetEffect('')"
+							anim="idle"
+							cameranear="100.0"
+							camerafar="20000.0"
+							depthclear="true"
+							depthcompress="false"
+							lookat="false"
+							cameradistance="30"
+							camerapos="30 10000 65"
+							cameraangles="0 0 180"
+							camerafov="7"
+							modelpos="0 0 0"
+							modelangles="-15.0 0 0.0"
+							modelscale="1.0"
+							sunazimuth="120"
+							sunaltitude="20"
+							suncolor="0.9 0.9 0.9"
+							ambientcolor="0.6 0.7 0.7"
+							scenebuffer="true"
+							resourcecontext="plinko"
+						/>
+						<panel y="2h" height="11h">
+							<panel y="1h" x="-9h" height="7.5h" width="7.5h" valign="center" align="center">
+								<!-- effect model panel use to be here -->
+								<image name="plinko_prize_icon_model" width="-0.5h" height="-0.5h" align="center" valign="center"/>
+							</panel>
+							<label name="plinko_prize_name_model" font="dyn_18" textalign="center" color="white" outline="1" shadow="1"/>
+							<label name="plinko_prize_type_model" x="-9h" textalign="center" textvalign="bottom" font="dyn_12" color=".9 .9 .9" outline="1" shadow="1"/>
+						</panel>
+					</panel>
+				</panel>
+			</panel>
+
+			<!-- for tickets -->
+			<panel name="plinko_prize_info_tickets" noclick="1" visible="0">
+				<panel name="plinko_ticket_make_it_rain" noclick="1" />
+				<label name="plinko_ticket_won_amount" color="#F2CE3D" outline="1" shadow="1" font="dyn_18" textalign="center" y="10h" />
+				<panel name="plinko_tickets_won_image" width="8h" height="8h" align="center">
+					<modelpanel
+						name="plinko_prize_effect_tickets"
+						width="110%" height="110%"
+						valign="center" align="center"
+						noclick="true"
+						model="/shared/models/invis.mdf"
+						onhidelua="self:SetEffect('')"
+						camerapos="0 10 0"
+						cameraangles="0 0 180"
+						camerafov="55"
+						depthclear="false"
+						depthcompress="true"
+						resourcecontext="plinko"
+					/>
+					<image
+						name="plinko_prize_ticket_texture"
+						resourcecontext="plinko"
+					/>
+				</panel>
+				<label name="plinko_ticket_products_exhausted" color="white" content="plinko_products_exhausted" outline="1" shadow="1" wrap="1" width="25%" align="center" font="dyn_11" textalign="center" y="21h" />
+			</panel>
+
+			<!-- middle center accept/close button -->
+			<instance name="button2"
+				button_name="plinko_prize_close_button"
+				y="-2h" align="center" valign="bottom" width="20h" height="3.5h"
+				label="general_continue" font="dyn_16"
+				onmouseoverlua="PlaySound('/shared/sounds/ui/button_over_02.wav')"
+				onclicklua="PlaySound('/shared/sounds/ui/button_click_01.wav')
+					GetWidget('plinko_winner_is_you'):FadeOut(150)
+					groupfcall('ticket_rain', function(_,w,_) w:Destroy() end)
+				"
+			/>
+
+			<!-- exit button -->
+			<panel width="125h" noclick="1" align="center">
+				<instance name="mstore_btn_closex" width="2.0h" height="2.0h" align="right" x="-1h" y="1h"
+					onclicklua="GetWidget('plinko_winner_is_you'):FadeOut(150)
+								groupfcall('ticket_rain', function(_,w,_) w:Destroy() end)
+								"
+				/>
+			</panel>
+		</panel>
+	</template>
+	<!-- end templates -->
+
+	<panel name="plinko" y="2.5h" height="50h" noclick="1" visible="0"
+		hotkey="ESC"
+		onhotkeylua="UIManager.GetInterface('main'):HoNMainF('MainMenuPanelToggle', 'plinko', nil, false)"
+		onevent1lua="
+			self:FadeIn(300)
+			UIManager.GetInterface('main'):HoNPlinkoF('InitializePlinko')
+			local merric = GetWidget('plinko_merric')
+			merric:Sleep(750, function() merric:SetVisible(true) end)"
+		onevent0lua="
+			UIManager.GetInterface('main'):HoNPlinkoF('ShutdownPlinko')
+			UIManager.GetInterface('main'):HoNPlinkoF('BlockPlinkoInput', 650)
+			GetWidget('plinko_merric'):SetVisible(false)
+			self:Sleep(400, function() self:FadeOut(300) end)"
+		onshowlua="
+			GetWidget('plinko_lootlist_mask'):SetVisible(false) GetWidget('plinko_lootlist'):SetVisible(false)
+			self:SetY(isNewUI() and '4.5h' or '2.5h')
+		"
+		onhidelua="DeleteResourceContext('plinko_lootlist', true)"
+	>
+		<panel color="black" noclick="1" />
+		<instance name="ticket_redemption" />
+		<instance name="plinko" />
+
+		<panel name="plinko_input_blocker" color="invisible" visible="0"/>
+
+		<!-- 'global' quit button -->
+		<panel width="125h" noclick="1" align="center">
+			<instance name="mstore_btn_closex" button_name="plinko_close_button" width="2.0h" height="2.0h" align="right" x="-1h" y="1h" visible="0"
+				onclicklua="UIManager.GetInterface('main'):HoNMainF('MainMenuPanelToggle', 'plinko', nil, false)"
+			/>
+		</panel>
+
+		<!-- this will make the close button for the prompt appear over the quit one -->
+		<instance name="plinko_prize_popup" />
+
+		<panel name="plinko_processing" height="7h" width="20h" color="0 0 0 0.5" align="center" valign="center" visible="0" >
+			<frame color="invisible" bordercolor="0.75 0.5 0 0.5" borderthickness="0.15h" noclick="true" />
+			<label color="white" shadow="true" font="dyn_12" textvalign="center" textalign="center" width="-5h" content="mstore_processing_elipses" />
+			<animatedimage texture="/ui/elements/throb/throb.tga" noclick="true" loop="1" fps="30" onshow="StartAnim(1);" align="right" width="5h" height="5h" valign="center" x="-0.25h" />
+		</panel>
+
+		<!-- A generic dialog for plinko things (confirm purchse, confirm drop, etc.) -->
+		<panel name="plinko_generic_dialog" color="0 0 0 0.5" blockinput="1" visible="0"
+			onevent0lua="GetWidget('plinko_generic_dialog_panel'):SlideY('-35h', 175) self:Sleep(150, function() self:FadeOut(150) end)"
+			onevent1lua="self:FadeIn(150) self:Sleep(50, function() GetWidget('plinko_generic_dialog_panel'):SlideY('0h', 175) end)"
+		>
+			<panel name="plinko_generic_dialog_panel" y="-35h" width="50h" height="35h" align="center" color="white"
+				resourcecontext="plinko"
+			>
+				<panel valign="bottom" align="center" height="21h" width="-6h" noclick="1" >
+					<!-- title -->
+					<label name="plinko_generic_dialog_title" y="0h" width="-13h" color="white" noclick="1" shadow="1" outline="1" font="dyn_18" textalign="center"  align="center" />
+					<!-- image -->
+					<image name="plinko_generic_dialog_image" width="5h" height="5h" y="3.25h" x="2h" />
+					<!-- header text if image -->
+					<label name="plinko_generic_dialog_header_image" height="5h" width="-10h" align="right" x="-2h" y="3.25h" color="white" shadow="1" outline="1" font="dyn_18" textvalign="center" />
+					<!-- header text, no image -->
+					<label name="plinko_generic_dialog_header" height="5h" width="-4h" x="2h" y="3.25h" color="white" shadow="1" outline="1" font="dyn_18" textvalign="center" textalign="center"  visible="0"/>
+					<!-- body text -->
+					<label name="plinko_generic_dialog_body" y="8.5h" width="-4h" height="5.5h" align="center" color="white" shadow="1" outline="1" font="dyn_12" textvalign="center" textalign="center" wrap="1" />
+					<panel name="plinko_generic_dialog_checbox" y="13.5h" width="-4h" height="1.5h" align="center" >
+						<panel name="plinko_generic_dialog_checbox_helper" grow="1" height="100%" align="center" regrow="1" float="right" padding="0.5h">
+							<panel width="1.5h" color="invisible" noclick="1">
+								<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.5h" color="white" noclick="1"/>
+								<frame texture="/ui/frames/roundframe.tga" color="#3abde7" borderthickness="0.5h" noclick="1"/>
+								<image name="plinko_generic_dialog_checbox_checkmark" texture="/ui/elements/check.tga" noclick="1"/>
+							</panel>
+							<label name="plinko_generic_dialog_checbox_label" fity="1" textvalign="center" font="dyn_10" color="white" shadow="true" outline="true" fitx="1" noclick="1"/>
+						</panel>
+					</panel>
+					<!-- buttons -->
+					<panel y="-2h" width="-12h" align="center" height="3.375h" valign="bottom" >
+						<instance name="plinko_button" button_name="plinko_generic_dialog_left_button" width="11h" height="100%" label_group="plinko_generic_dialog_left_button_labels" align="left" valign="center" font="dyn_14" content="test"/>
+						<instance name="plinko_button" button_name="plinko_generic_dialog_right_button" width="11h" height="100%" label_group="plinko_generic_dialog_right_button_labels" align="right" valign="center" font="dyn_14" content="test2"/>
+					</panel>
+				</panel>
+			</panel>
+		</panel>
+
+		<!-- grab bag appears over all the things! -->
+		<panel name="plinko_grab_bag_container" height="50h" width="178h" align="center" noclick="1" />
+
+		<instance name="plinko_lootlist_template" />
+	</panel>
+
+</package>

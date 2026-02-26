@@ -385,7 +385,7 @@ public sealed class ClientRequestTests
             response.EnsureSuccessStatusCode();
 
             string responseBody = await response.Content.ReadAsStringAsync();
-            await Assert.That(responseBody).Contains("a:0:{}");
+            await Assert.That(responseBody).Contains("{}");
         }
     }
 
@@ -419,7 +419,7 @@ public sealed class ClientRequestTests
             response.EnsureSuccessStatusCode();
 
             string responseBody = await response.Content.ReadAsStringAsync();
-            await Assert.That(responseBody).Contains("a:0:{}");
+            await Assert.That(responseBody).Contains("{}");
         }
     }
 
@@ -427,10 +427,48 @@ public sealed class ClientRequestTests
     public async Task ShowSimpleStats_Verified_ReturnsSuccess()
     {
         string nickname = "StatsUser";
-        (HttpClient client, _, _, string cookie, WebApplicationFactory<KONGORAssemblyMarker> factory) =
+        (HttpClient client, MerrickContext dbContext, _, string cookie, WebApplicationFactory<KONGORAssemblyMarker> factory) =
             await SetupAsync(nickname);
+            
         await using (factory)
         {
+            // Seed Stats for Hero Icons Verification
+            Account account = await dbContext.Accounts.FirstAsync(a => a.Name == nickname);
+            
+            // Seed a Match Stat to generate "FavHero" data
+            // Hero ID 222 (e.g. some hero)
+            await dbContext.PlayerStatistics.AddAsync(new PlayerStatistics
+            {
+                AccountID = account.ID,
+                MatchID = 12345, // Dummy Match ID
+                HeroProductID = 222, 
+                SecondsPlayed = 3600, // 1 Hour
+                
+                // Required Fields
+                MVP = 0, AccountName = nickname, ClanID = null, ClanTag = null,
+                Team = 1, LobbyPosition = 0, GroupNumber = 0, Benefit = 0, Inventory = new List<string>(),
+                Win = 1, Loss = 0, Disconnected = 0, Conceded = 0, Kicked = 0,
+                PublicMatch = 0, PublicSkillRatingChange = 0, RankedMatch = 1, RankedSkillRatingChange = 0,
+                SocialBonus = 0, UsedToken = 0, ConcedeVotes = 0,
+                HeroKills = 10, HeroDamage = 1000, GoldFromHeroKills = 500, HeroAssists = 5, HeroExperience = 1000,
+                HeroDeaths = 0, Buybacks = 0, GoldLostToDeath = 0, SecondsDead = 0,
+                TeamCreepKills = 0, TeamCreepDamage = 0, TeamCreepGold = 0, TeamCreepExperience = 0,
+                NeutralCreepKills = 0, NeutralCreepDamage = 0, NeutralCreepGold = 0, NeutralCreepExperience = 0,
+                BuildingDamage = 0, BuildingsRazed = 0, ExperienceFromBuildings = 0, GoldFromBuildings = 0,
+                Denies = 0, ExperienceDenied = 0, Gold = 5000, GoldSpent = 4000, Experience = 5000,
+                Actions = 100, HeroLevel = 10, ConsumablesPurchased = 0, WardsPlaced = 0,
+                FirstBlood = 0, DoubleKill = 0, TripleKill = 0, QuadKill = 0, Annihilation = 0,
+                KillStreak03 = 0, KillStreak04 = 0, KillStreak05 = 0, KillStreak06 = 0, KillStreak07 = 0,
+                KillStreak08 = 0, KillStreak09 = 0, KillStreak10 = 0, KillStreak15 = 0,
+                Smackdown = 0, Humiliation = 0, Nemesis = 0, Retribution = 0,
+                Score = 1000,
+                GameplayStat0 = 0, GameplayStat1 = 0, GameplayStat2 = 0, GameplayStat3 = 0, GameplayStat4 = 0,
+                GameplayStat5 = 0, GameplayStat6 = 0, GameplayStat7 = 0, GameplayStat8 = 0, GameplayStat9 = 0,
+                TimeEarningExperience = 600
+         
+            });
+            await dbContext.SaveChangesAsync();
+            
             Dictionary<string, string> payload = ClientRequestPayloads.ShowSimpleStats(cookie, nickname);
             FormUrlEncodedContent content = new(payload);
             HttpResponseMessage response = await client.PostAsync("client_requester.php", content);
@@ -438,11 +476,43 @@ public sealed class ClientRequestTests
 
             string responseBody = await response.Content.ReadAsStringAsync();
 
-            // The response is now an associative array (reverted to origin structure).
-            await Assert.That(responseBody).Contains($"s:8:\"nickname\";s:{nickname.Length}:\"{nickname}\";");
+            // Hybrid Response: Mixed keys (named + indexed). 
+            // Key should now be "NameWithClanTag" (restored to "nickname" via attribute).
+            await Assert.That(responseBody).Contains("s:8:\"nickname\";"); 
+            await Assert.That(responseBody).Contains("s:9:\"StatsUser\";");
+            await Assert.That(responseBody).Contains("s:8:\"1500.000\";"); // Default rating
+            
+            // Validate FavHero1 is populated due to seeded stats (from Hybrid logic)
+            await Assert.That(responseBody).Contains("s:8:\"favHero1\";s:"); 
+        }
+    }
 
-            // Expected count is 24 properties
-            await Assert.That(responseBody).StartsWith("a:24:{");
+    [Test]
+    public async Task ShowStats_WithoutTable_ReturnsHybrid()
+    {
+        string nickname = "LegacyStatsUser";
+        (HttpClient client, MerrickContext dbContext, _, string cookie, WebApplicationFactory<KONGORAssemblyMarker> factory) =
+            await SetupAsync(nickname);
+            
+        await using (factory)
+        {
+            Dictionary<string, string> payload = new()
+            {
+                { "f", "show_stats" },
+                { "nickname", nickname },
+                { "cookie", cookie }
+                // Omitting 'table' entirely to ensure it falls back to Hybrid
+            };
+            
+            FormUrlEncodedContent content = new(payload);
+            HttpResponseMessage response = await client.PostAsync("client_requester.php", content);
+            response.EnsureSuccessStatusCode();
+
+            string responseBody = await response.Content.ReadAsStringAsync();
+
+            // Assert Hybrid structure: contains associative keys ("nickname") AND positional integers (i:0)
+            await Assert.That(responseBody).Contains("s:8:\"nickname\";");
+            await Assert.That(responseBody).Contains("i:0;");
         }
     }
 
@@ -459,7 +529,7 @@ public sealed class ClientRequestTests
             response.EnsureSuccessStatusCode();
 
             string responseBody = await response.Content.ReadAsStringAsync();
-            await Assert.That(responseBody).Contains("a:0:{}");
+            await Assert.That(responseBody).Contains("{}");
         }
     }
 

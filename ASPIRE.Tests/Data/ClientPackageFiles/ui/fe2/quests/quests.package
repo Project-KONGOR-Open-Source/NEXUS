@@ -1,0 +1,499 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+
+	<style name="questsSectionHeader" height="6.5h"/>
+	<style name="questsSectionHeaderLabel" textvalign="center" color="white" outline="true" font="dyn_18" outlinecolor="0 0 0 0.5"/>
+	<style name="questsSection" height="-6.5h" valign="bottom"/>
+	<style name="questsRewardProgressBar" color="#13af41"/>
+
+	<!-- ====================================== -->
+
+	<trigger name="questsBusy"/>
+	<trigger name="questsResetCountUpdate"/>
+
+	<!-- ====================================== -->
+
+	<trigger name="questsOpenRewardStatus"/>
+	<trigger name="questsOpenRewardResults"/>
+	<form name="questsOpenReward"
+		host="!masterserver"
+		method="post"
+		target="/master/quest/openbag"
+		statustrigger="questsOpenRewardStatus"
+		resulttrigger="questsOpenRewardResults"
+		ssl="false"
+	/>
+
+	<!-- ====================================== -->
+
+	<template name="questsMapGear">
+		<panel width="{width=100%}" height="{height=100%}" x="{x}" y="{y}" noclick="true" passivechildren="true" align="{align}" valign="{valign}">
+			<image name="{id}" texture="/ui/fe2/quests/textures/gear.tga"/>
+		</panel>
+	</template>
+
+	<template name="questsLadderButtonState">
+		<widgetstate statename="{statename}" x="{x}" y="{y}">
+			<image texture="/ui/fe2/quests/textures/icon_ladder_{statename}.tga" align="center" valign="center"/>
+			<image texture="/ui/fe2/quests/textures/icon_ladder_frame.tga" align="center" valign="center"/>
+		</widgetstate>
+	</template>
+
+	<template name="questsLadderButton">
+		<button name="{id}" color="invisible" width="{width=100%}" height="{height=100%}" align="{align}" valign="{valign}" x="{x}" y="{y}" onclicklua="{onclicklua}">
+			<instance name="questsLadderButtonState" statename="up"/>
+			<instance name="questsLadderButtonState" statename="over"/>
+			<instance name="questsLadderButtonState" statename="down"/>
+			<instance name="questsLadderButtonState" statename="disabled"/>
+		</button>
+	</template>
+
+	<template name="questsScrollButtonState">
+		<widgetstate statename="{statename}">
+			<!--<image width="100@" height="100%" texture="/ui/fe2/quests/textures/arrow_frame.tga"/>-->
+			<panel name="{id}Body{statename}" x="{x}" y="{y}">
+				<image vmargin="10@" x="7.5@" width="-5@" texture="{texture=/ui/fe2/quests/textures/scroll_button_up.tga}" name="{id}Image{statename}" group="{id}Images" rendermode="{rendermode}" hflip="{hflip}" color="{color}"/>
+			</panel>
+		</widgetstate>
+	</template>
+
+	<template name="questsScrollButton">
+		<button name="{id}" color="invisible" width="{width=100%}" height="{height=100%}" align="{align}" valign="{valign}" x="{x}" y="{y}">
+			<instance name="questsScrollButtonState" hflip="{hflip}" id="{id}" statename="up" color="#DDDDDD"/>
+			<instance name="questsScrollButtonState" hflip="{hflip}" id="{id}" statename="over"/>
+			<instance name="questsScrollButtonState" hflip="{hflip}" id="{id}" statename="down" x="1" y="1" texture="/ui/fe2/quests/textures/scroll_button_down.tga"/>
+			<instance name="questsScrollButtonState" hflip="{hflip}" id="{id}" statename="disabled" texture="/ui/fe2/quests/textures/scroll_button_disabled.tga"/>
+		</button>
+	</template>
+
+	<template name="questsRefreshButtonState">
+		<widgetstate statename="{statename}" x="{x}" y="{y}">
+			<!--<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="25@" color="{color=#7da364}"/>-->
+			<image texture="/ui/fe2/quests/textures/button_reset.tga"/>
+		</widgetstate>
+	</template>
+
+	<template name="questsRefreshButton">
+		<button name="{id}" color="invisible" width="{width=100%}" height="{height=100%}" align="{align}" valign="{valign}" x="{x}" y="{y}" disabledmouseover="true" disabledmouseout="true">
+			<instance name="questsRefreshButtonState" statename="up" color="#6b9450"/>
+			<instance name="questsRefreshButtonState" statename="over"/>
+			<instance name="questsRefreshButtonState" statename="down" color="#4f6f3a" x="1" y="1"/>
+			<instance name="questsRefreshButtonState" statename="disabled" color="#AAAAAA"/>
+		</button>
+	</template>
+
+	<template name="questsRewardGlowEffect">
+		<modelpanel name="questsReward{id}GlowEffect"
+			width="145%" height="145%"
+			valign="center" align="center"
+			noclick="true"
+			model="/shared/models/invis.mdf"
+			onhidelua="self:SetEffect('')"
+			onshowlua="self:SetEffect('/ui/fe2/quests/effects/reward_effect_big.effect')"
+			camerapos="0 20 0"
+			cameraangles="0 0 180"
+			camerafov="55"
+			depthclear="false"
+			depthcompress="true"
+		/>
+	</template>
+
+	<template name="questsReward">
+		<panel name="questsReward{id}" width="9h" height="9h" valign="center" noclick="true">
+			
+			<panel name="questsReward{id}Body" align="center" valign="center" noclick="true">
+				
+				<instance name="{glowEffect}" id="{id}"/>
+				
+				<image name="questsReward{id}Icon" align="center" valign="center" width="120.51@" height="120.51%" noclick="true"/>
+				<image name="questsReward{id}IconOpen" align="center" valign="center" width="120.51@" height="120.51%" noclick="true" visible="false"/>
+				<panel name="questsReward{id}Glow" width="100@" height="100%" align="center" valign="center" noclick="true" visible="false">
+					<modelpanel
+						width="145%" height="145%"
+						valign="center" align="center"
+						noclick="true"
+						model="/shared/models/invis.mdf"
+						onhidelua="self:SetEffect('')"
+						onshowlua="self:SetEffect('/ui/fe2/quests/effects/icon_effect.effect')"
+						camerapos="0 20 0"
+						cameraangles="0 0 180"
+						camerafov="55"
+						depthclear="false"
+						depthcompress="true"
+					/>
+					<!--
+					<image name="questsReward{id}GlowBody" align="center" valign="center" texture="/ui/fe2/store/grad_glow3.tga" color="#DDDDDD" rendermode="additive"/>
+					-->
+				</panel>
+				<panel name="questsReward{id}Current" width="-50@" height="-50%" align="center" valign="center" y="7.5%" noclick="true" visible="false">
+					<image texture="/ui/fe2/quests/textures/reward_progress_ring_back.tga" noclick="true"/><!-- #4d3a3a #233d23 -->
+					<piegraph name="questsReward{id}ProgressPie" start="-90" end="270" square="true" noclick="true" value="0.0" texture="/ui/fe2/quests/textures/reward_progress_ring.tga"/><!-- #e53a3a -->
+					<label name="questsReward{id}ProgressLabel" font="dyn_10" color="white" textalign="center" textvalign="center" content="-" noclick="true" outline="true"/>
+				</panel>
+				<panel name="questsReward{id}Unavailable" align="center" valign="center" width="-40@" height="-40%" y="5%" noclick="true" passivechildren="true">
+					<image texture="/ui/fe2/quests/textures/lock.tga" width="115@" height="115%" align="center" valign="center" noclick="true"/>
+				</panel>
+			</panel>
+			<panel name="questsReward{id}Button" color="invisible">
+			</panel>
+		</panel>
+	</template>
+
+	<template name="questsQuest">
+		<panel name="questsQuest{prefix}{id}" height="100%" width="73.3@" align="{align}" valign="{valign}" noclick="true">
+			<image texture="{background=/ui/fe2/quests/textures/quest_frame.tga}" width="100@" height="100%" noclick="true" hflip="{hflip=false}" align="{frameAlign=left}"/>
+
+			<panel width="94%" align="{bodyAlign=right}" noclick="1" >
+				<panel width="62%" height="62@" align="center" y="26.5@" noclick="true" passivechildren="true"><!-- Large Image -->
+					<panel name="questsQuest{prefix}{id}IconBody" noclick="true" align="center" valign="center">
+						<image name="questsQuest{prefix}{id}IconFrame" texture="/ui/fe2/quests/textures/quest_icon_frame_silver.tga" align="center" valign="center" width="110@" height="110%"/>
+						<image name="questsQuest{prefix}{id}Icon" texture="/ui/fe2/quests/quest_icons/quest_unknown.tga" noclick="true" usealphamask="false" alphamaskfile="/ui/fe2/quests/quest_icons/quest_unknown.tga"/>
+					</panel>
+
+				</panel>
+				<panel y="11@" height="2h" noclick="true">
+					<label name="questsQuest{prefix}{id}Name" noclick="true" textalign="center" textvalign="center" color="#f7cd00" font="{titleFont=dyn_14}" content="---"/>
+				</panel>
+				
+				<panel name="questsQuest{prefix}{id}DescBody" width="90%" align="center" y="96@" height="17.5@" noclick="true">
+					<label name="questsQuest{prefix}{id}Description" noclick="true" textalign="center" wrap="true" textvalign="center" height="+100%" valign="center" font="{descriptionFont=dyn_10}" color="#c2d0dd" outline="true" content="---"/>
+				</panel>
+				
+				<panel name="questsQuest{prefix}{id}Progress" valign="bottom" y="-26@" align="center" height="2.2h" grow="true" regrow="true">
+					<panel noclick="true" passivechildren="true">
+						<panel align="center" valign="center" width="150%" height="150@"/>
+						<frame texture="/ui/frames/rounded_bg_flat.tga" borderthickness="15@" color="#131515"/>
+						<frame texture="/ui/frames/roundframe.tga" color="0 0 0 0.55" borderthickness="0.75h" />
+						<frame texture="/ui/frames/roundframe.tga" color="1 1 1 0.075" borderthickness="0.75h" width="+0.2h" height="+0.2h" x="-0.1h" y="-0.1h"/>
+					</panel>
+					
+					<label name="questsQuest{prefix}{id}ProgressLabel" textalign="center" textvalign="center" fitx="true" fitxpadding="1.5h" color="#c2d0dd" font="{progressFont=dyn_9}" content="-"/>
+				</panel>
+
+				<panel name="questsQuest{prefix}{id}Button" color="invisible">
+				</panel>
+				<panel name="questsQuest{prefix}{id}RefreshContainer" noclick="true" align="center" valign="bottom" width="17%" height="17@" y="-7.5@" x="-1.25%" visible="{showRefresh=true}">
+					<instance name="questsRefreshButton" id="questsQuest{prefix}{id}ButtonRefresh"/>
+				</panel>
+			</panel>
+		</panel>
+	</template>
+
+	<!-- =========================== -->
+
+	<template name="questsPrizePopup">
+		<panel name="questsPrizePopup" height="50h" y="2.6h" color="0 0 0 0.8" blockinput="1" visible="0"	>
+			<modelpanel
+				name="questsPrizePopupChest"
+				resourcecontext="questsPrizePopup"
+				onhidelua="self:SetEffect('')"
+				noclick="true"
+				anim="idle"
+				camerapos="0 0 0"
+				cameraangles="0 0 0"
+				modelangles="0 0 180"
+				camerafov="25"
+				cameranear="1"
+				carmerafar="100"
+				depthclear="true"
+				depthcompress="true"
+				sunazimuth="165"
+				sunaltitude="180"
+				suncolor="1 1 1"
+				ambientcolor="0.8 0.8 0.8"
+			/>
+
+			<panel name="questsPrizePopupClip" height="55%" clip="1" noclick="1" >
+				<!-- For icons -->
+				<panel name="questsPrizePopupInfoIcon" grow="1" width="100%" valign="bottom" align="center" noclick="1" visible="0">
+					<panel height="16h" >
+						<panel height="12.5h" width="12.5h" valign="center" align="center">
+							<modelpanel
+								name="questsPrizePopupInfoIconEffect"
+								width="150%" height="150%"
+								valign="center" align="center"
+								noclick="true"
+								model="/shared/models/invis.mdf"
+								onhidelua="self:SetEffect('')"
+								camerapos="0 10 0"
+								cameraangles="0 0 180"
+								camerafov="55"
+								depthclear="false"
+								depthcompress="true"
+								resourcecontext="questsPrizePopup"
+							/>
+							<image name="questsPrizePopupInfoIconIcon" width="-0.5h" height="-0.5h" align="center" valign="center"/>
+						</panel>
+						<label name="questsPrizePopupInfoIconName" font="dyn_18" textalign="center" color="white" outline="1" shadow="1"/>
+						<label name="questsPrizePopupInfoIconType" y="-1h" textalign="center" textvalign="bottom" font="dyn_12" color=".9 .9 .9" outline="1" shadow="1"/>
+					</panel>
+				</panel>
+				<!-- For 3D Models -->
+				<panel name="questsPrizePopupInfoModel" grow="1" width="100%" valign="bottom" align="center" noclick="1" visible="0">
+					<panel height="19h" >
+						<!-- this effect needs to be in front of the actual model panel or else it won't look correct, weird bug -->
+						<panel y="3h" height="11h">
+							<panel x="-9h" height="7.5h" width="7.5h" valign="center" align="center">
+								<modelpanel
+									name="questsPrizePopupInfoModelEffect"
+									width="150%" height="150%"
+									valign="center" align="center"
+									noclick="true"
+									model="/shared/models/invis.mdf"
+									onhidelua="self:SetEffect('')"
+									camerapos="0 10 0"
+									cameraangles="0 0 180"
+									camerafov="55"
+									depthclear="false"
+									depthcompress="true"
+									resourcecontext="questsPrizePopup"
+								/>
+							</panel>
+						</panel>
+
+						<!-- the actual model panel -->
+						<modelpanel
+							height="27h"
+							align="center"
+							name="questsPrizePopupInfoModelModel"
+							noclick="true"
+							model="/shared/models/invis.mdf"
+							onhidelua="self:SetEffect('')"
+							anim="idle"
+							cameranear="100.0"
+							camerafar="20000.0"
+							depthclear="true"
+							depthcompress="false"
+							lookat="false"
+							cameradistance="30"
+							camerapos="30 10000 65"
+							cameraangles="0 0 180"
+							camerafov="7"
+							modelpos="0 0 0"
+							modelangles="-15.0 0 0.0"
+							modelscale="1.0"
+							sunazimuth="120"
+							sunaltitude="20"
+							suncolor="0.9 0.9 0.9"
+							ambientcolor="0.6 0.7 0.7"
+							scenebuffer="true"
+							resourcecontext="questsPrizePopup"
+						/>
+						<panel y="2h" height="11h">
+							<panel y="1h" x="-9h" height="7.5h" width="7.5h" valign="center" align="center">
+								<!-- effect model panel use to be here -->
+								<image name="questsPrizePopupInfoModelIcon" width="-0.5h" height="-0.5h" align="center" valign="center"/>
+							</panel>
+							<label name="questsPrizePopupInfoModelName" font="dyn_18" textalign="center" color="white" outline="1" shadow="1"/>
+							<label name="questsPrizePopupInfoModelType" x="-9h" textalign="center" textvalign="bottom" font="dyn_12" color=".9 .9 .9" outline="1" shadow="1"/>
+						</panel>
+					</panel>
+				</panel>
+			</panel>
+
+			<panel name="questsPrizePopupAltRewardNotice" width="32h" grow="true" align="center" valign="bottom" y="-6.5h">
+				<frame texture="/ui/frames/tooltip_bg.tga" color="0 0 0 0.85" borderthickness=".6h" />
+				<frame texture="/ui/frames/roundframe.tga" color="#A0A0A0" borderthickness=".6h" />
+				<label textalign="center" textvalign="center" wrap="true" fity="true" fitypadding="2h" color="white" font="dyn_12" content="quests_bag_opened_altreward"/>
+			</panel>
+
+			<!-- middle center accept/close button -->
+			<instance name="button2"
+				button_name="questsPrizePopupClose"
+				y="-2h" align="center" valign="bottom" width="20h" height="3.5h"
+				label="general_continue" font="dyn_16"
+				onmouseoverlua="PlaySound('/shared/sounds/ui/button_over_02.wav')"
+				onclicklua="
+					PlaySound('/shared/sounds/ui/button_click_01.wav')
+					questsPrizePopupClose()
+				"
+			/>
+
+			<!-- exit button -->
+			<panel width="125h" noclick="1" align="center">
+				<instance name="mstore_btn_closex" button_name="questsPrizePopupCloseX" width="2.0h" height="2.0h" align="right" x="-1h" y="1h"
+					onclicklua="questsPrizePopupClose()"
+				/>
+			</panel>
+		</panel>
+	</template>
+
+	<!-- =========================== -->
+
+	<template name="quests">
+		<panel name="quests" noclick="true" color="#121d25">
+
+			<panel width="100%" texture="/ui/fe2/quests/textures/quests_bg_mid.tga" noclick="true" nocompress="true"/>
+			<panel width="50@" align="right" texture="/ui/fe2/quests/textures/quests_bg_side.tga" noclick="true" nocompress="true"/>
+			<panel width="50@" texture="/ui/fe2/quests/textures/quests_bg_side.tga" hflip="true" noclick="true" nocompress="true"/>
+
+			<panel width="40.82h" height="-1.2h" x="1.25h">
+				<panel style="questsSectionHeader">
+					<label name="questsSectionHeaderOpenQuestsLabel" style="questsSectionHeaderLabel" content="quests_open" x="1.5h" textalign="center" width="-3h"/>
+				</panel>
+				<panel style="questsSection" align="center" noclick="true" grow="true">
+					<panel float="right" grow="true" padding="1h" noclick="true" height="100%">
+						<instance name="questsQuest" id="1" progressFont="dyn_9" descriptionFont="dyn_10" titleFont="dyn_12"/>
+						<instance name="questsQuest" id="2" progressFont="dyn_9" descriptionFont="dyn_10" titleFont="dyn_12" hflip="false" frameAlign="right" bodyAlign="left" background="/ui/fe2/quests/textures/quest_frame_right.tga" />
+					</panel>
+					<image align="center" width="12.5@" height="100%" noclick="true" texture="/ui/fe2/quests/textures/quest_frame_bridge.tga"/>
+				</panel>
+			</panel>
+			<panel width="-42.5h" height="-1h" align="right" x="-0.5h">
+				<panel style="questsSection" noclick="true">
+					<instance name="questsScrollButton" id="questsRewardsButtonScrollPrev" width="3.25h" height="11.25h" valign="center" hflip="true" x="0.25h"/>
+					<instance name="questsScrollButton" id="questsRewardsButtonScrollNext" width="3.25h" height="11.25h" valign="center" align="right" x="-1.5h"/>
+					<panel noclick="true" hmargin="5h" width="65.4h" height="-1.5h" y="0.75h">
+						<frame texture="/ui/frames/rounded_bg_white.tga" color="#060b11" borderthickness="1.5h" noclick="true" height="-0.75h"/>
+						<panel name="questsRewardsDragHandle" color="invisible"/>
+						<panel name="questsRewardsScrollArea" clip="true" noclick="true">
+							<panel name="questsRewardsScrollBodyBack" height="100%" noclick="true" passivechildren="true" align="right" y="0.75h">
+								<panel height="8%" noclick="true" passivechildren="true">
+									<image name="questsRewardsScrollBodyBackTexture" width="6400@" height="100%" texture="/ui/fe2/quests/textures/scroll_backer_back.tga" color="#666666" align="right"/>
+								</panel>
+							</panel>
+							<panel name="questsRewardsScrollBody" height="100%" noclick="true">
+								<panel height="1.25h" noclick="true" y="-0.35h" texture="/ui/fe2/quests/textures/gear_track.tga" utile="true" onloadlua="self:SetUScale((self:GetHeight() * 16) .. 'p')"/>
+								<panel height="1.25h" noclick="true" y="-0h" texture="/ui/fe2/quests/textures/gear_track.tga" utile="true" onloadlua="self:SetUScale((self:GetHeight() * 16) .. 'p')" vflip="true" valign="bottom"/>
+								<panel valign="center" noclick="true" passivechildren="true" y="1.4h">
+									<image width="100%" height="25@" texture="/ui/fe2/quests/textures/scroll_backer.tga" y="0"/>
+								</panel>
+								<panel noclick="true" y="4h" height="-7.5h">
+									<instance name="questsReward" id="1"/>
+									<instance name="questsReward" id="2"/>
+									<instance name="questsReward" id="3"/>
+									<instance name="questsReward" id="4"/>
+									<instance name="questsReward" id="5"/>
+									<instance name="questsReward" id="6"/>
+									<instance name="questsReward" id="7"/>
+									<instance name="questsReward" id="8"/>
+									<instance name="questsReward" id="9"/>
+									<instance name="questsReward" id="10"/>
+									<instance name="questsReward" id="11"/>
+									<instance name="questsReward" id="12"/>
+									<instance name="questsReward" id="13"/>
+									<instance name="questsReward" id="14" glowEffect="questsRewardGlowEffect" frameTexture="/ui/fe2/quests/textures/quest_icon_frame_gold.tga"/>
+								</panel>
+							</panel>
+							<image width="4h" texture="/ui/fe2/elements/shadow_hgradient.tga" noclick="true"/>
+							<image width="4h" texture="/ui/fe2/elements/shadow_hgradient.tga" align="right" hflip="true" noclick="true"/>
+							<instance name="questsMapGear" id="questsMapGearTL" width="3h" height="3h" x="-0.75h" y="0.25h"/>
+							<instance name="questsMapGear" id="questsMapGearTR" width="3h" height="3h" x="0.75h" y="0.25h" align="right"/>
+							<instance name="questsMapGear" id="questsMapGearBL" width="3h" valign="bottom" height="3h" x="-0.75h" y="-0.65h"/>
+							<instance name="questsMapGear" id="questsMapGearBR" width="3h" valign="bottom" height="3h" x="0.75h" y="-0.65h" align="right"/>
+							<panel name="questsRewardsScrollPanel" hover="false" processonlyscroll="true"/>
+						</panel>
+						<panel align="center" width="78.8h" height="+4%" valign="bottom" y="1%" noclick="true" passivechildren="true">
+							<panel x="4h" width="69h" texture="/ui/fe2/quests/textures/scroll_frame_center.tga"/>
+							<panel width="25@" height="100%" texture="/ui/fe2/quests/textures/scroll_frame_left.tga"/>
+							<panel width="25@" height="100%" texture="/ui/fe2/quests/textures/scroll_frame_right.tga" align="right"/>
+							<image width="29.6h" height="1.85h" y="-0.35h" x="-0.35h" align="center" texture="/ui/fe2/quests/textures/scroll_frame_ornament.tga"/><!-- 16 -->
+						</panel>
+					</panel>
+				</panel>
+				<panel style="questsSectionHeader">
+					<label name="questsSectionHeaderMapLabel" style="questsSectionHeaderLabel" content="quests_map" x="4.75h"/>
+					<instance name="questsLadderButton" id="questsLadderButton" width="100@" height="100%" valign="bottom" y="10%" align="right" x="-85@"/>
+				</panel>
+			</panel>
+			<frame texture="/ui/frames/thick.tga" color="#515e72" borderthickness="0.5h" noclick="true"/>
+			<panel height="1.25h" valign="bottom" visible="false" noclick="true"><!-- Merge into quest tab next to chat -->
+				<panel name="questsProgressBarMain" style="questsRewardProgressBar" width="0" noclick="true"/>
+			</panel>
+			<panel name="questsBusyCover" color="invisible" visible="false"
+				onmouseoverlua="Trigger('genericMainFloatingTip', 'true', '24.0h', '', 'quests_reward_unopened_ingame', 'quests_reward_unopened_tip_ingame', '', '', '22', '-22')"
+				onmouseoutlua="Trigger('genericMainFloatingTip', 'false', '', '', '', '', '', '', '', '')"
+			/>
+		</panel>
+	</template>
+
+	<template name="questsErrorMessage">
+		<panel name="questsErrorMessage" color="0 0 0 .5" visible="false">
+			<panel align="center" valign="center" width="38.0h" grow="true" regrow="true" color="0 0 0 1">						
+				<frame color="invisible" bordercolor="#455166" borderthickness="1" noclick="1" />						
+				<panel width="100%" height="2.5h" noclick="1">
+					<instance name="header_bar" lbl="general_error" lbl_font="dyn_10" show_close="0" />
+				</panel>						
+				<panel y="3.0h" align="center" grow="true" regrow="true" width="-1h" float="bottom">							
+					<panel width="100%" grow="true" regrow="true">
+						<label name="questsErrorMessageBody" color="white" shadow="true" font="dyn_10" width="-1.0h" align="center" wrap="true" fity="true" content="---"/>
+					</panel>							
+					<panel width="100%" height="4.0h">							
+						<instance
+							name="button2"
+							y="-1.0h"
+							align="center" valign="bottom"
+							width="9h" height="2.5h"
+							label="general_ok"
+							font="dyn_10"
+							button_name="questsErrorMessageOK"
+						/>						
+					</panel>							
+				</panel>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="questsResetPrompt">
+		<panel name="questsResetPrompt" color="0 0 0 .5" visible="false">
+			<panel align="center" valign="center" width="24.5h" grow="true" regrow="true" color="0 0 0 1">						
+				<frame color="invisible" bordercolor="#455166" borderthickness="1" noclick="1" />						
+				<panel width="100%" height="2.5h" noclick="1">
+					<instance name="header_bar" lbl="quests_reset_prompt" lbl_font="dyn_10" show_close="0" />
+				</panel>						
+				<panel y="3.0h" align="center" grow="true" regrow="true" width="-1h" float="bottom">							
+					<panel height="32h">
+						<instance name="questsQuest" prefix="Reset" id="1" align="center" showRefresh="false"/>
+					</panel>							
+					<panel width="100%" height="4.0h">							
+						<panel align="center" grow="true" height="2.5h" valign="center" float="right" padding="1h" x="-0.5h">
+							<instance
+								name="button2"
+								width="9h"
+								label="general_cancel"
+								font="dyn_10"
+								button_name="questsResetPromptCancel"
+							/>						
+							<instance
+								name="button2"
+								width="9h"
+								label="quests_reset"
+								font="dyn_10"
+								button_name="questsResetPromptOK"
+							/>						
+						</panel>
+
+					</panel>							
+				</panel>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="questsCompletedPopup">
+		<panel name="questsCompletedPopup{index}" color="0 0 0 .5" visible="false">
+			<panel align="center" valign="center" width="24.5h" grow="true" regrow="true" color="0 0 0 1">						
+				<frame color="invisible" bordercolor="#455166" borderthickness="1" noclick="1" />						
+				<panel width="100%" height="2.5h" noclick="1">
+					<instance name="header_bar" lbl="quest_complete" lbl_font="dyn_10" show_close="0" />
+				</panel>						
+				<panel y="3.0h" align="center" grow="true" regrow="true" width="-1h" float="bottom">							
+					<panel height="32h">
+						<instance name="questsQuest" prefix="Completed" id="{index}" align="center" showRefresh="false"/>
+					</panel>							
+					<panel width="100%" height="4.0h">							
+						<panel align="center" grow="true" height="2.5h" valign="center" float="right" padding="1h" x="-0.5h">
+							<instance
+								name="button2"
+								width="9h"
+								label="general_ok"
+								font="dyn_10"
+								button_name="questsCompletedPopup{index}OK"
+							/>						
+						</panel>
+					</panel>							
+				</panel>
+			</panel>
+		</panel>
+	</template>
+
+</package>

@@ -1,0 +1,872 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+	<template name="field">
+		<panel height="22" name="{widgetname}">
+			<panel x="-20" width="230"  align="right">
+				<frame noclick="true" texture="/ui/frames/rounded_bg_white.tga" borderthickness="6" color="black"/>
+				<frame noclick="true" texture="/ui/frames/roundframe.tga" color="#FFDA00" borderthickness="6"/>
+				<textbox x="5" y="4" taborder="{order}" passwordchar="{passchar}" textvalign="center" valign="center" font="chat_12" color="invisible" textcolor="white" shadow="true"  onchange="{cmd}(this);" onshow="{onshow}"/>
+			</panel>					
+			<panel noclick="true" x="-260"  align="right">
+				<label noclick="true" height="100%" width="100%" textalign="right" textvalign="center" font="chat_13" shadow="true" color="{color}">{label}</label> 	
+			</panel>				
+		</panel>
+	</template>
+	
+	<template name="day">
+		<panel>
+			<combobox
+				color="invisible"
+				itemwidth="40"
+				itemheight="24"
+				maxlistheight="8"
+				cvar="_create_day"
+				exteriorscrollbars="false"
+				scrolltexture="/ui/elements/vist_scroll.tga"
+				handleheight="24"
+				scrollbaroffset="-17"
+				highlight="under"
+				onload="CreateString('_create_day', '01');"
+				onshow="ListBoxCmd('Select 0');"
+				onselect="AcctSetBirthDay(this);"
+			>
+				<widgetstate statename="up">
+					<panel>
+						<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="4" color="black"/>
+						<frame texture="/ui/frames/roundframe.tga" borderthickness="4" color="#FFDA00"/>
+
+						<image x="-2" width="16" height="16" align="right" valign="center" texture="/ui/elements/vist_scroll_vmax_up.tga" />
+					</panel>
+				</widgetstate>
+				<widgetstate statename="over">
+					<panel>
+						<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="4" color="#504009"/>
+						<frame texture="/ui/frames/roundframe.tga" borderthickness="4" color="#5E2D1F"/>
+
+						<image x="-2" width="16" height="16" align="right" valign="center" texture="/ui/elements/vist_scroll_vmax_over.tga" />
+					</panel>
+				</widgetstate>
+				<widgetstate statename="down">
+					<panel>
+						<frame texture="/ui/frames/rounded_header_bg_white.tga" borderthickness="4" color="#504009"/>
+						<frame texture="/ui/frames/roundframe_header.tga" borderthickness="4" color="#5E2D1F"/>
+
+						<image x="-2" width="16" height="16" align="right" valign="center" texture="/ui/elements/vist_scroll_vmax_over.tga" />
+					</panel>
+				</widgetstate>
+				<widgetstate statename="listbg">
+					<panel height="192">
+						<frame texture="/ui/frames/rounded_footer_bg_white.tga" borderthickness="4" color="#504009"/>
+						<image height="-6" texture="/ui/elements/list_parchment.tga" />
+						<frame texture="/ui/frames/roundframe_footer.tga" borderthickness="4" color="#5E2D1F"/>
+					</panel>
+				</widgetstate>
+				<widgetstate statename="itembg">
+					<panel width="100%">
+						<image texture="/ui/elements/list_gradient.tga" rendermode="overlay" color="#909090" />
+						<frame texture="/ui/frames/roundframe_square.tga" borderthickness="10" color="#5E2D1F"/>
+					</panel>
+				</widgetstate>
+				<widgetstate statename="itemhighlight">
+					<panel width="100%">
+						<panel x="1" y="1" width="-2" height="-2" color="#404000" rendermode="additive" />
+					</panel>
+				</widgetstate>
+
+				<listitem value="01"><label x="4" height="100%" textvalign="100%" font="chat_14" color="white">01</label></listitem>
+				<listitem value="02"><label x="4" height="100%" textvalign="100%" font="chat_14" color="white">02</label></listitem>
+				<listitem value="03"><label x="4" height="100%" textvalign="100%" font="chat_14" color="white">03</label></listitem>
+				<listitem value="04"><label x="4" height="100%" textvalign="100%" font="chat_14" color="white">04</label></listitem>
+				<listitem value="05"><label x="4" height="100%" textvalign="100%" font="chat_14" color="white">05</label></listitem>
+				<listitem value="06"><label x="4" height="100%" textvalign="100%" font="chat_14" color="white">06</label></listitem>
+				<listitem value="07"><label x="4" height="100%" textvalign="100%" font="chat_14" color="white">07</label></listitem>
+				<listitem value="08"><label x="4" height="100%" textvalign="100%" font="chat_14" color="white">08</label></listitem>
+				<listitem value="09"><label x="4" height="100%" textvalign="100%" font="chat_14" color="white">09</label></listitem>
+				<listitem value="10"><label x="4" height="100%" textvalign="100%" font="chat_14" color="white">10</label></listitem>
+				<listitem value="11"><label x="4" height="100%" textvalign="100%" font="chat_14" color="white">11</label></listitem>
+				<listitem value="12"><label x="4" height="100%" textvalign="100%" font="chat_14" color="white">12</label></listitem>
+				<listitem value="13"><label x="4" height="100%" textvalign="100%" font="chat_14" color="white">13</label></listitem>
+				<listitem value="14"><label x="4" height="100%" textvalign="100%" font="chat_14" color="white">14</label></listitem>
+				<listitem value="15"><label x="4" height="100%" textvalign="100%" font="chat_14" color="white">15</label></listitem>
+				<listitem value="16"><label x="4" height="100%" textvalign="100%" font="chat_14" color="white">16</label></listitem>
+				<listitem value="17"><label x="4" height="100%" textvalign="100%" font="chat_14" color="white">17</label></listitem>
+				<listitem value="18"><label x="4" height="100%" textvalign="100%" font="chat_14" color="white">18</label></listitem>
+				<listitem value="19"><label x="4" height="100%" textvalign="100%" font="chat_14" color="white">19</label></listitem>
+				<listitem value="20"><label x="4" height="100%" textvalign="100%" font="chat_14" color="white">20</label></listitem>
+				<listitem value="21"><label x="4" height="100%" textvalign="100%" font="chat_14" color="white">21</label></listitem>
+				<listitem value="22"><label x="4" height="100%" textvalign="100%" font="chat_14" color="white">22</label></listitem>
+				<listitem value="23"><label x="4" height="100%" textvalign="100%" font="chat_14" color="white">23</label></listitem>
+				<listitem value="24"><label x="4" height="100%" textvalign="100%" font="chat_14" color="white">24</label></listitem>				
+				<listitem value="25"><label x="4" height="100%" textvalign="100%" font="chat_14" color="white">25</label></listitem>
+				<listitem value="26"><label x="4" height="100%" textvalign="100%" font="chat_14" color="white">26</label></listitem>
+				<listitem value="27"><label x="4" height="100%" textvalign="100%" font="chat_14" color="white">27</label></listitem>
+				<listitem value="28"><label x="4" height="100%" textvalign="100%" font="chat_14" color="white">28</label></listitem>
+				<listitem value="29"><label x="4" height="100%" textvalign="100%" font="chat_14" color="white">29</label></listitem>	
+				<listitem value="30"><label x="4" height="100%" textvalign="100%" font="chat_14" color="white">30</label></listitem>
+				<listitem value="31"><label x="4" height="100%" textvalign="100%" font="chat_14" color="white">31</label></listitem>				
+				
+			</combobox>
+		</panel>
+	</template>
+	
+	<template name="month">
+		<panel>
+			<combobox
+				color="invisible"
+				itemwidth="40"
+				itemheight="24"
+				maxlistheight="8"
+				cvar="_create_month"
+				exteriorscrollbars="false"
+				scrolltexture="/ui/elements/vist_scroll.tga"
+				handleheight="24"
+				scrollbaroffset="-17"
+				highlight="under"
+				onload="CreateString('_create_month', '01');"
+				onshow="ListBoxCmd('Select 0');"
+				onselect="AcctSetBirthMonth(this);"
+			>
+				<widgetstate statename="up">
+					<panel>
+						<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="4" color="black"/>
+						<frame texture="/ui/frames/roundframe.tga" borderthickness="4" color="#FFDA00"/>
+
+						<image x="-2" width="16" height="16" align="right" valign="center" texture="/ui/elements/vist_scroll_vmax_up.tga" />
+					</panel>
+				</widgetstate>
+				<widgetstate statename="over">
+					<panel>
+						<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="4" color="#504009"/>
+						<frame texture="/ui/frames/roundframe.tga" borderthickness="4" color="#5E2D1F"/>
+
+						<image x="-2" width="16" height="16" align="right" valign="center" texture="/ui/elements/vist_scroll_vmax_over.tga" />
+					</panel>
+				</widgetstate>
+				<widgetstate statename="down">
+					<panel>
+						<frame texture="/ui/frames/rounded_header_bg_white.tga" borderthickness="4" color="#504009"/>
+						<frame texture="/ui/frames/roundframe_header.tga" borderthickness="4" color="#5E2D1F"/>
+
+						<image x="-2" width="16" height="16" align="right" valign="center" texture="/ui/elements/vist_scroll_vmax_over.tga" />
+					</panel>
+				</widgetstate>
+				<widgetstate statename="listbg">
+					<panel height="192">
+						<frame texture="/ui/frames/rounded_footer_bg_white.tga" borderthickness="4" color="#504009"/>
+						<image height="-6" texture="/ui/elements/list_parchment.tga" />
+						<frame texture="/ui/frames/roundframe_footer.tga" borderthickness="4" color="#5E2D1F"/>
+					</panel>
+				</widgetstate>
+				<widgetstate statename="itembg">
+					<panel width="100%">
+						<image texture="/ui/elements/list_gradient.tga" rendermode="overlay" color="#909090" />
+						<frame texture="/ui/frames/roundframe_square.tga" borderthickness="10" color="#5E2D1F"/>
+					</panel>
+				</widgetstate>
+				<widgetstate statename="itemhighlight">
+					<panel width="100%">
+						<panel x="1" y="1" width="-2" height="-2" color="#404000" rendermode="additive" />
+					</panel>
+				</widgetstate>
+
+				<listitem value="01"><label x="4" height="100%" textvalign="100%" font="chat_14" color="white">01</label></listitem>
+				<listitem value="02"><label x="4" height="100%" textvalign="100%" font="chat_14" color="white">02</label></listitem>
+				<listitem value="03"><label x="4" height="100%" textvalign="100%" font="chat_14" color="white">03</label></listitem>
+				<listitem value="04"><label x="4" height="100%" textvalign="100%" font="chat_14" color="white">04</label></listitem>
+				<listitem value="05"><label x="4" height="100%" textvalign="100%" font="chat_14" color="white">05</label></listitem>
+				<listitem value="06"><label x="4" height="100%" textvalign="100%" font="chat_14" color="white">06</label></listitem>
+				<listitem value="07"><label x="4" height="100%" textvalign="100%" font="chat_14" color="white">07</label></listitem>
+				<listitem value="08"><label x="4" height="100%" textvalign="100%" font="chat_14" color="white">08</label></listitem>
+				<listitem value="09"><label x="4" height="100%" textvalign="100%" font="chat_14" color="white">09</label></listitem>
+				<listitem value="10"><label x="4" height="100%" textvalign="100%" font="chat_14" color="white">10</label></listitem>
+				<listitem value="11"><label x="4" height="100%" textvalign="100%" font="chat_14" color="white">11</label></listitem>
+				<listitem value="12"><label x="4" height="100%" textvalign="100%" font="chat_14" color="white">12</label></listitem>
+			</combobox>
+		</panel>
+	</template>
+	
+	
+	
+	<template name="year">
+		<panel>
+			<combobox
+				color="invisible"
+				itemwidth="70"
+				itemheight="24"
+				maxlistheight="8"
+				cvar="_create_year"
+				exteriorscrollbars="false"
+				scrolltexture="/ui/elements/vist_scroll.tga"
+				handleheight="24"
+				scrollbaroffset="-17"
+				highlight="under"
+				onload="CreateString('_create_year', '2000');"
+				onshow="ListBoxCmd('Select 0');"
+				onselect="AcctSetBirthYear(this);"
+			>
+				<widgetstate statename="up">
+					<panel>
+						<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="4"  color="black"/>
+						<frame texture="/ui/frames/roundframe.tga" borderthickness="4" color="#FFDA00"/>
+
+						<image x="-2" width="16" height="16" align="right" valign="center" texture="/ui/elements/vist_scroll_vmax_up.tga" />
+					</panel>
+				</widgetstate>
+				<widgetstate statename="over">
+					<panel>
+						<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="4" color="#504009"/>
+						<frame texture="/ui/frames/roundframe.tga" borderthickness="4" color="#5E2D1F"/>
+
+						<image x="-2" width="16" height="16" align="right" valign="center" texture="/ui/elements/vist_scroll_vmax_over.tga" />
+					</panel>
+				</widgetstate>
+				<widgetstate statename="down">
+					<panel>
+						<frame texture="/ui/frames/rounded_header_bg_white.tga" borderthickness="4" color="#504009"/>
+						<frame texture="/ui/frames/roundframe_header.tga" borderthickness="4" color="#5E2D1F"/>
+
+						<image x="-2" width="16" height="16" align="right" valign="center" texture="/ui/elements/vist_scroll_vmax_over.tga" />
+					</panel>
+				</widgetstate>
+				<widgetstate statename="listbg">
+					<panel height="192">
+						<frame texture="/ui/frames/rounded_footer_bg_white.tga" borderthickness="4" color="#504009"/>
+						<image height="-6" texture="/ui/elements/list_parchment.tga" />
+						<frame texture="/ui/frames/roundframe_footer.tga" borderthickness="4" color="#5E2D1F"/>
+					</panel>
+				</widgetstate>
+				<widgetstate statename="itembg">
+					<panel width="100%">
+						<image texture="/ui/elements/list_gradient.tga" rendermode="overlay" color="#909090" />
+						<frame texture="/ui/frames/roundframe_square.tga" borderthickness="10" color="#5E2D1F"/>
+					</panel>
+				</widgetstate>
+				<widgetstate statename="itemhighlight">
+					<panel width="100%">
+						<panel x="1" y="1" width="-2" height="-2" color="#404000" rendermode="additive" />
+					</panel>
+				</widgetstate>
+				
+				<listitem value="2000"><label x="4" height="100%" textvalign="100%"  font="chat_14" color="white">2000</label></listitem>
+				<listitem value="1999"><label x="4" height="100%" textvalign="100%"  font="chat_14" color="white">1999</label></listitem>
+				<listitem value="1998"><label x="4" height="100%" textvalign="100%"  font="chat_14" color="white">1998</label></listitem>
+				<listitem value="1997"><label x="4" height="100%" textvalign="100%"  font="chat_14" color="white">1997</label></listitem>
+				<listitem value="1996"><label x="4" height="100%" textvalign="100%"  font="chat_14" color="white">1996</label></listitem>
+				<listitem value="1995"><label x="4" height="100%" textvalign="100%"  font="chat_14" color="white">1995</label></listitem>
+				<listitem value="1994"><label x="4" height="100%" textvalign="100%"  font="chat_14" color="white">1994</label></listitem>
+				<listitem value="1993"><label x="4" height="100%" textvalign="100%"  font="chat_14" color="white">1993</label></listitem>
+				<listitem value="1992"><label x="4" height="100%" textvalign="100%"  font="chat_14" color="white">1992</label></listitem>
+				<listitem value="1991"><label x="4" height="100%" textvalign="100%"  font="chat_14" color="white">1991</label></listitem>
+				<listitem value="1990"><label x="4" height="100%" textvalign="100%"  font="chat_14" color="white">1990</label></listitem>
+				<listitem value="1989"><label x="4" height="100%" textvalign="100%"  font="chat_14" color="white">1989</label></listitem>
+				<listitem value="1988"><label x="4" height="100%" textvalign="100%"  font="chat_14" color="white">1988</label></listitem>
+				<listitem value="1987"><label x="4" height="100%" textvalign="100%"  font="chat_14" color="white">1987</label></listitem>
+				<listitem value="1986"><label x="4" height="100%" textvalign="100%"  font="chat_14" color="white">1986</label></listitem>
+				<listitem value="1985"><label x="4" height="100%" textvalign="100%"  font="chat_14" color="white">1985</label></listitem>
+				<listitem value="1984"><label x="4" height="100%" textvalign="100%"  font="chat_14" color="white">1984</label></listitem>
+				<listitem value="1983"><label x="4" height="100%" textvalign="100%"  font="chat_14" color="white">1983</label></listitem>
+				<listitem value="1982"><label x="4" height="100%" textvalign="100%"  font="chat_14" color="white">1982</label></listitem>
+				<listitem value="1981"><label x="4" height="100%" textvalign="100%"  font="chat_14" color="white">1981</label></listitem>
+				<listitem value="1980"><label x="4" height="100%" textvalign="100%"  font="chat_14" color="white">1980</label></listitem>
+				<listitem value="1979"><label x="4" height="100%" textvalign="100%"  font="chat_14" color="white">1979</label></listitem>
+				<listitem value="1978"><label x="4" height="100%" textvalign="100%"  font="chat_14" color="white">1978</label></listitem>
+				<listitem value="1977"><label x="4" height="100%" textvalign="100%"  font="chat_14" color="white">1977</label></listitem>
+				<listitem value="1976"><label x="4" height="100%" textvalign="100%"  font="chat_14" color="white">1976</label></listitem>
+				<listitem value="1975"><label x="4" height="100%" textvalign="100%"  font="chat_14" color="white">1975</label></listitem>
+				<listitem value="1974"><label x="4" height="100%" textvalign="100%"  font="chat_14" color="white">1974</label></listitem>
+				<listitem value="1973"><label x="4" height="100%" textvalign="100%"  font="chat_14" color="white">1973</label></listitem>
+				<listitem value="1972"><label x="4" height="100%" textvalign="100%"  font="chat_14" color="white">1972</label></listitem>
+				<listitem value="1971"><label x="4" height="100%" textvalign="100%"  font="chat_14" color="white">1971</label></listitem>
+				<listitem value="1970"><label x="4" height="100%" textvalign="100%"  font="chat_14" color="white">1970</label></listitem>
+				<listitem value="1969"><label x="4" height="100%" textvalign="100%"  font="chat_14" color="white">1969</label></listitem>
+				<listitem value="1968"><label x="4" height="100%" textvalign="100%"  font="chat_14" color="white">1968</label></listitem>
+				<listitem value="1967"><label x="4" height="100%" textvalign="100%"  font="chat_14" color="white">1967</label></listitem>
+				<listitem value="1966"><label x="4" height="100%" textvalign="100%"  font="chat_14" color="white">1966</label></listitem>
+				<listitem value="1965"><label x="4" height="100%" textvalign="100%"  font="chat_14" color="white">1965</label></listitem>
+				<listitem value="1964"><label x="4" height="100%" textvalign="100%"  font="chat_14" color="white">1964</label></listitem>
+				<listitem value="1963"><label x="4" height="100%" textvalign="100%"  font="chat_14" color="white">1963</label></listitem>
+				<listitem value="1962"><label x="4" height="100%" textvalign="100%"  font="chat_14" color="white">1962</label></listitem>
+				<listitem value="1961"><label x="4" height="100%" textvalign="100%"  font="chat_14" color="white">1961</label></listitem>
+				<listitem value="1960"><label x="4" height="100%" textvalign="100%"  font="chat_14" color="white">1960</label></listitem>
+				<listitem value="1959"><label x="4" height="100%" textvalign="100%"  font="chat_14" color="white">1959</label></listitem>
+				<listitem value="1958"><label x="4" height="100%" textvalign="100%"  font="chat_14" color="white">1958</label></listitem>
+				<listitem value="1957"><label x="4" height="100%" textvalign="100%"  font="chat_14" color="white">1957</label></listitem>
+				<listitem value="1956"><label x="4" height="100%" textvalign="100%"  font="chat_14" color="white">1956</label></listitem>
+				<listitem value="1955"><label x="4" height="100%" textvalign="100%"  font="chat_14" color="white">1955</label></listitem>
+				<listitem value="1954"><label x="4" height="100%" textvalign="100%"  font="chat_14" color="white">1954</label></listitem>
+				<listitem value="1953"><label x="4" height="100%" textvalign="100%"  font="chat_14" color="white">1953</label></listitem>
+				<listitem value="1952"><label x="4" height="100%" textvalign="100%"  font="chat_14" color="white">1952</label></listitem>
+				<listitem value="1951"><label x="4" height="100%" textvalign="100%"  font="chat_14" color="white">1951</label></listitem>
+				<listitem value="1950"><label x="4" height="100%" textvalign="100%"  font="chat_14" color="white">1950</label></listitem>
+				<listitem value="1949"><label x="4" height="100%" textvalign="100%"  font="chat_14" color="white">1949</label></listitem>
+				<listitem value="1948"><label x="4" height="100%" textvalign="100%"  font="chat_14" color="white">1948</label></listitem>
+				<listitem value="1947"><label x="4" height="100%" textvalign="100%"  font="chat_14" color="white">1947</label></listitem>
+				<listitem value="1946"><label x="4" height="100%" textvalign="100%"  font="chat_14" color="white">1946</label></listitem>
+				<listitem value="1945"><label x="4" height="100%" textvalign="100%"  font="chat_14" color="white">1945</label></listitem>
+				<listitem value="1944"><label x="4" height="100%" textvalign="100%"  font="chat_14" color="white">1944</label></listitem>
+				<listitem value="1943"><label x="4" height="100%" textvalign="100%"  font="chat_14" color="white">1943</label></listitem>
+				<listitem value="1942"><label x="4" height="100%" textvalign="100%"  font="chat_14" color="white">1942</label></listitem>
+				<listitem value="1941"><label x="4" height="100%" textvalign="100%"  font="chat_14" color="white">1941</label></listitem>
+				<listitem value="1940"><label x="4" height="100%" textvalign="100%"  font="chat_14" color="white">1940</label></listitem>
+				<listitem value="1939"><label x="4" height="100%" textvalign="100%"  font="chat_14" color="white">1939</label></listitem>
+				<listitem value="1938"><label x="4" height="100%" textvalign="100%"  font="chat_14" color="white">1938</label></listitem>
+				<listitem value="1937"><label x="4" height="100%" textvalign="100%"  font="chat_14" color="white">1937</label></listitem>
+				<listitem value="1936"><label x="4" height="100%" textvalign="100%"  font="chat_14" color="white">1936</label></listitem>
+				<listitem value="1935"><label x="4" height="100%" textvalign="100%"  font="chat_14" color="white">1935</label></listitem>
+				<listitem value="1934"><label x="4" height="100%" textvalign="100%"  font="chat_14" color="white">1934</label></listitem>
+				<listitem value="1933"><label x="4" height="100%" textvalign="100%"  font="chat_14" color="white">1933</label></listitem>
+				<listitem value="1932"><label x="4" height="100%" textvalign="100%"  font="chat_14" color="white">1932</label></listitem>
+				<listitem value="1931"><label x="4" height="100%" textvalign="100%"  font="chat_14" color="white">1931</label></listitem>
+				<listitem value="1930"><label x="4" height="100%" textvalign="100%"  font="chat_14" color="white">1930</label></listitem>
+				<listitem value="1929"><label x="4" height="100%" textvalign="100%"  font="chat_14" color="white">1929</label></listitem>
+				<listitem value="1928"><label x="4" height="100%" textvalign="100%"  font="chat_14" color="white">1928</label></listitem>
+				<listitem value="1927"><label x="4" height="100%" textvalign="100%"  font="chat_14" color="white">1927</label></listitem>
+				<listitem value="1926"><label x="4" height="100%" textvalign="100%"  font="chat_14" color="white">1926</label></listitem>
+				<listitem value="1925"><label x="4" height="100%" textvalign="100%"  font="chat_14" color="white">1925</label></listitem>
+				<listitem value="1924"><label x="4" height="100%" textvalign="100%"  font="chat_14" color="white">1924</label></listitem>
+				<listitem value="1923"><label x="4" height="100%" textvalign="100%"  font="chat_14" color="white">1923</label></listitem>
+				<listitem value="1922"><label x="4" height="100%" textvalign="100%"  font="chat_14" color="white">1922</label></listitem>
+				<listitem value="1921"><label x="4" height="100%" textvalign="100%"  font="chat_14" color="white">1921</label></listitem>
+				<listitem value="1920"><label x="4" height="100%" textvalign="100%"  font="chat_14" color="white">1920</label></listitem>
+				<listitem value="1919"><label x="4" height="100%" textvalign="100%"  font="chat_14" color="white">1919</label></listitem>
+				<listitem value="1918"><label x="4" height="100%" textvalign="100%"  font="chat_14" color="white">1918</label></listitem>
+				<listitem value="1917"><label x="4" height="100%" textvalign="100%"  font="chat_14" color="white">1917</label></listitem>
+				<listitem value="1916"><label x="4" height="100%" textvalign="100%"  font="chat_14" color="white">1916</label></listitem>
+				<listitem value="1915"><label x="4" height="100%" textvalign="100%"  font="chat_14" color="white">1915</label></listitem>
+			</combobox>
+		</panel>	
+	</template>
+	
+
+	<template name="statefield">
+		<panel  height="22"  noclick="true" y="{y}">
+			<panel x="-20" width="{width}" align="right">
+				<combobox
+					height="20"
+					color="invisible"
+					itemwidth="{width}"
+					itemheight="20"
+					maxlistheight="8"
+					cvar="_create_state"
+					exteriorscrollbars="false"
+					scrolltexture="/ui/elements/vist_scroll.tga"
+					handleheight="24"
+					scrollbaroffset="-17"
+					highlight="under"
+					onload="CreateString('_create_state', 'AL');"
+					onshow="ListBoxCmd('Select 0');"
+					onselect="if(!StringEquals(_create_country, 'USA'), Split(Set('_create_state', '--'), {cmd}('--')), {cmd}(this)); if(StringEquals(_create_state, '--'), ShowWidget('CreateProvince'), HideWidget('CreateProvince'));"
+				>
+					<widgetstate statename="up">
+						<panel>
+							<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="4"  color="black"/>
+							<frame texture="/ui/frames/roundframe.tga" borderthickness="4" color="#FFDA00"/>
+
+							<image x="-2" width="16" height="16" align="right" valign="center" texture="/ui/elements/vist_scroll_vmax_up.tga" />
+						</panel>
+					</widgetstate>
+					<widgetstate statename="over">
+						<panel>
+							<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="4" color="#504009"/>
+							<frame texture="/ui/frames/roundframe.tga" borderthickness="4" color="#5E2D1F"/>
+
+							<image x="-2" width="16" height="16" align="right" valign="center" texture="/ui/elements/vist_scroll_vmax_over.tga" />
+						</panel>
+					</widgetstate>
+					<widgetstate statename="down">
+						<panel>
+							<frame texture="/ui/frames/rounded_header_bg_white.tga" borderthickness="4" color="#504009"/>
+							<frame texture="/ui/frames/roundframe_header.tga" borderthickness="4" color="#5E2D1F"/>
+
+							<image x="-2" width="16" height="16" align="right" valign="center" texture="/ui/elements/vist_scroll_vmax_over.tga" />
+						</panel>
+					</widgetstate>
+					<widgetstate statename="listbg">
+						<panel height="160">
+							<frame texture="/ui/frames/rounded_footer_bg_white.tga" borderthickness="4" color="#504009"/>
+							<image height="-6" texture="/ui/elements/list_parchment.tga" />
+							<frame texture="/ui/frames/roundframe_footer.tga" borderthickness="4" color="#5E2D1F"/>
+						</panel>
+					</widgetstate>
+					<widgetstate statename="itembg">
+						<panel width="100%">
+							<image texture="/ui/elements/list_gradient.tga" rendermode="overlay" color="#909090" />
+							<frame texture="/ui/frames/roundframe_square.tga" borderthickness="10" color="#5E2D1F"/>
+						</panel>
+					</widgetstate>
+					<widgetstate statename="itemhighlight">
+						<panel width="100%">
+							<panel x="1" y="1" width="-2" height="-2" color="#404000" rendermode="additive" />
+						</panel>
+					</widgetstate>
+					<listitem value="--"><label  x="4" height="100%" textvalign="100%"  font="chat_14" color="white">create_acc_label_outside_of_usa</label></listitem>
+					<listitem value="AL"><label  x="4" height="100%" textvalign="100%" font="chat_14" color="white">create_acc_state_alabama</label></listitem>
+					<listitem value="AK"><label  x="4" height="100%" textvalign="100%" font="chat_14" color="white">create_acc_state_alaska</label></listitem>
+					<listitem value="AZ"><label  x="4" height="100%" textvalign="100%" font="chat_14" color="white">create_acc_state_arizona</label></listitem>
+					<listitem value="AR"><label  x="4" height="100%" textvalign="100%" font="chat_14" color="white">create_acc_state_arkansas</label></listitem>
+					<listitem value="CA"><label  x="4" height="100%" textvalign="100%" font="chat_14" color="white">create_acc_state_california</label></listitem>
+					<listitem value="CO"><label  x="4" height="100%" textvalign="100%" font="chat_14" color="white">create_acc_state_colorado</label></listitem>
+					<listitem value="CT"><label  x="4" height="100%" textvalign="100%" font="chat_14" color="white">create_acc_state_connecticut</label></listitem>
+					<listitem value="DE"><label  x="4" height="100%" textvalign="100%" font="chat_14" color="white">create_acc_state_delaware</label></listitem>
+					<listitem value="DC"><label  x="4" height="100%" textvalign="100%" font="chat_14" color="white">create_acc_state_dc</label></listitem>
+					<listitem value="FL"><label  x="4" height="100%" textvalign="100%" font="chat_14" color="white">create_acc_state_florida</label></listitem>
+					<listitem value="GA"><label  x="4" height="100%" textvalign="100%" font="chat_14" color="white">create_acc_state_georgia</label></listitem>
+					<listitem value="HI"><label  x="4" height="100%" textvalign="100%" font="chat_14" color="white">create_acc_state_hawaii</label></listitem>
+					<listitem value="ID"><label  x="4" height="100%" textvalign="100%" font="chat_14" color="white">create_acc_state_idaho</label></listitem>
+					<listitem value="IL"><label  x="4" height="100%" textvalign="100%" font="chat_14" color="white">create_acc_state_illinois</label></listitem>
+					<listitem value="IN"><label  x="4" height="100%" textvalign="100%" font="chat_14" color="white">create_acc_state_indiana</label></listitem>
+					<listitem value="IA"><label  x="4" height="100%" textvalign="100%" font="chat_14" color="white">create_acc_state_iowa</label></listitem>
+					<listitem value="KS"><label  x="4" height="100%" textvalign="100%" font="chat_14" color="white">create_acc_state_kansas</label></listitem>
+					<listitem value="KY"><label  x="4" height="100%" textvalign="100%" font="chat_14" color="white">create_acc_state_kentucky</label></listitem>
+					<listitem value="LA"><label  x="4" height="100%" textvalign="100%" font="chat_14" color="white">create_acc_state_louisiana</label></listitem>
+					<listitem value="ME"><label  x="4" height="100%" textvalign="100%" font="chat_14" color="white">create_acc_state_maine</label></listitem>
+					<listitem value="MD"><label  x="4" height="100%" textvalign="100%" font="chat_14" color="white">create_acc_state_maryland</label></listitem>
+					<listitem value="MA"><label  x="4" height="100%" textvalign="100%" font="chat_14" color="white">create_acc_state_massachusetts</label></listitem>
+					<listitem value="MI"><label  x="4" height="100%" textvalign="100%" font="chat_14" color="white">create_acc_state_michigan</label></listitem>
+					<listitem value="MN"><label  x="4" height="100%" textvalign="100%" font="chat_14" color="white">create_acc_state_minnesota</label></listitem>
+					<listitem value="MS"><label  x="4" height="100%" textvalign="100%" font="chat_14" color="white">create_acc_state_mississippi</label></listitem>
+					<listitem value="MO"><label  x="4" height="100%" textvalign="100%" font="chat_14" color="white">create_acc_state_missouri</label></listitem>
+					<listitem value="MT"><label  x="4" height="100%" textvalign="100%" font="chat_14" color="white">create_acc_state_montana</label></listitem>
+					<listitem value="NE"><label  x="4" height="100%" textvalign="100%" font="chat_14" color="white">create_acc_state_nebraska</label></listitem>
+					<listitem value="NV"><label  x="4" height="100%" textvalign="100%" font="chat_14" color="white">create_acc_state_nevada</label></listitem>
+					<listitem value="NH"><label  x="4" height="100%" textvalign="100%" font="chat_14" color="white">create_acc_state_new_hampshire</label></listitem>
+					<listitem value="NJ"><label  x="4" height="100%" textvalign="100%" font="chat_14" color="white">create_acc_state_new_jersey</label></listitem>
+					<listitem value="NM"><label  x="4" height="100%" textvalign="100%" font="chat_14" color="white">create_acc_state_new_mexico</label></listitem>
+					<listitem value="NY"><label  x="4" height="100%" textvalign="100%" font="chat_14" color="white">create_acc_state_new_york</label></listitem>
+					<listitem value="NC"><label  x="4" height="100%" textvalign="100%" font="chat_14" color="white">create_acc_state_north_carolina</label></listitem>
+					<listitem value="ND"><label  x="4" height="100%" textvalign="100%" font="chat_14" color="white">create_acc_state_north_dakota</label></listitem>
+					<listitem value="OH"><label  x="4" height="100%" textvalign="100%" font="chat_14" color="white">create_acc_state_ohio</label></listitem>
+					<listitem value="OK"><label  x="4" height="100%" textvalign="100%" font="chat_14" color="white">create_acc_state_oklahoma</label></listitem>
+					<listitem value="OR"><label  x="4" height="100%" textvalign="100%" font="chat_14" color="white">create_acc_state_oregon</label></listitem>
+					<listitem value="PA"><label  x="4" height="100%" textvalign="100%" font="chat_14" color="white">create_acc_state_pennsylvania</label></listitem>
+					<listitem value="RI"><label  x="4" height="100%" textvalign="100%" font="chat_14" color="white">create_acc_state_rhode_island</label></listitem>
+					<listitem value="SC"><label  x="4" height="100%" textvalign="100%" font="chat_14" color="white">create_acc_state_south_carolina</label></listitem>
+					<listitem value="SD"><label  x="4" height="100%" textvalign="100%" font="chat_14" color="white">create_acc_state_south_dakota</label></listitem>
+					<listitem value="TN"><label  x="4" height="100%" textvalign="100%" font="chat_14" color="white">create_acc_state_tennessee</label></listitem>
+					<listitem value="TX"><label  x="4" height="100%" textvalign="100%" font="chat_14" color="white">create_acc_state_texas</label></listitem>
+					<listitem value="UT"><label  x="4" height="100%" textvalign="100%" font="chat_14" color="white">create_acc_state_utah</label></listitem>
+					<listitem value="VT"><label  x="4" height="100%" textvalign="100%" font="chat_14" color="white">create_acc_state_vermont</label></listitem>
+					<listitem value="VA"><label  x="4" height="100%" textvalign="100%" font="chat_14" color="white">create_acc_state_virginia</label></listitem>
+					<listitem value="WA"><label  x="4" height="100%" textvalign="100%" font="chat_14" color="white">create_acc_state_washington</label></listitem>
+					<listitem value="WV"><label  x="4" height="100%" textvalign="100%" font="chat_14" color="white">create_acc_state_west_virginia</label></listitem>
+					<listitem value="WI"><label  x="4" height="100%" textvalign="100%" font="chat_14" color="white">create_acc_state_wisconsin</label></listitem>
+                    			<listitem value="WY"><label  x="4" height="100%" textvalign="100%"  font="chat_14" color="white">create_acc_state_wyoming</label></listitem>
+				</combobox>
+			</panel>					
+			<panel x="-340" align="right" noclick="true" passivechildren="true">
+				<label x="80" height="100%" width="100%" textalign="right" textvalign="center" font="chat_13" shadow="true" color="{color}">{label}</label>
+			</panel>				
+		</panel>
+	</template>
+
+	
+	<template name="countryfield_create">
+		<panel  height="22"  noclick="true" y="{y}">
+			<panel noclick="false" x="-20" width="{width}" align="right">
+				<combobox
+					height="22"
+					color="invisible"
+					itemwidth="{width}"
+					itemheight="20"
+					maxlistheight="8"
+					cvar="_create_country"
+					exteriorscrollbars="false"
+					scrolltexture="/ui/elements/vist_scroll.tga"
+					handleheight="24"
+					scrollbaroffset="-17"
+					highlight="under"
+					onload="CreateString('_create_country', 'USA');"
+					onshow="ListBoxCmd('Select 0');"
+					onselect="{cmd}(this); if(StringEquals(this, 'USA'), Set('_create_state', 'AL'), If(StringEquals(this, 'Canada') or StringEquals(this, 'Mexico'), Set('_create_state', '--'), Set('_create_state', '--')));"
+				>
+					<widgetstate statename="up">
+						<panel>
+							<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="4"  color="black"/>
+							<frame texture="/ui/frames/roundframe.tga" borderthickness="4" color="#FFDA00"/>
+
+							<image x="-2" width="16" height="16" align="right" valign="center" texture="/ui/elements/vist_scroll_vmax_up.tga" />
+						</panel>
+					</widgetstate>
+					<widgetstate statename="over">
+						<panel>
+							<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="4" color="#504009"/>
+							<frame texture="/ui/frames/roundframe.tga" borderthickness="4" color="#5E2D1F"/>
+
+							<image x="-2" width="16" height="16" align="right" valign="center" texture="/ui/elements/vist_scroll_vmax_over.tga" />
+						</panel>
+					</widgetstate>
+					<widgetstate statename="down">
+						<panel>
+							<frame texture="/ui/frames/rounded_header_bg_white.tga" borderthickness="4" color="#504009"/>
+							<frame texture="/ui/frames/roundframe_header.tga" borderthickness="4" color="#5E2D1F"/>
+
+							<image x="-2" width="16" height="16" align="right" valign="center" texture="/ui/elements/vist_scroll_vmax_over.tga" />
+						</panel>
+					</widgetstate>
+					<widgetstate statename="listbg">
+						<panel width="-17"  height="160">
+							<frame texture="/ui/frames/rounded_footer_bg_white.tga" borderthickness="4" color="#504009"/>
+							<image height="-6" texture="/ui/elements/list_parchment.tga" />
+							<frame texture="/ui/frames/roundframe_footer.tga" borderthickness="4" color="#5E2D1F"/>
+						</panel>
+					</widgetstate>
+					<widgetstate statename="itembg">
+						<panel width="-17" >
+							<image texture="/ui/elements/list_gradient.tga" rendermode="overlay" color="#909090" />
+							<frame texture="/ui/frames/roundframe_square.tga" borderthickness="10" color="#5E2D1F"/>
+						</panel>
+					</widgetstate>
+					<widgetstate statename="itemhighlight">
+						<panel width="-17"  >
+							<panel x="1" y="1" width="-2" height="-2" color="#404000" rendermode="additive" />
+						</panel>
+					</widgetstate>
+
+					<listitem value="USA"><label x="4" textvalign="center" height="100%" font="chat_14" color="white">create_acc_country_united_states</label></listitem>
+					<listitem value="Algeria"><label font="chat_14" color="white">create_acc_country_algeria</label></listitem>
+					<listitem value="American Samoa"><label font="chat_14" color="white">create_acc_country_american_samoa</label></listitem>
+					<listitem value="Andorra"><label font="chat_14" color="white">create_acc_country_andorra</label></listitem>
+					<listitem value="Angola"><label font="chat_14" color="white">create_acc_country_angola</label></listitem>
+					<listitem value="Anguilla"><label font="chat_14" color="white">create_acc_country_anguilla</label></listitem>
+					<listitem value="Antarctica"><label font="chat_14" color="white">create_acc_country_antarctica</label></listitem>
+					<listitem value="Antigua and Barbuda"><label font="chat_14" color="white">create_acc_country_antigua_barbuda</label></listitem>
+					<listitem value="Argentina"><label font="chat_14" color="white">create_acc_country_argentina</label></listitem>
+					<listitem value="Aruba"><label font="chat_14" color="white">create_acc_country_aruba</label></listitem>
+					<listitem value="Australia"><label font="chat_14" color="white">create_acc_country_australia</label></listitem>
+					<listitem value="Austria"><label font="chat_14" color="white">create_acc_country_austria</label></listitem>
+					<listitem value="Bahamas"><label font="chat_14" color="white">create_acc_country_bahamas</label></listitem>
+					<listitem value="Bahrain"><label font="chat_14" color="white">create_acc_country_bahrain</label></listitem>
+					<listitem value="Bangledesh"><label font="chat_14" color="white">create_acc_country_bangledesh</label></listitem>
+					<listitem value="Barbados"><label font="chat_14" color="white">create_acc_country_barbados</label></listitem>
+					<listitem value="Belgium"><label font="chat_14" color="white">create_acc_country_belgium</label></listitem>
+					<listitem value="Belize"><label font="chat_14" color="white">create_acc_country_belize</label></listitem>
+					<listitem value="Benin"><label font="chat_14" color="white">create_acc_country_benin</label></listitem>
+					<listitem value="Bermuda"><label font="chat_14" color="white">create_acc_country_bermuda</label></listitem>
+					<listitem value="Bhutan"><label font="chat_14" color="white">create_acc_country_bhutan</label></listitem>
+					<listitem value="Bolivia"><label font="chat_14" color="white">create_acc_country_bolivia</label></listitem>
+					<listitem value="Bosnia and Herzegovina"><label font="chat_14" color="white">create_acc_country_bosnia</label></listitem>
+					<listitem value="Bouvet Island"><label font="chat_14" color="white">create_acc_country_bouvet_island</label></listitem>
+					<listitem value="Brazil"><label font="chat_14" color="white">create_acc_country_brazil</label></listitem>
+					<listitem value="British Indian Ocean Territory"><label font="chat_14" color="white">create_acc_country_brit_ocean</label></listitem>
+					<listitem value="Brunei Darussalam"><label font="chat_14" color="white">create_acc_country_brunei</label></listitem>
+					<listitem value="Burkina Faso"><label font="chat_14" color="white">create_acc_country_burkina</label></listitem>
+					<listitem value="Burundi"><label font="chat_14" color="white">create_acc_country_burundi</label></listitem>
+					<listitem value="Cameroon"><label font="chat_14" color="white">create_acc_country_cameroon</label></listitem>
+					<listitem value="Canada"><label font="chat_14" color="white">create_acc_country_canada</label></listitem>
+					<listitem value="Cape Verde"><label font="chat_14" color="white">create_acc_country_cape_verde</label></listitem>
+					<listitem value="Cayman Islands"><label font="chat_14" color="white">create_acc_country_cayman</label></listitem>
+					<listitem value="Central African Republic"><label font="chat_14" color="white">create_acc_country_african_rep</label></listitem>
+					<listitem value="Chad"><label font="chat_14" color="white">create_acc_country_chad</label></listitem>
+					<listitem value="Czech Republic"><label font="chat_14" color="white">create_acc_country_czech</label></listitem>
+					<listitem value="Chile"><label font="chat_14" color="white">create_acc_country_chile</label></listitem>
+					<listitem value="China"><label font="chat_14" color="white">create_acc_country_china</label></listitem>
+					<listitem value="Christmas Island"><label font="chat_14" color="white">create_acc_country_christmas</label></listitem>
+					<listitem value="Cocos (Keeling Islands)"><label font="chat_14" color="white">create_acc_country_cocos</label></listitem>
+					<listitem value="Colombia"><label font="chat_14" color="white">create_acc_country_colombia</label></listitem>
+					<listitem value="Comoros"><label font="chat_14" color="white">create_acc_country_comoros</label></listitem>
+					<listitem value="Congo"><label font="chat_14" color="white">create_acc_country_congo</label></listitem>
+					<listitem value="Cook Islands"><label font="chat_14" color="white">create_acc_country_cook</label></listitem>
+					<listitem value="Cote D'Ivoire (Ivory Coast)"><label font="chat_14" color="white">create_acc_country_cote</label></listitem>
+					<listitem value="Croatia"><label font="chat_14" color="white">create_acc_country_croatia</label></listitem>
+					<listitem value="Cyprus"><label font="chat_14" color="white">create_acc_country_cyprus</label></listitem>
+					<listitem value="Denmark"><label font="chat_14" color="white">create_acc_country_denmark</label></listitem>
+					<listitem value="Djibouti"><label font="chat_14" color="white">create_acc_country_djibouti</label></listitem>
+					<listitem value="Dominica"><label font="chat_14" color="white">create_acc_country_dominica</label></listitem>
+					<listitem value="Dominican Republic"><label font="chat_14" color="white">create_acc_country_dominican_rep</label></listitem>
+					<listitem value="East Timor"><label font="chat_14" color="white">create_acc_country_east_timor</label></listitem>
+					<listitem value="Ecuador"><label font="chat_14" color="white">create_acc_country_ecuador</label></listitem>
+					<listitem value="Egypt"><label font="chat_14" color="white">create_acc_country_egypt</label></listitem>
+					<listitem value="El Salvador"><label font="chat_14" color="white">create_acc_country_elsalvador</label></listitem>
+					<listitem value="Equatorial Guinea"><label font="chat_14" color="white">create_acc_country_equatorial_g</label></listitem>
+					<listitem value="Eritrea"><label font="chat_14" color="white">create_acc_country_eritrea</label></listitem>
+					<listitem value="Estonia"><label font="chat_14" color="white">create_acc_country_estonia</label></listitem>
+					<listitem value="Ethiopia"><label font="chat_14" color="white">create_acc_country_ethiopia</label></listitem>
+					<listitem value="Falkland Islands (Malvinas)"><label font="chat_14" color="white">create_acc_country_falkland_island</label></listitem>
+					<listitem value="Faroe Islands"><label font="chat_14" color="white">create_acc_country_faroe</label></listitem>
+					<listitem value="Fiji"><label font="chat_14" color="white">create_acc_country_fiji</label></listitem>
+					<listitem value="Finland"><label font="chat_14" color="white">create_acc_country_finland</label></listitem>
+					<listitem value="France"><label font="chat_14" color="white">create_acc_country_france</label></listitem>
+					<listitem value="France, Metropolitan"><label font="chat_14" color="white">create_acc_country_france_metro</label></listitem>
+					<listitem value="French Guiana"><label font="chat_14" color="white">create_acc_country_france_guiana</label></listitem>
+					<listitem value="French Polynesia"><label font="chat_14" color="white">create_acc_country_france_poly</label></listitem>
+					<listitem value="French Southern Territories"><label font="chat_14" color="white">create_acc_country_france_south</label></listitem>
+					<listitem value="Gabon"><label font="chat_14" color="white">create_acc_country_gabon</label></listitem>
+					<listitem value="Gambia"><label font="chat_14" color="white">create_acc_country_gambia</label></listitem>
+					<listitem value="Germany"><label font="chat_14" color="white">create_acc_country_germany</label></listitem>
+					<listitem value="Ghana"><label font="chat_14" color="white">create_acc_country_ghana</label></listitem>
+					<listitem value="Gibraltar"><label font="chat_14" color="white">create_acc_country_gibraltar</label></listitem>
+					<listitem value="Greece"><label font="chat_14" color="white">create_acc_country_greece</label></listitem>
+					<listitem value="Greenland"><label font="chat_14" color="white">create_acc_country_greenland</label></listitem>
+					<listitem value="Grenada"><label font="chat_14" color="white">create_acc_country_grenada</label></listitem>
+					<listitem value="Guadeloupe"><label font="chat_14" color="white">create_acc_country_guadeloupe</label></listitem>
+					<listitem value="Guam"><label font="chat_14" color="white">create_acc_country_guam</label></listitem>
+					<listitem value="Guatemala"><label font="chat_14" color="white">create_acc_country_guatemala</label></listitem>
+					<listitem value="Guinea"><label font="chat_14" color="white">create_acc_country_guinea</label></listitem>
+					<listitem value="Guinea-Bissau"><label font="chat_14" color="white">create_acc_country_guinea_bissau</label></listitem>
+					<listitem value="Guyana"><label font="chat_14" color="white">create_acc_country_guyana</label></listitem>
+					<listitem value="Haiti"><label font="chat_14" color="white">create_acc_country_haiti</label></listitem>
+					<listitem value="Heard and McDonald Islands"><label font="chat_14" color="white">create_acc_country_heard_mcdonald</label></listitem>
+					<listitem value="Honduras"><label font="chat_14" color="white">create_acc_country_honduras</label></listitem>
+					<listitem value="Hungary"><label font="chat_14" color="white">create_acc_country_hungary</label></listitem>
+					<listitem value="Iceland"><label font="chat_14" color="white">create_acc_country_iceland</label></listitem>
+					<listitem value="India"><label font="chat_14" color="white">create_acc_country_india</label></listitem>
+					<listitem value="Indonesia"><label font="chat_14" color="white">create_acc_country_indonesia</label></listitem>
+					<listitem value="Ireland"><label font="chat_14" color="white">create_acc_country_ireland</label></listitem>
+					<listitem value="Israel"><label font="chat_14" color="white">create_acc_country_israel</label></listitem>
+					<listitem value="Italy"><label font="chat_14" color="white">create_acc_country_italy</label></listitem>
+					<listitem value="Ivory Coast"><label font="chat_14" color="white">create_acc_country_ivory_coast</label></listitem>
+					<listitem value="Jamaica"><label font="chat_14" color="white">create_acc_country_jamaica</label></listitem>
+					<listitem value="Japan"><label font="chat_14" color="white">create_acc_country_japan</label></listitem>
+					<listitem value="Kenya"><label font="chat_14" color="white">create_acc_country_kenya</label></listitem>
+					<listitem value="Laos"><label font="chat_14" color="white">create_acc_country_laos</label></listitem>
+					<listitem value="Latvia"><label font="chat_14" color="white">create_acc_country_latvia</label></listitem>
+					<listitem value="Lesotho"><label font="chat_14" color="white">create_acc_country_lesotho</label></listitem>
+					<listitem value="Liechtenstein"><label font="chat_14" color="white">create_acc_country_liechtenstein</label></listitem>
+					<listitem value="Lithuania"><label font="chat_14" color="white">create_acc_country_lithuania</label></listitem>
+					<listitem value="Luxembourg"><label font="chat_14" color="white">create_acc_country_luxembourg</label></listitem>
+					<listitem value="Macau"><label font="chat_14" color="white">create_acc_country_macau</label></listitem>
+					<listitem value="Madagascar"><label font="chat_14" color="white">create_acc_country_madagascar</label></listitem>
+					<listitem value="Malawia"><label font="chat_14" color="white">create_acc_country_malawia</label></listitem>
+					<listitem value="Malaysia"><label font="chat_14" color="white">create_acc_country_malaysia</label></listitem>
+					<listitem value="Maldives"><label font="chat_14" color="white">create_acc_country_maldives</label></listitem>
+					<listitem value="Mali"><label font="chat_14" color="white">create_acc_country_mali</label></listitem>
+					<listitem value="Malta"><label font="chat_14" color="white">create_acc_country_malta</label></listitem>
+					<listitem value="Marshall Islands"><label font="chat_14" color="white">create_acc_country_marshall</label></listitem>
+					<listitem value="Martinique"><label font="chat_14" color="white">create_acc_country_martinique</label></listitem>
+					<listitem value="Mauritania"><label font="chat_14" color="white">create_acc_country_mauritania</label></listitem>
+					<listitem value="Mauritius"><label font="chat_14" color="white">create_acc_country_mauritius</label></listitem>
+					<listitem value="Mayotte"><label font="chat_14" color="white">create_acc_country_mayotte</label></listitem>
+					<listitem value="Mexico"><label font="chat_14" color="white">create_acc_country_mexico</label></listitem>
+					<listitem value="Micronesia"><label font="chat_14" color="white">create_acc_country_micronesia</label></listitem>
+					<listitem value="Monaco"><label font="chat_14" color="white">create_acc_country_monaco</label></listitem>
+					<listitem value="Mongolia"><label font="chat_14" color="white">create_acc_country_mongolia</label></listitem>
+					<listitem value="Montenegro"><label font="chat_14" color="white">create_acc_country_montenegro</label></listitem>
+					<listitem value="Morocco"><label font="chat_14" color="white">create_acc_country_moracco</label></listitem>
+					<listitem value="Mozambique"><label font="chat_14" color="white">create_acc_country_mozambique</label></listitem>
+					<listitem value="Myanmar"><label font="chat_14" color="white">create_acc_country_myanmar</label></listitem>
+					<listitem value="Namibia"><label font="chat_14" color="white">create_acc_country_namibia</label></listitem>
+					<listitem value="Nauru"><label font="chat_14" color="white">create_acc_country_nauru</label></listitem>
+					<listitem value="Nepal"><label font="chat_14" color="white">create_acc_country_nepal</label></listitem>
+					<listitem value="Netherlands"><label font="chat_14" color="white">create_acc_country_netherlands</label></listitem>
+					<listitem value="Netherlands Antilles"><label font="chat_14" color="white">create_acc_country_netherlands_ant</label></listitem>
+					<listitem value="New Caledonia"><label font="chat_14" color="white">create_acc_country_new_caledonia</label></listitem>
+					<listitem value="New Zealand"><label font="chat_14" color="white">create_acc_country_new_zealand</label></listitem>
+					<listitem value="Nicaragua"><label font="chat_14" color="white">create_acc_country_nicaragua</label></listitem>
+					<listitem value="Niger"><label font="chat_14" color="white">create_acc_country_niger</label></listitem>
+					<listitem value="Niue"><label font="chat_14" color="white">create_acc_country_niue</label></listitem>
+					<listitem value="Norfolk Island"><label font="chat_14" color="white">create_acc_country_norfolk_island</label></listitem>
+					<listitem value="Northern Mariana Islands"><label font="chat_14" color="white">create_acc_country_norther_mariana</label></listitem>
+					<listitem value="Norway"><label font="chat_14" color="white">create_acc_country_norway</label></listitem>
+					<listitem value="Oman"><label font="chat_14" color="white">create_acc_country_oman</label></listitem>
+					<listitem value="Pakistan"><label font="chat_14" color="white">create_acc_country_pakistan</label></listitem>
+					<listitem value="Palau"><label font="chat_14" color="white">create_acc_country_palau</label></listitem>
+					<listitem value="Panama"><label font="chat_14" color="white">create_acc_country_panama</label></listitem>
+					<listitem value="Papua New Guinea"><label font="chat_14" color="white">create_acc_country_papau_nguinea</label></listitem>
+					<listitem value="Paraguay"><label font="chat_14" color="white">create_acc_country_paraguay</label></listitem>
+					<listitem value="Peru"><label font="chat_14" color="white">create_acc_country_peru</label></listitem>
+					<listitem value="Phillipines"><label font="chat_14" color="white">create_acc_country_phillipines</label></listitem>
+					<listitem value="Pitcairn"><label font="chat_14" color="white">create_acc_country_pitcairn</label></listitem>
+					<listitem value="Poland"><label font="chat_14" color="white">create_acc_country_poland</label></listitem>
+					<listitem value="Portugal"><label font="chat_14" color="white">create_acc_country_portugal</label></listitem>
+					<listitem value="Puerto Rico"><label font="chat_14" color="white">create_acc_country_puerto_rico</label></listitem>
+					<listitem value="Qatar"><label font="chat_14" color="white">create_acc_country_qatar</label></listitem>
+					<listitem value="Romania"><label font="chat_14" color="white">create_acc_country_romania</label></listitem>
+					<listitem value="Russia"><label font="chat_14" color="white">create_acc_country_russia</label></listitem>
+					<listitem value="Saint Kitts and Nevis"><label font="chat_14" color="white">create_acc_country_saint_kitts</label></listitem>
+					<listitem value="Saint Lucia"><label font="chat_14" color="white">create_acc_country_saint_lucia</label></listitem>
+					<listitem value="Saint Vincent and The Grenadines"><label font="chat_14" color="white">create_acc_country_saint_vincent</label></listitem>
+					<listitem value="Samoa"><label font="chat_14" color="white">create_acc_country_samoa</label></listitem>
+					<listitem value="San Marino"><label font="chat_14" color="white">create_acc_country_san_marino</label></listitem>
+					<listitem value="Sao Tome and Principe"><label font="chat_14" color="white">create_acc_country_sao_tome</label></listitem>
+					<listitem value="Saudi Arabia"><label font="chat_14" color="white">create_acc_country_saudi_arabia</label></listitem>
+					<listitem value="Senegal"><label font="chat_14" color="white">create_acc_country_senegal</label></listitem>
+					<listitem value="Serbia"><label font="chat_14" color="white">create_acc_country_serbia</label></listitem>
+					<listitem value="Seychelles"><label font="chat_14" color="white">create_acc_country_seychelles</label></listitem>
+					<listitem value="Sierra Leone"><label font="chat_14" color="white">create_acc_country_sierra_leone</label></listitem>
+					<listitem value="Singapore"><label font="chat_14" color="white">create_acc_country_singapore</label></listitem>
+					<listitem value="Slovakia"><label font="chat_14" color="white">create_acc_country_slovakia</label></listitem>
+					<listitem value="Slovenia"><label font="chat_14" color="white">create_acc_country_slovenia</label></listitem>
+					<listitem value="Solomon Islands"><label font="chat_14" color="white">create_acc_country_solomon</label></listitem>
+					<listitem value="South Africa"><label font="chat_14" color="white">create_acc_country_south_africa</label></listitem>
+					<listitem value="South Korea"><label font="chat_14" color="white">create_acc_country_south_korea</label></listitem>
+					<listitem value="Spain"><label font="chat_14" color="white">create_acc_country_spain</label></listitem>
+					<listitem value="Sri Lanka"><label font="chat_14" color="white">create_acc_country_sri_lanka</label></listitem>
+					<listitem value="St. Helena"><label font="chat_14" color="white">create_acc_country_sthelena</label></listitem>
+					<listitem value="St. Pierre and Miquelon"><label font="chat_14" color="white">create_acc_country_stpierre</label></listitem>
+					<listitem value="Sudan"><label font="chat_14" color="white">create_acc_country_sudan</label></listitem>
+					<listitem value="Suriname"><label font="chat_14" color="white">create_acc_country_suriname</label></listitem>
+					<listitem value="Svalbard and Jan Mayen Islands"><label font="chat_14" color="white">create_acc_country_svalbard</label></listitem>
+					<listitem value="Swaziland"><label font="chat_14" color="white">create_acc_country_swaziland</label></listitem>
+					<listitem value="Sweden"><label font="chat_14" color="white">create_acc_country_sweden</label></listitem>
+					<listitem value="Switzerland"><label font="chat_14" color="white">create_acc_country_switzerland</label></listitem>
+					<listitem value="Syria"><label font="chat_14" color="white">create_acc_country_syria</label></listitem>
+					<listitem value="Tanzania"><label font="chat_14" color="white">create_acc_country_tanzania</label></listitem>
+					<listitem value="Togo"><label font="chat_14" color="white">create_acc_country_togo</label></listitem>
+					<listitem value="Tonga"><label font="chat_14" color="white">create_acc_country_tongo</label></listitem>
+					<listitem value="Trinidad and Tobago"><label font="chat_14" color="white">create_acc_country_trinidad</label></listitem>
+					<listitem value="Tunisia"><label font="chat_14" color="white">create_acc_country_tunisia</label></listitem>
+					<listitem value="Turkey"><label font="chat_14" color="white">create_acc_country_turkey</label></listitem>
+					<listitem value="Turks and Caicos Islands"><label font="chat_14" color="white">create_acc_country_turks_and_caicos</label></listitem>
+					<listitem value="Uganda"><label font="chat_14" color="white">create_acc_country_uganda</label></listitem>
+					<listitem value="Ukraine"><label font="chat_14" color="white">create_acc_country_ukraine</label></listitem>
+					<listitem value="United Kingdom"><label font="chat_14" color="white">create_acc_country_united_kingdom</label></listitem>
+					<listitem value="US Minor Outlying Islands"><label font="chat_14" color="white">create_acc_country_us_minor</label></listitem>
+					<listitem value="Uruguay"><label font="chat_14" color="white">create_acc_country_uruguay</label></listitem>
+					<listitem value="Vanuatu"><label font="chat_14" color="white">create_acc_country_vanuatu</label></listitem>
+					<listitem value="Vatican City State"><label font="chat_14" color="white">create_acc_country_vatican</label></listitem>
+					<listitem value="Venezuela"><label font="chat_14" color="white">create_acc_country_venezuela</label></listitem>
+					<listitem value="Virgin Islands (British)"><label font="chat_14" color="white">create_acc_country_virgin_brit</label></listitem>
+					<listitem value="Virgin Islands (US)"><label font="chat_14" color="white">create_acc_country_virgin_us</label></listitem>
+					<listitem value="Wallis and Futuna Islands"><label font="chat_14" color="white">create_acc_country_wallis</label></listitem>
+					<listitem value="Western Sahara"><label font="chat_14" color="white">create_acc_country_western_sahara</label></listitem>
+					<listitem value="Zaire"><label font="chat_14" color="white">create_acc_country_zaire</label></listitem>
+				</combobox>
+			</panel>					
+			<panel x="-340" align="right" noclick="true" passivechildren="true">
+				<label x="80" noclick="true" height="100%" width="100%" textalign="right" textvalign="center" font="chat_13" shadow="true" color="{color}">{label}</label>
+			</panel>				
+		</panel>
+	</template>	
+	
+	
+	
+	
+<panel  name="create_account" color="0 0 0 .3" visible="0">
+	<panel y="200" width="800" height="416" align="center" >	
+		<panel y="0" valign="center" height="-40" texture="/ui/elements/parchment.tga"/>
+		<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="12" style="lobby_window_bg"/>
+		<frame texture="/ui/frames/roundframe.tga" style="lobby_window" borderthickness="12"/>
+		<frame texture="/ui/frames/rounded_header_bg_white.tga" height="28" style="lobby_window_header_bg" borderthickness="12"/>
+		<frame texture="/ui/frames/roundframe_header.tga" height="28" style="lobby_window_header" borderthickness="12"/>
+
+		<frame noclick="true" valign="bottom" texture="/ui/frames/rounded_footer_bg_white.tga" height="60" style="lobby_window_footer_bg" borderthickness="12"/>
+		<frame noclick="true" valign="bottom" texture="/ui/frames/roundframe_footer.tga" height="60" style="lobby_window_footer" borderthickness="12">
+			<panel name="debug1" noclick="false" x="-10" width="180" height="26" align="right" valign="center">
+				
+				<instance width="100%" height="100%" name="round_button2" 
+					font="chat_12" label="create_acc_lobby_create_account"
+					onclick="CreateAccount();"
+				/>				
+				
+				<!--
+					<frame texture="/ui/frames/rounded_button_bg_white.tga" borderthickness="8" color="white"/>
+					<frame texture="/ui/frames/roundframe.tga" color="gray" borderthickness="8"/>
+					<label
+						name="create_acct_button_label"
+						width="100%" height="100"
+						textalign="center" textvalign="center"
+						align="center"
+						font="gametweener"
+						color="black"
+						shadow="false"
+						onshow="SetText(Translate('general_create_account'));"
+						watch1="CreateAccountSuccess"
+						ontrigger1="SetText(Translate('general_contrinue'));"
+						watch2="CreateAccountError"
+						ontrigger2="Set(_create_acct_cmd, 'CreateAccount'); SetText(Translate('general_create_account'));"
+					/>
+					<button
+						color="invisible"
+						onshow="Set(_create_acct_cmd, 'CreateAccount');"
+						watch="CreateAccountSuccess"
+						ontrigger="Set(_create_acct_cmd, ShowInterface('credit_card');"
+						onclick="Call('create_acct_button_label', SetText(Translate(\'create_account_please_wait\'))); Do(_create_acct_cmd); Set(_create_acct_cmd, '');"
+					/>
+				-->
+			</panel>
+
+			
+			<!--<label y="10" x="135" height="100%" align="left" textalign="left" width="100%" textvalign="top" font="chat_11" shadow="true" color="white">create_acc_label_select_payment_type</label>-->
+			<label noclick="true"
+				width="-200" height="100%"
+				textalign="center" textvalign="center"
+				align="left"
+				font="gametweener"
+				shadow="true"
+				color="white"
+				watch1="CreateAccountError"
+				ontrigger1="SetText('^y' # param);"
+				watch2="CreateAccountSuccess"
+				ontrigger2="ClearText(); ShowWidget('CreateSuccess');"
+			/>
+		<!--	<label y="-10" x="192" height="100%" align="left" valign="bottom" textalign="left" width="100%" textvalign="bottom" font="chat_11" shadow="true" color="yellow">create_acc_label_terms_conditions</label>-->
+		</frame>
+
+		<label width="-20" height="28" textvalign="center" align="center" font="chat_14" color="white" shadow="true">create_acc_label_finsh_create_account</label>
+		<button x="-12" y="7"  width="14" height="14" align="right" bgcolor="#FFFFFF99" texture="/ui/elements/xbutton.tga" onclick="Hidewidget('create_account');"/>
+
+		<panel name="info_section" height="-78" width="-4" align="center" y="27" color="invisible">
+			<panel y="125" width="-10" align="center" height="36">
+				<frame texture="/ui/frames/rounded_bg_white.tga" color=".5 .1 0 .4" borderthickness="8"/>			
+				<frame texture="/ui/frames/roundframe.tga" color="orange" borderthickness="8"/>
+				<label x="-12" height="100%" width="100%" textalign="right" textvalign="center" font="chat_11" shadow="true" color="white">create_acc_label_nick_name_tip</label>
+			</panel>
+
+			<panel y="12" name="left" width="50%" color="invisible" float="bottom" padding="18" onload="CreateString('_create_nickname');">
+				<instance name="field" color="#FFDA00" order="13" cmd="AcctSetFirstName" label="create_acc_first_name" onshow="SetFocus(true);" passchar=""/>
+				<instance name="field" color="#FFDA00" order="15" cmd="AcctSetEmail" label="create_acc_email" passchar=""/>
+				<instance name="field" color="#FFDA00" order="17" cmd="AcctSetPass" label="create_acc_password" passchar="*"/>
+				<instance name="field" color="#FFFFFF" order="19" cmd="Set('_create_nickname', this); AcctSetNick" label="create_acc_nickname" passchar=""/>
+				<instance name="field" color="#FFDA00" order="20" cmd="AcctSetAddress" label="create_acc_input_address" passchar=""/>
+				<instance name="field" color="#FFDA00" order="22" cmd="AcctSetProvince" widgetname="CreateProvince" label="create_acc_input_province" passchar=""/>
+				<instance name="statefield" y="280" width="230" color="#FFDA00" cmd="AcctSetState" label="create_acc_input_state"/>
+				<instance name="countryfield_create" y="240" width="230" color="#FFDA00" cmd="AcctSetCountry" label="create_acc_input_country"/>
+			</panel>
+				
+
+			<panel y="12" name="left" align="right" width="50%" color="invisible" float="bottom" padding="18">
+				<instance name="field" color="#FFDA00" order="14" cmd="AcctSetLastName" label="create_acc_last_name" passchar=""/>
+				<instance name="field" color="#FFDA00" order="16" cmd="AcctSetEmailConfirm" label="create_acc_confirm_email" passchar=""/>
+				<instance name="field" color="#FFDA00" order="18" cmd="AcctSetPassConfirm" label="create_acc_confirm_password" passchar="*"/>
+				<panel height="26"/>
+				<instance name="field" color="#FFDA00" order="21" cmd="AcctSetCity" label="create_acc_input_city" passchar=""/>
+				<instance name="field" color="#FFDA00" order="23" cmd="AcctSetPostal" label="create_acc_input_postal_code" passchar=""/>
+				<instance name="field" color="#FFDA00" order="25" cmd="AcctSetReferrer" label="create_acc_input_referrer" passchar=""/>
+					
+				<panel height="22">
+					<panel x="-20" width="70" align="right">
+						<instance name="year"/>
+					</panel>
+					<panel noclick="true" x="-95" align="right">
+						<label noclick="true" height="100%" width="100%" textalign="right" textvalign="center" font="chat_13" shadow="true" color="#FFDA00">create_acc_input_year</label>
+					</panel>
+
+					<panel x="-142" width="40" align="right">
+						<instance name="month"/>
+					</panel>
+					<panel noclick="true" x="-189" align="right">
+						<label  noclick="true" height="100%" width="100%" textalign="right" textvalign="center" font="chat_13" shadow="true" color="#FFDA00">create_acc_input_month</label>
+					</panel>
+
+					<panel x="-250" width="40" align="right">
+						<instance name="day"/>
+					</panel>
+					<panel noclick="true" x="-303"  align="right">
+						<label noclick="true" height="100%" width="100%" textalign="right" textvalign="center" font="chat_13" shadow="true" color="#FFDA00">create_acc_input_birth_day</label>
+					</panel>
+				</panel>
+			</panel>
+		</panel>
+	</panel>
+	
+	<!-- Account creation success -->
+	<panel name="CreateSuccess" color="#00000099" visible="false" blockinput="true">
+		<panel width="250" height="90" y="35%" align="center">
+			<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="12" style="lobby_window"/>
+			<frame texture="/ui/frames/roundframe.tga" style="lobby_window_bg" borderthickness="12"/>
+
+			<panel height="-50" y="25" width="-2" align="center" texture="/ui/elements/parchment.tga"/>
+			
+			<label height="24" valign="center" textvalign="center" textalign="center" font="chat_12" color="white" shadow="true">create_acc_label_account_success</label>
+
+			<frame texture="/ui/frames/rounded_header_bg_white.tga" height="25" style="lobby_window_header_bg" borderthickness="12"/>
+			<frame texture="/ui/frames/roundframe_header.tga" height="25" style="lobby_window_header" borderthickness="12"/>
+			<frame valign="bottom" texture="/ui/frames/rounded_footer_bg_white.tga" height="25" style="lobby_window_footer_bg" borderthickness="12"/>
+			<frame valign="bottom" texture="/ui/frames/roundframe_footer.tga" height="25" style="lobby_window_footer" borderthickness="12">
+				<instance name="round_button2" height="16" width="60%" label="create_acc_success_button_okay" align="center" valign="center" font="chat_12" color="invisible" onclick="HideWidget('create_account'); HideWidget('CreateSuccess'); Set('_accountCreated', 1); Exec('/scripts/menu_login.cfg'); Call('login_username_box', 'Set(\'login_username\',_create_nickname);');"/>
+			</frame>
+		</panel>
+	</panel>
+	
+</panel>
+</package>

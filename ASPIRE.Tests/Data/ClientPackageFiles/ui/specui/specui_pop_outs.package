@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+	
+	<template name="specui_ItemPopout" >
+		<panel name="specui_ItemPopout{player}" noclick="1" height="7h" width="7h" color="1 1 0 0.0" align="center" valign="center" float="right" visible="0"
+			onloadlua="self:BringToFront() self:DoEventN(0)"
+			onevent0lua="if ('{infoalign}' == 'left') then self:SetX('-20h') else self:SetX('20h') end"
+			onevent1lua="if ('{infoalign}' == 'left') then self:SlideX('20h', 500) else self:SlideX('-20h', 500) end"
+		>
+			<animatedimage name="spec_animated_gold{player}"
+				height="150%" width="75%" y="-70%" x="-5%" valign="top" align="center" fps="30" loop="true" startframe="5" 
+				numframes="-1" loopbackframe="-1" texture="/ui/common/gold/gold.tga" noclick="true" 
+			/>
+			<panel x="0" y="0" name="spec_animated_item{player}" width="85%" height="85@" valign="center" align="center" visible="1" watch0="" ontrigger0="" noclick="1" color="1 1 1 0.9">
+				<image texture="/ui/elements/button_bevel_up.tga" noclick="1" />
+			</panel>
+		</panel>		
+	</template>
+</package>

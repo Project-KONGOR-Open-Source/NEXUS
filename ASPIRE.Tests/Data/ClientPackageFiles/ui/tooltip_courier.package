@@ -1,0 +1,428 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+	<template name="courier_state_tooltip">
+		<frame
+			name="courier_state_tooltip"
+			texture="/ui/frames/rounded_bg_white.tga"
+			borderthickness="0.6h"
+			color="0 0 0 .75"
+			visible="false"
+			align="right"
+			valign="bottom"
+			width="27h"
+			height="5.0h"
+			float="bottom"
+			group="tooltip_group"
+			grow="1" regrow="1" growinvis="0"
+		>
+			<frame texture="/ui/frames/roundframe.tga" borderthickness="0.6h" bordercolor="#434d50"/>
+			<anchor x="1.0h" y="0.6h" />
+
+			<panel width="-2.0h" height="3.6h">
+				<!-- Icon -->
+				<panel width="100@" height="100%" >
+					<image texture=""
+						watch="CourierState"
+						ontriggerlua="self:SetTexture('/ui/common/courier/courier_state_'..param..'.tga')" 
+					/>
+					<frame color="invisible" borderthickness="1" bordercolor=".3 .3 .3 1" />
+				</panel>
+				
+				<panel width="-120@" align="right">
+					<!-- Name -->
+					<label
+						valign="top"
+						textalign="left"
+						font="dyn_12" color="#ffab01" shadow="true" textvalign="center"
+						watch="CourierState"
+						ontriggerlua="
+							local text = Translate('courier_state_'..param)
+							self:SetFont(GetFontSizeForWidth(text, self:GetWidth(), 12))
+							self:SetText(text)
+						"
+					/>
+				</panel>
+			
+			</panel>
+
+			<!-- padding -->
+			<panel
+				width="-2.0h"
+				height="1.0h"
+				sticky="true"
+				stickytoinvis="false"
+			/>
+
+			<!-- Description text -->
+			<label
+				width="-2.0h"
+				height="0.0h"
+				font="dyn_11"
+				wrap="true"
+				color="white"
+				watch="CourierState"
+				ontriggerlua="self:SetText(Translate('courier_state_'..param..'_desc'))"
+				sticky="true"
+				fity="1"
+				fitypadding="0.2h"
+				stickytoinvis="false"
+			/>
+
+			<!-- padding -->
+			<panel
+				width="-2.0h"
+				height="1.0h"
+				sticky="true"
+				stickytoinvis="false"
+				watch="CourierControllable"
+				ontriggerlua="self:SetVisible(not AtoB(param))"
+			/>
+
+			<!-- Cannot control text -->
+			<label
+				width="-2.0h"
+				height="0.0h"
+				font="dyn_11"
+				wrap="true"
+				color="#E00000"
+				watch="CourierControllable"
+				ontriggerlua="self:SetVisible(not AtoB(param))"
+				content="courier_uncontrollable"
+				sticky="true"
+				fity="1"
+				fitypadding="0.2h"
+				stickytoinvis="false"
+			/>
+
+			<!-- padding -->
+			<panel width="-2.0h" height="0.55h" sticky="true" stickytoinvis="false" />
+		</frame>
+	</template>
+
+	<template name="courier_status_tooltip">
+		<frame
+			name="courier_status_tooltip"
+			texture="/ui/frames/rounded_bg_white.tga"
+			borderthickness="0.6h"
+			color="0 0 0 .75"
+			visible="false"
+			align="right"
+			valign="bottom"
+			width="27h"
+			height="5.0h"
+			float="bottom"
+			group="tooltip_group"
+			grow="1" regrow="1" growinvis="0"
+		>
+			<frame texture="/ui/frames/roundframe.tga" borderthickness="0.6h" bordercolor="#434d50"/>
+			<anchor x="1.0h" y="0.6h" />
+
+			<panel width="-2.0h" height="3.6h">
+				<!-- Status -->
+				<label
+					valign="top"
+					textalign="left"
+					font="dyn_12" color="#ffab01" shadow="true" textvalign="center"
+					watch1="CourierPrivate"
+					ontrigger1="If(StringEquals(CourierState, 'Dead'),
+									SetText(Translate('courier_status_dead')),
+									If(param,
+										SetText(Translate('courier_status_private')),
+										SetText(Translate('courier_status_shared'))
+									)
+								);"
+					watch2="CourierState"
+					ontrigger2="If(StringEquals(param, 'Dead'),
+									SetText(Translate('courier_status_dead')),
+									If(CourierPrivate,
+										SetText(Translate('courier_status_private')),
+										SetText(Translate('courier_status_shared'))
+									)
+								);"
+				/>
+			</panel>
+
+			<!-- padding -->
+			<panel
+				width="-2.0h"
+				height="0.1h"
+				sticky="true"
+				stickytoinvis="false"
+			/>
+
+			<!-- Status Description -->
+			<label
+				width="-2.0h"
+				height="0.0h"
+				font="dyn_11"
+				wrap="true"
+				color="white"
+				watch1="CourierPrivate"
+				ontrigger1="If(StringEquals(CourierState, 'Dead'),
+								SetText(Translate('courier_status_dead_desc')),
+								If(param,
+									SetText(Translate('courier_status_private_desc')),
+									SetText(Translate('courier_status_shared_desc'))
+								)
+							);"
+				watch2="CourierState"
+				ontrigger2="If(StringEquals(param, 'Dead'),
+								SetText(Translate('courier_status_dead_desc')),
+								If(CourierPrivate,
+									SetText(Translate('courier_status_private_desc')),
+									SetText(Translate('courier_status_shared_desc'))
+								)
+							);"
+				sticky="true"
+				fity="1"
+				fitypadding="0.2h"
+				stickytoinvis="false"
+			/>
+
+			<!-- padding -->
+			<panel
+				width="-2.0h"
+				height="1.0h"
+				sticky="true"
+				stickytoinvis="false"
+				watch="CourierControllable"
+				ontriggerlua="self:SetVisible(not AtoB(param))"
+			/>
+
+			<!-- Cannot control text -->
+			<label
+				width="-2.0h"
+				height="0.0h"
+				font="dyn_11"
+				wrap="true"
+				color="#E00000"
+				watch="CourierControllable"
+				ontriggerlua="self:SetVisible(not AtoB(param))"
+				content="courier_uncontrollable"
+				sticky="true"
+				fity="1"
+				fitypadding="0.2h"
+				stickytoinvis="false"
+			/>
+
+			<!-- padding -->
+			<panel width="-2.0h" height="0.55h" sticky="true" stickytoinvis="false" />
+		</frame>
+	</template>
+
+	<template name="courier_controller_tooltip">
+		<frame
+			name="courier_controller_tooltip"
+			texture="/ui/frames/rounded_bg_white.tga"
+			borderthickness="0.6h"
+			color="0 0 0 .75"
+			visible="false"
+			align="right"
+			valign="bottom"
+			width="27h"
+			height="5.0h"
+			float="bottom"
+			group="tooltip_group"
+			grow="1" regrow="1" growinvis="0"
+		>
+			<frame texture="/ui/frames/roundframe.tga" borderthickness="0.6h" bordercolor="#434d50"/>
+			<anchor x="1.0h" y="0.6h" />
+
+			<panel width="-2.0h" height="3.6h">
+				<!-- Icon -->
+				<panel width="100@" height="100%"
+					watch="CourierController"
+					ontriggerlua="self:SetVisible(NotEmpty(param0))" 
+				>
+					<image texture=""
+						watch="CourierController"
+						ontriggerlua="if (NotEmpty(param2)) then self:SetTexture(GetEntityIconPath(param2)) end" 
+					/>
+					<frame color="invisible" borderthickness="1" bordercolor=".3 .3 .3 1"
+						watch="CourierController"
+						ontriggerlua="if (NotEmpty(param1)) then self:SetBorderColor(param1) end" 
+					/>
+				</panel>
+				
+				<panel width="-120@" align="right"
+					watch="CourierController"
+					ontriggerlua="if (NotEmpty(param0)) then
+									self:SetWidth('-120@')
+								  else
+								  	self:SetWidth('100%')
+								  end" 
+				>
+					<!-- Name -->
+					<label
+						valign="top"
+						textalign="left"
+						width="100%"
+						font="dyn_12" color="#ffab01" shadow="true" textvalign="center"
+						watch="CourierController"
+						ontriggerlua="
+							if (NotEmpty(param0)) then
+								self:SetColor(param0)
+								self:SetText(param3)
+								self:SetFont(GetFontSizeForWidth(param3, self:GetWidth(), 12))
+							else
+								self:SetColor('#ffab01')
+								self:SetText(Translate('courier_no_controller'))
+								self:SetFont('dyn_12')
+							end
+						"
+					/>
+				</panel>
+			
+			</panel>
+
+			<!-- padding -->
+			<panel
+				width="-2.0h"
+				height="1.0h"
+				sticky="true"
+				stickytoinvis="false"
+			/>
+
+			<!-- Description text -->
+			<label
+				width="-2.0h"
+				height="0.0h"
+				font="dyn_11"
+				wrap="true"
+				color="white"
+				watch="CourierController"
+				ontriggerlua="
+					if (NotEmpty(param0)) then
+						self:SetText(Translate('courier_controller_desc', 'playerName', param3))
+					else
+						self:SetText(Translate('courier_no_controller_desc'))
+					end
+				"
+				sticky="true"
+				fity="1"
+				fitypadding="0.2h"
+				stickytoinvis="false"
+			/>
+
+			<!-- padding -->
+			<panel
+				width="-2.0h"
+				height="1.0h"
+				sticky="true"
+				stickytoinvis="false"
+				watch="CourierControllable"
+				ontriggerlua="self:SetVisible(not AtoB(param))"
+			/>
+
+			<!-- Cannot control text -->
+			<label
+				width="-2.0h"
+				height="0.0h"
+				font="dyn_11"
+				wrap="true"
+				color="#E00000"
+				watch="CourierControllable"
+				ontriggerlua="self:SetVisible(not AtoB(param))"
+				content="courier_uncontrollable"
+				sticky="true"
+				fity="1"
+				fitypadding="0.2h"
+				stickytoinvis="false"
+			/>
+
+			<!-- padding -->
+			<panel width="-2.0h" height="0.55h" sticky="true" stickytoinvis="false" />
+		</frame>
+	</template>
+
+	<template name="courier_action_tooltip">
+		<frame
+			name="courier_action_tooltip"
+			texture="/ui/frames/rounded_bg_white.tga"
+			borderthickness="0.6h"
+			color="0 0 0 .75"
+			visible="false"
+			align="right"
+			valign="bottom"
+			width="27h"
+			height="5.0h"
+			float="bottom"
+			group="tooltip_group"
+			grow="1" regrow="1" growinvis="0"
+		>
+			<frame texture="/ui/frames/roundframe.tga" borderthickness="0.6h" bordercolor="#434d50"/>
+			<anchor x="1.0h" y="0.6h" />
+
+			<panel width="-2.0h" height="3.6h">
+				<!-- Icon -->
+				<panel width="100@" height="100%" >
+					<image texture="/ui/common/courier/courier_action.tga" />
+					<frame color="invisible" borderthickness="1" bordercolor=".3 .3 .3 1" />
+				</panel>
+				
+				<panel width="-120@" align="right">
+					<!-- Name -->
+					<label
+						valign="top"
+						textalign="left"
+						font="dyn_12" color="#ffab01" shadow="true" textvalign="center"
+						content="courier_action"
+					/>
+				</panel>
+			
+			</panel>
+
+			<!-- padding -->
+			<panel
+				width="-2.0h"
+				height="1.0h"
+				sticky="true"
+				stickytoinvis="false"
+			/>
+
+			<!-- Description text -->
+			<label
+				width="-2.0h"
+				height="0.0h"
+				font="dyn_11"
+				wrap="true"
+				color="white"
+				content="courier_action_desc"
+				sticky="true"
+				fity="1"
+				fitypadding="0.2h"
+				stickytoinvis="false"
+			/>
+
+			<!-- padding -->
+			<panel
+				width="-2.0h"
+				height="1.0h"
+				sticky="true"
+				stickytoinvis="false"
+				watch="CourierControllable"
+				ontriggerlua="self:SetVisible(not AtoB(param))"
+			/>
+
+			<!-- Cannot control text -->
+			<label
+				width="-2.0h"
+				height="0.0h"
+				font="dyn_11"
+				wrap="true"
+				color="#E00000"
+				watch="CourierControllable"
+				ontriggerlua="self:SetVisible(not AtoB(param))"
+				content="courier_uncontrollable"
+				sticky="true"
+				fity="1"
+				fitypadding="0.2h"
+				stickytoinvis="false"
+			/>
+
+			<!-- padding -->
+			<panel width="-2.0h" height="0.55h" sticky="true" stickytoinvis="false" />
+		</frame>
+	</template>
+
+</package>

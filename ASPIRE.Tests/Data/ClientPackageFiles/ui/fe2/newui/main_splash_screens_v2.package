@@ -1,0 +1,659 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+	<panel name="main_splash_maliken" width="100%" height="100%" align="center" color="0 0 0 .8" visible="false" onload="BringToFront();" >
+		<panel y="2.0h" width="95.0@" height="95.0h" align="center" valign="center" noclick="true">
+			<image texture="$invis" noclick="true"
+				resourcecontext="splash3" watch9="MainRegisterTextures"
+				ontrigger9lua="ResourceManager.RegisterTexture(GetCvarString('ui_malikenMessagePath'), 'splash3', self)"
+			/>
+
+			<panel align="center" valign="center" width="-37h" float="bottom" padding="1.05h" grow="true" regrow="true" y="-2h" x="2h">
+				<label fity="true" wrap="true" font="dyn_10" color="#000000" content="maliken_says1" onload="SetText(Translate(ui_malikenMessageString#'1'));" noclick="true"/>
+				<label fity="true" wrap="true" font="dyn_10" color="#000000" content="maliken_says2" onload="SetText(Translate(ui_malikenMessageString#'2'));" noclick="true"/>
+				<label fity="true" wrap="true" font="dyn_10" color="#000000" content="maliken_says3" onload="SetText(Translate(ui_malikenMessageString#'3'));" noclick="true"/>
+				<label fity="true" wrap="true" font="dyn_10" color="#000000" content="maliken_says4" onload="SetText(Translate(ui_malikenMessageString#'4'));" noclick="true"/>
+				<label fity="true" wrap="true" font="dyn_10" color="#000000" content="maliken_says5" onload="SetText(Translate(ui_malikenMessageString#'5'));" noclick="true"/>
+				<label fity="true" wrap="true" font="dyn_10" color="#000000" content="maliken_says6" onload="SetText(Translate(ui_malikenMessageString#'6'));" noclick="true"/>
+				<label fity="true" wrap="true" font="dyn_10" color="#000000" content="maliken_says7" onload="SetText(Translate(ui_malikenMessageString#'7'));" noclick="true"/>
+				<label fity="true" wrap="true" font="dyn_10" color="#000000" content="maliken_says8" onload="SetText(Translate(ui_malikenMessageString#'8'));" noclick="true"/>
+				<label fity="true" wrap="true" font="dyn_10" color="#000000" content="maliken_says9" onload="SetText(Translate(ui_malikenMessageString#'9'));" noclick="true"/>
+				<label fity="true" wrap="true" font="dyn_10" color="#000000" content="maliken_says10" onload="SetText(Translate(ui_malikenMessageString#'10'));" noclick="true"/>
+			</panel>
+
+			<!-- Udder Close Button -->
+			<instance
+				x="-16h" y="85.5%"
+				name="button2" button_name="unnamedButton164"
+				width="10.0h"
+				height="3.0h"
+				valign="top"
+				align="right"
+				onclick="PlaySound('/shared/sounds/ui/ccpanel/button_close_02.wav'); CreateBool('ui_maliken_letter_4', true); SetSave('ui_maliken_letter_4');"
+				onclicklua="UIManager.GetInterface('main'):HoNMainF('MainMenuPanelToggle', 'main_splash_maliken', nil, nil, nil, nil, 63)"
+				font="dyn_12"
+				label="general_close"
+			/>
+
+			<!-- Close Button -->
+			<button
+				x="-1.4h" y="1.4h"
+				width="2.5h" height="2.5h"
+				align="right"
+				color="invisible"
+				onclick="PlaySound('/shared/sounds/ui/ccpanel/button_close_02.wav'); CreateBool('ui_maliken_letter_4', true); SetSave('ui_maliken_letter_4');"
+				onclicklua="UIManager.GetInterface('main'):HoNMainF('MainMenuPanelToggle', 'main_splash_maliken', nil, nil, nil, nil, 63)"
+				onmouseover="PlaySound('/shared/sounds/ui/ccpanel/button_over_01.wav');"
+			>
+				<widgetstate statename="up">
+					<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.5h" color="#910000" blockinput="false" noclick="true"/>
+					<frame texture="/ui/frames/roundframe.tga" color="0 0 0 1" borderthickness="0.5h" blockinput="false" noclick="true"/>
+					<image width="1.4h" height="1.4h" align="center" valign="center" color=".75 .75 .75 1" texture="/ui/elements/closex.tga" noclick="true" />
+				</widgetstate>
+				<widgetstate statename="over">
+					<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.5h" color="#dc0000" blockinput="false" noclick="true"/>
+					<frame texture="/ui/frames/roundframe.tga" color="0 0 0 1" borderthickness="0.5h" blockinput="false" noclick="true"/>
+					<image width="1.4h" height="1.4h" align="center" valign="center" color="1 1 1 1" texture="/ui/elements/closex.tga" noclick="true" />
+				</widgetstate>
+				<widgetstate statename="down" x="1" y="1">
+					<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.5h" color="#910000" blockinput="false" noclick="true"/>
+					<frame texture="/ui/frames/roundframe.tga" color="0 0 0 1" borderthickness="0.5h" blockinput="false" noclick="true"/>
+					<image width="1.4h" height="1.4h" align="center" valign="center" color="1 1 1 1" texture="/ui/elements/closex.tga" noclick="true" />
+				</widgetstate>
+			</button>
+		</panel>
+	</panel>
+
+	<template name="main_double_red_button_template">
+		<panel x="{x}" y="{y}" align="{align}" width="{width=100%}" height="{height=100%}" noclick="true">
+			<button
+				align="center" valign="top"
+				color="invisible"
+				mouseoverdisabled="true"
+				mouseoutdisabled="true"
+				onmouseover="PlaySound('/shared/sounds/ui/button_over_01.wav'); {onmouseover}"
+				onmouseout="{onmouseout}"
+				enabled="{enabled=true}"
+				onclick="PlaySound('{sound=/shared/sounds/ui/button_click_01.wav}'); {onclick}"
+				onclicklua="{onclicklua}"
+				name="{button_name}"
+			>
+				<widgetstate statename="up">
+					<frame texture="/ui/fe2/frames/menu_playnow.tga" borderthickness="3.0h" noclick="true" />
+					<image x="-36%" y="10%" width="80@" height="80%" align="center" valign="top" texture="/ui/fe2/mainmenu/icons/{icon}.tga" noclick="true"/>
+					<label group="{button_name}_label" y="0.1h" x="-6@" width="-115@" align="right" textalign="center" textvalign="center" font="dyn_18" color="#ffc600" outline="true" content="{label}" />
+				</widgetstate>
+				<widgetstate statename="over">
+					<frame texture="/ui/fe2/frames/menu_playnow_over.tga" borderthickness="3.0h" noclick="true" />
+					<image x="-36%" y="9%" width="160@" height="160%" align="center" valign="top" texture="/ui/fe2/mainmenu/icons/{icon}_glow_blue.tga" noclick="true"/>
+					<image x="-36%" y="10%" width="80@" height="80%" align="center" valign="top" texture="/ui/fe2/mainmenu/icons/{icon}.tga" noclick="true"/>
+					<label group="{button_name}_label" y="0.1h" x="-6@" width="-115@" align="right" textalign="center" textvalign="center" font="dyn_18" color="#ffff00" outline="true" content="{label}" />
+				</widgetstate>
+				<widgetstate statename="down">
+					<frame texture="/ui/fe2/frames/menu_playnow_down.tga" borderthickness="3.0h" noclick="true" />
+					<image x="-36%" y="9%" width="160@" height="160%" align="center" valign="top" texture="/ui/fe2/mainmenu/icons/{icon}_glow_blue.tga" noclick="true"/>
+					<image x="-36%" y="10%" width="80@" height="80%" align="center" valign="top" texture="/ui/fe2/mainmenu/icons/{icon}.tga" noclick="true"/>
+					<label group="{button_name}_label" y="0.1h" x="-6@" width="-115@" align="right" textalign="center" textvalign="center" font="dyn_18" color="#ffff00" outline="true" content="{label}" />
+				</widgetstate>
+				<widgetstate statename="disabled">
+					<frame texture="/ui/fe2/frames/menu_playnow.tga" borderthickness="3.0h" rendermode="grayscale" noclick="true" />
+					<image x="-36%" y="10%" width="80@" height="80%" align="center" valign="top" texture="/ui/fe2/mainmenu/icons/{icon}.tga" rendermode="grayscale" noclick="true"/>
+					<label group="{button_name}_label" y="0.1h" x="-6@" width="-115@" align="right" textalign="center" textvalign="center" font="dyn_18" color=".5 .5 .5 1" outline="true" content="{label}" />
+				</widgetstate>
+			</button>
+		</panel>
+	</template>
+
+	<template name="main_notnow_button_template">
+		<button
+			width="20h"
+			height="{height=100%}"
+			align="center" valign="top"
+			color="invisible"
+			onmouseover="PlaySound('/shared/sounds/ui/button_over_01.wav'); {onmouseover}"
+			onclick="PlaySound('{sound=/shared/sounds/ui/button_click_01.wav}'); {onclick}"
+			onclicklua="{onclicklua}"
+		>
+			<widgetstate statename="up">
+				<image width="100@" height="100%" texture="/ui/elements/kick_up.tga" color="1 1 1 .5" />
+				<label height="100%" width="-126@" align="right" textvalign="center" font="dyn_14" color=".7 .7 .7 1" content="main_new_player_splash_1_7" />
+			</widgetstate>
+			<widgetstate statename="over">
+				<image width="100@" height="100%" texture="/ui/elements/kick_up.tga" color="1 1 1 1" />
+				<label height="100%" width="-126@" align="right" textvalign="center" font="dyn_14" color="1 1 1 1" content="main_new_player_splash_1_7" />
+			</widgetstate>
+			<widgetstate statename="down" x="1" y="1">
+				<image width="100@" height="100%" texture="/ui/elements/kick_down.tga" />
+				<label height="100%" width="-126@" align="right" textvalign="center" font="dyn_14" color="1 1 1 1" content="main_new_player_splash_1_7" />
+			</widgetstate>
+		</button>
+	</template>
+
+	<!-- New player walkthrough  -->
+	<panel name="main_splash_new_player" width="100%" height="100%" color="0 0 0 .85" visible="false" onload="BringToFront();"
+		onshowlua="
+			UIManager.GetInterface('main'):HoNGMainF('UserAction',22, true)
+			trackedUserFocus:logFocus('walkthroughPromptVisible', true)
+		"
+		onhidelua="trackedUserFocus:logFocus('walkthroughPromptVisible', nil)"
+	>
+		<panel width="184.0h" align="center" noclick="true">
+			<image width="100%" height="50@" align="center" noclick="true"
+				texture="$invis"
+				resourcecontext="splash1" watch9="MainRegisterTextures"
+				ontrigger9lua="ResourceManager.RegisterTexture('/ui/fe2/elements/welcome_wrapper.tga', 'splash1', self)"
+			/>
+
+			<!-- Close button -->
+			<button
+				x="26%" y="4%"
+				width="2.2h" height="2.2h"
+				align="center"
+				color="invisible"
+				onclick="PlaySound('/shared/sounds/ui/ccpanel/button_close_02.wav');"
+				onclicklua="HoN_Learner:TutorialPromptEnd() GetWidget('main_splash_new_player'):FadeOut(150)"
+				onmouseover="PlaySound('/shared/sounds/ui/ccpanel/button_over_01.wav');"
+			>
+				<widgetstate statename="up">
+					<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.5h" color="#910000" blockinput="false" noclick="true"/>
+					<frame texture="/ui/frames/roundframe.tga" color="0 0 0 1" borderthickness="0.5h" blockinput="false" noclick="true"/>
+					<image width="1.4h" height="1.4h" align="center" valign="center" color=".75 .75 .75 1" texture="/ui/elements/closex.tga" noclick="true" />
+				</widgetstate>
+				<widgetstate statename="over">
+					<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.5h" color="#dc0000" blockinput="false" noclick="true"/>
+					<frame texture="/ui/frames/roundframe.tga" color="0 0 0 1" borderthickness="0.5h" blockinput="false" noclick="true"/>
+					<image width="1.4h" height="1.4h" align="center" valign="center" color="1 1 1 1" texture="/ui/elements/closex.tga" noclick="true" />
+				</widgetstate>
+				<widgetstate statename="down" x="1" y="1">
+					<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.5h" color="#910000" blockinput="false" noclick="true"/>
+					<frame texture="/ui/frames/roundframe.tga" color="0 0 0 1" borderthickness="0.5h" blockinput="false" noclick="true"/>
+					<image width="1.4h" height="1.4h" align="center" valign="center" color="1 1 1 1" texture="/ui/elements/closex.tga" noclick="true" />
+				</widgetstate>
+			</button>
+
+			<!-- Welcome to Heroes of Newerth title -->
+			<label y="6%" height="3.0h" textalign="center" textvalign="center" font="dyn_18" color="#ffc600" outline="true" content="main_new_player_splash_1_0" noclick="true"/>
+
+			<panel grow="true" y="11%" width="38.0%" align="center" color="0 0 0 1" noclick="true">
+				<frame color="invisible" noclick="true" borderthickness="1" bordercolor=".1 .1 .1 1" />
+
+				<panel grow="true" y="1.0h" width="96%" float="bottom" padding="2.0h" align="center" noclick="true">
+
+					<!-- Video -->
+					<panel name="web_browser_tutorial" width="100%" height="56@" noclick="1" >
+						<panel noclick="1" name="web_browser_tutorial_insert"
+							onshowlua="UIManager.GetInterface('webpanel'):HoNWebPanelF('ShowNewPlayerTutorial', self)"
+							onhidelua="UIManager.GetInterface('webpanel'):HoNWebPanelF('UnloadPage')"
+						>
+							<label textvalign="center" textalign="center" font="dyn_10" color="1 1 1 1" shadow="true" content="Loading..." noclick="1"
+								watch="WebBrowserStatus"
+								ontrigger="SetVisible(param == 0);"
+							/>
+						</panel>
+						<if condition="!ui_webBrowser" >
+							<panel color="0 0 0 1" noclick="1"  >
+								<label x="2" y="2" font="dyn_10" color="1 1 1 1" shadow="true" content="HoN TV is only currently supported on Windows." noclick="1"  />
+							</panel>
+						</if>
+						<frame color="invisible" bordercolor=".2 .2 .2 1" borderthickness="1" noclick="1" />
+					</panel>
+
+					<!-- Body text -->
+					<panel grow="true" width="100%" float="bottom" padding="1.0h" noclick="true">
+						<label fity="true" width="94%" align="center" wrap="true" font="dyn_12" textalign="center" color=".8 .8 .8 1" shadow="true" content="main_new_player_splash_1_1" noclick="true" />
+						<label fity="true" width="94%" align="center" wrap="true" font="dyn_14" textalign="center" color="#3abde7" shadow="true" content="main_new_player_splash_1_2" noclick="true" />
+					</panel>
+
+					<panel width="100%" height="8.0h" noclick="true">
+						<panel x="4%" width="29%" align="left" noclick="true">
+							<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.6h" color="#001117" blockinput="false" noclick="true"/>
+							<frame texture="/ui/frames/roundframe.tga" color=".2 .2 .2 1" borderthickness="0.6h" blockinput="false" noclick="true"/>
+							<panel width="-2.0h" align="center" noclick="true">
+								<image x="1%" y="-1@" width="42%" height="42@" valign="center" noclick="true"
+									texture="$invis"
+									resourcecontext="splash1" watch9="MainRegisterTextures"
+									ontrigger9lua="ResourceManager.RegisterTexture('/ui/fe2/elements/welcome_watchvid.tga', 'splash1', self)"
+								/>
+								<label width="-44%" align="right" textalign="center" textvalign="center" wrap="true" font="dyn_10" color=".9 .9 .9 .9" shadow="true" content="main_new_player_splash_1_3" noclick="true" />
+							</panel>
+						</panel>
+						<panel width="29%" align="center" noclick="true">
+							<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.6h" color="#001117" blockinput="false" noclick="true"/>
+							<frame texture="/ui/frames/roundframe.tga" color=".2 .2 .2 1" borderthickness="0.6h" blockinput="false" noclick="true"/>
+							<panel width="-2.0h" align="center" noclick="true">
+								<image x="2%" y="-2@" width="36%" height="36@" valign="center" texture="/ui/fe2/mainmenu/icons/N_tutorial.tga" noclick="true" />
+								<label width="-44%" align="right" textalign="center" textvalign="center" wrap="true" font="dyn_10" color=".9 .9 .9 .9" shadow="true" content="main_new_player_splash_1_4" noclick="true" />
+							</panel>
+						</panel>
+						<panel x="-4%" width="29%" align="right" noclick="true">
+							<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.6h" color="#001117" blockinput="false" noclick="true"/>
+							<frame texture="/ui/frames/roundframe.tga" color=".2 .2 .2 1" borderthickness="0.6h" blockinput="false" noclick="true"/>
+							<panel width="-2.0h" align="center" noclick="true">
+								<image x="2%" y="-1@" width="36%" height="36@" valign="center" texture="/ui/fe2/mainmenu/icons/N_matchmaking.tga" noclick="true" />
+								<label width="-44%" align="right" textalign="center" textvalign="center" wrap="true" font="dyn_10" color=".9 .9 .9 .9" shadow="true" content="main_new_player_splash_1_5" noclick="true" />
+							</panel>
+						</panel>
+					</panel>
+
+					<panel height="0" noclick="true" />
+					<panel width="100%" height="6.0h" noclick="true">
+						<instance name="main_double_red_button_template" button_name="main_splash_new_tutorial" width="68%" align="center" icon="N_matchmaking" label="main_new_player_splash_1_6"
+							onclick="Set('sv_gameCountdownLength', 6500); Set('sv_gameStartCountdown', 5000); StartGame('practice', 'Tutorial', 'map:tutorial', 'casual:true');"
+							onclicklua=
+							"
+								UIManager.GetInterface('main'):HoNGMainF('UserAction',23, true)
+								HoN_Learner:TutorialPromptEnd()
+								UIManager.GetInterface('main'):HoNMainF('MainMenuPanelToggle', 'main_splash_new_player')
+								if (Main.walkthroughState == 0) then
+									Main.walkthroughState = 1
+								end
+								CheckForWalkthrough()
+								Main_Walkthrough.pregameLobbyStep = 1
+							"
+						/>
+					</panel>
+					<panel width="100%" height="2.6h" noclick="true">
+						<instance name="main_notnow_button_template"
+							onclicklua="HoN_Learner:TutorialPromptEnd() GetWidget('main_splash_new_player'):FadeOut(150)
+										UIManager.GetInterface('main'):HoNNewsF('ReopenNews')"
+						/>
+					</panel>
+					<panel height="1.0h" noclick="true" />
+				</panel>
+			</panel>
+		</panel>
+	</panel>
+
+	<trigger name="DoWalkthrough" />
+	<trigger name="HighlightWidget" />
+	<frame name="main_widget_highlighter" color="invisible" visible="0" noclick="1" >
+		<modelpanel
+			noclick="1" align="center" valign="center"
+			model="/ui/common/models/main/tut_highlight.mdf"
+			anim="idle"
+			camerapos="0 -1000 3"
+			cameraangles="0 0 0"
+			camerafov="4.42"
+			carmerafar="5000"
+			depthclear="false"
+			depthcompress="true"
+			sunazimuth="140"
+			sunaltitude="10"
+			suncolor="1 1 1 1"
+			onshow="SetEffect('/ui/common/models/main/tut_highlight.effect');"
+			onhide="SetEffect('');"
+		/>
+	</frame>
+	<panel name="main_widget_highlighter_blocker" visible="0" color="invisible" blockinput="1" />
+	<panel name="main_widget_highlighter_bg_1" visible="0" color="0 0 0 0.5" />
+	<panel name="main_widget_highlighter_bg_2" visible="0" color="0 0 0 0.5" />
+	<panel name="main_widget_highlighter_bg_3" visible="0" color="0 0 0 0.5" />
+	<panel name="main_widget_highlighter_bg_4" visible="0" color="0 0 0 0.5" />
+
+	<panel name="main_widget_highlighter_label_frame" grow="1" visible="0" valign="top" align="left" noclick="1" passivechildren="1" >
+		<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.6h" color="0 0 0 1" noclick="1"/>
+		<frame texture="/ui/frames/roundframe.tga" borderthickness="0.6h" color=".3 .3 .3 1" noclick="1" />
+		<panel align="center" valign="top" width="1h" height="1h" noclick="1" grow="1" regrow="1" >
+			<label x="2.0h" y="-0.5h" name="main_widget_highlighter_label" fity="1" fitypadding="2h" width="20h" wrap="1" valign="center" textalign="center" textvalign="center"
+				font="dyn_14" color="#ffc600" outline="0" shadow="1" content="main_walkthrough_1_1" noclick="true"
+			/>
+			<panel noclick="1" width="+2h" height="+1h" />
+		</panel>
+	</panel>
+
+	<panel name="walkthrough_tip" grow="1" regrow="1" growinvis="0" width="68h" align="center" visible="0" noclick="0"
+		onclick="FadeOut(250);"
+		onrightclick="FadeOut(250);"
+		watch1="EventKill"
+		ontrigger1=""
+	>
+		<frame texture="/ui/frames/togglebox.tga" borderthickness="1.4h" color="1 1 1 1" blockinput="false" noclick="1" />
+		<panel name="lobby_walkthrough_tip_info_parent" width="-2.0h" height="13h" align="center" float="right" padding="1h" noclick="1">
+			<panel width="11.0h" height="11.0h" valign="center" noclick="1">
+				<image name="lobby_walkthrough_tip_icon" texture="$invis" visible="0" noclick="1"/>
+				<frame color="invisible" bordercolor=".4 .4 .4 1" borderthickness="1" noclick="1"/>
+			</panel>
+			<panel grow="1" regrow="1" growinvis="0" width="-11h" color=".5 0 0 .5" valign="center" float="bottom" padding="0.3h" noclick="1">
+				<label name="lobby_walkthrough_tip_icon_label" fity="1" color="red" outline="1" font="dyn_14" content="" visible="0" noclick="1"/>
+				<label name="lobby_walkthrough_tip_icon_desc" fity="1" wrap="1" color="1 1 1 1" shadow="1" font="dyn_12" content="" visible="0" noclick="1"/>
+			</panel>
+		</panel>
+	</panel>
+
+	<!-- Working On (Animaged Image)  -->
+	<animatedimage name="main_widget_highlighter_pointer" visible="0" luatable="1" onevent="" height="12.0h" width="12.0h" noclick="1" loop="1" fps="30"
+		onshow="StartAnim(1);" resourcecontext="walkthrough1" texture="/ui/fe2/elements/hand/hand.tga"
+	/>
+
+	<button
+		name="main_widget_highlighter_close" visible="0"
+		x="-4h" y="4h"
+		width="2.8h" height="2.8h"
+		align="right"
+		color="invisible"
+		onclick="PlaySound('/shared/sounds/ui/ccpanel/button_close_02.wav'); Trigger('DoWalkthrough', '', '');"
+		onclicklua="Main_Walkthrough.ShowWalkthroughTextPanel(false) Main.walkthroughState = 6 GetDBEntry('walkthroughState', Main.walkthroughState, true, false, false)"
+		onmouseover="PlaySound('/shared/sounds/ui/ccpanel/button_over_01.wav');"
+	>
+		<widgetstate statename="up">
+			<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.5h" color="#dc0000" blockinput="false" noclick="true"/>
+			<frame texture="/ui/frames/roundframe.tga" color="0 0 0 1" borderthickness="0.5h" blockinput="false" noclick="true"/>
+			<image width="1.4h" height="1.4h" align="center" valign="center" color="1 1 1 1" texture="/ui/elements/closex.tga" noclick="true" />
+		</widgetstate>
+		<widgetstate statename="over">
+			<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.5h" color="#910000" blockinput="false" noclick="true"/>
+			<frame texture="/ui/frames/roundframe.tga" color="0 0 0 1" borderthickness="0.5h" blockinput="false" noclick="true"/>
+			<image width="1.4h" height="1.4h" align="center" valign="center" color=".75 .75 .75 1" texture="/ui/elements/closex.tga" noclick="true" />
+		</widgetstate>
+		<widgetstate statename="down" x="1" y="1">
+			<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.5h" color="#910000" blockinput="false" noclick="true"/>
+			<frame texture="/ui/frames/roundframe.tga" color="0 0 0 1" borderthickness="0.5h" blockinput="false" noclick="true"/>
+			<image width="1.4h" height="1.4h" align="center" valign="center" color="1 1 1 1" texture="/ui/elements/closex.tga" noclick="true" />
+		</widgetstate>
+
+		<panel grow="1" visible="1" valign="top" align="left" noclick="1" passivechildren="1" y="3.5h" x="-15h" >
+			<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.6h" color="0 0 0 1" noclick="1"/>
+			<frame texture="/ui/frames/roundframe.tga" borderthickness="0.6h" color=".3 .3 .3 1" noclick="1" />
+			<panel align="center" valign="top" width="1h" height="1h" noclick="1" grow="1" regrow="1" >
+				<label fity="1" fitypadding="2h" width="15h" wrap="1" valign="center" textalign="center" textvalign="center"
+					font="dyn_11" color="#ffc600" outline="0" shadow="1" content="ui_main_walkthrough_0" noclick="true"
+				/>
+			</panel>
+		</panel>
+	</button>
+
+	<panel name="main_splash_level_parent" onload="" noclick="1"/>
+
+	<if condition="!ui_promptedAboutBackground and !cg_disableBackgroundEffects and (ui_background != 0)" >
+		<panel name="background_performance_prompt" align="center" valign="center" visible="0" x="35h" y="15h" noclick="1"
+			onload="CreateBool('ui_promptedAboutBackground', false); FadeIn(500);"
+			watch="LoginStatus"
+			ontrigger="
+				If(!ui_promptedAboutBackground,
+					If(StringEquals(param0, 'success'),
+						SetVisible(0),
+						Split(
+							SetY('15h'),
+							SetX('35h'),
+							SetParent('main_splash_level_parent'),
+							FadeIn(500)
+						)
+					)
+				);
+			"
+		>
+			<panel width="33h" align="center" valign="center" grow="1" regrow="1" growinvis="0" noclick="1">
+				<instance name="newui_popup_caption_frame" title="main_perf_notice"
+					onclick="Set('ui_promptedAboutBackground', true); SetSave('ui_promptedAboutBackground', true); Call('background_performance_prompt', 'FadeOut(250);');"
+				/>
+
+				<panel y="3.5h" width="100%" align="center" grow="1" regrow="1" growinvis="0" noclick="1">
+					<panel width="-1.0h" align="center" grow="1" regrow="1" growinvis="0" float="bottom" padding=".5h" noclick="1" reverse="true" >
+
+						<panel grow="1" regrow="1" growinvis="0" stickytoinvis="0" width="100%" noclick="1">
+							<label fity="1" align="center" textalign="center" style="newui_font_style_11" wrap="1" content="main_perf_notice_1" noclick="1"/>
+						</panel>
+
+						<panel grow="1" regrow="1" growinvis="0" stickytoinvis="0" height="3h" align="center" noclick="1">
+							<instance name="newui_checkbox_template" widget_name="form_create_account_gender_1"
+								type="2" width="18h" align="center" valign="center" font="dyn_10"
+								cvar="cg_disableBackgroundEffects" content="options_checkbox_disable_background_effects"
+								onmouseoverlua="Common_V2:ShowGenericTip(true, 'options_checkbox_disable_background_effects', 'options_checkbox_disable_background_effects_tip', '30h')"
+								onmouseoutlua="Common_V2:ShowGenericTip(false)"
+							/>
+						</panel>
+
+						<panel height="3.5h" align="center" grow="1" regrow="1" growinvis="0" stickytoinvis="0" noclick="1">
+							<instance name="newui_common_button_2_template" label="general_ok" width="15h" height="2.5h"
+								onclick="Set('ui_promptedAboutBackground', true); SetSave('ui_promptedAboutBackground', true); Call('background_performance_prompt', 'FadeOut(250);');"
+							/>
+						</panel>
+					</panel>
+				</panel>
+			</panel>
+		</panel>
+	</if>
+
+	<panel name="main_login_logo_splash" color="0 0 0 1" blockinput="1" visible="1" noclick="0">
+		<image name="main_login_logo_splash_image" width="512" height="512" visible="1" align="center" valign="center" texture="$invis" noclick="1" resourcecontext="bgmodels" />
+		<image name="main_login_logo_splash_image_2" width="128" height="128" visible="1" x="148" y="-10" align="left" valign="bottom" texture="$invis" noclick="1" resourcecontext="bgmodels" />
+		<image name="main_login_logo_splash_image_3" width="128" height="128" visible="1" x="10" y="-10" align="left" valign="bottom" texture="$invis" noclick="1" resourcecontext="bgmodels" />
+	</panel>
+
+	<template name="options_left_tab_header_template" >
+		<panel noclick="0" height="2.5h" width="18h" align="{align=center}" valign="{valign=top}" sticky="1" stickytoinvis="0"
+			onclick="GroupCall('options_left_subheaders', 'SetVisible(0)'); GroupCall('options_left_subheader_{subgroup}', 'SetVisible(1)');"
+		>
+			<label height="80%" wrap="true" color="#00baff" shadow="1" font="dyn_14" textalign="center" valign="center" noclick="1" content="{label}" />
+		</panel>
+	</template>
+
+	<template name="options_left_tab_subheader_template" >
+		<panel noclick="0" height="1.6h" width="18h" align="center" group0="options_left_subheaders" group="options_left_subheader_{group}" visible="0" sticky="1" stickytoinvis="0" >
+			<label height="80%" wrap="true" color="#ffffff" shadow="1" font="dyn_11" textalign="center" valign="center" noclick="1" content="{label}" />
+		</panel>
+	</template>
+
+	<template name="options_chunky_checkbox_template_1" >
+		<panel width="34h" height="8hh" noclick="0" cangrab="1" passivechildren="1"  >
+			<frame texture="/ui/frames/rounded_bg_blue.tga" borderthickness="0.6h" color=".6 .6 .6 .9" blockinput="0" noclick="1" visible="1" />
+			<frame texture="/ui/frames/roundframe.tga" color=".2 .2 .2 1" borderthickness="0.6h" blockinput="false" noclick="1" />
+
+			<image texture="/ui/fe2/elements/aftermatch/rewards_check.tga" height="4h" width="4h" noclick="1" />
+
+			<label x="4.4h" width="-4.4h" height="2.5h" color="1 0 1 1" content="{label}" font="dyn_14" />
+
+			<image x="1.2h" y="4.12h" width="1.0h" height="1.0h" texture="/ui/fe2/elements/web_forward.tga" color=".5 .5 .5 1" noclick="true" />
+			<label x="2.4h" y="3.5h" width="-4.4h" height="2.5h" color="1 1 1 1" content="Improves the appearence of effects and lighting." font="dyn_11" />
+
+			<image x="1.2h" y="6.62h" width="1.0h" height="1.0h" texture="/ui/fe2/elements/web_forward.tga" color=".5 .5 .5 1" noclick="true" />
+			<label x="2.4h" y="6.0h" width="-4.4h" height="2.5h" color="1 1 1 1" content="Can reduce frame rate" font="dyn_11" />
+
+			<instance name="tip_mark" align="right" valign="top" x="-0.4h" y="0.4h" width="2.0h" height="2.0h"
+				onmouseover="Trigger('genericMainFloatingTip', true, '45h', '/ui/elements/tip_mark_up.tga', 'Post Processing', 'Instead of rendering 3D objects directly to the display, the scene is first rendered to a buffer in the memory of the video card. Pixel shaders are then used to apply post-processing filters to the image buffer before displaying it to the screen. Post-processing allows effects to be used that require awareness of the entire image (since normally each 3D object is rendered in isolation). Such effects include: High Dynamic Range, Bloom, Ambient Occlusion, Depth of Field, Cel Shading, and Motion Blur.', '', '', '3h', '-2h')"
+				onmouseout="Trigger('genericMainFloatingTip', false, '', '', '', '', '', '', '', '');"
+			/>
+		</panel>
+	</template>
+
+	<template name="options_chunky_slider_template_1" >
+		<panel width="34h" height="8hh" noclick="0" cangrab="1" passivechildren="1"  >
+			<frame texture="/ui/frames/rounded_bg_blue.tga" borderthickness="0.6h" color=".6 .6 .6 .9" blockinput="0" noclick="1" visible="1" />
+			<frame texture="/ui/frames/roundframe.tga" color=".2 .2 .2 1" borderthickness="0.6h" blockinput="false" noclick="1" />
+
+			<label x="4.4h" width="-4.4h" height="2.5h" color="1 0 1 1" content="{label}" font="dyn_14" textalign="center" />
+
+			<panel noclick="1" height="2.5h" width="80%" align="center" valign="bottom" y="-0.9h" >
+				<slider
+					name="{slider_name}"
+					slotwidth="-1%" slotheight="0.6h"
+					slotcolor="1 1 1 1"
+					handlewidth="100@" handleheight="-10%"
+					handlecolor="1 1 1 1"
+					cvar="{cvar}"
+					minvalue="{minvalue}" maxvalue="{maxvalue}"
+					step="{step}"
+					texture="/ui/info/slider.tga"
+					onselect="PlaySound('/shared/sounds/ui/button_over_02.wav');"
+					onchange="If({slider_name}_value != {value}, PlaySound('/shared/sounds/ui/button_slide_01.wav')); Set({slider_name}_value, {value}); {action=}; {slideronchange};"
+					onshow="Set({slider_name}_value, {value});"
+				/>
+			</panel>
+
+			<instance name="tip_mark" align="right" valign="top" x="-0.4h" y="0.4h" width="2.0h" height="2.0h"
+				onmouseover="Trigger('genericMainFloatingTip', true, '45h', '/ui/elements/tip_mark_up.tga', 'Post Processing', 'Instead of rendering 3D objects directly to the display, the scene is first rendered to a buffer in the memory of the video card. Pixel shaders are then used to apply post-processing filters to the image buffer before displaying it to the screen. Post-processing allows effects to be used that require awareness of the entire image (since normally each 3D object is rendered in isolation). Such effects include: High Dynamic Range, Bloom, Ambient Occlusion, Depth of Field, Cel Shading, and Motion Blur.', '', '', '3h', '-2h')"
+				onmouseout="Trigger('genericMainFloatingTip', false, '', '', '', '', '', '', '', '');"
+			/>
+		</panel>
+	</template>
+
+	<template name="options_chunky_dropdown_template_1" >
+		<panel width="34h" height="8hh" noclick="0" cangrab="1" passivechildren="1"  >
+			<frame texture="/ui/frames/rounded_bg_blue.tga" borderthickness="0.6h" color=".6 .6 .6 .9" blockinput="0" noclick="1" visible="1" />
+			<frame texture="/ui/frames/roundframe.tga" color=".2 .2 .2 1" borderthickness="0.6h" blockinput="false" noclick="1" />
+
+			<label x="4.4h" width="-4.4h" height="2.5h" color="1 0 1 1" content="{label}" font="dyn_14" textalign="center" />
+
+			<panel noclick="1" height="2.5h" width="80%" align="center" valign="bottom" y="-0.9h" >
+				<instance name="Moptions_combobox" id="{id}" font="{font=dyn_12}" x="0" width="100%" itemwidth="100%" maxlistheight="{maxlistheight=10}" cvar="{cvar}" data="{data}" onselect="{onselect}" populate="{populate}" />
+			</panel>
+
+			<instance name="tip_mark" align="right" valign="top" x="-0.4h" y="0.4h" width="2.0h" height="2.0h"
+				onmouseover="Trigger('genericMainFloatingTip', true, '45h', '/ui/elements/tip_mark_up.tga', 'Post Processing', 'Instead of rendering 3D objects directly to the display, the scene is first rendered to a buffer in the memory of the video card. Pixel shaders are then used to apply post-processing filters to the image buffer before displaying it to the screen. Post-processing allows effects to be used that require awareness of the entire image (since normally each 3D object is rendered in isolation). Such effects include: High Dynamic Range, Bloom, Ambient Occlusion, Depth of Field, Cel Shading, and Motion Blur.', '', '', '3h', '-2h')"
+				onmouseout="Trigger('genericMainFloatingTip', false, '', '', '', '', '', '', '', '');"
+			/>
+		</panel>
+	</template>
+
+	<template name="main_splash_referral_player_template">
+		<panel height="5.2h" noclick="0" sticky="1" stickytoinvis="0" name="ms_slot{slot}_parent" group="ms_slot_parents"
+			onclicklua="Match_Stats.ClickedMatchReferral(self, {slot})" passivechildren="1"
+			onmouseover="PlaySound('/shared/sounds/ui/ccpanel/button_over_01.wav'); ShowWidget('ms_slot{slot}_highlight');" onmouseout="HideWidget('ms_slot{slot}_highlight');"
+			onclick="ShowOnly('ms_slot{slot}_selected');"
+		>
+			<frame name="ms_slot{slot}_frame1" texture="/ui/frames/roundframe.tga" color="#183042" borderthickness="0.6h" noclick="1"/>
+			<panel align="center" valign="center" width="-0.25h" height="-0.25h" noclick="1" color="invisible"/>
+			<!-- Slot Number / Account Status -->
+			<panel height="100%" width="3.0h" noclick="true">
+				<frame name="ms_slot{slot}_frame2" texture="/ui/frames/rounded_bg_solid.tga" borderthickness="0.6h" color="#183042" noclick="1"/>
+				<panel name="ms_slot{slot}_cpanel" width="50%" align="right" color="#183042" noclick="true" />
+				<label y="0.2h" textalign="center" font="dyn_16" color="1 1 1 1" shadow="true" content="{slot}" noclick="true" />
+				<!-- Checkbox -->
+				<panel width="1.5h" height="1.5h" noclick="1" align="center" valign="bottom" y="-0.8h">
+					<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.5h" color="white" noclick="1"/>
+					<frame texture="/ui/frames/roundframe.tga" color="#3abde7" borderthickness="0.5h" noclick="1"/>
+					<panel name="ms_slot{slot}_selected" group="ms_slot_selected" x="0.1h" y="-0.2h" valign="bottom" align="center" width="125@" height="125%" nolclick="true" visible="false" noclick="1">
+						<image x="1" y="1" texture="/ui/elements/check_mark_white.tga" color="0 0 0 1" noclick="1"/>
+						<image texture="/ui/elements/check_mark_white.tga" color="#40cd3c" noclick="1"/>
+					</panel>
+				</panel>
+			</panel>
+
+			<panel x="-0.5h" width="-4.0h" height="-1.0h" align="right" valign="center" noclick="1">
+				<!-- Account Icon -->
+				<image name="ms_slot{slot}_icon" height="100%" width="100@" texture="/ui/fe2/store/icons/account_icons/default.tga" noclick="true" />
+
+				<panel width="-108@" align="right" noclick="1">
+					<label name="ms_slot{slot}_name" fity="true" font="dyn_14" color="#ffaa00" content="Player Name" noclick="true" />
+					<label name="ms_slot{slot}_namesub" y="54%" fity="true" font="dyn_12" color="#37b2d9" content="MMR: 1500" noclick="true" />
+				</panel>
+			</panel>
+			<frame name="ms_slot{slot}_highlight" texture="/ui/frames/roundframe.tga" color="#1894f1" borderthickness="0.6h" visible="false" noclick="1"/>
+		</panel>
+	</template>
+
+	<!-- Choose Your Ref -->
+	<panel name="main_splash_referral_popup_1" visible="0" color="0 0 0 .6"
+		onshowlua="self:BringToFront()"
+		onhidelua="self:BringToFront()"
+	>
+		<panel grow="1" regrow="1" growinvis="0" width="62.0h" align="center" valign="center">
+			<instance name="newui_custom_frame_template" alpha="0.9"/>
+
+			<panel grow="1" regrow="1" growinvis="0" width="-3.0h" align="center" float="bottom" padding="1.2h">
+
+				<panel y="1.0h" width="-3.0h" align="center" height="10.0h">
+					<panel x="1.0h" width="9.6h" height="9.6h">
+						<image width="60%" height="60@" align="left" valign="bottom" texture="/ui/elements/basic.tga" color="1 1 1 .8" />
+						<image width="86%" height="86@" align="right" valign="top" texture="/ui/elements/verified.tga" />
+					</panel>
+					<label x="-3.0h" y="0.6h" fity="1" width="-14.0h" align="right" textalign="center" font="dyn_18" wrap="1" outline="1" color="#ffc600" content="ref_string_1"/>
+					<label x="-3.0h" y="3.4h" fity="1" width="-14.0h" align="right" textalign="center" font="dyn_18" wrap="1" outline="1" color=".8 .8 .8 1" content="ref_string_2" onshow="SetText(Translate('ref_string_' # ui_raf_region_string # '_2'));"/>
+				</panel>
+
+				<panel stickytoinvis="0" sticky="1" grow="1" regrow="1" growinvis="0" width="-3.0h" align="center">
+					<panel width="23h" x="1h" y="1.0h" height="23.0h" noclick="true" >
+						<image valign="bottom" width="50@" height="100%" ontrigger9lua="ResourceManager.RegisterTexture('/ui/fe2/store/coinstack_large.tga', 'referral_popup_1', self)" resourcecontext="referral_popup_1" watch9="MainRegisterTextures" />
+						<image valign="bottom" align="center" x="14%" y="-1%" width="90%" height="90@" ontrigger9lua="ResourceManager.RegisterTexture('/ui/fe2/store/full_chest.tga', 'referral_popup_1', self)" resourcecontext="referral_popup_1" watch9="MainRegisterTextures" />
+						<image valign="bottom" align="center" x="-13%" width="68@" height="68%" ontrigger9lua="ResourceManager.RegisterTexture('/ui/fe2/store/money_bag.tga', 'referral_popup_1', self)" resourcecontext="referral_popup_1" watch9="MainRegisterTextures" />
+						<image valign="bottom" align="right" x="-10%" width="42@" height="42%" ontrigger9lua="ResourceManager.RegisterTexture('/ui/fe2/store/coinstack_med.tga', 'referral_popup_1', self)" resourcecontext="referral_popup_1" watch9="MainRegisterTextures" />
+						<image valign="bottom" align="right" x="8%" y="10%" width="42@" height="42%" ontrigger9lua="ResourceManager.RegisterTexture('/ui/fe2/store/coinstack_sml.tga', 'referral_popup_1', self)" resourcecontext="referral_popup_1" watch9="MainRegisterTextures" />
+					</panel>
+
+					<panel grow="1" regrow="1" width="28h" x="-1h" float="bottom" padding="0.5h" align="right" noclick="1">
+						<label fity="1" style="newui_font_style_12" content="ref_string_set" />
+						<instance name="main_splash_referral_player_template" slot="1" />
+						<instance name="main_splash_referral_player_template" slot="2" />
+						<instance name="main_splash_referral_player_template" slot="3" />
+						<instance name="main_splash_referral_player_template" slot="4" />
+					</panel>
+				</panel>
+
+				<panel grow="1" stickytoinvis="0" sticky="0" width="-6h" align="center" noclick="1">
+					<label fity="1" align="center" textalign="center" wrap="1" style="newui_font_style_12" content="ref_string_gen_1b" noclick="1"/>
+				</panel>
+
+				<panel stickytoinvis="0" sticky="0" height="9.0h" align="center" color="invisible" width="-3h">
+					<panel width="-3h" height="6.0h" noclick="true" >
+						<instance name="main_double_red_button_template" width="80%" align="center" icon="N_coins" label="ref_string_6"
+							onclick="Call('main_splash_referral_popup_1', 'FadeOut(150);');"
+							onclicklua="Match_Stats.ClickedMatchReferralSubmit()"
+							button_name="ms_referral_1_submit_btn"
+							enabled="false"
+						/>
+					</panel>
+				</panel>
+			</panel>
+
+			<!-- Close X -->
+			<instance name="newui_button_close_template" x="-1.8h" y="1.8h" width="2.2h" height="2.2h" align="right"
+				onclick="Call('main_splash_referral_popup_1', 'FadeOut(150);');"
+			/>
+		</panel>
+	</panel>
+
+	<!-- Bring back to HoN -->
+	<panel name="main_splash_referral_popup_2" visible="0" color="0 0 0 .6"
+		onshow=" BringToFront();  ##Call('main_splash_referral_popup_2_model', 'SetVisible(1);');##"
+		onhide=" BringToFront();  ##Call('main_splash_referral_popup_2_model', 'SetVisible(0);');##"
+	>
+		<panel grow="1" regrow="1" growinvis="0" width="62h" align="center" valign="center" noclick="1">
+			<frame texture="/ui/fe2/newui/res/common/frames/popupframe.png" align="center" valign="center" borderthickness="4i" noclick="1"/>
+
+			<panel grow="1" regrow="1" growinvis="0" width="100%" float="bottom" padding="2h" noclick="1">
+
+				<panel y="1.0h" width="-3.0h" align="center" height="7.5h" noclick="1">
+					<label x="0" y="0.6h" fity="true" width="-14.0h" align="center" textalign="center" font="dyn_18" wrap="true" outline="true" color="#ffc600" content="ref_string_2_1" onshow="SetText(Translate('ref_string_' # ui_raf_region_string # '_2_1'));" />
+					<label x="0" y="4.0h" fity="true" width="-14.0h" align="center" textalign="center" font="dyn_18" wrap="true" outline="true" color=".8 .8 .8 1" content="ref_string_2_2" onshow="SetText(Translate('ref_string_' # ui_raf_region_string # '_2_2'));" />
+				</panel>
+
+				<panel stickytoinvis="0" sticky="1" height="22.0h" growinvis="0" width="-3.0h" align="center">
+					<panel x="10@" width="100@" height="100%" noclick="true">
+						<image valign="bottom" width="50@" height="100%" ontrigger9lua="ResourceManager.RegisterTexture('/ui/fe2/store/coinstack_large.tga', 'referral_popup_2', self)" resourcecontext="referral_popup_2" watch9="MainRegisterTextures" />
+						<image valign="bottom" align="center" x="14%" y="-1%" width="90%" height="90@" ontrigger9lua="ResourceManager.RegisterTexture('/ui/fe2/store/full_chest.tga', 'referral_popup_2', self)" resourcecontext="referral_popup_2" watch9="MainRegisterTextures" />
+						<image valign="bottom" align="center" x="-13%" width="68@" height="68%" ontrigger9lua="ResourceManager.RegisterTexture('/ui/fe2/store/money_bag.tga', 'referral_popup_2', self)" resourcecontext="referral_popup_2" watch9="MainRegisterTextures" />
+						<image valign="bottom" align="right" x="-10%" width="42@" height="42%" ontrigger9lua="ResourceManager.RegisterTexture('/ui/fe2/store/coinstack_med.tga', 'referral_popup_2', self)" resourcecontext="referral_popup_2" watch9="MainRegisterTextures" />
+						<image valign="bottom" align="right" x="8%" y="10%" width="42@" height="42%" ontrigger9lua="ResourceManager.RegisterTexture('/ui/fe2/store/coinstack_sml.tga', 'referral_popup_2', self)" resourcecontext="referral_popup_2" watch9="MainRegisterTextures" />
+					</panel>
+
+					<panel noclick="1" width="-125@" float="bottom" padding="1h" align="right" >
+						<label y="1.8h" fity="true" width="100%" align="left" textalign="left" font="dyn_18" wrap="true" outline="true" color="#ffc600" content="ref_string_2_3" onshow="SetText(Translate('ref_string_' # ui_raf_region_string # '_2_3'));" />
+						<label fity="true" width="100%" align="left" textalign="left" font="dyn_18" wrap="true" outline="true" color="#ffc600" content="ref_string_2_4" onshow="SetText(Translate('ref_string_' # ui_raf_region_string # '_2_4'));" />
+						<label fity="true" width="100%" align="left" textalign="left" font="dyn_18" wrap="true" outline="true" color="#ffc600" content="ref_string_2_5" onshow="SetText(Translate('ref_string_' # ui_raf_region_string # '_2_5'));" />
+						<label fity="true" width="100%" align="left" textalign="left" font="dyn_18" wrap="true" outline="true" color="#ffc600" content="ref_string_2_6" onshow="SetText(Translate('ref_string_' # ui_raf_region_string # '_2_6'));" />
+						<label fity="true" width="100%" align="left" textalign="left" font="dyn_18" wrap="true" outline="true" color="#3abde7" content="ref_string_2_8" onshow="SetText(Translate('ref_string_' # ui_raf_region_string # '_2_8'));" />
+					</panel>
+				</panel>
+
+				<panel width="-3.0h" grow="1" stickytoinvis="0" sticky="0" align="center" noclick="1">
+					<label fity="1" width="80%" align="center" textalign="center" wrap="1" style="newui_font_style_14" content="ref_string_gen_1" />
+				</panel>
+
+				<panel stickytoinvis="0" sticky="0" height="6.0h" width="-3.0h" align="center" noclick="1">
+					<instance name="main_double_red_button_template" width="84%" align="center" icon="N_coins" label="ref_string_6_7"
+						onclicklua="GetWidget('main_splash_referral_popup_2'):FadeOut(250) UIManager.GetInterface('main'):HoNMainF('DoEmailInactiveAccount', GetCvarString('ui_lastSelectedUser'))"
+						button_name="main_splash_ref_2_do_it_btn"
+					/>
+				</panel>
+
+				<panel stickytoinvis="0" sticky="0" width="-3.0h" align="center" height="4h" noclick="1">
+					<instance name="main_notnow_button_template" height="3h" onclicklua="GetWidget('main_splash_referral_popup_2'):FadeOut(250)"/>
+				</panel>
+			</panel>
+
+			<!-- Close X -->
+			<instance name="newui_button_close_template" x="-1.8h" y="1.8h" width="2.2h" height="2.2h" align="right"
+				onclicklua="GetWidget('main_splash_referral_popup_2'):FadeOut(250)"
+			/>
+		</panel>
+	</panel>
+</package>

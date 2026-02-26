@@ -1,0 +1,670 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package >
+	<!-- Social Panel
+		Disabled move/resize, some users display info and alert stuff until other things overhauled =(
+	-->
+	<panel name="social_panel_trigger_helper" noclick="1" color="invisible"/>
+
+	<lua file="/ui/scripts/social_panel.lua" />
+
+	<include file="/ui/fe2/social_panel_templates.package"/>
+	<childinterface file="/ui/fe2/ui_items_2.interface" />
+
+	<trigger name="SocialMPDragged" />
+	<trigger name="social_panel_inactive_invited" />
+
+	<panel name="social_panel" group="sp_im_category_headers" noclick="0" width="23h" height="50h" align="right" y="-100%" x="0" cangrab="0" visible="0"
+		onload="CreateBool('social_mainPanel_beingDragged', 0); If(!VarExists('ui_socialPanelCanDrag'), DoEvent(5)); Call('social_panel_drag_widget', 'SetVisible(ui_socialPanelCanDrag)'); SleepWidget(1, 'Trigger(\'SocialMPDragged\', 0);');"
+		onmouselup="If(ui_socialPanelCanDrag, If(HasFocus(), DoEvent()));"
+		onevent="
+			SetAbsoluteX(GetAbsoluteX());
+			SetAbsoluteY(GetAbsoluteY());
+			SleepWidget(1, '
+				Cmd(\'Trigger SocialMPDragged 0 1\');
+			');
+			"
+		onevent1="If(IsVisibleSelf(), FadeOut(150), FadeIn(150));"
+		onevent5="CreateBool('ui_socialPanelCanDrag', false);"
+		onshowlua="UIManager.GetInterface('main'):HoNSocialPanelF('SocialPanelOnShow', self)"
+		onhidelua="UIManager.GetInterface('main'):HoNSocialPanelF('SocialPanelOnHide', self)"
+		onloadlua="--UIManager.GetInterface('main'):HoNSocialPanelF('SocialPanelOnLoad', self)"
+		onreloadlua="UIManager.GetInterface('main'):HoNSocialPanelF('SocialPanelOnLoad', self)"
+	>
+
+		<instance name="user_left_menu" panel_name="sp_left_user_menu" group_name="sp_left_menu_grp"
+			width="16h" x="1.0h" align="right"/>
+
+		<panel noclick="1" y="-1" x="0" color="0 0 0 1" >
+
+			<frame color=".05 .07 .1 .5" bordercolor="#455166" borderthickness="1" noclick="true" />
+
+			<!-- Footer / Drag Area (Disabled for now) -->
+			<panel name="social_panel_drag_widget" valign="top" align="center" color="invisible" height="2.5h" cangrab="1" y="47.5h" noclick="0" luatable="1" visible="0"
+				onmouseldown="If(ui_socialPanelCanDrag, If(HasFocus(), DoEvent(0)));"
+				onevent0="
+					Set(social_mainPanel_beingDragged, 1);
+					Cmd('Trigger SocialMPDragged 1');
+					SetOnFrame('If(social_mainPanel_beingDragged,  DoEvent() );');
+					"
+				onmouselup="If(ui_socialPanelCanDrag, If(HasFocus(), DoEvent(1)));"
+				onevent1="
+					If(social_mainPanel_beingDragged, Split(Cmd('Trigger SocialMPDragged 0'), CallEvent('social_friends_listbox')));
+					Set(social_mainPanel_beingDragged, 0);
+					SetOnFrame('');
+					"
+				onevent=""
+			>
+				<!-- Footer -->
+				<panel name="sp_footer_parent" width="100%" grow="1" regrow="1" growinvis="0" valign="bottom" noclick="true" color="1 1 0 0" float="bottom" visible="1" >
+					<!-- Re-size  -->
+					<image name="sp_footer_parent_image" noclick="1" width="1.5h" height="1.5h" align="right" x="-4" valign="bottom" y="-4" texture="/ui/fe2/elements/frameControl_resize.tga" />
+
+				</panel>
+				<!-- Drag Zone -->
+				<frame visible="0" valign="top" align="center" watch="SocialMPDragged" ontrigger="If(param0, FadeIn(50), FadeOut(50));"	color="0 1 0 0.2" bordercolor="0 1 0 0.4" borderthickness="0.2h" noclick="1" texture="/ui/frames/rounded_bg_solid.tga" />
+
+			</panel>
+
+			<panel width="-1.2h" align="center" float="bottom" noclick="true">
+
+				<panel height="0.6h" width="100%" noclick="true" />
+
+				<panel width="100%" height="3.0h" noclick="true">
+
+					<!-- Header -->
+					<panel width="100%" height="3.0h" valign="top" noclick="true" >
+						<frame texture="/ui/frames/rounded_bg_flat.tga" borderthickness="0.6h" color="#192130" blockinput="false" noclick="true"/>
+						<frame texture="/ui/frames/roundframe.tga" color="#30405d" borderthickness="0.6h" blockinput="false" noclick="true"/>
+
+						<label name="sp_friends_header_label" textalign="center" height="100%" textvalign="center" font="dyn_14" color="1 1 1 1" shadow="true" content="mainlobby_label_cc_friends" noclick="true" visible="1" />
+
+						<!-- Options  -->
+						<button
+							name="social_friends_options_btn"
+							x="-0.4h"
+							width="2.0h" height="2.0h"
+							align="right"
+							valign="center"
+							color="invisible"
+							onclick="PlaySound('/shared/sounds/ui/ccpanel/button_close_02.wav');"
+							onmouseover="
+								PlaySound('/shared/sounds/ui/ccpanel/button_over_01.wav');
+								##Trigger('genericMainFloatingTip', true, '30h', '/ui/fe2/systembar/icons/clans.tga', 'sp_options_tt_title', 'sp_options_tt_desc', '', '', '-31h', '1h');##
+								"
+							onmouseout="##Trigger('genericMainFloatingTip', false, '', '', '', '', '', '', '', '');##"
+						>
+							<widgetstate statename="up">
+								<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.5h" color="#0e9100" blockinput="false" noclick="true"/>
+								<frame texture="/ui/frames/roundframe.tga" color="0 0 0 1" borderthickness="0.5h" blockinput="false" noclick="true"/>
+								<image width="1.3h" height="1.3h" align="center" valign="center" color=".75 .75 .75 1" texture="/ui/fe2/systembar/icons/options.tga" noclick="true" />
+							</widgetstate>
+							<widgetstate statename="over">
+								<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.5h" color="#1adc00" blockinput="false" noclick="true"/>
+								<frame texture="/ui/frames/roundframe.tga" color="0 0 0 1" borderthickness="0.5h" blockinput="false" noclick="true"/>
+								<image width="1.3h" height="1.3h" align="center" valign="center" color="1 1 1 1" texture="/ui/fe2/systembar/icons/options.tga" noclick="true" />
+							</widgetstate>
+							<widgetstate statename="down" x="1" y="1">
+								<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.5h" color="#0e9100" blockinput="false" noclick="true"/>
+								<frame texture="/ui/frames/roundframe.tga" color="0 0 0 1" borderthickness="0.5h" blockinput="false" noclick="true"/>
+								<image width="1.3h" height="1.3h" align="center" valign="center" color="1 1 1 1" texture="/ui/fe2/systembar/icons/options.tga" noclick="true" />
+							</widgetstate>
+						</button>
+
+						<!-- Bot -->
+						<panel name="sp_footer_bot" height="3.0h" valign="top" noclick="1" visible="0" >
+							<!-- Add Friend -->
+							<panel x="0h" height="3.0h" width="100%" valign="center" y="0" noclick="true">
+								<panel width="100%" align="center" noclick="true">
+									<frame texture="/ui/frames/rounded_bg_solid.tga" borderthickness="0.4h" color="0 0 0 0.6" blockinput="false" noclick="true"/>
+									<frame texture="/ui/frames/roundframe.tga" color="#30405d" borderthickness="0.6h" blockinput="false" noclick="true"/>
+
+									<textbox
+										name="sp_textbox_friendlist_input"
+										hmargin="1.0h" vmargin="0.4h"
+										maxlength="15"
+										textalign="center" textvalign="center"
+										font="dyn_14"
+										textcolor="white"
+										shadow="true"
+										color="invisible"
+										onload=""
+										onshow="SetFocus(true);"
+										onenter="
+											SetFocus(false);
+										"
+										onesc="
+											EraseInputLine();
+											SetFocus(false);
+											HideWidget('sp_footer_bot');
+										"
+										onchangelua="
+											UIManager.GetInterface('main'):HoNSocialPanelF('InputBoxUpdate', self:GetValue() )
+											UIManager.GetInterface('main'):HoNNotificationF('InputBoxUpdate', self:GetValue() )
+										"
+										onchange="
+											if(!StringEmpty(''#this),
+												Call('sp_footer_input_cover', 'SetVisible(0)')
+											);"
+										onfocus="
+											if(!StringEmpty(''#this),
+												Call('sp_footer_input_cover', 'SetVisible(0)')
+											);
+										"
+										onlosefocus="
+											if(StringEmpty(''#this),
+												Call('sp_footer_input_cover', 'SetVisible(1)')
+											);
+										"
+										onhide="
+											EraseInputLine();
+											Call('sp_player_search_button', 'SetVisible(1)');
+											Call('sp_friends_header_label', 'SetVisible(1)');
+											GroupCall('sp_header_icons', 'SetVisible(1)');
+											Call('sp_footer_input_cover', 'SetVisible(1)');
+										"
+										onmousewheeldown="CallEvent('sp_user_list_scroller', 1); 	## Echo('onmousewheeldown 1 '); ##"
+										onmousewheelup="CallEvent('sp_user_list_scroller', 0); 		## Echo('onmousewheelup 1 ');   ##"
+									/>
+									<label name="sp_footer_input_cover" x="1h" y="0" width="-0.5h" height="-0.4h" valign="center" align="center" textvalign="center" font="dyn_10" color="white" shadow="true" content="social_panel_enter_name" noclick="1" />
+									<panel noclick="0" blockinput="0" processonlyscroll="1" hover="false"
+										onmousewheeldown="CallEvent('sp_user_list_scroller', 1); 	## Echo('onmousewheeldown 1 '); ##"
+										onmousewheelup="CallEvent('sp_user_list_scroller', 0); 		## Echo('onmousewheelup 1 ');   ##"
+									/>
+								</panel>
+							</panel>
+
+							<button
+								x="-0.4h"
+								width="2.0h" height="2.0h"
+								align="right"
+								valign="center"
+								color="invisible"
+								onclick="
+									HideWidget('sp_footer_bot');
+									PlaySound('/shared/sounds/ui/ccpanel/button_close_02.wav');
+								"
+								onmouseover="PlaySound('/shared/sounds/ui/ccpanel/button_over_01.wav');"
+							>
+								<widgetstate statename="up">
+									<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.5h" color="#910000" blockinput="false" noclick="true"/>
+									<frame texture="/ui/frames/roundframe.tga" color="0 0 0 1" borderthickness="0.5h" blockinput="false" noclick="true"/>
+									<image width="1.3h" height="1.3h" align="center" valign="center" color=".75 .75 .75 1" texture="/ui/elements/closex.tga" noclick="true" />
+								</widgetstate>
+								<widgetstate statename="over">
+									<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.5h" color="#dc0000" blockinput="false" noclick="true"/>
+									<frame texture="/ui/frames/roundframe.tga" color="0 0 0 1" borderthickness="0.5h" blockinput="false" noclick="true"/>
+									<image width="1.3h" height="1.3h" align="center" valign="center" color="1 1 1 1" texture="/ui/elements/closex.tga" noclick="true" />
+								</widgetstate>
+								<widgetstate statename="down" x="1" y="1">
+									<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.5h" color="#910000" blockinput="false" noclick="true"/>
+									<frame texture="/ui/frames/roundframe.tga" color="0 0 0 1" borderthickness="0.5h" blockinput="false" noclick="true"/>
+									<image width="1.3h" height="1.3h" align="center" valign="center" color="1 1 1 1" texture="/ui/elements/closex.tga" noclick="true" />
+								</widgetstate>
+							</button>
+						</panel>
+
+						<!-- Search -->
+						<panel name="sp_player_search_button" noclick="0" align="right" valign="center" width="4.5h" height="3.0h" x="-2.8h"
+							onclick="
+								Call('sp_friends_header_label', 'SetVisible(0)');
+								GroupCall('sp_header_icons', 'SetVisible(0)');
+								SetVisible(0);
+								SleepWidget(101, 'ShowWidget(\'sp_footer_bot\')');
+							"
+							onmousewheeldown="CallEvent('sp_user_list_scroller', 1); 	## Echo('onmousewheeldown 1 '); ##"
+							onmousewheelup="CallEvent('sp_user_list_scroller', 0); 		## Echo('onmousewheelup 1 ');   ##"
+							ontrigger="SetX(0); SetY(0);"
+							onmouseover="
+								GroupCall('sp_header_search_button_jiggle', 'SetWatch(1, \'HostTime\')');
+								Scale('5.76h', '3.6h', 250);
+							"
+							onmouseout="
+								GroupCall('sp_header_search_button_jiggle', 'SetWatch(\'\'); SetWatch(1, \'\'); SetX(-4); SetY(0); SetRotation(0);');
+								Scale('4.5h', '3.0h', 250);
+							"
+							onhide="
+								GroupCall('sp_header_search_button_jiggle', 'SetWatch(\'\'); SetWatch(1, \'\'); SetX(-4); SetY(0); SetRotation(0);');
+								SetWidth('4.5h'); SetHeight('3.0h');
+							"
+						>
+							<image noclick="1" width="76@" height="76%" align="right" valign="center" texture="/ui/fe2/elements/social_findfriend.tga"
+								watch="" ontrigger="SetRotation(Sin(((param % 300) / 300) * (3.14159265 * 2)) * 8);" group="sp_header_search_button_jiggle"
+								watch1="" ontrigger1="SetRotation(Sin(((param % 300) / 300) * (3.14159265 * 2)) * 4);"
+							/>
+						</panel>
+
+						<panel noclick="1" group="sp_header_icons" float="right" height="3.0h" grow="1" regrow="1" growinvis="0" padding="2%" >
+							<panel noclick="1" height="3.0h" width="0" x="0" />
+
+							<panel name="sp_header_friendrequests_button" visible="0" noclick="0" align="left" valign="center" height="2.5h" width="2.5h" sticky="1" stickytoinvis="0"
+								onclick="ToggleWidget('sp_header_popup_friendrequests'); Call('sp_header_popup_invites', 'SetVisible(0)');"
+								ontrigger="SetX(0); SetY(0);"
+								onshow="
+									SleepWidget(750, '
+										Scale(\'3.5h\', \'3.5h\', 250);
+										SleepWidget(250, \'
+											Scale(\\\'2.5h\\\', \\\'2.5h\\\', 250);
+										\');
+										GroupCall(
+											\'sp_header_friendrequests_button_jiggle\',
+											\'
+												SetWatch(\\\'HostTime\\\');
+												SleepWidget(750, \\\'SetWatch(\\\\\\\'\\\\\\\');
+												SetX(0);
+												SetY(0);
+												SetRotation(0);\\\');
+											\'
+										);
+									');
+								"
+								onmouseover="
+									GroupCall('sp_header_friendrequests_button_jiggle', 'SetWatch(1, \'HostTime\')');
+									Scale('2.8h', '2.8h', 250);
+									##
+									SleepWidget(250, '
+										Scale(\'2.5h\', \'2.5h\', 125);
+										GroupCall(\'sp_header_friendrequests_button_jiggle\', \'SetWatch(\\\'\\\'); SetWatch(1, \\\'\\\'); SetX(0); SetY(0); SetRotation(0);\');
+									');
+									##
+								"
+								onmouseout="
+									GroupCall('sp_header_friendrequests_button_jiggle', 'SetWatch(\'\'); SetWatch(1, \'\'); SetX(0); SetY(0); SetRotation(0);');
+									Scale('2.5h', '2.5h', 250);
+								"
+								onhide="
+									GroupCall('sp_header_friendrequests_button_jiggle', 'SetWatch(\'\'); SetWatch(1, \'\'); SetX(0); SetY(0); SetRotation(0);');
+									SetHeight('2.5h'); SetWidth('2.5h');
+								"
+							>
+								<image noclick="1" width="2.0h" height="2.0h" align="center" valign="center" texture="/ui/fe2/systembar/icons/friends.tga"
+									watch="" ontrigger="SetRotation(Sin(((param % 300) / 300) * (3.14159265 * 2)) * 8);" group="sp_header_friendrequests_button_jiggle"
+									watch1="" ontrigger1="SetRotation(Sin(((param % 300) / 300) * (3.14159265 * 2)) * 4);"
+								/>
+								<frame name="sp_header_friendrequests_button_count_bg" visible="0" noclick="1" height="55%" width="55%" align="right" valign="top" x="16%" y="-7%" color="red" bordercolor="black" borderthickness="1" >
+									<label name="sp_header_friendrequests_button_count_label" font="dyn_9" shadow="1" shadowcolor="black" content="0" color="white" noclick="1" textalign="center" textvalign="center" />
+								</frame>
+							</panel>
+
+							<panel name="sp_header_invites_button" visible="0" noclick="0" align="left" valign="center" height="2.5h" width="2.5h" sticky="1" stickytoinvis="0"
+								onclick="ToggleWidget('sp_header_popup_invites'); Call('sp_header_popup_friendrequests', 'SetVisible(0)');"
+								ontrigger="SetX(0); SetY(0);"
+								onshow="
+									SleepWidget(750, '
+										Scale(\'3.5h\', \'3.5h\', 250);
+										SleepWidget(250, \'
+											Scale(\\\'2.5h\\\', \\\'2.5h\\\', 250);
+										\');
+										GroupCall(
+											\'sp_header_invites_button_jiggle\',
+											\'
+												SetWatch(\\\'HostTime\\\');
+												SleepWidget(750, \\\'SetWatch(\\\\\\\'\\\\\\\');
+												SetX(0);
+												SetY(0);
+												SetRotation(0);\\\');
+											\'
+										);
+									');
+								"
+								onmouseover="
+									GroupCall('sp_header_invites_button_jiggle', 'SetWatch(1, \'HostTime\')');
+									Scale('2.8h', '2.8h', 250);
+									##
+									SleepWidget(250, '
+										Scale(\'2.5h\', \'2.5h\', 125);
+										GroupCall(\'sp_header_invites_button_jiggle\', \'SetWatch(\\\'\\\'); SetWatch(1, \\\'\\\'); SetX(0); SetY(0); SetRotation(0);\');
+									');
+									##
+								"
+								onmouseout="
+									GroupCall('sp_header_invites_button_jiggle', 'SetWatch(\'\'); SetWatch(1, \'\'); SetX(0); SetY(0); SetRotation(0);');
+									Scale('2.5h', '2.5h', 250);
+								"
+								onhide="
+									GroupCall('sp_header_invites_button_jiggle', 'SetWatch(\'\'); SetWatch(1, \'\'); SetX(0); SetY(0); SetRotation(0);');
+									SetHeight('2.5h'); SetWidth('2.5h');
+								"
+							>
+								<image noclick="1" width="2.0h" height="2.0h" align="center" valign="center" texture="/ui/fe2/systembar/icons/notifications.tga"
+									watch="" ontrigger="SetRotation(Sin(((param % 300) / 300) * (3.14159265 * 2)) * 8);" group="sp_header_invites_button_jiggle"
+									watch1="" ontrigger1="SetRotation(Sin(((param % 300) / 300) * (3.14159265 * 2)) * 4);"
+								/>
+								<frame name="sp_header_invites_button_count_bg" visible="0" noclick="1" height="55%" width="55%" align="right" valign="top" x="16%" y="-7%" color="red" bordercolor="black" borderthickness="1" >
+									<label name="sp_header_invites_button_count_label" font="dyn_9" shadow="1" shadowcolor="black" content="0" color="white" noclick="1" textalign="center" textvalign="center" />
+								</frame>
+							</panel>
+						</panel>
+
+						<!-- Top -->
+						<panel name="sp_footer_top" visible="0" y="4.0h" height="2.5h" align="center" valign="top" noclick="1" sticky="0" stickytoinvis="0" >
+							<panel visible="1" y="-0.6h" width="-1.6h" valign="top" align="center" float="bottom" >
+								<panel name="sp_main_dyn_btn_1" y="0" width="46%" noclick="0" onclick="PlaySound('/shared/sounds/ui/ccpanel/button_click_01.wav');" onmouseover="Call('sp_main_dyn_btn_1_frame', 'SetVisible(1);');" onmouseout="Call('sp_main_dyn_btn_1_frame', 'SetVisible(0);');" >
+									<frame name="sp_main_dyn_btn_1_frame" visible="0" texture="/ui/frames/rounded_bg_solid.tga" borderthickness="0.4h" color="#39c6ff44" blockinput="false" noclick="true"/>
+									<frame texture="/ui/frames/roundframe.tga" valign="center" color="#39c6ff77" borderthickness="0.4h" blockinput="false" noclick="true"/>
+									<label name="sp_main_dyn_btn_1_label" width="100%" fity="1" valign="center" textalign="center" textvalign="center" font="dyn_10" color="#39c6ff" shadow="true" content="sp_main_dyn_btn_1" noclick="1" underline="1" />
+								</panel>
+								<panel name="sp_main_dyn_btn_2" y="0" width="46%" align="right" noclick="0" onclick="PlaySound('/shared/sounds/ui/ccpanel/button_click_01.wav');" onmouseover="Call('sp_main_dyn_btn_2_frame', 'SetVisible(1);');" onmouseout="Call('sp_main_dyn_btn_2_frame', 'SetVisible(0);');" >
+									<frame name="sp_main_dyn_btn_2_frame" visible="0" texture="/ui/frames/rounded_bg_solid.tga" borderthickness="0.4h" color="#39c6ff44" blockinput="false" noclick="true"/>
+									<frame texture="/ui/frames/roundframe.tga" valign="center" color="#39c6ff77" borderthickness="0.4h" blockinput="false" noclick="true"/>
+									<label name="sp_main_dyn_btn_2_label" width="100%" fity="1" valign="center" textalign="center" textvalign="center" font="dyn_10" color="#39c6ff" shadow="true" content="sp_main_dyn_btn_2" noclick="1" underline="1" />
+								</panel>
+							</panel>
+						</panel>
+					</panel>
+
+				</panel>
+
+				<panel height="0.8h" width="100%" noclick="true" />
+
+				<!-- Userlist -->
+				<panel name="social_friends_userlist" height="-5.5h" width="100%" align="left" valign="top" noclick="0" visible="1" stickytoinvis="0" sticky="1"
+					blockinput="1" processonlyscroll="1" hover="false"
+					onmousewheeldown="CallEvent('sp_user_list_scroller', 1); 	## Echo('onmousewheeldown 1 '); ##"
+					onmousewheelup="CallEvent('sp_user_list_scroller', 0); 		## Echo('onmousewheelup 1 ');   ##"
+					onshow="HideWidget('notifications_remove_all_btn');"
+				>
+					<panel name="social_friends_panel" height="100%" width="-2.0h" float="bottom" padding="0.2h" noclick="true" >
+
+						<panel height="100%" name="social_friends_listbox" align="center"  float="bottom" visible="true" color="1 0 0 0.0" clip="1"
+							oneventlua="UIManager.GetInterface('main'):HoNSocialPanelF('UpdateVisibleSlots')"
+						>
+							<instance name="sp_friendslist_entry_template" id="1" />
+							<instance name="sp_friendslist_entry_template" id="2" />
+							<instance name="sp_friendslist_entry_template" id="3" />
+							<instance name="sp_friendslist_entry_template" id="4" />
+							<instance name="sp_friendslist_entry_template" id="5" />
+							<instance name="sp_friendslist_entry_template" id="6" />
+							<instance name="sp_friendslist_entry_template" id="7" />
+							<instance name="sp_friendslist_entry_template" id="8" />
+							<instance name="sp_friendslist_entry_template" id="9" />
+							<instance name="sp_friendslist_entry_template" id="10" />
+							<instance name="sp_friendslist_entry_template" id="11" />
+							<instance name="sp_friendslist_entry_template" id="12" />
+							<instance name="sp_friendslist_entry_template" id="13" />
+							<instance name="sp_friendslist_entry_template" id="14" />
+							<instance name="sp_friendslist_entry_template" id="15" />
+							<instance name="sp_friendslist_entry_template" id="16" />
+							<instance name="sp_friendslist_entry_template" id="17" />
+							<instance name="sp_friendslist_entry_template" id="18" />
+							<instance name="sp_friendslist_entry_template" id="19" />
+							<instance name="sp_friendslist_entry_template" id="20" />
+
+							<panel y="0" visible="true" color="1 0 0 0.0" clip="1" noclick="0" processonlyscroll="1"  hover="false"
+								onmousewheeldown="CallEvent('sp_user_list_scroller', 1); ##Echo('onmousewheeldown 2 ');##"
+								onmousewheelup="CallEvent('sp_user_list_scroller', 0);   ##Echo('onmousewheelup 2');##"
+							/>
+
+						</panel>
+
+						<scrollbar noclick="0" x="2.3h" height="-1.15h" name="sp_user_list_scroller"
+							visible="0"
+							align="right"
+							width="2.0h"
+							scrollbarsize="1.8h"
+							handlewidth="1.8h"
+							handleheight="7.2h"
+							texture="/ui/info/im.tga"
+							scrollbarplaceholder="true"
+							minvalue="1"
+							maxvalue="1"
+							step="1"
+							value="1"
+							vertical="true"
+							slotwidth="0.6h" slotheight="1"
+							onevent1="SetValue(GetValue+1);"
+							onevent0="SetValue(GetValue-1);"
+							onslide="DoEvent();"
+							onshow="DoEvent();"
+							oneventlua="UIManager.GetInterface('main'):HoNSocialPanelF('PopulateUserlist', self:GetValue())"
+						/>
+					</panel>
+
+					<panel name="social_notifications_panel" height="100%" width="-2.0h" float="bottom" padding="0.2h" noclick="true" visible="0"
+						onshow="ShowWidget('notifications_remove_all_btn');"
+						onhide="HideWidget('notifications_remove_all_btn');"
+					>
+						<panel name="social_notifications_listbox" float="bottom" clip="1"
+							width="100%" height="101.5%"
+						>
+							<!-- instantiated here -->
+							<panel noclick="1" align="bottom" width="100%" height="5.4h" visible="0" />
+
+							<instance name="sp_notification_history_template" index="1" label_1="1" label_2="2" label_3="3" label_4="4" label_5="5" hasExpandBtns="1" hasHoverInfo="1" icon="/ui/fe2/store/icons/account_icons/default.tga" namecolor="red" scaleheight="11.9h" />
+							<instance name="sp_notification_history_template" index="2" label_1="1" label_2="2" label_3="3" label_4="4" label_5="5" hasExpandBtns="1" hasHoverInfo="1" icon="/ui/fe2/store/icons/account_icons/default.tga" namecolor="red" scaleheight="11.9h" />
+							<instance name="sp_notification_history_template" index="3" label_1="1" label_2="2" label_3="3" label_4="4" label_5="5" hasExpandBtns="1" hasHoverInfo="1" icon="/ui/fe2/store/icons/account_icons/default.tga" namecolor="red" scaleheight="11.9h" />
+							<instance name="sp_notification_history_template" index="4" label_1="1" label_2="2" label_3="3" label_4="4" label_5="5" hasExpandBtns="1" hasHoverInfo="1" icon="/ui/fe2/store/icons/account_icons/default.tga" namecolor="red" scaleheight="11.9h" />
+							<instance name="sp_notification_history_template" index="5" label_1="1" label_2="2" label_3="3" label_4="4" label_5="5" hasExpandBtns="1" hasHoverInfo="1" icon="/ui/fe2/store/icons/account_icons/default.tga" namecolor="red" scaleheight="11.9h" />
+							<instance name="sp_notification_history_template" index="6" label_1="1" label_2="2" label_3="3" label_4="4" label_5="5" hasExpandBtns="1" hasHoverInfo="1" icon="/ui/fe2/store/icons/account_icons/default.tga" namecolor="red" scaleheight="11.9h" />
+
+							<panel y="0" visible="true" color="1 0 0 0.0" clip="1" noclick="0" processonlyscroll="1"  hover="false"
+								onmousewheeldown="CallEvent('social_notifications_scroller', 1); ##Echo('onmousewheeldown 2 ');##"
+								onmousewheelup="CallEvent('social_notifications_scroller', 0);   ##Echo('onmousewheelup 2');##"
+							/>
+						</panel>
+
+						<scrollbar noclick="0" x="2.3h" height="-1.15h" name="social_notifications_scroller"
+							visible="0"
+							align="right"
+							width="2.0h"
+							scrollbarsize="1.8h"
+							handlewidth="1.8h"
+							handleheight="7.2h"
+							texture="/ui/info/im.tga"
+							scrollbarplaceholder="true"
+							minvalue="1"
+							maxvalue="1"
+							step="1"
+							value="1"
+							vertical="true"
+							slotwidth="0.6h" slotheight="1"
+							onevent1="If(IsEnabledSelf(), SetValue(GetValue+1));"
+							onevent0="If(IsEnabledSelf(), SetValue(GetValue-1));"
+							onslide="DoEvent();"
+							onshow="DoEvent();"
+							oneventlua="UIManager.GetInterface('main'):HoNNotificationF('NotificationHistoryOnScroll', self:GetValue())"
+						/>
+
+						<panel name="sp_no_notifications_cover" x="0" y="0" width="+3.0h" visible="1">
+							<label height="100%" width="-5.0h" align="center" textalign="center" textvalign="center" wrap="true" font="dyn_10" color="white" content="sp_no_notifications"/>
+						</panel>
+					</panel>
+
+				</panel>
+
+				<panel name="notifications_remove_all_panel" width="-2.0h" x="-1.0h" y="-1.2h" height="5.4h" align="center" valign="bottom" noclick="1" visible="0">
+
+					<instance
+						name="button2" button_name="notifications_remove_all_btn"
+						width="-2.0h" height="2.4h"
+						align="center" valign="bottom"
+						font="dyn_10"
+						label="notification_history_remove_all_button"
+						onclick="
+							PlaySound('/shared/sounds/ui/ccpanel/notification_remove.wav');
+							ChatRemoveAllNotifications();
+							HideWidget('notifications_remove_all_panel');
+							Call('social_notifications_scroller', 'SetMaxValue(1); SetMinValue(1); SetValue(1);');
+						"
+					/>
+				</panel>
+
+				<!-- Options -->
+				<panel name="social_friends_options" y="-0.2h" x="0" height="-4.2h" align="center" valign="bottom" noclick="1" visible="0" stickytoinvis="0" sticky="0" float="bottom" padding="2h" color="0 0 0 1"			onshowlua="UIManager.GetInterface('main'):HoNSocialPanelF('OnShowOptions')">
+
+					<frame color=".05 .07 .1 0.5" noclick="0" blockinput="1" />
+
+					<panel y="1.0h" x="0" noclick="1" align="center" width="100%" height="10h" float="bottom" padding="0.8h" >
+						<label width="80%" fity="1" align="center" textalign="center" textvalign="bottom" font="dyn_14" color="#39c6ff" shadow="true" content="sp_listlabel_clan" noclick="true" />
+						<frame width="80%" height="1" color="#39c6ff" />
+
+						<instance
+							name="button2"
+							button_name="create_new_clan_btn"
+							width="70%" height="2.4h"
+							align="center" valign="bottom"
+							font="dyn_10"
+							label="cc_com_create_button"
+							enabled="false"
+							onshow="SetEnabled(!IsInClan()); ## SetVisible(!IsInClan()); ##"
+							onclick="Call('create_new_clan', 'FadeIn(250);'); Call('social_panel', 'DoEvent(4)');"
+							watch="ChatNotificationClan" ontrigger="SetEnabled(!IsInClan());"
+						/>
+						<instance
+							name="button2"
+							button_name="leave_clan_btn"
+							width="70%" height="2.4h"
+							align="center" valign="bottom"
+							font="dyn_10"
+							label="ui_items_cc_right_click_clan_leave"
+							enabled="false"
+							onshow="SetEnabled(IsInClan()); ## SetVisible(IsInClan()); ##"
+							onclick="Trigger('ShowLeaveClanPanel');"
+							watch="ChatNotificationClan" ontrigger="SetEnabled(IsInClan());"
+						/>
+					</panel>
+
+					<panel noclick="1" align="center" width="100%" height="15.5h" float="bottom" padding="0.8h" >
+						<label width="80%" fity="1" align="center" textalign="center" textvalign="bottom" font="dyn_14" color="#39c6ff" shadow="true" content="sp_options_display" noclick="true" />
+						<frame width="80%" height="1" color="#39c6ff" />
+
+						<panel height="2.5h" width="94%" noclick="1" align="left" valign="top" >
+							<instance name="Noptions_checkbox" checkbox_name="sp_options_btn_1" height="1.5h" tip_id="" font="dyn_10" valign="center" cvar="" label="sp_options_btn_1" enabled="1"
+								onclicklua="UIManager.GetInterface('main'):HoNSocialPanelF('OptionsButtonClicked', self, 1)"
+							/>
+						</panel>
+
+						<panel height="2.5h" width="94%" noclick="1" align="left" valign="top" >
+							<instance name="Noptions_checkbox" checkbox_name="sp_options_btn_2" height="1.5h" tip_id="" font="dyn_10" valign="center" cvar="" label="sp_options_btn_2" enabled="1"
+								onclicklua="UIManager.GetInterface('main'):HoNSocialPanelF('OptionsButtonClicked', self, 2)"
+							/>
+						</panel>
+
+						<panel height="2.5h" width="94%" noclick="1" align="left" valign="top" >
+							<instance name="Noptions_checkbox" checkbox_name="sp_options_btn_3" height="1.5h" tip_id="" font="dyn_10" valign="center" cvar="" label="sp_options_btn_3" enabled="1"
+								onclicklua="UIManager.GetInterface('main'):HoNSocialPanelF('OptionsButtonClicked', self, 3)"
+							/>
+						</panel>
+
+						<panel height="2.5h" width="94%" noclick="1" align="left" valign="top" >
+							<instance name="Noptions_checkbox" checkbox_name="sp_options_btn_5" height="1.5h" tip_id="" font="dyn_9" valign="center" cvar="" label="sp_options_btn_5" enabled="1"
+								onclicklua="UIManager.GetInterface('main'):HoNSocialPanelF('OptionsButtonClicked', self, 5)"
+							/>
+						</panel>
+					</panel>
+
+					<panel noclick="1" align="center" width="100%" height="10h" float="bottom" padding="0.8h" >
+						<label width="80%" fity="1" align="center" textalign="center" textvalign="bottom" font="dyn_14" color="#39c6ff" shadow="true" content="sp_options_notifications" noclick="true" />
+						<frame width="80%" height="1" color="#39c6ff" />
+
+						<instance
+							name="button2"
+							button_name="sp_open_notifications_options_btn"
+							width="70%" height="2.4h"
+							align="center" valign="bottom"
+							font="dyn_10"
+							label="sp_options_open_options"
+							enabled="true"
+							onclick="PlaySound('/shared/sounds/ui/button_click_01.wav');"
+							onclicklua="OpenOptions(4, 4, false)"
+						/>
+					</panel>
+				</panel>
+
+				<panel height="0.5h" width="100%" noclick="true" />
+
+				<panel name="sp_header_popup_invites" y="4h" grow="1" regrow="1" growinvis="0" maxheight="37.8h" width="25h" x="-14.5h" onshow="BringToFront();" visible="0" noclick="1" >
+					<frame texture="/ui/frames/rounded_bg_doubleedge.tga" borderthickness="0.8h" color=".1 .1 .1 1" noclick="true"/>
+					<frame texture="/ui/frames/roundframe.tga" borderthickness="0.8h" color=".2 .2 .2 1" noclick="true" />
+					<panel y="0.5h" height="2.5h" width="-1.4h" align="center" >
+						<label align="left" height="100%" width="-2.2h" textalign="left" textvalign="center" font="dyn_14" color="#ffaa00" outline="true" content="Invitations" noclick="true" visible="1" />
+						<panel width="1.7h" height="1.7h" valign="center" align="right" color="invisible" visible="1" >
+							<button color="invisible" onclick="PlaySound('/shared/sounds/ui/ccpanel/notification_close.wav'); Call('sp_header_popup_invites', 'SetVisible(0)');" >
+								<widgetstate statename="up">
+									<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.3h" color=".3 .3 .3 1" blockinput="false" noclick="true"/>
+									<frame texture="/ui/frames/roundframe.tga" color=".7 .7 .7 1" borderthickness="0.3h" blockinput="false" noclick="true"/>
+									<image width="1.3h" height="1.3h" align="center" valign="center" color=".75 .75 .75 1" texture="/ui/fe2/elements/closex.tga" noclick="true" />
+								</widgetstate>
+								<widgetstate statename="over">
+									<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.3h" color=".5 .5 .5 1" blockinput="false" noclick="true"/>
+									<frame texture="/ui/frames/roundframe.tga" color=".7 .7 .7 1" borderthickness="0.3h" blockinput="false" noclick="true"/>
+									<image width="1.3h" height="1.3h" align="center" valign="center" color="1 1 1 1" texture="/ui/fe2/elements/closex.tga" noclick="true" />
+								</widgetstate>
+								<widgetstate statename="down" x="1" y="1">
+									<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.3h" color=".4 .4 .4 1" blockinput="false" noclick="true"/>
+									<frame texture="/ui/frames/roundframe.tga" color=".7 .7 .7 1" borderthickness="0.3h" blockinput="false" noclick="true"/>
+									<image width="1.3h" height="1.3h" align="center" valign="center" color="1 1 1 1" texture="/ui/fe2/elements/closex.tga" noclick="true" />
+								</widgetstate>
+							</button>
+						</panel>
+					</panel>
+					<panel name="sp_header_popup_invites_insertion" y="3.0h" width="-1.4h" grow="1" regrow="1" growinvis="0" maxheight="34.3h" align="center" float="bottom" padding="0.6h" noclick="1" >
+
+						<instance name="sp_notification_invite_popup_template" index="1" />
+						<instance name="sp_notification_invite_popup_template" index="2" />
+						<instance name="sp_notification_invite_popup_template" index="3" />
+
+						<panel name="sp_header_popup_invites_showmore" visible="0" height="2.5h" valign="bottom" align="center" width="100%" sticky="1" stickytoinvis="0"
+							onclick="
+								Call('sp_header_popup_invites', 'SetVisible(0)');
+								If(!IsVisible('social_notifications_panel'), Call('sysbar_notifications_btn', 'DoEvent(1)'));
+							"
+						>
+							<label textalign="center" height="100%" textvalign="top" font="dyn_11" color="1 1 1 1" shadow="true" content="Show All" noclick="1" visible="1" />
+						</panel>
+
+					</panel>
+				</panel>
+
+				<panel name="sp_header_popup_friendrequests" y="4h" grow="1" regrow="1" maxheight="37.8h" width="25h" x="-14.5h" onshow="BringToFront();" visible="0" noclick="1" >
+					<frame texture="/ui/frames/rounded_bg_doubleedge.tga" borderthickness="0.8h" color=".1 .1 .1 1" noclick="true"/>
+					<frame texture="/ui/frames/roundframe.tga" borderthickness="0.8h" color=".2 .2 .2 1" noclick="true" />
+					<panel y="0.5h" height="2.5h" width="-1.4h" align="center" >
+						<label align="left" height="100%" width="-2.2h" textalign="left" textvalign="center" font="dyn_14" color="#ffaa00" outline="true" content="Friend Requests" noclick="true" visible="1" />
+						<panel width="1.7h" height="1.7h" valign="center" align="right" color="invisible" visible="1" >
+							<button color="invisible" onclick="PlaySound('/shared/sounds/ui/ccpanel/notification_close.wav'); Call('sp_header_popup_friendrequests', 'SetVisible(0)');" >
+								<widgetstate statename="up">
+									<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.3h" color=".3 .3 .3 1" blockinput="false" noclick="true"/>
+									<frame texture="/ui/frames/roundframe.tga" color=".7 .7 .7 1" borderthickness="0.3h" blockinput="false" noclick="true"/>
+									<image width="1.3h" height="1.3h" align="center" valign="center" color=".75 .75 .75 1" texture="/ui/fe2/elements/closex.tga" noclick="true" />
+								</widgetstate>
+								<widgetstate statename="over">
+									<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.3h" color=".5 .5 .5 1" blockinput="false" noclick="true"/>
+									<frame texture="/ui/frames/roundframe.tga" color=".7 .7 .7 1" borderthickness="0.3h" blockinput="false" noclick="true"/>
+									<image width="1.3h" height="1.3h" align="center" valign="center" color="1 1 1 1" texture="/ui/fe2/elements/closex.tga" noclick="true" />
+								</widgetstate>
+								<widgetstate statename="down" x="1" y="1">
+									<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="0.3h" color=".4 .4 .4 1" blockinput="false" noclick="true"/>
+									<frame texture="/ui/frames/roundframe.tga" color=".7 .7 .7 1" borderthickness="0.3h" blockinput="false" noclick="true"/>
+									<image width="1.3h" height="1.3h" align="center" valign="center" color="1 1 1 1" texture="/ui/fe2/elements/closex.tga" noclick="true" />
+								</widgetstate>
+							</button>
+						</panel>
+					</panel>
+					<panel name="sp_header_popup_friendrequests_insertion" y="3.0h" width="-1.4h" grow="1" regrow="1" growinvis="0" maxheight="34.3h" align="center" float="bottom" padding="0.6h" noclick="1" >
+
+						<instance name="sp_notification_friend_popup_template" index="1" />
+						<instance name="sp_notification_friend_popup_template" index="2" />
+						<instance name="sp_notification_friend_popup_template" index="3" />
+
+						<panel name="sp_header_popup_friendrequests_showmore" visible="0" height="2.5h" valign="bottom" align="center" width="100%" sticky="1" stickytoinvis="0"
+							onclick="
+								Call('sp_header_popup_friendrequests', 'SetVisible(0)');
+								If(!IsVisible('social_notifications_panel'), Call('sysbar_notifications_btn', 'DoEvent(1)'));
+							"
+						>
+							<label textalign="center" height="100%" textvalign="top" font="dyn_11" color="1 1 1 1" shadow="true" content="Show All" noclick="1" visible="1" />
+						</panel>
+
+					</panel>
+				</panel>
+
+				<panel noclick="1" name="social_panel_addons_1" height="0" y="0" x="-38.2h"  >
+					<instance name="social_panel_clan_creation" />
+				</panel>
+				<panel noclick="1" name="social_panel_addons_2" height="0" y="0" x="-23.6h"  >
+					<instance name="social_panel_group_creation" />
+				</panel>
+			</panel>
+		</panel>
+	</panel>
+</package>

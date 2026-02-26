@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+	<lua file="/ui/scripts/widget_editor.lua" />
+
+	<template name="widget_editor_slider" >
+		<panel x="{x=}" y="{y=}" width="{width=100%}" height="{height=100%}" align="{align=}" valign="{valign=}" noclick="1" >
+			<panel width="-{valuewidth=24.5%}" noclick="1" >
+				<frame texture="/ui/test_suite/images/tooltip_bg.tga" color="0 0 0 0.5" borderthickness=".6h" />
+				<frame texture="/ui/test_suite/images/roundframe.tga" color="#A0A0A060" borderthickness=".6h" />
+
+				<panel noclick="1" width="97%" height="97%" valign="center" align="center">
+					<label name="{slider}_tag" width="30%" valign="center" font="{font=dyn_10}" shadow="1" color="white" textvalign="left" fitx="1" content="{tag=}" sticky="1" />
+					<slider name="{slider}" x="-1h" width="68%" align="right" slotwidth="-1%" slotheight="0.6h" slotcolor="{color=#065294}" handlewidth="80@" handleheight="-20%" handlecolor="{color=#1672B4}" cvar="{cvar=}" minvalue="{minvalue=0}" maxvalue="{maxvalue=100}" step="{step=1}" texture="/ui/test_suite/images/slider_white.tga" sticky="1"
+						onshowlua="
+							local inputLine = string.format('%.{decimals=0}f', self:GetValue())..GetCvarString('{cvar}'..'_typestring')
+							GetWidget('{slider}_value_input'):SetInputLine(inputLine)
+							{onshowlua=}
+						"
+						onchangelua="
+							local inputLine = string.format('%.{decimals=0}f', self:GetValue())..GetCvarString('{cvar}'..'_typestring')
+							GetWidget('{slider}_value_input'):SetInputLine(inputLine) 
+							{onchangelua=}
+						"
+						onhidelua="{onhidelua=}"
+					/>
+				</panel>
+			</panel>
+
+			<panel width="{valuewidth=22.5%}" x="-1h" align="right" noclick="1">
+				<frame texture="/ui/test_suite/images/tooltip_bg.tga" color="0 0 0 0.5" borderthickness=".6h" />
+				<frame texture="/ui/test_suite/images/roundframe.tga" color="#A0A0A060" borderthickness=".6h" />
+				<textbox name="{slider}_value_input" width="90%" height="95%" align="right" valign="bottom" textvalign="bottom" textalign="right" shadow="1" font="{font=dyn_10}" color="invisible" noclick="0"
+					onenter="DoEvent();"
+					oneventlua="
+					local value, _type = WidgetEditor:ParseSizeString(self:GetInputLine())
+					local sliderWidget = GetWidget('{slider}')
+					if sliderWidget ~= nil then
+						sliderWidget:ExpandValueRange(value)
+					end
+					
+					Set('{cvar}'..'_typestring', _type, string)
+					Set('{cvar}', value, float)
+					"
+				/>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="dbg_widget_editor_list">
+		<label height="100%" x="50@" font="{font=dyn_9}" color="{color=white}" textvalign="center" shadow="true" shadowoffset="1" content="{label}"/>
+	</template>
+
+	<template name="dbg_widget_editor">
+		<panel name="dbg_widget_editor" x="{x=0}" y="{y=23h}" noclick="0" width="60h" height="59h" align="{align=right}" valign="{valign=top}" color="0 0 0 0.5" visible="{visible=0}" cangrab="true" watch="WidgetEditor" ontriggerlua="self:SetVisible(true)" onloadlua="WidgetEditor:Init()">
+			
+			<listbox name="dbg_widget_editor_listbox" x="0" width="25h" height="{height=100%}" color="0 0 0 0.5" itemheight="1.5h" hoverselect="false" hoverhighlight="true" highlight="under" interactive="false" scrollbarsize="1.75h"
+			scrolltexture="/ui/test_suite/images/im.tga"
+			selectedcolor="#00437533"
+			onselectlua="WidgetEditor.SetCurrentEditWidgetIndex(tonumber(param0))"
+			watch="WidgetEditor"
+			ontriggerlua="WidgetEditor.FillWidgetList(self, ...)"
+			/>
+
+			<instance name="button2" width="2h" height="1.5h" x="-2h" y="0.9h" align="right" label="X" onclicklua="GetWidget('dbg_widget_editor'):SetVisible(0)" />
+			
+			<panel width="35h" height="100%" align="right" noclick="1" float="bottom">
+				<label name="widget_editor_label" x=".5h" y="1h" height="3h" color="white" noclick="1" />
+				
+				<instance name="widget_editor_slider" slider="we_x" tag="x: " height="2.5h" minvalue="-30" maxvalue="100" step="0.01" decimals="2" valuewidth="20%" 
+					cvar="widget_editor_x" onchangelua="WidgetEditor:OnChange()" />
+				<instance name="widget_editor_slider" slider="we_y" tag="y: " height="2.5h" minvalue="-1" maxvalue="100" step="0.01" decimals="2" valuewidth="20%" 
+					cvar="widget_editor_y" onchangelua="WidgetEditor:OnChange()" />
+				<instance name="widget_editor_slider" slider="we_width" tag="width: " height="2.5h" minvalue="0" maxvalue="100" step="0.01" decimals="2" valuewidth="20%" 
+					cvar="widget_editor_width" onchangelua="WidgetEditor:OnChange()" />
+				<instance name="widget_editor_slider" slider="we_height" tag="height: " height="2.5h" minvalue="0" maxvalue="100" step="0.01" decimals="2" valuewidth="20%" 
+					cvar="widget_editor_height" onchangelua="WidgetEditor:OnChange()" />
+
+				<instance name="widget_editor_slider" slider="we_color_r" tag="color r: " height="2.5h" minvalue="0" maxvalue="1" step="0.01" decimals="2" valuewidth="20%" 
+					cvar="widget_editor_color_r" onchangelua="WidgetEditor:OnChange()" />
+				<instance name="widget_editor_slider" slider="we_color_g" tag="color g: " height="2.5h" minvalue="0" maxvalue="1" step="0.01" decimals="2" valuewidth="20%" 
+					cvar="widget_editor_color_g" onchangelua="WidgetEditor:OnChange()" />
+				<instance name="widget_editor_slider" slider="we_color_b" tag="color b: " height="2.5h" minvalue="0" maxvalue="1" step="0.01" decimals="2" valuewidth="20%" 
+					cvar="widget_editor_color_b" onchangelua="WidgetEditor:OnChange()" />
+				<instance name="widget_editor_slider" slider="we_color_a" tag="color a: " height="2.5h" minvalue="0" maxvalue="1" step="0.01" decimals="2" valuewidth="20%" 
+					cvar="widget_editor_color_a" onchangelua="WidgetEditor:OnChange()" />
+
+				<instance name="widget_editor_slider" slider="we_colorscale_r" tag="colorscale r: " height="2.5h" minvalue="0" maxvalue="1" step="0.01" decimals="2" valuewidth="20%" 
+					cvar="widget_editor_colorscale_r" onchangelua="WidgetEditor:OnChange()" />
+				<instance name="widget_editor_slider" slider="we_colorscale_g" tag="colorscale g: " height="2.5h" minvalue="0" maxvalue="1" step="0.01" decimals="2" valuewidth="20%" 
+					cvar="widget_editor_colorscale_g" onchangelua="WidgetEditor:OnChange()" />
+				<instance name="widget_editor_slider" slider="we_colorscale_b" tag="colorscale b: " height="2.5h" minvalue="0" maxvalue="1" step="0.01" decimals="2" valuewidth="20%" 
+					cvar="widget_editor_colorscale_b" onchangelua="WidgetEditor:OnChange()" />
+				<instance name="widget_editor_slider" slider="we_colorscale_a" tag="colorscale a: " height="2.5h" minvalue="0" maxvalue="1" step="0.01" decimals="2" valuewidth="20%" 
+					cvar="widget_editor_colorscale_a" onchangelua="WidgetEditor:OnChange()" />
+
+				<panel height="15h" noclick="1" >
+					<label x=".5h" height="5h" textvalign="center" color="green" noclick="1" content="Copy To Clipboard" />
+					<instance name="button2" width="8h" height="3h" x="1h" y="3h" label="X" onclicklua="WidgetEditor:CopyToClipboard('X')" />
+					<instance name="button2" width="8h" height="3h" x="11h" y="3h" label="Y" onclicklua="WidgetEditor:CopyToClipboard('Y')" />
+					<instance name="button2" width="8h" height="3h" x="21h" y="3h" label="X Y" onclicklua="WidgetEditor:CopyToClipboard('X','Y')" />
+					<instance name="button2" width="8h" height="3h" x="1h" y="7h" label="Width" onclicklua="WidgetEditor:CopyToClipboard('Width')" />
+					<instance name="button2" width="8h" height="3h" x="11h" y="7h" label="Height" onclicklua="WidgetEditor:CopyToClipboard('Height')" />
+					<instance name="button2" width="8h" height="3h" x="21h" y="7h" label="Width Height" onclicklua="WidgetEditor:CopyToClipboard('Width', 'Height')" />
+					<instance name="button2" width="8h" height="3h" x="1h" y="11h" label="Color" onclicklua="WidgetEditor:CopyToClipboard('Color')" />
+				</panel>
+			</panel>
+
+
+		</panel>
+	</template>
+</package>

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+	<template name="score_tooltips">
+	
+		<floater name="score_open_tooltip" grow="true" x="-0.2h" y="-0.2h" height="2.6h" align="right" valign="top" color="invisible" visible="false" noclick="true">
+			<frame texture="/ui/frames/tooltip_bg.tga" color="0 0 0 .8" borderthickness=".6h" />
+			<frame texture="/ui/frames/roundframe.tga" color="#A0A0A0" borderthickness=".6h" />			
+			<label x="1.0h" fitx="true" fitxpadding="1.0h" height="100%" textvalign="center" font="dyn_10" color="white" shadow="true" content="tooltip_open_scores" />
+		</floater>
+		
+		<floater name="score_close_tooltip" grow="true" x="-0.2h" y="-0.2h" height="2.6h" align="right" valign="top" color="invisible" visible="false" noclick="true">
+			<frame texture="/ui/frames/tooltip_bg.tga" color="0 0 0 .8" borderthickness=".6h" />
+			<frame texture="/ui/frames/roundframe.tga" color="#A0A0A0" borderthickness=".6h" />			
+			<label x="1.0h" fitx="true" fitxpadding="1.0h" height="100%" textvalign="center" font="dyn_10" color="white" shadow="true" content="tooltip_close_scores" />
+		</floater>
+		
+	</template>
+	
+
+</package>

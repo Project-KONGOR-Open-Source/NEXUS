@@ -1,0 +1,1629 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+
+	<trigger name="MicroStoreUpdateOverride"/>
+
+	<template name="storePlayButton2State">
+		<widgetstate statename="{statename}" x="{x}" y="{y}">
+			<frame texture="/ui/frames/rounded_bg_white.tga" borderthickness="1h" color="{bgcolor=#9d5b1a66}" noclick="true"/>
+			<frame texture="/ui/frames/roundframe.tga" color="#9d5b1a" borderthickness="1h" noclick="true"/>
+			<image valign="center" align="center" width="90@" height="90%" texture="/ui/elements/play.tga" noclick="true"/>
+		</widgetstate>
+	</template>
+
+	<template name="storePlayButton2">
+		<button x="{x}" y="{y}" width="{width}" height="{height}" align="{align}" valign="{valign}"
+			onclick="{onclick}"
+			onmouseover="{onmouseover}"
+			onmouseout="{onmouseout}"
+			onshow="{onshow}"
+			onhide="{onhide}"
+			color="invisible"
+		>
+			<instance name="storePlayButton2State" statename="up"/>
+			<instance name="storePlayButton2State" statename="over" bgcolor="#c7701b66"/>
+			<instance name="storePlayButton2State" statename="down" x="1" y="1"/>
+			<instance name="storePlayButton2State" statename="disabled"/>
+		</button>
+	</template>
+
+	<template name="storeAddonPurchaseItem">
+		<panel
+			width="100@" height="100%" sticky="true" stickytoinvis="false"
+			onmouseover="
+				Trigger(
+					'genericMainFloatingTip',
+					true,
+					'20h',
+					'{iconPath}',
+					'{productName}',
+					FormatStringNewLine(
+						Translate('mstore_costamount_gold', 'amount', '{goldCost}') #
+						'\\n' #
+						Translate('mstore_costamount_silver', 'amount', '{silverCost}')
+					),
+					'',
+					'',
+					''
+				);
+			"
+			onhide="HideWidget('genericMainFloatingTip');"
+			onmouseout="HideWidget('genericMainFloatingTip');"
+		>
+			<image texture="{iconPath}" noclick="true"/>
+			<frame color="invisible" borderthickness="1" bordercolor="0 0 0 1" noclick="true"/>
+		</panel>
+	</template>
+
+	<template name="storeAddonPurchase">
+		<panel width="100%" grow="true" float="bottom" padding="0.5h" name="" visible="false" sticky="true" stickytoinvis="false"
+			onload="
+				CreateInt('specialBundleFullPriceGold', 0);
+				CreateInt('specialBundleFullPriceSilver', 0);
+			"
+			watch="MicroStoreUpdateSelection"
+			ontrigger="
+				If(
+					_microStore_Category == 71 and
+					!StringEquals(
+						GetDelimitedString(*('microStoreSubBundles' # _microStore_SelectedItem), '|', 0),
+						'-1~-1~-1~-1~-1'
+					),
+					SetVisible(true),
+					SetVisible(false)
+				);
+			"
+		>
+			<panel height="0.4h" sticky="true" stickytoinvis="false">
+				<panel height="1" style="microStorePaperText" width="-0.5h" align="center" valign="center"/>
+			</panel>
+			<label fity="true" fitypadding="0.5h" width="100%" textalign="center" textvalign="center" font="dyn_11" style="microStorePaperTitle" content="mstore_buyhero_altBundle_title" noclick="true"/>
+			<!-- Bundle Item(s)-->
+			<panel width="100%" height="4.0h" noclick="true">
+				<panel grow="true" regrow="true" growinvis="false" height="100%" x="-1.5h" align="center" float="right" padding="1.5h" noclick="true"
+					watch="MicroStoreUpdateSelection"
+					ontrigger="
+						Set('microStoreOverridePurchaseID', -1);
+						If(
+							_microStore_Category == 71 and
+							!StringEquals(
+								GetDelimitedString(*('microStoreSubBundles' # _microStore_SelectedItem), '|', 0),
+								'-1~-1~-1~-1~-1'
+							),
+							DoEvent()
+						);
+					"
+					onevent="
+						Set('specialBundleFullPriceGold', 0);
+						Set('specialBundleFullPriceSilver', 0);
+						ClearChildren();
+						ExplodeTrigger(
+							'populateHeroAvatarBundleInfo',
+							GetDelimitedString(*('microStoreSubBundles' # _microStore_SelectedItem), '~', 4),
+							'`','#'
+						);
+						CallEvent('storePopupHeroBundleGoldOrig');
+						CallEvent('storePopupHeroBundleSilverOrig');
+						CallEvent('storePopupHeroBundleGoldNew');
+						CallEvent('storePopupHeroBundleSilverNew');
+					"
+					watch1="populateHeroAvatarBundleInfo"
+					ontrigger1="
+						If(
+							param5 gt 0,
+							Set('specialBundleFullPriceGold', specialBundleFullPriceGold + param5)
+						);
+						If(
+							param6 gt 0,
+							Set('specialBundleFullPriceSilver', specialBundleFullPriceSilver + param6)
+						);
+						CallEvent('');
+						If(
+							!StringEquals(GetDelimitedString(param1, '.', 1), 'Hero') and !StringEquals(param1, '-1'),
+							Instantiate(
+								'storeAddonPurchaseItem',
+								'product', param1,
+								'productName', param2,
+								'iconPath', param3,
+								'goldCost', param5,
+								'silverCost', param6,
+								'premium', param7
+							)
+						);
+					"
+				/>
+			</panel>
+			<panel width="100%" height="0" sticky="true" stickytoinvis="false" noclick="true"/>
+			<!-- Price Comparison -->
+			<panel height="4.4h" sticky="true" stickytoinvis="false" noclick="true">
+				<!-- Original Price -->
+				<panel width="50%" align="left" noclick="true">
+					<label textalign="center" font="dyn_11" style="microStorePaperText" content="mstore_buyhero_altBundle_costSep" noclick="true"/>
+					<panel grow="true" regrow="true" growinvis="false" height="2.2h" valign="bottom" align="center" float="right" padding="0.5h" noclick="true">
+						<!-- Gold -->
+						<panel height="100%" width="8.0h" noclick="true" visible="true">
+							<frame texture="/ui/frames/rounded_bg_white.tga" color="#48230f" borderthickness="0.5h" noclick="true"/>
+							<frame texture="/ui/frames/roundframe.tga" style="microStorePaperText" borderthickness="0.5h" noclick="true"/>
+							<panel hmargin="0.35h" vmargin="0.35h">
+								<label noclick="true" font="dyn_10" width="-120@" height="100%" textalign="center" textvalign="center" outline="true" outlinecolor="#2d1d0d" color="#FFCC00" name="storePopupHeroBundleGoldOrig"
+									content="-"
+									onevent="
+										SetText(Floor(specialBundleFullPriceGold));
+									"
+								/>
+								<image align="right" width="100@" height="100%" ontrigger9lua="ResourceManager.RegisterTexture('/ui/fe2/store/gold_coins.tga', 'store', self)" resourcecontext="store" watch9="MainRegisterTextures"/>
+							</panel>
+							<image width="6.8h" height="3.2h" align="center" valign="center" ontrigger9lua="ResourceManager.RegisterTexture('/ui/fe2/store/priceCross.tga', 'store', self)" resourcecontext="store" watch9="MainRegisterTextures" color=".3 .3 .3 .75" noclick="true"/>
+						</panel>
+						<!-- Silver -->
+						<panel height="100%" width="8.0h" noclick="true" sticky="true" stickytoinvis="false" visible="true">
+							<frame texture="/ui/frames/rounded_bg_white.tga" color="#48230f" borderthickness="0.5h" noclick="true"/>
+							<frame texture="/ui/frames/roundframe.tga" style="microStorePaperText" borderthickness="0.5h" noclick="true"/>
+							<panel hmargin="0.35h" vmargin="0.35h">
+								<label noclick="true" font="dyn_10" width="-120@" height="100%" textalign="center" textvalign="center" outline="true" outlinecolor="#2d1d0d" color="#c0d5ed" name="storePopupHeroBundleSilverOrig"
+									onevent="SetText(Floor(specialBundleFullPriceSilver));"
+									content="-"
+								/>
+								<image align="right" width="100@" height="100%" ontrigger9lua="ResourceManager.RegisterTexture('/ui/fe2/store/silver_coins.tga', 'store', self)" resourcecontext="store" watch9="MainRegisterTextures"/>
+							</panel>
+							<image width="6.8h" height="3.2h" align="center" valign="center" ontrigger9lua="ResourceManager.RegisterTexture('/ui/fe2/store/priceCross.tga', 'store', self)" resourcecontext="store" watch9="MainRegisterTextures" color=".3 .3 .3 .75" noclick="true"/>
+						</panel>
+					</panel>
+				</panel>
+				<!-- Discounted Price -->
+				<panel width="50%" align="right" noclick="true">
+					<label textalign="center" font="dyn_11" style="microStorePaperText" content="mstore_buyhero_altBundle_cost_Bun" noclick="true"/>
+					<panel grow="true" regrow="true" growinvis="false" height="2.2h" valign="bottom" align="center" float="right" padding="0.5h" noclick="true">
+						<!-- Gold -->
+						<panel height="100%" width="8.0h" noclick="true" visible="true">
+							<frame texture="/ui/frames/rounded_bg_white.tga" color="#48230f" borderthickness="0.5h" noclick="true"/>
+							<frame texture="/ui/frames/roundframe.tga" style="microStorePaperText" borderthickness="0.5h" noclick="true"/>
+							<panel hmargin="0.35h" vmargin="0.35h">
+								<label noclick="true" font="dyn_10" width="-120@" height="100%" textalign="center" textvalign="center" outline="true" outlinecolor="#2d1d0d" color="#FFCC00" name="storePopupHeroBundleGoldNew"
+									content="-"
+									onevent="
+										SetText(
+											GetDelimitedString(
+												*('microStoreSubBundles' # _microStore_SelectedItem),
+												'~', 1
+											)
+										);
+									"
+								/>
+								<image align="right" width="100@" height="100%" ontrigger9lua="ResourceManager.RegisterTexture('/ui/fe2/store/gold_coins.tga', 'store', self)" resourcecontext="store" watch9="MainRegisterTextures"/>
+							</panel>
+						</panel>
+						<!-- Silver -->
+						<panel height="100%" width="8.0h" noclick="true" sticky="true" stickytoinvis="false" visible="true">
+							<frame texture="/ui/frames/rounded_bg_white.tga" color="#48230f" borderthickness="0.5h" noclick="true"/>
+							<frame texture="/ui/frames/roundframe.tga" style="microStorePaperText" borderthickness="0.5h" noclick="true"/>
+							<panel hmargin="0.35h" vmargin="0.35h">
+								<label noclick="true" font="dyn_10" width="-120@" height="100%" textalign="center" textvalign="center" outline="true" outlinecolor="#2d1d0d" color="#c0d5ed" name="storePopupHeroBundleSilverNew"
+									content="-"
+									onevent="
+										SetText(
+											GetDelimitedString(
+												*('microStoreSubBundles' # _microStore_SelectedItem),
+												'~', 2
+											)
+										);
+									"
+								/>
+								<image align="right" width="100@" height="100%" ontrigger9lua="ResourceManager.RegisterTexture('/ui/fe2/store/silver_coins.tga', 'store', self)" resourcecontext="store" watch9="MainRegisterTextures"/>
+							</panel>
+						</panel>
+					</panel>
+				</panel>
+			</panel>
+			<panel width="100%" height="0" sticky="true" stickytoinvis="false" noclick="true"/>
+			<panel width="100%" height="3.0h" sticky="true" stickytoinvis="false" noclick="true"
+				onload="
+					CreateInt('microStoreOverridePurchaseID', -1);
+				"
+			>
+				<frame width="94%" align="center" texture="/ui/frames/rounded_bg_white.tga" color="#facb6d48" borderthickness="0.5h" noclick="true"/>
+				<frame width="94%" align="center" texture="/ui/frames/roundframe.tga" style="microStorePaperText" borderthickness="0.5h" noclick="true"/>
+				<instance
+					name="form_checkbox2"
+					x="-0.4h" width="80%" height="1.6h" valign="center" align="center"
+					checkbox_name="mstore_confirmpurchase_altbundlebox"
+					label="mstore_buyhero_altBundle_checkbox"
+					font="dyn_10"
+					updatetrigger="MicroStoreUpdateOverride"
+					onclick="
+						If(GetButtonState(),
+							Split(
+								CallEvent('storeConfirmPurchaseGoldCost'),
+								CallEvent('storeConfirmPurchaseGoldCost2'),
+								CallEvent('storeConfirmPurchaseGoldCost3'),
+								CallEvent('storeConfirmPurchaseGoldCost4'),
+								CallEvent('storeConfirmPurchaseSilverCost'),
+								CallEvent('storeConfirmPurchaseButtonNeedGold'),
+								CallEvent('storeConfirmPurchaseButtonNeedGold2'),
+								CallEvent('storeConfirmPurchaseButtonNeedSilver'),
+								CallEvent('storeConfirmPurchaseButtonBtnGold'),
+								CallEvent('storeConfirmPurchaseButtonBtnGold2'),
+								CallEvent('storeConfirmGiftButtonBtnGold'),
+								CallEvent('storeConfirmGiftButtonBtnGold2'),
+								CallEvent('storeConfirmPurchaseButtonBtnSilver'),
+								Set(
+									'microStoreOverridePurchaseID',
+									GetDelimitedString(
+										*('microStoreSubBundles' # _microStore_SelectedItem),
+										'~', 0
+									)
+								),
+								## Echo('Clicked enable bundle. microStoreOverridePurchaseID = ' # microStoreOverridePurchaseID), ##
+								Trigger('MicroStoreUpdateOverride')
+							),
+							Split(
+								Trigger('MicroStoreUpdatePayStyleChoice'),
+								Set('microStoreOverridePurchaseID', -1),
+								## Echo('Clicked disable bundle. microStoreOverridePurchaseID = ' # microStoreOverridePurchaseID), ##
+								Trigger('MicroStoreUpdateOverride')
+							)
+						);
+					"
+				/>
+			</panel>
+		</panel>
+	</template>
+
+	<!-- ============================= BASIC POPUP WINDOWS =============================  -->
+
+	<template name="storePopupError">
+		<panel width="100%" grow="true" float="bottom" padding="1h" regrow="true">
+			<label align="right" wrap="true" fity="true" textalign="center" textvalign="center" font="dyn_10" style="microStorePaperText" content="mstore_error_unknown"
+					watch=""
+					ontriggerlua="if param0 == '3' then
+									self:SetText(Translate('mstore_error_connect'))
+									HoN_Store:Store2Loading(0, 'Connect Error')
+								end"
+					watch1="MicroStoreErrorID"
+					ontrigger1lua="self:SetText(Translate('mstore_error'..tostring(param0)))
+									HoN_Store:Store2Loading(0, 'Error')"
+					watch2="MicroStoreSetProcTrig" ontrigger2="SetWatch(param0);"
+			/>
+
+			<panel grow="true" width="100%">
+				<instance name="store2Button" texture="button5" width="14h" height="3.5h" align="center" color="#fffdf6" outlinecolor="#9c4404" label="general_ok" onclick="CallEvent('store_popup_error', 1);"/>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="storePopupFormError">
+		<panel width="100%" grow="true" float="bottom" padding="1h" regrow="true">
+			<label width="100%" align="right" wrap="true" fity="true" fitypadding="1h" textalign="left" textvalign="center" font="dyn_12" style="microStorePaperText"
+				content="mstore_error_unknown"
+				watch1="StoreNameChangeResult"
+				ontrigger1="
+					Set('_mStoreFormErrors', '');
+					If(
+						param0 == 0,
+						ExplodeTrigger('mStoreAppendFormErrors', param1, '|', ':')
+					);
+					If(
+						param0 == 0 and !StringEmpty(_mStoreFormErrors),
+						SetText(FormatStringNewLine(_mStoreFormErrors)),
+						SetText(Translate('mstore_error_unknown'))
+					);
+				"
+				ontrigger1lua="HoN_Store:Store2Loading(0,'StoreNameChangeResult')"
+				watch2="StoreSubAccountResult"
+				ontrigger2="
+					Set('_mStoreFormErrors', '');
+					If(
+						param0 == 0,
+						ExplodeTrigger('mStoreAppendFormErrors', param1, '|', ':')
+					);
+					If(
+						param0 == 0 and !StringEmpty(_mStoreFormErrors),
+						SetText(FormatStringNewLine(_mStoreFormErrors)),
+						SetText(Translate('mstore_error_unknown'))
+					);
+				"
+				ontrigger2lua="HoN_Store:Store2Loading(0,'StoreSubAccountResult')"
+			/>
+
+			<panel grow="true" width="100%">
+				<instance name="store2Button" texture="button5" width="14h" height="3.5h" align="center" color="#fffdf6" outlinecolor="#9c4404" label="general_ok" onclick="CallEvent('store_popup_form_error', 1);"/>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="storePopupConfirmPurchaseChoose">
+		<panel width="100%" grow="true" regrow="true" float="bottom" padding="0.5h" growinvis="false" reverse="true" onshow="Set('_microStoreSantaTarget', '');" onshowlua="" >
+			<panel height="7h" width="100%" sticky="true" stickytoinvis="false">
+				<webimage align="left" width="7h" height="7h" valign="center"
+					resourcecontext="store"
+					watch="MicroStoreUpdateSelection"
+					ontrigger="
+						If(
+							!StringEquals(*('microStoreLocalContent' # _microStore_SelectedItem), '-1'),
+							SetTexture(*('microStoreLocalContent' # _microStore_SelectedItem)),
+							If(
+								!StringEquals(*('microStoreWebContent' # _microStore_SelectedItem), '-1'),
+								SetTextureURL(*('microStoreWebContent' # _microStore_SelectedItem)),
+								SetTexture('/ui/legion/ability_coverup.tga')
+							)
+						);
+					"
+				/>
+				<panel align="right" width="-8h" height="7h">
+					<panel valign="center" grow="true" regrow="true" width="100%" float="bottom" growinvis="false">
+						<panel width="100%" height="5.5h">
+							<label height="2.5h" content="-" textalign="left" align="center" textvalign="top" font="dyn_14" style="microStorePaperTitle" watch="MicroStoreUpdateSelection"
+								ontrigger="
+									If(
+										!_microStore_overrideConfirmName,
+										If(
+											_microStore_Category == 71 or _microStore_Category == 58,
+											SetText(_microStoreSelectedHeroItem),
+											SetText(Translate('mstore_product' # *('microStoreID' # _microStore_SelectedItem) # '_name'))
+										),
+										SetText(Translate(_microStoreSelectedHeroItem))
+									);
+								"
+							/>
+							<label x="0.4h" y="2.8h" width="95%" height="2.5h" textalign="left" fity="1" align="left" textvalign="center" font="dyn_10" style="microStorePaperText" wrap="true"
+								watch="MicroStoreUpdateSelection"
+								ontrigger="
+									If(_microStore_SelectedID == 464,
+										Split(SetText(Translate('mstore_custom_detail')), SetVisible(true)),
+										if(
+											StringEmpty(microStoreTrialInfo),
+											SetVisible(false),
+											Split(
+												SetText(Translate('compendium_trial_info') # ' ' # Translate('compendium_trial_infohead') # microStoreTrialInfo # Translate('compendium_trial_infotail')),
+												SetVisible(true)
+												)
+											)
+										)
+									);
+								"
+							/>
+						</panel>
+						<panel width="100%" height="2.75h" sticky="true" stickytoinvis="false" name="mstoreConfirmChooseExpiration" visible="false">
+							<instance name="paperForm_combobox_container" hastip="true" label="mstore_expiration" form="" fieldwidth="65%" labelwidth="25%"
+								fieldname="paperForm_combobox_container_field4"
+								boxwatch1="MicroStoreUpdateSelection"
+								boxontrigger1="
+									Set('_microStore_itemExpirationChoice', 0);
+									HideWidget('mstoreConfirmChooseExpiration');
+									ClearItems();
+									ExplodeTrigger('MicroStoreUpdateDurationChoices', *('microStoreDurations' # _microStore_SelectedItem), ',', '~');
+
+									Set('microStoreCDPriceGold', *('microStorePrice' # _microStore_SelectedItem));
+									Set('microStoreCDPriceSilver', *('microStoreSilverPrice' # _microStore_SelectedItem));
+									Trigger('MicroStoreUpdatePayStyleChoice');
+
+									SetSelectedItemByIndex(0);
+								"
+								boxontrigger1lua="HoN_Store:SetSpecialDailyPrice() Trigger('MicroStoreUpdatePayStyleChoice')"
+								onselect="
+									Set('_microStore_itemExpirationChoice', this);
+									If(
+										_microStore_itemExpirationChoice == 0 and *('microStorePurchasable' # _microStore_SelectedItem),
+										Split(
+											Set('microStoreCDPriceGold', *('microStorePrice' # _microStore_SelectedItem)),
+											Set('microStoreCDPriceSilver', *('microStoreSilverPrice' # _microStore_SelectedItem))
+										)
+									);
+									If(
+										_microStore_itemExpirationChoice == 0 and *('microStorePurchasable' # _microStore_SelectedItem),
+										Trigger('MicroStoreUpdatePayStyleChoice')
+									);
+									If(
+										_microStore_itemExpirationChoice ge 1,
+										ExplodeTrigger('MicroStoreDurationChoice', *('microStoreDurations' # _microStore_SelectedItem), ',', '~')
+									);
+								"
+								boxwatch="MicroStoreUpdateDurationChoices"
+								boxontrigger="
+									If(
+										param1 gt 0 and !HasListItem(param1),
+										Split(
+											ShowWidget('mstoreConfirmChooseExpiration'),
+											AddTemplateListItem(
+												'paperform_combobox_item_goldsilvercost',
+												param1,
+												'label',
+												If(
+													param3 ge 604800,
+													If(
+														param3 == 604800,
+														Translate('general_one_week'),
+														Translate('general_weeks_amount', 'amount', FtoA(param3 / 604800, 1))
+													),
+													If(
+														param3 ge 86400,
+														If(
+															param3 == 86400,
+															Translate('general_one_day'),
+															Translate('general_days_amount', 'amount', FtoA(param3 / 86400, 1))
+														),
+														If(
+															param3 ge 3600,
+															If(
+																param3 == 3600,
+																Translate('general_one_hour'),
+																Translate('general_hours_amount', 'amount', FtoA(param3 / 3600, 1))
+															),
+															If(
+																param3 == 60,
+																Translate('general_one_minute'),
+																Translate('general_minutes_amount', 'amount', FtoA(param3 / 60, 1))
+															)
+														)
+													)
+												),
+												'goldCost', If(param2 == 0 and param4 le 0, 'mstore_free', FtoA(param2, 0, 0, ',')),
+												'silverCost', FtoA(param4, 0, 0, ','),
+												'showSilver', (param4 gt 0)
+											)
+										)
+									);
+								"
+							/>
+						</panel>
+						<panel width="100%" height="2.75h" sticky="true" stickytoinvis="false" name="mstoreConfirmChooseDuration" visible="false">
+							<instance name="paperForm_combobox_container" hastip="true" label="mstore_duration" form="" fieldwidth="65%" labelwidth="25%"
+								tipmouseover="
+									If(
+										*('microStoreID' # _microStore_SelectedItem) == 655,
+										ShowWidget('mstore_item_matches_tip'),
+										ShowWidget('mstore_item_duration_tip')
+									);
+								"
+								tipmouseout="
+									HideWidget('mstore_item_matches_tip');
+									HideWidget('mstore_item_duration_tip');
+								"
+								fieldname="paperForm_combobox_container_field5"
+								boxwatch1="MicroStoreUpdateSelection"
+								boxontrigger1="
+									Set('_microStore_itemDurationChoice', 0);
+									HideWidget('mstoreConfirmChooseDuration');
+									ClearItems();
+									ExplodeTrigger('MicroStoreUpdateChargeChoices', *('microStoreCharges' # _microStore_SelectedItem), ',', '~');
+
+									Set('microStoreCDPriceGold', *('microStorePrice' # _microStore_SelectedItem));
+									Set('microStoreCDPriceSilver', *('microStoreSilverPrice' # _microStore_SelectedItem));
+									Trigger('MicroStoreUpdatePayStyleChoice');
+
+									SetSelectedItemByIndex(0);
+								"
+								onselect="
+									Set('_microStore_itemDurationChoice', this);
+									If(
+										_microStore_itemDurationChoice == 0 and *('microStorePurchasable' # _microStore_SelectedItem),
+										Split(
+											Set('microStoreCDPriceGold', *('microStorePrice' # _microStore_SelectedItem)),
+											Set('microStoreCDPriceSilver', *('microStoreSilverPrice' # _microStore_SelectedItem))
+										)
+									);
+									If(
+										_microStore_itemDurationChoice == 0 and *('microStorePurchasable' # _microStore_SelectedItem),
+										Trigger('MicroStoreUpdatePayStyleChoice')
+									);
+									If(
+										_microStore_itemDurationChoice ge 1,
+										ExplodeTrigger('MicroStoreChargeChoice', *('microStoreCharges' # _microStore_SelectedItem), ',', '~')
+									);
+								"
+								boxwatch="MicroStoreUpdateChargeChoices"
+								boxontrigger="
+									If(
+										param1 gt 0 and !HasListItem(param1),
+										Split(
+											ShowWidget('mstoreConfirmChooseDuration'),
+											AddTemplateListItem(
+												'paperform_combobox_item_goldsilvercost',
+												param1,
+												'label',
+												If(
+													param6 le 0,
+													If(
+														param3 == 1,
+														'mstore_onegame',
+														Translate('mstore_games_amount', 'amount', param3)
+													),
+													If(
+														param6 ge 604800,
+														If(
+															param6 == 604800,
+															Translate('general_one_week'),
+															Translate('general_weeks_amount', 'amount', FtoA(param6 / 604800, 1))
+														),
+														If(
+															param6 ge 86400,
+															If(
+																param6 == 86400,
+																Translate('general_one_day'),
+																Translate('general_days_amount', 'amount', FtoA(param6 / 86400, 1))
+															),
+															If(
+																param6 ge 3600,
+																If(
+																	param6 == 3600,
+																	Translate('general_one_hour'),
+																	Translate('general_hours_amount', 'amount', FtoA(param6 / 3600, 1))
+																),
+																If(
+																	param6 == 60,
+																	Translate('general_one_minute'),
+																	Translate('general_minutes_amount', 'amount', FtoA(param6 / 60, 1))
+																)
+															)
+														)
+													)
+												),
+												'goldCost', If(param2 == 0 and param4 le 0, 'mstore_free', FtoA(param2, 0, 0, ',')),
+												'silverCost', FtoA(param4, 0, 0, ','),
+												'showSilver', (param4 gt 0)
+											)
+										)
+									);
+								"
+							/>
+						</panel>
+					</panel>
+				</panel>
+				<panel align="left" valign="center" width="32i" height="32i" x="50i" y="25i" watch="MicroStoreUpdateSelection" ontrigger="If(_microStore_SelectedID == 464, SetVisible(true), SetVisible(false))">
+					<instance name="store2_tip_mark" tip_name="custom_icon_tip"  align="center" valign="center" onmouseoverlua="GetWidget('store2_custom_slot_faq_tip'):SetVisible(true)" onmouseoutlua="GetWidget('store2_custom_slot_faq_tip'):SetVisible(false)"/>
+				</panel>
+			</panel>
+
+			<!-- Hero Purchase - Alt Avatar Bundle -->
+			<instance name="storeAddonPurchase"/>
+
+			<!-- charge info -->
+			<panel width="100%" grow="true" float="bottom" padding="0.5h" name="mstoreConfirmPurchaseChargeInfo" visible="false" sticky="true" stickytoinvis="false">
+				<panel height="0.5h">
+					<image texture="/ui/fe2/elements/store2/line2.png" height="2i" width="-0.5h" align="center" valign="center"/>
+				</panel>
+				<label fity="true" wrap="true" textvalign="center" textalign="center" font="dyn_10" style="microStorePaperItem" content="-"
+					watch="MicroStoreUpdateSelection"
+					ontrigger="
+						Set('mtoreCRemainTempQuantity', -1);
+						Set('mtoreCRemainTempStartTime', -1);
+						Set('mtoreCRemainTempEndtime', -1);
+
+						If( *('microStoreChargeRemaining' # _microStore_SelectedItem) != -1,
+							ExplodeTrigger('MicroStoreSaveTempChargeData', *('microStoreChargeRemaining' # _microStore_SelectedItem), ',', '~')
+						);
+						If(
+							mtoreCRemainTempQuantity gt 1,
+							SetText(Translate('mstore_matches_remaining', 'amount', mtoreCRemainTempQuantity))
+						);
+						If(
+							mtoreCRemainTempQuantity == 1 and mtoreCRemainTempEndtime gt 1,
+							SetText(Translate('mstore_expireson', 'date', FormatDateTime(mtoreCRemainTempEndtime, '%#m/%#d/%Y %#I:%M %p', true)))
+						);
+
+						If(
+							mtoreCRemainTempQuantity ge 1,
+							ShowWidget('mstoreConfirmPurchaseChargeInfo'),
+							HideWidget('mstoreConfirmPurchaseChargeInfo')
+						);
+					"
+				/>
+			</panel>
+			<!-- /charge info -->
+			<panel height="0.5h" sticky="true" stickytoinvis="false">
+				<image texture="/ui/fe2/elements/store2/line2.png" height="2i" width="-0.5h" align="center" valign="center"/>
+			</panel>
+			<label sticky="true" stickytoinvis="false" align="center" width="100%" wrap="true" fity="true" textalign="center" textvalign="center" font="dyn_11" style="microStorePaperTitle" fitypadding="0.5h" content="mstore_buyitem_confirm_body"/>
+			<label sticky="true" stickytoinvis="false" align="center" width="100%" wrap="true" fity="true" textalign="center" textvalign="center" font="dyn_10" style="microStorePaperText" content="-"
+				watch0="MicroStoreChargeChoice"
+				ontrigger0="
+					If(
+						_microStore_itemDurationChoice == param1,
+						Split(
+							Set('microStoreCDPriceGold', param2),
+							Set('microStoreCDPriceSilver', param4)
+						)
+					);
+
+					If(
+						_microStore_itemDurationChoice == param1,
+						Trigger('MicroStoreUpdatePayStyleChoice')
+					);
+				"
+				watch1="MicroStoreDurationChoice"
+				ontrigger1="
+					If(
+						_microStore_itemExpirationChoice == param1,
+						Split(
+							Set('microStoreCDPriceGold', param2),
+							Set('microStoreCDPriceSilver', param4)
+						)
+					);
+					If(
+						_microStore_itemExpirationChoice == param1,
+						Trigger('MicroStoreUpdatePayStyleChoice')
+					);
+				"
+				watch2="MicroStoreUpdatePayStyleChoice"
+				ontrigger2="
+					DoEvent();
+				"
+				onevent="
+					SetText(
+						Translate(
+								If((microStoreCDPriceGold ge 1 and microStoreCDPriceGold != 9006) and (microStoreCDPriceSilver le 0 or microStoreCDPriceSilver == 9002),
+									'mstore_purchase_goldonly',
+									If((microStoreCDPriceGold le 0 or microStoreCDPriceGold == 9006) and (microStoreCDPriceSilver ge 1 and microStoreCDPriceSilver != 9002),
+										'mstore_purchase_silveronly',
+										If((microStoreCDPriceGold ge 1 and microStoreCDPriceGold != 9006) and (microStoreCDPriceSilver ge 1 and microStoreCDPriceSilver != 9002),
+											'mstore_purchase_choosecurrency_desc',
+											'mstore_purchase_itemisfree'
+										)
+									)
+								)
+							)
+					);
+				"
+			/>
+
+			<panel name="CardListPanel_store" width="-0.5h" float="bottom" grow="true" sticky="true" stickytoinvis="false">
+				<image texture="/ui/fe2/elements/store2/line2.png" height="2i" width="-0.5h" align="center" />
+				<panel height="2.0h" sticky="true" stickytoinvis="false" color="invisible"/>
+
+				<instance name="Store2_CardListControl" surffix="store" sticky="true" stickytoinvis="false" width="100%" height="11.0h"
+					itemheight="3.0h"
+					label_y="10.0h"
+					useframe="true"
+					highlightcolor="#3e312e"
+					highlightbordercolor="#4f413d"
+					selectedcolor="#3e312e"
+					selectedbordercolor="#4f413d"
+					textcolor="#4f2e0b"
+					backgroundimagecolor="#322522"
+					backgroundimage="/ui/fe2/elements/comm_item_bg_white.tga"
+					onselectlua="UIManager.GetInterface('main'):HoNStoreF('Store2OnCardListSelect', self:GetSelectedItemIndex())"
+					watch="MicroStoreUpdateSelection"
+					ontrigger="Clear();"
+					ontriggerlua="
+						UIManager.GetInterface('main'):HoNStoreF('Store2AddCardsListItems', GetCvarNumber('microStoreID999'))
+						"
+					/>
+			</panel>
+
+			<panel height="0.5h" sticky="true" stickytoinvis="false">
+				<image texture="/ui/fe2/elements/store2/line2.png" height="2i" width="-0.5h" align="center" valign="center"/>
+			</panel>
+			<panel name="confirmPurchaseButtons" align="center" height="5.3h" width="100%" float="right" onshowlua="HoN_Store:ArrangeChildrenCloseToCenter(self)">
+					<!-- Self Gold Choice -->
+					<panel width="12h" height="100%" sticky="true" stickytoinvis="false" watch="MicroStoreUpdatePayStyleChoice" ontrigger="SetVisible(microStoreCDPriceGold gt 0 and microStoreCDPriceGold != 9006);">
+						<panel width="-1h" height="2.25h" align="center">
+								<label x="16i" noclick="true" align="center" font="dyn_12" textalign="center" textvalign="center" outline="true" outlinecolor="#2d1d0d" color="#FFCC00" name="storeConfirmPurchaseGoldCost"
+									watch="MicroStoreUpdatePayStyleChoice"
+									ontrigger="
+										## Set text to established gold price outside of bundles - bundles and charge choices are not compatible ##
+										SetText(
+											If(
+												microStoreCDPriceGold gt 0,
+												FtoA(microStoreCDPriceGold, 0, 0, ','),
+												'-'
+											)
+										);
+										"
+									onevent="
+										SetText(
+											GetDelimitedString(
+												*('microStoreSubBundles' # _microStore_SelectedItem),
+												'~', 1
+											)
+										);
+									"
+								/>
+								<image x="-20i" y="-5i" align="center" width="32i" height="32i" ontrigger9lua="ResourceManager.RegisterTexture('/ui/fe2/elements/store2/gold_card.png', 'store', self)" resourcecontext="store" watch9="MainRegisterTextures"/>
+						</panel>
+						<instance name="store2Button" scale="0.78" texture="button5" align="center" valign="bottom" width="160i" height="37i" label="mstore_purchase_gold" visible="true" watch="MicroStoreProcessing" ontrigger="SetEnabled(!param0);" color="#fffdf6" outlinecolor="#c36000" font="dyn_10"
+							watch1="MicroStoreUpdatePayStyleChoice"
+							ontrigger1="SetVisible(_microStore_TotalCoins ge microStoreCDPriceGold); SetEnabled(!_microStore_SelectedItemOwned);"
+							onshowlua="
+								self:SetLabel(Translate(GetCvarBool('_microStore_SelectedItemOwned') and 'store2_owned' or 'mstore_purchase_gold'))
+							"
+							onclick="
+								Set('_microStore_PremiumCurrency', 0);
+								Set('_microStore_RequestCode', 4);
+								CallEvent('MicroStoreAction', 0);
+							"
+							buttonName="storeConfirmPurchaseButtonBtnGold"
+							onevent="
+								SetVisible(
+									_microStore_TotalCoins
+									ge
+									GetDelimitedString(
+										*('microStoreSubBundles' # _microStore_SelectedItem),
+										'~', 1
+									)
+								);
+							"
+						/>
+						<instance name="store2Button" scale="0.78" texture="button5" align="center" valign="bottom" width="160i" height="37i" label="mstore_needcoins" visible="false" color="#fffdf6" outlinecolor="#c36000" font="dyn_10" onmouseoverlua="HoN_Store:ShowToolTip('mstore_needcoins', 'mstore_needcoins_desc', true)" onmouseoutlua="HoN_Store:HideToolTip()"
+							watch1="MicroStoreUpdatePayStyleChoice"
+							ontrigger1="SetVisible(_microStore_TotalCoins lt microStoreCDPriceGold);"
+							onclick="
+								CallEvent('store_popup_confirm_purchase_choose', 1);
+								Set('_microStore_RequestCode', 5); CallEvent('MicroStoreAction', 0);
+							"
+							buttonName="storeConfirmPurchaseButtonNeedGold2"
+							onevent="
+								SetVisible(
+									_microStore_TotalCoins
+									lt
+									GetDelimitedString(
+										*('microStoreSubBundles' # _microStore_SelectedItem),
+										'~', 1
+									)
+								);
+							"
+						/>
+					</panel>
+					<!-- Gift Gold Choice -->
+					<panel width="12h" height="100%" sticky="true" stickytoinvis="false" watch="MicroStoreUpdatePayStyleChoice MicroStoreUpdateOverride" ontrigger="If(microStoreCDPriceGold gt 0 and _microStoreGiftsRemaining gt 0 and microStoreOverridePurchaseID == -1 and microStoreCDPriceGold != 9006, SetVisible(1), SetVisible(0));">
+						<panel width="-1h" height="2.25h" align="center">
+								<label x="16i" noclick="true" align="center" font="dyn_12" textalign="center" textvalign="center" outline="true" outlinecolor="#2d1d0d" color="#FFCC00" name="storeConfirmPurchaseGoldCost2"
+									watch="MicroStoreUpdatePayStyleChoice"
+									ontrigger="
+										## Set text to established gold price outside of bundles - bundles and charge choices are not compatible ##
+										SetText(
+											If(
+												microStoreCDPriceGold gt 0,
+												FtoA(microStoreCDPriceGold, 0, 0, ','),
+												'-'
+											)
+										);
+									"
+									onevent="
+										SetText(
+											GetDelimitedString(
+												*('microStoreSubBundles' # _microStore_SelectedItem),
+												'~', 1
+											)
+										);
+									"
+								/>
+								<image x="-20i" y="-5i" align="center" width="32i" height="32i" ontrigger9lua="ResourceManager.RegisterTexture('/ui/fe2/elements/store2/gold_card.png', 'store', self)" resourcecontext="store" watch9="MainRegisterTextures"/>
+						</panel>
+						<instance name="store2Button" scale="0.78" texture="button5" align="center" valign="bottom" width="160i" height="37i" label="mstore_purchase_gift" visible="true" watch="MicroStoreProcessing" ontrigger="SetEnabled(!param0);" color="#fffdf6" outlinecolor="#c36000" font="dyn_10"
+							watch1="MicroStoreUpdatePayStyleChoice"
+							ontrigger1="SetVisible(_microStore_TotalCoins ge microStoreCDPriceGold);"
+							onclick="Call('store_popup_confirm_purchase_choose', 'DoEvent(1);'); Call('store_popup_confirm_purchase_gift', 'DoEvent(0);');"
+							buttonName="storeConfirmGiftButtonBtnGold"
+							onevent="
+								SetVisible(
+									_microStore_TotalCoins
+									ge
+									GetDelimitedString(
+										*('microStoreSubBundles' # _microStore_SelectedItem),
+										'~', 1
+									)
+								);
+							"
+						/>
+						<instance name="store2Button" scale="0.78" texture="button5" align="center" valign="bottom" width="160i" height="37i" label="mstore_needcoins" visible="false" color="#fffdf6" outlinecolor="#c36000" font="dyn_10" onmouseoverlua="HoN_Store:ShowToolTip('mstore_needcoins', 'mstore_needcoins_desc', true)" onmouseoutlua="HoN_Store:HideToolTip()"
+							watch1="MicroStoreUpdatePayStyleChoice"
+							ontrigger1="SetVisible(_microStore_TotalCoins lt microStoreCDPriceGold);"
+							onclick="
+								CallEvent('store_popup_confirm_purchase_choose', 1);
+								Set('_microStore_RequestCode', 5); CallEvent('MicroStoreAction', 0);
+							"
+							buttonName="storeConfirmPurchaseButtonNeedGold"
+							onevent="
+								SetVisible(
+									_microStore_TotalCoins
+									lt
+									GetDelimitedString(
+										*('microStoreSubBundles' # _microStore_SelectedItem),
+										'~', 1
+									)
+								);
+							"
+						/>
+					</panel>
+					<!-- Silver Choice -->
+					<panel width="12h" height="100%" sticky="true" stickytoinvis="false" watch="MicroStoreUpdatePayStyleChoice" ontrigger="SetVisible(microStoreCDPriceSilver gt 0 and microStoreCDPriceSilver != 9002);">
+						<panel width="-1h" height="2.25h" align="center">
+								<label x="16i" noclick="true" align="center" font="dyn_12" textalign="center" textvalign="center" outline="true" outlinecolor="#2d1d0d" color="#c0d5ed" name="storeConfirmPurchaseSilverCost"
+									watch="MicroStoreUpdatePayStyleChoice"
+									ontrigger="
+										## Set text to established silver price outside of bundles - bundles and charge choices are not compatible ##
+										SetText(
+											If(
+												microStoreCDPriceSilver gt 0,
+												FtoA(microStoreCDPriceSilver, 0, 0, ','),
+												'-'
+											)
+										);
+										"
+									onevent="
+										SetText(
+											GetDelimitedString(
+												*('microStoreSubBundles' # _microStore_SelectedItem),
+												'~', 2
+											)
+										);
+									"
+								/>
+								<image x="-20i" y="-5i" align="center" width="32i" height="32i" ontrigger9lua="ResourceManager.RegisterTexture('/ui/fe2/elements/store2/silver_card.png', 'store', self)" resourcecontext="store" watch9="MainRegisterTextures"/>
+						</panel>
+						<instance name="store2Button" scale="0.78" texture="button5" align="center" valign="bottom" width="160i" height="37i" label="mstore_purchase_silver" visible="true" watch="MicroStoreProcessing" ontrigger="SetEnabled(!param0);" color="#fffdf6" outlinecolor="#c36000" font="dyn_10"
+							watch1="MicroStoreUpdatePayStyleChoice"
+							ontrigger1="SetVisible(_microStore_TotalSilverCoins ge microStoreCDPriceSilver); SetEnabled(!_microStore_SelectedItemOwned);"
+							onshowlua="
+								self:SetLabel(Translate(GetCvarBool('_microStore_SelectedItemOwned') and 'store2_owned' or 'mstore_purchase_silver'))
+							"
+							onclick="
+								Set('_microStore_PremiumCurrency', 1);
+								Set('_microStore_RequestCode', 4); CallEvent('MicroStoreAction', 0);
+							"
+							buttonName="storeConfirmPurchaseButtonBtnSilver"
+							onevent="
+								SetVisible(
+									_microStore_TotalSilverCoins
+									ge
+									GetDelimitedString(
+										*('microStoreSubBundles' # _microStore_SelectedItem),
+										'~', 2
+									)
+								);
+							"
+						/>
+						<instance name="store2Button" scale="0.78" texture="button5" align="center" valign="bottom" width="160i" height="37i" label="mstore_needcoins" visible="false" enabled="false" color="#fffdf6" outlinecolor="#c36000" font="dyn_10" onmouseoverlua="HoN_Store:ShowToolTip('mstore_needcoins', 'mstore_needcoins_desc', true)" onmouseoutlua="HoN_Store:HideToolTip()"
+							watch1="MicroStoreUpdatePayStyleChoice"
+							ontrigger1="SetVisible(_microStore_TotalSilverCoins lt microStoreCDPriceSilver);"
+							buttonName="storeConfirmPurchaseButtonNeedSilver"
+							onevent="
+								SetVisible(
+									_microStore_TotalSilverCoins
+									lt
+									GetDelimitedString(
+										*('microStoreSubBundles' # _microStore_SelectedItem),
+										'~', 2
+									)
+								);
+							"
+						/>
+					</panel>
+					<!-- Free Choice -->
+					<panel width="12h" height="100%" sticky="true" stickytoinvis="false" watch="MicroStoreUpdatePayStyleChoice" 
+						ontrigger="SetVisible((microStoreCDPriceGold le 0 or microStoreCDPriceGold == 9006) and (microStoreCDPriceSilver le 0 or microStoreCDPriceSilver == 9002));">
+						<instance name="store2Button" scale="0.78" texture="button5" align="center" valign="bottom" width="160i" height="37i" label="mstore_purchase_claimfree" color="#fffdf6" outlinecolor="#c36000" font="dyn_10" watch="MicroStoreProcessing" ontrigger="SetEnabled(!param0);"
+							onclick="
+								if(
+									microStoreCDPriceGold == 9006,
+									Set('_microStore_PremiumCurrency', 1),
+									Set('_microStore_PremiumCurrency', 0)
+								);
+								Set('_microStore_RequestCode', 4); CallEvent('MicroStoreAction', 0);
+							"
+						/>
+					</panel>
+					<panel width="12h" height="100%" sticky="true" stickytoinvis="false">
+						<instance name="store2Button"  texture="button4" scale="0.78" color="#fffdf6" outlinecolor="#006370" font="dyn_10" align="center" valign="bottom"  width="160i" height="37i" label="general_cancel" visible="true" watch="MicroStoreProcessing" ontrigger="SetEnabled(!param0);" onclick="CallEvent('store_popup_confirm_purchase_choose', 1);"/>
+					</panel>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="storePopupConfirmGiftChoose">
+		<panel width="100%" grow="true" regrow="true" float="bottom" padding="0.5h" growinvis="false" reverse="true"
+			onhide="ShowWidget('store_gift_promo_enter_name');"
+		>
+			<panel height="7h" width="100%" sticky="true" stickytoinvis="false">
+				<webimage align="left" width="7h" height="7h" valign="center"
+					resourcecontext="store"
+					watch="MicroStoreUpdateSelection"
+					ontrigger="
+						If(
+							!StringEquals(*('microStoreLocalContent' # _microStore_SelectedItem), '-1'),
+							SetTexture(*('microStoreLocalContent' # _microStore_SelectedItem)),
+							If(
+								!StringEquals(*('microStoreWebContent' # _microStore_SelectedItem), '-1'),
+								SetTextureURL(*('microStoreWebContent' # _microStore_SelectedItem)),
+								SetTexture('/ui/legion/ability_coverup.tga')
+							)
+						);
+					"
+				/>
+				<panel align="right" width="-8h" height="7h">
+					<panel valign="center" grow="true" regrow="true" width="100%" float="bottom" growinvis="false">
+						<panel width="100%" height="7.8h">
+							<label content="-" textalign="left" align="center" textvalign="top" font="dyn_14" style="microStorePaperTitle" watch="MicroStoreUpdateSelection"
+								ontrigger="
+									If(
+										_microStore_Category == 71 or _microStore_Category == 58,
+										SetText(_microStoreSelectedHeroItem),
+										SetText(Translate('mstore_product' # *('microStoreID' # _microStore_SelectedItem) # '_name'))
+									);
+								"
+							/>
+						</panel>
+						<panel width="100%" height="2.75h" sticky="true" stickytoinvis="false" name="mstoreConfirmChooseExpiration2" visible="false">
+							<instance name="paperForm_combobox_container" hastip="true" label="mstore_expiration" form="" fieldwidth="65%" labelwidth="25%"
+								fieldname="paperForm_combobox_container_field4B"
+								boxwatch1="MicroStoreUpdateSelection"
+								boxontrigger1="
+									Set('_microStore_itemExpirationChoice', 0);
+									HideWidget('mstoreConfirmChooseExpiration2');
+									ClearItems();
+									ExplodeTrigger('MicroStoreUpdateDurationChoices', *('microStoreDurations' # _microStore_SelectedItem), ',', '~');
+
+									Set('microStoreCDPriceGold', *('microStorePrice' # _microStore_SelectedItem));
+									Set('microStoreCDPriceSilver', *('microStoreSilverPrice' # _microStore_SelectedItem));
+									Trigger('MicroStoreUpdatePayStyleChoice');
+
+									SetSelectedItemByIndex(0);
+								"
+								onselect="
+									Set('_microStore_itemExpirationChoice', this);
+									If(
+										_microStore_itemExpirationChoice == 0 and *('microStorePurchasable' # _microStore_SelectedItem),
+										Split(
+											Set('microStoreCDPriceGold', *('microStorePrice' # _microStore_SelectedItem)),
+											Set('microStoreCDPriceSilver', *('microStoreSilverPrice' # _microStore_SelectedItem))
+										)
+									);
+									If(
+										_microStore_itemExpirationChoice == 0 and *('microStorePurchasable' # _microStore_SelectedItem),
+										Trigger('MicroStoreUpdatePayStyleChoice')
+									);
+									If(
+										_microStore_itemExpirationChoice ge 1,
+										ExplodeTrigger('MicroStoreDurationChoice', *('microStoreDurations' # _microStore_SelectedItem), ',', '~')
+									);
+								"
+								boxwatch="MicroStoreUpdateDurationChoices"
+								boxontrigger="
+									If(
+										param1 gt 0 and !HasListItem(param1),
+										Split(
+											ShowWidget('mstoreConfirmChooseExpiration2'),
+											AddTemplateListItem(
+												'paperform_combobox_item_goldsilvercost',
+												param1,
+												'label',
+												If(
+													param3 ge 604800,
+													If(
+														param3 == 604800,
+														Translate('general_one_week'),
+														Translate('general_weeks_amount', 'amount', FtoA(param3 / 604800, 1))
+													),
+													If(
+														param3 ge 86400,
+														If(
+															param3 == 86400,
+															Translate('general_one_day'),
+															Translate('general_days_amount', 'amount', FtoA(param3 / 86400, 1))
+														),
+														If(
+															param3 ge 3600,
+															If(
+																param3 == 3600,
+																Translate('general_one_hour'),
+																Translate('general_hours_amount', 'amount', FtoA(param3 / 3600, 1))
+															),
+															If(
+																param3 == 60,
+																Translate('general_one_minute'),
+																Translate('general_minutes_amount', 'amount', FtoA(param3 / 60, 1))
+															)
+														)
+													)
+												),
+												'goldCost', If(param2 == 0 and param4 le 0, 'mstore_free', FtoA(param2, 0, 0, ',')),
+												'silverCost', FtoA(param4, 0, 0, ','),
+												'showSilver', (param4 gt 0)
+											)
+										)
+									);
+								"
+							/>
+						</panel>
+						<panel width="100%" height="2.75h" sticky="true" stickytoinvis="false" name="mstoreConfirmChooseDuration2" visible="false">
+							<instance name="paperForm_combobox_container" hastip="true" label="mstore_duration" form="" fieldwidth="65%" labelwidth="25%"
+								tipmouseover="
+									If(
+										*('microStoreID' # _microStore_SelectedItem) == 655,
+										ShowWidget('mstore_item_matches_tip'),
+										ShowWidget('mstore_item_duration_tip')
+									);
+								"
+								tipmouseout="
+									HideWidget('mstore_item_matches_tip');
+									HideWidget('mstore_item_duration_tip');
+								"
+								fieldname="paperForm_combobox_container_field5B"
+								boxwatch1="MicroStoreUpdateSelection"
+								boxontrigger1="
+									Set('_microStore_itemDurationChoice', 0);
+									HideWidget('mstoreConfirmChooseDuration2');
+									ClearItems();
+									ExplodeTrigger('MicroStoreUpdateChargeChoices', *('microStoreCharges' # _microStore_SelectedItem), ',', '~');
+
+									Set('microStoreCDPriceGold', *('microStorePrice' # _microStore_SelectedItem));
+									Set('microStoreCDPriceSilver', *('microStoreSilverPrice' # _microStore_SelectedItem));
+									Trigger('MicroStoreUpdatePayStyleChoice');
+
+									SetSelectedItemByIndex(0);
+								"
+								onselect="
+									Set('_microStore_itemDurationChoice', this);
+									If(
+										_microStore_itemDurationChoice == 0 and *('microStorePurchasable' # _microStore_SelectedItem),
+										Split(
+											Set('microStoreCDPriceGold', *('microStorePrice' # _microStore_SelectedItem)),
+											Set('microStoreCDPriceSilver', *('microStoreSilverPrice' # _microStore_SelectedItem))
+										)
+									);
+									If(
+										_microStore_itemDurationChoice == 0 and *('microStorePurchasable' # _microStore_SelectedItem),
+										Trigger('MicroStoreUpdatePayStyleChoice')
+									);
+									If(
+										_microStore_itemDurationChoice ge 1,
+										ExplodeTrigger('MicroStoreChargeChoice', *('microStoreCharges' # _microStore_SelectedItem), ',', '~')
+									);
+								"
+								boxwatch="MicroStoreUpdateChargeChoices"
+								boxontrigger="
+									If(
+										param1 gt 0 and !HasListItem(param1),
+										Split(
+											ShowWidget('mstoreConfirmChooseDuration2'),
+											AddTemplateListItem(
+												'paperform_combobox_item_goldsilvercost',
+												param1,
+												'label',
+												If(
+													param6 le 0,
+													If(
+														param3 == 1,
+														'mstore_onegame',
+														Translate('mstore_games_amount', 'amount', param3)
+													),
+													If(
+														param6 ge 604800,
+														If(
+															param6 == 604800,
+															Translate('general_one_week'),
+															Translate('general_weeks_amount', 'amount', FtoA(param6 / 604800, 1))
+														),
+														If(
+															param6 ge 86400,
+															If(
+																param6 == 86400,
+																Translate('general_one_day'),
+																Translate('general_days_amount', 'amount', FtoA(param6 / 86400, 1))
+															),
+															If(
+																param6 ge 3600,
+																If(
+																	param6 == 3600,
+																	Translate('general_one_hour'),
+																	Translate('general_hours_amount', 'amount', FtoA(param6 / 3600, 1))
+																),
+																If(
+																	param6 == 60,
+																	Translate('general_one_minute'),
+																	Translate('general_minutes_amount', 'amount', FtoA(param6 / 60, 1))
+																)
+															)
+														)
+													)
+												),
+												'goldCost', If(param2 == 0 and param4 le 0, 'mstore_free', FtoA(param2, 0, 0, ',')),
+												'silverCost', FtoA(param4, 0, 0, ','),
+												'showSilver', (param4 gt 0)
+											)
+										)
+									);
+								"
+							/>
+						</panel>
+					</panel>
+				</panel>
+			</panel>
+
+			<!-- charge info -->
+			<panel width="100%" grow="true" float="bottom" padding="0.5h" name="mstoreConfirmPurchaseChargeInfo2" visible="false" sticky="true" stickytoinvis="false">
+				<panel height="0.5h">
+					<image texture="/ui/fe2/elements/store2/line2.png" height="2i" width="-0.5h" align="center" valign="center"/>
+				</panel>
+				<label fity="true" wrap="true" textvalign="center" textalign="center" font="dyn_10" style="microStorePaperItem" content="-"
+					watch="MicroStoreUpdateSelection"
+					ontrigger="
+						Set('mtoreCRemainTempQuantity', -1);
+						Set('mtoreCRemainTempStartTime', -1);
+						Set('mtoreCRemainTempEndtime', -1);
+
+						If( *('microStoreChargeRemaining' # _microStore_SelectedItem) != -1,
+							ExplodeTrigger('MicroStoreSaveTempChargeData', *('microStoreChargeRemaining' # _microStore_SelectedItem), ',', '~')
+						);
+						If(
+							mtoreCRemainTempQuantity gt 1,
+							SetText(Translate('mstore_matches_remaining', 'amount', mtoreCRemainTempQuantity))
+						);
+						If(
+							mtoreCRemainTempQuantity == 1 and mtoreCRemainTempEndtime gt 1,
+							SetText(Translate('mstore_expireson', 'date', FormatDateTime(mtoreCRemainTempEndtime, '%#m/%#d/%Y %#I:%M %p', true)))
+						);
+
+						If(
+							mtoreCRemainTempQuantity ge 1,
+							ShowWidget('mstoreConfirmPurchaseChargeInfo2'),
+							HideWidget('mstoreConfirmPurchaseChargeInfo2')
+						);
+					"
+				/>
+			</panel>
+			<!-- /charge info -->
+
+			<panel height="0.5h" sticky="true" stickytoinvis="false">
+				<image texture="/ui/fe2/elements/store2/line2.png" height="2i" width="-0.5h" align="center" valign="center"/>
+			</panel>
+
+			<label sticky="true" stickytoinvis="false" align="center" width="100%" wrap="true" fity="true" textalign="center" textvalign="center" font="dyn_11" style="microStorePaperTitle" fitypadding="0.5h" content="mstore_buygift_confirm_body"/>
+			<label sticky="true" stickytoinvis="false" align="center" width="100%" wrap="true" fity="true" textalign="center" textvalign="center" font="dyn_10" style="microStorePaperText" fitypadding="0.5h"  content=""
+				onshow="SetText(Translate('mstore_buygift_confirm_desc', 'value', _microStoreGiftsRemaining));"  watch="UpdatePurchaseGiftForm" ontrigger="SetText(Translate('mstore_buygift_confirm_desc', 'value', _microStoreGiftsRemaining));"
+			/>
+			<label sticky="true" stickytoinvis="false" align="center" width="100%" wrap="true" fity="true" textalign="center" textvalign="center" font="dyn_10" style="microStorePaperText" fitypadding="0.5h"  content=""
+				onshowlua="local expiration = GetCvarString('_microStoreGiftsEventExpiration')
+							if NotEmpty(expiration) then
+								self:SetText(Translate('mstore_buygift_confirm_exp', 'date', expiration))
+							else
+								self:SetText('')
+							end"
+			/>
+			<!-- Nickname -->
+			<panel sticky="true" stickytoinvis="false" align="center" width="100%" height="4.5h" onload="CreateString('buy_gift_friendnick', ''); CreateBool('buy_gift_friendnick_valid', false);">
+				<panel visible="1" noclick="true"
+					watch="CoinsFriendNameResult"
+					ontrigger="
+						If(param0 == 0 and !StringEquals(buy_gift_friendnick, StripClanTag(GetAccountName())),
+							Split(
+								Set('buy_gift_friendnick_valid', true),
+								Set('_microStoreSantaTarget', StripClanTag(EscapeString(buy_gift_friendnick)))
+							),
+							Split(
+								Set('buy_gift_friendnick_valid', false),
+								Set('_microStoreSantaTarget', '')
+							)
+						);
+						Trigger('UpdatePurchaseGiftForm');
+					"
+				>
+					<label y="0.2h" x="57%" fitx="1" fity="1" name="store_gift_promo_enter_check" textvalign="top" content="mstore_buygift_enter_player" style="microStorePaperTitle" wrap="0" font="dyn_12" valign="top" watch="CoinsFriendNameResult" ontrigger="SetText(Translate('nickname_exists_response' # param0)); If(param0 == 0, SetColor('#29dfe7'), SetColor('#e40000'));"/>
+					<panel width="2.5h" height="2.5h" x="50%">
+						<animatedimage name="CoinsFriendNameThrob2" texture="/ui/elements/throb/throb.tga" noclick="true" loop="1" fps="30" onshow="StartAnim(1);" visible="false" watch="CoinsFriendNameStatus" ontrigger="SetVisible(param == 1);"/>
+						<image name="CoinsFriendNameValid2" texture="/ui/fe2/elements/store2/check_mark_T.png" color="#29dfe7" align="center" valign="center" width="-25%" height="-25%" visible="false" watch="CoinsFriendNameResult" ontrigger="SetVisible(param0 == 0);"/>
+						<image name="CoinsFriendNameInvalid2" texture="/ui/fe2/elements/store2/check_mark_F.png" resourcecontext="store" watch9="MainRegisterTextures" color="#e40000" align="center" valign="center" width="-30%" height="-30%" visible="false" watch="CoinsFriendNameResult" ontrigger="SetVisible(param0 != 0);"/>
+					</panel>
+					<panel y="2.5h">
+						<panel x="5%" y="-0.3h" width="45%" height="2.5h" noclick="true" onevent0="SleepWidget(3000, 'If(buy_gift_friendnick_valid, FadeOut(3000));');"
+						watch="CoinsFriendNameResult" ontrigger="SetVisible(1); If(param0 == 0, DoEvent(0));"
+						watch1="UpdatePurchaseGiftForm" ontrigger1="If(StringEmpty(buy_gift_friendnick_textbox), HideWidget('store_gift_promo_enter_check'), ShowWidget('store_gift_promo_enter_check'));">
+						<panel width="100%" grow="true" regrow="true" valign="bottom">
+							<panel width="-1h" grow="true" regrow="true" align="center" float="bottom">
+								<panel width="100%" height="0.5h"/>
+									<label y="0.1h" fity="1" name="store_gift_promo_enter_name" textvalign="center" style="microStorePaperTitle" wrap="0" font="dyn_12" valign="center" content="mstore_buygift_enter_player"/>
+								<panel width="100%" height="0.5h"/>
+							</panel>
+						</panel>
+					</panel>
+					<panel x="-5%" noclick="1" >
+						<instance
+							name="paperForm_textbox_container"
+							label=""
+							hastip="false"
+							order="138"
+							width="100%"
+							fieldwidth="40%"
+							labelwidth="51.5%"
+							showarrow="false"
+							fieldname="buy_gift_friendnick_textbox"
+							tip_id=""
+							form="" data=""
+							updatetrigger="UpdatePurchaseGiftForm"
+							textboxwatch="UpdatePurchaseGiftForm"
+							textboxontrigger="If(!StringEquals(buy_gift_friendnick, *(name)), EraseInputLine());"
+							onesc="Trigger('ChatAutoCompleteClear');"
+							onfocuslua="
+								Set('buycoins_friend_auto2', true)
+								local wdgList = GetWidget('store2_autocomplete_buycoins_friend2_listbox')
+								if wdgList then
+									wdgList:RegisterWatch('ChatAutoCompleteAdd', function(wdg, name) wdg:AddTemplateListItem('autocomplete_player', name, 'username', name) end)
+									wdgList:RegisterWatch('ChatAutoCompleteClear', function(wdg) wdg:ClearItems() end)
+								end
+							"
+							onlosefocuslua="
+								Set('buycoins_friend_auto2', false)
+								local wdgList = GetWidget('store2_autocomplete_buycoins_friend2_listbox')
+								if wdgList then
+									wdgList:UnregisterWatch('ChatAutoCompleteAdd')
+									wdgList:UnregisterWatch('ChatAutoCompleteClear')
+								end
+							"
+							onhide="SetInputLine('');"
+							onchange="
+								Call('storeConfirmGiftButtonBtnGold2', 'SetEnabled(0)');
+								CreateString('ui_autocompleteTextBox', name); ChatAutoCompleteNick(this);
+								Set('buy_gift_friendnick_valid', false);
+								Set('buy_gift_friendnick', StripClanTag(EscapeString(*(name))));
+								If(
+									!StringEmpty(buy_gift_friendnick),
+									Split(
+										HideWidget('CoinsFriendNameValid2'),
+										HideWidget('CoinsFriendNameInvalid2'),
+										ShowWidget('CoinsFriendNameThrob2'),
+										SleepWidget(250, 'SubmitForm(\'CoinsFriendName\', \'nickname\', buy_gift_friendnick);')
+									),
+									Split(
+										HideWidget('CoinsFriendNameValid2'),
+										HideWidget('CoinsFriendNameInvalid2'),
+										HideWidget('CoinsFriendNameThrob2')
+									)
+								);
+							"
+							onload="CreateBool('buycoins_friend_auto2', false);"
+						/>
+						<panel width="40%" height="30.0h" x="57%" y="2.25h" visible="false" color="invisible" watch="ChatAutoCompleteClear" ontrigger="SetVisible(false);" watch2="ChatAutoCompleteAdd" ontrigger2="if(buycoins_friend_auto2, SetVisible(true));"
+							   watch3="CoinsFriendNameResult" ontrigger3="If(param0 == 0 and !StringEquals(buy_gift_friendnick, GetAccountName()), SetVisible(false));"
+						>
+							<instance name="store2_autocomplete_list" listbox_name="autocomplete_buycoins_friend2" y="0.5h" width="100%" height="12.5h" align="left" valign="top" />
+						</panel>
+					</panel>
+						<panel y="-0.6h" width="2.4h" x="0.25h" align="right" height="100%" valign="center">
+							<instance x="-1h" y="-0.3h" name="store2_tip_mark" tip_id="mstore_tip_buygift_other" width="2.5h" height="2.5h" valign="center" align="right"/>
+						</panel>
+					</panel>
+				</panel>
+			</panel>
+			<!-- /Nickname -->
+
+			<panel height="0.5h" sticky="true" stickytoinvis="false">
+				<image texture="/ui/fe2/elements/store2/line2.png" height="2i" width="-0.5h" align="center" valign="center"/>
+			</panel>
+
+			<panel name="confirmGiftButtons" align="center" height="5.3h" width="100%" float="right" stickytoinvis="false" onshowlua="HoN_Store:ArrangeChildrenCloseToCenter(self)">
+				<!-- Gift Gold Choice -->
+				<panel width="12" height="100%" sticky="true" stickytoinvis="false"
+					watch="MicroStoreUpdatePayStyleChoice MicroStoreUpdateOverride"
+					ontrigger="
+						If(microStoreCDPriceGold gt 0 and _microStoreGiftsRemaining gt 0 and microStoreOverridePurchaseID == -1,
+							Split(
+								SetVisible(1),
+								Call('store_popup_confirm_purchase_gift_plank', 'SetWidth(\'53h\');')
+							),
+							Split(
+								SetVisible(0),
+								Call('store_popup_confirm_purchase_gift_plank', 'SetWidth(\'47h\');')
+							)
+						);
+					"
+				>
+					<panel width="-1h" height="2.25h" align="center">
+						<label x="16i" align="center" noclick="true" font="dyn_12" height="100%" textalign="center" textvalign="center" outline="true" outlinecolor="#2d1d0d" color="#FFCC00" name="storeConfirmPurchaseGoldCost3"
+							watch="MicroStoreUpdatePayStyleChoice"
+							ontrigger="
+								## Set text to established gold price outside of bundles - bundles and charge choices are not compatible ##
+								SetText(
+									If(
+										microStoreCDPriceGold gt 0,
+										FtoA(microStoreCDPriceGold, 0, 0, ','),
+										'-'
+									)
+								);
+							"
+							onevent="
+								SetText(
+									GetDelimitedString(
+										*('microStoreSubBundles' # _microStore_SelectedItem),
+										'~', 1
+									)
+								);
+							"
+						/>
+						<image x="-20i" y="-5i" align="center" width="32i" height="32i" ontrigger9lua="ResourceManager.RegisterTexture('/ui/fe2/elements/store2/gold_card.png', 'store', self)" resourcecontext="store" watch9="MainRegisterTextures"/>
+					</panel>
+					<instance name="store2Button" scale="0.78" texture="button5" align="center" valign="bottom" width="160i" height="37i" label="mstore_purchase_gift" visible="true" color="#fffdf6" outlinecolor="#c36000" font="dyn_10"
+								watch="MicroStoreProcessing" ontrigger="SetEnabled(!param0 and buy_gift_friendnick_valid and (CoinsFriendNameStatus != 1));" enabled="0"
+								watch3="CoinsFriendNameStatus" ontrigger3="SetEnabled(!MicroStoreProcessing and buy_gift_friendnick_valid and (CoinsFriendNameStatus != 1));"
+								watch1="MicroStoreUpdatePayStyleChoice"
+								ontrigger1="SetVisible(_microStore_TotalCoins ge microStoreCDPriceGold);"
+								onclick="
+									Set('_microStore_PremiumCurrency', 0);
+									Set('_microStore_RequestCode', 4);
+									If(!StringEmpty(_microStoreSantaTarget), CallEvent('MicroStoreAction', 1)); ## Gift Action ##
+								"
+								buttonName="storeConfirmGiftButtonBtnGold2"
+								onevent="
+									SetVisible(
+										_microStore_TotalCoins
+										ge
+										GetDelimitedString(
+											*('microStoreSubBundles' # _microStore_SelectedItem),
+											'~', 1
+										)
+									);
+								"
+								watch2="CoinsFriendNameResult"
+								ontrigger2="SetEnabled(buy_gift_friendnick_valid);"
+							/>
+				</panel>
+				<!-- Self Gold Choice -->
+				<panel width="12h" height="100%" sticky="true" stickytoinvis="false" watch="MicroStoreUpdatePayStyleChoice" ontrigger="SetVisible(microStoreCDPriceGold gt 0);">
+						<panel width="-1h" height="2.25h" align="center">
+								<label x="16i" align="center" noclick="true" font="dyn_12" textalign="center" textvalign="center" outline="true" outlinecolor="#2d1d0d" color="#FFCC00" name="storeConfirmPurchaseGoldCost4"
+									   watch="MicroStoreUpdatePayStyleChoice"
+									   ontrigger="
+												## Set text to established gold price outside of bundles - bundles and charge choices are not compatible ##
+												SetText(
+													If(
+														microStoreCDPriceGold gt 0,
+														FtoA(microStoreCDPriceGold, 0, 0, ','),
+														'-'
+													)
+												);
+											"
+									   onevent="
+												SetText(
+													GetDelimitedString(
+														*('microStoreSubBundles' # _microStore_SelectedItem),
+														'~', 1
+													)
+												);
+											"
+								/>
+								<image x="-20i" y="-5i" align="center" width="32i" height="32i" ontrigger9lua="ResourceManager.RegisterTexture('/ui/fe2/elements/store2/gold_card.png', 'store', self)" resourcecontext="store" watch9="MainRegisterTextures"/>
+						</panel>
+						<instance name="store2Button" scale="0.78" texture="button5" align="center" valign="bottom" width="160i" height="37i" label="mstore_purchase_self" visible="true" watch="MicroStoreProcessing" ontrigger="SetEnabled(!param0);" color="#fffdf6" outlinecolor="#c36000" font="dyn_10"
+								  watch1="MicroStoreUpdatePayStyleChoice"
+								  ontrigger1="SetVisible(_microStore_TotalCoins ge microStoreCDPriceGold); SetEnabled(!_microStore_SelectedItemOwned);"
+								  onclick="
+										Set('_microStore_PremiumCurrency', 0);
+										Set('_microStore_RequestCode', 4); CallEvent('MicroStoreAction', 0);
+									"
+								  buttonName="storeConfirmPurchaseButtonBtnGold2"
+								  onevent="
+										SetVisible(
+											_microStore_TotalCoins
+											ge
+											GetDelimitedString(
+												*('microStoreSubBundles' # _microStore_SelectedItem),
+												'~', 1
+											)
+										);
+									"
+						/>
+					</panel>
+				<panel width="12h" height="100%" sticky="true" stickytoinvis="false">
+					<instance name="store2Button" texture="button4" scale="0.78" color="#fffdf6" outlinecolor="#006370" font="dyn_10" align="center" valign="bottom" width="160i" height="37i" label="general_cancel" visible="true" watch="MicroStoreProcessing" ontrigger="SetEnabled(!param0);" onclick="Call('store_popup_confirm_purchase_choose', 'DoEvent(0);'); CallEvent('store_popup_confirm_purchase_gift', 1);"/>
+				</panel>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="storePopupBuyCoinSuccessAccount">
+		<panel width="100%" grow="true" float="bottom" padding="1h" regrow="true">
+			<label align="right" wrap="true" fity="true" textalign="center" textvalign="center" font="dyn_12" style="microStorePaperText" content="mstore_buycoin_success_account_body"/>
+			<label align="right" wrap="true" fity="true" textalign="center" textvalign="center" font="dyn_12" style="microStorePaperText" content="---------" watch="MicroStoreResults" ontrigger="If(!StringEmpty(param37), SetText(param37), SetText('---------'));"/>
+			<panel grow="true" width="100%" regrow="true">
+				<instance name="store2Button" texture="button5" width="14h" height="3.5h" align="center" color="#fffdf6" outlinecolor="#9c4404" label="general_ok" onclick="CallEvent('store_popup_buy_coin_success_account', 1);"/>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="storePopupBuyCoinSuccessUpgrade">
+		<panel width="100%" grow="true" float="bottom" padding="1h" regrow="true">
+			<label align="right" wrap="true" fity="true" textalign="center" textvalign="center" font="dyn_12" style="microStorePaperText" content="mstore_buycoin_success_upgrade_body"/>
+			<panel grow="true" width="100%" regrow="true">
+				<instance name="store2Button" texture="button5" width="14h" height="3.5h" align="center" color="#fffdf6" outlinecolor="#9c4404" label="general_ok" onclick="CallEvent('store_popup_buy_coin_success_upgrade', 1);"/>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="storePopupBuyCoinSuccess">
+		<panel width="100%" grow="true" float="bottom" padding="1h" regrow="true">
+			<label align="right" wrap="true" fity="true" textalign="center" textvalign="center" font="dyn_12" style="microStorePaperText" content="mstore_buycoin_success_body"/>
+			<panel grow="true" width="100%" regrow="true">
+				<instance name="store2Button" texture="button5" width="14h" height="3.5h" align="center" color="#fffdf6" outlinecolor="#9c4404" label="general_ok" onclick="CallEvent('store_popup_buy_coin_success', 1);"/>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="storePopupBuyCoinFriendSuccess">
+		<panel width="100%" grow="true" float="bottom" padding="1h" regrow="true">
+			<label align="right" wrap="true" fity="true" textalign="center" textvalign="center" font="dyn_12" style="microStorePaperText" content="mstore_buycoin_friend_success_body"/>
+			<panel grow="true" width="100%" regrow="true">
+				<instance name="store2Button" texture="button5" width="14h" height="3.5h" align="center" color="#fffdf6" outlinecolor="#9c4404" label="general_ok" onclick="CallEvent('store_popup_buy_coin_friend_success', 1);"/>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="storePopupBuyItemSuccess">
+		<panel width="100%" grow="true" float="bottom" padding="1h" regrow="true">
+			<label align="right" wrap="true" fity="true" textalign="center" textvalign="center" font="dyn_12" style="microStorePaperText" content="mstore_buyitem_success_body"
+				watch="MicroStoreResults"
+				ontrigger="
+					SetText(
+						Translate(
+							If(
+								_microStore_Category == 3 or
+								_microStore_Category == 4 or
+								_microStore_Category == 5 or
+								_microStore_Category == 6 or
+								_microStore_Category == 16 or
+								_microStore_Category == 27 or
+								_microStore_Category == 59 or
+								_microStore_Category == 60 or
+								_microStore_Category == 61,
+								'mstore_buyitem_success_body_vault',
+								'mstore_buyitem_success_body'
+							)
+						)
+					);
+
+				"
+			/>
+			<panel grow="true" width="100%" regrow="true">
+				<panel float="right" padding="0.5h" align="center" grow="true" height="3h" regrow="true" growinvis="false">
+					<instance name="store2Button" buttonName="store_button_purchase_success_confirm" texture="button5" width="14h" height="3.5h" color="#fffdf6" outlinecolor="#9c4404" label="general_ok" onclick="CallEvent('store_popup_buy_item_success', 1);"/>
+					<instance name="store2Button" texture="button5" width="14h" height="3.5h" color="#fffdf6" outlinecolor="#9c4404" label="mstore_openvault" visible="0"
+						tip_id="mstore_tip_open_vault"
+						watch="MicroStoreProcessing"
+						ontrigger="SetEnabled(!param0);"
+						watch1="MicroStoreResults"
+						ontrigger1="
+							SetVisible(
+								(
+								_microStore_Category == 3 or
+								_microStore_Category == 4 or
+								_microStore_Category == 5 or
+								_microStore_Category == 6 or
+								_microStore_Category == 16 or
+								_microStore_Category == 27 or
+								_microStore_Category == 59 or
+								_microStore_Category == 60 or
+								_microStore_Category == 61
+								)
+								and _microStore_SelectedID != 4606
+							);
+						"
+						onclicklua="HoN_Store:OpenVaultAfterPurchase()"
+					/>
+				</panel>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="storePopupResetStatsSuccess">
+		<panel width="100%" grow="true" float="bottom" padding="1h" regrow="true">
+			<label name="storePopupResetStatsSuccessLabel" align="right" wrap="true" fity="true" textalign="center" textvalign="center" font="dyn_12" style="microStorePaperText" content="web_form_resetstats_success"/>
+			<panel grow="true" width="100%" regrow="true">
+				<instance name="store2Button" texture="button5" width="14h" height="3.5h" align="center" color="#fffdf6" outlinecolor="#9c4404" label="general_ok" onclick="CallEvent('store_popup_resetstats_success', 1);"/>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="storePopupSubAccountSuccess">
+		<panel width="100%" grow="true" float="bottom" padding="1h" regrow="true">
+			<label align="right" wrap="true" fity="true" textalign="center" textvalign="center" font="dyn_12" style="microStorePaperText" content="web_form_subaccount_success"/>
+			<panel grow="true" width="100%" regrow="true">
+				<instance name="store2Button" texture="button5" width="14h" height="3.5h" align="center" color="#fffdf6" outlinecolor="#9c4404" label="general_ok" onclick="CallEvent('store_popup_SubAccount_success', 1);"/>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="storePopupNameChangeSuccess">
+		<panel width="100%" grow="true" float="bottom" padding="1h" regrow="true">
+			<label align="right" wrap="true" fity="true" textalign="center" textvalign="center" font="dyn_12" style="microStorePaperText" content="mstore_nickchange_success_body"/>
+			<panel grow="true" width="100%" regrow="true">
+				<instance name="store2Button" texture="button5" width="14h" height="3.5h" align="center" color="#fffdf6" outlinecolor="#9c4404" label="general_ok" onclick="CallEvent('store_popup_name_change', 1); CallEvent('store_popup_namechange_success', 1);"/>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="storePopupSelectUpgradeSuccess">
+		<panel width="100%" grow="true" float="bottom" padding="1h" regrow="true">
+			<label align="right" wrap="true" fity="true" textalign="center" textvalign="center" font="dyn_12" style="microStorePaperText" content="mstore_selectupgrade_success_body"/>
+			<panel grow="true" width="100%" regrow="true">
+				<instance name="store2Button" texture="button5" width="14h" height="3.5h" align="center" color="#fffdf6" outlinecolor="#9c4404" label="general_ok" onclick="CallEvent('store_popup_selectupgrade_success', 1);"/>
+			</panel>
+		</panel>
+	</template>
+
+
+	<template name="storePopupFirstVisit1">
+		<panel width="100%" grow="true" float="bottom" padding="1h" regrow="true">
+			<label align="right" wrap="true" fity="true" textalign="center" textvalign="center" font="dyn_12" style="microStorePaperText" content="mstore_firstvisit1b_body"/>
+			<panel grow="true" width="100%" regrow="true">
+				<instance name="store2Button" texture="button5" width="14h" height="3.5h"
+					align="center" valign="center"
+					color="#fffdf6" outlinecolor="#9c4404"
+					label="general_ok"
+					onclick="##Trigger('DoWalkthrough', 'store1', 1);## CallEvent('store_popup_firstvisit1', 1);"
+				/>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="storePopupBuyAvatarNeedHero">
+		<panel width="100%" grow="true" float="bottom" padding="1h" regrow="true">
+			<label width="100%" align="right" wrap="true" fity="true" fitypadding="1h" textvalign="center" font="dyn_12" style="microStorePaperText" content="mstore_buyavatar_needhero_desc"/>
+			<panel grow="true" width="100%">
+				<panel float="right" padding="0.75h" height="3h" grow="true" align="center">
+					<instance name="store2Button" texture="button5" width="14h" height="3.5h" color="#fffdf6" outlinecolor="#9c4404" label="mstore_viewhero"
+						onclicklua="
+							local g = _G['HoN_Store']
+							g:SwitchToHeroAvatarPanelFromBuyAvatarPopup()
+							GetWidget('store_popup_buyavatar_needhero'):DoEventN(1)
+						"
+					/>
+					<instance name="store2Button" texture="button4" width="14h" height="3.5h" color="#e9f2f6" outlinecolor="#2f7182" label="general_cancel"
+						onclicklua="GetWidget('store_popup_buyavatar_needhero'):DoEventN(1)"
+					/>
+				</panel>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="storePopupBuyFeaturedOwnedProduct">
+		<panel width="100%" grow="true" float="bottom" padding="1h" regrow="true">
+			<label name="store_popup_buyfeatured_ownedproduct_body" width="100%" align="right" wrap="true" fity="true" fitypadding="1h" textvalign="center" textalign="center" font="dyn_12" style="microStorePaperText" content="mstore_featured_owned_body"/>
+			<panel grow="true" width="100%">
+				<panel float="right" padding="0.75h" height="3h" grow="true" align="center">
+					<instance name="store2Button" texture="button5" width="14h" height="3.5h" color="#fffdf6" outlinecolor="#9c4404" label="general_continue"
+						onclicklua="
+							local g = _G['HoN_Store']
+							Set('_microStore_overrideConfirmName', true)
+							g:OnPurchase()
+							Set('_microStore_overrideConfirmName', false)
+							GetWidget('store_popup_buyfeatured_ownedproduct'):DoEventN(1)
+						"
+					/>
+					<instance name="store2Button" texture="button4" width="14h" height="3.5h" color="#e9f2f6" outlinecolor="#2f7182" label="general_cancel"
+						onclicklua="
+							GetWidget('store_popup_buyfeatured_ownedproduct'):DoEventN(1)
+						"
+					/>
+				</panel>
+			</panel>
+		</panel>
+	</template>
+
+	<!-- it's used in /content/store_avatars.package -->
+	<trigger name="StoreAvatarIsNewRequest"/>
+	<trigger name="StoreAvatarIsNewResult"/>
+	<template name="altAvatarPreviewPanel">
+		<panel color="0 0 0 0.5" visible="false"
+			group="storeAltAvatarInfoPanels"
+			oneventlua="UIManager.GetInterface('main'):HoNStoreF('RegisterAltAvatar',
+					{id=0},
+					'{definition=}',
+					{hasmodel=false},
+					{hastexture=false},
+					{haseffects=false},
+					{hassounds=false},
+					{hasanimations=false},
+					{goldCollection=false},
+					{limitedEdition=false},
+					{holidayEdition=false},
+					{collectorsEditionSet=0},
+					{heroEntryID=1},
+					{ultimateAvatar=false},
+					{hasEnhancement=false},
+					{hasnewanimations=true}
+				)"
+			watch3="StoreAvatarIsNewRequest"
+			ontrigger3="
+				Trigger('StoreAvatarIsNewResult', {id=0}, '{new=false}', '{ultimateAvatar=false}');
+			"
+		/>
+	</template>
+</package>

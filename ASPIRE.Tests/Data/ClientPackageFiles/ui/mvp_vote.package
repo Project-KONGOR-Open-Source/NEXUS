@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+
+	<template name="mvp_vote_candidate">
+		<panel name="candidate{id}" x="{x=0}" y="{y=0}" width="{width=100%}" height="{height=100%}" noclick="false" align="center" valign="center"
+			onmouseoverlua="
+				PlaySound('/shared/sounds/ui/ccpanel/button_over_01.wav')
+				self:GetWidget('cdd_bg{id}'):SetTexture('/ui/mvpvoting/bg03.png')
+				"
+			onmouseoutlua="self:GetWidget('cdd_bg{id}'):SetTexture('/ui/mvpvoting/bg02.png')"
+		>
+			<image name="cdd_bg{id}" texture="/ui/mvpvoting/bg02.png" align="center" valign="center" width="210%" height="131%" noclick="true"/>
+			<panel y="-42%" width="100%" height="16%" align="center" valign="center" noclick="true">
+				<label textalign="center" textvalign="center" align="center" valign="center" y="-20%" height="50%" color="#03D603" outline="true" outlinecolor="0 0 0 0.35" font="dyn_12" content="{cdd_player}" noclick="true"/>
+				<label textalign="center" textvalign="center" align="center" valign="center" y="10%" height="50%" color="#148C00" outline="true" outlinecolor="0 0 0 0.35" font="dyn_10" content="{cdd_hero}" noclick="false"/>
+			</panel>
+			<panel name="cdd_model{id}" y="2%" width="98%" height="72%" align="center" valign="center" noclick="true">
+				<modelpanel name="mvp_hero_avatar{id}" visible="true"	noclick="true"
+					camerapos="0 900 60"
+					cameraangles="0 0 180"
+					camerafov="10"
+					cameranear="0"
+					camerafar="2000"
+					depthclear="true"
+					depthcompress="true"
+					sunazimuth="157.06"
+					sunaltitude="22.05"
+					suncolor=".9 .9 .9"
+					ambientcolor="1.34 1.34 1.34"
+					scenebuffer="true"
+					lookat="false"
+					cull="false"
+				/>
+				<panel width="100%" height="17%" align="center" valign="bottom" noclick="false">
+					<image name="award_bg{id}" texture="/ui/mvpvoting/bg01.png" align="center" valign="center" width="100%" height="100%" noclick="true"/>
+					<label textalign="center" textvalign="center" align="center" valign="center" y="-22%" height="50%" color="#FFD200" outline="true" outlinecolor="0 0 0 0.35" font="dyn_18" content="{cdd_award_score}" noclick="true"/>
+					<label textalign="center" textvalign="center" align="center" valign="center" y="22%" height="50%" color="#CFC2A6" outline="true" outlinecolor="0 0 0 0.35" font="dyn_8" content="{cdd_award_name}" noclick="true"/>
+					<image name="cdd_award_img{id}" texture="{award_texture}" align="left" valign="center" x="3%" width="90@" height="90%" noclick="true"/>
+				</panel>
+			</panel>
+			<panel y="44%" width="100%" height="12%" align="center" valign="center" noclick="true">
+				<image name="thumbup_img{id}" align="center" valign="center" y="1%" width="68@" height="68%" texture="/ui/mvpvoting/thumbup_disabled.png" noclick="true" />
+				<label name="thumbup_owned{id}" textalign="center" textvalign="center" align="right" valign="center" width="100@" height="90%" color="#CFC2A6" outline="true" outlinecolor="0 0 0 0.35" font="dyn_18" content="0" noclick="true"/>
+			</panel>
+			<panel width="284i" height="466i" align="center" valign="center" noclick="true">
+				<modelpanel name="mvp_selected_effect{id}" align="center" valign="center" noclick="true"
+					model="/shared/models/invis.mdf"
+					onshowlua="self:SetEffect('/ui/mvpvoting/effects/mvp_select.effect')"
+					onhidelua="self:SetEffect('')"
+					modelpos="0 0 0"
+					modelscale="1.0"
+					modelangles="0 0 0"
+					cameradistance="30"
+					camerapos="0 850 0"
+					cameraangles="0 0 180"
+					camerafov="7"
+					cameranear="100.0"
+					camerafar="20000.0"
+					depthclear="true"
+					depthcompress="false"
+					sunazimuth="120"
+					sunaltitude="20"
+					suncolor="0.9 0.9 0.9"
+					ambientcolor="0.6 0.7 0.7"
+					scenebuffer="true"
+					lookat="false"
+					visible="false"
+				/>
+			</panel>
+			<panel width="284i" height="466i" align="center" valign="center" noclick="true">
+				<modelpanel name="mvp_effect{id}" align="center" valign="center" noclick="true"
+					model="/shared/models/invis.mdf"
+					onshowlua="self:SetEffect('/ui/mvpvoting/effects/mvp.effect')"
+					onhidelua="self:SetEffect('')"
+					modelpos="0 0 0"
+					modelscale="1.0"
+					modelangles="0 0 0"
+					cameradistance="30"
+					camerapos="0 850 0"
+					cameraangles="0 0 180"
+					camerafov="7"
+					cameranear="100.0"
+					camerafar="20000.0"
+					depthclear="true"
+					depthcompress="false"
+					sunazimuth="120"
+					sunaltitude="20"
+					suncolor="0.9 0.9 0.9"
+					ambientcolor="0.6 0.7 0.7"
+					scenebuffer="true"
+					lookat="false"
+					visible="false"
+				/>
+			</panel>
+		</panel>
+	</template>
+
+	<template name="simple_progbar">
+		<panel name="simple_progbar_{id}" align="center" valign="center" width="{width=100%}" height="{height=100%}" noclick="true">
+			<panel name="simple_progbar_body_{id}" align="left" valign="center" width="50%" height="15i" texture="/ui/mvpvoting/progbar.png" noclick="true">
+				<panel align="right" valign="center" width="32i" height="32i">
+					<panel name="bar_light_{id}" align="center" valign="center" x="36%" width="32i" height="32i" texture = "/ui/mvpvoting/progbar_light.png" noclick="true" />
+				</panel>
+			</panel>
+		</panel>
+	</template>
+	
+	<template name="mvp_vote">
+		<panel name="mvp_vote" y="-10%" width="63%" height="63%" align="center" valign="center" visible="{visible}">
+			<panel name="mvp_vote_body" color="#09030120" align="center" valign="center">
+				<frame texture="/ui/mvpvoting/frame/frame.png" borderthickness="1"/>
+				
+                <!--<panel name="mvp_close_button" x="-0.75h" y="0.75h" height="4.5h" width="4.5h" noclick="0" align="right" passivechildren="1"
+					onclicklua="UIManager.GetInterface('game'):GetWidget('mvp_vote'):FadeOut(150)"
+				>
+                    <widgetstate statename="up">
+                        <image texture="/ui/fe2/store/closex2.tga" noclick="1" align="center" valign="center" width="65@" height="65%" />
+                    </widgetstate>
+                    <widgetstate statename="over">
+                        <image texture="/ui/fe2/store/closex2.tga" noclick="1" align="center" valign="center" width="65@" height="65%" color="yellow" />
+                    </widgetstate>
+				</panel>-->
+				<button color="invisible" name="mvp_disconnect_button" x="-8.05h" y="0.75h" height="5.3h" width="6.3h" noclick="0" align="right" passivechildren="1"
+					onclick="Disconnect(); ClearReconnectInfo();"
+					onclicklua="
+						Set('cg_enableAutoDisconnect', true)
+						Set('cl_manuallyDisconnect', false)
+					"
+					watch="GamePhase"
+					ontriggerlua="if tonumber(param0) == 7 then
+						self:SetVisible(true)
+					else
+						self:SetVisible(false)
+					end"
+				>
+                    <widgetstate statename="up">
+                        <image texture="/ui/elements/disconnect.tga" noclick="1" align="center" valign="top" width="65%" height="75%" color="white"/>
+                    </widgetstate>
+                    <widgetstate statename="over">
+                        <image texture="/ui/elements/disconnect.tga" noclick="1" align="center" valign="top" width="65%" height="75%" color="red"/>
+                    </widgetstate>
+					<label name="mvp_disconnect_label" textalign="center" textvalign="bot" color="white" shadow="true" font="dyn_8" content="Disconnect" />
+				</button>
+				
+				<button	name="mvp_vote_close_btn" visible="1" x="-0.75h" y="0.75h" width="4h" height="4h" align="right" valign="top" color="invisible">
+					<widgetstate statename="up">
+						<image width="100%" height="100%" align="center" valign="center" color="white" texture="/ui/fe2/store/closex2.tga" noclick="true" />
+					</widgetstate>
+					<widgetstate statename="over">
+						<image width="100%" height="100%" align="center" valign="center" color="yellow" texture="/ui/fe2/store/closex2.tga" noclick="true" />
+					</widgetstate>
+					<widgetstate statename="down" x="1" y="1">
+						<image width="100%" height="100%" align="center" valign="center" color="white" texture="/ui/fe2/store/closex2.tga" noclick="true" />
+					</widgetstate>
+				</button>
+				<panel align="center" height="22%" noclick="true">
+					<panel width="100%" height="100%" align="center" valign="center" noclick="true">
+						<modelpanel align="center" valign="center" noclick="true"
+							model="/shared/models/invis.mdf"
+							onshowlua="self:SetEffect('/ui/mvpvoting/effects/mvp_title_back.effect')"
+							onhidelua="self:SetEffect('')"
+							modelpos="0 0 0"
+							modelscale="1.0"
+							modelangles="0 0 0"
+							cameradistance="30"
+							camerapos="0 850 0"
+							cameraangles="0 0 180"
+							camerafov="7"
+							cameranear="100.0"
+							camerafar="20000.0"
+							depthclear="true"
+							depthcompress="false"
+							sunazimuth="120"
+							sunaltitude="20"
+							suncolor="0.9 0.9 0.9"
+							ambientcolor="0.6 0.7 0.7"
+							scenebuffer="true"
+							lookat="false"
+							visible="true"
+						/>
+					</panel>
+					<image name="mvp_title" texture="/ui/mvpvoting/mvp_top.png" align="center" valign="top" height="128i" noclick="true"/>
+					<image name="mvp_title_bg" texture="/ui/mvpvoting/bgtitle.png" align="center" valign="top" height="100%" noclick="true"/>
+					<panel width="100%" height="100%" align="center" valign="center" noclick="true">
+						<modelpanel align="center" valign="center" noclick="true"
+							model="/shared/models/invis.mdf"
+							onshowlua="self:SetEffect('/ui/mvpvoting/effects/mvp_title.effect')"
+							onhidelua="self:SetEffect('')"
+							modelpos="0 0 0"
+							modelscale="1.0"
+							modelangles="0 0 0"
+							cameradistance="30"
+							camerapos="0 850 0"
+							cameraangles="0 0 180"
+							camerafov="7"
+							cameranear="100.0"
+							camerafar="20000.0"
+							depthclear="true"
+							depthcompress="false"
+							sunazimuth="120"
+							sunaltitude="20"
+							suncolor="0.9 0.9 0.9"
+							ambientcolor="0.6 0.7 0.7"
+							scenebuffer="true"
+							lookat="false"
+							visible="true"
+						/>
+					</panel>
+					
+				</panel>
+<!--
+		 		<instance name="mvp_vote_candidate" id="1" x="-33%" y="1%" width="20%" height="58%" scaleup_w="20.5%" scaleup_h="59.5%" 
+						cdd_player="player1" cdd_hero="Calamity" cdd_award_score="100" cdd_award_name="Most Annihilations"/>
+				<instance name="mvp_vote_candidate" id="2" x="-11%" y="1%" width="20%" height="58%" scaleup_w="20.5%" scaleup_h="59.5%" 
+						cdd_player="player2" cdd_hero="Calamity" cdd_award_score="100" cdd_award_name="Most Smackdowns"/>
+				<instance name="mvp_vote_candidate" id="3" x="11%" y="1%" width="20%" height="58%" scaleup_w="20.5%" scaleup_h="59.5%" 
+						cdd_player="player3" cdd_hero="Calamity" cdd_award_score="100" cdd_award_name="Most Building Damage"/>
+				<instance name="mvp_vote_candidate" id="4" x="33%" y="1%" width="20%" height="58%" scaleup_w="20.5%" scaleup_h="59.5%" 
+						cdd_player="player4" cdd_hero="Calamity" cdd_award_score="100" cdd_award_name="Most Hero Damage Dealt"/>
+-->
+			<panel name="vote_cd_progress_bar_body" y="85%" width="85%" height="15%" align="center" noclick="true">
+					<label name="mvp_progbar_title" content="mvp_progress_bar_title" height="20%" textalign="left" textvalign="center" color="#CFC2A6" outline="true" outlinecolor="0 0 0 0.35" font="dyn_18" />
+					<instance name="simple_progbar" id="countdown" width="100%" height="50%" noclick="true" />
+				</panel>
+			</panel>
+		</panel>
+	</template>
+
+</package>

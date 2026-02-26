@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+	<template name="mana_tooltip_info">
+		<frame
+			name="mana_tooltip_info"
+			texture="/ui/frames/rounded_bg_white.tga"
+			borderthickness="0.6h"
+			color="0 0 0 .75"
+			visible="false"
+			align="right"
+			valign="bottom"
+			width="30h"
+			height="5.0h"
+			float="bottom"
+			grow="1" regrow="1" growinvis="0"
+		>
+			<frame texture="/ui/frames/roundframe.tga" borderthickness="0.6h" bordercolor="#434d50"/>
+			<anchor x="1.0h" y="0.6h" />
+
+			<label
+				width="-2.0h"
+				height="1.8h"
+				textalign="left"
+				font="dyn_10"
+				color="white"
+				watch="SelectedMana0"
+				ontriggerlua="self:SetText(Translate('tooltip_mana') .. math.floor(tonumber(param0)) .. '/' .. math.floor(tonumber(param1)))"
+			/>
+
+			<label
+				width="-2.0h"
+				height="1.8h"
+				textalign="left"
+				font="dyn_10"
+				color="white"
+				watch="SelectedManaRegen"
+				ontriggerlua="
+					local diff = (tonumber(param1) - tonumber(param0))
+					if (diff == 0.0) then
+						self:SetText('Mana Regeneration: ' .. FtoA2(tonumber(param0), 0, 2))
+					elseif (diff > 0.0) then
+						self:SetText(Translate('tooltip_mana_regen') .. FtoA2(tonumber(param0), 0, 2) .. ' ^g+' .. FtoA2(diff, 0, 2) .. '^* = ^y' .. FtoA2(tonumber(param1), 0, 2))
+					else
+						self:SetText(Translate('tooltip_mana_regen') .. FtoA2(tonumber(param0), 0, 2) .. ' ^r' .. FtoA2(diff, 0, 2) .. '^* = ^y' .. FtoA2(tonumber(param1), 0, 2))
+					end
+				"
+			/>
+
+			<panel width="-2.0h" height="0.55h" sticky="true" stickytoinvis="false" />
+		</frame>
+	</template>
+</package>

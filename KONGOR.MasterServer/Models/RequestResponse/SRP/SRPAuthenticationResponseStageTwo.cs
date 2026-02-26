@@ -409,8 +409,8 @@ public class SRPAuthenticationResponseStageTwo
     /// <summary>
     ///     Metadata attached to each of the account's owned store items.
     /// </summary>
-    [PHPProperty("my_upgrades_info")]
-    public required Dictionary<string, OneOf<StoreItemData, StoreItemDiscountCoupon>> OwnedStoreItemsData { get; set; }
+    [PHPProperty("my_upgrades_info", IsDiscriminatedUnion = true)]
+    public required Dictionary<string, OneOf<object, Dictionary<string, object>>> OwnedStoreItemsData { get; set; }
 
     /// <summary>
     ///     The list of heroes with a non-standard-ownership (free/early-access/etc.) model.

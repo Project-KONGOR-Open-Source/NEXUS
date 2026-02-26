@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package>
+	<template name="goldReportField">
+		<panel height="2.5h">
+			<frame texture="/ui/frames/rounded_bg_white.tga" color="{bgcolor=1 1 1 0.075}" bordercolor="{bgcolor=1 1 1 0.075}" borderthickness="0.25h"/>
+			<panel hmargin="0.25h" vmargin="0.5h">
+				<label textvalign="center" color="{color=white}" outline="true" font="dyn_10" content="{label}" watch="{watch}" ontriggerlua="{ontriggerlua}"/>
+				<label textvalign="center" color="{color=white}" outline="true" textalign="right" font="dyn_10" content="-" watch="GoldReport" ontriggerlua="self:SetText({param}) {ontriggerlua2}"/>
+			</panel>
+		</panel>
+	</template>
+
+	<panel name="buyback_indicator" x="22.2h" y="-13h" width="11.5h" height="1.8h" align="center" valign="bottom" visible="0" noclick="1"
+		onshowlua="Set('cg_enableGoldReport', true)"
+		onhidelua="
+			if not GetWidget('shop_tooltip_gold_report', 'game'):IsVisible() then
+				Set('cg_enableGoldReport', false)
+			end
+		"
+	>
+		<image width="128i" height="32i" align="center" valign="center" texture="/ui/huds/buyback_indicator_bg.tga" noclick="1"/>
+
+		<!-- Buybacks -->
+		<panel x="0.2h" y="0" width="2.25h" height="1.8h" valign="center" noclick="1">
+			<image x="0.0h" y="-0.15h" width="1.1h" height="1.1h" valign="center" texture="/ui/fe2/store/icons/hero_token2.tga" noclick="1" watch="GoldReport" ontriggerlua="self:SetVisible(tonumber(param8) >= 1)"/>
+			<image x="0.75h"  y="0.25h" width="1.1h" height="1.1h" valign="center" texture="/ui/fe2/store/icons/hero_token2.tga" noclick="1" watch="GoldReport" ontriggerlua="self:SetVisible(tonumber(param8) >= 2)"/>
+		</panel>
+
+		<label x="2.5h" y="0.1h" textvalign="center" outline="1" outlinecolor="black" font="dyn_7"
+			watch="GoldReport"
+			ontriggerlua="
+				local buybacks, type, value = tonumber(param8), tonumber(param9), ''
+				if buybacks == 1 then
+					self:SetX('2h')
+				end
+				if type == 0 then
+					value = ' ^777( --- )^*'
+				elseif type == 1 then
+					value = ' ^g(+'..param10..')^*'
+				elseif type == 2 then
+					value = ' ^r(-'..param10..')^*'
+				end
+				self:SetText((type == 0 and '^777' or '^y') .. Translate('gold_report_buyback_indicator', 'val', value) .. '^*')
+			"
+		/>
+	</panel>
+
+	<floater name="shop_tooltip_gold_report" grow="true" regrow="true" width="34h" x="-4h" y="2h" valign="bottom" color="invisible" visible="false"
+		onloadlua="Set('cg_enableGoldReport', false)"
+		onshowlua="Set('cg_enableGoldReport', true)"
+		onhidelua="if not GetWidget('buyback_indicator', 'game'):IsVisible() then Set('cg_enableGoldReport', false) end"
+	>
+		<frame texture="/ui/frames/tooltip_bg.tga" color="0 0 0 .8" borderthickness="0.5h" />
+		<frame texture="/ui/frames/roundframe.tga" color="#A0A0A0" borderthickness="0.5h" />
+		<panel grow="true" align="center" width="-1h" float="bottom" padding="0">
+			<panel height="0.5h"/>
+			<instance name="goldReportField" label="gold_report_kills" param="param0"/>
+			<instance name="goldReportField" label="gold_report_assists" param="param1" bgcolor="0 0 0 0.15"/>
+			<instance name="goldReportField" label="gold_report_buildings" param="param2"/>
+			<instance name="goldReportField" label="gold_report_creeps" param="param4" bgcolor="0 0 0 0.15"/>
+			<instance name="goldReportField" label="gold_report_lost_to_death" param="param3" color="#FF2222"/>
+			<instance name="goldReportField" label="gold_report_buyback_cost" param="param5" bgcolor="0 0 0 0.15" color="#999999"/>
+			<instance name="goldReportField" label="gold_report_to_lose_on_death" param="param6" color="#999999"/>
+			<instance name="goldReportField" label="gold_report_gpm" param="param7" bgcolor="0 0 0 0.15" color="#FFCC00"/>
+			<instance name="goldReportField" label="gold_report_buybacks" param="param8"/>
+			<instance name="goldReportField" param="param10" watch="GoldReport" ontriggerlua="self:SetText(Translate('gold_report_buyback_gold'..param9))" ontriggerlua2="
+				local color, type = 'gray', tonumber(param9)
+				if type == 1 then
+					color = 'lime'
+				elseif type ==2 then
+					color = 'red'
+				end
+				self:SetColor(color)
+			"
+			/>
+			<panel height="0.5h"/>
+		</panel>
+	</floater>
+</package>
