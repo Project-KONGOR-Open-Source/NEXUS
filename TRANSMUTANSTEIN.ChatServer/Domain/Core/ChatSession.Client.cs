@@ -235,6 +235,18 @@ public class ClientChatSession(TCPServer server, IServiceProvider serviceProvide
         BroadcastConnectionStatusUpdate(status, matchServer);
     }
 
+    /// <summary>
+    ///     Re-broadcasts the current connection status to all friends and clan members, bypassing the same-status guard.
+    ///     Used when upgrade visuals (icon, chat symbol, name colour) have changed and peers need to be notified.
+    /// </summary>
+    public void BroadcastVisualRefresh()
+    {
+        if (Metadata.ClientChatModeState is ChatProtocol.ChatModeType.CHAT_MODE_INVISIBLE)
+            return;
+
+        BroadcastConnectionStatusUpdate(Metadata.LastKnownClientState, Metadata.MatchServerConnectedTo);
+    }
+
     public ClientChatSession Reject(ChatProtocol.ChatRejectReason reason)
     {
         ChatBuffer reject = new ();
