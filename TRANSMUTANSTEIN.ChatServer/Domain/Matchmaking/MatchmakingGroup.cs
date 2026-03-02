@@ -231,17 +231,6 @@ public class MatchmakingGroup
 
         MatchmakingGroup group = new () { Members = [member], Information = information };
 
-        // Create Group Chat Channel (Uses RESERVED | UNJOINABLE | HIDDEN Flags)
-        group.ChatChannel = ChatChannel.GetOrCreateGroupChannel(group.GUID.GetHashCode());
-
-        // Join Group Chat Channel (Silent Join For Leader)
-        if (group.ChatChannel.Members.ContainsKey(session.Account.Name) is false)
-        {
-            ChatChannelMember channelMember = new (session, group.ChatChannel);
-            group.ChatChannel.Members.TryAdd(session.Account.Name, channelMember);
-            session.CurrentChannels.Add(group.ChatChannel.ID);
-        }
-
         if (MatchmakingService.Groups.ContainsKey(session.Account.ID) is false)
         {
             if (MatchmakingService.Groups.TryAdd(session.Account.ID, group) is false)
@@ -357,8 +346,25 @@ public class MatchmakingGroup
             return this;
         }
 
-        // Join Group Chat Channel (Uses RESERVED | UNJOINABLE | HIDDEN Flags)
-        if (ChatChannel is not null && ChatChannel.Members.ContainsKey(session.Account.Name) is false)
+        // Create The Group Chat Channel When The Second Member Joins
+        // For Subsequent Members, The Channel Already Exists And They Are Simply Added To It
+        if (ChatChannel is null)
+        {
+            ChatChannel = ChatChannel.GetOrCreateGroupChannel(GUID.GetHashCode());
+
+            // Add All Existing Members To The Newly-Created Channel
+            foreach (MatchmakingGroupMember existingMember in Members)
+            {
+                if (ChatChannel.Members.ContainsKey(existingMember.Account.Name) is false)
+                {
+                    ChatChannelMember existingChannelMember = new (existingMember.Session, ChatChannel);
+                    ChatChannel.Members.TryAdd(existingMember.Account.Name, existingChannelMember);
+                    existingMember.Session.CurrentChannels.Add(ChatChannel.ID);
+                }
+            }
+        }
+
+        else if (ChatChannel.Members.ContainsKey(session.Account.Name) is false)
         {
             ChatChannelMember channelMember = new (session, ChatChannel);
             ChatChannel.Members.TryAdd(session.Account.Name, channelMember);
@@ -622,6 +628,24 @@ public class MatchmakingGroup
 
         // Remove Member From Group
         Members.Remove(memberToRemove);
+
+        // Dispose The Group Chat Channel When The Group Drops To One Or Fewer Members
+        if (Members.Count <= 1 && ChatChannel is not null)
+        {
+            foreach (MatchmakingGroupMember remainingMember in Members)
+            {
+                ChatChannel.Members.TryRemove(remainingMember.Account.Name, out _);
+
+                remainingMember.Session.CurrentChannels.Remove(ChatChannel.ID);
+            }
+
+            if (ChatChannel.Members.IsEmpty)
+            {
+                Context.ChatChannels.TryRemove(ChatChannel.Name, out _);
+            }
+
+            ChatChannel = null;
+        }
 
         // If Group Is Now Empty, Disband It
         if (Members.Count is 0)
