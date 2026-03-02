@@ -1,7 +1,7 @@
 ﻿namespace TRANSMUTANSTEIN.ChatServer.CommandProcessors.Connection;
 
 [ChatCommand(ChatProtocol.GameServerToChatServer.NET_CHAT_GS_CONNECT)]
-public class ServerHandshake(IDatabase distributedCacheStore, MerrickContext databaseContext) : IAsynchronousCommandProcessor<MatchServerChatSession>
+public class ServerHandshake(IDatabase distributedCacheStore, MerrickContext databaseContext, IHostEnvironment hostEnvironment) : IAsynchronousCommandProcessor<MatchServerChatSession>
 {
     public async Task Process(MatchServerChatSession session, ChatBuffer buffer)
     {
@@ -139,6 +139,7 @@ public class ServerHandshake(IDatabase distributedCacheStore, MerrickContext dat
             "svr_submitMatchStatItems true",
             "svr_submitMatchStatAbilities true",
             "svr_submitMatchStatFrags true",
+            $"svr_noConsole {(hostEnvironment.IsProduction() ? "false" : "true")}",
             $"svr_name {uniqueServerName}",
             "echo Project KONGOR Remote Configuration Was Injected Successfully"
         ];
