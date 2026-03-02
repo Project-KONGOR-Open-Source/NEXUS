@@ -258,6 +258,11 @@ public class StoreController(MerrickContext databaseContext, IDatabase distribut
         if (success)
             await MerrickContext.SaveChangesAsync();
 
+        // The Client Expects The Response Code To Match The Request Code
+        response["responseCode"] = (int) StoreRequestCode.BUY_PRODUCT_GAME_LOBBY_REQUEST;
+        response["totalPoints"] = account.User.GoldCoins;
+        response["totalMMPoints"] = account.User.SilverCoins;
+
         return Ok(PhpSerialization.Serialize(response));
     }
 
