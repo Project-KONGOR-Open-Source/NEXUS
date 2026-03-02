@@ -241,6 +241,7 @@ public static partial class DistributedCacheExtensions
 
     /// <summary>
     ///     Retrieves the match information associated with the specified match server ID from the distributed cache.
+    ///     If multiple match entries exist for the same server ID (e.g. due to cache entries for previous matches on the same server which have not yet expired), the most recently started match is returned.
     /// </summary>
     public static async Task<MatchInformation?> GetMatchInformationByMatchServerID(this IDatabase distributedCacheStore, int serverID)
     {
@@ -265,7 +266,7 @@ public static partial class DistributedCacheExtensions
             }
         }
 
-        return matches.SingleOrDefault();
+        return matches.OrderByDescending(match => match.TimestampStarted).FirstOrDefault();
     }
 
     public static async Task<MatchInformation?> GetMatchInformationByMatchServerSessionCookie(this IDatabase distributedCacheStore, string sessionCookie)
