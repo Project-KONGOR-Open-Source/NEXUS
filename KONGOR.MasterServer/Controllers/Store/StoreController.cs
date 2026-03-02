@@ -71,7 +71,7 @@ public class StoreController(MerrickContext databaseContext, IDatabase distribut
                 return ListSelectedUpgrades(account);
 
             case StoreRequestCode.BUY_PRODUCT_GAME_LOBBY_REQUEST:
-                return await PurchaseProductInGame(account);
+                return await PurchaseProductInMatchLobby(account);
 
             case StoreRequestCode.REDEEM_CODE_REQUEST:
                 return RedeemCode();
@@ -230,9 +230,9 @@ public class StoreController(MerrickContext databaseContext, IDatabase distribut
     }
 
     /// <summary>
-    ///     Processes a purchase request from within the game lobby.
+    ///     Processes a purchase request from within the match lobby.
     /// </summary>
-    private async Task<IActionResult> PurchaseProductInGame(Account account)
+    private async Task<IActionResult> PurchaseProductInMatchLobby(Account account)
     {
         string? heroName = Request.Form["hero_name"];
 
