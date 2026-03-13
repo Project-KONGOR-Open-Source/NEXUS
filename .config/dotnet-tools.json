@@ -1,27 +1,27 @@
 {
-    "version": 1,
-    "isRoot": true,
-    "tools": {
-        "dotnet-ef": {
-            "version": "10.0.3",
-            "commands": [
-                "dotnet-ef"
-            ],
-            "rollForward": false
-        },
-        "aspire.cli": {
-            "version": "13.1.1",
-            "commands": [
-                "aspire"
-            ],
-            "rollForward": false
-        },
-        "powershell": {
-            "version": "7.5.4",
-            "commands": [
-                "pwsh"
-            ],
-            "rollForward": false
-        }
+  "version": 1,
+  "isRoot": true,
+  "tools": {
+    "dotnet-ef": {
+      "version": "10.0.5",
+      "commands": [
+        "dotnet-ef"
+      ],
+      "rollForward": false
+    },
+    "aspire.cli": {
+      "version": "13.1.2",
+      "commands": [
+        "aspire"
+      ],
+      "rollForward": false
+    },
+    "powershell": {
+      "version": "7.5.5",
+      "commands": [
+        "pwsh"
+      ],
+      "rollForward": false
     }
+  }
 }
