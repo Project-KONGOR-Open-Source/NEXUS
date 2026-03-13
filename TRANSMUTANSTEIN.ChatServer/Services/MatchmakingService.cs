@@ -50,11 +50,9 @@ public class MatchmakingService : BackgroundService, IDisposable
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        Log.Information("Matchmaking Service Is Starting");
+        Log.Information("Matchmaking Service Has Started");
 
         await RunMatchBroker(stoppingToken);
-
-        Log.Information("Matchmaking Service Has Started");
     }
 
     public override async Task StopAsync(CancellationToken cancellationToken)
@@ -387,10 +385,11 @@ public class MatchmakingService : BackgroundService, IDisposable
             // Try To Find Groups Matching Each Size In The Pattern
             foreach (int requiredSize in sortedPattern)
             {
-                // Find A Group With Exactly This Size (That Hasn't Been Used Yet)
+                // Find A Group With Exactly This Size (That Hasn't Been Used Yet And Is Compatible With Existing Team Groups)
                 MatchmakingGroup? matchingGroup = availableGroups
                     .Except(usedGroups)
                     .Where(group => group.Members.Count == requiredSize)
+                    .Where(group => teamGroups.Count == 0 || HasCompatibleQueuePreferences(teamGroups.First(), group))
                     .OrderBy(group => group.QueueStartTime) // FIFO Within Same Size
                     .FirstOrDefault();
 
@@ -427,6 +426,31 @@ public class MatchmakingService : BackgroundService, IDisposable
         }
 
         return teams;
+    }
+
+    /// <summary>
+    ///     Checks if a candidate group has compatible queue preferences with a reference group for team formation.
+    ///     Verifies overlapping game modes, overlapping regions, and matching ranked status.
+    ///     This is a subset of <see cref="MatchmakingGroup.IsCompatibleWith"/> that excludes size and TMR checks.
+    /// </summary>
+    private static bool HasCompatibleQueuePreferences(MatchmakingGroup reference, MatchmakingGroup candidate)
+    {
+        // Must Have Overlapping Game Modes
+        if (reference.Information.GameModes.Intersect(candidate.Information.GameModes).Any() is false)
+            return false;
+
+        // Must Have Overlapping Regions (NEWERTH Is A Wildcard That Matches All Regions)
+        bool eitherHasAutoRegion = reference.Information.GameRegions.Contains("NEWERTH", StringComparer.OrdinalIgnoreCase)
+            || candidate.Information.GameRegions.Contains("NEWERTH", StringComparer.OrdinalIgnoreCase);
+
+        if (eitherHasAutoRegion is false && reference.Information.GameRegions.Intersect(candidate.Information.GameRegions).Any() is false)
+            return false;
+
+        // Must Be Same Ranked Status
+        if (reference.Information.Ranked != candidate.Information.Ranked)
+            return false;
+
+        return true;
     }
 
     /// <summary>
