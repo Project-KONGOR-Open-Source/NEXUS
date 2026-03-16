@@ -62,6 +62,9 @@ public partial class ClientRequesterController(MerrickContext databaseContext, I
             "get_initStats"                 => await GetInitialStatistics(),
             "show_simple_stats"             => await GetSimpleStatistics(),
 
+            // upgrades
+            "selected_upgrades"             => await SetSelectedUpgrades(),
+
             // servers
             "server_list"                   => await GetServerList(),
 
