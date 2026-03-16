@@ -88,10 +88,10 @@ public partial class ServerRequesterController
     /// </summary>
     private async Task<IActionResult> HandleGetServerUpgrades()
     {
-        string? cookie = Request.Query["cookie"];
+        string? cookie = Request.Form["cookie"];
 
         if (cookie is null)
-            return BadRequest(@"Missing Value For Query Parameter ""cookie""");
+            return BadRequest(@"Missing Value For Form Parameter ""cookie""");
 
         string? accountName = await DistributedCache.GetAccountNameForSessionCookie(cookie);
 
