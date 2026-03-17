@@ -71,6 +71,9 @@ public partial class ClientRequesterController(MerrickContext databaseContext, I
             // friends
             "remove_buddy2"                 => await RemoveFriend(),
 
+            // session
+            "logout"                        => await HandleLogout(),
+
             // fallback
             null                            => await HandleClientRequestWithNoQueryString(),
 
