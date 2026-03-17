@@ -65,7 +65,7 @@ public partial class StatsRequesterController
         // Remove The Match Information From Redis Now That The Database Snapshot Is The Single Source Of Truth
         await DistributedCache.RemoveMatchInformation(form.MatchStats.MatchID);
 
-        return Ok();
+        return Ok(PhpSerialization.Serialize(new StatisticsSubmissionResponse()));
     }
 
     private async Task<IActionResult> HandleStatsResubmission(StatsForSubmissionRequestForm form)
@@ -148,6 +148,6 @@ public partial class StatsRequesterController
 
         await MerrickContext.SaveChangesAsync();
 
-        return Ok();
+        return Ok(PhpSerialization.Serialize(new StatisticsResubmissionResponse(form.MatchStats.MatchID)));
     }
 }
