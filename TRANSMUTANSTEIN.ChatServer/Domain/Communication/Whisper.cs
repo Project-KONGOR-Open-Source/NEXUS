@@ -14,8 +14,16 @@ public class Whisper
 
     public Whisper Send(ClientChatSession senderSession, string recipientName)
     {
-        ClientChatSession recipientSession = Context.ClientChatSessions.Values
-            .Single(chatSession => chatSession.Account.Name.Equals(recipientName, StringComparison.OrdinalIgnoreCase));
+        ClientChatSession? recipientSession = Context.ClientChatSessions.Values
+            .SingleOrDefault(chatSession => chatSession.Account.Name.Equals(recipientName, StringComparison.OrdinalIgnoreCase));
+
+        // Recipient Is Offline Or Not Found
+        if (recipientSession is null)
+        {
+            SendWhisperFailure(senderSession, recipientName);
+
+            return this;
+        }
 
         // Check Recipient's Chat Mode
         switch (recipientSession.Metadata.ClientChatModeState)
