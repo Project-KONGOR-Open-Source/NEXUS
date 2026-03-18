@@ -13,6 +13,9 @@ public class TRANSMUTANSTEIN
         // Configure Matchmaking Settings
         builder.Services.Configure<MatchmakingSettings>(builder.Configuration.GetSection(MatchmakingSettings.SectionName));
 
+        // Configure Match Server Settings
+        builder.Services.Configure<MatchServerSettings>(builder.Configuration.GetSection(MatchServerSettings.SectionName));
+
         // Add The Database Context
         builder.AddSqlServerDbContext<MerrickContext>("MERRICK", configureSettings: null, configureDbContextOptions: options =>
         {
