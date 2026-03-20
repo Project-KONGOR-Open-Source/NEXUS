@@ -32,8 +32,14 @@ public sealed class MatchStatisticsInterceptor : SaveChangesInterceptor
 
         foreach (MatchParticipantStatistics match in newMatches)
         {
-            UpdateHeroStatistics(context, match);
-            UpdateAwardStatistics(context, match);
+            MatchStatistics? matchStatistics = context.Set<MatchStatistics>()
+                .SingleOrDefault(matchStats => matchStats.MatchID == match.MatchID);
+
+            if (matchStatistics is null)
+                continue;
+
+            UpdateHeroStatistics(context, match, matchStatistics.Map);
+            UpdateAwardStatistics(context, match, matchStatistics);
         }
     }
 
@@ -50,14 +56,20 @@ public sealed class MatchStatisticsInterceptor : SaveChangesInterceptor
 
         foreach (MatchParticipantStatistics match in newMatches)
         {
-            await UpdateHeroStatisticsAsync(context, match, cancellationToken);
-            await UpdateAwardStatisticsAsync(context, match, cancellationToken);
+            MatchStatistics? matchStatistics = await context.Set<MatchStatistics>()
+                .SingleOrDefaultAsync(matchStats => matchStats.MatchID == match.MatchID, cancellationToken);
+
+            if (matchStatistics is null)
+                continue;
+
+            await UpdateHeroStatisticsAsync(context, match, matchStatistics.Map, cancellationToken);
+            await UpdateAwardStatisticsAsync(context, match, matchStatistics, cancellationToken);
         }
     }
 
-    private static void UpdateHeroStatistics(DbContext context, MatchParticipantStatistics match)
+    private static void UpdateHeroStatistics(DbContext context, MatchParticipantStatistics match, string map)
     {
-        AccountStatisticsType statisticsType = DetermineStatisticsType(match);
+        AccountStatisticsType statisticsType = DetermineStatisticsType(match, map);
 
         AccountStatistics? accountStatistics = context.Set<AccountStatistics>()
             .SingleOrDefault(statistics => statistics.AccountID == match.AccountID && statistics.Type == statisticsType);
@@ -88,9 +100,9 @@ public sealed class MatchStatisticsInterceptor : SaveChangesInterceptor
         heroStats.TimeEarningExperience += match.TimeEarningExperience;
     }
 
-    private static async Task UpdateHeroStatisticsAsync(DbContext context, MatchParticipantStatistics match, CancellationToken cancellationToken)
+    private static async Task UpdateHeroStatisticsAsync(DbContext context, MatchParticipantStatistics match, string map, CancellationToken cancellationToken)
     {
-        AccountStatisticsType statisticsType = DetermineStatisticsType(match);
+        AccountStatisticsType statisticsType = DetermineStatisticsType(match, map);
 
         AccountStatistics? accountStatistics = await context.Set<AccountStatistics>()
             .SingleOrDefaultAsync(statistics => statistics.AccountID == match.AccountID && statistics.Type == statisticsType, cancellationToken);
@@ -121,20 +133,14 @@ public sealed class MatchStatisticsInterceptor : SaveChangesInterceptor
         heroStats.TimeEarningExperience += match.TimeEarningExperience;
     }
 
-    private static void UpdateAwardStatistics(DbContext context, MatchParticipantStatistics match)
+    private static void UpdateAwardStatistics(DbContext context, MatchParticipantStatistics match, MatchStatistics matchStatistics)
     {
-        AccountStatisticsType statisticsType = DetermineStatisticsType(match);
+        AccountStatisticsType statisticsType = DetermineStatisticsType(match, matchStatistics.Map);
 
         AccountStatistics? accountStatistics = context.Set<AccountStatistics>()
             .SingleOrDefault(statistics => statistics.AccountID == match.AccountID && statistics.Type == statisticsType);
 
         if (accountStatistics is null)
-            return;
-
-        MatchStatistics? matchStatistics = context.Set<MatchStatistics>()
-            .SingleOrDefault(matchStats => matchStats.MatchID == match.MatchID);
-
-        if (matchStatistics is null)
             return;
 
         if (matchStatistics.MVPAccountID == match.AccountID)
@@ -174,20 +180,14 @@ public sealed class MatchStatisticsInterceptor : SaveChangesInterceptor
             accountStatistics.AwardStatistics.HighestCreepScoreAwards++;
     }
 
-    private static async Task UpdateAwardStatisticsAsync(DbContext context, MatchParticipantStatistics match, CancellationToken cancellationToken)
+    private static async Task UpdateAwardStatisticsAsync(DbContext context, MatchParticipantStatistics match, MatchStatistics matchStatistics, CancellationToken cancellationToken)
     {
-        AccountStatisticsType statisticsType = DetermineStatisticsType(match);
+        AccountStatisticsType statisticsType = DetermineStatisticsType(match, matchStatistics.Map);
 
         AccountStatistics? accountStatistics = await context.Set<AccountStatistics>()
             .SingleOrDefaultAsync(statistics => statistics.AccountID == match.AccountID && statistics.Type == statisticsType, cancellationToken);
 
         if (accountStatistics is null)
-            return;
-
-        MatchStatistics? matchStatistics = await context.Set<MatchStatistics>()
-            .SingleOrDefaultAsync(matchStats => matchStats.MatchID == match.MatchID, cancellationToken);
-
-        if (matchStatistics is null)
             return;
 
         if (matchStatistics.MVPAccountID == match.AccountID)
@@ -227,29 +227,32 @@ public sealed class MatchStatisticsInterceptor : SaveChangesInterceptor
             accountStatistics.AwardStatistics.HighestCreepScoreAwards++;
     }
 
-    private static AccountStatisticsType DetermineStatisticsType(MatchParticipantStatistics match)
+    private static AccountStatisticsType DetermineStatisticsType(MatchParticipantStatistics match, string map)
     {
-        // If It Has Ranked Match Flag, It's Normal Matchmaking
+        // MidWars Has Dedicated Statistics Regardless Of Whether The Match Is Ranked Or Public
+        if (map.Equals("midwars", StringComparison.OrdinalIgnoreCase))
+            return AccountStatisticsType.MidWars;
+
+        // RiftWars Has Dedicated Statistics Regardless Of Whether The Match Is Ranked Or Public
+        if (map.Equals("riftwars", StringComparison.OrdinalIgnoreCase))
+            return AccountStatisticsType.RiftWars;
+
+        // Ranked Matches On "caldavar" Are Normal Matchmaking, While "caldavar_old" Is Casual Matchmaking
         if (match.RankedMatch is 1)
         {
-            return AccountStatisticsType.Matchmaking;
+            if (map.Equals("caldavar", StringComparison.OrdinalIgnoreCase))
+                return AccountStatisticsType.Matchmaking;
+
+            else if (map.Equals("caldavar_old", StringComparison.OrdinalIgnoreCase))
+                return AccountStatisticsType.MatchmakingCasual;
+
+            else throw new ArgumentOutOfRangeException(nameof(map), $@"Unexpected Map ""{map}"" For Ranked Match {match.MatchID}");
         }
 
-        // If Not Ranked But Has Ranked Skill Rating Change, It's Casual Matchmaking
-        // if (match.RankedMatch is not 1 && match.RankedSkillRatingChange is not 0)
-        // {
-        //     return AccountStatisticsType.MatchmakingCasual;
-        // }
-        // TODO: Confirm That RankedSkillRatingChange Is Only Non-Zero For Casual Matchmaking Matches And Not For Other Modes Like MidWars And RiftWars
-
-        // If It Has Public Match Flag, It's Public
+        // Public And Unranked Matches (Including "caldavar_reborn") Are Classified As Public
         if (match.PublicMatch is 1)
-        {
             return AccountStatisticsType.Public;
-        }
 
-        // TODO: Add More Specific Logic For MidWars And RiftWars When We Get More Data On Those Modes, Probably Based On Map Identifier Or Something Similar
-
-        throw new InvalidOperationException("Unable To Determine Account Statistics Type");
+        throw new InvalidOperationException($@"Unable To Determine Account Statistics Type For Match {match.MatchID} On Map ""{map}""");
     }
 }
