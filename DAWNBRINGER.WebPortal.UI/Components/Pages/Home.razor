@@ -5,43 +5,49 @@
 <PageTitle>Project KONGOR</PageTitle>
 
 <!-- Hero Section -->
-<MudPaper Class="hero-section" Elevation="0" Square="true">
+<MudPaper Elevation="0" Square="true"
+          Style="position: relative; min-height: 80vh; overflow: hidden; background: #0F0F1A;">
 
-    <div class="hero-overlay">
+    <MudImage Src="img/caldavar.jpg"
+              ObjectFit="ObjectFit.Cover"
+              ObjectPosition="ObjectPosition.Top"
+              Style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0.25; pointer-events: none;" />
 
-        <MudContainer MaxWidth="MaxWidth.Large" Class="d-flex flex-column align-center justify-center" Style="min-height: 80vh;">
+    <MudContainer MaxWidth="MaxWidth.Large"
+                  Class="d-flex flex-column align-center justify-center"
+                  Style="position: relative; z-index: 1; min-height: 80vh;">
 
-            <MudText Typo="Typo.h2" Align="Align.Center" Class="hero-title mb-4" Style="font-weight: 700; letter-spacing: 4px;">
-                PROJECT KONGOR
-            </MudText>
+        <MudText Typo="Typo.h2" Align="Align.Center" Class="scurlock mb-4"
+                 Style="color: #FFFFFF; font-size: 60px; letter-spacing: 4px; text-shadow: 0 0 40px rgba(119, 107, 231, 0.5);">
+            Project KONGOR
+        </MudText>
 
-            <MudText Typo="Typo.h5" Align="Align.Center" Class="hero-subtitle mb-2" Style="opacity: 0.9;">
-                Coming Soon To A Fountain Near You
-            </MudText>
+        <MudText Typo="Typo.h5" Align="Align.Center" Class="scurlock mb-2"
+                 Style="color: #E0E0E0; font-size: 60px; opacity: 0.9;">
+            Coming Soon To A Fountain Near You
+        </MudText>
 
-            <MudText Typo="Typo.body1" Align="Align.Center" Class="mb-8" Style="opacity: 0.7;">
-                Stay up to speed with the updates on
-                <MudLink Href="https://discord.gg/QjMBn5Wkzz" Target="_blank" Typo="Typo.body1" Color="Color.Primary">
-                    our Discord server
-                </MudLink>
-            </MudText>
+        <MudText Typo="Typo.body1" Align="Align.Center" Class="mb-8" Style="color: #E0E0E0; opacity: 0.7;">
+            Stay up to speed with the updates on
+            <MudLink Href="https://discord.gg/QjMBn5Wkzz" Target="_blank" Typo="Typo.body1" Color="Color.Primary">
+                our Discord server
+            </MudLink>
+        </MudText>
 
-            <AuthorizeView>
-                <NotAuthorized>
-                    <MudButton Href="/register"
-                               Variant="Variant.Outlined"
-                               Color="Color.Primary"
-                               Size="Size.Large"
-                               EndIcon="@Icons.Material.Filled.AppRegistration"
-                               Class="hero-register-button">
-                        Register
-                    </MudButton>
-                </NotAuthorized>
-            </AuthorizeView>
+        <AuthorizeView>
+            <NotAuthorized>
+                <MudButton Href="/register"
+                           Variant="Variant.Outlined"
+                           Color="Color.Primary"
+                           Size="Size.Large"
+                           EndIcon="@Icons.Material.Filled.AppRegistration"
+                           Style="width: 220px; height: 56px; font-size: 1.1rem; border-width: 2px;">
+                    Register
+                </MudButton>
+            </NotAuthorized>
+        </AuthorizeView>
 
-        </MudContainer>
-
-    </div>
+    </MudContainer>
 
 </MudPaper>
 
