@@ -1,0 +1,130 @@
+@page "/login"
+
+@inject PortalAuthenticationService AuthenticationService
+@inject NavigationManager NavigationManager
+@inject ISnackbar Snackbar
+
+<PageTitle>Log In</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Small" Class="mt-8">
+
+    <MudText Typo="Typo.h4" Class="mb-6" Style="font-weight: 600;">Log In</MudText>
+
+    <EditForm Model="FormModel" OnValidSubmit="HandleValidSubmit" FormName="log-in">
+        <DataAnnotationsValidator />
+
+        <MudCard Elevation="2">
+            <MudCardContent>
+
+                <MudTextField Label="Account Name"
+                              HelperText="Enter your account name"
+                              Class="mt-3"
+                              @bind-Value="FormModel.Name"
+                              For="() => FormModel.Name"
+                              Variant="Variant.Outlined"
+                              Adornment="Adornment.Start"
+                              AdornmentIcon="@Icons.Material.Filled.Person" />
+
+                <MudTextField Label="Password"
+                              HelperText="Enter your password"
+                              Class="mt-3"
+                              @bind-Value="FormModel.Password"
+                              For="() => FormModel.Password"
+                              Variant="Variant.Outlined"
+                              InputType="@PasswordInputType"
+                              Adornment="Adornment.End"
+                              AdornmentIcon="@PasswordVisibilityIcon"
+                              OnAdornmentClick="TogglePasswordVisibility" />
+
+            </MudCardContent>
+            <MudCardActions Class="pa-4">
+                <MudButton Href="/recover"
+                           Variant="Variant.Text"
+                           Color="Color.Default"
+                           Size="Size.Small">
+                    Forgotten Password
+                </MudButton>
+                <MudSpacer />
+                <MudButton Disabled="Processing"
+                           ButtonType="ButtonType.Submit"
+                           Variant="Variant.Filled"
+                           Color="Color.Primary"
+                           Size="Size.Large">
+                    @if (Processing)
+                    {
+                        <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true" />
+                        <MudText Class="ms-2">Logging in ...</MudText>
+                    }
+                    else
+                    {
+                        <MudText>Log In</MudText>
+                    }
+                </MudButton>
+            </MudCardActions>
+        </MudCard>
+
+    </EditForm>
+
+    <MudText Typo="Typo.body2" Align="Align.Center" Class="mt-4">
+        Do not have an account yet?
+        <MudLink Href="/register" Typo="Typo.body2">Register here</MudLink>
+    </MudText>
+
+</MudContainer>
+
+@code {
+
+    private LogInFormModel FormModel { get; set; } = new();
+
+    private bool Processing { get; set; }
+
+    private bool PasswordVisible { get; set; }
+
+    private InputType PasswordInputType => PasswordVisible ? InputType.Text : InputType.Password;
+
+    private string PasswordVisibilityIcon => PasswordVisible ? Icons.Material.Filled.VisibilityOff : Icons.Material.Filled.Visibility;
+
+    private void TogglePasswordVisibility()
+    {
+        PasswordVisible = !PasswordVisible;
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        Processing = true;
+
+        try
+        {
+            HttpClient client = AuthenticationService.CreateAnonymousClient();
+
+            LogInUserRequest request = new(FormModel.Name, FormModel.Password);
+
+            HttpResponseMessage response = await client.PostAsJsonAsync("/User/LogIn", request);
+
+            if (response.StatusCode is HttpStatusCode.OK)
+            {
+                AuthenticationTokenResponse? tokenResponse = await response.Content.ReadFromJsonAsync<AuthenticationTokenResponse>();
+
+                if (tokenResponse is not null)
+                {
+                    await AuthenticationService.SetToken(tokenResponse.Token);
+                    Snackbar.Add("Logged in successfully", Severity.Success);
+                    NavigationManager.NavigateTo("/");
+                }
+            }
+            else
+            {
+                string errorMessage = await response.Content.ReadAsStringAsync();
+                Snackbar.Add(errorMessage, Severity.Error);
+            }
+        }
+        catch (Exception)
+        {
+            Snackbar.Add("Unable to reach the server. Please try again later.", Severity.Error);
+        }
+        finally
+        {
+            Processing = false;
+        }
+    }
+}

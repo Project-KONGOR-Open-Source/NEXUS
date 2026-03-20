@@ -1,0 +1,129 @@
+@page "/register/{Token}"
+
+@inject PortalAuthenticationService AuthenticationService
+@inject NavigationManager NavigationManager
+@inject ISnackbar Snackbar
+
+<PageTitle>Create Account</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Small" Class="mt-8">
+
+    <MudText Typo="Typo.h4" Class="mb-6" Style="font-weight: 600;">Create Account</MudText>
+
+    <EditForm Model="FormModel" OnValidSubmit="HandleValidSubmit" FormName="create-account">
+        <DataAnnotationsValidator />
+
+        <MudCard Elevation="2">
+            <MudCardContent>
+
+                <MudText Typo="Typo.body2" Class="mb-4" Color="Color.Secondary">
+                    Choose an account name and a strong password to complete your registration.
+                </MudText>
+
+                <MudTextField Label="Account Name"
+                              HelperText="Between 4 and 12 characters (letters, numbers, underscores, hyphens, backticks)"
+                              Class="mt-3"
+                              @bind-Value="FormModel.Name"
+                              For="() => FormModel.Name"
+                              Variant="Variant.Outlined"
+                              Adornment="Adornment.Start"
+                              AdornmentIcon="@Icons.Material.Filled.Person" />
+
+                <MudTextField Label="Password"
+                              HelperText="Choose a strong password at least 8 characters long"
+                              Class="mt-3"
+                              @bind-Value="FormModel.Password"
+                              For="() => FormModel.Password"
+                              Variant="Variant.Outlined"
+                              InputType="@PasswordInputType"
+                              Adornment="Adornment.End"
+                              AdornmentIcon="@PasswordVisibilityIcon"
+                              OnAdornmentClick="TogglePasswordVisibility" />
+
+                <MudTextField Label="Confirm Password"
+                              HelperText="Type your chosen password again for confirmation"
+                              Class="mt-3"
+                              @bind-Value="FormModel.ConfirmPassword"
+                              For="() => FormModel.ConfirmPassword"
+                              Variant="Variant.Outlined"
+                              InputType="InputType.Password" />
+
+            </MudCardContent>
+            <MudCardActions Class="pa-4">
+                <MudSpacer />
+                <MudButton Disabled="Processing"
+                           ButtonType="ButtonType.Submit"
+                           Variant="Variant.Filled"
+                           Color="Color.Primary"
+                           Size="Size.Large">
+                    @if (Processing)
+                    {
+                        <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true" />
+                        <MudText Class="ms-2">Creating account ...</MudText>
+                    }
+                    else
+                    {
+                        <MudText>Create Account</MudText>
+                    }
+                </MudButton>
+            </MudCardActions>
+        </MudCard>
+
+    </EditForm>
+
+</MudContainer>
+
+@code {
+
+    [Parameter]
+    public string? Token { get; set; }
+
+    private CreateAccountFormModel FormModel { get; set; } = new();
+
+    private bool Processing { get; set; }
+
+    private bool PasswordVisible { get; set; }
+
+    private InputType PasswordInputType => PasswordVisible ? InputType.Text : InputType.Password;
+
+    private string PasswordVisibilityIcon => PasswordVisible ? Icons.Material.Filled.VisibilityOff : Icons.Material.Filled.Visibility;
+
+    private void TogglePasswordVisibility()
+    {
+        PasswordVisible = !PasswordVisible;
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        Processing = true;
+
+        try
+        {
+            HttpClient client = AuthenticationService.CreateAnonymousClient();
+
+            RegisterUserAndMainAccountRequest request = new(Token ?? string.Empty, FormModel.Name, FormModel.Password, FormModel.ConfirmPassword);
+
+            HttpResponseMessage response = await client.PostAsJsonAsync("/User/Register", request);
+
+            if (response.StatusCode is HttpStatusCode.Created)
+            {
+                FormModel = new CreateAccountFormModel();
+                Snackbar.Add("Account successfully created", Severity.Success);
+                NavigationManager.NavigateTo("/login");
+            }
+            else
+            {
+                string errorMessage = await response.Content.ReadAsStringAsync();
+                Snackbar.Add(errorMessage, Severity.Error);
+            }
+        }
+        catch (Exception)
+        {
+            Snackbar.Add("Unable to reach the server. Please try again later.", Severity.Error);
+        }
+        finally
+        {
+            Processing = false;
+        }
+    }
+}

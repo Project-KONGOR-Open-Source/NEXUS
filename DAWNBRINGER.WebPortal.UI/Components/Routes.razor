@@ -1,0 +1,30 @@
+<Router AppAssembly="typeof(global::DAWNBRINGER.WebPortal.UI.Components.App).Assembly">
+    <Found Context="routeData">
+        <AuthorizeRouteView RouteData="routeData" DefaultLayout="typeof(Layout.MainLayout)">
+            <NotAuthorized>
+                <MudContainer MaxWidth="MaxWidth.Small" Class="mt-16 pa-8">
+                    <MudAlert Severity="Severity.Warning" Variant="Variant.Filled" Class="mb-4">
+                        You need to log in to access this page.
+                    </MudAlert>
+                    <MudButton Href="/login" Variant="Variant.Filled" Color="Color.Primary" FullWidth="true">
+                        Go To Log In
+                    </MudButton>
+                </MudContainer>
+            </NotAuthorized>
+        </AuthorizeRouteView>
+        <FocusOnNavigate RouteData="routeData" Selector="h1" />
+    </Found>
+    <NotFound>
+        <PageTitle>Not Found</PageTitle>
+        <LayoutView Layout="typeof(Layout.MainLayout)">
+            <MudContainer MaxWidth="MaxWidth.Small" Class="mt-16 pa-8 d-flex flex-column align-center">
+                <MudIcon Icon="@Icons.Material.Filled.SearchOff" Size="Size.Large" Color="Color.Secondary" Class="mb-4" />
+                <MudText Typo="Typo.h4" Align="Align.Center" GutterBottom="true">Page Not Found</MudText>
+                <MudText Typo="Typo.body1" Align="Align.Center" Class="mb-6">There is nothing at this address.</MudText>
+                <MudButton Href="/" Variant="Variant.Filled" Color="Color.Primary">
+                    Return Home
+                </MudButton>
+            </MudContainer>
+        </LayoutView>
+    </NotFound>
+</Router>

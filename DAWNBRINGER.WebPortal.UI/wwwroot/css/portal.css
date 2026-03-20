@@ -1,0 +1,133 @@
+/* ===================================
+   Project KONGOR — Portal Stylesheet
+   =================================== */
+
+/* Hero Section */
+
+.hero-section {
+    position: relative;
+    min-height: 80vh;
+    background: linear-gradient(135deg, #0F0F1A 0%, #1A1A3E 40%, #2D1B69 70%, #1A1A2E 100%);
+    overflow: hidden;
+}
+
+.hero-section::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background:
+        radial-gradient(ellipse at 20% 50%, rgba(119, 107, 231, 0.15) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 20%, rgba(255, 64, 129, 0.10) 0%, transparent 50%),
+        radial-gradient(ellipse at 50% 80%, rgba(119, 107, 231, 0.08) 0%, transparent 50%);
+    pointer-events: none;
+}
+
+.hero-overlay {
+    position: relative;
+    z-index: 1;
+}
+
+.hero-title {
+    color: #FFFFFF;
+    text-shadow: 0 0 40px rgba(119, 107, 231, 0.5);
+}
+
+.hero-subtitle {
+    color: #E0E0E0;
+}
+
+.hero-register-button {
+    width: 220px;
+    height: 56px;
+    font-size: 1.1rem;
+    border-width: 2px;
+    transition: all 0.3s ease;
+}
+
+.hero-register-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(119, 107, 231, 0.4);
+}
+
+/* Card Enhancements */
+
+.mud-card {
+    border-radius: 12px !important;
+    transition: box-shadow 0.3s ease;
+}
+
+.mud-card:hover {
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+}
+
+/* Timeline Enhancements */
+
+.mud-timeline .mud-card {
+    border-radius: 12px !important;
+}
+
+/* Form Enhancements */
+
+.mud-input-outlined .mud-input-outlined-border {
+    border-radius: 8px !important;
+}
+
+/* Expansion Panel Enhancements */
+
+.mud-expand-panel {
+    border-radius: 12px !important;
+}
+
+/* App Bar Enhancements */
+
+.mud-appbar {
+    backdrop-filter: blur(12px);
+}
+
+/* Smooth Page Transitions */
+
+.mud-main-content {
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Responsive Adjustments */
+
+@media (max-width: 960px) {
+
+    .hero-title {
+        font-size: 2rem !important;
+        letter-spacing: 2px !important;
+    }
+
+    .hero-subtitle {
+        font-size: 1.1rem !important;
+    }
+
+}
+
+@media (max-width: 600px) {
+
+    .hero-title {
+        font-size: 1.5rem !important;
+        letter-spacing: 1px !important;
+    }
+
+    .hero-subtitle {
+        font-size: 1rem !important;
+    }
+
+    .hero-register-button {
+        width: 180px;
+        height: 48px;
+        font-size: 0.95rem;
+    }
+
+}

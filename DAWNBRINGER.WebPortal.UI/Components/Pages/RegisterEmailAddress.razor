@@ -1,0 +1,112 @@
+@page "/register"
+
+@inject PortalAuthenticationService AuthenticationService
+@inject ISnackbar Snackbar
+
+<PageTitle>Register Email Address</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Small" Class="mt-8">
+
+    <MudText Typo="Typo.h4" Class="mb-6" Style="font-weight: 600;">Register Email Address</MudText>
+
+    <EditForm Model="FormModel" OnValidSubmit="HandleValidSubmit" FormName="register-email">
+        <DataAnnotationsValidator />
+
+        <MudCard Elevation="2">
+            <MudCardContent>
+
+                <MudText Typo="Typo.body2" Class="mb-4" Color="Color.Secondary">
+                    Enter your email address to begin the registration process. A verification link will be sent to your inbox.
+                </MudText>
+
+                <MudTextField Label="Email Address"
+                              HelperText="Must be a real email address from a major email provider"
+                              Class="mt-3"
+                              @bind-Value="FormModel.EmailAddress"
+                              For="() => FormModel.EmailAddress"
+                              Variant="Variant.Outlined"
+                              InputType="InputType.Email"
+                              Adornment="Adornment.Start"
+                              AdornmentIcon="@Icons.Material.Filled.Email" />
+
+                <MudTextField Label="Confirm Email Address"
+                              HelperText="Type your email address again for confirmation"
+                              Class="mt-3"
+                              @bind-Value="FormModel.ConfirmEmailAddress"
+                              For="() => FormModel.ConfirmEmailAddress"
+                              Variant="Variant.Outlined"
+                              InputType="InputType.Email"
+                              Adornment="Adornment.Start"
+                              AdornmentIcon="@Icons.Material.Filled.Email"
+                              Immediate="false" />
+
+            </MudCardContent>
+            <MudCardActions Class="pa-4">
+                <MudSpacer />
+                <MudButton Disabled="Processing"
+                           ButtonType="ButtonType.Submit"
+                           Variant="Variant.Filled"
+                           Color="Color.Primary"
+                           Size="Size.Large">
+                    @if (Processing)
+                    {
+                        <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true" />
+                        <MudText Class="ms-2">Processing ...</MudText>
+                    }
+                    else
+                    {
+                        <MudText>Register Email Address</MudText>
+                    }
+                </MudButton>
+            </MudCardActions>
+        </MudCard>
+
+    </EditForm>
+
+    <MudText Typo="Typo.body2" Align="Align.Center" Class="mt-4">
+        Already have an account?
+        <MudLink Href="/login" Typo="Typo.body2">Log in here</MudLink>
+    </MudText>
+
+</MudContainer>
+
+@code {
+
+    private RegisterEmailAddressFormModel FormModel { get; set; } = new();
+
+    private bool Processing { get; set; }
+
+    private async Task HandleValidSubmit()
+    {
+        Processing = true;
+
+        try
+        {
+            HttpClient client = AuthenticationService.CreateAnonymousClient();
+
+            RegisterEmailAddressRequest request = new(FormModel.EmailAddress, FormModel.ConfirmEmailAddress);
+
+            HttpResponseMessage response = await client.PostAsJsonAsync("/EmailAddress/Register", request);
+
+            if (response.StatusCode is HttpStatusCode.OK)
+            {
+                FormModel = new RegisterEmailAddressFormModel();
+                Snackbar.Add("Email successfully registered", Severity.Success);
+                Snackbar.Add("Check your email inbox to continue", Severity.Info);
+            }
+            else
+            {
+                string errorMessage = await response.Content.ReadAsStringAsync();
+                Snackbar.Add(errorMessage, Severity.Error);
+            }
+        }
+        catch (Exception)
+        {
+            Snackbar.Add("Unable to reach the server. Please try again later.", Severity.Error);
+        }
+        finally
+        {
+            Processing = false;
+        }
+    }
+}

@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "DAWNBRINGER.WebPortal.UI": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "applicationUrl": "https://localhost:40352;http://localhost:40353"
+    }
+  }
+}

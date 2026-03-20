@@ -1,0 +1,161 @@
+@page "/account"
+
+@attribute [Authorize]
+
+@inject PortalAuthenticationService AuthenticationService
+@inject ISnackbar Snackbar
+
+<PageTitle>Account</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Medium" Class="mt-8">
+
+    <MudText Typo="Typo.h4" Class="mb-6" Style="font-weight: 600;">Account Management</MudText>
+
+    <AuthorizeView Context="userContext">
+        <Authorized>
+
+            <!-- Account Information -->
+            <MudCard Elevation="2" Class="mb-6">
+                <MudCardHeader>
+                    <CardHeaderAvatar>
+                        <MudAvatar Color="Color.Primary" Variant="Variant.Filled">
+                            <MudIcon Icon="@Icons.Material.Filled.Person" />
+                        </MudAvatar>
+                    </CardHeaderAvatar>
+                    <CardHeaderContent>
+                        <MudText Typo="Typo.h6">@GetClaimValue("sub")</MudText>
+                        <MudText Typo="Typo.body2" Color="Color.Secondary">@GetClaimValue("email")</MudText>
+                    </CardHeaderContent>
+                </MudCardHeader>
+                <MudCardContent>
+                    <MudGrid>
+                        <MudItem xs="12" sm="6">
+                            <MudField Label="Account Name" Variant="Variant.Outlined">@GetClaimValue("sub")</MudField>
+                        </MudItem>
+                        <MudItem xs="12" sm="6">
+                            <MudField Label="Email Address" Variant="Variant.Outlined">@GetClaimValue("email")</MudField>
+                        </MudItem>
+                        <MudItem xs="12" sm="6">
+                            <MudField Label="User Role" Variant="Variant.Outlined">@GetClaimValue("user_role")</MudField>
+                        </MudItem>
+                        <MudItem xs="12" sm="6">
+                            <MudField Label="Clan" Variant="Variant.Outlined">
+                                @(string.IsNullOrWhiteSpace(GetClaimValue("clan_name")) ? "None" : GetClaimValue("clan_name"))
+                            </MudField>
+                        </MudItem>
+                    </MudGrid>
+                </MudCardContent>
+            </MudCard>
+
+            <!-- Update Email Address Section -->
+            <MudExpansionPanels Elevation="2" Class="mb-6">
+                <MudExpansionPanel Text="Update Email Address" Icon="@Icons.Material.Filled.Email">
+
+                    <MudText Typo="Typo.body2" Class="mb-4" Color="Color.Secondary">
+                        Enter a new email address below. A verification link will be sent to your new email address.
+                    </MudText>
+
+                    <EditForm Model="EmailUpdateFormModel" OnValidSubmit="HandleEmailUpdateSubmit" FormName="update-email">
+                        <DataAnnotationsValidator />
+
+                        <MudTextField Label="New Email Address"
+                                      HelperText="Enter your new email address"
+                                      Class="mt-3"
+                                      @bind-Value="EmailUpdateFormModel.EmailAddress"
+                                      For="() => EmailUpdateFormModel.EmailAddress"
+                                      Variant="Variant.Outlined"
+                                      InputType="InputType.Email"
+                                      Adornment="Adornment.Start"
+                                      AdornmentIcon="@Icons.Material.Filled.Email" />
+
+                        <MudTextField Label="Confirm New Email Address"
+                                      HelperText="Type your new email address again for confirmation"
+                                      Class="mt-3"
+                                      @bind-Value="EmailUpdateFormModel.ConfirmEmailAddress"
+                                      For="() => EmailUpdateFormModel.ConfirmEmailAddress"
+                                      Variant="Variant.Outlined"
+                                      InputType="InputType.Email"
+                                      Adornment="Adornment.Start"
+                                      AdornmentIcon="@Icons.Material.Filled.Email" />
+
+                        <div class="d-flex justify-end mt-4">
+                            <MudButton Disabled="EmailUpdateProcessing"
+                                       ButtonType="ButtonType.Submit"
+                                       Variant="Variant.Filled"
+                                       Color="Color.Primary">
+                                @if (EmailUpdateProcessing)
+                                {
+                                    <MudProgressCircular Class="ms-n1" Size="Size.Small" Indeterminate="true" />
+                                    <MudText Class="ms-2">Processing ...</MudText>
+                                }
+                                else
+                                {
+                                    <MudText>Request Email Update</MudText>
+                                }
+                            </MudButton>
+                        </div>
+
+                    </EditForm>
+
+                </MudExpansionPanel>
+            </MudExpansionPanels>
+
+        </Authorized>
+    </AuthorizeView>
+
+</MudContainer>
+
+@code {
+
+    [CascadingParameter]
+    private Task<AuthenticationState>? AuthenticationStateTask { get; set; }
+
+    private RegisterEmailAddressFormModel EmailUpdateFormModel { get; set; } = new();
+
+    private bool EmailUpdateProcessing { get; set; }
+
+    private string GetClaimValue(string claimType)
+    {
+        if (AuthenticationStateTask is null)
+            return string.Empty;
+
+        AuthenticationState authenticationState = AuthenticationStateTask.Result;
+
+        return authenticationState.User.Claims
+            .SingleOrDefault(claim => claim.Type.Equals(claimType))?.Value ?? string.Empty;
+    }
+
+    private async Task HandleEmailUpdateSubmit()
+    {
+        EmailUpdateProcessing = true;
+
+        try
+        {
+            HttpClient client = AuthenticationService.CreateAuthenticatedClient();
+
+            RegisterEmailAddressRequest request = new(EmailUpdateFormModel.EmailAddress, EmailUpdateFormModel.ConfirmEmailAddress);
+
+            HttpResponseMessage response = await client.PostAsJsonAsync("/EmailAddress/Register", request);
+
+            if (response.StatusCode is HttpStatusCode.OK)
+            {
+                EmailUpdateFormModel = new RegisterEmailAddressFormModel();
+                Snackbar.Add("Email address update successfully requested", Severity.Success);
+                Snackbar.Add("Check your email inbox to continue", Severity.Info);
+            }
+            else
+            {
+                string errorMessage = await response.Content.ReadAsStringAsync();
+                Snackbar.Add(errorMessage, Severity.Error);
+            }
+        }
+        catch (Exception)
+        {
+            Snackbar.Add("Unable to reach the server. Please try again later.", Severity.Error);
+        }
+        finally
+        {
+            EmailUpdateProcessing = false;
+        }
+    }
+}

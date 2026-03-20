@@ -1,0 +1,58 @@
+@inherits LayoutComponentBase
+
+<MudThemeProvider @bind-IsDarkMode="IsDarkMode" Theme="Theme" />
+<MudPopoverProvider />
+<MudDialogProvider />
+<MudSnackbarProvider />
+
+<MudLayout>
+    <NavigationBar IsDarkMode="@IsDarkMode" IsDarkModeChanged="@ToggleDarkMode" />
+    <MudMainContent Class="ma-0 pt-16">
+        <MudContainer MaxWidth="MaxWidth.ExtraExtraLarge" Class="ma-0 px-0 pt-8">
+            @Body
+        </MudContainer>
+    </MudMainContent>
+</MudLayout>
+
+@code {
+
+    private static readonly MudTheme Theme = new()
+    {
+        PaletteLight = new PaletteLight
+        {
+            Primary = "#776BE7",
+            Secondary = "#FF4081",
+            AppbarBackground = "#1A1A2E",
+            AppbarText = "#FFFFFF",
+            Background = "#F5F5F7",
+            Surface = "#FFFFFF",
+            TextPrimary = "#1A1A2E",
+            TextSecondary = "#4A4A6A"
+        },
+        PaletteDark = new PaletteDark
+        {
+            Primary = "#776BE7",
+            Secondary = "#FF4081",
+            AppbarBackground = "#0F0F1A",
+            AppbarText = "#FFFFFF",
+            Background = "#121212",
+            Surface = "#1E1E2E",
+            TextPrimary = "#E0E0E0",
+            TextSecondary = "#A0A0B0"
+        },
+        Typography = new Typography
+        {
+            Default = new DefaultTypography
+            {
+                FontFamily = ["Inter", "Segoe UI", "Roboto", "Helvetica Neue", "Arial", "sans-serif"]
+            }
+        }
+    };
+
+    private bool IsDarkMode { get; set; } = true;
+
+    private void ToggleDarkMode()
+    {
+        IsDarkMode = !IsDarkMode;
+    }
+}

@@ -1,0 +1,96 @@
+@inject NavigationManager NavigationManager
+@inject PortalAuthenticationService AuthenticationService
+
+<MudAppBar Elevation="4" Dense="false">
+
+    <MudButton Href="https://github.com/Project-KONGOR-Open-Source"
+               StartIcon="@Icons.Custom.Brands.GitHub"
+               Variant="Variant.Text"
+               Color="Color.Inherit"
+               Style="text-transform: none; font-weight: 600; font-size: 1.1rem;"
+               Class="ml-4">
+        Project KONGOR
+    </MudButton>
+
+    <MudSpacer />
+
+    <MudButton Href="/"
+               StartIcon="@Icons.Material.Filled.Home"
+               Variant="Variant.Text"
+               Color="Color.Inherit">
+        Home
+    </MudButton>
+
+    <MudButton Href="https://discord.gg/QjMBn5Wkzz"
+               StartIcon="@Icons.Material.Filled.Forum"
+               Variant="Variant.Text"
+               Color="Color.Inherit"
+               Target="_blank">
+        Discord
+    </MudButton>
+
+    <AuthorizeView>
+
+        <NotAuthorized>
+
+            <MudButton Href="/login"
+                       StartIcon="@Icons.Material.Filled.Login"
+                       Variant="Variant.Text"
+                       Color="Color.Inherit">
+                Log In
+            </MudButton>
+
+        </NotAuthorized>
+
+        <Authorized>
+
+            <MudButton Href="/account"
+                       StartIcon="@Icons.Material.Filled.Person"
+                       Variant="Variant.Text"
+                       Color="Color.Inherit">
+                Account
+            </MudButton>
+
+            <AuthorizeView Context="administrator" Roles="Administrator">
+
+                <MudButton Href="/admin"
+                           StartIcon="@Icons.Material.Filled.AdminPanelSettings"
+                           Variant="Variant.Text"
+                           Color="Color.Inherit">
+                    Admin
+                </MudButton>
+
+            </AuthorizeView>
+
+            <MudButton OnClick="HandleLogOut"
+                       StartIcon="@Icons.Material.Filled.Logout"
+                       Variant="Variant.Text"
+                       Color="Color.Inherit">
+                Log Out
+            </MudButton>
+
+        </Authorized>
+
+    </AuthorizeView>
+
+    <MudIconButton Icon="@(IsDarkMode ? Icons.Material.Filled.LightMode : Icons.Material.Filled.DarkMode)"
+                   Color="Color.Inherit"
+                   OnClick="IsDarkModeChanged"
+                   Class="ml-2" />
+
+</MudAppBar>
+
+@code {
+
+    [Parameter]
+    public bool IsDarkMode { get; set; }
+
+    [Parameter]
+    public EventCallback IsDarkModeChanged { get; set; }
+
+    private async Task HandleLogOut()
+    {
+        await AuthenticationService.ClearToken();
+        NavigationManager.NavigateTo("/", forceLoad: true);
+    }
+}

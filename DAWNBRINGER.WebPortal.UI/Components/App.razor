@@ -1,0 +1,43 @@
+@using static Microsoft.AspNetCore.Components.Web.RenderMode
+
+<!DOCTYPE html>
+
+<html lang="en">
+
+    <head>
+
+        <!-- Meta Tags -->
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+
+        <!-- Base -->
+        <base href="/" />
+
+        <!-- Title -->
+        <title>Project KONGOR</title>
+
+        <!-- Blazor Head Outlet -->
+        <HeadOutlet @rendermode="InteractiveServer" />
+
+        <!-- MudBlazor CSS -->
+        <link href="@Assets["_content/MudBlazor/MudBlazor.min.css"]" rel="stylesheet" />
+
+        <!-- Custom CSS -->
+        <link href="@Assets["css/portal.css"]" rel="stylesheet" />
+
+    </head>
+
+    <body>
+
+        <!-- Blazor Application Root -->
+        <Routes @rendermode="InteractiveServer" />
+
+        <!-- Blazor Server Script -->
+        <script src="_framework/blazor.web.js"></script>
+
+        <!-- MudBlazor JavaScript -->
+        <script src="@Assets["_content/MudBlazor/MudBlazor.min.js"]"></script>
+
+    </body>
+
+</html>

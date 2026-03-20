@@ -1,0 +1,149 @@
+@page "/"
+
+@inject PortalAuthenticationService AuthenticationService
+
+<PageTitle>Project KONGOR</PageTitle>
+
+<!-- Hero Section -->
+<MudPaper Class="hero-section" Elevation="0" Square="true">
+
+    <div class="hero-overlay">
+
+        <MudContainer MaxWidth="MaxWidth.Large" Class="d-flex flex-column align-center justify-center" Style="min-height: 80vh;">
+
+            <MudText Typo="Typo.h2" Align="Align.Center" Class="hero-title mb-4" Style="font-weight: 700; letter-spacing: 4px;">
+                PROJECT KONGOR
+            </MudText>
+
+            <MudText Typo="Typo.h5" Align="Align.Center" Class="hero-subtitle mb-2" Style="opacity: 0.9;">
+                Coming Soon To A Fountain Near You
+            </MudText>
+
+            <MudText Typo="Typo.body1" Align="Align.Center" Class="mb-8" Style="opacity: 0.7;">
+                Stay up to speed with the updates on
+                <MudLink Href="https://discord.gg/QjMBn5Wkzz" Target="_blank" Typo="Typo.body1" Color="Color.Primary">
+                    our Discord server
+                </MudLink>
+            </MudText>
+
+            <AuthorizeView>
+                <NotAuthorized>
+                    <MudButton Href="/register"
+                               Variant="Variant.Outlined"
+                               Color="Color.Primary"
+                               Size="Size.Large"
+                               EndIcon="@Icons.Material.Filled.AppRegistration"
+                               Class="hero-register-button">
+                        Register
+                    </MudButton>
+                </NotAuthorized>
+            </AuthorizeView>
+
+        </MudContainer>
+
+    </div>
+
+</MudPaper>
+
+<!-- Timeline Section -->
+<MudContainer MaxWidth="MaxWidth.Large" Class="py-12">
+
+    <MudText Typo="Typo.h4" Align="Align.Center" Class="mb-8" Style="font-weight: 600;">
+        Project KONGOR Timeline
+    </MudText>
+
+    <MudTimeline TimelineAlign="TimelineAlign.Default" TimelinePosition="TimelinePosition.Alternate" Class="my-6">
+
+        <MudTimelineItem Color="Color.Primary" Size="Size.Small">
+            <ItemOpposite>
+                <MudText Color="Color.Primary" Typo="Typo.h6">September 16th 2022</MudText>
+            </ItemOpposite>
+            <ItemContent>
+                <MudCard Outlined="true" Elevation="0">
+                    <MudCardContent>
+                        <MudText Align="Align.Right" Color="Color.Secondary" Typo="Typo.h6" GutterBottom="true">
+                            GOPO™ Retires From The Development Team
+                        </MudText>
+                        <MudText Align="Align.Right" Typo="Typo.body2">
+                            Having built Project KONGOR into the canonical HoN successor, the original project founder steps down to focus more on his personal life.
+                        </MudText>
+                    </MudCardContent>
+                </MudCard>
+            </ItemContent>
+        </MudTimelineItem>
+
+        <MudTimelineItem Color="Color.Primary" Size="Size.Small">
+            <ItemOpposite>
+                <MudText Color="Color.Primary" Typo="Typo.h6">August 5th 2022</MudText>
+            </ItemOpposite>
+            <ItemContent>
+                <MudCard Outlined="true" Elevation="0">
+                    <MudCardContent>
+                        <MudText Align="Align.Left" Color="Color.Secondary" Typo="Typo.h6" GutterBottom="true">
+                            Project KONGOR Enters Open Beta Testing
+                        </MudText>
+                        <MudText Align="Align.Left" Typo="Typo.body2">
+                            Project KONGOR publicly invites all players to start using the service.
+                        </MudText>
+                    </MudCardContent>
+                </MudCard>
+            </ItemContent>
+        </MudTimelineItem>
+
+        <MudTimelineItem Color="Color.Primary" Size="Size.Small">
+            <ItemOpposite>
+                <MudText Color="Color.Primary" Typo="Typo.h6">June 20th 2022</MudText>
+            </ItemOpposite>
+            <ItemContent>
+                <MudCard Outlined="true" Elevation="0">
+                    <MudCardContent>
+                        <MudText Align="Align.Right" Color="Color.Secondary" Typo="Typo.h6" GutterBottom="true">
+                            Official HoN Servers Shut Down
+                        </MudText>
+                        <MudText Align="Align.Right" Typo="Typo.body2">
+                            The game first launched on May 12th 2010, running for a little over 13 years, before finally shutting down.
+                        </MudText>
+                    </MudCardContent>
+                </MudCard>
+            </ItemContent>
+        </MudTimelineItem>
+
+        <MudTimelineItem Color="Color.Primary" Size="Size.Small">
+            <ItemOpposite>
+                <MudText Color="Color.Primary" Typo="Typo.h6">December 13th 2021</MudText>
+            </ItemOpposite>
+            <ItemContent>
+                <MudCard Outlined="true" Elevation="0">
+                    <MudCardContent>
+                        <MudText Align="Align.Left" Color="Color.Secondary" Typo="Typo.h6" GutterBottom="true">
+                            Project KONGOR Development Begins
+                        </MudText>
+                        <MudText Align="Align.Left" Typo="Typo.body2">
+                            Packet capturing starts and the first proof-of-concept is released. The proof-of-concept consisted of logging in and playing Plinko.
+                        </MudText>
+                    </MudCardContent>
+                </MudCard>
+            </ItemContent>
+        </MudTimelineItem>
+
+        <MudTimelineItem Color="Color.Primary" Size="Size.Small">
+            <ItemOpposite>
+                <MudText Color="Color.Primary" Typo="Typo.h6">December 13th 2021</MudText>
+            </ItemOpposite>
+            <ItemContent>
+                <MudCard Outlined="true" Elevation="0">
+                    <MudCardContent>
+                        <MudText Align="Align.Right" Color="Color.Secondary" Typo="Typo.h6" GutterBottom="true">
+                            HoN's End-Of-Life Is Announced
+                        </MudText>
+                        <MudText Align="Align.Right" Typo="Typo.body2">
+                            Frostburn announces that the game will shut down on June 20th 2022.
+                        </MudText>
+                    </MudCardContent>
+                </MudCard>
+            </ItemContent>
+        </MudTimelineItem>
+
+    </MudTimeline>
+
+</MudContainer>
