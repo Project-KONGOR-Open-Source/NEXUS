@@ -7,7 +7,7 @@
     <ItemGroup>
         <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="10.0.5" />
         <PackageReference Include="MudBlazor" Version="9.2.0" />
-        <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.11.0" />
+        <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.16.0" />
     </ItemGroup>
 
     <ItemGroup>
