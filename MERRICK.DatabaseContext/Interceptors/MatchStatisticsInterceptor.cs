@@ -86,9 +86,6 @@ public sealed class MatchStatisticsInterceptor : SaveChangesInterceptor
         heroStats.Gold += match.Gold;
         heroStats.Actions += match.Actions;
         heroStats.TimeEarningExperience += match.TimeEarningExperience;
-
-        // Mark The JSON Property As Modified To Ensure EF Core Persists The Changes
-        context.Entry(accountStatistics).Property(statistics => statistics.HeroStatistics).IsModified = true;
     }
 
     private static async Task UpdateHeroStatisticsAsync(DbContext context, MatchParticipantStatistics match, CancellationToken cancellationToken)
@@ -122,9 +119,6 @@ public sealed class MatchStatisticsInterceptor : SaveChangesInterceptor
         heroStats.Gold += match.Gold;
         heroStats.Actions += match.Actions;
         heroStats.TimeEarningExperience += match.TimeEarningExperience;
-
-        // Mark The JSON Property As Modified To Ensure EF Core Persists The Changes
-        context.Entry(accountStatistics).Property(statistics => statistics.HeroStatistics).IsModified = true;
     }
 
     private static void UpdateAwardStatistics(DbContext context, MatchParticipantStatistics match)
@@ -178,9 +172,6 @@ public sealed class MatchStatisticsInterceptor : SaveChangesInterceptor
 
         if (matchStatistics.AwardHighestCreepScore == match.AccountID)
             accountStatistics.AwardStatistics.HighestCreepScoreAwards++;
-
-        // Mark The JSON Property As Modified To Ensure EF Core Persists The Changes
-        context.Entry(accountStatistics).Property(statistics => statistics.AwardStatistics).IsModified = true;
     }
 
     private static async Task UpdateAwardStatisticsAsync(DbContext context, MatchParticipantStatistics match, CancellationToken cancellationToken)
@@ -234,9 +225,6 @@ public sealed class MatchStatisticsInterceptor : SaveChangesInterceptor
 
         if (matchStatistics.AwardHighestCreepScore == match.AccountID)
             accountStatistics.AwardStatistics.HighestCreepScoreAwards++;
-
-        // Mark The JSON Property As Modified To Ensure EF Core Persists The Changes
-        context.Entry(accountStatistics).Property(statistics => statistics.AwardStatistics).IsModified = true;
     }
 
     private static AccountStatisticsType DetermineStatisticsType(MatchParticipantStatistics match)
