@@ -2,11 +2,12 @@
     <Found Context="routeData">
         <AuthorizeRouteView RouteData="routeData" DefaultLayout="typeof(Layout.MainLayout)">
             <NotAuthorized>
-                <MudContainer MaxWidth="MaxWidth.Small" Class="mt-16 pa-8">
-                    <MudAlert Severity="Severity.Warning" Variant="Variant.Filled" Class="mb-4">
+                <MudContainer MaxWidth="MaxWidth.Small" Class="portal-form-page d-flex flex-column align-center">
+                    <MudAlert Severity="Severity.Warning" Variant="Variant.Filled" Class="mb-4" Style="border-radius: 12px;">
                         You need to log in to access this page.
                     </MudAlert>
-                    <MudButton Href="/login" Variant="Variant.Filled" Color="Color.Primary" FullWidth="true">
+                    <MudButton Href="/login" Variant="Variant.Filled" Color="Color.Primary" FullWidth="true"
+                               Style="border-radius: 12px; height: 48px; font-weight: 600;">
                         Go To Log In
                     </MudButton>
                 </MudContainer>
@@ -17,11 +18,16 @@
     <NotFound>
         <PageTitle>Not Found</PageTitle>
         <LayoutView Layout="typeof(Layout.MainLayout)">
-            <MudContainer MaxWidth="MaxWidth.Small" Class="mt-16 pa-8 d-flex flex-column align-center">
+            <MudContainer MaxWidth="MaxWidth.Small" Class="portal-form-page d-flex flex-column align-center">
                 <MudIcon Icon="@Icons.Material.Filled.SearchOff" Size="Size.Large" Color="Color.Secondary" Class="mb-4" />
-                <MudText Typo="Typo.h4" Align="Align.Center" GutterBottom="true">Page Not Found</MudText>
-                <MudText Typo="Typo.body1" Align="Align.Center" Class="mb-6">There is nothing at this address.</MudText>
-                <MudButton Href="/" Variant="Variant.Filled" Color="Color.Primary">
+                <MudText Typo="Typo.h4" Align="Align.Center" GutterBottom="true" Style="font-weight: 700;">
+                    Page Not Found
+                </MudText>
+                <MudText Typo="Typo.body1" Align="Align.Center" Class="mb-6">
+                    There is nothing at this address.
+                </MudText>
+                <MudButton Href="/" Variant="Variant.Filled" Color="Color.Primary"
+                           Style="border-radius: 12px; height: 48px; font-weight: 600; min-width: 180px;">
                     Return Home
                 </MudButton>
             </MudContainer>

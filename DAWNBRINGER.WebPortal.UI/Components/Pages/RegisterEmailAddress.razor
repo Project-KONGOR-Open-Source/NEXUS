@@ -5,14 +5,14 @@
 
 <PageTitle>Register Email Address</PageTitle>
 
-<MudContainer MaxWidth="MaxWidth.Small" Class="mt-8">
+<MudContainer MaxWidth="MaxWidth.Small" Class="portal-form-page">
 
-    <MudText Typo="Typo.h4" Class="mb-6" Style="font-weight: 600;">Register Email Address</MudText>
+    <MudText Typo="Typo.h4" Class="portal-form-page-title">Register Email Address</MudText>
 
     <EditForm Model="FormModel" OnValidSubmit="HandleValidSubmit" FormName="register-email">
         <DataAnnotationsValidator />
 
-        <MudCard Elevation="2">
+        <MudCard Elevation="2" Class="portal-form-card">
             <MudCardContent>
 
                 <MudText Typo="Typo.body2" Class="mb-4" Color="Color.Secondary">
@@ -63,7 +63,7 @@
 
     </EditForm>
 
-    <MudText Typo="Typo.body2" Align="Align.Center" Class="mt-4">
+    <MudText Typo="Typo.body2" Align="Align.Center" Class="portal-page-link-text">
         Already have an account?
         <MudLink Href="/login" Typo="Typo.body2">Log in here</MudLink>
     </MudText>

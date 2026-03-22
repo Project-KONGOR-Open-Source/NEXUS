@@ -6,14 +6,14 @@
 
 <PageTitle>Log In</PageTitle>
 
-<MudContainer MaxWidth="MaxWidth.Small" Class="mt-8">
+<MudContainer MaxWidth="MaxWidth.Small" Class="portal-form-page">
 
-    <MudText Typo="Typo.h4" Class="mb-6" Style="font-weight: 600;">Log In</MudText>
+    <MudText Typo="Typo.h4" Class="portal-form-page-title">Log In</MudText>
 
     <EditForm Model="FormModel" OnValidSubmit="HandleValidSubmit" FormName="log-in">
         <DataAnnotationsValidator />
 
-        <MudCard Elevation="2">
+        <MudCard Elevation="2" Class="portal-form-card">
             <MudCardContent>
 
                 <MudTextField Label="Account Name"
@@ -65,7 +65,7 @@
 
     </EditForm>
 
-    <MudText Typo="Typo.body2" Align="Align.Center" Class="mt-4">
+    <MudText Typo="Typo.body2" Align="Align.Center" Class="portal-page-link-text">
         Do not have an account yet?
         <MudLink Href="/register" Typo="Typo.body2">Register here</MudLink>
     </MudText>

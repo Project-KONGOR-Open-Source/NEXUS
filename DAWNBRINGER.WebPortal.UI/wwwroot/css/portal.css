@@ -1,11 +1,432 @@
-/* Custom Font — MudBlazor Cannot Register @font-face Declarations */
+/* ===================================================================
+   Project KONGOR — Portal Design System
+   =================================================================== */
+
+
+/* ---------------------------------------------------------------
+   Custom Fonts
+   --------------------------------------------------------------- */
 
 @font-face {
     font-family: Scurlock;
     src: url("../fonts/scurlock.ttf");
+    font-display: swap;
 }
 
 .scurlock {
     font-family: Scurlock, serif;
+}
+
+
+/* ---------------------------------------------------------------
+   Smooth Theme Transitions
+   --------------------------------------------------------------- */
+
+body,
+.mud-appbar,
+.mud-card,
+.mud-paper,
+.mud-main-content,
+.mud-timeline-item-dot,
+.mud-expansion-panel {
+    transition: background-color 0.35s ease, color 0.25s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+
+/* ---------------------------------------------------------------
+   Smooth Scrolling
+   --------------------------------------------------------------- */
+
+html {
+    scroll-behavior: smooth;
+}
+
+
+/* ---------------------------------------------------------------
+   Layout — Remove Excess Padding From MudMainContent
+   --------------------------------------------------------------- */
+
+.portal-main-content {
+    padding-top: 0 !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+}
+
+
+/* ---------------------------------------------------------------
+   Glass Navigation Bar
+   --------------------------------------------------------------- */
+
+.portal-glass-navbar {
+    transition: background-color 0.35s ease, border-color 0.3s ease, backdrop-filter 0.3s ease !important;
+}
+
+
+/* ---------------------------------------------------------------
+   Hero Section — Full-Viewport, Edge-to-Edge
+   --------------------------------------------------------------- */
+
+.portal-hero {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.portal-hero-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: top center;
+    pointer-events: none;
+    user-select: none;
+}
+
+.portal-hero-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.portal-hero-fade {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 45%;
+    pointer-events: none;
+    z-index: 2;
+}
+
+.portal-hero-content {
+    position: relative;
+    z-index: 3;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 80px 24px 48px;
+    max-width: 800px;
+    width: 100%;
+}
+
+
+/* ---------------------------------------------------------------
+   Hero Content — Entrance Animation
+   --------------------------------------------------------------- */
+
+@keyframes heroFadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(32px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.portal-hero-title {
+    animation: heroFadeInUp 0.9s ease-out 0.1s both;
+}
+
+.portal-hero-subtitle {
+    animation: heroFadeInUp 0.9s ease-out 0.3s both;
+}
+
+.portal-hero-description {
+    animation: heroFadeInUp 0.9s ease-out 0.5s both;
+}
+
+.portal-hero-cta {
+    animation: heroFadeInUp 0.9s ease-out 0.7s both;
+}
+
+
+/* ---------------------------------------------------------------
+   Hero Text — Glow Effect
+   --------------------------------------------------------------- */
+
+.portal-glow-text {
+    text-shadow: 0 0 40px rgba(119, 107, 231, 0.5), 0 0 80px rgba(119, 107, 231, 0.2);
+}
+
+
+/* ---------------------------------------------------------------
+   CTA Button — Glow Hover
+   --------------------------------------------------------------- */
+
+.portal-cta-button {
+    position: relative;
+    transition: transform 0.25s ease, box-shadow 0.3s ease !important;
+    border-width: 2px !important;
+}
+
+.portal-cta-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 24px rgba(119, 107, 231, 0.4), 0 0 48px rgba(119, 107, 231, 0.15);
+}
+
+
+/* ---------------------------------------------------------------
+   Timeline Section
+   --------------------------------------------------------------- */
+
+.portal-timeline-section {
+    padding-top: 64px;
+    padding-bottom: 80px;
+}
+
+.portal-timeline-heading {
+    font-weight: 700 !important;
+    letter-spacing: 0.5px;
+    margin-bottom: 48px !important;
+}
+
+
+/* ---------------------------------------------------------------
+   Timeline Cards — Hover Lift and Glow
+   --------------------------------------------------------------- */
+
+.portal-timeline-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease !important;
+    border: 1px solid rgba(119, 107, 231, 0.12) !important;
+    border-radius: 12px !important;
+    overflow: hidden;
+}
+
+.portal-timeline-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 32px rgba(119, 107, 231, 0.15), 0 2px 8px rgba(0, 0, 0, 0.1);
+    border-color: rgba(119, 107, 231, 0.3) !important;
+}
+
+
+/* ---------------------------------------------------------------
+   Timeline Date Chips
+   --------------------------------------------------------------- */
+
+.portal-timeline-date {
+    font-weight: 600 !important;
+    letter-spacing: 0.3px;
+}
+
+
+/* ---------------------------------------------------------------
+   Form Page Cards — Refined Styling
+   --------------------------------------------------------------- */
+
+.portal-form-card {
+    border-radius: 16px !important;
+    border: 1px solid rgba(119, 107, 231, 0.1) !important;
+    transition: box-shadow 0.3s ease, border-color 0.3s ease !important;
+}
+
+.portal-form-card:hover,
+.portal-form-card:focus-within {
+    box-shadow: 0 8px 32px rgba(119, 107, 231, 0.12) !important;
+    border-color: rgba(119, 107, 231, 0.2) !important;
+}
+
+
+/* ---------------------------------------------------------------
+   Form Page Containers
+   --------------------------------------------------------------- */
+
+.portal-form-page {
+    padding-top: 96px;
+    padding-bottom: 48px;
+    min-height: 100vh;
+}
+
+.portal-form-page-title {
+    font-weight: 700 !important;
+    letter-spacing: 0.3px;
+    margin-bottom: 32px !important;
+}
+
+
+/* ---------------------------------------------------------------
+   Page Link Text
+   --------------------------------------------------------------- */
+
+.portal-page-link-text {
+    margin-top: 24px !important;
+    opacity: 0.8;
+}
+
+
+/* ---------------------------------------------------------------
+   Navigation — Desktop Links
+   --------------------------------------------------------------- */
+
+.portal-nav-desktop {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.portal-nav-button {
+    text-transform: none !important;
+    font-weight: 500 !important;
+    letter-spacing: 0.3px !important;
+    border-radius: 8px !important;
+    transition: background-color 0.2s ease !important;
+}
+
+.portal-nav-button:hover {
+    background-color: rgba(119, 107, 231, 0.1) !important;
+}
+
+
+/* ---------------------------------------------------------------
+   Navigation — Brand Button
+   --------------------------------------------------------------- */
+
+.portal-brand-button {
+    text-transform: none !important;
+    font-weight: 700 !important;
+    font-size: 1.1rem !important;
+    letter-spacing: 0.5px !important;
+}
+
+
+/* ---------------------------------------------------------------
+   Navigation — Theme Toggle
+   --------------------------------------------------------------- */
+
+.portal-theme-toggle {
+    transition: transform 0.3s ease, color 0.3s ease !important;
+    border-radius: 8px !important;
+}
+
+.portal-theme-toggle:hover {
+    transform: rotate(30deg);
+    background-color: rgba(119, 107, 231, 0.1) !important;
+}
+
+
+/* ---------------------------------------------------------------
+   Custom Scrollbar (Webkit Browsers)
+   --------------------------------------------------------------- */
+
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: rgba(119, 107, 231, 0.3);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(119, 107, 231, 0.5);
+}
+
+
+/* ---------------------------------------------------------------
+   Text Selection
+   --------------------------------------------------------------- */
+
+::selection {
+    background: rgba(119, 107, 231, 0.3);
+    color: inherit;
+}
+
+
+/* ---------------------------------------------------------------
+   Responsive — Small Devices (< 960px)
+   --------------------------------------------------------------- */
+
+@media (max-width: 959.98px) {
+
+    .portal-nav-desktop {
+        display: none !important;
+    }
+
+    .portal-hero-content {
+        padding: 72px 16px 32px;
+    }
+
+    .portal-hero-title-text {
+        font-size: 36px !important;
+        letter-spacing: 2px !important;
+    }
+
+    .portal-hero-subtitle-text {
+        font-size: 32px !important;
+    }
+
+    .portal-timeline-section {
+        padding-top: 40px;
+        padding-bottom: 48px;
+    }
+
+    .portal-form-page {
+        padding-top: 80px;
+        padding-left: 16px;
+        padding-right: 16px;
+    }
+}
+
+
+/* ---------------------------------------------------------------
+   Responsive — Extra-Small Devices (< 600px)
+   --------------------------------------------------------------- */
+
+@media (max-width: 599.98px) {
+
+    .portal-hero-title-text {
+        font-size: 28px !important;
+        letter-spacing: 1px !important;
+    }
+
+    .portal-hero-subtitle-text {
+        font-size: 24px !important;
+    }
+
+    .portal-hero-content {
+        padding: 64px 12px 24px;
+    }
+
+    .portal-timeline-section {
+        padding-top: 32px;
+        padding-bottom: 32px;
+    }
+
+    .portal-form-page {
+        padding-top: 72px;
+    }
+}
+
+
+/* ---------------------------------------------------------------
+   Responsive — Mobile Menu Visibility
+   --------------------------------------------------------------- */
+
+.portal-mobile-menu {
+    display: none;
+}
+
+@media (max-width: 959.98px) {
+    .portal-mobile-menu {
+        display: flex;
+        align-items: center;
+    }
 }
 
