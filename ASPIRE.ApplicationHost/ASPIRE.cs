@@ -123,6 +123,18 @@ public class ASPIRE
             .WithReference(database, connectionName: "MERRICK").WaitFor(database) // Connect To SQL Server Database And Wait For It To Start
             .WithEnvironment("INFRASTRUCTURE_GATEWAY", gateway);
 
+        // Add SMTP Server (Development Only)
+        if (builder.Environment.IsDevelopment())
+        {
+            IResourceBuilder<ContainerResource> smtpServer = builder.AddContainer("mailpit", "axllent/mailpit")
+                .WithImageTag("latest") // Latest MailPit Image: https://github.com/axllent/mailpit/releases/latest
+                .WithLifetime(ContainerLifetime.Persistent)
+                .WithEndpoint(port: 1025, targetPort: 1025, name: "smtp", scheme: "tcp") // SMTP Port
+                .WithHttpEndpoint(port: 8025, targetPort: 8025, name: "http"); // Web UI Port
+
+            webPortalAPI.WaitFor(smtpServer);
+        }
+
         // Add Web Portal UI Project
         builder.AddProject<DAWNBRINGER>("web-portal-ui", builder.Environment.IsProduction() ? "DAWNBRINGER.WebPortal.UI Production" : "DAWNBRINGER.WebPortal.UI Development")
             .WithReference(webPortalAPI).WaitFor(webPortalAPI) // Connect To Web Portal API And Wait For It To Start
