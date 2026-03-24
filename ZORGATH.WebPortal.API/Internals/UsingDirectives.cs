@@ -4,6 +4,8 @@ global using ASPIRE.Common.ServiceDefaults;
 global using FluentValidation;
 global using FluentValidation.Results;
 
+global using MailKit.Net.Smtp;
+
 global using MERRICK.DatabaseContext.Constants;
 global using MERRICK.DatabaseContext.Entities.Core;
 global using MERRICK.DatabaseContext.Entities.Utility;
@@ -23,6 +25,8 @@ global using Microsoft.Extensions.FileProviders;
 global using Microsoft.Extensions.Options;
 global using Microsoft.IdentityModel.Tokens;
 global using Microsoft.OpenApi;
+
+global using MimeKit;
 
 global using SecureRemotePassword;
 

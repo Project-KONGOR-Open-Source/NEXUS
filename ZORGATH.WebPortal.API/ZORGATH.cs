@@ -226,8 +226,17 @@ public class ZORGATH
             });
         });
 
-        // Add Email Service
-        builder.Services.AddSingleton<IEmailService, EmailService>();
+        // Add Email Service With Local STMP Server In Development
+        if (builder.Environment.IsDevelopment())
+        {
+            builder.Services.AddSingleton<IEmailService, MailPitEmailService>();
+        }
+
+        // Add Email Service With AWS SES In Staging/Production/etc.
+        else
+        {
+            builder.Services.AddSingleton<IEmailService, AWSSESEmailService>();
+        }
 
         // Configure Forwarded Headers For Reverse Proxy Support
         builder.Services.Configure<ForwardedHeadersOptions>(options =>
