@@ -7,8 +7,8 @@ public sealed class StubEmailService : IEmailService
 {
     public List<(string EmailAddress, string Token)> RegistrationLinks { get; } = [];
     public List<(string EmailAddress, string AccountName)> RegistrationConfirmations { get; } = [];
-    public List<(string EmailAddress, string Token, List<string> AccountNames)> PasswordRecoveryLinks { get; } = [];
-    public List<(string EmailAddress, List<string> AccountNames)> PasswordRecoveryConfirmations { get; } = [];
+    public List<(string EmailAddress, string Token, List<string> AccountNames)> AccountPasswordRecoveryLinks { get; } = [];
+    public List<(string EmailAddress, List<string> AccountNames)> AccountPasswordRecoveryConfirmations { get; } = [];
     public List<(string EmailAddress, string Token)> EmailAddressUpdateLinks { get; } = [];
     public List<(string OldEmailAddress, string NewEmailAddress)> EmailAddressUpdateConfirmations { get; } = [];
 
@@ -24,15 +24,15 @@ public sealed class StubEmailService : IEmailService
         return Task.FromResult(true);
     }
 
-    public Task<bool> SendPasswordRecoveryLink(string emailAddress, string token, List<string> accountNames)
+    public Task<bool> SendAccountPasswordRecoveryLink(string emailAddress, string token, List<string> accountNames)
     {
-        PasswordRecoveryLinks.Add((emailAddress, token, accountNames));
+        AccountPasswordRecoveryLinks.Add((emailAddress, token, accountNames));
         return Task.FromResult(true);
     }
 
-    public Task<bool> SendPasswordRecoveryConfirmation(string emailAddress, List<string> accountNames)
+    public Task<bool> SendAccountPasswordRecoveryConfirmation(string emailAddress, List<string> accountNames)
     {
-        PasswordRecoveryConfirmations.Add((emailAddress, accountNames));
+        AccountPasswordRecoveryConfirmations.Add((emailAddress, accountNames));
         return Task.FromResult(true);
     }
 
