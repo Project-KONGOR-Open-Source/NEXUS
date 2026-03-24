@@ -126,7 +126,11 @@ public class AWSSESEmailService(IOptions<OperationalConfiguration> configuration
 
             // AWS SES Returns A Response Starting With "Ok" On Success (e.g. "Ok 010b018307ef6101-59cfc741-dcbf-44a5-a935-b76452b87bf3-000000")
             if (response.StartsWith("OK", StringComparison.OrdinalIgnoreCase))
+            {
+                Logger.LogDebug("Email Sent To {EmailAddress} Using AWS SES: {Subject}", emailAddress, subject);
+
                 return true;
+            }
 
             Logger.LogError("Email Sending Failure Using AWS SES To {EmailAddress}: {Response}", emailAddress, response);
 
