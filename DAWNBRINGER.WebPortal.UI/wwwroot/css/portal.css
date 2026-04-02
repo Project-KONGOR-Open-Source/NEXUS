@@ -12,7 +12,7 @@
 
 :root {
     color-scheme: dark light;
-    font-family: "Righteous", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    font-family: "Righteous", sans-serif;
 }
 
 html {
@@ -22,7 +22,7 @@ html {
 body {
     margin: 0;
     min-height: 100vh;
-    font-family: "Righteous", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    font-family: "Righteous", sans-serif;
 }
 
 .portal-app-body {
@@ -265,7 +265,7 @@ body {
     font-size: 1.34rem;
     font-weight: 700;
     letter-spacing: 0.08rem;
-    font-family: "Righteous", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    font-family: "Righteous", sans-serif;
 }
 
 .portal-primary-navigation {
@@ -545,7 +545,7 @@ body {
 .portal-management-title {
     margin: 0;
     line-height: 0.96;
-    font-family: "Righteous", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    font-family: "Righteous", sans-serif;
     font-weight: 800;
     letter-spacing: 0.01rem;
 }
