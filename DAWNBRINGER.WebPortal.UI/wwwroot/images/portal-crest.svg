@@ -6,9 +6,9 @@
             <stop offset="1" stop-color="#162114" />
         </linearGradient>
         <linearGradient id="portalGold" x1="72" y1="44" x2="178" y2="214" gradientUnits="userSpaceOnUse">
-            <stop offset="0" stop-color="#F8E3A0" />
-            <stop offset="0.5" stop-color="#D5B45B" />
-            <stop offset="1" stop-color="#8D7130" />
+            <stop offset="0" stop-color="#FFF3B5" />
+            <stop offset="0.42" stop-color="#F1D36B" />
+            <stop offset="1" stop-color="#B88416" />
         </linearGradient>
         <filter id="portalGlow" x="-24" y="-24" width="304" height="304" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
             <feGaussianBlur stdDeviation="12" result="blur" />

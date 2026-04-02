@@ -38,19 +38,22 @@ body {
     --portal-surface: rgba(20, 31, 21, 0.86);
     --portal-surface-strong: rgba(27, 39, 28, 0.96);
     --portal-surface-ornament: rgba(94, 125, 59, 0.14);
-    --portal-border: rgba(216, 187, 98, 0.18);
-    --portal-border-strong: rgba(216, 187, 98, 0.34);
+    --portal-border: rgba(241, 211, 107, 0.22);
+    --portal-border-strong: rgba(241, 211, 107, 0.42);
     --portal-text: #edf0e5;
     --portal-text-soft: #bbc5b2;
     --portal-text-muted: #86917f;
     --portal-accent: #7fa853;
-    --portal-accent-strong: #d7bc67;
-    --portal-accent-soft: rgba(127, 168, 83, 0.16);
+    --portal-accent-strong: #f1d36b;
+    --portal-accent-soft: rgba(241, 211, 107, 0.14);
+    --portal-gold-bright: #fff1a6;
+    --portal-gold-deep: #ba8b1f;
+    --portal-gold-shadow: rgba(255, 225, 115, 0.28);
     --portal-shadow: 0 30px 90px rgba(0, 0, 0, 0.4);
     --portal-button-text: #fffbea;
     background:
         radial-gradient(circle at top left, rgba(127, 168, 83, 0.18), transparent 28%),
-        radial-gradient(circle at top right, rgba(215, 188, 103, 0.14), transparent 28%),
+        radial-gradient(circle at top right, rgba(241, 211, 107, 0.18), transparent 28%),
         linear-gradient(180deg, #0d1610 0%, #101a12 48%, #0d1610 100%);
     color: var(--portal-text);
 }
@@ -63,19 +66,22 @@ body {
     --portal-surface: rgba(255, 255, 249, 0.93);
     --portal-surface-strong: rgba(255, 255, 251, 1);
     --portal-surface-ornament: rgba(127, 168, 83, 0.1);
-    --portal-border: rgba(95, 125, 59, 0.18);
-    --portal-border-strong: rgba(95, 125, 59, 0.32);
+    --portal-border: rgba(212, 175, 55, 0.2);
+    --portal-border-strong: rgba(212, 175, 55, 0.34);
     --portal-text: #192214;
     --portal-text-soft: #596450;
     --portal-text-muted: #7c866f;
     --portal-accent: #5f7d3b;
-    --portal-accent-strong: #ba9a43;
-    --portal-accent-soft: rgba(95, 125, 59, 0.12);
+    --portal-accent-strong: #d4af37;
+    --portal-accent-soft: rgba(212, 175, 55, 0.12);
+    --portal-gold-bright: #fff0a0;
+    --portal-gold-deep: #b68918;
+    --portal-gold-shadow: rgba(212, 175, 55, 0.18);
     --portal-shadow: 0 28px 80px rgba(51, 64, 35, 0.14);
     --portal-button-text: #fffdf4;
     background:
         radial-gradient(circle at top left, rgba(127, 168, 83, 0.14), transparent 28%),
-        radial-gradient(circle at top right, rgba(186, 154, 67, 0.12), transparent 28%),
+        radial-gradient(circle at top right, rgba(212, 175, 55, 0.14), transparent 28%),
         linear-gradient(180deg, #ebe9d9 0%, #f4f2e6 52%, #ebe9d9 100%);
     color: var(--portal-text);
 }
@@ -224,23 +230,29 @@ body {
     color: var(--portal-accent-strong);
 }
 
-.portal-brand-title,
+.portal-brand-wordmark,
 .portal-site-footer-title,
-.portal-hero-title,
-.portal-section-heading h2,
-.portal-final-call h2,
-.portal-state-panel h1,
-.portal-auth-display,
-.portal-auth-panel-heading h2,
-.portal-account-title,
-.portal-management-title {
+.portal-account-title {
     font-family: "Scurlock", Georgia, serif;
     font-weight: 700;
     letter-spacing: 0.04rem;
 }
 
+.portal-brand-wordmark,
+.portal-site-footer-title,
+.portal-nav-disclosure-title,
+.portal-mobile-disclosure-title {
+    color: transparent;
+    background: linear-gradient(180deg, var(--portal-gold-bright) 0%, var(--portal-accent-strong) 42%, var(--portal-gold-deep) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    text-shadow: 0 0 1.2rem var(--portal-gold-shadow);
+}
+
 .portal-brand-title {
     font-size: 1.34rem;
+    font-weight: 700;
+    letter-spacing: 0.08rem;
 }
 
 .portal-primary-navigation {
@@ -489,6 +501,9 @@ body {
 .portal-management-title {
     margin: 0;
     line-height: 0.96;
+    font-family: Inter, "Segoe UI", sans-serif;
+    font-weight: 800;
+    letter-spacing: 0.01rem;
 }
 
 .portal-hero-title {
@@ -930,6 +945,13 @@ body {
 
 .portal-account-title {
     font-size: clamp(2.7rem, 6vw, 4.6rem);
+    font-family: "Scurlock", Georgia, serif;
+    letter-spacing: 0.04rem;
+    color: transparent;
+    background: linear-gradient(180deg, var(--portal-gold-bright) 0%, var(--portal-accent-strong) 40%, var(--portal-gold-deep) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    text-shadow: 0 0 1.8rem var(--portal-gold-shadow);
 }
 
 .portal-account-stat-grid {
