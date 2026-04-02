@@ -33,7 +33,7 @@
 
         <div class="portal-auth-main">
             <div class="portal-auth-panel-heading">
-                <div class="portal-section-kicker">Sign In</div>
+                <div class="portal-section-kicker">Portal Access</div>
                 <h2 class="portal-form-page-title">Log In</h2>
                 <p class="portal-auth-panel-copy">Use your account name and password to enter the user portal.</p>
             </div>
@@ -135,7 +135,7 @@
                 {
                     await AuthenticationService.SetToken(tokenResponse.Token);
                     Snackbar.Add("Logged in successfully", Severity.Success);
-                    NavigationManager.NavigateTo("/");
+                    NavigationManager.NavigateTo("/account");
                 }
             }
             else

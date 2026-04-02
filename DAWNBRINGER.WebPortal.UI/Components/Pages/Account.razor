@@ -59,7 +59,6 @@
                 <div class="portal-account-management-grid">
                     <section class="portal-management-card">
                         <div>
-                            <div class="portal-management-kicker">Identity</div>
                             <h2 class="portal-management-title">Update E-mail Address</h2>
                             <p class="portal-management-copy">Enter a new e-mail address below. A verification link will be sent to your new e-mail address.</p>
                         </div>
@@ -69,8 +68,8 @@
 
                             <MudCard Elevation="0" Class="portal-form-card portal-account-card-surface">
                                 <MudCardContent>
-                                    <MudTextField Label="New Email Address"
-                                                  HelperText="Enter your new email address"
+                                    <MudTextField Label="New E-mail Address"
+                                                  HelperText="Enter your new e-mail address"
                                                   Class="mt-3"
                                                   @bind-Value="EmailUpdateFormModel.EmailAddress"
                                                   For="() => EmailUpdateFormModel.EmailAddress"
@@ -79,8 +78,8 @@
                                                   Adornment="Adornment.Start"
                                                   AdornmentIcon="@Icons.Material.Filled.Email" />
 
-                                    <MudTextField Label="Confirm New Email Address"
-                                                  HelperText="Type your new email address again for confirmation"
+                                    <MudTextField Label="Confirm New E-mail Address"
+                                                  HelperText="Type your new e-mail address again for confirmation"
                                                   Class="mt-3"
                                                   @bind-Value="EmailUpdateFormModel.ConfirmEmailAddress"
                                                   For="() => EmailUpdateFormModel.ConfirmEmailAddress"
@@ -89,15 +88,19 @@
                                                   Adornment="Adornment.Start"
                                                   AdornmentIcon="@Icons.Material.Filled.Email" />
 
-                                    <MudTextField Label="Current Password"
-                                                  HelperText="Enter your current password to confirm the change"
-                                                  Class="mt-3"
-                                                  @bind-Value="EmailUpdateFormModel.Password"
-                                                  For="() => EmailUpdateFormModel.Password"
-                                                  Variant="Variant.Outlined"
-                                                  InputType="InputType.Password"
-                                                  Adornment="Adornment.Start"
-                                                  AdornmentIcon="@Icons.Material.Filled.Lock" />
+                                    <div class="portal-input-with-visibility mt-3">
+                                        <MudTextField Label="Current Password"
+                                                      HelperText="Enter your current password to confirm the change"
+                                                      @bind-Value="EmailUpdateFormModel.Password"
+                                                      For="() => EmailUpdateFormModel.Password"
+                                                      Variant="Variant.Outlined"
+                                                      InputType="@GetPasswordInputType(EmailUpdatePasswordVisible)"
+                                                      Adornment="Adornment.Start"
+                                                      AdornmentIcon="@Icons.Material.Filled.Lock" />
+                                        <button type="button" class="portal-password-visibility-button" @onclick="ToggleEmailUpdatePasswordVisibility" aria-label="Toggle current password visibility">
+                                            <MudIcon Icon="@GetPasswordVisibilityIcon(EmailUpdatePasswordVisible)" />
+                                        </button>
+                                    </div>
                                 </MudCardContent>
                                 <MudCardActions Class="pa-4">
                                     <MudSpacer />
@@ -122,7 +125,6 @@
 
                     <section class="portal-management-card">
                         <div>
-                            <div class="portal-management-kicker">Security</div>
                             <h2 class="portal-management-title">Update Password</h2>
                             <p class="portal-management-copy">Choose a new password below. A confirmation link will be sent to your e-mail address to activate the change.</p>
                         </div>
@@ -132,33 +134,47 @@
 
                             <MudCard Elevation="0" Class="portal-form-card portal-account-card-surface">
                                 <MudCardContent>
-                                    <MudTextField Label="Current Password"
-                                                  HelperText="Enter your current password"
-                                                  Class="mt-3"
-                                                  @bind-Value="PasswordUpdateFormModel.CurrentPassword"
-                                                  For="() => PasswordUpdateFormModel.CurrentPassword"
-                                                  Variant="Variant.Outlined"
-                                                  InputType="InputType.Password"
-                                                  Adornment="Adornment.Start"
-                                                  AdornmentIcon="@Icons.Material.Filled.Lock" />
+                                    <div class="portal-input-with-visibility mt-3">
+                                        <MudTextField Label="Current Password"
+                                                      HelperText="Enter your current password"
+                                                      @bind-Value="PasswordUpdateFormModel.CurrentPassword"
+                                                      For="() => PasswordUpdateFormModel.CurrentPassword"
+                                                      Variant="Variant.Outlined"
+                                                      InputType="@GetPasswordInputType(CurrentPasswordVisible)"
+                                                      Adornment="Adornment.Start"
+                                                      AdornmentIcon="@Icons.Material.Filled.Lock" />
+                                        <button type="button" class="portal-password-visibility-button" @onclick="ToggleCurrentPasswordVisibility" aria-label="Toggle current password visibility">
+                                            <MudIcon Icon="@GetPasswordVisibilityIcon(CurrentPasswordVisible)" />
+                                        </button>
+                                    </div>
 
-                                    <MudTextField Label="New Password"
-                                                  HelperText="Choose a strong password at least 8 characters long"
-                                                  Class="mt-3"
-                                                  @bind-Value="PasswordUpdateFormModel.Password"
-                                                  For="() => PasswordUpdateFormModel.Password"
-                                                  Variant="Variant.Outlined"
-                                                  InputType="InputType.Password"
-                                                  Adornment="Adornment.Start"
-                                                  AdornmentIcon="@Icons.Material.Filled.VpnKey" />
+                                    <div class="portal-input-with-visibility mt-3">
+                                        <MudTextField Label="New Password"
+                                                      HelperText="Choose a strong password at least 8 characters long"
+                                                      @bind-Value="PasswordUpdateFormModel.Password"
+                                                      For="() => PasswordUpdateFormModel.Password"
+                                                      Variant="Variant.Outlined"
+                                                      InputType="@GetPasswordInputType(NewPasswordVisible)"
+                                                      Adornment="Adornment.Start"
+                                                      AdornmentIcon="@Icons.Material.Filled.VpnKey" />
+                                        <button type="button" class="portal-password-visibility-button" @onclick="ToggleNewPasswordVisibility" aria-label="Toggle new password visibility">
+                                            <MudIcon Icon="@GetPasswordVisibilityIcon(NewPasswordVisible)" />
+                                        </button>
+                                    </div>
 
-                                    <MudTextField Label="Confirm New Password"
-                                                  HelperText="Type your new password again for confirmation"
-                                                  Class="mt-3"
-                                                  @bind-Value="PasswordUpdateFormModel.ConfirmPassword"
-                                                  For="() => PasswordUpdateFormModel.ConfirmPassword"
-                                                  Variant="Variant.Outlined"
-                                                  InputType="InputType.Password" />
+                                    <div class="portal-input-with-visibility mt-3">
+                                        <MudTextField Label="Confirm New Password"
+                                                      HelperText="Type your new password again for confirmation"
+                                                      @bind-Value="PasswordUpdateFormModel.ConfirmPassword"
+                                                      For="() => PasswordUpdateFormModel.ConfirmPassword"
+                                                      Variant="Variant.Outlined"
+                                                      InputType="@GetPasswordInputType(ConfirmPasswordVisible)"
+                                                      Adornment="Adornment.Start"
+                                                      AdornmentIcon="@Icons.Material.Filled.VpnKey" />
+                                        <button type="button" class="portal-password-visibility-button" @onclick="ToggleConfirmPasswordVisibility" aria-label="Toggle confirm new password visibility">
+                                            <MudIcon Icon="@GetPasswordVisibilityIcon(ConfirmPasswordVisible)" />
+                                        </button>
+                                    </div>
                                 </MudCardContent>
                                 <MudCardActions Class="pa-4">
                                     <MudSpacer />
@@ -196,6 +212,41 @@
 
     private bool EmailUpdateProcessing { get; set; }
     private bool PasswordUpdateProcessing { get; set; }
+
+    private bool EmailUpdatePasswordVisible { get; set; }
+    private bool CurrentPasswordVisible { get; set; }
+    private bool NewPasswordVisible { get; set; }
+    private bool ConfirmPasswordVisible { get; set; }
+
+    private static InputType GetPasswordInputType(bool passwordVisible)
+    {
+        return passwordVisible ? InputType.Text : InputType.Password;
+    }
+
+    private static string GetPasswordVisibilityIcon(bool passwordVisible)
+    {
+        return passwordVisible ? Icons.Material.Filled.VisibilityOff : Icons.Material.Filled.Visibility;
+    }
+
+    private void ToggleEmailUpdatePasswordVisibility()
+    {
+        EmailUpdatePasswordVisible = !EmailUpdatePasswordVisible;
+    }
+
+    private void ToggleCurrentPasswordVisibility()
+    {
+        CurrentPasswordVisible = !CurrentPasswordVisible;
+    }
+
+    private void ToggleNewPasswordVisibility()
+    {
+        NewPasswordVisible = !NewPasswordVisible;
+    }
+
+    private void ToggleConfirmPasswordVisibility()
+    {
+        ConfirmPasswordVisible = !ConfirmPasswordVisible;
+    }
 
     private string GetClaimValue(string claimType)
     {

@@ -40,21 +40,27 @@
         </nav>
 
         <div class="portal-header-actions">
-            <button type="button" class="portal-theme-button" @onclick="HandleThemeSelection" aria-label="Toggle colour theme">
-                <MudIcon Icon="@(IsDarkMode ? Icons.Material.Filled.LightMode : Icons.Material.Filled.DarkMode)" />
-            </button>
-
             <AuthorizeView>
                 <NotAuthorized>
-                    <a href="/login" class="portal-utility-link">Log In</a>
-                    <a href="/register" class="portal-call-to-action portal-call-to-action-compact">Create Account</a>
+                    <div class="portal-header-action-group" aria-label="Account actions">
+                        <a href="/login" class="portal-header-pill portal-utility-link">Log In</a>
+                        <a href="/register" class="portal-call-to-action portal-call-to-action-compact">Create Account</a>
+                    </div>
                 </NotAuthorized>
 
                 <Authorized>
-                    <a href="/account" class="portal-utility-link">Account</a>
-                    <button type="button" class="portal-utility-button" @onclick="HandleLogOut">Log Out</button>
+                    <div class="portal-header-action-group" aria-label="Account actions">
+                        <a href="/account" class="portal-header-pill portal-utility-link">Account</a>
+                        <button type="button" class="portal-header-pill portal-utility-button" @onclick="HandleLogOut">Log Out</button>
+                    </div>
                 </Authorized>
             </AuthorizeView>
+
+            <div class="portal-header-theme-group" aria-label="Appearance">
+                <button type="button" class="portal-header-pill portal-theme-button" @onclick="HandleThemeSelection" aria-label="Toggle colour theme">
+                    <MudIcon Icon="@(IsDarkMode ? Icons.Material.Filled.LightMode : Icons.Material.Filled.DarkMode)" />
+                </button>
+            </div>
 
             <button type="button" class="portal-mobile-toggle" @onclick="ToggleMobileMenu" aria-expanded="@IsMobileMenuOpen.ToString().ToLowerInvariant()" aria-label="Toggle navigation menu">
                 <MudIcon Icon="@(IsMobileMenuOpen ? Icons.Material.Filled.Close : Icons.Material.Filled.Menu)" />

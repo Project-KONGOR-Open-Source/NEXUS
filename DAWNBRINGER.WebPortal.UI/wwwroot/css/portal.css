@@ -31,7 +31,9 @@ body {
 
 .portal-shell {
     position: relative;
-    min-height: 100vh;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    min-height: 100dvh;
     overflow: clip;
     transition: background-color 0.3s ease, color 0.3s ease;
 }
@@ -167,7 +169,11 @@ body {
 
 .portal-site-main {
     display: block;
-    min-height: 100vh;
+    min-height: 0;
+}
+
+.portal-site-main:focus {
+    outline: none;
 }
 
 .portal-site-header {
@@ -363,22 +369,40 @@ body {
     gap: 0.75rem;
 }
 
-.portal-theme-button,
-.portal-mobile-toggle,
-.portal-utility-button {
+.portal-header-action-group,
+.portal-header-theme-group {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.portal-header-theme-group {
+    padding-left: 0.75rem;
+    border-left: 1px solid var(--portal-border);
+}
+
+.portal-header-pill {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     min-height: 2.8rem;
-    padding: 0 0.95rem;
+    padding: 0 1.1rem;
     border-radius: 999px;
     border: 1px solid var(--portal-border);
     background: rgba(255, 255, 255, 0.02);
     color: var(--portal-text-soft);
     cursor: pointer;
+    text-decoration: none;
     transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
 }
 
+.portal-theme-button,
+.portal-mobile-toggle,
+.portal-utility-button {
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.portal-header-pill:hover,
 .portal-theme-button:hover,
 .portal-mobile-toggle:hover,
 .portal-utility-button:hover {
@@ -386,6 +410,19 @@ body {
     background: var(--portal-accent-soft);
     color: var(--portal-text);
     transform: translateY(-1px);
+}
+
+.portal-header-pill:focus-visible,
+.portal-theme-button:focus-visible,
+.portal-mobile-toggle:focus-visible,
+.portal-utility-button:focus-visible {
+    outline: 2px solid var(--portal-accent-strong);
+    outline-offset: 2px;
+}
+
+.portal-theme-button {
+    min-width: 2.8rem;
+    padding-inline: 0.8rem;
 }
 
 .portal-mobile-toggle {
@@ -784,9 +821,16 @@ body {
     border-radius: 2rem;
 }
 
-.portal-auth-page,
+.portal-auth-page {
+    display: grid;
+    align-items: center;
+    min-height: 100%;
+    padding-top: 3rem;
+    padding-bottom: 2rem;
+}
+
 .portal-account-page {
-    padding-top: 7rem;
+    padding-top: 5rem;
     padding-bottom: 4rem;
 }
 
@@ -883,6 +927,49 @@ body {
 .portal-management-copy {
     margin-top: 0.85rem;
     line-height: 1.7;
+}
+
+.portal-management-title {
+    margin-top: 0;
+    font-size: clamp(1.85rem, 4vw, 3rem);
+    line-height: 1.02;
+}
+
+.portal-input-with-visibility {
+    position: relative;
+}
+
+.portal-password-visibility-button {
+    position: absolute;
+    top: 0.85rem;
+    right: 0.9rem;
+    z-index: 2;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    padding: 0;
+    border: none;
+    border-radius: 999px;
+    background: transparent;
+    color: var(--portal-text-soft);
+    cursor: pointer;
+    transition: color 0.2s ease, background-color 0.2s ease;
+}
+
+.portal-password-visibility-button:hover {
+    color: var(--portal-text);
+    background: var(--portal-accent-soft);
+}
+
+.portal-password-visibility-button:focus-visible {
+    outline: 2px solid var(--portal-accent-strong);
+    outline-offset: 2px;
+}
+
+.portal-input-with-visibility .mud-input-slot {
+    padding-right: 2.8rem !important;
 }
 
 .portal-auth-main .portal-form-card,
@@ -1055,7 +1142,8 @@ body {
 
 @media (max-width: 860px) {
     .portal-primary-navigation,
-    .portal-header-actions .portal-utility-link,
+    .portal-header-action-group,
+    .portal-header-theme-group,
     .portal-header-actions .portal-call-to-action-compact,
     .portal-header-actions .portal-utility-button,
     .portal-nav-disclosure-panel {
@@ -1098,9 +1186,13 @@ body {
         grid-template-columns: 1fr;
     }
 
-    .portal-auth-page,
+    .portal-auth-page {
+        padding-top: 2rem;
+        padding-bottom: 1.5rem;
+    }
+
     .portal-account-page {
-        padding-top: 6.6rem;
+        padding-top: 4rem;
     }
 
     .portal-hero-section {
