@@ -1,0 +1,25 @@
+<svg width="256" height="256" viewBox="0 0 256 256" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+        <linearGradient id="portalShield" x1="40" y1="24" x2="214" y2="230" gradientUnits="userSpaceOnUse">
+            <stop offset="0" stop-color="#F2C57B" />
+            <stop offset="0.45" stop-color="#C96A41" />
+            <stop offset="1" stop-color="#5E2D23" />
+        </linearGradient>
+        <linearGradient id="portalSteel" x1="72" y1="52" x2="182" y2="204" gradientUnits="userSpaceOnUse">
+            <stop offset="0" stop-color="#F7F1E7" />
+            <stop offset="1" stop-color="#8A9AAF" />
+        </linearGradient>
+        <filter id="portalGlow" x="-20" y="-20" width="296" height="296" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+            <feGaussianBlur stdDeviation="10" result="blur" />
+            <feColorMatrix in="blur" type="matrix" values="1 0 0 0 0.95 0 1 0 0 0.62 0 0 1 0 0.36 0 0 0 0.35 0" result="glow" />
+            <feBlend in="SourceGraphic" in2="glow" mode="screen" />
+        </filter>
+    </defs>
+    <g filter="url(#portalGlow)">
+        <path d="M128 18L206 48V109C206 162 176 208 128 238C80 208 50 162 50 109V48L128 18Z" fill="url(#portalShield)" />
+        <path d="M128 34L193 59V110C193 153 169 192 128 219C87 192 63 153 63 110V59L128 34Z" stroke="#F8E6C1" stroke-opacity="0.8" stroke-width="4" />
+        <path d="M102 68L116 82L90 128L120 120L104 188L154 112L126 120L152 68L138 54L118 90L102 68Z" fill="url(#portalSteel)" />
+        <path d="M82 140C95 151 111 157 128 157C145 157 161 151 174 140" stroke="#F8E6C1" stroke-width="8" stroke-linecap="round" />
+        <circle cx="128" cy="102" r="14" fill="#1B2735" stroke="#F8E6C1" stroke-width="6" />
+    </g>
+</svg>

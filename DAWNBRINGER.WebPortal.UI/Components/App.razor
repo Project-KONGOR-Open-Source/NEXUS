@@ -5,54 +5,27 @@
 <html lang="en">
 
     <head>
-
-        <!-- Meta Tags -->
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
         <meta name="color-scheme" content="dark light" />
-
-        <!-- Base -->
+        <meta name="description" content="Project KONGOR user portal for accounts, updates, security, and community." />
+        <meta name="theme-color" content="#0b111b" />
         <base href="/" />
 
-        <!-- Title -->
-        <title>Project KONGOR</title>
-
-        <!-- Blazor Head Outlet -->
+        <PageTitle>Project KONGOR</PageTitle>
         <HeadOutlet @rendermode="InteractiveServer" />
 
-        <!-- Google Fonts — Inter -->
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
-
-        <!-- MudBlazor CSS -->
+        <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
         <link href="@Assets["_content/MudBlazor/MudBlazor.min.css"]" rel="stylesheet" />
-
-        <!-- Custom CSS -->
         <link href="@Assets["css/portal.css"]" rel="stylesheet" />
-
     </head>
 
-    <body>
-
-        <!-- Blazor Application Root -->
+    <body class="portal-app-body">
         <Routes @rendermode="new InteractiveServerRenderMode(prerender: false)" />
-
-        <!-- Blazor Server Script -->
         <script src="_framework/blazor.web.js"></script>
-
-        <!-- MudBlazor JavaScript -->
         <script src="@Assets["_content/MudBlazor/MudBlazor.min.js"]"></script>
-
-        <!-- Portal Theme Detection -->
-        <script>
-            window.portalTheme = {
-                getPreferredColourScheme: function () {
-                    return window.matchMedia('(prefers-color-scheme: dark)').matches;
-                }
-            };
-        </script>
-
     </body>
 
 </html>

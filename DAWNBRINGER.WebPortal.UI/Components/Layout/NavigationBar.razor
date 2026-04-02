@@ -1,147 +1,107 @@
 @inject NavigationManager NavigationManager
 @inject PortalAuthenticationService AuthenticationService
 
-<MudAppBar Elevation="0" Fixed="true" Class="portal-glass-navbar" Style="@AppBarStyle">
+<header class="portal-site-header">
+    <div class="portal-site-header-inner">
+        <a href="/" class="portal-brand-link" aria-label="Project KONGOR home">
+            <img src="images/portal-crest.svg" alt="Project KONGOR crest" class="portal-brand-crest" />
+            <span class="portal-brand-copy">
+                <span class="portal-brand-kicker">Project KONGOR</span>
+                <span class="portal-brand-title">User Portal</span>
+            </span>
+        </a>
 
-    <!-- Brand -->
-    <MudButton Href="https://github.com/Project-KONGOR-Open-Source"
-               StartIcon="@Icons.Custom.Brands.GitHub"
-               Variant="Variant.Text"
-               Color="Color.Inherit"
-               Class="portal-brand-button ml-2 ml-md-4">
-        Project KONGOR
-    </MudButton>
+        <nav class="portal-primary-navigation" aria-label="Primary navigation">
+            <a href="/">Home</a>
+            <a href="/#features">Features</a>
+            <a href="/#heroes">Heroes</a>
+            <details class="portal-nav-disclosure">
+                <summary>
+                    Download
+                    <MudIcon Icon="@Icons.Material.Filled.KeyboardArrowDown" Class="portal-nav-disclosure-icon" />
+                </summary>
 
-    <MudSpacer />
+                <div class="portal-nav-disclosure-panel">
+                    @foreach (DownloadGroup downloadGroup in DownloadGroups)
+                    {
+                        <section class="portal-nav-disclosure-group">
+                            <div class="portal-nav-disclosure-title">@downloadGroup.Title</div>
 
-    <!-- Desktop Navigation Links -->
-    <div class="portal-nav-desktop">
+                            @foreach (DownloadEntry downloadEntry in downloadGroup.Entries)
+                            {
+                                <a href="@downloadEntry.Link" target="_blank" rel="noreferrer">@downloadEntry.Title</a>
+                            }
+                        </section>
+                    }
+                </div>
+            </details>
+            <a href="https://codex.kongor.net" target="_blank" rel="noreferrer">Knowledge Base</a>
+            <a href="https://discord.gg/QjMBn5Wkzz" target="_blank" rel="noreferrer">Community</a>
+        </nav>
 
-        <MudButton Href="/"
-                   StartIcon="@Icons.Material.Filled.Home"
-                   Variant="Variant.Text"
-                   Color="Color.Inherit"
-                   Class="portal-nav-button">
-            Home
-        </MudButton>
-
-        <MudButton Href="https://discord.gg/QjMBn5Wkzz"
-                   StartIcon="@Icons.Material.Filled.Forum"
-                   Variant="Variant.Text"
-                   Color="Color.Inherit"
-                   Target="_blank"
-                   Class="portal-nav-button">
-            Discord
-        </MudButton>
-
-        <AuthorizeView>
-
-            <NotAuthorized>
-
-                <MudButton Href="/login"
-                           StartIcon="@Icons.Material.Filled.Login"
-                           Variant="Variant.Text"
-                           Color="Color.Inherit"
-                           Class="portal-nav-button">
-                    Log In
-                </MudButton>
-
-            </NotAuthorized>
-
-            <Authorized>
-
-                <MudButton Href="/account"
-                           StartIcon="@Icons.Material.Filled.Person"
-                           Variant="Variant.Text"
-                           Color="Color.Inherit"
-                           Class="portal-nav-button">
-                    Account
-                </MudButton>
-
-                <AuthorizeView Context="administrator" Roles="Administrator">
-
-                    <MudButton Href="/admin"
-                               StartIcon="@Icons.Material.Filled.AdminPanelSettings"
-                               Variant="Variant.Text"
-                               Color="Color.Inherit"
-                               Class="portal-nav-button">
-                        Admin
-                    </MudButton>
-
-                </AuthorizeView>
-
-                <MudButton OnClick="HandleLogOut"
-                           StartIcon="@Icons.Material.Filled.Logout"
-                           Variant="Variant.Text"
-                           Color="Color.Inherit"
-                           Class="portal-nav-button">
-                    Log Out
-                </MudButton>
-
-            </Authorized>
-
-        </AuthorizeView>
-
-    </div>
-
-    <!-- Dark/Light Mode Toggle -->
-    <MudIconButton Icon="@(IsDarkMode ? Icons.Material.Filled.LightMode : Icons.Material.Filled.DarkMode)"
-                   Color="Color.Inherit"
-                   OnClick="IsDarkModeChanged"
-                   Class="portal-theme-toggle ml-1" />
-
-    <!-- Mobile Hamburger Menu -->
-    <div class="portal-mobile-menu">
-        <MudMenu Icon="@Icons.Material.Filled.Menu"
-                 Color="Color.Inherit"
-                 AnchorOrigin="Origin.BottomRight"
-                 TransformOrigin="Origin.TopRight"
-                 Dense="false">
-
-            <MudMenuItem Href="/" Icon="@Icons.Material.Filled.Home">
-                Home
-            </MudMenuItem>
-
-            <MudMenuItem Href="https://discord.gg/QjMBn5Wkzz" Icon="@Icons.Material.Filled.Forum">
-                Discord
-            </MudMenuItem>
+        <div class="portal-header-actions">
+            <button type="button" class="portal-theme-button" @onclick="HandleThemeSelection" aria-label="Toggle colour theme">
+                <MudIcon Icon="@(IsDarkMode ? Icons.Material.Filled.LightMode : Icons.Material.Filled.DarkMode)" />
+            </button>
 
             <AuthorizeView>
-
                 <NotAuthorized>
-
-                    <MudMenuItem Href="/login" Icon="@Icons.Material.Filled.Login">
-                        Log In
-                    </MudMenuItem>
-
+                    <a href="/login" class="portal-utility-link">Log In</a>
+                    <a href="/register" class="portal-call-to-action portal-call-to-action-compact">Create Account</a>
                 </NotAuthorized>
 
                 <Authorized>
-
-                    <MudMenuItem Href="/account" Icon="@Icons.Material.Filled.Person">
-                        Account
-                    </MudMenuItem>
-
-                    <AuthorizeView Context="mobileAdministrator" Roles="Administrator">
-
-                        <MudMenuItem Href="/admin" Icon="@Icons.Material.Filled.AdminPanelSettings">
-                            Admin
-                        </MudMenuItem>
-
-                    </AuthorizeView>
-
-                    <MudMenuItem OnClick="HandleLogOut" Icon="@Icons.Material.Filled.Logout">
-                        Log Out
-                    </MudMenuItem>
-
+                    <a href="/account" class="portal-utility-link">Account</a>
+                    <button type="button" class="portal-utility-button" @onclick="HandleLogOut">Log Out</button>
                 </Authorized>
-
             </AuthorizeView>
 
-        </MudMenu>
+            <button type="button" class="portal-mobile-toggle" @onclick="ToggleMobileMenu" aria-expanded="@IsMobileMenuOpen.ToString().ToLowerInvariant()" aria-label="Toggle navigation menu">
+                <MudIcon Icon="@(IsMobileMenuOpen ? Icons.Material.Filled.Close : Icons.Material.Filled.Menu)" />
+            </button>
+        </div>
     </div>
 
-</MudAppBar>
+    @if (IsMobileMenuOpen)
+    {
+        <div class="portal-mobile-panel">
+            <a href="/" @onclick="CloseMobileMenu">Home</a>
+            <a href="/#features" @onclick="CloseMobileMenu">Features</a>
+            <a href="/#heroes" @onclick="CloseMobileMenu">Heroes</a>
+            <details class="portal-mobile-disclosure">
+                <summary>Download</summary>
+
+                <div class="portal-mobile-disclosure-panel">
+                    @foreach (DownloadGroup downloadGroup in DownloadGroups)
+                    {
+                        <section class="portal-mobile-disclosure-group">
+                            <div class="portal-mobile-disclosure-title">@downloadGroup.Title</div>
+
+                            @foreach (DownloadEntry downloadEntry in downloadGroup.Entries)
+                            {
+                                <a href="@downloadEntry.Link" target="_blank" rel="noreferrer" @onclick="CloseMobileMenu">@downloadEntry.Title</a>
+                            }
+                        </section>
+                    }
+                </div>
+            </details>
+            <a href="https://codex.kongor.net" target="_blank" rel="noreferrer" @onclick="CloseMobileMenu">Knowledge Base</a>
+            <a href="https://discord.gg/QjMBn5Wkzz" target="_blank" rel="noreferrer" @onclick="CloseMobileMenu">Community</a>
+
+            <AuthorizeView>
+                <NotAuthorized>
+                    <a href="/login" @onclick="CloseMobileMenu">Log In</a>
+                    <a href="/register" class="portal-call-to-action" @onclick="CloseMobileMenu">Create Account</a>
+                </NotAuthorized>
+
+                <Authorized>
+                    <a href="/account" @onclick="CloseMobileMenu">Account</a>
+                    <button type="button" class="portal-utility-button portal-utility-button-mobile" @onclick="HandleMobileLogOut">Log Out</button>
+                </Authorized>
+            </AuthorizeView>
+        </div>
+    }
+</header>
 
 @code {
 
@@ -149,15 +109,53 @@
     public bool IsDarkMode { get; set; }
 
     [Parameter]
-    public EventCallback IsDarkModeChanged { get; set; }
+    public EventCallback OnThemeToggle { get; set; }
 
-    private string AppBarStyle => IsDarkMode
-        ? "background: rgba(13, 13, 26, 0.8); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 1px solid rgba(119, 107, 231, 0.1);"
-        : "background: rgba(248, 249, 252, 0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-bottom: 1px solid rgba(0, 0, 0, 0.06);";
+    private static readonly DownloadGroup[] DownloadGroups =
+    [
+        new DownloadGroup("Launcher",
+        [
+            new DownloadEntry("Client", "https://example.com/kongor/launcher/client"),
+            new DownloadEntry("Server", "https://example.com/kongor/launcher/server")
+        ]),
+        new DownloadGroup("Distribution",
+        [
+            new DownloadEntry("Windows", "https://example.com/kongor/distribution/windows"),
+            new DownloadEntry("Linux", "https://example.com/kongor/distribution/linux"),
+            new DownloadEntry("macOS", "https://example.com/kongor/distribution/macos")
+        ])
+    ];
+
+    private bool IsMobileMenuOpen { get; set; }
+
+    private Task HandleThemeSelection()
+    {
+        return OnThemeToggle.InvokeAsync();
+    }
+
+    private void ToggleMobileMenu()
+    {
+        IsMobileMenuOpen = IsMobileMenuOpen is false;
+    }
+
+    private void CloseMobileMenu()
+    {
+        IsMobileMenuOpen = false;
+    }
 
     private async Task HandleLogOut()
     {
+        CloseMobileMenu();
         await AuthenticationService.ClearToken();
         NavigationManager.NavigateTo("/", forceLoad: true);
     }
+
+    private Task HandleMobileLogOut()
+    {
+        return HandleLogOut();
+    }
+
+    private sealed record DownloadGroup(string Title, DownloadEntry[] Entries);
+
+    private sealed record DownloadEntry(string Title, string Link);
 }

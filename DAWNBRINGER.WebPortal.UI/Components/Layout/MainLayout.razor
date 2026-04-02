@@ -1,20 +1,48 @@
+@implements IAsyncDisposable
 @inherits LayoutComponentBase
 
 @inject IJSRuntime JavaScript
 
-<MudThemeProvider @bind-IsDarkMode="IsDarkMode" Theme="Theme" />
+<MudThemeProvider IsDarkMode="IsDarkMode" Theme="Theme" />
 <MudPopoverProvider />
 <MudDialogProvider />
 <MudSnackbarProvider />
 
-<MudLayout>
-    <NavigationBar IsDarkMode="@IsDarkMode" IsDarkModeChanged="@ToggleDarkMode" />
-    <MudMainContent Class="portal-main-content">
-        <CascadingValue Value="IsDarkMode" Name="IsDarkMode">
+<div class="portal-shell @(IsDarkMode ? "portal-theme-dark" : "portal-theme-light")">
+    <div class="portal-background" aria-hidden="true">
+        <div class="portal-background-orb portal-background-orb-left"></div>
+        <div class="portal-background-orb portal-background-orb-right"></div>
+        <div class="portal-background-grid"></div>
+    </div>
+
+    <NavigationBar IsDarkMode="IsDarkMode" OnThemeToggle="HandleThemeToggle" />
+
+    <main class="portal-site-main">
+        <CascadingValue Name="IsDarkMode" Value="IsDarkMode">
             @Body
         </CascadingValue>
-    </MudMainContent>
-</MudLayout>
+    </main>
+
+    <footer class="portal-site-footer">
+        <div class="portal-site-footer-inner">
+            <div class="portal-site-footer-brand">
+                <img src="images/portal-crest.svg" alt="Project KONGOR crest" class="portal-site-footer-crest" />
+                <div>
+                    <div class="portal-site-footer-title">Project KONGOR</div>
+                    <div class="portal-site-footer-copy">A modern front door for the community portal.</div>
+                </div>
+            </div>
+
+            <div class="portal-site-footer-links">
+                <a href="/#features">Features</a>
+                <a href="/#heroes">Heroes</a>
+                <a href="https://codex.kongor.net" target="_blank" rel="noreferrer">Knowledge Base</a>
+                <a href="/#timeline">Timeline</a>
+                <a href="https://discord.gg/QjMBn5Wkzz" target="_blank" rel="noreferrer">Community</a>
+            </div>
+        </div>
+    </footer>
+</div>
 
 @code {
 
@@ -22,75 +50,130 @@
     {
         PaletteLight = new PaletteLight
         {
-            Primary = "#776BE7",
-            Secondary = "#FF4081",
-            Tertiary = "#5C6BC0",
-            AppbarBackground = "rgba(255, 255, 255, 0.85)",
-            AppbarText = "#1A1A2E",
-            Background = "#F8F9FC",
-            Surface = "#FFFFFF",
-            TextPrimary = "#1A1A2E",
-            TextSecondary = "#5A5A7A",
-            DrawerBackground = "#FFFFFF",
-            DrawerText = "#1A1A2E",
-            ActionDefault = "#5A5A7A",
-            ActionDisabled = "#9E9E9E",
-            Divider = "rgba(0, 0, 0, 0.08)"
+            Primary = "#a53d2d",
+            Secondary = "#355f87",
+            Tertiary = "#c4a46d",
+            AppbarBackground = "rgba(246, 240, 230, 0.88)",
+            AppbarText = "#231a14",
+            Background = "#f6f0e6",
+            Surface = "#fffaf2",
+            TextPrimary = "#231a14",
+            TextSecondary = "#5d4e40",
+            DrawerBackground = "#fffaf2",
+            DrawerText = "#231a14",
+            ActionDefault = "#5d4e40",
+            ActionDisabled = "#a7998c",
+            Divider = "rgba(35, 26, 20, 0.12)"
         },
         PaletteDark = new PaletteDark
         {
-            Primary = "#776BE7",
-            Secondary = "#FF4081",
-            Tertiary = "#7C4DFF",
-            AppbarBackground = "rgba(15, 15, 26, 0.85)",
-            AppbarText = "#FFFFFF",
-            Background = "#0D0D1A",
-            Surface = "#1A1A2E",
-            TextPrimary = "#E8E8F0",
-            TextSecondary = "#A0A0C0",
-            DrawerBackground = "#1A1A2E",
-            DrawerText = "#E8E8F0",
-            ActionDefault = "#A0A0C0",
-            ActionDisabled = "#4A4A6A",
-            Divider = "rgba(119, 107, 231, 0.12)"
+            Primary = "#d06a3c",
+            Secondary = "#7aa4d2",
+            Tertiary = "#d5bc83",
+            AppbarBackground = "rgba(10, 17, 27, 0.86)",
+            AppbarText = "#f6efe4",
+            Background = "#0b111b",
+            Surface = "#121c29",
+            TextPrimary = "#f6efe4",
+            TextSecondary = "#b8c0cb",
+            DrawerBackground = "#121c29",
+            DrawerText = "#f6efe4",
+            ActionDefault = "#b8c0cb",
+            ActionDisabled = "#5c6470",
+            Divider = "rgba(245, 197, 122, 0.12)"
         },
         Typography = new Typography
         {
             Default = new DefaultTypography
             {
                 FontFamily = ["Inter", "Segoe UI", "Roboto", "Helvetica Neue", "Arial", "sans-serif"]
+            },
+            H1 = new H1Typography
+            {
+                FontFamily = ["Cinzel", "Georgia", "serif"],
+                FontWeight = "700"
+            },
+            H2 = new H2Typography
+            {
+                FontFamily = ["Cinzel", "Georgia", "serif"],
+                FontWeight = "700"
+            },
+            H3 = new H3Typography
+            {
+                FontFamily = ["Cinzel", "Georgia", "serif"],
+                FontWeight = "700"
+            },
+            H4 = new H4Typography
+            {
+                FontFamily = ["Cinzel", "Georgia", "serif"],
+                FontWeight = "700"
+            },
+            H5 = new H5Typography
+            {
+                FontFamily = ["Cinzel", "Georgia", "serif"],
+                FontWeight = "700"
+            },
+            H6 = new H6Typography
+            {
+                FontFamily = ["Cinzel", "Georgia", "serif"],
+                FontWeight = "700"
             }
         },
         LayoutProperties = new LayoutProperties
         {
-            DefaultBorderRadius = "12px"
+            DefaultBorderRadius = "18px"
         }
     };
 
+    private IJSObjectReference? ThemeModule { get; set; }
+
     private bool IsDarkMode { get; set; } = true;
-
-    private bool ThemeInitialised { get; set; }
-
-    private void ToggleDarkMode()
-    {
-        IsDarkMode = !IsDarkMode;
-    }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (firstRender && ThemeInitialised is false)
+        if (firstRender is false)
         {
-            try
-            {
-                IsDarkMode = await JavaScript.InvokeAsync<bool>("portalTheme.getPreferredColourScheme");
-                ThemeInitialised = true;
-                StateHasChanged();
-            }
-            catch
-            {
-                // If JS Interop Fails, Default To Dark Mode
-                ThemeInitialised = true;
-            }
+            return;
         }
+
+        ThemeModule = await JavaScript.InvokeAsync<IJSObjectReference>("import", "./js/portalTheme.js");
+
+        ThemePreference themePreference = await ThemeModule.InvokeAsync<ThemePreference>("getThemePreference");
+        IsDarkMode = themePreference.Mode.Equals("dark", StringComparison.Ordinal);
+
+        StateHasChanged();
+    }
+
+    private async Task HandleThemeToggle()
+    {
+        IsDarkMode = IsDarkMode is false;
+
+        if (ThemeModule is not null)
+        {
+            await ThemeModule.InvokeVoidAsync("setThemePreference", IsDarkMode ? "dark" : "light");
+        }
+    }
+
+    async ValueTask IAsyncDisposable.DisposeAsync()
+    {
+        if (ThemeModule is null)
+        {
+            return;
+        }
+
+        try
+        {
+            await ThemeModule.DisposeAsync();
+        }
+        catch (JSDisconnectedException)
+        {
+        }
+    }
+
+    private sealed class ThemePreference
+    {
+        public string Mode { get; set; } = "dark";
+
+        public string Source { get; set; } = "system";
     }
 }

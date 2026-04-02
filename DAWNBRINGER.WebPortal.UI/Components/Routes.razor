@@ -2,15 +2,17 @@
     <Found Context="routeData">
         <AuthorizeRouteView RouteData="routeData" DefaultLayout="typeof(Layout.MainLayout)">
             <NotAuthorized>
-                <MudContainer MaxWidth="MaxWidth.Small" Class="portal-form-page d-flex flex-column align-center">
-                    <MudAlert Severity="Severity.Warning" Variant="Variant.Filled" Class="mb-4" Style="border-radius: 12px;">
-                        You need to log in to access this page.
-                    </MudAlert>
-                    <MudButton Href="/login" Variant="Variant.Filled" Color="Color.Primary" FullWidth="true"
-                               Style="border-radius: 12px; height: 48px; font-weight: 600;">
-                        Go To Log In
-                    </MudButton>
-                </MudContainer>
+                <section class="portal-utility-state">
+                    <div class="portal-state-panel">
+                        <div class="portal-section-kicker">Authorisation Required</div>
+                        <h1>Sign in to reach this part of the portal.</h1>
+                        <p>The new shell is public, but this route still requires an authenticated account.</p>
+                        <div class="portal-hero-actions portal-hero-actions-centred">
+                            <a href="/login" class="portal-call-to-action">Go To Log In</a>
+                            <a href="/" class="portal-secondary-action">Return Home</a>
+                        </div>
+                    </div>
+                </section>
             </NotAuthorized>
         </AuthorizeRouteView>
         <FocusOnNavigate RouteData="routeData" Selector="h1" />
@@ -18,19 +20,16 @@
     <NotFound>
         <PageTitle>Not Found</PageTitle>
         <LayoutView Layout="typeof(Layout.MainLayout)">
-            <MudContainer MaxWidth="MaxWidth.Small" Class="portal-form-page d-flex flex-column align-center">
-                <MudIcon Icon="@Icons.Material.Filled.SearchOff" Size="Size.Large" Color="Color.Secondary" Class="mb-4" />
-                <MudText Typo="Typo.h4" Align="Align.Center" GutterBottom="true" Style="font-weight: 700;">
-                    Page Not Found
-                </MudText>
-                <MudText Typo="Typo.body1" Align="Align.Center" Class="mb-6">
-                    There is nothing at this address.
-                </MudText>
-                <MudButton Href="/" Variant="Variant.Filled" Color="Color.Primary"
-                           Style="border-radius: 12px; height: 48px; font-weight: 600; min-width: 180px;">
-                    Return Home
-                </MudButton>
-            </MudContainer>
+            <section class="portal-utility-state">
+                <div class="portal-state-panel">
+                    <div class="portal-section-kicker">Page Not Found</div>
+                    <h1>There is nothing at this address.</h1>
+                    <p>The redesigned portal does not have a route mapped here yet.</p>
+                    <div class="portal-hero-actions portal-hero-actions-centred">
+                        <a href="/" class="portal-call-to-action">Return Home</a>
+                    </div>
+                </div>
+            </section>
         </LayoutView>
     </NotFound>
 </Router>

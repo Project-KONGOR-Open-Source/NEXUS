@@ -1,195 +1,187 @@
 @page "/"
 
-@inject PortalAuthenticationService AuthenticationService
-
 <PageTitle>Project KONGOR</PageTitle>
 
-<!-- Full-Viewport Hero Section — Edge-to-Edge, Viewport-Matched -->
-<section class="portal-hero">
+<HeadContent>
+    <meta name="description" content="Project KONGOR user portal with a Dota-inspired presentation, modern account flows, download signposting, and a public knowledge base link." />
+</HeadContent>
 
-    <!-- Caldavar Background Image -->
-    <img src="img/caldavar.jpg" alt="" class="portal-hero-image" />
+<div class="portal-home-page">
+    <section class="portal-hero-section" id="top">
+        <div class="portal-hero-copy">
+            <div class="portal-section-kicker">Project KONGOR</div>
+            <h1 class="portal-hero-title">The Modern Portal For Newerth</h1>
+            <p class="portal-hero-summary">
+                A rebuilt front page for accounts, downloads, documentation, security flows, and community touchpoints &mdash; shaped by the cinematic energy of Dota&rsquo;s homepage and tuned for your portal.
+            </p>
 
-    <!-- Dark Tint Overlay -->
-    <div class="portal-hero-overlay"
-         style="@HeroOverlayStyle" />
+            <div class="portal-hero-actions">
+                <AuthorizeView>
+                    <NotAuthorized>
+                        <a href="/register" class="portal-call-to-action">Create Account</a>
+                        <a href="/login" class="portal-secondary-action">Log In</a>
+                    </NotAuthorized>
 
-    <!-- Bottom Fade Gradient -->
-    <div class="portal-hero-fade"
-         style="@HeroFadeStyle" />
+                    <Authorized>
+                        <a href="/account" class="portal-call-to-action">Open Account</a>
+                        <a href="https://discord.gg/QjMBn5Wkzz" target="_blank" rel="noreferrer" class="portal-secondary-action">Join Community</a>
+                    </Authorized>
+                </AuthorizeView>
+            </div>
 
-    <!-- Hero Content -->
-    <div class="portal-hero-content">
+            <div class="portal-hero-caption">A Dota-inspired landing experience rebuilt for accounts, downloads, and portal readiness.</div>
+        </div>
 
-        <MudText Typo="Typo.h2" Align="Align.Center"
-                 Class="scurlock portal-hero-title portal-glow-text portal-hero-title-text"
-                 Style="color: #FFFFFF; font-size: 60px; letter-spacing: 4px;">
-            Project KONGOR
-        </MudText>
-
-        <MudText Typo="Typo.h5" Align="Align.Center"
-                 Class="scurlock portal-hero-subtitle portal-hero-subtitle-text mb-2"
-                 Style="color: #E0E0E0; font-size: 48px; opacity: 0.9;">
-            Coming Soon To A Fountain Near You
-        </MudText>
-
-        <MudText Typo="Typo.body1" Align="Align.Center"
-                 Class="portal-hero-description mb-10"
-                 Style="color: rgba(224, 224, 224, 0.75); max-width: 480px;">
-            Stay up to speed with the updates on
-            <MudLink Href="https://discord.gg/QjMBn5Wkzz" Target="_blank" Typo="Typo.body1"
-                     Style="color: #9B8FFF; font-weight: 600;">
-                our Discord server
-            </MudLink>
-        </MudText>
-
-        <AuthorizeView>
-            <NotAuthorized>
-                <div class="portal-hero-cta">
-                    <MudButton Href="/register"
-                               Variant="Variant.Outlined"
-                               Size="Size.Large"
-                               EndIcon="@Icons.Material.Filled.AppRegistration"
-                               Class="portal-cta-button"
-                               Style="width: 240px; height: 56px; font-size: 1.1rem; font-weight: 600; color: #FFFFFF; border-color: rgba(119, 107, 231, 0.7);">
-                        Register
-                    </MudButton>
+        <div class="portal-hero-visual" aria-hidden="true">
+            <div class="portal-hero-emblem-card">
+                <img src="images/portal-crest.svg" alt="" class="portal-hero-emblem" />
+                <div class="portal-hero-emblem-copy">
+                    <div>Modern account flows</div>
+                    <div>Security-first requests</div>
+                    <div>Community dispatches</div>
                 </div>
-            </NotAuthorized>
-        </AuthorizeView>
+            </div>
 
-    </div>
+            <div class="portal-hero-stat-grid">
+                <article class="portal-hero-stat-card">
+                    <span>01</span>
+                    <strong>Unified portal access</strong>
+                    <p>Registration, sign-in, and account management in one place.</p>
+                </article>
 
-</section>
+                <article class="portal-hero-stat-card">
+                    <span>02</span>
+                    <strong>Secure request flows</strong>
+                    <p>Email and password changes remain routed through verified actions.</p>
+                </article>
 
-<!-- Timeline Section -->
-<MudContainer MaxWidth="MaxWidth.Large" Class="portal-timeline-section">
+                <article class="portal-hero-stat-card">
+                    <span>03</span>
+                    <strong>Download ready</strong>
+                    <p>Launcher and distribution targets now have a dedicated navigation path.</p>
+                </article>
+            </div>
+        </div>
+    </section>
 
-    <MudText Typo="Typo.h4" Align="Align.Center" Class="portal-timeline-heading">
-        Project KONGOR Timeline
-    </MudText>
+    <section class="portal-section portal-feature-banner" id="features">
+        <div class="portal-feature-banner-copy">
+            <div class="portal-section-kicker">Portal Focus</div>
+            <h2>Sharper Navigation. Cleaner Identity. Better Access.</h2>
+            <p>
+                The new shell keeps the familiar portal functionality, trims away irrelevant menu items, and makes the important actions obvious whether a visitor is browsing casually, downloading builds, or managing an account.
+            </p>
+            <div class="portal-hero-actions">
+                <a href="https://codex.kongor.net" target="_blank" rel="noreferrer" class="portal-secondary-action">Open Knowledge Base</a>
+                <a href="https://example.com/kongor/launcher/client" target="_blank" rel="noreferrer" class="portal-secondary-action">Placeholder Client Download</a>
+            </div>
+        </div>
 
-    <MudTimeline TimelineAlign="TimelineAlign.Default" TimelinePosition="TimelinePosition.Alternate" Class="my-6">
+        <div class="portal-feature-grid">
+            @foreach (PortalFeature portalFeature in PortalFeatures)
+            {
+                <article class="portal-feature-card">
+                    <MudIcon Icon="@portalFeature.Icon" Class="portal-feature-icon" />
+                    <h3>@portalFeature.Title</h3>
+                    <p>@portalFeature.Description</p>
+                </article>
+            }
+        </div>
+    </section>
 
-        <MudTimelineItem Color="Color.Primary" Size="Size.Small">
-            <ItemOpposite>
-                <MudText Color="Color.Primary" Typo="Typo.h6" Class="portal-timeline-date">
-                    September 16th 2022
-                </MudText>
-            </ItemOpposite>
-            <ItemContent>
-                <MudCard Outlined="true" Elevation="0" Class="portal-timeline-card">
-                    <MudCardContent>
-                        <MudText Align="Align.Right" Color="Color.Secondary" Typo="Typo.h6" GutterBottom="true"
-                                 Style="font-weight: 700;">
-                            GOPO™ Retires From The Development Team
-                        </MudText>
-                        <MudText Align="Align.Right" Typo="Typo.body2">
-                            Having built Project KONGOR into the canonical HoN successor, the original project founder steps down to focus more on his personal life.
-                        </MudText>
-                    </MudCardContent>
-                </MudCard>
-            </ItemContent>
-        </MudTimelineItem>
+    <section class="portal-section" id="heroes">
+        <div class="portal-section-heading">
+            <div class="portal-section-kicker">Choose Your Path</div>
+            <h2>Everything Important Has A Place</h2>
+            <p>The presentation borrows the strong silhouettes and section rhythm of the Dota reference while mapping each panel to practical portal tasks such as account access, downloads, and documentation.</p>
+        </div>
 
-        <MudTimelineItem Color="Color.Primary" Size="Size.Small">
-            <ItemOpposite>
-                <MudText Color="Color.Primary" Typo="Typo.h6" Class="portal-timeline-date">
-                    August 5th 2022
-                </MudText>
-            </ItemOpposite>
-            <ItemContent>
-                <MudCard Outlined="true" Elevation="0" Class="portal-timeline-card">
-                    <MudCardContent>
-                        <MudText Align="Align.Left" Color="Color.Secondary" Typo="Typo.h6" GutterBottom="true"
-                                 Style="font-weight: 700;">
-                            Project KONGOR Enters Open Beta Testing
-                        </MudText>
-                        <MudText Align="Align.Left" Typo="Typo.body2">
-                            Project KONGOR publicly invites all players to start using the service.
-                        </MudText>
-                    </MudCardContent>
-                </MudCard>
-            </ItemContent>
-        </MudTimelineItem>
+        <div class="portal-path-grid">
+            @foreach (PortalPath portalPath in PortalPaths)
+            {
+                <article class="portal-path-card">
+                    <div class="portal-path-icon-shell">
+                        <MudIcon Icon="@portalPath.Icon" />
+                    </div>
+                    <h3>@portalPath.Title</h3>
+                    <p>@portalPath.Description</p>
+                    <a href="@portalPath.Link" class="portal-inline-link" target="@portalPath.Target">@portalPath.LinkLabel</a>
+                </article>
+            }
+        </div>
+    </section>
 
-        <MudTimelineItem Color="Color.Primary" Size="Size.Small">
-            <ItemOpposite>
-                <MudText Color="Color.Primary" Typo="Typo.h6" Class="portal-timeline-date">
-                    June 20th 2022
-                </MudText>
-            </ItemOpposite>
-            <ItemContent>
-                <MudCard Outlined="true" Elevation="0" Class="portal-timeline-card">
-                    <MudCardContent>
-                        <MudText Align="Align.Right" Color="Color.Secondary" Typo="Typo.h6" GutterBottom="true"
-                                 Style="font-weight: 700;">
-                            Official HoN Servers Shut Down
-                        </MudText>
-                        <MudText Align="Align.Right" Typo="Typo.body2">
-                            The game first launched on May 12th 2010, running for a little over 13 years, before finally shutting down.
-                        </MudText>
-                    </MudCardContent>
-                </MudCard>
-            </ItemContent>
-        </MudTimelineItem>
+    <section class="portal-section" id="timeline">
+        <div class="portal-section-heading">
+            <div class="portal-section-kicker">Project Timeline</div>
+            <h2>The Road That Led Here</h2>
+            <p>The portal overhaul sits on top of the same community story. The visual language is new, but the project milestones remain intact.</p>
+        </div>
 
-        <MudTimelineItem Color="Color.Primary" Size="Size.Small">
-            <ItemOpposite>
-                <MudText Color="Color.Primary" Typo="Typo.h6" Class="portal-timeline-date">
-                    December 13th 2021
-                </MudText>
-            </ItemOpposite>
-            <ItemContent>
-                <MudCard Outlined="true" Elevation="0" Class="portal-timeline-card">
-                    <MudCardContent>
-                        <MudText Align="Align.Left" Color="Color.Secondary" Typo="Typo.h6" GutterBottom="true"
-                                 Style="font-weight: 700;">
-                            Project KONGOR Development Begins
-                        </MudText>
-                        <MudText Align="Align.Left" Typo="Typo.body2">
-                            Packet capturing starts and the first proof-of-concept is released. The proof-of-concept consisted of logging in and playing Plinko.
-                        </MudText>
-                    </MudCardContent>
-                </MudCard>
-            </ItemContent>
-        </MudTimelineItem>
+        <div class="portal-timeline-list">
+            @foreach (PortalMilestone portalMilestone in PortalMilestones)
+            {
+                <article class="portal-timeline-entry">
+                    <div class="portal-timeline-date">@portalMilestone.DateLabel</div>
+                    <div class="portal-timeline-body">
+                        <h3>@portalMilestone.Title</h3>
+                        <p>@portalMilestone.Description</p>
+                    </div>
+                </article>
+            }
+        </div>
+    </section>
 
-        <MudTimelineItem Color="Color.Primary" Size="Size.Small">
-            <ItemOpposite>
-                <MudText Color="Color.Primary" Typo="Typo.h6" Class="portal-timeline-date">
-                    December 13th 2021
-                </MudText>
-            </ItemOpposite>
-            <ItemContent>
-                <MudCard Outlined="true" Elevation="0" Class="portal-timeline-card">
-                    <MudCardContent>
-                        <MudText Align="Align.Right" Color="Color.Secondary" Typo="Typo.h6" GutterBottom="true"
-                                 Style="font-weight: 700;">
-                            HoN's End-Of-Life Is Announced
-                        </MudText>
-                        <MudText Align="Align.Right" Typo="Typo.body2">
-                            Frostburn announces that the game will shut down on June 20th 2022.
-                        </MudText>
-                    </MudCardContent>
-                </MudCard>
-            </ItemContent>
-        </MudTimelineItem>
+    <section class="portal-final-call">
+        <div class="portal-section-kicker">Enter The Portal</div>
+        <h2>Ready To Keep Going?</h2>
+        <p>Use the rebuilt portal to register, sign in, manage credentials, grab the right build, and stay close to the community while the broader ecosystem continues to evolve.</p>
+        <div class="portal-hero-actions portal-hero-actions-centred">
+            <AuthorizeView>
+                <NotAuthorized>
+                    <a href="/register" class="portal-call-to-action">Begin Registration</a>
+                </NotAuthorized>
 
-    </MudTimeline>
+                <Authorized>
+                    <a href="/account" class="portal-call-to-action">Manage Account</a>
+                </Authorized>
+            </AuthorizeView>
 
-</MudContainer>
+            <a href="https://discord.gg/QjMBn5Wkzz" target="_blank" rel="noreferrer" class="portal-secondary-action">Open Discord</a>
+        </div>
+    </section>
+</div>
 
 @code {
 
-    [CascadingParameter(Name = "IsDarkMode")]
-    private bool IsDarkMode { get; set; }
+    private static readonly PortalFeature[] PortalFeatures =
+    [
+        new PortalFeature(Icons.Material.Filled.PersonAddAlt1, "Sharper onboarding", "Visitors can move from the cinematic hero straight into registration or sign-in without hunting through sparse navigation."),
+        new PortalFeature(Icons.Material.Filled.VerifiedUser, "Security-first actions", "Email and password changes still route through verified flows, but the surrounding presentation is clearer and more modern."),
+        new PortalFeature(Icons.Material.Filled.Download, "Download-aware navigation", "Launcher and distribution targets now sit behind a dedicated menu structure instead of being buried inside generic landing content."),
+        new PortalFeature(Icons.Material.Filled.LibraryBooks, "Documentation in reach", "The knowledge base now sits directly in the primary navigation so public guidance is always one click away.")
+    ];
 
-    private string HeroOverlayStyle => IsDarkMode
-        ? "background: rgba(13, 13, 26, 0.6);"
-        : "background: rgba(13, 13, 26, 0.5);";
+    private static readonly PortalPath[] PortalPaths =
+    [
+        new PortalPath(Icons.Material.Filled.AccountCircle, "Create or recover", "The portal is tuned for the first few minutes: registration, e-mail confirmation, sign-in, and password recovery.", "/register", "Start here", null),
+        new PortalPath(Icons.Material.Filled.LockReset, "Protect your account", "Authenticated users can request e-mail and password changes through dedicated account-management flows.", "/account", "Open account", null),
+        new PortalPath(Icons.Material.Filled.Download, "Choose a build", "Placeholder download targets are already grouped by launcher and full distribution so the portal structure is ready for real artefacts.", "https://example.com/kongor/distribution/windows", "View downloads", "_blank"),
+        new PortalPath(Icons.Material.Filled.MenuBook, "Read the codex", "Reference material now has a dedicated public destination for documentation, onboarding, and future support content.", "https://codex.kongor.net", "Open Knowledge Base", "_blank")
+    ];
 
-    private string HeroFadeStyle => IsDarkMode
-        ? "background: linear-gradient(to bottom, transparent 10%, #0D0D1A);"
-        : "background: linear-gradient(to bottom, transparent 10%, #F8F9FC);";
+    private static readonly PortalMilestone[] PortalMilestones =
+    [
+        new PortalMilestone("16 September 2022", "GOPO retires from the development team", "After helping establish Project KONGOR as the canonical Heroes of Newerth successor, the original founder stepped back to focus on personal life."),
+        new PortalMilestone("5 August 2022", "Project KONGOR enters open beta testing", "The project publicly invited players to begin using the service and testing the community-driven experience."),
+        new PortalMilestone("20 June 2022", "Official HoN servers shut down", "The original service closed after more than thirteen years, making room for community revival efforts to carry the torch."),
+        new PortalMilestone("13 December 2021", "Project KONGOR development begins", "Packet capture work began and the first proof-of-concept experiences appeared as the community effort took shape."),
+        new PortalMilestone("13 December 2021", "Heroes of Newerth end-of-life announced", "Frostburn announced the shutdown plan that ultimately set the stage for KONGOR and related revival work.")
+    ];
+
+    private sealed record PortalFeature(string Icon, string Title, string Description);
+
+    private sealed record PortalPath(string Icon, string Title, string Description, string Link, string LinkLabel, string? Target);
+
+    private sealed record PortalMilestone(string DateLabel, string Title, string Description);
 }
