@@ -21,7 +21,7 @@ public class CreateAccountFormModel
     [Required(ErrorMessage = "Account name is required")]
     // The Server Allows Up To 16 Characters In Development; Use Swagger UI To Bypass This Limit
     [StringLength(12, ErrorMessage = "The account name must be between 4 and 12 characters long", MinimumLength = 4)]
-    [RegularExpression(@"^[a-zA-Z0-9_\-`]+$", ErrorMessage = "The account name may only contain letters, numbers, underscores, hyphens, and backticks")]
+    [RegularExpression(@"^[a-zA-Z0-9_\-]+$", ErrorMessage = "The account name may only contain letters, numbers, underscores, and hyphens")]
     public string Name { get; set; } = string.Empty;
 
     [Required(ErrorMessage = "Password is required")]
