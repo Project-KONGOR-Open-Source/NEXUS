@@ -16,14 +16,24 @@ public interface IEmailService
     Task<bool> SendEmailAddressRegistrationConfirmation(string emailAddress, string accountName);
 
     /// <summary>
-    ///     Sends an email containing a link for the user to reset a forgotten account password.
+    ///     Sends an email containing a generated random password and a confirmation link for the user to activate the reset.
     /// </summary>
-    Task<bool> SendAccountPasswordRecoveryLink(string emailAddress, string token, List<string> accountNames);
+    Task<bool> SendAccountPasswordResetLink(string emailAddress, string token, string generatedPassword, List<string> accountNames);
 
     /// <summary>
-    ///     Sends a confirmation email after the user has successfully reset their account password.
+    ///     Sends a confirmation email after the user has successfully confirmed their account password reset.
     /// </summary>
-    Task<bool> SendAccountPasswordRecoveryConfirmation(string emailAddress, List<string> accountNames);
+    Task<bool> SendAccountPasswordResetConfirmation(string emailAddress, List<string> accountNames);
+
+    /// <summary>
+    ///     Sends an email containing a confirmation link for the user to activate their chosen new password.
+    /// </summary>
+    Task<bool> SendAccountPasswordUpdateLink(string emailAddress, string token, List<string> accountNames);
+
+    /// <summary>
+    ///     Sends a confirmation email after the user has successfully confirmed their account password update.
+    /// </summary>
+    Task<bool> SendAccountPasswordUpdateConfirmation(string emailAddress, List<string> accountNames);
 
     /// <summary>
     ///     Sends an email containing a link for the user to confirm an email address update.

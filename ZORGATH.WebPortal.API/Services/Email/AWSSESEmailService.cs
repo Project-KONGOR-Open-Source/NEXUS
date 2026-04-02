@@ -11,7 +11,7 @@ public class AWSSESEmailService(IOptions<OperationalConfiguration> configuration
 
     public async Task<bool> SendEmailAddressRegistrationLink(string emailAddress, string token)
     {
-        string link = "https://portal.ui.kongor.net/register/" + token;
+        string link = "https://portal.kongor.net/register/" + token;
 
         const string subject = "Verify Email Address";
 
@@ -38,20 +38,21 @@ public class AWSSESEmailService(IOptions<OperationalConfiguration> configuration
         return await SendEmail(emailAddress, subject, body);
     }
 
-    public async Task<bool> SendAccountPasswordRecoveryLink(string emailAddress, string token, List<string> accountNames)
+    public async Task<bool> SendAccountPasswordResetLink(string emailAddress, string token, string generatedPassword, List<string> accountNames)
     {
-        string link = "https://portal.ui.kongor.net/recover/" + token;
+        string link = "https://portal.kongor.net/recover/" + token;
 
         const string subject = "Reset Forgotten Password";
 
         string accountNamesBody = accountNames.Count > 0
-            ? "Accounts:" + Environment.NewLine + string.Join(Environment.NewLine, accountNames) + Environment.NewLine
-            : "No accounts found." + Environment.NewLine;
+            ? "Account(s): " + string.Join(", ", accountNames)
+            : "No accounts found.";
 
         string body = "A password reset has been requested for an account that is registered with this email address."
                       + Environment.NewLine + "If you did not make this request, please ignore this message."
                       + Environment.NewLine + Environment.NewLine + accountNamesBody
-                      + Environment.NewLine + "Please follow the link below to continue:"
+                      + Environment.NewLine + $@"Your new password will be: ""{generatedPassword}"""
+                      + Environment.NewLine + Environment.NewLine + "Please follow the link below to confirm and activate this new password:"
                       + Environment.NewLine + Environment.NewLine + link
                       + Environment.NewLine + Environment.NewLine + "Regards,"
                       + Environment.NewLine + "The Project KONGOR Team";
@@ -59,11 +60,44 @@ public class AWSSESEmailService(IOptions<OperationalConfiguration> configuration
         return await SendEmail(emailAddress, subject, body);
     }
 
-    public async Task<bool> SendAccountPasswordRecoveryConfirmation(string emailAddress, List<string> accountNames)
+    public async Task<bool> SendAccountPasswordResetConfirmation(string emailAddress, List<string> accountNames)
     {
         const string subject = "Account Password Was Reset";
 
-        string body = $@"The password for all accounts linked to email address ""{emailAddress}"" has been changed:" + Environment.NewLine
+        string body = $@"The password for all accounts linked to email address ""{emailAddress}"" has been reset:" + Environment.NewLine
+                      + string.Join(", ", accountNames)
+                      + Environment.NewLine + Environment.NewLine + "Regards,"
+                      + Environment.NewLine + "The Project KONGOR Team";
+
+        return await SendEmail(emailAddress, subject, body);
+    }
+
+    public async Task<bool> SendAccountPasswordUpdateLink(string emailAddress, string token, List<string> accountNames)
+    {
+        string link = "https://portal.kongor.net/password/update/" + token;
+
+        const string subject = "Confirm Password Update";
+
+        string accountNamesBody = accountNames.Count > 0
+            ? "Account(s): " + string.Join(", ", accountNames)
+            : "No accounts found.";
+
+        string body = "A password update has been requested for an account that is registered with this email address."
+                      + Environment.NewLine + "If you did not make this request, please ignore this message."
+                      + Environment.NewLine + Environment.NewLine + accountNamesBody
+                      + Environment.NewLine + "Please follow the link below to confirm and activate your new password:"
+                      + Environment.NewLine + Environment.NewLine + link
+                      + Environment.NewLine + Environment.NewLine + "Regards,"
+                      + Environment.NewLine + "The Project KONGOR Team";
+
+        return await SendEmail(emailAddress, subject, body);
+    }
+
+    public async Task<bool> SendAccountPasswordUpdateConfirmation(string emailAddress, List<string> accountNames)
+    {
+        const string subject = "Account Password Was Updated";
+
+        string body = $@"The password for all accounts linked to email address ""{emailAddress}"" has been updated:" + Environment.NewLine
                       + string.Join(", ", accountNames)
                       + Environment.NewLine + Environment.NewLine + "Regards,"
                       + Environment.NewLine + "The Project KONGOR Team";
@@ -73,7 +107,7 @@ public class AWSSESEmailService(IOptions<OperationalConfiguration> configuration
 
     public async Task<bool> SendEmailAddressUpdateLink(string emailAddress, string token)
     {
-        string link = "https://portal.ui.kongor.net/update/" + token;
+        string link = "https://portal.kongor.net/update/" + token;
 
         const string subject = "Update Email Address";
 
