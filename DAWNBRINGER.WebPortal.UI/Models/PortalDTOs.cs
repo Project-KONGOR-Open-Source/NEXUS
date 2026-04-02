@@ -117,3 +117,7 @@ public record AuthenticationTokenResponse(int UserID, string TokenType, string T
 public record BasicUserResponse(int ID, string EmailAddress, List<BasicAccountResponse> Accounts);
 
 public record BasicAccountResponse(int ID, string Name);
+
+public record UserResponse(int ID, string EmailAddress, string Role, string CurrentAccountName, string CurrentClanName, string CurrentClanTag, DateTimeOffset TimestampCreated, int TotalLevel, int CurrentAccountLevel, List<UserAccountResponse> Accounts);
+
+public record UserAccountResponse(int ID, string Name, bool IsMain, string ClanName, string ClanTag);

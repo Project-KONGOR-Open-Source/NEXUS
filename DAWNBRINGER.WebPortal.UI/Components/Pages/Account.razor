@@ -10,54 +10,95 @@
 <div class="portal-account-page">
     <AuthorizeView Context="userContext">
         <Authorized>
-            <section class="portal-account-shell">
-                <div class="portal-account-hero">
-                    <div class="portal-account-header">
-                        <div class="portal-account-crest-shell">
-                            <img src="images/portal-crest.svg" alt="Project KONGOR crest" class="portal-account-crest" />
+            @if (LoadingAccountOverview)
+            {
+                <section class="portal-account-shell">
+                    <div class="portal-account-hero portal-account-hero-loading">
+                        <MudProgressCircular Size="Size.Large" Color="Color.Primary" Indeterminate="true" />
+                        <p class="portal-account-summary">Loading your account overview.</p>
+                    </div>
+                </section>
+            }
+            else if (AccountOverview is null)
+            {
+                <section class="portal-account-shell">
+                    <div class="portal-account-hero portal-account-hero-loading">
+                        <h1 class="portal-account-title">Account Unavailable</h1>
+                        <p class="portal-account-summary">The account overview could not be loaded right now. Please refresh and try again.</p>
+                    </div>
+                </section>
+            }
+            else
+            {
+                <section class="portal-account-shell">
+                    <div class="portal-account-hero">
+                        <div class="portal-account-hero-top">
+                            <div>
+                                <div class="portal-account-kicker">Current Account</div>
+                                <h1 class="portal-account-title">@AccountOverview.CurrentAccountName</h1>
+                            </div>
                         </div>
+
+                        <div class="portal-account-stat-grid">
+                            <article class="portal-account-stat-card">
+                                <span class="portal-account-stat-label">E-mail Address</span>
+                                <strong class="portal-account-stat-value">@AccountOverview.EmailAddress</strong>
+                            </article>
+
+                            <article class="portal-account-stat-card">
+                                <span class="portal-account-stat-label">User Role</span>
+                                <strong class="portal-account-stat-value">@AccountOverview.Role</strong>
+                            </article>
+
+                            <article class="portal-account-stat-card">
+                                <span class="portal-account-stat-label">Member Since</span>
+                                <strong class="portal-account-stat-value">@FormatTimestamp(AccountOverview.TimestampCreated)</strong>
+                            </article>
+
+                            <article class="portal-account-stat-card">
+                                <span class="portal-account-stat-label">Account Level</span>
+                                <strong class="portal-account-stat-value">@AccountOverview.CurrentAccountLevel</strong>
+                            </article>
+                        </div>
+                    </div>
+
+                    <section class="portal-management-card portal-account-overview-card">
                         <div>
-                            <div class="portal-account-kicker">Project KONGOR Account</div>
-                            <div class="portal-brand-title">Command Centre</div>
+                            <h2 class="portal-management-title">Sibling Accounts</h2>
+                            <p class="portal-management-copy">All accounts linked to this user, including whether each account is the main account and which clan it belongs to.</p>
                         </div>
-                    </div>
 
-                    <h1 class="portal-account-title">@GetClaimValue("sub")</h1>
-                    <p class="portal-account-summary">
-                        Review your identity details, request credential changes, and keep your portal access aligned with the rebuilt shell.
-                    </p>
+                        <div class="portal-account-table-wrapper">
+                            <table class="portal-account-table">
+                                <thead>
+                                    <tr>
+                                        <th>Account Name</th>
+                                        <th>Main Account</th>
+                                        <th>Clan</th>
+                                        <th>Clan Tag</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (UserAccountResponse account in AccountOverview.Accounts)
+                                    {
+                                        <tr>
+                                            <td>@account.Name</td>
+                                            <td>
+                                                <span class="portal-account-table-badge @(account.IsMain ? "portal-account-table-badge-main" : "portal-account-table-badge-secondary")">
+                                                    @GetMainAccountLabel(account.IsMain)
+                                                </span>
+                                            </td>
+                                            <td>@GetDisplayValue(account.ClanName)</td>
+                                            <td>@GetDisplayValue(account.ClanTag)</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
 
-                    <ul class="portal-account-points">
-                        <li>Primary e-mail and role details are surfaced at a glance.</li>
-                        <li>Security requests remain protected behind your current credentials.</li>
-                        <li>All actions still use the same verified backend flows.</li>
-                    </ul>
-
-                    <div class="portal-account-stat-grid">
-                        <article class="portal-account-stat-card">
-                            <span class="portal-account-stat-label">Account Name</span>
-                            <strong class="portal-account-stat-value">@GetClaimValue("sub")</strong>
-                        </article>
-
-                        <article class="portal-account-stat-card">
-                            <span class="portal-account-stat-label">E-mail Address</span>
-                            <strong class="portal-account-stat-value">@GetClaimValue("email")</strong>
-                        </article>
-
-                        <article class="portal-account-stat-card">
-                            <span class="portal-account-stat-label">User Role</span>
-                            <strong class="portal-account-stat-value">@GetClaimValue("user_role")</strong>
-                        </article>
-
-                        <article class="portal-account-stat-card">
-                            <span class="portal-account-stat-label">Clan</span>
-                            <strong class="portal-account-stat-value">@(string.IsNullOrWhiteSpace(GetClaimValue("clan_name")) ? "None" : GetClaimValue("clan_name"))</strong>
-                        </article>
-                    </div>
-                </div>
-
-                <div class="portal-account-management-grid">
-                    <section class="portal-management-card">
+                    <div class="portal-account-management-grid">
+                        <section class="portal-management-card">
                         <div>
                             <h2 class="portal-management-title">Update E-mail Address</h2>
                             <p class="portal-management-copy">Enter a new e-mail address below. A verification link will be sent to your new e-mail address.</p>
@@ -121,9 +162,9 @@
                                 </MudCardActions>
                             </MudCard>
                         </EditForm>
-                    </section>
+                        </section>
 
-                    <section class="portal-management-card">
+                        <section class="portal-management-card">
                         <div>
                             <h2 class="portal-management-title">Update Password</h2>
                             <p class="portal-management-copy">Choose a new password below. A confirmation link will be sent to your e-mail address to activate the change.</p>
@@ -195,9 +236,10 @@
                                 </MudCardActions>
                             </MudCard>
                         </EditForm>
-                    </section>
-                </div>
-            </section>
+                        </section>
+                    </div>
+                </section>
+            }
         </Authorized>
     </AuthorizeView>
 </div>
@@ -210,8 +252,11 @@
     private RequestEmailAddressUpdateFormModel EmailUpdateFormModel { get; set; } = new();
     private RequestAccountPasswordUpdateFormModel PasswordUpdateFormModel { get; set; } = new();
 
+    private UserResponse? AccountOverview { get; set; }
+
     private bool EmailUpdateProcessing { get; set; }
     private bool PasswordUpdateProcessing { get; set; }
+    private bool LoadingAccountOverview { get; set; } = true;
 
     private bool EmailUpdatePasswordVisible { get; set; }
     private bool CurrentPasswordVisible { get; set; }
@@ -248,15 +293,76 @@
         ConfirmPasswordVisible = !ConfirmPasswordVisible;
     }
 
-    private string GetClaimValue(string claimType)
+    protected override async Task OnInitializedAsync()
     {
         if (AuthenticationStateTask is null)
-            return string.Empty;
+        {
+            LoadingAccountOverview = false;
+            return;
+        }
 
-        AuthenticationState authenticationState = AuthenticationStateTask.Result;
+        AuthenticationState authenticationState = await AuthenticationStateTask;
 
-        return authenticationState.User.Claims
-            .SingleOrDefault(claim => claim.Type.Equals(claimType))?.Value ?? string.Empty;
+        string? userIDClaimValue = authenticationState.User.Claims.SingleOrDefault(claim => claim.Type.Equals("user_id"))?.Value;
+
+        if (int.TryParse(userIDClaimValue, out int userID).Equals(false))
+        {
+            LoadingAccountOverview = false;
+            Snackbar.Add("Unable to determine the authenticated user.", Severity.Error);
+            return;
+        }
+
+        await LoadAccountOverview(userID);
+    }
+
+    private async Task LoadAccountOverview(int userID)
+    {
+        try
+        {
+            HttpClient client = AuthenticationService.CreateAuthenticatedClient();
+            HttpResponseMessage response = await client.GetAsync($"/User/{userID}");
+
+            if (response.StatusCode is HttpStatusCode.OK)
+            {
+                AccountOverview = await response.Content.ReadFromJsonAsync<UserResponse>();
+            }
+            else
+            {
+                string errorMessage = await response.Content.ReadAsStringAsync();
+                Snackbar.Add(errorMessage, Severity.Error);
+            }
+        }
+        catch (HttpRequestException)
+        {
+            Snackbar.Add("Unable to reach the server. Please try again later.", Severity.Error);
+        }
+        catch (NotSupportedException)
+        {
+            Snackbar.Add("The account overview response format is not supported.", Severity.Error);
+        }
+        catch (JsonException)
+        {
+            Snackbar.Add("The account overview response could not be read.", Severity.Error);
+        }
+        finally
+        {
+            LoadingAccountOverview = false;
+        }
+    }
+
+    private static string GetDisplayValue(string value)
+    {
+        return string.IsNullOrWhiteSpace(value) ? "-" : value;
+    }
+
+    private static string GetMainAccountLabel(bool isMain)
+    {
+        return isMain ? "Yes" : "No";
+    }
+
+    private static string FormatTimestamp(DateTimeOffset timestamp)
+    {
+        return timestamp.ToString("dd MMM yyyy");
     }
 
     private async Task HandleEmailUpdateSubmit()

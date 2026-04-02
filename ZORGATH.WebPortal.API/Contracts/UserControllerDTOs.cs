@@ -8,4 +8,8 @@ public record GetBasicUserDTO(int ID, string EmailAddress, List<GetBasicAccountD
 
 public record GetBasicAccountDTO(int ID, string Name);
 
+public record GetUserDTO(int ID, string EmailAddress, string Role, string CurrentAccountName, string CurrentClanName, string CurrentClanTag, DateTimeOffset TimestampCreated, int TotalLevel, int CurrentAccountLevel, List<GetUserAccountDTO> Accounts);
+
+public record GetUserAccountDTO(int ID, string Name, bool IsMain, string ClanName, string ClanTag);
+
 public record GetAuthenticationTokenDTO(int UserID, string TokenType, string Token);

@@ -1034,7 +1034,19 @@ body {
 }
 
 .portal-account-hero {
+    display: grid;
+    gap: 1.75rem;
     padding-bottom: 2.2rem;
+}
+
+.portal-account-hero-top {
+    display: grid;
+    gap: 0.5rem;
+}
+
+.portal-account-hero-loading {
+    justify-items: center;
+    text-align: center;
 }
 
 .portal-account-title {
@@ -1051,6 +1063,64 @@ body {
 .portal-account-stat-grid {
     grid-template-columns: repeat(4, minmax(0, 1fr));
     margin-top: 1.6rem;
+}
+
+.portal-account-overview-card {
+    gap: 1.25rem;
+}
+
+.portal-account-table-wrapper {
+    overflow-x: auto;
+    border: 1px solid var(--portal-border);
+    border-radius: 1.35rem;
+}
+
+.portal-account-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.portal-account-table th,
+.portal-account-table td {
+    padding: 1rem 1.15rem;
+    text-align: left;
+}
+
+.portal-account-table th {
+    color: var(--portal-accent-strong);
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.12rem;
+    text-transform: uppercase;
+}
+
+.portal-account-table tbody tr {
+    border-top: 1px solid var(--portal-border);
+}
+
+.portal-account-table tbody td {
+    color: var(--portal-text);
+}
+
+.portal-account-table-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 4.25rem;
+    padding: 0.35rem 0.7rem;
+    border-radius: 999px;
+    font-size: 0.82rem;
+    font-weight: 700;
+}
+
+.portal-account-table-badge-main {
+    background: var(--portal-accent-soft);
+    color: var(--portal-text);
+}
+
+.portal-account-table-badge-secondary {
+    background: rgba(255, 255, 255, 0.04);
+    color: var(--portal-text-soft);
 }
 
 .portal-account-stat-value {
@@ -1138,6 +1208,7 @@ body {
     .portal-account-stat-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
+
 }
 
 @media (max-width: 860px) {
@@ -1184,6 +1255,11 @@ body {
     .portal-account-stat-grid,
     .portal-account-management-grid {
         grid-template-columns: 1fr;
+    }
+
+    .portal-account-table th,
+    .portal-account-table td {
+        padding: 0.9rem 1rem;
     }
 
     .portal-auth-page {

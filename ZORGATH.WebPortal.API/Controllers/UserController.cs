@@ -179,7 +179,7 @@ public class UserController(MerrickContext databaseContext, ILogger<UserControll
 
     [HttpGet("{id}", Name = "Get User")]
     [Authorize(UserRoles.AllRoles)]
-    [ProducesResponseType(typeof(GetBasicUserDTO), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(GetUserDTO), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(string), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(string), StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(typeof(string), StatusCodes.Status403Forbidden)]
@@ -196,23 +196,56 @@ public class UserController(MerrickContext databaseContext, ILogger<UserControll
 
         // TODO: [OutputCache] On Get Requests
 
-        string role = User.Claims.GetUserRole();
+        string role = User.Claims.SingleOrDefault(claim => claim.Type.Equals(Claims.UserRole))?.Value ?? string.Empty;
 
-        if (role.Equals(UserRoles.Administrator))
+        if (role.Equals(UserRoles.Administrator).Equals(false) && role.Equals(UserRoles.User).Equals(false))
         {
-            return Ok(new GetBasicUserDTO(user.ID, user.EmailAddress,
-                user.Accounts.Select(account => new GetBasicAccountDTO(account.ID, account.NameWithClanTag)).ToList()));
+            Logger.LogError(@"[BUG] Unknown User Role ""{User.Role}""", role);
+
+            return BadRequest($@"Unknown User Role ""{role}""");
         }
 
         if (role.Equals(UserRoles.User))
         {
-            return Ok(new GetBasicUserDTO(user.ID,
-                new string(user.EmailAddress.Select(character => char.IsLetterOrDigit(character) ? '*' : character).ToArray()),
-                user.Accounts.Select(account => new GetBasicAccountDTO(account.ID, account.NameWithClanTag)).ToList()));
+            string? userIDClaimValue = User.Claims.SingleOrDefault(claim => claim.Type.Equals(Claims.UserID))?.Value;
+
+            if (int.TryParse(userIDClaimValue, out int authenticatedUserID).Equals(false))
+                return Unauthorized(@"The authenticated user identifier is missing or invalid");
+
+            if (authenticatedUserID.Equals(id).Equals(false))
+                return Forbid();
         }
 
-        Logger.LogError(@"[BUG] Unknown User Role ""{User.Role}""", role);
+        string? currentAccountIDClaimValue = User.Claims.SingleOrDefault(claim => claim.Type.Equals(Claims.AccountID))?.Value;
+        int? currentAccountID = int.TryParse(currentAccountIDClaimValue, out int parsedCurrentAccountID) ? parsedCurrentAccountID : null;
 
-        return BadRequest($@"Unknown User Role ""{role}""");
+        Account currentAccount = ResolveCurrentAccount(user, currentAccountID);
+
+        GetUserDTO response = new(
+            user.ID,
+            user.EmailAddress,
+            user.Role.Name,
+            currentAccount.Name,
+            currentAccount.Clan?.Name ?? string.Empty,
+            currentAccount.Clan?.Tag ?? string.Empty,
+            user.TimestampCreated,
+            user.TotalLevel,
+            currentAccount.AscensionLevel,
+            user.Accounts
+                .OrderByDescending(account => account.IsMain)
+                .ThenBy(account => account.Name)
+                .Select(account => new GetUserAccountDTO(account.ID, account.Name, account.IsMain, account.Clan?.Name ?? string.Empty, account.Clan?.Tag ?? string.Empty))
+                .ToList());
+
+        return Ok(response);
+    }
+
+    private static Account ResolveCurrentAccount(User user, int? currentAccountID)
+    {
+        Account? currentAccount = currentAccountID is not null
+            ? user.Accounts.SingleOrDefault(account => account.ID.Equals(currentAccountID.Value))
+            : null;
+
+        return currentAccount ?? user.Accounts.Single(account => account.IsMain);
     }
 }
